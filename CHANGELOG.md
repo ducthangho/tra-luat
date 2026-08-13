@@ -1,3 +1,70 @@
+# ★ dev-side — vòng 8: vá bốn khe hở còn treo, và một lỗi vệ sinh của chính bộ test (2026-08-13)
+
+Đợt này **không đi tìm lỗi mới**. Nó vá đúng năm khe hở mà bản bàn giao vòng 7b đã ghi
+là *đã biết, chưa vá*. Ranh giới bằng chứng nói trước vì đây là chỗ dễ đọc nhầm nhất:
+mọi số dưới đây đo trên **Linux**; bốn khe hở đều là đường Windows nên ở nền này chúng
+chỉ có phản chứng **giả lập**. Phép đo thật thuộc về CI `launcher (Windows thật)`.
+
+- **#3 — con ngắn ngủi trên Windows không có khoá danh tính.** Con thoát trước khi
+  powershell kịp nhìn thì CIM không còn thấy nó (POSIX không dính vì `/proc/<pid>` còn
+  là zombie), sổ ghi `khoa_danh_tinh=null`, và `stop` lượt đó **từ chối vĩnh viễn** bằng
+  mã 10. Nay đọc thêm khoá từ **handle `Popen` đang giữ** (`GetProcessTimes`) — handle
+  sống qua lúc con thoát, và Windows không tái dùng PID khi còn handle mở.
+- **Phần nguy hiểm của #3 không phải lấy số mà là QUY ĐỔI.** Hai nguồn lệch nhau ba
+  lần: epoch (năm 1 vs 1601), múi giờ (Local vs UTC), độ phân giải (micro-giây vs
+  100ns). Sai một trong ba thì khoá **không bao giờ khớp** và chốt hoá ra *luôn từ chối
+  giết* — hỏng âm thầm, tệ hơn hẳn không có chốt. Khử ở ba chỗ khác nhau: múi giờ khử
+  **tại nguồn** (`ToUniversalTime()` trong PowerShell — tự suy độ lệch là mở cửa cho
+  DST); epoch khử bằng hằng số mà `t84` **tính lại độc lập** bằng `datetime` chứ không
+  chép từ mã; độ phân giải hạ cả hai xuống micro-giây. Thêm một lớp để sai sót còn lại
+  không hỏng về phía im lặng: sổ ghi **cả hai** khoá, khớp bất kỳ là đủ. Không nới chốt
+  — cả hai khoá đều nói về thời điểm khởi động nên PID tái dùng vẫn trượt cả bộ.
+- **#2 — `stop` không với tới Job Object.** Handle job chỉ sống trong tiến trình `run`,
+  nên `stop` phải rơi về `taskkill` + ảnh chụp cha-con, đúng hai đường **mù với hậu duệ
+  mồ côi**. Nay job có **TÊN**, tên nằm trong sổ, `stop` mở lại bằng `OpenJobObjectW`.
+  Kèm theo: khi có job thì job là **bằng chứng mạnh hơn ảnh chụp** trong `_giet_cay` —
+  ảnh chụp trả `{}` cho một cây chỉ còn mồ côi, và bản trước đọc đó thành "đã tắt".
+- **#1 — gán job lúc tạo.** Con sinh với `CREATE_SUSPENDED`, gán job xong mới thả, nên
+  không còn khoảng nào để cháu lọt ra ngoài. `Popen` đóng handle luồng chính nên không
+  `ResumeThread` được; `NtResumeProcess` chỉ cần handle tiến trình. Thả hỏng thì **giết
+  con và báo hỏng** — để nó treo thì nó nằm im tới hạn chót rồi lượt chạy khai "quá
+  hạn", tức khai sai nguyên nhân, hỏng nặng hơn khe hở vừa khép.
+- **#5 — `_chup_cay` thành phép đo.** `t89` dựng cây hai tầng **thật**, gọi `_chup_cay`
+  **thật**, chạy trên mọi nền; workflow Windows thêm probe đếm số tiến trình thật sự
+  thiếu `CreationDate` trên runner. Suy luận thành số.
+- **#4 — bỏ qua trên Windows: 12 → 10.** Hai ca lấy lại được vì lý do bỏ qua **sai**:
+  `t33` bỏ qua *không nêu lý do* (nó chạy được, chỉ cần hỏi "còn sống" bằng phép đo hợp
+  lệ của nền ấy — và sau #2 đây là chỗ đáng đo nhất); `t51` bỏ qua vì "cần tín hiệu
+  POSIX" nhưng nó **không đòi tín hiệu**, nó đòi mã thoát ngoài `0..255`, mà Windows có
+  sẵn: thoát `-1` cho `4294967295` — đúng ví dụ trong docstring của chính ca đó.
+
+**Lỗi ngoài danh sách, tìm được trong lúc vá.** `m.platform.system = lambda: "Windows"`
+trông như sửa bản đang thử, nhưng `m.platform` **chính là** module dùng chung cả tiến
+trình test: nó đổi `platform.system` cho **mọi ca chạy sau**, vĩnh viễn, không ai khôi
+phục. `m.subprocess.run` y hệt. Bảy vòng không ai thấy vì mọi ca đứng sau đều tự giả lập
+nốt phần còn lại — nó chỉ lộ khi có ca **đo thật**, và ca đo thật ấy đã lặng lẽ đo một
+`platform` giả cùng một `subprocess` giả, tức đo đúng cái nó vừa được viết ra để không
+đo. Sửa ở tầng: `_ep_nen`/`_ep_subprocess` gán vào tên toàn cục của **bản đang thử**.
+
+**Và một bẫy đã ghi trong nếp kho lại nằm ngay trong hàm giới thiệu là chỗ để né nó.**
+`_con_song_that` rơi xuống `os.kill(pid, 0)`; trên Windows `os.kill` với tín hiệu khác
+`CTRL_*_EVENT` gọi thẳng `TerminateProcess` — câu hỏi "còn sống không" **tự giết** đối
+tượng rồi trả `True` vì không có ngoại lệ nào. Nay hỏi bằng `GetExitCodeProcess`
+(259 = `STILL_ACTIVE`).
+
+Đo: **91/91 ca** (qua 88, bỏ qua 3, hỏng 0) · **đột biến 50/50** (2 không đo được trên
+Linux) · ruff F sạch · 17/17 bước gate `rc=0` · `tl selftest 1697/1697` ·
+`RELEASE_MANIFEST` giữ **179** mục (không tệp runtime nào được thêm) · ratchet `docs/`
+56→57, cây thật 235→236.
+
+**Hai chỗ nói thẳng là chưa đo được, đừng đọc thành đã đo.** Nửa **múi giờ** của phép
+quy đổi khoá không đo được ngay cả trên CI: runner GitHub chạy ở UTC nên bỏ
+`ToUniversalTime()` đi thì hai nguồn vẫn khớp ở đó — chỗ ấy chỉ đỏ trên máy lệch UTC.
+Và `CREATE_SUSPENDED` **không có đột biến**: khoảng hở nó khép là một cuộc đua rất ngắn,
+không dựng lại được theo ý muốn, mà một ca chỉ khẳng định "cờ có mặt trong
+`creationflags`" thì chỉ chứng minh mã nói đúng điều mã nói. Nhánh **thả treo hỏng** thì
+đo được, và `t86` đo nó.
+
 # ★ dev-side — vòng 7b: bản vá ĐÚNG của vòng 7 làm đỏ Windows, và vì sao (2026-08-13)
 
 Vòng 7 sửa `if not con:` thành `con == []` — **đúng**, vì `None` là KHÔNG ĐO ĐƯỢC chứ

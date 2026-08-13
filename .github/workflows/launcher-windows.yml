@@ -182,6 +182,49 @@ jobs:
               print('t62: DO ->', e); sys.exit(1)
           "@
 
+      - name: 'Probe: pham vi fail-closed cua _chup_cay tren may THAT'
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # KHE HO #5 cua ban ban giao truoc: "fail-closed CO PHAM VI cua _chup_cay
+          # la SUY LUAN, chua do". Tu vong 7b anh chup la duong quyet dinh 0-hay-125
+          # tren Windows, nen "tren may that co bao nhieu tien trinh thieu
+          # CreationDate, va chung nam trong hay ngoai cay" phai la mot CON SO chu
+          # khong phai mot niem tin. Buoc nay bien no thanh so.
+          # Here-string LITERAL (@'...'@): dang @"..."@ se de PowerShell noi suy
+          # moi ky tu `$` trong ma Python.
+          python -c @'
+          import importlib.util, os, subprocess, sys
+          sp = importlib.util.spec_from_file_location("L", ".claude/dev/launcher.py")
+          M = importlib.util.module_from_spec(sp); sp.loader.exec_module(M)
+
+          def dem(wql):
+              # WQL thay cho ForEach-Object: khong can `$_`, nen chuoi nay khong co
+              # mot ky tu `$` nao va khong the bi PowerShell noi suy nham.
+              loc = (" -Filter " + repr(wql)) if wql else ""
+              pr = subprocess.run(["powershell", "-NoProfile", "-NonInteractive",
+                  "-Command", "@(Get-CimInstance Win32_Process" + loc + ").Count"],
+                  capture_output=True, text=True, timeout=60)
+              v = pr.stdout.strip()
+              return int(v) if v.isdigit() else -1
+
+          print("tien trinh tren may :", dem(""))
+          print("thieu CreationDate  :", dem("CreationDate IS NULL"))
+          con = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+          try:
+              anh = M._chup_cay(os.getpid())
+              print("_chup_cay(chinh minh):", "None" if anh is None else str(len(anh)) + " pid")
+              if anh is None:
+                  print("DO: fail-closed BAT trong mot ca hoan toan binh thuong")
+                  sys.exit(1)
+              if con.pid not in anh:
+                  print("DO: anh chup thieu con truc tiep", con.pid)
+                  sys.exit(1)
+          finally:
+              con.kill()
+          print("KET LUAN: anh chup dung duoc tren may that")
+          '@
+
       - name: 'Probe: taskkill /T tren tien trinh do CHINH minh sinh'
         if: runner.os == 'Windows'
         shell: pwsh

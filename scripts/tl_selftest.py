@@ -21187,10 +21187,12 @@ def run() -> int:
         # Package 200 không nhúc nhích; cây thật = 179 + 55 = 234.
         # KÊ KHAI SLOT (audit launcher vòng 7): 55 → **56** Markdown dưới `docs/`. Thêm đúng
         # `docs/AUDIT_LAUNCHER_VONG_7.md`, dev-side/ngoài gói; package vẫn 179, cây thật 235.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 56 == 235
+        # KÊ KHAI SLOT (audit launcher vòng 8): 56 → **57** Markdown dưới `docs/`. Thêm đúng
+        # `docs/AUDIT_LAUNCHER_VONG_8.md`, dev-side/ngoài gói; package vẫn 179, cây thật 236.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 57 == 236
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 56
+        ok4 = (len(tren_dia) == 57
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

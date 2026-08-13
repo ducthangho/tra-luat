@@ -12,8 +12,10 @@ Chạy:  python .claude/dev/launcher_test.py             (chạy tất cả; Win
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import importlib.util
+import io
 import json
 import os
 import platform
@@ -24,6 +26,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import types
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -113,6 +116,29 @@ def _con_song_that(pid: int) -> bool:
     thành công với cả zombie, nên chỉ dùng nó là báo "còn sống" cho tiến trình đã
     chết hẳn.
     """
+    if LA_WINDOWS:
+        # TUYET DOI KHONG dung os.kill(pid, 0) o day. Tren Windows, os.kill voi
+        # tin hieu khac CTRL_C_EVENT/CTRL_BREAK_EVENT goi thang TerminateProcess:
+        # cau hoi "con song khong" tu no GIET mat doi tuong dang do, roi tra True
+        # vi khong co ngoai le nao. Mot phep do lam thay doi thu no do la phep do
+        # hong, va no hong ve phia im lang. Hoi bang ma thoat: 259 = STILL_ACTIVE.
+        try:
+            import ctypes
+            from ctypes import wintypes
+            k32 = ctypes.windll.kernel32
+            k32.OpenProcess.restype = wintypes.HANDLE
+            h = k32.OpenProcess(0x1000, False, int(pid))  # QUERY_LIMITED_INFORMATION
+            if not h:
+                return False
+            try:
+                ma = wintypes.DWORD()
+                if not k32.GetExitCodeProcess(h, ctypes.byref(ma)):
+                    return False
+                return int(ma.value) == 259
+            finally:
+                k32.CloseHandle(h)
+        except (OSError, AttributeError, ValueError):
+            return False
     st = Path(f"/proc/{pid}/stat")
     if st.exists():
         try:
@@ -131,6 +157,24 @@ def _con_song_that(pid: int) -> bool:
     return True
 
 
+def _don_pid(tep: Path) -> None:
+    """Giết tiến trình mà fixture đã ghi pid ra `tep`. Im lặng nếu nó đã chết.
+
+    Trên Windows đi qua `taskkill /T` chứ không `os.kill`: xem `_con_song_that`.
+    """
+    try:
+        pid = int(tep.read_text().strip())
+    except (OSError, ValueError):
+        return
+    if LA_WINDOWS:
+        subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"], capture_output=True)
+        return
+    try:
+        os.kill(pid, 9)
+    except OSError:
+        pass
+
+
 def _tai_launcher_thu():
     """Nạp đúng bản launcher đang thử (kể cả bản sao đột biến)."""
     ten = f"launcher_thu_{time.time_ns()}"
@@ -138,6 +182,36 @@ def _tai_launcher_thu():
     m = importlib.util.module_from_spec(sp)
     sp.loader.exec_module(m)
     return m
+
+
+def _ep_nen(m, he: str) -> None:
+    """Ép `platform.system()` của BẢN ĐANG THỬ trả `he`.
+
+    ĐÃ TRẢ GIÁ: bản trước viết `m.platform.system = lambda: "Windows"`. `m.platform`
+    KHÔNG phải bản sao — nó là chính module `platform` dùng chung cả tiến trình
+    test, nên phép gán đó đổi `platform.system` cho MỌI ca chạy sau, vĩnh viễn và
+    không ai khôi phục. Cùng lớp lỗi với `m.subprocess.run` (xem `_ep_subprocess`).
+    Không ai phát hiện suốt bảy vòng vì các ca đứng sau đều tự giả lập nốt phần
+    còn lại; nó chỉ lộ ra khi có ca ĐO THẬT (`t89`) — và ca đo thật ấy đã lặng lẽ
+    đo một `platform` giả cùng một `subprocess` giả.
+
+    Gán vào TÊN TOÀN CỤC của module đang thử thì bản thật không bị đụng tới.
+    """
+    m.platform = types.SimpleNamespace(system=lambda: he)
+
+
+def _ep_subprocess(m, stdout: str, rc: int = 0) -> None:
+    """Ép `subprocess.run` của BẢN ĐANG THỬ trả sẵn một kết quả. Xem `_ep_nen`."""
+
+    class _KetQua:
+        returncode = rc
+
+    _KetQua.stdout = stdout
+
+    m.subprocess = types.SimpleNamespace(
+        run=lambda *_a, **_k: _KetQua(),
+        SubprocessError=subprocess.SubprocessError,
+        TimeoutExpired=subprocess.TimeoutExpired)
 
 
 # ------------------------------------------------------------- chốt: workspace
@@ -548,8 +622,13 @@ def t32_stop_tu_choi_khi_khong_co_khoa():
 
 @ca
 def t33_stop_giet_that():
-    if LA_WINDOWS:
-        return "bo qua tren Windows"
+    """`stop` phải GIẾT THẬT, không chỉ báo đã giết.
+
+    Trước đợt 8 ca này tự bỏ qua trên Windows mà không nêu lý do. Nó chạy được ở
+    đó — chỉ cần hỏi "còn sống không" bằng phép đo hợp lệ của nền ấy: `os.kill`
+    trên Windows là TerminateProcess trá hình (xem `_con_song_that`). Và đây đúng
+    là chỗ đáng đo nhất sau khi `stop` mở lại được Job Object theo tên.
+    """
     with San() as s:
         repo = tao_repo(s)
         rr = s / "runs"
@@ -569,15 +648,7 @@ def t33_stop_giet_that():
         r = chay("stop", "--run-root", str(rr), "--id", d["short_id"])
         bang(r.returncode == MA_OK, f"stop that bai: {r.returncode} {r.stdout}")
         pr.wait(timeout=30)
-        bang(not _con_song(d["pid"]), "tien trinh van song sau stop")
-
-
-def _con_song(pid: int) -> bool:
-    try:
-        os.kill(pid, 0)
-        return True
-    except OSError:
-        return False
+        bang(not _con_song_that(d["pid"]), "tien trinh van song sau stop")
 
 
 @ca
@@ -865,13 +936,16 @@ def t50_stop_roi_runner_KHONG_duoc_de_len_so():
 def t51_ma_thoat_ngoai_khoang_khong_bi_cat_cut():
     """Con chết vì tín hiệu → returncode âm (Windows: 4294967295). Trả thẳng ra thì
     bị cắt còn 0/255 và phía gọi đọc 'hỏng' thành 'xong'."""
-    if LA_WINDOWS:
-        return "bo qua tren Windows (can tin hieu POSIX)"
+    # Windows khong co tin hieu POSIX, nhung ca nay KHONG doi tin hieu - no doi
+    # mot ma thoat NGOAI 0..255, va Windows dung san mot: tien trinh thoat -1 co
+    # ma thoat that 4294967295. Bo qua o day suot bay vong la bo qua chinh cai ca
+    # ma dong docstring tren dang lay lam vi du.
+    con = ([PY, "-c", "import sys; sys.exit(-1)"] if LA_WINDOWS else
+           [PY, "-c", "import os, signal; os.kill(os.getpid(), signal.SIGKILL)"])
     with San() as s:
         repo = tao_repo(s)
         rr = s / "runs"
-        r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--",
-                 PY, "-c", "import os, signal; os.kill(os.getpid(), signal.SIGKILL)")
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", *con)
         bang(r.returncode not in (0,), f"con bi giet ma launcher tra {r.returncode}")
         bang(0 <= r.returncode <= 255, f"ma thoat ngoai khoang: {r.returncode}")
         d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
@@ -1726,7 +1800,7 @@ def t78_khong_do_duoc_nhom_KHONG_phai_cay_rong():
     m._khoa_danh_tinh = lambda _pid: None
     m._thanh_vien_nhom = lambda _pid: None     # phep do POSIX
     m._chup_cay = lambda _pid: None            # phep do Windows
-    m.platform.system = lambda: "Windows"
+    _ep_nen(m, "Windows")
     da_goi = []
     m._giet_windows = lambda *_a, **_k: (da_goi.append(True) or m.KetGiet(False, False, "khong do duoc"))
     kq = m._giet_cay(12345, "win:1")
@@ -1738,7 +1812,7 @@ def t78_khong_do_duoc_nhom_KHONG_phai_cay_rong():
 def t79_job_windows_phai_kiem_ket_qua_dat_gioi_han():
     """SetInformationJobObject hỏng thì handle không được quảng cáo là job tốt."""
     m = _tai_launcher_thu()
-    m.platform.system = lambda: "Windows"
+    _ep_nen(m, "Windows")
     import ctypes
 
     class K32:
@@ -1802,19 +1876,19 @@ def t81_chup_cay_windows_thieu_creationdate_phai_fail_closed():
     chứng "đã tắt" trên Windows, đó chính là đường quyết định 0-hay-125.
     """
     m = _tai_launcher_thu()
-    m.platform.system = lambda: "Windows"
+    _ep_nen(m, "Windows")
 
     def _ra(dong):
-        class P:
-            returncode = 0
-            stdout = dong
-        m.subprocess.run = lambda *_a, **_k: P()
+        _ep_subprocess(m, dong)
 
+    # Tick tan cung bang 0 la CO Y, khong phai so dep: chuoi CIM_DATETIME chi co
+    # toi MICRO-giay nen `.Ticks` tu CIM luon la boi cua 10. Khoa chuan hoa chia
+    # 10 (xem `_khoa_win`), nen 1230 -> "win:123".
     # (a) tien trinh mu la CON cua 10 => khong do duoc
-    _ra("OK|10|1|123\nERR|11|10|NO_CREATION_DATE\n")
+    _ra("OK|10|1|1230\nERR|11|10|NO_CREATION_DATE\n")
     bang(m._chup_cay(10) is None, "hau due thieu CreationDate bi bo qua im lang")
     # (b) tien trinh mu thuoc nhanh KHAC (cha = 1) => anh van dung duoc
-    _ra("OK|10|1|123\nOK|12|10|456\nERR|11|1|NO_CREATION_DATE\n")
+    _ra("OK|10|1|1230\nOK|12|10|4560\nERR|11|1|NO_CREATION_DATE\n")
     bang(m._chup_cay(10) == {10: "win:123", 12: "win:456"},
          "tien trinh mu NGOAI cay khong duoc lam hong ca anh")
 
@@ -1835,7 +1909,7 @@ def t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung():
     m = _tai_launcher_thu()
     m._khoa_danh_tinh = lambda _pid: None          # me da tat, do duoc
     m._thanh_vien_nhom = lambda _pid: None         # phep do POSIX: mu tren Windows
-    m.platform.system = lambda: "Windows"
+    _ep_nen(m, "Windows")
     goi = []
     m._giet_windows = lambda *_a, **_k: (goi.append(True) or m.KetGiet(False, False, "duong giet"))
 
@@ -1847,6 +1921,260 @@ def t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung():
     m._chup_cay = lambda _pid: None                # KHONG DO DUOC
     kq2 = m._giet_cay(12345, "win:1")
     bang(goi and not kq2.tron_ven, "None bi doc thanh rong: ket luan khong bang chung")
+
+
+@ca
+def t84_khoa_windows_phai_chuan_hoa_epoch_va_do_phan_giai():
+    """Hai nguồn khoá Windows phải quy về CÙNG một mẫu số, nếu không chốt LUÔN từ chối.
+
+    Đây là bẫy được cảnh báo trước khi vá khe hở #3, và nó nguy hiểm theo chiều ít
+    ai ngờ: quy đổi sai thì khoá không bao giờ khớp, `_giet_cay` trả "tu choi giet"
+    mãi mãi, và một chốt luôn-từ-chối còn tệ hơn không có chốt — nó im lặng.
+
+    Ba vế, mỗi vế một nguồn sai lệch ĐỘC LẬP:
+      (a) EPOCH — FILETIME đếm từ 1601, `.Ticks` đếm từ năm 1. Ca này KHÔNG chép
+          lại hằng số trong mã (chép lại thì chỉ chứng minh hai bản chép giống
+          nhau) mà tự tính bằng `datetime`, tức một nguồn thứ hai thật sự.
+      (b) ĐỘ PHÂN GIẢI — CIM_DATETIME chỉ tới micro-giây nên `.Ticks` từ CIM luôn
+          là bội của 10, còn FILETIME đủ 100ns. Không cắt thì hai bên lệch ở chữ
+          số cuối và không khớp trong khoảng 9/10 số lần.
+      (c) MÚI GIỜ đã được xử ở NGUỒN (`ToUniversalTime()` trong PowerShell), nên
+          ở đây chỉ còn số học — cố ý, vì tự suy độ lệch múi giờ là mở cửa cho DST.
+    """
+    m = _tai_launcher_thu()
+    lech = (datetime(1601, 1, 1) - datetime(1, 1, 1)).days * 86400 * 10_000_000
+    bang(m.LECH_EPOCH_FILETIME == lech,
+         f"lech epoch FILETIME sai: {m.LECH_EPOCH_FILETIME} thay vi {lech}")
+    # (b) cắt xuống micro-giây: hai tick cách nhau dưới 1µs ra CÙNG một khoá
+    bang(m._khoa_win(1230) == "win:123", f"khong cat ve micro-giay: {m._khoa_win(1230)}")
+    bang(m._khoa_win(1237) == m._khoa_win(1230),
+         "hai tick trong cung mot micro-giay phai ra cung khoa")
+    # (a)+(b) FILETIME 0 = 1601-01-01 UTC: hai đường phải gặp nhau ở đúng một chuỗi
+    bang(m._khoa_win(0 + m.LECH_EPOCH_FILETIME) == f"win:{lech // 10}",
+         "duong FILETIME va duong CIM khong gap nhau o cung mot khoa")
+    bang(m._khoa_win("khong-phai-so") is None, "khoa hong phai la None, khong duoc nem")
+
+
+@ca
+def t85_bo_khoa_chap_nhan_khop_BAT_KY_nhung_khong_noi_long():
+    """Bộ khoá: khớp bất kỳ là ĐỦ, nhưng PID tái dùng vẫn không khớp cái nào.
+
+    Ghi cả hai nguồn khoá (CIM + handle) là để một sai sót trong phép quy đổi
+    epoch không thể biến chốt thành "luôn từ chối". Nó KHÔNG được nới chốt: cả
+    hai khoá đều nói về THỜI ĐIỂM KHỞI ĐỘNG, nên tiến trình khác vẫn trượt cả bộ.
+    """
+    m = _tai_launcher_thu()
+    bang(m._khop_khoa("win:2", ["win:1", "win:2"]), "khop mot trong bo phai la DU")
+    bang(not m._khop_khoa("win:9", ["win:1", "win:2"]),
+         "PID tai dung khong duoc khop bat ky khoa nao")
+    bang(not m._khop_khoa(None, ["win:1"]), "khong doc duoc khoa hien tai = KHONG khop")
+    bang(not m._khop_khoa("win:1", []), "bo khoa RONG khong duoc coi la khop")
+    bang(m._ds_khoa("win:1") == ["win:1"], "mot khoa don phai ve duoc dang bo")
+    bang(m._ds_khoa(None) == [] and m._ds_khoa("") == [], "khoa rong phai thanh bo rong")
+
+
+@ca
+def t86_khong_tha_duoc_tien_trinh_treo_thi_phai_GIET_con():
+    """Sinh con TREO mà không thả được ⇒ giết con và báo hỏng, KHÔNG để nó treo.
+
+    Bản vá khe hở #1 sinh con ở trạng thái treo để gán Job Object trước khi con
+    kịp sinh cháu. Cái giá là một trạng thái mới có thể hỏng: thả không được.
+    Nếu để con treo sống tiếp thì nó nằm im tới tận hạn chót rồi lượt chạy báo
+    "qua han" — một lời khai SAI NGUYÊN NHÂN, và là hỏng nặng hơn hẳn khe hở mà
+    bản vá vừa khép. Nên ở đây chốt HAI thứ: có ném chặn, VÀ con đã chết thật.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        m = _tai_launcher_thu()
+        m._thao_treo = lambda _p: "gia lap: khong tha duoc"
+        # KHÔNG có `--` ở đây: `main` mới là chỗ bóc nó khỏi REMAINDER, mà ca này
+        # gọi thẳng `lenh_run` để đi vào được nhánh chỉ có trên Windows.
+        a = m.build_parser().parse_args(
+            ["run", "--workspace", str(repo), "--run-root", str(rr),
+             PY, "-c", "import time; time.sleep(60)"])
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                m.lenh_run(a)
+            raise AssertionError("tha treo hong ma van chay tiep")
+        except m.Chan as e:
+            bang(e.ma == MA_THAM_SO, f"mong doi {MA_THAM_SO}, duoc {e.ma}")
+            bang("treo" in str(e), f"thong diep khong noi ro vi sao: {e}")
+        thu_muc = next(p for p in rr.iterdir() if p.is_dir())
+        so = json.loads((thu_muc / "run.json").read_text(encoding="utf-8"))
+        bang(so["trang_thai"] == "hong", f"so phai ghi hong, dang la {so['trang_thai']}")
+        pid = so.get("pid")
+        bang(pid, "so khong ghi pid nen khong kiem duoc con da chet chua")
+        for _ in range(50):
+            if not _con_song_that(pid):
+                break
+            time.sleep(0.1)
+        bang(not _con_song_that(pid), f"con {pid} van song sau khi tha treo that bai")
+
+
+@ca
+def t87_job_la_bang_chung_MANH_HON_anh_chup():
+    """Windows: job nói còn người thì ảnh chụp rỗng KHÔNG được đọc thành "đã sạch".
+
+    Đây là nội dung của khe hở #2. `_chup_cay` đi theo liên kết CHA-CON, nên một
+    hậu duệ MỒ CÔI (cha đã thoát, nó được nhận nuôi) không còn nằm trong cây tính
+    từ `pid` — ảnh chụp trả `{}` và bản trước đọc đó là bằng chứng cả cây đã tắt.
+    Job Object thì giữ hậu duệ mồ côi, nên khi có job, job mới là phép đo.
+
+    Vế hai giữ đúng doctrine `None`: job rỗng là bằng chứng ĐỦ kể cả khi ảnh chụp
+    không đo được — hai chiều của cùng một câu "đo được cái mạnh hơn thì dùng nó".
+    """
+    m = _tai_launcher_thu()
+    _ep_nen(m, "Windows")
+    m._khoa_danh_tinh = lambda _pid: None        # me da tat
+    m._thanh_vien_nhom = lambda _pid: None       # phep do POSIX: mu tren Windows
+    goi = []
+    m._giet_windows = lambda *_a, **_k: (goi.append(True) or m.KetGiet(False, False, "duong giet"))
+
+    m._chup_cay = lambda _pid: {}                # anh chup: "khong con ai"
+    m._pid_trong_job = lambda _job: [4242]       # job: VAN CON nguoi
+    kq = m._giet_cay(12345, "win:1", job="job-gia")
+    bang(goi and not kq.tron_ven,
+         "job noi con hau due ma van tin anh chup rong => bo sot mo coi")
+
+    goi.clear()
+    m._chup_cay = lambda _pid: None              # anh chup KHONG do duoc
+    m._pid_trong_job = lambda _job: []           # job: da chung minh RONG
+    kq2 = m._giet_cay(12345, "win:1", job="job-gia")
+    bang(kq2.tron_ven and not goi,
+         "job rong la bang chung du, khong duoc roi xuong duong giet")
+
+
+@ca
+def t88_stop_phai_mo_lai_job_THEO_TEN():
+    """`stop` chạy ở tiến trình KHÁC nên phải mở lại job bằng TÊN trong sổ.
+
+    Không có tên thì handle job chỉ sống trong tiến trình `run`, và `stop` mù với
+    hậu duệ mồ côi — đúng khe hở #2. Ca này neo đường dây: tên trong sổ phải đi
+    tới `_mo_job_windows`, và handle mở được phải đi tới `_giet_cay`.
+    """
+    with San() as s:
+        rr = s / "runs"
+        (rr / "abcd1234").mkdir(parents=True)
+        (rr / "abcd1234" / "run.json").write_text(json.dumps({
+            "short_id": "abcd1234", "run_id": "abcd1234" * 4, "pid": 4242,
+            "khoa_danh_tinh": "win:1", "khoa_danh_tinh_ds": ["win:1", "win:2"],
+            "job_ten": "Local\\tl-launcher-thu", "trang_thai": "dang_chay",
+        }), encoding="utf-8")
+        m = _tai_launcher_thu()
+        thay = {}
+
+        def _mo(ten):
+            thay["ten"] = ten
+            return "job-gia"
+
+        def _giet(pid, khoa, job=None):
+            thay.update(pid=pid, khoa=khoa, job=job)
+            return m.KetGiet(True, True, "gia lap da giet")
+
+        m._mo_job_windows = _mo
+        m._giet_cay = _giet
+        a = m.build_parser().parse_args(
+            ["stop", "--run-root", str(rr), "--id", "abcd1234"])
+        with contextlib.redirect_stdout(io.StringIO()):
+            ma = m.lenh_stop(a)
+        bang(ma == MA_OK, "stop phai tra 0 khi giet tron ven")
+        bang(thay.get("ten") == "Local\\tl-launcher-thu",
+             f"ten job trong so khong toi duoc _mo_job_windows: {thay.get('ten')}")
+        bang(thay.get("job") == "job-gia", f"handle job khong toi duoc _giet_cay: {thay}")
+        bang(thay.get("khoa") == ["win:1", "win:2"],
+             f"stop phai dung CA BO khoa trong so: {thay.get('khoa')}")
+
+
+@ca
+def t89_chup_cay_THAT_tren_may_THAT_khong_duoc_tra_None():
+    """Phép ĐO thật cho `_chup_cay`, thay cho suy luận (khe hở #5).
+
+    Từ vòng 7b, ảnh chụp là đường quyết định 0-hay-125 trên Windows: `{}` nghĩa là
+    cả cây đã tắt, `None` nghĩa là không đo được. Fail-closed CÓ PHẠM VI — chỉ
+    tiến trình mù TRONG cây mới làm hỏng ảnh — cho tới đợt này vẫn là SUY LUẬN:
+    chưa ai quan sát `_chup_cay` chạy thật trên một máy thật rồi xem nó trả gì.
+
+    Ca này chạy trên MỌI nền và không giả lập gì: dựng cây hai tầng thật, gọi
+    `_chup_cay` thật. Trên Windows nó gọi CIM thật trên toàn máy — đúng chỗ mà
+    "trên máy có tiến trình thiếu CreationDate không" thôi là câu hỏi và thành số.
+    """
+    m = _tai_launcher_thu()
+    with San() as s:
+        dau = s / "chau.pid"
+        (s / "chau.py").write_text(
+            "import os, sys, time\n"
+            "open(sys.argv[1], 'w').write(str(os.getpid()))\n"
+            "time.sleep(30)\n", encoding="utf-8")
+        (s / "me.py").write_text(
+            "import subprocess, sys, time\n"
+            "subprocess.Popen([sys.executable, sys.argv[1], sys.argv[2]])\n"
+            "time.sleep(30)\n", encoding="utf-8")
+        me = subprocess.Popen([PY, str(s / "me.py"), str(s / "chau.py"), str(dau)])
+        try:
+            for _ in range(200):
+                if dau.exists() and dau.read_text().strip().isdigit():
+                    break
+                time.sleep(0.05)
+            bang(dau.exists(), "thi nghiem hong: chau chua kip ghi pid")
+            chau = int(dau.read_text().strip())
+            anh = m._chup_cay(me.pid)
+            bang(anh is not None,
+                 "_chup_cay tra None tren may THAT: fail-closed dang bat trong ca binh thuong")
+            bang(me.pid in anh, f"anh chup thieu chinh tien trinh me {me.pid}")
+            bang(chau in anh, f"anh chup thieu chau {chau} (lien ket cha-con hong)")
+            bang(all(k for k in anh.values()), "co pid trong anh khong kem khoa danh tinh")
+        finally:
+            try:
+                me.kill()
+                me.wait(timeout=10)
+            except (OSError, subprocess.SubprocessError):
+                pass
+            _don_pid(dau)
+
+
+@ca
+def t90_con_NGAN_NGUI_tren_Windows_van_phai_co_khoa_danh_tinh():
+    """Khe hở #3, đo bằng đúng ca đã làm nó lộ ra: con thoát trước khi CIM kịp nhìn.
+
+    ĐO ĐƯỢC trên windows-latest 13-08: với `-c pass`, con thoát trước khi
+    `_khoa_danh_tinh` chạy, mà `Get-Process`/CIM KHÔNG thấy tiến trình đã thoát
+    (POSIX thì `/proc/<pid>` còn ở dạng zombie nên đọc được) ⇒ sổ ghi
+    `khoa_danh_tinh=null` ⇒ `stop` lượt đó từ chối vĩnh viễn bằng mã 10.
+
+    Handle mà `Popen` giữ thì sống qua lúc con thoát, nên `GetProcessTimes` vẫn
+    đọc được. Ca này cũng là chỗ DUY NHẤT xác nhận phép quy đổi epoch đúng trên
+    máy thật: `khoa_hai_nguon` phải là "khop" khi cả hai nguồn cùng đọc được.
+    """
+    if not LA_WINDOWS:
+        return "khe ho nay CHI co tren Windows: POSIX doc duoc zombie trong /proc"
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", PY, "-c", "pass")
+        thu_muc = next(p for p in rr.iterdir() if p.is_dir())
+        so = json.loads((thu_muc / "run.json").read_text(encoding="utf-8"))
+        bang(so["trang_thai"] == "xong", f"tien de sai: {so['trang_thai']}")
+        bang(so.get("khoa_danh_tinh"),
+             f"con ngan ngui van khong co khoa: {so.get('khoa_thieu_ly_do')}")
+        bang(so.get("khoa_hai_nguon") != "lech",
+             f"hai nguon khoa LECH nhau: quy doi epoch sai, xem _khoa_win. so={so}")
+
+
+@ca
+def t91_job_phai_co_TEN_trong_so_de_stop_dung_lai_duoc():
+    """Lượt chạy trên Windows phải ghi tên job vào sổ, nếu không `stop` mù trở lại."""
+    if not LA_WINDOWS:
+        return "job Object la khai niem Windows; tren POSIX so khong co truong nay"
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        chay("run", "--workspace", str(repo), "--run-root", str(rr),
+             "--", PY, "-c", "import time; time.sleep(1)")
+        thu_muc = next(p for p in rr.iterdir() if p.is_dir())
+        so = json.loads((thu_muc / "run.json").read_text(encoding="utf-8"))
+        bang(so.get("job_windows"), f"khong dung duoc Job Object: {so}")
+        bang(so.get("job_ten"), f"so khong ghi ten job nen stop khong mo lai duoc: {so}")
 
 
 def _dot_bien_du_san(tong: int, khong_do: int) -> bool:
@@ -1885,8 +2213,11 @@ DOT_BIEN = [
     # Neo chuyển từ `if _khoa_danh_tinh(pid) != khoa:` sang `elif hien != khoa:`
     # khi _giet_cay tách "đã chết" khỏi "PID tái dùng" (vòng 3 đợt 2). Ý định
     # KHÔNG đổi: bỏ chốt khoá ⇒ giết liều theo PID trần.
+    # CHUYEN NEO (khong noi dieu kien): `hien != khoa` thanh `not _khop_khoa(...)`
+    # khi khoa Windows duoc ghi tu HAI nguon doc lap (khe ho #3). Y DINH KHONG DOI:
+    # bo chot khoa => giet lieu theo PID tran.
     ("giet_lieu_khong_can_khoa",
-     ('    elif hien != khoa:', '    elif False:'),
+     ('    elif not _khop_khoa(hien, ds_khoa):', '    elif False:'),
      ["t31_stop_tu_choi_khi_khoa_danh_tinh_khac"]),
     # DA DO bang git that: `-uall` so voi mac dinh (`normal`) KHONG doi sach/ban,
     # chi doi do chi tiet liet ke (`?? thumuc/` thay vi tung tep). Chi `-uno` moi
@@ -2002,8 +2333,9 @@ DOT_BIEN = [
      ("    if len(doan_m) >= 3:", "    if len(doan_m) == 3:"),
      ["t68_kho_duong_dan_SAU_neu_host_van_phai_QUA"]),
     ("stop_de_len_luot_da_xong",
-     ('    ket = _giet_cay(int(pid), khoa)\n    if so.get("trang_thai") in TRANG_THAI_KET_THUC:',
-      '    ket = _giet_cay(int(pid), khoa)\n    if False:'),
+     ('    ket = _giet_cay(int(pid), ds_khoa, job)\n'
+      '    if so.get("trang_thai") in TRANG_THAI_KET_THUC:',
+      '    ket = _giet_cay(int(pid), ds_khoa, job)\n    if False:'),
      ["t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so"]),
     # Neo phải kèm chú thích: "if hien is None:" trần xuất hiện TRƯỚC ở nhánh
     # Windows của _con_song, mà replace(...,1) chỉ đổi chỗ ĐẦU TIÊN — đột biến
@@ -2054,8 +2386,8 @@ DOT_BIEN = [
     # theo nen khi Windows duoc cap phep do rieng (anh chup). Y DINH GIU NGUYEN -
     # ep None bi doc nhu rong. Neo vao nhanh Windows vi ca hai ca dich deu chay o do.
     ("none_nhom_thanh_cay_rong",
-     ('            rong = con == {}',
-      '            rong = con is None or con == {}   # DOT BIEN: None bi doc nhu rong'),
+     ('                rong = con == {}',
+      '                rong = con is None or con == {}   # DOT BIEN: None doc nhu rong'),
      ["t78_khong_do_duoc_nhom_KHONG_phai_cay_rong",
       "t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung"]),
     ("job_bo_qua_loi_dat_gioi_han",
@@ -2072,8 +2404,8 @@ DOT_BIEN = [
     # lan vao anh nhu mot tien trinh binh thuong. Day la LOP KHAC voi
     # `chup_cay_khong_fail_closed_trong_cay`: mot ben bo DAU, ben kia bo phep KIEM.
     ("chup_cay_bo_qua_dong_thieu",
-     ('                                    f"win:{phan[3]}" if phan[0] == "OK" else KHONG_DOC_DUOC_KHOA)',
-      '                                    f"win:{phan[3]}")'),
+     ('                tt[int(phan[1])] = (int(phan[2]), 0, khoa_q or KHONG_DOC_DUOC_KHOA)',
+      '                tt[int(phan[1])] = (int(phan[2]), 0, khoa_q or f"win:{phan[3]}")'),
      ["t81_chup_cay_windows_thieu_creationdate_phai_fail_closed"]),
     ("san_dot_bien_chi_can_mot",
      ('TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI = 7',
@@ -2083,7 +2415,7 @@ DOT_BIEN = [
     # luot DA KET THUC lai roi xuong taskkill tren PID khong ton tai => 125 (t69 do
     # that tren windows-latest 13-08).
     ("windows_khong_co_duong_bang_chung_me_da_tat",
-     ('            rong = con == {}', '            rong = False'),
+     ('                rong = con == {}', '                rong = False'),
      ["t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung"]),
     # Bo dau "khong doc duoc khoa" => hau due mu lot vao anh voi khoa rong, roi
     # `_con_song_dung_khoa` khong bao gio khop => bao la da chet.
@@ -2096,6 +2428,52 @@ DOT_BIEN = [
      ('            if len(phan) != 4 or phan[0] not in ("OK", "ERR"):',
       '            if len(phan) != 4 or phan[0] != "OK":'),
      ["t81_chup_cay_windows_thieu_creationdate_phai_fail_closed"]),
+    # --- đợt 8: bốn khe hở còn treo của đợt trước.
+    # Lệch epoch là bẫy được cảnh báo TRƯỚC khi vá, và nó hỏng về phía im lặng:
+    # khoá không bao giờ khớp ⇒ chốt LUÔN từ chối giết.
+    ("lech_epoch_FILETIME_sai",
+     ('LECH_EPOCH_FILETIME = 504_911_232_000_000_000',
+      'LECH_EPOCH_FILETIME = 0'),
+     ["t84_khoa_windows_phai_chuan_hoa_epoch_va_do_phan_giai"]),
+    # CIM chi co micro-giay, GetProcessTimes co 100ns. Khong cat thi hai nguon
+    # lech o chu so cuoi va truot nhau khoang 9/10 so lan.
+    ("khoa_win_khong_cat_ve_micro_giay",
+     ('    return f"win:{int(tick_nam_1_utc) // 10}"',
+      '    return f"win:{int(tick_nam_1_utc)}"'),
+     ["t84_khoa_windows_phai_chuan_hoa_epoch_va_do_phan_giai"]),
+    ("bo_khoa_bi_thu_ve_mot_khoa",
+     ('    return hien in set(mong_doi)', '    return list(mong_doi) == [hien]'),
+     ["t85_bo_khoa_chap_nhan_khop_BAT_KY_nhung_khong_noi_long"]),
+    # Con TREO ma khong tha duoc: bo qua thi no nam im toi han chot roi luot chay
+    # bao "qua han" - khai SAI nguyen nhan.
+    ("tha_treo_hong_van_di_tiep",
+     ('    if loi_tha:', '    if False:'),
+     ["t86_khong_tha_duoc_tien_trinh_treo_thi_phai_GIET_con"]),
+    ("bao_hong_nhung_de_con_treo_song",
+     ('            p.kill()', '            pass  # DOT BIEN: bo giet con treo'),
+     ["t86_khong_tha_duoc_tien_trinh_treo_thi_phai_GIET_con"]),
+    # Anh chup di theo lien ket CHA-CON nen mu voi hau due MO COI; job thi khong.
+    # Bo job o day la quay ve dung khe ho #2.
+    ("job_khong_manh_hon_anh_chup",
+     ('            trong_job = _pid_trong_job(job) if job is not None else None',
+      '            trong_job = None'),
+     ["t87_job_la_bang_chung_MANH_HON_anh_chup"]),
+    ("stop_khong_mo_lai_job_theo_ten",
+     ('    job = _mo_job_windows(so.get("job_ten") or "")', '    job = None'),
+     ["t88_stop_phai_mo_lai_job_THEO_TEN"]),
+    ("stop_bo_qua_bo_khoa_trong_so",
+     ('    ds_khoa = _ds_khoa(so.get("khoa_danh_tinh_ds") or khoa)',
+      '    ds_khoa = _ds_khoa(khoa)'),
+     ["t88_stop_phai_mo_lai_job_THEO_TEN"]),
+    # Bo nguon khoa thu hai => con ngan ngui tren Windows lai khong co khoa. CHI
+    # do duoc tren Windows: tren POSIX `_khoa_tu_handle` luon tra None theo thiet
+    # ke, nen bo no di khong doi gi ca - va do la ly do dung, khong phai cho giau.
+    ("khong_lay_khoa_tu_handle",
+     ('    ds_khoa = [k for k in (khoa_cim, khoa_handle) if k]',
+      '    ds_khoa = [k for k in (khoa_cim,) if k]'),
+     ["t90_con_NGAN_NGUI_tren_Windows_van_phai_co_khoa_danh_tinh"],
+     ("windows", "`_khoa_tu_handle` tra None tren POSIX theo thiet ke: bo no di "
+                 "KHONG doi gi o nen nay, nen day khong phai dot bien song sot")),
 ]
 
 

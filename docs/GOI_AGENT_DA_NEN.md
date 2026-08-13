@@ -105,6 +105,35 @@ Remote là **đường dẫn địa phương** (`/srv/kho.git`, `D:\ho-so\kho`, 
 danh tính nên bị loại khỏi danh sách: kho chỉ có remote kiểu đó sẽ **bị chặn**
 (`thuc te (khong co remote)`), không bao giờ khớp nhầm.
 
+### Giết cả cây trên Windows — ba lớp, và chỗ mỗi lớp mù
+
+Windows không có nhóm tiến trình, nên "giết cả cây" ở đó dựng bằng ba phép đo chồng
+lên nhau, xếp theo độ mạnh giảm dần:
+
+1. **Job Object** — lớp duy nhất giữ được hậu duệ **mồ côi** (cha đã thoát trước, nên
+   nó không còn nằm trong cây tính từ tiến trình mẹ). Con được sinh ở trạng thái
+   **treo** rồi mới thả, nên nó đã ở trong job trước khi chạy được lệnh đầu tiên —
+   không còn khoảng nào để cháu lọt ra ngoài. Job có **tên**, tên nằm trong sổ, nên
+   `stop` — chạy ở tiến trình khác — mở lại được. Không tên thì `stop` mù với mồ côi.
+2. **`taskkill /PID x /T /F`** — duyệt cây cha-con tại thời điểm chạy, nên bỏ sót
+   đúng ca mồ côi. `rc=0` **không** phải bằng chứng cả cây đã tắt.
+3. **Ảnh chụp cha-con** kèm khoá danh tính từng PID — kiểm lại từng tiến trình sau
+   khi giết, thay vì tin `rc`. Cũng đi theo liên kết cha-con nên cũng mù với mồ côi.
+
+`{}`/`[]` là **đã chứng minh rỗng**; `None` là **không đo được** và tuyệt đối không
+được đọc thành rỗng — đó là đường quyết định giữa `124` và `125`.
+
+Khoá danh tính trên Windows đọc từ **hai nguồn độc lập**: CIM `Win32_Process` và
+handle mà `Popen` giữ (`GetProcessTimes`). Nguồn thứ hai có vì con thoát nhanh hơn
+lần gọi powershell đầu tiên thì CIM không còn thấy nó, và sổ không có khoá nghĩa là
+`stop` từ chối vĩnh viễn. Sổ ghi cả hai (`khoa_danh_tinh_ds`), khớp **bất kỳ** là đủ;
+`khoa_hai_nguon` ghi lại hai nguồn có khớp nhau không, để phép quy đổi epoch là số đo
+chứ không phải niềm tin.
+
+Nếu con sinh ra treo mà **không thả được**, lượt chạy giết con và báo hỏng ngay
+(mã 2, `trang_thai="hong"`). Không để nó treo: một tiến trình treo sẽ nằm im tới hạn
+chót rồi lượt chạy khai "quá hạn" — khai sai nguyên nhân.
+
 ## Mã thoát
 
 | mã | nghĩa |

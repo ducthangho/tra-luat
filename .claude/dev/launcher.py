@@ -97,6 +97,14 @@ TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI = 7
 # thì một hậu duệ biến mất khỏi ảnh rồi ảnh rỗng thành "cả cây đã chết".
 KHONG_DOC_DUOC_KHOA = "\x00khong-doc-duoc-khoa"
 
+# Số tick 100ns từ 0001-01-01 tới 1601-01-01. FILETIME đếm từ 1601, .NET
+# DateTime.Ticks đếm từ năm 1 — đây là toàn bộ phần lệch EPOCH giữa hai nguồn.
+LECH_EPOCH_FILETIME = 504_911_232_000_000_000
+
+# Tạo cờ CREATE_SUSPENDED: `subprocess` không đặt tên hằng này, mà `creationflags`
+# chỉ là số nguyên nên truyền thẳng được.
+CREATE_SUSPENDED = 0x0000_0004
+
 # Trạng thái CUỐI của một lượt chạy — `stop` không được ghi đè lên chúng.
 TRANG_THAI_KET_THUC = {"xong", "qua_han", "bi_ngat", "hong", "da_dung"}
 
@@ -171,6 +179,63 @@ def _git_mot_dong(workspace, *doi_so) -> tuple[int, str, str]:
 
 # --------------------------------------------------- danh tính tiến trình (kill an toàn)
 
+def _khoa_win(tick_nam_1_utc) -> str | None:
+    """Khoá Windows CHUẨN HOÁ: MICRO-GIÂY kể từ năm 1, giờ UTC.
+
+    Windows có HAI nguồn đọc được thời điểm khởi động, và chúng KHÔNG cùng đơn vị:
+
+      · CIM `Win32_Process.CreationDate` — `DateTime` kiểu Local, `.Ticks` đếm
+        100ns từ năm 1. Chuỗi CIM_DATETIME gốc chỉ có tới MICRO-giây, nên ba chữ
+        số tick cuối luôn là 0.
+      · `GetProcessTimes` trên handle — FILETIME, 100ns từ 1601, luôn UTC, ĐỦ
+        độ phân giải 100ns.
+
+    Nếu để nguyên hai dạng rồi so bằng `==` thì khoá KHÔNG BAO GIỜ khớp, và hậu
+    quả đi theo chiều nguy hiểm nhất: chốt danh tính hoá ra LUÔN TỪ CHỐI giết —
+    hỏng âm thầm, tệ hơn hẳn không có chốt (cảnh báo mở đầu của khe hở #3).
+    Nên chuẩn hoá về mẫu số chung THÔ HƠN cả hai:
+      · epoch: cả hai đưa về năm 1 (cộng `LECH_EPOCH_FILETIME` cho FILETIME);
+      · múi giờ: cả hai đưa về UTC (PowerShell gọi `ToUniversalTime()`, tránh
+        hẳn việc phải tự suy độ lệch múi giờ TẠI THỜI ĐIỂM ĐÓ — nghĩ được là DST
+        đã sai rồi);
+      · độ phân giải: chia 10, tức bỏ phần 100ns mà CIM vốn đã không có.
+
+    Cắt xuống micro-giây KHÔNG làm loãng chốt: nó tồn tại để phân biệt hai tiến
+    trình dùng lại cùng một PID, mà hai lần khởi động cách nhau xa hơn 1µs rất
+    nhiều lần.
+    """
+    try:
+        return f"win:{int(tick_nam_1_utc) // 10}"
+    except (TypeError, ValueError):
+        return None
+
+
+def _khop_khoa(hien: str | None, mong_doi) -> bool:
+    """`hien` có khớp khoá mong đợi không. `mong_doi` là MỘT khoá hoặc BỘ khoá.
+
+    VÌ SAO LÀ BỘ: trên Windows một lượt chạy có thể ghi được khoá từ hai nguồn
+    độc lập (CIM và handle `Popen`, xem `_khoa_tu_handle`). Chúng phải ra cùng
+    một chuỗi — nhưng "phải" là suy luận cho tới khi đo được trên Windows thật.
+    Ghi cả hai rồi chấp nhận khớp BẤT KỲ nghĩa là: một sai sót trong phép quy đổi
+    epoch không thể biến chốt thành "luôn từ chối". Không nới lỏng gì cả — PID bị
+    tái dùng vẫn không khớp khoá nào, vì cả hai đều nói về THỜI ĐIỂM KHỞI ĐỘNG.
+    """
+    if hien is None or mong_doi is None:
+        return False
+    if isinstance(mong_doi, str):
+        return hien == mong_doi
+    return hien in set(mong_doi)
+
+
+def _ds_khoa(khoa) -> list[str]:
+    """Đưa khoá (một chuỗi / bộ khoá / None) về danh sách chuỗi không rỗng."""
+    if khoa is None:
+        return []
+    if isinstance(khoa, str):
+        return [khoa] if khoa else []
+    return [k for k in khoa if isinstance(k, str) and k]
+
+
 def _khoa_danh_tinh(pid: int) -> str | None:
     """Khoá nhận dạng tiến trình để chống PID tái dùng. None = không xác định được.
 
@@ -195,15 +260,57 @@ def _khoa_danh_tinh(pid: int) -> str | None:
             # ParentProcessId lan thoi diem tao la CIM. Hai nguon khac nhau thi
             # `.Ticks` lech dinh dang/epoch, khoa khong bao gio khop, va chot hoa ra
             # LUON tu choi giet - hong am tham theo chieu nguoc lai.
+            # `.ToUniversalTime()` la BAT BUOC: CIM tra DateTime kieu Local, con
+            # nguon thu hai (`_khoa_tu_handle`) la FILETIME von luon UTC. Doi ve UTC
+            # NGAY TAI NGUON thi khong ai phai tu suy do lech mui gio - va khong ai
+            # phai nho rang do lech ay con doi theo DST.
             p = subprocess.run(
                 ["powershell", "-NoProfile", "-NonInteractive", "-Command",
-                 f'(Get-CimInstance Win32_Process -Filter "ProcessId={pid}").CreationDate.Ticks'],
+                 f'(Get-CimInstance Win32_Process -Filter "ProcessId={pid}")'
+                 '.CreationDate.ToUniversalTime().Ticks'],
                 capture_output=True, text=True, timeout=30)
             v = p.stdout.strip()
-            return f"win:{v}" if v.isdigit() else None
+            return _khoa_win(v) if v.isdigit() else None
     except (OSError, ValueError, IndexError):
         return None
     return None
+
+
+def _khoa_tu_handle(p) -> str | None:
+    """Khoá danh tính đọc từ HANDLE mà `Popen` đang giữ. None = không lấy được.
+
+    VÌ SAO CẦN, dù đã có `_khoa_danh_tinh` (khe hở #3 của đợt trước): trên Windows
+    một tiến trình VỪA THOÁT là biến mất hẳn khỏi CIM/`Get-Process`, nên con chạy
+    nhanh hơn lần gọi powershell đầu tiên sẽ không bao giờ có khoá. POSIX không
+    dính vì `/proc/<pid>` còn ở dạng zombie cho tới khi cha `wait`. Hậu quả ĐO
+    ĐƯỢC trên windows-latest: sổ ghi `khoa_danh_tinh=null` ⇒ `stop` lượt đó TỪ
+    CHỐI vĩnh viễn bằng mã 10, kể cả khi lượt chạy hoàn toàn bình thường.
+
+    Handle thì khác: `Popen` giữ nó cho tới lúc đóng, và Windows không tái dùng
+    PID chừng nào còn một handle mở. Nên `GetProcessTimes` trên chính handle ấy
+    đọc được thời điểm khởi động SAU KHI tiến trình đã thoát — đúng chỗ CIM mù.
+
+    Trả về cùng khuôn `_khoa_win` với nguồn CIM; xem hàm đó về lệch epoch/múi giờ.
+    """
+    if platform.system() != "Windows":
+        return None
+    try:
+        import ctypes
+        from ctypes import wintypes
+        h = getattr(p, "_handle", None)
+        if not h:
+            return None
+        tao, thoat, nhan, nguoi = (wintypes.FILETIME() for _ in range(4))
+        if not ctypes.windll.kernel32.GetProcessTimes(
+                ctypes.c_void_p(int(h)), ctypes.byref(tao), ctypes.byref(thoat),
+                ctypes.byref(nhan), ctypes.byref(nguoi)):
+            return None
+        ft = (int(tao.dwHighDateTime) << 32) | int(tao.dwLowDateTime)
+        if ft <= 0:
+            return None
+        return _khoa_win(ft + LECH_EPOCH_FILETIME)
+    except (OSError, AttributeError, ValueError):
+        return None
 
 
 def _thanh_vien_nhom(pgid: int) -> list[int] | None:
@@ -320,7 +427,8 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
             pr = subprocess.run(
                 ["powershell", "-NoProfile", "-NonInteractive", "-Command",
                  "Get-CimInstance Win32_Process | ForEach-Object { if ($_.CreationDate) "
-                 "{ \"OK|$($_.ProcessId)|$($_.ParentProcessId)|$($_.CreationDate.Ticks)\" } "
+                 "{ \"OK|$($_.ProcessId)|$($_.ParentProcessId)|"
+                 "$($_.CreationDate.ToUniversalTime().Ticks)\" } "
                  "else { \"ERR|$($_.ProcessId)|$($_.ParentProcessId)|NO_CREATION_DATE\" } }"],
                 capture_output=True, text=True, timeout=60)
         except (OSError, subprocess.SubprocessError):
@@ -345,8 +453,8 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
             if len(phan) != 4 or phan[0] not in ("OK", "ERR"):
                 return None
             try:
-                tt[int(phan[1])] = (int(phan[2]), 0,
-                                    f"win:{phan[3]}" if phan[0] == "OK" else KHONG_DOC_DUOC_KHOA)
+                khoa_q = _khoa_win(phan[3]) if phan[0] == "OK" else None
+                tt[int(phan[1])] = (int(phan[2]), 0, khoa_q or KHONG_DOC_DUOC_KHOA)
             except ValueError:
                 return None
     else:
@@ -374,13 +482,14 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
     return ra
 
 
-def _con_song_dung_khoa(pid: int, khoa: str) -> bool:
+def _con_song_dung_khoa(pid: int, khoa) -> bool:
     """Còn sống VÀ vẫn đúng tiến trình cũ. Khoá rỗng = không có khoá để so."""
     if not _con_song(pid):
         return False
-    if not khoa:
+    ds = _ds_khoa(khoa)
+    if not ds:
         return True
-    return _khoa_danh_tinh(pid) == khoa
+    return _khop_khoa(_khoa_danh_tinh(pid), ds)
 
 
 def _giet_rieng(anh: dict[int, str], tin_hieu: int) -> None:
@@ -398,7 +507,7 @@ def _giet_rieng(anh: dict[int, str], tin_hieu: int) -> None:
             pass
 
 
-def _con_song(pid: int, khoa: str | None = None) -> bool:
+def _con_song(pid: int, khoa=None) -> bool:
     """Tiến trình còn sống không. Dùng để KIỂM SAU khi giết, không đoán.
 
     `khoa` là khoá danh tính mong đợi. Có nó thì "còn sống" nghĩa là ĐÚNG tiến
@@ -418,7 +527,7 @@ def _con_song(pid: int, khoa: str | None = None) -> bool:
         hien = _khoa_danh_tinh(pid)
         if hien is None:
             return False
-        return khoa is None or hien == khoa
+        return khoa is None or _khop_khoa(hien, khoa)
     trang_thai = Path(f"/proc/{pid}/stat")
     if trang_thai.exists():
         try:
@@ -475,7 +584,39 @@ class KetGiet:
         return self.mo_ta
 
 
-def _job_windows(pid: int):
+def _ten_job(run_id: str) -> str:
+    """Tên Job Object cho một lượt chạy. `Local\\` = không gian tên của phiên đăng nhập.
+
+    Có TÊN thì `stop` — chạy ở TIẾN TRÌNH KHÁC — mới mở lại được job. Không tên
+    thì handle chỉ sống trong tiến trình `run`, và đó chính là khe hở #2: đường
+    `stop` phải rơi về `taskkill` + ảnh chụp cha-con, tức mù với hậu duệ mồ côi.
+    """
+    return f"Local\\tl-launcher-{run_id}"
+
+
+def _mo_job_windows(ten: str):
+    """Mở lại Job Object THEO TÊN. None = không mở được (job đã mất, hoặc không phải Windows).
+
+    Job Object biến mất khi handle CUỐI CÙNG đóng — mà cờ KILL_ON_JOB_CLOSE khiến
+    lúc đó mọi thành viên bị giết luôn. Nên "mở không được" ở đây có hai nghĩa và
+    cả hai đều lành: hoặc tiến trình `run` đã thoát (job đóng ⇒ cây đã bị giết),
+    hoặc lượt chạy này không dựng được job. KHÔNG được đọc thành "cây đã sạch" —
+    hàm gọi vẫn phải đi tiếp xuống các phép đo khác.
+    """
+    if platform.system() != "Windows" or not ten:
+        return None
+    try:
+        import ctypes
+        from ctypes import wintypes
+        k32 = ctypes.windll.kernel32
+        k32.OpenJobObjectW.restype = wintypes.HANDLE
+        job = k32.OpenJobObjectW(0x1F001F, False, ctypes.c_wchar_p(ten))  # ALL_ACCESS
+        return job or None
+    except (OSError, AttributeError, ValueError):
+        return None
+
+
+def _job_windows(pid: int, ten: str | None = None):
     """Nhốt tiến trình vào một Job Object. Trả handle, hoặc None nếu không được.
 
     VÌ SAO PHẢI CÓ: `taskkill /T` duyệt cây CHA-CON tại thời điểm chạy, nên một
@@ -485,10 +626,12 @@ def _job_windows(pid: int):
     Job Object là cơ chế DUY NHẤT trên Windows giữ được cả hậu duệ mồ côi: tiến
     trình con sinh ra đã ở trong job của cha, và ở lại đó kể cả khi cha chết.
 
-    KHE HỞ, nói thẳng: `Popen` không cho gán job lúc tạo (không có CREATE_SUSPENDED),
-    nên có một khoảng rất ngắn giữa lúc sinh con và lúc gán. Con nào sinh cháu
-    trong khoảng đó thì cháu nằm ngoài job. Hẹp hơn hẳn khe cũ, nhưng không phải
-    không có.
+    KHE CŨ ĐÃ KHÉP: bản trước sinh con rồi mới gán job, nên tồn tại một khoảng
+    rất ngắn mà cháu sinh trong đó nằm NGOÀI job. Nay `lenh_run` sinh con ở trạng
+    thái TREO (CREATE_SUSPENDED), gán job xong mới thả — con chưa chạy được một
+    lệnh nào trước khi đã ở trong job, nên không còn khoảng nào để lọt. Xem
+    `_thao_treo` về việc thả, và vì sao thả HỎNG thì phải giết con chứ không
+    được để nó treo.
     """
     if platform.system() != "Windows":
         return None
@@ -496,7 +639,7 @@ def _job_windows(pid: int):
         import ctypes
         from ctypes import wintypes
         k32 = ctypes.windll.kernel32
-        job = k32.CreateJobObjectW(None, None)
+        job = k32.CreateJobObjectW(None, ctypes.c_wchar_p(ten) if ten else None)
         if not job:
             return None
 
@@ -546,6 +689,76 @@ def _job_windows(pid: int):
         return None
 
 
+def _thao_treo(p) -> str | None:
+    """Thả tiến trình sinh ra ở trạng thái TREO. None = đã thả; chuỗi = lý do HỎNG.
+
+    VÌ SAO PHẢI TREO RỒI THẢ (khe hở #1): gán job SAU khi con đã chạy để hở đúng
+    một khoảng — ngắn, nhưng con chỉ cần sinh một cháu trong khoảng đó là cháu
+    nằm ngoài job vĩnh viễn, và job là cơ chế DUY NHẤT trên Windows giữ được hậu
+    duệ mồ côi. Sinh con treo thì con chưa thực thi được lệnh nào trước lúc đã ở
+    trong job, nên khoảng đó không còn tồn tại.
+
+    VÌ SAO KHÔNG DÙNG ResumeThread THẲNG: `Popen` ĐÓNG handle luồng chính ngay
+    trong `_execute_child`, nên phía Python không còn thứ để thả. `NtResumeProcess`
+    chỉ cần handle TIẾN TRÌNH — thứ `Popen` vẫn giữ. Nó là API không tài liệu
+    nhưng ổn định lâu đời; dù vậy vẫn có đường dự phòng bằng Toolhelp bên dưới,
+    vì một con TREO MÃI là hỏng nặng hơn hẳn mọi khe hở mà bản vá này khép.
+
+    Phía gọi BẮT BUỘC phải giết con khi hàm này trả về chuỗi. Để một tiến trình
+    treo sống tiếp là biến bản vá thành treo cả lượt chạy tới tận hạn chót.
+    """
+    if platform.system() != "Windows":
+        return None
+    h = getattr(p, "_handle", None)
+    if not h:
+        return "khong co handle tien trinh de tha treo"
+    loi = ""
+    try:
+        import ctypes
+        rc = ctypes.windll.ntdll.NtResumeProcess(ctypes.c_void_p(int(h)))
+        if rc == 0:
+            return None
+        loi = f"NtResumeProcess NTSTATUS=0x{rc & 0xFFFFFFFF:08x}"
+    except (OSError, AttributeError, ValueError) as e:
+        loi = f"NtResumeProcess loi: {e}"
+    try:                       # dự phòng: duyệt luồng bằng Toolhelp rồi thả từng cái
+        import ctypes
+        from ctypes import wintypes
+        k32 = ctypes.windll.kernel32
+
+        class _LUONG(ctypes.Structure):
+            _fields_ = [("dwSize", wintypes.DWORD), ("cntUsage", wintypes.DWORD),
+                        ("th32ThreadID", wintypes.DWORD),
+                        ("th32OwnerProcessID", wintypes.DWORD),
+                        ("tpBasePri", ctypes.c_long), ("tpDeltaPri", ctypes.c_long),
+                        ("dwFlags", wintypes.DWORD)]
+
+        k32.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
+        anh = k32.CreateToolhelp32Snapshot(0x00000004, 0)   # SNAPTHREAD
+        if not anh:
+            return loi + "; khong chup duoc danh sach luong"
+        te = _LUONG()
+        te.dwSize = ctypes.sizeof(_LUONG)
+        da_tha = 0
+        try:
+            tiep = k32.Thread32First(anh, ctypes.byref(te))
+            while tiep:
+                if int(te.th32OwnerProcessID) == int(p.pid):
+                    ht = k32.OpenThread(0x0002, False, te.th32ThreadID)  # SUSPEND_RESUME
+                    if ht:
+                        if k32.ResumeThread(ht) != -1:
+                            da_tha += 1
+                        k32.CloseHandle(ht)
+                tiep = k32.Thread32Next(anh, ctypes.byref(te))
+        finally:
+            k32.CloseHandle(anh)
+        if da_tha:
+            return None
+        return loi + "; Toolhelp khong tha duoc luong nao"
+    except (OSError, AttributeError, ValueError) as e:
+        return f"{loi}; Toolhelp loi: {e}"
+
+
 def _pid_trong_job(job) -> list[int] | None:
     """PID còn trong job. [] = đã chứng minh rỗng · None = không đọc được."""
     try:
@@ -579,7 +792,7 @@ def _pid_trong_job(job) -> list[int] | None:
         return None
 
 
-def _giet_windows(pid: int, khoa: str | None = None,
+def _giet_windows(pid: int, khoa=None,
                   anh: dict[int, str] | None = None, job=None) -> KetGiet:
     """Giết trên Windows: taskkill trước, rồi TerminateProcess nếu vẫn sống.
 
@@ -656,13 +869,16 @@ def _giet_windows(pid: int, khoa: str | None = None,
     return KetGiet(True, False, "; ".join(buoc))
 
 
-def _giet_cay(pid: int, khoa: str | None, job=None) -> KetGiet:
+def _giet_cay(pid: int, khoa, job=None) -> KetGiet:
     """Giết tiến trình VÀ con cháu. Trả KetGiet, KHÔNG trả chuỗi.
 
     Phía gọi quyết định mã thoát bằng `.tron_ven`, nên không còn cách nào để một
     câu mô tả nghe-như-thành-công lọt qua.
+
+    `khoa` nhận MỘT khoá hoặc BỘ khoá — xem `_khop_khoa` về lý do có bộ.
     """
-    if khoa is None:
+    ds_khoa = _ds_khoa(khoa)
+    if not ds_khoa:
         return KetGiet(False, False, "tu choi giet: khong co khoa danh tinh", tu_choi=True)
     hien = _khoa_danh_tinh(pid)
     if hien is None:
@@ -682,21 +898,30 @@ def _giet_cay(pid: int, khoa: str | None, job=None) -> KetGiet:
         # tiến trình sống nào nhận `pid` làm tổ tiên, và `hien is None` ở trên đã
         # chứng minh chính `pid` đã tắt.
         if platform.system() == "Windows":
-            con = _chup_cay(pid)
-            rong = con == {}
+            # Job Object la bang chung MANH NHAT o day: no giu ca hau due MO COI,
+            # dung thu ma anh chup theo lien ket cha-con bo sot (cha da thoat thi
+            # chau khong con nam trong cay tinh tu `pid`). Chi lui ve anh chup khi
+            # KHONG co job - luot chay cu, hoac job da dong. `None` van la khong do
+            # duoc, khong bao gio doc thanh rong.
+            trong_job = _pid_trong_job(job) if job is not None else None
+            if trong_job is not None:
+                con, rong = trong_job, (trong_job == [])
+            else:
+                con = _chup_cay(pid)
+                rong = con == {}
         else:
             con = _thanh_vien_nhom(pid)
             rong = con == []      # [] = đã chứng minh rỗng · None = không đo được
         if rong:
             return KetGiet(True, True, "tien trinh da khong con chay")
-    elif hien != khoa:
+    elif not _khop_khoa(hien, ds_khoa):
         return KetGiet(False, False,
                        "tu choi giet: khoa danh tinh KHAC (PID da bi tai dung)",
                        tu_choi=True)
     if platform.system() == "Windows":
         # Chup TRUOC khi giet: sau khi me chet, hau due mo coi khong con duong nao
         # tim lai (cung ly le nhu POSIX, xem `_chup_cay`).
-        return _giet_windows(pid, khoa, _chup_cay(pid), job)
+        return _giet_windows(pid, ds_khoa, _chup_cay(pid), job)
     # POSIX: con được sinh với start_new_session nên pgid == pid, giết cả nhóm.
     # Ảnh chụp phải lấy TRƯỚC phát tín hiệu đầu tiên — sau đó kẻ đã setsid() là
     # không thể tìm lại (xem _chup_cay).
@@ -1202,7 +1427,9 @@ def lenh_run(a) -> int:
     f_err = (thu_muc / "stderr.log").open("w", encoding="utf-8")
     them = {}
     if platform.system() == "Windows":
-        them["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+        # CREATE_SUSPENDED: con dung yen cho toi khi da nam trong Job Object. Day
+        # la ca noi dung ban va khe ho #1 - xem `_job_windows` va `_thao_treo`.
+        them["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP | CREATE_SUSPENDED
     else:
         # nhóm tiến trình riêng: điều kiện CẦN để giết được cả con cháu sau này
         them["start_new_session"] = True
@@ -1216,13 +1443,51 @@ def lenh_run(a) -> int:
         f_out.close(); f_err.close()
         raise Chan(MA_THAM_SO, f"khong chay duoc lenh: {e}")
 
-    # Nhot con vao Job Object NGAY sau khi sinh: chi co no giu duoc hau due mo coi
-    # tren Windows (xem `_job_windows`). Tren POSIX tra None, khong anh huong gi.
-    job = _job_windows(p.pid)
-    khoa = _khoa_danh_tinh(p.pid)
+    # Nhot con vao Job Object TRUOC KHI no chay duoc lenh nao (con dang TREO): chi
+    # co job giu duoc hau due mo coi tren Windows (xem `_job_windows`). Job co TEN
+    # de `stop` - chay o tien trinh khac - mo lai duoc (khe ho #2).
+    # Tren POSIX ca hai ham deu tra None/khong lam gi.
+    ten_job = _ten_job(rid)
+    job = _job_windows(p.pid, ten_job)
+    # Khoa danh tinh doc NGAY, TRUOC khi tha treo: con dang treo thi chac chan
+    # chua thoat, nen day la thoi diem duy nhat ca hai nguon deu chac chan doc duoc.
+    khoa_cim = _khoa_danh_tinh(p.pid)
+    khoa_handle = _khoa_tu_handle(p)
+    loi_tha = _thao_treo(p)
+    if loi_tha:
+        # Con dang TREO ma khong tha duoc: khong duoc de no song: no se treo cho
+        # toi han chot roi bao "qua han", tuc bao sai nguyen nhan. Giet ngay va noi
+        # thang la KHONG CHAY DUOC LENH - cung ho voi nhanh Popen hong o tren.
+        try:
+            p.kill()
+        except OSError:
+            pass
+        ban_ghi.update(trang_thai="hong", pid=p.pid,
+                       ly_do_dung=f"khong tha duoc tien trinh treo: {loi_tha}",
+                       ket_thuc_utc=_bay_gio().isoformat())
+        _ghi_so(thu_muc, ban_ghi)
+        f_out.close(); f_err.close()
+        raise Chan(MA_THAM_SO, f"khong chay duoc lenh: khong tha duoc tien trinh treo: {loi_tha}")
+
+    # GHI CA HAI khoa. `_khop_khoa` chap nhan khop bat ky - nen mot sai sot trong
+    # phep quy doi epoch cua `_khoa_tu_handle` khong the bien chot thanh "luon tu
+    # choi giet", ma chi lam thua mot khoa khong ai khop. Xem `_khop_khoa`.
+    ds_khoa = [k for k in (khoa_cim, khoa_handle) if k]
+    khoa = ds_khoa[0] if ds_khoa else None
     ban_ghi.update(pid=p.pid, khoa_danh_tinh=khoa)
     if platform.system() == "Windows":
         ban_ghi["job_windows"] = job is not None
+        ban_ghi["job_ten"] = ten_job if job is not None else None
+        ban_ghi["khoa_danh_tinh_ds"] = ds_khoa
+        ban_ghi["khoa_nguon"] = ("ca hai" if khoa_cim and khoa_handle
+                                 else "cim" if khoa_cim
+                                 else "handle" if khoa_handle else None)
+        # PHEP DO, khong phai loi: hai nguon doc lap cung noi ve MOT thoi diem khoi
+        # dong thi phai ra cung mot chuoi. Ghi ket qua so sanh de lan sau khong ai
+        # phai doan - `t85` tren Windows that doc dung truong nay.
+        ban_ghi["khoa_hai_nguon"] = ("khop" if khoa_cim and khoa_cim == khoa_handle
+                                     else "lech" if khoa_cim and khoa_handle
+                                     else "khong du hai nguon")
     if khoa is None:
         # Nói RÕ vì sao thiếu, đừng để phía đọc phải đoán. Con thoát quá nhanh là
         # ca lành; không lấy được khoá cho một tiến trình CÒN SỐNG mới là ca đáng lo.
@@ -1247,7 +1512,7 @@ def lenh_run(a) -> int:
                 ma = p.wait(timeout=max(0.0, con_lai))
             except subprocess.TimeoutExpired:
                 qua_han = True
-                ket_giet = _giet_cay(p.pid, khoa, job)
+                ket_giet = _giet_cay(p.pid, ds_khoa, job)
                 ban_ghi["ly_do_dung"] = "qua han: " + ket_giet.mo_ta
                 ban_ghi["giet_tron_ven"] = ket_giet.tron_ven
                 # 124 CHỈ khi cả cây đã chết. Mẹ chết mà cháu chưa xác nhận vẫn là
@@ -1258,7 +1523,7 @@ def lenh_run(a) -> int:
                 except subprocess.TimeoutExpired:
                     pass
     except KeyboardInterrupt:
-        ban_ghi["ly_do_dung"] = "bi ngat: " + _giet_cay(p.pid, khoa, job).mo_ta
+        ban_ghi["ly_do_dung"] = "bi ngat: " + _giet_cay(p.pid, ds_khoa, job).mo_ta
         bi_ngat = True
         ma = 130
     finally:
@@ -1360,9 +1625,12 @@ def lenh_stop(a) -> int:
     if so is None:
         raise Chan(MA_THAM_SO, f"so luot chay hong: {thu_muc}")
     pid, khoa = so.get("pid"), so.get("khoa_danh_tinh")
+    # Bộ khoá đầy đủ nếu sổ có (Windows ghi cả hai nguồn); nếu không thì khoá đơn.
+    # Đọc bằng `or` để sổ CŨ — chỉ có `khoa_danh_tinh` — vẫn chạy y như trước.
+    ds_khoa = _ds_khoa(so.get("khoa_danh_tinh_ds") or khoa)
     if not pid:
         raise Chan(MA_THAM_SO, "so khong co pid")
-    if khoa is None:
+    if not ds_khoa:
         # KHÔNG nới thành "đã xong thì trả OK": thiếu khoá nghĩa là KHÔNG ĐO ĐƯỢC
         # gì cả, kể cả việc con cháu đã chết hay chưa. Trên Linux `stop` trả 0 cho
         # lượt đã xong là vì `_giet_cay` ĐO được tiến trình đã biến mất, không phải
@@ -1375,7 +1643,12 @@ def lenh_stop(a) -> int:
     # bản trước ghi đè trang_thai="da_dung" lên lượt vừa "xong" bình thường, tức
     # sổ nói nó bị dừng trong khi nó chạy hết. Đúng lớp lỗi mà t50 khoá ở chiều
     # ngược lại (runner đè lên quyết định của stop); chiều này bị bỏ sót.
-    ket = _giet_cay(int(pid), khoa)
+    # Mở lại Job Object THEO TÊN. Đây là khe hở #2 của đợt trước: handle job chỉ
+    # sống trong tiến trình `run`, nên `stop` — tiến trình KHÁC — không với tới,
+    # phải rơi về `taskkill` + ảnh chụp cha-con và mù với hậu duệ MỒ CÔI. Tên nằm
+    # trong sổ nên mở lại được; mở không được thì `job=None` và đường cũ vẫn chạy.
+    job = _mo_job_windows(so.get("job_ten") or "")
+    ket = _giet_cay(int(pid), ds_khoa, job)
     if so.get("trang_thai") in TRANG_THAI_KET_THUC:
         print(f"KET LUAN  : luot chay da ket thuc tu truoc "
               f"(trang_thai={so['trang_thai']}); {ket.mo_ta}")

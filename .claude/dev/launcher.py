@@ -792,13 +792,17 @@ def _cap_id(run_root: Path) -> tuple[str, str]:
     # giờ bị ghi đè (khác tên cố định cũ vốn tự lành), và writer bị SIGKILL giữa
     # `write_text` và `os.replace` để lại rác vĩnh viễn. Phải quét từ run_root:
     # rác nằm trong thư mục của lượt ĐÃ CHẾT, mà lượt đó không ai ghi lại nữa.
+    # Ban chup prompt cung quet o day: xem chu thich `cay_da_chet` trong lenh_run.
+    # Khong the giu mot tep chua NOI DUNG PROMPT tren dia vo thoi han chi vi nen
+    # do khong do duoc nhom tien trinh.
     try:
-        for cu in run_root.glob("*/run.json.*.tmp"):
-            try:
-                if time.time() - cu.stat().st_mtime > 86400:
-                    cu.unlink()
-            except OSError:
-                pass
+        for mau in ("*/run.json.*.tmp", "*/prompt.snapshot"):
+            for cu in run_root.glob(mau):
+                try:
+                    if time.time() - cu.stat().st_mtime > 86400:
+                        cu.unlink()
+                except OSError:
+                    pass
     except OSError:
         pass
 
@@ -1065,9 +1069,21 @@ def lenh_run(a) -> int:
         # `status` liệt kê — nói là kết thúc bình thường. Cùng lớp lỗi với t50.
         ban_ghi["trang_thai"] = ("bi_ngat" if bi_ngat
                                  else "qua_han" if qua_han else "xong")
-    # Bản chụp prompt đã hết việc khi con thoát. Giữ lại = để nội dung prompt
-    # nằm trên đĩa vô thời hạn; mặc định xoá, ai cần truy vết thì xin tường minh.
-    if ban_ghi.get("prompt_ban_chup") and not a.giu_ban_chup:
+    # Wrapper thoát KHÔNG có nghĩa bản chụp đã hết việc: nó có thể vừa
+    # sinh cháu, và cháu mới là người mở {PROMPT_FILE}. Xoá ngay khi p.wait()
+    # trả về tạo một TOCTOU do chính launcher gây ra: sổ báo xong/rc=0
+    # nhưng agent đọc trễ nhận ENOENT. Chỉ xoá khi đã CHỨNG MINH nhóm
+    # tiến trình rỗng. Không đo được hoặc còn hậu duệ thì giữ bản 0600;
+    # làm hỏng lần đọc tệ hơn việc tạm giữ một tệp kín cho tiến trình còn sống.
+    # `== []` chu khong `not ...`: [] la DA CHUNG MINH rong, None la KHONG DO
+    # DUOC. Tren Windows (va moi nen khong phai Linux/Darwin) _thanh_vien_nhom
+    # luon tra None, nen o do dieu kien nay LUON sai va ban chup KHONG BAO GIO
+    # bi xoa ngay. Do la lua chon co y (hong lan doc te hon giu mot tep kin),
+    # nhung "khong xoa ngay" KHONG duoc thanh "nam lai vinh vien": `_cap_id`
+    # quet don ban chup qua han o moi luot chay moi.
+    cay_da_chet = (_thanh_vien_nhom(p.pid) == [])
+    if (ban_ghi.get("prompt_ban_chup") and not a.giu_ban_chup
+            and cay_da_chet):
         try:
             Path(ban_ghi["prompt_ban_chup"]).unlink()
             ban_ghi["prompt_ban_chup_da_xoa"] = True

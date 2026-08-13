@@ -1456,8 +1456,16 @@ def t71_ban_chup_prompt_phai_KIN_va_bi_XOA():
         quyen = (thu_muc / "stdout.log").read_text(encoding="utf-8").strip()
         if not LA_WINDOWS:
             bang(quyen == "0o600", f"ban chup KHONG kin: quyen={quyen}")
-        bang(not (thu_muc / "prompt.snapshot").exists(),
-             "ban chup con nam lai tren dia sau khi con thoat")
+        # Xoa NGAY chi xay ra khi chung minh duoc nhom tien trinh da rong (xem
+        # `cay_da_chet`). Windows khong do duoc nhom nen ban chup o lai cho toi
+        # luot quet - khang dinh o day phai noi dung dieu do, dung doi hoi mot
+        # bao dam ma nen kia khong the giu.
+        if not LA_WINDOWS:
+            bang(not (thu_muc / "prompt.snapshot").exists(),
+                 "ban chup con nam lai tren dia sau khi con thoat")
+        else:
+            bang((thu_muc / "prompt.snapshot").exists(),
+                 "Windows khong do duoc nhom nen phai GIU ban chup, khong xoa mu")
         # xin giữ thì phải còn
         rr2 = s / "runs2"
         r2 = chay("run", "--workspace", str(repo), "--run-root", str(rr2),
@@ -1466,6 +1474,65 @@ def t71_ban_chup_prompt_phai_KIN_va_bi_XOA():
         bang(r2.returncode == MA_OK, f"rc={r2.returncode}: {r2.stderr}")
         tm2 = next(p for p in rr2.iterdir() if p.is_dir())
         bang((tm2 / "prompt.snapshot").exists(), "--giu-ban-chup ma van xoa")
+
+
+@ca
+def t76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau():
+    """Wrapper thoát ngay, cháu đọc trễ: snapshot phải còn cho tới lúc đọc.
+
+    `codex exec` cũng có thể bọc công việc trong tiến trình con. Bản trước
+    xoá snapshot ngay khi wrapper trả rc=0; cháu mở sau 0,4s nhận ENOENT.
+    """
+    if LA_WINDOWS:
+        return "ca nhom tien trinh POSIX; Windows can fixture that rieng"
+    with San() as s:
+        repo = tao_repo(s)
+        pf = s / "prompt.txt"
+        pf.write_text("PROMPT-CHO-TIEN-TRINH-CHAU\n", encoding="utf-8")
+        sha = hashlib.sha256(pf.read_bytes()).hexdigest()
+        ket_qua = s / "chau-doc.txt"
+        ma_chau = ("import pathlib,sys,time;time.sleep(.4);"
+                   "p=pathlib.Path(sys.argv[1]);o=pathlib.Path(sys.argv[2]);"
+                   "o.write_text(p.read_text(encoding='utf-8'),encoding='utf-8')")
+        ma_wrapper = ("import subprocess,sys;"
+                      "subprocess.Popen([sys.executable,'-c',sys.argv[1],"
+                      "sys.argv[2],sys.argv[3]])")
+        rr = s / "runs"
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                 "--prompt-file", str(pf), "--expected-prompt-sha256", sha,
+                 "--", PY, "-c", ma_wrapper, ma_chau, "{PROMPT_FILE}", str(ket_qua))
+        bang(r.returncode == MA_OK, f"wrapper rc={r.returncode}: {r.stderr}")
+        for _ in range(40):
+            if ket_qua.exists():
+                break
+            time.sleep(.05)
+        bang(ket_qua.exists(),
+             "wrapper thoat da lam launcher xoa snapshot truoc khi chau mo")
+        bang(ket_qua.read_text(encoding="utf-8") == pf.read_text(encoding="utf-8"),
+             "chau khong doc dung noi dung snapshot")
+
+
+@ca
+def t77_ban_chup_qua_han_bi_QUET_du_khong_xoa_duoc_ngay():
+    """Ban chup giu lai (nen khong do duoc nhom) KHONG duoc nam lai vinh vien.
+
+    Vong 4 doi luat: chi xoa ngay khi CHUNG MINH duoc nhom tien trinh da rong.
+    Tren Windows dieu kien do luon sai, nen neu khong co gi quet don thi noi dung
+    prompt nam tren dia mai mai - dung thu ma `_tom_tat_lenh` da bo argv de tranh.
+    """
+    with San() as s:
+        repo = tao_repo(s)
+        rr = s / "runs"
+        chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", PY, "-c", "pass")
+        cu = next(p for p in rr.iterdir() if p.is_dir())
+        qua_han = cu / "prompt.snapshot"
+        qua_han.write_text("PROMPT-CU-QUA-HAN", encoding="utf-8")
+        os.utime(qua_han, (time.time() - 2 * 86400,) * 2)
+        moi = cu / "prompt.snapshot.moi"
+        moi.write_text("x", encoding="utf-8")
+        chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", PY, "-c", "pass")
+        bang(not qua_han.exists(), "ban chup qua han KHONG duoc quet don")
+        bang(moi.exists(), "quet nham tep khac")
 
 
 @ca
@@ -1711,8 +1778,12 @@ DOT_BIEN = [
       "        _fd = os.open(ban_chup, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)"),
      ["t71_ban_chup_prompt_phai_KIN_va_bi_XOA"]),
     ("ban_chup_de_lai_tren_dia",
-     ('    if ban_ghi.get("prompt_ban_chup") and not a.giu_ban_chup:', '    if False:'),
+     ('            and cay_da_chet):', '            and False):'),
      ["t71_ban_chup_prompt_phai_KIN_va_bi_XOA"]),
+    ("xoa_prompt_khi_wrapper_vua_thoat",
+     ('    cay_da_chet = (_thanh_vien_nhom(p.pid) == [])',
+      '    cay_da_chet = True'),
+     ["t76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau"]),
     ("ngat_ghi_thanh_xong",
      ('        ban_ghi["trang_thai"] = ("bi_ngat" if bi_ngat',
       '        ban_ghi["trang_thai"] = ("xong" if bi_ngat'),
@@ -1721,9 +1792,13 @@ DOT_BIEN = [
      ('    {"ten": "bash", "bat_buoc": False, "ung_vien": ["bash"],',
       '    {"ten": "bash_da_dot_bien", "bat_buoc": False, "ung_vien": ["bash"],'),
      ["t73_doctor_phai_do_bash_va_npm"]),
+    ("khong_quet_ban_chup_qua_han",
+     ('        for mau in ("*/run.json.*.tmp", "*/prompt.snapshot"):',
+      '        for mau in ("*/run.json.*.tmp",):'),
+     ["t77_ban_chup_qua_han_bi_QUET_du_khong_xoa_duoc_ngay"]),
     ("khong_don_tep_tam_mo_coi",
-     ('        for cu in run_root.glob("*/run.json.*.tmp"):',
-      '        for cu in run_root.glob("KHONG-KHOP-GI-CA"):'),
+     ('            for cu in run_root.glob(mau):',
+      '            for cu in run_root.glob("KHONG-KHOP-GI-CA"):'),
      ["t75_tep_tam_mo_coi_bi_don"]),
     ("dut_ong_nuot_ma_that",
      ("    try:\n        print(chuoi)\n        return True\n"

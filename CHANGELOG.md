@@ -1,3 +1,25 @@
+# ★ dev-side — audit launcher vòng 4 POSIX: không xoá prompt khi wrapper còn cháu (2026-08-13)
+
+Không bump `VERSION`; chỉ `.claude/`, `docs/` và CHANGELOG.
+
+- `run` không còn xoá `prompt.snapshot` ngay khi tiến trình wrapper thoát.
+  Trước khi xoá, launcher phải chứng minh nhóm tiến trình POSIX đã rỗng;
+  nếu cháu còn sống hoặc không đo được thì giữ bản chụp 0600 cho cháu
+  đọc. Phản chứng `t76_wrapper_thoat_khong_duoc_xoa_prompt_cua_chau`
+  dựng wrapper sinh cháu đọc trễ; đột biến `xoa_prompt_khi_wrapper_vua_thoat`
+  khôi phục đúng lỗi cũ và bị t76 giết.
+- **Hệ quả đa nền của luật mới, vá kèm.** "Không đo được thì giữ" trên Windows
+  nghĩa là *luôn luôn* giữ: `_thanh_vien_nhom` trả `None` ở mọi nền không phải
+  Linux/Darwin, nên `cay_da_chet` không bao giờ đúng và bản chụp sẽ nằm lại vô
+  thời hạn — đúng thứ mà việc bỏ argv khỏi sổ đã tránh. Hai việc: `_cap_id` quét
+  dọn `prompt.snapshot` quá hạn (gộp vào chỗ đã dọn `.tmp` mồ côi), và `t71` nói
+  đúng hợp đồng theo nền thay vì đòi một bảo đảm Windows không thể giữ. Khoá bằng
+  `t77_ban_chup_qua_han_bi_QUET_du_khong_xoa_duoc_ngay` + đột biến
+  `khong_quet_ban_chup_qua_han`.
+- Báo cáo và số đo Linux: `docs/AUDIT_LAUNCHER_VONG_4_POSIX.md`.
+  Cổng cuối: **77/77** (qua 75, bỏ qua 2, hỏng 0), **34/34** đột biến
+  (1 không đo được trên Linux), ruff F sạch.
+
 # ★ dev-side — vá nốt 12 mục NÊN SỬA của audit vòng 3 (2026-08-12)
 
 Không bump `VERSION`: chỉ `.claude/` + `docs/` + CHANGELOG. `RELEASE_MANIFEST.json`

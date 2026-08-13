@@ -945,13 +945,19 @@ def t56_prompt_doi_sau_khi_kiem_KHONG_toi_duoc_con():
         sha = hashlib.sha256(p.read_bytes()).hexdigest()
         ra = s / "con-doc-duoc.txt"
         # con ngủ 1.5s rồi mới đọc — thừa thời gian cho kẻ đổi tệp
-        ma_con = (f"import pathlib,time\ntime.sleep(1.5)\n"
-                  f"pathlib.Path({str(ra)!r}).write_text("
-                  f"pathlib.Path('{{PROMPT_FILE}}').read_text(encoding='utf-8'), encoding='utf-8')")
+        # Duong dan di qua ARGV, KHONG nhung vao ma nguon: tren Windows duong dan
+        # co dang 'C:\\Users\\...' ma '\\U' la escape unicode cua Python =>
+        # SyntaxError => con chet truoc khi lam gi, bao "con khong chay". Do that
+        # tren runner windows-latest 13-08.
+        ma_con = ("import pathlib,sys,time\n"
+                  "time.sleep(1.5)\n"
+                  "pathlib.Path(sys.argv[2]).write_text("
+                  "pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'), encoding='utf-8')")
         pr = subprocess.Popen(
             [PY, str(LAUNCHER_DANG_DUNG), "run", "--workspace", str(repo),
              "--run-root", str(rr), "--prompt-file", str(p),
-             "--expected-prompt-sha256", sha, "--", PY, "-c", ma_con],
+             "--expected-prompt-sha256", sha, "--",
+             PY, "-c", ma_con, "{PROMPT_FILE}", str(ra)],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         try:
             for _ in range(100):
@@ -1041,21 +1047,22 @@ def t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc():
 
 @ca
 def t61_run_root_khong_ghi_duoc_KHONG_do_traceback():
-    """Lỗi môi trường phải ra mã thoát, không phải nguyên stack Python."""
-    if os.geteuid() == 0 if hasattr(os, "geteuid") else False:
-        return "bo qua khi chay bang root (chmod khong chan duoc root)"
+    """Lỗi môi trường phải ra mã thoát, không phải nguyên stack Python.
+
+    KHÔNG dùng chmod: `chmod(0o500)` trên THƯ MỤC là no-op ở Windows (đo trên
+    runner windows-latest 13-08: run-root vẫn ghi được ⇒ rc=0 thay vì 2), và ở
+    POSIX thì root ghi xuyên quyền nên ca này từng phải tự bỏ qua. Đặt một TỆP
+    làm thành phần đường dẫn thì `mkdir` buộc phải hỏng ở MỌI nền và MỌI user —
+    ca chạy được khắp nơi, không còn nhánh bỏ qua nào.
+    """
     with San() as s:
         repo = tao_repo(s)
-        khoa = s / "khoa"
-        khoa.mkdir()
-        khoa.chmod(0o500)
-        try:
-            r = chay("run", "--workspace", str(repo), "--run-root", str(khoa / "runs"),
-                     "--", PY, "-c", "pass")
-            bang(r.returncode == MA_THAM_SO, f"mong doi {MA_THAM_SO}, duoc {r.returncode}")
-            bang("Traceback" not in r.stderr, f"do traceback tho: {r.stderr[-200:]}")
-        finally:
-            khoa.chmod(0o700)
+        chan = s / "chan-la-mot-tep"
+        chan.write_text("khong phai thu muc", encoding="utf-8")
+        r = chay("run", "--workspace", str(repo), "--run-root", str(chan / "runs"),
+                 "--", PY, "-c", "pass")
+        bang(r.returncode == MA_THAM_SO, f"mong doi {MA_THAM_SO}, duoc {r.returncode}")
+        bang("Traceback" not in r.stderr, f"do traceback tho: {r.stderr[-200:]}")
 
 
 @ca
@@ -1404,10 +1411,18 @@ def t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so():
     with San() as s:
         repo = tao_repo(s)
         rr = s / "runs"
-        chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", PY, "-c", "pass")
+        # Con phai SONG DU LAU de khoa danh tinh kip duoc lay. ĐÃ ĐO trên runner
+        # windows-latest (13-08): với `-c pass` con thoát trước khi
+        # `_khoa_danh_tinh` chạy, mà Get-Process KHÔNG thấy tiến trình đã thoát
+        # (POSIX thì /proc/<pid> còn ở dạng zombie nên đọc được) ⇒ sổ ghi
+        # khoa_danh_tinh=null ⇒ stop từ chối bằng mã 10 và ca này ĐỎ oan.
+        # Ca "thiếu khoá thì TỪ CHỐI" là việc của t32, không phải của ca này.
+        chay("run", "--workspace", str(repo), "--run-root", str(rr),
+             "--", PY, "-c", "import time; time.sleep(1)")
         thu_muc = next(p for p in rr.iterdir() if p.is_dir())
         truoc = json.loads((thu_muc / "run.json").read_text(encoding="utf-8"))
         bang(truoc["trang_thai"] == "xong", f"tien de sai: {truoc['trang_thai']}")
+        bang(truoc.get("khoa_danh_tinh"), "tien de sai: khong lay duoc khoa danh tinh")
         r = chay("stop", "--run-root", str(rr), "--id", truoc["short_id"])
         sau = json.loads((thu_muc / "run.json").read_text(encoding="utf-8"))
         bang(sau["trang_thai"] == "xong",
@@ -1415,6 +1430,7 @@ def t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so():
         bang("tai dung" not in (r.stdout + r.stderr),
              f"chan doan SAI 'PID da bi tai dung' cho tien trinh chi don gian la da thoat: {r.stdout}")
         bang(r.returncode == MA_OK, f"mong doi {MA_OK}, duoc {r.returncode}")
+
 
 
 @ca
@@ -1589,18 +1605,45 @@ def t73_doctor_phai_do_bash_va_npm():
 
 @ca
 def t74_dut_ong_KHONG_duoc_nuot_ma_that():
-    """Người đọc đóng ống giữa chừng KHÔNG được đổi kết luận của doctor.
+    """Người đọc đóng ống giữa chừng KHÔNG được đổi kết luận đã tính xong.
 
     Bản trước bắt BrokenPipeError ở `main` rồi trả 141, nên `doctor | head` trên
-    môi trường LÀNH cũng ra 141 (đo được 20/20 lượt) — phía gọi kiểm `rc != 0`
-    vẫn báo "THIEU CONG CU" oan, đúng triệu chứng mà bản va truoc dinh dep.
-    """
-    pr = subprocess.Popen([PY, str(LAUNCHER_DANG_DUNG), "doctor"],
-                          stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-    pr.stdout.close()          # doc 0 byte roi dong: moi luot in deu vo ong
-    ma = pr.wait(timeout=120)
-    bang(ma == MA_OK, f"moi truong DU cong cu ma dut ong lam ra ma {ma}")
+    môi trường LÀNH cũng ra 141 — phía gọi kiểm `rc != 0` báo "THIEU CONG CU" oan.
 
+    CA NÀY TỪNG PHI-TẤT-ĐỊNH và đã trả giá: bản đầu cho người đọc đóng ống NGAY,
+    rồi trông chờ ống vỡ. Nhưng stdout của Python nối ống là block-buffered 8KB và
+    ống hệ điều hành còn đệm thêm 64KB, nên với đầu ra NHỎ mọi thứ lọt hết vào đệm,
+    KHÔNG lần ghi nào hỏng, và đột biến sống sót. Cổng xanh ở máy này, ĐỎ trên
+    runner CI (13-08: `dut_ong_nuot_ma_that SAI giet 0/1`).
+    Nay ép tất định: dựng sổ đủ lớn để vượt đệm 8KB của Python (nhiều lần ghi),
+    ĐỌC ĐÚNG 1 BYTE cho lần ghi đầu chắc chắn thành công, rồi đóng — lần ghi kế
+    tiếp buộc phải vỡ ống. Không còn phụ thuộc thời điểm.
+    """
+    with San() as s:
+        rr = s / "runs"
+        rr.mkdir()
+        # `ten` dài để đầu ra `status` vượt xa 8KB mà không phải chạy thật N lượt.
+        for i in range(40):
+            d = rr / f"{i:08x}"
+            d.mkdir()
+            (d / "run.json").write_text(json.dumps({
+                "short_id": f"{i:08x}", "ten": "x" * 2000, "trang_thai": "xong",
+                "ma_thoat": 0, "bat_dau_utc": "2026-01-01T00:00:00+00:00"}),
+                encoding="utf-8")
+        do_dai = len(chay("status", "--run-root", str(rr)).stdout)
+        bang(do_dai > 8192, f"tien de sai: dau ra chi {do_dai} byte, chua vuot dem 8KB")
+
+        pr = subprocess.Popen([PY, str(LAUNCHER_DANG_DUNG), "status", "--run-root", str(rr)],
+                              stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        try:
+            bang(pr.stdout.read(1) != b"", "khong doc duoc byte nao")
+            pr.stdout.close()      # lan ghi KE TIEP buoc phai vo ong
+            ma = pr.wait(timeout=120)
+        finally:
+            if pr.poll() is None:
+                pr.kill()
+                pr.wait(timeout=10)
+        bang(ma == MA_OK, f"so lanh lan ma dut ong lam ra ma {ma}")
 
 @ca
 def t75_tep_tam_mo_coi_bi_don():
@@ -1760,7 +1803,8 @@ DOT_BIEN = [
      ("    if len(doan_m) >= 3:", "    if len(doan_m) == 3:"),
      ["t68_kho_duong_dan_SAU_neu_host_van_phai_QUA"]),
     ("stop_de_len_luot_da_xong",
-     ('    if so.get("trang_thai") in TRANG_THAI_KET_THUC:', '    if False:'),
+     ('    ket = _giet_cay(int(pid), khoa)\n    if so.get("trang_thai") in TRANG_THAI_KET_THUC:',
+      '    ket = _giet_cay(int(pid), khoa)\n    if False:'),
      ["t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so"]),
     # Neo phải kèm chú thích: "if hien is None:" trần xuất hiện TRƯỚC ở nhánh
     # Windows của _con_song, mà replace(...,1) chỉ đổi chỗ ĐẦU TIÊN — đột biến

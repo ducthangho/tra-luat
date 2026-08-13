@@ -1008,6 +1008,12 @@ def lenh_run(a) -> int:
 
     khoa = _khoa_danh_tinh(p.pid)
     ban_ghi.update(pid=p.pid, khoa_danh_tinh=khoa)
+    if khoa is None:
+        # Nói RÕ vì sao thiếu, đừng để phía đọc phải đoán. Con thoát quá nhanh là
+        # ca lành; không lấy được khoá cho một tiến trình CÒN SỐNG mới là ca đáng lo.
+        ban_ghi["khoa_thieu_ly_do"] = ("con da thoat truoc khi lay duoc khoa"
+                                       if p.poll() is not None
+                                       else "khong doc duoc danh tinh du tien trinh con song")
     _ghi_so(thu_muc, ban_ghi)
     if not a.json:
         print(f"short_id  : {sid}")
@@ -1142,6 +1148,11 @@ def lenh_stop(a) -> int:
     if not pid:
         raise Chan(MA_THAM_SO, "so khong co pid")
     if khoa is None:
+        # KHÔNG nới thành "đã xong thì trả OK": thiếu khoá nghĩa là KHÔNG ĐO ĐƯỢC
+        # gì cả, kể cả việc con cháu đã chết hay chưa. Trên Linux `stop` trả 0 cho
+        # lượt đã xong là vì `_giet_cay` ĐO được tiến trình đã biến mất, không phải
+        # vì suy ra từ nhãn trong sổ. Vòng 5 đã thử nới chỗ này và nó đụng thẳng
+        # t32 — đúng ra thì t32 mới là bên giữ doctrine.
         print("KET LUAN  : TU CHOI - khong co khoa danh tinh, khong giet theo PID tran")
         return MA_DANH_TINH
     # VẪN chạy _giet_cay kể cả khi sổ nói đã kết thúc: nhãn có thể cũ, và chốt

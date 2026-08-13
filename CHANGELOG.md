@@ -1,3 +1,47 @@
+# ★ dev-side — vòng 5: vá 4 lỗi do lượt CI Windows ĐẦU TIÊN lộ ra (2026-08-13)
+
+Không bump `VERSION`; chỉ `.claude/` + CHANGELOG. `RELEASE_MANIFEST.json` giữ 179 tệp.
+
+Lượt `launcher (Windows that)` chạy được lần đầu sau khi Actions hồi phục. Bốn vòng
+audit trước đều đo trên Linux; runner `windows-latest` lộ ngay **3 ca đỏ trên Windows**
+và **1 đột biến sống sót trên Linux CI** mà máy dev không thấy.
+
+- **`t56` — nhúng đường dẫn vào MÃ NGUỒN Python.** Trên Windows đường dẫn bản chụp có
+  dạng `C:\Users\…`, mà `\U` là escape unicode ⇒ `SyntaxError` ⇒ con chết trước khi
+  làm gì, báo "con khong chay". Nay đường dẫn đi qua **argv**, không nhúng vào nguồn.
+  Lỗi fixture, không phải lỗi launcher.
+- **`t61` — `chmod(0o500)` trên THƯ MỤC là no-op ở Windows** (run-root vẫn ghi được ⇒
+  rc=0 thay vì 2), còn ở POSIX thì root ghi xuyên quyền nên ca phải tự bỏ qua. Nay đặt
+  một **TỆP** làm thành phần đường dẫn ⇒ `mkdir` buộc phải hỏng ở mọi nền, mọi user.
+  Ca từ "bỏ qua khi root + đỏ trên Windows" thành **chạy được khắp nơi**.
+- **`t69` — con `-c pass` thoát trước khi `_khoa_danh_tinh` kịp chạy.** `Get-Process`
+  KHÔNG thấy tiến trình đã thoát (POSIX thì `/proc/<pid>` còn ở dạng zombie nên đọc
+  được) ⇒ sổ ghi `khoa_danh_tinh=null` ⇒ `stop` từ chối bằng mã 10. Fixture nay dùng
+  con sống đủ lâu và **kiểm tiền đề** là khoá đã lấy được. Sổ thêm `khoa_thieu_ly_do`
+  để lần sau không phải đoán vì sao thiếu khoá.
+- **`t74` — ca PHI-TẤT-ĐỊNH do chính vòng 4 viết.** Nó cho người đọc đóng ống ngay rồi
+  trông chờ ống vỡ; nhưng stdout Python nối ống là block-buffered 8KB và ống hệ điều
+  hành đệm thêm 64KB, nên với đầu ra NHỎ không lần ghi nào hỏng và đột biến sống sót.
+  Xanh ở máy dev, **ĐỎ trên CI**. Nay dựng sổ vượt 8KB, **đọc đúng 1 byte** rồi đóng ⇒
+  lần ghi kế tiếp buộc phải vỡ ống. Hết phụ thuộc thời điểm.
+
+**Một bản vá bị HOÀN NGUYÊN giữa chừng, ghi lại vì nó đáng nhớ.** Bản đầu chữa `t69`
+bằng cách cho `lenh_stop` trả `MA_OK` khi thiếu khoá mà lượt chạy đã kết thúc. Nó đụng
+thẳng `t32_stop_tu_choi_khi_khong_co_khoa` — cùng một kịch bản, một bên đòi 10, một bên
+đòi 0. `t32` mới là bên giữ doctrine: trên Linux `stop` trả 0 vì `_giet_cay` **ĐO được**
+tiến trình đã biến mất, không phải vì suy ra từ nhãn trong sổ; thiếu khoá nghĩa là không
+đo được gì cả. Sửa fixture chứ không nới chốt.
+
+CÒN TREO — `_khoa_danh_tinh` mất khoá với con ngắn ngủi trên Windows là lỗi THẬT, mới
+chỉ né trong fixture. Bản vá gốc là lấy danh tính từ HANDLE mà `Popen` đang giữ
+(`GetProcessTimes`), vì handle sống qua lúc tiến trình thoát. Chưa làm vì `.NET
+StartTime.Ticks` (epoch năm 1, giờ ĐỊA PHƯƠNG) và `FILETIME` (epoch 1601, UTC) lệch
+epoch lẫn múi giờ — chuyển đổi sai thì khoá không bao giờ khớp và chốt hoá ra luôn từ
+chối. Cần đo trên Windows thật trước khi đụng.
+
+Cổng Linux: **77/77** (qua 76, bỏ qua **1**, hỏng 0) · đột biến **34/34**
+(1 không đo được) · ruff F sạch. Số bỏ qua giảm từ 2 xuống 1 nhờ `t61`.
+
 # ★ dev-side — audit launcher vòng 4 POSIX: không xoá prompt khi wrapper còn cháu (2026-08-13)
 
 Không bump `VERSION`; chỉ `.claude/`, `docs/` và CHANGELOG.

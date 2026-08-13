@@ -18,12 +18,34 @@ on:
   # hiệu lực SAU khi bản này lên master.)
   workflow_dispatch:
 
+# r245 — CẮT PHÚT ACTIONS. Đo ngày 13-08: gate chạy 6,6 phút tường, nhân hệ số
+# Windows x2 thành ~20 phút TÍNH TIỀN mỗi lượt, x13,6 lượt/ngày = ~8.100 phút/tháng.
+# Hạn mức Free là 2.000 ⇒ cạn khoảng ngày 11 hằng tháng, và ĐÃ cạn thật: 12-08 16:21
+# còn chạy tốt, 12-08 19:30 trở đi mọi job chết ở giây thứ 2 với runner_id=0 (không
+# nhận được runner, không có bước nào, không log). CI của kho đứng hình từ đó.
+#
+# Hai chốt dưới đây KHÔNG hạ tiêu chuẩn gate, chỉ bỏ phần lặp vô ích:
+concurrency:
+  # Agent đẩy nhiều lần lên cùng một PR; lượt cũ thành vô nghĩa ngay khi có lượt mới.
+  # KHÔNG huỷ trên master: đó là lượt gác cổng phát hành, phải chạy trọn.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
 jobs:
   gate:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # Windows tốn GẤP ĐÔI phút. Chạy nó ở nơi thật sự cần: trước khi vào master,
+        # khi gọi tay, hoặc khi PR được gắn nhãn `windows` (dùng cho PR đụng đường
+        # phụ thuộc nền). PR thường vẫn được Linux soi mỗi lần đẩy.
+        # KHÔNG phải nới gate: master vẫn luôn qua CẢ HAI nền trước khi phát hành.
+        os: ${{ fromJSON(
+              (github.event_name == 'workflow_dispatch'
+               || github.ref == 'refs/heads/master'
+               || contains(github.event.pull_request.labels.*.name, 'windows'))
+              && '["ubuntu-latest","windows-latest"]'
+              || '["ubuntu-latest"]') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25
     env:

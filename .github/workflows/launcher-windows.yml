@@ -139,6 +139,14 @@ jobs:
           python .claude/dev/launcher.py doctor | Select-Object -First 1 | Out-Null
           Write-Host "ho so| du cong cu | Select -First 1 -> LASTEXITCODE=$LASTEXITCODE (dat truoc = 77; van 77 nghia la PowerShell KHONG dat lai)"
           if ($loi) { Write-Host "CO $loi truong hop SAI"; exit 1 }
+          # BUOC PHAI THOAT TUONG MINH. Da tra gia: buoc nay tung DO voi $loi = 0 va ca
+          # ba phep do ĐÚNG. Ly do — chinh cai bay no vua chung minh: dong cuoi cua buoc
+          # la mot lenh native trong ONG BI CAT, nen `$LASTEXITCODE` con nguyen moc 77 va
+          # `$?` la $false; runner goi `pwsh -command ". 'script'"` roi lay ma thoat tu do
+          # ⇒ moc DIEN GIAI thanh phan quyet. Phan quyet cua buoc la `$loi`, khong phai
+          # tan du cua lenh cuoi. (Lan thu tu cung mot ho benh trong dot nay: minh chung
+          # cua mot bay lai tro thanh chinh bay do.)
+          exit 0
 
       - name: 'Probe: console cp1258 + duong dan co dau tieng Viet'
         if: runner.os == 'Windows'
@@ -167,7 +175,9 @@ jobs:
           fn = next(f for f in M.CA if f.__name__.startswith('t62_'))
           try:
               kq = fn()
-              print('t62:', 'BO QUA - ' + kq if isinstance(kq, str) else 'QUA')
+              if isinstance(kq, str):
+                  print('t62: BO QUA BAT NGO ->', kq); sys.exit(1)
+              print('t62: QUA')
           except AssertionError as e:
               print('t62: DO ->', e); sys.exit(1)
           "@
@@ -181,8 +191,10 @@ jobs:
           $p = Start-Process python -ArgumentList '-c','import time;time.sleep(60)' -PassThru
           Start-Sleep -Seconds 1
           $ra = & taskkill /PID $p.Id /T /F 2>&1
-          Write-Host "taskkill rc=$LASTEXITCODE : $ra"
+          $ma = $LASTEXITCODE
+          Write-Host "taskkill rc=$ma : $ra"
           Start-Sleep -Seconds 1
           $con = Get-Process -Id $p.Id -ErrorAction SilentlyContinue
           Write-Host "tien trinh con song? $([bool]$con)"
           if ($con) { Stop-Process -Id $p.Id -Force }
+          if ($ma -ne 0 -or $con) { exit 1 }

@@ -92,6 +92,11 @@ MA_THIEU_CONG_CU = 12
 # gần 0 mà vẫn xanh. Đặt ở mã được đột biến (không đặt trong chính runner test).
 TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI = 7
 
+# Ảnh chụp Windows: tiến trình CÓ MẶT nhưng không đọc được `CreationDate`, tức
+# không lấy được khoá danh tính cho nó. Đánh dấu thay vì bỏ qua im lặng — bỏ qua
+# thì một hậu duệ biến mất khỏi ảnh rồi ảnh rỗng thành "cả cây đã chết".
+KHONG_DOC_DUOC_KHOA = "\x00khong-doc-duoc-khoa"
+
 # Trạng thái CUỐI của một lượt chạy — `stop` không được ghi đè lên chúng.
 TRANG_THAI_KET_THUC = {"xong", "qua_han", "bi_ngat", "hong", "da_dung"}
 
@@ -316,7 +321,7 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
                 ["powershell", "-NoProfile", "-NonInteractive", "-Command",
                  "Get-CimInstance Win32_Process | ForEach-Object { if ($_.CreationDate) "
                  "{ \"OK|$($_.ProcessId)|$($_.ParentProcessId)|$($_.CreationDate.Ticks)\" } "
-                 "else { \"ERR|$($_.ProcessId)|NO_CREATION_DATE\" } }"],
+                 "else { \"ERR|$($_.ProcessId)|$($_.ParentProcessId)|NO_CREATION_DATE\" } }"],
                 capture_output=True, text=True, timeout=60)
         except (OSError, subprocess.SubprocessError):
             return None
@@ -328,10 +333,20 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
             # Thiếu CreationDate là "không đo được", KHÔNG phải "tiến trình
             # không tồn tại". Bỏ qua im lặng có thể làm mất đúng một hậu duệ rồi
             # ảnh rỗng được đọc thành bằng chứng cả cây đã chết.
-            if len(phan) != 4 or phan[0] != "OK":
+            #
+            # NHƯNG fail-closed phải CÓ PHẠM VI. Bản đầu (vòng 7) trả None ngay khi
+            # BẤT KỲ tiến trình nào trên máy thiếu `CreationDate` — kể cả tiến trình
+            # hệ thống chẳng liên quan gì tới cây ta sắp giết. Như thế ảnh chụp có
+            # dùng được hay không lại phụ thuộc trạng thái máy ở chỗ khác, mà từ khi
+            # `_giet_cay` lấy ảnh rỗng làm bằng chứng "đã tắt" trên Windows thì đó là
+            # đường quyết định 0-hay-125. Nên: giữ nguyên tiến trình mù TRONG cây (có
+            # ppid nên nối được cây), đánh dấu bằng `KHONG_DOC_DUOC_KHOA`, rồi CHỈ trả
+            # None nếu dấu đó thật sự rơi vào cây — kiểm ở cuối hàm.
+            if len(phan) != 4 or phan[0] not in ("OK", "ERR"):
                 return None
             try:
-                tt[int(phan[1])] = (int(phan[2]), 0, f"win:{phan[3]}")
+                tt[int(phan[1])] = (int(phan[2]), 0,
+                                    f"win:{phan[3]}" if phan[0] == "OK" else KHONG_DOC_DUOC_KHOA)
             except ValueError:
                 return None
     else:
@@ -351,6 +366,11 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
             if nhom == pid:
                 ra.setdefault(q, khoa)
     ra.pop(os.getpid(), None)                          # tuyệt đối không tự giết mình
+    # Fail-closed CÓ PHẠM VI (xem nhánh Windows ở trên): chỉ khi một tiến trình
+    # KHÔNG đọc được danh tính nằm TRONG cây thì ảnh mới là "không đo được". Kiểm
+    # SAU khi đã bỏ chính mình ra, để tiến trình của ta không tự làm hỏng ảnh.
+    if KHONG_DOC_DUOC_KHOA in ra.values():
+        return None
     return ra
 
 
@@ -651,8 +671,23 @@ def _giet_cay(pid: int, khoa: str | None, job=None) -> KetGiet:
         # bình thường báo "PID da bi tai dung" + rc=10, tức là hô hoán đúng cái
         # mối nguy mà khoá danh tính sinh ra để bắt, trong ca vô hại và PHỔ BIẾN
         # nhất (audit vòng 3: 7/12 lần đua). Chỉ còn con cháu là đáng hỏi.
-        con = _thanh_vien_nhom(pid)
-        if con == []:             # [] = đã chứng minh rỗng · None = không đo được
+        # Mỗi nền một PHÉP ĐO cho câu hỏi "còn hậu duệ không", và cả hai chỉ kết
+        # luận khi ĐO ĐƯỢC-VÀ-RỖNG (`None` = không đo được, tuyệt đối không đọc
+        # thành rỗng — đó là lỗ vòng 7 vừa vá).
+        # `_thanh_vien_nhom` là phép đo POSIX (nhóm tiến trình) nên trên Windows nó
+        # LUÔN trả None. Hỏi mỗi nó thì Windows không bao giờ chạm được nhánh này:
+        # ĐO ĐƯỢC trên windows-latest 13-08, `stop` một lượt ĐÃ KẾT THÚC rơi xuống
+        # taskkill trên một PID không còn tồn tại, rc≠0, thành 125 "không giết được"
+        # (t69 đỏ). Windows CÓ phép đo tương đương: ảnh chụp. `{}` nghĩa là không
+        # tiến trình sống nào nhận `pid` làm tổ tiên, và `hien is None` ở trên đã
+        # chứng minh chính `pid` đã tắt.
+        if platform.system() == "Windows":
+            con = _chup_cay(pid)
+            rong = con == {}
+        else:
+            con = _thanh_vien_nhom(pid)
+            rong = con == []      # [] = đã chứng minh rỗng · None = không đo được
+        if rong:
             return KetGiet(True, True, "tien trinh da khong con chay")
     elif hien != khoa:
         return KetGiet(False, False,

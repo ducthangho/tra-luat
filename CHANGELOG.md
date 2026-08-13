@@ -1,3 +1,44 @@
+# ★ dev-side — vòng 7b: bản vá ĐÚNG của vòng 7 làm đỏ Windows, và vì sao (2026-08-13)
+
+Vòng 7 sửa `if not con:` thành `con == []` — **đúng**, vì `None` là KHÔNG ĐO ĐƯỢC chứ
+không phải "đã chứng minh rỗng". Nhưng lượt `launcher (windows-latest)` ngay sau đó đỏ:
+
+```
+HONG t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so: mong doi 0, duoc 125
+81/82 ca (qua 69, bo qua 12, hong 1)
+```
+
+Vì phép đo đứng sau điều kiện đó là `_thanh_vien_nhom` — **nhóm tiến trình, khái niệm
+POSIX** — nên trên Windows nó luôn trả `None`. Trước bản vá, `not None` là True nên
+Windows đi qua nhánh "đã không còn chạy" **nhờ chính con bọ**. Vá xong thì Windows không
+còn đường nào chạm nhánh đó, rơi xuống `taskkill` trên một PID **không còn tồn tại**,
+rc≠0 ⇒ 125 "không giết được". Một bản vá đúng làm lộ ra rằng nền kia chưa bao giờ có
+phép đo của mình.
+
+- **Windows được cấp phép đo riêng.** `hien is None` đã chứng minh *mẹ* đã tắt; hậu duệ
+  thì hỏi ảnh chụp: `{}` nghĩa là không tiến trình sống nào nhận `pid` làm tổ tiên.
+  Vẫn giữ nguyên doctrine — `None` vẫn là không đo được, vẫn không kết luận (`t83` khoá
+  cả hai vế; `t78` giữ nguyên).
+- **Fail-closed của ảnh chụp phải CÓ PHẠM VI.** Bản vòng 7 trả `None` ngay khi **bất kỳ**
+  tiến trình nào trên máy thiếu `CreationDate`, kể cả tiến trình hệ thống chẳng liên quan.
+  Như thế ảnh có dùng được hay không lại tuỳ trạng thái máy ở chỗ khác — mà từ mục trên,
+  ảnh rỗng chính là đường quyết định 0-hay-125. Nay dòng mù được **giữ lại** kèm dấu
+  `KHONG_DOC_DUOC_KHOA` (truy vấn CIM trả thêm `ParentProcessId` cho cả dòng lỗi, nên nối
+  được cây), và chỉ trả `None` nếu dấu đó **rơi vào cây**. `t81` mạnh lên hai vế ngược
+  nhau: mù TRONG cây ⇒ `None`; mù NGOÀI cây ⇒ ảnh vẫn dùng được.
+
+Hai đột biến của vòng 7 mất neo vì đúng những dòng đó bị viết lại. **Chuyển neo, không
+nới điều kiện** (nếp đã ghi): `none_nhom_thanh_cay_rong` neo sang nhánh Windows và nhận
+thêm `t83` làm ca đích; `chup_cay_bo_qua_dong_thieu` neo sang chỗ đánh dấu — lớp KHÁC với
+`chup_cay_khong_fail_closed_trong_cay` (một bên bỏ DẤU, bên kia bỏ phép KIỂM).
+
+Đo: **83/83 ca** (qua 82, bỏ qua 1, hỏng 0) · **đột biến 42/42** (1 không đo được) ·
+ruff F sạch · 17/17 bước gate `rc=0` · `tl selftest 1697/1697`.
+
+Ghi rõ ranh giới bằng chứng: mục thứ nhất có **số đo thật trên `windows-latest`** (t69 đỏ
+125). Mục thứ hai là **suy luận**, chưa quan sát được `_chup_cay` trả `None` trên runner —
+nó trở nên đáng sửa vì mục thứ nhất khiến ảnh chụp thành đường quyết định.
+
 # ★ dev-side — audit launcher vòng 7: fail-closed cho Job Object và phép đo Windows (2026-08-13)
 
 Không bump `VERSION`. Vòng rà soát thứ bảy vá năm lỗ hổng đo/giết cây Windows:

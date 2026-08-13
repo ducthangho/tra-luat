@@ -1782,14 +1782,61 @@ def t80_job_pid_tang_buffer_khi_qua_suc_chua():
 
 @ca
 def t81_chup_cay_windows_thieu_creationdate_phai_fail_closed():
-    """Một dòng CIM thiếu CreationDate làm cả ảnh không đủ bằng chứng."""
+    """CIM thiếu CreationDate: fail-closed, nhưng CHỈ khi nó ở TRONG cây.
+
+    Hai vế cố ý ngược nhau. Vế (a) là bảo đảm gốc: một hậu duệ mà ta không lấy
+    được khoá danh tính thì cả ảnh không đủ bằng chứng — bỏ qua im lặng sẽ làm
+    ảnh rỗng thành "cả cây đã chết". Vế (b) là PHẠM VI: tiến trình mù NGOÀI cây
+    không liên quan gì tới thứ ta sắp giết; để nó phá ảnh thì ảnh có dùng được
+    hay không lại tuỳ trạng thái máy ở chỗ khác — mà từ khi ảnh rỗng là bằng
+    chứng "đã tắt" trên Windows, đó chính là đường quyết định 0-hay-125.
+    """
     m = _tai_launcher_thu()
     m.platform.system = lambda: "Windows"
-    class P:
-        returncode = 0
-        stdout = "OK|10|1|123\nERR|11|NO_CREATION_DATE\n"
-    m.subprocess.run = lambda *_a, **_k: P()
+
+    def _ra(dong):
+        class P:
+            returncode = 0
+            stdout = dong
+        m.subprocess.run = lambda *_a, **_k: P()
+
+    # (a) tien trinh mu la CON cua 10 => khong do duoc
+    _ra("OK|10|1|123\nERR|11|10|NO_CREATION_DATE\n")
     bang(m._chup_cay(10) is None, "hau due thieu CreationDate bi bo qua im lang")
+    # (b) tien trinh mu thuoc nhanh KHAC (cha = 1) => anh van dung duoc
+    _ra("OK|10|1|123\nOK|12|10|456\nERR|11|1|NO_CREATION_DATE\n")
+    bang(m._chup_cay(10) == {10: "win:123", 12: "win:456"},
+         "tien trinh mu NGOAI cay khong duoc lam hong ca anh")
+
+
+@ca
+def t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung():
+    """`stop` một lượt ĐÃ KẾT THÚC trên Windows phải trọn vẹn, không tụt xuống 125.
+
+    ĐO ĐƯỢC trên windows-latest 13-08: sau khi vòng 7 sửa `if not con` thành
+    `con == []` (đúng — None là KHÔNG ĐO ĐƯỢC), nhánh "đã không còn chạy" dùng
+    `_thanh_vien_nhom`, vốn là phép đo POSIX nên trên Windows luôn trả None ⇒
+    Windows không bao giờ chạm được nhánh đó, rơi xuống `taskkill` trên một PID
+    không tồn tại, rc≠0, và `t69` đỏ với 125.
+
+    Bản vá KHÔNG được nới chốt về lại `not con`: vế thứ hai dưới đây giữ đúng
+    doctrine của `t78` — không đo được thì tuyệt đối không kết luận.
+    """
+    m = _tai_launcher_thu()
+    m._khoa_danh_tinh = lambda _pid: None          # me da tat, do duoc
+    m._thanh_vien_nhom = lambda _pid: None         # phep do POSIX: mu tren Windows
+    m.platform.system = lambda: "Windows"
+    goi = []
+    m._giet_windows = lambda *_a, **_k: (goi.append(True) or m.KetGiet(False, False, "duong giet"))
+
+    m._chup_cay = lambda _pid: {}                  # DO DUOC va rong
+    kq = m._giet_cay(12345, "win:1")
+    bang(kq.tron_ven and kq.ca_cay and not goi,
+         "anh chup RONG la bang chung du, khong duoc roi xuong duong giet")
+
+    m._chup_cay = lambda _pid: None                # KHONG DO DUOC
+    kq2 = m._giet_cay(12345, "win:1")
+    bang(goi and not kq2.tron_ven, "None bi doc thanh rong: ket luan khong bang chung")
 
 
 def _dot_bien_du_san(tong: int, khong_do: int) -> bool:
@@ -1993,10 +2040,14 @@ DOT_BIEN = [
       "    except BrokenPipeError:\n        return False",
       "    print(chuoi)\n    return True"),
      ["t74_dut_ong_KHONG_duoc_nuot_ma_that"]),
+    # CHUYEN NEO (khong noi dieu kien): dong `if con == []` da tach thanh hai nhanh
+    # theo nen khi Windows duoc cap phep do rieng (anh chup). Y DINH GIU NGUYEN -
+    # ep None bi doc nhu rong. Neo vao nhanh Windows vi ca hai ca dich deu chay o do.
     ("none_nhom_thanh_cay_rong",
-     ('        if con == []:             # [] = đã chứng minh rỗng · None = không đo được',
-      '        if not con:               # DOT BIEN: None bi doc nhu rong'),
-     ["t78_khong_do_duoc_nhom_KHONG_phai_cay_rong"]),
+     ('            rong = con == {}',
+      '            rong = con is None or con == {}   # DOT BIEN: None bi doc nhu rong'),
+     ["t78_khong_do_duoc_nhom_KHONG_phai_cay_rong",
+      "t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung"]),
     ("job_bo_qua_loi_dat_gioi_han",
      ('        if not k32.SetInformationJobObject(job, 9, ctypes.byref(tt), ctypes.sizeof(tt)):',
       '        if False:'),
@@ -2005,14 +2056,36 @@ DOT_BIEN = [
      ('            suc_chua = max(suc_chua * 2, can)',
       '            return None  # DOT BIEN: bo doc lai khi buffer thieu'),
      ["t80_job_pid_tang_buffer_khi_qua_suc_chua"]),
+    # CHUYEN NEO (khong noi dieu kien): dong thieu CreationDate khong con bi loai o
+    # cho doc nua ma duoc GIU LAI kem dau `KHONG_DOC_DUOC_KHOA`, de fail-closed co
+    # PHAM VI (chi do khi no nam trong cay). Y DINH GIU NGUYEN - lam tien trinh mu
+    # lan vao anh nhu mot tien trinh binh thuong. Day la LOP KHAC voi
+    # `chup_cay_khong_fail_closed_trong_cay`: mot ben bo DAU, ben kia bo phep KIEM.
     ("chup_cay_bo_qua_dong_thieu",
-     ('            if len(phan) != 4 or phan[0] != "OK":\n                return None',
-      '            if len(phan) != 4 or phan[0] != "OK":\n                continue'),
+     ('                                    f"win:{phan[3]}" if phan[0] == "OK" else KHONG_DOC_DUOC_KHOA)',
+      '                                    f"win:{phan[3]}")'),
      ["t81_chup_cay_windows_thieu_creationdate_phai_fail_closed"]),
     ("san_dot_bien_chi_can_mot",
      ('TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI = 7',
       'TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI = 0'),
      ["t82_dot_bien_khong_duoc_mat_qua_30_phan_tram"]),
+    # Windows khong co phep do nhom tien trinh; bo phep do thay the thi `stop` mot
+    # luot DA KET THUC lai roi xuong taskkill tren PID khong ton tai => 125 (t69 do
+    # that tren windows-latest 13-08).
+    ("windows_khong_co_duong_bang_chung_me_da_tat",
+     ('            rong = con == {}', '            rong = False'),
+     ["t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung"]),
+    # Bo dau "khong doc duoc khoa" => hau due mu lot vao anh voi khoa rong, roi
+    # `_con_song_dung_khoa` khong bao gio khop => bao la da chet.
+    ("chup_cay_khong_fail_closed_trong_cay",
+     ('    if KHONG_DOC_DUOC_KHOA in ra.values():', '    if False:'),
+     ["t81_chup_cay_windows_thieu_creationdate_phai_fail_closed"]),
+    # Chieu NGUOC LAI: fail-closed mat pham vi, tro lai "bat ky tien trinh nao tren
+    # may thieu CreationDate cung lam hong anh". Xanh ma vo dung.
+    ("chup_cay_fail_closed_ca_may",
+     ('            if len(phan) != 4 or phan[0] not in ("OK", "ERR"):',
+      '            if len(phan) != 4 or phan[0] != "OK":'),
+     ["t81_chup_cay_windows_thieu_creationdate_phai_fail_closed"]),
 ]
 
 

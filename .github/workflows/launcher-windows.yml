@@ -188,8 +188,23 @@ jobs:
         run: |
           # Vong 2 ket luan "Access denied" la han che sandbox codex chu khong phai
           # Windows noi chung. Day la phep do TRUC TIEP khang dinh do.
-          $p = Start-Process python -ArgumentList '-c','import time;time.sleep(60)' -PassThru
+          # `Start-Process -ArgumentList 'a','b'` NOI cac phan tu bang DAU CACH ma
+          # KHONG dat dau nhay. Ban dau viet -ArgumentList '-c','import time;...' nen
+          # python nhan `-c import time;time.sleep(60)`, tach ra thanh `-c` `import`
+          # `time;...` => chay chuong trinh `import` => SyntaxError => CHET NGAY.
+          # Mot giay sau taskkill bao rc=128 "The process not found". Suot thoi gian
+          # buoc nay chi IN ket qua (khong khang dinh gi) thi loi do vo hinh; codex
+          # sieu no thanh chot o vong 7 va no lo ra ngay luot dau. Truyen MOT chuoi
+          # co dau nhay long vao la dung.
+          $p = Start-Process python -ArgumentList '-c "import time; time.sleep(60)"' -PassThru
           Start-Sleep -Seconds 1
+          # KIEM TIEN DE truoc khi do (nep t69 vong 5): neu tien trinh moi da chet thi
+          # taskkill khong do duoc gi ca, va "rc!=0" luc do la loi FIXTURE chu khong
+          # phai ket luan ve taskkill. Phai tach hai chuyen do ra.
+          if (-not (Get-Process -Id $p.Id -ErrorAction SilentlyContinue)) {
+            Write-Host "FIXTURE HONG: tien trinh moi sinh da chet truoc khi do - KHONG DO DUOC"
+            exit 1
+          }
           $ra = & taskkill /PID $p.Id /T /F 2>&1
           $ma = $LASTEXITCODE
           Write-Host "taskkill rc=$ma : $ra"
@@ -198,3 +213,4 @@ jobs:
           Write-Host "tien trinh con song? $([bool]$con)"
           if ($con) { Stop-Process -Id $p.Id -Force }
           if ($ma -ne 0 -or $con) { exit 1 }
+          exit 0

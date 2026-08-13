@@ -48,6 +48,16 @@ thiếu công cụ**, không nhờ điều nó khẳng định. Trên `windows-l
 muốn thử "không đo được" thì phải dựng cho bằng được trạng thái đó ở mọi nền. Đã soi cả
 bốn ca stub `platform.system() == "Windows"`; chỉ `t78` có hình dạng này.
 
+**Lượt kế: cả bộ test, bộ đột biến và BA probe đầu đều qua — đỏ ở probe cuối, lại là
+fixture.** `taskkill rc=128 : ERROR: The process "6156" not found`. Nguyên nhân:
+`Start-Process -ArgumentList 'a','b'` **nối các phần tử bằng dấu cách mà KHÔNG đặt dấu
+nháy**, nên `-ArgumentList '-c','import time;time.sleep(60)'` tới python thành `-c`
+`import` `time;…` ⇒ chạy chương trình tên `import` ⇒ `SyntaxError` ⇒ chết ngay, và một
+giây sau `taskkill` không tìm thấy PID. Suốt thời gian probe này chỉ **in** kết quả mà
+không khẳng định gì thì lỗi đó **vô hình**; vòng 7 siết nó thành chốt và nó lộ ra ngay
+lượt đầu — đúng lý do phải siết. Nay truyền một chuỗi có dấu nháy lồng, và **kiểm tiền đề**
+(tiến trình mồi còn sống) trước khi đo, để tách "fixture hỏng" khỏi "kết luận về taskkill".
+
 # ★ dev-side — audit launcher vòng 7: fail-closed cho Job Object và phép đo Windows (2026-08-13)
 
 Không bump `VERSION`. Vòng rà soát thứ bảy vá năm lỗ hổng đo/giết cây Windows:

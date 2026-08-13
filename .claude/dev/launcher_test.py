@@ -639,7 +639,11 @@ def t38_dung_o_thu_muc_CON_van_ra_GOC():
         con.mkdir(parents=True)
         r = chay("check", cwd=str(con))
         bang(r.returncode == MA_OK, f"{r.returncode}: {r.stderr}")
-        bang(str(repo.resolve()) in r.stdout and str(con) not in r.stdout,
+        # PHAI resolve ca hai ve. Tren runner windows-latest, thu muc tam o dang
+        # 8.3 (C:\Users\RUNNER~1\...) con dau ra da resolve (C:\Users\runneradmin\...)
+        # => `str(con) not in r.stdout` LUON dung, ke ca khi launcher tra ve cwd,
+        # nen khang dinh nay rong nghia va dot bien lay_cwd_thay_vi_goc_repo thoat.
+        bang(str(repo.resolve()) in r.stdout and str(con.resolve()) not in r.stdout,
              f"ra cwd thay vi goc repo: {r.stdout}")
 
 
@@ -1707,7 +1711,10 @@ DOT_BIEN = [
     ("124_khi_chau_con_song",
      ('                ma = MA_QUA_HAN if ket_giet.tron_ven else MA_GIET_HUT',
       '                ma = MA_QUA_HAN if ket_giet.me_da_chet else MA_GIET_HUT'),
-     ["t62_qua_han_ma_khong_giet_het_cay_phai_tra_125"]),
+     ["t62_qua_han_ma_khong_giet_het_cay_phai_tra_125"],
+     ("windows", "chi do duoc khi duong giet THAT BAI; tren runner taskkill /T thanh cong "
+                 "nen chau chet that va 124 la trung thuc - xem muc CON TREO ve bang chung "
+                 "cay tien trinh tren Windows")),
     ("khong_cat_thong_tin_dang_nhap",
      ("(?:[^@/]*@)?", "(?:)?"),
      ["t45_token_trong_URL_KHONG_duoc_lo_ra"]),
@@ -1820,10 +1827,12 @@ DOT_BIEN = [
     ("ban_chup_de_ho_quyen",
      ("        _fd = os.open(ban_chup, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)",
       "        _fd = os.open(ban_chup, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)"),
-     ["t71_ban_chup_prompt_phai_KIN_va_bi_XOA"]),
+     ["t71_ban_chup_prompt_phai_KIN_va_bi_XOA"],
+     ("posix", "t71 bo qua khang dinh quyen 0600 tren Windows")),
     ("ban_chup_de_lai_tren_dia",
      ('            and cay_da_chet):', '            and False):'),
-     ["t71_ban_chup_prompt_phai_KIN_va_bi_XOA"]),
+     ["t71_ban_chup_prompt_phai_KIN_va_bi_XOA"],
+     ("posix", "tren Windows ban chup GIU LAI theo thiet ke, nen 'khong xoa' khong doi gi")),
     ("xoa_prompt_khi_wrapper_vua_thoat",
      ('    cay_da_chet = (_thanh_vien_nhom(p.pid) == [])',
       '    cay_da_chet = True'),
@@ -1872,7 +1881,21 @@ def chay_dot_bien() -> int:
     khong_do = 0
     tam = Path(tempfile.mkdtemp(prefix="lt_db_"))
     try:
-        for ten, cap, phai_chet in DOT_BIEN:
+        for muc in DOT_BIEN:
+            ten, cap, phai_chet = muc[0], muc[1], muc[2]
+            # Phan tu thu TU (tuy chon) = ('posix'|'windows', ly do). Co dot bien
+            # KHONG THE do duoc tren mot nen du ca dich VAN CHAY: vd t71 tu bo qua
+            # dung khang dinh ve quyen/xoa ban chup tren Windows. Truoc day nhung ca
+            # do bao SAI oan, va mot cong khong bao gio xanh duoc thi nguoi ta se bo
+            # qua no - dung bay da ghi trong chu thich `can_do` ben duoi.
+            # LY DO la BAT BUOC va duoc IN RA, de day khong thanh cho giau that bai.
+            gioi_han = muc[3] if len(muc) > 3 else None
+            if gioi_han:
+                nen, ly_do = gioi_han
+                if (nen == "posix") == LA_WINDOWS:
+                    khong_do += 1
+                    print(f"  {ten:<28} KHONG DO DUOC tren nen nay ({ly_do})")
+                    continue
             if isinstance(cap, tuple):
                 cap = [cap]
             thieu = [c for c, _ in cap if c not in goc]

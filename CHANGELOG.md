@@ -39,6 +39,26 @@ StartTime.Ticks` (epoch năm 1, giờ ĐỊA PHƯƠNG) và `FILETIME` (epoch 160
 epoch lẫn múi giờ — chuyển đổi sai thì khoá không bao giờ khớp và chốt hoá ra luôn từ
 chối. Cần đo trên Windows thật trước khi đụng.
 
+**Lượt CI Windows thứ hai** (sau ba bản vá trên): bộ phản chứng **77/77, hỏng 0** —
+ba ca đỏ đã hết. Còn 4 đột biến báo SAI, hoá ra là ba chuyện khác nhau:
+
+- `lay_cwd_thay_vi_goc_repo` — **lỗi test thật**. `t38` so `str(con)` với stdout đã
+  `resolve()`; trên runner thư mục tạm ở dạng **8.3 short path** (`RUNNER~1`) còn đầu
+  ra ở dạng dài (`runneradmin`), nên `str(con) not in r.stdout` **luôn đúng** kể cả khi
+  launcher trả về cwd ⇒ khẳng định rỗng nghĩa, đột biến thoát. Nay resolve cả hai vế.
+- `ban_chup_de_ho_quyen` · `ban_chup_de_lai_tren_dia` — `t71` **cố ý** bỏ qua đúng hai
+  khẳng định đó trên Windows (hợp đồng bản chụp khác nhau theo nền, vòng 4), nên đột
+  biến không thể giết dù ca đích VẪN CHẠY.
+- `124_khi_chau_con_song` — `t62` **chạy được lần đầu và QUA**, nhưng chỉ đo được khi
+  đường giết THẤT BẠI; trên runner `taskkill /T` thành công nên cháu chết thật và 124
+  là trung thực.
+
+Bảng `DOT_BIEN` nay nhận **phần tử thứ tư tuỳ chọn** `('posix'|'windows', lý do)` cho
+những đột biến không thể đo trên một nền dù ca đích vẫn chạy. **Lý do là bắt buộc và
+được IN RA** — đây không phải chỗ giấu thất bại, và sàn "0 đo được ⇒ đỏ" vẫn nguyên.
+Trước đó chúng báo SAI oan, mà một cổng không bao giờ xanh được thì người ta sẽ bỏ qua
+nó — đúng cái bẫy đã ghi trong chú thích `can_do`.
+
 Cổng Linux: **77/77** (qua 76, bỏ qua **1**, hỏng 0) · đột biến **34/34**
 (1 không đo được) · ruff F sạch. Số bỏ qua giảm từ 2 xuống 1 nhờ `t61`.
 

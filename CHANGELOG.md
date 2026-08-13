@@ -1,3 +1,17 @@
+# ★ dev-side — audit launcher vòng 7: fail-closed cho Job Object và phép đo Windows (2026-08-13)
+
+Không bump `VERSION`. Vòng rà soát thứ bảy vá năm lỗ hổng đo/giết cây Windows:
+
+- kiểm kết quả `SetInformationJobObject`, đóng handle và trả thất bại nếu không đặt được giới hạn;
+- cấp phát lại danh sách PID trong Job Object khi sức chứa ban đầu thiếu;
+- không còn đọc trạng thái “không đo được nhóm” như bằng chứng “nhóm rỗng”;
+- ảnh cây CIM fail-closed nếu một dòng thiếu `CreationDate` hoặc sai khuôn;
+- cổng đột biến yêu cầu ít nhất 70% bảng đo được trên mỗi nền, thay vì chỉ yêu cầu một ca.
+
+Thêm năm phản chứng `t78`–`t82` và năm đột biến tương ứng. Workflow Windows cũng
+không còn xanh khi `t62` tự bỏ qua hoặc probe `taskkill /T` trả mã khác 0/còn tiến trình.
+Báo cáo và số đo đầy đủ ở `docs/AUDIT_LAUNCHER_VONG_7.md`.
+
 # ★ dev-side — vòng 6: ba cổng ĐỎ của kho mà CI chỉ kịp báo MỘT (2026-08-13)
 
 Không bump `VERSION`. `RELEASE_MANIFEST.json` giữ **179 tệp** — không tệp runtime nào

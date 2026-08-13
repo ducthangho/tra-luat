@@ -150,7 +150,9 @@ jobs:
           fn = next(f for f in M.CA if f.__name__.startswith('t62_'))
           try:
               kq = fn()
-              print('t62:', 'BO QUA - ' + kq if isinstance(kq, str) else 'QUA')
+              if isinstance(kq, str):
+                  print('t62: BO QUA BAT NGO ->', kq); sys.exit(1)
+              print('t62: QUA')
           except AssertionError as e:
               print('t62: DO ->', e); sys.exit(1)
           "@
@@ -164,8 +166,10 @@ jobs:
           $p = Start-Process python -ArgumentList '-c','import time;time.sleep(60)' -PassThru
           Start-Sleep -Seconds 1
           $ra = & taskkill /PID $p.Id /T /F 2>&1
-          Write-Host "taskkill rc=$LASTEXITCODE : $ra"
+          $ma = $LASTEXITCODE
+          Write-Host "taskkill rc=$ma : $ra"
           Start-Sleep -Seconds 1
           $con = Get-Process -Id $p.Id -ErrorAction SilentlyContinue
           Write-Host "tien trinh con song? $([bool]$con)"
           if ($con) { Stop-Process -Id $p.Id -Force }
+          if ($ma -ne 0 -or $con) { exit 1 }

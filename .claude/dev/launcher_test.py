@@ -13,6 +13,7 @@ Chạy:  python .claude/dev/launcher_test.py             (chạy tất cả; Win
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import os
 import platform
@@ -128,6 +129,15 @@ def _con_song_that(pid: int) -> bool:
                            capture_output=True, text=True)
         return not p.stdout.strip().startswith("Z")
     return True
+
+
+def _tai_launcher_thu():
+    """Nạp đúng bản launcher đang thử (kể cả bản sao đột biến)."""
+    ten = f"launcher_thu_{time.time_ns()}"
+    sp = importlib.util.spec_from_file_location(ten, LAUNCHER_DANG_DUNG)
+    m = importlib.util.module_from_spec(sp)
+    sp.loader.exec_module(m)
+    return m
 
 
 # ------------------------------------------------------------- chốt: workspace
@@ -1700,6 +1710,102 @@ def t75_tep_tam_mo_coi_bi_don():
         bang(rac_moi.exists(), "don ca tep tam DANG dung cua writer khac")
 
 
+@ca
+def t78_khong_do_duoc_nhom_KHONG_phai_cay_rong():
+    """None từ phép quét không được biến thành bằng chứng cả cây đã chết."""
+    m = _tai_launcher_thu()
+    m._khoa_danh_tinh = lambda _pid: None
+    m._thanh_vien_nhom = lambda _pid: None
+    m.platform.system = lambda: "Windows"
+    da_goi = []
+    m._giet_windows = lambda *_a, **_k: (da_goi.append(True) or m.KetGiet(False, False, "khong do duoc"))
+    kq = m._giet_cay(12345, "win:1")
+    bang(da_goi and not kq.tron_ven,
+         "None bi doc nhu []: bao ca cay da chet ma khong goi duong giet Windows")
+
+
+@ca
+def t79_job_windows_phai_kiem_ket_qua_dat_gioi_han():
+    """SetInformationJobObject hỏng thì handle không được quảng cáo là job tốt."""
+    m = _tai_launcher_thu()
+    m.platform.system = lambda: "Windows"
+    import ctypes
+
+    class K32:
+        def __init__(self): self.dong = []
+        def CreateJobObjectW(self, *_a): return 41
+        def SetInformationJobObject(self, *_a): return 0
+        def CloseHandle(self, h): self.dong.append(h); return 1
+        def OpenProcess(self, *_a): raise AssertionError("khong duoc di tiep sau SetInformation hong")
+
+    cu = getattr(ctypes, "windll", None)
+    fake = type("Windll", (), {})(); fake.kernel32 = K32()
+    ctypes.windll = fake
+    try:
+        bang(m._job_windows(12345) is None and fake.kernel32.dong == [41],
+             "SetInformationJobObject hong ma van tra handle")
+    finally:
+        if cu is None: del ctypes.windll
+        else: ctypes.windll = cu
+
+
+@ca
+def t80_job_pid_tang_buffer_khi_qua_suc_chua():
+    """ERROR_MORE_DATA phải làm tăng buffer, không được thành rỗng/không đo."""
+    m = _tai_launcher_thu()
+    import ctypes
+
+    class K32:
+        def __init__(self): self.lan = 0
+        def QueryInformationJobObject(self, _job, _lop, pds, _sz, _ret):
+            self.lan += 1
+            ds = pds._obj
+            if self.lan == 1:
+                ds.NumberOfAssignedProcesses = 100
+                ds.NumberOfProcessIdsInList = 64
+                return 0
+            ds.NumberOfAssignedProcesses = 100
+            ds.NumberOfProcessIdsInList = 100
+            for i in range(100): ds.ProcessIdList[i] = i + 1
+            return 1
+
+    cu = getattr(ctypes, "windll", None)
+    fake = type("Windll", (), {})(); fake.kernel32 = K32()
+    ctypes.windll = fake
+    try:
+        bang(m._pid_trong_job(41) == list(range(1, 101)) and fake.kernel32.lan == 2,
+             "job > buffer dau khong duoc doc lai dung kich thuoc")
+    finally:
+        if cu is None: del ctypes.windll
+        else: ctypes.windll = cu
+
+
+@ca
+def t81_chup_cay_windows_thieu_creationdate_phai_fail_closed():
+    """Một dòng CIM thiếu CreationDate làm cả ảnh không đủ bằng chứng."""
+    m = _tai_launcher_thu()
+    m.platform.system = lambda: "Windows"
+    class P:
+        returncode = 0
+        stdout = "OK|10|1|123\nERR|11|NO_CREATION_DATE\n"
+    m.subprocess.run = lambda *_a, **_k: P()
+    bang(m._chup_cay(10) is None, "hau due thieu CreationDate bi bo qua im lang")
+
+
+def _dot_bien_du_san(tong: int, khong_do: int) -> bool:
+    """Ít nhất 70% đột biến phải đo được trên mỗi nền."""
+    m = _tai_launcher_thu()
+    nguong = m.TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI
+    return tong > 0 and (tong - khong_do) * 10 >= tong * nguong
+
+
+@ca
+def t82_dot_bien_khong_duoc_mat_qua_30_phan_tram():
+    bang(_dot_bien_du_san(35, 10), "moc Windows da do 25/35 phai duoc chap nhan")
+    bang(not _dot_bien_du_san(35, 11), "24/35 (<70%) phai lam cong do")
+    bang(not _dot_bien_du_san(35, 30), "5/35 khong duoc xanh")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -1887,6 +1993,26 @@ DOT_BIEN = [
       "    except BrokenPipeError:\n        return False",
       "    print(chuoi)\n    return True"),
      ["t74_dut_ong_KHONG_duoc_nuot_ma_that"]),
+    ("none_nhom_thanh_cay_rong",
+     ('        if con == []:             # [] = đã chứng minh rỗng · None = không đo được',
+      '        if not con:               # DOT BIEN: None bi doc nhu rong'),
+     ["t78_khong_do_duoc_nhom_KHONG_phai_cay_rong"]),
+    ("job_bo_qua_loi_dat_gioi_han",
+     ('        if not k32.SetInformationJobObject(job, 9, ctypes.byref(tt), ctypes.sizeof(tt)):',
+      '        if False:'),
+     ["t79_job_windows_phai_kiem_ket_qua_dat_gioi_han"]),
+    ("job_pid_khong_tang_buffer",
+     ('            suc_chua = max(suc_chua * 2, can)',
+      '            return None  # DOT BIEN: bo doc lai khi buffer thieu'),
+     ["t80_job_pid_tang_buffer_khi_qua_suc_chua"]),
+    ("chup_cay_bo_qua_dong_thieu",
+     ('            if len(phan) != 4 or phan[0] != "OK":\n                return None',
+      '            if len(phan) != 4 or phan[0] != "OK":\n                continue'),
+     ["t81_chup_cay_windows_thieu_creationdate_phai_fail_closed"]),
+    ("san_dot_bien_chi_can_mot",
+     ('TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI = 7',
+      'TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI = 0'),
+     ["t82_dot_bien_khong_duoc_mat_qua_30_phan_tram"]),
 ]
 
 
@@ -1986,11 +2112,11 @@ def main() -> int:
         do_duoc = len(DOT_BIEN) - khong_do
         print(f"\nDOT BIEN: {do_duoc - hong}/{do_duoc} dat"
               + (f"  ({khong_do} khong do duoc tren nen nay)" if khong_do else ""))
-        if do_duoc == 0:
+        if not _dot_bien_du_san(len(DOT_BIEN), khong_do):
             # SÀN. Bảng mà MỌI đột biến đều không đo được sẽ in "0/0 dat" rồi
             # thoát 0 — thoả đúng hình thức "hai số BẰNG NHAU" mà chứng minh CON
             # SỐ KHÔNG. Đây là cổng xanh nhờ rc=0, thứ CLAUDE.md dặn đừng tin.
-            print("!! KHONG do duoc dot bien nao tren nen nay - cong nay KHONG chung minh gi")
+            print("!! DUOI SAN: phai do duoc it nhat 70% dot bien tren moi nen")
             return 1
         return 1 if hong else 0
 

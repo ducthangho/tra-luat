@@ -88,6 +88,10 @@ MA_QUA_HAN = 124
 MA_GIET_HUT = 125
 MA_THIEU_CONG_CU = 12
 
+# Bộ đột biến dùng cùng mốc này để không thể trượt từ ~70% phép đo được xuống
+# gần 0 mà vẫn xanh. Đặt ở mã được đột biến (không đặt trong chính runner test).
+TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI = 7
+
 # Trạng thái CUỐI của một lượt chạy — `stop` không được ghi đè lên chúng.
 TRANG_THAI_KET_THUC = {"xong", "qua_han", "bi_ngat", "hong", "da_dung"}
 
@@ -311,7 +315,8 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
             pr = subprocess.run(
                 ["powershell", "-NoProfile", "-NonInteractive", "-Command",
                  "Get-CimInstance Win32_Process | ForEach-Object { if ($_.CreationDate) "
-                 "{ \"$($_.ProcessId)|$($_.ParentProcessId)|$($_.CreationDate.Ticks)\" } }"],
+                 "{ \"OK|$($_.ProcessId)|$($_.ParentProcessId)|$($_.CreationDate.Ticks)\" } "
+                 "else { \"ERR|$($_.ProcessId)|NO_CREATION_DATE\" } }"],
                 capture_output=True, text=True, timeout=60)
         except (OSError, subprocess.SubprocessError):
             return None
@@ -320,12 +325,15 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
         tt = {}
         for dong in pr.stdout.splitlines():
             phan = dong.strip().split("|")
-            if len(phan) != 3:
-                continue
+            # Thiếu CreationDate là "không đo được", KHÔNG phải "tiến trình
+            # không tồn tại". Bỏ qua im lặng có thể làm mất đúng một hậu duệ rồi
+            # ảnh rỗng được đọc thành bằng chứng cả cây đã chết.
+            if len(phan) != 4 or phan[0] != "OK":
+                return None
             try:
-                tt[int(phan[0])] = (int(phan[1]), 0, f"win:{phan[2]}")
+                tt[int(phan[1])] = (int(phan[2]), 0, f"win:{phan[3]}")
             except ValueError:
-                continue
+                return None
     else:
         return None
     con = {}
@@ -501,7 +509,9 @@ def _job_windows(pid: int):
 
         tt = _MO_RONG()
         tt.BasicLimitInformation.LimitFlags = 0x2000   # KILL_ON_JOB_CLOSE
-        k32.SetInformationJobObject(job, 9, ctypes.byref(tt), ctypes.sizeof(tt))
+        if not k32.SetInformationJobObject(job, 9, ctypes.byref(tt), ctypes.sizeof(tt)):
+            k32.CloseHandle(job)
+            return None
         h = k32.OpenProcess(0x1F0FFF, False, int(pid))  # PROCESS_ALL_ACCESS
         if not h:
             k32.CloseHandle(job)
@@ -523,16 +533,28 @@ def _pid_trong_job(job) -> list[int] | None:
         from ctypes import wintypes
         k32 = ctypes.windll.kernel32
 
-        class _DS(ctypes.Structure):
-            _fields_ = [("NumberOfAssignedProcesses", wintypes.DWORD),
-                        ("NumberOfProcessIdsInList", wintypes.DWORD),
-                        ("ProcessIdList", ctypes.c_size_t * 512)]
+        # JOBOBJECT_BASIC_PROCESS_ID_LIST là mảng độ dài biến đổi. Không đóng
+        # đinh 512 PID: job lớn hơn sẽ trả ERROR_MORE_DATA; đó là tín hiệu tăng
+        # buffer, không phải "job rỗng".
+        suc_chua = 64
+        for _ in range(8):
+            class _DS(ctypes.Structure):
+                _fields_ = [("NumberOfAssignedProcesses", wintypes.DWORD),
+                            ("NumberOfProcessIdsInList", wintypes.DWORD),
+                            ("ProcessIdList", ctypes.c_size_t * suc_chua)]
 
-        ds = _DS()
-        if not k32.QueryInformationJobObject(job, 3, ctypes.byref(ds),
+            ds = _DS()
+            if k32.QueryInformationJobObject(job, 3, ctypes.byref(ds),
                                              ctypes.sizeof(ds), None):
-            return None
-        return [int(ds.ProcessIdList[i]) for i in range(ds.NumberOfProcessIdsInList)]
+                n = int(ds.NumberOfProcessIdsInList)
+                if n > suc_chua:
+                    return None
+                return [int(ds.ProcessIdList[i]) for i in range(n)]
+            can = int(ds.NumberOfAssignedProcesses)
+            if can <= suc_chua:
+                return None
+            suc_chua = max(suc_chua * 2, can)
+        return None
     except (OSError, AttributeError, ValueError):
         return None
 
@@ -630,7 +652,7 @@ def _giet_cay(pid: int, khoa: str | None, job=None) -> KetGiet:
         # mối nguy mà khoá danh tính sinh ra để bắt, trong ca vô hại và PHỔ BIẾN
         # nhất (audit vòng 3: 7/12 lần đua). Chỉ còn con cháu là đáng hỏi.
         con = _thanh_vien_nhom(pid)
-        if not con:               # [] = đã chứng minh rỗng · None = không có /proc
+        if con == []:             # [] = đã chứng minh rỗng · None = không đo được
             return KetGiet(True, True, "tien trinh da khong con chay")
     elif hien != khoa:
         return KetGiet(False, False,

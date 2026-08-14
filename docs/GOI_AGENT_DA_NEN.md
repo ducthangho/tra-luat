@@ -129,6 +129,28 @@ python .claude/dev/launcher.py status --run-root ~/.tl-runs --id <short_id>
 python .claude/dev/launcher.py stop   --run-root ~/.tl-runs --id <short_id>
 ```
 
+### Ba thứ đã trả giá khi dựng lượt chạy thật (14-08-2026)
+
+**`--run-root` phải nằm NGOÀI kho.** Thư mục chạy không có trong bảng loại trừ của
+`release-verify`, nên để trong kho là đẻ `extra_files` và gate đỏ ở chỗ chẳng liên
+quan gì tới việc đang làm.
+
+**Vân tay kho đo trên clone NÔNG là vân tay GIẢ.** `git rev-list --max-parents=0 HEAD`
+trên clone nông trả về **ranh giới cắt**, không phải commit gốc — và nó trông y hệt
+một sha gốc thật. Đo được ca thật: cùng một kho cho `dfb94186…` khi nông (174 commit)
+và `394e9346…` sau `git fetch --unshallow` (607 commit). Neo nhầm số đầu thì mọi lượt
+chạy trên clone ĐẦY ĐỦ bị chặn oan, còn lượt chạy trên một clone nông khác lại "khớp"
+một cách vô nghĩa. Luôn `git rev-parse --is-shallow-repository` **trước** khi lấy vân
+tay; `false` rồi mới đo. (Chốt `--expected-root-commit` bắt được ca này — `rc=11`, nêu
+cả số mong đợi lẫn số thực tế.)
+
+**Đừng lấy `git worktree` làm workspace cho agent có sandbox.** Worktree để metadata
+git ở `.git` của kho chính, tức **ngoài** workspace; sandbox `workspace-write` chỉ cho
+ghi trong workspace nên mọi `git fetch`/`git gc` trong worktree bị chặn. Đã đo: phiên
+codex báo đúng triệu chứng ấy và phải xoay sang đọc ref local. Cần agent fetch được
+thì dựng **clone riêng** (`git clone --no-hardlinks`), chấp nhận tốn đĩa. Worktree vẫn
+tốt cho lượt chỉ ĐỌC cây ở một head cố định.
+
 Gọi Claude thì thay phần sau `--` bằng `claude -p "..."`. Không có gì khác đổi.
 
 ### `{PROMPT_FILE}` — neo prompt kín *sau* khi sinh con

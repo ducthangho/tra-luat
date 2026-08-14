@@ -63,8 +63,35 @@ nhất đứng giữa một tệp YAML trong kho và một comment mang danh ngh
 | đã đăng rồi (`posted_comment_id`) — **bỏ qua**, không phải lỗi | `9` |
 | mỏ neo prompt hỏng: thiếu `prompt_path`, tệp không có, đường dẫn ra ngoài kho, hoặc **băm lệch** | `6` |
 
-`ops/lease_publish_test.py` giữ 27 ca cho những chốt đó, và **workflow chạy chính
-bộ test ấy trước mỗi lượt đăng** — rẻ hơn nhiều so với một lần đăng sai.
+`ops/lease_publish_test.py` giữ 29 ca cho những chốt đó, và **workflow chạy chính
+bộ test ấy trước mỗi lượt đăng** — rẻ hơn nhiều so với một lần đăng sai. Từ bản vá P1
+ngày 14-08-2026, bộ test ấy chạy từ **bản neo vào nhánh mặc định**, không phải bản
+trong head được đẩy; xem mục dưới.
+
+### Bộ kiểm phải neo NGOÀI nhánh nó kiểm
+
+Cross-review trên PR #104 nêu P1: bản trước chạy `python3 ops/lease_publish.py`, tức
+bộ kiểm **đến từ chính nhánh đang bị kiểm**. Một push vào `ops/**` vừa thêm tên mình
+vào `NGUOI_CO_THAM_QUYEN` vừa đổi lease là đủ — `checkout` lấy head chưa ai review đó,
+workflow chạy bộ kiểm đã bị sửa, cả `granted_by` lẫn `GITHUB_ACTOR` đều qua trơn.
+**Bộ kiểm nằm cùng nhánh với thứ nó kiểm thì nó không kiểm gì.**
+
+Đã đo lại đúng kịch bản ấy: bộ kiểm lấy từ head kẻ tấn công → `rc=0`; bộ kiểm neo vào
+nhánh mặc định, cùng tệp lease đó → `rc=4`.
+
+Nay workflow dựng một **worktree rời của nhánh mặc định** rồi chạy `lease_publish_test.py`,
+`check`, `body`, `mark` từ đó; head chỉ còn góp đúng thứ nó có quyền góp là **tệp lease**.
+Dùng worktree chứ không chép hai tệp `.py` ra thư mục trơ, vì `t23` quét `ops/leases/**`
+và `t24`/`t25` quét `.github/workflows/**` — thư mục trơ làm chúng `return` sớm và suite
+vẫn báo N/N trong khi ba ca không đo gì. `t25` khoá chiều trôi ngược: mọi lời gọi
+`lease_publish*.py` trong workflow phải đi qua `$NEO/…`.
+
+**Phần còn thủng, nói thẳng:** với sự kiện `push`, GitHub lấy chính tệp workflow từ head.
+Ai sửa được `ops/lease_publish.py` cũng sửa được workflow và gỡ luôn mỏ neo — kể cả `t25`.
+Lớp này đóng đường "một push đổi bộ kiểm", nó **không** biến `push` thành thao tác có thẩm
+quyền. Đóng nốt phần còn lại là việc **ngoài kho**: ruleset/branch protection chặn push vào
+`.github/workflows/**` và `ops/lease_publish*.py`. Chưa đặt ruleset thì đường này vẫn quy về
+"ai push được vào `ops/**` thì đăng được".
 
 ### Mỏ neo prompt (`prompt_path` + `prompt_sha256_required`)
 
@@ -147,11 +174,23 @@ matrix — nhiễu không đáng kể so với gate Windows ~20 phút/lượt. `
 
 ## Chưa được nghiệm thu
 
-Phần logic (`lease_publish.py`) có 27 ca phản chứng và đã chạy thử trọn vòng bằng một
+Phần logic (`lease_publish.py`) có 29 ca phản chứng và đã chạy thử trọn vòng bằng một
 `gh` giả: tìm tệp → cổng → dựng thân → đăng → ghi ngược → chạy lại ra `9`. Sáu đột
 biến (chạy trên **bản sao tạm**, không đụng tệp thật) giết đúng ca đích của từng cái,
 kể cả hai ca mà lượt đo đầu cho thấy bộ test **không** thật sự đo — xem mục mỏ neo
 prompt ở trên.
+
+Bước neo bộ kiểm (14-08-2026) có thêm bốn đột biến, cũng trên bản sao tạm: trả một lời gọi
+về `ops/…` → `t25` đỏ; gỡ bước dựng worktree → `t25` đỏ; đổi một byte trong verdict gốc →
+`t26` đỏ; biên nhận quay về `pending-owner-post` → `t26` đỏ. Riêng bản thân mỏ neo thì đo
+bằng HÀNH VI chứ không bằng chữ trong YAML: dựng cây kẻ tấn công đã tự thêm tên mình vào
+`NGUOI_CO_THAM_QUYEN`, bộ kiểm lấy từ cây đó trả `rc=0`, bộ kiểm neo vào nhánh mặc định
+trả `rc=4` trên **cùng một tệp lease**.
+
+**Bước neo chưa chạy thật trên Actions** — nó chỉ thực thi khi có một lượt đăng lease mới.
+`git worktree add` với `fetch-depth: 0` là đường đã dùng rộng rãi, nhưng "chưa chạy" thì
+vẫn là chưa chạy: lượt đăng lease kế tiếp là lần đo thật đầu tiên, và log của bước neo in
+băm cả hai bản để lượt chạy tự khai nó chạy bản nào.
 
 **Nhưng chưa lượt nào chạy thật trên Actions.** Workflow chỉ kích hoạt sau khi có mặt
 ở nhánh được push, và lượt đầu tiên cần người xem kết quả. Đúng bài học "script đa nền

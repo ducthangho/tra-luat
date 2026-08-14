@@ -109,3 +109,4 @@ preconditions_measured_at_utc: '2026-08-14T17:25:00Z'
 master_sha_at_grant: 3d2c52d62696b0c7c190fd891115f543b0f9cb55
 merge_tree_master_head: "rc 0"
 master_touches_in_write_set: [CLAUDE.md]
+posted_comment_id: 5296249851   # workflow ghi, ĐỪNG sửa tay

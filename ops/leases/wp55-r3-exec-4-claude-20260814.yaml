@@ -98,14 +98,15 @@ attempt_1_scope: >-
 findings_to_fix:
   - finding_id: doctrine-rendering-bypass-nfkc
     severity: P1
-    source: chatgpt-codex-connector[bot] · PR #92 · 2026-08-14T17:27:49Z
+    # NHỚ ĐÓNG NHÁY: `#` không có nháy sẽ bắt đầu CHÚ THÍCH YAML và cắt cụt giá trị.
+    source: 'chatgpt-codex-connector[bot] · PR #92 · 2026-08-14T17:27:49Z'
     site: .claude/dev/packet_loop.py — _chuan_hoa
     root_cause: NFC theo định nghĩa không gộp ký tự tương thích; phải là NFKC
     layer_fix: NFKC + lọc Cf + giải entity một lần, áp cho CẢ HAI vế so khớp
     mutation_required: hạ NFKC về NFC ⇒ ca đích phải ĐỎ
   - finding_id: partial-lease-authority-bypass
     severity: P1
-    source: verdict lượt 5 · PR #92 review 4939956924
+    source: 'verdict lượt 5 · PR #92 review 4939956924'
     site: .claude/dev/packet_loop.py — cmd_begin_attempt (~507)
     root_cause: kiểm SỰ TỒN TẠI một khoá, không kiểm TRỌN LƯỢC ĐỒ; hai chốt tự kiểm rời nhau
     layer_fix: một hàm kiểm chung dùng bởi cả record-lease lẫn begin-attempt
@@ -113,7 +114,7 @@ findings_to_fix:
     extra: mọi hình dạng sai phải có mã thoát kiểm soát, KHÔNG traceback
   - finding_id: merged-tree-doctrine-false-positive
     severity: P1
-    source: verdict lượt 5 · PR #92 review 4939956924
+    source: 'verdict lượt 5 · PR #92 review 4939956924'
     site: .claude/dev/packet_loop.py — doctrine-scan, chiều BẮT OAN
     root_cause: >-
       _chuan_hoa chuẩn hoá CẢ TỆP nên nối dòng; CLAUDE.md master dòng 82 kết thúc bằng

@@ -56,6 +56,18 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   · `Get-Content -Raw` trên tệp **RỖNG** trả `$null` → `[regex]::Match` ném "Value cannot be null"; ép `[string]`.
   · `Get-Item`/`Get-ChildItem` **BỎ tệp ẩn khi thiếu `-Force`** (trên Unix: mọi tên bắt đầu bằng `.`) —
   `Test-Path` thấy có mà `Get-Item` báo not-found là dấu hiệu kinh điển.
+- **Câu mô tả VỊ TRÍ của một artefact phải đúng ở CẢ HAI phía của lần merge.** Prompt reviewer neo
+  theo băm, mà trong prompt lại có câu "tệp nằm ở đâu". Bản đầu ghi "trên master" khi tệp còn ở nhánh
+  ops ⇒ ai clone master là dừng ngay; sửa thành "chỉ ở nhánh ops, chưa vào master" ⇒ câu ấy **chết
+  đúng lúc merge**. Mỗi lần sửa câu ấy lại đổi băm ⇒ kéo theo cập nhật lease + chiếu lại; ba bản chiếu
+  chết chỉ vì một câu chữ. Cách thoát: viết câu đúng ở CẢ HAI trạng thái ("tìm ở `master` trước, chưa
+  thấy thì fetch nhánh X"), và nói thẳng trong prompt rằng **thứ định danh tệp là BĂM, không phải tên
+  nhánh** — tên nhánh là thứ trôi và bị xoá.
+- **"Ca có MẶT" khác "ca có ĐO".** Một ca `return` sớm vì đường dẫn sai vẫn được đếm là ĐẠT: `t24` trỏ
+  `HERE.parent.parent` nên tìm thư mục workflow ở TRÊN gốc kho, không thấy thì thoát êm — suite báo
+  **24/24** trong khi ca ấy không đo gì, và nó lại là ca sinh ra để chặn đúng bệnh đó. Chỉ lộ vì đã
+  đột biến thử sau khi viết. Mọi ca có nhánh "không thấy thì bỏ qua" phải kèm chốt: chỉ được tha khi
+  cây rõ ràng là bản sao rời (không `.git`); trong kho thật mà thiếu thì ĐỎ.
 - **`[skip ci]` trong THÔNG ĐIỆP COMMIT là chốt đặt sai chỗ — nó sống trong LỊCH SỬ.**
   Bước ghi ngược của `ops-publish-lease.yml` từng commit kèm `[skip ci]` để khỏi tự kích hoạt lại.
   Dấu ấy ở lại trong commit, nên khi commit ghi ngược thành **HEAD của một PR** thì nó tắt luôn gate

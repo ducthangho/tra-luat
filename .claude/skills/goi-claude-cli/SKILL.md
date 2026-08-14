@@ -22,7 +22,7 @@ python .claude/dev/launcher.py run \
   --expected-prompt-sha256 <sha256 prompt> \
   --deadline-utc           <hạn lease dạng RFC3339> \
   --run-root /duong/dan/runs --name <ten-luot> \
-  -- bash -c 'claude --permission-mode auto -p < "{PROMPT_FILE}"'
+  -- bash -c 'claude --permission-mode auto -p < "$1"' _ '{PROMPT_FILE}'
 ```
 
 Chạy `check` (cùng bộ cờ, bỏ `--run-root`/`--name`/lệnh) **trước** — nó kiểm hết chốt
@@ -39,10 +39,20 @@ Ba chi tiết trong lệnh con, mỗi cái đều đã trả giá:
   Cho stdin bằng tệp cũng giải luôn việc `claude -p` treo chờ stdin (`Warning: no
   stdin data received in 3s`) — nên **không cần** `< /dev/null` nữa; nếu vì lý do khác
   mà không truyền prompt qua stdin thì mới cần nó.
-  **Phải có dấu nháy: `< "{PROMPT_FILE}"`.** Launcher thay chỗ ấy bằng đường dẫn THẬT,
-  và `--run-root` có khoảng trắng là đủ để bash tách thành nhiều token. Đã tái lập với
-  run-root tên `run root`: không quote ⇒ `bash: /tmp/claude-0/run: No such file or
-  directory`, `rc=1`, prompt KHÔNG tới con; có quote ⇒ chạy đúng.
+  **Truyền đường dẫn làm ĐỐI SỐ VỊ TRÍ, đừng nhét vào phần mã shell.** Launcher thay
+  `{PROMPT_FILE}` bằng đường dẫn THẬT; nếu chỗ thay nằm trong chuỗi lệnh của `bash -c`
+  thì bash **phân tích nó như mã**. Hai lần trả giá, mỗi lần một tầng sâu hơn:
+
+  | dạng viết | run-root | kết quả |
+  |---|---|---|
+  | `< {PROMPT_FILE}` | `run root` | `bash: /tmp/claude-0/run: No such file` · `rc=1` |
+  | `< "{PROMPT_FILE}"` | `run-$HOME` | `bash: /tmp/claude-0/run-/root/…` · `rc=1` |
+  | `< "$1"` + `_ '{PROMPT_FILE}'` | cả hai | **chạy đúng** |
+
+  Dấu nháy chỉ chặn tách token, **không** chặn nở biến — `$HOME` vẫn nở bên trong dấu
+  nháy kép, và một đường dẫn chứa thay thế lệnh còn **chạy được lệnh đó**. Đối số vị trí
+  thì bash không bao giờ đọc như mã: đó mới là hàng rào, dấu nháy chỉ là mành che.
+  (`_` đứng làm `$0`; đường dẫn thành `$1`.)
 - **`{PROMPT_FILE}`** — launcher thay bằng **bản chụp bất biến** trong thư mục lượt
   chạy, nên prompt không đổi được giữa lúc kiểm băm và lúc con đọc. Có
   `{PROMPT_FILE}` mà quên `--prompt-file` thì launcher chặn, không để con mở một tệp
@@ -75,7 +85,8 @@ bằng cờ theo LƯỢT CHẠY, **đừng** nới `permissions.allow` của kho
 sách chung, một lượt chạy không được đổi nó:
 
 ```bash
-claude --permission-mode auto --allowedTools "Bash(git push:*)" -p < "{PROMPT_FILE}"
+bash -c 'claude --permission-mode auto --allowedTools "Bash(git push:*)" -p < "$1"' \
+     _ '{PROMPT_FILE}'
 ```
 
 (Vẫn là dạng stdin. Đừng viết `-p "…"` ở đây cho gọn: thay dấu ba chấm bằng một prompt
@@ -162,6 +173,51 @@ json.dump(d, open(p, 'w'), indent=2)
 PY
 ```
 
+## Settings nạp từ CÂY LÀM VIỆC — merge vào master KHÔNG cứu được worktree cũ
+
+Bẫy này lộ ra khi chạy executor trên một nhánh neo commit cũ. Chủ kho đã merge bản nới
+`ask` vào master, nhưng worktree ghim ở commit cũ vẫn mang **settings của commit ấy**,
+nên `ask` vẫn chặn y nguyên. Đo trực tiếp trong worktree:
+
+```
+ask trong worktree: ['Bash(git commit:*)', 'Bash(git push:*)', 'Bash(clasp:*)']
+git push trong allow: False
+```
+
+Nhớ tách hai phép phân giải, chúng KHÁC nhau và dễ nhầm:
+
+| thứ | phân giải theo |
+|---|---|
+| **trust** (`hasTrustDialogAccepted`) | **git common dir** → về kho chính |
+| **settings/hook/permissions** | **cây làm việc** → theo commit đang checkout |
+
+Nên: trust bật một lần ở kho chính là đủ cho mọi worktree; còn `settings.json` thì mỗi
+worktree mang bản của commit nó đứng.
+
+### Đường thoát `ask` mà KHÔNG tháo chốt
+
+`ask` không ghi đè được — đã thử **bốn** cách, xem bảng ở mục trên cộng `--settings`
+với `ask: []` (cũng thua). Nhưng có thể **bỏ nguồn `project` rồi CẤP LẠI chính sách**:
+
+```bash
+claude --permission-mode auto \
+       --setting-sources user,local \
+       --settings /duong/dan/policy.json
+```
+
+`policy.json` chép từ `.claude/settings.json` của **master** (bản mới nhất), chỉ đặt
+`ask: []`. Khác hẳn `--setting-sources user,local` trần trụi: ở đó hook chết theo, còn
+ở đây `deny` và `hooks` được cấp lại nguyên vẹn. Đo cả ba lớp trước khi giao việc:
+
+| lớp | phép thử | kết quả |
+|---|---|---|
+| `ask` | `git push --dry-run` | **chạy được** |
+| hook `PreToolUse` | `tl.py --apply --help` | **vẫn chặn** |
+| `deny` | `rm -rf …` | **vẫn chặn** |
+
+Ba dòng đó là điều kiện để dùng cách này. Thiếu một dòng thì bạn đang tháo chốt chứ
+không phải cấp quyền — hãy đo lại, đừng suy từ việc "tôi đã chép đủ tệp".
+
 ## `rc=0` KHÔNG phải bằng chứng đã làm việc
 
 Lượt đo bốn chế độ quyền: **cả bốn** trả `rc=0`, nhưng chỉ **một** thật sự ghi được
@@ -230,15 +286,20 @@ cháu mới là bên đọc bản chụp — xoá sớm là tự tạo TOCTOU. H
 Nên với prompt có nội dung nhạy cảm, phải tự kiểm và tự dọn:
 
 ```bash
-find <run-root> -name prompt.snapshot -ls                 # còn sót cái nào, từ lượt nào
-find <run-root> -name prompt.snapshot -mmin +1440 -delete # CHỈ dọn bản đã cũ >24 giờ
+find <run-root> -name prompt.snapshot -ls    # LIỆT KÊ trước: còn sót cái nào, từ lượt nào
 ```
 
-**Đừng `-delete` không điều kiện.** Nó xoá cả bản chụp của lượt ĐANG chạy — đúng ca
-TOCTOU mô tả ngay trên: cháu chưa kịp mở tệp thì nhận `ENOENT`. `trang_thai: xong` của
-tiến trình cha **không** chứng minh hậu duệ đã xong. Muốn dọn một lượt cụ thể sớm hơn
-24 giờ thì phải tự xác minh nhóm tiến trình của nó đã rỗng trước, rồi mới xoá đúng
-thư mục lượt ấy.
+**Đừng `-delete` hàng loạt — kể cả có `-mmin`.** Nó xoá cả bản chụp của lượt ĐANG chạy,
+đúng ca TOCTOU mô tả ngay trên: cháu chưa kịp mở tệp thì nhận `ENOENT`. Và `-mmin +1440`
+**chỉ chứng minh TUỔI, không chứng minh ĐÃ XONG** — launcher không áp hạn chót tối đa
+24 giờ, nên một lượt (hoặc một hậu duệ được giữ lại có chủ đích) sống lâu hơn thế vẫn
+có thể chưa đọc bản chụp. `trang_thai: xong` của tiến trình cha cũng không chứng minh
+hậu duệ đã xong.
+
+Nên dọn **theo từng lượt**, và chỉ sau khi biết lượt ấy đã kết thúc thật: đối chiếu
+`run.json` của đúng lượt đó, xác minh nhóm tiến trình của nó đã rỗng, rồi mới xoá
+`<run-root>/<short_id>/prompt.snapshot`. Không có phép đo ấy thì để nguyên — giữ một
+tệp kín của lượt còn sống vẫn ít hại hơn làm hỏng lần đọc của nó.
 
 `--giu-ban-chup` giữ bản chụp **có chủ đích** để đối chiếu — dùng khi cần, và nhớ dọn.
 

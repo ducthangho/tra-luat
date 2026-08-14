@@ -41,8 +41,8 @@ recorded_by: claude-session (KHÔNG phải dispatcher, ghi hộ quyết định)
 recorder_is_dispatcher: false
 authority_basis: "§2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền"
 
-leased_at_utc: '2026-08-14T03:00:00Z'
-lease_expires_at_utc: '2026-08-14T09:00:00Z'
+leased_at_utc: '2026-08-14T03:08:40Z'
+lease_expires_at_utc: '2026-08-14T09:08:40Z'
 run_minutes: 360
 heartbeat_required_minutes: 30
 

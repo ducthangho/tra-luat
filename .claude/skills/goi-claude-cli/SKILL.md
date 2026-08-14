@@ -270,52 +270,20 @@ chốt ĐẦU TIÊN bị vấp.**
 <run-root>/<short_id>/stderr.log
 ```
 
-`launcher.py status` xem sổ; `launcher.py stop` giết cả cây tiến trình.
+`launcher.py status` xem sổ; `launcher.py stop` giết cây tiến trình — **nhưng không
+phải mọi hậu duệ**, xem [#112](https://github.com/ducthangho/tra-luat/issues/112).
 
-**`prompt.snapshot` KHÔNG được bảo đảm xoá ngay khi con thoát** — đừng đọc rộng hơn
-thực tế, tệp này chứa nguyên văn prompt. Launcher chỉ xoá khi **chứng minh được** nhóm
-tiến trình đã rỗng (`_thanh_vien_nhom(...) == []`), vì con có thể vừa sinh cháu và
-cháu mới là bên đọc bản chụp — xoá sớm là tự tạo TOCTOU. Hệ quả:
+**Bản chụp prompt, hạn chót, và việc giết cây tiến trình: xem [#112](https://github.com/ducthangho/tra-luat/issues/112).**
+Phần ấy đã được **cắt ra khỏi skill này** sau ba vòng cross-review liên tiếp cho thấy nó
+sâu hơn mức một tài liệu hướng dẫn nên đi — và cần vá ở `launcher.py`, không phải ở
+tài liệu. Hai điều cần biết ngay, phần còn lại đọc ở issue:
 
-- còn hậu duệ sống ⇒ **giữ lại** (bản `0600`);
-- trên **Windows và mọi nền không phải Linux/Darwin**, `_thanh_vien_nhom` luôn trả
-  `None` nên điều kiện luôn sai ⇒ bản chụp **không bao giờ** bị xoá ngay;
-- lưới cuối là dọn rác >24 giờ, nhưng nó chỉ chạy khi có **một lượt chạy sau** — không
-  còn lượt nào thì tệp nằm đó vô thời hạn.
-
-Nên với prompt có nội dung nhạy cảm, phải tự kiểm và tự dọn:
-
-```bash
-find <run-root> -name prompt.snapshot -ls    # LIỆT KÊ trước: còn sót cái nào, từ lượt nào
-```
-
-**Đừng `-delete` hàng loạt — kể cả có `-mmin`.** Nó xoá cả bản chụp của lượt ĐANG chạy,
-đúng ca TOCTOU mô tả ngay trên: cháu chưa kịp mở tệp thì nhận `ENOENT`. Và `-mmin +1440`
-**chỉ chứng minh TUỔI, không chứng minh ĐÃ XONG** — launcher không áp hạn chót tối đa
-24 giờ, nên một lượt (hoặc một hậu duệ được giữ lại có chủ đích) sống lâu hơn thế vẫn
-có thể chưa đọc bản chụp. `trang_thai: xong` của tiến trình cha cũng không chứng minh
-hậu duệ đã xong.
-
-Nên dọn **theo từng lượt**, và chỉ sau khi biết lượt ấy đã kết thúc thật: đối chiếu
-`run.json` của đúng lượt đó, xác minh nhóm tiến trình của nó đã rỗng, rồi mới xoá
-`<run-root>/<short_id>/prompt.snapshot`. Không có phép đo ấy thì để nguyên — giữ một
-tệp kín của lượt còn sống vẫn ít hại hơn làm hỏng lần đọc của nó.
-
-**Nhưng kỷ luật tay ở trên KHÔNG cứu được, vì chính launcher tự dọn.** `_cap_id`
-(`launcher.py:989`) xoá **mọi** `prompt.snapshot` cũ hơn 24 giờ, **không** kiểm nhóm
-tiến trình — và nó được gọi ở `lenh_run` (dòng 1149), tức **mỗi lượt chạy mới đều kích
-hoạt**. Hai hệ quả phải biết:
-
-- Trong đúng ca đọc-trễ mô tả ở trên, **chỉ cần khởi động một lượt khác cùng
-  `--run-root`** là bản chụp của lượt còn sống bị xoá, và hậu duệ nhận `ENOENT`.
-- `--giu-ban-chup` **không bền quá 24 giờ** nếu run-root ấy còn được dùng lại.
-
-Cách né, cho tới khi bản thân launcher áp phép kiểm liveness ở chỗ dọn: **đừng dùng
-lại một run-root đang chứa bản chụp cần sống lâu** — cấp run-root riêng cho lượt dài,
-hoặc chép bản chụp đi nơi khác nếu thật sự cần giữ. Đây là giới hạn của công cụ, không
-phải của quy trình; ghi ra để người vận hành khỏi tin vào một kỷ luật mà công cụ sẽ phá.
-
-`--giu-ban-chup` giữ bản chụp **có chủ đích** để đối chiếu — dùng khi cần, và nhớ dọn.
+- `prompt.snapshot` chứa **nguyên văn prompt** và **không được bảo đảm xoá**. Với prompt
+  nhạy cảm, tự kiểm bằng `find <run-root> -name prompt.snapshot -ls` và tự dọn — nhưng
+  đọc #112 trước để biết vì sao dọn hàng loạt là sai.
+- `--deadline-utc` **không** bảo đảm cả cây dừng khi hết hạn. Muốn rào thật thì phải
+  dùng thứ ngoài launcher (container / cgroup / PID namespace). Không có thì khai đúng
+  giới hạn: một lượt chạy có thể sống quá hạn lease, và sổ sẽ không nói cho biết.
 
 Lỗi im lặng nằm ở **`stderr.log`**, không ở `run.json`. Và đừng trông vào `ma_thoat`
 để phân biệt: lượt hỏng vì trust hoặc vì cờ quyền có thể cho **đúng** cặp
@@ -331,30 +299,5 @@ Thứ phân biệt được chỉ có hai: **log** và **hậu điều kiện h�
 2. `launcher.py check …` — `QUA HET CHOT`, `rc=0`.
 3. Neo prompt bằng **băm**, không bằng tên nhánh: tên nhánh trôi và bị xoá.
 4. Cho `--deadline-utc` khớp hạn lease — nhưng **đừng đọc nó thành "lượt chạy không
-   sống quá quyền"**. Hạn chót chỉ rào **TIẾN TRÌNH CON TRỰC TIẾP**: `_giet_cay` chỉ
-   chạy ở nhánh `TimeoutExpired` (`launcher.py:1250`), khi bị ngắt (1261), và ở lệnh
-   `stop` (1378). Con thoát **bình thường** trước hạn mà để lại hậu duệ thì `p.wait()`
-   trả về êm, **không lượt giết nào xảy ra**, và hậu duệ ấy chạy tiếp qua hạn lease.
-   Hạn chót là **hàng rào cho MỘT tiến trình**, không phải cho cả cây.
-
-   **Và launcher KHÔNG có cách nào bảo đảm cả cây đã dừng — nói thẳng thay vì kê thêm
-   một mẹo nữa.** Hai cách tưởng là lối thoát, cả hai đều thủng, đã tái lập:
-
-   - `launcher.py stop` — trả `rc=0` với *"tien trinh da khong con chay"* trong khi hậu
-     duệ vẫn sống;
-   - "tự xác minh nhóm tiến trình đã rỗng" — cùng một lỗ, vì đó chính là phép đo mà
-     `stop` dùng.
-
-   Gốc: hậu duệ gọi `setsid()` **rời khỏi nhóm tiến trình** của con. Khi con thoát,
-   `_thanh_vien_nhom(pid)` (`launcher.py:667-691`) không còn thấy nó, `con == []`, và
-   mã đọc `[]` thành **"đã chứng minh rỗng"**. Phép đo vẫn đúng với thứ nó đo — nhóm
-   tiến trình — chỉ là hậu duệ đã ra khỏi phạm vi ấy.
-
-   Muốn thật sự rào cả cây thì phải dùng thứ **ngoài launcher**: chạy trọn lượt trong
-   một container / cgroup / PID namespace mà bạn xoá được, hoặc một cơ chế theo dõi
-   riêng bắt được cả hậu duệ đã thoát nhóm. Không có thứ đó thì **hãy khai đúng giới
-   hạn** — một lượt chạy có thể sống quá hạn lease, và sổ sẽ không nói cho bạn biết.
-
-   *(Ba vòng cross-review liên tiếp rơi vào đúng đoạn này: mỗi lần tôi đề xuất một cách
-   khắc phục, vòng sau chứng minh nó chưa đủ. Lần này ghi ranh giới thay vì mẹo thứ ba
-   — khi ba lần vá đều hụt, thứ sai là giả định "có mẹo", không phải mẹo.)*
+   sống quá quyền"**. Hạn chót chỉ rào tiến trình con trực tiếp; hậu duệ thoát được.
+   Chi tiết và hướng vá: [#112](https://github.com/ducthangho/tra-luat/issues/112).

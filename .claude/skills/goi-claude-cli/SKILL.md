@@ -22,7 +22,7 @@ python .claude/dev/launcher.py run \
   --expected-prompt-sha256 <sha256 prompt> \
   --deadline-utc           <hạn lease dạng RFC3339> \
   --run-root /duong/dan/runs --name <ten-luot> \
-  -- bash -c 'claude --permission-mode auto -p "$(cat {PROMPT_FILE})" < /dev/null'
+  -- bash -c 'claude --permission-mode auto -p < {PROMPT_FILE}'
 ```
 
 Chạy `check` (cùng bộ cờ, bỏ `--run-root`/`--name`/lệnh) **trước** — nó kiểm hết chốt
@@ -31,12 +31,18 @@ mà không gọi gì. Phải ra `KET LUAN : QUA HET CHOT` và `rc=0`.
 Ba chi tiết trong lệnh con, mỗi cái đều đã trả giá:
 
 - **`--permission-mode auto`** — xem bảng dưới, các chế độ khác không đủ hoặc bị chặn.
-- **`< /dev/null`** — thiếu là `claude -p` treo chờ stdin rồi in
-  `Warning: no stdin data received in 3s`.
+- **`-p < {PROMPT_FILE}`, KHÔNG phải `-p "$(cat …)"`.** Nội dung prompt phải đi qua
+  **stdin**, đừng nội suy vào dòng lệnh: `$(cat …)` nở toàn bộ prompt vào **argv** của
+  tiến trình, nơi mọi tiến trình cùng UID và mọi công cụ đo tiến trình đọc được — phá
+  đúng chủ đích bản chụp `0600` và việc launcher cố ý KHÔNG ghi đối số thô vào
+  `run.json`. Prompt lớn còn đụng trần độ dài đối số của hệ điều hành.
+  Cho stdin bằng tệp cũng giải luôn việc `claude -p` treo chờ stdin (`Warning: no
+  stdin data received in 3s`) — nên **không cần** `< /dev/null` nữa; nếu vì lý do khác
+  mà không truyền prompt qua stdin thì mới cần nó.
 - **`{PROMPT_FILE}`** — launcher thay bằng **bản chụp bất biến** trong thư mục lượt
   chạy, nên prompt không đổi được giữa lúc kiểm băm và lúc con đọc. Có
-  `{PROMPT_FILE}` mà quên `--prompt-file` thì launcher chặn (`rc=7`), không để con
-  mở một tệp tên `{PROMPT_FILE}` rồi báo xong.
+  `{PROMPT_FILE}` mà quên `--prompt-file` thì launcher chặn, không để con mở một tệp
+  tên `{PROMPT_FILE}` rồi báo xong.
 
 ## Bảng chế độ quyền — ĐO, không suy từ tên
 
@@ -176,6 +182,23 @@ Launcher sinh con với `cwd=workspace` (`subprocess.Popen(..., cwd=kq["workspac
 dẫn kho chính, đó là **phân giải project**, không phải con chạy nhầm thư mục — đừng
 đi sửa cwd, sẽ mất thì giờ ở nhánh sai.
 
+## Bảng mã thoát của launcher — ĐO, đừng đoán
+
+| ca | mã |
+|---|---|
+| `{PROMPT_FILE}` trong lệnh mà **thiếu** `--prompt-file` | **2** (`MA_THAM_SO`) |
+| có `--expected-prompt-sha256` mà thiếu `--prompt-file` | **2** |
+| `--prompt-file` CÓ nhưng tệp thiếu / rỗng / **băm lệch** | **7** (`MA_PROMPT`) |
+| workspace không phải kho git | **3** (`MA_GIT`) |
+| quá hạn + đã giết được con · quá hạn + KHÔNG giết được | **124** · **125** |
+
+Bản đầu của skill này khai nhầm ca thiếu cờ là `rc=7`; cross-review bắt được và số đo
+là `2`. Rồi phép đo ĐẦU TIÊN của tôi lại ra `3` — vì thư mục thử **không phải kho
+git** nên launcher chết ở chốt git trước khi tới chốt prompt. Dụng cụ đo sai chỗ cho
+một con số sai, và con số sai ấy trông y như một phát hiện. Đo trong kho thật mới ra
+`2`. Ghi lại vì đây là bẫy chung: **chốt chạy theo THỨ TỰ, nên mã thoát chỉ nói về
+chốt ĐẦU TIÊN bị vấp.**
+
 ## Đọc kết quả lượt chạy
 
 ```
@@ -185,8 +208,26 @@ dẫn kho chính, đó là **phân giải project**, không phải con chạy nh
 ```
 
 `launcher.py status` xem sổ; `launcher.py stop` giết cả cây tiến trình.
-`prompt.snapshot` bị **xoá** khi con thoát (nó chứa nội dung prompt); muốn giữ để đối
-chiếu thì thêm `--giu-ban-chup`.
+
+**`prompt.snapshot` KHÔNG được bảo đảm xoá ngay khi con thoát** — đừng đọc rộng hơn
+thực tế, tệp này chứa nguyên văn prompt. Launcher chỉ xoá khi **chứng minh được** nhóm
+tiến trình đã rỗng (`_thanh_vien_nhom(...) == []`), vì con có thể vừa sinh cháu và
+cháu mới là bên đọc bản chụp — xoá sớm là tự tạo TOCTOU. Hệ quả:
+
+- còn hậu duệ sống ⇒ **giữ lại** (bản `0600`);
+- trên **Windows và mọi nền không phải Linux/Darwin**, `_thanh_vien_nhom` luôn trả
+  `None` nên điều kiện luôn sai ⇒ bản chụp **không bao giờ** bị xoá ngay;
+- lưới cuối là dọn rác >24 giờ, nhưng nó chỉ chạy khi có **một lượt chạy sau** — không
+  còn lượt nào thì tệp nằm đó vô thời hạn.
+
+Nên với prompt có nội dung nhạy cảm, phải tự kiểm và tự dọn:
+
+```bash
+find <run-root> -name prompt.snapshot -ls        # còn sót cái nào
+find <run-root> -name prompt.snapshot -delete    # dọn tay sau khi đã xong việc
+```
+
+`--giu-ban-chup` giữ bản chụp **có chủ đích** để đối chiếu — dùng khi cần, và nhớ dọn.
 
 Lỗi im lặng nằm ở **`stderr.log`**, không ở `run.json`: lượt hỏng vì trust hoặc vì cờ
 quyền vẫn cho `trang_thai: xong`, chỉ khác `ma_thoat`. Đọc `stderr.log` trước tiên.

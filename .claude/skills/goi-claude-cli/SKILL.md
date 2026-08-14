@@ -301,6 +301,20 @@ Nên dọn **theo từng lượt**, và chỉ sau khi biết lượt ấy đã k
 `<run-root>/<short_id>/prompt.snapshot`. Không có phép đo ấy thì để nguyên — giữ một
 tệp kín của lượt còn sống vẫn ít hại hơn làm hỏng lần đọc của nó.
 
+**Nhưng kỷ luật tay ở trên KHÔNG cứu được, vì chính launcher tự dọn.** `_cap_id`
+(`launcher.py:989`) xoá **mọi** `prompt.snapshot` cũ hơn 24 giờ, **không** kiểm nhóm
+tiến trình — và nó được gọi ở `lenh_run` (dòng 1149), tức **mỗi lượt chạy mới đều kích
+hoạt**. Hai hệ quả phải biết:
+
+- Trong đúng ca đọc-trễ mô tả ở trên, **chỉ cần khởi động một lượt khác cùng
+  `--run-root`** là bản chụp của lượt còn sống bị xoá, và hậu duệ nhận `ENOENT`.
+- `--giu-ban-chup` **không bền quá 24 giờ** nếu run-root ấy còn được dùng lại.
+
+Cách né, cho tới khi bản thân launcher áp phép kiểm liveness ở chỗ dọn: **đừng dùng
+lại một run-root đang chứa bản chụp cần sống lâu** — cấp run-root riêng cho lượt dài,
+hoặc chép bản chụp đi nơi khác nếu thật sự cần giữ. Đây là giới hạn của công cụ, không
+phải của quy trình; ghi ra để người vận hành khỏi tin vào một kỷ luật mà công cụ sẽ phá.
+
 `--giu-ban-chup` giữ bản chụp **có chủ đích** để đối chiếu — dùng khi cần, và nhớ dọn.
 
 Lỗi im lặng nằm ở **`stderr.log`**, không ở `run.json`. Và đừng trông vào `ma_thoat`

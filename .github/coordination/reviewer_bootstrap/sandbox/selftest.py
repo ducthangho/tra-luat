@@ -30,9 +30,106 @@ from oracle import source_pin  # noqa: E402
 from oracle.trusted_inventory import (  # noqa: E402
     REQUIRED_ESCAPE_KEYS,
     REQUIRED_RESOURCE_KEYS,
+    SANDBOX_PORTABLE_CONTROL_IDS,
     SANDBOX_TEST_IDS,
 )
 from sandbox import runner  # noqa: E402
+
+NET_NS_SELF = "/proc/self/ns/net"
+NET_NS_INIT = "/proc/1/ns/net"
+PARENT_NET_NS_ENV = "RA02_PARENT_NET_NS"
+REENTRY_MARKER_ENV = "RA02_DISPOSABLE_FIXTURE_NS"
+PRISTINE_LOOPBACK = ("127.0.0.1/8", "::1/128")
+
+
+class DisposableNamespaceError(RuntimeError):
+    """The fixture cannot prove it is inside a network namespace it created."""
+
+
+def measure_network_namespace(read_link=os.readlink) -> dict[str, object]:
+    try:
+        current = read_link(NET_NS_SELF)
+    except OSError as exc:
+        raise DisposableNamespaceError("cannot read %s: %s" % (NET_NS_SELF, exc)) from exc
+    try:
+        initial = read_link(NET_NS_INIT)
+    except OSError:
+        initial = None
+    return {"current": current, "initial": initial}
+
+
+def disposable_namespace_evidence(environment: Mapping[str, str], read_link=os.readlink) -> dict[str, object]:
+    """Đo, không tin lời khai.
+
+    Bản trước quyết định bằng biến môi trường `RA02_DISPOSABLE_FIXTURE_NS`: đặt
+    sẵn `=1` ở tiến trình cha là bỏ qua `unshare`, rồi fixture nhét địa chỉ
+    metadata vào loopback CỦA MÁY và bộ thử vẫn xanh (R2).  Danh tính namespace
+    là thứ ĐO được; biến môi trường thì không.
+    """
+    measured = measure_network_namespace(read_link)
+    recorded = environment.get(PARENT_NET_NS_ENV)
+    checks = {
+        "parent_namespace_recorded": bool(recorded),
+        "initial_namespace_readable": measured["initial"] is not None,
+        "differs_from_initial": measured["initial"] is not None
+        and measured["current"] != measured["initial"],
+        "differs_from_recorded_parent": bool(recorded) and measured["current"] != recorded,
+    }
+    return {
+        "measured": measured,
+        "recorded_parent": recorded,
+        "checks": checks,
+        "disposable": all(checks.values()),
+    }
+
+
+def require_disposable_network_namespace(
+    environment: Mapping[str, str] | None = None, read_link=os.readlink
+) -> dict[str, object]:
+    evidence = disposable_namespace_evidence(
+        os.environ if environment is None else environment, read_link
+    )
+    if not evidence["disposable"]:
+        failed = sorted(name for name, value in evidence["checks"].items() if not value)
+        raise DisposableNamespaceError(
+            "refusing host-visible network fixtures; failed namespace checks: %s" % failed
+        )
+    return evidence
+
+
+def loopback_addresses(run=subprocess.run) -> list[str]:
+    proc = run(
+        ["ip", "-o", "addr", "show", "dev", "lo"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if proc.returncode != 0:
+        raise DisposableNamespaceError(
+            "cannot enumerate loopback addresses rc=%d: %s" % (proc.returncode, proc.stderr.strip())
+        )
+    found = []
+    for line in proc.stdout.splitlines():
+        parts = line.split()
+        for index, token in enumerate(parts):
+            if token in ("inet", "inet6") and index + 1 < len(parts):
+                found.append(parts[index + 1])
+    return sorted(found)
+
+
+def require_pristine_loopback(run=subprocess.run) -> list[str]:
+    """Loopback của một namespace mới CHỈ có 127.0.0.1/8 và ::1/128.
+
+    Thấy nhiều hơn nghĩa là ta đang đứng trên loopback dùng chung của ai đó —
+    dừng TRƯỚC khi ghi, chứ không dựa vào `finally` để dọn.
+    """
+    found = loopback_addresses(run)
+    extra = [address for address in found if address not in PRISTINE_LOOPBACK]
+    if extra:
+        raise DisposableNamespaceError(
+            "loopback is not a fresh namespace; unexpected addresses present: %s" % extra
+        )
+    return found
 
 
 CANDIDATE = textwrap.dedent(
@@ -232,6 +329,70 @@ def descendant_checks_treat_zombies_as_gone_with_one_snapshot() -> None:
     expected = {"41": True, "42": False, "43": True, "44": True}
     if checks != expected or calls != [41, 42, 43, 44]:
         raise AssertionError({"checks": checks, "calls": calls})
+
+
+def disposable_namespace_guard_rejects_inherited_environment_claim() -> None:
+    """Phản chứng CHÍNH XÁC của R2: cha đặt sẵn cờ, không hề có namespace mới."""
+    host_links = {NET_NS_SELF: "net:[4026531840]", NET_NS_INIT: "net:[4026531840]"}
+    hostile_environment = {REENTRY_MARKER_ENV: "1", PARENT_NET_NS_ENV: "net:[4026531840]"}
+    evidence = disposable_namespace_evidence(hostile_environment, host_links.__getitem__)
+    if evidence["disposable"] is not False:
+        raise AssertionError(evidence)
+    if evidence["checks"]["differs_from_initial"] is not False:
+        raise AssertionError(evidence)
+    try:
+        require_disposable_network_namespace(hostile_environment, host_links.__getitem__)
+    except DisposableNamespaceError as exc:
+        if "differs_from_initial" not in str(exc):
+            raise AssertionError(str(exc)) from exc
+    else:
+        raise AssertionError("inherited environment claim was accepted as a disposable namespace")
+
+    # Cánh dương: một namespace THẬT sự mới phải đi qua.
+    fresh_links = {NET_NS_SELF: "net:[4026532999]", NET_NS_INIT: "net:[4026531840]"}
+    fresh_environment = {REENTRY_MARKER_ENV: "1", PARENT_NET_NS_ENV: "net:[4026531840]"}
+    fresh = require_disposable_network_namespace(fresh_environment, fresh_links.__getitem__)
+    if fresh["disposable"] is not True or fresh["checks"]["differs_from_recorded_parent"] is not True:
+        raise AssertionError(fresh)
+
+
+def host_loopback_fixture_refuses_outside_disposable_namespace() -> None:
+    """Không có ghi chép namespace cha, và loopback bẩn: cả hai đều phải chặn TRƯỚC khi ghi."""
+    fresh_links = {NET_NS_SELF: "net:[4026532999]", NET_NS_INIT: "net:[4026531840]"}
+    try:
+        require_disposable_network_namespace({}, fresh_links.__getitem__)
+    except DisposableNamespaceError as exc:
+        if "parent_namespace_recorded" not in str(exc):
+            raise AssertionError(str(exc)) from exc
+    else:
+        raise AssertionError("missing parent namespace record was accepted")
+
+    class _Completed:
+        def __init__(self, stdout: str):
+            self.returncode = 0
+            self.stdout = stdout
+            self.stderr = ""
+
+    dirty = (
+        "1: lo    inet 127.0.0.1/8 scope host lo\\       valid_lft forever\n"
+        "1: lo    inet 169.254.169.254/32 scope global lo\\       valid_lft forever\n"
+        "1: lo    inet6 ::1/128 scope host \\       valid_lft forever\n"
+    )
+    try:
+        require_pristine_loopback(lambda *a, **k: _Completed(dirty))
+    except DisposableNamespaceError as exc:
+        if "169.254.169.254/32" not in str(exc):
+            raise AssertionError(str(exc)) from exc
+    else:
+        raise AssertionError("a loopback carrying metadata addresses was treated as pristine")
+
+    clean = (
+        "1: lo    inet 127.0.0.1/8 scope host lo\\       valid_lft forever\n"
+        "1: lo    inet6 ::1/128 scope host \\       valid_lft forever\n"
+    )
+    observed = require_pristine_loopback(lambda *a, **k: _Completed(clean))
+    if observed != ["127.0.0.1/8", "::1/128"]:
+        raise AssertionError(observed)
 
 
 class SocketFixture:
@@ -551,6 +712,11 @@ def _full_once(repo_root: str, candidate_head: str, dispatcher_pin: str, run_ind
                 else:
                     os.environ[key] = previous
 
+        # Chốt R2: chỉ được chạm vào loopback SAU khi chứng minh được namespace
+        # này do chính ta tạo và loopback còn nguyên sơ.  Không có `finally` nào
+        # cứu được máy chủ nếu ta đã ghi nhầm chỗ.
+        namespace_evidence = require_disposable_network_namespace()
+        loopback_before = require_pristine_loopback()
         host, metadata4, metadata6, port, dns_port = "10.99.0.1", "169.254.169.254", "fd00:ec2::254", 43861, 53
         for command in (
             ["ip", "link", "set", "lo", "up"],
@@ -594,6 +760,8 @@ def _full_once(repo_root: str, candidate_head: str, dispatcher_pin: str, run_ind
             ),
         )
         records["network_dns_loopback_metadata_unix"]["outside_positive_controls"] = controls
+        records["network_dns_loopback_metadata_unix"]["disposable_namespace_evidence"] = namespace_evidence
+        records["network_dns_loopback_metadata_unix"]["loopback_before_fixture"] = loopback_before
         protocol = _parse_protocol(network)
         if not all(controls.values()) or not isinstance(protocol, Mapping) or not protocol or not all(value is True for value in protocol.values()):
             records["network_dns_loopback_metadata_unix"]["passed"] = False
@@ -711,13 +879,24 @@ def _full_once(repo_root: str, candidate_head: str, dispatcher_pin: str, run_ind
     return report
 
 
+PORTABLE_CONTROLS = (
+    watchdog_timeout_precedes_cpu_heuristics,
+    cpu_limit_requires_explicit_signal_evidence,
+    descendant_checks_treat_zombies_as_gone_with_one_snapshot,
+    disposable_namespace_guard_rejects_inherited_environment_claim,
+    host_loopback_fixture_refuses_outside_disposable_namespace,
+)
+
+
 def _run_portable_controls() -> list[dict[str, object]]:
+    declared = tuple(control.__name__ for control in PORTABLE_CONTROLS)
+    if declared != SANDBOX_PORTABLE_CONTROL_IDS:
+        raise RuntimeError(
+            "portable control registry drift: declared=%s callable=%s"
+            % (list(SANDBOX_PORTABLE_CONTROL_IDS), list(declared))
+        )
     records = []
-    for control in (
-        watchdog_timeout_precedes_cpu_heuristics,
-        cpu_limit_requires_explicit_signal_evidence,
-        descendant_checks_treat_zombies_as_gone_with_one_snapshot,
-    ):
+    for control in PORTABLE_CONTROLS:
         try:
             control()
         except Exception as exc:
@@ -765,7 +944,11 @@ def _enter_disposable_fixture_namespace(
     if not bootstrap:
         raise source_pin.SourcePinError("external bootstrap path is absent")
     env = dict(os.environ)
-    env["RA02_DISPOSABLE_FIXTURE_NS"] = "1"
+    # Cờ này CHỈ đánh dấu "đã re-exec một lần" để khỏi lặp vô hạn; nó KHÔNG còn
+    # là bằng chứng cách ly.  Danh tính namespace cha được ghi lại để phía sau
+    # ĐO rằng `unshare --net` đã thật sự đổi namespace.
+    env[REENTRY_MARKER_ENV] = "1"
+    env[PARENT_NET_NS_ENV] = str(measure_network_namespace()["current"])
     command = [
         "unshare",
         "--fork",
@@ -790,11 +973,13 @@ def _enter_disposable_fixture_namespace(
 
 
 def _unit() -> int:
-    tests = (
-        watchdog_timeout_precedes_cpu_heuristics,
-        cpu_limit_requires_explicit_signal_evidence,
-        descendant_checks_treat_zombies_as_gone_with_one_snapshot,
-    )
+    """Chạy các control khả chuyển và NÓI RÕ chúng không đo ID nào của bộ đầy đủ.
+
+    `3/3` cộng rc=0 từng là toàn bộ kết quả của lần gọi mặc định, trong khi không
+    một ID nào trong `SANDBOX_TEST_IDS` được chạm tới — cổng xanh nhờ rc=0 đúng
+    kiểu bị lừa.  Mẫu số của bộ đầy đủ nay được in ra cùng chỗ.
+    """
+    tests = PORTABLE_CONTROLS
     passed = 0
     for test in tests:
         try:
@@ -804,8 +989,50 @@ def _unit() -> int:
         else:
             passed += 1
             print("[OK] %s" % test.__name__)
-    print("== ra02 sandbox unit selftest %d/%d ==" % (passed, len(tests)))
+    accounting = {
+        "schema_version": 1,
+        "mode": "portable_controls_only",
+        "portable_controls_passed": passed,
+        "portable_controls_total": len(tests),
+        "sandbox_scheduled_test_ids": list(SANDBOX_TEST_IDS),
+        "sandbox_scheduled_total": len(SANDBOX_TEST_IDS),
+        "sandbox_executed": 0,
+        "sandbox_passed": 0,
+        "sandbox_failed": 0,
+        "sandbox_skipped": 0,
+        "sandbox_not_run": len(SANDBOX_TEST_IDS),
+        "sandbox_suite_ok": False,
+        "full_suite_command": "source_pin.py run-sandbox --repo-root ... --candidate-head ... --pin ...",
+    }
+    print(json.dumps(accounting, ensure_ascii=False, sort_keys=True))
+    print(
+        "== ra02 sandbox portable controls %d/%d · sandbox scheduled %d executed 0 not_run %d — NOT the full suite =="
+        % (passed, len(tests), len(SANDBOX_TEST_IDS), len(SANDBOX_TEST_IDS))
+    )
     return 0 if passed == len(tests) and len(tests) > 0 else 1
+
+
+def _refuse_default_invocation() -> int:
+    report = {
+        "schema_version": 1,
+        "ok": False,
+        "error": {
+            "name": "NoMeasurementRequested",
+            "message": (
+                "a bare invocation measures none of the scheduled sandbox test IDs; "
+                "pass --unit for the portable controls or --full for the measured suite"
+            ),
+        },
+        "scheduled_test_ids": list(SANDBOX_TEST_IDS),
+        "scheduled_total": len(SANDBOX_TEST_IDS),
+        "executed": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "not_run": len(SANDBOX_TEST_IDS),
+    }
+    print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+    return 2
 
 
 def _exception_run(candidate_head: str, run_index: int, exc: Exception) -> dict[str, object]:
@@ -842,6 +1069,7 @@ def _exception_run(candidate_head: str, run_index: int, exc: Exception) -> dict[
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--full", action="store_true")
+    parser.add_argument("--unit", action="store_true")
     parser.add_argument("--repo-root")
     parser.add_argument("--candidate-head")
     parser.add_argument("--dispatcher-pin")
@@ -849,7 +1077,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--output")
     args = parser.parse_args(argv)
     if not args.full:
-        return _unit()
+        return _unit() if args.unit else _refuse_default_invocation()
     if not args.repo_root or not args.candidate_head or not args.dispatcher_pin or args.repeat < 1:
         parser.error("--full requires --repo-root, --candidate-head, --dispatcher-pin, and positive --repeat")
     bootstrap = os.environ.get("RA02_BOOTSTRAP_PATH")
@@ -873,7 +1101,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         }
         print(json.dumps(aggregate, ensure_ascii=False, sort_keys=True))
         return 1
-    if sys.platform.startswith("linux") and os.environ.get("RA02_DISPOSABLE_FIXTURE_NS") != "1":
+    # Re-exec ĐÚNG MỘT LẦN.  Nếu cha đặt sẵn cờ để bỏ qua bước này, ta không
+    # lặp, nhưng chốt ĐO trong `_full_once` vẫn chặn trước khi chạm loopback.
+    if sys.platform.startswith("linux") and os.environ.get(REENTRY_MARKER_ENV) != "1":
         _enter_disposable_fixture_namespace(
             args.repo_root,
             args.candidate_head,

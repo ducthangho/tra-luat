@@ -4,19 +4,33 @@ No Mission, Packet, generation, commit, or hash value is compiled into this
 module.  The caller supplies independently measured observations; the sealed
 bundle supplies the expected durable authority.  Equality is checked at every
 leaf before any oracle evaluation starts.
+
+Bằng nhau THÔI thì chưa đủ: hai tệp cùng nói `mission: {}` vẫn bằng nhau.  Vì vậy
+`validate_durable_facts` đòi HÌNH DẠNG đầy đủ cộng một SÀN đơn điệu do Dispatcher
+cấp trong pin niêm phong (R3 của verdict 5297249899).
 """
 
 from __future__ import annotations
 
 import json
-import os
 import pathlib
 import re
-import stat
+import sys
 from typing import Mapping
+
+HERE = pathlib.Path(__file__).resolve().parent
+PARENT = HERE.parent
+if str(PARENT) not in sys.path:
+    sys.path.insert(0, str(PARENT))
+
+from oracle import safe_io  # noqa: E402
+from oracle.trusted_inventory import AUTHORITY_FLOOR_KEYS  # noqa: E402
 
 OID40 = re.compile(r"[0-9a-f]{40}\Z")
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
+
+MISSION_FIELDS = ("issue", "revision", "plan_hash")
+PACKET_FIELDS = ("issue", "revision", "generation", "spec_hash")
 
 
 class AuthorityError(RuntimeError):
@@ -24,28 +38,9 @@ class AuthorityError(RuntimeError):
 
 
 def _read_sealed(path: pathlib.Path) -> bytes:
-    try:
-        before = path.lstat()
-    except OSError as exc:
-        raise AuthorityError("authority bundle cannot be inspected: %s" % exc) from exc
-    if not stat.S_ISREG(before.st_mode) or stat.S_ISLNK(before.st_mode):
-        raise AuthorityError("authority bundle must be a regular non-symlink file")
-    if before.st_nlink != 1:
-        raise AuthorityError("authority bundle must have exactly one hard link")
-    if before.st_mode & 0o222:
-        raise AuthorityError("authority bundle must be sealed read-only")
-    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
-    try:
-        fd = os.open(path, flags)
-        with os.fdopen(fd, "rb") as handle:
-            opened = os.fstat(handle.fileno())
-            if (opened.st_dev, opened.st_ino) != (before.st_dev, before.st_ino):
-                raise AuthorityError("authority bundle changed identity while opening")
-            return handle.read()
-    except AuthorityError:
-        raise
-    except OSError as exc:
-        raise AuthorityError("authority bundle cannot be read safely: %s" % exc) from exc
+    return safe_io.read_regular_single_link(
+        path, "authority bundle", AuthorityError, require_readonly=True
+    )
 
 
 def _walk_differences(expected: object, actual: object, path: str = "") -> list[str]:
@@ -82,6 +77,77 @@ def _require_hashes(value: object, path: str = "") -> None:
             _require_hashes(child, "%s[%d]" % (path, index))
 
 
+def _positive_int(value: object, label: str) -> int:
+    # `isinstance(True, int)` là True trong Python — bool lọt qua kiểm kiểu số là
+    # bẫy im lặng, nên loại bool ra TRƯỚC.
+    if not isinstance(value, int) or isinstance(value, bool) or value < 1:
+        raise AuthorityError("%s must be a positive integer" % label)
+    return value
+
+
+def _exact_block(value: object, fields: tuple[str, ...], label: str) -> Mapping[str, object]:
+    if not isinstance(value, Mapping):
+        raise AuthorityError("%s must be an object" % label)
+    missing = [name for name in fields if name not in value]
+    extra = sorted(set(value) - set(fields), key=str)
+    if missing or extra:
+        raise AuthorityError(
+            "%s must name exactly %s: missing=%s unexpected=%s"
+            % (label, list(fields), missing, extra)
+        )
+    return value
+
+
+def validate_durable_facts(
+    facts: Mapping[str, object], floor: Mapping[str, object]
+) -> dict[str, object]:
+    """Đòi hình dạng ĐẦY ĐỦ cộng sàn hiện hành, và chết theo TÊN trường sai.
+
+    Trước bản vá này một bó chỉ chứa `mission: {}` và `packet: {}` đi qua sạch:
+    chỉ TẬP KHOÁ ngoài cùng được kiểm, còn ruột thì không.
+    """
+    if not isinstance(floor, Mapping) or set(floor) != set(AUTHORITY_FLOOR_KEYS):
+        raise AuthorityError(
+            "Dispatcher authority floor must name exactly %s" % list(AUTHORITY_FLOOR_KEYS)
+        )
+    for key in AUTHORITY_FLOOR_KEYS:
+        _positive_int(floor[key], "authority_floor.%s" % key)
+
+    mission = _exact_block(facts.get("mission"), MISSION_FIELDS, "durable facts mission")
+    packet = _exact_block(facts.get("packet"), PACKET_FIELDS, "durable facts packet")
+    _positive_int(mission["issue"], "mission.issue")
+    _positive_int(mission["revision"], "mission.revision")
+    _positive_int(packet["issue"], "packet.issue")
+    _positive_int(packet["revision"], "packet.revision")
+    _positive_int(packet["generation"], "packet.generation")
+    for label, value in (("mission.plan_hash", mission["plan_hash"]), ("packet.spec_hash", packet["spec_hash"])):
+        if not isinstance(value, str) or not SHA256.fullmatch(value):
+            raise AuthorityError("%s must be an exact lowercase SHA-256" % label)
+
+    if mission["issue"] != floor["mission_issue"]:
+        raise AuthorityError(
+            "mission.issue names a fenced authority: expected %r got %r"
+            % (floor["mission_issue"], mission["issue"])
+        )
+    if packet["issue"] != floor["packet_issue"]:
+        raise AuthorityError(
+            "packet.issue names a fenced authority: expected %r got %r"
+            % (floor["packet_issue"], packet["issue"])
+        )
+    stale = []
+    if mission["revision"] < floor["mission_revision_min"]:
+        stale.append("mission.revision %r < floor %r" % (mission["revision"], floor["mission_revision_min"]))
+    if packet["revision"] < floor["packet_revision_min"]:
+        stale.append("packet.revision %r < floor %r" % (packet["revision"], floor["packet_revision_min"]))
+    if packet["generation"] < floor["packet_generation_min"]:
+        stale.append(
+            "packet.generation %r < floor %r" % (packet["generation"], floor["packet_generation_min"])
+        )
+    if stale:
+        raise AuthorityError("durable facts are stale against the Dispatcher floor: %s" % "; ".join(stale))
+    return {"mission": dict(mission), "packet": dict(packet)}
+
+
 def load_and_verify(path: pathlib.Path | str, observations: Mapping[str, object]) -> dict[str, object]:
     raw = _read_sealed(pathlib.Path(path))
     try:
@@ -92,6 +158,12 @@ def load_and_verify(path: pathlib.Path | str, observations: Mapping[str, object]
         raise AuthorityError("authority bundle must be a schema_version 1 object")
     actual = dict(bundle)
     actual.pop("schema_version", None)
+    # Pin nguồn và bó authority dùng CHUNG một tệp niêm phong.  `candidate`,
+    # `trusted_source_paths` và digest kiểm kê VẪN được so vì chúng nằm trong
+    # observations đã đo; chỉ hai khối chỉ-dành-cho-pin mới bỏ qua ở đây — chúng
+    # đã được `source_pin.pin_blocks` kiểm hình dạng và `oracle` đối chiếu riêng.
+    for key in ("target", "authority_floor"):
+        actual.pop(key, None)
     expected = dict(observations)
     differences = _walk_differences(expected, actual)
     if differences:

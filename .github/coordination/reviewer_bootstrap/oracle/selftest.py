@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import json
+import os
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -245,7 +248,17 @@ def every_inventoried_keyword_has_positive_and_negative_teeth() -> None:
         "additionalProperties": False,
     }
     inventory = engine.keyword_inventory(schema)
-    controls = engine.keyword_controls(inventory)
+
+    class _Independent:
+        """Người chấm thứ hai; oracle thật dùng `python-jsonschema` ở vị trí này."""
+
+        def validate(self, node, instance):
+            return not engine.validate(node, instance)
+
+        def check_schema(self, node):
+            return not engine.schema_shape_errors(node)
+
+    controls = engine.keyword_controls(inventory, independent=_Independent())
     missing = sorted(keyword for keyword in inventory if keyword not in controls)
     failed = sorted(
         keyword
@@ -279,10 +292,14 @@ def validator_stderr_cannot_forge_fixture_gap() -> None:
         {"case_id": "1" * 16, "document": {}, "expected_valid": False},
     ]
     record = fake_validators.run_one("stderr_forger_control", cases, timeout_seconds=3)
-    if record["disposition"] == "fixture_gap":
+    # Khẳng định DƯƠNG, không phải "khác fixture_gap": một ca chỉ kiểm `!=` vẫn
+    # xanh khi nó chẳng đo gì (vd `anchor_missing` với `real_rc: None`).
+    if record["disposition"] != "masked":
         raise AssertionError(record)
-    if record["real_rc"] == 0:
-        raise AssertionError("stderr forger did not exercise a real failing process")
+    if record["real_rc"] != 19:
+        raise AssertionError("stderr forger did not exercise the fixture's real exit code: %r" % record)
+    if not record.get("affected_case_ids"):
+        raise AssertionError("masked verdict carries no affected case evidence: %r" % record)
 
 
 def all_five_fake_validators_are_killed_by_blind_case_evidence() -> None:
@@ -366,6 +383,246 @@ def source_pin_rejects_fabricated_repository() -> None:
             raise AssertionError("candidate-authored always-green selftest emitted evidence")
 
 
+def _module(name: str):
+    sys.path.insert(0, str(HERE.parent))
+    try:
+        module = __import__("oracle.%s" % name, fromlist=[name])
+    finally:
+        sys.path.pop(0)
+    return module
+
+
+def _sealed_json(path: pathlib.Path, value: object) -> pathlib.Path:
+    path.write_text(json.dumps(value, sort_keys=True) + "\n", encoding="utf-8")
+    path.chmod(0o444)
+    return path
+
+
+def durable_facts_reject_empty_authority_blocks() -> None:
+    """Phản chứng chính xác của R3: hai khối RỖNG từng đi qua sạch."""
+    oracle = _module("oracle")
+    floor = {
+        "mission_issue": 76,
+        "mission_revision_min": 6,
+        "packet_issue": 99,
+        "packet_revision_min": 3,
+        "packet_generation_min": 3,
+    }
+    with tempfile.TemporaryDirectory(prefix="ra02-r3-") as tmp:
+        facts = _sealed_json(
+            pathlib.Path(tmp) / "durable-facts.json",
+            {"schema_version": 1, "mission": {}, "packet": {}},
+        )
+        try:
+            oracle._read_durable_facts(facts, floor)
+        except oracle.OracleError as exc:
+            if "mission" not in str(exc) or "missing" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("an authority bundle naming no authority at all was accepted")
+
+
+def durable_facts_reject_authority_below_dispatcher_floor() -> None:
+    """Sàn hiện hành đến từ pin Dispatcher, và hai vế nằm ở HAI tệp ngoài khác nhau."""
+    oracle = _module("oracle")
+    with tempfile.TemporaryDirectory(prefix="ra02-floor-") as tmp:
+        root = pathlib.Path(tmp)
+        floor_path = _sealed_json(
+            root / "dispatcher-authority-floor.json",
+            {
+                "mission_issue": 76,
+                "mission_revision_min": 6,
+                "packet_issue": 99,
+                "packet_revision_min": 3,
+                "packet_generation_min": 3,
+            },
+        )
+        floor = json.loads(floor_path.read_text(encoding="utf-8"))
+        stale = _sealed_json(
+            root / "stale-facts.json",
+            {
+                "schema_version": 1,
+                "mission": {"issue": 76, "revision": 4, "plan_hash": "a" * 64},
+                "packet": {"issue": 99, "revision": 2, "generation": 2, "spec_hash": "b" * 64},
+            },
+        )
+        try:
+            oracle._read_durable_facts(stale, floor)
+        except oracle.OracleError as exc:
+            for needle in ("stale", "mission.revision", "packet.revision", "packet.generation"):
+                if needle not in str(exc):
+                    raise AssertionError("%r absent from %s" % (needle, exc)) from exc
+        else:
+            raise AssertionError("authority below the Dispatcher floor was accepted")
+
+        fenced = _sealed_json(
+            root / "fenced-facts.json",
+            {
+                "schema_version": 1,
+                "mission": {"issue": 76, "revision": 6, "plan_hash": "a" * 64},
+                "packet": {"issue": 86, "revision": 6, "generation": 6, "spec_hash": "b" * 64},
+            },
+        )
+        try:
+            oracle._read_durable_facts(fenced, floor)
+        except oracle.OracleError as exc:
+            if "packet.issue names a fenced authority" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("a bundle naming the cancelled predecessor Packet was accepted")
+
+        current = _sealed_json(
+            root / "current-facts.json",
+            {
+                "schema_version": 1,
+                "mission": {"issue": 76, "revision": 6, "plan_hash": "a" * 64},
+                "packet": {"issue": 99, "revision": 3, "generation": 3, "spec_hash": "b" * 64},
+            },
+        )
+        accepted = oracle._read_durable_facts(current, floor)
+        if accepted["mission"]["revision"] != 6 or accepted["packet"]["generation"] != 3:
+            raise AssertionError(accepted)
+
+
+def sandbox_report_missing_repeat_fields_is_structured_red() -> None:
+    """R4: thiếu `repeat_requested` từng ném `TypeError` trần, rc=1, stdout rỗng."""
+    oracle = _module("oracle")
+    with tempfile.TemporaryDirectory(prefix="ra02-r4-") as tmp:
+        root = pathlib.Path(tmp)
+        missing = _sealed_json(root / "no-repeat.json", {"schema_version": 1, "ok": True})
+        try:
+            oracle._runner_observation(missing, "a" * 40, "b" * 64)
+        except oracle.OracleError as exc:
+            if "repeat_requested" not in str(exc) or "missing" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("a sandbox report without repeat accounting was accepted")
+
+        mistyped = _sealed_json(
+            root / "string-repeat.json",
+            {"schema_version": 1, "ok": True, "repeat_requested": "8", "repeat_executed": 8},
+        )
+        try:
+            oracle._runner_observation(mistyped, "a" * 40, "b" * 64)
+        except oracle.OracleError as exc:
+            if "repeat_requested" not in str(exc) or "must be int" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("a mistyped repeat count was accepted")
+
+
+def keyword_controls_require_independent_engine_agreement() -> None:
+    """R7: hai răng từng do CHÍNH bộ máy bị chấm tự chấm."""
+    engine = _module("engine")
+
+    class _Agreeing:
+        def validate(self, schema, instance):
+            return not engine.validate(schema, instance)
+
+        def check_schema(self, schema):
+            return not engine.schema_shape_errors(schema)
+
+    class _Disagreeing(_Agreeing):
+        def validate(self, schema, instance):
+            return not super().validate(schema, instance)
+
+    absent = engine.keyword_controls(["type"], independent=None)["type"]
+    if absent["positive_passed"] is not False or absent["negative_mode"] != "INDEPENDENT_ENGINE_MISSING":
+        raise AssertionError(absent)
+
+    agreed = engine.keyword_controls(["type", "title"], independent=_Agreeing())
+    for keyword in ("type", "title"):
+        record = agreed[keyword]
+        if record["positive_passed"] is not True or record["negative_failed"] is not True:
+            raise AssertionError({keyword: record})
+        if record["engine_agreement"] is not True:
+            raise AssertionError({keyword: record})
+
+    split = engine.keyword_controls(["type"], independent=_Disagreeing())["type"]
+    if split["engine_agreement"] is not False or split["positive_passed"] is not False:
+        raise AssertionError(split)
+
+
+def pinned_corpus_is_in_tree_and_anchors_are_well_formed() -> None:
+    """R1: corpus không còn là tệp chỉ tồn tại trên máy Executor."""
+    corpus_module = _module("corpus")
+    inventory = _module("trusted_inventory")
+    pinned = HERE.parents[3] / pathlib.PurePosixPath(inventory.PINNED_CORPUS_PATH)
+    if inventory.PINNED_CORPUS_PATH not in inventory.TRUSTED_SOURCE_PATHS:
+        raise AssertionError("the pinned corpus is not covered by the trusted source inventory")
+    raw = corpus_module.read_bytes(pinned, require_readonly=False)
+    loaded = corpus_module.load(
+        pinned,
+        hashlib.sha256(raw).hexdigest(),
+        inventory.PROTOCOL_SCHEMA_PATHS,
+        require_readonly=False,
+    )
+    by_case = {case.case_id: case for case in loaded.cases}
+    if len(loaded.case_id_registry) != len(loaded.cases) or len(set(loaded.case_id_registry)) != len(loaded.cases):
+        raise AssertionError("case registry is not a duplicate-free cover of the corpus")
+    if not re.fullmatch(r"[0-9a-f]{64}", loaded.target_schema_inventory_sha256):
+        raise AssertionError(loaded.target_schema_inventory_sha256)
+    for keyword, record in loaded.anchors.items():
+        valid = by_case[record["valid_case_id"]]
+        invalid = by_case[record["invalid_case_id"]]
+        if valid.expected_valid is not True or invalid.expected_valid is not False:
+            raise AssertionError("anchor %s is not one valid and one invalid case" % keyword)
+        if valid.schema_path != invalid.schema_path:
+            raise AssertionError("anchor %s crosses schema boundaries" % keyword)
+    schemas_with_anchors = {by_case[record["valid_case_id"]].schema_path for record in loaded.anchors.values()}
+    if not schemas_with_anchors:
+        raise AssertionError("corpus declares no keyword anchors")
+
+
+def hardened_reader_parity_between_bootstrap_and_shared_module() -> None:
+    """S6: bản sao cố ý trong bootstrap phải được ĐO, không phải được hứa."""
+    source_pin = _source_pin_module()
+    safe_io = _module("safe_io")
+
+    class _ParityError(RuntimeError):
+        pass
+
+    def shared(path: pathlib.Path, label: str) -> bytes:
+        return safe_io.read_regular_single_link(path, label, _ParityError)
+
+    def bootstrap(path: pathlib.Path, label: str) -> bytes:
+        return source_pin._read_regular_single_link(path, label)
+
+    def outcome(reader, path: pathlib.Path) -> tuple[str, object]:
+        try:
+            return ("bytes", reader(path, "parity fixture"))
+        except Exception as exc:  # noqa: BLE001
+            return ("error", str(exc))
+
+    with tempfile.TemporaryDirectory(prefix="ra02-parity-") as tmp:
+        root = pathlib.Path(tmp)
+        regular = root / "regular.bin"
+        regular.write_bytes(b"parity-bytes\n")
+        link = root / "link.bin"
+        link.symlink_to(regular)
+        hardlinked = root / "hardlinked.bin"
+        hardlinked.write_bytes(b"parity-bytes\n")
+        second = root / "second-name.bin"
+        os.link(hardlinked, second)
+        absent = root / "absent.bin"
+
+        divergent = []
+        for name, path in (
+            ("regular", regular),
+            ("symlink", link),
+            ("multi_hardlink", hardlinked),
+            ("absent", absent),
+        ):
+            left = outcome(shared, path)
+            right = outcome(bootstrap, path)
+            if left != right:
+                divergent.append({"fixture": name, "shared": left, "bootstrap": right})
+        if divergent:
+            raise AssertionError("hardened reader implementations diverged: %r" % divergent)
+        if outcome(shared, regular)[0] != "bytes" or outcome(shared, link)[0] != "error":
+            raise AssertionError("parity matrix did not exercise both a pass and a refusal")
+
+
 def main() -> int:
     tests = (
         source_pin_rejects_fabricated_repository,
@@ -373,6 +630,12 @@ def main() -> int:
         source_pin_rejects_symlink_mismatch,
         fake_lowercase_commit_cannot_emit_oracle_artifact,
         authority_bundle_rejects_stale_pins,
+        durable_facts_reject_empty_authority_blocks,
+        durable_facts_reject_authority_below_dispatcher_floor,
+        sandbox_report_missing_repeat_fields_is_structured_red,
+        keyword_controls_require_independent_engine_agreement,
+        pinned_corpus_is_in_tree_and_anchors_are_well_formed,
+        hardened_reader_parity_between_bootstrap_and_shared_module,
         every_inventoried_keyword_has_positive_and_negative_teeth,
         schema_shape_rejects_remote_or_unresolved_refs,
         validator_stderr_cannot_forge_fixture_gap,

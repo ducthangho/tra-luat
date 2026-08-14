@@ -313,8 +313,21 @@ def schema_shape_errors(schema: object) -> list[str]:
     return errors
 
 
-def keyword_controls(keywords: Sequence[str]) -> dict[str, dict[str, object]]:
-    """Executable independent positive/negative teeth for every schema keyword."""
+def keyword_controls(
+    keywords: Sequence[str],
+    independent: object | None = None,
+) -> dict[str, dict[str, object]]:
+    """Executable positive/negative teeth for every schema keyword.
+
+    Trước bản vá này cả hai răng đều do CHÍNH `engine.validate` chấm — bộ máy tự
+    chấm bài của mình, và cái cổng tự chấm đó lại có quyền làm đỏ cả oracle (R7
+    của verdict 5297249899).  Nay mỗi răng phải được BỘ MÁY ĐỘC LẬP xác nhận, và
+    hai bên bất đồng là một bản ghi ĐỎ chứ không phải một phiếu bầu.
+
+    `independent` phải có `.validate(schema, instance) -> bool` (hợp lệ?) và
+    `.check_schema(schema) -> bool` (schema hợp lệ?).  Thiếu nó thì mọi control
+    đỏ theo TÊN, không im lặng bỏ qua.
+    """
     micro: dict[str, tuple[object, object, object]] = {
         "type": ({"type": "integer"}, 1, "1"),
         "enum": ({"enum": ["a"]}, "a", "b"),
@@ -349,33 +362,102 @@ def keyword_controls(keywords: Sequence[str]) -> dict[str, dict[str, object]]:
         "dependentRequired": ({"type": "object", "dependentRequired": {"x": ["y"]}}, {"x": 1, "y": 2}, {"x": 1}),
         "$ref": ({"$ref": "#/$defs/x", "$defs": {"x": {"const": 1}}}, 1, 2),
     }
+    annotation_good: dict[str, object] = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://fixture.ra02.invalid/control.json",
+        "$defs": {"x": {"type": "integer"}},
+        "title": "text",
+        "description": "text",
+        "default": 1,
+        "examples": [1],
+    }
+    annotation_bad: dict[str, object] = {
+        "$schema": 1,
+        "$id": 1,
+        "$defs": [],
+        "title": 1,
+        "description": 1,
+    }
+
+    def _record(
+        local_positive: bool,
+        local_negative: bool,
+        independent_positive: bool | None,
+        independent_negative: bool | None,
+        mode: str,
+    ) -> dict[str, object]:
+        agreement = (
+            independent_positive is not None
+            and independent_negative is not None
+            and bool(local_positive) is bool(independent_positive)
+            and bool(local_negative) is bool(independent_negative)
+        )
+        return {
+            "positive_passed": bool(local_positive and independent_positive and agreement),
+            "negative_failed": bool(local_negative and independent_negative and agreement),
+            "local_positive": bool(local_positive),
+            "local_negative": bool(local_negative),
+            "independent_positive": independent_positive,
+            "independent_negative": independent_negative,
+            "engine_agreement": agreement,
+            "negative_mode": mode,
+        }
+
     controls: dict[str, dict[str, object]] = {}
     for keyword in sorted(set(keywords)):
+        if independent is None:
+            controls[keyword] = {
+                "positive_passed": False,
+                "negative_failed": False,
+                "local_positive": None,
+                "local_negative": None,
+                "independent_positive": None,
+                "independent_negative": None,
+                "engine_agreement": False,
+                "negative_mode": "INDEPENDENT_ENGINE_MISSING",
+            }
+            continue
         if keyword in micro:
             schema, good, bad = micro[keyword]
-            controls[keyword] = {
-                "positive_passed": not validate(schema, good),
-                "negative_failed": bool(validate(schema, bad)),
-                "negative_mode": "instance",
-            }
+            controls[keyword] = _record(
+                not validate(schema, good),
+                bool(validate(schema, bad)),
+                independent.validate(schema, good),
+                not independent.validate(schema, bad),
+                "instance",
+            )
         elif keyword in ANNOTATION_KEYWORDS:
-            good_value: object = {"x": {"type": "integer"}} if keyword == "$defs" else ([1] if keyword == "examples" else (1 if keyword == "default" else "text"))
-            bad_value: object = [] if keyword == "$defs" else (1 if keyword in {"$schema", "$id", "title", "description"} else good_value)
+            good_value = annotation_good.get(keyword, "text")
             good_schema = {"type": "integer", keyword: good_value}
-            bad_schema = {"type": "integer", keyword: bad_value}
-            if keyword in ("default", "examples"):
-                negative = bool(validate(good_schema, "wrong-type"))
+            if keyword in annotation_bad:
+                bad_schema = {"type": "integer", keyword: annotation_bad[keyword]}
+                controls[keyword] = _record(
+                    not schema_shape_errors(good_schema) and not validate(good_schema, 1),
+                    bool(schema_shape_errors(bad_schema)),
+                    independent.check_schema(good_schema) and independent.validate(good_schema, 1),
+                    not independent.check_schema(bad_schema),
+                    "schema_shape",
+                )
             else:
-                negative = bool(schema_shape_errors(bad_schema))
-            controls[keyword] = {
-                "positive_passed": not schema_shape_errors(good_schema) and not validate(good_schema, 1),
-                "negative_failed": negative,
-                "negative_mode": "schema_shape" if keyword not in ("default", "examples") else "annotation_not_authority",
-            }
+                # `default`/`examples` là chú thích, không phải thẩm quyền: răng âm
+                # của chúng là "một instance sai kiểu vẫn phải đỏ", chứ không phải
+                # "giá trị chú thích sai làm schema đỏ".
+                controls[keyword] = _record(
+                    not schema_shape_errors(good_schema) and not validate(good_schema, 1),
+                    bool(validate(good_schema, "wrong-type")),
+                    independent.check_schema(good_schema) and independent.validate(good_schema, 1),
+                    not independent.validate(good_schema, "wrong-type"),
+                    "annotation_not_authority",
+                )
         else:
             controls[keyword] = {
                 "positive_passed": False,
                 "negative_failed": False,
+                "local_positive": None,
+                "local_negative": None,
+                "independent_positive": None,
+                "independent_negative": None,
+                "engine_agreement": False,
                 "negative_mode": "ANCHOR_MISSING",
             }
     return controls

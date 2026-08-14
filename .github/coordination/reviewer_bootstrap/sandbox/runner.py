@@ -54,6 +54,10 @@ SAFE_ENV = {
     "PYTHONUNBUFFERED": "1",
 }
 REQUIRED_TOOLS = ("unshare", "mount", "umount", "chroot", "ip")
+# Hai bảng dưới đây KHÔNG phải bản sao của `scripts/pkg_secret_scan.py`: bảng kia
+# quét GÓI phát hành để chặn bí mật lọt ra ngoài, hai bảng này canh FIXTURE của
+# chính bộ thử để một marker bí mật không bao giờ đi vào biên sandbox.  Mỗi bảng
+# phải có NGƯỜI ĐỌC — một bảng chết là bảng sẽ trôi lệch.
 SECRET_VALUE = re.compile(
     r"(?:AKIA|ASIA)[0-9A-Z]{8,}|"
     r"(?i:github_pat_|gh[pousr]_|bearer\s+|basic\s+|sk-[a-z0-9]|"
@@ -63,6 +67,17 @@ CREDENTIAL_NAME = re.compile(
     r"(?i)(?:^|[_-])(?:token|secret|pass(?:word|wd)?|credential|api[_-]?key|"
     r"access[_-]?key|private[_-]?key|oauth|github|gitlab|anthropic|openai|"
     r"aws|azure|gcp|google|stripe|slack)(?:$|[_-])"
+)
+
+# Danh sách CHO PHÉP, không phải danh sách cấm: "danh sách cấm không bao giờ đủ".
+# argv của ứng viên chỉ được gồm các ký tự dưới đây, và phần tử đầu phải là
+# đường dẫn tuyệt đối nằm dưới một thư mục thực thi đã cho phép.
+ARGV_ALLOWED = re.compile(r"[A-Za-z0-9_./:=+,@-]+\Z")
+ARGV_MAX_LENGTH = 512
+ALLOWED_COMMAND_ROOTS = ("/usr/bin/", "/usr/local/bin/", "/bin/")
+# resolv.conf fixture: chỉ hai dạng dòng, không có gì khác.
+RESOLV_LINE_ALLOWED = re.compile(
+    r"(?:nameserver [0-9a-fA-F.:]+|options (?:[a-z-]+:[0-9]+)(?: [a-z-]+:[0-9]+)*)\Z"
 )
 
 
@@ -106,6 +121,7 @@ class SandboxResult:
     resource_report: Mapping[str, object]
     cleanup: Mapping[str, object]
     retained_outputs: Mapping[str, bytes]
+    environment_boundary: Mapping[str, object] = dataclasses.field(default_factory=dict)
 
     def as_dict(self) -> dict[str, object]:
         value = dataclasses.asdict(self)
@@ -221,6 +237,62 @@ def _safe_locator(locator: object) -> str:
     return locator
 
 
+def _validate_command_allowlist(command: Sequence[str]) -> None:
+    """Chỉ nhận argv nằm TRONG danh sách cho phép, rồi mới quét mẫu bí mật.
+
+    Quét mẫu bí mật vẫn giữ làm lớp thứ hai, nhưng nó KHÔNG còn là cửa duy nhất:
+    một danh sách cấm chỉ chặn được thứ nó đã biết tên.
+    """
+    if not command or not all(isinstance(item, str) and item for item in command):
+        raise SandboxError("command must be a non-empty string sequence")
+    for index, item in enumerate(command):
+        if len(item) > ARGV_MAX_LENGTH:
+            raise SandboxError("candidate argv element %d exceeds %d bytes" % (index, ARGV_MAX_LENGTH))
+        if not ARGV_ALLOWED.fullmatch(item):
+            raise SandboxError("candidate argv element %d is outside the allow-list charset" % index)
+        if ".." in item.split("/"):
+            raise SandboxError("candidate argv element %d contains a parent traversal" % index)
+    if not any(command[0].startswith(prefix) for prefix in ALLOWED_COMMAND_ROOTS):
+        raise SandboxError("candidate command is not an allow-listed absolute executable: %r" % command[0])
+    if any(SECRET_VALUE.search(item) for item in command):
+        raise SandboxError("candidate argv contains credential-shaped material")
+
+
+def _validate_resolv_allowlist(text: object) -> None:
+    if not isinstance(text, str) or not text or "\0" in text:
+        raise SandboxError("unsafe resolv.conf fixture")
+    if len(text.encode("utf-8")) > 4096:
+        raise SandboxError("oversized resolv.conf fixture")
+    for number, line in enumerate(text.splitlines(), start=1):
+        if not line.strip():
+            continue
+        if not RESOLV_LINE_ALLOWED.fullmatch(line.strip()):
+            raise SandboxError("resolv.conf fixture line %d is outside the allow-list grammar" % number)
+    if SECRET_VALUE.search(text):
+        raise SandboxError("resolv.conf fixture contains credential-shaped material")
+
+
+def _validate_child_environment(environment: Mapping[str, str]) -> dict[str, object]:
+    """Người đọc thật của `CREDENTIAL_NAME`.
+
+    Trước đây bảng này KHÔNG có ai đọc — đúng điều kiện làm một bảng mẫu trôi
+    lệch.  Nay mọi TÊN biến môi trường trao cho tiến trình con phải đi qua nó, và
+    kết quả đi vào bằng chứng chứ không phải một hằng `true`.
+    """
+    credential_shaped = sorted(name for name in environment if CREDENTIAL_NAME.search(name))
+    value_shaped = sorted(name for name, value in environment.items() if SECRET_VALUE.search(value))
+    if credential_shaped or value_shaped:
+        raise SandboxError(
+            "child environment carries credential-shaped material: names=%s values_of=%s"
+            % (credential_shaped, value_shaped)
+        )
+    return {
+        "names_checked": sorted(environment),
+        "credential_shaped_names": credential_shaped,
+        "credential_shaped_values": value_shaped,
+    }
+
+
 def _validate_config(config: SandboxConfig, measured: Mapping[str, object]) -> tuple[str, str]:
     target = os.path.realpath(os.path.abspath(config.target_root))
     scratch = os.path.realpath(os.path.abspath(config.scratch_root))
@@ -231,20 +303,14 @@ def _validate_config(config: SandboxConfig, measured: Mapping[str, object]) -> t
             raise SandboxError("target_root and scratch_root must not contain each other")
     except ValueError as exc:
         raise SandboxError("target_root and scratch_root must share a filesystem namespace") from exc
-    if not config.command or not all(isinstance(item, str) and item for item in config.command):
-        raise SandboxError("command must be a non-empty string sequence")
-    if any(SECRET_VALUE.search(item) for item in config.command):
-        raise SandboxError("candidate argv contains credential-shaped material")
+    _validate_command_allowlist(config.command)
     for locator in tuple(config.retained_output_paths) + tuple(config.scratch_input_files):
         _safe_locator(locator)
     for locator, content in config.scratch_input_files.items():
         if not isinstance(content, str) or len(content.encode("utf-8")) > config.output_bytes:
             raise SandboxError("unsafe or oversized scratch input: %s" % locator)
     if config.resolv_conf_text is not None:
-        if not isinstance(config.resolv_conf_text, str) or not config.resolv_conf_text or "\0" in config.resolv_conf_text:
-            raise SandboxError("unsafe resolv.conf fixture")
-        if len(config.resolv_conf_text.encode("utf-8")) > 4096 or SECRET_VALUE.search(config.resolv_conf_text):
-            raise SandboxError("unsafe resolv.conf fixture")
+        _validate_resolv_allowlist(config.resolv_conf_text)
     limits = (
         config.timeout_seconds,
         config.memory_bytes,
@@ -540,16 +606,25 @@ def _launch_candidate(spec: Mapping[str, object], rootfs: str, boundary_fd: int)
             os._exit(125)
     os.close(ready_w)
     os.close(go_r)
+    setgroups_deny: dict[str, object] = {"attempted": True, "applied": False, "error": None}
+    child_uid = int(RUNNER_REQUIREMENTS["child_uid"])
+    child_gid = int(RUNNER_REQUIREMENTS["child_gid"])
     try:
         if os.read(ready_r, 1) != b"1":
             raise SandboxError("final child failed before requesting uid/gid maps")
         proc_dir = os.path.join(rootfs, "proc", str(pid))
         try:
             _write_text(os.path.join(proc_dir, "setgroups"), "deny")
-        except OSError:
-            pass
-        _write_text(os.path.join(proc_dir, "uid_map"), "1000 1000 1\n")
-        _write_text(os.path.join(proc_dir, "gid_map"), "1000 1000 1\n")
+        except OSError as exc:
+            # Nuốt lỗi này bằng `pass` là bỏ mất một sự kiện an ninh THẬT.  Kernel
+            # cũ không có `setgroups` là chuyện bình thường, nhưng phải GHI LẠI:
+            # `Groups: []` trong bằng chứng biên mới là thứ kết luận, không phải
+            # giả định rằng lệnh ghi đã thành công.
+            setgroups_deny["error"] = "%s: %s" % (type(exc).__name__, exc)
+        else:
+            setgroups_deny["applied"] = True
+        _write_text(os.path.join(proc_dir, "uid_map"), "%d %d 1\n" % (child_uid, child_uid))
+        _write_text(os.path.join(proc_dir, "gid_map"), "%d %d 1\n" % (child_gid, child_gid))
         os.write(go_w, b"1")
     finally:
         os.close(ready_r)
@@ -558,6 +633,7 @@ def _launch_candidate(spec: Mapping[str, object], rootfs: str, boundary_fd: int)
     if waited != pid or not os.WIFSTOPPED(stopped):
         raise SandboxError("final child did not stop for boundary measurement")
     boundary = _boundary_observation(rootfs, pid)
+    boundary["setgroups_deny"] = setgroups_deny
     os.write(boundary_fd, (json.dumps(boundary, sort_keys=True) + "\n").encode("utf-8"))
     os.close(boundary_fd)
     os.kill(pid, signal.SIGCONT)
@@ -583,21 +659,23 @@ def _child_init(encoded: str, boundary_fd: int) -> int:
         if os.path.exists(source):
             _bind_readonly(source, os.path.join(rootfs, source.lstrip("/")))
     _bind_readonly(target, os.path.join(rootfs, "target"))
+    child_uid = int(RUNNER_REQUIREMENTS["child_uid"])
+    child_gid = int(RUNNER_REQUIREMENTS["child_gid"])
     _mkdir(writable, 0o700)
-    os.chown(writable, 1000, 1000)
+    os.chown(writable, child_uid, child_gid)
     _mount("--bind", writable, os.path.join(rootfs, "scratch"))
     _mount("-o", "remount,bind,rw,nosuid,nodev", os.path.join(rootfs, "scratch"))
-    os.chown(os.path.join(rootfs, "scratch"), 1000, 1000)
+    os.chown(os.path.join(rootfs, "scratch"), child_uid, child_gid)
     for name in ("home", "tmp"):
         destination = os.path.join(rootfs, "scratch", name)
         _mkdir(destination, 0o700)
-        os.chown(destination, 1000, 1000)
+        os.chown(destination, child_uid, child_gid)
     for locator, content in spec.get("scratch_input_files", {}).items():
         destination = os.path.join(rootfs, "scratch", *locator.split("/"))
         _mkdir(os.path.dirname(destination), 0o700)
         with open(destination, "w", encoding="utf-8") as handle:
             handle.write(content)
-        os.chown(destination, 1000, 1000)
+        os.chown(destination, child_uid, child_gid)
         os.chmod(destination, 0o400)
     _mount("-t", "proc", "-o", "nosuid,nodev,noexec,hidepid=2", "proc", os.path.join(rootfs, "proc"))
     _mount("-t", "tmpfs", "-o", "mode=0755,nosuid,noexec", "tmpfs", os.path.join(rootfs, "dev"))
@@ -783,15 +861,20 @@ def _validate_boundary(boundary: Mapping[str, object]) -> None:
     status = boundary.get("status")
     if not isinstance(status, Mapping):
         raise SandboxError("boundary status evidence missing")
+    # Ba giá trị danh tính con lấy TỪ `RUNNER_REQUIREMENTS`, không viết lại thành
+    # số ở đây: khi chúng bị khai lại tại chỗ thì sửa bản khai báo cũng không làm
+    # cổng biên đỏ, tức bản khai báo chỉ còn là trang trí.
+    child_uid = int(RUNNER_REQUIREMENTS["child_uid"])
+    child_gid = int(RUNNER_REQUIREMENTS["child_gid"])
     required = {
-        "Uid": [1000, 1000, 1000, 1000],
-        "Gid": [1000, 1000, 1000, 1000],
+        "Uid": [child_uid] * 4,
+        "Gid": [child_gid] * 4,
         "Groups": [],
         "CapPrm": "0000000000000000",
         "CapEff": "0000000000000000",
         "CapAmb": "0000000000000000",
         "CapBnd": "0000000000000000",
-        "NoNewPrivs": 1,
+        "NoNewPrivs": int(RUNNER_REQUIREMENTS["child_no_new_privs"]),
     }
     mismatches = {name: {"expected": expected, "actual": status.get(name)} for name, expected in required.items() if status.get(name) != expected}
     descriptors = boundary.get("descriptor_inventory")
@@ -807,6 +890,7 @@ def _validate_boundary(boundary: Mapping[str, object]) -> None:
 def run(config: SandboxConfig) -> SandboxResult:
     measured = fingerprint()
     target, scratch = _validate_config(config, measured)
+    environment_boundary = _validate_child_environment(SAFE_ENV)
     run_root = tempfile.mkdtemp(prefix="ra02-sandbox-", dir=scratch)
     os.chmod(run_root, 0o700)
     writable = os.path.join(run_root, "writable")
@@ -953,6 +1037,7 @@ def run(config: SandboxConfig) -> SandboxResult:
         resource_report=resource_report,
         cleanup=cleanup,
         retained_outputs=retained,
+        environment_boundary=environment_boundary,
     )
 
 

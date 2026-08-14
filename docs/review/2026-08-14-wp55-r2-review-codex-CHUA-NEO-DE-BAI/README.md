@@ -4,6 +4,18 @@
 > chuyển `assurance_target: cross_approved`. Nội dung review dùng được; tư cách thủ
 > tục thì không. Ba chỗ lệch nêu ở dưới, không chỗ nào che giấu.
 
+> **HEAD ĐÃ DỊCH — bản review này neo vào một head KHÔNG còn là đầu PR.**
+> Lượt review đọc `22d2cc92164ca2018c0560aaf9404659ea81f51e`. Finding CHẶN của nó
+> đã được sửa, và bản sửa `cf39109c9e5167516c53f2071e5fa7ec5c6afff5` đã
+> fast-forward vào nhánh PR ngày 2026-08-14 — nên đầu PR #92 nay là `cf39109c`.
+>
+> Mọi kết luận dưới đây **chỉ đúng với `22d2cc9`**. Theo đúng luật của kho ("mở lượt
+> mới thì bản duyệt cũ hết hiệu lực"), bản review này **không còn hiệu lực** với đầu
+> PR hiện tại; lease kế tiếp phải neo `reviewed_sha_required: cf39109c…`.
+>
+> Đã đo lại trên head mới: merge với master **sạch, 0 xung đột**; suite trên cây đã
+> merge **48/48 đạt**; write_set vẫn đúng **6 tệp**.
+
 ## Lượt chạy này là gì
 
 Một lượt review thật do `codex` chạy trên write_set của PR #92, gọi qua
@@ -61,6 +73,7 @@ Toàn văn ở `stdout.log`.
 
 ## Muốn có artifact §8 hợp lệ thì cần
 
+0. Neo vào **`cf39109c`** (đầu PR hiện tại), KHÔNG phải `22d2cc9` như lượt này
 1. Lease #3 còn hiệu lực tại thời điểm chạy
 2. Đúng prompt neo `sha256:46a833cc…550dfc`
 3. `--sandbox read-only` (hoặc sửa lease cho phép ghi trong worktree dùng một lần)

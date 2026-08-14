@@ -1,0 +1,109 @@
+# BIÊN NHẬN GIAO HÀNG cho verdict cross-review wp55 lượt 5.
+#
+# Cùng khuôn với biên nhận lượt 4 (`wp55-r2-review-4-codex-verdict.receipt.yaml`), và cùng
+# lý do: bản gốc là NGUYÊN VĂN của reviewer, neo băm, KHÔNG được sửa — kể cả để điền URL
+# sau khi đăng. Chỗ đăng được ghi ra tệp riêng này. Chốt chống trôi: `t26` trong
+# `ops/lease_publish_test.py` băm lại tệp gốc mỗi lượt chạy và ĐỎ nếu lệch.
+#
+# KHÁC lượt 4 một điểm đáng ghi: bản gốc lượt này KHÔNG phải bản chép tay mà là **chính
+# `stdout` của phiên reviewer**, copy nguyên tệp. `diff -q` giữa hai bên cho byte-identical
+# trước khi commit. Lượt 4 chép tay và đã lệch một chỗ; lượt này bỏ hẳn khâu chép.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+lease_id: wp55-r2-review-5-codex-20260814
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 546ecf9fd4dfe889d0cd3ee77b9589d8bed0465f
+
+verdict_path: ops/reviews/wp55-r2-review-5-codex-verdict.md
+verdict_sha256: d1d04452d0ab2df917c1f1f9aa46d52aa554fdf497480ab176780a462a43623e
+verdict_bytes: 4392
+verdict_source: "stdout của phiên reviewer, copy nguyên tệp — không chép tay"
+
+evidence_url: https://github.com/ducthangho/tra-luat/pull/92#pullrequestreview-4939956924
+issue_evidence_url: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5296575188
+correction_url: https://github.com/ducthangho/tra-luat/pull/92#issuecomment-5296569977
+
+delivered: true
+delivered_by: claude-session   # người chuyển thư, KHÔNG phải người viết
+delivered_at_utc: '2026-08-14T18:01:16Z'
+
+# Hai finding P1 chặn. Ghi ra đây để đọc nhanh; nội dung đầy đủ ở tệp gốc.
+findings:
+  - finding_id: merged-tree-doctrine-false-positive
+    severity: P1
+    disposition: blocking
+    note: >-
+      doctrine-scan sạch trên nhánh nhưng rc=6 trên cây ĐÃ MERGE với master, tại
+      CLAUDE.md:82. merge-tree rc=0 không thấy — xung khắc TÍCH HỢP, không phải xung đột
+      merge. Cần người có thẩm quyền chọn hướng: thu hẹp phạm vi quét, hay diễn đạt lại
+      dòng trên master.
+  - finding_id: partial-lease-authority-bypass
+    severity: P1
+    disposition: blocking
+    note: >-
+      begin-attempt chỉ đòi lease truthy + expires_utc, nên state có lease KHUYẾT (không
+      lease_id/granted_by/evidence) vẫn vào running với rc=0. Generation 3 đóng ca "lease
+      thiếu hẳn" mà không đóng ca "lease có mà khuyết" — lỗ chuyển chỗ, không bị bịt.
+      Kèm hai kiểu sai ném Traceback rc=1 thay vì fail-closed có kiểm soát.
+
+# Phiên đăng ĐO LẠI cả hai finding trên chính head 546ecf9, tái lập được cả hai.
+# Ghi ra vì một biên nhận chỉ khai "đã giao" mà không nói ai đã kiểm là biên nhận yếu.
+independently_reproduced_by_poster: true
+reproduction_notes:
+  partial_lease_authority_bypass: >-
+    lease={"expires_utc":"2099-01-01T00:00:00Z"} ⇒ begin-attempt rc=0, state running.
+    lease="chuỗi" ⇒ rc=1 Traceback. lease={"expires_utc":123} ⇒ rc=1 Traceback.
+    lease={} và null ⇒ rc=8. thiếu múi giờ ⇒ rc=2.
+  merged_tree_doctrine_false_positive: >-
+    dựng cây merge từ origin/master + diff base..546ecf9, chạy doctrine-scan ⇒ rc=6,
+    đúng CLAUDE.md:82. Dòng bị bắt do phiên claude viết trong bài học ở PR #103; cụm
+    doctrine vắt qua chỗ ngắt dòng nên scanner làm phẳng cả tệp mới thấy.
+
+# Cảnh báo về CÁCH DÙNG tệp gốc. Ghi ở ĐÂY vì tệp gốc bị neo băm, không sửa được.
+#
+# Codex review PR #114 nêu một P2 ĐÚNG: lệnh tái hiện trong verdict dùng `origin/master`,
+# một mỏ neo DI ĐỘNG. Master tiến lên là lệnh ấy dựng cây khác, và bằng chứng đáng ra bất
+# biến sẽ ra kết quả khác — hoặc không tái lập được nữa.
+#
+# KHÔNG sửa tệp gốc để chữa. Tệp đó là nguyên văn reviewer, neo `verdict_sha256`, và `t26`
+# băm lại nó mỗi lượt chạy. Sửa cho "đúng hơn" là phá đúng thứ làm nó có giá trị: một bản
+# ghi sửa được thì không còn là bản ghi. Chỗ đúng để đính chính là tệp này.
+verdict_usage_caveats:
+  - id: mutable-master-ref-in-repro-command
+    raised_by: "codex review PR #114 (P2)"
+    raised_at_url: https://github.com/ducthangho/tra-luat/pull/114#discussion_r3786156028
+    applies_to: "khối bash tái hiện `merged-tree-doctrine-false-positive` trong tệp gốc"
+    issue: >-
+      `git archive origin/master` và `git merge-tree … origin/master` neo vào ref DI ĐỘNG.
+      Verdict đã ghi master lúc đo là 3d2c52d62696b0c7c190fd891115f543b0f9cb55; chạy lại
+      lệnh nguyên văn sau khi master tiến lên sẽ đo một cây KHÁC.
+    fix_when_rerunning: >-
+      thay cả hai chỗ `origin/master` bằng 3d2c52d62696b0c7c190fd891115f543b0f9cb55.
+    not_fixed_in_source_because: >-
+      tệp gốc là nguyên văn reviewer, neo băm, `t26` cưỡng chế. Sửa = phá mỏ neo xuất xứ.
+
+# Sai lệch của ĐƯỜNG ĐĂNG, không phải của nội dung. Ghi lại vì giấu chỗ méo là khai rộng.
+delivery_deviations:
+  - id: event-downgraded-to-comment
+    detail: >-
+      GitHub từ chối REQUEST_CHANGES trên PR của chính chủ token, nên review đăng với
+      event COMMENT. Verdict KHÔNG đổi — vẫn changes_requested, hai finding P1 chặn.
+  - id: backslash-double-escaped
+    detail: >-
+      6 dấu nối dòng shell trong ba khối bash hiện thành `\\` thay vì `\`. Lượt 4 bị
+      đường MCP GIẢI MÃ chuỗi thoát nên lượt này nhân đôi để chống nuốt — nhưng đường
+      này nhận nguyên văn, không giải mã, nên nhân đôi thành thừa. Sửa một lỗi bằng cách
+      giả định lỗi NGƯỢC LẠI vẫn xảy ra. Thuần hiển thị; lệnh vẫn chạy nếu bỏ một dấu
+      chéo mỗi dòng nối. Đã đính chính tại correction_url. Chuẩn chịu lực là ĐỌC NGƯỢC
+      VỀ VÀ DIFF, không phải áp mẹo escape.
+
+# Trần attempt: verdict chặn này làm revision 2 cạn trần.
+attempts_used: 3
+attempts_limit: 3
+consequence: "revision 2 sang blocked — hai finding phải vá ở revision 3"
+
+authoritative_source: repo_file

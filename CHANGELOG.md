@@ -372,6 +372,36 @@ kể cả khi runtime triển khai đứng yên.
   bằng một ca phản chứng. `.claude/dev/launcher_test.py`: 62 ca + 17 đột biến.
 - Bài học đã ghi vào `CLAUDE.md`; hướng dẫn ở `docs/GOI_AGENT_DA_NEN.md`.
 
+# ★ v1.36.68 — r336: loại `ops/` + `.mcp.json` khỏi kiểm kê gói (2026-08-14)
+
+Nhánh `ops` (đường đăng lease bằng git) đỏ `release-verify --strict` **ngay từ commit đầu** và
+không ai đọc ra, vì nó đỏ ở `extra_files` chứ không ở `failed`: `failed: 0`,
+`package_hash_match: true`, manifest vẫn lành. Đúng lớp bệnh r238/r331 — gate đỏ theo PHẠM VI
+QUÉT chứ không theo nội dung, nên nhìn vào đâu cũng thấy "mọi thứ đúng".
+
+- `ops` vào `_RELEASE_EXCLUDE_DIRS`, `.mcp.json` vào `_RELEASE_EXCLUDE_NAMES`. Cả hai dev-side
+  thuần, runtime Cowork trong gói không đọc. GIỮ trong repo/git, CHỈ loại khỏi GÓI — cùng tiền
+  lệ `.claude` `.github` `.githooks` `docs` `rasoat` `changelog_archive` `.editorconfig`.
+- `ops` khoá theo THƯ MỤC, `.mcp.json` theo TÊN vì nó ở gốc kho. Đã kiểm chứ không đoán: 0 mục
+  manifest mang thành phần đường dẫn tên `ops` — `ingest_ops.py`/`nlm_ops.py`/`ops_misc.py` là
+  TÊN TỆP nên không dính, mà khoá thư mục dùng phép giao trên MỌI thành phần đường dẫn.
+- `release-verify --strict`: rc=2 · extra_files 6 → **rc=0 · extra_files 0 · failed 0**.
+  `RELEASE_MANIFEST.json` tái sinh giữ `file_count` **179**, 0 thêm 0 bớt.
+- Bẫy đã sập rồi mới hiểu: bảng loại trừ không thêm bớt mục nào, nhưng manifest **vẫn phải**
+  tái sinh — `release.py` NẰM TRONG gói nên sửa chính nó là đổi sha của chính nó. Lượt đầu quên
+  và cổng trả `failed: 1` đúng ngay tệp vừa sửa. Cổng nói thật, chỉ là nói về chuyện khác với
+  chuyện mình đang nghĩ. `references/golden/**` KHÔNG bị chạm — không ghi đè golden cho hết đỏ.
+- Nghiệm thu trên GitHub Actions, `workflow_dispatch` nên chạy CẢ HAI nền: `gate (ubuntu-latest)`
+  và `gate (windows-latest)` đều `success`, **20/20 bước**, không bước nào `skipped` do nền.
+  Bước `release-bundle x2 cùng SHA-256` xanh ở cả hai — bảng loại trừ mới cho kết quả tất định,
+  không lệch giữa `/` và `\`, đúng chỗ đáng ngờ nhất của một bản vá đụng đường dẫn.
+
+Kèm trong đợt (nhánh ops, không đụng runtime gói): lease neo prompt bằng `prompt_path` + băm và
+cổng `ops/lease_publish.py` kiểm được nó (`rc=6`) — trước đó lease #3 của wp55 neo một băm không
+ứng với văn bản nào, cổng phía reviewer hỏng IM LẶNG và chặn wp55 hai ngày. 23 ca phản chứng, 6
+đột biến giết đúng ca đích; lượt đột biến đầu bắt được hai "chốt" thực ra là trang trí, nên phản
+chứng nay neo THÔNG ĐIỆP chứ không chỉ mã thoát.
+
 # ★ v1.36.67 — r335: kích hoạt topology test-fragment F1 (2026-08-06)
 
 Mission F1 chuyển selftest sang mô hình fragment dành cho nhánh phát triển nhưng vẫn giữ gói phát hành

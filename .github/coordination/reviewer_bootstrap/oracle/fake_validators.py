@@ -78,9 +78,10 @@ def run_one(fake_id: str, cases: Sequence[object], timeout_seconds: float = 5.0)
             "fake_id": fake_id,
             "disposition": "anchor_missing",
             "real_rc": None,
+            "affected_case_ids": sorted(expected),
             "evidence": "both valid and invalid blind cases are required",
         }
-    with tempfile.TemporaryDirectory(prefix="wp99-fake-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="ra02-fake-") as tmp:
         root = pathlib.Path(tmp)
         request = root / "request.json"
         result = root / "result.json"
@@ -102,22 +103,25 @@ def run_one(fake_id: str, cases: Sequence[object], timeout_seconds: float = 5.0)
                 env=env,
             )
         except FileNotFoundError as exc:
-            return {"fake_id": fake_id, "disposition": "fixture_gap", "real_rc": None, "evidence": str(exc)}
+            return {"fake_id": fake_id, "disposition": "fixture_gap", "real_rc": None, "affected_case_ids": sorted(expected), "evidence": str(exc)}
         except subprocess.TimeoutExpired as exc:
-            return {"fake_id": fake_id, "disposition": "masked", "real_rc": None, "evidence": "trusted watchdog timeout: %s" % exc}
+            return {"fake_id": fake_id, "disposition": "masked", "real_rc": None, "affected_case_ids": sorted(expected), "evidence": "trusted watchdog timeout: %s" % exc}
         record: dict[str, object] = {
             "fake_id": fake_id,
             "real_rc": proc.returncode,
             "stdout_sha256": hashlib.sha256(proc.stdout).hexdigest(),
             "stderr_sha256": hashlib.sha256(proc.stderr).hexdigest(),
             "typed_result_present": result.is_file(),
+            "affected_case_ids": [],
         }
         if proc.returncode != 0:
             record["disposition"] = "masked"
+            record["affected_case_ids"] = sorted(expected)
             record["evidence"] = "validator process exited nonzero; stderr content is not classified"
             return record
         if not result.is_file():
             record["disposition"] = "killed"
+            record["affected_case_ids"] = sorted(expected)
             record["evidence"] = "typed result artifact missing; stdout cannot substitute"
             return record
         try:
@@ -134,11 +138,23 @@ def run_one(fake_id: str, cases: Sequence[object], timeout_seconds: float = 5.0)
                 raise ValueError("result IDs are missing, duplicate, or unexpected")
         except (KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
             record["disposition"] = "killed"
+            predictions_value = locals().get("predictions")
+            present_ids = set()
+            if isinstance(predictions_value, list):
+                present_ids = {
+                    item.get("case_id")
+                    for item in predictions_value
+                    if isinstance(item, dict)
+                    and item.get("case_id") in expected
+                    and type(item.get("valid")) is bool
+                }
+            record["affected_case_ids"] = sorted(set(expected) - present_ids) or sorted(expected)
             record["evidence"] = "typed result rejected: %s" % exc
             return record
         mismatches = [case_id for case_id in sorted(expected) if by_id[case_id] is not expected[case_id]]
         record["disposition"] = "killed" if mismatches else "survived"
         record["mismatched_case_ids"] = mismatches
+        record["affected_case_ids"] = mismatches
         record["evidence"] = "blind per-case comparison"
         return record
 

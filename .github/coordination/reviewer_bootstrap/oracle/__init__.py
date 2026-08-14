@@ -1,1 +1,1 @@
-"""Dispatcher-pinned trusted oracle package for Packet wp99."""
+"""Dispatcher-pinned trusted oracle package for RA-02."""

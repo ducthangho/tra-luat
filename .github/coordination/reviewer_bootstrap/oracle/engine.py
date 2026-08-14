@@ -275,6 +275,13 @@ def schema_shape_errors(schema: object) -> list[str]:
         unknown = set(node) - SUPPORTED_KEYWORDS
         if unknown:
             errors.append("ANCHOR_MISSING at %s: %s" % (path, ",".join(sorted(unknown))))
+        if "$ref" in node:
+            try:
+                if not isinstance(schema, Mapping):
+                    raise ValueError("root schema is not an object")
+                resolve(schema, node["$ref"])
+            except ValueError as exc:
+                errors.append("%s.$ref rejected: %s" % (path, exc))
         for keyword in ("$schema", "$id", "title", "description", "format", "pattern"):
             if keyword in node and not isinstance(node[keyword], str):
                 errors.append("%s.%s malformed" % (path, keyword))

@@ -23,7 +23,7 @@ def _trusted_temp_repository() -> Iterator[tuple[pathlib.Path, str, tuple[str, .
     finally:
         sys.path.pop(0)
     checkout = HERE.parents[3]
-    with tempfile.TemporaryDirectory(prefix="wp99-source-pin-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="ra02-source-pin-") as tmp:
         root = pathlib.Path(tmp)
         subprocess.run(["git", "init", "-q", str(root)], check=True)
         for relative in TRUSTED_SOURCE_PATHS:
@@ -39,9 +39,9 @@ def _trusted_temp_repository() -> Iterator[tuple[pathlib.Path, str, tuple[str, .
                 "-C",
                 str(root),
                 "-c",
-                "user.name=wp99",
+                "user.name=ra02",
                 "-c",
-                "user.email=wp99@example.invalid",
+                "user.email=ra02@example.invalid",
                 "commit",
                 "-qm",
                 "trusted-source-fixture",
@@ -131,7 +131,7 @@ def fake_lowercase_commit_cannot_emit_oracle_artifact() -> None:
         proc = subprocess.run(
             [
                 sys.executable,
-                str(root / pathlib.PurePosixPath(source_paths[7])),
+                str(SOURCE_PIN),
                 "run-oracle",
                 "--repo-root",
                 str(root),
@@ -168,38 +168,59 @@ def authority_bundle_rejects_stale_pins() -> None:
         from oracle import authority
     finally:
         sys.path.pop(0)
-    current = {
+    observations = {
         "protocol": {
             "commit_sha": "a" * 40,
-            "path": "docs/PROTOCOL_DA_PHIEN.md",
+            "path": "docs/example-protocol.md",
             "file_git_oid": "b" * 40,
             "file_sha256": "c" * 64,
         },
-        "mission": {"issue": 76, "revision": 6, "plan_hash": "d" * 64},
+        "mission": {"issue": 301, "revision": 12, "plan_hash": "d" * 64},
         "packet": {
-            "issue": 99,
-            "revision": 2,
-            "generation": 2,
+            "issue": 302,
+            "revision": 9,
+            "generation": 4,
             "spec_hash": "e" * 64,
         },
         "candidate": {"head": "f" * 40, "tree": "1" * 40},
+        "trusted_source_paths": ["example/source.py"],
         "trusted_source_inventory_sha256": "2" * 64,
         "target_checkout": {"head": "3" * 40, "tree": "4" * 40},
+        "target_schema_paths": ["example/schema.json"],
         "target_schema_inventory_sha256": "5" * 64,
         "corpus_sha256": "6" * 64,
         "runner_fingerprint_sha256": "7" * 64,
     }
-    stale = json.loads(json.dumps(current))
-    stale["mission"]["revision"] = 4
-    stale["packet"]["revision"] = 6
-    stale["packet"]["generation"] = 6
-    stale["schema_version"] = 1
-    with tempfile.TemporaryDirectory(prefix="wp99-b2-") as tmp:
+    sealed_stale = {
+        "schema_version": 1,
+        "protocol": {
+            "commit_sha": "a" * 40,
+            "path": "docs/example-protocol.md",
+            "file_git_oid": "b" * 40,
+            "file_sha256": "c" * 64,
+        },
+        "mission": {"issue": 301, "revision": 11, "plan_hash": "d" * 64},
+        "packet": {
+            "issue": 302,
+            "revision": 8,
+            "generation": 3,
+            "spec_hash": "e" * 64,
+        },
+        "candidate": {"head": "f" * 40, "tree": "1" * 40},
+        "trusted_source_paths": ["example/source.py"],
+        "trusted_source_inventory_sha256": "2" * 64,
+        "target_checkout": {"head": "3" * 40, "tree": "4" * 40},
+        "target_schema_paths": ["example/schema.json"],
+        "target_schema_inventory_sha256": "5" * 64,
+        "corpus_sha256": "6" * 64,
+        "runner_fingerprint_sha256": "7" * 64,
+    }
+    with tempfile.TemporaryDirectory(prefix="ra02-b2-") as tmp:
         bundle = pathlib.Path(tmp) / "authority.json"
-        bundle.write_text(json.dumps(stale, sort_keys=True) + "\n", encoding="utf-8")
+        bundle.write_text(json.dumps(sealed_stale, sort_keys=True) + "\n", encoding="utf-8")
         bundle.chmod(0o444)
         try:
-            authority.load_and_verify(bundle, current)
+            authority.load_and_verify(bundle, observations)
         except authority.AuthorityError as exc:
             if "mission.revision" not in str(exc) or "packet.revision" not in str(exc):
                 raise AssertionError(str(exc)) from exc
@@ -233,6 +254,18 @@ def every_inventoried_keyword_has_positive_and_negative_teeth() -> None:
     )
     if missing or failed:
         raise AssertionError("missing=%s failed=%s" % (missing, failed))
+
+
+def schema_shape_rejects_remote_or_unresolved_refs() -> None:
+    sys.path.insert(0, str(HERE.parent))
+    try:
+        from oracle import engine
+    finally:
+        sys.path.pop(0)
+    for ref in ("https://fixture.invalid/schema.json", "#/$defs/missing"):
+        errors = engine.schema_shape_errors({"$ref": ref, "$defs": {}})
+        if not any("$ref rejected" in error for error in errors):
+            raise AssertionError("unsafe ref was not rejected: %s errors=%r" % (ref, errors))
 
 
 def validator_stderr_cannot_forge_fixture_gap() -> None:
@@ -272,65 +305,65 @@ def all_five_fake_validators_are_killed_by_blind_case_evidence() -> None:
         raise AssertionError(matrix)
     if any(record.get("real_rc") != 0 for record in matrix["records"]):
         raise AssertionError("mutation verdict did not retain each real process rc: %r" % matrix)
+    expected_ids = sorted(case["case_id"] for case in cases)
+    for record in matrix["records"]:
+        affected = record.get("affected_case_ids")
+        if not isinstance(affected, list) or not affected:
+            raise AssertionError("killed fake lacks exact affected case evidence: %r" % record)
+        if any(case_id not in expected_ids for case_id in affected):
+            raise AssertionError("fake named a case outside the blind corpus: %r" % record)
 
 
 def source_pin_rejects_fabricated_repository() -> None:
-    with tempfile.TemporaryDirectory(prefix="wp99-b3-red-") as tmp:
-        root = pathlib.Path(tmp)
-        subprocess.run(["git", "init", "-q", str(root)], check=True)
-        (root / "always_green.py").write_text("print('13/13')\n", encoding="utf-8")
-        subprocess.run(["git", "-C", str(root), "add", "always_green.py"], check=True)
+    source_pin = _source_pin_module()
+    with _trusted_temp_repository() as (root, trusted_head, source_paths):
+        binding = source_pin.measure(str(root), trusted_head, source_paths)
+        pin = root / "dispatcher-pin.json"
+        _write_source_pin(pin, binding, source_paths)
+        fabricated = root / ".github/coordination/reviewer_bootstrap/sandbox/selftest.py"
+        fabricated.write_text("print('11/11')\n", encoding="utf-8")
+        relative = fabricated.relative_to(root).as_posix()
+        subprocess.run(["git", "-C", str(root), "add", "--", relative], check=True)
         subprocess.run(
             [
                 "git",
                 "-C",
                 str(root),
                 "-c",
-                "user.name=wp99",
+                "user.name=ra02",
                 "-c",
-                "user.email=wp99@example.invalid",
+                "user.email=ra02@example.invalid",
                 "commit",
                 "-qm",
-                "fabricated",
+                "fabricated-always-green-selftest",
             ],
             check=True,
         )
-        head = subprocess.check_output(
+        fabricated_head = subprocess.check_output(
             ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
         ).strip()
-        pin = root / "dispatcher-pin.json"
-        pin.write_text(
-            json.dumps(
-                {
-                    "schema_version": 1,
-                    "candidate": {"head": head, "tree": "0" * 40},
-                    "trusted_source_paths": ["always_green.py"],
-                    "trusted_source_inventory_sha256": "0" * 64,
-                }
-            )
-            + "\n",
-            encoding="utf-8",
-        )
-        pin.chmod(0o444)
+        output = root / "forged-sandbox.json"
         proc = subprocess.run(
             [
                 sys.executable,
                 str(SOURCE_PIN),
-                "verify",
+                "run-sandbox",
                 "--repo-root",
                 str(root),
                 "--candidate-head",
-                head,
+                fabricated_head,
                 "--pin",
                 str(pin),
+                "--output",
+                str(output),
             ],
             capture_output=True,
             text=True,
         )
-        if proc.returncode == 0:
-            raise AssertionError("fabricated candidate-authored source was accepted")
-        if "SourcePinError" not in proc.stdout:
+        if proc.returncode != 2 or "SourcePinError" not in proc.stdout:
             raise AssertionError(proc.stdout + proc.stderr)
+        if output.exists() or "11/11" in proc.stdout:
+            raise AssertionError("candidate-authored always-green selftest emitted evidence")
 
 
 def main() -> int:
@@ -341,6 +374,7 @@ def main() -> int:
         fake_lowercase_commit_cannot_emit_oracle_artifact,
         authority_bundle_rejects_stale_pins,
         every_inventoried_keyword_has_positive_and_negative_teeth,
+        schema_shape_rejects_remote_or_unresolved_refs,
         validator_stderr_cannot_forge_fixture_gap,
         all_five_fake_validators_are_killed_by_blind_case_evidence,
     )
@@ -353,7 +387,7 @@ def main() -> int:
         else:
             passed += 1
             print("[OK] %s" % test.__name__)
-    print("== wp99 oracle selftest %d/%d ==" % (passed, len(tests)))
+    print("== ra02 oracle selftest %d/%d ==" % (passed, len(tests)))
     return 0 if passed == len(tests) and len(tests) > 0 else 1
 
 

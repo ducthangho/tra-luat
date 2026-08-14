@@ -223,7 +223,7 @@ def _case_worker(request_path: pathlib.Path, result_path: pathlib.Path) -> int:
 
 
 def _run_case(case: corpus.Case, schema: Mapping[str, object]) -> dict[str, object]:
-    with tempfile.TemporaryDirectory(prefix="wp99-case-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="ra02-case-") as tmp:
         root = pathlib.Path(tmp)
         request = root / "request.json"
         result = root / "result.json"
@@ -393,11 +393,13 @@ def evaluate(
 
     all_keywords = set()
     shape_errors = {}
+    schema_keywords = {}
     for path, schema in schemas.items():
         errors = engine.schema_shape_errors(schema)
         if errors:
             shape_errors[path] = errors
-        all_keywords.update(engine.keyword_inventory(schema))
+        schema_keywords[path] = engine.keyword_inventory(schema)
+        all_keywords.update(schema_keywords[path])
     missing_anchors = sorted(all_keywords - set(anchors))
     extra_anchors = sorted(set(anchors) - all_keywords)
     controls = engine.keyword_controls(sorted(all_keywords))
@@ -417,6 +419,10 @@ def evaluate(
         invalid = by_case[record["invalid_case_id"]]
         if valid.expected_valid is not True or invalid.expected_valid is not False:
             raise OracleError("keyword anchor labels are not one valid and one invalid case: %s" % keyword)
+        if valid.schema_path != invalid.schema_path:
+            raise OracleError("keyword anchor crosses schema boundaries: %s" % keyword)
+        if keyword not in schema_keywords[valid.schema_path]:
+            raise OracleError("keyword anchor does not target a schema containing the keyword: %s" % keyword)
 
     matrix = [_run_case(case, schemas[case.schema_path]) for case in cases]
     passed = sum(record["passed"] is True for record in matrix)
@@ -462,7 +468,7 @@ def evaluate(
     destination = pathlib.Path(output_root)
     if destination.exists() and any(destination.iterdir()):
         raise OracleError("output_root must be absent or empty")
-    artifact_set = artifacts.ArtifactSet(destination, "wp99-%s" % candidate_head)
+    artifact_set = artifacts.ArtifactSet(destination, "candidate-%s" % candidate_head)
     artifact_set.add("source", "trusted-source-and-authority.json", json.dumps({"source_binding": source_binding, "authority": authority_value}, ensure_ascii=False, sort_keys=True) + "\n")
     artifact_set.add("corpus", "corpus.json", corpus_raw)
     artifact_set.add("per_case_matrix", "oracle-matrix.json", json.dumps(report, ensure_ascii=False, sort_keys=True) + "\n")

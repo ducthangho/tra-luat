@@ -278,7 +278,7 @@ class _Cgroup:
                 _write_text(os.path.join(root, "cgroup.subtree_control"), " ".join("+" + name for name in missing))
         except OSError as exc:
             raise PlatformUnsupported("PlatformUnsupported: cannot delegate cgroup controllers: %s" % exc) from exc
-        self.path = os.path.join(root, "wp99-%s" % uuid.uuid4().hex)
+        self.path = os.path.join(root, "ra02-%s" % uuid.uuid4().hex)
         self.observed: dict[int, str | None] = {}
         os.mkdir(self.path, 0o700)
         try:
@@ -789,7 +789,7 @@ def _validate_boundary(boundary: Mapping[str, object]) -> None:
 def run(config: SandboxConfig) -> SandboxResult:
     measured = fingerprint()
     target, scratch = _validate_config(config, measured)
-    run_root = tempfile.mkdtemp(prefix="wp99-sandbox-", dir=scratch)
+    run_root = tempfile.mkdtemp(prefix="ra02-sandbox-", dir=scratch)
     os.chmod(run_root, 0o700)
     writable = os.path.join(run_root, "writable")
     rootfs = os.path.join(run_root, "rootfs")

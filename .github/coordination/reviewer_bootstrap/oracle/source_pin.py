@@ -162,9 +162,6 @@ def measure(repo_root: str, candidate_head: str, source_paths: Sequence[str]) ->
 
 def verify(repo_root: str, candidate_head: str, pin_path: str) -> dict[str, object]:
     root = pathlib.Path(repo_root).resolve()
-    expected_bootstrap = (root / pathlib.PurePosixPath(SOURCE_PIN_RELATIVE)).resolve()
-    if pathlib.Path(__file__).resolve() != expected_bootstrap:
-        raise _fail("trusted bootstrap is not executing from the candidate checkout")
     pin = _load_pin(pathlib.Path(pin_path))
     paths_value = pin.get("trusted_source_paths")
     if not isinstance(paths_value, list) or not all(isinstance(item, str) for item in paths_value):
@@ -198,6 +195,23 @@ def _output(value: dict[str, object]) -> None:
     print(json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
 
 
+def _candidate_bootstrap_parent(repo_root: str) -> pathlib.Path:
+    return (
+        pathlib.Path(repo_root).resolve()
+        / ".github"
+        / "coordination"
+        / "reviewer_bootstrap"
+    )
+
+
+def _require_external_bootstrap(repo_root: str) -> None:
+    candidate_copy = (
+        pathlib.Path(repo_root).resolve() / pathlib.PurePosixPath(SOURCE_PIN_RELATIVE)
+    ).resolve()
+    if pathlib.Path(__file__).resolve() == candidate_copy:
+        raise _fail("oracle and sandbox execution require an external Dispatcher-pinned bootstrap")
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command", required=True)
@@ -218,9 +232,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     run_parser.add_argument("--corpus", required=True)
     run_parser.add_argument("--sandbox-report", required=True)
     run_parser.add_argument("--output-root", required=True)
+    sandbox_parser = sub.add_parser("run-sandbox")
+    sandbox_parser.add_argument("--repo-root", required=True)
+    sandbox_parser.add_argument("--candidate-head", required=True)
+    sandbox_parser.add_argument("--pin", required=True)
+    sandbox_parser.add_argument("--repeat", type=int, default=1)
+    sandbox_parser.add_argument("--output")
     args = parser.parse_args(argv)
     try:
-        if args.command in ("verify", "run-oracle"):
+        if args.command in ("run-oracle", "run-sandbox"):
+            _require_external_bootstrap(args.repo_root)
+        if args.command in ("verify", "run-oracle", "run-sandbox"):
             result = verify(args.repo_root, args.candidate_head, args.pin)
         else:
             paths = json.loads(args.paths_json)
@@ -230,9 +252,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     except SourcePinError as exc:
         _output({"schema_version": 1, "ok": False, "error": {"name": "SourcePinError", "message": str(exc)}})
         return 2
+    candidate_parent = _candidate_bootstrap_parent(args.repo_root)
+    if args.command in ("run-oracle", "run-sandbox") and str(candidate_parent) not in sys.path:
+        sys.path.insert(0, str(candidate_parent))
     if args.command == "run-oracle":
-        if str(PARENT := pathlib.Path(__file__).resolve().parent.parent) not in sys.path:
-            sys.path.insert(0, str(PARENT))
         from oracle import oracle
 
         try:
@@ -258,6 +281,25 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 3
         _output(report)
         return 0
+    if args.command == "run-sandbox":
+        os.environ["RA02_SOURCE_PIN_VERIFIED"] = "1"
+        os.environ["RA02_BOOTSTRAP_PATH"] = str(pathlib.Path(__file__).resolve())
+        from sandbox import selftest
+
+        sandbox_argv = [
+            "--full",
+            "--repo-root",
+            args.repo_root,
+            "--candidate-head",
+            args.candidate_head,
+            "--dispatcher-pin",
+            args.pin,
+            "--repeat",
+            str(args.repeat),
+        ]
+        if args.output:
+            sandbox_argv.extend(("--output", args.output))
+        return selftest.main(sandbox_argv)
     _output({"schema_version": 1, "ok": True, "source_binding": result})
     return 0
 

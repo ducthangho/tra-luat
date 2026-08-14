@@ -1,4 +1,4 @@
-"""Standalone scheduled counterexamples for the Packet wp99 sandbox."""
+"""Standalone scheduled counterexamples for the RA-02 sandbox."""
 
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ CANDIDATE = textwrap.dedent(
         emit({"healthy": True})
     elif mode == "credentials":
         hits = {"env": [], "argv": [], "cwd": [], "fd": [], "procfs": []}
-        needle = "WP99_SECRET_MARKER_"
+        needle = "RA02_SECRET_MARKER_"
         for key, value in os.environ.items():
             if needle in key or needle in value:
                 hits["env"].append(key)
@@ -438,8 +438,27 @@ def _full_once(repo_root: str, candidate_head: str, dispatcher_pin: str, run_ind
     started = datetime.datetime.now(datetime.timezone.utc).isoformat()
     records: dict[str, dict[str, object]] = {}
     fixtures: list[object] = []
-    markers = ["WP99_SECRET_MARKER_%s_%s" % (name, uuid.uuid4().hex) for name in ("ENV", "ARGV", "CWD", "FD", "PROCFS")]
-    with tempfile.TemporaryDirectory(prefix="wp99-suite-", dir="/tmp") as tmp:
+    marker_names = (
+        "ENV",
+        "ARGV",
+        "CWD",
+        "FD",
+        "PROCFS",
+        "ALIAS_GITHUB",
+        "ALIAS_CLOUD",
+        "ALIAS_MODEL",
+        "ALIAS_REGISTRY",
+        "ALIAS_CREDENTIAL",
+    )
+    markers = ["RA02_SECRET_MARKER_%s_%s" % (name, uuid.uuid4().hex) for name in marker_names]
+    alias_markers = {
+        "RA02_GITHUB_TOKEN_ALIAS": markers[5],
+        "RA02_CLOUD_SECRET_ALIAS": markers[6],
+        "RA02_MODEL_API_KEY_ALIAS": markers[7],
+        "RA02_REGISTRY_TOKEN_ALIAS": markers[8],
+        "RA02_CREDENTIAL_ALIAS": markers[9],
+    }
+    with tempfile.TemporaryDirectory(prefix="ra02-suite-", dir="/tmp") as tmp:
         root = pathlib.Path(tmp)
         target = root / "target"
         scratch = root / "scratch"
@@ -458,15 +477,16 @@ def _full_once(repo_root: str, candidate_head: str, dispatcher_pin: str, run_ind
 
         record("healthy_positive_control", "ok", _run_case(target, scratch, "healthy"))
 
-        saved = os.environ.get("WP99_SECRET_MARKER_ENV")
-        os.environ["WP99_SECRET_MARKER_ENV"] = markers[0]
+        controlled_environment = {"RA02_SECRET_MARKER_ENV": markers[0], **alias_markers}
+        saved = {key: os.environ.get(key) for key in controlled_environment}
+        os.environ.update(controlled_environment)
         cwd = root / markers[2]
         cwd.mkdir()
         descriptor_path = root / markers[3]
         descriptor_path.write_text("control", encoding="utf-8")
         descriptor = descriptor_path.open("rb")
         helper_env = dict(os.environ)
-        helper_env["WP99_SECRET_MARKER_PROCFS"] = markers[4]
+        helper_env["RA02_SECRET_MARKER_PROCFS"] = markers[4]
         helper = subprocess.Popen(
             [sys.executable, "-c", "import time; print('ready',flush=True); time.sleep(30)", markers[1]],
             cwd=cwd,
@@ -477,11 +497,16 @@ def _full_once(repo_root: str, candidate_head: str, dispatcher_pin: str, run_ind
         try:
             ready = helper.stdout is not None and helper.stdout.readline().strip() == b"ready"
             controls = {
-                "env": os.environ.get("WP99_SECRET_MARKER_ENV") == markers[0],
+                "env": os.environ.get("RA02_SECRET_MARKER_ENV") == markers[0],
                 "argv": markers[1].encode() in pathlib.Path("/proc/%d/cmdline" % helper.pid).read_bytes(),
                 "cwd": markers[2] in os.readlink("/proc/%d/cwd" % helper.pid),
                 "fd": markers[3] in os.readlink("/proc/self/fd/%d" % descriptor.fileno()),
                 "procfs": markers[4].encode() in pathlib.Path("/proc/%d/environ" % helper.pid).read_bytes(),
+                "alias_github": os.environ.get("RA02_GITHUB_TOKEN_ALIAS") == markers[5],
+                "alias_cloud": os.environ.get("RA02_CLOUD_SECRET_ALIAS") == markers[6],
+                "alias_model": os.environ.get("RA02_MODEL_API_KEY_ALIAS") == markers[7],
+                "alias_registry": os.environ.get("RA02_REGISTRY_TOKEN_ALIAS") == markers[8],
+                "alias_credential": os.environ.get("RA02_CREDENTIAL_ALIAS") == markers[9],
                 "helper_ready": ready,
             }
             credential = record("credential_channels", "ok", _run_case(target, scratch, "credentials"))
@@ -495,10 +520,11 @@ def _full_once(repo_root: str, candidate_head: str, dispatcher_pin: str, run_ind
             helper.terminate()
             helper.wait(timeout=2)
             descriptor.close()
-            if saved is None:
-                os.environ.pop("WP99_SECRET_MARKER_ENV", None)
-            else:
-                os.environ["WP99_SECRET_MARKER_ENV"] = saved
+            for key, previous in saved.items():
+                if previous is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = previous
 
         host, metadata4, metadata6, port, dns_port = "10.99.0.1", "169.254.169.254", "fd00:ec2::254", 43861, 53
         for command in (
@@ -536,7 +562,7 @@ def _full_once(repo_root: str, candidate_head: str, dispatcher_pin: str, run_ind
                 metadata4,
                 metadata6,
                 str(unix_fixture.path),
-                "fixture.wp99.invalid",
+                "fixture.ra02.invalid",
                 metadata4,
                 str(dns_port),
                 resolv_conf_text="nameserver %s\noptions attempts:1 timeout:1\n" % metadata4,
@@ -626,7 +652,7 @@ def _full_once(repo_root: str, candidate_head: str, dispatcher_pin: str, run_ind
     all_classes = list(escape.values()) + list(resources.values())
     report = {
         "schema_version": 1,
-        "run_id": "wp99-sandbox-%02d-%s" % (run_index, uuid.uuid4().hex),
+        "run_id": "ra02-sandbox-%02d-%s" % (run_index, uuid.uuid4().hex),
         "started_at": started,
         "completed_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "candidate_head": candidate_head,
@@ -660,11 +686,29 @@ def _full_once(repo_root: str, candidate_head: str, dispatcher_pin: str, run_ind
     return report
 
 
+def _run_portable_controls() -> list[dict[str, object]]:
+    records = []
+    for control in (
+        watchdog_timeout_precedes_cpu_heuristics,
+        cpu_limit_requires_explicit_signal_evidence,
+    ):
+        try:
+            control()
+        except Exception as exc:
+            records.append(
+                {
+                    "test_id": control.__name__,
+                    "status": "failed",
+                    "error": {"name": type(exc).__name__, "message": str(exc)},
+                }
+            )
+        else:
+            records.append({"test_id": control.__name__, "status": "passed"})
+    return records
+
+
 def _platform_report(exc: Exception) -> dict[str, object]:
-    portable_controls = [
-        {"test_id": "watchdog_timeout_precedes_cpu_heuristics", "status": "passed"},
-        {"test_id": "cpu_limit_requires_explicit_signal_evidence", "status": "passed"},
-    ]
+    portable_controls = _run_portable_controls()
     return {
         "schema_version": 1,
         "ok": False,
@@ -677,24 +721,45 @@ def _platform_report(exc: Exception) -> dict[str, object]:
         "skipped": 0,
         "not_run": len(SANDBOX_TEST_IDS),
         "portable_controls": portable_controls,
+        "portable_controls_passed": sum(
+            item["status"] == "passed" for item in portable_controls
+        ),
+        "portable_controls_total": len(portable_controls),
     }
 
 
-def _enter_disposable_fixture_namespace(argv: Sequence[str]) -> None:
+def _enter_disposable_fixture_namespace(
+    repo_root: str,
+    candidate_head: str,
+    dispatcher_pin: str,
+    repeat: int,
+    output: str | None,
+) -> None:
+    bootstrap = os.environ.get("RA02_BOOTSTRAP_PATH")
+    if not bootstrap:
+        raise source_pin.SourcePinError("external bootstrap path is absent")
     env = dict(os.environ)
-    env["WP99_DISPOSABLE_FIXTURE_NS"] = "1"
+    env["RA02_DISPOSABLE_FIXTURE_NS"] = "1"
     command = [
         "unshare",
         "--fork",
         "--kill-child=KILL",
         "--net",
         "--mount",
-        "env",
-        "WP99_DISPOSABLE_FIXTURE_NS=1",
         sys.executable,
-        str(pathlib.Path(__file__).resolve()),
-        *argv,
+        bootstrap,
+        "run-sandbox",
+        "--repo-root",
+        repo_root,
+        "--candidate-head",
+        candidate_head,
+        "--pin",
+        dispatcher_pin,
+        "--repeat",
+        str(repeat),
     ]
+    if output:
+        command.extend(("--output", output))
     os.execvpe(command[0], command, env)
 
 
@@ -709,8 +774,39 @@ def _unit() -> int:
         else:
             passed += 1
             print("[OK] %s" % test.__name__)
-    print("== wp99 sandbox unit selftest %d/%d ==" % (passed, len(tests)))
+    print("== ra02 sandbox unit selftest %d/%d ==" % (passed, len(tests)))
     return 0 if passed == len(tests) and len(tests) > 0 else 1
+
+
+def _exception_run(candidate_head: str, run_index: int, exc: Exception) -> dict[str, object]:
+    now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    tests = [
+        {
+            "test_id": test_id,
+            "status": "not_run",
+            "passed": False,
+            "reason": "%s: %s" % (type(exc).__name__, exc),
+            "rc": None,
+        }
+        for test_id in SANDBOX_TEST_IDS
+    ]
+    return {
+        "schema_version": 1,
+        "run_id": "ra02-sandbox-%02d-error" % run_index,
+        "started_at": now,
+        "completed_at": now,
+        "candidate_head": candidate_head,
+        "scheduled_test_ids": list(SANDBOX_TEST_IDS),
+        "scheduled_total": len(SANDBOX_TEST_IDS),
+        "executed": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "not_run": len(SANDBOX_TEST_IDS),
+        "tests": tests,
+        "error": {"name": type(exc).__name__, "message": str(exc)},
+        "ok": False,
+    }
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -726,15 +822,51 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _unit()
     if not args.repo_root or not args.candidate_head or not args.dispatcher_pin or args.repeat < 1:
         parser.error("--full requires --repo-root, --candidate-head, --dispatcher-pin, and positive --repeat")
-    original_argv = list(argv if argv is not None else sys.argv[1:])
-    if sys.platform.startswith("linux") and os.environ.get("WP99_DISPOSABLE_FIXTURE_NS") != "1":
-        _enter_disposable_fixture_namespace(original_argv)
+    bootstrap = os.environ.get("RA02_BOOTSTRAP_PATH")
+    candidate_bootstrap = pathlib.Path(args.repo_root).resolve() / pathlib.PurePosixPath(
+        source_pin.SOURCE_PIN_RELATIVE
+    )
+    externally_verified = (
+        os.environ.get("RA02_SOURCE_PIN_VERIFIED") == "1"
+        and bootstrap is not None
+        and pathlib.Path(bootstrap).resolve() != candidate_bootstrap.resolve()
+    )
+    if not externally_verified:
+        aggregate = {
+            "schema_version": 1,
+            "ok": False,
+            "error": {
+                "name": "SourcePinError",
+                "message": "full sandbox execution requires the external source-pin bootstrap",
+            },
+            "artifact_written": False,
+        }
+        print(json.dumps(aggregate, ensure_ascii=False, sort_keys=True))
+        return 1
+    if sys.platform.startswith("linux") and os.environ.get("RA02_DISPOSABLE_FIXTURE_NS") != "1":
+        _enter_disposable_fixture_namespace(
+            args.repo_root,
+            args.candidate_head,
+            args.dispatcher_pin,
+            args.repeat,
+            args.output,
+        )
     try:
         runner.fingerprint()
-        runs = [
-            _full_once(args.repo_root, args.candidate_head, args.dispatcher_pin, index + 1)
-            for index in range(args.repeat)
-        ]
+        runs = []
+        for index in range(args.repeat):
+            try:
+                runs.append(
+                    _full_once(
+                        args.repo_root,
+                        args.candidate_head,
+                        args.dispatcher_pin,
+                        index + 1,
+                    )
+                )
+            except Exception as exc:
+                runs.append(_exception_run(args.candidate_head, index + 1, exc))
+                break
         scheduled_sets = [run["scheduled_test_ids"] for run in runs]
         classifications = [
             [item.get("actual_classification") for item in run["tests"]]
@@ -743,20 +875,30 @@ def main(argv: Sequence[str] | None = None) -> int:
         aggregate = {
             "schema_version": 1,
             "ok": all(run["ok"] is True for run in runs)
+            and len(runs) == args.repeat
             and all(value == scheduled_sets[0] for value in scheduled_sets)
             and all(value == classifications[0] for value in classifications),
             "repeat_requested": args.repeat,
             "repeat_executed": len(runs),
+            "repeat_completed": sum("error" not in run for run in runs),
             "same_scheduled_test_ids": all(value == scheduled_sets[0] for value in scheduled_sets),
             "stable_classifications": all(value == classifications[0] for value in classifications),
             "runs": runs,
         }
-    except (runner.PlatformUnsupported, source_pin.SourcePinError) as exc:
-        aggregate = _platform_report(exc) if isinstance(exc, runner.PlatformUnsupported) else {
+    except runner.PlatformUnsupported as exc:
+        aggregate = _platform_report(exc)
+    except Exception as exc:
+        aggregate = {
             "schema_version": 1,
             "ok": False,
-            "error": {"name": "SourcePinError", "message": str(exc)},
-            "artifact_written": False,
+            "error": {"name": type(exc).__name__, "message": str(exc)},
+            "scheduled_test_ids": list(SANDBOX_TEST_IDS),
+            "scheduled_total": len(SANDBOX_TEST_IDS),
+            "executed": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "not_run": len(SANDBOX_TEST_IDS),
         }
     encoded = json.dumps(aggregate, ensure_ascii=False, sort_keys=True) + "\n"
     if args.output and aggregate.get("error", {}).get("name") != "SourcePinError":

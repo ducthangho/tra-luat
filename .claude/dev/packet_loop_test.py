@@ -89,12 +89,13 @@ class Ctx:
             return rc, o, e
         return self.cap_lease(sd, packet)
 
-    def cap_lease(self, sd: Path, packet=55, granted_by="chu-kho", expires=None,
+    def cap_lease(self, sd: Path, packet=55, granted_by="ducthangho", expires=None,
                   evidence=None, extra=()):
         """Ghi một lease HỢP LỆ (mặc định) — hoặc lệch đúng một chiều để làm ca đỏ.
 
-        `granted_by` mặc định là một cái tên KHÔNG thuộc PROVIDERS: người cấp phải
-        là bên có thẩm quyền, không phải một agent tự ký cho mình.
+        `granted_by` mặc định là `"ducthangho"` — tên DUY NHẤT trong
+        `NGUOI_CO_THAM_QUYEN` (finding `lease-authority-spoof`: chốt là danh sách
+        CHO PHÉP, không còn là danh sách cấm PROVIDERS).
         """
         from datetime import datetime, timedelta, timezone
 
@@ -798,7 +799,7 @@ def _kich_ban_in(c: Ctx, codepage: str):
         # `record-lease` cũng in tiếng Việt nên nó THUỘC kịch bản này, không phải
         # chỉ là bước dọn đường: bỏ nó ra là mất luôn phép đo codepage cho một lệnh.
         (["record-lease", "--packet", 55, "--lease-id", "wp55-cp-test",
-          "--granted-by", "chu-kho",
+          "--granted-by", "ducthangho",
           "--evidence", "https://github.com/o/r/issues/55#issuecomment-1",
           "--expires-utc", _han_tuong_lai()], sd),
         (["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd),
@@ -883,11 +884,52 @@ def case_init_KHONG_duoc_tu_cap_lease(c: Ctx):
 
 
 def case_tu_cap_lease_bang_ten_provider_bi_chan(c: Ctx):
+    """Chặn ĐÚNG bởi chốt PROVIDERS (thông điệp gọi tên bệnh), không phải tình cờ
+    bị chốt allow-list phía sau vớt lại — cùng input, hai chốt độc lập, phải kiểm
+    được TỪNG chốt riêng (xem `case_lease_authority_ten_gia_mao_bi_chan` cho chốt
+    allow-list)."""
     sd = c.sd()
     rc, _, e = c.init(sd, lease=False)
     _doi(0, rc, e, "init")
     rc, _, e = c.cap_lease(sd, 55, granted_by=EXECUTOR)
     _doi(7, rc, e, "agent tự cấp lease cho chính mình mà không bị chặn")
+    if "tên một provider" not in _txt(e):
+        raise AssertionError(
+            f"rc=7 nhưng KHÔNG phải do chốt PROVIDERS (thông điệp phải nêu 'tên một "
+            f"provider'), có thể chốt allow-list phía sau đã vớt oan: {_txt(e)!r}")
+
+
+def case_lease_authority_ten_gia_mao_bi_chan(c: Ctx):
+    """`lease-authority-spoof` P1 — cross-review lượt 4 (codex, 14-08-2026).
+
+    Danh sách CẤM cũ chỉ từ chối đúng hai chuỗi `claude`/`codex`, nên bốn tên dưới
+    đây — nguyên văn ca reviewer tái lập được, cộng thêm dạng tổ hợp dấu — đều
+    `rc=0` trên bản trước. Nguyên văn kết luận: *"distinguishes spelling, not
+    authority"*. Cả `cödex` dựng sẵn (NFC, `U+00F6`) lẫn dạng tổ hợp
+    (`o` + `U+0308`, NFD) đều phải bị chặn — cùng một cái tên, hai cách mã hoá.
+    """
+    sd = c.sd()
+    rc, _, e = c.init(sd, lease=False)
+    _doi(0, rc, e, "init")
+    ten_gia_mao = [
+        "codex-dispatcher",
+        "ai-codex-bot",
+        "cödex",     # cödex dựng sẵn (NFC)
+        "cödex",    # o + combining diaeresis (NFD) — cùng cái tên, khác mã hoá
+    ]
+    for ten in ten_gia_mao:
+        rc, _, e = c.cap_lease(sd, 55, granted_by=ten)
+        _doi(7, rc, e, f"granted_by={ten!r} LỌT qua chốt thẩm quyền")
+
+
+def case_lease_authority_nguoi_co_tham_quyen_thi_qua(c: Ctx):
+    """Chiều DƯƠNG: danh sách cho phép chặn được kẻ gian mà không chặn oan."""
+    for ten in ("ducthangho", "Ducthangho", "  DUCTHANGHO  "):
+        sd = c.sd()
+        rc, _, e = c.init(sd, lease=False)
+        _doi(0, rc, e, "init")
+        rc, _, e = c.cap_lease(sd, 55, granted_by=ten)
+        _doi(0, rc, e, f"chặn oan người có thẩm quyền {ten!r}")
 
 
 def case_lease_da_het_han_khong_ghi_duoc(c: Ctx):
@@ -926,6 +968,92 @@ def case_begin_attempt_sau_khi_lease_HET_HAN_bi_chan(c: Ctx):
     time.sleep(3)
     rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
     _doi(8, rc, e, "mở được lượt bằng một lease ĐÃ HẾT HẠN")
+
+
+def _script_tu_git(tmp: Path, sha: str, ten: str) -> Path:
+    """Vật chất hoá `packet_loop.py` ở một SHA lịch sử thành TỆP THẬT.
+
+    Chạy được bằng `run()` giống hệt CANONICAL, không mô phỏng state bằng tay —
+    fixture phải đi qua ĐÚNG entrypoint cũ để chứng minh bug là ở HÀNH VI, không
+    phải ở một JSON tự bịa ra giống bug.
+
+    Đòi lịch sử KHÔNG shallow (cùng điều kiện mà `work-packet/SKILL.md` đòi trước
+    khi tin bất kỳ phép so lịch sử nào): thiếu commit thì báo lỗi rõ, không im lặng
+    bỏ qua ca.
+    """
+    p = subprocess.run(["git", "show", f"{sha}:.claude/dev/packet_loop.py"],
+                        cwd=ROOT, capture_output=True)
+    if p.returncode != 0:
+        raise AssertionError(
+            f"không đọc được packet_loop.py tại {sha} — lịch sử git thiếu commit này "
+            f"(clone shallow?): {_txt(p.stderr)!r}")
+    f = tmp / ten
+    f.write_bytes(p.stdout)
+    return f
+
+
+def case_legacy_state_khong_co_lease_bi_chan(c: Ctx):
+    """`legacy-lease-bypass` P1 — cross-review lượt 4 (codex, 14-08-2026).
+
+    State do ĐÚNG entrypoint TRƯỚC (`22d2cc9`) sinh ra có `state: leased` mà
+    KHÔNG có trường `lease` — bản đó ghi thẳng `leased` trong `init`, chưa có khái
+    niệm ghi hộ lease riêng. Bản MỚI trước khi vá nhận state đó thẳng vào
+    `running` (`begin-attempt` fail-open khi thiếu `lease`) mà chưa từng đi qua
+    `record-lease` — mâu thuẫn trực tiếp với bất biến "leased chỉ tới được qua
+    record-lease" (xem `CHUYEN_HOP_LE`).
+    """
+    sd = c.sd()
+    legacy = _script_tu_git(c.tmp, "22d2cc9", "packet_loop_22d2cc9.py")
+    rc, _, e = run(legacy, ["init", "--packet", 55, "--mission", 54,
+                            "--executor", EXECUTOR, "--reviewer", REVIEWER], sd)
+    _doi(0, rc, e, "init (entrypoint cũ 22d2cc9)")
+    tt = c.state(sd, 55)
+    if tt != "leased":
+        raise AssertionError(f"fixture không đúng dạng bug gốc: state={tt!r}, phải là 'leased'")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(8, rc, e, "begin-attempt (bản MỚI) nhận state cũ KHÔNG có 'lease' mà không chặn")
+
+
+# --- (g) doctrine-scan phải bắt cả dạng RENDER RA đúng cụm cấm ------------------
+
+
+def case_doctrine_scan_bat_zero_width_bi_chan(c: Ctx):
+    """`doctrine-rendering-bypass` P1 — cross-review lượt 4 (codex, 14-08-2026).
+
+    `mer<ZWSP>ged: PR đã vào nhánh đích` RENDER RA đúng cụm doctrine bị cấm (ký
+    tự zero-width không hiển thị), nhưng bản chuẩn hoá trước chỉ xử lý trang trí
+    Markdown + khoảng trắng, không xử lý ký tự định dạng Unicode (`Cf`) — nên nó
+    lọt (`rc=0`) trên bản cũ.
+    """
+    r = _repo_gia(c.tmp, SACH + "\nGhi chú: mer​ged: PR đã vào nhánh đích\n",
+                  ten="render-zwsp")
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(6, rc, e, "zero-width-space LỌT doctrine-scan dù render ra đúng cụm cấm")
+
+
+def case_doctrine_scan_bat_html_entity_bi_chan(c: Ctx):
+    """`doctrine-rendering-bypass` P1 — cùng finding, dạng HTML entity.
+
+    `merged&#58; ...` RENDER RA `merged: ...` trong Markdown/HTML, nhưng bản
+    chuẩn hoá trước không giải entity — nên nó lọt (`rc=0`) trên bản cũ.
+    """
+    r = _repo_gia(c.tmp, SACH + "\nGhi chú: merged&#58; PR đã vào nhánh đích\n",
+                  ten="render-entity")
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(6, rc, e, "HTML entity LỌT doctrine-scan dù render ra đúng cụm cấm")
+
+
+def case_doctrine_scan_khong_giai_entity_lap(c: Ctx):
+    """An toàn: giải entity MỘT LẦN, không lặp tới điểm bất động.
+
+    `&amp;#58;` hiển thị NGUYÊN VĂN `&#58;` trong Markdown/HTML — KHÔNG phải dấu
+    hai chấm. Giải LẶP sẽ biến nó thành `:` và sinh DƯƠNG TÍNH GIẢ trên cụm
+    `merged: ...`. `rc=0` Ở ĐÂY LÀ ĐÚNG — đây không phải chỗ để bắt lỗi.
+    """
+    r = _repo_gia(c.tmp, SACH + "\nGhi chú: merged&amp;#58; PR đã vào nhánh đích\n",
+                  ten="entity-kep")
+    rc, o, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(0, rc, e, "giải entity LẶP sinh dương tính giả trên merged&amp;#58;")
 
 
 CASES = [
@@ -977,6 +1105,12 @@ CASES = [
     ("stdout_cp1258", case_stdout_cp1258),
     ("cross_review_co_cu_phap_ghi_verdict_len_pr", case_cross_review_co_cu_phap_ghi_verdict_len_pr),
     ("land_packets_khong_tu_trigger", case_land_packets_khong_tu_trigger),
+    ("lease_authority_ten_gia_mao_bi_chan", case_lease_authority_ten_gia_mao_bi_chan),
+    ("lease_authority_nguoi_co_tham_quyen_thi_qua", case_lease_authority_nguoi_co_tham_quyen_thi_qua),
+    ("legacy_state_khong_co_lease_bi_chan", case_legacy_state_khong_co_lease_bi_chan),
+    ("doctrine_scan_bat_zero_width_bi_chan", case_doctrine_scan_bat_zero_width_bi_chan),
+    ("doctrine_scan_bat_html_entity_bi_chan", case_doctrine_scan_bat_html_entity_bi_chan),
+    ("doctrine_scan_khong_giai_entity_lap", case_doctrine_scan_khong_giai_entity_lap),
 ]
 
 # Đột biến nới ngưỡng: mỗi cái BẮT BUỘC giết đúng những ca dưới đây. Ca không
@@ -1017,9 +1151,38 @@ MUTANTS = {
     # khi lease hết hạn. Đột biến này bỏ RIÊNG phép kiểm lúc mở lượt, nên ca
     # `lease_da_het_han_khong_ghi_duoc` VẪN xanh — hai lớp, hai ca, không phủ nhau.
     "bo_kiem_han_LUC_MO_LUOT": (
-        "        if het <= datetime.now(timezone.utc):",
-        "        if False:",
+        "    if het <= datetime.now(timezone.utc):",
+        "    if False:",
         ["begin_attempt_sau_khi_lease_HET_HAN_bi_chan"],
+    ),
+    # --- `lease-authority-spoof` P1 (cross-review lượt 4, codex, 14-08-2026) -----
+    # Nới danh sách CHO PHÉP để chứa cả bốn tên tấn công: nếu ca đích VẪN xanh sau
+    # khi danh sách nới ra, nghĩa là ca không thật sự đo danh sách cho phép — nó
+    # đo thứ gì khác.
+    "noi_danh_sach_cho_phep_chua_ten_gia_mao": (
+        'NGUOI_CO_THAM_QUYEN = ("ducthangho",)',
+        'NGUOI_CO_THAM_QUYEN = ("ducthangho", "codex-dispatcher", "ai-codex-bot", '
+        '"cödex", "cödex")',
+        ["lease_authority_ten_gia_mao_bi_chan"],
+    ),
+    # --- `legacy-lease-bypass` P1 (cross-review lượt 4, codex, 14-08-2026) -------
+    # Trả điều kiện về đúng dạng fail-open của bản trước.
+    "tra_ve_fail_open_thieu_lease": (
+        '    if not lease or not lease.get("expires_utc"):',
+        '    if lease and lease.get("expires_utc"):',
+        ["legacy_state_khong_co_lease_bi_chan"],
+    ),
+    # --- `doctrine-rendering-bypass` P1 (cross-review lượt 4, codex, 14-08-2026) -
+    # Hai lớp, hai ca — gỡ RIÊNG từng lớp để chứng minh mỗi lớp thật sự cần thiết.
+    "bo_loc_ky_tu_dinh_dang_Cf": (
+        '    text = "".join(ch for ch in text if unicodedata.category(ch) != "Cf")\n',
+        "",
+        ["doctrine_scan_bat_zero_width_bi_chan"],
+    ),
+    "bo_giai_html_entity": (
+        "    text = html.unescape(text)\n",
+        "",
+        ["doctrine_scan_bat_html_entity_bi_chan"],
     ),
 }
 

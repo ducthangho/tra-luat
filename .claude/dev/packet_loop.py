@@ -26,6 +26,7 @@ liên tiếp chứng minh là sai từ thiết kế — chi tiết ở phần ch
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import re
 import sys
@@ -51,6 +52,28 @@ RC_GUARD = 7
 RC_STATE = 8
 
 PROVIDERS = ("claude", "codex")
+
+# CHỐT THẬT của `--granted-by` — danh sách CHO PHÉP, không phải danh sách cấm.
+#
+# Vì sao đổi: cross-review lượt 4 (codex, 14-08-2026) tìm ra `lease-authority-spoof`
+# P1 — chốt cũ (còn lại ở `PROVIDERS` phía trên) chỉ từ chối ĐÚNG hai chuỗi
+# `claude`/`codex`, nên `codex-dispatcher`, `ai-codex-bot`, `cödex` đều lọt qua và
+# tự cấp được lease. Nguyên văn kết luận của reviewer: *"distinguishes spelling,
+# not authority"* — phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN. Cùng khuyết
+# tật đã vá ở tầng cửa đăng, `ops/lease_publish.py::NGUOI_CO_THAM_QUYEN` — đây là
+# tầng cục bộ song song, cùng luật.
+#
+# Danh sách cấm phải đoán trước mọi cách viết của kẻ gian — thua từ trong thiết
+# kế. Danh sách cho phép chỉ phải liệt kê những người CÓ thẩm quyền, một tập nhỏ
+# và biết trước.
+#
+# NÓI THẲNG GIỚI HẠN, đừng để ai đọc rộng hơn thực tế: danh sách này chứng minh
+# cái TÊN được phép cấp lease, KHÔNG chứng minh đúng người đó đã gõ. Khác với
+# `ops/lease_publish.py`, tệp NÀY chạy CỤC BỘ (không phải trong GitHub Actions),
+# nên KHÔNG có `GITHUB_ACTOR` để neo danh tính — lớp neo GitHub-xác-thực đó chỉ
+# có mặt ở cửa đăng, không có mặt ở đây. Sửa danh sách này phải qua một commit có
+# review.
+NGUOI_CO_THAM_QUYEN = ("ducthangho",)
 
 # Hành vi bị chặn cứng. Bảng này KHÔNG có cờ nới — có cờ nới là không có chốt.
 HANH_VI_CHAN = (
@@ -184,13 +207,35 @@ _TRANG_TRI = str.maketrans("", "", "`*_~")
 
 
 def _chuan_hoa(text: str) -> str:
-    """NFC + casefold + bỏ trang trí Markdown + gộp khoảng trắng.
+    """Giải HTML entity + bỏ ký tự định dạng vô hình + NFC + casefold + bỏ trang
+    trí Markdown + gộp khoảng trắng.
 
     Dùng CHỈ cho doctrine-scan. Ở đây chuẩn hoá rộng là ĐÚNG HƯỚNG, ngược hẳn
     với phép đếm finding: khớp rộng chỉ buộc adapter viết mỏng hơn (sai về phía
     an toàn), còn khớp rộng ở finding-id sẽ gộp oan hai lỗi khác nhau.
+
+    Hai lớp đầu vá `doctrine-rendering-bypass` (cross-review lượt 4, codex,
+    14-08-2026): bản trước xử lý trang trí Markdown và khoảng trắng, nhưng KHÔNG
+    xử lý ký tự định dạng vô hình lẫn HTML entity, nên `mer<ZWSP>ged: ...` và
+    `merged&#58; ...` đều lọt (`rc=0`) dù cả hai RENDER RA đúng cụm bị cấm.
+
+      1. `html.unescape` giải entity — `&#58;` → `:`, `&amp;` → `&`, v.v. — để câu
+         gõ bằng entity và câu gõ bằng ký tự thật quy về một mối.
+      2. Bỏ ký tự thuộc phạm trù Unicode `Cf` (định dạng — gồm `U+200B` zero-width
+         space, `U+200C`/`U+200D` ZWNJ/ZWJ, `U+FEFF` BOM, `U+00AD` soft hyphen…):
+         những ký tự này KHÔNG hiển thị nhưng vẫn chia cắt được một chuỗi khớp.
+
+    AN TOÀN — nói thẳng, đừng lặp: `html.unescape` giải entity ĐÚNG MỘT LẦN (nó
+    thay thế trên chuỗi GỐC bằng một lượt quét tuyến tính, không quét lại phần vừa
+    thay), không lặp tới điểm bất động. Giải LẶP sẽ biến `&amp;#58;` — thứ hiển
+    thị NGUYÊN VĂN `&#58;` trong Markdown/HTML, KHÔNG phải dấu hai chấm — thành
+    dấu hai chấm thật, và sinh DƯƠNG TÍNH GIẢ trên cụm `merged: ...`. Đã ĐO:
+    `html.unescape("&amp;#58;")` → `"&#58;"`, không phải `":"`.
     """
-    text = unicodedata.normalize("NFC", text).casefold().translate(_TRANG_TRI)
+    text = html.unescape(text)
+    text = unicodedata.normalize("NFC", text)
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Cf")
+    text = text.casefold().translate(_TRANG_TRI)
     return " ".join(text.split())
 
 
@@ -407,6 +452,16 @@ def cmd_record_lease(a, state_dir: Path) -> int:
         _die(RC_GUARD,
              f"--granted-by {nguoi_cap!r} là tên một provider — agent KHÔNG tự cấp lease "
              f"cho mình được (xem doctrine 'không tự cấp lease')")
+    # CHỐT THẬT: phải NẰM TRONG danh sách cho phép, không chỉ "không nằm trong danh
+    # sách cấm" ở trên. Đây là chỗ `codex-dispatcher` / `ai-codex-bot` / `cödex`
+    # từng lọt (finding `lease-authority-spoof`, xem chú thích ở `NGUOI_CO_THAM_QUYEN`).
+    if nguoi_cap.lower() not in NGUOI_CO_THAM_QUYEN:
+        _die(RC_GUARD,
+             f"--granted-by {nguoi_cap!r} KHÔNG nằm trong danh sách người có thẩm quyền "
+             f"{list(NGUOI_CO_THAM_QUYEN)} — danh sách CẤM không bao giờ đủ (cross-review "
+             f"14-08-2026, finding lease-authority-spoof), nên chốt này đòi tên phải ĐƯỢC "
+             f"PHÉP chứ không chỉ 'không bị cấm'. Thêm người cấp mới = sửa "
+             f"NGUOI_CO_THAM_QUYEN qua một commit có review.")
     if not (a.evidence or "").strip():
         _die(RC_ARG, "--evidence rỗng — lease phải có dấu vết bền để đối chiếu")
     han = _doc_han_utc(a.expires_utc)
@@ -431,24 +486,38 @@ def cmd_record_lease(a, state_dir: Path) -> int:
 
 def cmd_begin_attempt(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
-    # Hạn lease cưỡng chế Ở ĐÂY, không chỉ lúc ghi. Đã có ca thật: một lượt review
-    # chạy 7 GIỜ sau khi lease hết hạn mà không gì chặn — vì hạn chỉ được kiểm một
-    # lần lúc cấp rồi thôi. Một cái hạn không ai đọc lại là một cái hạn không tồn tại.
+    # Lượt đầu đi từ 'leased'; lượt rework đi từ 'running' sau changes_requested.
+    if st["state"] not in ("leased", "running"):
+        _die(RC_STATE, f"không mở được lượt từ state {st['state']!r}")
+    # FAIL-CLOSED, không fail-open. Bản trước kiểm hạn CHỈ khi `lease` có mặt
+    # (`if lease and lease.get("expires_utc")`), nên state thiếu `lease` bỏ qua
+    # TOÀN BỘ phép kiểm và lọt thẳng vào 'running'. Finding `legacy-lease-bypass`
+    # (cross-review lượt 4, codex, 14-08-2026) tái lập bằng chính state do
+    # entrypoint TRƯỚC (`22d2cc9`) sinh ra: `state: leased` mà KHÔNG có trường
+    # `lease` — bản đó ghi thẳng `leased` trong `init`, chưa có khái niệm ghi hộ
+    # lease riêng. `leased`/`running` mà thiếu `lease` hợp lệ là state CŨ hoặc
+    # HỎNG: đường DUY NHẤT vào `leased` là `record-lease` (xem `CHUYEN_HOP_LE`),
+    # nên một state ở hai trạng thái này mà không có lease là mâu thuẫn trực tiếp
+    # với bất biến đó — chặn, KHÔNG nâng cấp ngầm. Di trú state cũ là việc TƯỜNG
+    # MINH, có uỷ quyền của bên điều phối (generation mới + record-lease thật),
+    # không phải việc lặng lẽ của `begin-attempt`.
     lease = st.get("lease")
-    if lease and lease.get("expires_utc"):
-        het = _doc_han_utc(lease["expires_utc"])
-        if het <= datetime.now(timezone.utc):
-            _die(RC_STATE,
-                 f"lease {lease.get('lease_id')!r} đã hết hạn lúc {het.isoformat()} — "
-                 f"không mở lượt mới được; xin lease mới từ bên điều phối")
+    if not lease or not lease.get("expires_utc"):
+        _die(RC_STATE,
+             f"state {st['state']!r} không có 'lease' hợp lệ — 'leased'/'running' chỉ "
+             f"đạt được qua `record-lease`, nên state thiếu lease là CŨ hoặc HỎNG. "
+             f"KHÔNG mở lượt ngầm trên state đó; cần một đường di trú tường minh, có "
+             f"uỷ quyền, do bên điều phối cấp (generation mới + record-lease thật).")
+    het = _doc_han_utc(lease["expires_utc"])
+    if het <= datetime.now(timezone.utc):
+        _die(RC_STATE,
+             f"lease {lease.get('lease_id')!r} đã hết hạn lúc {het.isoformat()} — "
+             f"không mở lượt mới được; xin lease mới từ bên điều phối")
     if a.provider != st["executor"]:
         _die(
             RC_PROVIDER,
             f"provider {a.provider!r} không phải executor của packet này ({st['executor']!r})",
         )
-    # Lượt đầu đi từ 'leased'; lượt rework đi từ 'running' sau changes_requested.
-    if st["state"] not in ("leased", "running"):
-        _die(RC_STATE, f"không mở được lượt từ state {st['state']!r}")
     # Một lượt ĐANG MỞ thì không mở thêm được. Thiếu chốt này, gõ `begin-attempt`
     # bốn lần liên tiếp sẽ đốt sạch trần dù chưa lượt nào chạy xong — trần bị
     # tiêu bởi thao tác lặp, không phải bởi công việc thật.

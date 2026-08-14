@@ -1,0 +1,111 @@
+# Lease EXECUTOR cho wp55 revision 2, generation 3 — vá ba finding P1 của cross-review lượt 4.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh
+# `ops/**`. Sửa lease thì sửa ở đây rồi push; đừng sửa tay comment.
+#
+# VÌ SAO CÓ LEASE NÀY:
+# Lease #4 (reviewer, codex) đã HOÀN THÀNH mục đích — verdict `changes_requested`
+# với ba finding P1 chặn, đăng trên PR #92 và issue #55, bản gốc lưu trong kho tại
+# `ops/reviews/wp55-r2-review-4-codex-verdict.md` (sha256 d58088be…). Lease này KHÔNG
+# thay thế lease đó: khác VAI (reviewer ↔ executor) nên không có xung đột "hai lease
+# sống cùng lúc cho cùng một vai". Lease #4 tự hết hạn 2026-08-15T08:00:00Z và không
+# cần gia hạn — việc của nó đã xong.
+#
+# ĐÂY LÀ ATTEMPT NỘI DUNG CUỐI CỦA REVISION 2 — đọc kỹ mục `attempts_*` bên dưới.
+#
+# CỬA SỔ 24 GIỜ, KHÔNG PHẢI 6: ba lease liên tiếp của vòng review chết vì cửa sổ ngắn
+# hơn khoảng cách tới lúc có một phiên thật. Đổi lại, heartbeat 30 phút là BẮT BUỘC —
+# thứ giữ cho lease không thành tờ giấy trắng là dấu vết sống, không phải con số hạn ngắn.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 55
+packet_id: wp55
+phase_key: F3-03
+mission_issue: 54
+mission_revision: 6
+revision: 2
+generation: 3
+spec_hash: a05c10f71e205d6268c46c62de9fd2d1cc5f7629b070af69a8e3b4254d782c5c
+
+lease_id: wp55-r2-exec-3-claude-20260814
+role: executor
+provider: claude                # executor là claude ⇒ reviewer kế tiếp BẮT BUỘC là codex (§8)
+assurance_target: cross_approved
+access: read-write
+
+# ĐÚNG 6 đường dẫn, không hơn. Trùng khít write_set của revision 2.
+write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - .claude/skills/cross-review/SKILL.md
+  - .claude/skills/land-packets/SKILL.md
+  - .claude/skills/work-packet/SKILL.md
+  - CLAUDE.md
+branch_ownership: claude/wp55-r2g2-f3-03
+
+target_pull_request: 92
+branch: claude/wp55-r2g2-f3-03
+base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2   # merge-base, KHÔNG đổi theo master
+
+# `reviewed_sha_required` là trường BẮT BUỘC của cổng đăng (`ops/lease_publish.py`).
+# Với lease REVIEWER nó nghĩa là "head phải review". Với lease EXECUTOR này nó nghĩa là
+# **head XUẤT PHÁT**: executor phải bắt đầu từ đúng commit mà verdict đã neo, nếu không
+# thì bản vá đang chữa một cây khác với cây bị soi. Executor SẼ tạo head mới — đó là
+# mục đích của lượt này — và head mới làm vô hiệu bản review cũ, đúng như thiết kế.
+reviewed_sha_required: cf39109c9e5167516c53f2071e5fa7ec5c6afff5
+
+prompt_path: ops/prompts/wp55-r2-exec-3-claude-20260814.md
+prompt_sha256_required: 952a6ff54742f98e300d38a0e322c5ad79aa07b3a69e3c93e02773de5df416f0
+
+granted_by: ducthangho          # CHỦ KHO — §2 "người có thẩm quyền"
+granted_on_instruction: direct, in-session, 2026-08-14 ("soạn lease executor generation 3")
+recorded_by: claude-session     # ghi hộ quyết định, KHÔNG phải dispatcher
+recorder_is_dispatcher: false
+authority_basis: "§2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền"
+
+leased_at_utc: '2026-08-14T13:30:00Z'
+lease_expires_at_utc: '2026-08-15T14:00:00Z'
+run_minutes: 1470
+heartbeat_required_minutes: 30
+
+# TRẦN NỘI DUNG — đọc kỹ, đây là ràng buộc nặng nhất của lượt này.
+# Số lease và số attempt NỘI DUNG là hai thứ khác nhau. Đã có BỐN lease cho wp55 r2
+# nhưng `attempts_used` vẫn 2, vì ba lease review đầu KHÔNG phiên nào chạy.
+attempts_used: 2
+attempts_limit: 3
+attempt_3_is_last: true
+attempt_3_scope: "vá CẢ BA finding P1 trong MỘT lượt — hỏng thì revision 2 cạn trần, packet chuyển blocked"
+
+# Ba finding phải vá, theo verdict lượt 4. Không được vá một phần rồi giao.
+findings_to_fix:
+  - finding_id: lease-authority-spoof
+    severity: P1
+    site: ".claude/dev/packet_loop.py — cmd_record_lease, chốt granted_by (~399-423 @ cf39109c)"
+    reference_fix: "ops/lease_publish.py trên master — NGUOI_CO_THAM_QUYEN; test t02b/t02d"
+    mutation_required: "nới danh sách cho phép để chứa tên tấn công ⇒ ca đích phải ĐỎ"
+  - finding_id: legacy-lease-bypass
+    severity: P1
+    site: ".claude/dev/packet_loop.py — cmd_begin_attempt, `if lease and lease.get(...)` (~437-450)"
+    fixture_required: "state cũ dựng bằng entrypoint ở 22d2cc9, rồi begin-attempt của bản mới"
+    mutation_required: "trả điều kiện về dạng fail-open ⇒ ca đích phải ĐỎ"
+  - finding_id: doctrine-rendering-bypass
+    severity: P1
+    site: ".claude/dev/packet_loop.py — _chuan_hoa (~183-194)"
+    fixture_required: "cả hai dạng lọt (ký tự Cf vô hình, HTML entity) thành negative fixture"
+    mutation_required: "gỡ lớp Cf, rồi gỡ lớp entity ⇒ mỗi lần một ca đích ĐỎ"
+
+prior_review: wp55-r2-review-4-codex-20260814
+prior_review_verdict: changes_requested
+prior_review_evidence: https://github.com/ducthangho/tra-luat/pull/92#pullrequestreview-4936728763
+prior_review_verdict_file: ops/reviews/wp55-r2-review-4-codex-verdict.md
+prior_review_verdict_sha256: d58088bec10ad36a912b64749cbe8a41af5de0b3f70033d9109f12bb6647e82f
+
+# Điều kiện tiên quyết ĐÃ ĐO 2026-08-14 13:20Z, executor phải kiểm lại chứ đừng tin:
+#   head PR #92          = cf39109c (chưa ai đổi)
+#   master               = 9796f67
+#   merge-tree(master, cf39109c) = rc 0
+#   trong 6 tệp write_set, master CHỈ chạm CLAUDE.md
+preconditions_measured_at_utc: '2026-08-14T13:20:00Z'
+master_sha_at_grant: 9796f674c0b05fad04ff7b001ba1dcb25b7f0830

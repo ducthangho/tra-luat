@@ -51,14 +51,17 @@ base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2   # merge-base, KHÔNG đổi
 # 14-08 07:45Z: head PR #92 vẫn cf39109c, merge với master mới vẫn SẠCH (rc=0), master
 # vẫn chỉ chạm CLAUDE.md trong 6 tệp write_set.
 #
-# `prompt_path` là đường dẫn TRONG KHO, và tệp này hiện CHỈ có trên nhánh
-# `ops/wp55-lease-4` — chưa merge vào master. Bản chiếu đầu (comment 5290916886) kèm
-# một prompt ghi nhầm rằng nguồn sự thật nằm "trên nhánh master": ai clone master sẽ
-# không thấy tệp và dừng ở BƯỚC 0a. Đúng loại lỗi lease #3 vừa trả giá — chỉ khác chỗ
-# sai — nên sửa ngay chứ không để lại làm bẫy. Prompt đã nói rõ phải `git fetch origin
-# ops/wp55-lease-4`; băm đổi theo, và lease được chiếu lại.
+# `prompt_path` là đường dẫn TRONG KHO — cố ý KHÔNG gắn với một nhánh.
+# Đã sai hai lần theo hai chiều ngược nhau và đó mới là bài học: bản đầu ghi "trên
+# nhánh master" trong khi tệp ở nhánh ops (ai clone master sẽ dừng ở BƯỚC 0a); sửa
+# thành "trên nhánh ops/wp55-lease-4, chưa vào master" thì câu ấy chết ngay lúc merge
+# xong. Một câu chỉ đúng ở MỘT phía của lần merge là bẫy hẹn giờ, và mỗi lần sửa lại
+# đổi băm nên kéo theo cấp lease mới — vòng luẩn quẩn.
+# Nay prompt nói cả hai chỗ: tìm ở `master` trước, chưa thấy thì `git fetch origin
+# ops/wp55-lease-4`. Đúng trước và sau khi merge, nên merge không làm lease hết hạn
+# sớm vì lý do câu chữ. Thứ định danh tệp là BĂM, không phải tên nhánh.
 prompt_path: ops/prompts/wp55-r2-review-4-codex-20260814.md
-prompt_sha256_required: 0edba1bdc82f2f5cbff353b69a8c7199be89a97d6cfed0dabb7488dfaed75ca0
+prompt_sha256_required: ae1dae49995e8c708284e86d92587e0dccafbdba2a8fec65a637648105a4cc6d
 
 granted_by: ducthangho          # CHỦ KHO — §2 "người có thẩm quyền"
 granted_on_instruction: direct, in-session, 2026-08-14 ("xu ly not ca 2 cho toi")
@@ -79,7 +82,10 @@ attempts_limit: 3
 attempt_2_summary: "sửa finding CHẶN 'init tự cấp lease' (cf39109c)"
 attempt_2_recorded_outside_state_machine: true   # begin-attempt KHÔNG được gọi; con số này do NGƯỜI khai
 prior_review_invalidated: wp55-r2-review-2-codex-20260813   # bản review neo 22d2cc9 hết hiệu lực (head mới ⇒ duyệt cũ hết hiệu lực)
-# Bản chiếu 5290916886 chiếu băm prompt CŨ (`e0f58b80…`) của bản prompt nói sai nhánh.
-# Gỡ `posted_comment_id` để workflow chiếu LẠI; giữ số cũ ở đây cho dấu vết khỏi đứt.
-supersedes_posted_comment: 5290916886
-posted_comment_id: 5290949262   # workflow ghi, ĐỪNG sửa tay
+# Dấu vết bản chiếu, mới nhất ở cuối. Gỡ `posted_comment_id` mỗi lần sửa lease để
+# workflow chiếu LẠI — không sửa tay comment, vì sửa tay thì lần sau không ai biết
+# bản chiếu đã lệch nguồn.
+#   5290916886 — prompt ghi "trên nhánh master" (sai), băm e0f58b80…
+#   5290949262 — prompt ghi "chỉ ở nhánh ops" (đúng lúc đó, sai ngay sau khi merge),
+#                băm 0edba1bd…
+supersedes_posted_comment: [5290916886, 5290949262]

@@ -53,10 +53,17 @@ Ba chi tiết trong lệnh con, mỗi cái đều đã trả giá:
   nháy kép, và một đường dẫn chứa thay thế lệnh còn **chạy được lệnh đó**. Đối số vị trí
   thì bash không bao giờ đọc như mã: đó mới là hàng rào, dấu nháy chỉ là mành che.
   (`_` đứng làm `$0`; đường dẫn thành `$1`.)
-- **`{PROMPT_FILE}`** — launcher thay bằng **bản chụp bất biến** trong thư mục lượt
-  chạy, nên prompt không đổi được giữa lúc kiểm băm và lúc con đọc. Có
-  `{PROMPT_FILE}` mà quên `--prompt-file` thì launcher chặn, không để con mở một tệp
-  tên `{PROMPT_FILE}` rồi báo xong.
+- **`{PROMPT_FILE}`** — launcher thay bằng một **bản chụp rời** trong thư mục lượt chạy.
+  **Rời, KHÔNG phải bất biến** — đừng đọc nhầm hai chữ ấy. Launcher tạo tệp với quyền
+  `0600` rồi thôi: nó **không** đặt cờ bất biến và **không** kiểm lại băm sau khi ghi
+  (`launcher.py` 1173–1187). Nên một tiến trình **cùng UID** — đúng mô hình đe doạ đã
+  viện ra ở gạch đầu dòng trên để bỏ prompt khỏi `argv` — vẫn ghi đè được bản chụp
+  trong khoảng giữa lúc kiểm băm và lúc shell mở nó. `--expected-prompt-sha256` neo
+  **tệp nguồn tại thời điểm kiểm**, không neo thứ con thật sự đọc.
+
+  Cái nó CHẮC CHẮN cho: sửa tệp prompt gốc sau khi lượt chạy bắt đầu không ảnh hưởng
+  lượt đang chạy. Có `{PROMPT_FILE}` mà quên `--prompt-file` thì launcher chặn, không
+  để con mở một tệp tên `{PROMPT_FILE}` rồi báo xong.
 
 ## Bảng chế độ quyền — ĐO, không suy từ tên
 
@@ -79,10 +86,15 @@ hỏi ⇒ từ chối"** — nó không ghi nổi một tệp trong chính works
 đo: `echo` chạy, `git add` + `git commit` **không** commit nào được tạo. Một executor
 phải commit và push thì `acceptEdits` là chọn sai.
 
-**`auto` vẫn chặn `git push` — kể cả `--dry-run`.** Nó cho biến đổi CỤC BỘ (`git
-commit` chạy được) nhưng không cho thao tác đẩy lên remote. Cấp đúng một quyền đó
-bằng cờ theo LƯỢT CHẠY, **đừng** nới `permissions.allow` của kho — settings là chính
-sách chung, một lượt chạy không được đổi nó:
+**`auto` vẫn chặn `git push` — kể cả `--dry-run`** — nhưng **chỉ trên worktree ghim
+commit TRƯỚC #111**, đúng như mục `ask` bên dưới. Trên master hiện hành `git push` đã
+nằm trong `allow`, nên phép đo này **không còn tái lập được** ở đó và bạn không cần cờ.
+Ghi lại vì worktree cũ vẫn gặp, và vì cơ chế thì không đổi.
+
+Trong ca ấy, `auto` cho biến đổi CỤC BỘ (`git commit` chạy được) nhưng không cho thao
+tác đẩy lên remote. Cấp đúng một quyền đó bằng cờ theo LƯỢT CHẠY, **đừng** nới
+`permissions.allow` của kho — settings là chính sách chung, một lượt chạy không được
+đổi nó:
 
 ```bash
 bash -c 'claude --permission-mode auto --allowedTools "Bash(git push:*)" -p < "$1"' \
@@ -125,8 +137,12 @@ quyền cho một lệnh đang nằm trong `ask`, cả ba đều **KHÔNG** vư�
 Chạy không người trực thì không có ai để hỏi, nên `ask` = chặn cứng.
 
 **Hệ quả phải nói thẳng: lệnh nào còn nằm trong `ask` thì agent KHÔNG tự chạy được khi
-không có người.** Sau #111 danh sách ấy còn đúng một mục — `clasp`, tức mọi thao tác
-Apps Script chạm LIVE. Đó là chốt của chủ kho, không phải trục trặc cần lách.
+không có người.** Sau #111 danh sách ấy còn đúng một mục: `Bash(clasp:*)` — một **ranh
+giới duyệt rộng**, phủ mọi lệnh `clasp` và **nhờ đó** phủ cả những lệnh chạm LIVE
+(`deploy`, `push`, `run`). Đừng rút gọn thành *"mọi thao tác `clasp` chạm LIVE"*: nó
+sai — `clasp --version` và `clasp --help` vô hại. Ranh giới cố tình rộng hơn tập nguy
+hiểm, vì kẻ ranh giới hẹp thì phải liệt kê đúng, mà danh sách CẤM thì không bao giờ đủ.
+Đó là chốt của chủ kho, không phải trục trặc cần lách.
 
 ### `--setting-sources user,local` vượt được — và đó là lý do KHÔNG dùng nó
 
@@ -221,9 +237,10 @@ claude --permission-mode auto \
 
 `policy.json` chép từ `.claude/settings.json` của **master** — **chép NGUYÊN TRẠNG,
 đừng đặt `ask: []`.** Bản master đã bỏ đúng hai mục lỗi thời và **cố ý giữ lại
-`Bash(clasp:*)`**; quét rỗng cả danh sách là gỡ luôn ranh giới duyệt cho thao tác Apps
-Script chạm LIVE. Hook `PreToolUse` KHÔNG đỡ thay được: nó chỉ khớp `clasp push` và
-`gas-deploy`, còn luật `ask` phủ mọi `clasp *`.
+`Bash(clasp:*)`**; quét rỗng cả danh sách là gỡ một ranh giới duyệt phủ **mọi** lệnh
+`clasp`, trong đó có các lệnh chạm LIVE. Hook `PreToolUse` **thu hẹp thiệt hại nhưng
+không thay thế được**: nó bắt đích danh `clasp push` và `gas-deploy`, còn `clasp
+deploy` / `clasp run` thì không — chi tiết và số đo ở ngay dưới.
 
 Đo hai nhánh trên cùng một phép thử, khác nhau **đúng một khoá** `ask`:
 
@@ -234,9 +251,24 @@ Script chạm LIVE. Hook `PreToolUse` KHÔNG đỡ thay được: nó chỉ kh�
 
 Đọc `rc=127` cho đúng sức nặng của nó, đừng hơn: nó chứng minh **ranh giới duyệt đã bị
 gỡ** — một tiến trình `clasp` được phép khởi chạy. Nó **không** chứng minh lượt ấy chạm
-LIVE; `clasp --version` chỉ in phiên bản, có cài cũng vô hại. Nguy hiểm là ở chỗ sau khi
-ranh giới mất thì `clasp deploy` / `clasp push` / `clasp run` cũng qua bằng đúng con
-đường đó, và phép thử này không phân biệt được lệnh nào.
+LIVE; `clasp --version` chỉ in phiên bản, có cài cũng vô hại.
+
+Phần còn phơi ra sau khi gỡ `ask` cũng **hẹp hơn** ta tưởng, phải đếm cho đúng. Hook
+`PreToolUse` được cấp lại nguyên vẹn, và nó khớp `\bclasp\s+push\b` cùng `gas-deploy`
+(`.claude/hooks/pretooluse_guard.py:15-16`) rồi trả `permissionDecision: ask` — mà
+`auto` không người trực đọc `ask` là chặn. Nên:
+
+| lệnh | `ask: []` + hook còn nguyên |
+|---|---|
+| `clasp push` · `gas-deploy` | **vẫn chặn** — hook bắt đích danh |
+| `clasp deploy` · `clasp run` · `clasp login` … | **lọt** — hook không khớp |
+
+Chỗ hở thật là **những lệnh `clasp` hook KHÔNG liệt kê**. Kể `clasp push` vào nhóm lọt
+là vẽ lỗ to hơn thực tế — và một lỗ vẽ quá cũng dẫn tới quyết định sai y như một lỗ bỏ
+sót, chỉ theo chiều ngược lại.
+
+Đó cũng là lý do `ask` phủ `clasp:*` chứ không liệt từng lệnh: hook đi theo danh sách
+CẤM nên luôn có mục chưa nghĩ ra, còn `ask` đi theo tiền tố nên không cần nghĩ đủ.
 
 Khác hẳn `--setting-sources user,local` trần trụi: ở đó hook chết theo, còn ở đây
 `deny`, `hooks` và phần `ask` còn lại được cấp lại nguyên vẹn. Đo **bốn** lớp trên
@@ -291,6 +323,15 @@ dẫn kho chính, đó là **phân giải project**, không phải con chạy nh
 | `--prompt-file` CÓ nhưng tệp thiếu / rỗng / **băm lệch** | **7** (`MA_PROMPT`) |
 | workspace không phải kho git | **3** (`MA_GIT`) |
 | quá hạn + đã giết được con · quá hạn + KHÔNG giết được | **124** · **125** |
+| quá hạn + **không lấy được khoá danh tính con** | **10** (`MA_DANH_TINH`) |
+
+Dòng cuối dễ sót vì nó **ghi đè** kết quả giết: `launcher.py:1268-1270` đặt `ma =
+MA_DANH_TINH` khi `khoa is None and qua_han`, **bất kể** lượt giết thành hay bại. Nên
+"quá hạn mà không dừng được" **không phải lúc nào cũng 125**. Đây là hành vi cố ý —
+launcher từ chối giết theo một PID chưa xác thực, vì PID được tái dùng và giết nhầm
+tiến trình của người khác còn tệ hơn để một tiến trình sống quá hạn. Tự động hoá đọc
+bảng thiếu dòng này sẽ xếp `10` vào nhóm "lỗi lạ" và bỏ qua, trong khi nó là ca **cần
+người xử lý**: có thứ đang chạy quá quyền và launcher đã nói thẳng là nó không dừng được.
 
 Bản đầu của skill này khai nhầm ca thiếu cờ là `rc=7`; cross-review bắt được và số đo
 là `2`. Rồi phép đo ĐẦU TIÊN của tôi lại ra `3` — vì thư mục thử **không phải kho

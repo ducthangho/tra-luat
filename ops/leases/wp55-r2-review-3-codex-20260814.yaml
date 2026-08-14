@@ -71,3 +71,4 @@ prior_review_invalidated: wp55-r2-review-2-codex-20260813   # bản review neo 2
 # workflow chiếu LẠI lease sau khi sửa — đây là cách duy nhất đúng, vì sửa tay bản
 # chiếu thì lần sau không ai biết nó lệch nguồn.
 supersedes_posted_comment: 5288950354
+posted_comment_id: 5290319622   # workflow ghi, ĐỪNG sửa tay

@@ -98,6 +98,69 @@ print(h + '_' + hashlib.sha256(sys.prefix.encode()).hexdigest()[:8])" )"
   fi
 fi
 
+# --- Xác thực codex, để nó chạy được trên NHIỀU môi trường
+#
+# VÌ SAO: `codex login --device-auth` giải quyết được lượt đăng nhập không cần trình
+# duyệt (đo 14-08-2026: in link + mã 15 phút, xong thì `Logged in using ChatGPT`).
+# Nhưng container phiên remote là PHÙ DU — thu hồi là mất `~/.codex/auth.json`, và
+# lượt sau lại phải nhập mã tay. Một chốt đòi thao tác tay mỗi lượt thì sớm muộn bị
+# bỏ qua.
+#
+# Cách bền: người dùng đăng nhập MỘT LẦN trên máy có trình duyệt, rồi đặt nội dung
+# `auth.json` (base64) vào biến Environment `CODEX_AUTH_JSON`, đúng khuôn `GITHUB_PAT`.
+# Hook này khôi phục lại. Cách lấy chuỗi ấy: xem `docs/GOI_AGENT_DA_NEN.md`.
+#
+# BỐN CHỐT, mỗi cái bịt một đường hỏng đã lường:
+#   1. KHÔNG in giá trị, và KHÔNG truyền qua đối số dòng lệnh — python đọc thẳng từ
+#      MÔI TRƯỜNG. Đối số lộ trong `ps` cho mọi tiến trình cùng máy; biến này chứa
+#      refresh token, lộ một lần là lộ hẳn.
+#      (Bản đầu `printf … | python - <<'PYEOF'` vừa pipe giá trị vừa nạp script qua
+#      heredoc — heredoc thắng, python đọc chuỗi RỖNG rồi báo "sai định dạng". Chốt
+#      chặn đúng nhưng vì lý do sai; chỉ lộ khi chạy thử ca thuận lợi.)
+#   2. KHÔNG đè khi đã đăng nhập. Bản trên đĩa có thể MỚI HƠN biến (codex tự làm mới
+#      token và ghi lại `last_refresh`), nên đè bừa là hạ cấp một credential đang tốt.
+#   3. Kiểm JSON + khoá bắt buộc TRƯỚC khi ghi. Biến hỏng mà ghi đè thì đổi một phiên
+#      "chưa đăng nhập" (dễ đọc) thành "đăng nhập hỏng" (khó đọc).
+#   4. Ghi qua tệp tạm + `chmod 600` rồi mới `mv` — không để lộ khoảnh khắc tệp có
+#      quyền rộng, và không để lại tệp nửa vời nếu tiến trình chết giữa chừng.
+if [ -n "${CODEX_AUTH_JSON:-}" ] && co codex; then
+  if codex login status >/dev/null 2>&1 </dev/null; then
+    echo "[session-start] codex: da dang nhap san — GIU nguyen, khong ghi de"
+  else
+    if "$PY" - <<'PYEOF'
+import base64, binascii, json, os, sys, tempfile
+raw = os.environ.get("CODEX_AUTH_JSON", "").strip()
+try:
+    data = base64.b64decode(raw, validate=True)
+except (binascii.Error, ValueError):
+    sys.exit(1)                      # KHONG in noi dung, ke ca doan dau
+try:
+    d = json.loads(data)
+except Exception:
+    sys.exit(2)
+if not isinstance(d, dict) or "tokens" not in d:
+    sys.exit(3)                      # thieu khoa bat buoc
+dst = os.path.join(os.path.expanduser("~"), ".codex", "auth.json")
+os.makedirs(os.path.dirname(dst), mode=0o700, exist_ok=True)
+fd, tmp = tempfile.mkstemp(dir=os.path.dirname(dst))
+try:
+    os.write(fd, data); os.close(fd)
+    os.chmod(tmp, 0o600); os.replace(tmp, dst)
+except BaseException:
+    os.unlink(tmp); raise
+PYEOF
+    then
+      echo "[session-start] codex: da khoi phuc auth tu CODEX_AUTH_JSON"
+    else
+      echo "[session-start] CANH BAO: CODEX_AUTH_JSON khong dung dang (base64 cua auth.json) — bo qua"
+    fi
+  fi
+fi
+if co codex; then
+  # BẰNG CHỨNG DƯƠNG, không suy từ việc đã ghi tệp: hỏi chính codex.
+  echo "[session-start] codex auth: $(codex login status 2>&1 </dev/null | head -1)"
+fi
+
 # --- BẰNG CHỨNG DƯƠNG, không tin "đã cài xong". doctor thoát khác 0 khi thiếu
 # công cụ BẮT BUỘC; thiếu codex/claude chỉ là cảnh báo vì có phiên không cần gọi agent.
 echo "[session-start] kiem cong cu:"

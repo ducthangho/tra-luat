@@ -51,3 +51,4 @@ attempts_limit: 3
 attempt_2_summary: "sửa finding CHẶN 'init tự cấp lease' (cf39109c)"
 attempt_2_recorded_outside_state_machine: true   # begin-attempt KHÔNG được gọi; con số này do NGƯỜI khai
 prior_review_invalidated: wp55-r2-review-2-codex-20260813   # bản review neo 22d2cc9 hết hiệu lực (head mới ⇒ duyệt cũ hết hiệu lực)
+posted_comment_id: 5288950354   # workflow ghi, ĐỪNG sửa tay

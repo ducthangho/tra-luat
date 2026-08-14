@@ -1,0 +1,51 @@
+{
+  "version": "1.0.0",
+  "run_id": "0ff807e23c984c01bfc6c6e3b97c9cae",
+  "short_id": "0ff807e2",
+  "ten": "wp55-r2-review-codex",
+  "lenh": {
+    "chuong_trinh": "codex",
+    "so_doi_so": 5,
+    "van_tay": "9774b795a7c5cdfc"
+  },
+  "trang_thai": "xong",
+  "bat_dau_utc": "2026-08-14T01:31:29.961015+00:00",
+  "ket_thuc_utc": "2026-08-14T01:34:43.595860+00:00",
+  "ma_thoat": 0,
+  "ly_do_dung": null,
+  "pid": 6061,
+  "khoa_danh_tinh": "linux:33566",
+  "workspace": "/tmp/wp55-review",
+  "head": "22d2cc92164ca2018c0560aaf9404659ea81f51e",
+  "ref": "HEAD",
+  "remotes": [
+    "github.com/ducthangho/tra-luat"
+  ],
+  "commit_goc": [
+    "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+  ],
+  "worktree_sach": true,
+  "so_muc_ban": 0,
+  "prompt_sha256": "40bf9181e9de2eaa936f9f005db1ec44c256b2e3da6cbc7e8b7532e11aee5132",
+  "deadline_utc": "2026-08-14T02:11:29+00:00",
+  "cong_cu_luot": [
+    {
+      "ten": "codex",
+      "duong_dan": "/opt/node22/bin/codex",
+      "phien_ban": "codex-cli 0.147.0"
+    }
+  ],
+  "xac_thuc": [
+    {
+      "probe": [
+        "codex",
+        "login",
+        "status"
+      ],
+      "rc": 0
+    }
+  ],
+  "prompt_ban_chup": "/tmp/wp55-review-runs/0ff807e2/prompt.snapshot",
+  "prompt_kin_hoan_toan": true,
+  "prompt_ban_chup_da_xoa": true
+}

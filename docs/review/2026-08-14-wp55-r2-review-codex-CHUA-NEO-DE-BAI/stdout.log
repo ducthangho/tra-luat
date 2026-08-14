@@ -1,0 +1,15 @@
+VERDICT: CHANGES_REQUESTED
+BANG CHUNG DA CHAY:
+  - `python3 .claude/dev/packet_loop_test.py`: nền 43/43 đạt; tự đột biến giết 4/4 ca.
+  - Phá tay chốt `attempt_open` rồi chạy lại suite: 42/43 đạt; đúng ca `vao_reviewing_phai_co_luot_dang_mo` chuyển ĐỎ. Đã khôi phục worktree.
+  - Kiểm doctrine động từ protocol: 11/11 dòng doctrine thật được suite bao phủ, gồm 9 dòng lịch sử và 2 dòng vai trò bổ sung.
+  - `python3 .claude/dev/packet_loop.py doctrine-scan --root .`: quét 4 tệp, 0 chỗ chép doctrine.
+  - `python3 -m py_compile .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py`: 2/2 tệp biên dịch được.
+  - Kịch bản tự cấp lease trên packet tùy ý: `init_rc=0`, `status_rc=0`, `begin_rc=0`; state đi thẳng `leased → running`.
+  - `git diff --check <base> HEAD -- <6 tệp>`: 6/6 tệp không có lỗi whitespace.
+FINDINGS (nặng trước):
+  [1] CHAN .claude/dev/packet_loop.py:335
+      Vấn đề: `init` tự ghi state `leased` mà không đòi bất kỳ bằng chứng hoặc uỷ quyền lease nào.
+      Kịch bản hỏng: Khi dispatcher chưa cấp lease, executor chạy `init --packet 999999 --mission 888888 --executor claude --reviewer codex`, nhận rc=0 và state `leased`, rồi `begin-attempt` cũng rc=0 và chuyển sang `running`.
+      Vì sao vi phạm: Vi phạm trực tiếp doctrine “không tự cấp lease”; máy trạng thái hiện biến khai báo cục bộ của executor thành lease hợp lệ.
+KHONG DO DUOC: Không kiểm được các lệnh GitHub thật trong adapter (`gh pr review`, comment/ID tồn tại) hoặc hành vi trên Windows vì môi trường review không có quyền remote và chỉ chạy Linux.

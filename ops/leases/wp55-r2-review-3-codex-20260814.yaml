@@ -1,0 +1,74 @@
+# Lease #3 cho wp55 revision 2 — reviewer codex, neo head SAU bản sửa cf39109c.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh
+# `ops/**`. Sửa lease thì sửa ở đây rồi push; đừng sửa tay comment.
+#
+# HẠN Ở CUỐI TỆP LÀ THỨ HAY HỎNG NHẤT: đăng sau `lease_expires_at_utc` thì cổng
+# `ops/lease_publish.py` chặn (rc=8) — đúng chủ đích, một lease sinh ra đã chết
+# còn tệ hơn không có lease. Push muộn thì dời cả `leased_at_utc` lẫn hạn.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+phase_key: F3-03
+mission_issue: 54
+mission_revision: 6
+revision: 2
+generation: 2
+spec_hash: a05c10f71e205d6268c46c62de9fd2d1cc5f7629b070af69a8e3b4254d782c5c
+
+lease_id: wp55-r2-review-3-codex-20260814
+supersedes_lease: wp55-r2-review-2-codex-20260813   # hết hạn 2026-08-13T18:30Z, KHÔNG phiên nào chạy trong cửa sổ
+role: reviewer
+review_attempt: 3
+provider: codex                 # BẮT BUỘC — executor là claude (§8 cross-provider)
+assurance_target: cross_approved
+access: read-only
+write_set: []                   # reviewer KHÔNG ghi (§2)
+branch_ownership: none
+
+target_pull_request: 92
+reviewed_sha_required: cf39109c9e5167516c53f2071e5fa7ec5c6afff5   # ĐỔI so với lease #2 (22d2cc92…)
+branch: claude/wp55-r2g2-f3-03
+base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2
+# Prompt reviewer: neo bằng ĐƯỜNG DẪN + BĂM, không chỉ bằng băm.
+#
+# Bản đầu của lease này chỉ có `prompt_sha256_required: 46a833cc…` mà không nói băm
+# CÁI GÌ. Không văn bản nào ứng với con băm đó — đã quét 294.578 cửa sổ 5292-byte
+# trên toàn bộ comment #54+#55 và 941 blob của 3 nhánh, 0 khớp. Reviewer không qua
+# được cổng, và cổng không nói được vì sao: wp55 đứng im hai ngày.
+#
+# Hai thứ sửa gốc, đi cùng nhau:
+#   1. Prompt là MỘT TỆP trong kho, không phải một khối trong comment. Một khối
+#      trong `<details>` có ít nhất 12 cách cắt hợp lý (kèm/không thẻ, kèm/không
+#      `<summary>`, ruột fence, có/không strip, CRLF/LF) — mỗi cách một băm khác.
+#      `sha256sum <tệp>` chỉ có một câu trả lời.
+#   2. `prompt_path` để cổng `ops/lease_publish.py` KIỂM ĐƯỢC, chứ không chỉ chép
+#      lại một con số cho người đọc tự tin. Thiếu tệp hoặc lệch băm ⇒ rc=6.
+prompt_path: ops/prompts/wp55-r2-review-3-codex-20260814.md
+prompt_sha256_required: 02a79e11fdf806a748e7c71fbfe023bfc37bd566f2d7d6bcef501ca92b0afa04
+
+granted_by: ducthangho          # CHỦ KHO — §2 "người có thẩm quyền"
+granted_on_instruction: direct, in-session, 2026-08-14
+recorded_by: claude-session (KHÔNG phải dispatcher, ghi hộ quyết định)
+recorder_is_dispatcher: false
+authority_basis: "§2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền"
+
+leased_at_utc: '2026-08-14T03:08:40Z'
+lease_expires_at_utc: '2026-08-14T09:08:40Z'
+run_minutes: 360
+heartbeat_required_minutes: 30
+
+attempts_used: 2
+attempts_limit: 3
+attempt_2_summary: "sửa finding CHẶN 'init tự cấp lease' (cf39109c)"
+attempt_2_recorded_outside_state_machine: true   # begin-attempt KHÔNG được gọi; con số này do NGƯỜI khai
+prior_review_invalidated: wp55-r2-review-2-codex-20260813   # bản review neo 22d2cc9 hết hiệu lực (head mới ⇒ duyệt cũ hết hiệu lực)
+# Bản chiếu 5288950354 chiếu mỏ neo prompt CŨ (`46a833cc…`, không ứng với văn bản nào)
+# nên đã hết hiệu lực; đính chính ở comment 5289976949. Gỡ `posted_comment_id` để
+# workflow chiếu LẠI lease sau khi sửa — đây là cách duy nhất đúng, vì sửa tay bản
+# chiếu thì lần sau không ai biết nó lệch nguồn.
+supersedes_posted_comment: 5288950354
+posted_comment_id: 5290319622   # workflow ghi, ĐỪNG sửa tay

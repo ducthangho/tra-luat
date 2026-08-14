@@ -1,0 +1,59 @@
+name: ops — mở PR bằng git
+
+# Cùng lý do với `ops-publish-lease.yml`: PR là object của GitHub, git không tạo
+# được. Nhưng push thì phiên nào cũng làm được, nên để workflow mở PR hộ.
+#
+# OPT-IN TƯỜNG MINH, không tự đoán. Chỉ mở PR khi commit cuối có `[open-pr]` trong
+# thông điệp. Vì sao không tự mở cho mọi nhánh `claude/**`: nhánh nháp, nhánh đo
+# thử, nhánh bỏ dở đều nằm dưới tiền tố đó — tự mở PR cho tất cả là rác hoá danh
+# sách PR và làm người ta ngừng đọc nó.
+#
+# Không mở trùng: hỏi trước xem nhánh đã có PR mở chưa.
+
+on:
+  push:
+    branches:
+      - 'claude/**'
+      - 'ops/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ops-open-pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mo:
+    # Lọc ngay ở đây để lượt không khớp KHÔNG tốn runner.
+    if: contains(github.event.head_commit.message, '[open-pr]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: mở PR nếu chưa có
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NHANH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          DA_CO=$(gh pr list --head "$NHANH" --state open --json number --jq 'length')
+          if [ "$DA_CO" != "0" ]; then
+            echo "nhánh $NHANH đã có PR mở — không mở thêm"
+            exit 0
+          fi
+          # Tiêu đề lấy từ commit cuối; thân trỏ về commit để người đọc tự tra.
+          TIEU_DE=$(git log -1 --pretty=%s | sed 's/\[open-pr\]//g' | sed 's/[[:space:]]*$//')
+          # Thân dựng ra TỆP rồi `--body-file`: thân nhiều dòng nhét thẳng vào đối
+          # số sẽ phá thụt lề của block scalar YAML — đã gãy đúng chỗ này một lần.
+          {
+            echo "Mở tự động từ push mang nhãn \`[open-pr]\`."
+            echo
+            echo "Commit: \`$(git rev-parse HEAD)\`"
+            echo
+            git log -1 --pretty=%b
+          } > than-pr.md
+          gh pr create --head "$NHANH" --base master \
+            --title "$TIEU_DE" --body-file than-pr.md
+          gh pr list --head "$NHANH" --state open --json number,url --jq '.[0]'

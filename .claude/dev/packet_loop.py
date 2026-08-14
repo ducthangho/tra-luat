@@ -30,6 +30,7 @@ import json
 import re
 import sys
 import unicodedata
+from datetime import datetime, timezone
 from pathlib import Path
 
 # --- Ngưỡng ------------------------------------------------------------------
@@ -77,6 +78,11 @@ LY_DO_VOID = ("quota", "rate_limit", "infrastructure", "permission")
 # hoàn toàn. Canh từng cửa một là thua; chỉ để lại MỘT cửa mới thắng.
 # Đừng thêm "accepted" vào đây, kể cả cho tiện.
 CHUYEN_HOP_LE = {
+    # `leased` KHÔNG phải đích của bất kỳ chuyển động nào ở bảng này — cùng lý do
+    # với `accepted` ngay trên, và cùng bài học "canh từng cửa là thua, chỉ để lại
+    # MỘT cửa mới thắng". Đường duy nhất vào `leased` là `record-lease`, nơi đòi
+    # uỷ quyền + dấu vết + hạn.
+    "awaiting_lease": (),
     "leased": ("running",),
     "running": ("reviewing",),
     "reviewing": ("running", "blocked"),
@@ -332,7 +338,15 @@ def cmd_init(a, state_dir: Path) -> int:
         "mission": a.mission,
         "executor": a.executor,
         "reviewer": a.reviewer,
-        "state": "leased",
+        # `awaiting_lease`, KHÔNG phải `leased`. Bản trước ghi thẳng `leased` ở đây,
+        # nghĩa là bất kỳ ai gõ được `init` đều tự cấp cho mình một lease hợp lệ rồi
+        # `begin-attempt` sang `running` — đường vòng qua đúng doctrine "không tự cấp
+        # lease", và acceptance #55 r2 đòi chặn TỪ init. Review cross-provider
+        # (codex, 14-08-2026) tái hiện được bằng `init --packet 999999 --mission
+        # 888888`: rc=0, state `leased`. `init` chỉ khai HÌNH DẠNG của packet; uỷ
+        # quyền là chuyện của `record-lease`.
+        "state": "awaiting_lease",
+        "lease": None,
         "attempts_used": 0,
         "attempts_limit": a.attempts_limit,
         "same_failure_limit": a.same_failure_limit,
@@ -352,8 +366,81 @@ def cmd_init(a, state_dir: Path) -> int:
     return RC_OK
 
 
+def _doc_han_utc(chuoi: str) -> datetime:
+    """Đọc mốc UTC dạng ISO8601. Sai dạng thì CHẶN, không đoán."""
+    s = (chuoi or "").strip()
+    if not s:
+        _die(RC_ARG, "--expires-utc rỗng")
+    try:
+        d = datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except ValueError:
+        _die(RC_ARG, f"--expires-utc không đọc được: {chuoi!r} "
+                     f"(cần ISO8601, ví dụ 2026-08-13T18:30:00Z)")
+    if d.tzinfo is None:
+        # KHÔNG đoán múi giờ của người gõ: "hết hạn 18:30" mà không nói múi là hai
+        # mốc cách nhau tới 26 giờ. Một lease sai 26 giờ thì chốt hạn thành trang trí.
+        _die(RC_ARG, f"--expires-utc phải kèm múi giờ (thêm 'Z'): {chuoi!r}")
+    return d.astimezone(timezone.utc)
+
+
+def cmd_record_lease(a, state_dir: Path) -> int:
+    """GHI HỘ một lease do bên có thẩm quyền cấp — không phải tự cấp.
+
+    Tiến trình này không cấp được lease cho ai. Nó chỉ ghi lại một quyết định đã
+    có ở nơi khác, kèm dấu vết bền để đối chiếu. Ba thứ bắt buộc, mỗi thứ bịt một
+    đường lách: người cấp (không được là provider), dấu vết (để đối chiếu được),
+    và hạn (để lease không sống mãi).
+    """
+    st = _load(state_dir, a.packet)
+    if st["state"] != "awaiting_lease":
+        _die(RC_STATE,
+             f"chỉ ghi được lease khi packet đang 'awaiting_lease'; hiện là {st['state']!r}. "
+             f"Ghi đè lease của một packet đang chạy là hồi sinh một lượt đã cạn.")
+    nguoi_cap = (a.granted_by or "").strip()
+    if not nguoi_cap:
+        _die(RC_ARG, "--granted-by rỗng")
+    # Chốt CỐT LÕI. Một agent tự ký cho chính mình thì thứ ghi ra không phải lease,
+    # chỉ là lời tự khai đội lốt uỷ quyền. §2: start/authorize thuộc bên CÓ THẨM
+    # QUYỀN; tiến trình này chỉ ghi hộ. So khớp không phân biệt hoa thường vì
+    # "Claude" và "claude" là cùng một lời tự khai.
+    if nguoi_cap.lower() in PROVIDERS:
+        _die(RC_GUARD,
+             f"--granted-by {nguoi_cap!r} là tên một provider — agent KHÔNG tự cấp lease "
+             f"cho mình được (xem doctrine 'không tự cấp lease')")
+    if not (a.evidence or "").strip():
+        _die(RC_ARG, "--evidence rỗng — lease phải có dấu vết bền để đối chiếu")
+    han = _doc_han_utc(a.expires_utc)
+    if han <= datetime.now(timezone.utc):
+        _die(RC_STATE,
+             f"lease đã hết hạn ngay lúc ghi ({han.isoformat()}) — xin lease mới, "
+             f"đừng ghi một lease chết rồi coi như có quyền")
+    st["lease"] = {
+        "lease_id": a.lease_id,
+        "granted_by": nguoi_cap,
+        "evidence": a.evidence.strip(),
+        "expires_utc": han.isoformat(),
+    }
+    st["state"] = "leased"
+    st["history"].append({"event": "record_lease", "lease_id": a.lease_id,
+                          "granted_by": nguoi_cap, "expires_utc": han.isoformat()})
+    _save(state_dir, st)
+    print(f"đã ghi lease {a.lease_id} (cấp bởi {nguoi_cap}, hết hạn {han.isoformat()}) "
+          f"— state {st['state']}")
+    return RC_OK
+
+
 def cmd_begin_attempt(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
+    # Hạn lease cưỡng chế Ở ĐÂY, không chỉ lúc ghi. Đã có ca thật: một lượt review
+    # chạy 7 GIỜ sau khi lease hết hạn mà không gì chặn — vì hạn chỉ được kiểm một
+    # lần lúc cấp rồi thôi. Một cái hạn không ai đọc lại là một cái hạn không tồn tại.
+    lease = st.get("lease")
+    if lease and lease.get("expires_utc"):
+        het = _doc_han_utc(lease["expires_utc"])
+        if het <= datetime.now(timezone.utc):
+            _die(RC_STATE,
+                 f"lease {lease.get('lease_id')!r} đã hết hạn lúc {het.isoformat()} — "
+                 f"không mở lượt mới được; xin lease mới từ bên điều phối")
     if a.provider != st["executor"]:
         _die(
             RC_PROVIDER,
@@ -666,6 +753,19 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--attempts-limit", type=int, default=MAC_DINH_TRAN_ATTEMPT)
     q.add_argument("--same-failure-limit", type=int, default=MAC_DINH_TRAN_SAME_FAILURE)
     q.set_defaults(fn=cmd_init)
+
+    q = sub.add_parser("record-lease",
+                       help="GHI HỘ lease do bên có thẩm quyền cấp (awaiting_lease → leased)")
+    q.add_argument("--packet", type=int, required=True)
+    q.add_argument("--lease-id", required=True, help="định danh lease bên điều phối đã cấp")
+    q.add_argument("--granted-by", required=True,
+                   help=f"bên CÓ THẨM QUYỀN đã cấp. KHÔNG được là {PROVIDERS} — "
+                        f"agent không tự cấp cho mình")
+    q.add_argument("--evidence", required=True,
+                   help="dấu vết bền để đối chiếu (URL/ID comment nơi lease được cấp)")
+    q.add_argument("--expires-utc", required=True,
+                   help="hạn lease, ISO8601 CÓ múi giờ, ví dụ 2026-08-13T18:30:00Z")
+    q.set_defaults(fn=cmd_record_lease)
 
     q = sub.add_parser("begin-attempt", help="mở một lượt executor")
     q.add_argument("--packet", type=int, required=True)

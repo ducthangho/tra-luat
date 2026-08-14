@@ -71,11 +71,44 @@ class Ctx:
         d.mkdir(parents=True, exist_ok=True)
         return d
 
-    def init(self, sd: Path, packet=55, executor=EXECUTOR, reviewer=REVIEWER, extra=()):
-        return run(
+    def init(self, sd: Path, packet=55, executor=EXECUTOR, reviewer=REVIEWER, extra=(),
+             lease=True):
+        """init, rồi GHI LUÔN một lease hợp lệ (mặc định).
+
+        `init` chỉ đưa packet tới `awaiting_lease`, nên phần lớn ca ở dưới — vốn đo
+        hành vi HẠ NGUỒN của lease — cần một lease thật để đi tiếp. Ca nào đo chính
+        cái chốt lease thì truyền `lease=False` để nhìn thấy trạng thái chưa có lease.
+        """
+        rc, o, e = run(
             self.script,
             ["init", "--packet", packet, "--mission", 54,
              "--executor", executor, "--reviewer", reviewer, *extra],
+            sd,
+        )
+        if rc != 0 or not lease:
+            return rc, o, e
+        return self.cap_lease(sd, packet)
+
+    def cap_lease(self, sd: Path, packet=55, granted_by="chu-kho", expires=None,
+                  evidence=None, extra=()):
+        """Ghi một lease HỢP LỆ (mặc định) — hoặc lệch đúng một chiều để làm ca đỏ.
+
+        `granted_by` mặc định là một cái tên KHÔNG thuộc PROVIDERS: người cấp phải
+        là bên có thẩm quyền, không phải một agent tự ký cho mình.
+        """
+        from datetime import datetime, timedelta, timezone
+
+        if expires is None:
+            expires = (datetime.now(timezone.utc) + timedelta(hours=4)).strftime(
+                "%Y-%m-%dT%H:%M:%SZ")
+        if evidence is None:
+            evidence = f"https://github.com/o/r/issues/{packet}#issuecomment-5281636040"
+        return run(
+            self.script,
+            ["record-lease", "--packet", packet,
+             "--lease-id", f"wp{packet}-r2-review-2-codex-test",
+             "--granted-by", granted_by, "--evidence", evidence,
+             "--expires-utc", expires, *extra],
             sd,
         )
 
@@ -747,6 +780,11 @@ def case_doctrine_scan_repo_that_sach(c: Ctx):
 # --- (d) stdout an toàn dưới codepage không UTF-8 ------------------------------
 
 
+def _han_tuong_lai(gio: int = 4) -> str:
+    from datetime import datetime, timedelta, timezone
+    return (datetime.now(timezone.utc) + timedelta(hours=gio)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def _kich_ban_in(c: Ctx, codepage: str):
     """Chạy MỌI lệnh in tiếng Việt với stdout BỊ CAPTURE và encoding ép về codepage."""
     env = {"PYTHONIOENCODING": codepage}
@@ -757,6 +795,12 @@ def _kich_ban_in(c: Ctx, codepage: str):
         (["where"], None),
         (["init", "--packet", 55, "--mission", 54,
           "--executor", EXECUTOR, "--reviewer", REVIEWER], sd),
+        # `record-lease` cũng in tiếng Việt nên nó THUỘC kịch bản này, không phải
+        # chỉ là bước dọn đường: bỏ nó ra là mất luôn phép đo codepage cho một lệnh.
+        (["record-lease", "--packet", 55, "--lease-id", "wp55-cp-test",
+          "--granted-by", "chu-kho",
+          "--evidence", "https://github.com/o/r/issues/55#issuecomment-1",
+          "--expires-utc", _han_tuong_lai()], sd),
         (["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd),
         (["next-comment", "--packet", 55], sd),
         (["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "7770000009"], sd),
@@ -811,7 +855,85 @@ def case_land_packets_khong_tu_trigger(c: Ctx):
         raise AssertionError("land-packets phải khai disable-model-invocation: true")
 
 
+# --- (f) lease: init KHÔNG được tự cấp -----------------------------------------
+#
+# Do review cross-provider (codex, 14-08-2026) tìm ra, mức CHẶN: `init` ghi thẳng
+# state `leased` mà không đòi bất kỳ uỷ quyền nào, nên executor gõ
+# `init --packet 999999 ...` là có ngay một "lease" hợp lệ rồi `begin-attempt`
+# sang `running`. Đó là đường vòng qua chính doctrine "không tự cấp lease", mà
+# acceptance #55 r2 lại đòi chặn TỪ `init`.
+#
+# Chốt gồm ba lớp, mỗi lớp một ca đỏ riêng:
+#   1. `init` chỉ đưa packet tới `awaiting_lease` — chưa mở được lượt.
+#   2. `record-lease` từ chối người cấp mang tên một PROVIDER (agent tự cấp cho mình).
+#   3. Hạn lease được cưỡng chế CẢ lúc ghi LẪN lúc mở lượt. Lớp 3 sinh ra từ một ca
+#      thật: một lượt review đã chạy 7 GIỜ SAU khi lease hết hạn mà không gì chặn.
+
+
+def case_init_KHONG_duoc_tu_cap_lease(c: Ctx):
+    """Ca tái hiện đúng finding của reviewer."""
+    sd = c.sd()
+    rc, _, e = c.init(sd, lease=False)
+    _doi(0, rc, e, "init")
+    tt = c.state(sd, 55)
+    if tt != "awaiting_lease":
+        raise AssertionError(f"init tự cấp lease: state={tt!r}, phải là 'awaiting_lease'")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(8, rc, e, "mở được lượt khi CHƯA có lease")
+
+
+def case_tu_cap_lease_bang_ten_provider_bi_chan(c: Ctx):
+    sd = c.sd()
+    rc, _, e = c.init(sd, lease=False)
+    _doi(0, rc, e, "init")
+    rc, _, e = c.cap_lease(sd, 55, granted_by=EXECUTOR)
+    _doi(7, rc, e, "agent tự cấp lease cho chính mình mà không bị chặn")
+
+
+def case_lease_da_het_han_khong_ghi_duoc(c: Ctx):
+    sd = c.sd()
+    rc, _, e = c.init(sd, lease=False)
+    _doi(0, rc, e, "init")
+    rc, _, e = c.cap_lease(sd, 55, expires="2020-01-01T00:00:00Z")
+    _doi(8, rc, e, "ghi được một lease đã hết hạn")
+
+
+def case_lease_hop_le_thi_mo_duoc_luot(c: Ctx):
+    """Chốt phải XANH được, không thì người ta gỡ nó ra."""
+    sd = c.sd()
+    rc, _, e = c.init(sd, lease=False)
+    _doi(0, rc, e, "init")
+    rc, _, e = c.cap_lease(sd, 55)
+    _doi(0, rc, e, "lease hợp lệ mà bị chặn")
+    tt = c.state(sd, 55)
+    if tt != "leased":
+        raise AssertionError(f"lease hợp lệ nhưng state={tt!r}")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "lease hợp lệ mà không mở được lượt")
+
+
+def case_begin_attempt_sau_khi_lease_HET_HAN_bi_chan(c: Ctx):
+    """Lease hết hạn giữa chừng thì lượt sau KHÔNG được mở."""
+    import time
+    from datetime import datetime, timedelta, timezone
+
+    sd = c.sd()
+    rc, _, e = c.init(sd, lease=False)
+    _doi(0, rc, e, "init")
+    han = (datetime.now(timezone.utc) + timedelta(seconds=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    rc, _, e = c.cap_lease(sd, 55, expires=han)
+    _doi(0, rc, e, "lease còn 2 giây mà bị từ chối ngay lúc ghi")
+    time.sleep(3)
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(8, rc, e, "mở được lượt bằng một lease ĐÃ HẾT HẠN")
+
+
 CASES = [
+    ("init_KHONG_duoc_tu_cap_lease", case_init_KHONG_duoc_tu_cap_lease),
+    ("tu_cap_lease_bang_ten_provider_bi_chan", case_tu_cap_lease_bang_ten_provider_bi_chan),
+    ("lease_da_het_han_khong_ghi_duoc", case_lease_da_het_han_khong_ghi_duoc),
+    ("lease_hop_le_thi_mo_duoc_luot", case_lease_hop_le_thi_mo_duoc_luot),
+    ("begin_attempt_sau_khi_lease_HET_HAN_bi_chan", case_begin_attempt_sau_khi_lease_HET_HAN_bi_chan),
     ("init_cross_provider_ok", case_init_cross_provider_ok),
     ("init_cung_provider_thoat_4", case_init_cung_provider_thoat_4),
     ("review_sai_provider_thoat_4", case_review_sai_provider_thoat_4),
@@ -874,6 +996,30 @@ MUTANTS = {
         "\n    _cung_hoa_stdout()\n",
         "\n    pass  # đột biến: bỏ cứng hoá stdout\n",
         ["stdout_cp1252", "stdout_cp1258"],
+    ),
+    # --- lease: dựng lại ĐÚNG bug gốc mà review cross-provider tìm ra.
+    "init_tu_cap_lease_nhu_bug_goc": (
+        '"state": "awaiting_lease",',
+        '"state": "leased",',
+        ["init_KHONG_duoc_tu_cap_lease"],
+    ),
+    "bo_chan_tu_cap_bang_ten_provider": (
+        "    if nguoi_cap.lower() in PROVIDERS:",
+        "    if False:",
+        ["tu_cap_lease_bang_ten_provider_bi_chan"],
+    ),
+    "bo_kiem_han_luc_GHI_lease": (
+        "    if han <= datetime.now(timezone.utc):",
+        "    if False:",
+        ["lease_da_het_han_khong_ghi_duoc"],
+    ),
+    # Hạn chỉ kiểm lúc cấp rồi thôi = đúng lỗ đã cho một lượt review chạy 7 GIỜ sau
+    # khi lease hết hạn. Đột biến này bỏ RIÊNG phép kiểm lúc mở lượt, nên ca
+    # `lease_da_het_han_khong_ghi_duoc` VẪN xanh — hai lớp, hai ca, không phủ nhau.
+    "bo_kiem_han_LUC_MO_LUOT": (
+        "        if het <= datetime.now(timezone.utc):",
+        "        if False:",
+        ["begin_attempt_sau_khi_lease_HET_HAN_bi_chan"],
     ),
 }
 

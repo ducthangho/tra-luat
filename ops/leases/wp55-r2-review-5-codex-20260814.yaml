@@ -1,0 +1,111 @@
+# Lease REVIEWER lượt 5 cho wp55 revision 2, generation 3 — neo head MỚI 546ecf9.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh
+# `ops/**`. Sửa lease thì sửa ở đây rồi push; đừng sửa tay comment.
+#
+# VÌ SAO CÓ LEASE NÀY:
+# Executor generation 3 (lease `wp55-r2-exec-3-claude-20260814`) đã vá ba finding P1 và
+# đẩy head mới `546ecf9`. Head đổi ⇒ bản review lượt 4 neo `cf39109c` HẾT HIỆU LỰC —
+# đúng thiết kế, không phải sự cố. Cần một lượt cross-review mới trên head mới.
+#
+# TRẦN ATTEMPT ĐÃ CẠN: `attempts_used = 3 / 3`. Revision 2 không còn attempt nội dung
+# nào. Nếu lượt review này ra finding CHẶN, packet chuyển `blocked` và phải mở
+# **revision 3** — không thể vá thêm trong revision 2. Reviewer cần biết điều đó khi
+# cân nhắc giữa `changes_requested` và các mức khác; nhưng ĐỪNG hạ chuẩn vì lý do ấy:
+# một bản duyệt dễ dãi để tránh mở revision mới là cách tệ nhất tiêu cái trần này.
+#
+# RỦI RO ĐÃ BIẾT, NÓI THẲNG: ba lease review đầu (#1 #2 #3) đều chết mà KHÔNG phiên nào
+# chạy. Nguyên nhân đo được: cửa sổ ngắn hơn khoảng cách tới lúc có một phiên `codex`
+# thật. Lease này để 24 giờ và heartbeat 30 phút — nhưng cửa sổ dài không tự sinh ra
+# một phiên reviewer. `codex` CLI trong container dev ĐÃ ĐO 14-08: "Not logged in".
+# Nên bên điều phối phải chủ động tìm một phiên `codex` thật, hoặc dùng connector
+# `chatgpt-codex-connector` trên PR #92 (nó ĐANG hoạt động — đã ra 11 finding trên
+# PR #110 cùng ngày).
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+phase_key: F3-03
+mission_issue: 54
+mission_revision: 6
+revision: 2
+generation: 3
+spec_hash: a05c10f71e205d6268c46c62de9fd2d1cc5f7629b070af69a8e3b4254d782c5c
+
+lease_id: wp55-r2-review-5-codex-20260814
+supersedes_lease: wp55-r2-review-4-codex-20260814   # lượt 4 đã HOÀN THÀNH, neo head cũ
+role: reviewer
+provider: codex                 # BẮT BUỘC — executor là claude (§8 cross-provider)
+assurance_target: cross_approved
+access: read-only
+write_set: []                   # reviewer KHÔNG ghi (§2)
+branch_ownership: none
+
+target_pull_request: 92
+reviewed_sha_required: 546ecf9fd4dfe889d0cd3ee77b9589d8bed0465f   # head MỚI, thay cf39109c
+branch: claude/wp55-r2g2-f3-03
+base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2   # merge-base, KHÔNG đổi theo master
+
+prompt_path: ops/prompts/wp55-r2-review-5-codex-20260814.md
+prompt_sha256_required: e535253224c820da7277059032c7cace3f10a2572acac428526f37affa7b9966
+
+granted_by: ducthangho          # CHỦ KHO — §2 "người có thẩm quyền"
+granted_on_instruction: direct, in-session, 2026-08-14 ("soạn lease reviewer lượt 5")
+recorded_by: claude-session     # ghi hộ quyết định, KHÔNG phải dispatcher
+recorder_is_dispatcher: false
+authority_basis: "§2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền"
+
+leased_at_utc: '2026-08-14T17:30:00Z'
+lease_expires_at_utc: '2026-08-15T18:00:00Z'
+run_minutes: 1470
+heartbeat_required_minutes: 30
+
+attempts_used: 3
+attempts_limit: 3
+attempts_exhausted: true
+attempts_note: >-
+  Trần nội dung đã cạn. Verdict CHẶN ở lượt này ⇒ packet sang `blocked`, phải mở
+  revision 3. Đây là thông tin để bên điều phối chuẩn bị, KHÔNG phải lý do hạ chuẩn duyệt.
+
+# Lượt trước và kết quả của nó — reviewer phải đọc bản gốc, không đọc tóm tắt.
+prior_review: wp55-r2-review-4-codex-20260814
+prior_review_verdict: changes_requested
+prior_review_verdict_file: ops/reviews/wp55-r2-review-4-codex-verdict.md
+prior_review_verdict_sha256: d58088bec10ad36a912b64749cbe8a41af5de0b3f70033d9109f12bb6647e82f
+prior_review_evidence: https://github.com/ducthangho/tra-luat/pull/92#pullrequestreview-4936728763
+prior_reviewed_sha: cf39109c9e5167516c53f2071e5fa7ec5c6afff5
+prior_review_invalidated_reason: "head đổi cf39109c → 546ecf9 sau bản vá generation 3"
+
+# Ba finding executor khai đã vá. Reviewer KIỂM, không nhận.
+findings_claimed_fixed:
+  - finding_id: lease-authority-spoof
+    claim: "đảo danh sách CẤM → CHO PHÉP (NGUOI_CO_THAM_QUYEN), giữ chốt PROVIDERS song song"
+  - finding_id: legacy-lease-bypass
+    claim: "begin-attempt đổi fail-open → fail-closed khi lease thiếu/hỏng"
+  - finding_id: doctrine-rendering-bypass
+    claim: "_chuan_hoa thêm html.unescape một lần + lọc ký tự Unicode Cf"
+
+# Số do một phiên CÙNG PROVIDER với executor chạy lại và đối chiếu — KHỚP lời khai.
+# Ghi ra để reviewer biết chỗ nào đã phủ, KHÔNG phải để chép lại. Chúng không thay
+# được lượt cross-review §8.
+prior_verification_by_same_provider:
+  packet_loop_test: "54/54 (nền cũ 48/48)"
+  mutations: "11/11 giết đúng ca đích"
+  tl_selftest: "1696/1696, 0 FAIL"
+  doc_claims_check: "ok, flags rỗng"
+  release_verify: "ok, expected=checked=179, failed 0, extra 0"
+  golden_test: "ok, không --write"
+  doctrine_scan: "sạch, 4 tệp"
+  merge_tree_with_master: "rc 0"
+  scope: "đúng 2 tệp, cả hai trong write_set"
+  behavioural_lease_authority: "4 tên giả mạo rc=7; ducthangho rc=0"
+  behavioural_doctrine_scan: "zero-width rc=6; HTML entity rc=6; dòng sạch rc=0"
+  not_measured_directly: "legacy-lease-bypass — chỉ có bằng chứng đột biến, chưa đo hành vi"
+
+# Điều kiện tiên quyết ĐÃ ĐO 2026-08-14 17:25Z; reviewer phải kiểm lại chứ đừng tin.
+preconditions_measured_at_utc: '2026-08-14T17:25:00Z'
+master_sha_at_grant: 3d2c52d62696b0c7c190fd891115f543b0f9cb55
+merge_tree_master_head: "rc 0"
+master_touches_in_write_set: [CLAUDE.md]

@@ -107,11 +107,23 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   — đúng một hunk lệch, mọi dòng khác khớp từng byte.
   Cùng họ với `doctrine-scan` và với dấu bỏ-qua-CI: **một lớp mà ta không coi là lớp**. Chốt: (a) băm
   phải đo trên thứ ĐÃ ĐẾN, nên đăng xong là đọc ngược về và diff, đừng dừng ở "lời gọi trả thành
-  công"; (b) tải trọng có dấu chéo ngược phải nhân đôi khi đi qua JSON; (c) nguồn có thẩm quyền là
+  công"; (b) phải biết mình đang đứng ở LỚP NÀO — xem ngay dưới; (c) nguồn có thẩm quyền là
   TỆP CÓ BĂM trong kho, comment chỉ là bản chiếu — nói thẳng điều đó ngay trong bản chiếu.
+  **Chốt (b) nói cho đúng, vì bản đầu viết sai và cross-review bắt được** (P2 trên PR #106):
+  "có dấu chéo ngược thì nhân đôi" là luật QUÁ RỘNG và tự nó tái tạo đúng cái lệch đang bàn.
+  Nhân đôi CHỈ đúng khi ta tự tay dựng CHÍNH CHUỖI JSON (đối số của một lời gọi công cụ là như
+  vậy). Khi tải trọng được trao cho bộ tuần tự hoá dưới dạng chuỗi ứng dụng (`json.dumps`,
+  client MCP/HTTP thường), bộ ấy ĐÃ thoát hộ — nhân đôi thêm một lần nữa thì bên nhận lĩnh
+  thừa một dấu chéo. Hai lớp, hai luật ngược nhau, và đoán sai lớp thì hỏng theo cả hai chiều.
+  Nên thứ đáng nhớ KHÔNG phải mẹo nhân đôi mà là chốt (a): đo thứ ĐÃ ĐẾN.
   Bằng chứng bẫy này KHÔNG hiếm và KHÔNG chỉ ở MCP: chính hai dòng trên đây, lượt viết đầu cũng bị
-  công cụ sửa tệp giải mã mất chuỗi thoát (cũng qua JSON), phải ghi lại bằng đường không đi qua JSON
-  rồi ĐO `repr()` mới thấy. Hễ nội dung NÓI VỀ chuỗi thoát thì phải đo nó sau khi ghi.
+  công cụ sửa tệp giải mã mất chuỗi thoát (đối số của nó cũng là chuỗi JSON), phải ghi lại bằng một
+  script tự dựng dấu chéo từ `chr(92)` rồi ĐO `repr()` mới thấy. Nói cho ĐÚNG kẻo lại giữ nguyên cái
+  mô hình lớp sai vừa sửa ở trên — bản đầu viết "đi vòng qua lớp JSON", và cross-review bắt được
+  (P2 trên PR #108): script ấy CŨNG là đối số công cụ nên CŨNG đi qua đúng lớp tuần tự hoá đó, không
+  vòng được đi đâu cả. Thứ nó tránh là **cho một dấu chéo NGUYÊN VĂN đi trên đường truyền**: dấu chéo
+  được DỰNG SAU khi đã phân tích cú pháp, nên không còn gì để lớp nào giải mã. Đó là HOÃN việc dựng
+  chuỗi, không phải né một tầng. Hễ nội dung NÓI VỀ chuỗi thoát thì phải đo nó sau khi ghi.
 - **Quét secrets: lọc theo PHẦN MỞ RỘNG là mù ĐÚNG CHỖ secrets nằm.** `Path('.env').suffix == ''` nên
   `.env` `.netrc` `credentials` (không mở rộng) bị bỏ qua SẠCH — bơm `GOCSPX-…` vào `.env` mà bộ quét
   trả rc=0. Cộng thêm `Get-ChildItem` thiếu `-Force` cũng bỏ y hệt: **hai lỗi ĐỘC LẬP mà CÙNG HƯỚNG** ⇒

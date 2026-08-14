@@ -330,4 +330,11 @@ Thứ phân biệt được chỉ có hai: **log** và **hậu điều kiện h�
    có bước này thì mọi chẩn đoán sau đều đoán mò.
 2. `launcher.py check …` — `QUA HET CHOT`, `rc=0`.
 3. Neo prompt bằng **băm**, không bằng tên nhánh: tên nhánh trôi và bị xoá.
-4. Cho `--deadline-utc` khớp hạn lease, để lượt chạy không sống quá quyền của nó.
+4. Cho `--deadline-utc` khớp hạn lease — nhưng **đừng đọc nó thành "lượt chạy không
+   sống quá quyền"**. Hạn chót chỉ rào **TIẾN TRÌNH CON TRỰC TIẾP**: `_giet_cay` chỉ
+   chạy ở nhánh `TimeoutExpired` (`launcher.py:1250`), khi bị ngắt (1261), và ở lệnh
+   `stop` (1378). Con thoát **bình thường** trước hạn mà để lại hậu duệ thì `p.wait()`
+   trả về êm, **không lượt giết nào xảy ra**, và hậu duệ ấy chạy tiếp qua hạn lease.
+   Muốn bảo đảm dừng khi hết quyền thì phải có phép đo độc lập: gọi `launcher.py stop`
+   cho lượt đó, hoặc tự xác minh nhóm tiến trình đã rỗng tại thời điểm hết hạn. Hạn
+   chót là **hàng rào cho một tiến trình**, không phải cho cả cây.

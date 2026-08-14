@@ -232,7 +232,11 @@ Script chạm LIVE. Hook `PreToolUse` KHÔNG đỡ thay được: nó chỉ kh�
 | chép nguyên trạng (`ask: ["Bash(clasp:*)"]`) | **BỊ CHẶN** |
 | sửa thành `ask: []` | **CHẠY** — `rc=127`, tức chỉ trượt vì máy chưa cài `clasp` |
 
-`rc=127` mới là chỗ đáng sợ: nếu container CÓ `clasp` thì lượt đó đã chạm LIVE thật.
+Đọc `rc=127` cho đúng sức nặng của nó, đừng hơn: nó chứng minh **ranh giới duyệt đã bị
+gỡ** — một tiến trình `clasp` được phép khởi chạy. Nó **không** chứng minh lượt ấy chạm
+LIVE; `clasp --version` chỉ in phiên bản, có cài cũng vô hại. Nguy hiểm là ở chỗ sau khi
+ranh giới mất thì `clasp deploy` / `clasp push` / `clasp run` cũng qua bằng đúng con
+đường đó, và phép thử này không phân biệt được lệnh nào.
 
 Khác hẳn `--setting-sources user,local` trần trụi: ở đó hook chết theo, còn ở đây
 `deny`, `hooks` và phần `ask` còn lại được cấp lại nguyên vẹn. Đo **bốn** lớp trên
@@ -318,7 +322,15 @@ tài liệu. Hai điều cần biết ngay, phần còn lại đọc ở issue:
   dùng thứ ngoài launcher (container / cgroup / PID namespace). Không có thì khai đúng
   giới hạn: một lượt chạy có thể sống quá hạn lease, và sổ sẽ không nói cho biết.
 
-Lỗi im lặng nằm ở **`stderr.log`**, không ở `run.json`. Và đừng trông vào `ma_thoat`
+Lỗi im lặng nằm ở **log**, không ở `run.json` — và phải đọc **CẢ HAI** log. Hai kiểu
+hỏng đẩy dấu vết sang hai tệp **ngược nhau**, đã đo:
+
+| kiểu hỏng | `stdout.log` | `stderr.log` |
+|---|---|---|
+| cờ sai (`--sandbox` xung khắc `--approve-for-me`) | **0 byte** | 206 byte |
+| bị chặn quyền (ba lượt `clasp`/hook/`deny` ở mục trên) | 14–36 byte | **0 byte** |
+
+Mở đúng một tệp là có lúc kết luận ngược hẳn. Và đừng trông vào `ma_thoat`
 để phân biệt: lượt hỏng vì trust hoặc vì cờ quyền có thể cho **đúng** cặp
 `trang_thai: xong` + `ma_thoat: 0` như một lượt thành công — chính tài liệu này ghi một
 ca như vậy ở mục trên (executor bị chặn `git push`, không sửa dòng nào, `ma_thoat: 0`).

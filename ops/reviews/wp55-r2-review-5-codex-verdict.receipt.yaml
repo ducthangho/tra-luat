@@ -63,6 +63,29 @@ reproduction_notes:
     đúng CLAUDE.md:82. Dòng bị bắt do phiên claude viết trong bài học ở PR #103; cụm
     doctrine vắt qua chỗ ngắt dòng nên scanner làm phẳng cả tệp mới thấy.
 
+# Cảnh báo về CÁCH DÙNG tệp gốc. Ghi ở ĐÂY vì tệp gốc bị neo băm, không sửa được.
+#
+# Codex review PR #114 nêu một P2 ĐÚNG: lệnh tái hiện trong verdict dùng `origin/master`,
+# một mỏ neo DI ĐỘNG. Master tiến lên là lệnh ấy dựng cây khác, và bằng chứng đáng ra bất
+# biến sẽ ra kết quả khác — hoặc không tái lập được nữa.
+#
+# KHÔNG sửa tệp gốc để chữa. Tệp đó là nguyên văn reviewer, neo `verdict_sha256`, và `t26`
+# băm lại nó mỗi lượt chạy. Sửa cho "đúng hơn" là phá đúng thứ làm nó có giá trị: một bản
+# ghi sửa được thì không còn là bản ghi. Chỗ đúng để đính chính là tệp này.
+verdict_usage_caveats:
+  - id: mutable-master-ref-in-repro-command
+    raised_by: "codex review PR #114 (P2)"
+    raised_at_url: https://github.com/ducthangho/tra-luat/pull/114#discussion_r3786156028
+    applies_to: "khối bash tái hiện `merged-tree-doctrine-false-positive` trong tệp gốc"
+    issue: >-
+      `git archive origin/master` và `git merge-tree … origin/master` neo vào ref DI ĐỘNG.
+      Verdict đã ghi master lúc đo là 3d2c52d62696b0c7c190fd891115f543b0f9cb55; chạy lại
+      lệnh nguyên văn sau khi master tiến lên sẽ đo một cây KHÁC.
+    fix_when_rerunning: >-
+      thay cả hai chỗ `origin/master` bằng 3d2c52d62696b0c7c190fd891115f543b0f9cb55.
+    not_fixed_in_source_because: >-
+      tệp gốc là nguyên văn reviewer, neo băm, `t26` cưỡng chế. Sửa = phá mỏ neo xuất xứ.
+
 # Sai lệch của ĐƯỜNG ĐĂNG, không phải của nội dung. Ghi lại vì giấu chỗ méo là khai rộng.
 delivery_deviations:
   - id: event-downgraded-to-comment

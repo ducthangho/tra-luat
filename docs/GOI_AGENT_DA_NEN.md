@@ -42,6 +42,70 @@ nào cần PowerShell.
 `py` (bản Microsoft Store thì có thêm `python3`). Đừng bắt cài thêm bí danh —
 `doctor` nhận cả ba tên.
 
+## Xác thực `codex` trên nhiều môi trường
+
+`doctor` nói **có `codex`**, không nói **`codex` gọi được**. Hai chuyện khác nhau, và
+chuyện thứ hai mới là thứ làm hỏng lượt chạy giữa chừng. Kiểm bằng lời khai của chính nó:
+
+```bash
+codex login status        # "Logged in using ChatGPT"  hoặc  "Not logged in"
+```
+
+### Đăng nhập ở máy KHÔNG có trình duyệt (container, server)
+
+```bash
+codex login --device-auth
+```
+
+In ra một link và một mã dùng một lần (hạn **15 phút**). Mở link trên thiết bị bất kỳ,
+nhập mã, xong thì tiến trình tự hoàn tất và ghi `~/.codex/auth.json`. Đã đo 14-08-2026
+trên container Claude Code web: chạy được, không cần khoá API — dùng thẳng tài khoản
+ChatGPT.
+
+> `codex login` **không** kèm `--device-auth` sẽ mở luồng qua trình duyệt cục bộ và
+> **treo** ở máy không có trình duyệt. Đã đo: `timeout 30` phải giết nó.
+
+### Để không phải nhập mã lại mỗi phiên
+
+Container phiên remote là **phù du** — thu hồi là mất `~/.codex/auth.json`. Một chốt đòi
+thao tác tay mỗi lượt thì sớm muộn bị bỏ qua, nên hook `.claude/hooks/session-start.sh`
+khôi phục credential từ biến Environment `CODEX_AUTH_JSON` (base64 của `auth.json`),
+đúng khuôn `GITHUB_PAT`.
+
+Lấy chuỗi ấy — **chạy trên MÁY CỦA BẠN**, sau khi đã `codex login` ở đó:
+
+```bash
+base64 -w0 ~/.codex/auth.json     # Linux
+base64 -i  ~/.codex/auth.json     # macOS
+```
+
+rồi dán thẳng vào phần Environment. **Đừng dán vào khung chat với agent, đừng commit,
+đừng gửi qua issue/PR** — chuỗi đó chứa refresh token, tương đương mật khẩu tài khoản
+ChatGPT của bạn cho mục đích codex. Lộ vào transcript là lộ hẳn, và transcript thì sống
+lâu hơn phiên.
+
+Hook có bốn chốt, mỗi cái bịt một đường hỏng đã lường:
+
+| chốt | vì sao |
+|---|---|
+| không in giá trị, đọc từ **môi trường** chứ không qua đối số | đối số lộ trong `ps` cho mọi tiến trình cùng máy |
+| **không đè** khi `codex login status` đã xanh | bản trên đĩa có thể mới hơn biến (codex tự làm mới token); đè bừa là hạ cấp một credential đang tốt |
+| kiểm base64 + JSON + khoá `tokens` **trước khi** ghi | biến hỏng mà ghi đè thì đổi "chưa đăng nhập" (dễ đọc) thành "đăng nhập hỏng" (khó đọc) |
+| ghi tệp tạm → `chmod 600` → `mv` | không hở khoảnh khắc quyền rộng, không để lại tệp nửa vời nếu chết giữa chừng |
+
+Sau đó hook hỏi lại chính `codex login status` và in dòng đó ra — **bằng chứng dương**,
+không suy từ việc "đã ghi tệp xong".
+
+Nếu một ngày chuỗi hết hiệu lực (OpenAI thu hồi hoặc xoay refresh token), triệu chứng là
+`Not logged in` dù biến vẫn còn. Chữa: `codex login --device-auth` lại rồi cập nhật biến.
+
+### Hai bẫy khi gọi `codex` trực tiếp
+
+- **Nó đọc thêm `stdin`.** Không có gì để đọc thì treo. Luôn `< /dev/null` khi gọi
+  không tương tác (launcher đã lo sẵn).
+- **Nó từ chối chạy ngoài thư mục git tin cậy**: `Not inside a trusted directory and
+  --skip-git-repo-check was not specified`. Chạy trong kho, đừng chạy ở `/tmp`.
+
 ## Các chốt
 
 Chạy trước khi gọi agent, hoặc gói luôn lượt gọi:

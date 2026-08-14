@@ -266,3 +266,10 @@ Hook `SessionStart` **không chặn được phiên**: thoát khác 0 chỉ hi�
 *Claude không thấy stderr*. Nhưng **stdout của `SessionStart` được đưa vào ngữ cảnh**
 — nên bảng `doctor` và dòng `THIEU CONG CU BAT BUOC` phải in ra **stdout**, đừng
 "dọn" mấy dòng `echo` đó đi.
+
+## Gọi `claude` CLI không người trực — xem skill `goi-claude-cli`
+
+Quy cách gọi headless (`claude -p` qua `launcher.py`) nằm ở
+`.claude/skills/goi-claude-cli/SKILL.md`: bảng bốn chế độ `--permission-mode` đã đo,
+vì sao `bypassPermissions` là ngõ cụt dưới root, bẫy trust im lặng khoá theo đường dẫn
+KHO CHÍNH chứ không theo worktree, và vì sao `rc=0` ở đây không chứng minh được gì.

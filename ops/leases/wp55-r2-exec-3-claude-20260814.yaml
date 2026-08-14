@@ -109,3 +109,4 @@ prior_review_verdict_sha256: d58088bec10ad36a912b64749cbe8a41af5de0b3f70033d9109
 #   trong 6 tệp write_set, master CHỈ chạm CLAUDE.md
 preconditions_measured_at_utc: '2026-08-14T13:20:00Z'
 master_sha_at_grant: 9796f674c0b05fad04ff7b001ba1dcb25b7f0830
+posted_comment_id: 5295011717   # workflow ghi, ĐỪNG sửa tay

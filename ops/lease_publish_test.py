@@ -433,6 +433,53 @@ def t23_MOI_lease_THAT_trong_kho_phai_QUA():
     bang(da_kiem, "không lease nào neo prompt — ca này không đo được gì")
 
 
+@ca
+def t24_workflow_KHONG_duoc_nhet_dau_skip_ci_vao_commit():
+    """Không workflow nào được ghi dấu skip-ci vào thông điệp commit.
+
+    Đã trả giá hai lần trong CÙNG một ngày (14-08-2026), theo hai đường khác nhau:
+
+    1. Bước ghi ngược của `ops-publish-lease.yml` commit kèm `[skip ci]` để khỏi tự
+       kích hoạt lại. Dấu ấy sống trong LỊCH SỬ, nên khi commit ghi ngược thành HEAD
+       của một PR thì nó tắt gate của PR đó: PR #100 có **0 check run** mà vẫn hiện
+       `mergeable_state: clean`. Cổng không nói dối — nó vắng mặt, và trên giao diện
+       hai thứ đó nhìn giống hệt nhau.
+    2. Một merge commit TRÍCH DẪN `[skip ci]` để giải thích lỗi số 1 đã tắt gate của
+       chính master. GitHub khớp CHUỖI trên toàn thông điệp, không đọc Markdown, nên
+       dấu nháy ngược không phải hàng rào — cùng bài học với `doctrine-scan`.
+
+    Ca này canh đường (1): quét mọi workflow, cấm dấu skip-ci đi kèm `git commit`.
+    Đường (2) là kỷ luật viết commit, máy không canh được ở đây — ghi trong CLAUDE.md.
+    """
+    # HERE là `ops/`, nên gốc kho là HERE.parent. Bản đầu viết `HERE.parent.parent`
+    # ⇒ trỏ RA NGOÀI gốc kho, thư mục không có, hàm `return` sớm và ca XANH RỖNG —
+    # đúng bệnh mà chính nó sinh ra để chặn. Chỉ lộ vì đã đột biến thử; suite vẫn báo
+    # 24/24 trong khi ca này không đo gì. "Ca có mặt" khác "ca có đo".
+    goc = HERE.parent / ".github" / "workflows"
+    if not goc.is_dir():
+        # Chỉ tha khi đây rõ ràng là BẢN SAO rời (bộ đột biến chép mỗi `ops/`).
+        # Trong kho thật mà thiếu thư mục workflow thì phải ĐỎ, không được lặng lẽ qua.
+        bang(not (HERE.parent / ".git").exists(),
+             f"kho thật mà không thấy {goc} — ca này sẽ xanh rỗng")
+        return
+    ds = sorted(p for p in goc.iterdir() if p.suffix in (".yml", ".yaml"))
+    bang(ds, f"không thấy workflow nào trong {goc} — ca này sẽ xanh mà không đo gì")
+    # Chỉ những dạng GitHub THẬT SỰ hiểu. Đừng nới thêm biến thể tưởng tượng: bảng
+    # rộng quá thì ca này bắt oan một chú thích bình thường rồi bị gỡ.
+    DAU = ("[skip ci]", "[ci skip]", "[no ci]", "[skip actions]", "[actions skip]")
+    for p in ds:
+        noi_dung = p.read_text(encoding="utf-8")
+        for so, dong in enumerate(noi_dung.splitlines(), 1):
+            # Chỉ soi dòng thực sự tạo commit — chú thích GIẢI THÍCH về dấu này là
+            # hợp lệ và cần thiết, cấm luôn thì tài liệu không viết được.
+            if "git commit" not in dong:
+                continue
+            for d in DAU:
+                bang(d not in dong,
+                     f"{p.name}:{so} nhét {d!r} vào thông điệp commit — dấu đó ở lại "
+                     f"trong lịch sử và sẽ tắt gate của PR nào có commit này làm HEAD")
+
+
 def main() -> int:
     qua, hong = 0, []
     for fn in CA:

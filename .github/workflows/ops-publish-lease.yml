@@ -37,6 +37,21 @@ concurrency:
 
 jobs:
   dang:
+    # CHỐNG LẶP — thay cho `[skip ci]` trong thông điệp commit.
+    # Bước cuối ghi ngược `posted_comment_id` vào đúng `ops/leases/**` mà workflow này
+    # theo dõi, nên về nguyên tắc nó tự kích hoạt một lượt nữa. Trước đây chặn bằng
+    # `[skip ci]` — sai chỗ: dấu đó sống trong LỊCH SỬ, và khi commit ghi ngược thành
+    # HEAD của một PR thì nó tắt gate của PR ấy (đã đụng thật, PR #100, 0 check run).
+    # Chốt phải nằm ở LƯỢT CHẠY, không nằm trong commit.
+    #
+    # Hai lớp, và lớp nào cũng đủ một mình:
+    #   1. GitHub KHÔNG sinh lượt chạy mới cho push thực hiện bằng `GITHUB_TOKEN`
+    #      (trừ workflow_dispatch/repository_dispatch) — đây là chống đệ quy sẵn có.
+    #   2. `if:` dưới đây, phòng khi lớp 1 đổi hoặc push đi bằng token khác.
+    # Kể cả hai lớp cùng thủng thì cũng KHÔNG thành vòng lặp vô hạn: chốt idempotent
+    # trong `lease_publish.py` trả rc=9 cho lease đã có `posted_comment_id`, nên lượt
+    # thừa không đăng gì và không ghi ngược gì — nó dừng sau đúng một vòng.
+    if: github.event.head_commit.author.name != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -112,8 +127,13 @@ jobs:
           git config user.name  'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add ops/leases
-          # `[skip ci]` BẮT BUỘC: bước này ghi vào đúng đường dẫn mà workflow đang
-          # theo dõi, nên nếu không có nó thì mỗi lần đăng lại tự kích hoạt một lượt
-          # nữa — vòng lặp tốn phút, dù chốt idempotent giữ cho không đăng trùng.
-          git commit -m "ops: ghi posted_comment_id sau khi đăng lease [skip ci]"
+          # KHÔNG nhét dấu skip-ci vào thông điệp commit. Bản trước có, và đã trả giá:
+          # dấu ấy nằm lại trong LỊCH SỬ, nên khi commit ghi ngược thành HEAD của một
+          # PR thì nó tắt luôn gate của PR đó — PR hiện `mergeable_state: clean` vì
+          # KHÔNG cổng nào chạy, chứ không phải vì cổng xanh, và trên giao diện hai
+          # trạng thái ấy nhìn giống hệt nhau. Đụng thật ở PR #100 (14-08-2026):
+          # `get_check_runs` trả total_count = 0.
+          # Chống lặp nay do `if:` ở mức job lo (xem đầu tệp) — chốt ấy chỉ ảnh hưởng
+          # LƯỢT CHẠY, không để lại vết trong lịch sử kho.
+          git commit -m "ops: ghi posted_comment_id sau khi đăng lease"
           git push origin HEAD:'${{ github.ref_name }}'

@@ -90,7 +90,7 @@ class Ctx:
         return self.cap_lease(sd, packet)
 
     def cap_lease(self, sd: Path, packet=55, granted_by="ducthangho", expires=None,
-                  evidence=None, extra=()):
+                  evidence=None, extra=(), lease_id=None):
         """Ghi một lease HỢP LỆ (mặc định) — hoặc lệch đúng một chiều để làm ca đỏ.
 
         `granted_by` mặc định là `"ducthangho"` — tên DUY NHẤT trong
@@ -104,10 +104,12 @@ class Ctx:
                 "%Y-%m-%dT%H:%M:%SZ")
         if evidence is None:
             evidence = f"https://github.com/o/r/issues/{packet}#issuecomment-5281636040"
+        if lease_id is None:
+            lease_id = f"wp{packet}-r2-review-2-codex-test"
         return run(
             self.script,
             ["record-lease", "--packet", packet,
-             "--lease-id", f"wp{packet}-r2-review-2-codex-test",
+             "--lease-id", lease_id,
              "--granted-by", granted_by, "--evidence", evidence,
              "--expires-utc", expires, *extra],
             sd,
@@ -1056,6 +1058,269 @@ def case_doctrine_scan_khong_giai_entity_lap(c: Ctx):
     _doi(0, rc, e, "giải entity LẶP sinh dương tính giả trên merged&amp;#58;")
 
 
+# --- (h) AC 18 · DANH SÁCH ĐÓNG các lớp lách -----------------------------------
+#
+# VÌ SAO LÀ DANH SÁCH, KHÔNG PHẢI VÀI CA LẺ: `doctrine-scan` đã thua NĂM vòng
+# liên tiếp, mỗi vòng đúng một hình dạng ký tự mới, và mỗi lần vá xong lại lộ
+# hình dạng kế tiếp. Bảng dưới đây là DANH SÁCH ĐÓNG đã đo trên bản CHƯA VÁ:
+# 40 ca, 18 LỌT. Mỗi lớp một ca, mỗi lớp một đột biến giết đúng ca đó (xem
+# MUTANTS) — đó là điều kiện để tin rằng ca đang đo đúng lớp nó khai.
+
+def _ca_doctrine(noi_dung: str, ten: str, doi: int = 6):
+    """Dựng một ca doctrine-scan: bơm `noi_dung` vào adapter, đòi đúng `doi`."""
+    def f(c: Ctx):
+        r = _repo_gia(c.tmp, SACH + "\n" + noi_dung + "\n", ten=ten)
+        rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+        _doi(doi, rc, e, f"lớp {ten!r}")
+    return f
+
+
+# Chiều LỌT — mỗi dòng RENDER RA đúng một cụm doctrine bị cấm.
+LOP_LACH = [
+    # A · NFKC vs NFC — NFC theo ĐỊNH NGHĨA không gộp ký tự tương thích.
+    ("nfkc_hai_cham_toan_rong", "Ghi chú: merged： PR đã vào nhánh đích"),
+    ("nfkc_chu_toan_rong", "Ghi chú: ｍｅｒｇｅｄ： PR đã vào nhánh đích"),
+    ("nfkc_chu_so_tron", "Ghi chú: ③ attempt/packet"),
+    ("nfkc_chu_so_mu", "Ghi chú: ³ attempt/packet"),
+    ("nfkc_ligature_ff", "Ghi chú: sửa đúng eﬀective write set trên branch của generation"),
+    ("nfkc_solidus_toan_rong", "Ghi chú: dispatcher／reconciler"),
+    ("nfkc_gach_duoi_toan_rong", "Ghi chú: same＿failure＿limit"),
+    ("nfkc_vach_dung_toan_rong", "Ghi chú: paused ｜ blocked ｜ cancelled ｜ stale"),
+    # phân cách: NBSP, en-dash, hyphen phải quy về cùng mối với khoảng trắng / `_`.
+    # NBSP được PHỦ HAI LỚP — NFKC đã gộp `U+00A0` về khoảng trắng, và phép gộp
+    # phân cách cũng gộp nó. Nên KHÔNG đột biến đơn lẻ nào giết được ca này, và
+    # nó cố ý không nằm trong danh sách phải-chết của mutant nào: nói thẳng chỗ
+    # phủ chồng còn hơn gán bừa cho một lớp rồi tưởng đã đo được lớp ấy.
+    ("nbsp_phu_hai_lop", "Ghi chú: local controller"),
+    ("phan_cach_en_dash", "Ghi chú: same–failure–limit"),
+    ("phan_cach_hyphen", "Ghi chú: same-failure-limit"),
+    # B · ký tự định dạng `Cf` — không hiển thị nhưng cắt được chuỗi khớp.
+    ("cf_zwnj", "Ghi chú: mer‌ged: PR đã vào nhánh đích"),
+    ("cf_zwj", "Ghi chú: mer‍ged: PR đã vào nhánh đích"),
+    ("cf_word_joiner", "Ghi chú: mer⁠ged: PR đã vào nhánh đích"),
+    ("cf_soft_hyphen", "Ghi chú: mer­ged: PR đã vào nhánh đích"),
+    ("cf_bom", "Ghi chú: mer﻿ged: PR đã vào nhánh đích"),
+    # C · HTML entity — bốn cách viết, cùng một dấu hai chấm.
+    ("entity_thap_luc", "Ghi chú: merged&#x3A; PR đã vào nhánh đích"),
+    ("entity_co_ten", "Ghi chú: merged&colon; PR đã vào nhánh đích"),
+    ("entity_thieu_cham_phay", "Ghi chú: merged&#58 PR đã vào nhánh đích"),
+    # D · đồng tự Cyrillic / Hy Lạp — NFKC KHÔNG gộp những chữ này.
+    ("dong_tu_cyrillic_e", "Ghi chú: mеrged: PR đã vào nhánh đích"),
+    ("dong_tu_cyrillic_o", "Ghi chú: lоcal controller"),
+    ("dong_tu_hy_lap_o", "Ghi chú: lοcal controller"),
+    ("dong_tu_cyrillic_a", "Ghi chú: pаused | blocked | cancelled | stale"),
+    # E · nháy cong xen giữa từ.
+    ("nhay_cong_xen_giua", "Ghi chú: mer’ged: PR đã vào nhánh đích"),
+    # F · biến thể mũi tên.
+    ("mui_ten_dai", "Ghi chú: proposed ⟶ ready ⟶ leased ⟶ running ⟶ reviewing "
+                    "⟶ accepted ⟶ integrated ⟶ landed"),
+    # G · cấu trúc Markdown / HTML — thứ RENDER RA cụm cấm.
+    ("tag_html_xen_giua", "Ghi chú: mer<b>ged</b>: PR đã vào nhánh đích"),
+    ("comment_html_xen_giua", "Ghi chú: mer<!-- x -->ged: PR đã vào nhánh đích"),
+    ("link_markdown", "Ghi chú: [merged](#a): PR đã vào nhánh đích"),
+    ("backslash_escape", "Ghi chú: merged\\: PR đã vào nhánh đích"),
+]
+
+# Chiều BẮT OAN — AC 19. Mỗi lớp chuẩn hoá thêm ở trên có ít nhất một ca ở đây.
+# Chuẩn hoá mạnh hơn mà bắt oan văn bản bình thường là KHÔNG ĐẠT, y như để lọt.
+#
+# `oan_claude_md_master` là ca THẬT đang làm gate đỏ trên cây ĐÃ MERGE: `CLAUDE.md`
+# của master ngắt dòng giữa `người có` / `thẩm quyền` trong một câu KỂ LẠI kết quả
+# đo. Câu ấy không chép bảng vai trò §2 — nó tường thuật một phép đo.
+LOP_BAT_OAN = [
+    ("oan_claude_md_master",
+     "biệt THẨM QUYỀN. Danh sách cấm phải đoán trước mọi cách viết của kẻ gian\n"
+     "  (dấu nối, tiền tố, hậu tố, đồng tự Unicode, tổ hợp dấu) nên thua từ trong\n"
+     "  thiết kế. Đo ở `v1.36.68` (PR #104): ba tên tấn công `rc=0` → `rc=4`, người có\n"
+     "  thẩm quyền vẫn `rc=0`. Kèm chốt: đột biến nới danh sách phải làm ca đích ĐỎ."),
+    ("oan_term_giua_cau",
+     "Chỉ người có thẩm quyền mới cấp được lease; phiên worker thì không."),
+    ("oan_term_ngat_dong",
+     "Quyết định này thuộc về người có\nthẩm quyền, không thuộc phiên này."),
+    ("oan_entity_long", "Ghi chú: merged&amp;#58; PR đã vào nhánh đích"),
+    ("oan_van_ban_nga", "Пример текста на русском языке: локальный контроллер работает."),
+    ("oan_van_ban_hy_lap", "Παράδειγμα κειμένου στα ελληνικά για δοκιμή."),
+    ("oan_tu_gach_noi", "Quy trình cross-review chạy end-to-end với cấu hình read-only."),
+    ("oan_shell_lt_gt", "Chạy: `python tl.py --json` rồi so `a < b > c` trong shell."),
+    ("oan_tag_html_vo_hai", "Xem <b>tài liệu</b> và <i>ghi chú</i> ở docs/."),
+    ("oan_link_binh_thuong",
+     "Đọc [protocol](docs/PROTOCOL_DA_PHIEN.md) và [changelog](CHANGELOG.md)."),
+    ("oan_escape_markdown", "Ký tự \\* và \\_ phải escape khi viết Markdown."),
+    ("oan_tieng_viet_du_dau",
+     "Điều 5 quy định: người sử dụng lao động phải trả lương đúng hạn."),
+    ("oan_dau_cau_toan_rong", "Trích nguồn CJK：文書の内容はここにあります。"),
+    ("oan_bang_khac", "| cột | giá trị |\n|---|---|\n| thời gian | 5 phút |"),
+]
+
+
+def case_ac19_bang_vai_tro_THAT_van_bi_bat(c: Ctx):
+    """Chiều DƯƠNG của hạng NGÔN NGỮ THƯỜNG: chép ĐÚNG dòng bảng vai trò vẫn ĐỎ.
+
+    Không có ca này thì `CUM_NGON_NGU_THUONG` chỉ là một đường tha, và người đọc
+    không phân biệt được "đã sửa chiều bắt oan" với "đã gỡ chốt".
+
+    Ô bảng CỐ Ý không chứa mục cấm nào khác — nếu để nguyên ô nội dung thật
+    (`start/pause/…`) thì ca vẫn đỏ nhờ mục KHÁC, và đột biến gỡ cụm khỏi danh
+    sách sẽ không giết được nó: ca sẽ xanh vì lý do khác với lý do nó khai.
+    """
+    dong = "| Người có thẩm quyền | vai trò cấp lease |"
+    r = _repo_gia(c.tmp, SACH + "\n" + dong + "\n", ten="oan_bang_vai_tro_that")
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(6, rc, e, "chép ĐÚNG dòng bảng vai trò §2 mà KHÔNG bị bắt")
+
+
+def case_ac19_term_kem_muc_khac_cung_nhom_bi_bat(c: Ctx):
+    """Cụm hạng ngôn ngữ thường + một mục KHÁC cùng nhóm trong cùng đoạn ⇒ ĐỎ.
+
+    Đây là điều kiện (2) của `_co_ngu_canh_doctrine`: đoạn đang DỰNG LẠI bảng vai
+    trò chứ không dùng cụm từ trong câu.
+    """
+    r = _repo_gia(
+        c.tmp,
+        SACH + "\nVai trò: người có thẩm quyền, local controller, land operator.\n",
+        ten="oan_term_kem_muc_khac")
+    rc, _, e = run(c.script, ["doctrine-scan", "--root", r])
+    _doi(6, rc, e, "term + mục khác cùng nhóm trong một đoạn mà KHÔNG bị bắt")
+
+
+# --- (i) AC 21 · lược đồ lease qua MỘT hàm kiểm chung ---------------------------
+
+def _state_voi_lease(c: Ctx, lease):
+    """Dựng state `leased` mang đúng hình dạng `lease` cần đo, rồi mở lượt.
+
+    Sửa THẲNG tệp state là cố ý: đây là mô phỏng một state CŨ hoặc BỊ SỬA TAY —
+    đúng thứ `begin-attempt` phải fail-closed trước, và đúng thứ `record-lease`
+    không bao giờ sinh ra được.
+    """
+    import json as _json
+    sd = c.sd()
+    rc, _, e = c.init(sd, lease=False)
+    _doi(0, rc, e, "init")
+    p = sd / "wp55.json"
+    st = _json.loads(p.read_text(encoding="utf-8"))
+    st["state"] = "leased"
+    st["lease"] = lease
+    p.write_text(_json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+                 encoding="utf-8")
+    return run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+
+
+def _han_sau(**kw) -> str:
+    from datetime import datetime, timedelta, timezone
+    return (datetime.now(timezone.utc) + timedelta(**kw)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _lease_du(**ghi_de) -> dict:
+    d = {"lease_id": "wp55-test", "granted_by": "ducthangho",
+         "evidence": "https://github.com/o/r/issues/55#issuecomment-5281636040",
+         "expires_utc": _han_sau(hours=4)}
+    d.update(ghi_de)
+    return d
+
+
+def _doi_chan(c: Ctx, lease, ten: str):
+    """Đòi MÃ THOÁT CÓ KIỂM SOÁT và KHÔNG traceback."""
+    rc, _, e = _state_voi_lease(c, lease)
+    err = _txt(e)
+    if rc == 0:
+        raise AssertionError(f"{ten}: hình dạng lease sai mà LỌT (rc=0)")
+    if rc == 1 or "Traceback" in err:
+        raise AssertionError(f"{ten}: vỡ bằng TRACEBACK THÔ (rc={rc}) thay vì mã thoát "
+                             f"có kiểm soát; stderr={err[:200]!r}")
+
+
+def case_ac21_lease_chi_co_expires(c: Ctx):
+    """P1-B nguyên văn: `begin-attempt` nhận state `record-lease` không sinh ra được."""
+    _doi_chan(c, {"expires_utc": _han_sau(hours=4)}, "chỉ có expires_utc")
+
+
+def case_ac21_lease_thieu_tung_khoa(c: Ctx):
+    for k in ("lease_id", "granted_by", "evidence", "expires_utc"):
+        d = _lease_du()
+        d.pop(k)
+        _doi_chan(c, d, f"thiếu {k}")
+
+
+def case_ac21_lease_sai_kieu_khong_traceback(c: Ctx):
+    for v in ("stolen", 12345, [1, 2], True, 3.5):
+        _doi_chan(c, v, f"lease kiểu {type(v).__name__}")
+
+
+def case_ac21_khoa_sai_kieu_khong_traceback(c: Ctx):
+    for k, v in (("lease_id", ["x"]), ("granted_by", 7), ("evidence", {}),
+                 ("expires_utc", 99), ("expires_utc", None)):
+        _doi_chan(c, _lease_du(**{k: v}), f"{k}={v!r}")
+
+
+def case_ac21_khoa_rong(c: Ctx):
+    for k in ("lease_id", "granted_by", "evidence", "expires_utc"):
+        _doi_chan(c, _lease_du(**{k: "   "}), f"{k} rỗng")
+
+
+def case_ac21_expires_sai_dang(c: Ctx):
+    for v in ("not-a-date", "2099-01-01T00:00:00", "2099-13-45T99:99:99"):
+        _doi_chan(c, _lease_du(expires_utc=v), f"expires_utc={v!r}")
+
+
+def case_ac21_expires_ngoai_cua_so(c: Ctx):
+    """Năm 9999 và trước 1970 — hai đầu của cửa sổ hạn.
+
+    Một lease sống tới năm 9999 làm chốt hạn thành trang trí; bản trước nhận nó.
+    """
+    _doi_chan(c, _lease_du(expires_utc="9999-01-01T00:00:00Z"), "năm 9999")
+    _doi_chan(c, _lease_du(expires_utc="1960-01-01T00:00:00Z"), "trước 1970")
+    _doi_chan(c, _lease_du(expires_utc=_han_sau(days=400)), "xa hơn 366 ngày")
+
+
+def case_ac21_lease_tu_cap_trong_state(c: Ctx):
+    """Lease TỰ CẤP còn nguyên trong state vẫn là lease tự cấp lúc mở lượt.
+
+    `record-lease` chặn `granted_by: "claude"` bằng rc=7, nhưng bản trước
+    `begin-attempt` KHÔNG kiểm lại thẩm quyền — nên state đó mở được lượt (rc=0).
+    """
+    _doi_chan(c, _lease_du(granted_by="claude"), "granted_by là provider")
+    _doi_chan(c, _lease_du(granted_by="codex-dispatcher"), "granted_by ngoài allowlist")
+
+
+def case_ac21_lease_hop_le_KHONG_bi_chan(c: Ctx):
+    """Chiều BẮT OAN của AC 21: state HỢP LỆ không được bị chặn.
+
+    Thiếu ca này thì "siết cho chặt" biến packet thành kẹt cứng, và không ai
+    phân biệt được chốt đúng với chốt hỏng.
+    """
+    for ten, d in (("hạn +4h", _lease_du()),
+                   ("hạn +300 ngày", _lease_du(expires_utc=_han_sau(days=300))),
+                   ("granted_by có hoa/khoảng trắng", _lease_du(granted_by="  DUCTHANGHO  "))):
+        rc, _, e = _state_voi_lease(c, d)
+        _doi(0, rc, e, f"chặn OAN một lease hợp lệ ({ten})")
+
+
+def case_ac21_hai_cua_CUNG_luoc_do(c: Ctx):
+    """Hai cửa, MỘT lược đồ: thứ `record-lease` từ chối thì `begin-attempt` cũng từ chối.
+
+    Đây là phát biểu trực tiếp của AC 21. Ca này so HÀNH VI của hai lệnh trên
+    cùng một tập hình dạng, thay vì tin rằng chúng dùng chung hàm.
+    """
+    xau = [_lease_du(granted_by="claude"),
+           _lease_du(granted_by="codex-dispatcher"),
+           _lease_du(lease_id="  "),
+           _lease_du(evidence="  "),
+           _lease_du(expires_utc="9999-01-01T00:00:00Z"),
+           _lease_du(expires_utc="2099-01-01T00:00:00")]
+    for d in xau:
+        sd = c.sd()
+        rc, _, e = c.init(sd, lease=False)
+        _doi(0, rc, e, "init")
+        rc_ghi, _, _ = c.cap_lease(sd, 55, granted_by=d["granted_by"],
+                                   expires=d["expires_utc"], evidence=d["evidence"],
+                                   lease_id=d["lease_id"])
+        rc_mo, _, _ = _state_voi_lease(c, d)
+        if (rc_ghi == 0) != (rc_mo == 0):
+            raise AssertionError(
+                f"record-lease và begin-attempt LỆCH NHAU trên {d!r}: "
+                f"record-lease rc={rc_ghi}, begin-attempt rc={rc_mo}")
+
+
 CASES = [
     ("init_KHONG_duoc_tu_cap_lease", case_init_KHONG_duoc_tu_cap_lease),
     ("tu_cap_lease_bang_ten_provider_bi_chan", case_tu_cap_lease_bang_ten_provider_bi_chan),
@@ -1111,7 +1376,26 @@ CASES = [
     ("doctrine_scan_bat_zero_width_bi_chan", case_doctrine_scan_bat_zero_width_bi_chan),
     ("doctrine_scan_bat_html_entity_bi_chan", case_doctrine_scan_bat_html_entity_bi_chan),
     ("doctrine_scan_khong_giai_entity_lap", case_doctrine_scan_khong_giai_entity_lap),
+    ("ac19_bang_vai_tro_THAT_van_bi_bat", case_ac19_bang_vai_tro_THAT_van_bi_bat),
+    ("ac19_term_kem_muc_khac_cung_nhom_bi_bat", case_ac19_term_kem_muc_khac_cung_nhom_bi_bat),
+    ("ac21_lease_chi_co_expires", case_ac21_lease_chi_co_expires),
+    ("ac21_lease_thieu_tung_khoa", case_ac21_lease_thieu_tung_khoa),
+    ("ac21_lease_sai_kieu_khong_traceback", case_ac21_lease_sai_kieu_khong_traceback),
+    ("ac21_khoa_sai_kieu_khong_traceback", case_ac21_khoa_sai_kieu_khong_traceback),
+    ("ac21_khoa_rong", case_ac21_khoa_rong),
+    ("ac21_expires_sai_dang", case_ac21_expires_sai_dang),
+    ("ac21_expires_ngoai_cua_so", case_ac21_expires_ngoai_cua_so),
+    ("ac21_lease_tu_cap_trong_state", case_ac21_lease_tu_cap_trong_state),
+    ("ac21_lease_hop_le_KHONG_bi_chan", case_ac21_lease_hop_le_KHONG_bi_chan),
+    ("ac21_hai_cua_CUNG_luoc_do", case_ac21_hai_cua_CUNG_luoc_do),
 ]
+
+# AC 18 — mỗi lớp trong danh sách đóng thành MỘT ca có tên riêng, để đột biến
+# tương ứng giết được ĐÚNG ca đó. Gộp cả bảng vào một ca sẽ làm mọi đột biến
+# giết cùng một chỗ, và khi ấy phép tự chứng minh không rỗng mất hết độ phân giải.
+CASES += [(f"ac18_{ten}", _ca_doctrine(nd, f"ac18_{ten}", 6)) for ten, nd in LOP_LACH]
+# AC 19 — chiều BẮT OAN, cùng cách tổ chức.
+CASES += [(f"ac19_{ten}", _ca_doctrine(nd, f"ac19_{ten}", 0)) for ten, nd in LOP_BAT_OAN]
 
 # Đột biến nới ngưỡng: mỗi cái BẮT BUỘC giết đúng những ca dưới đây. Ca không
 # chết được nghĩa là nó không đo cái nó khai.
@@ -1142,18 +1426,21 @@ MUTANTS = {
         "    if False:",
         ["tu_cap_lease_bang_ten_provider_bi_chan"],
     ),
-    "bo_kiem_han_luc_GHI_lease": (
-        "    if han <= datetime.now(timezone.utc):",
+    # AC 21 đổi hình dạng chốt hạn: TRƯỚC có HAI phép kiểm rời nhau (một trong
+    # `record-lease`, một trong `begin-attempt`) nên cần hai đột biến không phủ
+    # nhau. Giờ chỉ còn MỘT phép kiểm trong hàm chung — đó chính là điều AC 21
+    # đòi — nên một đột biến giết CẢ HAI ca là kết quả ĐÚNG, không phải mất độ
+    # phân giải: hai ca vẫn đi qua hai đường gọi khác nhau (ghi lease / mở lượt).
+    "bo_kiem_han_trong_ham_chung": (
+        "    if han <= bay_gio:",
         "    if False:",
-        ["lease_da_het_han_khong_ghi_duoc"],
+        ["lease_da_het_han_khong_ghi_duoc",
+         "begin_attempt_sau_khi_lease_HET_HAN_bi_chan"],
     ),
-    # Hạn chỉ kiểm lúc cấp rồi thôi = đúng lỗ đã cho một lượt review chạy 7 GIỜ sau
-    # khi lease hết hạn. Đột biến này bỏ RIÊNG phép kiểm lúc mở lượt, nên ca
-    # `lease_da_het_han_khong_ghi_duoc` VẪN xanh — hai lớp, hai ca, không phủ nhau.
-    "bo_kiem_han_LUC_MO_LUOT": (
-        "    if het <= datetime.now(timezone.utc):",
+    "bo_gioi_han_cua_so_han": (
+        "    if (han - bay_gio).days > GIOI_HAN_HAN_NGAY:",
         "    if False:",
-        ["begin_attempt_sau_khi_lease_HET_HAN_bi_chan"],
+        ["ac21_expires_ngoai_cua_so"],
     ),
     # --- `lease-authority-spoof` P1 (cross-review lượt 4, codex, 14-08-2026) -----
     # Nới danh sách CHO PHÉP để chứa cả bốn tên tấn công: nếu ca đích VẪN xanh sau
@@ -1165,24 +1452,117 @@ MUTANTS = {
         '"cödex", "cödex")',
         ["lease_authority_ten_gia_mao_bi_chan"],
     ),
-    # --- `legacy-lease-bypass` P1 (cross-review lượt 4, codex, 14-08-2026) -------
-    # Trả điều kiện về đúng dạng fail-open của bản trước.
+    # --- `partial-lease-authority-bypass` P1 (verdict lượt 5, PR #92) -----------
+    # ĐỘT BIẾN SPEC ĐÒI: "tách hai chốt ra khỏi hàm chung ⇒ ca đích phải ĐỎ".
+    # Thay lời gọi hàm chung bằng ĐÚNG phép tự kiểm rời rạc của bản trước — đòi
+    # `lease` truthy VÀ có `expires_utc`, rồi kiểm hạn — không kiểm trọn lược đồ,
+    # không kiểm kiểu, không kiểm lại thẩm quyền. Ca hạn VẪN xanh dưới đột biến
+    # này, nên nó đo đúng cái nó khai: sự CHUNG NHAU của phép kiểm lược đồ.
+    "tach_begin_attempt_khoi_ham_chung": (
+        '    _kiem_luoc_do_lease(st.get("lease"), RC_STATE)',
+        '    _l = st.get("lease")\n'
+        '    if not _l or not _l.get("expires_utc"):\n'
+        '        _die(RC_STATE, "đột biến: chốt riêng, không dùng hàm chung")\n'
+        '    if _doc_han_utc(_l["expires_utc"]) <= datetime.now(timezone.utc):\n'
+        '        _die(RC_STATE, "đột biến: lease hết hạn")',
+        ["ac21_lease_chi_co_expires", "ac21_lease_thieu_tung_khoa",
+         "ac21_lease_sai_kieu_khong_traceback", "ac21_khoa_sai_kieu_khong_traceback",
+         "ac21_khoa_rong", "ac21_lease_tu_cap_trong_state", "ac21_hai_cua_CUNG_luoc_do"],
+    ),
     "tra_ve_fail_open_thieu_lease": (
-        '    if not lease or not lease.get("expires_utc"):',
-        '    if lease and lease.get("expires_utc"):',
+        '    _kiem_luoc_do_lease(st.get("lease"), RC_STATE)',
+        '    _l = st.get("lease")\n'
+        '    if _l and _l.get("expires_utc"):\n'
+        '        _kiem_luoc_do_lease(_l, RC_STATE)',
         ["legacy_state_khong_co_lease_bi_chan"],
     ),
-    # --- `doctrine-rendering-bypass` P1 (cross-review lượt 4, codex, 14-08-2026) -
-    # Hai lớp, hai ca — gỡ RIÊNG từng lớp để chứng minh mỗi lớp thật sự cần thiết.
+    # --- AC 18 · MỘT ĐỘT BIẾN CHO MỖI LỚP CHUẨN HOÁ -----------------------------
+    # Gỡ RIÊNG từng lớp để chứng minh mỗi lớp thật sự cần thiết, và để ca của lớp
+    # ấy chết ĐÚNG khi lớp ấy biến mất. Đây là phép tự chứng minh không rỗng ở độ
+    # phân giải TỪNG LỚP — thứ mà năm vòng vá theo hình dạng trước đây không có.
+    #
+    # Đột biến spec đòi cho P1-A: "hạ NFKC về NFC ⇒ ca đích phải ĐỎ".
+    "ha_NFKC_ve_NFC": (
+        'unicodedata.normalize("NFKC", text)',
+        'unicodedata.normalize("NFC", text)',
+        ["ac18_nfkc_hai_cham_toan_rong", "ac18_nfkc_chu_toan_rong",
+         "ac18_nfkc_chu_so_tron", "ac18_nfkc_chu_so_mu",
+         "ac18_nfkc_solidus_toan_rong", "ac18_nfkc_gach_duoi_toan_rong",
+         "ac18_nfkc_vach_dung_toan_rong"],
+    ),
     "bo_loc_ky_tu_dinh_dang_Cf": (
         '    text = "".join(ch for ch in text if unicodedata.category(ch) != "Cf")\n',
         "",
-        ["doctrine_scan_bat_zero_width_bi_chan"],
+        ["doctrine_scan_bat_zero_width_bi_chan", "ac18_cf_zwnj", "ac18_cf_zwj",
+         "ac18_cf_word_joiner", "ac18_cf_soft_hyphen", "ac18_cf_bom"],
     ),
     "bo_giai_html_entity": (
         "    text = html.unescape(text)\n",
         "",
-        ["doctrine_scan_bat_html_entity_bi_chan"],
+        ["doctrine_scan_bat_html_entity_bi_chan", "ac18_entity_thap_luc",
+         "ac18_entity_co_ten", "ac18_entity_thieu_cham_phay"],
+    ),
+    "bo_gap_dong_tu": (
+        ".translate(_DONG_TU)",
+        "",
+        ["ac18_dong_tu_cyrillic_e", "ac18_dong_tu_cyrillic_o",
+         "ac18_dong_tu_hy_lap_o", "ac18_dong_tu_cyrillic_a"],
+    ),
+    "bo_gap_mui_ten": (
+        ".translate(_MUI_TEN)",
+        "",
+        ["ac18_mui_ten_dai"],
+    ),
+    "bo_bo_trang_tri_va_nhay": (
+        ".translate(_BO_HAN)",
+        "",
+        ["ac18_nhay_cong_xen_giua"],
+    ),
+    "bo_gop_phan_cach": (
+        ".translate(_PHAN_CACH)",
+        "",
+        ["ac18_phan_cach_en_dash", "ac18_phan_cach_hyphen"],
+    ),
+    "bo_tag_html": (
+        '    text = _RE_TAG_HTML.sub("", text)\n',
+        "",
+        ["ac18_tag_html_xen_giua"],
+    ),
+    "bo_comment_html": (
+        '    text = _RE_COMMENT_HTML.sub("", text)\n',
+        "",
+        ["ac18_comment_html_xen_giua"],
+    ),
+    "bo_rut_text_link_markdown": (
+        '    text = _RE_LINK_MD.sub(r"\\1", text)\n',
+        "",
+        ["ac18_link_markdown"],
+    ),
+    "bo_go_backslash_escape": (
+        '    text = _RE_ESCAPE.sub(r"\\1", text)\n',
+        "",
+        ["ac18_backslash_escape"],
+    ),
+    # --- AC 19 · chiều BẮT OAN --------------------------------------------------
+    # Bỏ điều kiện ngữ cảnh của hạng NGÔN NGỮ THƯỜNG ⇒ văn xuôi kể lại kết quả đo
+    # bị tính là chép doctrine trở lại. Không có đột biến này thì không ai biết
+    # ba ca bắt-oan kia đang đo chốt hay chỉ đang xanh sẵn.
+    "bo_ngu_canh_hang_ngon_ngu_thuong": (
+        "                if cum in CUM_NGON_NGU_THUONG:",
+        "                if False:",
+        ["ac19_oan_claude_md_master", "ac19_oan_term_giua_cau",
+         "ac19_oan_term_ngat_dong"],
+    ),
+    # Chiều ngược: gỡ HẲN cụm khỏi danh sách cấm thì ca DƯƠNG phải chết — chứng
+    # minh sửa chiều bắt oan KHÔNG phải là gỡ chốt.
+    #
+    # Chỉ ca ô-bảng nằm trong danh sách phải-chết. `ac19_term_kem_muc_khac_...`
+    # theo định nghĩa phải chứa một mục KHÁC cùng nhóm, nên nó vẫn đỏ khi cụm bị
+    # gỡ — nó đo điều kiện (2) của ngữ cảnh, không đo sự có mặt của cụm.
+    "go_han_cum_khoi_danh_sach": (
+        '        "người có thẩm quyền",\n',
+        "",
+        ["ac19_bang_vai_tro_THAT_van_bi_bat"],
     ),
 }
 

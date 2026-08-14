@@ -181,6 +181,28 @@ FORBIDDEN_DOCTRINE_PHRASES = {
     ],
 }
 
+# --- (c2) hạng NGÔN NGỮ THƯỜNG — chiều BẮT OAN (AC 19) -------------------------
+#
+# TIÊU CHÍ, khai tường minh và áp cho TOÀN danh sách trên chứ không riêng cụm nào:
+#   một mục thuộc hạng này khi nó là cụm danh từ tiếng Việt/Anh dùng được trong
+#   câu bình thường mà KHÔNG mượn nghĩa protocol.
+#
+# Soát cả danh sách theo tiêu chí ấy: ngưỡng số và định danh `max_*` là biểu thức
+# đặt ra (`3 attempt/packet`, `same_failure_limit`); dòng state machine là chuỗi
+# trạng thái; `dispatcher/reconciler`, `local controller`, `land operator`,
+# `apply job`, `phiên land` là NHÃN VAI do protocol đặt — tiếng Anh chen giữa văn
+# bản tiếng Việt, không ai viết vô tình; bốn ô nội dung và bốn định nghĩa
+# `merged:`/`integrated:`/`landed:`/`complete:` là câu của protocol. Còn lại đúng
+# MỘT mục là cụm danh từ tiếng Việt phổ thông.
+#
+# Đây là KẾT QUẢ của việc áp tiêu chí, không phải bỏ riêng cụm đang làm gate đỏ.
+# Mục hạng này KHÔNG bị gỡ khỏi danh sách cấm — nó chỉ đòi thêm NGỮ CẢNH TÁI TẠO
+# DOCTRINE (xem `_co_ngu_canh_doctrine`). Ca thật buộc phải có hạng này:
+# `CLAUDE.md` của master ngắt dòng giữa `người có` / `thẩm quyền` trong một câu
+# KỂ LẠI kết quả đo, và bản trước tính đó là chép doctrine (`rc=6`) — bắt oan.
+# Chuẩn hoá mạnh hơn mà bắt oan văn bản bình thường là KHÔNG ĐẠT, y như để lọt.
+CUM_NGON_NGU_THUONG = frozenset({"người có thẩm quyền"})
+
 
 def _cung_hoa_stdout() -> None:
     """Ép stdout/stderr về UTF-8 để lệnh không chết khi bị CAPTURE.
@@ -198,44 +220,103 @@ def _cung_hoa_stdout() -> None:
             pass
 
 
-# Ký tự TRANG TRÍ của Markdown, bị bỏ trước khi so. Không có bước này thì chép
-# nguyên một dòng doctrine kèm dấu nháy ngược là lọt: `merged`: … không khớp
-# "merged: …". Đã ĐO: 5/9 dòng doctrine THẬT lọt lưới chỉ vì lớp trang trí này.
-# Bỏ cả gạch dưới nên `same_failure_limit` và `same failure limit` quy về một mối
-# — hai vế đều đi qua cùng phép chuẩn hoá nên vẫn khớp nhau.
-_TRANG_TRI = str.maketrans("", "", "`*_~")
+# --- chuẩn hoá doctrine: MỘT MỐI cho CẢ HAI VẾ so khớp -------------------------
+#
+# VÌ SAO VIẾT LẠI CẢ TẦNG, KHÔNG VÁ THÊM MỘT LỚP (AC 18):
+# `doctrine-scan` đã thua NĂM vòng liên tiếp, mỗi vòng một hình dạng ký tự mới
+# (dấu `.` → `==`/`!=`/`!` → nháy ngược Markdown → ZWSP + HTML entity → ký tự
+# tương thích toàn rộng). Mỗi lần vá đúng hình dạng vừa bị chỉ ra, lần sau lộ
+# hình dạng kế tiếp. Nên revision 3 CẤM cách vá theo hình dạng: phải xuất DANH
+# SÁCH ĐÓNG các lớp trước, rồi vá MỘT LƯỢT ở tầng cho cả danh sách.
+#
+# Danh sách đóng đã đo trên bản CHƯA VÁ (40 ca, 18 LỌT). Spec chỉ nêu lớp NFKC;
+# đo ra thêm 5 nhóm nữa mà spec KHÔNG nêu — đồng tự Cyrillic/Hy Lạp, nháy cong
+# xen giữa, biến thể mũi tên/dash, tag+comment HTML, link Markdown, backslash
+# escape. Vá riêng NFKC sẽ đóng 6/18 và để lại 12.
+
+# Bỏ HẲN: trang trí Markdown và mọi loại nháy. Nháy cong `’` xen giữa từ
+# (`mer’ged`) là một lớp lách đã đo — bỏ nháy làm nó vô hiệu.
+_BO_HAN = str.maketrans("", "", "`*~\"'\u2018\u2019\u201a\u201b\u201c\u201d\u201e\u201f")
+
+# Quy về MỘT khoảng trắng: gạch dưới, mọi biến thể hyphen/dash, khoảng trắng
+# không ngắt. GỘP chứ KHÔNG XOÁ — bản trước xoá `_`, nên `same_failure_limit`
+# thành `samefailurelimit` còn `same failure limit` giữ nguyên khoảng trắng:
+# HAI CHUỖI KHÔNG KHỚP NHAU, trái hẳn điều chú thích bản trước tuyên bố. Gộp về
+# khoảng trắng làm `_`, `-`, en-dash và khoảng trắng thành MỘT mối thật, và giữ
+# nguyên ranh giới từ nên không mở thêm cửa cho dương tính giả.
+_PHAN_CACH = {ord(c): " " for c in "_\u00a0-\u2010\u2011\u2012\u2013\u2014\u2015\u2212"}
+
+# Đồng tự Cyrillic/Hy Lạp → Latin. Chỉ chữ THƯỜNG (chạy SAU casefold) và chỉ
+# những chữ TRÙNG HÌNH, không gấp bừa cả bảng chữ cái — gấp rộng sẽ băm nát văn
+# bản Nga/Hy Lạp thật và sinh dương tính giả (ca O5/O6 giữ chiều này).
+_DONG_TU = str.maketrans({
+    "\u0430": "a", "\u0432": "b", "\u0435": "e", "\u043a": "k", "\u043c": "m",
+    "\u043d": "h", "\u043e": "o", "\u0440": "p", "\u0441": "c", "\u0442": "t",
+    "\u0443": "y", "\u0445": "x", "\u0456": "i", "\u0458": "j", "\u0455": "s",
+    "\u04bb": "h", "\u0501": "d", "\u051b": "q", "\u051d": "w",
+    "\u03b1": "a", "\u03b5": "e", "\u03b9": "i", "\u03ba": "k", "\u03bd": "v",
+    "\u03bf": "o", "\u03c1": "p", "\u03c4": "t", "\u03c5": "u", "\u03c7": "x",
+})
+
+# Biến thể mũi tên → `→`. Dòng state machine của protocol dùng `→`; một mũi tên
+# DÀI `⟶` render gần như y hệt nhưng NFKC không gộp.
+_MUI_TEN = str.maketrans({
+    "\u27f6": "\u2192", "\u21d2": "\u2192", "\u27f9": "\u2192",
+    "\u2794": "\u2192", "\u279c": "\u2192", "\u2799": "\u2192",
+    "\u2b95": "\u2192", "\u21fe": "\u2192",
+})
+
+# Comment HTML: `mer<!-- x -->ged` render ra `merged`.
+_RE_COMMENT_HTML = re.compile(r"<!--.*?-->", re.DOTALL)
+# Tag HTML: `mer<b>ged</b>` render ra `merged`. ĐÒI tên tag NGAY SAU `<` (không
+# cho khoảng trắng chen vào), nên `a < b > c` trong một mẫu shell KHÔNG bị coi là
+# tag — đó là ràng buộc bắt-oan O8 của lớp này.
+_RE_TAG_HTML = re.compile(r"</?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?/?>")
+# Link/ảnh Markdown: `[merged](#a)` render ra `merged`.
+_RE_LINK_MD = re.compile(r"!?\[([^\]\n]*)\]\([^()\n]*\)")
+_RE_LINK_REF = re.compile(r"!?\[([^\]\n]*)\]\[[^\]\n]*\]")
+# Backslash escape: `merged\:` render ra `merged:`.
+_RE_ESCAPE = re.compile(r"\\([!-/:-@\[-`{-~])")
 
 
 def _chuan_hoa(text: str) -> str:
-    """Giải HTML entity + bỏ ký tự định dạng vô hình + NFC + casefold + bỏ trang
-    trí Markdown + gộp khoảng trắng.
+    """Quy một đoạn văn bản về DẠNG HIỂN THỊ, để so khớp doctrine.
 
-    Dùng CHỈ cho doctrine-scan. Ở đây chuẩn hoá rộng là ĐÚNG HƯỚNG, ngược hẳn
+    Dùng CHỈ cho doctrine-scan, và áp cho **CẢ HAI VẾ** — văn bản quét lẫn cụm
+    cấm đều đi qua đúng hàm này. Ở đây chuẩn hoá rộng là ĐÚNG HƯỚNG, ngược hẳn
     với phép đếm finding: khớp rộng chỉ buộc adapter viết mỏng hơn (sai về phía
     an toàn), còn khớp rộng ở finding-id sẽ gộp oan hai lỗi khác nhau.
 
-    Hai lớp đầu vá `doctrine-rendering-bypass` (cross-review lượt 4, codex,
-    14-08-2026): bản trước xử lý trang trí Markdown và khoảng trắng, nhưng KHÔNG
-    xử lý ký tự định dạng vô hình lẫn HTML entity, nên `mer<ZWSP>ged: ...` và
-    `merged&#58; ...` đều lọt (`rc=0`) dù cả hai RENDER RA đúng cụm bị cấm.
+    Thứ tự các bước CÓ LÝ DO, đừng đảo:
 
-      1. `html.unescape` giải entity — `&#58;` → `:`, `&amp;` → `&`, v.v. — để câu
-         gõ bằng entity và câu gõ bằng ký tự thật quy về một mối.
-      2. Bỏ ký tự thuộc phạm trù Unicode `Cf` (định dạng — gồm `U+200B` zero-width
-         space, `U+200C`/`U+200D` ZWNJ/ZWJ, `U+FEFF` BOM, `U+00AD` soft hyphen…):
-         những ký tự này KHÔNG hiển thị nhưng vẫn chia cắt được một chuỗi khớp.
+      1. bỏ comment HTML, rồi bỏ tag HTML;
+      2. rút text của link/ảnh Markdown, gỡ backslash escape;
+      3. `html.unescape` — ĐẶT SAU bước 1 có chủ đích: `&lt;b&gt;` hiển thị
+         NGUYÊN VĂN `<b>` chứ không phải một tag, nên nó phải thoát khỏi bước bỏ
+         tag trước rồi mới được giải;
+      4. **NFKC**, không phải NFC. NFC theo ĐỊNH NGHĨA không đụng tới ký tự
+         tương thích, nên `：` toàn rộng, `ｍｅｒｇｅｄ`, `③`, `³`, `／`, `＿`, `｜`
+         đều lọt. Đây là sai ở LỰA CHỌN DẠNG CHUẨN, không phải sót một trường hợp;
+      5. bỏ ký tự hạng `Cf` (ZWSP/ZWNJ/ZWJ/WORD JOINER/soft hyphen/BOM);
+      6. `casefold`, rồi gấp đồng tự (chỉ chữ thường), gấp mũi tên;
+      7. bỏ trang trí + nháy, gộp phân cách về khoảng trắng, gộp khoảng trắng.
 
-    AN TOÀN — nói thẳng, đừng lặp: `html.unescape` giải entity ĐÚNG MỘT LẦN (nó
-    thay thế trên chuỗi GỐC bằng một lượt quét tuyến tính, không quét lại phần vừa
-    thay), không lặp tới điểm bất động. Giải LẶP sẽ biến `&amp;#58;` — thứ hiển
-    thị NGUYÊN VĂN `&#58;` trong Markdown/HTML, KHÔNG phải dấu hai chấm — thành
-    dấu hai chấm thật, và sinh DƯƠNG TÍNH GIẢ trên cụm `merged: ...`. Đã ĐO:
-    `html.unescape("&amp;#58;")` → `"&#58;"`, không phải `":"`.
+    AN TOÀN — `html.unescape` giải entity ĐÚNG MỘT LẦN (một lượt quét tuyến tính
+    trên chuỗi GỐC, không quét lại phần vừa thay), KHÔNG lặp tới điểm bất động.
+    Giải LẶP sẽ biến `&amp;#58;` — thứ hiển thị NGUYÊN VĂN `&#58;`, KHÔNG phải
+    dấu hai chấm — thành dấu hai chấm thật và sinh DƯƠNG TÍNH GIẢ trên cụm
+    `merged: ...`. Đã ĐO: `html.unescape("&amp;#58;")` → `"&#58;"`.
     """
+    text = _RE_COMMENT_HTML.sub("", text)
+    text = _RE_TAG_HTML.sub("", text)
+    text = _RE_LINK_MD.sub(r"\1", text)
+    text = _RE_LINK_REF.sub(r"\1", text)
+    text = _RE_ESCAPE.sub(r"\1", text)
     text = html.unescape(text)
-    text = unicodedata.normalize("NFC", text)
+    text = unicodedata.normalize("NFKC", text)
     text = "".join(ch for ch in text if unicodedata.category(ch) != "Cf")
-    text = text.casefold().translate(_TRANG_TRI)
+    text = text.casefold().translate(_DONG_TU).translate(_MUI_TEN)
+    text = text.translate(_BO_HAN).translate(_PHAN_CACH)
     return " ".join(text.split())
 
 
@@ -264,6 +345,53 @@ def _phang_ca_tep(raw: str):
         phan.append(n)
         vi_tri += len(n)
     return "".join(phan), ban_do
+
+
+def _don_vi_van_ban(raw: str):
+    """Cắt tệp thành ĐƠN VỊ để xét ngữ cảnh: từng dòng thô, và từng ĐOẠN.
+
+    Đoạn = các dòng liền nhau không trống. Một ô bảng vai trò nằm gọn trong một
+    dòng; một dòng bảng bị bẻ thì vẫn nằm gọn trong một đoạn. Văn xuôi kể lại kết
+    quả đo cũng là một đoạn — nhưng nó không có `|` và không chứa mục nào khác
+    cùng nhóm, nên nó KHÔNG đạt ngữ cảnh.
+    """
+    dong = raw.splitlines()
+    for d in dong:
+        yield d
+    doan, dem = [], []
+    for d in dong:
+        if d.strip():
+            dem.append(d)
+        elif dem:
+            doan.append("\n".join(dem))
+            dem = []
+    if dem:
+        doan.append("\n".join(dem))
+    for d in doan:
+        yield d
+
+
+def _co_ngu_canh_doctrine(raw: str, kim: str, kim_khac_cung_nhom) -> bool:
+    """Một mục hạng NGÔN NGỮ THƯỜNG có đang TÁI TẠO doctrine không?
+
+    Định nghĩa CƠ HỌC, không cảm tính — đúng một trong hai là đủ:
+      1. cụm nằm trong một ĐƠN VỊ mà bản thô có `|`, tức một ô bảng: chép cả DÒNG
+         bảng vai trò mới là chép doctrine;
+      2. đơn vị ấy còn chứa một mục KHÁC cùng nhóm — tức bảng/mục đang được dựng
+         lại chứ không phải một cụm từ được dùng trong câu.
+
+    Dùng cụm trong văn xuôi, kể cả khi nó bị ngắt qua xuống dòng, KHÔNG đạt cả
+    hai điều kiện ⇒ THA. Đó là ca `CLAUDE.md` master dòng 82–83.
+    """
+    for dv in _don_vi_van_ban(raw):
+        n = _chuan_hoa(dv)
+        if kim not in n:
+            continue
+        if "|" in dv:
+            return True
+        if any(k and k in n for k in kim_khac_cung_nhom):
+            return True
+    return False
 
 
 def _dong_tai(ban_do, offset: int) -> int:
@@ -428,6 +556,88 @@ def _doc_han_utc(chuoi: str) -> datetime:
     return d.astimezone(timezone.utc)
 
 
+# Cửa sổ hạn hợp lệ của một lease. Chặn `expires_utc` năm 9999 — một lease sống
+# tới năm 9999 làm chốt hạn thành trang trí, mà bản trước nhận nó (`rc=0`).
+GIOI_HAN_HAN_NGAY = 366
+KHOA_LEASE = ("lease_id", "granted_by", "evidence", "expires_utc")
+
+
+def _kiem_luoc_do_lease(lease, rc_hinh_dang: int) -> dict:
+    """HÀM KIỂM CHUNG — nguồn sự thật DUY NHẤT về lược đồ lease (AC 21).
+
+    `record-lease` và `begin-attempt` gọi ĐÚNG hàm này trên ĐÚNG một cấu trúc.
+    Bản trước để hai chỗ tự kiểm rời nhau: `record-lease` đòi đủ bốn khoá, còn
+    `begin-attempt` chỉ đòi `lease` truthy VÀ có `expires_utc` — nên nó nhận một
+    state mà `record-lease` KHÔNG BAO GIỜ sinh ra được. Đã ĐO trên bản trước:
+    11 hình dạng sai LỌT (`rc=0`) và 5 hình dạng vỡ thành TRACEBACK THÔ (`rc=1`),
+    trong đó có cả lease TỰ CẤP (`granted_by: "claude"`) và lease cấp bởi tên
+    ngoài allowlist — hai thứ `record-lease` chặn thẳng. Đó là finding
+    `partial-lease-authority-bypass`.
+
+    `rc_hinh_dang` chỉ nói lỗi ĐẾN TỪ ĐÂU, không đổi phép kiểm: `record-lease`
+    nhận từ đối số dòng lệnh (`RC_ARG`), `begin-attempt` đọc từ state trên đĩa
+    (`RC_STATE`). Lỗi thẩm quyền luôn `RC_GUARD`, lỗi mốc thời gian luôn `RC_ARG`,
+    lease chết luôn `RC_STATE` — giống hệt nhau ở cả hai đường gọi.
+
+    Mọi hình dạng sai thoát CÓ KIỂM SOÁT. KHÔNG traceback: một chốt vỡ bằng
+    traceback là chốt chưa fail-closed, nó chỉ đang vỡ.
+    """
+    if isinstance(lease, bool) or not isinstance(lease, dict):
+        _die(rc_hinh_dang,
+             f"'lease' phải là một đối tượng có đủ {list(KHOA_LEASE)}; "
+             f"nhận được kiểu {type(lease).__name__!r}. State thiếu/hỏng lease là "
+             f"CŨ hoặc BỊ SỬA TAY — KHÔNG mở lượt ngầm trên nó.")
+    thieu = [k for k in KHOA_LEASE if k not in lease]
+    if thieu:
+        _die(rc_hinh_dang,
+             f"'lease' thiếu khoá {thieu} — lược đồ đủ là {list(KHOA_LEASE)}. "
+             f"Kiểm SỰ TỒN TẠI một khoá không phải kiểm TRỌN LƯỢC ĐỒ.")
+    for k in ("lease_id", "granted_by", "evidence"):
+        v = lease[k]
+        if not isinstance(v, str):
+            _die(rc_hinh_dang,
+                 f"'lease.{k}' phải là chuỗi, nhận kiểu {type(v).__name__!r}")
+        if not v.strip():
+            _die(rc_hinh_dang, f"'lease.{k}' rỗng")
+    nguoi_cap = lease["granted_by"].strip()
+    # Chốt CỐT LÕI, giữ nguyên thứ tự của bản trước để thông điệp gọi đúng tên
+    # bệnh: chốt PROVIDERS trước, chốt allowlist sau. Một agent tự ký cho chính
+    # mình thì thứ ghi ra không phải lease, chỉ là lời tự khai đội lốt uỷ quyền.
+    if nguoi_cap.lower() in PROVIDERS:
+        _die(RC_GUARD,
+             f"--granted-by {nguoi_cap!r} là tên một provider — agent KHÔNG tự cấp lease "
+             f"cho mình được (xem doctrine 'không tự cấp lease')")
+    if unicodedata.normalize("NFC", nguoi_cap).lower() not in NGUOI_CO_THAM_QUYEN:
+        _die(RC_GUARD,
+             f"--granted-by {nguoi_cap!r} KHÔNG nằm trong danh sách người có thẩm quyền "
+             f"{list(NGUOI_CO_THAM_QUYEN)} — danh sách CẤM không bao giờ đủ (cross-review "
+             f"14-08-2026, finding lease-authority-spoof), nên chốt này đòi tên phải ĐƯỢC "
+             f"PHÉP chứ không chỉ 'không bị cấm'. Thêm người cấp mới = sửa "
+             f"NGUOI_CO_THAM_QUYEN qua một commit có review.")
+    exp = lease["expires_utc"]
+    if not isinstance(exp, str):
+        _die(rc_hinh_dang,
+             f"'lease.expires_utc' phải là chuỗi ISO8601, nhận kiểu {type(exp).__name__!r}")
+    han = _doc_han_utc(exp)
+    bay_gio = datetime.now(timezone.utc)
+    if han.year < 1970:
+        _die(RC_STATE, f"'lease.expires_utc' trước 1970 ({han.isoformat()}) — mốc vô nghĩa")
+    if han <= bay_gio:
+        _die(RC_STATE,
+             f"lease hết hạn lúc {han.isoformat()} — không dùng được; xin lease mới, "
+             f"đừng coi một lease chết là có quyền")
+    if (han - bay_gio).days > GIOI_HAN_HAN_NGAY:
+        _die(RC_STATE,
+             f"'lease.expires_utc' {han.isoformat()} xa quá {GIOI_HAN_HAN_NGAY} ngày — "
+             f"một lease gần như vĩnh viễn làm chốt hạn thành trang trí")
+    return {
+        "lease_id": lease["lease_id"].strip(),
+        "granted_by": nguoi_cap,
+        "evidence": lease["evidence"].strip(),
+        "expires_utc": han.isoformat(),
+    }
+
+
 def cmd_record_lease(a, state_dir: Path) -> int:
     """GHI HỘ một lease do bên có thẩm quyền cấp — không phải tự cấp.
 
@@ -441,46 +651,25 @@ def cmd_record_lease(a, state_dir: Path) -> int:
         _die(RC_STATE,
              f"chỉ ghi được lease khi packet đang 'awaiting_lease'; hiện là {st['state']!r}. "
              f"Ghi đè lease của một packet đang chạy là hồi sinh một lượt đã cạn.")
-    nguoi_cap = (a.granted_by or "").strip()
-    if not nguoi_cap:
-        _die(RC_ARG, "--granted-by rỗng")
-    # Chốt CỐT LÕI. Một agent tự ký cho chính mình thì thứ ghi ra không phải lease,
-    # chỉ là lời tự khai đội lốt uỷ quyền. §2: start/authorize thuộc bên CÓ THẨM
-    # QUYỀN; tiến trình này chỉ ghi hộ. So khớp không phân biệt hoa thường vì
-    # "Claude" và "claude" là cùng một lời tự khai.
-    if nguoi_cap.lower() in PROVIDERS:
-        _die(RC_GUARD,
-             f"--granted-by {nguoi_cap!r} là tên một provider — agent KHÔNG tự cấp lease "
-             f"cho mình được (xem doctrine 'không tự cấp lease')")
-    # CHỐT THẬT: phải NẰM TRONG danh sách cho phép, không chỉ "không nằm trong danh
-    # sách cấm" ở trên. Đây là chỗ `codex-dispatcher` / `ai-codex-bot` / `cödex`
-    # từng lọt (finding `lease-authority-spoof`, xem chú thích ở `NGUOI_CO_THAM_QUYEN`).
-    if nguoi_cap.lower() not in NGUOI_CO_THAM_QUYEN:
-        _die(RC_GUARD,
-             f"--granted-by {nguoi_cap!r} KHÔNG nằm trong danh sách người có thẩm quyền "
-             f"{list(NGUOI_CO_THAM_QUYEN)} — danh sách CẤM không bao giờ đủ (cross-review "
-             f"14-08-2026, finding lease-authority-spoof), nên chốt này đòi tên phải ĐƯỢC "
-             f"PHÉP chứ không chỉ 'không bị cấm'. Thêm người cấp mới = sửa "
-             f"NGUOI_CO_THAM_QUYEN qua một commit có review.")
-    if not (a.evidence or "").strip():
-        _die(RC_ARG, "--evidence rỗng — lease phải có dấu vết bền để đối chiếu")
-    han = _doc_han_utc(a.expires_utc)
-    if han <= datetime.now(timezone.utc):
-        _die(RC_STATE,
-             f"lease đã hết hạn ngay lúc ghi ({han.isoformat()}) — xin lease mới, "
-             f"đừng ghi một lease chết rồi coi như có quyền")
-    st["lease"] = {
-        "lease_id": a.lease_id,
-        "granted_by": nguoi_cap,
-        "evidence": a.evidence.strip(),
-        "expires_utc": han.isoformat(),
-    }
+    # Dựng ứng viên rồi đưa qua ĐÚNG hàm kiểm chung. Không tự kiểm ở đây nữa —
+    # hai chỗ tự kiểm rời nhau CHÍNH LÀ finding `partial-lease-authority-bypass`.
+    lease = _kiem_luoc_do_lease(
+        {
+            "lease_id": a.lease_id,
+            "granted_by": a.granted_by,
+            "evidence": a.evidence,
+            "expires_utc": a.expires_utc,
+        },
+        RC_ARG,
+    )
+    st["lease"] = lease
     st["state"] = "leased"
-    st["history"].append({"event": "record_lease", "lease_id": a.lease_id,
-                          "granted_by": nguoi_cap, "expires_utc": han.isoformat()})
+    st["history"].append({"event": "record_lease", "lease_id": lease["lease_id"],
+                          "granted_by": lease["granted_by"],
+                          "expires_utc": lease["expires_utc"]})
     _save(state_dir, st)
-    print(f"đã ghi lease {a.lease_id} (cấp bởi {nguoi_cap}, hết hạn {han.isoformat()}) "
-          f"— state {st['state']}")
+    print(f"đã ghi lease {lease['lease_id']} (cấp bởi {lease['granted_by']}, "
+          f"hết hạn {lease['expires_utc']}) — state {st['state']}")
     return RC_OK
 
 
@@ -501,18 +690,12 @@ def cmd_begin_attempt(a, state_dir: Path) -> int:
     # với bất biến đó — chặn, KHÔNG nâng cấp ngầm. Di trú state cũ là việc TƯỜNG
     # MINH, có uỷ quyền của bên điều phối (generation mới + record-lease thật),
     # không phải việc lặng lẽ của `begin-attempt`.
-    lease = st.get("lease")
-    if not lease or not lease.get("expires_utc"):
-        _die(RC_STATE,
-             f"state {st['state']!r} không có 'lease' hợp lệ — 'leased'/'running' chỉ "
-             f"đạt được qua `record-lease`, nên state thiếu lease là CŨ hoặc HỎNG. "
-             f"KHÔNG mở lượt ngầm trên state đó; cần một đường di trú tường minh, có "
-             f"uỷ quyền, do bên điều phối cấp (generation mới + record-lease thật).")
-    het = _doc_han_utc(lease["expires_utc"])
-    if het <= datetime.now(timezone.utc):
-        _die(RC_STATE,
-             f"lease {lease.get('lease_id')!r} đã hết hạn lúc {het.isoformat()} — "
-             f"không mở lượt mới được; xin lease mới từ bên điều phối")
+    # ĐÚNG hàm kiểm mà `record-lease` dùng, trên ĐÚNG lược đồ đó. Không có phép
+    # kiểm riêng ở đây: mọi state mà hàm này từ chối là state `record-lease`
+    # KHÔNG BAO GIỜ sinh ra được, nên nhận nó là mở một đường vòng quanh chính
+    # cửa uỷ quyền. Hàm chung cũng kiểm lại THẨM QUYỀN người cấp, vì một lease
+    # tự cấp còn nguyên trong state vẫn là lease tự cấp lúc mở lượt.
+    _kiem_luoc_do_lease(st.get("lease"), RC_STATE)
     if a.provider != st["executor"]:
         _die(
             RC_PROVIDER,
@@ -770,6 +953,13 @@ def cmd_doctrine_scan(a, state_dir: Path) -> int:
                 kim = _chuan_hoa(cum)
                 if not kim:
                     continue
+                # Hạng NGÔN NGỮ THƯỜNG: chỉ tính khi có NGỮ CẢNH TÁI TẠO doctrine.
+                # Không có bước này thì một câu văn xuôi kể lại kết quả đo bị tính
+                # là chép doctrine — chiều BẮT OAN, AC 19.
+                if cum in CUM_NGON_NGU_THUONG:
+                    khac = [_chuan_hoa(c) for c in cum_list if c != cum]
+                    if not _co_ngu_canh_doctrine(raw, kim, khac):
+                        continue
                 tu = phang.find(kim)
                 while tu != -1:
                     dinh.append((str(f), nhom, cum, _dong_tai(ban_do, tu)))

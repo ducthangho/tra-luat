@@ -50,8 +50,15 @@ base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2   # merge-base, KHÔNG đổi
 # sai về master là đúng loại lỗi mà lease #3 vừa trả giá, chỉ khác chỗ sai. Đã đo lại
 # 14-08 07:45Z: head PR #92 vẫn cf39109c, merge với master mới vẫn SẠCH (rc=0), master
 # vẫn chỉ chạm CLAUDE.md trong 6 tệp write_set.
+#
+# `prompt_path` là đường dẫn TRONG KHO, và tệp này hiện CHỈ có trên nhánh
+# `ops/wp55-lease-4` — chưa merge vào master. Bản chiếu đầu (comment 5290916886) kèm
+# một prompt ghi nhầm rằng nguồn sự thật nằm "trên nhánh master": ai clone master sẽ
+# không thấy tệp và dừng ở BƯỚC 0a. Đúng loại lỗi lease #3 vừa trả giá — chỉ khác chỗ
+# sai — nên sửa ngay chứ không để lại làm bẫy. Prompt đã nói rõ phải `git fetch origin
+# ops/wp55-lease-4`; băm đổi theo, và lease được chiếu lại.
 prompt_path: ops/prompts/wp55-r2-review-4-codex-20260814.md
-prompt_sha256_required: e0f58b80beec8719dd7232381a27f1257a3154782812b9c4deff7fc260604911
+prompt_sha256_required: 0edba1bdc82f2f5cbff353b69a8c7199be89a97d6cfed0dabb7488dfaed75ca0
 
 granted_by: ducthangho          # CHỦ KHO — §2 "người có thẩm quyền"
 granted_on_instruction: direct, in-session, 2026-08-14 ("xu ly not ca 2 cho toi")
@@ -72,4 +79,6 @@ attempts_limit: 3
 attempt_2_summary: "sửa finding CHẶN 'init tự cấp lease' (cf39109c)"
 attempt_2_recorded_outside_state_machine: true   # begin-attempt KHÔNG được gọi; con số này do NGƯỜI khai
 prior_review_invalidated: wp55-r2-review-2-codex-20260813   # bản review neo 22d2cc9 hết hiệu lực (head mới ⇒ duyệt cũ hết hiệu lực)
-posted_comment_id: 5290916886   # workflow ghi, ĐỪNG sửa tay
+# Bản chiếu 5290916886 chiếu băm prompt CŨ (`e0f58b80…`) của bản prompt nói sai nhánh.
+# Gỡ `posted_comment_id` để workflow chiếu LẠI; giữ số cũ ở đây cho dấu vết khỏi đứt.
+supersedes_posted_comment: 5290916886

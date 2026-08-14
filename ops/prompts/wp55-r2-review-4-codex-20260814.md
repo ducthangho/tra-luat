@@ -4,7 +4,9 @@ KHONG sua file, KHONG push, KHONG merge, KHONG land, KHONG deploy, KHONG goi LIV
 
 lease     : wp55-r2-review-4-codex-20260814 · het han 2026-08-15T08:00:00Z (15:00 VN 15-08)
             nguon su that la TEP ops/leases/wp55-r2-review-4-codex-20260814.yaml tren
-            nhanh master; comment tu dong tren #55 chi la ban chieu.
+            nhanh `ops/wp55-lease-4` — CHUA merge vao master, nen `git fetch origin
+            ops/wp55-lease-4` truoc khi tim tep, dung clone master roi bao khong thay.
+            (Lease #3 va prompt #3 thi DA o master.) Comment tren #55 chi la ban chieu.
             Lease #3 het han 2026-08-14T09:08:40Z ma KHONG phien nao chay — lease nay
             thay no. Cua so dai hon HAN (24 gio thay vi 6): hai lease lien tiep chet
             vi cua so ngan hon khoang cach toi luc co phien that, chu khong phai vi ai

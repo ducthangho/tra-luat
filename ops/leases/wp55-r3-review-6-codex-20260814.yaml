@@ -1,0 +1,184 @@
+# Lease REVIEWER lượt 6 cho wp55 revision 3, generation 4 — neo head e6e4b73.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+# Sửa lease thì sửa ở đây rồi push; đừng sửa tay comment.
+#
+# NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và
+# cắt cụt giá trị — đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ.
+#
+# VÌ SAO CÓ LEASE NÀY:
+# Executor generation 4 đã giao nộp handoff §7 với `status: needs_followup`, đóng cả ba P1
+# bằng MỘT lượt vá ở tầng sau khi xuất danh sách đóng (AC 18). §8 bắt cross-provider:
+# executor là `claude` ⇒ reviewer lượt này BẮT BUỘC là `codex`.
+#
+# KHÁC MỌI LEASE TRƯỚC — trần CHƯA cạn: revision 3 mới dùng 1/3 attempt. Reviewer KHÔNG
+# bị sức ép "duyệt cho xong kẻo hết lượt". Nếu thấy vấn đề, `changes_requested` là đường
+# bình thường, không phải đường cùng.
+#
+# RỦI RO ĐÃ BIẾT, NÓI THẲNG — ĐƯỜNG GHI GITHUB:
+# BỐN lượt liên tiếp không ghi được verdict/handoff lên GitHub: vòng 3, lượt 4, lượt 5
+# (phải nhờ đăng hộ), và executor generation 4 vừa rồi (`api.github.com` trả 403
+# "GitHub access is not enabled for this session", `gh` không cài, MCP chưa xác thực).
+# `git push` thì CHẠY ĐƯỢC ở mọi lượt. Nên prompt đòi kiểm đường giao TRƯỚC khi làm việc,
+# và khuôn ghi-vào-kho của lượt 5 là đường dự phòng ĐÃ CHẠY ĐƯỢC.
+# Hệ quả phải nhìn thẳng: điều kiện `heartbeat_required_minutes` dưới đây có thể KHÔNG
+# thoả được bằng bất kỳ nỗ lực nào của phiên reviewer. Nếu vậy, ghi nhịp vào tệp trong kho
+# — im lặng KHÔNG được đọc thành phiên chết, và cũng KHÔNG được đọc thành phiên còn sống.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+phase_key: F3-03
+mission_issue: 54
+mission_revision: 6
+revision: 3
+generation: 4
+lease_id: wp55-r3-review-6-codex-20260814
+
+spec_path: ops/specs/wp55-r3-spec.md
+spec_branch: ops/wp55-r3-spec
+spec_hash: e321f811724fae97b19d523a3e5159bc13b425cd15fc6c753c7439fe28cae22d
+spec_hash_basis: sha256 của chính tệp spec, byte nguyên trạng
+
+role: reviewer
+provider: codex                 # BẮT BUỘC — executor là claude (§8 cross-provider)
+assurance_target: cross_approved
+access: read-only
+write_set: []                   # reviewer KHÔNG ghi (§2)
+branch_ownership: none
+
+target_pull_request: 115
+reviewed_sha_required: e6e4b73dc940fcd04e9030e353e0e5fe7f3f0af8
+branch: claude/wp55-r3g4-f3-03
+base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2
+
+prompt_path: ops/prompts/wp55-r3-review-6-codex-20260814.md
+prompt_sha256_required: e5719fc6e942ec3da9cf7dac66a35c05c3ae2ad86ffca17cb53b6d351e37050c
+
+granted_by: ducthangho          # CHỦ KHO — §2 người có thẩm quyền
+granted_on_instruction: 'direct, in-session, 2026-08-14 (làm cả hai đi — đăng hộ handoff, mở PR, cấp lease reviewer)'
+recorded_by: claude-session     # ghi hộ quyết định, KHÔNG phải dispatcher
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-14T19:30:00Z'
+lease_expires_at_utc: '2026-08-15T20:00:00Z'
+run_minutes: 1470
+heartbeat_required_minutes: 30
+
+attempts_used: 1
+attempts_limit: 3
+attempts_exhausted: false
+attempts_note: >-
+  Revision 3 mới dùng 1/3. Verdict chặn ở lượt này KHÔNG làm packet blocked — còn 2 lượt
+  nội dung. Ghi ra để reviewer không tự hạ chuẩn vì tưởng đang ở lượt cuối.
+
+# Executor khai đã đóng ba P1. Reviewer KIỂM, không nhận.
+findings_claimed_fixed:
+  - finding_id: doctrine-rendering-bypass-nfkc
+    claim: >-
+      _chuan_hoa viết lại cả tầng — NFKC (không phải NFC) + lọc Cf + giải entity MỘT lần
+      + gấp đồng tự Cyrillic/Hy Lạp + gấp mũi tên + bỏ nháy cong + gộp phân cách + bỏ
+      tag/comment HTML + rút text link + gỡ backslash escape; áp cho CẢ HAI vế so khớp
+    mutation_claimed: 'ha_NFKC_ve_NFC giết 7/7 ca đích'
+  - finding_id: partial-lease-authority-bypass
+    claim: >-
+      _kiem_luoc_do_lease — MỘT hàm kiểm chung dùng bởi cả record-lease lẫn begin-attempt;
+      trọn lược đồ + kiểu + thẩm quyền + cửa sổ hạn
+    mutation_claimed: 'tach_begin_attempt_khoi_ham_chung giết 7/7 ca đích'
+  - finding_id: merged-tree-doctrine-false-positive
+    claim: >-
+      hạng NGÔN NGỮ THƯỜNG + _co_ngu_canh_doctrine — mục ngôn ngữ thường chỉ tính là chép
+      doctrine khi có ngữ cảnh tái tạo doctrine
+    mutation_claimed: 'bo_ngu_canh_hang_ngon_ngu_thuong giết 3/3 ca bắt-oan'
+
+# AC 18 đòi danh sách ĐÓNG có TRƯỚC bản vá. Executor đã xuất, và nó lộ nhiều hơn spec biết.
+danh_sach_dong_AC18:
+  spec_neu_lop_doctrine: 2
+  do_duoc_lop_doctrine: 18
+  spec_neu_hinh_dang_lease: 5
+  do_duoc_hinh_dang_lease: 16
+  doctrine_truoc_va: '40 ca · 22 đạt · 18 LỌT · 0 bắt oan'
+  doctrine_sau_va: '40 ca · 40 đạt · 0 LỌT · 0 bắt oan'
+  bat_oan_truoc_va: '15 ca · 12 đạt · 3 BẮT OAN'
+  bat_oan_sau_va: '15 ca · 15 đạt · 0 BẮT OAN'
+  lease_truoc_va: '25 ca · 9 đạt · 11 LỌT · 5 TRACEBACK THÔ'
+  lease_sau_va: '28 ca · 28 đạt · 0 LỌT · 0 TRACEBACK · 0 bắt oan'
+
+# Tạo phẩm gốc của executor, neo băm — đọc bản gốc, đừng đọc tóm tắt.
+executor_evidence_branch: ops/wp55-r3g4-exec-4-evidence
+executor_evidence_commit: 68de2bd
+executor_artifacts:
+  - path: ops/handoffs/wp55-r3g4-exec-4-claude-handoff.md
+    sha256_prefix: e23873341d530977
+    bytes: 9698
+  - path: ops/evidence/wp55-r3g4-ac18-danh-sach-dong.md
+    sha256_prefix: 861514ef4722fc2e
+    bytes: 11957
+  - path: ops/evidence/wp55-r3g4-probe-doctrine.py
+    sha256_prefix: '5498211718571d94'
+    bytes: 7039
+  - path: ops/evidence/wp55-r3g4-probe-lease.py
+    sha256_prefix: 9279b116d228a081
+    bytes: 6344
+  - path: ops/evidence/wp55-r3g4-probe-oan.py
+    sha256_prefix: f7cbcecf45e79414
+    bytes: 5190
+
+# ĐÃ chạy lại bởi phiên ĐĂNG HỘ (khác phiên executor, CÙNG provider claude). Chúng KHÔNG
+# thay được lượt cross-review §8 — ghi ra để reviewer biết chỗ nào đã phủ, không phải để chép.
+verified_by_posting_session:
+  packet_loop_test: 'rc=0 · nền 109/109 đạt · 23 đột biến giết đúng ca đích · TỔNG ĐẠT'
+  doctrine_scan: 'rc=0 · sạch, 4 tệp'
+  scope: 'git diff --name-status fbe5ab9e e6e4b73 → ĐÚNG 6 tệp write_set'
+
+# CHƯA AI chạy lại — đây là phần việc của reviewer, đừng chép số executor khai.
+claimed_but_unverified:
+  - 'tl.py --selftest 1696/1696'
+  - 'doc-claims-check --strict flags=[]'
+  - 'release-verify --strict ok=true failed=[] extra=[]'
+  - 'golden-test rc=0'
+  - 'eol_policy scanned=304 violations=0'
+  - 'release-bundle ×2 head + ×1 base cùng sha256 20c89545…'
+  - 'suite 109/109 trên CÂY ĐÃ MERGE với master 3d2c52d (AC 20)'
+
+# Executor tự báo ba quan sát mức SPEC, KHÔNG tự nới. Reviewer định đoạt.
+executor_spec_observations:
+  - id: ac20-cay-merge-khong-phai-kho-git
+    note: >-
+      Công thức AC 20 (git archive + git apply) sinh thư mục KHÔNG có .git, nên ca
+      legacy_state_khong_co_lease_bi_chan (đọc blob lịch sử tại 22d2cc9) không chạy được
+      và suite ra 108/109; với GIT_DIR trỏ kho thật thì 109/109. Executor cho là khuyết
+      của CÔNG THỨC ĐO, không phải của bản vá. KIỂM CẢ HAI - lời khai có đúng không, và
+      cách chữa bằng GIT_DIR có làm ca đó đo một cây KHÁC không.
+  - id: heartbeat-khong-kha-thi-vi-403
+    note: >-
+      Lease đòi heartbeat 30 phút lên #55 nhưng môi trường executor không có đường ghi
+      GitHub. Ba lease trước bị ghi là chết vì không có dấu vết sống — nguyên nhân gốc
+      có thể là proxy chặn chứ không phải phiên im lặng.
+  - id: trang-tri-chu-thich-sai
+    note: >-
+      _TRANG_TRI bản trước khai xoá gạch dưới quy same_failure_limit và dạng có khoảng
+      trắng về một mối; thực tế không khớp nhau. Đã sửa bằng GỘP phân cách thay vì xoá.
+
+# Bài học lượt 5 — prompt lượt này CƯỠNG CHẾ, ghi lại để không trôi.
+neo_sha_bat_bien_required: true
+neo_sha_bat_bien_note: >-
+  Verdict lượt 5 khai master_sha_checked 3d2c52d… nhưng lệnh tái hiện neo origin/master,
+  một ref DI ĐỘNG — codex đã nêu P2 trên PR #114. Ghi số và neo số là hai việc khác nhau.
+  Verdict lượt này phải neo SHA bất biến trong MỌI lệnh.
+
+# Điều kiện tiên quyết ĐÃ ĐO 2026-08-14T19:20Z; reviewer phải kiểm lại chứ đừng tin.
+preconditions_measured_at_utc: '2026-08-14T19:20:00Z'
+master_sha_at_grant: 3d2c52d62696b0c7c190fd891115f543b0f9cb55
+prior_revision_blocked_event: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5296696111
+revision_opened_event: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5296702205
+executor_handoff_event: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5297276671
+prior_review: wp55-r2-review-5-codex-20260814
+prior_review_verdict: changes_requested
+prior_review_verdict_file: ops/reviews/wp55-r2-review-5-codex-verdict.md
+prior_review_verdict_branch: ops/wp55-verdict-5
+prior_review_verdict_sha256: d1d04452d0ab2df917c1f1f9aa46d52aa554fdf497480ab176780a462a43623e
+prior_review_invalidated_reason: 'revision 2 blocked; revision 3 head mới e6e4b73'

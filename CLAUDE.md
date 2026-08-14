@@ -96,6 +96,22 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   không đọc Markdown — dấu nháy ngược không phải hàng rào, y hệt bài học `doctrine-scan`. Muốn nhắc
   tới nó thì viết tách chữ (`skip` + `ci`) hoặc mô tả bằng lời. Máy KHÔNG canh được chỗ này (`t24`
   chỉ quét workflow, không quét commit sắp tạo) — đây thuần là kỷ luật viết.
+- **TẦNG VẬN CHUYỂN CŨNG CHUẨN HOÁ CHUỖI — "chép nguyên văn" chỉ chứng minh được bằng ĐO THỨ ĐÃ ĐẾN,
+  không phải thứ đã GỬI.** Đăng hộ verdict cross-review lượt 4 lên PR #92: bản gốc trong kho có băm
+  (`d58088be…`), đã kiểm khớp TRƯỚC khi đăng, và người đăng chép từng chữ. Vẫn lệch. Reviewer cố ý
+  liệt kê HAI cách viết khác nhau của cùng một tên để dò biên — bản dựng sẵn `cödex` (U+00F6) và bản
+  viết bằng **chuỗi thoát ASCII nguyên văn** `co\u0308dex`. Thân comment đi qua MCP nằm trong một
+  chuỗi JSON, mà `\u0308` **là escape hợp lệ của JSON**, nên nó bị giải mã thành dấu ghép THẬT ngay ở
+  tầng vận chuyển: hai tên khác nhau về byte biến thành hai tên hiển thị y hệt, và một hướng dò biên
+  biến mất không để lại dấu. Chỉ lộ vì đã chạy `diff -u` giữa nguồn và bản ĐÃ ĐĂNG (đọc lại qua API)
+  — đúng một hunk lệch, mọi dòng khác khớp từng byte.
+  Cùng họ với `doctrine-scan` và với dấu bỏ-qua-CI: **một lớp mà ta không coi là lớp**. Chốt: (a) băm
+  phải đo trên thứ ĐÃ ĐẾN, nên đăng xong là đọc ngược về và diff, đừng dừng ở "lời gọi trả thành
+  công"; (b) tải trọng có dấu chéo ngược phải nhân đôi khi đi qua JSON; (c) nguồn có thẩm quyền là
+  TỆP CÓ BĂM trong kho, comment chỉ là bản chiếu — nói thẳng điều đó ngay trong bản chiếu.
+  Bằng chứng bẫy này KHÔNG hiếm và KHÔNG chỉ ở MCP: chính hai dòng trên đây, lượt viết đầu cũng bị
+  công cụ sửa tệp giải mã mất chuỗi thoát (cũng qua JSON), phải ghi lại bằng đường không đi qua JSON
+  rồi ĐO `repr()` mới thấy. Hễ nội dung NÓI VỀ chuỗi thoát thì phải đo nó sau khi ghi.
 - **Quét secrets: lọc theo PHẦN MỞ RỘNG là mù ĐÚNG CHỖ secrets nằm.** `Path('.env').suffix == ''` nên
   `.env` `.netrc` `credentials` (không mở rộng) bị bỏ qua SẠCH — bơm `GOCSPX-…` vào `.env` mà bộ quét
   trả rc=0. Cộng thêm `Get-ChildItem` thiếu `-Force` cũng bỏ y hệt: **hai lỗi ĐỘC LẬP mà CÙNG HƯỚNG** ⇒

@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import os
 import re
 import sys
 from datetime import datetime, timezone
@@ -44,7 +45,34 @@ RC_DA_DANG = 9
 # Cùng danh sách với `.claude/dev/packet_loop.py`. Hai chỗ cưỡng chế CÙNG một luật
 # ("không tự cấp lease") ở hai tầng khác nhau: một tầng cục bộ lúc chạy máy trạng
 # thái, một tầng ở cửa đăng. Tầng nào thủng thì tầng kia còn đỡ.
+#
+# ĐÂY CHỈ LÀ DANH SÁCH CẤM, và một danh sách cấm KHÔNG BAO GIỜ ĐỦ. Giữ lại vì thông
+# điệp của nó chỉ đúng tên bệnh ("agent tự ký cho mình"), nhưng thứ thật sự chặn là
+# `NGUOI_CO_THAM_QUYEN` bên dưới.
 PROVIDERS = ("claude", "codex")
+
+# CHỐT THẬT — danh sách CHO PHÉP, không phải danh sách cấm.
+#
+# Vì sao đổi: cross-review lượt 4 (codex, 14-08-2026) tìm ra `lease-authority-spoof`
+# P1 — bản trước chỉ từ chối ĐÚNG hai chuỗi `claude`/`codex`, nên `codex-dispatcher`,
+# `ai-codex-bot`, `cödex` đều lọt qua và tự cấp được lease. Nguyên văn kết luận:
+# *"distinguishes spelling, not authority"* — phân biệt CÁCH VIẾT, không phân biệt
+# THẨM QUYỀN. Lỗ không bị bịt, nó chỉ chuyển chỗ.
+#
+# Đắng hơn: prompt do chính phiên soạn ra cho reviewer LIỆT KÊ `"codex-dispatcher"`
+# làm hướng tấn công số 1, rồi cổng này vẫn thua đúng ca đó. Nghĩ ra được phép thử
+# mà không chạy nó thì phép thử ấy không tồn tại.
+#
+# Danh sách cấm phải đoán trước mọi cách viết của kẻ gian — thua từ trong thiết kế.
+# Danh sách cho phép chỉ phải liệt kê những người CÓ thẩm quyền, một tập nhỏ và biết
+# trước. Đây là một trong hai đường mà finding đề ra; đường kia là "thôi đừng khai nó
+# chặn tự cấp nữa", và chúng ta chọn đường siết chứ không chọn đường hạ lời khai.
+#
+# NÓI THẲNG GIỚI HẠN, đừng để ai đọc rộng hơn thực tế: danh sách này chứng minh cái
+# TÊN được phép cấp lease, KHÔNG chứng minh đúng người đó đã gõ. Thứ thật sự neo là
+# (a) sửa danh sách này phải qua một commit có review, và (b) chốt `GITHUB_ACTOR`
+# dưới đây — danh tính do GitHub xác thực, không phải chữ trong tệp YAML.
+NGUOI_CO_THAM_QUYEN = ("ducthangho",)
 
 BAT_BUOC = (
     "packet_issue",
@@ -223,6 +251,27 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
         raise Chan(RC_TU_CAP,
                    f"granted_by={nguoi_cap!r} là tên một provider — agent KHÔNG tự cấp "
                    f"lease cho mình được (doctrine 'không tự cấp lease')")
+
+    # CHỐT THẬT: phải NẰM TRONG danh sách cho phép, không chỉ "không nằm trong danh
+    # sách cấm". Đây là chỗ `codex-dispatcher` / `ai-codex-bot` / `cödex` từng lọt.
+    if nguoi_cap.lower() not in NGUOI_CO_THAM_QUYEN:
+        raise Chan(RC_TU_CAP,
+                   f"granted_by={nguoi_cap!r} KHÔNG nằm trong danh sách người có thẩm "
+                   f"quyền {list(NGUOI_CO_THAM_QUYEN)} — danh sách CẤM không bao giờ đủ "
+                   f"(cross-review 14-08-2026, finding lease-authority-spoof), nên cổng "
+                   f"này đòi tên phải ĐƯỢC PHÉP chứ không chỉ 'không bị cấm'. Thêm người "
+                   f"cấp mới = sửa NGUOI_CO_THAM_QUYEN qua một commit có review.")
+
+    # Lớp neo vào danh tính GitHub XÁC THỰC, không phải chữ trong tệp YAML. `GITHUB_ACTOR`
+    # do GitHub đặt cho runner; kẻ soạn tệp lease không đặt được nó. Chỉ áp khi biến có
+    # mặt (tức đang chạy trong Actions) — chạy tay ở máy thì lớp này vắng, và nói thẳng
+    # như vậy còn hơn giả vờ có.
+    actor = (os.environ.get("GITHUB_ACTOR") or "").strip()
+    if actor and actor.lower() not in NGUOI_CO_THAM_QUYEN:
+        raise Chan(RC_TU_CAP,
+                   f"GITHUB_ACTOR={actor!r} không có thẩm quyền cấp lease — người ĐẨY "
+                   f"commit mới là thứ GitHub xác thực được, `granted_by` chỉ là chữ "
+                   f"trong tệp. Lệch nhau thì tin cái GitHub xác thực.")
 
     so = lease["packet_issue"]
     # `bool` là con của `int` trong Python: `True` sẽ lọt nếu chỉ kiểm isinstance.

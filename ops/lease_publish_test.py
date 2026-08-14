@@ -127,6 +127,59 @@ def t02_granted_by_la_ten_provider_bi_CHAN():
 
 
 @ca
+def t02b_ten_KHONG_CO_THAM_QUYEN_bi_CHAN():
+    """`lease-authority-spoof` — P1 của cross-review lượt 4 (codex, 14-08-2026).
+
+    Bản trước chỉ từ chối ĐÚNG hai chuỗi `claude`/`codex`, nên mọi biến thể lọt sạch.
+    Nguyên văn kết luận của reviewer: *"distinguishes spelling, not authority"*.
+    Bốn chuỗi dưới đây là ca reviewer đã chạy được và thu `rc=0` trên bản cũ.
+
+    Đắng: prompt do chính phiên soạn cho reviewer LIỆT KÊ `codex-dispatcher` làm hướng
+    tấn công số 1, rồi cổng vẫn thua đúng ca đó. Nghĩ ra phép thử mà không chạy thì
+    phép thử ấy không tồn tại — ca này tồn tại để lần sau không cần nghĩ lại.
+    """
+    with San() as s:
+        for ten in ("codex-dispatcher", "ai-codex-bot", "cödex", "claude-code",
+                    "dispatcher", "ducthangho2"):
+            rc, _, e = chay("check", viet(s, lease_mau(granted_by=ten), ten="a.yaml"))
+            bang(rc == RC_TU_CAP, f"granted_by={ten!r} LỌT: rc={rc} {e}")
+            bang("danh sách người có thẩm quyền" in e,
+                 f"{ten!r} bị chặn nhưng KHÔNG phải bởi danh sách cho phép: {e.strip()!r}")
+
+
+@ca
+def t02c_nguoi_CO_tham_quyen_thi_QUA_moi_cach_viet():
+    """Chiều DƯƠNG. Một danh sách cho phép chặn được tất cả thì cũng vô dụng."""
+    with San() as s:
+        for ten in ("ducthangho", "Ducthangho", "  DUCTHANGHO  "):
+            rc, _, e = chay("check", viet(s, lease_mau(granted_by=ten), ten="b.yaml"))
+            bang(rc == RC_OK, f"chặn oan người có thẩm quyền {ten!r}: rc={rc} {e}")
+
+
+@ca
+def t02d_GITHUB_ACTOR_khong_co_tham_quyen_bi_CHAN():
+    """Neo vào danh tính GitHub XÁC THỰC, không phải chữ trong tệp YAML.
+
+    Kẻ soạn lease đặt được `granted_by`, nhưng KHÔNG đặt được `GITHUB_ACTOR` — biến
+    đó do GitHub đặt cho runner. Lệch nhau thì tin cái GitHub xác thực.
+    """
+    import os
+    with San() as s:
+        p = viet(s, lease_mau())          # granted_by hợp lệ
+        moi = dict(os.environ, GITHUB_ACTOR="ke-la-mat")
+        q = subprocess.run([sys.executable, str(SCRIPT), "check", str(p)],
+                           capture_output=True, text=True, env=moi)
+        bang(q.returncode == RC_TU_CAP,
+             f"GITHUB_ACTOR lạ mà vẫn đăng được: rc={q.returncode} {q.stderr}")
+        bang("GITHUB_ACTOR" in q.stderr, f"chặn nhưng nói sai lỗi: {q.stderr.strip()!r}")
+        # chiều dương: actor có thẩm quyền thì qua
+        moi["GITHUB_ACTOR"] = "ducthangho"
+        q2 = subprocess.run([sys.executable, str(SCRIPT), "check", str(p)],
+                            capture_output=True, text=True, env=moi)
+        bang(q2.returncode == RC_OK, f"chặn oan actor hợp lệ: rc={q2.returncode} {q2.stderr}")
+
+
+@ca
 def t03_lease_da_het_han_bi_CHAN():
     with San() as s:
         rc, _, e = chay("check", viet(s, lease_mau(lease_expires_at_utc=khi_truoc())))

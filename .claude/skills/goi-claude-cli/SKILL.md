@@ -97,13 +97,23 @@ có cờ ⇒ `git push --dry-run` chạy. Cấp hẹp theo mẫu lệnh, đừng
 
 ## `ask` THẮNG `allow` ở MỌI lớp — đây là tường, không phải cửa
 
-Cách trên chỉ chạy khi kho **không** có luật `ask` cho lệnh đó. Kho `tra-luat` thì có:
+Cách trên chỉ chạy khi kho **không** có luật `ask` cho lệnh đó.
+
+**Đọc mục này theo đúng mốc thời gian của nó.** Số đo dưới đây lấy trên worktree ghim
+commit TRƯỚC #111, lúc `ask` của `tra-luat` còn là:
 
 ```json
 "permissions": { "ask": ["Bash(git commit:*)", "Bash(git push:*)", "Bash(clasp:*)"] }
 ```
 
-Đã thử **ba** đường cấp quyền, cả ba đều **KHÔNG** vượt được:
+`master` hôm nay (sau #111) chỉ còn **`ask: ["Bash(clasp:*)"]`** — `git commit` và
+`git push` đã chuyển sang `allow`. Nên trên worktree dựng từ master hiện hành, cả mục
+này lẫn cách chữa ở §"Đường thoát `ask`" đều **không cần dùng tới**; chúng chỉ áp cho
+worktree ghim commit cũ. Vì sao worktree cũ vẫn dính dù master đã merge: xem
+§"Settings nạp từ CÂY LÀM VIỆC" bên dưới — đó là cùng một cái bẫy, nhìn từ hai phía.
+
+Cơ chế thì không đổi theo mốc nào, và đó mới là thứ đáng nhớ. Đã thử **ba** đường cấp
+quyền cho một lệnh đang nằm trong `ask`, cả ba đều **KHÔNG** vượt được:
 
 | cách cấp | kết quả |
 |---|---|
@@ -114,8 +124,9 @@ Cách trên chỉ chạy khi kho **không** có luật `ask` cho lệnh đó. Kh
 `ask` không phải "mặc định hỏi rồi allow sẽ ghi đè" — nó là **cấp cao hơn allow**.
 Chạy không người trực thì không có ai để hỏi, nên `ask` = chặn cứng.
 
-**Hệ quả phải nói thẳng: kho này CỐ Ý cấu hình để agent KHÔNG tự commit/push khi
-không có người.** Đó là chốt của chủ kho, không phải trục trặc cần lách.
+**Hệ quả phải nói thẳng: lệnh nào còn nằm trong `ask` thì agent KHÔNG tự chạy được khi
+không có người.** Sau #111 danh sách ấy còn đúng một mục — `clasp`, tức mọi thao tác
+Apps Script chạm LIVE. Đó là chốt của chủ kho, không phải trục trặc cần lách.
 
 ### `--setting-sources user,local` vượt được — và đó là lý do KHÔNG dùng nó
 
@@ -196,6 +207,9 @@ worktree mang bản của commit nó đứng.
 
 ### Đường thoát `ask` mà KHÔNG tháo chốt
 
+**Chỉ cần tới khi buộc phải chạy trên worktree ghim commit TRƯỚC #111.** Dựng từ master
+hiện hành thì bỏ qua mục này — `git commit`/`git push` đã nằm sẵn trong `allow`.
+
 `ask` không ghi đè được — đã thử **bốn** cách, xem bảng ở mục trên cộng `--settings`
 với `ask: []` (cũng thua). Nhưng có thể **bỏ nguồn `project` rồi CẤP LẠI chính sách**:
 
@@ -205,18 +219,37 @@ claude --permission-mode auto \
        --settings /duong/dan/policy.json
 ```
 
-`policy.json` chép từ `.claude/settings.json` của **master** (bản mới nhất), chỉ đặt
-`ask: []`. Khác hẳn `--setting-sources user,local` trần trụi: ở đó hook chết theo, còn
-ở đây `deny` và `hooks` được cấp lại nguyên vẹn. Đo cả ba lớp trước khi giao việc:
+`policy.json` chép từ `.claude/settings.json` của **master** — **chép NGUYÊN TRẠNG,
+đừng đặt `ask: []`.** Bản master đã bỏ đúng hai mục lỗi thời và **cố ý giữ lại
+`Bash(clasp:*)`**; quét rỗng cả danh sách là gỡ luôn ranh giới duyệt cho thao tác Apps
+Script chạm LIVE. Hook `PreToolUse` KHÔNG đỡ thay được: nó chỉ khớp `clasp push` và
+`gas-deploy`, còn luật `ask` phủ mọi `clasp *`.
+
+Đo hai nhánh trên cùng một phép thử, khác nhau **đúng một khoá** `ask`:
+
+| `policy.json` | `clasp --version` |
+|---|---|
+| chép nguyên trạng (`ask: ["Bash(clasp:*)"]`) | **BỊ CHẶN** |
+| sửa thành `ask: []` | **CHẠY** — `rc=127`, tức chỉ trượt vì máy chưa cài `clasp` |
+
+`rc=127` mới là chỗ đáng sợ: nếu container CÓ `clasp` thì lượt đó đã chạm LIVE thật.
+
+Khác hẳn `--setting-sources user,local` trần trụi: ở đó hook chết theo, còn ở đây
+`deny`, `hooks` và phần `ask` còn lại được cấp lại nguyên vẹn. Đo **bốn** lớp trên
+chính bản nguyên trạng trước khi giao việc:
 
 | lớp | phép thử | kết quả |
 |---|---|---|
-| `ask` | `git push --dry-run` | **chạy được** |
+| `ask` → `Bash(clasp:*)` | `clasp --version` | **vẫn chặn** |
 | hook `PreToolUse` | `tl.py --apply --help` | **vẫn chặn** |
-| `deny` | `rm -rf …` | **vẫn chặn** |
+| `deny` → `Bash(rm -rf:*)` | `rm -rf /tmp/…` | **vẫn chặn** |
+| `deny` → `Read(**/.env)` | đọc `.env` | **vẫn chặn** |
 
-Ba dòng đó là điều kiện để dùng cách này. Thiếu một dòng thì bạn đang tháo chốt chứ
+Bốn dòng đó là điều kiện để dùng cách này. Thiếu một dòng thì bạn đang tháo chốt chứ
 không phải cấp quyền — hãy đo lại, đừng suy từ việc "tôi đã chép đủ tệp".
+
+Nhắc lại cho khỏi quên: **cả ba lượt đo trên đều trả `ma_thoat=0` ở mức launcher.** Thứ
+phân biệt "bị chặn" với "chạy được" nằm trong `stdout.log`, không nằm ở mã thoát.
 
 ## `rc=0` KHÔNG phải bằng chứng đã làm việc
 

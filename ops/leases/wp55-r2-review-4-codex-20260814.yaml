@@ -89,3 +89,4 @@ prior_review_invalidated: wp55-r2-review-2-codex-20260813   # bản review neo 2
 #   5290949262 — prompt ghi "chỉ ở nhánh ops" (đúng lúc đó, sai ngay sau khi merge),
 #                băm 0edba1bd…
 supersedes_posted_comment: [5290916886, 5290949262]
+posted_comment_id: 5290987281   # workflow ghi, ĐỪNG sửa tay

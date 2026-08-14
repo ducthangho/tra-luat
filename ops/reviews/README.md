@@ -12,13 +12,13 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 
 ## ⚠ Cảnh báo đang có hiệu lực
 
-| verdict | id | phải làm gì khi chạy lại |
+| tệp verdict | id | phải làm gì khi chạy lại |
 |---|---|---|
 | `wp55-r2-review-5-codex-verdict.md` | `mutable-master-ref-in-repro-command` | Khối bash tái hiện `merged-tree-doctrine-false-positive` dùng `origin/master`, một ref **DI ĐỘNG**. Master lúc đo là `3d2c52d62696b0c7c190fd891115f543b0f9cb55`. **Thay cả hai chỗ `origin/master` bằng SHA đó**, nếu không bạn đang đo một cây khác. |
 
 ## Mục lục
 
-| verdict | biên nhận | lease | verdict | head đã review | byte |
+| tệp verdict | biên nhận | lease | kết luận | head đã review | byte |
 |---|---|---|---|---|---|
 | [`wp55-r2-review-4-codex-verdict.md`](wp55-r2-review-4-codex-verdict.md) | [`.receipt.yaml`](wp55-r2-review-4-codex-verdict.receipt.yaml) | `wp55-r2-review-4-codex-20260814` | `changes_requested` | `cf39109c` | 6294 |
 | [`wp55-r2-review-5-codex-verdict.md`](wp55-r2-review-5-codex-verdict.md) | [`.receipt.yaml`](wp55-r2-review-5-codex-verdict.receipt.yaml) | `wp55-r2-review-5-codex-20260814` | `changes_requested` | `546ecf9f` | 4392 |

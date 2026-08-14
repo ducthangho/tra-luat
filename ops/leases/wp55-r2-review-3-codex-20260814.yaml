@@ -33,7 +33,22 @@ target_pull_request: 92
 reviewed_sha_required: cf39109c9e5167516c53f2071e5fa7ec5c6afff5   # ĐỔI so với lease #2 (22d2cc92…)
 branch: claude/wp55-r2g2-f3-03
 base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2
-prompt_sha256_required: 46a833ccfefba0b659a16183daf8b4f4893a5ef0eeb4e7fdf3cd315aad550dfc
+# Prompt reviewer: neo bằng ĐƯỜNG DẪN + BĂM, không chỉ bằng băm.
+#
+# Bản đầu của lease này chỉ có `prompt_sha256_required: 46a833cc…` mà không nói băm
+# CÁI GÌ. Không văn bản nào ứng với con băm đó — đã quét 294.578 cửa sổ 5292-byte
+# trên toàn bộ comment #54+#55 và 941 blob của 3 nhánh, 0 khớp. Reviewer không qua
+# được cổng, và cổng không nói được vì sao: wp55 đứng im hai ngày.
+#
+# Hai thứ sửa gốc, đi cùng nhau:
+#   1. Prompt là MỘT TỆP trong kho, không phải một khối trong comment. Một khối
+#      trong `<details>` có ít nhất 12 cách cắt hợp lý (kèm/không thẻ, kèm/không
+#      `<summary>`, ruột fence, có/không strip, CRLF/LF) — mỗi cách một băm khác.
+#      `sha256sum <tệp>` chỉ có một câu trả lời.
+#   2. `prompt_path` để cổng `ops/lease_publish.py` KIỂM ĐƯỢC, chứ không chỉ chép
+#      lại một con số cho người đọc tự tin. Thiếu tệp hoặc lệch băm ⇒ rc=6.
+prompt_path: ops/prompts/wp55-r2-review-3-codex-20260814.md
+prompt_sha256_required: 02a79e11fdf806a748e7c71fbfe023bfc37bd566f2d7d6bcef501ca92b0afa04
 
 granted_by: ducthangho          # CHỦ KHO — §2 "người có thẩm quyền"
 granted_on_instruction: direct, in-session, 2026-08-14

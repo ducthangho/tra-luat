@@ -60,9 +60,44 @@ nhất đứng giữa một tệp YAML trong kho và một comment mang danh ngh
 | `reviewed_sha_required` không phải 40 hex thường | `8` |
 | thiếu trường bắt buộc, `packet_issue` không phải số, YAML hỏng | `8` |
 | đã đăng rồi (`posted_comment_id`) — **bỏ qua**, không phải lỗi | `9` |
+| mỏ neo prompt hỏng: thiếu `prompt_path`, tệp không có, đường dẫn ra ngoài kho, hoặc **băm lệch** | `6` |
 
-`ops/lease_publish_test.py` giữ 13 ca cho những chốt đó, và **workflow chạy chính
+`ops/lease_publish_test.py` giữ 23 ca cho những chốt đó, và **workflow chạy chính
 bộ test ấy trước mỗi lượt đăng** — rẻ hơn nhiều so với một lần đăng sai.
+
+### Mỏ neo prompt (`prompt_path` + `prompt_sha256_required`)
+
+Lease nào neo prompt thì phải khai **cả hai** trường, đi thành đôi. Một con băm không
+kèm địa chỉ thì không kiểm được — nó chỉ là niềm tin viết dưới dạng hex; một địa chỉ
+không kèm băm thì tệp đổi lúc nào cũng không ai hay.
+
+Chốt này sinh ra từ một sự cố đã trả giá. Lease #3 của wp55 ghi
+`prompt_sha256_required: 46a833cc…` mà không nói băm **cái gì**, và không văn bản nào
+ứng với con băm ấy — đã quét 294.578 cửa sổ 5292-byte trên toàn bộ comment #54+#55 và
+941 blob của ba nhánh, 0 khớp. Cổng `--expected-prompt-sha256` phía reviewer vì thế
+không ai qua được, mà nó hỏng **im lặng**: lease hợp lệ, hạn còn, chỉ thiếu đúng cái
+vật nó trỏ tới. wp55 đứng im hai ngày.
+
+Kèm theo là một quy ước về **chỗ để prompt**: prompt là một **tệp** trong
+`ops/prompts/`, không phải một khối trong comment. Một khối trong `<details>` có ít
+nhất 12 cách cắt hợp lý (kèm/không thẻ, kèm/không `<summary>`, ruột fence, có/không
+`strip`, CRLF/LF) — mỗi cách một băm khác nhau, nên "băm khớp" không có nghĩa xác
+định. `sha256sum <tệp>` chỉ có một câu trả lời.
+
+Ba chi tiết cài đặt đã đo, đừng "dọn" nhầm:
+
+- Băm đọc **byte** (`read_bytes`), không đọc văn bản. `read_text` chuẩn hoá xuống dòng
+  nên cùng một tệp cho hai băm khác nhau tuỳ nền — xanh ở Linux, đỏ ở Windows.
+- `prompt_path` là dữ liệu YAML mà lại thành một lượt **đọc đĩa**, nên có hai lớp chặn
+  đường ra: lọc dạng đường dẫn (tuyệt đối, `..`, dấu `\`) trước khi chạm hệ tệp, rồi
+  `relative_to` sau `resolve()`. Đã đo bằng đột biến: bỏ lớp nào thì lớp kia vẫn trả
+  đúng `6` — **hai lớp chồng nhau về mã thoát**, chỉ khác thông điệp. Lớp bắt được
+  symlink (đường dẫn sạch về mặt chuỗi) là `relative_to`. Vì thế phản chứng neo
+  **thông điệp** chứ không chỉ mã thoát; neo mỗi mã thì đột biến gỡ một lớp sống sót
+  và bộ test nói dối rằng nó có đo lớp ấy.
+- Chốt `9` (đã đăng rồi) chạy **trước**, nên với lease đã đăng thì `check` không kiểm
+  mỏ neo nữa. Thứ canh lease thật là ca `t23`, và nó nằm trong bộ test mà workflow
+  chạy trước mỗi lượt đăng — đổi một byte trong `ops/prompts/**` là đỏ.
 
 Luật `granted_by` cố ý trùng với `.claude/dev/packet_loop.py record-lease`: cùng một
 doctrine ("không tự cấp lease") được cưỡng chế ở hai tầng độc lập — một tầng lúc chạy
@@ -83,8 +118,11 @@ matrix — nhiễu không đáng kể so với gate Windows ~20 phút/lượt. `
 
 ## Chưa được nghiệm thu
 
-Phần logic (`lease_publish.py`) có 13 ca phản chứng và đã chạy thử trọn vòng bằng một
-`gh` giả: tìm tệp → cổng → dựng thân → đăng → ghi ngược → chạy lại ra `9`.
+Phần logic (`lease_publish.py`) có 23 ca phản chứng và đã chạy thử trọn vòng bằng một
+`gh` giả: tìm tệp → cổng → dựng thân → đăng → ghi ngược → chạy lại ra `9`. Sáu đột
+biến (chạy trên **bản sao tạm**, không đụng tệp thật) giết đúng ca đích của từng cái,
+kể cả hai ca mà lượt đo đầu cho thấy bộ test **không** thật sự đo — xem mục mỏ neo
+prompt ở trên.
 
 **Nhưng chưa lượt nào chạy thật trên Actions.** Workflow chỉ kích hoạt sau khi có mặt
 ở nhánh được push, và lượt đầu tiên cần người xem kết quả. Đúng bài học "script đa nền

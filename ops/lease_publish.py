@@ -20,6 +20,7 @@ MÃ THOÁT
   0  qua
   2  tham số / không đọc được tệp
   4  `granted_by` là tên một PROVIDER — agent tự cấp lease cho mình
+  6  mỏ neo prompt hỏng (thiếu `prompt_path`, tệp không có, hoặc băm lệch)
   8  nội dung lease sai (thiếu trường, sai dạng, hết hạn, YAML hỏng)
   9  lease ĐÃ đăng rồi (có `posted_comment_id`) — workflow phải BỎ QUA, không đăng lại
 """
@@ -27,14 +28,16 @@ MÃ THOÁT
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 import sys
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 RC_OK = 0
 RC_THAM_SO = 2
 RC_TU_CAP = 4
+RC_NEO = 6
 RC_NOI_DUNG = 8
 RC_DA_DANG = 9
 
@@ -52,6 +55,7 @@ BAT_BUOC = (
 )
 
 SHA40 = re.compile(r"^[0-9a-f]{40}$")
+SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
 class Chan(Exception):
@@ -97,8 +101,110 @@ def _doc_han(chuoi) -> datetime:
     return d.astimezone(timezone.utc)
 
 
-def kiem(lease: dict) -> dict:
-    """Trả về lease nếu ĐĂNG ĐƯỢC. Ném `Chan` với mã tương ứng nếu không."""
+def _goc_kho(tep: Path, goc) -> Path:
+    """Thư mục mà `prompt_path` được tính từ đó.
+
+    `prompt_path` viết theo gốc KHO (`ops/prompts/…`) chứ không theo thư mục chứa
+    lease, vì người đọc lease cần dán đúng đường dẫn ấy vào `sha256sum` ở gốc kho.
+    Nên phải tìm được gốc: đi ngược từ tệp lease lên tới thư mục có `.git`.
+    `.git` có thể là THƯ MỤC (clone thường) hoặc TỆP (worktree/submodule) — dùng
+    `.exists()` chứ không `.is_dir()`, nếu không thì mọi lượt chạy trong worktree
+    sẽ rơi về CWD và tính sai đường dẫn.
+    """
+    if goc:
+        return Path(goc).resolve()
+    p = tep.resolve().parent
+    for d in (p, *p.parents):
+        if (d / ".git").exists():
+            return d
+    # Không thấy `.git` (tệp lease nằm ngoài kho, hoặc cây đã bị tháo): rơi về CWD
+    # — workflow luôn chạy ở gốc kho nên đây là mặc định đúng cho đường thật.
+    return Path.cwd().resolve()
+
+
+def _kiem_neo_prompt(lease: dict, tep: Path, goc) -> str:
+    """Prompt mà lease neo phải TỒN TẠI và ĐÚNG BĂM.
+
+    Vì sao có chốt này — đã trả giá: lease #3 của wp55 ghi
+    `prompt_sha256_required: 46a833cc…` mà KHÔNG nói băm cái gì, và không văn bản
+    nào ứng với con băm đó. Cổng `--expected-prompt-sha256` phía reviewer vì thế
+    không ai qua được, mà nó hỏng IM LẶNG: lease hợp lệ, hạn còn, chỉ thiếu đúng
+    cái vật nó trỏ tới. wp55 đứng im hai ngày.
+
+    Một con băm không kèm địa chỉ thì không kiểm được — nó chỉ là niềm tin viết
+    dưới dạng hex. Nên hai trường đi THÀNH ĐÔI: có cái này phải có cái kia.
+    """
+    sha_khai = str(lease.get("prompt_sha256_required") or "").strip()
+    duong = str(lease.get("prompt_path") or "").strip()
+    if not sha_khai and not duong:
+        return ""   # lease không neo prompt — không phải việc của chốt này
+
+    # Nửa vời là dạng nguy hiểm nhất, và cả HAI chiều đều nguy hiểm: băm không địa
+    # chỉ thì không kiểm được (đúng ca đã trả giá), còn địa chỉ không băm thì tệp
+    # đổi lúc nào cũng không ai biết. Bỏ một trong hai là gỡ chốt.
+    if not duong:
+        raise Chan(RC_NEO,
+                   "có `prompt_sha256_required` mà thiếu `prompt_path` — một con băm "
+                   "không kèm địa chỉ thì không ai kiểm được nó nói về cái gì "
+                   "(đúng lỗi đã chặn wp55 hai ngày)")
+    if not sha_khai:
+        raise Chan(RC_NEO,
+                   "có `prompt_path` mà thiếu `prompt_sha256_required` — trỏ vào một "
+                   "tệp không neo băm thì tệp đổi lúc nào cũng không ai biết")
+    # ĐO RỒI MỚI VIẾT CÂU NÀY: chốt dạng này KHÔNG bắt thêm ca nào mà chốt so băm
+    # bên dưới không bắt — băm sai dạng thì cũng khác băm thật, nên vẫn chặn. Giữ
+    # lại VÌ THÔNG ĐIỆP: "phải là 64 ký tự hex" chỉ thẳng lỗi gõ, còn "băm LỆCH"
+    # đẩy người sửa đi băm lại một tệp vốn không có lỗi. Cả sự cố hai ngày vừa rồi
+    # là chuyện cổng chặn đúng mà nói sai chỗ. Phản chứng vì thế neo THÔNG ĐIỆP,
+    # không chỉ neo mã thoát — bỏ chốt này là t20 đỏ.
+    if not SHA256.match(sha_khai):
+        raise Chan(RC_NEO,
+                   f"prompt_sha256_required phải là 64 ký tự hex thường, được {sha_khai!r}")
+
+    # `prompt_path` là dữ liệu trong tệp YAML mà lại thành một lượt ĐỌC ĐĨA. Chặn
+    # đường vượt ra ngoài kho TRƯỚC khi chạm hệ tệp: tuyệt đối, `..`, và cả dấu `\`
+    # (trên Linux `\` là ký tự tên tệp hợp lệ nên `PurePosixPath` KHÔNG coi nó là
+    # dấu phân cách — một `..\..\x` sẽ lọt qua vòng kiểm `parts` nếu không bắt riêng).
+    # Lớp này CHỒNG với `relative_to` bên dưới, và đã đo: bỏ nó đi thì mọi ca vẫn
+    # bị chặn, chỉ khác thông điệp. Giữ vì hai lẽ — chặn trước khi đụng đĩa, và nói
+    # đúng tên lỗi. Đừng tưởng nó là lớp phòng thủ độc lập: lớp THẬT là `relative_to`.
+    pp = PurePosixPath(duong)
+    if pp.is_absolute() or "\\" in duong or any(x == ".." for x in pp.parts):
+        raise Chan(RC_NEO,
+                   f"prompt_path phải là đường dẫn tương đối trong kho, được {duong!r}")
+
+    root = _goc_kho(tep, goc)
+    f = (root / pp).resolve()
+    try:
+        # Sau `resolve()` nên symlink trỏ ra ngoài cũng bị bắt ở đây, không chỉ `..`.
+        f.relative_to(root)
+    except ValueError:
+        raise Chan(RC_NEO,
+                   f"prompt_path trỏ ra ngoài kho: {duong!r} → {f}") from None
+    if not f.is_file():
+        raise Chan(RC_NEO,
+                   f"prompt_path {duong!r} không có tệp (tìm ở {f}) — lease neo một "
+                   f"vật không tồn tại thì reviewer không bao giờ qua được cổng")
+
+    # Đọc BYTE, không đọc văn bản: `read_text` sẽ chuẩn hoá xuống dòng trên Windows
+    # nên cùng một tệp cho hai băm khác nhau tuỳ nền — đúng loại lệch mà chốt này
+    # sinh ra để bắt.
+    thuc = hashlib.sha256(f.read_bytes()).hexdigest()
+    if thuc != sha_khai:
+        raise Chan(RC_NEO,
+                   f"băm prompt LỆCH: lease khai {sha_khai}, tệp {duong!r} thực tế là "
+                   f"{thuc} ({f.stat().st_size} byte)")
+    return thuc
+
+
+def kiem(lease: dict, tep=None, goc=None) -> tuple:
+    """Trả `(lease, băm prompt ĐÃ XÁC MINH)` nếu ĐĂNG ĐƯỢC; ném `Chan` nếu không.
+
+    Trả kèm cái băm chứ không trả mỗi lease, để dòng "prompt … khớp băm" mà `check`
+    in ra là BẰNG CHỨNG chứ không phải lời khen. Bản trước in dòng đó chỉ vì lease
+    có trường `prompt_path` — nghĩa là gỡ hẳn chốt kiểm băm đi thì nó vẫn in y
+    nguyên. Một dòng xác nhận không đi kèm việc kiểm là thứ tệ hơn im lặng.
+    """
     # Idempotent trước tiên: workflow bị chạy lại (retry, re-run tay, push lại
     # cùng commit) KHÔNG được đăng trùng một lease.
     if lease.get("posted_comment_id"):
@@ -130,12 +236,24 @@ def kiem(lease: dict) -> dict:
         raise Chan(RC_NOI_DUNG,
                    f"reviewed_sha_required phải là 40 ký tự hex thường, được {sha!r}")
 
+    neo = ""
+    if tep is None:
+        # KHÔNG KIỂM ĐƯỢC ≠ ĐẠT. Không có đường dẫn tệp lease thì không tính được
+        # gốc kho, nên chốt neo prompt không chạy — im lặng cho qua ở đây là dựng
+        # lại đúng cái lỗ vừa bịt, chỉ khác cửa vào.
+        if lease.get("prompt_sha256_required") or lease.get("prompt_path"):
+            raise Chan(RC_NEO,
+                       "lease có neo prompt nhưng `kiem()` được gọi không kèm đường dẫn "
+                       "tệp — không kiểm được thì không cho qua")
+    else:
+        neo = _kiem_neo_prompt(lease, Path(tep), goc)
+
     han = _doc_han(lease["lease_expires_at_utc"])
     if han <= datetime.now(timezone.utc):
         raise Chan(RC_NOI_DUNG,
                    f"lease đã hết hạn lúc {han.isoformat()} — đăng một lease chết thì "
                    f"người nhận tưởng có quyền mà không có")
-    return lease
+    return lease, neo
 
 
 def dung_than(lease: dict, duong_dan: str) -> str:
@@ -166,16 +284,17 @@ def _ghi_comment_id(duong_dan: str, comment_id: int) -> None:
 
 
 def lenh_check(a) -> int:
-    lease = kiem(_doc_yaml(a.tep))
+    lease, neo = kiem(_doc_yaml(a.tep), a.tep, getattr(a, "goc", None))
     print(f"lease {lease['lease_id']} ĐĂNG ĐƯỢC — issue #{lease['packet_issue']}, "
-          f"neo {lease['reviewed_sha_required'][:12]}, hết hạn {lease['lease_expires_at_utc']}")
+          f"neo {lease['reviewed_sha_required'][:12]}, hết hạn {lease['lease_expires_at_utc']}"
+          + (f", prompt {lease['prompt_path']} khớp băm {neo[:12]}" if neo else ""))
     return RC_OK
 
 
 def lenh_body(a) -> int:
     # Đi qua ĐÚNG hàm kiểm của `check`. Nếu `body` có đường riêng, ai đó chỉ cần
     # gọi thẳng `body` là vòng qua được toàn bộ chốt.
-    lease = kiem(_doc_yaml(a.tep))
+    lease, _ = kiem(_doc_yaml(a.tep), a.tep, getattr(a, "goc", None))
     sys.stdout.write(dung_than(lease, a.tep))
     return RC_OK
 
@@ -201,6 +320,10 @@ def main(argv=None) -> int:
     ):
         q = sub.add_parser(ten, help=mo_ta)
         q.add_argument("tep")
+        # Mặc định gốc kho tự tìm bằng `.git`; cờ này để bộ phản chứng dựng được
+        # một "kho" giả trong thư mục tạm mà không phải `git init`.
+        q.add_argument("--root", dest="goc", default=None,
+                       help="gốc kho để tính `prompt_path` (mặc định: tìm .git đi lên)")
         q.set_defaults(fn=fn)
     q = sub.add_parser("mark", help="ghi posted_comment_id vào tệp sau khi đăng xong")
     q.add_argument("tep")

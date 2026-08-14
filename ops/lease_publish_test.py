@@ -24,7 +24,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 SCRIPT = HERE / "lease_publish.py"
 
-RC_OK, RC_THAM_SO, RC_TU_CAP, RC_DA_DANG, RC_NOI_DUNG = 0, 2, 4, 9, 8
+RC_OK, RC_THAM_SO, RC_TU_CAP, RC_DA_DANG, RC_NOI_DUNG, RC_NEO = 0, 2, 4, 9, 8, 6
 
 CA: list = []
 
@@ -91,6 +91,15 @@ class San:
 def bang(dk, msg):
     if not dk:
         raise AssertionError(msg)
+
+
+def dat_prompt(goc: Path, noi_dung: bytes, duong="ops/prompts/p.md") -> tuple[str, str]:
+    """Đặt một tệp prompt trong "kho" giả, trả về (đường dẫn tương đối, sha256)."""
+    import hashlib
+    f = goc / duong
+    f.parent.mkdir(parents=True, exist_ok=True)
+    f.write_bytes(noi_dung)
+    return duong, hashlib.sha256(noi_dung).hexdigest()
 
 
 # --- các ca ---------------------------------------------------------------------
@@ -212,6 +221,202 @@ def t13_yaml_hong_khong_duoc_no_traceback():
         rc, _, e = chay("check", p)
         bang(rc == RC_NOI_DUNG, f"YAML hỏng phải là {RC_NOI_DUNG}: rc={rc}")
         bang("Traceback" not in e, "lộ traceback thô ra ngoài")
+
+
+@ca
+def t14_neo_prompt_DUNG_thi_QUA():
+    """Chiều DƯƠNG. Chốt chỉ biết chặn mà không biết cho qua thì cũng hỏng."""
+    with San() as s:
+        duong, sha = dat_prompt(s, b"Ban la phien REVIEWER...\n")
+        p = viet(s, lease_mau(prompt_path=duong, prompt_sha256_required=sha))
+        rc, o, e = chay("check", p, "--root", s)
+        bang(rc == RC_OK, f"chặn oan lease neo prompt đúng: rc={rc} {e}")
+        # Đòi in ra ĐÚNG cái băm vừa xác minh, không chỉ chữ "khớp băm": một dòng
+        # xác nhận in được cả khi chốt đã bị gỡ thì nó là trang trí, không phải
+        # bằng chứng. Có ca này thì gỡ chốt ⇒ ca này đỏ.
+        bang("khớp băm" in o and sha[:12] in o,
+             f"không nêu băm đã xác minh (chờ {sha[:12]}): {o!r}")
+
+
+@ca
+def t15_bam_LECH_thi_CHAN():
+    """ĐÂY LÀ BUG GỐC, dựng lại nguyên trạng.
+
+    Lease #3 của wp55 khai `46a833cc…` trong khi không văn bản nào băm ra thế.
+    Trước bản vá này cổng vẫn xanh, và hỏng im lặng suốt hai ngày.
+    """
+    with San() as s:
+        duong, _ = dat_prompt(s, b"noi dung that\n")
+        sai = "46a833ccfefba0b659a16183daf8b4f4893a5ef0eeb4e7fdf3cd315aad550dfc"
+        p = viet(s, lease_mau(prompt_path=duong, prompt_sha256_required=sai))
+        rc, _, e = chay("check", p, "--root", s)
+        bang(rc == RC_NEO, f"băm lệch mà vẫn đăng được: rc={rc} {e}")
+        # Đòi thông điệp nói CẢ HAI con số. Một cổng chỉ hô "lệch" thì người sửa
+        # vẫn phải tự đi băm lại — đúng chỗ hai ngày vừa rồi mất thời gian.
+        bang(sai in e and "thực tế" in e, f"thông điệp không nêu đủ hai băm: {e!r}")
+
+
+@ca
+def t16_tep_prompt_KHONG_CO_thi_CHAN():
+    with San() as s:
+        p = viet(s, lease_mau(prompt_path="ops/prompts/khong-co.md",
+                              prompt_sha256_required="0" * 64))
+        rc, _, e = chay("check", p, "--root", s)
+        bang(rc == RC_NEO, f"neo vào tệp không tồn tại mà qua: rc={rc} {e}")
+
+
+@ca
+def t17_neo_NUA_VOI_thi_CHAN_CA_HAI_CHIEU():
+    """Băm không địa chỉ = không kiểm được. Địa chỉ không băm = đổi lúc nào không hay.
+
+    Neo THÔNG ĐIỆP, và lý do đáng ghi: bỏ chốt này đi thì `prompt_path` rỗng biến
+    thành `PurePosixPath("")` = `.`, tức trỏ vào chính thư mục gốc kho, và bị chặn
+    ở `is_file()` với câu "không có tệp". Vẫn RC_NEO, nên ca chỉ đòi mã thoát sẽ
+    XANH trong khi chốt đã bị gỡ — mà thông điệp thì chỉ sai chỗ đúng kiểu đã làm
+    mất hai ngày: nói tệp thiếu, trong khi lỗi thật là lease không khai địa chỉ.
+    """
+    with San() as s:
+        duong, sha = dat_prompt(s, b"x\n")
+        rc, _, e = chay("check", viet(s, lease_mau(prompt_sha256_required=sha), ten="a.yaml"),
+                        "--root", s)
+        bang(rc == RC_NEO, f"băm không có prompt_path mà qua: rc={rc} {e}")
+        bang("thiếu `prompt_path`" in e,
+             f"chặn nhưng nói sai lỗi (chờ 'thiếu prompt_path'): {e.strip()!r}")
+        rc, _, e = chay("check", viet(s, lease_mau(prompt_path=duong), ten="b.yaml"),
+                        "--root", s)
+        bang(rc == RC_NEO, f"prompt_path không có băm mà qua: rc={rc} {e}")
+        bang("thiếu `prompt_sha256_required`" in e,
+             f"chặn nhưng nói sai lỗi (chờ 'thiếu prompt_sha256_required'): {e.strip()!r}")
+
+
+@ca
+def t18_prompt_path_VUOT_RA_NGOAI_kho_thi_CHAN():
+    """`prompt_path` là dữ liệu YAML mà thành một lượt đọc đĩa — phải chặn đường ra.
+
+    Ca này neo THÔNG ĐIỆP chứ không chỉ mã thoát, và đó là chủ đích. Có HAI lớp
+    chặn (lọc dạng đường dẫn trước khi đụng đĩa, rồi `relative_to` sau `resolve`),
+    và đã đo: bỏ lớp nào thì lớp kia vẫn trả đúng RC_NEO. Nếu chỉ đòi mã thoát thì
+    đột biến gỡ lớp trên SỐNG SÓT, và bộ test nói dối rằng nó có đo lớp ấy. Neo
+    thông điệp thì mỗi lớp có một ca riêng: t18 giữ lớp lọc, t19 giữ `relative_to`.
+    """
+    with San() as s:
+        ngoai = s.parent / f"ngoai_{s.name}.md"
+        ngoai.write_bytes(b"tep ngoai kho\n")
+        import hashlib
+        sha = hashlib.sha256(b"tep ngoai kho\n").hexdigest()
+        try:
+            for xau in (f"../{ngoai.name}", str(ngoai), "..\\..\\x.md",
+                        "ops/../../" + ngoai.name):
+                p = viet(s, lease_mau(prompt_path=xau, prompt_sha256_required=sha),
+                         ten="v.yaml")
+                rc, _, e = chay("check", p, "--root", s)
+                bang(rc == RC_NEO, f"prompt_path {xau!r} thoát ra ngoài kho: rc={rc} {e}")
+                bang("đường dẫn tương đối" in e,
+                     f"{xau!r} bị chặn nhưng KHÔNG phải bởi lớp lọc dạng đường dẫn "
+                     f"(thông điệp: {e.strip()!r})")
+        finally:
+            ngoai.unlink(missing_ok=True)
+
+
+@ca
+def t19_symlink_tro_RA_NGOAI_kho_thi_CHAN():
+    """`..` chỉ là một trong hai đường ra. Symlink là đường kia, và nó im hơn."""
+    with San() as s:
+        ngoai = s.parent / f"sym_{s.name}.md"
+        ngoai.write_bytes(b"tep ngoai kho\n")
+        import hashlib
+        sha = hashlib.sha256(b"tep ngoai kho\n").hexdigest()
+        lk = s / "ops" / "prompts" / "p.md"
+        lk.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            lk.symlink_to(ngoai)
+        except (OSError, NotImplementedError):
+            return   # nền không cho tạo symlink (Windows thiếu quyền) — bỏ qua
+        try:
+            p = viet(s, lease_mau(prompt_path="ops/prompts/p.md",
+                                  prompt_sha256_required=sha))
+            rc, _, e = chay("check", p, "--root", s)
+            bang(rc == RC_NEO, f"symlink ra ngoài kho vẫn qua: rc={rc} {e}")
+            # Symlink là ca DUY NHẤT mà lớp lọc dạng đường dẫn không thấy được:
+            # `ops/prompts/p.md` sạch về mặt chuỗi, chỉ `resolve()` mới lộ.
+            bang("ngoài kho" in e,
+                 f"chặn nhưng không phải bởi `relative_to` sau resolve: {e.strip()!r}")
+        finally:
+            ngoai.unlink(missing_ok=True)
+
+
+@ca
+def t20_sha256_SAI_DANG_thi_CHAN():
+    with San() as s:
+        duong, sha = dat_prompt(s, b"x\n")
+        for xau in (sha[:32], sha.upper(), sha + "0", "z" * 64):
+            p = viet(s, lease_mau(prompt_path=duong, prompt_sha256_required=xau),
+                     ten="d.yaml")
+            rc, _, e = chay("check", p, "--root", s)
+            bang(rc == RC_NEO, f"sha256 {xau!r} lọt: rc={rc} {e}")
+            # Neo THÔNG ĐIỆP: băm sai dạng thì cũng khác băm thật, nên chốt so băm
+            # bên dưới vẫn chặn — chỉ đòi mã thoát là ca này không đo gì cả (đã đo:
+            # gỡ chốt dạng đi thì suite vẫn xanh). Nói "sai dạng" khác hẳn nói
+            # "băm lệch": cái sau đẩy người sửa đi băm lại một tệp không có lỗi.
+            bang("64 ký tự hex" in e,
+                 f"sha256 {xau!r} bị chặn nhầm chỗ — chờ lỗi SAI DẠNG, được: {e.strip()!r}")
+
+
+@ca
+def t21_bam_theo_BYTE_chu_khong_theo_van_ban():
+    """CRLF và LF là hai tệp khác nhau, và phải ra hai băm khác nhau.
+
+    `read_text` chuẩn hoá xuống dòng nên cùng một tệp cho hai kết quả tuỳ nền —
+    một cổng như thế xanh ở Linux, đỏ ở Windows, không ai hiểu vì sao.
+    """
+    with San() as s:
+        import hashlib
+        lf = b"dong mot\ndong hai\n"
+        duong, sha_lf = dat_prompt(s, lf)
+        (s / duong).write_bytes(lf.replace(b"\n", b"\r\n"))   # cùng đường dẫn, đổi EOL
+        p = viet(s, lease_mau(prompt_path=duong, prompt_sha256_required=sha_lf))
+        rc, _, e = chay("check", p, "--root", s)
+        bang(rc == RC_NEO, f"CRLF/LF ra cùng băm — đang đọc văn bản, không đọc byte: rc={rc}")
+        # chiều dương: khai đúng băm bản CRLF thì phải qua
+        sha_crlf = hashlib.sha256(lf.replace(b"\n", b"\r\n")).hexdigest()
+        p2 = viet(s, lease_mau(prompt_path=duong, prompt_sha256_required=sha_crlf),
+                  ten="crlf.yaml")
+        rc2, _, e2 = chay("check", p2, "--root", s)
+        bang(rc2 == RC_OK, f"chặn oan bản CRLF khai đúng băm: rc={rc2} {e2}")
+
+
+@ca
+def t22_body_cung_bi_CHAN_khi_neo_hong():
+    """Hai lệnh hai đường mà chỉ một đường có chốt là chốt đi vòng được."""
+    with San() as s:
+        duong, _ = dat_prompt(s, b"that\n")
+        p = viet(s, lease_mau(prompt_path=duong, prompt_sha256_required="0" * 64))
+        rc, o, e = chay("body", p, "--root", s)
+        bang(rc == RC_NEO, f"`body` bỏ qua chốt neo prompt: rc={rc} {e}")
+        bang(not o.strip(), f"`body` vẫn in thân comment cho lease hỏng: {o[:120]!r}")
+
+
+@ca
+def t23_lease_THAT_trong_kho_phai_QUA():
+    """Chốt phải xanh trên chính tệp lease đang dùng, không chỉ trên đồ giả.
+
+    Bỏ ca này thì bộ test có thể xanh trong khi lease thật vẫn hỏng — đúng khoảng
+    cách giữa "code chạy" và "việc chạy".
+    """
+    that = HERE / "leases" / "wp55-r2-review-3-codex-20260814.yaml"
+    if not that.is_file():
+        return
+    import yaml
+    d = yaml.safe_load(that.read_text(encoding="utf-8"))
+    duong = d.get("prompt_path")
+    bang(bool(duong), "lease thật không khai prompt_path")
+    goc = HERE.parent
+    f = goc / duong
+    bang(f.is_file(), f"lease thật trỏ vào tệp không có: {duong}")
+    import hashlib
+    thuc = hashlib.sha256(f.read_bytes()).hexdigest()
+    bang(thuc == d.get("prompt_sha256_required"),
+         f"lease thật lệch băm: khai {d.get('prompt_sha256_required')}, thực {thuc}")
 
 
 def main() -> int:

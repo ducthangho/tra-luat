@@ -396,6 +396,7 @@ _RELEASE_EXCLUDE_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", 
                          "claude-code-best-practice",
                          "changelog_archive",
                          "rasoat",
+                         "ops",
                          "docs"}   # v1.33.54 dev-side; v1.33.59: +.github (CI); v1.34.68: +kho tham chiếu clone dev-only (Q1); v1.34.69: +changelog_archive (439KB deep-history, runtime agent không cần — best-practice trim); r249: +rasoat (báo cáo/bàn giao của các lượt rà — sản phẩm PHIÊN, runtime Cowork không đọc). Chọn THƯ MỤC chứ không liệt kê từng tên: báo cáo mới sinh liên tục theo ngày, bảng tên sẽ trôi lệch ngay lượt sau. KHÔNG dùng `reports/` sẵn có vì nó bị .gitignore — sẽ mất tệp khỏi git, mà yêu cầu là GIỮ trong repo và chỉ loại khỏi GÓI (cùng khuôn changelog_archive). r291 (T0-G, Q1 user CHỐT 01-08): +docs — 19 tệp (3 `docs/*.md` + 16 `docs/adr/*.md`) là hồ sơ THIẾT KẾ của người giữ (kế hoạch + ADR), runtime agent không đọc, mà chúng ăn 19/200 slot import trong khi quỹ chỉ còn 4 ⇒ trả quỹ về 23. GIỮ trong git y như rasoat/changelog_archive. ⚠ KHÔNG hạ cổng nào: `doc-claims-check` vẫn phủ `docs/` (r264) vì nó quét CÂY DEV qua `_DOC_CLAIMS_DEFAULT_PATHS`, không phải gói. r331: +`.codex` — SONG SINH của `.claude`, cùng lý do, chỉ khác tác nhân: agent Codex đặt worktree ở `.codex/worktrees/<nhánh>/`, mỗi worktree là MỘT BẢN SAO ĐẦY ĐỦ của kho (có `VERSION`/`SKILL.md`/`RELEASE_MANIFEST.json` riêng). Thiếu khoá này thì `release-verify` đếm chúng vào `extra_files` ⇒ gate ĐỎ ở MỌI lượt chạy từ main checkout, trong khi worktree sạch vẫn xanh — đỏ theo NƠI CHẠY chứ không theo nội dung, đúng lớp bệnh khó tin nhất. Đo 04-08-2026: 200 `extra_files`, 100% thuộc `.codex/`, mà `failed: []` và `expected/checked = 177/177` (manifest LÀNH). ★ Cạm bẫy: WARN của deploy khuyên `release-manifest --out …` — ở ca NÀY là SAI, nướng 4 bản sao kho vào manifest trong khi trần gói là 200 tệp CỨNG; lời khuyên đó chỉ đúng cho ca thêm/xoá tệp THẬT (r238).
 
 _RELEASE_EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".tmp", ".bak", ".swp", ".enc"}   # v1.33.54: +.enc (secrets mã hoá local)
@@ -426,6 +427,20 @@ _RELEASE_EXCLUDE_NAMES = {
     # vừa bị `release-verify --strict` hô extra_files vì manifest chưa có. Loại theo TÊN vì tệp
     # nằm ở gốc kho, không có thư mục riêng để khoá.
     ".editorconfig",
+    # `.mcp.json` khai server MCP ở phạm vi DỰ ÁN cho phiên dev (chỉ tên biến môi
+    # trường, không token). Cùng hạng `.editorconfig`: config dev-side, runtime agent
+    # trong gói không đọc, và cũng nằm ở gốc kho nên phải loại theo TÊN. Đi cùng
+    # khoá `ops` ở `_RELEASE_EXCLUDE_DIRS` — hai thứ sinh ra cùng một đợt (đường đăng
+    # lease bằng git) nên cùng thủng một lỗ: `release-verify --strict` hô 5 tệp
+    # `extra_files` NGAY TỪ commit đầu của nhánh ops, gate đỏ suốt mà không ai đọc
+    # ra vì đỏ ở "file thừa" chứ không ở `failed`. Đo 14-08-2026: extra_files 6 → 0.
+    # Bảng loại trừ KHÔNG thêm/bớt mục nào của manifest (`file_count` giữ 179, 0 thêm
+    # 0 bớt) — nhưng manifest vẫn phải tái sinh, vì `release.py` NẰM TRONG gói nên sửa
+    # chính tệp này là đổi sha của chính nó. Lượt đầu quên bước đó và `release-verify`
+    # trả `failed: 1` đúng ngay tệp vừa sửa: cổng nói thật, chỉ là nói về chuyện khác
+    # với chuyện mình đang nghĩ. Đổi bảng loại trừ ⇒ luôn chạy lại `release-manifest`
+    # rồi ĐỌC diff, đừng ghi đè cho hết đỏ.
+    ".mcp.json",
 }
 
 _RELEASE_WINDOWS_RESERVED = {

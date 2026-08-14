@@ -118,8 +118,12 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   Nên thứ đáng nhớ KHÔNG phải mẹo nhân đôi mà là chốt (a): đo thứ ĐÃ ĐẾN.
   Bằng chứng bẫy này KHÔNG hiếm và KHÔNG chỉ ở MCP: chính hai dòng trên đây, lượt viết đầu cũng bị
   công cụ sửa tệp giải mã mất chuỗi thoát (đối số của nó cũng là chuỗi JSON), phải ghi lại bằng một
-  script tự dựng dấu chéo từ `chr(92)` — tức đi vòng qua lớp JSON thay vì đoán cách thoát cho đúng —
-  rồi ĐO `repr()` mới thấy. Hễ nội dung NÓI VỀ chuỗi thoát thì phải đo nó sau khi ghi.
+  script tự dựng dấu chéo từ `chr(92)` rồi ĐO `repr()` mới thấy. Nói cho ĐÚNG kẻo lại giữ nguyên cái
+  mô hình lớp sai vừa sửa ở trên — bản đầu viết "đi vòng qua lớp JSON", và cross-review bắt được
+  (P2 trên PR #108): script ấy CŨNG là đối số công cụ nên CŨNG đi qua đúng lớp tuần tự hoá đó, không
+  vòng được đi đâu cả. Thứ nó tránh là **cho một dấu chéo NGUYÊN VĂN đi trên đường truyền**: dấu chéo
+  được DỰNG SAU khi đã phân tích cú pháp, nên không còn gì để lớp nào giải mã. Đó là HOÃN việc dựng
+  chuỗi, không phải né một tầng. Hễ nội dung NÓI VỀ chuỗi thoát thì phải đo nó sau khi ghi.
 - **Quét secrets: lọc theo PHẦN MỞ RỘNG là mù ĐÚNG CHỖ secrets nằm.** `Path('.env').suffix == ''` nên
   `.env` `.netrc` `credentials` (không mở rộng) bị bỏ qua SẠCH — bơm `GOCSPX-…` vào `.env` mà bộ quét
   trả rc=0. Cộng thêm `Get-ChildItem` thiếu `-Force` cũng bỏ y hệt: **hai lỗi ĐỘC LẬP mà CÙNG HƯỚNG** ⇒

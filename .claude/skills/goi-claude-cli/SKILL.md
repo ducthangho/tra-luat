@@ -22,7 +22,7 @@ python .claude/dev/launcher.py run \
   --expected-prompt-sha256 <sha256 prompt> \
   --deadline-utc           <hạn lease dạng RFC3339> \
   --run-root /duong/dan/runs --name <ten-luot> \
-  -- bash -c 'claude --permission-mode auto -p < {PROMPT_FILE}'
+  -- bash -c 'claude --permission-mode auto -p < "{PROMPT_FILE}"'
 ```
 
 Chạy `check` (cùng bộ cờ, bỏ `--run-root`/`--name`/lệnh) **trước** — nó kiểm hết chốt
@@ -39,6 +39,10 @@ Ba chi tiết trong lệnh con, mỗi cái đều đã trả giá:
   Cho stdin bằng tệp cũng giải luôn việc `claude -p` treo chờ stdin (`Warning: no
   stdin data received in 3s`) — nên **không cần** `< /dev/null` nữa; nếu vì lý do khác
   mà không truyền prompt qua stdin thì mới cần nó.
+  **Phải có dấu nháy: `< "{PROMPT_FILE}"`.** Launcher thay chỗ ấy bằng đường dẫn THẬT,
+  và `--run-root` có khoảng trắng là đủ để bash tách thành nhiều token. Đã tái lập với
+  run-root tên `run root`: không quote ⇒ `bash: /tmp/claude-0/run: No such file or
+  directory`, `rc=1`, prompt KHÔNG tới con; có quote ⇒ chạy đúng.
 - **`{PROMPT_FILE}`** — launcher thay bằng **bản chụp bất biến** trong thư mục lượt
   chạy, nên prompt không đổi được giữa lúc kiểm băm và lúc con đọc. Có
   `{PROMPT_FILE}` mà quên `--prompt-file` thì launcher chặn, không để con mở một tệp
@@ -71,8 +75,11 @@ bằng cờ theo LƯỢT CHẠY, **đừng** nới `permissions.allow` của kho
 sách chung, một lượt chạy không được đổi nó:
 
 ```bash
-claude --permission-mode auto --allowedTools "Bash(git push:*)" -p "…"
+claude --permission-mode auto --allowedTools "Bash(git push:*)" -p < "{PROMPT_FILE}"
 ```
+
+(Vẫn là dạng stdin. Đừng viết `-p "…"` ở đây cho gọn: thay dấu ba chấm bằng một prompt
+thật là prompt lại nằm trong argv, đúng thứ dạng stdin sinh ra để tránh.)
 
 Đã đo: không có cờ ⇒ phiên dừng ở BƯỚC 0 và báo "blocked waiting on permission";
 có cờ ⇒ `git push --dry-run` chạy. Cấp hẹp theo mẫu lệnh, đừng cấp `Bash(*)`.
@@ -223,14 +230,24 @@ cháu mới là bên đọc bản chụp — xoá sớm là tự tạo TOCTOU. H
 Nên với prompt có nội dung nhạy cảm, phải tự kiểm và tự dọn:
 
 ```bash
-find <run-root> -name prompt.snapshot -ls        # còn sót cái nào
-find <run-root> -name prompt.snapshot -delete    # dọn tay sau khi đã xong việc
+find <run-root> -name prompt.snapshot -ls                 # còn sót cái nào, từ lượt nào
+find <run-root> -name prompt.snapshot -mmin +1440 -delete # CHỈ dọn bản đã cũ >24 giờ
 ```
+
+**Đừng `-delete` không điều kiện.** Nó xoá cả bản chụp của lượt ĐANG chạy — đúng ca
+TOCTOU mô tả ngay trên: cháu chưa kịp mở tệp thì nhận `ENOENT`. `trang_thai: xong` của
+tiến trình cha **không** chứng minh hậu duệ đã xong. Muốn dọn một lượt cụ thể sớm hơn
+24 giờ thì phải tự xác minh nhóm tiến trình của nó đã rỗng trước, rồi mới xoá đúng
+thư mục lượt ấy.
 
 `--giu-ban-chup` giữ bản chụp **có chủ đích** để đối chiếu — dùng khi cần, và nhớ dọn.
 
-Lỗi im lặng nằm ở **`stderr.log`**, không ở `run.json`: lượt hỏng vì trust hoặc vì cờ
-quyền vẫn cho `trang_thai: xong`, chỉ khác `ma_thoat`. Đọc `stderr.log` trước tiên.
+Lỗi im lặng nằm ở **`stderr.log`**, không ở `run.json`. Và đừng trông vào `ma_thoat`
+để phân biệt: lượt hỏng vì trust hoặc vì cờ quyền có thể cho **đúng** cặp
+`trang_thai: xong` + `ma_thoat: 0` như một lượt thành công — chính tài liệu này ghi một
+ca như vậy ở mục trên (executor bị chặn `git push`, không sửa dòng nào, `ma_thoat: 0`).
+Thứ phân biệt được chỉ có hai: **log** và **hậu điều kiện hành vi** (`git status
+--porcelain`, số commit, tệp có thật, băm khớp).
 
 ## Trước khi giao việc thật
 

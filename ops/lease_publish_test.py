@@ -628,6 +628,52 @@ def t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi():
              f"gốc để `pending-owner-post`, và là lý do biên nhận này tồn tại")
 
 
+@ca
+def t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc():
+    """Mọi verdict/biên nhận phải có trong `ops/reviews/README.md`, và mọi caveat phải nêu tên ở đó.
+
+    Vì sao có (finding của codex trên PR #114, ĐÚNG): tệp verdict là nguyên văn neo băm
+    nên chỗ sai không vá được tại nguồn, và đính chính phải sống ở biên nhận. Nhưng
+    người mở thẳng `verdict_path` để chạy lại lệnh KHÔNG có gì trỏ họ sang tệp sidecar
+    — quét cả kho cũng không có bộ đọc nào đưa `verdict_usage_caveats` ra. Nghĩa là bản
+    vá đầu tiên chỉ DỜI vấn đề sang một tệp ít người mở hơn, không giải nó.
+
+    Ca này biến mục lục thành chốt: thêm caveat mà quên nâng lên `README.md` thì ĐỎ.
+    Nó KHÔNG khẳng định mục lục đủ để cứu mọi người đọc — giới hạn ấy ghi ngay trong
+    README. Nó chỉ bảo đảm một điều kiểm được: cảnh báo không nằm im một chỗ.
+    """
+    import yaml
+    thu_muc = HERE / "reviews"
+    if not thu_muc.is_dir():
+        bang(not (HERE.parent / ".git").exists(),
+             f"kho thật mà không thấy {thu_muc} — ca này sẽ xanh rỗng")
+        return
+    muc_luc = thu_muc / "README.md"
+    bang(muc_luc.is_file(),
+         f"thiếu {muc_luc} — thư mục verdict không có cửa vào thì cảnh báo trong biên "
+         f"nhận không tới được ai")
+    van = muc_luc.read_text(encoding="utf-8")
+
+    ds = sorted(thu_muc.glob("*.receipt.yaml"))
+    bang(ds, f"không thấy biên nhận nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
+    for p in ds:
+        d = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+        bang(p.name in van, f"{muc_luc.name}: thiếu biên nhận {p.name} trong mục lục")
+        ten_verdict = Path(str(d.get("verdict_path") or "")).name
+        bang(ten_verdict and ten_verdict in van,
+             f"{muc_luc.name}: thiếu verdict {ten_verdict!r} trong mục lục")
+
+        cac_caveat = d.get("verdict_usage_caveats") or []
+        for c in cac_caveat:
+            ma = str((c or {}).get("id") or "").strip()
+            bang(ma, f"{p.name}: có caveat KHÔNG có `id` — không nêu tên được thì "
+                     f"không nâng lên mục lục được, và cũng không ai trích dẫn được")
+            bang(ma in van,
+                 f"{muc_luc.name}: caveat {ma!r} của {p.name} CHƯA được nâng lên mục "
+                 f"lục. Cảnh báo nằm trong tệp sidecar mà không ai mở thì bằng không — "
+                 f"đó đúng là finding đã sinh ra ca này.")
+
+
 def main() -> int:
     qua, hong = 0, []
     for fn in CA:

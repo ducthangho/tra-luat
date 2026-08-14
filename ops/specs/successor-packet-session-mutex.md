@@ -48,27 +48,45 @@ python3 ops/evidence/probe-packet-session-mutex.py .claude/dev/packet_loop.py
 
 ### H1 · hai tiến trình ĐỒNG THỜI cùng mở lượt trên CÙNG state-dir
 
+Lỗ CÓ THẬT nhưng **HIẾM và phụ thuộc tải**. Số đo đầy đủ, kể cả các lần KHÔNG lộ lỗ —
+giấu chúng đi là biến một lỗ hiếm thành lời khai mạnh hơn thực tế:
+
 ```text
-tiến trình chạy      : 8
-số cái THẮNG (rc=0)  : 2      ← ĐÚNG phải là 1
-attempts_used ghi lại: 1      ← ĐÚNG phải bằng số cái thắng
+N=8  đồng thời, 12 vòng  → 12/12 vòng: thắng=1, attempts_used=1   (KHÔNG lộ lỗ lần nào)
+N=32 đồng thời, 15 vòng  → 13/15 vòng: thắng=1, attempts_used=1
+                             2/15 vòng: thắng=2, attempts_used=1   ← LỖ
 ```
 
-Hai hệ quả, cái thứ hai nặng hơn cái thứ nhất:
+Reproducer mạnh: `ops/evidence/probe-packet-session-mutex-race.py <packet_loop.py> 32 15`.
+
+Chữ ký `thắng=2, attempts_used=1` chỉ khớp một cơ chế: **lost update**. Hai tiến trình cùng
+đọc `attempts_used=0`, cùng thấy `attempt_open=False`, cùng ghi `1`. Hai hệ quả:
 
 1. **Hai lượt mở song song trên một packet.** Hai executor cùng tin mình đang giữ lượt.
-2. **Đếm THIẾU vì ghi đè mù.** Cả hai đọc `attempts_used=0`, cả hai ghi `1`. Nên 2 lượt
-   THẬT chỉ tiêu 1 đơn vị trần. Lặp lại đủ nhiều thì **trần attempt — lý do tồn tại của
-   `packet_loop.py` — bị vô hiệu**: chạy được nhiều lượt hơn `attempts_limit` cho phép.
+2. **Đếm THIẾU** — nặng hơn. 2 lượt THẬT chỉ tiêu 1 đơn vị trần ⇒ **trần attempt, lý do
+   tồn tại của `packet_loop.py`, bị bào mòn**: chạy được nhiều lượt hơn `attempts_limit`.
 
-`begin-attempt` CÓ chốt `attempt_open`, và chốt ấy đúng khi gọi TUẦN TỰ. Nó thua vì đây là
-read-modify-write không nguyên tử: `_load` → kiểm → `_save`. Giữa `_load` và `_save` không
-có gì giữ chỗ.
+`begin-attempt` CÓ chốt `attempt_open`, và chốt ấy ĐÚNG khi gọi tuần tự. Nó thua vì
+read-modify-write không nguyên tử: `_load` → kiểm → `_save`, giữa hai đầu không giữ chỗ.
 
-> **Ca này KHÔNG tất định** — lần đo trên cho 2/8, lần khác có thể 1/8 (không quan sát được
-> lỗ) hoặc 3/8. Phép thử nghiệm thu vì thế PHẢI lặp tới khi quan sát được, hoặc chèn điểm
-> dừng tất định, chứ không được viết kiểu "chạy một lần rồi kết luận". Một ca đua viết ẩu
-> sẽ xanh giả và đó là thứ tệ hơn không có ca.
+> **CẢNH BÁO cho người viết ca nghiệm thu — chỗ dễ tự lừa nhất của packet này.**
+> Ở N=8 lỗ KHÔNG lộ trong 12 vòng liên tiếp. Một ca đua chạy một lần rồi kết luận sẽ XANH
+> GIẢ, và xanh giả tệ hơn không có ca. AC 2 vì thế đòi: lặp tới khi quan sát được tranh
+> chấp, HOẶC chèn điểm dừng tất định (hook giữa `_load` và `_save`). Ca ấy còn phải tự
+> chứng minh không rỗng: trên bản CHƯA vá nó phải ĐỎ ĐƯỢC. Không quan sát được lỗ trên
+> bản chưa vá thì ca không đo gì.
+
+### H1b · `packet_loop.py` CHƯA TỒN TẠI trên master — `depends_on` là điều kiện vật lý
+
+```bash
+git show origin/master:.claude/dev/packet_loop.py
+# fatal: path '.claude/dev/packet_loop.py' ... not in 'origin/master'
+```
+
+Không chỉ GIAO write_set với wp55 — **cả hai tệp `.claude/dev/packet_loop*.py` là do wp55
+TẠO RA**, chúng chưa có mặt trên `master` (`2531366`). Packet này không sửa được một tệp
+chưa tồn tại. `depends_on: [wp55]` vì thế không phải lựa chọn thận trọng mà là điều kiện
+vật lý: chạy trước khi wp55 land thì không có gì để sửa.
 
 ### H2 · hai phiên KHÁC container — không có state dùng chung nào
 

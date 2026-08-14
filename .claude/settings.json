@@ -12,11 +12,11 @@
       "Bash(python scripts/tl.py counts:*)",
       "Bash(python scripts/tl.py sweep:*)",
       "Bash(python scripts/tl.py review-queue:*)",
-      "Bash(python scripts/tl.py reg-query:*)"
+      "Bash(python scripts/tl.py reg-query:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "ask": [
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
       "Bash(clasp:*)"
     ],
     "deny": [

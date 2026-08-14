@@ -82,3 +82,4 @@ prior_review_invalidated: wp55-r2-review-2-codex-20260813   # bản review neo 2
 # Bản chiếu 5290916886 chiếu băm prompt CŨ (`e0f58b80…`) của bản prompt nói sai nhánh.
 # Gỡ `posted_comment_id` để workflow chiếu LẠI; giữ số cũ ở đây cho dấu vết khỏi đứt.
 supersedes_posted_comment: 5290916886
+posted_comment_id: 5290949262   # workflow ghi, ĐỪNG sửa tay

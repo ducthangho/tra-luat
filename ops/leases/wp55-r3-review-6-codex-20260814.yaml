@@ -182,3 +182,4 @@ prior_review_verdict_file: ops/reviews/wp55-r2-review-5-codex-verdict.md
 prior_review_verdict_branch: ops/wp55-verdict-5
 prior_review_verdict_sha256: d1d04452d0ab2df917c1f1f9aa46d52aa554fdf497480ab176780a462a43623e
 prior_review_invalidated_reason: 'revision 2 blocked; revision 3 head mới e6e4b73'
+posted_comment_id: 5297322412   # workflow ghi, ĐỪNG sửa tay

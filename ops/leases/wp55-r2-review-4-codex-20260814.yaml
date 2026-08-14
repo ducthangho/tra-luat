@@ -1,0 +1,74 @@
+# Lease #4 cho wp55 revision 2 — reviewer codex, vẫn neo head cf39109c (head KHÔNG đổi).
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh
+# `ops/**`. Sửa lease thì sửa ở đây rồi push; đừng sửa tay comment.
+#
+# VÌ SAO CÓ LEASE #4, VÀ VÌ SAO CỬA SỔ DÀI HƠN HẲN:
+# Lease #2 và #3 đều chết mà KHÔNG phiên nào chạy trong cửa sổ. Đó là hai lần liên
+# tiếp, nên nó không còn là rủi ro mà là một chỗ hỏng có thật: cửa sổ 6 giờ ngắn hơn
+# khoảng cách tới lúc có một phiên `codex` thật. Cấp lại y hệt lần thứ ba là làm cùng
+# một việc rồi mong kết quả khác.
+# Nên lease này để 24 giờ. Đổi lại, heartbeat 30 phút là BẮT BUỘC — cái giữ cho lease
+# không thành tờ giấy trắng là dấu vết sống, không phải con số hạn ngắn. Và chốt hạn
+# ở `.claude/dev/packet_loop.py` cưỡng chế CẢ lúc ghi lease LẪN mỗi lần mở lượt, nên
+# cửa sổ dài không mở đường cho một lượt chạy sau khi hết hạn.
+#
+# Lease #3 (`wp55-r2-review-3-codex-20260814`) còn hạn tới 09:08:40Z lúc ghi tệp này.
+# `supersedes_lease` làm nó hết hiệu lực NGAY — không có hai lease sống cùng lúc cho
+# cùng một vai. Đây là cơ chế đã dùng ở #2→#3, không phải ngoại lệ nghĩ ra cho lượt này.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+phase_key: F3-03
+mission_issue: 54
+mission_revision: 6
+revision: 2
+generation: 2
+spec_hash: a05c10f71e205d6268c46c62de9fd2d1cc5f7629b070af69a8e3b4254d782c5c
+
+lease_id: wp55-r2-review-4-codex-20260814
+supersedes_lease: wp55-r2-review-3-codex-20260814   # hết hạn 09:08:40Z, KHÔNG phiên nào chạy
+role: reviewer
+review_attempt: 4
+provider: codex                 # BẮT BUỘC — executor là claude (§8 cross-provider)
+assurance_target: cross_approved
+access: read-only
+write_set: []                   # reviewer KHÔNG ghi (§2)
+branch_ownership: none
+
+target_pull_request: 92
+reviewed_sha_required: cf39109c9e5167516c53f2071e5fa7ec5c6afff5   # KHÔNG đổi so với lease #3 — đã kiểm lại 14-08 07:45Z, head PR #92 vẫn đúng commit này
+branch: claude/wp55-r2g2-f3-03
+base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2   # merge-base, KHÔNG đổi theo master
+
+# Prompt reviewer: TỆP MỚI, không dùng lại tệp của lease #3.
+# Lý do: master đã đổi (b666ded → 4dd1d6f, merge PR #98) nên hai con số trong prompt
+# cũ thành sai — `master =` và số commit đi trước merge-base (38 → 51). Một prompt nói
+# sai về master là đúng loại lỗi mà lease #3 vừa trả giá, chỉ khác chỗ sai. Đã đo lại
+# 14-08 07:45Z: head PR #92 vẫn cf39109c, merge với master mới vẫn SẠCH (rc=0), master
+# vẫn chỉ chạm CLAUDE.md trong 6 tệp write_set.
+prompt_path: ops/prompts/wp55-r2-review-4-codex-20260814.md
+prompt_sha256_required: e0f58b80beec8719dd7232381a27f1257a3154782812b9c4deff7fc260604911
+
+granted_by: ducthangho          # CHỦ KHO — §2 "người có thẩm quyền"
+granted_on_instruction: direct, in-session, 2026-08-14 ("xu ly not ca 2 cho toi")
+recorded_by: claude-session (KHÔNG phải dispatcher, ghi hộ quyết định)
+recorder_is_dispatcher: false
+authority_basis: "§2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền"
+
+leased_at_utc: '2026-08-14T07:55:00Z'
+lease_expires_at_utc: '2026-08-15T08:00:00Z'
+run_minutes: 1445
+heartbeat_required_minutes: 30
+
+attempts_used: 2
+attempts_limit: 3
+# Số lease và số attempt NỘI DUNG là hai thứ khác nhau — đừng gộp. Đây là lease thứ 4
+# nhưng `attempts_used` vẫn 2, vì KHÔNG lease nào trong ba lease trước có phiên chạy,
+# nên chưa lượt review nào tiêu attempt nội dung. Còn đúng MỘT attempt nội dung.
+attempt_2_summary: "sửa finding CHẶN 'init tự cấp lease' (cf39109c)"
+attempt_2_recorded_outside_state_machine: true   # begin-attempt KHÔNG được gọi; con số này do NGƯỜI khai
+prior_review_invalidated: wp55-r2-review-2-codex-20260813   # bản review neo 22d2cc9 hết hiệu lực (head mới ⇒ duyệt cũ hết hiệu lực)

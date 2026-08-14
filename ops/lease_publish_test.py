@@ -397,26 +397,40 @@ def t22_body_cung_bi_CHAN_khi_neo_hong():
 
 
 @ca
-def t23_lease_THAT_trong_kho_phai_QUA():
-    """Chốt phải xanh trên chính tệp lease đang dùng, không chỉ trên đồ giả.
+def t23_MOI_lease_THAT_trong_kho_phai_QUA():
+    """Chốt phải xanh trên chính các tệp lease đang dùng, không chỉ trên đồ giả.
+
+    Quét MỌI lease trong `ops/leases/`, không chỉ định danh một tệp. Bản đầu ca này
+    ghi cứng tên lease #3; đến lease #4 thì nó vẫn xanh trong khi lease mới có thể
+    hỏng — thêm lease là thêm chỗ mù, mà chỗ mù nằm đúng ở tệp mới nhất, tức tệp
+    khả nghi nhất. Ca ghi cứng một tên chỉ canh được quá khứ.
 
     Bỏ ca này thì bộ test có thể xanh trong khi lease thật vẫn hỏng — đúng khoảng
     cách giữa "code chạy" và "việc chạy".
     """
-    that = HERE / "leases" / "wp55-r2-review-3-codex-20260814.yaml"
-    if not that.is_file():
-        return
-    import yaml
-    d = yaml.safe_load(that.read_text(encoding="utf-8"))
-    duong = d.get("prompt_path")
-    bang(bool(duong), "lease thật không khai prompt_path")
-    goc = HERE.parent
-    f = goc / duong
-    bang(f.is_file(), f"lease thật trỏ vào tệp không có: {duong}")
     import hashlib
-    thuc = hashlib.sha256(f.read_bytes()).hexdigest()
-    bang(thuc == d.get("prompt_sha256_required"),
-         f"lease thật lệch băm: khai {d.get('prompt_sha256_required')}, thực {thuc}")
+    import yaml
+    goc = HERE.parent
+    thu_muc = HERE / "leases"
+    if not thu_muc.is_dir():
+        return
+    ds = sorted(p for p in thu_muc.iterdir() if p.suffix in (".yaml", ".yml"))
+    # KHÔNG cho phép "không có lease nào" âm thầm thành ĐẠT: thư mục rỗng và thư mục
+    # toàn lease lành cho cùng một màu xanh, mà ý nghĩa thì ngược nhau.
+    bang(ds, f"không thấy lease nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
+    da_kiem = 0
+    for p in ds:
+        d = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+        duong, sha = d.get("prompt_path"), d.get("prompt_sha256_required")
+        if not duong and not sha:
+            continue          # lease không neo prompt — hợp lệ, bỏ qua
+        bang(duong and sha, f"{p.name}: neo prompt NỬA VỜI (path={duong!r} sha={sha!r})")
+        f = goc / duong
+        bang(f.is_file(), f"{p.name}: trỏ vào tệp không có: {duong}")
+        thuc = hashlib.sha256(f.read_bytes()).hexdigest()
+        bang(thuc == sha, f"{p.name}: LỆCH BĂM — khai {sha}, tệp {duong!r} thực {thuc}")
+        da_kiem += 1
+    bang(da_kiem, "không lease nào neo prompt — ca này không đo được gì")
 
 
 def main() -> int:

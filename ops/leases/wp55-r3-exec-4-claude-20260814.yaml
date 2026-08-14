@@ -1,0 +1,141 @@
+# Lease EXECUTOR cho wp55 revision 3, generation 4 — attempt 1/3 của revision MỚI.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+# Sửa lease thì sửa ở đây rồi push; đừng sửa tay comment.
+#
+# VÌ SAO CÓ LEASE NÀY:
+# Revision 2 đã cạn 3/3 attempt và kết ở `blocked` (verdict lượt 5 = changes_requested,
+# ba P1 mở). Theo §12, stop condition cho thấy chính Packet Spec thiếu thì phải đi qua
+# revision mới — không nới cờ, không vá lượt thứ tư trên tiêu chí cũ. Revision 3 đã mở,
+# spec neo bằng TỆP trong kho. Lease này là lượt executor đầu tiên của revision đó.
+#
+# ĐIỀU KHÁC BIỆT LỚN NHẤT SO VỚI MỌI LEASE TRƯỚC — đọc kỹ `attempt_1_scope`:
+# AC 18 của revision 3 CẤM bắt đầu bằng bản vá. Phải xuất DANH SÁCH ĐÓNG các lớp lách
+# trước, rồi mới vá một lượt cho cả danh sách. Bảy lần trước đều vá đúng hình dạng vừa
+# bị chỉ ra, và lần sau lộ hình dạng kế tiếp. Một bản vá không kèm danh sách đóng là
+# KHÔNG ĐẠT, kể cả khi nó làm mọi phép thử hiện có xanh.
+#
+# CỬA SỔ 24 GIỜ, HEARTBEAT 30 PHÚT: ba lease của vòng review từng chết vì cửa sổ ngắn
+# hơn khoảng cách tới lúc có một phiên thật. Thứ giữ lease khỏi thành tờ giấy trắng là
+# dấu vết sống, không phải con số hạn dài.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 55
+packet_id: wp55
+phase_key: F3-03
+mission_issue: 54
+mission_revision: 6
+revision: 3
+generation: 4
+lease_id: wp55-r3-exec-4-claude-20260814
+
+# Mỏ neo spec ĐỔI KIỂU ở revision 3: băm TỆP trong kho, không băm thân Issue.
+# Kiểm được ở mọi nền, không cần mạng, không cần token:
+#   git show origin/ops/wp55-r3-spec:ops/specs/wp55-r3-spec.md | sha256sum
+spec_path: ops/specs/wp55-r3-spec.md
+spec_branch: ops/wp55-r3-spec
+spec_hash: e321f811724fae97b19d523a3e5159bc13b425cd15fc6c753c7439fe28cae22d
+spec_hash_basis: sha256 của chính tệp spec, byte nguyên trạng
+supersedes_revision: 2
+supersedes_spec_hash: a05c10f71e205d6268c46c62de9fd2d1cc5f7629b070af69a8e3b4254d782c5c
+
+role: executor
+provider: claude                # executor claude ⇒ reviewer kế tiếp BẮT BUỘC codex (§8)
+assurance_target: cross_approved
+access: read-write
+
+# ĐÚNG 6 đường dẫn, không hơn. Giữ nguyên write_set của revision 2.
+write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - .claude/skills/cross-review/SKILL.md
+  - .claude/skills/land-packets/SKILL.md
+  - .claude/skills/work-packet/SKILL.md
+  - CLAUDE.md
+branch_ownership: claude/wp55-r3g4-f3-03
+
+# `reviewed_sha_required` với lease EXECUTOR nghĩa là **head XUẤT PHÁT**, không phải
+# head phải review: executor bắt đầu từ đúng commit mà verdict đã neo, nếu không thì
+# bản vá đang chữa một cây khác với cây bị soi. Executor SẼ tạo head mới.
+reviewed_sha_required: 546ecf9fd4dfe889d0cd3ee77b9589d8bed0465f
+base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2
+branch: claude/wp55-r3g4-f3-03
+target_pull_request: null       # executor mở PR mới nhắm master
+
+# VÌ SAO NHÁNH MỚI MÀ VẪN XUẤT PHÁT TỪ HEAD CŨ — nói rõ để không ai đoán:
+# Ba bản vá của generation 3 đã được cross-review lượt 5 soi và KHÔNG bị bác; chúng
+# đúng, chỉ chưa đủ. Vứt đi rồi gõ lại là rủi ro không đổi lấy lợi ích. Nhưng TÊN nhánh
+# phải nói đúng revision/generation, nên không đẩy tiếp lên `claude/wp55-r2g2-f3-03`.
+# PR #92 giữ nguyên làm hồ sơ revision 2 — chủ kho quyết định lúc nào đóng, executor KHÔNG đóng.
+branch_start_point_rationale: giữ công đã được review, đổi tên cho đúng revision/generation
+
+prompt_path: ops/prompts/wp55-r3-exec-4-claude-20260814.md
+prompt_sha256_required: dd9f01cc9b0a676a5052644868f49839a04cfa56dfa5c51d0182a9a3fc1152d9
+
+granted_by: ducthangho          # CHỦ KHO — §2 người có thẩm quyền
+granted_on_instruction: direct, in-session, 2026-08-14 (Thực hiện 2, 3 cho tôi)
+recorded_by: claude-session     # ghi hộ quyết định, KHÔNG phải dispatcher
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-14T18:30:00Z'
+lease_expires_at_utc: '2026-08-15T19:00:00Z'
+run_minutes: 1470
+heartbeat_required_minutes: 30
+
+# TRẦN ĐẾM LẠI TỪ 0 — đó là ý nghĩa của việc đi qua revision (§12). Số của revision 2
+# KHÔNG mang sang. Nói thẳng để không ai tưởng đây là attempt thứ tư đội lốt.
+attempts_used: 0
+attempts_limit: 3
+attempt_1_scope: >-
+  Xuất DANH SÁCH ĐÓNG các lớp lách của doctrine-scan và của lược đồ lease TRƯỚC, kèm phép
+  thử chạy được cho từng lớp; rồi vá MỘT LƯỢT ở tầng cho cả danh sách. Bản vá không kèm
+  danh sách đóng là KHÔNG ĐẠT, kể cả khi mọi phép thử hiện có xanh — AC 18.
+
+# Ba P1 phải đóng. Executor KIỂM lại từng cái chứ đừng nhận mô tả ở đây làm đủ.
+findings_to_fix:
+  - finding_id: doctrine-rendering-bypass-nfkc
+    severity: P1
+    source: chatgpt-codex-connector[bot] · PR #92 · 2026-08-14T17:27:49Z
+    site: .claude/dev/packet_loop.py — _chuan_hoa
+    root_cause: NFC theo định nghĩa không gộp ký tự tương thích; phải là NFKC
+    layer_fix: NFKC + lọc Cf + giải entity một lần, áp cho CẢ HAI vế so khớp
+    mutation_required: hạ NFKC về NFC ⇒ ca đích phải ĐỎ
+  - finding_id: partial-lease-authority-bypass
+    severity: P1
+    source: verdict lượt 5 · PR #92 review 4939956924
+    site: .claude/dev/packet_loop.py — cmd_begin_attempt (~507)
+    root_cause: kiểm SỰ TỒN TẠI một khoá, không kiểm TRỌN LƯỢC ĐỒ; hai chốt tự kiểm rời nhau
+    layer_fix: một hàm kiểm chung dùng bởi cả record-lease lẫn begin-attempt
+    mutation_required: tách hai chốt ra khỏi hàm chung ⇒ ca đích phải ĐỎ
+    extra: mọi hình dạng sai phải có mã thoát kiểm soát, KHÔNG traceback
+  - finding_id: merged-tree-doctrine-false-positive
+    severity: P1
+    source: verdict lượt 5 · PR #92 review 4939956924
+    site: .claude/dev/packet_loop.py — doctrine-scan, chiều BẮT OAN
+    root_cause: >-
+      _chuan_hoa chuẩn hoá CẢ TỆP nên nối dòng; CLAUDE.md master dòng 82 kết thúc bằng
+      'người có', dòng 83 bắt đầu bằng 'thẩm quyền' — một câu KỂ LẠI kết quả đo bị tính
+      là chép doctrine
+    layer_fix: chiều bắt oan phải được đo ngang hàng chiều lọt; mỗi lớp chuẩn hoá một ca
+    note: merge-tree rc=0 KHÔNG phải bằng chứng tương thích — AC 20 đòi đo trên cây ĐÃ MERGE
+
+# Điều kiện tiên quyết ĐÃ ĐO; executor phải kiểm lại chứ đừng tin.
+preconditions_measured_at_utc: '2026-08-14T18:25:00Z'
+master_sha_at_grant: 3d2c52d62696b0c7c190fd891115f543b0f9cb55
+merge_tree_master_head: rc 0
+doctrine_scan_on_merged_tree: rc 6 — ĐỎ SẴN, chính là finding merged-tree-doctrine-false-positive
+doctrine_scan_on_branch_only: rc 0
+master_touches_in_write_set: [CLAUDE.md]
+
+prior_revision_record:
+  packet_state: blocked
+  blocked_event: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5296696111
+  revision_opened_event: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5296702205
+  review_5_recorded: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5296690883
+  review_5_verdict: https://github.com/ducthangho/tra-luat/pull/92#pullrequestreview-4939956924
+  review_5_verdict_original_missing: true
+  review_5_verdict_posted_copy: ops/reviews/wp55-r2-review-5-codex-verdict.POSTED-COPY.md
+  review_4_verdict_file: ops/reviews/wp55-r2-review-4-codex-verdict.md

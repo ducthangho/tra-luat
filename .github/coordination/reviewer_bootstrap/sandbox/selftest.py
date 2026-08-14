@@ -209,6 +209,31 @@ def cpu_limit_requires_explicit_signal_evidence() -> None:
         raise AssertionError(signalled)
 
 
+def descendant_checks_treat_zombies_as_gone_with_one_snapshot() -> None:
+    observed = {41: "100", 42: "200", 43: "300", 44: "400"}
+    snapshots = {
+        41: ("Z", "100"),
+        42: ("R", "200"),
+        43: None,
+        44: ("R", "401"),
+    }
+    calls: list[int] = []
+    original = runner._pid_observation
+
+    def fake_observation(pid: int) -> tuple[str, str] | None:
+        calls.append(pid)
+        return snapshots[pid]
+
+    runner._pid_observation = fake_observation
+    try:
+        checks = runner._descendant_identity_checks(observed)
+    finally:
+        runner._pid_observation = original
+    expected = {"41": True, "42": False, "43": True, "44": True}
+    if checks != expected or calls != [41, 42, 43, 44]:
+        raise AssertionError({"checks": checks, "calls": calls})
+
+
 class SocketFixture:
     def __init__(self, family: int, address: str, port: int, socktype: int):
         self.family = family
@@ -691,6 +716,7 @@ def _run_portable_controls() -> list[dict[str, object]]:
     for control in (
         watchdog_timeout_precedes_cpu_heuristics,
         cpu_limit_requires_explicit_signal_evidence,
+        descendant_checks_treat_zombies_as_gone_with_one_snapshot,
     ):
         try:
             control()
@@ -764,7 +790,11 @@ def _enter_disposable_fixture_namespace(
 
 
 def _unit() -> int:
-    tests = (watchdog_timeout_precedes_cpu_heuristics, cpu_limit_requires_explicit_signal_evidence)
+    tests = (
+        watchdog_timeout_precedes_cpu_heuristics,
+        cpu_limit_requires_explicit_signal_evidence,
+        descendant_checks_treat_zombies_as_gone_with_one_snapshot,
+    )
     passed = 0
     for test in tests:
         try:

@@ -259,12 +259,33 @@ def _validate_config(config: SandboxConfig, measured: Mapping[str, object]) -> t
     return target, scratch
 
 
-def _pid_identity(pid: int) -> str | None:
+def _pid_observation(pid: int) -> tuple[str, str] | None:
     try:
-        fields = _read_text("/proc/%d/stat" % pid).split()
-        return fields[21] if len(fields) > 21 else None
+        raw = _read_text("/proc/%d/stat" % pid)
     except OSError:
         return None
+    command_end = raw.rfind(")")
+    fields = raw[command_end + 1 :].split() if command_end >= 0 else []
+    if len(fields) <= 19:
+        return None
+    return fields[0], fields[19]
+
+
+def _pid_identity(pid: int) -> str | None:
+    observation = _pid_observation(pid)
+    return observation[1] if observation is not None else None
+
+
+def _descendant_identity_checks(observed: Mapping[int, str | None]) -> dict[str, bool]:
+    checks = {}
+    for pid, identity in observed.items():
+        current = _pid_observation(pid)
+        checks[str(pid)] = (
+            current is None
+            or current[0] in ("Z", "X", "x")
+            or current[1] != identity
+        )
+    return checks
 
 
 class _Cgroup:
@@ -349,10 +370,7 @@ class _Cgroup:
         remaining = self.pids()
         events = _read_kv(os.path.join(self.path, "cgroup.events"))
         cgroup_empty = events.get("populated") == 0 and not remaining
-        descendants = {
-            str(pid): (_pid_identity(pid) is None or _pid_identity(pid) != identity)
-            for pid, identity in observed.items()
-        }
+        descendants = _descendant_identity_checks(observed)
         descendants_gone = bool(observed) and all(descendants.values())
         removed = False
         removal_error = None

@@ -1,0 +1,59 @@
+# BIÊN NHẬN GIAO HÀNG cho verdict cross-review wp55 lượt 4.
+#
+# VÌ SAO CÓ TỆP NÀY, thay vì sửa thẳng vào bản gốc:
+# Cross-review trên PR #105 nêu P2 — bản gốc vẫn ghi `evidence_url: pending-owner-post`
+# và dòng cuối còn dặn "đăng đi rồi thay URL vào", trong khi metadata cùng commit nói
+# đã đăng xong. Người hoặc máy đọc YAML ấy sẽ đăng TRÙNG, và một reconciler không nối
+# được bản ghi này với review thật trên GitHub.
+#
+# Nhưng bản gốc là NGUYÊN VĂN của reviewer và được neo bằng băm: con băm ấy đã công bố
+# ở PR #92, ở issue #55 và trong `CLAUDE.md`. Sửa một ký tự trong đó là làm mọi lời
+# khai kia thành sai — kể cả sửa "cho đúng hơn". Reviewer cũng đã lường trước và cho
+# đúng hai đường; đây là đường thứ hai: **giữ bản gốc nguyên byte, ghi biên nhận riêng.**
+#
+# Chốt chống trôi: `t26` trong `ops/lease_publish_test.py` băm lại tệp gốc mỗi lượt
+# chạy và ĐỎ nếu lệch với `verdict_sha256` dưới đây. Biên nhận trỏ vào một tệp đã đổi
+# thì tệ hơn không có biên nhận: nó khai một con băm không còn đúng mà người đọc lại tin.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+lease_id: wp55-r2-review-4-codex-20260814
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: cf39109c9e5167516c53f2071e5fa7ec5c6afff5
+
+verdict_path: ops/reviews/wp55-r2-review-4-codex-verdict.md
+verdict_sha256: d58088bec10ad36a912b64749cbe8a41af5de0b3f70033d9109f12bb6647e82f
+verdict_bytes: 6294
+
+# Trường này thay cho `evidence_url: pending-owner-post` trong bản gốc. Bản gốc KHÔNG
+# đổi; chỗ nào cần URL thì đọc ở đây.
+evidence_url: https://github.com/ducthangho/tra-luat/pull/92#pullrequestreview-4936728763
+issue_evidence_url: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5292824915
+correction_url: https://github.com/ducthangho/tra-luat/pull/92#issuecomment-5292820391
+
+delivered: true
+delivered_by: claude-session   # KHÔNG phải reviewer — người chuyển thư, không phải người viết
+delivered_at_utc: '2026-08-14T11:32:26Z'
+
+# Hai sai lệch của ĐƯỜNG ĐĂNG, không phải của nội dung review. Ghi lại vì một biên
+# nhận chỉ khai "đã giao" mà giấu chỗ méo thì cũng là một lời khai rộng hơn thực tế.
+delivery_deviations:
+  - id: event-downgraded-to-comment
+    detail: >-
+      GitHub từ chối REQUEST_CHANGES trên PR của chính chủ token
+      ("Can not request changes on your own pull request"), nên review đăng với event
+      COMMENT. Verdict KHÔNG đổi — vẫn là changes_requested, ba finding P1 chặn.
+  - id: transport-decoded-escape
+    detail: >-
+      Reviewer cố ý viết HAI cách khác nhau của cùng một tên để dò biên; thân comment
+      đi qua MCP nằm trong chuỗi JSON nên chuỗi thoát bị giải mã ngay ở tầng vận
+      chuyển, hai tên khác byte thành hiển thị y hệt và mất một hướng dò. Đo bằng
+      `diff -u` giữa nguồn và bản đã đăng đọc ngược về qua API — ĐÚNG MỘT hunk lệch,
+      mọi dòng khác khớp từng byte. Đã đính chính tại `correction_url`.
+
+# Bản gốc trong kho là NGUỒN CÓ THẨM QUYỀN; comment trên GitHub chỉ là bản chiếu, và
+# bản chiếu ấy đã chứng minh là méo được. Ai cần lời reviewer thì đọc tệp có băm.
+authoritative_source: repo_file

@@ -533,6 +533,101 @@ def t24_workflow_KHONG_duoc_nhet_dau_skip_ci_vao_commit():
                      f"trong lịch sử và sẽ tắt gate của PR nào có commit này làm HEAD")
 
 
+@ca
+def t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head():
+    """Workflow đăng lease KHÔNG được chạy `lease_publish*.py` lấy từ head được đẩy.
+
+    Finding P1 của cross-review trên PR #104 (14-08-2026): bản trước chạy
+    `python3 ops/lease_publish.py`, tức bộ kiểm ĐẾN TỪ CHÍNH NHÁNH ĐANG BỊ KIỂM. Một
+    push vào `ops/**` vừa thêm tên mình vào `NGUOI_CO_THAM_QUYEN` vừa đổi lease là đủ:
+    `checkout` lấy head đó, workflow chạy bộ kiểm đã bị sửa, cả `granted_by` lẫn
+    `GITHUB_ACTOR` đều qua. Bộ kiểm nằm cùng nhánh với thứ nó kiểm thì nó không kiểm gì.
+
+    Ca này canh phần MÁY canh được: mọi lời gọi `lease_publish.py` / `lease_publish_test.py`
+    trong workflow phải đi qua bản neo (`$NEO/…`), không được gọi thẳng `ops/…`.
+
+    KHÔNG canh được ở đây, và phải nói thẳng: với sự kiện `push`, GitHub lấy chính
+    tệp workflow từ head, nên ai sửa được bộ kiểm cũng sửa được ca này lẫn mỏ neo.
+    Phần ấy chỉ ruleset ngoài kho mới đóng. Ca này chặn TRÔI NGƯỢC do vô ý — bản vá
+    bị "dọn cho gọn" về lại `ops/…` — chứ không chặn kẻ cố tình.
+    """
+    import re
+    goc = HERE.parent / ".github" / "workflows"
+    if not goc.is_dir():
+        # Cùng chốt với t24: chỉ tha khi đây rõ ràng là BẢN SAO rời (bộ đột biến chép
+        # mỗi `ops/`). Trong kho thật mà thiếu thư mục workflow thì phải ĐỎ.
+        bang(not (HERE.parent / ".git").exists(),
+             f"kho thật mà không thấy {goc} — ca này sẽ xanh rỗng")
+        return
+    tep = goc / "ops-publish-lease.yml"
+    bang(tep.is_file(), f"không thấy {tep} — ca này sẽ xanh mà không đo gì")
+    noi_dung = tep.read_text(encoding="utf-8")
+    # Chỉ soi dòng THỰC SỰ chạy python, không soi chú thích — chú thích giải thích về
+    # `ops/lease_publish.py` là hợp lệ và cần thiết (cả khối "vì sao có lớp 4" ở đầu
+    # tệp nhắc tên ấy). Cấm luôn thì không viết nổi tài liệu, và một ca bắt oan là
+    # một ca sắp bị gỡ.
+    goi = re.compile(r"python3?\s+(\S*lease_publish(?:_test)?\.py)")
+    thay = 0
+    for so, dong in enumerate(noi_dung.splitlines(), 1):
+        if dong.lstrip().startswith("#"):
+            continue
+        for duong in goi.findall(dong):
+            thay += 1
+            bang("$NEO" in duong or "${NEO}" in duong,
+                 f"ops-publish-lease.yml:{so} chạy {duong!r} — bộ kiểm này đến TỪ HEAD "
+                 f"ĐƯỢC ĐẨY, tức từ chính nhánh nó đang kiểm (finding P1, PR #104). "
+                 f"Phải gọi qua bản neo vào nhánh mặc định: \"$NEO/ops/…\"")
+    # Không cho "workflow không gọi bộ kiểm lần nào" âm thầm thành ĐẠT: một tệp đã bị
+    # gỡ sạch lời gọi và một tệp gọi đúng cho cùng màu xanh, mà nghĩa thì ngược nhau.
+    bang(thay >= 3,
+         f"chỉ thấy {thay} lời gọi lease_publish* trong workflow — chờ ít nhất 3 "
+         f"(test, check, body); ca này đang không đo cái nó tưởng nó đo")
+    # Mỏ neo phải CÓ THẬT, không chỉ là biến `$NEO` trỏ vào hư không.
+    bang("git worktree add" in noi_dung and "default_branch" in noi_dung,
+         "không thấy bước dựng worktree từ `default_branch` — `$NEO` phải được neo "
+         "vào nhánh mặc định, nếu không thì nó chỉ là một tên biến khác cho head")
+
+
+@ca
+def t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi():
+    """Biên nhận giao hàng trong `ops/reviews/` phải khớp băm tệp gốc.
+
+    Vì sao có: verdict của reviewer là tệp NGUYÊN VĂN neo băm, không được sửa — kể cả
+    để điền `evidence_url` sau khi đăng. Nên chỗ đăng được ghi ra một tệp biên nhận
+    RIÊNG. Nhưng một biên nhận trỏ vào tệp đã đổi thì tệ hơn không có biên nhận: nó
+    khai một con băm không còn đúng, mà người đọc lại tin. Ca này buộc hai thứ đi
+    cùng nhau — đổi tệp gốc mà quên biên nhận thì ĐỎ.
+    """
+    import hashlib
+    import yaml
+    thu_muc = HERE / "reviews"
+    if not thu_muc.is_dir():
+        bang(not (HERE.parent / ".git").exists(),
+             f"kho thật mà không thấy {thu_muc} — ca này sẽ xanh rỗng")
+        return
+    ds = sorted(thu_muc.glob("*.receipt.yaml"))
+    bang(ds, f"không thấy biên nhận nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
+    for p in ds:
+        d = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+        duong = str(d.get("verdict_path") or "").strip()
+        sha = str(d.get("verdict_sha256") or "").strip()
+        bang(duong and sha,
+             f"{p.name}: biên nhận NỬA VỜI (verdict_path={duong!r} sha={sha!r}) — "
+             f"băm không địa chỉ thì không kiểm được, địa chỉ không băm thì tệp đổi "
+             f"lúc nào cũng không ai biết")
+        f = HERE.parent / duong
+        bang(f.is_file(), f"{p.name}: trỏ vào tệp không có: {duong}")
+        thuc = hashlib.sha256(f.read_bytes()).hexdigest()
+        bang(thuc == sha,
+             f"{p.name}: LỆCH BĂM — biên nhận khai {sha}, tệp {duong!r} thực {thuc}. "
+             f"Tệp verdict là NGUYÊN VĂN của reviewer: hoặc bạn vừa sửa nhầm nó, hoặc "
+             f"biên nhận chưa cập nhật. Đừng ghi đè băm cho hết đỏ trước khi biết là ca nào.")
+        # Biên nhận mà không nói đăng ở đâu thì nó không phải biên nhận.
+        bang(str(d.get("evidence_url") or "").startswith("https://"),
+             f"{p.name}: thiếu `evidence_url` dạng https — đây chính là trường mà bản "
+             f"gốc để `pending-owner-post`, và là lý do biên nhận này tồn tại")
+
+
 def main() -> int:
     qua, hong = 0, []
     for fn in CA:

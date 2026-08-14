@@ -137,7 +137,14 @@ prior_revision_record:
   revision_opened_event: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5296702205
   review_5_recorded: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5296690883
   review_5_verdict: https://github.com/ducthangho/tra-luat/pull/92#pullrequestreview-4939956924
-  review_5_verdict_original_missing: true
-  review_5_verdict_posted_copy: ops/reviews/wp55-r2-review-5-codex-verdict.POSTED-COPY.md
+  # ĐÍNH CHÍNH 18:45Z: bản gốc CÓ trong kho, đẩy 18:06:42Z — trước lúc lease này soạn.
+  # Bản trước ghi `original_missing: true` vì chép lại một phép đo lúc ~18:05 mà không
+  # fetch lại. Bản chép POSTED-COPY đã bị xoá để khỏi tồn tại hai bản khác băm.
+  review_5_verdict_original_missing: false
+  review_5_verdict_file: ops/reviews/wp55-r2-review-5-codex-verdict.md
+  review_5_verdict_branch: ops/wp55-verdict-5
+  review_5_verdict_sha256: d1d04452d0ab2df917c1f1f9aa46d52aa554fdf497480ab176780a462a43623e
+  review_5_verdict_bytes: 4392
+  review_5_verdict_receipt: ops/reviews/wp55-r2-review-5-codex-verdict.receipt.yaml
   review_4_verdict_file: ops/reviews/wp55-r2-review-4-codex-verdict.md
 posted_comment_id: 5296806319   # workflow ghi, ĐỪNG sửa tay

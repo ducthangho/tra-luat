@@ -335,6 +335,26 @@ Thứ phân biệt được chỉ có hai: **log** và **hậu điều kiện h�
    chạy ở nhánh `TimeoutExpired` (`launcher.py:1250`), khi bị ngắt (1261), và ở lệnh
    `stop` (1378). Con thoát **bình thường** trước hạn mà để lại hậu duệ thì `p.wait()`
    trả về êm, **không lượt giết nào xảy ra**, và hậu duệ ấy chạy tiếp qua hạn lease.
-   Muốn bảo đảm dừng khi hết quyền thì phải có phép đo độc lập: gọi `launcher.py stop`
-   cho lượt đó, hoặc tự xác minh nhóm tiến trình đã rỗng tại thời điểm hết hạn. Hạn
-   chót là **hàng rào cho một tiến trình**, không phải cho cả cây.
+   Hạn chót là **hàng rào cho MỘT tiến trình**, không phải cho cả cây.
+
+   **Và launcher KHÔNG có cách nào bảo đảm cả cây đã dừng — nói thẳng thay vì kê thêm
+   một mẹo nữa.** Hai cách tưởng là lối thoát, cả hai đều thủng, đã tái lập:
+
+   - `launcher.py stop` — trả `rc=0` với *"tien trinh da khong con chay"* trong khi hậu
+     duệ vẫn sống;
+   - "tự xác minh nhóm tiến trình đã rỗng" — cùng một lỗ, vì đó chính là phép đo mà
+     `stop` dùng.
+
+   Gốc: hậu duệ gọi `setsid()` **rời khỏi nhóm tiến trình** của con. Khi con thoát,
+   `_thanh_vien_nhom(pid)` (`launcher.py:667-691`) không còn thấy nó, `con == []`, và
+   mã đọc `[]` thành **"đã chứng minh rỗng"**. Phép đo vẫn đúng với thứ nó đo — nhóm
+   tiến trình — chỉ là hậu duệ đã ra khỏi phạm vi ấy.
+
+   Muốn thật sự rào cả cây thì phải dùng thứ **ngoài launcher**: chạy trọn lượt trong
+   một container / cgroup / PID namespace mà bạn xoá được, hoặc một cơ chế theo dõi
+   riêng bắt được cả hậu duệ đã thoát nhóm. Không có thứ đó thì **hãy khai đúng giới
+   hạn** — một lượt chạy có thể sống quá hạn lease, và sổ sẽ không nói cho bạn biết.
+
+   *(Ba vòng cross-review liên tiếp rơi vào đúng đoạn này: mỗi lần tôi đề xuất một cách
+   khắc phục, vòng sau chứng minh nó chưa đủ. Lần này ghi ranh giới thay vì mẹo thứ ba
+   — khi ba lần vá đều hụt, thứ sai là giả định "có mẹo", không phải mẹo.)*

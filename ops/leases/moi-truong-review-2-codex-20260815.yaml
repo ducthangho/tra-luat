@@ -1,0 +1,169 @@
+# Lease REVIEWER lượt 2 cho nhánh HẠ TẦNG MÔI TRƯỜNG `ops/moi-truong-env-first`.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+# NHỚ ĐÓNG NHÁY mọi giá trị chứa `#` — không nháy thì `#` mở chú thích YAML và cắt cụt
+# giá trị (đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ).
+#
+# `packet_issue: 55` NHƯNG `la_viec_cua_packet: false` — trường ấy bắt buộc theo lược đồ
+# và chỉ quyết định comment đăng vào issue nào. Nhánh này rẽ từ `master`, KHÔNG tiêu
+# attempt của packet, KHÔNG nằm trong write_set của packet.
+#
+# VÌ SAO CÓ LEASE NÀY: lượt 1 trả `changes_requested` với MỘT finding mức HIGH. Người vá
+# đã vá finding đó, VÀ vá thêm hai mục reviewer nêu mà không xếp thành finding. Hai commit
+# ấy CHƯA AI SOI.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: null
+la_viec_cua_packet: false
+luong_dieu_phoi_note: 'dùng #55 làm luồng điều phối; KHÔNG thuộc packet wp55'
+
+role: reviewer
+provider: codex                 # BẮT BUỘC — người vá là claude (§8 cross-provider)
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+lease_id: moi-truong-review-2-codex-20260815
+review_round: 2
+
+branch: ops/moi-truong-env-first
+reviewed_sha_required: 026c4ea95ae5039ce32f794018a69f03a94bf41a
+base_sha: 0194ea0eea9d4b9eed569059f1bda9775ad92971
+base_note: >-
+  base CHÍNH LÀ head mà lượt 1 đã soi. Diff ĐÚNG 3 tệp, ĐÚNG 2 commit — nên verdict lượt 1
+  còn giá trị cho mọi phần delta không đụng tới.
+master_sha_at_grant: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1
+target_pull_request: null
+target_pull_request_note: >-
+  Chưa mở PR: chủ kho chưa duyệt nội dung. Verdict giao qua tệp + comment trên #55.
+
+delta_since_last_reviewed:
+  prior_reviewed_sha: 0194ea0eea9d4b9eed569059f1bda9775ad92971
+  current_sha: 026c4ea95ae5039ce32f794018a69f03a94bf41a
+  files_changed: 3
+  paths:
+    - .claude/dev/launcher.py
+    - .claude/dev/launcher_test.py
+    - .claude/hooks/session-start.sh
+  commits:
+    - sha: 0d05c618ff58a33baa097d8cdad201c462a3f3b8
+      tom_tat: 'bịt oracle — đáp lại finding HIGH của chính reviewer'
+    - sha: 026c4ea95ae5039ce32f794018a69f03a94bf41a
+      tom_tat: 'hook-phien đo NĂNG LỰC + nối 5 ca vào DOT_BIEN'
+  pushed_by: 'phiên ĐIỀU PHỐI, không qua lease executor'
+  authority: 'lệnh trực tiếp của chủ kho, 2026-08-15'
+
+prompt_path: ops/prompts/moi-truong-review-2-codex-20260815.md
+prompt_sha256_required: df3b11c130a6d317b353c5e13af82895b4cd3afeaca17d233e373c56c517a4a0
+
+granted_by: ducthangho          # CHỦ KHO — §2 người có thẩm quyền
+granted_on_instruction: 'direct, in-session, 2026-08-15 (cấp lease reviewer codex neo 026c4ea đi)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-15T18:35:00Z'
+lease_expires_at_utc: '2026-08-16T19:00:00Z'
+run_minutes: 1465
+heartbeat_required_minutes: 30
+
+prior_review: moi-truong-review-1-codex-20260815
+prior_review_verdict: changes_requested
+prior_review_verdict_file: 'ops/reviews/moi-truong-review-1-codex-verdict.md trên ops/moi-truong-review-1-verdict'
+prior_review_verdict_sha256: 54139baff2789cd2da4f36661e563ed33bdc95495518b3161458803c033ad6fc
+prior_review_still_applicable: true
+prior_review_note: >-
+  Lượt 1 ĐÃ xác nhận hợp đồng `doctor`, bốn chốt `chuan_bi_xac_thuc`, không còn bệnh
+  `set -e`, và các con số tài liệu. Những mục đó KHÔNG cần soi lại trừ khi delta đụng vào.
+
+# Thứ MỚI, chưa ai review — soi kỹ nhất chỗ này.
+new_since_last_review:
+  - finding_id: deterministic-secret-fingerprint-is-dictionary-oracle
+    trang_thai: 'đã vá ở 0d05c61 — CẦN reviewer phán định bản vá'
+    fix: >-
+      `_van_tay` từ sha256 trần sang HMAC khoá ngẫu nhiên mỗi tiến trình (không xuất);
+      bỏ hẳn trường `van_tay` khỏi đầu ra, thay bằng nhãn nhóm thứ tự `nhom-1` chỉ cho
+      nhóm >= 3; độ dài giá trị ngắn gộp thành `<8`
+    nguoi_va_do: >-
+      từ điển 4 ứng viên → 0 khớp; `van_tay` không còn trong đầu ra; nhóm 5 biến giữ chỗ
+      VẪN bị phát hiện
+    reviewer_must_check: >-
+      còn oracle nào KHÁC không — bộ ba `nhom` + `nghi_giu_cho` + `do_dai` tự nó đã nói
+      "năm biến này cùng một giá trị dài 14"; ngưỡng 8 là con số người vá TỰ ĐẶT không có
+      căn cứ đo; HMAC cắt còn 32 bit thì va chạm trong cùng một lượt gom nhầm được không
+  - id: hook-phien-doi-sang-do-nang-luc
+    fix: 'hook khai `# hook-nang-luc: …`; so TẬP TÊN với hook trên origin/master'
+    vi_sao: >-
+      đáp lại đúng điều reviewer nêu: so băm toàn tệp thì sửa chú thích cũng đỏ, mà chốt
+      đỏ vì lý do vô hại là chốt bị bỏ qua. Reviewer cũng đã loại đường tổ tiên commit.
+    nguoi_va_tu_khai_cach_hong: >-
+      thêm năng lực mà QUÊN thêm tên thì nhánh cũ không được cảnh báo, và hỏng IM LẶNG
+    reviewer_must_check: >-
+      có chốt cơ học nào bắt được chuyện quên thêm tên không, hay vốn không bắt được;
+      tên là chuỗi tự do nên gõ sai/đổi tên thì sao; `_nang_luc_hook` nhận NHIỀU dòng khai
+      — cố ý hay sơ suất; dòng khai nằm trong chú thích nên hook hỏng mà dòng còn nguyên
+      thì chốt vẫn xanh — đánh đổi ấy có đúng không
+  - id: noi-nam-ca-vao-DOT_BIEN
+    fix: 't84 t85 t86 t87 t88 vào bảng đột biến; 43 → 48 mục'
+    reviewer_must_check: >-
+      đột biến `do_codex_tin_DONG_DAU_thay_vi_ma_thoat` phải gỡ HAI lớp mới giết được ca
+      đích (bản đầu giết 0/1). Đó là PHÒNG THỦ NHIỀU LỚP như tiền lệ
+      `bo_kiem_rong_CA_BON_LOP`, hay là LÀM NHẸ một đột biến để nó chịu chết? Phân biệt
+      hai thứ đó là việc của lượt này.
+
+# Người vá tự khai chỗ CHƯA GIẢI THÍCH ĐƯỢC — mời reviewer đo, không giấu.
+chua_giai_thich_duoc:
+  id: hai-dot-bien-chap-chon
+  mo_ta: >-
+    Lượt chạy ĐẦU của cổng đột biến trên nhánh này, `so_URL_tho_khong_chuan_hoa` và
+    `bo_cung_hoa_dau_ra` báo SAI; lượt sau cả hai OK, nền master cũng OK. Người vá suýt
+    quy thành hồi quy do bản vá của mình — đo nền trước mới thấy không phải.
+  moi_reviewer: >-
+    chạy `--dot-bien` và nói thấy gì. Tái lập được điều kiện là finding có giá trị; chỉ
+    thấy chập chờn thì nói vậy cũng có giá trị.
+
+verified_by_coordinator:
+  suite: 'rc=0 · 88/88 (qua 87, bỏ qua 1 fixture Windows)'
+  dot_bien: 'rc=0 · 47/47 đạt (1 không đo được trên nền này)'
+  dot_bien_nen_master: '42/42 đạt trên d5b7bcc ⇒ DELTA = +5 mục, tất cả đều GIẾT'
+  eol: 'rc=0 · checked=330 · violations=0'
+  doc_claims: 'rc=0 · ok=true · flags=[]'
+  scope: 'đúng 3 tệp so với head đã review'
+
+# Bước 0 KHÁC prompt ở đúng hai lệnh — ghi ra để reviewer không `blocked` oan như lượt 1.
+buoc_0_khac_biet:
+  ly_do: >-
+    sandbox `workspace-write` của codex đặt `.git/` thành CHỈ ĐỌC theo chính sách của
+    chính codex — đo được là clone ĐỘC LẬP nằm trọn trong vùng ghi được vẫn hỏng y hệt.
+  da_chay_ho: ['git fetch', 'git config core.abbrev 7']
+  thay_bang: 'xác minh bằng ĐỌC — đúng vai read-only hơn'
+  neu_reviewer_khong_tin: >-
+    nêu thành FINDING và VẪN LÀM TIẾP; đừng dừng cả lượt, vì mọi mỏ neo là SHA bất biến
+    và khớp SHA bất biến mạnh hơn độ tươi của ref
+  tien_le: >-
+    lượt 1 đã `blocked` đúng ở chỗ này và nó ĐÚNG khi dừng — lỗi thuộc về người giao việc
+
+canh_bao_an_ninh:
+  khong_in_gia_tri: true
+  home_tam_bat_buoc: true
+  note: >-
+    Bản vá đụng credential thật. Không in giá trị biến nào kể cả một phần kể cả để chứng
+    minh. Mọi phản chứng đụng credential chạy trên HOME tạm; TUYỆT ĐỐI không ghi/xoá/đổi
+    `~/.codex/auth.json` thật — đó là credential đang nuôi chính phiên reviewer. Phép đo
+    nào buộc phải đụng tệp thật thì ĐỪNG LÀM, ghi vào `boundaries`.
+
+neo_sha_bat_bien_required: true
+fixture_nguyen_van_required: true
+
+duong_giao_verdict_da_do: >-
+  REST tới api.github.com bị PROXY trả 403 bất kể token; gh không cài; git push chạy.
+  Reviewer ghi verdict ra tệp, phiên điều phối đăng hộ.
+
+approve_la_hop_le: >-
+  `approve` là verdict hợp lệ nếu thật sự không tìm ra gì — đừng nặn finding cho có.
+  Ngược lại, hai commit này CHƯA AI SOI, nên đừng cho qua vì lượt 1 đã duyệt phần khác.
+
+preconditions_measured_at_utc: '2026-08-15T18:30:00Z'

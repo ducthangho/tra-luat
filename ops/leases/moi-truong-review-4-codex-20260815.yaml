@@ -1,0 +1,114 @@
+# Lease REVIEWER lượt 4 cho nhánh HẠ TẦNG MÔI TRƯỜNG `ops/moi-truong-env-first`.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+# NHỚ ĐÓNG NHÁY mọi giá trị chứa `#`.
+#
+# `packet_issue: 55` NHƯNG `la_viec_cua_packet: false` — trường bắt buộc theo lược đồ,
+# chỉ quyết định comment đăng vào issue nào. Nhánh rẽ từ `master`, KHÔNG tiêu attempt.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: null
+la_viec_cua_packet: false
+
+role: reviewer
+provider: codex
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+lease_id: moi-truong-review-4-codex-20260815
+review_round: 4
+
+branch: ops/moi-truong-env-first
+reviewed_sha_required: fe895a068368754bd11b25ca59c504f973e9f086
+base_sha: c89ca5929c2d5da6c182f7858e652c51df147cd5
+base_note: 'base là head lượt 3 đã soi. Delta ĐÚNG 1 tệp: .claude/dev/launcher_test.py'
+master_sha_at_grant: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1
+target_pull_request: null
+
+prompt_path: ops/prompts/moi-truong-review-4-codex-20260815.md
+prompt_sha256_required: 50908590c3beb7bc08b2d2d75d74b6d6c80a042535d5f1b184208a472c072848
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-15 (vá đi, cấp lease review như các lượt trước)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-15T19:45:00Z'
+lease_expires_at_utc: '2026-08-16T20:00:00Z'
+run_minutes: 1455
+heartbeat_required_minutes: 30
+
+prior_review: moi-truong-review-3-codex-20260815
+prior_review_verdict: changes_requested
+prior_review_verdict_sha256: 75ffcd02253cda3c487eebc33283b1053fb79c8be3530735738521767961e4ed
+prior_review_still_applicable: true
+prior_review_note: >-
+  Lượt 3 ĐÃ duyệt: chốt cô lập ĐỦ (không ca nào sửa sys.path/sys.modules/cwd/putenv/
+  signal/atexit ngoài năm mục); os.environ hoàn nguyên đúng cách; `t89` CÓ RĂNG;
+  lập luận "không đột biến được chốt harness" đúng về giới hạn kỹ thuật. ĐỪNG soi lại.
+
+new_since_last_review:
+  finding_id: launcher-gates-still-fail-after-global-isolation
+  severity_goc: high
+  trang_thai: 'đã vá ở fe895a0 — CẦN reviewer phán định'
+  co_che_do_duoc: >-
+    trong sandbox có PID namespace, vỏ shell là pid=2 pgid=1 và python THỪA KẾ nhóm 1 của
+    nó; `launcher.py` giết theo NHÓM (killpg) nên cuốn theo cả shell. Máy thường có job
+    control nên python là trưởng nhóm riêng, bán kính sát thương không chạm shell — đó là
+    lý do lỗi chưa bao giờ lộ ra ngoài sandbox.
+  do_duoc: >-
+    python3 launcher_test.py -> vỏ shell CHẾT, log 1 dòng, tệp rc KHÔNG được tạo;
+    setsid python3 launcher_test.py -> rc=0, đầy đủ, vỏ shell SỐNG
+  fix: >-
+    `_tu_tach_nhom_neu_can()` chạy TRƯỚC mọi thứ trong main(): không phải trưởng nhóm thì
+    setsid() sang session mới. Máy thường LÀ trưởng nhóm nên chốt không làm gì.
+  khong_noi_chot_cu: >-
+    KHÔNG nới bất kỳ chốt chống-giết-nhầm nào trong launcher.py — chúng là thứ kho đã trả
+    giá để dựng. Chốt mới nằm hoàn toàn ở phía bộ test.
+
+# Câu hỏi NẶNG NHẤT của lượt này — lease đòi trả lời thẳng.
+cau_hoi_trong_tam:
+  id: chot-co-tu-ban-vao-chan-khong
+  hoi: >-
+    Sau khi `setsid()` thành công, các ca GIẾT-CÂY có còn đo đúng thứ chúng khai không,
+    hay nay chúng chạy trong ngữ cảnh khác và trở nên VÔ HẠI — tức XANH GIẢ? Một bản vá
+    làm cổng thôi đỏ bằng cách làm nó thôi đo được là bản vá tệ hơn bệnh.
+  phu:
+    - '`setsid()` bỏ terminal điều khiển — có ca nào cần terminal/job control/tín hiệu từ nhóm cũ không?'
+    - '`--dot-bien` có bị ảnh hưởng không?'
+    - '`t90` có RĂNG không — đột biến từng nhánh trên BẢN SAO'
+
+tu_khai_chua_lam_duoc:
+  - id: chua-chi-dich-danh-ca-nao
+    note: >-
+      Điều phối CHƯA chỉ được ca nào phát cú killpg. Chạy từng ca qua driver — kể cả gọi
+      thẳng main() sau khi import — đều trọn vẹn; chỉ khi chạy tệp trực tiếp như __main__
+      mới chết. Bản vá chặn HẬU QUẢ chứ chưa chỉ ra thủ phạm. Reviewer tìm được thì đó là
+      finding có giá trị.
+  - id: khong-co-dot-bien-cho-chot-moi
+    note: 'bảng chỉ đột biến launcher.py; chốt nằm trong launcher_test.py — cùng giới hạn đã ghi lượt trước'
+
+verified_by_coordinator:
+  trong_sandbox_khong_setsid_boc_ngoai: >-
+    'nhom tien trinh: da tach sang session moi (pgid=3)' · 90/90 · rc=0 · VỎ SHELL SỐNG
+    (trước khi vá: tệp chứng KHÔNG được tạo)
+  suite: '89/89 → 90/90 (qua 89, bỏ qua 1 fixture Windows)'
+  dot_bien: '47/47 đạt, KHÔNG mục nào SAI (1 không đo được trên nền này)'
+  eol: 'checked=330 violations=0'
+  doc_claims: 'ok=true flags=[]'
+  scope: 'ĐÚNG 1 tệp'
+
+canh_bao_an_ninh:
+  khong_in_gia_tri: true
+  home_tam_bat_buoc: true
+
+neo_sha_bat_bien_required: true
+chay_hai_lan_required: true
+approve_la_hop_le: 'đừng nặn finding cho có; nhưng delta này CHƯA AI SOI'
+duong_giao_verdict_da_do: 'REST bị proxy 403, gh không cài ⇒ ghi verdict ra tệp, điều phối đăng hộ'
+preconditions_measured_at_utc: '2026-08-15T19:45:00Z'

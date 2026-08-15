@@ -236,3 +236,48 @@ git clone / fetch / ls-remote / push   rc=0
    cổng uỷ quyền mà packet này đang dựng.
 
 ⇒ **Cần người có quyền đăng hộ handoff này lên #55.**
+
+---
+
+## BỔ SUNG 06:45Z — verdict lượt 7 đã có, và bản này CŨNG hở một ca
+
+Fetch lúc `2026-08-15T06:41Z` thấy thêm `ops/wp55-r3-review-7` chứa
+`ops/reviews/wp55-r3-review-7-codex-verdict.md` (commit `4ec5577`, 06:06:47Z):
+**verdict `changes_requested`, `reviewed_sha: 2cccf1ea…`** — tức guồng đã coi head của
+phiên KIA là bản giao generation 5 và đã soi nó. Phiên kia sau đó đẩy tiếp hai commit
+gắn nhãn `g6` lúc 06:29 và 06:35. **Không có lease `exec-6` nào trong kho.**
+
+⇒ Lease generation 5 của phiên này trên thực tế **đã bị vượt qua**. Nói thẳng như vậy,
+không tranh chỗ.
+
+### Đo bản của mình bằng CHÍNH probe của verdict lượt 7
+
+Finding P1 lượt 7 (`doctrine-line-break-exemption-bypasses-non-prose`) nói miễn trừ ngắt
+dòng rộng hơn AC 19. Chạy đủ bốn probe của nó trên CẢ HAI bản:
+
+| probe | bản này (`38194b5`) | bản kia (`2cccf1ea`) | đòi |
+|---|---|---|---|
+| `## Chỉ người có` / `## thẩm quyền` | **rc=0 LỌT** | rc=0 LỌT | 6 |
+| `- Người có` / `  thẩm quyền` | rc=6 bắt | rc=0 LỌT | 6 |
+| `<table><tr><td>Người có` / `thẩm quyền</td></tr></table>` | rc=6 bắt | rc=0 LỌT | 6 |
+| code fence `Người có` / `thẩm quyền` | rc=6 bắt | rc=0 LỌT | 6 |
+
+**Bản này đóng 3/4, bản kia 0/4 — nhưng bản này VẪN HỞ ca heading tách dòng.** Không giấu:
+đây là cùng họ với finding 4 của lượt 6, và nó nằm trong `write_set`, tức về nguyên tắc vá được.
+
+### Vì sao KHÔNG vá ngay trong lượt này
+
+1. Finding lượt 7 neo `reviewed_sha 2cccf1ea` — head của phiên khác, dưới một lease review
+   mà phiên này KHÔNG cầm. Vá theo nó là tự nới phạm vi.
+2. Vá đúng phải sửa ranh giới "miễn trừ chỉ dành cho VĂN XUÔI", và điều đó đụng thẳng ca
+   canonical của AC 19 (`CLAUDE.md` master dòng 82–83, vốn nằm trong một mục có gạch đầu
+   dòng). Sửa một chiều rồi đo một chiều **chính là** cái bẫy lease này cấm — và là cách
+   generation 4 hỏng. Làm đúng phải đo lại cả bốn ma trận, không kịp gói trong lượt này.
+3. Lease cấm tự mở write set cho phát hiện ngoài spec: **xuất successor §7 rồi dừng**.
+
+### Successor §7 — đề xuất cho lượt sau
+
+`doctrine-line-break-exemption-only-for-prose`, P1, `code_fix_required`:
+thu miễn trừ ngắt dòng về đúng bề rộng AC 19 — chỉ tha khi các dòng liên quan là VĂN XUÔI
+(không mang dấu cấu trúc: `#`, gạch đầu dòng, `|`, fence, thẻ HTML). Bắt buộc đo CẢ BỐN
+ma trận trước/sau, và ca `CLAUDE.md` master dòng 82–83 phải VẪN XANH.

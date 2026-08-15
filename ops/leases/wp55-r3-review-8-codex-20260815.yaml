@@ -1,0 +1,143 @@
+# Lease REVIEWER lượt 8 cho wp55 revision 3 — neo head 91780cb (nhánh packet chủ kho đã chốt).
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt
+# cụt giá trị — đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ.
+#
+# VÌ SAO CÓ LEASE NÀY:
+# Chủ kho đã chốt `claude/wp55-r3g5-f3-03` @ 91780cb là nhánh packet của revision 3, và PR
+# #120 đã mở. §8 bắt cross-provider: executor là `claude` ⇒ reviewer BẮT BUỘC là `codex`.
+# Verdict lượt 7 neo 2cccf1e nên KHÔNG dùng lại được, và lượt đó cũng không có tệp lease.
+#
+# BA ĐIỀU BẤT THƯỜNG VỀ HỒ SƠ — khai thẳng, KHÔNG giấu reviewer:
+#   1. KHÔNG có handoff §7 cho head này. Thứ thay thế là bản ghi của phiên điều phối
+#      (#55 comment 5301382838) và nó KHÔNG thay được §7.
+#   2. Hai executor đã cùng sống trên lease exec-5. Nhánh này mang hai commit tự gắn nhãn
+#      `g6` mà KHÔNG có lease `exec-6`. Quyết định của chủ kho giải quyết NHÁNH NÀO, không
+#      hồi tố tạo lease — sổ có khoảng trống.
+#   3. `attempts_used` trong sổ là 2/3, nhưng hai commit `g6` không vào sổ nên con số thật
+#      có thể khác. Reviewer ĐỪNG hạ chuẩn vì tưởng sắp hết lượt.
+# Ba điều này là BỐI CẢNH, không phải finding sẵn. Reviewer thấy chúng làm bản giao không đủ
+# tư cách duyệt thì nêu bằng một finding có lập luận, đừng chỉ dẫn lại.
+#
+# TRỤC ĐÁNG DỒN SỨC NHẤT — con lắc đã đánh quá BA lần:
+#   g4  thêm miễn trừ để thôi bắt oan  ⇒ quá rộng, heading trần lọt rc=0
+#   g5  thu về "chỉ tha khi ngắt dòng" ⇒ vẫn quá rộng, heading/bullet/bảng/fence đều lọt
+#   nay thu về "chỉ tha cho VĂN XUÔI"  ⇒ CHƯA AI SOI ĐỘC LẬP
+# Việc của lượt này là tìm cú đánh quá THỨ TƯ, ở CẢ HAI chiều.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+phase_key: F3-03
+mission_issue: 54
+mission_revision: 6
+revision: 3
+generation: 5
+lease_id: wp55-r3-review-8-codex-20260815
+
+spec_path: ops/specs/wp55-r3-spec.md
+spec_branch: ops/wp55-r3-spec
+spec_hash: e321f811724fae97b19d523a3e5159bc13b425cd15fc6c753c7439fe28cae22d
+spec_hash_basis: sha256 của chính tệp spec, byte nguyên trạng
+
+role: reviewer
+provider: codex                 # BẮT BUỘC — executor là claude (§8 cross-provider)
+assurance_target: cross_approved
+access: read-only
+write_set: []                   # reviewer KHÔNG ghi (§2)
+branch_ownership: none
+
+target_pull_request: 120
+reviewed_sha_required: 91780cb0df3c898b2ca92bc17d14107547d944c6
+branch: claude/wp55-r3g5-f3-03
+base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2
+
+prompt_path: ops/prompts/wp55-r3-review-8-codex-20260815.md
+prompt_sha256_required: 07b60cfc6c7aa62e0d1178d8f9a370415297178775c233a9ed20656804da15b9
+
+granted_by: ducthangho          # CHỦ KHO — §2 người có thẩm quyền
+granted_on_instruction: 'direct, in-session, 2026-08-15 (cấp lease reviewer codex đi)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-15T08:45:00Z'
+lease_expires_at_utc: '2026-08-16T09:00:00Z'
+run_minutes: 1455
+heartbeat_required_minutes: 30
+
+attempts_used: 2
+attempts_limit: 3
+attempts_exhausted: false
+attempts_note: >-
+  Sổ ghi 2/3. Hai commit `g6` chạy không lease nên KHÔNG vào sổ — con số thật có thể khác.
+  Ghi ra để reviewer biết ranh giới của sổ, KHÔNG phải để hạ chuẩn duyệt.
+
+# Hồ sơ của head này — nói rõ cái gì có, cái gì KHÔNG.
+head_provenance:
+  executor_handoff_exists: false
+  substitute_record: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5301382838
+  substitute_record_type: coordinator_state_record
+  substitute_sha_correction: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5301384396
+  branch_resolved_by: ducthangho
+  branch_resolution_note: 'chốt NHÁNH NÀO; KHÔNG hồi tố tạo lease cho hai commit g6'
+  unleased_commits_on_branch: 2
+  superseded_alt_branch: claude/wp55-r3g5-f3-03-alt-38194b5
+  superseded_alt_head: 38194b5c2a934b8f09a2e647a583f254c86d4152
+  superseded_alt_handoff: 'ops/handoffs/wp55-r3g5-exec-5-claude-handoff.md trên ops/wp55-r3g5-exec-5-evidence'
+
+prior_review: wp55-r3-review-7
+prior_review_verdict: changes_requested
+prior_reviewed_sha: 2cccf1ea61859f1b051adb646294ead285dac39c
+prior_review_invalidated_reason: 'head đổi 2cccf1e → 91780cb; lượt 7 cũng KHÔNG có tệp lease'
+prior_review_verdict_file: 'ops/reviews/wp55-r3-review-7-codex-verdict.md trên ops/wp55-r3-review-7'
+prior_review_findings:
+  - doctrine-line-break-exemption-bypasses-non-prose
+  - ac18-overlap-exceptions-have-no-killing-mutant
+
+# ĐÃ chạy lại bởi PHIÊN ĐIỀU PHỐI (khác phiên executor, CÙNG provider claude) trên 91780cb.
+# KHÔNG thay được lượt cross-review §8 — ghi ra để reviewer biết chỗ nào đã phủ, không để chép.
+verified_by_coordinator:
+  scope: 'ĐÚNG 6 tệp write_set; manifest/golden/bundled/VERSION/CHANGELOG/ops-specs không đổi'
+  packet_loop_test: 'rc=0 · nền 149/149 · 36 đột biến giết đúng ca đích'
+  doctrine_scan: 'rc=0 · sạch, 4 tệp'
+  doc_claims_check: 'rc=0 · ok=true · 82 tệp · flags=0'
+  release_verify: 'rc=0 · ok=true · failed=0 · extra=0'
+  golden_test: 'rc=0, không --write'
+  eol_policy: 'rc=0 · violations=[]'
+  release_bundle: 'hai lượt CÙNG sha256 20c89545566b7682b3ecd2ac2ac0283add5af8a4d6ca377d9acbcde4487f8590'
+  ac20_merged_tree: 'doctrine rc=0 · suite rc=0 · nền 149/149 (master 2531366, GIT_DIR trỏ kho thật)'
+  luot7_probes: 'bốn probe của verdict lượt 7 đều rc=6 trên head này (2cccf1e chỉ 1/4, 38194b5 3/4)'
+  khong_lui_so_voi_g4: 'suite 109/109 → 149/149 · đột biến 23 → 36 · bundle cùng băm · phạm vi vẫn 6 tệp'
+
+# CHƯA AI chạy lại — phần việc của reviewer.
+claimed_but_unverified:
+  - id: tl-selftest
+    note: >-
+      Phiên điều phối KHÔNG chạy được `tl.py --selftest`: rc=1, pyo3_runtime.PanicException từ
+      cryptography rust bindings. Đo được delta=0 (cùng lỗi trên cây khác cùng container) và
+      nhánh không đụng tệp nào dưới scripts/, nhưng KHÔNG xác minh được. Reviewer tự chạy;
+      không chạy được thì nói rõ là không chạy được, đừng đoán.
+
+finding_deferred:
+  finding_id: ac20-archive-tree-suite-not-self-contained
+  disposition: spec_revision_required
+  decision: 'chủ kho chốt HOÃN sang revision 4'
+  note: >-
+    Đã ghi nhận ở verdict lượt 6. Đừng nêu lại như finding mới; chỉ nêu nếu đo được điều KHÁC
+    với mô tả đó.
+
+neo_sha_bat_bien_required: true
+neo_sha_bat_bien_note: >-
+  Mọi lệnh trong verdict phải neo SHA bất biến — không origin/master, không HEAD, không tên
+  nhánh. Verdict lượt 5 khai master_sha_checked nhưng lệnh lại neo ref di động và codex đã
+  nêu P2 trên PR #114. Ghi số và neo số là hai việc khác nhau.
+
+preconditions_measured_at_utc: '2026-08-15T08:30:00Z'
+master_sha_at_grant: 2531366e1abc6cbca0a6c2765e40e54be38d1fb7
+prior_generation_pull_request: 115
+packet_branch_resolution_event: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5301382838

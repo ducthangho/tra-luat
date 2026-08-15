@@ -432,6 +432,9 @@ def _phang_ca_tep(raw: str):
 _CO_CHU = re.compile(r"[^\W_]", re.UNICODE)
 _RE_DAU_DONG = re.compile(r"^\s*(?:#{1,6}|>+|[-*+]|\d+[.)])\s*")
 _RE_DAU_DONG_THO = re.compile(r"^\s{0,3}(?:>+|[-*+]|\d+[.)])\s+")
+# `<table>` … `</table>`, và cả bảng KHÔNG đóng thẻ (tới hết tệp) — bảng thiếu thẻ
+# đóng vẫn render ra bảng, nên vẫn là chép bảng.
+_RE_BANG_HTML = re.compile(r"<table\b.*?(?:</table\s*>|\Z)", re.DOTALL | re.IGNORECASE)
 # `\s*` chứ không `\s{0,3}`: CommonMark coi thụt 4 dấu cách là khối mã THỤT LỀ chứ
 # không phải hàng rào, nhưng ở đây sai về phía CHẶT là an toàn. Nhận thêm một dòng
 # là khối mã chỉ khiến miễn trừ THÔI áp dụng, tức cổng đỏ nhiều hơn; bỏ sót thì
@@ -494,6 +497,31 @@ def _go_dau_dong_tho(dong: str) -> str:
         truoc = dong
         dong = _RE_DAU_DONG_THO.sub("", dong, count=1)
     return dong
+
+
+def _dong_bang_html(raw: str) -> frozenset:
+    """Số hiệu những dòng nằm TRONG phần tử bảng HTML (`<table>` … `</table>`).
+
+    Cùng một nguyên tắc với ô bảng Markdown: ô bảng là CHÉP BẢNG, không bao giờ là
+    câu kể lại kết quả đo, nên không được hưởng miễn trừ AC 19. Bản trước chỉ chặn
+    ô bảng Markdown qua dấu `|`; cross-review lượt 8 chỉ ra dạng HTML tương đương
+    vẫn lọt vì `_dong_sau_khi_go` GỠ thẻ trước khi miễn trừ nhìn thấy chúng:
+
+        <table><tr><td>Ghi chú người có
+        thẩm quyền đây.</td></tr></table>          -> rc=0  LỌT
+
+    Gỡ thẻ xong thì hai dòng còn lại trông hệt văn xuôi có chữ hai phía, nên chốt
+    "văn xuôi bọc hai phía" tha. Phải đo trên dòng THÔ, y như `_dong_khoi_ma`.
+
+    Dò theo SPAN chứ không theo từng dòng: thẻ mở và thẻ đóng thường không cùng
+    dòng, và một bảng có thể trải nhiều dòng.
+    """
+    ket = set()
+    for m in _RE_BANG_HTML.finditer(raw):
+        dau = raw.count("\n", 0, m.start()) + 1
+        cuoi = raw.count("\n", 0, m.end()) + 1
+        ket.update(range(dau, cuoi + 1))
+    return frozenset(ket)
 
 
 def _go_dau_dong(s: str) -> str:
@@ -592,7 +620,7 @@ def _duoc_tha_vi_ngat_dong(raw: str, kim: str) -> bool:
     # vẫn được tha — `Ghi chú người có␤thẩm quyền đây.` lọt. Phân biệt nó với ca
     # thật của `CLAUDE.md` cần hiểu NGHĨA, mà AC 19 chính là lệnh phải tha hạng
     # đó. Đây là giá đã khai của miễn trừ, không phải lỗ bỏ sót.
-    trong_khoi_ma = _dong_khoi_ma(raw)
+    trong_khoi_ma = _dong_khoi_ma(raw) | _dong_bang_html(raw)
     phang, ban_do_dong = _khuc_chuan(dong_sach)
 
     def _khuc(off: int):
@@ -608,7 +636,7 @@ def _duoc_tha_vi_ngat_dong(raw: str, kim: str) -> bool:
         if mo is None or dong_cuoi is None:
             return False
         if mo[1] in trong_khoi_ma or dong_cuoi[1] in trong_khoi_ma:
-            return False                      # (1) khối mã
+            return False                      # (1) khối mã hoặc bảng HTML
         truoc = _go_dau_dong(mo[2][: tu - mo[0]])
         sau = dong_cuoi[2][tu + len(kim) - dong_cuoi[0] :]
         if not _CO_CHU.search(truoc) or not _CO_CHU.search(sau):

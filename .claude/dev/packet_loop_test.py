@@ -1230,6 +1230,14 @@ LOP_LACH = [
      "> ```\n> Bảng vai trò: người có\n> thẩm quyền là người cấp lease.\n> ```"),
     ("cum_don_fence_thut_bon_dau_cach",
      "    ```\n    Bảng vai trò: người có\n    thẩm quyền là người cấp lease.\n    ```"),
+    # Ô bảng HTML CÓ CHỮ HAI PHÍA — cross-review lượt 8. Khác `cum_don_o_bang_html_
+    # ngat_dong` ở chỗ ca kia không có chữ bọc nên chốt văn xuôi đã bắt; ca này có,
+    # nên chỉ còn chốt BẢNG HTML đứng giữa. Ô bảng là chép bảng, không bao giờ là
+    # câu kể lại kết quả đo, nên không được hưởng miễn trừ AC 19.
+    ("cum_don_o_bang_html_co_chu_hai_phia",
+     "<table><tr><td>Ghi chú người có\nthẩm quyền đây.</td></tr></table>"),
+    ("cum_don_o_bang_html_khong_dong_the",
+     "<table><tr><td>Ghi chú người có\nthẩm quyền đây."),
     ("cum_don_chi_co_chu_truoc", "Vai trò: người có\nthẩm quyền"),
     ("cum_don_chi_co_chu_sau", "Người có\nthẩm quyền là vai trò."),
     # Ba ca dưới lọt vì `_chuan_hoa` GIỮ dấu `>`, nên chuỗi phẳng ra
@@ -1316,6 +1324,16 @@ LOP_BAT_OAN = [
     # dòng thành hàng rào. Ca này có bullet, trích dẫn, đường kẻ ngang `---` và một
     # dòng chú thích shell mở đầu bằng `#` NGAY TRONG khối mã — `_go_dau_dong_tho`
     # cố ý không gỡ `#` chính vì dòng ấy.
+    # Chốt bảng HTML không được biến MỌI bảng thành vi phạm: bảng không chứa cụm cấm
+    # vẫn phải xanh.
+    ("oan_bang_html_vo_hai",
+     "<table><tr><td>thời gian</td><td>5 phút</td></tr></table>"),
+    # Và không được lan RA NGOÀI thẻ đóng: câu văn xuôi kể kết quả đo đứng SAU bảng
+    # vẫn phải được tha theo AC 19.
+    ("oan_van_xuoi_sau_bang_html",
+     "<table><tr><td>x</td></tr></table>\n\n"
+     "Đo được ở `v1.36.68`: ba tên tấn công `rc=0` → `rc=4`, người có\n"
+     "thẩm quyền vẫn `rc=0`."),
     ("oan_fence_long_cap_vo_hai",
      "- ```sh\n  # chay thu\n  python tl.py --json\n  ```\n\n---\n\n"
      "> ```\n> ket qua: rc=0\n> ```\n"),
@@ -1386,6 +1404,8 @@ ANH_XA_LOP_BAT_OAN = {
     "cum_don_fence_trong_bullet": "oan_fence_long_cap_vo_hai",
     "cum_don_fence_trong_trich_dan": "oan_fence_long_cap_vo_hai",
     "cum_don_fence_thut_bon_dau_cach": "oan_fence_long_cap_vo_hai",
+    "cum_don_o_bang_html_co_chu_hai_phia": "oan_bang_html_vo_hai",
+    "cum_don_o_bang_html_khong_dong_the": "oan_van_xuoi_sau_bang_html",
     "cum_don_chi_co_chu_truoc": "oan_claude_md_master",
     "cum_don_chi_co_chu_sau": "oan_term_ngat_dong",
     "cum_don_trich_dan_ngat_dong": "oan_van_xuoi_ngat_dong_trong_trich_dan",
@@ -1940,8 +1960,7 @@ MUTANTS = {
          # generation 4 thì tất cả lọt lại.
          "ac18_cum_don_heading_ngat_dong", "ac18_cum_don_gach_dau_dong_ngat_dong",
          "ac18_cum_don_danh_sach_so_ngat_dong", "ac18_cum_don_dong_tran_ngat_dong",
-         "ac18_cum_don_chi_co_chu_truoc", "ac18_cum_don_chi_co_chu_sau",
-         "ac18_cum_don_o_bang_html_ngat_dong"],
+         "ac18_cum_don_chi_co_chu_truoc", "ac18_cum_don_chi_co_chu_sau"],
     ),
     # Chốt khối mã của lượt 7, đứng RIÊNG để có độ phân giải.
     "bo_loai_tru_khoi_ma": (
@@ -1955,6 +1974,22 @@ MUTANTS = {
         "        m = _RE_HANG_RAO.match(_go_dau_dong_tho(dong))",
         "        m = _RE_HANG_RAO.match(dong)",
         ["ac18_cum_don_fence_trong_bullet", "ac18_cum_don_fence_trong_trich_dan"],
+    ),
+    "bo_chot_bang_html": (
+        "    trong_khoi_ma = _dong_khoi_ma(raw) | _dong_bang_html(raw)",
+        "    trong_khoi_ma = _dong_khoi_ma(raw)",
+        ["ac18_cum_don_o_bang_html_co_chu_hai_phia",
+         "ac18_cum_don_o_bang_html_khong_dong_the"],
+    ),
+    # Ô bảng HTML KHÔNG có chữ bọc thì HAI chốt cùng phủ — bảng HTML lẫn văn xuôi
+    # bọc hai phía — nên phải gỡ cả hai mới thấy ca đo gì. Đúng cơ chế phối hợp đã
+    # dựng cho P2 lượt 7, nay dùng lại cho một lớp khác.
+    "bo_chot_bang_html_va_van_xuoi": (
+        ("    trong_khoi_ma = _dong_khoi_ma(raw) | _dong_bang_html(raw)",
+         "        if not _CO_CHU.search(truoc) or not _CO_CHU.search(sau):"),
+        ("    trong_khoi_ma = _dong_khoi_ma(raw)",
+         "        if False:"),
+        ["ac18_cum_don_o_bang_html_ngat_dong"],
     ),
     "siet_hang_rao_ve_ba_dau_cach": (
         '_RE_HANG_RAO = re.compile(r"^\\s*(?:`{3,}|~{3,})")',

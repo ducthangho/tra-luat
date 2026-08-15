@@ -1,0 +1,20 @@
+schema_version: 1
+reviewer: codex
+verdict: changes_requested
+reviewed_head: 0194ea0eea9d4b9eed569059f1bda9775ad92971
+base_sha: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1
+prompt_sha256_required: 144198286555951ce1d82a310cb0d4773e58b3fc1fc1dd4146619a5bcbf623ae
+finding_ids:
+  - deterministic-secret-fingerprint-is-dictionary-oracle
+delivery: file
+repository_modified: false
+tests:
+  launcher: "86/86 (85 passed, 1 platform fixture skipped)"
+  eol_violations: 0
+  doc_claim_flags: 0
+boundaries:
+  - no_real_auth_file_touched
+  - no_environment_values_printed
+  - windows_not_run
+  - rest_proxy_claim_not_retested
+  - fetch_performed_by_coordinator_due_read_only_gitdir

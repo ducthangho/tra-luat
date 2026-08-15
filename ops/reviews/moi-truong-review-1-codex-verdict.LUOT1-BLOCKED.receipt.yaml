@@ -1,0 +1,13 @@
+schema_version: 1
+reviewer: codex
+verdict: blocked
+reviewed_head: 0194ea0eea9d4b9eed569059f1bda9775ad92971
+prompt_sha256_required: 144198286555951ce1d82a310cb0d4773e58b3fc1fc1dd4146619a5bcbf623ae
+finding_ids:
+  - step-0-shared-gitdir-read-only
+delivery: file
+repository_modified: false
+boundaries:
+  - stopped_at_step_0
+  - substantive_review_not_run
+  - credential_probes_not_run

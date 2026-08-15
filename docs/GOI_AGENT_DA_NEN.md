@@ -196,7 +196,7 @@ cảm hãy **tự kiểm** (`find <run-root> -name prompt.snapshot -ls`) chứ �
 
 **`--giu-ban-chup` chỉ hoãn lượt xoá NGAY, không giữ được lâu.** Nó không ghi dấu gì lên
 đĩa, và mọi lượt chạy sau đều gọi `_cap_id`, chỗ này xoá **vô điều kiện** mọi
-`prompt.snapshot` quá 24 giờ (dòng 1009–1013 của `.claude/dev/launcher.py`) mà không hề đọc cờ ấy. Nên giữ
+`prompt.snapshot` quá 24 giờ (trong `_cap_id()` của `.claude/dev/launcher.py`) mà không hề đọc cờ ấy. Nên giữ
 bản chụp để truy vết rồi dùng lại **cùng một `--run-root`** là mất — im lặng, sau 24 giờ.
 Cần giữ thật thì **chép ra ngoài `run-root`** ngay sau lượt chạy, và nhớ nó vẫn là tệp
 chứa nguyên văn prompt: chép đi đâu thì chỗ đó thành nơi phải bảo vệ.

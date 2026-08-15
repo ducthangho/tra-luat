@@ -103,6 +103,7 @@ SANDBOX_PORTABLE_CONTROL_IDS = (
     "descendant_checks_treat_zombies_as_gone_with_one_snapshot",
     "disposable_namespace_guard_rejects_inherited_environment_claim",
     "host_loopback_fixture_refuses_outside_disposable_namespace",
+    "fixture_baseline_is_established_once_and_survives_our_own_addresses",
 )
 
 FAKE_VALIDATOR_IDS = (

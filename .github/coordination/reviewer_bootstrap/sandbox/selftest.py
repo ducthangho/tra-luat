@@ -117,6 +117,29 @@ def loopback_addresses(run=subprocess.run) -> list[str]:
     return sorted(found)
 
 
+def establish_fixture_baseline(
+    environment: Mapping[str, str] | None = None, read_link=os.readlink, run=subprocess.run
+) -> dict[str, object]:
+    """Chứng minh MỘT LẦN rằng namespace này là của ta và loopback còn nguyên sơ.
+
+    Phép kiểm "nguyên sơ" phụ thuộc THỨ TỰ: lượt chạy thứ nhất hợp lệ tự thêm
+    10.99.0.1/32, 169.254.169.254/32 và fd00:ec2::254/128 vào loopback CỦA CHÍNH
+    namespace đó, nên nếu gọi lại ở lượt thứ hai nó sẽ tố cáo chính ta và chuỗi
+    >=8 lượt chết ở lượt 2.  Đó là lỗi đã ĐO được, không phải giả định.
+
+    Vì vậy: chốt độ nguyên sơ đúng một lần, TRƯỚC vòng lặp, khi chưa ai ghi gì;
+    còn danh tính namespace thì vẫn kiểm LẠI mỗi lượt vì nó bất biến theo thời
+    gian và chính nó mới là thứ chặn được lời khai môi trường giả (R2).
+    """
+    namespace = require_disposable_network_namespace(environment, read_link)
+    loopback = require_pristine_loopback(run)
+    return {
+        "namespace": namespace,
+        "loopback_before_first_run": loopback,
+        "pristine_checked_once_before_any_fixture": True,
+    }
+
+
 def require_pristine_loopback(run=subprocess.run) -> list[str]:
     """Loopback của một namespace mới CHỈ có 127.0.0.1/8 và ::1/128.
 
@@ -395,6 +418,69 @@ def host_loopback_fixture_refuses_outside_disposable_namespace() -> None:
         raise AssertionError(observed)
 
 
+def fixture_baseline_is_established_once_and_survives_our_own_addresses() -> None:
+    """Hồi quy cho lỗi ĐO được: lượt 2 tự tố cáo lượt 1.
+
+    Loopback sau lượt 1 mang chính ba địa chỉ fixture của ta.  Nếu phép kiểm
+    nguyên sơ chạy lại mỗi lượt, chuỗi >=8 lượt chết ở lượt 2 với
+    `stable_classifications: false` — đúng như đã quan sát tại
+    `d8b08e7398b3b660c9c6b7f509e7214bf4b238c5`.
+    """
+
+    class _Completed:
+        def __init__(self, stdout: str):
+            self.returncode = 0
+            self.stdout = stdout
+            self.stderr = ""
+
+    fresh_links = {NET_NS_SELF: "net:[4026532999]", NET_NS_INIT: "net:[4026531840]"}
+    environment = {REENTRY_MARKER_ENV: "1", PARENT_NET_NS_ENV: "net:[4026531840]"}
+    empty_lo = ""
+    baseline = establish_fixture_baseline(
+        environment, fresh_links.__getitem__, lambda *a, **k: _Completed(empty_lo)
+    )
+    if baseline["pristine_checked_once_before_any_fixture"] is not True:
+        raise AssertionError(baseline)
+    if baseline["loopback_before_first_run"] != []:
+        raise AssertionError(baseline)
+
+    # Sau lượt 1 loopback mang địa chỉ CỦA TA; baseline vẫn phải dùng lại được.
+    after_run_one = (
+        "1: lo    inet 127.0.0.1/8 scope host lo\\       valid_lft forever\n"
+        "1: lo    inet 10.99.0.1/32 scope global lo\\       valid_lft forever\n"
+        "1: lo    inet 169.254.169.254/32 scope global lo\\       valid_lft forever\n"
+        "1: lo    inet6 ::1/128 scope host \\       valid_lft forever\n"
+        "1: lo    inet6 fd00:ec2::254/128 scope global \\       valid_lft forever\n"
+    )
+    try:
+        require_pristine_loopback(lambda *a, **k: _Completed(after_run_one))
+    except DisposableNamespaceError:
+        pass
+    else:
+        raise AssertionError("the pristine check no longer refuses a populated loopback")
+
+    # Danh tính namespace KHÔNG đổi giữa các lượt, nên nó vẫn kiểm lại được.
+    repeat_evidence = require_disposable_network_namespace(environment, fresh_links.__getitem__)
+    if repeat_evidence["measured"]["current"] != baseline["namespace"]["measured"]["current"]:
+        raise AssertionError({"baseline": baseline["namespace"], "repeat": repeat_evidence})
+
+    # Và loopback bẩn TRƯỚC lượt đầu vẫn phải chặn baseline ngay từ đầu.
+    dirty_before_start = (
+        "1: lo    inet 127.0.0.1/8 scope host lo\\       valid_lft forever\n"
+        "1: lo    inet 10.255.255.254/32 scope global lo\\       valid_lft forever\n"
+        "1: lo    inet6 ::1/128 scope host \\       valid_lft forever\n"
+    )
+    try:
+        establish_fixture_baseline(
+            environment, fresh_links.__getitem__, lambda *a, **k: _Completed(dirty_before_start)
+        )
+    except DisposableNamespaceError as exc:
+        if "10.255.255.254/32" not in str(exc):
+            raise AssertionError(str(exc)) from exc
+    else:
+        raise AssertionError("a shared, already-populated loopback was accepted as a baseline")
+
+
 class SocketFixture:
     def __init__(self, family: int, address: str, port: int, socktype: int):
         self.family = family
@@ -619,7 +705,13 @@ def _run_case(target: pathlib.Path, scratch: pathlib.Path, mode: str, *args: str
     return runner.run(config)
 
 
-def _full_once(repo_root: str, candidate_head: str, dispatcher_pin: str, run_index: int) -> dict[str, object]:
+def _full_once(
+    repo_root: str,
+    candidate_head: str,
+    dispatcher_pin: str,
+    run_index: int,
+    fixture_baseline: Mapping[str, object],
+) -> dict[str, object]:
     binding = source_pin.verify(repo_root, candidate_head, dispatcher_pin)
     started = datetime.datetime.now(datetime.timezone.utc).isoformat()
     records: dict[str, dict[str, object]] = {}
@@ -713,10 +805,23 @@ def _full_once(repo_root: str, candidate_head: str, dispatcher_pin: str, run_ind
                     os.environ[key] = previous
 
         # Chốt R2: chỉ được chạm vào loopback SAU khi chứng minh được namespace
-        # này do chính ta tạo và loopback còn nguyên sơ.  Không có `finally` nào
-        # cứu được máy chủ nếu ta đã ghi nhầm chỗ.
+        # này do chính ta tạo.  Không có `finally` nào cứu được máy chủ nếu ta đã
+        # ghi nhầm chỗ.  Danh tính namespace kiểm LẠI mỗi lượt; còn độ nguyên sơ
+        # của loopback là bằng chứng chốt MỘT LẦN trước vòng lặp (xem
+        # `establish_fixture_baseline`) vì từ lượt 2 trở đi loopback mang đúng
+        # các địa chỉ mà chính ta đã đặt ở lượt 1.
         namespace_evidence = require_disposable_network_namespace()
-        loopback_before = require_pristine_loopback()
+        if fixture_baseline.get("pristine_checked_once_before_any_fixture") is not True:
+            raise DisposableNamespaceError(
+                "fixture baseline was not established before the repeat loop"
+            )
+        if fixture_baseline.get("namespace", {}).get("measured", {}).get("current") != namespace_evidence[
+            "measured"
+        ]["current"]:
+            raise DisposableNamespaceError(
+                "network namespace changed between the baseline and this run"
+            )
+        loopback_before = fixture_baseline["loopback_before_first_run"]
         host, metadata4, metadata6, port, dns_port = "10.99.0.1", "169.254.169.254", "fd00:ec2::254", 43861, 53
         for command in (
             ["ip", "link", "set", "lo", "up"],
@@ -762,6 +867,7 @@ def _full_once(repo_root: str, candidate_head: str, dispatcher_pin: str, run_ind
         records["network_dns_loopback_metadata_unix"]["outside_positive_controls"] = controls
         records["network_dns_loopback_metadata_unix"]["disposable_namespace_evidence"] = namespace_evidence
         records["network_dns_loopback_metadata_unix"]["loopback_before_fixture"] = loopback_before
+        records["network_dns_loopback_metadata_unix"]["fixture_baseline"] = dict(fixture_baseline)
         protocol = _parse_protocol(network)
         if not all(controls.values()) or not isinstance(protocol, Mapping) or not protocol or not all(value is True for value in protocol.values()):
             records["network_dns_loopback_metadata_unix"]["passed"] = False
@@ -885,6 +991,7 @@ PORTABLE_CONTROLS = (
     descendant_checks_treat_zombies_as_gone_with_one_snapshot,
     disposable_namespace_guard_rejects_inherited_environment_claim,
     host_loopback_fixture_refuses_outside_disposable_namespace,
+    fixture_baseline_is_established_once_and_survives_our_own_addresses,
 )
 
 
@@ -1113,6 +1220,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
     try:
         runner.fingerprint()
+        # Chốt độ nguyên sơ của loopback đúng một lần, khi chưa lượt nào ghi gì.
+        fixture_baseline = establish_fixture_baseline()
         runs = []
         for index in range(args.repeat):
             try:
@@ -1122,6 +1231,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                         args.candidate_head,
                         args.dispatcher_pin,
                         index + 1,
+                        fixture_baseline,
                     )
                 )
             except Exception as exc:

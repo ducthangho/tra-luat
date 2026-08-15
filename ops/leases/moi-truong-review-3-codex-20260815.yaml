@@ -1,0 +1,147 @@
+# Lease REVIEWER lượt 3 cho nhánh HẠ TẦNG MÔI TRƯỜNG `ops/moi-truong-env-first`.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+# NHỚ ĐÓNG NHÁY mọi giá trị chứa `#` — không nháy thì `#` mở chú thích YAML và cắt cụt
+# giá trị (đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ).
+#
+# `packet_issue: 55` NHƯNG `la_viec_cua_packet: false` — trường bắt buộc theo lược đồ,
+# chỉ quyết định comment đăng vào issue nào. Nhánh này rẽ từ `master`, KHÔNG tiêu attempt.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: null
+la_viec_cua_packet: false
+
+role: reviewer
+provider: codex                 # BẮT BUỘC — người vá là claude (§8 cross-provider)
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+lease_id: moi-truong-review-3-codex-20260815
+review_round: 3
+
+branch: ops/moi-truong-env-first
+reviewed_sha_required: c89ca5929c2d5da6c182f7858e652c51df147cd5
+base_sha: 026c4ea95ae5039ce32f794018a69f03a94bf41a
+base_note: 'base CHÍNH LÀ head lượt 2 đã soi. Delta ĐÚNG 1 tệp: .claude/dev/launcher_test.py'
+master_sha_at_grant: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1
+target_pull_request: null
+
+prompt_path: ops/prompts/moi-truong-review-3-codex-20260815.md
+prompt_sha256_required: a41865735ad45e09f034585a6a741805957eadd17f494e06664fc42c5b9870ab
+
+granted_by: ducthangho          # CHỦ KHO — §2 người có thẩm quyền
+granted_on_instruction: 'direct, in-session, 2026-08-15 (vá luôn cả 5 chỗ của master đi, chạy song song review codex với mỗi vá hoàn thành đi)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-15T19:05:00Z'
+lease_expires_at_utc: '2026-08-16T19:30:00Z'
+run_minutes: 1465
+heartbeat_required_minutes: 30
+
+prior_review: moi-truong-review-2-codex-20260815
+prior_review_verdict: changes_requested
+prior_review_verdict_file: 'ops/reviews/moi-truong-review-2-codex-verdict.md trên ops/moi-truong-review-2-verdict'
+prior_review_verdict_sha256: 0b28a66da5765f05384ddf724e5f88f95c5046f85745a0a07bae21f35ec4a390
+prior_review_still_applicable: true
+prior_review_note: >-
+  Lượt 2 ĐÃ duyệt phần còn lại của delta trước: bản vá oracle đúng hướng; ngưỡng 8 không
+  đủ thành finding chặn; va chạm HMAC 32 bit không đáng nâng; không có đường in plaintext
+  credential; đột biến t85 gỡ hai lớp là HỢP LỆ; `hook-nang-luc` fail-closed khi gõ sai
+  tên; `parents[2]` của t88 đúng. ĐỪNG soi lại trừ khi đo được điều KHÁC.
+
+new_since_last_review:
+  finding_id: launcher-tests-leak-global-module-monkeypatches
+  severity_goc: high
+  trang_thai: 'đã vá ở c89ca59 — CẦN reviewer phán định bản vá'
+  benh: >-
+    `_tai_launcher_thu()` nạp module launcher MỚI nhưng module ấy dùng CHÍNH các singleton
+    os/shutil/subprocess/platform của tiến trình test; ca gán đè mà không khôi phục nên
+    t85 làm bẩn `subprocess.run` và cổng đột biến đổ BA mục
+  fix: >-
+    chữa ở TẦNG HARNESS: `_co_lap_toan_cuc()` chụp rồi hoàn nguyên os.environ ·
+    platform.system · subprocess.run · shutil.which · os.path.expanduser, bọc quanh MỌI
+    lượt gọi ca ở CẢ HAI vòng lặp. os.environ hoàn nguyên CẢ NỘI DUNG, không chỉ tham chiếu.
+  vi_sao_tang_harness: >-
+    sửa 14 chỗ gán thì hôm nay sạch, ca thứ 15 viết tháng sau lại rò — và rò IM LẶNG,
+    chỉ hiện ở một mục không liên quan cách đó vài trăm dòng
+  nguoi_va_do: 'cô lập BẬT → 0 ca làm bẩn; cô lập TẮT → bẩn ngay từ t81 (ca của MASTER)'
+  reviewer_must_check: >-
+    danh sách năm mục có ĐỦ không (quét cả tệp, đừng tin danh sách); còn đường làm bẩn
+    NGOÀI năm mục đó không (sys.path, sys.modules, os.chdir, signal, atexit, tệp sót);
+    hoàn nguyên os.environ bằng clear()+update() có hỏng os.environb hay ca giữ tham chiếu
+    cũ không; có ca nào vá toàn cục LÚC IMPORT (ngoài phạm vi `with`) không
+
+# Lớp lỗi CÓ TRƯỚC — chủ kho yêu cầu vá luôn, và chốt ở harness bao được cả hai.
+bao_gom_5_cho_cua_master:
+  yeu_cau: 'lệnh trực tiếp của chủ kho: vá luôn cả 5 chỗ của master'
+  cach_bao: >-
+    chốt đặt ở HARNESS nên bao mọi chỗ gọi, kể cả 5 chỗ có sẵn trên master (đo được:
+    master 5, nhánh này 14). Không phải sửa từng chỗ.
+  bang_chung: 'gỡ chốt cô lập thì bẩn ngay từ t81 — ca của MASTER, không phải ca mới'
+
+# Người vá TỰ RÚT LẠI một con số đã công bố. Ghi ra để reviewer biết ranh giới của hồ sơ.
+so_da_rut_lai:
+  con_so: '47/47 công bố ở commit 026c4ea và comment 5303623279'
+  ly_do: 'đo trên harness BỊ Ô NHIỄM nên không đáng tin'
+  chan_doan_sai_kem_theo: >-
+    người vá từng gọi hai mục đổ là "chập chờn"; thật ra ô nhiễm THEO THỨ TỰ, tất định.
+    Hai lượt cho kết quả khác nhau vì giữa hai lượt chính bảng đột biến bị sửa.
+
+# Người vá KHAI đây là giới hạn — lease đòi reviewer PHÁN ĐỊNH, không nhận luôn.
+khai_la_gioi_han_can_phan_dinh:
+  muc: 'không có đột biến nào cho `_co_lap_toan_cuc`'
+  ly_do_nguoi_va_dua: >-
+    runner đọc `goc = LAUNCHER.read_text()` nên chỉ đột biến `launcher.py`; chốt cô lập
+    sống trong `launcher_test.py`, ngoài tầm với. Đã THỬ đặt hai mục, cả hai trả "khong
+    tim thay doan de dot bien", nên bỏ hẳn vì một mục ĐỎ THƯỜNG TRỰC sẽ bị bỏ qua.
+  reviewer_must_check: >-
+    có cách cơ học nào khoá chốt harness mà không cần bảng đột biến hiện tại không; nếu
+    không thì `t89` một mình có đủ mạnh không. Đột biến chính `t89` trên BẢN SAO và xem
+    nó có RĂNG không — đây là ca DUY NHẤT canh chốt harness, nó mù thì cả cơ chế mù theo.
+
+verified_by_coordinator:
+  suite: 'rc=0 · 89/89 (qua 88, bỏ qua 1 fixture Windows)'
+  dot_bien: 'rc=0 · 47/47 đạt · KHÔNG còn mục SAI (1 không đo được trên nền này)'
+  ba_muc_tung_do: 'do_codex_tin_DONG_DAU 1/1 · so_URL_tho_khong_chuan_hoa 2/2 · bo_cung_hoa_dau_ra 1/1'
+  co_lap: 'BẬT → 0 ca làm bẩn toàn cục; TẮT → bẩn ngay từ t81'
+  eol: 'rc=0 · checked=330 · violations=0'
+  doc_claims: 'rc=0 · ok=true · flags=[]'
+  scope: 'ĐÚNG 1 tệp so với head lượt 2 đã soi'
+
+chay_dot_bien_hai_lan: >-
+  Lease ĐÒI reviewer chạy `--dot-bien` ÍT NHẤT HAI LẦN. Chính chỗ này lần trước cho hai
+  kết quả khác nhau, và sự khác nhau ấy mới là thứ phơi ra finding. Khác giữa hai lượt là
+  finding, phải báo.
+
+buoc_0_khac_biet:
+  ly_do: >-
+    sandbox `workspace-write` của codex đặt `.git/` thành CHỈ ĐỌC theo chính sách của
+    chính codex — đo được là clone ĐỘC LẬP nằm trọn trong vùng ghi được vẫn hỏng y hệt
+  da_chay_ho: ['git fetch', 'git config core.abbrev 7']
+  thay_bang: 'xác minh bằng ĐỌC — đúng vai read-only hơn'
+  neu_reviewer_khong_tin: 'nêu thành FINDING và VẪN LÀM TIẾP, đừng dừng cả lượt'
+
+canh_bao_an_ninh:
+  khong_in_gia_tri: true
+  home_tam_bat_buoc: true
+  note: >-
+    Không in giá trị biến nào kể cả một phần. Mọi phản chứng đụng credential chạy trên
+    HOME tạm; TUYỆT ĐỐI không ghi/xoá/đổi `~/.codex/auth.json` thật — credential đang nuôi
+    chính phiên reviewer. Phép đo nào buộc phải đụng tệp thật thì ĐỪNG LÀM.
+
+neo_sha_bat_bien_required: true
+approve_la_hop_le: >-
+  `approve` hợp lệ nếu thật sự không tìm ra gì — đừng nặn finding cho có. Nhưng delta này
+  CHƯA AI SOI, và HAI lượt trước reviewer đều tìm ra finding HIGH ở đúng vùng mã này.
+
+duong_giao_verdict_da_do: >-
+  REST tới api.github.com bị PROXY trả 403 bất kể token; gh không cài; git push chạy.
+  Reviewer ghi verdict ra tệp, phiên điều phối đăng hộ.
+
+preconditions_measured_at_utc: '2026-08-15T19:00:34Z'

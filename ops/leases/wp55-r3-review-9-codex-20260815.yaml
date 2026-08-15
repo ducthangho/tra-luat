@@ -1,0 +1,161 @@
+# Lease REVIEWER lượt 9 cho wp55 revision 3 — neo head 4270210.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt
+# cụt giá trị — đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ.
+#
+# VÌ SAO CÓ LEASE NÀY — và vì sao lease lượt 8 bị THAY THẾ:
+# Lease `wp55-r3-review-8-codex-20260815` neo `91780cb`. Sau khi lease ấy được cấp, phiên
+# executor đẩy thêm HAI commit vào chính nhánh packet (`3c4fbc2` g7, `4270210` g8), làm tip
+# nhánh rời khỏi `reviewed_sha_required` của lease. Chủ kho được báo và chọn: KHÔNG lùi
+# nhánh, mà cấp lease mới neo `4270210` — vì cả ba phản chứng của lượt 8 đều đã được vá ở
+# g7/g8, nên bắt reviewer soi `91780cb` là soi một cây đã biết là đỏ.
+#
+# SỔ CÓ KHOẢNG TRỐNG, VÀ NÓ LỚN HƠN LEASE TRƯỚC GHI:
+#   - lease lượt 8 ghi `unleased_commits_on_branch: 2` (hai commit g6);
+#   - nay thêm `3c4fbc2` và `4270210` cũng không lease ⇒ TỔNG BỐN.
+#   - `attempts_used` trong sổ KHÔNG phản ánh số lượt thật.
+# Chủ kho biết và chấp nhận. Ghi ra để reviewer biết ranh giới của sổ, KHÔNG phải để hạ
+# chuẩn duyệt.
+#
+# LƯỢT 8 ĐÃ CẤP LEASE NHƯNG KHÔNG CHẠY THEO LEASE:
+# Phiên executor tự phát động một bản review riêng trên `91780cb` bằng prompt TỰ SOẠN, không
+# dùng `ops/prompts/wp55-r3-review-8-codex-20260815.md`. Bản ấy KHÔNG thoả §8. Nó được giữ
+# lại làm bằng chứng tại `ops/wp55-r3-review-8-ngoai-lease`, gắn nhãn rõ, và KHÔNG được tính
+# là lượt cross-review của revision 3.
+#
+# TRỤC ĐÁNG DỒN SỨC — con lắc đã đánh quá BỐN lần:
+#   g4    thêm miễn trừ để thôi bắt oan   ⇒ quá rộng, heading trần lọt rc=0
+#   g5    thu về "chỉ tha khi ngắt dòng"  ⇒ vẫn quá rộng, heading/bullet/bảng/fence lọt
+#   g6    thu về "chỉ tha cho VĂN XUÔI"   ⇒ vẫn lọt: fence lồng cấp, ô bảng HTML
+#   g7+g8 thêm chốt fence lồng cấp + bảng HTML ⇒ CHƯA AI SOI ĐỘC LẬP
+# Việc của lượt này là tìm cú đánh quá THỨ NĂM, ở CẢ HAI chiều.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+phase_key: F3-03
+mission_issue: 54
+mission_revision: 6
+revision: 3
+generation: 8
+lease_id: wp55-r3-review-9-codex-20260815
+
+spec_path: ops/specs/wp55-r3-spec.md
+spec_branch: ops/wp55-r3-spec
+spec_hash: e321f811724fae97b19d523a3e5159bc13b425cd15fc6c753c7439fe28cae22d
+spec_hash_basis: sha256 của chính tệp spec, byte nguyên trạng
+
+role: reviewer
+provider: codex                 # BẮT BUỘC — executor là claude (§8 cross-provider)
+assurance_target: cross_approved
+access: read-only
+write_set: []                   # reviewer KHÔNG ghi (§2)
+branch_ownership: none
+
+target_pull_request: 120
+reviewed_sha_required: 427021049bc8677f5915da13b8ac38a53c949b93
+branch: claude/wp55-r3g5-f3-03
+base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2
+
+prompt_path: ops/prompts/wp55-r3-review-9-codex-20260815.md
+prompt_sha256_required: 4ee85668fa86b229a7c12f3d71c000f0df52f9d7259ab420fef96452a3608eba
+
+granted_by: ducthangho          # CHỦ KHO — §2 người có thẩm quyền
+granted_on_instruction: 'direct, in-session, 2026-08-15 (chọn (b), cấp lease mới neo 4270210)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-15T08:50:00Z'
+lease_expires_at_utc: '2026-08-16T09:00:00Z'
+run_minutes: 1450
+heartbeat_required_minutes: 30
+
+attempts_used: 2
+attempts_limit: 3
+attempts_exhausted: false
+attempts_note: >-
+  Sổ ghi 2/3. BỐN commit trên nhánh chạy không lease (hai `g6`, cộng `3c4fbc2` và
+  `4270210`) nên KHÔNG vào sổ — con số thật CAO HƠN. Ghi ra để reviewer biết ranh giới
+  của sổ, KHÔNG phải để hạ chuẩn duyệt.
+
+# Lease này THAY THẾ lease lượt 8. Ghi tường minh để sổ không có hai lease cùng sống.
+supersedes_lease: wp55-r3-review-8-codex-20260815
+supersedes_reason: >-
+  Tip nhánh rời khỏi `reviewed_sha_required: 91780cb` sau khi executor đẩy `3c4fbc2` và
+  `4270210` không lease. Chủ kho chọn neo lease mới vào tip mới thay vì lùi nhánh.
+supersedes_decided_by: ducthangho
+
+# Hồ sơ của head này — nói rõ cái gì có, cái gì KHÔNG.
+head_provenance:
+  executor_handoff_exists: false
+  branch_resolved_by: ducthangho
+  unleased_commits_on_branch: 4
+  unleased_commits:
+    - 3c4fbc2d8b88ae76aa2f4f7aa4903440ee247c90
+    - 427021049bc8677f5915da13b8ac38a53c949b93
+  unleased_commits_note: >-
+    Hai SHA trên là phần THÊM so với lease lượt 8; hai commit `g6` trước đó cũng không
+    lease, đã ghi trong lease `wp55-r3-review-8-codex-20260815`.
+
+prior_review: wp55-r3-review-8-ngoai-lease
+prior_review_verdict: changes_requested
+prior_reviewed_sha: 91780cb0df3c898b2ca92bc17d14107547d944c6
+prior_review_is_leased: false
+prior_review_invalidated_reason: >-
+  Chạy NGOÀI lease bằng prompt tự soạn, không dùng `prompt_path` của lease lượt 8; KHÔNG
+  thoả §8 nên không tính là lượt cross-review. Giữ lại làm bằng chứng, không làm căn cứ duyệt.
+prior_review_verdict_file: >-
+  ops/reviews/wp55-r3-review-8-codex-verdict-NGOAI-LEASE.md trên nhánh
+  ops/wp55-r3-review-8-ngoai-lease
+prior_review_findings:
+  - doctrine-line-break-exemption-still-bypasses-structured-content
+
+# ĐÃ chạy lại bởi phiên executor trên 4270210. KHÔNG thay được lượt cross-review §8 —
+# ghi ra để reviewer biết chỗ nào đã phủ, KHÔNG để chép.
+claimed_by_executor:
+  scope: 'ĐÚNG 6 tệp write_set'
+  packet_loop_test: 'rc=0 · nền 157/157 · 39 đột biến · 0 ngoại lệ'
+  doctrine_scan: 'rc=0 · sạch, 4 tệp'
+  doc_claims_check: 'rc=0 · flags=[]'
+  release_verify: 'rc=0 · checked=179 · failed=0 · extra=0'
+  golden_test: 'rc=0 · case_count=20'
+  eol_policy: 'rc=0 · scanned=304 · violations=[]'
+  tl_selftest: 'rc=0 · 1696/1696'
+  ac20_merged_tree: 'doctrine rc=0 · suite rc=0 · nền 157/157 (master 2531366, GIT_DIR kho thật)'
+  ba_phan_chung_luot_8: 'fence trong bullet, fence trong trích dẫn, ô bảng HTML — cả ba nay rc=6'
+
+# CHƯA AI chạy lại độc lập — phần việc của reviewer.
+claimed_but_unverified:
+  - id: tl-selftest
+    note: >-
+      Lượt 7 và 8 đều KHÔNG xác nhận độc lập được `1696/1696`: lượt 7 vấp
+      `pyo3_runtime.PanicException` trong `cryptography`, lượt 8 đo `1694/1696` do ngữ cảnh
+      git. Executor báo đã sửa được (`cffi` lệch bản với `cryptography` 41.0.7 bản Debian)
+      và đo lại `1696/1696`. Reviewer tự chạy; không chạy được thì nói rõ, đừng đoán.
+  - id: chot-moi-g7-g8
+    note: >-
+      `_go_dau_dong_tho`, `_RE_HANG_RAO` nới về `\s*`, `_dong_bang_html` — ba chốt mới,
+      chưa lượt review nào soi. Rủi ro bắt-oan cao nhất ở `_dong_bang_html`: `<table>`
+      thiếu thẻ đóng sẽ đánh dấu MỌI dòng còn lại là "trong bảng".
+
+finding_deferred:
+  finding_id: ac20-archive-tree-suite-not-self-contained
+  disposition: spec_revision_required
+  decision: 'chủ kho chốt HOÃN sang revision 4'
+  note: >-
+    Đã ghi nhận ở verdict lượt 6. Đừng nêu lại như finding mới; chỉ nêu nếu đo được điều
+    KHÁC với mô tả đó.
+
+neo_sha_bat_bien_required: true
+neo_sha_bat_bien_note: >-
+  Mọi lệnh trong verdict phải neo SHA bất biến — không origin/master, không HEAD, không tên
+  nhánh. Verdict lượt 5 khai master_sha_checked nhưng lệnh lại neo ref di động và codex đã
+  nêu P2 trên PR #114. Ghi số và neo số là hai việc khác nhau.
+
+preconditions_measured_at_utc: '2026-08-15T08:47:00Z'
+master_sha_at_grant: 2531366e1abc6cbca0a6c2765e40e54be38d1fb7

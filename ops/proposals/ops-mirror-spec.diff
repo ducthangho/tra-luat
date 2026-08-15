@@ -361,3 +361,509 @@ index 0000000..750f398
 +
 +if __name__ == "__main__":
 +    sys.exit(main())
+diff --git a/ops/mirror_spec_test.py b/ops/mirror_spec_test.py
+new file mode 100644
+index 0000000..3dec29a
+--- /dev/null
++++ b/ops/mirror_spec_test.py
+@@ -0,0 +1,500 @@
++#!/usr/bin/env python3
++# -*- coding: utf-8 -*-
++"""Phản chứng cho `mirror_spec.py` — cổng chặn TRƯỚC khi thân một Issue bị GHI ĐÈ.
++
++Vì sao cổng này phải chặt hơn cổng lease: `ops-publish-lease.yml` chỉ THÊM comment,
++sai thì bản cũ còn nguyên để đối chiếu. Cửa `ops-mirror-spec` GHI ĐÈ thân issue —
++một lượt chạy sai xoá sạch văn bản người ta gõ tay, và trong kho KHÔNG có bản sao để
++dựng lại. Thứ duy nhất đứng giữa một tệp Markdown trong kho và việc xoá trắng thân
++issue là bộ kiểm này. Nó mà xanh dễ dãi thì cửa trở thành máy huỷ nội dung.
++
++Hai nguyên tắc, cả hai đều đã phải trả giá ở packet khác mới có:
++
++1. Gọi CHÍNH lệnh qua `subprocess`, KHÔNG import và KHÔNG gọi hàm nội bộ. Cùng
++   doctrine với `lease_publish_test.py` và `packet_loop_test.py`: thứ workflow gõ là
++   LỆNH, nên thứ được đo phải là lệnh.
++
++2. Suite TỰ CHỨNG MINH KHÔNG RỖNG. "18/18 đạt" chẳng nói lên gì nếu không ca nào đỏ
++   được. Mỗi chốt có một ĐỘT BIẾN gỡ đúng chốt ấy, và ca tương ứng BẮT BUỘC chết
++   theo. Ca không chết được là ca không đo gì. Đây là chỗ `lease_publish_test.py`
++   phải nhờ bộ đột biến ngoài; ở đây gắn thẳng vào suite để chạy một lệnh là đủ.
++
++Chạy: python3 ops/mirror_spec_test.py
++"""
++
++from __future__ import annotations
++
++import hashlib
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++from pathlib import Path
++
++HERE = Path(__file__).resolve().parent
++CANONICAL = HERE / "mirror_spec.py"
++
++RC_OK, RC_THAM_SO, RC_NEO, RC_NOI_DUNG = 0, 2, 6, 8
++
++MOC = "## ⬇ TỪ ĐÂY TRỞ XUỐNG LÀ NỘI DUNG CẦN DÁN"
++DAU_SO_HUU = "<!-- ops-mirror-spec v1"
++
++CA: list = []
++
++
++def ca(fn):
++    CA.append(fn)
++    return fn
++
++
++def chay(script: Path, *doi_so, cwd=None):
++    p = subprocess.run([sys.executable, str(script), *[str(x) for x in doi_so]],
++                       capture_output=True, text=True, cwd=cwd)
++    return p.returncode, p.stdout, p.stderr
++
++
++def _doi(mong: int, rc: int, err: str, msg: str) -> None:
++    if rc != mong:
++        raise AssertionError(f"{msg}: đòi rc={mong}, được rc={rc}; stderr={err.strip()!r}")
++
++
++def _khong_traceback(err: str, msg: str) -> None:
++    """Chốt vỡ bằng traceback là chốt CHƯA fail-closed — nó chỉ đang vỡ."""
++    if "Traceback" in err:
++        raise AssertionError(f"{msg}: vỡ bằng TRACEBACK THÔ thay vì mã thoát có kiểm soát")
++
++
++SPEC_MAU = """# Packet Spec — wp{n} revision 1
++
++```yaml
++packet_id: wp{n}
++packet_issue: {n}
++revision: 1
++```
++
++Nội dung spec.
++"""
++
++
++def _dung_kho(tmp: Path, *, issue=119, spec_ten="wp119-r1-spec.md",
++              spec_path=None, spec_hash=None, packet_issue=None,
++              co_khoi_mirror=True, co_moc=True, than="Nội dung thân issue.\n",
++              noi_dung_spec=None) -> tuple[Path, Path]:
++    """Dựng một kho giả: một spec + một bản chiếu. Trả `(gốc kho, đường bản chiếu)`.
++
++    Mọi tham số lệch đi đúng MỘT chiều để mỗi ca đo đúng một chốt.
++    """
++    goc = tmp / f"kho{len(list(tmp.iterdir()))}"
++    (goc / "ops" / "specs").mkdir(parents=True)
++    ds = goc / "ops" / "specs" / spec_ten
++    ds.write_text(noi_dung_spec if noi_dung_spec is not None
++                  else SPEC_MAU.format(n=issue), encoding="utf-8")
++
++    bam = spec_hash if spec_hash is not None else hashlib.sha256(ds.read_bytes()).hexdigest()
++    duong = spec_path if spec_path is not None else f"ops/specs/{spec_ten}"
++    so = packet_issue if packet_issue is not None else issue
++
++    phan = []
++    if co_khoi_mirror:
++        phan.append(f"```mirror\nspec_path: {duong}\nspec_hash: {bam}\n"
++                    f"packet_issue: {so}\n```\n")
++    phan.append("Văn xuôi giải thích, KHÔNG được coi là thân.\n")
++    if co_moc:
++        phan.append(f"\n{MOC} ⬇\n\n---\n\n")
++        phan.append(than)
++    chieu = goc / "ops" / "specs" / spec_ten.replace("-spec.md", "-than-issue.md")
++    chieu.write_text("".join(phan), encoding="utf-8")
++    return goc, chieu
++
++
++# --- chiều DƯƠNG: chốt phải XANH được, không thì người ta gỡ nó ra --------------
++
++
++@ca
++def t01_ban_chieu_hop_le_thi_QUA():
++    with tempfile.TemporaryDirectory() as td:
++        goc, chieu = _dung_kho(Path(td))
++        rc, out, err = chay(CANONICAL, "check", chieu, "--root", goc)
++        _doi(RC_OK, rc, err, "bản chiếu hợp lệ mà bị chặn")
++        if "băm khớp" not in out:
++            raise AssertionError(f"check phải in BẰNG CHỨNG băm khớp, được {out!r}")
++
++
++@ca
++def t02_body_dung_dau_so_huu_va_giu_nguyen_than():
++    with tempfile.TemporaryDirectory() as td:
++        goc, chieu = _dung_kho(Path(td), than="Dòng một.\nDòng hai.\n")
++        rc, out, err = chay(CANONICAL, "body", chieu, "--root", goc)
++        _doi(RC_OK, rc, err, "body")
++        if not out.startswith(DAU_SO_HUU):
++            raise AssertionError(f"thân phải mở đầu bằng dấu sở hữu, được {out[:60]!r}")
++        if "Dòng một.\nDòng hai." not in out:
++            raise AssertionError("thân bị mất nội dung gốc")
++        if "Văn xuôi giải thích" in out:
++            raise AssertionError("phần TRƯỚC mốc bị lọt vào thân — cắt sai chỗ")
++
++
++@ca
++def t03_issue_in_dung_so():
++    with tempfile.TemporaryDirectory() as td:
++        goc, chieu = _dung_kho(Path(td), issue=407)
++        rc, out, err = chay(CANONICAL, "issue", chieu, "--root", goc)
++        _doi(RC_OK, rc, err, "issue")
++        if out.strip() != "407":
++            raise AssertionError(f"đòi 407, được {out.strip()!r}")
++
++
++# --- chiều CHẶN: từng hình dạng sai một ca --------------------------------------
++
++
++@ca
++def t04_thieu_khoi_mirror_bi_CHAN():
++    with tempfile.TemporaryDirectory() as td:
++        goc, chieu = _dung_kho(Path(td), co_khoi_mirror=False)
++        rc, _, err = chay(CANONICAL, "check", chieu, "--root", goc)
++        _doi(RC_NOI_DUNG, rc, err, "bản chiếu KHÔNG khai nó chiếu cái gì mà vẫn qua")
++        _khong_traceback(err, "thiếu khối mirror")
++
++
++@ca
++def t05_bam_SAI_DANG_bi_CHAN_va_noi_DUNG_BENH():
++    """Neo THÔNG ĐIỆP, không chỉ neo mã thoát — và đây là lý do, đã đo:
++
++    chốt DẠNG băm không bắt thêm ca nào mà chốt SO BĂM bên dưới không bắt (băm sai
++    dạng thì cũng khác băm thật). Gỡ nó đi, `rc` vẫn là 6. Nó tồn tại VÌ THÔNG ĐIỆP:
++    "phải là 64 ký tự hex" chỉ thẳng lỗi gõ, còn "băm LỆCH" đẩy người sửa đi băm lại
++    một tệp vốn không có lỗi. Ca này vì thế phải đo CÂU CHỮ, nếu không nó không đo
++    được cái nó khai — cùng kết luận mà `lease_publish_test.py::t20` đã tự ghi.
++    """
++    with tempfile.TemporaryDirectory() as td:
++        goc, chieu = _dung_kho(Path(td), spec_hash="deadbeef")
++        rc, _, err = chay(CANONICAL, "check", chieu, "--root", goc)
++        _doi(RC_NEO, rc, err, "spec_hash 8 ký tự mà vẫn qua")
++        if "64 ký tự hex" not in err:
++            raise AssertionError(
++                f"rc=6 nhưng KHÔNG phải do chốt DẠNG băm — thông điệp phải nêu "
++                f"'64 ký tự hex', được {err.strip()!r}")
++
++
++@ca
++def t06_bam_LECH_bi_CHAN():
++    """Chốt QUAN TRỌNG NHẤT: bắt bản chiếu TRÔI khỏi spec."""
++    with tempfile.TemporaryDirectory() as td:
++        goc, chieu = _dung_kho(Path(td))
++        ds = goc / "ops" / "specs" / "wp119-r1-spec.md"
++        ds.write_text(ds.read_text(encoding="utf-8") + "\nmột dòng mới\n", encoding="utf-8")
++        rc, _, err = chay(CANONICAL, "check", chieu, "--root", goc)
++        _doi(RC_NEO, rc, err, "spec đổi mà bản chiếu không theo, vẫn qua")
++        if "băm spec LỆCH" not in err:
++            raise AssertionError(f"thông điệp phải gọi tên bệnh, được {err.strip()!r}")
++
++
++@ca
++def t07_packet_issue_LECH_giua_chieu_va_spec_bi_CHAN():
++    with tempfile.TemporaryDirectory() as td:
++        goc, chieu = _dung_kho(Path(td), issue=119, packet_issue=120)
++        rc, _, err = chay(CANONICAL, "check", chieu, "--root", goc)
++        _doi(RC_NOI_DUNG, rc, err, "bản chiếu khai issue khác spec mà vẫn qua")
++
++
++@ca
++def t08_packet_issue_khong_phai_so_duong_bi_CHAN():
++    for xau in ("0", "-3", "abc", "12x", "1.5", ""):
++        with tempfile.TemporaryDirectory() as td:
++            goc, chieu = _dung_kho(Path(td), packet_issue=xau)
++            rc, _, err = chay(CANONICAL, "check", chieu, "--root", goc)
++            if rc == RC_OK:
++                raise AssertionError(f"packet_issue={xau!r} LỌT")
++            _khong_traceback(err, f"packet_issue={xau!r}")
++
++
++@ca
++def t09_spec_path_TUYET_DOI_bi_CHAN():
++    """PHỦ HAI LỚP — cố ý không nằm trong danh sách phải-chết của đột biến nào.
++
++    `/etc/passwd` bị chốt CHUỖI bắt (`pp.startswith("/")`), và nếu gỡ chốt chuỗi thì
++    `resolve()` + `relative_to()` vẫn bắt. Không đột biến ĐƠN LẺ nào giết được ca này.
++    Nói thẳng chỗ phủ chồng còn hơn gán bừa nó cho một lớp rồi tưởng đã đo được lớp
++    ấy — ca cô lập chốt chuỗi là `t10` (ký tự `\\`), cô lập lớp chứa-trong-kho là `t11`
++    (symlink).
++    """
++    with tempfile.TemporaryDirectory() as td:
++        goc, chieu = _dung_kho(Path(td), spec_path="/etc/passwd")
++        rc, _, err = chay(CANONICAL, "check", chieu, "--root", goc)
++        _doi(RC_THAM_SO, rc, err, "spec_path tuyệt đối mà vẫn qua")
++
++
++@ca
++def t10_spec_path_leo_RA_NGOAI_kho_bi_CHAN():
++    """Đòi ĐÚNG `RC_THAM_SO`, không chỉ "khác 0".
++
++    Nếu chỉ đòi khác 0 thì ca xanh cả khi đường dẫn bị chặn vì lý do KHÁC (tệp
++    không tồn tại ⇒ `RC_NEO`), và khi ấy nó không còn đo chốt đường dẫn nữa.
++
++    Ký tự `\\` là ca đáng giá nhất trong danh sách: trên Linux nó là ký tự tên tệp
++    HỢP LỆ nên `PurePosixPath` KHÔNG coi là dấu phân cách — `relative_to` bên dưới
++    bỏ qua nó hoàn toàn. Chỉ chốt CHUỖI bắt được. Đó là lý do chốt chuỗi tồn tại
++    dù phần còn lại của nó chồng với `relative_to`.
++    """
++    for xau in ("../ngoai.md", "ops/../../ngoai.md", "..\\ngoai.md", "ops\\x.md"):
++        with tempfile.TemporaryDirectory() as td:
++            goc, chieu = _dung_kho(Path(td), spec_path=xau)
++            rc, _, err = chay(CANONICAL, "check", chieu, "--root", goc)
++            _doi(RC_THAM_SO, rc, err, f"spec_path={xau!r}")
++            _khong_traceback(err, f"spec_path={xau!r}")
++
++
++@ca
++def t11_spec_path_SYMLINK_ra_ngoai_bi_CHAN():
++    """`..` không phải hình dạng duy nhất: symlink cũng ra khỏi kho được.
++
++    Đây là lý do `kiem()` gọi `resolve()` TRƯỚC `relative_to`, chứ không chỉ soi
++    chuỗi đường dẫn. Bỏ `resolve()` thì ca này lọt mà mọi ca `..` vẫn xanh.
++    """
++    if os.name == "nt":
++        return
++    with tempfile.TemporaryDirectory() as td:
++        tmp = Path(td).resolve()
++        goc, chieu = _dung_kho(tmp)
++        lien_ket = goc / "ops" / "specs" / "lien-ket.md"
++
++        # Tệp NGOÀI phải có nội dung HỢP LỆ và bản chiếu khai ĐÚNG băm của nó.
++        # Không có bước này thì chốt SO BĂM bắt trước, và ca hoá ra đang đo chốt
++        # băm chứ không đo `resolve()` — nó sẽ sống sót qua đột biến gỡ `resolve()`
++        # và nói dối rằng nó có đo lớp ấy.
++        ngoai = tmp / "ngoai.md"
++        ngoai.write_text("packet_issue: 119\n", encoding="utf-8")
++        bam_ngoai = hashlib.sha256(ngoai.read_bytes()).hexdigest()
++        try:
++            lien_ket.symlink_to(ngoai)
++        except (OSError, NotImplementedError):
++            return
++
++        t = chieu.read_text(encoding="utf-8")
++        t = t.replace("spec_path: ops/specs/wp119-r1-spec.md",
++                      "spec_path: ops/specs/lien-ket.md")
++        cu = [d for d in t.splitlines() if d.startswith("spec_hash: ")][0]
++        t = t.replace(cu, f"spec_hash: {bam_ngoai}")
++        chieu.write_text(t, encoding="utf-8")
++
++        rc, _, err = chay(CANONICAL, "check", chieu, "--root", goc)
++        _doi(RC_THAM_SO, rc, err, "symlink trỏ RA NGOÀI kho mà vẫn qua")
++        _khong_traceback(err, "symlink ra ngoài kho")
++
++
++@ca
++def t12_spec_path_KHONG_CO_TEP_bi_CHAN():
++    with tempfile.TemporaryDirectory() as td:
++        goc, chieu = _dung_kho(Path(td), spec_path="ops/specs/khong-co.md")
++        rc, _, err = chay(CANONICAL, "check", chieu, "--root", goc)
++        _doi(RC_NEO, rc, err, "trỏ vào tệp không tồn tại mà vẫn qua")
++
++
++@ca
++def t13_spec_khong_khai_packet_issue_bi_CHAN():
++    with tempfile.TemporaryDirectory() as td:
++        goc, chieu = _dung_kho(Path(td), noi_dung_spec="# Spec không có trường issue\n")
++        rc, _, err = chay(CANONICAL, "check", chieu, "--root", goc)
++        _doi(RC_NOI_DUNG, rc, err, "spec thiếu packet_issue mà vẫn qua")
++
++
++@ca
++def t14_thieu_MOC_cat_than_bi_CHAN():
++    with tempfile.TemporaryDirectory() as td:
++        goc, chieu = _dung_kho(Path(td), co_moc=False)
++        rc, _, err = chay(CANONICAL, "check", chieu, "--root", goc)
++        _doi(RC_NOI_DUNG, rc, err, "không có mốc mà vẫn cắt được thân")
++
++
++@ca
++def t15_than_RONG_bi_CHAN():
++    with tempfile.TemporaryDirectory() as td:
++        goc, chieu = _dung_kho(Path(td), than="   \n\n")
++        rc, _, err = chay(CANONICAL, "check", chieu, "--root", goc)
++        _doi(RC_NOI_DUNG, rc, err, "thân rỗng mà vẫn qua — sẽ XOÁ TRẮNG thân issue")
++
++
++@ca
++def t16_tep_khong_doc_duoc_bao_RO_khong_traceback():
++    with tempfile.TemporaryDirectory() as td:
++        rc, _, err = chay(CANONICAL, "check", Path(td) / "khong-co.md", "--root", td)
++        _doi(RC_THAM_SO, rc, err, "tệp không tồn tại")
++        _khong_traceback(err, "tệp không tồn tại")
++
++
++# --- chốt QUYỀN SỞ HỮU (`guard`) — ba nhánh, mỗi nhánh một ca -------------------
++
++
++@ca
++def t17_guard_than_RONG_thi_CHO_ghi():
++    with tempfile.TemporaryDirectory() as td:
++        f = Path(td) / "cu.md"
++        f.write_text("   \n\n", encoding="utf-8")
++        rc, _, err = chay(CANONICAL, "guard", "--than-cu", f, "--issue", "119")
++        _doi(RC_OK, rc, err, "thân rỗng mà không cho ghi — packet sẽ kẹt")
++
++
++@ca
++def t18_guard_than_NGUOI_VIET_bi_CHAN():
++    """Ca đắt nhất của tệp này: chặn cửa xoá công của người khác."""
++    with tempfile.TemporaryDirectory() as td:
++        f = Path(td) / "cu.md"
++        f.write_text("# Ghi chú tay của chủ kho\n\nĐừng xoá tôi.\n", encoding="utf-8")
++        rc, _, err = chay(CANONICAL, "guard", "--than-cu", f, "--issue", "119")
++        _doi(RC_NOI_DUNG, rc, err, "GHI ĐÈ được văn bản người ta gõ tay")
++        if "dấu sở hữu" not in err:
++            raise AssertionError(f"thông điệp phải chỉ cách mở khoá, được {err.strip()!r}")
++
++
++@ca
++def t19_guard_than_CO_DAU_SO_HUU_thi_CHO_ghi():
++    with tempfile.TemporaryDirectory() as td:
++        f = Path(td) / "cu.md"
++        f.write_text(f"{DAU_SO_HUU} | spec_hash: abc -->\n\nbản cũ\n", encoding="utf-8")
++        rc, _, err = chay(CANONICAL, "guard", "--than-cu", f, "--issue", "119")
++        _doi(RC_OK, rc, err, "thân do chính cơ chế này đặt mà không ghi đè lại được")
++
++
++@ca
++def t20_guard_KHONG_nhan_dau_gia_mao_giua_than():
++    """Dấu phải ở ĐẦU thân, không phải nằm đâu đó giữa bài.
++
++    Không có chốt này thì chỉ cần nhắc tên dấu trong một câu văn là mở được cửa
++    ghi đè lên chính bài viết ấy.
++    """
++    with tempfile.TemporaryDirectory() as td:
++        f = Path(td) / "cu.md"
++        f.write_text(f"# Bài của người\n\nCơ chế dùng dấu {DAU_SO_HUU} --> để đánh dấu.\n",
++                     encoding="utf-8")
++        rc, _, err = chay(CANONICAL, "guard", "--than-cu", f, "--issue", "119")
++        _doi(RC_NOI_DUNG, rc, err, "dấu nằm GIỮA bài mà vẫn mở được cửa ghi đè")
++
++
++@ca
++def t21_body_TU_CHOI_ban_chieu_khong_hop_le():
++    """`body` không được in ra gì khi `check` sẽ chặn — nếu không, workflow có thể
++    lỡ dùng `body` mà bỏ `check` và ghi một thân chưa qua kiểm."""
++    with tempfile.TemporaryDirectory() as td:
++        goc, chieu = _dung_kho(Path(td), spec_hash="deadbeef")
++        rc, out, err = chay(CANONICAL, "body", chieu, "--root", goc)
++        if rc == RC_OK or out.strip():
++            raise AssertionError(f"body in ra thân cho bản chiếu KHÔNG hợp lệ: {out[:80]!r}")
++
++
++# --- đột biến: mỗi chốt một cái, giết ĐÚNG ca của nó ----------------------------
++#
++# Ca không chết được dưới đột biến của chính nó nghĩa là nó không đo cái nó khai.
++DOT_BIEN = {
++    "bo_kiem_bam_spec": (
++        '    if thuc != khai["spec_hash"]:',
++        "    if False:",
++        ["t06_bam_LECH_bi_CHAN"],
++    ),
++    # Chốt DẠNG băm KHÔNG bắt thêm ca nào — gỡ nó thì chốt SO BĂM vẫn chặn, `rc`
++    # không đổi. Nó chỉ đổi THÔNG ĐIỆP, nên ca của nó neo vào câu chữ.
++    "bo_kiem_dang_bam": (
++        '    if not SHA256.match(khai["spec_hash"]):',
++        "    if False:",
++        ["t05_bam_SAI_DANG_bi_CHAN_va_noi_DUNG_BENH"],
++    ),
++    "bo_kiem_packet_issue_khop_spec": (
++        "    if int(m.group(1)) != issue:",
++        "    if False:",
++        ["t07_packet_issue_LECH_giua_chieu_va_spec_bi_CHAN"],
++    ),
++    # BA LỚP ĐƯỜNG DẪN, ba đột biến RIÊNG — vì chúng CHỒNG nhau một phần và gộp lại
++    # thì không biết ca nào đo lớp nào.
++    #   · chốt chuỗi  : lớp DUY NHẤT bắt được ký tự `\` (PurePosixPath bỏ qua nó)
++    #   · relative_to : lớp THẬT chặn mọi đường leo ra ngoài
++    #   · resolve()   : lớp DUY NHẤT bắt được symlink
++    "bo_chan_ky_tu_va_dau_cham": (
++        '    if pp.startswith("/") or "\\\\" in pp or ".." in Path(pp).parts:',
++        "    if False:",
++        ["t10_spec_path_leo_RA_NGOAI_kho_bi_CHAN"],
++    ),
++    # `resolve()` và `relative_to()` là HAI NỬA của MỘT phép kiểm chứa-trong-kho:
++    # `resolve()` làm symlink lộ ra, `relative_to()` mới là cái từ chối. Gỡ nửa nào
++    # cũng mở đúng một lỗ, nên cả hai đột biến cùng giết `t11` — đó là kết quả ĐÚNG,
++    # không phải trùng lặp thừa. Giữ cả hai để chứng minh CẢ HAI câu lệnh đều gánh việc.
++    "bo_relative_to": (
++        "        f.relative_to(goc.resolve())",
++        "        pass",
++        ["t11_spec_path_SYMLINK_ra_ngoai_bi_CHAN"],
++    ),
++    "bo_resolve_nen_symlink_lot": (
++        "    f = (goc / pp).resolve()",
++        "    f = (goc / pp)",
++        ["t11_spec_path_SYMLINK_ra_ngoai_bi_CHAN"],
++    ),
++    "bo_kiem_than_rong": (
++        "    if not than.strip():",
++        "    if False:",
++        ["t15_than_RONG_bi_CHAN"],
++    ),
++    "bo_chot_quyen_so_huu": (
++        "    if t.startswith(DAU_SO_HUU):",
++        "    if True:",
++        ["t18_guard_than_NGUOI_VIET_bi_CHAN", "t20_guard_KHONG_nhan_dau_gia_mao_giua_than"],
++    ),
++    "chot_so_huu_nhan_dau_o_BAT_KY_dau": (
++        "    if t.startswith(DAU_SO_HUU):",
++        "    if DAU_SO_HUU in t:",
++        ["t20_guard_KHONG_nhan_dau_gia_mao_giua_than"],
++    ),
++}
++
++
++def _chay_bo(script: Path, chi_chay=None) -> dict:
++    ket = {}
++    for fn in CA:
++        if chi_chay and fn.__name__ not in chi_chay:
++            continue
++        try:
++            fn.__globals__["CANONICAL"] = script
++            fn()
++            ket[fn.__name__] = None
++        except Exception as ex:  # noqa: BLE001 — ca đỏ là dữ liệu, không phải sự cố
++            ket[fn.__name__] = f"{type(ex).__name__}: {ex}"
++    fn.__globals__["CANONICAL"] = HERE / "mirror_spec.py"
++    return ket
++
++
++def main() -> int:
++    goc_src = CANONICAL.read_text(encoding="utf-8")
++    hong_tong = 0
++
++    ket = _chay_bo(CANONICAL)
++    dat = sum(1 for v in ket.values() if v is None)
++    for ten, ly in ket.items():
++        if ly:
++            print(f"  ĐỎ  {ten}: {ly}")
++    print(f"nền: {dat}/{len(ket)} đạt")
++    hong_tong += len(ket) - dat
++
++    print("\ntự chứng minh suite KHÔNG RỖNG (gỡ chốt ⇒ ca tương ứng phải ĐỎ):")
++    with tempfile.TemporaryDirectory(prefix="mirror_spec_mut_") as td:
++        for ten_mut, (tim, thay, phai_chet) in DOT_BIEN.items():
++            if tim not in goc_src:
++                print(f"  ĐỎ  đột biến {ten_mut}: không tìm thấy mỏ neo {tim!r}")
++                hong_tong += 1
++                continue
++            d = Path(td) / ten_mut
++            d.mkdir(parents=True, exist_ok=True)
++            mut = d / "mirror_spec.py"
++            mut.write_text(goc_src.replace(tim, thay, 1), encoding="utf-8", newline="\n")
++            km = _chay_bo(mut, chi_chay=set(phai_chet))
++            song = [t for t in phai_chet if km.get(t) is None]
++            if song:
++                print(f"  ĐỎ  đột biến {ten_mut}: ca {song} VẪN XANH ⇒ ca đó không đo gì")
++                hong_tong += len(song)
++            else:
++                print(f"  ok  {ten_mut} → giết {len(phai_chet)}/{len(phai_chet)} ca: "
++                      f"{', '.join(phai_chet)}")
++
++    print(f"\nmirror_spec: {'ĐẠT' if hong_tong == 0 else f'{hong_tong} lỗi'}")
++    return 0 if hong_tong == 0 else 1
++
++
++if __name__ == "__main__":
++    sys.exit(main())

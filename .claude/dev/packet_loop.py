@@ -424,19 +424,77 @@ def _phang_ca_tep(raw: str):
     """
     # Gỡ cấu trúc TRẢI NHIỀU DÒNG trước: vòng lặp dưới chuẩn hoá theo từng dòng nên
     # không thấy được thứ bắc cầu qua hai dòng (lớp I4/I5).
-    phan, ban_do, vi_tri = [], [], 0
-    for so_dong, dong in _dong_sau_khi_go(raw):
-        n = _chuan_hoa(dong)
+    phang, khuc = _khuc_chuan(_dong_sau_khi_go(raw))
+    return phang, [(bat_dau, so_dong) for bat_dau, _het, so_dong, _n in khuc]
+
+
+
+_CO_CHU = re.compile(r"[^\W_]", re.UNICODE)
+_RE_DAU_DONG = re.compile(r"^\s*(?:#{1,6}|>+|[-*+]|\d+[.)])\s*")
+_RE_HANG_RAO = re.compile(r"^\s{0,3}(?:`{3,}|~{3,})")
+
+
+def _dong_khoi_ma(raw: str) -> frozenset:
+    """Số hiệu những dòng nằm TRONG khối mã rào (``` hoặc ~~~), kể cả dòng rào.
+
+    Đo trên dòng THÔ chứ không trên dòng đã chuẩn hoá: `_chuan_hoa("```")` trả
+    chuỗi RỖNG nên `_phang_ca_tep` bỏ qua nó — nhìn từ tầng đã chuẩn hoá thì
+    hàng rào không tồn tại. Đây đúng là chỗ lượt 7 lách được.
+    """
+    trong, mo_bang, ket = False, "", set()
+    for so_dong, dong in enumerate(raw.splitlines(), 1):
+        m = _RE_HANG_RAO.match(dong)
+        if m:
+            dau = m.group(0).strip()[0]
+            if not trong:
+                trong, mo_bang = True, dau
+                ket.add(so_dong)
+                continue
+            if dau == mo_bang:                # chỉ CÙNG loại rào mới đóng được
+                trong = False
+                ket.add(so_dong)
+                continue
+        if trong:
+            ket.add(so_dong)
+    return frozenset(ket)
+
+
+def _go_dau_dong(s: str) -> str:
+    """Gỡ dấu đầu dòng Markdown lặp tới hết (`> - `, `## `, `1. `)."""
+    truoc = None
+    while truoc != s:
+        truoc = s
+        s = _RE_DAU_DONG.sub("", s, count=1)
+    return s
+
+
+def _khuc_chuan(dong_sach):
+    """Nối các dòng ĐÃ GỠ DẤU ĐẦU DÒNG thành một chuỗi, kèm khúc của từng dòng.
+
+    VÌ SAO GỠ DẤU ĐẦU DÒNG Ở ĐÂY — lượt review 7 đóng được heading và bullet
+    nhưng ba ca trích dẫn vẫn lọt, và lý do KHÁC hẳn: `_chuan_hoa("> Người có")`
+    giữ nguyên dấu `>`, nên chuỗi phẳng ra `> người có > thẩm quyền` và cụm cấm
+    KHÔNG khớp một lần nào. Không phải miễn trừ tha nhầm — là scanner không thấy.
+    Đo được: `'người có thẩm quyền' in _phang_ca_tep('> Người có\n> thẩm quyền')`
+    trả `False`. Dấu `-` thì tình cờ bị `_PHAN_CACH` nuốt, `>` `#` `1.` thì không;
+    lỗ này chỉ tồn tại nhờ sự KHÔNG NHẤT QUÁN ấy.
+
+    Gỡ ở tầng phẳng hoá — dùng chung cho cả quét lẫn miễn trừ — thì hai nơi không
+    thể lệch nhau. Lệch nhau là đúng cái bẫy: miễn trừ tính offset trên một chuỗi,
+    quét tìm trên một chuỗi khác, và số dòng trong thông điệp lỗi trỏ sai chỗ.
+    """
+    phan, khuc, vi_tri = [], [], 0
+    for so_dong, dong in dong_sach:
+        n = _go_dau_dong(_chuan_hoa(dong))
         if not n:
             continue
         if phan:
             phan.append(" ")
             vi_tri += 1
-        ban_do.append((vi_tri, so_dong))
+        khuc.append((vi_tri, vi_tri + len(n), so_dong, n))
         phan.append(n)
         vi_tri += len(n)
-    return "".join(phan), ban_do
-
+    return "".join(phan), khuc
 
 
 def _duoc_tha_vi_ngat_dong(raw: str, kim: str) -> bool:
@@ -468,11 +526,57 @@ def _duoc_tha_vi_ngat_dong(raw: str, kim: str) -> bool:
     """
     # Dùng CHÍNH bản đã gỡ tag: nếu không, `Người có <b>thẩm quyền</b>` nằm gọn một
     # dòng nhưng bị tag cắt vụn sẽ được tha oan.
-    for _so_dong, dong in _dong_sau_khi_go(raw):
+    dong_sach = _dong_sau_khi_go(raw)
+    for _so_dong, dong in dong_sach:
         if kim in _chuan_hoa(dong):
             return False          # nằm gọn trong một dòng ⇒ chép doctrine, không tha
         if "|" in dong and kim in _chuan_hoa(dong.replace("|", " ")):
             return False          # ô bảng bị `|` cắt vụn vẫn là chép bảng
+
+    # ĐẾN ĐÂY cụm chỉ tồn tại nhờ bước NỐI DÒNG. Chưa đủ để tha: lượt review 7 đo
+    # được ba hình dạng ngắt dòng KHÔNG PHẢI văn xuôi mà bản trước vẫn tha —
+    #
+    #     ## Người có / thẩm quyền      (heading)     -> rc=0  LỌT
+    #     - Người có / ␠␠thẩm quyền     (bullet)      -> rc=0  LỌT
+    #     ```␤Người có␤thẩm quyền␤```   (code fence)  -> rc=0  LỌT
+    #
+    # — tức kẻ gian chỉ cần gõ Enter giữa cụm là qua cổng. Đó là fail-open, cùng
+    # HẠNG lỗi mà gen-4 mắc, chỉ khác hình dạng. AC 19 đòi tha ĐÚNG một thứ: cụm
+    # bị ngắt dòng **trong văn xuôi kể lại kết quả đo**. Nên thêm hai điều kiện,
+    # cả hai đo được, không cần hiểu nghĩa câu:
+    #
+    #   1. không dòng biên nào nằm trong khối mã — khối mã là chép NGUYÊN VĂN,
+    #      không bao giờ là lời kể;
+    #   2. dòng mở phải còn CHỮ trước mảnh cụm, và dòng đóng phải còn CHỮ sau nó,
+    #      sau khi đã gỡ dấu đầu dòng (`#`, `>`, `-`, `1.`). Văn xuôi bọc cụm ở cả
+    #      hai phía; heading/bullet đứng-một-mình thì không.
+    #
+    # GIỚI HẠN, ghi thẳng chứ không giấu: câu văn xuôi BẤT KỲ có cụm bị ngắt dòng
+    # vẫn được tha — `Ghi chú người có␤thẩm quyền đây.` lọt. Phân biệt nó với ca
+    # thật của `CLAUDE.md` cần hiểu NGHĨA, mà AC 19 chính là lệnh phải tha hạng
+    # đó. Đây là giá đã khai của miễn trừ, không phải lỗ bỏ sót.
+    trong_khoi_ma = _dong_khoi_ma(raw)
+    phang, ban_do_dong = _khuc_chuan(dong_sach)
+
+    def _khuc(off: int):
+        for bat_dau, ket_thuc, so_dong, n in ban_do_dong:
+            if bat_dau <= off < ket_thuc:
+                return bat_dau, so_dong, n
+        return None
+
+    tu = phang.find(kim)
+    while tu != -1:
+        mo = _khuc(tu)
+        dong_cuoi = _khuc(tu + len(kim) - 1)
+        if mo is None or dong_cuoi is None:
+            return False
+        if mo[1] in trong_khoi_ma or dong_cuoi[1] in trong_khoi_ma:
+            return False                      # (1) khối mã
+        truoc = _go_dau_dong(mo[2][: tu - mo[0]])
+        sau = dong_cuoi[2][tu + len(kim) - dong_cuoi[0] :]
+        if not _CO_CHU.search(truoc) or not _CO_CHU.search(sau):
+            return False                      # (2) không phải văn xuôi bọc hai phía
+        tu = phang.find(kim, tu + len(kim))
     return True
 
 

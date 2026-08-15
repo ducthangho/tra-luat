@@ -1147,7 +1147,17 @@ LOP_LACH = [
     # phân cách cũng gộp nó. Nên KHÔNG đột biến đơn lẻ nào giết được ca này, và
     # nó cố ý không nằm trong danh sách phải-chết của mutant nào: nói thẳng chỗ
     # phủ chồng còn hơn gán bừa cho một lớp rồi tưởng đã đo được lớp ấy.
-    ("nbsp_phu_hai_lop", "Ghi chú: local controller"),
+    # U+00A0 viết bằng ESCAPE chứ không phải ký tự trần. Ký tự trần trông hệt khoảng
+    # trắng thường trong mọi trình soạn thảo, nên một lần sửa dòng bên cạnh là gõ đè
+    # mất mà không ai thấy — ca sẽ lặng lẽ thôi đo lớp nó khai. Escape thì hỏng ồn ào.
+    #
+    # Tên lớp đổi `phu_hai_lop` → `phu_ba_lop` vì lời khai cũ SAI. Dựng đột biến đúng
+    # hai vế mà lời khai nêu (NFKC + `_PHAN_CACH`) thì ca VẪN XANH, và đường thứ ba
+    # lộ ra: `str.split()` không đối số tách theo khoảng trắng UNICODE, nên dòng cuối
+    # `_chuan_hoa` cũng nuốt U+00A0. Đây đúng là thứ ngoại lệ `PHU_NHIEU_LOP` che
+    # mất — nó GHI NHẬN lời khai "hai đường phủ" mà không bao giờ KIỂM, nên lời khai
+    # sai sống sót. Đòi có đột biến thì lời khai sai chết ngay lượt đầu.
+    ("nbsp_phu_ba_lop", "Ghi chú: local\u00a0controller"),
     ("phan_cach_en_dash", "Ghi chú: same–failure–limit"),
     ("phan_cach_hyphen", "Ghi chú: same-failure-limit"),
     # B · ký tự định dạng `Cf` — không hiển thị nhưng cắt được chuỗi khớp.
@@ -1192,6 +1202,34 @@ LOP_LACH = [
     ("cum_don_gach_dau_dong", "- Người có thẩm quyền"),
     ("cum_don_in_dam", "**Người có thẩm quyền**"),
     ("cum_don_dinh_nghia", "Người có thẩm quyền: người cấp lease"),
+    # --- K · cụm đứng một mình bị NGẮT DÒNG. Lượt 7 đo được: chỉ cần gõ Enter giữa
+    # cụm là qua cổng, vì miễn trừ AC 19 của generation 5 tha MỌI hình dạng ngắt
+    # dòng chứ không riêng văn xuôi. Danh sách đóng đo được 18 hình dạng lọt, trong
+    # đó reviewer nêu 4; ba ca trích dẫn thì lọt vì lý do KHÁC — xem `cum_don_trich_dan`.
+    ("cum_don_heading_ngat_dong", "## Người có\nthẩm quyền"),
+    ("cum_don_gach_dau_dong_ngat_dong", "- Người có\n  thẩm quyền"),
+    ("cum_don_danh_sach_so_ngat_dong", "1. Người có\n   thẩm quyền"),
+    ("cum_don_dong_tran_ngat_dong", "Người có\nthẩm quyền"),
+    # Hai ca fence CỐ TÌNH có chữ ở cả hai phía cụm. Nếu để cụm đứng trần trong
+    # fence thì chốt VĂN XUÔI đã bắt rồi, và đột biến gỡ chốt KHỐI MÃ sẽ không giết
+    # được ca — ca mất độ phân giải, đúng bệnh `ac18-mutation-not-per-class`. Có chữ
+    # hai phía thì chỉ còn chốt khối mã đứng giữa, nên nó đo đúng thứ nó khai.
+    ("cum_don_code_fence",
+     "```\nBảng vai trò: người có\nthẩm quyền là người cấp lease.\n```"),
+    ("cum_don_code_fence_ngoac_song",
+     "~~~\nBảng vai trò: người có\nthẩm quyền là người cấp lease.\n~~~"),
+    ("cum_don_o_bang_html_ngat_dong",
+     "<table><tr><td>Người có\nthẩm quyền</td></tr></table>"),
+    ("cum_don_chi_co_chu_truoc", "Vai trò: người có\nthẩm quyền"),
+    ("cum_don_chi_co_chu_sau", "Người có\nthẩm quyền là vai trò."),
+    # Ba ca dưới lọt vì `_chuan_hoa` GIỮ dấu `>`, nên chuỗi phẳng ra
+    # `> người có > thẩm quyền` và cụm cấm không khớp một lần nào — scanner KHÔNG
+    # THẤY, chứ không phải miễn trừ tha nhầm. Dấu `-` tình cờ bị `_PHAN_CACH` nuốt,
+    # `>` `#` `1.` thì không: lỗ tồn tại nhờ đúng sự không nhất quán ấy. Reviewer
+    # lượt 7 không nêu họ này; danh sách đóng tìm ra.
+    ("cum_don_trich_dan_ngat_dong", "> Người có\n> thẩm quyền"),
+    ("cum_don_trich_dan_long_hai_cap", ">> Người có\n>> thẩm quyền"),
+    ("cum_don_heading_long_trich_dan", "> ## Người có\n> thẩm quyền"),
     # Trước là ca bắt-oan `oan_term_giua_cau` của generation 4. Chuyển sang đây:
     # AC 2 đòi bơm một cụm trong danh sách là phải ĐỎ, và một adapter viết câu này
     # đang CHÉP nội dung bảng vai trò §2 chứ không TRỎ về protocol. AC 19 chỉ đòi
@@ -1249,6 +1287,21 @@ LOP_BAT_OAN = [
      "Đọc [ghi chú](docs/a(b).md) và [khác](docs/c.md) — đều vô hại."),
     ("oan_shell_chuyen_huong",
      "Chạy `a < b.txt > c.txt` rồi so `x <= y` — không phải tag HTML."),
+    # --- ca bắt-oan cho họ K của generation 6 ------------------------------------
+    # Bản vá lượt 7 thu miễn trừ về "văn xuôi BỌC HAI PHÍA và không nằm trong khối
+    # mã". Bốn ca dưới là chiều ngược của đúng chốt ấy: cùng bị ngắt dòng, cùng nằm
+    # trong bullet/danh sách/trích dẫn, nhưng CÓ chữ ở cả hai phía ⇒ vẫn phải tha.
+    # Thu miễn trừ quá tay thì chính bốn ca này đỏ lên.
+    ("oan_van_xuoi_ngat_dong_trong_bullet",
+     "- Kết quả đo cho thấy người có\n  thẩm quyền vẫn qua cổng bình thường."),
+    ("oan_van_xuoi_ngat_dong_trong_danh_sach_so",
+     "1. Bản đo ghi rằng người có\n   thẩm quyền vẫn qua cổng bình thường."),
+    ("oan_van_xuoi_ngat_dong_trong_trich_dan",
+     "> Bản đo ghi rằng người có\n> thẩm quyền không bị chặn ở bước này."),
+    # Khối mã bị LOẠI khỏi miễn trừ. Chốt ấy không được biến mọi khối mã thành vi
+    # phạm: khối mã KHÔNG chứa cụm cấm vẫn phải xanh.
+    ("oan_code_fence_vo_hai",
+     "```\nchay: python tl.py --json\nket qua: rc=0\n```"),
 ]
 
 # --- ÁNH XẠ LỚP → CA BẮT-OAN — AC 19 đòi "ít nhất một ca bắt-oan cho MỖI lớp" ----
@@ -1270,7 +1323,7 @@ ANH_XA_LOP_BAT_OAN = {
     "nfkc_solidus_toan_rong": "oan_dau_cau_toan_rong",
     "nfkc_gach_duoi_toan_rong": "oan_tu_gach_noi",
     "nfkc_vach_dung_toan_rong": "oan_bang_khac",
-    "nbsp_phu_hai_lop": "oan_tieng_viet_du_dau",
+    "nbsp_phu_ba_lop": "oan_tieng_viet_du_dau",
     "phan_cach_en_dash": "oan_tu_gach_noi",
     "phan_cach_hyphen": "oan_tu_gach_noi",
     "cf_zwnj": "oan_tieng_viet_du_dau",
@@ -1303,6 +1356,21 @@ ANH_XA_LOP_BAT_OAN = {
     "cum_don_in_dam": "oan_term_ngat_dong",
     "cum_don_dinh_nghia": "oan_term_ngat_dong",
     "cum_don_cau_van_xuoi_mot_dong": "oan_claude_md_master",
+    # Họ K — ca bắt-oan phải là hình dạng ĐỐI XỨNG: cùng bị ngắt dòng, nhưng LÀ văn
+    # xuôi kể lại kết quả đo. Nếu bản vá thu miễn trừ quá tay thì chính những ca này
+    # đỏ lên, nên chúng đo được hướng ngược của cùng một chốt.
+    "cum_don_heading_ngat_dong": "oan_claude_md_master",
+    "cum_don_gach_dau_dong_ngat_dong": "oan_van_xuoi_ngat_dong_trong_bullet",
+    "cum_don_danh_sach_so_ngat_dong": "oan_van_xuoi_ngat_dong_trong_danh_sach_so",
+    "cum_don_dong_tran_ngat_dong": "oan_term_ngat_dong",
+    "cum_don_code_fence": "oan_code_fence_vo_hai",
+    "cum_don_code_fence_ngoac_song": "oan_code_fence_vo_hai",
+    "cum_don_o_bang_html_ngat_dong": "oan_tag_ngat_dong_vo_hai",
+    "cum_don_chi_co_chu_truoc": "oan_claude_md_master",
+    "cum_don_chi_co_chu_sau": "oan_term_ngat_dong",
+    "cum_don_trich_dan_ngat_dong": "oan_van_xuoi_ngat_dong_trong_trich_dan",
+    "cum_don_trich_dan_long_hai_cap": "oan_van_xuoi_ngat_dong_trong_trich_dan",
+    "cum_don_heading_long_trich_dan": "oan_van_xuoi_ngat_dong_trong_trich_dan",
 }
 
 
@@ -1835,12 +1903,60 @@ MUTANTS = {
     ),
     # Nới miễn trừ trở lại bề rộng SAI của generation 4 (tha mọi thứ không nằm gọn
     # trong một dòng CÓ `|`) ⇒ mọi lớp "đứng một mình" phải ĐỎ lại.
+    # PHỐI HỢP hai vế, và lý do phải phối hợp là bài học của lượt 7. Bản đơn chỉ gỡ
+    # chốt "nằm gọn trong một dòng"; sau bản vá lượt 7 thì chốt VĂN XUÔI BỌC HAI PHÍA
+    # cũng bắt được đúng những ca ấy, nên gỡ một vế thôi thì ca vẫn XANH và đột biến
+    # mất răng — đã đo: 5/6 ca đích sống sót. Muốn nới miễn trừ về ĐÚNG bề rộng sai
+    # của generation 4 thì phải gỡ CẢ HAI vế.
     "noi_mien_tru_nhu_generation_4": (
-        "        if kim in _chuan_hoa(dong):\n            return False",
-        "        if False:\n            return False",
+        ("        if kim in _chuan_hoa(dong):\n            return False",
+         "        if not _CO_CHU.search(truoc) or not _CO_CHU.search(sau):"),
+        ("        if False:\n            return False",
+         "        if False:"),
         ["ac18_cum_don_heading", "ac18_cum_don_dong_tran",
          "ac18_cum_don_gach_dau_dong", "ac18_cum_don_in_dam",
-         "ac18_cum_don_dinh_nghia", "ac18_cum_don_cau_van_xuoi_mot_dong"],
+         "ac18_cum_don_dinh_nghia", "ac18_cum_don_cau_van_xuoi_mot_dong",
+         # Họ K bị chính chốt VĂN XUÔI BỌC HAI PHÍA bắt: nới miễn trừ về bề rộng
+         # generation 4 thì tất cả lọt lại.
+         "ac18_cum_don_heading_ngat_dong", "ac18_cum_don_gach_dau_dong_ngat_dong",
+         "ac18_cum_don_danh_sach_so_ngat_dong", "ac18_cum_don_dong_tran_ngat_dong",
+         "ac18_cum_don_chi_co_chu_truoc", "ac18_cum_don_chi_co_chu_sau",
+         "ac18_cum_don_o_bang_html_ngat_dong"],
+    ),
+    # Chốt khối mã của lượt 7, đứng RIÊNG để có độ phân giải.
+    "bo_loai_tru_khoi_ma": (
+        "        if mo[1] in trong_khoi_ma or dong_cuoi[1] in trong_khoi_ma:",
+        "        if False:",
+        ["ac18_cum_don_code_fence", "ac18_cum_don_code_fence_ngoac_song"],
+    ),
+    # Chốt gỡ dấu đầu dòng ở tầng phẳng hoá — thiếu nó thì `>` phá khớp hoàn toàn.
+    "bo_go_dau_dong_khi_phang_hoa": (
+        "        n = _go_dau_dong(_chuan_hoa(dong))",
+        "        n = _chuan_hoa(dong)",
+        ["ac18_cum_don_trich_dan_ngat_dong", "ac18_cum_don_trich_dan_long_hai_cap",
+         "ac18_cum_don_heading_long_trich_dan"],
+    ),
+    # HAI ĐỘT BIẾN PHỐI HỢP thay cho ngoại lệ `PHU_NHIEU_LOP` đã bỏ (xem
+    # `_cap_thay_the`). Mỗi cái gỡ ĐÚNG hai đường cùng phủ một lớp, không hơn.
+    # BA vế, không phải hai. Khai ban đầu là "hai đường phủ" (NFKC + `_PHAN_CACH`);
+    # dựng đột biến hai vế thì ca VẪN XANH, và đường thứ ba lộ ra: `str.split()`
+    # không đối số tách theo khoảng trắng UNICODE, nên `" ".join(text.split())` ở
+    # dòng cuối `_chuan_hoa` cũng nuốt U+00A0. Đo được: `'a\\xa0b'.split()` →
+    # `['a', 'b']`. Đây chính là giá trị của việc ĐÒI có đột biến thay vì cho khai
+    # ngoại lệ — lời khai "hai đường" sai, và chỉ đột biến mới phát hiện ra.
+    "ha_NFKC_va_bo_moi_duong_gop_nbsp": (
+        ('unicodedata.normalize("NFKC", text)',
+         ".translate(_PHAN_CACH)",
+         'return " ".join(text.split())'),
+        ('unicodedata.normalize("NFC", text)',
+         "",
+         'return " ".join(re.split(r"[ \\t\\n\\r\\f\\v]+", text)).strip()'),
+        ["ac18_nbsp_phu_ba_lop"],
+    ),
+    "ha_NFKC_va_bo_casefold": (
+        ('unicodedata.normalize("NFKC", text)', "text.casefold().translate(_DONG_TU)"),
+        ('unicodedata.normalize("NFC", text)', "text.translate(_DONG_TU)"),
+        ["ac18_nfkc_ligature_ff"],
     ),
     # Hai chốt của `void-reviewing-accepts-attempt-zero`, hai đột biến RỜI NHAU.
     "bo_void_roi_reviewing": (
@@ -1880,14 +1996,12 @@ MUTANTS = {
 # Ca được PHỦ BỞI NHIỀU LỚP nên không đột biến ĐƠN LẺ nào giết được. Khai tường
 # minh kèm lý do ĐO ĐƯỢC — nói thẳng chỗ phủ chồng còn hơn gán bừa cho một lớp rồi
 # tưởng đã đo được lớp ấy, và còn hơn để ca nằm ngoài mọi danh sách như generation 4.
-PHU_NHIEU_LOP = {
-    "ac18_nbsp_phu_hai_lop":
-        "NFKC gộp U+00A0 về khoảng trắng, và phép gộp phân cách cũng gộp nó — "
-        "gỡ một lớp thì lớp kia vẫn bắt",
-    "ac18_nfkc_ligature_ff":
-        "NFKC gấp ligature, và `str.casefold()` ĐỘC LẬP cũng gấp ligature "
-        "(đã đo: 'ﬀ'.casefold() == 'ff') — hạ NFKC về NFC không đủ để ca này đỏ",
-}
+# `PHU_NHIEU_LOP` ĐÃ BỎ. Nó từng miễn chốt AC 18 cho `ac18_nbsp_phu_ba_lop` và
+# `ac18_nfkc_ligature_ff` với lý do "hai đường cùng phủ nên đột biến đơn không giết
+# được". Cross-review lượt 7 bác: lý do ấy đúng, nhưng nó giải thích vì sao đột biến
+# ĐƠN không đủ, chứ không miễn được yêu cầu phải CÓ đột biến. Thay bằng hai đột biến
+# PHỐI HỢP gỡ đúng hai đường phủ của từng lớp — xem `_cap_thay_the`. Giờ KHÔNG lớp
+# nào trong `LOP_LACH` được miễn, và chốt dưới không còn cửa ngoại lệ để lách.
 
 
 # Đối chứng KHÁC HỌ: ca thuộc tầng mà một đột biến ở tầng kia KHÔNG được đụng tới.
@@ -1897,6 +2011,34 @@ DOI_CHUNG_DOCTRINE = ("doctrine_scan_sach_xanh", "ac18_nfkc_hai_cham_toan_rong",
                       "ac19_oan_claude_md_master")
 DOI_CHUNG_MAY_TRANG_THAI = ("lease_hop_le_thi_mo_duoc_luot", "transition_hop_le_rc0",
                             "cap_lan_4_thoat_3")
+
+
+def _cap_thay_the(tim, thay):
+    """Chuẩn hoá một đột biến về DANH SÁCH cặp `(tìm, thay)`.
+
+    Vì sao cần đột biến PHỐI HỢP — cross-review lượt 7 bắt đúng chỗ này. AC 18 đòi
+    *mỗi lớp* có một đột biến giết đúng ca của nó. Nhưng có lớp được HAI đường
+    trong `_chuan_hoa` cùng phủ:
+
+      `ac18_nbsp_phu_ba_lop`  — NFKC gộp U+00A0, và `_PHAN_CACH` cũng gộp nó;
+      `ac18_nfkc_ligature_ff`  — NFKC gấp `ﬀ`, và `casefold()` ĐỘC LẬP cũng gấp.
+
+    Gỡ một đường thì đường kia vẫn bắt, nên đột biến đơn không giết được ca —
+    generation 5 xử lý bằng cách KHAI NGOẠI LỆ (`PHU_NHIEU_LOP`) và coi lớp có mặt
+    trong danh sách ngoại lệ là đạt. Reviewer bác đúng: lý do phủ chồng giải thích
+    vì sao đột biến ĐƠN không giết được, nhưng không thay thế được yêu cầu phải CÓ
+    đột biến. Khai ngoại lệ là hạ chuẩn so với câu chữ spec.
+
+    Đường ra không phải ngoại lệ mà là đột biến MẠNH VỪA ĐỦ: gỡ ĐÚNG hai đường phủ
+    của lớp ấy, không gỡ thêm gì. Ca đích chết, và đối chứng khác họ vẫn sống —
+    tức đột biến vẫn nhắm đúng tầng. `PHU_NHIEU_LOP` do đó bị BỎ HẲN, không còn
+    lớp nào trong `LOP_LACH` được miễn.
+    """
+    if isinstance(tim, str):
+        return [(tim, thay)]
+    if len(tim) != len(thay):
+        raise AssertionError(f"đột biến phối hợp lệch số vế: {len(tim)} ≠ {len(thay)}")
+    return list(zip(tim, thay))
 
 
 def _la_ho_doctrine(ten: str) -> bool:
@@ -1989,14 +2131,19 @@ def main() -> int:
         # không nhắm đúng tầng nó khai.
         print("\ntự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH):")
         for ten_mut, (tim, thay, phai_chet) in MUTANTS.items():
-            if tim not in goc:
-                print(f"  ĐỎ  đột biến {ten_mut}: không tìm thấy mỏ neo {tim!r}")
-                that_bai_tong += 1
+            cap = _cap_thay_the(tim, thay)
+            thieu = [t for t, _ in cap if t not in goc]
+            if thieu:
+                print(f"  ĐỎ  đột biến {ten_mut}: không tìm thấy mỏ neo {thieu!r}")
+                that_bai_tong += len(thieu)
                 continue
             mut_dir = tmp / f"mut_{ten_mut}"
             mut_dir.mkdir(parents=True, exist_ok=True)
             mut = mut_dir / "packet_loop.py"
-            mut.write_text(goc.replace(tim, thay, 1), encoding="utf-8", newline="\n")
+            than = goc
+            for t, th in cap:
+                than = than.replace(t, th, 1)
+            mut.write_text(than, encoding="utf-8", newline="\n")
             doi_chung = _doi_chung_khac_ho(phai_chet)
             ket_mut = chay_suite(mut, mut_dir, chi_chay=set(phai_chet) | set(doi_chung))
             song = [t for t in phai_chet if ket_mut.get(t) is None]
@@ -2015,7 +2162,7 @@ def main() -> int:
         # --- 4. MỖI LỚP LÁCH phải có đột biến của nó -------------------------
         #
         # AC 18 nói về LỚP LÁCH: *"Mỗi lớp trong danh sách phải có một ca phản chứng
-        # và một đột biến giết đúng ca đó."* Generation 4 để `nbsp_phu_hai_lop` ngoài
+        # và một đột biến giết đúng ca đó."* Generation 4 để `nbsp_phu_ba_lop` ngoài
         # mọi danh sách phải-chết mà không ai thấy — chốt này làm chuyện đó không im
         # lặng được nữa.
         #
@@ -2031,15 +2178,18 @@ def main() -> int:
         print("\nAC 18 — mỗi LỚP LÁCH phải có đột biến của nó:")
         co_dot_bien = {t for _, (_, _, ds) in MUTANTS.items() for t in ds}
         ten_ca_lop = [f"ac18_{t}" for t, _ in LOP_LACH]
-        mo_coi = [t for t in ten_ca_lop if t not in co_dot_bien and t not in PHU_NHIEU_LOP]
+        # KHÔNG còn cửa ngoại lệ: mọi lớp trong `LOP_LACH` phải có một đột biến giết
+        # được ca của nó. Lớp bị nhiều đường cùng phủ thì dùng đột biến PHỐI HỢP, chứ
+        # không được khai miễn (bài học lượt 7 — xem `_cap_thay_the`).
+        mo_coi = [t for t in ten_ca_lop if t not in co_dot_bien]
         if mo_coi:
-            print(f"  ĐỎ  {len(mo_coi)} lớp KHÔNG đột biến nào giết và KHÔNG khai phủ chồng: "
-                  f"{mo_coi}")
+            print(f"  ĐỎ  {len(mo_coi)} lớp KHÔNG đột biến nào giết: {mo_coi}")
             that_bai_tong += len(mo_coi)
         else:
-            print(f"  ok  {len(ten_ca_lop)} lớp lách: "
-                  f"{len([t for t in ten_ca_lop if t in co_dot_bien])} có đột biến riêng · "
-                  f"{len([t for t in ten_ca_lop if t in PHU_NHIEU_LOP])} khai PHỦ CHỒNG kèm lý do")
+            phoi_hop = sum(1 for _t, (tim, _th, _d) in MUTANTS.items()
+                           if not isinstance(tim, str))
+            print(f"  ok  {len(ten_ca_lop)} lớp lách đều có đột biến giết · "
+                  f"{phoi_hop} đột biến PHỐI HỢP · 0 ngoại lệ")
 
     print(f"\nTỔNG: {'ĐẠT' if that_bai_tong == 0 else f'{that_bai_tong} lỗi'}")
     return 0 if that_bai_tong == 0 else 1

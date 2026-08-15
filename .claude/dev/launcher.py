@@ -1820,6 +1820,22 @@ def _do_github(ws: str | None) -> tuple[str, str]:
             + " · REST truc tiep co the bi proxy chan (403) — dung cong cu MCP github")
 
 
+_RE_NANG_LUC_HOOK = re.compile(r"^#\s*hook-nang-luc:\s*(.+)$", re.MULTILINE)
+
+
+def _nang_luc_hook(noi_dung: str) -> set:
+    """Đọc tập tên năng lực hook khai trong `# hook-nang-luc: …`.
+
+    Hook CŨ không có dòng này ⇒ trả tập RỖNG ⇒ thiếu MỌI năng lực của master. Đó đúng
+    là điều cần nói về một nhánh packet rẽ từ base cũ, và là lý do không cần đánh số
+    phiên bản: vắng mặt tự nó đã mang đủ nghĩa.
+    """
+    ra = set()
+    for m in _RE_NANG_LUC_HOOK.finditer(noi_dung):
+        ra.update(t for t in m.group(1).split() if t)
+    return ra
+
+
 def _do_hook_cu(ws: str | None) -> tuple[str, str]:
     """Hook phiên đang checkout có CŨ HƠN bản trên nhánh chính không?
 
@@ -1837,6 +1853,19 @@ def _do_hook_cu(ws: str | None) -> tuple[str, str]:
     công cụ lẫn hook phiên". Cảnh báo bằng CHỮ không chặn được ai — nên nay đo bằng
     MÁY: so băm hook đang có với hook trên `origin/master`.
 
+    ĐO THEO NĂNG LỰC, KHÔNG THEO BĂM TOÀN TỆP. Bản trước so `sha256` cả tệp và
+    cross-review bác đúng: sửa một dấu phẩy trong chú thích cũng làm chốt đỏ, mà chốt
+    đỏ vì lý do vô hại là chốt sẽ bị bỏ qua. Câu hỏi đúng không phải "hai tệp có khác
+    nhau không" mà là **"bản đang chạy có THIẾU thứ gì không"**.
+
+    Cũng KHÔNG dùng quan hệ tổ tiên commit — reviewer nêu thẳng và đúng: chính nhánh
+    packet CŨ mới là thứ cần cảnh báo, mà nó LÀ tổ tiên hợp lệ của master. Tổ tiên tính
+    không phân biệt được "cũ nhưng đủ" với "cũ và thiếu".
+
+    Hợp đồng là dòng `# hook-nang-luc: <tên> <tên> …` trong chính hook. So TẬP TÊN:
+    thiếu tên nào so với master thì báo đúng tên đó. Hook có THÊM năng lực so với master
+    (nhánh mới hơn) KHÔNG phải lỗi.
+
     KHÔNG gọi mạng. `git show` đọc ref đã fetch; chưa có ref thì nói KHONG_DO_DUOC
     chứ không đoán — một chốt không đo được phải nói là không đo được.
     """
@@ -1845,18 +1874,25 @@ def _do_hook_cu(ws: str | None) -> tuple[str, str]:
     duong = Path(ws) / ".claude" / "hooks" / "session-start.sh"
     if not duong.exists():
         return ("CHUA_XAC_THUC", "cay nay KHONG co .claude/hooks/session-start.sh")
-    dang_co = hashlib.sha256(duong.read_bytes()).hexdigest()
     rc, ra, _ = _git(ws, "show", "origin/master:.claude/hooks/session-start.sh")
     if rc != 0 or not ra:
         return ("KHONG_DO_DUOC",
                 "chua co origin/master trong cay nay — `git fetch origin master` roi do lai")
-    tren_master = hashlib.sha256(ra.encode("utf-8")).hexdigest()
-    if dang_co == tren_master:
-        return ("DUNG_DUOC", "hook khop origin/master")
+    cua_master = _nang_luc_hook(ra)
+    if not cua_master:
+        # Master chưa khai năng lực nào ⇒ không có gì để so. Nói thẳng là không đo
+        # được, đừng tụt về so băm: tụt về sẽ dựng lại đúng cái chốt vừa bị bác.
+        return ("KHONG_DO_DUOC",
+                "hook tren origin/master chua co dong `# hook-nang-luc:` de doi chieu")
+    dang_co = _nang_luc_hook(duong.read_text(encoding="utf-8", errors="replace"))
+    thieu = sorted(cua_master - dang_co)
+    if not thieu:
+        them = sorted(dang_co - cua_master)
+        return ("DUNG_DUOC", "du nang luc so voi master"
+                + (f" (+{','.join(them)} moi hon)" if them else ""))
     return ("CHUA_XAC_THUC",
-            f"hook LECH origin/master (dang_co={dang_co[:8]} master={tren_master[:8]}) "
-            f"— nhanh nay co the THIEU chot ma master da co; lay hook tu master truoc "
-            f"khi ket luan ve moi truong")
+            f"hook dang checkout THIEU nang luc: {', '.join(thieu)} — nhanh nay ra tu "
+            f"base cu hon; lay hook tu master truoc khi ket luan ve moi truong")
 
 
 KHA_NANG = [

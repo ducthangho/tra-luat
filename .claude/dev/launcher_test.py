@@ -2017,6 +2017,65 @@ def t87_khong_duoc_xuat_digest_on_dinh_cua_gia_tri_bien():
          "nhan noi bo GIONG NHAU giua hai tien trinh — khoa khong ngau nhien, oracle con song")
 
 
+@ca
+def t88_hook_phien_do_theo_NANG_LUC_khong_theo_bam_toan_tep():
+    """Chốt `hook-phien` phải im khi khác biệt VÔ HẠI, và kêu khi THIẾU năng lực.
+
+    Bản trước so `sha256` cả tệp; cross-review bác đúng: sửa một dấu phẩy trong chú
+    thích cũng làm chốt đỏ, mà chốt đỏ vì lý do vô hại là chốt sẽ bị bỏ qua.
+
+    Reviewer cũng loại sẵn đường chữa dễ nghĩ nhất: quan hệ TỔ TIÊN commit KHÔNG đủ,
+    vì chính nhánh packet cũ mới là thứ cần cảnh báo mà nó LÀ tổ tiên hợp lệ của
+    master. Nên hợp đồng là TẬP TÊN NĂNG LỰC khai trong chính hook.
+
+    Ca này khoá cả hai chiều — im khi vô hại, kêu khi thiếu — vì chữa một chiều bằng
+    cách nới chiều kia là đúng thứ con lắc doctrine của kho đã dạy.
+    """
+    m = _tai_launcher_thu()
+    MASTER = ("#!/bin/bash\n"
+              "# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung\n"
+              "echo hi\n")
+
+    def do(hook_cuc_bo, hook_master=MASTER):
+        d = Path(tempfile.mkdtemp())
+        (d / ".claude/hooks").mkdir(parents=True)
+        (d / ".claude/hooks/session-start.sh").write_text(hook_cuc_bo, encoding="utf-8")
+        m._git = lambda ws, *a: ((0, hook_master, "") if hook_master else (1, "", "x"))
+        return m._do_hook_cu(str(d))
+
+    tt, _ = do(MASTER)
+    bang(tt == "DUNG_DUOC", f"hook y het master phai xanh, duoc {tt}")
+
+    # ĐÂY LÀ CA REVIEWER NÊU: khác biệt vô hại KHÔNG được làm đỏ.
+    tt, _ = do(MASTER.replace("echo hi", "echo hi  # chu thich vo hai\n# them dau phay,"))
+    bang(tt == "DUNG_DUOC", f"doi CHU THICH khong duoc lam do, duoc {tt}")
+
+    tt, mo_ta = do("#!/bin/bash\n# hook-nang-luc: rg-bat-buoc doctor-kha-dung\necho hi\n")
+    bang(tt == "CHUA_XAC_THUC", f"thieu nang luc phai do, duoc {tt}")
+    bang("codex-auth-restore" in mo_ta, f"phai NEU TEN nang luc thieu, duoc {mo_ta!r}")
+
+    # Hook cũ của nhánh packet: không có dòng khai ⇒ thiếu TẤT CẢ.
+    tt, mo_ta = do("#!/bin/bash\necho hi\n")
+    bang(tt == "CHUA_XAC_THUC", f"hook cu khong khai gi phai do, duoc {tt}")
+    bang(all(x in mo_ta for x in ("codex-auth-restore", "rg-bat-buoc", "doctor-kha-dung")),
+         f"phai neu du ba nang luc thieu, duoc {mo_ta!r}")
+
+    # Hook MỚI HƠN master không phải lỗi.
+    tt, _ = do(MASTER.replace("doctor-kha-dung", "doctor-kha-dung dieu-moi"))
+    bang(tt == "DUNG_DUOC", f"hook moi hon master phai xanh, duoc {tt}")
+
+    # Master chưa khai ⇒ nói KHÔNG ĐO ĐƯỢC, KHÔNG được tụt về so băm.
+    tt, _ = do(MASTER, "#!/bin/bash\necho hi\n")
+    bang(tt == "KHONG_DO_DUOC", f"master chua khai thi phai KHONG_DO_DUOC, duoc {tt}")
+
+    # Và hook THẬT của kho phải khai đủ ba năng lực — nếu ai xoá dòng đó thì ca này đỏ.
+    that = Path(__file__).resolve().parents[2] / ".claude/hooks/session-start.sh"
+    if that.exists():
+        nl = m._nang_luc_hook(that.read_text(encoding="utf-8", errors="replace"))
+        bang({"codex-auth-restore", "rg-bat-buoc", "doctor-kha-dung"} <= nl,
+             f"hook THAT cua kho khai thieu nang luc: {sorted(nl)}")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -2032,6 +2091,48 @@ DOT_BIEN = [
       ('if rc != 0 or not top:', 'if rc != 0:'),
       ('if rc != 0 or not ref:', 'if rc != 0:')],
      ["t03_git_gia_thoat_0_im_lang_van_bi_chan"]),
+    # --- Nam dot bien duoi day noi cac ca moi cua dot moi-truong vao bang, theo dung
+    # muc cross-review neu: "ba ca t84/t85/t86 chua duoc noi vao DOT_BIEN, standard
+    # suite van khoa hanh vi nhung chua duoc CUONG CHE tu dong". Kiem bang tay thi
+    # dung mot lan roi tan; nam vao bang thi moi lan chay deu doi.
+    #
+    # `bo_hmac_tra_ve_sha256_tran` dung DOI chuoi: chi tra `_van_tay` ve sha256 tran
+    # thi dau ra van khong chua digest (vi da bo truong `van_tay`), nen phai dung lai
+    # CA HAI nua cua lo hong cu moi tai hien duoc oracle.
+    ("bo_hmac_tra_ve_sha256_tran_va_xuat_lai_van_tay",
+     [('return hmac.new(_KHOA_PHIEN, v.encode("utf-8", "replace"),\n'
+       '                    hashlib.sha256).hexdigest()[:8]',
+       'return hashlib.sha256(v.encode("utf-8", "replace")).hexdigest()[:8]'),
+      ('"nhom": thuoc_nhom.get(t, ""),',
+       '"nhom": thuoc_nhom.get(t, ""), "van_tay": _van_tay(os.environ.get(t, "")),')],
+     ["t87_khong_duoc_xuat_digest_on_dinh_cua_gia_tri_bien"]),
+    ("bo_loc_do_dai_va_ten_khi_gom_van_tay",
+     ('        if v and len(v) >= NGUONG_DO_DAI_BI_MAT and _RE_BIEN_NHAY_CAM.search(t):',
+      '        if v:'),
+     ["t84_nhom_van_tay_khong_duoc_bat_oan_co_bat_tat"]),
+    # PHAI doi CA HAI nua moi tai hien duoc lo hong cu, va do la mot ket qua DO chu
+    # khong phai suy: ban dau chi doi phep kiem `rc` thi KHONG ca nao chet (giet 0/1).
+    # Ly do: `_do_codex` co HAI lop doc lap — (a) lay MA THOAT lam chuan, (b) LOC dong
+    # WARNING/NOTE/HINT truoc khi doc cau trang thai. Bo rieng lop (a) thi lop (b) van
+    # dua "Not logged in" len dau danh sach nen phep kiem chu van bat duoc.
+    # Giong y het tien le `bo_kiem_rong_CA_BON_LOP` o dau bang: "dot bien song sot"
+    # KHONG phai test yeu, ma la phong thu nhieu lop — chi khi go DU ca hai lop moi
+    # dung lai duoc dung cai bug fail-open cua ban nhap.
+    ("do_codex_tin_DONG_DAU_thay_vi_ma_thoat",
+     [('    if rc == 0 and "not logged in" not in ra.lower():',
+       '    if "not logged in" not in (dong[0].lower() if dong else ""):'),
+      ('    dong = [d.strip() for d in ra.splitlines() if d.strip()\n'
+       '            and not d.strip().upper().startswith(("WARNING", "NOTE", "HINT"))]',
+       '    dong = [d.strip() for d in ra.splitlines() if d.strip()]')],
+     ["t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao"]),
+    ("chuan_bi_bo_duong_JSON_tho",
+     ('    for ten_cach, thu in (("base64 → JSON", None), ("JSON thô", thoc)):',
+      '    for ten_cach, thu in (("base64 → JSON", None),):'),
+     ["t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac"]),
+    ("hook_phien_bo_phep_so_nang_luc",
+     ('    thieu = sorted(cua_master - dang_co)',
+      '    thieu = []'),
+     ["t88_hook_phien_do_theo_NANG_LUC_khong_theo_bam_toan_tep"]),
     ("bo_kiem_prompt_rong",
      ('if not b.strip():\n        raise Chan(MA_PROMPT, f"tep prompt RONG: {p}")',
       'if False:\n        raise Chan(MA_PROMPT, f"tep prompt RONG: {p}")'),

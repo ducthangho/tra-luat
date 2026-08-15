@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 179,
-  "total_bytes": 7888191,
-  "package_hash": "cdb025475fb62cbb5a057659faf91e2abc0340c759df8bf9266bb0a468e78788",
-  "content_hash": "cdb025475fb62cbb5a057659faf91e2abc0340c759df8bf9266bb0a468e78788",
+  "total_bytes": 7899452,
+  "package_hash": "63a1ef857c5c9a0ec67d0a0734010afeb635208caf4671c12dcac8facf0564a9",
+  "content_hash": "63a1ef857c5c9a0ec67d0a0734010afeb635208caf4671c12dcac8facf0564a9",
   "required_missing": [],
   "files": [
     {
@@ -23,8 +23,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 658670,
-      "sha256": "25a7ae030d9f681f04052f220949cb59f2e4daa12abc2ce3af15a9e207335082"
+      "size": 663075,
+      "sha256": "0e53afd05130eb063625fa6ece9656ba12234b6685f9fa625b3e1aa4a644fdc9"
     },
     {
       "path": "CONTEXT.md",
@@ -113,8 +113,8 @@
     },
     {
       "path": "references/DOCTRINE_APPENDIX.md",
-      "size": 192673,
-      "sha256": "d62389d618fe3f9bea16a95887bd6f6f5b25900d61a15e9eefa3d58f3aee0644"
+      "size": 193868,
+      "sha256": "87d3e71f6b891b197989947e554d42ddb8aeea217ca792056cc00aefe1ce45e3"
     },
     {
       "path": "references/EXTERNAL_INGEST_GATE.md",
@@ -833,8 +833,8 @@
     },
     {
       "path": "scripts/tl_core/workflow.py",
-      "size": 123683,
-      "sha256": "03f178d61b89eda55acf90b5fd935e673bade289d499aa2caa1518d73660b86d"
+      "size": 126114,
+      "sha256": "cdc843f54f8fbda7a3d59a4d965399b98362ec03f7e6af3c69d943cb0e7fb257"
     },
     {
       "path": "scripts/tl_core/zip_ingest.py",
@@ -853,8 +853,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2114421,
-      "sha256": "5df93ac24b55c7ddab4ae0589c65d6d51504aa90c0a39d7d2d2e5e6e0b3f7b76"
+      "size": 2117651,
+      "sha256": "1060b6b13faf27818873d4869533b5bef91c9cffc4067664587d3ba658923208"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",

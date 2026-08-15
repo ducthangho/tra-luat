@@ -1080,7 +1080,17 @@ _DOC_CLAIMS_LINK_RE = re.compile(r"\[[^\]\n]*\]\(([^)\s]+)\)")
 # GAS đúng đắn bị hô «vượt VERSION hiện hành» (đo 28-07). Kế hoạch §2.3 viết `v1.NN.NN` là có lý do.
 _DOC_CLAIMS_VER_RE = re.compile(r"\bv(1\.\d+\.\d+)\b")
 _DOC_CLAIMS_R_RE = re.compile(r"\br(\d{2,4})[a-z]?\b")
-_DOC_CLAIMS_PYLOC_RE = re.compile(r"\b([A-Za-z0-9_][A-Za-z0-9_./\-]*\.py):(\d+)\b")
+# Dấu chấm đầu là BẮT BUỘC phải nhận: mọi tệp dưới `.claude/` (launcher, hook, skill) đều bắt đầu
+# bằng nó, và bản cũ đòi ký tự đầu là chữ/số nên trích dẫn `.claude/dev/launcher.py:1009` bị bộ trích
+# CẮT MẤT dấu chấm rồi báo `claude/dev/launcher.py PYLOC_FILE_MISSING` — một cờ ĐÚNG vì lý do SAI.
+#
+# Tiền tố `./` và `../` phải nằm TRONG mẫu, không được để lookbehind gạt đi. Lần vá đầu tôi dùng
+# `(?<![\w.\-/])` để giữ dấu chấm — và vô tình làm MỌI con trỏ `./…` `../…` biến mất khỏi tầm quét,
+# tức tài liệu né được `--strict` chỉ bằng cách gõ thêm hai ký tự. Đo được: `./scripts/tl.py:9999999`
+# trước cho cờ OUT_OF_RANGE, sau bản vá đầu cho **0 cờ**. Chốt phải nhận diện tiền tố, không phải
+# từ chối dấu gạch chéo đứng trước.
+_DOC_CLAIMS_PYPATH = r"((?:\.{1,2}/)*(?:\.[A-Za-z0-9_]|[A-Za-z0-9_])[A-Za-z0-9_./\-]*\.py)"
+_DOC_CLAIMS_PYLOC_RE = re.compile(r"(?<![\w\-])" + _DOC_CLAIMS_PYPATH + r":(\d+)\b")
 _DOC_CLAIMS_TRIM = ".,;:!?)]}»›\"'(«‹[{"
 
 
@@ -1266,17 +1276,44 @@ def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
         elif n not in ctx["changelog_rs"]:
             _add("L6", m.start(), claim, "R_NOT_IN_CHANGELOG", advisory=True)
 
+    def _pyloc_tim(fname: str):
+        """Phân giải tên tệp .py trong trích dẫn `<file>.py:<dòng>` — và KHÔNG ra khỏi kho.
+
+        Hai chốt, cả hai chỉ cần thiết SAU KHI mẫu bắt đầu nhận tiền tố `./` `../`:
+
+        • Tiền tố tương đối tường minh phân giải từ chỗ ĐẶT TÀI LIỆU, không từ gốc kho.
+          `root / "../scripts/a.py"` đi RA NGOÀI kho; máy chạy tình cờ có tệp anh em ở đó thì
+          nó CHE MẤT tệp trong kho, và cùng một trích dẫn cho kết quả khác nhau theo từng máy.
+        • Mọi ứng viên phải nằm TRONG kho sau khi `resolve()`. Một cổng mà kết quả phụ thuộc
+          thứ nằm ngoài cây được kiểm thì không còn là cổng — nó là một phép đo về máy chủ.
+        """
+        if fname.startswith(("./", "../")):
+            cands = [doc.parent / fname]        # tường minh ⇒ neo vào tài liệu, KHÔNG fallback
+        elif "/" in fname:
+            cands = [root / fname, doc.parent / fname]
+        else:
+            cands = list(ctx["pyindex"].get(fname.rsplit("/", 1)[-1], []))
+        try:
+            trong_kho = Path(root).resolve()
+        except OSError:
+            return None
+        for c in cands:
+            try:
+                rp = Path(c).resolve()
+                rp.relative_to(trong_kho)       # ra ngoài kho ⇒ bỏ, không phải ứng viên
+            except (OSError, ValueError):
+                continue
+            if rp.is_file():
+                return rp
+        return None
+
     # ── L7: con trỏ mã <file>.py:<dòng> ───────────────────────────────────────────────────────────
     for m in _DOC_CLAIMS_PYLOC_RE.finditer(nofence):
         fname, num = m.group(1), int(m.group(2))
         claim = f"{fname}:{num}"
         if _doc_claims_noisy(fname):
             continue
-        if "/" in fname:
-            cands = [root / fname, doc.parent / fname]
-        else:
-            cands = list(ctx["pyindex"].get(fname.rsplit("/", 1)[-1], []))
-        hit = next((c for c in cands if Path(c).is_file()), None)
+        hit = _pyloc_tim(fname)
         if hit is None:
             _add("L7", m.start(), claim, "PYLOC_FILE_MISSING")
             continue

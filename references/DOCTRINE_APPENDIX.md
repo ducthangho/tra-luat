@@ -934,7 +934,7 @@ kèm candidates). Add fail sau 3 vòng → `map_set&...&status=failed`. **Input 
 `action=map_unpushed`** (dòng chưa có nlm id + `stale/failed/pending_push`; chỉ Google Doc). File đổi nội dung
 sau khi push → tự `stale` (qua `changes_pull` hook hoặc `regen2`); file biến mất khỏi Drive còn source NLM →
 GIỮ DÒNG `nlm_status=removed_from_drive` chờ người quyết — KHÔNG bao giờ tự xóa NLM source.
-`traluat_checkpoint.py::reconcile_and_add` ra source id xong GỌI THÊM `map_set` để sổ cái không lệch
+**Engine `traluat_checkpoint.py` CHƯA TỒN TẠI** (xem ghi chú cuối mục) — hành vi mô tả ở đây là ĐẶC TẢ: ra source id xong phải GỌI THÊM `map_set` để sổ cái không lệch
 checkpoint cục bộ.
 > **(4) Cuối phiên (THAY `regen confirm=yes` cũ):** `regen2 confirm=yes` (files.list OR-parents theo lô — vài giây cho ~750 file thay 21–26s; GIỮ NGUYÊN nhóm cột nlm_* — regen không bao giờ phá mapping; tự LOẠI file nội trợ manifest/registry/config + shortcut) **rồi** `manifest_export` (Sheet → JSON snapshot + treeHash v2 FNV-1a — lần đầu đổi thuật toán nên cache L2 cũ stale MỘT lần, vô hại). Giữa phiên: `changes_pull` (mặc định vá luôn Sheet, `applySheet=false` để tắt).
 > **(5) Gotcha mới (KI-16→24 trong header .gs):** Sheets ÉP KIỂU (`05/2026`→ngày) — script đã ép plain-text, sửa tay cột mới phải tự format Plain text; ghi đồng thời → LockService, gặp `{error:'busy'}` đợi vài giây gọi lại; ghi atomic = tab tạm `files_tmp` + swap; POST vẫn KI-01 (urllib/`tl_post_json`, KHÔNG `curl -X POST -L`). Test đính kèm `tests/test_v212_*.js` (chạy Node TRÊN MÁY, không dán vào GAS): 34 unit + 21 integration trên file FULL = 55 pass; 2 bug thật đã bắt-và-sửa: (a) `changes_pull` vứt oan delta removed của file chỉ có trong Sheet → known = manifest ∪ Sheet; (b) regen tự ăn file sổ sách của chính nó vào registry → loại housekeeping.
@@ -948,8 +948,19 @@ phút).** Quy tắc cứng: **add fail ≠ source chưa vào** (Google có thể
 (b) `notebook_get` liệt kê source thật, khớp theo TÊN CHUẨN đã đặt → nếu CÓ thì ghi `nlm_source_id`, coi như
 đã add, KHÔNG add lại; (c) chỉ add lại khi xác nhận chưa vào; tối đa 3 vòng rồi đánh dấu `failed` trong
 manifest, đi tiếp văn bản khác. **TUYỆT ĐỐI KHÔNG retry `source_add` ngay lập tức** — đó là nguồn double-add.
-Engine: `scripts/traluat_checkpoint.py::reconcile_and_add` (v3, self-test:
-`python scripts/traluat_checkpoint.py` → PASS).
+Engine: **CHƯA TỒN TẠI — tham chiếu đứt.** Đo 15-08-2026: `scripts/traluat_checkpoint.py` không có
+trong cây làm việc và `git log --all` cho kết quả RỖNG, tức chưa từng tồn tại; `reconcile_and_add`
+cũng không được định nghĩa ở bất kỳ tệp `.py` nào. Câu tự kiểm cũ (*self-test: `python
+scripts/traluat_checkpoint.py` → PASS*) vì thế KHÔNG chạy được — đã bỏ, vì một lời khai «đã PASS»
+cho thứ không tồn tại là loại khai sai nguy hiểm nhất ở tài liệu này.
+
+Đây là tham chiếu đứt **thứ ba** cùng loại; hai cái trước ghi ở
+`docs/KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md` §0.3 (`scripts/nlm_log.py`,
+`templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json`). Cái này do một **nguyên mẫu** `L7b` của
+`doc-claims-check` bắt được — nguyên mẫu ấy sau đó **bị bỏ** (xem #126: bốn vòng cross-review,
+chín P1, và lý do phân tích tĩnh không quyết được «tên công khai của một module»). Nên đừng
+đọc câu này thành «có cổng canh loại tham chiếu này»: **không có**. Nó chỉ ghi rằng chỗ sai ấy
+do máy tìm ra chứ không do người đọc thấy.
 > **(2) `The read operation timed out` (43 lần) — KHÔNG phải mạng cục bộ; chụm ở thao tác DÀI:** auto-label, reorganize label, `studio_create`, query dài. Thuốc: các thao tác nặng **để CUỐI PHIÊN, sau khi ingest xong toàn bộ, chạy TỪNG CÁI MỘT**; timeout → retry tối đa 2 lần, backoff 15→30s + jitter. KHÔNG chèn label/studio vào giữa batch ingest.
 > **(3) `INVALID_ARGUMENT ... account-level restrictions on programmatic access` (3 lần, sáng 9/6, sau phiên ~190 request/4,5h) — chặn mềm anti-abuse của Google.** Thuốc: gặp 1 lần → NGHỈ ≥5 phút, thử lại đúng 1 lần; vẫn dính → **DỪNG batch hẳn** (manifest giữ chỗ, resume sau ≥1 giờ). Retry nhanh chỉ làm Google chặn gắt hơn. `ops_before_pause=18`/phiên giữ nguyên — biên an toàn xa ngưỡng thực nghiệm.
 > **(4) `Server disconnected`/`write EPIPE` (cụm tối 8/6) — tiến trình MCP chết** (máy yếu/đĩa đầy cũng gây). Không thuốc riêng: manifest checkpoint sau MỖI thao tác + resume từ manifest; restart MCP rồi gọi tiếp. **Đĩa hệ thống phải còn ≥5GB trống trước batch lớn.**

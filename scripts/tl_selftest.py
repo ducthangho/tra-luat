@@ -24695,6 +24695,52 @@ def run() -> int:
 
     _t110("r218_docclaims_l7_dong_vuot_so_dong_file", _c218_l7_dong_vuot_so_dong_file)
 
+    def _c337_l7_dau_cham_dau_va_tien_to_tuong_doi():
+        """r337 — L7 KHÔNG cắt dấu chấm đầu, và KHÔNG né được bằng `./` hay `../`.
+
+        Vì sao có: tài liệu trích `.claude/dev/launcher.py:1009` thì bộ trích CŨ đòi ký tự đầu là
+        chữ/số nên CẮT MẤT dấu chấm rồi báo `claude/dev/launcher.py PYLOC_FILE_MISSING` — một cờ
+        ĐÚNG vì lý do SAI. Chữa bằng cách đổi sang văn xuôi thì gate xanh, nhưng xanh vì KHÔNG
+        CÒN GÌ ĐỂ KIỂM: né gate. Bản vá đầu cho dấu chấm lại dùng lookbehind gạt luôn mọi con trỏ
+        `./…` `../…` — thoát `--strict` chỉ bằng cách gõ thêm hai ký tự.
+
+        Ca này KHÔNG dựa vào tệp nào phải tồn tại, và đó là chủ đích. Bản trước neo vào
+        `.claude/dev/launcher.py`, mà `.claude` nằm trong `_RELEASE_EXCLUDE_DIRS` — nghĩa là ca
+        ấy ĐẠT trong cây phát triển và ĐỎ trong MỌI gói đã đóng. Một ca chỉ xanh ở nhà người viết
+        thì tệ hơn không có ca.
+
+        Ba vế, thiếu vế nào cũng cho một chốt xanh dối:
+
+          • dấu chấm đầu KHÔNG bị cắt — đo bằng chính CHUỖI CLAIM chứ không bằng tệp: bộ trích cũ
+            trả `khong_co_339/x.py:1`, bộ trích nay trả `.khong_co_339/x.py:1`. Cùng lý do
+            FILE_MISSING, nhưng chuỗi khác nhau — và chuỗi mới là thứ phân biệt.
+          • phân giải THẬT vẫn chạy — dùng `scripts/tl_selftest.py`, một tệp CÓ trong gói.
+          • `./…` và `../…` vẫn THẤY. Cả hai ra FILE_MISSING ở fixture này và đó là ĐÚNG: tiền tố
+            tương đối tường minh neo vào chỗ ĐẶT TÀI LIỆU (không fallback về gốc kho — fallback ấy
+            từng cho một tệp anh em NGOÀI kho che mất tệp trong kho), mà fixture nằm trong tempdir.
+
+        CHƯA phủ: chiều dương của tiền tố tương đối (tài liệu THẬT trong kho trích `../…` tới đúng
+        tệp). Đã đo tay; không đưa vào được vì fixture phải nằm ngoài cây thật.
+        """
+        import tempfile as _tf337
+        with _tf337.TemporaryDirectory() as td:
+            d = _r218_doc(td, (
+                "# T\n\n"
+                "Dấu chấm đầu: `.khong_co_339/x.py:1`.\n\n"
+                "Tệp có trong gói: `scripts/tl_selftest.py:9999999`.\n\n"
+                "Né bằng tiền tố: `./scripts/tl.py:9999999` và `../scripts/tl.py:9999999`.\n"))
+            rc, j, _ = _r218_run("--path", str(d))
+        f = _r218_layers(j, "L7")
+        ly = [(x["claim"], x["reason"]) for x in f]
+        return (rc == 1 and len(f) == 4
+                and (".khong_co_339/x.py:1", "PYLOC_FILE_MISSING") in ly
+                and ("scripts/tl_selftest.py:9999999", "PYLOC_LINE_OUT_OF_RANGE") in ly
+                and ("./scripts/tl.py:9999999", "PYLOC_FILE_MISSING") in ly
+                and ("../scripts/tl.py:9999999", "PYLOC_FILE_MISSING") in ly)
+
+    _t110("r337_docclaims_l7_dot_path_va_tien_to_tuong_doi",
+          _c337_l7_dau_cham_dau_va_tien_to_tuong_doi)
+
     def _c218_che_nhieu_fence_va_span():
         """§2.4 — ca QUYẾT ĐỊNH chất lượng: CÙNG MỘT chuỗi, trong fence ⇒ IM, ngoài fence ⇒ NỔ.
         Test chỉ khẳng định 'trong fence im' sẽ XANH GIẢ khi chưa cài lớp nào ⇒ phải khẳng định CẢ HAI VẾ.

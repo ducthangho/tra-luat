@@ -1,3 +1,68 @@
+# ★ dev-side — r337: doc-claims L7 nhận đường dẫn có dấu chấm và tiền tố tương đối (2026-08-15)
+
+Cross-review chỉ ra một chỗ gate xanh vì **không còn gì để kiểm**, chứ không vì kiểm được.
+
+1. Tài liệu trích `.claude/dev/launcher.py:1009`. Bộ trích cũ đòi ký tự đầu là chữ/số nên
+   **cắt mất dấu chấm**, rồi báo `claude/dev/launcher.py PYLOC_FILE_MISSING` — một cờ ĐÚNG vì
+   lý do SAI.
+2. Người viết chữa bằng cách bỏ dạng `path:line`, chuyển sang văn xuôi *"dòng NNN của `<path>`"*.
+   Gate xanh — nhưng xanh vì L7 không nhận ra dạng ấy nữa. **Claim vẫn còn, chỉ là không ai kiểm.**
+   Cross-review gọi đúng tên: né gate.
+3. Bản vá đầu cho dấu chấm lại dùng lookbehind `(?<![\w.\-/])`, và gạt luôn MỌI con trỏ
+   `./…` `../…` — tài liệu thoát `--strict` chỉ bằng cách gõ thêm hai ký tự.
+
+`_DOC_CLAIMS_PYPATH` nay **nhận diện tiền tố** (`./`, `../`, dấu chấm đầu) thay vì từ chối dấu
+gạch chéo đứng trước. Đo trước khi nới: toàn kho `.md` có **0** trích dẫn dot-path ⇒ nới không
+làm đỏ thứ đang xanh.
+
+Kèm một tham chiếu đứt đã sửa: `references/DOCTRINE_APPENDIX.md` khai
+`scripts/traluat_checkpoint.py` là "Engine" kèm *"self-test → PASS"*. Đo 15-08: tệp không có
+trong cây, `git log --all` **rỗng** (chưa từng tồn tại), hàm `reconcile_and_add` không định
+nghĩa ở đâu. Một lời khai "đã PASS" cho thứ không tồn tại là khai sai nguy hiểm nhất ở tài liệu
+này — sửa thành khai đúng sự thật. Đây là tham chiếu đứt **thứ ba**; hai cái trước ghi ở
+`KE_HOACH_RASOAT_HOSO_ORCHESTRATION.md` §0.3.
+
+**Đã CẮT khỏi bản này: lớp L7b kiểm con trỏ theo ký hiệu (`file.py::tên`).** Bốn vòng
+cross-review cho **chín P1**, mỗi vòng bản vá mở một lỗ mới NGƯỢC HƯỚNG lỗ vừa bịt (chặt ⇒ báo
+oan; nới ⇒ lọt). Nguyên nhân không phải cẩu thả: *"tên công khai của một module"* **không quyết
+định được bằng phân tích tĩnh** khi module gán tên lúc chạy. Chi tiết và số đo ở issue riêng.
+
+**Vòng review sau khi cắt bắt tiếp hai lỗi — cả hai do chính việc NHẬN tiền tố `../` mở ra:**
+
+* **Phân giải ra NGOÀI kho.** `root / "../scripts/a.py"` được thử TRƯỚC `doc.parent / …`, nên một
+  tệp anh em nằm ngoài cây có thể **che mất** tệp trong kho: cùng một trích dẫn cho kết quả khác
+  nhau tuỳ máy chạy. Đo được: một tệp anh em ngoài kho, 50 dòng, làm con trỏ dưới đây **hợp lệ**.
+
+  ```text
+  ../scripts/a_ngoai_kho.py:5
+  ```
+
+   Nay tiền tố tương đối tường minh **neo vào tài liệu, không fallback**, và mọi ứng viên phải nằm
+  TRONG kho sau `resolve()` — tệp ngoài kho ấy nay cho `FILE_MISSING`.
+* **Mảnh vụn của L7b.** Ghi chú mới trong `DOCTRINE_APPENDIX.md` còn nói chỗ sai "do lớp `L7b`
+  của `doc-claims-check` tự bắt — đó chính là lý do lớp ấy tồn tại", trong khi cùng commit ấy
+  **gỡ** lớp đó. Người đọc bị nói rằng có cổng canh loại tham chiếu này; **không có**. Đã sửa
+  thành "một nguyên mẫu, sau đó bị bỏ (#126)".
+
+**Và một lỗi nữa ở CHÍNH CA KIỂM, không ở mã:** `r337` bản trước neo vào
+`.claude/dev/launcher.py` để chứng minh dấu chấm đầu được nhận. Nhưng `.claude` nằm trong
+`_RELEASE_EXCLUDE_DIRS` — nghĩa là ca ấy **ĐẠT trong cây phát triển và ĐỎ trong mọi gói đã
+đóng**. Một ca chỉ xanh ở nhà người viết thì tệ hơn không có ca.
+
+Nay ca không dựa vào tệp nào phải tồn tại: chứng minh dấu chấm không bị cắt bằng **chính chuỗi
+claim** — cùng lý do `FILE_MISSING`, chuỗi khác nhau:
+
+```text
+bộ trích cũ  ->  khong_co_339/x.py:1
+bộ trích nay -> .khong_co_339/x.py:1
+```
+
+và chứng minh phân giải thật bằng `scripts/tl_selftest.py`,
+một tệp **có** trong gói. Đã đo trên cây dựng từ đúng 179 tệp của `RELEASE_MANIFEST`: bốn cờ
+giống hệt cây phát triển.
+
+Đo: selftest **1698/1698** (nền 1697 + `r337`).
+
 # ★ dev-side — vòng 7b: bản vá ĐÚNG của vòng 7 làm đỏ Windows, và vì sao (2026-08-13)
 
 Vòng 7 sửa `if not con:` thành `con == []` — **đúng**, vì `None` là KHÔNG ĐO ĐƯỢC chứ

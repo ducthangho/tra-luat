@@ -74,6 +74,7 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   reviewer ngoài chạy mới lộ. Viết một hướng tấn công vào tài liệu cho cảm giác đã lo tới nó, nhưng
   tài liệu không chạy: chỉ có ca test chạy. Nghĩ ra được ca nào thì **biến ngay ca đó thành `rXX_`**,
   đừng để nó nằm trong prompt/README/mô tả PR — chỗ đó là nơi các ca đi chết.
+<!-- ac19:evidence nguồn="CLAUDE.md@2531366:82-83" lý-do="kể lại kết quả đo của chính chốt allowlist" -->
 - **Danh sách CẤM không bao giờ đủ — phải đảo thành danh sách CHO PHÉP.** Cùng sự cố trên: cổng từ
   chối đúng hai chuỗi `claude`/`codex`, nên `codex-dispatcher`, `ai-codex-bot`, `cödex` đều lọt.
   Nguyên văn reviewer: *"distinguishes spelling, not authority"* — phân biệt CÁCH VIẾT, không phân
@@ -82,6 +83,7 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   tập nhỏ và biết trước. Đo được ở `v1.36.68` (PR #104): ba tên tấn công `rc=0` → `rc=4`, người có
   thẩm quyền vẫn `rc=0`. Kèm chốt: đột biến **nới danh sách cho phép để chứa tên tấn công** phải làm
   ca đích ĐỎ — không có đột biến ấy thì không biết ca đang đo danh sách hay đo thứ khác.
+<!-- /ac19:evidence -->
 - **`[skip ci]` trong THÔNG ĐIỆP COMMIT là chốt đặt sai chỗ — nó sống trong LỊCH SỬ.**
   Bước ghi ngược của `ops-publish-lease.yml` từng commit kèm `[skip ci]` để khỏi tự kích hoạt lại.
   Dấu ấy ở lại trong commit, nên khi commit ghi ngược thành **HEAD của một PR** thì nó tắt luôn gate

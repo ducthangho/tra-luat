@@ -548,6 +548,94 @@ def _go_dau_dong_tho(dong: str) -> str:
     return dong
 
 
+def _xoa_gia_tri_thuoc_tinh(s: str) -> str:
+    """Xoá trắng GIÁ TRỊ THUỘC TÍNH có nháy, chỉ khi nó nằm BÊN TRONG một thẻ HTML.
+
+    Cross-review lượt 10+11, finding `doctrine-html-table-token-context-bypass`:
+
+        <table>
+        <tr><td data-x="</table>">x</td></tr>
+        <tr><td>Đo được rc=0: người có
+        thẩm quyền là vai trò.</td></tr>
+        </table>                                  -> rc=0  LỌT
+
+    `</table>` trong giá trị thuộc tính KHÔNG phải thẻ đóng — nó là dữ liệu. Bản
+    trước đếm nó như thẻ đóng thật, nên bảng "đóng" ngay ở dòng hai, mấy dòng sau
+    rơi khỏi tập bảng và cụm cấm trong đó được miễn trừ AC 19 tha.
+
+    Phải DUYỆT KÝ TỰ chứ không regex. `<td data-x="</table>">` có `>` NẰM TRONG
+    nháy, nên mọi mẫu kiểu `<[^>]*>` cắt thẻ sai chỗ — đúng cái bẫy sinh ra lỗ này.
+
+    Nháy KHÔNG đóng ⇒ trả nguyên chuỗi, không đoán. Xoá trắng ở hàm này là thao tác
+    NỚI (bớt token ⇒ bảng hẹp lại ⇒ miễn trừ dễ được tha hơn), nên khi đầu vào mơ hồ
+    thì phía an toàn là xoá ÍT, không phải xoá nhiều.
+    """
+    ra = list(s)
+    i, n = 0, len(s)
+    while i < n:
+        if s[i] != "<":
+            i += 1
+            continue
+        j = i + 1
+        if j >= n or not (s[j].isalpha() or s[j] in "/!"):
+            i += 1
+            continue
+        while j < n and s[j] != ">":
+            if s[j] in "\"'":
+                nhay, j = s[j], j + 1
+                while j < n and s[j] != nhay:
+                    if s[j] != "\n":
+                        ra[j] = " "
+                    j += 1
+                if j >= n:
+                    return s              # nháy không đóng — KHÔNG đoán
+            j += 1
+        i = j + 1
+    return "".join(ra)
+
+
+_RE_RAW_TEXT_MO = re.compile(r"<(script|style|textarea)\b[^>]*>", re.IGNORECASE)
+
+
+def _xoa_phan_tu_raw_text(s: str) -> str:
+    """Xoá trắng NỘI DUNG của phần tử raw-text (`script` · `style` · `textarea`).
+
+    Cùng finding với hàm trên, hai chiều ngược nhau:
+
+        <table>
+        <script>const s = "</table>";</script>
+        <tr><td>Đo được rc=0: người có
+        thẩm quyền là vai trò.</td></tr>
+        </table>                                  -> rc=0  LỌT (closer giả)
+
+        Ví dụ script: <script>const s="<table>";</script> Đo được rc=0: người có
+        thẩm quyền vẫn qua cổng.                  -> rc=6  BẮT OAN (opener giả)
+
+    Theo chuẩn HTML, nội dung ba phần tử này KHÔNG phải markup — `<table>` trong đó
+    là văn bản, không mở bảng. Danh sách ba tên là HỮU HẠN và ĐÓNG, cố ý: mỗi tên
+    thêm vào là một vùng thôi bị quét, mà vùng thôi bị quét chính là chỗ để giấu
+    doctrine. `title` không có ở đây vì nó không xuất hiện trong tài liệu của kho.
+
+    THIẾU THẺ ĐÓNG THÌ KHÔNG XOÁ GÌ — và đây là chỗ hàm này CỐ Ý khác luật HTML lẫn
+    khác chốt "dòng trống kết thúc khối HTML" ở `_dong_bang_html`. HTML nói `<script`
+    không đóng chạy tới hết tệp; làm vậy ở đây sẽ xoá trắng phần đuôi tệp, và phần bị
+    xoá thì KHÔNG CÒN được dò bảng — tức mở đúng một đường giấu doctrine sau một thẻ
+    `<script` cụt. Hai chốt ngược chiều nhau nên bó theo hai hướng khác nhau: chốt kia
+    SIẾT (đánh dấu dòng là bảng ⇒ mất miễn trừ) nên bó bằng dòng trống là đủ; chốt này
+    NỚI nên chỉ chạy khi có bằng chứng đóng thẻ rõ ràng.
+    """
+    ra = list(s)
+    for m in _RE_RAW_TEXT_MO.finditer(s):
+        dong = re.compile(rf"</{m.group(1)}\s*>", re.IGNORECASE)
+        k = dong.search(s, m.end())
+        if not k:
+            continue                      # không có thẻ đóng — KHÔNG xoá (xem trên)
+        for p in range(m.end(), k.start()):
+            if s[p] != "\n":
+                ra[p] = " "
+    return "".join(ra)
+
+
 def _dong_bang_html(raw: str) -> frozenset:
     """Số hiệu những dòng nằm TRONG phần tử bảng HTML (`<table>` … `</table>`).
 
@@ -594,6 +682,14 @@ def _dong_bang_html(raw: str) -> frozenset:
         for so, d in enumerate(sach.split("\n"), 1)
     )
     sach = _RE_MA_INLINE.sub(_xoa_trang, sach)
+    # Hai chốt NGỮ CẢNH TOKEN — cross-review lượt 10+11,
+    # `doctrine-html-table-token-context-bypass`. Trước hai dòng này, `<table`/`</table>`
+    # được đếm ở MỌI vị trí, kể cả khi chúng chỉ là DỮ LIỆU chứ không phải markup.
+    # Thứ tự BẮT BUỘC là thuộc tính TRƯỚC, raw-text SAU: giá trị thuộc tính có thể chứa
+    # `>` (`data-x="</table>"`), nên phải duyệt ký tự để cắt thẻ đúng chỗ trước khi mẫu
+    # `<script[^>]*>` của bước sau được phép tin vào dấu `>` đầu tiên nó gặp.
+    sach = _xoa_gia_tri_thuoc_tinh(sach)
+    sach = _xoa_phan_tu_raw_text(sach)
 
     moc = sorted(
         [(m.start(), 1) for m in _RE_MO_BANG.finditer(sach)]

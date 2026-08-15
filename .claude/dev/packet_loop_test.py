@@ -1300,6 +1300,27 @@ LOP_LACH = [
     ("cum_don_bang_html_long_ba_cap",
      "<table>\n<tr><td><table><tr><td><table></table></td></tr></table></td></tr>\n"
      "<tr><td>Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.</td></tr>\n</table>"),
+    # --- H2 · NGỮ CẢNH TOKEN bảng HTML (cross-review lượt 10, tái lập lượt 11) ---
+    # `doctrine-html-table-token-context-bypass`. Hai ca dưới KHÔNG phải bảng lồng:
+    # bảng ở đây phẳng và ĐÓNG ĐÚNG. Chỗ hở là bộ đếm coi `</table>` là thẻ đóng ở
+    # MỌI vị trí, kể cả khi nó chỉ là DỮ LIỆU — trong nội dung `<script>` (không phải
+    # markup theo chuẩn HTML) hoặc trong giá trị thuộc tính có nháy. Thẻ đóng giả ấy
+    # đưa bộ đếm về 0 sớm, mấy dòng sau rơi khỏi tập bảng và được AC 19 tha.
+    ("cum_don_bang_html_closer_trong_script",
+     "<table>\n<script>const s = \"</table>\";</script>\n"
+     "<tr><td>Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.</td></tr>\n</table>"),
+    ("cum_don_bang_html_closer_trong_thuoc_tinh",
+     "<table>\n<tr><td data-x=\"</table>\">x</td></tr>\n"
+     "<tr><td>Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.</td></tr>\n</table>"),
+    # Khoá CHỖ CỐ Ý LỆCH CHUẨN HTML: `_xoa_phan_tu_raw_text` KHÔNG xoá gì khi thẻ
+    # raw-text thiếu thẻ đóng. Chuẩn HTML nói `<script` cụt chạy tới hết tệp; làm theo
+    # thì phần đuôi bị xoá trắng, `</table>` thật trong đó biến mất, bảng thành "không
+    # đóng" và tụt về luật dòng trống — cụm cấm dưới dòng trống rơi khỏi tập bảng và
+    # được tha. Ca này ĐO đúng đường đó: `rc=6` với bản vá, `rc=0` nếu ai nới theo
+    # chuẩn HTML. Không có ca này thì cái lệch chuẩn kia trông như bug và sẽ bị "dọn".
+    ("cum_don_bang_html_script_cut_khong_duoc_nuot",
+     "<table>\n<script>\n\n"
+     "<tr><td>Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.</td></tr>\n</table>"),
     # Ba ca dưới lọt vì `_chuan_hoa` GIỮ dấu `>`, nên chuỗi phẳng ra
     # `> người có > thẩm quyền` và cụm cấm không khớp một lần nào — scanner KHÔNG
     # THẤY, chứ không phải miễn trừ tha nhầm. Dấu `-` tình cờ bị `_PHAN_CACH` nuốt,
@@ -1407,6 +1428,21 @@ LOP_BAT_OAN = [
     # Bảng lồng HỢP LỆ, không chứa cụm cấm — đếm lồng nhau không được bắt oan nó.
     ("oan_bang_html_long_vo_hai",
      "<table><tr><td><table><tr><td>5 phút</td></tr></table></td></tr></table>"),
+    # Chiều NGƯỢC của `doctrine-html-table-token-context-bypass`: một `<table>` nằm
+    # trong nội dung `<script>` KHÔNG mở bảng. Bản trước coi nó là thẻ mở thật, không
+    # thấy thẻ đóng nào, nên nuốt tới dòng trống và TƯỚC miễn trừ AC 19 của câu văn
+    # xuôi kể kết quả đo đứng ngay sau — đo được `rc=6` trên `4085bbf`.
+    # Ca này giữ cho bản vá không chữa chiều lọt bằng cách nới chiều bắt oan.
+    ("oan_opener_bang_trong_script",
+     "Ví dụ script: <script>const s=\"<table>\";</script> Đo được ở `v1.36.68`: "
+     "ba tên tấn công `rc=0` → `rc=4`, người có\nthẩm quyền vẫn `rc=0`."),
+    # Đối trọng của `cum_don_bang_html_script_cut_khong_duoc_nuot`: KHÔNG xoá nội dung
+    # thẻ raw-text cụt cũng không được biến `<table>` trong đó thành cái nuốt hết đuôi
+    # tệp. Luật dòng trống phải chặn nó lại, để câu kể kết quả đo phía dưới vẫn được tha.
+    ("oan_script_cut_van_xuoi_sau_dong_trong",
+     "<script>\n<table>\n\n"
+     "Đo được ở `v1.36.68`: ba tên tấn công `rc=0` → `rc=4`, người có\n"
+     "thẩm quyền vẫn `rc=0`."),
     # --- CHỐNG ĐẦU ĐỘC ĐUÔI TỆP (finding P1 thứ tư, lượt 9) ---------------------
     # g8 nới `_RE_HANG_RAO` về `^\s*` rồi biện minh "fail-closed". Reviewer bác: AC 19
     # nói bắt oan văn bản bình thường là KHÔNG ĐẠT, ngang với để lọt. Ba ca dưới đo
@@ -1514,6 +1550,12 @@ ANH_XA_LOP_BAT_OAN = {
     "cum_don_rao_song_dong_ngan_hon": "oan_rao_dong_dung_luat",
     "cum_don_bang_html_long": "oan_bang_html_long_vo_hai",
     "cum_don_bang_html_long_ba_cap": "oan_bang_html_long_vo_hai",
+    # Cặp đối chứng CÙNG CƠ CHẾ, ngược chiều: hai lớp lách nói "token giả không được
+    # ĐÓNG bảng", ca bắt-oan nói "token giả không được MỞ bảng". Một bản vá chỉ chữa
+    # một chiều sẽ làm đỏ chiều kia.
+    "cum_don_bang_html_closer_trong_script": "oan_opener_bang_trong_script",
+    "cum_don_bang_html_closer_trong_thuoc_tinh": "oan_opener_bang_trong_script",
+    "cum_don_bang_html_script_cut_khong_duoc_nuot": "oan_script_cut_van_xuoi_sau_dong_trong",
     "cum_don_chi_co_chu_truoc": "oan_claude_md_master",
     "cum_don_chi_co_chu_sau": "oan_term_ngat_dong",
     "cum_don_trich_dan_ngat_dong": "oan_van_xuoi_ngat_dong_trong_trich_dan",
@@ -2141,6 +2183,29 @@ MUTANTS = {
         "        sau = max(0, sau + buoc)",
         "        sau = 0 if buoc == -1 else sau + buoc",
         ["ac18_cum_don_bang_html_long", "ac18_cum_don_bang_html_long_ba_cap"],
+    ),
+    # Hai đột biến dưới GỠ đúng một chốt ngữ cảnh token, mỗi cái một hàm — để nếu ai
+    # đó xoá một trong hai thì ca đích của nó ĐỎ, không im lặng.
+    "bo_chot_raw_text_bang_html": (
+        "    sach = _xoa_phan_tu_raw_text(sach)",
+        "    sach = sach",
+        ["ac18_cum_don_bang_html_closer_trong_script"],
+    ),
+    "bo_chot_gia_tri_thuoc_tinh_bang_html": (
+        "    sach = _xoa_gia_tri_thuoc_tinh(sach)",
+        "    sach = sach",
+        ["ac18_cum_don_bang_html_closer_trong_thuoc_tinh"],
+    ),
+    # Đột biến NGƯỢC CHIỀU: nới `_xoa_phan_tu_raw_text` thành "thiếu thẻ đóng thì xoá
+    # tới hết tệp" (đúng luật HTML, nhưng là đường giấu doctrine sau một `<script` cụt).
+    # Ca đích là lớp lách bất kỳ đứng sau một thẻ raw-text không đóng.
+    "raw_text_khong_dong_the_nuot_toi_het_tep": (
+        "            continue                      # không có thẻ đóng — KHÔNG xoá (xem trên)",
+        "            for p2 in range(m.end(), len(s)):\n"
+        "                if s[p2] != '\\n':\n"
+        "                    ra[p2] = ' '\n"
+        "            continue",
+        ["ac18_cum_don_bang_html_script_cut_khong_duoc_nuot"],
     ),
     "bo_loai_ma_khoi_do_bang_html": (
         "    sach = _RE_MA_INLINE.sub(_xoa_trang, sach)",

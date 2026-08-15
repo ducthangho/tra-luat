@@ -56,7 +56,7 @@ Ba chi tiết trong lệnh con, mỗi cái đều đã trả giá:
 - **`{PROMPT_FILE}`** — launcher thay bằng một **bản chụp rời** trong thư mục lượt chạy.
   **Rời, KHÔNG phải bất biến** — đừng đọc nhầm hai chữ ấy. Launcher tạo tệp với quyền
   `0600` rồi thôi: nó **không** đặt cờ bất biến và **không** kiểm lại băm sau khi ghi
-  (`launcher.py` 1173–1187). Nên một tiến trình **cùng UID** — đúng mô hình đe doạ đã
+  (dòng 1173–1187 của `.claude/dev/launcher.py`). Nên một tiến trình **cùng UID** — đúng mô hình đe doạ đã
   viện ra ở gạch đầu dòng trên để bỏ prompt khỏi `argv` — vẫn ghi đè được bản chụp
   trong khoảng giữa lúc kiểm băm và lúc shell mở nó. `--expected-prompt-sha256` neo
   **tệp nguồn tại thời điểm kiểm**, không neo thứ con thật sự đọc.
@@ -265,7 +265,7 @@ LIVE; `clasp --version` chỉ in phiên bản, có cài cũng vô hại.
 
 Phần còn phơi ra sau khi gỡ `ask` cũng **hẹp hơn** ta tưởng, phải đếm cho đúng. Hook
 `PreToolUse` được cấp lại nguyên vẹn, và nó khớp `\bclasp\s+push\b` cùng `gas-deploy`
-(`.claude/hooks/pretooluse_guard.py:15-16`) rồi trả `permissionDecision: ask` — mà
+(dòng 15–16 của `.claude/hooks/pretooluse_guard.py`) rồi trả `permissionDecision: ask` — mà
 `auto` không người trực đọc `ask` là chặn. Nên:
 
 | lệnh | `ask: []` + hook còn nguyên |
@@ -341,7 +341,7 @@ dẫn kho chính, đó là **phân giải project**, không phải con chạy nh
 | quá hạn + đã giết được con · quá hạn + KHÔNG giết được | **124** · **125** |
 | quá hạn + **không lấy được khoá danh tính con** | **10** (`MA_DANH_TINH`) |
 
-Dòng cuối dễ sót vì nó **ghi đè** kết quả giết: `launcher.py:1268-1270` đặt `ma =
+Dòng cuối dễ sót vì nó **ghi đè** kết quả giết: dòng 1268–1270 của `.claude/dev/launcher.py` đặt `ma =
 MA_DANH_TINH` khi `khoa is None and qua_han`, **bất kể** lượt giết thành hay bại. Nên
 "quá hạn mà không dừng được" **không phải lúc nào cũng 125**. Đây là hành vi cố ý —
 launcher từ chối giết theo một PID chưa xác thực, vì PID được tái dùng và giết nhầm

@@ -1,0 +1,17 @@
+== TRƯỚC khi vá (1a4525a20aa360476a6f59cb157c21097919c457)
+-- lệnh trong adapter:
+echo "${TEN_BIEN:+có, ${#TEN_BIEN} ký tự}${TEN_BIEN:-chưa đặt}"
+-- stdout+stderr: có, 27 ký tựghp_FAKE_TOKEN_abcdef123456
+-- rc=0
+-- KẾT LUẬN: RÒ RỈ — giá trị giả xuất hiện nguyên văn
+
+== SAU khi vá (df5c09cb1f3553cadd3c8d53420420d1d4334438)
+-- lệnh trong adapter:
+if [ -n "${TEN_BIEN:+x}" ]; then echo "có, ${#TEN_BIEN} ký tự"; else echo "chưa đặt"; fi
+-- stdout+stderr: có, 27 ký tự
+-- rc=0
+-- KẾT LUẬN: SẠCH — giá trị giả KHÔNG xuất hiện
+
+== vết set -x, hai dạng vá khả dĩ
+-- sạch cả vết  : if [ -n "${TEN_BIEN:+x}" ]; then echo "có, ${#TEN_BIEN} ký tự"; else echo "chưa đặt"; fi
+-- RÒ RỈ ra vết : if [ -n "${TEN_BIEN:-}" ];  then echo "có, ${#TEN_BIEN} ký tự"; else echo "chưa đặt"; fi

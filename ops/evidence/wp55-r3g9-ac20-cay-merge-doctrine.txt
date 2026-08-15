@@ -1,0 +1,1 @@
+doctrine-scan: sạch — đã quét 4 tệp, 0 chỗ chép doctrine

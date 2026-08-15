@@ -1,0 +1,68 @@
+nền: 174/174 đạt
+
+AC 19 — ánh xạ lớp lách → ca bắt-oan:
+  ok  66/66 lớp lách đều có ca bắt-oan (28 ca riêng biệt)
+
+tự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH):
+  ok  tran_attempt_3_thanh_99 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  same_failure_2_thanh_99 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_cung_hoa_stdout → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  init_tu_cap_lease_nhu_bug_goc → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_chan_tu_cap_bang_ten_provider → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_kiem_khoa_thua_trong_luoc_do_lease → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_kiem_han_trong_ham_chung → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_gioi_han_cua_so_han → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  noi_danh_sach_cho_phep_chua_ten_gia_mao → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  tach_begin_attempt_khoi_ham_chung → giết 7 ca đích · 3 đối chứng khác họ còn sống
+  ok  tra_ve_fail_open_thieu_lease → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  ha_NFKC_ve_NFC → giết 7 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_loc_ky_tu_dinh_dang_Cf → giết 6 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_giai_html_entity → giết 4 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_gap_dong_tu → giết 4 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_gap_mui_ten → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_bo_trang_tri_va_nhay → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_gop_phan_cach → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_go_tag_html → giết 5 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_go_comment_html → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  tra_regex_tag_ve_cam_ky_tu → giết 3 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_ngoac_long_trong_link → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_rut_text_link_markdown → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_go_backslash_escape → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_mien_tru_ngat_dong → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  noi_mien_tru_nhu_generation_4 → giết 12 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_loai_tru_khoi_ma → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_go_dau_dong_tho_khi_do_hang_rao → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_chot_bang_html → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_chot_bang_html_va_van_xuoi → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  noi_muc_thut_rao_nhu_generation_8 → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  noi_wrapper_ve_bat_ky_chu → giết 4 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_luat_rao_dong_dung_chuan → giết 3 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_dem_long_bang_html → giết 2 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_loai_ma_khoi_do_bang_html → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_luat_dong_trong_ket_thuc_khoi_html → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_go_dau_dong_khi_phang_hoa → giết 3 ca đích · 3 đối chứng khác họ còn sống
+  ok  ha_NFKC_va_bo_moi_duong_gop_nbsp → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  ha_NFKC_va_bo_casefold → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_void_roi_reviewing → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_record_review_doi_luot_mo → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  bo_record_review_doi_so_luot_duong → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  mo_lai_cua_reviewing_sang_running → giết 1 ca đích · 3 đối chứng khác họ còn sống
+  ok  go_han_cum_khoi_danh_sach → giết 1 ca đích · 3 đối chứng khác họ còn sống
+
+AC 18 — mỗi LỚP LÁCH phải có đột biến của nó:
+  ok  66 lớp lách đều có đột biến giết · 5 đột biến PHỐI HỢP · 0 ngoại lệ
+
+đột biến ADAPTER (ca đọc tệp skill cũng phải chứng minh KHÔNG RỖNG):
+  ok  work_packet_kiem_bi_mat_nhu_bug_goc → giết 1 ca đích
+  ok  cross_review_go_cu_phap_ghi_pr → giết 1 ca đích
+  ok  land_packets_go_disable_model_invocation → giết 1 ca đích
+
+SỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):
+  ca               : 174
+  đột biến         : 44
+  đột biến adapter : 3
+  lớp lách         : 66
+  ca bắt-oan       : 35
+  ngoại lệ AC 18   : 0
+
+TỔNG: ĐẠT

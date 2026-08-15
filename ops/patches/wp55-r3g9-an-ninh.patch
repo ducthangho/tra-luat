@@ -1,0 +1,248 @@
+diff --git a/.claude/dev/packet_loop_test.py b/.claude/dev/packet_loop_test.py
+index 81c7177..6c2cac8 100644
+--- a/.claude/dev/packet_loop_test.py
++++ b/.claude/dev/packet_loop_test.py
+@@ -914,6 +914,94 @@ def case_land_packets_khong_tu_trigger(c: Ctx):
+         raise AssertionError("land-packets phải khai disable-model-invocation: true")
+ 
+ 
++# --- (e2) AN NINH: lệnh kiểm biến bí mật KHÔNG được in giá trị ------------------
++#
++# Finding `work-packet-secret-check-prints-secret` (P1, an ninh). Adapter khai kiểm
++# bằng **sự tồn tại**, "không bao giờ in nội dung", nhưng viết:
++#
++#     echo "${TEN_BIEN:+có, ${#TEN_BIEN} ký tự}${TEN_BIEN:-chưa đặt}"
++#
++# `${VAR:-…}` CHỈ thay thế khi biến rỗng/chưa đặt — ở nhánh "đã đặt" nó trả CHÍNH
++# GIÁ TRỊ, nối liền sau phần đếm ký tự. Đo được:
++#     có, 27 ký tựghp_FAKE_TOKEN_abcdef123456
++# Đây là lệnh hướng dẫn agent chạy với refresh token THẬT, và stdout của agent đi
++# vào transcript — một lần làm theo là token nằm lại đó.
++#
++# Ca này KHÔNG kiểm lại chuỗi mà tác giả nghĩ mình đã viết: nó BÓC lệnh nguyên văn
++# ra khỏi adapter rồi CHẠY THẬT với một giá trị giả, và đòi giá trị ấy không xuất
++# hiện ở bất kỳ đâu trong stdout lẫn stderr. Trả adapter về dạng cũ ⇒ ca này ĐỎ
++# (đột biến `work_packet_kiem_bi_mat_nhu_bug_goc`).
++
++BI_MAT_GIA = "ghp_FAKE_TOKEN_abcdef123456"
++
++
++def _khoi_bash_chua(txt: str, dau_hieu: str, ten_tep: str) -> str:
++    """Lấy NGUYÊN VĂN thân khối ``` đầu tiên có chứa `dau_hieu`.
++
++    Bóc từ tệp thay vì chép lại vào suite: chép lại là dựng bản sao, và bản sao
++    trôi lệch — đúng cái bẫy mà chính adapter này đã dính ba lượt liền.
++    """
++    dong = txt.splitlines()
++    i = 0
++    while i < len(dong):
++        if dong[i].lstrip().startswith("```"):
++            j = i + 1
++            while j < len(dong) and not dong[j].lstrip().startswith("```"):
++                j += 1
++            than = "\n".join(dong[i + 1:j])
++            if dau_hieu in than:
++                return than
++            i = j + 1
++            continue
++        i += 1
++    raise AssertionError(f"{ten_tep}: không tìm thấy khối lệnh nào chứa {dau_hieu!r}")
++
++
++def case_work_packet_kiem_bi_mat_khong_in_gia_tri(c: Ctx):
++    import shutil
++
++    f = ROOT / ".claude" / "skills" / "work-packet" / "SKILL.md"
++    if not f.is_file():
++        raise AssertionError(f"thiếu adapter {f}")
++    lenh = _khoi_bash_chua(f.read_text(encoding="utf-8"), "TEN_BIEN", str(f))
++
++    # --- lớp 1: HÌNH DẠNG, chạy được ở mọi nền kể cả nơi không có shell POSIX.
++    # `${TEN_BIEN:-…}` không được có mặt: nhánh "đã đặt" của nó LÀ giá trị. Dạng
++    # đúng dùng `:+` (trả từ thay thế, không bao giờ trả giá trị).
++    if "${TEN_BIEN:-" in lenh:
++        raise AssertionError(
++            "lệnh kiểm bí mật dùng `${TEN_BIEN:-…}` — nhánh 'đã đặt' của nó IN NGUYÊN "
++            f"giá trị. Dùng `${{TEN_BIEN:+x}}`. Lệnh đang là:\n{lenh}"
++        )
++
++    # --- lớp 2: HÀNH VI. Bơm giá trị giả, chạy ĐÚNG lệnh trong adapter, đòi giá
++    # trị không lọt ra stdout LẪN stderr (vết `set -x` cũng đi vào transcript).
++    sh = shutil.which("bash") or shutil.which("sh")
++    if sh is None:  # nền không có shell POSIX — lớp 1 vẫn đã chốt hình dạng
++        return
++    env = os.environ.copy()
++    env["TEN_BIEN"] = BI_MAT_GIA
++    p = subprocess.run([sh, "-c", lenh], capture_output=True, env=env)
++    ra = _txt(p.stdout) + "\n" + _txt(p.stderr)
++    if BI_MAT_GIA in ra:
++        raise AssertionError(
++            f"lệnh kiểm bí mật IN NGUYÊN GIÁ TRỊ ra: {ra!r}\nlệnh:\n{lenh}"
++        )
++    # bằng chứng DƯƠNG: vẫn phải báo được là biến CÓ, kèm số ký tự đúng.
++    if str(len(BI_MAT_GIA)) not in ra:
++        raise AssertionError(
++            f"lệnh không còn báo được độ dài {len(BI_MAT_GIA)}; ra={ra!r}\nlệnh:\n{lenh}"
++        )
++
++    # --- lớp 3: nhánh CHƯA ĐẶT vẫn phải phân biệt được với nhánh đã đặt.
++    env2 = os.environ.copy()
++    env2.pop("TEN_BIEN", None)
++    p2 = subprocess.run([sh, "-c", lenh], capture_output=True, env=env2)
++    ra2 = _txt(p2.stdout)
++    if str(len(BI_MAT_GIA)) in ra2 or not ra2.strip():
++        raise AssertionError(f"nhánh chưa-đặt không phân biệt được: {ra2!r}")
++
++
+ # --- (f) lease: init KHÔNG được tự cấp -----------------------------------------
+ #
+ # Do review cross-provider (codex, 14-08-2026) tìm ra, mức CHẶN: `init` ghi thẳng
+@@ -1845,6 +1933,7 @@ CASES = [
+     ("stdout_cp1258", case_stdout_cp1258),
+     ("cross_review_co_cu_phap_ghi_verdict_len_pr", case_cross_review_co_cu_phap_ghi_verdict_len_pr),
+     ("land_packets_khong_tu_trigger", case_land_packets_khong_tu_trigger),
++    ("work_packet_kiem_bi_mat_khong_in_gia_tri", case_work_packet_kiem_bi_mat_khong_in_gia_tri),
+     ("lease_authority_ten_gia_mao_bi_chan", case_lease_authority_ten_gia_mao_bi_chan),
+     ("lease_authority_nguoi_co_tham_quyen_thi_qua", case_lease_authority_nguoi_co_tham_quyen_thi_qua),
+     ("g9_lease_khoa_thua_bi_chan", case_g9_lease_khoa_thua_bi_chan),
+@@ -2216,6 +2305,40 @@ MUTANTS = {
+ }
+ 
+ 
++# Đột biến trên ADAPTER, không trên `packet_loop.py`.
++#
++# `MUTANTS` ở trên chỉ vá được `packet_loop.py`, nên MỌI ca đọc tệp adapter
++# (`cross_review_*`, `land_packets_*`, và ca an ninh mới) trước nay KHÔNG có phép
++# tự chứng minh không rỗng nào cả — chúng có thể đã mục từ lâu mà suite vẫn xanh.
++# Bảng này đóng đúng chỗ hở đó: chép adapter sang cây tạm, vá NGƯỢC về dạng lỗi
++# đã biết, rồi đòi ca đích ĐỎ.
++#
++#   ten: (đường-dẫn-tương-đối, tìm, thay, [ca phải chết])
++MUTANTS_ADAPTER = {
++    # Finding `work-packet-secret-check-prints-secret`: trả lệnh về ĐÚNG dạng cũ
++    # đã đo được rò rỉ. Ca an ninh phải chết theo, nếu không nó không đo gì.
++    "work_packet_kiem_bi_mat_nhu_bug_goc": (
++        ".claude/skills/work-packet/SKILL.md",
++        'if [ -n "${TEN_BIEN:+x}" ]; then echo "có, ${#TEN_BIEN} ký tự"; else echo "chưa đặt"; fi',
++        'echo "${TEN_BIEN:+có, ${#TEN_BIEN} ký tự}${TEN_BIEN:-chưa đặt}"',
++        ["work_packet_kiem_bi_mat_khong_in_gia_tri"],
++    ),
++    # Hai ca adapter cũ, nay cũng có đột biến của mình.
++    "cross_review_go_cu_phap_ghi_pr": (
++        ".claude/skills/cross-review/SKILL.md",
++        "gh pr ",
++        "gh KHONG-PHAI-PR ",
++        ["cross_review_co_cu_phap_ghi_verdict_len_pr"],
++    ),
++    "land_packets_go_disable_model_invocation": (
++        ".claude/skills/land-packets/SKILL.md",
++        "disable-model-invocation: true",
++        "disable-model-invocation: false",
++        ["land_packets_khong_tu_trigger"],
++    ),
++}
++
++
+ # Ca được PHỦ BỞI NHIỀU LỚP nên không đột biến ĐƠN LẺ nào giết được. Khai tường
+ # minh kèm lý do ĐO ĐƯỢC — nói thẳng chỗ phủ chồng còn hơn gán bừa cho một lớp rồi
+ # tưởng đã đo được lớp ấy, và còn hơn để ca nằm ngoài mọi danh sách như generation 4.
+@@ -2279,6 +2402,25 @@ def _doi_chung_khac_ho(phai_chet) -> tuple:
+     return ()
+ 
+ 
++def _tep_adapter() -> tuple:
++    return tuple(sorted({rel for rel, _t, _th, _d in MUTANTS_ADAPTER.values()}))
++
++
++def _chay_voi_root(root_moi: Path, ten_ca, tmp: Path):
++    """Chạy một tập ca với `ROOT` trỏ sang cây tạm.
++
++    Ca adapter đọc `ROOT` lúc GỌI (global Python), nên đổi global rồi trả lại là đủ
++    — không phải dựng tiến trình con, và cũng không đụng cây thật.
++    """
++    global ROOT
++    cu = ROOT
++    ROOT = root_moi
++    try:
++        return chay_suite(CANONICAL, tmp, chi_chay=set(ten_ca))
++    finally:
++        ROOT = cu
++
++
+ def chay_suite(script: Path, tmp: Path, chi_chay=None):
+     ket = {}
+     for ten, fn in CASES:
+@@ -2414,7 +2556,42 @@ def main() -> int:
+             print(f"  ok  {len(ten_ca_lop)} lớp lách đều có đột biến giết · "
+                   f"{phoi_hop} đột biến PHỐI HỢP · 0 ngoại lệ")
+ 
+-    # --- 5. SUITE PHẢI TỰ KHAI SỐ CỦA MÌNH ---------------------------------
++        # --- 5. đột biến trên ADAPTER ------------------------------------------
++        #
++        # `MUTANTS` chỉ vá `packet_loop.py`. Ca nào đọc tệp adapter vì thế nằm
++        # NGOÀI mọi phép tự chứng minh không rỗng — chúng có thể đã mục mà suite
++        # vẫn xanh. Vá ngược adapter về dạng lỗi đã biết và đòi ca đích chết.
++        print("\nđột biến ADAPTER (ca đọc tệp skill cũng phải chứng minh KHÔNG RỖNG):")
++        for ten_mut, (rel, tim, thay, phai_chet) in MUTANTS_ADAPTER.items():
++            if not (ROOT / rel).is_file():
++                print(f"  ĐỎ  đột biến {ten_mut}: thiếu {rel}")
++                that_bai_tong += 1
++                continue
++            if tim not in (ROOT / rel).read_text(encoding="utf-8"):
++                print(f"  ĐỎ  đột biến {ten_mut}: không thấy mỏ neo {tim!r} trong {rel}")
++                that_bai_tong += 1
++                continue
++            cay = tmp / f"adapter_{ten_mut}"
++            for r in _tep_adapter():
++                noi_dung = (ROOT / r).read_text(encoding="utf-8")
++                if r == rel:
++                    # Thay TẤT CẢ, không phải lần đầu: ca adapter hỏi "tệp có còn
++                    # affordance này không", nên gỡ một chỗ mà còn năm chỗ thì ca
++                    # đúng ra vẫn phải xanh — và khi ấy đột biến không đo được gì.
++                    # (`gh pr ` có 6 chỗ, `disable-model-invocation: true` có 2.)
++                    noi_dung = noi_dung.replace(tim, thay)
++                dich = cay / r
++                dich.parent.mkdir(parents=True, exist_ok=True)
++                dich.write_text(noi_dung, encoding="utf-8", newline="\n")
++            ket_mut = _chay_voi_root(cay, phai_chet, cay / "_chay")
++            song = [t for t in phai_chet if ket_mut.get(t) is None]
++            if song:
++                print(f"  ĐỎ  đột biến {ten_mut}: ca {song} VẪN XANH ⇒ ca đó không đo gì")
++                that_bai_tong += len(song)
++            else:
++                print(f"  ok  {ten_mut} → giết {len(phai_chet)} ca đích")
++
++    # --- 6. SUITE PHẢI TỰ KHAI SỐ CỦA MÌNH ---------------------------------
+     #
+     # Cross-review lượt 9, finding `packet-suite-mutation-count-mismatch`: hồ sơ
+     # executor khai `39 đột biến`, `len(MUTANTS)` thật là `38`. Con số lệch một thì
+@@ -2427,6 +2604,7 @@ def main() -> int:
+     print(f"\nSỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):")
+     print(f"  ca               : {len(CASES)}")
+     print(f"  đột biến         : {len(MUTANTS)}")
++    print(f"  đột biến adapter : {len(MUTANTS_ADAPTER)}")
+     print(f"  lớp lách         : {len(LOP_LACH)}")
+     print(f"  ca bắt-oan       : {len(LOP_BAT_OAN)}")
+     print(f"  ngoại lệ AC 18   : 0")
+diff --git a/.claude/skills/work-packet/SKILL.md b/.claude/skills/work-packet/SKILL.md
+index e7184ef..ff0abc3 100644
+--- a/.claude/skills/work-packet/SKILL.md
++++ b/.claude/skills/work-packet/SKILL.md
+@@ -64,9 +64,16 @@ Kiểm biến bí mật bằng **sự tồn tại**, không bao giờ in nội d
+ nhập chứa refresh token, in một lần là phải thu hồi và cấp lại:
+ 
+ ```bash
+-echo "${TEN_BIEN:+có, ${#TEN_BIEN} ký tự}${TEN_BIEN:-chưa đặt}"
++if [ -n "${TEN_BIEN:+x}" ]; then echo "có, ${#TEN_BIEN} ký tự"; else echo "chưa đặt"; fi
+ ```
+ 
++Dạng cũ `"${TEN_BIEN:+…}${TEN_BIEN:-chưa đặt}"` **in nguyên giá trị**: `:-` chỉ thay thế khi
++biến RỖNG/CHƯA ĐẶT, nên ở nhánh "đã đặt" nó trả chính token, nối liền sau phần đếm ký tự —
++đo được `có, 27 ký tựghp_FAKE_TOKEN_abcdef123456`. Dùng `:+x` chứ đừng dùng `:-`: giá trị
++không nằm trên đường in NÀO, và cũng không lọt vào vết `set -x` (`[ -n x ]`), trong khi
++`[ -n "${TEN_BIEN:-}" ]` tuy đúng stdout vẫn in token ra vết. Chốt bằng máy:
++`case_work_packet_kiem_bi_mat_khong_in_gia_tri` trong `.claude/dev/packet_loop_test.py`.
++
+ ## Gate
+ 
+ `/gate`. Đọc mã thoát trực tiếp từng tiến trình, không qua pipe — `rc` của pipe là `rc` của lệnh cuối.

@@ -99,6 +99,70 @@ không suy từ việc "đã ghi tệp xong".
 Nếu một ngày chuỗi hết hiệu lực (OpenAI thu hồi hoặc xoay refresh token), triệu chứng là
 `Not logged in` dù biến vẫn còn. Chữa: `codex login --device-auth` lại rồi cập nhật biến.
 
+### Khi hook ĐÚNG mà phiên vẫn hỏng — sự cố 15-08-2026
+
+Mọi thứ ở mục trên đã đúng và đã có từ 14-08. Hôm sau một phiên vẫn mất gần trọn ngày
+vì `codex login status` trả `Not logged in`, rồi **kết luận** "container không gọi được
+codex" và bắt chủ kho chờ một máy khác. Không phải lỗi của hook, cũng không phải của tài
+liệu này.
+
+**Nguyên nhân gốc: phiên chạy hook của NHÁNH PACKET, không phải hook trên `master`.**
+Nhánh packet rẽ từ `base_sha` cũ hơn commit thêm khối khôi phục credential, nên hook thật
+sự chạy là bản chưa có khối ấy. Đo được:
+
+| hook | `sha256` (16) | số lần nhắc `CODEX_AUTH_JSON` |
+|---|---|---|
+| cây phiên (`claude/wp55-r2g2-executor-…`) | `298d96fe51f70e4e` | **0** |
+| `origin/master` | `3c3dd49a8a163479` | **5** |
+
+Nên `codex login status` nói `Not logged in` còn tài liệu nói "hook lo rồi" — **hai câu
+cùng đúng**, và đó là kiểu mâu thuẫn khó thấy nhất. `.claude/skills/work-packet/SKILL.md`
+cảnh báo sẵn: *"`base_sha` thường cũ hơn công cụ trên nhánh chính, nên cây làm việc của
+packet có thể thiếu cả bộ dựng công cụ lẫn hook phiên."*
+
+Nay đo bằng máy thay vì bằng chữ:
+
+```bash
+python .claude/dev/launcher.py doctor        # muc `hook-phien` so bam voi origin/master
+python .claude/dev/launcher.py moi-truong    # quet bien theo MAU, khong theo ten doan truoc
+python .claude/dev/launcher.py chuan-bi      # duong CUU HO khi hook khong chay
+```
+
+**Hai lỗi nối tiếp, cùng một hình dạng, đều đã có tiền lệ trong `CLAUDE.md`:**
+
+- Tìm biến bằng **danh sách tên đoán trước** (`OPENAI_API_KEY`, `CODEX_API_KEY`…) nên
+  trượt đúng `CODEX_AUTH_JSON`. Y hệt bộ quét secrets lọc theo **phần mở rộng** rồi mù
+  với `.env`. *Lọc theo danh sách đoán trước thì mù đúng chỗ thứ cần tìm đang nằm.*
+- Ghi base64 **thô** vào `auth.json`, nhận `expected value at line 1 column 1`, rồi đọc
+  thành "biến này không dùng được". Câu đó nói **tệp** không phải JSON — nó không hề nói
+  **biến** sai.
+
+### ĐÃ ĐẶT ≠ DÙNG ĐƯỢC — biến giữ chỗ
+
+Cùng lượt đo phát hiện container có **năm** biến mang **cùng một chuỗi 14 ký tự** (cùng
+vân tay `f07d7417`): `GH_TOKEN` · `GITHUB_TOKEN` · `AWS_ACCESS_KEY_ID` ·
+`AWS_SECRET_ACCESS_KEY` · `CLOUDSDK_AUTH_ACCESS_TOKEN`. Credential GitHub **thật** nằm ở
+`GITHUB_PAT` (93 ký tự, tiền tố `github_pat_`).
+
+Biến giữ chỗ **tệ hơn** biến chưa đặt: công cụ báo "sai thông tin đăng nhập" thay vì
+"chưa đăng nhập", và thông điệp ấy đẩy người đọc đi sai hướng. `moi-truong` gom biến theo
+vân tay giá trị để phơi đúng chuyện này — chỉ gom biến **tên khớp mẫu bí mật** và **giá
+trị dài ≥ 8**, vì nếu không thì tám biến cùng `"1"` và chín biến cùng `"true"` bị báo oan
+(đã đo, đã sửa).
+
+### GitHub: bốn đường, hỏng độc lập
+
+| đường | trạng thái (đo 15-08-2026, container remote) |
+|---|---|
+| `git` đẩy/kéo HTTPS | **CHẠY** — credential qua `$GIT_CONFIG_KEY_*` |
+| công cụ **MCP github** | **CHẠY** — đăng comment, đọc issue |
+| REST thẳng `api.github.com` | **CHẶN** — proxy trả `403 GitHub access is not enabled for this session` |
+| `gh` CLI | không cài, và **cài cũng vô ích** vì đi đúng đường bị chặn |
+
+403 đó **không** phải thiếu token: `GITHUB_PAT` thật cũng 403, trong khi `/user` trả 200.
+Chính sách theo **đường dẫn**, không theo danh tính. Vậy nên "gọi GitHub không được" là
+kết luận sai ở container này — phải nói rõ **đường nào**.
+
 ### Hai bẫy khi gọi `codex` trực tiếp
 
 - **Nó đọc thêm `stdin`.** Không có gì để đọc thì treo. Luôn `< /dev/null` khi gọi

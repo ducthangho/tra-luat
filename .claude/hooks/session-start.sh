@@ -43,17 +43,37 @@ else
 fi
 
 # --- ripgrep: cả codex lẫn Claude Code đều gọi `rg` để tìm trong mã. Thiếu nó thì
-# lệnh tìm gãy giữa chừng chứ không tự lùi về grep.
+# lệnh tìm gãy giữa chừng chứ KHÔNG tự lùi về grep — phiên mất khả năng tra cứu mà
+# không hỏng ở chỗ đọc được. Vì thế `rg` là BAT BUOC trong `doctor` từ 15-08-2026.
+#
+# Ba đường cài, thử lần lượt: apt-get (có/không sudo), rồi cargo. Không đường nào
+# chạy thì nói THẲNG là phiên sẽ thiếu — đừng để nó lộ ra giữa chừng.
 if ! co rg; then
+  echo "[session-start] cai ripgrep ..."
   if co apt-get; then
-    echo "[session-start] cai ripgrep ..."
-    (apt-get install -y -qq ripgrep >/dev/null 2>&1 \
-      || sudo apt-get install -y -qq ripgrep >/dev/null 2>&1) \
-      || echo "[session-start] CANH BAO: cai ripgrep that bai"
+    apt-get install -y -qq ripgrep >/dev/null 2>&1 \
+      || sudo apt-get install -y -qq ripgrep >/dev/null 2>&1 \
+      || { apt-get update -qq >/dev/null 2>&1 || sudo apt-get update -qq >/dev/null 2>&1; \
+           apt-get install -y -qq ripgrep >/dev/null 2>&1 \
+           || sudo apt-get install -y -qq ripgrep >/dev/null 2>&1; } \
+      || true
+  fi
+  co rg || { co cargo && cargo install ripgrep >/dev/null 2>&1 || true; }
+  # BANG CHUNG DUONG: `command -v` la CO MAT, `rg --version` la CHAY DUOC. Audit
+  # codex tung dung hai tep RONG ten git.exe/python.exe roi doctor bao xanh.
+  if rg --version >/dev/null 2>&1; then
+    echo "[session-start] rg: $(rg --version | head -1)"
   else
-    echo "[session-start] CANH BAO: khong co rg va khong co apt-get"
+    echo "[session-start] CANH BAO: KHONG cai duoc rg — tra cuu ma se gay giua chung"
   fi
 fi
+
+# --- KHONG cai `gh`. Da DO 15-08-2026: REST truc tiep toi api.github.com bi PROXY
+# tra 403 ("GitHub access is not enabled for this session") BAT KE token — `GITHUB_PAT`
+# that cung 403, `/user` lai 200, tuc chinh sach theo DUONG DAN chu khong theo danh
+# tinh. Nen `gh` co cai cung khong dung duoc cho viec cua kho. Duong DUNG: cong cu
+# MCP github (dang comment/doc issue) va git over HTTPS (day/keo). `doctor` in ro
+# duong nao mo, de khong ai ket luan "GitHub khong goi duoc" tu duong hong.
 
 # --- phụ thuộc Python của kho
 PY=python3
@@ -161,12 +181,33 @@ if co codex; then
   echo "[session-start] codex auth: $(codex login status 2>&1 </dev/null | head -1)"
 fi
 
-# --- BẰNG CHỨNG DƯƠNG, không tin "đã cài xong". doctor thoát khác 0 khi thiếu
-# công cụ BẮT BUỘC; thiếu codex/claude chỉ là cảnh báo vì có phiên không cần gọi agent.
-echo "[session-start] kiem cong cu:"
-"$PY" .claude/dev/launcher.py doctor || {
+# --- KHOI PHUC credential codex: KHOI O TREN da lam roi, dung goi lai o day.
+# `launcher.py chuan-bi` la duong CUU HO cho truong hop hook NAY khong chay — xem
+# chu thich cua `chuan_bi_xac_thuc()`. Goi ca hai trong mot luot chi thanh nhieu.
+
+# --- BANG CHUNG DUONG, khong tin "da cai xong".
+#   12 = thieu cong cu BAT BUOC          -> phien nay khong lam viec duoc, DUNG.
+#   13 = co mat nhung CHUA XAC THUC      -> canh bao, khong chan: co phien khong
+#        can goi agent, va chan o day se khoa luon duong nguoi dung tu sua.
+# `doctor` LUON in phan bien moi truong, ke ca khi moi thu xanh — de khong ai bao
+# "cong cu X khong dung duoc" ma chua tung nhin vao bien.
+echo "[session-start] kiem cong cu + kha dung:"
+# `MA=0` rồi `|| MA=$?`, KHÔNG phải chạy rồi `MA=$?` ở dòng sau: tệp này có `set -e`,
+# nên lệnh thoát khác 0 giết cả script NGAY, trước khi dòng gán kịp chạy. Đã đo: hook
+# chết ở đây với rc=13 và KHÔNG in nổi dòng "xong", tức phần xử lý 12/13 bên dưới là
+# CODE CHẾT. Vế `||` đưa lệnh vào ngữ cảnh điều kiện nên `set -e` không bắt.
+MA=0
+"$PY" .claude/dev/launcher.py doctor --doi-kha-dung || MA=$?
+if [ "$MA" -eq 12 ]; then
   echo "[session-start] THIEU CONG CU BAT BUOC — xem bang tren"
   exit 1
-}
+elif [ "$MA" -eq 13 ]; then
+  echo "[session-start] CANH BAO: co cong cu CHUA DUNG DUOC (thieu xac thuc)."
+  echo "[session-start] DUNG ket luan 'khong goi duoc' truoc khi doc bien:"
+  echo "[session-start]   $PY .claude/dev/launcher.py moi-truong"
+elif [ "$MA" -ne 0 ]; then
+  echo "[session-start] doctor thoat $MA — xem bang tren"
+  exit 1
+fi
 
 echo "[session-start] xong"

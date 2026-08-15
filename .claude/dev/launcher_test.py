@@ -1863,6 +1863,118 @@ def t82_dot_bien_khong_duoc_mat_qua_30_phan_tram():
     bang(not _dot_bien_du_san(35, 30), "5/35 khong duoc xanh")
 
 
+@ca
+def t84_nhom_van_tay_khong_duoc_bat_oan_co_bat_tat():
+    """Nhóm trùng vân tay chỉ được phán về CREDENTIAL, không phán về cờ bật/tắt.
+
+    Bản nháp gom mọi biến theo vân tay rồi báo "nghi giữ chỗ" cho nhóm >= 3. Đo
+    thật trong container thì nó báo oan hai nhóm to: tám biến cùng là `"1"` và
+    chín biến cùng là `"true"`. Giá trị ngắn trùng nhau là chuyện thường.
+
+    Ca này khoá CẢ HAI chiều: cờ bật/tắt KHÔNG bị gom, còn chuỗi giữ chỗ THẬT
+    (14 ký tự, dùng lại cho năm dịch vụ — đo được 15-08-2026) thì PHẢI bị gom.
+    """
+    m = _tai_launcher_thu()
+    m.os.environ = {
+        "CLAUDE_CODE_DEBUG": "true", "CLAUDE_CODE_REMOTE": "true",
+        "CLAUDE_AUTO_BACKGROUND_TASKS": "true",          # ba cờ, cùng giá trị
+        "GH_TOKEN": "khong-phai-that", "GITHUB_TOKEN": "khong-phai-that",
+        "AWS_SECRET_ACCESS_KEY": "khong-phai-that",      # ba credential, cùng giá trị
+        "GITHUB_PAT": "github_pat_gia_dinh_dai_that_su", # credential RIÊNG
+    }
+    nhom = m._nhom_van_tay(sorted(m.os.environ))
+    gom = {k: sorted(v) for k, v in nhom.items() if len(v) >= 3}
+    bang(len(gom) == 1, f"chi duoc gom DUNG mot nhom credential, thuc te {gom}")
+    ds = next(iter(gom.values()))
+    bang(ds == ["AWS_SECRET_ACCESS_KEY", "GH_TOKEN", "GITHUB_TOKEN"],
+         f"gom sai danh sach: {ds}")
+    bang(all("CLAUDE" not in t for v in nhom.values() for t in v),
+         "co bat/tat bi gom nham vao nhom giu cho")
+
+
+@ca
+def t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao():
+    """`codex` chưa đăng nhập mà báo DUNG_DUOC là hỏng theo chiều NGUY HIỂM.
+
+    Bản nháp đọc `ra[0]` rồi tìm "not logged in" trong ĐÓ. Với `HOME` sạch,
+    `codex` in trước một dòng `WARNING: … could not create PATH aliases`, nên
+    dòng đầu không phải câu trạng thái và phép kiểm trượt → báo DUNG_DUOC cho
+    một `codex` CHƯA xác thực. Đúng cùng lỗi với sự cố sáng 15-08-2026: tin
+    dòng đầu tiên một công cụ nói ra.
+    """
+    m = _tai_launcher_thu()
+    m.shutil.which = lambda t: "/usr/bin/codex" if t == "codex" else None
+
+    def _ra(rc, text):
+        class P:
+            returncode = rc
+            stdout = text
+            stderr = ""
+        m.subprocess.run = lambda *_a, **_k: P()
+
+    canh_bao = ("WARNING: proceeding, even though we could not create PATH "
+                "aliases: Refusing to create helper binaries\n")
+    # (a) chua dang nhap, CO bien -> phai doi chuan-bi, TUYET DOI khong DUNG_DUOC
+    m.os.environ = {"CODEX_AUTH_JSON": "xxxx"}
+    _ra(1, canh_bao + "Not logged in\n")
+    tt, _ = m._do_codex()
+    bang(tt == "CAN_CHUAN_BI", f"co bien + chua dang nhap phai la CAN_CHUAN_BI, duoc {tt}")
+    # (b) chua dang nhap, KHONG bien
+    m.os.environ = {}
+    _ra(1, canh_bao + "Not logged in\n")
+    tt, _ = m._do_codex()
+    bang(tt == "CHUA_XAC_THUC", f"khong bien phai la CHUA_XAC_THUC, duoc {tt}")
+    # (c) da dang nhap that
+    _ra(0, "Logged in using ChatGPT\n")
+    tt, mo_ta = m._do_codex()
+    bang(tt == "DUNG_DUOC", f"da dang nhap phai la DUNG_DUOC, duoc {tt}")
+    bang("Logged in" in mo_ta, f"mo ta phai lay dong TRANG THAI, duoc {mo_ta!r}")
+    # (d) rc=0 nhung van co chu 'not logged in' => fail-closed
+    _ra(0, canh_bao + "Not logged in\n")
+    m.os.environ = {}
+    tt, _ = m._do_codex()
+    bang(tt == "CHUA_XAC_THUC", f"rc=0 ma noi chua dang nhap thi phai fail-closed, duoc {tt}")
+
+
+@ca
+def t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac():
+    """Sáng 15-08-2026 tôi ghi base64 THÔ vào `auth.json`, `codex` trả `expected
+    value at line 1 column 1`, và tôi đọc thành "biến này không dùng được" — trong
+    khi nó chỉ nói tệp không phải JSON. Hàm phải thử CẢ HAI đường, và khi cả hai
+    hỏng thì nói rõ đã thử những gì.
+
+    Ghi ra ĐĨA nên ca này dùng HOME TẠM. Không bao giờ đụng `~` thật: đột biến ghi
+    vào tệp thật rồi khôi phục trong `finally` là bom hẹn giờ (CLAUDE.md).
+    """
+    import base64 as _b64
+    m = _tai_launcher_thu()
+    that = '{"tokens":{"access":"gia-dinh"}}'
+    for ten, gia_tri in (("base64", _b64.b64encode(that.encode()).decode()),
+                         ("json tho", that)):
+        nha = tempfile.mkdtemp()
+        m.os.path.expanduser = (lambda n: lambda p: p.replace("~", n))(nha)
+        m.os.environ = {"CODEX_AUTH_JSON": gia_tri}
+        ket = m.chuan_bi_xac_thuc(that_su=True)
+        bang(len(ket) == 1 and ket[0]["ok"], f"{ten}: phai dung duoc, duoc {ket}")
+        dich = Path(nha) / ".codex" / "auth.json"
+        bang(dich.read_text(encoding="utf-8") == that,
+             f"{ten}: noi dung tren dia phai la JSON GIAI MA, khong phai chuoi tho")
+        bang(oct(dich.stat().st_mode)[-3:] == "600", f"{ten}: quyen phai la 600")
+        # idempotent: goi lai khong duoc bao da doi
+        bang(m.chuan_bi_xac_thuc(that_su=True)[0].get("doi") is False,
+             f"{ten}: goi lai phai nhan ra da khop va khong dung tep")
+    # rac => tu choi, va noi ro da thu CA HAI duong
+    nha = tempfile.mkdtemp()
+    m.os.path.expanduser = (lambda n: lambda p: p.replace("~", n))(nha)
+    m.os.environ = {"CODEX_AUTH_JSON": "!!khong-phai-gi-ca!!"}
+    ket = m.chuan_bi_xac_thuc(that_su=True)
+    bang(not ket[0]["ok"], "rac phai bi tu choi")
+    bang("base64" in ket[0]["cach"] and "JSON" in ket[0]["cach"],
+         f"thong diep phai neu CA HAI duong da thu, duoc {ket[0]['cach']!r}")
+    bang(not (Path(nha) / ".codex" / "auth.json").exists(),
+         "tu choi ma van ghi tep la fail-open")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [

@@ -171,6 +171,44 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   CHỈ dựng chốt quanh một lệnh bất kỳ rồi chạy lệnh đó — không biết agent nào, không
   prompt dựng sẵn. Wrapper tự chế sẽ phải bám theo cờ/biến/xác thực của hai CLI khác
   nhau rồi trôi lệch âm thầm.
+- **HOOK PHIÊN CỦA NHÁNH PACKET CŨ HƠN HOOK TRÊN MASTER — đó là nguyên nhân GỐC của
+  sự cố 15-08-2026, không phải chuyện xác thực.** Hook trên `master` ĐÃ khôi phục
+  `CODEX_AUTH_JSON` từ 14-08, có bốn chốt viết kỹ, và `docs/GOI_AGENT_DA_NEN.md` mô tả
+  đúng như thế. Nhưng phiên hôm đó đứng trên nhánh packet rẽ từ `base_sha` CŨ HƠN commit
+  ấy, nên hook chạy thật là bản cũ — **đo được: hook của phiên có 0 lần nhắc
+  `CODEX_AUTH_JSON`, hook master có 5**. Vì vậy `codex login status` nói `Not logged in`
+  còn tài liệu nói "hook lo rồi", và **hai câu đó cùng đúng**. Chính
+  `.claude/skills/work-packet/SKILL.md` cảnh báo sẵn cái bẫy này; cảnh báo bằng chữ
+  không chặn được ai, nên nay `launcher.py doctor` có mục `hook-phien` so băm hook đang
+  checkout với `origin/master` và nói thẳng khi lệch.
+- **ĐỌC BIẾN MÔI TRƯỜNG TRƯỚC KHI KẾT LUẬN MỘT CÔNG CỤ KHÔNG DÙNG ĐƯỢC.** Lỗi thứ hai
+  của cùng sự cố: gặp `Not logged in` thì phải hỏi "nó xác thực bằng ĐƯỜNG NÀO", không
+  phải "nó đã đăng nhập chưa". Giải `CODEX_AUTH_JSON` ra `~/.codex/auth.json` là chạy
+  được ngay, và cross-review lượt 11 đã chạy trọn trong chính container đó. Đường cứu
+  hộ khi hook không chạy: `launcher.py chuan-bi` (cùng bốn chốt như hook, không yếu hơn).
+  `doctor` LUÔN in phần biến kể cả khi mọi thứ xanh, đúng để chặn kiểu kết luận đó.
+  · **Đừng grep theo danh sách tên đoán trước** (`OPENAI_API_KEY`, `CODEX_API_KEY`…) —
+  trượt đúng tên thật, y hệt bộ quét secrets lọc theo phần mở rộng rồi mù với `.env`.
+  Quét TOÀN BỘ `os.environ` theo MẪU: `launcher.py moi-truong`.
+  · **ĐÃ ĐẶT ≠ DÙNG ĐƯỢC.** Container này có `GH_TOKEN` `GITHUB_TOKEN`
+  `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `CLOUDSDK_AUTH_ACCESS_TOKEN` — **năm
+  biến, cùng một chuỗi giữ chỗ 14 ký tự** (cùng vân tay `f07d7417`); credential GitHub
+  thật nằm ở `GITHUB_PAT`. Biến giữ chỗ tệ hơn biến chưa đặt: công cụ báo "sai thông
+  tin đăng nhập" thay vì "chưa đăng nhập", đẩy người đọc đi sai hướng. `moi-truong`
+  gom biến theo vân tay giá trị để phơi đúng chuyện này.
+  · **Sai định dạng ≠ biến vô dụng.** Ghi base64 THÔ vào `auth.json` thì `codex` kêu
+  `expected value at line 1 column 1` — câu đó nói TỆP không phải JSON, KHÔNG nói biến
+  sai. `chuan-bi` thử cả base64 lẫn JSON thô và chỉ báo hỏng khi cả hai đường đều hỏng.
+- **GitHub: bốn đường, hỏng độc lập — đừng kết luận từ đường hỏng.** Đo 15-08-2026 trong
+  container remote: `git` đẩy/kéo HTTPS **CHẠY** (credential qua `$GIT_CONFIG_KEY_*`) ·
+  công cụ **MCP github CHẠY** · **REST thẳng tới `api.github.com` bị PROXY chặn 403**
+  ("GitHub access is not enabled for this session") **bất kể token** — `GITHUB_PAT` thật
+  cũng 403 trong khi `/user` trả 200, tức chính sách theo ĐƯỜNG DẪN chứ không theo danh
+  tính · `gh` không cài, và **cài cũng vô ích** vì nó đi đúng đường bị chặn. Việc của kho
+  đi bằng **MCP github + git**, không bằng REST thẳng.
+- `rg` là công cụ **BẮT BUỘC** (từ 15-08-2026). Thiếu nó lệnh tìm của agent gãy giữa
+  chừng chứ KHÔNG tự lùi về `grep` — phiên vẫn "chạy" nhưng tra cứu mù. Hook phiên thử
+  apt-get (có/không sudo, có/không `update`) rồi cargo, và đòi bằng chứng `rg --version`.
 - `python .claude/dev/launcher.py doctor` trước khi nghi ngờ bất cứ thứ gì khác.
   Thoát 12 = thiếu công cụ bắt buộc. Container Claude Code web ĐÃ ĐO 12-08-2026:
   có python/git/node/claude/rg, **KHÔNG** có codex/gh/pwsh — `.claude/hooks/session-start.sh`

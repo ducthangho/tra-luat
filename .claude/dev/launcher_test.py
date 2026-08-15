@@ -12,6 +12,7 @@ Chạy:  python .claude/dev/launcher_test.py             (chạy tất cả; Win
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import importlib.util
 import json
@@ -1849,6 +1850,60 @@ def t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung():
     bang(goi and not kq2.tron_ven, "None bi doc thanh rong: ket luan khong bang chung")
 
 
+# --------------------------------------------------- CÔ LẬP TRẠNG THÁI TOÀN CỤC
+#
+# VÌ SAO CÓ KHỐI NÀY — cross-review lượt 2 nhánh môi trường, finding mức HIGH
+# `launcher-tests-leak-global-module-monkeypatches`.
+#
+# `_tai_launcher_thu()` nạp một module launcher MỚI, nên ai cũng tưởng mỗi ca chạy
+# trong hộp riêng. KHÔNG PHẢI: module mới ấy vẫn `import os, shutil, subprocess,
+# platform` và nhận về ĐÚNG các singleton của tiến trình test. Nên `m.os.environ = …`
+# trong một ca là sửa `os.environ` của CẢ runner, và ca nào chạy sau đọc phải bản đã
+# méo.
+#
+# Hậu quả ĐO ĐƯỢC, không phải lo xa: sau `t85`, `subprocess.run` toàn cục bị thay, và
+# cổng đột biến đổ ba mục — trong đó hai mục KHÔNG liên quan gì tới bản vá
+# (`so_URL_tho_khong_chuan_hoa`, `bo_cung_hoa_dau_ra`). Người vá đã đọc nhầm hiện
+# tượng ấy thành "chập chờn" vì hai lượt chạy cho hai kết quả khác nhau — thật ra hoàn
+# toàn TẤT ĐỊNH, chỉ phụ thuộc bảng đột biến quyết định `t85` chạy được tới đâu.
+#
+# CHỮA Ở TẦNG HARNESS, KHÔNG CHỮA TỪNG CHỖ GỌI. Sửa 14 chỗ gán thì hôm nay sạch, còn
+# ca thứ 15 viết tháng sau lại rò — và rò IM LẶNG, chỉ hiện ra ở một mục không liên
+# quan cách đó vài trăm dòng. Ở đây runner tự chụp và tự hoàn nguyên quanh MỌI lượt
+# gọi ca, nên bảo đảm không phụ thuộc trí nhớ người viết test.
+#
+# Lớp lỗi này CÓ TRƯỚC bản vá môi trường: `t81` trên `master` cũng để lại
+# `subprocess.run` bị vá (master 5 chỗ, nhánh này 14). Master vô sự chỉ vì bảng đột
+# biến của nó không có ca nào chạy sau `t81` mà cần `subprocess.run` thật.
+_TOAN_CUC_CAN_CO_LAP = (
+    (os, "environ"),
+    (platform, "system"),
+    (subprocess, "run"),
+    (shutil, "which"),
+    (os.path, "expanduser"),
+)
+
+
+@contextlib.contextmanager
+def _co_lap_toan_cuc():
+    """Chụp rồi hoàn nguyên các singleton mà ca test hay vá.
+
+    `os.environ` được chụp bằng BẢN SAO nội dung chứ không chỉ tham chiếu: ca nào
+    `os.environ["X"] = …` thay vì gán cả đối tượng thì hoàn nguyên tham chiếu KHÔNG
+    xoá được mục vừa thêm.
+    """
+    cu = [(d, t, getattr(d, t)) for d, t in _TOAN_CUC_CAN_CO_LAP]
+    noi_dung_env = dict(os.environ)
+    try:
+        yield
+    finally:
+        for d, t, v in cu:
+            setattr(d, t, v)
+        if os.environ is not None and dict(os.environ) != noi_dung_env:
+            os.environ.clear()
+            os.environ.update(noi_dung_env)
+
+
 def _dot_bien_du_san(tong: int, khong_do: int) -> bool:
     """Ít nhất 70% đột biến phải đo được trên mỗi nền."""
     m = _tai_launcher_thu()
@@ -2076,6 +2131,52 @@ def t88_hook_phien_do_theo_NANG_LUC_khong_theo_bam_toan_tep():
              f"hook THAT cua kho khai thieu nang luc: {sorted(nl)}")
 
 
+@ca
+def t89_harness_phai_hoan_nguyen_trang_thai_toan_cuc():
+    """Runner phải tự cô lập — không được tin ca test nhớ dọn sau mình.
+
+    Cross-review lượt 2, `launcher-tests-leak-global-module-monkeypatches` (HIGH):
+    `_tai_launcher_thu()` nạp module launcher MỚI nhưng module ấy dùng CHÍNH các
+    singleton `os` `platform` `subprocess` `shutil` của tiến trình test. Nên
+    `m.subprocess.run = …` trong một ca là sửa `subprocess.run` của cả runner, và
+    cổng đột biến đổ ở những mục KHÔNG liên quan.
+
+    Ca này đo CHÍNH `_co_lap_toan_cuc`, không đo từng ca gọi nó — vì chốt đặt ở
+    harness thì thứ cần khoá cũng là harness. Bỏ chốt đi thì ca này đỏ.
+
+    Lưu ý một chiều dễ quên: `os.environ` phải hoàn nguyên cả NỘI DUNG, không chỉ
+    tham chiếu — ca nào `os.environ["X"] = …` thay vì gán cả đối tượng thì trả lại
+    tham chiếu cũ KHÔNG xoá được mục vừa thêm.
+    """
+    goc = (subprocess.run, shutil.which, platform.system, os.path.expanduser)
+    env_goc = dict(os.environ)
+    ten_la = "TL_CA_T89_KHONG_DUOC_SONG_SOT"
+    bang(ten_la not in os.environ, "moi truong da co bien thu nghiem tu truoc")
+
+    with _co_lap_toan_cuc():
+        subprocess.run = lambda *a, **k: None
+        shutil.which = lambda t: None
+        platform.system = lambda: "Plan9"
+        os.path.expanduser = lambda p: "/khong-co-that"
+        os.environ[ten_la] = "1"          # THEM muc, khong gan ca doi tuong
+        bang(platform.system() == "Plan9", "va trong khoi co lap phai co hieu luc")
+
+    bang((subprocess.run, shutil.which, platform.system, os.path.expanduser) == goc,
+         "singleton KHONG duoc hoan nguyen sau khoi co lap")
+    bang(ten_la not in os.environ,
+         "muc THEM vao os.environ song sot — hoan nguyen tham chieu la CHUA DU")
+    bang(dict(os.environ) == env_goc, "noi dung os.environ bi doi sau khoi co lap")
+
+    # Ngoại lệ ném ra giữa chừng cũng phải hoàn nguyên (đó là lý do dùng `finally`).
+    try:
+        with _co_lap_toan_cuc():
+            platform.system = lambda: "Haiku"
+            raise RuntimeError("vo tinh")
+    except RuntimeError:
+        pass
+    bang(platform.system is goc[2], "ngoai le giua chung ma KHONG hoan nguyen")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -2133,6 +2234,15 @@ DOT_BIEN = [
      ('    thieu = sorted(cua_master - dang_co)',
       '    thieu = []'),
      ["t88_hook_phien_do_theo_NANG_LUC_khong_theo_bam_toan_tep"]),
+    # KHONG co dot bien cho `_co_lap_toan_cuc`, va day la GIOI HAN CUA BANG NAY chu
+    # khong phai so sot. Runner doc `goc = LAUNCHER.read_text()` — no chi dot bien
+    # `launcher.py`. Chot co lap song trong `launcher_test.py`, tuc NGOAI tam voi.
+    # Da thu dat hai muc vao day: ca hai tra "khong tim thay doan de dot bien", va
+    # mot muc do THUONG TRUC la thu se bi bo qua — dung benh ma chinh dot review nay
+    # dang chua. Nen bo han, ghi ly do o day.
+    # `t89` tu chung minh bang khang dinh truc tiep (ke ca duong NEM NGOAI LE giua
+    # chung), cong phan chung tay: go chot co lap thi `t81` lam ban `subprocess.run`
+    # ngay tu ca dau tien.
     ("bo_kiem_prompt_rong",
      ('if not b.strip():\n        raise Chan(MA_PROMPT, f"tep prompt RONG: {p}")',
       'if False:\n        raise Chan(MA_PROMPT, f"tep prompt RONG: {p}")'),
@@ -2407,7 +2517,8 @@ def chay_dot_bien() -> int:
                 if fn.__name__ not in phai_chet:
                     continue
                 try:
-                    kq = fn()
+                    with _co_lap_toan_cuc():
+                        kq = fn()
                     # Ca TỰ BỎ QUA trên nền này thì đột biến KHÔNG ĐO ĐƯỢC, chứ
                     # không phải "test yếu". Audit codex: trên Windows t03 và t50
                     # bỏ qua nên gate 14/14 thành BẤT KHẢ THI ở đúng nền cần nghiệm
@@ -2464,7 +2575,8 @@ def main() -> int:
     hong_ds = []
     for fn in CA:
         try:
-            kq = fn()
+            with _co_lap_toan_cuc():
+                kq = fn()
             if isinstance(kq, str):
                 bo_qua += 1
                 print(f"  BO QUA {fn.__name__}: {kq}")

@@ -60,10 +60,12 @@ from __future__ import annotations
 import argparse
 import base64
 import hashlib
+import hmac
 import json
 import os
 import platform
 import re
+import secrets
 import shutil
 import signal
 import subprocess
@@ -1541,9 +1543,34 @@ _RE_BIEN_LIEN_QUAN = re.compile(
 NGUONG_DO_DAI_BI_MAT = 8
 
 
+# Khoá NGẪU NHIÊN mỗi tiến trình, KHÔNG BAO GIỜ xuất ra. Xem `_van_tay`.
+_KHOA_PHIEN = secrets.token_bytes(32)
+
+
 def _van_tay(v: str) -> str:
-    """8 ký tự đầu của sha256. KHÔNG phải để bảo mật — để SO SÁNH."""
-    return hashlib.sha256(v.encode("utf-8", "replace")).hexdigest()[:8]
+    """Nhãn so sánh NỘI BỘ. TUYỆT ĐỐI KHÔNG ĐƯỢC XUẤT RA NGOÀI.
+
+    Bản trước trả 8 hex đầu của **sha256 trần** VÀ xuất nó ra `moi-truong` /
+    `doctor --json` cho mọi biến khớp mẫu, kèm ĐỘ DÀI CHÍNH XÁC. Cross-review
+    `deterministic-secret-fingerprint-is-dictionary-oracle` (mức HIGH) chỉ ra đó là
+    **oracle từ điển**: với biến có tập ứng viên nhỏ — cờ, token cấu hình, mật khẩu
+    yếu — người đọc transcript chỉ cần băm ngoại tuyến từng ứng viên rồi so 32 bit là
+    ra giá trị. Digest ổn định còn cho phép NỐI một biến qua nhiều transcript.
+
+    Đau nhất là chỗ này: ngưỡng `NGUONG_DO_DAI_BI_MAT` tôi thêm CHỈ nằm trong
+    `_nhom_van_tay`, tức phép GOM — trong khi `van_tay` được XUẤT ở
+    `quet_bien_moi_truong`, một chỗ khác hẳn. Đặt chốt đúng chỗ mình đang nghĩ tới,
+    rồi xuất dữ liệu ở chỗ mình quên. Và mỉa mai đúng chỗ đáng nhớ: bản vá này sinh
+    ra để chống kết luận sai VỀ biến môi trường, rồi tự mở một đường suy ngược GIÁ TRỊ
+    biến môi trường.
+
+    Nay dùng HMAC với khoá ngẫu nhiên sống trong đúng một tiến trình. Hệ quả: so sánh
+    trong CÙNG một lượt vẫn đúng (thứ duy nhất phép gom cần), còn băm ngoại tuyến và
+    nối chéo transcript đều chết vì kẻ đọc không có khoá. Đầu ra người dùng thấy là
+    nhãn thứ tự (`nhom-1`), không phải digest.
+    """
+    return hmac.new(_KHOA_PHIEN, v.encode("utf-8", "replace"),
+                    hashlib.sha256).hexdigest()[:8]
 
 
 def _nhom_van_tay(ten_bien: list[str]) -> dict:
@@ -1591,13 +1618,27 @@ def quet_bien_moi_truong() -> dict:
                  if _RE_BIEN_NHAY_CAM.search(k) or _RE_BIEN_LIEN_QUAN.search(k))
     nhom = _nhom_van_tay(ten)
     giu_cho = {t for ds in nhom.values() if len(ds) >= 3 for t in ds}
+    # Nhãn nhóm THỨ TỰ, không phải digest. Chỉ những nhóm >= 3 mới được đặt tên, vì
+    # đó là thứ duy nhất phép kiểm này cần nói ra ("mấy biến này CÙNG một giá trị").
+    trung = sorted((k for k, v in nhom.items() if len(v) >= 3), key=lambda k: sorted(nhom[k]))
+    nhan = {k: f"nhom-{i}" for i, k in enumerate(trung, 1)}
+    thuoc_nhom = {t: nhan[k] for k, ds in nhom.items() if k in nhan for t in ds}
+
+    def _do_dai(v: str) -> str:
+        # Độ dài CHÍNH XÁC của một giá trị NGẮN thu hẹp không gian tìm kiếm thêm một
+        # bậc nữa, cộng với nhãn nhóm là đủ để đoán. Giá trị dài thì độ dài chính xác
+        # vô hại và có ích khi chẩn đoán, nên chỉ gộp ở đầu ngắn.
+        n = len(v)
+        return str(n) if n >= NGUONG_DO_DAI_BI_MAT else f"<{NGUONG_DO_DAI_BI_MAT}"
+
     return {
         "so_bien": len(ten),
-        "bien": [{"ten": t, "do_dai": len(os.environ.get(t, "")),
-                  "van_tay": _van_tay(os.environ[t]) if os.environ.get(t) else "",
+        "bien": [{"ten": t, "do_dai": _do_dai(os.environ.get(t, "")),
+                  "nhom": thuoc_nhom.get(t, ""),
                   "nghi_giu_cho": t in giu_cho}
                  for t in ten],
-        "nhom_trung_gia_tri": {k: v for k, v in nhom.items() if len(v) >= 3},
+        # Khoá là NHÃN, không phải băm — không có gì băm ngoại tuyến được nữa.
+        "nhom_trung_gia_tri": {nhan[k]: sorted(v) for k, v in nhom.items() if k in nhan},
     }
 
 
@@ -1844,11 +1885,11 @@ def lenh_moi_truong(a) -> int:
           f"(chi in TEN · DO DAI · VAN TAY — KHONG bao gio in gia tri)")
     for b in q["bien"]:
         canh = "  <-- NGHI GIU CHO (trung gia tri voi bien khac)" if b["nghi_giu_cho"] else ""
-        print(f"  {b['ten']:<40} {b['do_dai']:>6} ky tu  {b['van_tay']}{canh}")
+        print(f"  {b['ten']:<40} {b['do_dai']:>6} ky tu  {b['nhom']:<8}{canh}")
     if q["nhom_trung_gia_tri"]:
         print("\nNHOM TRUNG GIA TRI — gan nhu chac chan la chuoi giu cho:")
-        for vt, ds in q["nhom_trung_gia_tri"].items():
-            print(f"  {vt}  {len(ds)} bien: {', '.join(ds)}")
+        for ten_nhom, ds in q["nhom_trung_gia_tri"].items():
+            print(f"  {ten_nhom}  {len(ds)} bien: {', '.join(ds)}")
         print("  DA DAT != DUNG DUOC. Dung ket luan tu mot bien co mat.")
     return MA_OK
 

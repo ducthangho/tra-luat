@@ -1975,6 +1975,48 @@ def t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac():
          "tu choi ma van ghi tep la fail-open")
 
 
+@ca
+def t87_khong_duoc_xuat_digest_on_dinh_cua_gia_tri_bien():
+    """Đầu ra KHÔNG được chứa thứ băm ngoại tuyến được — cross-review, mức HIGH.
+
+    `deterministic-secret-fingerprint-is-dictionary-oracle`: bản trước xuất 8 hex đầu
+    của **sha256 trần** cho mọi biến khớp mẫu, kèm độ dài chính xác. Với biến có tập
+    ứng viên nhỏ, kẻ đọc transcript băm ngoại tuyến từng ứng viên rồi so 32 bit là ra
+    giá trị; digest ổn định còn cho phép NỐI một biến qua nhiều transcript.
+
+    Ngưỡng độ dài khi ấy chỉ nằm ở `_nhom_van_tay` (phép GOM), trong khi digest được
+    xuất ở `quet_bien_moi_truong` — chốt đặt một chỗ, rò ở chỗ khác.
+
+    Ca này đóng bằng PHẢN CHỨNG TỪ ĐIỂN, không bằng việc đọc mã: bơm giá trị đã biết
+    rồi đòi sha256 của nó KHÔNG xuất hiện trong đầu ra.
+    """
+    m = _tai_launcher_thu()
+    bi_mat = "gia-tri-biet-truoc-de-thu"
+    m.os.environ = {
+        "TL_TOKEN_THU": bi_mat, "TL_SECRET_THU": bi_mat, "TL_AUTH_THU": bi_mat,
+        "TL_NGAN_SECRET": "abc",
+        "PATH": "/usr/bin",
+    }
+    q = m.quet_bien_moi_truong()
+    xuat = json.dumps(q, ensure_ascii=False)
+
+    tho = hashlib.sha256(bi_mat.encode()).hexdigest()
+    bang(tho[:8] not in xuat, "sha256 TRAN cua gia tri VAN xuat hien trong dau ra")
+    bang("van_tay" not in xuat, "truong `van_tay` van con trong dau ra")
+    # Phép GOM vẫn phải hoạt động — bịt rò không được làm mù phép kiểm.
+    ds = [b for b in q["bien"] if b["ten"].startswith("TL_") and b["nhom"]]
+    bang(len(ds) == 3, f"van phai gom dung ba bien trung gia tri, duoc {len(ds)}")
+    bang({b["nhom"] for b in ds} == {"nhom-1"}, "ba bien trung phai cung MOT nhan nhom")
+    # Độ dài giá trị NGẮN phải bị gộp, không xuất con số chính xác.
+    ngan = [b for b in q["bien"] if b["ten"] == "TL_NGAN_SECRET"][0]
+    bang(ngan["do_dai"] == f"<{m.NGUONG_DO_DAI_BI_MAT}",
+         f"do dai gia tri ngan phai duoc gop, duoc {ngan['do_dai']!r}")
+    # Nhãn nội bộ phải đổi theo TIẾN TRÌNH: cùng giá trị, hai khoá khác nhau ⇒ khác nhãn.
+    m2 = _tai_launcher_thu()
+    bang(m._van_tay(bi_mat) != m2._van_tay(bi_mat),
+         "nhan noi bo GIONG NHAU giua hai tien trinh — khoa khong ngau nhien, oracle con song")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [

@@ -1,0 +1,29 @@
+nền: 109/109 đạt
+
+tự chứng minh suite KHÔNG RỖNG (nới ngưỡng ⇒ ca tương ứng phải ĐỎ):
+  ok  tran_attempt_3_thanh_99 → giết 1/1 ca: cap_lan_4_thoat_3
+  ok  same_failure_2_thanh_99 → giết 1/1 ca: same_failure_cung_id_qua_2_review
+  ok  bo_cung_hoa_stdout → giết 2/2 ca: stdout_cp1252, stdout_cp1258
+  ok  init_tu_cap_lease_nhu_bug_goc → giết 1/1 ca: init_KHONG_duoc_tu_cap_lease
+  ok  bo_chan_tu_cap_bang_ten_provider → giết 1/1 ca: tu_cap_lease_bang_ten_provider_bi_chan
+  ok  bo_kiem_han_trong_ham_chung → giết 2/2 ca: lease_da_het_han_khong_ghi_duoc, begin_attempt_sau_khi_lease_HET_HAN_bi_chan
+  ok  bo_gioi_han_cua_so_han → giết 1/1 ca: ac21_expires_ngoai_cua_so
+  ok  noi_danh_sach_cho_phep_chua_ten_gia_mao → giết 1/1 ca: lease_authority_ten_gia_mao_bi_chan
+  ok  tach_begin_attempt_khoi_ham_chung → giết 7/7 ca: ac21_lease_chi_co_expires, ac21_lease_thieu_tung_khoa, ac21_lease_sai_kieu_khong_traceback, ac21_khoa_sai_kieu_khong_traceback, ac21_khoa_rong, ac21_lease_tu_cap_trong_state, ac21_hai_cua_CUNG_luoc_do
+  ok  tra_ve_fail_open_thieu_lease → giết 1/1 ca: legacy_state_khong_co_lease_bi_chan
+  ok  ha_NFKC_ve_NFC → giết 7/7 ca: ac18_nfkc_hai_cham_toan_rong, ac18_nfkc_chu_toan_rong, ac18_nfkc_chu_so_tron, ac18_nfkc_chu_so_mu, ac18_nfkc_solidus_toan_rong, ac18_nfkc_gach_duoi_toan_rong, ac18_nfkc_vach_dung_toan_rong
+  ok  bo_loc_ky_tu_dinh_dang_Cf → giết 6/6 ca: doctrine_scan_bat_zero_width_bi_chan, ac18_cf_zwnj, ac18_cf_zwj, ac18_cf_word_joiner, ac18_cf_soft_hyphen, ac18_cf_bom
+  ok  bo_giai_html_entity → giết 4/4 ca: doctrine_scan_bat_html_entity_bi_chan, ac18_entity_thap_luc, ac18_entity_co_ten, ac18_entity_thieu_cham_phay
+  ok  bo_gap_dong_tu → giết 4/4 ca: ac18_dong_tu_cyrillic_e, ac18_dong_tu_cyrillic_o, ac18_dong_tu_hy_lap_o, ac18_dong_tu_cyrillic_a
+  ok  bo_gap_mui_ten → giết 1/1 ca: ac18_mui_ten_dai
+  ok  bo_bo_trang_tri_va_nhay → giết 1/1 ca: ac18_nhay_cong_xen_giua
+  ok  bo_gop_phan_cach → giết 2/2 ca: ac18_phan_cach_en_dash, ac18_phan_cach_hyphen
+  ok  bo_tag_html → giết 1/1 ca: ac18_tag_html_xen_giua
+  ok  bo_comment_html → giết 1/1 ca: ac18_comment_html_xen_giua
+  ok  bo_rut_text_link_markdown → giết 1/1 ca: ac18_link_markdown
+  ok  bo_go_backslash_escape → giết 1/1 ca: ac18_backslash_escape
+  ok  bo_ngu_canh_hang_ngon_ngu_thuong → giết 3/3 ca: ac19_oan_claude_md_master, ac19_oan_term_giua_cau, ac19_oan_term_ngat_dong
+  ok  go_han_cum_khoi_danh_sach → giết 1/1 ca: ac19_bang_vai_tro_THAT_van_bi_bat
+
+TỔNG: ĐẠT
+SUITE_BEFORE_RC=0

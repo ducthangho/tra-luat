@@ -1,0 +1,42 @@
+nền: 136/136 đạt
+
+AC 18 · mọi lớp lách (42 ca) đều có ít nhất một đột biến
+
+tự chứng minh suite KHÔNG RỖNG — HAI VẾ (ca đích ĐỎ · ca ngoài tập XANH):
+  ok  tran_attempt_3_thanh_99 → giết ĐÚNG 1/1 ca đã khai, 135 ca ngoài tập vẫn XANH
+  ok  same_failure_2_thanh_99 → giết ĐÚNG 2/2 ca đã khai, 134 ca ngoài tập vẫn XANH
+  ok  bo_cung_hoa_stdout → giết ĐÚNG 2/2 ca đã khai, 134 ca ngoài tập vẫn XANH
+  ok  init_tu_cap_lease_nhu_bug_goc → giết 1/1 ca đích · MỘT VẾ, có lý do: đột biến này đưa `init` về thẳng `leased`, nên `record-lease` (vốn chỉ chạy từ `awaiting_lease`) hỏng ở MỌI ca dùng fixture chung — đo được 41 ca chết. Nó phá chính bộ đồ gá, không phải một lớp chuẩn hoá, nên vế 'ca ngoài tập vẫn XANH' không có nghĩa ở đây.
+  ok  bo_chan_tu_cap_bang_ten_provider → giết ĐÚNG 1/1 ca đã khai, 135 ca ngoài tập vẫn XANH
+  ok  bo_kiem_han_trong_ham_chung → giết ĐÚNG 2/2 ca đã khai, 134 ca ngoài tập vẫn XANH
+  ok  bo_gioi_han_cua_so_han → giết ĐÚNG 1/1 ca đã khai, 135 ca ngoài tập vẫn XANH
+  ok  noi_danh_sach_cho_phep_chua_ten_gia_mao → giết ĐÚNG 2/2 ca đã khai, 134 ca ngoài tập vẫn XANH
+  ok  tach_begin_attempt_khoi_ham_chung → giết ĐÚNG 8/8 ca đã khai, 128 ca ngoài tập vẫn XANH
+  ok  tra_ve_fail_open_thieu_lease → giết ĐÚNG 4/4 ca đã khai, 132 ca ngoài tập vẫn XANH
+  ok  ha_NFKC_ve_NFC → giết ĐÚNG 7/7 ca đã khai, 129 ca ngoài tập vẫn XANH
+  ok  bo_ca_hai_duong_gap_tuong_thich → giết 16/16 ca đích · MỘT VẾ, có lý do: gỡ casefold làm MỌI ca có chữ hoa trong nội dung bơm mất khớp — đo được 39 ca chết. Ligature ﬀ đi qua cả NFKC lẫn casefold nên không có đột biến phẫu thuật nào cho lớp này; nói thẳng thay vì khai một tập hẹp rồi tưởng đã đo đúng lớp.
+  ok  bo_casefold → giết 8/8 ca đích · MỘT VẾ, có lý do: cùng lý do: casefold áp cho CẢ HAI VẾ so khớp nên gỡ nó đụng mọi ca có chữ hoa — đo được 33 ca chết.
+  ok  bo_chuan_hoa_unicode → giết ĐÚNG 8/8 ca đã khai, 128 ca ngoài tập vẫn XANH
+  ok  bo_thu_gon_khoang_trang → giết ĐÚNG 1/1 ca đã khai, 135 ca ngoài tập vẫn XANH
+  ok  bo_ca_ba_duong_phu_nbsp → giết 1/1 ca đích · MỘT VẾ, có lý do: NBSP được ba lớp phủ chồng (NFKC · _PHAN_CACH · str.split); gỡ cả ba thì đụng gần hết bảng nên vế 'ca ngoài tập vẫn XANH' không áp được. Lớp `thu_gon_khoang_trang` vẫn có ISOLATE phẫu thuật riêng: ac18_thu_gon_khoang_trang_tab.
+  ok  tra_regex_tag_ve_cam_theo_vi_tri → giết ĐÚNG 3/3 ca đã khai, 133 ca ngoài tập vẫn XANH
+  ok  bo_chot_cum_dung_mot_minh → giết ĐÚNG 6/6 ca đã khai, 130 ca ngoài tập vẫn XANH
+  ok  noi_dung_mot_minh_thanh_co_chua → giết ĐÚNG 4/4 ca đã khai, 132 ca ngoài tập vẫn XANH
+  ok  mo_lai_duong_reviewing_sang_running → giết ĐÚNG 1/1 ca đã khai, 135 ca ngoài tập vẫn XANH
+  ok  void_khong_tra_state_ve_chay_duoc → giết ĐÚNG 1/1 ca đã khai, 135 ca ngoài tập vẫn XANH
+  ok  record_review_khong_doi_luot_dang_mo → giết ĐÚNG 2/2 ca đã khai, 134 ca ngoài tập vẫn XANH
+  ok  bo_loc_ky_tu_dinh_dang_Cf → giết ĐÚNG 6/6 ca đã khai, 130 ca ngoài tập vẫn XANH
+  ok  bo_giai_html_entity → giết ĐÚNG 4/4 ca đã khai, 132 ca ngoài tập vẫn XANH
+  ok  bo_gap_dong_tu → giết ĐÚNG 4/4 ca đã khai, 132 ca ngoài tập vẫn XANH
+  ok  bo_gap_mui_ten → giết ĐÚNG 1/1 ca đã khai, 135 ca ngoài tập vẫn XANH
+  ok  bo_bo_trang_tri_va_nhay → giết ĐÚNG 4/4 ca đã khai, 132 ca ngoài tập vẫn XANH
+  ok  bo_gop_phan_cach → giết ĐÚNG 4/4 ca đã khai, 132 ca ngoài tập vẫn XANH
+  ok  bo_tag_html → giết ĐÚNG 4/4 ca đã khai, 132 ca ngoài tập vẫn XANH
+  ok  bo_comment_html → giết ĐÚNG 1/1 ca đã khai, 135 ca ngoài tập vẫn XANH
+  ok  bo_rut_text_link_markdown → giết ĐÚNG 1/1 ca đã khai, 135 ca ngoài tập vẫn XANH
+  ok  bo_go_backslash_escape → giết ĐÚNG 1/1 ca đã khai, 135 ca ngoài tập vẫn XANH
+  ok  bo_ngu_canh_hang_ngon_ngu_thuong → giết ĐÚNG 4/4 ca đã khai, 132 ca ngoài tập vẫn XANH
+  ok  go_han_cum_khoi_danh_sach → giết ĐÚNG 7/7 ca đã khai, 129 ca ngoài tập vẫn XANH
+
+TỔNG: ĐẠT
+SUITE_V4_RC=0

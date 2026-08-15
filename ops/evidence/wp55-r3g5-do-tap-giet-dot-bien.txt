@@ -1,0 +1,115 @@
+
+### tran_attempt_3_thanh_99  [OK] chết 1 / khai 1
+  DO_DUOC = ['cap_lan_4_thoat_3']
+
+### same_failure_2_thanh_99  [LECH] chết 2 / khai 1
+  THUA  (chết mà KHÔNG khai): ['init_khong_ghi_de_state_da_blocked']
+  DO_DUOC = ['init_khong_ghi_de_state_da_blocked', 'same_failure_cung_id_qua_2_review']
+
+### bo_cung_hoa_stdout  [OK] chết 2 / khai 2
+  DO_DUOC = ['stdout_cp1252', 'stdout_cp1258']
+
+### init_tu_cap_lease_nhu_bug_goc  [LECH] chết 41 / khai 1
+  THUA  (chết mà KHÔNG khai): ['accepted_chi_dat_duoc_qua_record_review', 'approve_neo_dung_head_thi_chay', 'begin_attempt_lap_khong_tieu_them_tran', 'begin_attempt_sau_khi_lease_HET_HAN_bi_chan', 'cap_lan_4_thoat_3', 'comment_id_chua_dang_ky_bi_tu_choi', 'comment_id_dung_lai_bi_tu_choi', 'comment_id_sai_transition_bi_tu_choi', 'head_moi_lam_ban_duyet_cu_het_hieu_luc', 'init_cross_provider_ok', 'init_khong_ghi_de_state_da_blocked', 'lease_authority_nguoi_co_tham_quyen_thi_qua', 'lease_authority_ten_gia_mao_bi_chan', 'lease_hop_le_thi_mo_duoc_luot', 'record_post_id_sai_dang_bi_tu_choi', 'record_post_trung_id_bi_tu_choi', 'review_phai_neo_head_da_dua_ra_review', 'review_sai_provider_thoat_4', 'review_thieu_hoac_sai_dang_sha', 'reviewing_chi_roi_bang_verdict', 'same_failure_cung_id_qua_2_review', 'same_failure_hai_id_khac_khong_kich', 'same_failure_hai_mo_ta_cung_id_la_mot', 'same_failure_lap_trong_mot_review_tinh_mot', 'slug_sai_dang_thoat_khac_0', 'stdout_cp1252', 'stdout_cp1258', 'thieu_comment_id_chan_transition', 'thieu_finding_id_thoat_khac_0', 'transition_hop_le_rc0', 'transition_khong_hop_le_thoat_8', 'transition_reviewing_phai_khai_head', 'tu_cap_lease_bang_ten_provider_bi_chan', 'vao_reviewing_phai_co_luot_dang_mo', 'void_attempt_allowlist', 'void_attempt_ly_do_tu_che_bi_tu_choi', 'void_roi_duyet_bang_luot_so_khong', 'void_sau_review_bi_chan', 'void_tu_reviewing_khong_ket_cung', 'void_xong_van_mo_lai_duoc_luot']
+  DO_DUOC = ['accepted_chi_dat_duoc_qua_record_review', 'approve_neo_dung_head_thi_chay', 'begin_attempt_lap_khong_tieu_them_tran', 'begin_attempt_sau_khi_lease_HET_HAN_bi_chan', 'cap_lan_4_thoat_3', 'comment_id_chua_dang_ky_bi_tu_choi', 'comment_id_dung_lai_bi_tu_choi', 'comment_id_sai_transition_bi_tu_choi', 'head_moi_lam_ban_duyet_cu_het_hieu_luc', 'init_KHONG_duoc_tu_cap_lease', 'init_cross_provider_ok', 'init_khong_ghi_de_state_da_blocked', 'lease_authority_nguoi_co_tham_quyen_thi_qua', 'lease_authority_ten_gia_mao_bi_chan', 'lease_hop_le_thi_mo_duoc_luot', 'record_post_id_sai_dang_bi_tu_choi', 'record_post_trung_id_bi_tu_choi', 'review_phai_neo_head_da_dua_ra_review', 'review_sai_provider_thoat_4', 'review_thieu_hoac_sai_dang_sha', 'reviewing_chi_roi_bang_verdict', 'same_failure_cung_id_qua_2_review', 'same_failure_hai_id_khac_khong_kich', 'same_failure_hai_mo_ta_cung_id_la_mot', 'same_failure_lap_trong_mot_review_tinh_mot', 'slug_sai_dang_thoat_khac_0', 'stdout_cp1252', 'stdout_cp1258', 'thieu_comment_id_chan_transition', 'thieu_finding_id_thoat_khac_0', 'transition_hop_le_rc0', 'transition_khong_hop_le_thoat_8', 'transition_reviewing_phai_khai_head', 'tu_cap_lease_bang_ten_provider_bi_chan', 'vao_reviewing_phai_co_luot_dang_mo', 'void_attempt_allowlist', 'void_attempt_ly_do_tu_che_bi_tu_choi', 'void_roi_duyet_bang_luot_so_khong', 'void_sau_review_bi_chan', 'void_tu_reviewing_khong_ket_cung', 'void_xong_van_mo_lai_duoc_luot']
+
+### bo_chan_tu_cap_bang_ten_provider  [OK] chết 1 / khai 1
+  DO_DUOC = ['tu_cap_lease_bang_ten_provider_bi_chan']
+
+### bo_kiem_han_trong_ham_chung  [OK] chết 2 / khai 2
+  DO_DUOC = ['begin_attempt_sau_khi_lease_HET_HAN_bi_chan', 'lease_da_het_han_khong_ghi_duoc']
+
+### bo_gioi_han_cua_so_han  [OK] chết 1 / khai 1
+  DO_DUOC = ['ac21_expires_ngoai_cua_so']
+
+### noi_danh_sach_cho_phep_chua_ten_gia_mao  [LECH] chết 2 / khai 1
+  THUA  (chết mà KHÔNG khai): ['ac21_lease_tu_cap_trong_state']
+  DO_DUOC = ['ac21_lease_tu_cap_trong_state', 'lease_authority_ten_gia_mao_bi_chan']
+
+### tach_begin_attempt_khoi_ham_chung  [LECH] chết 8 / khai 7
+  THUA  (chết mà KHÔNG khai): ['ac21_expires_ngoai_cua_so']
+  DO_DUOC = ['ac21_expires_ngoai_cua_so', 'ac21_hai_cua_CUNG_luoc_do', 'ac21_khoa_rong', 'ac21_khoa_sai_kieu_khong_traceback', 'ac21_lease_chi_co_expires', 'ac21_lease_sai_kieu_khong_traceback', 'ac21_lease_thieu_tung_khoa', 'ac21_lease_tu_cap_trong_state']
+
+### tra_ve_fail_open_thieu_lease  [LECH] chết 4 / khai 1
+  THUA  (chết mà KHÔNG khai): ['ac21_khoa_sai_kieu_khong_traceback', 'ac21_lease_sai_kieu_khong_traceback', 'ac21_lease_thieu_tung_khoa']
+  DO_DUOC = ['ac21_khoa_sai_kieu_khong_traceback', 'ac21_lease_sai_kieu_khong_traceback', 'ac21_lease_thieu_tung_khoa', 'legacy_state_khong_co_lease_bi_chan']
+
+### ha_NFKC_ve_NFC  [OK] chết 7 / khai 7
+  DO_DUOC = ['ac18_nfkc_chu_so_mu', 'ac18_nfkc_chu_so_tron', 'ac18_nfkc_chu_toan_rong', 'ac18_nfkc_gach_duoi_toan_rong', 'ac18_nfkc_hai_cham_toan_rong', 'ac18_nfkc_solidus_toan_rong', 'ac18_nfkc_vach_dung_toan_rong']
+
+### bo_ca_hai_duong_gap_tuong_thich  [LECH] chết 39 / khai 16
+  THUA  (chết mà KHÔNG khai): ['ac18_backslash_escape', 'ac18_cf_bom', 'ac18_cf_soft_hyphen', 'ac18_cf_word_joiner', 'ac18_cf_zwj', 'ac18_cf_zwnj', 'ac18_comment_html_xen_giua', 'ac18_dong_tu_cyrillic_e', 'ac18_entity_co_ten', 'ac18_entity_thap_luc', 'ac18_entity_thieu_cham_phay', 'ac18_link_markdown', 'ac18_nhay_cong_xen_giua', 'ac18_quoted_angle_dau_nho_hon', 'ac18_quoted_angle_nhay_don', 'ac18_quoted_angle_nhay_kep', 'ac18_tag_html_xen_giua', 'ac18_to_hop_dau_NFD', 'doctrine_scan_bat_doctrine_THAT_tu_protocol', 'doctrine_scan_bat_html_entity_bi_chan', 'doctrine_scan_bat_qua_ngat_dong', 'doctrine_scan_bat_zero_width_bi_chan', 'doctrine_scan_bom_cum_tu_do']
+  DO_DUOC = ['ac18_backslash_escape', 'ac18_casefold_chu_hoa', 'ac18_cf_bom', 'ac18_cf_soft_hyphen', 'ac18_cf_word_joiner', 'ac18_cf_zwj', 'ac18_cf_zwnj', 'ac18_comment_html_xen_giua', 'ac18_cum_dung_mot_minh_dong_tran', 'ac18_cum_dung_mot_minh_gach_dau_dong', 'ac18_cum_dung_mot_minh_heading', 'ac18_cum_dung_mot_minh_in_dam', 'ac18_cum_dung_mot_minh_kem_hai_cham', 'ac18_cum_dung_mot_minh_so_thu_tu', 'ac18_dong_tu_cyrillic_e', 'ac18_entity_co_ten', 'ac18_entity_thap_luc', 'ac18_entity_thieu_cham_phay', 'ac18_link_markdown', 'ac18_nfkc_chu_so_mu', 'ac18_nfkc_chu_so_tron', 'ac18_nfkc_chu_toan_rong', 'ac18_nfkc_gach_duoi_toan_rong', 'ac18_nfkc_hai_cham_toan_rong', 'ac18_nfkc_solidus_toan_rong', 'ac18_nfkc_vach_dung_toan_rong', 'ac18_nhay_cong_xen_giua', 'ac18_quoted_angle_dau_nho_hon', 'ac18_quoted_angle_nhay_don', 'ac18_quoted_angle_nhay_kep', 'ac18_tag_html_xen_giua', 'ac18_to_hop_dau_NFD', 'ac18_tuong_thich_ligature_ff', 'ac19_bang_vai_tro_THAT_van_bi_bat', 'doctrine_scan_bat_doctrine_THAT_tu_protocol', 'doctrine_scan_bat_html_entity_bi_chan', 'doctrine_scan_bat_qua_ngat_dong', 'doctrine_scan_bat_zero_width_bi_chan', 'doctrine_scan_bom_cum_tu_do']
+
+### bo_casefold  [LECH] chết 33 / khai 8
+  THUA  (chết mà KHÔNG khai): ['ac18_backslash_escape', 'ac18_cf_bom', 'ac18_cf_soft_hyphen', 'ac18_cf_word_joiner', 'ac18_cf_zwj', 'ac18_cf_zwnj', 'ac18_comment_html_xen_giua', 'ac18_dong_tu_cyrillic_e', 'ac18_entity_co_ten', 'ac18_entity_thap_luc', 'ac18_entity_thieu_cham_phay', 'ac18_link_markdown', 'ac18_nfkc_chu_toan_rong', 'ac18_nfkc_hai_cham_toan_rong', 'ac18_nhay_cong_xen_giua', 'ac18_quoted_angle_dau_nho_hon', 'ac18_quoted_angle_nhay_don', 'ac18_quoted_angle_nhay_kep', 'ac18_tag_html_xen_giua', 'ac18_to_hop_dau_NFD', 'doctrine_scan_bat_doctrine_THAT_tu_protocol', 'doctrine_scan_bat_html_entity_bi_chan', 'doctrine_scan_bat_qua_ngat_dong', 'doctrine_scan_bat_zero_width_bi_chan', 'doctrine_scan_bom_cum_tu_do']
+  DO_DUOC = ['ac18_backslash_escape', 'ac18_casefold_chu_hoa', 'ac18_cf_bom', 'ac18_cf_soft_hyphen', 'ac18_cf_word_joiner', 'ac18_cf_zwj', 'ac18_cf_zwnj', 'ac18_comment_html_xen_giua', 'ac18_cum_dung_mot_minh_dong_tran', 'ac18_cum_dung_mot_minh_gach_dau_dong', 'ac18_cum_dung_mot_minh_heading', 'ac18_cum_dung_mot_minh_in_dam', 'ac18_cum_dung_mot_minh_kem_hai_cham', 'ac18_cum_dung_mot_minh_so_thu_tu', 'ac18_dong_tu_cyrillic_e', 'ac18_entity_co_ten', 'ac18_entity_thap_luc', 'ac18_entity_thieu_cham_phay', 'ac18_link_markdown', 'ac18_nfkc_chu_toan_rong', 'ac18_nfkc_hai_cham_toan_rong', 'ac18_nhay_cong_xen_giua', 'ac18_quoted_angle_dau_nho_hon', 'ac18_quoted_angle_nhay_don', 'ac18_quoted_angle_nhay_kep', 'ac18_tag_html_xen_giua', 'ac18_to_hop_dau_NFD', 'ac19_bang_vai_tro_THAT_van_bi_bat', 'doctrine_scan_bat_doctrine_THAT_tu_protocol', 'doctrine_scan_bat_html_entity_bi_chan', 'doctrine_scan_bat_qua_ngat_dong', 'doctrine_scan_bat_zero_width_bi_chan', 'doctrine_scan_bom_cum_tu_do']
+
+### bo_chuan_hoa_unicode  [OK] chết 8 / khai 8
+  DO_DUOC = ['ac18_nfkc_chu_so_mu', 'ac18_nfkc_chu_so_tron', 'ac18_nfkc_chu_toan_rong', 'ac18_nfkc_gach_duoi_toan_rong', 'ac18_nfkc_hai_cham_toan_rong', 'ac18_nfkc_solidus_toan_rong', 'ac18_nfkc_vach_dung_toan_rong', 'ac18_to_hop_dau_NFD']
+
+### bo_thu_gon_khoang_trang  [LECH] chết 0 / khai 1
+  THIEU (khai mà KHÔNG chết): ['ac18_nbsp_phu_ba_lop']
+  DO_DUOC = []
+
+### tra_regex_tag_ve_cam_theo_vi_tri  [OK] chết 3 / khai 3
+  DO_DUOC = ['ac18_quoted_angle_dau_nho_hon', 'ac18_quoted_angle_nhay_don', 'ac18_quoted_angle_nhay_kep']
+
+### bo_chot_cum_dung_mot_minh  [OK] chết 6 / khai 6
+  DO_DUOC = ['ac18_cum_dung_mot_minh_dong_tran', 'ac18_cum_dung_mot_minh_gach_dau_dong', 'ac18_cum_dung_mot_minh_heading', 'ac18_cum_dung_mot_minh_in_dam', 'ac18_cum_dung_mot_minh_kem_hai_cham', 'ac18_cum_dung_mot_minh_so_thu_tu']
+
+### noi_dung_mot_minh_thanh_co_chua  [OK] chết 4 / khai 4
+  DO_DUOC = ['ac19_oan_claude_md_master', 'ac19_oan_cum_trong_cau_dung_mot_minh', 'ac19_oan_term_giua_cau', 'ac19_oan_term_ngat_dong']
+
+### mo_lai_duong_reviewing_sang_running  [LECH] chết 0 / khai 1
+  THIEU (khai mà KHÔNG chết): ['reviewing_chi_roi_bang_verdict']
+  DO_DUOC = []
+
+### void_khong_tra_state_ve_chay_duoc  [OK] chết 1 / khai 1
+  DO_DUOC = ['void_tu_reviewing_khong_ket_cung']
+
+### record_review_khong_doi_luot_dang_mo  [LECH] chết 0 / khai 1
+  THIEU (khai mà KHÔNG chết): ['void_roi_duyet_bang_luot_so_khong']
+  DO_DUOC = []
+
+### bo_loc_ky_tu_dinh_dang_Cf  [OK] chết 6 / khai 6
+  DO_DUOC = ['ac18_cf_bom', 'ac18_cf_soft_hyphen', 'ac18_cf_word_joiner', 'ac18_cf_zwj', 'ac18_cf_zwnj', 'doctrine_scan_bat_zero_width_bi_chan']
+
+### bo_giai_html_entity  [OK] chết 4 / khai 4
+  DO_DUOC = ['ac18_entity_co_ten', 'ac18_entity_thap_luc', 'ac18_entity_thieu_cham_phay', 'doctrine_scan_bat_html_entity_bi_chan']
+
+### bo_gap_dong_tu  [OK] chết 4 / khai 4
+  DO_DUOC = ['ac18_dong_tu_cyrillic_a', 'ac18_dong_tu_cyrillic_e', 'ac18_dong_tu_cyrillic_o', 'ac18_dong_tu_hy_lap_o']
+
+### bo_gap_mui_ten  [OK] chết 1 / khai 1
+  DO_DUOC = ['ac18_mui_ten_dai']
+
+### bo_bo_trang_tri_va_nhay  [LECH] chết 4 / khai 1
+  THUA  (chết mà KHÔNG khai): ['ac18_cum_dung_mot_minh_in_dam', 'doctrine_scan_bat_doctrine_THAT_tu_protocol', 'doctrine_scan_bat_qua_ngat_dong']
+  DO_DUOC = ['ac18_cum_dung_mot_minh_in_dam', 'ac18_nhay_cong_xen_giua', 'doctrine_scan_bat_doctrine_THAT_tu_protocol', 'doctrine_scan_bat_qua_ngat_dong']
+
+### bo_gop_phan_cach  [LECH] chết 4 / khai 2
+  THUA  (chết mà KHÔNG khai): ['ac18_cum_dung_mot_minh_gach_dau_dong', 'ac18_phan_cach_dau_tru_toan_hoc']
+  DO_DUOC = ['ac18_cum_dung_mot_minh_gach_dau_dong', 'ac18_phan_cach_dau_tru_toan_hoc', 'ac18_phan_cach_en_dash', 'ac18_phan_cach_hyphen']
+
+### bo_tag_html  [LECH] chết 4 / khai 1
+  THUA  (chết mà KHÔNG khai): ['ac18_quoted_angle_dau_nho_hon', 'ac18_quoted_angle_nhay_don', 'ac18_quoted_angle_nhay_kep']
+  DO_DUOC = ['ac18_quoted_angle_dau_nho_hon', 'ac18_quoted_angle_nhay_don', 'ac18_quoted_angle_nhay_kep', 'ac18_tag_html_xen_giua']
+
+### bo_comment_html  [OK] chết 1 / khai 1
+  DO_DUOC = ['ac18_comment_html_xen_giua']
+
+### bo_rut_text_link_markdown  [OK] chết 1 / khai 1
+  DO_DUOC = ['ac18_link_markdown']
+
+### bo_go_backslash_escape  [OK] chết 1 / khai 1
+  DO_DUOC = ['ac18_backslash_escape']
+
+### bo_ngu_canh_hang_ngon_ngu_thuong  [LECH] chết 4 / khai 3
+  THUA  (chết mà KHÔNG khai): ['ac19_oan_cum_trong_cau_dung_mot_minh']
+  DO_DUOC = ['ac19_oan_claude_md_master', 'ac19_oan_cum_trong_cau_dung_mot_minh', 'ac19_oan_term_giua_cau', 'ac19_oan_term_ngat_dong']
+
+### go_han_cum_khoi_danh_sach  [LECH] chết 7 / khai 1
+  THUA  (chết mà KHÔNG khai): ['ac18_cum_dung_mot_minh_dong_tran', 'ac18_cum_dung_mot_minh_gach_dau_dong', 'ac18_cum_dung_mot_minh_heading', 'ac18_cum_dung_mot_minh_in_dam', 'ac18_cum_dung_mot_minh_kem_hai_cham', 'ac18_cum_dung_mot_minh_so_thu_tu']
+  DO_DUOC = ['ac18_cum_dung_mot_minh_dong_tran', 'ac18_cum_dung_mot_minh_gach_dau_dong', 'ac18_cum_dung_mot_minh_heading', 'ac18_cum_dung_mot_minh_in_dam', 'ac18_cum_dung_mot_minh_kem_hai_cham', 'ac18_cum_dung_mot_minh_so_thu_tu', 'ac19_bang_vai_tro_THAT_van_bi_bat']
+RC=0

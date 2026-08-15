@@ -355,10 +355,35 @@ sai**. Vì thế nó không vá được trong revision 3 — vá là **nới m�
    - khai bởi người **không** trong `NGUOI_CO_THAM_QUYEN` ⇒ ĐỎ.
 6. Một **đột biến** bỏ chốt ở mục 4 (cho approve khi bảo đảm chưa đạt) phải làm ca đích ĐỎ.
 
-**Vì sao mục này đáng nằm trong revision 4, không hoãn tiếp:** nó là lý do packet **đứng
-hình** khi không có phiên `codex`. Đã đo trong ngày — `codex` cài trong container điều phối
-nhưng `codex login status` trả `Not logged in`, nên mọi lượt review hợp lệ đều phải chờ một
-máy khác. Chừng nào AC 5 còn chặn tuyệt đối, đó là **điểm chết đơn** của cả vòng lặp.
+**ĐÍNH CHÍNH — căn cứ cấp bách của mục này đã SAI, mục vẫn đứng vững vì lý do khác.**
+
+Bản `fc5936c` viết: *"`codex` cài trong container điều phối nhưng `codex login status` trả
+`Not logged in`, nên mọi lượt review hợp lệ đều phải chờ một máy khác — AC 5 là **điểm chết
+đơn** của cả vòng lặp."*
+
+Câu đó **sai**, và sai theo kiểu đắt nhất: nó suy từ MỘT lệnh ra một kết luận về môi trường.
+`codex login status` nói đúng sự thật của nó — không có `auth.json` trên đĩa — nhưng tôi
+đọc thành "không dùng được", mà không hỏi tiếp **nó xác thực bằng đường nào**. Xác thực nằm
+ở biến môi trường `CODEX_AUTH_JSON` (base64 của chính `auth.json`). Giải mã ra `~/.codex/auth.json`
+là `codex` chạy được ngay. Cross-review lượt 11 **đã chạy trong chính container này**, ra
+verdict `changes_requested` neo `4085bbf22d565a4189977f0504dfd8e5f748bfce`.
+
+Sai lầm nối tiếp, đáng ghi vì đã có tiền lệ trong `CLAUDE.md`: khi đi tìm biến môi trường,
+tôi `grep` theo một **danh sách tên đoán trước** (`OPENAI_API_KEY`, `CODEX_API_KEY`, …) nên
+trượt đúng cái tên thật. Đó là cùng một lỗi với bộ quét secrets lọc theo **phần mở rộng** rồi
+mù với `.env` — *lọc theo danh sách đoán trước thì mù đúng chỗ thứ cần tìm đang nằm*.
+
+Chính adapter này đã cảnh báo trước bằng chữ, ở `.claude/skills/work-packet/SKILL.md`:
+**"Vắng mặt là một QUAN SÁT; 'môi trường không có' là một KẾT LUẬN."** Tôi đọc dòng đó, rồi
+vẫn vi phạm nó. Giá phải trả: packet đứng hình gần trọn một ngày để chờ một phiên `codex`
+vốn luôn sẵn sàng.
+
+**AC 27 vẫn đứng — nhưng trên căn cứ khác, và với mức ưu tiên thấp hơn.** Mâu thuẫn §8 ↔ AC 5
+là mâu thuẫn **văn bản**, không phụ thuộc việc `codex` có sẵn hay không: §8 cho phép
+`same_provider_approved` khi phía kia hết quota, còn AC 5 chặn **vô điều kiện** ngay tại
+`init`. Đường lui mà protocol viết ra vẫn là đường **không đi được**, và điều đó sai bất kể
+hôm nay ai đăng nhập được. Cái mất đi chỉ là chữ *"điểm chết đơn"* — hết quota vẫn là chuyện
+sẽ xảy ra, nhưng nó là rủi ro có thật chứ không còn là sự cố đang diễn ra.
 
 ## Ghi chú về phạm vi — cảnh báo trước cho lượt executor
 
@@ -373,6 +398,22 @@ doctrine-comment-erases-fence-closer-bypass
 
 — đều **mô tả lỗi của cơ chế suy đoán sắp bị xoá**. Vá chúng theo revision 3 rồi mới áp
 revision 4 là làm hai lần và vứt lần đầu.
+
+**Lượt 11 đã trả lời thẳng câu hỏi mà bản thảo này đặt cược vào.** Verdict
+`ops/reviews/wp55-r3-review-11-codex-verdict.md` (nhánh `ops/wp55-r3-review-11-verdict`,
+commit `653672e12bf9ff04fb3ea2972c3576be458c58a1`, sha256
+`4f6d5ab39d5a05eb3fc910d3a85dd1fa58a05653d19aa78b740230e0026b0f6f`) kết luận nguyên văn:
+
+**AC 19 hiện tại không thể cưỡng chế máy một cách vừa sound vừa complete: 'văn xuôi kể lại
+kết quả đo' là phân loại ngữ nghĩa mở, còn marker từ vựng (`rc=`, phân số, từ 'đo') không
+chứng minh quan hệ đó. Revision 4 phải thay ngoại lệ bằng hợp đồng cơ học hữu hạn; vá thêm
+heuristic tiếp tục tạo lách/bắt oan.**
+
+Đây là **bằng chứng độc lập, khác provider** cho hướng đi của AC 19 mới, và nó mạnh hơn lập
+luận của chính bản thảo: bản thảo suy từ việc con lắc đã đánh quá sáu lần; reviewer nói
+thẳng rằng cái đích **không tồn tại**, nên lần thứ bảy cũng vô ích. Lượt 11 cũng **không**
+tìm ra doctrine finding mới — bốn P1 cũ tái lập nguyên trạng, có fixture nguyên văn và đối
+chứng cùng-câu-khác-đúng-một-biến.
 
 Ba mục **không** phụ thuộc AC 19, vá được ngay và không phí:
 

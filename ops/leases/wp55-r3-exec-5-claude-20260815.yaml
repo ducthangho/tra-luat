@@ -166,3 +166,4 @@ master_sha_at_grant: 2531366e1abc6cbca0a6c2765e40e54be38d1fb7
 doctrine_scan_on_merged_tree: 'rc=0 — sạch với master 2531366 (đã đo)'
 prior_generation_pull_request: 115
 prior_generation_handoff: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5297276671
+posted_comment_id: 5300570464   # workflow ghi, ĐỪNG sửa tay

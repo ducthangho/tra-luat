@@ -432,14 +432,46 @@ def _phang_ca_tep(raw: str):
 _CO_CHU = re.compile(r"[^\W_]", re.UNICODE)
 _RE_DAU_DONG = re.compile(r"^\s*(?:#{1,6}|>+|[-*+]|\d+[.)])\s*")
 _RE_DAU_DONG_THO = re.compile(r"^\s{0,3}(?:>+|[-*+]|\d+[.)])\s+")
-# `<table>` … `</table>`, và cả bảng KHÔNG đóng thẻ (tới hết tệp) — bảng thiếu thẻ
-# đóng vẫn render ra bảng, nên vẫn là chép bảng.
-_RE_BANG_HTML = re.compile(r"<table\b.*?(?:</table\s*>|\Z)", re.DOTALL | re.IGNORECASE)
-# `\s*` chứ không `\s{0,3}`: CommonMark coi thụt 4 dấu cách là khối mã THỤT LỀ chứ
-# không phải hàng rào, nhưng ở đây sai về phía CHẶT là an toàn. Nhận thêm một dòng
-# là khối mã chỉ khiến miễn trừ THÔI áp dụng, tức cổng đỏ nhiều hơn; bỏ sót thì
-# ngược lại, mở cửa cho cụm cấm. Fail-closed, không fail-open.
-_RE_HANG_RAO = re.compile(r"^\s*(?:`{3,}|~{3,})")
+# `^ {0,3}` — TRẢ LẠI mức thụt của CommonMark, bỏ `^\s*` mà generation 8 nới ra.
+#
+# g8 nới rồi biện minh: nhận thừa một dòng là khối mã thì chỉ khiến cổng đỏ nhiều hơn,
+# nên "fail-closed", nên an toàn. Cross-review lượt 9 BÁC, và bác đúng: AC 19 nói thẳng
+# rằng chuẩn hoá mạnh hơn mà BẮT OAN văn bản bình thường là KHÔNG ĐẠT, ngang với để lọt.
+# Ở packet này hai chiều CÂN NHAU — không có chiều nào là chiều an toàn để nghiêng về.
+# Đo được cái giá của lập luận ấy: một dòng code thụt 4 dấu cách mở đầu bằng backtick
+# bị đọc là hàng rào mở, và MỌI dòng tới hết tệp bị đánh dấu khối mã, làm một câu AC 19
+# hợp lệ đứng sau đó đổi từ rc=0 thành rc=6.
+#
+# Nhóm bắt `(`{3,}|~{3,})` để nhớ ĐỘ DÀI rào, không chỉ loại ký tự — xem `_dong_khoi_ma`.
+_RE_HANG_RAO = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
+
+_RE_MO_BANG = re.compile(r"<table\b", re.IGNORECASE)
+_RE_DONG_BANG = re.compile(r"</table\s*>", re.IGNORECASE)
+_RE_COMMENT_MOT_DONG = re.compile(r"<!--.*?-->", re.DOTALL)
+_RE_MA_INLINE = re.compile(r"(?<!`)(`+)(?!`).*?(?<!`)\1(?!`)", re.DOTALL)
+
+# DẤU HIỆU PHÉP ĐO — mỏ neo hẹp thay cho "có chữ hai phía".
+#
+# AC 19 tha ĐÚNG một thứ: cụm doctrine bị ngắt dòng *trong văn xuôi KỂ LẠI KẾT QUẢ ĐO*.
+# Bản g6–g8 hiện thực vế "văn xuôi" bằng "có ký tự chữ ở hai phía", và cross-review lượt 9
+# đo được cái giá: `x người có␤thẩm quyền y` lọt rc=0. Hai ký tự vô nghĩa là qua cổng.
+#
+# Executor từng hai lần khẳng định đó là "giới hạn đã khai, vì phân biệt cần hiểu NGHĨA".
+# Reviewer bác bằng một lập luận không phản bác được: phân biệt MỌI câu bằng ngữ nghĩa thì
+# khó, nhưng KHÔNG buộc phải tha mọi wrapper — ca thật neo được vào dấu hiệu HẸP HƠN và
+# KIỂM ĐƯỢC. Đây là mỏ neo đó: đoạn văn phải mang ít nhất một dấu hiệu của việc kể lại
+# phép đo. Vẫn không phải hiểu nghĩa, vẫn đo được bằng máy, nhưng hẹp hơn hẳn "một ký tự".
+_DAU_HIEU_PHEP_DO = re.compile(
+    r"""(?:
+          rc\s*=                # mã thoát — dấu hiệu dày đặc nhất trong kho này
+        | \bđo\b                # đo được / đã đo / kết quả đo / bản đo / phép đo
+        | \bđếm\b
+        | \bv\d+\.\d+           # số hiệu bản: v1.36.68
+        | \bPR\s*\#?\d+         # PR #104
+        | \d+\s*/\s*\d+         # 133/133
+    )""",
+    re.VERBOSE | re.IGNORECASE,
+)
 
 
 def _dong_khoi_ma(raw: str) -> frozenset:
@@ -448,8 +480,21 @@ def _dong_khoi_ma(raw: str) -> frozenset:
     Đo trên dòng THÔ chứ không trên dòng đã chuẩn hoá: `_chuan_hoa("```")` trả
     chuỗi RỖNG nên `_phang_ca_tep` bỏ qua nó — nhìn từ tầng đã chuẩn hoá thì
     hàng rào không tồn tại. Đây đúng là chỗ lượt 7 lách được.
+
+    NHỚ CẢ ĐỘ DÀI RÀO, KHÔNG CHỈ LOẠI KÝ TỰ, và dòng đóng phải TRỐNG PHẦN ĐUÔI.
+    Bản generation 8 chỉ nhớ loại ký tự và không ràng buộc đuôi dòng, nên hai hình
+    dạng dưới đây đều bị coi là ĐÓNG trong khi Markdown vẫn coi là đang TRONG khối —
+    phần sau đó rơi khỏi tập khối mã và miễn trừ AC 19 cho cụm cấm lọt `rc=0`:
+
+        ````                     ```
+        ```          ← rào 3     ``` not-a-close   ← có phần đuôi
+        …cụm cấm…    KHÔNG đóng  …cụm cấm…         KHÔNG đóng
+        ````                     ```
+
+    Luật CommonMark: rào đóng phải CÙNG ký tự, dài KHÔNG NGẮN HƠN rào mở, và sau nó
+    chỉ được có khoảng trắng. Cài đúng luật ấy thì cả hai hình dạng hết lách.
     """
-    trong, mo_bang, ket = False, "", set()
+    trong, mo_dau, mo_dai, ket = False, "", 0, set()
     for so_dong, dong in enumerate(raw.splitlines(), 1):
         # GỠ DẤU ĐẦU DÒNG THÔ TRƯỚC KHI DÒ HÀNG RÀO. Bản đầu của chốt này chỉ khớp
         # `^\s{0,3}` nên hàng rào lồng một cấp trong danh sách hay trích dẫn KHÔNG
@@ -464,12 +509,16 @@ def _dong_khoi_ma(raw: str) -> frozenset:
         # MỞ một hàng rào ma ở cuối tệp thay vì đóng khối đã mở.
         m = _RE_HANG_RAO.match(_go_dau_dong_tho(dong))
         if m:
-            dau = m.group(0).strip()[0]
+            rao, duoi = m.group(1), m.group(2)
+            dau, dai = rao[0], len(rao)
             if not trong:
-                trong, mo_bang = True, dau
-                ket.add(so_dong)
-                continue
-            if dau == mo_bang:                # chỉ CÙNG loại rào mới đóng được
+                # Rào MỞ: `info string` của rào backtick không được chứa backtick
+                # (CommonMark) — nếu chứa thì đây không phải rào mở.
+                if not (dau == "`" and "`" in duoi):
+                    trong, mo_dau, mo_dai = True, dau, dai
+                    ket.add(so_dong)
+                    continue
+            elif dau == mo_dau and dai >= mo_dai and duoi.strip() == "":
                 trong = False
                 ket.add(so_dong)
                 continue
@@ -515,12 +564,57 @@ def _dong_bang_html(raw: str) -> frozenset:
 
     Dò theo SPAN chứ không theo từng dòng: thẻ mở và thẻ đóng thường không cùng
     dòng, và một bảng có thể trải nhiều dòng.
+
+    BA CHỖ BẢN GENERATION 8 LÀM SAI, cross-review lượt 9 đo được cả ba:
+
+    1. **Non-greedy tới `</table>` ĐẦU TIÊN** ⇒ thẻ đóng của bảng CON đóng luôn bảng
+       NGOÀI, phần còn lại của bảng ngoài rơi khỏi tập và cụm cấm trong đó lọt `rc=0`.
+       Chữa: ĐẾM LỒNG NHAU, mỗi `<table` +1, mỗi `</table>` −1, chỉ đóng khi về 0.
+
+    2. **Không loại mã** ⇒ một literal `<table>` trong khối mã hay trong nháy ngược
+       cũng mở bảng, và vì không có thẻ đóng nên nuốt tới hết tệp. Đó là ĐẦU ĐỘC
+       chiều bắt oan: một câu AC 19 hợp lệ đứng sau đổi từ `rc=0` thành `rc=6`.
+       Chữa: xoá trắng khối mã, mã inline và comment HTML TRƯỚC khi dò.
+
+    3. **Bảng không đóng thẻ nuốt tới hết tệp.** g8 lý luận "bảng thiếu thẻ đóng vẫn
+       render ra bảng". Đúng về HTML, nhưng sai về cái giá: nó tước miễn trừ AC 19 của
+       toàn bộ phần đuôi. CommonMark có luật sẵn và hẹp hơn hẳn — khối HTML kết thúc ở
+       DÒNG TRỐNG đầu tiên. Dùng đúng luật ấy: chưa đóng thẻ thì dừng ở dòng trống.
+
+    Xoá trắng chứ không cắt bỏ: thay mỗi ký tự không phải xuống dòng bằng khoảng
+    trắng, để MỌI vị trí trong chuỗi giữ nguyên offset và số dòng vẫn tính đúng.
     """
-    ket = set()
-    for m in _RE_BANG_HTML.finditer(raw):
-        dau = raw.count("\n", 0, m.start()) + 1
-        cuoi = raw.count("\n", 0, m.end()) + 1
-        ket.update(range(dau, cuoi + 1))
+    def _xoa_trang(m):
+        return "".join("\n" if c == "\n" else " " for c in m.group(0))
+
+    sach = _RE_COMMENT_MOT_DONG.sub(_xoa_trang, raw)
+    dong_ma = _dong_khoi_ma(sach)
+    sach = "\n".join(
+        (" " * len(d) if so in dong_ma else d)
+        for so, d in enumerate(sach.split("\n"), 1)
+    )
+    sach = _RE_MA_INLINE.sub(_xoa_trang, sach)
+
+    moc = sorted(
+        [(m.start(), 1) for m in _RE_MO_BANG.finditer(sach)]
+        + [(m.end(), -1) for m in _RE_DONG_BANG.finditer(sach)]
+    )
+    dong_cua = sach.split("\n")
+    ket, sau, mo_tai = set(), 0, None
+    for vi_tri, buoc in moc:
+        if sau == 0 and buoc == 1:
+            mo_tai = sach.count("\n", 0, vi_tri) + 1
+        sau = max(0, sau + buoc)
+        if sau == 0 and buoc == -1 and mo_tai is not None:
+            ket.update(range(mo_tai, sach.count("\n", 0, vi_tri) + 2))
+            mo_tai = None
+    if mo_tai is not None:                    # thẻ mở KHÔNG được đóng
+        cuoi = len(dong_cua)
+        for so in range(mo_tai, len(dong_cua) + 1):
+            if not dong_cua[so - 1].strip():  # dòng trống KẾT THÚC khối HTML
+                cuoi = so - 1
+                break
+        ket.update(range(mo_tai, cuoi + 1))
     return frozenset(ket)
 
 
@@ -615,11 +709,23 @@ def _duoc_tha_vi_ngat_dong(raw: str, kim: str) -> bool:
     #   2. dòng mở phải còn CHỮ trước mảnh cụm, và dòng đóng phải còn CHỮ sau nó,
     #      sau khi đã gỡ dấu đầu dòng (`#`, `>`, `-`, `1.`). Văn xuôi bọc cụm ở cả
     #      hai phía; heading/bullet đứng-một-mình thì không.
+    #   3. hai dòng biên phải mang DẤU HIỆU PHÉP ĐO.
     #
-    # GIỚI HẠN, ghi thẳng chứ không giấu: câu văn xuôi BẤT KỲ có cụm bị ngắt dòng
-    # vẫn được tha — `Ghi chú người có␤thẩm quyền đây.` lọt. Phân biệt nó với ca
-    # thật của `CLAUDE.md` cần hiểu NGHĨA, mà AC 19 chính là lệnh phải tha hạng
-    # đó. Đây là giá đã khai của miễn trừ, không phải lỗ bỏ sót.
+    # ĐIỀU KIỆN 3 THÊM Ở GENERATION 9, và nó sửa một chỗ executor đã HAI LẦN khẳng
+    # định sai. Bản g6–g8 dừng ở điều kiện 2 và khai rằng phần còn lại là "giới hạn
+    # đã khai, vì phân biệt cần hiểu NGHĨA, mà AC 19 chính là lệnh phải tha hạng đó".
+    # Cross-review lượt 9 đo được cái giá của lời khai ấy: `x người có␤thẩm quyền y`
+    # trả `rc=0`. Hai ký tự vô nghĩa là qua cổng — đó không còn là "văn xuôi kể lại
+    # kết quả đo" theo bất kỳ cách đọc nào của AC 19, trong khi AC 2 đòi bơm một cụm
+    # trong danh sách là phải ĐỎ.
+    #
+    # Reviewer bác bằng lập luận không phản bác được: phân biệt MỌI câu bằng ngữ nghĩa
+    # thì khó, nhưng KHÔNG buộc phải tha mọi wrapper — ca thật neo được vào dấu hiệu
+    # HẸP HƠN và KIỂM ĐƯỢC. `_DAU_HIEU_PHEP_DO` là mỏ neo đó.
+    #
+    # GIỚI HẠN CÒN LẠI, vẫn ghi thẳng: kẻ gian cố tình rắc `rc=0` vào câu vẫn qua
+    # được. Nhưng đó là một hành vi KHÁC hẳn về mức độ so với gõ hai ký tự bừa, và
+    # nó để lại dấu vết đọc được trong chính văn bản.
     trong_khoi_ma = _dong_khoi_ma(raw) | _dong_bang_html(raw)
     phang, ban_do_dong = _khuc_chuan(dong_sach)
 
@@ -641,6 +747,8 @@ def _duoc_tha_vi_ngat_dong(raw: str, kim: str) -> bool:
         sau = dong_cuoi[2][tu + len(kim) - dong_cuoi[0] :]
         if not _CO_CHU.search(truoc) or not _CO_CHU.search(sau):
             return False                      # (2) không phải văn xuôi bọc hai phía
+        if not _DAU_HIEU_PHEP_DO.search(mo[2] + " " + dong_cuoi[2]):
+            return False                      # (3) không kể lại một phép ĐO nào
         tu = phang.find(kim, tu + len(kim))
     return True
 
@@ -843,6 +951,21 @@ def _kiem_luoc_do_lease(lease, rc_hinh_dang: int) -> dict:
         _die(rc_hinh_dang,
              f"'lease' thiếu khoá {thieu} — lược đồ đủ là {list(KHOA_LEASE)}. "
              f"Kiểm SỰ TỒN TẠI một khoá không phải kiểm TRỌN LƯỢC ĐỒ.")
+    # KHOÁ THỪA cũng là lược đồ SAI — cross-review lượt 9, finding
+    # `lease-schema-allows-extra-keys`. Bản trước chỉ kiểm THIẾU, nên một state có đủ
+    # bốn khoá cộng `unexpected: true` vẫn mở được lượt (`rc=0`). Đó lặp lại ĐÚNG tiêu
+    # chí mà AC 21 đặt ra để bắt bệnh cũ: `begin-attempt` nhận một state mà
+    # `record-lease` KHÔNG BAO GIỜ sinh ra được — nó chỉ dựng đúng bốn khoá này.
+    #
+    # Lược đồ khép kín thì phải khép CẢ HAI chiều. Khoá thừa tuy hiện bị bỏ qua nên
+    # chưa thành đường lách quyền, nhưng nó là chỗ để một trường lạ nằm im trong state
+    # rồi được đọc bởi một phiên bản sau — bịt trước rẻ hơn bịt sau.
+    thua = [k for k in lease if k not in KHOA_LEASE]
+    if thua:
+        _die(rc_hinh_dang,
+             f"'lease' có khoá THỪA {sorted(thua)} — lược đồ đủ là {list(KHOA_LEASE)}, "
+             f"không hơn. `record-lease` chỉ sinh ra đúng bốn khoá ấy, nên một state "
+             f"mang khoá lạ là state BỊ SỬA TAY, không phải state do đường hợp lệ tạo.")
     for k in ("lease_id", "granted_by", "evidence"):
         v = lease[k]
         if not isinstance(v, str):

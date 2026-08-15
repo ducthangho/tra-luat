@@ -1050,6 +1050,31 @@ def _script_tu_git(tmp: Path, sha: str, ten: str) -> Path:
     return f
 
 
+def case_g9_lease_khoa_thua_bi_chan(c: Ctx):
+    """`lease-schema-allows-extra-keys` P2 — cross-review lượt 9.
+
+    `_kiem_luoc_do_lease` kiểm THIẾU khoá nhưng không kiểm THỪA. Nên một state có đủ
+    bốn khoá cộng `unexpected: true` vẫn mở được lượt (`rc=0`) — lặp lại ĐÚNG tiêu chí
+    mà AC 21 đặt ra để bắt bệnh cũ: `begin-attempt` nhận một state mà `record-lease`
+    KHÔNG BAO GIỜ sinh ra được, vì nó chỉ dựng đúng bốn khoá ấy.
+
+    Ca đi qua ĐƯỜNG HỢP LỆ trước rồi mới nhét khoá lạ vào state — để đo đúng chốt lược
+    đồ, không đo nhầm chốt thẩm quyền hay chốt hạn.
+    """
+    import json as _json
+    sd = c.sd()
+    rc, _, e = c.init(sd, lease=False)
+    _doi(0, rc, e, "init")
+    rc, _, e = c.cap_lease(sd, 55)
+    _doi(0, rc, e, "lease hợp lệ mà bị chặn")
+    p_state = Path(sd) / "wp55.json"
+    tt = _json.loads(p_state.read_text(encoding="utf-8"))
+    tt["lease"]["unexpected"] = True
+    p_state.write_text(_json.dumps(tt), encoding="utf-8")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(8, rc, e, "begin-attempt nhận lease có khoá THỪA mà không chặn")
+
+
 def case_legacy_state_khong_co_lease_bi_chan(c: Ctx):
     """`legacy-lease-bypass` P1 — cross-review lượt 4 (codex, 14-08-2026).
 
@@ -1215,9 +1240,9 @@ LOP_LACH = [
     # được ca — ca mất độ phân giải, đúng bệnh `ac18-mutation-not-per-class`. Có chữ
     # hai phía thì chỉ còn chốt khối mã đứng giữa, nên nó đo đúng thứ nó khai.
     ("cum_don_code_fence",
-     "```\nBảng vai trò: người có\nthẩm quyền là người cấp lease.\n```"),
+     "```\nĐo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.\n```"),
     ("cum_don_code_fence_ngoac_song",
-     "~~~\nBảng vai trò: người có\nthẩm quyền là người cấp lease.\n~~~"),
+     "~~~\nĐo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.\n~~~"),
     ("cum_don_o_bang_html_ngat_dong",
      "<table><tr><td>Người có\nthẩm quyền</td></tr></table>"),
     # Hàng rào LỒNG MỘT CẤP. Chốt khối mã bản đầu chỉ khớp `^\s{0,3}` nên không nhận
@@ -1228,18 +1253,53 @@ LOP_LACH = [
      "- ```\n  Bảng vai trò: người có\n  thẩm quyền là người cấp lease.\n  ```"),
     ("cum_don_fence_trong_trich_dan",
      "> ```\n> Bảng vai trò: người có\n> thẩm quyền là người cấp lease.\n> ```"),
-    ("cum_don_fence_thut_bon_dau_cach",
-     "    ```\n    Bảng vai trò: người có\n    thẩm quyền là người cấp lease.\n    ```"),
+    # LỚP `cum_don_fence_thut_bon_dau_cach` ĐÃ BỎ ở generation 9.
+    #
+    # Nó sinh ra ở g8 khi `_RE_HANG_RAO` còn khớp `^\\s*`, tức thụt 4 dấu cách vẫn được
+    # đọc là hàng rào. Generation 9 trả lại mức thụt CommonMark (`^ {0,3}`) vì lập luận
+    # "fail-closed" của g8 đã bị bác, nên thụt 4 dấu cách KHÔNG còn là hàng rào và lớp
+    # này thôi đo hàng rào — nó chỉ còn vô tình đỏ nhờ chốt phép đo.
+    #
+    # RESIDUAL KHAI THẲNG: CommonMark coi khối thụt 4 dấu cách là KHỐI MÃ THỤT LỀ, và
+    # packet này KHÔNG cài phép dò ấy. Nên một cụm cấm đặt trong khối mã thụt lề, kèm
+    # dấu hiệu phép đo, vẫn được tha. Không cài vì rủi ro BẮT OAN cao: dòng nối tiếp của
+    # một mục danh sách thường thụt 4 dấu cách trở lên và là văn xuôi thật. Đánh đổi này
+    # để chủ kho/reviewer phán, không tự quyết.
     # Ô bảng HTML CÓ CHỮ HAI PHÍA — cross-review lượt 8. Khác `cum_don_o_bang_html_
     # ngat_dong` ở chỗ ca kia không có chữ bọc nên chốt văn xuôi đã bắt; ca này có,
     # nên chỉ còn chốt BẢNG HTML đứng giữa. Ô bảng là chép bảng, không bao giờ là
     # câu kể lại kết quả đo, nên không được hưởng miễn trừ AC 19.
     ("cum_don_o_bang_html_co_chu_hai_phia",
-     "<table><tr><td>Ghi chú người có\nthẩm quyền đây.</td></tr></table>"),
+     "<table><tr><td>Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.</td></tr></table>"),
     ("cum_don_o_bang_html_khong_dong_the",
-     "<table><tr><td>Ghi chú người có\nthẩm quyền đây."),
+     "<table><tr><td>Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0."),
     ("cum_don_chi_co_chu_truoc", "Vai trò: người có\nthẩm quyền"),
     ("cum_don_chi_co_chu_sau", "Người có\nthẩm quyền là vai trò."),
+    # --- W · wrapper TUỲ Ý (cross-review lượt 9) --------------------------------
+    # Chốt g6–g8 chỉ đòi "có ký tự chữ hai phía", nên hai ký tự vô nghĩa là qua cổng.
+    # Executor đã HAI LẦN khai đây là "giới hạn đã khai vì cần hiểu NGHĨA"; reviewer bác
+    # đúng: không buộc phải tha MỌI wrapper, ca thật neo được vào dấu hiệu phép đo.
+    ("cum_don_wrapper_mot_chu_cai", "x người có\nthẩm quyền y"),
+    ("cum_don_wrapper_chu_so", "1 người có\nthẩm quyền 2"),
+    ("cum_don_wrapper_trong_tag", "<b>x</b> người có\nthẩm quyền <b>y</b>"),
+    # Câu văn xuôi thật, có chữ hai phía, nhưng KHÔNG kể lại phép đo nào — nên không
+    # nằm trong bề rộng AC 19 tha. Trước là ca bắt-oan `oan_term_ngat_dong`.
+    ("cum_don_van_xuoi_khong_ke_phep_do",
+     "Quyết định này thuộc về người có\nthẩm quyền, không thuộc phiên này."),
+    # --- F · rào đóng SAI LUẬT (cross-review lượt 9) ----------------------------
+    ("cum_don_rao_dong_ngan_hon",
+     "````\n```\nĐo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.\n````"),
+    ("cum_don_rao_dong_co_duoi",
+     "```\n``` not-a-close\nĐo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.\n```"),
+    ("cum_don_rao_song_dong_ngan_hon",
+     "~~~~\n~~~\nĐo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.\n~~~~"),
+    # --- H · bảng HTML LỒNG (cross-review lượt 9) ------------------------------
+    ("cum_don_bang_html_long",
+     "<table>\n<tr><td><table></table></td></tr>\n"
+     "<tr><td>Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.</td></tr>\n</table>"),
+    ("cum_don_bang_html_long_ba_cap",
+     "<table>\n<tr><td><table><tr><td><table></table></td></tr></table></td></tr>\n"
+     "<tr><td>Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.</td></tr>\n</table>"),
     # Ba ca dưới lọt vì `_chuan_hoa` GIỮ dấu `>`, nên chuỗi phẳng ra
     # `> người có > thẩm quyền` và cụm cấm không khớp một lần nào — scanner KHÔNG
     # THẤY, chứ không phải miễn trừ tha nhầm. Dấu `-` tình cờ bị `_PHAN_CACH` nuốt,
@@ -1270,8 +1330,13 @@ LOP_BAT_OAN = [
      "  thẩm quyền vẫn `rc=0`. Kèm chốt: đột biến nới danh sách phải làm ca đích ĐỎ."),
     # `oan_term_giua_cau` ĐÃ CHUYỂN sang LOP_LACH (`cum_don_cau_van_xuoi_mot_dong`)
     # — xem lý do ở đó. Giữ lại một ca cùng chỗ nhưng ĐÚNG bề rộng của AC 19:
+    # Ca này TRƯỚC ở ma trận BẮT-OAN. Generation 9 chuyển sang ma trận LỌT — xem
+    # `cum_don_van_xuoi_khong_ke_phep_do` trong `LOP_LACH`. Thay bằng một ca CÙNG hình
+    # dạng (ngắt dòng, văn xuôi, có chữ hai phía) nhưng CÓ kể lại một phép đo, tức đúng
+    # bề rộng mà AC 19 tha.
     ("oan_term_ngat_dong",
-     "Quyết định này thuộc về người có\nthẩm quyền, không thuộc phiên này."),
+     "Đo lại trên bản v1.36.68 thì quyết định vẫn thuộc về người có\n"
+     "thẩm quyền, và cổng trả rc=0 như cũ."),
     ("oan_entity_long", "Ghi chú: merged&amp;#58; PR đã vào nhánh đích"),
     ("oan_van_ban_nga", "Пример текста на русском языке: локальный контроллер работает."),
     ("oan_van_ban_hy_lap", "Παράδειγμα κειμένου στα ελληνικά για δοκιμή."),
@@ -1334,6 +1399,39 @@ LOP_BAT_OAN = [
      "<table><tr><td>x</td></tr></table>\n\n"
      "Đo được ở `v1.36.68`: ba tên tấn công `rc=0` → `rc=4`, người có\n"
      "thẩm quyền vẫn `rc=0`."),
+    # Rào đóng ĐÚNG LUẬT vẫn phải đóng được — siết luật rào không được biến mọi khối
+    # mã bình thường thành khối không bao giờ đóng.
+    ("oan_rao_dong_dung_luat",
+     "````\nvo hai\n````\n\nĐo được ở v1.36.68: cổng trả rc=0 cho người có\n"
+     "thẩm quyền như cũ."),
+    # Bảng lồng HỢP LỆ, không chứa cụm cấm — đếm lồng nhau không được bắt oan nó.
+    ("oan_bang_html_long_vo_hai",
+     "<table><tr><td><table><tr><td>5 phút</td></tr></table></td></tr></table>"),
+    # --- CHỐNG ĐẦU ĐỘC ĐUÔI TỆP (finding P1 thứ tư, lượt 9) ---------------------
+    # g8 nới `_RE_HANG_RAO` về `^\s*` rồi biện minh "fail-closed". Reviewer bác: AC 19
+    # nói bắt oan văn bản bình thường là KHÔNG ĐẠT, ngang với để lọt. Ba ca dưới đo
+    # đúng chiều ấy — một cấu trúc VÔ HẠI đứng trước không được tước miễn trừ của câu
+    # AC 19 hợp lệ đứng sau.
+    ("oan_dong_thut_le_khong_phai_rao",
+     "    ``` đây chỉ là một dòng code thụt lề\n\n"
+     "Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0."),
+    ("oan_the_bang_trong_khoi_ma",
+     "```html\n<table>\n```\n\n"
+     "Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0."),
+    # CÙNG MỘT ĐOẠN, cố ý không có dòng trống: nếu tách đoạn thì luật "dòng trống kết
+    # thúc khối HTML" đã cứu ca này rồi, và đột biến gỡ phép loại mã inline sẽ không
+    # giết được nó — ca mất độ phân giải.
+    ("oan_the_bang_trong_ma_inline",
+     "Ví dụ ký hiệu `<table>` trong tài liệu. "
+     "Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0."),
+    ("oan_the_bang_trong_comment",
+     "<!-- <table> -->\n\n"
+     "Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0."),
+    # Bảng THẬT chưa đóng thẻ. Luật CommonMark "khối HTML kết thúc ở DÒNG TRỐNG đầu
+    # tiên" là thứ duy nhất giữ câu AC 19 phía sau khỏi bị nuốt; g8 cho nuốt tới hết tệp.
+    ("oan_van_xuoi_sau_bang_html_chua_dong",
+     "<table><tr><td>thời gian</td></tr>\n\n"
+     "Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0."),
     ("oan_fence_long_cap_vo_hai",
      "- ```sh\n  # chay thu\n  python tl.py --json\n  ```\n\n---\n\n"
      "> ```\n> ket qua: rc=0\n> ```\n"),
@@ -1403,9 +1501,19 @@ ANH_XA_LOP_BAT_OAN = {
     "cum_don_o_bang_html_ngat_dong": "oan_tag_ngat_dong_vo_hai",
     "cum_don_fence_trong_bullet": "oan_fence_long_cap_vo_hai",
     "cum_don_fence_trong_trich_dan": "oan_fence_long_cap_vo_hai",
-    "cum_don_fence_thut_bon_dau_cach": "oan_fence_long_cap_vo_hai",
     "cum_don_o_bang_html_co_chu_hai_phia": "oan_bang_html_vo_hai",
     "cum_don_o_bang_html_khong_dong_the": "oan_van_xuoi_sau_bang_html",
+    # Họ W/F/H của lượt 9. Ca bắt-oan phải ĐỐI XỨNG: cùng hình dạng, nhưng CÓ kể lại
+    # một phép đo (họ W), hoặc rào/bảng hợp lệ (họ F/H).
+    "cum_don_wrapper_mot_chu_cai": "oan_term_ngat_dong",
+    "cum_don_wrapper_chu_so": "oan_term_ngat_dong",
+    "cum_don_wrapper_trong_tag": "oan_claude_md_master",
+    "cum_don_van_xuoi_khong_ke_phep_do": "oan_term_ngat_dong",
+    "cum_don_rao_dong_ngan_hon": "oan_rao_dong_dung_luat",
+    "cum_don_rao_dong_co_duoi": "oan_rao_dong_dung_luat",
+    "cum_don_rao_song_dong_ngan_hon": "oan_rao_dong_dung_luat",
+    "cum_don_bang_html_long": "oan_bang_html_long_vo_hai",
+    "cum_don_bang_html_long_ba_cap": "oan_bang_html_long_vo_hai",
     "cum_don_chi_co_chu_truoc": "oan_claude_md_master",
     "cum_don_chi_co_chu_sau": "oan_term_ngat_dong",
     "cum_don_trich_dan_ngat_dong": "oan_van_xuoi_ngat_dong_trong_trich_dan",
@@ -1739,6 +1847,7 @@ CASES = [
     ("land_packets_khong_tu_trigger", case_land_packets_khong_tu_trigger),
     ("lease_authority_ten_gia_mao_bi_chan", case_lease_authority_ten_gia_mao_bi_chan),
     ("lease_authority_nguoi_co_tham_quyen_thi_qua", case_lease_authority_nguoi_co_tham_quyen_thi_qua),
+    ("g9_lease_khoa_thua_bi_chan", case_g9_lease_khoa_thua_bi_chan),
     ("legacy_state_khong_co_lease_bi_chan", case_legacy_state_khong_co_lease_bi_chan),
     ("doctrine_scan_bat_zero_width_bi_chan", case_doctrine_scan_bat_zero_width_bi_chan),
     ("doctrine_scan_bat_html_entity_bi_chan", case_doctrine_scan_bat_html_entity_bi_chan),
@@ -1768,6 +1877,13 @@ CASES = [
 CASES += [(f"ac18_{ten}", _ca_doctrine(nd, f"ac18_{ten}", 6)) for ten, nd in LOP_LACH]
 # AC 19 — chiều BẮT OAN, cùng cách tổ chức.
 CASES += [(f"ac19_{ten}", _ca_doctrine(nd, f"ac19_{ten}", 0)) for ten, nd in LOP_BAT_OAN]
+
+# Chốt (3) của `_duoc_tha_vi_ngat_dong` — "hai dòng biên phải mang DẤU HIỆU PHÉP ĐO".
+# Đặt tên riêng vì NHIỀU đột biến cùng cần gỡ nó: chốt này phủ chồng lên mọi chốt cấu
+# trúc, nên một đột biến gỡ chốt cấu trúc mà KHÔNG gỡ nó thì ca đích vẫn xanh và đột
+# biến mất răng. Viết một chỗ để các chỗ kia không lệch nhau khi thân hàm đổi.
+C3_CU = '        if not _DAU_HIEU_PHEP_DO.search(mo[2] + " " + dong_cuoi[2]):'
+C3_MOI = "        if False:"
 
 # Đột biến nới ngưỡng: mỗi cái BẮT BUỘC giết đúng những ca dưới đây. Ca không
 # chết được nghĩa là nó không đo cái nó khai.
@@ -1803,6 +1919,11 @@ MUTANTS = {
     # nhau. Giờ chỉ còn MỘT phép kiểm trong hàm chung — đó chính là điều AC 21
     # đòi — nên một đột biến giết CẢ HAI ca là kết quả ĐÚNG, không phải mất độ
     # phân giải: hai ca vẫn đi qua hai đường gọi khác nhau (ghi lease / mở lượt).
+    "bo_kiem_khoa_thua_trong_luoc_do_lease": (
+        "    thua = [k for k in lease if k not in KHOA_LEASE]",
+        "    thua = []",
+        ["g9_lease_khoa_thua_bi_chan"],
+    ),
     "bo_kiem_han_trong_ham_chung": (
         "    if han <= bay_gio:",
         "    if False:",
@@ -1950,9 +2071,11 @@ MUTANTS = {
     # của generation 4 thì phải gỡ CẢ HAI vế.
     "noi_mien_tru_nhu_generation_4": (
         ("        if kim in _chuan_hoa(dong):\n            return False",
-         "        if not _CO_CHU.search(truoc) or not _CO_CHU.search(sau):"),
+         "        if not _CO_CHU.search(truoc) or not _CO_CHU.search(sau):",
+         C3_CU),
         ("        if False:\n            return False",
-         "        if False:"),
+         "        if False:",
+         C3_MOI),
         ["ac18_cum_don_heading", "ac18_cum_don_dong_tran",
          "ac18_cum_don_gach_dau_dong", "ac18_cum_don_in_dam",
          "ac18_cum_don_dinh_nghia", "ac18_cum_don_cau_van_xuoi_mot_dong",
@@ -1971,8 +2094,8 @@ MUTANTS = {
     # Hai chốt của việc dò hàng rào lồng cấp, RỜI NHAU để có độ phân giải: một cái
     # gỡ dấu khối trước khi dò, một cái nới mức thụt lề.
     "bo_go_dau_dong_tho_khi_do_hang_rao": (
-        "        m = _RE_HANG_RAO.match(_go_dau_dong_tho(dong))",
-        "        m = _RE_HANG_RAO.match(dong)",
+        ("        m = _RE_HANG_RAO.match(_go_dau_dong_tho(dong))", C3_CU),
+        ("        m = _RE_HANG_RAO.match(dong)", C3_MOI),
         ["ac18_cum_don_fence_trong_bullet", "ac18_cum_don_fence_trong_trich_dan"],
     ),
     "bo_chot_bang_html": (
@@ -1986,15 +2109,48 @@ MUTANTS = {
     # dựng cho P2 lượt 7, nay dùng lại cho một lớp khác.
     "bo_chot_bang_html_va_van_xuoi": (
         ("    trong_khoi_ma = _dong_khoi_ma(raw) | _dong_bang_html(raw)",
-         "        if not _CO_CHU.search(truoc) or not _CO_CHU.search(sau):"),
+         "        if not _CO_CHU.search(truoc) or not _CO_CHU.search(sau):",
+         C3_CU),
         ("    trong_khoi_ma = _dong_khoi_ma(raw)",
-         "        if False:"),
+         "        if False:",
+         C3_MOI),
         ["ac18_cum_don_o_bang_html_ngat_dong"],
     ),
-    "siet_hang_rao_ve_ba_dau_cach": (
-        '_RE_HANG_RAO = re.compile(r"^\\s*(?:`{3,}|~{3,})")',
-        '_RE_HANG_RAO = re.compile(r"^\\s{0,3}(?:`{3,}|~{3,})")',
-        ["ac18_cum_don_fence_thut_bon_dau_cach"],
+    # Generation 9 TRẢ LẠI mức thụt CommonMark, nên đột biến đổi chiều: nay nó NỚI
+    # mức thụt về `^\\s*` — đúng cái g8 làm — và ca đích là ca BẮT OAN, không phải ca
+    # lọt. Nới ra thì một dòng code thụt 4 dấu cách thành hàng rào ma và đầu độc đuôi tệp.
+    "noi_muc_thut_rao_nhu_generation_8": (
+        '_RE_HANG_RAO = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")',
+        '_RE_HANG_RAO = re.compile(r"^\\s*(`{3,}|~{3,})(.*)$")',
+        ["ac19_oan_dong_thut_le_khong_phai_rao"],
+    ),
+    # --- ba chốt MỚI của generation 9, mỗi cái một đột biến RIÊNG ---------------
+    "noi_wrapper_ve_bat_ky_chu": (
+        C3_CU,
+        C3_MOI,
+        ["ac18_cum_don_wrapper_mot_chu_cai", "ac18_cum_don_wrapper_chu_so",
+         "ac18_cum_don_wrapper_trong_tag", "ac18_cum_don_van_xuoi_khong_ke_phep_do"],
+    ),
+    "bo_luat_rao_dong_dung_chuan": (
+        "            elif dau == mo_dau and dai >= mo_dai and duoi.strip() == \"\":",
+        "            elif dau == mo_dau:",
+        ["ac18_cum_don_rao_dong_ngan_hon", "ac18_cum_don_rao_dong_co_duoi",
+         "ac18_cum_don_rao_song_dong_ngan_hon"],
+    ),
+    "bo_dem_long_bang_html": (
+        "        sau = max(0, sau + buoc)",
+        "        sau = 0 if buoc == -1 else sau + buoc",
+        ["ac18_cum_don_bang_html_long", "ac18_cum_don_bang_html_long_ba_cap"],
+    ),
+    "bo_loai_ma_khoi_do_bang_html": (
+        "    sach = _RE_MA_INLINE.sub(_xoa_trang, sach)",
+        "    sach = sach",
+        ["ac19_oan_the_bang_trong_ma_inline"],
+    ),
+    "bo_luat_dong_trong_ket_thuc_khoi_html": (
+        "            if not dong_cua[so - 1].strip():  # dòng trống KẾT THÚC khối HTML",
+        "            if False:",
+        ["ac19_oan_van_xuoi_sau_bang_html_chua_dong"],
     ),
     # Chốt gỡ dấu đầu dòng ở tầng phẳng hoá — thiếu nó thì `>` phá khớp hoàn toàn.
     "bo_go_dau_dong_khi_phang_hoa": (
@@ -2257,6 +2413,23 @@ def main() -> int:
                            if not isinstance(tim, str))
             print(f"  ok  {len(ten_ca_lop)} lớp lách đều có đột biến giết · "
                   f"{phoi_hop} đột biến PHỐI HỢP · 0 ngoại lệ")
+
+    # --- 5. SUITE PHẢI TỰ KHAI SỐ CỦA MÌNH ---------------------------------
+    #
+    # Cross-review lượt 9, finding `packet-suite-mutation-count-mismatch`: hồ sơ
+    # executor khai `39 đột biến`, `len(MUTANTS)` thật là `38`. Con số lệch một thì
+    # nhỏ, nhưng chỗ hở nó phơi ra thì không: **suite KHÔNG assert con số nó khai**.
+    # Một bộ test dựng lên để chống lời khai sai lại không chặn được lời khai sai của
+    # chính người viết nó — và con số ấy đã đi vào cả commit message lẫn tệp lease.
+    #
+    # Chữa bằng cách bắt suite IN RA con số đếm bằng máy, ở dòng cuối, cùng chỗ với
+    # các số khác. Ai chép số vào hồ sơ thì chép từ đây, không gõ tay.
+    print(f"\nSỐ LIỆU (đếm bằng máy — chép vào hồ sơ TỪ ĐÂY, đừng gõ tay):")
+    print(f"  ca               : {len(CASES)}")
+    print(f"  đột biến         : {len(MUTANTS)}")
+    print(f"  lớp lách         : {len(LOP_LACH)}")
+    print(f"  ca bắt-oan       : {len(LOP_BAT_OAN)}")
+    print(f"  ngoại lệ AC 18   : 0")
 
     print(f"\nTỔNG: {'ĐẠT' if that_bai_tong == 0 else f'{that_bai_tong} lỗi'}")
     return 0 if that_bai_tong == 0 else 1

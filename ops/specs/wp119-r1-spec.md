@@ -1,10 +1,23 @@
-# Packet Spec (DỰ THẢO) — `packet-session-mutex`
+# Packet Spec — wp119 revision 1 (`packet-session-mutex`)
 
-**Trạng thái: successor §7 đã xuất, CHƯA được cấp số packet và CHƯA được lease.**
-Tệp này là hồ sơ để chủ kho mở packet, không phải giấy phép chạy.
+**TỆP NÀY LÀ NGUỒN SỰ THẬT của wp119 revision 1.** Comment trên #119 chỉ là bản chiếu.
 
-`successor_key: packet-session-mutex` — khoá cục bộ ổn định. Số issue do chủ kho cấp;
-phiên soạn KHÔNG tạo được issue (`api.github.com` trả 403 cho cả REST lẫn GraphQL).
+Kiểm mỏ neo:
+
+```bash
+git show origin/ops/successor-packet-session-mutex:ops/specs/wp119-r1-spec.md | sha256sum
+```
+
+Con băm ấy **là** `spec_hash` của revision 1. Mọi lease, verdict và evidence §7 phải neo
+đúng con số đó; lệch một byte thì dừng và hỏi, đừng đoán. Cùng cơ sở băm mà wp55 revision 3
+đã phải đổi sang sau khi "băm thân Issue" chứng minh là không kiểm được từ phiên agent:
+**băm TỆP trong kho, KHÔNG băm thân Issue.**
+
+**Trạng thái: đã có số packet — #119, chủ kho mở 2026-08-15. CHƯA được lease.**
+Điều kiện khởi động vẫn chưa đủ; xem mục 1 và mục 8.
+
+`successor_key: packet-session-mutex` — khoá cục bộ ổn định, giữ nguyên kể cả khi số packet
+đổi. Tệp này ra đời là successor §7 của wp55, nay đã được cấp số.
 
 Xuất bởi: phiên executor wp55 `wp55-r3-exec-4-claude-20260814`, 2026-08-15 giờ VN.
 Nguồn: va chạm THẬT giữa hai phiên cùng chạy wp55 — xem
@@ -191,8 +204,13 @@ hoặc takeover — không có đường tắt, và đó là chủ ý.
 ```yaml
 schema_version: 1
 successor_key: packet-session-mutex
-packet_id: 119           # ĐỀ XUẤT, chưa reserve được — xem mục 7.1
-packet_id_status: provisional
+packet_id: wp119
+packet_issue: 119
+packet_id_status: assigned      # chủ kho mở issue 2026-08-15 — xem mục 7.1
+revision: 1
+spec_path: ops/specs/wp119-r1-spec.md
+spec_branch: ops/successor-packet-session-mutex
+spec_hash_basis: sha256 của chính tệp này, byte nguyên trạng, không chuẩn hoá gì thêm
 mission_issue: 54
 depends_on: [wp55]
 depends_on_reason: >-
@@ -275,9 +293,9 @@ mỗi phản chứng một đột biến giết đúng nó.**
 
 ## 7 · Ba câu hỏi — chủ kho ĐÃ QUYẾT, 2026-08-15
 
-### 7.1 · Số packet: **#119** (đề xuất, KHÔNG reserve được)
+### 7.1 · Số packet: **#119 — ĐÃ CẤP**
 
-Chỉ thị: *"lấy số kế tiếp còn trống"*. Đo được:
+Chỉ thị ban đầu: *"lấy số kế tiếp còn trống"*. Phiên này đo và đề xuất 119:
 
 ```text
 ref PR cao nhất trên remote            : 118   (git ls-remote 'refs/pull/*/head')
@@ -286,14 +304,23 @@ packet có spec/lease THẬT trong kho     : wp55
 ⇒ số kế tiếp còn trống                  : 119
 ```
 
-**Giới hạn phải nói thẳng:** issue và PR DÙNG CHUNG một bộ đếm trên GitHub, và phiên này
-KHÔNG tạo được issue (`api.github.com` 403) nên **không reserve được 119**. Nếu ai đó mở
-một PR/issue trước, số thật sẽ trượt. Vì vậy:
+Chủ kho báo đã mở issue **#119** ngày 2026-08-15. Tệp này đổi tên theo khuôn của kho
+(`ops/specs/wp{issue}-r{revision}-spec.md`, cùng khuôn với `wp55-r3-spec.md`) và
+`packet_id_status` chuyển từ `provisional` sang `assigned`.
 
-- mỏ neo bền của packet này là `successor_key: packet-session-mutex`, KHÔNG phải con số;
-- `packet_id: 119` mang `packet_id_status: provisional` — người mở issue điền lại số THẬT
-  do GitHub cấp rồi cập nhật đúng một dòng ấy;
-- không tệp nào khác trong kho được neo vào số 119 cho tới khi nó được xác nhận.
+**Trạng thái xác minh — nói thẳng, đừng đọc rộng hơn:**
+
+| kiểm | kết quả |
+|---|---|
+| đọc `api.github.com/repos/…/issues/119` | **HTTP 403** — phiên agent không đọc được issue |
+| `119` có phải một PR không (`refs/pull/119/head`) | **không** ⇒ nhất quán với việc nó là issue |
+| ref PR cao nhất sau khi chủ kho mở issue | vẫn `118` ⇒ 119 không bị PR chiếm |
+
+Nghĩa là: phiên này **KHÔNG tự xác minh được #119 tồn tại**. Con số được nhận theo lời chủ
+kho — người có thẩm quyền §2 — và mọi thứ phiên này ĐO ĐƯỢC đều nhất quán với nó, nhưng
+"nhất quán" không phải "đã xác minh". Ai có quyền đọc issue nên đối chiếu một lần.
+
+Mỏ neo bền của packet vẫn là `successor_key: packet-session-mutex`; con số chỉ là địa chỉ.
 
 ### 7.2 · `ops/state/**` là hạ tầng ops — ĐÃ XÁC NHẬN, và đã KIỂM
 
@@ -334,7 +361,18 @@ quyền ghi kho.
 
 ## 8 · Việc còn lại trước khi lease được
 
-1. Mở issue (số thật thay cho 119 provisional) — cần quyền GitHub, phiên agent 403.
-2. Chờ **wp55 land** — `depends_on` cứng, xem mục 1 và H1b.
-3. Kiểm ruleset cho `ops/state/**` (mục 7.2).
-4. Cấp lease executor cho `codex` neo spec hash của tệp này sau khi số packet chốt.
+| # | việc | ai làm | trạng thái |
+|---|---|---|---|
+| 1 | Mở issue #119 | chủ kho | ✅ **xong** 2026-08-15 (phiên agent không đọc lại được — xem 7.1) |
+| 2 | **wp55 land** | chủ kho / land operator | ⛔ **CHƯA** — chặn cứng, xem mục 1 và H1b |
+| 3 | Kiểm ruleset cho `ops/state/**` | chủ kho | ⛔ chưa đo được từ phiên agent (cần API) |
+| 4 | Cấp lease executor cho `codex`, neo `spec_hash` của tệp này | chủ kho | ⛔ chờ #2 |
+| 5 | Chiếu spec lên thân #119 | chủ kho | ⛔ phiên agent 403 |
+
+**Việc #2 là chặn cứng và chưa nhúc nhích.** wp55 đang ở PR #115, review lượt 6 chạy trên
+head `e6e4b73`. Hai tệp `.claude/dev/packet_loop*.py` mà packet này phải sửa **chưa tồn tại
+trên `master`** — chúng do wp55 tạo ra. Cấp lease trước khi wp55 land là cấp một lease
+không có gì để sửa.
+
+**Thứ tự đúng:** wp55 land → đo lại `H1b` trên master mới (hai tệp đã có mặt) → cấp lease
+cho codex neo `spec_hash` → executor mở nhánh `codex/wp119-r1g1-...`.

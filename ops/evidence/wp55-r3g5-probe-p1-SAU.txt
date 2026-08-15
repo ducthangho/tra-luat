@@ -1,0 +1,15 @@
+probe P1 · script=/workspace/tra-luat/.claude/dev/packet_loop.py
+----------------------------------------------------------------------------------------------------
+ok   F1     reviewing→running qua transition bị chặn       back_to_running_rc=8 (đòi != 0) · state=reviewing · attempts_used=1 · reviews=0
+ok   F2a    sau void-attempt, begin-attempt KHÔNG kẹt cứng void_rc=0 · attempts_used_sau_void=0 · state_sau_void=leased · begin_rc=0 (đòi 0)
+ok   F2b    record-review KHÔNG duyệt được bằng lượt số 0  record_review_rc=8 (đòi != 0) · state=leased (đòi != accepted) · reviews[0].attempt=None
+ok   F3a    quoted angle `<span title=">">` phải BẮT       rc=6 (đòi 6)
+ok   F3b    nền: tag thường `<span title="x">` vẫn BẮT     rc=6 (đòi 6)
+ok   F3c    nền: ASCII nguyên văn vẫn BẮT                  rc=6 (đòi 6)
+ok   F4a    heading TRẦN chép nguyên cụm phải BẮT          rc=6 (đòi 6)
+ok   F4b    dòng TRẦN chép nguyên cụm phải BẮT             rc=6 (đòi 6)
+ok   F4c    ô BẢNG chép cụm vẫn BẮT (không lùi)            rc=6 (đòi 6)
+ok   F4d    BẮT OAN: văn xuôi kể lại kết quả đo phải THA   rc=0 (đòi 0)
+ok   F4e    BẮT OAN: cụm giữa câu văn xuôi phải THA        rc=0 (đòi 0)
+----------------------------------------------------------------------------------------------------
+đạt 11/11

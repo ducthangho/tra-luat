@@ -1,0 +1,363 @@
+diff --git a/.github/workflows/ops-mirror-spec.yml b/.github/workflows/ops-mirror-spec.yml
+new file mode 100644
+index 0000000..16571ef
+--- /dev/null
++++ b/.github/workflows/ops-mirror-spec.yml
+@@ -0,0 +1,140 @@
++name: ops — chiếu spec lên thân Issue bằng git
++
++# Cùng lý do với `ops-publish-lease.yml`: thân Issue là CSDL riêng của GitHub, git
++# không ghi được. Nhưng push thì phiên nào cũng làm được. ĐÃ ĐO 14/15-08-2026: phiên
++# agent bị 403 ở MỌI lời gọi api.github.com (REST lẫn GraphQL, có token lẫn không)
++# trong khi clone/fetch/push đều chạy.
++#
++# ⚠ KHÁC `ops-publish-lease.yml` MỘT ĐIỂM QUYẾT ĐỊNH — đọc kỹ trước khi duyệt:
++# cửa lease chỉ THÊM comment (`POST …/issues/N/comments`), sai thì bản cũ còn nguyên.
++# Cửa này GHI ĐÈ thân issue (`PATCH …/issues/N`): một lượt chạy sai XOÁ SẠCH văn bản
++# người ta gõ tay, và trong kho không có bản sao để dựng lại. Vì thế có hai chốt mà
++# cửa lease không cần, cả hai nằm trong `ops/mirror_spec.py` để test được:
++#   A. QUYỀN SỞ HỮU — chỉ ghi khi thân RỖNG hoặc đã mang dấu `<!-- ops-mirror-spec v1`.
++#      Thân do người viết mà không có dấu thì TỪ CHỐI. Không "hợp nhất thông minh".
++#   B. IDEMPOTENT THEO NỘI DUNG — thân mới trùng thân cũ thì KHÔNG gọi PATCH.
++#
++# NĂM LỚP THU HẸP:
++#   1. Chỉ nhánh `ops/**`, chỉ đường dẫn `ops/specs/**-than-issue.md`.
++#   2. OPT-IN TƯỜNG MINH: commit cuối phải mang `[mirror-spec]`. Sửa spec là chuyện
++#      thường; ghi đè thân issue thì không — đừng tự đoán.
++#   3. `permissions` tối thiểu: `issues: write` + `contents: read`. KHÔNG
++#      `contents: write` (cửa này không ghi ngược gì vào kho), KHÔNG `pull-requests`,
++#      KHÔNG `actions`.
++#   4. Bộ kiểm NEO VÀO NHÁNH MẶC ĐỊNH, không lấy từ head được đẩy.
++#   5. Chốt A + B ở trên, cộng ĐỌC LẠI đối chiếu byte sau khi ghi.
++#
++# VÌ SAO CÓ LỚP 4 — kế thừa nguyên văn finding P1 của cross-review trên PR #104:
++# **bộ kiểm nằm cùng nhánh với thứ nó kiểm thì nó không kiểm gì hết.** Một push vào
++# `ops/**` vừa sửa bản chiếu vừa sửa bộ kiểm sẽ qua trơn nếu `checkout` lấy head đó.
++#
++# NÓI THẲNG PHẦN CÒN THỦNG — đừng để ai đọc rộng hơn thực tế:
++# với sự kiện `push`, GitHub lấy CHÍNH TỆP YAML NÀY từ head được đẩy. Ai sửa được
++# `ops/mirror_spec.py` thì cũng sửa được tệp này và gỡ luôn mỏ neo lớp 4. Thứ đóng
++# nốt phần còn lại nằm NGOÀI kho: ruleset/branch protection chặn push vào
++# `.github/workflows/**` và `ops/mirror_spec*.py`. **Chưa đặt ruleset thì đường này
++# vẫn quy về "ai push được vào `ops/**` thì GHI ĐÈ được thân issue"** — và với một
++# cửa ghi đè, câu đó nặng hơn hẳn cửa chỉ thêm comment. Cứ nói đúng như vậy.
++#
++# PHÚT ACTIONS: job ubuntu (hệ số 1x), vài giây, không matrix.
++
++on:
++  push:
++    branches: ['ops/**']
++    paths:
++      - 'ops/specs/**-than-issue.md'
++
++permissions:
++  contents: read
++  issues: write
++
++concurrency:
++  group: ops-mirror-spec-${{ github.ref }}
++  cancel-in-progress: false   # đang GHI ĐÈ thì không huỷ giữa chừng
++
++jobs:
++  chieu:
++    # Lọc ngay ở đây để lượt không khớp KHÔNG tốn runner.
++    if: contains(github.event.head_commit.message, '[mirror-spec]')
++    runs-on: ubuntu-latest
++    steps:
++      - name: lấy head được đẩy (NỘI DUNG cần chiếu)
++        uses: actions/checkout@v4
++        with:
++          fetch-depth: 0
++
++      - name: lấy NHÁNH MẶC ĐỊNH (BỘ KIỂM — lớp 4)
++        uses: actions/checkout@v4
++        with:
++          ref: ${{ github.event.repository.default_branch }}
++          path: _goc
++
++      - name: phản chứng của chính bộ kiểm phải XANH trước
++        run: python3 _goc/ops/mirror_spec_test.py
++
++      - name: chiếu từng bản chiếu ĐÃ ĐỔI trong lượt push này
++        env:
++          GH_TOKEN: ${{ github.token }}
++          REPO: ${{ github.repository }}
++          NEO: ${{ github.workspace }}/_goc
++          TRUOC: ${{ github.event.before }}
++          SAU: ${{ github.event.after }}
++        run: |
++          set -euo pipefail
++          # Chỉ tệp ĐỔI trong lượt push này, không quét cả cây: một push không được
++          # kéo theo mọi bản chiếu cũ cùng bị ghi lại.
++          if [ "$TRUOC" = "0000000000000000000000000000000000000000" ]; then
++            DS=$(git show --name-only --pretty=format: "$SAU" \
++                 | grep -E '^ops/specs/.*-than-issue\.md$' || true)
++          else
++            DS=$(git diff --name-only "$TRUOC" "$SAU" -- 'ops/specs/*-than-issue.md' || true)
++          fi
++          if [ -z "$DS" ]; then
++            echo "không có bản chiếu nào đổi — bỏ qua"
++            exit 0
++          fi
++
++          # Vòng `for` chứ không `... | while read`: pipe chạy ở subshell nên `exit 1`
++          # trong đó KHÔNG làm job đỏ — lỗi sẽ đi lọt trong im lặng.
++          for tep in $DS; do
++            if [ ! -f "$tep" ]; then
++              echo "bỏ qua $tep (đã xoá trong lượt này)"
++              continue
++            fi
++            echo "::group::$tep"
++
++            # KIỂM bằng bộ kiểm của NHÁNH MẶC ĐỊNH, đọc nội dung từ head được đẩy.
++            python3 "$NEO/ops/mirror_spec.py" check "$tep" --root .
++            python3 "$NEO/ops/mirror_spec.py" body  "$tep" --root . > than-moi.md
++            ISSUE=$(python3 "$NEO/ops/mirror_spec.py" issue "$tep" --root .)
++
++            # Chốt A — QUYỀN SỞ HỮU. Đọc thân hiện tại rồi mới quyết.
++            gh api "repos/$REPO/issues/$ISSUE" --jq '.body // ""' > than-cu.md
++            python3 "$NEO/ops/mirror_spec.py" guard --than-cu than-cu.md --issue "$ISSUE"
++
++            # Chốt B — IDEMPOTENT theo NỘI DUNG.
++            if cmp -s than-cu.md than-moi.md; then
++              echo "thân #$ISSUE đã đúng nội dung — KHÔNG gọi PATCH"
++              echo "::endgroup::"
++              continue
++            fi
++
++            python3 -c "import json,sys;print(json.dumps({'body':open(sys.argv[1],encoding='utf-8').read()}))" \
++              than-moi.md > payload.json
++            gh api -X PATCH "repos/$REPO/issues/$ISSUE" --input payload.json --jq '.number' >/dev/null
++            echo "đã chiếu $tep → thân issue #$ISSUE"
++
++            # ĐỌC LẠI để xác nhận — không tin mã trả về suông. Đường đăng của kho này
++            # ĐÃ TỪNG làm biến dạng ký tự (thân #55 còn `&#34;` nguyên văn ở đúng chỗ
++            # đáng ra là dấu nháy kép), nên phải đối chiếu BYTE sau khi ghi chứ không
++            # khai "đã đăng" rồi thôi. Đây chính là lý do wp55 r3 bỏ "băm thân Issue".
++            gh api "repos/$REPO/issues/$ISSUE" --jq '.body // ""' > than-doc-lai.md
++            if cmp -s than-doc-lai.md than-moi.md; then
++              echo "đọc lại KHỚP BYTE ✓"
++            else
++              echo "⚠ đọc lại LỆCH — đường đăng làm biến dạng nội dung:"
++              diff than-moi.md than-doc-lai.md | head -20 || true
++              exit 1
++            fi
++            echo "::endgroup::"
++          done
+diff --git a/ops/mirror_spec.py b/ops/mirror_spec.py
+new file mode 100644
+index 0000000..750f398
+--- /dev/null
++++ b/ops/mirror_spec.py
+@@ -0,0 +1,211 @@
++#!/usr/bin/env python3
++# -*- coding: utf-8 -*-
++"""Chiếu một Packet Spec lên THÂN Issue — kiểm trước, rồi mới dựng thân.
++
++Cùng khuôn với `ops/lease_publish.py`: tiến trình này KHÔNG gọi mạng. Nó chỉ KIỂM
++và DỰNG VĂN BẢN; workflow mới là bên gọi API. Tách như vậy để phần có logic thì
++test được, còn phần chạm mạng thì mỏng tới mức đọc hết bằng mắt.
++
++VÌ SAO GHI THÂN ISSUE PHẢI CẨN THẬN HƠN ĐĂNG COMMENT:
++`ops-publish-lease.yml` chỉ THÊM comment — sai thì bản cũ còn nguyên để đối chiếu.
++Ghi thân issue là GHI ĐÈ: một lượt chạy sai xoá sạch văn bản người ta gõ tay, và
++trong kho không có bản sao nào để dựng lại. Nên ở đây có hai chốt mà cửa lease
++không cần:
++
++  1. QUYỀN SỞ HỮU (`duoc_ghi_de`) — chỉ ghi đè khi thân hiện tại RỖNG, hoặc đã
++     mang đúng dấu `<!-- ops-mirror-spec v1 …>` do chính cơ chế này đặt. Thân do
++     người viết mà không có dấu thì TỪ CHỐI, KHÔNG "hợp nhất thông minh".
++  2. IDEMPOTENT theo NỘI DUNG — workflow so thân mới với thân cũ và bỏ qua nếu
++     trùng. Không có chốt này thì mỗi push sinh một lượt sửa và lịch sử issue
++     thành nhiễu.
++
++Mã thoát
++    0  ok
++    2  sai đối số / tệp không đọc được / đường dẫn ra ngoài kho
++    6  mỏ neo lệch — băm spec không khớp điều bản chiếu khai
++    8  nội dung không hợp lệ — thiếu trường, packet_issue lệch, thân rỗng
++"""
++from __future__ import annotations
++
++import argparse
++import hashlib
++import re
++import sys
++from pathlib import Path
++
++RC_OK, RC_THAM_SO, RC_NEO, RC_NOI_DUNG = 0, 2, 6, 8
++
++DAU_SO_HUU = "<!-- ops-mirror-spec v1"
++MOC_THAN = "## ⬇ TỪ ĐÂY TRỞ XUỐNG LÀ NỘI DUNG CẦN DÁN"
++SHA256 = re.compile(r"^[0-9a-f]{64}$")
++KHOI_MIRROR = re.compile(r"```mirror\n(.*?)```", re.S)
++
++
++class Chan(Exception):
++    def __init__(self, ma: int, msg: str):
++        super().__init__(msg)
++        self.ma = ma
++
++
++def _doc_khai(text: str) -> dict:
++    """Đọc khối ```mirror``` — phần MÁY ĐỌC ĐƯỢC của bản chiếu.
++
++    Bản chiếu là văn xuôi; KHÔNG parse văn xuôi để lấy mỏ neo. Khối này khai tường
++    minh ba thứ, và cả ba đều bị đối chiếu lại với tệp thật ở `kiem()`.
++    """
++    m = KHOI_MIRROR.search(text)
++    if not m:
++        raise Chan(RC_NOI_DUNG,
++                   "bản chiếu thiếu khối ```mirror``` khai spec_path/spec_hash/"
++                   "packet_issue — một bản chiếu không khai nó chiếu CÁI GÌ thì "
++                   "không ai kiểm được")
++    d = {}
++    for dong in m.group(1).splitlines():
++        if not dong.strip() or dong.lstrip().startswith("#"):
++            continue
++        if ":" not in dong:
++            raise Chan(RC_NOI_DUNG, f"dòng khai sai dạng trong khối mirror: {dong!r}")
++        k, v = dong.split(":", 1)
++        d[k.strip()] = v.strip()
++    thieu = [k for k in ("spec_path", "spec_hash", "packet_issue") if not d.get(k)]
++    if thieu:
++        raise Chan(RC_NOI_DUNG, f"khối mirror thiếu: {', '.join(thieu)}")
++    return d
++
++
++def _so_nguyen_duong(v: str, ten: str) -> int:
++    if not re.fullmatch(r"[1-9][0-9]*", v):
++        raise Chan(RC_NOI_DUNG, f"{ten} phải là số nguyên dương, được {v!r}")
++    return int(v)
++
++
++def kiem(duong_chieu: Path, goc: Path) -> tuple[dict, str]:
++    """Trả `(khai, thân đã dựng)` nếu chiếu được; ném `Chan` nếu không."""
++    text = duong_chieu.read_text(encoding="utf-8")
++    khai = _doc_khai(text)
++    issue = _so_nguyen_duong(khai["packet_issue"], "packet_issue")
++
++    if not SHA256.match(khai["spec_hash"]):
++        raise Chan(RC_NEO,
++                   f"spec_hash phải là 64 ký tự hex thường, được {khai['spec_hash']!r}")
++
++    # `spec_path` là DỮ LIỆU trong tệp mà lại thành một lượt đọc đĩa: chặn đường ra
++    # ngoài kho TRƯỚC khi chạm hệ tệp. Cùng lý do, cùng cách với `lease_publish.py`.
++    pp = khai["spec_path"]
++    if pp.startswith("/") or "\\" in pp or ".." in Path(pp).parts:
++        raise Chan(RC_THAM_SO,
++                   f"spec_path phải là đường dẫn tương đối trong kho, được {pp!r}")
++    f = (goc / pp).resolve()
++    try:
++        f.relative_to(goc.resolve())
++    except ValueError:
++        raise Chan(RC_THAM_SO, f"spec_path trỏ ra ngoài kho: {pp!r}") from None
++    if not f.is_file():
++        raise Chan(RC_NEO,
++                   f"spec_path {pp!r} không có tệp — bản chiếu trỏ vào một vật không "
++                   f"tồn tại thì nó đang chiếu cái gì?")
++
++    # CHỐT QUAN TRỌNG NHẤT của tệp này: bắt bản chiếu TRÔI khỏi spec. Sửa spec mà
++    # quên cập nhật bản chiếu ⇒ thân issue nói một đằng, kho một nẻo, và không ai
++    # biết. Chặn ở đây rẻ hơn nhiều so với phát hiện sau ba vòng review.
++    thuc = hashlib.sha256(f.read_bytes()).hexdigest()
++    if thuc != khai["spec_hash"]:
++        raise Chan(RC_NEO,
++                   f"băm spec LỆCH: bản chiếu khai {khai['spec_hash']}, tệp {pp!r} thực "
++                   f"tế là {thuc} ({f.stat().st_size} byte). Spec đã đổi mà bản chiếu "
++                   f"chưa theo — cập nhật bản chiếu rồi chạy lại.")
++
++    # `packet_issue` phải khớp CHÍNH SPEC, không chỉ khớp lời bản chiếu tự khai.
++    noi_dung_spec = f.read_text(encoding="utf-8")
++    m = re.search(r"^packet_issue:\s*([0-9]+)\s*$", noi_dung_spec, re.M)
++    if not m:
++        raise Chan(RC_NOI_DUNG, f"spec {pp!r} không khai `packet_issue`")
++    if int(m.group(1)) != issue:
++        raise Chan(RC_NOI_DUNG,
++                   f"packet_issue LỆCH: bản chiếu khai {issue}, spec khai {m.group(1)}")
++
++    if MOC_THAN not in text:
++        raise Chan(RC_NOI_DUNG,
++                   f"bản chiếu thiếu mốc {MOC_THAN!r} — không biết cắt thân từ đâu")
++    than = text.split(MOC_THAN, 1)[1]
++    than = than.split("\n", 1)[1] if "\n" in than else ""
++    than = than.lstrip("\n")
++    while than.startswith("---\n"):
++        than = than[4:].lstrip("\n")
++    if not than.strip():
++        raise Chan(RC_NOI_DUNG, "phần thân sau mốc RỖNG")
++
++    dau = f'{DAU_SO_HUU} | spec_hash: {khai["spec_hash"]} -->'
++    return khai, f"{dau}\n\n{than}"
++
++
++def duoc_ghi_de(than_cu: str | None) -> tuple[bool, str]:
++    """Thân hiện tại có cho phép cơ chế này ghi đè không?
++
++    CHỈ hai trường hợp: rỗng, hoặc đã mang dấu sở hữu. Mọi thứ khác là văn bản người
++    ta gõ, và ghi đè nó là xoá công của người khác — TỪ CHỐI, nói rõ cách mở khoá
++    thủ công, KHÔNG tự quyết.
++    """
++    t = (than_cu or "").strip()
++    if not t:
++        return True, "thân rỗng"
++    if t.startswith(DAU_SO_HUU):
++        return True, "thân đã mang dấu sở hữu của cơ chế này"
++    return False, (
++        "thân hiện tại do NGƯỜI viết (không có dấu sở hữu). Từ chối ghi đè. Muốn cho "
++        f"phép: tự dán dòng `{DAU_SO_HUU} -->` lên đầu thân, hoặc xoá trống thân, rồi "
++        "push lại.")
++
++
++def main(argv=None) -> int:
++    ap = argparse.ArgumentParser(
++        prog="mirror_spec.py",
++        description="Kiểm và dựng thân Issue từ một bản chiếu spec. KHÔNG gọi mạng.")
++    sub = ap.add_subparsers(dest="lenh", required=True)
++    # `check` kiểm và in bằng chứng · `body` dựng thân · `issue` in số issue.
++    for ten in ("check", "body", "issue"):
++        q = sub.add_parser(ten)
++        q.add_argument("tep")
++        q.add_argument("--root", default=".")
++    # `guard` là chốt QUYỀN SỞ HỮU, tách riêng vì nó nhận THÂN HIỆN TẠI từ ngoài.
++    # Để ở đây thay vì nhúng python vào YAML: logic nào đáng kiểm thì đáng test, mà
++    # YAML thì không test được.
++    q = sub.add_parser("guard")
++    q.add_argument("--than-cu", required=True, help="tệp chứa thân issue hiện tại")
++    q.add_argument("--issue", required=True)
++    a = ap.parse_args(argv)
++
++    if a.lenh == "guard":
++        try:
++            cu = Path(a.than_cu).read_text(encoding="utf-8")
++        except OSError as e:
++            print(f"CHẶN({RC_THAM_SO}): không đọc được {a.than_cu}: {e}", file=sys.stderr)
++            return RC_THAM_SO
++        cho_phep, ly_do = duoc_ghi_de(cu)
++        if not cho_phep:
++            print(f"CHẶN({RC_NOI_DUNG}) thân #{a.issue}: {ly_do}", file=sys.stderr)
++            return RC_NOI_DUNG
++        print(f"cho ghi đè thân #{a.issue} — {ly_do}")
++        return RC_OK
++
++    try:
++        khai, than = kiem(Path(a.tep), Path(a.root).resolve())
++    except Chan as e:
++        print(f"CHẶN({e.ma}): {e}", file=sys.stderr)
++        return e.ma
++    except (OSError, UnicodeDecodeError) as e:
++        print(f"CHẶN({RC_THAM_SO}): không đọc được {a.tep}: {e}", file=sys.stderr)
++        return RC_THAM_SO
++
++    if a.lenh == "body":
++        sys.stdout.write(than)
++    elif a.lenh == "issue":
++        print(khai["packet_issue"])
++    else:
++        print(f"ok: chiếu {khai['spec_path']} → issue #{khai['packet_issue']}, "
++              f"băm khớp {khai['spec_hash'][:12]}…, thân {len(than)} ký tự")
++    return RC_OK
++
++
++if __name__ == "__main__":
++    sys.exit(main())

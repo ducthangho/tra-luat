@@ -706,6 +706,40 @@ def _giet_cay(pid: int, khoa: str | None, job=None) -> KetGiet:
     # POSIX: con được sinh với start_new_session nên pgid == pid, giết cả nhóm.
     # Ảnh chụp phải lấy TRƯỚC phát tín hiệu đầu tiên — sau đó kẻ đã setsid() là
     # không thể tìm lại (xem _chup_cay).
+    # CHỐT TRƯỞNG NHÓM — `killpg` nhận PROCESS GROUP ID, còn ta đang cầm PID.
+    #
+    # Hai số đó chỉ bằng nhau khi tiến trình LÀ TRƯỞNG NHÓM — điều kiện mà
+    # `start_new_session=True` lúc sinh con tạo ra. Chú thích ngay trên khai đúng giả
+    # định ấy, nhưng KHÔNG AI KIỂM nó tại chỗ giết. Giả định không được kiểm là giả
+    # định sẽ sai vào đúng ngày nó đắt nhất.
+    #
+    # ĐÃ ĐO: với một tiến trình sinh KHÔNG kèm `start_new_session` (pid=26072,
+    # pgid=26071), `_giet_cay` gọi thẳng `killpg(26072)` — tức nhắm vào một nhóm
+    # KHÔNG PHẢI nhóm của mục tiêu.
+    #
+    # Trên máy thường pid cỡ vài chục nghìn nên nhóm ấy hầu như không tồn tại và lỗi
+    # tan thành `ProcessLookupError`. Trong PID NAMESPACE thì pid chạy từ 1 — và ở đó
+    # `killpg(<số nhỏ>)` rất dễ trúng một nhóm CÓ THẬT, kể cả nhóm 1 là nhóm của chính
+    # vỏ shell gọi ta. Đó khớp với triệu chứng cross-review đo được ba lượt liền: bộ
+    # test chạy xong nhưng lệnh shell kế tiếp không bao giờ chạy.
+    #
+    # Đây đúng họ lỗi mà tệp này đã dựng chốt khoá-danh-tính để chặn ("PID bị tái dùng,
+    # giết nhầm tiến trình vô can"). Chốt cũ hỏi "PID này còn là NGƯỜI CŨ không"; chốt
+    # này hỏi "PID này có thật sự là CẢ NHÓM không". Thiếu vế sau thì vế trước không đủ.
+    #
+    # KHÔNG đo được `pgid` thì ĐI TIẾP — tiến trình có thể vừa chết, và đó là đường đã
+    # có xử lý riêng bên dưới. Chỉ TỪ CHỐI khi đo được và biết chắc là KHÁC.
+    nhom_that = None
+    try:
+        nhom_that = os.getpgid(pid)
+    except OSError:
+        nhom_that = None
+    if nhom_that is not None and nhom_that != pid:
+        return KetGiet(False, False,
+                       f"tu choi giet: pid {pid} KHONG phai truong nhom "
+                       f"(pgid={nhom_that}) - killpg({pid}) se nham vao nhom KHAC",
+                       tu_choi=True)
+
     anh = _chup_cay(pid)
 
     def _con_lai():

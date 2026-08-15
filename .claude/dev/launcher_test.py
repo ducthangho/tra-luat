@@ -2408,6 +2408,57 @@ def t91_ban_khai_moi_truong_khong_duoc_chet_va_khong_duoc_doan():
     bang(mt["pid"] == os.getpid(), "pid khai sai")
 
 
+@ca
+def t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom():
+    """`killpg` nhận PROCESS GROUP ID, ta cầm PID — chỉ bằng nhau khi là trưởng nhóm.
+
+    Truy từ manh mối cross-review lượt 4 (`launcher.py:720` và `:739`). ĐO ĐƯỢC trên
+    bản trước: con sinh KHÔNG kèm `start_new_session` có pid=26072 pgid=26071, mà
+    `_giet_cay` vẫn gọi thẳng `killpg(26072)` — nhắm vào một nhóm KHÔNG PHẢI nhóm của
+    mục tiêu.
+
+    Máy thường pid cỡ vài chục nghìn nên nhóm ấy hầu như không tồn tại và lỗi tan thành
+    `ProcessLookupError`. Trong PID NAMESPACE pid chạy từ 1, nên `killpg(<số nhỏ>)` rất
+    dễ trúng một nhóm CÓ THẬT — kể cả nhóm 1 của chính vỏ shell. Khớp triệu chứng đo
+    được ba lượt: bộ test chạy xong mà lệnh shell kế tiếp không bao giờ chạy.
+
+    Ca này ghi lại `killpg` thay vì giết thật, và khoá CẢ HAI chiều — không phải trưởng
+    nhóm thì TỪ CHỐI và TUYỆT ĐỐI không gọi `killpg`; là trưởng nhóm thì vẫn phải giết
+    như cũ, kẻo chữa lỗ này bằng cách làm chốt giết thôi hoạt động.
+    """
+    m = _tai_launcher_thu()
+    ghi = []
+    m.os.killpg = lambda g, sig: ghi.append(g)
+    m._giet_rieng = lambda *a, **k: None
+    m._chup_cay = lambda p: {}
+    m._thanh_vien_nhom = lambda p: []
+    m._con_song = lambda p: False
+    m._khoa_danh_tinh = lambda p: "x"
+
+    # (a) pgid != pid  => TU CHOI, khong duoc goi killpg
+    m.os.getpgid = lambda p: p - 1
+    kq = m._giet_cay(500, "x")
+    bang(ghi == [], f"KHONG phai truong nhom ma VAN goi killpg: {ghi}")
+    bang(getattr(kq, "tu_choi", False) is True, f"phai TU CHOI, duoc {kq}")
+    bang("truong nhom" in str(kq), f"thong diep phai noi ro ly do, duoc {str(kq)!r}")
+
+    # (b) pgid == pid => van phai giet nhu cu
+    ghi.clear()
+    m.os.getpgid = lambda p: p
+    kq = m._giet_cay(500, "x")
+    bang(ghi and ghi[0] == 500, f"la truong nhom ma KHONG giet: {ghi} / {kq}")
+    bang(getattr(kq, "tu_choi", False) is False, f"la truong nhom ma lai tu choi: {kq}")
+
+    # (c) KHONG do duoc pgid => DI TIEP (tien trinh co the vua chet), dung tu choi oan
+    ghi.clear()
+    def _hong(_p):
+        raise OSError("khong do duoc")
+    m.os.getpgid = _hong
+    kq = m._giet_cay(500, "x")
+    bang(getattr(kq, "tu_choi", False) is False,
+         f"khong do duoc pgid ma TU CHOI OAN: {kq}")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -2474,6 +2525,11 @@ DOT_BIEN = [
     # `t89` tu chung minh bang khang dinh truc tiep (ke ca duong NEM NGOAI LE giua
     # chung), cong phan chung tay: go chot co lap thi `t81` lam ban `subprocess.run`
     # ngay tu ca dau tien.
+    # Chot nay nam trong launcher.py nen DOT BIEN DUOC (khac chot harness o launcher_test).
+    ("bo_chot_truong_nhom_truoc_killpg",
+     ('    if nhom_that is not None and nhom_that != pid:',
+      '    if False:'),
+     ["t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom"]),
     ("bo_kiem_prompt_rong",
      ('if not b.strip():\n        raise Chan(MA_PROMPT, f"tep prompt RONG: {p}")',
       'if False:\n        raise Chan(MA_PROMPT, f"tep prompt RONG: {p}")'),

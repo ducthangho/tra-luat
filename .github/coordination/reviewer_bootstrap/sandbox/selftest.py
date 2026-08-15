@@ -40,6 +40,7 @@ NET_NS_INIT = "/proc/1/ns/net"
 PARENT_NET_NS_ENV = "RA02_PARENT_NET_NS"
 REENTRY_MARKER_ENV = "RA02_DISPOSABLE_FIXTURE_NS"
 PRISTINE_LOOPBACK = ("127.0.0.1/8", "::1/128")
+CLONE_NEWNET = 0x40000000
 
 
 class DisposableNamespaceError(RuntimeError):
@@ -58,36 +59,103 @@ def measure_network_namespace(read_link=os.readlink) -> dict[str, object]:
     return {"current": current, "initial": initial}
 
 
-def disposable_namespace_evidence(environment: Mapping[str, str], read_link=os.readlink) -> dict[str, object]:
+def _libc_unshare(flags: int) -> tuple[int, int]:
+    import ctypes
+
+    libc = ctypes.CDLL(None, use_errno=True)
+    return libc.unshare(flags), ctypes.get_errno()
+
+
+def create_disposable_network_namespace(read_link=os.readlink, unshare=_libc_unshare) -> dict[str, object]:
+    """TỰ tạo namespace mạng và ĐO chuyển dịch của chính tiến trình này.
+
+    Đây là chốt của WP99-R3G3-SPEC-003.  Mọi tín hiệu do TIẾN TRÌNH CHA truyền
+    xuống — biến môi trường, đối số, thậm chí `/proc/<ppid>/cmdline` — đều giả
+    mạo được, vì cha kiểm soát toàn bộ những gì con quan sát.  Reviewer attempt 3
+    đã chứng minh bằng hành vi: đứng trong một `unshare --net --mount` bên ngoài,
+    đặt `RA02_DISPOSABLE_FIXTURE_NS=1` và bịa `RA02_PARENT_NET_NS=net:[111]`, bộ
+    thử bỏ qua bước tạo namespace của chính nó mà vẫn trả rc 0 với 11/11.
+
+    Không có cách nào chặn việc đó bằng cách kiểm lời khai kỹ hơn.  Cách duy
+    nhất là ĐỪNG NHẬN lời khai: gọi `unshare(CLONE_NEWNET)` NGAY TRONG tiến
+    trình này rồi đọc lại `/proc/self/ns/net`.  Bản ghi trả về sinh ra tại chỗ,
+    không thể thừa kế, và `before != after` là bằng chứng tự quan sát rằng
+    namespace đang đứng do chính bộ thử tạo ra.
+
+    `unshare` là tham số để control khả chuyển chạy được trên nền không Linux;
+    đường THẬT luôn dùng `_libc_unshare`.
+    """
+    before = read_link(NET_NS_SELF)
+    rc, errno_value = unshare(CLONE_NEWNET)
+    if rc != 0:
+        raise DisposableNamespaceError(
+            "cannot create a disposable network namespace: rc=%d errno=%d" % (rc, errno_value)
+        )
+    after = read_link(NET_NS_SELF)
+    if after == before:
+        # rc=0 mà không rời namespace cũ là đúng kiểu "cổng xanh nhờ rc": phải
+        # đo hiệu quả THẬT, không tin mã trả về.
+        raise DisposableNamespaceError(
+            "unshare(CLONE_NEWNET) reported success without moving this process out of %s" % before
+        )
+    return {
+        "before": before,
+        "after": after,
+        "created_in_process": True,
+        "clone_flags": CLONE_NEWNET,
+    }
+
+
+def disposable_namespace_evidence(
+    environment: Mapping[str, str],
+    read_link=os.readlink,
+    creation: Mapping[str, object] | None = None,
+) -> dict[str, object]:
     """Đo, không tin lời khai.
 
     Bản trước quyết định bằng biến môi trường `RA02_DISPOSABLE_FIXTURE_NS`: đặt
     sẵn `=1` ở tiến trình cha là bỏ qua `unshare`, rồi fixture nhét địa chỉ
     metadata vào loopback CỦA MÁY và bộ thử vẫn xanh (R2).  Danh tính namespace
     là thứ ĐO được; biến môi trường thì không.
+
+    Bốn phép kiểm đầu vẫn giữ nguyên nhưng chúng chỉ chứng minh "khác namespace
+    khởi tạo", KHÔNG chứng minh "do ta tạo": một namespace THỪA KẾ cũng khác
+    `/proc/1/ns/net` (SPEC-003).  Ba phép kiểm sau nói về BẢN GHI TẠO sinh tại
+    chỗ bởi `create_disposable_network_namespace`, thứ không tiến trình cha nào
+    truyền xuống được.
     """
     measured = measure_network_namespace(read_link)
     recorded = environment.get(PARENT_NET_NS_ENV)
+    created = creation if isinstance(creation, Mapping) else None
     checks = {
         "parent_namespace_recorded": bool(recorded),
         "initial_namespace_readable": measured["initial"] is not None,
         "differs_from_initial": measured["initial"] is not None
         and measured["current"] != measured["initial"],
         "differs_from_recorded_parent": bool(recorded) and measured["current"] != recorded,
+        "namespace_created_in_process": created is not None
+        and created.get("created_in_process") is True,
+        "creation_left_the_previous_namespace": created is not None
+        and created.get("before") != created.get("after"),
+        "current_is_the_created_namespace": created is not None
+        and measured["current"] == created.get("after"),
     }
     return {
         "measured": measured,
         "recorded_parent": recorded,
+        "creation": dict(created) if created is not None else None,
         "checks": checks,
         "disposable": all(checks.values()),
     }
 
 
 def require_disposable_network_namespace(
-    environment: Mapping[str, str] | None = None, read_link=os.readlink
+    environment: Mapping[str, str] | None = None,
+    read_link=os.readlink,
+    creation: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
     evidence = disposable_namespace_evidence(
-        os.environ if environment is None else environment, read_link
+        os.environ if environment is None else environment, read_link, creation
     )
     if not evidence["disposable"]:
         failed = sorted(name for name, value in evidence["checks"].items() if not value)
@@ -118,9 +186,16 @@ def loopback_addresses(run=subprocess.run) -> list[str]:
 
 
 def establish_fixture_baseline(
-    environment: Mapping[str, str] | None = None, read_link=os.readlink, run=subprocess.run
+    environment: Mapping[str, str] | None = None,
+    read_link=os.readlink,
+    run=subprocess.run,
+    create=create_disposable_network_namespace,
 ) -> dict[str, object]:
-    """Chứng minh MỘT LẦN rằng namespace này là của ta và loopback còn nguyên sơ.
+    """TẠO namespace, rồi chứng minh MỘT LẦN rằng loopback còn nguyên sơ.
+
+    Thứ tự có tải trọng.  Bước một là `create`: bộ thử KHÔNG hỏi ai xem mình
+    đang ở đâu, nó tự tạo namespace và giữ bản ghi chuyển dịch (SPEC-003).  Bước
+    hai kiểm lại danh tính đã đo.  Bước ba mới chạm loopback.
 
     Phép kiểm "nguyên sơ" phụ thuộc THỨ TỰ: lượt chạy thứ nhất hợp lệ tự thêm
     10.99.0.1/32, 169.254.169.254/32 và fd00:ec2::254/128 vào loopback CỦA CHÍNH
@@ -128,13 +203,16 @@ def establish_fixture_baseline(
     >=8 lượt chết ở lượt 2.  Đó là lỗi đã ĐO được, không phải giả định.
 
     Vì vậy: chốt độ nguyên sơ đúng một lần, TRƯỚC vòng lặp, khi chưa ai ghi gì;
-    còn danh tính namespace thì vẫn kiểm LẠI mỗi lượt vì nó bất biến theo thời
-    gian và chính nó mới là thứ chặn được lời khai môi trường giả (R2).
+    còn danh tính namespace thì vẫn kiểm LẠI mỗi lượt cùng bản ghi tạo, vì nó
+    bất biến theo thời gian và chính nó mới là thứ chặn được lời khai môi trường
+    giả (R2) lẫn namespace thừa kế (SPEC-003).
     """
-    namespace = require_disposable_network_namespace(environment, read_link)
+    creation = create(read_link)
+    namespace = require_disposable_network_namespace(environment, read_link, creation)
     loopback = require_pristine_loopback(run)
     return {
         "namespace": namespace,
+        "creation": creation,
         "loopback_before_first_run": loopback,
         "pristine_checked_once_before_any_fixture": True,
     }
@@ -354,6 +432,55 @@ def descendant_checks_treat_zombies_as_gone_with_one_snapshot() -> None:
         raise AssertionError({"checks": checks, "calls": calls})
 
 
+HOST_INITIAL_NS = "net:[4026531840]"
+
+
+class _FakeNamespace:
+    """Bản đồ `/proc/.../ns/net` giả cùng `unshare` giả.
+
+    Có `unshare` tiêm được thì các control này chạy được trên MỌI nền — kể cả
+    nền không có namespace — nên phản chứng SPEC-003 nằm trong bộ khả chuyển
+    chứ không chỉ sống trên runner Linux.
+    """
+
+    def __init__(self, current: str, initial: str = HOST_INITIAL_NS):
+        self._links = {NET_NS_SELF: current, NET_NS_INIT: initial}
+
+    def read_link(self, path: str) -> str:
+        return self._links[path]
+
+    def moving_unshare(self, destination: str):
+        def _unshare(flags: int) -> tuple[int, int]:
+            if flags != CLONE_NEWNET:
+                return -1, 22
+            self._links[NET_NS_SELF] = destination
+            return 0, 0
+
+        return _unshare
+
+    @staticmethod
+    def lying_unshare():
+        """rc=0 nhưng không đi đâu cả — đúng kiểu cổng xanh nhờ mã trả về."""
+
+        def _unshare(flags: int) -> tuple[int, int]:
+            return 0, 0
+
+        return _unshare
+
+    @staticmethod
+    def failing_unshare(errno_value: int = 1):
+        def _unshare(flags: int) -> tuple[int, int]:
+            return -1, errno_value
+
+        return _unshare
+
+
+def _fresh_creation(before: str = HOST_INITIAL_NS, after: str = "net:[4026532999]") -> dict[str, object]:
+    """Bản ghi tạo dựng bằng CHÍNH bộ tạo thật, không phải một dict viết tay."""
+    fake = _FakeNamespace(before)
+    return create_disposable_network_namespace(fake.read_link, fake.moving_unshare(after))
+
+
 def disposable_namespace_guard_rejects_inherited_environment_claim() -> None:
     """Phản chứng CHÍNH XÁC của R2: cha đặt sẵn cờ, không hề có namespace mới."""
     host_links = {NET_NS_SELF: "net:[4026531840]", NET_NS_INIT: "net:[4026531840]"}
@@ -371,10 +498,12 @@ def disposable_namespace_guard_rejects_inherited_environment_claim() -> None:
     else:
         raise AssertionError("inherited environment claim was accepted as a disposable namespace")
 
-    # Cánh dương: một namespace THẬT sự mới phải đi qua.
+    # Cánh dương: một namespace THẬT sự mới, do chính ta tạo, phải đi qua.
     fresh_links = {NET_NS_SELF: "net:[4026532999]", NET_NS_INIT: "net:[4026531840]"}
     fresh_environment = {REENTRY_MARKER_ENV: "1", PARENT_NET_NS_ENV: "net:[4026531840]"}
-    fresh = require_disposable_network_namespace(fresh_environment, fresh_links.__getitem__)
+    fresh = require_disposable_network_namespace(
+        fresh_environment, fresh_links.__getitem__, _fresh_creation()
+    )
     if fresh["disposable"] is not True or fresh["checks"]["differs_from_recorded_parent"] is not True:
         raise AssertionError(fresh)
 
@@ -383,7 +512,9 @@ def host_loopback_fixture_refuses_outside_disposable_namespace() -> None:
     """Không có ghi chép namespace cha, và loopback bẩn: cả hai đều phải chặn TRƯỚC khi ghi."""
     fresh_links = {NET_NS_SELF: "net:[4026532999]", NET_NS_INIT: "net:[4026531840]"}
     try:
-        require_disposable_network_namespace({}, fresh_links.__getitem__)
+        # Bản ghi tạo hợp lệ để phép kiểm CÒN LẠI duy nhất là bản ghi namespace
+        # cha: một ca kiểm chỉ có giá trị khi nó đỏ vì đúng lý do của nó.
+        require_disposable_network_namespace({}, fresh_links.__getitem__, _fresh_creation())
     except DisposableNamespaceError as exc:
         if "parent_namespace_recorded" not in str(exc):
             raise AssertionError(str(exc)) from exc
@@ -433,16 +564,23 @@ def fixture_baseline_is_established_once_and_survives_our_own_addresses() -> Non
             self.stdout = stdout
             self.stderr = ""
 
-    fresh_links = {NET_NS_SELF: "net:[4026532999]", NET_NS_INIT: "net:[4026531840]"}
     environment = {REENTRY_MARKER_ENV: "1", PARENT_NET_NS_ENV: "net:[4026531840]"}
     empty_lo = ""
+    fake = _FakeNamespace(HOST_INITIAL_NS)
+
+    def _create(read_link):
+        return create_disposable_network_namespace(read_link, fake.moving_unshare("net:[4026532999]"))
+
     baseline = establish_fixture_baseline(
-        environment, fresh_links.__getitem__, lambda *a, **k: _Completed(empty_lo)
+        environment, fake.read_link, lambda *a, **k: _Completed(empty_lo), _create
     )
     if baseline["pristine_checked_once_before_any_fixture"] is not True:
         raise AssertionError(baseline)
     if baseline["loopback_before_first_run"] != []:
         raise AssertionError(baseline)
+    # Baseline phải mang bản ghi TẠO, không chỉ mang danh tính đo được.
+    if baseline["creation"]["before"] == baseline["creation"]["after"]:
+        raise AssertionError(baseline["creation"])
 
     # Sau lượt 1 loopback mang địa chỉ CỦA TA; baseline vẫn phải dùng lại được.
     after_run_one = (
@@ -459,8 +597,11 @@ def fixture_baseline_is_established_once_and_survives_our_own_addresses() -> Non
     else:
         raise AssertionError("the pristine check no longer refuses a populated loopback")
 
-    # Danh tính namespace KHÔNG đổi giữa các lượt, nên nó vẫn kiểm lại được.
-    repeat_evidence = require_disposable_network_namespace(environment, fresh_links.__getitem__)
+    # Danh tính namespace KHÔNG đổi giữa các lượt, nên nó vẫn kiểm lại được —
+    # cùng bản ghi tạo của baseline, vì đó mới là thứ chứng minh quyền sở hữu.
+    repeat_evidence = require_disposable_network_namespace(
+        environment, fake.read_link, baseline["creation"]
+    )
     if repeat_evidence["measured"]["current"] != baseline["namespace"]["measured"]["current"]:
         raise AssertionError({"baseline": baseline["namespace"], "repeat": repeat_evidence})
 
@@ -470,15 +611,105 @@ def fixture_baseline_is_established_once_and_survives_our_own_addresses() -> Non
         "1: lo    inet 10.255.255.254/32 scope global lo\\       valid_lft forever\n"
         "1: lo    inet6 ::1/128 scope host \\       valid_lft forever\n"
     )
+    dirty_namespace = _FakeNamespace(HOST_INITIAL_NS)
     try:
         establish_fixture_baseline(
-            environment, fresh_links.__getitem__, lambda *a, **k: _Completed(dirty_before_start)
+            environment,
+            dirty_namespace.read_link,
+            lambda *a, **k: _Completed(dirty_before_start),
+            lambda read_link: create_disposable_network_namespace(
+                read_link, dirty_namespace.moving_unshare("net:[4026532998]")
+            ),
         )
     except DisposableNamespaceError as exc:
         if "10.255.255.254/32" not in str(exc):
             raise AssertionError(str(exc)) from exc
     else:
         raise AssertionError("a shared, already-populated loopback was accepted as a baseline")
+
+
+def namespace_guard_requires_a_self_created_namespace() -> None:
+    """Phản chứng CHÍNH XÁC của SPEC-003: namespace THỪA KẾ chứ không phải của ta.
+
+    Reviewer attempt 3 đứng trong một `unshare --net --mount` BÊN NGOÀI rồi đặt
+    `RA02_DISPOSABLE_FIXTURE_NS=1` cùng `RA02_PARENT_NET_NS=net:[111]` bịa đặt.
+    Bộ thử bỏ qua bước tạo namespace của chính nó và vẫn trả rc 0 với 11/11 pass.
+    Điểm đau: bốn phép kiểm cũ ĐỀU qua trong tình huống đó — một namespace thừa
+    kế thật sự khác `/proc/1/ns/net` và thật sự khác chuỗi cha bịa ra — nên
+    không có phép kiểm nào trong số đó bắt được.  Chỉ bản ghi TẠO sinh tại chỗ
+    mới phân biệt được "namespace mới" với "namespace của ta".
+    """
+    inherited = "net:[4026532777]"
+    fake = _FakeNamespace(inherited)
+    hostile_environment = {REENTRY_MARKER_ENV: "1", PARENT_NET_NS_ENV: "net:[111]"}
+
+    evidence = disposable_namespace_evidence(hostile_environment, fake.read_link)
+    legacy = (
+        "parent_namespace_recorded",
+        "initial_namespace_readable",
+        "differs_from_initial",
+        "differs_from_recorded_parent",
+    )
+    if not all(evidence["checks"][name] for name in legacy):
+        raise AssertionError("the inherited-namespace exploit no longer reproduces: %r" % evidence)
+    if evidence["disposable"] is not False:
+        raise AssertionError(evidence)
+    try:
+        require_disposable_network_namespace(hostile_environment, fake.read_link)
+    except DisposableNamespaceError as exc:
+        for needle in (
+            "namespace_created_in_process",
+            "creation_left_the_previous_namespace",
+            "current_is_the_created_namespace",
+        ):
+            if needle not in str(exc):
+                raise AssertionError("%r absent from %s" % (needle, exc)) from exc
+    else:
+        raise AssertionError("an inherited network namespace was accepted as self-created")
+
+    # Cánh dương: tự tạo thì đi qua.
+    creator = _FakeNamespace(HOST_INITIAL_NS)
+    creation = create_disposable_network_namespace(
+        creator.read_link, creator.moving_unshare("net:[4026532999]")
+    )
+    if creation["created_in_process"] is not True or creation["before"] == creation["after"]:
+        raise AssertionError(creation)
+    accepted = require_disposable_network_namespace(
+        {PARENT_NET_NS_ENV: HOST_INITIAL_NS}, creator.read_link, creation
+    )
+    if accepted["disposable"] is not True:
+        raise AssertionError(accepted)
+
+    # `rc=0` mà không rời namespace cũ là cổng xanh bị lừa — phải chết.
+    liar = _FakeNamespace(HOST_INITIAL_NS)
+    try:
+        create_disposable_network_namespace(liar.read_link, liar.lying_unshare())
+    except DisposableNamespaceError as exc:
+        if "without moving this process" not in str(exc):
+            raise AssertionError(str(exc)) from exc
+    else:
+        raise AssertionError("unshare rc=0 without a namespace change was accepted")
+
+    # Syscall hỏng phải nổi lên bằng lỗi CÓ TÊN, không phải một baseline im lặng.
+    broken = _FakeNamespace(HOST_INITIAL_NS)
+    try:
+        create_disposable_network_namespace(broken.read_link, broken.failing_unshare(1))
+    except DisposableNamespaceError as exc:
+        if "cannot create a disposable network namespace" not in str(exc):
+            raise AssertionError(str(exc)) from exc
+    else:
+        raise AssertionError("a failed unshare was treated as a disposable namespace")
+
+    # Bản ghi tạo THẬT nhưng của một namespace khác cũng không cứu được: quyền sở
+    # hữu phải nói về namespace ĐANG ĐỨNG, không phải về một lần tạo nào đó.
+    elsewhere = _FakeNamespace("net:[4026532888]")
+    mismatched = disposable_namespace_evidence(
+        {PARENT_NET_NS_ENV: HOST_INITIAL_NS}, elsewhere.read_link, creation
+    )
+    if mismatched["checks"]["current_is_the_created_namespace"] is not False:
+        raise AssertionError(mismatched)
+    if mismatched["disposable"] is not False:
+        raise AssertionError(mismatched)
 
 
 class SocketFixture:
@@ -810,7 +1041,9 @@ def _full_once(
         # của loopback là bằng chứng chốt MỘT LẦN trước vòng lặp (xem
         # `establish_fixture_baseline`) vì từ lượt 2 trở đi loopback mang đúng
         # các địa chỉ mà chính ta đã đặt ở lượt 1.
-        namespace_evidence = require_disposable_network_namespace()
+        namespace_evidence = require_disposable_network_namespace(
+            creation=fixture_baseline.get("creation")
+        )
         if fixture_baseline.get("pristine_checked_once_before_any_fixture") is not True:
             raise DisposableNamespaceError(
                 "fixture baseline was not established before the repeat loop"
@@ -992,6 +1225,7 @@ PORTABLE_CONTROLS = (
     disposable_namespace_guard_rejects_inherited_environment_claim,
     host_loopback_fixture_refuses_outside_disposable_namespace,
     fixture_baseline_is_established_once_and_survives_our_own_addresses,
+    namespace_guard_requires_a_self_created_namespace,
 )
 
 
@@ -1051,9 +1285,10 @@ def _enter_disposable_fixture_namespace(
     if not bootstrap:
         raise source_pin.SourcePinError("external bootstrap path is absent")
     env = dict(os.environ)
-    # Cờ này CHỈ đánh dấu "đã re-exec một lần" để khỏi lặp vô hạn; nó KHÔNG còn
-    # là bằng chứng cách ly.  Danh tính namespace cha được ghi lại để phía sau
-    # ĐO rằng `unshare --net` đã thật sự đổi namespace.
+    # Cờ này CHỈ đánh dấu "đã re-exec một lần" để khỏi lặp vô hạn; nó KHÔNG phải
+    # bằng chứng cách ly.  Danh tính namespace cha được ghi lại làm quan sát bổ
+    # sung; quyền sở hữu namespace do `create_disposable_network_namespace` tự
+    # đo trong tiến trình, không do hai biến này khai (SPEC-003).
     env[REENTRY_MARKER_ENV] = "1"
     env[PARENT_NET_NS_ENV] = str(measure_network_namespace()["current"])
     command = [
@@ -1208,8 +1443,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         }
         print(json.dumps(aggregate, ensure_ascii=False, sort_keys=True))
         return 1
-    # Re-exec ĐÚNG MỘT LẦN.  Nếu cha đặt sẵn cờ để bỏ qua bước này, ta không
-    # lặp, nhưng chốt ĐO trong `_full_once` vẫn chặn trước khi chạm loopback.
+    # Re-exec ĐÚNG MỘT LẦN, và chỉ để lấy mount namespace riêng cùng
+    # `--kill-child=KILL`.  Cờ môi trường ở đây CHỈ chống lặp vô hạn: nó KHÔNG
+    # còn là thẩm quyền cách ly nào cả.  Ai đặt sẵn cờ để bỏ qua bước này vẫn
+    # không thoát được, vì `establish_fixture_baseline` TỰ tạo namespace mạng
+    # trong tiến trình và đo chuyển dịch của chính nó trước khi chạm loopback
+    # (SPEC-003).
     if sys.platform.startswith("linux") and os.environ.get(REENTRY_MARKER_ENV) != "1":
         _enter_disposable_fixture_namespace(
             args.repo_root,

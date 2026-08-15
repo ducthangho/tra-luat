@@ -1,7 +1,15 @@
-"""Executable counterexamples for the trusted RA-02 successor oracle."""
+"""Executable counterexamples for the trusted RA-02 successor oracle.
+
+Không một hằng Mission / Packet / generation nào được viết trong tệp này (§4.2).
+Các ca kiểm thẩm quyền đọc pin hiện hành từ MỘT FIXTURE NGOÀI do Dispatcher soạn
+từ raw durable facts (§4.3) rồi DẪN XUẤT các biến thể stale / fenced / trên sàn
+từ chính giá trị ngoài đó.  Thiếu fixture là `not_run` có lý do kèm cổng ĐỎ, chứ
+không phải một ca tự chấm bằng hằng của chính mình (WP99-R3G3-SPEC-001).
+"""
 
 from __future__ import annotations
 
+import argparse
 import contextlib
 import hashlib
 import json
@@ -16,6 +24,28 @@ from collections.abc import Iterator
 
 HERE = pathlib.Path(__file__).resolve().parent
 SOURCE_PIN = HERE / "source_pin.py"
+CANDIDATE_ROOT = HERE.parents[3]
+
+# Đường dẫn fixture do `main` đặt từ dòng lệnh; `None` nghĩa là chỉ còn biến môi
+# trường để hỏi.  Đây là ĐỊA CHỈ, không phải thẩm quyền: nội dung vẫn phải niêm
+# phong read-only và nằm ngoài checkout ứng viên.
+_AUTHORITY_FIXTURE_PATH: str | None = None
+
+
+class FixtureUnavailable(RuntimeError):
+    """Ca kiểm cần một đầu vào ngoài do Dispatcher cấp, và nó không có ở đây."""
+
+
+def _authority_fixture():
+    module = _module("authority_fixture")
+    located = module.locate(_AUTHORITY_FIXTURE_PATH)
+    if not located:
+        raise FixtureUnavailable(
+            "no Dispatcher authority fixture: pass --authority-fixture PATH or set %s; "
+            "§4.3 forbids this selftest from supplying its own expected Mission/Packet pins"
+            % module.FIXTURE_PATH_ENV
+        )
+    return module.load(located, CANDIDATE_ROOT)
 
 
 @contextlib.contextmanager
@@ -25,7 +55,7 @@ def _trusted_temp_repository() -> Iterator[tuple[pathlib.Path, str, tuple[str, .
         from oracle.trusted_inventory import TRUSTED_SOURCE_PATHS
     finally:
         sys.path.pop(0)
-    checkout = HERE.parents[3]
+    checkout = CANDIDATE_ROOT
     with tempfile.TemporaryDirectory(prefix="ra02-source-pin-") as tmp:
         root = pathlib.Path(tmp)
         subprocess.run(["git", "init", "-q", str(root)], check=True)
@@ -399,22 +429,17 @@ def _sealed_json(path: pathlib.Path, value: object) -> pathlib.Path:
 
 
 def durable_facts_reject_empty_authority_blocks() -> None:
-    """Phản chứng chính xác của R3: hai khối RỖNG từng đi qua sạch."""
+    """Phản chứng chính xác của R3: hai khối RỖNG từng đi qua sạch.
+
+    Sàn đến từ fixture ngoài, không từ hằng của ứng viên — bản trước dựng cả sàn
+    lẫn ba bộ facts bằng cùng một nhúm hằng viết tay (SPEC-001).
+    """
     oracle = _module("oracle")
-    floor = {
-        "mission_issue": 76,
-        "mission_revision_min": 6,
-        "packet_issue": 99,
-        "packet_revision_min": 3,
-        "packet_generation_min": 3,
-    }
+    fixture = _authority_fixture()
     with tempfile.TemporaryDirectory(prefix="ra02-r3-") as tmp:
-        facts = _sealed_json(
-            pathlib.Path(tmp) / "durable-facts.json",
-            {"schema_version": 1, "mission": {}, "packet": {}},
-        )
+        facts = _sealed_json(pathlib.Path(tmp) / "durable-facts.json", fixture.empty_blocks())
         try:
-            oracle._read_durable_facts(facts, floor)
+            oracle._read_durable_facts(facts, dict(fixture.floor))
         except oracle.OracleError as exc:
             if "mission" not in str(exc) or "missing" not in str(exc):
                 raise AssertionError(str(exc)) from exc
@@ -423,29 +448,21 @@ def durable_facts_reject_empty_authority_blocks() -> None:
 
 
 def durable_facts_reject_authority_below_dispatcher_floor() -> None:
-    """Sàn hiện hành đến từ pin Dispatcher, và hai vế nằm ở HAI tệp ngoài khác nhau."""
+    """Ngữ nghĩa tươi/sàn, đo trên giá trị NGOÀI — không một số hiệu nào ở đây.
+
+    Ca này nói bốn điều và không điều nào phụ thuộc vào một Mission/Packet cụ
+    thể: dưới sàn thì chết theo tên trường; Packet đã rào thì chết; Mission lạ
+    thì chết; đúng sàn, trên sàn và CHÍNH pin hiện hành của fixture thì phải
+    được nhận.  Vế cuối là răng chống trôi: khi durable authority tiến lên,
+    Dispatcher sinh lại fixture và ca này nói về thẩm quyền MỚI, chứ không xanh
+    mãi với hằng lỗi thời của chính nó.
+    """
     oracle = _module("oracle")
+    fixture = _authority_fixture()
+    floor = dict(fixture.floor)
     with tempfile.TemporaryDirectory(prefix="ra02-floor-") as tmp:
         root = pathlib.Path(tmp)
-        floor_path = _sealed_json(
-            root / "dispatcher-authority-floor.json",
-            {
-                "mission_issue": 76,
-                "mission_revision_min": 6,
-                "packet_issue": 99,
-                "packet_revision_min": 3,
-                "packet_generation_min": 3,
-            },
-        )
-        floor = json.loads(floor_path.read_text(encoding="utf-8"))
-        stale = _sealed_json(
-            root / "stale-facts.json",
-            {
-                "schema_version": 1,
-                "mission": {"issue": 76, "revision": 4, "plan_hash": "a" * 64},
-                "packet": {"issue": 99, "revision": 2, "generation": 2, "spec_hash": "b" * 64},
-            },
-        )
+        stale = _sealed_json(root / "stale-facts.json", fixture.below_floor_facts())
         try:
             oracle._read_durable_facts(stale, floor)
         except oracle.OracleError as exc:
@@ -455,33 +472,91 @@ def durable_facts_reject_authority_below_dispatcher_floor() -> None:
         else:
             raise AssertionError("authority below the Dispatcher floor was accepted")
 
-        fenced = _sealed_json(
-            root / "fenced-facts.json",
-            {
-                "schema_version": 1,
-                "mission": {"issue": 76, "revision": 6, "plan_hash": "a" * 64},
-                "packet": {"issue": 86, "revision": 6, "generation": 6, "spec_hash": "b" * 64},
-            },
-        )
+        fenced = _sealed_json(root / "fenced-facts.json", fixture.fenced_packet_facts())
         try:
             oracle._read_durable_facts(fenced, floor)
         except oracle.OracleError as exc:
             if "packet.issue names a fenced authority" not in str(exc):
                 raise AssertionError(str(exc)) from exc
         else:
-            raise AssertionError("a bundle naming the cancelled predecessor Packet was accepted")
+            raise AssertionError("a bundle naming a fenced Packet was accepted")
 
-        current = _sealed_json(
-            root / "current-facts.json",
-            {
-                "schema_version": 1,
-                "mission": {"issue": 76, "revision": 6, "plan_hash": "a" * 64},
-                "packet": {"issue": 99, "revision": 3, "generation": 3, "spec_hash": "b" * 64},
-            },
-        )
-        accepted = oracle._read_durable_facts(current, floor)
-        if accepted["mission"]["revision"] != 6 or accepted["packet"]["generation"] != 3:
+        foreign = _sealed_json(root / "foreign-mission-facts.json", fixture.foreign_mission_facts())
+        try:
+            oracle._read_durable_facts(foreign, floor)
+        except oracle.OracleError as exc:
+            if "mission.issue names a fenced authority" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("a bundle naming a different Mission was accepted")
+
+        at_floor = _sealed_json(root / "at-floor-facts.json", fixture.at_floor_facts())
+        accepted = oracle._read_durable_facts(at_floor, floor)
+        if accepted["mission"]["revision"] != floor["mission_revision_min"]:
             raise AssertionError(accepted)
+        if accepted["packet"]["generation"] != floor["packet_generation_min"]:
+            raise AssertionError(accepted)
+
+        # Sàn là ĐƠN ĐIỆU, không phải bằng nhau: thẩm quyền mới hơn phải qua.
+        above = _sealed_json(root / "above-floor-facts.json", fixture.above_floor_facts())
+        accepted_above = oracle._read_durable_facts(above, floor)
+        if accepted_above["packet"]["revision"] != floor["packet_revision_min"] + 1:
+            raise AssertionError(accepted_above)
+
+        current_value = fixture.current_facts()
+        current = _sealed_json(root / "current-facts.json", current_value)
+        accepted_current = oracle._read_durable_facts(current, floor)
+        expected = {"mission": current_value["mission"], "packet": current_value["packet"]}
+        if accepted_current != expected:
+            raise AssertionError({"accepted": accepted_current, "fixture": expected})
+
+
+def authority_fixture_is_external_and_binds_the_current_durable_authority() -> None:
+    """Fixture phải NGOÀI cây ứng viên và phải niêm phong; cả hai đều đo được.
+
+    Một tệp "fixture" nằm trong checkout thì Executor sửa được, và khi đó nó chỉ
+    là hằng của ứng viên đội lốt đầu vào ngoài — đúng thứ §4.3 cấm.
+    """
+    module = _module("authority_fixture")
+    fixture = _authority_fixture()
+    if not fixture.produced_by or not fixture.source:
+        raise AssertionError("the fixture does not record who produced it: %r" % (fixture,))
+    if fixture.current["mission"]["issue"] != fixture.floor["mission_issue"]:
+        raise AssertionError("fixture floor and current facts name different Missions")
+    if fixture.current["packet"]["issue"] != fixture.floor["packet_issue"]:
+        raise AssertionError("fixture floor and current facts name different Packets")
+
+    with tempfile.TemporaryDirectory(prefix="ra02-fixture-") as tmp:
+        root = pathlib.Path(tmp)
+        inside = root / "authority-fixture.json"
+        shutil.copyfile(fixture.path, inside)
+        inside.chmod(0o444)
+        try:
+            module.load(inside, root)
+        except module.AuthorityFixtureError as exc:
+            if "outside the candidate checkout" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("a fixture inside the candidate checkout was accepted")
+
+        # Cánh dương trên CÙNG tệp đó: ca trên đỏ vì đúng lý do vị trí, không
+        # phải vì nội dung hỏng.
+        elsewhere = root / "elsewhere"
+        elsewhere.mkdir()
+        again = module.load(inside, elsewhere)
+        if again.sha256 != fixture.sha256 or dict(again.floor) != dict(fixture.floor):
+            raise AssertionError({"reloaded": again.sha256, "original": fixture.sha256})
+
+        writable = root / "writable-fixture.json"
+        shutil.copyfile(fixture.path, writable)
+        writable.chmod(0o644)
+        try:
+            module.load(writable, elsewhere)
+        except module.AuthorityFixtureError as exc:
+            if "sealed read-only" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("an unsealed authority fixture was accepted")
 
 
 def sandbox_report_missing_repeat_fields_is_structured_red() -> None:
@@ -547,7 +622,7 @@ def pinned_corpus_is_in_tree_and_anchors_are_well_formed() -> None:
     """R1: corpus không còn là tệp chỉ tồn tại trên máy Executor."""
     corpus_module = _module("corpus")
     inventory = _module("trusted_inventory")
-    pinned = HERE.parents[3] / pathlib.PurePosixPath(inventory.PINNED_CORPUS_PATH)
+    pinned = CANDIDATE_ROOT / pathlib.PurePosixPath(inventory.PINNED_CORPUS_PATH)
     if inventory.PINNED_CORPUS_PATH not in inventory.TRUSTED_SOURCE_PATHS:
         raise AssertionError("the pinned corpus is not covered by the trusted source inventory")
     raw = corpus_module.read_bytes(pinned, require_readonly=False)
@@ -623,7 +698,272 @@ def hardened_reader_parity_between_bootstrap_and_shared_module() -> None:
             raise AssertionError("parity matrix did not exercise both a pass and a refusal")
 
 
-def main() -> int:
+def _public_corpus():
+    """Corpus CÔNG KHAI đã ghim, đọc y như oracle đọc nó."""
+    corpus_module = _module("corpus")
+    inventory = _module("trusted_inventory")
+    pinned = CANDIDATE_ROOT / pathlib.PurePosixPath(inventory.PINNED_CORPUS_PATH)
+    raw = corpus_module.read_bytes(pinned, require_readonly=False)
+    loaded = corpus_module.load(
+        pinned,
+        hashlib.sha256(raw).hexdigest(),
+        inventory.PROTOCOL_SCHEMA_PATHS,
+        require_readonly=False,
+    )
+    return corpus_module, loaded
+
+
+def _heldout_document(tag: str) -> dict[str, object]:
+    """Tài liệu chưa từng công bố: khoá riêng, không đụng bất kỳ ca công khai nào."""
+    return {"ra02_withheld_probe": tag, "schema_version": 1}
+
+
+def _sealed_heldout(path: pathlib.Path, cases: list[dict[str, object]], binding: str, seed: int = 7) -> pathlib.Path:
+    return _sealed_json(
+        path,
+        {
+            "schema_version": 1,
+            "produced_by": "dispatcher-test-double",
+            "source": {"note": "selftest fixture"},
+            "target_schema_inventory_sha256": binding,
+            "reorder_seed": seed,
+            "cases": cases,
+        },
+    )
+
+
+def heldout_inputs_must_be_declared_sealed_and_truly_withheld() -> None:
+    """§8.4: "giữ lại" là thứ ĐO được, không phải một nhãn dán lên tệp.
+
+    Bốn cách gian lận bị chặn ở đây: pin không khai; tài liệu đã nằm trong corpus
+    công khai (đổi ID không cứu được); chỉ một nhãn (bộ nhớ đoán một phát là
+    trúng cả bộ); và sai mẫu số so với pin.
+    """
+    heldout = _module("heldout")
+    corpus_module, loaded = _public_corpus()
+    binding = loaded.target_schema_inventory_sha256
+    schema_paths = _module("trusted_inventory").PROTOCOL_SCHEMA_PATHS
+    public_ids = list(loaded.case_id_registry)
+    public_digests = [corpus_module.document_digest(case.document) for case in loaded.cases]
+    published = next(case for case in loaded.cases if case.expected_valid)
+
+    try:
+        heldout.declaration({"schema_version": 1})
+    except heldout.HeldOutError as exc:
+        if "declares no held-out input source" not in str(exc):
+            raise AssertionError(str(exc)) from exc
+    else:
+        raise AssertionError("a Dispatcher pin without a held-out block was accepted")
+
+    good_cases = [
+        {
+            "case_id": "a1b2c3d4e5f60718",
+            "schema_path": published.schema_path,
+            "kind": "valid",
+            "expected_valid": True,
+            "semantic_group": "withheld_valid",
+            "document": _heldout_document("valid-probe"),
+        },
+        {
+            "case_id": "b1b2c3d4e5f60719",
+            "schema_path": published.schema_path,
+            "kind": "invalid",
+            "expected_valid": False,
+            "semantic_group": "withheld_invalid",
+            "document": _heldout_document("invalid-probe"),
+        },
+    ]
+
+    def _load(path: pathlib.Path, count: int, digest: str | None = None):
+        raw = path.read_bytes()
+        declared = {
+            "path": str(path),
+            "sha256": digest or hashlib.sha256(raw).hexdigest(),
+            "case_count": count,
+        }
+        return heldout.load(declared, CANDIDATE_ROOT, schema_paths, binding, public_ids, public_digests)
+
+    with tempfile.TemporaryDirectory(prefix="ra02-heldout-") as tmp:
+        root = pathlib.Path(tmp)
+        good = _sealed_heldout(root / "heldout.json", good_cases, binding)
+        held = _load(good, 2)
+        if held.label_counts != {"valid": 1, "invalid": 1} or len(held.cases) != 2:
+            raise AssertionError(held)
+
+        leaked = _sealed_heldout(
+            root / "leaked.json",
+            [
+                dict(good_cases[0], document=published.document),
+                good_cases[1],
+            ],
+            binding,
+        )
+        try:
+            _load(leaked, 2)
+        except heldout.HeldOutError as exc:
+            if "already published in the public corpus" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("a published document was accepted as a held-out input")
+
+        reused_id = _sealed_heldout(
+            root / "reused-id.json",
+            [dict(good_cases[0], case_id=public_ids[0]), good_cases[1]],
+            binding,
+        )
+        try:
+            _load(reused_id, 2)
+        except heldout.HeldOutError as exc:
+            if "also appears in the public corpus" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("a public case id was accepted as a held-out id")
+
+        single = _sealed_heldout(root / "single-label.json", [good_cases[0]], binding)
+        try:
+            _load(single, 1)
+        except heldout.HeldOutError as exc:
+            if "must carry both labels" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("a single-label held-out set was accepted")
+
+        try:
+            _load(good, 3)
+        except heldout.HeldOutError as exc:
+            if "case count disagrees with the Dispatcher pin" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("a held-out set disagreeing with its pinned denominator was accepted")
+
+        try:
+            _load(good, 2, digest="0" * 64)
+        except heldout.HeldOutError as exc:
+            if "SHA-256 does not match the Dispatcher pin" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("a held-out set with the wrong digest was accepted")
+
+        wrong_binding = _sealed_heldout(root / "wrong-target.json", good_cases, "1" * 64)
+        try:
+            _load(wrong_binding, 2)
+        except heldout.HeldOutError as exc:
+            if "different target schema inventory" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("a held-out set authored for other schemas was accepted")
+
+
+def exact_hash_memorizer_survives_public_cases_and_dies_on_withheld_ones() -> None:
+    """Bằng chứng DƯƠNG cho SPEC-002, đo được cả hai chiều.
+
+    Reviewer attempt 3 đã dựng đúng bảng tra digest→nhãn từ corpus công khai và
+    khớp 34/34.  Ca này tái lập chính điều đó: trên tập công khai, bộ nhớ-thuộc-
+    lòng phải SỐNG SÓT — nếu nó chết ở đây thì phép giết của meta-suite nói về
+    một mutant khác chứ không phải kiểu gian lận cần chặn.  Rồi thêm ca giữ lại:
+    nó phải CHẾT, và mọi ca làm nó chết phải nằm trong tập giữ lại.
+    """
+    fake_validators = _module("fake_validators")
+    _corpus_module, loaded = _public_corpus()
+    public = list(loaded.cases)
+
+    survived = fake_validators.run_one("exact_hash_only", public)
+    if survived["disposition"] != "survived":
+        raise AssertionError(
+            "the public corpus alone no longer lets an exact-hash memorizer through: %r" % survived
+        )
+    if survived["real_rc"] != 0:
+        raise AssertionError(survived)
+
+    withheld = [
+        {
+            "case_id": "c1b2c3d4e5f6071a",
+            "document": _heldout_document("kill-valid"),
+            "expected_valid": True,
+        },
+        {
+            "case_id": "d1b2c3d4e5f6071b",
+            "document": _heldout_document("kill-invalid"),
+            "expected_valid": False,
+        },
+    ]
+    withheld_ids = {case["case_id"] for case in withheld}
+    killed = fake_validators.run_one("exact_hash_only", public + withheld)
+    if killed["disposition"] != "killed":
+        raise AssertionError("withheld cases did not kill the memorizer: %r" % killed)
+    affected = set(killed.get("affected_case_ids") or [])
+    if not affected:
+        raise AssertionError("the kill carries no case evidence: %r" % killed)
+    if not affected <= withheld_ids:
+        raise AssertionError(
+            "the memorizer was killed by public cases it should have memorized: %r" % sorted(affected - withheld_ids)
+        )
+
+
+def authority_floor_key_contract_has_exactly_one_declaration() -> None:
+    """WP99-R3G3-STD-001: bootstrap không còn bản sao thứ hai của bảng khoá sàn."""
+    source_pin = _source_pin_module()
+    inventory = _module("trusted_inventory")
+    if hasattr(source_pin, "AUTHORITY_FLOOR_KEYS"):
+        raise AssertionError("the bootstrap still declares its own AUTHORITY_FLOOR_KEYS")
+
+    with _trusted_temp_repository() as (root, head, source_paths):
+        derived = source_pin.pinned_authority_floor_keys(str(root))
+        if derived != inventory.AUTHORITY_FLOOR_KEYS:
+            raise AssertionError({"derived": derived, "declared": inventory.AUTHORITY_FLOOR_KEYS})
+        binding = source_pin.measure(str(root), head, source_paths)
+        pin = root / "dispatcher-pin-with-floor.json"
+        pin.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "candidate": {
+                        "head": binding["candidate_head"],
+                        "tree": binding["candidate_tree"],
+                    },
+                    "trusted_source_paths": list(source_paths),
+                    "trusted_source_inventory_sha256": binding["trusted_source_inventory_sha256"],
+                    "target": {
+                        "ref": "dispatcher/fixture",
+                        "head": "a" * 40,
+                        "tree": "b" * 40,
+                        "schema_inventory_sha256": "c" * 64,
+                    },
+                    "authority_floor": {key: 2 for key in derived},
+                },
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        pin.chmod(0o444)
+        blocks = source_pin.pin_blocks(str(pin), derived)
+        if set(blocks["authority_floor"]) != set(derived):
+            raise AssertionError(blocks)
+        # Bảng khoá là THAM SỐ: đưa bảng khác thì phải chết theo tên, chứng minh
+        # hằng cục bộ cũ đã thật sự biến mất chứ không chỉ bị đổi tên.
+        try:
+            source_pin.pin_blocks(str(pin), derived[:1])
+        except source_pin.SourcePinError as exc:
+            if "authority_floor must contain exactly" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("pin_blocks ignored the supplied floor key contract")
+        try:
+            source_pin.pin_blocks(str(pin), ())
+        except source_pin.SourcePinError as exc:
+            if "non-empty duplicate-free tuple" not in str(exc):
+                raise AssertionError(str(exc)) from exc
+        else:
+            raise AssertionError("an empty floor key contract was accepted")
+
+
+def main(argv: list[str] | None = None) -> int:
+    global _AUTHORITY_FIXTURE_PATH
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--authority-fixture")
+    args = parser.parse_args(argv)
+    _AUTHORITY_FIXTURE_PATH = args.authority_fixture
     tests = (
         source_pin_rejects_fabricated_repository,
         source_pin_rejects_git_blob_byte_mismatch,
@@ -632,26 +972,66 @@ def main() -> int:
         authority_bundle_rejects_stale_pins,
         durable_facts_reject_empty_authority_blocks,
         durable_facts_reject_authority_below_dispatcher_floor,
+        authority_fixture_is_external_and_binds_the_current_durable_authority,
+        authority_floor_key_contract_has_exactly_one_declaration,
         sandbox_report_missing_repeat_fields_is_structured_red,
         keyword_controls_require_independent_engine_agreement,
         pinned_corpus_is_in_tree_and_anchors_are_well_formed,
+        heldout_inputs_must_be_declared_sealed_and_truly_withheld,
+        exact_hash_memorizer_survives_public_cases_and_dies_on_withheld_ones,
         hardened_reader_parity_between_bootstrap_and_shared_module,
         every_inventoried_keyword_has_positive_and_negative_teeth,
         schema_shape_rejects_remote_or_unresolved_refs,
         validator_stderr_cannot_forge_fixture_gap,
         all_five_fake_validators_are_killed_by_blind_case_evidence,
     )
-    passed = 0
+    # §6.1: mẫu số là kích thước SỔ ĐĂNG KÝ, chốt trước khi chạy.  Một ca thiếu
+    # fixture ngoài phải hiện ra là `not_run` CÓ LÝ DO và kéo cổng xuống đỏ, chứ
+    # không được biến mất khỏi mẫu số để phần còn lại tự khai N/N.
+    scheduled = [test.__name__ for test in tests]
+    records: list[dict[str, object]] = []
+    passed = failed = not_run = 0
     for test in tests:
         try:
             test()
+        except FixtureUnavailable as exc:
+            not_run += 1
+            records.append(
+                {"test_id": test.__name__, "status": "not_run", "passed": False, "reason": str(exc)}
+            )
+            print("[NOT-RUN] %s -- %s" % (test.__name__, exc))
         except Exception as exc:
+            failed += 1
+            records.append(
+                {
+                    "test_id": test.__name__,
+                    "status": "executed",
+                    "passed": False,
+                    "error": {"name": type(exc).__name__, "message": str(exc)},
+                }
+            )
             print("[FAIL] %s -- %s: %s" % (test.__name__, type(exc).__name__, exc))
         else:
             passed += 1
+            records.append({"test_id": test.__name__, "status": "executed", "passed": True})
             print("[OK] %s" % test.__name__)
+    accounting = {
+        "schema_version": 1,
+        "scheduled_test_ids": scheduled,
+        "scheduled_total": len(scheduled),
+        "executed": passed + failed,
+        "passed": passed,
+        "failed": failed,
+        "skipped": 0,
+        "not_run": not_run,
+        "authority_fixture_supplied": _AUTHORITY_FIXTURE_PATH is not None
+        or bool(os.environ.get("RA02_AUTHORITY_FIXTURE")),
+        "tests": records,
+        "ok": bool(scheduled) and passed == len(scheduled),
+    }
+    print(json.dumps(accounting, ensure_ascii=False, sort_keys=True))
     print("== ra02 oracle selftest %d/%d ==" % (passed, len(tests)))
-    return 0 if passed == len(tests) and len(tests) > 0 else 1
+    return 0 if accounting["ok"] else 1
 
 
 if __name__ == "__main__":

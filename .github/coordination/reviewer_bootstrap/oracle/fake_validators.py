@@ -16,14 +16,51 @@ HERE = pathlib.Path(__file__).resolve().parent
 PARENT = HERE.parent
 if str(PARENT) not in sys.path:
     sys.path.insert(0, str(PARENT))
-from oracle.trusted_inventory import FAKE_VALIDATOR_IDS  # noqa: E402
+from oracle import corpus  # noqa: E402
+from oracle.trusted_inventory import FAKE_VALIDATOR_IDS, PINNED_CORPUS_PATH  # noqa: E402
 
 PROTOCOL_VERSION = 1
+
+# Mã thoát riêng cho "bộ nhớ-thuộc-lòng không dựng nổi bảng tra".  Nó phải KHÁC 0
+# để `run_one` xếp `masked` chứ không im lặng thành `killed`: một mutant chết vì
+# thiếu fixture không chứng minh được điều gì về ca giữ lại.
+MEMORIZER_FIXTURE_RC = 65
+
+
+def _public_corpus_lookup() -> tuple[dict[str, bool], bool]:
+    """Bảng tra digest-tài-liệu → nhãn, dựng từ ĐÚNG corpus CÔNG KHAI.
+
+    Đây là mutant mà §8.4 gọi tên: nó không kiểm schema một chữ nào, chỉ thuộc
+    lòng tập công khai.  Bản trước KHÔNG phải bộ nhớ-thuộc-lòng — nó bỏ nửa số
+    kết quả rồi gán nhãn theo tính chẵn lẻ của digest, nên phép giết khi đó nói
+    về một mutant khác chứ không phải kiểu gian lận cần chặn.
+
+    Với tài liệu LẠ nó buộc phải đoán, và một bộ nhớ thuần chỉ có một phép đoán
+    hợp lý: nhãn đa số của tập đã thuộc.  Vì bộ ca giữ lại bắt buộc mang cả hai
+    nhãn (`heldout.load`), phép đoán đó chắc chắn sai ít nhất một ca giữ lại.
+    """
+    root = HERE.parents[3]
+    raw = corpus.read_bytes(root / pathlib.PurePosixPath(PINNED_CORPUS_PATH), require_readonly=False)
+    value = json.loads(raw.decode("utf-8"))
+    table: dict[str, bool] = {}
+    for case in value["cases"]:
+        table[corpus.document_digest(case["document"])] = bool(case["expected_valid"])
+    if not table:
+        raise ValueError("the public corpus produced an empty lookup table")
+    majority_valid = sum(1 for label in table.values() if label) * 2 >= len(table)
+    return table, majority_valid
 
 
 def _worker(fake_id: str, request_path: pathlib.Path, result_path: pathlib.Path) -> int:
     request = json.loads(request_path.read_text(encoding="utf-8"))
     cases = request.get("cases", [])
+    memorized: dict[str, bool] = {}
+    memorized_fallback = False
+    if fake_id == "exact_hash_only":
+        try:
+            memorized, memorized_fallback = _public_corpus_lookup()
+        except Exception:  # noqa: BLE001
+            return MEMORIZER_FIXTURE_RC
     if fake_id == "stderr_forger_control":
         print("FileNotFoundError: printed by an untrusted validator", file=sys.stderr)
         return 19
@@ -31,19 +68,14 @@ def _worker(fake_id: str, request_path: pathlib.Path, result_path: pathlib.Path)
         print(json.dumps({"protocol_version": PROTOCOL_VERSION, "results": [], "ok": True}))
         return 0
     results = []
-    for index, case in enumerate(cases):
+    for case in cases:
         case_id = case.get("case_id")
         if fake_id == "always_pass":
             valid = True
         elif fake_id == "always_fail":
             valid = False
         elif fake_id == "exact_hash_only":
-            if index >= max(1, len(cases) // 2):
-                continue
-            digest = hashlib.sha256(
-                json.dumps(case.get("document"), sort_keys=True, separators=(",", ":")).encode("utf-8")
-            ).digest()
-            valid = bool(digest[0] & 1)
+            valid = memorized.get(corpus.document_digest(case.get("document")), memorized_fallback)
         elif fake_id == "path_aware_detector":
             valid = bool(case.get("schema_path"))
         else:

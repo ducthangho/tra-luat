@@ -160,9 +160,10 @@ def load_and_verify(path: pathlib.Path | str, observations: Mapping[str, object]
     actual.pop("schema_version", None)
     # Pin nguồn và bó authority dùng CHUNG một tệp niêm phong.  `candidate`,
     # `trusted_source_paths` và digest kiểm kê VẪN được so vì chúng nằm trong
-    # observations đã đo; chỉ hai khối chỉ-dành-cho-pin mới bỏ qua ở đây — chúng
-    # đã được `source_pin.pin_blocks` kiểm hình dạng và `oracle` đối chiếu riêng.
-    for key in ("target", "authority_floor"):
+    # observations đã đo; chỉ ba khối chỉ-dành-cho-pin mới bỏ qua ở đây — chúng
+    # đã được `source_pin.pin_blocks` / `heldout.declaration` kiểm hình dạng và
+    # `oracle` đối chiếu riêng bằng phép đo.
+    for key in ("target", "authority_floor", "heldout"):
         actual.pop(key, None)
     expected = dict(observations)
     differences = _walk_differences(expected, actual)

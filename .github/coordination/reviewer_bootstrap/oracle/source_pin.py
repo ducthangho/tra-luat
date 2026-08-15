@@ -6,6 +6,10 @@ module — bản sao ngoài do Dispatcher đặt phải chạy được một m�
 lặp lại vì lý do đó (`TRUSTED_PREFIXES`, gốc bootstrap) được ĐỐI CHIẾU với bản
 khai báo duy nhất trong `trusted_inventory.py` ngay trong `verify()`, sau khi
 từng byte của cây tin cậy đã được đối chiếu với blob Git của commit đã ghim.
+
+`AUTHORITY_FLOOR_KEYS` KHÔNG nằm trong nhóm đó nữa: nó chỉ cần thiết SAU khi
+`verify()` đã chạy, nên bootstrap ĐỌC nó ra từ khai báo duy nhất thay vì giữ bản
+sao thứ hai không ai đối chiếu (WP99-R3G3-STD-001).
 """
 
 from __future__ import annotations
@@ -31,13 +35,6 @@ TRUSTED_PREFIXES = (
 )
 OID40 = re.compile(r"[0-9a-f]{40}\Z")
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
-AUTHORITY_FLOOR_KEYS = (
-    "mission_issue",
-    "mission_revision_min",
-    "packet_issue",
-    "packet_revision_min",
-    "packet_generation_min",
-)
 TARGET_PIN_KEYS = ("ref", "head", "tree", "schema_inventory_sha256")
 
 
@@ -121,12 +118,21 @@ def _positive_int(value: object, label: str) -> int:
     return value
 
 
-def pin_blocks(pin_path: str) -> dict[str, object]:
+def pin_blocks(pin_path: str, floor_keys: Sequence[str]) -> dict[str, object]:
     """Đọc hai khối Dispatcher mà oracle bắt buộc phải có: target và sàn authority.
 
     Sàn authority KHÔNG được do ứng viên viết — thiếu nó thì §4.2 chỉ còn là so
     sánh tương đối giữa hai tệp cùng nguồn (R3 của verdict 5297249899).
+
+    `floor_keys` là THAM SỐ chứ không phải hằng cục bộ: bootstrap này từng giữ
+    bản sao thứ hai của `AUTHORITY_FLOOR_KEYS` mà không có phép đối chiếu nào
+    (WP99-R3G3-STD-001).  Người gọi phải lấy bảng khoá từ khai báo duy nhất
+    trong `trusted_inventory.py` SAU khi `verify()` đã đối chiếu từng byte của
+    cây tin cậy với blob Git của commit đã ghim.
     """
+    floor_keys = tuple(floor_keys)
+    if not floor_keys or len(set(floor_keys)) != len(floor_keys):
+        raise _fail("authority floor key contract must be a non-empty duplicate-free tuple")
     pin = _load_pin(pathlib.Path(pin_path))
     target = pin.get("target")
     if not isinstance(target, dict) or set(target) != set(TARGET_PIN_KEYS):
@@ -141,9 +147,9 @@ def pin_blocks(pin_path: str) -> dict[str, object]:
     ):
         raise _fail("Dispatcher pin target.schema_inventory_sha256 must be an exact lowercase SHA-256")
     floor = pin.get("authority_floor")
-    if not isinstance(floor, dict) or set(floor) != set(AUTHORITY_FLOOR_KEYS):
-        raise _fail("Dispatcher pin authority_floor must contain exactly %s" % list(AUTHORITY_FLOOR_KEYS))
-    for key in AUTHORITY_FLOOR_KEYS:
+    if not isinstance(floor, dict) or set(floor) != set(floor_keys):
+        raise _fail("Dispatcher pin authority_floor must contain exactly %s" % list(floor_keys))
+    for key in floor_keys:
         _positive_int(floor[key], "authority_floor.%s" % key)
     return {"target": dict(target), "authority_floor": dict(floor)}
 
@@ -223,6 +229,21 @@ def _pinned_inventory_namespace(root: pathlib.Path) -> dict[str, object]:
         namespace,
     )
     return namespace
+
+
+def pinned_authority_floor_keys(repo_root: str) -> tuple[str, ...]:
+    """Bảng khoá sàn authority, lấy từ khai báo DUY NHẤT đã được `verify()` đo byte.
+
+    Chỉ gọi SAU `verify()`: trước đó `trusted_inventory.py` mới chỉ là một tệp
+    trên đĩa, chưa phải tệp đã khớp blob Git của commit đã ghim.
+    """
+    namespace = _pinned_inventory_namespace(pathlib.Path(repo_root).resolve())
+    declared = tuple(namespace.get("AUTHORITY_FLOOR_KEYS", ()))
+    if not declared or not all(isinstance(key, str) and key for key in declared):
+        raise _fail("pinned trusted inventory declares no usable AUTHORITY_FLOOR_KEYS")
+    if len(set(declared)) != len(declared):
+        raise _fail("pinned AUTHORITY_FLOOR_KEYS declaration contains duplicates")
+    return declared
 
 
 def verify(repo_root: str, candidate_head: str, pin_path: str) -> dict[str, object]:
@@ -319,7 +340,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 raise _fail("paths-json must decode to a list")
             result = measure(args.repo_root, args.candidate_head, paths)
         if args.command == "run-oracle":
-            blocks = pin_blocks(args.pin)
+            blocks = pin_blocks(args.pin, pinned_authority_floor_keys(args.repo_root))
     except SourcePinError as exc:
         _output({"schema_version": 1, "ok": False, "error": {"name": "SourcePinError", "message": str(exc)}})
         return 2

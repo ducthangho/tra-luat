@@ -8,6 +8,7 @@ import importlib.metadata
 import json
 import os
 import pathlib
+import random
 import re
 import subprocess
 import sys
@@ -20,7 +21,7 @@ if str(PARENT) not in sys.path:
     sys.path.insert(0, str(PARENT))
 
 from core import artifacts  # noqa: E402
-from oracle import authority, corpus, engine, fake_validators, safe_io  # noqa: E402
+from oracle import authority, corpus, engine, fake_validators, heldout, safe_io  # noqa: E402
 from oracle.trusted_inventory import (  # noqa: E402
     FAKE_VALIDATOR_IDS,
     PINNED_CORPUS_PATH,
@@ -538,7 +539,27 @@ def evaluate(
             "pinned corpus was authored for a different target schema inventory: corpus=%s measured=%s"
             % (loaded.target_schema_inventory_sha256, target_observation["schema_inventory_sha256"])
         )
-    cases = loaded.cases
+    # §8.4: đầu vào GIỮ LẠI đến từ pin niêm phong, không từ nguồn ứng viên.  Bảng
+    # tra digest → nhãn dựng từ corpus công khai giải được 34/34 mà không kiểm một
+    # keyword nào (SPEC-002); chỉ ca chưa từng công bố mới giết được nó.
+    pin_value = _strict_json(
+        _read_regular(pathlib.Path(authority_bundle), "Dispatcher pin", require_readonly=True),
+        "Dispatcher pin",
+    )
+    if not isinstance(pin_value, Mapping):
+        raise OracleError("Dispatcher pin is not an object")
+    held = heldout.load(
+        heldout.declaration(pin_value),
+        root,
+        PROTOCOL_SCHEMA_PATHS,
+        target_observation["schema_inventory_sha256"],
+        loaded.case_id_registry,
+        [corpus.document_digest(case.document) for case in loaded.cases],
+    )
+    combined_reorder_seed = loaded.reorder_seed ^ held.reorder_seed
+    cases = list(loaded.cases) + list(held.cases)
+    random.Random(combined_reorder_seed).shuffle(cases)
+    heldout_case_ids = set(held.case_ids)
     anchors = loaded.anchors
 
     engine_metadata, independent = _engine_metadata()
@@ -577,7 +598,7 @@ def evaluate(
 
     # R6: mẫu số là kích thước SỔ ĐĂNG KÝ chốt trước khi chạy, không phải số bản
     # ghi mà vòng lặp tình cờ sinh ra.  Một ca chết vẫn phải hiện ra là not_run.
-    registry = loaded.case_id_registry
+    registry = tuple(sorted(tuple(loaded.case_id_registry) + held.case_ids))
     scheduled_total = len(registry)
     matrix: list[dict[str, object]] = []
     for case in cases:
@@ -606,6 +627,20 @@ def evaluate(
     skipped = sum(record.get("status") == "skipped" for record in matrix)
     not_run = scheduled_total - executed - skipped
     mutation = fake_validators.mutation_matrix(cases)
+    # Bằng chứng DƯƠNG cho §8.4: mutant thuộc lòng phải chết, và phải chết BỞI ca
+    # giữ lại.  "Đã giết đủ 5" thôi thì không phân biệt được phép giết thật với
+    # một mutant chết vì lý do khác — reviewer attempt 3 đã bắt đúng chỗ đó.
+    memorizer = next(
+        (item for item in mutation["records"] if isinstance(item, Mapping) and item.get("fake_id") == "exact_hash_only"),
+        None,
+    )
+    memorizer_affected = sorted(memorizer.get("affected_case_ids") or []) if isinstance(memorizer, Mapping) else []
+    memorizer_killed_by_heldout = (
+        isinstance(memorizer, Mapping)
+        and memorizer.get("disposition") == "killed"
+        and bool(memorizer_affected)
+        and set(memorizer_affected) <= heldout_case_ids
+    )
     ok = (
         scheduled_total > 0
         and not missing_records
@@ -615,6 +650,7 @@ def evaluate(
         and failed == skipped == not_run == 0
         and mutation["ok"] is True
         and mutation["killed"] == mutation["total"] == len(FAKE_VALIDATOR_IDS)
+        and memorizer_killed_by_heldout
     )
     resource_classification = {
         run.get("run_id"): (run.get("required_counterexamples") or {}).get("resource_classes")
@@ -652,6 +688,22 @@ def evaluate(
         "corpus_locator": PINNED_CORPUS_PATH,
         "corpus_supplied_externally": external_copy,
         "corpus_reorder_seed": loaded.reorder_seed,
+        "public_case_ids": list(loaded.case_id_registry),
+        "public_case_count": len(loaded.case_id_registry),
+        "heldout": {
+            "locator": held.path,
+            "sha256": held.sha256,
+            "produced_by": held.produced_by,
+            "source": held.source,
+            "case_ids": list(held.case_ids),
+            "case_count": len(held.case_ids),
+            "label_counts": dict(held.label_counts),
+            "reorder_seed": held.reorder_seed,
+            "disjoint_from_public_corpus": True,
+            "memorizer_killed_by_heldout": memorizer_killed_by_heldout,
+            "memorizer_mismatched_case_ids": memorizer_affected,
+        },
+        "combined_reorder_seed": combined_reorder_seed,
         "case_id_registry": list(registry),
         "scheduled_total": scheduled_total,
         "executed": executed,
@@ -669,8 +721,19 @@ def evaluate(
     }
     if not ok:
         raise OracleError(
-            "oracle case or mutation matrix is red: scheduled=%d executed=%d passed=%d failed=%d not_run=%d missing=%s mutation_ok=%s"
-            % (scheduled_total, executed, passed, failed, not_run, missing_records, mutation["ok"])
+            "oracle case or mutation matrix is red: scheduled=%d executed=%d passed=%d failed=%d "
+            "not_run=%d missing=%s mutation_ok=%s memorizer_killed_by_heldout=%s memorizer_mismatches=%s"
+            % (
+                scheduled_total,
+                executed,
+                passed,
+                failed,
+                not_run,
+                missing_records,
+                mutation["ok"],
+                memorizer_killed_by_heldout,
+                memorizer_affected,
+            )
         )
 
     destination = pathlib.Path(output_root)
@@ -697,6 +760,9 @@ def evaluate(
     for relative, data in raw_schema_bytes.items():
         artifact_set.add("source", "target-schemas/%s" % relative.rsplit("/", 1)[-1], data)
     artifact_set.add("corpus", "corpus.json", corpus_raw)
+    # Giữ lại BYTE của bộ ca giữ lại: bí mật chỉ cần thiết TRONG lúc chấm, còn
+    # bằng chứng sau đó phải tái lập được, nếu không thì "34 + N ca" lại là lời khai.
+    artifact_set.add("corpus", "heldout-corpus.json", held.raw)
     artifact_set.add("per_case_matrix", "oracle-matrix.json", json.dumps(report, ensure_ascii=False, sort_keys=True) + "\n")
     artifact_set.add(
         "per_case_matrix",

@@ -53,6 +53,51 @@ class Corpus:
     case_id_registry: tuple[str, ...]
 
 
+def document_digest(document: object) -> str:
+    """Digest CHÍNH TẮC của một tài liệu ca kiểm.
+
+    Khai báo MỘT chỗ: bộ nhớ-thuộc-lòng `exact_hash_only` và phép chứng minh
+    "held-out thật sự rời nhau" phải nói về cùng một phép băm, nếu không thì
+    "rời nhau" chỉ đúng theo cách viết JSON chứ không đúng theo nội dung.
+    """
+    return hashlib.sha256(
+        json.dumps(document, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+
+def parse_case(
+    raw_case: object,
+    allowed: Sequence[str] | set[str],
+    seen: set[str],
+    error: type[Exception] = CorpusError,
+) -> Case:
+    """Hợp đồng HÌNH DẠNG của một ca kiểm, khai báo đúng một lần.
+
+    `heldout.py` dùng lại chính hàm này: một bộ ca giữ lại được kiểm bằng luật
+    lỏng hơn corpus công khai thì "giữ lại" chỉ là lời nói.
+    """
+    if not isinstance(raw_case, Mapping):
+        raise error("corpus case is not an object")
+    case_id = raw_case.get("case_id")
+    schema_path = raw_case.get("schema_path")
+    expected = raw_case.get("expected_valid")
+    semantic = raw_case.get("semantic_group")
+    kind = raw_case.get("kind")
+    if not isinstance(case_id, str) or not BLIND_ID.fullmatch(case_id) or case_id in seen:
+        raise error("case_id must be unique blind lowercase 16-hex")
+    if schema_path not in allowed:
+        raise error("case names an unexpected schema path: %r" % schema_path)
+    if type(expected) is not bool:
+        raise error("case expected_valid must be boolean")
+    if not isinstance(semantic, str) or not semantic:
+        raise error("case semantic_group must be non-empty")
+    if kind not in ("valid", "invalid", "semantic_equivalent"):
+        raise error("case kind must be valid, invalid, or semantic_equivalent")
+    if (kind == "invalid") == expected:
+        raise error("case kind disagrees with expected_valid")
+    return Case(case_id, schema_path, raw_case.get("document"), expected, semantic, kind)
+
+
 def read_bytes(path: pathlib.Path | str, *, require_readonly: bool) -> bytes:
     """Đọc corpus.
 
@@ -99,33 +144,15 @@ def load(
     }
     groups: dict[tuple[str, str], int] = {}
     for raw_case in raw_cases:
-        if not isinstance(raw_case, Mapping):
-            raise CorpusError("corpus case is not an object")
-        case_id = raw_case.get("case_id")
-        schema_path = raw_case.get("schema_path")
-        expected = raw_case.get("expected_valid")
-        semantic = raw_case.get("semantic_group")
-        kind = raw_case.get("kind")
-        if not isinstance(case_id, str) or not BLIND_ID.fullmatch(case_id) or case_id in seen:
-            raise CorpusError("case_id must be unique blind lowercase 16-hex")
-        if schema_path not in allowed:
-            raise CorpusError("case names an unexpected schema path: %r" % schema_path)
-        if type(expected) is not bool:
-            raise CorpusError("case expected_valid must be boolean")
-        if not isinstance(semantic, str) or not semantic:
-            raise CorpusError("case semantic_group must be non-empty")
-        if kind not in ("valid", "invalid", "semantic_equivalent"):
-            raise CorpusError("case kind must be valid, invalid, or semantic_equivalent")
-        if (kind == "invalid") == expected:
-            raise CorpusError("case kind disagrees with expected_valid")
-        seen.add(case_id)
-        per_schema[schema_path]["valid" if expected else "invalid"] += 1
-        if kind == "semantic_equivalent":
-            per_schema[schema_path]["semantic"] += 1
-        groups[(schema_path, semantic)] = groups.get((schema_path, semantic), 0) + 1
-        cases.append(
-            Case(case_id, schema_path, raw_case.get("document"), expected, semantic, kind)
+        case = parse_case(raw_case, allowed, seen)
+        seen.add(case.case_id)
+        per_schema[case.schema_path]["valid" if case.expected_valid else "invalid"] += 1
+        if case.kind == "semantic_equivalent":
+            per_schema[case.schema_path]["semantic"] += 1
+        groups[(case.schema_path, case.semantic_group)] = (
+            groups.get((case.schema_path, case.semantic_group), 0) + 1
         )
+        cases.append(case)
     incomplete = {
         path_name: counts
         for path_name, counts in per_schema.items()

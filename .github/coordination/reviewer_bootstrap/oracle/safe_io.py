@@ -62,6 +62,26 @@ def read_regular_single_link(
         raise error("%s cannot be read safely: %s" % (label, exc)) from exc
 
 
+def require_outside_tree(
+    path: pathlib.Path | str,
+    root: pathlib.Path | str,
+    label: str,
+    error: Callable[[str], BaseException],
+) -> pathlib.Path:
+    """Đòi một đầu vào NGOÀI checkout ứng viên.
+
+    Đầu vào do Dispatcher niêm phong mà lại nằm trong cây ứng viên thì Executor
+    sửa được, và khi đó nó chỉ là hằng của ứng viên đội lốt đầu vào ngoài.  Điều
+    kiện này ĐO được nên nó phải được đo, không phải được hứa — cả fixture
+    authority lẫn bộ ca giữ lại đều đi qua đúng phép đo này.
+    """
+    resolved = pathlib.Path(path).resolve()
+    top = pathlib.Path(root).resolve()
+    if resolved == top or resolved.is_relative_to(top):
+        raise error("%s must live outside the candidate checkout; %s is inside %s" % (label, resolved, top))
+    return resolved
+
+
 def git(
     root: pathlib.Path | str,
     *args: str,

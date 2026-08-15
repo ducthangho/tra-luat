@@ -20,10 +20,12 @@ TRUSTED_PREFIXES = (ORACLE_PREFIX, SANDBOX_PREFIX)
 TRUSTED_SOURCE_PATHS = (
     ORACLE_PREFIX + "__init__.py",
     ORACLE_PREFIX + "authority.py",
+    ORACLE_PREFIX + "authority_fixture.py",
     ORACLE_PREFIX + "corpus.json",
     ORACLE_PREFIX + "corpus.py",
     ORACLE_PREFIX + "engine.py",
     ORACLE_PREFIX + "fake_validators.py",
+    ORACLE_PREFIX + "heldout.py",
     ORACLE_PREFIX + "oracle.py",
     ORACLE_PREFIX + "safe_io.py",
     ORACLE_PREFIX + "selftest.py",
@@ -104,6 +106,7 @@ SANDBOX_PORTABLE_CONTROL_IDS = (
     "disposable_namespace_guard_rejects_inherited_environment_claim",
     "host_loopback_fixture_refuses_outside_disposable_namespace",
     "fixture_baseline_is_established_once_and_survives_our_own_addresses",
+    "namespace_guard_requires_a_self_created_namespace",
 )
 
 FAKE_VALIDATOR_IDS = (
@@ -116,6 +119,10 @@ FAKE_VALIDATOR_IDS = (
 
 # Trần authority: Dispatcher cấp trong pin niêm phong; mọi bó authority thấp hơn
 # sàn này phải chết TRƯỚC khi oracle chạy (R3).
+#
+# ĐÂY LÀ KHAI BÁO DUY NHẤT (WP99-R3G3-STD-001).  `source_pin.py` từng giữ bản sao
+# thứ hai mà không có phép đối chiếu nào; nay nó ĐỌC bảng này ra từ chính tệp đã
+# đối chiếu byte với blob Git rồi mới kiểm khối `authority_floor` của pin.
 AUTHORITY_FLOOR_KEYS = (
     "mission_issue",
     "mission_revision_min",

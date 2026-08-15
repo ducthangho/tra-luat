@@ -311,3 +311,82 @@ Executor revision 4 phải tái lập lại, đừng nhận theo lời kể. Ma 
    phải đi đường số 2.
 4. **Sổ attempts của revision 3 không khớp thực tế** và revision 4 không hồi tố sửa được.
    AC 26 chặn tái diễn, không chữa quá khứ.
+
+---
+
+# BỔ SUNG của phiên ĐIỀU PHỐI — 2026-08-15T15:20Z
+
+Bản thảo gốc giữ NGUYÊN; đây là phần thêm, không sửa chữ nào ở trên.
+Chủ kho đã chốt tồn đọng revision 4 gồm **hai** mục
+([#55 comment 5301422660](https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5301422660)).
+Bản thảo phủ mục thứ nhất (`ac20`, ở AC 20) nhưng **không nhắc mục thứ hai**.
+
+## AC 27 · `same_provider_approved` — acceptance phải THÔI mâu thuẫn với §8
+
+`docs/PROTOCOL_DA_PHIEN.md` §8 cho phép, nguyên văn:
+
+> `same_provider_approved`: phiên mới, context/worktree riêng và read-only cùng nền tảng
+> khi phía kia hết quota.
+
+Nhưng acceptance của packet (AC 5, từ revision 2) đòi chặn executor-trùng-reviewer **ngay từ
+`init`**, nên CLI từ chối **vô điều kiện**. Hệ quả đo được: **dispatcher đi đúng đường
+fallback mà protocol cho phép thì không ghi nổi một review nào.**
+
+Đây **không** phải thiếu sót của mã. Mã đang cài đúng acceptance; **acceptance mới là chỗ
+sai**. Vì thế nó không vá được trong revision 3 — vá là **nới một AC**, đúng thứ §12 cấm
+(*"không thêm cờ nới bí mật"*).
+
+**Yêu cầu của AC 27:**
+
+1. `init` **không** được từ chối vô điều kiện khi executor và reviewer cùng provider. Nó
+   phải nhận một mức bảo đảm tường minh và ghi vào state.
+2. Mức bảo đảm là một trong bốn giá trị §8 — `cross_approved` · `human_audited` ·
+   `same_provider_approved` · `review_deferred` — **không có giá trị tự chế**.
+3. Mặc định vẫn là `cross_approved`. Hạ xuống `same_provider_approved` phải:
+   - do **người có thẩm quyền** khai (cùng chốt `NGUOI_CO_THAM_QUYEN` như `record-lease`);
+   - kèm **lý do allowlist** — chỉ `quota` hoặc `rate_limit`, đúng §8 và AC 8;
+   - ghi vào state và vào evidence §7, **không im lặng**.
+4. `record-review` phải **từ chối** approve khi mức bảo đảm của packet cao hơn mức thực tế
+   đạt được. Ví dụ: packet khai `cross_approved` mà chỉ có review cùng provider ⇒ ĐỎ.
+5. Phản chứng **hai chiều**:
+   - cùng provider **không khai** `same_provider_approved` ⇒ vẫn bị chặn (giữ hành vi cũ);
+   - cùng provider **có khai đúng** ⇒ đi tiếp được, và state ghi rõ mức bảo đảm đã hạ;
+   - khai `same_provider_approved` với lý do **ngoài allowlist** ⇒ ĐỎ;
+   - khai bởi người **không** trong `NGUOI_CO_THAM_QUYEN` ⇒ ĐỎ.
+6. Một **đột biến** bỏ chốt ở mục 4 (cho approve khi bảo đảm chưa đạt) phải làm ca đích ĐỎ.
+
+**Vì sao mục này đáng nằm trong revision 4, không hoãn tiếp:** nó là lý do packet **đứng
+hình** khi không có phiên `codex`. Đã đo trong ngày — `codex` cài trong container điều phối
+nhưng `codex login status` trả `Not logged in`, nên mọi lượt review hợp lệ đều phải chờ một
+máy khác. Chừng nào AC 5 còn chặn tuyệt đối, đó là **điểm chết đơn** của cả vòng lặp.
+
+## Ghi chú về phạm vi — cảnh báo trước cho lượt executor
+
+AC 19 mới **thay** cơ chế suy đoán bằng cơ chế khai báo. Hệ quả: ba finding P1 doctrine của
+verdict lượt 10 —
+
+```
+doctrine-measurement-marker-semantic-bypass
+doctrine-indented-code-block-bypass
+doctrine-comment-erases-fence-closer-bypass
+```
+
+— đều **mô tả lỗi của cơ chế suy đoán sắp bị xoá**. Vá chúng theo revision 3 rồi mới áp
+revision 4 là làm hai lần và vứt lần đầu.
+
+Ba mục **không** phụ thuộc AC 19, vá được ngay và không phí:
+
+| finding | vì sao độc lập |
+|---|---|
+| `lease-schema-allows-extra-keys` | lược đồ lease, không liên quan doctrine |
+| `packet-suite-mutation-count-mismatch` | hồ sơ khai 39, `len(MUTANTS)` = 38 |
+| `packet-loop-suite-mutant-gate-red` | hạ tầng test; còn lệch nền Windows/Linux chưa giải thích |
+
+Riêng `doctrine-html-table-token-context-bypass` nằm giữa: nó về **dò cấu trúc**, không về
+miễn trừ, nên vẫn cần dù AC 19 đổi.
+
+## Việc chưa làm — thêm vào danh sách của bản thảo
+
+5. **AC 27 chưa có bản cài mẫu.** AC 19 mới có `ops/specs/wp55-r4-ac19-nguyen-mau.py`;
+   AC 27 chưa có gì tương đương. Nên có, vì chỗ khó của nó là **thứ tự kiểm** giữa
+   `assurance` và `provider`, không phải cú pháp.

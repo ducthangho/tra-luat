@@ -1,0 +1,56 @@
+diff --git a/ops/leases/wp55-r3-review-8-codex-20260815.yaml b/ops/leases/wp55-r3-review-8-codex-20260815.yaml
+index 20b12e1..c099371 100644
+--- a/ops/leases/wp55-r3-review-8-codex-20260815.yaml
++++ b/ops/leases/wp55-r3-review-8-codex-20260815.yaml
+@@ -1,3 +1,8 @@
++# ╔════════════════════════════════════════════════════════════════════════════════════╗
++# ║  LEASE NÀY ĐÃ BỊ THAY THẾ — KHÔNG CÒN HIỆU LỰC. ĐỪNG NHẬN VIỆC THEO NÓ.            ║
++# ║  Thay bằng:  wp55-r3-review-9-codex-20260815   (neo 4270210)                        ║
++# ╚════════════════════════════════════════════════════════════════════════════════════╝
++#
+ # Lease REVIEWER lượt 8 cho wp55 revision 3 — neo head 91780cb (nhánh packet chủ kho đã chốt).
+ #
+ # NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+@@ -30,6 +35,42 @@
+ 
+ schema_version: 1
+ event: review_lease_granted
++
++# --- THAY THẾ ---------------------------------------------------------------------
++# Đặt NGAY SAU `event` chứ không nhét cuối tệp: ai đọc lease này để nhận việc thì đọc
++# từ trên xuống, và trạng thái "còn hiệu lực hay không" phải đập vào mắt trước mọi
++# trường khác. Cuối tệp là chỗ dễ bỏ sót nhất.
++#
++# `active: false` là trường MÁY ĐỌC. Cổng `ops/lease_publish.py` hiện CHƯA biết trường
++# này — nó chỉ chặn theo hạn (`lease_expires_at_utc`) và theo `posted_comment_id`. Nên
++# tự thân dòng này KHÔNG chặn được gì; nó là bản khai cho người đọc và là mỏ neo sẵn
++# cho lần cứng hoá sau. Muốn cổng thật sự chặn thì phải sửa `lease_publish.py`, và đó
++# là thay đổi RIÊNG, không gộp vào đây.
++active: false
++status: superseded
++superseded_by: wp55-r3-review-9-codex-20260815
++superseded_at_utc: '2026-08-15T08:50:00Z'
++superseded_by_decision_of: ducthangho
++superseded_decision_basis: 'direct, in-session, 2026-08-15 (chọn (b), cấp lease mới neo 4270210)'
++superseded_reason: >-
++  Lease này neo `reviewed_sha_required: 91780cb`. Sau khi lease được cấp, phiên executor
++  đẩy thêm hai commit KHÔNG LEASE vào chính nhánh packet (`3c4fbc2` g7, `4270210` g8),
++  làm tip nhánh rời khỏi SHA được neo. Chủ kho được báo và chọn KHÔNG lùi nhánh mà cấp
++  lease mới neo `4270210`, vì cả ba phản chứng của lượt 8 đều đã được vá ở g7/g8 — bắt
++  reviewer soi `91780cb` là soi một cây đã biết là đỏ.
++superseded_work_done: false
++superseded_work_note: >-
++  KHÔNG có verdict nào được nộp theo lease này. Bản review duy nhất chạy trên `91780cb`
++  là bản NGOÀI LEASE do chính phiên executor tự phát động bằng prompt tự soạn (không
++  dùng `prompt_path` của lease này), giữ tại `ops/wp55-r3-review-8-ngoai-lease`. Bản ấy
++  KHÔNG thoả §8 và KHÔNG được tính là lượt cross-review.
++
++# BẢN CHIẾU TRÊN #55 SẼ KHÔNG TỰ CẬP NHẬT. `posted_comment_id` đã có nên
++# `lease_publish.py check` trả rc=9 và workflow BỎ QUA tệp này — comment 5301410944 vẫn
++# hiển thị lease như lúc mới cấp, không có khối THAY THẾ ở trên. Đây là hệ quả đã biết
++# của thiết kế "đăng một lần", không phải lỗi của bản vá này. Muốn bản chiếu khớp thì
++# phải làm THÊM một trong hai: chủ kho sửa tay comment 5301410944, hoặc đăng một comment
++# mới trỏ về tệp này. Ghi ra đây để không ai tưởng push xong là xong.
+ packet_issue: 55
+ packet_id: wp55
+ phase_key: F3-03

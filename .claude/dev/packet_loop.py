@@ -431,7 +431,12 @@ def _phang_ca_tep(raw: str):
 
 _CO_CHU = re.compile(r"[^\W_]", re.UNICODE)
 _RE_DAU_DONG = re.compile(r"^\s*(?:#{1,6}|>+|[-*+]|\d+[.)])\s*")
-_RE_HANG_RAO = re.compile(r"^\s{0,3}(?:`{3,}|~{3,})")
+_RE_DAU_DONG_THO = re.compile(r"^\s{0,3}(?:>+|[-*+]|\d+[.)])\s+")
+# `\s*` chứ không `\s{0,3}`: CommonMark coi thụt 4 dấu cách là khối mã THỤT LỀ chứ
+# không phải hàng rào, nhưng ở đây sai về phía CHẶT là an toàn. Nhận thêm một dòng
+# là khối mã chỉ khiến miễn trừ THÔI áp dụng, tức cổng đỏ nhiều hơn; bỏ sót thì
+# ngược lại, mở cửa cho cụm cấm. Fail-closed, không fail-open.
+_RE_HANG_RAO = re.compile(r"^\s*(?:`{3,}|~{3,})")
 
 
 def _dong_khoi_ma(raw: str) -> frozenset:
@@ -443,7 +448,18 @@ def _dong_khoi_ma(raw: str) -> frozenset:
     """
     trong, mo_bang, ket = False, "", set()
     for so_dong, dong in enumerate(raw.splitlines(), 1):
-        m = _RE_HANG_RAO.match(dong)
+        # GỠ DẤU ĐẦU DÒNG THÔ TRƯỚC KHI DÒ HÀNG RÀO. Bản đầu của chốt này chỉ khớp
+        # `^\s{0,3}` nên hàng rào lồng một cấp trong danh sách hay trích dẫn KHÔNG
+        # được nhận, và miễn trừ văn xuôi tha luôn cả khối mã. Đo được hai ca lọt:
+        #
+        #     - ```                       > ```
+        #       Bảng vai trò: người có    > Bảng vai trò: người có
+        #       thẩm quyền là …           > thẩm quyền là …
+        #       ```                       > ```
+        #
+        # Ca bullet còn tệ hơn: dòng ĐÓNG `  ``` ` thụt 2 dấu cách thì khớp, nên nó
+        # MỞ một hàng rào ma ở cuối tệp thay vì đóng khối đã mở.
+        m = _RE_HANG_RAO.match(_go_dau_dong_tho(dong))
         if m:
             dau = m.group(0).strip()[0]
             if not trong:
@@ -457,6 +473,27 @@ def _dong_khoi_ma(raw: str) -> frozenset:
         if trong:
             ket.add(so_dong)
     return frozenset(ket)
+
+
+def _go_dau_dong_tho(dong: str) -> str:
+    """Gỡ dấu khối (`>`, `-`, `1.`) khỏi dòng THÔ — chỉ dùng để dò hàng rào mã.
+
+    Khác `_go_dau_dong` ở hai điểm, cả hai đều cố ý:
+
+      * chạy trên dòng THÔ, chưa qua `_chuan_hoa`, vì hàng rào ``` sau chuẩn hoá
+        thành chuỗi rỗng — nhìn từ tầng đã chuẩn hoá thì hàng rào không tồn tại;
+      * KHÔNG gỡ `#`. Heading không bao giờ mở khối mã, mà `#` lại là ký tự mở đầu
+        thường gặp trong chính khối mã (dòng chú thích shell), nên gỡ nó sẽ biến
+        `# ``` ` trong một khối shell thành hàng rào giả.
+
+    Đòi có khoảng trắng SAU dấu để `---` (đường kẻ ngang) không bị đọc là gạch đầu
+    dòng, và `1.5` không bị đọc là số thứ tự.
+    """
+    truoc = None
+    while truoc != dong:
+        truoc = dong
+        dong = _RE_DAU_DONG_THO.sub("", dong, count=1)
+    return dong
 
 
 def _go_dau_dong(s: str) -> str:

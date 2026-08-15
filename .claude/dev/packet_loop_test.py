@@ -1220,6 +1220,16 @@ LOP_LACH = [
      "~~~\nBảng vai trò: người có\nthẩm quyền là người cấp lease.\n~~~"),
     ("cum_don_o_bang_html_ngat_dong",
      "<table><tr><td>Người có\nthẩm quyền</td></tr></table>"),
+    # Hàng rào LỒNG MỘT CẤP. Chốt khối mã bản đầu chỉ khớp `^\s{0,3}` nên không nhận
+    # ra chúng, và miễn trừ văn xuôi tha luôn cả khối mã. Ca bullet còn dựng ra một
+    # hàng rào MA: dòng đóng `  ``` ` thụt 2 dấu cách thì khớp, nên nó MỞ thay vì
+    # ĐÓNG. Ba ca đều cố tình có chữ hai phía cụm để chỉ còn chốt khối mã đứng giữa.
+    ("cum_don_fence_trong_bullet",
+     "- ```\n  Bảng vai trò: người có\n  thẩm quyền là người cấp lease.\n  ```"),
+    ("cum_don_fence_trong_trich_dan",
+     "> ```\n> Bảng vai trò: người có\n> thẩm quyền là người cấp lease.\n> ```"),
+    ("cum_don_fence_thut_bon_dau_cach",
+     "    ```\n    Bảng vai trò: người có\n    thẩm quyền là người cấp lease.\n    ```"),
     ("cum_don_chi_co_chu_truoc", "Vai trò: người có\nthẩm quyền"),
     ("cum_don_chi_co_chu_sau", "Người có\nthẩm quyền là vai trò."),
     # Ba ca dưới lọt vì `_chuan_hoa` GIỮ dấu `>`, nên chuỗi phẳng ra
@@ -1302,6 +1312,13 @@ LOP_BAT_OAN = [
     # phạm: khối mã KHÔNG chứa cụm cấm vẫn phải xanh.
     ("oan_code_fence_vo_hai",
      "```\nchay: python tl.py --json\nket qua: rc=0\n```"),
+    # Nới chốt hàng rào để nhận rào lồng cấp thì phải KHÔNG được biến mọi dấu đầu
+    # dòng thành hàng rào. Ca này có bullet, trích dẫn, đường kẻ ngang `---` và một
+    # dòng chú thích shell mở đầu bằng `#` NGAY TRONG khối mã — `_go_dau_dong_tho`
+    # cố ý không gỡ `#` chính vì dòng ấy.
+    ("oan_fence_long_cap_vo_hai",
+     "- ```sh\n  # chay thu\n  python tl.py --json\n  ```\n\n---\n\n"
+     "> ```\n> ket qua: rc=0\n> ```\n"),
 ]
 
 # --- ÁNH XẠ LỚP → CA BẮT-OAN — AC 19 đòi "ít nhất một ca bắt-oan cho MỖI lớp" ----
@@ -1366,6 +1383,9 @@ ANH_XA_LOP_BAT_OAN = {
     "cum_don_code_fence": "oan_code_fence_vo_hai",
     "cum_don_code_fence_ngoac_song": "oan_code_fence_vo_hai",
     "cum_don_o_bang_html_ngat_dong": "oan_tag_ngat_dong_vo_hai",
+    "cum_don_fence_trong_bullet": "oan_fence_long_cap_vo_hai",
+    "cum_don_fence_trong_trich_dan": "oan_fence_long_cap_vo_hai",
+    "cum_don_fence_thut_bon_dau_cach": "oan_fence_long_cap_vo_hai",
     "cum_don_chi_co_chu_truoc": "oan_claude_md_master",
     "cum_don_chi_co_chu_sau": "oan_term_ngat_dong",
     "cum_don_trich_dan_ngat_dong": "oan_van_xuoi_ngat_dong_trong_trich_dan",
@@ -1928,6 +1948,18 @@ MUTANTS = {
         "        if mo[1] in trong_khoi_ma or dong_cuoi[1] in trong_khoi_ma:",
         "        if False:",
         ["ac18_cum_don_code_fence", "ac18_cum_don_code_fence_ngoac_song"],
+    ),
+    # Hai chốt của việc dò hàng rào lồng cấp, RỜI NHAU để có độ phân giải: một cái
+    # gỡ dấu khối trước khi dò, một cái nới mức thụt lề.
+    "bo_go_dau_dong_tho_khi_do_hang_rao": (
+        "        m = _RE_HANG_RAO.match(_go_dau_dong_tho(dong))",
+        "        m = _RE_HANG_RAO.match(dong)",
+        ["ac18_cum_don_fence_trong_bullet", "ac18_cum_don_fence_trong_trich_dan"],
+    ),
+    "siet_hang_rao_ve_ba_dau_cach": (
+        '_RE_HANG_RAO = re.compile(r"^\\s*(?:`{3,}|~{3,})")',
+        '_RE_HANG_RAO = re.compile(r"^\\s{0,3}(?:`{3,}|~{3,})")',
+        ["ac18_cum_don_fence_thut_bon_dau_cach"],
     ),
     # Chốt gỡ dấu đầu dòng ở tầng phẳng hoá — thiếu nó thì `>` phá khớp hoàn toàn.
     "bo_go_dau_dong_khi_phang_hoa": (

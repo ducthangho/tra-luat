@@ -10,6 +10,7 @@ from __future__ import annotations
 import ast
 import contextlib
 import copy
+import dataclasses
 import json
 import os
 import pathlib
@@ -27,10 +28,11 @@ if str(BOOTSTRAP_ROOT) not in sys.path:
 
 from core.guards import EnvGuard, NetworkGuard  # noqa: E402
 from gateway import authority as authority_module  # noqa: E402
-from gateway.authority import load_authority  # noqa: E402
+from gateway.authority import AuthoritySnapshot, load_authority  # noqa: E402
 from gateway.errors import GatewayRejected  # noqa: E402
 from gateway.fake_transport import FakeGatewayGitHub  # noqa: E402
 from gateway.gateway import MAX_REQUEST_BYTES, CapabilityGateway  # noqa: E402
+from oracle import safe_io as safe_io_module  # noqa: E402
 
 REPOSITORY = "ducthangho/tra-luat"
 ISSUE_HEAD = "1" * 40
@@ -87,7 +89,10 @@ def seal_json(path: pathlib.Path, value: object) -> None:
 
 @contextlib.contextmanager
 def gateway_fixture(
-    *, lease_active: bool = True, verdict_enabled: bool = True
+    *,
+    lease_active: bool = True,
+    verdict_enabled: bool = True,
+    store_class=FakeGatewayGitHub,
 ) -> Iterator[CapabilityGateway]:
     temp = tempfile.TemporaryDirectory(prefix="wp122-gateway-")
     root = pathlib.Path(temp.name).resolve()
@@ -98,7 +103,7 @@ def gateway_fixture(
     )
     try:
         authority = load_authority(root, "authority.json", candidate_root=CANDIDATE_ROOT)
-        store = FakeGatewayGitHub(root / "ledger.json", repo=REPOSITORY)
+        store = store_class(root / "ledger.json", repo=REPOSITORY)
         store.add_comment(900001, 7, "unrelated-object-byte-sentinel")
         yield CapabilityGateway(authority, store)
     finally:
@@ -270,7 +275,48 @@ def positive_closed_store_surface():
         unexpected = sorted(set(gateway.store.calls) - allowed)
         ensure(not unexpected, "fake store saw operations outside the closed allowlist")
         ensure(set(gateway.store.calls) == allowed, "positive run did not exercise all allowed fake ops")
+        ensure(
+            not hasattr(gateway.store, "add_gateway_comment"),
+            "gateway store exposes a direct comment mutation outside the closed dispatcher",
+        )
         return {"calls": list(gateway.store.calls), "unexpected": unexpected}
+
+
+class CorruptingGatewayStore(FakeGatewayGitHub):
+    """Fault injector proving readback examines the RA-01-created durable record."""
+
+    def _op_post_heartbeat(self, params):
+        tampered = copy.deepcopy(params)
+        tampered["payload"]["author"] = "attacker/forged-author"
+        return super()._op_post_heartbeat(tampered)
+
+
+@case("WP122-POS-008-corrupt-durable-readback-detected")
+def positive_corrupt_readback_detected():
+    with gateway_fixture(store_class=CorruptingGatewayStore) as gateway:
+        try:
+            gateway.create_heartbeat(request("post_heartbeat"))
+        except GatewayRejected as exc:
+            ensure(exc.category == "readback_mismatch", "corrupt readback category mismatch")
+        else:
+            raise AssertionError("corrupt RA-01-created durable record passed readback")
+        durable = gateway.store.ledger.get("wp122-heartbeat-0001")
+        ensure(durable is not None, "fault injector did not create the durable row")
+        ensure(
+            durable["payload"]["author"] == "attacker/forged-author",
+            "fault injector did not alter the durable record",
+        )
+        ensure(gateway.store.total_durable_write_count() == 1, "durable row count mismatch")
+        ensure(
+            gateway.store.calls == ["post_heartbeat", "read_comment"],
+            "fault-injection path did not perform the closed durable readback operation",
+        )
+        return {
+            "actual_rejection": "readback_mismatch",
+            "durable_rows": 1,
+            "closed_calls": list(gateway.store.calls),
+            "observed_corrupt_author": durable["payload"]["author"],
+        }
 
 
 @case("WP122-POS-005-credential-and-network-tripwires")
@@ -563,12 +609,13 @@ def negative_candidate_authority_field():
 def negative_authority_traversal():
     with tempfile.TemporaryDirectory(prefix="wp122-authority-path-") as tmp:
         root = pathlib.Path(tmp).resolve()
-        try:
-            load_authority(root, "../authority.json", candidate_root=CANDIDATE_ROOT)
-        except GatewayRejected as exc:
-            ensure(exc.category == "authority_path", "authority traversal category mismatch")
-            return {"expected_rejection": "authority_path", "actual_rejection": exc.category}
-        raise AssertionError("authority traversal was accepted")
+        with gateway_fixture() as gateway:
+            return rejection(
+                "WP122-NEG-032-authority-path-traversal",
+                gateway,
+                lambda: load_authority(root, "../authority.json", candidate_root=CANDIDATE_ROOT),
+                "authority_path",
+            )
 
 
 @case("WP122-NEG-033-authority-inside-candidate")
@@ -578,12 +625,13 @@ def negative_authority_inside_candidate():
     path = root / "authority.json"
     seal_json(path, authority_document())
     try:
-        try:
-            load_authority(root, "authority.json", candidate_root=root)
-        except GatewayRejected as exc:
-            ensure(exc.category == "candidate_authority", "inside-candidate category mismatch")
-            return {"expected_rejection": "candidate_authority", "actual_rejection": exc.category}
-        raise AssertionError("candidate-contained authority was accepted")
+        with gateway_fixture() as gateway:
+            return rejection(
+                "WP122-NEG-033-authority-inside-candidate",
+                gateway,
+                lambda: load_authority(root, "authority.json", candidate_root=root),
+                "candidate_authority",
+            )
     finally:
         path.chmod(stat.S_IREAD | stat.S_IWRITE)
         temp.cleanup()
@@ -599,16 +647,15 @@ def negative_authority_hardlink():
     os.link(source, linked)
     source.chmod(stat.S_IREAD)
     try:
-        try:
-            load_authority(root, "authority.json", candidate_root=CANDIDATE_ROOT)
-        except GatewayRejected as exc:
-            ensure(exc.category == "authority_hardlink", "hardlink category mismatch")
-            return {
-                "expected_rejection": "authority_hardlink",
-                "actual_rejection": exc.category,
-                "link_count": linked.stat().st_nlink,
-            }
-        raise AssertionError("hardlinked authority was accepted")
+        with gateway_fixture() as gateway:
+            result = rejection(
+                "WP122-NEG-034-authority-hardlink",
+                gateway,
+                lambda: load_authority(root, "authority.json", candidate_root=CANDIDATE_ROOT),
+                "authority_hardlink",
+            )
+            result["link_count"] = linked.stat().st_nlink
+            return result
     finally:
         source.chmod(stat.S_IREAD | stat.S_IWRITE)
         linked.chmod(stat.S_IREAD | stat.S_IWRITE)
@@ -633,27 +680,25 @@ def negative_authority_symlink():
             # skipping or shrinking the denominator; POSIX and capable Windows use the real FS.
             fixture_kind = "portable_symlink_lstat"
             symlink_stat = os.stat_result((stat.S_IFLNK | 0o777, 0, 0, 1, 0, 0, 0, 0, 0, 0))
-            with mock.patch.object(pathlib.Path, "lstat", return_value=symlink_stat):
-                try:
-                    authority_module._safe_read_authority(linked)
-                except GatewayRejected as exc:
-                    ensure(exc.category == "authority_symlink", "symlink category mismatch")
-                    return {
-                        "expected_rejection": "authority_symlink",
-                        "actual_rejection": exc.category,
-                        "fixture": fixture_kind,
-                    }
-                raise AssertionError("synthetic symlink lstat was accepted")
-        try:
-            load_authority(root, "authority.json", candidate_root=CANDIDATE_ROOT)
-        except GatewayRejected as exc:
-            ensure(exc.category == "authority_symlink", "symlink category mismatch")
-            return {
-                "expected_rejection": "authority_symlink",
-                "actual_rejection": exc.category,
-                "fixture": fixture_kind,
-            }
-        raise AssertionError("symlinked authority was accepted")
+            with gateway_fixture() as gateway:
+                with mock.patch.object(pathlib.Path, "lstat", return_value=symlink_stat):
+                    result = rejection(
+                        "WP122-NEG-035-authority-symlink",
+                        gateway,
+                        lambda: authority_module._safe_read_authority(linked),
+                        "authority_symlink",
+                    )
+                    result["fixture"] = fixture_kind
+                    return result
+        with gateway_fixture() as gateway:
+            result = rejection(
+                "WP122-NEG-035-authority-symlink",
+                gateway,
+                lambda: load_authority(root, "authority.json", candidate_root=CANDIDATE_ROOT),
+                "authority_symlink",
+            )
+            result["fixture"] = fixture_kind
+            return result
     finally:
         source.chmod(stat.S_IREAD | stat.S_IWRITE)
         temp.cleanup()
@@ -741,6 +786,159 @@ def negative_duplicate_json_key():
         )
 
 
+def credential_in_durable_body_negative(
+    case_id: str,
+    operation: str,
+    mutate: Callable[[dict[str, object]], None],
+    marker: str,
+):
+    with gateway_fixture() as gateway:
+        value = decoded(request(operation))
+        mutate(value)
+        action = (
+            gateway.create_heartbeat
+            if operation == "post_heartbeat"
+            else gateway.create_verdict
+        )
+        result = rejection(
+            case_id,
+            gateway,
+            lambda: action(encoded(value)),
+            "credential_surface",
+        )
+        stored_bodies = [
+            record.get("body", "")
+            for record in gateway.store.snapshot_objects().values()
+            if isinstance(record, dict)
+        ]
+        ensure(
+            all(marker not in body for body in stored_bodies if isinstance(body, str)),
+            "%s persisted the credential marker in a durable body" % case_id,
+        )
+        ensure(marker not in result["safe_message"], "%s leaked the credential marker" % case_id)
+        result["credential_absent_from_stored_bodies"] = True
+        return result
+
+
+@case("WP122-NEG-042-heartbeat-session-credential-shape")
+def negative_heartbeat_session_credential():
+    marker = "AKIAIOSFODNN7EXAMPLE"
+    return credential_in_durable_body_negative(
+        "WP122-NEG-042-heartbeat-session-credential-shape",
+        "post_heartbeat",
+        lambda value: value["body"].__setitem__("session_id", marker),
+        marker,
+    )
+
+
+@case("WP122-NEG-043-reviewer-session-credential-shape")
+def negative_reviewer_session_credential():
+    marker = "ASIAIOSFODNN7EXAMPLE"
+    return credential_in_durable_body_negative(
+        "WP122-NEG-043-reviewer-session-credential-shape",
+        "post_verdict",
+        lambda value: value["body"].__setitem__("reviewer_session_id", marker),
+        marker,
+    )
+
+
+@case("WP122-NEG-044-finding-id-credential-shape")
+def negative_finding_id_credential():
+    marker = "AKIAIOSFODNN7EXAMPLE"
+    return credential_in_durable_body_negative(
+        "WP122-NEG-044-finding-id-credential-shape",
+        "post_verdict",
+        lambda value: value["body"].__setitem__("finding_ids", [marker]),
+        marker,
+    )
+
+
+@case("WP122-NEG-045-authority-dataclass-replace")
+def negative_authority_dataclass_replace():
+    evil_sha = "9" * 40
+    with gateway_fixture() as gateway:
+        real = gateway._authority
+
+        def forge_and_write():
+            real_lane = real.lanes["pr:124"]
+            forged_lane = dataclasses.replace(real_lane, reviewed_sha=evil_sha)
+            forged = dataclasses.replace(real, lanes={"pr:124": forged_lane})
+            forged_gateway = CapabilityGateway(forged, gateway.store)
+            value = decoded(request("post_verdict"))
+            value["reviewed_sha"] = evil_sha
+            return forged_gateway.create_verdict(encoded(value))
+
+        return rejection(
+            "WP122-NEG-045-authority-dataclass-replace",
+            gateway,
+            forge_and_write,
+            "candidate_authority",
+        )
+
+
+@case("WP122-NEG-046-authority-subclass")
+def negative_authority_subclass():
+    class ForgedAuthority(AuthoritySnapshot):
+        def __init__(self, real):
+            object.__setattr__(self, "repository", real.repository)
+            object.__setattr__(self, "packet", real.packet)
+            object.__setattr__(self, "gateway_author", real.gateway_author)
+            object.__setattr__(self, "lanes", real.lanes)
+            object.__setattr__(self, "_seal", None)
+
+        def __post_init__(self):
+            pass
+
+        def is_sealed(self):
+            return True
+
+    with gateway_fixture() as gateway:
+        forged = ForgedAuthority(gateway._authority)
+
+        def forge_and_write():
+            forged_gateway = CapabilityGateway(forged, gateway.store)
+            return forged_gateway.create_heartbeat(request("post_heartbeat"))
+
+        return rejection(
+            "WP122-NEG-046-authority-subclass",
+            gateway,
+            forge_and_write,
+            "candidate_authority",
+        )
+
+
+@case("WP122-NEG-047-authority-shallow-copy")
+def negative_authority_shallow_copy():
+    with gateway_fixture() as gateway:
+        def copy_and_write():
+            copied = copy.copy(gateway._authority)
+            copied_gateway = CapabilityGateway(copied, gateway.store)
+            return copied_gateway.create_heartbeat(request("post_heartbeat"))
+
+        return rejection(
+            "WP122-NEG-047-authority-shallow-copy",
+            gateway,
+            copy_and_write,
+            "candidate_authority",
+        )
+
+
+@case("WP122-NEG-048-authority-deep-copy")
+def negative_authority_deep_copy():
+    with gateway_fixture() as gateway:
+        def copy_and_write():
+            copied = copy.deepcopy(gateway._authority)
+            copied_gateway = CapabilityGateway(copied, gateway.store)
+            return copied_gateway.create_heartbeat(request("post_heartbeat"))
+
+        return rejection(
+            "WP122-NEG-048-authority-deep-copy",
+            gateway,
+            copy_and_write,
+            "candidate_authority",
+        )
+
+
 @case("WP122-POS-007-sealed-authority-immutable")
 def positive_authority_immutable():
     temp = tempfile.TemporaryDirectory(prefix="wp122-authority-immutable-")
@@ -765,6 +963,29 @@ def positive_authority_immutable():
     finally:
         path.chmod(stat.S_IREAD | stat.S_IWRITE)
         temp.cleanup()
+
+
+@case("WP122-POS-009-shared-hardened-authority-reader")
+def positive_shared_authority_reader():
+    ensure(
+        authority_module.read_regular_single_link is safe_io_module.read_regular_single_link,
+        "authority loader does not reuse the sanctioned shared hardened reader",
+    )
+    tree = ast.parse((HERE / "authority.py").read_text(encoding="utf-8"))
+    duplicate_calls = sorted(
+        (node.func.attr, node.lineno)
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "os"
+        and node.func.attr in {"open", "fdopen", "fstat"}
+    )
+    ensure(duplicate_calls == [], "authority loader carries a driftable duplicate reader")
+    return {
+        "shared_function_identity": True,
+        "duplicate_low_level_reader_calls": duplicate_calls,
+    }
 
 
 def main() -> int:

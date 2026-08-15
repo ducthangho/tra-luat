@@ -9,15 +9,16 @@ untrusted request, path, symlink or hard link.
 from __future__ import annotations
 
 import json
-import os
 import pathlib
 import re
 import stat
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import Mapping
 
-from .errors import GatewayRejected, reject
+from oracle.safe_io import read_regular_single_link, require_outside_tree
+
+from .errors import reject
 
 MAX_AUTHORITY_BYTES = 64 * 1024
 OID40 = re.compile(r"[0-9a-f]{40}\Z")
@@ -73,15 +74,36 @@ class AuthoritySnapshot:
     packet: PacketIdentity
     gateway_author: str
     lanes: Mapping[str, LaneAuthority]
-    _seal: object
+    _seal: object = field(init=False, repr=False, compare=False)
 
     def __post_init__(self):
-        if self._seal is not _SEAL:
-            raise reject("candidate_authority", "authority must come from the sealed loader")
-        object.__setattr__(self, "lanes", MappingProxyType(dict(self.lanes)))
+        raise reject("candidate_authority", "authority must come from the sealed loader")
 
     def is_sealed(self) -> bool:
-        return self._seal is _SEAL
+        return type(self) is AuthoritySnapshot and getattr(self, "_seal", None) is _SEAL
+
+    def __copy__(self):
+        raise reject("candidate_authority", "sealed authority cannot be copied")
+
+    def __deepcopy__(self, memo):
+        raise reject("candidate_authority", "sealed authority cannot be copied")
+
+
+def _sealed_snapshot(
+    repository: str,
+    packet: PacketIdentity,
+    gateway_author: str,
+    lanes: Mapping[str, LaneAuthority],
+) -> AuthoritySnapshot:
+    """Construct the snapshot without exposing the seal through the dataclass init surface."""
+
+    snapshot = object.__new__(AuthoritySnapshot)
+    object.__setattr__(snapshot, "repository", repository)
+    object.__setattr__(snapshot, "packet", packet)
+    object.__setattr__(snapshot, "gateway_author", gateway_author)
+    object.__setattr__(snapshot, "lanes", MappingProxyType(dict(lanes)))
+    object.__setattr__(snapshot, "_seal", _SEAL)
+    return snapshot
 
 
 def _positive_int(value: object, category: str) -> int:
@@ -165,7 +187,7 @@ def _parse_authority(value: object) -> AuthoritySnapshot:
             heartbeat_provider=heartbeat_provider,
             reviewer_provider=reviewer_provider,
         )
-    return AuthoritySnapshot(repository, packet, author, lanes, _SEAL)
+    return _sealed_snapshot(repository, packet, author, lanes)
 
 
 def _safe_read_authority(path: pathlib.Path) -> bytes:
@@ -183,20 +205,14 @@ def _safe_read_authority(path: pathlib.Path) -> bytes:
         raise reject("authority_writable", "sealed authority must be read-only")
     if before.st_size > MAX_AUTHORITY_BYTES:
         raise reject("authority_oversized", "sealed authority exceeds its byte limit")
-    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
-    try:
-        descriptor = os.open(path, flags)
-        with os.fdopen(descriptor, "rb") as handle:
-            opened = os.fstat(handle.fileno())
-            if (before.st_dev, before.st_ino) != (opened.st_dev, opened.st_ino):
-                raise reject("authority_changed", "sealed authority changed identity while opening")
-            if opened.st_nlink != 1:
-                raise reject("authority_hardlink", "sealed authority gained another hard link")
-            raw = handle.read(MAX_AUTHORITY_BYTES + 1)
-    except GatewayRejected:
-        raise
-    except OSError as exc:
-        raise reject("authority_unreadable", "sealed authority could not be read safely") from exc
+    raw = read_regular_single_link(
+        path,
+        "sealed authority",
+        lambda _message: reject(
+            "authority_unreadable", "sealed authority could not be read safely"
+        ),
+        require_readonly=True,
+    )
     if len(raw) > MAX_AUTHORITY_BYTES:
         raise reject("authority_oversized", "sealed authority exceeds its byte limit")
     return raw
@@ -234,8 +250,14 @@ def load_authority(
     resolved = target.resolve(strict=False)
     if resolved.parent != root:
         raise reject("authority_path", "authority locator resolves outside the trusted root")
-    if resolved == candidate or resolved.is_relative_to(candidate):
-        raise reject("candidate_authority", "authority must live outside the candidate checkout")
+    require_outside_tree(
+        resolved,
+        candidate,
+        "sealed authority",
+        lambda _message: reject(
+            "candidate_authority", "authority must live outside the candidate checkout"
+        ),
+    )
     raw = _safe_read_authority(target)
     try:
         text = raw.decode("utf-8", errors="strict")

@@ -12,6 +12,8 @@ import json
 import re
 from typing import Callable
 
+from core import operations as core_operations
+
 from .authority import AuthoritySnapshot, LANE_ID, OID40
 from .errors import GatewayRejected, reject
 from .fake_transport import FakeGatewayGitHub
@@ -90,7 +92,7 @@ class CapabilityGateway:
     """Validate and execute only additive heartbeat and exact-head verdict creation."""
 
     def __init__(self, authority: AuthoritySnapshot, store: FakeGatewayGitHub):
-        if not isinstance(authority, AuthoritySnapshot) or not authority.is_sealed():
+        if type(authority) is not AuthoritySnapshot or not authority.is_sealed():
             raise reject("candidate_authority", "gateway requires a sealed external authority")
         if not isinstance(store, FakeGatewayGitHub):
             raise reject("backend_type", "gateway tests require the integrated RA-01 fake store")
@@ -230,7 +232,7 @@ class CapabilityGateway:
         return int(hashlib.sha256(seed).hexdigest()[:15], 16)
 
     def _duplicate_verdict(self, request: dict[str, object]) -> None:
-        for record in self._store.comments.values():
+        for record in self._store.snapshot_objects().values():
             if (
                 record.get("gateway_created") is True
                 and record.get("operation") == POST_VERDICT
@@ -260,7 +262,7 @@ class CapabilityGateway:
             "gateway_created": True,
         }
 
-        existing_object = self._store.comments.get(object_id)
+        existing_object = self._store.snapshot_objects().get(object_id)
         if (
             existing_object is not None
             and existing_object.get("reconcile_key") != reconcile_key
@@ -274,6 +276,7 @@ class CapabilityGateway:
             "repository": self._authority.repository,
             "lane": lane.lane_id,
             "reviewed_sha": lane.reviewed_sha,
+            "body": body_text,
             "body_sha256": hashlib.sha256(body_text.encode("utf-8")).hexdigest(),
         }
         try:
@@ -299,14 +302,27 @@ class CapabilityGateway:
                         "payload": core_payload,
                     },
                 )
+        except core_operations.CredentialSurfaceError as exc:
+            raise reject(
+                "credential_surface",
+                "integrated fake store rejected credential-like durable content",
+            ) from exc
         except Exception as exc:
             status = getattr(exc, "status", None)
             category = "reconcile_conflict" if status == 409 else "backend_rejected"
             raise reject(category, "integrated fake store rejected the additive operation") from exc
 
         created = outcome.get("created") is True
-        if created:
-            self._store.add_gateway_comment(expected_record)
+        expected_durable_record = {
+            "op": expected_operation,
+            "issue_number": lane.number,
+            "payload": core_payload,
+        }
+        if expected_operation == POST_VERDICT:
+            expected_durable_record.update(
+                {"reviewed_sha": lane.reviewed_sha, "verdict": request["body"]["verdict"]}
+            )
+        durable_record = outcome.get("record")
         try:
             readback = self._store.call(
                 "read_comment",
@@ -314,7 +330,7 @@ class CapabilityGateway:
             )
         except Exception as exc:
             raise reject("readback_failed", "created object could not be read back") from exc
-        if readback != expected_record:
+        if durable_record != expected_durable_record or readback != expected_record:
             raise reject("readback_mismatch", "durable readback did not match the exact created object")
         return {
             "schema_version": SCHEMA_VERSION,

@@ -1774,7 +1774,59 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
              "duong_dan": str(dich)}]
 
 
-def _do_codex() -> tuple[str, str]:
+def _han_token_codex() -> dict:
+    """Đọc HẠN của token trong `~/.codex/auth.json`. KHÔNG in giá trị token.
+
+    Chỉ trả về mốc thời gian và số giờ còn lại — `exp` là một con số, không phải bí mật.
+    Không xác thực chữ ký: ta không kiểm token có THẬT, ta chỉ kiểm nó đã HẾT HẠN chưa.
+    """
+    ra = {"doc_duoc": False, "last_refresh": None, "gio_con_lai": {}}
+    try:
+        d = json.loads(Path(os.path.expanduser("~/.codex/auth.json"))
+                       .read_text(encoding="utf-8"))
+    except Exception:
+        return ra
+    ra["doc_duoc"] = True
+    ra["last_refresh"] = d.get("last_refresh")
+    for ten, v in (d.get("tokens") or {}).items():
+        if not isinstance(v, str) or v.count(".") != 2:
+            continue
+        goi = v.split(".")[1]
+        goi += "=" * (-len(goi) % 4)
+        try:
+            exp = json.loads(base64.urlsafe_b64decode(goi)).get("exp")
+        except Exception:
+            continue
+        if isinstance(exp, (int, float)):
+            ra["gio_con_lai"][ten] = round((exp - time.time()) / 3600, 1)
+    return ra
+
+
+def _do_codex_song(han_giay: int = 90) -> tuple[bool, str]:
+    """Phép thử SỐNG: gọi `codex` thật và soi lỗi xác thực.
+
+    ĐẮT (tốn quota + mạng) nên KHÔNG chạy mặc định — chỉ khi phía gọi đòi
+    `--kiem-song`. Nhưng đây là thứ DUY NHẤT chứng minh được credential còn dùng được:
+    refresh token bị THU HỒI phía máy chủ thì không phép kiểm offline nào thấy.
+    """
+    try:
+        with open(os.devnull) as rong:
+            p = subprocess.run(["codex", "exec", "--skip-git-repo-check", "in ra: ok"],
+                               stdin=rong, capture_output=True, text=True,
+                               timeout=han_giay, encoding="utf-8", errors="replace")
+    except subprocess.TimeoutExpired:
+        return (False, f"qua han {han_giay}s")
+    except (OSError, subprocess.SubprocessError) as e:
+        return (False, f"khong chay duoc: {type(e).__name__}")
+    ra = ((p.stdout or "") + (p.stderr or "")).lower()
+    for dau in ("token_revoked", "refresh_token_invalidated", "token_invalidated",
+                "401 unauthorized", "please log in again", "could not be refreshed"):
+        if dau in ra:
+            return (False, f"credential BI TU CHOI ({dau})")
+    return (p.returncode == 0, f"rc={p.returncode}")
+
+
+def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
     """Đo `codex` bằng MÃ THOÁT, không bằng dòng đầu của đầu ra.
 
     ĐÃ ĐO: `codex login status` trả `rc=1` + `Not logged in` khi chưa xác thực,
@@ -1805,7 +1857,35 @@ def _do_codex() -> tuple[str, str]:
             and not d.strip().upper().startswith(("WARNING", "NOTE", "HINT"))]
     mo_ta = dong[-1][:70] if dong else f"rc={rc}, khong in gi"
     if rc == 0 and "not logged in" not in ra.lower():
-        return ("DUNG_DUOC", mo_ta)
+        # ĐẾN ĐÂY MỚI CHỈ BIẾT: có tệp credential, đọc được, `codex` không kêu.
+        # KHÔNG biết nó còn DÙNG ĐƯỢC.
+        #
+        # ĐÃ ĐO 15-08-2026, và đây là lần THỨ HAI cùng một lớp lỗi trong đúng hàm này:
+        # `codex login status` trả "Logged in using ChatGPT" rc=0 trong khi MỌI lời gọi
+        # thật trả 401 `refresh_token_invalidated`. Lệnh ấy chỉ kiểm tệp đọc được, không
+        # kiểm token còn sống. Bản trước gọi thẳng trạng thái này là `DUNG_DUOC` — tức
+        # NÂNG NHÃN VƯỢT QUÁ BẰNG CHỨNG, đúng cái bệnh đã đốt cả ngày hôm nay.
+        #
+        # Nay tách làm hai nhãn. `CO_CREDENTIAL` nói đúng thứ đã chứng minh được, và
+        # chỉ `--kiem-song` (gọi thật, tốn quota) mới được cấp `DUNG_DUOC`.
+        han = _han_token_codex()
+        het = [t for t, g in han["gio_con_lai"].items() if g <= 0]
+        chi_tiet = mo_ta
+        if han["gio_con_lai"]:
+            chi_tiet += " · con " + ", ".join(
+                f"{t}={g}h" for t, g in sorted(han["gio_con_lai"].items()))
+        if han["last_refresh"]:
+            chi_tiet += f" · last_refresh={han['last_refresh']}"
+        if het:
+            # HẾT HẠN là thứ ĐO ĐƯỢC offline ⇒ dám kết luận.
+            return ("CHUA_XAC_THUC", f"token HET HAN: {', '.join(het)} · {chi_tiet}")
+        if not kiem_song:
+            return ("CO_CREDENTIAL",
+                    f"{chi_tiet} · CHUA chung minh dung duoc (them --kiem-song de goi that)")
+        song, vi_sao = _do_codex_song()
+        if song:
+            return ("DUNG_DUOC", f"{chi_tiet} · kiem song: {vi_sao}")
+        return ("CHUA_XAC_THUC", f"kiem song HONG: {vi_sao} · {chi_tiet}")
     if os.environ.get("CODEX_AUTH_JSON"):
         return ("CAN_CHUAN_BI",
                 f"chua co auth.json TREN DIA (rc={rc}) nhung CO $CODEX_AUTH_JSON "
@@ -1930,16 +2010,16 @@ def _do_hook_cu(ws: str | None) -> tuple[str, str]:
 
 
 KHA_NANG = [
-    {"ten": "codex", "do": lambda ws: _do_codex(),
+    {"ten": "codex", "do": lambda ws, ks=False: _do_codex(ks),
      "vi_sao": "reviewer cross-provider (§8) — executor claude thi reviewer PHAI la codex",
      "khac_phuc": "launcher.py chuan-bi   (hoac: codex login --device-auth)"},
-    {"ten": "claude", "do": lambda ws: _do_claude(),
+    {"ten": "claude", "do": lambda ws, ks=False: _do_claude(),
      "vi_sao": "executor va phien dieu phoi",
      "khac_phuc": "dat ANTHROPIC_API_KEY / dang nhap lai claude"},
-    {"ten": "github", "do": _do_github,
+    {"ten": "github", "do": lambda ws, ks=False: _do_github(ws),
      "vi_sao": "dang handoff/verdict, doc issue, day nhanh",
      "khac_phuc": "dung cong cu MCP github + git; REST thang bi proxy chan"},
-    {"ten": "hook-phien", "do": _do_hook_cu,
+    {"ten": "hook-phien", "do": lambda ws, ks=False: _do_hook_cu(ws),
      "vi_sao": "hook cu hon master = thieu chot ma master da co (nguyen nhan goc 15-08)",
      "khac_phuc": "git show origin/master:.claude/hooks/session-start.sh > <tep>  "
                   "roi chay no; hoac merge master vao nhanh nay"},
@@ -2042,7 +2122,7 @@ def lenh_doctor(a) -> int:
     kha_nang, chua_xac_thuc = [], []
     for k in KHA_NANG:
         try:
-            tt, mo_ta = k["do"](ws)
+            tt, mo_ta = k["do"](ws, getattr(a, "kiem_song", False))
         except Exception as e:           # doctor KHÔNG được chết vì một phép đo
             tt, mo_ta = "KHONG_DO_DUOC", f"{type(e).__name__}"
         kha_nang.append({"ten": k["ten"], "trang_thai": tt, "chi_tiet": mo_ta,
@@ -2148,6 +2228,8 @@ def build_parser():
     d = sub.add_parser("doctor", help="kiem cong cu + KHA DUNG + bien (KHONG cai gi)")
     d.add_argument("--json", action="store_true")
     d.add_argument("--workspace", default=None)
+    d.add_argument("--kiem-song", action="store_true",
+                   help="GOI THAT de chung minh credential con dung duoc (ton quota/mang)")
     d.add_argument("--doi-kha-dung", action="store_true",
                    help="thoat 13 neu co cong cu CHUA DUNG DUOC (mac dinh: chi bao, van thoat 0)")
     d.set_defaults(fn=lenh_doctor)

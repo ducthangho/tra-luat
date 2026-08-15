@@ -2096,6 +2096,11 @@ def t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao():
     """
     m = _tai_launcher_thu()
     m.shutil.which = lambda t: "/usr/bin/codex" if t == "codex" else None
+    # Ghim HẠN TOKEN thay vì đọc `~/.codex/auth.json` THẬT: ca này đo phép kiểm DÒNG
+    # ĐẦU, không đo credential của máy đang chạy. Không ghim thì nó xanh/đỏ tuỳ máy —
+    # đúng bệnh "cổng phụ thuộc môi trường" mà đợt này vừa mất ba lượt vì nó.
+    m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
+                                  "gio_con_lai": {"access_token": 100.0}}
 
     def _ra(rc, text):
         class P:
@@ -2116,10 +2121,13 @@ def t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao():
     _ra(1, canh_bao + "Not logged in\n")
     tt, _ = m._do_codex()
     bang(tt == "CHUA_XAC_THUC", f"khong bien phai la CHUA_XAC_THUC, duoc {tt}")
-    # (c) da dang nhap that
+    # (c) da dang nhap => CO_CREDENTIAL, KHONG phai DUNG_DUOC.
+    # Hop dong DOI o dot `token_revoked` 15-08: `login status` rc=0 chi chung minh CO
+    # credential doc duoc, KHONG chung minh no con DUNG DUOC. `DUNG_DUOC` nay doi
+    # `--kiem-song` (goi that). Xem `t93`.
     _ra(0, "Logged in using ChatGPT\n")
     tt, mo_ta = m._do_codex()
-    bang(tt == "DUNG_DUOC", f"da dang nhap phai la DUNG_DUOC, duoc {tt}")
+    bang(tt == "CO_CREDENTIAL", f"da dang nhap phai la CO_CREDENTIAL, duoc {tt}")
     bang("Logged in" in mo_ta, f"mo ta phai lay dong TRANG THAI, duoc {mo_ta!r}")
     # (d) rc=0 nhung van co chu 'not logged in' => fail-closed
     _ra(0, canh_bao + "Not logged in\n")
@@ -2459,6 +2467,57 @@ def t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom():
          f"khong do duoc pgid ma TU CHOI OAN: {kq}")
 
 
+@ca
+def t93_do_codex_khong_duoc_nang_nhan_vuot_qua_bang_chung():
+    """`codex login status` rc=0 KHÔNG chứng minh credential còn dùng được.
+
+    ĐÃ ĐO 15-08-2026: lệnh đó trả "Logged in using ChatGPT" rc=0 trong khi MỌI lời gọi
+    thật trả 401 `refresh_token_invalidated`. Nó chỉ kiểm tệp đọc được. Bản trước gọi
+    thẳng trạng thái ấy là `DUNG_DUOC` — NÂNG NHÃN VƯỢT QUÁ BẰNG CHỨNG, và đó là lần
+    THỨ HAI cùng một lớp lỗi trong đúng hàm này trong đúng một ngày.
+
+    Ba nhãn, ba mức bằng chứng khác nhau, ca này khoá cả ba:
+      CO_CREDENTIAL  có tệp, đọc được, chưa hết hạn — CHƯA chứng minh dùng được
+      CHUA_XAC_THUC  đo được là hỏng (hết hạn, hoặc gọi thật bị từ chối)
+      DUNG_DUOC      CHỈ khi đã gọi thật và thành công
+    """
+    m = _tai_launcher_thu()
+    m.shutil.which = lambda t: "/usr/bin/codex" if t == "codex" else None
+
+    class P:
+        returncode = 0
+        stdout = "Logged in using ChatGPT\n"
+        stderr = ""
+    m.subprocess.run = lambda *_a, **_k: P()
+
+    # (a) token con han, KHONG kiem song => CO_CREDENTIAL, TUYET DOI khong DUNG_DUOC
+    m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
+                                  "gio_con_lai": {"access_token": 100.0}}
+    tt, mo_ta = m._do_codex(kiem_song=False)
+    bang(tt == "CO_CREDENTIAL", f"chua goi that ma da phong len {tt}")
+    bang("CHUA chung minh" in mo_ta, f"mo ta phai noi ro chua chung minh: {mo_ta!r}")
+
+    # (b) token HET HAN => ket luan duoc ngay, KHONG can goi mang
+    m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
+                                  "gio_con_lai": {"id_token": -39.1}}
+    tt, mo_ta = m._do_codex(kiem_song=False)
+    bang(tt == "CHUA_XAC_THUC", f"token het han ma bao {tt}")
+    bang("HET HAN" in mo_ta and "id_token" in mo_ta, f"phai neu TEN token het han: {mo_ta!r}")
+
+    # (c) kiem song THANH CONG => moi duoc DUNG_DUOC
+    m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
+                                  "gio_con_lai": {"access_token": 100.0}}
+    m._do_codex_song = lambda *_a: (True, "rc=0")
+    tt, _ = m._do_codex(kiem_song=True)
+    bang(tt == "DUNG_DUOC", f"kiem song dat ma khong cho DUNG_DUOC: {tt}")
+
+    # (d) kiem song BI TU CHOI => CHUA_XAC_THUC, du login status van rc=0
+    m._do_codex_song = lambda *_a: (False, "credential BI TU CHOI (token_revoked)")
+    tt, mo_ta = m._do_codex(kiem_song=True)
+    bang(tt == "CHUA_XAC_THUC", f"credential bi thu hoi ma van bao {tt}")
+    bang("token_revoked" in mo_ta, f"phai giu nguyen ly do may chu tra: {mo_ta!r}")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -2526,6 +2585,13 @@ DOT_BIEN = [
     # chung), cong phan chung tay: go chot co lap thi `t81` lam ban `subprocess.run`
     # ngay tu ca dau tien.
     # Chot nay nam trong launcher.py nen DOT BIEN DUOC (khac chot harness o launcher_test).
+    ("nang_nhan_CO_CREDENTIAL_thanh_DUNG_DUOC",
+     ('            return ("CO_CREDENTIAL",',
+      '            return ("DUNG_DUOC",'),
+     ["t93_do_codex_khong_duoc_nang_nhan_vuot_qua_bang_chung"]),
+    ("bo_kiem_han_token_codex",
+     ('        if het:', '        if False:'),
+     ["t93_do_codex_khong_duoc_nang_nhan_vuot_qua_bang_chung"]),
     ("bo_chot_truong_nhom_truoc_killpg",
      ('    if nhom_that is not None and nhom_that != pid:',
       '    if False:'),

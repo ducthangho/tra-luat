@@ -1,0 +1,160 @@
+# Lease REVIEWER lượt 11 cho wp55 revision 3 — neo head 4085bbf (có bản vá AN NINH).
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+# NHỚ ĐÓNG NHÁY mọi giá trị chứa `#` — không nháy thì `#` mở chú thích YAML và cắt cụt
+# giá trị (đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ).
+#
+# VÌ SAO CÓ LEASE NÀY:
+# Head đã đổi 1a4525a → 4085bbf vì phiên ĐIỀU PHỐI vá một P1 AN NINH theo lệnh trực tiếp
+# của chủ kho. Lease review-10 neo 1a4525a nên hết hiệu lực. Bản vá an ninh CHƯA AI REVIEW.
+#
+# ĐÂY LÀ LƯỢT REVIEW THỨ BA LIÊN TIẾP BỊ HEAD BỎ LẠI PHÍA SAU (8, 9→10, 10). Lần này do
+# chính phiên điều phối đẩy, đã báo trước và nhận là đánh đổi có ý thức: lượt 10 đang soi
+# một head có P1 an ninh chưa vá, mà head BUỘC phải đổi để vá.
+#
+# KHÁC MỌI LEASE REVIEW TRƯỚC: head này chỉ hơn head vừa bị soi ĐÚNG MỘT COMMIT, và commit
+# đó chỉ đụng .claude/skills/work-packet/SKILL.md. Nên verdict lượt 10 CÒN GIÁ TRỊ gần trọn
+# vẹn — bốn P1 của nó nằm trong packet_loop.py, tệp commit này không đụng. Việc của lượt 11
+# KHÔNG phải soi lại từ đầu.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+phase_key: F3-03
+mission_issue: 54
+mission_revision: 6
+revision: 3
+generation: 9
+lease_id: wp55-r3-review-11-codex-20260815
+
+spec_path: ops/specs/wp55-r3-spec.md
+spec_branch: ops/wp55-r3-spec
+spec_hash: e321f811724fae97b19d523a3e5159bc13b425cd15fc6c753c7439fe28cae22d
+spec_hash_basis: sha256 của chính tệp spec, byte nguyên trạng
+
+role: reviewer
+provider: codex                 # BẮT BUỘC — executor là claude (§8 cross-provider)
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+target_pull_request: 120
+reviewed_sha_required: 4085bbf22d565a4189977f0504dfd8e5f748bfce
+branch: claude/wp55-r3g5-f3-03
+base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2
+
+prompt_path: ops/prompts/wp55-r3-review-11-codex-20260815.md
+prompt_sha256_required: 7ddb25545f7bb35a1a7a436bbb872771cf4d5356733472d1f3ca75057eacecdb
+
+granted_by: ducthangho          # CHỦ KHO — §2 người có thẩm quyền
+granted_on_instruction: 'direct, in-session, 2026-08-15 (cấp lease reviewer neo 4085bbf đi)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-15T12:25:00Z'
+lease_expires_at_utc: '2026-08-16T12:30:00Z'
+run_minutes: 1445
+heartbeat_required_minutes: 30
+
+attempts_used_ledger: 2
+attempts_limit: 3
+attempts_ledger_reliable: false
+attempts_note: >-
+  Sổ ghi 2/3 nhưng nhánh đã mang nhiều commit chạy KHÔNG lease (g6/g7/g8), cộng một commit
+  của phiên điều phối. Con số thật CAO HƠN. Ghi ra để reviewer biết ranh giới của sổ, KHÔNG
+  phải để hạ chuẩn duyệt — thấy vấn đề thì `changes_requested` là đường bình thường.
+
+# Head này = 1a4525a + ĐÚNG MỘT commit vá an ninh.
+delta_since_last_reviewed:
+  prior_reviewed_sha: 1a4525a20aa360476a6f59cb157c21097919c457
+  current_sha: 4085bbf22d565a4189977f0504dfd8e5f748bfce
+  files_changed: 1
+  path: .claude/skills/work-packet/SKILL.md
+  pushed_by: 'phiên ĐIỀU PHỐI, không qua lease executor'
+  authority: 'lệnh trực tiếp của chủ kho, 2026-08-15'
+  evidence: https://github.com/ducthangho/tra-luat/pull/120#issuecomment-5301888820
+
+# Thứ MỚI, chưa ai review — soi kỹ nhất chỗ này.
+new_since_last_review:
+  finding_id: work-packet-secret-check-prints-secret
+  kind: security
+  fix: 'thay `echo "${VAR:+…}${VAR:-…}"` bằng một câu điều kiện; không expansion nào bung giá trị'
+  coordinator_measured: >-
+    đặt → 'có, N ký tự' (không lộ); chưa đặt/rỗng → 'chưa đặt'; an toàn dưới set -u;
+    đột biến trả về dạng cũ thì LỘ token
+  reviewer_must_check: >-
+    còn đường nào in giá trị trong CẢ BA adapter; có bắt oan không (chuỗi toàn khoảng trắng,
+    vỏ shell khác bash); chú thích mới khai HÀNH VI hay chỉ khai Ý ĐỊNH — bản cũ chỉ khai ý
+    định và lỗi sống sót qua nhiều lượt vì thế
+
+# Verdict lượt 10 CÒN GIÁ TRỊ — bốn P1 nằm trong packet_loop.py, tệp commit mới không đụng.
+prior_review: wp55-r3-review-10-codex-20260815
+prior_review_verdict: changes_requested
+prior_reviewed_sha: 1a4525a20aa360476a6f59cb157c21097919c457
+prior_review_verdict_file: 'ops/reviews/wp55-r3-review-10-codex-verdict.md trên ops/wp55-r3-review-10-verdict'
+prior_review_still_applicable: true
+prior_review_findings:
+  - finding_id: doctrine-measurement-marker-semantic-bypass
+    severity: P1
+    disposition: must_fix_spec_revision_4_and_code
+  - finding_id: doctrine-indented-code-block-bypass
+    severity: P1
+    disposition: must_fix_code
+  - finding_id: doctrine-comment-erases-fence-closer-bypass
+    severity: P1
+    disposition: must_fix_code
+  - finding_id: doctrine-html-table-token-context-bypass
+    severity: P1
+    disposition: must_fix_code
+
+# Câu hỏi mức SPEC mà lượt này được yêu cầu trả lời thẳng.
+cau_hoi_muc_spec: >-
+  AC 19 có cưỡng chế được bằng máy không? Con lắc đã đánh quá SÁU lần; finding 1 của lượt 10
+  (`doctrine-measurement-marker-semantic-bypass`) có disposition must_fix_spec_revision_4_and_code,
+  tức chính reviewer cũng cho rằng SPEC phải đổi. Nếu miễn trừ "văn xuôi kể lại kết quả đo"
+  không có tiêu chí máy nào phân biệt được với văn bản chép doctrine, hãy NÓI THẲNG — trả lời
+  "không" là verdict hợp lệ và có giá trị hơn cú đánh quá thứ bảy.
+ban_thao_revision_4: 'ops/wp55-r4-spec-draft (adff770) — CHỜ chủ kho duyệt, reviewer KHÔNG bị ràng buộc'
+
+# ĐÃ chạy bởi phiên ĐIỀU PHỐI trên 4085bbf (cùng provider với executor — KHÔNG thay §8).
+verified_by_coordinator:
+  doctrine_scan: 'rc=0 · sạch, 4 tệp'
+  packet_loop_test: 'rc=0 · nền 173/173 · TỔNG ĐẠT'
+  eol_policy: 'rc=0'
+  scope: 'đúng 6 tệp write_set'
+  an_ninh_phan_chung: 'ba nhánh không lộ giá trị; đột biến trả dạng cũ thì LỘ'
+
+claimed_but_unverified:
+  - id: tl-selftest
+    note: >-
+      Phiên điều phối KHÔNG chạy được (pyo3 PanicException từ cryptography; delta=0 trên cùng
+      container; nhánh không đụng scripts/). Lượt 9 cũng timeout ở mục này. CHƯA AI xác minh
+      1696/1696. Reviewer chạy được thì báo số thật; không chạy được thì nói rõ.
+  - id: ac20-merged-tree
+    note: 'lượt 9 khai not_run. Reviewer nên phủ, dùng GIT_DIR và neo SHA master bất biến.'
+
+finding_deferred:
+  rule: 'KHÔNG nêu như finding mới; chỉ nêu nếu đo được điều KHÁC với mô tả'
+  items:
+  - finding_id: ac20-archive-tree-suite-not-self-contained
+    decision: 'hoãn revision 4'
+  - finding_id: same-provider-fallback-contradicts-protocol
+    decision: 'hoãn revision 4 — vá là NỚI một AC, đúng thứ §12 cấm'
+
+# Bài học lượt 9 → cưỡng chế trong prompt lượt này.
+fixture_nguyen_van_required: true
+fixture_nguyen_van_note: >-
+  Lượt 9 mô tả fixture bằng lời; phiên điều phối dựng lại SAI và báo nhầm "không tái lập
+  được", phải đính chính. Khi có fixture nguyên văn thì 7/7 khớp. Verdict lượt này phải kèm
+  NỘI DUNG TỆP fixture nguyên văn, và mỗi ca lọt phải có đối chứng cùng-câu-khác-đúng-một-biến
+  — lượt 9 có một ca mà đối chứng dùng câu khác, nên rc=0 của nó giải thích được bằng finding KHÁC.
+
+neo_sha_bat_bien_required: true
+
+preconditions_measured_at_utc: '2026-08-15T12:20:00Z'
+master_sha_at_grant: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1
+security_fix_event: https://github.com/ducthangho/tra-luat/pull/120#issuecomment-5301888820
+revision_4_backlog_event: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5301422660

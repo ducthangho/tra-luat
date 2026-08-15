@@ -1,0 +1,10 @@
+schema: wp55-review-receipt.v1
+review: 11
+reviewer: codex
+executor: claude
+reviewed_sha: 4085bbf22d565a4189977f0504dfd8e5f748bfce
+verdict: changes_requested
+delivery: filesystem_handoff
+github_delivery: blocked_403_no_gh
+verdict_file: wp55-r3-review-11-codex-verdict.md
+prompt_sha256: 7ddb25545f7bb35a1a7a436bbb872771cf4d5356733472d1f3ca75057eacecdb

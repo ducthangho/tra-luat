@@ -50,3 +50,35 @@ trong một packet riêng. Executor KHÔNG viết lease giả để mượn đư
 | 05:15 | đang đo tập giết THẬT của từng đột biến (chạy trọn suite mỗi đột biến) |
 
 Phiên còn sống. Nếu tệp này ngừng cập nhật quá 45 phút thì coi là phiên chết.
+
+---
+
+## Nhịp — cập nhật 05:42Z
+
+| mốc UTC | việc |
+|---|---|
+| 05:20 | ba gate độc lập XANH: `release-verify` ok=true checked=179 failed=[] extra=[]; `golden-test` rc=0; `eol_policy` scanned=304 violations=0 |
+| 05:25 | `tl --selftest` **1696/1696** rc=0 — khớp số "không được lùi" của lease |
+| 05:30 | `release-bundle` ×2 trên head + ×1 từ `fbe5ab9e` → **cả BA cùng** `20c89545…8590`, đúng con số lease ghi |
+| 05:32 | `git diff --name-status fbe5ab9e` → **đúng 6 tệp**, trùng khít write_set |
+| 05:35 | đo tập giết THẬT của từng đột biến (chạy TRỌN suite cho mỗi đột biến) |
+| 05:42 | sửa xong bảng đột biến theo SỐ ĐO, chạy lại gate lần cuối |
+
+### Ba chỗ phép đo hai-vế bắt được mà bản một-vế KHÔNG thấy
+
+1. **Bốn đột biến cũ khai THIẾU tập giết.** `same_failure_2_thanh_99` giết 2 (khai 1);
+   `noi_danh_sach_cho_phep_chua_ten_gia_mao` giết 2 (khai 1); `tach_begin_attempt_khoi_ham_chung`
+   giết 8 (khai 7); `tra_ve_fail_open_thieu_lease` giết 4 (khai 1). Runner cũ chỉ chạy đúng tập
+   tự khai nên phần dôi ra không bao giờ hiện.
+
+2. **`ha_NFKC_ve_NFC` khai SAI một ca.** Nó liệt `ac18_nfkc_ligature_ff` vào tập phải-chết,
+   nhưng đo ra ca ấy KHÔNG chết: `"ﬀ".casefold()` cũng cho `"ff"`, nên hạ NFKC về NFC không đủ.
+   Suite vẫn xanh vì runner không đối chiếu lời khai với phép đo. Verdict lượt 6 đã nêu đúng chỗ này.
+
+3. **Ca `nbsp_phu_hai_lop` KHÔNG chứa NBSP nào** — `cat -A` trên `e6e4b73` cho `local controller`
+   với khoảng trắng THƯỜNG. Nó khớp cụm cấm nguyên văn, tức đo ca NỀN, không đo lớp nào; đó mới là
+   lý do cơ học khiến "không đột biến nào giết được nó", chứ không phải "phủ hai lớp" như chú thích
+   cũ giải thích. **Cùng loại lỗi với ca khai `Cf` mà không có ký tự `Cf`** — verdict lượt 6 bắt
+   được ca kia, ca này lọt. Đây là phát hiện MỚI của lượt này, không có trong verdict.
+
+Phiên còn sống.

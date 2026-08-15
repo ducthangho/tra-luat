@@ -1,0 +1,103 @@
+# Lease REVIEWER lượt 5 — nhánh HẠ TẦNG MÔI TRƯỜNG `ops/moi-truong-env-first`.
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. NHỚ ĐÓNG NHÁY mọi giá trị chứa `#`.
+# `packet_issue: 55` NHƯNG `la_viec_cua_packet: false` — nhánh rẽ từ master, KHÔNG tiêu attempt.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: null
+la_viec_cua_packet: false
+
+role: reviewer
+provider: codex
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+lease_id: moi-truong-review-5-codex-20260815
+review_round: 5
+
+branch: ops/moi-truong-env-first
+reviewed_sha_required: ad60b6f3402f1f8cca80f716667464734ea44395
+base_sha: fe895a068368754bd11b25ca59c504f973e9f086
+base_note: 'base là head lượt 4 đã soi. Delta ĐÚNG 2 tệp, ĐÚNG 2 commit — GỘP theo lệnh chủ kho.'
+master_sha_at_grant: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1
+target_pull_request: null
+
+prompt_path: ops/prompts/moi-truong-review-5-codex-20260815.md
+prompt_sha256_required: e9aed83a39b63477bf3ccace14dcae71fa6e8db01fc50f5b6b2caa5c139ffc26
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-15 (truy launcher.py:720/739 trước, rồi gộp cả hai vào một lượt review)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-15T20:20:00Z'
+lease_expires_at_utc: '2026-08-16T21:00:00Z'
+run_minutes: 1480
+heartbeat_required_minutes: 30
+
+prior_review: moi-truong-review-4-codex-20260815
+prior_review_verdict: changes_requested
+prior_review_verdict_sha256: e9f0c759e75bf459f25cdb06a524fca671925525c9e47965251a025a5901d37a
+
+delta_gom_hai_commit:
+  - sha: d9029c6
+    tom_tat: 'bộ test TỰ KHAI môi trường — để hai phép đo ở hai nơi SO ĐƯỢC với nhau'
+  - sha: ad60b6f3402f1f8cca80f716667464734ea44395
+    tom_tat: 'chốt TRƯỞNG NHÓM trước killpg — lỗ giết nhầm THẬT trong launcher.py'
+
+# Manh mối CỦA CHÍNH REVIEWER dẫn tới lỗ này — ghi công và ghi đường.
+truy_tu_manh_moi_reviewer:
+  nguon: 'verdict lượt 4 chỉ launcher.py:720 và :739'
+  ket_qua: >-
+    os.killpg nhận PROCESS GROUP ID, _giet_cay cầm PID; hai số chỉ bằng nhau khi tiến
+    trình là TRƯỞNG NHÓM — giả định start_new_session tạo ra nhưng KHÔNG ai kiểm tại chỗ
+    giết. Đo được: con không kèm start_new_session có pid=26072 pgid=26071, _giet_cay vẫn
+    gọi killpg(26072) tức nhắm vào nhóm KHÔNG PHẢI của mục tiêu.
+  vi_sao_song_lau: >-
+    máy thường pid lớn nên nhóm đó hầu như không tồn tại, lỗi tan thành ProcessLookupError.
+    Trong PID namespace pid chạy từ 1 nên dễ trúng nhóm CÓ THẬT, kể cả nhóm 1 của vỏ shell.
+
+# Bản khai môi trường đã LÀM ĐỔ giả thuyết cũ của người vá — nói thẳng.
+gia_thuyet_cu_da_do:
+  cu: '"chung nhóm với vỏ shell" là nguyên nhân, nên vá bằng setsid (fe895a0)'
+  bang_chung_bac_bo: 'bản khai cho chung_nhom_voi_cha TRUE ở CẢ HAI môi trường ⇒ không phân biệt được'
+  he_qua: 'setsid thu hẹp bán kính nhưng KHÔNG chạm gốc; chốt trưởng nhóm mới chạm gốc'
+  giu_ca_hai: >-
+    KHÔNG gỡ setsid trong cùng lượt — gỡ một chốt lúc chưa ai review chốt kia là đổi hai
+    biến một lúc. Reviewer thấy setsid nay thành THỪA hoặc thành CÓ HẠI thì nói thẳng.
+
+trong_tam_review:
+  - 'chốt trưởng nhóm có ĐỦ không: còn đường nào tới killpg mà không qua chốt (_giet_windows, _giet_rieng)?'
+  - 'có TỪ CHỐI OAN không: tiến trình vừa chết, pid tái dùng giữa lúc đo, race giữa getpgid và killpg'
+  - 'có mua an toàn bằng cách KHÔNG GIẾT ĐƯỢC GÌ NỮA không — các ca giết-cây còn đo đúng thứ chúng khai?'
+  - 'bản khai có RÒ thông tin nhạy cảm không (đường dẫn, tên máy, biến)?'
+  - '_do_an_toan nuốt BaseException — có nuốt nhầm KeyboardInterrupt/SystemExit gây hại?'
+
+doi_ban_khai_cua_reviewer: >-
+  Giờ hai bên ĐÃ so được. Lease ĐÒI reviewer chạy --dot-bien HAI LẦN và DÁN BẢN KHAI MÔI
+  TRƯỜNG của mình vào verdict. Số còn lệch thì bản khai sẽ nói vì sao — đó là mục đích nó
+  sinh ra sau ba lượt tranh cãi con số.
+
+verified_by_coordinator:
+  suite: '92/92 (qua 91, bỏ qua 1 fixture Windows)'
+  dot_bien: '48/48 đạt, KHÔNG mục nào SAI (1 không đo được trên nền này)'
+  dot_bien_moi: 'bo_chot_truong_nhom_truoc_killpg GIẾT 1/1 ca đích'
+  phan_chung_hai_chieu: 'pgid!=pid -> từ chối, killpg KHÔNG gọi; pgid==pid -> vẫn giết như cũ'
+  eol: 'checked=330 violations=0'
+  doc_claims: 'ok=true flags=[]'
+  scope: 'ĐÚNG 2 tệp'
+  ban_khai_dieu_phoi: 'pid/pgid/sid=20239/20237/19879 · chung_nhom_voi_cha=True · ns_pid=pid:[4026531836]'
+
+canh_bao_an_ninh:
+  khong_in_gia_tri: true
+  home_tam_bat_buoc: true
+
+neo_sha_bat_bien_required: true
+chay_hai_lan_required: true
+approve_la_hop_le: 'đừng nặn finding cho có; nhưng hai commit này CHƯA AI SOI'
+duong_giao_verdict_da_do: 'REST bị proxy 403, gh không cài ⇒ ghi verdict ra tệp, điều phối đăng hộ'
+preconditions_measured_at_utc: '2026-08-15T20:20:00Z'

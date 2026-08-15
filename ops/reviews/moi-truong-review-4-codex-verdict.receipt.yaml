@@ -1,0 +1,28 @@
+schema_version: 1
+reviewer: codex
+lease: moi-truong-review-4-codex-20260815
+verdict: changes_requested
+reviewed_head: fe895a068368754bd11b25ca59c504f973e9f086
+delta_base: c89ca5929c2d5da6c182f7858e652c51df147cd5
+base_sha: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1
+prompt_sha256_required: 50908590c3beb7bc08b2d2d75d74b6d6c80a042535d5f1b184208a472c072848
+la_viec_cua_packet: false
+finding_ids:
+  - launcher-caller-still-does-not-survive-self-detach
+  - launcher-mutation-gate-still-red
+delivery: file
+repository_modified: false
+tests:
+  launcher_standard_direct: "90/90; caller continuation absent"
+  launcher_standard_external_setsid: "90/90; caller continuation absent"
+  mutation_run_1: "rc=1; 46/47; do_codex mutation SAI 0/1"
+  mutation_run_2: "rc=1; 46/47; identical result"
+  t90_mutations: "four independent temporary-copy branch mutations all red"
+boundaries:
+  - no_real_auth_file_touched
+  - no_environment_values_printed
+  - windows_not_run
+  - rest_and_gh_not_retested
+  - fetch_and_config_performed_by_coordinator_due_read_only_gitdir
+  - exact_killpg_triggering_test_not_identified
+  - no_repository_files_modified

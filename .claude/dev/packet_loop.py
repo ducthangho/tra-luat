@@ -108,12 +108,30 @@ CHUYEN_HOP_LE = {
     "awaiting_lease": (),
     "leased": ("running",),
     "running": ("reviewing",),
-    "reviewing": ("running", "blocked"),
+    # `reviewing` KHÔNG còn đường ra bằng `transition` — kể cả về `running`.
+    #
+    # Finding `review-transition-bypasses-record-review` (cross-review lượt 6, codex,
+    # 15-08-2026): bản trước cho `reviewing → running`, nên gõ ba lệnh
+    # `transition reviewing` → `transition running` → `transition reviewing` là quay
+    # lại review mà KHÔNG hề gọi `record-review`. Đã ĐO trên head `e6e4b73`: cả ba
+    # rc=0, kết ở `state=reviewing attempts_used=1 reviews=[] finding_counts={}`.
+    # Nghĩa là lặp review↔fix VÔ HẠN trong cùng một attempt, không tăng phép đếm
+    # finding, không chạm trần attempt lẫn same-failure — vô hiệu hoá đúng hai thứ
+    # AC 3 và AC 4 tồn tại để cưỡng chế.
+    #
+    # Đường ra khỏi `reviewing` do VERDICT điều khiển, không do người gõ `transition`:
+    # `record-review` tự đặt state (`approve`→accepted, `changes_requested`→running,
+    # `blocked`→blocked) SAU khi đã đếm finding và kiểm trần. Đây là lần thứ BA cùng
+    # một bài học trong tệp này — `accepted`, rồi `leased`, giờ tới `reviewing`:
+    # canh từng cửa là thua, chỉ để lại MỘT cửa mới thắng.
+    "reviewing": (),
     "accepted": (),
     "blocked": (),
 }
 
 # Các state chỉ được ghi bởi luồng review, không bao giờ bởi `transition`.
+# `reviewing` không nằm đây vì nó VÀO được bằng `transition` (từ `running`); thứ bị
+# cấm là đường RA. Bảng `CHUYEN_HOP_LE` ở trên đã cưỡng chế điều đó.
 STATE_CHI_DO_REVIEW_GHI = ("accepted",)
 
 # --- (a) same-failure theo ID ỔN ĐỊNH ----------------------------------------
@@ -197,7 +215,7 @@ FORBIDDEN_DOCTRINE_PHRASES = {
 #
 # Đây là KẾT QUẢ của việc áp tiêu chí, không phải bỏ riêng cụm đang làm gate đỏ.
 # Mục hạng này KHÔNG bị gỡ khỏi danh sách cấm — nó chỉ đòi thêm NGỮ CẢNH TÁI TẠO
-# DOCTRINE (xem `_co_ngu_canh_doctrine`). Ca thật buộc phải có hạng này:
+# NGẮT DÒNG (xem `_duoc_tha_vi_ngat_dong`). Ca thật buộc phải có hạng này:
 # `CLAUDE.md` của master ngắt dòng giữa `người có` / `thẩm quyền` trong một câu
 # KỂ LẠI kết quả đo, và bản trước tính đó là chép doctrine (`rc=6`) — bắt oan.
 # Chuẩn hoá mạnh hơn mà bắt oan văn bản bình thường là KHÔNG ĐẠT, y như để lọt.
@@ -271,9 +289,27 @@ _RE_COMMENT_HTML = re.compile(r"<!--.*?-->", re.DOTALL)
 # Tag HTML: `mer<b>ged</b>` render ra `merged`. ĐÒI tên tag NGAY SAU `<` (không
 # cho khoảng trắng chen vào), nên `a < b > c` trong một mẫu shell KHÔNG bị coi là
 # tag — đó là ràng buộc bắt-oan O8 của lớp này.
-_RE_TAG_HTML = re.compile(r"</?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>]*)?/?>")
-# Link/ảnh Markdown: `[merged](#a)` render ra `merged`.
-_RE_LINK_MD = re.compile(r"!?\[([^\]\n]*)\]\([^()\n]*\)")
+#
+# Finding `doctrine-html-quoted-angle-bypass` (cross-review lượt 6, codex): bản
+# trước dùng `[^<>]*` cho phần thuộc tính, tức CẤM ký tự `>` theo VỊ TRÍ. Nhưng
+# `>` nằm hợp lệ trong một giá trị thuộc tính có nháy, nên
+# `mer<span title=">">ged:</span>` không khớp regex ⇒ tag không bị gỡ ⇒ `rc=0`,
+# trong khi trình duyệt render ra đúng cụm cấm. Đã ĐO trên `e6e4b73`: rc=0, còn
+# tag thường và ASCII trần đều rc=6.
+#
+# Chữa đúng tầng: phân tích phần thuộc tính theo CẤU TRÚC — chuỗi trong nháy kép,
+# chuỗi trong nháy đơn, hoặc ký tự thường — thay vì cấm một ký tự. Cùng cách này
+# xử lý luôn `<` trong thuộc tính (lớp I3), thứ bản trước cũng để lọt.
+_RE_TAG_HTML = re.compile(
+    r"""</?[A-Za-z][A-Za-z0-9-]*"""      # `<tag` hoặc `</tag`
+    r"""(?:\s+(?:"[^"]*"|'[^']*'|[^>"'])*)?"""  # thuộc tính: nháy kép | nháy đơn | ký tự thường
+    r"""\s*/?>""",                        # `>` hoặc `/>`
+    re.VERBOSE,
+)
+# Link/ảnh Markdown: `[merged](#a)` render ra `merged`. Phần đích cho phép MỘT cấp
+# ngoặc lồng — `[merged](#a(b))` là link hợp lệ trong Markdown, và bản trước dùng
+# `[^()\n]*` nên không khớp, tag không bị rút, cụm cấm lọt (lớp I6, đã ĐO rc=0).
+_RE_LINK_MD = re.compile(r"!?\[([^\]\n]*)\]\((?:[^()\n]|\([^()\n]*\))*\)")
 _RE_LINK_REF = re.compile(r"!?\[([^\]\n]*)\]\[[^\]\n]*\]")
 # Backslash escape: `merged\:` render ra `merged:`.
 _RE_ESCAPE = re.compile(r"\\([!-/:-@\[-`{-~])")
@@ -307,8 +343,10 @@ def _chuan_hoa(text: str) -> str:
     dấu hai chấm — thành dấu hai chấm thật và sinh DƯƠNG TÍNH GIẢ trên cụm
     `merged: ...`. Đã ĐO: `html.unescape("&amp;#58;")` → `"&#58;"`.
     """
-    text = _RE_COMMENT_HTML.sub("", text)
-    text = _RE_TAG_HTML.sub("", text)
+    # KHÔNG gỡ comment/tag HTML ở đây: việc đó làm TRỌN ở `_dong_sau_khi_go`, tầng
+    # duy nhất thấy được cấu trúc trải nhiều dòng. Để hai nơi cùng gỡ thì một đột
+    # biến gỡ chốt ở nơi này vẫn xanh nhờ nơi kia — bộ test mất độ phân giải, đúng
+    # bệnh `ac18-mutation-not-per-class` mà cross-review lượt 6 vừa bắt.
     text = _RE_LINK_MD.sub(r"\1", text)
     text = _RE_LINK_REF.sub(r"\1", text)
     text = _RE_ESCAPE.sub(r"\1", text)
@@ -318,6 +356,57 @@ def _chuan_hoa(text: str) -> str:
     text = text.casefold().translate(_DONG_TU).translate(_MUI_TEN)
     text = text.translate(_BO_HAN).translate(_PHAN_CACH)
     return " ".join(text.split())
+
+
+def _dong_sau_khi_go(raw: str):
+    """Gỡ comment/tag HTML — KỂ CẢ loại trải nhiều dòng — trả `[(số dòng, text)]`.
+
+    Vì sao phải làm ở tầng này chứ không trong `_chuan_hoa`: `_chuan_hoa` chạy theo
+    TỪNG DÒNG, nên một tag mở ở dòng này đóng ở dòng sau không nằm gọn trong dòng
+    nào cả và KHÔNG BAO GIỜ khớp regex. Đã ĐO trên `e6e4b73`, cả hai lọt `rc=0`:
+
+        mer<span                          |  mer<!--
+          class="x">ged: PR đã vào…       |    ghi chú
+                                          |  -->ged: PR đã vào…
+
+    VÀ PHẢI NUỐT LUÔN XUỐNG DÒNG. Bản vá đầu của lượt này thay vùng bị gỡ bằng đúng
+    số `\\n` nó chứa, định giữ số dòng cho thông điệp lỗi. Đo lại thì vẫn lọt: chỗ
+    nối hai mảnh thành `mer ged`, trong khi trình duyệt render `merged` LIỀN — xuống
+    dòng nằm bên trong một tag không phải chỗ ngắt từ. Giữ số dòng bằng cách ấy là
+    đổi một lỗ lấy một lỗ.
+    Nên: nuốt cả xuống dòng, và mang số dòng theo bằng bản đồ — dòng ra mang số của
+    dòng nó BẮT ĐẦU. Thông điệp `tệp:dòng` vẫn chỉ đúng chỗ.
+    """
+    vung = []
+    for rx in (_RE_COMMENT_HTML, _RE_TAG_HTML):
+        vung.extend(m.span() for m in rx.finditer(raw))
+    vung.sort()
+    gop: list[list[int]] = []
+    for s, e in vung:
+        if gop and s <= gop[-1][1]:
+            gop[-1][1] = max(gop[-1][1], e)
+        else:
+            gop.append([s, e])
+
+    ket, cur, cur_dong, so_dong, gi = [], [], None, 1, 0
+    for i, ch in enumerate(raw):
+        while gi < len(gop) and gop[gi][1] <= i:
+            gi += 1
+        trong_vung = gi < len(gop) and gop[gi][0] <= i < gop[gi][1]
+        if ch == "\n":
+            if not trong_vung:                    # xuống dòng THẬT: chốt dòng lại
+                ket.append((cur_dong or so_dong, "".join(cur)))
+                cur, cur_dong = [], None
+            so_dong += 1                          # nằm trong vùng gỡ ⇒ nối tiếp
+            continue
+        if trong_vung:
+            continue
+        if cur_dong is None:
+            cur_dong = so_dong
+        cur.append(ch)
+    if cur:
+        ket.append((cur_dong or so_dong, "".join(cur)))
+    return ket
 
 
 def _phang_ca_tep(raw: str):
@@ -333,8 +422,10 @@ def _phang_ca_tep(raw: str):
     nháy ngược). Nên lần này chữa tận gốc: so trên VĂN BẢN LOGIC, không phải trên
     cách nó được bẻ dòng.
     """
+    # Gỡ cấu trúc TRẢI NHIỀU DÒNG trước: vòng lặp dưới chuẩn hoá theo từng dòng nên
+    # không thấy được thứ bắc cầu qua hai dòng (lớp I4/I5).
     phan, ban_do, vi_tri = [], [], 0
-    for so_dong, dong in enumerate(raw.splitlines(), 1):
+    for so_dong, dong in _dong_sau_khi_go(raw):
         n = _chuan_hoa(dong)
         if not n:
             continue
@@ -347,51 +438,42 @@ def _phang_ca_tep(raw: str):
     return "".join(phan), ban_do
 
 
-def _don_vi_van_ban(raw: str):
-    """Cắt tệp thành ĐƠN VỊ để xét ngữ cảnh: từng dòng thô, và từng ĐOẠN.
 
-    Đoạn = các dòng liền nhau không trống. Một ô bảng vai trò nằm gọn trong một
-    dòng; một dòng bảng bị bẻ thì vẫn nằm gọn trong một đoạn. Văn xuôi kể lại kết
-    quả đo cũng là một đoạn — nhưng nó không có `|` và không chứa mục nào khác
-    cùng nhóm, nên nó KHÔNG đạt ngữ cảnh.
+def _duoc_tha_vi_ngat_dong(raw: str, kim: str) -> bool:
+    """Cụm hạng NGÔN NGỮ THƯỜNG có được tha không? CHỈ khi nó bị NGẮT QUA DÒNG.
+
+    ĐÂY LÀ CHỖ GENERATION 4 LÀM HỎNG, ghi lại để không ai lặp lại. Bản gen-4 hỏi
+    ngược: "có ngữ cảnh tái tạo doctrine không?" và THA mọi thứ không có `|` cũng
+    không kèm mục cùng nhóm. Hậu quả đo được trên `e6e4b73` — fail-open:
+
+        ## Người có thẩm quyền        (heading trần)      -> rc=0  LỌT
+        Người có thẩm quyền           (dòng trần)         -> rc=0  LỌT
+        - Người có thẩm quyền         (gạch đầu dòng)     -> rc=0  LỌT
+        | Người có thẩm quyền | x |   (ô bảng)            -> rc=6  bắt
+
+    Sai vì AC 2 nói thẳng: bơm **một cụm trong danh sách** vào adapter là phải ĐỎ.
+    Còn AC 19 chỉ đòi tha ĐÚNG MỘT thứ — *"một cụm doctrine bị **ngắt qua xuống
+    dòng** trong văn xuôi kể lại kết quả đo"*. Gen-4 nới miễn trừ rộng hơn hẳn
+    điều được yêu cầu, và biến chiều bắt-oan thành cửa lọt.
+
+    Nên câu hỏi đảo lại, và miễn trừ thu về đúng bề rộng của AC 19:
+
+      cụm chỉ được tha khi nó KHÔNG xuất hiện trọn vẹn trong bất kỳ DÒNG VẬT LÝ
+      nào — tức phép khớp CHỈ tồn tại nhờ bước nối dòng của `_phang_ca_tep` —
+      và không dòng nào liên quan là ô bảng (`|`).
+
+    Ca thật đạt điều kiện: `CLAUDE.md` master dòng 82 kết thúc bằng `người có`,
+    dòng 83 mở đầu bằng `thẩm quyền`. Không dòng nào chứa trọn cụm ⇒ THA.
+    Mọi hình dạng đứng-một-mình ở trên đều nằm gọn trong MỘT dòng ⇒ KHÔNG tha.
     """
-    dong = raw.splitlines()
-    for d in dong:
-        yield d
-    doan, dem = [], []
-    for d in dong:
-        if d.strip():
-            dem.append(d)
-        elif dem:
-            doan.append("\n".join(dem))
-            dem = []
-    if dem:
-        doan.append("\n".join(dem))
-    for d in doan:
-        yield d
-
-
-def _co_ngu_canh_doctrine(raw: str, kim: str, kim_khac_cung_nhom) -> bool:
-    """Một mục hạng NGÔN NGỮ THƯỜNG có đang TÁI TẠO doctrine không?
-
-    Định nghĩa CƠ HỌC, không cảm tính — đúng một trong hai là đủ:
-      1. cụm nằm trong một ĐƠN VỊ mà bản thô có `|`, tức một ô bảng: chép cả DÒNG
-         bảng vai trò mới là chép doctrine;
-      2. đơn vị ấy còn chứa một mục KHÁC cùng nhóm — tức bảng/mục đang được dựng
-         lại chứ không phải một cụm từ được dùng trong câu.
-
-    Dùng cụm trong văn xuôi, kể cả khi nó bị ngắt qua xuống dòng, KHÔNG đạt cả
-    hai điều kiện ⇒ THA. Đó là ca `CLAUDE.md` master dòng 82–83.
-    """
-    for dv in _don_vi_van_ban(raw):
-        n = _chuan_hoa(dv)
-        if kim not in n:
-            continue
-        if "|" in dv:
-            return True
-        if any(k and k in n for k in kim_khac_cung_nhom):
-            return True
-    return False
+    # Dùng CHÍNH bản đã gỡ tag: nếu không, `Người có <b>thẩm quyền</b>` nằm gọn một
+    # dòng nhưng bị tag cắt vụn sẽ được tha oan.
+    for _so_dong, dong in _dong_sau_khi_go(raw):
+        if kim in _chuan_hoa(dong):
+            return False          # nằm gọn trong một dòng ⇒ chép doctrine, không tha
+        if "|" in dong and kim in _chuan_hoa(dong.replace("|", " ")):
+            return False          # ô bảng bị `|` cắt vụn vẫn là chép bảng
+    return True
 
 
 def _dong_tai(ban_do, offset: int) -> int:
@@ -749,6 +831,23 @@ def cmd_void_attempt(a, state_dir: Path) -> int:
     # packet: trần đã trả về nhưng `attempt_open` còn bật nên không mở lại được
     # lượt nào — biến một lỗi hạ tầng tạm thời thành ngõ cụt vĩnh viễn.
     st["attempt_open"] = False
+    # …và phải RỜI `reviewing`, không chỉ đóng cờ.
+    #
+    # Finding `void-reviewing-accepts-attempt-zero` (cross-review lượt 6, codex):
+    # bản trước giảm `attempts_used` và tắt `attempt_open` nhưng để state nguyên ở
+    # `reviewing`. Hậu quả đo được trên `e6e4b73`: `void-attempt` rc=0 đưa
+    # `attempts_used` về 0 mà vẫn `state=reviewing`; `begin-attempt` rc=8 (không mở
+    # được lượt từ `reviewing`) nên packet KẸT CỨNG; rồi `record-review --verdict
+    # approve` rc=0 đưa thẳng sang `accepted` với `reviews[0].attempt=0` — một bản
+    # duyệt của LƯỢT KHÔNG TỒN TẠI.
+    #
+    # AC 8 đòi trả quota mà không tiêu attempt. Nó KHÔNG cho phép packet vừa kẹt
+    # vừa được accepted bằng review của attempt 0. Trả về `running` là trạng thái
+    # chạy được: `begin-attempt` mở lại lượt bình thường.
+    if st["state"] == "reviewing":
+        st["state"] = "running"
+        # Head cũ hết hiệu lực: lượt đã bị hoàn thì bản duyệt neo vào nó cũng vậy.
+        st["reviewing_head_sha"] = None
     st["history"].append({"event": "void_attempt", "reason": a.reason})
     _save(state_dir, st)
     print(f"đã hoàn một lượt vì {a.reason} — còn dùng {st['attempts_used']}/{st['attempts_limit']}")
@@ -764,6 +863,23 @@ def cmd_record_review(a, state_dir: Path) -> int:
             RC_PROVIDER,
             f"reviewer {a.provider!r} sai nền — packet này đòi {st['reviewer']!r}",
         )
+
+    # LỚP THỨ HAI của `void-reviewing-accepts-attempt-zero`, độc lập với chốt trong
+    # `cmd_void_attempt`. Một bản duyệt phải nói về một LƯỢT CÓ THẬT: có lượt đang
+    # mở, và số lượt lớn hơn 0. Bản trước không đòi gì trong hai điều đó, nên một
+    # state đã hoàn hết lượt vẫn `approve` được và ghi `reviews[0].attempt = 0`.
+    #
+    # Hai lớp, hai ca, không phủ nhau: gỡ chốt ở `cmd_void_attempt` thì state kẹt
+    # lại `reviewing` và CHỐT NÀY chặn; gỡ chốt này thì `void` đã đưa về `running`
+    # nên chốt state ở trên chặn. Muốn lọt phải gỡ CẢ HAI — đó là ý đồ.
+    if not st["attempt_open"]:
+        _die(RC_STATE,
+             "không có lượt nào đang mở — bản duyệt phải nói về một lượt CÓ THẬT. "
+             "Lượt đã bị hoàn (`void-attempt`) hoặc đã được review rồi.")
+    if st["attempts_used"] <= 0:
+        _die(RC_STATE,
+             f"attempts_used = {st['attempts_used']} — không ghi được review cho "
+             f"lượt số 0. Mở lượt bằng `begin-attempt` trước.")
 
     # Bản duyệt phải neo ĐÚNG head đã đưa ra review. Không có chốt này thì
     # `approve` đưa packet sang 'accepted' mà chẳng nói về commit nào — và một
@@ -956,10 +1072,8 @@ def cmd_doctrine_scan(a, state_dir: Path) -> int:
                 # Hạng NGÔN NGỮ THƯỜNG: chỉ tính khi có NGỮ CẢNH TÁI TẠO doctrine.
                 # Không có bước này thì một câu văn xuôi kể lại kết quả đo bị tính
                 # là chép doctrine — chiều BẮT OAN, AC 19.
-                if cum in CUM_NGON_NGU_THUONG:
-                    khac = [_chuan_hoa(c) for c in cum_list if c != cum]
-                    if not _co_ngu_canh_doctrine(raw, kim, khac):
-                        continue
+                if cum in CUM_NGON_NGU_THUONG and _duoc_tha_vi_ngat_dong(raw, kim):
+                    continue
                 tu = phang.find(kim)
                 while tu != -1:
                     dinh.append((str(f), nhom, cum, _dong_tai(ban_do, tu)))

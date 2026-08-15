@@ -449,27 +449,30 @@ def case_comment_id_chua_dang_ky_bi_tu_choi(c: Ctx):
 
 
 def case_comment_id_dung_lai_bi_tu_choi(c: Ctx):
-    """Cùng một ID dùng cho transition THỨ HAI phải bị từ chối."""
+    """Cùng một ID dùng cho transition THỨ HAI phải bị từ chối.
+
+    Dựng lại sau finding `review-transition-bypasses-record-review`: bản trước quay
+    về `running` bằng `transition`, cửa đó nay ĐÃ ĐÓNG. Đường hợp lệ duy nhất ra
+    khỏi `reviewing` là một VERDICT — nên vòng hai đi qua `record-review
+    --verdict changes_requested`, rồi `begin-attempt` mở lượt mới. Ca vẫn đo đúng
+    thứ nó khai: một `comment-id` đã tiêu thụ không dùng lại được.
+    """
     sd = c.sd()
     _doi(0, *c.init(sd)[0:1], b"", "init")
-    c.den_reviewing(sd, 55, 1)
-    cid_run = "7770000001"
+    cid_rev1 = c.den_reviewing(sd, 55, 1)
+    # Ra khỏi `reviewing` bằng VERDICT, không bằng `transition`.
+    rc, _, e = c.review(sd, 55, ["mot-loi"], luot=1)
+    _doi(0, rc, e, "record-review changes_requested đưa về running")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "begin-attempt lượt 2")
+    # Vào `reviewing` vòng 2 bằng ĐÚNG id đã tiêu thụ ở vòng 1. State lúc này là
+    # `running` nên BẢNG CHUYỂN cho phép — thứ phải chặn là SỔ COMMENT. Đo như vậy
+    # mới cô lập được chốt "mỗi ID dùng đúng MỘT lần". Nếu dùng một id mới rồi mới
+    # thử lại id cũ thì lệnh chết vì `reviewing → reviewing` không hợp lệ, và ca hoá
+    # ra đang đo bảng chuyển chứ không đo sổ comment.
     rc, _, e = run(c.script,
-                   ["record-post", "--packet", 55, "--for", "running", "--comment-id", cid_run], sd)
-    _doi(0, rc, e, "record-post running")
-    rc, _, e = run(c.script,
-                   ["transition", "--packet", 55, "--to", "running", "--comment-id", cid_run], sd)
-    _doi(0, rc, e, "transition running lần 1")
-    # vòng hai: quay lại reviewing (không cần lượt mới) rồi thử tiêu thụ LẠI ID cũ
-    rc, _, e = run(c.script,
-                   ["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "7770000013"], sd)
-    _doi(0, rc, e, "record-post reviewing vòng 2")
-    rc, _, e = run(c.script,
-                   ["transition", "--packet", 55, "--to", "reviewing",
-                    "--comment-id", "7770000013", "--head-sha", c.head(1)], sd)
-    _doi(0, rc, e, "transition reviewing vòng 2")
-    rc, _, e = run(c.script,
-                   ["transition", "--packet", 55, "--to", "running", "--comment-id", cid_run], sd)
+                   ["transition", "--packet", 55, "--to", "reviewing", "--comment-id", cid_rev1,
+                    "--head-sha", c.head(2)], sd)
     _doi(5, rc, e, "ID đã tiêu thụ không được dùng lại")
 
 
@@ -788,6 +791,32 @@ def _han_tuong_lai(gio: int = 4) -> str:
     return (datetime.now(timezone.utc) + timedelta(hours=gio)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+# Lệnh con KHÔNG có đường thành công in stdout — khai TƯỜNG MINH kèm lý do.
+LENH_KHONG_CO_STDOUT = {
+    "guard": "luôn thoát 7 và chỉ in stderr — không có đường thành công để đo",
+}
+
+
+def _lenh_con_tu_parser(script: Path) -> list:
+    """Danh sách lệnh con lấy từ CHÍNH `build_parser()`, không liệt kê tay.
+
+    Finding `ac14-codepage-void-attempt-uncovered` (cross-review lượt 6): ma trận
+    codepage của generation 4 liệt kê tay và bỏ sót `void-attempt`, dù lệnh đó in
+    stdout tiếng Việt lúc thành công. Liệt kê tay thì thêm một lệnh con mới là mất
+    phủ mà KHÔNG AI BIẾT — bộ test im lặng đúng chỗ đáng ra nó phải kêu.
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("pl_parser", script)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    p = m.build_parser()
+    for a in p._actions:
+        ch = getattr(a, "choices", None)
+        if ch and hasattr(next(iter(ch.values())), "parse_args"):
+            return sorted(ch)
+    raise AssertionError("không tìm được subparser trong build_parser()")
+
+
 def _kich_ban_in(c: Ctx, codepage: str):
     """Chạy MỌI lệnh in tiếng Việt với stdout BỊ CAPTURE và encoding ép về codepage."""
     env = {"PYTHONIOENCODING": codepage}
@@ -809,15 +838,27 @@ def _kich_ban_in(c: Ctx, codepage: str):
         (["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "7770000009"], sd),
         (["transition", "--packet", 55, "--to", "reviewing", "--comment-id", "7770000009",
           "--head-sha", "%040x" % 1], sd),
+        # `void-attempt` in tiếng Việt lúc THÀNH CÔNG — lệnh generation 4 bỏ sót.
+        # Đặt TRƯỚC `record-review`: một lượt đã có review thì không hoàn được nữa
+        # (chốt `void_sau_review_bi_chan`), nên đặt sau sẽ đo nhầm đường thất bại.
+        (["void-attempt", "--packet", 55, "--reason", "quota"], sd),
+        # Mở lại lượt: đồng thời là phép đo chiều bắt-oan của
+        # `void-reviewing-accepts-attempt-zero` — void xong phải chạy tiếp được.
+        (["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd),
+        (["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "7770000019"], sd),
+        (["transition", "--packet", 55, "--to", "reviewing", "--comment-id", "7770000019",
+          "--head-sha", "%040x" % 2], sd),
         (["record-review", "--packet", 55, "--provider", REVIEWER, "--verdict", "changes_requested",
-          "--reviewed-sha", "%040x" % 1,
+          "--reviewed-sha", "%040x" % 2,
           "--finding-id", "loi-co-dau-tieng-viet", "--finding-desc", "mô tả có dấu tiếng Việt"], sd),
         (["status", "--packet", 55], sd),
         (["doctrine-scan", "--root", r], None),
     ]
+    da_phu = set()
     for args, state_dir in buoc:
         rc, o, e = run(c.script, args, state_dir, env_extra=env)
         ten = args[0]
+        da_phu.add(ten)
         if rc != 0:
             raise AssertionError(
                 f"[{codepage}] lệnh {ten!r} phải rc=0 khi stdout bị capture, được rc={rc}; "
@@ -825,6 +866,21 @@ def _kich_ban_in(c: Ctx, codepage: str):
             )
         if not o.strip():
             raise AssertionError(f"[{codepage}] lệnh {ten!r} rc=0 nhưng stdout RỖNG")
+
+    # CHỐT PHỦ: mọi lệnh con của parser phải nằm trong kịch bản, hoặc được khai
+    # tường minh là không có stdout. Không có chốt này thì thêm lệnh con mới là mất
+    # phủ trong im lặng — đúng cách `void-attempt` lọt qua generation 4.
+    tat_ca = _lenh_con_tu_parser(c.script)
+    thieu = [x for x in tat_ca if x not in da_phu and x not in LENH_KHONG_CO_STDOUT]
+    if thieu:
+        raise AssertionError(
+            f"[{codepage}] ma trận codepage THIẾU PHỦ lệnh con {thieu} — thêm vào kịch "
+            f"bản, hoặc khai trong LENH_KHONG_CO_STDOUT kèm lý do")
+    thua = [x for x in LENH_KHONG_CO_STDOUT if x not in tat_ca]
+    if thua:
+        raise AssertionError(
+            f"LENH_KHONG_CO_STDOUT khai {thua} nhưng parser không có lệnh ấy — "
+            f"danh sách miễn trừ đã trôi khỏi thực tế")
 
 
 def case_stdout_cp1252(c: Ctx):
@@ -1119,6 +1175,29 @@ LOP_LACH = [
     ("comment_html_xen_giua", "Ghi chú: mer<!-- x -->ged: PR đã vào nhánh đích"),
     ("link_markdown", "Ghi chú: [merged](#a): PR đã vào nhánh đích"),
     ("backslash_escape", "Ghi chú: merged\\: PR đã vào nhánh đích"),
+    # --- I · tag/link mà regex của generation 4 xử lý SAI (cross-review lượt 6) ---
+    # Bản trước cấm ký tự `>` theo VỊ TRÍ (`[^<>]*`), nên một `>` nằm hợp lệ trong
+    # giá trị thuộc tính làm regex không khớp và tag không bị gỡ.
+    ("tag_thuoc_tinh_nhay_kep", 'Ghi chú: mer<span title=">">ged:</span> PR đã vào nhánh đích'),
+    ("tag_thuoc_tinh_nhay_don", "Ghi chú: mer<span title='>'>ged:</span> PR đã vào nhánh đích"),
+    ("tag_thuoc_tinh_dau_nho_hon", 'Ghi chú: mer<span title="<">ged:</span> PR đã vào nhánh đích'),
+    # Tag/comment TRẢI NHIỀU DÒNG: `_chuan_hoa` chạy theo từng dòng nên không thấy.
+    ("tag_ngat_qua_dong", 'Ghi chú: mer<span\n  class="x">ged: PR đã vào nhánh đích'),
+    ("comment_html_ngat_qua_dong", 'Ghi chú: mer<!--\n  ghi chú\n-->ged: PR đã vào nhánh đích'),
+    ("link_ngoac_long", "Ghi chú: [merged](#a(b)): PR đã vào nhánh đích"),
+    # --- J · cụm ĐỨNG MỘT MÌNH — AC 2 đòi bơm MỘT cụm là phải ĐỎ ------------------
+    # Đây là chiều FAIL-OPEN mà bản vá bắt-oan của generation 4 tự mở ra.
+    ("cum_don_heading", "## Người có thẩm quyền"),
+    ("cum_don_dong_tran", "Người có thẩm quyền"),
+    ("cum_don_gach_dau_dong", "- Người có thẩm quyền"),
+    ("cum_don_in_dam", "**Người có thẩm quyền**"),
+    ("cum_don_dinh_nghia", "Người có thẩm quyền: người cấp lease"),
+    # Trước là ca bắt-oan `oan_term_giua_cau` của generation 4. Chuyển sang đây:
+    # AC 2 đòi bơm một cụm trong danh sách là phải ĐỎ, và một adapter viết câu này
+    # đang CHÉP nội dung bảng vai trò §2 chứ không TRỎ về protocol. AC 19 chỉ đòi
+    # tha câu văn xuôi KỂ LẠI KẾT QUẢ ĐO bị ngắt dòng, không tha mọi câu văn xuôi.
+    ("cum_don_cau_van_xuoi_mot_dong",
+     "Chỉ người có thẩm quyền mới cấp được lease; phiên worker thì không."),
 ]
 
 # Chiều BẮT OAN — AC 19. Mỗi lớp chuẩn hoá thêm ở trên có ít nhất một ca ở đây.
@@ -1133,8 +1212,8 @@ LOP_BAT_OAN = [
      "  (dấu nối, tiền tố, hậu tố, đồng tự Unicode, tổ hợp dấu) nên thua từ trong\n"
      "  thiết kế. Đo ở `v1.36.68` (PR #104): ba tên tấn công `rc=0` → `rc=4`, người có\n"
      "  thẩm quyền vẫn `rc=0`. Kèm chốt: đột biến nới danh sách phải làm ca đích ĐỎ."),
-    ("oan_term_giua_cau",
-     "Chỉ người có thẩm quyền mới cấp được lease; phiên worker thì không."),
+    # `oan_term_giua_cau` ĐÃ CHUYỂN sang LOP_LACH (`cum_don_cau_van_xuoi_mot_dong`)
+    # — xem lý do ở đó. Giữ lại một ca cùng chỗ nhưng ĐÚNG bề rộng của AC 19:
     ("oan_term_ngat_dong",
      "Quyết định này thuộc về người có\nthẩm quyền, không thuộc phiên này."),
     ("oan_entity_long", "Ghi chú: merged&amp;#58; PR đã vào nhánh đích"),
@@ -1146,11 +1225,191 @@ LOP_BAT_OAN = [
     ("oan_link_binh_thuong",
      "Đọc [protocol](docs/PROTOCOL_DA_PHIEN.md) và [changelog](CHANGELOG.md)."),
     ("oan_escape_markdown", "Ký tự \\* và \\_ phải escape khi viết Markdown."),
+    # Ca này TRƯỚC khai là lớp `Cf` nhưng KHÔNG chứa ký tự Cf nào — nó không đo lớp
+    # nó khai (cross-review lượt 6). Nay có ZWSP thật giữa câu tiếng Việt vô hại.
     ("oan_tieng_viet_du_dau",
-     "Điều 5 quy định: người sử dụng lao động phải trả lương đúng hạn."),
+     "Điều 5 quy định: người sử dụng​ lao động phải trả lương đúng hạn."),
     ("oan_dau_cau_toan_rong", "Trích nguồn CJK：文書の内容はここにあります。"),
     ("oan_bang_khac", "| cột | giá trị |\n|---|---|\n| thời gian | 5 phút |"),
+    # --- ca bắt-oan cho các chốt generation 4 thêm mà chưa có ca (AC 19) ---------
+    ("oan_nhay_cong_van_xuoi",
+     "Tác giả viết “đúng” và ‘chưa đúng’ để phân biệt hai mức."),
+    ("oan_mui_ten_van_xuoi",
+     "Luồng xử lý: đọc ⟶ kiểm ⟶ ghi, không liên quan state machine."),
+    ("oan_comment_html_vo_hai",
+     "Đoạn này <!-- ghi chú của người soạn --> vẫn là văn bản bình thường."),
+    ("oan_to_hop_dau_tieng_viet",
+     "Chuỗi tổ hợp: cà phê, tiếng Việt, nhân viên — không có cụm cấm nào."),
+    # --- ca bắt-oan cho các chốt MỚI của generation 5 ----------------------------
+    ("oan_tag_thuoc_tinh_vo_hai",
+     'Xem <a href="https://x/y?a=1&b=2" title="Ghi chú">tài liệu</a> ở docs/.'),
+    ("oan_tag_ngat_dong_vo_hai",
+     'Thẻ nhiều dòng vô hại: <a\n  href="/x">tài liệu</a> — không có cụm cấm.'),
+    ("oan_link_ngoac_long_vo_hai",
+     "Đọc [ghi chú](docs/a(b).md) và [khác](docs/c.md) — đều vô hại."),
+    ("oan_shell_chuyen_huong",
+     "Chạy `a < b.txt > c.txt` rồi so `x <= y` — không phải tag HTML."),
 ]
+
+# --- ÁNH XẠ LỚP → CA BẮT-OAN — AC 19 đòi "ít nhất một ca bắt-oan cho MỖI lớp" ----
+#
+# Finding `ac19-false-positive-matrix-incomplete` (cross-review lượt 6): generation 4
+# khai 40 lớp lách nhưng chỉ có 14 ca bắt-oan, và KHÔNG có bảng nào nối hai bên. Không
+# có ánh xạ thì "mỗi lớp một ca" là lời hứa, không phải điều kiểm được — thêm một lớp
+# mà quên ca bắt-oan sẽ đi lọt trong im lặng.
+#
+# Bảng này biến lời hứa thành CHỐT: `main()` đối chiếu mọi lớp trong `LOP_LACH` với
+# bảng, và suite ĐỎ nếu có lớp không được ánh xạ. Một lớp có thể dùng chung ca với lớp
+# cùng họ — nói rõ như vậy còn hơn nhân bản ca cho đủ số.
+ANH_XA_LOP_BAT_OAN = {
+    "nfkc_hai_cham_toan_rong": "oan_dau_cau_toan_rong",
+    "nfkc_chu_toan_rong": "oan_dau_cau_toan_rong",
+    "nfkc_chu_so_tron": "oan_dau_cau_toan_rong",
+    "nfkc_chu_so_mu": "oan_dau_cau_toan_rong",
+    "nfkc_ligature_ff": "oan_tieng_viet_du_dau",
+    "nfkc_solidus_toan_rong": "oan_dau_cau_toan_rong",
+    "nfkc_gach_duoi_toan_rong": "oan_tu_gach_noi",
+    "nfkc_vach_dung_toan_rong": "oan_bang_khac",
+    "nbsp_phu_hai_lop": "oan_tieng_viet_du_dau",
+    "phan_cach_en_dash": "oan_tu_gach_noi",
+    "phan_cach_hyphen": "oan_tu_gach_noi",
+    "cf_zwnj": "oan_tieng_viet_du_dau",
+    "cf_zwj": "oan_tieng_viet_du_dau",
+    "cf_word_joiner": "oan_tieng_viet_du_dau",
+    "cf_soft_hyphen": "oan_tieng_viet_du_dau",
+    "cf_bom": "oan_tieng_viet_du_dau",
+    "entity_thap_luc": "oan_entity_long",
+    "entity_co_ten": "oan_entity_long",
+    "entity_thieu_cham_phay": "oan_entity_long",
+    "dong_tu_cyrillic_e": "oan_van_ban_nga",
+    "dong_tu_cyrillic_o": "oan_van_ban_nga",
+    "dong_tu_hy_lap_o": "oan_van_ban_hy_lap",
+    "dong_tu_cyrillic_a": "oan_van_ban_nga",
+    "nhay_cong_xen_giua": "oan_nhay_cong_van_xuoi",
+    "mui_ten_dai": "oan_mui_ten_van_xuoi",
+    "tag_html_xen_giua": "oan_tag_html_vo_hai",
+    "comment_html_xen_giua": "oan_comment_html_vo_hai",
+    "link_markdown": "oan_link_binh_thuong",
+    "backslash_escape": "oan_escape_markdown",
+    "tag_thuoc_tinh_nhay_kep": "oan_tag_thuoc_tinh_vo_hai",
+    "tag_thuoc_tinh_nhay_don": "oan_tag_thuoc_tinh_vo_hai",
+    "tag_thuoc_tinh_dau_nho_hon": "oan_shell_chuyen_huong",
+    "tag_ngat_qua_dong": "oan_tag_ngat_dong_vo_hai",
+    "comment_html_ngat_qua_dong": "oan_comment_html_vo_hai",
+    "link_ngoac_long": "oan_link_ngoac_long_vo_hai",
+    "cum_don_heading": "oan_term_ngat_dong",
+    "cum_don_dong_tran": "oan_term_ngat_dong",
+    "cum_don_gach_dau_dong": "oan_term_ngat_dong",
+    "cum_don_in_dam": "oan_term_ngat_dong",
+    "cum_don_dinh_nghia": "oan_term_ngat_dong",
+    "cum_don_cau_van_xuoi_mot_dong": "oan_claude_md_master",
+}
+
+
+def case_g5_reviewing_khong_ra_bang_transition(c: Ctx):
+    """`review-transition-bypasses-record-review` P1 — cross-review lượt 6.
+
+    Bản trước cho `reviewing → running` bằng `transition`, nên ba lệnh transition là
+    quay lại review mà KHÔNG gọi `record-review`: lặp review↔fix vô hạn trong cùng
+    một attempt, `reviews` rỗng, `finding_counts` rỗng, không chạm trần nào.
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    rc, _, e = run(c.script,
+                   ["record-post", "--packet", 55, "--for", "running", "--comment-id", "7788000001"], sd)
+    _doi(0, rc, e, "record-post running")
+    rc, _, e = run(c.script,
+                   ["transition", "--packet", 55, "--to", "running", "--comment-id", "7788000001"], sd)
+    _doi(8, rc, e, "ra khỏi 'reviewing' bằng transition — đường vòng qua record-review")
+    if c.state(sd, 55) != "reviewing":
+        raise AssertionError("transition bị chặn nhưng state vẫn đổi")
+
+
+def case_g5_verdict_van_dua_duoc_ve_running(c: Ctx):
+    """Chiều BẮT OAN của ca trên: đóng cửa `transition` KHÔNG được khoá cứng packet.
+
+    Đường hợp lệ ra khỏi `reviewing` là VERDICT. Thiếu ca này thì "siết cho chặt"
+    biến `reviewing` thành ngõ cụt và không ai phân biệt được chốt đúng với chốt hỏng.
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    rc, _, e = c.review(sd, 55, ["mot-loi"], luot=1)
+    _doi(0, rc, e, "changes_requested phải đưa về running")
+    if c.state(sd, 55) != "running":
+        raise AssertionError(f"sau changes_requested state phải là 'running', được {c.state(sd, 55)!r}")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "mở được lượt mới sau verdict")
+
+
+def case_g5_void_o_reviewing_khong_ket_thuc_bang_approve(c: Ctx):
+    """`void-reviewing-accepts-attempt-zero` P1 — cross-review lượt 6.
+
+    Chuỗi đo được trên `e6e4b73`: `void-attempt` rc=0 để lại `state=reviewing` với
+    `attempts_used=0`; `begin-attempt` rc=8 nên packet KẸT; rồi `record-review
+    --verdict approve` rc=0 đưa sang `accepted` với `reviews[0].attempt=0` — bản
+    duyệt của một lượt KHÔNG TỒN TẠI.
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota"], sd)
+    _doi(0, rc, e, "void-attempt vì quota")
+    tt = c.state(sd, 55)
+    if tt == "reviewing":
+        raise AssertionError("void để state KẸT ở 'reviewing' — begin-attempt sẽ rc=8")
+    rc, _, e = run(c.script,
+                   ["record-review", "--packet", 55, "--provider", REVIEWER,
+                    "--verdict", "approve", "--reviewed-sha", c.head(1)], sd)
+    if rc == 0:
+        raise AssertionError("approve được với attempts_used=0 — bản duyệt của lượt KHÔNG TỒN TẠI")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "sau void phải mở lại được lượt — không được kẹt cứng")
+
+
+def case_g5_record_review_doi_LUOT_DANG_MO(c: Ctx):
+    """Cô lập chốt LỚP HAI của `void-reviewing-accepts-attempt-zero`.
+
+    Sau khi `void-attempt` đã được sửa để rời `reviewing`, trạng thái
+    `state=reviewing` + `attempt_open=False` KHÔNG còn tới được qua public CLI —
+    nên ca đi qua CLI chỉ đo được chốt thứ nhất, và chốt thứ hai trông như thừa.
+    Nó không thừa: nó là hàng phòng thủ cho state CŨ hoặc BỊ SỬA TAY, đúng loại
+    state mà `legacy_state_khong_co_lease_bi_chan` đã phải chặn một lần rồi.
+
+    Nên ca này dựng thẳng state ấy — cùng cách `_state_voi_lease` đang làm — để mỗi
+    chốt có ca riêng và mỗi đột biến giết đúng ca của nó.
+    """
+    import json as _json
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    p = sd / "wp55.json"
+    st = _json.loads(p.read_text(encoding="utf-8"))
+    st["attempt_open"] = False          # lượt đã đóng nhưng state kẹt ở reviewing
+    p.write_text(_json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+                 encoding="utf-8")
+    rc, _, e = run(c.script,
+                   ["record-review", "--packet", 55, "--provider", REVIEWER,
+                    "--verdict", "approve", "--reviewed-sha", c.head(1)], sd)
+    _doi(8, rc, e, "ghi được review khi KHÔNG có lượt nào đang mở")
+
+
+def case_g5_record_review_doi_SO_LUOT_LON_HON_0(c: Ctx):
+    """Cô lập chốt `attempts_used > 0`, tách khỏi chốt `attempt_open`."""
+    import json as _json
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    p = sd / "wp55.json"
+    st = _json.loads(p.read_text(encoding="utf-8"))
+    st["attempts_used"] = 0             # lượt vẫn "mở" nhưng số lượt là 0
+    p.write_text(_json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+                 encoding="utf-8")
+    rc, _, e = run(c.script,
+                   ["record-review", "--packet", 55, "--provider", REVIEWER,
+                    "--verdict", "approve", "--reviewed-sha", c.head(1)], sd)
+    _doi(8, rc, e, "ghi được review cho lượt số 0")
 
 
 def case_ac19_bang_vai_tro_THAT_van_bi_bat(c: Ctx):
@@ -1376,6 +1635,11 @@ CASES = [
     ("doctrine_scan_bat_zero_width_bi_chan", case_doctrine_scan_bat_zero_width_bi_chan),
     ("doctrine_scan_bat_html_entity_bi_chan", case_doctrine_scan_bat_html_entity_bi_chan),
     ("doctrine_scan_khong_giai_entity_lap", case_doctrine_scan_khong_giai_entity_lap),
+    ("g5_reviewing_khong_ra_bang_transition", case_g5_reviewing_khong_ra_bang_transition),
+    ("g5_verdict_van_dua_duoc_ve_running", case_g5_verdict_van_dua_duoc_ve_running),
+    ("g5_void_o_reviewing_khong_ket_thuc_bang_approve", case_g5_void_o_reviewing_khong_ket_thuc_bang_approve),
+    ("g5_record_review_doi_LUOT_DANG_MO", case_g5_record_review_doi_LUOT_DANG_MO),
+    ("g5_record_review_doi_SO_LUOT_LON_HON_0", case_g5_record_review_doi_SO_LUOT_LON_HON_0),
     ("ac19_bang_vai_tro_THAT_van_bi_bat", case_ac19_bang_vai_tro_THAT_van_bi_bat),
     ("ac19_term_kem_muc_khac_cung_nhom_bi_bat", case_ac19_term_kem_muc_khac_cung_nhom_bi_bat),
     ("ac21_lease_chi_co_expires", case_ac21_lease_chi_co_expires),
@@ -1523,15 +1787,32 @@ MUTANTS = {
         "",
         ["ac18_phan_cach_en_dash", "ac18_phan_cach_hyphen"],
     ),
-    "bo_tag_html": (
-        '    text = _RE_TAG_HTML.sub("", text)\n',
-        "",
-        ["ac18_tag_html_xen_giua"],
+    # Gỡ tag/comment nay nằm TRỌN ở `_dong_sau_khi_go` — tầng duy nhất thấy được
+    # cấu trúc trải nhiều dòng. Đột biến vì thế bỏ từng regex khỏi vòng lặp ở đó.
+    "bo_go_tag_html": (
+        "    for rx in (_RE_COMMENT_HTML, _RE_TAG_HTML):",
+        "    for rx in (_RE_COMMENT_HTML,):",
+        ["ac18_tag_html_xen_giua", "ac18_tag_thuoc_tinh_nhay_kep",
+         "ac18_tag_thuoc_tinh_nhay_don", "ac18_tag_thuoc_tinh_dau_nho_hon",
+         "ac18_tag_ngat_qua_dong"],
     ),
-    "bo_comment_html": (
-        '    text = _RE_COMMENT_HTML.sub("", text)\n',
-        "",
-        ["ac18_comment_html_xen_giua"],
+    "bo_go_comment_html": (
+        "    for rx in (_RE_COMMENT_HTML, _RE_TAG_HTML):",
+        "    for rx in (_RE_TAG_HTML,):",
+        ["ac18_comment_html_xen_giua", "ac18_comment_html_ngat_qua_dong"],
+    ),
+    # Trả regex tag về dạng CẤM KÝ TỰ theo vị trí của generation 4 ⇒ mọi lớp
+    # thuộc-tính-có-nháy phải ĐỎ lại, còn tag thường vẫn xanh.
+    "tra_regex_tag_ve_cam_ky_tu": (
+        'r"""(?:\\s+(?:"[^"]*"|\'[^\']*\'|[^>"\'])*)?"""  # thuộc tính: nháy kép | nháy đơn | ký tự thường',
+        'r"""(?:\\s[^<>]*)?"""',
+        ["ac18_tag_thuoc_tinh_nhay_kep", "ac18_tag_thuoc_tinh_nhay_don",
+         "ac18_tag_thuoc_tinh_dau_nho_hon"],
+    ),
+    "bo_ngoac_long_trong_link": (
+        r'_RE_LINK_MD = re.compile(r"!?\[([^\]\n]*)\]\((?:[^()\n]|\([^()\n]*\))*\)")',
+        r'_RE_LINK_MD = re.compile(r"!?\[([^\]\n]*)\]\([^()\n]*\)")',
+        ["ac18_link_ngoac_long"],
     ),
     "bo_rut_text_link_markdown": (
         '    text = _RE_LINK_MD.sub(r"\\1", text)\n',
@@ -1547,11 +1828,40 @@ MUTANTS = {
     # Bỏ điều kiện ngữ cảnh của hạng NGÔN NGỮ THƯỜNG ⇒ văn xuôi kể lại kết quả đo
     # bị tính là chép doctrine trở lại. Không có đột biến này thì không ai biết
     # ba ca bắt-oan kia đang đo chốt hay chỉ đang xanh sẵn.
-    "bo_ngu_canh_hang_ngon_ngu_thuong": (
-        "                if cum in CUM_NGON_NGU_THUONG:",
+    "bo_mien_tru_ngat_dong": (
+        "                if cum in CUM_NGON_NGU_THUONG and _duoc_tha_vi_ngat_dong(raw, kim):",
         "                if False:",
-        ["ac19_oan_claude_md_master", "ac19_oan_term_giua_cau",
-         "ac19_oan_term_ngat_dong"],
+        ["ac19_oan_claude_md_master", "ac19_oan_term_ngat_dong"],
+    ),
+    # Nới miễn trừ trở lại bề rộng SAI của generation 4 (tha mọi thứ không nằm gọn
+    # trong một dòng CÓ `|`) ⇒ mọi lớp "đứng một mình" phải ĐỎ lại.
+    "noi_mien_tru_nhu_generation_4": (
+        "        if kim in _chuan_hoa(dong):\n            return False",
+        "        if False:\n            return False",
+        ["ac18_cum_don_heading", "ac18_cum_don_dong_tran",
+         "ac18_cum_don_gach_dau_dong", "ac18_cum_don_in_dam",
+         "ac18_cum_don_dinh_nghia", "ac18_cum_don_cau_van_xuoi_mot_dong"],
+    ),
+    # Hai chốt của `void-reviewing-accepts-attempt-zero`, hai đột biến RỜI NHAU.
+    "bo_void_roi_reviewing": (
+        '    if st["state"] == "reviewing":\n        st["state"] = "running"',
+        '    if False:\n        st["state"] = "running"',
+        ["g5_void_o_reviewing_khong_ket_thuc_bang_approve"],
+    ),
+    "bo_record_review_doi_luot_mo": (
+        '    if not st["attempt_open"]:',
+        "    if False:",
+        ["g5_record_review_doi_LUOT_DANG_MO"],
+    ),
+    "bo_record_review_doi_so_luot_duong": (
+        '    if st["attempts_used"] <= 0:\n        _die(RC_STATE,\n             f"attempts_used',
+        '    if False:\n        _die(RC_STATE,\n             f"attempts_used',
+        ["g5_record_review_doi_SO_LUOT_LON_HON_0"],
+    ),
+    "mo_lai_cua_reviewing_sang_running": (
+        '    "reviewing": (),',
+        '    "reviewing": ("running",),',
+        ["g5_reviewing_khong_ra_bang_transition"],
     ),
     # Chiều ngược: gỡ HẲN cụm khỏi danh sách cấm thì ca DƯƠNG phải chết — chứng
     # minh sửa chiều bắt oan KHÔNG phải là gỡ chốt.
@@ -1565,6 +1875,43 @@ MUTANTS = {
         ["ac19_bang_vai_tro_THAT_van_bi_bat"],
     ),
 }
+
+
+# Ca được PHỦ BỞI NHIỀU LỚP nên không đột biến ĐƠN LẺ nào giết được. Khai tường
+# minh kèm lý do ĐO ĐƯỢC — nói thẳng chỗ phủ chồng còn hơn gán bừa cho một lớp rồi
+# tưởng đã đo được lớp ấy, và còn hơn để ca nằm ngoài mọi danh sách như generation 4.
+PHU_NHIEU_LOP = {
+    "ac18_nbsp_phu_hai_lop":
+        "NFKC gộp U+00A0 về khoảng trắng, và phép gộp phân cách cũng gộp nó — "
+        "gỡ một lớp thì lớp kia vẫn bắt",
+    "ac18_nfkc_ligature_ff":
+        "NFKC gấp ligature, và `str.casefold()` ĐỘC LẬP cũng gấp ligature "
+        "(đã đo: 'ﬀ'.casefold() == 'ff') — hạ NFKC về NFC không đủ để ca này đỏ",
+}
+
+
+# Đối chứng KHÁC HỌ: ca thuộc tầng mà một đột biến ở tầng kia KHÔNG được đụng tới.
+# Chọn ca "xương sống" của mỗi họ — nếu đột biến làm hỏng cả những ca này thì nó
+# không nhắm đúng tầng nó khai, dù ca đích vẫn chết đúng.
+DOI_CHUNG_DOCTRINE = ("doctrine_scan_sach_xanh", "ac18_nfkc_hai_cham_toan_rong",
+                      "ac19_oan_claude_md_master")
+DOI_CHUNG_MAY_TRANG_THAI = ("lease_hop_le_thi_mo_duoc_luot", "transition_hop_le_rc0",
+                            "cap_lan_4_thoat_3")
+
+
+def _la_ho_doctrine(ten: str) -> bool:
+    return ten.startswith(("ac18_", "ac19_", "doctrine_"))
+
+
+def _doi_chung_khac_ho(phai_chet) -> tuple:
+    """Đột biến ở họ nào thì đối chứng lấy từ họ KIA."""
+    if all(_la_ho_doctrine(t) for t in phai_chet):
+        return DOI_CHUNG_MAY_TRANG_THAI
+    if not any(_la_ho_doctrine(t) for t in phai_chet):
+        return DOI_CHUNG_DOCTRINE
+    # Đột biến bắc qua hai họ: không có "họ kia" để đối chứng — nói thẳng thay vì
+    # chọn bừa một tập rồi coi như đã đo.
+    return ()
 
 
 def chay_suite(script: Path, tmp: Path, chi_chay=None):
@@ -1601,8 +1948,46 @@ def main() -> int:
         print(f"nền: {dat}/{tong} đạt")
         that_bai_tong += tong - dat
 
-        # --- 2. tự chứng minh không rỗng --------------------------------------
-        print("\ntự chứng minh suite KHÔNG RỖNG (nới ngưỡng ⇒ ca tương ứng phải ĐỎ):")
+        # --- 2. AC 19: MỖI lớp lách phải có một ca bắt-oan ---------------------
+        # Không có chốt này thì "mỗi lớp một ca" chỉ là lời hứa: thêm một lớp mà
+        # quên ca bắt-oan sẽ đi lọt trong im lặng (finding
+        # `ac19-false-positive-matrix-incomplete`).
+        print("\nAC 19 — ánh xạ lớp lách → ca bắt-oan:")
+        ten_ca_oan = {f"ac19_{t}" for t, _ in LOP_BAT_OAN}
+        thieu_anh_xa = [t for t, _ in LOP_LACH if t not in ANH_XA_LOP_BAT_OAN]
+        tro_hong = {k: v for k, v in ANH_XA_LOP_BAT_OAN.items()
+                    if f"ac19_{v}" not in ten_ca_oan}
+        thua_anh_xa = [k for k in ANH_XA_LOP_BAT_OAN
+                       if k not in {t for t, _ in LOP_LACH}]
+        if thieu_anh_xa:
+            print(f"  ĐỎ  {len(thieu_anh_xa)} lớp KHÔNG có ca bắt-oan: {thieu_anh_xa}")
+            that_bai_tong += len(thieu_anh_xa)
+        if tro_hong:
+            print(f"  ĐỎ  ánh xạ trỏ vào ca KHÔNG TỒN TẠI: {tro_hong}")
+            that_bai_tong += len(tro_hong)
+        if thua_anh_xa:
+            print(f"  ĐỎ  ánh xạ khai lớp không còn trong LOP_LACH: {thua_anh_xa}")
+            that_bai_tong += len(thua_anh_xa)
+        if not (thieu_anh_xa or tro_hong or thua_anh_xa):
+            print(f"  ok  {len(LOP_LACH)}/{len(LOP_LACH)} lớp lách đều có ca bắt-oan "
+                  f"({len(set(ANH_XA_LOP_BAT_OAN.values()))} ca riêng biệt)")
+
+        # --- 3. tự chứng minh không rỗng, ĐO CẢ HAI VẾ ------------------------
+        #
+        # Finding `ac18-mutation-not-per-class`: generation 4 chỉ chạy tập `phai_chet`
+        # do chính đột biến tự khai, nên nó chứng minh "ca đích chết" mà KHÔNG chứng
+        # minh "và ĐÚNG ca đó" — một đột biến giết sạch mọi thứ cũng qua trót lọt.
+        #
+        # ĐÃ THỬ VÀ BỎ cách hiển nhiên — chạy TOÀN BỘ suite dưới mỗi đột biến rồi đòi
+        # không ca nào ngoài `phai_chet` chết. Đo ra thì nó SAI DẠNG: đột biến
+        # `init_tu_cap_lease_nhu_bug_goc` giết 42 ca, vì gần như mọi ca đều gọi
+        # `c.init()` làm bước dựng nền. Đó là phụ thuộc FIXTURE, không phải "đo chung
+        # một chốt" — phạt nó chỉ ép người viết làm YẾU chính những đột biến tốt nhất.
+        #
+        # Thứ vừa đo được vừa đúng ý AC 18 là ĐỐI CHỨNG KHÁC HỌ: một đột biến ở tầng
+        # doctrine KHÔNG được đụng tới máy trạng thái, và ngược lại. Đụng nghĩa là nó
+        # không nhắm đúng tầng nó khai.
+        print("\ntự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH):")
         for ten_mut, (tim, thay, phai_chet) in MUTANTS.items():
             if tim not in goc:
                 print(f"  ĐỎ  đột biến {ten_mut}: không tìm thấy mỏ neo {tim!r}")
@@ -1612,13 +1997,49 @@ def main() -> int:
             mut_dir.mkdir(parents=True, exist_ok=True)
             mut = mut_dir / "packet_loop.py"
             mut.write_text(goc.replace(tim, thay, 1), encoding="utf-8", newline="\n")
-            ket_mut = chay_suite(mut, mut_dir, chi_chay=set(phai_chet))
+            doi_chung = _doi_chung_khac_ho(phai_chet)
+            ket_mut = chay_suite(mut, mut_dir, chi_chay=set(phai_chet) | set(doi_chung))
             song = [t for t in phai_chet if ket_mut.get(t) is None]
+            oan = [t for t in doi_chung if ket_mut.get(t) is not None]
             if song:
                 print(f"  ĐỎ  đột biến {ten_mut}: ca {song} VẪN XANH ⇒ ca đó không đo gì")
                 that_bai_tong += len(song)
-            else:
-                print(f"  ok  {ten_mut} → giết {len(phai_chet)}/{len(phai_chet)} ca: {', '.join(phai_chet)}")
+            if oan:
+                print(f"  ĐỎ  đột biến {ten_mut}: giết cả ĐỐI CHỨNG KHÁC HỌ {oan} ⇒ "
+                      f"đột biến không nhắm đúng tầng nó khai")
+                that_bai_tong += len(oan)
+            if not song and not oan:
+                print(f"  ok  {ten_mut} → giết {len(phai_chet)} ca đích · "
+                      f"{len(doi_chung)} đối chứng khác họ còn sống")
+
+        # --- 4. MỖI LỚP LÁCH phải có đột biến của nó -------------------------
+        #
+        # AC 18 nói về LỚP LÁCH: *"Mỗi lớp trong danh sách phải có một ca phản chứng
+        # và một đột biến giết đúng ca đó."* Generation 4 để `nbsp_phu_hai_lop` ngoài
+        # mọi danh sách phải-chết mà không ai thấy — chốt này làm chuyện đó không im
+        # lặng được nữa.
+        #
+        # PHẠM VI CÓ CHỦ Ý, nói rõ để không ai tưởng là bỏ sót: chốt chỉ áp cho các ca
+        # sinh từ `LOP_LACH` (`ac18_*`). ĐÃ THỬ áp cho MỌI ca và nó sai dạng — 65 ca
+        # bị báo, gần hết là ca CHIỀU THA (`ac19_oan_*`, `*_hop_le_*`, `*_sach_xanh`)
+        # vốn khẳng định `rc=0`. Một đột biến GỠ chốt không thể giết ca chiều tha; thứ
+        # giết được nó là đột biến SIẾT THÊM, một loại khác hẳn. Ép mỗi ca chiều tha
+        # có một đột biến sẽ đẻ ra hàng chục đột biến giả chỉ để lấp bảng — làm suite
+        # dài ra mà không đo thêm gì. Giá trị của ca chiều tha được chứng minh theo
+        # đường khác: chúng ĐỎ ngay khi một chốt siết quá tay, và `bo_mien_tru_ngat_dong`
+        # là ví dụ đang chạy.
+        print("\nAC 18 — mỗi LỚP LÁCH phải có đột biến của nó:")
+        co_dot_bien = {t for _, (_, _, ds) in MUTANTS.items() for t in ds}
+        ten_ca_lop = [f"ac18_{t}" for t, _ in LOP_LACH]
+        mo_coi = [t for t in ten_ca_lop if t not in co_dot_bien and t not in PHU_NHIEU_LOP]
+        if mo_coi:
+            print(f"  ĐỎ  {len(mo_coi)} lớp KHÔNG đột biến nào giết và KHÔNG khai phủ chồng: "
+                  f"{mo_coi}")
+            that_bai_tong += len(mo_coi)
+        else:
+            print(f"  ok  {len(ten_ca_lop)} lớp lách: "
+                  f"{len([t for t in ten_ca_lop if t in co_dot_bien])} có đột biến riêng · "
+                  f"{len([t for t in ten_ca_lop if t in PHU_NHIEU_LOP])} khai PHỦ CHỒNG kèm lý do")
 
     print(f"\nTỔNG: {'ĐẠT' if that_bai_tong == 0 else f'{that_bai_tong} lỗi'}")
     return 0 if that_bai_tong == 0 else 1

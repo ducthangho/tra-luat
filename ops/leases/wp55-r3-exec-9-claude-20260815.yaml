@@ -101,6 +101,29 @@ attempt_scope: >-
   đó (phối hợp khi nhiều đường cùng phủ, KHÔNG khai ngoại lệ).
 
 findings_to_close:
+  # ===== BỔ SUNG bởi phiên điều phối 2026-08-15T10:10Z — chủ kho chỉ đạo trực tiếp =====
+  # "sửa P1 an ninh đi, cấp lease executor mới". Bản lease gốc KHÔNG có mục này.
+  # Đây là finding AN NINH và là ưu tiên SỐ MỘT của lượt, trên cả sáu finding doctrine.
+  - finding_id: work-packet-secret-check-prints-secret
+    severity: P1
+    kind: security
+    priority: 1
+    must_finish_even_if_out_of_time: true
+    site: '.claude/skills/work-packet/SKILL.md:67'
+    do_duoc: >-
+      Lệnh khai là kiểm sự tồn tại mà "không bao giờ in nội dung", nhưng `${VAR:-…}` chỉ thay
+      thế khi biến RỖNG/CHƯA ĐẶT — ở nhánh "đã đặt" nó trả CHÍNH GIÁ TRỊ, và nó bị nối liền
+      với `${VAR:+…}`. Đo với giá trị giả TEN_BIEN='ghp_FAKE_TOKEN_abcdef123456' cho stdout
+      'có, 27 ký tựghp_FAKE_TOKEN_abcdef123456'.
+    tai_sao_nang: >-
+      Đây là lệnh HƯỚNG DẪN AGENT chạy với refresh token thật, và stdout của agent đi vào
+      transcript/log. Một lần làm theo là token nằm lại đó.
+    layer_fix: 'không đường nào in giá trị; không dùng `:-` chung chuỗi với `:+`; rà CẢ BA adapter'
+    counter_proof_required: 'bơm giá trị giả, chạy đúng lệnh trong adapter, đòi stdout KHÔNG chứa giá trị đó'
+    mutation_required: 'trả lệnh về dạng cũ ⇒ ca đích phải ĐỎ'
+    reproduced_by_coordinator: true
+    evidence: https://github.com/ducthangho/tra-luat/pull/120#issuecomment-5301603482
+  # ===== hết phần bổ sung; dưới đây là SÁU finding của bản gốc =====
   - finding_id: doctrine-arbitrary-prose-wrapper-bypass
     severity: P1
     direction: siết
@@ -163,3 +186,25 @@ neo_sha_bat_bien_required: true
 preconditions_measured_at_utc: '2026-08-15T09:56:00Z'
 master_sha_at_grant: 2531366e1abc6cbca0a6c2765e40e54be38d1fb7
 posted_comment_id: 5301712453   # workflow ghi, ĐỪNG sửa tay
+
+# ===== BỔ SUNG bởi phiên điều phối 2026-08-15T10:10Z =====
+coordinator_amendment:
+  by: claude-session
+  at_utc: '2026-08-15T10:10:00Z'
+  authority: ducthangho
+  authority_basis: 'lệnh trực tiếp trong phiên 2026-08-15 — sửa P1 an ninh đi, cấp lease executor mới'
+  added: 'findings_to_close[0] = work-packet-secret-check-prints-secret (P1 an ninh, ưu tiên 1)'
+  khong_doi: >-
+    Mọi trường khác của bản gốc giữ NGUYÊN, kể cả prompt_sha256_required và sáu finding cũ.
+    Prompt KHÔNG được sửa (đổi băm là vô hiệu lease), nên mục an ninh chỉ có trong lease —
+    executor phải đọc lease, không chỉ đọc prompt.
+  ghi_chu_va_cham: >-
+    Phiên điều phối đã soạn một bản lease exec-9 riêng rồi phát hiện nhánh ops/wp55-r3-exec-9
+    đã tồn tại do phiên khác tạo và đã đăng (comment 5301712453). KHÔNG ghi đè: bản gốc giữ
+    nguyên, chỉ bổ sung thêm. Đây là lần thứ tư trong ngày hai phiên đụng nhau trên cùng
+    một tạo phẩm.
+  frozen_head_nhac_lai: >-
+    Prompt gốc đã có chốt "trước mọi lần push lên claude/** phải fetch ops/* và tự hỏi có
+    lease nào đang neo SHA trên nhánh này không". Nhắc lại cho cụ thể: lease
+    wp55-r3-review-9-codex-20260815 neo 427021049bc8677f5915da13b8ac38a53c949b93 và
+    reviewer đã tuyên bố trên PR #120 rằng head đang ĐÓNG BĂNG.

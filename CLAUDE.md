@@ -172,10 +172,16 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   prompt dựng sẵn. Wrapper tự chế sẽ phải bám theo cờ/biến/xác thực của hai CLI khác
   nhau rồi trôi lệch âm thầm.
 - `python .claude/dev/launcher.py doctor` trước khi nghi ngờ bất cứ thứ gì khác.
-  Thoát 12 = thiếu công cụ bắt buộc. Container Claude Code web ĐÃ ĐO 12-08-2026:
-  có python/git/node/claude/rg, **KHÔNG** có codex/gh/pwsh — `.claude/hooks/session-start.sh`
-  cài codex/claude/ripgrep (KHÔNG cài gh, pwsh: kho dùng GitHub qua MCP, không còn
-  đường nào cần PowerShell).
+  Thoát 12 = thiếu binary **hoặc auth** bắt buộc. Nhóm bắt buộc là
+  git/python/claude/codex/gh/rg/bash; MCP không thay thế đường `gh` dự phòng vì
+  GitHub là nguồn sự thật của điều phối. `doctor` phải đọc/chụp biến môi trường
+  trước khi resolve tool, chỉ ghi CÓ/KHÔNG (không ghi giá trị token), chạy probe
+  dương có timeout, và thử ứng viên tiếp theo nếu mục đầu PATH có nhưng không chạy.
+- **15-08-2026:** Codex Desktop đặt một `rg.exe` không thực thi được ở WindowsApps,
+  `bash.exe` của WSL trả Access denied, Codex chưa auth và credential GitHub hết
+  hiệu lực; doctor cũ vẫn xanh vì coi gần hết là tùy chọn. Xem postmortem
+  `docs/incidents/2026-08-15-launcher-codex-github-toolchain.md`. Hook nay dùng
+  exec-form qua bridge Python, không còn phụ thuộc tên trần `bash`/shell quoting.
 - **Không được giả định Windows có `python3`** (bản phổ biến chỉ có `python`, `py`).
   Đừng bắt cài thêm bí danh; tài liệu và script phải nhận cả ba tên.
 - **Neo theo KHO, không theo đường dẫn.** Đường dẫn tuyệt đối là thứ duy nhất không
@@ -192,6 +198,10 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   chính mình sinh, trong khi `Stop-Process -Force` giết được. Đã giết thì phải KIỂM LẠI;
   "đã gọi lệnh giết" ≠ "đã chết". Tách mã 124 (quá hạn + đã giết) khỏi 125 (quá hạn +
   KHÔNG giết được) — trả 124 khi tiến trình còn sống là chốt nói dối.
+- **WMI cũng không phải primitive sandbox-safe.** `Get-CimInstance Win32_Process`
+  trả `Access denied` trong sandbox ngày 15-08-2026, khiến khóa PID rỗng và deadline
+  trả 10/125 sai. Khóa/ảnh cây Windows dùng Win32 API trực tiếp (`GetProcessTimes`,
+  Toolhelp32); không gọi PowerShell/WMI cho đường cưỡng chế.
 - **ZOMBIE tính là đã chết.** Con vừa bị giết nằm ở trạng thái Z tới khi được `wait` thu
   hồi, mà `os.kill(pid,0)` với zombie vẫn thành công ⇒ báo "chưa giết được" cho tiến
   trình đã chết hẳn.

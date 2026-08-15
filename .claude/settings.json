@@ -38,8 +38,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-start.sh\"",
-            "shell": "bash"
+            "command": "python",
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/session_start.py"]
           }
         ]
       }
@@ -50,8 +50,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pretooluse_guard.py\"",
-            "shell": "bash"
+            "command": "python",
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/pretooluse_guard.py"]
           }
         ]
       }

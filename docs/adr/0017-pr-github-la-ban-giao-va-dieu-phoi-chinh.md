@@ -13,6 +13,11 @@ trong GitHub Secrets; workflow chỉ được ghi Issue, PR và feature branch. 
 nhánh canonical, bump version hoặc deploy. Giới hạn này giữ chuỗi công việc chạy khi máy Windows tắt mà không
 chuyển quyền phát hành ra khỏi canonical.
 
+**Bổ sung vận hành 2026-08-15.** Vì GitHub là nguồn sự thật, mọi môi trường executor/reviewer phải có ít nhất
+một đường GitHub độc lập đã probe dương ngoài connector: `gh` phải cài được và `gh auth status` phải xanh trước
+khi nhận việc. Không còn giả định “có MCP nên không cần gh”. Bootstrap đọc nguồn credential từ môi trường trước
+khi gọi tool, không in giá trị; auth thiếu/hết hạn phải fail-closed ở preflight, không được lộ ra giữa bàn giao.
+
 Mỗi work packet chỉ định đúng một executor (`claude` hoặc `codex`) làm bên ghi duy nhất; nền tảng còn lại review
 PR ở chế độ read-only. Dispatcher chỉ reroute sau khi đã thu hồi claim cũ, nên hai nền tảng không bao giờ cùng
 triển khai một packet hoặc cùng ghi một branch.

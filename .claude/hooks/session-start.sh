@@ -12,29 +12,67 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 set -euo pipefail
 
+# Đọc TOÀN BỘ biến điều phối/xác thực cần dùng trước khi resolve hay gọi tool.
+# Chỉ giữ trạng thái/nguồn; tuyệt đối không echo giá trị credential.
+MOI_TRUONG_DA_DOC=1
+REMOTE_VALUE="${CLAUDE_CODE_REMOTE:-}"
+PROJECT_VALUE="${CLAUDE_PROJECT_DIR:-}"
+PATH_VALUE="${PATH:-}"
+CODEX_AUTH_CO=0; [ -n "${CODEX_AUTH_JSON:-}" ] && CODEX_AUTH_CO=1
+GITHUB_AUTH_SOURCE=none
+if [ -n "${GH_TOKEN:-}" ]; then
+  GITHUB_AUTH_SOURCE=GH_TOKEN
+elif [ -n "${GITHUB_TOKEN:-}" ]; then
+  GITHUB_AUTH_SOURCE=GITHUB_TOKEN
+elif [ -n "${GITHUB_PAT:-}" ]; then
+  # `gh` không đọc tên biến lịch sử GITHUB_PAT. Chỉ ánh xạ trong tiến trình hook,
+  # không ghi token xuống đĩa và không in giá trị.
+  export GH_TOKEN="${GITHUB_PAT}"
+  GITHUB_AUTH_SOURCE=GITHUB_PAT-to-GH_TOKEN
+fi
+
 # Chỉ chạy trong môi trường remote. Máy cá nhân đã có sẵn công cụ theo ý người
 # dùng; cài đè vào đó là vượt quyền.
-if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+if [ "$REMOTE_VALUE" != "true" ]; then
   echo "[session-start] khong phai moi truong remote — bo qua"
   exit 0
 fi
 
-GOC="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+GOC="${PROJECT_VALUE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$GOC"
 
 # `command -v` chứ không `which`: có sẵn ở mọi shell POSIX và không phụ thuộc gói ngoài.
 co() { command -v "$1" >/dev/null 2>&1; }
+if co python3; then PY=python3
+elif co python; then PY=python
+else
+  echo "[session-start] HONG: khong co python/python3 de probe va chay launcher"
+  exit 1
+fi
+# `command -v` chỉ chứng minh có path. Probe thật có timeout, rc=0 và output.
+co_chay() {
+  local duong
+  duong="$(command -v "$1" 2>/dev/null || true)"
+  [ -n "$duong" ] || return 1
+  "$PY" -c 'import subprocess,sys
+try:
+ p=subprocess.run([sys.argv[1],"--version"],capture_output=True,text=True,timeout=8)
+except (OSError,subprocess.SubprocessError):
+ raise SystemExit(1)
+raise SystemExit(0 if p.returncode == 0 and (p.stdout+p.stderr).strip() else 1)' "$duong"
+}
 
 echo "[session-start] goc du an: $GOC"
+echo "[session-start] moi truong: da doc truoc tool; GitHub auth source=$GITHUB_AUTH_SOURCE; CODEX_AUTH_JSON present=$CODEX_AUTH_CO"
 
 # --- CLI agent chính thức. Idempotent: đã có thì không đụng (container được
 # cache sau khi hook xong, nên lần sau vào thẳng).
 if co npm; then
-  if ! co codex; then
+  if ! co_chay codex; then
     echo "[session-start] cai @openai/codex ..."
     npm install -g @openai/codex >/dev/null 2>&1 || echo "[session-start] CANH BAO: cai codex that bai"
   fi
-  if ! co claude; then
+  if ! co_chay claude; then
     echo "[session-start] cai @anthropic-ai/claude-code ..."
     npm install -g @anthropic-ai/claude-code >/dev/null 2>&1 || echo "[session-start] CANH BAO: cai claude that bai"
   fi
@@ -42,9 +80,23 @@ else
   echo "[session-start] CANH BAO: khong co npm — bo qua phan CLI agent"
 fi
 
+# --- GitHub CLI là đường vận hành bắt buộc. MCP có thể là đường chính ở một số
+# phiên, nhưng ADR-0017 đặt Issue/PR làm nguồn sự thật nên không được để mất cả
+# đường dự phòng/chuẩn đoán `gh`.
+if ! co_chay gh; then
+  if co apt-get; then
+    echo "[session-start] cai gh ..."
+    (apt-get install -y -qq gh >/dev/null 2>&1 \
+      || sudo apt-get install -y -qq gh >/dev/null 2>&1) \
+      || echo "[session-start] CANH BAO: cai gh that bai"
+  else
+    echo "[session-start] CANH BAO: khong co gh va khong co apt-get"
+  fi
+fi
+
 # --- ripgrep: cả codex lẫn Claude Code đều gọi `rg` để tìm trong mã. Thiếu nó thì
 # lệnh tìm gãy giữa chừng chứ không tự lùi về grep.
-if ! co rg; then
+if ! co_chay rg; then
   if co apt-get; then
     echo "[session-start] cai ripgrep ..."
     (apt-get install -y -qq ripgrep >/dev/null 2>&1 \
@@ -56,8 +108,6 @@ if ! co rg; then
 fi
 
 # --- phụ thuộc Python của kho
-PY=python3
-co python3 || PY=python
 # Chi cai lai khi requirements.txt DOI. Audit codex: hook chay pip moi lan
 # SessionStart la khong idempotent that su - vua cham vua co the keo ve ban khac
 # (pypdf>=4.0 khong ghim tran).
@@ -161,8 +211,23 @@ if co codex; then
   echo "[session-start] codex auth: $(codex login status 2>&1 </dev/null | head -1)"
 fi
 
+if co claude; then
+  if claude auth status >/dev/null 2>&1 </dev/null; then
+    echo "[session-start] claude auth: OK"
+  else
+    echo "[session-start] CANH BAO: claude auth KHONG dung"
+  fi
+fi
+if co gh; then
+  if gh auth status >/dev/null 2>&1 </dev/null; then
+    echo "[session-start] github auth: OK"
+  else
+    echo "[session-start] CANH BAO: github auth KHONG dung"
+  fi
+fi
+
 # --- BẰNG CHỨNG DƯƠNG, không tin "đã cài xong". doctor thoát khác 0 khi thiếu
-# công cụ BẮT BUỘC; thiếu codex/claude chỉ là cảnh báo vì có phiên không cần gọi agent.
+# công cụ BẮT BUỘC; Claude/Codex/GitHub/rg/bash đều fail-closed theo yêu cầu vận hành.
 echo "[session-start] kiem cong cu:"
 "$PY" .claude/dev/launcher.py doctor || {
   echo "[session-start] THIEU CONG CU BAT BUOC — xem bang tren"

@@ -29,14 +29,27 @@ python .claude/dev/launcher.py doctor          # người đọc
 python .claude/dev/launcher.py doctor --json   # máy đọc
 ```
 
-Thoát `12` khi thiếu công cụ **bắt buộc** (git, python). Thiếu `claude`/`codex`
-chỉ là cảnh báo — có phiên không cần gọi agent nào cả.
+Thoát `12` khi thiếu binary **hoặc xác thực** bắt buộc. Nhóm bắt buộc là
+`git`, `python`, `claude`, `codex`, `gh`, `rg`, `bash`. Đây là preflight cho môi
+trường điều phối, không chỉ cho riêng phần mã Python của launcher; một phiên có
+thể chưa cần agent ở bước đầu nhưng phải có khả năng gọi chúng khi packet yêu cầu.
+
+`doctor` chụp môi trường **trước** khi resolve/probe công cụ. JSON chỉ ghi sự hiện
+diện của biến và nguồn credential, không ghi giá trị. Nếu `GITHUB_PAT` có mà
+`GH_TOKEN`/`GITHUB_TOKEN` không có, nó chỉ ánh xạ sang `GH_TOKEN` trong môi trường
+tiến trình con. Mọi probe có timeout; mục đầu PATH bị `Access denied` không che
+mục tốt phía sau.
 
 Đã đo trong container Claude Code web (12-08-2026): có `python`, `git`, `node`,
 `claude`, `rg`; **không có** `codex`, `gh`, `pwsh`. Hook
-`.claude/hooks/session-start.sh` cài `codex`, `claude` và `ripgrep` — **không** cài
-`gh` và `pwsh`: kho này dùng GitHub qua MCP chứ không qua `gh`, và không còn đường
-nào cần PowerShell.
+`.claude/hooks/session-start.sh` cài `codex`, `claude`, `gh` và `ripgrep`, rồi
+probe binary + auth. Giả định cũ “GitHub qua MCP nên không cần `gh`” đã bị loại:
+ADR-0017 coi GitHub là nguồn sự thật, nên phải giữ một đường CLI độc lập để bàn
+giao và chẩn đoán khi connector không có hoặc lỗi.
+
+Trên Windows, hook project không còn dùng shell-form `bash "..."`. Settings dùng
+exec-form chính thức gọi bridge Python; bridge đọc env trước, thử từng Bash thật
+và bỏ WSL shim trả `Access denied`, rồi mới chạy shell script bằng Git Bash.
 
 **Không được giả định Windows có `python3`.** Bản cài phổ biến chỉ có `python` và
 `py` (bản Microsoft Store thì có thêm `python3`). Đừng bắt cài thêm bí danh —
@@ -44,8 +57,8 @@ nào cần PowerShell.
 
 ## Xác thực `codex` trên nhiều môi trường
 
-`doctor` nói **có `codex`**, không nói **`codex` gọi được**. Hai chuyện khác nhau, và
-chuyện thứ hai mới là thứ làm hỏng lượt chạy giữa chừng. Kiểm bằng lời khai của chính nó:
+`doctor` tách **có binary**, **binary chạy được** và **auth hợp lệ**. Cả ba phải
+xanh. Có thể kiểm riêng bằng lời khai của chính Codex:
 
 ```bash
 codex login status        # "Logged in using ChatGPT"  hoặc  "Not logged in"
@@ -95,6 +108,21 @@ Hook có bốn chốt, mỗi cái bịt một đường hỏng đã lường:
 
 Sau đó hook hỏi lại chính `codex login status` và in dòng đó ra — **bằng chứng dương**,
 không suy từ việc "đã ghi tệp xong".
+
+## Xác thực GitHub
+
+`gh --version` xanh chưa đủ. `gh auth status` phải thoát 0. Hook ưu tiên
+`GH_TOKEN`, rồi `GITHUB_TOKEN`; tên biến lịch sử `GITHUB_PAT` được ánh xạ kín sang
+`GH_TOKEN` trong môi trường con. Không biến nào được in giá trị hay ghi vào sổ.
+Credential sai/hết hạn làm `doctor` thoát 12; không được lùi về kết luận “có gh”.
+
+Nếu cần đăng nhập lại tương tác:
+
+```bash
+gh auth login -h github.com
+```
+
+Với remote/headless, đặt token hợp lệ trong Environment thay vì dán vào chat.
 
 Nếu một ngày chuỗi hết hiệu lực (OpenAI thu hồi hoặc xoay refresh token), triệu chứng là
 `Not logged in` dù biến vẫn còn. Chữa: `codex login --device-auth` lại rồi cập nhật biến.
@@ -229,7 +257,7 @@ sống, nên phía gọi tưởng đã dọn xong.
 ## Chạy bộ phản chứng
 
 ```bash
-python .claude/dev/launcher_test.py             # 74 ca
+python .claude/dev/launcher_test.py             # bộ ca launcher (in tổng số thực tế)
 python .claude/dev/launcher_test.py --dot-bien  # 31 đột biến, mỗi cái phải giết đúng ca chỉ định
 ```
 
@@ -244,23 +272,18 @@ không bao giờ xanh được thì người ta sẽ bỏ qua nó.
 **Chưa chạy trên Windows thì đường Windows chưa được nghiệm thu** — đúng bài học
 "script đa nền phải chạy THẬT trên nền đó".
 
-## Đăng ký hook: đừng để chuỗi lệnh rơi vào PowerShell
+## Đăng ký hook: dùng exec-form, không để chuỗi lệnh rơi vào shell
 
 Tài liệu chính thức (<https://code.claude.com/docs/en/hooks>):
 
 > The `command` string is passed to a shell: `sh -c` on macOS and Linux, **Git Bash on
 > Windows, or PowerShell when Git Bash isn't installed.**
 
-Máy Windows **không có Git Bash** thì chuỗi `bash "$CLAUDE_PROJECT_DIR/..."` được giao
-cho PowerShell, ở đó `bash` không tồn tại **và** `$CLAUDE_PROJECT_DIR` là biến
-PowerShell chưa định nghĩa nên nở ra **rỗng** — hai lỗi độc lập, cùng hướng. Vì vậy
-`.claude/settings.json` ghim `"shell": "bash"` và dùng dạng ngoặc `${CLAUDE_PROJECT_DIR}`.
-
-Chặt hơn nữa thì dùng **exec form** (`args`), không qua shell nào cả — tài liệu khuyến
-nghị đúng cho trường hợp có path placeholder: *"Prefer exec form for any hook that
-references a path placeholder."* Kho này chưa dùng vì client cũ bỏ qua `args` sẽ chạy
-`bash` trần và đọc stdin — mà `PreToolUse` hỏng thì **mọi lệnh Bash chết trước khi
-chạy**, đúng bẫy tự khoá đã ghi trong `CLAUDE.md`.
+Máy Windows có thể resolve tên trần `bash` tới WSL shim hỏng dù Git Bash tốt vẫn
+tồn tại. Chuỗi shell-form còn diễn giải biến/quote khác nhau giữa PowerShell và
+Bash. `.claude/settings.json` vì vậy dùng **exec form** (`command` + `args`) gọi
+Python trực tiếp. Bridge `session_start.py` tự tìm Bash chạy được bằng probe dương.
+Đây cũng là khuôn tài liệu chính thức khuyến nghị cho path placeholder.
 
 Hook `SessionStart` **không chặn được phiên**: thoát khác 0 chỉ hiện một dòng lỗi,
 *Claude không thấy stderr*. Nhưng **stdout của `SessionStart` được đưa vào ngữ cảnh**

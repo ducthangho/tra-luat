@@ -1,0 +1,164 @@
+# Lease EXECUTOR generation 9 cho wp55 revision 3 — xuất phát 4270210.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt
+# cụt giá trị — đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ.
+#
+# VÌ SAO CÓ LEASE NÀY:
+# Verdict lượt 9 (có lease, prompt khớp băm) trả `changes_requested` với SÁU finding —
+# bốn P1, hai P2 — và phiên executor đã TÁI LẬP ĐƯỢC CẢ SÁU trên `4270210`. Chủ kho chỉ
+# thị vá cả sáu, xuất phát từ chính `4270210`.
+#
+# BỐN COMMIT KHÔNG LEASE ĐÃ CÓ TRÊN NHÁNH — sổ có khoảng trống, khai thẳng:
+#   hai commit `g6`, cộng `3c4fbc2` (g7) và `4270210` (g8). Lease này KHÔNG hồi tố hợp
+#   thức hoá chúng; nó chỉ cấp quyền cho phần việc TỪ ĐÂY TRỞ ĐI. `attempts_used` trong
+#   sổ vì thế THẤP HƠN số lượt thật.
+#
+# SỰ CỐ ĐÃ TRẢ GIÁ, VÀ CHỐT SINH RA TỪ NÓ:
+# `3c4fbc2` và `4270210` được đẩy lên nhánh packet KHI lease reviewer lượt 8 đang neo
+# `91780cb`, làm tip nhánh rời khỏi SHA mà reviewer đang được thuê để soi; phải huỷ lease
+# lượt 8 và cấp lại lượt 9. Prompt của lease này vì thế mang một chốt BẮT BUỘC: fetch
+# `ops/**` và kiểm lease đang sống TRƯỚC mọi lần push lên `claude/**`.
+#
+# TRỤC KHÓ NHẤT CỦA LƯỢT NÀY — bốn P1 KÉO NGƯỢC NHAU:
+#   ba cái đòi SIẾT (wrapper tuỳ ý, closer fence sai, bảng HTML lồng)
+#   một cái đòi NỚI (span mở làm bắt oan toàn bộ phần đuôi tệp)
+# Vá từng cái một sẽ đẩy con lắc sang cú thứ SÁU. Con lắc đã đánh quá NĂM lần.
+#
+# VÀ MỘT CHỐT DOCTRINE: lập luận "fail-closed" mà generation 8 dùng để biện minh cho việc
+# nới `_RE_HANG_RAO` ĐÃ BỊ BÁC. AC 19 nói thẳng — bắt oan văn bản bình thường là KHÔNG
+# ĐẠT, ngang với để lọt. Hai chiều CÂN NHAU, không chiều nào an toàn để nghiêng về.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 55
+packet_id: wp55
+phase_key: F3-03
+mission_issue: 54
+mission_revision: 6
+revision: 3
+generation: 9
+lease_id: wp55-r3-exec-9-claude-20260815
+
+spec_path: ops/specs/wp55-r3-spec.md
+spec_branch: ops/wp55-r3-spec
+spec_hash: e321f811724fae97b19d523a3e5159bc13b425cd15fc6c753c7439fe28cae22d
+spec_hash_basis: sha256 của chính tệp spec, byte nguyên trạng
+spec_unchanged_this_generation: true
+
+role: executor
+provider: claude                # ⇒ reviewer kế tiếp BẮT BUỘC codex (§8)
+assurance_target: cross_approved
+access: read-write
+
+write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - .claude/skills/cross-review/SKILL.md
+  - .claude/skills/land-packets/SKILL.md
+  - .claude/skills/work-packet/SKILL.md
+  - CLAUDE.md
+branch_ownership: claude/wp55-r3g5-f3-03
+
+# Với lease EXECUTOR, `reviewed_sha_required` nghĩa là head XUẤT PHÁT: phải bắt đầu từ đúng
+# commit mà verdict đã neo, nếu không thì bản vá đang chữa một cây khác với cây bị soi.
+reviewed_sha_required: 427021049bc8677f5915da13b8ac38a53c949b93
+base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2
+branch: claude/wp55-r3g5-f3-03
+target_pull_request: 120
+branch_start_point_rationale: >-
+  Verdict lượt 9 neo đúng `4270210`, nên vá phải xuất phát từ đó. Bản vá g7/g8 không bị bác
+  về HƯỚNG — hai họ fence lồng cấp và ô bảng HTML vẫn đóng; việc của lượt này là sửa cách
+  DÒ hai cấu trúc ấy cho đúng, và thu miễn trừ AC 19 về dấu hiệu hẹp hơn "có chữ hai phía".
+
+prompt_path: ops/prompts/wp55-r3-exec-9-claude-20260815.md
+prompt_sha256_required: 2ed48fc9e445f157165166e4e45f5caf1d132623bf08c707dc33a028c4f9d83f
+
+granted_by: ducthangho          # CHỦ KHO — §2 người có thẩm quyền
+granted_on_instruction: 'direct, in-session, 2026-08-15 (cấp lease executor, vá cả 6 finding trên 4270210)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-15T09:56:00Z'
+lease_expires_at_utc: '2026-08-16T10:00:00Z'
+run_minutes: 1444
+heartbeat_required_minutes: 30
+
+attempts_used: 2
+attempts_limit: 3
+attempts_exhausted: false
+attempts_note: >-
+  Sổ ghi 2/3. BỐN commit trên nhánh chạy KHÔNG lease (hai `g6`, cộng `3c4fbc2` và
+  `4270210`) nên không vào sổ — con số thật CAO HƠN. Lease này KHÔNG hồi tố hợp thức hoá
+  chúng. Ghi ra để không ai đọc `2/3` rồi tưởng còn dư dả.
+
+attempt_scope: >-
+  Đóng SÁU finding của verdict lượt 9, vá Ở TẦNG một lượt cho cả bốn P1 vì chúng kéo ngược
+  nhau. Đo DANH SÁCH ĐÓNG trước khi vá, đo CẢ HAI CHIỀU, mỗi lớp một đột biến giết đúng ca
+  đó (phối hợp khi nhiều đường cùng phủ, KHÔNG khai ngoại lệ).
+
+findings_to_close:
+  - finding_id: doctrine-arbitrary-prose-wrapper-bypass
+    severity: P1
+    direction: siết
+  - finding_id: doctrine-fence-invalid-closer-bypass
+    severity: P1
+    direction: siết
+  - finding_id: doctrine-nested-html-table-bypass
+    severity: P1
+    direction: siết
+  - finding_id: doctrine-structural-opener-poisons-ac19-tail
+    severity: P1
+    direction: nới          # NGƯỢC chiều ba cái trên — đây là chỗ khó nhất
+  - finding_id: lease-schema-allows-extra-keys
+    severity: P2
+    direction: siết
+  - finding_id: packet-suite-mutation-count-mismatch
+    severity: P2
+    direction: đính chính + thêm chốt tự kiểm
+
+# Executor lượt trước đã tái lập ĐỦ SÁU trên 4270210. Ghi ra để lượt này không mất công
+# nghi ngờ tính có thật của finding — nhưng VẪN phải tự chạy lại, đừng nhận theo lời kể.
+findings_reproduced_by_executor: true
+findings_reproduced_evidence: >-
+  Ma trận `doctrine-matrix` 9/9 khớp chính xác số của reviewer; `lease-extra-key` rc=0
+  (đáng lẽ khác 0); `len(MUTANTS)` = 38 trong khi hồ sơ khai 39.
+
+prior_review: wp55-r3-review-9-codex-20260815
+prior_review_verdict: changes_requested
+prior_reviewed_sha: 427021049bc8677f5915da13b8ac38a53c949b93
+prior_review_is_leased: true
+prior_review_verdict_file: >-
+  ops/reviews/wp55-r3-review-9-codex-verdict.md trên nhánh ops/wp55-r3-review-9-verdict
+
+# CHỐT SINH RA TỪ SỰ CỐ LƯỢT 8 — prompt mang bản đầy đủ.
+push_precondition:
+  rule: >-
+    Trước MỌI lần push lên `claude/**`, phải `git fetch origin
+    'refs/heads/ops/*:refs/remotes/origin/ops/*'` rồi tự trả lời: có lease nào đang neo một
+    SHA trên nhánh này không? Có ⇒ DỪNG, hỏi chủ kho.
+  rationale: >-
+    `3c4fbc2` và `4270210` được đẩy khi lease reviewer lượt 8 đang neo `91780cb`, làm tip
+    nhánh rời khỏi SHA được thuê soi; phải huỷ lease lượt 8 và cấp lại lượt 9.
+
+finding_deferred:
+  finding_id: ac20-archive-tree-suite-not-self-contained
+  disposition: spec_revision_required
+  decision: 'chủ kho chốt HOÃN sang revision 4'
+
+# Câu hỏi MỞ, chủ kho chưa chốt — executor KHÔNG tự quyết.
+open_question:
+  id: ac19-can-sua-spec-khong
+  note: >-
+    Finding `doctrine-arbitrary-prose-wrapper-bypass` chạm tới chính câu chữ AC 19. Reviewer
+    lập luận rằng không buộc phải tha MỌI wrapper, và ca thật có thể neo vào dấu hiệu phép
+    đo hẹp hơn. Nếu khi vá thấy không thể thoả cả AC 2 lẫn AC 19 mà không sửa spec, thì
+    DỪNG và xuất successor §7 — KHÔNG tự sửa spec, vì sửa spec là đổi băm và tự vô hiệu
+    lease này.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-15T09:56:00Z'
+master_sha_at_grant: 2531366e1abc6cbca0a6c2765e40e54be38d1fb7

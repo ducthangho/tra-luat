@@ -192,8 +192,18 @@ không hỗ trợ thì phép chứng minh ấy trả `None`, còn trên POSIX m�
 đủ chặn. Tệp ở lại cho tới khi một lượt chạy **sau** dọn các bản chụp quá 24 giờ — mà nếu
 không có lượt nào sau thì ở lại vô hạn. Prompt có thể chứa bí mật, nên với prompt nhạy
 cảm hãy **tự kiểm** (`find <run-root> -name prompt.snapshot -ls`) chứ đừng tin lời hứa;
-đọc #112 trước, vì dọn hàng loạt là sai. Cần giữ có chủ đích để truy vết thì
-`--giu-ban-chup`.
+đọc #112 trước, vì dọn hàng loạt là sai.
+
+**`--giu-ban-chup` chỉ hoãn lượt xoá NGAY, không giữ được lâu.** Nó không ghi dấu gì lên
+đĩa, và mọi lượt chạy sau đều gọi `_cap_id`, chỗ này xoá **vô điều kiện** mọi
+`prompt.snapshot` quá 24 giờ (`launcher.py:1009-1013`) mà không hề đọc cờ ấy. Nên giữ
+bản chụp để truy vết rồi dùng lại **cùng một `--run-root`** là mất — im lặng, sau 24 giờ.
+Cần giữ thật thì **chép ra ngoài `run-root`** ngay sau lượt chạy, và nhớ nó vẫn là tệp
+chứa nguyên văn prompt: chép đi đâu thì chỗ đó thành nơi phải bảo vệ.
+
+Hai câu trên mâu thuẫn nhau **có chủ ý** ở tầng thiết kế: không giữ nổi thì rò rỉ vô
+hạn, giữ vô điều kiện thì cũng rò rỉ vô hạn. Launcher chọn xoá; tài liệu phải nói rõ giá
+của lựa chọn ấy thay vì hứa một thứ nó không làm.
 
 ### Neo theo *kho*, không theo đường dẫn
 

@@ -151,7 +151,19 @@ codex báo đúng triệu chứng ấy và phải xoay sang đọc ref local. C�
 thì dựng **clone riêng** (`git clone --no-hardlinks`), chấp nhận tốn đĩa. Worktree vẫn
 tốt cho lượt chỉ ĐỌC cây ở một head cố định.
 
-Gọi Claude thì thay phần sau `--` bằng `claude -p "..."`. Không có gì khác đổi.
+**Gọi Claude: đọc `.claude/skills/goi-claude-cli/SKILL.md` TRƯỚC.** Đừng dùng
+`claude -p "..."` — prompt nằm nguyên trong `argv`, nơi mọi tiến trình cùng UID đọc
+được, và nó còn đụng trần kích thước đối số của hệ điều hành. Dạng đúng đưa prompt qua
+**stdin**, với đường dẫn truyền làm **đối số vị trí** chứ không nội suy vào chuỗi shell:
+
+```bash
+-- bash -c 'claude --permission-mode auto -p < "$1"' _ '{PROMPT_FILE}'
+```
+
+`_` đứng làm `$0`, đường dẫn thành `$1`. Nội suy thẳng `{PROMPT_FILE}` vào chuỗi lệnh
+thì một `--run-root` chứa khoảng trắng — hay chứa `$HOME` — sẽ làm bash đọc sai đường
+dẫn; đã đo cả hai ca, và dấu nháy kép chỉ cứu được ca đầu. Skill kia còn có bảng chế độ
+quyền (tên chế độ đánh lừa), bẫy trust, và bảng mã thoát.
 
 ### `{PROMPT_FILE}` — neo prompt kín *sau* khi sinh con
 
@@ -160,15 +172,27 @@ hash được kiểm lại ngay trước khi sinh con. Nhưng nếu lệnh tự 
 (`... "Doc tep nhiem_vu.txt ..."`) thì ai đó đổi nội dung tệp *sau* thời điểm đó vẫn
 qua mặt được neo.
 
-Viết `{PROMPT_FILE}` ở đâu trong lệnh thì chỗ đó được thay bằng **bản chụp bất biến**
-trong thư mục lượt chạy, nên con đọc đúng thứ đã được hash. Thay ở mọi lần xuất hiện,
+Viết `{PROMPT_FILE}` ở đâu trong lệnh thì chỗ đó được thay bằng một **bản chụp rời**
+trong thư mục lượt chạy, nên con không đọc lại đường dẫn gốc. Thay ở mọi lần xuất hiện,
 kể cả khi lồng trong một đối số lớn (`--file={PROMPT_FILE}`). Sổ ghi
 `prompt_kin_hoan_toan: true`; không dùng thì ghi `false` — không giả vờ là đã kín.
 Có `{PROMPT_FILE}` mà quên `--prompt-file` thì bị chặn (mã 2), vì nếu không con sẽ
 nhận đúng chuỗi `{PROMPT_FILE}` làm đường dẫn.
 
-Bản chụp ghi quyền `0600` và **bị xoá khi con thoát** (prompt có thể chứa bí mật —
-đó cũng là lý do sổ không lưu đối số nguyên văn). Cần giữ để truy vết thì
+**RỜI, không phải BẤT BIẾN — hai chữ ấy khác nhau và bản trước của tài liệu này dùng
+nhầm.** Launcher tạo bản chụp với quyền `0600` rồi thôi: nó **không** đặt cờ bất biến và
+**không** kiểm lại băm sau khi ghi. Một tiến trình **cùng UID** vẫn ghi đè được bản chụp
+trong khoảng giữa lúc kiểm băm và lúc con mở nó. Nói cách khác `--expected-prompt-sha256`
+neo **tệp nguồn tại thời điểm kiểm**, không neo thứ con thật sự đọc. Thứ nó chắc chắn
+cho: sửa tệp prompt gốc sau khi lượt chạy bắt đầu thì không ảnh hưởng lượt đang chạy.
+
+**Bản chụp KHÔNG được bảo đảm xoá** — bản trước hứa "bị xoá khi con thoát", cũng sai.
+Nó chỉ bị xoá khi launcher chứng minh được nhóm tiến trình đã rỗng; trên Windows và nền
+không hỗ trợ thì phép chứng minh ấy trả `None`, còn trên POSIX một hậu duệ còn sống cũng
+đủ chặn. Tệp ở lại cho tới khi một lượt chạy **sau** dọn các bản chụp quá 24 giờ — mà nếu
+không có lượt nào sau thì ở lại vô hạn. Prompt có thể chứa bí mật, nên với prompt nhạy
+cảm hãy **tự kiểm** (`find <run-root> -name prompt.snapshot -ls`) chứ đừng tin lời hứa;
+đọc #112 trước, vì dọn hàng loạt là sai. Cần giữ có chủ đích để truy vết thì
 `--giu-ban-chup`.
 
 ### Neo theo *kho*, không theo đường dẫn

@@ -86,30 +86,40 @@ hỏi ⇒ từ chối"** — nó không ghi nổi một tệp trong chính works
 đo: `echo` chạy, `git add` + `git commit` **không** commit nào được tạo. Một executor
 phải commit và push thì `acceptEdits` là chọn sai.
 
-**`auto` vẫn chặn `git push` — kể cả `--dry-run`** — nhưng **chỉ trên worktree ghim
-commit TRƯỚC #111**, đúng như mục `ask` bên dưới. Trên master hiện hành `git push` đã
-nằm trong `allow`, nên phép đo này **không còn tái lập được** ở đó và bạn không cần cờ.
-Ghi lại vì worktree cũ vẫn gặp, và vì cơ chế thì không đổi.
+### ⚠ RÚT LẠI: `auto` KHÔNG chặn `git push`
 
-Trong ca ấy, `auto` cho biến đổi CỤC BỘ (`git commit` chạy được) nhưng không cho thao
-tác đẩy lên remote. Cấp đúng một quyền đó bằng cờ theo LƯỢT CHẠY, **đừng** nới
-`permissions.allow` của kho — settings là chính sách chung, một lượt chạy không được
-đổi nó:
+Bản trước của mục này khai *"`auto` vẫn chặn `git push` — kể cả `--dry-run`, cấp bằng
+`--allowedTools`"*. **Sai, và nó sống qua chín vòng cross-review.** Đo lại, ba nhánh chỉ
+khác nhau ở `ask`/`allow` của `git push`:
 
-```bash
-bash -c 'claude --permission-mode auto --allowedTools "Bash(git push:*)" -p < "$1"' \
-     _ '{PROMPT_FILE}'
-```
+| policy | `--allowedTools` | `git push --dry-run` |
+|---|---|---|
+| `git push` **không** ở `ask`, **không** ở `allow` | không có cờ | **CHẠY** (`rc=0`) |
+| như trên | có cờ | **CHẠY** (`rc=0`) |
+| `git push` **trong `ask`** | có cờ | **BỊ CHẶN** |
 
-(Vẫn là dạng stdin. Đừng viết `-p "…"` ở đây cho gọn: thay dấu ba chấm bằng một prompt
-thật là prompt lại nằm trong argv, đúng thứ dạng stdin sinh ra để tránh.)
+Ba dòng đó nói:
 
-Đã đo: không có cờ ⇒ phiên dừng ở BƯỚC 0 và báo "blocked waiting on permission";
-có cờ ⇒ `git push --dry-run` chạy. Cấp hẹp theo mẫu lệnh, đừng cấp `Bash(*)`.
+- Thứ chặn là **luật `ask`**, không phải chế độ quyền. Bản cũ **quy nhân sai đối tượng**:
+  nó thấy chặn, thấy có cờ thì hết chặn, rồi gán nhân quả cho cái cờ.
+- `--allowedTools` **không cứu được** khi có `ask`, và **không cần** khi không có ⇒
+  **không tồn tại môi trường nào nó vừa cần vừa hiệu quả** trong kho này.
+
+Nên: **đừng thêm `--allowedTools "Bash(git push:*)"` vào lệnh chạy.** Nếu `git push` bị
+chặn, nguyên nhân là một luật `ask` — đọc mục ngay dưới, đừng đi tìm cờ.
+
+**Giới hạn của phép đo, đừng suy rộng:** chỉ đo `git push --dry-run` tới một nhánh không
+tồn tại. Push THẬT không được thử, nên không có số về nó.
+
+Bài học đắt hơn con số: lời khai sai này đứng vững chín vòng vì nó **hợp lý** — và vì
+bảng ở mục `ask` ngay bên dưới đã ghi `--allowedTools → bị chặn` **suốt thời gian đó**.
+Hai chỗ trong cùng một tệp mâu thuẫn nhau, không ai đọc chúng cạnh nhau. Cross-review
+bắt được mâu thuẫn ấy trước khi bắt được cái sai.
 
 ## `ask` THẮNG `allow` ở MỌI lớp — đây là tường, không phải cửa
 
-Cách trên chỉ chạy khi kho **không** có luật `ask` cho lệnh đó.
+Đây là mục giải thích ca "BỊ CHẶN" ở bảng vừa rút lại bên trên — và là chỗ đáng đọc khi
+một lệnh không chạy.
 
 **Đọc mục này theo đúng mốc thời gian của nó.** Số đo dưới đây lấy trên worktree ghim
 commit TRƯỚC #111, lúc `ask` của `tra-luat` còn là:
@@ -289,8 +299,14 @@ phân biệt "bị chặn" với "chạy được" nằm trong `stdout.log`, kh�
 
 ## `rc=0` KHÔNG phải bằng chứng đã làm việc
 
-Lượt đo bốn chế độ quyền: **cả bốn** trả `rc=0`, nhưng chỉ **một** thật sự ghi được
-tệp. Ba chế độ kia trả lời tử tế, thoát sạch, và không làm gì.
+Lượt đo bốn chế độ quyền: **`bypassPermissions` trả `rc=1`** (CLI từ chối thẳng dưới
+`root` — xem bảng ở trên). **Ba chế độ còn lại đều trả `rc=0`, mà chỉ MỘT thật sự ghi
+được tệp.** Hai chế độ kia trả lời tử tế, thoát sạch, và không làm gì.
+
+Đếm cho đúng vì đó chính là điểm: ca đáng sợ **không** phải `bypassPermissions` — nó
+đỏ, nó tự khai. Ca đáng sợ là hai chế độ **xanh mà rỗng**. Bản trước của mục này viết
+"cả bốn trả `rc=0`", vừa sai vừa làm loãng bài học bằng cách gộp một ca tự khai vào
+nhóm im lặng.
 
 Vậy nghiệm thu một lượt chạy phải neo **hành vi**, không neo mã thoát: tệp có tồn tại
 không, commit có tăng không, băm có đổi không. Cùng doctrine với "cổng xanh nhờ `rc=0`
@@ -381,7 +397,9 @@ Thứ phân biệt được chỉ có hai: **log** và **hậu điều kiện h�
 ## Trước khi giao việc thật
 
 1. `claude -p "Tra loi dung mot tu: OK" < /dev/null` — xác thực CLI còn sống. Không
-   có bước này thì mọi chẩn đoán sau đều đoán mò.
+   có bước này thì mọi chẩn đoán sau đều đoán mò. (Đây là ngoại lệ **có chủ ý** của luật
+   "prompt không đi qua `argv`": chuỗi hằng sáu chữ, không bí mật, không phụ thuộc kích
+   thước. Luật ấy bảo vệ *nội dung nhạy cảm* và *prompt dài* — nó không cấm chữ `-p`.)
 2. `launcher.py check …` — `QUA HET CHOT`, `rc=0`.
 3. Neo prompt bằng **băm**, không bằng tên nhánh: tên nhánh trôi và bị xoá.
 4. Cho `--deadline-utc` khớp hạn lease — nhưng **đừng đọc nó thành "lượt chạy không

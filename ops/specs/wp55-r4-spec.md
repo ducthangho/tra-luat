@@ -40,7 +40,11 @@ spec_hash_basis: sha256 của chính tệp này, byte nguyên trạng, không ch
 supersedes_revision: 3
 supersedes_spec_hash: e321f811724fae97b19d523a3e5159bc13b425cd15fc6c753c7439fe28cae22d
 
-base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2
+base_sha: CHUA_XAC_DINH        # đổi sau khi master mang khối chứng cứ — xem mục di trú
+base_sha_note: >-
+  CỐ Ý để trống. Chủ kho đã chốt đường di trú "sửa master trước rồi packet rebase", nên
+  `base_sha` không còn là `fbe5ab9e`. Điền số THẬT lúc cấp lease, sau khi commit sửa master
+  đã có SHA. Đoán trước là tự dựng một mỏ neo chết.
 start_from_sha: 1a4525a20aa360476a6f59cb157c21097919c457
 start_from_note: >-
   KHÔNG dựng lại từ base. Generation 9 đã đóng được sáu finding của lượt 9 và mười tám hình
@@ -127,10 +131,12 @@ thẩm quyền vẫn `rc=0`.
 2. Thuộc tính `nguồn` **bắt buộc**, dạng `<đường-dẫn>@<sha40 hoặc sha ngắn>:<dòng>-<dòng>`.
 3. Khối **không được lồng nhau**, và không được để mở tới hết tệp (thiếu thẻ đóng ⇒ ĐỎ, mã
    thoát riêng, không im lặng bỏ qua).
-4. Khối tối đa **N dòng** (đề xuất `N = 12`) — miễn trừ là ngoại lệ hẹp, không phải vùng tự do.
-5. **Số khối tối đa mỗi tệp: `M`** (đề xuất `M = 3`). Vượt ⇒ ĐỎ. Adapter cần nhiều hơn thế
-   thì nó đang chép doctrine chứ không phải kể một phép đo.
-6. Ngoài khối chứng cứ, **KHÔNG có miễn trừ nào khác**. Mọi cụm cấm ở mọi hình dạng đều ĐỎ.
+4. Khối tối đa **12 dòng**. Vượt ⇒ ĐỎ. Miễn trừ là ngoại lệ hẹp, không phải vùng tự do.
+5. **Tối đa 3 khối mỗi tệp.** Vượt ⇒ ĐỎ. Đo được hôm nay chỉ có **một** chỗ thật cần miễn
+   trừ, nên 3 đã dư gấp ba; adapter cần nhiều hơn thế thì nó đang chép doctrine chứ không
+   phải kể một phép đo.
+6. Khối chứng cứ được phép nằm trong **mọi tệp thuộc `write_set`, kể cả `CLAUDE.md`**.
+7. Ngoài khối chứng cứ, **KHÔNG có miễn trừ nào khác**. Mọi cụm cấm ở mọi hình dạng đều ĐỎ.
 
 **Vì sao khuôn này đóng được, còn các xấp xỉ trước thì không:** scanner chỉ phải trả lời
 "đoạn này có nằm giữa hai mốc đúng cú pháp không", một câu hỏi hữu hạn và kiểm được. Kẻ gian
@@ -173,7 +179,21 @@ tại trên master. Executor phải chọn và KHAI RÕ một trong hai đườn
 2. đề nghị chủ kho sửa `CLAUDE.md` trên master **trước**, rồi packet rebase lên master mới —
    sạch hơn, nhưng đổi `base_sha` và cần chủ kho ra tay.
 
-Chủ kho chốt đường nào trước khi cấp lease. Đây là quyết định §2, không phải của executor.
+**CHỦ KHO ĐÃ CHỐT (2026-08-15, trực tiếp trong phiên): đường số 2 — sửa master trước, rồi
+packet rebase.** Kéo theo một hệ quả bắt buộc phải xử lý trước khi cấp lease:
+
+> `base_sha` của revision 4 **KHÔNG còn là `fbe5ab9e`**. Sau khi master mang khối chứng cứ,
+> packet phải rebase lên master mới và `base_sha` đổi theo. Spec này để trống ô ấy có chủ ý
+> — điền số thật vào lúc cấp lease, sau khi commit sửa master đã có SHA. Điền số đoán trước
+> là tự dựng một mỏ neo chết, đúng bệnh mà `spec_hash` sinh ra để chặn.
+
+Thứ tự bắt buộc:
+
+1. chủ kho (hoặc phiên được uỷ quyền §2) thêm khối chứng cứ vào `CLAUDE.md` **trên master**,
+   bọc đúng dòng 82–83 — đây là commit NGOÀI packet;
+2. đo lại: `doctrine-scan` trên master mới phải `rc=0` **dưới luật AC 19 mới**;
+3. packet rebase lên master mới; ghi `base_sha` thật vào spec; băm lại spec;
+4. mới cấp lease executor revision 4.
 
 ---
 
@@ -300,15 +320,16 @@ Executor revision 4 phải tái lập lại, đừng nhận theo lời kể. Ma 
 
 ## Việc chưa làm, phải nói ra
 
-1. **Ba tham số của AC 19 chưa chốt**: `N` (số dòng tối đa mỗi khối), `M` (số khối tối đa
-   mỗi tệp), và dạng chính xác của thuộc tính `nguồn`. Đề xuất `N=12`, `M=3`. Chủ kho chốt.
-2. **Chi phí di trú ĐÃ đo** (xem bảng ở AC 19): 0 chỗ trên nhánh packet, **1 chỗ trên cây đã
+1. **Tham số AC 19 ĐÃ CHỐT** (chủ kho, trực tiếp trong phiên 2026-08-15): `N = 12` dòng mỗi
+   khối, `M = 3` khối mỗi tệp, khối được phép nằm trong **mọi tệp `write_set` kể cả
+   `CLAUDE.md`**, di trú theo đường **sửa master trước rồi rebase**. Còn lại: **dạng chính
+   xác của thuộc tính `nguồn`** — nguyên mẫu dùng `<đường-dẫn>@<sha7..40>:<dòng>[-<dòng>]`
+   và đã đo chạy được, nhưng chưa ai duyệt nó là dạng chuẩn.
+2. **`base_sha` chưa điền được** — hệ quả của đường di trú đã chốt, xem mục AC 19. Đây là
+   việc PHẢI làm trước khi cấp lease, không phải việc hoãn được.
+3. **Chi phí di trú ĐÃ đo** (xem bảng ở AC 19): 0 chỗ trên nhánh packet, **1 chỗ trên cây đã
    merge** — `CLAUDE.md` dòng 82–83, đến từ master. Cái CHƯA quyết là **di trú ở đâu**: sửa
    `CLAUDE.md` phía nhánh packet, hay sửa trên master rồi rebase. Chủ kho chốt.
-3. **Chưa quyết khối chứng cứ có được nằm trong `CLAUDE.md` hay chỉ trong adapter.**
-   `CLAUDE.md` nằm trong write_set nên sửa được, nhưng nó không phải adapter — cần chốt.
-   Lưu ý: nếu chốt "chỉ adapter" thì đường di trú số 1 ở AC 19 KHÔNG dùng được, và bắt buộc
-   phải đi đường số 2.
 4. **Sổ attempts của revision 3 không khớp thực tế** và revision 4 không hồi tố sửa được.
    AC 26 chặn tái diễn, không chữa quá khứ.
 

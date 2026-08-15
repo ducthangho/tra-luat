@@ -14,8 +14,8 @@ RE_DONG = re.compile(r'^[ \t]*<!--[ \t]*/ac19:evidence[ \t]*-->[ \t]*$', re.MULT
 RE_NGUON = re.compile(r'nguồn\s*=\s*"([^"]+)"')
 RE_DANG_NGUON = re.compile(r'^[^@\s]+@[0-9a-f]{7,40}:\d+(?:-\d+)?$')
 
-N_TOI_DA = 12
-M_TOI_DA = 3
+N_TOI_DA = 12   # CHỐT bởi chủ kho 2026-08-15
+M_TOI_DA = 3    # CHỐT bởi chủ kho 2026-08-15
 
 
 def khoi_chung_cu(raw: str):

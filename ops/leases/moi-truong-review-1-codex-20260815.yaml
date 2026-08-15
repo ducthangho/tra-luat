@@ -1,0 +1,149 @@
+# Lease REVIEWER cho nhánh HẠ TẦNG MÔI TRƯỜNG `ops/moi-truong-env-first` — KHÔNG phải wp55.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+# NHỚ ĐÓNG NHÁY mọi giá trị chứa `#` — không nháy thì `#` mở chú thích YAML và cắt cụt
+# giá trị (đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ).
+#
+# `packet_issue: 55` LÀ CHỖ CẦN ĐỌC KỸ, đừng hiểu nhầm:
+# Trường này là BẮT BUỘC của lược đồ lease và nó quyết định comment đăng vào issue nào.
+# Nhánh này KHÔNG thuộc packet wp55 — nó rẽ từ `master`, sửa hạ tầng môi trường, không
+# đụng `packet_loop*`, KHÔNG tiêu attempt của packet, KHÔNG nằm trong write_set của packet.
+# Dùng #55 vì đó là luồng điều phối đang mở và vì sự cố sinh ra nhánh này xảy ra GIỮA LÚC
+# chạy wp55. Ghi thẳng ra đây để không ai đọc `packet_issue: 55` thành "đây là việc của
+# packet".
+#
+# VÌ SAO CÓ NHÁNH NÀY:
+# 15-08-2026 phiên điều phối chạy `codex login status`, nhận `Not logged in`, rồi KẾT LUẬN
+# "container không gọi được codex" và bắt chủ kho chờ máy khác gần trọn ngày. Nguyên nhân
+# gốc KHÔNG phải xác thực: hook trên `master` đã khôi phục `CODEX_AUTH_JSON` từ 14-08,
+# nhưng phiên đứng trên NHÁNH PACKET rẽ từ base_sha CŨ HƠN commit ấy nên chạy hook cũ.
+# Đo được: hook cây phiên nhắc `CODEX_AUTH_JSON` 0 lần, hook master nhắc 5 lần.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: null
+la_viec_cua_packet: false
+luong_dieu_phoi_note: 'dùng #55 làm luồng điều phối; KHÔNG thuộc packet wp55'
+
+role: reviewer
+provider: codex                 # BẮT BUỘC — người vá là claude (§8 cross-provider)
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+lease_id: moi-truong-review-1-codex-20260815
+
+branch: ops/moi-truong-env-first
+reviewed_sha_required: 0194ea0eea9d4b9eed569059f1bda9775ad92971
+base_sha: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1
+base_note: 'base là master tại lúc rẽ nhánh — diff ĐÚNG 5 tệp'
+target_pull_request: null
+target_pull_request_note: >-
+  Chưa mở PR: chủ kho chưa duyệt nội dung, mở PR trước khi có verdict là tự tạo áp lực
+  land. Verdict giao qua tệp + comment trên #55.
+
+pham_vi_sua:
+  - .claude/dev/launcher.py
+  - .claude/dev/launcher_test.py
+  - .claude/hooks/session-start.sh
+  - CLAUDE.md
+  - docs/GOI_AGENT_DA_NEN.md
+
+prompt_path: ops/prompts/moi-truong-review-1-codex-20260815.md
+prompt_sha256_required: 144198286555951ce1d82a310cb0d4773e58b3fc1fc1dd4146619a5bcbf623ae
+
+granted_by: ducthangho          # CHỦ KHO — §2 người có thẩm quyền
+granted_on_instruction: 'direct, in-session, 2026-08-15 (cấp lease reviewer codex cho cả hai nhánh đi)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-15T17:25:00Z'
+lease_expires_at_utc: '2026-08-16T18:00:00Z'
+run_minutes: 1475
+heartbeat_required_minutes: 30
+
+nguoi_va: 'phiên ĐIỀU PHỐI (claude), theo lệnh trực tiếp của chủ kho'
+
+# Trục đáng dồn sức — đây là bản vá đụng CREDENTIAL, nên chiều an ninh nặng hơn cả.
+trong_tam_review:
+  - id: ro-gia-tri-bien
+    muc: >-
+      quet_bien_moi_truong · lenh_moi_truong · _van_tay · _nhom_van_tay · lenh_doctor ·
+      chuan_bi_xac_thuc
+    hoi: >-
+      có ĐƯỜNG NÀO in ra GIÁ TRỊ biến không, kể cả gián tiếp qua thông điệp lỗi, traceback,
+      --json, repr()? Độ dài + vân tay 8 ký tự có đủ suy ngược với biến giá trị ngắn không
+      (oracle)?
+  - id: ghi-credential-ra-dia
+    muc: chuan_bi_xac_thuc
+    hoi: >-
+      bốn chốt nó khai có THẬT không — không đè khi đã đăng nhập, đòi khoá `tokens`, tệp
+      tạm + chmod 600 + os.replace, không in giá trị kể cả khi hỏng? Có cửa sổ nào tệp mang
+      quyền rộng? Tệp tạm còn sót khi chết giữa chừng?
+  - id: trung-viec-voi-hook
+    hoi: >-
+      chuan_bi_xac_thuc TRÙNG việc với khối trong session-start.sh. Hai bản trôi lệch được
+      không? Bên quên cập nhật là bên đẩy lọt cái gì?
+  - id: hook-phien-do-thuong-truc
+    hoi: >-
+      chốt `hook-phien` đỏ trên gần như MỌI nhánh packet, nên người vá để nó ra khỏi mã
+      thoát mặc định (chỉ vào `--doi-kha-dung`) với lý do "chốt đỏ thường trực là chốt bị
+      bỏ qua". Lý do ĐÚNG hay là HẠ CHUẨN? Có tiêu chí cơ học chặt hơn so-băm-toàn-tệp không?
+  - id: noi-hop-dong-ngam
+    hoi: >-
+      doctor thêm mã 13 và trường `ok_kha_dung`. Người vá khai GIỮ nguyên nghĩa `ok` và mã
+      12, chỉ nới bằng cờ. KIỂM BẰNG CHẠY: `git grep -n 'launcher.py doctor'` xem phía gọi
+      nào đổi hành vi.
+  - id: set-e-code-chet
+    hoi: >-
+      người vá tự khai suýt để code chết (`set -e` + `lenh; MA=$?`). Còn chỗ nào cùng bệnh
+      trong hook? `|| true` ở đường cài rg có nuốt lỗi cần thấy không?
+
+# Người vá TỰ KHAI hai lỗi của chính bản vá, do phản chứng bắt được — kiểm xem đã sửa thật.
+tu_khai_da_sua:
+  - id: do-codex-fail-open
+    mo_ta: >-
+      bản nháp đọc dòng ĐẦU của `codex login status` rồi tìm "not logged in"; với HOME sạch
+      codex in trước một dòng WARNING nên phép kiểm trượt và báo DUNG_DUOC cho codex CHƯA
+      xác thực — fail-OPEN. Nay lấy MÃ THOÁT làm chuẩn.
+  - id: hook-set-e-code-chet
+    mo_ta: >-
+      `"$PY" … doctor; MA=$?` với `set -e` giết script ngay tại doctor ⇒ xử lý 12/13 là CODE
+      CHẾT và dòng "xong" không in. Nay `MA=0` rồi `|| MA=$?`.
+  - id: nhom-van-tay-bat-oan
+    mo_ta: >-
+      bản đầu gom mọi biến theo vân tay ⇒ báo oan tám biến cùng `"1"` và chín biến cùng
+      `"true"`. Nay đòi tên khớp mẫu bí mật VÀ giá trị dài >= 8.
+
+do_lai_dung_chep:
+  note: >-
+    Tài liệu khai nhiều CON SỐ đo trong container điều phối. Môi trường của bạn có thể
+    KHÁC. Đo lại từng cái; khác thì NÓI RÕ, đừng chép số của người vá.
+  items:
+    - 'hook cây phiên 298d96fe51f70e4e nhắc CODEX_AUTH_JSON 0 lần; hook master 3c3dd49a8a163479 nhắc 5 lần'
+    - 'năm biến cùng vân tay f07d7417: GH_TOKEN GITHUB_TOKEN AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY CLOUDSDK_AUTH_ACCESS_TOKEN'
+    - 'REST api.github.com 403 bất kể token; /user trả 200'
+    - 'launcher_test 83/83 → 86/86 · eol checked=330 violations=0 · doc-claims flags=[]'
+
+phan_chung_bat_buoc:
+  home_tam: true
+  note: >-
+    Mọi phản chứng đụng credential PHẢI chạy trên HOME TẠM. Đột biến ghi vào `~` thật rồi
+    khôi phục trong `finally` là bom hẹn giờ (CLAUDE.md) — lượt chạy bị cắt giữa chừng thì
+    `finally` không chạy. ĐỪNG đụng `~/.codex/auth.json` thật.
+  dot_bien_ca_moi: >-
+    Đột biến từng ca mới (t84 t85 t86) và xem nó có RĂNG không. Ca xanh không chứng minh gì
+    nếu bỏ chốt đi nó vẫn xanh.
+
+neo_sha_bat_bien_required: true
+fixture_nguyen_van_required: true
+
+duong_giao_verdict_da_do: >-
+  REST thẳng tới api.github.com bị PROXY trả 403 bất kể token; gh không cài; git push chạy.
+  Không ghi được lên GitHub thì ghi verdict ra tệp, phiên điều phối đăng hộ.
+
+preconditions_measured_at_utc: '2026-08-15T17:15:00Z'
+master_sha_at_grant: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1

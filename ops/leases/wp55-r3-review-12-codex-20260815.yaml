@@ -1,0 +1,140 @@
+# Lease REVIEWER lượt 12 cho wp55 revision 3 — nhánh VÁ RIÊNG, KHÔNG phải head PR #120.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+# NHỚ ĐÓNG NHÁY mọi giá trị chứa `#` — không nháy thì `#` mở chú thích YAML và cắt cụt
+# giá trị (đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ).
+#
+# VÌ SAO CÓ LEASE NÀY:
+# Verdict lượt 11 giữ nguyên bốn P1. Ba trong bốn mô tả lỗi của cơ chế suy đoán mà AC 19
+# mới sẽ XOÁ, nên vá bây giờ là làm hai lần rồi vứt lần đầu. Riêng
+# `doctrine-html-table-token-context-bypass` là về DÒ CẤU TRÚC, cần dù AC 19 đổi thế nào —
+# nên chỉ mục đó được vá, trên NHÁNH RIÊNG.
+#
+# KHÁC MỌI LEASE REVIEW TRƯỚC CỦA PACKET NÀY: head được soi KHÔNG phải head của PR #120.
+# PR #120 vẫn đứng ở 4085bbf và CỐ Ý không đổi — lượt 11 vừa soi đúng head đó, và đã có BA
+# lượt liên tiếp bị head bỏ lại phía sau. Bản vá nằm riêng để chủ kho quyết đưa vào
+# revision 3 hay để sang revision 4.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+phase_key: F3-03
+mission_issue: 54
+mission_revision: 6
+revision: 3
+generation: 9
+lease_id: wp55-r3-review-12-codex-20260815
+
+spec_path: ops/specs/wp55-r3-spec.md
+spec_branch: ops/wp55-r3-spec
+spec_hash: e321f811724fae97b19d523a3e5159bc13b425cd15fc6c753c7439fe28cae22d
+spec_hash_basis: sha256 của chính tệp spec, byte nguyên trạng
+
+role: reviewer
+provider: codex                 # BẮT BUỘC — người vá là claude (§8 cross-provider)
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+branch: ops/wp55-r3-fix-html-table-token
+reviewed_sha_required: 5ec8fabfded6adcfb8b7288ac7846f92267e165e
+base_sha: 4085bbf22d565a4189977f0504dfd8e5f748bfce
+base_note: 'base CHÍNH LÀ head mà lượt 11 đã soi — diff chỉ ĐÚNG 2 tệp'
+target_pull_request: null
+target_pull_request_note: >-
+  Chưa mở PR. Chủ kho chưa quyết bản vá này vào revision 3 hay sang revision 4; mở PR
+  trước khi có quyết định là tự tạo áp lực land. Verdict giao qua tệp + comment trên #55.
+
+prompt_path: ops/prompts/wp55-r3-review-12-codex-20260815.md
+prompt_sha256_required: 52a94636d9e4bb1564576cd521fdeb78df9984827bd6380559b4ef083bb45bd8
+
+granted_by: ducthangho          # CHỦ KHO — §2 người có thẩm quyền
+granted_on_instruction: 'direct, in-session, 2026-08-15 (cấp lease reviewer codex cho cả hai nhánh đi)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-15T17:20:00Z'
+lease_expires_at_utc: '2026-08-16T18:00:00Z'
+run_minutes: 1480
+heartbeat_required_minutes: 30
+
+# Người vá là phiên ĐIỀU PHỐI, không qua lease executor — nói thẳng để reviewer biết.
+nguoi_va: 'phiên ĐIỀU PHỐI (claude), theo lệnh trực tiếp của chủ kho'
+khong_qua_lease_executor: true
+attempts_note: >-
+  Sổ attempts của revision 3 đã 3/3. Bản vá này KHÔNG tiêu attempt vì nằm ngoài nhánh
+  packet và chưa được quyết đưa vào revision 3. Ghi ra để reviewer biết ranh giới, KHÔNG
+  phải để hạ chuẩn duyệt — thấy vấn đề thì `changes_requested` là đường bình thường.
+
+# Thứ MỚI, chưa ai review.
+new_since_last_review:
+  finding_id: doctrine-html-table-token-context-bypass
+  kind: doctrine-structural
+  fix: >-
+    hai hàm chạy trước lúc đếm mốc bảng — `_xoa_gia_tri_thuoc_tinh` (duyệt ký tự, xoá giá
+    trị thuộc tính có nháy trong thẻ) và `_xoa_phan_tu_raw_text` (xoá nội dung
+    script/style/textarea)
+  do_duoc_boi_nguoi_va: >-
+    closer-in-script 0→6 · closer-in-attribute 0→6 · opener-in-script (bắt oan) 6→0 ·
+    ba đối chứng khác đúng một biến GIỮ NGUYÊN 6/6/0
+  chot_co_hoc: 'nền 173/173 → 178/178 · đột biến 44→47 · lớp lách 66→69 · ca bắt-oan 35→37'
+  reviewer_must_check: >-
+    lập luận "đây là dò CẤU TRÚC, không phải phân loại NGỮ NGHĨA như AC 19, nên không phải
+    cú đánh quá thứ bảy" có đứng vững không; chỗ CỐ Ý lệch chuẩn HTML (raw-text thiếu thẻ
+    đóng thì KHÔNG xoá gì) có mở đường lách nào khác không; duyệt ký tự có bắt oan văn xuôi
+    dạng `a <b "x" c>` không; danh sách raw-text ba tên có đủ không
+
+# Câu hỏi mức SPEC mà chính reviewer đã trả lời ở lượt 11 — lượt này kiểm sự NHẤT QUÁN.
+cau_hoi_muc_spec: >-
+  Lượt 11 kết luận AC 19 KHÔNG cưỡng chế được bằng máy vừa sound vừa complete, và vá thêm
+  heuristic thì tiếp tục tạo lách/bắt oan. Người vá lập luận finding NÀY khác loại — cơ
+  học, hữu hạn, không phải ngữ nghĩa. Phán định thẳng: nếu vẫn là cùng con lắc thì nói rõ,
+  `changes_requested` hoặc `blocked` có giá trị hơn một cái gật.
+
+prior_review: wp55-r3-review-11-codex-20260815
+prior_review_verdict: changes_requested
+prior_reviewed_sha: 4085bbf22d565a4189977f0504dfd8e5f748bfce
+prior_review_verdict_file: 'ops/reviews/wp55-r3-review-11-codex-verdict.md trên ops/wp55-r3-review-11-verdict'
+prior_review_verdict_sha256: 4f6d5ab39d5a05eb3fc910d3a85dd1fa58a05653d19aa78b740230e0026b0f6f
+
+# Ba mục KHÔNG nêu lại: đã đo là ĐÃ ĐÓNG ở 4085bbf.
+da_dong_dung_neu_lai:
+  - finding_id: lease-schema-allows-extra-keys
+    bang_chung: 'begin-attempt với state có khoá thừa → rc=8 có kiểm soát'
+  - finding_id: packet-suite-mutation-count-mismatch
+    bang_chung: 'suite tự IN số đếm bằng máy; hồ sơ hết chép tay'
+  - finding_id: packet-loop-suite-mutant-gate-red
+    bang_chung: 'suite rc=0, TỔNG ĐẠT'
+
+finding_deferred:
+  rule: 'KHÔNG nêu như finding mới; chỉ nêu nếu đo được điều KHÁC với mô tả'
+  items:
+  - finding_id: doctrine-measurement-marker-semantic-bypass
+    decision: 'hoãn revision 4 — mô tả lỗi của cơ chế sắp bị xoá'
+  - finding_id: doctrine-indented-code-block-bypass
+    decision: 'hoãn revision 4 — cùng lý do'
+  - finding_id: doctrine-comment-erases-fence-closer-bypass
+    decision: 'hoãn revision 4 — cùng lý do'
+  - finding_id: ac20-archive-tree-suite-not-self-contained
+    decision: 'hoãn revision 4'
+  - finding_id: same-provider-fallback-contradicts-protocol
+    decision: 'hoãn revision 4 — vá là NỚI một AC, đúng thứ §12 cấm'
+
+claimed_but_unverified:
+  - id: tl-selftest
+    note: >-
+      CHƯA AI xác minh 1696/1696 qua ba lượt (9 timeout, điều phối không chạy được, 11 chết
+      ở pyo3 PanicException). Chạy được thì báo số thật; không thì nói rõ và ĐỪNG mượn số.
+
+fixture_nguyen_van_required: true
+neo_sha_bat_bien_required: true
+
+duong_giao_verdict_da_do: >-
+  REST thẳng tới api.github.com bị PROXY trả 403 bất kể token; gh không cài; git push chạy.
+  Không ghi được lên GitHub thì ghi verdict ra tệp, phiên điều phối đăng hộ.
+
+preconditions_measured_at_utc: '2026-08-15T17:15:00Z'
+master_sha_at_grant: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1

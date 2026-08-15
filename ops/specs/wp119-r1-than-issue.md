@@ -8,6 +8,16 @@
 > `PATCH /repos/…/issues/119` trả **HTTP 403**, và không workflow nào trong kho ghi được
 > THÂN issue (`ops-publish-lease.yml` chỉ `POST …/issues/N/comments`). Cần chủ kho dán.
 
+```mirror
+spec_path: ops/specs/wp119-r1-spec.md
+spec_hash: 1740b1c5c0b999c48c24b4aead29a6bc9b97c58eb483d42dd0a03714c9ce0a97
+packet_issue: 119
+```
+
+> Khối trên là phần MÁY ĐỌC ĐƯỢC của bản chiếu. `ops/mirror_spec.py` đối chiếu cả ba
+> trường với tệp thật: băm lệch ⇒ CHẶN(6), `packet_issue` lệch với spec ⇒ CHẶN(8).
+> Nhờ vậy bản chiếu không TRÔI khỏi spec mà không ai biết.
+
 ---
 
 ## ⬇ TỪ ĐÂY TRỞ XUỐNG LÀ NỘI DUNG CẦN DÁN VÀO THÂN #119 ⬇

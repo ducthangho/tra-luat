@@ -1938,6 +1938,84 @@ def _co_lap_toan_cuc():
 #
 # KHÔNG dùng `killpg` để tự bảo vệ, và cũng KHÔNG nới bất kỳ chốt chống-giết-nhầm nào
 # trong `launcher.py` — chúng là thứ kho đã trả giá để dựng.
+# ------------------------------------------------------------- TỰ KHAI MÔI TRƯỜNG
+#
+# VÌ SAO — BA lượt cross-review liên tiếp, hai bên đo cùng một cổng ra hai kết quả
+# khác nhau, mỗi bên tự nhất quán:
+#
+#   điều phối (ngoài/trong sandbox)  47/47 đạt · vỏ shell sống sau khi python xong
+#   reviewer  (sandbox codex)        46/47     · lệnh shell sau python KHÔNG chạy
+#
+# Hai lượt đầu tôi đi chứng minh số của mình đúng. Cả hai lần đều đúng theo nghĩa hẹp
+# và KHÔNG giải quyết được gì, vì lượt sau lại lệch tiếp. Vấn đề không phải ai đúng —
+# **một cổng cho kết quả phụ thuộc nơi chạy thì chưa phải cổng**.
+#
+# Khối này không sửa cổng. Nó làm việc phải làm TRƯỚC: bắt cổng TỰ KHAI nó đang chạy ở
+# đâu, để hai phép đo ở hai nơi SO ĐƯỢC với nhau thay vì mâu thuẫn nhau. Không có nó,
+# mỗi lần lệch lại tốn một lượt review để phát hiện ra là hai người đứng hai chỗ khác nhau.
+#
+# NGUYÊN TẮC: mọi phép dò bọc `try` riêng và trả `None` khi không đo được. Một khối
+# CHẨN ĐOÁN mà tự nó ném lỗi thì phá đúng thứ nó sinh ra để cứu. `None` nghĩa là KHÔNG
+# ĐO ĐƯỢC, khác hẳn `False` — đừng gộp hai thứ đó.
+def _do_an_toan(ham):
+    try:
+        return ham()
+    except BaseException:            # noqa: BLE001 - chẩn đoán KHÔNG được làm hỏng lượt chạy
+        return None
+
+
+def khai_moi_truong() -> dict:
+    """Chụp những thứ ĐÃ CHỨNG MINH là làm đổi kết quả cổng, cộng vài thứ lân cận."""
+    pid = _do_an_toan(os.getpid)
+    pgid = _do_an_toan(lambda: os.getpgid(0))
+    ppid = _do_an_toan(os.getppid)
+    return {
+        "he_dieu_hanh": _do_an_toan(platform.system),
+        "python": _do_an_toan(lambda: sys.version.split()[0]),
+        "pid": pid,
+        "ppid": ppid,
+        "pgid": pgid,
+        "sid": _do_an_toan(lambda: os.getsid(0)),
+        # TRỌNG TÂM: ta có chung nhóm với TIẾN TRÌNH GỌI không. Chung nhóm thì một cú
+        # `killpg` của ca test với tới cả nó — đó là kịch bản đã đo thấy giết vỏ shell.
+        "la_truong_nhom": None if (pid is None or pgid is None) else pid == pgid,
+        "chung_nhom_voi_cha": _do_an_toan(
+            lambda: os.getpgid(0) == os.getpgid(os.getppid())),
+        # Job control: không có thì vỏ shell KHÔNG đặt con vào nhóm riêng.
+        "co_job_control": _do_an_toan(lambda: os.tcgetpgrp(0) >= 0),
+        "stdin_la_tty": _do_an_toan(lambda: os.isatty(0)),
+        "stdout_la_tty": _do_an_toan(lambda: os.isatty(1)),
+        # PID namespace — GIÁ TRỊ THÔ, KHÔNG suy ra boolean.
+        #
+        # Bản đầu của tôi tính `trong_pid_namespace` bằng cách so ns của mình với ns của
+        # `/proc/1`. SAI, và bản khai tự phơi ra ngay lượt chạy đầu: TRONG một namespace
+        # thì `/proc/1` cũng thuộc chính namespace ấy, nên phép so LUÔN bằng nhau và cờ
+        # luôn `false` — kể cả khi đang ở namespace riêng thật.
+        #
+        # Thứ THẬT SỰ phân biệt là so INODE GIỮA HAI MÁY: đo được `pid:[4026531836]` ở
+        # phiên điều phối và `pid:[4026532315]` trong sandbox codex. Không phép dò tại
+        # chỗ nào nói được điều đó — phải đặt hai bản khai cạnh nhau. Đó đúng là lý do
+        # khối này tồn tại, nên ở đây CHỈ ghi số thô và để việc so cho người đọc.
+        "ns_pid": _do_an_toan(lambda: os.readlink("/proc/self/ns/pid")),
+        "ns_pid_cua_init": _do_an_toan(lambda: os.readlink("/proc/1/ns/pid")),
+        "tien_trinh_1_la": _do_an_toan(
+            lambda: open("/proc/1/comm", encoding="utf-8").read().strip()),
+        "co_dockerenv": _do_an_toan(lambda: os.path.exists("/.dockerenv")),
+        "so_cpu": _do_an_toan(os.cpu_count),
+    }
+
+
+def _mot_dong_moi_truong(mt: dict) -> str:
+    """Một dòng gọn để LUÔN in — đủ phân biệt hai môi trường đã gây tranh cãi."""
+    def g(k):
+        v = mt.get(k)
+        return "?" if v is None else v
+    return (f"moi truong: pid={g('pid')} pgid={g('pgid')} sid={g('sid')} "
+            f"truong_nhom={g('la_truong_nhom')} chung_nhom_voi_cha={g('chung_nhom_voi_cha')} "
+            f"job_control={g('co_job_control')} ns_pid={g('ns_pid')} "
+            f"init={g('tien_trinh_1_la')}")
+
+
 def _la_truong_nhom() -> bool:
     """True nếu tiến trình này là TRƯỞNG NHÓM (pid == pgid)."""
     try:
@@ -2290,6 +2368,44 @@ def t90_tu_tach_nhom_khi_chung_nhom_voi_vo_shell():
     # (d) khong do duoc pgid => coi nhu an toan, DUNG tu y setsid
     os.getpgid = lambda _: (_ for _ in ()).throw(OSError("khong do duoc"))
     bang(_la_truong_nhom() is True, "khong do duoc pgid thi phai coi la truong nhom")
+
+
+@ca
+def t91_ban_khai_moi_truong_khong_duoc_chet_va_khong_duoc_doan():
+    """Bản khai phải SỐNG SÓT mọi phép dò hỏng, và phải phân biệt KHÔNG ĐO ĐƯỢC với FALSE.
+
+    Khối này sinh ra vì BA lượt review liên tiếp hai bên đo ra hai kết quả khác nhau mà
+    không ai biết mình đứng đâu. Nếu chính nó ném lỗi thì nó phá đúng thứ nó sinh ra để
+    cứu — nên ca này ép TỪNG phép dò hỏng và đòi bản khai vẫn ra.
+
+    `None` (không đo được) KHÁC `False` (đo được, và là không). Gộp hai thứ đó lại là
+    đúng kiểu sai đã làm tôi mất ba lượt: đọc một quan sát thiếu thành một kết luận.
+    """
+    goc_readlink, goc_getpgid, goc_open = os.readlink, os.getpgid, __builtins__["open"] \
+        if isinstance(__builtins__, dict) else __builtins__.open
+
+    def no(*_a, **_k):
+        raise OSError("ep hong de thu")
+
+    # (a) mọi phép dò hỏng ⇒ VẪN ra bản khai, không ném
+    os.readlink, os.getpgid = no, no
+    mt = khai_moi_truong()
+    bang(isinstance(mt, dict) and mt, "moi phep do hong ma ban khai KHONG ra")
+    bang(mt["ns_pid"] is None, f"do hong phai la None, duoc {mt['ns_pid']!r}")
+    bang(mt["chung_nhom_voi_cha"] is None,
+         f"do hong phai la None chu khong phai False, duoc {mt['chung_nhom_voi_cha']!r}")
+    bang(mt["he_dieu_hanh"] is not None, "phep do KHONG hong cung bi keo theo")
+    os.readlink, os.getpgid = goc_readlink, goc_getpgid
+
+    # (b) một dòng tóm tắt phải in được kể cả khi thiếu, và hiện `?` chứ không vỡ
+    dong = _mot_dong_moi_truong({"pid": 1})
+    bang("pid=1" in dong and "?" in dong, f"dong tom tat sai: {dong!r}")
+
+    # (c) đo THẬT: những khoá đã dùng để so hai môi trường phải có mặt
+    mt = khai_moi_truong()
+    for k in ("pid", "pgid", "sid", "la_truong_nhom", "chung_nhom_voi_cha", "ns_pid"):
+        bang(k in mt, f"ban khai thieu khoa {k!r} — khoa nay dung de so hai moi truong")
+    bang(mt["pid"] == os.getpid(), "pid khai sai")
 
 
 # ------------------------------------------------------ tự đột biến: có răng không
@@ -2672,6 +2788,14 @@ def chay_dot_bien() -> int:
 def main() -> int:
     # TRƯỚC MỌI THỨ KHÁC: nếu đang chung nhóm với vỏ shell thì tách ra, kẻo một cú
     # `killpg` của ca test cuốn theo cả người gọi (xem `_tu_tach_nhom_neu_can`).
+    # TỰ KHAI TRƯỚC, tách nhóm SAU — thứ tự này cố ý: bản khai phải mô tả môi trường
+    # NHƯ NÓ ĐẾN, không phải như sau khi ta đã sửa nó. Khai sau khi tách thì mọi lượt
+    # chạy đều trông giống nhau và khối này thành vô dụng.
+    mt = khai_moi_truong()
+    if "--moi-truong" in sys.argv:
+        print(json.dumps(mt, ensure_ascii=False, indent=2, default=str))
+        return 0
+    print(_mot_dong_moi_truong(mt))
     print(f"nhom tien trinh: {_tu_tach_nhom_neu_can()}")
     if "--dot-bien" in sys.argv:
         print("TU DOT BIEN - moi dot bien PHAI giet dung cac ca da chi dinh:")

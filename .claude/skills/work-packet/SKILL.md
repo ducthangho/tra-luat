@@ -36,6 +36,37 @@ export PYTHONDONTWRITEBYTECODE=1
 export PYTHONPYCACHEPREFIX=<ngoài cây>
 ```
 
+## Công cụ — nhánh packet KHÔNG mang công cụ của kho
+
+`base_sha` thường cũ hơn công cụ trên nhánh chính, nên cây làm việc của packet có thể
+thiếu cả bộ dựng công cụ lẫn hook phiên, và `settings.json` bản cũ có thể chưa đăng ký
+`SessionStart`. Kho gắn giữa phiên thì hook cũng không chạy. Ba chuyện độc lập, mỗi
+chuyện một mình đã đủ để phiên mở ra mà không có `codex`/`rg`.
+
+Lấy công cụ TỪ NHÁNH CHÍNH, đừng chạy cả hook phiên chỉ để lấy một thứ — hook có bước
+cài phụ thuộc Python và đã đo được một lần làm hỏng môi trường đang tốt:
+
+```bash
+D="$(mktemp -d)"
+git show origin/master:.claude/dev/launcher.py > "$D/launcher.py"
+python3 "$D/launcher.py" doctor              # bằng chứng DƯƠNG, chạy được từ mọi nhánh
+```
+
+**Vắng mặt là một QUAN SÁT; "môi trường không có" là một KẾT LUẬN.** Trước khi báo với
+người điều phối rằng không gọi được một CLI, phải chạy `command -v <tool>` và
+`<tool> login status` trong CHÍNH phiên này, rồi loại trừ xong hai khả năng còn lại: hook
+chưa chạy, và nhánh đang checkout không mang hook. Tài liệu mô tả một lần đo trong quá
+khứ trên một cây khác — nó không phải quan sát về phiên đang chạy. Đã trả giá:
+một phiên báo cross-review không chạy được, trong khi CLI cài được và lượt review sau đó
+tìm ra một P1 thật.
+
+Kiểm biến bí mật bằng **sự tồn tại**, không bao giờ in nội dung — biến khôi phục đăng
+nhập chứa refresh token, in một lần là phải thu hồi và cấp lại:
+
+```bash
+echo "${TEN_BIEN:+có, ${#TEN_BIEN} ký tự}${TEN_BIEN:-chưa đặt}"
+```
+
 ## Gate
 
 `/gate`. Đọc mã thoát trực tiếp từng tiến trình, không qua pipe — `rc` của pipe là `rc` của lệnh cuối.

@@ -1881,6 +1881,11 @@ _TOAN_CUC_CAN_CO_LAP = (
     (subprocess, "run"),
     (shutil, "which"),
     (os.path, "expanduser"),
+    # Ba mục dưới để `t90` vá được QUYẾT ĐỊNH tách nhóm mà không phải gọi `setsid`
+    # thật — gọi thật là đổi session của chính bộ test đang chạy.
+    (os, "getpid"),
+    (os, "getpgid"),
+    (os, "setsid"),
 )
 
 
@@ -1902,6 +1907,60 @@ def _co_lap_toan_cuc():
         if os.environ is not None and dict(os.environ) != noi_dung_env:
             os.environ.clear()
             os.environ.update(noi_dung_env)
+
+
+# ------------------------------------------------- TỰ TÁCH NHÓM TIẾN TRÌNH
+#
+# VÌ SAO — cross-review lượt 3, `launcher-gates-still-fail-after-global-isolation`.
+# Reviewer báo suite "không in tổng kết" và cả lệnh shell đặt SAU python cũng không
+# chạy. Tôi tái lập được: chạy bộ test TRONG sandbox có PID namespace thì VỎ SHELL
+# GỌI NÓ CHẾT, đầu ra rỗng sạch.
+#
+# ĐO ĐƯỢC, cùng một sandbox:
+#   python3 launcher_test.py            -> vo shell CHET, log 1 dong
+#   setsid python3 launcher_test.py     -> rc=0, day du 89/89, vo shell SONG
+#   vo shell trong sandbox: pid=2 pgid=1
+#
+# Cơ chế: `launcher.py` giết theo NHÓM (`killpg`). Ở máy thường có job control, vỏ
+# shell đặt python vào NHÓM RIÊNG nên python là trưởng nhóm và bán kính sát thương
+# không chạm tới shell. Trong PID namespace không có job control, python THỪA KẾ
+# nhóm 1 của shell — nên một cú `killpg` của bộ test cuốn theo cả shell.
+#
+# Kho đã trả giá đúng lớp này: chú thích ở `t50` ghi "bộ test tự sát (exit 143),
+# `finally` không chạy, launcher.py ở lại trạng thái đã đột biến và đi thẳng vào
+# commit". Chốt dựng khi ấy (`start_new_session=True` cho tiến trình mồi) đủ cho máy
+# thường, KHÔNG đủ khi cả python lẫn shell bị dồn vào một nhóm.
+#
+# CHỮA: nếu ta KHÔNG phải trưởng nhóm thì ta đang chung nhóm với người gọi ⇒ `setsid()`
+# để sang session/nhóm mới. Ở máy thường ta LÀ trưởng nhóm nên chốt này KHÔNG làm gì —
+# đó là lý do lỗi chưa bao giờ lộ ra ngoài sandbox, và cũng là lý do bản vá không đổi
+# hành vi ở đó.
+#
+# KHÔNG dùng `killpg` để tự bảo vệ, và cũng KHÔNG nới bất kỳ chốt chống-giết-nhầm nào
+# trong `launcher.py` — chúng là thứ kho đã trả giá để dựng.
+def _la_truong_nhom() -> bool:
+    """True nếu tiến trình này là TRƯỞNG NHÓM (pid == pgid)."""
+    try:
+        return os.getpid() == os.getpgid(0)
+    except (OSError, AttributeError):
+        return True          # không đo được thì coi như an toàn, ĐỪNG tự ý setsid
+
+
+def _tu_tach_nhom_neu_can() -> str:
+    """Tách sang session mới khi đang chung nhóm với vỏ shell gọi mình.
+
+    Trả về chuỗi mô tả để IN RA — im lặng ở đây là tự tước mất bằng chứng, mà cả
+    đợt review này xoay quanh đúng chuyện đó.
+    """
+    if os.name != "posix":
+        return "bo qua (khong phai POSIX)"
+    if _la_truong_nhom():
+        return "khong can (da la truong nhom)"
+    try:
+        os.setsid()
+    except OSError as e:
+        return f"KHONG tach duoc ({type(e).__name__}) - killpg co the giet vo shell"
+    return f"da tach sang session moi (pgid={os.getpgid(0)})"
 
 
 def _dot_bien_du_san(tong: int, khong_do: int) -> bool:
@@ -2175,6 +2234,62 @@ def t89_harness_phai_hoan_nguyen_trang_thai_toan_cuc():
     except RuntimeError:
         pass
     bang(platform.system is goc[2], "ngoai le giua chung ma KHONG hoan nguyen")
+
+
+@ca
+def t90_tu_tach_nhom_khi_chung_nhom_voi_vo_shell():
+    """Bộ test phải tự tách nhóm khi nó chung nhóm với người gọi.
+
+    Cross-review lượt 3: trong sandbox có PID namespace, vỏ shell là `pid=2 pgid=1`
+    và python thừa kế nhóm 1 của nó, nên một cú `killpg` của ca test GIẾT LUÔN VỎ
+    SHELL — đo được: chạy trực tiếp thì shell chết và đầu ra rỗng, còn
+    `setsid python3 …` thì rc=0 và đủ `89/89`.
+
+    Ca này vá `os.getpid`/`os.getpgid`/`os.setsid` (đã nằm trong danh sách cô lập)
+    để đo QUYẾT ĐỊNH chứ không gọi `setsid` thật — gọi thật là đổi session của chính
+    bộ test đang chạy.
+
+    Khoá cả bốn nhánh, vì chữa một chiều mà nới chiều kia là bệnh kinh niên của kho:
+    chung nhóm thì PHẢI tách; là trưởng nhóm thì KHÔNG được đụng vào; `setsid` hỏng
+    thì phải NÓI RA chứ không im lặng; và không POSIX thì bỏ qua.
+    """
+    # Chot nay nam trong CHINH tep test (harness), khong nam trong launcher.py —
+    # nen va thang vao `os` toan cuc. An toan vi `os.getpid`/`getpgid`/`setsid`
+    # deu nam trong `_TOAN_CUC_CAN_CO_LAP`, runner hoan nguyen sau moi ca.
+    def dung_canh(pid, pgid, setsid_hong=False):
+        goi = []
+        os.getpid = lambda: pid
+        os.getpgid = lambda _: pgid
+
+        def _setsid():
+            goi.append(1)
+            if setsid_hong:
+                raise PermissionError("EPERM")
+        os.setsid = _setsid
+        return goi
+
+    # (a) CHUNG nhom voi vo shell (pid != pgid) => PHAI tach
+    goi = dung_canh(2, 1)
+    kq = _tu_tach_nhom_neu_can()
+    bang(len(goi) == 1, f"chung nhom ma KHONG goi setsid: {kq!r}")
+    bang("da tach" in kq, f"mo ta phai noi da tach, duoc {kq!r}")
+
+    # (b) DA la truong nhom => TUYET DOI khong dung vao
+    goi = dung_canh(500, 500)
+    kq = _tu_tach_nhom_neu_can()
+    bang(len(goi) == 0, f"la truong nhom ma VAN goi setsid: {kq!r}")
+    bang("khong can" in kq, f"mo ta sai: {kq!r}")
+
+    # (c) setsid HONG => phai NOI RA, khong im lang
+    goi = dung_canh(2, 1, setsid_hong=True)
+    kq = _tu_tach_nhom_neu_can()
+    bang(len(goi) == 1, "phai co thu goi setsid")
+    bang("KHONG tach duoc" in kq and "killpg" in kq,
+         f"setsid hong ma khong canh bao ro: {kq!r}")
+
+    # (d) khong do duoc pgid => coi nhu an toan, DUNG tu y setsid
+    os.getpgid = lambda _: (_ for _ in ()).throw(OSError("khong do duoc"))
+    bang(_la_truong_nhom() is True, "khong do duoc pgid thi phai coi la truong nhom")
 
 
 # ------------------------------------------------------ tự đột biến: có răng không
@@ -2555,6 +2670,9 @@ def chay_dot_bien() -> int:
 # ---------------------------------------------------------------------- main
 
 def main() -> int:
+    # TRƯỚC MỌI THỨ KHÁC: nếu đang chung nhóm với vỏ shell thì tách ra, kẻo một cú
+    # `killpg` của ca test cuốn theo cả người gọi (xem `_tu_tach_nhom_neu_can`).
+    print(f"nhom tien trinh: {_tu_tach_nhom_neu_can()}")
     if "--dot-bien" in sys.argv:
         print("TU DOT BIEN - moi dot bien PHAI giet dung cac ca da chi dinh:")
         hong, khong_do = chay_dot_bien()

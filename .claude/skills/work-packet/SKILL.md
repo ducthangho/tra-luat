@@ -64,8 +64,12 @@ Kiểm biến bí mật bằng **sự tồn tại**, không bao giờ in nội d
 nhập chứa refresh token, in một lần là phải thu hồi và cấp lại:
 
 ```bash
-echo "${TEN_BIEN:+có, ${#TEN_BIEN} ký tự}${TEN_BIEN:-chưa đặt}"
+if [ -n "${TEN_BIEN:-}" ]; then echo "có, ${#TEN_BIEN} ký tự"; else echo "chưa đặt"; fi
 ```
+
+Đừng nối `${VAR:+…}` với `${VAR:-…}` trong cùng một chuỗi: `:-` chỉ thay thế khi biến
+**rỗng hoặc chưa đặt**, nên ở nhánh "đã đặt" — nhánh người ta thật sự chạy — nó bung ra
+**chính giá trị**. Bản trước của dòng này in `có, 27 ký tự` rồi in luôn cả token.
 
 ## Gate
 

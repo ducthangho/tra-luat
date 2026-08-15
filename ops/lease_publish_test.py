@@ -19,7 +19,7 @@ import subprocess
 import sys
 import tempfile
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 HERE = Path(__file__).resolve().parent
 SCRIPT = HERE / "lease_publish.py"
@@ -588,6 +588,120 @@ def t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head():
          "vào nhánh mặc định, nếu không thì nó chỉ là một tên biến khác cho head")
 
 
+def _doi_thu_muc_reviews():
+    """Trả `ops/reviews`, và ĐỎ nếu nó vắng — KHÔNG có nhánh 'vắng thì thôi'.
+
+    Nhánh cũ bỏ qua ca khi thư mục vắng, với lý do 'bản sao không phải kho thật'. Đo ra
+    thì đó là một lỗ: xoá RIÊNG `README.md` -> ĐỎ, mà xoá CẢ thư mục -> vẫn 30/30 ĐẠT.
+    Tức chốt bắt được đột biến nhỏ và bỏ lọt đột biến lớn hơn chứa nó.
+
+    Cái giá thật nằm ở chỗ khác và đắt hơn: đột biến LUÔN chạy trên bản sao tạm (bài học
+    "bom hẹn giờ" — không đột biến tệp thật). Bản sao không có `.git`, nên chính chỗ duy
+    nhất ta dùng để đo sức của bộ test lại là chỗ chốt tự tắt. Bộ đo mà tự tắt trong môi
+    trường đo thì mọi con số nó trả về đều không neo vào đâu.
+
+    Một bản sao `ops/` hợp lệ vốn phải chứa `reviews/`. Nên đòi thẳng.
+    """
+    thu_muc = HERE / "reviews"
+    bang(thu_muc.is_dir(),
+         f"thiếu hẳn {thu_muc}. KHÔNG bỏ qua ca khi thư mục vắng: bản sao `ops/` hợp lệ "
+         f"vốn phải chứa nó. Nhánh 'vắng thì thôi' từng làm CẢ t26 lẫn t27 XANH khi đột "
+         f"biến xoá trọn thư mục — bắt được cái nhỏ, lọt cái to hơn chứa nó.")
+    return thu_muc
+
+
+def _bang(van: str, tieu_de: str) -> list:
+    """Trả các HÀNG DỮ LIỆU của bảng dưới `## <tieu_de>`, mỗi hàng là dict {tên cột: ô}.
+
+    SÁU bậc thu hẹp, mỗi bậc vì một lỗ ĐO ĐƯỢC. Chuỗi này mới là bài học, không phải
+    từng bậc riêng lẻ:
+
+    1. `in` cả tệp        -> id sót ở prose vẫn ĐẠT
+    2. `in` các DÒNG bảng -> id trong `<!-- -->` trên dòng '|' vẫn ĐẠT
+    3. `in` mọi Ô         -> tái dùng id được thoả bởi hàng của verdict KHÁC
+    4. theo HÀNG          -> mô tả của hàng nhắc CHÉO verdict khác + id của nó vẫn ĐẠT
+    5. theo CỘT CÓ TÊN    -> nhưng lấy cột thành HAI danh sách rồi `zip` thì hàng thiếu ô
+       bị lọc lệch nhau ⇒ `zip` ghép ô của HAI hàng khác nhau; và bảng KHÔNG có hàng
+       gạch phân cách vẫn được nhận, dù GitHub không render nó thành bảng.
+    6. nay: đòi hàng gạch, và trả HÀNG-CÓ-KHOÁ — không bao giờ tách cột rồi ghép lại.
+
+    Bậc 5 là bậc do CHÍNH bản vá bậc 4 sinh ra: tôi ràng "cùng hàng" bằng một cơ chế tự
+    nó phá vỡ ranh giới hàng. Vá một lớp bằng cách mở một lớp khác.
+    """
+    import re
+    van = re.sub(r"<!--.*?-->", "", van, flags=re.S)      # comment: người đọc KHÔNG thấy
+    ra, lay, rao = [], False, None
+    dau_bang, cho_gach = None, False
+
+    def la_gach(dong):
+        o = [x.strip() for x in dong.strip().strip("|").split("|")]
+        return bool(o) and all(x and set(x) <= set("-: ") for x in o)
+
+    for dong in van.splitlines():
+        # Rào mã: PHẢI nhớ ký tự mở và ĐỘ DÀI. Cờ bật/tắt thô bỏ sót rào `~~~` và đóng
+        # sớm rào ```` khi gặp dòng ``` bên trong — Markdown thì không đóng.
+        m = re.match(r"^\s*(`{3,}|~{3,})", dong)
+        if m:
+            k, d = m.group(1)[0], len(m.group(1))
+            if rao is None:
+                rao = (k, d)
+            elif k == rao[0] and d >= rao[1] and not dong.strip()[d:].strip():
+                rao = None
+            continue
+        if rao is not None:                                # bảng trong khối mã là ví dụ
+            continue
+        if dong.startswith("## "):
+            lay, dau_bang, cho_gach = (tieu_de in dong), None, False
+            continue
+        if not lay:
+            continue
+        if not dong.strip().startswith("|"):
+            dau_bang, cho_gach = None, False               # hết bảng
+            continue
+
+        o = [x.strip().strip("`").strip() for x in dong.strip().strip("|").split("|")]
+        if dau_bang is None:                               # ứng viên hàng tiêu đề
+            dau_bang, cho_gach = [x.lower() for x in o], True
+            continue
+        if cho_gach:
+            # Không có hàng gạch thì GitHub KHÔNG render thành bảng. Bộ đọc cũ chỉ BỎ QUA
+            # hàng gạch chứ không ĐÒI nó, nên xoá `|---|` đi là người đọc mất bảng mà
+            # `t27` vẫn xanh.
+            if la_gach(dong):
+                cho_gach = False
+            else:
+                dau_bang, cho_gach = None, False
+            continue
+        if la_gach(dong):
+            continue
+        ra.append({ten: o[i] for i, ten in enumerate(dau_bang) if i < len(o)})
+    return ra
+
+
+def _cot_duy_nhat(van: str, tieu_de: str, ten_cot: str) -> str:
+    """Kiểm tên cột tồn tại và DUY NHẤT trong bảng; trả về khoá đã chuẩn hoá."""
+    hang = _bang(van, tieu_de)
+    bang(hang, f"bảng dưới '## …{tieu_de}…' RỖNG, thiếu hàng gạch `|---|`, hoặc không "
+               f"có — không kiểm được gì")
+    ten = ten_cot.strip().lower()
+    dem = sum(1 for k in hang[0] if k == ten)
+    bang(dem == 1,
+         f"bảng '{tieu_de}': cột {ten_cot!r} xuất hiện {dem} lần — không định danh được "
+         f"cột thì mọi phép kiểm theo cột chỉ là đoán")
+    return ten
+
+
+def _ten_tep(o: str) -> set:
+    """Rút TÊN TỆP trong một ô, để so BẰNG NHAU thay vì so chuỗi con.
+
+    Vì sao: `foo-verdict.md` là chuỗi con của `old-foo-verdict.md`, nên một hàng mục lục
+    của tệp NÀY thoả luôn cho tệp KIA. Hai tên chồng nhau là đủ để một verdict không có
+    hàng riêng mà vẫn xanh.
+    """
+    import re
+    return set(re.findall(r"[\w.\-/]+\.(?:md|ya?ml)", o))
+
+
 @ca
 def t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi():
     """Biên nhận giao hàng trong `ops/reviews/` phải khớp băm tệp gốc.
@@ -600,11 +714,7 @@ def t26_moi_bien_nhan_review_phai_khop_BAM_tep_no_tro_toi():
     """
     import hashlib
     import yaml
-    thu_muc = HERE / "reviews"
-    if not thu_muc.is_dir():
-        bang(not (HERE.parent / ".git").exists(),
-             f"kho thật mà không thấy {thu_muc} — ca này sẽ xanh rỗng")
-        return
+    thu_muc = _doi_thu_muc_reviews()
     ds = sorted(thu_muc.glob("*.receipt.yaml"))
     bang(ds, f"không thấy biên nhận nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
     for p in ds:
@@ -641,37 +751,101 @@ def t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc():
     Ca này biến mục lục thành chốt: thêm caveat mà quên nâng lên `README.md` thì ĐỎ.
     Nó KHÔNG khẳng định mục lục đủ để cứu mọi người đọc — giới hạn ấy ghi ngay trong
     README. Nó chỉ bảo đảm một điều kiểm được: cảnh báo không nằm im một chỗ.
+
+    BA LỖ đã bịt (codex tìm trên cây đã merge của PR #114; cả ba tái lập được trên
+    master trước khi vá, cả ba đều cho 30/30 ĐẠT):
+
+      L1  không có thư mục `ops/reviews`               -> ĐỎ qua `_doi_thu_muc_reviews`
+      L2  bỏ caveat khỏi BẢNG, giữ id trong comment    -> soi Ô của bảng cảnh báo
+      L3  thả một `*-verdict.md` mồ côi                -> glob verdict ĐỘC LẬP
+
+    BA LỖ NỮA (codex tìm trên chính bản vá ba lỗ trên; cả ba cũng 30/30 ĐẠT trước khi vá):
+
+      N1  id chỉ còn trong `<!-- … -->` TRÊN một dòng `|`  -> bỏ comment TRƯỚC khi tách Ô
+      N2  tên verdict/biên nhận chỉ còn ở prose            -> soi Ô của bảng 'Mục lục'
+      N3  biên nhận đúng tên nhưng `verdict_path` trỏ tệp KHÁC -> so khớp đường dẫn
+
+    N1 và N2 đáng ghi hơn cả: bản vá L2 sinh ra để bịt lỗ comment HTML, rồi **tự nó vẫn
+    thủng bằng đúng comment HTML** — vì nó chỉ thu hẹp PHẠM VI (dòng bảng) mà không đổi
+    THỨ ĐEM SO (văn bản thô). Và tôi áp ý "soi trong bảng" cho caveat mà quên áp cho mục
+    lục — cùng một khẳng định, hai vị trí, lần thứ tư trong đợt này.
     """
     import yaml
-    thu_muc = HERE / "reviews"
-    if not thu_muc.is_dir():
-        bang(not (HERE.parent / ".git").exists(),
-             f"kho thật mà không thấy {thu_muc} — ca này sẽ xanh rỗng")
-        return
+    thu_muc = _doi_thu_muc_reviews()
     muc_luc = thu_muc / "README.md"
     bang(muc_luc.is_file(),
          f"thiếu {muc_luc} — thư mục verdict không có cửa vào thì cảnh báo trong biên "
          f"nhận không tới được ai")
     van = muc_luc.read_text(encoding="utf-8")
+    CB = "Cảnh báo đang có hiệu lực"
+    ML = "Mục lục"
+    k_cb_v = _cot_duy_nhat(van, CB, "tệp verdict")
+    k_cb_id = _cot_duy_nhat(van, CB, "id")
+    k_ml_v = _cot_duy_nhat(van, ML, "tệp verdict")
+    k_ml_bn = _cot_duy_nhat(van, ML, "biên nhận")
+    hang_cb = _bang(van, CB)
+    hang_ml = _bang(van, ML)
+    bang(hang_ml, f"{muc_luc.name}: bảng 'Mục lục' RỖNG — mục lục rỗng thì mọi phép "
+                  f"kiểm dưới đây chỉ là hình thức")
+
+    def co_o_cot(ten, hang, khoa):
+        """Tên tệp phải BẰNG một tên trong ô của đúng cột — không phải chuỗi con."""
+        return any(ten in _ten_tep(h.get(khoa, "")) for h in hang)
 
     ds = sorted(thu_muc.glob("*.receipt.yaml"))
+    ds_verdict = sorted(thu_muc.glob("*-verdict.md"))
     bang(ds, f"không thấy biên nhận nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
+    bang(ds_verdict, f"không thấy verdict nào trong {thu_muc} — ca này sẽ xanh mà không đo gì")
+
+    # L3 — duyệt VERDICT theo đĩa, KHÔNG suy từ biên nhận. Suy từ biên nhận thì một
+    # verdict chưa ai làm biên nhận sẽ vô hình đúng lúc nó cần bị thấy nhất.
+    for f in ds_verdict:
+        bang(co_o_cot(f.name, hang_ml, k_ml_v),
+             f"{muc_luc.name}: verdict {f.name!r} KHÔNG có trong CỘT 'tệp verdict' của "
+             f"bảng 'Mục lục'. Nằm ở đoạn giải thích, trong comment HTML, hay ở một cột "
+             f"mô tả nào đó thì bảng render ra vẫn thiếu nó.")
+        bn = thu_muc / f"{f.stem}.receipt.yaml"
+        bang(bn.is_file(),
+             f"{f.name}: KHÔNG có biên nhận {bn.name}. Verdict không biên nhận là verdict "
+             f"không ai khai đã đăng ở đâu — và `t26` cũng không đụng tới nó.")
+        # N3+P1 — đúng TÊN chưa đủ, và đúng BASENAME cũng chưa đủ. So ĐƯỜNG DẪN ĐẦY ĐỦ:
+        # một biên nhận trỏ `ops/reviews/archive/x.md` trong khi tệp thật nằm ở
+        # `ops/reviews/x.md` có basename y hệt, nên t26 đi băm BẢN LƯU TRỮ còn tệp thật
+        # không ca nào đụng tới. Đã đo: thay ruột tệp thật bằng rác mà suite vẫn 30/30.
+        d_bn = yaml.safe_load(bn.read_text(encoding="utf-8")) or {}
+        tro = PurePosixPath(str(d_bn.get("verdict_path") or "").strip().lstrip("./"))
+        mong = PurePosixPath(f.relative_to(HERE.parent).as_posix())
+        bang(tro == mong,
+             f"{bn.name}: `verdict_path` trỏ {str(tro)!r} chứ không phải {str(mong)!r}. "
+             f"So basename thôi thì một bản sao ở thư mục khác lọt qua, và tệp THẬT "
+             f"không được băm bởi bất kỳ ca nào.")
+
     for p in ds:
         d = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
-        bang(p.name in van, f"{muc_luc.name}: thiếu biên nhận {p.name} trong mục lục")
+        bang(co_o_cot(p.name, hang_ml, k_ml_bn),
+             f"{muc_luc.name}: biên nhận {p.name} KHÔNG có trong CỘT 'biên nhận' của "
+             f"bảng 'Mục lục'")
         ten_verdict = Path(str(d.get("verdict_path") or "")).name
-        bang(ten_verdict and ten_verdict in van,
-             f"{muc_luc.name}: thiếu verdict {ten_verdict!r} trong mục lục")
+        bang(ten_verdict and co_o_cot(ten_verdict, hang_ml, k_ml_v),
+             f"{muc_luc.name}: verdict {ten_verdict!r} KHÔNG có trong CỘT 'tệp verdict' "
+             f"của bảng 'Mục lục'")
 
         cac_caveat = d.get("verdict_usage_caveats") or []
         for c in cac_caveat:
             ma = str((c or {}).get("id") or "").strip()
             bang(ma, f"{p.name}: có caveat KHÔNG có `id` — không nêu tên được thì "
                      f"không nâng lên mục lục được, và cũng không ai trích dẫn được")
-            bang(ma in van,
-                 f"{muc_luc.name}: caveat {ma!r} của {p.name} CHƯA được nâng lên mục "
-                 f"lục. Cảnh báo nằm trong tệp sidecar mà không ai mở thì bằng không — "
-                 f"đó đúng là finding đã sinh ra ca này.")
+            # L2+N4+P3 — id phải nằm ở CỘT `id`, trên CÙNG HÀNG với tên verdict ở CỘT
+            # `tệp verdict`. Ràng theo hàng thôi vẫn thủng: phần mô tả của một hàng nhắc
+            # CHÉO tên verdict khác kèm id của nó thì phép kiểm "cả hai chuỗi có mặt đâu
+            # đó trong hàng" nhận nhầm đó là cảnh báo của verdict thứ hai.
+            bang(any(ma in {x.strip() for x in h.get(k_cb_id, "").split()}
+                     and ten_verdict in _ten_tep(h.get(k_cb_v, ""))
+                     for h in hang_cb),
+                 f"{muc_luc.name}: caveat {ma!r} của {p.name} KHÔNG nằm ở CỘT 'id' trên "
+                 f"cùng hàng với {ten_verdict!r} ở CỘT 'tệp verdict', trong bảng "
+                 f"'Cảnh báo đang có hiệu lực'. Bị nhắc trong phần mô tả của hàng khác "
+                 f"KHÔNG tính — verdict này vẫn phải có hàng cảnh báo của riêng nó.")
 
 
 def main() -> int:

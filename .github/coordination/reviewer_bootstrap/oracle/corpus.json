@@ -1,0 +1,718 @@
+{
+  "schema_version": 1,
+  "reorder_seed": 20260814,
+  "target_schema_inventory_sha256": "aa8cee43287aac9c34c4d2114d50a6cf7fad0b8ed44bf6ad4a1eca9d2e1c047c",
+  "target_schema_paths": [
+    ".github/schemas/handoff.schema.json",
+    ".github/schemas/review.schema.json",
+    ".github/schemas/land.schema.json",
+    ".github/schemas/state.schema.json",
+    ".github/schemas/command.schema.json"
+  ],
+  "cases": [
+    {
+      "case_id": "7b1e0a1b2c3d4e5f",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "valid",
+      "expected_valid": true,
+      "semantic_group": "handoff_full_document",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "spec_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "provider": "claude",
+        "role": "executor",
+        "session_id": "ra02-executor-session",
+        "base_sha": "0123456789abcdef0123456789abcdef01234567",
+        "head_sha": "fedcba98765432100123456789abcdef01234567",
+        "status": "done",
+        "summary": "successor sandbox and oracle corrective",
+        "changed_paths": [".github/coordination/reviewer_bootstrap/oracle/oracle.py"],
+        "tests": [
+          {"name": "oracle_selftest", "status": "passed", "evidence": "real rc 0"},
+          {"name": "platform_only_control", "status": "not_run", "evidence": "none", "reason": "linux namespaces required"}
+        ],
+        "test_selection": {
+          "gate_tier": "T3",
+          "selector_policy_sha": "ra02-selector-policy",
+          "tested_sha": "0123456789abcdef0123456789abcdef01234567",
+          "selected_groups": ["oracle", "sandbox"],
+          "full_fallback_reason": null
+        },
+        "remaining_work": [],
+        "next_role": "reviewer",
+        "manual_next_action": null,
+        "copyable_prompt": null,
+        "failure": {"fingerprint": null, "category": null},
+        "successors": []
+      }
+    },
+    {
+      "case_id": "2d9f9f8e7d6c5b4a",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "semantic_equivalent",
+      "expected_valid": true,
+      "semantic_group": "handoff_minimal_required",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "spec_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "provider": "codex",
+        "role": "executor",
+        "session_id": "s",
+        "head_sha": null,
+        "status": "blocked",
+        "next_role": null,
+        "manual_next_action": "run the gate",
+        "copyable_prompt": "resume"
+      }
+    },
+    {
+      "case_id": "c40a0a1b2c3d4e5f",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "semantic_equivalent",
+      "expected_valid": true,
+      "semantic_group": "handoff_minimal_required",
+      "document": {
+        "copyable_prompt": "resume",
+        "manual_next_action": "run the gate",
+        "next_role": null,
+        "status": "blocked",
+        "head_sha": null,
+        "session_id": "s",
+        "role": "executor",
+        "provider": "codex",
+        "spec_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "generation": 3,
+        "packet_id": "wp99",
+        "schema_version": 1,
+        "remaining_work": [],
+        "changed_paths": []
+      }
+    },
+    {
+      "case_id": "91f39f8e7d6c5b4a",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "handoff_schema_version",
+      "document": {
+        "schema_version": 2,
+        "packet_id": "wp99",
+        "generation": 3,
+        "spec_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "provider": "claude",
+        "role": "executor",
+        "session_id": "s",
+        "head_sha": null,
+        "status": "done",
+        "next_role": null,
+        "manual_next_action": null,
+        "copyable_prompt": null
+      }
+    },
+    {
+      "case_id": "5e280a1b2c3d4e5f",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "handoff_packet_id",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "WP99",
+        "generation": 3,
+        "spec_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "provider": "claude",
+        "role": "executor",
+        "session_id": "s",
+        "head_sha": null,
+        "status": "done",
+        "next_role": null,
+        "manual_next_action": null,
+        "copyable_prompt": null
+      }
+    },
+    {
+      "case_id": "a6c59f8e7d6c5b4a",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "handoff_generation",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 0,
+        "spec_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "provider": "claude",
+        "role": "executor",
+        "session_id": "s",
+        "head_sha": null,
+        "status": "done",
+        "next_role": null,
+        "manual_next_action": null,
+        "copyable_prompt": null
+      }
+    },
+    {
+      "case_id": "3f800a1b2c3d4e5f",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "handoff_spec_hash",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "spec_hash": "0123",
+        "provider": "claude",
+        "role": "executor",
+        "session_id": "s",
+        "head_sha": null,
+        "status": "done",
+        "next_role": null,
+        "manual_next_action": null,
+        "copyable_prompt": null
+      }
+    },
+    {
+      "case_id": "d15c9f8e7d6c5b4a",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "handoff_provider",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "spec_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "provider": "gemini",
+        "role": "executor",
+        "session_id": "s",
+        "head_sha": null,
+        "status": "done",
+        "next_role": null,
+        "manual_next_action": null,
+        "copyable_prompt": null
+      }
+    },
+    {
+      "case_id": "68b20a1b2c3d4e5f",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "handoff_session_id",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "spec_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "provider": "claude",
+        "role": "executor",
+        "session_id": "",
+        "head_sha": null,
+        "status": "done",
+        "next_role": null,
+        "manual_next_action": null,
+        "copyable_prompt": null
+      }
+    },
+    {
+      "case_id": "04e79f8e7d6c5b4a",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "handoff_summary",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "spec_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "provider": "claude",
+        "role": "executor",
+        "session_id": "s",
+        "head_sha": null,
+        "status": "done",
+        "summary": 123,
+        "next_role": null,
+        "manual_next_action": null,
+        "copyable_prompt": null
+      }
+    },
+    {
+      "case_id": "b9370a1b2c3d4e5f",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "handoff_required_status",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "spec_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "provider": "claude",
+        "role": "executor",
+        "session_id": "s",
+        "head_sha": null,
+        "next_role": null,
+        "manual_next_action": null,
+        "copyable_prompt": null
+      }
+    },
+    {
+      "case_id": "4a619f8e7d6c5b4a",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "handoff_changed_paths",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "spec_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "provider": "claude",
+        "role": "executor",
+        "session_id": "s",
+        "head_sha": null,
+        "status": "done",
+        "changed_paths": ["ok", 5],
+        "next_role": null,
+        "manual_next_action": null,
+        "copyable_prompt": null
+      }
+    },
+    {
+      "case_id": "ec080a1b2c3d4e5f",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "handoff_head_sha",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "spec_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "provider": "claude",
+        "role": "executor",
+        "session_id": "s",
+        "head_sha": 123,
+        "status": "done",
+        "next_role": null,
+        "manual_next_action": null,
+        "copyable_prompt": null
+      }
+    },
+    {
+      "case_id": "1d549f8e7d6c5b4a",
+      "schema_path": ".github/schemas/handoff.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "handoff_root_shape",
+      "document": "this document is not an object"
+    },
+    {
+      "case_id": "8f2b0a1b2c3d4e5f",
+      "schema_path": ".github/schemas/review.schema.json",
+      "kind": "valid",
+      "expected_valid": true,
+      "semantic_group": "review_full_document",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "provider": "claude",
+        "role": "reviewer",
+        "session_id": "ra02-reviewer-session",
+        "reviewed_sha": "0123456789abcdef0123456789abcdef01234567",
+        "independent_from_executor_session": true,
+        "review_axes": ["spec", "standards_security"],
+        "tests": [{"name": "repository_selftest", "status": "passed", "evidence": "real rc 0"}],
+        "findings": [],
+        "verdict": "changes_requested",
+        "assurance": "review_deferred",
+        "evidence_url": "https://github.com/ducthangho/tra-luat/issues/99"
+      }
+    },
+    {
+      "case_id": "57c99f8e7d6c5b4a",
+      "schema_path": ".github/schemas/review.schema.json",
+      "kind": "semantic_equivalent",
+      "expected_valid": true,
+      "semantic_group": "review_axes_order",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "provider": "codex",
+        "role": "reviewer",
+        "session_id": "s",
+        "reviewed_sha": "0123456789abcdef0123456789abcdef01234567",
+        "independent_from_executor_session": true,
+        "review_axes": ["spec", "standards_security"],
+        "tests": [],
+        "findings": [],
+        "verdict": "approve",
+        "assurance": "cross_approved"
+      }
+    },
+    {
+      "case_id": "f3060a1b2c3d4e5f",
+      "schema_path": ".github/schemas/review.schema.json",
+      "kind": "semantic_equivalent",
+      "expected_valid": true,
+      "semantic_group": "review_axes_order",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "provider": "codex",
+        "role": "reviewer",
+        "session_id": "s",
+        "reviewed_sha": "0123456789abcdef0123456789abcdef01234567",
+        "independent_from_executor_session": true,
+        "review_axes": ["standards_security", "spec"],
+        "tests": [],
+        "findings": [],
+        "verdict": "approve",
+        "assurance": "cross_approved"
+      }
+    },
+    {
+      "case_id": "2b8e9f8e7d6c5b4a",
+      "schema_path": ".github/schemas/review.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "review_axes_unique",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "provider": "codex",
+        "role": "reviewer",
+        "session_id": "s",
+        "reviewed_sha": "0123456789abcdef0123456789abcdef01234567",
+        "independent_from_executor_session": true,
+        "review_axes": ["spec", "spec", "standards_security"],
+        "tests": [],
+        "findings": [],
+        "verdict": "approve",
+        "assurance": "cross_approved"
+      }
+    },
+    {
+      "case_id": "9c470a1b2c3d4e5f",
+      "schema_path": ".github/schemas/review.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "review_axes_contains",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "provider": "codex",
+        "role": "reviewer",
+        "session_id": "s",
+        "reviewed_sha": "0123456789abcdef0123456789abcdef01234567",
+        "independent_from_executor_session": true,
+        "review_axes": ["standards_security"],
+        "tests": [],
+        "findings": [],
+        "verdict": "approve",
+        "assurance": "cross_approved"
+      }
+    },
+    {
+      "case_id": "6ad19f8e7d6c5b4a",
+      "schema_path": ".github/schemas/review.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "review_axes_allof",
+      "document": {
+        "schema_version": 1,
+        "packet_id": "wp99",
+        "generation": 3,
+        "provider": "codex",
+        "role": "reviewer",
+        "session_id": "s",
+        "reviewed_sha": "0123456789abcdef0123456789abcdef01234567",
+        "independent_from_executor_session": true,
+        "review_axes": ["spec"],
+        "tests": [],
+        "findings": [],
+        "verdict": "approve",
+        "assurance": "cross_approved"
+      }
+    },
+    {
+      "case_id": "30f50a1b2c3d4e5f",
+      "schema_path": ".github/schemas/land.schema.json",
+      "kind": "valid",
+      "expected_valid": true,
+      "semantic_group": "land_authorization_branch",
+      "document": {
+        "schema_version": 1,
+        "authorization_id": "ra02-authorization",
+        "decision": "approved",
+        "mission_id": "gh-76",
+        "authorized_head_sha": "0123456789abcdef0123456789abcdef01234567",
+        "actor": "dispatcher",
+        "role": "land_operator",
+        "session_id": "ra02-land-session"
+      }
+    },
+    {
+      "case_id": "e1429f8e7d6c5b4a",
+      "schema_path": ".github/schemas/land.schema.json",
+      "kind": "semantic_equivalent",
+      "expected_valid": true,
+      "semantic_group": "land_authorization_shape",
+      "document": {
+        "schema_version": 1,
+        "authorization_id": "ra02-authorization",
+        "decision": "approved",
+        "mission_id": "gh-76",
+        "authorized_head_sha": "0123456789abcdef0123456789abcdef01234567",
+        "actor": "dispatcher",
+        "role": "land_operator",
+        "session_id": "ra02-land-session",
+        "expires_at": null
+      }
+    },
+    {
+      "case_id": "7d690a1b2c3d4e5f",
+      "schema_path": ".github/schemas/land.schema.json",
+      "kind": "semantic_equivalent",
+      "expected_valid": true,
+      "semantic_group": "land_authorization_shape",
+      "document": {
+        "schema_version": 1,
+        "authorization_id": "ra02-authorization",
+        "decision": "approved",
+        "mission_id": "gh-76",
+        "authorized_head_sha": "0123456789abcdef0123456789abcdef01234567",
+        "actor": "dispatcher",
+        "role": "land_operator",
+        "session_id": "ra02-land-session",
+        "change_request": null
+      }
+    },
+    {
+      "case_id": "b58c9f8e7d6c5b4a",
+      "schema_path": ".github/schemas/land.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "land_branch_none",
+      "document": {
+        "schema_version": 1,
+        "actor": "dispatcher",
+        "role": "land_operator",
+        "session_id": "ra02-land-session"
+      }
+    },
+    {
+      "case_id": "0c3a0a1b2c3d4e5f",
+      "schema_path": ".github/schemas/land.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "land_branch_both",
+      "document": {
+        "schema_version": 1,
+        "authorization_id": "ra02-authorization",
+        "decision": "approved",
+        "mission_id": "gh-76",
+        "authorized_head_sha": "0123456789abcdef0123456789abcdef01234567",
+        "actor": "dispatcher",
+        "role": "land_operator",
+        "session_id": "ra02-land-session",
+        "land_evidence_id": "ra02-land-evidence",
+        "generation": 3,
+        "provider": "human",
+        "input_packet_generations": ["wp99/g3"],
+        "approver": "owner",
+        "authorization_url": "https://github.com/ducthangho/tra-luat/issues/99",
+        "land_operator": "dispatcher",
+        "merge_method": "merge",
+        "merge_commit": "fedcba98765432100123456789abcdef01234567",
+        "pre_merge_checks": [],
+        "post_merge_checks": [],
+        "bookkeeping": []
+      }
+    },
+    {
+      "case_id": "a9209f8e7d6c5b4a",
+      "schema_path": ".github/schemas/state.schema.json",
+      "kind": "valid",
+      "expected_valid": true,
+      "semantic_group": "state_full_projection",
+      "document": {
+        "schema_version": 1,
+        "mission_issue": 76,
+        "mission_revision": 6,
+        "mission_state": "running",
+        "packet_id": "wp99",
+        "packet_revision": 3,
+        "spec_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "packet_state": "reviewing",
+        "lease": {
+          "packet_id": "wp99",
+          "executor": "claude",
+          "environment": "local",
+          "branch": "agent/wp99-g3-claude",
+          "write_set_hash": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+          "generation": 3,
+          "heartbeat_at": "2026-08-14T19:55:56Z",
+          "lease_until": "2026-08-15T19:55:56Z"
+        },
+        "budget": {"used": 49, "reserved": 22, "limit": 71},
+        "review_assurance": null,
+        "head_sha": "0123456789abcdef0123456789abcdef01234567",
+        "tested_sha": null,
+        "handoff_url": null,
+        "commit_shas": ["0123456789abcdef0123456789abcdef01234567"],
+        "last_consumed_event_id": 0
+      }
+    },
+    {
+      "case_id": "4e7f0a1b2c3d4e5f",
+      "schema_path": ".github/schemas/state.schema.json",
+      "kind": "semantic_equivalent",
+      "expected_valid": true,
+      "semantic_group": "state_minimal_projection",
+      "document": {
+        "schema_version": 1,
+        "mission_issue": 76,
+        "mission_revision": 6,
+        "mission_state": "running",
+        "last_consumed_event_id": 0
+      }
+    },
+    {
+      "case_id": "12d89f8e7d6c5b4a",
+      "schema_path": ".github/schemas/state.schema.json",
+      "kind": "semantic_equivalent",
+      "expected_valid": true,
+      "semantic_group": "state_minimal_projection",
+      "document": {
+        "schema_version": 1,
+        "mission_issue": 76,
+        "mission_revision": 6,
+        "mission_state": "running",
+        "last_consumed_event_id": 0,
+        "packet_id": null,
+        "lease": null
+      }
+    },
+    {
+      "case_id": "cf510a1b2c3d4e5f",
+      "schema_path": ".github/schemas/state.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "state_mission_issue",
+      "document": {
+        "schema_version": 1,
+        "mission_issue": 0,
+        "mission_revision": 6,
+        "mission_state": "running",
+        "last_consumed_event_id": 0
+      }
+    },
+    {
+      "case_id": "86b49f8e7d6c5b4a",
+      "schema_path": ".github/schemas/state.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "state_spec_hash",
+      "document": {
+        "schema_version": 1,
+        "mission_issue": 76,
+        "mission_revision": 6,
+        "mission_state": "running",
+        "last_consumed_event_id": 0,
+        "spec_hash": "0123"
+      }
+    },
+    {
+      "case_id": "5a030a1b2c3d4e5f",
+      "schema_path": ".github/schemas/command.schema.json",
+      "kind": "valid",
+      "expected_valid": true,
+      "semantic_group": "command_mission_resume",
+      "document": {
+        "schema_version": 1,
+        "command": "/mission resume",
+        "mission_id": "gh-76",
+        "actor": "dispatcher",
+        "expected_state_revision": 0
+      }
+    },
+    {
+      "case_id": "d47e9f8e7d6c5b4a",
+      "schema_path": ".github/schemas/command.schema.json",
+      "kind": "semantic_equivalent",
+      "expected_valid": true,
+      "semantic_group": "command_land_apply",
+      "document": {
+        "schema_version": 1,
+        "command": "/land apply",
+        "mission_id": "gh-76",
+        "head_sha": "0123456789abcdef0123456789abcdef01234567",
+        "actor": "dispatcher",
+        "expected_state_revision": 7
+      }
+    },
+    {
+      "case_id": "09fc0a1b2c3d4e5f",
+      "schema_path": ".github/schemas/command.schema.json",
+      "kind": "semantic_equivalent",
+      "expected_valid": true,
+      "semantic_group": "command_land_apply",
+      "document": {
+        "schema_version": 1,
+        "command": "/land apply",
+        "mission_id": "gh-76",
+        "head_sha": "0123456789abcdef0123456789abcdef01234567",
+        "actor": "dispatcher",
+        "expected_state_revision": 7,
+        "reason": null
+      }
+    },
+    {
+      "case_id": "bb269f8e7d6c5b4a",
+      "schema_path": ".github/schemas/command.schema.json",
+      "kind": "invalid",
+      "expected_valid": false,
+      "semantic_group": "command_conditional_required",
+      "document": {
+        "schema_version": 1,
+        "command": "/mission start",
+        "actor": "dispatcher",
+        "expected_state_revision": 0
+      }
+    }
+  ],
+  "keyword_anchors": {
+    "$schema": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "1d549f8e7d6c5b4a"},
+    "$id": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "1d549f8e7d6c5b4a"},
+    "title": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "1d549f8e7d6c5b4a"},
+    "description": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "1d549f8e7d6c5b4a"},
+    "additionalProperties": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "1d549f8e7d6c5b4a"},
+    "type": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "04e79f8e7d6c5b4a"},
+    "properties": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "04e79f8e7d6c5b4a"},
+    "required": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "b9370a1b2c3d4e5f"},
+    "const": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "91f39f8e7d6c5b4a"},
+    "pattern": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "5e280a1b2c3d4e5f"},
+    "minimum": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "a6c59f8e7d6c5b4a"},
+    "$ref": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "3f800a1b2c3d4e5f"},
+    "$defs": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "3f800a1b2c3d4e5f"},
+    "enum": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "d15c9f8e7d6c5b4a"},
+    "minLength": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "68b20a1b2c3d4e5f"},
+    "items": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "4a619f8e7d6c5b4a"},
+    "oneOf": {"valid_case_id": "7b1e0a1b2c3d4e5f", "invalid_case_id": "ec080a1b2c3d4e5f"},
+    "uniqueItems": {"valid_case_id": "8f2b0a1b2c3d4e5f", "invalid_case_id": "2b8e9f8e7d6c5b4a"},
+    "contains": {"valid_case_id": "8f2b0a1b2c3d4e5f", "invalid_case_id": "9c470a1b2c3d4e5f"},
+    "allOf": {"valid_case_id": "8f2b0a1b2c3d4e5f", "invalid_case_id": "6ad19f8e7d6c5b4a"},
+    "if": {"valid_case_id": "5a030a1b2c3d4e5f", "invalid_case_id": "bb269f8e7d6c5b4a"},
+    "then": {"valid_case_id": "5a030a1b2c3d4e5f", "invalid_case_id": "bb269f8e7d6c5b4a"}
+  }
+}

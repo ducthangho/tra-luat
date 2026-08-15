@@ -1,0 +1,168 @@
+# Lease EXECUTOR cho wp55 revision 3, generation 5 — attempt 2/3.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt
+# cụt giá trị — đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ.
+#
+# VÌ SAO CÓ LEASE NÀY:
+# Cross-review lượt 6 (codex, dưới lease wp55-r3-review-6-codex-20260814) trả
+# `changes_requested` với TÁM finding trên head e6e4b73. BẢY cái vá được trong revision 3;
+# cái thứ tám là spec_revision_required và chủ kho đã CHỐT HOÃN sang revision 4.
+#
+# CHỦ KHO CHỌN ĐƯỜNG (b): vá bảy finding trong revision 3 thay vì mở revision 4 ngay.
+# Căn cứ: bảy finding đều là code/test nằm trong write_set, không đụng spec; còn khuyết
+# AC 20 chỉ ảnh hưởng CÁCH ĐO chứ không ảnh hưởng CÁI ĐƯỢC ĐO — reviewer đã xác nhận
+# `GIT_DIR` cho phép đo hợp lệ và suite ra 109/109. Mở revision 4 ngay là trả giá một vòng
+# cho một khuyết nằm ở câu chữ công thức.
+#
+# ĐIỀU ĐẮT NHẤT CỦA LƯỢT TRƯỚC, ĐỌC TRƯỚC KHI SỬA MÃ:
+# `_co_ngu_canh_doctrine` sinh ra ở generation 4 để THÔI BẮT OAN câu văn xuôi ngắt dòng,
+# và nó đã QUÁ TAY THÀNH FAIL-OPEN — một heading chép nguyên cụm cấm nay lọt rc=0.
+# Chữa một chiều làm hở chiều kia. Lease này CẤM sửa một chiều rồi đo một chiều: mọi thay
+# đổi trong _chuan_hoa / _co_ngu_canh_doctrine phải chạy CẢ HAI ma trận trước và sau.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 55
+packet_id: wp55
+phase_key: F3-03
+mission_issue: 54
+mission_revision: 6
+revision: 3
+generation: 5
+lease_id: wp55-r3-exec-5-claude-20260815
+
+spec_path: ops/specs/wp55-r3-spec.md
+spec_branch: ops/wp55-r3-spec
+spec_hash: e321f811724fae97b19d523a3e5159bc13b425cd15fc6c753c7439fe28cae22d
+spec_hash_basis: sha256 của chính tệp spec, byte nguyên trạng
+spec_unchanged_this_generation: true
+
+role: executor
+provider: claude                # ⇒ reviewer kế tiếp BẮT BUỘC codex (§8)
+assurance_target: cross_approved
+access: read-write
+
+write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - .claude/skills/cross-review/SKILL.md
+  - .claude/skills/land-packets/SKILL.md
+  - .claude/skills/work-packet/SKILL.md
+  - CLAUDE.md
+branch_ownership: claude/wp55-r3g5-f3-03
+
+# Với lease EXECUTOR, `reviewed_sha_required` nghĩa là head XUẤT PHÁT: phải bắt đầu từ đúng
+# commit mà verdict đã neo, nếu không thì bản vá đang chữa một cây khác với cây bị soi.
+reviewed_sha_required: e6e4b73dc940fcd04e9030e353e0e5fe7f3f0af8
+base_sha: fbe5ab9e1ece3b45c065879bfd59dee2554db3e2
+branch: claude/wp55-r3g5-f3-03
+target_pull_request: null       # executor mở PR mới nhắm master; PR #115 giữ nguyên
+prior_pull_request: 115
+branch_start_point_rationale: >-
+  Bản vá generation 4 không bị bác về HƯỚNG — 18 lớp doctrine và 16 hình dạng lease vẫn
+  đóng, gate vẫn xanh. Việc của lượt này là bịt chỗ hở còn lại và chứng minh cho đủ.
+
+prompt_path: ops/prompts/wp55-r3-exec-5-claude-20260815.md
+prompt_sha256_required: b91b5fe54a7a92814c3857a409ed15ac28eec8a97babdb053fb775bd6ca02cbd
+
+granted_by: ducthangho          # CHỦ KHO — §2 người có thẩm quyền
+granted_on_instruction: 'direct, in-session, 2026-08-15 (chọn b, cấp lease executor generation 5)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-15T04:45:00Z'
+lease_expires_at_utc: '2026-08-16T05:00:00Z'
+run_minutes: 1455
+heartbeat_required_minutes: 30
+
+attempts_used: 1
+attempts_limit: 3
+attempt_2_scope: >-
+  Đóng BẢY finding của verdict lượt 6. Đo cả bốn ma trận (lọt, bắt-oan, lease, codepage)
+  TRƯỚC khi vá, vá MỘT lượt ở tầng, rồi đo lại và báo tám con số. Không được lùi bất kỳ ca
+  nào đã đóng ở generation 4.
+
+prior_review: wp55-r3-review-6-codex-20260814
+prior_review_verdict: changes_requested
+prior_review_provider: codex
+prior_review_evidence: https://github.com/ducthangho/tra-luat/pull/115
+prior_reviewed_sha: e6e4b73dc940fcd04e9030e353e0e5fe7f3f0af8
+prior_review_delivery_path: github_connector
+
+findings_to_fix:
+  - finding_id: review-transition-bypasses-record-review
+    severity: P1
+    site: '.claude/dev/packet_loop.py:103-117 — CHUYEN_HOP_LE'
+    do_duoc: 'reviewing→running→reviewing đều rc=0; reviews=[] finding_counts={} attempts_used=1'
+    layer_fix: đường ra khỏi `reviewing` do VERDICT điều khiển, không do `transition`
+  - finding_id: void-reviewing-accepts-attempt-zero
+    severity: P1
+    site: '.claude/dev/packet_loop.py:734-755 và 758+'
+    do_duoc: 'void-attempt rc=0 để state=reviewing; begin-attempt rc=8; record-review approve rc=0 → accepted với reviews[0].attempt=0'
+    layer_fix: void phải đưa state về trạng thái chạy được VÀ record-review phải đòi lượt đang mở, số lượt > 0
+  - finding_id: doctrine-html-quoted-angle-bypass
+    severity: P1
+    site: '.claude/dev/packet_loop.py:269-274 — regex gỡ tag'
+    do_duoc: 'mer<span title=">">ged:</span> … → rc=0; tag thường và ASCII đều rc=6'
+    layer_fix: xử lý đúng nội dung thuộc tính trong nháy, đừng cấm ký tự theo vị trí
+  - finding_id: doctrine-common-term-fail-open
+    severity: P1
+    site: '.claude/dev/packet_loop.py:374-394, 959-962 — _co_ngu_canh_doctrine'
+    do_duoc: 'heading trần và dòng trần chép nguyên cụm → rc=0; chỉ trong bảng mới rc=6'
+    layer_fix: >-
+      AC 2 đòi bơm MỘT cụm trong danh sách là phải ĐỎ; AC 19 chỉ cho tha câu văn xuôi kể lại
+      kết quả đo. Bản vá bắt-oan của generation 4 đã quá tay thành fail-open — sửa cả hai
+      chiều cùng lúc, đo cả hai ma trận
+  - finding_id: ac18-mutation-not-per-class
+    severity: P2
+    site: '.claude/dev/packet_loop_test.py:1089-1094, 1606-1621'
+    do_duoc: >-
+      nbsp_phu_hai_lop bị loại khỏi mọi mutant; ha_NFKC_ve_NFC không giết ca ligature vì
+      casefold() vẫn gấp ligature; runner chỉ chạy tập phai_chet do mutant tự khai
+    layer_fix: mỗi lớp một đột biến; runner đo CẢ HAI vế — ca đích ĐỎ và ca ngoài tập XANH
+  - finding_id: ac19-false-positive-matrix-incomplete
+    severity: P2
+    site: '.claude/dev/packet_loop_test.py:1130-1153 — LOP_BAT_OAN'
+    do_duoc: '40 lớp lách nhưng chỉ 14 ca bắt-oan; ca khai là Cf không chứa ký tự Cf nào; không có mapping lớp→ca'
+    layer_fix: bảng ánh xạ lớp→ca tường minh + chốt làm suite ĐỎ khi có lớp không có ca
+  - finding_id: ac14-codepage-void-attempt-uncovered
+    severity: P2
+    site: '.claude/dev/packet_loop_test.py:791-817'
+    do_duoc: ma trận codepage bỏ sót void-attempt dù lệnh đó in stdout tiếng Việt
+    layer_fix: sinh ma trận từ danh sách lệnh con THẬT (duyệt parser), đừng liệt kê tay
+
+# Finding thứ TÁM của verdict lượt 6 — KHÔNG thuộc lượt này.
+finding_deferred:
+  finding_id: ac20-archive-tree-suite-not-self-contained
+  severity: P2
+  disposition: spec_revision_required
+  decision: 'chủ kho chốt HOÃN sang revision 4, 2026-08-15'
+  reason: >-
+    Sửa nó là sửa ops/specs/wp55-r3-spec.md, tức đổi spec_hash, tức vô hiệu chính lease này.
+    Executor KHÔNG được đụng, và KHÔNG được khai là đã xử lý.
+  workaround_hop_le: >-
+    GIT_DIR trỏ object store kho nguồn — reviewer lượt 6 đã xác nhận đây là phép đo code hợp
+    lệ và cho 109/109. Executor phải GHI RÕ mình dùng GIT_DIR, đừng khai công thức spec chạy được.
+
+# Số gate của generation 4, reviewer lượt 6 đã CHẠY LẠI và khớp. KHÔNG được lùi.
+khong_duoc_lui:
+  packet_loop_test: 109/109 + 23 đột biến
+  doctrine_lop_da_dong: 18
+  lease_hinh_dang_da_dong: 16
+  tl_selftest: 1696/1696
+  doc_claims: flags=[]
+  release_verify: checked=179 failed=[] extra=[]
+  golden_test: rc=0
+  eol_policy: scanned=304 violations=[]
+  release_bundle_sha256: 20c89545566b7682b3ecd2ac2ac0283add5af8a4d6ca377d9acbcde4487f8590
+  scope: đúng 6 tệp write_set
+
+preconditions_measured_at_utc: '2026-08-15T04:40:00Z'
+master_sha_at_grant: 2531366e1abc6cbca0a6c2765e40e54be38d1fb7
+doctrine_scan_on_merged_tree: 'rc=0 — sạch với master 2531366 (đã đo)'
+prior_generation_pull_request: 115
+prior_generation_handoff: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5297276671

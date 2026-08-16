@@ -21176,10 +21176,21 @@ def run() -> int:
         # KÊ KHAI SLOT (WP57/F3-00 rev3 — automation-first): 43 → **47** Markdown dưới `docs/`.
         # Thêm hai research note, ADR-0035 và manual successor prompt; cả bốn đều dev-side/ngoài gói.
         # Phép ratchet cây thật = 179 + 47 = 226; trần package 200 không đổi.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 47 == 226
+        # KÊ KHAI SLOT (wp88/F2-D-WT — thu hồi research row 1): 47 → **52** Markdown dưới `docs/`.
+        # Thêm đúng năm research doc wp88, đều dev-side/ngoài gói; cây thật = 179 + 52 = 231.
+        # KÊ KHAI SLOT (audit launcher vòng 3–6, r246): 52 → **55** Markdown dưới `docs/`. Thêm đúng BA
+        # tài liệu dev-side, KHÔNG tệp nào vào gói (đều nằm thẳng dưới `docs/`, vế ok4 tự chứng minh):
+        #   + `docs/GOI_AGENT_DA_NEN.md`          — quy ước gọi agent đa nền qua CLI chính thức.
+        #   + `docs/AUDIT_LAUNCHER_VONG_3.md`     — báo cáo audit vòng 3 (3 CHẶN + 12 nên sửa).
+        #   + `docs/AUDIT_LAUNCHER_VONG_4_POSIX.md` — báo cáo audit vòng 4 phần POSIX.
+        # Gói giữ 179 (`RELEASE_MANIFEST.json` KHÔNG đổi — không tệp runtime nào được thêm), nên trần
+        # Package 200 không nhúc nhích; cây thật = 179 + 55 = 234.
+        # KÊ KHAI SLOT (audit launcher vòng 7): 55 → **56** Markdown dưới `docs/`. Thêm đúng
+        # `docs/AUDIT_LAUNCHER_VONG_7.md`, dev-side/ngoài gói; package vẫn 179, cây thật 235.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 56 == 235
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 47
+        ok4 = (len(tren_dia) == 56
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

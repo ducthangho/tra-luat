@@ -56,12 +56,163 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   · `Get-Content -Raw` trên tệp **RỖNG** trả `$null` → `[regex]::Match` ném "Value cannot be null"; ép `[string]`.
   · `Get-Item`/`Get-ChildItem` **BỎ tệp ẩn khi thiếu `-Force`** (trên Unix: mọi tên bắt đầu bằng `.`) —
   `Test-Path` thấy có mà `Get-Item` báo not-found là dấu hiệu kinh điển.
+- **Câu mô tả VỊ TRÍ của một artefact phải đúng ở CẢ HAI phía của lần merge.** Prompt reviewer neo
+  theo băm, mà trong prompt lại có câu "tệp nằm ở đâu". Bản đầu ghi "trên master" khi tệp còn ở nhánh
+  ops ⇒ ai clone master là dừng ngay; sửa thành "chỉ ở nhánh ops, chưa vào master" ⇒ câu ấy **chết
+  đúng lúc merge**. Mỗi lần sửa câu ấy lại đổi băm ⇒ kéo theo cập nhật lease + chiếu lại; ba bản chiếu
+  chết chỉ vì một câu chữ. Cách thoát: viết câu đúng ở CẢ HAI trạng thái ("tìm ở `master` trước, chưa
+  thấy thì fetch nhánh X"), và nói thẳng trong prompt rằng **thứ định danh tệp là BĂM, không phải tên
+  nhánh** — tên nhánh là thứ trôi và bị xoá.
+- **"Ca có MẶT" khác "ca có ĐO".** Một ca `return` sớm vì đường dẫn sai vẫn được đếm là ĐẠT: `t24` trỏ
+  `HERE.parent.parent` nên tìm thư mục workflow ở TRÊN gốc kho, không thấy thì thoát êm — suite báo
+  **24/24** trong khi ca ấy không đo gì, và nó lại là ca sinh ra để chặn đúng bệnh đó. Chỉ lộ vì đã
+  đột biến thử sau khi viết. Mọi ca có nhánh "không thấy thì bỏ qua" phải kèm chốt: chỉ được tha khi
+  cây rõ ràng là bản sao rời (không `.git`); trong kho thật mà thiếu thì ĐỎ.
+- **NGHĨ RA được phép thử mà KHÔNG CHẠY nó thì phép thử ấy KHÔNG TỒN TẠI.** Prompt reviewer do chính
+  phiên viết cổng soạn ra **liệt kê `codex-dispatcher` làm hướng tấn công số 1** — rồi cổng
+  `ops/lease_publish.py` của phiên đó thua đúng ca ấy (`rc=0`, tự cấp được lease), và phải chờ
+  reviewer ngoài chạy mới lộ. Viết một hướng tấn công vào tài liệu cho cảm giác đã lo tới nó, nhưng
+  tài liệu không chạy: chỉ có ca test chạy. Nghĩ ra được ca nào thì **biến ngay ca đó thành `rXX_`**,
+  đừng để nó nằm trong prompt/README/mô tả PR — chỗ đó là nơi các ca đi chết.
+- **Danh sách CẤM không bao giờ đủ — phải đảo thành danh sách CHO PHÉP.** Cùng sự cố trên: cổng từ
+  chối đúng hai chuỗi `claude`/`codex`, nên `codex-dispatcher`, `ai-codex-bot`, `cödex` đều lọt.
+  Nguyên văn reviewer: *"distinguishes spelling, not authority"* — phân biệt CÁCH VIẾT, không phân
+  biệt THẨM QUYỀN. Danh sách cấm phải đoán trước mọi cách viết của kẻ gian (dấu nối, tiền tố, hậu tố,
+  đồng tự Unicode, tổ hợp dấu) nên **thua từ trong thiết kế**; danh sách cho phép chỉ phải liệt kê một
+  tập nhỏ và biết trước. Đo được ở `v1.36.68` (PR #104): ba tên tấn công `rc=0` → `rc=4`, người có
+  thẩm quyền vẫn `rc=0`. Kèm chốt: đột biến **nới danh sách cho phép để chứa tên tấn công** phải làm
+  ca đích ĐỎ — không có đột biến ấy thì không biết ca đang đo danh sách hay đo thứ khác.
+- **`[skip ci]` trong THÔNG ĐIỆP COMMIT là chốt đặt sai chỗ — nó sống trong LỊCH SỬ.**
+  Bước ghi ngược của `ops-publish-lease.yml` từng commit kèm `[skip ci]` để khỏi tự kích hoạt lại.
+  Dấu ấy ở lại trong commit, nên khi commit ghi ngược thành **HEAD của một PR** thì nó tắt luôn gate
+  của PR đó: PR #100 có **0 check run** mà vẫn hiện `mergeable_state: clean`. Cổng không nói dối —
+  nó **vắng mặt**, và trên giao diện "xanh" với "không chạy" nhìn giống hệt nhau. Chốt chống lặp phải
+  nằm ở **lượt chạy** (`if:` mức job), đừng nằm trong commit. Khoá bằng `t24` trong
+  `ops/lease_publish_test.py`. Nhắc: push bằng `GITHUB_TOKEN` vốn KHÔNG sinh lượt chạy mới, và chốt
+  idempotent `rc=9` chặn đăng trùng — nên bỏ `[skip ci]` không hề mở ra vòng lặp vô hạn.
+- **ĐỪNG viết `[skip ci]` nguyên văn trong commit message, KỂ CẢ khi đang trích dẫn để giải thích.**
+  Đã sập thật: merge commit của PR #100 nhắc `[skip ci]` trong phần *giải thích lỗi trên* và tắt
+  luôn gate của master (`464124d` không có lượt chạy nào). GitHub khớp **CHUỖI trên toàn thông điệp**,
+  không đọc Markdown — dấu nháy ngược không phải hàng rào, y hệt bài học `doctrine-scan`. Muốn nhắc
+  tới nó thì viết tách chữ (`skip` + `ci`) hoặc mô tả bằng lời. Máy KHÔNG canh được chỗ này (`t24`
+  chỉ quét workflow, không quét commit sắp tạo) — đây thuần là kỷ luật viết.
+- **TẦNG VẬN CHUYỂN CŨNG CHUẨN HOÁ CHUỖI — "chép nguyên văn" chỉ chứng minh được bằng ĐO THỨ ĐÃ ĐẾN,
+  không phải thứ đã GỬI.** Đăng hộ verdict cross-review lượt 4 lên PR #92: bản gốc trong kho có băm
+  (`d58088be…`), đã kiểm khớp TRƯỚC khi đăng, và người đăng chép từng chữ. Vẫn lệch. Reviewer cố ý
+  liệt kê HAI cách viết khác nhau của cùng một tên để dò biên — bản dựng sẵn `cödex` (U+00F6) và bản
+  viết bằng **chuỗi thoát ASCII nguyên văn** `co\u0308dex`. Thân comment đi qua MCP nằm trong một
+  chuỗi JSON, mà `\u0308` **là escape hợp lệ của JSON**, nên nó bị giải mã thành dấu ghép THẬT ngay ở
+  tầng vận chuyển: hai tên khác nhau về byte biến thành hai tên hiển thị y hệt, và một hướng dò biên
+  biến mất không để lại dấu. Chỉ lộ vì đã chạy `diff -u` giữa nguồn và bản ĐÃ ĐĂNG (đọc lại qua API)
+  — đúng một hunk lệch, mọi dòng khác khớp từng byte.
+  Cùng họ với `doctrine-scan` và với dấu bỏ-qua-CI: **một lớp mà ta không coi là lớp**. Chốt: (a) băm
+  phải đo trên thứ ĐÃ ĐẾN, nên đăng xong là đọc ngược về và diff, đừng dừng ở "lời gọi trả thành
+  công"; (b) phải biết mình đang đứng ở LỚP NÀO — xem ngay dưới; (c) nguồn có thẩm quyền là
+  TỆP CÓ BĂM trong kho, comment chỉ là bản chiếu — nói thẳng điều đó ngay trong bản chiếu.
+  **Chốt (b) nói cho đúng, vì bản đầu viết sai và cross-review bắt được** (P2 trên PR #106):
+  "có dấu chéo ngược thì nhân đôi" là luật QUÁ RỘNG và tự nó tái tạo đúng cái lệch đang bàn.
+  Nhân đôi CHỈ đúng khi ta tự tay dựng CHÍNH CHUỖI JSON (đối số của một lời gọi công cụ là như
+  vậy). Khi tải trọng được trao cho bộ tuần tự hoá dưới dạng chuỗi ứng dụng (`json.dumps`,
+  client MCP/HTTP thường), bộ ấy ĐÃ thoát hộ — nhân đôi thêm một lần nữa thì bên nhận lĩnh
+  thừa một dấu chéo. Hai lớp, hai luật ngược nhau, và đoán sai lớp thì hỏng theo cả hai chiều.
+  Nên thứ đáng nhớ KHÔNG phải mẹo nhân đôi mà là chốt (a): đo thứ ĐÃ ĐẾN.
+  Bằng chứng bẫy này KHÔNG hiếm và KHÔNG chỉ ở MCP: chính hai dòng trên đây, lượt viết đầu cũng bị
+  công cụ sửa tệp giải mã mất chuỗi thoát (đối số của nó cũng là chuỗi JSON), phải ghi lại bằng một
+  script tự dựng dấu chéo từ `chr(92)` rồi ĐO `repr()` mới thấy. Nói cho ĐÚNG kẻo lại giữ nguyên cái
+  mô hình lớp sai vừa sửa ở trên — bản đầu viết "đi vòng qua lớp JSON", và cross-review bắt được
+  (P2 trên PR #108): script ấy CŨNG là đối số công cụ nên CŨNG đi qua đúng lớp tuần tự hoá đó, không
+  vòng được đi đâu cả. Thứ nó tránh là **cho một dấu chéo NGUYÊN VĂN đi trên đường truyền**: dấu chéo
+  được DỰNG SAU khi đã phân tích cú pháp, nên không còn gì để lớp nào giải mã. Đó là HOÃN việc dựng
+  chuỗi, không phải né một tầng. Hễ nội dung NÓI VỀ chuỗi thoát thì phải đo nó sau khi ghi.
+- **HỎI CHỖ TIỆN TAY thay vì hỏi CHỖ KẾT LUẬN ĐƯỢC GHI — ba lần trong MỘT phiên (14-08-2026).**
+  Cùng một gốc, ba mặt khác nhau, và KHÔNG lần nào tự phát hiện. Chép ra đây vì cái gốc ấy tái phát
+  nhanh hơn mọi bài học khác trong tệp này: nó không đòi ta lười, chỉ đòi ta tin một tín hiệu ở gần.
+  · **(a) "Gate xanh" KHÔNG phải "đã được review".** Đã merge PR #104 và #105 sau khi kiểm gate mà
+  KHÔNG mở phần review; codex đã đăng finding trước lúc merge ba phút. Hai finding thật (một P1 về
+  cổng đăng lease, một P2 về evidence_url) đi thẳng vào master, phải vá bằng PR #107. **Trước khi
+  merge: đọc review, không chỉ đọc cổng.** Hai thứ đó trả lời hai câu hỏi khác nhau.
+  · **(b) RỖNG ở API mình hỏi KHÔNG phải "chưa chạy".** Connector codex chỉ tạo ĐỐI TƯỢNG review khi
+  **có** góp ý; kết luận SẠCH nó gửi bằng một issue comment thường, neo bằng dòng `Reviewed commit:`.
+  Hỏi `get_reviews`/`get_review_comments` thấy rỗng rồi đọc thành "chưa review" ⇒ đã báo sai rằng #103
+  là chỗ mù, và đăng thêm một lời gọi review với cái cớ sai — trong khi kết luận sạch đã có từ 20 phút
+  trước. **Muốn biết đã review chưa thì tìm dòng `Reviewed commit:` cho ĐÚNG commit đang xét.**
+  · **(c) Gate PR và gate master KHÔNG phải một thứ.** `ci.yml` cố ý chỉ chạy `ubuntu` cho PR thường,
+  còn master chạy CẢ `ubuntu` LẪN `windows` (Windows tốn gấp đôi phút, để dành cho lượt gác cổng phát
+  hành). Nên **"PR xanh" không hàm ý "master xanh"**: với một PR THƯỜNG — không gắn nhãn `windows`,
+  không ai gọi tay — lần merge chính là lần đo Windows ĐẦU TIÊN của mã đó. Nói CÓ ĐIỀU KIỆN vì ma
+  trận cũng kèm `windows-latest` cho PR gắn nhãn `windows` và cho `workflow_dispatch`; bỏ điều kiện
+  ấy là đánh lừa người đang xem đúng một PR như vậy (cross-review bắt được, P2 trên PR #109 — và
+  trớ trêu là đoạn ngay trên đã trích đúng điều kiện đó rồi vẫn viết câu quên nó).
+  **Muốn có Windows TRƯỚC khi merge thì đường CHẮC CHẮN là gọi tay `workflow_dispatch` trên ref đó.**
+  Gắn nhãn `windows` KHÔNG đủ cho một PR ĐANG MỞ, và đây là bẫy thật (cross-review bắt, P2 thứ hai
+  trên PR #109): `ci.yml` khai `pull_request:` mà KHÔNG khai `types:`, nên mặc định chỉ bắn ở
+  `opened`/`synchronize`/`reopened` — **`labeled` không nằm trong đó**. Gắn nhãn không tự sinh lượt
+  chạy nào; ma trận chỉ đọc nhãn ở lượt bắn KẾ TIẾP. Người làm theo sẽ gắn nhãn, thấy vẫn đúng một
+  check Ubuntu, rồi merge mà tưởng đã có Windows. Muốn dùng nhãn thì phải kèm một cò mới sau khi gắn
+  (đẩy thêm commit, hoặc đóng rồi mở lại PR) — hoặc khai `types: [..., labeled]` cho workflow.
+  Đợt 14-08 không dùng đường nào, nên cả sáu lần merge của đợt đúng là sáu lần đo Windows đầu tiên.
+  Kèm theo: trên lượt master, bước `PR head contains required EOL base` LUÔN `skipped` vì nó có
+  `if: github.event_name == 'pull_request'` — nên tiêu chí "không bước nào `skipped`" chỉ đúng cho
+  lượt PR; bê nguyên sang lượt master là tự báo động giả.
+  Cả ba cùng họ với bài học "cổng không nói dối, nó VẮNG MẶT": **"vắng mặt vì sạch" và "vắng mặt vì
+  chưa chạy" nhìn giống hệt nhau** nếu hỏi sai chỗ. Chốt chung, rẻ và luôn dùng được: trước khi kết
+  luận từ một chỗ RỖNG, hỏi "nếu thứ tôi đang tìm CÓ THẬT thì nó sẽ được ghi ở đâu?" — rồi đi hỏi
+  đúng chỗ đó. Máy không canh được mục này; nó là kỷ luật đọc.
 - **Quét secrets: lọc theo PHẦN MỞ RỘNG là mù ĐÚNG CHỖ secrets nằm.** `Path('.env').suffix == ''` nên
   `.env` `.netrc` `credentials` (không mở rộng) bị bỏ qua SẠCH — bơm `GOCSPX-…` vào `.env` mà bộ quét
   trả rc=0. Cộng thêm `Get-ChildItem` thiếu `-Force` cũng bỏ y hệt: **hai lỗi ĐỘC LẬP mà CÙNG HƯỚNG** ⇒
   đường Windows từng mù hoàn toàn với secrets trong tệp ẩn. Nay quét cả tệp không mở rộng, tránh nhị
   phân bằng NUL-check 8KB + trần 2MB. Bảng mẫu bí mật ĐỂ MỘT CHỖ: `scripts/pkg_secret_scan.py`, dùng
   chung cho cả `sh` lẫn `ps1` — hai bản sẽ trôi lệch, và bên quên cập nhật chính là bên đẩy lọt.
+
+## Gọi agent đa nền (chi tiết: `docs/GOI_AGENT_DA_NEN.md`)
+- **KHÔNG viết script spawn agent.** Dùng CLI CHÍNH THỨC: `claude`
+  (`@anthropic-ai/claude-code`) và `codex` (`@openai/codex`). `.claude/dev/launcher.py`
+  CHỈ dựng chốt quanh một lệnh bất kỳ rồi chạy lệnh đó — không biết agent nào, không
+  prompt dựng sẵn. Wrapper tự chế sẽ phải bám theo cờ/biến/xác thực của hai CLI khác
+  nhau rồi trôi lệch âm thầm.
+- `python .claude/dev/launcher.py doctor` trước khi nghi ngờ bất cứ thứ gì khác.
+  Thoát 12 = thiếu công cụ bắt buộc. Container Claude Code web ĐÃ ĐO 12-08-2026:
+  có python/git/node/claude/rg, **KHÔNG** có codex/gh/pwsh — `.claude/hooks/session-start.sh`
+  cài codex/claude/ripgrep (KHÔNG cài gh, pwsh: kho dùng GitHub qua MCP, không còn
+  đường nào cần PowerShell).
+- **Không được giả định Windows có `python3`** (bản phổ biến chỉ có `python`, `py`).
+  Đừng bắt cài thêm bí danh; tài liệu và script phải nhận cả ba tên.
+- **Neo theo KHO, không theo đường dẫn.** Đường dẫn tuyệt đối là thứ duy nhất không
+  mang được sang máy khác — phiên remote clone vào đường dẫn không ai biết trước.
+  Dùng `--expected-repo` + `--expected-root-commit` (vân tay bền nhất: sống qua đổi
+  tên/chuyển chủ/fork, đọc được không cần mạng).
+
+## Bài học lớp "chạy được ở đây" (12-08-2026, codex đo trên Windows thật)
+- **`print` giết cả lượt chạy trước khi logic kịp sai.** Console máy Việt là cp1258 nên
+  in đường dẫn có dấu ném `UnicodeEncodeError`, rc=1. Bẫy ở ĐẦU RA chứ không ở đối số:
+  git nhận đúng, trả đúng, rồi câu print giết. Mọi CLI phải ép stdout/stderr sang UTF-8
+  TRƯỚC khi in gì.
+- **`taskkill /T /F` KHÔNG đáng tin.** Trả `rc=1 Access denied` ngay trên tiến trình do
+  chính mình sinh, trong khi `Stop-Process -Force` giết được. Đã giết thì phải KIỂM LẠI;
+  "đã gọi lệnh giết" ≠ "đã chết". Tách mã 124 (quá hạn + đã giết) khỏi 125 (quá hạn +
+  KHÔNG giết được) — trả 124 khi tiến trình còn sống là chốt nói dối.
+- **ZOMBIE tính là đã chết.** Con vừa bị giết nằm ở trạng thái Z tới khi được `wait` thu
+  hồi, mà `os.kill(pid,0)` với zombie vẫn thành công ⇒ báo "chưa giết được" cho tiến
+  trình đã chết hẳn.
+- **`endswith` để so danh tính = lỗ giả mạo.** `--expected-repo github.com/o/r` từng KHỚP
+  remote `https://evil.example/github.com/o/r.git`. Nêu host (≥3 đoạn) ⇒ đòi bằng nhau
+  tuyệt đối — KHÔNG bó ở đúng 3 đoạn, vì GitLab subgroup/GHE lồng nhau có 4+ đoạn và bó
+  như thế là chặn oan chính danh tính đúng (audit vòng 3).
+- **Đột biến ghi vào tệp THẬT rồi khôi phục trong `finally` là bom hẹn giờ.** Lượt chạy bị
+  SIGTERM cắt giữa chừng ⇒ `finally` không chạy ⇒ tệp ở lại trạng thái đã méo, và lượt sau
+  đọc bản méo làm "bản gốc". Một bản vá NGƯỢC (`if False:` thay cho chốt chống giết nhầm
+  PID) đã đi thẳng vào commit theo đường này. Đột biến phải chạy trên BẢN SAO TẠM.
+- **Test không được nhét PID của chính nó vào thứ mình đang thử giết.** Ở lượt đột biến
+  "giết liều" — đúng lượt cần đo — bộ test tự sát (exit 143). Đó chính là nguyên nhân gốc
+  của gạch đầu dòng trên.
+- **Đột biến SỐNG SÓT không luôn nghĩa là test yếu.** Đo rồi mới biết: `-uall` so với mặc
+  định KHÔNG đổi sạch/bẩn (chỉ `-uno` mới làm chốt mù), và ca "rc=0 mà rỗng" được chặn ở
+  BỐN lớp độc lập nên phải đột biến ghép cả bốn. Đột biến sai chỗ ≠ mã sai.
+- **Hook dùng đường dẫn TƯƠNG ĐỐI là bẫy tự khoá.** `.claude/settings.json` từng ghi
+  `python .claude/hooks/pretooluse_guard.py`; khi cwd của shell trôi vào thư mục con thì
+  MỌI lệnh Bash chết trước khi chạy, và không còn đường `cd` về. Luôn dùng
+  `$CLAUDE_PROJECT_DIR`.
 
 ## Cấm
 - Không tự chạy lệnh có `--apply` / `source-delete` / `reg-delete` / `--clear-stale` khi user chưa duyệt (hook sẽ hỏi).

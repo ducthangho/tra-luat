@@ -1,0 +1,192 @@
+name: ops — đăng lease bằng git
+
+# VÌ SAO CÓ WORKFLOW NÀY
+# Git không tạo được issue/comment/PR — đó là CSDL riêng của GitHub, không phải
+# object trong git. Nhưng Actions kích hoạt được bằng `push` và tự có GITHUB_TOKEN,
+# nên `git push → workflow → API` biến git thành đường vận chuyển. Phiên chạy chỉ
+# cần quyền GIT, thứ mọi phiên đều có. ĐÃ ĐO 13/14-08-2026: phiên
+# `origin: claude_code_mcp_seed` bị 403 ở mọi lời gọi api.github.com trong khi
+# clone/fetch/push đều chạy — nên đường API không dùng để điều phối được.
+#
+# RỦI RO, NÓI THẲNG: workflow chạy bằng GITHUB_TOKEN ⇒ **push được thành đăng được**.
+# Bốn lớp thu hẹp:
+#   1. Chỉ nhánh `ops/**` và chỉ đường dẫn `ops/leases/**` mới kích hoạt.
+#   2. `permissions` tối thiểu — không có `pull-requests`, không có `actions`.
+#   3. Mọi lease đi qua `ops/lease_publish.py` (13 ca phản chứng), nơi chặn
+#      `granted_by` mang tên provider, lease hết hạn, SHA sai dạng, YAML hỏng.
+#   4. Bộ kiểm ấy NEO VÀO NHÁNH MẶC ĐỊNH, không lấy từ head được đẩy.
+# KHÔNG dùng `pull_request_target`: nó chạy code của nhánh đích với token ghi.
+#
+# VÌ SAO CÓ LỚP 4 — finding P1 của cross-review trên PR #104 (14-08-2026):
+# Bản trước chạy `python3 ops/lease_publish.py` LẤY TỪ HEAD ĐƯỢC ĐẨY. Một người có
+# quyền ghi kho chỉ cần MỘT push vào `ops/**` vừa thêm tên mình vào
+# `NGUOI_CO_THAM_QUYEN` vừa đổi lease: bộ lọc đường dẫn kích hoạt, `checkout` lấy
+# đúng head chưa ai review đó, rồi workflow chạy bộ kiểm ĐÃ BỊ SỬA — nên cả chốt
+# `granted_by` lẫn chốt `GITHUB_ACTOR` đều qua trơn. Lời khai "sửa danh sách phải
+# qua một commit có review" khi ấy không được cưỡng chế ở đâu cả. **Bộ kiểm nằm
+# cùng nhánh với thứ nó kiểm thì nó không kiểm gì hết.**
+#
+# NÓI THẲNG PHẦN CÒN THỦNG, đừng để ai đọc rộng hơn thực tế: với sự kiện `push`,
+# GitHub lấy CHÍNH TỆP YAML NÀY từ head được đẩy. Ai sửa được `ops/lease_publish.py`
+# thì cũng sửa được tệp này và gỡ luôn mỏ neo. Lớp 4 đóng đường "một push đổi bộ
+# kiểm"; nó KHÔNG biến `push` thành thao tác có thẩm quyền. Thứ đóng nốt phần còn
+# lại nằm NGOÀI kho: ruleset/branch protection chặn push vào `.github/workflows/**`
+# và `ops/lease_publish*.py`. Chưa đặt ruleset thì đường này vẫn quy về "ai push
+# được vào `ops/**` thì đăng được" — cứ nói đúng như vậy, đừng khai rộng hơn.
+#
+# PHÚT ACTIONS: r245 đã đo Free 2.000 phút/tháng bị đốt ~8.100 nên CI từng chết.
+# Job này ubuntu (hệ số 1x), vài giây, không matrix — nhiễu không đáng kể so với
+# gate Windows 20 phút/lượt.
+
+on:
+  push:
+    branches: ['ops/**']
+    paths:
+      - 'ops/leases/**.yaml'
+      - 'ops/leases/**.yml'
+
+permissions:
+  contents: write   # ghi ngược posted_comment_id vào nhánh ops/**
+  issues: write     # đăng comment
+
+concurrency:
+  group: ops-publish-lease-${{ github.ref }}
+  cancel-in-progress: false   # đăng comment KHÔNG được huỷ giữa chừng
+
+jobs:
+  dang:
+    # CHỐNG LẶP — thay cho `[skip ci]` trong thông điệp commit.
+    # Bước cuối ghi ngược `posted_comment_id` vào đúng `ops/leases/**` mà workflow này
+    # theo dõi, nên về nguyên tắc nó tự kích hoạt một lượt nữa. Trước đây chặn bằng
+    # `[skip ci]` — sai chỗ: dấu đó sống trong LỊCH SỬ, và khi commit ghi ngược thành
+    # HEAD của một PR thì nó tắt gate của PR ấy (đã đụng thật, PR #100, 0 check run).
+    # Chốt phải nằm ở LƯỢT CHẠY, không nằm trong commit.
+    #
+    # Hai lớp, và lớp nào cũng đủ một mình:
+    #   1. GitHub KHÔNG sinh lượt chạy mới cho push thực hiện bằng `GITHUB_TOKEN`
+    #      (trừ workflow_dispatch/repository_dispatch) — đây là chống đệ quy sẵn có.
+    #   2. `if:` dưới đây, phòng khi lớp 1 đổi hoặc push đi bằng token khác.
+    # Kể cả hai lớp cùng thủng thì cũng KHÔNG thành vòng lặp vô hạn: chốt idempotent
+    # trong `lease_publish.py` trả rc=9 cho lease đã có `posted_comment_id`, nên lượt
+    # thừa không đăng gì và không ghi ngược gì — nó dừng sau đúng một vòng.
+    if: github.event.head_commit.author.name != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # cần lịch sử để so `before`..`sha`
+
+      - name: cài PyYAML
+        run: python3 -m pip install --quiet pyyaml
+
+      - name: neo bộ kiểm vào nhánh mặc định
+        # Dựng một worktree RỜI của nhánh mặc định rồi chạy bộ kiểm TỪ ĐÓ. Head được
+        # đẩy chỉ còn góp đúng thứ nó có quyền góp: TỆP LEASE. Xem đầu tệp về finding
+        # P1 đã buộc phải có bước này.
+        #
+        # Vì sao worktree chứ không phải `git show > tệp`: bộ phản chứng đo cả cây —
+        # `t23` quét `ops/leases/**`, `t24` quét `.github/workflows/**`. Chép mỗi hai
+        # tệp `.py` ra một thư mục trơ thì hai ca ấy không thấy thư mục cần quét và
+        # `return` sớm: suite vẫn báo N/N trong khi hai ca không đo gì. Đúng bệnh
+        # "ca có MẶT khác ca có ĐO" mà `t24` sinh ra để chặn — đừng tái lập nó ở đây.
+        env:
+          MAC_DINH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          test -n "$MAC_DINH"
+          git fetch --no-tags origin "$MAC_DINH"
+          NEO="$RUNNER_TEMP/neo"          # NGOÀI workspace: không làm bẩn cây được đẩy
+          git worktree add --detach "$NEO" "origin/$MAC_DINH"
+          test -s "$NEO/ops/lease_publish.py"
+          test -s "$NEO/ops/lease_publish_test.py"
+          echo "NEO=$NEO" >> "$GITHUB_ENV"
+          # BẰNG CHỨNG DƯƠNG: in băm cả hai bản để lượt chạy TỰ KHAI nó chạy bản nào.
+          # Hai băm khác nhau là chuyện bình thường (head có thể đi trước master);
+          # điều cần đọc được từ log là bản ĐANG CHẠY đến từ đâu.
+          echo "bản ĐANG CHẠY — từ origin/$MAC_DINH @ $(git -C "$NEO" rev-parse --short HEAD):"
+          sha256sum "$NEO/ops/lease_publish.py" "$NEO/ops/lease_publish_test.py"
+          echo "bản trong head được đẩy — KHÔNG chạy:"
+          sha256sum ops/lease_publish.py ops/lease_publish_test.py
+
+      - name: tự kiểm cổng trước khi tin nó
+        # Cổng này là thứ DUY NHẤT đứng giữa một tệp YAML và một comment mang danh
+        # nghĩa kho. Chạy phản chứng của chính nó trước mỗi lượt đăng — rẻ hơn
+        # nhiều so với một lần đăng sai.
+        run: python3 "$NEO/ops/lease_publish_test.py"
+
+      - name: tìm lease vừa đổi
+        id: tim
+        run: |
+          set -euo pipefail
+          TRUOC='${{ github.event.before }}'
+          # Nhánh mới: `before` là toàn số 0, không diff được. Khi đó liệt kê tất cả
+          # lease trong cây — chốt `posted_comment_id` lo phần không đăng trùng.
+          if [ -z "$TRUOC" ] || [ "$TRUOC" = "0000000000000000000000000000000000000000" ]; then
+            find ops/leases -type f \( -name '*.yaml' -o -name '*.yml' \) > ds.txt || true
+          else
+            git diff --name-only --diff-filter=ACM "$TRUOC" '${{ github.sha }}' -- \
+              'ops/leases/*.yaml' 'ops/leases/*.yml' > ds.txt || true
+          fi
+          echo "tìm thấy $(wc -l < ds.txt) tệp:"; cat ds.txt
+
+      - name: đăng
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          DA_DOI=0
+          while IFS= read -r tep; do
+            [ -n "$tep" ] || continue
+            [ -f "$tep" ] || continue
+            echo "::group::$tep"
+
+            # `check` phân ba đường bằng MÃ THOÁT, không bằng chữ: 0 đăng được,
+            # 9 đã đăng rồi (bỏ qua, không phải lỗi), còn lại là CHẶN.
+            # `--root .` là gốc kho ĐƯỢC ĐẨY: bộ kiểm đến từ nhánh mặc định, còn tệp
+            # lease và `prompt_path` mà nó neo thì đọc từ head. Không nêu cờ này thì
+            # `_goc_kho` đi ngược từ tệp lease tìm `.git` và cũng ra đúng chỗ đó, nhưng
+            # nói rõ ràng vẫn hơn để tuỳ một hàm suy đoán.
+            set +e
+            python3 "$NEO/ops/lease_publish.py" check "$tep" --root .
+            rc=$?
+            set -e
+            if [ "$rc" = "9" ]; then echo "đã đăng trước đó — bỏ qua"; echo "::endgroup::"; continue; fi
+            if [ "$rc" != "0" ]; then echo "::error file=$tep::cổng chặn (rc=$rc)"; exit "$rc"; fi
+
+            ISSUE=$(python3 -c "import sys,yaml;print(yaml.safe_load(open(sys.argv[1],encoding='utf-8'))['packet_issue'])" "$tep")
+            # `body` cũng phải đi từ bản neo: nó dựng NỘI DUNG comment mang danh nghĩa
+            # kho, nên một bản `body` bị sửa đăng được bất cứ thứ gì dù `check` xanh.
+            python3 "$NEO/ops/lease_publish.py" body "$tep" > than.md
+            # Dựng JSON bằng python: thân comment có tiếng Việt, dấu nháy và xuống
+            # dòng — nhét thẳng vào đối số shell là hỏng ở chỗ khó đọc.
+            python3 -c "import json,sys;print(json.dumps({'body':open('than.md',encoding='utf-8').read()}))" > payload.json
+
+            ID=$(gh api "repos/$REPO/issues/$ISSUE/comments" --input payload.json --jq .id)
+            # BẰNG CHỨNG DƯƠNG: đòi một ID số, đừng tin rc của `gh`.
+            case "$ID" in ''|*[!0-9]*) echo "::error::gh không trả về comment id: $ID"; exit 1;; esac
+            echo "đã đăng comment $ID lên #$ISSUE"
+
+            python3 "$NEO/ops/lease_publish.py" mark "$tep" --comment-id "$ID"
+            DA_DOI=1
+            echo "::endgroup::"
+          done < ds.txt
+          echo "DA_DOI=$DA_DOI" >> "$GITHUB_ENV"
+
+      - name: ghi ngược comment id
+        if: env.DA_DOI == '1'
+        run: |
+          set -euo pipefail
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add ops/leases
+          # KHÔNG nhét dấu skip-ci vào thông điệp commit. Bản trước có, và đã trả giá:
+          # dấu ấy nằm lại trong LỊCH SỬ, nên khi commit ghi ngược thành HEAD của một
+          # PR thì nó tắt luôn gate của PR đó — PR hiện `mergeable_state: clean` vì
+          # KHÔNG cổng nào chạy, chứ không phải vì cổng xanh, và trên giao diện hai
+          # trạng thái ấy nhìn giống hệt nhau. Đụng thật ở PR #100 (14-08-2026):
+          # `get_check_runs` trả total_count = 0.
+          # Chống lặp nay do `if:` ở mức job lo (xem đầu tệp) — chốt ấy chỉ ảnh hưởng
+          # LƯỢT CHẠY, không để lại vết trong lịch sử kho.
+          git commit -m "ops: ghi posted_comment_id sau khi đăng lease"
+          git push origin HEAD:'${{ github.ref_name }}'

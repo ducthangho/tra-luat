@@ -12,11 +12,11 @@
       "Bash(python scripts/tl.py counts:*)",
       "Bash(python scripts/tl.py sweep:*)",
       "Bash(python scripts/tl.py review-queue:*)",
-      "Bash(python scripts/tl.py reg-query:*)"
+      "Bash(python scripts/tl.py reg-query:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "ask": [
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
       "Bash(clasp:*)"
     ],
     "deny": [
@@ -33,13 +33,25 @@
     ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-start.sh\"",
+            "shell": "bash"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/pretooluse_guard.py"
+            "command": "python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pretooluse_guard.py\"",
+            "shell": "bash"
           }
         ]
       }

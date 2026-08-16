@@ -199,27 +199,34 @@ FORBIDDEN_DOCTRINE_PHRASES = {
     ],
 }
 
-# --- (c2) hạng NGÔN NGỮ THƯỜNG — chiều BẮT OAN (AC 19) -------------------------
+# --- (c2) hạng NGÔN NGỮ THƯỜNG — ĐÃ BỎ ở revision 4 ---------------------------
 #
-# TIÊU CHÍ, khai tường minh và áp cho TOÀN danh sách trên chứ không riêng cụm nào:
-#   một mục thuộc hạng này khi nó là cụm danh từ tiếng Việt/Anh dùng được trong
-#   câu bình thường mà KHÔNG mượn nghĩa protocol.
+# Từng có một hạng riêng cho cụm danh từ tiếng Việt phổ thông, được tha khi bị ngắt
+# qua dòng trong văn xuôi kể lại một phép đo. Revision 4 BỎ HẲN nó: danh sách cấm
+# không còn miễn trừ nào, ở bất kỳ hình dạng nào.
 #
-# Soát cả danh sách theo tiêu chí ấy: ngưỡng số và định danh `max_*` là biểu thức
-# đặt ra (`3 attempt/packet`, `same_failure_limit`); dòng state machine là chuỗi
-# trạng thái; `dispatcher/reconciler`, `local controller`, `land operator`,
-# `apply job`, `phiên land` là NHÃN VAI do protocol đặt — tiếng Anh chen giữa văn
-# bản tiếng Việt, không ai viết vô tình; bốn ô nội dung và bốn định nghĩa
-# `merged:`/`integrated:`/`landed:`/`complete:` là câu của protocol. Còn lại đúng
-# MỘT mục là cụm danh từ tiếng Việt phổ thông.
+# VÌ SAO BỎ — sáu lượt cross-review, mỗi lượt một xấp xỉ hẹp hơn, mỗi xấp xỉ vẫn có
+# phản ví dụ đo được:
+#     "có ngữ cảnh doctrine"        -> heading trần lọt          (lượt 6)
+#     "không nằm gọn trong một dòng" -> heading ngắt dòng lọt     (lượt 7)
+#     "có chữ ở hai phía"            -> wrapper hai ký tự lọt     (lượt 9)
+#     "có dấu hiệu phép đo"          -> phân số trong văn xuôi lọt (lượt 10)
+# Reviewer lượt 10 nói thẳng: tiếp tục thêm marker từ vựng chỉ DỜI cửa lọt. Con lắc
+# sáu lần đánh quá là con lắc của MIỄN TRỪ, không phải của bản vá.
 #
-# Đây là KẾT QUẢ của việc áp tiêu chí, không phải bỏ riêng cụm đang làm gate đỏ.
-# Mục hạng này KHÔNG bị gỡ khỏi danh sách cấm — nó chỉ đòi thêm NGỮ CẢNH TÁI TẠO
-# NGẮT DÒNG (xem `_duoc_tha_vi_ngat_dong`). Ca thật buộc phải có hạng này:
-# `CLAUDE.md` của master ngắt dòng giữa `người có` / `thẩm quyền` trong một câu
-# KỂ LẠI kết quả đo, và bản trước tính đó là chép doctrine (`rc=6`) — bắt oan.
-# Chuẩn hoá mạnh hơn mà bắt oan văn bản bình thường là KHÔNG ĐẠT, y như để lọt.
-CUM_NGON_NGU_THUONG = frozenset({"người có thẩm quyền"})
+# Chỗ DUY NHẤT trên cây đã merge từng cần miễn trừ là `CLAUDE.md` dòng 82 của master.
+# Nó được xử lý bằng cách VIẾT LẠI CÂU (`c44b2d4`, land qua PR #129 thành `18da1da`),
+# cross-review duyệt, không finding. Một cơ chế không còn người dùng là một cơ chế
+# chưa ai kiểm — nên nó bị xoá thay vì để mục trong tệp.
+#
+# HỢP ĐỒNG MỚI, một câu: adapter cần kể lại một phép đo có chứa cụm cấm thì VIẾT LẠI
+# CÂU. Cái giá khai thẳng — văn xuôi thật kể lại phép đo, có cụm cấm ngắt dòng, nay ĐỎ.
+#
+# NẾU MỘT REVISION SAU MỞ LẠI MIỄN TRỪ, ba lớp lỗi này quay lại ngay và đây là danh
+# sách kiểm sẵn (cả ba đã đo, cả ba tự đóng khi bỏ miễn trừ):
+#     doctrine-indented-code-block-bypass          khối mã thụt lề CommonMark
+#     doctrine-comment-erases-fence-closer-bypass  comment xoá rào đóng thật
+#     doctrine-html-table-token-context-bypass     token bảng trong script/thuộc tính
 
 
 def _cung_hoa_stdout() -> None:
@@ -429,195 +436,7 @@ def _phang_ca_tep(raw: str):
 
 
 
-_CO_CHU = re.compile(r"[^\W_]", re.UNICODE)
 _RE_DAU_DONG = re.compile(r"^\s*(?:#{1,6}|>+|[-*+]|\d+[.)])\s*")
-_RE_DAU_DONG_THO = re.compile(r"^\s{0,3}(?:>+|[-*+]|\d+[.)])\s+")
-# `^ {0,3}` — TRẢ LẠI mức thụt của CommonMark, bỏ `^\s*` mà generation 8 nới ra.
-#
-# g8 nới rồi biện minh: nhận thừa một dòng là khối mã thì chỉ khiến cổng đỏ nhiều hơn,
-# nên "fail-closed", nên an toàn. Cross-review lượt 9 BÁC, và bác đúng: AC 19 nói thẳng
-# rằng chuẩn hoá mạnh hơn mà BẮT OAN văn bản bình thường là KHÔNG ĐẠT, ngang với để lọt.
-# Ở packet này hai chiều CÂN NHAU — không có chiều nào là chiều an toàn để nghiêng về.
-# Đo được cái giá của lập luận ấy: một dòng code thụt 4 dấu cách mở đầu bằng backtick
-# bị đọc là hàng rào mở, và MỌI dòng tới hết tệp bị đánh dấu khối mã, làm một câu AC 19
-# hợp lệ đứng sau đó đổi từ rc=0 thành rc=6.
-#
-# Nhóm bắt `(`{3,}|~{3,})` để nhớ ĐỘ DÀI rào, không chỉ loại ký tự — xem `_dong_khoi_ma`.
-_RE_HANG_RAO = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
-
-_RE_MO_BANG = re.compile(r"<table\b", re.IGNORECASE)
-_RE_DONG_BANG = re.compile(r"</table\s*>", re.IGNORECASE)
-_RE_COMMENT_MOT_DONG = re.compile(r"<!--.*?-->", re.DOTALL)
-_RE_MA_INLINE = re.compile(r"(?<!`)(`+)(?!`).*?(?<!`)\1(?!`)", re.DOTALL)
-
-# DẤU HIỆU PHÉP ĐO — mỏ neo hẹp thay cho "có chữ hai phía".
-#
-# AC 19 tha ĐÚNG một thứ: cụm doctrine bị ngắt dòng *trong văn xuôi KỂ LẠI KẾT QUẢ ĐO*.
-# Bản g6–g8 hiện thực vế "văn xuôi" bằng "có ký tự chữ ở hai phía", và cross-review lượt 9
-# đo được cái giá: `x người có␤thẩm quyền y` lọt rc=0. Hai ký tự vô nghĩa là qua cổng.
-#
-# Executor từng hai lần khẳng định đó là "giới hạn đã khai, vì phân biệt cần hiểu NGHĨA".
-# Reviewer bác bằng một lập luận không phản bác được: phân biệt MỌI câu bằng ngữ nghĩa thì
-# khó, nhưng KHÔNG buộc phải tha mọi wrapper — ca thật neo được vào dấu hiệu HẸP HƠN và
-# KIỂM ĐƯỢC. Đây là mỏ neo đó: đoạn văn phải mang ít nhất một dấu hiệu của việc kể lại
-# phép đo. Vẫn không phải hiểu nghĩa, vẫn đo được bằng máy, nhưng hẹp hơn hẳn "một ký tự".
-_DAU_HIEU_PHEP_DO = re.compile(
-    r"""(?:
-          rc\s*=                # mã thoát — dấu hiệu dày đặc nhất trong kho này
-        | \bđo\b                # đo được / đã đo / kết quả đo / bản đo / phép đo
-        | \bđếm\b
-        | \bv\d+\.\d+           # số hiệu bản: v1.36.68
-        | \bPR\s*\#?\d+         # PR #104
-        | \d+\s*/\s*\d+         # 133/133
-    )""",
-    re.VERBOSE | re.IGNORECASE,
-)
-
-
-def _dong_khoi_ma(raw: str) -> frozenset:
-    """Số hiệu những dòng nằm TRONG khối mã rào (``` hoặc ~~~), kể cả dòng rào.
-
-    Đo trên dòng THÔ chứ không trên dòng đã chuẩn hoá: `_chuan_hoa("```")` trả
-    chuỗi RỖNG nên `_phang_ca_tep` bỏ qua nó — nhìn từ tầng đã chuẩn hoá thì
-    hàng rào không tồn tại. Đây đúng là chỗ lượt 7 lách được.
-
-    NHỚ CẢ ĐỘ DÀI RÀO, KHÔNG CHỈ LOẠI KÝ TỰ, và dòng đóng phải TRỐNG PHẦN ĐUÔI.
-    Bản generation 8 chỉ nhớ loại ký tự và không ràng buộc đuôi dòng, nên hai hình
-    dạng dưới đây đều bị coi là ĐÓNG trong khi Markdown vẫn coi là đang TRONG khối —
-    phần sau đó rơi khỏi tập khối mã và miễn trừ AC 19 cho cụm cấm lọt `rc=0`:
-
-        ````                     ```
-        ```          ← rào 3     ``` not-a-close   ← có phần đuôi
-        …cụm cấm…    KHÔNG đóng  …cụm cấm…         KHÔNG đóng
-        ````                     ```
-
-    Luật CommonMark: rào đóng phải CÙNG ký tự, dài KHÔNG NGẮN HƠN rào mở, và sau nó
-    chỉ được có khoảng trắng. Cài đúng luật ấy thì cả hai hình dạng hết lách.
-    """
-    trong, mo_dau, mo_dai, ket = False, "", 0, set()
-    for so_dong, dong in enumerate(raw.splitlines(), 1):
-        # GỠ DẤU ĐẦU DÒNG THÔ TRƯỚC KHI DÒ HÀNG RÀO. Bản đầu của chốt này chỉ khớp
-        # `^\s{0,3}` nên hàng rào lồng một cấp trong danh sách hay trích dẫn KHÔNG
-        # được nhận, và miễn trừ văn xuôi tha luôn cả khối mã. Đo được hai ca lọt:
-        #
-        #     - ```                       > ```
-        #       Bảng vai trò: người có    > Bảng vai trò: người có
-        #       thẩm quyền là …           > thẩm quyền là …
-        #       ```                       > ```
-        #
-        # Ca bullet còn tệ hơn: dòng ĐÓNG `  ``` ` thụt 2 dấu cách thì khớp, nên nó
-        # MỞ một hàng rào ma ở cuối tệp thay vì đóng khối đã mở.
-        m = _RE_HANG_RAO.match(_go_dau_dong_tho(dong))
-        if m:
-            rao, duoi = m.group(1), m.group(2)
-            dau, dai = rao[0], len(rao)
-            if not trong:
-                # Rào MỞ: `info string` của rào backtick không được chứa backtick
-                # (CommonMark) — nếu chứa thì đây không phải rào mở.
-                if not (dau == "`" and "`" in duoi):
-                    trong, mo_dau, mo_dai = True, dau, dai
-                    ket.add(so_dong)
-                    continue
-            elif dau == mo_dau and dai >= mo_dai and duoi.strip() == "":
-                trong = False
-                ket.add(so_dong)
-                continue
-        if trong:
-            ket.add(so_dong)
-    return frozenset(ket)
-
-
-def _go_dau_dong_tho(dong: str) -> str:
-    """Gỡ dấu khối (`>`, `-`, `1.`) khỏi dòng THÔ — chỉ dùng để dò hàng rào mã.
-
-    Khác `_go_dau_dong` ở hai điểm, cả hai đều cố ý:
-
-      * chạy trên dòng THÔ, chưa qua `_chuan_hoa`, vì hàng rào ``` sau chuẩn hoá
-        thành chuỗi rỗng — nhìn từ tầng đã chuẩn hoá thì hàng rào không tồn tại;
-      * KHÔNG gỡ `#`. Heading không bao giờ mở khối mã, mà `#` lại là ký tự mở đầu
-        thường gặp trong chính khối mã (dòng chú thích shell), nên gỡ nó sẽ biến
-        `# ``` ` trong một khối shell thành hàng rào giả.
-
-    Đòi có khoảng trắng SAU dấu để `---` (đường kẻ ngang) không bị đọc là gạch đầu
-    dòng, và `1.5` không bị đọc là số thứ tự.
-    """
-    truoc = None
-    while truoc != dong:
-        truoc = dong
-        dong = _RE_DAU_DONG_THO.sub("", dong, count=1)
-    return dong
-
-
-def _dong_bang_html(raw: str) -> frozenset:
-    """Số hiệu những dòng nằm TRONG phần tử bảng HTML (`<table>` … `</table>`).
-
-    Cùng một nguyên tắc với ô bảng Markdown: ô bảng là CHÉP BẢNG, không bao giờ là
-    câu kể lại kết quả đo, nên không được hưởng miễn trừ AC 19. Bản trước chỉ chặn
-    ô bảng Markdown qua dấu `|`; cross-review lượt 8 chỉ ra dạng HTML tương đương
-    vẫn lọt vì `_dong_sau_khi_go` GỠ thẻ trước khi miễn trừ nhìn thấy chúng:
-
-        <table><tr><td>Ghi chú người có
-        thẩm quyền đây.</td></tr></table>          -> rc=0  LỌT
-
-    Gỡ thẻ xong thì hai dòng còn lại trông hệt văn xuôi có chữ hai phía, nên chốt
-    "văn xuôi bọc hai phía" tha. Phải đo trên dòng THÔ, y như `_dong_khoi_ma`.
-
-    Dò theo SPAN chứ không theo từng dòng: thẻ mở và thẻ đóng thường không cùng
-    dòng, và một bảng có thể trải nhiều dòng.
-
-    BA CHỖ BẢN GENERATION 8 LÀM SAI, cross-review lượt 9 đo được cả ba:
-
-    1. **Non-greedy tới `</table>` ĐẦU TIÊN** ⇒ thẻ đóng của bảng CON đóng luôn bảng
-       NGOÀI, phần còn lại của bảng ngoài rơi khỏi tập và cụm cấm trong đó lọt `rc=0`.
-       Chữa: ĐẾM LỒNG NHAU, mỗi `<table` +1, mỗi `</table>` −1, chỉ đóng khi về 0.
-
-    2. **Không loại mã** ⇒ một literal `<table>` trong khối mã hay trong nháy ngược
-       cũng mở bảng, và vì không có thẻ đóng nên nuốt tới hết tệp. Đó là ĐẦU ĐỘC
-       chiều bắt oan: một câu AC 19 hợp lệ đứng sau đổi từ `rc=0` thành `rc=6`.
-       Chữa: xoá trắng khối mã, mã inline và comment HTML TRƯỚC khi dò.
-
-    3. **Bảng không đóng thẻ nuốt tới hết tệp.** g8 lý luận "bảng thiếu thẻ đóng vẫn
-       render ra bảng". Đúng về HTML, nhưng sai về cái giá: nó tước miễn trừ AC 19 của
-       toàn bộ phần đuôi. CommonMark có luật sẵn và hẹp hơn hẳn — khối HTML kết thúc ở
-       DÒNG TRỐNG đầu tiên. Dùng đúng luật ấy: chưa đóng thẻ thì dừng ở dòng trống.
-
-    Xoá trắng chứ không cắt bỏ: thay mỗi ký tự không phải xuống dòng bằng khoảng
-    trắng, để MỌI vị trí trong chuỗi giữ nguyên offset và số dòng vẫn tính đúng.
-    """
-    def _xoa_trang(m):
-        return "".join("\n" if c == "\n" else " " for c in m.group(0))
-
-    sach = _RE_COMMENT_MOT_DONG.sub(_xoa_trang, raw)
-    dong_ma = _dong_khoi_ma(sach)
-    sach = "\n".join(
-        (" " * len(d) if so in dong_ma else d)
-        for so, d in enumerate(sach.split("\n"), 1)
-    )
-    sach = _RE_MA_INLINE.sub(_xoa_trang, sach)
-
-    moc = sorted(
-        [(m.start(), 1) for m in _RE_MO_BANG.finditer(sach)]
-        + [(m.end(), -1) for m in _RE_DONG_BANG.finditer(sach)]
-    )
-    dong_cua = sach.split("\n")
-    ket, sau, mo_tai = set(), 0, None
-    for vi_tri, buoc in moc:
-        if sau == 0 and buoc == 1:
-            mo_tai = sach.count("\n", 0, vi_tri) + 1
-        sau = max(0, sau + buoc)
-        if sau == 0 and buoc == -1 and mo_tai is not None:
-            ket.update(range(mo_tai, sach.count("\n", 0, vi_tri) + 2))
-            mo_tai = None
-    if mo_tai is not None:                    # thẻ mở KHÔNG được đóng
-        cuoi = len(dong_cua)
-        for so in range(mo_tai, len(dong_cua) + 1):
-            if not dong_cua[so - 1].strip():  # dòng trống KẾT THÚC khối HTML
-                cuoi = so - 1
-                break
-        ket.update(range(mo_tai, cuoi + 1))
-    return frozenset(ket)
-
-
 def _go_dau_dong(s: str) -> str:
     """Gỡ dấu đầu dòng Markdown lặp tới hết (`> - `, `## `, `1. `)."""
     truoc = None
@@ -654,103 +473,6 @@ def _khuc_chuan(dong_sach):
         phan.append(n)
         vi_tri += len(n)
     return "".join(phan), khuc
-
-
-def _duoc_tha_vi_ngat_dong(raw: str, kim: str) -> bool:
-    """Cụm hạng NGÔN NGỮ THƯỜNG có được tha không? CHỈ khi nó bị NGẮT QUA DÒNG.
-
-    ĐÂY LÀ CHỖ GENERATION 4 LÀM HỎNG, ghi lại để không ai lặp lại. Bản gen-4 hỏi
-    ngược: "có ngữ cảnh tái tạo doctrine không?" và THA mọi thứ không có `|` cũng
-    không kèm mục cùng nhóm. Hậu quả đo được trên `e6e4b73` — fail-open:
-
-        ## Người có thẩm quyền        (heading trần)      -> rc=0  LỌT
-        Người có thẩm quyền           (dòng trần)         -> rc=0  LỌT
-        - Người có thẩm quyền         (gạch đầu dòng)     -> rc=0  LỌT
-        | Người có thẩm quyền | x |   (ô bảng)            -> rc=6  bắt
-
-    Sai vì AC 2 nói thẳng: bơm **một cụm trong danh sách** vào adapter là phải ĐỎ.
-    Còn AC 19 chỉ đòi tha ĐÚNG MỘT thứ — *"một cụm doctrine bị **ngắt qua xuống
-    dòng** trong văn xuôi kể lại kết quả đo"*. Gen-4 nới miễn trừ rộng hơn hẳn
-    điều được yêu cầu, và biến chiều bắt-oan thành cửa lọt.
-
-    Nên câu hỏi đảo lại, và miễn trừ thu về đúng bề rộng của AC 19:
-
-      cụm chỉ được tha khi nó KHÔNG xuất hiện trọn vẹn trong bất kỳ DÒNG VẬT LÝ
-      nào — tức phép khớp CHỈ tồn tại nhờ bước nối dòng của `_phang_ca_tep` —
-      và không dòng nào liên quan là ô bảng (`|`).
-
-    Ca thật đạt điều kiện: `CLAUDE.md` master dòng 82 kết thúc bằng `người có`,
-    dòng 83 mở đầu bằng `thẩm quyền`. Không dòng nào chứa trọn cụm ⇒ THA.
-    Mọi hình dạng đứng-một-mình ở trên đều nằm gọn trong MỘT dòng ⇒ KHÔNG tha.
-    """
-    # Dùng CHÍNH bản đã gỡ tag: nếu không, `Người có <b>thẩm quyền</b>` nằm gọn một
-    # dòng nhưng bị tag cắt vụn sẽ được tha oan.
-    dong_sach = _dong_sau_khi_go(raw)
-    for _so_dong, dong in dong_sach:
-        if kim in _chuan_hoa(dong):
-            return False          # nằm gọn trong một dòng ⇒ chép doctrine, không tha
-        if "|" in dong and kim in _chuan_hoa(dong.replace("|", " ")):
-            return False          # ô bảng bị `|` cắt vụn vẫn là chép bảng
-
-    # ĐẾN ĐÂY cụm chỉ tồn tại nhờ bước NỐI DÒNG. Chưa đủ để tha: lượt review 7 đo
-    # được ba hình dạng ngắt dòng KHÔNG PHẢI văn xuôi mà bản trước vẫn tha —
-    #
-    #     ## Người có / thẩm quyền      (heading)     -> rc=0  LỌT
-    #     - Người có / ␠␠thẩm quyền     (bullet)      -> rc=0  LỌT
-    #     ```␤Người có␤thẩm quyền␤```   (code fence)  -> rc=0  LỌT
-    #
-    # — tức kẻ gian chỉ cần gõ Enter giữa cụm là qua cổng. Đó là fail-open, cùng
-    # HẠNG lỗi mà gen-4 mắc, chỉ khác hình dạng. AC 19 đòi tha ĐÚNG một thứ: cụm
-    # bị ngắt dòng **trong văn xuôi kể lại kết quả đo**. Nên thêm hai điều kiện,
-    # cả hai đo được, không cần hiểu nghĩa câu:
-    #
-    #   1. không dòng biên nào nằm trong khối mã — khối mã là chép NGUYÊN VĂN,
-    #      không bao giờ là lời kể;
-    #   2. dòng mở phải còn CHỮ trước mảnh cụm, và dòng đóng phải còn CHỮ sau nó,
-    #      sau khi đã gỡ dấu đầu dòng (`#`, `>`, `-`, `1.`). Văn xuôi bọc cụm ở cả
-    #      hai phía; heading/bullet đứng-một-mình thì không.
-    #   3. hai dòng biên phải mang DẤU HIỆU PHÉP ĐO.
-    #
-    # ĐIỀU KIỆN 3 THÊM Ở GENERATION 9, và nó sửa một chỗ executor đã HAI LẦN khẳng
-    # định sai. Bản g6–g8 dừng ở điều kiện 2 và khai rằng phần còn lại là "giới hạn
-    # đã khai, vì phân biệt cần hiểu NGHĨA, mà AC 19 chính là lệnh phải tha hạng đó".
-    # Cross-review lượt 9 đo được cái giá của lời khai ấy: `x người có␤thẩm quyền y`
-    # trả `rc=0`. Hai ký tự vô nghĩa là qua cổng — đó không còn là "văn xuôi kể lại
-    # kết quả đo" theo bất kỳ cách đọc nào của AC 19, trong khi AC 2 đòi bơm một cụm
-    # trong danh sách là phải ĐỎ.
-    #
-    # Reviewer bác bằng lập luận không phản bác được: phân biệt MỌI câu bằng ngữ nghĩa
-    # thì khó, nhưng KHÔNG buộc phải tha mọi wrapper — ca thật neo được vào dấu hiệu
-    # HẸP HƠN và KIỂM ĐƯỢC. `_DAU_HIEU_PHEP_DO` là mỏ neo đó.
-    #
-    # GIỚI HẠN CÒN LẠI, vẫn ghi thẳng: kẻ gian cố tình rắc `rc=0` vào câu vẫn qua
-    # được. Nhưng đó là một hành vi KHÁC hẳn về mức độ so với gõ hai ký tự bừa, và
-    # nó để lại dấu vết đọc được trong chính văn bản.
-    trong_khoi_ma = _dong_khoi_ma(raw) | _dong_bang_html(raw)
-    phang, ban_do_dong = _khuc_chuan(dong_sach)
-
-    def _khuc(off: int):
-        for bat_dau, ket_thuc, so_dong, n in ban_do_dong:
-            if bat_dau <= off < ket_thuc:
-                return bat_dau, so_dong, n
-        return None
-
-    tu = phang.find(kim)
-    while tu != -1:
-        mo = _khuc(tu)
-        dong_cuoi = _khuc(tu + len(kim) - 1)
-        if mo is None or dong_cuoi is None:
-            return False
-        if mo[1] in trong_khoi_ma or dong_cuoi[1] in trong_khoi_ma:
-            return False                      # (1) khối mã hoặc bảng HTML
-        truoc = _go_dau_dong(mo[2][: tu - mo[0]])
-        sau = dong_cuoi[2][tu + len(kim) - dong_cuoi[0] :]
-        if not _CO_CHU.search(truoc) or not _CO_CHU.search(sau):
-            return False                      # (2) không phải văn xuôi bọc hai phía
-        if not _DAU_HIEU_PHEP_DO.search(mo[2] + " " + dong_cuoi[2]):
-            return False                      # (3) không kể lại một phép ĐO nào
-        tu = phang.find(kim, tu + len(kim))
-    return True
 
 
 def _dong_tai(ban_do, offset: int) -> int:
@@ -1361,11 +1083,9 @@ def cmd_doctrine_scan(a, state_dir: Path) -> int:
                 kim = _chuan_hoa(cum)
                 if not kim:
                     continue
-                # Hạng NGÔN NGỮ THƯỜNG: chỉ tính khi có NGỮ CẢNH TÁI TẠO doctrine.
-                # Không có bước này thì một câu văn xuôi kể lại kết quả đo bị tính
-                # là chép doctrine — chiều BẮT OAN, AC 19.
-                if cum in CUM_NGON_NGU_THUONG and _duoc_tha_vi_ngat_dong(raw, kim):
-                    continue
+                # KHÔNG CÓ MIỄN TRỪ NÀO (AC 19, revision 4). Cụm cấm khớp ở bất kỳ
+                # hình dạng nào — liền dòng, ngắt dòng, trong khối mã, trong bảng,
+                # trong tag, sau chuẩn hoá — đều là chép doctrine.
                 tu = phang.find(kim)
                 while tu != -1:
                     dinh.append((str(f), nhom, cum, _dong_tai(ban_do, tu)))

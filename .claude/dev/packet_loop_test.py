@@ -1314,6 +1314,46 @@ LOP_LACH = [
     # tha câu văn xuôi KỂ LẠI KẾT QUẢ ĐO bị ngắt dòng, không tha mọi câu văn xuôi.
     ("cum_don_cau_van_xuoi_mot_dong",
      "Chỉ người có thẩm quyền mới cấp được lease; phiên worker thì không."),
+    # --- MƯỜI HAI CA ĐỔI MA TRẬN ở revision 4 — BẮT-OAN sang LỌT ------------------
+    #
+    # Cả mười hai TRƯỚC nằm ở `LOP_BAT_OAN`, được miễn trừ AC 19 tha vì cụm cấm bị
+    # ngắt qua dòng trong văn xuôi kể lại một phép đo. Revision 4 bỏ hẳn miễn trừ,
+    # nên chúng ĐỎ. Đây KHÔNG phải hồi quy — đây là hợp đồng mới, khai thẳng:
+    # cụm trong danh sách cấm không được xuất hiện ở BẤT KỲ hình dạng nào, và
+    # adapter cần kể lại phép đo có chứa cụm ấy thì VIẾT LẠI CÂU.
+    #
+    # Spec revision 4 đoán HAI ca sẽ đổi. Đo trọn suite: MƯỜI HAI. Phân hoạch sạch —
+    # 12 ca đỏ đúng bằng 12 ca CÓ chứa cụm cấm, 23 ca không chứa vẫn xanh; không ca
+    # nào đỏ vì lý do khác. Chênh lệch là do spec mới mô phỏng chứ chưa chạy trọn.
+    #
+    # Mỗi ca ở đây có một ca CÙNG TÊN GỐC bên `LOP_BAT_OAN` giữ Y HỆT hình dạng
+    # (bảng chưa đóng thẻ, rào bốn backtick, dòng thụt lề, mã inline, comment,
+    # bullet, danh sách số, trích dẫn) nhưng viết `tên thuộc / danh sách cho phép`.
+    # Cặp ấy là thứ chứng minh cổng phân biệt NỘI DUNG chứ không phân biệt HÌNH DẠNG.
+    ("cum_don_claude_md_master_tha_cu",
+     'biệt THẨM QUYỀN. Danh sách cấm phải đoán trước mọi cách viết của kẻ gian\n  (dấu nối, tiền tố, hậu tố, đồng tự Unicode, tổ hợp dấu) nên thua từ trong\n  thiết kế. Đo ở `v1.36.68` (PR #104): ba tên tấn công `rc=0` → `rc=4`, người có\n  thẩm quyền vẫn `rc=0`. Kèm chốt: đột biến nới danh sách phải làm ca đích ĐỎ.'),
+    ("cum_don_term_ngat_dong_tha_cu",
+     'Đo lại trên bản v1.36.68 thì quyết định vẫn thuộc về người có\nthẩm quyền, và cổng trả rc=0 như cũ.'),
+    ("cum_don_van_xuoi_ngat_dong_trong_bullet_tha_cu",
+     '- Kết quả đo cho thấy người có\n  thẩm quyền vẫn qua cổng bình thường.'),
+    ("cum_don_van_xuoi_ngat_dong_trong_danh_sach_so_tha_cu",
+     '1. Bản đo ghi rằng người có\n   thẩm quyền vẫn qua cổng bình thường.'),
+    ("cum_don_van_xuoi_ngat_dong_trong_trich_dan_tha_cu",
+     '> Bản đo ghi rằng người có\n> thẩm quyền không bị chặn ở bước này.'),
+    ("cum_don_van_xuoi_sau_bang_html_tha_cu",
+     '<table><tr><td>x</td></tr></table>\n\nĐo được ở `v1.36.68`: ba tên tấn công `rc=0` → `rc=4`, người có\nthẩm quyền vẫn `rc=0`.'),
+    ("cum_don_rao_dong_dung_luat_tha_cu",
+     '````\nvo hai\n````\n\nĐo được ở v1.36.68: cổng trả rc=0 cho người có\nthẩm quyền như cũ.'),
+    ("cum_don_dong_thut_le_khong_phai_rao_tha_cu",
+     '    ``` đây chỉ là một dòng code thụt lề\n\nĐo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.'),
+    ("cum_don_the_bang_trong_khoi_ma_tha_cu",
+     '```html\n<table>\n```\n\nĐo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.'),
+    ("cum_don_the_bang_trong_ma_inline_tha_cu",
+     'Ví dụ ký hiệu `<table>` trong tài liệu. Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.'),
+    ("cum_don_the_bang_trong_comment_tha_cu",
+     '<!-- <table> -->\n\nĐo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.'),
+    ("cum_don_van_xuoi_sau_bang_html_chua_dong_tha_cu",
+     '<table><tr><td>thời gian</td></tr>\n\nĐo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0.'),
 ]
 
 # Chiều BẮT OAN — AC 19. Mỗi lớp chuẩn hoá thêm ở trên có ít nhất một ca ở đây.
@@ -1324,10 +1364,7 @@ LOP_LACH = [
 # đo. Câu ấy không chép bảng vai trò §2 — nó tường thuật một phép đo.
 LOP_BAT_OAN = [
     ("oan_claude_md_master",
-     "biệt THẨM QUYỀN. Danh sách cấm phải đoán trước mọi cách viết của kẻ gian\n"
-     "  (dấu nối, tiền tố, hậu tố, đồng tự Unicode, tổ hợp dấu) nên thua từ trong\n"
-     "  thiết kế. Đo ở `v1.36.68` (PR #104): ba tên tấn công `rc=0` → `rc=4`, người có\n"
-     "  thẩm quyền vẫn `rc=0`. Kèm chốt: đột biến nới danh sách phải làm ca đích ĐỎ."),
+     'biệt DANH SÁCH CHO PHÉP. Danh sách cấm phải đoán trước mọi cách viết của kẻ gian\n  (dấu nối, tiền tố, hậu tố, đồng tự Unicode, tổ hợp dấu) nên thua từ trong\n  thiết kế. Đo ở `v1.36.68` (PR #104): ba tên tấn công `rc=0` → `rc=4`, tên thuộc\n  danh sách cho phép vẫn `rc=0`. Kèm chốt: đột biến nới danh sách phải làm ca đích ĐỎ.'),
     # `oan_term_giua_cau` ĐÃ CHUYỂN sang LOP_LACH (`cum_don_cau_van_xuoi_mot_dong`)
     # — xem lý do ở đó. Giữ lại một ca cùng chỗ nhưng ĐÚNG bề rộng của AC 19:
     # Ca này TRƯỚC ở ma trận BẮT-OAN. Generation 9 chuyển sang ma trận LỌT — xem
@@ -1335,8 +1372,7 @@ LOP_BAT_OAN = [
     # dạng (ngắt dòng, văn xuôi, có chữ hai phía) nhưng CÓ kể lại một phép đo, tức đúng
     # bề rộng mà AC 19 tha.
     ("oan_term_ngat_dong",
-     "Đo lại trên bản v1.36.68 thì quyết định vẫn thuộc về người có\n"
-     "thẩm quyền, và cổng trả rc=0 như cũ."),
+     'Đo lại trên bản v1.36.68 thì quyết định vẫn thuộc về tên thuộc\ndanh sách cho phép, và cổng trả rc=0 như cũ.'),
     ("oan_entity_long", "Ghi chú: merged&amp;#58; PR đã vào nhánh đích"),
     ("oan_van_ban_nga", "Пример текста на русском языке: локальный контроллер работает."),
     ("oan_van_ban_hy_lap", "Παράδειγμα κειμένου στα ελληνικά για δοκιμή."),
@@ -1376,11 +1412,11 @@ LOP_BAT_OAN = [
     # trong bullet/danh sách/trích dẫn, nhưng CÓ chữ ở cả hai phía ⇒ vẫn phải tha.
     # Thu miễn trừ quá tay thì chính bốn ca này đỏ lên.
     ("oan_van_xuoi_ngat_dong_trong_bullet",
-     "- Kết quả đo cho thấy người có\n  thẩm quyền vẫn qua cổng bình thường."),
+     '- Kết quả đo cho thấy tên thuộc\n  danh sách cho phép vẫn qua cổng bình thường.'),
     ("oan_van_xuoi_ngat_dong_trong_danh_sach_so",
-     "1. Bản đo ghi rằng người có\n   thẩm quyền vẫn qua cổng bình thường."),
+     '1. Bản đo ghi rằng tên thuộc\n   danh sách cho phép vẫn qua cổng bình thường.'),
     ("oan_van_xuoi_ngat_dong_trong_trich_dan",
-     "> Bản đo ghi rằng người có\n> thẩm quyền không bị chặn ở bước này."),
+     '> Bản đo ghi rằng tên thuộc\n> danh sách cho phép không bị chặn ở bước này.'),
     # Khối mã bị LOẠI khỏi miễn trừ. Chốt ấy không được biến mọi khối mã thành vi
     # phạm: khối mã KHÔNG chứa cụm cấm vẫn phải xanh.
     ("oan_code_fence_vo_hai",
@@ -1396,14 +1432,11 @@ LOP_BAT_OAN = [
     # Và không được lan RA NGOÀI thẻ đóng: câu văn xuôi kể kết quả đo đứng SAU bảng
     # vẫn phải được tha theo AC 19.
     ("oan_van_xuoi_sau_bang_html",
-     "<table><tr><td>x</td></tr></table>\n\n"
-     "Đo được ở `v1.36.68`: ba tên tấn công `rc=0` → `rc=4`, người có\n"
-     "thẩm quyền vẫn `rc=0`."),
+     '<table><tr><td>x</td></tr></table>\n\nĐo được ở `v1.36.68`: ba tên tấn công `rc=0` → `rc=4`, tên thuộc\ndanh sách cho phép vẫn `rc=0`.'),
     # Rào đóng ĐÚNG LUẬT vẫn phải đóng được — siết luật rào không được biến mọi khối
     # mã bình thường thành khối không bao giờ đóng.
     ("oan_rao_dong_dung_luat",
-     "````\nvo hai\n````\n\nĐo được ở v1.36.68: cổng trả rc=0 cho người có\n"
-     "thẩm quyền như cũ."),
+     '````\nvo hai\n````\n\nĐo được ở v1.36.68: cổng trả rc=0 cho tên thuộc\ndanh sách cho phép như cũ.'),
     # Bảng lồng HỢP LỆ, không chứa cụm cấm — đếm lồng nhau không được bắt oan nó.
     ("oan_bang_html_long_vo_hai",
      "<table><tr><td><table><tr><td>5 phút</td></tr></table></td></tr></table>"),
@@ -1413,25 +1446,20 @@ LOP_BAT_OAN = [
     # đúng chiều ấy — một cấu trúc VÔ HẠI đứng trước không được tước miễn trừ của câu
     # AC 19 hợp lệ đứng sau.
     ("oan_dong_thut_le_khong_phai_rao",
-     "    ``` đây chỉ là một dòng code thụt lề\n\n"
-     "Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0."),
+     '    ``` đây chỉ là một dòng code thụt lề\n\nĐo được: ba tên tấn công rc=4, tên thuộc\ndanh sách cho phép vẫn rc=0.'),
     ("oan_the_bang_trong_khoi_ma",
-     "```html\n<table>\n```\n\n"
-     "Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0."),
+     '```html\n<table>\n```\n\nĐo được: ba tên tấn công rc=4, tên thuộc\ndanh sách cho phép vẫn rc=0.'),
     # CÙNG MỘT ĐOẠN, cố ý không có dòng trống: nếu tách đoạn thì luật "dòng trống kết
     # thúc khối HTML" đã cứu ca này rồi, và đột biến gỡ phép loại mã inline sẽ không
     # giết được nó — ca mất độ phân giải.
     ("oan_the_bang_trong_ma_inline",
-     "Ví dụ ký hiệu `<table>` trong tài liệu. "
-     "Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0."),
+     'Ví dụ ký hiệu `<table>` trong tài liệu. Đo được: ba tên tấn công rc=4, tên thuộc\ndanh sách cho phép vẫn rc=0.'),
     ("oan_the_bang_trong_comment",
-     "<!-- <table> -->\n\n"
-     "Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0."),
+     '<!-- <table> -->\n\nĐo được: ba tên tấn công rc=4, tên thuộc\ndanh sách cho phép vẫn rc=0.'),
     # Bảng THẬT chưa đóng thẻ. Luật CommonMark "khối HTML kết thúc ở DÒNG TRỐNG đầu
     # tiên" là thứ duy nhất giữ câu AC 19 phía sau khỏi bị nuốt; g8 cho nuốt tới hết tệp.
     ("oan_van_xuoi_sau_bang_html_chua_dong",
-     "<table><tr><td>thời gian</td></tr>\n\n"
-     "Đo được: ba tên tấn công rc=4, người có\nthẩm quyền vẫn rc=0."),
+     '<table><tr><td>thời gian</td></tr>\n\nĐo được: ba tên tấn công rc=4, tên thuộc\ndanh sách cho phép vẫn rc=0.'),
     ("oan_fence_long_cap_vo_hai",
      "- ```sh\n  # chay thu\n  python tl.py --json\n  ```\n\n---\n\n"
      "> ```\n> ket qua: rc=0\n> ```\n"),
@@ -1448,6 +1476,21 @@ LOP_BAT_OAN = [
 # bảng, và suite ĐỎ nếu có lớp không được ánh xạ. Một lớp có thể dùng chung ca với lớp
 # cùng họ — nói rõ như vậy còn hơn nhân bản ca cho đủ số.
 ANH_XA_LOP_BAT_OAN = {
+    # Mười hai lớp mới của revision 4: mỗi lớp trỏ về ca bắt-oan CÙNG HÌNH DẠNG,
+    # khác đúng một chỗ — nội dung không còn cụm cấm. Cặp cùng hình dạng là thứ
+    # chứng minh cổng phân biệt NỘI DUNG chứ không phân biệt cấu trúc Markdown.
+    "cum_don_claude_md_master_tha_cu": "oan_claude_md_master",
+    "cum_don_term_ngat_dong_tha_cu": "oan_term_ngat_dong",
+    "cum_don_van_xuoi_ngat_dong_trong_bullet_tha_cu": "oan_van_xuoi_ngat_dong_trong_bullet",
+    "cum_don_van_xuoi_ngat_dong_trong_danh_sach_so_tha_cu": "oan_van_xuoi_ngat_dong_trong_danh_sach_so",
+    "cum_don_van_xuoi_ngat_dong_trong_trich_dan_tha_cu": "oan_van_xuoi_ngat_dong_trong_trich_dan",
+    "cum_don_van_xuoi_sau_bang_html_tha_cu": "oan_van_xuoi_sau_bang_html",
+    "cum_don_rao_dong_dung_luat_tha_cu": "oan_rao_dong_dung_luat",
+    "cum_don_dong_thut_le_khong_phai_rao_tha_cu": "oan_dong_thut_le_khong_phai_rao",
+    "cum_don_the_bang_trong_khoi_ma_tha_cu": "oan_the_bang_trong_khoi_ma",
+    "cum_don_the_bang_trong_ma_inline_tha_cu": "oan_the_bang_trong_ma_inline",
+    "cum_don_the_bang_trong_comment_tha_cu": "oan_the_bang_trong_comment",
+    "cum_don_van_xuoi_sau_bang_html_chua_dong_tha_cu": "oan_van_xuoi_sau_bang_html_chua_dong",
     "nfkc_hai_cham_toan_rong": "oan_dau_cau_toan_rong",
     "nfkc_chu_toan_rong": "oan_dau_cau_toan_rong",
     "nfkc_chu_so_tron": "oan_dau_cau_toan_rong",
@@ -1888,6 +1931,92 @@ C3_MOI = "        if False:"
 # Đột biến nới ngưỡng: mỗi cái BẮT BUỘC giết đúng những ca dưới đây. Ca không
 # chết được nghĩa là nó không đo cái nó khai.
 MUTANTS = {
+    # Cùng họ với đột biến trên, nhưng RỘNG HƠN — đây là hình dạng generation 4:
+    # tha cụm ấy VÔ ĐIỀU KIỆN, không cần ngắt dòng. Nói cách khác: "cứ cho hẳn cụm
+    # này vào danh sách miễn". Đó là cách sửa mà người ta thật sự hay chọn khi gate
+    # đỏ ở một chỗ phiền, nên nó đáng có đột biến riêng chứ không gộp vào cái trên.
+    #
+    # Nó phủ SÁU lớp mà đột biến ngắt-dòng KHÔNG với tới — `cum_don_heading`,
+    # `dong_tran`, `gach_dau_dong`, `in_dam`, `dinh_nghia`, `cau_van_xuoi_mot_dong`
+    # — vì cả sáu đặt cụm cấm GỌN TRONG MỘT DÒNG, mà miễn trừ ngắt dòng theo định
+    # nghĩa không tha những ca ấy. Hai đột biến vì thế đo hai bề rộng khác nhau của
+    # cùng một sai lầm, và bỏ cái nào cũng để lại một khoảng mù.
+    #
+    # Danh sách phải-chết ĐO ĐƯỢC: 43 ca, đúng bằng số ca của `LOP_LACH` có chứa cụm.
+    "tha_vo_dieu_kien_nhu_generation_4": (
+        "                tu = phang.find(kim)\n",
+        ('                if cum in ("người có thẩm quyền",):\n'
+         '                    tu = -1               # đột biến: tha VÔ ĐIỀU KIỆN\n'
+         '                else:\n'
+         '                    tu = phang.find(kim)\n'),
+        [
+         'ac18_cum_don_heading', 'ac18_cum_don_dong_tran',
+         'ac18_cum_don_gach_dau_dong', 'ac18_cum_don_in_dam',
+         'ac18_cum_don_dinh_nghia', 'ac18_cum_don_heading_ngat_dong',
+         'ac18_cum_don_gach_dau_dong_ngat_dong', 'ac18_cum_don_danh_sach_so_ngat_dong',
+         'ac18_cum_don_dong_tran_ngat_dong', 'ac18_cum_don_code_fence',
+         'ac18_cum_don_code_fence_ngoac_song', 'ac18_cum_don_o_bang_html_ngat_dong',
+         'ac18_cum_don_fence_trong_bullet', 'ac18_cum_don_fence_trong_trich_dan',
+         'ac18_cum_don_o_bang_html_co_chu_hai_phia', 'ac18_cum_don_o_bang_html_khong_dong_the',
+         'ac18_cum_don_chi_co_chu_truoc', 'ac18_cum_don_chi_co_chu_sau',
+         'ac18_cum_don_wrapper_mot_chu_cai', 'ac18_cum_don_wrapper_chu_so',
+         'ac18_cum_don_wrapper_trong_tag', 'ac18_cum_don_van_xuoi_khong_ke_phep_do',
+         'ac18_cum_don_rao_dong_ngan_hon', 'ac18_cum_don_rao_dong_co_duoi',
+         'ac18_cum_don_rao_song_dong_ngan_hon', 'ac18_cum_don_bang_html_long',
+         'ac18_cum_don_bang_html_long_ba_cap', 'ac18_cum_don_trich_dan_ngat_dong',
+         'ac18_cum_don_trich_dan_long_hai_cap', 'ac18_cum_don_heading_long_trich_dan',
+         'ac18_cum_don_cau_van_xuoi_mot_dong', 'ac18_cum_don_claude_md_master_tha_cu',
+         'ac18_cum_don_term_ngat_dong_tha_cu', 'ac18_cum_don_van_xuoi_ngat_dong_trong_bullet_tha_cu',
+         'ac18_cum_don_van_xuoi_ngat_dong_trong_danh_sach_so_tha_cu', 'ac18_cum_don_van_xuoi_ngat_dong_trong_trich_dan_tha_cu',
+         'ac18_cum_don_van_xuoi_sau_bang_html_tha_cu', 'ac18_cum_don_rao_dong_dung_luat_tha_cu',
+         'ac18_cum_don_dong_thut_le_khong_phai_rao_tha_cu', 'ac18_cum_don_the_bang_trong_khoi_ma_tha_cu',
+         'ac18_cum_don_the_bang_trong_ma_inline_tha_cu', 'ac18_cum_don_the_bang_trong_comment_tha_cu',
+         'ac18_cum_don_van_xuoi_sau_bang_html_chua_dong_tha_cu',
+        ],
+    ),
+    # --- ĐỘT BIẾN THAY CHO MƯỜI HAI ĐỘT BIẾN ĐÃ XOÁ ở revision 4 -------------------
+    #
+    # Mười hai đột biến cũ nhắm vào máy dò cấu trúc phục vụ MIỄN TRỪ (`_dong_khoi_ma`,
+    # `_dong_bang_html`, `_DAU_HIEU_PHEP_DO`, `_RE_HANG_RAO`…). Revision 4 xoá hẳn máy
+    # ấy, nên cả mười hai mất mỏ neo — giữ lại là giữ đột biến của mã không còn tồn tại.
+    #
+    # Thay bằng MỘT đột biến duy nhất, và nó mạnh hơn cả mười hai cộng lại: dựng LẠI
+    # đúng cơ chế miễn trừ (tha khi cụm cấm chỉ xuất hiện qua ngắt dòng). Nếu ai đó mở
+    # lại miễn trừ dưới bất kỳ hình thức nào, ca ở đây ĐỎ ngay.
+    #
+    # Danh sách phải-chết dưới đây ĐO ĐƯỢC, không kê tay: chạy scanner đã đột biến trên
+    # từng ca của `LOP_LACH` rồi lấy đúng những ca trả rc=0. Ba mươi bảy ca — mười hai
+    # ca vừa đổi ma trận, cộng hai mươi lăm ca ngắt dòng đã có từ trước. Con số lớn là
+    # ĐÚNG chứ không phải đột biến nhắm sai tầng: miễn trừ vốn tha theo HÌNH DẠNG ngắt
+    # dòng, nên mở lại nó thì mọi hình dạng ngắt dòng cùng lọt một lượt.
+    "mo_lai_mien_tru_ngat_dong": (
+        "                tu = phang.find(kim)\n",
+        ("                if any(kim in _chuan_hoa(_d) for _s, _d in _dong_sau_khi_go(raw)):\n"
+         "                    tu = phang.find(kim)      # đột biến: mở lại miễn trừ\n"
+         "                else:\n"
+         "                    tu = -1\n"),
+        [
+         'ac18_cum_don_heading_ngat_dong', 'ac18_cum_don_gach_dau_dong_ngat_dong',
+         'ac18_cum_don_danh_sach_so_ngat_dong', 'ac18_cum_don_dong_tran_ngat_dong',
+         'ac18_cum_don_code_fence', 'ac18_cum_don_code_fence_ngoac_song',
+         'ac18_cum_don_o_bang_html_ngat_dong', 'ac18_cum_don_fence_trong_bullet',
+         'ac18_cum_don_fence_trong_trich_dan', 'ac18_cum_don_o_bang_html_co_chu_hai_phia',
+         'ac18_cum_don_o_bang_html_khong_dong_the', 'ac18_cum_don_chi_co_chu_truoc',
+         'ac18_cum_don_chi_co_chu_sau', 'ac18_cum_don_wrapper_mot_chu_cai',
+         'ac18_cum_don_wrapper_chu_so', 'ac18_cum_don_wrapper_trong_tag',
+         'ac18_cum_don_van_xuoi_khong_ke_phep_do', 'ac18_cum_don_rao_dong_ngan_hon',
+         'ac18_cum_don_rao_dong_co_duoi', 'ac18_cum_don_rao_song_dong_ngan_hon',
+         'ac18_cum_don_bang_html_long', 'ac18_cum_don_bang_html_long_ba_cap',
+         'ac18_cum_don_trich_dan_ngat_dong', 'ac18_cum_don_trich_dan_long_hai_cap',
+         'ac18_cum_don_heading_long_trich_dan', 'ac18_cum_don_claude_md_master_tha_cu',
+         'ac18_cum_don_term_ngat_dong_tha_cu', 'ac18_cum_don_van_xuoi_ngat_dong_trong_bullet_tha_cu',
+         'ac18_cum_don_van_xuoi_ngat_dong_trong_danh_sach_so_tha_cu', 'ac18_cum_don_van_xuoi_ngat_dong_trong_trich_dan_tha_cu',
+         'ac18_cum_don_van_xuoi_sau_bang_html_tha_cu', 'ac18_cum_don_rao_dong_dung_luat_tha_cu',
+         'ac18_cum_don_dong_thut_le_khong_phai_rao_tha_cu', 'ac18_cum_don_the_bang_trong_khoi_ma_tha_cu',
+         'ac18_cum_don_the_bang_trong_ma_inline_tha_cu', 'ac18_cum_don_the_bang_trong_comment_tha_cu',
+         'ac18_cum_don_van_xuoi_sau_bang_html_chua_dong_tha_cu',
+        ],
+    ),
     "tran_attempt_3_thanh_99": (
         "MAC_DINH_TRAN_ATTEMPT = 3",
         "MAC_DINH_TRAN_ATTEMPT = 99",
@@ -2057,11 +2186,6 @@ MUTANTS = {
     # Bỏ điều kiện ngữ cảnh của hạng NGÔN NGỮ THƯỜNG ⇒ văn xuôi kể lại kết quả đo
     # bị tính là chép doctrine trở lại. Không có đột biến này thì không ai biết
     # ba ca bắt-oan kia đang đo chốt hay chỉ đang xanh sẵn.
-    "bo_mien_tru_ngat_dong": (
-        "                if cum in CUM_NGON_NGU_THUONG and _duoc_tha_vi_ngat_dong(raw, kim):",
-        "                if False:",
-        ["ac19_oan_claude_md_master", "ac19_oan_term_ngat_dong"],
-    ),
     # Nới miễn trừ trở lại bề rộng SAI của generation 4 (tha mọi thứ không nằm gọn
     # trong một dòng CÓ `|`) ⇒ mọi lớp "đứng một mình" phải ĐỎ lại.
     # PHỐI HỢP hai vế, và lý do phải phối hợp là bài học của lượt 7. Bản đơn chỉ gỡ
@@ -2069,89 +2193,16 @@ MUTANTS = {
     # cũng bắt được đúng những ca ấy, nên gỡ một vế thôi thì ca vẫn XANH và đột biến
     # mất răng — đã đo: 5/6 ca đích sống sót. Muốn nới miễn trừ về ĐÚNG bề rộng sai
     # của generation 4 thì phải gỡ CẢ HAI vế.
-    "noi_mien_tru_nhu_generation_4": (
-        ("        if kim in _chuan_hoa(dong):\n            return False",
-         "        if not _CO_CHU.search(truoc) or not _CO_CHU.search(sau):",
-         C3_CU),
-        ("        if False:\n            return False",
-         "        if False:",
-         C3_MOI),
-        ["ac18_cum_don_heading", "ac18_cum_don_dong_tran",
-         "ac18_cum_don_gach_dau_dong", "ac18_cum_don_in_dam",
-         "ac18_cum_don_dinh_nghia", "ac18_cum_don_cau_van_xuoi_mot_dong",
-         # Họ K bị chính chốt VĂN XUÔI BỌC HAI PHÍA bắt: nới miễn trừ về bề rộng
-         # generation 4 thì tất cả lọt lại.
-         "ac18_cum_don_heading_ngat_dong", "ac18_cum_don_gach_dau_dong_ngat_dong",
-         "ac18_cum_don_danh_sach_so_ngat_dong", "ac18_cum_don_dong_tran_ngat_dong",
-         "ac18_cum_don_chi_co_chu_truoc", "ac18_cum_don_chi_co_chu_sau"],
-    ),
     # Chốt khối mã của lượt 7, đứng RIÊNG để có độ phân giải.
-    "bo_loai_tru_khoi_ma": (
-        "        if mo[1] in trong_khoi_ma or dong_cuoi[1] in trong_khoi_ma:",
-        "        if False:",
-        ["ac18_cum_don_code_fence", "ac18_cum_don_code_fence_ngoac_song"],
-    ),
     # Hai chốt của việc dò hàng rào lồng cấp, RỜI NHAU để có độ phân giải: một cái
     # gỡ dấu khối trước khi dò, một cái nới mức thụt lề.
-    "bo_go_dau_dong_tho_khi_do_hang_rao": (
-        ("        m = _RE_HANG_RAO.match(_go_dau_dong_tho(dong))", C3_CU),
-        ("        m = _RE_HANG_RAO.match(dong)", C3_MOI),
-        ["ac18_cum_don_fence_trong_bullet", "ac18_cum_don_fence_trong_trich_dan"],
-    ),
-    "bo_chot_bang_html": (
-        "    trong_khoi_ma = _dong_khoi_ma(raw) | _dong_bang_html(raw)",
-        "    trong_khoi_ma = _dong_khoi_ma(raw)",
-        ["ac18_cum_don_o_bang_html_co_chu_hai_phia",
-         "ac18_cum_don_o_bang_html_khong_dong_the"],
-    ),
     # Ô bảng HTML KHÔNG có chữ bọc thì HAI chốt cùng phủ — bảng HTML lẫn văn xuôi
     # bọc hai phía — nên phải gỡ cả hai mới thấy ca đo gì. Đúng cơ chế phối hợp đã
     # dựng cho P2 lượt 7, nay dùng lại cho một lớp khác.
-    "bo_chot_bang_html_va_van_xuoi": (
-        ("    trong_khoi_ma = _dong_khoi_ma(raw) | _dong_bang_html(raw)",
-         "        if not _CO_CHU.search(truoc) or not _CO_CHU.search(sau):",
-         C3_CU),
-        ("    trong_khoi_ma = _dong_khoi_ma(raw)",
-         "        if False:",
-         C3_MOI),
-        ["ac18_cum_don_o_bang_html_ngat_dong"],
-    ),
     # Generation 9 TRẢ LẠI mức thụt CommonMark, nên đột biến đổi chiều: nay nó NỚI
     # mức thụt về `^\\s*` — đúng cái g8 làm — và ca đích là ca BẮT OAN, không phải ca
     # lọt. Nới ra thì một dòng code thụt 4 dấu cách thành hàng rào ma và đầu độc đuôi tệp.
-    "noi_muc_thut_rao_nhu_generation_8": (
-        '_RE_HANG_RAO = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")',
-        '_RE_HANG_RAO = re.compile(r"^\\s*(`{3,}|~{3,})(.*)$")',
-        ["ac19_oan_dong_thut_le_khong_phai_rao"],
-    ),
     # --- ba chốt MỚI của generation 9, mỗi cái một đột biến RIÊNG ---------------
-    "noi_wrapper_ve_bat_ky_chu": (
-        C3_CU,
-        C3_MOI,
-        ["ac18_cum_don_wrapper_mot_chu_cai", "ac18_cum_don_wrapper_chu_so",
-         "ac18_cum_don_wrapper_trong_tag", "ac18_cum_don_van_xuoi_khong_ke_phep_do"],
-    ),
-    "bo_luat_rao_dong_dung_chuan": (
-        "            elif dau == mo_dau and dai >= mo_dai and duoi.strip() == \"\":",
-        "            elif dau == mo_dau:",
-        ["ac18_cum_don_rao_dong_ngan_hon", "ac18_cum_don_rao_dong_co_duoi",
-         "ac18_cum_don_rao_song_dong_ngan_hon"],
-    ),
-    "bo_dem_long_bang_html": (
-        "        sau = max(0, sau + buoc)",
-        "        sau = 0 if buoc == -1 else sau + buoc",
-        ["ac18_cum_don_bang_html_long", "ac18_cum_don_bang_html_long_ba_cap"],
-    ),
-    "bo_loai_ma_khoi_do_bang_html": (
-        "    sach = _RE_MA_INLINE.sub(_xoa_trang, sach)",
-        "    sach = sach",
-        ["ac19_oan_the_bang_trong_ma_inline"],
-    ),
-    "bo_luat_dong_trong_ket_thuc_khoi_html": (
-        "            if not dong_cua[so - 1].strip():  # dòng trống KẾT THÚC khối HTML",
-        "            if False:",
-        ["ac19_oan_van_xuoi_sau_bang_html_chua_dong"],
-    ),
     # Chốt gỡ dấu đầu dòng ở tầng phẳng hoá — thiếu nó thì `>` phá khớp hoàn toàn.
     "bo_go_dau_dong_khi_phang_hoa": (
         "        n = _go_dau_dong(_chuan_hoa(dong))",

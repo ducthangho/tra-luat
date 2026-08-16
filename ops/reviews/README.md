@@ -48,8 +48,10 @@ trả giá. Nhánh công bố vẫn ghi đủ trong biên nhận ở `published_
 
 **Các nhánh `ops/wp55-r4-*` nay ĐÃ XOÁ** (đo: `git ls-remote --heads origin 'refs/heads/ops/wp55-r4*'`
 trả rỗng), và **tag lưu trữ đã tạo TRƯỚC khi xoá** — đúng thứ tự mà bản đầu của trang này còn
-phải dặn. Nên cờ trong biên nhận nay là `truy_xuat_published_khong_bao_dam: false`, kèm khoá
-`tag_giu_published` nêu đích danh tag giữ từng commit:
+phải dặn. Biên nhận nay mang **hai** khoá thay cho một boolean: `truy_xuat_published_qua_tag_tai_lan_do: true`
+và `truy_xuat_published_duoc_bao_dam_lau_dai: false` — vì tag **xoá được**, nên "đo được ở lần
+đo" khác hẳn "bảo đảm lâu dài", và một cờ `khong_bao_dam: false` đọc máy móc thành cái thứ hai.
+Kèm khoá `tag_giu_published` nêu đích danh tag giữ từng commit:
 
 | commit | tag giữ nó |
 |---|---|
@@ -62,7 +64,11 @@ phải dặn. Nên cờ trong biên nhận nay là `truy_xuat_published_khong_ba
 
 Phép đo dùng để hạ cờ **không** phải là liệt kê ref — liệt kê chỉ chứng minh cái tên còn đó.
 Nó là: `git init` một kho **trống**, `fetch` từng tag từ remote, rồi băm lại tệp verdict trong
-kho ấy. **6/6 khớp `verdict_sha256`**: nhánh đã mất mà nội dung vẫn tải về được, đúng byte.
+kho ấy. Kết quả, nói chính xác: **6/6 khớp con băm ghi cho đúng mốc đó**, và **5/6 đồng thời
+khớp `verdict_sha256`**. Mốc thứ sáu là `b4e5c5f9` — bản trước khi reviewer tự rút finding,
+băm `7dd8e203…` — nó khớp `published_first.sha256_tai_commit` chứ **không** khớp
+`verdict_sha256` hiện hành, và đúng ra phải thế. Điều chung cho cả sáu: nhánh đã mất mà nội
+dung vẫn tải về được, đúng byte.
 
 **Xoá tag = biến `published_*` thành SHA không tra được.** Đó giờ là ref bền duy nhất giữ chúng.
 

@@ -56,9 +56,19 @@ lease_release_record_url: https://github.com/ducthangho/tra-luat/issues/55#issue
 # đúng thứ tự mà chính khoá này dặn.
 #
 # ĐÃ ĐO SAU KHI XOÁ NHÁNH, và đo bằng cách nặng nhất chứ không chỉ liệt kê ref: `git
-# init` một kho TRỐNG, `fetch` từng tag từ remote, rồi băm lại tệp verdict trong đó —
-# 6/6 khớp `verdict_sha256`. Nhánh đã mất mà nội dung vẫn tải về được, đúng byte.
-truy_xuat_published_khong_bao_dam: false
+# init` một kho TRỐNG, `fetch` từng tag từ remote, rồi băm lại tệp verdict trong đó.
+# Kết quả, nói CHÍNH XÁC: **6/6 khớp con băm ghi cho ĐÚNG MỐC ĐÓ**, và **5/6 đồng thời
+# khớp `verdict_sha256`** — mốc thứ sáu là `b4e5c5f9` (bản trước khi reviewer tự rút),
+# băm `7dd8e203…`, khớp `published_first.sha256_tai_commit` chứ KHÔNG khớp
+# `verdict_sha256` hiện hành, và đúng ra là phải thế. Bản đầu của chú thích này viết
+# gọn thành "6/6 khớp verdict_sha256" — khai RỘNG hơn thứ đo được; finding P2 của
+# cross-review codex, đúng. Nhánh đã mất mà nội dung vẫn tải về được, đúng byte.
+# HAI khoá thay cho MỘT boolean cũ. `khong_bao_dam: false` đọc máy móc thành "truy xuất
+# ĐƯỢC BẢO ĐẢM", mà tag thì xoá được — ghi chú bên dưới nói đúng giới hạn nhưng không
+# làm con boolean bớt tuyệt đối. Tách thành hai khẳng định ĐO ĐƯỢC (finding P2 của
+# cross-review codex, đúng): một cái nói về LẦN ĐO, một cái nói về BẢO ĐẢM LÂU DÀI.
+truy_xuat_published_qua_tag_tai_lan_do: true
+truy_xuat_published_duoc_bao_dam_lau_dai: false
 tag_giu_published:
   - tag: luu-tru/wp55-r4-verdict-review-2
     commit: c2e7c1f520a85a6ea857bd2179e1699627e6474b

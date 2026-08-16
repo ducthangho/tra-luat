@@ -1828,6 +1828,13 @@ def _tuoi_anh_chup_gio(last_refresh) -> float | None:
     return round((datetime.now(timezone.utc) - moc).total_seconds() / 3600, 1)
 
 
+# Token NGẮN HẠN THEO THIẾT KẾ — hạn của chúng KHÔNG phải tín hiệu credential sắp chết.
+# `id_token` đo được 1.0h ngay sau `codex login --device-auth`, trong khi `access_token`
+# còn 240h. Lọc ở HAI nơi: lúc THU THẬP (`_han_token_codex`) và lúc QUYẾT ĐỊNH — vì test
+# bơm thẳng vào `gio_con_lai` đã chứng minh lớp quyết định tự nó vẫn tin nếu lọt vào.
+_TOKEN_KHONG_XET_HAN = frozenset({"id_token"})
+
+
 def _last_refresh_cua(noi_dung: str):
     """Đọc `last_refresh` từ nội dung auth.json. None nếu không đọc được."""
     try:
@@ -1853,6 +1860,15 @@ def _han_token_codex() -> dict:
     ra["last_refresh"] = d.get("last_refresh")
     ra["tuoi_anh_chup_gio"] = _tuoi_anh_chup_gio(d.get("last_refresh"))
     for ten, v in (d.get("tokens") or {}).items():
+        # BỎ QUA `id_token`: nó NGẮN HẠN THEO THIẾT KẾ (đo được: 1.0h ngay sau
+        # `codex login --device-auth`) và được làm mới tự động. Lấy nó làm tín hiệu
+        # thì credential VỪA ĐÚC XONG đã bị gắn "sắp hết hạn" — chốt đỏ thường trực,
+        # đúng thứ sẽ bị bỏ qua, và tôi đã tự dựng nó vào chính bản vá cảnh báo sớm.
+        #
+        # Ca 15-08 (`id_token=-39.1h` trên credential đã chết) KHÔNG mất: thứ bắt được
+        # nó là TUỔI ẢNH CHỤP 40h, chứ không phải `id_token`. Tín hiệu thật vẫn còn.
+        if ten in _TOKEN_KHONG_XET_HAN:
+            continue
         if not isinstance(v, str) or v.count(".") != 2:
             continue
         goi = v.split(".")[1]
@@ -1933,11 +1949,13 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
         # Nay tách làm hai nhãn. `CO_CREDENTIAL` nói đúng thứ đã chứng minh được, và
         # chỉ `--kiem-song` (gọi thật, tốn quota) mới được cấp `DUNG_DUOC`.
         han = _han_token_codex()
-        het = [t for t, g in han["gio_con_lai"].items() if g <= 0]
+        het = [t for t, g in han["gio_con_lai"].items()
+               if g <= 0 and t not in _TOKEN_KHONG_XET_HAN]
         chi_tiet = mo_ta
         if han["gio_con_lai"]:
             chi_tiet += " · con " + ", ".join(
-                f"{t}={g}h" for t, g in sorted(han["gio_con_lai"].items()))
+                f"{t}={g}h" for t, g in sorted(han["gio_con_lai"].items())
+                if t not in _TOKEN_KHONG_XET_HAN)
         if han["last_refresh"]:
             chi_tiet += f" · last_refresh={han['last_refresh']}"
         if het:
@@ -1946,7 +1964,7 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
         # SẮP hết hạn / ảnh chụp CŨ ⇒ vẫn dùng được NHƯNG phải báo NGAY. Đây là mục
         # 3.1 của phương án chống tái diễn sự cố thu hồi: cảnh báo TRƯỚC, không phải sau.
         sap = [f"{t}={g}h" for t, g in sorted(han["gio_con_lai"].items())
-               if 0 < g <= NGUONG_CANH_BAO_GIO]
+               if 0 < g <= NGUONG_CANH_BAO_GIO and t not in _TOKEN_KHONG_XET_HAN]
         tuoi = han.get("tuoi_anh_chup_gio")
         anh_cu = tuoi is not None and tuoi >= NGUONG_ANH_CHUP_CU_GIO
         if sap or anh_cu:
@@ -1956,6 +1974,14 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
             if anh_cu:
                 vi_sao.append(f"anh chup CU {tuoi}h (refresh token xoay vong - ban trong "
                               f"CODEX_AUTH_JSON co the da bi vo hieu)")
+            # `--kiem-song` phải chạy KỂ CẢ khi sắp hết hạn. Bản trước trả về ngay ở
+            # đây, nên đòi kiểm sống mà KHÔNG BAO GIỜ kiểm — phép đo bị chính cảnh báo
+            # nuốt mất. "Sắp hết hạn" và "còn dùng được không" là HAI câu hỏi khác nhau.
+            if kiem_song:
+                song, ly_do = _do_codex_song()
+                if not song:
+                    return ("CHUA_XAC_THUC", f"kiem song HONG: {ly_do} · {chi_tiet}")
+                vi_sao.append(f"kiem song: {ly_do} (VAN dung duoc)")
             return ("SAP_HET_HAN", " · ".join(vi_sao) + f" · {chi_tiet}")
         if not kiem_song:
             return ("CO_CREDENTIAL",

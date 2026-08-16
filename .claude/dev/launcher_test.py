@@ -2497,12 +2497,16 @@ def t93_do_codex_khong_duoc_nang_nhan_vuot_qua_bang_chung():
     bang(tt == "CO_CREDENTIAL", f"chua goi that ma da phong len {tt}")
     bang("CHUA chung minh" in mo_ta, f"mo ta phai noi ro chua chung minh: {mo_ta!r}")
 
-    # (b) token HET HAN => ket luan duoc ngay, KHONG can goi mang
+    # (b) token HET HAN => ket luan duoc ngay, KHONG can goi mang.
+    # Dung `access_token`, KHONG dung `id_token`: id_token ngan han theo thiet ke nen
+    # da bi loai khoi moi phep xet han (xem `_TOKEN_KHONG_XET_HAN`). Fixture cu dung
+    # id_token la ghim mot gia dinh SAI, sua theo hop dong moi.
     m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
-                                  "gio_con_lai": {"id_token": -39.1}}
+                                  "gio_con_lai": {"access_token": -39.1}}
     tt, mo_ta = m._do_codex(kiem_song=False)
     bang(tt == "CHUA_XAC_THUC", f"token het han ma bao {tt}")
-    bang("HET HAN" in mo_ta and "id_token" in mo_ta, f"phai neu TEN token het han: {mo_ta!r}")
+    bang("HET HAN" in mo_ta and "access_token" in mo_ta,
+         f"phai neu TEN token het han: {mo_ta!r}")
 
     # (c) kiem song THANH CONG => moi duoc DUNG_DUOC
     m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
@@ -2565,8 +2569,9 @@ def t94_canh_bao_TRUOC_khi_credential_het_han():
     bang("anh chup CU" in mo_ta and "xoay vong" in mo_ta,
          f"phai giai thich VI SAO anh chup cu la nguy hiem: {mo_ta!r}")
 
-    # (d) DA het han thi uu tien bao HET HAN, khong ha xuong canh bao
-    dat({"id_token": -39.0}, 40.0)
+    # (d) DA het han thi uu tien bao HET HAN, khong ha xuong canh bao.
+    # `access_token` chu khong phai `id_token` — xem chu thich o (f) va (b) cua t93.
+    dat({"access_token": -39.0}, 40.0)
     tt, mo_ta = m._do_codex()
     bang(tt == "CHUA_XAC_THUC", f"da het han ma chi canh bao: {tt}")
     bang("HET HAN" in mo_ta, f"phai noi ro DA het han: {mo_ta!r}")
@@ -2575,6 +2580,17 @@ def t94_canh_bao_TRUOC_khi_credential_het_han():
     dat({"access_token": 100.0}, None)
     tt, _ = m._do_codex()
     bang(tt == "CO_CREDENTIAL", f"khong doc duoc tuoi ma canh bao oan: {tt}")
+
+    # (f) `id_token` NGAN HAN THEO THIET KE — khong duoc lay lam tin hieu.
+    # Do duoc ngay sau `codex login --device-auth`: access_token=240h, id_token=1.0h.
+    # Ban dau toi lay ca id_token nen credential VUA DUC XONG da bi gan SAP_HET_HAN —
+    # chot do thuong truc, dung thu se bi bo qua, va toi tu dung no vao chinh ban va
+    # canh bao som. Ca nay khoa lai.
+    dat({"access_token": 240.0, "id_token": 1.0}, 0.1)
+    tt, mo_ta = m._do_codex()
+    bang(tt == "CO_CREDENTIAL",
+         f"credential VUA DUC bi bao {tt} vi id_token ngan han: {mo_ta!r}")
+    bang("id_token" not in mo_ta, f"id_token khong duoc xuat hien trong ban khai: {mo_ta!r}")
 
 
 @ca
@@ -2586,6 +2602,44 @@ def t95_tuoi_anh_chup_doc_dung_va_khong_chet():
     bang(m._tuoi_anh_chup_gio("khong-phai-ngay") is None, "rac phai ra None, KHONG duoc nem")
     gio = m._tuoi_anh_chup_gio("2026-08-14T04:13:33.127497Z")
     bang(isinstance(gio, float) and gio > 0, f"ISO co Z phai doc duoc, duoc {gio!r}")
+
+
+@ca
+def t96_kiem_song_phai_chay_KE_CA_khi_sap_het_han():
+    """`--kiem-song` bị chính cảnh báo nuốt mất thì phép đo thành vô nghĩa.
+
+    Bản trước trả về ngay tại nhánh `SAP_HET_HAN`, nên ai đòi kiểm sống sẽ KHÔNG BAO
+    GIỜ được kiểm — đo được khi chạy `doctor --kiem-song` trên một credential sắp hết
+    hạn: nó in cảnh báo rồi thoát, không hề gọi thật.
+
+    "Sắp hết hạn" và "còn dùng được không" là HAI câu hỏi khác nhau; trả lời câu này
+    KHÔNG được phép nuốt câu kia.
+    """
+    m = _tai_launcher_thu()
+    m.shutil.which = lambda t: "/usr/bin/codex" if t == "codex" else None
+
+    class P:
+        returncode = 0
+        stdout = "Logged in using ChatGPT\n"
+        stderr = ""
+    m.subprocess.run = lambda *_a, **_k: P()
+    m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
+                                  "tuoi_anh_chup_gio": 40.0,
+                                  "gio_con_lai": {"access_token": 199.0}}
+
+    # (a) sap het han NHUNG kiem song DAT => van SAP_HET_HAN, co ghi la van dung duoc
+    goi = []
+    m._do_codex_song = lambda *_a: (goi.append(1), (True, "rc=0"))[1]
+    tt, mo_ta = m._do_codex(kiem_song=True)
+    bang(len(goi) == 1, "doi kiem song ma KHONG he goi — canh bao da nuot phep do")
+    bang(tt == "SAP_HET_HAN", f"kiem song dat thi van phai canh bao, duoc {tt}")
+    bang("VAN dung duoc" in mo_ta, f"phai ghi ro van dung duoc: {mo_ta!r}")
+
+    # (b) sap het han VA kiem song HONG => CHUA_XAC_THUC, canh bao khong duoc che lap
+    m._do_codex_song = lambda *_a: (False, "credential BI TU CHOI (token_revoked)")
+    tt, mo_ta = m._do_codex(kiem_song=True)
+    bang(tt == "CHUA_XAC_THUC", f"kiem song hong ma chi canh bao: {tt}")
+    bang("token_revoked" in mo_ta, f"phai giu ly do may chu tra: {mo_ta!r}")
 
 
 # ------------------------------------------------------ tự đột biến: có răng không
@@ -2655,9 +2709,20 @@ DOT_BIEN = [
     # chung), cong phan chung tay: go chot co lap thi `t81` lam ban `subprocess.run`
     # ngay tu ca dau tien.
     # Chot nay nam trong launcher.py nen DOT BIEN DUOC (khac chot harness o launcher_test).
+    # Dot bien vao HANG SO, khong vao mot cho dung: `_TOKEN_KHONG_XET_HAN` duoc doc o
+    # CA HAI lop (thu thap + quyet dinh), nen rong hoa no la go DU ca hai — dung thu
+    # can do. Bam vao mot dong `if` chi go duoc mot lop.
+    ("lay_ca_id_token_lam_tin_hieu_han",
+     ('_TOKEN_KHONG_XET_HAN = frozenset({"id_token"})',
+      '_TOKEN_KHONG_XET_HAN = frozenset()'),
+     ["t94_canh_bao_TRUOC_khi_credential_het_han"]),
+    ("kiem_song_bi_canh_bao_nuot",
+     ('            if kiem_song:\n                song, ly_do = _do_codex_song()',
+      '            if False:\n                song, ly_do = _do_codex_song()'),
+     ["t96_kiem_song_phai_chay_KE_CA_khi_sap_het_han"]),
     ("bo_canh_bao_som_theo_exp",
      ('        sap = [f"{t}={g}h" for t, g in sorted(han["gio_con_lai"].items())\n'
-      '               if 0 < g <= NGUONG_CANH_BAO_GIO]',
+      '               if 0 < g <= NGUONG_CANH_BAO_GIO and t not in _TOKEN_KHONG_XET_HAN]',
       '        sap = []'),
      ["t94_canh_bao_TRUOC_khi_credential_het_han"]),
     ("bo_canh_bao_theo_tuoi_anh_chup",

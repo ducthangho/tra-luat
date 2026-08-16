@@ -134,3 +134,4 @@ preconditions_measured_at_utc: '2026-08-16T15:18:54Z'
 master_sha_at_grant: 18da1da6a07ab2c86d716cef1d74ff2cd0e3218a
 packet_head_at_grant: b0e3e3b6a4c630ba0652b8fc939025d9c4031c67
 lease_song_khac_luc_cap: 'không — lease review-rebase đã đóng khi c44b2d4 land qua PR #129'
+posted_comment_id: 5308160047   # workflow ghi, ĐỪNG sửa tay

@@ -129,6 +129,13 @@ jobs:
         run: python -m pip install --quiet PyYAML==6.0.3
       - name: lease-publish selftest (cổng đăng lease)
         run: python ops/lease_publish_test.py
+      # Cùng doctrine với bước ngay trên và với hai bước eol/pre-push: guard không nối
+      # vào đường TỰ ĐỘNG thì guard chỉ là tài liệu (bài học r225).
+      # `gate_lifecycle.py` là cơ chế dev-side chống chạy trùng gate + ghi/validate
+      # evidence. Nó KHÔNG deselect test và KHÔNG thay promotion gate A2 — xem
+      # `docs/PROTOCOL_DA_PHIEN.md`. Bộ này thuần Python, đo 16-08: 13 ca.
+      - name: gate lifecycle selftest
+        run: python .claude/dev/gate_lifecycle_test.py
       # `--all` soi TOÀN BỘ index, không chỉ tệp đang stage — đây là thứ duy nhất bắt được nợ
       # CRLF có sẵn (hook cũ so với HEAD nên mù hoàn toàn với nó).
       #

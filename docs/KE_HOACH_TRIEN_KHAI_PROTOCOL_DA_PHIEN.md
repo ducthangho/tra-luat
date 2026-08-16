@@ -176,6 +176,12 @@ Pha này được ưu tiên ngay sau F4 và trước model orchestration để g
 selector bằng cách lọc output của harness eager hoặc shard modulo; full suite hiện hành vẫn là oracle trong thời
 gian shadow.
 
+Bootstrap pre-selector được phép land sớm: exact-head evidence wrapper, fail-closed reuse validator, targeted-first
+runbook và semaphore `heavy_gate=1` trên mỗi host. Bootstrap này chỉ loại **duplicate execution** của cùng exact
+identity; nó không deselect test và không thay promotion gate A2. `.github/workflows/ci.yml` phải checkout PR head
+tường minh trước khi gọi evidence wrapper; run chỉ “associated with” head nhưng test synthetic merge ref không được
+nhận là exact-head evidence.
+
 | Packet | Kết quả | Nghiệm thu/promotion |
 |---|---|---|
 | A2-01 | duration/event instrumentation và stable catalog cho 1.696 ca | báo top cost theo group/callable; instrumentation không đổi verdict |

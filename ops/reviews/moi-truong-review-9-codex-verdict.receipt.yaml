@@ -1,0 +1,34 @@
+schema_version: 1
+review: moi-truong-review-9
+reviewer: codex
+executor: claude
+verdict: changes_requested
+head: 1df800be15580d7432a1200900dd04ed9a7b997c
+base: 3f8b2904cfb4f99aab151cd0be435e4ba4553bb8
+read_only_repository: true
+findings:
+  high: 2
+  medium: 2
+  low: 1
+checks:
+  step_0: pass
+  expected_delta_files: 6
+  fixture_snapshot_lines_before: 37
+  fixture_snapshot_lines_after: 26
+  fixture_removed_bytes: 397
+  mutation_runs:
+    - measured: 57
+      passed: 57
+      unmeasurable: 1
+    - measured: 57
+      passed: 57
+      unmeasurable: 1
+  caller_probe:
+    atexit_printed: false
+    marker_after_written: false
+    journal_enter: 74
+    journal_exit: 73
+    journal_complete_marker: false
+    last_entered_case: t72_bi_ngat_KHONG_duoc_ghi_thanh_xong
+    surviving_suite_process_observed: false
+repository_status_expected: clean

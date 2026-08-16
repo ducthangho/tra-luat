@@ -1921,13 +1921,6 @@ CASES += [(f"ac18_{ten}", _ca_doctrine(nd, f"ac18_{ten}", 6)) for ten, nd in LOP
 # AC 19 — chiều BẮT OAN, cùng cách tổ chức.
 CASES += [(f"ac19_{ten}", _ca_doctrine(nd, f"ac19_{ten}", 0)) for ten, nd in LOP_BAT_OAN]
 
-# Chốt (3) của `_duoc_tha_vi_ngat_dong` — "hai dòng biên phải mang DẤU HIỆU PHÉP ĐO".
-# Đặt tên riêng vì NHIỀU đột biến cùng cần gỡ nó: chốt này phủ chồng lên mọi chốt cấu
-# trúc, nên một đột biến gỡ chốt cấu trúc mà KHÔNG gỡ nó thì ca đích vẫn xanh và đột
-# biến mất răng. Viết một chỗ để các chỗ kia không lệch nhau khi thân hàm đổi.
-C3_CU = '        if not _DAU_HIEU_PHEP_DO.search(mo[2] + " " + dong_cuoi[2]):'
-C3_MOI = "        if False:"
-
 # Đột biến nới ngưỡng: mỗi cái BẮT BUỘC giết đúng những ca dưới đây. Ca không
 # chết được nghĩa là nó không đo cái nó khai.
 MUTANTS = {

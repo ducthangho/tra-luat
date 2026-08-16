@@ -2518,6 +2518,76 @@ def t93_do_codex_khong_duoc_nang_nhan_vuot_qua_bang_chung():
     bang("token_revoked" in mo_ta, f"phai giu nguyen ly do may chu tra: {mo_ta!r}")
 
 
+@ca
+def t94_canh_bao_TRUOC_khi_credential_het_han():
+    """Phải báo TRƯỚC khi hỏng, không phải sau.
+
+    Sự cố 15-08-2026: credential codex bị thu hồi giữa chừng, một lượt cross-review đã
+    cấp lease mất trắng, và `doctor` chỉ phát hiện SAU khi mọi lời gọi đã 401.
+
+    Ca gay nhất là ca THỨ BA dưới đây: `access_token` còn 199 giờ — mọi phép kiểm `exp`
+    đều xanh — nhưng `last_refresh` đã quá 40 giờ và credential THẬT SỰ đã bị vô hiệu.
+    Refresh token XOAY VÒNG: bản trên đĩa đổi thì bản trong `CODEX_AUTH_JSON` chết theo.
+    Tuổi ảnh chụp là tín hiệu DUY NHẤT nhìn thấy trước, nên bỏ nó là bỏ đúng ca đã xảy ra.
+
+    `SAP_HET_HAN` vẫn là DÙNG ĐƯỢC — nó KHÔNG được biến thành `CHUA_XAC_THUC`, kẻo chốt
+    đỏ khi mọi thứ còn chạy và người ta học cách bỏ qua nó.
+    """
+    m = _tai_launcher_thu()
+    m.shutil.which = lambda t: "/usr/bin/codex" if t == "codex" else None
+
+    class P:
+        returncode = 0
+        stdout = "Logged in using ChatGPT\n"
+        stderr = ""
+    m.subprocess.run = lambda *_a, **_k: P()
+
+    def dat(gio_con_lai, tuoi):
+        m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
+                                      "tuoi_anh_chup_gio": tuoi,
+                                      "gio_con_lai": gio_con_lai}
+
+    # (a) khoe manh => CO_CREDENTIAL, KHONG canh bao oan
+    dat({"access_token": 100.0}, 1.0)
+    tt, _ = m._do_codex()
+    bang(tt == "CO_CREDENTIAL", f"credential khoe ma canh bao oan: {tt}")
+
+    # (b) SAP het han theo `exp`
+    dat({"access_token": 5.0}, 1.0)
+    tt, mo_ta = m._do_codex()
+    bang(tt == "SAP_HET_HAN", f"con 5h ma khong canh bao: {tt}")
+    bang("access_token=5.0h" in mo_ta, f"phai neu TEN token va SO GIO: {mo_ta!r}")
+
+    # (c) CA DA XAY RA: exp con xa NHUNG anh chup CU
+    dat({"access_token": 199.0}, 40.0)
+    tt, mo_ta = m._do_codex()
+    bang(tt == "SAP_HET_HAN", f"anh chup cu 40h ma van bao {tt} — dung ca 15-08 tai dien")
+    bang("anh chup CU" in mo_ta and "xoay vong" in mo_ta,
+         f"phai giai thich VI SAO anh chup cu la nguy hiem: {mo_ta!r}")
+
+    # (d) DA het han thi uu tien bao HET HAN, khong ha xuong canh bao
+    dat({"id_token": -39.0}, 40.0)
+    tt, mo_ta = m._do_codex()
+    bang(tt == "CHUA_XAC_THUC", f"da het han ma chi canh bao: {tt}")
+    bang("HET HAN" in mo_ta, f"phai noi ro DA het han: {mo_ta!r}")
+
+    # (e) khong doc duoc tuoi => KHONG duoc canh bao oan (None khac 0)
+    dat({"access_token": 100.0}, None)
+    tt, _ = m._do_codex()
+    bang(tt == "CO_CREDENTIAL", f"khong doc duoc tuoi ma canh bao oan: {tt}")
+
+
+@ca
+def t95_tuoi_anh_chup_doc_dung_va_khong_chet():
+    """`_tuoi_anh_chup_gio` phải đọc được ISO có `Z`, và trả None khi không đọc được."""
+    m = _tai_launcher_thu()
+    bang(m._tuoi_anh_chup_gio(None) is None, "None phai ra None")
+    bang(m._tuoi_anh_chup_gio("") is None, "chuoi rong phai ra None")
+    bang(m._tuoi_anh_chup_gio("khong-phai-ngay") is None, "rac phai ra None, KHONG duoc nem")
+    gio = m._tuoi_anh_chup_gio("2026-08-14T04:13:33.127497Z")
+    bang(isinstance(gio, float) and gio > 0, f"ISO co Z phai doc duoc, duoc {gio!r}")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -2585,6 +2655,15 @@ DOT_BIEN = [
     # chung), cong phan chung tay: go chot co lap thi `t81` lam ban `subprocess.run`
     # ngay tu ca dau tien.
     # Chot nay nam trong launcher.py nen DOT BIEN DUOC (khac chot harness o launcher_test).
+    ("bo_canh_bao_som_theo_exp",
+     ('        sap = [f"{t}={g}h" for t, g in sorted(han["gio_con_lai"].items())\n'
+      '               if 0 < g <= NGUONG_CANH_BAO_GIO]',
+      '        sap = []'),
+     ["t94_canh_bao_TRUOC_khi_credential_het_han"]),
+    ("bo_canh_bao_theo_tuoi_anh_chup",
+     ('        anh_cu = tuoi is not None and tuoi >= NGUONG_ANH_CHUP_CU_GIO',
+      '        anh_cu = False'),
+     ["t94_canh_bao_TRUOC_khi_credential_het_han"]),
     ("nang_nhan_CO_CREDENTIAL_thanh_DUNG_DUOC",
      ('            return ("CO_CREDENTIAL",',
       '            return ("DUNG_DUOC",'),

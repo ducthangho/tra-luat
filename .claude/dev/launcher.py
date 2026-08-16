@@ -1774,13 +1774,46 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
              "duong_dan": str(dich)}]
 
 
+# Cảnh báo TRƯỚC khi hỏng, không phải sau. Sự cố 15-08-2026: credential bị thu hồi giữa
+# chừng, một lượt cross-review đã cấp lease bị mất trắng, và `doctor` chỉ phát hiện SAU
+# khi mọi thứ đã 401. Bản vá hôm đó thêm phép kiểm hạn offline — nhưng nó chỉ đỏ khi ĐÃ
+# hết hạn, tức vẫn báo muộn.
+#
+# 24 giờ là con số CHỌN, không phải đo: đủ để người dùng thấy cảnh báo ở phiên kế tiếp và
+# kịp chạy `codex login` trước khi nó chặn việc. Ai thấy quá dài/ngắn thì đổi ở ĐÂY, một
+# chỗ, và nói rõ vì sao.
+NGUONG_CANH_BAO_GIO = 24.0
+
+# `last_refresh` là dấu ẤN THỜI ĐIỂM CHỤP của chuỗi trong biến môi trường. Refresh token
+# XOAY VÒNG: mỗi lần codex làm mới, bản trên đĩa đổi và bản cũ bị vô hiệu. Nên một ảnh
+# chụp CŨ là dấu hiệu sắp hỏng KỂ CẢ khi `exp` còn xa — đo được 15-08: `access_token` còn
+# 199 giờ mà credential đã bị thu hồi, trong khi `last_refresh` đã quá 40 giờ. Đây là tín
+# hiệu DUY NHẤT nhìn thấy trước, nên đừng bỏ.
+NGUONG_ANH_CHUP_CU_GIO = 24.0
+
+
+def _tuoi_anh_chup_gio(last_refresh) -> float | None:
+    """Số giờ kể từ `last_refresh`. None = không đọc được, KHÁC với 0."""
+    if not isinstance(last_refresh, str) or not last_refresh.strip():
+        return None
+    t = last_refresh.strip().replace("Z", "+00:00")
+    try:
+        moc = datetime.fromisoformat(t)
+    except ValueError:
+        return None
+    if moc.tzinfo is None:
+        moc = moc.replace(tzinfo=timezone.utc)
+    return round((datetime.now(timezone.utc) - moc).total_seconds() / 3600, 1)
+
+
 def _han_token_codex() -> dict:
     """Đọc HẠN của token trong `~/.codex/auth.json`. KHÔNG in giá trị token.
 
     Chỉ trả về mốc thời gian và số giờ còn lại — `exp` là một con số, không phải bí mật.
     Không xác thực chữ ký: ta không kiểm token có THẬT, ta chỉ kiểm nó đã HẾT HẠN chưa.
     """
-    ra = {"doc_duoc": False, "last_refresh": None, "gio_con_lai": {}}
+    ra = {"doc_duoc": False, "last_refresh": None, "tuoi_anh_chup_gio": None,
+          "gio_con_lai": {}}
     try:
         d = json.loads(Path(os.path.expanduser("~/.codex/auth.json"))
                        .read_text(encoding="utf-8"))
@@ -1788,6 +1821,7 @@ def _han_token_codex() -> dict:
         return ra
     ra["doc_duoc"] = True
     ra["last_refresh"] = d.get("last_refresh")
+    ra["tuoi_anh_chup_gio"] = _tuoi_anh_chup_gio(d.get("last_refresh"))
     for ten, v in (d.get("tokens") or {}).items():
         if not isinstance(v, str) or v.count(".") != 2:
             continue
@@ -1879,6 +1913,20 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
         if het:
             # HẾT HẠN là thứ ĐO ĐƯỢC offline ⇒ dám kết luận.
             return ("CHUA_XAC_THUC", f"token HET HAN: {', '.join(het)} · {chi_tiet}")
+        # SẮP hết hạn / ảnh chụp CŨ ⇒ vẫn dùng được NHƯNG phải báo NGAY. Đây là mục
+        # 3.1 của phương án chống tái diễn sự cố thu hồi: cảnh báo TRƯỚC, không phải sau.
+        sap = [f"{t}={g}h" for t, g in sorted(han["gio_con_lai"].items())
+               if 0 < g <= NGUONG_CANH_BAO_GIO]
+        tuoi = han.get("tuoi_anh_chup_gio")
+        anh_cu = tuoi is not None and tuoi >= NGUONG_ANH_CHUP_CU_GIO
+        if sap or anh_cu:
+            vi_sao = []
+            if sap:
+                vi_sao.append("sap het han: " + ", ".join(sap))
+            if anh_cu:
+                vi_sao.append(f"anh chup CU {tuoi}h (refresh token xoay vong - ban trong "
+                              f"CODEX_AUTH_JSON co the da bi vo hieu)")
+            return ("SAP_HET_HAN", " · ".join(vi_sao) + f" · {chi_tiet}")
         if not kiem_song:
             return ("CO_CREDENTIAL",
                     f"{chi_tiet} · CHUA chung minh dung duoc (them --kiem-song de goi that)")
@@ -2180,6 +2228,12 @@ def lenh_doctor(a) -> int:
         for k in kha_nang:
             if k["trang_thai"] in ("CHUA_XAC_THUC", "CAN_CHUAN_BI") and k["khac_phuc"]:
                 _in_an_toan(f"  CHUA DUNG DUOC {k['ten']:<11} -> {k['khac_phuc']}")
+        # SAP_HET_HAN vẫn DÙNG ĐƯỢC nên KHÔNG vào mục trên và KHÔNG đổi mã thoát — nhưng
+        # để nó lẫn giữa danh sách thì cảnh báo sớm thành vô dụng. In riêng, kèm cách chữa.
+        for k in kha_nang:
+            if k["trang_thai"] == "SAP_HET_HAN":
+                _in_an_toan(f"  CANH BAO SOM   {k['ten']:<11} -> {k['khac_phuc']}")
+                _in_an_toan(f"                 {k['chi_tiet']}")
     return _ma_doctor(thieu_bat_buoc, chua_xac_thuc, getattr(a, "doi_kha_dung", False))
 
 

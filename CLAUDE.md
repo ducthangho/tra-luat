@@ -206,6 +206,20 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   cũng 403 trong khi `/user` trả 200, tức chính sách theo ĐƯỜNG DẪN chứ không theo danh
   tính · `gh` không cài, và **cài cũng vô ích** vì nó đi đúng đường bị chặn. Việc của kho
   đi bằng **MCP github + git**, không bằng REST thẳng.
+- **Refresh token của codex XOAY VÒNG ⇒ `CODEX_AUTH_JSON` là ảnh chụp CHẾT NHANH.** Mỗi lần
+  codex làm mới token, bản cũ bị vô hiệu — kể cả bản đang nằm trong biến. Đo 16-08: chuỗi
+  vừa dán xong, đưa xuống đĩa khớp từng byte, vẫn `refresh_token_invalidated`. Chép base64
+  **ngay sau `codex login`**, đừng chạy `codex` trên máy cá nhân trong lúc còn muốn dùng
+  chuỗi đó ở phiên remote. `doctor` nay cảnh báo TRƯỚC (`SAP_HET_HAN`) khi `exp` dưới 24h
+  **hoặc** `last_refresh` cũ hơn 24h — tín hiệu thứ hai mới là cái bắt được ca đã xảy ra.
+- **`codex login status` NÓI DỐI** — chỉ kiểm tệp đọc được, không kiểm token còn sống
+  (rc=0 "Logged in" trong khi mọi lời gọi trả 401). Đã trả giá HAI lần: một lần dán nhãn
+  `DUNG_DUOC` sai, một lần chốt "đã đăng nhập thì không ghi đè" bảo vệ đúng bản đã chết và
+  chặn bản mới. Chốt nay so `last_refresh` giữa đĩa và biến, không hỏi lệnh đó nữa.
+- **Codex mặc định KHÔNG thấy biến tuỳ biến** (`shell_environment_policy.inherit` chỉ truyền
+  tập lõi — KHÔNG phải vì bộ lọc bí mật; mẫu mặc định chỉ có `*KEY*` `*SECRET*` `*TOKEN*`).
+  Hook đặt `inherit = "all"` kèm `exclude` **tính bằng máy**, vì `GITHUB_PAT` là credential
+  thật duy nhất lọt qua ba mẫu đó. Đánh đổi có chủ đích; chi tiết ở `docs/GOI_AGENT_DA_NEN.md`.
 - `rg` là công cụ **BẮT BUỘC** (từ 15-08-2026). Thiếu nó lệnh tìm của agent gãy giữa
   chừng chứ KHÔNG tự lùi về `grep` — phiên vẫn "chạy" nhưng tra cứu mù. Hook phiên thử
   apt-get (có/không sudo, có/không `update`) rồi cargo, và đòi bằng chứng `rg --version`.

@@ -1712,21 +1712,43 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
     if not thoc:
         return ket
     dich = Path(os.path.expanduser("~/.codex/auth.json"))
-
-    # Chốt 2 — hỏi chính `codex`, đừng suy từ sự tồn tại của tệp.
-    if shutil.which("codex"):
+    # Giải mã SỚM để so mốc; phần kiểm lược đồ đầy đủ vẫn ở dưới, không bỏ.
+    noi_dung_tam = None
+    for thu in (thoc, None):
+        if thu is None:
+            try:
+                thu = base64.b64decode(thoc, validate=True).decode("utf-8")
+            except Exception:
+                break
         try:
-            with open(os.devnull) as rong:
-                p = subprocess.run(["codex", "login", "status"], stdin=rong,
-                                   capture_output=True, text=True, timeout=30,
-                                   encoding="utf-8", errors="replace")
-            if p.returncode == 0 and "not logged in" not in (
-                    (p.stdout or "") + (p.stderr or "")).lower():
-                return [{"ten": "codex", "ok": True, "doi": False,
-                         "cach": "da dang nhap san — GIU nguyen, khong ghi de",
-                         "duong_dan": str(dich)}]
-        except (OSError, subprocess.SubprocessError):
-            pass                       # không hỏi được thì đi tiếp theo đường kiểm tệp
+            json.loads(thu)
+            noi_dung_tam = thu
+            break
+        except Exception:
+            continue
+
+    # Chốt 2 — SO MỐC `last_refresh`, KHÔNG hỏi `codex login status`.
+    #
+    # Ý ĐỊNH của chốt này không đổi: đừng hạ cấp một credential trên đĩa MỚI HƠN biến
+    # (codex tự làm mới token rồi ghi lại). Nhưng CÁCH HỎI thì sai, và đã gây hại thật.
+    #
+    # ĐO ĐƯỢC 16-08-2026: chủ kho đăng nhập lại và cập nhật `CODEX_AUTH_JSON`
+    # (`last_refresh=2026-08-16T01:58`), trong khi trên đĩa vẫn là bản ĐÃ BỊ THU HỒI
+    # (`last_refresh=2026-08-14T04:13`). `codex login status` trả rc=0 "Logged in" —
+    # nó chỉ kiểm tệp đọc được — nên chốt cũ kết luận "đã đăng nhập sẵn, GIỮ nguyên" và
+    # CHẶN bản mới. Chốt sinh ra để bảo vệ bản mới hơn lại đi bảo vệ đúng bản đã chết.
+    #
+    # Nay so MỐC THỜI GIAN, thứ đo được và không nói dối. Trên đĩa mới hơn hoặc bằng thì
+    # giữ; cũ hơn thì thay. Không đọc được mốc của một trong hai bên ⇒ đi tiếp theo đường
+    # so nội dung bên dưới, đừng đoán.
+    moc_dia = _tuoi_anh_chup_gio(_last_refresh_cua(dich.read_text(encoding="utf-8"))
+                                 ) if dich.exists() else None
+    moc_bien = _tuoi_anh_chup_gio(_last_refresh_cua(noi_dung_tam)) if noi_dung_tam else None
+    if moc_dia is not None and moc_bien is not None and moc_dia <= moc_bien:
+        return [{"ten": "codex", "ok": True, "doi": False,
+                 "cach": f"tren dia MOI HON hoac BANG bien ({moc_dia}h vs {moc_bien}h) "
+                         f"— GIU nguyen, khong ha cap",
+                 "duong_dan": str(dich)}]
 
     # Chốt 3 — giải mã + kiểm lược đồ TRƯỚC khi đụng đĩa.
     noi_dung, cach = None, ""
@@ -1804,6 +1826,14 @@ def _tuoi_anh_chup_gio(last_refresh) -> float | None:
     if moc.tzinfo is None:
         moc = moc.replace(tzinfo=timezone.utc)
     return round((datetime.now(timezone.utc) - moc).total_seconds() / 3600, 1)
+
+
+def _last_refresh_cua(noi_dung: str):
+    """Đọc `last_refresh` từ nội dung auth.json. None nếu không đọc được."""
+    try:
+        return json.loads(noi_dung).get("last_refresh")
+    except Exception:
+        return None
 
 
 def _han_token_codex() -> dict:

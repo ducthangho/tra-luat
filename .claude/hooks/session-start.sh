@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -205,6 +205,75 @@ fi
 # --- KHOI PHUC credential codex: KHOI O TREN da lam roi, dung goi lai o day.
 # `launcher.py chuan-bi` la duong CUU HO cho truong hop hook NAY khong chay — xem
 # chu thich cua `chuan_bi_xac_thuc()`. Goi ca hai trong mot luot chi thanh nhieu.
+
+# --- CHINH SACH BIEN MOI TRUONG CHO CODEX
+#
+# VI SAO: `codex` mac dinh chi truyen mot TAP LOI bien vao moi truong cua lenh no chay
+# (`shell_environment_policy.inherit` mac dinh KHONG phai "all"). Nen mot phien codex
+# KHONG thay `CODEX_AUTH_JSON`, va vi the khong tu tai dung duoc credential; cong cu cua
+# kho chay BEN TRONG sandbox codex cung bao "khong co bien" roi de dan toi ket luan sai.
+#
+# DO DUOC 15-08-2026, va no sua lai mot chan doan sai cua chinh toi: mau loai tru MAC DINH
+# cua codex chi co BA — `*KEY*` `*SECRET*` `*TOKEN*`. `CODEX_AUTH_JSON` KHONG khop cai nao.
+# Bien bi an vi `inherit`, KHONG phai vi bo loc bi mat.
+#
+# DANH DOI, noi thang: `inherit = "all"` dua `CODEX_AUTH_JSON` (chua refresh token) vao
+# moi truong cua MOI lenh codex chay, thay vi chi nam tren dia quyen 600. Doi lai, phien
+# codex tu tai dung duoc credential.
+#
+# `exclude` KHONG phai cho co. Da tinh bang may: nhung bien co HINH DANG BI MAT ma LOT qua
+# ba mau mac dinh. Ket qua: `GITHUB_PAT` la credential THAT duy nhat lot luoi (93 ky tu,
+# tien to `github_pat_`) — thieu dong nay la phoi PAT cho moi lenh codex chay. Ba bien con
+# lai la DANH TINH PHIEN, codex khong can, nen cat luon.
+#
+# Doi mau/them bien thi tinh LAI bang may, dung doan:
+#   python3 - <<'EOF'
+#   import os, re, fnmatch
+#   MD=["*KEY*","*SECRET*","*TOKEN*"]
+#   NC=re.compile(r"TOKEN|SECRET|PASSWORD|CREDENTIAL|COOKIE|AUTH|API_KEY|_KEY$|_PAT|SESSION",re.I)
+#   print([k for k in os.environ if NC.search(k) and not any(fnmatch.fnmatch(k,m) for m in MD)])
+#   EOF
+if co codex; then
+  "$PY" - <<'PYEOF'
+import os, pathlib
+MOC_MO = "# >>> tra-luat: shell_environment_policy (quan ly tu dong) >>>"
+MOC_DONG = "# <<< tra-luat <<<"
+KHOI = f"""{MOC_MO}
+[shell_environment_policy]
+inherit = "all"
+exclude = [
+  "GITHUB_PAT",                                 # credential THAT, khong khop mau mac dinh
+  "CLAUDE_CODE_SESSION_ID",                     # danh tinh phien, codex khong can
+  "CLAUDE_CODE_REMOTE_SESSION_ID",
+  "CLAUDE_CODE_WEBSOCKET_AUTH_FILE_DESCRIPTOR",
+]
+{MOC_DONG}"""
+
+tep = pathlib.Path(os.path.expanduser("~/.codex/config.toml"))
+tep.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
+cu = tep.read_text(encoding="utf-8") if tep.exists() else ""
+
+# Go khoi CU do chinh ta quan ly, GIU nguyen phan con lai (vd [projects...] cua codex).
+if MOC_MO in cu and MOC_DONG in cu:
+    dau = cu.index(MOC_MO)
+    cuoi = cu.index(MOC_DONG) + len(MOC_DONG)
+    cu = (cu[:dau] + cu[cuoi:]).strip("\n")
+
+# Khoi phai dung TRUOC moi bang [projects...]: TOML gan khoa vao bang GAN NHAT phia tren,
+# nen dat cuoi tep se bi nuot vao bang cuoi cung. Da tra gia o cho khac trong kho: cu phap
+# am tham gan thu vao noi minh khong dinh.
+moi = KHOI + ("\n\n" + cu if cu.strip() else "") + "\n"
+if tep.exists() and tep.read_text(encoding="utf-8") == moi:
+    print("[session-start] codex env policy: da dung, khong dung toi")
+else:
+    tep.write_text(moi, encoding="utf-8")
+    try:
+        os.chmod(tep, 0o600)
+    except OSError:
+        pass
+    print("[session-start] codex env policy: da dat (inherit=all + exclude)")
+PYEOF
+fi
 
 # --- BANG CHUNG DUONG, khong tin "da cai xong".
 #   12 = thieu cong cu BAT BUOC          -> phien nay khong lam viec duoc, DUNG.

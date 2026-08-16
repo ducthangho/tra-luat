@@ -99,6 +99,83 @@ không suy từ việc "đã ghi tệp xong".
 Nếu một ngày chuỗi hết hiệu lực (OpenAI thu hồi hoặc xoay refresh token), triệu chứng là
 `Not logged in` dù biến vẫn còn. Chữa: `codex login --device-auth` lại rồi cập nhật biến.
 
+### Codex có thấy `CODEX_AUTH_JSON` không — và cái giá để nó thấy
+
+**Mặc định là KHÔNG**, và lý do không phải cái ai cũng đoán.
+
+Mẫu loại trừ **mặc định** của codex chỉ có **ba**: `*KEY*` · `*SECRET*` · `*TOKEN*`.
+`CODEX_AUTH_JSON` **không khớp cái nào**. Biến vô hình vì
+`shell_environment_policy.inherit` mặc định chỉ truyền một **tập lõi**, chứ không phải vì
+bộ lọc bí mật. (Tôi từng chẩn đoán nhầm là khớp `*AUTH*` — `*AUTH*` là mẫu tự gõ khi thử,
+không có trong codex. Đo binary rồi mới ra.)
+
+Lược đồ đầy đủ: `inherit` · `ignore_default_excludes` · `exclude` · `set` · `include_only`.
+
+**Codex KHÔNG cần biến này để xác thực.** Nó đọc `~/.codex/auth.json`. Biến chỉ là *hạt
+giống bền* để hook giải mã xuống đĩa **trước khi** codex khởi động. Mở biến ra chỉ thêm
+một khả năng: phiên codex **tự tái dựng** được credential, và công cụ của kho chạy *bên
+trong* sandbox thôi báo nhầm "không có biến".
+
+Hook đặt sẵn, idempotent, giữ nguyên phần `[projects]` của codex:
+
+```toml
+[shell_environment_policy]
+inherit = "all"
+exclude = ["GITHUB_PAT", "CLAUDE_CODE_SESSION_ID",
+           "CLAUDE_CODE_REMOTE_SESSION_ID", "CLAUDE_CODE_WEBSOCKET_AUTH_FILE_DESCRIPTOR"]
+```
+
+**`exclude` KHÔNG phải cho có.** Đã tính bằng máy: biến nào có *hình dạng bí mật* mà **lọt
+qua** ba mẫu mặc định. Kết quả: `GITHUB_PAT` là credential **thật** duy nhất lọt lưới
+(93 ký tự, tiền tố `github_pat_`) — thiếu dòng đó là phơi PAT cho **mọi** lệnh codex chạy.
+Ba biến còn lại là danh tính phiên, codex không cần. Đổi mẫu hay thêm biến thì **tính lại
+bằng máy**, đừng đoán — lệnh tính nằm ngay trong hook.
+
+**Đánh đổi, nói thẳng:** `inherit = "all"` đưa `CODEX_AUTH_JSON` (chứa refresh token) vào
+môi trường của mọi lệnh codex chạy, thay vì chỉ nằm trên đĩa quyền 600. Đây là lựa chọn
+CÓ CHỦ ĐÍCH của chủ kho, không phải mặc định — ai thấy không đáng thì đổi `inherit` về
+`"core"`, codex vẫn chạy bình thường.
+
+**TUYỆT ĐỐI KHÔNG** dùng `shell_environment_policy.set` để truyền giá trị qua dòng lệnh:
+đối số lộ trong `ps` cho mọi tiến trình cùng máy.
+
+### Refresh token XOAY VÒNG — vì sao ảnh chụp chết nhanh
+
+Đây là chỗ đắt nhất, và nó đã cắn hai lần trong một ngày.
+
+Mỗi lần codex làm mới token, nó ghi đè `~/.codex/auth.json` và **vô hiệu bộ cũ**. Chuỗi
+base64 trong `CODEX_AUTH_JSON` là **ảnh chụp một thời điểm** — nó chết ngay khi bản trên
+đĩa ở *bất kỳ máy nào* được làm mới.
+
+Đo được 16-08-2026: chủ kho đăng nhập lại và dán chuỗi mới
+(`last_refresh=2026-08-16T01:58`); hook đưa xuống đĩa **khớp từng byte**; codex vẫn trả
+`refresh_token_invalidated`. Tức **ảnh chụp đã chết trước khi tới nơi** — giữa lúc chụp và
+lúc dùng đã có một lượt xoay vòng khác.
+
+**Quy trình chép cho đúng:**
+
+1. `codex login` (hoặc `--device-auth`).
+2. **Chép base64 NGAY**, trước khi chạy bất kỳ lệnh `codex` nào khác trên máy đó.
+3. Dán vào Environment, rồi **mở phiên mới** (biến chỉ nạp lúc phiên khởi động).
+4. **Đừng chạy `codex` trên máy cá nhân** trong lúc còn muốn dùng chuỗi đó ở phiên remote —
+   mỗi lượt chạy có thể xoay vòng và giết chuỗi đã dán.
+
+### `codex login status` NÓI DỐI — đừng dùng nó làm chốt
+
+Nó chỉ kiểm tệp **đọc được**, không kiểm token còn **sống**. Đo được: trả rc=0
+`Logged in using ChatGPT` trong khi mọi lời gọi thật trả 401 `refresh_token_invalidated`.
+
+Đã trả giá **hai lần**:
+
+- `launcher.py` từng dán nhãn `DUNG_DUOC` chỉ vì lệnh đó rc=0. Nay tách ba nhãn:
+  `CO_CREDENTIAL` (có tệp, đọc được, chưa hết hạn — **chưa** chứng minh dùng được) ·
+  `CHUA_XAC_THUC` (đo được là hỏng) · `DUNG_DUOC` (**chỉ** khi `--kiem-song` gọi thật).
+- Hook từng dùng nó cho chốt "đã đăng nhập thì không ghi đè". Hậu quả **đo được**: bản trên
+  đĩa đã bị thu hồi, biến có bản mới, mà chốt vẫn kết luận "đã đăng nhập sẵn, GIỮ nguyên"
+  và **chặn bản mới** — chốt sinh ra để bảo vệ bản mới hơn lại đi bảo vệ đúng bản đã chết.
+  Nay so **`last_refresh`** giữa đĩa và biến: đĩa mới hơn hoặc bằng thì giữ, cũ hơn thì thay.
+  Mốc thời gian đo được và không nói dối.
+
 ### Khi hook ĐÚNG mà phiên vẫn hỏng — sự cố 15-08-2026
 
 Mọi thứ ở mục trên đã đúng và đã có từ 14-08. Hôm sau một phiên vẫn mất gần trọn ngày

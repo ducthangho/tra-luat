@@ -1,0 +1,87 @@
+# BIÊN NHẬN GIAO HÀNG cho verdict cross-review wp55 revision 4, lượt review 1.
+#
+# VÌ SAO TỆP NÀY RA ĐỜI MUỘN, VÀ AI VIẾT NÓ — nói trước, vì nó đổi cách đọc mọi
+# trường bên dưới. PR #132 land năm tệp verdict của revision 4 vào master mà KHÔNG
+# kèm biên nhận và KHÔNG thêm hàng nào vào `ops/reviews/README.md`. `t27` duyệt
+# verdict theo GLOB ĐĨA (cố ý — để verdict chưa ai làm biên nhận không vô hình) nên
+# master ĐỎ ngay sau đó: `lease_publish: 29/30`. Biên nhận này do một phiên
+# `claude-session` KHÁC viết sau, không phải reviewer, không phải phiên đã land.
+#
+# NÊN ĐỌC ĐÚNG PHẠM VI: mọi trường dưới đây là thứ ĐO ĐƯỢC TỪ KHO (băm tệp, commit
+# công bố, ngày commit, lease trong `ops/leases/`). KHÔNG có trường nào là lời khai
+# của reviewer, và người viết biên nhận này KHÔNG chứng kiến lượt review.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+revision: 4
+generation: 1
+lease_id: wp55-r4-review-1-codex-20260816
+provider: codex
+role: reviewer
+verdict: do_not_land
+reviewed_sha: 2432e3f64f05739741dfe6f49081e9aaa140799f
+
+verdict_path: ops/reviews/wp55-r4-review-1-codex-verdict.md
+verdict_sha256: fe002e5b245a3f38f183b673809d4fe3362622c7a9653aa3c6a78dd9bfc5b9b4
+verdict_bytes: 6578
+
+# ĐƯỜNG GIAO KHÁC HẲN revision 2 — đây là chỗ dễ đọc nhầm nhất của cả tệp.
+# Verdict lượt 4/5 của revision 2 đăng thành PR review trên #92, nên `evidence_url`
+# của chúng trỏ vào GitHub review. Revision 4 KHÔNG có PR cho nhánh packet — lease
+# khai thẳng `target_pull_request: null` + "review neo thẳng vào SHA" — nên verdict
+# được giao bằng TỆP TRÊN NHÁNH, và không tồn tại comment/review nào mang nguyên văn
+# nó. Đã đo: không có comment nào trên #55 chứa verdict; các comment r4 trên #55 là
+# lease (bản chiếu tự động) và bản ghi giải phóng lease.
+evidence_channel: repo_file        # KHÔNG phải github_comment, KHÔNG phải pr_review
+evidence_url: https://github.com/ducthangho/tra-luat/blob/3223644dbea3d0164d5fcf24bfdd0237eec395c7/ops/reviews/wp55-r4-review-1-codex-verdict.md
+
+# Vì sao `evidence_url` neo vào commit MASTER chứ không vào nhánh công bố đầu tiên:
+# `ops/HO_SO_wp55-r4.md` khai kế hoạch XOÁ các nhánh `ops/**` sau khi land hồ sơ.
+# Một URL trỏ nhánh sắp bị xoá chính là lớp lỗi lease #3 đã trả giá (băm không ứng
+# với văn bản nào). Nhánh công bố ghi ở `published_first` để ai còn thấy nó thì kiểm
+# lại được; thứ SỐNG SÓT chắc chắn là commit master.
+published_first:
+  branch: ops/wp55-r4-review-1-codex-verdict
+  commit: 872679c360a43a4b12221749901aa0cf231566ac
+  commit_utc: '2026-08-16T17:03:15Z'
+  # ĐÃ ĐO: byte tại commit này BẰNG byte trên master. Không phải suy từ tên nhánh.
+  sha256_tai_commit: fe002e5b245a3f38f183b673809d4fe3362622c7a9653aa3c6a78dd9bfc5b9b4
+
+# BẢN TRƯỚC ĐÓ CỦA CHÍNH TỆP NÀY — ghi ra vì "verdict là nguyên văn neo băm, không
+# sửa" là doctrine của kho, và ở đây tệp CÓ bị viết lại. Không giấu:
+#   b4e5c5f9  2026-08-16  sha256 7dd8e20357e595af27056c05d781bc3f1fcff2d54d4cd3073339a2532d9fb97b
+# Bản ấy còn finding `mutation-kill-set-omits-false-positive-case` (P1). Reviewer TỰ
+# RÚT sau khi chạy lại ba phép đo (thuật lại ở `ops/HO_SO_wp55-r4.md`), rồi viết lại
+# verdict ở `872679c3`. Người rút là `codex` — đúng §8; phản chứng do một phiên
+# `claude` gửi chỉ là ĐẦU VÀO, không phải phán quyết. Băm mà mọi hồ sơ khác của
+# revision 4 trích dẫn (`fe002e5b…`) là băm bản SAU khi rút.
+ban_truoc_khi_reviewer_tu_rut:
+  commit: b4e5c5f9ef85e652fa2cc98bb3474036519d663c
+  sha256: 7dd8e20357e595af27056c05d781bc3f1fcff2d54d4cd3073339a2532d9fb97b
+  finding_bi_rut: mutation-kill-set-omits-false-positive-case
+
+landed_to_master:
+  commit: 3223644dbea3d0164d5fcf24bfdd0237eec395c7
+  pull_request: 132
+  merge_commit: d9de1c94  # tip master lúc viết biên nhận này
+
+# Hai bản ghi trên #55 dựng nên dấu vết thẩm quyền. Cả hai là bản chiếu/bản ghi,
+# KHÔNG chứa nguyên văn verdict.
+lease_evidence_url: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5308370506
+lease_release_record_url: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5308802270
+
+delivered: true
+delivered_by: codex-reviewer-session
+delivered_at_utc: '2026-08-16T17:03:15Z'   # = ngày commit công bố, không phải giờ khai
+authoritative_source: repo_file
+
+receipt_written_by: claude-session          # KHÔNG phải reviewer
+receipt_written_at_utc: '2026-08-16T19:05:00Z'
+receipt_basis: >-
+  Đo lại từ kho, không hỏi ai: sha256 tệp trên master và trên commit công bố; ngày
+  commit; `lease_id`/`verdict`/`reviewed_sha` đọc từ `ops/leases/wp55-r4-review-1-codex-20260816.yaml`
+  và từ khối YAML trong chính tệp verdict; `posted_comment_id` đọc từ lease.
+receipt_khong_khai:
+  - Không khai đã đăng verdict này thành comment hay PR review ở đâu — đã đo là KHÔNG có.
+  - Không khai giờ reviewer kết thúc lượt review; chỉ khai giờ commit công bố.

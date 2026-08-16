@@ -1,0 +1,63 @@
+# BIÊN NHẬN GIAO HÀNG cho verdict cross-review wp55 revision 4, lượt review 2 —
+# lượt CHỐT của packet: `approve` trên head `817598e2`, và là căn cứ để #130 land.
+#
+# Viết muộn, bởi một phiên KHÁC reviewer: PR #132 land năm verdict của revision 4 mà
+# không kèm biên nhận nào, làm `t27` ĐỎ trên master (`lease_publish: 29/30`). Mọi
+# trường dưới đây ĐO TỪ KHO, không có trường nào là lời khai của reviewer.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+revision: 4
+generation: 2
+lease_id: wp55-r4-review-2-codex-20260816
+supersedes_lease: wp55-r4-review-1-codex-20260816
+provider: codex
+role: reviewer
+verdict: approve
+reviewed_sha: 817598e2a3101c1e550dcba59bd7caea093264f6
+
+verdict_path: ops/reviews/wp55-r4-review-2-codex-verdict.md
+verdict_sha256: 8896120bbd77f0b1503fbfcce9d292be6b347cb9416c47f083f2a44471c0f6bb
+verdict_bytes: 4525
+
+# Giao bằng TỆP TRÊN NHÁNH, không phải comment/PR review: lease khai
+# `target_pull_request: null` — "review neo thẳng vào SHA". Đã đo: không comment nào
+# trên #55 mang nguyên văn verdict.
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/3223644dbea3d0164d5fcf24bfdd0237eec395c7/ops/reviews/wp55-r4-review-2-codex-verdict.md
+
+# Neo vào commit master vì `ops/HO_SO_wp55-r4.md` khai kế hoạch xoá các nhánh `ops/**`
+# sau khi land hồ sơ; URL trỏ nhánh sắp xoá là băm không ứng với văn bản nào.
+published_first:
+  branch: ops/wp55-r4-review-2-codex-verdict
+  commit: c2e7c1f520a85a6ea857bd2179e1699627e6474b
+  commit_utc: '2026-08-16T17:40:59Z'
+  sha256_tai_commit: 8896120bbd77f0b1503fbfcce9d292be6b347cb9416c47f083f2a44471c0f6bb
+
+landed_to_master:
+  commit: 3223644dbea3d0164d5fcf24bfdd0237eec395c7
+  pull_request: 132
+  merge_commit: d9de1c94
+
+# Verdict này là thứ #130 dựa vào để land. Ghi cả hai để người sau nối được chuỗi.
+packet_landed_via_pull_request: 130
+packet_merge_commit: 07fb03d6e245381f6f38e5b79f6a7dadfc76f4eb
+
+lease_evidence_url: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5308705907
+lease_release_record_url: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5308802270
+
+delivered: true
+delivered_by: codex-reviewer-session
+delivered_at_utc: '2026-08-16T17:40:59Z'
+authoritative_source: repo_file
+
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-16T19:05:00Z'
+receipt_basis: >-
+  sha256 tệp trên master và trên commit công bố (bằng nhau); ngày commit;
+  `lease_id`/`verdict`/`reviewed_sha` từ `ops/leases/wp55-r4-review-2-codex-20260816.yaml`
+  và khối YAML trong chính tệp verdict.
+receipt_khong_khai:
+  - Không khai đã đăng verdict này thành comment hay PR review — đã đo là KHÔNG có.
+  - Không khai giờ reviewer kết thúc lượt; chỉ khai giờ commit công bố.

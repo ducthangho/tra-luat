@@ -1,0 +1,62 @@
+# BIÊN NHẬN GIAO HÀNG cho verdict "đường di trú AC 19" — việc PHỤ TRỢ của wp55
+# revision 4, không phải một lượt cross-review của packet.
+#
+# Phân biệt cho rõ, vì hai thứ dễ bị gộp: lượt này review MỘT commit trên master
+# (`9a5b05cf`, đúng một tệp `CLAUDE.md`), không review nhánh packet. Lease khai
+# `attempts_used: 0 / attempts_limit: 0` — cố ý, để sổ attempt của packet không bị lẫn.
+#
+# Viết muộn, bởi một phiên KHÁC reviewer: PR #132 land năm verdict của revision 4 mà
+# không kèm biên nhận nào ⇒ `t27` ĐỎ trên master. Mọi trường dưới đây đo từ kho.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+revision: 4
+lease_id: wp55-r4-review-di-tru-codex-20260815
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 9a5b05cfd8804455dd785b8fe710736773dc78cf
+
+verdict_path: ops/reviews/wp55-r4-review-di-tru-codex-verdict.md
+verdict_sha256: e90ef983b911c5f0438271133a6f341e75478e518f6356db462f00a564816776
+verdict_bytes: 7797
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/3223644dbea3d0164d5fcf24bfdd0237eec395c7/ops/reviews/wp55-r4-review-di-tru-codex-verdict.md
+
+published_first:
+  branch: ops/wp55-r4-verdict-di-tru
+  commit: 6a74f62b47c82697a073cf9d98e858f88cd85503
+  commit_utc: '2026-08-15T20:06:39Z'
+  sha256_tai_commit: e90ef983b911c5f0438271133a6f341e75478e518f6356db462f00a564816776
+
+landed_to_master:
+  commit: 3223644dbea3d0164d5fcf24bfdd0237eec395c7
+  pull_request: 132
+  merge_commit: d9de1c94
+
+# Kết cục của verdict này: `9a5b05cf` KHÔNG vào master. Bản viết lại `c47a4399` thay
+# nó, được duyệt ở lease `wp55-r4-review-viet-lai-codex-20260815` (finding
+# `ac19-exemption-wider-than-necessary`). Nối chuỗi ở đây để người đọc không phải suy.
+bi_thay_boi:
+  lease_id: wp55-r4-review-viet-lai-codex-20260815
+  reviewed_sha: c47a439997e0191427d775636ebadbf3be7e1481
+  finding: ac19-exemption-wider-than-necessary
+
+lease_evidence_url: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5303952183
+
+delivered: true
+delivered_by: codex-reviewer-session
+delivered_at_utc: '2026-08-15T20:06:39Z'
+authoritative_source: repo_file
+
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-16T19:05:00Z'
+receipt_basis: >-
+  sha256 tệp trên master và trên commit công bố (bằng nhau); ngày commit;
+  `lease_id`/`reviewed_sha` từ `ops/leases/wp55-r4-review-di-tru-codex-20260815.yaml`;
+  `verdict` đọc trong chính tệp verdict.
+receipt_khong_khai:
+  - Không khai đã đăng verdict này thành comment hay PR review — đã đo là KHÔNG có.
+  - Không khai giờ reviewer kết thúc lượt; chỉ khai giờ commit công bố.

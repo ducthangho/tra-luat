@@ -1,0 +1,64 @@
+# BIÊN NHẬN GIAO HÀNG cho verdict "bản rebase AC 19" — việc PHỤ TRỢ của wp55
+# revision 4: review `c44b2d4c` (bản rebase của `c47a4399`) để trả lời đúng một câu
+# lease đặt ra: commit ấy có nên vào master không, và GIỜ ff được chưa.
+#
+# MỘT KHÁC BIỆT ĐÁNG GHI so với bốn biên nhận kia: verdict này KHÔNG công bố trên
+# nhánh verdict riêng. Nó được commit vào `ops/wp55-r4-spec-draft` cùng lượt điền
+# `base_sha` của spec (`1cfe47f8`). Ghi ra vì suy theo khuôn "mỗi verdict một nhánh"
+# sẽ đi tìm một nhánh không tồn tại.
+#
+# Viết muộn, bởi một phiên KHÁC reviewer: PR #132 land năm verdict của revision 4 mà
+# không kèm biên nhận nào ⇒ `t27` ĐỎ trên master. Mọi trường dưới đây đo từ kho.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+revision: 4
+lease_id: wp55-r4-review-rebase-codex-20260816
+provider: codex
+role: reviewer
+verdict: approve
+reviewed_sha: c44b2d4c351cbe7f519e1b46aadf68d45e98af86
+
+verdict_path: ops/reviews/wp55-r4-review-rebase-codex-verdict.md
+verdict_sha256: eb1e76d7cf9765ea516498eedb1d40cdc87a2bd38587aec525d726fd3c8fd855
+verdict_bytes: 5383
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/3223644dbea3d0164d5fcf24bfdd0237eec395c7/ops/reviews/wp55-r4-review-rebase-codex-verdict.md
+
+published_first:
+  branch: ops/wp55-r4-spec-draft      # KHÔNG có nhánh verdict riêng — xem đầu tệp
+  commit: 1cfe47f85f0b6c67edc843a4676a78c5057a1c86
+  commit_utc: '2026-08-16T07:56:25Z'
+  sha256_tai_commit: eb1e76d7cf9765ea516498eedb1d40cdc87a2bd38587aec525d726fd3c8fd855
+
+landed_to_master:
+  commit: 3223644dbea3d0164d5fcf24bfdd0237eec395c7
+  pull_request: 132
+  merge_commit: d9de1c94
+
+# Nội dung verdict: patch sau rebase giống hệt patch đã duyệt tại `c47a4399`,
+# byte-for-byte kể cả vị trí hunk. Nối chuỗi để đọc được cả ba lượt phụ trợ.
+tuong_duong_voi:
+  reviewed_sha: c47a439997e0191427d775636ebadbf3be7e1481
+  lease_id: wp55-r4-review-viet-lai-codex-20260815
+landed_qua_pull_request: 129
+
+lease_evidence_url: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5306389133
+
+delivered: true
+delivered_by: codex-reviewer-session
+delivered_at_utc: '2026-08-16T07:56:25Z'
+authoritative_source: repo_file
+
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-16T19:05:00Z'
+receipt_basis: >-
+  sha256 tệp trên master và trên commit công bố (bằng nhau); ngày commit;
+  `lease_id`/`reviewed_sha` từ `ops/leases/wp55-r4-review-rebase-codex-20260816.yaml`;
+  `verdict` đọc trong chính tệp verdict. Nhánh công bố tìm bằng cách quét MỌI nhánh
+  remote xem nhánh nào chứa tệp, không suy từ quy ước đặt tên.
+receipt_khong_khai:
+  - Không khai đã đăng verdict này thành comment hay PR review — đã đo là KHÔNG có.
+  - Không khai giờ reviewer kết thúc lượt; chỉ khai giờ commit công bố.

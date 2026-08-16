@@ -47,6 +47,34 @@ landed_qua_pull_request: 129
 
 lease_evidence_url: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5306389133
 
+# GIỚI HẠN TRUY XUẤT — nói ra thay vì để người sau đâm vào. Commit ở `published_*`
+# nằm trên nhánh `ops/**` mà `ops/HO_SO_wp55-r4.md` khai kế hoạch XOÁ. Khi ref cuối
+# cùng trỏ tới nó biến mất, git được phép thu hồi object ⇒ SHA ấy có thể KHÔNG còn
+# tra được. Nên đọc `published_*` là METADATA LỊCH SỬ KHÔNG BẢO ĐẢM TRUY XUẤT, không
+# phải mỏ neo. Mỏ neo là `evidence_url` (commit master `3223644`, đã đo
+# `git merge-base --is-ancestor 3223644 <head>` = 0) cộng `verdict_sha256`: nội dung
+# vẫn kiểm được kể cả khi lịch sử công bố mất. Muốn giữ cả lịch sử thì phải có
+# tag/ref lưu trữ trỏ các commit ấy TRƯỚC khi xoá nhánh — CHƯA LÀM, nói rõ là chưa.
+truy_xuat_published_khong_bao_dam: true
+
+# LỜI KHAI PHỦ ĐỊNH, kèm phạm vi và cách đo — vì "không tìm thấy" khác "không tồn
+# tại", và một lời khai phủ định không nêu phạm vi thì không ai bác được, cũng không
+# ai xác nhận được. Đây là finding P2 của cross-review codex trên chính bản vá này.
+pham_vi_da_kiem_khong_thay_ban_dang:
+  da_quet:
+    - 90 comment của issue #55, đọc qua GitHub MCP
+    - review của PR #130 (`get_reviews`)
+  do_luc_utc: '2026-08-16T18:45:00Z'
+  ket_qua: không thấy comment hay review nào mang nguyên văn verdict
+  chua_quet:
+    - comment/review của các PR khác
+    - review comment theo dòng
+    - mọi issue khác, và mọi nơi ngoài kho này
+  ghi_chu: >-
+    Reviewer `codex` KHÔNG tái lập được phép đo này trong sandbox read-only (không có
+    `gh`, không ra được mạng) và đã khai đúng là KHÔNG ĐO ĐƯỢC. Giữ nguyên chữ ấy ở
+    đây thay vì nâng thành "đã xác nhận độc lập".
+
 delivered: true
 delivered_by: codex-reviewer-session
 delivered_at_utc: '2026-08-16T07:56:25Z'
@@ -60,5 +88,7 @@ receipt_basis: >-
   `verdict` đọc trong chính tệp verdict. Nhánh công bố tìm bằng cách quét MỌI nhánh
   remote xem nhánh nào chứa tệp, không suy từ quy ước đặt tên.
 receipt_khong_khai:
-  - Không khai đã đăng verdict này thành comment hay PR review — đã đo là KHÔNG có.
+  - Không khai verdict này đã đăng ở bất kỳ đâu NGOÀI kho. Xem
+    `pham_vi_da_kiem_khong_thay_ban_dang` — đó là lời khai phủ định TRONG PHẠM VI
+    ĐÃ LIỆT KÊ, không phải "chắc chắn không tồn tại".
   - Không khai giờ reviewer kết thúc lượt; chỉ khai giờ commit công bố.

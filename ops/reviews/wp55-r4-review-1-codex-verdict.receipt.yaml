@@ -30,36 +30,50 @@ verdict_bytes: 6578
 # Verdict lượt 4/5 của revision 2 đăng thành PR review trên #92, nên `evidence_url`
 # của chúng trỏ vào GitHub review. Revision 4 KHÔNG có PR cho nhánh packet — lease
 # khai thẳng `target_pull_request: null` + "review neo thẳng vào SHA" — nên verdict
-# được giao bằng TỆP TRÊN NHÁNH, và không tồn tại comment/review nào mang nguyên văn
-# nó. Đã đo: không có comment nào trên #55 chứa verdict; các comment r4 trên #55 là
-# lease (bản chiếu tự động) và bản ghi giải phóng lease.
+# được giao bằng TỆP TRÊN NHÁNH. Trong phạm vi đã quét (xem
+# `pham_vi_da_kiem_khong_thay_ban_dang` bên dưới) KHÔNG thấy comment hay review nào
+# mang nguyên văn nó — các comment r4 trên #55 là lease (bản chiếu tự động) và bản
+# ghi giải phóng lease. Đó là "không thấy trong phạm vi ĐÃ kiểm", không phải "không
+# tồn tại".
 evidence_channel: repo_file        # KHÔNG phải github_comment, KHÔNG phải pr_review
 evidence_url: https://github.com/ducthangho/tra-luat/blob/3223644dbea3d0164d5fcf24bfdd0237eec395c7/ops/reviews/wp55-r4-review-1-codex-verdict.md
 
-# Vì sao `evidence_url` neo vào commit MASTER chứ không vào nhánh công bố đầu tiên:
+# Vì sao `evidence_url` neo vào commit MASTER chứ không vào nhánh công bố:
 # `ops/HO_SO_wp55-r4.md` khai kế hoạch XOÁ các nhánh `ops/**` sau khi land hồ sơ.
 # Một URL trỏ nhánh sắp bị xoá chính là lớp lỗi lease #3 đã trả giá (băm không ứng
-# với văn bản nào). Nhánh công bố ghi ở `published_first` để ai còn thấy nó thì kiểm
-# lại được; thứ SỐNG SÓT chắc chắn là commit master.
-published_first:
+# với văn bản nào). Thứ SỐNG SÓT chắc chắn là commit master.
+#
+# TỆP NÀY LÀ TỆP DUY NHẤT TRONG NĂM CÓ HAI MỐC KHÁC NHAU, nên tách hẳn hai khoá.
+# Bản đầu tiên là commit THÊM tệp (`A`); bản hiện hành là commit SỬA nó (`M`), và
+# bản hiện hành mới là bản có byte trùng master. Gộp hai thứ vào một khoá tên
+# `published_first` là khai sai — finding P1 của cross-review codex trên chính bản
+# vá này, đo bằng `git show --name-status`, đúng.
+published_first:                       # commit THÊM tệp — `git show --name-status` = A
+  branch: ops/wp55-r4-review-1-codex-verdict
+  commit: b4e5c5f9ef85e652fa2cc98bb3474036519d663c
+  commit_utc: '2026-08-16T16:46:06Z'
+  sha256_tai_commit: 7dd8e20357e595af27056c05d781bc3f1fcff2d54d4cd3073339a2532d9fb97b
+  ghi_chu: >-
+    Bản này còn finding `mutation-kill-set-omits-false-positive-case` (P1). KHÔNG
+    phải bản mà các hồ sơ khác của revision 4 trích dẫn.
+
+published_ban_hien_hanh:               # commit SỬA tệp — `git show --name-status` = M
   branch: ops/wp55-r4-review-1-codex-verdict
   commit: 872679c360a43a4b12221749901aa0cf231566ac
   commit_utc: '2026-08-16T17:03:15Z'
-  # ĐÃ ĐO: byte tại commit này BẰNG byte trên master. Không phải suy từ tên nhánh.
+  # ĐÃ ĐO: byte tại commit này BẰNG byte trên master. Không suy từ tên nhánh.
   sha256_tai_commit: fe002e5b245a3f38f183b673809d4fe3362622c7a9653aa3c6a78dd9bfc5b9b4
 
-# BẢN TRƯỚC ĐÓ CỦA CHÍNH TỆP NÀY — ghi ra vì "verdict là nguyên văn neo băm, không
-# sửa" là doctrine của kho, và ở đây tệp CÓ bị viết lại. Không giấu:
-#   b4e5c5f9  2026-08-16  sha256 7dd8e20357e595af27056c05d781bc3f1fcff2d54d4cd3073339a2532d9fb97b
-# Bản ấy còn finding `mutation-kill-set-omits-false-positive-case` (P1). Reviewer TỰ
-# RÚT sau khi chạy lại ba phép đo (thuật lại ở `ops/HO_SO_wp55-r4.md`), rồi viết lại
-# verdict ở `872679c3`. Người rút là `codex` — đúng §8; phản chứng do một phiên
-# `claude` gửi chỉ là ĐẦU VÀO, không phải phán quyết. Băm mà mọi hồ sơ khác của
-# revision 4 trích dẫn (`fe002e5b…`) là băm bản SAU khi rút.
-ban_truoc_khi_reviewer_tu_rut:
-  commit: b4e5c5f9ef85e652fa2cc98bb3474036519d663c
-  sha256: 7dd8e20357e595af27056c05d781bc3f1fcff2d54d4cd3073339a2532d9fb97b
+# VÌ SAO TỆP BỊ VIẾT LẠI — ghi ra vì "verdict là nguyên văn neo băm, không sửa" là
+# doctrine của kho, và ở đây tệp CÓ bị sửa. Reviewer TỰ RÚT finding sau khi chạy lại
+# ba phép đo (thuật lại ở `ops/HO_SO_wp55-r4.md`), rồi viết lại verdict ở `872679c3`.
+# Người rút là `codex` — đúng §8; phản chứng do một phiên `claude` gửi chỉ là ĐẦU VÀO,
+# không phải phán quyết. Băm mà mọi hồ sơ khác của revision 4 trích dẫn (`fe002e5b…`)
+# là băm bản SAU khi rút.
+reviewer_tu_rut:
   finding_bi_rut: mutation-kill-set-omits-false-positive-case
+  tu_commit: b4e5c5f9ef85e652fa2cc98bb3474036519d663c
+  den_commit: 872679c360a43a4b12221749901aa0cf231566ac
 
 landed_to_master:
   commit: 3223644dbea3d0164d5fcf24bfdd0237eec395c7
@@ -71,9 +85,37 @@ landed_to_master:
 lease_evidence_url: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5308370506
 lease_release_record_url: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5308802270
 
+# GIỚI HẠN TRUY XUẤT — nói ra thay vì để người sau đâm vào. Commit ở `published_*`
+# nằm trên nhánh `ops/**` mà `ops/HO_SO_wp55-r4.md` khai kế hoạch XOÁ. Khi ref cuối
+# cùng trỏ tới nó biến mất, git được phép thu hồi object ⇒ SHA ấy có thể KHÔNG còn
+# tra được. Nên đọc `published_*` là METADATA LỊCH SỬ KHÔNG BẢO ĐẢM TRUY XUẤT, không
+# phải mỏ neo. Mỏ neo là `evidence_url` (commit master `3223644`, đã đo
+# `git merge-base --is-ancestor 3223644 <head>` = 0) cộng `verdict_sha256`: nội dung
+# vẫn kiểm được kể cả khi lịch sử công bố mất. Muốn giữ cả lịch sử thì phải có
+# tag/ref lưu trữ trỏ các commit ấy TRƯỚC khi xoá nhánh — CHƯA LÀM, nói rõ là chưa.
+truy_xuat_published_khong_bao_dam: true
+
+# LỜI KHAI PHỦ ĐỊNH, kèm phạm vi và cách đo — vì "không tìm thấy" khác "không tồn
+# tại", và một lời khai phủ định không nêu phạm vi thì không ai bác được, cũng không
+# ai xác nhận được. Đây là finding P2 của cross-review codex trên chính bản vá này.
+pham_vi_da_kiem_khong_thay_ban_dang:
+  da_quet:
+    - 90 comment của issue #55, đọc qua GitHub MCP
+    - review của PR #130 (`get_reviews`)
+  do_luc_utc: '2026-08-16T18:45:00Z'
+  ket_qua: không thấy comment hay review nào mang nguyên văn verdict
+  chua_quet:
+    - comment/review của các PR khác
+    - review comment theo dòng
+    - mọi issue khác, và mọi nơi ngoài kho này
+  ghi_chu: >-
+    Reviewer `codex` KHÔNG tái lập được phép đo này trong sandbox read-only (không có
+    `gh`, không ra được mạng) và đã khai đúng là KHÔNG ĐO ĐƯỢC. Giữ nguyên chữ ấy ở
+    đây thay vì nâng thành "đã xác nhận độc lập".
+
 delivered: true
 delivered_by: codex-reviewer-session
-delivered_at_utc: '2026-08-16T17:03:15Z'   # = ngày commit công bố, không phải giờ khai
+delivered_at_utc: '2026-08-16T17:03:15Z'   # = ngày `published_ban_hien_hanh`, không phải giờ khai
 authoritative_source: repo_file
 
 receipt_written_by: claude-session          # KHÔNG phải reviewer
@@ -83,5 +125,7 @@ receipt_basis: >-
   commit; `lease_id`/`verdict`/`reviewed_sha` đọc từ `ops/leases/wp55-r4-review-1-codex-20260816.yaml`
   và từ khối YAML trong chính tệp verdict; `posted_comment_id` đọc từ lease.
 receipt_khong_khai:
-  - Không khai đã đăng verdict này thành comment hay PR review ở đâu — đã đo là KHÔNG có.
+  - Không khai verdict này đã đăng ở bất kỳ đâu NGOÀI kho. Xem
+    `pham_vi_da_kiem_khong_thay_ban_dang` — đó là lời khai phủ định TRONG PHẠM VI
+    ĐÃ LIỆT KÊ, không phải "chắc chắn không tồn tại".
   - Không khai giờ reviewer kết thúc lượt review; chỉ khai giờ commit công bố.

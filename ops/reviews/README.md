@@ -36,11 +36,23 @@ trên `817598e2`, và `approve` ấy là căn cứ để #130 land.
 **Đường giao của revision 4 khác revision 2, đọc kỹ chỗ này.** Verdict r2 đăng thành PR review
 trên #92, nên `evidence_url` của chúng trỏ vào GitHub. Nhánh packet của r4 **không có PR** —
 lease khai `target_pull_request: null`, "review neo thẳng vào SHA" — nên năm verdict r4 được
-giao bằng **tệp trên nhánh**, và **không có comment hay review nào mang nguyên văn chúng**.
+giao bằng **tệp trên nhánh**. Trong phạm vi đã quét (90 comment của #55 + review của #130, ghi
+rõ ngày giờ ở khoá `pham_vi_da_kiem_khong_thay_ban_dang` của mỗi biên nhận) **không thấy**
+comment hay review nào mang nguyên văn chúng — đọc đúng là "không thấy trong phạm vi đã kiểm",
+không phải "không tồn tại".
+
 Biên nhận r4 vì thế mang `evidence_channel: repo_file`, và `evidence_url` neo vào commit
 **master** `3223644` chứ không vào nhánh công bố: `ops/HO_SO_wp55-r4.md` khai kế hoạch xoá các
 nhánh `ops/**` sau khi land hồ sơ, mà một URL trỏ nhánh sắp xoá chính là lớp lỗi lease #3 đã
-trả giá. Nhánh công bố đầu tiên vẫn ghi đủ trong biên nhận, ở `published_first`.
+trả giá. Nhánh công bố vẫn ghi đủ trong biên nhận ở `published_first` — nhưng kèm cờ
+`truy_xuat_published_khong_bao_dam: true`, vì các commit ấy sống trên nhánh sắp bị xoá và git
+được phép thu hồi object không còn ref. Thứ bảo đảm là `evidence_url` + `verdict_sha256`; muốn
+giữ cả lịch sử công bố thì phải có tag/ref lưu trữ **trước** khi xoá nhánh, và việc đó **chưa
+làm**.
+
+Riêng `wp55-r4-review-1` có **hai** mốc, tách thành hai khoá: `published_first` (`b4e5c5f9`,
+commit **thêm** tệp, băm `7dd8e203…`) và `published_ban_hien_hanh` (`872679c3`, commit **sửa**
+tệp khi reviewer tự rút một finding, băm `fe002e5b…` — bản trùng byte với master).
 
 **Năm biên nhận r4 do một phiên `claude-session` viết SAU, không phải reviewer** — PR #132 land
 verdict mà quên biên nhận và quên bảng này, làm `t27` đỏ trên master (`29/30`). Mọi trường

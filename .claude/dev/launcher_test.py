@@ -12,6 +12,7 @@ Chạy:  python .claude/dev/launcher_test.py             (chạy tất cả; Win
 
 from __future__ import annotations
 
+import argparse
 import contextlib
 import hashlib
 import importlib.util
@@ -2728,6 +2729,116 @@ def t96_kiem_song_phai_chay_KE_CA_khi_sap_het_han():
 
 
 @ca
+def t101_phan_tich_doi_so_phai_do_NGAY_khong_doi_chay_het_suite():
+    """Công cụ chẩn đoán dễ xanh giả thì tệ hơn không có.
+
+    Cross-review lượt 8 (LOW) đếm bốn tổ hợp của bộ phân tích tay cũ; ca này khoá cả
+    bốn. Nặng nhất là `--nhat-ky --dot-bien`: nó chạy mutation, rc=0, và KHÔNG tạo
+    nhật ký — người dùng tin là đã có nhật ký trong khi không có gì.
+    """
+    def do_loi(argv):
+        cu = sys.stderr
+        sys.stderr = io.StringIO()
+        try:
+            phan_tich_doi_so(argv)
+            return None                       # khong loi
+        except SystemExit as e:
+            return e.code
+        finally:
+            sys.stderr = cu
+
+    # (a) --nhat-ky THIEU duong dan => do NGAY, khong chay gi
+    bang(do_loi(["--nhat-ky"]) == 2, "--nhat-ky thieu duong dan ma khong do ngay")
+    # (b) --nhat-ky kem --dot-bien => TU CHOI, khong duoc im lang nuot
+    bang(do_loi(["--nhat-ky", "/tmp/x", "--dot-bien"]) == 2,
+         "--nhat-ky + --dot-bien phai bi tu choi")
+    bang(do_loi(["--dot-bien", "--nhat-ky", "/tmp/x"]) == 2, "thu tu nguoc lai cung phai do")
+    # (c) --moi-truong khong duoc lo di --nhat-ky
+    bang(do_loi(["--moi-truong", "--nhat-ky", "/tmp/x"]) == 2,
+         "--moi-truong nuot --nhat-ky trong im lang")
+    # (d) hai che do cung luc => loai tru nhau
+    bang(do_loi(["--dot-bien", "--moi-truong"]) == 2, "hai che do cung luc ma khong do")
+    # (e) co la / viet tat => tu choi, khong tu doan
+    bang(do_loi(["--khong-co-co-nay"]) == 2, "co la ma khong do")
+    bang(do_loi(["--dot"]) == 2, "viet tat --dot tu no thanh --dot-bien (allow_abbrev)")
+    # (f) cac to hop HOP LE phai qua, keo chot thanh chan oan
+    for argv, kiem in ((["--dot-bien"], lambda a: a.dot_bien),
+                       (["--moi-truong"], lambda a: a.moi_truong),
+                       ([], lambda a: not a.dot_bien and not a.moi_truong and not a.nhat_ky),
+                       (["--nhat-ky", "/tmp/x"], lambda a: a.nhat_ky == "/tmp/x")):
+        bang(do_loi(argv) is None, f"to hop hop le {argv} bi chan oan")
+        bang(kiem(phan_tich_doi_so(argv)), f"phan tich sai gia tri cho {argv}")
+
+
+@ca
+def t102_khong_go_duoc_policy_thi_phai_CHAN_codex():
+    """Từ chối mà vẫn để codex chạy là fail-open — lỗi của chính bản vá lượt trước.
+
+    Cross-review lượt 8 (HIGH): hook bắt rc=3 rồi chỉ in `CANH BAO` và đi tiếp. Đúng
+    lúc phát hiện config nguy hiểm mà không gỡ được thì khối `inherit = "all"` cũ VẪN
+    CÒN HIỆU LỰC — tức mọi lệnh con của codex nhận toàn bộ môi trường. Reviewer gọi
+    đúng tên: biến một lỗi xác-định-an-toàn thành phơi môi trường CÓ CHỦ ĐÍCH.
+
+    Ca này khoá ba vế: (1) từ chối thì PHẢI đặt cờ chặn · (2) `_do_codex` thấy cờ thì
+    hạ codex xuống `CHUA_XAC_THUC` TRƯỚC mọi phép đo khác, kể cả khi credential hoàn
+    hảo · (3) dọn xong thì cờ PHẢI tự hết — cờ không tự hết là chốt đỏ thường trực.
+    """
+    cs = _nap_sach(CODEX_ENV_POLICY)
+    m = _tai_launcher_thu()
+    bang(m.CO_CHAN_CODEX == cs.TEN_CO_CHAN,
+         f"hai tep lech ten co chan: {m.CO_CHAN_CODEX!r} vs {cs.TEN_CO_CHAN!r} — "
+         f"lech la chot an ninh IM LANG bien mat")
+
+    def chay(tep, co):
+        cu_out, cu_err = sys.stdout, sys.stderr
+        sys.stdout = sys.stderr = io.StringIO()
+        try:
+            return cs.main(["--tep", str(tep), "--co-chan", str(co)])
+        finally:
+            sys.stdout, sys.stderr = cu_out, cu_err
+
+    with San() as s:
+        co = s / cs.TEN_CO_CHAN
+        # (1) TU CHOI => dat co
+        xau = s / "hong.toml"
+        xau.write_text(cs.MOC_MO + "\n[shell_environment_policy]\n", encoding="utf-8")
+        bang(chay(xau, co) == cs.MA_TU_CHOI, "marker le ma khong tu choi")
+        bang(co.exists(), "TU CHOI ma KHONG dat co chan — codex van chay tu do")
+        bang("inherit" in co.read_text(encoding="utf-8"),
+             "co chan khong noi ro nguy co, nguoi doc khong biet vi sao bi chan")
+
+        # (2) `_do_codex` thay co => CHUA_XAC_THUC, TRUOC moi phep do khac
+        # Gia lap mot codex XAC THUC HOAN HAO: neu chot co chan bi go, ham se tra
+        # CO_CREDENTIAL va ca nay do bang MOT KHANG DINH SACH — khong phai bang crash.
+        goi = []
+
+        class PhienBanTot:
+            returncode = 0
+            stdout = "Logged in using ChatGPT\n"
+            stderr = ""
+
+        m.shutil.which = lambda t: "/usr/bin/codex" if t == "codex" else None
+        m.subprocess.run = lambda *_a, **_k: (goi.append(1), PhienBanTot())[1]
+        m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
+                                      "gio_con_lai": {"access_token": 100.0}}
+        m.os.path.expanduser = lambda d: str(s.parent) if d == "~/.codex" else d
+        (s.parent / cs.TEN_CO_CHAN).write_text("x", encoding="utf-8")
+        try:
+            tt, mo_ta = m._do_codex()
+            bang(tt == "CHUA_XAC_THUC", f"co co chan ma van bao {tt}")
+            bang("BI CHAN" in mo_ta, f"khong noi ro la bi chan: {mo_ta!r}")
+            bang(not goi, "da goi `codex login status` roi moi xet co — phai chan TRUOC")
+        finally:
+            (s.parent / cs.TEN_CO_CHAN).unlink()
+
+        # (3) don xong => co PHAI tu het
+        sach = s / "sach.toml"
+        sach.write_text('[projects."/a"]\ntrust_level = "trusted"\n', encoding="utf-8")
+        bang(chay(sach, co) == cs.MA_OK, "config sach ma bao loi")
+        bang(not co.exists(), "da sach ma co chan con nguyen — chot do thuong truc")
+
+
+@ca
 def t100_go_env_policy_khong_duoc_lam_hong_config_nguoi_dung():
     """Gỡ khối của mình thì được; đụng vào cấu hình người khác thì KHÔNG.
 
@@ -2793,6 +2904,88 @@ def t100_go_env_policy_khong_duoc_lam_hong_config_nguoi_dung():
         nguon = CODEX_ENV_POLICY.read_text(encoding="utf-8")
         bang('inherit = "all"' not in nguon.replace('`inherit = "all"`', ""),
              "van con duong ghi inherit=all trong tep chinh sach")
+
+        # (f) MARKER NAM GIUA DONG KHAC => TU CHOI. Day la PHAN CHUNG CUA REVIEWER,
+        # chep nguyen: ban v1 khop substring nen bien
+        #     x=1 # <MO>\ny=2\nz=3 # <DONG>   thanh   "x=1 #\nz=3\n"  (MAT y=2)
+        # va ket qua VAN parse duoc nhu TOML hop le, nen phep "parse lai" cua toi mu.
+        t7 = s / "c7.toml"
+        goc7 = f'x = 1 # {m.MOC_MO}\ny = 2\nz = 3 # {m.MOC_DONG}\n'
+        t7.write_text(goc7, encoding="utf-8")
+        bang(chay_go(t7) == m.MA_TU_CHOI, "marker giua dong khac ma khong TU CHOI")
+        bang(t7.read_text(encoding="utf-8") == goc7,
+             f"DA LAM MAT DU LIEU: {t7.read_text(encoding='utf-8')!r}")
+
+        # (g) marker nam TRONG CHUOI TOML nhieu dong => cung phai TU CHOI
+        t8 = s / "c8.toml"
+        goc8 = f'ghi_chu = """\n{m.MOC_MO}\nnoi dung cua nguoi dung\n{m.MOC_DONG}\n"""\n'
+        t8.write_text(goc8, encoding="utf-8")
+        bang(chay_go(t8) == m.MA_TU_CHOI, "marker trong chuoi TOML ma van go")
+        bang(t8.read_text(encoding="utf-8") == goc8, "da sua chuoi cua nguoi dung")
+
+        # (h) marker dung nhung PHAN GIUA khong phai khoi cu => TU CHOI
+        t9 = s / "c9.toml"
+        goc9 = (f"{m.MOC_MO}\n[shell_environment_policy]\ninherit = \"all\"\n"
+                f"model = \"o3\"\n{m.MOC_DONG}\n")
+        t9.write_text(goc9, encoding="utf-8")
+        bang(chay_go(t9) == m.MA_TU_CHOI, "phan giua co dong LA ma van go")
+        bang(t9.read_text(encoding="utf-8") == goc9, "da go mot khoi khong phai cua ta")
+
+        # (i) BAO TOAN dong trang cua nguoi dung — `strip(\"\\n\")` cu an ca hai dau
+        t10 = s / "c10.toml"
+        t10.write_text(f"\n\n{khoi}\n\n[a]\nb = 1\n\n\n", encoding="utf-8")
+        bang(chay_go(t10) == MA_OK, "go khoi hop le ma bao loi")
+        bang(t10.read_text(encoding="utf-8") == "\n\n[a]\nb = 1\n\n\n",
+             f"khong bao toan dong trang cua nguoi dung: "
+             f"{t10.read_text(encoding='utf-8')!r}")
+
+        # (j) GHI NGUYEN TU: ghi do dang roi nem loi => tep goc CON NGUYEN
+        t11 = s / "c11.toml"
+        goc11 = khoi + "\n\n" + duoi
+        t11.write_text(goc11, encoding="utf-8")
+        that_bai = []
+
+        class GhiDo:
+            def __init__(self, *a, **k):
+                self.f = open(*a, **k)
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                self.f.close()
+                return False
+
+            def write(self, s):
+                self.f.write(s[:5])          # ghi DO DANG
+                self.f.flush()
+                that_bai.append(1)
+                raise OSError("dia day (gia lap)")
+
+            def flush(self):
+                self.f.flush()
+
+            def fileno(self):
+                return self.f.fileno()
+
+        cu_open = m.open if hasattr(m, "open") else None
+        m.open = GhiDo
+        try:
+            ma = chay_go(t11)
+        finally:
+            if cu_open is None:
+                del m.open
+            else:
+                m.open = cu_open
+        # Kiem TOAN VEN TRUOC: neu duong ghi bi doi (vd quay ve `write_text`) thi day
+        # la khang dinh noi dung dung van de, chu khong phai "fixture hong".
+        bang(t11.read_text(encoding="utf-8") == goc11,
+             f"ghi KHONG NGUYEN TU: tep goc da bi doi trong khi bao 'tu choi': "
+             f"{t11.read_text(encoding='utf-8')[:60]!r}")
+        bang(that_bai, "fixture hong: writer gia khong he duoc goi")
+        bang(ma == m.MA_TU_CHOI, f"ghi hong ma khong TU CHOI, duoc {ma}")
+        bang(not [p for p in s.iterdir() if "tra-luat-tam" in p.name],
+             "de lai tep tam sau khi ghi hong")
 
 
 @ca
@@ -3034,6 +3227,9 @@ DOT_BIEN = [
        '            and not d.strip().upper().startswith(("WARNING", "NOTE", "HINT"))]',
        '    dong = [d.strip() for d in ra.splitlines() if d.strip()]')],
      ["t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao"]),
+    ("do_codex_lo_di_CO_CHAN_codex",
+     ('    if co_chan.exists():', '    if False:'),
+     ["t102_khong_go_duoc_policy_thi_phai_CHAN_codex"]),
     # Hai dot bien duoi day khoa hai P1 cua cross-review luot 6.
     ("chot_truong_nhom_FAIL_OPEN_khi_khong_do_duoc_pgid",
      ('    dung_killpg = nhom_that == pid          # CHỈ True khi ĐO ĐƯỢC và bằng nhau',
@@ -3481,19 +3677,53 @@ def chay_bo_ca(ds_ca, nk=None):
     return qua, bo_qua, hong_ds
 
 
+def phan_tich_doi_so(argv):
+    """Phân tích đối số TRƯỚC KHI làm bất cứ việc gì. Trả `argparse.Namespace`.
+
+    Cross-review lượt 8 (LOW) đếm bốn tổ hợp xanh giả của bộ phân tích TAY cũ:
+      · `--nhat-ky` thiếu đường dẫn ⇒ chạy HẾT suite rồi mới rc=2 (báo lỗi sau ~30s);
+      · `--nhat-ky --dot-bien` ⇒ chạy mutation, rc=0, và KHÔNG hề tạo nhật ký —
+        `--dot-bien` bị nuốt làm đường dẫn, còn nhánh mutation thắng trước;
+      · `--moi-truong` lờ luôn `--nhat-ky` lẫn đối số rác, rc=0;
+      · cờ lặp/cờ lạ không bị từ chối.
+    Đây là công cụ CHẨN ĐOÁN. Một công cụ chẩn đoán dễ xanh giả thì tệ hơn không có,
+    vì nó biến "chưa đo" thành "đã đo rồi, không sao".
+
+    `argparse` + ba chế độ LOẠI TRỪ NHAU + `--nhat-ky` đòi đường dẫn ngay tại chỗ.
+    """
+    p = argparse.ArgumentParser(
+        prog="launcher_test.py", description="bo test cua launcher.py",
+        allow_abbrev=False)          # `--dot` KHONG duoc tu nở thành `--dot-bien`
+    che_do = p.add_mutually_exclusive_group()
+    che_do.add_argument("--dot-bien", action="store_true",
+                        help="chay bang tu dot bien thay vi bo ca")
+    che_do.add_argument("--moi-truong", action="store_true",
+                        help="chi in ban khai moi truong roi thoat")
+    p.add_argument("--nhat-ky", metavar="TEP", default=None,
+                   help="ghi >>> vao / <<< ra tung ca, flush+fsync (chi o che do mac dinh)")
+    a = p.parse_args(argv)
+    if a.nhat_ky and (a.dot_bien or a.moi_truong):
+        # argparse khong dien ta duoc rang buoc nay, nen noi THANG thay vi lo di.
+        p.error("--nhat-ky chi dung o che do mac dinh (khong kem --dot-bien/--moi-truong)")
+    return a
+
+
 def main() -> int:
-    # TRƯỚC MỌI THỨ KHÁC: nếu đang chung nhóm với vỏ shell thì tách ra, kẻo một cú
-    # `killpg` của ca test cuốn theo cả người gọi (xem `_tu_tach_nhom_neu_can`).
+    # PHÂN TÍCH ĐỐI SỐ TRƯỚC MỌI VIỆC — kể cả trước khi tự khai/tách nhóm. Sai đối số
+    # phải đỏ NGAY, đừng để người ta chờ hết suite mới biết mình gõ nhầm.
+    a = phan_tich_doi_so(sys.argv[1:])
+    # Kế đó: nếu đang chung nhóm với vỏ shell thì tách ra, kẻo một cú `killpg` của ca
+    # test cuốn theo cả người gọi (xem `_tu_tach_nhom_neu_can`).
     # TỰ KHAI TRƯỚC, tách nhóm SAU — thứ tự này cố ý: bản khai phải mô tả môi trường
     # NHƯ NÓ ĐẾN, không phải như sau khi ta đã sửa nó. Khai sau khi tách thì mọi lượt
     # chạy đều trông giống nhau và khối này thành vô dụng.
     mt = khai_moi_truong()
-    if "--moi-truong" in sys.argv:
+    if a.moi_truong:
         print(json.dumps(mt, ensure_ascii=False, indent=2, default=str))
         return 0
     print(_mot_dong_moi_truong(mt))
     print(f"nhom tien trinh: {_tu_tach_nhom_neu_can()}")
-    if "--dot-bien" in sys.argv:
+    if a.dot_bien:
         print("TU DOT BIEN - moi dot bien PHAI giet dung cac ca da chi dinh:")
         hong, khong_do = chay_dot_bien()
         do_duoc = len(DOT_BIEN) - khong_do
@@ -3509,13 +3739,7 @@ def main() -> int:
 
     if not shutil.which("git"):
         print("khong co git - khong chay duoc"), sys.exit(2)
-    duong_nk = None
-    if "--nhat-ky" in sys.argv:
-        i = sys.argv.index("--nhat-ky")
-        if i + 1 >= len(sys.argv):
-            print("--nhat-ky can duong dan tep"), sys.exit(2)
-        duong_nk = sys.argv[i + 1]
-    nk = NhatKyCa(duong_nk) if duong_nk else None
+    nk = NhatKyCa(a.nhat_ky) if a.nhat_ky else None
     try:
         qua, bo_qua, hong_ds = chay_bo_ca(CA, nk)
     finally:

@@ -1865,6 +1865,11 @@ def _tuoi_anh_chup_gio(last_refresh) -> float | None:
 # bơm thẳng vào `gio_con_lai` đã chứng minh lớp quyết định tự nó vẫn tin nếu lọt vào.
 _TOKEN_KHONG_XET_HAN = frozenset({"id_token"})
 
+# Tên cờ CHẶN codex — PHẢI khớp `TEN_CO_CHAN` trong `.claude/dev/codex_env_policy.py`.
+# Hai tệp, một tên: đổi một bên mà quên bên kia thì chốt an ninh im lặng biến mất, nên
+# `t102` khoá bằng cách ĐỌC hằng của tệp kia chứ không chép lại chuỗi.
+CO_CHAN_CODEX = "tra-luat-CHAN-CODEX"
+
 
 def _last_refresh_cua(noi_dung: str):
     """Đọc `last_refresh` từ nội dung auth.json. None nếu không đọc được."""
@@ -1955,6 +1960,19 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
     """
     if not shutil.which("codex"):
         return ("THIEU", "chua cai — npm install -g @openai/codex")
+    # CỜ CHẶN do `codex_env_policy.py` đặt khi nó KHÔNG gỡ được khối
+    # `shell_environment_policy` cũ (cross-review lượt 8, HIGH — fail-open).
+    #
+    # Khi đó `inherit = "all"` có thể VẪN CÒN HIỆU LỰC, tức mọi lệnh con của codex
+    # nhận TOÀN BỘ môi trường. Ta không được sửa config của người dùng (đó chính là
+    # lý do đang từ chối), nên chặn ở PHÍA TA. Đặt TRƯỚC mọi phép đo khác: một
+    # credential hoàn hảo cũng không làm đường này an toàn.
+    co_chan = Path(os.path.expanduser("~/.codex")) / CO_CHAN_CODEX
+    if co_chan.exists():
+        return ("CHUA_XAC_THUC",
+                f"BI CHAN: {co_chan} ton tai — khoi shell_environment_policy cu chua go "
+                f"duoc, `inherit=all` co the con hieu luc. Chay "
+                f"`python3 .claude/dev/codex_env_policy.py` sau khi sua tay")
     try:
         p = subprocess.run(["codex", "login", "status"], capture_output=True, text=True,
                            timeout=30, encoding="utf-8", errors="replace")

@@ -280,6 +280,21 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   từng đột biến; `t97` khoá lại, và mỗi lớp có phản chứng RIÊNG — lớp "tắt ghi bytecode"
   lúc đầu KHÔNG có răng (gỡ nó ra mà `t97` vẫn xanh) nên phải đo thẳng bằng "nạp xong
   không được để lại `.pyc`".
+- **"Từ chối" mà vẫn để đường nguy hiểm chạy tiếp là FAIL-OPEN, không phải thận trọng.**
+  Bộ gỡ `shell_environment_policy` trả rc=3 khi không dám sửa config người dùng, còn hook
+  thì chỉ in `CANH BAO` rồi đi tiếp — nghĩa là đúng lúc phát hiện `inherit="all"` còn hiệu
+  lực thì ta để nó hiệu lực. Biến một lỗi xác-định-an-toàn thành phơi môi trường CÓ CHỦ
+  ĐÍCH. Không sửa được tệp của họ thì chặn ở PHÍA TA (cờ riêng `~/.codex/tra-luat-CHAN-CODEX`,
+  `_do_codex` đọc cờ và hạ nhãn TRƯỚC mọi phép đo khác) — và cờ phải TỰ HẾT khi sạch,
+  kẻo lại thành chốt đỏ thường trực.
+- **Khớp marker bằng SUBSTRING là đường mất dữ liệu, và "parse lại vẫn hợp lệ" KHÔNG bắt
+  được.** Phản chứng: `x=1 # <MO>` / `y=2` / `z=3 # <DONG>` → `x=1 #\nz=3\n`, mất `y=2`,
+  mà kết quả VẪN là TOML hợp lệ — nên phép kiểm "parse lại được" tôi dùng làm bằng chứng
+  mù hoàn toàn. **Một phép kiểm không thể đỏ thì không phải bằng chứng.** Marker phải là
+  DÒNG RIÊNG, và phần giữa hai marker phải khớp hình dạng khối ta từng ghi.
+- **Ghi đè thẳng `write_text` phá chính hợp đồng "hoặc đúng, hoặc không đụng tệp".** Nó
+  truncate trước rồi mới ghi; lỗi giữa chừng để lại tệp cụt trong khi hàm vẫn trả "đã từ
+  chối". Ghi ra tệp tạm CÙNG THƯ MỤC → `fsync` → `os.replace`.
 - **DÒNG IN CUỐI CÙNG ≠ CA CHẠY CUỐI CÙNG.** Bộ test launcher không in gì trong lúc chạy
   (chỉ dòng BỎ QUA + tổng kết), nên khi tiến trình bị giết, thứ còn lại trên màn hình là
   `BO QUA t62`. Reviewer đọc thành "chết ngay sau t62"; **tôi cũng đọc y hệt** rồi đi truy
@@ -289,6 +304,10 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   flush+fsync, kèm dấu `# XONG TRON VEN` để phân biệt "chạy hết" với "bị giết". Ca nào có
   `vao` mà không có `ra` chính là ca giết tiến trình. **Trước khi định vị một cú chết, hãy
   hỏi phép đo có sống sót qua cú chết đó không.**
+  KẾT QUẢ (lượt 8, đo trong namespace reviewer): `vao=100 ra=100`, không ca nào thiếu,
+  `# XONG TRON VEN` — **rồi vỏ shell vẫn chết**. Không có "ca giết". Cú chết nằm SAU khi
+  `main` chạy hết (vùng thoát/`atexit`/tiến trình còn sót). Ba lượt truy bên trong vòng
+  lặp ca là truy sai VÙNG, và chỉ phép đo mới loại được vùng đó.
 - **Hook dùng đường dẫn TƯƠNG ĐỐI là bẫy tự khoá.** `.claude/settings.json` từng ghi
   `python .claude/hooks/pretooluse_guard.py`; khi cwd của shell trôi vào thư mục con thì
   MỌI lệnh Bash chết trước khi chạy, và không còn đường `cd` về. Luôn dùng

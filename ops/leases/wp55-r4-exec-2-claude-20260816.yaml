@@ -1,0 +1,178 @@
+# Lease EXECUTOR — wp55 revision 4, generation 2, lượt 2/3. Neo head 2432e3f6.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên "#55" chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt
+# cụt giá trị — đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 55
+packet_id: wp55
+mission_issue: 54
+mission_revision: 6
+revision: 4
+generation: 2
+phase_key: F3-03
+lease_id: wp55-r4-exec-2-claude-20260816
+
+role: executor
+provider: claude
+executor: claude
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/wp55-r4-spec.md
+spec_branch: ops/wp55-r4-spec-draft
+spec_sha256_required: 86d9627caf55ea2cb8e4caa29ef036fd490c190d8481fb4f79dd5d1703eb1afd
+spec_status: da_duyet
+spec_duyet_boi: ducthangho
+spec_duyet_luc: 'direct, in-session, 2026-08-16 ("tôi duyệt. thực hiện tiếp")'
+spec_note: >-
+  Băm KHÔNG đổi so với generation 1 — spec không được sửa giữa hai generation. Đã xác minh
+  lại lúc cấp lease này, khớp `86d9627c…`.
+
+write_set:
+  - .claude/skills/work-packet/SKILL.md
+  - .claude/skills/cross-review/SKILL.md
+  - .claude/skills/land-packets/SKILL.md
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - CLAUDE.md
+write_set_note: >-
+  Giữ nguyên `write_set` của spec vì đó là hợp đồng của packet, KHÔNG thu hẹp trong lease.
+  Nhưng phạm vi DỰ KIẾN của lượt này hẹp hơn hẳn — xem `pham_vi_du_kien`.
+pham_vi_du_kien:
+  so_tep: 1
+  tep: .claude/dev/packet_loop_test.py
+  note: >-
+    Tệp thứ hai xuất hiện trong diff là ra ngoài phạm vi lượt này, và reviewer được quyền
+    tính đó là finding. Đây là ràng buộc CHẶT HƠN `write_set`, cố ý.
+
+branch: claude/wp55-r4g1-f3-03
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: 2432e3f64f05739741dfe6f49081e9aaa140799f
+reviewed_sha_note: >-
+  Đây là head XUẤT PHÁT, không phải head đưa ra review — cùng quy ước với lease exec lượt 1.
+  Trường mang tên `reviewed_sha_*` vì bộ kiểm dùng CHUNG một validator cho lease executor lẫn
+  reviewer (AC 21). Head để review sẽ ghi ở lease REVIEWER lượt 2, sau khi lượt này xong.
+base_sha: 18da1da6a07ab2c86d716cef1d74ff2cd0e3218a
+start_from_sha: 2432e3f64f05739741dfe6f49081e9aaa140799f
+
+prompt_path: ops/prompts/wp55-r4-exec-2-claude-20260816.md
+prompt_sha256_required: f252f7b41b407d77fae5a0b1e7f02a1e90af228e683f5ec433f9f1393968784f
+
+granted_by: ducthangho          # CHỦ KHO — §2 "người có thẩm quyền"
+granted_on_instruction: 'direct, in-session, 2026-08-16 ("cấp lease exec generation 2 cho claude, sửa finding 2")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-16T17:15:00Z'
+lease_expires_at_utc: '2026-08-17T17:15:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 1
+attempts_limit: 3
+attempts_note: >-
+  Generation 1 đã tiêu MỘT attempt nội dung. Lượt này là attempt 2; còn đúng MỘT sau nó.
+  Bản vá rất nhỏ (xoá hai hằng chết), nhưng trần vẫn là trần — cạn thì §12, không tự gia hạn.
+
+# --- VÌ SAO CÓ LƯỢT NÀY: đóng ĐÚNG MỘT finding của cross-review lượt 1 ---------------
+review_dau_vao:
+  lease_id: wp55-r4-review-1-codex-20260816
+  reviewer: codex
+  reviewed_sha: 2432e3f64f05739741dfe6f49081e9aaa140799f
+  verdict: do_not_land
+  verdict_path: ops/reviews/wp55-r4-review-1-codex-verdict.md
+  verdict_branch: ops/wp55-r4-review-1-codex-verdict
+  verdict_sha256: fe002e5b245a3f38f183b673809d4fe3362622c7a9653aa3c6a78dd9bfc5b9b4
+  so_finding_con_lai: 1
+
+finding_phai_dong:
+  - id: ac19-dead-exemption-mutation-anchors-remain
+    muc: P2
+    note: >-
+      `C3_CU` và `C3_MOI` ở `.claude/dev/packet_loop_test.py` dòng 1928–1929 là mã chết phục
+      vụ miễn trừ: `C3_CU` chứa nguyên mỏ neo `_DAU_HIEU_PHEP_DO`, `C3_MOI` chứa thân vô hiệu
+      `if False`. Trái AC 19 mục 2 (XOÁ, không vô hiệu) và trái lời khai của g1 rằng không
+      còn tham chiếu ngoài chú thích.
+    da_tai_lap_doc_lap: >-
+      CÓ — trước khi cấp lease này. `git grep` trên `2432e3f6` trả đúng 2 lần xuất hiện trên
+      toàn `.claude/dev/`, cả hai là dòng định nghĩa, không consumer nào.
+
+finding_da_rut:
+  - id: mutation-kill-set-omits-false-positive-case
+    trang_thai: reviewer TỰ RÚT sau khi đo lại
+    note: >-
+      Reviewer đã phân loại nhầm hai ca VIẾT TAY (`doctrine_scan_bat_qua_ngat_dong`,
+      `ac19_bang_vai_tro_THAT_van_bi_bat`) thành thành viên `LOP_BAT_OAN` chỉ vì tiền tố
+      `ac19_`. Cả hai đòi `rc=6`, tức chiều BẮT, nên đột biến làm chúng lọt là hành vi ĐÚNG.
+      Trong đúng miền `LOP_LACH` mà danh sách tự khai: 37 khai/37 chết, 43 khai/43 chết.
+    canh_bao_cho_executor: >-
+      KHÔNG sửa hai danh sách phải-chết, KHÔNG đổi `MUTANTS`, KHÔNG đổi hai ma trận. Sửa
+      chúng là làm hỏng một thứ đang đúng vì tin một finding đã rút.
+    ai_gui_phan_chung: >-
+      Một phiên `claude` — CÙNG provider với executor, nên theo §8 nó KHÔNG có thẩm quyền bác
+      finding; phản chứng chỉ là ĐẦU VÀO. Quyết định rút là của reviewer `codex`, sau khi tự
+      chạy lại cả ba phép đo. Ghi ra đây để dấu vết thẩm quyền đọc được, không phải suy.
+
+# --- Nghiệm thu: SỐ PHẢI KHÔNG ĐỔI ---------------------------------------------------
+so_lieu_nen_g1:
+  ca: 185
+  dot_bien: 34
+  lop_lach: 78
+  ca_bat_oan: 35
+  ngoai_le_ac_18: 0
+so_lieu_note: >-
+  Hai hằng bị xoá KHÔNG ai dùng, nên năm con số trên phải GIỮ NGUYÊN. Một con số đổi nghĩa là
+  đã xoá nhầm thứ đang được dùng ⇒ DỪNG, đừng "sửa cho khớp". Chốt này mạnh hơn "suite xanh":
+  suite xanh chỉ nói không ca nào đỏ, năm số bằng nhau nói phạm vi không đổi.
+
+gate_bat_buoc:
+  - 'doctrine-scan trên nhánh -> rc=0'
+  - 'suite trên nhánh -> rc=0, và 185/185'
+  - 'AC 20 doctrine-scan trên cây ĐÃ MERGE -> rc=0'
+  - 'AC 20 suite trên cây ĐÃ MERGE, có GIT_DIR -> rc=0'
+  - 'AC 20 suite BỎ GIT_DIR (chứng đường) -> PHẢI đỏ; xanh là finding'
+  - 'git diff --stat 2432e3f6..<head-moi> -> đúng 1 tệp'
+
+# --- AC 26: chốt lease trước khi commit ----------------------------------------------
+ac26_lease_song_khac_luc_cap:
+  lease_reviewer_wp55_r4_review_1:
+    trang_thai: 'ĐÃ HOÀN TẤT NHIỆM VỤ, tuy hạn danh nghĩa còn tới 2026-08-17T16:10:00Z'
+    bang_chung: >-
+      Reviewer đã giao verdict trên đúng SHA nó neo (`2432e3f6`) và verdict đã đăng tại
+      `ops/wp55-r4-review-1-codex-verdict`, băm `fe002e5b…`. Một lease review đã giao verdict
+      thì không còn giữ yêu sách nào trên nhánh; cái còn lại chỉ là hạn danh nghĩa.
+    vi_sao_ghi_ra: >-
+      AC 26 chốt số 2 bắt DỪNG-VÀ-HỎI khi có lease REVIEWER đang sống neo một SHA trên nhánh
+      này. Chốt ấy sinh ra vì revision 3 đẩy commit trong lúc một lease reviewer đang neo SHA
+      cũ, làm hỏng lượt review 8 và phải cấp lại. Ở đây điều kiện hình thức CÓ xảy ra, nên
+      không im lặng bỏ qua: chủ kho đã được báo và đã cho phép cấp lease này.
+    he_qua: >-
+      Head sẽ đổi sau lượt này, nên verdict lượt 1 hết hiệu lực và PHẢI cấp lease review 2
+      neo head MỚI. Sau khi lease ấy được cấp thì KHÔNG đẩy thêm gì lên nhánh packet.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-16T17:10:15Z'
+master_sha_at_grant: 18da1da6a07ab2c86d716cef1d74ff2cd0e3218a
+packet_head_at_grant: 2432e3f64f05739741dfe6f49081e9aaa140799f
+master_khong_doi_tu_g1: >-
+  ĐÃ ĐO — master vẫn ở `18da1da`, đúng bằng `base_sha`, nên không phải đo lại AC 20 trên một
+  tip mới.
+
+reviewer_provider: codex
+reviewer_note: 'executor là claude ⇒ §8 bắt reviewer khác provider'
+
+muc_tieu:
+  - 'XOÁ hai hằng chết `C3_CU` và `C3_MOI` khỏi packet_loop_test.py — xoá cả dòng, không comment ra'
+  - 'GIỮ khối chú thích lịch sử quanh đó — nó là chú thích, không phải mã'
+  - 'Đòi năm con số SỐ LIỆU không đổi so với g1'
+  - 'Đo AC 20 trên cây ĐÃ MERGE, kèm chứng đường bỏ GIT_DIR phải đỏ'
+  - 'Đúng MỘT commit, khai lease_id trong thông điệp (AC 26)'
+posted_comment_id: 5308641388   # workflow ghi, ĐỪNG sửa tay

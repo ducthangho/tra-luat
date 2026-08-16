@@ -1,0 +1,144 @@
+# Lease REVIEWER cho commit VIẾT LẠI CỤM trong CLAUDE.md — neo c47a439.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt
+# cụt giá trị — đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ.
+#
+# ĐÂY KHÔNG PHẢI MỘT GENERATION CỦA PACKET.
+# Commit `c47a439` nhắm thẳng vào nhánh MẶC ĐỊNH (`master`), không thuộc `write_set` của
+# packet nào, và là ĐIỀU KIỆN TIÊN QUYẾT để revision 4 chốt được `base_sha`. Không tiêu
+# một lượt attempt của packet nào.
+#
+# THAY THẾ commit `9a5b05c`, đã bị chính reviewer này trả `do_not_land` với finding P1
+# `ac19-exemption-wider-than-necessary` (khối chứng cứ miễn 10 dòng để cứu 2 dòng).
+# Bản này đi ĐÚNG đường reviewer đề xuất: viết lại cụm thay vì bọc miễn trừ quanh nó.
+#
+# CÂU HỎI QUAN TRỌNG NHẤT CỦA LƯỢT NÀY — prompt đặt nó lên đầu:
+# dòng bị sửa là một BẢN GHI PHÉP ĐO CÓ THẬT (`v1.36.68`, PR #104). `người có thẩm quyền`
+# là một VAI TRÒ; `tên thuộc danh sách cho phép` là một CƠ CHẾ. Trong ngữ cảnh đo cổng
+# allowlist chúng trỏ cùng một thứ, nhưng reviewer phải phán định bản ghi còn thuật ĐÚNG
+# thứ đã đo hay đã TRƯỢT NGHĨA. Sửa tài liệu cho qua cổng mà làm sai bản ghi là cái giá
+# không được trả — nếu trượt nghĩa thì đó là finding nặng.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+mission_issue: 54
+mission_revision: 6
+revision: 4
+phase_key: F3-03
+lease_id: wp55-r4-review-viet-lai-codex-20260815
+
+spec_path: ops/specs/wp55-r4-spec.md
+spec_branch: ops/wp55-r4-spec-draft
+spec_status: ban_thao_chua_duyet
+spec_note: >-
+  Spec revision 4 còn là BẢN THẢO và `base_sha` để trống có chủ ý — nó phụ thuộc chính commit
+  đang được review. KHÔNG khai `spec_hash` làm mỏ neo: băm bản thảo sẽ đổi khi điền
+  `base_sha`, nên neo vào nó là dựng một mỏ neo chết.
+
+role: reviewer
+provider: codex                 # BẮT BUỘC — tác giả commit là claude (§8 cross-provider)
+assurance_target: cross_approved
+access: read-only
+write_set: []                   # reviewer KHÔNG ghi (§2)
+branch_ownership: none
+
+reviewed_sha_required: c47a439997e0191427d775636ebadbf3be7e1481
+base_sha: 2531366e1abc6cbca0a6c2765e40e54be38d1fb7
+branch: ops/master-ac19-viet-lai
+target_branch_neu_land: master
+target_pull_request: null
+scope_files: 1
+scope_note: 'ĐÚNG một tệp, HAI dòng: CLAUDE.md. Diff ngoài phạm vi ấy là finding.'
+
+prompt_path: ops/prompts/wp55-r4-review-viet-lai-codex-20260815.md
+prompt_sha256_required: d62802bbe5e70fd31eb7c64d2b902875e1ff6a23a638be36db1c7f6cc439eee0
+
+granted_by: ducthangho          # CHỦ KHO — §2 người có thẩm quyền
+granted_on_instruction: 'direct, in-session, 2026-08-15 (cấp lease review cho c47a439 đi)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-15T20:18:00Z'
+lease_expires_at_utc: '2026-08-16T21:00:00Z'
+run_minutes: 1482
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+attempts_note: >-
+  Commit ngoài packet nên không tiêu lượt. Ghi 0/0 để sổ không lẫn với trần attempt của
+  revision 3 (đã cạn 3/3) hay revision 4 (chưa mở).
+
+supersedes_reviewed_sha: 9a5b05cfd8804455dd785b8fe710736773dc78cf
+supersedes_verdict: do_not_land
+supersedes_finding: ac19-exemption-wider-than-necessary
+supersedes_verdict_file: >-
+  ops/reviews/wp55-r4-review-di-tru-codex-verdict.md trên nhánh ops/wp55-r4-verdict-di-tru
+
+quyet_dinh_chu_kho:
+  ngay: '2026-08-15'
+  hinh_thuc: 'trực tiếp trong phiên'
+  N_dong_moi_khoi: 12
+  M_khoi_moi_tep: 3
+  pham_vi_khoi: 'mọi tệp write_set, KỂ CẢ CLAUDE.md'
+  duong_di_tru: 'sửa master trước rồi packet rebase'
+  ghi_chu: >-
+    Ba tham số đầu nay KHÔNG còn được dùng ở commit này — bản viết lại không xài khối chứng
+    cứ nào. Giữ lại trong lease để reviewer thấy bối cảnh chúng đã được chốt trong hoàn cảnh
+    nào, và vì sao câu hỏi "cơ chế còn người dùng không" lại đặt ra.
+
+claimed_by_executor:
+  cum_cam_con_lai: '0 ở MỌI hình dạng — cả ngắt dòng lẫn một dòng'
+  khoi_chung_cu_dung: '0 dòng được miễn — tệp không xài miễn trừ nào'
+  doctrine_scan_scanner_g9: 'rc=0'
+  eol_policy: 'rc=0'
+  doc_claims_check: 'rc=0'
+  golden_test: 'rc=0'
+  release_verify: 'rc=0 · checked=179 · failed=0 · extra=0'
+  doi_chung_noi_mot_dong: 'rc=6 — nối cụm thành một dòng KHÔNG giải quyết được'
+  doi_chung_viet_lai: 'rc=0 — chỉ viết lại mới giải quyết được'
+  pham_vi: '1 tệp, 2 dòng'
+
+claimed_but_unverified:
+  - id: ban-ghi-con-dung-khong
+    note: >-
+      Executor KHÔNG tự phán định được việc này về mình. Dòng bị sửa kể lại một phép đo có
+      thật; hai cách gọi không đồng nghĩa hoàn toàn. Reviewer phải đối chiếu với PR #104 và
+      với mô tả cổng allowlist trong `packet_loop.py`.
+  - id: cum-thay-the-co-thanh-cum-cam-khong
+    note: >-
+      `danh sách cho phép` là khái niệm doctrine của chính kho này. Nếu nó nằm trong danh
+      sách cấm hoặc có nguy cơ được thêm vào thì ta chỉ DỜI vấn đề chứ không đóng.
+  - id: con-cho-nao-khac-khong
+    note: >-
+      Executor khai đây là chỗ DUY NHẤT trên toàn cây đã merge. Kiểm lại ở CẢ HAI hình dạng
+      trên TOÀN BỘ tệp bị doctrine-scan quét — con số này là căn cứ cho cả câu hỏi thiết kế
+      dưới đây.
+
+# Ý kiến tham khảo cho chủ kho, KHÔNG phải finding — prompt nói rõ đừng để nó ảnh hưởng verdict.
+cau_hoi_thiet_ke:
+  van_de: >-
+    Nếu đây là chỗ duy nhất cần miễn trừ AC 19, và nó vừa được xử lý mà KHÔNG dùng miễn trừ,
+    thì cơ chế khối chứng cứ của AC 19 mới không còn người dùng nào.
+  duong_1: 'giữ AC 19 mới như hợp đồng dự phòng — nhưng là cơ chế chưa từng kiểm bằng ca thật'
+  duong_2: >-
+    đơn giản hoá thành "không cụm cấm nào được xuất hiện, kể cả ngắt dòng", bỏ hẳn miễn trừ —
+    mọi phản ví dụ của bốn lượt review tự đóng, scanner đơn giản hẳn; đổi lại mất cửa thoát
+  executor_nghieng_ve: 'đường 2 — cơ chế không có người dùng là cơ chế chưa ai kiểm'
+  ai_quyet: 'chủ kho'
+
+verdict_must_answer: >-
+  Commit này có nên vào `master` không, và nếu có thì land bằng FAST-FORWARD (giữ nguyên SHA
+  c47a439, dùng được ngay làm base_sha) hay merge/squash (đổi SHA, phải chờ số mới). Verdict
+  phải có trường `land_recommendation`.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-15T20:18:00Z'
+master_sha_at_grant: 2531366e1abc6cbca0a6c2765e40e54be38d1fb7
+posted_comment_id: 5304062814   # workflow ghi, ĐỪNG sửa tay

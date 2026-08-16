@@ -10,6 +10,27 @@
 # chúng. Mọi việc gọi agent đi qua đúng hai CLI đó.
 #
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
+#
+# ------------------------------------------------------------------------------------
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc
+# ------------------------------------------------------------------------------------
+# DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
+# đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
+# đang chạy THIẾU năng lực mà master đã có.
+#
+# VÌ SAO KHÔNG SO BĂM TOÀN TỆP: bản trước làm vậy và cross-review bác đúng — sửa một
+# dấu phẩy trong chú thích cũng làm chốt đỏ, mà chốt đỏ vì lý do vô hại là chốt sẽ bị
+# bỏ qua. Cái cần biết không phải "hai tệp có khác nhau không" mà là "bản đang chạy có
+# THIẾU thứ gì không".
+#
+# VÌ SAO KHÔNG DÙNG QUAN HỆ TỔ TIÊN COMMIT: reviewer nêu thẳng và đúng — chính nhánh
+# packet CŨ mới là thứ cần cảnh báo, mà nó LÀ tổ tiên hợp lệ của master. Tổ tiên tính
+# không phân biệt được "cũ nhưng đủ" với "cũ và thiếu".
+#
+# THÊM NĂNG LỰC MỚI thì thêm TÊN vào dòng trên. Quên thêm thì phiên chạy nhánh cũ sẽ
+# không được cảnh báo về đúng thứ vừa thêm — đó là cách hỏng duy nhất của cơ chế này,
+# và nó hỏng IM LẶNG. Tên đặt theo NĂNG LỰC, đừng theo số phiên bản: số thì phải nhớ
+# tăng, còn tên thì tự nói nó là gì khi báo động.
 set -euo pipefail
 
 # Chỉ chạy trong môi trường remote. Máy cá nhân đã có sẵn công cụ theo ý người
@@ -43,17 +64,37 @@ else
 fi
 
 # --- ripgrep: cả codex lẫn Claude Code đều gọi `rg` để tìm trong mã. Thiếu nó thì
-# lệnh tìm gãy giữa chừng chứ không tự lùi về grep.
+# lệnh tìm gãy giữa chừng chứ KHÔNG tự lùi về grep — phiên mất khả năng tra cứu mà
+# không hỏng ở chỗ đọc được. Vì thế `rg` là BAT BUOC trong `doctor` từ 15-08-2026.
+#
+# Ba đường cài, thử lần lượt: apt-get (có/không sudo), rồi cargo. Không đường nào
+# chạy thì nói THẲNG là phiên sẽ thiếu — đừng để nó lộ ra giữa chừng.
 if ! co rg; then
+  echo "[session-start] cai ripgrep ..."
   if co apt-get; then
-    echo "[session-start] cai ripgrep ..."
-    (apt-get install -y -qq ripgrep >/dev/null 2>&1 \
-      || sudo apt-get install -y -qq ripgrep >/dev/null 2>&1) \
-      || echo "[session-start] CANH BAO: cai ripgrep that bai"
+    apt-get install -y -qq ripgrep >/dev/null 2>&1 \
+      || sudo apt-get install -y -qq ripgrep >/dev/null 2>&1 \
+      || { apt-get update -qq >/dev/null 2>&1 || sudo apt-get update -qq >/dev/null 2>&1; \
+           apt-get install -y -qq ripgrep >/dev/null 2>&1 \
+           || sudo apt-get install -y -qq ripgrep >/dev/null 2>&1; } \
+      || true
+  fi
+  co rg || { co cargo && cargo install ripgrep >/dev/null 2>&1 || true; }
+  # BANG CHUNG DUONG: `command -v` la CO MAT, `rg --version` la CHAY DUOC. Audit
+  # codex tung dung hai tep RONG ten git.exe/python.exe roi doctor bao xanh.
+  if rg --version >/dev/null 2>&1; then
+    echo "[session-start] rg: $(rg --version | head -1)"
   else
-    echo "[session-start] CANH BAO: khong co rg va khong co apt-get"
+    echo "[session-start] CANH BAO: KHONG cai duoc rg — tra cuu ma se gay giua chung"
   fi
 fi
+
+# --- KHONG cai `gh`. Da DO 15-08-2026: REST truc tiep toi api.github.com bi PROXY
+# tra 403 ("GitHub access is not enabled for this session") BAT KE token — `GITHUB_PAT`
+# that cung 403, `/user` lai 200, tuc chinh sach theo DUONG DAN chu khong theo danh
+# tinh. Nen `gh` co cai cung khong dung duoc cho viec cua kho. Duong DUNG: cong cu
+# MCP github (dang comment/doc issue) va git over HTTPS (day/keo). `doctor` in ro
+# duong nao mo, de khong ai ket luan "GitHub khong goi duoc" tu duong hong.
 
 # --- phụ thuộc Python của kho
 PY=python3
@@ -123,7 +164,76 @@ fi
 #      "chưa đăng nhập" (dễ đọc) thành "đăng nhập hỏng" (khó đọc).
 #   4. Ghi qua tệp tạm + `chmod 600` rồi mới `mv` — không để lộ khoảnh khắc tệp có
 #      quyền rộng, và không để lại tệp nửa vời nếu tiến trình chết giữa chừng.
-if [ -n "${CODEX_AUTH_JSON:-}" ] && co codex; then
+# --- THU HOI CHINH SACH BIEN MOI TRUONG CHO CODEX  (cross-review luot 7, HIGH)
+#
+# LICH SU, de khong ai dung lai: khoi cu dat `shell_environment_policy.inherit = "all"`
+# de phien codex "thay duoc" $CODEX_AUTH_JSON. Do la truyen TOAN BO moi truong cho moi
+# lenh con cua codex, chi loai BON ten quan sat duoc tren MOT may tai MOT thoi diem.
+#
+# Ly le bao ve no SAI ngay trong chinh tep nay: khoi khoi phuc credential o TREN da ghi
+# $CODEX_AUTH_JSON ra ~/.codex/auth.json TRUOC khi khoi policy chay. Tu do codex doc
+# credential tu tep chuan, khong can bien. Va neu hook nay khong chay thi policy cung
+# khong duoc cai — nen no chua bao gio la duong cuu ho doc lap. Ta doi MOT credential
+# lay CA MOI TRUONG ma khong mua duoc gi.
+#
+# `exclude` khong cuu duoc: quet theo TEN khong chung minh duoc gi cho PGPASSWORD,
+# DATABASE_URL, SSH_AUTH_SOCK hay bien vendor moi, va no loi thoi dung luc moi truong doi.
+#
+# Nay chi con duong GO, va go PHAI KHONG DUOC lam hong config nguoi dung — ban truoc
+# luon prepend mot bang, nen mot config da co [shell_environment_policy] KHONG marker se
+# thanh HAI bang trung ten va codex tu choi parse. Logic nam o mot tep RIENG de test
+# duoc (t100): go dung khoi cua ta, hoac TU CHOI kem chan doan. Khong doan.
+#
+# FAIL-CLOSE, khong phai canh bao (cross-review luot 8, HIGH — loi cua ban va truoc).
+# Ban truoc bat rc=3 roi chi in CANH BAO va di tiep: dung luc phat hien config NGUY HIEM
+# ma khong go duoc thi khoi `inherit="all"` cu VAN CON HIEU LUC. Do la bien mot loi
+# xac-dinh-an-toan thanh phoi moi truong CO CHU DICH.
+#
+# VI TRI CUA KHOI NAY LA MOT PHAN CUA CHOT (cross-review luot 9, HIGH):
+# ban truoc dat no SAU hai loi goi `codex login status` cua chinh hook, nen dung
+# truong hop can chan thi hook DA GOI codex xong roi. Nay khoi chay TRUOC MOI loi goi
+# codex, va hai loi goi do deu bi boc bang `[ "${CODEX_BI_CHAN:-0}" = 0 ]`.
+#
+# PHAM VI, NOI THANG — day la cho ban truoc toi noi qua:
+#   CHAN DUOC : moi duong DO KHO CUNG CAP (hook nay, `_do_codex`, `_do_codex_song`,
+#               tuc ca `doctor`, `doctor --kiem-song` va `--doi-kha-dung`).
+#   KHONG CHAN DUOC : nguoi dung go thang `codex` o terminal. Mot la co ma chi ma
+#               cua ta doc thi khong the thuc thi hop dong "chan executable".
+# Ghi nhan gioi han thay vi dat ten to hon viec no lam duoc — dung bai hoc da tra gia.
+#
+# HOOK CHI PHAT HIEN, KHONG GHI (quyet dinh 16-08-2026 — xem dau
+# `.claude/dev/codex_env_policy.py`). Bon luot cross-review, BAY phat hien, TAT CA cung
+# mot duong: viec TU DONG ghi lai config cua nguoi dung. Moi lan va bao toan duoc thu ta
+# NGHI TOI va lam hong thu ta KHONG NGHI TOI (bang trung ten, mat du lieu, tep cut,
+# symlink bi xuyen, CRLF, lost-update). Bay lan cung mot hinh dang thi loi nam o QUYET
+# DINH GOC, khong nam o cac ban va. Ma phan thuong thi nho: go mot khoi CHINH TA them vao.
+#
+# Nen: hook DOC, dat co chan, va in cach chua. Nguoi dung tu chay `--go` roi tu `mv`.
+# Ca lop rui ro tren chet theo KIEN TRUC, khong theo ban va.
+if co codex; then
+  MA_GO=0
+  "$PY" "$GOC/.claude/dev/codex_env_policy.py" 2>&1 | sed 's/^/[session-start] /' || MA_GO=$?
+  # KHONG doc `${PIPESTATUS[0]}` o day. Ban truoc co dong do, kem chu thich "`set -o
+  # pipefail` khong bat o day" — chu thich SAI: tep nay dat `set -euo pipefail` o dong 34.
+  # Va dong "phong thu" ay chinh la thu GIET ma thoat: `MA_GO=$?` la MOT LENH, nen no
+  # dat lai PIPESTATUS ve 0; doc PIPESTATUS SAU do luon ra 0 ⇒ `CODEX_BI_CHAN` khong bao
+  # gio duoc dat ⇒ hook van goi `codex login status` du da phat hien `inherit=all`.
+  # DO DUOC (bash, cung hinh dang pipeline): sau `|| MA_GO=$?` thi MA_GO=3 PIPESTATUS[0]=0;
+  # gan lai tu PIPESTATUS dua MA_GO ve 0. Lan thu BA chot fail-close chet vi mot dong
+  # tuong la lam cho chac. Co `pipefail` thi `$?` cua pipeline DA la ma cua python.
+  if [ "$MA_GO" -ne 0 ]; then
+    CODEX_BI_CHAN=1
+    echo "[session-start] !! CHAN MOI DUONG CODEX CUA KHO (ma $MA_GO): config con khoi"
+    echo "[session-start]    env policy cu, hoac khong phan loai duoc. \`inherit=all\` co"
+    echo "[session-start]    the CON HIEU LUC — moi lenh con cua codex nhan TOAN BO moi truong."
+    echo "[session-start]    LUU Y: lenh \`codex\` go THANG o terminal KHONG bi chan."
+    echo "[session-start]    Chua (cong cu KHONG tu ghi vao config cua ban):"
+    echo "[session-start]      $PY .claude/dev/codex_env_policy.py --go   # dung ban da go"
+    echo "[session-start]      diff ~/.codex/config.toml{,.tra-luat-da-go} && mv ... # ban tu thay"
+  fi
+fi
+
+if [ -n "${CODEX_AUTH_JSON:-}" ] && co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then
   if codex login status >/dev/null 2>&1 </dev/null; then
     echo "[session-start] codex: da dang nhap san — GIU nguyen, khong ghi de"
   else
@@ -156,17 +266,40 @@ PYEOF
     fi
   fi
 fi
-if co codex; then
+if co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then
   # BẰNG CHỨNG DƯƠNG, không suy từ việc đã ghi tệp: hỏi chính codex.
   echo "[session-start] codex auth: $(codex login status 2>&1 </dev/null | head -1)"
+elif co codex; then
+  echo "[session-start] codex auth: BO QUA — codex dang bi chan (xem tren)"
 fi
 
-# --- BẰNG CHỨNG DƯƠNG, không tin "đã cài xong". doctor thoát khác 0 khi thiếu
-# công cụ BẮT BUỘC; thiếu codex/claude chỉ là cảnh báo vì có phiên không cần gọi agent.
-echo "[session-start] kiem cong cu:"
-"$PY" .claude/dev/launcher.py doctor || {
+# --- KHOI PHUC credential codex: KHOI O TREN da lam roi, dung goi lai o day.
+# `launcher.py chuan-bi` la duong CUU HO cho truong hop hook NAY khong chay — xem
+# chu thich cua `chuan_bi_xac_thuc()`. Goi ca hai trong mot luot chi thanh nhieu.
+
+# --- BANG CHUNG DUONG, khong tin "da cai xong".
+#   12 = thieu cong cu BAT BUOC          -> phien nay khong lam viec duoc, DUNG.
+#   13 = co mat nhung CHUA XAC THUC      -> canh bao, khong chan: co phien khong
+#        can goi agent, va chan o day se khoa luon duong nguoi dung tu sua.
+# `doctor` LUON in phan bien moi truong, ke ca khi moi thu xanh — de khong ai bao
+# "cong cu X khong dung duoc" ma chua tung nhin vao bien.
+echo "[session-start] kiem cong cu + kha dung:"
+# `MA=0` rồi `|| MA=$?`, KHÔNG phải chạy rồi `MA=$?` ở dòng sau: tệp này có `set -e`,
+# nên lệnh thoát khác 0 giết cả script NGAY, trước khi dòng gán kịp chạy. Đã đo: hook
+# chết ở đây với rc=13 và KHÔNG in nổi dòng "xong", tức phần xử lý 12/13 bên dưới là
+# CODE CHẾT. Vế `||` đưa lệnh vào ngữ cảnh điều kiện nên `set -e` không bắt.
+MA=0
+"$PY" .claude/dev/launcher.py doctor --doi-kha-dung || MA=$?
+if [ "$MA" -eq 12 ]; then
   echo "[session-start] THIEU CONG CU BAT BUOC — xem bang tren"
   exit 1
-}
+elif [ "$MA" -eq 13 ]; then
+  echo "[session-start] CANH BAO: co cong cu CHUA DUNG DUOC (thieu xac thuc)."
+  echo "[session-start] DUNG ket luan 'khong goi duoc' truoc khi doc bien:"
+  echo "[session-start]   $PY .claude/dev/launcher.py moi-truong"
+elif [ "$MA" -ne 0 ]; then
+  echo "[session-start] doctor thoat $MA — xem bang tren"
+  exit 1
+fi
 
 echo "[session-start] xong"

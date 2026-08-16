@@ -151,6 +151,70 @@ codex báo đúng triệu chứng ấy và phải xoay sang đọc ref local. C�
 thì dựng **clone riêng** (`git clone --no-hardlinks`), chấp nhận tốn đĩa. Worktree vẫn
 tốt cho lượt chỉ ĐỌC cây ở một head cố định.
 
+### Bốn thứ đã trả giá ở lượt gọi `codex` thật (16-08-2026)
+
+**`trang_thai=xong` + `ma_thoat=0` KHÔNG nghĩa là việc đã làm.** Lượt gọi reviewer đầu
+tiên trả đúng hai trường ấy, và nó chạy **43 giây** rồi thoát — agent dừng ngay ở bước
+đầu vì môi trường thiếu quyền, và từ chối làm tiếp. Cả hai trường trong sổ đều xanh:
+launcher đo VÒNG ĐỜI TIẾN TRÌNH, nó không biết nội dung công việc và không thể biết.
+Thứ tố cáo là thời lượng và kích thước đầu ra, nên từ nay sổ ghi thẳng
+`thoi_luong_giay`, `stdout_byte`, `stderr_byte`, và `run` in chúng ngay cạnh dòng
+`trang thai`. Đo được sau khi vá, hai lượt có `trang_thai`/`ma_thoat` **giống hệt nhau**:
+
+```
+ca rỗng (exit 0 tức thì) : trang thai: xong  ma_thoat=0   thoi luong: 0.007s  stdout=0B
+ca làm việc thật         : trang thai: xong  ma_thoat=0   thoi luong: 2.01s   stdout=21B
+```
+
+Ai gọi tự động phải tự đặt ngưỡng cho ba số ấy. Không có ngưỡng thì "xong" chỉ là chữ.
+
+**Sandbox `workspace-write` của codex chặn CẢ `.git` LẪN mạng — và hai thứ đó hỏng
+khác nhau.** Triệu chứng cụ thể để nhận ra: `git fetch` trả `rc=255` kèm
+`.git/FETCH_HEAD: Read-only file system`, còn `git ls-remote` thì lỗi kết nối. Mở đúng
+hai chốt, không cần mở toang:
+
+```
+-c 'sandbox_workspace_write.network_access=true'
+-c 'sandbox_workspace_write.writable_roots=["<workspace>/.git","/tmp"]'
+```
+
+`/tmp` cần vì công thức đo trên cây đã merge dựng thư mục tạm. Đo được sau khi thêm:
+`fetch_rc=0`, `lsremote_rc=0`. **Đừng nhảy sang
+`--dangerously-bypass-approvals-and-sandbox`** dù mô tả của nó khớp hoàn cảnh container
+("environments that are externally sandboxed") — mở hai khoá trên là đủ, và giữ được
+điều kiện agent không ghi ra ngoài workspace.
+
+**Luôn kèm `--strict-config`.** Gõ sai tên khoá `-c` thì codex BỎ QUA im lặng: lượt chạy
+vẫn xanh, sandbox vẫn đóng, và ta tưởng đã mở. `--strict-config` biến chỗ đó thành đỏ.
+Cùng họ với "cổng không nói dối, nó vắng mặt".
+
+**`--full-auto` KHÔNG tồn tại ở `codex exec` 0.147.0** — nó trả `rc=2` usage error, tức
+lệnh không chạy gì cả. Cờ đúng là `-s <read-only|workspace-write|danger-full-access>`,
+và `--approve-for-me` nếu cần tự duyệt. Kiểm bằng `codex exec --help` trên CHÍNH bản
+đang cài, đừng chép cờ từ trí nhớ hay từ tài liệu của bản khác.
+
+**Nhắc lại bài học worktree ở trên, vì lượt này đã lặp lại nó.** Đoạn "Đừng lấy
+`git worktree` làm workspace cho agent có sandbox" viết từ 14-08 mà lượt 16-08 vẫn dựng
+worktree trước rồi mới đổi sang clone. Vân tay nhận ra sớm: trong worktree, `.git` là
+một **tệp** trỏ ra ngoài, nên `test -d .git` trả sai. Kiểm một dòng đó trước khi giao
+workspace cho agent.
+
+### `codex login status` chỉ đọc TỆP — đòi bằng chứng dương
+
+`codex login status` in `Logged in using ChatGPT` dựa trên `~/.codex/auth.json` chứ
+KHÔNG hỏi máy chủ, nên nó báo đăng nhập với một token đã bị thu hồi (đo 16-08-2026).
+Hook `session-start.sh` cũng dựa vào lệnh này ở chốt "không ghi đè khi đã đăng nhập",
+nên chốt ấy thừa hưởng đúng điểm mù.
+
+Muốn biết token còn sống thì gọi thật một lượt và đòi kết quả:
+
+```bash
+codex exec --skip-git-repo-check -C /tmp 'Reply with exactly: PONG'
+```
+
+Đòi `rc=0` VÀ chuỗi `PONG` trong đầu ra. Lượt gọi thật in kèm `auth_mode`, tài khoản và
+số token đã dùng — đó mới là bằng chứng máy chủ đã nhận, khác hẳn một dòng đọc từ đĩa.
+
 Gọi Claude thì thay phần sau `--` bằng `claude -p "..."`. Không có gì khác đổi.
 
 ### `{PROMPT_FILE}` — neo prompt kín *sau* khi sinh con

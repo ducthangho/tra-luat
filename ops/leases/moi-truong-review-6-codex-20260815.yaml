@@ -108,3 +108,4 @@ chay_hai_lan_required: true
 approve_la_hop_le: 'đừng nặn finding cho có; nhưng BA commit này CHƯA AI SOI'
 duong_giao_verdict_da_do: 'REST bị proxy 403, gh không cài ⇒ ghi verdict ra tệp, điều phối đăng hộ'
 preconditions_measured_at_utc: '2026-08-15T21:00:00Z'
+posted_comment_id: 5305225847   # workflow ghi, ĐỪNG sửa tay

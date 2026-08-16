@@ -1,0 +1,196 @@
+# Lease REVIEWER — wp55 revision 4, generation 1, lượt review 1. Neo head 2432e3f6.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên "#55" chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+# Sửa lease thì sửa tệp rồi push; đừng sửa tay comment.
+#
+# NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt
+# cụt giá trị — đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+mission_issue: 54
+mission_revision: 6
+revision: 4
+generation: 1
+phase_key: F3-03
+lease_id: wp55-r4-review-1-codex-20260816
+
+role: reviewer
+review_attempt: 1
+provider: codex
+reviewer: codex
+executor: claude
+reviewer_note: 'executor lượt này là `claude` ⇒ §8 bắt reviewer khác provider'
+assurance_target: cross_approved
+access: read-only
+write_set: []                   # reviewer KHÔNG ghi (§2)
+branch_ownership: none
+
+spec_path: ops/specs/wp55-r4-spec.md
+spec_branch: ops/wp55-r4-spec-draft
+spec_sha256_required: 86d9627caf55ea2cb8e4caa29ef036fd490c190d8481fb4f79dd5d1703eb1afd
+spec_status: da_duyet
+spec_duyet_boi: ducthangho
+spec_duyet_luc: 'direct, in-session, 2026-08-16 ("tôi duyệt. thực hiện tiếp")'
+spec_note: >-
+  Chủ kho duyệt bản băm `271b88f9…`. SAU khi duyệt, executor đo ra hai khuyết cưỡng chế nên
+  băm chốt là `86d9627c…`; cả hai khai ở `sua_sau_khi_duyet` của lease executor. Reviewer
+  đòi băm `86d9627c…` — đã xác minh lúc cấp lease này, khớp.
+
+# --- Vật để review ------------------------------------------------------------------
+reviewed_sha_required: 2432e3f64f05739741dfe6f49081e9aaa140799f
+reviewed_sha_note: >-
+  Đây là head ĐỂ REVIEW, khác nghĩa với trường cùng tên ở lease executor (ở đó nó mang head
+  XUẤT PHÁT, vì bộ kiểm dùng CHUNG một validator cho cả hai vai — AC 21). Đã đo lúc cấp:
+  tip của `claude/wp55-r4g1-f3-03` đúng bằng SHA này.
+branch: claude/wp55-r4g1-f3-03
+base_sha: 18da1da6a07ab2c86d716cef1d74ff2cd0e3218a
+start_from_sha: b0e3e3b6a4c630ba0652b8fc939025d9c4031c67
+target_pull_request: null
+target_pull_request_note: >-
+  KHÔNG có PR cho nhánh này — đã đo, `list_pull_requests` trả rỗng cho cả `state: all`.
+  Review neo thẳng vào SHA. Ghi ra để reviewer không mất thì giờ đi tìm một PR không tồn tại;
+  lease `wp55-r2-review-4` có `target_pull_request: 92` nên chỗ trống này là CỐ Ý, không phải
+  quên điền.
+
+handoff_path: ops/handoff/wp55-r4g1-handoff.md
+handoff_branch: ops/wp55-r4g1-handoff
+handoff_sha256: 4d33130936f8c0810f3d46e55d9123bfd8bf548376400b9327b6a7faa9bbda82
+
+prompt_path: ops/prompts/wp55-r4-review-1-codex-20260816.md
+prompt_sha256_required: f4d307461ca664bf403107c9e4a9aa27a6bbbb36240ee475549ad9f180d2a8ed
+
+granted_by: ducthangho          # CHỦ KHO — §2 "người có thẩm quyền"
+granted_on_instruction: 'direct, in-session, 2026-08-16 ("đồng ý. thực hiện ở phiên mới được bàn giao")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-16T16:10:00Z'
+lease_expires_at_utc: '2026-08-17T16:10:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+cua_so_note: >-
+  24 giờ, cùng độ dài với lease executor và lease `wp55-r2-review-4`. Lý do đã trả giá: lease
+  review "#2" và "#3" của revision 2 đều chết mà KHÔNG phiên nào chạy trong cửa sổ 6 giờ. Hai
+  lần liên tiếp thì đó không còn là rủi ro mà là chỗ hỏng có thật. Cái giữ lease khỏi thành
+  tờ giấy trắng là heartbeat 30 phút, không phải con số hạn ngắn.
+
+# Số lease và số attempt NỘI DUNG là hai thứ khác nhau — đừng gộp.
+attempts_used: 1
+attempts_limit: 3
+attempts_note: >-
+  Đếm lại từ 0 cho revision 4 (§12). Executor đã tiêu MỘT attempt nội dung ở generation 1
+  (`attempts_used: 1` trong bàn giao §7), nên còn hai. Lượt review này KHÔNG tiêu attempt của
+  executor.
+
+# --- Sổ commit lượt này, để reviewer đối chiếu AC 26 --------------------------------
+commit_trong_luot:
+  - sha: 179d5f37
+    lease_id: wp55-r4-exec-1-claude-20260816
+    noi_dung: 'merge master `18da1da` vào nhánh packet'
+  - sha: 2432e3f6
+    lease_id: wp55-r4-exec-1-claude-20260816
+    noi_dung: 'AC 19 bỏ hẳn miễn trừ — xoá cơ chế, nối lại ma trận'
+commit_note: >-
+  Đúng hai commit, không có commit ngoài sổ. Revision 3 hỏng đúng ở chỗ này — BỐN commit chạy
+  không lease — và AC 26 sinh ra để chặn. Reviewer đo `git log 18da1da..2432e3f6` và đòi không
+  có commit thứ ba.
+
+# --- Bốn mục kiểm. Chi tiết ở prompt; đây là thứ để đối chiếu lúc nghiệm thu. --------
+muc_kiem:
+  - id: cap-cung-hinh-dang-co-phu-moi-hinh-dang
+    note: >-
+      12 ca `_tha_cu` ở `LOP_LACH` phải có 12 ca CÙNG HÌNH DẠNG ở `LOP_BAT_OAN` (bảng chưa
+      đóng thẻ, rào bốn backtick, dòng thụt lề, mã inline, comment, bullet, danh sách số,
+      trích dẫn). ĐÃ ĐO SẴN MỘT NỬA lúc cấp lease: cả 12 đều có ca cùng gốc tên, tức không
+      thiếu theo TÊN. Phần còn lại là phần khó — tên khớp KHÔNG có nghĩa hình dạng khớp.
+      Hình dạng chỉ có ở một vế là finding thật.
+  - id: hai-dot-bien-moi-co-nham-dung-tang-khong
+    note: >-
+      `mo_lai_mien_tru_ngat_dong` giết 37, `tha_vo_dieu_kien_nhu_generation_4` giết 43. Đòi
+      hai chiều: mọi ca trong danh sách phải-chết có chết thật không (thiếu ⇒ kê tay), và có
+      ca nào chết ngoài danh sách không (thừa ⇒ giết cả đối chứng khác họ). Đột biến chạm một
+      ca của `LOP_BAT_OAN` là finding.
+  - id: tai-lap-280-dong-18-6-phan-tram-va-37-43
+    note: >-
+      Tái lập, đừng nhận theo lời kể. `packet_loop.py` ở head này đo được 1223 dòng; handoff
+      khai từ 1503 xuống, tức 280 dòng và 18,6%. Kiểm mẫu số 1503 có đúng là số dòng ở
+      `start_from_sha` không — mẫu số sai thì cả hai con số cùng sai.
+  - id: con-ma-mien-tru-nao-chi-bi-vo-hieu-khong
+    note: >-
+      AC 19 mục 2 đòi XOÁ, không đòi vô hiệu. Tìm ba dạng sót: hàm/hằng còn định nghĩa mà
+      không ai gọi; nhánh `if` bị ép False hoặc cờ đặt cứng; và ba thứ khai là "giữ có chủ ý"
+      (`_go_dau_dong`, `_RE_DAU_DONG`, `_dong_tai`) có thật sự còn người dùng không. Khối chú
+      thích lịch sử được phép giữ, nhưng phải là CHÚ THÍCH chứ không phải mã bị comment ra.
+
+# --- Ba chỗ executor tự khai ngược spec. KIỂM LẠI, đừng nhận. -----------------------
+executor_tu_khai_nguoc_spec:
+  - id: hai-ca-thanh-muoi-hai-ca
+    khai: 'spec đoán 2 ca đổi ma trận; đo thật 12. Phân hoạch sạch: 12 ca đỏ = 12 ca CÓ chứa cụm cấm, 23 ca không chứa vẫn xanh.'
+    kiem: 'đếm ca chứa cụm cấm, đếm ca đỏ, đòi hai tập TRÙNG KHÍT. Lệch một ca là hợp đồng cơ học chạy sai thiết kế.'
+  - id: so-dong-ma-chet-va-re-bang-html
+    khai: 'spec ước lượng `~241 dòng ≈16%`; đo thật `280 dòng 18,6%`. Và `_RE_BANG_HTML` mà spec bắt xoá KHÔNG TỒN TẠI trong tệp.'
+    kiem: 'kiểm `_RE_BANG_HTML` thật sự chưa bao giờ có ở `start_from_sha`. Nếu nó CÓ mà bị bỏ sót thì lời khai "không tồn tại" đang che một chỗ chưa xoá.'
+  - id: muoi-hai-dot-bien-mat-mo-neo
+    khai: '12 đột biến cũ nhắm máy dò cấu trúc phục vụ miễn trừ, mà máy ấy đã xoá; thay bằng 2 cái cùng họ.'
+    kiem: '44 − 12 + 2 = 34 khớp số liệu suite in. Nhưng khớp SỐ không phải khớp ĐỘ PHỦ — đòi mọi lớp trong `LOP_LACH` vẫn có ít nhất một đột biến giết đúng nó (AC 18), và suite tự chốt điều đó.'
+
+# --- Số liệu suite tự in (AC 25). Chép từ bàn giao §7, không gõ lại. -----------------
+so_lieu_suite_tu_in:
+  ca: 185
+  dot_bien: 34
+  lop_lach: 78
+  ca_bat_oan: 35
+  ngoai_le_ac_18: 0
+so_lieu_nen_truoc_luot: '173 / 44 / 66 / 35 / 0'
+
+# --- Gate executor đã báo. Reviewer chạy lại, KỂ CẢ dòng cố ý đỏ. -------------------
+gate_executor_bao:
+  - phep_do: 'doctrine-scan trên nhánh'
+    rc: 0
+  - phep_do: 'suite trên nhánh'
+    rc: 0
+  - phep_do: 'bộ tái lập 24 ca'
+    rc: 'lệch 0/24 · trước khi vá 10/24'
+  - phep_do: 'AC 20 — doctrine-scan trên cây ĐÃ MERGE'
+    rc: 0
+  - phep_do: 'AC 20 — suite trên cây ĐÃ MERGE, có GIT_DIR'
+    rc: 0
+  - phep_do: 'AC 20 — suite BỎ GIT_DIR (chứng đường, PHẢI đỏ)'
+    rc: 1
+gate_note: >-
+  Dòng cuối là phép đo cố ý. Bỏ `GIT_DIR` mà VẪN XANH thì điều kiện spec vừa thêm là thừa và
+  cả AC 20 chỉ là nghi lễ — đó là finding, và là finding lớn. Nó đỏ thật
+  (`fatal: not a git repository`), nên finding `ac20-archive-tree-suite-not-self-contained`
+  hoãn từ verdict lượt 6 đã đóng THẬT. Reviewer chạy lại cả sáu dòng.
+
+# --- Lỗ đã biết, NGOÀI phạm vi. Đừng tính là finding mới. ---------------------------
+ngoai_pham_vi_da_biet:
+  - id: hook-tin-codex-login-status
+    note: >-
+      Chốt "không ghi đè khi đã đăng nhập" của hook tin `codex login status`, mà lệnh ấy chỉ
+      đọc TỆP chứ không hỏi máy chủ — ngày 16-08 nó báo "Logged in" với một token ĐÃ THU HỒI.
+      Lỗ thật, ngoài `write_set`, cố ý không đóng ở lượt này.
+  - id: so-attempts-revision-3-khong-khop
+    note: 'bốn commit chạy không lease ở revision 3. Không hồi tố sửa được; AC 26 chỉ chặn tái diễn.'
+  - id: chua-chay-ruff-va-gate-phat-hanh
+    note: >-
+      `packet_loop*.py` là công cụ dev-side, không vào gói. Executor TỰ NHẬN đây là phép đo
+      thiếu — nêu nó là bổ sung, không phải bắt lỗi giấu giếm.
+  - id: mo-lai-mien-tru-duoi-moi-hinh-thuc
+    note: >-
+      Chủ kho chốt BỎ, sau khi đo được rằng cơ chế miễn trừ không có người dùng nào. Đề xuất
+      mở lại KHÔNG phải finding hợp lệ ở lượt này.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-16T16:04:18Z'
+master_sha_at_grant: 18da1da6a07ab2c86d716cef1d74ff2cd0e3218a
+packet_head_at_grant: 2432e3f64f05739741dfe6f49081e9aaa140799f
+lease_song_khac_luc_cap: >-
+  không — lease executor `wp55-r4-exec-1-claude-20260816` đã bàn giao xong ở §7. Đã đo:
+  không có lease review nào khác cho revision 4 (`search_code` trả total_count=0 cho
+  `wp55-r4-review`).

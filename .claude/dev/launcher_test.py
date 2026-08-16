@@ -2236,7 +2236,17 @@ def t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac():
         dich = Path(nha) / ".codex" / "auth.json"
         bang(dich.read_text(encoding="utf-8") == that,
              f"{ten}: noi dung tren dia phai la JSON GIAI MA, khong phai chuoi tho")
-        bang(oct(dich.stat().st_mode)[-3:] == "600", f"{ten}: quyen phai la 600")
+        # Quyền 600 là khái niệm POSIX. Trên Windows `os.chmod` CHỈ bật/tắt cờ
+        # read-only, nên `st_mode & 0o777` không bao giờ ra 600 — khẳng định cũ đỏ
+        # trên `windows-latest` (đo được PR #128, lượt Windows THẬT đầu tiên).
+        #
+        # ĐỪNG đọc đây thành "Windows cũng an toàn": nó KHÔNG được `chmod` bảo vệ.
+        # Thứ che `~/.codex/auth.json` ở đó là ACL của chính hồ sơ người dùng, mà ta
+        # KHÔNG đặt và KHÔNG kiểm. Ghi ra để không ai suy "test xanh = đã bảo vệ".
+        if LA_WINDOWS:
+            bang(dich.exists(), f"{ten}: tep phai ton tai")
+        else:
+            bang(oct(dich.stat().st_mode)[-3:] == "600", f"{ten}: quyen phai la 600")
         # idempotent: goi lai khong duoc bao da doi
         bang(m.chuan_bi_xac_thuc(that_su=True)[0].get("doi") is False,
              f"{ten}: goi lai phai nhan ra da khop va khong dung tep")
@@ -2419,8 +2429,15 @@ def t90_tu_tach_nhom_khi_chung_nhom_voi_vo_shell():
     # Chot nay nam trong CHINH tep test (harness), khong nam trong launcher.py —
     # nen va thang vao `os` toan cuc. An toan vi `os.getpid`/`getpgid`/`setsid`
     # deu nam trong `_TOAN_CUC_CAN_CO_LAP`, runner hoan nguyen sau moi ca.
+    # GHIM `os.name`: `_tu_tach_nhom_neu_can` thoát NGAY ở dòng đầu khi không POSIX,
+    # nên trên `windows-latest` cả ba nhánh (a)(b)(c) đỏ hết — đo được ở lượt Windows
+    # THẬT đầu tiên (PR #128). Ghim vào thì bốn nhánh QUYẾT ĐỊNH được đo trên MỌI nền,
+    # thay vì Windows chỉ đo được đúng nhánh "bỏ qua". Trả lại trong `finally`.
+    goc_name = os.name
+
     def dung_canh(pid, pgid, setsid_hong=False):
         goi = []
+        os.name = "posix"
         os.getpid = lambda: pid
         os.getpgid = lambda _: pgid
 
@@ -2453,6 +2470,16 @@ def t90_tu_tach_nhom_khi_chung_nhom_voi_vo_shell():
     # (d) khong do duoc pgid => coi nhu an toan, DUNG tu y setsid
     os.getpgid = lambda _: (_ for _ in ()).throw(OSError("khong do duoc"))
     bang(_la_truong_nhom() is True, "khong do duoc pgid thi phai coi la truong nhom")
+
+    # (e) KHONG POSIX => bo qua, va TUYET DOI khong goi setsid
+    goi = dung_canh(2, 1)
+    os.name = "nt"
+    try:
+        kq = _tu_tach_nhom_neu_can()
+        bang(len(goi) == 0, f"khong POSIX ma VAN goi setsid: {kq!r}")
+        bang("khong phai POSIX" in kq, f"mo ta phai noi ro ly do, duoc {kq!r}")
+    finally:
+        os.name = goc_name
 
 
 @ca
@@ -2541,8 +2568,14 @@ def t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom():
     m._giet_rieng = lambda *a, **k: None
     m._chup_cay = lambda p: {}
     m._thanh_vien_nhom = lambda p: []
-    m._con_song = lambda p: False
+    # `_con_song(pid, khoa)` nhan HAI doi so o duong Windows; fixture mot doi so nem
+    # `TypeError` — do duoc o luot Windows THAT dau tien (PR #128).
+    m._con_song = lambda p, khoa=None: False
     m._khoa_danh_tinh = lambda p: "x"
+    # `_giet_cay` re sang `_giet_windows` TRUOC ca chot truong nhom, nen tren Windows
+    # ca nay khong do duoc thu no sinh ra de do. Ghim nen: `platform.system` nam trong
+    # `_TOAN_CUC_CAN_CO_LAP` nen runner hoan nguyen sau ca.
+    m.platform.system = lambda: "Linux"
 
     # (a) pgid != pid  => TU CHOI, khong duoc goi killpg
     m.os.getpgid = lambda p: p - 1
@@ -2901,11 +2934,33 @@ def t103_nam_finding_cua_bot_review_PR128():
             "gia_lap 2>&1 | sed 's/^/[x] /' >/dev/null || MA_GO=$?\n"
             'if [ "$MA_GO" -ne 0 ]; then CHAN=1; else CHAN=0; fi\n'
             'printf "%s %s" "$MA_GO" "$CHAN"\n')
-    if not shutil.which("bash"):
-        return "khong co bash tren nen nay"
-    r = subprocess.run(["bash", "-c", kich], capture_output=True, text=True, timeout=30)
+    # CHON bash CHO ĐÚNG. Trên `windows-latest`, `shutil.which("bash")` trả về **WSL
+    # bash** (`wsl.exe`), mà runner không cài distro nào — nó trả một thông điệp UTF-16
+    # "Windows Subsystem for Linux has no installed distributions" và ca này đỏ với lý
+    # do chẳng liên quan gì tới điều đang đo. Đo được ở lượt Windows THẬT đầu tiên
+    # (PR #128). Đây là bash CỦA GIT, thứ hook phiên thật sự chạy trên.
+    #
+    # KHÔNG đoán theo đường dẫn: THỬ từng ứng viên bằng một lệnh biết trước kết quả,
+    # rồi mới dùng. "Có tệp tên bash" khác "bash chạy được" — đúng doctrine CÓ MẶT ≠
+    # DÙNG ĐƯỢC mà cả nhánh này dựng.
+    ung_vien = [c for c in (shutil.which("bash"),
+                            r"C:\Program Files\Git\bin\bash.exe",
+                            r"C:\Program Files\Git\usr\bin\bash.exe") if c]
+    vo = None
+    for c in ung_vien:
+        try:
+            t = subprocess.run([c, "-c", "printf ok"], capture_output=True, text=True,
+                               timeout=30)
+        except (OSError, subprocess.SubprocessError):
+            continue
+        if t.stdout.strip() == "ok":
+            vo = c
+            break
+    if vo is None:
+        return f"khong co bash CHAY DUOC tren nen nay (da thu: {ung_vien})"
+    r = subprocess.run([vo, "-c", kich], capture_output=True, text=True, timeout=30)
     bang(r.stdout.strip() == "3 1",
-         f"hinh dang pipeline khong dua duoc ma 3 toi co chan: {r.stdout!r}")
+         f"hinh dang pipeline khong dua duoc ma 3 toi co chan ({vo}): {r.stdout!r}")
 
 
 @ca

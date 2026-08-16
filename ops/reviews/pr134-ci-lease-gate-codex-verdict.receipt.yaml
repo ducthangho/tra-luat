@@ -65,6 +65,20 @@ verdict_usage_caveats:
       symlink, con số `30/30` chứa một ca CÓ MẶT mà KHÔNG ĐO (đúng bệnh `t24`). Đây là
       nợ có sẵn của bộ test, KHÔNG do PR "#134" tạo ra, nên không phải finding của PR ấy.
       Ai đọc `30/30` trên một lượt Windows thì đọc kèm cảnh báo này.
+    cap_nhat_sau_khi_ghi_verdict: >-
+      Lượt Windows THẬT đầu tiên ĐÃ chạy và XANH — `workflow_dispatch` run `31968805678`
+      trên head `3ee62330`, bước `lease-publish selftest` `success` ở `windows-latest`.
+      Đo trước khi merge "#134" CÓ CHỦ ĐÍCH: bộ `launcher_test.py` vừa chạy Windows thật
+      lần đầu ở "#128" và ra BỐN ca đỏ, cả bốn là lỗi thật — nên để lần merge làm phép đo
+      Windows đầu tiên là lặp lại đúng cái vừa trả giá.
+      NHƯNG phần reviewer cảnh báo VẪN CHƯA chứng minh được: không đọc được đầu ra in ra
+      của bước ấy (`get_job_logs` chỉ trả phần ĐUÔI; đuôi 5.000 dòng chỉ chạm tới các
+      bước 17–22, còn bước 10 nằm xa hơn về trước). Nên khẳng định đúng là: **xanh trên
+      Windows ⇒ bộ CHẠY ĐƯỢC; KHÔNG ⇒ mọi ca đều ĐO.** Caveat giữ nguyên hiệu lực.
+    cach_chua_de_nghi: >-
+      Cho `t19` báo `SKIP` riêng và KHÔNG tính vào số đạt — đúng đề nghị của reviewer.
+      Cùng lớp với bốn ca `launcher_test` vừa vá ở "#128"; hiện HAI bộ test cùng mắc bệnh
+      "ca có mặt khác ca có đo", nên đáng làm một lượt chung thay vì vá lẻ.
 
 pham_vi_da_kiem: >-
   Comment của PR "#134" đọc lại qua API lúc ghi biên nhận; verdict là comment 5309262102,

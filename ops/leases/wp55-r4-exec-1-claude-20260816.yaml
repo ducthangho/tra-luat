@@ -1,0 +1,136 @@
+# Lease EXECUTOR — wp55 revision 4, lượt 1/3. Neo b0e3e3b6.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt
+# cụt giá trị — đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 55
+packet_id: wp55
+mission_issue: 54
+mission_revision: 6
+revision: 4
+phase_key: F3-03
+lease_id: wp55-r4-exec-1-claude-20260816
+
+spec_path: ops/specs/wp55-r4-spec.md
+spec_branch: ops/wp55-r4-spec-draft
+spec_sha256_required: 86d9627caf55ea2cb8e4caa29ef036fd490c190d8481fb4f79dd5d1703eb1afd
+spec_status: da_duyet
+spec_duyet_boi: ducthangho
+spec_duyet_luc: 'direct, in-session, 2026-08-16 ("tôi duyệt. thực hiện tiếp")'
+spec_note: >-
+  Chủ kho duyệt bản băm `271b88f9…`. SAU khi duyệt, executor đo ra hai khuyết PHẢI sửa,
+  nên băm chốt là `86d9627c…`. Cả hai sửa đều mang tính cưỡng chế, không phải lựa chọn —
+  xem `sua_sau_khi_duyet` bên dưới. Reviewer đòi băm `86d9627c…`.
+
+sua_sau_khi_duyet:
+  - id: start-from-bo-mat-ban-va-an-ninh
+    cu: 'start_from_sha: 1a4525a20aa360476a6f59cb157c21097919c457'
+    moi: 'start_from_sha: b0e3e3b6a4c630ba0652b8fc939025d9c4031c67'
+    do_duoc: 'git merge-base --is-ancestor 4085bbf2 1a4525a -> SAI; với b0e3e3b6 -> ĐÚNG'
+    vi_sao: >-
+      `4085bbf2` là bản vá P1 an ninh cho `SKILL.md` (nối `${VAR:+…}` với `${VAR:-…}` nên
+      nhánh "đã đặt" bung ra CHÍNH GIÁ TRỊ biến bí mật). `SKILL.md` nằm trong `write_set`,
+      nên xuất phát từ `1a4525a` sẽ ghi đè bản đã vá và mở lại lỗ ấy TRONG IM LẶNG.
+  - id: nhanh-packet-do-vi-claude-md-cua-master-cu
+    them: 'must_merge_master_truoc_khi_do'
+    do_duoc: 'trên b0e3e3b6 — r3g5 rc=0, mô phỏng r4 rc=6 CLAUDE.md:82'
+    vi_sao: >-
+      `b0e3e3b6` merge master ở mức `d5b7bcc`, mà `CLAUDE.md` của `d5b7bcc` còn cụm cấm.
+      Dưới hợp đồng mới nhánh packet ĐỎ vì một dòng KHÔNG phải của nó; bản vá đã nằm trên
+      master `18da1da`. Không merge master trước thì đuổi theo một finding đã có bản vá.
+
+role: executor
+provider: claude
+executor: claude
+assurance_target: cross_approved
+access: read-write
+
+write_set:
+  - .claude/skills/work-packet/SKILL.md
+  - .claude/skills/cross-review/SKILL.md
+  - .claude/skills/land-packets/SKILL.md
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+  - CLAUDE.md
+write_set_note: >-
+  `CLAUDE.md` có mặt vì chủ kho chốt 2026-08-15 cho phép; nhưng chỗ duy nhất cần sửa ĐÃ
+  được xử lý trên master (`c44b2d4`, land qua PR #129 thành `18da1da`). Nhánh này chỉ cần
+  MERGE master, KHÔNG sửa tay `CLAUDE.md` — sửa tay sẽ va với bản đã duyệt.
+
+branch: claude/wp55-r4g1-f3-03
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: b0e3e3b6a4c630ba0652b8fc939025d9c4031c67
+reviewed_sha_note: >-
+  Đây là head XUẤT PHÁT, không phải head đưa ra review. Trường mang tên `reviewed_sha_*` vì
+  bộ kiểm dùng CHUNG một validator cho lease executor lẫn reviewer (AC 21) — một validator
+  chung, đo được, tốt hơn hai bản lệch nhau. Head để review sẽ ghi ở lease REVIEWER lượt sau.
+base_sha: 18da1da6a07ab2c86d716cef1d74ff2cd0e3218a
+start_from_sha: b0e3e3b6a4c630ba0652b8fc939025d9c4031c67
+
+prompt_path: ops/prompts/wp55-r4-exec-1-claude-20260816.md
+prompt_sha256_required: 97ce26fdbd4620d3d99985edb0ca0cecf8e4577f7571cea8dcf407cb07731631
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-16 ("tôi duyệt. thực hiện tiếp")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-16T15:20:00Z'
+lease_expires_at_utc: '2026-08-17T15:20:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 3
+attempts_note: >-
+  Đếm lại từ 0 cho revision 4 (§12). Revision 3 cạn 3/3 ở verdict lượt 10. GHI THẲNG MỘT
+  KHUYẾT của sổ cũ: revision 3 có BỐN commit chạy không lease (hai `g6`, cộng `3c4fbc2` và
+  `4270210`), nên `3/3` thấp hơn số lượt thật. AC 26 của revision 4 chặn tái diễn.
+
+reviewer_provider: codex
+reviewer_note: 'executor là claude ⇒ §8 bắt reviewer khác provider'
+
+# Việc của lượt này, gọn. Chi tiết ở spec; đây chỉ là thứ để đối chiếu lúc nghiệm thu.
+muc_tieu:
+  - 'XOÁ hẳn cơ chế miễn trừ AC 19 khỏi packet_loop.py — xoá, không vô hiệu (AC 19 mục 2)'
+  - 'Chuyển hai ca chiều-tha sang ma trận LỌT, kèm lý do ghi tại chỗ (AC 19 mục 4)'
+  - 'Giữ chiều bắt oan: bảng/khối mã/tag/comment/dấu đầu dòng không chứa cụm cấm -> rc=0'
+  - 'Đo AC 20 trên cây ĐÃ MERGE, có GIT_DIR trỏ kho thật'
+  - 'Handoff §7 mang nguyên văn khối SỐ LIỆU do suite tự in (AC 25)'
+
+# Nói TRƯỚC những gì lượt này chưa chứng minh, để reviewer không phải tự đoán.
+chua_chung_minh_luc_cap_lease:
+  - id: so-dong-ma-chet
+    note: >-
+      Spec ước lượng `~241 dòng, ≈16% tệp`. Đó là ƯỚC LƯỢNG. Executor phải đo lại con số
+      thật sau khi xoá và khai con số ĐO ĐƯỢC, không chép lại của spec.
+  - id: con-ca-nao-doi-chieu-nua-khong
+    note: >-
+      Spec nêu ĐÚNG HAI ca chiều-tha sẽ đổi sang LỌT, dựa trên mô phỏng chứ chưa chạy trọn
+      173 ca dưới hợp đồng mới. Có thể còn ca khác. Executor ĐO và BÁO, không tự quyết.
+  - id: ba-loi-luot-10-co-that-tu-dong-khong
+    note: >-
+      Spec khẳng định cả ba trả `rc=6` trên bản không miễn trừ nên AC 22-24 rút được.
+      Executor phải TÁI LẬP, không nhận theo lời kể.
+
+# Lỗ đã biết, NGOÀI write_set, cố ý không đóng ở lượt này.
+ngoai_pham_vi_da_biet:
+  - id: hook-tin-codex-login-status
+    note: >-
+      Chốt "không ghi đè khi đã đăng nhập" của hook tin `codex login status`, mà lệnh ấy chỉ
+      đọc TỆP chứ không hỏi máy chủ — ngày 16-08 nó báo "Logged in" với một token ĐÃ THU HỒI.
+      Lỗ thật, nằm ngoài `write_set`, không đóng ở lượt này. Nêu ra để không ai tưởng đã xong.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-16T15:18:54Z'
+master_sha_at_grant: 18da1da6a07ab2c86d716cef1d74ff2cd0e3218a
+packet_head_at_grant: b0e3e3b6a4c630ba0652b8fc939025d9c4031c67
+lease_song_khac_luc_cap: 'không — lease review-rebase đã đóng khi c44b2d4 land qua PR #129'

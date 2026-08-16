@@ -1,0 +1,112 @@
+# Lease REVIEWER lượt 8 — nhánh HẠ TẦNG MÔI TRƯỜNG ops/moi-truong-ba-p1.
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. NHỚ ĐÓNG NHÁY mọi giá trị chứa '#'.
+# packet_issue 55 NHƯNG la_viec_cua_packet false — rẽ từ master, KHÔNG tiêu attempt.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: null
+la_viec_cua_packet: false
+
+role: reviewer
+provider: codex
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+lease_id: moi-truong-review-8-codex-20260816
+review_round: 8
+
+branch: ops/moi-truong-ba-p1
+reviewed_sha_required: 3f8b2904cfb4f99aab151cd0be435e4ba4553bb8
+base_sha: 69bc3cede6085bf6229ac95a44da4aae9e51ee42
+base_note: 'base là head lượt 7 đã soi. MỘT commit; delta ĐÚNG 5 tệp (1 tệp MỚI).'
+master_sha_at_grant: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1
+target_pull_request: null
+
+prompt_path: ops/prompts/moi-truong-review-8-codex-20260816.md
+prompt_sha256_required: 5f6f3bab34f1ad34ec886faef7773abca168d9bef7a4a54bdac6cb320ce5eb23
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-16 (vá cả ba đi, rồi cấp lease review)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-16T06:00:00Z'
+lease_expires_at_utc: '2026-08-17T08:00:00Z'
+run_minutes: 1500
+heartbeat_required_minutes: 30
+
+prior_review: moi-truong-review-7-codex-20260816
+prior_review_verdict: changes_requested
+prior_review_verdict_sha256: 8a1cb2171eb5fe3fa4743b4c198ac4930e051fb30d4a3549815c296295b34e64
+
+# HAI BÊN CÙNG ĐỌC SAI MỘT TẠO TÁC — ghi vào hồ sơ, không giấu.
+doc_sai_chung_luot_6_va_7:
+  ca_hai_ben_ket_luan: 'suite chết ngay sau t62'
+  su_that: >-
+    bộ test KHÔNG in gì trong lúc chạy (chỉ dòng BỎ QUA + tổng kết), nên `BO QUA t62` là
+    dòng CUỐI CÙNG ĐƯỢC IN chứ không phải ca cuối cùng ĐƯỢC CHẠY; stdout nối vào ống là
+    bộ đệm KHỐI nên phần chưa xả mất cùng cú giết.
+  he_qua: 'ba lượt review đi truy t63 — sai chỗ. Không ai biết ca nào giết.'
+  bai_hoc: 'phép đo dùng để định vị cú chết phải SỐNG SÓT được cú chết đó'
+
+viec_so_mot: >-
+  Chạy `--nhat-ky` trong namespace của reviewer và BÁO ĐÍCH DANH ca có `>>> vao` mà không
+  có `<<< ra`. Đây là lần đầu có phép đo sống sót qua cú giết. Nếu nhật ký XONG TRON VEN
+  mà vỏ shell vẫn chết thì cái chết nằm NGOÀI vòng lặp ca — cũng là thông tin mới.
+
+trong_tam_review:
+  - id: nhat-ky-tung-ca
+    hoi: >-
+      t99 có răng thật không? fsync mỗi ca có đổi hành vi/tốc độ đáng kể không? phân tích
+      `--nhat-ky` bằng sys.argv.index có nuốt nhầm hay chết ở ca nào không?
+  - id: thu-hoi-inherit-all
+    hoi: >-
+      còn đường nào trong kho ghi lại inherit="all"? gỡ xong codex CÒN CHẠY ĐƯỢC chứ (điều
+      phối mới chỉ LẬP LUẬN, chưa ĐO)? tài liệu còn chỗ nào dạy người sau dựng lại không?
+  - id: go-ma-khong-lam-hong
+    hoi: >-
+      go_khoi có ca xoá quá tay/xoá thiếu? marker nằm trong chuỗi TOML, trong comment, hay
+      lồng nhau thì sao? strip("\n") có ăn mất phần hợp lệ? rc=3 mà hook chỉ CẢNH BÁO rồi
+      đi tiếp — đúng hay nên chặn? t100 thiếu ca nào?
+
+khong_dong_HIGH_so_1: >-
+  Ba mục lượt này KHÔNG đóng finding HIGH "suite giết caller". Chúng làm lượt sau ĐỊNH VỊ
+  được nó. Reviewer thấy phải đóng HIGH đó trước thì nói thẳng.
+
+doi_ban_khai_cua_reviewer: >-
+  DÁN LẠI bản khai môi trường và chạy --dot-bien HAI LẦN. Lượt 7 là lần đầu hai bên ra
+  cùng con số (56/56) — giữ chuỗi đó.
+
+verified_by_coordinator:
+  suite: '100/100 (qua 99, bỏ qua 1)'
+  dot_bien: '56/56 đạt, KHÔNG mục nào SAI — hai lượt độc lập giống nhau'
+  eol: 'checked=308 violations=0'
+  doc_claims: 'strict ok=true flags=[]'
+  scope: 'ĐÚNG 5 tệp, 1 tệp MỚI'
+  thu_tren_config_that: >-
+    chạy trên BẢN SAO config thật: 37->26 dòng, 9 [projects] giữ nguyên, inherit=0,
+    TOML parse lại được, chạy lần hai no-op. ĐỪNG TIN con số này, đo lại.
+  hook_phien_KHONG_DO_DUOC: 'SẴN CÓ ở nền 2348e63 (không xác định được workspace từ thư mục tạm)'
+  phan_chung: >-
+    3/3 đúng chiều trên BẢN SAO TẠM — nhật ký ghi SAU ca ⇒ t99 đỏ; bỏ chốt TỪ CHỐI ⇒ t100
+    đỏ; đổi TỪ CHỐI thành im lặng ⇒ t100 đỏ.
+  gioi_han_bang_dot_bien: >-
+    DOT_BIEN chỉ đột biến launcher.py nên t99/t100 không vào bảng được — cùng giới hạn đã
+    khai cho _co_lap_toan_cuc/t89 và _nap_sach/t97.
+
+canh_bao_an_ninh:
+  khong_in_gia_tri: true
+  home_tam_bat_buoc: true
+  khong_dung_config_that: >-
+    mọi phép thử policy PHẢI dùng --tep <tệp tạm>; không đụng ~/.codex/auth.json hay
+    ~/.codex/config.toml thật.
+
+neo_sha_bat_bien_required: true
+chay_hai_lan_required: true
+approve_la_hop_le: 'đừng nặn finding cho có'
+duong_giao_verdict_da_do: 'REST bị proxy 403, gh không cài ⇒ ghi verdict ra tệp, điều phối đăng hộ'
+preconditions_measured_at_utc: '2026-08-16T06:00:00Z'

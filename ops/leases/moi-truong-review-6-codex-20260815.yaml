@@ -1,0 +1,110 @@
+# Lease REVIEWER lượt 6 — nhánh HẠ TẦNG MÔI TRƯỜNG ops/moi-truong-env-first.
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. NHỚ ĐÓNG NHÁY mọi giá trị chứa '#'.
+# packet_issue 55 NHƯNG la_viec_cua_packet false — rẽ từ master, KHÔNG tiêu attempt.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: null
+la_viec_cua_packet: false
+
+role: reviewer
+provider: codex
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+lease_id: moi-truong-review-6-codex-20260815
+review_round: 6
+
+branch: ops/moi-truong-env-first
+reviewed_sha_required: c775c0a5b0bf0816e913ba0b300d898fec3c58b0
+base_sha: fe895a068368754bd11b25ca59c504f973e9f086
+base_note: 'base là head lượt 4 đã soi. GỘP BA commit; delta ĐÚNG 2 tệp.'
+master_sha_at_grant: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1
+target_pull_request: null
+
+prompt_path: ops/prompts/moi-truong-review-6-codex-20260815.md
+prompt_sha256_required: 97e3a089a1cfed2e02dea05b2b692e8e0e54150238c0aa5100b0cb7f8cc98b2c
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-15 (cập nhật CODEX_AUTH_JSON rồi cấp lease neo c775c0a)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-15T21:00:00Z'
+lease_expires_at_utc: '2026-08-16T22:00:00Z'
+run_minutes: 1500
+heartbeat_required_minutes: 30
+
+# Lượt 5 đã cấp nhưng KHÔNG CHẠY ĐƯỢC — ghi ra để hồ sơ không có lỗ.
+luot_5_khong_chay_duoc:
+  lease_id: moi-truong-review-5-codex-20260815
+  neo: ad60b6f3402f1f8cca80f716667464734ea44395
+  ly_do: >-
+    credential codex bị THU HỒI phía máy chủ giữa chừng (refresh_token_invalidated,
+    token_revoked). Không phải lỗi kho, không phải lỗi reviewer, KHÔNG tiêu attempt.
+  he_qua: 'd9029c6 và ad60b6f CHƯA AI SOI ⇒ gộp vào lượt này'
+
+prior_review: moi-truong-review-4-codex-20260815
+prior_review_verdict: changes_requested
+prior_review_verdict_sha256: e9f0c759e75bf459f25cdb06a524fca671925525c9e47965251a025a5901d37a
+
+delta_gom_ba_commit:
+  - sha: d9029c6
+    tom_tat: 'bộ test TỰ KHAI môi trường'
+  - sha: ad60b6f3402f1f8cca80f716667464734ea44395
+    tom_tat: 'chốt TRƯỞNG NHÓM trước killpg — lỗ giết nhầm THẬT trong launcher.py'
+  - sha: c775c0a5b0bf0816e913ba0b300d898fec3c58b0
+    tom_tat: 'tách CO_CREDENTIAL khỏi DUNG_DUOC — thôi nâng nhãn vượt quá bằng chứng'
+
+trong_tam_review:
+  - id: chot-truong-nhom
+    hoi: >-
+      còn đường nào tới killpg không qua chốt (_giet_windows, _giet_rieng)? có TỪ CHỐI OAN
+      không (tiến trình vừa chết, pid tái dùng, race giữa getpgid và killpg)? có mua an
+      toàn bằng cách KHÔNG GIẾT ĐƯỢC GÌ NỮA không?
+  - id: ba-nhan-bang-chung
+    hoi: >-
+      CO_CREDENTIAL có bị đối xử như DUNG_DUOC ở đâu trong dòng chảy không? _han_token_codex
+      đọc JWT KHÔNG xác thực chữ ký — lời khai đó có bị dùng như bằng chứng mạnh hơn thực
+      tế ở đâu không? có rò giá trị token qua exp hay thông điệp không? _do_codex_song gọi
+      codex THẬT — tác dụng phụ gì (ghi tệp, đổi auth.json, tốn quota ngoài dự kiến)?
+  - id: t85-doi-ky-vong
+    hoi: >-
+      t85 ĐỔI kỳ vọng từ DUNG_DUOC sang CO_CREDENTIAL và được ghim _han_token_codex. Đổi
+      kỳ vọng một ca SẴN CÓ là việc cần soi kỹ: ĐÚNG theo hợp đồng mới, hay NỚI CA cho vừa
+      bản vá? Đây là câu hỏi nặng nhất của lượt này.
+  - id: ban-khai
+    hoi: 'thiếu khoá nào? rò thông tin nhạy cảm không? _do_an_toan nuốt BaseException có hại không?'
+
+doi_ban_khai_cua_reviewer: >-
+  Lease ĐÒI reviewer DÁN BẢN KHAI MÔI TRƯỜNG của mình vào verdict và chạy --dot-bien HAI
+  LẦN. Sau ba lượt tranh cãi con số, đây là lượt đầu hai bên có thứ để so.
+
+setsid_giu_nguyen: >-
+  KHÔNG gỡ setsid ở fe895a0 trong lượt này — gỡ một chốt lúc chưa ai review chốt kia là
+  đổi hai biến một lúc. Reviewer thấy nó nay THỪA hoặc CÓ HẠI thì nói thẳng.
+
+verified_by_coordinator:
+  suite: '93/93 (qua 92, bỏ qua 1 fixture Windows)'
+  dot_bien: '50/50 đạt, KHÔNG mục nào SAI (1 không đo được trên nền này)'
+  dot_bien_moi: 'nang_nhan_CO_CREDENTIAL_thanh_DUNG_DUOC 1/1 · bo_kiem_han_token_codex 1/1 · bo_chot_truong_nhom_truoc_killpg 1/1'
+  eol: 'checked=330 violations=0'
+  doc_claims: 'ok=true flags=[]'
+  scope: 'ĐÚNG 2 tệp'
+  ban_khai_dieu_phoi: 'pid/pgid/sid=20239/20237/19879 · chung_nhom_voi_cha=True · ns_pid=pid:[4026531836]'
+
+canh_bao_an_ninh:
+  khong_in_gia_tri: true
+  home_tam_bat_buoc: true
+  khong_dung_auth_that: >-
+    credential VỪA ĐƯỢC CẤP LẠI sau sự cố thu hồi — làm hỏng nó là chặn mọi lượt sau.
+
+neo_sha_bat_bien_required: true
+chay_hai_lan_required: true
+approve_la_hop_le: 'đừng nặn finding cho có; nhưng BA commit này CHƯA AI SOI'
+duong_giao_verdict_da_do: 'REST bị proxy 403, gh không cài ⇒ ghi verdict ra tệp, điều phối đăng hộ'
+preconditions_measured_at_utc: '2026-08-15T21:00:00Z'

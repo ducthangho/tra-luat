@@ -106,3 +106,4 @@ chay_hai_lan_required: true
 approve_la_hop_le: 'bốn lượt liền changes_requested KHÔNG phải hạn ngạch'
 duong_giao_verdict_da_do: 'REST bị proxy 403, gh không cài ⇒ ghi verdict ra tệp, điều phối đăng hộ'
 preconditions_measured_at_utc: '2026-08-16T07:00:00Z'
+posted_comment_id: 5306035243   # workflow ghi, ĐỪNG sửa tay

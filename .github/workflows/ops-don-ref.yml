@@ -79,8 +79,16 @@ jobs:
           LY_DO: ${{ inputs.ly_do }}
         run: |
           set -euo pipefail
-          # Qua biến env, KHÔNG nội suy ${{ }} thẳng vào thân script: đầu vào là
-          # chuỗi người gõ, nội suy thẳng là đường tiêm lệnh cổ điển.
+          # Đầu vào đi qua BIẾN MÔI TRƯỜNG, không chèn biểu thức Actions thẳng vào
+          # thân script: đầu vào là chuỗi người gõ, chèn thẳng là đường tiêm lệnh cổ điển.
+          #
+          # VÀ ĐỪNG VIẾT NGUYÊN CÚ PHÁP BIỂU THỨC RA ĐÂY, kể cả trong dòng chú thích.
+          # GitHub nội suy biểu thức trên TOÀN BỘ thân `run` trước khi shell thấy nó, nên
+          # một cặp dấu ngoặc kép-kép RỖNG trong comment là biểu thức RỖNG ⇒ tệp workflow
+          # KHÔNG HỢP LỆ, GitHub từ chối trước khi chạy job nào. Đã trả giá: bản trước của
+          # chính dòng này viết cú pháp ấy ra để giải thích rằng ta không dùng nó, và đó
+          # là thứ duy nhất làm hỏng cả workflow. Sáu lượt cross-review không thấy, vì cả
+          # sáu chỉ kiểm bằng PyYAML — "YAML parse được" KHÁC "GitHub nhận".
           printf 'hành động : %s\n' "$HANH_DONG"
           printf 'ref       : %s\n' "$REF"
           printf 'sha       : %s\n' "${SHA:-(không)}"

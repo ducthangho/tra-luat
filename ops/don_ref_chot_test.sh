@@ -225,6 +225,37 @@ lam "tạo tag: hai cặp KHÁC sha, ghép đúng" 0 tao-tag 'v1,v2' "$S1,$S2" f
 lam "tạo tag: phần tử rỗng giữa, vẫn ghép đúng" 0 tao-tag 'a,,b' "$S1,,$S2" false
 lam "tạo tag: số cặp lệch sau khi nén -> ĐỎ" 1 tao-tag 'a,b' "$S1" false
 
+# ================= GITHUB CO NHAN TEP NAY KHONG =================
+# BAI HOC DAT NHAT CUA CA DOT NAY. Sau luot cross-review deu ket luan "YAML ok" — vi ca
+# sau chi kiem bang PyYAML. Nhung GitHub NOI SUY BIEU THUC tren toan bo than `run` TRUOC
+# khi shell thay no, nen mot cap dau ngoac kep-kep RONG nam trong mot dong CHU THICH la
+# mot bieu thuc RONG => tep workflow KHONG HOP LE, GitHub tu choi truoc khi chay job nao.
+# Lan chay dau tien tren GitHub tra ve mot "workflow run" mang ten DUONG DAN TEP, 0 job,
+# conclusion=failure — chu khong phai mot job do.
+#
+# Nen o day goi trinh kiem THAT (actionlint). Neu khong co no thi KHONG im lang bo qua:
+# in KHONG DO DUOC va tra ma khac 0, vi mot cong tu tat khi thieu cong cu la cong khong
+# ton tai — dung luc no can nhat.
+echo
+if command -v actionlint >/dev/null 2>&1; then
+  AL=actionlint
+elif [ -x "${ACTIONLINT:-}" ]; then
+  AL="$ACTIONLINT"
+else
+  AL=""
+fi
+if [ -n "$AL" ]; then
+  if "$AL" -shellcheck= -pyflakes= "$YML"; then
+    QUA=$((QUA+1)); echo "  QUA   actionlint: GitHub nhận tệp workflow này"
+  else
+    HONG=$((HONG+1)); echo "  ĐỎ    actionlint bắt lỗi ở trên"
+  fi
+else
+  HONG=$((HONG+1))
+  echo "  ĐỎ    KHÔNG ĐO ĐƯỢC: thiếu actionlint, không kiểm được GitHub có nhận tệp không."
+  echo "        Cài: https://github.com/rhysd/actionlint/releases  ·  hoặc đặt ACTIONLINT=<đường dẫn>"
+fi
+
 TONG=$((QUA+HONG))
 echo
 echo "don_ref: $QUA/$TONG đạt (chốt + bước làm)"

@@ -1,3 +1,68 @@
+# ĐÍNH CHÍNH 16-08 — cách các bạn đã làm TỐT HƠN cách tôi đề nghị
+
+**Đọc mục này trước phần còn lại.** Đề xuất bên dưới soạn lúc `a3fd3ff`. Rà lại ở
+`5e7425c` thì thấy các bạn ĐÃ vá lỗ này trong `launcher.py`, và vá theo cách tốt hơn.
+
+Cách các bạn làm — `chuan_bi_xac_thuc()` bắt tín hiệu thu hồi từ **đầu ra lời gọi thật**,
+có timeout:
+
+```
+token_revoked · refresh_token_invalidated · token_invalidated
+401 unauthorized · please log in again · could not be refreshed
+```
+
+cộng việc tách nhãn `CO_CREDENTIAL` khỏi `DUNG_DUOC`.
+
+Cách tôi đề nghị dưới đây — so `tokens.refresh_token` giữa biến và đĩa — **yếu hơn**: nó
+chỉ chứng minh *biến và đĩa có cùng một credential không*, KHÔNG chứng minh credential còn
+**sống**. Một token bị thu hồi mà biến chưa cập nhật thì phép so của tôi vẫn nói "giống,
+giữ đĩa" và vẫn hỏng. Tôi cũng khuyên *"đừng gọi mạng vì chậm và có thể treo"* — các bạn
+giải quyết đúng mối lo ấy bằng timeout, chứ không bằng cách né lời gọi. **Cách của các bạn
+đúng hơn; bỏ qua phần đề xuất kỹ thuật bên dưới.**
+
+## Việc CÒN LẠI — một chỗ không nhất quán, đo được
+
+Chỉ còn đúng một điều đáng làm: **cho hook dùng chung phép kiểm ấy.**
+
+| | bắt tín hiệu thu hồi |
+|---|---|
+| `.claude/dev/launcher.py` | **2 chỗ** — đã vá |
+| `.claude/hooks/session-start.sh` | **0 chỗ** — vẫn `if codex login status` (dòng 237) |
+
+Hook chưa gọi `chuan_bi_xac_thuc`; chú thích dòng 277 nói `chuan-bi` là *"đường CỨU HỘ cho
+trường hợp hook NÀY không chạy"*, tức hai đường song song chứ không dùng chung.
+
+Hệ quả cụ thể, chính là kịch bản đã xảy ra thật 15–16/08: credential bị xoay ⇒ biến đổi ⇒
+đĩa còn bản cũ ⇒ **hook vẫn bỏ qua**, vì `login status` vẫn trả "Logged in". Đường cứu hộ
+chỉ cứu khi người ta biết mà chạy nó — mà lúc hỏng thì dấu hiệu duy nhất là `codex exec`
+chết với 401, không ai nghĩ tới `chuan-bi`.
+
+Đây KHÔNG phải hồi quy của `5e7425c` — dòng ấy giống nhau ở cả `a3fd3ff` lẫn `5e7425c`. Nó
+là một chỗ còn mở mà chính bản vá của các bạn làm lộ rõ hơn: cùng một quyết định, hai nơi,
+một nơi đã sửa.
+
+## Rà chéo `a3fd3ff` → `5e7425c`: KHÔNG hồi quy
+
+Đo cả hai bản, cùng điều kiện:
+
+| | `a3fd3ff` | `5e7425c` |
+|---|---|---|
+| `launcher_test` | rc=0 | rc=0 |
+| `launcher doctor` | rc=0 | rc=0 |
+| `eol_policy` (có `GIT_DIR`) | rc=0 | rc=0 |
+| `doc-claims --strict` | 1 flag | 1 flag — cùng một cái, có sẵn trên master |
+| không ghi vào config người dùng | an toàn | an toàn |
+| CRLF giữ nguyên (finding MEDIUM lượt 10) | 2 | 2 |
+
+`--thu-khan` biến mất khỏi `codex_env_policy` **không phải** tham chiếu treo — bản còn lại
+ở `launcher.py:2489` thuộc lệnh con `chuan-bi` khác hẳn.
+
+**Một chỗ tôi đo sai lần đầu, ghi ra để các bạn không tin nhầm:** tôi từng đo `eol_policy`
+và `doc-claims` ra `rc=2` trên cả hai bản. Đó là lỗi fixture của TÔI — cây `git archive`
+không có `.git`. Đo lại với `GIT_DIR` thì xanh cả hai.
+
+---
+
 # Đề xuất: hook không nạp được credential MỚI sau khi token bị xoay
 
 **Trạng thái:** CHƯA ÁP. Soạn cho phiên đang giữ `ops/moi-truong-ba-p1`.

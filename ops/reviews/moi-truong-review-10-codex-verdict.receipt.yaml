@@ -1,0 +1,42 @@
+schema_version: 1
+review: moi-truong-review-10
+reviewer: codex
+branch: ops/moi-truong-ba-p1
+head: a3fd3ff705bf4831495b1988de7655b32dc68197
+base: 1df800be15580d7432a1200900dd04ed9a7b997c
+verdict: changes_requested
+read_only_repo: true
+findings:
+  high: 0
+  medium: 2
+  low: 0
+tests:
+  step_0: pass
+  t72_repeat:
+    requested: 40
+    entered: 40
+    completed: 40
+    dead_runs: []
+    complete_marker: true
+    return_code: 0
+  full_suite:
+    total: 102
+    passed: 101
+    skipped: 1
+    failed: 0
+    entered: 102
+    completed: 102
+    complete_marker: true
+  mutation_run_1:
+    measured: 58
+    passed: 58
+    unmeasurable: 1
+    return_code: 0
+  mutation_run_2:
+    measured: 58
+    passed: 58
+    unmeasurable: 1
+    return_code: 0
+artifacts:
+  verdict: moi-truong-review-10-codex-verdict.md
+  receipt: moi-truong-review-10-codex-verdict.receipt.yaml

@@ -1,0 +1,118 @@
+# Lease REVIEWER lượt 7 — nhánh HẠ TẦNG MÔI TRƯỜNG ops/moi-truong-ba-p1.
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. NHỚ ĐÓNG NHÁY mọi giá trị chứa '#'.
+# packet_issue 55 NHƯNG la_viec_cua_packet false — rẽ từ master, KHÔNG tiêu attempt.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: null
+la_viec_cua_packet: false
+
+role: reviewer
+provider: codex
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+lease_id: moi-truong-review-7-codex-20260816
+review_round: 7
+
+branch: ops/moi-truong-ba-p1
+reviewed_sha_required: 69bc3cede6085bf6229ac95a44da4aae9e51ee42
+base_sha: c775c0a5b0bf0816e913ba0b300d898fec3c58b0
+base_note: 'base là head lượt 6 đã soi. GỘP BỐN commit; delta ĐÚNG 5 tệp.'
+master_sha_at_grant: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1
+target_pull_request: null
+
+prompt_path: ops/prompts/moi-truong-review-7-codex-20260816.md
+prompt_sha256_required: b1e30aa4b0a965dba8a052fe1daf7148512e80a203f722fd34e9b1287e276a66
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-16 (vá ba P1 này trước, rồi cấp lease review)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-16T05:00:00Z'
+lease_expires_at_utc: '2026-08-17T06:00:00Z'
+run_minutes: 1500
+heartbeat_required_minutes: 30
+
+prior_review: moi-truong-review-6-codex-20260815
+prior_review_verdict: changes_requested
+prior_review_verdict_sha256: 677a6cca560aeb2390edcf58c2cdfc1f0b9c18caec1a36e51e63989ca31bffb2
+
+# ĐIỀU PHỐI TỰ KHAI SAI SỐ — ghi vào hồ sơ, không giấu.
+dinh_chinh_luot_6:
+  toi_da_ghi: 'dot_bien 50/50 đạt, KHÔNG mục nào SAI'
+  do_lai_tai_c775c0a: '49/50, do_codex_tin_DONG_DAU_thay_vi_ma_thoat giet 0/1 — HAI lượt độc lập'
+  ket_luan: 'reviewer ĐÚNG, điều phối SAI. Đã đăng đính chính công khai trên #55.'
+  nguyen_nhan_goc: >-
+    KHÔNG phải mutant hết răng. Runner ghi mọi bản đột biến vào CÙNG một đường dẫn; CPython
+    coi .pyc còn hợp lệ theo (mtime tính bằng GIÂY, kích thước) nên hai đột biến cùng kích
+    thước ghi trong cùng một giây làm bản sau chạy MÃ CỦA BẢN TRƯỚC.
+
+delta_gom_bon_commit:
+  - sha: 71aa638
+    tom_tat: 'CẢNH BÁO SỚM trước khi credential codex hết hạn'
+    da_ai_soi: 'CHƯA'
+  - sha: c7bbd81
+    tom_tat: 'mở CODEX_AUTH_JSON cho codex qua shell_environment_policy'
+    da_ai_soi: 'CHƯA'
+  - sha: 2348e6367c8a76da346742bc6066813411c798cc
+    tom_tat: 'sửa hai lỗi của chính bản vá cảnh báo sớm'
+    da_ai_soi: 'CHƯA'
+  - sha: 69bc3cede6085bf6229ac95a44da4aae9e51ee42
+    tom_tat: 'ba P1 + một P2 của lượt 6, và chốt cổng đột biến chấm sai bản'
+    da_ai_soi: 'CHƯA'
+
+trong_tam_review:
+  - id: cong-cham-sai-ban
+    hoi: >-
+      lời giải stale-.pyc có đủ giải thích con số CỦA REVIEWER không? Chạy --dot-bien trên
+      c775c0a rồi 69bc3ce — mutant đó PHẢI chuyển SAI -> OK; không chuyển thì lời giải SAI.
+      Bốn lớp vá có lớp nào THỪA hoặc GIẢ? (lớp tắt-ghi-bytecode lúc đầu KHÔNG có răng.)
+  - id: chot-truong-nhom-sau-va
+    hoi: >-
+      còn đường nào tới killpg không qua chốt? _con_lai() lấy phần nhóm là [] khi không
+      killpg — có làm me_da_chet/ca_cay nói dối ca nào không? t92(c) ĐẢO CHIỀU kỳ vọng:
+      đúng hợp đồng hay nới cho vừa bản vá?
+  - id: danh-sach-trang
+    hoi: >-
+      mặc định vẫn thoát 0 khi CHUA_CHUNG_MINH — rộng lượng thế có làm chốt vô dụng đúng
+      chỗ cần chặn? t98 ghim KHA_NANG/CONG_CU: ghim thế có mất liên hệ với hành vi thật?
+  - id: ba-commit-chua-ai-soi
+    hoi: >-
+      cảnh báo sớm có thành CHỐT ĐỎ THƯỜNG TRỰC ở đâu? inherit="all" mở TOÀN BỘ môi trường
+      cho tiến trình con của codex — exclude đủ chưa, khối có đặt trước mọi [projects] chưa,
+      chạy lại nhiều lần có bất biến không? Nay nó THỪA (đã có device-auth) hay CÓ HẠI?
+
+phep_thu_quyet_dinh: >-
+  Lượt 6 suite chuẩn GIẾT CALLER bên reviewer (dừng sau t62) trong khi bên điều phối 93/93.
+  Nếu bịt fail-open killpg là đúng nguyên nhân thì LƯỢT NÀY SUITE PHẢI CHẠY HẾT BÊN REVIEWER.
+  Vẫn chết = finding HIGH và là bằng chứng giả thuyết điều phối SAI. Báo thẳng, đừng nương.
+
+doi_ban_khai_cua_reviewer: >-
+  DÁN LẠI bản khai môi trường vào verdict và chạy --dot-bien HAI LẦN. Lượt 6 cho thấy hai
+  bên ở hai PID namespace khác nhau (reviewer pgid=1 sid=1) — số chỉ so được khi có bản khai.
+
+verified_by_coordinator:
+  nen_2348e63: 'suite 96/96 · dot-bien 53/54 (1 SAI)'
+  sau_va_69bc3ce: 'suite 98/98 · dot-bien 56/56, KHONG muc nao SAI — hai luot doc lap giong nhau'
+  eol: 'checked=308 violations=0'
+  doc_claims: 'strict ok=true flags=[]'
+  scope: 'ĐÚNG 5 tệp'
+  phan_chung: '4/4 đúng chiều, chạy trên BẢN SAO TẠM (không đụng cây thật)'
+  ban_khai_dieu_phoi: 'pid/pgid/sid=17306/17306/17306 · ns_pid=pid:[4026531836] · init=process_api'
+
+canh_bao_an_ninh:
+  khong_in_gia_tri: true
+  home_tam_bat_buoc: true
+  khong_dung_auth_that: 'credential device-auth đúc tại chỗ — làm hỏng nó là chặn mọi lượt sau'
+
+neo_sha_bat_bien_required: true
+chay_hai_lan_required: true
+approve_la_hop_le: 'đừng nặn finding cho có; nhưng BỐN commit này CHƯA AI SOI'
+duong_giao_verdict_da_do: 'REST bị proxy 403, gh không cài ⇒ ghi verdict ra tệp, điều phối đăng hộ'
+preconditions_measured_at_utc: '2026-08-16T05:00:00Z'

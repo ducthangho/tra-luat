@@ -261,6 +261,19 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
 - **Đột biến SỐNG SÓT không luôn nghĩa là test yếu.** Đo rồi mới biết: `-uall` so với mặc
   định KHÔNG đổi sạch/bẩn (chỉ `-uno` mới làm chốt mù), và ca "rc=0 mà rỗng" được chặn ở
   BỐN lớp độc lập nên phải đột biến ghép cả bốn. Đột biến sai chỗ ≠ mã sai.
+- **…và cũng không luôn nghĩa là mã đúng: đột biến có thể CHƯA TỪNG ĐƯỢC CHẠY.** Runner
+  đột biến ghi mọi bản sao vào CÙNG một `launcher.py` tạm. CPython coi `.pyc` còn hợp lệ
+  theo **(mtime tính bằng GIÂY, kích thước)** — hai đột biến ra tệp cùng kích thước, ghi
+  trong cùng một giây ⇒ bản sau chạy **mã của bản trước**. Mutant
+  `do_codex_tin_DONG_DAU…` báo `giet 0/1` suốt BA lượt review vì lý do đó, và khi gỡ chốt
+  ra để phản chứng thì nó kéo câm luôn mutant canh bản vá `killpg` — **cơ chế tước răng
+  mọi mutant, không riêng một cái**. Bằng chứng A/B: `sys.dont_write_bytecode=True` ⇒
+  `1/1`; chạy tay một mình ⇒ `1/1`. Đây cũng là lời giải cho ba lượt "cùng cổng, hai kết
+  quả": va chạm chỉ xảy ra khi hai lượt ghi lọt cùng một giây, tức phụ thuộc MÁY.
+  Ba lớp bịt (xoá `.pyc` · tắt ghi bytecode · `invalidate_caches`) cộng tên tệp riêng
+  từng đột biến; `t97` khoá lại, và mỗi lớp có phản chứng RIÊNG — lớp "tắt ghi bytecode"
+  lúc đầu KHÔNG có răng (gỡ nó ra mà `t97` vẫn xanh) nên phải đo thẳng bằng "nạp xong
+  không được để lại `.pyc`".
 - **Hook dùng đường dẫn TƯƠNG ĐỐI là bẫy tự khoá.** `.claude/settings.json` từng ghi
   `python .claude/hooks/pretooluse_guard.py`; khi cwd của shell trôi vào thư mục con thì
   MỌI lệnh Bash chết trước khi chạy, và không còn đường `cd` về. Luôn dùng

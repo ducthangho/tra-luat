@@ -727,8 +727,23 @@ def _giet_cay(pid: int, khoa: str | None, job=None) -> KetGiet:
     # giết nhầm tiến trình vô can"). Chốt cũ hỏi "PID này còn là NGƯỜI CŨ không"; chốt
     # này hỏi "PID này có thật sự là CẢ NHÓM không". Thiếu vế sau thì vế trước không đủ.
     #
-    # KHÔNG đo được `pgid` thì ĐI TIẾP — tiến trình có thể vừa chết, và đó là đường đã
-    # có xử lý riêng bên dưới. Chỉ TỪ CHỐI khi đo được và biết chắc là KHÁC.
+    # v1.35.86 (cross-review lượt 6, P1 `chot-truong-nhom-van-fail-open`) — bản vá
+    # ĐẦU của chốt này ghi: "KHÔNG đo được `pgid` thì ĐI TIẾP — tiến trình có thể vừa
+    # chết". Đó là FAIL-OPEN, và nó bỏ qua chốt ở ĐÚNG ca nguy hiểm nhất.
+    #
+    # `getpgid` không chỉ ném `ESRCH` (mục tiêu đã chết — vô hại). Nó còn ném `EPERM`
+    # khi mục tiêu SỐNG nhưng ở SESSION KHÁC — tức đúng cái ca mà `killpg(pid)` bắn
+    # vào nhóm của người vô can. Bản trước không phân biệt được hai ca đó, và vẫn bắn.
+    #
+    # Doctrine tệp này đã viết rồi: `None` (không đo được) KHÁC `False`. Tôi viết nó
+    # vào chỗ khác rồi vi phạm ngay tại dòng vá.
+    #
+    # Chốt mới: `killpg` CHỈ chạy khi ĐO ĐƯỢC và `pgid == pid`. Không đo được thì
+    # KHÔNG mua an toàn bằng cách thôi giết — vẫn giết, nhưng bằng `_giet_rieng` trên
+    # ẢNH CHỤP, tức từng pid một CÓ KHOÁ DANH TÍNH. `_chup_cay` phủ chính `pid`, mọi
+    # hậu duệ VÀ mọi thành viên nhóm, nên đường này không yếu hơn về tầm với.
+    # Khe duy nhất mất đi, nói thẳng: tiến trình GIA NHẬP nhóm SAU lúc chụp — `killpg`
+    # với tới, `_giet_rieng` thì không. Đổi một khe hẹp lấy việc thôi bắn vào nhóm 1.
     nhom_that = None
     try:
         nhom_that = os.getpgid(pid)
@@ -739,21 +754,36 @@ def _giet_cay(pid: int, khoa: str | None, job=None) -> KetGiet:
                        f"tu choi giet: pid {pid} KHONG phai truong nhom "
                        f"(pgid={nhom_that}) - killpg({pid}) se nham vao nhom KHAC",
                        tu_choi=True)
+    dung_killpg = nhom_that == pid          # CHỈ True khi ĐO ĐƯỢC và bằng nhau
 
     anh = _chup_cay(pid)
+    if not dung_killpg and not anh:
+        # Không được `killpg`, mà ảnh chụp cũng rỗng/không đo được ⇒ KHÔNG còn đường
+        # giết nào an toàn. Nói thật là không giết được, đừng im lặng không làm gì.
+        return KetGiet(False, False,
+                       "tu choi giet: pgid KHONG do duoc (khong duoc killpg) va anh "
+                       "chup rong/khong do duoc - khong con duong giet an toan",
+                       tu_choi=True)
 
     def _con_lai():
         """Ai còn sống: ảnh chụp (bắt cả kẻ đã rời nhóm) HỢP thành viên nhóm hiện
-        tại (bắt cả kẻ sinh sau lúc chụp). None = không đo được ⇒ KHÔNG khẳng định."""
-        nhom = _thanh_vien_nhom(pid)
+        tại (bắt cả kẻ sinh sau lúc chụp). None = không đo được ⇒ KHÔNG khẳng định.
+
+        Khi KHÔNG dùng `killpg`, nhóm của `pid` KHÔNG phải đơn vị kế toán của ta —
+        ta chưa từng bắn vào nó, và `pid` còn chẳng phải trưởng nhóm — nên phần nhóm
+        đóng góp RỖNG. Đây không phải khẳng định "nhóm đã rỗng"; là "nhóm không nằm
+        trong phạm vi ta nhận trách nhiệm". Ảnh chụp vẫn phủ cả thành viên nhóm tại
+        thời điểm chụp, nên phần bị bỏ đúng bằng khe đã khai ở trên."""
+        nhom = _thanh_vien_nhom(pid) if dung_killpg else []
         if nhom is None or anh is None:
             return None
         return {q for q, k in anh.items() if _con_song_dung_khoa(q, k)} | set(nhom)
 
-    try:
-        os.killpg(pid, signal.SIGTERM)
-    except (ProcessLookupError, PermissionError, OSError) as e:
-        return KetGiet(False, False, f"killpg SIGTERM loi: {e}")
+    if dung_killpg:
+        try:
+            os.killpg(pid, signal.SIGTERM)
+        except (ProcessLookupError, PermissionError, OSError) as e:
+            return KetGiet(False, False, f"killpg SIGTERM loi: {e}")
     if anh:
         _giet_rieng(anh, signal.SIGTERM)   # killpg không với tới kẻ đã setsid()
     for _ in range(20):  # 2 giây chờ tự chết tử tế
@@ -769,12 +799,13 @@ def _giet_cay(pid: int, khoa: str | None, job=None) -> KetGiet:
             continue
         if not con:
             return KetGiet(True, True, "SIGTERM: cay da sach")
-    try:
-        os.killpg(pid, signal.SIGKILL)
-    except ProcessLookupError:
-        pass                       # nhóm đã sạch giữa chừng
-    except OSError as e:
-        return KetGiet(False, False, f"killpg SIGKILL loi: {e}")
+    if dung_killpg:
+        try:
+            os.killpg(pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass                   # nhóm đã sạch giữa chừng
+        except OSError as e:
+            return KetGiet(False, False, f"killpg SIGKILL loi: {e}")
     if anh:
         _giet_rieng(anh, signal.SIGKILL)
     time.sleep(0.3)
@@ -2163,7 +2194,19 @@ def lenh_chuan_bi(a) -> int:
     return MA_CHUA_XAC_THUC if xau else MA_OK
 
 
-def _ma_doctor(thieu_bat_buoc, chua_xac_thuc, doi_kha_dung: bool) -> int:
+# Nhãn DUY NHẤT được tính là ĐÃ CHỨNG MINH khả dụng. Danh sách TRẮNG, cố ý:
+# thêm nhãn mới mà quên cập nhật ở đây thì nó rơi vào "chưa chứng minh" — sai về
+# phía AN TOÀN. Danh sách ĐEN thì ngược lại, nhãn mới lọt thẳng thành "khả dụng",
+# và đó đúng là cách `CO_CREDENTIAL` lọt qua ở lượt trước.
+#
+# `SAP_HET_HAN` KHÔNG có trong đây: nếu không chạy `--kiem-song` thì nó cũng chỉ là
+# `CO_CREDENTIAL` kèm cảnh báo, và hạn lấy từ JWT KHÔNG xác thực chữ ký — lời khai đó
+# đủ để HẠ nhãn (fail-closed), không đủ để NÂNG.
+DA_CHUNG_MINH_KHA_DUNG = frozenset({"DUNG_DUOC"})
+
+
+def _ma_doctor(thieu_bat_buoc, chua_xac_thuc, doi_kha_dung: bool,
+               chua_chung_minh=()) -> int:
     """Mã thoát của `doctor`. Thiếu công cụ BẮT BUỘC luôn là 12.
 
     CHƯA XÁC THỰC chỉ thành mã 13 khi phía gọi ĐÒI (`--doi-kha-dung`). Mặc định
@@ -2184,7 +2227,9 @@ def _ma_doctor(thieu_bat_buoc, chua_xac_thuc, doi_kha_dung: bool) -> int:
     """
     if thieu_bat_buoc:
         return MA_THIEU_CONG_CU
-    if chua_xac_thuc and doi_kha_dung:
+    # `--doi-kha-dung` FAIL-CLOSED: phía gọi đòi "khả dụng" thì "chưa chứng minh được"
+    # phải chặn y như "đo được là hỏng". Chỉ mặc định (không có cờ) mới rộng lượng.
+    if (chua_xac_thuc or chua_chung_minh) and doi_kha_dung:
         return MA_CHUA_XAC_THUC
     return MA_OK
 
@@ -2223,7 +2268,7 @@ def lenh_doctor(a) -> int:
         ws = tim_workspace(getattr(a, "workspace", None))
     except Chan:
         ws = None                       # doctor phải chạy được cả ngoài repo
-    kha_nang, chua_xac_thuc = [], []
+    kha_nang, chua_xac_thuc, chua_chung_minh = [], [], []
     for k in KHA_NANG:
         try:
             tt, mo_ta = k["do"](ws, getattr(a, "kiem_song", False))
@@ -2233,6 +2278,8 @@ def lenh_doctor(a) -> int:
                          "vi_sao": k["vi_sao"], "khac_phuc": k.get("khac_phuc", "")})
         if tt in ("CHUA_XAC_THUC", "CAN_CHUAN_BI"):
             chua_xac_thuc.append(k["ten"])
+        elif tt not in DA_CHUNG_MINH_KHA_DUNG:
+            chua_chung_minh.append(k["ten"])
     bien = quet_bien_moi_truong()
 
     if a.json:
@@ -2240,15 +2287,24 @@ def lenh_doctor(a) -> int:
         # thành "đủ công cụ VÀ đã xác thực", làm `t53` đỏ — và đúng ra là phải đỏ:
         # đổi nghĩa một trường mà phía gọi đã đọc thì cũng là nới hợp đồng ngầm,
         # y như đổi mã thoát. Thông tin mới đi vào TRƯỜNG MỚI (`ok_kha_dung`).
+        #
+        # v1.35.86 (cross-review lượt 6, P1 `co-credential-van-duoc-coi-la-kha-dung`):
+        # `ok_kha_dung` trước chỉ trừ `chua_xac_thuc`, mà danh sách đó KHÔNG chứa
+        # `CO_CREDENTIAL`. Hệ quả: tầng ĐO đã thôi nâng nhãn, nhưng tầng TIÊU THỤ
+        # nâng lại nguyên vẹn — `ok_kha_dung=true` cho đúng credential mà lệnh gọi
+        # thật trả 401. Sửa một đầu mà để đầu kia y nguyên thì chưa sửa gì.
         _in_an_toan(json.dumps({"ok": not thieu_bat_buoc,
-                                "ok_kha_dung": not thieu_bat_buoc and not chua_xac_thuc,
+                                "ok_kha_dung": not thieu_bat_buoc and not chua_xac_thuc
+                                               and not chua_chung_minh,
                                 "he_dieu_hanh": he,
                                 "python_dang_chay": sys.version.split()[0],
                                 "cong_cu": ket, "thieu_bat_buoc": thieu_bat_buoc,
                                 "kha_nang": kha_nang, "chua_xac_thuc": chua_xac_thuc,
+                                "chua_chung_minh": chua_chung_minh,
                                 "bien_moi_truong": bien},
                                ensure_ascii=False, indent=2))
-        return _ma_doctor(thieu_bat_buoc, chua_xac_thuc, getattr(a, "doi_kha_dung", False))
+        return _ma_doctor(thieu_bat_buoc, chua_xac_thuc,
+                          getattr(a, "doi_kha_dung", False), chua_chung_minh)
     else:
         con_ong = _in_an_toan(
             f"he dieu hanh : {he}  |  python dang chay: {sys.version.split()[0]}")
@@ -2290,7 +2346,14 @@ def lenh_doctor(a) -> int:
             if k["trang_thai"] == "SAP_HET_HAN":
                 _in_an_toan(f"  CANH BAO SOM   {k['ten']:<11} -> {k['khac_phuc']}")
                 _in_an_toan(f"                 {k['chi_tiet']}")
-    return _ma_doctor(thieu_bat_buoc, chua_xac_thuc, getattr(a, "doi_kha_dung", False))
+        # "Chưa chứng minh" KHÁC "đo được là hỏng" — in riêng, đừng để người đọc
+        # suy ra im lặng là xanh. Đây chính là khoảng cách đã đốt cả ngày 15-08.
+        if chua_chung_minh:
+            _in_an_toan("  CHUA CHUNG MINH KHA DUNG (co mat, chua ai goi that): "
+                        + ", ".join(chua_chung_minh))
+            _in_an_toan("                 chay lai voi --kiem-song de doi bang chung that")
+    return _ma_doctor(thieu_bat_buoc, chua_xac_thuc,
+                      getattr(a, "doi_kha_dung", False), chua_chung_minh)
 
 
 # ----------------------------------------------------------------------- CLI

@@ -15,6 +15,7 @@ from __future__ import annotations
 import contextlib
 import hashlib
 import importlib.util
+import io
 import json
 import os
 import platform
@@ -132,13 +133,57 @@ def _con_song_that(pid: int) -> bool:
     return True
 
 
+def _nap_sach(duong):
+    """Nạp một tệp `.py` và ĐẢM BẢO chạy đúng NỘI DUNG ĐANG CÓ TRÊN ĐĨA.
+
+    ĐÃ ĐO (cross-review lượt 6, truy nguyên P1 `cong-dot-bien-do-luot-1`): bản trước
+    chỉ gọi thẳng `exec_module`, và cổng đột biến ĐÃ CHẤM ĐIỂM NHẦM BẢN.
+
+    Cơ chế, đo được bằng A/B: CPython coi một `.pyc` là còn hợp lệ khi (mtime nguồn
+    tính theo GIÂY, kích thước nguồn) khớp với đầu tệp `.pyc`. Runner đột biến ghi
+    MỌI bản sao vào CÙNG một đường dẫn. Mutation #3 (`bo_loc_do_dai…`) và #4
+    (`do_codex_tin_DONG_DAU…`) tình cờ ra tệp CÙNG 129395 byte; khi hai lượt ghi rơi
+    vào CÙNG MỘT GIÂY thì bản #4 KHÔNG BAO GIỜ được biên dịch — Python phục vụ lại
+    mã của #3. Kết quả: mutant #4 báo `giet 0/1` "sống sót" mà nó chưa hề được chạy.
+    Bật `sys.dont_write_bytecode` rồi chạy lại: `giet 1/1`. Đó là toàn bộ bằng chứng.
+    Chạy tay một mình cũng `1/1` — nên ba lượt trước tôi "chứng minh số của mình
+    đúng" bằng cách vô tình chạy nó ở dạng KHÔNG dính lỗi.
+
+    Đây cũng là lời giải cho câu "một cổng cho kết quả phụ thuộc nơi chạy": va chạm
+    chỉ xảy ra khi HAI lượt ghi lọt cùng một giây, mà điều đó phụ thuộc ca test ở
+    giữa chạy nhanh hay chậm — tức phụ thuộc MÁY. Không phải ai đo sai; là cổng đo
+    một thứ không phải mã của nó.
+
+    Ba lớp, độc lập nhau (một lớp hỏng thì lớp kia vẫn chặn):
+      1. xoá `.pyc` tương ứng nếu có — bịt cả bản cũ còn sót từ LƯỢT CHẠY TRƯỚC,
+         thứ mà tắt ghi bytecode KHÔNG cứu được (tắt ghi ≠ tắt đọc);
+      2. tắt ghi bytecode trong lúc nạp — không sinh thêm bản cache để va chạm;
+      3. `invalidate_caches()` — bỏ bộ nhớ đệm mục lục thư mục của importlib.
+    Runner còn đặt TÊN TỆP KHÁC NHAU cho từng đột biến, là lớp thứ tư ở phía nó.
+    """
+    duong = Path(duong)
+    try:
+        pyc = Path(importlib.util.cache_from_source(str(duong)))
+        if pyc.exists():
+            pyc.unlink()
+    except (OSError, ValueError, NotImplementedError):
+        pass                        # không xoá được thì còn hai lớp kia
+    truoc = sys.dont_write_bytecode
+    sys.dont_write_bytecode = True
+    try:
+        importlib.invalidate_caches()
+        ten = f"launcher_thu_{time.time_ns()}"
+        sp = importlib.util.spec_from_file_location(ten, duong)
+        m = importlib.util.module_from_spec(sp)
+        sp.loader.exec_module(m)
+        return m
+    finally:
+        sys.dont_write_bytecode = truoc
+
+
 def _tai_launcher_thu():
     """Nạp đúng bản launcher đang thử (kể cả bản sao đột biến)."""
-    ten = f"launcher_thu_{time.time_ns()}"
-    sp = importlib.util.spec_from_file_location(ten, LAUNCHER_DANG_DUNG)
-    m = importlib.util.module_from_spec(sp)
-    sp.loader.exec_module(m)
-    return m
+    return _nap_sach(LAUNCHER_DANG_DUNG)
 
 
 # ------------------------------------------------------------- chốt: workspace
@@ -896,6 +941,7 @@ def t52_so_hong_KHONG_duoc_im_lang():
 # ------------------------------------------ kiểm công cụ môi trường (doctor)
 
 MA_THIEU_CONG_CU = 12
+MA_CHUA_XAC_THUC = 13
 
 
 @ca
@@ -1958,9 +2004,14 @@ def _co_lap_toan_cuc():
 # CHẨN ĐOÁN mà tự nó ném lỗi thì phá đúng thứ nó sinh ra để cứu. `None` nghĩa là KHÔNG
 # ĐO ĐƯỢC, khác hẳn `False` — đừng gộp hai thứ đó.
 def _do_an_toan(ham):
+    # `Exception`, KHÔNG phải `BaseException` (cross-review lượt 6, P2). Bản trước bắt
+    # `BaseException` nên `KeyboardInterrupt` và `SystemExit` phát ra TRONG một phép dò
+    # bị nuốt thành `None`, rồi runner đi tiếp vào các ca có `killpg`. Biến một YÊU CẦU
+    # DỪNG thành "không đo được" là đúng thứ nguy hiểm nhất khối này có thể làm: người
+    # bấm Ctrl-C thường là người đang thấy nó chạy sai.
     try:
         return ham()
-    except BaseException:            # noqa: BLE001 - chẩn đoán KHÔNG được làm hỏng lượt chạy
+    except Exception:                # noqa: BLE001 - chẩn đoán KHÔNG được làm hỏng lượt chạy
         return None
 
 
@@ -2415,6 +2466,19 @@ def t91_ban_khai_moi_truong_khong_duoc_chet_va_khong_duoc_doan():
         bang(k in mt, f"ban khai thieu khoa {k!r} — khoa nay dung de so hai moi truong")
     bang(mt["pid"] == os.getpid(), "pid khai sai")
 
+    # (d) `_do_an_toan` KHONG duoc nuot YEU CAU DUNG (cross-review luot 6, P2).
+    # Ban truoc bat `BaseException`, nen Ctrl-C phat ra trong mot phep do bi doi
+    # thanh `None` va runner di tiep vao cac ca co `killpg`. Nguoi bam Ctrl-C
+    # thuong la nguoi dang thay no chay sai — nuot dung ho la te nhat.
+    bang(_do_an_toan(lambda: 1 / 0) is None, "loi thuong phai thanh None")
+    for loai in (KeyboardInterrupt, SystemExit):
+        da_thoat = False
+        try:
+            _do_an_toan(lambda: (_ for _ in ()).throw(loai()))
+        except BaseException as e:      # noqa: BLE001 - dang do CHINH viec nay
+            da_thoat = isinstance(e, loai)
+        bang(da_thoat, f"{loai.__name__} bi NUOT thanh 'khong do duoc'")
+
 
 @ca
 def t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom():
@@ -2457,14 +2521,34 @@ def t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom():
     bang(ghi and ghi[0] == 500, f"la truong nhom ma KHONG giet: {ghi} / {kq}")
     bang(getattr(kq, "tu_choi", False) is False, f"la truong nhom ma lai tu choi: {kq}")
 
-    # (c) KHONG do duoc pgid => DI TIEP (tien trinh co the vua chet), dung tu choi oan
+    # (c) KHONG do duoc pgid => KHONG duoc killpg, NHUNG VAN phai giet tung pid
+    #
+    # Ban dau ca nay ghim dung nguoc lai: "khong do duoc thi DI TIEP", tuc VAN goi
+    # killpg. Cross-review luot 6 bat dung cho: `getpgid` con nem EPERM khi muc tieu
+    # SONG nhung o SESSION KHAC — dung ca ma killpg(pid) ban vao nhom nguoi vo can.
+    # Test dang BAO VE lo thay vi cam no. Nay khoa CA HAI ve: khong killpg, ma cung
+    # khong duoc mua an toan bang cach thoi giet.
     ghi.clear()
+    da_giet_rieng = []
+    m._giet_rieng = lambda anh, sig: da_giet_rieng.append(sorted(anh))
+    m._chup_cay = lambda p: {p: "x", p + 1: "y"}
     def _hong(_p):
         raise OSError("khong do duoc")
     m.os.getpgid = _hong
     kq = m._giet_cay(500, "x")
-    bang(getattr(kq, "tu_choi", False) is False,
-         f"khong do duoc pgid ma TU CHOI OAN: {kq}")
+    bang(ghi == [], f"pgid KHONG do duoc ma VAN goi killpg: {ghi}")
+    bang(da_giet_rieng and da_giet_rieng[0] == [500, 501],
+         f"bo killpg roi KHONG giet rieng ai — mua an toan bang cach thoi giet: "
+         f"{da_giet_rieng} / {kq}")
+
+    # (d) KHONG do duoc pgid VA anh chup rong => noi that la khong giet duoc
+    ghi.clear()
+    da_giet_rieng.clear()
+    m._chup_cay = lambda p: {}
+    kq = m._giet_cay(500, "x")
+    bang(ghi == [], f"anh chup rong ma van killpg: {ghi}")
+    bang(getattr(kq, "tu_choi", False) is True,
+         f"khong con duong giet nao ma khong noi that: {kq}")
 
 
 @ca
@@ -2642,6 +2726,138 @@ def t96_kiem_song_phai_chay_KE_CA_khi_sap_het_han():
     bang("token_revoked" in mo_ta, f"phai giu ly do may chu tra: {mo_ta!r}")
 
 
+@ca
+def t98_CO_CREDENTIAL_khong_duoc_thanh_kha_dung_o_tang_doctor():
+    """Tầng ĐO thôi nâng nhãn rồi, tầng TIÊU THỤ nâng lại thì coi như chưa sửa gì.
+
+    Cross-review lượt 6, P1: `_do_codex` đã tách `CO_CREDENTIAL` khỏi `DUNG_DUOC`,
+    nhưng `lenh_doctor` chỉ trừ `chua_xac_thuc` khi tính `ok_kha_dung` — mà danh sách
+    ấy KHÔNG chứa `CO_CREDENTIAL`. Hệ quả: đúng cái credential mà lời gọi thật trả
+    401 vẫn cho `ok_kha_dung=true` và `--doi-kha-dung` vẫn thoát 0.
+
+    Ca này ghim ở tầng `lenh_doctor`, KHÔNG gọi CLI thật: bảng `KHA_NANG` và `CONG_CU`
+    đều được ghim, nên kết quả không phụ thuộc credential của máy đang chạy — đúng bài
+    học "cổng phụ thuộc nơi chạy thì chưa phải cổng".
+    """
+    m = _tai_launcher_thu()
+    m.CONG_CU = []                       # khong do cong cu that => thieu_bat_buoc rong
+
+    class DoiSo:
+        json = True
+        workspace = None
+        kiem_song = False
+        doi_kha_dung = False
+
+    def dat(nhan):
+        m.KHA_NANG = [{"ten": "codex", "do": lambda ws, ks=False: (nhan, "x"),
+                       "vi_sao": "v", "khac_phuc": "k"}]
+
+    def chay_doctor(doi_kha_dung):
+        a = DoiSo()
+        a.doi_kha_dung = doi_kha_dung
+        cu = sys.stdout
+        sys.stdout = io.StringIO()
+        try:
+            ma = m.lenh_doctor(a)
+            return ma, json.loads(sys.stdout.getvalue())
+        finally:
+            sys.stdout = cu
+
+    # (a) DUNG_DUOC = da chung minh => kha dung, ma 0 ke ca khi doi
+    dat("DUNG_DUOC")
+    ma, d = chay_doctor(True)
+    bang(d["ok_kha_dung"] is True, f"DUNG_DUOC ma bao khong kha dung: {d['ok_kha_dung']}")
+    bang(ma == MA_OK, f"DUNG_DUOC ma van chan: {ma}")
+
+    # (b) CO_CREDENTIAL = CHUA chung minh => KHONG duoc bao kha dung
+    dat("CO_CREDENTIAL")
+    ma, d = chay_doctor(False)
+    bang(d["ok_kha_dung"] is False,
+         "CO_CREDENTIAL van duoc tinh la KHA DUNG — tang tieu thu nang lai nhan")
+    bang("codex" in d["chua_chung_minh"], f"phai neu ten muc: {d.get('chua_chung_minh')}")
+    bang(ma == MA_OK, f"KHONG doi kha dung thi van phai 0 (khong chan oan): {ma}")
+
+    # (c) doi kha dung => FAIL-CLOSED
+    ma, _ = chay_doctor(True)
+    bang(ma == MA_CHUA_XAC_THUC,
+         f"--doi-kha-dung ma CO_CREDENTIAL van thoat {ma}: doi bang chung roi nhan bua")
+
+    # (d) SAP_HET_HAN cung CHUA chung minh (han lay tu JWT khong xac thuc chu ky)
+    dat("SAP_HET_HAN")
+    ma, d = chay_doctor(True)
+    bang(d["ok_kha_dung"] is False, "SAP_HET_HAN khong phai bang chung dung duoc")
+    bang(ma == MA_CHUA_XAC_THUC, f"--doi-kha-dung voi SAP_HET_HAN phai chan, duoc {ma}")
+
+    # (e) KHONG_DO_DUOC: `None` KHAC `False` — khong do duoc thi khong duoc noi la xanh
+    dat("KHONG_DO_DUOC")
+    ma, d = chay_doctor(True)
+    bang(d["ok_kha_dung"] is False, "KHONG_DO_DUOC ma bao kha dung")
+    bang(ma == MA_CHUA_XAC_THUC, f"--doi-kha-dung voi KHONG_DO_DUOC phai chan, duoc {ma}")
+
+
+@ca
+def t97_nap_ban_sao_khong_duoc_an_phai_BYTECODE_CU():
+    """Cổng đột biến phải chấm điểm ĐÚNG BẢN nó vừa ghi, không phải bản trước đó.
+
+    ĐÃ ĐO, và đây là nguyên nhân gốc thật của ba lượt cãi nhau về con số: runner ghi
+    mọi bản sao vào cùng một đường dẫn, mà CPython coi `.pyc` còn hợp lệ theo (mtime
+    tính bằng GIÂY, kích thước). Hai đột biến ra tệp CÙNG kích thước, ghi trong CÙNG
+    một giây ⇒ bản sau chạy MÃ CỦA BẢN TRƯỚC. Mutant `do_codex_tin_DONG_DAU…` báo
+    `giet 0/1` suốt ba lượt vì nó CHƯA TỪNG ĐƯỢC CHẠY.
+
+    Ca này dựng lại đúng cái bẫy đó — hai nội dung KHÁC nhau, CÙNG kích thước, ghi
+    liên tiếp vào CÙNG đường dẫn — rồi đòi bản nạp lần hai phải là bản thứ hai. Với
+    `exec_module` trần, nó ĐỎ; với `_nap_sach`, nó xanh.
+
+    Không đưa được vào bảng `DOT_BIEN`: runner chỉ đột biến `launcher.py`, còn hàm
+    này ở `launcher_test.py`. Cùng giới hạn đã khai cho `_co_lap_toan_cuc`/`t89`.
+    Phản chứng thay thế đã CHẠY TAY (ghi trong CHANGELOG): bỏ lớp xoá `.pyc` thì ca
+    này đỏ.
+    """
+    with San() as s:
+        tep = s / "mo_dun_thu.py"
+        # CÙNG SỐ KÝ TỰ, khác nội dung — đúng điều kiện làm `.pyc` bị coi là hợp lệ.
+        tep.write_text("GIA_TRI = 'AAA'\n", encoding="utf-8")
+        m1 = _nap_sach(tep)
+        bang(m1.GIA_TRI == "AAA", f"lan nap dau da sai: {m1.GIA_TRI!r}")
+        tep.write_text("GIA_TRI = 'BBB'\n", encoding="utf-8")
+        bang(len("GIA_TRI = 'AAA'\n") == len("GIA_TRI = 'BBB'\n"),
+             "fixture hong: hai ban PHAI cung kich thuoc thi bay moi bat")
+        m2 = _nap_sach(tep)
+        bang(m2.GIA_TRI == "BBB",
+             f"NAP PHAI BAN CU: doc duoc {m2.GIA_TRI!r} trong khi tren dia la 'BBB' "
+             f"— cong dang cham diem mot ban khac voi ban no vua ghi")
+
+    # Lớp thứ hai: `.pyc` CÒN SÓT TỪ LƯỢT CHẠY TRƯỚC. Tắt ghi bytecode không cứu
+    # được ca này (tắt GHI khác tắt ĐỌC) — chỉ xoá mới cứu.
+    with San() as s:
+        tep = s / "mo_dun_thu2.py"
+        tep.write_text("GIA_TRI = 'AAA'\n", encoding="utf-8")
+        truoc = sys.dont_write_bytecode
+        sys.dont_write_bytecode = False
+        try:
+            sp = importlib.util.spec_from_file_location("sinh_pyc_cu", tep)
+            mm = importlib.util.module_from_spec(sp)
+            sp.loader.exec_module(mm)           # ghi ra .pyc
+        finally:
+            sys.dont_write_bytecode = truoc
+        tep.write_text("GIA_TRI = 'BBB'\n", encoding="utf-8")
+        m3 = _nap_sach(tep)
+        bang(m3.GIA_TRI == "BBB",
+             f"pyc con sot tu luot truoc van duoc dung: doc {m3.GIA_TRI!r}")
+
+    # Lớp thứ ba, ĐO RIÊNG: tắt ghi bytecode. Phản chứng đã chạy cho thấy bỏ lớp này
+    # KHÔNG làm hai khối trên đỏ — tức nó là phòng thủ chồng lớp KHÔNG CÓ RĂNG nếu
+    # không đo thẳng. Đo thẳng: nạp xong thì KHÔNG được để lại `.pyc` nào.
+    with San() as s:
+        tep = s / "mo_dun_thu3.py"
+        tep.write_text("GIA_TRI = 'CCC'\n", encoding="utf-8")
+        _nap_sach(tep)
+        pyc = Path(importlib.util.cache_from_source(str(tep)))
+        bang(not pyc.exists(),
+             f"nap xong con de lai {pyc.name} — lop tat ghi bytecode da bi go")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -2691,6 +2907,17 @@ DOT_BIEN = [
        '            and not d.strip().upper().startswith(("WARNING", "NOTE", "HINT"))]',
        '    dong = [d.strip() for d in ra.splitlines() if d.strip()]')],
      ["t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao"]),
+    # Hai dot bien duoi day khoa hai P1 cua cross-review luot 6.
+    ("chot_truong_nhom_FAIL_OPEN_khi_khong_do_duoc_pgid",
+     ('    dung_killpg = nhom_that == pid          # CHỈ True khi ĐO ĐƯỢC và bằng nhau',
+      '    dung_killpg = True'),
+     ["t92_khong_duoc_killpg_khi_pid_KHONG_phai_truong_nhom"]),
+    ("ok_kha_dung_bo_qua_muc_CHUA_CHUNG_MINH",
+     [('        elif tt not in DA_CHUNG_MINH_KHA_DUNG:\n'
+       '            chua_chung_minh.append(k["ten"])',
+       '        elif False:\n'
+       '            chua_chung_minh.append(k["ten"])')],
+     ["t98_CO_CREDENTIAL_khong_duoc_thanh_kha_dung_o_tang_doctor"]),
     ("chuan_bi_bo_duong_JSON_tho",
      ('    for ten_cach, thu in (("base64 → JSON", None), ("JSON thô", thoc)):',
       '    for ten_cach, thu in (("base64 → JSON", None),):'),
@@ -3006,7 +3233,11 @@ def chay_dot_bien() -> int:
             moi_ma = goc
             for c, m in cap:
                 moi_ma = moi_ma.replace(c, m, 1)
-            ban_sao = tam / "launcher.py"
+            # TÊN RIÊNG cho từng đột biến. Bản trước ghi đè CÙNG một `launcher.py`,
+            # và hai đột biến cùng kích thước rơi vào cùng một giây thì bản sau ăn
+            # `.pyc` của bản trước — cổng chấm điểm nhầm bản (xem `_nap_sach`).
+            # Đường dẫn khác nhau ⇒ đường `.pyc` khác nhau ⇒ va chạm là bất khả.
+            ban_sao = tam / f"launcher_db_{DOT_BIEN.index(muc):02d}.py"
             ban_sao.write_text(moi_ma, encoding="utf-8")
             LAUNCHER_DANG_DUNG = ban_sao
             chet, bo_qua = [], []

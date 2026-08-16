@@ -1,0 +1,108 @@
+# Lease REVIEWER lượt 9 — nhánh HẠ TẦNG MÔI TRƯỜNG ops/moi-truong-ba-p1.
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. NHỚ ĐÓNG NHÁY mọi giá trị chứa '#'.
+# packet_issue 55 NHƯNG la_viec_cua_packet false — rẽ từ master, KHÔNG tiêu attempt.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: null
+la_viec_cua_packet: false
+
+role: reviewer
+provider: codex
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+lease_id: moi-truong-review-9-codex-20260816
+review_round: 9
+
+branch: ops/moi-truong-ba-p1
+reviewed_sha_required: 1df800be15580d7432a1200900dd04ed9a7b997c
+base_sha: 3f8b2904cfb4f99aab151cd0be435e4ba4553bb8
+base_note: 'base là head lượt 8 đã soi. MỘT commit; delta ĐÚNG 6 tệp (1 tệp MỚI).'
+master_sha_at_grant: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1
+target_pull_request: null
+
+prompt_path: ops/prompts/moi-truong-review-9-codex-20260816.md
+prompt_sha256_required: e76d0787616d4b9071ae0136ab73b6aea73fd521eea03fc8981346164920cf98
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-16 (vá cả bốn đi, rồi cấp lease review)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-16T07:00:00Z'
+lease_expires_at_utc: '2026-08-17T10:00:00Z'
+run_minutes: 1500
+heartbeat_required_minutes: 30
+
+prior_review: moi-truong-review-8-codex-20260816
+prior_review_verdict: changes_requested
+prior_review_verdict_sha256: e942335be67525c95997f2ca3bd6c45d054755b0f690ddccd432b3af9d9fe4ef
+
+# LỖI THIẾT KẾ ĐỀ BÀI CỦA ĐIỀU PHỐI Ở LƯỢT 8 — đã sửa, ghi vào hồ sơ.
+sua_loi_de_bai_luot_8:
+  chuyen_gi: >-
+    reviewer KHÔNG đo lại được tuyên bố "37->26 dòng" vì điều phối không cấp fixture, mà
+    prompt lại cấm đụng config thật. Lỗi của điều phối, không phải của reviewer.
+  da_sua: >-
+    .claude/dev/fixtures/config_codex_mau.toml — chụp từ config thật, thay MỌI đường dẫn,
+    không chứa bí mật (config codex chỉ có đường dẫn + trust_level).
+
+gioi_han_do_duoc_dieu_phoi_TU_KHAI:
+  lop_marker_dong_rieng: >-
+    gỡ RIÊNG lớp "marker phải là dòng riêng" thì t100 VẪN XANH — lớp xác thực phần giữa
+    bắt được. Phải gỡ CẢ HAI mới đỏ. Hai lớp phủ lên nhau, KHÔNG khai là mỗi lớp đã chứng
+    minh độc lập (bài học lượt 7-8: đã hai lần khai vượt bằng chứng).
+
+trong_tam_review:
+  - id: fail-close-co-chan
+    hoi: >-
+      cờ có bịt THẬT không hay chỉ bịt đường doctor? có đường nào gọi codex không qua
+      _do_codex? đặt cờ trong ~/.codex có bị codex dọn/ghi đè? cờ có tự hết OAN không?
+      hook không tự thoát mà chỉ chặn đường codex — đúng hay nên chặn cả phiên?
+  - id: marker-va-xac-thuc
+    hoi: >-
+      _DONG_HOP_LE quá rộng hay quá hẹp? xoá "nhiều nhất một dòng trắng ngay sau" có ăn
+      nhầm của người dùng? còn ca MẤT DỮ LIỆU nào khác?
+  - id: ghi-nguyen-tu
+    hoi: >-
+      os.replace giữ đúng quyền/chủ sở hữu chưa? chmod 600 tệp tạm có THẮT CHẶT LÉN khi
+      tệp gốc mode khác? thư mục chỉ-đọc / config.toml là symlink thì sao? không fsync
+      THƯ MỤC — đáng thêm hay quá tay?
+  - id: argparse
+    hoi: 'còn tổ hợp nào t101 không phủ?'
+
+viec_con_treo_HIGH:
+  ten: 'suite giết caller'
+  da_loai_duoc_vung: >-
+    nhật ký lượt 8 cho vao=100 ra=100 + XONG TRON VEN rồi vỏ shell mới chết ⇒ cú chết nằm
+    SAU khi main chạy hết. Ba lượt trước truy trong vòng lặp ca là truy SAI VÙNG.
+  huong_do_tiep: 'faulthandler + atexit marker + ps sau khi suite xong — prompt có lệnh gợi ý'
+  luu_y: 'KHÔNG đoán nguyên nhân; đo được đến đâu báo đến đó'
+
+verified_by_coordinator:
+  suite: '102/102 (qua 101, bỏ qua 1)'
+  dot_bien: '57/57 đạt, KHÔNG mục nào SAI — hai lượt độc lập giống nhau'
+  dot_bien_moi: 'do_codex_lo_di_CO_CHAN_codex 1/1'
+  eol: 'checked=309 violations=0'
+  doc_claims: 'strict ok=true flags=[]'
+  scope: 'ĐÚNG 6 tệp, 1 tệp MỚI'
+  tren_fixture: '45->34 dòng, 10 [projects] giữ nguyên, inherit=0, chạy lần hai no-op — ĐO LẠI GIÙM'
+  phan_chung: >-
+    7 lượt trên BẢN SAO TẠM, đúng chiều — trừ ĐÚNG MỘT lượt tự khai là không có răng riêng
+    (xem gioi_han_do_duoc_dieu_phoi_TU_KHAI).
+
+canh_bao_an_ninh:
+  khong_in_gia_tri: true
+  home_tam_bat_buoc: true
+  khong_dung_config_that: 'dùng fixture + --tep <tệp tạm>; không đụng auth.json/config.toml thật'
+
+neo_sha_bat_bien_required: true
+chay_hai_lan_required: true
+approve_la_hop_le: 'bốn lượt liền changes_requested KHÔNG phải hạn ngạch'
+duong_giao_verdict_da_do: 'REST bị proxy 403, gh không cài ⇒ ghi verdict ra tệp, điều phối đăng hộ'
+preconditions_measured_at_utc: '2026-08-16T07:00:00Z'

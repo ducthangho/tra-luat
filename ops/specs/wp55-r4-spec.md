@@ -56,11 +56,32 @@ base_sha_note: >-
     mô phỏng r4  (BỎ miễn trừ),   d5b7bcc      -> rc=6 CLAUDE.md:82 'người có thẩm quyền'
   Hai dòng cuối là CHỨNG ĐƯỜNG: chúng chứng minh phép mô phỏng thật sự có tác dụng, nên
   `rc=0` ở dòng thứ hai là bằng chứng dương chứ không phải phép đo rỗng.
-start_from_sha: 1a4525a20aa360476a6f59cb157c21097919c457
+start_from_sha: b0e3e3b6a4c630ba0652b8fc939025d9c4031c67
 start_from_note: >-
   KHÔNG dựng lại từ base. Generation 9 đã đóng được sáu finding của lượt 9 và mười tám hình
-  dạng của họ K/B/C — bỏ đi là mất công đo đã trả giá. Revision 4 xuất phát từ `1a4525a`,
-  giữ mọi chốt cấu trúc, và chỉ thay ĐÚNG hợp đồng AC 19 cộng ba lỗi mã của lượt 10.
+  dạng của họ K/B/C — bỏ đi là mất công đo đã trả giá. Revision 4 giữ mọi chốt cấu trúc, và
+  chỉ thay ĐÚNG hợp đồng AC 19 cộng ba lỗi mã của lượt 10.
+  SỬA 16-08 — bản thảo trước ghi `1a4525a` và ĐÓ LÀ MỘT LỖI CÓ HẠI. Đo được:
+    git merge-base --is-ancestor 4085bbf2 1a4525a  ->  SAI (không phải tổ tiên)
+    git merge-base --is-ancestor 4085bbf2 b0e3e3b6 ->  ĐÚNG
+  `4085bbf2` là bản vá **P1 an ninh** do phiên điều phối đẩy sau lượt 10: `SKILL.md` nối
+  `${VAR:+…}` với `${VAR:-…}` nên ở nhánh "đã đặt" nó bung ra CHÍNH GIÁ TRỊ của biến bí mật,
+  trong một lệnh hướng dẫn agent chạy với refresh token thật. Xuất phát từ `1a4525a` sẽ
+  **mở lại lỗ ấy trong im lặng** — `SKILL.md` nằm trong `write_set` nên nhánh mới sẽ ghi đè
+  bản đã vá. Vì thế xuất phát từ `b0e3e3b6` = head nhánh packet = `1a4525a` + `4085bbf2` +
+  merge master `d5b7bcc`.
+  BÀI HỌC, cùng lớp với cái đã ghi ở `base_sha`: SHA neo cho phép đo và HEAD hiện thời của
+  nhánh là hai thứ khác nhau. Lần trước neo vào SHA không còn là tip; lần này suýt neo vào
+  SHA chưa bao giờ là tip. Cùng một câu chữa cả ba: **con số này có phải head thật không,
+  đo lúc nào?**
+must_merge_master_truoc_khi_do: >-
+  BẮT BUỘC, không phải tuỳ chọn. `b0e3e3b6` merge master ở mức `d5b7bcc`, mà `CLAUDE.md` của
+  `d5b7bcc` vẫn còn `người có thẩm quyền` ở dòng 82. Đo trên chính `b0e3e3b6`:
+    r3g5 (còn miễn trừ)  ->  rc=0
+    r4   (bỏ miễn trừ)   ->  rc=6  CLAUDE.md:82 'người có thẩm quyền'
+  Tức dưới hợp đồng MỚI, nhánh packet ĐỎ vì một dòng KHÔNG PHẢI của nó. Executor phải merge
+  master `18da1da` vào nhánh trước khi đo AC 19/AC 20, nếu không sẽ đuổi theo một finding
+  mà bản vá đã nằm sẵn trên master.
 
 objective: >-
   Đổi AC 19 từ một hợp đồng NGỮ NGHĨA MỞ ("văn xuôi kể lại kết quả đo") sang một hợp đồng

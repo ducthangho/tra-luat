@@ -13,63 +13,6 @@ verdict: do_not_land
 
 ## Findings
 
-### `mutation-kill-set-omits-false-positive-case`
-
-`finding_id: mutation-kill-set-omits-false-positive-case`
-
-Mức: P1 / chặn land.
-
-Hai danh sách `phải-chết` không bằng tập chết thực tế khi chạy đột biến qua **toàn bộ** 185 ca:
-
-- `mo_lai_mien_tru_ngat_dong`: khai 37, thực tế 38; thừa
-  `doctrine_scan_bat_qua_ngat_dong`.
-- `tha_vo_dieu_kien_nhu_generation_4`: khai 43, thực tế 44; thừa
-  `ac19_bang_vai_tro_THAT_van_bi_bat`.
-
-Ca thừa thứ hai là ca `ac19_*` (chiều BẮT-OAN), đúng điều kiện prompt quy định là finding.
-Suite hiện chỉ chạy `phải-chết` cộng ba đối chứng khác họ, nên tự in 37/43 xanh mà không phát
-hiện hai ca chết ngoài danh sách.
-
-Tái lập (chạy từ cây archive của reviewed SHA; `GIT_DIR` trỏ vào kho hiện tại):
-
-```bash
-TREE=$(mktemp -d)
-git archive 2432e3f64f05739741dfe6f49081e9aaa140799f | tar -x -C "$TREE"
-GIT_DIR="$PWD/.git" TREE="$TREE" python3 -B - <<'PY'
-import importlib.util, os, tempfile
-from pathlib import Path
-p = Path(os.environ["TREE"]) / ".claude/dev/packet_loop_test.py"
-s = importlib.util.spec_from_file_location("packet_test", p)
-m = importlib.util.module_from_spec(s)
-s.loader.exec_module(m)
-goc = m.CANONICAL.read_text(encoding="utf-8")
-for name in ("mo_lai_mien_tru_ngat_dong", "tha_vo_dieu_kien_nhu_generation_4"):
-    tim, thay, khai = m.MUTANTS[name]
-    than = goc
-    for a, b in m._cap_thay_the(tim, thay):
-        than = than.replace(a, b, 1)
-    with tempfile.TemporaryDirectory() as td:
-        script = Path(td) / "packet_loop.py"
-        script.write_text(than, encoding="utf-8")
-        ket = m.chay_suite(script, Path(td) / "cases")
-    chet = {ten for ten, loi in ket.items() if loi is not None}
-    print(name, "khai", len(khai), "thực", len(chet), "thừa", sorted(chet-set(khai)))
-PY
-echo "rc=$?"
-```
-
-Kết quả thật:
-
-```text
-mo_lai_mien_tru_ngat_dong khai 37 thực 38 thừa ['doctrine_scan_bat_qua_ngat_dong']
-tha_vo_dieu_kien_nhu_generation_4 khai 43 thực 44 thừa ['ac19_bang_vai_tro_THAT_van_bi_bat']
-rc=0
-```
-
-`rc=0` là rc của chính script đo; output là bất biến bị vi phạm. Phép đo có chứng đường dương:
-cả hai tập chết đều chứa đủ toàn bộ danh sách khai (không thiếu ca), đồng thời phơi đúng ca
-ngoài danh sách.
-
 ### `ac19-dead-exemption-mutation-anchors-remain`
 
 `finding_id: ac19-dead-exemption-mutation-anchors-remain`
@@ -101,10 +44,9 @@ Kết quả thật: chỉ hai dòng định nghĩa ở dòng 1928–1929, `rc=0`
    `oan_van_xuoi_sau_bang_html`, còn `...chua_dong_tha_cu` →
    `oan_van_xuoi_sau_bang_html_chua_dong`. Cặp `claude_md_master` đều giữ bốn dòng và mức
    thụt hai dấu cách ở ba dòng nối.
-2. **Hai đột biến — đã đo, không đạt.** Tập chết thật là 38/44 chứ không phải 37/43; đột
-   biến thứ hai giết một ca `LOP_BAT_OAN`. Bỏ `tha_vo_dieu_kien_nhu_generation_4` để hở đúng
-   sáu lớp một dòng: `cum_don_heading`, `dong_tran`, `gach_dau_dong`, `in_dam`,
-   `dinh_nghia`, `cau_van_xuoi_mot_dong`.
+2. **Hai đột biến — đã đo, đạt trong miền khai báo.** Trong `LOP_LACH`, tập chết khớp tuyệt
+   đối danh sách khai: 37/37 và 43/43. Hai ca chết thêm khi chạy toàn bộ 185 ca đều là ca
+   dương đòi scanner bắt, không phải ca `LOP_BAT_OAN`; xem mục xét lại dưới đây.
 3. **Số liệu — đã đo.** Suite với `GIT_DIR` trả `rc=0` và tự in nguyên văn
    `185 / 34 / 78 / 35 / 0`. `packet_loop.py` ở `start_from_sha` có 1503 dòng, ở head có
    1223: giảm 280; `280 / 1503 = 18,629...%`, làm tròn 18,6%. `_RE_BANG_HTML` không tồn tại
@@ -132,6 +74,32 @@ Kết quả thật: chỉ hai dòng định nghĩa ở dòng 1928–1929, `rc=0`
 - Suite nền trên cây head với `GIT_DIR` đạt 185/185, `rc=0`. Không chạy ruff/release gate
   đầy đủ; đây là thiếu sót đã khai và ngoài điều kiện chặn của verdict này.
 
-Kết luận: không land SHA này. Cần làm cho hai danh sách đột biến bằng đúng tập chết thực tế
-(đặc biệt không được giết `LOP_BAT_OAN`), bổ sung chốt suite đo hai chiều trên phạm vi phù hợp,
-và xoá hai hằng miễn trừ chết trước lượt review kế tiếp.
+## Xét lại sau phản chứng
+
+Đã chạy lại cả ba phản chứng từ archive của đúng
+`2432e3f64f05739741dfe6f49081e9aaa140799f`, với `GIT_DIR` trỏ kho hiện tại, và bắt `rc`
+ngay sau Python (`python_rc=0`). Kết quả:
+
+- Đọc mã và kiểm membership xác nhận `doctrine_scan_bat_qua_ngat_dong` không thuộc
+  `LOP_BAT_OAN`; `bang_vai_tro_THAT_van_bi_bat` cũng không thuộc `LOP_BAT_OAN`.
+  `case_doctrine_scan_bat_qua_ngat_dong` gom lỗi khi `rc != 6`; ca viết tay
+  `case_ac19_bang_vai_tro_THAT_van_bi_bat` gọi `_doi(6, rc, ...)`.
+- Tiền tố `ac19_` thật sự có hai nguồn: bảng `CASES` đăng ký ca viết tay
+  `ac19_bang_vai_tro_THAT_van_bi_bat`, còn comprehension sinh các ca khác từ
+  `LOP_BAT_OAN`. Suy tiền tố thành membership là sai.
+- Với mutant `mo_lai_mien_tru_ngat_dong`, miền `LOP_LACH` khớp 37 khai/37 chết. Ca chết
+  ngoài miền là `doctrine_scan_bat_qua_ngat_dong`; chứng đường cho thấy cả 6/6 biến thể
+  đáng lẽ phải đỏ đều thật sự nhận `rc=0` trên mutant.
+- Với mutant `tha_vo_dieu_kien_nhu_generation_4`, miền `LOP_LACH` khớp 43 khai/43 chết.
+  Ca chết ngoài miền là ca viết tay `ac19_bang_vai_tro_THAT_van_bi_bat`; lỗi thật là
+  “đòi `rc=6`, được `rc=0`”. Đây là ca BẮT đúng bị mutant làm lọt, không phải ca BẮT-OAN.
+
+Vì bàn giao khai rõ danh sách phải-chết được đo trên `LOP_LACH`, hai danh sách không thiếu
+hay thừa phần tử trong chính miền ấy. Finding `mutation-kill-set-omits-false-positive-case`
+đã dựa trên việc phân loại nhầm ca viết tay `ac19_*` thành `LOP_BAT_OAN`; tôi **rút finding
+này**, không hạ mức và không thay bằng finding mới. Sự nhập nhằng tiền tố là một rủi ro đặt
+tên, nhưng phép đo hiện tại chưa cho thấy lỗi chức năng hoặc vi phạm đủ để ghi finding riêng.
+
+Kết luận xét lại: vẫn `do_not_land`, nay có đúng **một finding**: P2
+`ac19-dead-exemption-mutation-anchors-remain`. Cần xoá hai hằng miễn trừ chết `C3_CU` và
+`C3_MOI` trước lượt review kế tiếp.

@@ -152,6 +152,11 @@ case "$DONG" in
       # phep khop thanh mau bao trum thi ca nay lo ra ngay — reviewer luot 4 do duoc
       # rang dot bien ay song sot khi chua co no.
       [ "${GIA_GET_500_CO_CHU_404:-0}" = "$n" ] && { printf 'HTTP/2 500 upstream-404 gateway\n'; exit 1; }
+      # DONG DAU co nguyen token " 404 " nhung KHONG bat dau bang dong trang thai HTTP.
+      # Khoa bien the `*" 404 "*` — reviewer luot 5 do duoc rang no con song khi chua co
+      # ca nay. Phai dat o lan doc SAU: o lan doc TRUOC ca `khong` lan `khong-do-duoc`
+      # deu cho ra ma 1, nen ca ay khong phan biet duoc hai nhanh.
+      [ "${GIA_GET_TOKEN_404:-0}" = "$n" ] && { printf 'gateway 404 unavailable\n'; exit 1; }
       if [ "${GIA_MISSING:-0}" = 1 ] || grep -qxF "$ten" "$DA_XOA"; then
         echo "HTTP/2 404 Not Found"; exit 1
       fi
@@ -212,6 +217,7 @@ lam "xoá: 500 có DÒNG THÂN giả mạo 404 -> vẫn ĐỎ" 1 xoa-nhanh a "" 
 lam "xoá: dòng thân giả 404 ở lần đọc TRƯỚC -> ĐỎ" 1 xoa-nhanh a "" false GIA_GET_500_GIA_DONG_404=1
 lam "xoá: dòng ĐẦU có chữ 404 mà là 500 -> ĐỎ" 1 xoa-nhanh a "" false GIA_GET_500_CO_CHU_404=2
 lam "xoá: dòng đầu có chữ 404, lần đọc TRƯỚC -> ĐỎ" 1 xoa-nhanh a "" false GIA_GET_500_CO_CHU_404=1
+lam "xoá: dòng đầu 'gateway 404 unavailable' -> ĐỎ" 1 xoa-nhanh a "" false GIA_GET_TOKEN_404=2
 
 lam "tạo tag: đúng sha -> XANH"           0 tao-tag v1 "$S1" false
 lam "tạo tag: API trả sha KHÁC -> ĐỎ"     1 tao-tag v1 "$S1" false GIA_TAG_SHA="$S2"

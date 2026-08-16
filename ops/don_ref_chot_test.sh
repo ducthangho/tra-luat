@@ -145,6 +145,9 @@ case "$DONG" in
       # bằng chuỗi tự do sẽ đọc nó thành "ref không còn"; phân loại bằng DÒNG TRẠNG
       # THÁI thì không.
       [ "${GIA_GET_500_NOTFOUND:-0}" = "$n" ] && { printf 'HTTP/2 500 Internal Server Error\nmessage: Not Found\n'; exit 1; }
+      # 500 mà THÂN có nguyên một dòng nhìn y hệt dòng trạng thái 404. Thân phản hồi do
+      # máy chủ đầu kia quyết định, nên đây không phải ca giả tưởng.
+      [ "${GIA_GET_500_GIA_DONG_404:-0}" = "$n" ] && { printf 'HTTP/2 500 Internal Server Error\nHTTP/2 404 dong than gia mao\n'; exit 1; }
       if [ "${GIA_MISSING:-0}" = 1 ] || grep -qxF "$ten" "$DA_XOA"; then
         echo "HTTP/2 404 Not Found"; exit 1
       fi
@@ -201,6 +204,8 @@ lam "xoá: DELETE không ăn gì -> ĐỎ"       1 xoa-nhanh a "" false GIA_DELE
 lam "xoá: đọc SAU lỗi 500 -> ĐỎ (fail-close)" 1 xoa-nhanh a "" false GIA_GET_ERR=2
 lam "xoá: 500 mà thân có chữ Not Found -> vẫn ĐỎ" 1 xoa-nhanh a "" false GIA_GET_500_NOTFOUND=2
 lam "xoá: 500-có-Not-Found ở lần đọc TRƯỚC -> ĐỎ" 1 xoa-nhanh a "" false GIA_GET_500_NOTFOUND=1
+lam "xoá: 500 có DÒNG THÂN giả mạo 404 -> vẫn ĐỎ" 1 xoa-nhanh a "" false GIA_GET_500_GIA_DONG_404=2
+lam "xoá: dòng thân giả 404 ở lần đọc TRƯỚC -> ĐỎ" 1 xoa-nhanh a "" false GIA_GET_500_GIA_DONG_404=1
 
 lam "tạo tag: đúng sha -> XANH"           0 tao-tag v1 "$S1" false
 lam "tạo tag: API trả sha KHÁC -> ĐỎ"     1 tao-tag v1 "$S1" false GIA_TAG_SHA="$S2"

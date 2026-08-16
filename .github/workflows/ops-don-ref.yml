@@ -227,7 +227,11 @@ jobs:
             # đoán, không phải đo. Finding P2 của cross-review, đúng.
             out="$(gh api -i "repos/$GITHUB_REPOSITORY/git/ref/$LOAI/$ten" 2>&1)"; rc=$?
             if [ "$rc" = 0 ]; then echo co; return; fi
-            if printf '%s' "$out" | grep -Eq '^HTTP/[0-9.]+ 404( |$)'; then echo khong; return; fi
+            # CHỈ dòng ĐẦU. `grep` quét mọi dòng, nên một 500 có dòng THÂN bắt đầu
+            # bằng `HTTP/2 404` cũng khớp — và thân phản hồi thì máy chủ ở đầu kia
+            # quyết định, không phải ta. Dòng trạng thái là dòng thứ nhất, chấm hết.
+            dong1="${out%%$'\n'*}"
+            case "$dong1" in HTTP/[0-9.]*" 404 "*|HTTP/[0-9.]*" 404") echo khong; return ;; esac
             echo "khong-do-duoc: $out"
           }
 

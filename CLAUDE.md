@@ -287,8 +287,22 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   ĐÍCH. Không sửa được tệp của họ thì chặn ở PHÍA TA (cờ riêng `~/.codex/tra-luat-CHAN-CODEX`,
   `_do_codex` đọc cờ và hạ nhãn TRƯỚC mọi phép đo khác) — và cờ phải TỰ HẾT khi sạch,
   kẻo lại thành chốt đỏ thường trực.
+- **PHẠM VI TUYÊN BỐ phải bằng phạm vi ĐO ĐƯỢC.** Tôi đặt cờ chặn codex, gọi nó là
+  "CODEX BI CHAN", mà chỉ `_do_codex` đọc cờ — trong khi chính hook gọi `codex login
+  status` TRƯỚC đó, `_do_codex_song` (cửa thật sự chạy `codex exec`) đi thẳng qua, và
+  lệnh `codex` gõ tay thì không gì chặn nổi. Chốt mà chỉ một trong nhiều cửa đọc thì
+  không phải chốt. Hai việc phải làm cùng lúc: cho MỌI cửa của kho dùng CHUNG một hàm
+  guard (`_co_chan_codex`), và **khai thẳng cái không chặn được** thay vì đặt tên to hơn.
+  Mỗi cửa phải có ĐỘT BIẾN RIÊNG — cửa không có mutant là cửa sẽ âm thầm hở lại.
+- **Vá một lỗ mà mở lỗ khác trong cùng hàm.** Writer "nguyên tử" của tôi dùng tên tạm
+  ĐOÁN ĐƯỢC (`<tệp>.tra-luat-tam-<pid>`) + `open(...,"w")`: trỏ tên đó thành symlink là
+  ghi đè tệp bất kỳ — hỏng TRƯỚC `os.replace`, tức phá đúng hợp đồng viết ở dòng trên.
+  `mkstemp` (tên ngẫu nhiên + `O_EXCL`) · từ chối khi đích là symlink · **giữ nguyên
+  quyền tệp gốc** (ép 0600 là đổi metadata sau lưng người dùng) · `fsync` cả thư mục.
 - **Khớp marker bằng SUBSTRING là đường mất dữ liệu, và "parse lại vẫn hợp lệ" KHÔNG bắt
-  được.** Phản chứng: `x=1 # <MO>` / `y=2` / `z=3 # <DONG>` → `x=1 #\nz=3\n`, mất `y=2`,
+  được.** Sửa lần một (kiểm từng dòng) VẪN mất dữ liệu: membership từng dòng không thấy
+  CẤU TRÚC, nên `inherit = "core"`, một dòng chú thích đơn độc, hay thứ tự đảo ngược đều
+  bị nhận là "khối của ta" rồi xoá. Chỉ so NGUYÊN KHỐI với bản canonical mới đóng được. Phản chứng: `x=1 # <MO>` / `y=2` / `z=3 # <DONG>` → `x=1 #\nz=3\n`, mất `y=2`,
   mà kết quả VẪN là TOML hợp lệ — nên phép kiểm "parse lại được" tôi dùng làm bằng chứng
   mù hoàn toàn. **Một phép kiểm không thể đỏ thì không phải bằng chứng.** Marker phải là
   DÒNG RIÊNG, và phần giữa hai marker phải khớp hình dạng khối ta từng ghi.
@@ -308,6 +322,11 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   `# XONG TRON VEN` — **rồi vỏ shell vẫn chết**. Không có "ca giết". Cú chết nằm SAU khi
   `main` chạy hết (vùng thoát/`atexit`/tiến trình còn sót). Ba lượt truy bên trong vòng
   lặp ca là truy sai VÙNG, và chỉ phép đo mới loại được vùng đó.
+  LƯỢT 9 lại ra chỗ KHÁC: `vao=74 ra=73`, chết trong `t72`, không `XONG TRON VEN`, không
+  `atexit`. Hai lượt hai chỗ ⇒ **chập chờn hoặc phụ thuộc thứ tự**, chưa ai biết nguyên
+  nhân. Có `--lap-ca TEN --lan N` để chạy lặp MỘT ca — phân biệt "ca tự nó chập chờn" với
+  "chỉ chết khi đứng sau 73 ca khác". Đo tại chỗ 40/40 qua, tức **không tái hiện ở đây**;
+  phải đo trong namespace của bên kia.
 - **Hook dùng đường dẫn TƯƠNG ĐỐI là bẫy tự khoá.** `.claude/settings.json` từng ghi
   `python .claude/hooks/pretooluse_guard.py`; khi cwd của shell trôi vào thư mục con thì
   MỌI lệnh Bash chết trước khi chạy, và không còn đường `cd` về. Luôn dùng

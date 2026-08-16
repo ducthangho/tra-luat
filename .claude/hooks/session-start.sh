@@ -164,7 +164,59 @@ fi
 #      "chưa đăng nhập" (dễ đọc) thành "đăng nhập hỏng" (khó đọc).
 #   4. Ghi qua tệp tạm + `chmod 600` rồi mới `mv` — không để lộ khoảnh khắc tệp có
 #      quyền rộng, và không để lại tệp nửa vời nếu tiến trình chết giữa chừng.
-if [ -n "${CODEX_AUTH_JSON:-}" ] && co codex; then
+# --- THU HOI CHINH SACH BIEN MOI TRUONG CHO CODEX  (cross-review luot 7, HIGH)
+#
+# LICH SU, de khong ai dung lai: khoi cu dat `shell_environment_policy.inherit = "all"`
+# de phien codex "thay duoc" $CODEX_AUTH_JSON. Do la truyen TOAN BO moi truong cho moi
+# lenh con cua codex, chi loai BON ten quan sat duoc tren MOT may tai MOT thoi diem.
+#
+# Ly le bao ve no SAI ngay trong chinh tep nay: khoi khoi phuc credential o TREN da ghi
+# $CODEX_AUTH_JSON ra ~/.codex/auth.json TRUOC khi khoi policy chay. Tu do codex doc
+# credential tu tep chuan, khong can bien. Va neu hook nay khong chay thi policy cung
+# khong duoc cai — nen no chua bao gio la duong cuu ho doc lap. Ta doi MOT credential
+# lay CA MOI TRUONG ma khong mua duoc gi.
+#
+# `exclude` khong cuu duoc: quet theo TEN khong chung minh duoc gi cho PGPASSWORD,
+# DATABASE_URL, SSH_AUTH_SOCK hay bien vendor moi, va no loi thoi dung luc moi truong doi.
+#
+# Nay chi con duong GO, va go PHAI KHONG DUOC lam hong config nguoi dung — ban truoc
+# luon prepend mot bang, nen mot config da co [shell_environment_policy] KHONG marker se
+# thanh HAI bang trung ten va codex tu choi parse. Logic nam o mot tep RIENG de test
+# duoc (t100): go dung khoi cua ta, hoac TU CHOI kem chan doan. Khong doan.
+#
+# FAIL-CLOSE, khong phai canh bao (cross-review luot 8, HIGH — loi cua ban va truoc).
+# Ban truoc bat rc=3 roi chi in CANH BAO va di tiep: dung luc phat hien config NGUY HIEM
+# ma khong go duoc thi khoi `inherit="all"` cu VAN CON HIEU LUC. Do la bien mot loi
+# xac-dinh-an-toan thanh phoi moi truong CO CHU DICH.
+#
+# VI TRI CUA KHOI NAY LA MOT PHAN CUA CHOT (cross-review luot 9, HIGH):
+# ban truoc dat no SAU hai loi goi `codex login status` cua chinh hook, nen dung
+# truong hop can chan thi hook DA GOI codex xong roi. Nay khoi chay TRUOC MOI loi goi
+# codex, va hai loi goi do deu bi boc bang `[ "${CODEX_BI_CHAN:-0}" = 0 ]`.
+#
+# PHAM VI, NOI THANG — day la cho ban truoc toi noi qua:
+#   CHAN DUOC : moi duong DO KHO CUNG CAP (hook nay, `_do_codex`, `_do_codex_song`,
+#               tuc ca `doctor`, `doctor --kiem-song` va `--doi-kha-dung`).
+#   KHONG CHAN DUOC : nguoi dung go thang `codex` o terminal. Mot la co ma chi ma
+#               cua ta doc thi khong the thuc thi hop dong "chan executable".
+# Ghi nhan gioi han thay vi dat ten to hon viec no lam duoc — dung bai hoc da tra gia.
+if co codex; then
+  MA_GO=0
+  "$PY" "$GOC/.claude/dev/codex_env_policy.py" 2>&1 | sed 's/^/[session-start] /' || MA_GO=$?
+  # `set -o pipefail` khong bat o day => lay ma cua PYTHON, khong phai cua `sed`.
+  MA_GO=${PIPESTATUS[0]:-$MA_GO}
+  if [ "$MA_GO" -ne 0 ]; then
+    CODEX_BI_CHAN=1
+    echo "[session-start] !! CHAN MOI DUONG CODEX CUA KHO (ma $MA_GO): khong go duoc"
+    echo "[session-start]    khoi env policy cu. \`inherit=all\` co the CON HIEU LUC —"
+    echo "[session-start]    moi lenh con cua codex nhan TOAN BO moi truong."
+    echo "[session-start]    LUU Y: lenh \`codex\` go THANG o terminal KHONG bi chan."
+    echo "[session-start]    Sua tay ~/.codex/config.toml roi chay:"
+    echo "[session-start]      $PY .claude/dev/codex_env_policy.py"
+  fi
+fi
+
+if [ -n "${CODEX_AUTH_JSON:-}" ] && co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then
   if codex login status >/dev/null 2>&1 </dev/null; then
     echo "[session-start] codex: da dang nhap san — GIU nguyen, khong ghi de"
   else
@@ -197,56 +249,16 @@ PYEOF
     fi
   fi
 fi
-if co codex; then
+if co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then
   # BẰNG CHỨNG DƯƠNG, không suy từ việc đã ghi tệp: hỏi chính codex.
   echo "[session-start] codex auth: $(codex login status 2>&1 </dev/null | head -1)"
+elif co codex; then
+  echo "[session-start] codex auth: BO QUA — codex dang bi chan (xem tren)"
 fi
 
 # --- KHOI PHUC credential codex: KHOI O TREN da lam roi, dung goi lai o day.
 # `launcher.py chuan-bi` la duong CUU HO cho truong hop hook NAY khong chay — xem
 # chu thich cua `chuan_bi_xac_thuc()`. Goi ca hai trong mot luot chi thanh nhieu.
-
-# --- THU HOI CHINH SACH BIEN MOI TRUONG CHO CODEX  (cross-review luot 7, HIGH)
-#
-# LICH SU, de khong ai dung lai: khoi cu dat `shell_environment_policy.inherit = "all"`
-# de phien codex "thay duoc" $CODEX_AUTH_JSON. Do la truyen TOAN BO moi truong cho moi
-# lenh con cua codex, chi loai BON ten quan sat duoc tren MOT may tai MOT thoi diem.
-#
-# Ly le bao ve no SAI ngay trong chinh tep nay: khoi khoi phuc credential o TREN da ghi
-# $CODEX_AUTH_JSON ra ~/.codex/auth.json TRUOC khi khoi policy chay. Tu do codex doc
-# credential tu tep chuan, khong can bien. Va neu hook nay khong chay thi policy cung
-# khong duoc cai — nen no chua bao gio la duong cuu ho doc lap. Ta doi MOT credential
-# lay CA MOI TRUONG ma khong mua duoc gi.
-#
-# `exclude` khong cuu duoc: quet theo TEN khong chung minh duoc gi cho PGPASSWORD,
-# DATABASE_URL, SSH_AUTH_SOCK hay bien vendor moi, va no loi thoi dung luc moi truong doi.
-#
-# Nay chi con duong GO, va go PHAI KHONG DUOC lam hong config nguoi dung — ban truoc
-# luon prepend mot bang, nen mot config da co [shell_environment_policy] KHONG marker se
-# thanh HAI bang trung ten va codex tu choi parse. Logic nam o mot tep RIENG de test
-# duoc (t100): go dung khoi cua ta, hoac TU CHOI kem chan doan. Khong doan.
-#
-# FAIL-CLOSE, khong phai canh bao (cross-review luot 8, HIGH — loi cua ban va truoc).
-# Ban truoc bat rc=3 roi chi in CANH BAO va di tiep: dung luc phat hien config NGUY HIEM
-# ma khong go duoc thi khoi `inherit="all"` cu VAN CON HIEU LUC. Do la bien mot loi
-# xac-dinh-an-toan thanh phoi moi truong CO CHU DICH.
-#
-# Bo go tu dat co `~/.codex/tra-luat-CHAN-CODEX`; `_do_codex` doc co do va ha codex xuong
-# CHUA_XAC_THUC, nen `doctor --doi-kha-dung` chan va nguoi doc thay ly do. Hook KHONG tu
-# thoat: chan CA PHIEN vi mot muc codex se khoa luon duong nguoi dung tu sua — cung ly le
-# da ghi o `_ma_doctor`. Chan dung DUONG CODEX, khong chan ca nha.
-if co codex; then
-  MA_GO=0
-  "$PY" "$GOC/.claude/dev/codex_env_policy.py" 2>&1 | sed 's/^/[session-start] /' || MA_GO=$?
-  # `set -o pipefail` khong bat o day => lay ma cua PYTHON, khong phai cua `sed`.
-  MA_GO=${PIPESTATUS[0]:-$MA_GO}
-  if [ "$MA_GO" -ne 0 ]; then
-    echo "[session-start] !! CODEX BI CHAN (ma $MA_GO): khong go duoc khoi env policy cu."
-    echo "[session-start]    \`inherit=all\` co the CON HIEU LUC — moi lenh con cua codex"
-    echo "[session-start]    nhan TOAN BO moi truong. Sua tay ~/.codex/config.toml roi chay:"
-    echo "[session-start]      $PY .claude/dev/codex_env_policy.py"
-  fi
-fi
 
 # --- BANG CHUNG DUONG, khong tin "da cai xong".
 #   12 = thieu cong cu BAT BUOC          -> phien nay khong lam viec duoc, DUNG.

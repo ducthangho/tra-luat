@@ -36,6 +36,7 @@ import argparse
 import os
 import re
 import sys
+import tempfile
 from pathlib import Path
 
 MOC_MO = "# >>> tra-luat: shell_environment_policy (quan ly tu dong) >>>"
@@ -59,18 +60,38 @@ def _in(s: str, loi: bool = False) -> None:
     print(s, file=sys.stderr if loi else sys.stdout)
 
 
-# Những dòng ta CHẤP NHẬN thấy giữa hai marker. Đây là toàn bộ hình dạng khối cũ mà
-# hook từng ghi, không hơn. Thấy dòng lạ ⇒ TỪ CHỐI: nghĩa là hoặc người dùng đã sửa
-# vào giữa khối, hoặc marker này không phải khối của ta.
-_DONG_HOP_LE = (
-    re.compile(r"^\s*$"),                                   # trắng
-    re.compile(r"^\s*#"),                                   # chú thích
-    re.compile(r"^\s*\[shell_environment_policy\]\s*$"),
-    re.compile(r"^\s*inherit\s*=\s*\"[a-z]+\"\s*$"),
-    re.compile(r"^\s*exclude\s*=\s*\[\s*$"),
-    re.compile(r"^\s*\"[A-Za-z0-9_]+\"\s*,?\s*(#.*)?$"),     # một tên trong exclude
-    re.compile(r"^\s*\]\s*$"),
+# KHỐI CANONICAL — nguyên văn thân khối mà hook TỪNG ghi (lấy từ `c7bbd81`). Đây là
+# bản DUY NHẤT từng được ghi ra; nếu sau này có thêm biến thể thì THÊM vào tuple này,
+# đừng nới luật so sánh.
+#
+# ## Vì sao so nguyên khối, không kiểm từng dòng (cross-review lượt 9, MEDIUM)
+#
+# Bản trước kiểm MEMBERSHIP TỪNG DÒNG: mỗi dòng giữa hai marker chỉ cần khớp một mẫu
+# trong danh sách là được. Reviewer đưa ba phản chứng chạy được, cả ba đều bị XOÁ với
+# lý do "da go khoi cua ta":
+#     [shell_environment_policy] + inherit = "core"   <- GIÁ TRỊ KHÁC HẲN
+#     một dòng "# ghi chu cua nguoi dung" đơn độc      <- KHÔNG PHẢI khối ta
+#     inherit = "all" rồi mới [shell_environment_policy]  <- THỨ TỰ ĐẢO NGƯỢC
+# Trái đúng câu tôi viết ngay trên đầu: "toàn bộ hình dạng khối cũ, không hơn" và
+# "người dùng sửa giữa khối ⇒ từ chối". Kiểm từng dòng không thấy CẤU TRÚC.
+#
+# So nguyên khối thì không còn khe đó: hoặc đúng thứ ta viết, hoặc từ chối. Chuẩn hoá
+# tối thiểu — bỏ khoảng trắng cuối dòng và dòng trắng đầu/cuối — vì trình soạn thảo hay
+# cắt khoảng trắng cuối, và đó KHÔNG phải "người dùng sửa nội dung".
+_THAN_KHOI_CU = (
+    '[shell_environment_policy]\n'
+    'inherit = "all"\n'
+    'exclude = [\n'
+    '  "GITHUB_PAT",                                 # credential THAT, khong khop mau mac dinh\n'
+    '  "CLAUDE_CODE_SESSION_ID",                     # danh tinh phien, codex khong can\n'
+    '  "CLAUDE_CODE_REMOTE_SESSION_ID",\n'
+    '  "CLAUDE_CODE_WEBSOCKET_AUTH_FILE_DESCRIPTOR",\n'
+    ']',
 )
+
+
+def _chuan_hoa(than: str) -> str:
+    return "\n".join(d.rstrip() for d in than.strip("\n").splitlines())
 
 
 def go_khoi(noi_dung: str) -> tuple[str | None, str]:
@@ -91,11 +112,13 @@ def go_khoi(noi_dung: str) -> tuple[str | None, str]:
     TOML hợp lệ, nên phép "parse lại sau khi gỡ" mà tôi dùng làm bằng chứng ở lượt
     trước MÙ HOÀN TOÀN với ca này. Một phép kiểm không thể đỏ thì không phải bằng chứng.
 
-    Hai chốt, độc lập nhau:
+    Hai chốt, PHỦ LÊN NHAU (đo được: gỡ riêng chốt 1 thì chốt 2 vẫn bắt — khai thẳng,
+    không nhận là mỗi chốt đã chứng minh độc lập):
       1. marker phải là DÒNG RIÊNG (cho phép khoảng trắng hai bên, không gì khác);
-      2. mọi dòng GIỮA hai marker phải khớp hình dạng khối cũ ta từng ghi.
+      2. phần GIỮA hai marker phải khớp NGUYÊN KHỐI một bản canonical trong
+         `_THAN_KHOI_CU` — xem chú thích ở đó về việc kiểm từng dòng đã hỏng thế nào.
     Chốt 2 chặn cả ca marker nằm trong chuỗi TOML nhiều dòng: nội dung kẹp giữa khi
-    ấy là văn bản bất kỳ, không khớp `_DONG_HOP_LE`.
+    ấy là văn bản bất kỳ, không khớp khối canonical nào.
     """
     dong = noi_dung.splitlines(keepends=True)
     vt_mo = [i for i, d in enumerate(dong) if d.strip() == MOC_MO]
@@ -118,10 +141,10 @@ def go_khoi(noi_dung: str) -> tuple[str | None, str]:
     i_mo, i_dong = vt_mo[0], vt_dong[0]
     if i_dong < i_mo:
         return None, "marker DONG nam TRUOC marker MO — tep da bi sua tay, KHONG doan"
-    for k in range(i_mo + 1, i_dong):
-        if not any(r.match(dong[k]) for r in _DONG_HOP_LE):
-            return None, (f"dong {k + 1} giua hai marker KHONG thuoc khoi cu cua ta "
-                          f"({dong[k].strip()[:40]!r}) — KHONG doan")
+    than = _chuan_hoa("".join(dong[i_mo + 1:i_dong]))
+    if than not in tuple(_chuan_hoa(k) for k in _THAN_KHOI_CU):
+        return None, ("phan giua hai marker KHONG khop khoi canonical nao cua ta "
+                      f"({than.splitlines()[0][:40]!r}...) — da bi sua tay, KHONG doan")
     # Xoá đúng các dòng của khối, CỘNG NHIỀU NHẤT MỘT dòng trắng ngay sau — đúng dấu
     # phân cách mà chính bản ghi cũ chèn (`KHOI + "\n\n" + phan_con_lai`).
     #
@@ -147,14 +170,49 @@ def ghi_nguyen_tu(tep: Path, noi_dung: str) -> None:
     có thể qua ranh giới filesystem), `fsync` nội dung, rồi `os.replace`. Hỏng ở bất
     kỳ bước nào trước `replace` thì bản gốc còn nguyên; tệp tạm được dọn.
     """
-    tam = tep.with_name(tep.name + f".tra-luat-tam-{os.getpid()}")
+    # v2 — bản v1 TỰ MỞ MỘT LỖ trong lúc đang vá một lỗ (cross-review lượt 9, MEDIUM).
+    #
+    # Tên tạm cũ ĐOÁN ĐƯỢC (`config.toml.tra-luat-tam-<pid>`) và mở bằng `open(...,"w")`
+    # — không `O_EXCL`, không chống symlink. Phản chứng chạy được: trỏ đúng tên đó thành
+    # symlink tới một tệp `victim` ⇒ VICTIM BỊ GHI ĐÈ. Hỏng TRƯỚC `os.replace`, tức phá
+    # đúng hợp đồng viết ở dòng ngay trên. Vá một lỗ mà mở lỗ khác trong cùng hàm.
+    #
+    # `mkstemp` cho tên NGẪU NHIÊN + `O_CREAT|O_EXCL|O_NOFOLLOW`: đã tồn tại (kể cả là
+    # symlink) thì tạo THẤT BẠI thay vì ghi xuyên qua.
+    ten_that = os.path.realpath(tep)
+    if os.path.islink(tep):
+        # `os.replace` thay CHÍNH symlink chứ không cập nhật đích — với người dùng quản
+        # lý dotfiles bằng symlink, đó là phá cách bố trí của họ. Không đoán ý: từ chối,
+        # và chỉ họ chạy thẳng trên đường thật.
+        raise OSError(f"{tep} la SYMLINK toi {ten_that} — chay lai voi --tep {ten_that}")
+    # GIỮ NGUYÊN quyền tệp gốc. Bản trước ép 0600 cho MỌI tệp: đó là đổi metadata sau
+    # lưng người dùng ("thắt chặt lén" — reviewer gọi đúng). Ta đang GỠ một khối, không
+    # phải đặt lại chính sách quyền của họ.
     try:
-        with open(tam, "w", encoding="utf-8") as f:
+        che_do = os.stat(tep).st_mode & 0o7777
+    except OSError:
+        che_do = 0o600
+    fd, ten_tam = tempfile.mkstemp(dir=str(tep.parent), prefix=tep.name + ".tra-luat-",
+                                   suffix=".tam")
+    tam = Path(ten_tam)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(noi_dung)
             f.flush()
             os.fsync(f.fileno())
-        os.chmod(tam, 0o600)
+        os.chmod(tam, che_do)
         os.replace(tam, tep)        # nguyên tử trong cùng filesystem
+        # `fsync` NỘI DUNG thôi chưa đủ để bền qua mất điện: mục lục thư mục cũng phải
+        # xuống đĩa, nếu không `replace` có thể bay. Rẻ, và đây là tệp cấu hình chứ
+        # không phải vòng lặp nóng.
+        try:
+            dfd = os.open(str(tep.parent), os.O_RDONLY)
+            try:
+                os.fsync(dfd)
+            finally:
+                os.close(dfd)
+        except OSError:
+            pass                    # không fsync được thư mục thì thôi, KHÔNG hỏng việc
     except BaseException:
         # Kể cả KeyboardInterrupt: rác tạm phải dọn, rồi NÉM TIẾP để phía gọi biết.
         try:

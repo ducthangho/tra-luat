@@ -1918,6 +1918,26 @@ def _han_token_codex() -> dict:
     return ra
 
 
+def _co_chan_codex() -> str | None:
+    """Lý do codex đang bị CHẶN, hoặc `None` nếu không bị chặn.
+
+    CHỐT DÙNG CHUNG cho MỌI đường gọi codex do kho cung cấp (cross-review lượt 9,
+    HIGH). Bản trước chỉ đọc cờ ở `_do_codex`, nên `_do_codex_song` — đường THẬT SỰ
+    chạy `codex exec` — đi thẳng qua. Một chốt mà chỉ một trong hai cửa đọc thì không
+    phải chốt; reviewer gọi đúng là "xanh giả với phạm vi nó tự nhận".
+
+    PHẠM VI, khai thẳng: cờ này chặn được các cửa CỦA KHO. Người dùng gõ `codex` ở
+    terminal thì KHÔNG có gì đọc cờ — muốn chặn tới đó phải là cơ chế khác (đổi PATH,
+    gói bọc), và ta KHÔNG làm thế vì nó lại là thứ sửa môi trường sau lưng người dùng.
+    """
+    co = Path(os.path.expanduser("~/.codex")) / CO_CHAN_CODEX
+    if not co.exists():
+        return None
+    return (f"BI CHAN: {co} ton tai — khoi shell_environment_policy cu chua go duoc, "
+            f"`inherit=all` co the con hieu luc. Sua tay roi chay "
+            f"`python3 .claude/dev/codex_env_policy.py`")
+
+
 def _do_codex_song(han_giay: int = 90) -> tuple[bool, str]:
     """Phép thử SỐNG: gọi `codex` thật và soi lỗi xác thực.
 
@@ -1925,6 +1945,10 @@ def _do_codex_song(han_giay: int = 90) -> tuple[bool, str]:
     `--kiem-song`. Nhưng đây là thứ DUY NHẤT chứng minh được credential còn dùng được:
     refresh token bị THU HỒI phía máy chủ thì không phép kiểm offline nào thấy.
     """
+    bi_chan = _co_chan_codex()
+    if bi_chan:
+        # Đây là cửa THẬT SỰ chạy `codex exec`. Bản trước bỏ sót đúng cửa này.
+        return (False, bi_chan)
     try:
         with open(os.devnull) as rong:
             p = subprocess.run(["codex", "exec", "--skip-git-repo-check", "in ra: ok"],
@@ -1960,19 +1984,9 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
     """
     if not shutil.which("codex"):
         return ("THIEU", "chua cai — npm install -g @openai/codex")
-    # CỜ CHẶN do `codex_env_policy.py` đặt khi nó KHÔNG gỡ được khối
-    # `shell_environment_policy` cũ (cross-review lượt 8, HIGH — fail-open).
-    #
-    # Khi đó `inherit = "all"` có thể VẪN CÒN HIỆU LỰC, tức mọi lệnh con của codex
-    # nhận TOÀN BỘ môi trường. Ta không được sửa config của người dùng (đó chính là
-    # lý do đang từ chối), nên chặn ở PHÍA TA. Đặt TRƯỚC mọi phép đo khác: một
-    # credential hoàn hảo cũng không làm đường này an toàn.
-    co_chan = Path(os.path.expanduser("~/.codex")) / CO_CHAN_CODEX
-    if co_chan.exists():
-        return ("CHUA_XAC_THUC",
-                f"BI CHAN: {co_chan} ton tai — khoi shell_environment_policy cu chua go "
-                f"duoc, `inherit=all` co the con hieu luc. Chay "
-                f"`python3 .claude/dev/codex_env_policy.py` sau khi sua tay")
+    bi_chan = _co_chan_codex()
+    if bi_chan:
+        return ("CHUA_XAC_THUC", bi_chan)
     try:
         p = subprocess.run(["codex", "login", "status"], capture_output=True, text=True,
                            timeout=30, encoding="utf-8", errors="replace")

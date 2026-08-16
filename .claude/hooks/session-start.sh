@@ -213,8 +213,14 @@ fi
 if co codex; then
   MA_GO=0
   "$PY" "$GOC/.claude/dev/codex_env_policy.py" 2>&1 | sed 's/^/[session-start] /' || MA_GO=$?
-  # `set -o pipefail` khong bat o day => lay ma cua PYTHON, khong phai cua `sed`.
-  MA_GO=${PIPESTATUS[0]:-$MA_GO}
+  # KHONG doc `${PIPESTATUS[0]}` o day. Ban truoc co dong do, kem chu thich "`set -o
+  # pipefail` khong bat o day" — chu thich SAI: tep nay dat `set -euo pipefail` o dong 34.
+  # Va dong "phong thu" ay chinh la thu GIET ma thoat: `MA_GO=$?` la MOT LENH, nen no
+  # dat lai PIPESTATUS ve 0; doc PIPESTATUS SAU do luon ra 0 ⇒ `CODEX_BI_CHAN` khong bao
+  # gio duoc dat ⇒ hook van goi `codex login status` du da phat hien `inherit=all`.
+  # DO DUOC (bash, cung hinh dang pipeline): sau `|| MA_GO=$?` thi MA_GO=3 PIPESTATUS[0]=0;
+  # gan lai tu PIPESTATUS dua MA_GO ve 0. Lan thu BA chot fail-close chet vi mot dong
+  # tuong la lam cho chac. Co `pipefail` thi `$?` cua pipeline DA la ma cua python.
   if [ "$MA_GO" -ne 0 ]; then
     CODEX_BI_CHAN=1
     echo "[session-start] !! CHAN MOI DUONG CODEX CUA KHO (ma $MA_GO): config con khoi"

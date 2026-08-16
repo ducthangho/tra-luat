@@ -297,6 +297,13 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   lần trở lên thì câu hỏi đúng là "có nên làm việc này không", không phải "vá thế nào".
   Chữa: công cụ KHÔNG ghi vào tệp của người dùng nữa — phát hiện + dựng bản đã gỡ ra tệp
   BÊN CẠNH, người dùng tự `mv`. Cả lớp rủi ro chết theo KIẾN TRÚC, không theo bản vá.
+- **`MA=$?` SAU pipeline rồi đọc `${PIPESTATUS[0]}` = tự giết mã thoát.** Phép gán
+  `MA_GO=$?` LÀ một lệnh, nên nó đặt lại `PIPESTATUS` về 0; dòng đọc `PIPESTATUS` phía
+  sau kéo mã về 0 và chốt fail-close chết **lần thứ ba**. Tệ hơn: chú thích biện minh cho
+  dòng đó ghi "`set -o pipefail` không bật ở đây" trong khi CHÍNH TỆP ẤY đặt
+  `set -euo pipefail` ở dòng 34. **Chú thích khẳng định về tệp mình đang nằm trong thì
+  phải kiểm trên tệp đó** — một câu sai ở đây biến bản vá thành bản phá. Có `pipefail`
+  thì `$?` của pipeline đã là mã của lệnh trái; đừng "làm cho chắc".
 - **PHẠM VI TUYÊN BỐ phải bằng phạm vi ĐO ĐƯỢC.** Tôi đặt cờ chặn codex, gọi nó là
   "CODEX BI CHAN", mà chỉ `_do_codex` đọc cờ — trong khi chính hook gọi `codex login
   status` TRƯỚC đó, `_do_codex_song` (cửa thật sự chạy `codex exec`) đi thẳng qua, và

@@ -2730,6 +2730,97 @@ def t96_kiem_song_phai_chay_KE_CA_khi_sap_het_han():
 
 
 @ca
+def t103_nam_finding_cua_bot_review_PR128():
+    """Năm mục bot codex nêu trên PR #128 — cả năm ĐO LẠI đều đúng, nên khoá cả năm.
+
+    Mục nặng nhất là `PIPESTATUS`, và nó đáng ghi: chú thích của tôi ghi "`set -o pipefail`
+    khong bat o day" trong khi CHÍNH TỆP ĐÓ đặt `set -euo pipefail` ở dòng 34. Dòng
+    "phòng thủ" `MA_GO=${PIPESTATUS[0]:-$MA_GO}` là MỘT LỆNH, nên nó đặt lại PIPESTATUS
+    về 0 và kéo `MA_GO` về 0 — `CODEX_BI_CHAN` không bao giờ được đặt. Lần thứ BA chốt
+    fail-close chết, lần này vì một dòng tưởng là làm cho chắc.
+    """
+    m = _tai_launcher_thu()
+
+    # (a) BIEN RONG khong phai credential
+    m.shutil.which = lambda t: f"/usr/bin/{t}"
+    m.os.path.expanduser = lambda d: "/khong-ton-tai-o-dau-ca" if d.startswith("~") else d
+    m.os.environ = {"ANTHROPIC_API_KEY": ""}
+    tt, mo_ta = m._do_claude()
+    bang(tt != "DUNG_DUOC", f"bien RONG ma van bao DUNG_DUOC: {mo_ta!r}")
+    m.os.environ = {"ANTHROPIC_API_KEY": "sk-that-su-co-gia-tri"}
+    tt, _ = m._do_claude()
+    bang(tt == "DUNG_DUOC", f"bien CO gia tri ma bao {tt} — chan oan")
+
+    # (b) `gh` CO MAT khong phai DA XAC THUC
+    #
+    # `m.subprocess` LA module subprocess dung chung, nen gan de len no la de len CA
+    # tien trinh test. Da dinh ngay trong chinh ca nay: phan (e) goi bash that va nhan
+    # ve chuoi rong vi van dang dung ban gia cua phan (b). Giu ban goc, tra lai ngay.
+    goc_run = m.subprocess.run
+    goi = []
+
+    class Rc:
+        def __init__(self, rc):
+            self.returncode, self.stdout, self.stderr = rc, "", ""
+
+    for rc_gh, mong in ((1, False), (0, True)):
+        m.subprocess.run = lambda *_a, **_k: (goi.append(1), Rc(rc_gh))[1]
+        tt, mo_ta = m._do_github(None)      # KHONG co workspace => chi con duong gh
+        bang((tt == "DUNG_DUOC") is mong,
+             f"gh rc={rc_gh} ma ket luan {tt} (mong kha dung={mong}): {mo_ta!r}")
+    bang(goi, "khong he goi `gh auth status` — van dang do CO MAT")
+    m.subprocess.run = goc_run          # tra lai TRUOC khi phan (e) goi bash that
+
+    # (c) SO MOC THAT, khong so tuoi da lam tron (0,1h = 6 phut)
+    # Doi do CHINH XAC TOI GIAY. Ban dau toi viet ca nay bang cach doi hai moc cach
+    # 3 phut phai CUNG o lam tron — no CHAP CHON, vi hai tuoi cach 0,05h roi vao cung
+    # o hay khac o la tuy THOI DIEM CHAY. Mot ca do thoi diem chay thi khong phai ca.
+    a = m._moc_refresh("2026-08-16T01:00:00Z")
+    b = m._moc_refresh("2026-08-16T01:00:01Z")     # cach DUNG MOT GIAY
+    bang(a is not None and b is not None, "khong doc duoc moc")
+    bang(a < b, "hai moc cach 1 GIAY ma so ra bang nhau — dang lam tron truoc khi so")
+    # ...va noi ro vi sao khong duoc dung `_tuoi_anh_chup_gio` de QUYET DINH:
+    v = m._tuoi_anh_chup_gio("2026-08-16T01:00:00Z")
+    bang(v is not None and round(v, 1) == v,
+         f"tuoi phai la so DA LAM TRON 0,1h (=6 phut) — do la ly do khong duoc so bang no: {v}")
+    bang(m._moc_refresh("rac") is None and m._moc_refresh(None) is None,
+         "moc khong doc duoc phai la None")
+
+    # (d) `O_NOFOLLOW` KHONG co tren Windows => phai dung getattr
+    cs = _nap_sach(CODEX_ENV_POLICY)
+    with San() as s:
+        goc_getattr = cs.os.O_NOFOLLOW if hasattr(cs.os, "O_NOFOLLOW") else None
+        try:
+            if goc_getattr is not None:
+                del cs.os.O_NOFOLLOW          # gia lap Windows
+            cs.viet_ban_da_go(s / "ra.txt", b"noi dung")
+            bang((s / "ra.txt").read_bytes() == b"noi dung", "ghi sai noi dung")
+        except AttributeError as e:
+            bang(False, f"goi thang os.O_NOFOLLOW — Windows se chet: {e}")
+        finally:
+            if goc_getattr is not None:
+                cs.os.O_NOFOLLOW = goc_getattr
+
+    # (e) HOOK: ma thoat cua bo phat hien phai TOI DUOC `CODEX_BI_CHAN`
+    hook = (LAUNCHER.parent.parent / "hooks" / "session-start.sh").read_text(encoding="utf-8")
+    bang("MA_GO=${PIPESTATUS[0]" not in hook,
+         "doc lai PIPESTATUS SAU `|| MA_GO=$?` — chinh dong do dat lai PIPESTATUS ve 0")
+    bang("set -euo pipefail" in hook, "hook mat pipefail thi `$?` khong con la ma cua python")
+    # ...va chay THAT hinh dang pipeline do trong bash, doi ma 3 di toi noi
+    kich = ("set -euo pipefail\n"
+            "gia_lap() { echo loi; return 3; }\n"
+            "MA_GO=0\n"
+            "gia_lap 2>&1 | sed 's/^/[x] /' >/dev/null || MA_GO=$?\n"
+            'if [ "$MA_GO" -ne 0 ]; then CHAN=1; else CHAN=0; fi\n'
+            'printf "%s %s" "$MA_GO" "$CHAN"\n')
+    if not shutil.which("bash"):
+        return "khong co bash tren nen nay"
+    r = subprocess.run(["bash", "-c", kich], capture_output=True, text=True, timeout=30)
+    bang(r.stdout.strip() == "3 1",
+         f"hinh dang pipeline khong dua duoc ma 3 toi co chan: {r.stdout!r}")
+
+
+@ca
 def t101_phan_tich_doi_so_phai_do_NGAY_khong_doi_chay_het_suite():
     """Công cụ chẩn đoán dễ xanh giả thì tệ hơn không có.
 
@@ -3228,6 +3319,19 @@ DOT_BIEN = [
     # Hai dot bien: mot cho CHINH ham co chan, mot cho CUA `_do_codex_song`. Luot 9
     # bat dung chuyen chi mot trong hai cua doc co — nen phai co dot bien RIENG cho cua
     # thu hai, khong thi no lai am tham khong duoc kiem.
+    # Ba dot bien cho ba finding cua bot review PR #128 nam trong launcher.py.
+    ("claude_dem_ca_BIEN_RONG_la_credential",
+     ('            and v.strip()]', '            ]'),
+     ["t103_nam_finding_cua_bot_review_PR128"]),
+    ("github_dem_CO_MAT_gh_la_da_xac_thuc",
+     ('            duong.append(("gh-cli", pg.returncode == 0,',
+      '            duong.append(("gh-cli", True,'),
+     ["t103_nam_finding_cua_bot_review_PR128"]),
+    ("moc_refresh_MAT_DO_PHAN_GIAI",
+     ('        moc = datetime.fromisoformat(last_refresh.strip().replace("Z", "+00:00"))',
+      '        moc = datetime.fromisoformat(last_refresh.strip().replace("Z", "+00:00")'
+      ').replace(minute=0, second=0, microsecond=0)'),
+     ["t103_nam_finding_cua_bot_review_PR128"]),
     ("co_chan_codex_luon_tra_KHONG_BI_CHAN",
      ('    if not co.exists():\n        return None', '    if True:\n        return None'),
      ["t102_khong_go_duoc_policy_thi_phai_CHAN_codex"]),

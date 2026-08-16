@@ -161,7 +161,11 @@ def viet_ban_da_go(dich: Path, noi_dung: bytes) -> None:
     không có symlink bị xuyên, không có metadata bị đổi lén. Đó là cả bốn phát hiện của
     lượt 9-10, chết theo kiến trúc chứ không theo bản vá.
     """
-    fd = os.open(str(dich), os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    # `O_NOFOLLOW` KHONG co tren Windows — goi thang la `AttributeError`, ma `main`
+    # chi bat `OSError`/`FileExistsError` nen no thoat ra ngoai va chan sach nguoi
+    # dung Windows. `O_EXCL` mot minh da chan ghi de; `O_NOFOLLOW` la lop THEM.
+    khong_theo_link = getattr(os, "O_NOFOLLOW", 0)
+    fd = os.open(str(dich), os.O_WRONLY | os.O_CREAT | os.O_EXCL | khong_theo_link, 0o600)
     try:
         with os.fdopen(fd, "wb") as f:
             f.write(noi_dung)

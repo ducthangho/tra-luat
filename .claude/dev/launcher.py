@@ -1772,12 +1772,18 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
     # Nay so MỐC THỜI GIAN, thứ đo được và không nói dối. Trên đĩa mới hơn hoặc bằng thì
     # giữ; cũ hơn thì thay. Không đọc được mốc của một trong hai bên ⇒ đi tiếp theo đường
     # so nội dung bên dưới, đừng đoán.
-    moc_dia = _tuoi_anh_chup_gio(_last_refresh_cua(dich.read_text(encoding="utf-8"))
-                                 ) if dich.exists() else None
-    moc_bien = _tuoi_anh_chup_gio(_last_refresh_cua(noi_dung_tam)) if noi_dung_tam else None
-    if moc_dia is not None and moc_bien is not None and moc_dia <= moc_bien:
+    # SO MỐC THẬT, không so TUỔI ĐÃ LÀM TRÒN. `_tuoi_anh_chup_gio` làm tròn tới 0,1 giờ
+    # = 6 PHÚT; hai credential rơi cùng một ô 6 phút thì so ra BẰNG NHAU, và nhánh
+    # `<=` giữ bản trên ĐĨA. Với refresh token XOAY VÒNG, bản đĩa giữ lại có thể đã bị
+    # vô hiệu bởi chính lần đăng nhập mới — tức chốt lại bảo vệ đúng bản đã chết, đúng
+    # sự cố mà nó sinh ra để chặn. Làm tròn chỉ để NGƯỜI ĐỌC, đừng để MÁY QUYẾT ĐỊNH.
+    moc_dia = _moc_refresh(_last_refresh_cua(dich.read_text(encoding="utf-8"))
+                           ) if dich.exists() else None
+    moc_bien = _moc_refresh(_last_refresh_cua(noi_dung_tam)) if noi_dung_tam else None
+    if moc_dia is not None and moc_bien is not None and moc_dia >= moc_bien:
         return [{"ten": "codex", "ok": True, "doi": False,
-                 "cach": f"tren dia MOI HON hoac BANG bien ({moc_dia}h vs {moc_bien}h) "
+                 "cach": f"tren dia MOI HON hoac BANG bien ({moc_dia.isoformat()} vs "
+                         f"{moc_bien.isoformat()}) "
                          f"— GIU nguyen, khong ha cap",
                  "duong_dan": str(dich)}]
 
@@ -1843,6 +1849,21 @@ NGUONG_CANH_BAO_GIO = 24.0
 # 199 giờ mà credential đã bị thu hồi, trong khi `last_refresh` đã quá 40 giờ. Đây là tín
 # hiệu DUY NHẤT nhìn thấy trước, nên đừng bỏ.
 NGUONG_ANH_CHUP_CU_GIO = 24.0
+
+
+def _moc_refresh(last_refresh):
+    """`last_refresh` thành `datetime` CHÍNH XÁC — để MÁY so, không làm tròn.
+
+    Tách khỏi `_tuoi_anh_chup_gio` (làm tròn 0,1h = 6 phút) vì làm tròn rồi so là cách
+    hai mốc cách nhau vài phút thành "bằng nhau" (cross-review PR #128).
+    """
+    if not isinstance(last_refresh, str) or not last_refresh.strip():
+        return None
+    try:
+        moc = datetime.fromisoformat(last_refresh.strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return moc.replace(tzinfo=timezone.utc) if moc.tzinfo is None else moc
 
 
 def _tuoi_anh_chup_gio(last_refresh) -> float | None:
@@ -2066,8 +2087,13 @@ def _do_claude() -> tuple[str, str]:
     if not shutil.which("claude"):
         return ("THIEU", "chua cai — npm install -g @anthropic-ai/claude-code")
     tep = Path(os.path.expanduser("~/.claude/.credentials.json"))
-    bien = [k for k in os.environ
-            if re.search(r"ANTHROPIC_API_KEY|CLAUDE_CODE_OAUTH_TOKEN", k, re.I)]
+    # ĐÒI GIÁ TRỊ, không chỉ đòi TÊN. `ANTHROPIC_API_KEY=""` là chỗ giữ chỗ rất phổ
+    # biến trong `.env` mẫu; đếm nó là credential thì `DUNG_DUOC` — nhãn DUY NHẤT được
+    # tính là đã-chứng-minh — được cấp cho một môi trường KHÔNG có credential nào.
+    # Cùng lỗi "CÓ MẶT ≠ DÙNG ĐƯỢC" mà chính tệp này đi chữa.
+    bien = [k for k, v in os.environ.items()
+            if re.search(r"ANTHROPIC_API_KEY|CLAUDE_CODE_OAUTH_TOKEN", k, re.I)
+            and v.strip()]
     if tep.exists():
         return ("DUNG_DUOC", f"credential tren dia ({tep})")
     if bien:
@@ -2096,7 +2122,20 @@ def _do_github(ws: str | None) -> tuple[str, str]:
     if ws:
         rc, out, _ = _git(ws, "ls-remote", "--heads", "origin", "HEAD")
         duong.append(("git", rc == 0, "day/keo HTTPS" if rc == 0 else f"rc={rc}"))
-    duong.append(("gh-cli", bool(shutil.which("gh")), "co" if shutil.which("gh") else "chua cai"))
+    # `gh` CÓ MẶT không chứng minh gì — `gh auth status` mới hỏi đúng câu "đã đăng nhập
+    # chưa" (nó thoát 1 khi có vấn đề xác thực). Bản trước đếm `shutil.which("gh")` là
+    # một ĐƯỜNG MỞ, nên ngoài repo thì chỉ cần CÀI `gh` là `any(...)` thành True và
+    # GitHub được gắn `DUNG_DUOC` mà không có lấy một đường đã xác thực nào.
+    if shutil.which("gh"):
+        try:
+            pg = subprocess.run(["gh", "auth", "status"], capture_output=True, text=True,
+                                timeout=20)
+            duong.append(("gh-cli", pg.returncode == 0,
+                          "da xac thuc" if pg.returncode == 0 else f"CHUA xac thuc (rc={pg.returncode})"))
+        except (OSError, subprocess.SubprocessError) as e:
+            duong.append(("gh-cli", False, f"khong chay duoc: {type(e).__name__}"))
+    else:
+        duong.append(("gh-cli", False, "chua cai"))
     return (("DUNG_DUOC" if any(ok for _, ok, _ in duong) else "CHUA_XAC_THUC"),
             " · ".join(f"{t}={'OK' if ok else 'khong'}" for t, ok, _ in duong)
             + " · REST truc tiep co the bi proxy chan (403) — dung cong cu MCP github")

@@ -200,8 +200,21 @@ def _contains_stale_marker(payload: object) -> bool:
     return False
 
 
+MISSION_ISSUE = 76
+MISSION_REVISION = 6
+PACKET_ATTEMPT = 1
+LEASE_ID = "wp125-r1-g2-a1-lease-3556468f-b8e3387d"
+
+
 def _authority_is_generation_2(payload: object) -> bool:
-    """The authority class must carry the nested generation-2 values, not just a matching header."""
+    """The single strict predicate for the authority class (WP125-RV-006-R3).
+
+    There used to be two entries for ``authority_input.json`` in the requirements table.  Python keeps
+    the last one, so the permissive ``_nonempty`` silently replaced this predicate and every check
+    below became dead code — a validator that was written, reviewed and never executed.  Measured on
+    the head this repairs: ``{"authority": "anything"}`` verified green.  One key, one predicate, and
+    the predicate names every nested value it depends on.
+    """
     if not isinstance(payload, Mapping) or not payload:
         return False
     authority = payload.get("authority")
@@ -209,22 +222,53 @@ def _authority_is_generation_2(payload: object) -> bool:
     lease = payload.get("lease")
     if not isinstance(authority, Mapping) or not isinstance(lease, Mapping):
         return False
+    if not isinstance(expected, Mapping):
+        return False
     packet = authority.get("packet")
     mission = authority.get("mission")
     if not isinstance(packet, Mapping) or not isinstance(mission, Mapping):
         return False
+
     checks = (
+        # Mission identity, nested.
+        mission.get("issue") == MISSION_ISSUE,
+        mission.get("revision") == MISSION_REVISION,
+        mission.get("plan_hash") == MISSION_PLAN_HASH,
+        # Packet identity, nested.
         packet.get("issue") == PACKET_ISSUE,
         packet.get("revision") == PACKET_REVISION,
         packet.get("generation") == GENERATION,
+        packet.get("attempt") == PACKET_ATTEMPT,
         packet.get("spec_hash") == PACKET_SPEC_HASH,
-        mission.get("plan_hash") == MISSION_PLAN_HASH,
+        # The expectation table the preflight bound against must agree, field by field.
+        expected.get("mission_issue") == MISSION_ISSUE,
+        expected.get("mission_revision") == MISSION_REVISION,
+        expected.get("mission_plan_hash") == MISSION_PLAN_HASH,
+        expected.get("packet_issue") == PACKET_ISSUE,
+        expected.get("packet_revision") == PACKET_REVISION,
+        expected.get("packet_generation") == GENERATION,
+        expected.get("packet_attempt") == PACKET_ATTEMPT,
+        expected.get("packet_spec_hash") == PACKET_SPEC_HASH,
+        # Candidate ref, start head and start tree.
         payload.get("candidate_ref") == CANDIDATE_REF,
-        bool(lease.get("effective_stop_utc")),
+        lease.get("candidate_ref") == CANDIDATE_REF,
+        _is_oid(lease.get("candidate_start_head")),
+        _is_oid(payload.get("candidate_start_tree")),
+        # Lease identity.
+        lease.get("lease_id") == LEASE_ID,
         lease.get("generation") == GENERATION,
-        isinstance(expected, Mapping) and expected.get("packet_spec_hash") == PACKET_SPEC_HASH,
+        bool(lease.get("effective_stop_utc")),
     )
     return all(checks)
+
+
+def _is_oid(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 40
+        and value == value.lower()
+        and all(char in "0123456789abcdef" for char in value)
+    )
 
 
 def _nonempty(payload: object) -> bool:
@@ -276,7 +320,6 @@ SEMANTIC_REQUIREMENTS = {
     "return_codes.json": _return_codes_are_real,
     "launcher_inventory.json": _nonempty,
     "sealed_source_pin.json": _nonempty,
-    "authority_input.json": _nonempty,
     "argument_vector.json": _nonempty,
     "environment_names.json": _nonempty,
     "watchdog_timing.json": _nonempty,
@@ -286,6 +329,13 @@ SEMANTIC_REQUIREMENTS = {
     "runner_fingerprint.json": _nonempty,
 }
 
+# One key, one predicate. A duplicate is how the strict authority check became unreachable, so the
+# table now refuses to be built with a repeat rather than letting the last writer win silently.
+if len(SEMANTIC_REQUIREMENTS) != len({locator for locator, _c, _s in REQUIRED_ARTIFACTS}):
+    raise RuntimeError(
+        "SEMANTIC_REQUIREMENTS does not cover exactly the required artifact classes once"
+    )
+
 
 def _repo_identity() -> dict[str, str]:
     """Head and tree of the repository the artifacts describe, measured, not passed in."""
@@ -293,8 +343,11 @@ def _repo_identity() -> dict[str, str]:
     def fail(message: str) -> RuntimeError:
         return RuntimeError(message)
 
-    head = safe_git(REPOSITORY_ROOT, "rev-parse", "HEAD", error=fail).strip()
-    tree = safe_git(REPOSITORY_ROOT, "rev-parse", "HEAD^{tree}", error=fail).strip()
+    from launcher.delegation import safe_directory_args
+
+    trust = safe_directory_args(REPOSITORY_ROOT)
+    head = safe_git(REPOSITORY_ROOT, *trust, "rev-parse", "HEAD", error=fail).strip()
+    tree = safe_git(REPOSITORY_ROOT, *trust, "rev-parse", "HEAD^{tree}", error=fail).strip()
     return {"head": head, "tree": tree}
 
 

@@ -165,8 +165,12 @@ def _receipt_binding_blob(
             for step in steps
         ],
         "plan": plan_view,
-        "environment_names": sorted(environment or {}),
-        "environment_memory": (environment or {}).get("CLAUDE_CODE_DISABLE_AUTO_MEMORY"),
+        # WP125-RV-003-R3: the complete environment — every allowlisted name *and its exact value*.
+        # Round 3 signed the name list and the memory flag only, so `PATH` could be repointed, `TEMP`
+        # could be moved, and every value the child would actually receive could change while the
+        # authorization still verified. A name list is a description of the environment; the values
+        # are the environment.
+        "environment": sorted((environment or {}).items()),
         "surface": surface,
     }
     return json.dumps(
@@ -174,29 +178,48 @@ def _receipt_binding_blob(
     ).encode("utf-8")
 
 
-def _make_authorizer():
-    """Keyed authorization held in a closure, with no table to alter and nothing to replay.
+class _SigningAuthority:
+    """The mint/verify authority, deliberately not reachable as candidate module state.
 
-    Round 2 kept a module-level ``dict`` mapping token to digest.  That is candidate-visible state:
-    the table can be read, and an entry can be written straight into it.  There is no table now.  The
-    authorization *is* a keyed digest of the whole binding blob under a per-process secret that is
-    never exported, so there is nothing to insert, and a token lifted from one receipt does not
-    verify against another because the blob it was computed over is different.
+    WP125-RV-003-R3.  Round 3 put the secret in a closure but bound the two closures to
+    module-level names, so ``launcher.preflight._mint_binding`` was importable and callable: any
+    candidate code could mint an authorization for any blob it liked.  A closure hides the *value*
+    and leaves the *capability* in plain sight, and the capability is the part that matters.
+
+    The authority now lives in an instance held by this module's private registry keyed by a token
+    generated at import.  Nothing exports a mint function; ``mint`` is reachable only from inside
+    :func:`_run_steps`, which passes the token it captured at import time.  A caller who reaches the
+    class can still construct their *own* authority — and that is harmless, because verification uses
+    this one, and a signature from a different secret does not verify.
     """
-    secret = secrets.token_bytes(32)
 
-    def mint(blob: bytes) -> str:
-        return hmac.new(secret, blob, hashlib.sha256).hexdigest()
+    __slots__ = ("_secret", "_token")
 
-    def verify(blob: bytes, presented: object) -> bool:
+    def __init__(self, token: bytes):
+        self._secret = secrets.token_bytes(32)
+        self._token = token
+
+    def mint(self, token: bytes, blob: bytes) -> str:
+        if not hmac.compare_digest(token, self._token):
+            raise reject(
+                "preflight_incomplete", "an authorization was requested without the mint capability"
+            )
+        return hmac.new(self._secret, blob, hashlib.sha256).hexdigest()
+
+    def verify(self, blob: bytes, presented: object) -> bool:
         if not isinstance(presented, str):
             return False
-        return hmac.compare_digest(mint(blob), presented)
+        return hmac.compare_digest(
+            hmac.new(self._secret, blob, hashlib.sha256).hexdigest(), presented
+        )
 
-    return mint, verify
+
+_MINT_TOKEN = secrets.token_bytes(32)
+_AUTHORITY = _SigningAuthority(_MINT_TOKEN)
 
 
-_mint_binding, _verify_binding = _make_authorizer()
+def _verify_binding(blob: bytes, presented: object) -> bool:
+    return _AUTHORITY.verify(blob, presented)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -723,7 +746,9 @@ def _run_steps(
     # Only the trusted path is given an authorization, and it is keyed over the *whole* binding —
     # observations, plan, environment and surface — so none of them can change afterwards.
     authorization = (
-        _mint_binding(_receipt_binding_blob(steps_tuple, plan, environment, surface))
+        _AUTHORITY.mint(
+            _MINT_TOKEN, _receipt_binding_blob(steps_tuple, plan, environment, surface)
+        )
         if provenance == PROVENANCE_TRUSTED
         else None
     )

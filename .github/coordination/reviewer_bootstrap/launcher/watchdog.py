@@ -499,8 +499,94 @@ class ProcessFence:
         # lose it, so this is the terminator of last resort rather than a convenience.
         self._child = None
 
+        # WP125-RV-010-R3.  POSIX identity for the *group*, kept independently of the root pid.
+        # `os.getpgid(pid)` stops working the moment the root exits, which is precisely the case the
+        # group exists to survive: root gone, descendants still in the group. Recording the pgid and
+        # session at adoption means the fence can still name, signal and census the group afterwards.
+        self.pgid: int | None = None
+        self.session: int | None = None
+
     def attach_child(self, child) -> None:
         self._child = child
+
+    # -- POSIX group identity ---------------------------------------------
+    def record_group_identity(self, pid: int) -> dict[str, object]:
+        """Capture pgid/session while the root is still alive to be asked."""
+        if IS_WINDOWS:
+            return {"applicable": False, "reason": "windows_uses_job_object"}
+        try:
+            self.pgid = os.getpgid(pid)
+        except OSError:
+            self.pgid = None
+        try:
+            self.session = os.getsid(pid)
+        except (OSError, AttributeError):
+            self.session = None
+        return {
+            "applicable": True,
+            "pgid": self.pgid,
+            "session": self.session,
+            "captured_while_root_alive": True,
+        }
+
+    def group_members(self) -> list[int]:
+        """Live pids whose process group is ours, read from the process table, not from the root."""
+        if IS_WINDOWS or self.pgid is None:
+            return []
+        members: list[int] = []
+        for pid in live_pids():
+            try:
+                if os.getpgid(pid) == self.pgid:
+                    members.append(pid)
+            except OSError:
+                continue
+        return sorted(members)
+
+    def group_census(self) -> dict[str, object]:
+        """Independent census of the POSIX process group.
+
+        On Windows this is *not applicable* and says so.  A non-applicable answer is not proof of
+        cleanup — it is the absence of a measurement — so :meth:`prove_cleanup` treats the two
+        platforms' authorities separately rather than letting one stand in for the other.
+        """
+        if IS_WINDOWS:
+            return {
+                "applicable": False,
+                "ok": True,
+                "members": None,
+                "reason": "windows_job_object_is_the_authority",
+            }
+        if self.pgid is None:
+            return {
+                "applicable": True,
+                "ok": False,
+                "members": None,
+                "reason": "process_group_identity_was_never_captured",
+            }
+        members = self.group_members()
+        return {
+            "applicable": True,
+            "ok": True,
+            "members": members,
+            "empty": not members,
+            "pgid": self.pgid,
+            "reason": "measured",
+        }
+
+    def terminate_group(self) -> dict[str, object]:
+        """Kill the recorded process group, whatever the root is doing."""
+        if IS_WINDOWS or self.pgid is None:
+            return {"applicable": not IS_WINDOWS, "signalled": False}
+        try:
+            os.killpg(self.pgid, signal.SIGKILL)
+            return {"applicable": True, "signalled": True, "pgid": self.pgid}
+        except OSError as exc:
+            return {
+                "applicable": True,
+                "signalled": False,
+                "pgid": self.pgid,
+                "error": type(exc).__name__,
+            }
 
     # -- containment ------------------------------------------------------
     def open(self) -> None:
@@ -665,6 +751,8 @@ class ProcessFence:
             _kernel32.CloseHandle(handle)
             self._assigned = True
         self.recorded.append(identity_value)
+        # Capture the POSIX group identity while the root can still be asked for it.
+        self.record_group_identity(pid)
         return identity_value
 
     def resume(self, pid: int) -> None:
@@ -710,20 +798,24 @@ class ProcessFence:
         # contained: once its parent has exited, a parent-table walk cannot find it, so the job's
         # own census is the sole witness that more than one process was inside the fence.
         active_before = self.active_process_count()
+        group_result: dict[str, object] = {"applicable": not IS_WINDOWS, "signalled": False}
         if IS_WINDOWS and self._job is not None:
             _kernel32.TerminateJobObject(self._job, 1)
         else:
+            # WP125-RV-010-R3: signal the *recorded* group, not `getpgid(root)`. Round 3 asked the
+            # root for its group id at kill time, which fails with ESRCH exactly when the root has
+            # already exited — the orphaned-group case. The identity was captured at adoption for
+            # this reason, so it is still available now.
+            group_result = self.terminate_group()
             for identity_value in self.recorded:
                 if not is_alive(identity_value):
                     continue
                 try:
-                    os.killpg(os.getpgid(identity_value.pid), signal.SIGKILL)
-                except (OSError, AttributeError):
-                    try:
-                        os.kill(identity_value.pid, signal.SIGKILL)
-                    except OSError:
-                        pass
+                    os.kill(identity_value.pid, signal.SIGKILL)
+                except OSError:
+                    pass
         return {
+            "group": group_result,
             "observed_descendants": attempted,
             "job_active_before_terminate": active_before,
             "mechanism": "job_object" if IS_WINDOWS else "killpg",
@@ -812,6 +904,7 @@ class ProcessFence:
                 survivors.append(identity_value.pid)
                 survivors.extend(descendants_of(identity_value.pid, table))
             census = self.job_census()
+            group = self.group_census()
             table_clean = not survivors
             # WP125-RV-005.  On Windows a census that cannot answer is RED, not clean: a missing job
             # handle or a failed Win32 query means the fence has lost sight of the tree, and "I
@@ -821,13 +914,23 @@ class ProcessFence:
             census_clean = bool(census["ok"]) and (
                 census["active"] == 0 if census["applicable"] else True
             )
-            if table_clean and census_clean:
-                paths = 2 if census["applicable"] else 1
+            # WP125-RV-010-R3: on POSIX the group census is the second authority, and it must be a
+            # real measurement showing an empty group. A Windows "not applicable" answer proves
+            # nothing about a POSIX group and is never allowed to stand in for one; each platform's
+            # second path is its own.
+            group_clean = (
+                (bool(group["ok"]) and bool(group.get("empty")))
+                if group["applicable"]
+                else True
+            )
+            if table_clean and census_clean and group_clean:
+                paths = 2 if (census["applicable"] or group["applicable"]) else 1
                 return {
                     "cleanup_proven": True,
                     "process_table_survivors": [],
                     "recorded_identities": [item.as_dict() for item in self.recorded],
                     "job_census": census,
+                    "group_census": group,
                     "job_active_processes": census["active"],
                     "independent_paths": paths,
                 }
@@ -836,8 +939,15 @@ class ProcessFence:
             time.sleep(0.05)
         raise reject(
             "watchdog_cleanup",
-            "cleanup could not be proven: %d table survivors, job census %s (active=%s)"
-            % (len(set(survivors)), census.get("reason"), census.get("active")),
+            "cleanup could not be proven: %d table survivors, job census %s (active=%s), "
+            "group census %s (members=%s)"
+            % (
+                len(set(survivors)),
+                census.get("reason"),
+                census.get("active"),
+                group.get("reason"),
+                group.get("members"),
+            ),
         )
 
     def close(self) -> None:

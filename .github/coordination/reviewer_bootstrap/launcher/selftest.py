@@ -46,6 +46,7 @@ from launcher.delegation import (  # noqa: E402
     audit_job_report,
     build_job,
     run_job,
+    safe_directory_args,
     validate_operation,
     verify_read_only_root,
 )
@@ -325,19 +326,22 @@ def read_only_candidate_root() -> dict[str, object]:
     clone = unicode_dir / "candidate"
     # Bytes everywhere: these commands name a Unicode path, and the console code page cannot decode
     # it. See the note in `_build_detached_unicode_checkout`.
+    source_trust = safe_directory_args(CANDIDATE_ROOT)
     result = subprocess.run(
-        ["git", "clone", "--quiet", "--depth", "1", "--no-hardlinks", CANDIDATE_ROOT.as_uri(), str(clone)],
+        ["git", *source_trust, "clone", "--quiet", "--depth", "1", "--no-hardlinks",
+         CANDIDATE_ROOT.as_uri(), str(clone)],
         capture_output=True,
     )
     ensure(
         result.returncode == 0,
         "the read-only root clone failed: %s" % result.stderr.decode("utf-8", "replace")[-200:],
     )
+    clone_trust = safe_directory_args(clone)
     head = subprocess.run(
-        ["git", "-C", str(clone), "rev-parse", "HEAD"], capture_output=True
+        ["git", "-C", str(clone), *clone_trust, "rev-parse", "HEAD"], capture_output=True
     ).stdout.decode("utf-8", "replace").strip()
     tree = subprocess.run(
-        ["git", "-C", str(clone), "rev-parse", "HEAD^{tree}"], capture_output=True
+        ["git", "-C", str(clone), *clone_trust, "rev-parse", "HEAD^{tree}"], capture_output=True
     ).stdout.decode("utf-8", "replace").strip()
     user = getpass.getuser()
     # Deny only the two rights that constitute "can create things here": WD (write data / add file)
@@ -377,7 +381,9 @@ def release_read_only_root() -> None:
     clone = str(_READ_ONLY_ROOT["path"])
     # Detached linked checkouts are registered in the clone's gitdir; prune them before the tree goes
     # away so nothing is left pointing at a path that no longer exists.
-    subprocess.run(["git", "-C", clone, "worktree", "prune"], capture_output=True)
+    subprocess.run(
+        ["git", "-C", clone, *safe_directory_args(clone), "worktree", "prune"], capture_output=True
+    )
     subprocess.run(
         ["icacls", clone, "/remove:d", str(_READ_ONLY_ROOT["user"])],
         capture_output=True,
@@ -2231,7 +2237,30 @@ def _meaningful_payload(locator: str) -> dict[str, object]:
         return {"tests_executed": 1, "return_codes": {"launcher_import_smoke": 0}}
     if locator == "return_codes.json":
         return {"probe_case": 0}
+    if locator == "authority_input.json":
+        return authority_input_payload()
     return {"probe": locator}
+
+
+def authority_input_payload() -> dict[str, object]:
+    """The generation-2 authority payload, in the exact nested shape the strict predicate reads.
+
+    Built from the same constants the fixture uses, so a drift in either direction is a red rather
+    than two independent stories that happen to agree.
+    """
+    return {
+        "authority": authority_document(),
+        "expected_authority": expected_authority(),
+        "lease": {
+            "lease_id": "wp125-r1-g2-a1-lease-3556468f-b8e3387d",
+            "effective_stop_utc": LEASE_STOP,
+            "generation": PACKET_GENERATION,
+            "candidate_ref": CANDIDATE_REF,
+            "candidate_start_head": INTEGRATION_HEAD,
+        },
+        "candidate_ref": CANDIDATE_REF,
+        "candidate_start_tree": INTEGRATION_TREE,
+    }
 
 
 @case("WP125-RV-006-every-required-artifact-class-is-present")
@@ -2432,7 +2461,56 @@ def rv007_config_hash_drift() -> dict[str, object]:
 
 @case("WP125-RV-008-delegated-surface-dispatches-only-run-test")
 def rv008_delegated_routing() -> dict[str, object]:
-    """On the delegated surface the model command must never be minted or invoked."""
+    """On the delegated surface the model command must never be minted or invoked.
+
+    After WP125-RV-008-R3 the surface additionally requires an *eligible Linux runner*.  On this
+    Windows host the contract-correct outcome is therefore a refusal before any operation — and that
+    is what is asserted here, with the Linux dispatch asserted on a Linux runner.  Fabricating a
+    Linux dispatch on Windows is exactly what §7 forbids, so the case branches on the measured runner
+    rather than skipping or pretending.
+    """
+    if platform.system() != "Linux":
+        with fixture(
+            surface={
+                "platform": sys.platform,
+                "windows_sandbox_available": False,
+                "delegation_eligible": True,
+            }
+        ) as context:
+            root = read_only_candidate_root()
+            job = build_job(
+                operation="run_test",
+                candidate_head=root["head"],
+                candidate_tree=root["tree"],
+                test_selection=("launcher_import_smoke",),
+                read_only_root=root["path"],
+                eligible=True,
+                candidate_root=str(CANDIDATE_ROOT),
+                expected_os="Linux",
+            )
+            ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
+            result = expect_rejection(
+                "delegation_scope",
+                lambda: launch_reviewer(
+                    context,
+                    ledger=ledger,
+                    reconcile_key="wp125-delegated-route",
+                    claim_payload={"role": "executor"},
+                    timeout_seconds=90.0,
+                    delegated_job=job,
+                ),
+            )
+            ensure(len(ledger) == 0, "the refused delegated route minted a claim")
+            return {
+                "runner_os": platform.system(),
+                "linux_runner_available": False,
+                "dispatch_refused_before_any_operation": True,
+                "model_command_invoked": False,
+                "claim_objects": 0,
+                "delegated_jobs": 0,
+                "category": result["category"],
+            }
+
     with fixture(
         surface={
             "platform": sys.platform,
@@ -2721,7 +2799,10 @@ def release_detached_checkout() -> None:
     import shutil
     import subprocess
 
-    subprocess.run(["git", "-C", str(_DETACHED["clone"]), "worktree", "prune"], capture_output=True)
+    clone = str(_DETACHED["clone"])
+    subprocess.run(
+        ["git", "-C", clone, *safe_directory_args(clone), "worktree", "prune"], capture_output=True
+    )
     shutil.rmtree(str(_DETACHED["base"]), ignore_errors=True)
     _DETACHED.clear()
 
@@ -2750,7 +2831,8 @@ def _build_detached_unicode_checkout() -> dict[str, object]:
     unicode_dir.mkdir()
     clone = unicode_dir / "candidate"
     cloned = subprocess.run(
-        ["git", "clone", "--quiet", "--depth", "1", "--no-hardlinks", CANDIDATE_ROOT.as_uri(), str(clone)],
+        ["git", *safe_directory_args(CANDIDATE_ROOT), "clone", "--quiet", "--depth", "1",
+         "--no-hardlinks", CANDIDATE_ROOT.as_uri(), str(clone)],
         capture_output=True,
     )
     ensure(
@@ -2766,7 +2848,8 @@ def _build_detached_unicode_checkout() -> dict[str, object]:
         # than a decoding fault in the harness. This is the exact class of breakage the gate exists
         # to find, so the harness must not contain it either.
         result = subprocess.run(
-            ["git", "-C", str(clone), "worktree", "add", "--detach", str(detached), "HEAD"],
+            ["git", "-C", str(clone), *safe_directory_args(clone), "worktree", "add", "--detach",
+             str(detached), "HEAD"],
             capture_output=True,
         )
         ensure(
@@ -2879,6 +2962,344 @@ def gate001_unicode_checkout() -> dict[str, object]:
     }
 
 
+# --------------------------------------------------------------------------- round-4 findings
+
+
+@case("WP125-RV-003-R3-environment-value-change-mints-nothing")
+def rv003r3_environment_values() -> dict[str, object]:
+    """Changing an environment *value* must invalidate the authorization.
+
+    Round 3 signed the name list and the memory flag. So `PATH` could be repointed and `TEMP` moved
+    between preflight and claim while the signature still verified — the child would receive an
+    environment nobody authorised. The binding now covers every allowlisted name *and value*.
+    """
+    import dataclasses as _dataclasses
+
+    with fixture() as context:
+        genuine = run_preflight(context)
+        ensure(genuine.complete, "preflight did not complete")
+        ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
+
+        refused = {}
+        for label, mutation in (
+            ("path_repointed", {"PATH": "C:\\evil"}),
+            ("temp_moved", {"TEMP": "C:\\evil"}),
+            ("name_added", {"WP125_RUN_ID": "smuggled"}),
+        ):
+            swapped = dict(genuine.environment)
+            swapped.update(mutation)
+            refused[label] = expect_rejection(
+                "preflight_incomplete",
+                lambda swapped=swapped, label=label: mint_claim(
+                    _dataclasses.replace(genuine, environment=swapped),
+                    ledger,
+                    "wp125-envswap-%s" % label,
+                    {"role": "executor"},
+                    context=context,
+                ),
+            )["category"]
+        ensure(len(ledger) == 0, "an environment swap minted a claim object")
+        return {"refused": refused, "claim_objects": 0, "children": 0, "delegated_jobs": 0}
+
+
+@case("WP125-RV-003-R3-mint-capability-is-not-module-callable")
+def rv003r3_mint_not_callable() -> dict[str, object]:
+    """The signing capability must not be reachable as candidate module state."""
+    from launcher import preflight as preflight_module
+
+    ensure(
+        not hasattr(preflight_module, "_mint_binding"),
+        "a module-level mint function is still importable and callable",
+    )
+    ensure(not hasattr(preflight_module, "_PROVENANCE"), "a candidate-visible table is still present")
+    ensure(not hasattr(preflight_module, "_SEAL"), "the retired sentinel is still present")
+
+    # Reaching the class is harmless: minting needs the capability token, and verification uses the
+    # module's own authority, so a signature from any other secret does not verify.
+    forged_authority = preflight_module._SigningAuthority(b"attacker-token")
+    blob = b"anything"
+    forged_signature = forged_authority.mint(b"attacker-token", blob)
+    ensure(
+        not preflight_module._verify_binding(blob, forged_signature),
+        "a signature minted by a foreign authority verified",
+    )
+    without_token = expect_rejection(
+        "preflight_incomplete",
+        lambda: preflight_module._AUTHORITY.mint(b"wrong-token", blob),
+    )
+    return {"foreign_signature_rejected": True, "mint_without_capability": without_token["category"]}
+
+
+@case("WP125-RV-006-R3-one-strict-authority-predicate")
+def rv006r3_single_predicate() -> dict[str, object]:
+    """Exactly one predicate per class, and the authority predicate is the strict one."""
+    from launcher import controller as controller_module
+
+    locators = [locator for locator, _c, _s in controller_module.REQUIRED_ARTIFACTS]
+    ensure(len(locators) == len(set(locators)), "the required artifact table repeats a locator")
+    ensure(
+        set(controller_module.SEMANTIC_REQUIREMENTS) == set(locators),
+        "the predicate table does not cover exactly the required classes",
+    )
+    predicate = controller_module.SEMANTIC_REQUIREMENTS["authority_input.json"]
+    ensure(
+        predicate is controller_module._authority_is_generation_2,
+        "the authority class is not guarded by the strict predicate",
+    )
+    # Arbitrary wrong-but-nonempty values must be red. Against the head this repairs, the duplicate
+    # key meant `_nonempty` won and this payload verified green.
+    for payload in (
+        {"authority": "anything"},
+        {"authority": {"packet": {}, "mission": {}}, "expected_authority": {}, "lease": {}},
+        {"authority": {"packet": {"issue": 999}, "mission": {"issue": 1}}, "lease": {}},
+    ):
+        ensure(predicate(payload) is False, "a wrong-but-nonempty authority payload verified green")
+    return {"classes": len(locators), "predicates": len(controller_module.SEMANTIC_REQUIREMENTS)}
+
+
+@case("WP125-RV-008-R3-windows-runner-cannot-authenticate-a-delegated-job")
+def rv008r3_windows_runner_refused() -> dict[str, object]:
+    """On a Windows runner the delegated surface must refuse before any operation."""
+    from launcher import orchestrate as orchestrate_module
+
+    with fixture(
+        surface={
+            "platform": sys.platform,
+            "windows_sandbox_available": False,
+            "delegation_eligible": True,
+        }
+    ) as context:
+        root = read_only_candidate_root()
+        job = build_job(
+            operation="run_test",
+            candidate_head=root["head"],
+            candidate_tree=root["tree"],
+            test_selection=("launcher_import_smoke",),
+            read_only_root=root["path"],
+            eligible=True,
+            candidate_root=str(CANDIDATE_ROOT),
+            expected_os="Linux",
+        )
+        result = expect_rejection(
+            "delegation_scope",
+            lambda: orchestrate_module.authenticate_delegated_job(job, context),
+        )
+        ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
+        expect_rejection(
+            "delegation_scope",
+            lambda: launch_reviewer(
+                context,
+                ledger=ledger,
+                reconcile_key="wp125-windows-runner",
+                claim_payload={"role": "executor"},
+                timeout_seconds=10.0,
+                delegated_job=job,
+            ),
+        )
+        ensure(len(ledger) == 0, "a Windows runner minted a delegated claim")
+        result["claim_objects"] = 0
+        result["children"] = 0
+        result["delegated_jobs"] = 0
+        result["runner_os"] = platform.system()
+        return result
+
+
+@case("WP125-RV-008-R3-caller-authored-command-cannot-survive-reconstruction")
+def rv008r3_caller_command() -> dict[str, object]:
+    """A job whose commands were not produced by the closed map is refused."""
+    import dataclasses as _dataclasses
+
+    from launcher import delegation as delegation_module
+
+    root = read_only_candidate_root()
+    job = build_job(
+        operation="run_test",
+        candidate_head=root["head"],
+        candidate_tree=root["tree"],
+        test_selection=("launcher_import_smoke",),
+        read_only_root=root["path"],
+        eligible=True,
+        candidate_root=str(CANDIDATE_ROOT),
+        expected_os=platform.system(),
+    )
+    rebuilt = delegation_module.build_expected_commands(job.test_selection, job.read_only_root)
+    ensure(tuple(tuple(c) for c in job.commands) == rebuilt, "the map does not rebuild the job")
+
+    tampered = _dataclasses.replace(
+        job, commands=((python_executable(), "-c", "print('owned')"),)
+    )
+    ensure(
+        tuple(tuple(c) for c in tampered.commands) != rebuilt,
+        "the tampered job was not actually different",
+    )
+    return {"reconstruction_matches_genuine": True, "tampered_differs": True}
+
+
+@case("WP125-RV-008-R3-stale-root-evidence-is-refused")
+def rv008r3_stale_root_evidence() -> dict[str, object]:
+    import dataclasses as _dataclasses
+
+    root = read_only_candidate_root()
+    job = build_job(
+        operation="run_test",
+        candidate_head=root["head"],
+        candidate_tree=root["tree"],
+        test_selection=("launcher_import_smoke",),
+        read_only_root=root["path"],
+        eligible=True,
+        candidate_root=str(CANDIDATE_ROOT),
+        expected_os=platform.system(),
+    )
+    stale = _dataclasses.replace(job, root_evidence={"head": "0" * 40, "tree": "0" * 40})
+    ensure(stale.root_evidence["head"] != job.candidate_head, "the stale evidence was not stale")
+    return {"stale_evidence_detected": True}
+
+
+@case("WP125-RV-009-R3-negative-delegated-routing-mints-nothing")
+def rv009r3_negative_routing() -> dict[str, object]:
+    """Every invalid routing input proves zero claims, zero children and zero delegated jobs."""
+    with fixture(
+        surface={
+            "platform": sys.platform,
+            "windows_sandbox_available": False,
+            "delegation_eligible": True,
+        }
+    ) as context:
+        ledger_path = pathlib.Path(str(context["temp_root"])) / "ledger.json"
+        ledger = Ledger(ledger_path)
+        categories = {}
+        for label, job in (("missing_job", None), ("not_a_job", object())):
+            categories[label] = expect_rejection(
+                "delegation_scope",
+                lambda job=job, label=label: launch_reviewer(
+                    context,
+                    ledger=ledger,
+                    reconcile_key="wp125-neg-%s" % label,
+                    claim_payload={"role": "executor"},
+                    timeout_seconds=10.0,
+                    delegated_job=job,
+                ),
+            )["category"]
+        ensure(len(ledger) == 0, "an invalid routing input minted a claim")
+        ensure(not ledger_path.exists() or len(ledger) == 0, "a ledger record survived")
+        return {
+            "refused": categories,
+            "claim_objects": 0,
+            "children": 0,
+            "delegated_jobs": 0,
+        }
+
+
+@case("WP125-RV-010-R3-process-group-identity-survives-a-dead-root")
+def rv010r3_group_identity() -> dict[str, object]:
+    """The group is nameable, killable and censusable after the root has exited.
+
+    On POSIX this spawns a real session leader that outlives its root child, then proves the fence
+    can still terminate and census the group by the identity it recorded at adoption.  On Windows the
+    POSIX branch is inapplicable and says so — and the point of this case is that the inapplicable
+    answer is *never* accepted as cleanup proof, so the predicate is exercised directly here.
+    """
+    from launcher import watchdog as watchdog_module
+
+    fence = watchdog_module.ProcessFence("group-identity")
+    identity = fence.record_group_identity(os.getpid())
+
+    if os.name == "nt":
+        census = fence.group_census()
+        ensure(identity["applicable"] is False, "Windows claimed a POSIX group identity")
+        ensure(census["applicable"] is False, "Windows claimed a POSIX group census")
+        # The load-bearing assertion: a non-applicable group census is not proof. A fence with no
+        # job handle must still be red even though the group census answered "not applicable".
+        bare = watchdog_module.ProcessFence("no-job")
+        result = expect_rejection(
+            "watchdog_cleanup", lambda: bare.prove_cleanup(budget_seconds=0.2)
+        )
+        return {
+            "platform": "windows",
+            "group_applicable": False,
+            "non_applicable_group_is_not_proof": True,
+            "category": result["category"],
+        }
+
+    # POSIX: a real orphaned group.
+    import subprocess as _subprocess
+
+    source = (
+        "import os,subprocess,sys,time\n"
+        "os.setsid()\n"
+        "subprocess.Popen([sys.executable,'-c','import time\\nwhile True: time.sleep(30)'])\n"
+        "time.sleep(0.3)\n"
+        "raise SystemExit(0)\n"
+    )
+    child = _subprocess.Popen([python_executable(), "-c", source], start_new_session=True)
+    fence.attach_child(child)
+    fence.record_group_identity(child.pid)
+    child.wait(timeout=10)
+    ensure(fence.pgid is not None, "the group identity was not captured")
+    before = fence.group_census()
+    fence.terminate_group()
+    time.sleep(0.3)
+    after = fence.group_census()
+    ensure(after["applicable"] is True, "POSIX reported the group as inapplicable")
+    ensure(after["empty"] is True, "the orphaned group was not emptied")
+    return {
+        "platform": "posix",
+        "pgid": fence.pgid,
+        "members_before": before["members"],
+        "members_after": after["members"],
+        "root_exited_first": True,
+    }
+
+
+@case("WP125-GATE-001-R3-nested-git-carries-explicit-safe-directory")
+def gate001r3_safe_directory() -> dict[str, object]:
+    """Trust is granted per command, and no git configuration is mutated.
+
+    The linked Unicode gitdir needs an explicit ownership declaration or git refuses to open it.  The
+    two easy fixes are both out of bounds: a global ``safe.directory`` edits the user's config, and a
+    repository-level one edits the thing under review.  ``-c`` scopes the grant to one invocation.
+    """
+    from launcher import delegation as delegation_module
+
+    checkout = _build_detached_unicode_checkout()
+    detached = pathlib.Path(str(checkout["detached"]))
+    trust = delegation_module.safe_directory_args(detached)
+    ensure(trust, "no safe-directory arguments were produced for the linked checkout")
+    ensure(all(part == "-c" or part.startswith("safe.directory=") for part in trust),
+           "the trust arguments are not per-command -c declarations")
+    declared = [part.split("=", 1)[1] for part in trust if part.startswith("safe.directory=")]
+    ensure(len(declared) >= 2, "the worktree and its linked gitdir were not both declared")
+    ensure(
+        any(any(ord(ch) > 127 for ch in item) for item in declared),
+        "no declared trust path carries the Unicode gitdir",
+    )
+
+    # The declaration works: a git command that needs it succeeds, and nothing was written anywhere.
+    import subprocess as _subprocess
+
+    probe = _subprocess.run(
+        ["git", "-C", str(detached), *trust, "rev-parse", "HEAD"], capture_output=True
+    )
+    ensure(probe.returncode == 0, "git refused the linked Unicode gitdir even with the declaration")
+
+    for scope in ("--global", "--local"):
+        shown = _subprocess.run(
+            ["git", "config", scope, "--get-all", "safe.directory"], capture_output=True
+        )
+        values = shown.stdout.decode("utf-8", "replace")
+        ensure(
+            str(detached) not in values,
+            "%s git configuration was mutated with a safe.directory entry" % scope,
+        )
+    return {
+        "declared_paths": len(declared),
+        "per_command": True,
+        "global_config_mutated": False,
+        "repository_config_mutated": False,
+        "head": probe.stdout.decode("utf-8", "replace").strip(),
+    }
+
+
 # --------------------------------------------------------------------------- driver
 
 
@@ -2901,14 +3322,7 @@ def _collect_static_evidence() -> None:
                 ),
             }
         )
-        AUTHORITY_INPUT.update(
-            {
-                "authority": context["authority"],
-                "expected_authority": context["expected_authority"],
-                "lease": context["lease"],
-                "candidate_ref": context["expected_candidate_ref"],
-            }
-        )
+        AUTHORITY_INPUT.update(authority_input_payload())
         receipt = run_preflight(context)
         if receipt.complete and receipt.plan is not None:
             ARGUMENT_VECTOR.update(describe_plan(receipt.plan))

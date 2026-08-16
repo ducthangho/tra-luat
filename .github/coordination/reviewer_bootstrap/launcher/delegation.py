@@ -144,6 +144,39 @@ def _root_error(message: str):
     return reject("delegation_scope", message)
 
 
+def safe_directory_args(*paths: object) -> tuple[str, ...]:
+    """Per-command ``safe.directory`` entries for exactly the paths this command will touch.
+
+    WP125-GATE-001-R3.  A linked checkout keeps its ``.git`` as a file pointing at a gitdir that git
+    treats as a separate ownership domain, and under a Unicode path the two are easy to get wrong
+    together.  The alternative fixes are both unacceptable here: ``git config --global
+    safe.directory`` mutates the user's configuration, and writing into the repository's own config
+    mutates the thing under review.  ``-c`` supplies the trust for one invocation and leaves nothing
+    behind — the trust boundary is exactly as wide as the command, and no wider.
+
+    Both the worktree and its linked gitdir are declared, because the checkout is trusted only if git
+    can open both.
+    """
+    args: list[str] = []
+    for raw in paths:
+        if not raw:
+            continue
+        path = pathlib.Path(str(raw))
+        args.extend(("-c", "safe.directory=%s" % path.as_posix()))
+        git_marker = path / ".git"
+        try:
+            if git_marker.is_file():
+                pointer = git_marker.read_text(encoding="utf-8").strip()
+                if pointer.startswith("gitdir:"):
+                    linked = pathlib.Path(pointer.split(":", 1)[1].strip())
+                    args.extend(("-c", "safe.directory=%s" % linked.as_posix()))
+            elif git_marker.is_dir():
+                args.extend(("-c", "safe.directory=%s" % git_marker.as_posix()))
+        except OSError:
+            continue
+    return tuple(args)
+
+
 def verify_read_only_root(
     read_only_root: str,
     *,
@@ -194,9 +227,14 @@ def verify_read_only_root(
     # On this host that is cp1258, and a delegated root under a Unicode path makes git quote bytes it
     # cannot represent — which would surface as a decoding crash instead of a typed rejection, from
     # the one call whose whole job is to answer an identity question about that path.
-    head = git(path, "rev-parse", "HEAD", error=_root_error, binary=True).decode("utf-8").strip()
+    trust = safe_directory_args(path)
+    head = (
+        git(path, *trust, "rev-parse", "HEAD", error=_root_error, binary=True).decode("utf-8").strip()
+    )
     tree = (
-        git(path, "rev-parse", "HEAD^{tree}", error=_root_error, binary=True).decode("utf-8").strip()
+        git(path, *trust, "rev-parse", "HEAD^{tree}", error=_root_error, binary=True)
+        .decode("utf-8")
+        .strip()
     )
     if head != candidate_head:
         raise _root_error("the delegated root is at a different commit than the candidate")
@@ -209,6 +247,24 @@ def verify_read_only_root(
         "tree": tree,
         "identity_verified_by": "controller",
     }
+
+
+def build_expected_commands(
+    test_selection: Sequence[str], read_only_root: str
+) -> tuple[tuple[str, ...], ...]:
+    """Reconstruct the argument vectors for a selection, from the closed map alone.
+
+    The single source of truth for what a delegated test *is*.  Used both when the job is built and
+    again when the controller authenticates it, so "the job's commands" can be compared against
+    something the job had no hand in producing (WP125-RV-008-R3).
+    """
+    bootstrap = str(pathlib.Path(read_only_root) / BOOTSTRAP_RELATIVE)
+    unknown = [item for item in test_selection if item not in DELEGATED_TESTS]
+    if unknown:
+        raise reject("delegation_scope", "%d test ids are outside the closed map" % len(unknown))
+    return tuple(
+        (python_executable(), "-c", DELEGATED_TESTS[item], bootstrap) for item in test_selection
+    )
 
 
 def validate_operation(operation: object) -> str:
@@ -266,10 +322,7 @@ def build_job(
         candidate_head=candidate_head,
         candidate_tree=candidate_tree,
     )
-    bootstrap = str(pathlib.Path(read_only_root) / BOOTSTRAP_RELATIVE)
-    commands = tuple(
-        (python_executable(), "-c", DELEGATED_TESTS[item], bootstrap) for item in selection
-    )
+    commands = build_expected_commands(selection, read_only_root)
     return DelegatedJob(
         operation=name,
         candidate_head=candidate_head,

@@ -108,8 +108,9 @@ def launch_reviewer(
     # proving nothing ran.  A claim is the record that a run was authorised; it must not outlive the
     # discovery that the run was never permissible.
     surface = receipt.surface
+    delegated_authentication: dict[str, object] | None = None
     if surface == "delegated_linux_run_test":
-        _validate_delegated_job(delegated_job)
+        delegated_authentication = authenticate_delegated_job(delegated_job, context)
         launched = "delegated_run_test"
     elif surface == "windows":
         if delegated_job is not None:
@@ -133,6 +134,13 @@ def launch_reviewer(
     assert_launch_inputs_unchanged(context, receipt)
 
     if surface == "delegated_linux_run_test":
+        # WP125-RV-009-R3: the *same* sealed job is authenticated again immediately before dispatch.
+        # The first pass happened before the claim; between then and now a claim was minted and the
+        # sealed inputs were re-read, and any of that time is time for the root or the job to move.
+        redispatch = authenticate_delegated_job(delegated_job, context)
+        if redispatch["root_evidence"]["head"] != delegated_authentication["root_evidence"]["head"]:
+            raise reject("delegation_scope", "the delegated root moved between claim and dispatch")
+
         # WP125-RV-008-R2.  The delegated surface goes through the complete existing validator and
         # runner, not a hand-picked command out of the job.  Round 2 pulled `commands[0]` and ran it
         # directly, which skipped the Linux identity check, the read-only-root proof, the credential
@@ -168,15 +176,27 @@ def launch_reviewer(
     return LaunchRecord(receipt=receipt, claim=claim, outcome=outcome, launched=launched)
 
 
-def _validate_delegated_job(job: object) -> None:
-    """Refuse an unknown or partial delegated job before any claim exists.
+def authenticate_delegated_job(job: object, context: Mapping[str, object]) -> dict[str, object]:
+    """Re-derive the delegated job from the controller's own inputs (WP125-RV-008-R3).
 
-    The job is only accepted when it is a real :class:`~launcher.delegation.DelegatedJob` carrying
-    the closed operation, a verified read-only root, an exact candidate identity and a non-empty
-    declared selection drawn entirely from the closed test map.  "Looks about right" is how a partial
-    job becomes a green run.
+    Round 3 checked the job against *itself*: it asked whether the commands covered the selection and
+    whether the root evidence agreed with the head the job carried.  A job that was internally
+    consistent and entirely fabricated passed every one of those questions, because the answers came
+    from the same object being examined.
+
+    Nothing here trusts the job.  The runner OS is required to be Linux and is read from the machine.
+    Every command is reconstructed from the closed test-ID map and compared to what the job carries,
+    so a caller-authored command cannot survive.  The read-only root is re-probed live, and the
+    candidate commit, tree and credential surface are measured again from the root itself.
     """
-    from .delegation import DELEGATED_TESTS, DelegatedJob
+    import platform
+
+    from .delegation import (
+        DELEGATED_TESTS,
+        DelegatedJob,
+        build_expected_commands,
+        verify_read_only_root,
+    )
 
     if job is None:
         raise reject(
@@ -190,16 +210,54 @@ def _validate_delegated_job(job: object) -> None:
             "delegation_scope",
             "only the closed run_test operation may be dispatched on the delegated surface",
         )
+
+    # An eligible Linux runner is required before anything else. §7 makes this the whole point of the
+    # surface, and a Windows runner answering to a Linux-declared job is fabricated evidence.
+    runner_os = platform.system()
+    if runner_os != "Linux":
+        raise reject(
+            "delegation_scope",
+            "the delegated surface requires an eligible Linux runner; this runner is %r" % runner_os,
+        )
+    if job.expected_os != "Linux":
+        raise reject("delegation_scope", "the delegated job was not built for a Linux runner")
+
     if not job.test_selection:
         raise reject("delegation_evidence", "the delegated job declares no test selection")
     unknown = [item for item in job.test_selection if item not in DELEGATED_TESTS]
     if unknown:
         raise reject("delegation_scope", "the delegated job names %d unknown tests" % len(unknown))
-    if len(job.commands) != len(job.test_selection):
-        raise reject("delegation_evidence", "the delegated job is partial: commands do not cover the selection")
-    if not job.root_evidence or job.root_evidence.get("writability_probe") != "refused":
-        raise reject("delegation_scope", "the delegated job carries no proven read-only root")
-    if job.root_evidence.get("head") != job.candidate_head:
-        raise reject("delegation_scope", "the delegated root identity does not match the job head")
-    if job.root_evidence.get("tree") != job.candidate_tree:
-        raise reject("delegation_scope", "the delegated root identity does not match the job tree")
+    if len(set(job.test_selection)) != len(job.test_selection):
+        raise reject("delegation_evidence", "the delegated test selection repeats an entry")
+
+    # Live re-probe of the root, and an independent re-measure of the candidate identity.
+    root_evidence = verify_read_only_root(
+        job.read_only_root,
+        candidate_root=str(context["candidate_root"]),
+        candidate_head=job.candidate_head,
+        candidate_tree=job.candidate_tree,
+    )
+    if root_evidence["head"] != job.candidate_head or root_evidence["tree"] != job.candidate_tree:
+        raise reject("delegation_scope", "the re-measured root identity does not match the job")
+    if job.root_evidence.get("head") != root_evidence["head"]:
+        raise reject("delegation_scope", "the job carries stale or fabricated root evidence")
+    if job.root_evidence.get("tree") != root_evidence["tree"]:
+        raise reject("delegation_scope", "the job carries stale or fabricated root evidence")
+    if root_evidence["writability_probe"] != "refused":
+        raise reject("delegation_scope", "the delegated root is writable at dispatch time")
+
+    # Commands are reconstructed, not inspected. Comparing the job's commands to the closed map is
+    # the only way a caller-authored command becomes visible.
+    expected = build_expected_commands(job.test_selection, job.read_only_root)
+    if tuple(tuple(item) for item in job.commands) != expected:
+        raise reject(
+            "delegation_scope",
+            "the delegated commands are not the ones the closed test map reconstructs",
+        )
+
+    return {
+        "runner_os": runner_os,
+        "root_evidence": root_evidence,
+        "commands_reconstructed": True,
+        "selection": list(job.test_selection),
+    }

@@ -139,6 +139,16 @@ CASES: Mapping[str, str] = {
     "WP125-RV-003-handmade-receipt-cannot-mint-a-claim": "preflight_before_claim_ordering",
     # -- review round 2 ------------------------------------------------------
     "WP125-RV-003-imported-seal-replay-cannot-mint": "preflight_before_claim_ordering",
+    # -- review round 4 ------------------------------------------------------
+    "WP125-RV-003-R3-environment-value-change-mints-nothing": "preflight_before_claim_ordering",
+    "WP125-RV-003-R3-mint-capability-is-not-module-callable": "preflight_before_claim_ordering",
+    "WP125-RV-006-R3-one-strict-authority-predicate": "launcher_source_inventory_and_write_set",
+    "WP125-RV-008-R3-windows-runner-cannot-authenticate-a-delegated-job": "credential_free_delegated_run_test",
+    "WP125-RV-008-R3-caller-authored-command-cannot-survive-reconstruction": "credential_free_delegated_run_test",
+    "WP125-RV-008-R3-stale-root-evidence-is-refused": "credential_free_delegated_run_test",
+    "WP125-RV-009-R3-negative-delegated-routing-mints-nothing": "preflight_before_claim_ordering",
+    "WP125-RV-010-R3-process-group-identity-survives-a-dead-root": "process_tree_cleanup_and_stale_generation_rejection",
+    "WP125-GATE-001-R3-nested-git-carries-explicit-safe-directory": "real_windows_delegated_parity",
     "WP125-RV-006-stale-generation-1-authority-is-red": "launcher_source_inventory_and_write_set",
     "WP125-RV-006-empty-delegation-payload-is-red": "launcher_source_inventory_and_write_set",
     "WP125-RV-006-red-matrix-cannot-verify-green": "launcher_source_inventory_and_write_set",

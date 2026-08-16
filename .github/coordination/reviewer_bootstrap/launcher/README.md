@@ -43,7 +43,7 @@ properties proves nothing there — every check in this Packet is an explicit br
 | `parity.py` | denominators compared before outcomes; an undeclared skip is red |
 | `inventory.py` | per-file SHA-256 reduced to one digest; static boundary scan for shell strings and bare `assert` |
 | `orchestrate.py` | the one trusted preflight → claim → contained launch path |
-| `registry.py` | the single registry of all 113 case IDs and their required check |
+| `registry.py` | the single registry of all 122 case IDs and their required check |
 | `selftest.py` | the executable matrix; separate `scheduled`/`executed`/`passed`/`failed`/`skipped`/`not_run` |
 
 ## Three things this Packet paid for
@@ -144,6 +144,28 @@ this package rather than in the test:
    moment it is free, and `th32ParentProcessID` keeps pointing at the number. Measured: ten
    "survivors" while the Job Object census said zero active. Cleanup now walks descendants only from
    roots that are still alive — the job is the authority for the tree, which is why it exists.
+
+## Review round 4 — six clusters, and the one that was never executed
+
+| cluster | what round 3 still left open | closed by |
+|---|---|---|
+| `RV-006-R3` | **`SEMANTIC_REQUIREMENTS` had `authority_input.json` twice.** Python keeps the last entry, so the permissive `_nonempty` replaced the strict predicate and every nested authority check written in round 3 was dead code. Measured: `{"authority": "anything"}` verified green | one key, one composed strict predicate covering Mission revision/plan hash, Packet issue/revision/generation/attempt/spec hash, candidate ref/start head/tree and lease identity — plus a build-time guard that refuses a table which does not cover the classes exactly once |
+| `RV-003-R3` | the binding signed environment *names* and the memory flag, so `PATH` could be repointed between preflight and claim while the signature still verified. And the mint closure was bound to a module-level name, leaving the capability importable | the blob covers every allowlisted name **and value**; the signing authority is an instance guarded by a capability token, so there is no module-callable mint |
+| `RV-008-R3` | the job was checked against *itself* — internally consistent and entirely fabricated passed | an eligible Linux runner is required and read from the machine, every command is reconstructed from the closed test-ID map and compared, the root is re-probed live, and the candidate identity is re-measured |
+| `RV-009-R3` | — | the same sealed job is authenticated again immediately before dispatch, and every negative proves zero claims, children and jobs |
+| `RV-010-R3` | `killpg(getpgid(root))` asks the root for its group at kill time, which fails with `ESRCH` exactly when the root has already exited — the orphaned-group case | pgid and session are captured at adoption and retained independently; the group is terminated and censused by that identity, and a Windows "not applicable" census is never accepted as POSIX cleanup proof |
+| `GATE-001-R3` | the linked Unicode gitdir needed an ownership declaration | per-command `-c safe.directory=` for both the worktree and its linked gitdir; neither global nor repository git configuration is written, and the case asserts both remain unmutated |
+
+The duplicate-key finding is the one worth carrying forward. Nothing failed, nothing warned, and the
+code read correctly at every review — a validator can be written, reviewed, committed and never once
+executed, and the only thing that would have caught it is asking the table *which function it
+actually holds*. That question is now a registered case.
+
+One consequence is worth stating plainly rather than hiding in a diff: after `RV-008-R3` the
+delegated surface requires a real Linux runner, so on this Windows host the contract-correct outcome
+is a **refusal before any operation**. `WP125-RV-008-delegated-surface-dispatches-only-run-test`
+asserts exactly that here and asserts the dispatch on a Linux runner. Fabricating a Linux dispatch on
+Windows is what §7 forbids, so the case branches on the measured runner rather than skipping.
 
 ## What this launcher does not claim
 

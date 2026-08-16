@@ -181,3 +181,4 @@ lease_song_khac_luc_cap: >-
   Lease executor `wp55-r4-exec-2-claude-20260816` đã hoàn tất việc của nó (một commit,
   `817598e2`). KHÔNG đẩy thêm gì lên nhánh packet trong lúc lease review này còn sống — đó
   đúng là cách lượt review 8 của revision 3 bị hỏng.
+posted_comment_id: 5308705907   # workflow ghi, ĐỪNG sửa tay

@@ -79,6 +79,12 @@ ca "ký tự đại diện thì DỪNG"              2 xoa-nhanh 'tmp-*' "" XOA
 ca "dấu ? thì DỪNG"                       2 xoa-nhanh 'tmp-?' "" XOA
 ca "khoảng trắng giữa tên thì DỪNG"       2 xoa-nhanh 'tmp probe' "" XOA
 ca "danh sách RỖNG thì DỪNG"              2 xoa-nhanh '  ,  ' "" XOA
+# `read -ra` NUỐT phần tử rỗng ở cuối, nên `a,` từng lọt vòng kiểm phần tử. Ba ca dưới
+# soi chuỗi THÔ — không có chúng thì gỡ chốt ấy đi bộ test vẫn xanh (đã đo).
+ca "dấu phẩy ở CUỐI thì DỪNG"             2 xoa-nhanh 'a,' "" XOA
+ca "dấu phẩy ở ĐẦU thì DỪNG"              2 xoa-nhanh ',a' "" XOA
+ca "hai dấu phẩy liền thì DỪNG"           2 xoa-nhanh 'a,,b' "" XOA
+ca "sha có dấu phẩy cuối thì DỪNG"        2 tao-tag v1 "$SHA_THAT," TAO
 ca "hai ref hợp lệ thì QUA"               0 xoa-nhanh 'tmp-probe-2, tmp-probe-delete' "" XOA
 ca "xoá TAG dưới luu-tru/ thì DỪNG"       2 xoa-tag luu-tru/wp55-r4-verdict-review-1 "" XOA
 # Bốn ca dưới khoá finding P2 `protection-is-exact-case-only`. Git PHÂN BIỆT hoa thường
@@ -88,6 +94,11 @@ ca "Ops/** viết HOA thì DỪNG"             2 xoa-nhanh Ops/secret "" XOA
 ca "LUU-TRU/** viết HOA thì DỪNG"         2 xoa-nhanh LUU-TRU/x "" XOA
 ca "chữ Cyrillic nhìn giống ops/ thì DỪNG" 2 xoa-nhanh 'оps/secret' "" XOA
 ca "dấu // trong tên thì DỪNG"            2 xoa-nhanh 'a//b' "" XOA
+ca "tên bắt đầu bằng dấu chấm thì DỪNG"   2 xoa-nhanh '.hidden' "" XOA
+ca "thành phần bắt đầu bằng chấm thì DỪNG" 2 xoa-nhanh 'a/.b' "" XOA
+ca "tên kết thúc .lock thì DỪNG"          2 xoa-nhanh 'a.lock' "" XOA
+ca "tên kết thúc bằng / thì DỪNG"         2 xoa-nhanh 'a/' "" XOA
+ca "tên dài 250 ký tự thì DỪNG"           2 xoa-nhanh "$(printf 'a%.0s' $(seq 250))" "" XOA
 ca "tạo TAG mang tên vùng bảo vệ thì DỪNG" 2 tao-tag ops/x "$SHA_THAT" TAO
 ca "tạo tag: sha sai dạng thì DỪNG"       2 tao-tag v1 "abc" TAO
 ca "tạo tag: sha CHỮ HOA thì DỪNG"        2 tao-tag v1 "B4E5C5F9EF85E652FA2CC98BB3474036519D663C" TAO
@@ -98,30 +109,46 @@ ca "tạo tag: hai cặp khớp thì QUA"        0 tao-tag 'v1,v2' "$SHA_THAT,$S
 
 # ================= BƯỚC LÀM =================
 # VÌ SAO PHẢI CÓ PHẦN NÀY. Bản đầu của tệp này chỉ phủ bước CHỐT — 23/23 xanh trong khi
-# bước LÀM mang HAI lỗi P1 (coi mọi lỗi API là "ref đã mất"; ghép lệch chỉ số khi danh
-# sách có phần tử rỗng). Cross-review codex chỉ đúng: chốt được phủ mà thao tác PHÁ thì
-# không, nên bộ test xanh chẳng nói gì về thứ nguy hiểm nhất.
+# bước LÀM mang HAI lỗi P1. Chốt được phủ mà thao tác PHÁ thì không, nên bộ test xanh
+# chẳng nói gì về thứ nguy hiểm nhất.
 #
-# `gh` giả ở đây LÁI ĐƯỢC bằng biến GIA_*: mỗi ca dựng một kịch bản API rồi đo hành vi.
+# VÀ BẢN THỨ HAI CỦA PHẦN NÀY CŨNG SAI, theo một cách đáng ghi hơn: `gh` giả khi ấy
+# DIỄN KỊCH BẢN (lần đọc thứ hai luôn trả "không còn") thay vì mô phỏng TRẠNG THÁI.
+# Hệ quả: đột biến XOÁ HẲN lệnh `gh api -X DELETE` vẫn cho 40/40 — bộ test đo NHÁNH RẼ
+# của script chứ không đo THAO TÁC CÓ XẢY RA KHÔNG. Cross-review codex tìm ra bằng đúng
+# đột biến ấy. Bản này: `gh` giả giữ TRẠNG THÁI thật (ref nào đã bị xoá), nên chỉ khi
+# DELETE thật sự được gọi thì lần đọc sau mới thấy mất; cộng thêm phép đòi ĐÚNG MỘT lời
+# gọi DELETE đúng endpoint trong nhật ký.
 cat > "$TAM/bin/gh" <<'GHEOF'
 #!/usr/bin/env bash
-echo "$*" >> "$GIA_LOG"
-case "$*" in
-  *"-X DELETE"*)  exit "${GIA_DELETE_RC:-0}" ;;
+# `${*##...}` khai triển theo TỪNG tham số rồi mới nối, nên nó trả `api -X DELETE heads/a`
+# chứ không phải `heads/a`. Gán vào một biến TRƯỚC rồi mới cắt. (Đo được khi ca "xoá:
+# có trước, mất sau" đỏ với "VẪN CÒN" — bản ghi trạng thái và bản đọc lại cắt ra hai
+# chuỗi khác nhau nên không bao giờ khớp.)
+DONG="$*"
+echo "$DONG" >> "$GIA_LOG"
+DA_XOA="$GIA_LOG.daxoa"; touch "$DA_XOA"
+case "$DONG" in
+  *"-X DELETE"*)
+      ten="${DONG##*/git/refs/}"
+      [ "${GIA_DELETE_KHONG_AN_GI:-0}" = 1 ] || echo "$ten" >> "$DA_XOA"
+      exit "${GIA_DELETE_RC:-0}" ;;
   *"-X POST"*)
-      # Ghi lai sha vua duoc yeu cau tao. Nho no ma phep kiem chung o buoc lam moi do
-      # duoc GHEP DUNG CAP hay khong — thay vi luon tra mot hang so.
-      printf '%s' "$*" | tr ' ' '\n' | sed -n 's/^sha=//p' > "$GIA_LOG.sha"
+      printf '%s' "$DONG" | tr ' ' '\n' | sed -n 's/^sha=//p' > "$GIA_LOG.sha"
       exit "${GIA_POST_RC:-0}" ;;
   *"--jq .object.sha"*) echo "${GIA_TAG_SHA:-$(cat "$GIA_LOG.sha" 2>/dev/null)}"; exit 0 ;;
   *"git/ref/"*)
-      n=$(grep -c 'git/ref/' "$GIA_LOG")          # lần đọc thứ mấy
-      ma="GIA_GET_$n"; kb="${!ma:-${GIA_GET:-co}}"
-      case "$kb" in
-        co)      echo '{"ref":"x"}'; exit 0 ;;
-        khong)   echo "gh: Not Found (HTTP 404)" >&2; exit 1 ;;
-        loi)     echo "gh: HTTP 500 Internal Server Error" >&2; exit 1 ;;
-      esac ;;
+      ten="${DONG##*/git/ref/}"
+      n=$(grep -c 'git/ref/' "$GIA_LOG")            # lần đọc thứ mấy
+      [ "${GIA_GET_ERR:-0}" = "$n" ] && { echo "HTTP/2 500 Internal Server Error"; exit 1; }
+      # 500 mà THÂN có chữ "Not Found" — đây là ca khoá cách nhận diện 404. Phân loại
+      # bằng chuỗi tự do sẽ đọc nó thành "ref không còn"; phân loại bằng DÒNG TRẠNG
+      # THÁI thì không.
+      [ "${GIA_GET_500_NOTFOUND:-0}" = "$n" ] && { printf 'HTTP/2 500 Internal Server Error\nmessage: Not Found\n'; exit 1; }
+      if [ "${GIA_MISSING:-0}" = 1 ] || grep -qxF "$ten" "$DA_XOA"; then
+        echo "HTTP/2 404 Not Found"; exit 1
+      fi
+      echo "HTTP/2 200 OK"; exit 0 ;;
 esac
 exit 0
 GHEOF
@@ -129,7 +156,7 @@ chmod +x "$TAM/bin/gh"
 
 lam() {
   local ten="$1" mong="$2" hd="$3" ref="$4" sha="$5" thu="$6"; shift 6
-  : > "$TAM/gialog"
+  : > "$TAM/gialog"; rm -f "$TAM/gialog.daxoa" "$TAM/gialog.sha"
   env GIA_LOG="$TAM/gialog" HANH_DONG="$hd" REF="$ref" SHA="$sha" CHI_THU="$thu" \
       GITHUB_REPOSITORY=ducthangho/tra-luat "$@" bash "$TAM/lam.sh" >"$TAM/out" 2>&1
   local rc=$?
@@ -137,26 +164,48 @@ lam() {
   else HONG=$((HONG+1)); printf '  ĐỎ    %s  (rc=%s, mong %s)\n' "$ten" "$rc" "$mong"; sed 's/^/          /' "$TAM/out" | tail -4; fi
 }
 
+# Đo NHẬT KÝ, không đo mã thoát: đây là thứ duy nhất phân biệt "đã gọi lệnh xoá" với
+# "ref tình cờ không còn".
+doi_log() {
+  local ten="$1" mau="$2" mong="$3"
+  local n; n=$(grep -c -- "$mau" "$TAM/gialog" 2>/dev/null || true)
+  if [ "$n" = "$mong" ]; then QUA=$((QUA+1)); printf '  QUA   %s\n' "$ten"
+  else HONG=$((HONG+1)); printf '  ĐỎ    %s  (đếm %s, mong %s)\n' "$ten" "$n" "$mong"; fi
+}
+
 echo
 echo "bước LÀM của ops-don-ref.yml — phản chứng"
 S1=b4e5c5f9ef85e652fa2cc98bb3474036519d663c
 S2=872679c360a43a4b12221749901aa0cf231566ac
 
-lam "thử khô: KHÔNG gọi gh lần nào"      0 xoa-nhanh 'a,b' ""      true
-if [ -s "$TAM/gialog" ]; then HONG=$((HONG+1)); echo "  ĐỎ    thử khô mà VẪN gọi gh"; else QUA=$((QUA+1)); echo "  QUA   thử khô: gialog rỗng"; fi
+lam "thử khô: KHÔNG gọi gh lần nào"       0 xoa-nhanh 'a,b' ""    true
+doi_log "thử khô: nhật ký gh RỖNG"        "." 0
 
-lam "xoá: có trước, mất sau -> XANH"     0 xoa-nhanh a "" false GIA_GET_1=co GIA_GET_2=khong
-lam "xoá: ref không tồn tại -> ĐỎ"       1 xoa-nhanh a "" false GIA_GET=khong
-lam "xoá: đọc TRƯỚC lỗi 500 -> ĐỎ"       1 xoa-nhanh a "" false GIA_GET=loi
-lam "xoá: gọi xong mà VẪN CÒN -> ĐỎ"     1 xoa-nhanh a "" false GIA_GET=co
-lam "xoá: đọc SAU lỗi 500 -> ĐỎ (fail-close)" 1 xoa-nhanh a "" false GIA_GET_1=co GIA_GET_2=loi
-lam "tạo tag: đúng sha -> XANH"          0 tao-tag v1 "$S1" false GIA_TAG_SHA="$S1"
-lam "tạo tag: API trả sha KHÁC -> ĐỎ"    1 tao-tag v1 "$S1" false GIA_TAG_SHA="$S2"
-lam "tạo tag: hai cặp KHÁC sha, ghép đúng -> XANH" 0 tao-tag 'v1,v2' "$S1,$S2" false
-# Đây là ca khoá finding P1 `sparse-list-misaligns-tag-and-sha`: có phần tử RỖNG ở
-# GIỮA cả hai danh sách. Bản trước nén một bên mà không nén bên kia nên `b` nhận sha
-# RỖNG; nay hai danh sách cùng được nén nên `b` phải nhận đúng $S2.
-lam "tạo tag: phần tử rỗng giữa danh sách, vẫn ghép đúng" 0 tao-tag 'a,,b' "$S1,,$S2" false
+lam "xoá: có trước, mất sau -> XANH"      0 xoa-nhanh a "" false
+doi_log "xoá: ĐÚNG MỘT lời gọi DELETE"    "-X DELETE" 1
+doi_log "xoá: DELETE đi đúng endpoint"    "git/refs/heads/a" 1
+
+lam "xoá HAI ref -> hai lời gọi DELETE"   0 xoa-nhanh 'a,b' "" false
+doi_log "xoá hai: đếm DELETE = 2"         "-X DELETE" 2
+
+lam "xoá TAG: đi đường refs/tags"         0 xoa-tag t1 "" false
+doi_log "xoá tag: endpoint là refs/tags"  "git/refs/tags/t1" 1
+
+lam "xoá: ref không tồn tại -> ĐỎ"        1 xoa-nhanh a "" false GIA_MISSING=1
+doi_log "không tồn tại: KHÔNG gọi DELETE" "-X DELETE" 0
+
+lam "xoá: đọc TRƯỚC lỗi 500 -> ĐỎ"        1 xoa-nhanh a "" false GIA_GET_ERR=1
+doi_log "lỗi đọc trước: KHÔNG gọi DELETE" "-X DELETE" 0
+
+lam "xoá: DELETE không ăn gì -> ĐỎ"       1 xoa-nhanh a "" false GIA_DELETE_KHONG_AN_GI=1
+lam "xoá: đọc SAU lỗi 500 -> ĐỎ (fail-close)" 1 xoa-nhanh a "" false GIA_GET_ERR=2
+lam "xoá: 500 mà thân có chữ Not Found -> vẫn ĐỎ" 1 xoa-nhanh a "" false GIA_GET_500_NOTFOUND=2
+lam "xoá: 500-có-Not-Found ở lần đọc TRƯỚC -> ĐỎ" 1 xoa-nhanh a "" false GIA_GET_500_NOTFOUND=1
+
+lam "tạo tag: đúng sha -> XANH"           0 tao-tag v1 "$S1" false
+lam "tạo tag: API trả sha KHÁC -> ĐỎ"     1 tao-tag v1 "$S1" false GIA_TAG_SHA="$S2"
+lam "tạo tag: hai cặp KHÁC sha, ghép đúng" 0 tao-tag 'v1,v2' "$S1,$S2" false
+lam "tạo tag: phần tử rỗng giữa, vẫn ghép đúng" 0 tao-tag 'a,,b' "$S1,,$S2" false
 lam "tạo tag: số cặp lệch sau khi nén -> ĐỎ" 1 tao-tag 'a,b' "$S1" false
 
 TONG=$((QUA+HONG))

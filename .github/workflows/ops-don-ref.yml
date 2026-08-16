@@ -109,6 +109,17 @@ jobs:
           test -n "$MAC_DINH"
           echo "nhánh mặc định đo được: $MAC_DINH"
 
+          # `read -ra` NUỐT phần tử rỗng ở CUỐI, nên `a,` lọt qua vòng kiểm phần tử.
+          # Soi chuỗi THÔ trước khi tách — finding P1 của cross-review, đúng.
+          case "$REF" in
+            ,*|*,) echo "DỪNG: danh sách ref bắt đầu hoặc kết thúc bằng dấu phẩy"; exit 2 ;;
+            *,,*) echo "DỪNG: danh sách ref có dấu phẩy liền nhau"; exit 2 ;;
+          esac
+          case "${SHA:-}" in
+            ,*|*,) echo "DỪNG: danh sách sha bắt đầu hoặc kết thúc bằng dấu phẩy"; exit 2 ;;
+            *,,*) echo "DỪNG: danh sách sha có dấu phẩy liền nhau"; exit 2 ;;
+          esac
+
           IFS=',' read -ra DS <<< "$REF"
           SO=0
           for r in "${DS[@]}"; do
@@ -127,11 +138,22 @@ jobs:
             # CHỈ ASCII. `оps/x` với chữ `о` Cyrillic KHÔNG khớp `ops/*` nên lọt sạch
             # danh sách bảo vệ trong khi mắt người đọc ra `ops/x` — finding P2 của
             # cross-review codex, đúng. Chặn ở đây rẻ hơn mọi cách chuẩn hoá khác.
+            # Dạng tên ref — tương đương phần dùng được của `git check-ref-format`.
+            # Những tên này API sẽ từ chối, nhưng từ chối MUỘN nghĩa là đã xoá xong vài
+            # ref đầu rồi mới hỏng ở giữa danh sách. Chặn ở đây, trước khi đụng gì.
+            case "$r" in
+              .*|*/.*) echo "DỪNG: '$r' có thành phần bắt đầu bằng dấu chấm"; exit 2 ;;
+              */|*.|*.lock|*.lock/*) echo "DỪNG: '$r' kết thúc bằng / hoặc . hoặc .lock"; exit 2 ;;
+              /*) echo "DỪNG: '$r' bắt đầu bằng /"; exit 2 ;;
+            esac
+            [ "${#r}" -le 200 ] || { echo "DỪNG: tên ref dài ${#r} ký tự, quá 200"; exit 2; }
             LC_ALL=C; case "$r" in *[![:alnum:]/._-]*)
               echo "DỪNG: '$r' có ký tự ngoài [A-Za-z0-9/._-] — tên ref ở kho này chỉ dùng bảng ấy, và ký tự nhìn giống chữ ASCII là đường lách danh sách bảo vệ"; exit 2 ;;
             esac
             if [ "$HANH_DONG" != tao-tag ]; then
-              [ "$r" = "$MAC_DINH" ] && { echo "DỪNG: '$r' là nhánh MẶC ĐỊNH"; exit 2; }
+              # So thường-hoá: `Master` từng lọt khi nhánh mặc định là `master`.
+              [ "$(printf '%s' "$r" | tr '[:upper:]' '[:lower:]')" = "$(printf '%s' "$MAC_DINH" | tr '[:upper:]' '[:lower:]')" ] \
+                && { echo "DỪNG: '$r' trùng nhánh MẶC ĐỊNH ($MAC_DINH), kể cả khác hoa thường"; exit 2; }
               # So KHÔNG phân biệt hoa/thường: `Ops/secret` từng lọt. Git phân biệt hoa
               # thường nên `Ops/x` là nhánh KHÁC `ops/x` — nhưng người đọc log thì không
               # phân biệt, và một workflow đặc quyền không nên dựa vào mắt người.
@@ -199,9 +221,14 @@ jobs:
           # đúng lớp doctrine của kho: KHÔNG ĐO ĐƯỢC khác KHÔNG CÓ.
           doc_ref() {
             local ten="$1" out rc
-            out="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/$LOAI/$ten" 2>&1)"; rc=$?
+            # `-i` để lấy DÒNG TRẠNG THÁI HTTP. Bản trước phân loại 404 bằng cách dò
+            # chuỗi "Not Found" trong thông báo lỗi — một 500 có chữ ấy trong thân sẽ
+            # bị đọc thành "ref không còn". Phân loại trạng thái bằng văn bản tự do là
+            # đoán, không phải đo. Finding P2 của cross-review, đúng.
+            out="$(gh api -i "repos/$GITHUB_REPOSITORY/git/ref/$LOAI/$ten" 2>&1)"; rc=$?
             if [ "$rc" = 0 ]; then echo co; return; fi
-            case "$out" in *"HTTP 404"*|*"Not Found"*) echo khong ;; *) echo "khong-do-duoc: $out" ;; esac
+            if printf '%s' "$out" | grep -Eq '^HTTP/[0-9.]+ 404( |$)'; then echo khong; return; fi
+            echo "khong-do-duoc: $out"
           }
 
           i=-1
@@ -228,6 +255,9 @@ jobs:
                 *) echo "ĐỎ: KHÔNG ĐO ĐƯỢC $LOAI/$r trước khi xoá — dừng, không xoá mù. $truoc"; exit 1 ;;
               esac
               gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/$LOAI/$r"
+              # Không có gì ở đây bảo đảm lệnh trên ĐÃ CHẠY nếu ai đó xoá nó đi — phép
+              # đọc lại phía dưới sẽ vẫn xanh khi ref tình cờ đã biến mất vì lý do khác.
+              # Chốt thật nằm ở bộ test (đòi đúng một lời gọi DELETE trong nhật ký).
               sau="$(doc_ref "$r")"
               case "$sau" in
                 khong) echo "đã xoá và ĐO LẠI: $LOAI/$r không còn" ;;

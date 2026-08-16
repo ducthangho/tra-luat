@@ -14,6 +14,7 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 
 | tệp verdict | id | phải làm gì khi chạy lại |
 |---|---|---|
+| `pr134-ci-lease-gate-codex-verdict.md` | `windows-chua-do-that` | Verdict báo `30/30`, nhưng con số ấy **đo trên Linux** — reviewer từ chối gọi Windows là đạt vì chưa chạy thật. **CẬP NHẬT sau khi verdict được ghi:** lượt Windows THẬT đầu tiên đã chạy (`workflow_dispatch` run `31968805678`, head `3ee62330`) và **xanh** — bước `lease-publish selftest` `success` trên `windows-latest`. Nhưng phần reviewer cảnh báo thì **vẫn chưa chứng minh được**: `t19_symlink_tro_RA_NGOAI_kho_thi_CHAN` bắt `OSError`/`NotImplementedError` rồi `return`, mà harness **vẫn tính ca đó vào số đạt**, nên một lượt Windows xanh có thể chứa một ca CÓ MẶT mà KHÔNG ĐO (đúng bệnh `t24`). Không đọc được đầu ra in ra của bước ấy để xác nhận — `get_job_logs` chỉ trả phần đuôi, và đuôi không chạm tới bước đó. **Xanh trên Windows ⇒ bộ chạy được; KHÔNG ⇒ mọi ca đều đo.** Nợ có sẵn của bộ test, **không** do PR "#134" tạo ra; cách chữa reviewer đề nghị là cho `t19` báo `SKIP` riêng và không tính vào số đạt. |
 | `wp55-r2-review-5-codex-verdict.md` | `mutable-master-ref-in-repro-command` | Khối bash tái hiện `merged-tree-doctrine-false-positive` dùng `origin/master`, một ref **DI ĐỘNG**. Master lúc đo là `3d2c52d62696b0c7c190fd891115f543b0f9cb55`. **Thay cả hai chỗ `origin/master` bằng SHA đó**, nếu không bạn đang đo một cây khác. |
 
 ## Mục lục
@@ -27,6 +28,7 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 | [`wp55-r4-review-rebase-codex-verdict.md`](wp55-r4-review-rebase-codex-verdict.md) | [`.receipt.yaml`](wp55-r4-review-rebase-codex-verdict.receipt.yaml) | `wp55-r4-review-rebase-codex-20260816` | `approve` | `c44b2d4c` | 5383 |
 | [`wp55-r4-review-1-codex-verdict.md`](wp55-r4-review-1-codex-verdict.md) | [`.receipt.yaml`](wp55-r4-review-1-codex-verdict.receipt.yaml) | `wp55-r4-review-1-codex-20260816` | `do_not_land` | `2432e3f6` | 6578 |
 | [`wp55-r4-review-2-codex-verdict.md`](wp55-r4-review-2-codex-verdict.md) | [`.receipt.yaml`](wp55-r4-review-2-codex-verdict.receipt.yaml) | `wp55-r4-review-2-codex-20260816` | `approve` | `817598e2` | 4525 |
+| [`pr134-ci-lease-gate-codex-verdict.md`](pr134-ci-lease-gate-codex-verdict.md) | [`.receipt.yaml`](pr134-ci-lease-gate-codex-verdict.receipt.yaml) | — (không lease) | `approve_with_findings` | `ae755d10` | 7975 |
 
 Ba hàng đầu của revision 4 (`di-tru`, `viet-lai`, `rebase`) là việc **phụ trợ** — mỗi lượt
 review đúng một commit trên master, một tệp `CLAUDE.md` — chứ không phải lượt cross-review

@@ -848,6 +848,66 @@ def t27_canh_bao_trong_bien_nhan_phai_duoc_NANG_len_muc_luc():
                  f"KHÔNG tính — verdict này vẫn phải có hàng cảnh báo của riêng nó.")
 
 
+@ca
+def t31_moi_workflow_cai_pyyaml_phai_GHIM_va_ghim_CUNG_MOT_ban():
+    """Mọi bước cài PyYAML trong workflow phải ghim exact, và tất cả cùng một số.
+
+    Vì sao có, hai lớp:
+
+    1. **Spec trần.** Cross-review PR #134 (codex) nêu `unpinned-pyyaml-ci-dependency`:
+       `pip install pyyaml` không biên làm CÙNG MỘT SHA có thể xanh hôm nay và đỏ sau
+       này mà cây không đổi. Cùng lớp với tiền lệ `pypdf>=4.0` không có trần. Bộ kiểm
+       cổng đăng lease chạy ở đường có `contents: write` + `issues: write`, nên một
+       dependency trôi ở đó là trôi ngay dưới chân cổng.
+
+    2. **Hai bản sẽ trôi lệch.** Bản vá cho lớp 1 ghi `PyYAML==6.0.3` vào HAI tệp
+       workflow. CLAUDE.md đã ghi đúng hình dạng này ở ca quét secrets: *"hai bản sẽ
+       trôi lệch, và bên quên cập nhật chính là bên đẩy lọt"*. Nâng bản ở một chỗ mà
+       quên chỗ kia thì hai đường chạy hai runtime khác nhau, và chỗ quên là chỗ không
+       ai đo. Ca này biến lời hứa "nhớ sửa cả hai" thành chốt.
+
+    Ca này sinh ra từ chính lượt vá lớp 1: nghĩ ra được rủi ro thì phải biến ngay thành
+    ca test, đừng để nó nằm trong chú thích — chỗ đó là nơi các ca đi chết.
+    """
+    import re
+    goc = HERE.parent / ".github" / "workflows"
+    if not goc.is_dir():
+        # Cùng chốt chống xanh-rỗng với `t24`: chỉ tha khi đây rõ ràng là BẢN SAO rời.
+        bang(not (HERE.parent / ".git").exists(),
+             f"kho thật mà không thấy {goc} — ca này sẽ xanh rỗng")
+        return
+    ds = sorted(p for p in goc.iterdir() if p.suffix in (".yml", ".yaml"))
+    bang(ds, f"không thấy workflow nào trong {goc} — ca này sẽ xanh mà không đo gì")
+
+    # Bắt MỌI dòng cài pyyaml, kể cả viết hoa/thường khác nhau, rồi mới xét nó có ghim
+    # không. Bắt theo `pip install` chứ không theo `PyYAML==` — nếu chỉ tìm dạng ĐÚNG
+    # thì một dòng SAI (spec trần) không khớp mẫu và ca này im lặng cho qua.
+    RE_CAI = re.compile(r"pip\s+install\b[^\n]*?\bpyyaml", re.I)
+    RE_GHIM = re.compile(r"\bPyYAML==(\d+(?:\.\d+)*)\b", re.I)
+
+    thay = []
+    for p in ds:
+        for so, dong in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
+            if not RE_CAI.search(dong):
+                continue
+            m = RE_GHIM.search(dong)
+            bang(m, f"{p.name}:{so} cài PyYAML mà KHÔNG ghim exact: {dong.strip()!r} — "
+                    f"spec trần làm cùng một SHA xanh hôm nay, đỏ sau này mà cây không đổi")
+            thay.append((p.name, so, m.group(1)))
+
+    # Chốt chống xanh-rỗng: hai tệp ĐANG có bước cài. Bộ này về 0 nghĩa là mẫu khớp
+    # hỏng, không phải cây sạch — và khi ấy hai chốt trên không đo gì.
+    bang(len(thay) >= 2,
+         f"chỉ thấy {len(thay)} bước cài PyYAML (đợi >= 2) — mẫu khớp có thể đã hỏng; "
+         f"ca xanh vì không tìm thấy gì thì tệ hơn ca đỏ")
+
+    ban = {v for _, _, v in thay}
+    bang(len(ban) == 1,
+         f"các workflow ghim PyYAML LỆCH NHAU: "
+         f"{', '.join(f'{t}:{s}={v}' for t, s, v in thay)} — hai đường chạy hai runtime "
+         f"khác nhau, và chỗ quên nâng bản chính là chỗ không ai đo")
+
+
 def main() -> int:
     qua, hong = 0, []
     for fn in CA:

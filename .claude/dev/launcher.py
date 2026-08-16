@@ -89,6 +89,20 @@ from pathlib import Path
 
 VERSION = "1.0.0"
 
+# launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu
+#
+# CÙNG CƠ CHẾ với `# hook-nang-luc:` trong `.claude/hooks/session-start.sh`, áp cho
+# CHÍNH TỆP NÀY. Vì sao cần: sự cố 15-08 là hook của nhánh packet cũ hơn hook master;
+# 16-08 lặp lại y hệt một tầng khác — một phiên chạy `launcher.py` từ cây đã checkout
+# NHÁNH PACKET, nên bản chạy thật THIẾU đúng bản vá vừa land trên master. Sổ lượt chạy
+# im lặng không có `thoi_luong_giay`/`stdout_byte`/`stderr_byte`, và người vận hành phải
+# tự trừ hai mốc thời gian mới thấy — đúng thứ bản vá ấy sinh ra để khỏi phải làm.
+#
+# ĐO THEO NĂNG LỰC, KHÔNG THEO BĂM TOÀN TỆP: sửa một dấu phẩy trong chú thích mà chốt
+# đỏ thì chốt sẽ bị bỏ qua. Và KHÔNG dùng quan hệ tổ tiên: nhánh packet cũ LÀ tổ tiên
+# hợp lệ của master, nên tổ tiên không phân biệt được "cũ nhưng đủ" với "cũ và thiếu".
+# Thêm năng lực so với master (nhánh mới hơn) KHÔNG phải lỗi.
+
 MA_OK = 0
 MA_THAM_SO = 2
 MA_GIT = 3
@@ -1556,6 +1570,30 @@ CONG_CU = [
              "Darwin": "brew install node", "Linux": "sudo apt-get install -y nodejs npm"}},
 ]
 
+# MODULE PYTHON — bảng RIÊNG, cố ý không nhét vào `CONG_CU`.
+#
+# `CONG_CU` đo bằng `shutil.which`, tức đo LỆNH TRÊN PATH. PyYAML không có binary
+# nào cả: `which pyyaml` không bao giờ thấy gì. Thêm nó vào bảng trên thì `doctor`
+# sẽ báo "thiếu" trên MỌI máy, kể cả máy đã cài — một chốt luôn đỏ là chốt sẽ bị bỏ
+# qua, và bỏ qua được một chốt thì bỏ qua được cả bảng.
+#
+# `bat_buoc: False` là ĐO ĐƯỢC chứ không phải nhân nhượng: `launcher.py` KHÔNG import
+# yaml (đo 16-08-2026: 0 lần nhắc trong cả tệp). Người cần nó là `ops/lease_publish.py`
+# và `ops/lease_publish_test.py`. Đặt bắt buộc sẽ làm `doctor` thoát 12 trên máy chỉ
+# gọi agent mà không đụng đường ops — chặn oan, và chặn oan cũng là một dạng nói dối.
+#
+# VÌ SAO ĐÁNG CÓ MỤC NÀY: thiếu PyYAML thì cổng đăng lease chết bằng `ImportError`
+# giữa chừng chứ không nói "thiếu phụ thuộc". `ops/lease_publish.py` đã cố dịch câu
+# ấy sang "thiếu PyYAML — `pip install pyyaml`", nhưng chỉ ở nhánh nó chạy được tới;
+# hỏi TRƯỚC vẫn rẻ hơn hỏng GIỮA CHỪNG. Từ 16-08-2026 cả `ci.yml` lẫn
+# `ops-publish-lease.yml` ghim `PyYAML==6.0.3`, nên máy dev lệch bản với CI là chuyện
+# đọc được ngay ở đây thay vì đọc trong log CI.
+MODULE_PY = [
+    {"ten": "yaml", "goi_la": "PyYAML", "bat_buoc": False,
+     "vi_sao": "ops/lease_publish.py + bo phan chung cua no doc/ghi lease bang YAML",
+     "cai": {"*": "python -m pip install PyYAML==6.0.3   (dung so voi ci.yml)"}},
+]
+
 
 def _phien_ban(duong_dan: str) -> tuple[bool, str]:
     """Chạy thử `--version`. Trả (chay_duoc, dong_dau).
@@ -2175,6 +2213,7 @@ def _do_github(ws: str | None) -> tuple[str, str]:
 
 
 _RE_NANG_LUC_HOOK = re.compile(r"^#\s*hook-nang-luc:\s*(.+)$", re.MULTILINE)
+_RE_NANG_LUC_LAUNCHER = re.compile(r"^#\s*launcher-nang-luc:\s*(.+)$", re.MULTILINE)
 
 
 def _nang_luc_hook(noi_dung: str) -> set:
@@ -2249,6 +2288,56 @@ def _do_hook_cu(ws: str | None) -> tuple[str, str]:
             f"base cu hon; lay hook tu master truoc khi ket luan ve moi truong")
 
 
+def _nang_luc_launcher(noi_dung: str) -> set:
+    """Đọc tập tên năng lực launcher khai trong `# launcher-nang-luc: …`."""
+    ra = set()
+    for m in _RE_NANG_LUC_LAUNCHER.finditer(noi_dung):
+        ra.update(t for t in m.group(1).split() if t)
+    return ra
+
+
+def _do_launcher_cu(ws: str | None) -> tuple[str, str]:
+    """Chính `launcher.py` ĐANG CHẠY có cũ hơn bản trên nhánh chính không?
+
+    Cùng lớp với `hook-phien`, và đã trả giá RIÊNG một lần (16-08-2026): một phiên chạy
+    `launcher.py` từ cây đang checkout NHÁNH PACKET để gọi reviewer. Bản vá thêm
+    `thoi_luong_giay`/`stdout_byte`/`stderr_byte` vào sổ vừa land trên master nhưng KHÔNG
+    có trên nhánh ấy, nên sổ lượt chạy thiếu cả ba trường mà không báo gì. Người vận hành
+    phải tự trừ `bat_dau_utc` với `ket_thuc_utc` mới phát hiện — đúng việc mà bản vá sinh
+    ra để khỏi phải làm.
+
+    Đo TỆP ĐANG CHẠY (`__file__`), không đo tệp trong workspace: hai thứ đó có thể khác
+    nhau, và thứ quyết định hành vi là cái đang chạy. Đây cũng là khác biệt so với
+    `hook-phien` — hook thì cây quyết định, launcher thì lời gọi quyết định.
+
+    KHÔNG gọi mạng: `git show` đọc ref đã fetch. Chưa có ref thì nói KHONG_DO_DUOC chứ
+    không đoán.
+    """
+    if not ws:
+        return ("KHONG_DO_DUOC", "khong xac dinh duoc workspace")
+    rc, ra, _ = _git(ws, "show", "origin/master:.claude/dev/launcher.py")
+    if rc != 0 or not ra:
+        return ("KHONG_DO_DUOC",
+                "chua co origin/master trong cay nay — `git fetch origin master` roi do lai")
+    cua_master = _nang_luc_launcher(ra)
+    if not cua_master:
+        return ("KHONG_DO_DUOC",
+                "launcher tren origin/master chua co dong `# launcher-nang-luc:` de doi chieu")
+    try:
+        dang_chay = Path(__file__).read_text(encoding="utf-8", errors="replace")
+    except OSError as e:
+        return ("KHONG_DO_DUOC", f"khong doc duoc chinh tep dang chay: {e}")
+    dang_co = _nang_luc_launcher(dang_chay)
+    thieu = sorted(cua_master - dang_co)
+    if not thieu:
+        them = sorted(dang_co - cua_master)
+        return ("DUNG_DUOC", "du nang luc so voi master"
+                + (f" (+{','.join(them)} moi hon)" if them else ""))
+    return ("CHUA_XAC_THUC",
+            f"launcher DANG CHAY thieu nang luc: {', '.join(thieu)} — ban nay ra tu base "
+            f"cu hon master; ket qua/so luot chay co the THIEU TRUONG ma khong bao gi")
+
+
 KHA_NANG = [
     {"ten": "codex", "do": lambda ws, ks=False: _do_codex(ks),
      "vi_sao": "reviewer cross-provider (§8) — executor claude thi reviewer PHAI la codex",
@@ -2259,6 +2348,9 @@ KHA_NANG = [
     {"ten": "github", "do": lambda ws, ks=False: _do_github(ws),
      "vi_sao": "dang handoff/verdict, doc issue, day nhanh",
      "khac_phuc": "dung cong cu MCP github + git; REST thang bi proxy chan"},
+    {"ten": "launcher-phien", "do": lambda ws, ks=False: _do_launcher_cu(ws),
+     "vi_sao": "launcher dang chay cu hon master = so luot chay THIEU truong ma khong bao",
+     "khac_phuc": "chay launcher tu cay da merge master, hoac merge master vao nhanh nay"},
     {"ten": "hook-phien", "do": lambda ws, ks=False: _do_hook_cu(ws),
      "vi_sao": "hook cu hon master = thieu chot ma master da co (nguyen nhan goc 15-08)",
      "khac_phuc": "git show origin/master:.claude/hooks/session-start.sh > <tep>  "
@@ -2385,6 +2477,38 @@ def lenh_doctor(a) -> int:
             chua_xac_thuc.append(k["ten"])
         elif tt not in DA_CHUNG_MINH_KHA_DUNG:
             chua_chung_minh.append(k["ten"])
+    # --- MODULE PYTHON. Đo bằng `find_spec`, KHÔNG bằng `import`: một module hỏng
+    # nửa chừng sẽ ném ngay giữa `doctor`, mà `doctor` không được chết vì một phép đo.
+    #
+    # NÓI RÕ ĐO BẰNG INTERPRETER NÀO, và đây không phải chi tiết thừa: `doctor` chạy
+    # bằng `sys.executable`, còn `ops/lease_publish_test.py` trong CI chạy bằng python
+    # của runner, và `run` sinh con bằng interpreter mà LỆNH tự nêu. Ba cái đó có thể
+    # là ba môi trường khác nhau. Khẳng định đúng chỉ là "python ĐANG CHẠY doctor có
+    # thấy module này" — khai rộng hơn là dựng lại đúng lớp lỗi "có mặt ≠ dùng được".
+    import importlib.util as _ilu
+    mo_dun = []
+    thieu_mo_dun_bat_buoc = []
+    for m in MODULE_PY:
+        try:
+            spec = _ilu.find_spec(m["ten"])
+        except (ImportError, ValueError, AttributeError):
+            spec = None
+        pb = ""
+        if spec is not None:
+            # Phiên bản là THÔNG TIN, không phải chốt: hai workflow ghim `PyYAML==6.0.3`
+            # nên lệch bản ở máy dev là chuyện đáng BIẾT, chưa phải chuyện đáng CHẶN.
+            try:
+                pb = getattr(__import__(m["ten"]), "__version__", "") or ""
+            except Exception:            # noqa: BLE001 - doctor khong duoc chet
+                pb = "(nap duoc spec nhung import loi)"
+        mo_dun.append({"ten": m["ten"], "goi_la": m["goi_la"], "co": spec is not None,
+                       "bat_buoc": m["bat_buoc"], "phien_ban": pb, "vi_sao": m["vi_sao"],
+                       "lenh_cai": m["cai"].get(he) or m["cai"].get("*") or "",
+                       "do_bang_interpreter": sys.executable})
+        if spec is None and m["bat_buoc"]:
+            thieu_mo_dun_bat_buoc.append(m["goi_la"])
+    thieu_bat_buoc = thieu_bat_buoc + thieu_mo_dun_bat_buoc
+
     bien = quet_bien_moi_truong()
 
     if a.json:
@@ -2403,7 +2527,8 @@ def lenh_doctor(a) -> int:
                                                and not chua_chung_minh,
                                 "he_dieu_hanh": he,
                                 "python_dang_chay": sys.version.split()[0],
-                                "cong_cu": ket, "thieu_bat_buoc": thieu_bat_buoc,
+                                "cong_cu": ket, "mo_dun_python": mo_dun,
+                                "thieu_bat_buoc": thieu_bat_buoc,
                                 "kha_nang": kha_nang, "chua_xac_thuc": chua_xac_thuc,
                                 "chua_chung_minh": chua_chung_minh,
                                 "bien_moi_truong": bien},
@@ -2426,6 +2551,16 @@ def lenh_doctor(a) -> int:
                     f"        co o {hong['duong_dan']} nhung KHONG chay duoc: {hong['loi']}")
             if not c["co"] and con_ong:
                 con_ong = _in_an_toan(f"        cai bang: {c['lenh_cai']}")
+        # In NGAY SAU bảng công cụ vì cùng trả lời câu "đủ đồ chưa", chỉ khác tầng:
+        # bảng trên là LỆNH trên PATH, bảng này là MODULE của interpreter đang chạy.
+        if mo_dun:
+            _in_an_toan(f"MODULE PYTHON (do bang {sys.executable}):")
+            for m in mo_dun:
+                dau = "co  " if m["co"] else ("THIEU" if m["bat_buoc"] else "khong")
+                mo_ta = (m["phien_ban"] or "co") if m["co"] else m["vi_sao"]
+                _in_an_toan(f"  {dau:<5} {m['goi_la']:<8} {mo_ta}")
+                if not m["co"]:
+                    _in_an_toan(f"        cai bang: {m['lenh_cai']}")
         _in_an_toan("KHA DUNG (co mat != dung duoc):")
         for k in kha_nang:
             _in_an_toan(f"  {k['trang_thai']:<14} {k['ten']:<8} {k['chi_tiet']}")

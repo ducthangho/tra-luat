@@ -1,0 +1,285 @@
+name: ops — dọn ref (xoá nhánh · xoá tag · tạo tag)
+
+# VÌ SAO CÓ WORKFLOW NÀY
+# Phiên Claude Code trên web KHÔNG xoá được ref và KHÔNG đẩy được `refs/tags/*`.
+# ĐÃ ĐO 16-08-2026, cùng một repo, cùng một POST `/git-receive-pack`:
+#   tạo ref     -> 200, phản hồi CÓ `X-Github-Request-Id`  (đi tới GitHub)
+#   xoá ref     -> 403, phản hồi KHÔNG có header GitHub nào, ~41ms
+#   đẩy tag     -> 403, y hệt
+# ⇒ 403 do proxy egress tự sinh, KHÔNG phải GitHub và KHÔNG phải thiếu quyền token.
+# Tài liệu khớp: credential git nằm ngoài sandbox, đi qua "secure proxy using scoped
+# credentials" — phạm vi ấy loại xoá ref và ghi tag.
+#
+# Actions chạy trên runner của GitHub với `GITHUB_TOKEN`, không đi qua proxy ấy, nên
+# đây là đường sạch DUY NHẤT để một phiên web làm hai việc trên — thay vì nhờ người.
+#
+# CHỖ ĐAU, NÓI THẲNG: workflow này CẤP LẠI ĐÚNG QUYỀN MÀ SANDBOX CỐ Ý KHÔNG CHO.
+# Nên nó phải khó dùng sai hơn là tiện dùng. Sáu lớp:
+#   1. `workflow_dispatch` — chỉ người có quyền GHI mới kích hoạt được.
+#   2. MẶC ĐỊNH LÀ THỬ KHÔ (`chi_thu: true`). Bấm nhầm thì không xoá gì.
+#   3. Đòi gõ đúng `xac_nhan` cho mỗi hành động: `XOA` hoặc `TAO`.
+#   4. Danh sách BẢO VỆ: nhánh mặc định (ĐO lúc chạy, không ghi cứng `master`),
+#      `ops/**`, `claude/**`, `codex/**`, `agent/**`, và `luu-tru/**`.
+#   5. `permissions: contents: write` — không `pull-requests`, không `actions`,
+#      không `issues`.
+#   6. KHÔNG tin `rc=0`: sau mỗi thao tác phải ĐO LẠI trạng thái ref thật, và
+#      workflow ĐỎ nếu trạng thái không đúng như vừa khai.
+#
+# LỖ ĐÃ BIẾT của chốt proxy, ghi ra để không ai tưởng sandbox là bất khả xâm: proxy
+# chặn theo HÌNH DẠNG chứ không theo HẬU QUẢ — `git push --force` (ép lùi) VẪN ĐƯỢC
+# PHÉP, mà ép lùi cũng làm commit thành không tra được y như xoá. Đã đo cùng ngày.
+
+on:
+  workflow_dispatch:
+    inputs:
+      hanh_dong:
+        description: 'Làm gì'
+        required: true
+        type: choice
+        options: [xoa-nhanh, xoa-tag, tao-tag]
+      ref:
+        description: 'Tên ref, cách nhau bằng dấu phẩy. KHÔNG có tiền tố refs/heads hay refs/tags.'
+        required: true
+        type: string
+      sha:
+        description: 'Chỉ cho tao-tag: SHA40 đích. Một SHA cho một tag, cùng thứ tự với ô ref.'
+        required: false
+        type: string
+      xac_nhan:
+        description: 'Gõ XOA để xoá, TAO để tạo tag. Sai một ký tự là dừng.'
+        required: true
+        type: string
+      chi_thu:
+        description: 'Thử khô — in ra sẽ làm gì rồi dừng, không đụng ref nào'
+        required: false
+        default: true
+        type: boolean
+      ly_do:
+        description: 'Vì sao dọn. Đi vào log, để nửa năm sau còn đọc được.'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ops-don-ref
+  cancel-in-progress: false     # dọn ref KHÔNG được huỷ giữa chừng
+
+jobs:
+  don:
+    runs-on: ubuntu-latest
+    steps:
+      - name: khai đầu vào vào log
+        env:
+          HANH_DONG: ${{ inputs.hanh_dong }}
+          REF: ${{ inputs.ref }}
+          SHA: ${{ inputs.sha }}
+          CHI_THU: ${{ inputs.chi_thu }}
+          LY_DO: ${{ inputs.ly_do }}
+        run: |
+          set -euo pipefail
+          # Đầu vào đi qua BIẾN MÔI TRƯỜNG, không chèn biểu thức Actions thẳng vào
+          # thân script: đầu vào là chuỗi người gõ, chèn thẳng là đường tiêm lệnh cổ điển.
+          #
+          # VÀ ĐỪNG VIẾT NGUYÊN CÚ PHÁP BIỂU THỨC RA ĐÂY, kể cả trong dòng chú thích.
+          # GitHub nội suy biểu thức trên TOÀN BỘ thân `run` trước khi shell thấy nó, nên
+          # một cặp dấu ngoặc kép-kép RỖNG trong comment là biểu thức RỖNG ⇒ tệp workflow
+          # KHÔNG HỢP LỆ, GitHub từ chối trước khi chạy job nào. Đã trả giá: bản trước của
+          # chính dòng này viết cú pháp ấy ra để giải thích rằng ta không dùng nó, và đó
+          # là thứ duy nhất làm hỏng cả workflow. Sáu lượt cross-review không thấy, vì cả
+          # sáu chỉ kiểm bằng PyYAML — "YAML parse được" KHÁC "GitHub nhận".
+          printf 'hành động : %s\n' "$HANH_DONG"
+          printf 'ref       : %s\n' "$REF"
+          printf 'sha       : %s\n' "${SHA:-(không)}"
+          printf 'chỉ thử   : %s\n' "$CHI_THU"
+          printf 'người bấm : %s\n' "${GITHUB_ACTOR}"
+          printf 'lý do     : %s\n' "${LY_DO:-(không ghi)}"
+
+      - name: chốt — xác nhận, danh sách bảo vệ, dạng tên
+        env:
+          HANH_DONG: ${{ inputs.hanh_dong }}
+          REF: ${{ inputs.ref }}
+          SHA: ${{ inputs.sha }}
+          XAC_NHAN: ${{ inputs.xac_nhan }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          MONG=XOA; [ "$HANH_DONG" = tao-tag ] && MONG=TAO
+          if [ "$XAC_NHAN" != "$MONG" ]; then
+            echo "DỪNG: xac_nhan phải đúng bằng '$MONG' (nhận '$XAC_NHAN')"; exit 2
+          fi
+
+          # ĐO nhánh mặc định, không ghi cứng: kho đổi tên nhánh mặc định thì chốt
+          # ghi cứng sẽ im lặng thành vô dụng đúng lúc cần nhất.
+          MAC_DINH=$(gh api "repos/$GITHUB_REPOSITORY" --jq .default_branch)
+          test -n "$MAC_DINH"
+          echo "nhánh mặc định đo được: $MAC_DINH"
+
+          # `read -ra` NUỐT phần tử rỗng ở CUỐI, nên `a,` lọt qua vòng kiểm phần tử.
+          # Soi chuỗi THÔ trước khi tách — finding P1 của cross-review, đúng.
+          case "$REF" in
+            ,*|*,) echo "DỪNG: danh sách ref bắt đầu hoặc kết thúc bằng dấu phẩy"; exit 2 ;;
+            *,,*) echo "DỪNG: danh sách ref có dấu phẩy liền nhau"; exit 2 ;;
+          esac
+          case "${SHA:-}" in
+            ,*|*,) echo "DỪNG: danh sách sha bắt đầu hoặc kết thúc bằng dấu phẩy"; exit 2 ;;
+            *,,*) echo "DỪNG: danh sách sha có dấu phẩy liền nhau"; exit 2 ;;
+          esac
+
+          IFS=',' read -ra DS <<< "$REF"
+          SO=0
+          for r in "${DS[@]}"; do
+            r="${r#"${r%%[![:space:]]*}"}"; r="${r%"${r##*[![:space:]]}"}"   # trim, KHONG dung xargs (xargs giai ma dau nhay)
+            # PHẦN TỬ RỖNG bị CHẶN, không bị bỏ qua im lặng. Bản đầu bỏ qua, và đó là
+            # finding P1: chốt đếm phần tử KHÔNG rỗng còn bước làm ghép theo chỉ số của
+            # mảng THÔ, nên `ref=a,,b` + `sha=s1,,s3` cho `a->s1` rồi `b->` rỗng — tag
+            # thứ nhất đã tạo xong mới hỏng ở cái thứ hai, để lại trạng thái làm dở.
+            [ -z "$r" ] && { echo "DỪNG: danh sách ref có phần tử RỖNG (dấu phẩy thừa?)"; exit 2; }
+            SO=$((SO+1))
+            case "$r" in
+              refs/*) echo "DỪNG: '$r' — đưa TÊN ref, đừng đưa refs/heads hay refs/tags"; exit 2 ;;
+              *' '*|*'*'*|*'?'*|*'..'*|*'~'*|*'^'*|*':'*|*'\'*|*//*)
+                echo "DỪNG: '$r' có ký tự không cho phép (khoảng trắng, ký tự đại diện, ký tự git đặc biệt, hay // )"; exit 2 ;;
+            esac
+            # CHỈ ASCII. `оps/x` với chữ `о` Cyrillic KHÔNG khớp `ops/*` nên lọt sạch
+            # danh sách bảo vệ trong khi mắt người đọc ra `ops/x` — finding P2 của
+            # cross-review codex, đúng. Chặn ở đây rẻ hơn mọi cách chuẩn hoá khác.
+            # Dạng tên ref — tương đương phần dùng được của `git check-ref-format`.
+            # Những tên này API sẽ từ chối, nhưng từ chối MUỘN nghĩa là đã xoá xong vài
+            # ref đầu rồi mới hỏng ở giữa danh sách. Chặn ở đây, trước khi đụng gì.
+            case "$r" in
+              .*|*/.*) echo "DỪNG: '$r' có thành phần bắt đầu bằng dấu chấm"; exit 2 ;;
+              */|*.|*.lock|*.lock/*) echo "DỪNG: '$r' kết thúc bằng / hoặc . hoặc .lock"; exit 2 ;;
+              /*) echo "DỪNG: '$r' bắt đầu bằng /"; exit 2 ;;
+            esac
+            [ "${#r}" -le 200 ] || { echo "DỪNG: tên ref dài ${#r} ký tự, quá 200"; exit 2; }
+            LC_ALL=C; case "$r" in *[![:alnum:]/._-]*)
+              echo "DỪNG: '$r' có ký tự ngoài [A-Za-z0-9/._-] — tên ref ở kho này chỉ dùng bảng ấy, và ký tự nhìn giống chữ ASCII là đường lách danh sách bảo vệ"; exit 2 ;;
+            esac
+            if [ "$HANH_DONG" != tao-tag ]; then
+              # So thường-hoá: `Master` từng lọt khi nhánh mặc định là `master`.
+              [ "$(printf '%s' "$r" | tr '[:upper:]' '[:lower:]')" = "$(printf '%s' "$MAC_DINH" | tr '[:upper:]' '[:lower:]')" ] \
+                && { echo "DỪNG: '$r' trùng nhánh MẶC ĐỊNH ($MAC_DINH), kể cả khác hoa thường"; exit 2; }
+              # So KHÔNG phân biệt hoa/thường: `Ops/secret` từng lọt. Git phân biệt hoa
+              # thường nên `Ops/x` là nhánh KHÁC `ops/x` — nhưng người đọc log thì không
+              # phân biệt, và một workflow đặc quyền không nên dựa vào mắt người.
+              rl="$(printf '%s' "$r" | tr '[:upper:]' '[:lower:]')"
+              case "$rl" in
+                luu-tru/*) echo "DỪNG: '$r' nằm dưới luu-tru/** — đó là ref lưu trữ, xoá nó là làm published_* trong ops/reviews/*.receipt.yaml thành SHA không tra được"; exit 2 ;;
+                ops/*|claude/*|codex/*|agent/*|mission/*|dispatcher/*)
+                  echo "DỪNG: '$r' thuộc vùng làm việc được bảo vệ (ops/ claude/ codex/ agent/ mission/ dispatcher/). Nhánh ở đây thường mang hồ sơ chưa vào master — xoá phải do người, không qua workflow."; exit 2 ;;
+              esac
+            else
+              # TẠO TAG cũng chịu danh sách bảo vệ. Bản đầu miễn trừ hẳn — reviewer hỏi
+              # đúng: một tag tên `ops/...` không xoá được nhánh nào, nhưng nó dựng một
+              # cái tên gây hiểu nhầm ngay trong vùng đang được bảo vệ. Cấm cho nhất quán.
+              rl="$(printf '%s' "$r" | tr '[:upper:]' '[:lower:]')"
+              case "$rl" in
+                luu-tru/*|ops/*|claude/*|codex/*|agent/*|mission/*|dispatcher/*)
+                  echo "DỪNG: tag '$r' mang tên vùng được bảo vệ. Đặt tên khác."; exit 2 ;;
+              esac
+            fi
+          done
+          [ "$SO" -gt 0 ] || { echo "DỪNG: danh sách ref RỖNG"; exit 2; }
+
+          if [ "$HANH_DONG" = tao-tag ]; then
+            IFS=',' read -ra DSS <<< "${SHA:-}"
+            SOS=0; for s in "${DSS[@]}"; do s="${s//[[:space:]]/}"
+              [ -z "$s" ] && { echo "DỪNG: danh sách sha có phần tử RỖNG"; exit 2; }
+              SOS=$((SOS+1))
+              echo "$s" | grep -Eq '^[0-9a-f]{40}$' || { echo "DỪNG: '$s' không phải SHA40 chữ thường"; exit 2; }
+            done
+            [ "$SOS" = "$SO" ] || { echo "DỪNG: $SO tag nhưng $SOS sha — hai danh sách phải bằng nhau"; exit 2; }
+          fi
+          echo "chốt qua: $SO ref"
+
+      - name: làm, rồi ĐO LẠI trạng thái thật
+        env:
+          HANH_DONG: ${{ inputs.hanh_dong }}
+          REF: ${{ inputs.ref }}
+          SHA: ${{ inputs.sha }}
+          CHI_THU: ${{ inputs.chi_thu }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          LOAI=heads; [ "$HANH_DONG" != xoa-nhanh ] && LOAI=tags
+
+          # NÉN cả hai danh sách trước khi ghép — không ghép theo chỉ số của mảng thô.
+          # Chốt đã chặn phần tử rỗng, nhưng hai lớp cho một finding P1 là đáng: lớp
+          # kia sửa được, lớp này thì không phụ thuộc vào nó.
+          DS=(); DSS=()
+          IFS=',' read -ra _R <<< "$REF"
+          for x in "${_R[@]}"; do
+            x="${x#"${x%%[![:space:]]*}"}"; x="${x%"${x##*[![:space:]]}"}"
+            [ -n "$x" ] && DS+=("$x")
+          done
+          IFS=',' read -ra _S <<< "${SHA:-}"
+          for x in "${_S[@]}"; do x="${x//[[:space:]]/}"; [ -n "$x" ] && DSS+=("$x"); done
+
+          if [ "$HANH_DONG" = tao-tag ] && [ "${#DS[@]}" != "${#DSS[@]}" ]; then
+            echo "ĐỎ: sau khi nén, ${#DS[@]} tag nhưng ${#DSS[@]} sha"; exit 1
+          fi
+
+          # ĐỌC trạng thái ref. In: `co`, `khong` (đúng HTTP 404), hoặc `khong-do-duoc`.
+          # VÌ SAO PHẢI TÁCH BA: bản đầu coi MỌI lỗi của `gh api` là "ref không còn",
+          # nên một lỗi mạng, 500 hay hết quyền ngay sau lệnh xoá sẽ báo XANH cho một
+          # lượt chưa chắc đã xoá được. Finding P1 của cross-review codex, đúng, và
+          # đúng lớp doctrine của kho: KHÔNG ĐO ĐƯỢC khác KHÔNG CÓ.
+          doc_ref() {
+            local ten="$1" out rc
+            # `-i` để lấy DÒNG TRẠNG THÁI HTTP. Bản trước phân loại 404 bằng cách dò
+            # chuỗi "Not Found" trong thông báo lỗi — một 500 có chữ ấy trong thân sẽ
+            # bị đọc thành "ref không còn". Phân loại trạng thái bằng văn bản tự do là
+            # đoán, không phải đo. Finding P2 của cross-review, đúng.
+            out="$(gh api -i "repos/$GITHUB_REPOSITORY/git/ref/$LOAI/$ten" 2>&1)"; rc=$?
+            if [ "$rc" = 0 ]; then echo co; return; fi
+            # CHỈ dòng ĐẦU. `grep` quét mọi dòng, nên một 500 có dòng THÂN bắt đầu
+            # bằng `HTTP/2 404` cũng khớp — và thân phản hồi thì máy chủ ở đầu kia
+            # quyết định, không phải ta. Dòng trạng thái là dòng thứ nhất, chấm hết.
+            dong1="${out%%$'\n'*}"
+            case "$dong1" in HTTP/[0-9.]*" 404 "*|HTTP/[0-9.]*" 404") echo khong; return ;; esac
+            echo "khong-do-duoc: $out"
+          }
+
+          i=-1
+          for r in "${DS[@]}"; do
+            i=$((i+1))
+
+            if [ "$HANH_DONG" = tao-tag ]; then
+              s="${DSS[$i]}"
+              if [ "$CHI_THU" = true ]; then echo "[thử khô] sẽ TẠO tag $r -> $s"; continue; fi
+              gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
+                -f ref="refs/tags/$r" -f sha="$s" >/dev/null
+              # KHÔNG tin rc: đọc lại từ API và đòi ĐÚNG SHA.
+              that=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$r" --jq .object.sha)
+              [ "$that" = "$s" ] || { echo "ĐỎ: tag $r trỏ $that chứ không phải $s"; exit 1; }
+              echo "đã tạo và ĐO LẠI: $r -> $that"
+            else
+              if [ "$CHI_THU" = true ]; then echo "[thử khô] sẽ XOÁ $LOAI/$r"; continue; fi
+              # Đòi ref CÓ THẬT trước khi xoá: "xoá thành công" một thứ chưa từng tồn
+              # tại là câu nói dối dễ chịu nhất trong nhóm này.
+              truoc="$(doc_ref "$r")"
+              case "$truoc" in
+                co) : ;;
+                khong) echo "ĐỎ: $LOAI/$r KHÔNG tồn tại — không xoá được thứ không có"; exit 1 ;;
+                *) echo "ĐỎ: KHÔNG ĐO ĐƯỢC $LOAI/$r trước khi xoá — dừng, không xoá mù. $truoc"; exit 1 ;;
+              esac
+              gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/$LOAI/$r"
+              # Không có gì ở đây bảo đảm lệnh trên ĐÃ CHẠY nếu ai đó xoá nó đi — phép
+              # đọc lại phía dưới sẽ vẫn xanh khi ref tình cờ đã biến mất vì lý do khác.
+              # Chốt thật nằm ở bộ test (đòi đúng một lời gọi DELETE trong nhật ký).
+              sau="$(doc_ref "$r")"
+              case "$sau" in
+                khong) echo "đã xoá và ĐO LẠI: $LOAI/$r không còn" ;;
+                co) echo "ĐỎ: $LOAI/$r VẪN CÒN sau khi gọi xoá"; exit 1 ;;
+                *) echo "ĐỎ: gọi xoá xong mà KHÔNG ĐO ĐƯỢC $LOAI/$r — coi như CHƯA xoá. $sau"; exit 1 ;;
+              esac
+            fi
+          done
+
+          if [ "$CHI_THU" = true ]; then
+            echo
+            echo "THỬ KHÔ — KHÔNG ref nào bị đụng. Chạy lại với chi_thu = false để làm thật."
+          fi

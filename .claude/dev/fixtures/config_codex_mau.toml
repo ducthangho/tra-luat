@@ -1,0 +1,45 @@
+# FIXTURE AN DANH — chup tu mot config THAT roi thay MOI duong dan.
+# Muc dich: reviewer DO LAI duoc tuyen bo cua dieu phoi ma KHONG phai
+# dung ~/.codex/config.toml that (luot 8 reviewer khong do lai duoc vi
+# dieu phoi quen cap fixture — loi thiet ke de bai, khong phai loi ho).
+# KHONG chua bi mat: config codex chi co duong dan + trust_level.
+# >>> tra-luat: shell_environment_policy (quan ly tu dong) >>>
+[shell_environment_policy]
+inherit = "all"
+exclude = [
+  "GITHUB_PAT",                                 # credential THAT, khong khop mau mac dinh
+  "CLAUDE_CODE_SESSION_ID",                     # danh tinh phien, codex khong can
+  "CLAUDE_CODE_REMOTE_SESSION_ID",
+  "CLAUDE_CODE_WEBSOCKET_AUTH_FILE_DESCRIPTOR",
+]
+# <<< tra-luat <<<
+
+[projects."/duong/dan/an/danh/du-an-01"]
+trust_level = "trusted"
+
+[projects."/duong/dan/an/danh/du-an-02"]
+trust_level = "trusted"
+
+[projects."/duong/dan/an/danh/du-an-03"]
+trust_level = "trusted"
+
+[projects."/duong/dan/an/danh/du-an-04"]
+trust_level = "trusted"
+
+[projects."/duong/dan/an/danh/du-an-05"]
+trust_level = "trusted"
+
+[projects."/duong/dan/an/danh/du-an-06"]
+trust_level = "trusted"
+
+[projects."/duong/dan/an/danh/du-an-07"]
+trust_level = "trusted"
+
+[projects."/duong/dan/an/danh/du-an-08"]
+trust_level = "trusted"
+
+[projects."/duong/dan/an/danh/du-an-09"]
+trust_level = "trusted"
+
+[projects."/duong/dan/an/danh/du-an-10"]
+trust_level = "trusted"

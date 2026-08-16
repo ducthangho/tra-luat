@@ -64,6 +64,28 @@ jobs:
             Write-Host ("  {0,-11} {1}" -f $t, $(if ($c) { $c.Source } else { '(khong co)' }))
           }
 
+      # `rg` la CONG CU BAT BUOC tu 15-08-2026 (thieu no thi lenh tim cua agent gay
+      # giua chung chu KHONG tu lui ve grep — phien van "chay" nhung tra cuu mu).
+      # Runner GitHub KHONG co san ripgrep, nen buoc `doctor` ngay duoi day thoat 12.
+      #
+      # DA DO tren chinh PR nay: ca hai nen do o buoc `doctor` voi "KET LUAN: THIEU rg".
+      # Do la chot MOI lam dung viec cua no, khong phai chot hong — nen chua bang cach
+      # CAP DU CONG CU cho runner, dung bang cach ha chuan `doctor`.
+      - name: Cai ripgrep
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v rg >/dev/null 2>&1; then rg --version | head -1; exit 0; fi
+          if [ "${RUNNER_OS:-}" = "Windows" ]; then
+            choco install ripgrep -y --no-progress >/dev/null
+          else
+            sudo apt-get update -qq >/dev/null
+            sudo apt-get install -y -qq ripgrep >/dev/null
+          fi
+          # BANG CHUNG DUONG, khong tin "da cai xong": `command -v` la CO MAT,
+          # `rg --version` la CHAY DUOC.
+          rg --version | head -1
+
       - name: doctor
         run: python .claude/dev/launcher.py doctor
 

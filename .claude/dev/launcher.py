@@ -40,6 +40,7 @@ MÃ THOÁT — mỗi chốt một mã, để phía gọi xử lý được mà k
   10  không xác định được danh tính tiến trình → từ chối giết
   11  kho không đúng (remote/commit gốc lệch)
   12  thiếu công cụ bắt buộc (xem `doctor`)
+  13  công cụ CÓ MẶT nhưng CHƯA DÙNG ĐƯỢC — thiếu xác thực (xem `doctor`, `chuan-bi`)
   124 quá hạn trong lúc chạy (giống `timeout(1)`) — VÀ đã giết được
   125 quá hạn NHƯNG KHÔNG giết được: tiến trình còn sống, cần người can thiệp
   130 bị ngắt (Ctrl-C) — đã giết con
@@ -68,15 +69,19 @@ việc. Ai gọi tự động phải tự đặt ngưỡng cho ba số ấy.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
+import hmac
 import json
 import os
 import platform
 import re
+import secrets
 import shutil
 import signal
 import subprocess
 import sys
+import tempfile
 import time
 import uuid
 from datetime import datetime, timezone
@@ -98,6 +103,7 @@ MA_KHO = 11
 MA_QUA_HAN = 124
 MA_GIET_HUT = 125
 MA_THIEU_CONG_CU = 12
+MA_CHUA_XAC_THUC = 13
 
 # Bộ đột biến dùng cùng mốc này để không thể trượt từ ~70% phép đo được xuống
 # gần 0 mà vẫn xanh. Đặt ở mã được đột biến (không đặt trong chính runner test).
@@ -711,20 +717,84 @@ def _giet_cay(pid: int, khoa: str | None, job=None) -> KetGiet:
     # POSIX: con được sinh với start_new_session nên pgid == pid, giết cả nhóm.
     # Ảnh chụp phải lấy TRƯỚC phát tín hiệu đầu tiên — sau đó kẻ đã setsid() là
     # không thể tìm lại (xem _chup_cay).
+    # CHỐT TRƯỞNG NHÓM — `killpg` nhận PROCESS GROUP ID, còn ta đang cầm PID.
+    #
+    # Hai số đó chỉ bằng nhau khi tiến trình LÀ TRƯỞNG NHÓM — điều kiện mà
+    # `start_new_session=True` lúc sinh con tạo ra. Chú thích ngay trên khai đúng giả
+    # định ấy, nhưng KHÔNG AI KIỂM nó tại chỗ giết. Giả định không được kiểm là giả
+    # định sẽ sai vào đúng ngày nó đắt nhất.
+    #
+    # ĐÃ ĐO: với một tiến trình sinh KHÔNG kèm `start_new_session` (pid=26072,
+    # pgid=26071), `_giet_cay` gọi thẳng `killpg(26072)` — tức nhắm vào một nhóm
+    # KHÔNG PHẢI nhóm của mục tiêu.
+    #
+    # Trên máy thường pid cỡ vài chục nghìn nên nhóm ấy hầu như không tồn tại và lỗi
+    # tan thành `ProcessLookupError`. Trong PID NAMESPACE thì pid chạy từ 1 — và ở đó
+    # `killpg(<số nhỏ>)` rất dễ trúng một nhóm CÓ THẬT, kể cả nhóm 1 là nhóm của chính
+    # vỏ shell gọi ta. Đó khớp với triệu chứng cross-review đo được ba lượt liền: bộ
+    # test chạy xong nhưng lệnh shell kế tiếp không bao giờ chạy.
+    #
+    # Đây đúng họ lỗi mà tệp này đã dựng chốt khoá-danh-tính để chặn ("PID bị tái dùng,
+    # giết nhầm tiến trình vô can"). Chốt cũ hỏi "PID này còn là NGƯỜI CŨ không"; chốt
+    # này hỏi "PID này có thật sự là CẢ NHÓM không". Thiếu vế sau thì vế trước không đủ.
+    #
+    # v1.35.86 (cross-review lượt 6, P1 `chot-truong-nhom-van-fail-open`) — bản vá
+    # ĐẦU của chốt này ghi: "KHÔNG đo được `pgid` thì ĐI TIẾP — tiến trình có thể vừa
+    # chết". Đó là FAIL-OPEN, và nó bỏ qua chốt ở ĐÚNG ca nguy hiểm nhất.
+    #
+    # `getpgid` không chỉ ném `ESRCH` (mục tiêu đã chết — vô hại). Nó còn ném `EPERM`
+    # khi mục tiêu SỐNG nhưng ở SESSION KHÁC — tức đúng cái ca mà `killpg(pid)` bắn
+    # vào nhóm của người vô can. Bản trước không phân biệt được hai ca đó, và vẫn bắn.
+    #
+    # Doctrine tệp này đã viết rồi: `None` (không đo được) KHÁC `False`. Tôi viết nó
+    # vào chỗ khác rồi vi phạm ngay tại dòng vá.
+    #
+    # Chốt mới: `killpg` CHỈ chạy khi ĐO ĐƯỢC và `pgid == pid`. Không đo được thì
+    # KHÔNG mua an toàn bằng cách thôi giết — vẫn giết, nhưng bằng `_giet_rieng` trên
+    # ẢNH CHỤP, tức từng pid một CÓ KHOÁ DANH TÍNH. `_chup_cay` phủ chính `pid`, mọi
+    # hậu duệ VÀ mọi thành viên nhóm, nên đường này không yếu hơn về tầm với.
+    # Khe duy nhất mất đi, nói thẳng: tiến trình GIA NHẬP nhóm SAU lúc chụp — `killpg`
+    # với tới, `_giet_rieng` thì không. Đổi một khe hẹp lấy việc thôi bắn vào nhóm 1.
+    nhom_that = None
+    try:
+        nhom_that = os.getpgid(pid)
+    except OSError:
+        nhom_that = None
+    if nhom_that is not None and nhom_that != pid:
+        return KetGiet(False, False,
+                       f"tu choi giet: pid {pid} KHONG phai truong nhom "
+                       f"(pgid={nhom_that}) - killpg({pid}) se nham vao nhom KHAC",
+                       tu_choi=True)
+    dung_killpg = nhom_that == pid          # CHỈ True khi ĐO ĐƯỢC và bằng nhau
+
     anh = _chup_cay(pid)
+    if not dung_killpg and not anh:
+        # Không được `killpg`, mà ảnh chụp cũng rỗng/không đo được ⇒ KHÔNG còn đường
+        # giết nào an toàn. Nói thật là không giết được, đừng im lặng không làm gì.
+        return KetGiet(False, False,
+                       "tu choi giet: pgid KHONG do duoc (khong duoc killpg) va anh "
+                       "chup rong/khong do duoc - khong con duong giet an toan",
+                       tu_choi=True)
 
     def _con_lai():
         """Ai còn sống: ảnh chụp (bắt cả kẻ đã rời nhóm) HỢP thành viên nhóm hiện
-        tại (bắt cả kẻ sinh sau lúc chụp). None = không đo được ⇒ KHÔNG khẳng định."""
-        nhom = _thanh_vien_nhom(pid)
+        tại (bắt cả kẻ sinh sau lúc chụp). None = không đo được ⇒ KHÔNG khẳng định.
+
+        Khi KHÔNG dùng `killpg`, nhóm của `pid` KHÔNG phải đơn vị kế toán của ta —
+        ta chưa từng bắn vào nó, và `pid` còn chẳng phải trưởng nhóm — nên phần nhóm
+        đóng góp RỖNG. Đây không phải khẳng định "nhóm đã rỗng"; là "nhóm không nằm
+        trong phạm vi ta nhận trách nhiệm". Ảnh chụp vẫn phủ cả thành viên nhóm tại
+        thời điểm chụp, nên phần bị bỏ đúng bằng khe đã khai ở trên."""
+        nhom = _thanh_vien_nhom(pid) if dung_killpg else []
         if nhom is None or anh is None:
             return None
         return {q for q, k in anh.items() if _con_song_dung_khoa(q, k)} | set(nhom)
 
-    try:
-        os.killpg(pid, signal.SIGTERM)
-    except (ProcessLookupError, PermissionError, OSError) as e:
-        return KetGiet(False, False, f"killpg SIGTERM loi: {e}")
+    if dung_killpg:
+        try:
+            os.killpg(pid, signal.SIGTERM)
+        except (ProcessLookupError, PermissionError, OSError) as e:
+            return KetGiet(False, False, f"killpg SIGTERM loi: {e}")
     if anh:
         _giet_rieng(anh, signal.SIGTERM)   # killpg không với tới kẻ đã setsid()
     for _ in range(20):  # 2 giây chờ tự chết tử tế
@@ -740,12 +810,13 @@ def _giet_cay(pid: int, khoa: str | None, job=None) -> KetGiet:
             continue
         if not con:
             return KetGiet(True, True, "SIGTERM: cay da sach")
-    try:
-        os.killpg(pid, signal.SIGKILL)
-    except ProcessLookupError:
-        pass                       # nhóm đã sạch giữa chừng
-    except OSError as e:
-        return KetGiet(False, False, f"killpg SIGKILL loi: {e}")
+    if dung_killpg:
+        try:
+            os.killpg(pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass                   # nhóm đã sạch giữa chừng
+        except OSError as e:
+            return KetGiet(False, False, f"killpg SIGKILL loi: {e}")
     if anh:
         _giet_rieng(anh, signal.SIGKILL)
     time.sleep(0.3)
@@ -1453,11 +1524,16 @@ CONG_CU = [
     {"ten": "codex", "bat_buoc": False, "ung_vien": ["codex"],
      "vi_sao": "CLI chinh thuc de goi phien Codex (khong tu viet script spawn)",
      "cai": {"*": "npm install -g @openai/codex"}},
-    # rg (ripgrep): codex và Claude Code đều gọi nó để tìm trong mã. Nhanh hơn
-    # grep nhiều lần, tôn trọng .gitignore, và đọc UTF-8 đúng — quan trọng với kho
-    # tiếng Việt, nơi `findstr` của Windows đọc sai dấu. Không bắt buộc vì mọi chốt
-    # trong tệp này chạy được khi thiếu nó; chỉ là công cụ tra cứu bị chậm và mù hơn.
-    {"ten": "rg", "bat_buoc": False, "ung_vien": ["rg"],
+    # rg (ripgrep): codex và Claude Code đều gọi nó để tìm trong mã. Nhanh hơn grep
+    # nhiều lần, tôn trọng .gitignore, và đọc UTF-8 đúng — quan trọng với kho tiếng
+    # Việt, nơi `findstr` của Windows đọc sai dấu.
+    #
+    # BẮT BUỘC từ 15-08-2026 (trước đó là tuỳ chọn, lý do cũ: "mọi chốt trong tệp này
+    # chạy được khi thiếu nó"). Lý do cũ đúng về LAUNCHER và sai về VIỆC: thiếu `rg`
+    # thì lệnh tìm của agent gãy giữa chừng chứ KHÔNG tự lùi về `grep`, nên phiên mất
+    # khả năng tra cứu mà không báo lỗi ở chỗ đọc được. Một công cụ mà thiếu nó phiên
+    # vẫn "chạy" nhưng làm việc sai thì nguy hơn công cụ thiếu là chết ngay.
+    {"ten": "rg", "bat_buoc": True, "ung_vien": ["rg"],
      "vi_sao": "tim trong ma - codex/Claude Code goi rg; findstr doc sai dau tieng Viet",
      "cai": {"Windows": "winget install --id BurntSushi.ripgrep.MSVC -e",
              "Darwin": "brew install ripgrep",
@@ -1516,6 +1592,753 @@ def _in_an_toan(chuoi: str) -> bool:
         return False
 
 
+# ------------------------------------------------- BIẾN MÔI TRƯỜNG & KHẢ DỤNG
+#
+# VÌ SAO CÓ CẢ MẢNG NÀY — sự cố 15-08-2026, mất gần trọn một ngày làm việc.
+#
+# Phiên điều phối chạy `codex login status`, nhận `Not logged in`, rồi KẾT LUẬN
+# "container không gọi được codex" và báo với chủ kho rằng cross-review phải chờ
+# một máy khác. Sai. `codex` xác thực qua biến môi trường `CODEX_AUTH_JSON`
+# (base64 của chính `auth.json`); giải mã ra `~/.codex/auth.json` là chạy được
+# NGAY, và lượt cross-review thứ 11 đã chạy trọn trong chính container đó.
+#
+# BA lỗi chồng lên nhau, mỗi lỗi một bài học, và cả ba đều đã có tiền lệ trong kho:
+#
+#   1. Dừng ở MỘT lệnh. `codex login status` nói đúng sự thật của nó — không có
+#      `auth.json` trên đĩa — nhưng câu hỏi đúng là "nó xác thực bằng ĐƯỜNG NÀO",
+#      không phải "nó đã đăng nhập chưa". `.claude/skills/work-packet/SKILL.md`
+#      viết sẵn: "Vắng mặt là một QUAN SÁT; 'môi trường không có' là một KẾT LUẬN."
+#
+#   2. Tìm biến bằng DANH SÁCH TÊN ĐOÁN TRƯỚC (`OPENAI_API_KEY`, `CODEX_API_KEY`…)
+#      nên trượt đúng cái tên thật. Y hệt lỗi bộ quét secrets lọc theo PHẦN MỞ RỘNG
+#      rồi mù với `.env` (CLAUDE.md đã ghi). Lọc theo danh sách đoán trước thì mù
+#      đúng chỗ thứ cần tìm đang nằm. Ở đây: quét TOÀN BỘ `os.environ` theo MẪU.
+#
+#   3. Đưa base64 THÔ vào `auth.json`, nhận `expected value at line 1 column 1`,
+#      rồi đọc thành "biến này không dùng được" thay vì "mình đưa sai định dạng".
+#      `chuan_bi_xac_thuc()` thử CẢ HAI định dạng và khi hỏng thì nói rõ hỏng ở đâu.
+#
+# LUẬT ĐỌC BIẾN TRƯỚC KHI DÙNG CÔNG CỤ: mọi kết luận "công cụ X không dùng được"
+# phải đi sau một lượt quét biến môi trường. `doctor` cưỡng chế bằng cách LUÔN in
+# phần biến, kể cả khi mọi công cụ đều xanh.
+#
+# TUYỆT ĐỐI KHÔNG IN GIÁ TRỊ. Chỉ tên · độ dài · vân tay 8 ký tự. Vân tay có mục
+# đích riêng, xem `_nhom_van_tay`.
+
+_RE_BIEN_NHAY_CAM = re.compile(
+    r"TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIAL|COOKIE|AUTH|APIKEY|API_KEY"
+    r"|ACCESS_KEY|_KEY$|^KEY_|PAT$|_PAT|SESSION",
+    re.IGNORECASE,
+)
+
+# Biến LIÊN QUAN tới ba khả năng dưới, kể cả khi tên không khớp mẫu bí mật.
+_RE_BIEN_LIEN_QUAN = re.compile(
+    r"CODEX|CLAUDE|ANTHROPIC|OPENAI|^GH_|GITHUB|GIT_CONFIG", re.IGNORECASE)
+
+
+# Dưới ngưỡng này, hai biến trùng giá trị không nói lên điều gì — `"1"`, `"true"`,
+# `"0"` trùng nhau khắp nơi. Không có credential thật nào ngắn tới mức này.
+NGUONG_DO_DAI_BI_MAT = 8
+
+
+# Khoá NGẪU NHIÊN mỗi tiến trình, KHÔNG BAO GIỜ xuất ra. Xem `_van_tay`.
+_KHOA_PHIEN = secrets.token_bytes(32)
+
+
+def _van_tay(v: str) -> str:
+    """Nhãn so sánh NỘI BỘ. TUYỆT ĐỐI KHÔNG ĐƯỢC XUẤT RA NGOÀI.
+
+    Bản trước trả 8 hex đầu của **sha256 trần** VÀ xuất nó ra `moi-truong` /
+    `doctor --json` cho mọi biến khớp mẫu, kèm ĐỘ DÀI CHÍNH XÁC. Cross-review
+    `deterministic-secret-fingerprint-is-dictionary-oracle` (mức HIGH) chỉ ra đó là
+    **oracle từ điển**: với biến có tập ứng viên nhỏ — cờ, token cấu hình, mật khẩu
+    yếu — người đọc transcript chỉ cần băm ngoại tuyến từng ứng viên rồi so 32 bit là
+    ra giá trị. Digest ổn định còn cho phép NỐI một biến qua nhiều transcript.
+
+    Đau nhất là chỗ này: ngưỡng `NGUONG_DO_DAI_BI_MAT` tôi thêm CHỈ nằm trong
+    `_nhom_van_tay`, tức phép GOM — trong khi `van_tay` được XUẤT ở
+    `quet_bien_moi_truong`, một chỗ khác hẳn. Đặt chốt đúng chỗ mình đang nghĩ tới,
+    rồi xuất dữ liệu ở chỗ mình quên. Và mỉa mai đúng chỗ đáng nhớ: bản vá này sinh
+    ra để chống kết luận sai VỀ biến môi trường, rồi tự mở một đường suy ngược GIÁ TRỊ
+    biến môi trường.
+
+    Nay dùng HMAC với khoá ngẫu nhiên sống trong đúng một tiến trình. Hệ quả: so sánh
+    trong CÙNG một lượt vẫn đúng (thứ duy nhất phép gom cần), còn băm ngoại tuyến và
+    nối chéo transcript đều chết vì kẻ đọc không có khoá. Đầu ra người dùng thấy là
+    nhãn thứ tự (`nhom-1`), không phải digest.
+    """
+    return hmac.new(_KHOA_PHIEN, v.encode("utf-8", "replace"),
+                    hashlib.sha256).hexdigest()[:8]
+
+
+def _nhom_van_tay(ten_bien: list[str]) -> dict:
+    """Nhóm các biến theo vân tay giá trị. Trả {van_tay: [tên, …]}.
+
+    ĐÂY LÀ PHÉP KIỂM ĐÁNG GIÁ NHẤT TRONG TỆP NÀY, và nó ra đời từ một phép đo.
+
+    Container 15-08-2026 có `GH_TOKEN`, `GITHUB_TOKEN`, `AWS_ACCESS_KEY_ID`,
+    `AWS_SECRET_ACCESS_KEY`, `CLOUDSDK_AUTH_ACCESS_TOKEN` — NĂM biến, CÙNG một
+    giá trị 14 ký tự, cùng vân tay `f07d7417`. Một chuỗi giữ chỗ. Còn credential
+    THẬT của GitHub nằm ở `GITHUB_PAT` (93 ký tự, tiền tố `github_pat_`).
+
+    Hệ quả nếu không có phép kiểm này: `gh auth status` đọc `GH_TOKEN` giữ chỗ rồi
+    hỏng, và người đọc kết luận "GitHub không dùng được" — trong khi đường thật vẫn
+    mở. ĐÃ ĐẶT ≠ DÙNG ĐƯỢC, và một biến giữ chỗ còn tệ hơn biến chưa đặt: biến chưa
+    đặt thì công cụ nói "chưa đăng nhập", biến giữ chỗ thì công cụ nói "sai thông tin
+    đăng nhập" — thông điệp đẩy người đọc đi sai hướng.
+
+    Ba biến trở lên trùng vân tay thì gần như chắc chắn là giữ chỗ: hai dịch vụ khác
+    nhau không tình cờ cấp cùng một chuỗi.
+
+    HAI ĐIỀU KIỆN LỌC, và chúng có được là nhờ ĐO chứ không nhờ nghĩ ra. Bản đầu chỉ
+    nhóm theo vân tay và lập tức báo oan hai nhóm lớn: tám biến cùng vân tay
+    `6b86b273` (là sha256 của `"1"`) và chín biến `b5bea41b` (sha256 của `"true"`).
+    Đó là CỜ BẬT/TẮT, không phải credential. Giá trị ngắn thì đụng nhau là chuyện
+    thường, nên:
+
+      · giá trị phải dài `>= NGUONG_DO_DAI_BI_MAT` — dưới ngưỡng đó, trùng nhau
+        không nói lên điều gì;
+      · tên phải khớp mẫu bí mật — phép kiểm này chỉ trả lời đúng MỘT câu hỏi
+        ("biến credential này có phải chuỗi giữ chỗ không"), nên đừng để nó phán
+        về những biến không phải credential.
+    """
+    nhom: dict = {}
+    for t in ten_bien:
+        v = os.environ.get(t)
+        if v and len(v) >= NGUONG_DO_DAI_BI_MAT and _RE_BIEN_NHAY_CAM.search(t):
+            nhom.setdefault(_van_tay(v), []).append(t)
+    return nhom
+
+
+def quet_bien_moi_truong() -> dict:
+    """Quét TOÀN BỘ `os.environ` theo MẪU. Không bao giờ trả về giá trị."""
+    ten = sorted(k for k in os.environ
+                 if _RE_BIEN_NHAY_CAM.search(k) or _RE_BIEN_LIEN_QUAN.search(k))
+    nhom = _nhom_van_tay(ten)
+    giu_cho = {t for ds in nhom.values() if len(ds) >= 3 for t in ds}
+    # Nhãn nhóm THỨ TỰ, không phải digest. Chỉ những nhóm >= 3 mới được đặt tên, vì
+    # đó là thứ duy nhất phép kiểm này cần nói ra ("mấy biến này CÙNG một giá trị").
+    trung = sorted((k for k, v in nhom.items() if len(v) >= 3), key=lambda k: sorted(nhom[k]))
+    nhan = {k: f"nhom-{i}" for i, k in enumerate(trung, 1)}
+    thuoc_nhom = {t: nhan[k] for k, ds in nhom.items() if k in nhan for t in ds}
+
+    def _do_dai(v: str) -> str:
+        # Độ dài CHÍNH XÁC của một giá trị NGẮN thu hẹp không gian tìm kiếm thêm một
+        # bậc nữa, cộng với nhãn nhóm là đủ để đoán. Giá trị dài thì độ dài chính xác
+        # vô hại và có ích khi chẩn đoán, nên chỉ gộp ở đầu ngắn.
+        n = len(v)
+        return str(n) if n >= NGUONG_DO_DAI_BI_MAT else f"<{NGUONG_DO_DAI_BI_MAT}"
+
+    return {
+        "so_bien": len(ten),
+        "bien": [{"ten": t, "do_dai": _do_dai(os.environ.get(t, "")),
+                  "nhom": thuoc_nhom.get(t, ""),
+                  "nghi_giu_cho": t in giu_cho}
+                 for t in ten],
+        # Khoá là NHÃN, không phải băm — không có gì băm ngoại tuyến được nữa.
+        "nhom_trung_gia_tri": {nhan[k]: sorted(v) for k, v in nhom.items() if k in nhan},
+    }
+
+
+def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
+    """Dựng credential trên ĐĨA từ biến môi trường, cho CLI nào cần đọc từ đĩa.
+
+    Hiện chỉ `codex` cần: nó đọc `~/.codex/auth.json`, không đọc biến.
+
+    KHÔNG IN NỘI DUNG, kể cả khi hỏng. Ghi quyền 0600. Idempotent: nội dung đã
+    khớp thì không đụng tệp.
+
+    QUAN HỆ VỚI `.claude/hooks/session-start.sh`: hook ĐÃ làm đúng việc này từ
+    14-08-2026, với bốn chốt được lập luận kỹ. Hàm này KHÔNG thay hook và không
+    được yếu hơn hook — nó tồn tại cho đúng một tình huống, và tình huống ấy chính
+    là thứ đã đốt ngày 15-08-2026: **hook KHÔNG chạy**. Cây làm việc lúc đó đứng
+    trên nhánh packet, mà nhánh packet rẽ từ `base_sha` CŨ HƠN commit thêm khối
+    khôi phục credential — nên hook chạy là bản cũ, không có khối ấy.
+    `.claude/skills/work-packet/SKILL.md` cảnh báo sẵn đúng cái bẫy đó ("nhánh
+    packet KHÔNG mang công cụ của kho"), và tôi vẫn rơi vào.
+
+    BỐN CHỐT LẤY NGUYÊN TỪ HOOK, đừng nới cái nào:
+      1. Không in giá trị, đọc thẳng từ môi trường (không qua đối số — `ps` thấy).
+      2. ĐÃ ĐĂNG NHẬP THÌ KHÔNG ĐÈ. Bản trên đĩa có thể MỚI HƠN biến vì `codex` tự
+         làm mới token; đè bừa là hạ cấp một credential đang tốt.
+      3. Kiểm JSON + khoá `tokens` TRƯỚC khi ghi. Biến hỏng mà ghi đè thì biến một
+         phiên "chưa đăng nhập" (dễ đọc) thành "đăng nhập hỏng" (khó đọc).
+      4. Ghi tệp tạm → `chmod 600` → `os.replace` — không hở khoảnh khắc quyền rộng,
+         không để lại tệp nửa vời nếu chết giữa chừng.
+
+    Chỉ RIÊNG việc nhận cả base64 lẫn JSON thô là thêm so với hook, và có lý do:
+    sáng 15-08-2026 tôi ghi base64 THÔ vào `auth.json`, `codex` trả `expected value
+    at line 1 column 1`, và tôi đọc thành "biến này không dùng được". Câu đó nói
+    ĐÚNG rằng TỆP không phải JSON — nó không hề nói BIẾN sai.
+    """
+    ket = []
+    thoc = os.environ.get("CODEX_AUTH_JSON", "").strip()
+    if not thoc:
+        return ket
+    dich = Path(os.path.expanduser("~/.codex/auth.json"))
+    # Giải mã SỚM để so mốc; phần kiểm lược đồ đầy đủ vẫn ở dưới, không bỏ.
+    noi_dung_tam = None
+    for thu in (thoc, None):
+        if thu is None:
+            try:
+                thu = base64.b64decode(thoc, validate=True).decode("utf-8")
+            except Exception:
+                break
+        try:
+            json.loads(thu)
+            noi_dung_tam = thu
+            break
+        except Exception:
+            continue
+
+    # Chốt 2 — SO MỐC `last_refresh`, KHÔNG hỏi `codex login status`.
+    #
+    # Ý ĐỊNH của chốt này không đổi: đừng hạ cấp một credential trên đĩa MỚI HƠN biến
+    # (codex tự làm mới token rồi ghi lại). Nhưng CÁCH HỎI thì sai, và đã gây hại thật.
+    #
+    # ĐO ĐƯỢC 16-08-2026: chủ kho đăng nhập lại và cập nhật `CODEX_AUTH_JSON`
+    # (`last_refresh=2026-08-16T01:58`), trong khi trên đĩa vẫn là bản ĐÃ BỊ THU HỒI
+    # (`last_refresh=2026-08-14T04:13`). `codex login status` trả rc=0 "Logged in" —
+    # nó chỉ kiểm tệp đọc được — nên chốt cũ kết luận "đã đăng nhập sẵn, GIỮ nguyên" và
+    # CHẶN bản mới. Chốt sinh ra để bảo vệ bản mới hơn lại đi bảo vệ đúng bản đã chết.
+    #
+    # Nay so MỐC THỜI GIAN, thứ đo được và không nói dối. Trên đĩa mới hơn hoặc bằng thì
+    # giữ; cũ hơn thì thay. Không đọc được mốc của một trong hai bên ⇒ đi tiếp theo đường
+    # so nội dung bên dưới, đừng đoán.
+    # SO MỐC THẬT, không so TUỔI ĐÃ LÀM TRÒN. `_tuoi_anh_chup_gio` làm tròn tới 0,1 giờ
+    # = 6 PHÚT; hai credential rơi cùng một ô 6 phút thì so ra BẰNG NHAU, và nhánh
+    # `<=` giữ bản trên ĐĨA. Với refresh token XOAY VÒNG, bản đĩa giữ lại có thể đã bị
+    # vô hiệu bởi chính lần đăng nhập mới — tức chốt lại bảo vệ đúng bản đã chết, đúng
+    # sự cố mà nó sinh ra để chặn. Làm tròn chỉ để NGƯỜI ĐỌC, đừng để MÁY QUYẾT ĐỊNH.
+    moc_dia = _moc_refresh(_last_refresh_cua(dich.read_text(encoding="utf-8"))
+                           ) if dich.exists() else None
+    moc_bien = _moc_refresh(_last_refresh_cua(noi_dung_tam)) if noi_dung_tam else None
+    if moc_dia is not None and moc_bien is not None and moc_dia >= moc_bien:
+        return [{"ten": "codex", "ok": True, "doi": False,
+                 "cach": f"tren dia MOI HON hoac BANG bien ({moc_dia.isoformat()} vs "
+                         f"{moc_bien.isoformat()}) "
+                         f"— GIU nguyen, khong ha cap",
+                 "duong_dan": str(dich)}]
+
+    # Chốt 3 — giải mã + kiểm lược đồ TRƯỚC khi đụng đĩa.
+    noi_dung, cach = None, ""
+    for ten_cach, thu in (("base64 → JSON", None), ("JSON thô", thoc)):
+        if thu is None:
+            try:
+                thu = base64.b64decode(thoc, validate=True).decode("utf-8")
+            except Exception:
+                continue
+        try:
+            d = json.loads(thu)
+        except Exception:
+            continue
+        if not isinstance(d, dict) or "tokens" not in d:
+            cach = f"HỎNG: giải được ({ten_cach}) nhưng thiếu khoá bắt buộc 'tokens'"
+            continue
+        noi_dung, cach = thu, ten_cach
+        break
+    if noi_dung is None:
+        return [{"ten": "codex", "ok": False, "duong_dan": str(dich),
+                 "cach": cach or "HỎNG: không phải base64-của-JSON, cũng không phải JSON thô"}]
+
+    if dich.exists() and dich.read_text(encoding="utf-8") == noi_dung:
+        return [{"ten": "codex", "ok": True, "doi": False,
+                 "cach": cach + " (đã khớp, không đụng)", "duong_dan": str(dich)}]
+    if not that_su:
+        return [{"ten": "codex", "ok": True, "doi": True,
+                 "cach": cach + " (thử khan)", "duong_dan": str(dich)}]
+
+    # Chốt 4 — tệp tạm, quyền hẹp, rồi mới thay.
+    dich.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
+    fd, tam = tempfile.mkstemp(dir=str(dich.parent))
+    try:
+        os.write(fd, noi_dung.encode("utf-8"))
+        os.close(fd)
+        os.chmod(tam, 0o600)
+        os.replace(tam, dich)
+    except BaseException:
+        try:
+            os.unlink(tam)
+        except OSError:
+            pass
+        raise
+    return [{"ten": "codex", "ok": True, "doi": True, "cach": cach,
+             "duong_dan": str(dich)}]
+
+
+# Cảnh báo TRƯỚC khi hỏng, không phải sau. Sự cố 15-08-2026: credential bị thu hồi giữa
+# chừng, một lượt cross-review đã cấp lease bị mất trắng, và `doctor` chỉ phát hiện SAU
+# khi mọi thứ đã 401. Bản vá hôm đó thêm phép kiểm hạn offline — nhưng nó chỉ đỏ khi ĐÃ
+# hết hạn, tức vẫn báo muộn.
+#
+# 24 giờ là con số CHỌN, không phải đo: đủ để người dùng thấy cảnh báo ở phiên kế tiếp và
+# kịp chạy `codex login` trước khi nó chặn việc. Ai thấy quá dài/ngắn thì đổi ở ĐÂY, một
+# chỗ, và nói rõ vì sao.
+NGUONG_CANH_BAO_GIO = 24.0
+
+# `last_refresh` là dấu ẤN THỜI ĐIỂM CHỤP của chuỗi trong biến môi trường. Refresh token
+# XOAY VÒNG: mỗi lần codex làm mới, bản trên đĩa đổi và bản cũ bị vô hiệu. Nên một ảnh
+# chụp CŨ là dấu hiệu sắp hỏng KỂ CẢ khi `exp` còn xa — đo được 15-08: `access_token` còn
+# 199 giờ mà credential đã bị thu hồi, trong khi `last_refresh` đã quá 40 giờ. Đây là tín
+# hiệu DUY NHẤT nhìn thấy trước, nên đừng bỏ.
+NGUONG_ANH_CHUP_CU_GIO = 24.0
+
+
+def _moc_refresh(last_refresh):
+    """`last_refresh` thành `datetime` CHÍNH XÁC — để MÁY so, không làm tròn.
+
+    Tách khỏi `_tuoi_anh_chup_gio` (làm tròn 0,1h = 6 phút) vì làm tròn rồi so là cách
+    hai mốc cách nhau vài phút thành "bằng nhau" (cross-review PR #128).
+    """
+    if not isinstance(last_refresh, str) or not last_refresh.strip():
+        return None
+    try:
+        moc = datetime.fromisoformat(last_refresh.strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return moc.replace(tzinfo=timezone.utc) if moc.tzinfo is None else moc
+
+
+def _tuoi_anh_chup_gio(last_refresh) -> float | None:
+    """Số giờ kể từ `last_refresh`. None = không đọc được, KHÁC với 0."""
+    if not isinstance(last_refresh, str) or not last_refresh.strip():
+        return None
+    t = last_refresh.strip().replace("Z", "+00:00")
+    try:
+        moc = datetime.fromisoformat(t)
+    except ValueError:
+        return None
+    if moc.tzinfo is None:
+        moc = moc.replace(tzinfo=timezone.utc)
+    return round((datetime.now(timezone.utc) - moc).total_seconds() / 3600, 1)
+
+
+# Token NGẮN HẠN THEO THIẾT KẾ — hạn của chúng KHÔNG phải tín hiệu credential sắp chết.
+# `id_token` đo được 1.0h ngay sau `codex login --device-auth`, trong khi `access_token`
+# còn 240h. Lọc ở HAI nơi: lúc THU THẬP (`_han_token_codex`) và lúc QUYẾT ĐỊNH — vì test
+# bơm thẳng vào `gio_con_lai` đã chứng minh lớp quyết định tự nó vẫn tin nếu lọt vào.
+_TOKEN_KHONG_XET_HAN = frozenset({"id_token"})
+
+# Tên cờ CHẶN codex — PHẢI khớp `TEN_CO_CHAN` trong `.claude/dev/codex_env_policy.py`.
+# Hai tệp, một tên: đổi một bên mà quên bên kia thì chốt an ninh im lặng biến mất, nên
+# `t102` khoá bằng cách ĐỌC hằng của tệp kia chứ không chép lại chuỗi.
+CO_CHAN_CODEX = "tra-luat-CHAN-CODEX"
+
+
+def _last_refresh_cua(noi_dung: str):
+    """Đọc `last_refresh` từ nội dung auth.json. None nếu không đọc được."""
+    try:
+        return json.loads(noi_dung).get("last_refresh")
+    except Exception:
+        return None
+
+
+def _han_token_codex() -> dict:
+    """Đọc HẠN của token trong `~/.codex/auth.json`. KHÔNG in giá trị token.
+
+    Chỉ trả về mốc thời gian và số giờ còn lại — `exp` là một con số, không phải bí mật.
+    Không xác thực chữ ký: ta không kiểm token có THẬT, ta chỉ kiểm nó đã HẾT HẠN chưa.
+    """
+    ra = {"doc_duoc": False, "last_refresh": None, "tuoi_anh_chup_gio": None,
+          "gio_con_lai": {}}
+    try:
+        d = json.loads(Path(os.path.expanduser("~/.codex/auth.json"))
+                       .read_text(encoding="utf-8"))
+    except Exception:
+        return ra
+    ra["doc_duoc"] = True
+    ra["last_refresh"] = d.get("last_refresh")
+    ra["tuoi_anh_chup_gio"] = _tuoi_anh_chup_gio(d.get("last_refresh"))
+    for ten, v in (d.get("tokens") or {}).items():
+        # BỎ QUA `id_token`: nó NGẮN HẠN THEO THIẾT KẾ (đo được: 1.0h ngay sau
+        # `codex login --device-auth`) và được làm mới tự động. Lấy nó làm tín hiệu
+        # thì credential VỪA ĐÚC XONG đã bị gắn "sắp hết hạn" — chốt đỏ thường trực,
+        # đúng thứ sẽ bị bỏ qua, và tôi đã tự dựng nó vào chính bản vá cảnh báo sớm.
+        #
+        # Ca 15-08 (`id_token=-39.1h` trên credential đã chết) KHÔNG mất: thứ bắt được
+        # nó là TUỔI ẢNH CHỤP 40h, chứ không phải `id_token`. Tín hiệu thật vẫn còn.
+        if ten in _TOKEN_KHONG_XET_HAN:
+            continue
+        if not isinstance(v, str) or v.count(".") != 2:
+            continue
+        goi = v.split(".")[1]
+        goi += "=" * (-len(goi) % 4)
+        try:
+            exp = json.loads(base64.urlsafe_b64decode(goi)).get("exp")
+        except Exception:
+            continue
+        if isinstance(exp, (int, float)):
+            ra["gio_con_lai"][ten] = round((exp - time.time()) / 3600, 1)
+    return ra
+
+
+def _co_chan_codex() -> str | None:
+    """Lý do codex đang bị CHẶN, hoặc `None` nếu không bị chặn.
+
+    CHỐT DÙNG CHUNG cho MỌI đường gọi codex do kho cung cấp (cross-review lượt 9,
+    HIGH). Bản trước chỉ đọc cờ ở `_do_codex`, nên `_do_codex_song` — đường THẬT SỰ
+    chạy `codex exec` — đi thẳng qua. Một chốt mà chỉ một trong hai cửa đọc thì không
+    phải chốt; reviewer gọi đúng là "xanh giả với phạm vi nó tự nhận".
+
+    PHẠM VI, khai thẳng: cờ này chặn được các cửa CỦA KHO. Người dùng gõ `codex` ở
+    terminal thì KHÔNG có gì đọc cờ — muốn chặn tới đó phải là cơ chế khác (đổi PATH,
+    gói bọc), và ta KHÔNG làm thế vì nó lại là thứ sửa môi trường sau lưng người dùng.
+    """
+    co = Path(os.path.expanduser("~/.codex")) / CO_CHAN_CODEX
+    if not co.exists():
+        return None
+    return (f"BI CHAN: {co} ton tai — config codex con khoi "
+            f"shell_environment_policy cu (hoac khong phan loai duoc), "
+            f"`inherit=all` co the con hieu luc. Chua: "
+            f"`python3 .claude/dev/codex_env_policy.py --go` roi TU thay tep")
+
+
+def _do_codex_song(han_giay: int = 90) -> tuple[bool, str]:
+    """Phép thử SỐNG: gọi `codex` thật và soi lỗi xác thực.
+
+    ĐẮT (tốn quota + mạng) nên KHÔNG chạy mặc định — chỉ khi phía gọi đòi
+    `--kiem-song`. Nhưng đây là thứ DUY NHẤT chứng minh được credential còn dùng được:
+    refresh token bị THU HỒI phía máy chủ thì không phép kiểm offline nào thấy.
+    """
+    bi_chan = _co_chan_codex()
+    if bi_chan:
+        # Đây là cửa THẬT SỰ chạy `codex exec`. Bản trước bỏ sót đúng cửa này.
+        return (False, bi_chan)
+    try:
+        with open(os.devnull) as rong:
+            p = subprocess.run(["codex", "exec", "--skip-git-repo-check", "in ra: ok"],
+                               stdin=rong, capture_output=True, text=True,
+                               timeout=han_giay, encoding="utf-8", errors="replace")
+    except subprocess.TimeoutExpired:
+        return (False, f"qua han {han_giay}s")
+    except (OSError, subprocess.SubprocessError) as e:
+        return (False, f"khong chay duoc: {type(e).__name__}")
+    ra = ((p.stdout or "") + (p.stderr or "")).lower()
+    for dau in ("token_revoked", "refresh_token_invalidated", "token_invalidated",
+                "401 unauthorized", "please log in again", "could not be refreshed"):
+        if dau in ra:
+            return (False, f"credential BI TU CHOI ({dau})")
+    return (p.returncode == 0, f"rc={p.returncode}")
+
+
+def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
+    """Đo `codex` bằng MÃ THOÁT, không bằng dòng đầu của đầu ra.
+
+    ĐÃ ĐO: `codex login status` trả `rc=1` + `Not logged in` khi chưa xác thực,
+    `rc=0` + `Logged in using ChatGPT` khi đã xác thực.
+
+    Bản nháp của chính hàm này đọc `ra[0]` — DÒNG ĐẦU — rồi tìm chữ "not logged in"
+    trong đó. Phản chứng bắt được ngay: với `HOME` sạch, `codex` in trước một dòng
+    `WARNING: proceeding, even though we could not create PATH aliases: …`, nên dòng
+    đầu KHÔNG phải câu trạng thái, phép kiểm trượt, và hàm báo `DUNG_DUOC` cho một
+    `codex` CHƯA đăng nhập. Hỏng theo chiều FAIL-OPEN — chiều nguy hiểm, và đúng
+    cùng một lỗi với sự cố sáng nay: tin dòng đầu tiên một công cụ nói ra.
+
+    Nay: `rc != 0` là CHƯA XÁC THỰC, dứt khoát; chữ chỉ dùng để giải thích, và tìm
+    trong TOÀN BỘ đầu ra chứ không riêng dòng nào.
+    """
+    if not shutil.which("codex"):
+        return ("THIEU", "chua cai — npm install -g @openai/codex")
+    bi_chan = _co_chan_codex()
+    if bi_chan:
+        return ("CHUA_XAC_THUC", bi_chan)
+    try:
+        p = subprocess.run(["codex", "login", "status"], capture_output=True, text=True,
+                           timeout=30, encoding="utf-8", errors="replace")
+        ra = ((p.stdout or "") + (p.stderr or ""))
+        rc = p.returncode
+    except (OSError, subprocess.SubprocessError) as e:
+        return ("KHONG_DO_DUOC", f"khong chay duoc: {type(e).__name__}")
+    # Câu trạng thái nằm ở đâu cũng được — lọc dòng nhiễu (WARNING/hint) rồi lấy
+    # dòng cuối còn lại, vì `codex` in trạng thái SAU các cảnh báo.
+    dong = [d.strip() for d in ra.splitlines() if d.strip()
+            and not d.strip().upper().startswith(("WARNING", "NOTE", "HINT"))]
+    mo_ta = dong[-1][:70] if dong else f"rc={rc}, khong in gi"
+    if rc == 0 and "not logged in" not in ra.lower():
+        # ĐẾN ĐÂY MỚI CHỈ BIẾT: có tệp credential, đọc được, `codex` không kêu.
+        # KHÔNG biết nó còn DÙNG ĐƯỢC.
+        #
+        # ĐÃ ĐO 15-08-2026, và đây là lần THỨ HAI cùng một lớp lỗi trong đúng hàm này:
+        # `codex login status` trả "Logged in using ChatGPT" rc=0 trong khi MỌI lời gọi
+        # thật trả 401 `refresh_token_invalidated`. Lệnh ấy chỉ kiểm tệp đọc được, không
+        # kiểm token còn sống. Bản trước gọi thẳng trạng thái này là `DUNG_DUOC` — tức
+        # NÂNG NHÃN VƯỢT QUÁ BẰNG CHỨNG, đúng cái bệnh đã đốt cả ngày hôm nay.
+        #
+        # Nay tách làm hai nhãn. `CO_CREDENTIAL` nói đúng thứ đã chứng minh được, và
+        # chỉ `--kiem-song` (gọi thật, tốn quota) mới được cấp `DUNG_DUOC`.
+        han = _han_token_codex()
+        het = [t for t, g in han["gio_con_lai"].items()
+               if g <= 0 and t not in _TOKEN_KHONG_XET_HAN]
+        chi_tiet = mo_ta
+        if han["gio_con_lai"]:
+            chi_tiet += " · con " + ", ".join(
+                f"{t}={g}h" for t, g in sorted(han["gio_con_lai"].items())
+                if t not in _TOKEN_KHONG_XET_HAN)
+        if han["last_refresh"]:
+            chi_tiet += f" · last_refresh={han['last_refresh']}"
+        if het:
+            # HẾT HẠN là thứ ĐO ĐƯỢC offline ⇒ dám kết luận.
+            return ("CHUA_XAC_THUC", f"token HET HAN: {', '.join(het)} · {chi_tiet}")
+        # SẮP hết hạn / ảnh chụp CŨ ⇒ vẫn dùng được NHƯNG phải báo NGAY. Đây là mục
+        # 3.1 của phương án chống tái diễn sự cố thu hồi: cảnh báo TRƯỚC, không phải sau.
+        sap = [f"{t}={g}h" for t, g in sorted(han["gio_con_lai"].items())
+               if 0 < g <= NGUONG_CANH_BAO_GIO and t not in _TOKEN_KHONG_XET_HAN]
+        tuoi = han.get("tuoi_anh_chup_gio")
+        anh_cu = tuoi is not None and tuoi >= NGUONG_ANH_CHUP_CU_GIO
+        if sap or anh_cu:
+            vi_sao = []
+            if sap:
+                vi_sao.append("sap het han: " + ", ".join(sap))
+            if anh_cu:
+                vi_sao.append(f"anh chup CU {tuoi}h (refresh token xoay vong - ban trong "
+                              f"CODEX_AUTH_JSON co the da bi vo hieu)")
+            # `--kiem-song` phải chạy KỂ CẢ khi sắp hết hạn. Bản trước trả về ngay ở
+            # đây, nên đòi kiểm sống mà KHÔNG BAO GIỜ kiểm — phép đo bị chính cảnh báo
+            # nuốt mất. "Sắp hết hạn" và "còn dùng được không" là HAI câu hỏi khác nhau.
+            if kiem_song:
+                song, ly_do = _do_codex_song()
+                if not song:
+                    return ("CHUA_XAC_THUC", f"kiem song HONG: {ly_do} · {chi_tiet}")
+                vi_sao.append(f"kiem song: {ly_do} (VAN dung duoc)")
+            return ("SAP_HET_HAN", " · ".join(vi_sao) + f" · {chi_tiet}")
+        if not kiem_song:
+            return ("CO_CREDENTIAL",
+                    f"{chi_tiet} · CHUA chung minh dung duoc (them --kiem-song de goi that)")
+        song, vi_sao = _do_codex_song()
+        if song:
+            return ("DUNG_DUOC", f"{chi_tiet} · kiem song: {vi_sao}")
+        return ("CHUA_XAC_THUC", f"kiem song HONG: {vi_sao} · {chi_tiet}")
+    if os.environ.get("CODEX_AUTH_JSON"):
+        return ("CAN_CHUAN_BI",
+                f"chua co auth.json TREN DIA (rc={rc}) nhung CO $CODEX_AUTH_JSON "
+                f"— chay `launcher.py chuan-bi`")
+    return ("CHUA_XAC_THUC",
+            f"rc={rc} · {mo_ta} · khong co $CODEX_AUTH_JSON de dung ra dia")
+
+
+def _do_claude() -> tuple[str, str]:
+    if not shutil.which("claude"):
+        return ("THIEU", "chua cai — npm install -g @anthropic-ai/claude-code")
+    tep = Path(os.path.expanduser("~/.claude/.credentials.json"))
+    # ĐÒI GIÁ TRỊ, không chỉ đòi TÊN. `ANTHROPIC_API_KEY=""` là chỗ giữ chỗ rất phổ
+    # biến trong `.env` mẫu; đếm nó là credential thì `DUNG_DUOC` — nhãn DUY NHẤT được
+    # tính là đã-chứng-minh — được cấp cho một môi trường KHÔNG có credential nào.
+    # Cùng lỗi "CÓ MẶT ≠ DÙNG ĐƯỢC" mà chính tệp này đi chữa.
+    bien = [k for k, v in os.environ.items()
+            if re.search(r"ANTHROPIC_API_KEY|CLAUDE_CODE_OAUTH_TOKEN", k, re.I)
+            and v.strip()]
+    if tep.exists():
+        return ("DUNG_DUOC", f"credential tren dia ({tep})")
+    if bien:
+        return ("DUNG_DUOC", "qua bien: " + ", ".join(sorted(bien)))
+    return ("CHUA_XAC_THUC", "khong co ~/.claude/.credentials.json va khong co bien")
+
+
+def _do_github(ws: str | None) -> tuple[str, str]:
+    """Đo GitHub theo BA ĐƯỜNG ĐỘC LẬP, vì chúng hỏng độc lập với nhau.
+
+    Đo được 15-08-2026 trong container remote:
+
+      git đẩy/kéo HTTPS   CHẠY  (credential qua $GIT_CONFIG_KEY_*)
+      công cụ MCP github  CHẠY  (đăng comment, đọc issue — dùng suốt ngày)
+      REST api.github.com CHẶN  403 do PROXY, kèm nguyên văn "GitHub access is not
+                                enabled for this session" — KHÔNG phải lỗi của
+                                GitHub, KHÔNG phải thiếu token: `GITHUB_PAT` thật
+                                cũng 403, mà `/user` lại 200. Chính sách theo
+                                ĐƯỜNG DẪN, không theo danh tính.
+      gh CLI              KHONG cai
+
+    Vì vậy "gọi GitHub không được" là KẾT LUẬN SAI ở container này: hai trong bốn
+    đường vẫn mở. Hàm này trả về ĐƯỜNG NÀO mở, để không ai kết luận theo đường hỏng.
+    """
+    duong = []
+    if ws:
+        rc, out, _ = _git(ws, "ls-remote", "--heads", "origin", "HEAD")
+        duong.append(("git", rc == 0, "day/keo HTTPS" if rc == 0 else f"rc={rc}"))
+    # `gh` CÓ MẶT không chứng minh gì — `gh auth status` mới hỏi đúng câu "đã đăng nhập
+    # chưa" (nó thoát 1 khi có vấn đề xác thực). Bản trước đếm `shutil.which("gh")` là
+    # một ĐƯỜNG MỞ, nên ngoài repo thì chỉ cần CÀI `gh` là `any(...)` thành True và
+    # GitHub được gắn `DUNG_DUOC` mà không có lấy một đường đã xác thực nào.
+    if shutil.which("gh"):
+        try:
+            pg = subprocess.run(["gh", "auth", "status"], capture_output=True, text=True,
+                                timeout=20)
+            duong.append(("gh-cli", pg.returncode == 0,
+                          "da xac thuc" if pg.returncode == 0 else f"CHUA xac thuc (rc={pg.returncode})"))
+        except (OSError, subprocess.SubprocessError) as e:
+            duong.append(("gh-cli", False, f"khong chay duoc: {type(e).__name__}"))
+    else:
+        duong.append(("gh-cli", False, "chua cai"))
+    return (("DUNG_DUOC" if any(ok for _, ok, _ in duong) else "CHUA_XAC_THUC"),
+            " · ".join(f"{t}={'OK' if ok else 'khong'}" for t, ok, _ in duong)
+            + " · REST truc tiep co the bi proxy chan (403) — dung cong cu MCP github")
+
+
+_RE_NANG_LUC_HOOK = re.compile(r"^#\s*hook-nang-luc:\s*(.+)$", re.MULTILINE)
+
+
+def _nang_luc_hook(noi_dung: str) -> set:
+    """Đọc tập tên năng lực hook khai trong `# hook-nang-luc: …`.
+
+    Hook CŨ không có dòng này ⇒ trả tập RỖNG ⇒ thiếu MỌI năng lực của master. Đó đúng
+    là điều cần nói về một nhánh packet rẽ từ base cũ, và là lý do không cần đánh số
+    phiên bản: vắng mặt tự nó đã mang đủ nghĩa.
+    """
+    ra = set()
+    for m in _RE_NANG_LUC_HOOK.finditer(noi_dung):
+        ra.update(t for t in m.group(1).split() if t)
+    return ra
+
+
+def _do_hook_cu(ws: str | None) -> tuple[str, str]:
+    """Hook phiên đang checkout có CŨ HƠN bản trên nhánh chính không?
+
+    ĐÂY LÀ NGUYÊN NHÂN GỐC CỦA SỰ CỐ 15-08-2026, và nó không phải chuyện xác thực.
+
+    `.claude/hooks/session-start.sh` trên `master` ĐÃ khôi phục `CODEX_AUTH_JSON`
+    từ 14-08-2026, có bốn chốt viết cẩn thận, và `docs/GOI_AGENT_DA_NEN.md` mô tả
+    đúng như vậy. Nhưng phiên hôm đó đứng trên NHÁNH PACKET, rẽ từ `base_sha` CŨ
+    HƠN commit ấy — nên hook thật sự chạy là bản cũ, KHÔNG có khối khôi phục. Kết
+    quả: `codex login status` nói `Not logged in`, tài liệu nói "hook lo rồi", và
+    hai câu đó cùng đúng.
+
+    `.claude/skills/work-packet/SKILL.md` cảnh báo sẵn: "`base_sha` thường cũ hơn
+    công cụ trên nhánh chính, nên cây làm việc của packet có thể thiếu cả bộ dựng
+    công cụ lẫn hook phiên". Cảnh báo bằng CHỮ không chặn được ai — nên nay đo bằng
+    MÁY: so băm hook đang có với hook trên `origin/master`.
+
+    ĐO THEO NĂNG LỰC, KHÔNG THEO BĂM TOÀN TỆP. Bản trước so `sha256` cả tệp và
+    cross-review bác đúng: sửa một dấu phẩy trong chú thích cũng làm chốt đỏ, mà chốt
+    đỏ vì lý do vô hại là chốt sẽ bị bỏ qua. Câu hỏi đúng không phải "hai tệp có khác
+    nhau không" mà là **"bản đang chạy có THIẾU thứ gì không"**.
+
+    Cũng KHÔNG dùng quan hệ tổ tiên commit — reviewer nêu thẳng và đúng: chính nhánh
+    packet CŨ mới là thứ cần cảnh báo, mà nó LÀ tổ tiên hợp lệ của master. Tổ tiên tính
+    không phân biệt được "cũ nhưng đủ" với "cũ và thiếu".
+
+    Hợp đồng là dòng `# hook-nang-luc: <tên> <tên> …` trong chính hook. So TẬP TÊN:
+    thiếu tên nào so với master thì báo đúng tên đó. Hook có THÊM năng lực so với master
+    (nhánh mới hơn) KHÔNG phải lỗi.
+
+    KHÔNG gọi mạng. `git show` đọc ref đã fetch; chưa có ref thì nói KHONG_DO_DUOC
+    chứ không đoán — một chốt không đo được phải nói là không đo được.
+    """
+    if not ws:
+        return ("KHONG_DO_DUOC", "khong xac dinh duoc workspace")
+    duong = Path(ws) / ".claude" / "hooks" / "session-start.sh"
+    if not duong.exists():
+        return ("CHUA_XAC_THUC", "cay nay KHONG co .claude/hooks/session-start.sh")
+    rc, ra, _ = _git(ws, "show", "origin/master:.claude/hooks/session-start.sh")
+    if rc != 0 or not ra:
+        return ("KHONG_DO_DUOC",
+                "chua co origin/master trong cay nay — `git fetch origin master` roi do lai")
+    cua_master = _nang_luc_hook(ra)
+    if not cua_master:
+        # Master chưa khai năng lực nào ⇒ không có gì để so. Nói thẳng là không đo
+        # được, đừng tụt về so băm: tụt về sẽ dựng lại đúng cái chốt vừa bị bác.
+        return ("KHONG_DO_DUOC",
+                "hook tren origin/master chua co dong `# hook-nang-luc:` de doi chieu")
+    dang_co = _nang_luc_hook(duong.read_text(encoding="utf-8", errors="replace"))
+    thieu = sorted(cua_master - dang_co)
+    if not thieu:
+        them = sorted(dang_co - cua_master)
+        return ("DUNG_DUOC", "du nang luc so voi master"
+                + (f" (+{','.join(them)} moi hon)" if them else ""))
+    return ("CHUA_XAC_THUC",
+            f"hook dang checkout THIEU nang luc: {', '.join(thieu)} — nhanh nay ra tu "
+            f"base cu hon; lay hook tu master truoc khi ket luan ve moi truong")
+
+
+KHA_NANG = [
+    {"ten": "codex", "do": lambda ws, ks=False: _do_codex(ks),
+     "vi_sao": "reviewer cross-provider (§8) — executor claude thi reviewer PHAI la codex",
+     "khac_phuc": "launcher.py chuan-bi   (hoac: codex login --device-auth)"},
+    {"ten": "claude", "do": lambda ws, ks=False: _do_claude(),
+     "vi_sao": "executor va phien dieu phoi",
+     "khac_phuc": "dat ANTHROPIC_API_KEY / dang nhap lai claude"},
+    {"ten": "github", "do": lambda ws, ks=False: _do_github(ws),
+     "vi_sao": "dang handoff/verdict, doc issue, day nhanh",
+     "khac_phuc": "dung cong cu MCP github + git; REST thang bi proxy chan"},
+    {"ten": "hook-phien", "do": lambda ws, ks=False: _do_hook_cu(ws),
+     "vi_sao": "hook cu hon master = thieu chot ma master da co (nguyen nhan goc 15-08)",
+     "khac_phuc": "git show origin/master:.claude/hooks/session-start.sh > <tep>  "
+                  "roi chay no; hoac merge master vao nhanh nay"},
+]
+
+
+def lenh_moi_truong(a) -> int:
+    q = quet_bien_moi_truong()
+    if a.json:
+        print(json.dumps(q, ensure_ascii=False, indent=2))
+        return MA_OK
+    print(f"BIEN MOI TRUONG khop mau: {q['so_bien']}  "
+          f"(chi in TEN · DO DAI · VAN TAY — KHONG bao gio in gia tri)")
+    for b in q["bien"]:
+        canh = "  <-- NGHI GIU CHO (trung gia tri voi bien khac)" if b["nghi_giu_cho"] else ""
+        print(f"  {b['ten']:<40} {b['do_dai']:>6} ky tu  {b['nhom']:<8}{canh}")
+    if q["nhom_trung_gia_tri"]:
+        print("\nNHOM TRUNG GIA TRI — gan nhu chac chan la chuoi giu cho:")
+        for ten_nhom, ds in q["nhom_trung_gia_tri"].items():
+            print(f"  {ten_nhom}  {len(ds)} bien: {', '.join(ds)}")
+        print("  DA DAT != DUNG DUOC. Dung ket luan tu mot bien co mat.")
+    return MA_OK
+
+
+def lenh_chuan_bi(a) -> int:
+    ket = chuan_bi_xac_thuc(that_su=not a.thu_khan)
+    if not ket:
+        print("chuan-bi: khong co bien nao can dung ra dia (hien chi codex can)")
+        return MA_OK
+    xau = 0
+    for k in ket:
+        if k["ok"]:
+            print(f"  ok    {k['ten']:<8} {k['cach']} -> {k['duong_dan']}")
+        else:
+            xau += 1
+            print(f"  HONG  {k['ten']:<8} {k['cach']}", file=sys.stderr)
+    return MA_CHUA_XAC_THUC if xau else MA_OK
+
+
+# Nhãn DUY NHẤT được tính là ĐÃ CHỨNG MINH khả dụng. Danh sách TRẮNG, cố ý:
+# thêm nhãn mới mà quên cập nhật ở đây thì nó rơi vào "chưa chứng minh" — sai về
+# phía AN TOÀN. Danh sách ĐEN thì ngược lại, nhãn mới lọt thẳng thành "khả dụng",
+# và đó đúng là cách `CO_CREDENTIAL` lọt qua ở lượt trước.
+#
+# `SAP_HET_HAN` KHÔNG có trong đây: nếu không chạy `--kiem-song` thì nó cũng chỉ là
+# `CO_CREDENTIAL` kèm cảnh báo, và hạn lấy từ JWT KHÔNG xác thực chữ ký — lời khai đó
+# đủ để HẠ nhãn (fail-closed), không đủ để NÂNG.
+DA_CHUNG_MINH_KHA_DUNG = frozenset({"DUNG_DUOC"})
+
+
+def _ma_doctor(thieu_bat_buoc, chua_xac_thuc, doi_kha_dung: bool,
+               chua_chung_minh=()) -> int:
+    """Mã thoát của `doctor`. Thiếu công cụ BẮT BUỘC luôn là 12.
+
+    CHƯA XÁC THỰC chỉ thành mã 13 khi phía gọi ĐÒI (`--doi-kha-dung`). Mặc định
+    vẫn 0, và đây là quyết định có lý do chứ không phải nhân nhượng:
+
+    `doctor` là chốt "môi trường có đủ đồ nghề không", và nhiều phiên hợp lệ KHÔNG
+    cần gọi agent nào — bắt chúng đỏ vì `codex` chưa đăng nhập là chặn nhầm. Nguy
+    hơn: mục `hook-phien` đỏ trên gần như MỌI nhánh packet (nhánh rẽ từ base_sha cũ),
+    nên để nó vào mã thoát mặc định thì hook phiên sẽ đỏ thường trực, và một chốt
+    đỏ thường trực là chốt bị bỏ qua.
+
+    Bản trước của tôi trả 13 vô điều kiện và làm đỏ `t53_doctor_bao_du_khi_du` —
+    ca đó ghim đúng hợp đồng cũ. Nới hợp đồng của một lệnh đã có người gọi thì phải
+    nới bằng CỜ, không nới ngầm.
+
+    Thông tin vẫn LUÔN được in ra, kể cả khi mã thoát là 0 — biết là một chuyện,
+    chặn là chuyện khác.
+    """
+    if thieu_bat_buoc:
+        return MA_THIEU_CONG_CU
+    # `--doi-kha-dung` FAIL-CLOSED: phía gọi đòi "khả dụng" thì "chưa chứng minh được"
+    # phải chặn y như "đo được là hỏng". Chỉ mặc định (không có cờ) mới rộng lượng.
+    if (chua_xac_thuc or chua_chung_minh) and doi_kha_dung:
+        return MA_CHUA_XAC_THUC
+    return MA_OK
+
+
 def lenh_doctor(a) -> int:
     he = platform.system()
     ket = []
@@ -1541,11 +2364,52 @@ def lenh_doctor(a) -> int:
         if thay is None and c["bat_buoc"]:
             thieu_bat_buoc.append(c["ten"])
 
+    # --- KHẢ DỤNG, không chỉ CÓ MẶT.
+    # `--version` chạy được KHÔNG chứng minh công cụ dùng được: `codex --version` in
+    # số phiên bản ngon lành trong khi `codex` chưa có credential nào. Cả ngày
+    # 15-08-2026 mất đúng vì khoảng cách giữa hai điều đó. Bảng `CONG_CU` ở trên đo
+    # CÓ MẶT + CHẠY ĐƯỢC; khối này đo DÙNG ĐƯỢC.
+    try:
+        ws = tim_workspace(getattr(a, "workspace", None))
+    except Chan:
+        ws = None                       # doctor phải chạy được cả ngoài repo
+    kha_nang, chua_xac_thuc, chua_chung_minh = [], [], []
+    for k in KHA_NANG:
+        try:
+            tt, mo_ta = k["do"](ws, getattr(a, "kiem_song", False))
+        except Exception as e:           # doctor KHÔNG được chết vì một phép đo
+            tt, mo_ta = "KHONG_DO_DUOC", f"{type(e).__name__}"
+        kha_nang.append({"ten": k["ten"], "trang_thai": tt, "chi_tiet": mo_ta,
+                         "vi_sao": k["vi_sao"], "khac_phuc": k.get("khac_phuc", "")})
+        if tt in ("CHUA_XAC_THUC", "CAN_CHUAN_BI"):
+            chua_xac_thuc.append(k["ten"])
+        elif tt not in DA_CHUNG_MINH_KHA_DUNG:
+            chua_chung_minh.append(k["ten"])
+    bien = quet_bien_moi_truong()
+
     if a.json:
-        _in_an_toan(json.dumps({"ok": not thieu_bat_buoc, "he_dieu_hanh": he,
+        # `ok` GIU NGHIA CU: đủ công cụ BẮT BUỘC hay không. Bản trước tôi đổi nó
+        # thành "đủ công cụ VÀ đã xác thực", làm `t53` đỏ — và đúng ra là phải đỏ:
+        # đổi nghĩa một trường mà phía gọi đã đọc thì cũng là nới hợp đồng ngầm,
+        # y như đổi mã thoát. Thông tin mới đi vào TRƯỜNG MỚI (`ok_kha_dung`).
+        #
+        # v1.35.86 (cross-review lượt 6, P1 `co-credential-van-duoc-coi-la-kha-dung`):
+        # `ok_kha_dung` trước chỉ trừ `chua_xac_thuc`, mà danh sách đó KHÔNG chứa
+        # `CO_CREDENTIAL`. Hệ quả: tầng ĐO đã thôi nâng nhãn, nhưng tầng TIÊU THỤ
+        # nâng lại nguyên vẹn — `ok_kha_dung=true` cho đúng credential mà lệnh gọi
+        # thật trả 401. Sửa một đầu mà để đầu kia y nguyên thì chưa sửa gì.
+        _in_an_toan(json.dumps({"ok": not thieu_bat_buoc,
+                                "ok_kha_dung": not thieu_bat_buoc and not chua_xac_thuc
+                                               and not chua_chung_minh,
+                                "he_dieu_hanh": he,
                                 "python_dang_chay": sys.version.split()[0],
-                                "cong_cu": ket, "thieu_bat_buoc": thieu_bat_buoc},
+                                "cong_cu": ket, "thieu_bat_buoc": thieu_bat_buoc,
+                                "kha_nang": kha_nang, "chua_xac_thuc": chua_xac_thuc,
+                                "chua_chung_minh": chua_chung_minh,
+                                "bien_moi_truong": bien},
                                ensure_ascii=False, indent=2))
+        return _ma_doctor(thieu_bat_buoc, chua_xac_thuc,
+                          getattr(a, "doi_kha_dung", False), chua_chung_minh)
     else:
         con_ong = _in_an_toan(
             f"he dieu hanh : {he}  |  python dang chay: {sys.version.split()[0]}")
@@ -1562,9 +2426,39 @@ def lenh_doctor(a) -> int:
                     f"        co o {hong['duong_dan']} nhung KHONG chay duoc: {hong['loi']}")
             if not c["co"] and con_ong:
                 con_ong = _in_an_toan(f"        cai bang: {c['lenh_cai']}")
+        _in_an_toan("KHA DUNG (co mat != dung duoc):")
+        for k in kha_nang:
+            _in_an_toan(f"  {k['trang_thai']:<14} {k['ten']:<8} {k['chi_tiet']}")
+        # LUẬT ĐỌC BIẾN TRƯỚC KHI KẾT LUẬN: phần này in KỂ CẢ khi mọi thứ xanh, để
+        # không ai báo "cong cu X khong dung duoc" mà chưa từng nhìn vào biến.
+        _in_an_toan(f"BIEN MOI TRUONG khop mau: {bien['so_bien']} "
+                    f"(xem day du: `launcher.py moi-truong`)")
+        for vt, ds in bien["nhom_trung_gia_tri"].items():
+            _in_an_toan(f"  NGHI GIU CHO  {vt}  {len(ds)} bien cung gia tri: "
+                        f"{', '.join(ds)}")
         _in_an_toan("KET LUAN  : " + ("DU CONG CU BAT BUOC" if not thieu_bat_buoc
                                       else "THIEU " + ", ".join(thieu_bat_buoc)))
-    return MA_THIEU_CONG_CU if thieu_bat_buoc else MA_OK
+        # Mỗi khả năng một cách chữa RIÊNG. Bản trước gợi ý `chuan-bi` cho MỌI mục —
+        # sai với `hook-phien` (hook cũ không chữa bằng chuan-bi) và với `github`.
+        # Một gợi ý sai còn tệ hơn không gợi ý: nó làm người đọc chạy nhầm rồi tin là
+        # đã thử.
+        for k in kha_nang:
+            if k["trang_thai"] in ("CHUA_XAC_THUC", "CAN_CHUAN_BI") and k["khac_phuc"]:
+                _in_an_toan(f"  CHUA DUNG DUOC {k['ten']:<11} -> {k['khac_phuc']}")
+        # SAP_HET_HAN vẫn DÙNG ĐƯỢC nên KHÔNG vào mục trên và KHÔNG đổi mã thoát — nhưng
+        # để nó lẫn giữa danh sách thì cảnh báo sớm thành vô dụng. In riêng, kèm cách chữa.
+        for k in kha_nang:
+            if k["trang_thai"] == "SAP_HET_HAN":
+                _in_an_toan(f"  CANH BAO SOM   {k['ten']:<11} -> {k['khac_phuc']}")
+                _in_an_toan(f"                 {k['chi_tiet']}")
+        # "Chưa chứng minh" KHÁC "đo được là hỏng" — in riêng, đừng để người đọc
+        # suy ra im lặng là xanh. Đây chính là khoảng cách đã đốt cả ngày 15-08.
+        if chua_chung_minh:
+            _in_an_toan("  CHUA CHUNG MINH KHA DUNG (co mat, chua ai goi that): "
+                        + ", ".join(chua_chung_minh))
+            _in_an_toan("                 chay lai voi --kiem-song de doi bang chung that")
+    return _ma_doctor(thieu_bat_buoc, chua_xac_thuc,
+                      getattr(a, "doi_kha_dung", False), chua_chung_minh)
 
 
 # ----------------------------------------------------------------------- CLI
@@ -1609,9 +2503,24 @@ def build_parser():
     s.add_argument("--id", default=None, help="run_id day du hoac short_id")
     s.set_defaults(fn=lenh_status)
 
-    d = sub.add_parser("doctor", help="kiem cong cu moi truong (KHONG cai gi)")
+    d = sub.add_parser("doctor", help="kiem cong cu + KHA DUNG + bien (KHONG cai gi)")
     d.add_argument("--json", action="store_true")
+    d.add_argument("--workspace", default=None)
+    d.add_argument("--kiem-song", action="store_true",
+                   help="GOI THAT de chung minh credential con dung duoc (ton quota/mang)")
+    d.add_argument("--doi-kha-dung", action="store_true",
+                   help="thoat 13 neu co cong cu CHUA DUNG DUOC (mac dinh: chi bao, van thoat 0)")
     d.set_defaults(fn=lenh_doctor)
+
+    m = sub.add_parser("moi-truong",
+                       help="quet bien moi truong theo MAU — ten/do dai/van tay, KHONG in gia tri")
+    m.add_argument("--json", action="store_true")
+    m.set_defaults(fn=lenh_moi_truong)
+
+    cb = sub.add_parser("chuan-bi",
+                        help="dung credential tu bien ra dia cho CLI can doc tu dia (codex)")
+    cb.add_argument("--thu-khan", action="store_true", help="chi bao se lam gi, khong ghi")
+    cb.set_defaults(fn=lenh_chuan_bi)
 
     k = sub.add_parser("stop", help="dung mot luot chay (giet ca cay tien trinh)")
     k.add_argument("--run-root", required=True)

@@ -171,6 +171,64 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   CHỈ dựng chốt quanh một lệnh bất kỳ rồi chạy lệnh đó — không biết agent nào, không
   prompt dựng sẵn. Wrapper tự chế sẽ phải bám theo cờ/biến/xác thực của hai CLI khác
   nhau rồi trôi lệch âm thầm.
+- **HOOK PHIÊN CỦA NHÁNH PACKET CŨ HƠN HOOK TRÊN MASTER — đó là nguyên nhân GỐC của
+  sự cố 15-08-2026, không phải chuyện xác thực.** Hook trên `master` ĐÃ khôi phục
+  `CODEX_AUTH_JSON` từ 14-08, có bốn chốt viết kỹ, và `docs/GOI_AGENT_DA_NEN.md` mô tả
+  đúng như thế. Nhưng phiên hôm đó đứng trên nhánh packet rẽ từ `base_sha` CŨ HƠN commit
+  ấy, nên hook chạy thật là bản cũ — **đo được: hook của phiên có 0 lần nhắc
+  `CODEX_AUTH_JSON`, hook master có 5**. Vì vậy `codex login status` nói `Not logged in`
+  còn tài liệu nói "hook lo rồi", và **hai câu đó cùng đúng**. Chính
+  `.claude/skills/work-packet/SKILL.md` cảnh báo sẵn cái bẫy này; cảnh báo bằng chữ
+  không chặn được ai, nên nay `launcher.py doctor` có mục `hook-phien` so băm hook đang
+  checkout với `origin/master` và nói thẳng khi lệch.
+- **ĐỌC BIẾN MÔI TRƯỜNG TRƯỚC KHI KẾT LUẬN MỘT CÔNG CỤ KHÔNG DÙNG ĐƯỢC.** Lỗi thứ hai
+  của cùng sự cố: gặp `Not logged in` thì phải hỏi "nó xác thực bằng ĐƯỜNG NÀO", không
+  phải "nó đã đăng nhập chưa". Giải `CODEX_AUTH_JSON` ra `~/.codex/auth.json` là chạy
+  được ngay, và cross-review lượt 11 đã chạy trọn trong chính container đó. Đường cứu
+  hộ khi hook không chạy: `launcher.py chuan-bi` (cùng bốn chốt như hook, không yếu hơn).
+  `doctor` LUÔN in phần biến kể cả khi mọi thứ xanh, đúng để chặn kiểu kết luận đó.
+  · **Đừng grep theo danh sách tên đoán trước** (`OPENAI_API_KEY`, `CODEX_API_KEY`…) —
+  trượt đúng tên thật, y hệt bộ quét secrets lọc theo phần mở rộng rồi mù với `.env`.
+  Quét TOÀN BỘ `os.environ` theo MẪU: `launcher.py moi-truong`.
+  · **ĐÃ ĐẶT ≠ DÙNG ĐƯỢC.** Container này có `GH_TOKEN` `GITHUB_TOKEN`
+  `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `CLOUDSDK_AUTH_ACCESS_TOKEN` — **năm
+  biến, cùng một chuỗi giữ chỗ 14 ký tự** (cùng vân tay `f07d7417`); credential GitHub
+  thật nằm ở `GITHUB_PAT`. Biến giữ chỗ tệ hơn biến chưa đặt: công cụ báo "sai thông
+  tin đăng nhập" thay vì "chưa đăng nhập", đẩy người đọc đi sai hướng. `moi-truong`
+  gom biến theo vân tay giá trị để phơi đúng chuyện này.
+  · **Sai định dạng ≠ biến vô dụng.** Ghi base64 THÔ vào `auth.json` thì `codex` kêu
+  `expected value at line 1 column 1` — câu đó nói TỆP không phải JSON, KHÔNG nói biến
+  sai. `chuan-bi` thử cả base64 lẫn JSON thô và chỉ báo hỏng khi cả hai đường đều hỏng.
+- **GitHub: bốn đường, hỏng độc lập — đừng kết luận từ đường hỏng.** Đo 15-08-2026 trong
+  container remote: `git` đẩy/kéo HTTPS **CHẠY** (credential qua `$GIT_CONFIG_KEY_*`) ·
+  công cụ **MCP github CHẠY** · **REST thẳng tới `api.github.com` bị PROXY chặn 403**
+  ("GitHub access is not enabled for this session") **bất kể token** — `GITHUB_PAT` thật
+  cũng 403 trong khi `/user` trả 200, tức chính sách theo ĐƯỜNG DẪN chứ không theo danh
+  tính · `gh` không cài, và **cài cũng vô ích** vì nó đi đúng đường bị chặn. Việc của kho
+  đi bằng **MCP github + git**, không bằng REST thẳng.
+- **Refresh token của codex XOAY VÒNG ⇒ `CODEX_AUTH_JSON` là ảnh chụp CHẾT NHANH.** Mỗi lần
+  codex làm mới token, bản cũ bị vô hiệu — kể cả bản đang nằm trong biến. Đo 16-08: chuỗi
+  vừa dán xong, đưa xuống đĩa khớp từng byte, vẫn `refresh_token_invalidated`. Chép base64
+  **ngay sau `codex login`**, đừng chạy `codex` trên máy cá nhân trong lúc còn muốn dùng
+  chuỗi đó ở phiên remote. `doctor` nay cảnh báo TRƯỚC (`SAP_HET_HAN`) khi `exp` dưới 24h
+  **hoặc** `last_refresh` cũ hơn 24h — tín hiệu thứ hai mới là cái bắt được ca đã xảy ra.
+- **`codex login status` NÓI DỐI** — chỉ kiểm tệp đọc được, không kiểm token còn sống
+  (rc=0 "Logged in" trong khi mọi lời gọi trả 401). Đã trả giá HAI lần: một lần dán nhãn
+  `DUNG_DUOC` sai, một lần chốt "đã đăng nhập thì không ghi đè" bảo vệ đúng bản đã chết và
+  chặn bản mới. Chốt nay so `last_refresh` giữa đĩa và biến, không hỏi lệnh đó nữa.
+- **Codex mặc định KHÔNG thấy biến tuỳ biến** (`shell_environment_policy.inherit` chỉ truyền
+  tập lõi — KHÔNG phải vì bộ lọc bí mật; mẫu mặc định chỉ có `*KEY*` `*SECRET*` `*TOKEN*`).
+  **`inherit = "all"` ĐÃ THU HỒI (16-08-2026, cross-review lượt 7) — đừng dựng lại.** Lý lẽ
+  "phiên codex cần thấy biến để tái dựng credential" sai ngay trong luồng hook: credential
+  đã được ghi ra `~/.codex/auth.json` TRƯỚC khi policy chạy, nên ta đổi MỘT credential lấy
+  CẢ MÔI TRƯỜNG mà không mua được gì. `exclude` theo TÊN là bằng chứng về *cái ta đã nghĩ
+  tới*, không phải bằng chứng an toàn. Đường đúng: `codex login --device-auth`.
+  Hook nay chỉ **PHÁT HIỆN** (đọc, đặt cờ chặn, in cách chữa) — KHÔNG ghi vào config.
+  Gỡ là `codex_env_policy.py --go`, dựng bản đã gỡ ra tệp **bên cạnh**; người dùng tự
+  `diff` rồi `mv`. Chi tiết `docs/GOI_AGENT_DA_NEN.md`.
+- `rg` là công cụ **BẮT BUỘC** (từ 15-08-2026). Thiếu nó lệnh tìm của agent gãy giữa
+  chừng chứ KHÔNG tự lùi về `grep` — phiên vẫn "chạy" nhưng tra cứu mù. Hook phiên thử
+  apt-get (có/không sudo, có/không `update`) rồi cargo, và đòi bằng chứng `rg --version`.
 - `python .claude/dev/launcher.py doctor` trước khi nghi ngờ bất cứ thứ gì khác.
   Thoát 12 = thiếu công cụ bắt buộc. Container Claude Code web ĐÃ ĐO 12-08-2026:
   có python/git/node/claude/rg, **KHÔNG** có codex/gh/pwsh — `.claude/hooks/session-start.sh`
@@ -209,6 +267,95 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
 - **Đột biến SỐNG SÓT không luôn nghĩa là test yếu.** Đo rồi mới biết: `-uall` so với mặc
   định KHÔNG đổi sạch/bẩn (chỉ `-uno` mới làm chốt mù), và ca "rc=0 mà rỗng" được chặn ở
   BỐN lớp độc lập nên phải đột biến ghép cả bốn. Đột biến sai chỗ ≠ mã sai.
+- **…và cũng không luôn nghĩa là mã đúng: đột biến có thể CHƯA TỪNG ĐƯỢC CHẠY.** Runner
+  đột biến ghi mọi bản sao vào CÙNG một `launcher.py` tạm. CPython coi `.pyc` còn hợp lệ
+  theo **(mtime tính bằng GIÂY, kích thước)** — hai đột biến ra tệp cùng kích thước, ghi
+  trong cùng một giây ⇒ bản sau chạy **mã của bản trước**. Mutant
+  `do_codex_tin_DONG_DAU…` báo `giet 0/1` suốt BA lượt review vì lý do đó, và khi gỡ chốt
+  ra để phản chứng thì nó kéo câm luôn mutant canh bản vá `killpg` — **cơ chế tước răng
+  mọi mutant, không riêng một cái**. Bằng chứng A/B: `sys.dont_write_bytecode=True` ⇒
+  `1/1`; chạy tay một mình ⇒ `1/1`. Đây cũng là lời giải cho ba lượt "cùng cổng, hai kết
+  quả": va chạm chỉ xảy ra khi hai lượt ghi lọt cùng một giây, tức phụ thuộc MÁY.
+  Ba lớp bịt (xoá `.pyc` · tắt ghi bytecode · `invalidate_caches`) cộng tên tệp riêng
+  từng đột biến; `t97` khoá lại, và mỗi lớp có phản chứng RIÊNG — lớp "tắt ghi bytecode"
+  lúc đầu KHÔNG có răng (gỡ nó ra mà `t97` vẫn xanh) nên phải đo thẳng bằng "nạp xong
+  không được để lại `.pyc`".
+- **"Từ chối" mà vẫn để đường nguy hiểm chạy tiếp là FAIL-OPEN, không phải thận trọng.**
+  Bộ gỡ `shell_environment_policy` trả rc=3 khi không dám sửa config người dùng, còn hook
+  thì chỉ in `CANH BAO` rồi đi tiếp — nghĩa là đúng lúc phát hiện `inherit="all"` còn hiệu
+  lực thì ta để nó hiệu lực. Biến một lỗi xác-định-an-toàn thành phơi môi trường CÓ CHỦ
+  ĐÍCH. Không sửa được tệp của họ thì chặn ở PHÍA TA (cờ riêng `~/.codex/tra-luat-CHAN-CODEX`,
+  `_do_codex` đọc cờ và hạ nhãn TRƯỚC mọi phép đo khác) — và cờ phải TỰ HẾT khi sạch,
+  kẻo lại thành chốt đỏ thường trực.
+- **BẢY phát hiện cùng MỘT đường ⇒ sai ở QUYẾT ĐỊNH GỐC, không ở các bản vá.** Việc tự
+  động ghi lại `~/.codex/config.toml` ăn bốn lượt cross-review liên tiếp: bảng TOML trùng
+  tên · khớp substring mất dữ liệu · `write_text` không nguyên tử · kiểm từng dòng vẫn mất
+  dữ liệu · symlink tên tạm ghi đè tệp khác · CRLF đổi kết thúc dòng toàn tệp · lost-update.
+  Mỗi lượt vá bảo toàn được thứ ta NGHĨ TỚI và làm hỏng thứ ta KHÔNG NGHĨ TỚI. Vá tiếp lúc
+  nào cũng *có vẻ* đúng vì lần nào cũng có lỗi thật — đó chính là cách người ta ở lại quá
+  lâu trong một cái hố. **Đếm hình dạng lỗi, đừng chỉ đếm lỗi**: cùng một hình dạng lặp ba
+  lần trở lên thì câu hỏi đúng là "có nên làm việc này không", không phải "vá thế nào".
+  Chữa: công cụ KHÔNG ghi vào tệp của người dùng nữa — phát hiện + dựng bản đã gỡ ra tệp
+  BÊN CẠNH, người dùng tự `mv`. Cả lớp rủi ro chết theo KIẾN TRÚC, không theo bản vá.
+- **API CHỈ CÓ TRÊN MỘT NỀN: hỏi trước, đừng đụng thẳng — và một job CI mặc định SKIP
+  là một cổng KHÔNG TỒN TẠI.** Hai lần trong cùng một ngày: `os.O_NOFOLLOW` (bot review
+  bắt) và `os.getpgid` trong chốt cô lập — cái sau làm suite **0/103** trên
+  `windows-latest`, tức bộ test **chưa từng chạy** trên Windows kể từ lúc có chốt ấy.
+  Không ai biết, vì job Windows chỉ chạy khi PR có nhãn `windows`. Năm lượt cross-review
+  trên Linux không thể thấy, và đã không thấy.
+  Ba luật: (1) `hasattr`/`getattr(..., mặc_định)` trước khi đụng API riêng nền; (2)
+  truyền **lambda** vào hàm bọc lỗi, đừng truyền thẳng `os.getpgid` — tra thuộc tính
+  xảy ra TRƯỚC lời gọi, tức NGOÀI `try`; (3) gán thêm một API mà nền vốn không có thì
+  phải **gỡ lại** khi ra khỏi chốt, kẻo nền tự nhận có thứ nó không có.
+  Gắn nhãn `windows` cho PR đụng `.claude/dev/**` — nó tốn ~40 phút và trả lại thứ mà
+  năm lượt review không mua được.
+- **`MA=$?` SAU pipeline rồi đọc `${PIPESTATUS[0]}` = tự giết mã thoát.** Phép gán
+  `MA_GO=$?` LÀ một lệnh, nên nó đặt lại `PIPESTATUS` về 0; dòng đọc `PIPESTATUS` phía
+  sau kéo mã về 0 và chốt fail-close chết **lần thứ ba**. Tệ hơn: chú thích biện minh cho
+  dòng đó ghi "`set -o pipefail` không bật ở đây" trong khi CHÍNH TỆP ẤY đặt
+  `set -euo pipefail` ở dòng 34. **Chú thích khẳng định về tệp mình đang nằm trong thì
+  phải kiểm trên tệp đó** — một câu sai ở đây biến bản vá thành bản phá. Có `pipefail`
+  thì `$?` của pipeline đã là mã của lệnh trái; đừng "làm cho chắc".
+- **PHẠM VI TUYÊN BỐ phải bằng phạm vi ĐO ĐƯỢC.** Tôi đặt cờ chặn codex, gọi nó là
+  "CODEX BI CHAN", mà chỉ `_do_codex` đọc cờ — trong khi chính hook gọi `codex login
+  status` TRƯỚC đó, `_do_codex_song` (cửa thật sự chạy `codex exec`) đi thẳng qua, và
+  lệnh `codex` gõ tay thì không gì chặn nổi. Chốt mà chỉ một trong nhiều cửa đọc thì
+  không phải chốt. Hai việc phải làm cùng lúc: cho MỌI cửa của kho dùng CHUNG một hàm
+  guard (`_co_chan_codex`), và **khai thẳng cái không chặn được** thay vì đặt tên to hơn.
+  Mỗi cửa phải có ĐỘT BIẾN RIÊNG — cửa không có mutant là cửa sẽ âm thầm hở lại.
+- **Vá một lỗ mà mở lỗ khác trong cùng hàm.** Writer "nguyên tử" của tôi dùng tên tạm
+  ĐOÁN ĐƯỢC (`<tệp>.tra-luat-tam-<pid>`) + `open(...,"w")`: trỏ tên đó thành symlink là
+  ghi đè tệp bất kỳ — hỏng TRƯỚC `os.replace`, tức phá đúng hợp đồng viết ở dòng trên.
+  `mkstemp` (tên ngẫu nhiên + `O_EXCL`) · từ chối khi đích là symlink · **giữ nguyên
+  quyền tệp gốc** (ép 0600 là đổi metadata sau lưng người dùng) · `fsync` cả thư mục.
+- **Khớp marker bằng SUBSTRING là đường mất dữ liệu, và "parse lại vẫn hợp lệ" KHÔNG bắt
+  được.** Sửa lần một (kiểm từng dòng) VẪN mất dữ liệu: membership từng dòng không thấy
+  CẤU TRÚC, nên `inherit = "core"`, một dòng chú thích đơn độc, hay thứ tự đảo ngược đều
+  bị nhận là "khối của ta" rồi xoá. Chỉ so NGUYÊN KHỐI với bản canonical mới đóng được. Phản chứng: `x=1 # <MO>` / `y=2` / `z=3 # <DONG>` → `x=1 #\nz=3\n`, mất `y=2`,
+  mà kết quả VẪN là TOML hợp lệ — nên phép kiểm "parse lại được" tôi dùng làm bằng chứng
+  mù hoàn toàn. **Một phép kiểm không thể đỏ thì không phải bằng chứng.** Marker phải là
+  DÒNG RIÊNG, và phần giữa hai marker phải khớp hình dạng khối ta từng ghi.
+- **Ghi đè thẳng `write_text` phá chính hợp đồng "hoặc đúng, hoặc không đụng tệp".** Nó
+  truncate trước rồi mới ghi; lỗi giữa chừng để lại tệp cụt trong khi hàm vẫn trả "đã từ
+  chối". Ghi ra tệp tạm CÙNG THƯ MỤC → `fsync` → `os.replace`.
+- **DÒNG IN CUỐI CÙNG ≠ CA CHẠY CUỐI CÙNG.** Bộ test launcher không in gì trong lúc chạy
+  (chỉ dòng BỎ QUA + tổng kết), nên khi tiến trình bị giết, thứ còn lại trên màn hình là
+  `BO QUA t62`. Reviewer đọc thành "chết ngay sau t62"; **tôi cũng đọc y hệt** rồi đi truy
+  `t63` — ba lượt review tìm sai chỗ vì một tạo tác của BỘ ĐỆM (stdout nối vào ống là đệm
+  KHỐI, mọi thứ chưa xả mất cùng cú giết). `flush()` chưa đủ — mới ra khỏi đệm Python;
+  phải `fsync()` mới qua đệm HĐH. Nay có `--nhat-ky TEP`: ghi `>>> vao` / `<<< ra` từng ca,
+  flush+fsync, kèm dấu `# XONG TRON VEN` để phân biệt "chạy hết" với "bị giết". Ca nào có
+  `vao` mà không có `ra` chính là ca giết tiến trình. **Trước khi định vị một cú chết, hãy
+  hỏi phép đo có sống sót qua cú chết đó không.**
+  KẾT QUẢ (lượt 8, đo trong namespace reviewer): `vao=100 ra=100`, không ca nào thiếu,
+  `# XONG TRON VEN` — **rồi vỏ shell vẫn chết**. Không có "ca giết". Cú chết nằm SAU khi
+  `main` chạy hết (vùng thoát/`atexit`/tiến trình còn sót). Ba lượt truy bên trong vòng
+  lặp ca là truy sai VÙNG, và chỉ phép đo mới loại được vùng đó.
+  LƯỢT 9 lại ra chỗ KHÁC: `vao=74 ra=73`, chết trong `t72`, không `XONG TRON VEN`, không
+  `atexit`. Hai lượt hai chỗ ⇒ **chập chờn hoặc phụ thuộc thứ tự**, chưa ai biết nguyên
+  nhân. Có `--lap-ca TEN --lan N` để chạy lặp MỘT ca — phân biệt "ca tự nó chập chờn" với
+  "chỉ chết khi đứng sau 73 ca khác". Đo tại chỗ 40/40 qua, tức **không tái hiện ở đây**;
+  phải đo trong namespace của bên kia.
 - **Hook dùng đường dẫn TƯƠNG ĐỐI là bẫy tự khoá.** `.claude/settings.json` từng ghi
   `python .claude/hooks/pretooluse_guard.py`; khi cwd của shell trôi vào thư mục con thì
   MỌI lệnh Bash chết trước khi chạy, và không còn đường `cd` về. Luôn dùng

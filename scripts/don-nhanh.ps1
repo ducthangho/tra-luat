@@ -30,12 +30,31 @@
   Số nhánh mỗi lượt `git push --delete`. Mặc định 25.
 
 .EXAMPLE
-  .\scripts\don-nhanh.ps1
-  # chỉ xem sẽ xoá gì
+  .\scripts\don-nhanh.cmd
+  # ĐƯỜNG NÊN DÙNG trên Windows — chỉ xem sẽ xoá gì
 
 .EXAMPLE
-  .\scripts\don-nhanh.ps1 -Xoa
+  .\scripts\don-nhanh.cmd -Xoa
   # xoá thật
+
+.NOTES
+  GỌI TRÊN WINDOWS: dùng `don-nhanh.cmd`, đừng gọi thẳng `.ps1`.
+
+  ĐÃ TRẢ GIÁ 16-08-2026. Hướng dẫn ban đầu ghi `.\scripts\don-nhanh.ps1`, và máy
+  người dùng ở chế độ `AllSigned` nên chặn ngay:
+
+      File ...\don-nhanh.ps1 cannot be loaded. The file is not digitally signed.
+
+  Người viết kiểm script trên `pwsh` Linux, nơi ExecutionPolicy mặc định là
+  `Unrestricted` — đúng lớp lỗi "chạy được ở đây khác chạy được ở đó" mà kho này
+  đã ghi nhiều lần. Và khuôn `.cmd` bọc `.ps1` ĐÃ CÓ SẴN ở `deploy-package.cmd`
+  lẫn `tl-setup.cmd`; bỏ qua một lời giải đã viết sẵn thì đắt hơn là không biết.
+
+  Muốn gọi thẳng `.ps1` (CI, hoặc máy đã nới chính sách):
+
+      pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\don-nhanh.ps1
+
+  `-ExecutionPolicy Bypass` chỉ áp cho ĐÚNG tiến trình ấy, không đổi cài đặt máy.
 #>
 
 # KHÔNG đặt tên tham số là `$Args`: đó là BIẾN TỰ ĐỘNG của PowerShell trong hàm,

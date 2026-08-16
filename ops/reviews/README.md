@@ -44,11 +44,27 @@ không phải "không tồn tại".
 Biên nhận r4 vì thế mang `evidence_channel: repo_file`, và `evidence_url` neo vào commit
 **master** `3223644` chứ không vào nhánh công bố: `ops/HO_SO_wp55-r4.md` khai kế hoạch xoá các
 nhánh `ops/**` sau khi land hồ sơ, mà một URL trỏ nhánh sắp xoá chính là lớp lỗi lease #3 đã
-trả giá. Nhánh công bố vẫn ghi đủ trong biên nhận ở `published_first` — nhưng kèm cờ
-`truy_xuat_published_khong_bao_dam: true`, vì các commit ấy sống trên nhánh sắp bị xoá và git
-được phép thu hồi object không còn ref. Thứ bảo đảm là `evidence_url` + `verdict_sha256`; muốn
-giữ cả lịch sử công bố thì phải có tag/ref lưu trữ **trước** khi xoá nhánh, và việc đó **chưa
-làm**.
+trả giá. Nhánh công bố vẫn ghi đủ trong biên nhận ở `published_first`.
+
+**Các nhánh `ops/wp55-r4-*` nay ĐÃ XOÁ** (đo: `git ls-remote --heads origin 'refs/heads/ops/wp55-r4*'`
+trả rỗng), và **tag lưu trữ đã tạo TRƯỚC khi xoá** — đúng thứ tự mà bản đầu của trang này còn
+phải dặn. Nên cờ trong biên nhận nay là `truy_xuat_published_khong_bao_dam: false`, kèm khoá
+`tag_giu_published` nêu đích danh tag giữ từng commit:
+
+| commit | tag giữ nó |
+|---|---|
+| `b4e5c5f9` | `luu-tru/wp55-r4-verdict-review-1-ban-dau` |
+| `872679c3` | `luu-tru/wp55-r4-verdict-review-1` |
+| `c2e7c1f5` | `luu-tru/wp55-r4-verdict-review-2` |
+| `6a74f62b` | `luu-tru/wp55-r4-verdict-di-tru` |
+| `699ac9af` | `luu-tru/wp55-r4-verdict-viet-lai` |
+| `1cfe47f8` | `luu-tru/wp55-r4-verdict-rebase` |
+
+Phép đo dùng để hạ cờ **không** phải là liệt kê ref — liệt kê chỉ chứng minh cái tên còn đó.
+Nó là: `git init` một kho **trống**, `fetch` từng tag từ remote, rồi băm lại tệp verdict trong
+kho ấy. **6/6 khớp `verdict_sha256`**: nhánh đã mất mà nội dung vẫn tải về được, đúng byte.
+
+**Xoá tag = biến `published_*` thành SHA không tra được.** Đó giờ là ref bền duy nhất giữ chúng.
 
 Riêng `wp55-r4-review-1` có **hai** mốc, tách thành hai khoá: `published_first` (`b4e5c5f9`,
 commit **thêm** tệp, băm `7dd8e203…`) và `published_ban_hien_hanh` (`872679c3`, commit **sửa**

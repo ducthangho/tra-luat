@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# ╔══════════════════════════════════════════════════════════════════════════════════╗
+# ║  NGUYÊN MẪU NÀY ĐÃ BỊ BỎ. GIỮ LÀM HỒ SƠ, KHÔNG PHẢI ĐỂ CÀI.                      ║
+# ╚══════════════════════════════════════════════════════════════════════════════════╝
+#
+# Chủ kho chốt 2026-08-15: AC 19 của revision 4 BỎ HẲN MIỄN TRỪ, không dùng cơ chế khối
+# chứng cứ mà tệp này dựng thử.
+#
+# Nguyên mẫu chạy được 9/9 — nó KHÔNG bị bỏ vì hỏng. Nó bị bỏ vì đo ra rằng nó không có
+# người dùng nào: chỗ duy nhất trên cây đã merge cần miễn trừ đã được xử lý ở `c47a439`
+# bằng cách VIẾT LẠI CÂU, và cross-review duyệt. Một cơ chế không có người dùng là một cơ
+# chế chưa ai kiểm.
+#
+# Giữ tệp lại vì nó là bằng chứng cho một lựa chọn đã cân nhắc chứ không phải bỏ qua, và
+# vì nếu sau này có ca thật cần miễn trừ thì đây là điểm xuất phát đã đo được.
 """NGUYÊN MẪU AC 19 MỚI — kiểm hợp đồng CƠ HỌC có cài được không.
 
 Không phải bản vá. Chỉ trả lời một câu: khuôn "khối chứng cứ khai báo" có đóng được

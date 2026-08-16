@@ -40,11 +40,12 @@ spec_hash_basis: sha256 của chính tệp này, byte nguyên trạng, không ch
 supersedes_revision: 3
 supersedes_spec_hash: e321f811724fae97b19d523a3e5159bc13b425cd15fc6c753c7439fe28cae22d
 
-base_sha: CHUA_XAC_DINH        # đổi sau khi master mang khối chứng cứ — xem mục di trú
+base_sha: CHUA_XAC_DINH        # = c47a439 SAU khi land fast-forward — xem mục Di trú
 base_sha_note: >-
-  CỐ Ý để trống. Chủ kho đã chốt đường di trú "sửa master trước rồi packet rebase", nên
-  `base_sha` không còn là `fbe5ab9e`. Điền số THẬT lúc cấp lease, sau khi commit sửa master
-  đã có SHA. Đoán trước là tự dựng một mỏ neo chết.
+  CỐ Ý để trống. Di trú đã xong ở `c47a439` (verdict `approve`, `land_recommendation:
+  fast_forward`), nhưng commit ấy CHƯA land lên master. Điền số THẬT lúc cấp lease: bằng
+  `c47a439` nếu land fast-forward, bằng SHA mới nếu land merge/squash. Đoán trước là tự
+  dựng một mỏ neo chết.
 start_from_sha: 1a4525a20aa360476a6f59cb157c21097919c457
 start_from_note: >-
   KHÔNG dựng lại từ base. Generation 9 đã đóng được sáu finding của lượt 9 và mười tám hình
@@ -111,91 +112,104 @@ Mỗi xấp xỉ hẹp hơn cái trước, và mỗi cái vẫn có phản ví d
 hướng đi: *"Revision 4 cần chốt một ngoại lệ cơ học hữu hạn… tiếp tục thêm marker từ vựng
 sẽ chỉ dời cửa lọt."*
 
-### AC 19 MỚI — miễn trừ phải được KHAI BÁO, không phải suy đoán
+### AC 19 MỚI — KHÔNG CÒN MIỄN TRỪ NÀO
 
-**Scanner không đoán ý nghĩa. Người viết adapter KHAI BÁO ý định, và scanner kiểm khai báo
-ấy có đúng hình thức không.**
+**Chủ kho chốt 2026-08-15, trực tiếp trong phiên: bỏ hẳn miễn trừ.**
 
-Một đoạn được miễn trừ khi và chỉ khi nó nằm trong một **khối chứng cứ** đúng khuôn:
+> Cụm trong danh sách cấm KHÔNG được xuất hiện trong tệp bị quét, **ở bất kỳ hình dạng nào**
+> — liền một dòng, ngắt qua dòng, trong khối mã, trong bảng, trong tag, sau chuẩn hoá.
+> Không có ngoại lệ, không có khối khai báo, không có danh sách tha.
+>
+> Adapter cần kể lại một phép đo có chứa cụm cấm thì **viết lại câu** cho không còn cụm ấy.
 
-```markdown
-<!-- ac19:evidence nguồn="CLAUDE.md@2531366:82-83" lý-do="kể lại kết quả đo" -->
-Đo được ở `v1.36.68` (PR #104): ba tên tấn công `rc=0` → `rc=4`, người có
-thẩm quyền vẫn `rc=0`.
-<!-- /ac19:evidence -->
+#### Vì sao đường này, sau khi đã soạn xong đường kia
+
+Bản thảo trước của chính spec này đề xuất **khối chứng cứ khai báo**
+(`<!-- ac19:evidence nguồn=… -->`), có nguyên mẫu chạy được 9/9. Nó bị bỏ vì một lý do đo
+được chứ không phải vì khó cài: **nó không còn người dùng nào.**
+
+Trên toàn cây đã merge có ĐÚNG MỘT chỗ cần miễn trừ — `CLAUDE.md` dòng 82–83 của master.
+Chỗ ấy đã được xử lý ở `c47a439` bằng cách **viết lại câu**, không dùng miễn trừ nào, và
+cross-review duyệt (`approve`, không finding, xác nhận bản ghi phép đo vẫn đúng nghĩa).
+Một cơ chế không có người dùng là một cơ chế **chưa ai kiểm**, và nó sẽ mục trong spec.
+
+#### Cái này đóng được gì — ĐÃ ĐO, không phải suy luận
+
+Mô phỏng bằng cách bỏ hẳn nhánh miễn trừ khỏi scanner `1a4525a`:
+
+| phản ví dụ | lượt bắt | có miễn trừ | KHÔNG miễn trừ |
+|---|---|---|---|
+| `doctrine-measurement-marker-semantic-bypass` | 10 | `rc=0` | **`rc=6`** |
+| `doctrine-indented-code-block-bypass` | 10 | `rc=0` | **`rc=6`** |
+| `doctrine-comment-erases-fence-closer-bypass` | 10 | `rc=0` | **`rc=6`** |
+| `doctrine-html-table-token-context-bypass` | 10 | `rc=0` | **`rc=6`** |
+| wrapper hai ký tự | 9 | `rc=0` | **`rc=6`** |
+| heading ngắt dòng | 7 | `rc=0` | **`rc=6`** |
+
+**Cả sáu đóng cùng lúc, không cần vá gì thêm.** Con lắc sáu lần đánh quá đều là con lắc
+của MIỄN TRỪ; bỏ miễn trừ thì không còn gì để đánh quá.
+
+#### Mã trở thành chết — cũng đã đo
+
+`_duoc_tha_vi_ngat_dong` (97 dòng), `_dong_khoi_ma` (53), `_dong_bang_html` (70),
+`_go_dau_dong_tho` (21), cộng 8 hằng số/regex (`_DAU_HIEU_PHEP_DO`, `_RE_HANG_RAO`,
+`_RE_BANG_HTML`, `_RE_MO_BANG`, `_RE_DONG_BANG`, `_RE_MA_INLINE`, `_RE_DAU_DONG_THO`,
+`_CO_CHU`, `CUM_NGON_NGU_THUONG`).
+
+**~241 dòng hàm biến mất, ≈16% tệp.** Executor PHẢI xoá chúng, không để lại mã chết —
+mã chết là chỗ nấp cho lỗi và là gánh nặng cho mọi lượt review sau.
+
+#### CÁI GIÁ — khai thẳng, đây là chiều bắt oan
+
+Bỏ miễn trừ nghĩa là **văn xuôi thật kể lại phép đo, có cụm cấm ngắt dòng, nay sẽ ĐỎ**.
+Đo trên hai ca chiều-tha đang có trong suite:
+
+```
+Đo được: ba tên tấn công rc=4, người có␤thẩm quyền vẫn rc=0.        rc=0 -> rc=6
+- Kết quả đo cho thấy người có␤thẩm quyền vẫn qua cổng.             rc=0 -> rc=6
 ```
 
-Điều kiện, tất cả đều **cơ học**:
+Cả hai phải **chuyển từ ma trận BẮT-OAN sang ma trận LỌT**, và người viết adapter phải
+viết lại câu. Đó không phải hồi quy — đó là hợp đồng mới, khai rõ.
 
-1. Mở bằng `<!-- ac19:evidence … -->`, đóng bằng `<!-- /ac19:evidence -->`, **cùng một tệp**.
-2. Thuộc tính `nguồn` **bắt buộc**, dạng `<đường-dẫn>@<sha40 hoặc sha ngắn>:<dòng>-<dòng>`.
-3. Khối **không được lồng nhau**, và không được để mở tới hết tệp (thiếu thẻ đóng ⇒ ĐỎ, mã
-   thoát riêng, không im lặng bỏ qua).
-4. Khối tối đa **12 dòng**. Vượt ⇒ ĐỎ. Miễn trừ là ngoại lệ hẹp, không phải vùng tự do.
-5. **Tối đa 3 khối mỗi tệp.** Vượt ⇒ ĐỎ. Đo được hôm nay chỉ có **một** chỗ thật cần miễn
-   trừ, nên 3 đã dư gấp ba; adapter cần nhiều hơn thế thì nó đang chép doctrine chứ không
-   phải kể một phép đo.
-6. Khối chứng cứ được phép nằm trong **mọi tệp thuộc `write_set`, kể cả `CLAUDE.md`**.
-7. Ngoài khối chứng cứ, **KHÔNG có miễn trừ nào khác**. Mọi cụm cấm ở mọi hình dạng đều ĐỎ.
+Ca giữ nguyên `rc=0`: trỏ về protocol thay vì chép; bảng Markdown thường; văn bản tiếng
+Việt vô hại. Tức chỉ những chỗ **thật sự chứa cụm cấm** mới đỏ.
 
-**Vì sao khuôn này đóng được, còn các xấp xỉ trước thì không:** scanner chỉ phải trả lời
-"đoạn này có nằm giữa hai mốc đúng cú pháp không", một câu hỏi hữu hạn và kiểm được. Kẻ gian
-muốn lọt thì phải **tự tay dán một khai báo có nguồn trỏ tới SHA và số dòng cụ thể** — việc
-ấy để lại dấu vết kiểm chứng được, và có thể đối chiếu tự động ở bước sau.
+#### Điều kiện nghiệm thu của AC 19 mới
 
-**Chiều bắt oan vẫn phải đo, ngang hàng.** Văn xuôi bình thường không chứa cụm cấm phải luôn
-`rc=0`; khối chứng cứ hợp lệ phải `rc=0`; và một khối chứng cứ **không chứa cụm cấm nào**
-cũng phải `rc=0`, không bị phạt vì thừa.
+1. Không tệp nào trong `write_set` chứa cụm cấm ở bất kỳ hình dạng nào — đo cả trên nhánh
+   LẪN trên cây đã merge (AC 20).
+2. Mọi hàm và hằng số phục vụ miễn trừ bị **xoá**, không phải bị vô hiệu.
+3. Suite giữ chiều bắt oan: văn bản không chứa cụm cấm phải `rc=0`, kể cả khi có bảng,
+   khối mã, tag, comment, dấu đầu dòng.
+4. Hai ca chiều-tha nêu trên chuyển sang ma trận LỌT, kèm lý do ghi tại chỗ.
 
-### Chi phí di trú — ĐÃ ĐO, và kết quả có một cái bẫy
+### Di trú — ĐÃ XONG TRƯỚC revision 4
 
-Đây là **thay đổi có phá vỡ**: chỗ nào đang dựa vào miễn trừ ngầm đều phải thêm khối khai
-báo. Đo trên sáu tệp `write_set`, đếm số chỗ cụm cấm bị ngắt qua hai dòng:
+Chỗ duy nhất trên cây đã merge cần xử lý là `CLAUDE.md` dòng 82–83 của master, và nó đã
+được xử lý bằng cách **viết lại câu**:
 
-| tệp | trên nhánh packet `1a4525a` | trên CÂY ĐÃ MERGE |
-|---|---|---|
-| `CLAUDE.md` | **0** | **1** — dòng 82–83 |
-| ba `SKILL.md` | 0 | 0 |
+```
+người có / thẩm quyền   →   tên thuộc / danh sách cho phép
+```
 
-**Cái bẫy nằm ở cột thứ hai.** Chỗ thật duy nhất cần miễn trừ KHÔNG có trên nhánh packet —
-nó đến từ `CLAUDE.md` của **master**, thêm sau `base_sha`. Nhánh packet chỉ thêm 10 dòng vào
-`CLAUDE.md` và không đụng đoạn ấy.
+| | |
+|---|---|
+| commit | `c47a439997e0191427d775636ebadbf3be7e1481`, dựng thẳng trên master `2531366` |
+| phạm vi | 1 tệp, 2 dòng |
+| lease review | `wp55-r4-review-viet-lai-codex-20260815` |
+| verdict | **`approve`**, không finding, `land_recommendation: fast_forward` |
 
-Hệ quả, và đây là chỗ AC 19 mới giao nhau với AC 20:
+Reviewer kiểm cả câu hỏi khó nhất — *bản ghi phép đo còn thuật đúng thứ đã đo không* — bằng
+cách quay về chính PR #104 (merge `e344e7c`, `VERSION=1.36.68`) và đo lại cổng. Kết luận:
+`tên thuộc danh sách cho phép` mô tả đúng cơ chế và kết quả đã đo, không đánh tráo vai trò.
 
-- chạy `doctrine-scan` **trên nhánh** sẽ XANH dù chưa di trú gì cả — vì chỗ cần miễn trừ
-  không có mặt ở đó;
-- chạy trên **cây đã merge** (thứ AC 20 bắt buộc) sẽ ĐỎ nếu chưa bọc khối chứng cứ.
+**Một bản trước đã bị bác, và chính nó dẫn tới quyết định bỏ miễn trừ.** Commit `9a5b05c`
+bọc chỗ ấy bằng khối chứng cứ AC 19; verdict trả `do_not_land` với finding
+`ac19-exemption-wider-than-necessary` — khối miễn 10 dòng để cứu 2 dòng.
 
-Nên với revision 4, **AC 20 không còn là bước kiểm cuối mà là bước kiểm CHÍNH** của AC 19.
-Executor nào chỉ đo trên nhánh sẽ tưởng đã xong trong khi chưa bắt đầu. Spec ghi thẳng điều
-này để không ai phải phát hiện lại bằng một lượt review.
-
-**Việc di trú phải làm ở đâu:** `CLAUDE.md` nằm trong `write_set`, nhưng đoạn cần bọc chỉ tồn
-tại trên master. Executor phải chọn và KHAI RÕ một trong hai đường, kèm lý do đo được:
-
-1. thêm khối chứng cứ vào `CLAUDE.md` của nhánh packet ở vị trí sao cho sau khi merge nó bọc
-   đúng dòng 82–83 — rủi ro: phụ thuộc vị trí, merge lệch là hỏng;
-2. đề nghị chủ kho sửa `CLAUDE.md` trên master **trước**, rồi packet rebase lên master mới —
-   sạch hơn, nhưng đổi `base_sha` và cần chủ kho ra tay.
-
-**CHỦ KHO ĐÃ CHỐT (2026-08-15, trực tiếp trong phiên): đường số 2 — sửa master trước, rồi
-packet rebase.** Kéo theo một hệ quả bắt buộc phải xử lý trước khi cấp lease:
-
-> `base_sha` của revision 4 **KHÔNG còn là `fbe5ab9e`**. Sau khi master mang khối chứng cứ,
-> packet phải rebase lên master mới và `base_sha` đổi theo. Spec này để trống ô ấy có chủ ý
-> — điền số thật vào lúc cấp lease, sau khi commit sửa master đã có SHA. Điền số đoán trước
-> là tự dựng một mỏ neo chết, đúng bệnh mà `spec_hash` sinh ra để chặn.
-
-Thứ tự bắt buộc:
-
-1. chủ kho (hoặc phiên được uỷ quyền §2) thêm khối chứng cứ vào `CLAUDE.md` **trên master**,
-   bọc đúng dòng 82–83 — đây là commit NGOÀI packet;
-2. đo lại: `doctrine-scan` trên master mới phải `rc=0` **dưới luật AC 19 mới**;
-3. packet rebase lên master mới; ghi `base_sha` thật vào spec; băm lại spec;
-4. mới cấp lease executor revision 4.
-
----
+`base_sha` của revision 4 = SHA của `c47a439` **sau khi land bằng fast-forward**. Land bằng
+merge hoặc squash thì SHA đổi và phải điền số mới; spec để trống cho tới lúc đó.
 
 ## Acceptance criteria
 
@@ -205,10 +219,10 @@ Không đổi câu chữ. AC 18 (danh sách ĐÓNG trước khi vá, mỗi lớp
 biến giết đúng ca đó) đã chứng minh giá trị qua bốn lượt: mỗi lượt danh sách đóng đều tìm ra
 nhiều hơn reviewer nêu (18 so với 2, 18 so với 4, 18 so với 9). Giữ nguyên.
 
-### AC 19 — THAY TOÀN BỘ
+### AC 19 — THAY TOÀN BỘ: bỏ hẳn miễn trừ
 
-Xem mục trên. Ba con số `N`, `M`, và dạng của `nguồn` **chủ kho chốt trước khi cấp lease** —
-executor không tự chọn.
+Xem mục trên. Không còn tham số `N`/`M`/`nguồn` nào cần chốt — cơ chế khối chứng cứ đã bị
+bỏ trước khi có người dùng đầu tiên.
 
 ### AC 20 — sửa công thức, không sửa yêu cầu
 
@@ -228,45 +242,26 @@ GIT_DIR="$PWD/.git" python3 -B "$TREE/.claude/dev/packet_loop_test.py"
 Đây chính là finding `ac20-archive-tree-suite-not-self-contained` đã hoãn từ verdict lượt 6.
 Revision 4 đóng nó bằng cách sửa spec, đúng như `disposition: spec_revision_required`.
 
-### AC 22 · Khối mã THỤT LỀ là khối mã
+### AC 22–24 · RÚT — ba finding của lượt 10 tự đóng khi bỏ miễn trừ
 
-`doctrine-indented-code-block-bypass` (lượt 10). Khối thụt ≥4 dấu cách, đứng độc lập (có
-dòng trống trước, không phải dòng nối của mục danh sách), là **khối mã CommonMark** và không
-được hưởng miễn trừ nào.
+Bản thảo trước có ba AC riêng cho ba lỗi mã của cross-review lượt 10:
 
-Phản chứng bắt buộc cả hai chiều: khối thụt độc lập chứa cụm cấm ⇒ ĐỎ; dòng nối tiếp thụt
-sâu của một mục danh sách, là văn xuôi thật ⇒ XANH. Ranh giới giữa hai ca này là chỗ dễ sai,
-phải có ca cho cả hai.
+| finding_id | AC cũ | vá cái gì |
+|---|---|---|
+| `doctrine-indented-code-block-bypass` | 22 | `_dong_khoi_ma` |
+| `doctrine-comment-erases-fence-closer-bypass` | 23 | thứ tự gỡ trong `_dong_bang_html` |
+| `doctrine-html-table-token-context-bypass` | 24 | `_RE_MO_BANG` / `_RE_DONG_BANG` |
 
-### AC 23 · Thứ tự gỡ cấu trúc phải KHÔNG phá cấu trúc còn lại
+**Cả ba chỉ tồn tại để vá cái máy dò cấu trúc phục vụ MIỄN TRỪ.** Bỏ miễn trừ thì máy ấy bị
+xoá, và ba lỗi biến mất cùng nó — đã đo: cả ba trả `rc=6` trên bản không miễn trừ, không cần
+vá gì thêm.
 
-`doctrine-comment-erases-fence-closer-bypass` (lượt 10). Generation 9 xoá comment HTML
-**trước** khi dò hàng rào mã, nên một `<!--` mở bên trong khối mã nuốt luôn rào đóng thật:
+Giữ ba AC ấy sau khi đã bỏ miễn trừ là **đòi executor vá mã sắp xoá**. Nên chúng RÚT, và
+điều kiện nghiệm thu tương ứng gộp vào AC 19 mục 2: *mọi hàm và hằng số phục vụ miễn trừ bị
+XOÁ, không phải bị vô hiệu*.
 
-```markdown
-```html
-<!--
-```
--->
-```
-
-Chốt: mỗi tầng gỡ chỉ được nhìn thấy phần văn bản mà tầng trước **chưa** tuyên bố sở hữu.
-Khối mã phải được xác định TRƯỚC, và comment nằm trong khối mã không phải comment.
-
-Phản chứng: ca trên ⇒ ĐỎ; comment thật ngoài khối mã vẫn phải được gỡ ⇒ hành vi cũ giữ nguyên.
-
-### AC 24 · Token markup chỉ tính khi nó THẬT SỰ là markup
-
-`doctrine-html-table-token-context-bypass` (lượt 10). Chuỗi `<table` / `</table>` nằm trong
-**thuộc tính có nháy** hoặc trong `<script>`/`<style>` không phải thẻ:
-
-| ca | đòi |
-|---|---|
-| `<td data-x="</table>">` đóng bảng ngoài | ĐỎ — thẻ trong thuộc tính không đóng bảng |
-| `<script>const s = "</table>";</script>` | ĐỎ — như trên |
-| `<script>const s="<table>";</script>` rồi văn xuôi | XANH — không mở bảng, không bắt oan |
-
-Ca thứ ba là chiều bắt oan và nó ĐANG ĐỎ trên `1a4525a` — phải xanh lại.
+**Ghi lại vì sao chúng từng có mặt:** nếu một revision sau này mở lại miễn trừ dưới bất kỳ
+hình thức nào, ba lớp lỗi này quay lại ngay, và ba dòng bảng trên là danh sách kiểm sẵn.
 
 ### AC 25 · Suite phải TỰ IN số liệu của chính nó
 
@@ -314,141 +309,29 @@ Executor revision 4 phải tái lập lại, đừng nhận theo lời kể. Ma 
   sửa `release.py`, cả hai kéo manifest + golden vào write-set).
 - **Wiring suite vào CI** — gộp vào #52.
 - **`land-packets --apply`** — không thực thi trong packet này.
-- **Đối chiếu tự động `nguồn` của khối chứng cứ** với SHA và số dòng nó trỏ tới. AC 19 mới
-  chỉ đòi ĐÚNG CÚ PHÁP, chưa đòi xác minh nội dung. Việc ấy đáng làm nhưng là packet riêng:
-  nó cần đọc lịch sử git từ trong scanner, một phụ thuộc mới hẳn.
+- **Cơ chế miễn trừ dưới MỌI hình thức.** Khối chứng cứ khai báo đã được soạn, dựng nguyên
+  mẫu, đo 9/9, rồi BỎ vì không có người dùng. Nguyên mẫu giữ tại
+  `ops/specs/wp55-r4-ac19-nguyen-mau.py` với nhãn ĐÃ BỎ — nó là điểm xuất phát nếu sau này
+  có ca thật, KHÔNG phải việc của revision 4.
 
 ## Việc chưa làm, phải nói ra
 
-1. **Tham số AC 19 ĐÃ CHỐT** (chủ kho, trực tiếp trong phiên 2026-08-15): `N = 12` dòng mỗi
-   khối, `M = 3` khối mỗi tệp, khối được phép nằm trong **mọi tệp `write_set` kể cả
-   `CLAUDE.md`**, di trú theo đường **sửa master trước rồi rebase**. Còn lại: **dạng chính
-   xác của thuộc tính `nguồn`** — nguyên mẫu dùng `<đường-dẫn>@<sha7..40>:<dòng>[-<dòng>]`
-   và đã đo chạy được, nhưng chưa ai duyệt nó là dạng chuẩn.
-2. **`base_sha` chưa điền được** — hệ quả của đường di trú đã chốt, xem mục AC 19. Đây là
-   việc PHẢI làm trước khi cấp lease, không phải việc hoãn được.
-3. **Chi phí di trú ĐÃ đo** (xem bảng ở AC 19): 0 chỗ trên nhánh packet, **1 chỗ trên cây đã
-   merge** — `CLAUDE.md` dòng 82–83, đến từ master. Cái CHƯA quyết là **di trú ở đâu**: sửa
-   `CLAUDE.md` phía nhánh packet, hay sửa trên master rồi rebase. Chủ kho chốt.
-4. **Sổ attempts của revision 3 không khớp thực tế** và revision 4 không hồi tố sửa được.
-   AC 26 chặn tái diễn, không chữa quá khứ.
+1. **`base_sha` chưa điền được.** Chờ `c47a439` land lên master bằng fast-forward. Đây là
+   việc PHẢI làm trước khi cấp lease, không hoãn được. Land bằng merge/squash thì SHA đổi.
+2. **Chưa đo lại toàn bộ suite dưới hợp đồng mới.** Đã đo sáu phản ví dụ và năm ca chiều-tha
+   bằng mô phỏng (bỏ nhánh miễn trừ khỏi scanner `1a4525a`); **chưa** chạy trọn 173 ca. Hai
+   ca chiều-tha chắc chắn đỏ và phải chuyển ma trận; có thể còn ca khác. Executor đo, đừng
+   chép con số ở đây.
+3. **Sổ attempts của revision 3 không khớp thực tế** — bốn commit chạy không lease. Revision
+   4 không hồi tố sửa được; AC 26 chỉ chặn tái diễn.
+4. **`CODEX_AUTH_JSON` đã bị thu hồi và cấp lại một lần trong phiên 15-08** vì executor in
+   nó ra transcript. Hook KHÔNG tự nạp token mới: chốt "không ghi đè khi đã đăng nhập" của
+   nó tin `codex login status`, mà lệnh ấy chỉ đọc TỆP chứ không hỏi máy chủ — nên nó báo
+   "Logged in" với một token đã chết. Đây là lỗ thật trong hook, **ngoài `write_set`**, chưa
+   ai vá. Ghi ở đây để không rơi.
 
----
+## Những thứ ĐÃ chốt, đừng mở lại nếu không có căn cứ mới
 
-# BỔ SUNG của phiên ĐIỀU PHỐI — 2026-08-15T15:20Z
-
-Bản thảo gốc giữ NGUYÊN; đây là phần thêm, không sửa chữ nào ở trên.
-Chủ kho đã chốt tồn đọng revision 4 gồm **hai** mục
-([#55 comment 5301422660](https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5301422660)).
-Bản thảo phủ mục thứ nhất (`ac20`, ở AC 20) nhưng **không nhắc mục thứ hai**.
-
-## AC 27 · `same_provider_approved` — acceptance phải THÔI mâu thuẫn với §8
-
-`docs/PROTOCOL_DA_PHIEN.md` §8 cho phép, nguyên văn:
-
-> `same_provider_approved`: phiên mới, context/worktree riêng và read-only cùng nền tảng
-> khi phía kia hết quota.
-
-Nhưng acceptance của packet (AC 5, từ revision 2) đòi chặn executor-trùng-reviewer **ngay từ
-`init`**, nên CLI từ chối **vô điều kiện**. Hệ quả đo được: **dispatcher đi đúng đường
-fallback mà protocol cho phép thì không ghi nổi một review nào.**
-
-Đây **không** phải thiếu sót của mã. Mã đang cài đúng acceptance; **acceptance mới là chỗ
-sai**. Vì thế nó không vá được trong revision 3 — vá là **nới một AC**, đúng thứ §12 cấm
-(*"không thêm cờ nới bí mật"*).
-
-**Yêu cầu của AC 27:**
-
-1. `init` **không** được từ chối vô điều kiện khi executor và reviewer cùng provider. Nó
-   phải nhận một mức bảo đảm tường minh và ghi vào state.
-2. Mức bảo đảm là một trong bốn giá trị §8 — `cross_approved` · `human_audited` ·
-   `same_provider_approved` · `review_deferred` — **không có giá trị tự chế**.
-3. Mặc định vẫn là `cross_approved`. Hạ xuống `same_provider_approved` phải:
-   - do **người có thẩm quyền** khai (cùng chốt `NGUOI_CO_THAM_QUYEN` như `record-lease`);
-   - kèm **lý do allowlist** — chỉ `quota` hoặc `rate_limit`, đúng §8 và AC 8;
-   - ghi vào state và vào evidence §7, **không im lặng**.
-4. `record-review` phải **từ chối** approve khi mức bảo đảm của packet cao hơn mức thực tế
-   đạt được. Ví dụ: packet khai `cross_approved` mà chỉ có review cùng provider ⇒ ĐỎ.
-5. Phản chứng **hai chiều**:
-   - cùng provider **không khai** `same_provider_approved` ⇒ vẫn bị chặn (giữ hành vi cũ);
-   - cùng provider **có khai đúng** ⇒ đi tiếp được, và state ghi rõ mức bảo đảm đã hạ;
-   - khai `same_provider_approved` với lý do **ngoài allowlist** ⇒ ĐỎ;
-   - khai bởi người **không** trong `NGUOI_CO_THAM_QUYEN` ⇒ ĐỎ.
-6. Một **đột biến** bỏ chốt ở mục 4 (cho approve khi bảo đảm chưa đạt) phải làm ca đích ĐỎ.
-
-**ĐÍNH CHÍNH — căn cứ cấp bách của mục này đã SAI, mục vẫn đứng vững vì lý do khác.**
-
-Bản `fc5936c` viết: *"`codex` cài trong container điều phối nhưng `codex login status` trả
-`Not logged in`, nên mọi lượt review hợp lệ đều phải chờ một máy khác — AC 5 là **điểm chết
-đơn** của cả vòng lặp."*
-
-Câu đó **sai**, và sai theo kiểu đắt nhất: nó suy từ MỘT lệnh ra một kết luận về môi trường.
-`codex login status` nói đúng sự thật của nó — không có `auth.json` trên đĩa — nhưng tôi
-đọc thành "không dùng được", mà không hỏi tiếp **nó xác thực bằng đường nào**. Xác thực nằm
-ở biến môi trường `CODEX_AUTH_JSON` (base64 của chính `auth.json`). Giải mã ra `~/.codex/auth.json`
-là `codex` chạy được ngay. Cross-review lượt 11 **đã chạy trong chính container này**, ra
-verdict `changes_requested` neo `4085bbf22d565a4189977f0504dfd8e5f748bfce`.
-
-Sai lầm nối tiếp, đáng ghi vì đã có tiền lệ trong `CLAUDE.md`: khi đi tìm biến môi trường,
-tôi `grep` theo một **danh sách tên đoán trước** (`OPENAI_API_KEY`, `CODEX_API_KEY`, …) nên
-trượt đúng cái tên thật. Đó là cùng một lỗi với bộ quét secrets lọc theo **phần mở rộng** rồi
-mù với `.env` — *lọc theo danh sách đoán trước thì mù đúng chỗ thứ cần tìm đang nằm*.
-
-Chính adapter này đã cảnh báo trước bằng chữ, ở `.claude/skills/work-packet/SKILL.md`:
-**"Vắng mặt là một QUAN SÁT; 'môi trường không có' là một KẾT LUẬN."** Tôi đọc dòng đó, rồi
-vẫn vi phạm nó. Giá phải trả: packet đứng hình gần trọn một ngày để chờ một phiên `codex`
-vốn luôn sẵn sàng.
-
-**AC 27 vẫn đứng — nhưng trên căn cứ khác, và với mức ưu tiên thấp hơn.** Mâu thuẫn §8 ↔ AC 5
-là mâu thuẫn **văn bản**, không phụ thuộc việc `codex` có sẵn hay không: §8 cho phép
-`same_provider_approved` khi phía kia hết quota, còn AC 5 chặn **vô điều kiện** ngay tại
-`init`. Đường lui mà protocol viết ra vẫn là đường **không đi được**, và điều đó sai bất kể
-hôm nay ai đăng nhập được. Cái mất đi chỉ là chữ *"điểm chết đơn"* — hết quota vẫn là chuyện
-sẽ xảy ra, nhưng nó là rủi ro có thật chứ không còn là sự cố đang diễn ra.
-
-## Ghi chú về phạm vi — cảnh báo trước cho lượt executor
-
-AC 19 mới **thay** cơ chế suy đoán bằng cơ chế khai báo. Hệ quả: ba finding P1 doctrine của
-verdict lượt 10 —
-
-```
-doctrine-measurement-marker-semantic-bypass
-doctrine-indented-code-block-bypass
-doctrine-comment-erases-fence-closer-bypass
-```
-
-— đều **mô tả lỗi của cơ chế suy đoán sắp bị xoá**. Vá chúng theo revision 3 rồi mới áp
-revision 4 là làm hai lần và vứt lần đầu.
-
-**Lượt 11 đã trả lời thẳng câu hỏi mà bản thảo này đặt cược vào.** Verdict
-`ops/reviews/wp55-r3-review-11-codex-verdict.md` (nhánh `ops/wp55-r3-review-11-verdict`,
-commit `653672e12bf9ff04fb3ea2972c3576be458c58a1`, sha256
-`4f6d5ab39d5a05eb3fc910d3a85dd1fa58a05653d19aa78b740230e0026b0f6f`) kết luận nguyên văn:
-
-**AC 19 hiện tại không thể cưỡng chế máy một cách vừa sound vừa complete: 'văn xuôi kể lại
-kết quả đo' là phân loại ngữ nghĩa mở, còn marker từ vựng (`rc=`, phân số, từ 'đo') không
-chứng minh quan hệ đó. Revision 4 phải thay ngoại lệ bằng hợp đồng cơ học hữu hạn; vá thêm
-heuristic tiếp tục tạo lách/bắt oan.**
-
-Đây là **bằng chứng độc lập, khác provider** cho hướng đi của AC 19 mới, và nó mạnh hơn lập
-luận của chính bản thảo: bản thảo suy từ việc con lắc đã đánh quá sáu lần; reviewer nói
-thẳng rằng cái đích **không tồn tại**, nên lần thứ bảy cũng vô ích. Lượt 11 cũng **không**
-tìm ra doctrine finding mới — bốn P1 cũ tái lập nguyên trạng, có fixture nguyên văn và đối
-chứng cùng-câu-khác-đúng-một-biến.
-
-Ba mục **không** phụ thuộc AC 19, vá được ngay và không phí:
-
-| finding | vì sao độc lập |
-|---|---|
-| `lease-schema-allows-extra-keys` | lược đồ lease, không liên quan doctrine |
-| `packet-suite-mutation-count-mismatch` | hồ sơ khai 39, `len(MUTANTS)` = 38 |
-| `packet-loop-suite-mutant-gate-red` | hạ tầng test; còn lệch nền Windows/Linux chưa giải thích |
-
-Riêng `doctrine-html-table-token-context-bypass` nằm giữa: nó về **dò cấu trúc**, không về
-miễn trừ, nên vẫn cần dù AC 19 đổi.
-
-## Việc chưa làm — thêm vào danh sách của bản thảo
-
-5. **AC 27 chưa có bản cài mẫu.** AC 19 mới có `ops/specs/wp55-r4-ac19-nguyen-mau.py`;
-   AC 27 chưa có gì tương đương. Nên có, vì chỗ khó của nó là **thứ tự kiểm** giữa
-   `assurance` và `provider`, không phải cú pháp.
+- `N`, `M`, dạng thuộc tính `nguồn` — **không còn ý nghĩa**, cơ chế khối chứng cứ đã bỏ.
+- Đường di trú — **đã thực hiện xong**, `c47a439` được duyệt.
+- Bỏ hay giữ miễn trừ — **chủ kho chốt BỎ**, sau khi đo được rằng nó không có người dùng.

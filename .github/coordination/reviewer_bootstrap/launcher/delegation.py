@@ -190,8 +190,14 @@ def verify_read_only_root(
     if writable:
         raise _root_error("the delegated read-only root accepted a write and is not read-only")
 
-    head = git(path, "rev-parse", "HEAD", error=_root_error).strip()
-    tree = git(path, "rev-parse", "HEAD^{tree}", error=_root_error).strip()
+    # `binary=True` so the shared reader never decodes git's output through the console code page.
+    # On this host that is cp1258, and a delegated root under a Unicode path makes git quote bytes it
+    # cannot represent — which would surface as a decoding crash instead of a typed rejection, from
+    # the one call whose whole job is to answer an identity question about that path.
+    head = git(path, "rev-parse", "HEAD", error=_root_error, binary=True).decode("utf-8").strip()
+    tree = (
+        git(path, "rev-parse", "HEAD^{tree}", error=_root_error, binary=True).decode("utf-8").strip()
+    )
     if head != candidate_head:
         raise _root_error("the delegated root is at a different commit than the candidate")
     if tree != candidate_tree:

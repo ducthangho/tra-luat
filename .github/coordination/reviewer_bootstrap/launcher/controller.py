@@ -170,6 +170,63 @@ GENERATION = 2
 CANDIDATE_BRANCH = "agent/wp125-g2-claude"
 
 
+PACKET_ISSUE = 125
+PACKET_REVISION = 1
+CANDIDATE_REF = "refs/heads/agent/wp125-g2-claude"
+
+# WP125-RV-006-R2.  Round 2 checked the *wrapper*: generation, spec hash and branch in the binding
+# header.  A payload carrying generation-1 fixture semantics inside a correct generation-2 header
+# passed, because nothing looked past the header.  These walk the payload itself.
+_G1_MARKERS = (
+    "6cbc678ecdc36fdbda81a9c96d6921797e5d5e6d2467c03f26f95589d9f0c7f5",  # generation-1 spec hash
+    "agent/wp125-g1-claude",
+    "refs/heads/agent/wp125-g1-claude",
+)
+
+
+def _contains_stale_marker(payload: object) -> bool:
+    """True when generation-1 identity appears anywhere inside the payload, at any depth."""
+    if isinstance(payload, str):
+        return any(marker in payload for marker in _G1_MARKERS)
+    if isinstance(payload, Mapping):
+        if payload.get("generation") in (1, "1"):
+            return True
+        return any(
+            _contains_stale_marker(key) or _contains_stale_marker(value)
+            for key, value in payload.items()
+        )
+    if isinstance(payload, (list, tuple)):
+        return any(_contains_stale_marker(item) for item in payload)
+    return False
+
+
+def _authority_is_generation_2(payload: object) -> bool:
+    """The authority class must carry the nested generation-2 values, not just a matching header."""
+    if not isinstance(payload, Mapping) or not payload:
+        return False
+    authority = payload.get("authority")
+    expected = payload.get("expected_authority")
+    lease = payload.get("lease")
+    if not isinstance(authority, Mapping) or not isinstance(lease, Mapping):
+        return False
+    packet = authority.get("packet")
+    mission = authority.get("mission")
+    if not isinstance(packet, Mapping) or not isinstance(mission, Mapping):
+        return False
+    checks = (
+        packet.get("issue") == PACKET_ISSUE,
+        packet.get("revision") == PACKET_REVISION,
+        packet.get("generation") == GENERATION,
+        packet.get("spec_hash") == PACKET_SPEC_HASH,
+        mission.get("plan_hash") == MISSION_PLAN_HASH,
+        payload.get("candidate_ref") == CANDIDATE_REF,
+        bool(lease.get("effective_stop_utc")),
+        lease.get("generation") == GENERATION,
+        isinstance(expected, Mapping) and expected.get("packet_spec_hash") == PACKET_SPEC_HASH,
+    )
+    return all(checks)
+
+
 def _nonempty(payload: object) -> bool:
     return bool(payload)
 
@@ -212,6 +269,7 @@ def _return_codes_are_real(payload: object) -> bool:
 
 # locator -> predicate the payload must satisfy
 SEMANTIC_REQUIREMENTS = {
+    "authority_input.json": _authority_is_generation_2,
     "case_matrix.json": _matrix_is_green,
     "parity_report.json": lambda payload: isinstance(payload, Mapping) and bool(payload.get("ok")),
     "delegation_receipt.json": _delegation_is_real,
@@ -450,8 +508,14 @@ def verify_bindings(root: str, *, run_id: str | None = None) -> dict[str, object
                 {"kind": "stale_authority", "locator": locator, "fields": sorted(drifted)}
             )
             continue
+        payload = document.get("payload")
+        # A correct generation-2 wrapper around a payload that still carries generation-1 identity is
+        # exactly the shape round 2 accepted. The wrapper is checked above; this looks inside.
+        if _contains_stale_marker(payload):
+            findings.append({"kind": "stale_payload_semantics", "locator": locator})
+            continue
         predicate = SEMANTIC_REQUIREMENTS.get(locator)
-        if predicate is not None and not predicate(document.get("payload")):
+        if predicate is not None and not predicate(payload):
             findings.append({"kind": "payload_not_meaningful", "locator": locator})
             continue
         verified += 1

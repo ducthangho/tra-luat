@@ -113,6 +113,38 @@ handle left to kill with — and the new case caught it, red, before the repair 
 terminator of last resort is the handle `Popen` already holds from creation, which cannot fail to
 exist.
 
+## Review round 3 — seven clusters, and where the boundaries actually were
+
+Round 2 closed eight findings; round 3 found seven more, six of them one field outside a round-2
+repair. The lesson compounds: **a control repaired at the wrong radius is still a control that
+measures the wrong thing.**
+
+| cluster | what round 2 still left open | closed by |
+|---|---|---|
+| `RV-003-R2` | authorization was a module-private sentinel plus a caller-filled `provenance`, then a module-level table — all candidate-visible. It signed only the *observations*, so the plan, environment and surface the claim licences sat outside the signature | a keyed digest over the whole binding (observations **and** plan, environment, surface) under a per-process secret held in a closure. No table to write into, and a genuine token does not verify against swapped content |
+| `RV-006-R2` | the wrapper was checked, the payload was not: a correct generation-2 header around generation-1 semantics passed | nested authority validation (packet/revision/generation/spec/ref/lease) plus a recursive stale-marker walk over the payload itself |
+| `RV-007-R2` | the SHA-256 anchors were checked `if expected_sha` — opt-in, and the party they protect against fills in the context | anchors mandatory; byte-for-byte readback immediately before the claim **and** again immediately before spawn or dispatch |
+| `RV-008-R2` | the delegated surface pulled `commands[0]` out of the job and ran it directly, skipping the Linux identity check, the read-only-root proof, the credential probe, the per-test return codes and the cleanup receipt | the surface routes through `delegation.run_job`, the complete existing validator and runner, and an unknown or partial job is refused before any claim exists |
+| `RV-009-R2` | routing was validated *after* the claim, so an invalid delegated job left a durable claim behind | all surface, job, root, identity and deadline validation completes before the transactional commit |
+| `RV-010-R2` | `terminated: True` was written unconditionally — it recorded that a kill had been *attempted* | every field is an observation: what the API returned, what the wait returned, what an independent census says. `proven_gone` requires all four legs, so an unidentifiable child is named red rather than assumed clean |
+| `GATE-001` | the clone sat under a Unicode path, but the *linked source gitdir* did not | a detached linked checkout whose `.git` file points into a Unicode gitdir, with the full suite run from it under both interpreters |
+
+Three defects surfaced only because the gates were built to catch them, and each was a live bug in
+this package rather than in the test:
+
+1. **`text=True` decodes subprocess pipes through the console code page.** On this host that is
+   cp1258, and git quotes the Unicode path in its messages, so the reader thread died and `stderr`
+   arrived as `None` — surfacing as `'NoneType' object is not subscriptable`, which reads like a
+   broken assertion rather than a decoding fault. Every git call around a Unicode path now captures
+   bytes and decodes UTF-8 explicitly, including `verify_read_only_root` via `binary=True`.
+2. **`git worktree add` writes into the source's `.git/worktrees/`.** The read-only root is
+   deny-ACLed, so it cannot also be the linked source. The two fixtures want opposite things from
+   one directory and now get two.
+3. **A parent-table walk from a *dead* root harvests unrelated processes.** Windows reuses a pid the
+   moment it is free, and `th32ParentProcessID` keeps pointing at the number. Measured: ten
+   "survivors" while the Job Object census said zero active. Cleanup now walks descendants only from
+   roots that are still alive — the job is the authority for the tree, which is why it exists.
+
 ## What this launcher does not claim
 
 - The static scan cannot see a forbidden callable reached through a name built at run time, or a

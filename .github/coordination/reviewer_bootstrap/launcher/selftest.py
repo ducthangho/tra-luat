@@ -75,11 +75,16 @@ from launcher.watchdog import (  # noqa: E402
 )
 
 REPOSITORY = "ducthangho/tra-luat"
+# WP125-RV-006-R2: these are the *generation-2* values. The fixture used to carry generation-1
+# authority — the g1 spec hash and the g1 branch — and that fixture identity flowed straight into
+# the retained production evidence, so the artifact set described a Packet generation that was not
+# the one under review. A fixture is not neutral when its values are what gets retained.
 MISSION_PLAN_HASH = "ac5d5180be3de124dce002041683c3d6926aa60b36d39c7cad02136fd0776b9a"
-PACKET_SPEC_HASH = "6cbc678ecdc36fdbda81a9c96d6921797e5d5e6d2467c03f26f95589d9f0c7f5"
+PACKET_SPEC_HASH = "b8e3387d13cf60974a3e7a35350557605df52b282666a401b7b5b4100e42f3f3"
 INTEGRATION_HEAD = "60446be6467347e7242d5e03c001c19794e6e96d"
 INTEGRATION_TREE = "5d19b56a32d5fd127141ad0cd0824b8c976ba877"
-CANDIDATE_REF = "refs/heads/agent/wp125-g1-claude"
+CANDIDATE_REF = "refs/heads/agent/wp125-g2-claude"
+PACKET_GENERATION = 2
 LEASE_STOP = "2099-01-01T00:00:00Z"
 WRITE_PREFIX = inventory_module.LAUNCHER_PREFIX
 
@@ -176,7 +181,7 @@ def authority_document() -> dict[str, object]:
         "packet": {
             "issue": 125,
             "revision": 1,
-            "generation": 1,
+            "generation": PACKET_GENERATION,
             "attempt": 1,
             "spec_hash": PACKET_SPEC_HASH,
         },
@@ -191,7 +196,7 @@ def expected_authority() -> dict[str, object]:
         "mission_plan_hash": MISSION_PLAN_HASH,
         "packet_issue": 125,
         "packet_revision": 1,
-        "packet_generation": 1,
+        "packet_generation": PACKET_GENERATION,
         "packet_attempt": 1,
         "packet_spec_hash": PACKET_SPEC_HASH,
     }
@@ -231,9 +236,9 @@ def fixture(**overrides: object) -> Iterator[dict[str, object]]:
             "authority": authority_document(),
             "expected_authority": expected_authority(),
             "lease": {
-                "lease_id": "wp125-r1-g1-a1-lease-60446be6-6cbc678e",
+                "lease_id": "wp125-r1-g2-a1-lease-3556468f-b8e3387d",
                 "effective_stop_utc": LEASE_STOP,
-                "generation": 1,
+                "generation": PACKET_GENERATION,
                 "candidate_ref": CANDIDATE_REF,
                 "candidate_start_head": INTEGRATION_HEAD,
             },
@@ -318,18 +323,22 @@ def read_only_candidate_root() -> dict[str, object]:
     unicode_dir = base / "đường-dẫn-kiểm-thử"
     unicode_dir.mkdir()
     clone = unicode_dir / "candidate"
+    # Bytes everywhere: these commands name a Unicode path, and the console code page cannot decode
+    # it. See the note in `_build_detached_unicode_checkout`.
     result = subprocess.run(
         ["git", "clone", "--quiet", "--depth", "1", "--no-hardlinks", CANDIDATE_ROOT.as_uri(), str(clone)],
         capture_output=True,
-        text=True,
     )
-    ensure(result.returncode == 0, "the read-only root clone failed: %s" % result.stderr[-200:])
+    ensure(
+        result.returncode == 0,
+        "the read-only root clone failed: %s" % result.stderr.decode("utf-8", "replace")[-200:],
+    )
     head = subprocess.run(
-        ["git", "-C", str(clone), "rev-parse", "HEAD"], capture_output=True, text=True
-    ).stdout.strip()
+        ["git", "-C", str(clone), "rev-parse", "HEAD"], capture_output=True
+    ).stdout.decode("utf-8", "replace").strip()
     tree = subprocess.run(
-        ["git", "-C", str(clone), "rev-parse", "HEAD^{tree}"], capture_output=True, text=True
-    ).stdout.strip()
+        ["git", "-C", str(clone), "rev-parse", "HEAD^{tree}"], capture_output=True
+    ).stdout.decode("utf-8", "replace").strip()
     user = getpass.getuser()
     # Deny only the two rights that constitute "can create things here": WD (write data / add file)
     # and AD (append data / add subdirectory).  The simple right `W` looks like the obvious choice
@@ -338,9 +347,13 @@ def read_only_candidate_root() -> dict[str, object]:
     # anything.  A fixture that broke traversal would have made every identity check fail for a
     # reason unrelated to identity.
     deny = subprocess.run(
-        ["icacls", str(clone), "/deny", "%s:(OI)(CI)(WD,AD)" % user], capture_output=True, text=True
+        ["icacls", str(clone), "/deny", "%s:(OI)(CI)(WD,AD)" % user], capture_output=True
     )
-    ensure(deny.returncode == 0, "the read-only ACL could not be applied: %s" % deny.stdout[-200:])
+    ensure(
+        deny.returncode == 0,
+        "the read-only ACL could not be applied: %s"
+        % deny.stdout.decode("utf-8", "replace")[-200:],
+    )
     _READ_ONLY_ROOT.update(
         {
             "path": str(clone),
@@ -361,8 +374,12 @@ def release_read_only_root() -> None:
     import shutil
     import subprocess
 
+    clone = str(_READ_ONLY_ROOT["path"])
+    # Detached linked checkouts are registered in the clone's gitdir; prune them before the tree goes
+    # away so nothing is left pointing at a path that no longer exists.
+    subprocess.run(["git", "-C", clone, "worktree", "prune"], capture_output=True)
     subprocess.run(
-        ["icacls", str(_READ_ONLY_ROOT["path"]), "/remove:d", str(_READ_ONLY_ROOT["user"])],
+        ["icacls", clone, "/remove:d", str(_READ_ONLY_ROOT["user"])],
         capture_output=True,
     )
     shutil.rmtree(str(_READ_ONLY_ROOT["base"]), ignore_errors=True)
@@ -942,7 +959,7 @@ def negative_wrong_attempt() -> dict[str, object]:
 def negative_stale_generation() -> dict[str, object]:
     with fixture() as context:
         lease = dict(context["lease"])
-        lease["generation"] = 0
+        lease["generation"] = 1
         context["lease"] = lease
         return _preflight_failure(context, "lease_and_branch", "stale_generation")
 
@@ -1787,36 +1804,60 @@ def rv003_imported_seal_replay() -> dict[str, object]:
     to observations the controller actually witnessed, and it is re-validated live at the commit
     point.
     """
+    import dataclasses as _dataclasses
+
     from launcher import preflight as preflight_module
 
     with fixture() as context:
-        steps = tuple(
-            StepResult(name=name, index=index, observations={"forged": True})
-            for index, name in enumerate(STEP_NAMES + ("value_binding",), start=1)
-        )
-        forged = PreflightReceipt(
-            complete=True,
-            steps=steps,
-            plan=object(),
-            environment={"CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"},
-            surface="windows",
-            failure=None,
-            # Replay a token lifted straight out of the controller-held table.
-            authorization=next(iter(preflight_module._PROVENANCE), "wp125-preflight-1-deadbeef"),
-        )
+        genuine = run_preflight(context)
+        ensure(genuine.complete, "preflight did not complete on a valid fixture")
+        ensure(isinstance(genuine.authorization, str), "the trusted run minted no authorization")
+
+        # There is no table to steal from any more, and no field to stamp. The only thing an attacker
+        # has is a *genuine* authorization from a real run — so replay it onto a receipt whose plan,
+        # environment and surface have been swapped. Round 2 would have accepted this: it signed the
+        # observations only, and the launch the claim licences was outside the signature.
+        replayed = _dataclasses.replace(genuine, plan=object())
         ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
-        result = expect_rejection(
+        swapped_plan = expect_rejection(
             "preflight_incomplete",
-            lambda: mint_claim(forged, ledger, "wp125-replay", {"role": "executor"}, context=context),
+            lambda: mint_claim(replayed, ledger, "wp125-replay-plan", {"role": "executor"}, context=context),
+        )
+        swapped_env = expect_rejection(
+            "preflight_incomplete",
+            lambda: mint_claim(
+                _dataclasses.replace(genuine, environment={"CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"}),
+                ledger,
+                "wp125-replay-env",
+                {"role": "executor"},
+                context=context,
+            ),
+        )
+        swapped_surface = expect_rejection(
+            "preflight_incomplete",
+            lambda: mint_claim(
+                _dataclasses.replace(genuine, surface="delegated_linux_run_test"),
+                ledger,
+                "wp125-replay-surface",
+                {"role": "executor"},
+                context=context,
+            ),
         )
         ensure(len(ledger) == 0, "a replayed authorization minted a claim object")
         ensure(
             not hasattr(preflight_module, "_SEAL"),
             "the retired sentinel is still present and still stampable",
         )
-        result["claim_objects"] = 0
-        result["replayed_token"] = True
-        return result
+        ensure(
+            not hasattr(preflight_module, "_PROVENANCE"),
+            "a candidate-visible authorization table is still present and still writable",
+        )
+        return {
+            "claim_objects": 0,
+            "swapped_plan": swapped_plan["category"],
+            "swapped_environment": swapped_env["category"],
+            "swapped_surface": swapped_surface["category"],
+        }
 
 
 @case("WP125-RV-003-commit-point-revalidates-the-sealed-pin")
@@ -2426,12 +2467,34 @@ def rv008_delegated_routing() -> dict[str, object]:
             described["model_command_invoked"] is False,
             "the Reviewer/model command was invoked on the delegated surface",
         )
-        ensure(record.outcome.return_code == 0, "the delegated run_test did not exit zero")
-        RETURN_CODES["WP125-RV-008-delegated"] = record.outcome.return_code
+        ensure(record.outcome is None, "a local Reviewer child ran on the delegated surface")
+        # The complete validator and runner produced the evidence, not a hand-picked command.
+        evidence = record.delegation_evidence
+        ensure(evidence, "the delegated surface produced no runner evidence")
+        ensure(evidence["runner_os"] == platform.system(), "the runner OS was not verified")
+        ensure(evidence["tests_executed"] >= 1, "no declared delegated test executed")
+        ensure(evidence["tests_failed"] == 0, "a declared delegated test failed")
+        ensure(
+            all(isinstance(code, int) for code in evidence["return_codes"].values()),
+            "the delegated evidence carries no real return codes",
+        )
+        ensure(evidence["timeout_source"] == "controller", "the timeout was not controller-owned")
+        ensure(evidence["cleanup"]["cleanup_proven"] is True, "delegated cleanup was not proven")
+        ensure(
+            evidence["job_report"]["credential_marker_present"] is False,
+            "a credential reached the delegated job",
+        )
+        # Flattened to integers: the retained return-code class is a map of case to *raw exit code*,
+        # and nesting a dict inside it made the class structurally present and semantically useless —
+        # which the round-3 predicate caught, correctly.
+        for test_id, code in evidence["return_codes"].items():
+            RETURN_CODES["WP125-RV-008-delegated:%s" % test_id] = code
         return {
             "surface": described["surface"],
             "launched": described["launched"],
             "model_command_invoked": False,
+            "return_codes": evidence["return_codes"],
+            "routed_through_full_runner": True,
         }
 
 
@@ -2500,19 +2563,28 @@ def rv009_single_deadline_source() -> dict[str, object]:
         return {"deadline": deadline, "caller_parameter_removed": True}
 
 
-@case("WP125-RV-010-open-failure-terminates-the-suspended-child")
+@case("WP125-RV-010-open-failure-is-red-and-still-kills-the-child")
 def rv010_open_failure() -> dict[str, object]:
-    return _pre_adoption_failure("OpenProcess", "the child could not be opened for containment")
+    """When ``OpenProcess`` is broken, identification is broken too — so cleanup is *not* provable.
+
+    This is the honest outcome, and it is the one RV-010-R2 asks for: the inability to identify the
+    child is named red rather than papered over.  The child must still actually die, through the
+    retained creation handle, and that is checked independently after the injection is removed.
+    """
+    return _pre_adoption_failure("OpenProcess", expect_proven_gone=False, expect_identified=False)
 
 
-@case("WP125-RV-010-assign-failure-terminates-the-suspended-child")
+@case("WP125-RV-010-assign-failure-terminates-and-proves-the-child-gone")
 def rv010_assign_failure() -> dict[str, object]:
+    """Here identification still works, so cleanup can be — and must be — proven."""
     return _pre_adoption_failure(
-        "AssignProcessToJobObject", "the child could not be assigned to the job"
+        "AssignProcessToJobObject", expect_proven_gone=True, expect_identified=True
     )
 
 
-def _pre_adoption_failure(api: str, expected_fragment: str) -> dict[str, object]:
+def _pre_adoption_failure(
+    api: str, *, expect_proven_gone: bool, expect_identified: bool
+) -> dict[str, object]:
     """Inject a Win32 failure inside the create-to-adopt window and prove nothing is left behind.
 
     Generation 2 raised on each of these paths without touching the child, which had been created
@@ -2556,18 +2628,44 @@ def _pre_adoption_failure(api: str, expected_fragment: str) -> dict[str, object]
         fence = seen.get("fence")
         records = getattr(fence, "pre_adoption_cleanup", [])
         ensure(records, "no pre-adoption cleanup was recorded")
-        ensure(records[-1]["terminated"] is True, "the suspended child was not terminated")
-        ensure(records[-1]["proven_gone"] is True, "the suspended child was not proven gone")
+        record = records[-1]
 
-        # Independent check against the live process table, not the fence's own bookkeeping.
+        # Observations, not intentions. `terminated` must come from an API that returned success.
+        ensure(record["terminate_calls"], "no termination was attempted at all")
+        ensure(record["terminated"] is True, "no termination call reported success")
+        ensure(record["waited"] is True, "the controller did not wait for the child")
+        ensure(
+            record["identified"] is expect_identified,
+            "identification was %r, expected %r" % (record["identified"], expect_identified),
+        )
+        ensure(
+            record["proven_gone"] is expect_proven_gone,
+            "proven_gone was %r, expected %r" % (record["proven_gone"], expect_proven_gone),
+        )
+
+        # Independent check with the injection removed: whatever the fence could or could not prove
+        # at the time, the child must actually be dead.
         identity_value = watchdog_module.identify(pid)
         alive = identity_value is not None and watchdog_module.is_alive(identity_value)
         ensure(not alive, "a suspended orphan survived the pre-adoption failure")
-        PRE_ADOPTION_EVIDENCE.append({"api": api, "pid": pid, "survivor": False})
+        ensure(pid not in watchdog_module.live_pids(), "the child pid is still in the process table")
+
+        PRE_ADOPTION_EVIDENCE.append(
+            {
+                "api": api,
+                "pid": pid,
+                "identified": record["identified"],
+                "terminated": record["terminated"],
+                "waited": record["waited"],
+                "proven_gone": record["proven_gone"],
+                "survivor": False,
+            }
+        )
         result["injected_api"] = api
         result["pid"] = pid
+        result["identified"] = record["identified"]
+        result["proven_gone"] = record["proven_gone"]
         result["survivor"] = False
-        result["expected_fragment_present"] = expected_fragment in str(result.get("category", ""))
         return result
 
 
@@ -2613,36 +2711,170 @@ def specg2_duplicate_switches() -> dict[str, object]:
         return {"refused": refused}
 
 
-@case("WP125-G2-GATE-001-delegation-cases-run-from-a-unicode-path-checkout")
-def gate001_unicode_checkout() -> dict[str, object]:
-    """The read-only exact-root clone and its git identity check must survive a Unicode gitdir.
+DETACHED_MARKER = "WP125_DETACHED_SUITE"
+_DETACHED: dict[str, object] = {}
 
-    A launcher whose evidence can only be produced from an ASCII path is a launcher that has not been
-    measured on this repository, which is Vietnamese throughout.  The fixture root is rebuilt under a
-    Unicode directory and the identity verification is re-run against it, so the nine delegation
-    controls execute from a fresh detached checkout whose ``.git`` lives behind non-ASCII bytes.
+
+def release_detached_checkout() -> None:
+    if not _DETACHED:
+        return
+    import shutil
+    import subprocess
+
+    subprocess.run(["git", "-C", str(_DETACHED["clone"]), "worktree", "prune"], capture_output=True)
+    shutil.rmtree(str(_DETACHED["base"]), ignore_errors=True)
+    _DETACHED.clear()
+
+
+def _build_detached_unicode_checkout() -> dict[str, object]:
+    """A detached linked checkout whose *source gitdir* lives behind non-ASCII bytes.
+
+    Round 2 put the clone itself under a Unicode directory, which is not the same thing.  A linked
+    checkout keeps its ``.git`` as a **file** containing ``gitdir: <path>`` — so the interesting path
+    is the one that file points at, and that is what git must open before it can answer any identity
+    question.  Here the pointed-at gitdir is inside the Unicode clone, so the indirection itself is
+    what gets exercised.
     """
-    root = read_only_candidate_root()
-    path = pathlib.Path(str(root["path"]))
-    ensure(root["unicode_path"] is True, "the read-only root was not built under a Unicode path")
+    import shutil
+    import subprocess
+
+    if _DETACHED:
+        return _DETACHED
+
+    # A *separate* Unicode clone. The read-only root cannot double as the linked source: registering
+    # a linked checkout writes into the source's `.git/worktrees/`, and that tree is deliberately
+    # deny-ACLed, so `git worktree add` fails with "could not create leading directories". The two
+    # fixtures want opposite things from the same directory, so they get two directories.
+    base = pathlib.Path(tempfile.mkdtemp(prefix="wp125-detached-"))
+    unicode_dir = base / "nguồn-liên-kết"
+    unicode_dir.mkdir()
+    clone = unicode_dir / "candidate"
+    cloned = subprocess.run(
+        ["git", "clone", "--quiet", "--depth", "1", "--no-hardlinks", CANDIDATE_ROOT.as_uri(), str(clone)],
+        capture_output=True,
+    )
     ensure(
-        any(ord(ch) > 127 for ch in str(path)),
-        "the read-only root path carries no non-ASCII character: %s" % path,
+        cloned.returncode == 0,
+        "the linked-source clone failed: %s" % cloned.stderr.decode("utf-8", "replace")[-300:],
     )
-    evidence = verify_read_only_root(
-        str(path),
-        candidate_root=str(CANDIDATE_ROOT),
-        candidate_head=str(root["head"]),
-        candidate_tree=str(root["tree"]),
+    detached = unicode_dir / "tách-rời"
+    if not detached.exists():
+        # Bytes, then decode UTF-8 by hand. `text=True` hands the pipe to the console code page,
+        # which here is cp1258 — and git's messages quote the Unicode path, so the reader thread dies
+        # on the first non-Latin byte and `stderr` arrives as None. The failure surfaced as
+        # `'NoneType' object is not subscriptable`, which reads like a bug in the assertion rather
+        # than a decoding fault in the harness. This is the exact class of breakage the gate exists
+        # to find, so the harness must not contain it either.
+        result = subprocess.run(
+            ["git", "-C", str(clone), "worktree", "add", "--detach", str(detached), "HEAD"],
+            capture_output=True,
+        )
+        ensure(
+            result.returncode == 0,
+            "the detached checkout failed: %s"
+            % result.stderr.decode("utf-8", "replace")[-300:],
+        )
+
+    git_file = detached / ".git"
+    ensure(git_file.is_file(), "the detached checkout has no .git file, so nothing is linked")
+    pointer = git_file.read_text(encoding="utf-8").strip()
+    ensure(pointer.startswith("gitdir:"), "the .git file does not point at a linked gitdir")
+    gitdir = pointer.split(":", 1)[1].strip()
+    ensure(
+        any(ord(ch) > 127 for ch in gitdir),
+        "the linked source gitdir carries no non-ASCII character: %s" % gitdir,
     )
-    ensure(evidence["head"] == root["head"], "git identity through a Unicode gitdir disagreed")
-    ensure(evidence["writability_probe"] == "refused", "the Unicode root was writable")
+
+    # The package under test is the working tree's, not the committed one; the checkout supplies the
+    # Unicode-linked gitdir the gate is about.
+    target = detached / ".github" / "coordination" / "reviewer_bootstrap" / "launcher"
+    if target.exists():
+        shutil.rmtree(target)
+    shutil.copytree(HERE, target, ignore=shutil.ignore_patterns("__pycache__"))
+    _DETACHED.update(
+        {"detached": str(detached), "gitdir": gitdir, "clone": str(clone), "base": str(base)}
+    )
+    return _DETACHED
+
+
+@case("WP125-G2-GATE-001-full-suite-runs-from-a-unicode-linked-gitdir-checkout")
+def gate001_unicode_checkout() -> dict[str, object]:
+    """Run the complete suite, normal and optimized, from the detached Unicode-gitdir checkout.
+
+    Nothing here is allowed to shrink: both inner runs must report the full registered denominator
+    with zero failed, skipped or not-run.  The inner runs carry a marker so this case does not
+    recurse into itself; the marker changes *only* this case's behaviour, and every other case runs
+    identically on both sides.
+    """
+    import subprocess
+
+    checkout = _build_detached_unicode_checkout()
+
+    if os.environ.get(DETACHED_MARKER) == "1":
+        # Inner run: prove the property, do not spawn another suite.
+        return {
+            "inner_run": True,
+            "linked_gitdir": checkout["gitdir"],
+            "gitdir_non_ascii": True,
+        }
+
+    suite = (
+        pathlib.Path(checkout["detached"])
+        / ".github"
+        / "coordination"
+        / "reviewer_bootstrap"
+        / "launcher"
+        / "selftest.py"
+    )
+    child_env = dict(os.environ)
+    child_env[DETACHED_MARKER] = "1"
+    child_env["PYTHONIOENCODING"] = "utf-8"
+
+    runs: dict[str, object] = {}
+    for label, flags in (("normal", []), ("optimized", ["-O"])):
+        proc = subprocess.run(
+            [python_executable(), *flags, str(suite)],
+            capture_output=True,
+            env=child_env,
+            cwd=checkout["detached"],
+        )
+        out = proc.stdout.decode("utf-8", "replace").strip()
+        ensure(out, "the %s detached run produced no report: %s" % (label, proc.stderr[-300:]))
+        report = json.loads(out.splitlines()[-1])
+        # Carry the inner failures outward. A nested run that only reports its exit code turns every
+        # inner problem into "exited 1", which is the least useful sentence a harness can produce.
+        inner_failures = [
+            "%s: %s" % (record["case_id"], str(record.get("error", ""))[:200])
+            for record in report["records"]
+            if record["status"] != "passed"
+        ]
+        ensure(
+            proc.returncode == 0,
+            "the %s detached run exited %d; inner failures: %s"
+            % (label, proc.returncode, " | ".join(inner_failures) or "(none reported)"),
+        )
+        ensure(report["ok"] is True, "the %s detached run was not green" % label)
+        ensure(report["failed"] == 0, "the %s detached run had failures" % label)
+        ensure(report["skipped"] == 0, "the %s detached run skipped cases" % label)
+        ensure(report["not_run"] == 0, "the %s detached run left cases not run" % label)
+        ensure(
+            report["scheduled"] == report["passed"] == len(registry_module.CASES),
+            "the %s detached run shrank the denominator: %s scheduled, %s registered"
+            % (label, report["scheduled"], len(registry_module.CASES)),
+        )
+        runs[label] = {
+            "rc": proc.returncode,
+            "scheduled": report["scheduled"],
+            "passed": report["passed"],
+            "optimized": report["optimized"],
+        }
+
     delegated = [case_id for case_id, _ in CASES if "delegat" in case_id.lower()]
     ensure(len(delegated) >= 9, "fewer than nine delegation cases are registered")
     return {
-        "root_path_non_ascii": True,
-        "head": evidence["head"],
-        "tree": evidence["tree"],
+        "linked_gitdir": checkout["gitdir"],
+        "gitdir_non_ascii": True,
+        "detached_runs": runs,
         "delegation_cases": len(delegated),
     }
 
@@ -2735,6 +2967,7 @@ def run_matrix() -> dict[str, object]:
                 )
 
     release_read_only_root()
+    release_detached_checkout()
 
     outcomes = {record["case_id"]: record["status"] for record in records}
     for case_id in not_run:

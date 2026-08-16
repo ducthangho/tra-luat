@@ -24,8 +24,10 @@ from __future__ import annotations
 import dataclasses
 import datetime
 import hashlib
+import hmac
 import json
 import pathlib
+import secrets
 from collections.abc import Callable, Mapping, Sequence
 
 from core.ledger import Ledger
@@ -132,35 +134,69 @@ class StepResult:
 #
 # The fault-injection seam mints no authorization, which is why a substituted step map remains
 # studiable and remains incapable of reaching a durable operation.
-_PROVENANCE: dict[str, str] = {}
-_PROVENANCE_COUNTER = [0]
-
 PROVENANCE_TRUSTED = "trusted_run"
 PROVENANCE_FAULT_INJECTION = "fault_injection"
 
 SURFACES = frozenset({"windows", "delegated_linux_run_test"})
 
 
-def _observations_digest(steps: Sequence["StepResult"]) -> str:
-    """Digest of the ordered observations, independent of anything the caller may assert."""
-    blob = json.dumps(
-        [{"index": step.index, "name": step.name, "observations": step.observations} for step in steps],
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-        default=str,
-    )
-    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+def _receipt_binding_blob(
+    steps: Sequence["StepResult"], plan: object, environment: Mapping[str, str], surface: str
+) -> bytes:
+    """The complete thing an authorization is about.
+
+    WP125-RV-003-R2.  Round 2 bound only the ordered observations, so the *launch* the receipt
+    authorised — its executable, its argument vector, its working directory, its environment, its
+    surface — was outside the signature entirely.  A receipt could be re-pointed at a different plan
+    after preflight and still present a matching authorization, which is the same forgery the round
+    was meant to close, one field further out.  Everything the claim actually licences is in here.
+    """
+    plan_view: dict[str, object] = {}
+    if plan is not None:
+        plan_view = {
+            "executable": getattr(plan, "executable", None),
+            "argv": list(getattr(plan, "argv", ()) or ()),
+            "working_directory": getattr(plan, "working_directory", None),
+            "prompt_path": getattr(plan, "prompt_path", None),
+        }
+    document = {
+        "steps": [
+            {"index": step.index, "name": step.name, "observations": step.observations}
+            for step in steps
+        ],
+        "plan": plan_view,
+        "environment_names": sorted(environment or {}),
+        "environment_memory": (environment or {}).get("CLAUDE_CODE_DISABLE_AUTO_MEMORY"),
+        "surface": surface,
+    }
+    return json.dumps(
+        document, ensure_ascii=False, sort_keys=True, separators=(",", ":"), default=str
+    ).encode("utf-8")
 
 
-def _mint_authorization(steps: Sequence["StepResult"]) -> str:
-    _PROVENANCE_COUNTER[0] += 1
-    token = "wp125-preflight-%d-%s" % (
-        _PROVENANCE_COUNTER[0],
-        _observations_digest(steps)[:16],
-    )
-    _PROVENANCE[token] = _observations_digest(steps)
-    return token
+def _make_authorizer():
+    """Keyed authorization held in a closure, with no table to alter and nothing to replay.
+
+    Round 2 kept a module-level ``dict`` mapping token to digest.  That is candidate-visible state:
+    the table can be read, and an entry can be written straight into it.  There is no table now.  The
+    authorization *is* a keyed digest of the whole binding blob under a per-process secret that is
+    never exported, so there is nothing to insert, and a token lifted from one receipt does not
+    verify against another because the blob it was computed over is different.
+    """
+    secret = secrets.token_bytes(32)
+
+    def mint(blob: bytes) -> str:
+        return hmac.new(secret, blob, hashlib.sha256).hexdigest()
+
+    def verify(blob: bytes, presented: object) -> bool:
+        if not isinstance(presented, str):
+            return False
+        return hmac.compare_digest(mint(blob), presented)
+
+    return mint, verify
+
+
+_mint_binding, _verify_binding = _make_authorizer()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -385,9 +421,17 @@ def _seal_launch_inputs(context: Mapping[str, object]) -> dict[str, object]:
         candidate_root=str(context["candidate_root"]),
         required_keys=("permission_mode", "executable", "working_directory", "prompt_path"),
     )
+    # WP125-RV-007-R2: the anchors are mandatory. Round 2 checked them only `if expected_sha`, so a
+    # context that simply omitted the anchor got an unanchored sealed file and a green step — the
+    # control was opt-in, and the party it was protecting against is the one filling in the context.
     expected_sha = context.get("expected_launch_config_sha256")
+    if not isinstance(expected_sha, str) or len(expected_sha) != 64:
+        raise reject(
+            "sealed_input",
+            "the launch configuration carries no Dispatcher-bound SHA-256 anchor",
+        )
     actual_sha = hashlib.sha256(raw).hexdigest()
-    if expected_sha and actual_sha != expected_sha:
+    if actual_sha != expected_sha:
         raise reject("sealed_input", "the sealed launch config does not match its pinned hash")
 
     # The prompt is a sealed input in its own right: hashing the configuration proves nothing about
@@ -397,8 +441,10 @@ def _seal_launch_inputs(context: Mapping[str, object]) -> dict[str, object]:
         prompt_path, "sealed prompt", candidate_root=str(context["candidate_root"])
     )
     expected_prompt_sha = context.get("expected_prompt_sha256")
+    if not isinstance(expected_prompt_sha, str) or len(expected_prompt_sha) != 64:
+        raise reject("sealed_input", "the prompt carries no Dispatcher-bound SHA-256 anchor")
     prompt_sha = hashlib.sha256(prompt_bytes).hexdigest()
-    if expected_prompt_sha and prompt_sha != expected_prompt_sha:
+    if prompt_sha != expected_prompt_sha:
         raise reject("sealed_input", "the sealed prompt does not match its pinned hash")
 
     # Anything the caller also supplied must be identical to the sealed document, or it is an
@@ -427,6 +473,51 @@ def _seal_launch_inputs(context: Mapping[str, object]) -> dict[str, object]:
         "prompt_path": prompt_path,
         "prompt_sha256": prompt_sha,
         "prompt_bytes": len(prompt_bytes),
+    }
+
+
+def assert_launch_inputs_unchanged(
+    context: Mapping[str, object], receipt: "PreflightReceipt"
+) -> dict[str, object]:
+    """Re-read the sealed inputs and refuse if a single byte moved (WP125-RV-007-R2).
+
+    Called immediately before the claim and again immediately before spawn or dispatch.  Preflight
+    validating a file once says the file was right *then*; the window between preflight and the
+    process actually starting is exactly where a replacement pays off, and it is the window nothing
+    was watching.  Both call sites re-open the sealed inputs through the hardened reader and compare
+    against the digests the receipt is bound to.
+    """
+    bound = receipt.steps[len(STEP_NAMES) - 1].observations
+    root = str(context["candidate_root"])
+    config_raw = read_sealed_bytes(
+        str(context["sealed_launch_config_path"]), "sealed launch config readback", candidate_root=root
+    )
+    config_sha = hashlib.sha256(config_raw).hexdigest()
+    if config_sha != bound.get("sealed_config_sha256"):
+        raise reject("sealed_input", "the sealed launch config changed after preflight")
+
+    document = json.loads(config_raw.decode("utf-8"))
+    prompt_raw = read_sealed_bytes(
+        str(document["prompt_path"]), "sealed prompt readback", candidate_root=root
+    )
+    prompt_sha = hashlib.sha256(prompt_raw).hexdigest()
+    if prompt_sha != bound.get("sealed_prompt_sha256"):
+        raise reject("sealed_input", "the sealed prompt changed after preflight")
+
+    plan = receipt.plan
+    if plan is not None:
+        if plan.executable != str(pathlib.Path(document["executable"]).resolve()):
+            raise reject("sealed_input", "the bound executable no longer matches the sealed input")
+        if plan.prompt_path != str(pathlib.Path(document["prompt_path"]).resolve()):
+            raise reject("sealed_input", "the bound prompt path no longer matches the sealed input")
+        if plan.working_directory != str(pathlib.Path(document["working_directory"]).resolve()):
+            raise reject(
+                "sealed_input", "the bound working directory no longer matches the sealed input"
+            )
+    return {
+        "config_sha256": config_sha,
+        "prompt_sha256": prompt_sha,
+        "readback": "byte_for_byte",
     }
 
 
@@ -629,10 +720,12 @@ def _run_steps(
         StepResult(name="value_binding", index=len(STEP_NAMES) + 1, observations=binding)
     )
     steps_tuple = tuple(results)
-    # Only the trusted path is given an authorization, and it is minted from the observations that
-    # were actually witnessed rather than from anything the caller supplied.
+    # Only the trusted path is given an authorization, and it is keyed over the *whole* binding —
+    # observations, plan, environment and surface — so none of them can change afterwards.
     authorization = (
-        _mint_authorization(steps_tuple) if provenance == PROVENANCE_TRUSTED else None
+        _mint_binding(_receipt_binding_blob(steps_tuple, plan, environment, surface))
+        if provenance == PROVENANCE_TRUSTED
+        else None
     )
     return PreflightReceipt(
         complete=True,
@@ -705,19 +798,20 @@ def mint_claim(
     if not isinstance(context, Mapping) or not context:
         raise reject("preflight_incomplete", "a claim was attempted without the pinned context")
 
-    # Controller-held provenance. The id is a lookup key, not a grant: it only means anything when
-    # the observations presented with it still hash to what the controller recorded against it.
-    token = receipt.authorization
-    if not isinstance(token, str) or token not in _PROVENANCE:
+    # Keyed authorization over the complete binding as it stands *now*: observations, plan,
+    # environment and surface. A receipt whose plan or environment was swapped after preflight fails
+    # here, because the blob it is verified against is recomputed from what is actually present.
+    if not _verify_binding(
+        _receipt_binding_blob(receipt.steps, receipt.plan, receipt.environment, receipt.surface),
+        receipt.authorization,
+    ):
         raise reject(
             "preflight_incomplete",
-            "the receipt carries no controller-held authorization",
+            "the receipt does not carry a valid controller authorization for its current binding",
         )
-    if _PROVENANCE[token] != _observations_digest(receipt.steps):
-        raise reject(
-            "preflight_incomplete",
-            "the receipt observations do not match the authorization the controller recorded",
-        )
+
+    # WP125-RV-007-R2: byte-for-byte readback of the sealed inputs immediately before the claim.
+    readback = assert_launch_inputs_unchanged(context, receipt)
 
     # Live re-validation. Any of these failing means the claim must not exist, whatever was true
     # when preflight ran.
@@ -739,6 +833,7 @@ def mint_claim(
     record = dict(payload)
     record["preflight_receipt_sha256"] = receipt.receipt_hash()
     record["revalidated_at_commit"] = True
+    record["sealed_input_readback"] = readback["readback"]
     created, stored = ledger.record(reconcile_key, record)
     if not created and stored != record:
         raise reject("duplicate_claim", "a conflicting payload already answers to this reconcile key")

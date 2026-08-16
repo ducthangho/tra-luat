@@ -543,43 +543,96 @@ class ProcessFence:
         table by identity.  The rejection names whether the child was proven gone, because "we tried
         to kill it" and "it is gone" are different claims and only the second one is cleanup.
         """
-        proven_gone = True
+        # WP125-RV-010-R2.  Round 2 recorded `terminated: True` unconditionally — it recorded that a
+        # kill had been *attempted*.  An attempted call is not an outcome, and a receipt that says
+        # "terminated" because a function was entered is the same false green this finding is about.
+        # Every field below is an observation: what the API returned, what the wait returned, and
+        # what an independent census of the process table says afterwards.
+        record: dict[str, object] = {
+            "pid": pid,
+            "reason": reason,
+            "identified": False,
+            "terminate_calls": [],
+            "waited": False,
+            "wait_signalled": None,
+            "census_after": None,
+            "terminated": False,
+            "proven_gone": False,
+        }
         identity_value = identify(pid)
+        record["identified"] = identity_value is not None
+
         if IS_WINDOWS and handle:
-            _kernel32.TerminateProcess(handle, 1)
-            _kernel32.WaitForSingleObject(handle, 5000)
-        # Always also go through the retained creation handle. When the failure being handled *is*
-        # `OpenProcess` returning null there is no ctypes handle at all, and this is the only
-        # terminator left; when there is one, killing twice is harmless and killing zero times is not.
+            ok = bool(_kernel32.TerminateProcess(handle, 1))
+            record["terminate_calls"].append({"via": "direct_handle", "returned_ok": ok})
+            wait = _kernel32.WaitForSingleObject(handle, 5000)
+            record["waited"] = True
+            record["wait_signalled"] = wait == WAIT_OBJECT_0
+        # The retained creation handle. When the failure being handled *is* `OpenProcess` returning
+        # null there is no ctypes handle at all, and this is the only terminator left.
         if self._child is not None:
             try:
                 self._child.kill()
                 self._child.wait(timeout=5)
-            except (OSError, ValueError, subprocess.TimeoutExpired):
-                pass
+                record["terminate_calls"].append({"via": "creation_handle", "returned_ok": True})
+                record["waited"] = True
+                record["wait_signalled"] = True
+            except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
+                record["terminate_calls"].append(
+                    {"via": "creation_handle", "returned_ok": False, "error": type(exc).__name__}
+                )
         if not IS_WINDOWS:
             try:
                 os.kill(pid, signal.SIGKILL)
-            except OSError:
-                pass
+                record["terminate_calls"].append({"via": "signal", "returned_ok": True})
+            except OSError as exc:
+                record["terminate_calls"].append(
+                    {"via": "signal", "returned_ok": False, "error": type(exc).__name__}
+                )
 
+        record["terminated"] = any(
+            call.get("returned_ok") for call in record["terminate_calls"]
+        )
+
+        # Independent census: the live process table, consulted after the wait, by identity.
         end = time.monotonic() + 5.0
-        while time.monotonic() < end:
-            if identity_value is None or not is_alive(identity_value):
+        survivor = True
+        while True:
+            table = live_pids()
+            present = pid in table
+            still_same = identity_value is not None and is_alive(identity_value)
+            survivor = still_same or (identity_value is None and present)
+            if not survivor:
+                break
+            if time.monotonic() >= end:
                 break
             time.sleep(0.02)
-        if identity_value is not None and is_alive(identity_value):
-            proven_gone = False
+        record["census_after"] = {"pid_in_table": pid in live_pids(), "identity_alive": survivor}
+
+        # Green only from observation, and only when every leg is observed. An unidentifiable child
+        # cannot be proven gone even if the table happens not to list it, because there is nothing to
+        # compare the table against.
+        record["proven_gone"] = bool(
+            record["identified"]
+            and record["terminated"]
+            and record["waited"]
+            and not survivor
+        )
 
         if IS_WINDOWS and handle:
             _kernel32.CloseHandle(handle)
-        self.pre_adoption_cleanup.append(
-            {"pid": pid, "reason": reason, "terminated": True, "proven_gone": proven_gone}
-        )
+        self.pre_adoption_cleanup.append(record)
         return reject(
             "watchdog_cleanup",
-            "%s; the pre-adoption child was terminated and %s"
-            % (reason, "proven gone" if proven_gone else "COULD NOT BE PROVEN GONE"),
+            "%s; pre-adoption child pid=%s identified=%s terminated=%s waited=%s proven_gone=%s"
+            % (
+                reason,
+                pid,
+                record["identified"],
+                record["terminated"],
+                record["waited"],
+                record["proven_gone"],
+            ),
         )
 
     def adopt(self, pid: int) -> ProcessIdentity:
@@ -743,11 +796,20 @@ class ProcessFence:
         survivors: list[int] = []
         census: dict[str, object] = {}
         while True:
-            survivors = [
-                identity_value.pid for identity_value in self.recorded if is_alive(identity_value)
-            ]
             table = live_pids()
+            survivors = []
             for identity_value in self.recorded:
+                if not is_alive(identity_value):
+                    # The root is gone. Its former children are no longer attributable to it: a pid
+                    # is reused the moment it is free, and `th32ParentProcessID` keeps pointing at the
+                    # number, not at the process that owned it. Walking the parent table from a dead
+                    # root therefore harvests *unrelated live processes* — measured here as ten of
+                    # them, on a busy machine, while the Job Object census said zero active. Treating
+                    # that as a survivor list turns a clean fence into an unprovable one, and the same
+                    # noise would drown a real survivor. The job is the authority for the tree; the
+                    # parent walk is only meaningful while the root it starts from is alive.
+                    continue
+                survivors.append(identity_value.pid)
                 survivors.extend(descendants_of(identity_value.pid, table))
             census = self.job_census()
             table_clean = not survivors

@@ -1,0 +1,183 @@
+# Lease REVIEWER — wp55 revision 4, generation 2, lượt review 2. Neo head 817598e2.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên "#55" chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt
+# cụt giá trị — đã đụng thật ở lease exec-4, mất dữ liệu IM LẶNG, cổng đăng không đỏ.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+mission_issue: 54
+mission_revision: 6
+revision: 4
+generation: 2
+phase_key: F3-03
+lease_id: wp55-r4-review-2-codex-20260816
+
+supersedes_lease: wp55-r4-review-1-codex-20260816
+supersedes_note: >-
+  Lease review 1 neo `2432e3f6` và ĐÃ giao verdict trên đúng SHA ấy (`do_not_land`, băm
+  `fe002e5b…`). Head nay đã đổi, nên duyệt cũ hết hiệu lực và lease cũ không còn giữ yêu sách.
+  Ghi `supersedes_lease` để KHÔNG có hai lease review sống cùng lúc cho cùng một vai — đúng
+  cơ chế đã dùng ở r2 (#2→#3→#4), không phải ngoại lệ nghĩ ra cho lượt này.
+
+role: reviewer
+review_attempt: 2
+provider: codex
+reviewer: codex
+executor: claude
+reviewer_note: 'executor vẫn là `claude` ⇒ §8 bắt reviewer khác provider'
+assurance_target: cross_approved
+access: read-only
+write_set: []                   # reviewer KHÔNG ghi (§2)
+branch_ownership: none
+
+spec_path: ops/specs/wp55-r4-spec.md
+spec_branch: ops/wp55-r4-spec-draft
+spec_sha256_required: 86d9627caf55ea2cb8e4caa29ef036fd490c190d8481fb4f79dd5d1703eb1afd
+spec_status: da_duyet
+spec_duyet_boi: ducthangho
+spec_note: >-
+  Băm KHÔNG đổi qua cả hai generation — spec không được sửa giữa chừng. Đã xác minh lại lúc
+  cấp lease này, khớp `86d9627c…`.
+
+# --- Vật để review ------------------------------------------------------------------
+reviewed_sha_required: 817598e2a3101c1e550dcba59bd7caea093264f6
+reviewed_sha_note: >-
+  Head ĐỂ REVIEW. Đã đo lúc cấp: tip của `claude/wp55-r4g1-f3-03` đúng bằng SHA này.
+branch: claude/wp55-r4g1-f3-03
+base_sha: 18da1da6a07ab2c86d716cef1d74ff2cd0e3218a
+start_from_sha: 2432e3f64f05739741dfe6f49081e9aaa140799f
+head_luot_truoc: 2432e3f64f05739741dfe6f49081e9aaa140799f
+target_pull_request: null
+target_pull_request_note: 'KHÔNG có PR cho nhánh này — review neo thẳng vào SHA.'
+
+prompt_path: ops/prompts/wp55-r4-review-2-codex-20260816.md
+prompt_sha256_required: 8b50c6470839ad2eba826cd4d87219d5c054ea51adf3f654859fb57ef6a5583c
+
+granted_by: ducthangho          # CHỦ KHO — §2 "người có thẩm quyền"
+granted_on_instruction: 'direct, in-session, 2026-08-16 ("cấp lease review 2 cho codex, neo 817598e2")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorder_cung_la_executor_g2: true
+recorder_note: >-
+  KHAI THẲNG: phiên `claude` ghi lease này CHÍNH LÀ phiên đã thực thi generation 2. Hai vai
+  khác nhau, cùng một phiên. Nó KHÔNG tự cấp quyền — `granted_by` là `ducthangho`, duyệt trực
+  tiếp, và cổng `ops/lease_publish.py` chặn cứng mọi tên provider ở trường ấy. Ghi ra để dấu
+  vết thẩm quyền ĐỌC ĐƯỢC chứ không phải suy, và để reviewer biết mà soi kỹ hơn phần khai
+  trong commit lẫn trong lease — cả hai do chính phiên thực thi viết.
+
+leased_at_utc: '2026-08-16T17:30:00Z'
+lease_expires_at_utc: '2026-08-17T17:30:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 2
+attempts_limit: 3
+attempts_note: >-
+  Generation 1 và 2 mỗi lượt tiêu một attempt nội dung. Còn đúng MỘT. Lượt review này KHÔNG
+  tiêu attempt của executor. Nếu verdict là `do_not_land` thì executor chỉ còn một lượt sửa
+  trước khi §12 buộc dừng và bàn giao — nhưng ĐỪNG hạ chuẩn vì sắp cạn trần.
+
+# --- Lượt review HẸP: diff so với head đã review là 7 dòng xoá ----------------------
+pham_vi_du_kien:
+  so_tep: 1
+  tep: .claude/dev/packet_loop_test.py
+  so_commit: 1
+  dong_them: 0
+  dong_xoa: 7
+  note: >-
+    Reviewer PHẢI tự đo phạm vi trước, đừng nhận theo khai báo. Lệch một dòng ⇒ phạm vi lớn
+    hơn khai báo và toàn bộ phần "đã đo ở lượt 1" MẤT HIỆU LỰC, phải review như head mới.
+
+review_dau_vao:
+  lease_id: wp55-r4-review-1-codex-20260816
+  verdict: do_not_land
+  verdict_path: ops/reviews/wp55-r4-review-1-codex-verdict.md
+  verdict_branch: ops/wp55-r4-review-1-codex-verdict
+  verdict_sha256: fe002e5b245a3f38f183b673809d4fe3362622c7a9653aa3c6a78dd9bfc5b9b4
+  so_finding: 1
+
+finding_phai_nghiem_thu:
+  - id: ac19-dead-exemption-mutation-anchors-remain
+    muc: P2
+    executor_khai: 'đã xoá `C3_CU`/`C3_MOI` cùng khối chú thích 4 dòng ngay trên chúng'
+    kiem: >-
+      `git grep -E "\bC3_CU\b|\bC3_MOI\b" 817598e2 -- .claude/` phải RỖNG. `_DAU_HIEU_PHEP_DO`
+      còn đúng một dòng — kiểm nó là CHÚ THÍCH chứ không phải mã. Và quét rộng hơn tên: còn
+      hằng/hàm nào khác chỉ phục vụ miễn trừ mà bị vô hiệu chứ không bị xoá không.
+
+mo_rong_pham_vi_can_xet:
+  - id: xoa-them-khoi-chu-thich-4-dong
+    note: >-
+      Finding chỉ nêu HAI hằng; executor xoá 7 dòng. Bốn dòng thừa là khối chú thích mô tả
+      "chốt (3) của `_duoc_tha_vi_ngat_dong`" — hàm đã bị xoá ở g1. Executor khai đây KHÔNG
+      phải khối chú thích lịch sử mà handoff g1 cố ý giữ (khối ấy nằm trong `packet_loop.py`).
+      Reviewer xét: khối bị xoá có mang thông tin cho thứ khác không, và việc mở rộng phạm vi
+      so với finding có chính đáng không. Thấy đáng giữ thì đó là finding.
+
+finding_da_rut_dung_neu_lai:
+  - id: mutation-kill-set-omits-false-positive-case
+    trang_thai: reviewer TỰ RÚT ở lượt 1 sau khi đo lại
+    kiem: >-
+      Xác minh executor KHÔNG đụng `MUTANTS`, hai danh sách phải-chết, hai ma trận —
+      `git diff 2432e3f6..817598e2` lọc theo các tên ấy phải RỖNG. Không rỗng là finding.
+    canh_bao: >-
+      ĐỪNG nêu lại finding đã rút trừ khi có phép đo MỚI cho thấy việc rút là sai. Rút rồi nêu
+      lại mà không có số mới thì lượt review sau không tin được lượt nào.
+
+# --- Nghiệm thu: SỐ PHẢI KHÔNG ĐỔI ---------------------------------------------------
+so_lieu_nen_g1:
+  ca: 185
+  dot_bien: 34
+  lop_lach: 78
+  ca_bat_oan: 35
+  ngoai_le_ac_18: 0
+so_lieu_note: >-
+  Hai hằng bị xoá không ai dùng, nên năm số phải GIỮ NGUYÊN. Executor báo đo được y hệt.
+  Reviewer chạy lại và đối chiếu — một số đổi nghĩa là đã xoá nhầm thứ đang được dùng.
+
+gate_executor_bao:
+  - phep_do: 'doctrine-scan trên nhánh'
+    rc: 0
+  - phep_do: 'suite trên nhánh'
+    rc: 0
+  - phep_do: 'AC 20 — doctrine-scan trên cây ĐÃ MERGE'
+    rc: 0
+  - phep_do: 'AC 20 — suite trên cây ĐÃ MERGE, có GIT_DIR'
+    rc: 0
+  - phep_do: 'AC 20 — suite BỎ GIT_DIR (chứng đường, PHẢI đỏ)'
+    rc: 1
+    ca_do: 'legacy_state_khong_co_lease_bi_chan — fatal: not a git repository'
+gate_note: >-
+  Chạy lại cả năm, KỂ CẢ dòng cố ý đỏ. Bỏ `GIT_DIR` mà vẫn xanh thì điều kiện spec vừa thêm là
+  thừa và cả AC 20 chỉ là nghi lễ — finding lớn.
+
+ngoai_pham_vi_da_biet:
+  - id: hook-tin-codex-login-status
+    note: >-
+      Hook tin `codex login status`, mà lệnh ấy chỉ đọc TỆP chứ không hỏi máy chủ. Lỗ thật,
+      NGOÀI `write_set`, cố ý không đóng. Đã ghi công thức đòi bằng chứng dương vào
+      `docs/GOI_AGENT_DA_NEN.md` trên nhánh `ops/launcher-bang-chung-dinh-luong` (chưa land).
+  - id: so-attempts-revision-3-khong-khop
+    note: 'bốn commit chạy không lease ở revision 3. Không hồi tố sửa được; AC 26 chỉ chặn tái diễn.'
+  - id: chua-chay-ruff-va-gate-phat-hanh
+    note: '`packet_loop*.py` là công cụ dev-side, không vào gói. Executor tự nhận đây là phép đo thiếu.'
+  - id: mo-lai-mien-tru-duoi-moi-hinh-thuc
+    note: 'Chủ kho chốt BỎ. Đề xuất mở lại KHÔNG phải finding hợp lệ ở lượt này.'
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-16T17:24:53Z'
+master_sha_at_grant: 18da1da6a07ab2c86d716cef1d74ff2cd0e3218a
+packet_head_at_grant: 817598e2a3101c1e550dcba59bd7caea093264f6
+master_khong_doi_tu_g1: >-
+  ĐÃ ĐO — master vẫn `18da1da`, đúng bằng `base_sha`. Nếu master tiến thêm trong cửa sổ lease
+  thì phải đo lại AC 20 trên tip mới, vì AC 20 nói *cây đã merge*, không nói *cây tại base_sha*.
+lease_song_khac_luc_cap: >-
+  Lease executor `wp55-r4-exec-2-claude-20260816` đã hoàn tất việc của nó (một commit,
+  `817598e2`). KHÔNG đẩy thêm gì lên nhánh packet trong lúc lease review này còn sống — đó
+  đúng là cách lượt review 8 của revision 3 bị hỏng.

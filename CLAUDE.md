@@ -79,8 +79,8 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   Nguyên văn reviewer: *"distinguishes spelling, not authority"* — phân biệt CÁCH VIẾT, không phân
   biệt THẨM QUYỀN. Danh sách cấm phải đoán trước mọi cách viết của kẻ gian (dấu nối, tiền tố, hậu tố,
   đồng tự Unicode, tổ hợp dấu) nên **thua từ trong thiết kế**; danh sách cho phép chỉ phải liệt kê một
-  tập nhỏ và biết trước. Đo được ở `v1.36.68` (PR #104): ba tên tấn công `rc=0` → `rc=4`, người có
-  thẩm quyền vẫn `rc=0`. Kèm chốt: đột biến **nới danh sách cho phép để chứa tên tấn công** phải làm
+  tập nhỏ và biết trước. Đo được ở `v1.36.68` (PR #104): ba tên tấn công `rc=0` → `rc=4`, tên thuộc
+  danh sách cho phép vẫn `rc=0`. Kèm chốt: đột biến **nới danh sách cho phép để chứa tên tấn công** phải làm
   ca đích ĐỎ — không có đột biến ấy thì không biết ca đang đo danh sách hay đo thứ khác.
 - **`[skip ci]` trong THÔNG ĐIỆP COMMIT là chốt đặt sai chỗ — nó sống trong LỊCH SỬ.**
   Bước ghi ngược của `ops-publish-lease.yml` từng commit kèm `[skip ci]` để khỏi tự kích hoạt lại.

@@ -52,6 +52,17 @@ cưỡng chế hạn chót" với "con tự thoát 124" (con chạy `timeout(1)`
 một launcher khác). Phía gọi TỰ ĐỘNG phải đọc `trang_thai` trong `run.json`
 (`xong` · `qua_han` · `bi_ngat` · `da_dung` · `hong`) chứ đừng suy từ mã trần.
 `check`/`status`/`stop`/`doctor` không có con nên bảng trên là dứt khoát.
+
+VÀ `trang_thai` CŨNG KHÔNG ĐỦ — nói thẳng kẻo câu trên bị đọc rộng hơn thực tế.
+`xong` chỉ nghĩa là CON ĐÃ THOÁT VỚI MÃ 0, không nghĩa là việc đã làm. Đo được
+16-08-2026: một lượt gọi agent trả `trang_thai=xong`, `ma_thoat=0`, mà agent
+dừng ngay ở bước đầu và từ chối làm vì môi trường thiếu quyền — nếu người vận
+hành dừng ở hai trường ấy thì đã báo "chạy xong, không có gì" cho một lượt chưa
+làm gì. Thứ tố cáo là THỜI LƯỢNG (43 giây cho việc lẽ ra hàng chục phút) và
+KÍCH THƯỚC ĐẦU RA, nên hai thứ đó nay được ghi thẳng vào sổ: `thoi_luong_giay`,
+`stdout_byte`, `stderr_byte`. Cùng họ với bài học "ca có MẶT khác ca có ĐO":
+launcher đo VÒNG ĐỜI TIẾN TRÌNH, nó không biết và không thể biết nội dung công
+việc. Ai gọi tự động phải tự đặt ngưỡng cho ba số ấy.
 """
 
 from __future__ import annotations
@@ -1310,12 +1321,33 @@ def lenh_run(a) -> int:
             ban_ghi["prompt_ban_chup_da_xoa"] = True
         except OSError:
             pass
-    ban_ghi.update(ket_thuc_utc=_bay_gio().isoformat(), ma_thoat=ma_that)
+    ket_thuc = _bay_gio()
+    ban_ghi.update(ket_thuc_utc=ket_thuc.isoformat(), ma_thoat=ma_that)
+    # BẰNG CHỨNG ĐỊNH LƯỢNG cho câu "xong" — xem CẢNH BÁO ở đầu tệp. `trang_thai`
+    # và `ma_thoat` chỉ nói về vòng đời tiến trình; ba số dưới đây là thứ duy nhất
+    # trong sổ phân biệt được "đã làm" với "thoát 0 mà chưa làm gì". Tính ở đây
+    # chứ không bắt người đọc tự trừ hai mốc thời gian: một phép tính phải làm tay
+    # là một phép tính sẽ bị bỏ qua đúng lúc cần nhất.
+    try:
+        bat_dau = datetime.fromisoformat(ban_ghi["bat_dau_utc"])
+        ban_ghi["thoi_luong_giay"] = round((ket_thuc - bat_dau).total_seconds(), 3)
+    except (ValueError, KeyError, TypeError):
+        ban_ghi["thoi_luong_giay"] = None    # không đo được thì nói KHÔNG ĐO ĐƯỢC
+    for ten, tep in (("stdout_byte", "stdout.log"), ("stderr_byte", "stderr.log")):
+        try:
+            ban_ghi[ten] = (thu_muc / tep).stat().st_size
+        except OSError:
+            ban_ghi[ten] = None
     _ghi_so(thu_muc, ban_ghi)
     if a.json:
         print(json.dumps(ban_ghi, ensure_ascii=False))
     else:
         print(f"trang thai: {ban_ghi['trang_thai']}  ma_thoat={ma}")
+        # In CẠNH nhau, không để người đọc phải mở sổ mới thấy: "xong ma_thoat=0"
+        # đứng một mình là câu dễ tin nhất và cũng dễ sai nhất.
+        print(f"thoi luong: {ban_ghi.get('thoi_luong_giay')}s  "
+              f"stdout={ban_ghi.get('stdout_byte')}B  "
+              f"stderr={ban_ghi.get('stderr_byte')}B")
         if ban_ghi["ly_do_dung"]:
             print(f"ly do     : {ban_ghi['ly_do_dung']}")
     return ma
@@ -1341,7 +1373,8 @@ def lenh_status(a) -> int:
             so = _doc_so(p)
             if so:
                 ds.append({k: so.get(k) for k in
-                           ("short_id", "ten", "trang_thai", "ma_thoat", "bat_dau_utc")})
+                           ("short_id", "ten", "trang_thai", "ma_thoat", "bat_dau_utc",
+                            "thoi_luong_giay", "stdout_byte", "stderr_byte")})
             elif (p / "run.json").exists():
                 # Sổ hỏng mà im lặng bỏ qua là fail-open: danh sách rỗng trông
                 # hệt như "không có lượt nào". Nói ra, và trả mã khác 0.

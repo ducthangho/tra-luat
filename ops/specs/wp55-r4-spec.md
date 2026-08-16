@@ -40,12 +40,14 @@ spec_hash_basis: sha256 của chính tệp này, byte nguyên trạng, không ch
 supersedes_revision: 3
 supersedes_spec_hash: e321f811724fae97b19d523a3e5159bc13b425cd15fc6c753c7439fe28cae22d
 
-base_sha: CHUA_XAC_DINH        # = c47a439 SAU khi land fast-forward — xem mục Di trú
+base_sha: c44b2d4c351cbe7f519e1b46aadf68d45e98af86
 base_sha_note: >-
-  CỐ Ý để trống. Di trú đã xong ở `c47a439` (verdict `approve`, `land_recommendation:
-  fast_forward`), nhưng commit ấy CHƯA land lên master. Điền số THẬT lúc cấp lease: bằng
-  `c47a439` nếu land fast-forward, bằng SHA mới nếu land merge/squash. Đoán trước là tự
-  dựng một mỏ neo chết.
+  ĐÃ CHỐT. Bản viết lại `c47a439` được duyệt nhưng KHÔNG ff được — nó dựng trên `2531366`
+  trong khi master tip đã là `d5b7bcc` (đi trước hai commit, PR #116). Rebase lên `d5b7bcc`
+  cho `c44b2d4`, và bản rebase cũng đã qua cross-review: `approve`, không finding, hai diff
+  giống nhau BYTE-FOR-BYTE kể cả context và hunk header `@@ -79,8 +79,8`.
+  ĐIỀU KIỆN: số này chỉ đúng nếu `c44b2d4` land bằng FAST-FORWARD. Land bằng merge/squash
+  thì SHA đổi và phải sửa lại đây.
 start_from_sha: 1a4525a20aa360476a6f59cb157c21097919c457
 start_from_note: >-
   KHÔNG dựng lại từ base. Generation 9 đã đóng được sáu finding của lượt 9 và mười tám hình
@@ -195,7 +197,8 @@ người có / thẩm quyền   →   tên thuộc / danh sách cho phép
 
 | | |
 |---|---|
-| commit | `c47a439997e0191427d775636ebadbf3be7e1481`, dựng thẳng trên master `2531366` |
+| commit ĐƯỢC DUYỆT | `c47a439997e0191427d775636ebadbf3be7e1481`, dựng trên `2531366` |
+| commit SẼ LAND | `c44b2d4c351cbe7f519e1b46aadf68d45e98af86` — cùng patch, rebase lên `d5b7bcc` |
 | phạm vi | 1 tệp, 2 dòng |
 | lease review | `wp55-r4-review-viet-lai-codex-20260815` |
 | verdict | **`approve`**, không finding, `land_recommendation: fast_forward` |
@@ -208,8 +211,20 @@ cách quay về chính PR #104 (merge `e344e7c`, `VERSION=1.36.68`) và đo lạ
 bọc chỗ ấy bằng khối chứng cứ AC 19; verdict trả `do_not_land` với finding
 `ac19-exemption-wider-than-necessary` — khối miễn 10 dòng để cứu 2 dòng.
 
-`base_sha` của revision 4 = SHA của `c47a439` **sau khi land bằng fast-forward**. Land bằng
-merge hoặc squash thì SHA đổi và phải điền số mới; spec để trống cho tới lúc đó.
+**`base_sha` của revision 4 = `c44b2d4c351cbe7f519e1b46aadf68d45e98af86`.**
+
+Vì sao không phải `c47a439`: bản ấy dựng trên `2531366`, mà master tip là `d5b7bcc` — đi
+trước hai commit (PR #116). **Fast-forward bất khả thi**, dù verdict khuyến nghị đúng chữ
+`fast_forward`. Cả executor lẫn reviewer khi ấy đều dùng `2531366` — con số spec neo cho
+phép đo AC 20 — mà không đo xem nó có còn là TIP không. Ghi ra để không lặp: **SHA neo cho
+phép đo và SHA tip của nhánh là hai thứ khác nhau.**
+
+Rebase lên `d5b7bcc` cho `c44b2d4`, và bản rebase cũng qua cross-review riêng
+(`wp55-r4-review-rebase-codex-20260816`): `approve`, không finding, hai diff giống nhau
+byte-for-byte kể cả context và hunk header. PR #116 không đụng `CLAUDE.md` nên không nuốt
+mất thay đổi nào của họ.
+
+Số này chỉ đúng nếu `c44b2d4` land bằng **fast-forward**.
 
 ## Acceptance criteria
 

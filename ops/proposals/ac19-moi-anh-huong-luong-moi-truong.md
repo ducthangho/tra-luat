@@ -45,14 +45,32 @@ Không có gì phải sửa trong phần các bạn viết.
 ## Cách chữa: rebase, đừng sửa tay
 
 Dòng 82 đã được xử lý ở `c44b2d4c351cbe7f519e1b46aadf68d45e98af86` — một commit hai dòng,
-đã qua **hai** lượt cross-review (`approve`, không finding), đang chờ chủ kho ff lên master:
+đã qua **hai** lượt cross-review (`approve`, không finding):
 
 ```
 người có / thẩm quyền   →   tên thuộc / danh sách cho phép
 ```
 
-Sau khi `c44b2d4` vào master, chỉ cần rebase `moi-truong-ba-p1` lên master mới là hết đỏ.
-**Đừng sửa dòng 82 ở nhánh các bạn** — sẽ va với `c44b2d4` và tạo xung đột không cần thiết.
+**ĐÃ LÊN MASTER 16-08** qua PR #129, land bằng merge commit
+`18da1da6a07ab2c86d716cef1d74ff2cd0e3218a` (không ff — master theo nếp merge commit). Tip
+master hiện là `18da1da`, không còn là `d5b7bcc`.
+
+**Việc của các bạn bây giờ: rebase `moi-truong-ba-p1` lên `18da1da` là hết đỏ.** Không cần
+sửa gì thêm. **Đừng sửa dòng 82 ở nhánh các bạn** — sẽ va với `c44b2d4` và tạo xung đột
+không cần thiết.
+
+Đã đo trên chính `18da1da`, kèm chứng đường để phép đo không rỗng:
+
+```
+scanner r3g5 (CÒN miễn trừ) @ 18da1da  ->  rc=0
+mô phỏng r4  (BỎ miễn trừ)  @ 18da1da  ->  rc=0    master sạch cả dưới hợp đồng MỚI
+scanner r3g5 (CÒN miễn trừ) @ d5b7bcc  ->  rc=0
+mô phỏng r4  (BỎ miễn trừ)  @ d5b7bcc  ->  rc=6    CLAUDE.md:82 'người có thẩm quyền'
+```
+
+Hai dòng cuối là chứng đường: chúng chứng minh phép mô phỏng thật sự bắt được lỗi, nên
+`rc=0` ở dòng thứ hai là bằng chứng dương chứ không phải một phép đo không đo gì. Nói cách
+khác: rebase lên `18da1da` an toàn **kể cả khi** revision 4 bỏ hẳn miễn trừ AC 19.
 
 ## Không va chạm hunk
 

@@ -47,15 +47,35 @@ landed_qua_pull_request: 129
 
 lease_evidence_url: https://github.com/ducthangho/tra-luat/issues/55#issuecomment-5306389133
 
-# GIỚI HẠN TRUY XUẤT — nói ra thay vì để người sau đâm vào. Commit ở `published_*`
-# nằm trên nhánh `ops/**` mà `ops/HO_SO_wp55-r4.md` khai kế hoạch XOÁ. Khi ref cuối
-# cùng trỏ tới nó biến mất, git được phép thu hồi object ⇒ SHA ấy có thể KHÔNG còn
-# tra được. Nên đọc `published_*` là METADATA LỊCH SỬ KHÔNG BẢO ĐẢM TRUY XUẤT, không
-# phải mỏ neo. Mỏ neo là `evidence_url` (commit master `3223644`, đã đo
-# `git merge-base --is-ancestor 3223644 <head>` = 0) cộng `verdict_sha256`: nội dung
-# vẫn kiểm được kể cả khi lịch sử công bố mất. Muốn giữ cả lịch sử thì phải có
-# tag/ref lưu trữ trỏ các commit ấy TRƯỚC khi xoá nhánh — CHƯA LÀM, nói rõ là chưa.
-truy_xuat_published_khong_bao_dam: true
+# TRUY XUẤT — trước đây là GIỚI HẠN, nay ĐÃ ĐÓNG, và ghi lại cả hai trạng thái vì
+# lịch sử của lời khai này chính là bài học. Bản đầu của biên nhận khai
+# `truy_xuat_published_khong_bao_dam: true`: lúc đó nhánh `ops/**` chưa xoá và CHƯA có
+# tag nào, nên commit ở `published_*` chỉ sống nhờ ref sắp bị xoá — git được phép thu
+# hồi object không còn ai trỏ tới. Ngày 16-08 đã tạo tag lưu trữ TRƯỚC khi xoá nhánh,
+# đúng thứ tự mà chính khoá này dặn.
+#
+# ĐÃ ĐO SAU KHI XOÁ NHÁNH, và đo bằng cách nặng nhất chứ không chỉ liệt kê ref: `git
+# init` một kho TRỐNG, `fetch` từng tag từ remote, rồi băm lại tệp verdict trong đó.
+# Kết quả, nói CHÍNH XÁC: **6/6 khớp con băm ghi cho ĐÚNG MỐC ĐÓ**, và **5/6 đồng thời
+# khớp `verdict_sha256`** — mốc thứ sáu là `b4e5c5f9` (bản trước khi reviewer tự rút),
+# băm `7dd8e203…`, khớp `published_first.sha256_tai_commit` chứ KHÔNG khớp
+# `verdict_sha256` hiện hành, và đúng ra là phải thế. Bản đầu của chú thích này viết
+# gọn thành "6/6 khớp verdict_sha256" — khai RỘNG hơn thứ đo được; finding P2 của
+# cross-review codex, đúng. Nhánh đã mất mà nội dung vẫn tải về được, đúng byte.
+# HAI khoá thay cho MỘT boolean cũ. `khong_bao_dam: false` đọc máy móc thành "truy xuất
+# ĐƯỢC BẢO ĐẢM", mà tag thì xoá được — ghi chú bên dưới nói đúng giới hạn nhưng không
+# làm con boolean bớt tuyệt đối. Tách thành hai khẳng định ĐO ĐƯỢC (finding P2 của
+# cross-review codex, đúng): một cái nói về LẦN ĐO, một cái nói về BẢO ĐẢM LÂU DÀI.
+truy_xuat_published_qua_tag_tai_lan_do: true
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+tag_giu_published:
+  - tag: luu-tru/wp55-r4-verdict-rebase
+    commit: 1cfe47f85f0b6c67edc843a4676a78c5057a1c86
+    giu_khoa: published_first
+tag_giu_published_ghi_chu: >-
+  Tag là ref BỀN duy nhất giữ các commit này — nhánh gốc `ops/wp55-r4-*` đã xoá hết
+  (đo: `git ls-remote --heads origin 'refs/heads/ops/wp55-r4*'` trả RỖNG). Xoá tag là
+  làm `published_*` thành SHA không tra được; muốn dọn thì đọc khoá này trước.
 
 # LỜI KHAI PHỦ ĐỊNH, kèm phạm vi và cách đo — vì "không tìm thấy" khác "không tồn
 # tại", và một lời khai phủ định không nêu phạm vi thì không ai bác được, cũng không

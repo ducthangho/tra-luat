@@ -1,0 +1,71 @@
+# BIÊN NHẬN GIAO HÀNG cho verdict review PR "#134" — nối bộ cổng đăng lease vào `ci.yml`.
+#
+# Đây KHÔNG phải review packet theo §8: không lease, không spec, không `attempts`. Nó là
+# một lượt review hẹp cho một thay đổi hạ tầng, gọi vì phiên viết bản vá giữ BA VAI cùng
+# lúc — gây ra chỗ hỏng (PR "#132" làm `t27` đỏ), viết chốt chặn chỗ hỏng, rồi tự tuyên bố
+# chốt hoạt động. Ghi ra để người đọc sau biết vì sao có lượt review này.
+#
+# Mọi trường dưới đây ĐO TỪ KHO, không trường nào là lời khai của reviewer.
+
+schema_version: 1
+kind: review_delivery_receipt
+scope: infra_pr            # không thuộc packet nào
+target_pull_request: 134
+provider: codex
+role: reviewer
+verdict: approve_with_findings
+reviewed_sha: ae755d10856991db7577974a2e8464005f84c940
+
+verdict_path: ops/reviews/pr134-ci-lease-gate-codex-verdict.md
+verdict_sha256: b838fb9bedb006ae66e92c89680dd72a4a85fab5cb8ce9f0d44af81b6d3984ef
+verdict_bytes: 7975
+
+# Giao bằng COMMENT trên chính PR được review — khác nếp của năm verdict wp55 r4 (chúng
+# giao bằng tệp trên nhánh vì lease khai `target_pull_request: null`). Ở đây PR có thật,
+# nên comment là kênh tự nhiên và nó cho URL ổn định TRƯỚC khi commit, tránh vòng tròn
+# "biên nhận phải trỏ vào commit chứa chính biên nhận ấy".
+evidence_channel: pr_comment
+evidence_url: https://github.com/ducthangho/tra-luat/pull/134#issuecomment-5309262102
+
+# ĐÃ ĐO SAU KHI ĐĂNG, không dừng ở "lời gọi trả thành công": đọc ngược comment qua API
+# rồi `diff -u` với tệp nguồn — giống hệt từng byte. Đây là chốt của bài học "tầng vận
+# chuyển cũng chuẩn hoá chuỗi": băm phải đo trên thứ ĐÃ ĐẾN, không phải thứ đã GỬI.
+da_doc_nguoc_va_diff: true
+
+lease_id: null
+lease_note: >-
+  KHÔNG có lease. Thay đổi này nằm ngoài mọi `write_set` của packet, nên AC 26 không áp.
+  Ghi `null` tường minh thay vì bỏ trống — trường vắng và trường rỗng đọc giống nhau, và
+  đoán sai thì tưởng có lease mà không tra được.
+
+chay_duoi_chot:
+  cong_cu: .claude/dev/launcher.py
+  expected_head: ae755d10856991db7577974a2e8464005f84c940
+  prompt_sha256: 5eabad8c76fffbcda8ab37ed78b1b82e0beda11894971cd76c13148296d34b5b
+  chung_duong_chot: 'HEAD sai một ký tự -> rc=4; nguyên trạng -> rc=0'
+  thoi_luong_phut: 3.4
+
+finding:
+  - id: unpinned-pyyaml-ci-dependency
+    muc: thap
+    chan_land: false
+    note: >-
+      `python -m pip install --quiet pyyaml` không có biên phiên bản, và reviewer đo được
+      lỗ ấy có ở CẢ HAI chỗ — `ci.yml` lẫn `ops-publish-lease.yml`. Không sai hôm nay
+      (venv sạch với PyYAML 6.0.3 cho `rc=0`, 30/30), nhưng cùng lớp với tiền lệ
+      `pypdf>=4.0`: cùng một SHA có thể xanh hôm nay và đỏ sau này mà cây không đổi.
+    trang_thai: chưa sửa tại thời điểm ghi biên nhận
+
+verdict_usage_caveats:
+  - id: windows-chua-do-that
+    note: >-
+      Reviewer TỪ CHỐI gọi Windows là đạt vì chưa chạy thật trên nền ấy. Nó chỉ ra
+      `t19_symlink_tro_RA_NGOAI_kho_thi_CHAN` bắt `OSError`/`NotImplementedError` rồi
+      `return`, mà harness VẪN tính ca đó vào `30/30` — nên trên nền không tạo được
+      symlink, con số `30/30` chứa một ca CÓ MẶT mà KHÔNG ĐO (đúng bệnh `t24`). Đây là
+      nợ có sẵn của bộ test, KHÔNG do PR "#134" tạo ra, nên không phải finding của PR ấy.
+      Ai đọc `30/30` trên một lượt Windows thì đọc kèm cảnh báo này.
+
+pham_vi_da_kiem: >-
+  Comment của PR "#134" đọc lại qua API lúc ghi biên nhận; verdict là comment 5309262102,
+  đăng bởi phiên claude điều phối, nguyên văn sản phẩm của codex.

@@ -42,7 +42,8 @@ properties proves nothing there — every check in this Packet is an explicit br
 | `delegation.py` | closed operation set `{run_test}`; credential-freedom probed with a planted marker, not asserted |
 | `parity.py` | denominators compared before outcomes; an undeclared skip is red |
 | `inventory.py` | per-file SHA-256 reduced to one digest; static boundary scan for shell strings and bare `assert` |
-| `registry.py` | the single registry of all 64 case IDs and their required check |
+| `orchestrate.py` | the one trusted preflight → claim → contained launch path |
+| `registry.py` | the single registry of all 94 case IDs and their required check |
 | `selftest.py` | the executable matrix; separate `scheduled`/`executed`/`passed`/`failed`/`skipped`/`not_run` |
 
 ## Three things this Packet paid for
@@ -66,6 +67,28 @@ more correct behaviour: tear the tree down on **every** path before proving clea
 timeout. Proving cleanup first would have reported a green receipt over a live orphan —
 `WP125-NEG-034` now witnesses the contained descendant through the job's own census, because once a
 parent has exited a process-table walk cannot see its orphan at all.
+
+## Generation 2 — the six Reviewer findings, and what each one really was
+
+Every finding was a control that *reported* success without *measuring* it. That is the shape worth
+remembering: none of them failed loudly, and the suite was green over all six.
+
+| finding | what generation 1 actually did | closed by |
+|---|---|---|
+| `WP125-RV-001` | `extra` accepted any non-credential-shaped name and wrote it straight into the child, so `{"PATH": …}` replaced the sanitized PATH computed six lines earlier, and `PYTHONPATH`/`BASH_ENV`/`NODE_OPTIONS` were injectable | a closed controller extra set, refusal of overrides, case-folded collisions and execution-influencing names by name, and identifier-shaped values |
+| `WP125-RV-002` | the delegated body printed a report and exited zero regardless; `test_selection` rode along in argv and was never executed, the root was never checked, the OS was never checked | a closed test-ID→command map with real exit codes, a measured writability probe, git-verified root identity, and a declared-OS check that refuses rather than simulates |
+| `WP125-RV-003` | the order guard was skipped for exactly the callers that supplied their own steps, so the seven-function substitution it existed to stop was the one case it never checked; receipts were plain dataclasses anyone could build | a production entry with no `steps` parameter, a sealed receipt, an independent value-binding stage that re-reads the pin, and provenance authenticated before `mint_claim` |
+| `WP125-RV-004` | every piece of preflight → claim → launch existed and nothing performed the sequence, so only tests ever ran it, each slightly differently | `orchestrate.launch_reviewer`, plus a controlled fake executable that reports the argv a real Windows process received |
+| `WP125-RV-005` | `active is None or active == 0` treated a *failed* Win32 census as clean — the state where the fence has lost sight of the tree was the state it called green | a census that names its reason, red on Windows when it cannot answer, and green only on `active == 0` plus clean recorded identities |
+| `WP125-RV-006` | five RA-01 categories cannot express "the sealed source pin is present"; a run that dropped a required class still sealed cleanly | a table of all fourteen required classes with per-file binding headers, verified by exact name, schema, run, head and tree |
+
+Two fixture measurements were needed to make the RV-002 controls real rather than decorative, and
+both contradicted the obvious approach. A directory `chmod`-ed to `0o555` on this host still reports
+`os.access(path, os.W_OK) == True` and still accepts file creation, so a mode-bit check would have
+certified a writable directory as read-only. And `icacls /deny <user>:(W)` breaks the fixture
+outright: the simple right `W` expands to `FILE_GENERIC_WRITE`, which includes `SYNCHRONIZE`, so
+denying it makes the directory unopenable and `git -C` fails with "Permission denied" before it can
+read anything. The working form denies only `WD,AD`.
 
 ## What this launcher does not claim
 

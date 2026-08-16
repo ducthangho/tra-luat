@@ -197,8 +197,21 @@ def build_launch_plan(
         raise reject("argument_vector", "launch_config.extra_args must be a sequence")
     trailing = _reject_switch_injection(extra)
 
-    # Fixed template.  The only variable slots are the two the controller minted.
-    argv: tuple[str, ...] = (
+    # Controller-owned interpreter prefix, validated exactly like the trailing arguments.
+    #
+    # This exists because the real CLI is not always a bare executable: on Windows it is commonly a
+    # script that an interpreter runs, so a vector that can only be `<exe> -p ...` cannot express the
+    # actual invocation — and, in testing, cannot be pointed at a controlled fake executable that
+    # reports the argv it received.  Without that, "the boundary is preserved" would be a claim about
+    # a vector nobody ever observed a process receive.  It is a *prefix*, so it can never displace or
+    # duplicate the permission-mode switch, and it goes through the same injection screen.
+    prefix_source = launch_config.get("executable_args", ())
+    if isinstance(prefix_source, (str, bytes)) or not isinstance(prefix_source, Sequence):
+        raise reject("argument_vector", "launch_config.executable_args must be a sequence")
+    prefix = _reject_switch_injection(prefix_source)
+
+    # Fixed template.  The only variable slots are the ones the controller minted.
+    argv: tuple[str, ...] = prefix + (
         "-p",
         "--permission-mode",
         mode,

@@ -21,6 +21,7 @@ import datetime
 import json
 import os
 import pathlib
+import platform
 import stat
 import sys
 import tempfile
@@ -35,6 +36,7 @@ if str(BOOTSTRAP_ROOT) not in sys.path:
 
 from core.ledger import Ledger  # noqa: E402
 
+from launcher import environment as environment_module  # noqa: E402
 from launcher import inventory as inventory_module  # noqa: E402
 from launcher import parity as parity_module  # noqa: E402
 from launcher import registry as registry_module  # noqa: E402
@@ -53,11 +55,13 @@ from launcher.environment import (  # noqa: E402
 )
 from launcher.errors import LauncherRejected  # noqa: E402
 from launcher.inputs import read_sealed_bytes, read_sealed_json  # noqa: E402
+from launcher.orchestrate import launch_reviewer  # noqa: E402
 from launcher.preflight import (  # noqa: E402
     STEP_NAMES,
     PreflightReceipt,
     mint_claim,
     run_preflight,
+    run_preflight_fault_injection,
 )
 from launcher.watchdog import (  # noqa: E402
     ProcessIdentity,
@@ -81,10 +85,17 @@ CASES: list[tuple[str, Callable[[], dict[str, object]]]] = []
 _SEEN_IDS: set[str] = set()
 
 # Collected while the matrix runs, so `controller.py produce` can retain real evidence rather than a
-# second, separately-computed story about the same run.
+# second, separately-computed story about the same run.  WP125-RV-006 requires each §8 class to be a
+# distinct retained artifact, so each one has its own collector here rather than being folded into a
+# neighbour and reconstructed later.
 CLEANUP_RECORDS: list[dict[str, object]] = []
 DELEGATION_RECEIPT: dict[str, object] = {}
 ENVIRONMENT_NAMES: list[str] = []
+WATCHDOG_TIMING: list[dict[str, object]] = []
+RETURN_CODES: dict[str, object] = {}
+ARGUMENT_VECTOR: dict[str, object] = {}
+SEALED_SOURCE_PIN: dict[str, object] = {}
+AUTHORITY_INPUT: dict[str, object] = {}
 
 
 def ensure(condition: object, message: str) -> None:
@@ -240,6 +251,69 @@ def child_report_command(source: str) -> tuple[str, ...]:
     return (python_executable(), "-c", source)
 
 
+# A genuinely non-writable checkout of the exact candidate, built once and shared.
+#
+# Both halves of "read-only root" have to be real for the RV-002 controls to mean anything. The
+# checkout is a shallow local clone, so its HEAD and tree are the candidate's rather than something
+# a fixture asserted. The read-only half is an ACL deny, because this host was measured to ignore
+# the alternatives: a directory chmod-ed to 0o555 still reports `os.access(..., W_OK) == True` and
+# still accepts file creation, so a mode-bit fixture would have certified a writable directory as
+# read-only and every rejection control built on it would have been vacuous.
+_READ_ONLY_ROOT: dict[str, object] = {}
+
+
+def read_only_candidate_root() -> dict[str, object]:
+    if _READ_ONLY_ROOT:
+        return _READ_ONLY_ROOT
+    import getpass
+    import subprocess
+
+    base = pathlib.Path(tempfile.mkdtemp(prefix="wp125-ro-root-"))
+    clone = base / "candidate"
+    result = subprocess.run(
+        ["git", "clone", "--quiet", "--depth", "1", "--no-hardlinks", CANDIDATE_ROOT.as_uri(), str(clone)],
+        capture_output=True,
+        text=True,
+    )
+    ensure(result.returncode == 0, "the read-only root clone failed: %s" % result.stderr[-200:])
+    head = subprocess.run(
+        ["git", "-C", str(clone), "rev-parse", "HEAD"], capture_output=True, text=True
+    ).stdout.strip()
+    tree = subprocess.run(
+        ["git", "-C", str(clone), "rev-parse", "HEAD^{tree}"], capture_output=True, text=True
+    ).stdout.strip()
+    user = getpass.getuser()
+    # Deny only the two rights that constitute "can create things here": WD (write data / add file)
+    # and AD (append data / add subdirectory).  The simple right `W` looks like the obvious choice
+    # and is wrong — it expands to FILE_GENERIC_WRITE, which includes SYNCHRONIZE, and denying that
+    # makes the directory unopenable, so `git -C` fails with "Permission denied" before it can read
+    # anything.  A fixture that broke traversal would have made every identity check fail for a
+    # reason unrelated to identity.
+    deny = subprocess.run(
+        ["icacls", str(clone), "/deny", "%s:(OI)(CI)(WD,AD)" % user], capture_output=True, text=True
+    )
+    ensure(deny.returncode == 0, "the read-only ACL could not be applied: %s" % deny.stdout[-200:])
+    _READ_ONLY_ROOT.update(
+        {"path": str(clone), "head": head, "tree": tree, "base": str(base), "user": user}
+    )
+    return _READ_ONLY_ROOT
+
+
+def release_read_only_root() -> None:
+    """Remove the deny ACE and delete the fixture; safe to call when it was never built."""
+    if not _READ_ONLY_ROOT:
+        return
+    import shutil
+    import subprocess
+
+    subprocess.run(
+        ["icacls", str(_READ_ONLY_ROOT["path"]), "/remove:d", str(_READ_ONLY_ROOT["user"])],
+        capture_output=True,
+    )
+    shutil.rmtree(str(_READ_ONLY_ROOT["base"]), ignore_errors=True)
+    _READ_ONLY_ROOT.clear()
+
+
 def short_deadline(seconds: float = 2.0):
     return build_deadline(seconds, LEASE_STOP)
 
@@ -334,28 +408,32 @@ def positive_delegation() -> dict[str, object]:
     ) as context:
         receipt = run_preflight(context)
         ensure(receipt.surface == "delegated_linux_run_test", "the fallback surface was not selected")
+        root = read_only_candidate_root()
         job = build_job(
             operation="run_test",
-            candidate_head=INTEGRATION_HEAD,
-            candidate_tree=INTEGRATION_TREE,
-            test_selection=("launcher_matrix",),
-            read_only_root=str(CANDIDATE_ROOT),
+            candidate_head=root["head"],
+            candidate_tree=root["tree"],
+            test_selection=("launcher_import_smoke",),
+            read_only_root=root["path"],
             eligible=True,
+            candidate_root=str(CANDIDATE_ROOT),
+            expected_os=platform.system(),
         )
         evidence = run_job(
             job,
             parent_environment=dict(os.environ),
             candidate_root=str(CANDIDATE_ROOT),
             working_directory=str(context["temp_root"]),
-            deadline=short_deadline(20.0),
+            deadline=short_deadline(60.0),
         )
         DELEGATION_RECEIPT = dict(evidence)
         CLEANUP_RECORDS.append({"case": "POS-005", "cleanup": evidence["cleanup"]})
-        ensure(evidence["return_code"] == 0, "the delegated job did not exit zero")
+        ensure(evidence["tests_executed"] == 1, "the delegated job did not execute its declared test")
+        ensure(evidence["tests_failed"] == 0, "the declared delegated test did not pass")
         ensure(job.operation == "run_test", "the delegated operation is not run_test")
         return {
             "operation": job.operation,
-            "return_code": evidence["return_code"],
+            "return_codes": evidence["return_codes"],
             "timeout_source": evidence["timeout_source"],
         }
 
@@ -439,9 +517,13 @@ def positive_preflight_order() -> dict[str, object]:
         receipt = run_preflight(context)
         ensure(receipt.complete, "preflight did not complete")
         order = tuple(step.name for step in receipt.steps)
-        ensure(order == STEP_NAMES, "preflight ran out of contract order")
+        # The seven contract steps, then the independent value-binding stage added by WP125-RV-003.
+        ensure(order == STEP_NAMES + ("value_binding",), "preflight ran out of contract order")
         indexes = [step.index for step in receipt.steps]
-        ensure(indexes == list(range(1, len(STEP_NAMES) + 1)), "preflight step indexes are not dense")
+        ensure(
+            indexes == list(range(1, len(STEP_NAMES) + 2)),
+            "preflight step indexes are not dense",
+        )
         return {"order": list(order)}
 
 
@@ -871,7 +953,7 @@ def negative_fake_preflight() -> dict[str, object]:
             (name, always_green if name == "authority_identity" else function)
             for name, function in preflight_module.STEPS
         )
-        receipt = run_preflight(context, steps=steps)
+        receipt = run_preflight_fault_injection(context, steps)
         ensure(receipt.complete is False, "a fake always-green preflight was accepted")
         failure = receipt.failure or {}
         ensure(
@@ -1113,9 +1195,11 @@ def negative_delegation_without_eligibility() -> dict[str, object]:
             operation="run_test",
             candidate_head=INTEGRATION_HEAD,
             candidate_tree=INTEGRATION_TREE,
-            test_selection=("launcher_matrix",),
+            test_selection=("launcher_import_smoke",),
             read_only_root=str(CANDIDATE_ROOT),
             eligible=False,
+            candidate_root=str(CANDIDATE_ROOT),
+            expected_os=platform.system(),
         ),
     )
 
@@ -1152,6 +1236,8 @@ def negative_delegated_selection_escape() -> dict[str, object]:
             test_selection=("../../etc/passwd",),
             read_only_root=str(CANDIDATE_ROOT),
             eligible=True,
+            candidate_root=str(CANDIDATE_ROOT),
+            expected_os=platform.system(),
         ),
     )
 
@@ -1260,7 +1346,812 @@ def parity_forged_success() -> dict[str, object]:
     return {"kinds": sorted(kinds)}
 
 
+# --------------------------------------------------------------------------- WP125-RV-001
+
+
+@case("WP125-RV-001-closed-extra-name-set-is-accepted")
+def rv001_closed_set_accepted() -> dict[str, object]:
+    child = build_child_environment(
+        {"PATH": os.environ.get("PATH", "")},
+        candidate_root=str(CANDIDATE_ROOT),
+        extra={"WP125_RUN_ID": "r1", "WP125_CASE_ID": "RV-001"},
+    )
+    ensure(child["WP125_RUN_ID"] == "r1", "a closed-set extra name was not applied")
+    ensure(child["WP125_CASE_ID"] == "RV-001", "a closed-set extra name was not applied")
+    return {"applied": sorted(environment_module.CONTROLLER_EXTRA_NAMES), "accepted": 2}
+
+
+@case("WP125-RV-001-extra-cannot-override-allowlisted-name")
+def rv001_no_override() -> dict[str, object]:
+    poisoned = str(CANDIDATE_ROOT / "scripts")
+    result = expect_rejection(
+        "child_environment",
+        lambda: build_child_environment(
+            {"PATH": os.environ.get("PATH", "")},
+            candidate_root=str(CANDIDATE_ROOT),
+            extra={"PATH": poisoned},
+        ),
+    )
+    result["override_attempted"] = "PATH"
+    return result
+
+
+@case("WP125-RV-001-extra-case-folded-collision-refused")
+def rv001_case_folded_collision() -> dict[str, object]:
+    lower = expect_rejection(
+        "child_environment",
+        lambda: build_child_environment(
+            {"PATH": os.environ.get("PATH", "")},
+            candidate_root=str(CANDIDATE_ROOT),
+            extra={"path": "C:\\evil"},
+        ),
+    )
+    duplicate = expect_rejection(
+        "child_environment",
+        lambda: build_child_environment(
+            {},
+            candidate_root=str(CANDIDATE_ROOT),
+            extra={"WP125_RUN_ID": "a", "wp125_run_id": "b"},
+        ),
+    )
+    return {"lowercase_path": lower["category"], "duplicate_spelling": duplicate["category"]}
+
+
+@case("WP125-RV-001-execution-influencing-extra-refused")
+def rv001_execution_influencing() -> dict[str, object]:
+    attacks = {
+        "PATH": "C:\\evil",
+        "PYTHONPATH": "C:\\evil",
+        "BASH_ENV": "/tmp/evil.sh",
+        "NODE_OPTIONS": "--require=/tmp/evil.js",
+        "LD_PRELOAD": "/tmp/evil.so",
+        "PYTHONSTARTUP": "/tmp/evil.py",
+        "COMSPEC": "C:\\evil.exe",
+    }
+    refused = {}
+    for name, value in attacks.items():
+        refused[name] = expect_rejection(
+            "child_environment",
+            lambda name=name, value=value: build_child_environment(
+                {"PATH": os.environ.get("PATH", "")},
+                candidate_root=str(CANDIDATE_ROOT),
+                extra={name: value},
+            ),
+        )["category"]
+    return {"refused_by_name": refused, "attack_count": len(attacks)}
+
+
+@case("WP125-RV-001-extra-outside-closed-set-refused")
+def rv001_outside_closed_set() -> dict[str, object]:
+    return expect_rejection(
+        "child_environment",
+        lambda: build_child_environment(
+            {}, candidate_root=str(CANDIDATE_ROOT), extra={"WP125_NOT_DECLARED": "x"}
+        ),
+    )
+
+
+@case("WP125-RV-001-extra-value-must-be-identifier-shaped")
+def rv001_value_shape() -> dict[str, object]:
+    refused = {}
+    for label, value in (
+        ("path_separator", "C:\\a" + os.pathsep + "C:\\b"),
+        ("directory_separator", "/etc/passwd"),
+        ("newline", "ok\nevil"),
+        ("oversized", "x" * 200),
+    ):
+        refused[label] = expect_rejection(
+            "child_environment",
+            lambda value=value: build_child_environment(
+                {}, candidate_root=str(CANDIDATE_ROOT), extra={"WP125_RUN_ID": value}
+            ),
+        )["category"]
+    return {"refused": refused}
+
+
+# --------------------------------------------------------------------------- WP125-RV-002
+
+
+def _delegated_job(test_selection, **overrides):
+    root = read_only_candidate_root()
+    kwargs = {
+        "operation": "run_test",
+        "candidate_head": root["head"],
+        "candidate_tree": root["tree"],
+        "test_selection": test_selection,
+        "read_only_root": root["path"],
+        "eligible": True,
+        "candidate_root": str(CANDIDATE_ROOT),
+        "expected_os": platform.system(),
+    }
+    kwargs.update(overrides)
+    return build_job(**kwargs)
+
+
+@case("WP125-RV-002-declared-test-runs-with-real-return-code")
+def rv002_real_execution() -> dict[str, object]:
+    global DELEGATION_RECEIPT
+    with fixture() as context:
+        job = _delegated_job(("launcher_import_smoke", "launcher_registry_coverage"))
+        evidence = run_job(
+            job,
+            parent_environment=dict(os.environ),
+            candidate_root=str(CANDIDATE_ROOT),
+            working_directory=str(context["temp_root"]),
+            deadline=short_deadline(90.0),
+        )
+        DELEGATION_RECEIPT = dict(evidence)
+        ensure(evidence["tests_executed"] == 2, "not every declared test ran")
+        codes = evidence["return_codes"]
+        ensure(set(codes.values()) == {0}, "a declared test did not return zero: %s" % codes)
+        ensure(
+            evidence["job"]["root_evidence"]["head"] == job.candidate_head,
+            "the delegated root identity was not bound to the candidate head",
+        )
+        return {
+            "return_codes": codes,
+            "root_head": evidence["job"]["root_evidence"]["head"],
+            "writability_probe": evidence["job"]["root_evidence"]["writability_probe"],
+        }
+
+
+@case("WP125-RV-002-failing-declared-test-makes-the-job-red")
+def rv002_failing_test_is_red() -> dict[str, object]:
+    """A declared test that exits non-zero must make the job red.
+
+    Generation 1 could not fail this way at all: the delegated body printed a report and exited zero
+    regardless, so "the delegated tests passed" carried no information.  Substituting one mapped
+    program for a genuinely failing one proves the exit code is now load-bearing.
+    """
+    from launcher import delegation as delegation_module
+
+    with fixture() as context:
+        original = dict(delegation_module.DELEGATED_TESTS)
+        try:
+            delegation_module.DELEGATED_TESTS["launcher_import_smoke"] = (
+                "import sys\nprint('WP125-DELEGATED-TEST {\"test\": \"launcher_import_smoke\"}')\n"
+                "raise SystemExit(3)\n"
+            )
+            job = _delegated_job(("launcher_import_smoke",))
+            result = expect_rejection(
+                "delegation_evidence",
+                lambda: run_job(
+                    job,
+                    parent_environment=dict(os.environ),
+                    candidate_root=str(CANDIDATE_ROOT),
+                    working_directory=str(context["temp_root"]),
+                    deadline=short_deadline(60.0),
+                ),
+            )
+        finally:
+            delegation_module.DELEGATED_TESTS.clear()
+            delegation_module.DELEGATED_TESTS.update(original)
+        result["injected_exit_code"] = 3
+        return result
+
+
+@case("WP125-RV-002-unknown-test-id-refused")
+def rv002_unknown_test() -> dict[str, object]:
+    return expect_rejection(
+        "delegation_scope", lambda: _delegated_job(("launcher_matrix",))
+    )
+
+
+@case("WP125-RV-002-writable-root-refused")
+def rv002_writable_root() -> dict[str, object]:
+    with fixture() as context:
+        writable = pathlib.Path(str(context["temp_root"])) / "writable-root"
+        writable.mkdir()
+        result = expect_rejection(
+            "delegation_scope",
+            lambda: _delegated_job(("launcher_import_smoke",), read_only_root=str(writable)),
+        )
+        result["probe"] = "a real write succeeded, so the read-only declaration was false"
+        return result
+
+
+@case("WP125-RV-002-missing-root-refused")
+def rv002_missing_root() -> dict[str, object]:
+    with fixture() as context:
+        absent = pathlib.Path(str(context["temp_root"])) / "does-not-exist"
+        return expect_rejection(
+            "delegation_scope",
+            lambda: _delegated_job(("launcher_import_smoke",), read_only_root=str(absent)),
+        )
+
+
+@case("WP125-RV-002-root-identity-mismatch-refused")
+def rv002_identity_mismatch() -> dict[str, object]:
+    return expect_rejection(
+        "delegation_scope",
+        lambda: _delegated_job(("launcher_import_smoke",), candidate_head="0" * 40),
+    )
+
+
+@case("WP125-RV-002-wrong-runner-os-refused-not-fabricated")
+def rv002_wrong_os() -> dict[str, object]:
+    """A Linux-declared job on this Windows host must be refused, never simulated.
+
+    §7 forbids fabricating delegated Linux execution.  The only honest behaviour when the runner is
+    not the declared OS is to fail here, which is what this observes.
+    """
+    with fixture() as context:
+        job = _delegated_job(("launcher_import_smoke",), expected_os="Linux")
+        result = expect_rejection(
+            "delegation_scope",
+            lambda: run_job(
+                job,
+                parent_environment=dict(os.environ),
+                candidate_root=str(CANDIDATE_ROOT),
+                working_directory=str(context["temp_root"]),
+                deadline=short_deadline(30.0),
+            ),
+        )
+        result["declared_os"] = "Linux"
+        result["actual_os"] = platform.system()
+        result["fabricated"] = False
+        return result
+
+
+@case("WP125-RV-002-credential-marker-absent-inside-real-job")
+def rv002_marker_absent() -> dict[str, object]:
+    with fixture() as context:
+        job = _delegated_job(("launcher_import_smoke",))
+        evidence = run_job(
+            job,
+            parent_environment=dict(os.environ) | {MARKER_NAME: "planted-by-controller"},
+            candidate_root=str(CANDIDATE_ROOT),
+            working_directory=str(context["temp_root"]),
+            deadline=short_deadline(60.0),
+        )
+        report = evidence["job_report"]
+        ensure(report["credential_marker_present"] is False, "the marker reached the job")
+        ensure(report["observed_from_inside_job"] is True, "the observation was not made in the job")
+        return {
+            "marker_name": MARKER_NAME,
+            "present_inside_job": False,
+            "credential_shaped_names": report["credential_shaped_names"],
+        }
+
+
+# --------------------------------------------------------------------------- WP125-RV-003
+
+
+def _full_map_mutant(context: dict[str, object]):
+    """Seven always-green functions that fabricate every required observation key.
+
+    This is the mutant the reviewer named.  Generation 1's order guard skipped exactly the callers
+    that supplied their own steps, so this map produced a complete receipt and could mint a claim.
+    """
+    from launcher import preflight as preflight_module
+
+    fabricated = {
+        "authority_identity": dict(context["expected_authority"]),
+        "lease_and_branch": {
+            "lease_id": "forged",
+            "lease_effective_stop_utc": LEASE_STOP,
+            "lease_seconds_remaining": 999,
+            "candidate_ref": CANDIDATE_REF,
+            "candidate_start_head": INTEGRATION_HEAD,
+        },
+        "source_pin": {
+            "source_pin_sha256": "0" * 64,
+            "source_pin_bytes": 1,
+            "integration_head": INTEGRATION_HEAD,
+            "integration_tree": INTEGRATION_TREE,
+            "effective_write_prefix": WRITE_PREFIX,
+        },
+        "worktree_and_write_set": {
+            "worktree_clean": True,
+            "selected_write_paths": [WRITE_PREFIX + "controller.py"],
+            "paths_outside_prefix": [],
+        },
+        "trusted_inventory": {
+            "launcher_file_count": 1,
+            "launcher_inventory_sha256": "1" * 64,
+            "executable_identity": "forged",
+        },
+        "execution_surface": {
+            "platform": sys.platform,
+            "windows_sandbox_available": True,
+            "delegation_eligible": False,
+            "selected_surface": "windows",
+        },
+        "environment_and_argv": {
+            "environment_name_count": 1,
+            "environment_memory_value": "1",
+            "argument_count": 5,
+            "permission_mode": "dontAsk",
+        },
+    }
+    return tuple(
+        (name, lambda _ctx, name=name: dict(fabricated[name]))
+        for name, _ in preflight_module.STEPS
+    )
+
+
+@case("WP125-RV-003-seven-function-full-map-mutant-cannot-claim")
+def rv003_full_map_mutant() -> dict[str, object]:
+    with fixture() as context:
+        receipt = run_preflight_fault_injection(context, _full_map_mutant(context))
+        ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
+        result = expect_rejection(
+            "preflight_incomplete",
+            lambda: mint_claim(receipt, ledger, "wp125-mutant", {"role": "executor"}),
+        )
+        ensure(len(ledger) == 0, "the full-map mutant minted a claim object")
+        result["provenance"] = receipt.provenance
+        result["claim_objects"] = len(ledger)
+        result["binding_caught_forged_pin"] = receipt.complete is False
+        return result
+
+
+@case("WP125-RV-003-handmade-receipt-is-unconstructible")
+def rv003_handmade_receipt() -> dict[str, object]:
+    return expect_rejection(
+        "preflight_incomplete",
+        lambda: PreflightReceipt(
+            complete=True,
+            steps=(),
+            plan=object(),
+            environment={"X": "1"},
+            surface="windows",
+            failure=None,
+            provenance="trusted_run",
+        ),
+    )
+
+
+@case("WP125-RV-003-value-binding-catches-wrong-plan-hash")
+def rv003_binding_plan_hash() -> dict[str, object]:
+    """The binding stage compares against the caller's pins, not against the step's own output."""
+    with fixture() as context:
+        from launcher import preflight as preflight_module
+
+        steps = tuple(
+            (
+                name,
+                (lambda _ctx: dict(context["expected_authority"], mission_plan_hash="9" * 64))
+                if name == "authority_identity"
+                else function,
+            )
+            for name, function in preflight_module.STEPS
+        )
+        receipt = run_preflight_fault_injection(context, steps)
+        ensure(receipt.complete is False, "a forged plan hash produced a complete receipt")
+        return {"step": (receipt.failure or {}).get("step"), "category": (receipt.failure or {}).get("category")}
+
+
+@case("WP125-RV-003-value-binding-catches-expired-lease")
+def rv003_binding_expired_lease() -> dict[str, object]:
+    with fixture() as context:
+        lease = dict(context["lease"])
+        lease["effective_stop_utc"] = "2000-01-01T00:00:00Z"
+        context["lease"] = lease
+        receipt = run_preflight(context)
+        ensure(receipt.complete is False, "an expired lease produced a complete receipt")
+        ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
+        expect_rejection(
+            "preflight_incomplete",
+            lambda: mint_claim(receipt, ledger, "wp125-expired", {"role": "executor"}),
+        )
+        ensure(len(ledger) == 0, "an expired lease minted a claim")
+        return {"category": (receipt.failure or {}).get("category"), "claim_objects": 0}
+
+
+@case("WP125-RV-003-value-binding-catches-dirty-worktree")
+def rv003_binding_dirty_worktree() -> dict[str, object]:
+    with fixture() as context:
+        context["worktree_clean"] = False
+        receipt = run_preflight(context)
+        ensure(receipt.complete is False, "a dirty worktree produced a complete receipt")
+        return {"category": (receipt.failure or {}).get("category")}
+
+
+@case("WP125-RV-003-complete-receipt-requires-plan-environment-surface")
+def rv003_requires_plan() -> dict[str, object]:
+    """Replacing only the final step used to yield complete=True with nothing to launch."""
+    with fixture() as context:
+        from launcher import preflight as preflight_module
+
+        steps = tuple(
+            (
+                name,
+                (
+                    lambda _ctx: {
+                        "environment_name_count": 1,
+                        "environment_memory_value": "1",
+                        "argument_count": 5,
+                        "permission_mode": "dontAsk",
+                    }
+                )
+                if name == "environment_and_argv"
+                else function,
+            )
+            for name, function in preflight_module.STEPS
+        )
+        receipt = run_preflight_fault_injection(context, steps)
+        ensure(receipt.complete is False, "a receipt without a plan was reported complete")
+        ensure(receipt.plan is None, "a plan appeared without the final step")
+        return {"category": (receipt.failure or {}).get("category"), "plan": None}
+
+
+# --------------------------------------------------------------------------- WP125-RV-004
+
+
+def _fake_executable_config(context: dict[str, object], root: pathlib.Path) -> dict[str, object]:
+    """A controlled fake executable that reports the argv the OS actually delivered."""
+    script = root / "fake_claude.py"
+    # The reporter writes UTF-8 explicitly rather than through `print`. On this host the child's
+    # console encoding is cp1258, so a Vietnamese argument makes `print` raise mid-write and emit a
+    # truncated line — which arrives here as a JSON parse error and looks like a corrupted vector
+    # rather than a broken reporter. The observation channel must not be able to damage the thing it
+    # is observing.
+    script.write_text(
+        "import io, json, sys\n"
+        "out = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', newline='\\n')\n"
+        "out.write('WP125-VECTOR ' + json.dumps({'argv': sys.argv[1:]}, ensure_ascii=False) + '\\n')\n"
+        "out.flush()\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    config = dict(context["launch_config"])
+    config["executable"] = python_executable()
+    config["executable_args"] = (str(script),)
+    return config
+
+
+@case("WP125-RV-004-orchestration-sequences-preflight-claim-launch")
+def rv004_orchestration() -> dict[str, object]:
+    with fixture() as context:
+        root = pathlib.Path(str(context["temp_root"]))
+        context["launch_config"] = _fake_executable_config(context, root)
+        ledger = Ledger(root / "ledger.json")
+        record = launch_reviewer(
+            context,
+            ledger=ledger,
+            reconcile_key="wp125-orchestrated",
+            claim_payload={"role": "executor"},
+            timeout_seconds=30.0,
+            lease_effective_stop_utc=LEASE_STOP,
+        )
+        ensure(record.claim["created"] is True, "the orchestrated claim was not created")
+        ensure(len(ledger) == 1, "the orchestrated run minted more than one claim")
+        ensure(record.outcome.return_code == 0, "the orchestrated child did not exit zero")
+        ensure(record.outcome.fenced is False, "the orchestrated child was fenced")
+        WATCHDOG_TIMING.append(
+            {"case": "RV-004", "deadline": record.outcome.deadline, "status": record.outcome.status}
+        )
+        RETURN_CODES["WP125-RV-004-orchestration"] = record.outcome.return_code
+        ARGUMENT_VECTOR.update(describe_plan(record.receipt.plan))
+        return {
+            "ordering": record.as_dict()["ordering"],
+            "claims": len(ledger),
+            "return_code": record.outcome.return_code,
+        }
+
+
+@case("WP125-RV-004-vector-observed-through-controlled-fake-executable")
+def rv004_vector_observed() -> dict[str, object]:
+    """Observe the built vector as a real Windows process received it.
+
+    The arguments carry spaces, quotes, trailing backslashes and Vietnamese characters, because those
+    are the places ``CreateProcess`` quoting and the console code page each go wrong, and a string
+    comparison inside the parent would not have noticed either.
+    """
+    with fixture() as context:
+        root = pathlib.Path(str(context["temp_root"]))
+        config = _fake_executable_config(context, root)
+        hostile = (
+            "plain",
+            "with space",
+            'quote"inside',
+            "back\\slash\\end\\",
+            "trailing\\\\",
+            "đường-dẫn-tiếng-việt",
+            "semi;colon & amp | pipe",
+            "%PATH%",
+            "$HOME",
+        )
+        config["extra_args"] = hostile
+        context["launch_config"] = config
+        receipt = run_preflight(context)
+        ensure(receipt.complete, "preflight refused the fake-executable configuration")
+        plan = receipt.plan
+        outcome = run_supervised(
+            plan.command(),
+            environment=receipt.environment,
+            working_directory=plan.working_directory,
+            deadline=short_deadline(30.0),
+        )
+        observed = None
+        for line in outcome.stdout_text.splitlines():
+            index = line.find("WP125-VECTOR ")
+            if index >= 0:
+                observed = json.loads(line[index + len("WP125-VECTOR ") :])["argv"]
+        ensure(observed is not None, "the fake executable reported no vector")
+
+        # The reporter sees `sys.argv[1:]`, so its own path — the interpreter prefix the controller
+        # supplied — is argv[0] and is not repeated in the list. The expectation is therefore the
+        # built vector with that prefix removed; comparing against the whole vector would be an
+        # off-by-one in the test rather than a finding about the boundary.
+        prefix_length = len(config["executable_args"])
+        expected = list(plan.argv)[prefix_length:]
+        ensure(
+            observed == expected,
+            "the delivered vector differs from the built vector:\nbuilt     %r\ndelivered %r"
+            % (expected, observed),
+        )
+        ensure("--permission-mode" in observed, "the delivered vector lost the permission switch")
+        ensure(
+            observed[observed.index("--permission-mode") + 1] == "dontAsk",
+            "the delivered permission mode is not dontAsk",
+        )
+        # No shell touched the vector: the metacharacters arrived as literal argument bytes and
+        # `%PATH%` was not expanded. That is the property §4.1 is really asking about.
+        ensure("%PATH%" in observed, "%PATH% was expanded, so something re-parsed the vector")
+        ensure(
+            "semi;colon & amp | pipe" in observed,
+            "shell metacharacters did not survive as one literal argument",
+        )
+        ensure(
+            "đường-dẫn-tiếng-việt" in observed,
+            "the non-ASCII argument did not survive the process boundary",
+        )
+        ARGUMENT_VECTOR.update(describe_plan(plan))
+        RETURN_CODES["WP125-RV-004-vector"] = outcome.return_code
+        return {
+            "delivered_argv": observed,
+            "argument_count": len(observed),
+            "hostile_arguments": len(hostile),
+            "shell_expansion_observed": False,
+        }
+
+
+@case("WP125-RV-004-orchestration-refuses-when-preflight-fails")
+def rv004_refuses_on_failed_preflight() -> dict[str, object]:
+    with fixture() as context:
+        context["worktree_clean"] = False
+        root = pathlib.Path(str(context["temp_root"]))
+        ledger_path = root / "ledger.json"
+        ledger = Ledger(ledger_path)
+        result = expect_rejection(
+            "write_set",
+            lambda: launch_reviewer(
+                context,
+                ledger=ledger,
+                reconcile_key="wp125-refused",
+                claim_payload={"role": "executor"},
+                timeout_seconds=5.0,
+                lease_effective_stop_utc=LEASE_STOP,
+            ),
+        )
+        ensure(len(ledger) == 0, "a refused orchestration minted a claim")
+        result["claim_objects"] = 0
+        result["child_processes"] = 0
+        return result
+
+
+# --------------------------------------------------------------------------- WP125-RV-005
+
+
+@case("WP125-RV-005-failed-job-census-is-red")
+def rv005_failed_census() -> dict[str, object]:
+    """A Win32 census that fails must be red, not silently treated as clean."""
+    from launcher import watchdog as watchdog_module
+
+    if os.name != "nt":
+        # Off Windows there is no job census to fail; the POSIX branch is covered by
+        # WP125-RV-005-clean-requires-active-zero-and-clean-identities.
+        return {"platform": os.name, "job_census_applicable": False}
+
+    fence = watchdog_module.ProcessFence("census-failure")
+    fence.open()
+    try:
+        original = watchdog_module._kernel32.QueryInformationJobObject
+        watchdog_module._kernel32.QueryInformationJobObject = lambda *a, **k: 0
+        try:
+            census = fence.job_census()
+            ensure(census["ok"] is False, "a failed census reported ok")
+            ensure(
+                census["reason"] == "query_information_job_object_failed",
+                "the census failure was not named",
+            )
+            result = expect_rejection(
+                "watchdog_cleanup", lambda: fence.prove_cleanup(budget_seconds=0.2)
+            )
+        finally:
+            watchdog_module._kernel32.QueryInformationJobObject = original
+    finally:
+        fence.close()
+    result["census_reason"] = "query_information_job_object_failed"
+    return result
+
+
+@case("WP125-RV-005-absent-job-handle-is-red")
+def rv005_absent_handle() -> dict[str, object]:
+    from launcher import watchdog as watchdog_module
+
+    if os.name != "nt":
+        return {"platform": os.name, "job_census_applicable": False}
+
+    fence = watchdog_module.ProcessFence("no-handle")
+    census = fence.job_census()
+    ensure(census["ok"] is False, "an absent job handle reported ok")
+    ensure(census["reason"] == "job_handle_absent", "the absent handle was not named")
+    result = expect_rejection("watchdog_cleanup", lambda: fence.prove_cleanup(budget_seconds=0.2))
+    result["census_reason"] = census["reason"]
+    return result
+
+
+@case("WP125-RV-005-clean-requires-active-zero-and-clean-identities")
+def rv005_clean_requires_both() -> dict[str, object]:
+    with fixture() as context:
+        receipt = run_preflight(context)
+        outcome = run_supervised(
+            child_report_command("print('done')"),
+            environment=receipt.environment,
+            working_directory=str(context["temp_root"]),
+            deadline=short_deadline(15.0),
+        )
+        cleanup = outcome.cleanup
+        ensure(cleanup["cleanup_proven"] is True, "a healthy run did not prove cleanup")
+        ensure(cleanup["process_table_survivors"] == [], "identities were not clean")
+        ensure("recorded_identities" in cleanup, "the proof did not record the identities it checked")
+        census = cleanup["job_census"]
+        if os.name == "nt":
+            ensure(census["ok"] is True, "the Windows census did not answer")
+            ensure(census["active"] == 0, "the Windows census did not report zero active")
+            ensure(cleanup["independent_paths"] == 2, "two independent paths were not recorded")
+        else:
+            ensure(census["applicable"] is False, "POSIX claimed a job census")
+            ensure(cleanup["independent_paths"] == 1, "POSIX claimed two independent paths")
+        WATCHDOG_TIMING.append({"case": "RV-005", "deadline": outcome.deadline})
+        return {"job_census": census, "independent_paths": cleanup["independent_paths"]}
+
+
+# --------------------------------------------------------------------------- WP125-RV-006
+
+
+def _produced_run(root: pathlib.Path, run_id: str = "rv006") -> dict[str, object]:
+    """Produce a full artifact set without re-running the matrix."""
+    from launcher import controller as controller_module
+    from core.artifacts import ArtifactSet
+
+    identity = controller_module._repo_identity()
+    selection = sorted(registry_module.CASES)
+    artifacts = ArtifactSet(root, run_id)
+    for locator, category, schema in controller_module.REQUIRED_ARTIFACTS:
+        artifacts.add(
+            category,
+            locator,
+            controller_module._bound(schema, run_id, identity, selection, {"probe": locator}),
+        )
+    artifacts.finalize()
+    return {"run_id": run_id, "identity": identity, "classes": len(controller_module.REQUIRED_ARTIFACTS)}
+
+
+@case("WP125-RV-006-every-required-artifact-class-is-present")
+def rv006_all_classes_present() -> dict[str, object]:
+    from launcher import controller as controller_module
+    from core.artifacts import verify as verify_artifacts
+
+    with fixture() as context:
+        run_root = pathlib.Path(str(context["temp_root"])) / "run"
+        produced = _produced_run(run_root)
+        hashed = verify_artifacts(str(run_root))
+        ensure(hashed.get("ok") is True, "the sealed set did not verify by hash")
+        bindings = controller_module.verify_bindings(str(run_root), run_id=produced["run_id"])
+        ensure(bindings["ok"] is True, "binding verification failed: %s" % bindings["findings"])
+        ensure(
+            bindings["verified_classes"] == produced["classes"],
+            "not every required class verified",
+        )
+        return {
+            "required_classes": bindings["required_classes"],
+            "verified_classes": bindings["verified_classes"],
+        }
+
+
+@case("WP125-RV-006-deleted-artifact-class-is-red")
+def rv006_deleted_class() -> dict[str, object]:
+    from launcher import controller as controller_module
+
+    with fixture() as context:
+        base = pathlib.Path(str(context["temp_root"])) / "runs"
+        reds = {}
+        for locator, _category, _schema in controller_module.REQUIRED_ARTIFACTS:
+            run_root = base / locator.replace(".", "_")
+            _produced_run(run_root)
+            (run_root / locator).unlink()
+            bindings = controller_module.verify_bindings(str(run_root))
+            kinds = {finding["kind"] for finding in bindings["findings"]}
+            ensure(bindings["ok"] is False, "deleting %s stayed green" % locator)
+            ensure("class_unreadable" in kinds or "required_class_missing" in kinds,
+                   "deleting %s was not named" % locator)
+            reds[locator] = sorted(kinds)
+        return {"classes_checked": len(reds), "every_deletion_red": True}
+
+
+@case("WP125-RV-006-modified-artifact-class-is-red")
+def rv006_modified_class() -> dict[str, object]:
+    from launcher import controller as controller_module
+    from core.artifacts import verify as verify_artifacts
+
+    with fixture() as context:
+        base = pathlib.Path(str(context["temp_root"])) / "modified"
+        checked = 0
+        for locator, _category, _schema in controller_module.REQUIRED_ARTIFACTS:
+            run_root = base / locator.replace(".", "_")
+            _produced_run(run_root)
+            target = run_root / locator
+            target.write_text(target.read_text(encoding="utf-8") + " ", encoding="utf-8")
+            hashed = verify_artifacts(str(run_root))
+            ensure(hashed.get("ok") is False, "modifying %s stayed green" % locator)
+            ensure(hashed.get("hash_mismatches"), "modifying %s produced no hash mismatch" % locator)
+            checked += 1
+        return {"classes_checked": checked, "every_modification_red": True}
+
+
+@case("WP125-RV-006-rebound-artifact-identity-is-red")
+def rv006_rebound_identity() -> dict[str, object]:
+    """A file whose binding header names a different head/tree/run must be red."""
+    from launcher import controller as controller_module
+
+    with fixture() as context:
+        run_root = pathlib.Path(str(context["temp_root"])) / "rebound"
+        produced = _produced_run(run_root)
+        target = run_root / "argument_vector.json"
+        document = json.loads(target.read_text(encoding="utf-8"))
+        document["head"] = "0" * 40
+        target.write_text(
+            json.dumps(document, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        bindings = controller_module.verify_bindings(str(run_root), run_id=produced["run_id"])
+        kinds = {finding["kind"] for finding in bindings["findings"]}
+        ensure(bindings["ok"] is False, "a rebound identity stayed green")
+        ensure("identity_mismatch" in kinds, "the rebound identity was not named")
+        wrong_run = controller_module.verify_bindings(str(run_root), run_id="some-other-run")
+        ensure(wrong_run["ok"] is False, "a mismatched run id stayed green")
+        return {"kinds": sorted(kinds), "run_mismatch_detected": True}
+
+
 # --------------------------------------------------------------------------- driver
+
+
+def _collect_static_evidence() -> None:
+    """Populate the §8 classes that are properties of the run rather than of a single case."""
+    with fixture() as context:
+        pin_path = str(context["source_pin_path"])
+        pin_bytes = read_sealed_bytes(
+            pin_path, "retained source pin", candidate_root=str(CANDIDATE_ROOT)
+        )
+        import hashlib
+
+        SEALED_SOURCE_PIN.update(
+            {
+                "path": pin_path,
+                "bytes": len(pin_bytes),
+                "sha256": hashlib.sha256(pin_bytes).hexdigest(),
+                "document": read_sealed_json(
+                    pin_path, "retained source pin", candidate_root=str(CANDIDATE_ROOT)
+                ),
+            }
+        )
+        AUTHORITY_INPUT.update(
+            {
+                "authority": context["authority"],
+                "expected_authority": context["expected_authority"],
+                "lease": context["lease"],
+                "candidate_ref": context["expected_candidate_ref"],
+            }
+        )
+        receipt = run_preflight(context)
+        if receipt.complete and receipt.plan is not None:
+            ARGUMENT_VECTOR.update(describe_plan(receipt.plan))
+            ENVIRONMENT_NAMES[:] = describe_environment(receipt.environment)["names"]
 
 
 def run_matrix() -> dict[str, object]:
@@ -1273,6 +2164,10 @@ def run_matrix() -> dict[str, object]:
     records: list[dict[str, object]] = []
     executed = 0
     failed = 0
+    try:
+        _collect_static_evidence()
+    except Exception:  # noqa: BLE001 - evidence collection must never mask a case result
+        pass
     for case_id, function in CASES:
         executed += 1
         try:
@@ -1309,6 +2204,8 @@ def run_matrix() -> dict[str, object]:
                         "evidence": evidence,
                     }
                 )
+
+    release_read_only_root()
 
     outcomes = {record["case_id"]: record["status"] for record in records}
     for case_id in not_run:
@@ -1352,6 +2249,11 @@ def run_matrix() -> dict[str, object]:
         "cleanup_records": CLEANUP_RECORDS,
         "delegation": DELEGATION_RECEIPT,
         "environment_names": ENVIRONMENT_NAMES,
+        "watchdog_timing": WATCHDOG_TIMING,
+        "return_codes": RETURN_CODES,
+        "argument_vector": ARGUMENT_VECTOR,
+        "sealed_source_pin": SEALED_SOURCE_PIN,
+        "authority_input": AUTHORITY_INPUT,
     }
     report["ok"] = (
         scheduled > 0

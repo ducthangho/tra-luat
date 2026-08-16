@@ -124,6 +124,61 @@ _MEASURE_WORDS = frozenset({"BUDGET", "COUNT", "LIMIT", "MAX", "MIN", "TIMEOUT",
 
 _WORD_SPLIT = re.compile(r"[^A-Za-z0-9]+")
 
+# WP125-RV-001.  The closed set of names ``extra`` may set.  Generation 1 accepted *any* name that
+# was not credential-shaped and wrote it straight into the child, which made ``extra`` a general
+# environment-injection channel: ``{"PATH": ...}`` silently replaced the sanitized PATH computed six
+# lines earlier, and ``PYTHONPATH``/``BASH_ENV``/``NODE_OPTIONS`` are code-execution switches wearing
+# ordinary-variable clothes. None of them is credential-shaped, so the only check in the way said
+# yes. The fix is the same shape as the parent allowlist: name the three run coordinates the
+# controller actually needs, and refuse everything else — including anything already allowlisted, so
+# ``extra`` can never override a value the allowlist just computed.
+CONTROLLER_EXTRA_NAMES: tuple[str, ...] = (
+    "WP125_RUN_ID",
+    "WP125_CASE_ID",
+    "WP125_PROBE_LABEL",
+)
+
+_CONTROLLER_EXTRA = frozenset(CONTROLLER_EXTRA_NAMES)
+
+# Names that change *what code runs* rather than what the code sees. They are already outside the
+# closed set above, so this table changes no outcome — it changes the diagnosis. A reviewer reading
+# the matrix should see that the injection question was asked by name and answered, instead of
+# inferring it from a generic "not in the closed set" rejection.
+EXECUTION_INFLUENCING_NAMES = frozenset(
+    {
+        "PATH",
+        "PATHEXT",
+        "PYTHONPATH",
+        "PYTHONHOME",
+        "PYTHONSTARTUP",
+        "PYTHONEXECUTABLE",
+        "PYTHONWARNINGS",
+        "PYTHONINSPECT",
+        "BASH_ENV",
+        "ENV",
+        "SHELLOPTS",
+        "BASHOPTS",
+        "PROMPT_COMMAND",
+        "NODE_OPTIONS",
+        "NODE_PATH",
+        "LD_PRELOAD",
+        "LD_LIBRARY_PATH",
+        "LD_AUDIT",
+        "DYLD_INSERT_LIBRARIES",
+        "COMSPEC",
+        "SYSTEMROOT",
+        "WINDIR",
+        "APPDATA",
+        "USERPROFILE",
+        "HOME",
+    }
+)
+
+# Values for the closed extra names are identifiers, not paths. Refusing separators here means a run
+# identifier can never smuggle a search path into a variable whose *name* passed the closed-set test.
+_EXTRA_VALUE_ALLOWED = re.compile(r"\A[A-Za-z0-9][A-Za-z0-9._:-]{0,127}\Z")
+_MAX_EXTRA_VALUE_BYTES = 128
+
 COVERAGE = {
     "covered": (
         "child environment is built from a named allowlist",
@@ -131,6 +186,9 @@ COVERAGE = {
         "credential-shaped names are refused even if an allowlist entry introduces one",
         "PATH entries inside the candidate checkout are dropped before the child sees PATH",
         "no raw parent environment mapping reaches diagnostics or retained artifacts",
+        "the controller extra set is closed; overrides, case-folded collisions and "
+        "execution-influencing names are refused by name (WP125-RV-001)",
+        "extra values must be identifier-shaped, so a run coordinate cannot smuggle a search path",
     ),
     "not_covered": (
         "credentials resident in files under HOME/USERPROFILE, which this boundary does not read "
@@ -206,18 +264,71 @@ def build_child_environment(
             value = _sanitize_path(value, root)
         child[name] = value
 
-    for name, value in dict(extra or {}).items():
-        if not isinstance(name, str) or not name:
-            raise reject("child_environment", "an extra variable name is not a non-empty string")
-        if not isinstance(value, str):
-            raise reject("child_environment", "extra variable %r has a non-string value" % (name,))
-        if credential_shaped(name):
-            raise reject("child_environment", "extra variable %r is credential-shaped" % (name,))
-        child[name] = value
+    _apply_controller_extra(child, extra)
 
     child[MEMORY_VARIABLE] = MEMORY_VALUE
     _assert_boundary(child)
     return child
+
+
+def _apply_controller_extra(child: dict[str, str], extra: Mapping[str, str] | None) -> None:
+    """Merge the closed controller extra set, or reject by category (WP125-RV-001).
+
+    Every refusal below is a distinct measurement rather than a fallthrough, because the point of
+    this function is that an auditor can see which attack was asked about.
+    """
+    if extra is None:
+        return
+    if not isinstance(extra, Mapping):
+        raise reject("child_environment", "the extra environment must be a mapping")
+
+    # Case-folded index of everything already decided. Windows environment lookup is
+    # case-insensitive, so `path` and `PATH` are one variable there and two keys in a plain dict —
+    # comparing exact names only would let the second spelling through and let the child resolve
+    # whichever the OS happens to prefer.
+    decided = {name.casefold(): name for name in child}
+    decided[MEMORY_VARIABLE.casefold()] = MEMORY_VARIABLE
+    seen: dict[str, str] = {}
+
+    for name, value in dict(extra).items():
+        if not isinstance(name, str) or not name:
+            raise reject("child_environment", "an extra variable name is not a non-empty string")
+        folded = name.casefold()
+
+        if folded in seen:
+            raise reject(
+                "child_environment",
+                "extra variable %r collides case-folded with %r" % (name, seen[folded]),
+            )
+        if name.upper() in EXECUTION_INFLUENCING_NAMES:
+            raise reject(
+                "child_environment",
+                "extra variable %r selects what code runs and is never grantable" % (name,),
+            )
+        if folded in decided:
+            raise reject(
+                "child_environment",
+                "extra variable %r would override allowlisted %r" % (name, decided[folded]),
+            )
+        if credential_shaped(name):
+            raise reject("child_environment", "extra variable %r is credential-shaped" % (name,))
+        if name not in _CONTROLLER_EXTRA:
+            raise reject(
+                "child_environment",
+                "extra variable %r is outside the closed controller extra set" % (name,),
+            )
+        if not isinstance(value, str):
+            raise reject("child_environment", "extra variable %r has a non-string value" % (name,))
+        if len(value.encode("utf-8")) > _MAX_EXTRA_VALUE_BYTES:
+            raise reject("child_environment", "extra variable %r exceeds the value ceiling" % (name,))
+        if not _EXTRA_VALUE_ALLOWED.fullmatch(value):
+            raise reject(
+                "child_environment",
+                "extra variable %r carries a separator, control character or path-shaped value"
+                % (name,),
+            )
+        seen[folded] = name
+        child[name] = value
 
 
 def _assert_boundary(child: Mapping[str, str]) -> None:

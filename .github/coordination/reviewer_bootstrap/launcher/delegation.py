@@ -26,8 +26,12 @@ import dataclasses
 import hashlib
 import json
 import os
+import pathlib
 import platform
+import stat
 from collections.abc import Mapping, Sequence
+
+from oracle.safe_io import git, require_outside_tree
 
 from .environment import MEMORY_VARIABLE, build_child_environment, credential_shaped
 from .errors import reject
@@ -60,6 +64,55 @@ FORBIDDEN_OPERATIONS = (
 MARKER_NAME = "GITHUB_TOKEN"
 MARKER_VALUE = "wp125-credential-marker-must-not-reach-the-delegated-job"
 
+BOOTSTRAP_RELATIVE = ".github/coordination/reviewer_bootstrap"
+
+# WP125-RV-002.  The delegated side used to be one literal probe that printed a report and exited
+# zero no matter what, while `test_selection` rode along in argv and was never executed.  That is a
+# job which cannot fail, and a job which cannot fail is not evidence of anything.
+#
+# The replacement is a closed, controller-authored map from a declared test ID to the program that
+# actually implements it.  The map lives here, in trusted code, so the *caller* selects an ID and
+# never supplies a command; an unknown ID is refused rather than passed through.  Each program
+# returns a real process exit code that the controller records, so a failing check makes the job
+# red instead of decorating a green one.
+_SRC_IMPORT_SMOKE = """
+import json, sys
+sys.path.insert(0, sys.argv[1])
+try:
+    from launcher import argv, delegation, environment, inventory, parity, preflight, registry, watchdog
+except Exception as exc:
+    print("WP125-DELEGATED-TEST " + json.dumps({"test": "launcher_import_smoke", "ok": False, "error": type(exc).__name__}))
+    raise SystemExit(1)
+print("WP125-DELEGATED-TEST " + json.dumps({"test": "launcher_import_smoke", "ok": True, "modules": 8}))
+raise SystemExit(0)
+"""
+
+_SRC_REGISTRY_COVERAGE = """
+import json, sys
+sys.path.insert(0, sys.argv[1])
+from launcher import registry
+coverage = registry.check_coverage()
+print("WP125-DELEGATED-TEST " + json.dumps({"test": "launcher_registry_coverage", "ok": bool(coverage["ok"]), "cases": coverage["case_count"]}))
+raise SystemExit(0 if coverage["ok"] else 1)
+"""
+
+_SRC_STATIC_BOUNDARY = """
+import json, pathlib, sys
+sys.path.insert(0, sys.argv[1])
+from launcher import inventory
+scan = inventory.scan_package(pathlib.Path(sys.argv[1]) / "launcher")
+print("WP125-DELEGATED-TEST " + json.dumps({"test": "launcher_static_boundary", "ok": bool(scan["ok"]), "findings": len(scan["findings"])}))
+raise SystemExit(0 if scan["ok"] else 1)
+"""
+
+DELEGATED_TESTS: Mapping[str, str] = {
+    "launcher_import_smoke": _SRC_IMPORT_SMOKE,
+    "launcher_registry_coverage": _SRC_REGISTRY_COVERAGE,
+    "launcher_static_boundary": _SRC_STATIC_BOUNDARY,
+}
+
+DELEGATED_TEST_IDS: tuple[str, ...] = tuple(sorted(DELEGATED_TESTS))
+
 
 @dataclasses.dataclass(frozen=True)
 class DelegatedJob:
@@ -69,8 +122,10 @@ class DelegatedJob:
     candidate_head: str
     candidate_tree: str
     test_selection: tuple[str, ...]
-    command: tuple[str, ...]
+    commands: tuple[tuple[str, ...], ...]
     read_only_root: str
+    expected_os: str
+    root_evidence: Mapping[str, object]
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -78,9 +133,76 @@ class DelegatedJob:
             "candidate_head": self.candidate_head,
             "candidate_tree": self.candidate_tree,
             "test_selection": list(self.test_selection),
-            "command": list(self.command),
+            "commands": [list(command) for command in self.commands],
             "read_only_root": self.read_only_root,
+            "expected_os": self.expected_os,
+            "root_evidence": dict(self.root_evidence),
         }
+
+
+def _root_error(message: str):
+    return reject("delegation_scope", message)
+
+
+def verify_read_only_root(
+    read_only_root: str,
+    *,
+    candidate_root: str,
+    candidate_head: str,
+    candidate_tree: str,
+) -> dict[str, object]:
+    """Prove the delegated root exists, is genuinely not writable, and is the exact candidate.
+
+    Writability is measured by *attempting a write*, because on Windows nothing cheaper is true.
+    Measured on this host: a directory that has been ``chmod``-ed to ``0o555`` still reports
+    ``os.access(path, os.W_OK) == True`` and still accepts file creation.  A control built on mode
+    bits or ``os.access`` would therefore certify a fully writable directory as read-only — the same
+    shape of fake green this finding is about.  The probe is refused *before* it runs unless the root
+    lies outside the live candidate worktree, so the one side effect it can have is a sentinel file
+    inside a directory whose read-only declaration was already false, and even that is removed.
+    """
+    path = pathlib.Path(read_only_root)
+    if not path.is_absolute():
+        raise _root_error("the delegated read-only root must be an absolute path")
+    require_outside_tree(path, candidate_root, "delegated read-only root", _root_error)
+    try:
+        info = path.lstat()
+    except OSError as exc:
+        raise _root_error("the delegated read-only root does not exist") from exc
+    if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+        raise _root_error("the delegated read-only root is a link or reparse point")
+    if not path.is_dir():
+        raise _root_error("the delegated read-only root is not a directory")
+
+    sentinel = path / ("wp125-writability-probe-%d.tmp" % os.getpid())
+    writable = False
+    try:
+        with open(sentinel, "xb") as handle:
+            handle.write(b"probe")
+        writable = True
+    except OSError:
+        writable = False
+    finally:
+        try:
+            sentinel.unlink()
+        except OSError:
+            pass
+    if writable:
+        raise _root_error("the delegated read-only root accepted a write and is not read-only")
+
+    head = git(path, "rev-parse", "HEAD", error=_root_error).strip()
+    tree = git(path, "rev-parse", "HEAD^{tree}", error=_root_error).strip()
+    if head != candidate_head:
+        raise _root_error("the delegated root is at a different commit than the candidate")
+    if tree != candidate_tree:
+        raise _root_error("the delegated root is at a different tree than the candidate")
+    return {
+        "root": str(path),
+        "writability_probe": "refused",
+        "head": head,
+        "tree": tree,
+        "identity_verified_by": "controller",
+    }
 
 
 def validate_operation(operation: object) -> str:
@@ -102,6 +224,8 @@ def build_job(
     test_selection: Sequence[str],
     read_only_root: str,
     eligible: bool,
+    candidate_root: str,
+    expected_os: str,
 ) -> DelegatedJob:
     """Build the job, or refuse.
 
@@ -112,26 +236,50 @@ def build_job(
     if not eligible:
         raise reject("delegation_scope", "delegation was attempted without preflight eligibility")
     name = validate_operation(operation)
+    if expected_os not in ("Windows", "Linux"):
+        raise reject("delegation_scope", "expected_os %r is not a declared runner OS" % (expected_os,))
     if not test_selection:
         raise reject("delegation_evidence", "the delegated job declares no test selection")
+
     selection = tuple(str(item) for item in test_selection)
     for item in selection:
-        if not item or item.startswith("-") or ".." in item:
-            raise reject("delegation_scope", "test selection entry %r is not a declared test" % (item,))
-    command = (python_executable(), "-c", _PROBE_SOURCE, *selection)
+        # WP125-RV-002: membership in the closed map, not a shape heuristic. Generation 1 accepted
+        # anything that was neither switch-shaped nor traversal-shaped and then never ran it, so a
+        # plausible-looking string bought a green job.
+        if item not in DELEGATED_TESTS:
+            raise reject(
+                "delegation_scope",
+                "test %r is not in the closed controller-authored test map" % (item,),
+            )
+    if len(set(selection)) != len(selection):
+        raise reject("delegation_evidence", "the delegated test selection repeats an entry")
+
+    root_evidence = verify_read_only_root(
+        read_only_root,
+        candidate_root=candidate_root,
+        candidate_head=candidate_head,
+        candidate_tree=candidate_tree,
+    )
+    bootstrap = str(pathlib.Path(read_only_root) / BOOTSTRAP_RELATIVE)
+    commands = tuple(
+        (python_executable(), "-c", DELEGATED_TESTS[item], bootstrap) for item in selection
+    )
     return DelegatedJob(
         operation=name,
         candidate_head=candidate_head,
         candidate_tree=candidate_tree,
         test_selection=selection,
-        command=command,
-        read_only_root=read_only_root,
+        commands=commands,
+        read_only_root=str(pathlib.Path(read_only_root)),
+        expected_os=expected_os,
+        root_evidence=root_evidence,
     )
 
 
-# The job body.  It reports the environment *names* it received and the marker's presence, then runs
-# the declared selection.  Kept as a literal so the delegated side cannot be swapped for something
-# the controller did not author — there is no file on disk for anyone to edit between build and run.
+# The credential probe.  This is deliberately *separate* from the declared tests above: its job is
+# to report, from inside the job, which environment names arrived, so the controller's claim that it
+# filtered the planted marker is checked against an observation rather than restated.  It carries no
+# pass/fail of its own — the tests do that, with real exit codes.
 _PROBE_SOURCE = """
 import json, os, platform, sys
 
@@ -150,7 +298,6 @@ report = {
         "machine": platform.machine(),
         "python": platform.python_version(),
     },
-    "test_selection": sys.argv[1:],
     "write_attempted": False,
 }
 print("WP125-DELEGATED-REPORT " + json.dumps(report, sort_keys=True))
@@ -165,7 +312,19 @@ def run_job(
     working_directory: str,
     deadline: Deadline,
 ) -> dict[str, object]:
-    """Run the delegated job under the controller's watchdog and return measured evidence."""
+    """Run the delegated job under the controller's watchdog and return measured evidence.
+
+    Refuses outright when the runner is not the OS the job was built for.  §7 forbids fabricating
+    delegated Linux execution, and the only way to honour that on a Windows host is to make a
+    Linux-declared job fail here rather than quietly run somewhere else and be reported as Linux.
+    """
+    actual_os = platform.system()
+    if actual_os != job.expected_os:
+        raise reject(
+            "delegation_scope",
+            "the runner is %r but the job was built for %r" % (actual_os, job.expected_os),
+        )
+
     parent = dict(parent_environment)
     parent[MARKER_NAME] = MARKER_VALUE  # planted so its absence downstream is a measurement
     environment = build_child_environment(parent, candidate_root=candidate_root)
@@ -174,21 +333,48 @@ def run_job(
     if leaked:
         raise reject("delegation_credential", "%d credential-shaped names reached the job" % len(leaked))
 
-    outcome = run_supervised(
-        job.command,
+    # The credential probe first, then every declared test, each with its own real exit code.
+    probe = run_supervised(
+        (python_executable(), "-c", _PROBE_SOURCE),
         environment=environment,
         working_directory=working_directory,
         deadline=deadline,
-        label="delegated-run-test",
+        label="delegated-credential-probe",
     )
 
+    per_test: list[dict[str, object]] = []
+    for test_id, command in zip(job.test_selection, job.commands):
+        outcome = run_supervised(
+            command,
+            environment=environment,
+            working_directory=working_directory,
+            deadline=deadline,
+            label="delegated-%s" % test_id,
+        )
+        per_test.append(
+            {
+                "test_id": test_id,
+                "return_code": outcome.return_code,
+                "status": outcome.status,
+                "fenced": outcome.fenced,
+                "cleanup": outcome.cleanup,
+                "report": _test_report_line(outcome.stdout_text, test_id),
+            }
+        )
+
+    failed = [item for item in per_test if item["return_code"] != 0]
     evidence = {
         "job": job.as_dict(),
-        "return_code": outcome.return_code,
-        "status": outcome.status,
-        "fenced": outcome.fenced,
+        "runner_os": actual_os,
+        "expected_os": job.expected_os,
+        "per_test": per_test,
+        "return_codes": {item["test_id"]: item["return_code"] for item in per_test},
+        "tests_executed": len(per_test),
+        "tests_failed": len(failed),
+        "probe_return_code": probe.return_code,
+        "status": "passed" if not failed and probe.return_code == 0 else "failed",
         "timeout_source": "controller",
-        "cleanup": outcome.cleanup,
+        "cleanup": probe.cleanup,
         "runner_fingerprint": {
             "controller_system": platform.system(),
             "controller_release": platform.release(),
@@ -202,12 +388,38 @@ def run_job(
     }
     # The job's self-report is audited against what the controller independently knows it planted.
     # Only the audited summary is retained — names and booleans, never values.
-    evidence["job_report"] = audit_job_report(outcome.stdout_text, evidence)
+    evidence["job_report"] = audit_job_report(probe.stdout_text, evidence)
     evidence["runner"] = evidence["job_report"].get("runner")
+    if failed:
+        raise reject(
+            "delegation_evidence",
+            "%d of %d declared delegated tests returned a non-zero code"
+            % (len(failed), len(per_test)),
+        )
     evidence["evidence_sha256"] = hashlib.sha256(
         json.dumps(evidence, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()
     return evidence
+
+
+def _test_report_line(stdout_text: str, test_id: str) -> dict[str, object]:
+    """Extract the declared test's own machine-readable line, for context only.
+
+    The verdict comes from the process exit code above; this is recorded so an auditor can see what
+    the test said, not so the controller can believe it.
+    """
+    prefix = "WP125-DELEGATED-TEST "
+    for line in str(stdout_text).splitlines():
+        index = line.find(prefix)
+        if index < 0:
+            continue
+        try:
+            payload = json.loads(line[index + len(prefix) :].strip())
+        except ValueError:
+            continue
+        if payload.get("test") == test_id:
+            return payload
+    return {"test": test_id, "report_present": False}
 
 
 def audit_job_report(report_line: str, evidence: Mapping[str, object]) -> dict[str, object]:
@@ -236,8 +448,8 @@ def audit_job_report(report_line: str, evidence: Mapping[str, object]) -> dict[s
         )
     if payload.get("automatic_memory") != "1":
         raise reject("child_environment", "the delegated job did not observe the memory variable")
-    if evidence.get("return_code") != 0:
-        raise reject("delegation_evidence", "the delegated job did not exit zero")
+    if evidence.get("probe_return_code") != 0:
+        raise reject("delegation_evidence", "the delegated credential probe did not exit zero")
     return {
         "observed_from_inside_job": True,
         "credential_marker_present": False,

@@ -109,6 +109,21 @@ class StepResult:
     observations: dict[str, object]
 
 
+# WP125-RV-003.  A receipt is an authority object, so it must be unforgeable by construction rather
+# than by convention.  This is the RA-03 sealed-snapshot idiom: the seal is a module-private object
+# no caller outside this file can name, so `PreflightReceipt(complete=True, ...)` written by hand —
+# or by a substituted step map — cannot produce a receipt that `mint_claim` will accept.
+_SEAL = object()
+
+# Provenance values. Only `trusted_run` may mint a claim. The fault-injection seam stamps
+# `fault_injection` so that a substituted step map can still be *tested* while being structurally
+# incapable of reaching a durable operation.
+PROVENANCE_TRUSTED = "trusted_run"
+PROVENANCE_FAULT_INJECTION = "fault_injection"
+
+SURFACES = frozenset({"windows", "delegated_linux_run_test"})
+
+
 @dataclasses.dataclass(frozen=True)
 class PreflightReceipt:
     """The complete, ordered evidence that preflight finished before anything durable happened."""
@@ -119,6 +134,18 @@ class PreflightReceipt:
     environment: Mapping[str, str]
     surface: str
     failure: dict[str, object] | None
+    provenance: str = PROVENANCE_FAULT_INJECTION
+    _seal: object = None
+
+    def __post_init__(self):
+        if self._seal is not _SEAL:
+            raise reject(
+                "preflight_incomplete",
+                "a preflight receipt was constructed outside the trusted preflight",
+            )
+
+    def is_trusted(self) -> bool:
+        return self._seal is _SEAL and self.provenance == PROVENANCE_TRUSTED
 
     def as_dict(self) -> dict[str, object]:
         return {
@@ -130,6 +157,7 @@ class PreflightReceipt:
                 for step in self.steps
             ],
             "selected_surface": self.surface,
+            "provenance": self.provenance,
             "failure": self.failure,
         }
 
@@ -347,60 +375,161 @@ def _audit_observations(name: str, observations: object) -> dict[str, object]:
     return dict(observations)
 
 
-def run_preflight(
-    context: Mapping[str, object],
-    *,
-    steps: Sequence[tuple[str, Callable[[Mapping[str, object]], dict[str, object]]]] = STEPS,
-) -> PreflightReceipt:
-    """Run every check, in order, writing nothing.
+def _bind_observations_to_pins(
+    context: Mapping[str, object], results: Sequence[StepResult]
+) -> dict[str, object]:
+    """Re-verify the finished observations against the pinned expectations (WP125-RV-003).
 
-    Returns a receipt.  A failed receipt is a *value*, not an exception, because the caller must be
-    able to record a negative outcome and then prove that no claim, child or delegated job exists —
-    which is hard to do from inside an exception handler that never got a receipt.
+    This runs *after* the steps and does not trust them.  Generation 1 delegated every equality
+    check to the step that produced the value, so a substituted step map could fabricate the required
+    keys and every later check would happily compare a fabrication against itself.  Here the caller's
+    pins are the left-hand side and the observations are the right-hand side, and the source pin is
+    re-read from disk so at least one value cannot be fabricated at all: an impostor that wants to
+    pass has to actually hash the sealed file.
     """
-    if [name for name, _ in steps] != list(STEP_NAMES[: len(steps)]) and steps is STEPS:
+    observed: dict[str, object] = {}
+    for step in results:
+        observed.update(step.observations)
+
+    expected = context["expected_authority"]
+    for key, want in dict(expected).items():
+        if observed.get(key) != want:
+            raise reject("authority_mismatch", "observed %s is not the pinned value" % key)
+
+    if observed.get("candidate_ref") != context["expected_candidate_ref"]:
+        raise reject("authority_mismatch", "observed candidate_ref is not the pinned value")
+    if observed.get("integration_head") != context["expected_integration_head"]:
+        raise reject("authority_mismatch", "observed integration_head is not the pinned value")
+    if observed.get("effective_write_prefix") != WRITE_PREFIX:
+        raise reject("write_set", "observed write prefix is not the sole permitted prefix")
+    if observed.get("worktree_clean") is not True:
+        raise reject("write_set", "the bound receipt does not record a clean worktree")
+    if observed.get("paths_outside_prefix"):
+        raise reject("write_set", "the bound receipt records paths outside the launcher prefix")
+    if observed.get("permission_mode") != "dontAsk":
+        raise reject("permission_mode", "the bound receipt does not carry the mandated dontAsk")
+    if observed.get("environment_memory_value") != "1":
+        raise reject("child_environment", "the bound receipt does not carry the memory value 1")
+    if observed.get("selected_surface") not in SURFACES:
+        raise reject("sandbox_unavailable", "the bound receipt names no known execution surface")
+
+    # Independent re-measurement. The step already hashed the pin; doing it again here means the
+    # binding stage has its own evidence rather than a restatement of the step's.
+    rebound = hashlib.sha256(
+        read_sealed_bytes(
+            str(context["source_pin_path"]),
+            "source pin rebind",
+            candidate_root=str(context["candidate_root"]),
+        )
+    ).hexdigest()
+    if rebound != context["expected_source_pin_sha256"]:
+        raise reject("authority_mismatch", "the re-read source pin does not match the pinned hash")
+    if observed.get("source_pin_sha256") != rebound:
+        raise reject("authority_mismatch", "the observed source pin hash is not the re-read hash")
+
+    return {
+        "bound_keys": len(observed),
+        "source_pin_rebound_sha256": rebound,
+        "independent_rebind": True,
+    }
+
+
+def _run_steps(
+    context: Mapping[str, object],
+    steps: Sequence[tuple[str, Callable[[Mapping[str, object]], dict[str, object]]]],
+    provenance: str,
+) -> PreflightReceipt:
+    """Shared engine.  Order is enforced for every caller, trusted or injected."""
+    if [name for name, _ in steps] != list(STEP_NAMES):
         raise reject("preflight_order", "the preflight step order has drifted from the contract")
 
     sink: dict[str, object] = {}
     working = dict(context)
     working["_sink"] = sink
 
+    def negative(name: str, index: int, exc: BaseException) -> PreflightReceipt:
+        return PreflightReceipt(
+            complete=False,
+            steps=tuple(results),
+            plan=sink.get("plan"),
+            environment=sink.get("environment", {}),
+            surface="unselected",
+            failure={
+                "step": name,
+                "step_index": index,
+                "category": getattr(exc, "category", "preflight_incomplete"),
+                "message": str(exc),
+            },
+            provenance=provenance,
+            _seal=_SEAL,
+        )
+
     results: list[StepResult] = []
     for index, (name, function) in enumerate(steps, start=1):
         try:
             observations = _audit_observations(name, function(working))
         except Exception as exc:  # noqa: BLE001 - every failure becomes a named negative receipt
-            category = getattr(exc, "category", "preflight_incomplete")
-            return PreflightReceipt(
-                complete=False,
-                steps=tuple(results),
-                plan=sink.get("plan"),
-                environment=sink.get("environment", {}),
-                surface=str(
-                    results[-1].observations.get("selected_surface", "unselected")
-                    if results
-                    else "unselected"
-                ),
-                failure={
-                    "step": name,
-                    "step_index": index,
-                    "category": category,
-                    "message": str(exc),
-                },
-            )
+            return negative(name, index, exc)
         results.append(StepResult(name=name, index=index, observations=observations))
 
     if len(results) != len(STEP_NAMES):
-        raise reject("preflight_incomplete", "preflight produced %d of %d steps" % (len(results), len(STEP_NAMES)))
+        raise reject(
+            "preflight_incomplete",
+            "preflight produced %d of %d steps" % (len(results), len(STEP_NAMES)),
+        )
+
+    # WP125-RV-003: a complete run must produce a usable plan, environment and surface. Generation 1
+    # returned complete=True with plan=None and environment={} whenever the final step was replaced,
+    # which is a receipt that says "ready to launch" while carrying nothing to launch.
+    plan = sink.get("plan")
+    environment = sink.get("environment", {})
+    try:
+        if plan is None:
+            raise reject("preflight_incomplete", "preflight completed without a launch plan")
+        if not environment:
+            raise reject("preflight_incomplete", "preflight completed without a child environment")
+        binding = _bind_observations_to_pins(context, results)
+    except Exception as exc:  # noqa: BLE001
+        return negative("value_binding", len(STEP_NAMES) + 1, exc)
+
     surface = str(results[5].observations["selected_surface"])
+    results.append(
+        StepResult(name="value_binding", index=len(STEP_NAMES) + 1, observations=binding)
+    )
     return PreflightReceipt(
         complete=True,
         steps=tuple(results),
-        plan=sink.get("plan"),
-        environment=sink.get("environment", {}),
+        plan=plan,
+        environment=environment,
         surface=surface,
         failure=None,
+        provenance=provenance,
+        _seal=_SEAL,
     )
+
+
+def run_preflight(context: Mapping[str, object]) -> PreflightReceipt:
+    """The production entry point.  Runs the trusted step map, and only that map.
+
+    There is deliberately no ``steps`` parameter.  Generation 1 exposed one whose order guard was
+    skipped for exactly the callers that supplied their own steps, so the full seven-function
+    substitution it was meant to stop was the one case it never checked.
+    """
+    return _run_steps(context, STEPS, PROVENANCE_TRUSTED)
+
+
+def run_preflight_fault_injection(
+    context: Mapping[str, object],
+    steps: Sequence[tuple[str, Callable[[Mapping[str, object]], dict[str, object]]]],
+) -> PreflightReceipt:
+    """Test-only seam for substituting steps.
+
+    Substitution stays reachable for the fault-injection controls, but every receipt it produces is
+    stamped ``fault_injection`` and :func:`mint_claim` refuses those outright.  So an impostor step
+    map can be *studied* and can never mint a durable operation, which is the property §5 actually
+    needs — stronger than hiding the seam, because it holds even for a caller who finds it.
+    """
+    return _run_steps(context, steps, PROVENANCE_FAULT_INJECTION)
 
 
 def mint_claim(
@@ -418,8 +547,19 @@ def mint_claim(
     """
     if not isinstance(receipt, PreflightReceipt) or not receipt.complete:
         raise reject("preflight_incomplete", "a claim was attempted before preflight completed")
-    if len(receipt.steps) != len(STEP_NAMES):
+    # WP125-RV-003: authenticate provenance before anything durable happens. A receipt that did not
+    # come from the trusted step map is refused here even if every field on it looks perfect.
+    if not receipt.is_trusted():
+        raise reject(
+            "preflight_incomplete",
+            "a claim was attempted on a receipt with provenance %r" % (receipt.provenance,),
+        )
+    if len(receipt.steps) != len(STEP_NAMES) + 1:
         raise reject("preflight_incomplete", "a claim was attempted on a partial preflight receipt")
+    if receipt.plan is None or not receipt.environment:
+        raise reject("preflight_incomplete", "a claim was attempted without a plan or environment")
+    if receipt.surface not in SURFACES:
+        raise reject("preflight_incomplete", "a claim was attempted without a selected surface")
     if not isinstance(reconcile_key, str) or not reconcile_key:
         raise reject("duplicate_claim", "the reconcile key must be a non-empty string")
 

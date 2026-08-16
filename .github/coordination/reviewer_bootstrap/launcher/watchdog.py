@@ -600,10 +600,30 @@ class ProcessFence:
         }
 
     # -- proof ------------------------------------------------------------
-    def active_process_count(self) -> int | None:
-        """The job's own count of live processes, or ``None`` off Windows."""
-        if not IS_WINDOWS or self._job is None:
-            return None
+    def job_census(self) -> dict[str, object]:
+        """Ask the job how many processes it still owns, and say *why* if it cannot answer.
+
+        WP125-RV-005.  Generation 1 collapsed three different states into ``None`` — "this is POSIX,
+        there is no job", "the job handle is missing", and "the Win32 census call failed" — and then
+        treated ``None`` as clean.  On Windows the last two are the states where the fence has
+        stopped being able to see anything, which is precisely when a green receipt is most
+        dangerous.  Returning a reason instead of ``None`` is what lets :meth:`prove_cleanup` call
+        them red on Windows while still accepting the genuinely inapplicable POSIX case.
+        """
+        if not IS_WINDOWS:
+            return {
+                "applicable": False,
+                "ok": True,
+                "active": None,
+                "reason": "posix_process_group_has_no_job_census",
+            }
+        if self._job is None:
+            return {
+                "applicable": True,
+                "ok": False,
+                "active": None,
+                "reason": "job_handle_absent",
+            }
         info = _JOBOBJECT_BASIC_ACCOUNTING_INFORMATION()
         returned = wintypes.DWORD(0)
         ok = _kernel32.QueryInformationJobObject(
@@ -614,8 +634,27 @@ class ProcessFence:
             ctypes.byref(returned),
         )
         if not ok:
-            return None
-        return int(info.ActiveProcesses)
+            return {
+                "applicable": True,
+                "ok": False,
+                "active": None,
+                "reason": "query_information_job_object_failed",
+            }
+        return {
+            "applicable": True,
+            "ok": True,
+            "active": int(info.ActiveProcesses),
+            "reason": "measured",
+        }
+
+    def active_process_count(self) -> int | None:
+        """The job's live-process count, or ``None`` when the census could not answer.
+
+        Kept for the pre-terminate observation, where an unavailable census is information rather
+        than a verdict.  Cleanup proof must use :meth:`job_census` so it can tell the reasons apart.
+        """
+        census = self.job_census()
+        return census["active"] if census["ok"] else None
 
     def prove_cleanup(self, *, budget_seconds: float = 10.0) -> dict[str, object]:
         """Two independent proofs that nothing survived.
@@ -625,7 +664,7 @@ class ProcessFence:
         """
         end = time.monotonic() + budget_seconds
         survivors: list[int] = []
-        active: int | None = None
+        census: dict[str, object] = {}
         while True:
             survivors = [
                 identity_value.pid for identity_value in self.recorded if is_alive(identity_value)
@@ -633,23 +672,33 @@ class ProcessFence:
             table = live_pids()
             for identity_value in self.recorded:
                 survivors.extend(descendants_of(identity_value.pid, table))
-            active = self.active_process_count()
+            census = self.job_census()
             table_clean = not survivors
-            job_clean = active is None or active == 0
-            if table_clean and job_clean:
+            # WP125-RV-005.  On Windows a census that cannot answer is RED, not clean: a missing job
+            # handle or a failed Win32 query means the fence has lost sight of the tree, and "I
+            # cannot see any survivors" is not the same claim as "there are none".  Off Windows the
+            # census is genuinely inapplicable, and that is recorded as such rather than silently
+            # counted as a second proof.
+            census_clean = bool(census["ok"]) and (
+                census["active"] == 0 if census["applicable"] else True
+            )
+            if table_clean and census_clean:
+                paths = 2 if census["applicable"] else 1
                 return {
                     "cleanup_proven": True,
                     "process_table_survivors": [],
-                    "job_active_processes": active,
-                    "independent_paths": 2 if active is not None else 1,
+                    "recorded_identities": [item.as_dict() for item in self.recorded],
+                    "job_census": census,
+                    "job_active_processes": census["active"],
+                    "independent_paths": paths,
                 }
             if time.monotonic() >= end:
                 break
             time.sleep(0.05)
         raise reject(
             "watchdog_cleanup",
-            "cleanup could not be proven: %d table survivors, job active=%s"
-            % (len(set(survivors)), active),
+            "cleanup could not be proven: %d table survivors, job census %s (active=%s)"
+            % (len(set(survivors)), census.get("reason"), census.get("active")),
         )
 
     def close(self) -> None:

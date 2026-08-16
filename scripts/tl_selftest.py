@@ -21187,10 +21187,18 @@ def run() -> int:
         # Package 200 không nhúc nhích; cây thật = 179 + 55 = 234.
         # KÊ KHAI SLOT (audit launcher vòng 7): 55 → **56** Markdown dưới `docs/`. Thêm đúng
         # `docs/AUDIT_LAUNCHER_VONG_7.md`, dev-side/ngoài gói; package vẫn 179, cây thật 235.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 56 == 235
+        # KÊ KHAI SLOT (gate_lifecycle — cơ chế vòng đời gate dev-side): 56 → **57** Markdown dưới
+        # `docs/`. Thêm đúng `docs/research/2026-08-15-chien-luoc-gate-nang-theo-vong-doi.md`,
+        # dev-side/ngoài gói. Hai tệp mã cùng đợt (`.claude/dev/gate_lifecycle.py` và
+        # `gate_lifecycle_test.py`) nằm dưới `.claude/` — đã có khoá trong `_RELEASE_EXCLUDE_DIRS`
+        # nên KHÔNG ăn khe nào; package giữ 179, cây thật = 179 + 57 = 236, trần 200 không nhúc nhích.
+        # ĐÃ TRẢ GIÁ: `release-manifest` vẫn báo `file_count: 179` sau khi thêm tệp docs này, nên
+        # lượt chạy cổng phát hành TRƯỚC push xanh và tôi tưởng đã đủ — chính ca này mới là chỗ ghi
+        # con số docs, và nó chỉ đỏ ở `tl selftest`. Cổng khác nhau trả lời câu hỏi khác nhau.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 57 == 236
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 56
+        ok4 = (len(tren_dia) == 57
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

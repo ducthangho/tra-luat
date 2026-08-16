@@ -1,0 +1,27 @@
+schema: cross-review-receipt/v1
+review: moi-truong-review-8
+reviewer: codex
+patch_author: claude
+verdict: changes_requested
+head_sha: 3f8b2904cfb4f99aab151cd0be435e4ba4553bb8
+base_sha: 69bc3cede6085bf6229ac95a44da4aae9e51ee42
+repository_mutated: false
+worktree_clean: true
+artifacts:
+  verdict: moi-truong-review-8-codex-verdict.md
+checks:
+  step_0: pass
+  journal_enter_count: 100
+  journal_exit_count: 100
+  journal_complete_marker: true
+  killing_test_case: null
+  caller_survived_after_suite: false
+  mutation_run_1: "56/56, rc=0, 1 not measurable"
+  mutation_run_2: "56/56, rc=0, 1 not measurable"
+findings:
+  high: 2
+  medium: 2
+  low: 1
+notes:
+  - "No test case has enter without exit; death occurs outside the case loop."
+  - "Real user credential/config files were neither read nor written."

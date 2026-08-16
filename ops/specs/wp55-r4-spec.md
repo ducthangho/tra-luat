@@ -40,14 +40,22 @@ spec_hash_basis: sha256 của chính tệp này, byte nguyên trạng, không ch
 supersedes_revision: 3
 supersedes_spec_hash: e321f811724fae97b19d523a3e5159bc13b425cd15fc6c753c7439fe28cae22d
 
-base_sha: c44b2d4c351cbe7f519e1b46aadf68d45e98af86
+base_sha: 18da1da6a07ab2c86d716cef1d74ff2cd0e3218a
 base_sha_note: >-
-  ĐÃ CHỐT. Bản viết lại `c47a439` được duyệt nhưng KHÔNG ff được — nó dựng trên `2531366`
-  trong khi master tip đã là `d5b7bcc` (đi trước hai commit, PR #116). Rebase lên `d5b7bcc`
-  cho `c44b2d4`, và bản rebase cũng đã qua cross-review: `approve`, không finding, hai diff
-  giống nhau BYTE-FOR-BYTE kể cả context và hunk header `@@ -79,8 +79,8`.
-  ĐIỀU KIỆN: số này chỉ đúng nếu `c44b2d4` land bằng FAST-FORWARD. Land bằng merge/squash
-  thì SHA đổi và phải sửa lại đây.
+  ĐÃ LAND, ĐÃ ĐO. Bản viết lại `c47a439` được duyệt nhưng KHÔNG ff được — nó dựng trên
+  `2531366` trong khi master tip đã là `d5b7bcc` (đi trước hai commit, PR #116). Rebase lên
+  `d5b7bcc` cho `c44b2d4`, và bản rebase cũng đã qua cross-review: `approve`, không finding,
+  hai diff giống nhau BYTE-FOR-BYTE kể cả context và hunk header `@@ -79,8 +79,8`.
+  `c44b2d4` land qua PR #129 ngày 16-08 bằng MERGE COMMIT (theo nếp master, không ff), nên
+  SHA neo là commit merge `18da1da`, KHÔNG phải `c44b2d4`. Điều kiện ff ghi ở bản nháp
+  trước đó đã hết hiệu lực đúng như nó tự dự phòng.
+  ĐÃ ĐO trên chính `18da1da`, có chứng đường hai chiều:
+    scanner r3g5 (CÒN miễn trừ),  tip 18da1da  -> rc=0
+    mô phỏng r4  (BỎ miễn trừ),   tip 18da1da  -> rc=0    <- hợp đồng mới, master sạch
+    scanner r3g5 (CÒN miễn trừ),  d5b7bcc      -> rc=0
+    mô phỏng r4  (BỎ miễn trừ),   d5b7bcc      -> rc=6 CLAUDE.md:82 'người có thẩm quyền'
+  Hai dòng cuối là CHỨNG ĐƯỜNG: chúng chứng minh phép mô phỏng thật sự có tác dụng, nên
+  `rc=0` ở dòng thứ hai là bằng chứng dương chứ không phải phép đo rỗng.
 start_from_sha: 1a4525a20aa360476a6f59cb157c21097919c457
 start_from_note: >-
   KHÔNG dựng lại từ base. Generation 9 đã đóng được sáu finding của lượt 9 và mười tám hình
@@ -198,7 +206,8 @@ người có / thẩm quyền   →   tên thuộc / danh sách cho phép
 | | |
 |---|---|
 | commit ĐƯỢC DUYỆT | `c47a439997e0191427d775636ebadbf3be7e1481`, dựng trên `2531366` |
-| commit SẼ LAND | `c44b2d4c351cbe7f519e1b46aadf68d45e98af86` — cùng patch, rebase lên `d5b7bcc` |
+| commit ĐÃ LAND | `c44b2d4c351cbe7f519e1b46aadf68d45e98af86` — cùng patch, rebase lên `d5b7bcc` |
+| cách land | PR #129, **merge commit** `18da1da6a07ab2c86d716cef1d74ff2cd0e3218a` (16-08) |
 | phạm vi | 1 tệp, 2 dòng |
 | lease review | `wp55-r4-review-viet-lai-codex-20260815` |
 | verdict | **`approve`**, không finding, `land_recommendation: fast_forward` |
@@ -211,7 +220,9 @@ cách quay về chính PR #104 (merge `e344e7c`, `VERSION=1.36.68`) và đo lạ
 bọc chỗ ấy bằng khối chứng cứ AC 19; verdict trả `do_not_land` với finding
 `ac19-exemption-wider-than-necessary` — khối miễn 10 dòng để cứu 2 dòng.
 
-**`base_sha` của revision 4 = `c44b2d4c351cbe7f519e1b46aadf68d45e98af86`.**
+**`base_sha` của revision 4 = `18da1da6a07ab2c86d716cef1d74ff2cd0e3218a`** — commit merge của
+PR #129, tức tip master sau khi bản viết lại land. KHÔNG phải `c44b2d4`: nó chỉ là commit
+*bên trong* PR, và AC 20 đo trên **cây đã merge** nên phải neo vào tip, không neo vào nhánh.
 
 Vì sao không phải `c47a439`: bản ấy dựng trên `2531366`, mà master tip là `d5b7bcc` — đi
 trước hai commit (PR #116). **Fast-forward bất khả thi**, dù verdict khuyến nghị đúng chữ
@@ -224,7 +235,12 @@ Rebase lên `d5b7bcc` cho `c44b2d4`, và bản rebase cũng qua cross-review ri�
 byte-for-byte kể cả context và hunk header. PR #116 không đụng `CLAUDE.md` nên không nuốt
 mất thay đổi nào của họ.
 
-Số này chỉ đúng nếu `c44b2d4` land bằng **fast-forward**.
+**Đã land 16-08 — nhưng bằng merge commit, không phải fast-forward.** Master theo nếp merge
+commit (`Merge pull request #116` ngay trước đó), nên PR #129 land cùng nếp và sinh
+`18da1da`. Hệ quả duy nhất, và nó không nhỏ: **`base_sha` là `18da1da`, không phải
+`c44b2d4`** — đúng cái bẫy mà chính đoạn trên vừa cảnh báo, chỉ khác một tầng. Lần trước là
+*neo vào SHA không còn là tip*; lần này là *neo vào SHA chưa bao giờ là tip*. Cùng một câu
+hỏi chữa được cả hai: **con số này có phải tip master không, đo lúc nào?**
 
 ## Acceptance criteria
 
@@ -331,8 +347,11 @@ Executor revision 4 phải tái lập lại, đừng nhận theo lời kể. Ma 
 
 ## Việc chưa làm, phải nói ra
 
-1. **`base_sha` chưa điền được.** Chờ `c47a439` land lên master bằng fast-forward. Đây là
-   việc PHẢI làm trước khi cấp lease, không hoãn được. Land bằng merge/squash thì SHA đổi.
+1. ~~**`base_sha` chưa điền được.**~~ **XONG 16-08.** Land bằng merge commit qua PR #129, nên
+   `base_sha = 18da1da` (tip master), không phải `c44b2d4`. Đã đo hai chiều trên chính tip
+   ấy — xem `base_sha_note`. Cảnh báo còn lại: `18da1da` là tip **tại lúc soạn spec**; nếu
+   master tiến thêm trước khi cấp lease thì phải đo lại AC 20 trên tip mới, vì AC 20 nói
+   *cây đã merge* chứ không nói *cây tại base_sha*.
 2. **Chưa đo lại toàn bộ suite dưới hợp đồng mới.** Đã đo sáu phản ví dụ và năm ca chiều-tha
    bằng mô phỏng (bỏ nhánh miễn trừ khỏi scanner `1a4525a`); **chưa** chạy trọn 173 ca. Hai
    ca chiều-tha chắc chắn đỏ và phải chuyển ma trận; có thể còn ca khác. Executor đo, đừng

@@ -1,0 +1,20 @@
+review: moi-truong-review-6
+reviewer: codex
+verdict: changes_requested
+head: c775c0a5b0bf0816e913ba0b300d898fec3c58b0
+base: fe895a068368754bd11b25ca59c504f973e9f086
+read_only: true
+step_0:
+  shallow: false
+  core_abbrev: 7
+  head_matches: true
+  changed_files_match: true
+tests:
+  standard_suite: "incomplete: caller terminated after t62; no summary/rc"
+  mutation_run_1: "rc=1; 49/50 measured passed; 1 unmeasurable; t85 mutation survived"
+  mutation_run_2: "rc=1; 49/50 measured passed; 1 unmeasurable; t85 mutation survived"
+credential_live_check_run: false
+repository_clean: true
+findings:
+  p1: 3
+  p2: 1

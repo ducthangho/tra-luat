@@ -116,25 +116,35 @@ giống bền* để hook giải mã xuống đĩa **trước khi** codex khởi
 một khả năng: phiên codex **tự tái dựng** được credential, và công cụ của kho chạy *bên
 trong* sandbox thôi báo nhầm "không có biến".
 
-Hook đặt sẵn, idempotent, giữ nguyên phần `[projects]` của codex:
+#### ĐÃ THU HỒI (cross-review lượt 7, 16-08-2026) — đừng dựng lại
+
+Hook **từng** ghi khối này, và nay hook **gỡ** nó đi:
 
 ```toml
 [shell_environment_policy]
-inherit = "all"
-exclude = ["GITHUB_PAT", "CLAUDE_CODE_SESSION_ID",
-           "CLAUDE_CODE_REMOTE_SESSION_ID", "CLAUDE_CODE_WEBSOCKET_AUTH_FILE_DESCRIPTOR"]
+inherit = "all"                 # <- ĐÃ THU HỒI
+exclude = ["GITHUB_PAT", "CLAUDE_CODE_SESSION_ID", …]
 ```
 
-**`exclude` KHÔNG phải cho có.** Đã tính bằng máy: biến nào có *hình dạng bí mật* mà **lọt
-qua** ba mẫu mặc định. Kết quả: `GITHUB_PAT` là credential **thật** duy nhất lọt lưới
-(93 ký tự, tiền tố `github_pat_`) — thiếu dòng đó là phơi PAT cho **mọi** lệnh codex chạy.
-Ba biến còn lại là danh tính phiên, codex không cần. Đổi mẫu hay thêm biến thì **tính lại
-bằng máy**, đừng đoán — lệnh tính nằm ngay trong hook.
+Lý lẽ bảo vệ nó là "phiên codex cần thấy biến để tự tái dựng credential". **Lý lẽ đó sai
+ngay trong chính luồng hook**: khối khôi phục credential chạy TRƯỚC, đã ghi
+`$CODEX_AUTH_JSON` ra `~/.codex/auth.json` rồi mới tới khối policy. Từ đó codex đọc
+credential từ tệp chuẩn, không cần biến. Và nếu hook không chạy thì policy cũng không được
+cài — nên nó **chưa bao giờ** là đường cứu hộ độc lập. Ta đổi **một** credential lấy **cả
+môi trường** mà không mua được gì.
 
-**Đánh đổi, nói thẳng:** `inherit = "all"` đưa `CODEX_AUTH_JSON` (chứa refresh token) vào
-môi trường của mọi lệnh codex chạy, thay vì chỉ nằm trên đĩa quyền 600. Đây là lựa chọn
-CÓ CHỦ ĐÍCH của chủ kho, không phải mặc định — ai thấy không đáng thì đổi `inherit` về
-`"core"`, codex vẫn chạy bình thường.
+`exclude` cũng không cứu được: quét theo **tên** không chứng minh được gì cho `PGPASSWORD`,
+`DATABASE_URL`, `REDIS_URL`, `SSH_AUTH_SOCK`, hay biến vendor mới; và nó lỗi thời đúng vào
+lúc môi trường đổi — bên quên cập nhật chính là bên đẩy lọt. Danh sách chặn theo tên là
+*bằng chứng về cái ta đã nghĩ tới*, không phải bằng chứng an toàn.
+
+Đường thay thế đã đủ và rẻ hơn: **`codex login --device-auth`** đúc credential tại chỗ.
+
+Việc gỡ nằm ở `.claude/dev/codex_env_policy.py` (tách riêng để test được, `t100`). Nó chỉ
+có hai kết cục: **gỡ đúng khối có marker của ta**, hoặc **TỪ CHỐI kèm chẩn đoán**. Không
+prepend, không đoán — bản trước luôn prepend một bảng, nên một config đã có
+`[shell_environment_policy]` **không marker** (hoàn toàn hợp lệ với codex) sẽ thành **hai
+bảng trùng tên** và codex từ chối parse; ta làm hỏng cấu hình người dùng.
 
 **TUYỆT ĐỐI KHÔNG** dùng `shell_environment_policy.set` để truyền giá trị qua dòng lệnh:
 đối số lộ trong `ps` cho mọi tiến trình cùng máy.

@@ -218,8 +218,14 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   chặn bản mới. Chốt nay so `last_refresh` giữa đĩa và biến, không hỏi lệnh đó nữa.
 - **Codex mặc định KHÔNG thấy biến tuỳ biến** (`shell_environment_policy.inherit` chỉ truyền
   tập lõi — KHÔNG phải vì bộ lọc bí mật; mẫu mặc định chỉ có `*KEY*` `*SECRET*` `*TOKEN*`).
-  Hook đặt `inherit = "all"` kèm `exclude` **tính bằng máy**, vì `GITHUB_PAT` là credential
-  thật duy nhất lọt qua ba mẫu đó. Đánh đổi có chủ đích; chi tiết ở `docs/GOI_AGENT_DA_NEN.md`.
+  **`inherit = "all"` ĐÃ THU HỒI (16-08-2026, cross-review lượt 7) — đừng dựng lại.** Lý lẽ
+  "phiên codex cần thấy biến để tái dựng credential" sai ngay trong luồng hook: credential
+  đã được ghi ra `~/.codex/auth.json` TRƯỚC khi policy chạy, nên ta đổi MỘT credential lấy
+  CẢ MÔI TRƯỜNG mà không mua được gì. `exclude` theo TÊN là bằng chứng về *cái ta đã nghĩ
+  tới*, không phải bằng chứng an toàn. Đường đúng: `codex login --device-auth`.
+  Hook nay chỉ GỠ khối cũ, và gỡ theo luật "gỡ đúng khối có marker, hoặc TỪ CHỐI kèm chẩn
+  đoán" — bản trước luôn prepend nên làm HỎNG config người dùng đã có bảng cùng tên không
+  marker (hai bảng trùng ⇒ codex không parse được). Chi tiết `docs/GOI_AGENT_DA_NEN.md`.
 - `rg` là công cụ **BẮT BUỘC** (từ 15-08-2026). Thiếu nó lệnh tìm của agent gãy giữa
   chừng chứ KHÔNG tự lùi về `grep` — phiên vẫn "chạy" nhưng tra cứu mù. Hook phiên thử
   apt-get (có/không sudo, có/không `update`) rồi cargo, và đòi bằng chứng `rg --version`.
@@ -274,6 +280,15 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   từng đột biến; `t97` khoá lại, và mỗi lớp có phản chứng RIÊNG — lớp "tắt ghi bytecode"
   lúc đầu KHÔNG có răng (gỡ nó ra mà `t97` vẫn xanh) nên phải đo thẳng bằng "nạp xong
   không được để lại `.pyc`".
+- **DÒNG IN CUỐI CÙNG ≠ CA CHẠY CUỐI CÙNG.** Bộ test launcher không in gì trong lúc chạy
+  (chỉ dòng BỎ QUA + tổng kết), nên khi tiến trình bị giết, thứ còn lại trên màn hình là
+  `BO QUA t62`. Reviewer đọc thành "chết ngay sau t62"; **tôi cũng đọc y hệt** rồi đi truy
+  `t63` — ba lượt review tìm sai chỗ vì một tạo tác của BỘ ĐỆM (stdout nối vào ống là đệm
+  KHỐI, mọi thứ chưa xả mất cùng cú giết). `flush()` chưa đủ — mới ra khỏi đệm Python;
+  phải `fsync()` mới qua đệm HĐH. Nay có `--nhat-ky TEP`: ghi `>>> vao` / `<<< ra` từng ca,
+  flush+fsync, kèm dấu `# XONG TRON VEN` để phân biệt "chạy hết" với "bị giết". Ca nào có
+  `vao` mà không có `ra` chính là ca giết tiến trình. **Trước khi định vị một cú chết, hãy
+  hỏi phép đo có sống sót qua cú chết đó không.**
 - **Hook dùng đường dẫn TƯƠNG ĐỐI là bẫy tự khoá.** `.claude/settings.json` từng ghi
   `python .claude/hooks/pretooluse_guard.py`; khi cwd của shell trôi vào thư mục con thì
   MỌI lệnh Bash chết trước khi chạy, và không còn đường `cd` về. Luôn dùng

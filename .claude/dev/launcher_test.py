@@ -30,6 +30,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 LAUNCHER = Path(__file__).resolve().parent / "launcher.py"
+CODEX_ENV_POLICY = Path(__file__).resolve().parent / "codex_env_policy.py"
 PY = sys.executable or "python3"
 LA_WINDOWS = platform.system() == "Windows"
 
@@ -2727,6 +2728,132 @@ def t96_kiem_song_phai_chay_KE_CA_khi_sap_het_han():
 
 
 @ca
+def t100_go_env_policy_khong_duoc_lam_hong_config_nguoi_dung():
+    """Gỡ khối của mình thì được; đụng vào cấu hình người khác thì KHÔNG.
+
+    Cross-review lượt 7 (HIGH + MEDIUM). Bản trước gỡ khối CÓ marker rồi LUÔN prepend
+    một `[shell_environment_policy]`. Config người dùng đã có bảng cùng tên nhưng
+    KHÔNG marker (hoàn toàn hợp lệ với codex) ⇒ tệp có HAI bảng trùng tên ⇒ codex từ
+    chối parse. "Bất biến" tôi đo được chỉ đúng cho đúng ca marker nguyên vẹn.
+
+    Nay chỉ hai kết cục: gỡ ĐÚNG khối của ta, hoặc TỪ CHỐI kèm chẩn đoán. Bốn ca dưới
+    đây chính là bốn ca reviewer đòi: chạy lặp · bảng sẵn không marker · marker thiếu
+    một đầu · giữ nguyên phần còn lại.
+    """
+    m = _nap_sach(CODEX_ENV_POLICY)
+    khoi = (f'{m.MOC_MO}\n[shell_environment_policy]\ninherit = "all"\n{m.MOC_DONG}')
+    duoi = '[projects."/home/u/kho"]\ntrust_level = "trusted"\n'
+
+    def chay_go(tep):
+        # Nuot dau ra chan doan: ca nay chay 6 lan, de nguyen thi no lan at ca ban
+        # tong ket cua suite. `sys.stderr` cung phai nuot — nhanh TU CHOI in ra do.
+        cu_out, cu_err = sys.stdout, sys.stderr
+        sys.stdout = sys.stderr = io.StringIO()
+        try:
+            return m.main(["--tep", str(tep)])
+        finally:
+            sys.stdout, sys.stderr = cu_out, cu_err
+
+    with San() as s:
+        # (a) go dung khoi cua ta, GIU phan con lai — va CHAY LAP khong doi them gi
+        t1 = s / "c1.toml"
+        t1.write_text(khoi + "\n\n" + duoi, encoding="utf-8")
+        bang(chay_go(t1) == MA_OK, "go khoi cua ta ma khong OK")
+        sau = t1.read_text(encoding="utf-8")
+        bang(m.MOC_MO not in sau and "inherit" not in sau, f"chua go het: {sau!r}")
+        bang('[projects."/home/u/kho"]' in sau, f"da nuot phan cua codex: {sau!r}")
+        bang(chay_go(t1) == MA_OK, "chay lai ma khong OK")
+        bang(t1.read_text(encoding="utf-8") == sau, "chay lai lam doi tep — khong bat bien")
+
+        # (b) nguoi dung CO SAN bang cung ten, KHONG marker => TUYET DOI khong dung toi
+        t2 = s / "c2.toml"
+        cua_ho = '[shell_environment_policy]\ninherit = "core"\nset = { FOO = "1" }\n'
+        t2.write_text(cua_ho, encoding="utf-8")
+        bang(chay_go(t2) == MA_OK, "bang khong phai cua ta ma bao loi")
+        bang(t2.read_text(encoding="utf-8") == cua_ho,
+             f"DA SUA config nguoi dung: {t2.read_text(encoding='utf-8')!r}")
+
+        # (c) marker THIEU MOT DAU => TU CHOI kem chan doan, KHONG doan, KHONG ghi
+        for ten, noi_dung in (("c3", m.MOC_MO + '\n[shell_environment_policy]\n' + duoi),
+                              ("c4", duoi + "\n" + m.MOC_DONG),
+                              ("c5", khoi + "\n" + khoi)):
+            t = s / f"{ten}.toml"
+            t.write_text(noi_dung, encoding="utf-8")
+            ma = chay_go(t)
+            bang(ma == m.MA_TU_CHOI, f"{ten}: marker hong ma khong TU CHOI, duoc {ma}")
+            bang(t.read_text(encoding="utf-8") == noi_dung,
+                 f"{ten}: da TU CHOI ma van sua tep")
+
+        # (d) khong co tep => khong co gi de go, khong duoc TAO ra
+        t6 = s / "khong-co.toml"
+        bang(chay_go(t6) == MA_OK, "thieu tep ma bao loi")
+        bang(not t6.exists(), "da TU TAO config khong can thiet")
+
+        # (e) khong con duong nao ghi `inherit = \"all\"` nua
+        nguon = CODEX_ENV_POLICY.read_text(encoding="utf-8")
+        bang('inherit = "all"' not in nguon.replace('`inherit = "all"`', ""),
+             "van con duong ghi inherit=all trong tep chinh sach")
+
+
+@ca
+def t99_nhat_ky_ca_phai_song_sot_qua_mot_cu_giet():
+    """Dòng in CUỐI CÙNG không phải ca chạy CUỐI CÙNG — nhật ký phải nói được ca nào.
+
+    Ba lượt review đi truy nhầm chỗ vì đúng chuyện này: suite không in gì trong lúc
+    chạy, nên khi bị giết thì thứ còn lại trên màn hình là dòng `BO QUA t62`, và cả
+    reviewer lẫn tôi đọc thành "chết ở ngay sau t62". Đó là tạo tác của BỘ ĐỆM.
+
+    Chốt mạnh nhất ở đây là ca (b): một ca TỰ ĐỌC nhật ký trong lúc nó đang chạy và
+    đòi thấy dòng `>>> vao` của CHÍNH NÓ đã nằm trên đĩa. Nếu `flush`/`fsync` chạy
+    SAU ca thay vì TRƯỚC, ca này đỏ — mà đúng thứ tự đó mới là thứ sống sót qua một
+    cú giết không bắt được.
+    """
+    with San() as s:
+        duong = s / "nhat-ky.txt"
+        thay = []
+
+        def ca_qua():
+            thay.append("qua")
+
+        def ca_tu_doc_nhat_ky():
+            # ĐỌC nhat ky NGAY TRONG luc minh dang chay
+            noi_dung = duong.read_text(encoding="utf-8")
+            bang("ca_tu_doc_nhat_ky" in noi_dung,
+                 "dong '>>> vao' CHUA nam tren dia luc ca dang chay — ghi SAU thi "
+                 "mot cu giet la mat dau vet")
+
+        def ca_bo_qua():
+            return "co tinh bo qua"
+
+        def ca_hong():
+            bang(False, "co tinh hong")
+
+        ds = [ca_qua, ca_tu_doc_nhat_ky, ca_bo_qua, ca_hong]
+        nk = NhatKyCa(duong)
+        cu_out = sys.stdout
+        sys.stdout = io.StringIO()      # nuot dong "BO QUA ca_bo_qua" cua ca gia
+        try:
+            qua, bo_qua, hong = chay_bo_ca(ds, nk)
+        finally:
+            sys.stdout = cu_out
+            nk.dong()
+
+        bang((qua, bo_qua, len(hong)) == (2, 1, 1),
+             f"dem sai: qua={qua} bo_qua={bo_qua} hong={len(hong)}")
+        dong = duong.read_text(encoding="utf-8").splitlines()
+        vao = [d for d in dong if d.startswith(">>> vao")]
+        ra = [d for d in dong if d.startswith("<<< ra")]
+        bang(len(vao) == 4, f"thieu dong vao: {len(vao)}/4")
+        bang(len(ra) == 4, f"thieu dong ra: {len(ra)}/4 — ca HONG/BO QUA cung phai co")
+        for ten in ("ca_qua", "ca_bo_qua", "ca_hong"):
+            bang(any(ten in d for d in ra), f"thieu ket qua cua {ten}")
+        bang(any("BO QUA" in d for d in ra), "khong phan biet duoc BO QUA")
+        bang(any("HONG" in d for d in ra), "khong phan biet duoc HONG")
+        bang(dong[-1].startswith("# XONG TRON VEN"),
+             f"thieu dau XONG TRON VEN — khong phan biet duoc 'chay het' voi 'bi giet': {dong[-1]!r}")
+
+
+@ca
 def t98_CO_CREDENTIAL_khong_duoc_thanh_kha_dung_o_tang_doctor():
     """Tầng ĐO thôi nâng nhãn rồi, tầng TIÊU THỤ nâng lại thì coi như chưa sửa gì.
 
@@ -3282,6 +3409,78 @@ def chay_dot_bien() -> int:
 
 # ---------------------------------------------------------------------- main
 
+class NhatKyCa:
+    """Nhật ký TỪNG CA, `flush` + `fsync` TRƯỚC khi ca kế chạy.
+
+    VÌ SAO CẦN — bài học lượt 6/7, và cả hai bên đều đọc sai một lần:
+
+    Bộ test này KHÔNG in gì trong lúc chạy; nó chỉ in dòng BỎ QUA và dòng tổng kết.
+    Nên khi tiến trình bị giết giữa chừng, thứ duy nhất còn lại trên màn hình là
+    `BO QUA t62...`. Reviewer đọc thành "chết ngay sau t62", tôi cũng đọc y như thế
+    và đi truy `t63` — trong khi dòng đó chỉ là dòng CUỐI CÙNG ĐƯỢC IN, không phải
+    ca cuối cùng ĐƯỢC CHẠY. Cộng thêm stdout nối vào ống là bộ đệm KHỐI, nên mọi
+    thứ chưa xả cũng mất sạch cùng cú giết. Ba lượt review đi tìm ở sai chỗ vì
+    một tạo tác của bộ đệm.
+
+    `flush()` chưa đủ: nó mới đẩy khỏi bộ đệm Python. `fsync()` mới qua bộ đệm HĐH.
+    Cú giết không chờ ta. Ca nào có `>>> vao` mà KHÔNG có `<<< ra` chính là ca giết
+    tiến trình — đây là kỹ thuật duy nhất sống sót qua một cú giết KHÔNG BẮT ĐƯỢC.
+
+    Nhật ký ghi RA NGOÀI cây kho, đường dẫn do phía gọi đưa (`--nhat-ky`).
+    """
+
+    def __init__(self, duong):
+        self.tep = open(duong, "w", encoding="utf-8")
+        self.ghi(f"# pid={os.getpid()} tong so ca={len(CA)}")
+
+    def ghi(self, s: str) -> None:
+        self.tep.write(s + "\n")
+        self.tep.flush()
+        os.fsync(self.tep.fileno())      # qua ca bo dem HDH
+
+    def vao(self, i: int, ten: str) -> None:
+        self.ghi(f">>> vao {i:3d} {ten}")
+
+    def ra(self, i: int, ten: str, kq: str) -> None:
+        self.ghi(f"<<< ra  {i:3d} {ten} -> {kq}")
+
+    def dong(self) -> None:
+        self.ghi("# XONG TRON VEN")
+        self.tep.close()
+
+
+def chay_bo_ca(ds_ca, nk=None):
+    """Chạy một danh sách ca, trả `(qua, bo_qua, hong_ds)`.
+
+    Tách khỏi `main` để `t99` gọi được với danh sách ca giả — nếu không thì chốt
+    nhật ký chỉ kiểm được bằng cách chạy lại toàn bộ suite trong suite.
+    """
+    qua = bo_qua = 0
+    hong_ds = []
+    for i, fn in enumerate(ds_ca):
+        if nk:
+            nk.vao(i, fn.__name__)
+        try:
+            with _co_lap_toan_cuc():
+                kq = fn()
+            if isinstance(kq, str):
+                bo_qua += 1
+                print(f"  BO QUA {fn.__name__}: {kq}", flush=True)
+                ket = f"BO QUA: {kq[:60]}"
+            else:
+                qua += 1
+                ket = "qua"
+        except AssertionError as e:
+            hong_ds.append((fn.__name__, str(e)))
+            ket = f"HONG: {str(e)[:60]}"
+        except Exception as e:  # noqa: BLE001
+            hong_ds.append((fn.__name__, f"{type(e).__name__}: {e}"))
+            ket = f"LOI {type(e).__name__}"
+        if nk:
+            nk.ra(i, fn.__name__, ket)
+    return qua, bo_qua, hong_ds
+
+
 def main() -> int:
     # TRƯỚC MỌI THỨ KHÁC: nếu đang chung nhóm với vỏ shell thì tách ra, kẻo một cú
     # `killpg` của ca test cuốn theo cả người gọi (xem `_tu_tach_nhom_neu_can`).
@@ -3310,25 +3509,23 @@ def main() -> int:
 
     if not shutil.which("git"):
         print("khong co git - khong chay duoc"), sys.exit(2)
-    qua = bo_qua = 0
-    hong_ds = []
-    for fn in CA:
-        try:
-            with _co_lap_toan_cuc():
-                kq = fn()
-            if isinstance(kq, str):
-                bo_qua += 1
-                print(f"  BO QUA {fn.__name__}: {kq}")
-            else:
-                qua += 1
-        except AssertionError as e:
-            hong_ds.append((fn.__name__, str(e)))
-        except Exception as e:  # noqa: BLE001
-            hong_ds.append((fn.__name__, f"{type(e).__name__}: {e}"))
+    duong_nk = None
+    if "--nhat-ky" in sys.argv:
+        i = sys.argv.index("--nhat-ky")
+        if i + 1 >= len(sys.argv):
+            print("--nhat-ky can duong dan tep"), sys.exit(2)
+        duong_nk = sys.argv[i + 1]
+    nk = NhatKyCa(duong_nk) if duong_nk else None
+    try:
+        qua, bo_qua, hong_ds = chay_bo_ca(CA, nk)
+    finally:
+        if nk:
+            nk.dong()
     tong = len(CA)
     for ten, ly_do in hong_ds:
-        print(f"  HONG {ten}: {ly_do}")
-    print(f"\n{qua + bo_qua}/{tong} ca (qua {qua}, bo qua {bo_qua}, hong {len(hong_ds)})")
+        print(f"  HONG {ten}: {ly_do}", flush=True)
+    print(f"\n{qua + bo_qua}/{tong} ca (qua {qua}, bo qua {bo_qua}, hong {len(hong_ds)})",
+          flush=True)
     return 1 if hong_ds else 0
 
 

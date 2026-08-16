@@ -136,16 +136,38 @@ def normalize_permission_mode(value: object) -> str:
     return value
 
 
-def _reject_switch_injection(extra: Sequence[object]) -> tuple[str, ...]:
-    """Validate controller-supplied trailing arguments.
+def _reject_switch_injection(extra: Sequence[object], label: str) -> tuple[str, ...]:
+    """Validate a controller-supplied variable argument run (prefix or trailing).
 
     These come from the pinned launch configuration, not from the Reviewer — but a configuration is
-    still a file, and a file is still bytes someone could edit.  The check is cheap and the failure
-    mode it prevents (a second `--permission-mode`, a `--settings` override) is not.
+    still a file, and a file is still bytes someone could edit.
+
+    SPEC-G2-001.  Generation 2 only inspected *switch-shaped* tokens, so the check began with
+    ``if _SWITCH_SHAPED.match(text)`` and a **bare** ``auto`` walked past it untouched in either
+    argument run.  That matters because the permission mode is positional as well as named: a bare
+    forbidden mode sitting where a value is expected is the same grant as spelling the switch out.
+    Every token is now screened for the forbidden modes case-folded, whatever its shape and whatever
+    position it occupies, and both the ``--permission-mode X`` and ``--permission-mode=X`` spellings
+    of a duplicate are refused.
     """
     checked: list[str] = []
     for index, item in enumerate(extra):
-        text = _require_text(item, "launch_config.extra_args[%d]" % index)
+        text = _require_text(item, "%s[%d]" % (label, index))
+        folded = text.casefold()
+
+        # Bare forbidden permission token, any position, any case.
+        if folded in FORBIDDEN_PERMISSION_MODES:
+            raise reject(
+                "permission_mode",
+                "%s[%d] is the bare forbidden permission token %r" % (label, index, text),
+            )
+        # The mandated mode spelled bare is equally a positional grant the controller did not build.
+        if text == REQUIRED_PERMISSION_MODE or folded == REQUIRED_PERMISSION_MODE.casefold():
+            raise reject(
+                "permission_mode",
+                "%s[%d] restates the permission mode positionally" % (label, index),
+            )
+
         if _SWITCH_SHAPED.match(text):
             base = text.split("=", 1)[0].casefold()
             if base == PERMISSION_SWITCH:
@@ -195,7 +217,7 @@ def build_launch_plan(
     extra = launch_config.get("extra_args", ())
     if isinstance(extra, (str, bytes)) or not isinstance(extra, Sequence):
         raise reject("argument_vector", "launch_config.extra_args must be a sequence")
-    trailing = _reject_switch_injection(extra)
+    trailing = _reject_switch_injection(extra, "launch_config.extra_args")
 
     # Controller-owned interpreter prefix, validated exactly like the trailing arguments.
     #
@@ -208,7 +230,7 @@ def build_launch_plan(
     prefix_source = launch_config.get("executable_args", ())
     if isinstance(prefix_source, (str, bytes)) or not isinstance(prefix_source, Sequence):
         raise reject("argument_vector", "launch_config.executable_args must be a sequence")
-    prefix = _reject_switch_injection(prefix_source)
+    prefix = _reject_switch_injection(prefix_source, "launch_config.executable_args")
 
     # Fixed template.  The only variable slots are the ones the controller minted.
     argv: tuple[str, ...] = prefix + (

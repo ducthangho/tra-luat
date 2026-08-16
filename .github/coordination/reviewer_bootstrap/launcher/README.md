@@ -43,7 +43,7 @@ properties proves nothing there — every check in this Packet is an explicit br
 | `parity.py` | denominators compared before outcomes; an undeclared skip is red |
 | `inventory.py` | per-file SHA-256 reduced to one digest; static boundary scan for shell strings and bare `assert` |
 | `orchestrate.py` | the one trusted preflight → claim → contained launch path |
-| `registry.py` | the single registry of all 94 case IDs and their required check |
+| `registry.py` | the single registry of all 113 case IDs and their required check |
 | `selftest.py` | the executable matrix; separate `scheduled`/`executed`/`passed`/`failed`/`skipped`/`not_run` |
 
 ## Three things this Packet paid for
@@ -89,6 +89,29 @@ certified a writable directory as read-only. And `icacls /deny <user>:(W)` break
 outright: the simple right `W` expands to `FILE_GENERIC_WRITE`, which includes `SYNCHRONIZE`, so
 denying it makes the directory unopenable and `git -C` fails with "Permission denied" before it can
 read anything. The working form denies only `WD,AD`.
+
+## Review round 2 — eight findings, and the pattern behind them
+
+Round 1 closed six findings and the suite went green over all of them. Round 2 found eight more, and
+five were in the round-1 repairs themselves. The pattern is worth naming: **a control that names the
+right property can still measure the wrong thing**, and a green suite cannot tell the difference.
+
+| finding | what was still wrong after round 1 | closed by |
+|---|---|---|
+| `WP125-RV-003` | authorization was a module-private sentinel plus a `provenance` string — both fields the caller fills in. `from launcher.preflight import _SEAL` minted a real claim in one import | controller-held provenance keyed to witnessed observations, plus live re-validation at the commit point: the pin is re-read and the lease re-checked when the durable object is created |
+| `WP125-RV-006` | exact-name structural verification passed a set that was structurally perfect and semantically stale — generation-1 authority, an empty delegation payload, a red matrix | generation-2 authority bound by value into every class, plus payload predicates: a green matrix must be green, a delegation receipt must carry an executed test with a real return code |
+| `WP125-RV-007` | executable, working directory, variable arguments and prompt were ordinary values in the caller's context mapping | all consumed from a sealed input outside the candidate tree, hash-pinned, and compared byte for byte at final binding |
+| `WP125-RV-008` | orchestration launched the full Reviewer vector regardless of surface, so a run that had *proved* no Windows sandbox existed still minted and invoked the local model command | routing on the selected surface; the delegated surface dispatches only the closed `run_test` job and records `model_command_invoked: false` |
+| `WP125-RV-009` | the lease stop was a caller parameter, giving the fence a second clock nothing compared against the one preflight validated | the parameter is gone; the deadline is derived from the lease observation the trusted preflight bound |
+| `WP125-RV-010` | every failure between `CreateProcess` and job adoption raised without touching a child that had been created **suspended** — the one path reporting "containment failed" was the one leaking a process | the direct handle is opened first and retained, the child is terminated unconditionally, waited on, and proven gone against the live process table before the red is returned |
+| `SPEC-G2-001` | the permission screen only inspected switch-*shaped* tokens, so a bare `auto` walked past it in either argument run | every token screened case-folded in every prefix and trailing position, both duplicate spellings refused |
+| `WP125-G2-GATE-001` | the read-only root fixture was built under an ASCII path only | the exact-root clone now lives behind a Vietnamese directory, and git identity is verified through that Unicode gitdir |
+
+`WP125-RV-010` is the one to read twice. The first repair opened the direct handle *after* the
+`OpenProcess` call it was meant to survive, so when that call was the injected failure there was no
+handle left to kill with — and the new case caught it, red, before the repair shipped. The
+terminator of last resort is the handle `Popen` already holds from creation, which cannot fail to
+exist.
 
 ## What this launcher does not claim
 

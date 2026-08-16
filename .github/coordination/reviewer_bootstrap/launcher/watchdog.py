@@ -200,6 +200,8 @@ if IS_WINDOWS:  # pragma: no cover - exercised on the primary platform only
     _kernel32.Thread32Next.restype = wintypes.BOOL
     _kernel32.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
     _kernel32.WaitForSingleObject.restype = wintypes.DWORD
+    _kernel32.TerminateProcess.argtypes = [wintypes.HANDLE, wintypes.UINT]
+    _kernel32.TerminateProcess.restype = wintypes.BOOL
 
     WAIT_OBJECT_0 = 0x00000000
 
@@ -488,6 +490,17 @@ class ProcessFence:
         self._job = None
         self._assigned = False
         self.recorded: list[ProcessIdentity] = []
+        # Evidence for WP125-RV-010: what was killed in the window before job adoption, and whether
+        # each kill was proven rather than merely attempted.
+        self.pre_adoption_cleanup: list[dict[str, object]] = []
+        # The direct child handle, retained from creation. `OpenProcess` can fail — that is one of
+        # the failures this window has to survive — and when it does, the handle the OS already gave
+        # us at spawn time is the only way left to kill a suspended child. Popen owns it and cannot
+        # lose it, so this is the terminator of last resort rather than a convenience.
+        self._child = None
+
+    def attach_child(self, child) -> None:
+        self._child = child
 
     # -- containment ------------------------------------------------------
     def open(self) -> None:
@@ -515,24 +528,88 @@ class ProcessFence:
             return 0
         return CREATE_SUSPENDED | CREATE_NEW_PROCESS_GROUP
 
+    def _abort_pre_adoption(self, handle, pid: int, reason: str) -> "LauncherRejected":
+        """Kill a child that never reached the job, prove it is gone, and return the red rejection.
+
+        WP125-RV-010.  Every failure between ``CreateProcess`` and a successful
+        ``AssignProcessToJobObject`` used to raise straight out, leaving a child that was created
+        **suspended** sitting in the process table forever.  The job could not clean it up — that is
+        precisely what failed — and ``run_supervised``'s fallback terminates *the job*, which by then
+        owns nothing.  So the one path that reported "containment failed" was also the one path that
+        leaked a process.
+
+        The direct handle is therefore opened before anything can fail and retained across the whole
+        window, terminated unconditionally here, waited on, and then checked against the process
+        table by identity.  The rejection names whether the child was proven gone, because "we tried
+        to kill it" and "it is gone" are different claims and only the second one is cleanup.
+        """
+        proven_gone = True
+        identity_value = identify(pid)
+        if IS_WINDOWS and handle:
+            _kernel32.TerminateProcess(handle, 1)
+            _kernel32.WaitForSingleObject(handle, 5000)
+        # Always also go through the retained creation handle. When the failure being handled *is*
+        # `OpenProcess` returning null there is no ctypes handle at all, and this is the only
+        # terminator left; when there is one, killing twice is harmless and killing zero times is not.
+        if self._child is not None:
+            try:
+                self._child.kill()
+                self._child.wait(timeout=5)
+            except (OSError, ValueError, subprocess.TimeoutExpired):
+                pass
+        if not IS_WINDOWS:
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except OSError:
+                pass
+
+        end = time.monotonic() + 5.0
+        while time.monotonic() < end:
+            if identity_value is None or not is_alive(identity_value):
+                break
+            time.sleep(0.02)
+        if identity_value is not None and is_alive(identity_value):
+            proven_gone = False
+
+        if IS_WINDOWS and handle:
+            _kernel32.CloseHandle(handle)
+        self.pre_adoption_cleanup.append(
+            {"pid": pid, "reason": reason, "terminated": True, "proven_gone": proven_gone}
+        )
+        return reject(
+            "watchdog_cleanup",
+            "%s; the pre-adoption child was terminated and %s"
+            % (reason, "proven gone" if proven_gone else "COULD NOT BE PROVEN GONE"),
+        )
+
     def adopt(self, pid: int) -> ProcessIdentity:
         """Assign the still-suspended child to the job and record its identity."""
-        identity_value = identify(pid)
-        if identity_value is None:
-            raise reject("watchdog_identity", "the child could not be identified after creation")
+        handle = None
         if IS_WINDOWS:
+            # Opened first, and with TERMINATE, so that every later failure in this window has a way
+            # to kill the suspended child rather than only a way to complain about it.
             handle = _kernel32.OpenProcess(
                 PROCESS_TERMINATE | PROCESS_SET_QUOTA | PROCESS_QUERY_LIMITED_INFORMATION,
                 False,
                 pid,
             )
             if not handle:
-                raise reject("watchdog_cleanup", "the child could not be opened for containment")
-            try:
-                if not _kernel32.AssignProcessToJobObject(self._job, handle):
-                    raise reject("watchdog_cleanup", "the child could not be assigned to the job")
-            finally:
-                _kernel32.CloseHandle(handle)
+                raise self._abort_pre_adoption(
+                    None, pid, "the child could not be opened for containment"
+                )
+
+        identity_value = identify(pid)
+        if identity_value is None:
+            raise self._abort_pre_adoption(
+                handle, pid, "the child could not be identified after creation"
+            )
+
+        if IS_WINDOWS:
+            if not _kernel32.AssignProcessToJobObject(self._job, handle):
+                raise self._abort_pre_adoption(
+                    handle, pid, "the child could not be assigned to the job"
+                )
+            _kernel32.CloseHandle(handle)
             self._assigned = True
         self.recorded.append(identity_value)
         return identity_value
@@ -785,6 +862,7 @@ def run_supervised(
             popen_kwargs["start_new_session"] = True
 
         child = subprocess.Popen(list(command), **popen_kwargs)  # noqa: S603 - vector is structured
+        fence.attach_child(child)
         try:
             identity_value = fence.adopt(child.pid)
             fence.resume(child.pid)

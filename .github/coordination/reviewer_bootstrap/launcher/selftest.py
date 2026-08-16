@@ -47,6 +47,7 @@ from launcher.delegation import (  # noqa: E402
     build_job,
     run_job,
     validate_operation,
+    verify_read_only_root,
 )
 from launcher.environment import (  # noqa: E402
     MEMORY_VARIABLE,
@@ -59,6 +60,7 @@ from launcher.orchestrate import launch_reviewer  # noqa: E402
 from launcher.preflight import (  # noqa: E402
     STEP_NAMES,
     PreflightReceipt,
+    StepResult,
     mint_claim,
     run_preflight,
     run_preflight_fault_injection,
@@ -92,6 +94,7 @@ CLEANUP_RECORDS: list[dict[str, object]] = []
 DELEGATION_RECEIPT: dict[str, object] = {}
 ENVIRONMENT_NAMES: list[str] = []
 WATCHDOG_TIMING: list[dict[str, object]] = []
+PRE_ADOPTION_EVIDENCE: list[dict[str, object]] = []
 RETURN_CODES: dict[str, object] = {}
 ARGUMENT_VECTOR: dict[str, object] = {}
 SEALED_SOURCE_PIN: dict[str, object] = {}
@@ -204,8 +207,25 @@ def fixture(**overrides: object) -> Iterator[dict[str, object]]:
             json.dumps(source_pin_document(), ensure_ascii=False, sort_keys=True, indent=2) + "\n"
         ).encode("utf-8")
         pin_path = seal(root / "source_pin.json", pin_bytes)
-        prompt_path = seal(root / "reviewer_prompt.txt", b"Review the exact head.\n")
+        prompt_bytes = b"Review the exact head.\n"
+        prompt_path = seal(root / "reviewer_prompt.txt", prompt_bytes)
         import hashlib
+
+        # WP125-RV-007: the launch configuration is a sealed Dispatcher input on disk, not a dict the
+        # caller hands over. The plain document is also exposed for the argv-level cases, which
+        # exercise `build_launch_plan` in isolation and never go through preflight.
+        config_document = {
+            "permission_mode": "dontAsk",
+            "executable": python_executable(),
+            "working_directory": str(root),
+            "prompt_path": str(prompt_path),
+            "extra_args": [],
+            "executable_args": [],
+        }
+        config_bytes = (
+            json.dumps(config_document, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
+        ).encode("utf-8")
+        config_path = seal(root / "launch_config.json", config_bytes)
 
         context: dict[str, object] = {
             "authority": authority_document(),
@@ -225,13 +245,10 @@ def fixture(**overrides: object) -> Iterator[dict[str, object]]:
             "worktree_clean": True,
             "selected_write_paths": (WRITE_PREFIX + "controller.py",),
             "inventory": inventory_module.build_inventory(HERE, CANDIDATE_ROOT),
-            "launch_config": {
-                "permission_mode": "dontAsk",
-                "executable": python_executable(),
-                "working_directory": str(root),
-                "extra_args": (),
-            },
-            "prompt_path": str(prompt_path),
+            "sealed_launch_config_path": str(config_path),
+            "expected_launch_config_sha256": hashlib.sha256(config_bytes).hexdigest(),
+            "expected_prompt_sha256": hashlib.sha256(prompt_bytes).hexdigest(),
+            "config_document": config_document,
             "surface": {
                 "platform": sys.platform,
                 "windows_sandbox_available": True,
@@ -249,6 +266,31 @@ def fixture(**overrides: object) -> Iterator[dict[str, object]]:
 
 def child_report_command(source: str) -> tuple[str, ...]:
     return (python_executable(), "-c", source)
+
+
+def reseal(context: dict[str, object], **changes: object) -> dict[str, object]:
+    """Rewrite the sealed launch configuration and re-pin its hash.
+
+    Tests that want a different launch configuration change the *sealed input*, because after
+    WP125-RV-007 that is the only place a launch value can come from. A test that mutated a
+    caller-side dict would now be testing nothing.
+    """
+    import hashlib
+
+    document = dict(context["config_document"])
+    document.update(changes)
+    path = pathlib.Path(str(context["sealed_launch_config_path"]))
+    path.chmod(stat.S_IREAD | stat.S_IWRITE)
+    data = (json.dumps(document, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8")
+    path.write_bytes(data)
+    path.chmod(stat.S_IREAD)
+    context["config_document"] = document
+    context["expected_launch_config_sha256"] = hashlib.sha256(data).hexdigest()
+    if "prompt_path" in changes:
+        prompt = pathlib.Path(str(changes["prompt_path"]))
+        if prompt.exists():
+            context["expected_prompt_sha256"] = hashlib.sha256(prompt.read_bytes()).hexdigest()
+    return document
 
 
 # A genuinely non-writable checkout of the exact candidate, built once and shared.
@@ -269,7 +311,13 @@ def read_only_candidate_root() -> dict[str, object]:
     import subprocess
 
     base = pathlib.Path(tempfile.mkdtemp(prefix="wp125-ro-root-"))
-    clone = base / "candidate"
+    # WP125-G2-GATE-001: the checkout lives behind a non-ASCII directory on purpose. This repository
+    # is Vietnamese throughout, and a read-only-root control that only works from an ASCII path has
+    # not been measured on the paths it will actually meet — including the `.git` directory, which is
+    # what `git -C` has to open before it can answer an identity question at all.
+    unicode_dir = base / "đường-dẫn-kiểm-thử"
+    unicode_dir.mkdir()
+    clone = unicode_dir / "candidate"
     result = subprocess.run(
         ["git", "clone", "--quiet", "--depth", "1", "--no-hardlinks", CANDIDATE_ROOT.as_uri(), str(clone)],
         capture_output=True,
@@ -294,7 +342,14 @@ def read_only_candidate_root() -> dict[str, object]:
     )
     ensure(deny.returncode == 0, "the read-only ACL could not be applied: %s" % deny.stdout[-200:])
     _READ_ONLY_ROOT.update(
-        {"path": str(clone), "head": head, "tree": tree, "base": str(base), "user": user}
+        {
+            "path": str(clone),
+            "head": head,
+            "tree": tree,
+            "base": str(base),
+            "user": user,
+            "unicode_path": any(ord(ch) > 127 for ch in str(clone)),
+        }
     )
     return _READ_ONLY_ROOT
 
@@ -327,7 +382,7 @@ def positive_single_child() -> dict[str, object]:
         receipt = run_preflight(context)
         ensure(receipt.complete, "preflight did not complete on a valid fixture")
         ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
-        claim = mint_claim(receipt, ledger, "wp125-r1-g1-a1", {"role": "executor"})
+        claim = mint_claim(receipt, ledger, "wp125-r1-g1-a1", {"role": "executor"}, context=context)
         ensure(claim["created"] is True, "the first claim was not created")
 
         source = "import json,os,sys;print(json.dumps({'pid':os.getpid()}))"
@@ -355,8 +410,8 @@ def positive_idempotent_claim() -> dict[str, object]:
         receipt = run_preflight(context)
         ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
         payload = {"role": "executor", "branch": CANDIDATE_REF}
-        first = mint_claim(receipt, ledger, "wp125-retry", dict(payload))
-        second = mint_claim(receipt, ledger, "wp125-retry", dict(payload))
+        first = mint_claim(receipt, ledger, "wp125-retry", dict(payload), context=context)
+        second = mint_claim(receipt, ledger, "wp125-retry", dict(payload), context=context)
         ensure(first["created"] is True, "the first claim was not created")
         ensure(second["created"] is False, "an identical retry created a second claim")
         ensure(len(ledger) == 1, "the ledger holds more than one record")
@@ -606,22 +661,26 @@ def dataclass_replace(report: parity_module.SideReport, **changes: object) -> pa
 
 
 def _plan_with(config_changes: dict[str, object], context: dict[str, object]):
-    config = dict(context["launch_config"])
+    config = dict(context["config_document"])
     config.update(config_changes)
     return lambda: build_launch_plan(
-        config, prompt_path=str(context["prompt_path"]), candidate_root=str(CANDIDATE_ROOT)
+        config,
+        prompt_path=str(context["config_document"]["prompt_path"]),
+        candidate_root=str(CANDIDATE_ROOT),
     )
 
 
 @case("WP125-NEG-001-permission-mode-omitted")
 def negative_mode_omitted() -> dict[str, object]:
     with fixture() as context:
-        config = dict(context["launch_config"])
+        config = dict(context["config_document"])
         config.pop("permission_mode")
         return expect_rejection(
             "permission_mode",
             lambda: build_launch_plan(
-                config, prompt_path=str(context["prompt_path"]), candidate_root=str(CANDIDATE_ROOT)
+                    config,
+                prompt_path=str(context["config_document"]["prompt_path"]),
+                candidate_root=str(CANDIDATE_ROOT),
             ),
         )
 
@@ -692,7 +751,7 @@ def negative_prompt_inside_tree() -> dict[str, object]:
         return expect_rejection(
             "argument_vector",
             lambda: build_launch_plan(
-                dict(context["launch_config"]),
+                dict(context["config_document"]),
                 prompt_path=inside,
                 candidate_root=str(CANDIDATE_ROOT),
             ),
@@ -929,7 +988,7 @@ def negative_claim_before_preflight() -> dict[str, object]:
         ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
         result = expect_rejection(
             "preflight_incomplete",
-            lambda: mint_claim(receipt, ledger, "wp125-early", {"role": "executor"}),
+            lambda: mint_claim(receipt, ledger, "wp125-early", {"role": "executor"}, context=context),
         )
         ensure(len(ledger) == 0, "a claim object was minted despite a failed preflight")
         result["claim_objects"] = len(ledger)
@@ -968,10 +1027,12 @@ def negative_conflicting_payload() -> dict[str, object]:
     with fixture() as context:
         receipt = run_preflight(context)
         ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
-        mint_claim(receipt, ledger, "wp125-conflict", {"role": "executor"})
+        mint_claim(receipt, ledger, "wp125-conflict", {"role": "executor"}, context=context)
         result = expect_rejection(
             "duplicate_claim",
-            lambda: mint_claim(receipt, ledger, "wp125-conflict", {"role": "reviewer"}),
+            lambda: mint_claim(
+                receipt, ledger, "wp125-conflict", {"role": "reviewer"}, context=context
+            ),
         )
         ensure(len(ledger) == 1, "the conflicting claim created a second record")
         result["records"] = len(ledger)
@@ -1677,7 +1738,7 @@ def rv003_full_map_mutant() -> dict[str, object]:
         ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
         result = expect_rejection(
             "preflight_incomplete",
-            lambda: mint_claim(receipt, ledger, "wp125-mutant", {"role": "executor"}),
+            lambda: mint_claim(receipt, ledger, "wp125-mutant", {"role": "executor"}, context=context),
         )
         ensure(len(ledger) == 0, "the full-map mutant minted a claim object")
         result["provenance"] = receipt.provenance
@@ -1686,20 +1747,100 @@ def rv003_full_map_mutant() -> dict[str, object]:
         return result
 
 
-@case("WP125-RV-003-handmade-receipt-is-unconstructible")
+@case("WP125-RV-003-handmade-receipt-cannot-mint-a-claim")
 def rv003_handmade_receipt() -> dict[str, object]:
-    return expect_rejection(
-        "preflight_incomplete",
-        lambda: PreflightReceipt(
+    """A receipt is constructible — it is a dataclass — but it authorizes nothing.
+
+    Round 1 tried to make construction impossible with a module-private sentinel.  Round 2 showed
+    that is not a boundary: one import reaches the sentinel.  The property that actually holds is
+    that authorization lives in the controller, so a hand-built receipt simply has none.
+    """
+    with fixture() as context:
+        forged = PreflightReceipt(
             complete=True,
-            steps=(),
+            steps=tuple(
+                StepResult(name=name, index=index, observations={"forged": True})
+                for index, name in enumerate(STEP_NAMES + ("value_binding",), start=1)
+            ),
             plan=object(),
-            environment={"X": "1"},
+            environment={"CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"},
             surface="windows",
             failure=None,
-            provenance="trusted_run",
-        ),
-    )
+        )
+        ensure(forged.authorization is None, "a hand-built receipt carried an authorization")
+        ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
+        result = expect_rejection(
+            "preflight_incomplete",
+            lambda: mint_claim(forged, ledger, "wp125-handmade", {"role": "executor"}, context=context),
+        )
+        ensure(len(ledger) == 0, "a hand-built receipt minted a claim object")
+        result["claim_objects"] = 0
+        return result
+
+
+@case("WP125-RV-003-imported-seal-replay-cannot-mint")
+def rv003_imported_seal_replay() -> dict[str, object]:
+    """The exact round-2 exploit: reach into the module and stamp your own authority.
+
+    Against generation 2 this minted a real claim in one import.  It now fails because there is no
+    caller-fillable authority field left to stamp — authorization is a controller-held record keyed
+    to observations the controller actually witnessed, and it is re-validated live at the commit
+    point.
+    """
+    from launcher import preflight as preflight_module
+
+    with fixture() as context:
+        steps = tuple(
+            StepResult(name=name, index=index, observations={"forged": True})
+            for index, name in enumerate(STEP_NAMES + ("value_binding",), start=1)
+        )
+        forged = PreflightReceipt(
+            complete=True,
+            steps=steps,
+            plan=object(),
+            environment={"CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1"},
+            surface="windows",
+            failure=None,
+            # Replay a token lifted straight out of the controller-held table.
+            authorization=next(iter(preflight_module._PROVENANCE), "wp125-preflight-1-deadbeef"),
+        )
+        ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
+        result = expect_rejection(
+            "preflight_incomplete",
+            lambda: mint_claim(forged, ledger, "wp125-replay", {"role": "executor"}, context=context),
+        )
+        ensure(len(ledger) == 0, "a replayed authorization minted a claim object")
+        ensure(
+            not hasattr(preflight_module, "_SEAL"),
+            "the retired sentinel is still present and still stampable",
+        )
+        result["claim_objects"] = 0
+        result["replayed_token"] = True
+        return result
+
+
+@case("WP125-RV-003-commit-point-revalidates-the-sealed-pin")
+def rv003_commit_revalidates() -> dict[str, object]:
+    """Editing the sealed pin between preflight and claim must make the claim refuse.
+
+    This is what "revalidate at the durable commit point" buys: a receipt that was honest when it was
+    produced stops being sufficient the moment the thing it attested to changes.
+    """
+    with fixture() as context:
+        receipt = run_preflight(context)
+        ensure(receipt.complete, "preflight did not complete on a valid fixture")
+        pin = pathlib.Path(str(context["source_pin_path"]))
+        pin.chmod(stat.S_IREAD | stat.S_IWRITE)
+        pin.write_bytes(pin.read_bytes() + b"\n")
+        pin.chmod(stat.S_IREAD)
+        ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
+        result = expect_rejection(
+            "authority_mismatch",
+            lambda: mint_claim(receipt, ledger, "wp125-drift", {"role": "executor"}, context=context),
+        )
+        ensure(len(ledger) == 0, "a drifted pin still minted a claim")
+        result["claim_objects"] = 0
+        return result
 
 
 @case("WP125-RV-003-value-binding-catches-wrong-plan-hash")
@@ -1733,7 +1874,7 @@ def rv003_binding_expired_lease() -> dict[str, object]:
         ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
         expect_rejection(
             "preflight_incomplete",
-            lambda: mint_claim(receipt, ledger, "wp125-expired", {"role": "executor"}),
+            lambda: mint_claim(receipt, ledger, "wp125-expired", {"role": "executor"}, context=context),
         )
         ensure(len(ledger) == 0, "an expired lease minted a claim")
         return {"category": (receipt.failure or {}).get("category"), "claim_objects": 0}
@@ -1795,17 +1936,18 @@ def _fake_executable_config(context: dict[str, object], root: pathlib.Path) -> d
         encoding="utf-8",
         newline="\n",
     )
-    config = dict(context["launch_config"])
-    config["executable"] = python_executable()
-    config["executable_args"] = (str(script),)
-    return config
+    return reseal(
+        context,
+        executable=python_executable(),
+        executable_args=[str(script)],
+    )
 
 
 @case("WP125-RV-004-orchestration-sequences-preflight-claim-launch")
 def rv004_orchestration() -> dict[str, object]:
     with fixture() as context:
         root = pathlib.Path(str(context["temp_root"]))
-        context["launch_config"] = _fake_executable_config(context, root)
+        _fake_executable_config(context, root)
         ledger = Ledger(root / "ledger.json")
         record = launch_reviewer(
             context,
@@ -1813,7 +1955,10 @@ def rv004_orchestration() -> dict[str, object]:
             reconcile_key="wp125-orchestrated",
             claim_payload={"role": "executor"},
             timeout_seconds=30.0,
-            lease_effective_stop_utc=LEASE_STOP,
+        )
+        ensure(
+            record.as_dict()["deadline_source"] == "trusted_preflight_lease_observation",
+            "the deadline did not come from the trusted preflight observation",
         )
         ensure(record.claim["created"] is True, "the orchestrated claim was not created")
         ensure(len(ledger) == 1, "the orchestrated run minted more than one claim")
@@ -1841,7 +1986,7 @@ def rv004_vector_observed() -> dict[str, object]:
     """
     with fixture() as context:
         root = pathlib.Path(str(context["temp_root"]))
-        config = _fake_executable_config(context, root)
+        _fake_executable_config(context, root)
         hostile = (
             "plain",
             "with space",
@@ -1853,8 +1998,7 @@ def rv004_vector_observed() -> dict[str, object]:
             "%PATH%",
             "$HOME",
         )
-        config["extra_args"] = hostile
-        context["launch_config"] = config
+        config = reseal(context, extra_args=list(hostile))
         receipt = run_preflight(context)
         ensure(receipt.complete, "preflight refused the fake-executable configuration")
         plan = receipt.plan
@@ -1923,7 +2067,6 @@ def rv004_refuses_on_failed_preflight() -> dict[str, object]:
                 reconcile_key="wp125-refused",
                 claim_payload={"role": "executor"},
                 timeout_seconds=5.0,
-                lease_effective_stop_utc=LEASE_STOP,
             ),
         )
         ensure(len(ledger) == 0, "a refused orchestration minted a claim")
@@ -2013,7 +2156,7 @@ def rv005_clean_requires_both() -> dict[str, object]:
 # --------------------------------------------------------------------------- WP125-RV-006
 
 
-def _produced_run(root: pathlib.Path, run_id: str = "rv006") -> dict[str, object]:
+def _produced_run(root: pathlib.Path, run_id: str = "rv006", payloads=None) -> dict[str, object]:
     """Produce a full artifact set without re-running the matrix."""
     from launcher import controller as controller_module
     from core.artifacts import ArtifactSet
@@ -2022,13 +2165,32 @@ def _produced_run(root: pathlib.Path, run_id: str = "rv006") -> dict[str, object
     selection = sorted(registry_module.CASES)
     artifacts = ArtifactSet(root, run_id)
     for locator, category, schema in controller_module.REQUIRED_ARTIFACTS:
+        payload = dict(payloads.get(locator, {"probe": locator})) if payloads else _meaningful_payload(locator)
         artifacts.add(
             category,
             locator,
-            controller_module._bound(schema, run_id, identity, selection, {"probe": locator}),
+            controller_module._bound(schema, run_id, identity, selection, payload),
         )
     artifacts.finalize()
     return {"run_id": run_id, "identity": identity, "classes": len(controller_module.REQUIRED_ARTIFACTS)}
+
+
+def _meaningful_payload(locator: str) -> dict[str, object]:
+    """Payloads that satisfy the round-2 semantic predicates.
+
+    Deliberately minimal but *真* in shape: a green matrix is green, a delegation receipt carries an
+    executed test with an integer return code. A fixture that emitted placeholders would make the
+    semantic checks untestable, which is the failure mode they exist to prevent.
+    """
+    if locator == "case_matrix.json":
+        return {"ok": True, "scheduled": 3, "executed": 3, "passed": 3, "failed": 0, "skipped": 0, "not_run": 0}
+    if locator == "parity_report.json":
+        return {"ok": True, "portable_case_count": 3, "findings": []}
+    if locator == "delegation_receipt.json":
+        return {"tests_executed": 1, "return_codes": {"launcher_import_smoke": 0}}
+    if locator == "return_codes.json":
+        return {"probe_case": 0}
+    return {"probe": locator}
 
 
 @case("WP125-RV-006-every-required-artifact-class-is-present")
@@ -2116,6 +2278,373 @@ def rv006_rebound_identity() -> dict[str, object]:
         wrong_run = controller_module.verify_bindings(str(run_root), run_id="some-other-run")
         ensure(wrong_run["ok"] is False, "a mismatched run id stayed green")
         return {"kinds": sorted(kinds), "run_mismatch_detected": True}
+
+
+@case("WP125-RV-006-stale-generation-1-authority-is-red")
+def rv006_stale_authority() -> dict[str, object]:
+    """A structurally perfect set that still names generation 1 must not verify."""
+    from launcher import controller as controller_module
+
+    with fixture() as context:
+        run_root = pathlib.Path(str(context["temp_root"])) / "stale"
+        produced = _produced_run(run_root)
+        target = run_root / "authority_input.json"
+        document = json.loads(target.read_text(encoding="utf-8"))
+        document["generation"] = 1
+        document["packet_spec_hash"] = (
+            "6cbc678ecdc36fdbda81a9c96d6921797e5d5e6d2467c03f26f95589d9f0c7f5"
+        )
+        document["candidate_branch"] = "agent/wp125-g1-claude"
+        target.write_text(
+            json.dumps(document, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        bindings = controller_module.verify_bindings(str(run_root), run_id=produced["run_id"])
+        kinds = {finding["kind"] for finding in bindings["findings"]}
+        ensure(bindings["ok"] is False, "stale generation-1 authority verified green")
+        ensure("stale_authority" in kinds, "the stale authority was not named")
+        fields = [f for finding in bindings["findings"] for f in finding.get("fields", [])]
+        ensure("generation" in fields, "the generation drift was not reported")
+        return {"kinds": sorted(kinds), "drifted_fields": sorted(set(fields))}
+
+
+@case("WP125-RV-006-empty-delegation-payload-is-red")
+def rv006_empty_delegation() -> dict[str, object]:
+    from launcher import controller as controller_module
+
+    with fixture() as context:
+        run_root = pathlib.Path(str(context["temp_root"])) / "emptydel"
+        produced = _produced_run(run_root, payloads={"delegation_receipt.json": {}})
+        bindings = controller_module.verify_bindings(str(run_root), run_id=produced["run_id"])
+        kinds = {finding["kind"] for finding in bindings["findings"]}
+        ensure(bindings["ok"] is False, "an empty delegation receipt verified green")
+        ensure("payload_not_meaningful" in kinds, "the empty payload was not named")
+        return {"kinds": sorted(kinds)}
+
+
+@case("WP125-RV-006-red-matrix-cannot-verify-green")
+def rv006_red_matrix() -> dict[str, object]:
+    from launcher import controller as controller_module
+
+    with fixture() as context:
+        run_root = pathlib.Path(str(context["temp_root"])) / "redmatrix"
+        produced = _produced_run(
+            run_root,
+            payloads={
+                "case_matrix.json": {
+                    "ok": False,
+                    "scheduled": 3,
+                    "executed": 3,
+                    "passed": 2,
+                    "failed": 1,
+                    "skipped": 0,
+                    "not_run": 0,
+                }
+            },
+        )
+        bindings = controller_module.verify_bindings(str(run_root), run_id=produced["run_id"])
+        kinds = {finding["kind"] for finding in bindings["findings"]}
+        ensure(bindings["ok"] is False, "a red matrix verified green")
+        ensure("payload_not_meaningful" in kinds, "the red matrix was not named")
+        return {"kinds": sorted(kinds)}
+
+
+# --------------------------------------------------------------------------- round-2 findings
+
+
+@case("WP125-RV-007-caller-selected-executable-cannot-survive-binding")
+def rv007_caller_executable() -> dict[str, object]:
+    with fixture() as context:
+        context["launch_config"] = {"executable": str(CANDIDATE_ROOT / "scripts" / "tl.py")}
+        return _preflight_failure(context, "trusted_inventory", "sealed_input")
+
+
+@case("WP125-RV-007-caller-selected-prompt-cannot-survive-binding")
+def rv007_caller_prompt() -> dict[str, object]:
+    with fixture() as context:
+        context["prompt_path"] = str(CANDIDATE_ROOT / "README.md")
+        return _preflight_failure(context, "trusted_inventory", "sealed_input")
+
+
+@case("WP125-RV-007-unsealed-launch-config-is-refused")
+def rv007_unsealed_config() -> dict[str, object]:
+    with fixture() as context:
+        context.pop("sealed_launch_config_path")
+        return _preflight_failure(context, "trusted_inventory", "sealed_input")
+
+
+@case("WP125-RV-007-writable-launch-config-is-refused")
+def rv007_writable_config() -> dict[str, object]:
+    with fixture() as context:
+        path = pathlib.Path(str(context["sealed_launch_config_path"]))
+        path.chmod(stat.S_IREAD | stat.S_IWRITE)
+        return _preflight_failure(context, "trusted_inventory", "sealed_input")
+
+
+@case("WP125-RV-007-launch-config-hash-drift-is-refused")
+def rv007_config_hash_drift() -> dict[str, object]:
+    with fixture() as context:
+        context["expected_launch_config_sha256"] = "0" * 64
+        return _preflight_failure(context, "trusted_inventory", "sealed_input")
+
+
+@case("WP125-RV-008-delegated-surface-dispatches-only-run-test")
+def rv008_delegated_routing() -> dict[str, object]:
+    """On the delegated surface the model command must never be minted or invoked."""
+    with fixture(
+        surface={
+            "platform": sys.platform,
+            "windows_sandbox_available": False,
+            "delegation_eligible": True,
+        }
+    ) as context:
+        root = read_only_candidate_root()
+        job = build_job(
+            operation="run_test",
+            candidate_head=root["head"],
+            candidate_tree=root["tree"],
+            test_selection=("launcher_import_smoke",),
+            read_only_root=root["path"],
+            eligible=True,
+            candidate_root=str(CANDIDATE_ROOT),
+            expected_os=platform.system(),
+        )
+        ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
+        record = launch_reviewer(
+            context,
+            ledger=ledger,
+            reconcile_key="wp125-delegated-route",
+            claim_payload={"role": "executor"},
+            timeout_seconds=90.0,
+            delegated_job=job,
+        )
+        described = record.as_dict()
+        ensure(described["surface"] == "delegated_linux_run_test", "the surface was not delegated")
+        ensure(described["launched"] == "delegated_run_test", "the delegated job was not what ran")
+        ensure(
+            described["model_command_invoked"] is False,
+            "the Reviewer/model command was invoked on the delegated surface",
+        )
+        ensure(record.outcome.return_code == 0, "the delegated run_test did not exit zero")
+        RETURN_CODES["WP125-RV-008-delegated"] = record.outcome.return_code
+        return {
+            "surface": described["surface"],
+            "launched": described["launched"],
+            "model_command_invoked": False,
+        }
+
+
+@case("WP125-RV-008-delegated-surface-without-a-job-is-refused")
+def rv008_delegated_without_job() -> dict[str, object]:
+    with fixture(
+        surface={
+            "platform": sys.platform,
+            "windows_sandbox_available": False,
+            "delegation_eligible": True,
+        }
+    ) as context:
+        ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
+        result = expect_rejection(
+            "delegation_scope",
+            lambda: launch_reviewer(
+                context,
+                ledger=ledger,
+                reconcile_key="wp125-delegated-nojob",
+                claim_payload={"role": "executor"},
+                timeout_seconds=10.0,
+            ),
+        )
+        result["model_command_invoked"] = False
+        return result
+
+
+@case("WP125-RV-009-deadline-has-one-source-the-validated-lease")
+def rv009_single_deadline_source() -> dict[str, object]:
+    """There is no caller parameter for the lease stop, and the fence uses the validated one."""
+    import inspect
+
+    from launcher import orchestrate as orchestrate_module
+
+    signature = inspect.signature(orchestrate_module.launch_reviewer)
+    ensure(
+        "lease_effective_stop_utc" not in signature.parameters,
+        "a second caller-supplied deadline source is still accepted",
+    )
+    with fixture() as context:
+        root = pathlib.Path(str(context["temp_root"]))
+        _fake_executable_config(context, root)
+        # The lease in the fixture stops far in the future; a huge requested timeout must still be
+        # clamped by it rather than by anything the caller could have passed.
+        near = (
+            datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=30)
+        ).isoformat().replace("+00:00", "Z")
+        lease = dict(context["lease"])
+        lease["effective_stop_utc"] = near
+        context["lease"] = lease
+        ledger = Ledger(root / "ledger.json")
+        record = launch_reviewer(
+            context,
+            ledger=ledger,
+            reconcile_key="wp125-one-clock",
+            claim_payload={"role": "executor"},
+            timeout_seconds=86400.0,
+        )
+        deadline = record.outcome.deadline
+        ensure(deadline["bounded_by_lease"] is True, "the fence was not bounded by the lease")
+        ensure(
+            deadline["lease_effective_stop_utc"] == near,
+            "the fence used a stop other than the validated lease observation",
+        )
+        WATCHDOG_TIMING.append({"case": "RV-009", "deadline": deadline})
+        return {"deadline": deadline, "caller_parameter_removed": True}
+
+
+@case("WP125-RV-010-open-failure-terminates-the-suspended-child")
+def rv010_open_failure() -> dict[str, object]:
+    return _pre_adoption_failure("OpenProcess", "the child could not be opened for containment")
+
+
+@case("WP125-RV-010-assign-failure-terminates-the-suspended-child")
+def rv010_assign_failure() -> dict[str, object]:
+    return _pre_adoption_failure(
+        "AssignProcessToJobObject", "the child could not be assigned to the job"
+    )
+
+
+def _pre_adoption_failure(api: str, expected_fragment: str) -> dict[str, object]:
+    """Inject a Win32 failure inside the create-to-adopt window and prove nothing is left behind.
+
+    Generation 2 raised on each of these paths without touching the child, which had been created
+    **suspended** — so the run that reported "containment failed" was the run that leaked a process
+    that could never wake up and could never be reaped.
+    """
+    from launcher import watchdog as watchdog_module
+
+    if os.name != "nt":
+        return {"platform": os.name, "windows_pre_adoption_window": False}
+
+    with fixture() as context:
+        receipt = run_preflight(context)
+        original = getattr(watchdog_module._kernel32, api)
+        setattr(watchdog_module._kernel32, api, lambda *a, **k: 0)
+        seen: dict[str, object] = {}
+        original_adopt = watchdog_module.ProcessFence.adopt
+
+        def watching_adopt(self, pid):
+            seen["pid"] = pid
+            seen["fence"] = self
+            return original_adopt(self, pid)
+
+        watchdog_module.ProcessFence.adopt = watching_adopt
+        try:
+            result = expect_rejection(
+                "watchdog_cleanup",
+                lambda: run_supervised(
+                    child_report_command("import time\nwhile True:\n    time.sleep(30)"),
+                    environment=receipt.environment,
+                    working_directory=str(context["temp_root"]),
+                    deadline=short_deadline(20.0),
+                ),
+            )
+        finally:
+            setattr(watchdog_module._kernel32, api, original)
+            watchdog_module.ProcessFence.adopt = original_adopt
+
+        pid = seen.get("pid")
+        ensure(isinstance(pid, int), "the injected failure never reached adopt()")
+        fence = seen.get("fence")
+        records = getattr(fence, "pre_adoption_cleanup", [])
+        ensure(records, "no pre-adoption cleanup was recorded")
+        ensure(records[-1]["terminated"] is True, "the suspended child was not terminated")
+        ensure(records[-1]["proven_gone"] is True, "the suspended child was not proven gone")
+
+        # Independent check against the live process table, not the fence's own bookkeeping.
+        identity_value = watchdog_module.identify(pid)
+        alive = identity_value is not None and watchdog_module.is_alive(identity_value)
+        ensure(not alive, "a suspended orphan survived the pre-adoption failure")
+        PRE_ADOPTION_EVIDENCE.append({"api": api, "pid": pid, "survivor": False})
+        result["injected_api"] = api
+        result["pid"] = pid
+        result["survivor"] = False
+        result["expected_fragment_present"] = expected_fragment in str(result.get("category", ""))
+        return result
+
+
+@case("SPEC-G2-001-bare-forbidden-permission-token-in-trailing-position")
+def specg2_bare_trailing() -> dict[str, object]:
+    with fixture() as context:
+        refused = {}
+        for token in ("auto", "AuTo", "AUTO", "bypassPermissions", "acceptEdits"):
+            refused[token] = expect_rejection(
+                "permission_mode", _plan_with({"extra_args": (token,)}, context)
+            )["category"]
+        return {"refused": refused, "position": "trailing"}
+
+
+@case("SPEC-G2-001-bare-forbidden-permission-token-in-prefix-position")
+def specg2_bare_prefix() -> dict[str, object]:
+    with fixture() as context:
+        refused = {}
+        for token in ("auto", "AuTo", "bypassPermissions"):
+            refused[token] = expect_rejection(
+                "permission_mode", _plan_with({"executable_args": (token,)}, context)
+            )["category"]
+        return {"refused": refused, "position": "prefix"}
+
+
+@case("SPEC-G2-001-duplicate-and-conflicting-permission-switches")
+def specg2_duplicate_switches() -> dict[str, object]:
+    with fixture() as context:
+        refused = {}
+        for label, args in (
+            ("space_form_trailing", ("--permission-mode", "auto")),
+            ("equals_form_trailing", ("--permission-mode=auto",)),
+            ("space_form_prefix_key", ("--permission-mode",)),
+            ("repeat_of_mandated_mode", ("--permission-mode", "dontAsk")),
+        ):
+            refused[label] = expect_rejection(
+                "permission_mode", _plan_with({"extra_args": args}, context)
+            )["category"]
+        for label, args in (("prefix_equals_form", ("--permission-mode=auto",)),):
+            refused[label] = expect_rejection(
+                "permission_mode", _plan_with({"executable_args": args}, context)
+            )["category"]
+        return {"refused": refused}
+
+
+@case("WP125-G2-GATE-001-delegation-cases-run-from-a-unicode-path-checkout")
+def gate001_unicode_checkout() -> dict[str, object]:
+    """The read-only exact-root clone and its git identity check must survive a Unicode gitdir.
+
+    A launcher whose evidence can only be produced from an ASCII path is a launcher that has not been
+    measured on this repository, which is Vietnamese throughout.  The fixture root is rebuilt under a
+    Unicode directory and the identity verification is re-run against it, so the nine delegation
+    controls execute from a fresh detached checkout whose ``.git`` lives behind non-ASCII bytes.
+    """
+    root = read_only_candidate_root()
+    path = pathlib.Path(str(root["path"]))
+    ensure(root["unicode_path"] is True, "the read-only root was not built under a Unicode path")
+    ensure(
+        any(ord(ch) > 127 for ch in str(path)),
+        "the read-only root path carries no non-ASCII character: %s" % path,
+    )
+    evidence = verify_read_only_root(
+        str(path),
+        candidate_root=str(CANDIDATE_ROOT),
+        candidate_head=str(root["head"]),
+        candidate_tree=str(root["tree"]),
+    )
+    ensure(evidence["head"] == root["head"], "git identity through a Unicode gitdir disagreed")
+    ensure(evidence["writability_probe"] == "refused", "the Unicode root was writable")
+    delegated = [case_id for case_id, _ in CASES if "delegat" in case_id.lower()]
+    ensure(len(delegated) >= 9, "fewer than nine delegation cases are registered")
+    return {
+        "root_path_non_ascii": True,
+        "head": evidence["head"],
+        "tree": evidence["tree"],
+        "delegation_cases": len(delegated),
+    }
 
 
 # --------------------------------------------------------------------------- driver

@@ -147,7 +147,86 @@ REQUIRED_ARTIFACTS: tuple[tuple[str, str, str], ...] = (
     ("delegation_receipt.json", "cleanup_record", "wp125.delegation_receipt.v1"),
 )
 
-BINDING_KEYS = ("schema", "run_id", "head", "tree", "test_selection")
+BINDING_KEYS = (
+    "schema",
+    "run_id",
+    "head",
+    "tree",
+    "test_selection",
+    "mission_plan_hash",
+    "packet_spec_hash",
+    "generation",
+    "candidate_branch",
+)
+
+# WP125-RV-006, review round 2.  Exact-name structural verification was satisfied by a set that was
+# structurally perfect and semantically stale: generation-1 authority, an empty delegation payload,
+# and a red matrix all passed, because "the file is present and its hash matches" says nothing about
+# what the file says.  These are the generation-2 values every retained class must name, and the
+# predicates below are the meaning the hashes cannot carry.
+MISSION_PLAN_HASH = "ac5d5180be3de124dce002041683c3d6926aa60b36d39c7cad02136fd0776b9a"
+PACKET_SPEC_HASH = "b8e3387d13cf60974a3e7a35350557605df52b282666a401b7b5b4100e42f3f3"
+GENERATION = 2
+CANDIDATE_BRANCH = "agent/wp125-g2-claude"
+
+
+def _nonempty(payload: object) -> bool:
+    return bool(payload)
+
+
+def _matrix_is_green(payload: object) -> bool:
+    if not isinstance(payload, Mapping):
+        return False
+    return (
+        bool(payload.get("ok"))
+        and payload.get("failed") == 0
+        and payload.get("skipped") == 0
+        and payload.get("not_run") == 0
+        and int(payload.get("passed") or 0) > 0
+        and payload.get("passed") == payload.get("scheduled")
+    )
+
+
+def _delegation_is_real(payload: object) -> bool:
+    """A delegation receipt must carry an executed test with a real return code, or nothing at all.
+
+    An empty mapping used to satisfy the class; it now fails, because "we retained the delegation
+    receipt" and "a delegated job ran" were being reported by the same green.
+    """
+    if not isinstance(payload, Mapping) or not payload:
+        return False
+    codes = payload.get("return_codes")
+    return (
+        isinstance(codes, Mapping)
+        and bool(codes)
+        and all(isinstance(value, int) for value in codes.values())
+        and int(payload.get("tests_executed") or 0) > 0
+    )
+
+
+def _return_codes_are_real(payload: object) -> bool:
+    return isinstance(payload, Mapping) and bool(payload) and all(
+        isinstance(value, int) for value in payload.values()
+    )
+
+
+# locator -> predicate the payload must satisfy
+SEMANTIC_REQUIREMENTS = {
+    "case_matrix.json": _matrix_is_green,
+    "parity_report.json": lambda payload: isinstance(payload, Mapping) and bool(payload.get("ok")),
+    "delegation_receipt.json": _delegation_is_real,
+    "return_codes.json": _return_codes_are_real,
+    "launcher_inventory.json": _nonempty,
+    "sealed_source_pin.json": _nonempty,
+    "authority_input.json": _nonempty,
+    "argument_vector.json": _nonempty,
+    "environment_names.json": _nonempty,
+    "watchdog_timing.json": _nonempty,
+    "watchdog_cleanup.json": _nonempty,
+    "case_registry.json": _nonempty,
+    "static_boundary_scan.json": _nonempty,
+    "runner_fingerprint.json": _nonempty,
+}
 
 
 def _repo_identity() -> dict[str, str]:
@@ -169,6 +248,10 @@ def _bound(schema: str, run_id: str, identity: Mapping[str, str], test_selection
         "head": identity["head"],
         "tree": identity["tree"],
         "test_selection": list(test_selection),
+        "mission_plan_hash": MISSION_PLAN_HASH,
+        "packet_spec_hash": PACKET_SPEC_HASH,
+        "generation": GENERATION,
+        "candidate_branch": CANDIDATE_BRANCH,
         "payload": payload,
     }
     return json.dumps(document, ensure_ascii=False, sort_keys=True, indent=2) + "\n"
@@ -352,6 +435,24 @@ def verify_bindings(root: str, *, run_id: str | None = None) -> dict[str, object
             continue
         if not document["test_selection"]:
             findings.append({"kind": "empty_test_selection", "locator": locator})
+            continue
+        # Generation-2 authority, by value. A retained class that still names generation 1, the old
+        # spec hash or the old branch is stale evidence wearing a current filename.
+        stale = {
+            "mission_plan_hash": (document["mission_plan_hash"], MISSION_PLAN_HASH),
+            "packet_spec_hash": (document["packet_spec_hash"], PACKET_SPEC_HASH),
+            "generation": (document["generation"], GENERATION),
+            "candidate_branch": (document["candidate_branch"], CANDIDATE_BRANCH),
+        }
+        drifted = [key for key, (actual, want) in stale.items() if actual != want]
+        if drifted:
+            findings.append(
+                {"kind": "stale_authority", "locator": locator, "fields": sorted(drifted)}
+            )
+            continue
+        predicate = SEMANTIC_REQUIREMENTS.get(locator)
+        if predicate is not None and not predicate(document.get("payload")):
+            findings.append({"kind": "payload_not_meaningful", "locator": locator})
             continue
         verified += 1
 

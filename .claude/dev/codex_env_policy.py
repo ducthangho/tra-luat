@@ -1,57 +1,92 @@
 #!/usr/bin/env python3
-"""THU HỒI khối `shell_environment_policy` mà hook phiên từng ghi vào config codex.
+"""PHÁT HIỆN khối `shell_environment_policy` mà hook phiên từng ghi vào config codex.
 
-## Vì sao thu hồi (cross-review lượt 7, HIGH)
+## Vì sao khối cũ phải biến mất (cross-review lượt 7, HIGH)
 
-Khối cũ đặt `inherit = "all"`, tức truyền TOÀN BỘ môi trường vào mọi lệnh con của
-codex, chỉ loại bốn tên quan sát được trên MỘT máy tại MỘT thời điểm. Lập luận bảo
-vệ nó là "phiên codex cần thấy `CODEX_AUTH_JSON` để tự tái dựng credential".
+Khối đó đặt `inherit = "all"`, tức truyền TOÀN BỘ môi trường vào mọi lệnh con của codex,
+chỉ loại bốn tên quan sát được trên MỘT máy tại MỘT thời điểm. Lý lẽ bảo vệ nó — "phiên
+codex cần thấy `CODEX_AUTH_JSON` để tự tái dựng credential" — sai ngay trong luồng hook:
+credential ĐÃ được ghi ra `~/.codex/auth.json` TRƯỚC khi khối policy chạy. Ta đổi MỘT
+credential lấy CẢ MÔI TRƯỜNG mà không mua được gì. Đường đúng: `codex login --device-auth`.
 
-Lập luận đó SAI ngay trong chính luồng hook: `CODEX_AUTH_JSON` đã được khôi phục ra
-`~/.codex/auth.json` **TRƯỚC KHI** khối policy được ghi. Từ đó codex và mọi lệnh con
-đọc credential từ tệp chuẩn, không cần biến. Và nếu hook không chạy thì policy cũng
-không được cài — nên nó chưa bao giờ là đường cứu hộ độc lập. Ta đã đổi MỘT credential
-lấy CẢ MÔI TRƯỜNG mà không mua được gì.
+## Vì sao tệp này KHÔNG CÒN TỰ GHI VÀO CONFIG (quyết định 16-08-2026)
 
-Danh sách `exclude` cũng không cứu được: quét theo TÊN không chứng minh được gì cho
-`PGPASSWORD`, `DATABASE_URL`, `REDIS_URL`, `SSH_AUTH_SOCK`, hay biến vendor mới. Nó
-lỗi thời đúng vào lúc môi trường đổi — và bên quên cập nhật chính là bên đẩy lọt.
+Bốn lượt cross-review liên tiếp, BẢY phát hiện, TẤT CẢ cùng một đường — việc TỰ ĐỘNG ghi
+lại config của người dùng:
 
-## Vì sao KHÔNG viết đè, chỉ GỠ
+    lượt 7   bảng TOML trùng tên ⇒ codex không parse được
+    lượt 8   khớp marker bằng substring ⇒ MẤT DỮ LIỆU · `write_text` không nguyên tử
+    lượt 9   kiểm từng dòng ⇒ VẪN mất dữ liệu · symlink tên tạm ⇒ ghi đè tệp khác
+    lượt 10  CRLF ⇒ đổi kết thúc dòng toàn tệp · lost-update giữa lúc đọc và lúc thay
 
-Bản trước gỡ khối CÓ MARKER rồi LUÔN prepend một `[shell_environment_policy]`. Người
-dùng đã có sẵn bảng cùng tên nhưng KHÔNG marker (cấu hình codex hoàn toàn hợp lệ) thì
-tệp thành HAI bảng trùng tên và codex từ chối parse — ta làm hỏng config của họ.
+Mỗi lượt vá bảo toàn được thứ ta NGHĨ TỚI và làm hỏng thứ ta KHÔNG NGHĨ TỚI. Bảy lần theo
+đúng một hình dạng thì vấn đề không nằm ở các bản vá — nó nằm ở QUYẾT ĐỊNH GỐC. Và phần
+thưởng của cả đường ấy rất nhỏ: gỡ một khối mà chính ta đã thêm vào.
 
-Nay chỉ có đúng hai kết cục: gỡ ĐÚNG khối của mình, hoặc TỪ CHỐI kèm chẩn đoán. Không
-đoán, không viết đè, không prepend. Marker hỏng một đầu là ca phải từ chối chứ không
-phải ca để suy diễn — suy sai ở đây là xoá mất cấu hình người khác.
+Nên: **tệp này không bao giờ ghi vào config của người dùng nữa.**
 
-Mã thoát:  0 = xong (đã gỡ, hoặc không có gì để gỡ) · 2 = sai tham số
-           3 = TỪ CHỐI kèm chẩn đoán, KHÔNG đụng tệp
+    mặc định   CHỈ ĐỌC. Phát hiện khối, đặt/gỡ CỜ CHẶN, in cách chữa. Không ghi config.
+    `--go`     Dựng bản ĐÃ GỠ ra một tệp BÊN CẠNH để người dùng xem rồi tự thay.
+               Vẫn KHÔNG đụng bản gốc.
+
+Cả lớp rủi ro trên biến mất theo kiến trúc chứ không theo bản vá: không ghi đè thì không
+có lost-update, không có tệp cụt, không có symlink bị xuyên, không có metadata bị đổi lén.
+Phần còn lại — quyết định thay tệp — là việc người dùng làm có chủ đích, trên tệp của họ.
+
+Đọc/ghi bằng BYTE, không qua universal-newline: `Path.read_text` đổi CRLF thành `\\n`
+trước cả khi ta nhìn, nên chỉ cần ghi ra là toàn bộ phần của người dùng đổi kết thúc dòng
+(lượt 10). Làm việc trên byte thì phần ngoài khối ra đúng từng byte như nó vào.
+
+Mã thoát:  0 = sạch (không có khối, hoặc đã dựng xong bản đã gỡ)
+           2 = sai tham số
+           3 = CÒN KHỐI NGUY HIỂM hoặc KHÔNG PHÂN LOẠI ĐƯỢC ⇒ cờ chặn được đặt
 """
 from __future__ import annotations
 
 import argparse
 import os
-import re
 import sys
-import tempfile
 from pathlib import Path
 
-MOC_MO = "# >>> tra-luat: shell_environment_policy (quan ly tu dong) >>>"
-MOC_DONG = "# <<< tra-luat <<<"
+MOC_MO = b"# >>> tra-luat: shell_environment_policy (quan ly tu dong) >>>"
+MOC_DONG = b"# <<< tra-luat <<<"
+BOM = b"\xef\xbb\xbf"
 
-# Cờ CHẶN codex, đặt CẠNH config chứ không PHẢI TRONG config — ta đang từ chối vì
-# không dám sửa tệp của người dùng, nên chặn cũng không được sửa vào đó.
+# Cờ CHẶN codex, đặt CẠNH config chứ không PHẢI TRONG config — ta không sửa tệp của
+# người dùng, nên chặn cũng không được sửa vào đó.
 TEN_CO_CHAN = "tra-luat-CHAN-CODEX"
 
-MA_OK, MA_THAM_SO, MA_TU_CHOI = 0, 2, 3
+# Đuôi của bản ĐÃ GỠ. Tệp MỚI, cạnh bản gốc; người dùng xem rồi tự `mv`.
+DUOI_DA_GO = ".tra-luat-da-go"
+
+MA_OK, MA_THAM_SO, MA_CON_KHOI = 0, 2, 3
+
+# Nguyên văn THÂN khối mà hook từng ghi (lấy từ `c7bbd81`). Bản DUY NHẤT từng được ghi;
+# thêm biến thể thì THÊM vào tuple, đừng nới luật so sánh.
+#
+# So NGUYÊN KHỐI, không kiểm từng dòng: lượt 9 đưa ba phản chứng cho thấy kiểm membership
+# từng dòng không thấy CẤU TRÚC — `inherit = "core"`, một dòng chú thích đơn độc, và cả
+# thứ tự đảo ngược đều bị nhận là "khối của ta".
+_THAN_KHOI_CU = (
+    b'[shell_environment_policy]\n'
+    b'inherit = "all"\n'
+    b'exclude = [\n'
+    b'  "GITHUB_PAT",                                 # credential THAT, khong khop mau mac dinh\n'
+    b'  "CLAUDE_CODE_SESSION_ID",                     # danh tinh phien, codex khong can\n'
+    b'  "CLAUDE_CODE_REMOTE_SESSION_ID",\n'
+    b'  "CLAUDE_CODE_WEBSOCKET_AUTH_FILE_DESCRIPTOR",\n'
+    b']',
+)
+
+# Ba kết luận, ba mức bằng chứng khác nhau — đừng gộp.
+SACH = "SACH"                      # đã chứng minh KHÔNG có khối của ta
+CON_KHOI = "CON_KHOI"              # đã chứng minh CÒN khối canonical
+KHONG_PHAN_LOAI = "KHONG_PHAN_LOAI"  # có dấu vết marker nhưng KHÔNG dám kết luận
 
 
 def _in(s: str, loi: bool = False) -> None:
-    # stdout/stderr ép UTF-8 TRƯỚC khi in: console máy Việt là cp1258, in đường dẫn
-    # có dấu sẽ ném UnicodeEncodeError và giết cả lượt chạy trước khi logic kịp sai.
+    # stdout/stderr ép UTF-8 TRƯỚC khi in: console máy Việt là cp1258, in đường dẫn có
+    # dấu sẽ ném UnicodeEncodeError và giết cả lượt chạy trước khi logic kịp sai.
     for luong in (sys.stdout, sys.stderr):
         try:
             luong.reconfigure(encoding="utf-8", errors="replace")
@@ -60,163 +95,81 @@ def _in(s: str, loi: bool = False) -> None:
     print(s, file=sys.stderr if loi else sys.stdout)
 
 
-# KHỐI CANONICAL — nguyên văn thân khối mà hook TỪNG ghi (lấy từ `c7bbd81`). Đây là
-# bản DUY NHẤT từng được ghi ra; nếu sau này có thêm biến thể thì THÊM vào tuple này,
-# đừng nới luật so sánh.
-#
-# ## Vì sao so nguyên khối, không kiểm từng dòng (cross-review lượt 9, MEDIUM)
-#
-# Bản trước kiểm MEMBERSHIP TỪNG DÒNG: mỗi dòng giữa hai marker chỉ cần khớp một mẫu
-# trong danh sách là được. Reviewer đưa ba phản chứng chạy được, cả ba đều bị XOÁ với
-# lý do "da go khoi cua ta":
-#     [shell_environment_policy] + inherit = "core"   <- GIÁ TRỊ KHÁC HẲN
-#     một dòng "# ghi chu cua nguoi dung" đơn độc      <- KHÔNG PHẢI khối ta
-#     inherit = "all" rồi mới [shell_environment_policy]  <- THỨ TỰ ĐẢO NGƯỢC
-# Trái đúng câu tôi viết ngay trên đầu: "toàn bộ hình dạng khối cũ, không hơn" và
-# "người dùng sửa giữa khối ⇒ từ chối". Kiểm từng dòng không thấy CẤU TRÚC.
-#
-# So nguyên khối thì không còn khe đó: hoặc đúng thứ ta viết, hoặc từ chối. Chuẩn hoá
-# tối thiểu — bỏ khoảng trắng cuối dòng và dòng trắng đầu/cuối — vì trình soạn thảo hay
-# cắt khoảng trắng cuối, và đó KHÔNG phải "người dùng sửa nội dung".
-_THAN_KHOI_CU = (
-    '[shell_environment_policy]\n'
-    'inherit = "all"\n'
-    'exclude = [\n'
-    '  "GITHUB_PAT",                                 # credential THAT, khong khop mau mac dinh\n'
-    '  "CLAUDE_CODE_SESSION_ID",                     # danh tinh phien, codex khong can\n'
-    '  "CLAUDE_CODE_REMOTE_SESSION_ID",\n'
-    '  "CLAUDE_CODE_WEBSOCKET_AUTH_FILE_DESCRIPTOR",\n'
-    ']',
-)
+def _goc_dong(d: bytes) -> bytes:
+    """Dòng đã bỏ BOM, CR cuối và khoảng trắng hai bên — để SO SÁNH, không để ghi lại."""
+    return d.lstrip(BOM).strip(b"\r\n").strip()
 
 
-def _chuan_hoa(than: str) -> str:
-    return "\n".join(d.rstrip() for d in than.strip("\n").splitlines())
+def _chuan_hoa(than: bytes) -> bytes:
+    """Chuẩn hoá tối thiểu để so thân khối: bỏ CR, khoảng trắng cuối dòng, dòng trắng biên.
 
-
-def go_khoi(noi_dung: str) -> tuple[str | None, str]:
-    """Trả `(noi_dung_moi, ly_do)`. `None` = TỪ CHỐI, `ly_do` giải thích.
-
-    `noi_dung_moi == noi_dung` nghĩa là không có gì để gỡ.
-
-    ## v2 — bản v1 khớp marker bằng SUBSTRING và LÀM MẤT DỮ LIỆU
-
-    Cross-review lượt 8 (MEDIUM) đưa phản chứng chạy được, không phải suy luận:
-
-        x=1 # <MOC_MO>
-        y=2
-        z=3 # <MOC_DONG>      ->  "x=1 #\nz=3\n"     (MẤT y=2)
-
-    Marker nằm CÙNG DÒNG với nội dung thật vẫn được `str.index` nhận là marker, và
-    phần bị cắt mang theo dòng của người dùng. Tệ nhất: kết quả VẪN parse được như
-    TOML hợp lệ, nên phép "parse lại sau khi gỡ" mà tôi dùng làm bằng chứng ở lượt
-    trước MÙ HOÀN TOÀN với ca này. Một phép kiểm không thể đỏ thì không phải bằng chứng.
-
-    Hai chốt, PHỦ LÊN NHAU (đo được: gỡ riêng chốt 1 thì chốt 2 vẫn bắt — khai thẳng,
-    không nhận là mỗi chốt đã chứng minh độc lập):
-      1. marker phải là DÒNG RIÊNG (cho phép khoảng trắng hai bên, không gì khác);
-      2. phần GIỮA hai marker phải khớp NGUYÊN KHỐI một bản canonical trong
-         `_THAN_KHOI_CU` — xem chú thích ở đó về việc kiểm từng dòng đã hỏng thế nào.
-    Chốt 2 chặn cả ca marker nằm trong chuỗi TOML nhiều dòng: nội dung kẹp giữa khi
-    ấy là văn bản bất kỳ, không khớp khối canonical nào.
+    Trình soạn thảo hay cắt khoảng trắng cuối và đổi kết thúc dòng; đó KHÔNG phải "người
+    dùng sửa nội dung khối". Ngoài hai thứ đó thì không nới thêm gì.
     """
+    return b"\n".join(d.rstrip() for d in than.replace(b"\r\n", b"\n").strip(b"\n").split(b"\n"))
+
+
+def phan_loai(noi_dung: bytes) -> tuple[str, bytes | None, str]:
+    """Trả `(ket_luan, noi_dung_da_go, ly_do)`. `noi_dung_da_go` chỉ có khi `CON_KHOI`.
+
+    KHÔNG ghi gì — hàm này thuần tuý phân loại. Việc dựng bản đã gỡ nằm luôn ở đây vì nó
+    chỉ là phép cắt trên byte, nhưng ai ghi nó ra đĩa là chuyện của `main`.
+    """
+    # BOM ĐẦU TỆP tách ra rồi gắn lại: khối cũ được ghi ở ĐẦU tệp, nên dòng marker mở
+    # chính là dòng mang BOM — cắt dòng đó là mất BOM, tức lại sửa thứ ngoài phạm vi
+    # (đúng họ lỗi CRLF ở lượt 10). Reviewer lượt 10 ghi BOM đang bị "từ chối oan";
+    # nay nhận, và giữ nguyên.
+    bom = BOM if noi_dung.startswith(BOM) else b""
+    noi_dung = noi_dung[len(bom):]
     dong = noi_dung.splitlines(keepends=True)
-    vt_mo = [i for i, d in enumerate(dong) if d.strip() == MOC_MO]
-    vt_dong = [i for i, d in enumerate(dong) if d.strip() == MOC_DONG]
-    # Marker LỌT vào giữa dòng khác: không nhận là marker, nhưng cũng KHÔNG lờ đi —
-    # nó là dấu hiệu tệp đã bị sửa tay hoặc bị bản v1 cắt hỏng.
+    vt_mo = [i for i, d in enumerate(dong) if _goc_dong(d) == MOC_MO]
+    vt_dong = [i for i, d in enumerate(dong) if _goc_dong(d) == MOC_DONG]
+    # Marker LỌT giữa dòng khác: không nhận là marker, nhưng cũng KHÔNG lờ đi — đó là
+    # dấu hiệu tệp đã bị sửa tay, hoặc bị bản cũ (khớp substring) cắt hỏng.
     le_loi = (noi_dung.count(MOC_MO) != len(vt_mo)
               or noi_dung.count(MOC_DONG) != len(vt_dong))
-    if not vt_mo and not vt_dong:
-        if le_loi:
-            return None, "marker xuat hien GIUA dong khac — tep da bi sua tay, KHONG doan"
-        return noi_dung, "khong co khoi nao do ta quan ly"
     if le_loi:
-        return None, "co marker nam GIUA dong khac ben canh marker dong rieng — KHONG doan"
+        return (KHONG_PHAN_LOAI, None,
+                "marker xuat hien GIUA dong khac — tep da bi sua tay, KHONG doan")
+    if not vt_mo and not vt_dong:
+        return (SACH, None, "khong co khoi nao do ta quan ly")
     if len(vt_mo) != 1 or len(vt_dong) != 1:
-        # Nhiều hơn một cặp = tệp đã bị chồng khối (đúng triệu chứng của bản prepend
-        # cũ khi marker hỏng). Gỡ "cặp đầu tiên" là ĐOÁN; đoán sai thì xoá nhầm.
-        return None, (f"marker khong thanh MOT cap (mo={len(vt_mo)}, dong={len(vt_dong)}) — "
-                      f"KHONG doan, sua tay roi chay lai")
+        return (KHONG_PHAN_LOAI, None,
+                f"marker khong thanh MOT cap (mo={len(vt_mo)}, dong={len(vt_dong)})")
     i_mo, i_dong = vt_mo[0], vt_dong[0]
     if i_dong < i_mo:
-        return None, "marker DONG nam TRUOC marker MO — tep da bi sua tay, KHONG doan"
-    than = _chuan_hoa("".join(dong[i_mo + 1:i_dong]))
+        return (KHONG_PHAN_LOAI, None, "marker DONG nam TRUOC marker MO")
+    than = _chuan_hoa(b"".join(dong[i_mo + 1:i_dong]))
     if than not in tuple(_chuan_hoa(k) for k in _THAN_KHOI_CU):
-        return None, ("phan giua hai marker KHONG khop khoi canonical nao cua ta "
-                      f"({than.splitlines()[0][:40]!r}...) — da bi sua tay, KHONG doan")
-    # Xoá đúng các dòng của khối, CỘNG NHIỀU NHẤT MỘT dòng trắng ngay sau — đúng dấu
-    # phân cách mà chính bản ghi cũ chèn (`KHOI + "\n\n" + phan_con_lai`).
-    #
-    # Bản trước dùng `strip("\n")` trên cả tệp: nó xoá luôn dòng trắng đầu/cuối CỦA
-    # NGƯỜI DÙNG, tức sửa thứ ta không được phép sửa. Reviewer bắt đúng: "TOML vẫn
-    # hợp lệ" KHÔNG đồng nghĩa "đã bảo toàn tệp của họ".
+        dau = than.split(b"\n")[0][:40].decode("utf-8", "replace") if than else ""
+        return (KHONG_PHAN_LOAI, None,
+                f"phan giua hai marker KHONG khop khoi canonical nao cua ta ({dau!r}...)")
+    # Cắt đúng các dòng của khối, CỘNG NHIỀU NHẤT MỘT dòng trắng ngay sau — đúng dấu phân
+    # cách mà bản ghi cũ chèn (`KHOI + "\n\n" + phan_con_lai`). Không `strip` cả tệp: dòng
+    # trắng đầu/cuối là của người dùng.
     het = i_dong + 1
-    if het < len(dong) and dong[het].strip() == "":
+    if het < len(dong) and dong[het].strip() == b"":
         het += 1
-    moi = "".join(dong[:i_mo] + dong[het:])
-    return moi, "da go khoi cua ta"
+    return (CON_KHOI, bom + b"".join(dong[:i_mo] + dong[het:]),
+            "con khoi canonical cua ta")
 
 
-def ghi_nguyen_tu(tep: Path, noi_dung: str) -> None:
-    """Ghi kiểu THAY THẾ: tệp đích hoặc là bản CŨ, hoặc là bản MỚI, không có ở giữa.
+def viet_ban_da_go(dich: Path, noi_dung: bytes) -> None:
+    """Ghi bản đã gỡ ra một tệp MỚI. `O_EXCL`: đã tồn tại thì HỎNG, không ghi đè.
 
-    Cross-review lượt 8 (MEDIUM): bản trước gọi thẳng `write_text`. Nó TRUNCATE trước
-    rồi mới ghi — lỗi giữa chừng (đầy đĩa, tín hiệu) để lại tệp CỤT, trong khi nhánh
-    bắt lỗi vẫn trả `MA_TU_CHOI`. Tức ta trả về "đã từ chối, không đụng tệp" cho một
-    tệp ĐÃ HỎNG. Hợp đồng của chính tệp này bị phá bởi cách ghi.
-
-    Ghi ra tệp tạm CÙNG THƯ MỤC (khác thư mục thì `os.replace` không còn nguyên tử vì
-    có thể qua ranh giới filesystem), `fsync` nội dung, rồi `os.replace`. Hỏng ở bất
-    kỳ bước nào trước `replace` thì bản gốc còn nguyên; tệp tạm được dọn.
+    Không `os.replace`, không đụng bản gốc — nên không có lost-update, không có tệp cụt,
+    không có symlink bị xuyên, không có metadata bị đổi lén. Đó là cả bốn phát hiện của
+    lượt 9-10, chết theo kiến trúc chứ không theo bản vá.
     """
-    # v2 — bản v1 TỰ MỞ MỘT LỖ trong lúc đang vá một lỗ (cross-review lượt 9, MEDIUM).
-    #
-    # Tên tạm cũ ĐOÁN ĐƯỢC (`config.toml.tra-luat-tam-<pid>`) và mở bằng `open(...,"w")`
-    # — không `O_EXCL`, không chống symlink. Phản chứng chạy được: trỏ đúng tên đó thành
-    # symlink tới một tệp `victim` ⇒ VICTIM BỊ GHI ĐÈ. Hỏng TRƯỚC `os.replace`, tức phá
-    # đúng hợp đồng viết ở dòng ngay trên. Vá một lỗ mà mở lỗ khác trong cùng hàm.
-    #
-    # `mkstemp` cho tên NGẪU NHIÊN + `O_CREAT|O_EXCL|O_NOFOLLOW`: đã tồn tại (kể cả là
-    # symlink) thì tạo THẤT BẠI thay vì ghi xuyên qua.
-    ten_that = os.path.realpath(tep)
-    if os.path.islink(tep):
-        # `os.replace` thay CHÍNH symlink chứ không cập nhật đích — với người dùng quản
-        # lý dotfiles bằng symlink, đó là phá cách bố trí của họ. Không đoán ý: từ chối,
-        # và chỉ họ chạy thẳng trên đường thật.
-        raise OSError(f"{tep} la SYMLINK toi {ten_that} — chay lai voi --tep {ten_that}")
-    # GIỮ NGUYÊN quyền tệp gốc. Bản trước ép 0600 cho MỌI tệp: đó là đổi metadata sau
-    # lưng người dùng ("thắt chặt lén" — reviewer gọi đúng). Ta đang GỠ một khối, không
-    # phải đặt lại chính sách quyền của họ.
+    fd = os.open(str(dich), os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
     try:
-        che_do = os.stat(tep).st_mode & 0o7777
-    except OSError:
-        che_do = 0o600
-    fd, ten_tam = tempfile.mkstemp(dir=str(tep.parent), prefix=tep.name + ".tra-luat-",
-                                   suffix=".tam")
-    tam = Path(ten_tam)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
+        with os.fdopen(fd, "wb") as f:
             f.write(noi_dung)
             f.flush()
             os.fsync(f.fileno())
-        os.chmod(tam, che_do)
-        os.replace(tam, tep)        # nguyên tử trong cùng filesystem
-        # `fsync` NỘI DUNG thôi chưa đủ để bền qua mất điện: mục lục thư mục cũng phải
-        # xuống đĩa, nếu không `replace` có thể bay. Rẻ, và đây là tệp cấu hình chứ
-        # không phải vòng lặp nóng.
-        try:
-            dfd = os.open(str(tep.parent), os.O_RDONLY)
-            try:
-                os.fsync(dfd)
-            finally:
-                os.close(dfd)
-        except OSError:
-            pass                    # không fsync được thư mục thì thôi, KHÔNG hỏng việc
     except BaseException:
-        # Kể cả KeyboardInterrupt: rác tạm phải dọn, rồi NÉM TIẾP để phía gọi biết.
         try:
-            tam.unlink()
+            dich.unlink()
         except OSError:
             pass
         raise
@@ -226,8 +179,8 @@ def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--tep", default="~/.codex/config.toml",
                    help="config codex; mac dinh ~/.codex/config.toml")
-    p.add_argument("--thu-khan", action="store_true",
-                   help="chi bao se lam gi, KHONG ghi")
+    p.add_argument("--go", action="store_true",
+                   help="dung ban DA GO ra tep ben canh (VAN khong dung ban goc)")
     p.add_argument("--co-chan", default=None,
                    help="duong dan tep CO CHAN codex; mac dinh canh config")
     a = p.parse_args(argv)
@@ -235,32 +188,24 @@ def main(argv=None) -> int:
     tep = Path(os.path.expanduser(a.tep))
     co_chan = Path(os.path.expanduser(a.co_chan)) if a.co_chan else tep.with_name(TEN_CO_CHAN)
 
-    def tu_choi(ly_do: str) -> int:
-        # FAIL-CLOSE (cross-review luot 8, HIGH). Ban truoc chi in canh bao roi di tiep:
-        # dung luc phat hien config NGUY HIEM ma khong go duoc thi khoi `inherit="all"`
-        # cu VAN CON HIEU LUC. Bien mot loi xac-dinh-an-toan thanh phoi moi truong CO
-        # CHU DICH — chinh chu reviewer dung, va do la loi cua ban va truoc cua toi.
-        #
-        # Ta KHONG duoc sua config cua ho (do la ly do dang tu choi), nen chan o phia
-        # TA: dung mot la co RIENG. `_do_codex` doc la co nay va ha codex xuong
-        # CHUA_XAC_THUC, nen `doctor --doi-kha-dung` chan, va nguoi doc thay ly do.
-        _in(f"codex env policy: TU CHOI — {ly_do} ({tep})", loi=True)
+    def dat_co(ly_do: str) -> None:
         try:
             co_chan.write_text(
-                "codex bi CHAN: khong go duoc khoi shell_environment_policy cu.\n"
+                "codex bi CHAN: config con khoi shell_environment_policy cu, hoac khong\n"
+                "phan loai duoc.\n"
                 f"ly do: {ly_do}\n"
                 f"tep: {tep}\n"
-                "Khoi `inherit = \"all\"` co the VAN CON HIEU LUC — no truyen TOAN BO\n"
-                "moi truong cho moi lenh con cua codex. Sua tay roi chay lai:\n"
-                "  python3 .claude/dev/codex_env_policy.py\n",
+                'Khoi `inherit = "all"` co the CON HIEU LUC — no truyen TOAN BO moi truong\n'
+                "cho moi lenh con cua codex. Chua:\n"
+                "  python3 .claude/dev/codex_env_policy.py --go   # dung ban da go ben canh\n"
+                "roi xem va tu thay. Cong cu KHONG tu ghi vao config cua ban.\n",
                 encoding="utf-8")
         except OSError as e:
             _in(f"codex env policy: KHONG dat duoc co chan ({e}) — CHAN CODEX BANG TAY",
                 loi=True)
-        return MA_TU_CHOI
 
-    def go_co_chan() -> None:
-        """Gỡ cờ khi đã sạch. Cờ không tự hết là một chốt đỏ thường trực."""
+    def go_co() -> None:
+        """Cờ phải TỰ HẾT khi sạch — cờ không tự hết là một chốt đỏ thường trực."""
         try:
             co_chan.unlink()
             _in("codex env policy: da go co chan codex")
@@ -269,29 +214,44 @@ def main(argv=None) -> int:
 
     if not tep.exists():
         _in("codex env policy: khong co config.toml — khong co gi de go")
-        go_co_chan()
+        go_co()
         return MA_OK
     try:
-        cu = tep.read_text(encoding="utf-8")
+        noi_dung = tep.read_bytes()
     except OSError as e:
-        return tu_choi(f"KHONG doc duoc: {e}")
+        dat_co(f"KHONG doc duoc: {e}")
+        _in(f"codex env policy: KHONG doc duoc {tep}: {e}", loi=True)
+        return MA_CON_KHOI
 
-    moi, ly_do = go_khoi(cu)
-    if moi is None:
-        return tu_choi(ly_do)
-    if moi == cu:
+    ket_luan, da_go, ly_do = phan_loai(noi_dung)
+
+    if ket_luan == SACH:
         _in(f"codex env policy: {ly_do}")
-        go_co_chan()
+        go_co()
         return MA_OK
-    if a.thu_khan:
-        _in(f"codex env policy: SE go khoi ({len(cu) - len(moi)} ky tu) — thu khan, khong ghi")
-        return MA_OK
+
+    dat_co(ly_do)
+    if ket_luan == KHONG_PHAN_LOAI:
+        _in(f"codex env policy: KHONG PHAN LOAI DUOC — {ly_do} ({tep})", loi=True)
+        _in("  => sua tay roi chay lai. Cong cu KHONG doan va KHONG ghi.", loi=True)
+        return MA_CON_KHOI
+
+    _in(f"codex env policy: CON KHOI `inherit=all` trong {tep}")
+    if not a.go:
+        _in(f"  => chay lai voi --go de dung ban da go ra {tep.name}{DUOI_DA_GO}")
+        return MA_CON_KHOI
+    dich = tep.with_name(tep.name + DUOI_DA_GO)
     try:
-        ghi_nguyen_tu(tep, moi)
+        viet_ban_da_go(dich, da_go)
+    except FileExistsError:
+        _in(f"codex env policy: {dich} DA TON TAI — xem/xoa no truoc, KHONG ghi de", loi=True)
+        return MA_CON_KHOI
     except OSError as e:
-        return tu_choi(f"KHONG ghi duoc: {e}")
-    _in("codex env policy: DA GO khoi inherit=all (xem chu thich dau tep nay)")
-    go_co_chan()
+        _in(f"codex env policy: KHONG ghi duoc {dich}: {e}", loi=True)
+        return MA_CON_KHOI
+    _in(f"  da dung ban da go: {dich}")
+    _in(f"  xem thu:  diff {tep} {dich}")
+    _in(f"  thay:     mv {dich} {tep}     # ban TU quyet dinh, cong cu khong lam ho")
     return MA_OK
 
 

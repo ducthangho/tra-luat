@@ -140,11 +140,17 @@ lúc môi trường đổi — bên quên cập nhật chính là bên đẩy l�
 
 Đường thay thế đã đủ và rẻ hơn: **`codex login --device-auth`** đúc credential tại chỗ.
 
-Việc gỡ nằm ở `.claude/dev/codex_env_policy.py` (tách riêng để test được, `t100`). Nó chỉ
-có hai kết cục: **gỡ đúng khối có marker của ta**, hoặc **TỪ CHỐI kèm chẩn đoán**. Không
-prepend, không đoán — bản trước luôn prepend một bảng, nên một config đã có
-`[shell_environment_policy]` **không marker** (hoàn toàn hợp lệ với codex) sẽ thành **hai
-bảng trùng tên** và codex từ chối parse; ta làm hỏng cấu hình người dùng.
+Việc phát hiện nằm ở `.claude/dev/codex_env_policy.py` (tách riêng để test được, `t100`).
+
+**Công cụ KHÔNG ghi vào config của bạn.** Mặc định nó chỉ đọc: thấy khối cũ thì đặt cờ
+`~/.codex/tra-luat-CHAN-CODEX` (mọi cửa codex *của kho* fail-close) và in cách chữa. Chạy
+`--go` thì nó dựng bản đã gỡ ra `config.toml.tra-luat-da-go` **bên cạnh**; bạn `diff` rồi
+tự `mv`. Bản gốc bất khả xâm ở mọi đường.
+
+Lý do: bốn lượt cross-review liên tiếp tìm ra **bảy** lỗi, tất cả cùng thuộc việc tự động
+ghi lại config — bảng TOML trùng tên, khớp substring mất dữ liệu, ghi không nguyên tử,
+kiểm từng dòng vẫn mất dữ liệu, symlink tên tạm ghi đè tệp khác, CRLF đổi kết thúc dòng
+toàn tệp, lost-update. Phần thưởng thì nhỏ: gỡ một khối chính ta thêm vào. Không đáng.
 
 **TUYỆT ĐỐI KHÔNG** dùng `shell_environment_policy.set` để truyền giá trị qua dòng lệnh:
 đối số lộ trong `ps` cho mọi tiến trình cùng máy.

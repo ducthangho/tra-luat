@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -200,6 +200,16 @@ fi
 #   KHONG CHAN DUOC : nguoi dung go thang `codex` o terminal. Mot la co ma chi ma
 #               cua ta doc thi khong the thuc thi hop dong "chan executable".
 # Ghi nhan gioi han thay vi dat ten to hon viec no lam duoc — dung bai hoc da tra gia.
+#
+# HOOK CHI PHAT HIEN, KHONG GHI (quyet dinh 16-08-2026 — xem dau
+# `.claude/dev/codex_env_policy.py`). Bon luot cross-review, BAY phat hien, TAT CA cung
+# mot duong: viec TU DONG ghi lai config cua nguoi dung. Moi lan va bao toan duoc thu ta
+# NGHI TOI va lam hong thu ta KHONG NGHI TOI (bang trung ten, mat du lieu, tep cut,
+# symlink bi xuyen, CRLF, lost-update). Bay lan cung mot hinh dang thi loi nam o QUYET
+# DINH GOC, khong nam o cac ban va. Ma phan thuong thi nho: go mot khoi CHINH TA them vao.
+#
+# Nen: hook DOC, dat co chan, va in cach chua. Nguoi dung tu chay `--go` roi tu `mv`.
+# Ca lop rui ro tren chet theo KIEN TRUC, khong theo ban va.
 if co codex; then
   MA_GO=0
   "$PY" "$GOC/.claude/dev/codex_env_policy.py" 2>&1 | sed 's/^/[session-start] /' || MA_GO=$?
@@ -207,12 +217,13 @@ if co codex; then
   MA_GO=${PIPESTATUS[0]:-$MA_GO}
   if [ "$MA_GO" -ne 0 ]; then
     CODEX_BI_CHAN=1
-    echo "[session-start] !! CHAN MOI DUONG CODEX CUA KHO (ma $MA_GO): khong go duoc"
-    echo "[session-start]    khoi env policy cu. \`inherit=all\` co the CON HIEU LUC —"
-    echo "[session-start]    moi lenh con cua codex nhan TOAN BO moi truong."
+    echo "[session-start] !! CHAN MOI DUONG CODEX CUA KHO (ma $MA_GO): config con khoi"
+    echo "[session-start]    env policy cu, hoac khong phan loai duoc. \`inherit=all\` co"
+    echo "[session-start]    the CON HIEU LUC — moi lenh con cua codex nhan TOAN BO moi truong."
     echo "[session-start]    LUU Y: lenh \`codex\` go THANG o terminal KHONG bi chan."
-    echo "[session-start]    Sua tay ~/.codex/config.toml roi chay:"
-    echo "[session-start]      $PY .claude/dev/codex_env_policy.py"
+    echo "[session-start]    Chua (cong cu KHONG tu ghi vao config cua ban):"
+    echo "[session-start]      $PY .claude/dev/codex_env_policy.py --go   # dung ban da go"
+    echo "[session-start]      diff ~/.codex/config.toml{,.tra-luat-da-go} && mv ... # ban tu thay"
   fi
 fi
 

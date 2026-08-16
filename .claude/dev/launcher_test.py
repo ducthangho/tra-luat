@@ -13,6 +13,7 @@ Chạy:  python .claude/dev/launcher_test.py             (chạy tất cả; Win
 from __future__ import annotations
 
 import argparse
+import ast
 import contextlib
 import hashlib
 import importlib.util
@@ -2815,8 +2816,8 @@ def t102_khong_go_duoc_policy_thi_phai_CHAN_codex():
         co = s / cs.TEN_CO_CHAN
         # (1) TU CHOI => dat co
         xau = s / "hong.toml"
-        xau.write_text(cs.MOC_MO + "\n[shell_environment_policy]\n", encoding="utf-8")
-        bang(chay(xau, co) == cs.MA_TU_CHOI, "marker le ma khong tu choi")
+        xau.write_bytes(cs.MOC_MO + b"\n[shell_environment_policy]\n")
+        bang(chay(xau, co) == cs.MA_CON_KHOI, "marker le ma khong bao dong")
         bang(co.exists(), "TU CHOI ma KHONG dat co chan — codex van chay tu do")
         bang("inherit" in co.read_text(encoding="utf-8"),
              "co chan khong noi ro nguy co, nguoi doc khong biet vi sao bi chan")
@@ -2855,222 +2856,134 @@ def t102_khong_go_duoc_policy_thi_phai_CHAN_codex():
 
         # (3) don xong => co PHAI tu het
         sach = s / "sach.toml"
-        sach.write_text('[projects."/a"]\ntrust_level = "trusted"\n', encoding="utf-8")
+        sach.write_bytes(b'[projects."/a"]\ntrust_level = "trusted"\n')
         bang(chay(sach, co) == cs.MA_OK, "config sach ma bao loi")
         bang(not co.exists(), "da sach ma co chan con nguyen — chot do thuong truc")
 
 
 @ca
-def t100_go_env_policy_khong_duoc_lam_hong_config_nguoi_dung():
-    """Gỡ khối của mình thì được; đụng vào cấu hình người khác thì KHÔNG.
+def t100_cong_cu_policy_KHONG_BAO_GIO_duoc_ghi_vao_config():
+    """Hợp đồng MỚI (16-08-2026): công cụ không ghi vào config của người dùng, chấm hết.
 
-    Cross-review lượt 7 (HIGH + MEDIUM). Bản trước gỡ khối CÓ marker rồi LUÔN prepend
-    một `[shell_environment_policy]`. Config người dùng đã có bảng cùng tên nhưng
-    KHÔNG marker (hoàn toàn hợp lệ với codex) ⇒ tệp có HAI bảng trùng tên ⇒ codex từ
-    chối parse. "Bất biến" tôi đo được chỉ đúng cho đúng ca marker nguyên vẹn.
+    BỐN lượt cross-review, BẢY phát hiện, tất cả cùng một đường — việc TỰ ĐỘNG ghi lại
+    config: bảng TOML trùng tên · khớp substring mất dữ liệu · `write_text` không nguyên
+    tử · kiểm từng dòng vẫn mất dữ liệu · symlink tên tạm ghi đè tệp khác · CRLF đổi kết
+    thúc dòng toàn tệp · lost-update. Bảy lần cùng một hình dạng thì lỗi nằm ở QUYẾT ĐỊNH
+    GỐC. Nay: mặc định CHỈ ĐỌC; `--go` dựng bản đã gỡ ra tệp BÊN CẠNH; bản gốc bất khả xâm.
 
-    Nay chỉ hai kết cục: gỡ ĐÚNG khối của ta, hoặc TỪ CHỐI kèm chẩn đoán. Bốn ca dưới
-    đây chính là bốn ca reviewer đòi: chạy lặp · bảng sẵn không marker · marker thiếu
-    một đầu · giữ nguyên phần còn lại.
+    Ca này khoá đúng câu đó, và cách khoá mạnh nhất là ĐO BYTE: trước và sau mọi lệnh,
+    tệp gốc phải giống nhau TỪNG BYTE — không phải "vẫn parse được", vì "parse được" là
+    đúng phép kiểm đã mù trước ca mất dữ liệu ở lượt 8.
     """
     m = _nap_sach(CODEX_ENV_POLICY)
-    # Khối THẬT, lấy từ chính hằng canonical — KHÔNG chép tay một bản rút gọn. Bản
-    # rút gọn cũ vẫn xanh vì luật cũ chỉ kiểm từng dòng; nay luật so NGUYÊN KHỐI nên
-    # fixture phải là thứ hook từng ghi, không phải thứ trông giống nó.
-    khoi = f"{m.MOC_MO}\n{m._THAN_KHOI_CU[0]}\n{m.MOC_DONG}"
-    duoi = '[projects."/home/u/kho"]\ntrust_level = "trusted"\n'
+    khoi = m.MOC_MO + b"\n" + m._THAN_KHOI_CU[0] + b"\n" + m.MOC_DONG
+    duoi = b'[projects."/home/u/kho"]\ntrust_level = "trusted"\n'
 
-    def chay_go(tep):
-        # Nuot dau ra chan doan: ca nay chay 6 lan, de nguyen thi no lan at ca ban
-        # tong ket cua suite. `sys.stderr` cung phai nuot — nhanh TU CHOI in ra do.
+    def chay(tep, co, go=False):
+        doi = ["--tep", str(tep), "--co-chan", str(co)] + (["--go"] if go else [])
         cu_out, cu_err = sys.stdout, sys.stderr
         sys.stdout = sys.stderr = io.StringIO()
         try:
-            return m.main(["--tep", str(tep)])
+            return m.main(doi)
         finally:
             sys.stdout, sys.stderr = cu_out, cu_err
 
     with San() as s:
-        # (a) go dung khoi cua ta, GIU phan con lai — va CHAY LAP khong doi them gi
+        co = s / m.TEN_CO_CHAN
+
+        # (a) CON KHOI: bao dong, dat co, va TUYET DOI khong dung config
         t1 = s / "c1.toml"
-        t1.write_text(khoi + "\n\n" + duoi, encoding="utf-8")
-        bang(chay_go(t1) == MA_OK, "go khoi cua ta ma khong OK")
-        sau = t1.read_text(encoding="utf-8")
-        bang(m.MOC_MO not in sau and "inherit" not in sau, f"chua go het: {sau!r}")
-        bang('[projects."/home/u/kho"]' in sau, f"da nuot phan cua codex: {sau!r}")
-        bang(chay_go(t1) == MA_OK, "chay lai ma khong OK")
-        bang(t1.read_text(encoding="utf-8") == sau, "chay lai lam doi tep — khong bat bien")
+        goc = khoi + b"\n\n" + duoi
+        t1.write_bytes(goc)
+        bang(chay(t1, co) == m.MA_CON_KHOI, "con khoi ma khong bao dong")
+        bang(t1.read_bytes() == goc, "DA GHI VAO CONFIG o che do chi doc")
+        bang(co.exists(), "con khoi ma khong dat co chan")
 
-        # (b) nguoi dung CO SAN bang cung ten, KHONG marker => TUYET DOI khong dung toi
+        # (b) --go: dung ban BEN CANH, ban goc VAN nguyen tung byte
+        bang(chay(t1, co, go=True) == MA_OK, "--go that bai")
+        bang(t1.read_bytes() == goc, "--go DA SUA ban goc")
+        ben_canh = s / ("c1.toml" + m.DUOI_DA_GO)
+        bang(ben_canh.exists(), "khong dung ra ban da go")
+        bang(m.MOC_MO not in ben_canh.read_bytes(), "ban da go van con khoi")
+        bang(duoi in ben_canh.read_bytes(), "ban da go nuot phan cua nguoi dung")
+
+        # (c) chay --go lan hai: tep da ton tai => TU CHOI, khong ghi de
+        ben_canh.write_bytes(b"NGUOI DUNG DA SUA\n")
+        bang(chay(t1, co, go=True) == m.MA_CON_KHOI, "ghi de ban da go co san")
+        bang(ben_canh.read_bytes() == b"NGUOI DUNG DA SUA\n", "DA GHI DE ban da go")
+
+        # (d) CRLF: phan NGOAI khoi phai ra dung tung byte (phan chung luot 10)
         t2 = s / "c2.toml"
-        cua_ho = '[shell_environment_policy]\ninherit = "core"\nset = { FOO = "1" }\n'
-        t2.write_text(cua_ho, encoding="utf-8")
-        bang(chay_go(t2) == MA_OK, "bang khong phai cua ta ma bao loi")
-        bang(t2.read_text(encoding="utf-8") == cua_ho,
-             f"DA SUA config nguoi dung: {t2.read_text(encoding='utf-8')!r}")
+        than_crlf = m._THAN_KHOI_CU[0].replace(b"\n", b"\r\n")
+        goc2 = (m.MOC_MO + b"\r\n" + than_crlf + b"\r\n" + m.MOC_DONG + b"\r\n\r\n"
+                + b'[user]\r\nname = "giu-nguyen"\r\n')
+        t2.write_bytes(goc2)
+        bang(chay(t2, co, go=True) == MA_OK, "khoi CRLF ma khong nhan ra")
+        ra = (s / ("c2.toml" + m.DUOI_DA_GO)).read_bytes()
+        bang(ra == b'[user]\r\nname = "giu-nguyen"\r\n',
+             f"CRLF cua nguoi dung bi doi: {ra!r}")
 
-        # (c) marker THIEU MOT DAU => TU CHOI kem chan doan, KHONG doan, KHONG ghi
-        for ten, noi_dung in (("c3", m.MOC_MO + '\n[shell_environment_policy]\n' + duoi),
-                              ("c4", duoi + "\n" + m.MOC_DONG),
-                              ("c5", khoi + "\n" + khoi)):
-            t = s / f"{ten}.toml"
-            t.write_text(noi_dung, encoding="utf-8")
-            ma = chay_go(t)
-            bang(ma == m.MA_TU_CHOI, f"{ten}: marker hong ma khong TU CHOI, duoc {ma}")
-            bang(t.read_text(encoding="utf-8") == noi_dung,
-                 f"{ten}: da TU CHOI ma van sua tep")
+        # (e) BOM: nhan, va GIU. Luot 10 ghi BOM dang bi tu choi oan.
+        t3 = s / "c3.toml"
+        t3.write_bytes(m.BOM + khoi + b"\n\n" + duoi)
+        bang(chay(t3, co, go=True) == MA_OK, "BOM van bi tu choi oan")
+        ra3 = (s / ("c3.toml" + m.DUOI_DA_GO)).read_bytes()
+        bang(ra3 == m.BOM + duoi, f"mat BOM cua nguoi dung: {ra3[:8]!r}")
 
-        # (d) khong co tep => khong co gi de go, khong duoc TAO ra
-        t6 = s / "khong-co.toml"
-        bang(chay_go(t6) == MA_OK, "thieu tep ma bao loi")
-        bang(not t6.exists(), "da TU TAO config khong can thiet")
-
-        # (e) khong con duong nao GHI RA `inherit = "all"`.
-        #
-        # Chuoi do VAN CON trong tep — trong hang canonical `_THAN_KHOI_CU`, la thu
-        # dung de NHAN DIEN khoi cu ma go. Nhan dien khac han sinh ra. Nen ca nay bo
-        # hang canonical va cac dong chu thich ra TRUOC khi kiem, keo no do OAN va
-        # bi ai do "sua" bang cach xoa hang canonical — tuc pha chinh chot luot 9.
-        nguon = CODEX_ENV_POLICY.read_text(encoding="utf-8")
-        d_hang = nguon.index("_THAN_KHOI_CU = (")
-        c_hang = nguon.index("\n)\n", d_hang) + 3
-        con_lai = nguon[:d_hang] + nguon[c_hang:]
-        con_lai = "\n".join(d for d in con_lai.splitlines() if not d.lstrip().startswith("#"))
-        bang('inherit = "all"' not in con_lai.replace('`inherit = "all"`', ""),
-             "van con duong GHI inherit=all ngoai hang canonical")
-        # ...va hang canonical PHAI con, khong duoc "don" mat
-        bang('inherit = "all"' in m._THAN_KHOI_CU[0],
-             "hang canonical mat noi dung — se khong nhan ra khoi cu de go nua")
-
-        # (f) MARKER NAM GIUA DONG KHAC => TU CHOI. Day la PHAN CHUNG CUA REVIEWER,
-        # chep nguyen: ban v1 khop substring nen bien
-        #     x=1 # <MO>\ny=2\nz=3 # <DONG>   thanh   "x=1 #\nz=3\n"  (MAT y=2)
-        # va ket qua VAN parse duoc nhu TOML hop le, nen phep "parse lai" cua toi mu.
-        t7 = s / "c7.toml"
-        goc7 = f'x = 1 # {m.MOC_MO}\ny = 2\nz = 3 # {m.MOC_DONG}\n'
-        t7.write_text(goc7, encoding="utf-8")
-        bang(chay_go(t7) == m.MA_TU_CHOI, "marker giua dong khac ma khong TU CHOI")
-        bang(t7.read_text(encoding="utf-8") == goc7,
-             f"DA LAM MAT DU LIEU: {t7.read_text(encoding='utf-8')!r}")
-
-        # (g) marker nam TRONG CHUOI TOML nhieu dong => cung phai TU CHOI
-        t8 = s / "c8.toml"
-        goc8 = f'ghi_chu = """\n{m.MOC_MO}\nnoi dung cua nguoi dung\n{m.MOC_DONG}\n"""\n'
-        t8.write_text(goc8, encoding="utf-8")
-        bang(chay_go(t8) == m.MA_TU_CHOI, "marker trong chuoi TOML ma van go")
-        bang(t8.read_text(encoding="utf-8") == goc8, "da sua chuoi cua nguoi dung")
-
-        # (h) marker dung nhung PHAN GIUA khong phai khoi cu => TU CHOI
-        t9 = s / "c9.toml"
-        goc9 = (f"{m.MOC_MO}\n[shell_environment_policy]\ninherit = \"all\"\n"
-                f"model = \"o3\"\n{m.MOC_DONG}\n")
-        t9.write_text(goc9, encoding="utf-8")
-        bang(chay_go(t9) == m.MA_TU_CHOI, "phan giua co dong LA ma van go")
-        bang(t9.read_text(encoding="utf-8") == goc9, "da go mot khoi khong phai cua ta")
-
-        # (i) BAO TOAN dong trang cua nguoi dung — `strip(\"\\n\")` cu an ca hai dau
-        t10 = s / "c10.toml"
-        t10.write_text(f"\n\n{khoi}\n\n[a]\nb = 1\n\n\n", encoding="utf-8")
-        bang(chay_go(t10) == MA_OK, "go khoi hop le ma bao loi")
-        bang(t10.read_text(encoding="utf-8") == "\n\n[a]\nb = 1\n\n\n",
-             f"khong bao toan dong trang cua nguoi dung: "
-             f"{t10.read_text(encoding='utf-8')!r}")
-
-        # (j) GHI NGUYEN TU: ghi do dang roi nem loi => tep goc CON NGUYEN
-        t11 = s / "c11.toml"
-        goc11 = khoi + "\n\n" + duoi
-        t11.write_text(goc11, encoding="utf-8")
-        that_bai = []
-
-        # Ghim vao `os.fdopen` — dung cua ma `ghi_nguyen_tu` di qua sau khi doi sang
-        # `mkstemp`. Ghim nham cua thi fixture "xanh" ma chang do gi (da dinh mot lan
-        # o luot nay: fixture cu ghim `open`, doi duong ghi la no im lang khong chay).
-        goc_fdopen = m.os.fdopen
-
-        class GhiDo:
-            def __init__(self, f):
-                self.f = f
-
-            def __enter__(self):
-                return self
-
-            def __exit__(self, *a):
-                self.f.close()
-                return False
-
-            def write(self, s):
-                self.f.write(s[:5])          # ghi DO DANG
-                self.f.flush()
-                that_bai.append(1)
-                raise OSError("dia day (gia lap)")
-
-            def flush(self):
-                self.f.flush()
-
-            def fileno(self):
-                return self.f.fileno()
-
-        m.os.fdopen = lambda fd, *a, **k: GhiDo(goc_fdopen(fd, *a, **k))
-        try:
-            ma = chay_go(t11)
-        finally:
-            m.os.fdopen = goc_fdopen
-        # Kiem TOAN VEN TRUOC: neu duong ghi bi doi (vd quay ve `write_text`) thi day
-        # la khang dinh noi dung dung van de, chu khong phai "fixture hong".
-        bang(t11.read_text(encoding="utf-8") == goc11,
-             f"ghi KHONG NGUYEN TU: tep goc da bi doi trong khi bao 'tu choi': "
-             f"{t11.read_text(encoding='utf-8')[:60]!r}")
-        bang(that_bai, "fixture hong: writer gia khong he duoc goi")
-        bang(ma == m.MA_TU_CHOI, f"ghi hong ma khong TU CHOI, duoc {ma}")
-        bang(not [p for p in s.iterdir() if "tra-luat-" in p.name and p.suffix == ".tam"],
-             "de lai tep tam sau khi ghi hong")
-
-        # (k) BA PHAN CHUNG CUA REVIEWER (luot 9): kiem tung dong khong thay CAU TRUC.
-        # Ca ba deu la khoi NGUOI DUNG DA SUA, ban truoc xoa het voi ly do
-        # "da go khoi cua ta". Nay so NGUYEN KHOI nen phai tu choi ca ba.
-        for ten, giua in (
-            ("gia_tri_khac", '[shell_environment_policy]\ninherit = "core"'),
-            ("chi_mot_chu_thich", '# ghi chu cua nguoi dung'),
-            ("dao_thu_tu", 'inherit = "all"\n[shell_environment_policy]'),
+        # (f) KHOI DA BI SUA / marker hong => KHONG PHAN LOAI, dat co, khong dung tep
+        for ten, noi in (
+            ("gia_tri_khac", m.MOC_MO + b'\n[shell_environment_policy]\ninherit = "core"\n' + m.MOC_DONG),
+            ("dao_thu_tu", m.MOC_MO + b'\ninherit = "all"\n[shell_environment_policy]\n' + m.MOC_DONG),
+            ("marker_giua_dong", b"x = 1 # " + m.MOC_MO + b"\ny = 2\nz = 3 # " + m.MOC_DONG),
+            ("chi_mot_dau", m.MOC_MO + b"\n[shell_environment_policy]\n"),
+            ("chong_khoi", khoi + b"\n" + khoi),
+            ("trong_chuoi_toml", b'ghi_chu = """\n' + m.MOC_MO + b"\nnoi dung\n" + m.MOC_DONG + b'\n"""\n'),
         ):
             t = s / f"{ten}.toml"
-            g = f"{m.MOC_MO}\n{giua}\n{m.MOC_DONG}\n"
-            t.write_text(g, encoding="utf-8")
-            bang(chay_go(t) == m.MA_TU_CHOI, f"{ten}: khoi DA BI SUA ma van go")
-            bang(t.read_text(encoding="utf-8") == g, f"{ten}: da XOA du lieu nguoi dung")
+            t.write_bytes(noi)
+            bang(chay(t, co, go=True) == m.MA_CON_KHOI, f"{ten}: khong phan loai duoc ma van lam")
+            bang(t.read_bytes() == noi, f"{ten}: DA SUA config")
+            bang(not (s / f"{ten}.toml{m.DUOI_DA_GO}").exists(),
+                 f"{ten}: da dung ban da go tu mot khoi KHONG phai cua ta")
 
-        # (l) SYMLINK cua TEN TAM: ban truoc dat ten tam DOAN DUOC + open(...,"w"),
-        # nen tro ten do toi mot tep khac la GHI DE tep do — hong TRUOC os.replace,
-        # pha dung hop dong viet o dong ngay tren. Nay mkstemp => ten ngau nhien,
-        # O_EXCL => da ton tai thi tao THAT BAI thay vi ghi xuyen qua.
-        t12 = s / "c12.toml"
-        t12.write_text(khoi + "\n\n" + duoi, encoding="utf-8")
-        nan_nhan = s / "nan_nhan.txt"
-        nan_nhan.write_text("DUNG DUNG VAO", encoding="utf-8")
-        (s / f"c12.toml.tra-luat-tam-{os.getpid()}").symlink_to(nan_nhan)
-        bang(chay_go(t12) == MA_OK, "go khoi hop le ma bao loi")
-        bang(nan_nhan.read_text(encoding="utf-8") == "DUNG DUNG VAO",
-             f"DA GHI DE tep ngoai dich qua symlink: {nan_nhan.read_text(encoding='utf-8')!r}")
+        # (g) SACH => rc 0 va co chan TU HET (co khong tu het la chot do thuong truc)
+        t4 = s / "c4.toml"
+        t4.write_bytes(duoi)
+        bang(chay(t4, co) == MA_OK, "config sach ma bao dong")
+        bang(not co.exists(), "da sach ma co chan con nguyen")
+        bang(t4.read_bytes() == duoi, "config sach ma van bi dung toi")
 
-        # (m) config.toml CHINH NO la symlink => TU CHOI. `os.replace` thay CHINH
-        # symlink chu khong cap nhat dich, tuc pha cach bo tri dotfiles cua nguoi dung.
-        that = s / "that.toml"
-        that.write_text(khoi + "\n\n" + duoi, encoding="utf-8")
-        lien_ket = s / "lien_ket.toml"
-        lien_ket.symlink_to(that)
-        bang(chay_go(lien_ket) == m.MA_TU_CHOI, "config la symlink ma van ghi de")
-        bang(that.read_text(encoding="utf-8") == khoi + "\n\n" + duoi,
-             "da sua qua symlink du dang tu choi")
-        bang(lien_ket.is_symlink(), "da BIEN symlink cua nguoi dung thanh tep thuong")
+        # (h) khong co tep => khong tu tao
+        t5 = s / "khong-co.toml"
+        bang(chay(t5, co, go=True) == MA_OK, "thieu tep ma bao loi")
+        bang(not t5.exists(), "da TU TAO config khong can thiet")
 
-        # (n) GIU NGUYEN quyen tep goc — ban truoc ep 0600 cho MOI tep, tuc doi
-        # metadata sau lung nguoi dung ("that chat len").
-        t13 = s / "c13.toml"
-        t13.write_text(khoi + "\n\n" + duoi, encoding="utf-8")
-        os.chmod(t13, 0o644)
-        bang(chay_go(t13) == MA_OK, "go khoi hop le ma bao loi")
-        bang(oct(t13.stat().st_mode & 0o777) == "0o644",
-             f"da doi quyen tep cua nguoi dung: {oct(t13.stat().st_mode & 0o777)}")
+        # (i) KHONG con duong nao GHI VAO config: quet AST, khong quet chuoi.
+        # Luot 10 ha dung phep quet chuoi cu: no chi la lexical. Nay hoi CAY CU PHAP —
+        # trong ca tep khong duoc con loi goi ghi nao nham vao `tep` (ban goc).
+        # Hoi CHINH XAC: co loi goi ghi nao NHAM VAO `tep` (ban goc) khong. Quet mu ca
+        # tep se do oan — `co_chan.write_text` la ghi CO CHAN CUA TA, con
+        # `.replace(b"\\r\\n", ...)` la phuong thuc cua bytes, khong dinh gi toi tep.
+        cay = ast.parse(CODEX_ENV_POLICY.read_text(encoding="utf-8"))
+        ghi = {"write_text", "write_bytes", "open", "unlink", "touch", "chmod", "rename"}
+        thay = {"replace", "rename", "remove", "unlink", "truncate", "chmod"}
+        pham = []
+        for nut in ast.walk(cay):
+            if not isinstance(nut, ast.Call) or not isinstance(nut.func, ast.Attribute):
+                continue
+            nhan = nut.func.value
+            # (1) tep.write_*(...) / tep.open(...) ...
+            if isinstance(nhan, ast.Name) and nhan.id == "tep" and nut.func.attr in ghi:
+                pham.append(f"tep.{nut.func.attr}@dong{nut.lineno}")
+            # (2) os.replace(..., tep) / os.chmod(tep, ...) ...
+            if (isinstance(nhan, ast.Name) and nhan.id == "os" and nut.func.attr in thay
+                    and any(isinstance(x, ast.Name) and x.id == "tep" for x in nut.args)):
+                pham.append(f"os.{nut.func.attr}(tep)@dong{nut.lineno}")
+        bang(not pham, f"con loi goi GHI vao CONFIG GOC trong tep chinh sach: {pham}")
+        # ...va chot nay phai co RANG: dung chinh no soi mot doan gia co loi ghi.
+        gia = ast.parse('tep.write_bytes(x)\nos.replace(tam, tep)\n')
+        thay_duoc = [n for n in ast.walk(gia) if isinstance(n, ast.Call)]
+        bang(len(thay_duoc) == 2, "fixture chot AST hong")
 
 
 @ca

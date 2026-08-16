@@ -223,9 +223,9 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   đã được ghi ra `~/.codex/auth.json` TRƯỚC khi policy chạy, nên ta đổi MỘT credential lấy
   CẢ MÔI TRƯỜNG mà không mua được gì. `exclude` theo TÊN là bằng chứng về *cái ta đã nghĩ
   tới*, không phải bằng chứng an toàn. Đường đúng: `codex login --device-auth`.
-  Hook nay chỉ GỠ khối cũ, và gỡ theo luật "gỡ đúng khối có marker, hoặc TỪ CHỐI kèm chẩn
-  đoán" — bản trước luôn prepend nên làm HỎNG config người dùng đã có bảng cùng tên không
-  marker (hai bảng trùng ⇒ codex không parse được). Chi tiết `docs/GOI_AGENT_DA_NEN.md`.
+  Hook nay chỉ **PHÁT HIỆN** (đọc, đặt cờ chặn, in cách chữa) — KHÔNG ghi vào config.
+  Gỡ là `codex_env_policy.py --go`, dựng bản đã gỡ ra tệp **bên cạnh**; người dùng tự
+  `diff` rồi `mv`. Chi tiết `docs/GOI_AGENT_DA_NEN.md`.
 - `rg` là công cụ **BẮT BUỘC** (từ 15-08-2026). Thiếu nó lệnh tìm của agent gãy giữa
   chừng chứ KHÔNG tự lùi về `grep` — phiên vẫn "chạy" nhưng tra cứu mù. Hook phiên thử
   apt-get (có/không sudo, có/không `update`) rồi cargo, và đòi bằng chứng `rg --version`.
@@ -287,6 +287,16 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   ĐÍCH. Không sửa được tệp của họ thì chặn ở PHÍA TA (cờ riêng `~/.codex/tra-luat-CHAN-CODEX`,
   `_do_codex` đọc cờ và hạ nhãn TRƯỚC mọi phép đo khác) — và cờ phải TỰ HẾT khi sạch,
   kẻo lại thành chốt đỏ thường trực.
+- **BẢY phát hiện cùng MỘT đường ⇒ sai ở QUYẾT ĐỊNH GỐC, không ở các bản vá.** Việc tự
+  động ghi lại `~/.codex/config.toml` ăn bốn lượt cross-review liên tiếp: bảng TOML trùng
+  tên · khớp substring mất dữ liệu · `write_text` không nguyên tử · kiểm từng dòng vẫn mất
+  dữ liệu · symlink tên tạm ghi đè tệp khác · CRLF đổi kết thúc dòng toàn tệp · lost-update.
+  Mỗi lượt vá bảo toàn được thứ ta NGHĨ TỚI và làm hỏng thứ ta KHÔNG NGHĨ TỚI. Vá tiếp lúc
+  nào cũng *có vẻ* đúng vì lần nào cũng có lỗi thật — đó chính là cách người ta ở lại quá
+  lâu trong một cái hố. **Đếm hình dạng lỗi, đừng chỉ đếm lỗi**: cùng một hình dạng lặp ba
+  lần trở lên thì câu hỏi đúng là "có nên làm việc này không", không phải "vá thế nào".
+  Chữa: công cụ KHÔNG ghi vào tệp của người dùng nữa — phát hiện + dựng bản đã gỡ ra tệp
+  BÊN CẠNH, người dùng tự `mv`. Cả lớp rủi ro chết theo KIẾN TRÚC, không theo bản vá.
 - **PHẠM VI TUYÊN BỐ phải bằng phạm vi ĐO ĐƯỢC.** Tôi đặt cờ chặn codex, gọi nó là
   "CODEX BI CHAN", mà chỉ `_do_codex` đọc cờ — trong khi chính hook gọi `codex login
   status` TRƯỚC đó, `_do_codex_song` (cửa thật sự chạy `codex exec`) đi thẳng qua, và

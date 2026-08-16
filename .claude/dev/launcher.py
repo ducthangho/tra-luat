@@ -1933,9 +1933,10 @@ def _co_chan_codex() -> str | None:
     co = Path(os.path.expanduser("~/.codex")) / CO_CHAN_CODEX
     if not co.exists():
         return None
-    return (f"BI CHAN: {co} ton tai — khoi shell_environment_policy cu chua go duoc, "
-            f"`inherit=all` co the con hieu luc. Sua tay roi chay "
-            f"`python3 .claude/dev/codex_env_policy.py`")
+    return (f"BI CHAN: {co} ton tai — config codex con khoi "
+            f"shell_environment_policy cu (hoac khong phan loai duoc), "
+            f"`inherit=all` co the con hieu luc. Chua: "
+            f"`python3 .claude/dev/codex_env_policy.py --go` roi TU thay tep")
 
 
 def _do_codex_song(han_giay: int = 90) -> tuple[bool, str]:

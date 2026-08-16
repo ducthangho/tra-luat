@@ -1,6 +1,6 @@
 # Postmortem — launcher, Codex, GitHub và toolchain Windows ngày 15-08-2026
 
-- **Trạng thái:** mã phòng ngừa đã triển khai trên nhánh; `rg` local đã phục hồi; còn chờ người dùng cấp lại Codex/GitHub credential.
+- **Trạng thái:** mã phòng ngừa đã triển khai trên nhánh; `rg`, Claude và GitHub connector dùng được; còn chờ người dùng cấp lại credential cho Codex CLI và GitHub CLI.
 - **Phạm vi:** launcher/doctor, Claude Code SessionStart, Codex CLI, GitHub CLI, `rg`, Bash.
 - **Không chứa bí mật:** chỉ ghi sự hiện diện/nguồn và mã kết quả; không ghi giá trị token.
 
@@ -12,7 +12,7 @@ Các phép đo trực tiếp ngày 15-08-2026 cho thấy:
 |---|---|---|
 | Claude | `claude --version` và `claude auth status` thoát 0 | dùng được |
 | Codex | `codex --version` xanh; `codex login status` trả `Not logged in`/rc khác 0 | có binary nhưng không gọi phiên được |
-| GitHub | `gh --version` xanh; `gh auth status` báo credential mặc định không hợp lệ | có binary nhưng không gọi GitHub được |
+| GitHub CLI | `gh --version` xanh; `gh auth status` báo credential mặc định không hợp lệ | có binary nhưng không gọi GitHub qua `gh` được; không suy rộng sang connector |
 | biến GitHub | `GITHUB_PAT` có; `GH_TOKEN`/`GITHUB_TOKEN` không có; ánh xạ PAT sang `GH_TOKEN` vẫn auth đỏ | credential hiện có đã sai/hết hạn, không chỉ sai tên biến |
 | ripgrep | tên `rg` trỏ vào `...WindowsApps\OpenAI.Codex...\rg.exe`, CreateProcess trả WinError 5 | có path nhưng không thực thi được |
 | Bash | tên `bash` trỏ vào `C:\Windows\System32\bash.exe`, trả `E_ACCESSDENIED`; Git Bash tốt có ở Program Files | shell-form chọn nhầm shim |
@@ -21,6 +21,17 @@ Các phép đo trực tiếp ngày 15-08-2026 cho thấy:
 | cài `rg` | lệnh gợi ý `winget` thất bại vì máy không có `winget`; `choco install ripgrep` thành công | chỉ ghi một package manager là hướng dẫn không đủ |
 
 `doctor` cũ còn probe tuần tự với timeout riêng cho từng lệnh. Một shim chậm có thể làm lệnh trông như treo hàng chục giây dù cuối cùng có output.
+
+## Tái kiểm tra ngày 16-08-2026
+
+- Mốc bắt đầu tái kiểm tra là HEAD `824517859a1a0974547ff79354df85c1efe9a42e` với launcher `1.1.0`; bản vá auth-envelope trong working tree nâng phiên bản lên `1.1.1`. Trong lúc kiểm tra, `origin/master` tiến thêm hai commit (`672522c`, merge `d5b7bcc`), nên nhánh `codex/gate-lifecycle` hiện diverged: ahead 2, behind 2. Các thay đổi lần này chưa commit; chưa tự merge/rebase vì hai phía cùng chạm launcher/hook.
+- `python -B .claude/dev/launcher.py doctor --json` hoàn tất sau khoảng 11 giây, trả rc=12; môi trường được ghi nhận là đã đọc trước resolve/probe. Binary `git`, `python`, `claude`, `codex`, `gh`, `rg`, `bash`, `npm`, `node` đều chạy được. Chỉ auth Codex CLI và `gh` đỏ.
+- `claude auth status` thoát 0. Một lời gọi `claude -p` tối giản ở safe mode, tắt tools, đã thật sự nhận phản hồi mô hình và thoát 0; vì vậy Claude không chỉ “có binary” hoặc “có auth trên đĩa”.
+- Codex Desktop đang dùng được, nhưng đây không phải bằng chứng cho Codex CLI. `codex login status` vẫn thoát 1; không có `CODEX_AUTH_JSON` hay `OPENAI_API_KEY` trong môi trường đã chụp.
+- GitHub connector xác thực được tài khoản `ducthangho` và đọc repo private `ducthangho/tra-luat` với quyền admin/push. Đường connector vì vậy dùng được. Riêng `gh auth status --hostname github.com` vẫn thoát 1; doctor mới đã thử cả `credential_store` lẫn `GITHUB_PAT->GH_TOKEN`, và cả hai đều đỏ.
+- `rg 15.2.0` chạy từ `D:\\chocolatey\\bin\\rg.exe`; Git Bash chạy từ `C:\\Program Files\\Git\\bin\\bash.exe`. Resolver không còn dừng ở shim WindowsApps/WSL hỏng đứng trước PATH.
+
+Kết luận tái kiểm tra: resolver executable không regression, nhưng tìm thấy một false-negative trong auth envelope: ánh xạ mù `GITHUB_PAT` cũ có thể che credential store vừa được `gh auth login` sửa. Bản vá thêm hai phản chứng: store phải được thử trước PAT legacy, và container không có store vẫn phải fallback sang PAT. Hai mục đỏ thực tế còn lại là nợ xác thực CLI, không phải nợ cài đặt. GitHub vẫn có connector hoạt động, nhưng bất biến “không một đường độc quyền” yêu cầu sửa cả `gh` thay vì dùng connector để che gate đỏ.
 
 ## Nguyên nhân gốc
 
@@ -41,7 +52,7 @@ Các phép đo trực tiếp ngày 15-08-2026 cho thấy:
 - Resolver duyệt mọi mục PATH và fallback nền, tiếp tục sau `Access denied`.
 - SessionStart chuyển sang exec-form gọi bridge Python; bridge đọc env trước, probe Bash rồi gọi Git Bash bằng đường dẫn thật.
 - Khóa PID và ảnh cây Windows chuyển sang Win32 API trực tiếp (`GetProcessTimes` + Toolhelp32), không còn gọi PowerShell/WMI.
-- Hook cài thêm `gh`, ánh xạ kín `GITHUB_PAT` sang `GH_TOKEN`, và probe auth cuối phiên.
+- Hook cài thêm `gh`; thử credential store trước rồi mới ánh xạ kín `GITHUB_PAT` sang `GH_TOKEN` cho đúng một probe fallback; không export PAT cũ để che store.
 - Hướng dẫn `rg` Windows có cả Chocolatey và WinGet. Máy này đã cài `ripgrep 15.2.0` bằng Chocolatey; tên trần `rg` hiện chạy được.
 
 ## Bất biến phải giữ

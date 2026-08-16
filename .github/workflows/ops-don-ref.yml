@@ -113,19 +113,42 @@ jobs:
           SO=0
           for r in "${DS[@]}"; do
             r="${r#"${r%%[![:space:]]*}"}"; r="${r%"${r##*[![:space:]]}"}"   # trim, KHONG dung xargs (xargs giai ma dau nhay)
-            [ -z "$r" ] && continue
+            # PHẦN TỬ RỖNG bị CHẶN, không bị bỏ qua im lặng. Bản đầu bỏ qua, và đó là
+            # finding P1: chốt đếm phần tử KHÔNG rỗng còn bước làm ghép theo chỉ số của
+            # mảng THÔ, nên `ref=a,,b` + `sha=s1,,s3` cho `a->s1` rồi `b->` rỗng — tag
+            # thứ nhất đã tạo xong mới hỏng ở cái thứ hai, để lại trạng thái làm dở.
+            [ -z "$r" ] && { echo "DỪNG: danh sách ref có phần tử RỖNG (dấu phẩy thừa?)"; exit 2; }
             SO=$((SO+1))
             case "$r" in
               refs/*) echo "DỪNG: '$r' — đưa TÊN ref, đừng đưa refs/heads hay refs/tags"; exit 2 ;;
-              *' '*|*'*'*|*'?'*|*'..'*|*'~'*|*'^'*|*':'*|*'\'*)
-                echo "DỪNG: '$r' có ký tự không cho phép (khoảng trắng, ký tự đại diện, hay ký tự git đặc biệt)"; exit 2 ;;
+              *' '*|*'*'*|*'?'*|*'..'*|*'~'*|*'^'*|*':'*|*'\'*|*//*)
+                echo "DỪNG: '$r' có ký tự không cho phép (khoảng trắng, ký tự đại diện, ký tự git đặc biệt, hay // )"; exit 2 ;;
+            esac
+            # CHỈ ASCII. `оps/x` với chữ `о` Cyrillic KHÔNG khớp `ops/*` nên lọt sạch
+            # danh sách bảo vệ trong khi mắt người đọc ra `ops/x` — finding P2 của
+            # cross-review codex, đúng. Chặn ở đây rẻ hơn mọi cách chuẩn hoá khác.
+            LC_ALL=C; case "$r" in *[![:alnum:]/._-]*)
+              echo "DỪNG: '$r' có ký tự ngoài [A-Za-z0-9/._-] — tên ref ở kho này chỉ dùng bảng ấy, và ký tự nhìn giống chữ ASCII là đường lách danh sách bảo vệ"; exit 2 ;;
             esac
             if [ "$HANH_DONG" != tao-tag ]; then
               [ "$r" = "$MAC_DINH" ] && { echo "DỪNG: '$r' là nhánh MẶC ĐỊNH"; exit 2; }
-              case "$r" in
+              # So KHÔNG phân biệt hoa/thường: `Ops/secret` từng lọt. Git phân biệt hoa
+              # thường nên `Ops/x` là nhánh KHÁC `ops/x` — nhưng người đọc log thì không
+              # phân biệt, và một workflow đặc quyền không nên dựa vào mắt người.
+              rl="$(printf '%s' "$r" | tr '[:upper:]' '[:lower:]')"
+              case "$rl" in
                 luu-tru/*) echo "DỪNG: '$r' nằm dưới luu-tru/** — đó là ref lưu trữ, xoá nó là làm published_* trong ops/reviews/*.receipt.yaml thành SHA không tra được"; exit 2 ;;
                 ops/*|claude/*|codex/*|agent/*|mission/*|dispatcher/*)
                   echo "DỪNG: '$r' thuộc vùng làm việc được bảo vệ (ops/ claude/ codex/ agent/ mission/ dispatcher/). Nhánh ở đây thường mang hồ sơ chưa vào master — xoá phải do người, không qua workflow."; exit 2 ;;
+              esac
+            else
+              # TẠO TAG cũng chịu danh sách bảo vệ. Bản đầu miễn trừ hẳn — reviewer hỏi
+              # đúng: một tag tên `ops/...` không xoá được nhánh nào, nhưng nó dựng một
+              # cái tên gây hiểu nhầm ngay trong vùng đang được bảo vệ. Cấm cho nhất quán.
+              rl="$(printf '%s' "$r" | tr '[:upper:]' '[:lower:]')"
+              case "$rl" in
+                luu-tru/*|ops/*|claude/*|codex/*|agent/*|mission/*|dispatcher/*)
+                  echo "DỪNG: tag '$r' mang tên vùng được bảo vệ. Đặt tên khác."; exit 2 ;;
               esac
             fi
           done
@@ -133,7 +156,9 @@ jobs:
 
           if [ "$HANH_DONG" = tao-tag ]; then
             IFS=',' read -ra DSS <<< "${SHA:-}"
-            SOS=0; for s in "${DSS[@]}"; do s="${s//[[:space:]]/}"; [ -z "$s" ] && continue; SOS=$((SOS+1))
+            SOS=0; for s in "${DSS[@]}"; do s="${s//[[:space:]]/}"
+              [ -z "$s" ] && { echo "DỪNG: danh sách sha có phần tử RỖNG"; exit 2; }
+              SOS=$((SOS+1))
               echo "$s" | grep -Eq '^[0-9a-f]{40}$' || { echo "DỪNG: '$s' không phải SHA40 chữ thường"; exit 2; }
             done
             [ "$SOS" = "$SO" ] || { echo "DỪNG: $SO tag nhưng $SOS sha — hai danh sách phải bằng nhau"; exit 2; }
@@ -151,19 +176,44 @@ jobs:
           set -euo pipefail
           LOAI=heads; [ "$HANH_DONG" != xoa-nhanh ] && LOAI=tags
 
-          IFS=',' read -ra DS <<< "$REF"
-          IFS=',' read -ra DSS <<< "${SHA:-}"
+          # NÉN cả hai danh sách trước khi ghép — không ghép theo chỉ số của mảng thô.
+          # Chốt đã chặn phần tử rỗng, nhưng hai lớp cho một finding P1 là đáng: lớp
+          # kia sửa được, lớp này thì không phụ thuộc vào nó.
+          DS=(); DSS=()
+          IFS=',' read -ra _R <<< "$REF"
+          for x in "${_R[@]}"; do
+            x="${x#"${x%%[![:space:]]*}"}"; x="${x%"${x##*[![:space:]]}"}"
+            [ -n "$x" ] && DS+=("$x")
+          done
+          IFS=',' read -ra _S <<< "${SHA:-}"
+          for x in "${_S[@]}"; do x="${x//[[:space:]]/}"; [ -n "$x" ] && DSS+=("$x"); done
+
+          if [ "$HANH_DONG" = tao-tag ] && [ "${#DS[@]}" != "${#DSS[@]}" ]; then
+            echo "ĐỎ: sau khi nén, ${#DS[@]} tag nhưng ${#DSS[@]} sha"; exit 1
+          fi
+
+          # ĐỌC trạng thái ref. In: `co`, `khong` (đúng HTTP 404), hoặc `khong-do-duoc`.
+          # VÌ SAO PHẢI TÁCH BA: bản đầu coi MỌI lỗi của `gh api` là "ref không còn",
+          # nên một lỗi mạng, 500 hay hết quyền ngay sau lệnh xoá sẽ báo XANH cho một
+          # lượt chưa chắc đã xoá được. Finding P1 của cross-review codex, đúng, và
+          # đúng lớp doctrine của kho: KHÔNG ĐO ĐƯỢC khác KHÔNG CÓ.
+          doc_ref() {
+            local ten="$1" out rc
+            out="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/$LOAI/$ten" 2>&1)"; rc=$?
+            if [ "$rc" = 0 ]; then echo co; return; fi
+            case "$out" in *"HTTP 404"*|*"Not Found"*) echo khong ;; *) echo "khong-do-duoc: $out" ;; esac
+          }
+
           i=-1
           for r in "${DS[@]}"; do
-            r="${r#"${r%%[![:space:]]*}"}"; r="${r%"${r##*[![:space:]]}"}"; [ -z "$r" ] && continue
             i=$((i+1))
 
             if [ "$HANH_DONG" = tao-tag ]; then
-              s="${DSS[$i]//[[:space:]]/}"
+              s="${DSS[$i]}"
               if [ "$CHI_THU" = true ]; then echo "[thử khô] sẽ TẠO tag $r -> $s"; continue; fi
               gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
                 -f ref="refs/tags/$r" -f sha="$s" >/dev/null
-              # KHÔNG tin rc: đọc lại từ API và đòi đúng SHA.
+              # KHÔNG tin rc: đọc lại từ API và đòi ĐÚNG SHA.
               that=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$r" --jq .object.sha)
               [ "$that" = "$s" ] || { echo "ĐỎ: tag $r trỏ $that chứ không phải $s"; exit 1; }
               echo "đã tạo và ĐO LẠI: $r -> $that"
@@ -171,13 +221,19 @@ jobs:
               if [ "$CHI_THU" = true ]; then echo "[thử khô] sẽ XOÁ $LOAI/$r"; continue; fi
               # Đòi ref CÓ THẬT trước khi xoá: "xoá thành công" một thứ chưa từng tồn
               # tại là câu nói dối dễ chịu nhất trong nhóm này.
-              gh api "repos/$GITHUB_REPOSITORY/git/ref/$LOAI/$r" >/dev/null \
-                || { echo "ĐỎ: $LOAI/$r KHÔNG tồn tại — không xoá được thứ không có"; exit 1; }
+              truoc="$(doc_ref "$r")"
+              case "$truoc" in
+                co) : ;;
+                khong) echo "ĐỎ: $LOAI/$r KHÔNG tồn tại — không xoá được thứ không có"; exit 1 ;;
+                *) echo "ĐỎ: KHÔNG ĐO ĐƯỢC $LOAI/$r trước khi xoá — dừng, không xoá mù. $truoc"; exit 1 ;;
+              esac
               gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/$LOAI/$r"
-              if gh api "repos/$GITHUB_REPOSITORY/git/ref/$LOAI/$r" >/dev/null 2>&1; then
-                echo "ĐỎ: $LOAI/$r VẪN CÒN sau khi gọi xoá"; exit 1
-              fi
-              echo "đã xoá và ĐO LẠI: $LOAI/$r không còn"
+              sau="$(doc_ref "$r")"
+              case "$sau" in
+                khong) echo "đã xoá và ĐO LẠI: $LOAI/$r không còn" ;;
+                co) echo "ĐỎ: $LOAI/$r VẪN CÒN sau khi gọi xoá"; exit 1 ;;
+                *) echo "ĐỎ: gọi xoá xong mà KHÔNG ĐO ĐƯỢC $LOAI/$r — coi như CHƯA xoá. $sau"; exit 1 ;;
+              esac
             fi
           done
 

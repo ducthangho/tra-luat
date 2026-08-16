@@ -1,0 +1,109 @@
+# Lease REVIEWER lượt 10 — nhánh HẠ TẦNG MÔI TRƯỜNG ops/moi-truong-ba-p1.
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. NHỚ ĐÓNG NHÁY mọi giá trị chứa '#'.
+# packet_issue 55 NHƯNG la_viec_cua_packet false — rẽ từ master, KHÔNG tiêu attempt.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: null
+la_viec_cua_packet: false
+
+role: reviewer
+provider: codex
+assurance_target: cross_approved
+access: read-only
+write_set: []
+branch_ownership: none
+
+lease_id: moi-truong-review-10-codex-20260816
+review_round: 10
+
+branch: ops/moi-truong-ba-p1
+reviewed_sha_required: a3fd3ff705bf4831495b1988de7655b32dc68197
+base_sha: 1df800be15580d7432a1200900dd04ed9a7b997c
+base_note: 'base là head lượt 9 đã soi. MỘT commit; delta ĐÚNG 5 tệp.'
+master_sha_at_grant: d5b7bccd679480f2eb9e7f7d84c518bade7f7df1
+target_pull_request: null
+
+prompt_path: ops/prompts/moi-truong-review-10-codex-20260816.md
+prompt_sha256_required: ebb2dd21bbbf64c831bc51cac5576f02d58fc2905a6ecf828cc729b86154b405
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-16 (vá cả năm đi, rồi cấp lease review)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc người có thẩm quyền
+
+leased_at_utc: '2026-08-16T08:00:00Z'
+lease_expires_at_utc: '2026-08-17T12:00:00Z'
+run_minutes: 1500
+heartbeat_required_minutes: 30
+
+prior_review: moi-truong-review-9-codex-20260816
+prior_review_verdict: changes_requested
+prior_review_verdict_sha256: a7db0fd4ead68094b14bcac31ad03201da509c2d755f953e3ec875c596bf2812
+
+# HAI LỖ ĐIỀU PHỐI TỰ MỞ KHI ĐANG VÁ LỖ KHÁC — ghi vào hồ sơ.
+lo_tu_mo_o_luot_truoc:
+  - ten: 'cờ chặn chỉ chặn MỘT cửa'
+    chi_tiet: >-
+      đặt tên "CODEX BI CHAN" trong khi hook gọi `codex login status` TRƯỚC đó,
+      `_do_codex_song` không đọc cờ, và `codex` gõ tay thì không gì đọc.
+  - ten: 'writer "nguyên tử" ghi đè xuyên symlink'
+    chi_tiet: >-
+      tên tạm đoán được + open(...,"w") không O_EXCL ⇒ hỏng TRƯỚC os.replace, phá đúng
+      hợp đồng viết ở dòng ngay trên.
+
+viec_so_mot:
+  ten: 't72 chập chờn hay phụ thuộc thứ tự'
+  cong_cu: '--lap-ca t72 --lan 40 --nhat-ky <tệp>'
+  ba_ket_cuc: >-
+    40/40 qua ⇒ t72 MỘT MÌNH không chết, cái chết cần NGỮ CẢNH · chết ở lần k ⇒ tự nó
+    chập chờn, k là dữ liệu · chết ngay lần 1 ⇒ khác hẳn lượt 8, phải đo lại cả hai.
+  do_tai_cho: '40/40 qua — KHÔNG tái hiện trên nền điều phối. ĐỪNG TIN, nền reviewer mới là nền lỗi.'
+  luu_y: 'KHÔNG đoán nguyên nhân'
+
+trong_tam_review:
+  - id: fail-close-that
+    hoi: >-
+      còn cửa nào của kho gọi codex mà không qua chốt? phạm vi khai (KHÔNG chặn được
+      `codex` gõ tay) đã đúng chưa hay còn chỗ nói quá? CODEX_BI_CHAN có đường nào đáng
+      đặt mà không được đặt?
+  - id: so-nguyen-khoi
+    hoi: >-
+      chuẩn hoá có QUÁ TAY không? khối THẬT có bị từ chối OAN ở nền CRLF/BOM/kết thúc
+      dòng khác? cách t100(e) loại hằng canonical ra trước khi kiểm có tạo lỗ để nhét
+      lại đường ghi vào chính vùng bị loại?
+  - id: ghi-nguyen-tu-v2
+    hoi: >-
+      từ chối symlink có làm ai đó KHÔNG BAO GIỜ gỡ được (dotfiles bằng symlink)? giữ
+      nguyên quyền 0644 cạnh auth.json là ĐÚNG (tôn trọng) hay SAI (nên siết) — nói rõ
+      quan điểm, điều phối chọn "tôn trọng" và có thể chọn sai. mkstemp tạo 0600 rồi
+      chmod sang mode gốc — có khoảnh khắc lộ quyền rộng? đua giữa stat và replace?
+  - id: co-lap-va-lap-ca
+    hoi: 't101 phủ đủ chưa? --lap-ca khớp theo TIỀN TỐ nên hai ca cùng tiền tố thì từ chối — đúng chưa?'
+
+verified_by_coordinator:
+  suite: '102/102 (qua 101, bỏ qua 1)'
+  dot_bien: '58/58 đạt, KHÔNG mục nào SAI — hai lượt độc lập giống nhau'
+  dot_bien_moi: 'co_chan_codex_luon_tra_KHONG_BI_CHAN 1/1 · do_codex_song_bo_qua_co_chan 1/1'
+  eol: 'checked=310 violations=0'
+  doc_claims: 'strict ok=true flags=[]'
+  scope: 'ĐÚNG 5 tệp'
+  tren_fixture: '45->34 dòng, 1407->1010 byte, 10 [projects] giữ nguyên, lần hai no-op'
+  tren_ban_sao_config_that: '43->32 dòng, 11 [projects] giữ nguyên, inherit=0'
+  lap_t72_tai_cho: '40/40 qua — KHÔNG tái hiện'
+  phan_chung: '5 lượt trên BẢN SAO TẠM, đúng chiều cả 5'
+
+canh_bao_an_ninh:
+  khong_in_gia_tri: true
+  home_tam_bat_buoc: true
+  khong_dung_config_that: 'dùng .claude/dev/fixtures/config_codex_mau.toml + --tep <tệp tạm>'
+
+neo_sha_bat_bien_required: true
+chay_hai_lan_required: true
+approve_la_hop_le: >-
+  NĂM lượt liền changes_requested KHÔNG phải hạn ngạch. Và nếu reviewer cho rằng nhánh
+  này nên DỪNG thay vì vá tiếp thì nói thẳng — đó cũng là kết luận hợp lệ.
+duong_giao_verdict_da_do: 'REST bị proxy 403, gh không cài ⇒ ghi verdict ra tệp, điều phối đăng hộ'
+preconditions_measured_at_utc: '2026-08-16T08:00:00Z'

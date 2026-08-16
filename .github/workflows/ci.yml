@@ -97,6 +97,38 @@ jobs:
         run: python .githooks/eol_policy_test.py
       - name: pre-push selftest
         run: python .githooks/pre_push_test.py
+      # CỔNG ĐĂNG LEASE — cùng doctrine với hai bước ngay trên: guard không nối vào
+      # đường TỰ ĐỘNG thì guard chỉ là tài liệu (bài học r225).
+      #
+      # ĐÃ TRẢ GIÁ, 16-08-2026, và đây là ca thật chứ không phải giả định. PR #132
+      # thêm năm tệp `ops/reviews/*-verdict.md` mà KHÔNG thêm chúng vào bảng mục lục
+      # của `ops/reviews/README.md`. `t27` sinh ra để chặn đúng chuyện đó và nó ĐỎ
+      # ngay: `29/30`. Nhưng bộ này chỉ chạy ở `ops-publish-lease.yml`, mà workflow
+      # ấy CHỈ bắn trên nhánh `ops/**` — nên master đỏ ở một chốt mà cổng master
+      # KHÔNG đo. `ci.yml` xanh, PR merge trơn, và trạng thái đỏ nằm im cho tới khi
+      # một phiên khác tình cờ chạy tay mới lộ.
+      #
+      # Cùng họ với "cổng không nói dối, nó VẮNG MẶT": người merge đã kiểm cổng và
+      # kiểm đúng cái cổng có mặt — chỉ là cái cổng cần thì không ở đó.
+      #
+      # Vì sao đặt Ở ĐÂY chứ không để `ops-publish-lease.yml` lo: workflow ấy trả lời
+      # câu "lease này đăng được không", còn câu cần trả lời trước mỗi lần vào master
+      # là "cây này còn hợp lệ không". Hai câu khác nhau, và chỉ câu thứ hai mới chặn
+      # được một PR không đụng `ops/leases/**`.
+      #
+      # Chạy trên CẢ hai nền: bộ này gọi lệnh qua `sys.executable` nên thuần Python;
+      # `t19` (symlink) tự bỏ qua khi nền không cho tạo symlink. Đo 16-08: 3,4 giây,
+      # không đáng kể so với trần 25 phút của job.
+      # GHIM EXACT, không để spec trần. Cross-review PR "#134" (codex) nêu
+      # `unpinned-pyyaml-ci-dependency`: spec trần làm CÙNG MỘT SHA có thể xanh hôm nay
+      # và đỏ sau này mà cây không đổi — cùng lớp với tiền lệ `pypdf>=4.0` không có trần.
+      # Chọn exact chứ không phải `>=6.0,<7` vì job này đã ghim `python-version: "3.12"`
+      # ngay trên: ghim một nửa thì tính tất định cũng chỉ được một nửa.
+      # Nâng bản là việc CÓ CHỦ ĐÍCH — đổi số ở đây, đừng để PyPI đổi hộ.
+      - name: cài PyYAML (bộ cổng đăng lease cần)
+        run: python -m pip install --quiet PyYAML==6.0.3
+      - name: lease-publish selftest (cổng đăng lease)
+        run: python ops/lease_publish_test.py
       # `--all` soi TOÀN BỘ index, không chỉ tệp đang stage — đây là thứ duy nhất bắt được nợ
       # CRLF có sẵn (hook cũ so với HEAD nên mù hoàn toàn với nó).
       #

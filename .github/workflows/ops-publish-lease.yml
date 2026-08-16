@@ -76,8 +76,14 @@ jobs:
         with:
           fetch-depth: 0        # cần lịch sử để so `before`..`sha`
 
+      # GHIM EXACT, cùng số với `ci.yml`. Cross-review PR "#134" (codex) đo được lỗ spec
+      # trần có ở CẢ HAI workflow, không chỉ ở bản vá mới — nên sửa một chỗ là để lại
+      # đúng lỗ ấy ở chỗ NGUY HIỂM HƠN: đường này chạy với `contents: write` +
+      # `issues: write`, và bộ kiểm nó chạy là thứ DUY NHẤT đứng giữa một tệp YAML và một
+      # comment mang danh nghĩa kho. Một dependency trôi ở đây là trôi ngay dưới chân cổng.
+      # Hai chỗ phải cùng số; lệch nhau thì bên quên cập nhật chính là bên đẩy lọt.
       - name: cài PyYAML
-        run: python3 -m pip install --quiet pyyaml
+        run: python3 -m pip install --quiet PyYAML==6.0.3
 
       - name: neo bộ kiểm vào nhánh mặc định
         # Dựng một worktree RỜI của nhánh mặc định rồi chạy bộ kiểm TỪ ĐÓ. Head được

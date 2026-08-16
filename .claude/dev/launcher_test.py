@@ -1946,13 +1946,31 @@ def _co_lap_toan_cuc():
     `os.environ["X"] = …` thay vì gán cả đối tượng thì hoàn nguyên tham chiếu KHÔNG
     xoá được mục vừa thêm.
     """
-    cu = [(d, t, getattr(d, t)) for d, t in _TOAN_CUC_CAN_CO_LAP]
+    # `hasattr` TRƯỚC khi chụp — ba mục cuối bảng (`getpgid`, `setsid`, và trên vài
+    # bản cả `getpid`) là POSIX; trên Windows chúng KHÔNG TỒN TẠI.
+    #
+    # ĐÃ ĐO trên `windows-latest` (PR #128, sau khi gắn nhãn `windows`): bản trước gọi
+    # thẳng `getattr(d, t)` nên ném `AttributeError: module 'os' has no attribute
+    # 'getpgid'` NGAY Ở ĐẦU MỌI CA — **0/103**, không ca nào chạy. Nghĩa là bộ test này
+    # chưa từng chạy trên Windows kể từ lúc có chốt cô lập, và không ai biết vì job
+    # Windows mặc định skip.
+    #
+    # Cùng họ với `os.O_NOFOLLOW` mà bot review vừa bắt: đụng thuộc tính CHỈ CÓ TRÊN
+    # MỘT NỀN mà không hỏi trước. Hai lần trong một ngày ⇒ ghi thành luật, đừng vá lẻ.
+    cu = [(d, t, getattr(d, t)) for d, t in _TOAN_CUC_CAN_CO_LAP if hasattr(d, t)]
+    thieu = [t for d, t in _TOAN_CUC_CAN_CO_LAP if not hasattr(d, t)]
     noi_dung_env = dict(os.environ)
     try:
         yield
     finally:
         for d, t, v in cu:
             setattr(d, t, v)
+        # Ca test có thể GẮN THÊM một thuộc tính vốn không có trên nền này (vd `t90`
+        # gán `os.setsid` giả trên Windows). Không gỡ thì nó rò sang ca sau, và rò
+        # theo kiểu tệ nhất: nền tự nhận có một API mà nó không có.
+        for d, t in _TOAN_CUC_CAN_CO_LAP:
+            if t in thieu and hasattr(d, t):
+                delattr(d, t)
         if os.environ is not None and dict(os.environ) != noi_dung_env:
             os.environ.clear()
             os.environ.update(noi_dung_env)
@@ -2020,9 +2038,14 @@ def _do_an_toan(ham):
 
 def khai_moi_truong() -> dict:
     """Chụp những thứ ĐÃ CHỨNG MINH là làm đổi kết quả cổng, cộng vài thứ lân cận."""
-    pid = _do_an_toan(os.getpid)
+    # TRUYỀN LAMBDA, đừng truyền thẳng `os.getpid`: tra thuộc tính xảy ra TRƯỚC lời
+    # gọi, tức NGOÀI `try` của `_do_an_toan`. Trên nền thiếu hàm thì `AttributeError`
+    # bay ra ngoài và giết cả khối chẩn đoán — đúng thứ khối này sinh ra để tránh.
+    # `getpid`/`getppid` có trên Windows nên hôm nay chưa cắn, nhưng viết đồng nhất thì
+    # lớp lỗi này không còn chỗ nấp.
+    pid = _do_an_toan(lambda: os.getpid())
     pgid = _do_an_toan(lambda: os.getpgid(0))
-    ppid = _do_an_toan(os.getppid)
+    ppid = _do_an_toan(lambda: os.getppid())
     return {
         "he_dieu_hanh": _do_an_toan(platform.system),
         "python": _do_an_toan(lambda: sys.version.split()[0]),
@@ -2443,21 +2466,32 @@ def t91_ban_khai_moi_truong_khong_duoc_chet_va_khong_duoc_doan():
     `None` (không đo được) KHÁC `False` (đo được, và là không). Gộp hai thứ đó lại là
     đúng kiểu sai đã làm tôi mất ba lượt: đọc một quan sát thiếu thành một kết luận.
     """
-    goc_readlink, goc_getpgid, goc_open = os.readlink, os.getpgid, __builtins__["open"] \
-        if isinstance(__builtins__, dict) else __builtins__.open
+    # `getpgid` là POSIX — trên Windows nó KHÔNG TỒN TẠI, nên chụp thẳng là ném
+    # `AttributeError` và ca này chết ở dòng đầu. Đúng lớp lỗi vừa làm suite 0/103 trên
+    # `windows-latest`. Ở đây ta ÉP HỎNG các phép dò, mà "không có hàm" cũng là một
+    # kiểu hỏng — nên trên nền thiếu hàm thì bản khai vẫn phải ra, và đó chính là điều
+    # ca này đo. Dùng `getattr` để không đòi hỏi nền phải có.
+    goc_readlink = os.readlink
+    goc_getpgid = getattr(os, "getpgid", None)
+    goc_open = __builtins__["open"] if isinstance(__builtins__, dict) else __builtins__.open
 
     def no(*_a, **_k):
         raise OSError("ep hong de thu")
 
     # (a) mọi phép dò hỏng ⇒ VẪN ra bản khai, không ném
-    os.readlink, os.getpgid = no, no
+    os.readlink = no
+    os.getpgid = no
     mt = khai_moi_truong()
     bang(isinstance(mt, dict) and mt, "moi phep do hong ma ban khai KHONG ra")
     bang(mt["ns_pid"] is None, f"do hong phai la None, duoc {mt['ns_pid']!r}")
     bang(mt["chung_nhom_voi_cha"] is None,
          f"do hong phai la None chu khong phai False, duoc {mt['chung_nhom_voi_cha']!r}")
     bang(mt["he_dieu_hanh"] is not None, "phep do KHONG hong cung bi keo theo")
-    os.readlink, os.getpgid = goc_readlink, goc_getpgid
+    os.readlink = goc_readlink
+    if goc_getpgid is None:
+        del os.getpgid                  # nen KHONG co san: tra lai dung trang thai cu
+    else:
+        os.getpgid = goc_getpgid
 
     # (b) một dòng tóm tắt phải in được kể cả khi thiếu, và hiện `?` chứ không vỡ
     dong = _mot_dong_moi_truong({"pid": 1})
@@ -2727,6 +2761,60 @@ def t96_kiem_song_phai_chay_KE_CA_khi_sap_het_han():
     tt, mo_ta = m._do_codex(kiem_song=True)
     bang(tt == "CHUA_XAC_THUC", f"kiem song hong ma chi canh bao: {tt}")
     bang("token_revoked" in mo_ta, f"phai giu ly do may chu tra: {mo_ta!r}")
+
+
+@ca
+def t104_khong_duoc_dung_API_CHI_CO_TREN_MOT_NEN_ma_khong_hoi_truoc():
+    """Bộ test phải CHẠY ĐƯỢC trên nền thiếu API POSIX, không chết ở dòng đầu.
+
+    ĐÃ ĐO trên `windows-latest` (PR #128, ngay sau khi gắn nhãn `windows`): chốt cô lập
+    gọi thẳng `getattr(os, "getpgid")` nên ném `AttributeError` NGAY Ở ĐẦU MỌI CA —
+    **0/103**, không ca nào chạy. Bộ test chưa từng chạy trên Windows kể từ lúc có chốt
+    ấy, và **không ai biết**, vì job Windows mặc định skip để tiết kiệm phút.
+
+    Cùng ngày, bot review bắt `os.O_NOFOLLOW` không có trên Windows. Hai lần trong một
+    ngày cùng một hình dạng — đụng API CHỈ CÓ TRÊN MỘT NỀN mà không hỏi trước — nên ca
+    này khoá hình dạng đó chứ không khoá từng tên hàm.
+
+    Ca chạy được trên MỌI nền: nó GỠ thuộc tính (nếu nền có) để dựng lại đúng cảnh nền
+    thiếu, rồi trả lại nguyên trạng.
+    """
+    ten = "getpgid"
+    co_san = hasattr(os, ten)
+    goc = getattr(os, ten) if co_san else None
+    if co_san:
+        delattr(os, ten)
+    try:
+        # (a) vào/ra chốt cô lập trên nền THIẾU hàm: không được ném
+        try:
+            with _co_lap_toan_cuc():
+                pass
+        except AttributeError as e:
+            bang(False, f"chot co lap chet tren nen thieu {ten}: {e}")
+
+        # (b) ca test gán thêm hàm mà nền vốn KHÔNG có ⇒ ra khỏi chốt phải SẠCH.
+        # Rò thứ này là rò kiểu tệ nhất: nền tự nhận có một API mà nó không có, và ca
+        # sau đo trên một nền KHÔNG TỒN TẠI.
+        with _co_lap_toan_cuc():
+            setattr(os, ten, lambda *_a: 123)
+        bang(not hasattr(os, ten),
+             f"{ten} RO ra ngoai chot — nen tu nhan co mot API no khong co")
+
+        # (c) bản khai vẫn phải RA, và khoá không đo được là None chứ không phải False
+        mt = khai_moi_truong()
+        bang(isinstance(mt, dict) and mt, "ban khai KHONG ra tren nen thieu ham")
+        bang(mt["pgid"] is None, f"thieu {ten} thi pgid phai None, duoc {mt['pgid']!r}")
+        bang(mt["la_truong_nhom"] is None,
+             f"khong do duoc thi phai None chu khong phai False, duoc {mt['la_truong_nhom']!r}")
+        bang(mt["he_dieu_hanh"] is not None, "phep do KHONG lien quan cung bi keo theo")
+
+        # (d) dòng tóm tắt vẫn in được
+        bang("pid=" in _mot_dong_moi_truong(mt), "dong tom tat vo tren nen thieu ham")
+    finally:
+        if co_san:
+            setattr(os, ten, goc)
+        elif hasattr(os, ten):
+            delattr(os, ten)
 
 
 @ca

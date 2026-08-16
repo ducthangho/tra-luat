@@ -297,6 +297,18 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   lần trở lên thì câu hỏi đúng là "có nên làm việc này không", không phải "vá thế nào".
   Chữa: công cụ KHÔNG ghi vào tệp của người dùng nữa — phát hiện + dựng bản đã gỡ ra tệp
   BÊN CẠNH, người dùng tự `mv`. Cả lớp rủi ro chết theo KIẾN TRÚC, không theo bản vá.
+- **API CHỈ CÓ TRÊN MỘT NỀN: hỏi trước, đừng đụng thẳng — và một job CI mặc định SKIP
+  là một cổng KHÔNG TỒN TẠI.** Hai lần trong cùng một ngày: `os.O_NOFOLLOW` (bot review
+  bắt) và `os.getpgid` trong chốt cô lập — cái sau làm suite **0/103** trên
+  `windows-latest`, tức bộ test **chưa từng chạy** trên Windows kể từ lúc có chốt ấy.
+  Không ai biết, vì job Windows chỉ chạy khi PR có nhãn `windows`. Năm lượt cross-review
+  trên Linux không thể thấy, và đã không thấy.
+  Ba luật: (1) `hasattr`/`getattr(..., mặc_định)` trước khi đụng API riêng nền; (2)
+  truyền **lambda** vào hàm bọc lỗi, đừng truyền thẳng `os.getpgid` — tra thuộc tính
+  xảy ra TRƯỚC lời gọi, tức NGOÀI `try`; (3) gán thêm một API mà nền vốn không có thì
+  phải **gỡ lại** khi ra khỏi chốt, kẻo nền tự nhận có thứ nó không có.
+  Gắn nhãn `windows` cho PR đụng `.claude/dev/**` — nó tốn ~40 phút và trả lại thứ mà
+  năm lượt review không mua được.
 - **`MA=$?` SAU pipeline rồi đọc `${PIPESTATUS[0]}` = tự giết mã thoát.** Phép gán
   `MA_GO=$?` LÀ một lệnh, nên nó đặt lại `PIPESTATUS` về 0; dòng đọc `PIPESTATUS` phía
   sau kéo mã về 0 và chốt fail-close chết **lần thứ ba**. Tệ hơn: chú thích biện minh cho

@@ -1,0 +1,22 @@
+schema: cross-review-receipt/v1
+reviewer: codex
+round: 7
+verdict: changes_requested
+head: 69bc3cede6085bf6229ac95a44da4aae9e51ee42
+base: c775c0a5b0bf0816e913ba0b300d898fec3c58b0
+read_only_repository: true
+repository_clean: true
+findings:
+  high: 2
+  medium: 1
+  low: 0
+tests:
+  step_0: pass
+  diff_check: pass
+  standard_suite: "failed catastrophically: caller terminated after t62"
+  mutations_head_run_1: "56/56 pass; 1 platform-unmeasurable"
+  mutations_head_run_2: "56/56 pass; 1 platform-unmeasurable"
+  mutations_base: "49/50 pass; do_codex_tin_DONG_DAU_thay_vi_ma_thoat killed 0/1"
+artifacts:
+  verdict: moi-truong-review-7-codex-verdict.md
+  receipt: moi-truong-review-7-codex-verdict.receipt.yaml

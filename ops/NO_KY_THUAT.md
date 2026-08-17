@@ -130,16 +130,31 @@ sẽ đụng bản mới hơn trên master — lấy hook từ master trước.
 
 ## 6. Khe TRƯỚC khi cắm handler tín hiệu
 
-Đo được (sweep 14 mốc trên `8eca8d4`): bắn `SIGTERM` ở mốc **0,05s** — tức trong
-lúc preflight (các lệnh `git`), TRƯỚC khi handler được cắm — thì runner thoát
-`-15` và **không có tệp bằng chứng**.
+Đo được (sweep 14 mốc trên `8eca8d4`, rồi sweep mịn hơn trên `c92b09c`): bắn
+`SIGTERM` sớm — trong lúc preflight (các lệnh `git`), TRƯỚC khi handler được cắm
+— thì **không có tệp bằng chứng**, và mã thoát **không nhất quán**:
 
-**Vì sao để lại:** ở thời điểm ấy CHƯA có cgroup và CHƯA có con gate nào, nên
-không rò gì cả; thiệt hại duy nhất là "một lượt chưa kịp bắt đầu thì không có bản
-ghi". Cắm handler sớm hơn nữa (ngay đầu `cmd_run`) sẽ kéo theo phải dọn cả những
-trạng thái chưa dựng xong — đổi một khe vô hại lấy một lớp phức tạp mới.
+| mốc bắn | mã thoát | bằng chứng | con gate sống sót |
+|---|---|---|---|
+| 0,05s | `-15` | không | không |
+| 0,09–0,10s | `1` | không | không |
+| 0,11–0,12s | `-15` | không | không |
+| ≥ 0,13s | `143` | **có** | không |
 
-**Xong khi:** hoặc cắm handler ngay đầu `cmd_run` kèm đường dọn chịu được trạng
-thái nửa vời, hoặc kết luận là không đáng làm và đóng mục này. Sweep ở trên là
-phản chứng sẵn có để đo lại.
+`-15` là tín hiệu tới khi handler CHƯA cắm (disposition mặc định). `1` là
+`BiKetThuc` ném ra ở quãng đã cắm handler nhưng CHƯA vào phạm vi có đường ghi
+bằng chứng, nên nó thoát ra ngoài dưới dạng traceback. Ba mã thoát cho cùng một
+loại sự kiện là khó đọc — nhưng lưu ý cột cuối: **không mốc nào để con gate sống
+sót**, nên đây là chuyện KHAI BÁO, không phải chuyện rò rỉ.
+
+**Vì sao để lại:** ở những mốc ấy CHƯA có cgroup và CHƯA có con gate nào (bảng
+trên đo đúng điều đó), nên không rò gì cả; thiệt hại duy nhất là "một lượt chưa
+kịp bắt đầu thì không có bản ghi, và mã thoát khó đọc". Cắm handler sớm hơn nữa
+(ngay đầu `cmd_run`) sẽ kéo theo phải dọn cả những trạng thái chưa dựng xong —
+đổi một khe vô hại lấy một lớp phức tạp mới.
+
+**Xong khi:** mọi mốc bắn sớm cho CÙNG một mã thoát đọc được (nên là `143`) và
+không còn traceback lọt ra — hoặc kết luận là không đáng làm và đóng mục này kèm
+lý do. Sweep ở trên là phản chứng sẵn có để đo lại; nhớ quét cả quãng 0,09–0,13s
+vì đó là chỗ ba hành vi khác nhau nằm sát nhau.
 

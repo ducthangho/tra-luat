@@ -125,9 +125,15 @@ là hàng rào bằng chữ.
 
 **Xong khi:** `doctor` phân biệt được "hook chưa từng chạy" với "hook cũ" — ví dụ
 hook ghi một dấu vết (kèm danh sách năng lực + thời điểm) và `doctor` đọc dấu vết
-ấy. Lưu ý: hook trên nhánh này đang CŨ HƠN master (`doctor` báo thiếu
-`co-chay-probe`, `github-nguon-that`, `moi-truong-doc-truoc`), nên sửa hook ở đây
-sẽ đụng bản mới hơn trên master — lấy hook từ master trước.
+ấy. **Lời khai cũ đã HẾT ĐÚNG, đính chính** (P3 review lượt 2 trên `e37e1f6`): bản
+trước viết "hook trên nhánh này đang CŨ HƠN master, `doctor` báo thiếu
+`co-chay-probe`/`github-nguon-that`/`moi-truong-doc-truoc`". Sau khi hoà master
+thì không còn đo ra được nữa: `git diff origin/master -- .claude/hooks` **rỗng**,
+và `doctor` in `DUNG_DUOC hook-phien du nang luc so voi master`.
+
+Chính lượt hoà master là lúc phải rà lại lời khai này mà tôi để nguyên — sổ nợ
+tự đặt chuẩn "lời khai phải khớp phép đo tại head hiện hành", nên đây là chỗ lệch
+còn sót của chính nó.
 
 ---
 
@@ -208,8 +214,18 @@ dem cgroup     : dem thu muc `tl-gate-*` DUOI diem gan cgroup v2, quet de quy
                  (`rglob`) — KHONG dem o goc diem gan, vi `_tao_cgroup_gate` tao
                  cgroup duoi nhanh cua CHINH tien trinh (`_cgroup_cua_ta()`),
                  tren host systemd cho ay khong phai goc
-dat            : 0 traceback · 0 con song sot · 0 cgroup rac, o CA HAI cach goi
+goi ra pha DUOI : chen quang ngu SAU `_atomic_json(evidence, payload)` cuoi
+                  `cmd_run` (BAN SAO, khong sua kho), doi bang chung `status=pass`
+                  hien tren dia roi moi ban SIGTERM
+dat            : 0 traceback · 0 con song sot · 0 cgroup rac, o CA BA cach goi
 ```
+
+**Ba cách gọi, không phải hai** (P3 review lượt 2 trên `e37e1f6`). Đoạn trên vừa
+kể tên pha ĐUÔI, nhưng công thức nghiệm thu lúc ấy chỉ có lưới thời gian và mối
+nối `TL_GATE_EP_CHAM_SAU_CGROUP` — **cả hai đều không chạm pha ĐUÔI**. Ai chạy
+đúng công thức thiếu ấy rồi tuyên "đạt vế 1" sẽ lại khai rộng hơn thứ đã đo, đúng
+hình dạng lỗi mà chính đoạn ấy vừa gọi tên — lùi một tầng. Cách gọi thứ ba ở trên
+đã đo được: `rc=-15`, bằng chứng đầy đủ, 0 traceback.
 
 ---
 
@@ -254,9 +270,26 @@ trường khác hẳn. Kiểm `command -v codex` TRƯỚC khi kết luận đã 
 ### Manh mối thật: chính `doctor` mới là thứ chớp
 
 Đo được sau đó: `python .claude/dev/launcher.py doctor` **thoát 12 rồi ngay sau
-đó thoát 0** — cùng lệnh, cùng máy, cách nhau hai phút, `ok=True`,
-`thieu_bat_buoc=[]`. Mà `t53` khẳng định `returncode == 0`, nên **doctor chớp là
-`t53` đỏ là `hong 1`**. `t53` chỉ là nơi nó lộ ra.
+đó thoát 0** — cùng lệnh, cùng máy, cách nhau hai phút. Mà `t53` khẳng định
+`returncode == 0`, nên **doctor chớp là `t53` đỏ là `hong 1`**. `t53` chỉ là nơi
+nó lộ ra.
+
+**ĐÍNH CHÍNH — bản trước ghép số của HAI lượt vào một câu** (P3 review lượt 2 trên
+`e37e1f6`). Nó viết "thoát 12 ... `ok=True`, `thieu_bat_buoc=[]`", mà hai thứ ấy
+**không thể cùng thuộc một lượt**: theo `_ma_doctor` (`launcher.py:3085`, docstring
+ghi thẳng "Thiếu công cụ BẮT BUỘC luôn là 12"), thoát 12 ⇔ `thieu_bat_buoc` KHÁC
+RỖNG. Hai trường sạch kia là của **lượt thoát 0 ngay sau**. Câu ghép ấy khiến
+người sau đọc thành "JSON của lượt 12 vẫn sạch" rồi đi nghi ngờ nhầm `_ma_doctor`.
+
+**JSON của lượt thoát 12 KHÔNG được chụp lại** — và chính nó mới nêu tên thủ phạm.
+Review lượt 2 dựng lại bằng shim cưỡng bức timeout: lượt thoát 12 cho
+`ok=False`, `thieu_bat_buoc=['codex']`, kèm
+`co_mat_nhung_khong_chay_duoc: {loi: "timeout sau 8.0s"}` — tức cơ chế đúng là
+**một lượt `--version` hết hạn** rồi bị đếm là thiếu, khớp nghi ngờ ban đầu.
+
+**Việc phải làm khi nó chớp lần tới:** chạy `doctor --json` và **giữ nguyên
+stdout** của đúng lượt thoát khác 0. Chỉ cần thế là mục này tự đóng được nửa
+đường — đừng chỉ ghi lại mã thoát như tôi đã làm.
 
 Thử gọi lại: 12 lượt không tải + 12 lượt dưới tải CPU ⇒ **24/24 đều thoát 0**.
 Chưa gọi ra được — tải thật lúc nó chớp là **churn tiến trình/cgroup** (chạy ngay

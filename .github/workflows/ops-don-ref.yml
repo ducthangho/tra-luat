@@ -167,7 +167,33 @@ jobs:
               # phân biệt, và một workflow đặc quyền không nên dựa vào mắt người.
               rl="$(printf '%s' "$r" | tr '[:upper:]' '[:lower:]')"
               case "$rl" in
-                luu-tru/*) echo "DỪNG: '$r' nằm dưới luu-tru/** — đó là ref lưu trữ, xoá nó là làm published_* trong ops/reviews/*.receipt.yaml thành SHA không tra được"; exit 2 ;;
+                luu-tru/*)
+                  # BẤT BIẾN thật sự cần giữ KHÔNG phải "đừng đụng luu-tru/**", mà là
+                  # "commit công bố verdict phải còn tra được". Bản đầu cấm tuyệt đối —
+                  # đơn giản, nhưng cấm luôn cả việc dọn những ref lưu trữ dạng NHÁNH đã
+                  # thành thừa sau khi tag được tạo, và một chốt cấm cả việc đúng thì
+                  # người ta sẽ tìm đường vòng quanh nó.
+                  #
+                  # Nay: xoá NHÁNH `luu-tru/**` chỉ khi commit của nó CÒN ĐƯỢC MỘT TAG
+                  # GIỮ. Đo, không tin: đọc SHA của nhánh, rồi đối chiếu với danh sách
+                  # tag đã DEREFERENCE (`repos/O/R/tags` trả `commit.sha`, nên tag chú
+                  # giải cũng ra đúng commit — `git/matching-refs/tags` thì KHÔNG, nó
+                  # trả SHA của đối tượng tag).
+                  #
+                  # XOÁ TAG dưới `luu-tru/` thì vẫn CẤM TUYỆT ĐỐI: tag mới là mỏ neo.
+                  if [ "$HANH_DONG" != xoa-nhanh ]; then
+                    echo "DỪNG: '$r' là TAG lưu trữ — đó là mỏ neo duy nhất giữ commit công bố verdict. Không xoá qua workflow."; exit 2
+                  fi
+                  sha_nhanh="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$r" --jq .object.sha 2>/dev/null || true)"
+                  if ! printf '%s' "$sha_nhanh" | grep -Eq '^[0-9a-f]{40}$'; then
+                    echo "DỪNG: KHÔNG ĐO ĐƯỢC SHA của nhánh '$r' — không xoá mù một ref lưu trữ."; exit 2
+                  fi
+                  if gh api --paginate "repos/$GITHUB_REPOSITORY/tags" --jq '.[].commit.sha' 2>/dev/null | grep -qxF "$sha_nhanh"; then
+                    echo "cho phép: '$r' ($sha_nhanh) vẫn còn tag giữ commit ấy"
+                  else
+                    echo "DỪNG: '$r' trỏ $sha_nhanh mà KHÔNG tag nào giữ commit ấy. Xoá nhánh này là làm published_* trong ops/reviews/*.receipt.yaml thành SHA không tra được. Tạo tag TRƯỚC (hành động tao-tag), rồi mới xoá."; exit 2
+                  fi
+                  ;;
                 ops/*|claude/*|codex/*|agent/*|mission/*|dispatcher/*)
                   echo "DỪNG: '$r' thuộc vùng làm việc được bảo vệ (ops/ claude/ codex/ agent/ mission/ dispatcher/). Nhánh ở đây thường mang hồ sơ chưa vào master — xoá phải do người, không qua workflow."; exit 2 ;;
               esac

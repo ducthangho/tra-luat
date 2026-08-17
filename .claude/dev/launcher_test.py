@@ -3918,7 +3918,9 @@ def t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh():
     Bốn điều ca này khoá:
       1. `gh` OK MỘT MÌNH không lật nhãn (phần (a) — cũng đo ở `t103`)
       2. chưa khai server github  -> CHUA_XAC_THUC (đo được, hỏng thật, chữa được)
-      3. đã khai                  -> KHONG_DO_DUOC, KHÔNG phải DUNG_DUOC
+      3. đã khai                  -> hỏi `claude mcp list`, và trạng thái XẤU của nó
+                                     (`Pending approval`) phải xuống CHUA_XAC_THUC,
+                                     không được chôn vào KHONG_DO_DUOC
       4. lời khai nêu rõ ĐỌC Ở GỐC NÀO — `[workspace]` khác `[goc cua launcher]`
     """
     import json as _json
@@ -3926,16 +3928,32 @@ def t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh():
     goc_run = m.subprocess.run
 
     class Rc:
-        def __init__(self, rc):
-            self.returncode, self.stdout, self.stderr = rc, "", ""
+        def __init__(self, rc, out=""):
+            self.returncode, self.stdout, self.stderr = rc, out, ""
 
     # GIA CA `which`, khong chi `run`. Ban dau toi chi gia `run`, va tren may KHONG co
     # `gh` thi nhanh `if shutil.which("gh")` khong chay — ca nay bien thanh ca do MAY
     # chu khong do HOP DONG. Do duoc: dot bien cho `gh` lat nhan tro lai VAN SONG SOT
     # qua t105 (1/1 qua) truoc khi them dong nay.
     goc_which = m.shutil.which
-    m.shutil.which = lambda t, *a, **k: ("/usr/bin/gh" if t == "gh" else goc_which(t, *a, **k))
-    m.subprocess.run = lambda *_a, **_k: Rc(0)          # gh LUON "da xac thuc"
+    co_claude = [True]
+    m.shutil.which = lambda t, *a, **k: (
+        "/usr/bin/gh" if t == "gh"
+        else ("/usr/bin/claude" if co_claude[0] else None) if t == "claude"
+        else goc_which(t, *a, **k))
+
+    # `claude mcp list` GIA — o chua doi duoc giua cac ca. Phai phan phoi theo ARGV
+    # chu khong tra chung mot Rc: gia chung mot ket qua cho moi lenh thi ca nay do
+    # nhanh "khong hoi duoc suc khoe" cho MOI kich ban, va hai nhanh `khoe`/`hong`
+    # — chinh hai nhanh cua finding P1 — khong bao gio duoc chay.
+    mcp_out = [""]
+
+    def gia_run(cmd, *_a, **_k):
+        if list(cmd)[:3] == ["claude", "mcp", "list"]:
+            return Rc(0, mcp_out[0])
+        return Rc(0)                                    # gh LUON "da xac thuc"
+
+    m.subprocess.run = gia_run
     try:
         with tempfile.TemporaryDirectory() as td:
             # (2) khai RONG
@@ -3945,15 +3963,76 @@ def t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh():
                  f"chua khai server github ma tra {tt} (mong CHUA_XAC_THUC): {mo_ta!r}")
             bang("[workspace]" in mo_ta, f"khong khai doc o goc nao: {mo_ta!r}")
 
-            # (3) DA khai
             (Path(td) / ".mcp.json").write_text(
                 _json.dumps({"mcpServers": {"github": {"command": "x"}}}), encoding="utf-8")
+
+            # (3a) DA khai + `claude mcp list` bao KHOE. Van KHONG duoc len DUNG_DUOC:
+            #      CLI noi duoc khong chung minh PHIEN goi duoc cong cu.
+            mcp_out[0] = "github: https://api.githubcopilot.com/mcp/ (HTTP) - ✓ Connected\n"
             tt, mo_ta = m._do_github_api(td)
             bang(tt == "KHONG_DO_DUOC",
-                 f"da khai server ma tra {tt} — tien trinh con KHONG goi duoc MCP nen "
-                 f"KHONG duoc khai DUNG_DUOC: {mo_ta!r}")
+                 f"MCP `Connected` ma tra {tt} — CLI noi duoc KHONG phai PHIEN goi duoc: {mo_ta!r}")
+            bang("Connected" in mo_ta, f"khong dan lai loi CLI da do duoc: {mo_ta!r}")
             bang("get_me" in mo_ta,
                  f"khong chi ra ai moi do duoc (phien goi mcp__github__get_me): {mo_ta!r}")
+
+            # (3b) FINDING P1 CUA CROSS-REVIEW. `Pending approval` la HONG THAT va
+            #      CHUA DUOC — ban truoc chon no vao KHONG_DO_DUOC, tuc bao "khong do
+            #      duoc" ngay tren mot thu VUA DO XONG. Do that trong container nay:
+            #      `github: ... - Pending approval (run `claude` to approve)`, rc=0.
+            mcp_out[0] = ("github: https://api.githubcopilot.com/mcp/ (HTTP) - "
+                          "⏸ Pending approval (run `claude` to approve)\n")
+            tt, mo_ta = m._do_github_api(td)
+            bang(tt == "CHUA_XAC_THUC",
+                 f"`Pending approval` ma tra {tt} — do duoc, hong that, chua duoc: {mo_ta!r}")
+            bang("Pending approval" in mo_ta,
+                 f"khong noi cach chua (nguyen van dong CLI): {mo_ta!r}")
+            # ...va PHAI khai PHAM VI. Do that trong container nay: CLI bao `Pending
+            # approval` trong khi phien agent van goi `mcp__github__*` duoc. Mot nhan
+            # do khong noi ro no noi ve AI se bi doc thanh "phien toi mat cong cu".
+            bang("AGENT SAP SINH" in mo_ta, f"khong khai nhan nay noi ve AI: {mo_ta!r}")
+
+            # (3c) `not connected` KHONG duoc lot qua chi vi co chuoi con `connected`.
+            mcp_out[0] = "github: https://api.githubcopilot.com/mcp/ (HTTP) - not connected\n"
+            tt, mo_ta = m._do_github_api(td)
+            bang(tt == "CHUA_XAC_THUC", f"`not connected` ma tra {tt}: {mo_ta!r}")
+
+            # (3d) HOI MA KHONG CO CAU TRA LOI XAC DANG -> moi la KHONG_DO_DUOC.
+            #      Hai duong: CLI khong in dong `github:`, va khong co `claude` de hoi.
+            mcp_out[0] = "linear: https://mcp.linear.app/mcp (HTTP) - ✓ Connected\n"
+            tt, mo_ta = m._do_github_api(td)
+            bang(tt == "KHONG_DO_DUOC", f"CLI khong co dong github ma tra {tt}: {mo_ta!r}")
+            co_claude[0] = False
+            tt, mo_ta = m._do_github_api(td)
+            bang(tt == "KHONG_DO_DUOC", f"khong co `claude` de hoi ma tra {tt}: {mo_ta!r}")
+            co_claude[0] = True
+            mcp_out[0] = ""
+
+
+            # (4b) KHOP TEN CHINH XAC, khong khop chuoi con. `not-github-backup` tung
+            #      duoc tinh la "da khai server github" — finding P2 cua cross-review.
+            (Path(td) / ".mcp.json").write_text(
+                _json.dumps({"mcpServers": {"not-github-backup": {}}}), encoding="utf-8")
+            tt, mo_ta = m._do_github_api(td)
+            bang(tt == "CHUA_XAC_THUC",
+                 f"ten `not-github-backup` ma tinh la khai github: {tt} {mo_ta!r}")
+            # ...nhung HOA/THUONG thi van phai nhan
+            (Path(td) / ".mcp.json").write_text(
+                _json.dumps({"mcpServers": {"GitHub": {}}}), encoding="utf-8")
+            tt, _ = m._do_github_api(td)
+            bang(tt != "CHUA_XAC_THUC", f"ten `GitHub` bi chan oan: {tt}")
+
+            # (4c) JSON HOP LE ma SAI KIEU — khong duoc nem loi, khong duoc doc nham
+            for xau in ([], {"mcpServers": ["github"]}, {"mcpServers": "github"}):
+                (Path(td) / ".mcp.json").write_text(_json.dumps(xau), encoding="utf-8")
+                tt, mo_ta = m._do_github_api(td)
+                bang(tt == "CHUA_XAC_THUC",
+                     f"lươc do sai ({xau!r}) ma tra {tt}: {mo_ta!r}")
+
+            # (4d) JSON HONG CU PHAP
+            (Path(td) / ".mcp.json").write_text("{khong phai json", encoding="utf-8")
+            tt, mo_ta = m._do_github_api(td)
+            bang(tt == "CHUA_XAC_THUC", f".mcp.json hong ma tra {tt}: {mo_ta!r}")
 
             # (4) khong co .mcp.json
             (Path(td) / ".mcp.json").unlink()

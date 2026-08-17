@@ -2195,10 +2195,21 @@ def _doc_mcp_json(ws: str | None) -> tuple[bool, str]:
         d = json.loads(tep.read_text(encoding="utf-8"))
     except (OSError, ValueError) as e:
         return False, f".mcp.json [{nguon}] khong doc/parse duoc: {type(e).__name__}"
+    # KIEM KIEU. JSON hop le van co the sai lươc do: mang o goc lam `d.get` nem
+    # AttributeError, va `mcpServers` la MANG thi vong lap duyet PHAN TU (chuoi) chu
+    # khong duyet KHOA — mot tep sai kieu se duoc doc thanh "da khai server". Ca hai
+    # deu la finding P2 cua cross-review, ca hai deu tai lap duoc.
+    if not isinstance(d, dict):
+        return False, f".mcp.json [{nguon}] khong phai object o goc (la {type(d).__name__})"
     srv = d.get("mcpServers") or d.get("servers") or {}
-    ten = [k for k in srv if "github" in k.lower()]
+    if not isinstance(srv, dict):
+        return False, f".mcp.json [{nguon}] khoa mcpServers/servers khong phai object (la {type(srv).__name__})"
+    # KHOP CHINH XAC, khong khop chuoi con: `not-github-backup` tung duoc tinh la
+    # "da khai server github". Doi thanh DANH SACH CHO PHEP — dung doctrine cua kho:
+    # danh sach cam khong bao gio du, danh sach cho phep thi biet truoc va nho.
+    ten = [k for k in srv if k.casefold() == "github"]
     if not ten:
-        return False, (f".mcp.json [{nguon}] KHONG khai server github "
+        return False, (f".mcp.json [{nguon}] KHONG khai server ten dung bang `github` "
                        f"(co: {', '.join(srv) or 'khong co server nao'})")
     return True, f".mcp.json [{nguon}] khai server: {', '.join(ten)}"
 
@@ -2220,14 +2231,69 @@ def _do_git_day_keo(ws: str | None) -> tuple[str, str]:
     return ("CHUA_XAC_THUC", f"git ls-remote rc={rc}: {(err or '').strip()[:120]}")
 
 
-def _do_github_api(ws: str | None) -> tuple[str, str]:
-    """Đường GitHub API của kho này là **MCP**, và launcher KHÔNG đo được nó.
+def _suc_khoe_mcp_github() -> tuple[str, str]:
+    """Hỏi `claude mcp list` xem server `github` đang ở trạng thái nào.
 
-    NÓI TRƯỚC GIỚI HẠN, vì nó quyết định cả thiết kế hàm: công cụ MCP là năng lực
-    của PHIÊN AGENT, không phải của tiến trình con. Không có lệnh nào chạy trong
-    subprocess mà gọi được `mcp__github__*`. Nên câu trả lời trung thực ở đây là
-    trạng thái THỨ BA — `KHONG_DO_DUOC` — chứ không phải bịa ra một phép đo thay
-    thế rồi gắn nhãn như thể đã đo.
+    VÌ SAO CÓ HÀM NÀY — nó bác một lời khai của chính tôi. Bản trước viết rằng tiến
+    trình con "KHÔNG đo được MCP" và trả `KHONG_DO_DUOC` vô điều kiện. Cross-review
+    codex bác lại bằng phép đo chạy được: `claude mcp list` in ra tên server, endpoint
+    và trạng thái health/approval. Đo lại trong chính container này:
+
+        github: https://api.githubcopilot.com/mcp/ (HTTP) - ⏸ Pending approval
+
+    `Pending approval` là một trạng thái HỎNG THẬT, chữa được (`claude` rồi duyệt) —
+    mà bản trước gộp nó vào "không đo được", còn bản trước nữa thì gắn `DUNG_DUOC`.
+    "Không đo được" chỉ đúng khi ĐÃ THỬ HỎI mà không có câu trả lời xác đáng.
+
+    PHẠM VI — đo xong mới thấy, và phải khai kẻo lại khai rộng hơn thứ đo được. Ngay
+    trong container này, CLI báo `Pending approval` TRONG KHI phiên agent đang gọi
+    `mcp__github__*` bình thường. Hai điều đó cùng đúng: `mcp list` đọc trạng thái
+    DUYỆT SERVER `.mcp.json` CHO DỰ ÁN NÀY theo con mắt của CLI — tức thứ mà một
+    tiến trình `claude` MỚI SINH sẽ gặp — chứ không phải công cụ của phiên đang chạy.
+    Và với `launcher.py` thì đó ĐÚNG là câu hỏi cần: việc của nó là SINH agent bằng
+    CLI, nên "agent tôi sắp sinh có github MCP không" mới là thứ đáng đo. Nhãn vì thế
+    phải nói rõ nó nói về AI, kẻo người đọc thấy đỏ rồi tưởng phiên mình đã mất công cụ.
+
+    Trả về (`khoe` | `hong` | `khong_do_duoc`, chi tiết).
+    """
+    if not shutil.which("claude"):
+        return ("khong_do_duoc", "khong co `claude` de hoi `mcp list`")
+    try:
+        r = subprocess.run(["claude", "mcp", "list"], capture_output=True, text=True,
+                           timeout=30)
+    except (OSError, subprocess.SubprocessError) as e:
+        return ("khong_do_duoc", f"`claude mcp list` khong chay duoc: {type(e).__name__}")
+    dong = [d.strip() for d in (r.stdout or "").splitlines()
+            if d.strip().casefold().startswith("github:")]
+    if not dong:
+        return ("khong_do_duoc",
+                f"`claude mcp list` khong co dong nao cho `github` (rc={r.returncode})")
+    d = dong[0]
+    thap = d.casefold()
+    # HỎNG là danh sách CHO PHÉP ngược: nêu đích danh các trạng thái xấu ta biết, và
+    # bất cứ thứ gì KHÔNG phải "connected" đều KHÔNG được coi là khoẻ.
+    if "connected" in thap and "not connected" not in thap:
+        return ("khoe", d)
+    return ("hong", d)
+
+
+def _do_github_api(ws: str | None) -> tuple[str, str]:
+    """Đường GitHub API của kho này là **MCP**, và launcher đo được ĐẾN ĐÂU thì khai đến đó.
+
+    NÓI TRƯỚC GIỚI HẠN, vì nó quyết định cả thiết kế hàm: **GỌI** một công cụ MCP là
+    năng lực của PHIÊN AGENT — không lệnh con nào gọi được `mcp__github__*`. Nhưng
+    "không GỌI được" KHÔNG kéo theo "không ĐO được", và bản trước của chính hàm này
+    đã lẫn hai điều đó: nó trả `KHONG_DO_DUOC` vô điều kiện ngay khi `.mcp.json` có
+    khai server. Cross-review codex bác bằng phép đo chạy được (`claude mcp list`,
+    xem `_suc_khoe_mcp_github`), và bác đúng: trạng thái `Pending approval` là hỏng
+    THẬT, chữa được, mà bản trước chôn nó vào "không đo được".
+
+    Nên nay có ba câu trả lời, và mỗi câu ứng với một điều KHÁC NHAU:
+      CHUA_XAC_THUC  chưa khai server, HOẶC đã khai mà `claude mcp list` báo xấu
+                     (`Pending approval`, `not connected`) — hỏng thật, chữa được
+      KHONG_DO_DUOC  đã khai và server nối được, HOẶC không hỏi được sức khoẻ —
+                     cả hai đều còn thiếu đúng một bằng chứng: PHIÊN gọi được
+      (không có DUNG_DUOC) — chỉ phiên agent gọi `mcp__github__get_me` mới cấp được
 
     Ba đường, và vì sao chỉ một đường là đường của kho:
 
@@ -2261,9 +2327,28 @@ def _do_github_api(ws: str | None) -> tuple[str, str]:
         # ĐO ĐƯỢC và là hỏng THẬT: không khai server thì phiên agent không có công cụ
         # MCP github nào để gọi, bất kể máy có gì.
         return ("CHUA_XAC_THUC", chi_tiet_mcp + duoi)
+
+    # ĐÃ KHAI thì hỏi tiếp sức khoẻ — đừng dừng ở "có khai" rồi gọi là không đo được.
+    tt_mcp, chi_tiet_suc_khoe = _suc_khoe_mcp_github()
+    if tt_mcp == "hong":
+        # KHAI RO PHAM VI. Do duoc trong chinh container nay: CLI bao `Pending approval`
+        # trong khi PHIEN dang goi `mcp__github__*` binh thuong. Khong mau thuan — hai
+        # phep do hoi hai thu khac nhau; xem `_suc_khoe_mcp_github`. Nhan nay noi ve
+        # AGENT SAP SINH, va phai noi thanh loi, khong de nguoi doc tu suy.
+        return ("CHUA_XAC_THUC",
+                f"{chi_tiet_mcp} — nhung `claude mcp list` bao: {chi_tiet_suc_khoe}; "
+                f"tuc AGENT SAP SINH bang CLI se thieu github MCP (phien DANG chay co "
+                f"the van goi duoc — day la hai pham vi khac nhau)" + duoi)
+    if tt_mcp == "khoe":
+        # VẪN KHÔNG PHẢI `DUNG_DUOC`. `claude mcp list` chứng minh server nối được từ
+        # CLI; nó KHÔNG chứng minh phiên agent gọi được công cụ. Hai điều khác nhau, và
+        # nâng nhãn ở đây là lặp đúng lỗi mà bản vá này sinh ra để chữa.
+        return ("KHONG_DO_DUOC",
+                f"{chi_tiet_mcp} — `claude mcp list`: {chi_tiet_suc_khoe}; con thieu bang "
+                f"chung phien GOI duoc: `mcp__github__get_me`" + duoi)
     return ("KHONG_DO_DUOC",
-            chi_tiet_mcp + " — nhung MCP la nang luc cua PHIEN AGENT, tien trinh con "
-            "KHONG goi duoc; bang chung duong: phien goi `mcp__github__get_me`" + duoi)
+            f"{chi_tiet_mcp} — va khong hoi duoc suc khoe MCP ({chi_tiet_suc_khoe}); "
+            f"bang chung duong: phien goi `mcp__github__get_me`" + duoi)
 
 
 _RE_NANG_LUC_HOOK = re.compile(r"^#\s*hook-nang-luc:\s*(.+)$", re.MULTILINE)
@@ -2407,7 +2492,7 @@ KHA_NANG = [
      "khac_phuc": "chay trong mot kho co remote origin; kiem $GIT_CONFIG_KEY_*"},
     {"ten": "github-api", "do": lambda ws, ks=False: _do_github_api(ws),
      "vi_sao": "doc issue, dang comment/verdict, PR — kho nay di bang MCP",
-     "khac_phuc": "khai server github trong .mcp.json; roi PHIEN goi mcp__github__get_me de co bang chung duong"},
+     "khac_phuc": "khai server github trong .mcp.json · neu `claude mcp list` bao Pending approval thi chay `claude` roi duyet · bang chung duong cuoi cung: PHIEN goi mcp__github__get_me"},
     {"ten": "launcher-phien", "do": lambda ws, ks=False: _do_launcher_cu(ws),
      "vi_sao": "launcher dang chay cu hon master = so luot chay THIEU truong ma khong bao",
      "khac_phuc": "chay launcher tu cay da merge master, hoac merge master vao nhanh nay"},

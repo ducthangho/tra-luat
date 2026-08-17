@@ -1,0 +1,148 @@
+# Lease REVIEWER lượt 2 — `doctor` đo GitHub theo đúng đường MCP.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# VÌ SAO CÓ LƯỢT 2. Lượt 1 (`doctor-github-mcp-review-1-codex-20260817`) trả
+# `changes_requested` trên `4ff2c6bf` với ba finding, và finding P1 BÁC ĐÚNG một lời khai
+# của người vá: `_do_github_api` viết tuyệt đối rằng tiến trình con không đo được MCP, trong
+# khi `claude mcp list` đo được thật. Ba finding đã vá trong đúng một commit (`fc48421`);
+# lượt này xét bản vá ấy.
+#
+# ĐIỀU ĐÁNG SOI NHẤT của lượt này KHÔNG phải ba bản vá — nó là một LỜI KHAI PHẠM VI mà
+# người vá tự đo được khi chạy thật: CLI báo `Pending approval` TRONG KHI phiên agent vẫn
+# gọi `mcp__github__*` bình thường. Người vá lập luận hai phép đo hỏi hai thứ khác nhau và
+# `launcher.py` cần đúng thứ CLI đo (vì nó SINH agent bằng CLI). Lập luận đó chưa ai soi.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: doctor-github-mcp-review-2-codex-20260817
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+reviewer_note: người vá là `claude` ⇒ §8 bắt reviewer khác nhà cung cấp
+assurance_target: cross_approved
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: fc4842130dd4514d4a4e0d013429fa97743cbf7c
+branch: ops/doctor-github-qua-mcp
+base_sha: e38b0bed7c95d2a9ab97d6ec09f047de5fc05978
+target_branch_neu_land: master
+target_pull_request_note: 'Chưa mở PR lúc cấp lease — review neo thẳng vào SHA.'
+
+luot_truoc:
+  lease_id: doctor-github-mcp-review-1-codex-20260817
+  reviewed_sha: 4ff2c6bfe04a205e5989642bc527bc5341db3e0f
+  verdict: changes_requested
+  finding: [p1-mcp-co-the-do-tu-tien-trinh-con, p2-ten-server-github-khop-chuoi-con,
+    p2-mcp-json-sai-kieu-lam-phep-do-nem-loi]
+  dot_bien_reviewer_bao_song_sot: 2
+  da_va_o_commit: fc4842130dd4514d4a4e0d013429fa97743cbf7c
+
+scope_files: 4
+scope_note: >-
+  Diff `e38b0be..fc48421` gồm BỐN tệp: `.claude/dev/launcher.py`,
+  `.claude/dev/launcher_test.py` (hai commit `4ff2c6b` + `fc48421`), cùng lease/prompt lượt 1
+  (`d16fb7c`). Tệp thứ năm là finding. Nội dung cần xét nằm ở hai tệp `.claude/dev/**`.
+
+prompt_path: ops/prompts/doctor-github-mcp-review-2-codex-20260817.md
+prompt_sha256_required: 7f6a74a3694e59a00959add1022b4fdb816fa46c8a6217d2d3bb3188503a3547
+
+granted_by: ducthangho
+granted_on_instruction: direct, in-session, 2026-08-17 ("vá bốn điểm đó đi, rồi cấp lease review")
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  KHAI THẲNG: phiên ghi lease này CHÍNH LÀ phiên đã vá. Nó KHÔNG tự cấp quyền —
+  `granted_by` là `ducthangho`, duyệt trực tiếp, và `ops/lease_publish.py` chặn cứng mọi tên
+  provider ở trường ấy. Ghi ra để dấu vết thẩm quyền ĐỌC ĐƯỢC chứ không phải suy, và để
+  reviewer soi kỹ hơn phần khai trong commit lẫn trong lease — cả hai do chính phiên thực thi
+  viết. Lượt 1 đã cho thấy vì sao điều đó đáng ngại: lời khai sai nằm trong docstring, không
+  nằm trong logic.
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc chủ kho
+
+leased_at_utc: '2026-08-17T05:25:00Z'
+lease_expires_at_utc: '2026-08-18T05:25:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+attempts_note: >-
+  Việc dev-side ngoài packet nên KHÔNG tiêu lượt. Ghi 0/0 để sổ không lẫn với trần attempt
+  của revision 4.
+
+muc_kiem:
+- id: loi-khai-pham-vi-cua-nhan-CHUA-XAC-THUC
+  note: >-
+    Trọng tâm lượt này. `github-api` trả `CHUA_XAC_THUC` khi `claude mcp list` báo xấu, kèm
+    câu khai rằng nhãn ấy nói về AGENT SẮP SINH chứ không phải phiên đang chạy. Reviewer đo
+    trong môi trường của mình rồi xét: lời khai đó đúng không, có đủ hẹp không, hay `CHUA_XAC_THUC`
+    vẫn là nhãn quá rộng cho thứ chỉ hỏng với một loại người dùng.
+- id: khoe-khong-len-DUNG-DUOC-dung-hay-luoi
+  note: >-
+    `Connected` vẫn ở `KHONG_DO_DUOC`. Đây CHÍNH LÀ lớp lập luận mà P1 lượt 1 đã bác một lần
+    ("không gọi được" bị lẫn thành "không đo được"). Xét lại từ đầu: còn bằng chứng nào từ
+    tiến trình con nâng được nhãn không? Nếu có, đó là finding P1.
+- id: ba-ban-va-co-kin-khong
+  note: >-
+    Khớp tên chính xác có chặn oan không · kiểm kiểu còn hình dạng nào lọt (`{"servers":...}`
+    sai kiểu, `null`, khoá `github` giá trị không phải object) · phân ba nhánh của
+    `_suc_khoe_mcp_github` có đọc nhầm dòng CLI phiên bản khác không.
+- id: gh-con-lat-duoc-nhan-o-duong-nao-khong
+  note: >-
+    Giữ nguyên từ lượt 1 — đừng bỏ chỉ vì đã hỏi. Đọc `_do_github_api` VÀ tầng tiêu thụ
+    (`ok_kha_dung`, `--doi-kha-dung`, `chua_chung_minh`).
+- id: bo-test-co-ca-nao-do-MAY-thay-vi-do-HOP-DONG
+  note: >-
+    Lượt 1 đã có một ca như thế (chỉ giả `subprocess.run`, không giả `shutil.which`). `t105`
+    nay giả cả `which` lẫn `run` và phân phối `run` theo ARGV. Soi xem còn ca nào mắc bệnh ấy,
+    và tự nghĩ đột biến người vá KHÔNG nghĩ tới.
+
+so_lieu_nguoi_va_bao:
+  suite: 105/105 (qua 104, bỏ qua 1, hỏng 0)
+  nen_master: 104/104 (qua 103, bỏ qua 1, hỏng 0) — e38b0be, ĐO CÙNG LÚC, CÙNG MÁY
+  delta: 0 ca đỏ, +1 ca xanh (`t105`)
+  nen_da_doi_so_voi_luot_1: >-
+    Lease lượt 1 ghi nền "100/104, bốn ca đỏ t85/t93/t94/t96". Bốn ca ấy đỏ vì cờ chặn
+    `~/.codex/tra-luat-CHAN-CODEX`, và cờ ấy NAY ĐÃ HẾT (hook phiên mới báo "codex env policy:
+    khong co khoi nao do ta quan ly"). Nền sạch hoàn toàn, không còn gì để reviewer phải tái
+    hiện — lượt 1 đã báo KHÔNG ĐO ĐƯỢC cho vế delta vì lý do này.
+  dot_bien: 11/11 bị bắt (M1…M11; M1 và M2 là hai đột biến reviewer lượt 1 báo SỐNG SÓT)
+  cong_khac: eol selftest 30/30 · eol survey violations=[] · doc-claims --strict rc=0 ·
+    doctrine-scan sạch (4 tệp, 0 chỗ chép doctrine)
+
+ngoai_pham_vi_da_biet:
+- id: gh-trong-github-actions
+  note: >-
+    `.github/workflows/**` vẫn dùng `gh` — ĐÚNG, không phải chỗ cần sửa: runner GitHub không
+    có MCP, và `GITHUB_TOKEN` ở đó là đường sạch. Phạm vi lượt này là phía DEV.
+- id: gh-trong-skill-va-docs
+  note: >-
+    `.claude/skills/**` và `docs/**` còn nhiều lệnh `gh` (đọc issue, comment). Chúng lệch với
+    "mọi việc GitHub đi bằng MCP" nhưng NGOÀI phạm vi lượt này. Nêu ra để không ai tưởng đã
+    quét hết.
+- id: bo-chay-dot-bien-nam-ngoai-kho
+  note: >-
+    `scratchpad/dotbien_mcp.sh` KHÔNG được commit (nó là công cụ một lượt, ngoài kho).
+    Reviewer chỉ xét được nó qua phần mô tả trong thông điệp commit — nói thẳng để không ai
+    tưởng đã soi mã của nó.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T05:24:00Z'
+master_sha_at_grant: e38b0bed7c95d2a9ab97d6ec09f047de5fc05978
+lease_song_khac_luc_cap: >-
+  Lease lượt 1 đã đóng bằng verdict `changes_requested`. Không có lease review nào khác đang
+  mở cho việc dev-side này.
+
+canh_bao_moi_truong_luc_cap: >-
+  ĐO ĐƯỢC lúc cấp, và ĐÃ ĐỔI so với lượt 1: `codex` KHÔNG còn bị chặn trong container phiên
+  cấp lease (`~/.codex/tra-luat-CHAN-CODEX` không tồn tại; hook báo "khong co khoi nao do ta
+  quan ly", đã đăng nhập bằng ChatGPT). Cảnh báo còn lại là `SAP_HET_HAN`: ảnh chụp
+  `CODEX_AUTH_JSON` đã cũ ~26h, mà refresh token xoay vòng — nếu reviewer không khởi động
+  được thì đọc `launcher.py doctor` trước khi nghi bất cứ thứ gì khác.

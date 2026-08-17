@@ -3302,6 +3302,45 @@ def t113_probe_github_phai_nhan_credential_DA_CHUAN_HOA():
 
 
 @ca
+def t114_ngan_sach_phu_CA_khoi_kha_dung_va_khong_thanh_THIEU():
+    """Trần phải phủ CẢ khối khả dụng, và hết ngân sách KHÔNG thành "thiếu công cụ".
+
+    Hai P2 cross-review PR "#143", và cả hai là nửa việc tôi làm dở ở lượt trước:
+      · khối `KHA_NANG` chạy NGOÀI mọi trần — mà nó gọi `gh`/`codex`/`claude`, đúng
+        loại lệnh chậm nhất. Một trần chỉ phủ nửa lượt chạy thì không phải trần.
+      · hết ngân sách vẫn rơi vào `thieu_bat_buoc`, nên `doctor` vẫn trả 12 và vẫn
+        nói "THIEU". Lượt trước tôi tách được cái NHÃN mà chưa tách cái QUYẾT ĐỊNH;
+        đổi tên chỗ hỏng mà giữ nguyên kết luận thì chưa sửa gì.
+    """
+    m = _tai_launcher_thu()
+    m.CONG_CU = [{"ten": "cham", "bat_buoc": True, "ung_vien": ["cham"],
+                  "vi_sao": "thu", "cai": {"*": "cai cham"}}]
+    m.MO_DUN_PY = []
+    da_goi = []
+    m.KHA_NANG = [{"ten": "gia", "vi_sao": "thu",
+                   "do": lambda ws, ks=False: (da_goi.append(1), ("DUNG_DUOC", "x"))[1]}]
+    m._doc_moi_truong = lambda: ({"PATH": "P"}, {"da_doc_truoc_cong_cu": True})
+    m._cac_duong_dan = lambda _c, _e: [("cham", "/gia/cham")]
+    m._tran_doctor = lambda: -1.0            # ngân sách âm = hết ngay từ đầu
+    a_ = type("A", (), {"json": True, "workspace": None, "doi_kha_dung": False})()
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        rc = m.lenh_doctor(a_)
+    d = json.loads(out.getvalue())
+
+    # (a) khối khả dụng phải TÔN TRỌNG trần — không được gọi khi đã hết ngân sách
+    bang(not da_goi, "khoi kha dung van chay du da het ngan sach")
+    kn = [k for k in d["kha_nang"] if k["ten"] == "gia"][0]
+    bang(kn["trang_thai"] == "KHONG_DO_DUOC", f"het ngan sach ma khong khai: {kn}")
+
+    # (b) chưa đo được KHÁC thiếu — hai danh sách riêng
+    bang(d["thieu_bat_buoc"] == [],
+         f"het ngan sach bi doc thanh THIEU cong cu: {d['thieu_bat_buoc']}")
+    bang(d.get("chua_do_bat_buoc") == ["cham"],
+         f"khong khai duoc muc chua do: {d.get('chua_do_bat_buoc')}")
+
+
+@ca
 def t103_nam_finding_cua_bot_review_PR128():
     """Năm mục bot codex nêu trên PR #128 — cả năm ĐO LẠI đều đúng, nên khoá cả năm.
 
@@ -4092,15 +4131,15 @@ DOT_BIEN = [
      ('    return MA_THAM_SO if hong else MA_OK', '    return MA_OK'),
      ["t52_so_hong_KHONG_duoc_im_lang"]),
     ("doctor_luon_xanh",
-     ('        if bb and (thay is None or xac_thuc_ok is False):',
-      '        if False:'),
+     ('        elif bb and (thay is None or xac_thuc_ok is False):',
+      '        elif False:'),
      ["t54_doctor_thieu_cong_cu_bat_buoc_thi_DO"]),
     # Chiều hẹp hơn: giữ phép kiểm CÓ MẶT, bỏ riêng phép kiểm XÁC THỰC. Bản cũ chỉ
     # có một đột biến "luôn xanh", nên nếu ai lỡ tay bỏ vế `xac_thuc_ok` thì không
     # mutant nào đỏ — cửa mới mà không có mutant riêng là cửa sẽ âm thầm hở lại.
     ("doctor_bo_qua_auth_hong",
-     ('        if bb and (thay is None or xac_thuc_ok is False):',
-      '        if bb and thay is None:'),
+     ('        elif bb and (thay is None or xac_thuc_ok is False):',
+      '        elif bb and thay is None:'),
      ["t105_doctor_auth_hong_thi_DO_du_binary_chay_duoc"]),
     ("khong_chup_prompt",
      ('        if any("{PROMPT_FILE}" in x for x in lenh_con):',
@@ -4157,8 +4196,7 @@ DOT_BIEN = [
     # Quay ve mot con so chon tay: bang lon len ma tran dung yen => cong cu cuoi
     # bang bi bao thieu vi HET NGAN SACH chu khong vi no hong.
     ("tran_tong_chon_tay",
-     ('    so_probe = len(CONG_CU) + sum(1 for c in CONG_CU if c.get("xac_thuc"))\n'
-      '    return max(30.0, PROBE_TIMEOUT_GIAY * so_probe + 30.0)',
+     ('    return max(30.0, PROBE_TIMEOUT_GIAY * so_probe + 30.0)',
       '    return 120.0'),
      ["t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong"]),
     # Het ngan sach bi dan nhan "cong cu hong" — dung cai nhan sai dot nay di sua.
@@ -4167,8 +4205,18 @@ DOT_BIEN = [
       '                co_mat_nhung_hong = {"goi_bang": ten_uv, "duong_dan": d,'),
      ["t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong"]),
     # Khong noi credential da chuan hoa vao probe => van di bang chuoi giu cho.
+    # Khoi kha dung chay ngoai tran => tran chi phu nua luot chay.
+    ("kha_dung_chay_ngoai_tran",
+     ('        if time.monotonic() >= het_han:', '        if False:'),
+     ["t114_ngan_sach_phu_CA_khoi_kha_dung_va_khong_thanh_THIEU"]),
+    # Het ngan sach lai roi vao `thieu_bat_buoc` — doi ten cho hong ma giu ket luan.
+    ("het_ngan_sach_van_thanh_thieu",
+     ('        if bb and het_ngan_sach is not None and thay is None:',
+      '        if False:'),
+     ["t114_ngan_sach_phu_CA_khoi_kha_dung_va_khong_thanh_THIEU"]),
     ("probe_github_bo_qua_moi_truong_chuan_hoa",
-     ('    mt = moi_truong or dict(os.environ)', '    mt = dict(os.environ)'),
+     ('    if moi_truong is None:\n        moi_truong = _MOI_TRUONG_DA_DOC',
+      '    if True:\n        moi_truong = dict(os.environ)'),
      ["t113_probe_github_phai_nhan_credential_DA_CHUAN_HOA"]),
     ("rest_gop_khong_do_duoc_vao_chan",
      ('        return ("khong_do_duoc", f"{type(e).__name__}", False)',

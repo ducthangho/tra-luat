@@ -286,7 +286,11 @@ không tra được.
   · **Đếm SỰ CÓ MẶT của một đường thay vì KHẢ NĂNG của nó — lỗi này đã tái phát.** `t103`
   sinh ra vì bản cũ đếm `shutil.which("gh")` là "đường mở"; rồi chính tôi thêm `rest-chung`
   (`/rate_limit`, MỞ nhưng không đọc nổi PR nào) vào `any(...)` và `t103` đỏ ngay. Chỉ đường
-  **LÀM ĐƯỢC VIỆC** (`git`, `gh-cli` đã xác thực, `rest-kho`) mới được tính vào `DUNG_DUOC`.
+  **LÀM ĐƯỢC VIỆC** mới được tính vào `DUNG_DUOC`, và tập ấy là **`git` · `gh-kho` · `rest-kho`**
+  — KHÔNG có `gh-cli`. Đó là lần sửa thứ ba: `gh auth status` hỏi `/user`, tức đường proxy CHO
+  PHÉP, nên nó xanh trong khi mọi thao tác kho trả 403. "Đã xác thực" không phải "làm được việc";
+  `gh-kho` chạy thật `gh api repos/<slug>`. `gh-cli` và `rest-chung` vẫn được ĐO và IN ra làm
+  chẩn đoán, chỉ không còn quyền quyết định.
 - **Refresh token của codex XOAY VÒNG ⇒ `CODEX_AUTH_JSON` là ảnh chụp CHẾT NHANH.** Mỗi lần
   codex làm mới token, bản cũ bị vô hiệu — kể cả bản đang nằm trong biến. Đo 16-08: chuỗi
   vừa dán xong, đưa xuống đĩa khớp từng byte, vẫn `refresh_token_invalidated`. Chép base64

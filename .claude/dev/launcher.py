@@ -1735,7 +1735,19 @@ def _tran_doctor() -> float:
     Nên trần phải LỚN LÊN THEO BẢNG. Cộng cả mục `xac_thuc` vì chúng cũng tiêu hạn,
     và cộng biên cho phần đo khả dụng chạy SAU vòng lặp.
     """
-    so_probe = len(CONG_CU) + sum(1 for c in CONG_CU if c.get("xac_thuc"))
+    # ĐẾM ĐÚNG SỐ PROBE SẼ CHẠY, không đếm số DÒNG trong bảng (P2 review "#143").
+    # `_cac_duong_dan` trả MỌI executable khớp trong PATH — `python` có ba ứng viên
+    # (`python3`/`python`/`py`), và một máy có nhiều bản `rg` thì mỗi bản là một
+    # probe. Lấy `len(CONG_CU)` là giả định mỗi công cụ đúng một phép đo, tức lại
+    # đặt trần theo thứ ta MONG chứ không theo thứ sẽ CHẠY.
+    moi_truong = dict(os.environ)
+    so_probe = 0
+    for c in CONG_CU:
+        try:
+            n = len(_cac_duong_dan(c, moi_truong))
+        except OSError:
+            n = len(c.get("ung_vien") or [1])
+        so_probe += max(1, n) + (1 if c.get("xac_thuc") else 0)
     return max(30.0, PROBE_TIMEOUT_GIAY * so_probe + 30.0)
 
 
@@ -2560,7 +2572,16 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     Vì vậy "gọi GitHub không được" là KẾT LUẬN SAI ở container này: hai trong bốn
     đường vẫn mở. Hàm này trả về ĐƯỜNG NÀO mở, để không ai kết luận theo đường hỏng.
     """
-    mt = moi_truong or dict(os.environ)
+    # LÙI VỀ BẢN ĐÃ CHUẨN HOÁ, KHÔNG VỀ `os.environ` THÔ (P2 review "#143").
+    # `_MOI_TRUONG_DA_DOC` chỉ được đặt trong `lenh_doctor`; mọi đường gọi khác
+    # (bảng `KHA_NANG` từ lệnh khác, hoặc gọi trực tiếp) sẽ truyền `None`, và lùi
+    # về `os.environ` là lùi về ĐÚNG bản giữ chỗ mà `_doc_moi_truong` vừa loại.
+    # Sửa một chỗ rồi để đường lùi mang lại cái sai thì chưa sửa.
+    if moi_truong is None:
+        moi_truong = _MOI_TRUONG_DA_DOC
+    if moi_truong is None:
+        moi_truong, _ = _doc_moi_truong()
+    mt = moi_truong
     tok = mt.get("GH_TOKEN") or None
     duong = []
     if ws:
@@ -2885,6 +2906,7 @@ def lenh_doctor(a) -> int:
     he = platform.system()
     ket = []
     thieu_bat_buoc = []
+    chua_do_bat_buoc = []          # bắt buộc nhưng HẾT NGÂN SÁCH trước khi đo tới
     # Trần tổng cho cả vòng đo: `doctor` là thứ người ta chạy KHI đã nghi ngờ môi
     # trường, nên nó không được phép treo — mỗi probe có hạn riêng, và cả lượt có
     # hạn chung.
@@ -2938,7 +2960,14 @@ def lenh_doctor(a) -> int:
         if thay is None and het_ngan_sach:
             muc["chua_do_duoc"] = het_ngan_sach
         ket.append(muc)
-        if bb and (thay is None or xac_thuc_ok is False):
+        # HẾT NGÂN SÁCH KHÔNG PHẢI THIẾU CÔNG CỤ (P2 review "#143"). Lượt trước tôi
+        # tách được cái NHÃN (`chua_do_duoc`) nhưng chưa tách cái QUYẾT ĐỊNH: mục ấy
+        # vẫn rơi vào `thieu_bat_buoc` nên `doctor` vẫn trả 12 và vẫn nói "THIEU".
+        # Đổi tên chỗ hỏng mà giữ nguyên kết luận thì chưa sửa gì. Chưa đo được thì
+        # phải nói CHƯA ĐO ĐƯỢC — `None ≠ False`.
+        if bb and het_ngan_sach is not None and thay is None:
+            chua_do_bat_buoc.append(c["ten"])
+        elif bb and (thay is None or xac_thuc_ok is False):
             thieu_bat_buoc.append(c["ten"])
 
     # --- KHẢ DỤNG, không chỉ CÓ MẶT.
@@ -2952,6 +2981,18 @@ def lenh_doctor(a) -> int:
         ws = None                       # doctor phải chạy được cả ngoài repo
     kha_nang, chua_xac_thuc, chua_chung_minh = [], [], []
     for k in KHA_NANG:
+        # KHỐI NÀY CŨNG PHẢI TIÊU NGÂN SÁCH CHUNG (P2 review "#143"). Trước đây nó
+        # chạy NGOÀI mọi trần: `doctor` có thể vượt xa hạn tổng vì các phép đo khả
+        # dụng, mà chúng gọi `gh`/`codex`/`claude` — đúng loại lệnh chậm nhất. Một
+        # trần chỉ phủ nửa lượt chạy thì không phải trần.
+        # Hết ngân sách ở đây là KHÔNG ĐO ĐƯỢC, không phải "chưa xác thực": trạng
+        # thái thứ ba, `None ≠ False`.
+        if time.monotonic() >= het_han:
+            kha_nang.append({"ten": k["ten"], "trang_thai": "KHONG_DO_DUOC",
+                             "chi_tiet": "doctor het ngan sach truoc khi do toi day",
+                             "vi_sao": k["vi_sao"], "khac_phuc": k.get("khac_phuc", "")})
+            chua_chung_minh.append(k["ten"])
+            continue
         try:
             tt, mo_ta = k["do"](ws, getattr(a, "kiem_song", False))
         except Exception as e:           # doctor KHÔNG được chết vì một phép đo
@@ -3013,6 +3054,9 @@ def lenh_doctor(a) -> int:
                                 "he_dieu_hanh": he,
                                 "python_dang_chay": sys.version.split()[0],
                                 "moi_truong": moi_truong_cong_khai,
+                                # Tách hẳn khỏi `thieu_bat_buoc`: "chưa đo được"
+                                # không phải "đo được là thiếu".
+                                "chua_do_bat_buoc": chua_do_bat_buoc,
                                 "cong_cu": ket, "mo_dun_python": mo_dun,
                                 "thieu_bat_buoc": thieu_bat_buoc,
                                 "kha_nang": kha_nang, "chua_xac_thuc": chua_xac_thuc,
@@ -3060,6 +3104,9 @@ def lenh_doctor(a) -> int:
         for vt, ds in bien["nhom_trung_gia_tri"].items():
             _in_an_toan(f"  NGHI GIU CHO  {vt}  {len(ds)} bien cung gia tri: "
                         f"{', '.join(ds)}")
+        if chua_do_bat_buoc:
+            _in_an_toan("CHUA DO DUOC (het ngan sach, KHONG phai thieu): "
+                        + ", ".join(chua_do_bat_buoc))
         _in_an_toan("KET LUAN  : " + ("DU CONG CU BAT BUOC" if not thieu_bat_buoc
                                       else "THIEU " + ", ".join(thieu_bat_buoc)))
         # Mỗi khả năng một cách chữa RIÊNG. Bản trước gợi ý `chuan-bi` cho MỌI mục —

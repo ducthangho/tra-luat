@@ -381,7 +381,30 @@ def _maybe_heavy_lock(kind: str, root: Path, wait_seconds: float) -> Iterator[tu
 # không thể từ chối, nên không còn gì để quét và không còn cửa sổ để lách.
 # Đo được: `cgroup.kill` giết sạch đúng kẻ đẻ lại ấy trong 0,0002s, 0 sống sót.
 #
-# PHẠM VI, KHAI THẲNG: chỉ Linux có cgroup v2. Windows đã có Job Object — cùng
+# PHẠM VI CỦA CHÍNH LỚP CGROUP — KHAI THẲNG, ĐỪNG ĐỂ AI ĐỌC RỘNG HƠN.
+#
+# ĐÓNG ĐƯỢC (đo được): thoát VÔ TÌNH — `setsid`, mồ côi rồi được `init` nhận
+# nuôi, đẻ trong lúc dọn, sinh sau khi hạn vỡ. Đó đúng là thứ đã gãy BỐN vòng vá,
+# và cgroup đóng nó bằng MỘT thao tác nguyên tử của nhân, không quét, không đua.
+#
+# KHÔNG ĐÓNG ĐƯỢC: tiến trình CỐ TÌNH tự ghi PID của mình vào `cgroup.procs` của
+# cgroup cha để trèo ra. Uỷ quyền cgroup KHÔNG ĐẶC QUYỀN về nguyên tắc không chặn
+# nổi: quyền cần để chuyển VÀO chính là quyền cho phép trèo RA một tầng. Muốn
+# chặn thật thì phải có helper đặc quyền làm việc chuyển, hoặc cgroup namespace —
+# cả hai đều bắt gate phải có quyền root ở mọi nơi nó chạy, kể cả máy người dùng.
+# HIỆN TẠI KHE NÀY KHÔNG CHẶN VÀ CŨNG CHƯA PHÁT HIỆN ĐƯỢC — nói thẳng, vì một
+# lời khai nửa vời ở đây còn tệ hơn không khai. Đã thử một bản phát hiện (nhớ ai
+# từng ở trong cgroup rồi kiểm lại từng đứa) và ĐO THẤY NÓ SAI CẢ HAI CHIỀU:
+#   · kẻ trèo ra TRƯỚC lượt dọn thì chưa từng được ghi nhớ ⇒ lọt;
+#   · tiến trình đã chết nhưng chưa được cha gặt (zombie) vẫn còn
+#     `/proc/<pid>/stat` với đúng `starttime` ⇒ khoá danh tính khớp ⇒ HÔ OAN.
+# Một bộ phát hiện hô oan sẽ làm cổng mất tin cậy nhanh hơn là cái lỗ nó vá. Nên
+# nó bị TÁCH RA làm việc riêng, không nhét nửa vời vào đây (xem `ops/NO_KY_THUAT.md`).
+#
+# Nghĩa là: `giet_tron_ven: true` KHÔNG bao gồm lời hứa "không ai trèo ra". Nó chỉ
+# nói "cgroup đã rỗng và đã xác nhận rỗng". Ai đọc bản ghi phải hiểu đúng chừng ấy.
+#
+# PHẠM VI NỀN: chỉ Linux có cgroup v2. Windows đã có Job Object — cùng
 # một kiến trúc "vùng chứa, giết cả vùng". macOS và FreeBSD KHÔNG có cả hai, nên
 # ở đó vẫn là vòng quét cây và lỗ "đẻ trong lúc dọn" CÒN NGUYÊN; `giet_tron_ven`
 # và `co_che_cach_ly` là thứ nói thật về điều đó.

@@ -47,6 +47,13 @@ python3 .claude/dev/launcher.py run \
 | bộ test | `21/21` (pwsh 7.4.6, `TMPDIR=/dev/shm`, ~15s) |
 | cổng | eol ok=true checked=398 · lease_publish 31/31 · release-verify ok=true · golden rc=0 · `file_count` 179 |
 
+> **Đính chính một con số trong lịch sử commit.** Thông điệp của commit `9a133a4` ghi
+> `eol … checked=400`; phép đo thật in **398**. Người vá gõ số trước khi đo. Commit đã đẩy
+> nên không sửa được tại chỗ (sửa lịch sử đã công bố là thứ khác hẳn, đắt hơn nhiều so với
+> một dòng đính chính). **Số đúng ở bảng trên.** Ghi ra vì kho này đo lời khai, và một con
+> số sai trong thông điệp commit là một lời khai sai trong bản ghi vĩnh viễn — dù nó chỉ
+> lệch 2.
+
 ## SÁU LƯỢT, SÁU LẦN TÌM RA THỨ THẬT — đọc bảng này trước khi nghĩ "chắc sạch rồi"
 
 | lượt | reviewer | tìm ra |

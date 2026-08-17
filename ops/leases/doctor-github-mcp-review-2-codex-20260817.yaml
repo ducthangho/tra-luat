@@ -146,3 +146,4 @@ canh_bao_moi_truong_luc_cap: >-
   quan ly", đã đăng nhập bằng ChatGPT). Cảnh báo còn lại là `SAP_HET_HAN`: ảnh chụp
   `CODEX_AUTH_JSON` đã cũ ~26h, mà refresh token xoay vòng — nếu reviewer không khởi động
   được thì đọc `launcher.py doctor` trước khi nghi bất cứ thứ gì khác.
+posted_comment_id: 5312208278   # workflow ghi, ĐỪNG sửa tay

@@ -1,0 +1,147 @@
+# Lease REVIEWER lượt 3 — PR #150. PHẠM VI ĐÓNG BĂNG. **CÙNG NHÀ CUNG CẤP** — SAI LỆCH §8.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+#
+# ĐỌC KHỐI NÀY TRƯỚC KHI ĐỌC BẤT CỨ SỐ NÀO BÊN DƯỚI.
+#
+# Lượt này DÙNG `claude` LÀM REVIEWER TRONG KHI NGƯỜI VÁ CŨNG LÀ `claude`. §8 của
+# `docs/PROTOCOL_DA_PHIEN.md` đòi cross-provider, và nói thẳng rằng với workflow / security
+# path / credential boundary / dispatcher / migration / LIVE adapter thì
+# `same_provider_approved` "một mình KHÔNG thay mức assurance bắt buộc".
+#
+# PR NÀY ĐỤNG `.github/workflows/ci.yml` ⇒ ĐÚNG một trong các phạm vi ấy.
+#
+# Vì vậy `assurance_target` dưới đây ghi `same_provider_approved`, KHÔNG phải
+# `cross_approved`. Đây là lease ĐẦU TIÊN của kho không ghi `cross_approved` (19 lease
+# trước đều ghi) — ghi ra để ai đọc bảng sau này thấy ngay chỗ gãy, thay vì phải suy.
+#
+# KẾT LUẬN CỦA LƯỢT NÀY KHÔNG ĐỦ ĐỂ LAND theo protocol. Nó là PHẢN BIỆN BỔ SUNG. Muốn land
+# thì cần một trong hai: cross-review `codex` khi có quota, hoặc human review có audit của
+# chủ kho. Chủ kho quyết định thế nào là việc của chủ kho — nhưng bản ghi phải nói đúng
+# thứ đã xảy ra.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: don-nhanh-base-review-3-claude-20260817
+role: reviewer
+provider: claude
+reviewer: claude
+executor: claude
+
+# ---- SAI LỆCH §8, KHAI TƯỜNG MINH ----
+cross_provider: false
+sai_lech_giao_thuc: true
+sai_lech_dieu: '§8 — cross-provider bắt buộc cho phạm vi workflow'
+sai_lech_ly_do: '`codex` sắp hết quota'
+sai_lech_ai_chap_nhan: ducthangho
+sai_lech_chap_nhan_luc: 'direct, in-session, 2026-08-17 ("do Codex sắp hết quota dùng tạm Reviewer cũng là Claude và tôi chấp nhận")'
+assurance_target: same_provider_approved
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  §8 cấm dùng `review_deferred` cho phạm vi workflow và nói `same_provider_approved` một
+  mình không thay mức bắt buộc. PR này sửa `.github/workflows/ci.yml`. Nên kể cả khi lượt
+  này ra `approve`, điều kiện land theo protocol VẪN CHƯA đủ — cần cross-review `codex` khi
+  có quota, hoặc human review có audit.
+reviewer_cung_provider_dieu_kien: >-
+  §2: "Reviewer cùng provider với Executor phải là PHIÊN MỚI, read-only và được ghi mức
+  assurance thấp hơn cross-provider." Phiên mới: launcher sinh tiến trình `claude` RIÊNG.
+  Read-only: sẽ ĐO sau khi chạy (`git status --porcelain` rỗng và HEAD không đổi trong
+  worktree dùng một lần), KHÔNG tin cờ quyền — cùng doctrine "đòi bằng chứng dương".
+
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: 0ce4d4917afb955c76b17df44657e88eccc6a39f
+branch: ops/don-nhanh-giu-base-pr
+base_sha: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+sha_luot_truoc: 1511dd75a5a4f65c623738f2dc91e384b96bad9a
+target_branch_neu_land: master
+target_pull_request: 150
+
+pham_vi_dong_bang: true
+scope_files_can_xet: 2
+scope_note: >-
+  Delta `1511dd7..0ce4d49` trong `scripts/`: `don-nhanh.ps1` (+21/−4) và
+  `don-nhanh_test.ps1` (+39/−1). Không gì khác. Finding ngoài hai tệp ⇒ `Nợ khai báo`.
+
+prompt_path: ops/prompts/don-nhanh-base-review-3-claude-20260817.md
+prompt_sha256_required: b21efcd97bdcf88c54ce643c4e191d35d45ebb38edb3b6f048830196a1af9db8
+
+granted_by: ducthangho
+granted_on_instruction: direct, in-session, 2026-08-17 ("cấp lease lượt 3 rồi chạy đi")
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  Phiên ghi lease này CHÍNH LÀ phiên đã vá, VÀ lượt này reviewer cũng là `claude`. Tức lớp
+  bảo vệ duy nhất còn lại là "phiên mới, read-only" — mỏng hơn hai lượt trước rất nhiều.
+  Prompt nói thẳng với reviewer rằng họ có CÙNG thiên kiến với người vá, và rằng "không
+  tìm được gì" nhiều khả năng nghĩa là nhìn theo đúng cách người vá đã nhìn.
+
+leased_at_utc: '2026-08-17T13:15:00Z'
+lease_expires_at_utc: '2026-08-18T13:15:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 0
+
+muc_kiem:
+- id: hoi-quy-luot-2-da-dong-chua
+  note: >-
+    `gh` in cảnh báo ra STDERR + `[]` ra stdout, rc=0 ⇒ đòi BA vế: `rc=0`, base của PR đang
+    mở ĐƯỢC GIỮ, nhánh rác BỊ XOÁ. Một vế thôi thì không phân biệt được "chạy đúng" với
+    "từ chối oan" hay "xoá mù".
+- id: tach-luong-co-dung-tren-moi-ca-khong
+  note: >-
+    Lọc theo kiểu `ErrorRecord`. Thử JSON NHIỀU DÒNG trên stdout; cảnh báo in SAU hoặc XEN
+    GIỮA các dòng JSON; stdout rỗng mà stderr có nội dung với rc=0; và một tệp `gh` trên
+    PATH nhưng KHÔNG executable.
+- id: tim-dot-bien-song-sot-TRONG-hai-tep
+  note: >-
+    Người vá chạy ba (bản 1511dd7 + M7 + M8). Có cái thứ tư không? "Không tìm được" là kết
+    luận hợp lệ.
+- id: hinh-dang-loi-lap-lai
+  note: >-
+    HAI lượt liên tiếp, HAI finding, CÙNG MỘT HÀM đọc `gh`. `CLAUDE.md`: cùng một hình dạng
+    lặp ba lần trở lên thì câu hỏi đúng là "có nên làm việc này không", không phải "vá thế
+    nào". Reviewer ĐƯỢC PHÉP kết luận nên đổi KIẾN TRÚC thay vì vá tiếp — nếu có bằng chứng.
+
+so_lieu_nguoi_va_bao:
+  bo_test: 15/15 — pwsh 7.4.6, TMPDIR=/dev/shm
+  bang_chung_duong: 'bản 1511dd7 (SHA lượt 2 đã review) ⇒ 14/15, ĐỎ đúng t14 — tái hiện ĐỘC LẬP hồi quy'
+  dot_bien: 'M7 gộp lại stderr vào JSON ⇒ 14/15 (đỏ t14) · M8 tách luồng nhưng bỏ kiểm mã thoát ⇒ 13/15 (đỏ t10 và t15) — chứng minh bản vá KHÔNG làm yếu phép kiểm cũ'
+  do_phu_tro_truoc_khi_sua: >-
+    Căn cứ chọn cách tách luồng: gh in cảnh báo + `[]`, rc=0 ⇒ `$het.Count = 2` (1
+    ErrorRecord, 1 stdout), stdout nối lại `"[]"`, parse OK. KIỂM LẠI PHÉP ĐO NÀY — nó là
+    căn cứ của cả bản vá.
+  cong_khac: 'actionlint rc=0 · eol ok=true checked=381 violations=0 · lease_publish 31/31 · release-verify ok=true failed=0 · golden rc=0 · file_count 179'
+
+no_da_khai_KHONG_neu_lai:
+- id: bo-qua-lop-pr-khong-kiem-gi
+- id: phu-thuoc-gh
+- id: hai-duong-se-troi-lech
+- id: tl-selftest-khong-do-duoc
+  note: Cả hai lượt trước đều KHÔNG xác nhận được. Giữ nguyên "chưa ai đo".
+- id: lease-khong-nam-trong-cay-duoc-review
+  note: >-
+    NỢ MỚI do reviewer lượt 2 nêu và ĐÚNG: cây checkout ở `reviewed_sha_required` không
+    chứa lease của chính lượt ấy (lease commit SAU), nên reviewer đọc `ops/leases/` trong
+    cây lại thấy lease LƯỢT TRƯỚC rồi báo lệch băm — trong khi prompt dặn "nguồn có thẩm
+    quyền là tệp lease trong kho". Quy ước ấy TỰ MÂU THUẪN ở mọi lượt N>1; lượt 1 không lộ
+    chỉ vì chưa có lease cũ để nhầm. CHỮA TẠM ở lượt này: prompt nêu đích danh lệnh
+    `git show origin/<nhánh>:ops/leases/<lease lượt 3>` và cảnh báo lease trong cây là bản
+    CŨ. Chữa gốc (đổi quy ước neo) chưa làm.
+
+ngoai_pham_vi_da_biet:
+- id: khong-doi-hanh-vi-ops-don-ref
+  note: '`ops-don-ref.yml` KHÔNG bị đụng ở cả ba lượt.'
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T13:11:16Z'
+master_sha_at_grant: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+lease_song_khac_luc_cap: 'Lease lượt 1 và 2 của chính PR này đã đóng. Không có lease review nào khác đang mở.'
+canh_bao_moi_truong_luc_cap: >-
+  Thiếu `pwsh` thì khai KHÔNG ĐO ĐƯỢC. Hai lượt trước phải đặt `TMPDIR=/dev/shm` vì sandbox
+  khoá `/tmp`.

@@ -16,6 +16,7 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 |---|---|---|
 | `pr134-ci-lease-gate-codex-verdict.md` | `windows-chua-do-that` | Verdict báo `30/30`, nhưng con số ấy **đo trên Linux** — reviewer từ chối gọi Windows là đạt vì chưa chạy thật. **CẬP NHẬT sau khi verdict được ghi:** lượt Windows THẬT đầu tiên đã chạy (`workflow_dispatch` run `31968805678`, head `3ee62330`) và **xanh** — bước `lease-publish selftest` `success` trên `windows-latest`. Nhưng phần reviewer cảnh báo thì **vẫn chưa chứng minh được**: `t19_symlink_tro_RA_NGOAI_kho_thi_CHAN` bắt `OSError`/`NotImplementedError` rồi `return`, mà harness **vẫn tính ca đó vào số đạt**, nên một lượt Windows xanh có thể chứa một ca CÓ MẶT mà KHÔNG ĐO (đúng bệnh `t24`). Không đọc được đầu ra in ra của bước ấy để xác nhận — `get_job_logs` chỉ trả phần đuôi, và đuôi không chạm tới bước đó. **Xanh trên Windows ⇒ bộ chạy được; KHÔNG ⇒ mọi ca đều đo.** Nợ có sẵn của bộ test, **không** do PR "#134" tạo ra; cách chữa reviewer đề nghị là cho `t19` báo `SKIP` riêng và không tính vào số đạt. |
 | `wp55-r2-review-5-codex-verdict.md` | `mutable-master-ref-in-repro-command` | Khối bash tái hiện `merged-tree-doctrine-false-positive` dùng `origin/master`, một ref **DI ĐỘNG**. Master lúc đo là `3d2c52d62696b0c7c190fd891115f543b0f9cb55`. **Thay cả hai chỗ `origin/master` bằng SHA đó**, nếu không bạn đang đo một cây khác. |
+| `tao-tag-luu-tru-review-1-codex-verdict.md` | `so-do-thieu-actionlint` | Mọi con số trong verdict (`81/82`, `73/74`, `79/82`, `80/82`) đo ở môi trường **KHÔNG có `actionlint`**, nên đã trừ sẵn đúng một ca — phép `actionlint` fail-close. Ở máy **có** `actionlint` thì cộng 1 vào từng số (`82/82`, `74/74`, `80/82`, `81/82`); chính verdict đã quy đổi sẵn cho hai số đột biến. **Đừng đọc `81/82` thành "có một ca hỏng"** — nó là bằng chứng chốt fail-close CHẠY. Hệ quả thật: `actionlint` trên bản vá này chỉ có **một** nguồn (người vá), reviewer khai `KHÔNG ĐO ĐƯỢC` và từ chối thay bằng PyYAML. |
 
 ## Mục lục
 
@@ -29,6 +30,37 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 | [`wp55-r4-review-1-codex-verdict.md`](wp55-r4-review-1-codex-verdict.md) | [`.receipt.yaml`](wp55-r4-review-1-codex-verdict.receipt.yaml) | `wp55-r4-review-1-codex-20260816` | `do_not_land` | `2432e3f6` | 6578 |
 | [`wp55-r4-review-2-codex-verdict.md`](wp55-r4-review-2-codex-verdict.md) | [`.receipt.yaml`](wp55-r4-review-2-codex-verdict.receipt.yaml) | `wp55-r4-review-2-codex-20260816` | `approve` | `817598e2` | 4525 |
 | [`pr134-ci-lease-gate-codex-verdict.md`](pr134-ci-lease-gate-codex-verdict.md) | [`.receipt.yaml`](pr134-ci-lease-gate-codex-verdict.receipt.yaml) | — (không lease) | `approve_with_findings` | `ae755d10` | 7975 |
+| [`doctor-github-mcp-review-6-codex-verdict.md`](doctor-github-mcp-review-6-codex-verdict.md) | [`.receipt.yaml`](doctor-github-mcp-review-6-codex-verdict.receipt.yaml) | `doctor-github-mcp-review-6-codex-20260817` | `approve` | `45a06e48` | 2160 |
+| [`doctor-github-mcp-review-9-codex-verdict.md`](doctor-github-mcp-review-9-codex-verdict.md) | [`.receipt.yaml`](doctor-github-mcp-review-9-codex-verdict.receipt.yaml) | `doctor-github-mcp-review-9-codex-20260817` | `approve` | `0826629a` | 1156 |
+| [`tao-tag-luu-tru-review-1-codex-verdict.md`](tao-tag-luu-tru-review-1-codex-verdict.md) | [`.receipt.yaml`](tao-tag-luu-tru-review-1-codex-verdict.receipt.yaml) | `tao-tag-luu-tru-review-1-codex-20260817` | `approve` | `525c824e` | 2841 |
+
+Hàng `tao-tag-luu-tru-review-1` là hàng **`approve` ở lượt 1** duy nhất của bảng này, nên
+nó dễ bị đọc sai theo hướng ngược lại: không phải "việc dễ", mà là lượt đầu tiên áp
+**phạm vi đóng băng** ngay từ đầu — hai tệp, `+36/−4`, lease hỏi đúng bốn câu ĐO ĐƯỢC, và
+mọi thứ không phải hồi quy/lỗ an ninh/P1 bị bắt vào `## Nợ khai báo` thay vì `## Findings`.
+Đây là cùng cách làm đã kéo chuỗi `doctor-github-mcp` ra khỏi tám lượt `changes_requested`.
+Nội dung nó duyệt là bản vá **MỞ một chốt an ninh** (`tao-tag` được tạo `luu-tru/*`), nên
+biên nhận ghi riêng từng biên đã đo: `xoa-tag luu-tru/*` **vẫn DỪNG**, `xoa-nhanh` **không
+bị nới**, và `luu-tru-gia/` `xluu-tru/` **không khớp oan**. Reviewer cũng **bác một nửa**
+lập luận của người vá — về kỹ thuật thì "đặt tên tag khác" vẫn qua được chốt `xoa-nhanh`;
+lý do thật để vá là **quy ước không gian tên**, không phải "workflow không chạy được".
+
+Hai hàng `doctor-github-mcp-review-*` là việc **dev-side ngoài packet** — nó sửa
+`.claude/dev/launcher.py`, không đụng `write_set` của wp55, và lease ghi `attempts 0/0`.
+**Đọc kỹ chỗ này: nó là lượt THỨ SÁU, và năm lượt trước KHÔNG có tệp ở đây.** Cả năm đều
+`changes_requested`, và bốn lượt đầu reviewer đều tìm được đột biến SỐNG SÓT ở cùng một lớp
+(bộ test đo ĐỒ GIẢ chứ không đo HỢP ĐỒNG) — mỗi lần phải đổi KIẾN TRÚC chốt chứ không phải
+thêm điều kiện. Chúng chỉ sống trong log chạy dưới `scratchpad/`, tức NGOÀI kho, nên chuỗi
+lập luận dẫn tới `approve` này **không tra lại được đầy đủ từ kho**. Biên nhận khai thẳng
+điều đó ở `luot_truoc_khong_duoc_ghi_thanh_tep`, kèm `lease_id`/`reviewed_sha`/`short_id`
+của từng lượt để ai muốn thì còn biết đường tìm. Một hàng `approve` đứng một mình ở bảng
+này rất dễ đọc thành "duyệt ngay lượt đầu"; nó không phải vậy.
+
+**Hàng `review-9` KHÔNG phải lượt thứ chín của cùng một bản vá.** Lượt 6 `approve`
+trên nền `e38b0be`; rồi #143 land và sửa CHÍNH hàm ấy, nên nền thành `c7ad260` và
+verdict lượt 6 không còn phủ mã. Lượt 7..9 xét **BẢN HOÀ** — mã khác, nền khác.
+Lượt 9 đóng băng phạm vi (không ca mới, không hàm mới) và ra `approve` với
+**Findings TRỐNG và Nợ khai báo TRỐNG** — chín lượt trước không lượt nào trống cả hai.
 
 Ba hàng đầu của revision 4 (`di-tru`, `viet-lai`, `rebase`) là việc **phụ trợ** — mỗi lượt
 review đúng một commit trên master, một tệp `CLAUDE.md` — chứ không phải lượt cross-review
@@ -73,6 +105,33 @@ băm `7dd8e203…` — nó khớp `published_first.sha256_tai_commit` chứ **kh
 dung vẫn tải về được, đúng byte.
 
 **Xoá tag = biến `published_*` thành SHA không tra được.** Đó giờ là ref bền duy nhất giữ chúng.
+
+### Hai tag của 17-08 — và chỗ trang này từng nói một điều không còn đúng
+
+| commit | tag giữ nó | verdict |
+|---|---|---|
+| `de86c247` | `luu-tru/doctor-github-mcp-verdict-9` | `doctor-github-mcp-review-9` |
+| `9d3e3e9e` | `luu-tru/tao-tag-luu-tru-verdict-1` | `tao-tag-luu-tru-review-1` |
+
+Cùng phép đo với sáu tag `wp55-r4` ở trên — `git init` kho **trống**, fetch **đúng một** ref
+`refs/tags/…`, băm lại tệp verdict trong kho ấy: **2/2 khớp cả `verdict_sha256` lẫn
+`verdict_bytes`** (`0923678b…` 1156 byte · `be342cc4…` 2841 byte). Một kho không có gì
+ngoài cái tag vẫn dựng lại được verdict đúng từng byte.
+
+**Chỗ đáng ghi không phải hai cái tag, mà là vì sao suốt một thời gian không tạo được
+cái nào.** Chốt `tao-tag` của `ops-don-ref.yml` cấm đúng không gian tên `luu-tru/`, trong
+khi chốt `xoa-nhanh` của **cùng tệp ấy** dặn nguyên văn *"Tạo tag TRƯỚC (hành động
+tao-tag), rồi mới xoá"*. Không lượt chạy nào thoả được cả hai vế — workflow tự chặn trình
+tự do chính nó quy định, và câu "chưa có tag" trong ba biên nhận không phải vì ai quên.
+PR #147 gỡ đúng chỗ đó; hai tag trên là hai lượt `tao-tag` **đầu tiên** chạy được trong
+`luu-tru/`. Một trong hai neo chính verdict đã duyệt bản vá ấy.
+
+**Biên nhận `review-6` KHÔNG có tag riêng, và điều đó không tương đương.** Commit
+`4920113a` bền nhờ **dòng dõi master** (đã đo `git merge-base --is-ancestor` → rc=0), chứ
+không nhờ mỏ neo tag. Hai thứ đó hỏng theo hai cách khác nhau: dòng dõi mất nếu master bị
+ép lùi — mà proxy egress chặn *xoá* ref lại **vẫn cho** `git push --force`, đã ghi trong
+`CLAUDE.md` — còn tag thì `xoa-tag` dưới `luu-tru/` cấm tuyệt đối. `truy_xuat_tag` của
+biên nhận ấy để `null`, không để `false`.
 
 Riêng `wp55-r4-review-1` có **hai** mốc, tách thành hai khoá: `published_first` (`b4e5c5f9`,
 commit **thêm** tệp, băm `7dd8e203…`) và `published_ban_hien_hanh` (`872679c3`, commit **sửa**

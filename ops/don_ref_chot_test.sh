@@ -43,8 +43,27 @@ PYEOF
 mkdir -p "$TAM/bin"
 cat > "$TAM/bin/gh" <<'GHEOF'
 #!/usr/bin/env bash
-[ "${2:-}" = "repos/$GITHUB_REPOSITORY" ] && { echo master; exit 0; }
-echo "gh gia: khong mong lenh nay: $*" >&2
+DONG="$*"
+echo "$DONG" >> "${GIA_LOG_CHOT:-/dev/null}"
+case "$DONG" in
+  *"repos/$GITHUB_REPOSITORY --jq .default_branch"*) echo master; exit 0 ;;
+  *"git/ref/heads/"*)
+      # SHA cua nhanh luu-tru. GIA_SHA_NHANH= rong => coi nhu doc KHONG duoc.
+      [ -n "${GIA_SHA_NHANH:-}" ] && { echo "$GIA_SHA_NHANH"; exit 0; }
+      exit 1 ;;
+  *"repos/$GITHUB_REPOSITORY/tags"*)
+      # Danh sach tag DA dereference. GIA_TAG_SHAS = trang MOT, cach nhau bang khoang trang.
+      for s in ${GIA_TAG_SHAS:-}; do echo "$s"; done
+      # TRANG HAI chi hien khi co `--paginate`. Nho no ma bo test khoa duoc chinh co ay:
+      # bo `--paginate` thi mot tag nam o trang sau tro nen vo hinh, va nhanh co tag giu
+      # se bi tu choi SAI.
+      case "$DONG" in *--paginate*) for s in ${GIA_TAG_SHAS_TRANG2:-}; do echo "$s"; done ;; esac
+      # Xuat mot phan roi HONG — ca nay khoa `pipefail`. Neu thieu pipefail thi `grep`
+      # tra 0 va chot cho xoa trong khi danh sach tag CHUA doc tron ven.
+      [ "${GIA_TAG_HONG_GIUA:-0}" = 1 ] && exit 1
+      exit 0 ;;
+esac
+echo "gh gia: khong mong lenh nay: $DONG" >&2
 exit 1
 GHEOF
 chmod +x "$TAM/bin/gh"
@@ -52,12 +71,24 @@ export PATH="$TAM/bin:$PATH" GITHUB_REPOSITORY=ducthangho/tra-luat
 
 QUA=0; HONG=0
 ca() {
-  local ten="$1" mong="$2" hd="$3" ref="$4" sha="$5" xn="$6"
-  env HANH_DONG="$hd" REF="$ref" SHA="$sha" XAC_NHAN="$xn" \
+  local ten="$1" mong="$2" hd="$3" ref="$4" sha="$5" xn="$6"; shift 6
+  : > "$TAM/gialog_chot"
+  env HANH_DONG="$hd" REF="$ref" SHA="$sha" XAC_NHAN="$xn" GIA_LOG_CHOT="$TAM/gialog_chot" "$@" \
       bash "$TAM/chot.sh" >"$TAM/out" 2>&1
   local rc=$?
   if [ "$rc" = "$mong" ]; then QUA=$((QUA+1)); printf '  QUA   %s\n' "$ten"
   else HONG=$((HONG+1)); printf '  ĐỎ    %s  (rc=%s, mong %s)\n' "$ten" "$rc" "$mong"; sed 's/^/          /' "$TAM/out" | tail -3; fi
+}
+
+# Đo NHẬT KÝ của bước chốt. Cần vì mã thoát không phân biệt được "dừng vì không đọc
+# được SHA" với "dừng vì không tag nào giữ" — cả hai đều là 2. Đã đo: thiếu phép này
+# thì đột biến GỠ chốt "không đọc được SHA thì dừng" vẫn cho 69/69, tức chốt ấy không
+# được khoá. Fail-close mà không ai đo thì cũng chỉ là chữ.
+doi_log_chot() {
+  local ten="$1" mau="$2" mong="$3"
+  local n; n=$(grep -c -- "$mau" "$TAM/gialog_chot" 2>/dev/null || true)
+  if [ "$n" = "$mong" ]; then QUA=$((QUA+1)); printf '  QUA   %s\n' "$ten"
+  else HONG=$((HONG+1)); printf '  ĐỎ    %s  (đếm %s, mong %s)\n' "$ten" "$n" "$mong"; fi
 }
 
 echo "chốt của ops-don-ref.yml — phản chứng"
@@ -68,7 +99,23 @@ ca "xac_nhan rỗng thì DỪNG"               2 xoa-nhanh tmp-probe-2 "" ""
 ca "xac_nhan TAO cho lệnh XOÁ thì DỪNG"   2 xoa-nhanh tmp-probe-2 "" TAO
 ca "ref thường + XOA thì QUA"             0 xoa-nhanh tmp-probe-2 "" XOA
 ca "nhánh MẶC ĐỊNH thì DỪNG"              2 xoa-nhanh master "" XOA
-ca "luu-tru/** thì DỪNG"                  2 xoa-nhanh luu-tru/wp55-r4/x "" XOA
+# BẤT BIẾN mới cho `luu-tru/**`: xoá NHÁNH được, nhưng CHỈ KHI commit của nó còn tag
+# giữ. Năm ca dưới khoá đúng hợp đồng ấy — cả chiều cho phép lẫn ba chiều từ chối.
+S_LT=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+ca "luu-tru/**: có tag giữ thì QUA"       0 xoa-nhanh luu-tru/wp55-r4/x "" XOA GIA_SHA_NHANH="$S_LT" GIA_TAG_SHAS="$S_LT bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+doi_log_chot "…và CÓ đọc SHA của nhánh"   "git/ref/heads/" 1
+doi_log_chot "…và CÓ hỏi danh sách tag"   "/tags" 1
+ca "luu-tru/**: KHÔNG tag nào giữ thì DỪNG" 2 xoa-nhanh luu-tru/wp55-r4/x "" XOA GIA_SHA_NHANH="$S_LT" GIA_TAG_SHAS="bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+ca "luu-tru/**: kho KHÔNG có tag nào thì DỪNG" 2 xoa-nhanh luu-tru/wp55-r4/x "" XOA GIA_SHA_NHANH="$S_LT" GIA_TAG_SHAS=""
+ca "luu-tru/**: không đọc được SHA thì DỪNG" 2 xoa-nhanh luu-tru/wp55-r4/x "" XOA GIA_TAG_SHAS="$S_LT"
+# DỪNG SỚM: không đọc được SHA thì KHÔNG được hỏi tiếp danh sách tag. Nếu vẫn hỏi thì
+# nghĩa là chốt đã bị gỡ và luồng chảy tiếp — mã thoát vẫn 2 nên chỉ nhật ký thấy.
+doi_log_chot "…và KHÔNG hỏi danh sách tag (dừng sớm)" "/tags" 0
+ca "luu-tru/**: xoá TAG thì vẫn CẤM"      2 xoa-tag luu-tru/wp55-r4/x "" XOA GIA_SHA_NHANH="$S_LT" GIA_TAG_SHAS="$S_LT"
+# Hai ca dưới là finding P2 của cross-review codex trên chính bản vá này: hợp đồng đúng
+# nhưng KHÔNG ĐƯỢC KHOÁ — gỡ `--paginate` hay gỡ `pipefail` thì bộ test vẫn xanh.
+ca "luu-tru/**: tag giữ ở TRANG SAU vẫn QUA" 0 xoa-nhanh luu-tru/wp55-r4/x "" XOA GIA_SHA_NHANH="$S_LT" GIA_TAG_SHAS="bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" GIA_TAG_SHAS_TRANG2="$S_LT"
+ca "luu-tru/**: gh hỏng GIỮA phân trang thì DỪNG" 2 xoa-nhanh luu-tru/wp55-r4/x "" XOA GIA_SHA_NHANH="$S_LT" GIA_TAG_SHAS="$S_LT" GIA_TAG_HONG_GIUA=1
 ca "ops/** thì DỪNG"                      2 xoa-nhanh ops/wp55-r4-ho-so "" XOA
 ca "claude/** thì DỪNG"                   2 xoa-nhanh claude/abc "" XOA
 ca "codex/** thì DỪNG"                    2 xoa-nhanh codex/abc "" XOA
@@ -86,12 +133,12 @@ ca "dấu phẩy ở ĐẦU thì DỪNG"              2 xoa-nhanh ',a' "" XOA
 ca "hai dấu phẩy liền thì DỪNG"           2 xoa-nhanh 'a,,b' "" XOA
 ca "sha có dấu phẩy cuối thì DỪNG"        2 tao-tag v1 "$SHA_THAT," TAO
 ca "hai ref hợp lệ thì QUA"               0 xoa-nhanh 'tmp-probe-2, tmp-probe-delete' "" XOA
-ca "xoá TAG dưới luu-tru/ thì DỪNG"       2 xoa-tag luu-tru/wp55-r4-verdict-review-1 "" XOA
+ca "xoá TAG dưới luu-tru/ thì DỪNG"       2 xoa-tag luu-tru/wp55-r4-verdict-review-1 "" XOA GIA_SHA_NHANH=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa GIA_TAG_SHAS=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 # Bốn ca dưới khoá finding P2 `protection-is-exact-case-only`. Git PHÂN BIỆT hoa thường
 # nên `Ops/x` đúng là nhánh khác `ops/x` — nhưng người đọc log thì không phân biệt, và
 # `оps/x` với chữ `о` Cyrillic thì mắt thường không thấy gì cả.
 ca "Ops/** viết HOA thì DỪNG"             2 xoa-nhanh Ops/secret "" XOA
-ca "LUU-TRU/** viết HOA thì DỪNG"         2 xoa-nhanh LUU-TRU/x "" XOA
+ca "LUU-TRU/** viết HOA: cùng luật, không tag thì DỪNG" 2 xoa-nhanh LUU-TRU/x "" XOA GIA_SHA_NHANH=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa GIA_TAG_SHAS=""
 ca "chữ Cyrillic nhìn giống ops/ thì DỪNG" 2 xoa-nhanh 'оps/secret' "" XOA
 ca "dấu // trong tên thì DỪNG"            2 xoa-nhanh 'a//b' "" XOA
 ca "tên bắt đầu bằng dấu chấm thì DỪNG"   2 xoa-nhanh '.hidden' "" XOA
@@ -100,6 +147,21 @@ ca "tên kết thúc .lock thì DỪNG"          2 xoa-nhanh 'a.lock' "" XOA
 ca "tên kết thúc bằng / thì DỪNG"         2 xoa-nhanh 'a/' "" XOA
 ca "tên dài 250 ký tự thì DỪNG"           2 xoa-nhanh "$(printf 'a%.0s' $(seq 250))" "" XOA
 ca "tạo TAG mang tên vùng bảo vệ thì DỪNG" 2 tao-tag ops/x "$SHA_THAT" TAO
+# `luu-tru/` LÀ NGOẠI LỆ CÓ CHỦ Ý, và phải khoá cả hai chiều.
+# Bản trước cấm luôn `luu-tru/`, nên workflow TỰ CHẶN TRÌNH TỰ CHÍNH NÓ QUY ĐỊNH:
+# nhánh `xoa-nhanh` dặn "Tạo tag TRƯỚC (hành động tao-tag), rồi mới xoá" mà `tao-tag`
+# lại từ chối đúng không gian tên ấy. ĐO ĐƯỢC 17-08-2026 trên run thật:
+#   tao-tag luu-tru/doctor-github-mcp-verdict-6 -> "DỪNG: … Đặt tên khác." (rc=2)
+ca "tạo tag luu-tru/ thì QUA (trình tự của chính workflow)" 0 tao-tag luu-tru/x "$SHA_THAT" TAO
+ca "tạo tag LUU-TRU/ hoa cũng QUA"        0 tao-tag LUU-TRU/x "$SHA_THAT" TAO
+# ...nhưng MỞ TẠO KHÔNG kéo theo MỞ XOÁ. Tag là mỏ neo; xoá nó vẫn cấm tuyệt đối.
+ca "mở tạo KHÔNG mở xoá: xoá tag luu-tru/ vẫn DỪNG" 2 xoa-tag luu-tru/x "" XOA GIA_SHA_NHANH="$S_LT" GIA_TAG_SHAS="$S_LT"
+# ...và các vùng còn lại KHÔNG được nới theo.
+ca "tạo tag claude/ vẫn DỪNG"             2 tao-tag claude/x "$SHA_THAT" TAO
+ca "tạo tag codex/ vẫn DỪNG"              2 tao-tag codex/x "$SHA_THAT" TAO
+ca "tạo tag dispatcher/ vẫn DỪNG"         2 tao-tag dispatcher/x "$SHA_THAT" TAO
+ca "tạo tag mission/ vẫn DỪNG"            2 tao-tag mission/x "$SHA_THAT" TAO
+ca "tạo tag agent/ vẫn DỪNG"              2 tao-tag agent/x "$SHA_THAT" TAO
 ca "tạo tag: sha sai dạng thì DỪNG"       2 tao-tag v1 "abc" TAO
 ca "tạo tag: sha CHỮ HOA thì DỪNG"        2 tao-tag v1 "B4E5C5F9EF85E652FA2CC98BB3474036519D663C" TAO
 ca "tạo tag: lệch số lượng thì DỪNG"      2 tao-tag 'v1,v2' "$SHA_THAT" TAO

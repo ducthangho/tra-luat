@@ -1,0 +1,135 @@
+# Lease REVIEWER lượt 9 — PHẠM VI ĐÓNG BĂNG.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+#
+# VÌ SAO LƯỢT NÀY KHÁC TÁM LƯỢT TRƯỚC. Chủ kho hỏi thẳng: qua nhiều vòng mà vẫn chưa
+# `approve`, lý do chính là gì. Người vá trả lời, và câu trả lời chỉ vào CHÍNH MÌNH:
+#
+#   · Chuỗi này ĐÃ `approve` một lần (lượt 6). Nó mở lại vì #143 land và đổi nền — không
+#     phải vì chất lượng.
+#   · Nguyên nhân chính là NGƯỜI VÁ NỚI PHẠM VI MỖI LƯỢT. Bằng chứng rõ nhất: cả HAI
+#     finding của lượt 8 đều nói về `t117`, mà `t117` do người vá tự nghĩ ra trong lúc
+#     CHUẨN BỊ lượt 8 — nó chưa từng có trong bản lượt 7 xét. Sửa xong danh sách của
+#     lượt 7 rồi thêm `_env_da_chuan` + `t117` + `DA_BIET_TRUNG`, tức ba mảng bề mặt MỚI
+#     chưa ai soi, và chúng sinh ra đúng danh sách finding kế tiếp.
+#   · Nguyên nhân thứ hai (lượt 1..5, đã đóng): một sai lầm KIẾN TRÚC lặp năm lần — oracle
+#     đặc tả "những gì phải đúng" (danh sách CẤM) thay vì "đúng những gì được phép".
+#   · Nguyên nhân thứ ba: chính các prompt trước LUÔN mời reviewer đi tìm thêm. Nó mua
+#     được lỗi thật, nhưng cấu trúc ấy làm `approve` khó tới theo thiết kế.
+#
+# NÊN LƯỢT NÀY ĐÓNG BĂNG: không ca mới, không hàm mới, không "gia cố nhân tiện". Prompt
+# hỏi ĐÚNG MỘT câu (danh sách đóng được của lượt 8 đã đóng chưa) và yêu cầu mọi thứ khác
+# xếp vào `## Nợ khai báo` trừ hồi quy hoặc P1 đường sản xuất.
+#
+# LƯU Ý VỀ SỐ ĐO: delta ĐỎ = 0 SUỐT CHÍN LƯỢT. Không lượt nào tìm ra bản vá làm hỏng gì;
+# các finding đều nói về CÔNG CỤ ĐO chưa đặc tả đủ chặt. Ghi ra để đừng đọc "chín lượt"
+# thành "mã tồi".
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: doctor-github-mcp-review-9-codex-20260817
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+reviewer_note: người vá là `claude` ⇒ §8 bắt reviewer khác nhà cung cấp
+assurance_target: cross_approved
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: 0826629a9e550ea97f3ae46259e40772d32abc76
+branch: ops/doctor-github-qua-mcp
+base_sha: c7ad2600f6785fa39fce261765a7f02e266a5b1a
+target_branch_neu_land: master
+target_pull_request: 146
+
+pham_vi_dong_bang: true
+scope_files: 1
+scope_note: >-
+  Diff `897b7fa..<head>` chỉ `.claude/dev/launcher_test.py` (+38/−15). `launcher.py`
+  KHÔNG đổi. Tệp thứ hai trong diff mã là finding.
+
+luot_truoc:
+- lease_id: doctor-github-mcp-review-8-codex-20260817
+  reviewed_sha: 897b7fab3a702088e817e5976f4d0b6fae7c01a3
+  verdict: changes_requested
+  finding: [p2-chot-nguoc-t117-khong-khoa-cardinality, p2-docstring-t117-khai-hep]
+  danh_sach_dong_duoc: 3
+  nguoi_va_dong_duoc: 2
+  muc_khong_dong_duoc: >-
+    Mục 3 — "chạy lại standard suite trong môi trường không bị ca process-tree cắt" — là
+    môi trường CỦA REVIEWER, người vá không đóng được từ đây. Số `117/117` vì thế vẫn chỉ
+    có MỘT nguồn.
+  nguoi_va_lam_them_ngoai_danh_sach: >-
+    Chốt `rest-kho` đổi từ dò chuỗi nguồn sang đo HÀNH VI. Reviewer chỉ QUAN SÁT chỗ yếu
+    này chứ không đòi sửa. KHAI THẲNG: đây chính là kiểu "làm thêm ngoài danh sách" mà
+    lease này nói là nguyên nhân giữ vòng lặp mở — lần này nó nằm trong phạm vi đóng băng
+    và được liệt kê, chứ không lặng lẽ thêm vào.
+  da_va_o_commit: 0826629a9e550ea97f3ae46259e40772d32abc76
+
+prompt_path: ops/prompts/doctor-github-mcp-review-9-codex-20260817.md
+prompt_sha256_required: 1531f7b814bb1a334f25b7abc244062a41ae30cce8ced8773c0734f3a7257ca5
+
+granted_by: ducthangho
+granted_on_instruction: direct, in-session, 2026-08-17 ("chạy lượt 9 frozen scope đi")
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  KHAI THẲNG: phiên ghi lease này CHÍNH LÀ phiên đã vá. `granted_by` là `ducthangho`.
+  Lượt này người vá tự chẩn đoán rằng NGUYÊN NHÂN CHÍNH giữ vòng lặp mở là chính mình, rồi
+  tự viết prompt hẹp lại. Một người vá tự ra luật cho lượt review của mình là chỗ đáng ngại
+  — nên prompt vẫn mở đường cho reviewer báo HỒI QUY và P1 đường sản xuất không giới hạn;
+  cái bị hẹp chỉ là những thứ đằng nào cũng thành thay đổi RIÊNG.
+
+leased_at_utc: '2026-08-17T10:35:00Z'
+lease_expires_at_utc: '2026-08-18T10:35:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 0
+attempts_note: Việc dev-side ngoài packet nên KHÔNG tiêu lượt.
+
+muc_kiem:
+- id: danh-sach-dong-duoc-cua-luot-8-da-dong-chua
+  note: >-
+    ĐÚNG MỘT câu hỏi của lượt này. Từng mục: đóng / chưa đóng / không đo được, kèm phép đo.
+    Cả ba đóng (mục 3 tính "không đo được" nếu sandbox vẫn cắt) ⇒ `approve`.
+- id: hoi-quy-hoac-P1-duong-san-xuat
+  note: >-
+    Hai loại DUY NHẤT vẫn được xếp vào `## Findings`. Mọi thứ khác vào `## Nợ khai báo`.
+
+so_lieu_nguoi_va_bao:
+  suite: 117/117 (qua 116, bỏ qua 1, hỏng 0)
+  nen_master_suite: 114/114 — c7ad260
+  dot_bien: 94/94
+  nen_master_dot_bien: 74/74 — c7ad260
+  delta: 0 ca đỏ
+  phan_chung_da_chay: >-
+    K1 (bản sao THỨ BA trước `_do_hook_cu`) 116/117 `t117` ĐỎ · K2 (mẫu ngoại lệ biến mất)
+    116/117 `t117` ĐỎ · K3 (giữ chuỗi trong comment, hành vi trả False) 115/117 `t115` VÀ
+    `t117` ĐỎ. Trước bản vá cả ba XANH. K1 và K2 chính là hai kịch bản reviewer lượt 8 nêu
+    ra nhưng không chạy được vì lease read-only.
+  nguon_duy_nhat: >-
+    Số suite chưa có nguồn thứ hai — reviewer lượt 8 bị sandbox cắt sau `t62` hai lần.
+
+ngoai_pham_vi_da_biet:
+- id: gh-trong-workflows-va-skills-va-ci-yml
+  note: '`.github/workflows/**`, `.claude/skills/**` dùng `gh`; `ci.yml` không chạy launcher_test.'
+- id: chot-tao-tag-cam-luu-tru
+  note: ĐÃ sửa ở nhánh RIÊNG — PR #147. Ngoài phạm vi PR #146.
+- id: no-hook_phien_bo_phep_so_nang_luc
+  note: 2 chỗ trùng, CÓ SẴN trên master. Đã vào `DA_BIET_TRUNG` kèm số lượng + chốt ngược.
+- id: t116-t117-tu-lua-khi-sua-PHOI-HOP
+  note: Đã khai trong docstring cả hai, cùng phạm vi.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T10:34:53Z'
+master_sha_at_grant: c7ad2600f6785fa39fce261765a7f02e266a5b1a
+lease_song_khac_luc_cap: Lease lượt 1..8 đã đóng. Không có lease review nào khác đang mở.
+canh_bao_moi_truong_luc_cap: >-
+  `codex` KHÔNG bị chặn. Reviewer lượt 8 bị sandbox cắt suite sau `t62` — nếu lặp lại thì
+  khai KHÔNG ĐO ĐƯỢC, đừng suy từ số của người vá.
+posted_comment_id: 5314956865   # workflow ghi, ĐỪNG sửa tay

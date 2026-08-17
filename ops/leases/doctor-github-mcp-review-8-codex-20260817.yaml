@@ -1,0 +1,125 @@
+# Lease REVIEWER lượt 8 — vá P1/P2 của lượt 7, cộng một chốt BỊ TƯỚC RĂNG.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+#
+# VÌ SAO CÓ LƯỢT 8. Lượt 7 trả `changes_requested` trên `fe55f2ce`: P1 (`t115` chỉ hỏi
+# `"env" in _k` chứ không hỏi GIÁ TRỊ ⇒ `env=None` sống sót — LƯỢT THỨ NĂM của lớp "đo đồ
+# giả") và P2 (lời bào chữa cho việc không sửa `rest-kho` không đứng vững). Cả hai đã vá.
+#
+# NHƯNG THỨ ĐÁNG ĐỌC NHẤT LƯỢT NÀY KHÔNG PHẢI HAI FINDING ẤY. Chạy đột biến sau khi vá thì
+# `probe_github_bo_qua_moi_truong_chuan_hoa` — đột biến CÓ SẴN của master, canh `t113` —
+# SỐNG SÓT. Không dòng logic nào sai: `chay_dot_bien` thay chỗ khớp ĐẦU TIÊN, mà khối
+# chuẩn hoá env người vá chép vào `_suc_khoe_mcp_github` trùng khít với khối của
+# `_do_github` VÀ đứng trước nó. Đột biến nhắm `_do_github` nhảy sang bản sao ⇒ `t113`
+# không chết nữa. THÊM mã, không đổi dòng nào của ai, mà vẫn làm hỏng chốt của người khác.
+# Chữa bằng `_env_da_chuan()`, và chặn CẢ LỚP bằng `t117`.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: doctor-github-mcp-review-8-codex-20260817
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+reviewer_note: người vá là `claude` ⇒ §8 bắt reviewer khác nhà cung cấp
+assurance_target: cross_approved
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: 897b7fab3a702088e817e5976f4d0b6fae7c01a3
+branch: ops/doctor-github-qua-mcp
+base_sha: c7ad2600f6785fa39fce261765a7f02e266a5b1a
+target_branch_neu_land: master
+target_pull_request: 146
+
+luot_truoc:
+- lease_id: doctor-github-mcp-review-7-codex-20260817
+  reviewed_sha: fe55f2ce00ba97c01d98a99f388eb7ffdf0536ea
+  verdict: changes_requested
+  finding: [p1-t115-van-thung-hop-dong-env, p2-loi-khai-ve-rest-kho-khong-dung-vung]
+  dot_bien_reviewer_bao_song_sot: 2
+  da_va_o_commit: 7d34b4bdb0fcd568acb7a7450591486c64d83f3b
+  ghi_chu_luot_1_den_6: >-
+    Sáu lượt đầu duyệt một diff trên nền `e38b0be` và kết ở `approve` (lượt 6). Nền đã đổi
+    sang `c7ad260` sau khi #143 land, nên verdict ấy KHÔNG phủ bản hoà. Lượt 7 là lượt
+    review ĐẦU TIÊN của bản hoà.
+
+scope_files: 2
+scope_note: >-
+  Diff `fe55f2c..897b7fa` chỉ `.claude/dev/launcher.py` và `.claude/dev/launcher_test.py`,
+  qua hai commit: `7d34b4b` (vá P1/P2 + tách `_env_da_chuan`) và `897b7fa` (`t117`).
+
+prompt_path: ops/prompts/doctor-github-mcp-review-8-codex-20260817.md
+prompt_sha256_required: f06c957ec78cb8a8d78f5d26bb0297387dec9075a72ee4909e17b6f38a8c73e0
+
+granted_by: ducthangho
+granted_on_instruction: direct, in-session, 2026-08-17 ("đồng ý cả 2")
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  KHAI THẲNG: phiên ghi lease này CHÍNH LÀ phiên đã vá. `granted_by` là `ducthangho`.
+  Lượt này người vá TỰ CHẠY trước một phép đo định giao cho reviewer (quét trùng mẫu
+  `DOT_BIEN`) và nó ra ngay một chỗ — nên mục 2 của prompt đổi từ "đi tìm" thành "kiểm lại
+  cái tôi đã tìm", kèm cả con số trên master để reviewer bác được nếu tôi đo sai.
+
+leased_at_utc: '2026-08-17T10:17:00Z'
+lease_expires_at_utc: '2026-08-18T10:17:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 0
+attempts_note: Việc dev-side ngoài packet nên KHÔNG tiêu lượt.
+
+muc_kiem:
+- id: env_da_chuan-co-tra-rang-cho-t113-khong
+  note: Đo lại — `probe_github_bo_qua_moi_truong_chuan_hoa` phải GIẾT `t113` trở lại.
+- id: t117-va-loi-khai-latent-cua-no
+  note: >-
+    Người vá ĐÃ TỰ CHẠY phép quét: nhánh 95 mục / 1 chỗ trùng; master `c7ad260` CŨNG 1 chỗ
+    trùng cùng mục (`hook_phien_bo_phep_so_nang_luc`). Reviewer: (a) đếm lại độc lập;
+    (b) `t117` có tự lừa được không; (c) lời khai "latent chứ chưa hỏng" đúng không —
+    `t88` có THẬT SỰ còn chết vì đột biến ấy không?
+- id: oracle-env-doi-DUNG-OBJECT
+  note: >-
+    Còn đường nào để một bản vá bỏ qua tham số mà vẫn qua? Người vá đã phải sửa ORACLE chứ
+    không sửa mã, vì "env là dict khác None" vẫn qua — `os.environ` cũng là dict.
+- id: rest-kho-va-chot-KIEM-NGUON-yeu
+  note: >-
+    `False -> None` có làm sai nghĩa gì không? Ca khoá nó là phép kiểm NGUỒN chứ không phải
+    HÀNH VI — nói rõ nó yếu tới đâu và có đường nào làm nó xanh giả.
+- id: t116-t117-do-CONG-CU-DO
+  note: >-
+    Cả hai đọc chính tệp test / bảng đã nạp. Lời khai giới hạn tự-lừa có đúng phạm vi chưa?
+
+so_lieu_nguoi_va_bao:
+  suite: 117/117 (qua 116, bỏ qua 1, hỏng 0)
+  nen_master_suite: 114/114 — c7ad260, đo trên WORKTREE THẬT
+  dot_bien: 94/94
+  nen_master_dot_bien: 74/74 — c7ad260
+  delta: 0 ca đỏ · +3 ca xanh (`t115` `t116` `t117`) · +20 đột biến
+  cong_khac: eol violations=[] · doc-claims --strict rc=0 · doctrine-scan sạch ·
+    lease_publish 31/31
+
+ngoai_pham_vi_da_biet:
+- id: gh-trong-workflows-va-skills
+  note: '`.github/workflows/**` và `.claude/skills/**` còn dùng `gh`.'
+- id: ci-yml-khong-chay-launcher-test
+  note: ĐO ĐƯỢC `grep -c launcher_test` = 0. Chỉ `launcher-windows.yml` chạy nó.
+- id: chot-tao-tag-cam-luu-tru
+  note: Đang sửa bằng thay đổi RIÊNG, review riêng — chủ kho đã chốt.
+- id: no-hook_phien_bo_phep_so_nang_luc
+  note: >-
+    Chỗ trùng mẫu CÓ SẴN trên master. Dọn nó đụng mã của #143 ⇒ thay đổi RIÊNG. Đã vào
+    danh sách cho phép của `t117` kèm chốt ngược.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T10:16:53Z'
+master_sha_at_grant: c7ad2600f6785fa39fce261765a7f02e266a5b1a
+lease_song_khac_luc_cap: Lease lượt 1..7 đã đóng. Không có lease review nào khác đang mở.
+canh_bao_moi_truong_luc_cap: >-
+  `codex` KHÔNG bị chặn. `CODEX_AUTH_JSON` cũ ~31h (refresh token xoay vòng) — nếu reviewer
+  không khởi động được thì đọc `launcher.py doctor` trước khi nghi thứ khác.
+posted_comment_id: 5314781327   # workflow ghi, ĐỪNG sửa tay

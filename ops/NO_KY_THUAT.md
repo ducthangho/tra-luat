@@ -92,17 +92,28 @@ khi sửa mã (bẫy đã trả giá ba lần trong một phiên).
 
 ---
 
-## 4. Nợ "ca BO QUA tính vào tổng" ở `launcher_test.py`
+## 4. Nợ "ca BO QUA tính vào tổng" — hoá ra ở CẢ HAI bộ, hai nửa cùng một khuôn
 
-`gate_lifecycle_test.py` đã sửa (lớp `BoQua`, harness đếm riêng). Kết quả đọc
-được ngay: Windows CI từ `23/23` phẳng thành `23/23 ca (qua 14, bo qua 9, hong 0)`
-— chín ca trước giờ vẫn được tính là đạt.
+Nợ gốc ghi cho `launcher_test.py`: `104/104 ca (qua 92, bo qua 12, hong 0)` —
+con số đầu nuốt phần bỏ qua; bàn giao ghi cho `t19`/`t62`. Nửa ấy đổi ở PR #153
+(W0-M1): tách `dong_ket_qua`, tử số chỉ đếm ca thực sự qua, đuôi `KHONG DU` khi
+có ca bỏ qua, khoá bằng `t118`.
 
-`launcher_test.py` **còn nguyên** nợ ấy: `104/104 ca (qua 92, bo qua 12, hong 0)`
-— con số đầu vẫn nuốt phần bỏ qua. Bàn giao đã ghi cho `t19`/`t62`.
+Đoạn cũ của mục này từng lấy `gate_lifecycle_test.py` làm mẫu ĐÃ SỬA và khoe
+"Windows CI từ `23/23` phẳng thành `23/23 ca (qua 14, bo qua 9, hong 0)`" —
+nhưng tử số 23 ĐÓ vẫn là `len(CASES) - len(failures)` = qua + bỏ-qua, tức chính
+câu khoe còn nguyên hình dạng N/N với 9 ca chưa chạy. Harness đếm riêng THẬT
+(lớp `BoQua`); chỉ DÒNG KẾT LUẬN nói dối. Nửa này đổi cùng khuôn ở packet W0-M2
+(18-08-2026): đo trên Windows, `25/25 ca (qua 14, bo qua 11, hong 0)` thành
+`15/26 ca QUA (bo qua 11, hong 0) - KHONG DU: ...`, khoá bằng
+`case_headline_khong_duoc_dem_ca_bo_qua_la_da_qua`, mã thoát giữ nguyên.
 
-**Xong khi:** con số đầu không còn nuốt phần bỏ qua, hoặc CI từ chối số skip nằm
-ngoài danh sách nền tảng cho phép.
+**Xong khi:** trên master, CẢ HAI tệp có tử số không nuốt phần bỏ qua — kiểm
+bằng sự HIỆN DIỆN của `dong_ket_qua` + ca phản chứng trong từng tệp (`t118` bên
+launcher, `case_headline_…` bên gate lifecycle), đừng kiểm bằng tên nhánh hay
+trạng thái PR — tên nhánh là thứ trôi. Vế "CI từ chối số skip nằm ngoài danh
+sách nền tảng cho phép" là SIẾT CHUẨN (đổi rc), chưa làm ở cả hai nửa trên —
+còn muốn thì tách quyết định riêng, Packet riêng.
 
 ---
 

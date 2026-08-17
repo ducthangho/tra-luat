@@ -128,33 +128,81 @@ sẽ đụng bản mới hơn trên master — lấy hook từ master trước.
 
 ---
 
-## 6. Khe TRƯỚC khi cắm handler tín hiệu
+## 6. Tín hiệu tới TRƯỚC khi đường ghi bằng chứng sẵn sàng
 
-Đo được (sweep 14 mốc trên `8eca8d4`, rồi sweep mịn hơn trên `c92b09c`): bắn
-`SIGTERM` sớm — trong lúc preflight (các lệnh `git`), TRƯỚC khi handler được cắm
-— thì **không có tệp bằng chứng**, và mã thoát **không nhất quán**:
+### Đo được gì
 
-| mốc bắn | mã thoát | bằng chứng | con gate sống sót |
-|---|---|---|---|
-| 0,05s | `-15` | không | không |
-| 0,09–0,10s | `1` | không | không |
-| 0,11–0,12s | `-15` | không | không |
-| ≥ 0,13s | `143` | **có** | không |
+Sweep 10 mốc trên `c231d02`, mỗi mốc một lượt, bắn `SIGTERM` vào runner rồi ghi
+lại **trạng thái NGAY LÚC BẮN** (có cgroup chưa, con gate đã chạy chưa) chứ không
+chỉ ghi kết cục:
 
-`-15` là tín hiệu tới khi handler CHƯA cắm (disposition mặc định). `1` là
-`BiKetThuc` ném ra ở quãng đã cắm handler nhưng CHƯA vào phạm vi có đường ghi
-bằng chứng, nên nó thoát ra ngoài dưới dạng traceback. Ba mã thoát cho cùng một
-loại sự kiện là khó đọc — nhưng lưu ý cột cuối: **không mốc nào để con gate sống
-sót**, nên đây là chuyện KHAI BÁO, không phải chuyện rò rỉ.
+| mốc bắn | cgroup lúc bắn | con đã chạy | mã thoát | bằng chứng | con sống sót |
+|---|---|---|---|---|---|
+| 0,03s | 0 | không | `-15` | không | **không** |
+| 0,05s | 0 | không | `-15` | không | **không** |
+| 0,07s | 0 | không | `-15` | không | **không** |
+| 0,09s | 1 | không | `143` | **có** | **không** |
+| 0,10s | 1 | không | `143` | **có** | **không** |
+| 0,11s | 1 | không | `143` | **có** | **không** |
+| 0,12s | 0 | không | `-15` | không | **không** |
+| 0,13s | 1 | không | `143` | **có** | **không** |
+| 0,15s | 1 | không | `143` | **có** | **không** |
+| 0,20s | 1 | **có** | `143` | **có** | **không** |
 
-**Vì sao để lại:** ở những mốc ấy CHƯA có cgroup và CHƯA có con gate nào (bảng
-trên đo đúng điều đó), nên không rò gì cả; thiệt hại duy nhất là "một lượt chưa
-kịp bắt đầu thì không có bản ghi, và mã thoát khó đọc". Cắm handler sớm hơn nữa
-(ngay đầu `cmd_run`) sẽ kéo theo phải dọn cả những trạng thái chưa dựng xong —
-đổi một khe vô hại lấy một lớp phức tạp mới.
+### Đọc bảng cho đúng — ba điều bản trước của chính mục này ghi SAI
 
-**Xong khi:** mọi mốc bắn sớm cho CÙNG một mã thoát đọc được (nên là `143`) và
-không còn traceback lọt ra — hoặc kết luận là không đáng làm và đóng mục này kèm
-lý do. Sweep ở trên là phản chứng sẵn có để đo lại; nhớ quét cả quãng 0,09–0,13s
-vì đó là chỗ ba hành vi khác nhau nằm sát nhau.
+1. **Mốc thời gian KHÔNG phải biến quyết định.** Bảng không đơn điệu theo thời
+   gian: 0,12s cho `-15` trong khi 0,09–0,11s đã cho `143`. Preflight (các lệnh
+   `git`) dài ngắn tuỳ máy và tuỳ tải, nên con số giây chỉ là hệ quả. Biến thật là
+   **PHA**: bắn trước khi `_tao_cgroup_gate()` chạy xong ⇒ `-15`, không bằng
+   chứng; bắn sau ⇒ `143`, có bằng chứng. Cột `cgroup lúc bắn` khớp 10/10 với cột
+   mã thoát, cột thời gian thì không.
+2. **`rc=1` KHÔNG tái lập được.** Bản trước của mục này khai `0,09–0,10s → 1` như
+   một dải ổn định. Sai: `1` chỉ xuất hiện MỘT lần trong một sweep trước đó và
+   KHÔNG hiện lại lần nào trong 10 mốc ở đây. Nó có thật (đã thấy), nhưng là ca
+   hiếm chưa gọi ra được theo ý muốn — ghi nó thành một dải là bịa ra quy luật từ
+   một điểm.
+3. **KHÔNG được suy "chưa có cgroup" từ cột "con sống sót".** Bản trước viết "ở
+   những mốc ấy CHƯA có cgroup và CHƯA có con gate nào" và lấy cột sống-sót làm
+   căn cứ. Cột ấy chỉ đo **không còn ai sống**, không đo **chưa từng có ai**. Đo
+   riêng ra thì rõ: từ 0,09s trở đi cgroup ĐÃ được cấp, và ở 0,20s con gate ĐÃ
+   chạy — rồi bị dọn. Suy như bản trước là đúng cái lỗi mà chính sổ nợ này tồn tại
+   để chặn.
 
+### Thiệt hại thật, và vì sao vẫn để lại
+
+Ở pha trước khi cgroup được cấp: **không rò gì** (chưa có cgroup lẫn con gate —
+đo được ở cột `cgroup lúc bắn` = 0 và `con đã chạy` = không), thiệt hại duy nhất
+là **mất bản ghi** của một lượt chưa kịp bắt đầu, kèm mã thoát `-15` khó đọc.
+
+Ở pha sau khi cgroup được cấp: đường dọn chạy đúng — `143`, có bằng chứng, không
+ai sống sót (10/10).
+
+Cắm handler sớm hơn nữa (ngay đầu `cmd_run`) sẽ kéo theo phải dọn cả những trạng
+thái chưa dựng xong — đổi một khe không rò lấy một lớp phức tạp mới.
+
+### Xong khi
+
+Cả ba, thiếu một là chưa xong:
+
+1. **Mã thoát nhất quán:** mọi mốc bắn ở pha trước-cgroup cho cùng một mã đọc được
+   (nên là `143`), không còn `-15` lẫn `1`, và không traceback nào lọt ra stderr.
+2. **Bằng chứng, hoặc khai thẳng là không có:** hoặc mọi mốc đều sinh tệp bằng
+   chứng với `status` phản ánh đúng pha, **hoặc** tài liệu này nói rõ "bắn trước
+   pha X thì không có bằng chứng là kết quả CHẤP NHẬN ĐƯỢC". Không được để điều
+   kiện 1 một mình — chuyển hết sang `143` mà vẫn không ghi bằng chứng thì đạt
+   điều kiện 1 trong khi một nửa thiệt hại còn nguyên.
+3. **Phép đo tái lập được**, neo vào PHA chứ không vào giây:
+
+   ```
+   dai quet   : 0,02s → 0,30s, buoc 0,01s
+   lap        : 3 luot moi moc (preflight dai ngan khac nhau tung luot)
+   ghi lai    : cgroup luc ban (dem thu muc `tl-gate-*`), con da chay chua,
+                rc, co tep bang chung khong, con song sot qua moc tuyet doi khong
+   dat        : moi luot co `cgroup luc ban` = 0 phai cho CUNG mot rc va cung mot
+                ket cuc bang chung; khong luot nao co con song sot
+   traceback  : stderr cua runner khong duoc chua chuoi "Traceback"
+   ```
+
+   Neo vào pha vì ngưỡng giây **trôi theo máy và theo tải** — bảng trên tự chứng
+   minh điều đó bằng chỗ không đơn điệu ở 0,12s.

@@ -157,6 +157,7 @@ CASES: Mapping[str, str] = {
     "WP125-GATE-001-R5-fixture-operations-are-bounded-and-cleaned": "real_windows_delegated_parity",
     "WP125-GATE-001-R5-ineffective-acl-fails-closed": "credential_free_delegated_run_test",
     "WP125-GATE-001-R5-fixture-cleanup-leaves-nothing-behind": "process_tree_cleanup_and_stale_generation_rejection",
+    "WP125-GATE-001-R5-ephemeral-trust-config-dies-with-the-process": "real_windows_delegated_parity",
     "WP125-RV-010-R5-unreadable-member-session-fails-closed": "process_tree_cleanup_and_stale_generation_rejection",
     "WP125-RV-010-R5-leader-pid-reuse-fails-closed": "process_tree_cleanup_and_stale_generation_rejection",
     "WP125-RV-010-R5-member-pid-reuse-fails-closed": "process_tree_cleanup_and_stale_generation_rejection",

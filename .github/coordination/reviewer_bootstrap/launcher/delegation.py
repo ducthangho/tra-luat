@@ -218,6 +218,27 @@ def trust_paths(*paths: object) -> tuple[str, ...]:
 _AMBIENT_TRUST: dict[str, object] = {}
 
 
+def release_ambient_trust() -> None:
+    """Delete the per-process ephemeral trust config.  Safe to call when there is none.
+
+    ``ignore_errors`` because this runs at interpreter exit: a directory that has already gone, or a
+    file another process still holds open on Windows, must not turn a finished run into a traceback
+    on the way out.
+    """
+    import shutil
+
+    directory = _AMBIENT_TRUST.pop("dir", None)
+    _AMBIENT_TRUST.pop("entries", None)
+    if directory:
+        shutil.rmtree(str(directory), ignore_errors=True)
+
+
+def ambient_trust_directory() -> str | None:
+    """The current ephemeral trust directory, so a control can watch it disappear."""
+    directory = _AMBIENT_TRUST.get("dir")
+    return str(directory) if directory else None
+
+
 def ambient_trust_env(*paths: object, base: Mapping[str, str] | None = None) -> dict[str, str]:
     """Trust environment for direct git calls, backed by one per-process ephemeral config.
 
@@ -226,6 +247,7 @@ def ambient_trust_env(*paths: object, base: Mapping[str, str] | None = None) -> 
     takes no extra arguments and no environment — so one inheritable mechanism is used everywhere
     rather than two that differ by call site.
     """
+    import atexit
     import tempfile
 
     entries = trust_paths(*paths)
@@ -234,6 +256,12 @@ def ambient_trust_env(*paths: object, base: Mapping[str, str] | None = None) -> 
         directory = tempfile.mkdtemp(prefix="wp125-trust-")
         _AMBIENT_TRUST["dir"] = directory
         _AMBIENT_TRUST["entries"] = []
+        # WP125-GATE-001-R5.  Measured on this host: without this, one directory per *process* was
+        # left behind — 162 of them after a day of matrices, one for every child the suite ever
+        # spawned.  The clone and the detached checkout were already proven to leave nothing; this
+        # was the one temporary fixture with no owner, because it is created lazily and belongs to
+        # the interpreter rather than to any test.  Exit is when it stops being needed.
+        atexit.register(release_ambient_trust)
     known = list(_AMBIENT_TRUST["entries"])
     for entry in entries:
         if entry not in known:

@@ -3894,6 +3894,69 @@ def gate001r5_cleanup() -> dict[str, object]:
     }
 
 
+@case("WP125-GATE-001-R5-ephemeral-trust-config-dies-with-the-process")
+def gate001r5_trust_config_cleanup() -> dict[str, object]:
+    """The ephemeral git trust config must not outlive the interpreter that made it.
+
+    Measured before this repair, by counting ``%TEMP%\\wp125-*`` after a day of matrices: the clone
+    fixture and the detached checkout left **nothing**, and the trust directory left **one per
+    process** — 162 of them.  It was the only temporary fixture with no owner, because it is created
+    lazily by whichever call first needs git to trust a path and belongs to the interpreter rather
+    than to any test.  Nothing persistent is written to global or repository git configuration either
+    way; this is about the scratch file, and a scratch file that survives its process is not scratch.
+    """
+    import glob
+    import subprocess
+    import tempfile
+
+    from launcher import delegation as delegation_module
+
+    probe = (
+        "import os, sys\n"
+        "sys.path.insert(0, os.path.join(sys.argv[1], '.github', 'coordination',"
+        " 'reviewer_bootstrap'))\n"
+        "from launcher import delegation\n"
+        "env = delegation.ambient_trust_env(sys.argv[1])\n"
+        "assert os.path.isfile(env['GIT_CONFIG_GLOBAL']), 'the trust config was not written'\n"
+        "print(delegation.ambient_trust_directory())\n"
+    )
+    before = set(glob.glob(os.path.join(tempfile.gettempdir(), "wp125-trust-*")))
+    done = subprocess.run(
+        [python_executable(), "-c", probe, str(CANDIDATE_ROOT)],
+        capture_output=True,
+        timeout=FIXTURE_DEADLINE_SECONDS,
+        cwd=str(CANDIDATE_ROOT),
+    )
+    ensure(
+        done.returncode == 0,
+        "the trust probe failed: %s" % done.stderr.decode("utf-8", "replace")[-300:],
+    )
+    reported = done.stdout.decode("utf-8", "replace").strip().splitlines()[-1]
+    ensure(reported.startswith(tempfile.gettempdir()), "the probe reported no trust directory")
+    ensure(
+        not os.path.exists(reported),
+        "the ephemeral trust directory survived the process that created it",
+    )
+    after = set(glob.glob(os.path.join(tempfile.gettempdir(), "wp125-trust-*")))
+    ensure(
+        not (after - before),
+        "the probe left %d new trust directories behind" % len(after - before),
+    )
+
+    # And the release is idempotent, so an exit path that runs it twice is not a crash on the way out.
+    delegation_module.release_ambient_trust()
+    delegation_module.release_ambient_trust()
+    ensure(
+        delegation_module.ambient_trust_directory() is None,
+        "the trust directory was still registered after release",
+    )
+    return {
+        "trust_directory_removed_at_exit": True,
+        "new_directories_left_behind": 0,
+        "release_is_idempotent": True,
+    }
+
+
 @case("WP125-RV-010-R5-unreadable-member-session-fails-closed")
 def rv010r5_unreadable_session() -> dict[str, object]:
     """A member whose session cannot be observed is not evidence of anything.

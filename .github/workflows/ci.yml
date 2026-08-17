@@ -129,6 +129,79 @@ jobs:
         run: python -m pip install --quiet PyYAML==6.0.3
       - name: lease-publish selftest (cổng đăng lease)
         run: python ops/lease_publish_test.py
+      # Cùng doctrine với bước ngay trên và với hai bước eol/pre-push: guard không nối
+      # vào đường TỰ ĐỘNG thì guard chỉ là tài liệu (bài học r225).
+      # `gate_lifecycle.py` là cơ chế dev-side chống chạy trùng gate + ghi/validate
+      # evidence. Nó KHÔNG deselect test và KHÔNG thay promotion gate A2 — xem
+      # `docs/PROTOCOL_DA_PHIEN.md`. Bộ này thuần Python, đo 16-08: 13 ca.
+      # CHẠY BỘ CA GATE BÊN TRONG MỘT CGROUP ĐƯỢC UỶ QUYỀN — một bước duy nhất.
+      #
+      # Vì sao gộp: tư cách thành viên cgroup KHÔNG mang được sang bước khác (mỗi
+      # `run:` là một shell con của runner agent, không phải con của bước trước).
+      # Muốn bộ ca chạy BÊN TRONG vùng được uỷ quyền thì việc chuyển vào và việc
+      # chạy phải nằm cùng một shell.
+      #
+      # Đo được trên `ef82ca3`: không uỷ quyền thì `mkdir` cgroup con trả
+      # `[Errno 13]`, gate tụt về QUÉT CÂY và hai ca cgroup lặng lẽ bỏ qua trong
+      # khi tổng vẫn xanh — tức con số nói về đường dự phòng.
+      #
+      # THU HỒI QUYỀN Ở CHA SAU KHI VÀO (P1 cross-review trên `19a9c0e`): muốn
+      # chuyển tiến trình vào cgroup con thì luật delegation containment đòi ghi
+      # được `cgroup.procs` của TỔ TIÊN CHUNG. Mở đủ lâu để bước vào, rồi TRẢ LẠI
+      # root ngay — thu hẹp được một tầng.
+      #
+      # NHƯNG ĐỪNG ĐỌC ĐÂY THÀNH "ĐÃ KHOÁ ĐƯỜNG RA" (P1 cross-review trên
+      # `052d100`; bản trước của chính chú thích này khai đúng như vậy và đó là
+      # lời khai SAI). `RIENG/cgroup.procs` vẫn thuộc UID của runner, mà lệnh gate
+      # chạy bằng CHÍNH UID ấy trong một `tl-gate-*` con của `RIENG` — nên nó vẫn
+      # tự ghi mình ngược lên `RIENG` được, không cần đụng `CHA/cgroup.procs` đã
+      # trả về root. Khe "cố tình trèo ra" là khe ĐƯỢC HOÃN CÓ CHỦ Ý; xem khối
+      # "PHẠM VI CỦA CHÍNH LỚP CGROUP" trong `gate_lifecycle.py` và
+      # `ops/NO_KY_THUAT.md` mục 1. Bước này chặn thoát VÔ TÌNH, không chặn cố ý.
+      - name: bo ca gate chay TRONG cgroup duoc uy quyen (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          MOUNT="$(awk '{for(i=1;i<=NF;i++) if($i=="-" && $(i+1)=="cgroup2"){print $5; exit}}' /proc/self/mountinfo)"
+          GOC="$(awk -F: '$1=="0"{print $3}' /proc/self/cgroup)"
+          echo "mount cgroup2 = ${MOUNT:-KHONG CO} | cgroup cua ta = ${GOC:-KHONG CO}"
+          if [ -z "$MOUNT" ] || [ -z "$GOC" ] || [ "$GOC" = "/" ]; then
+            echo "KHONG uy quyen duoc (khong co cgroup2, hoac ta dang o GOC diem gan)"
+            exit 1
+          fi
+          CHA="${MOUNT}${GOC}"
+          RIENG="${CHA}/tl-gate-ci"
+          sudo mkdir -p "$RIENG"
+          # Chỉ hai tệp, KHÔNG đệ quy: thư mục (để `mkdir` cgroup con) và
+          # `cgroup.procs` của nó. KHÔNG đụng `cgroup.subtree_control`, KHÔNG đụng
+          # cgroup con nào đang có dưới service.
+          sudo chown "$(id -u):$(id -g)" "$RIENG" "$RIENG/cgroup.procs"
+          # Mở tạm ở CHA đúng để bước vào...
+          sudo chown "$(id -u):$(id -g)" "$CHA/cgroup.procs"
+          echo $$ > "$RIENG/cgroup.procs"
+          # ...rồi TRẢ LẠI root ngay. Việc này đóng đúng MỘT đường: ghi thẳng vào
+          # `CHA/cgroup.procs`. Con cháu vẫn ghi ngược lên `RIENG` được vì
+          # `RIENG/cgroup.procs` phải thuộc UID runner mới chuyển vào được — xem
+          # khối trên. ĐỪNG đọc dòng này thành "đã hết đường ra".
+          sudo chown root:root "$CHA/cgroup.procs"
+          echo "da vao $(awk -F: '$1=="0"{print $3}' /proc/self/cgroup)"
+          # FAIL-CLOSE CHO CHÍNH PHÉP ĐO: Linux mà không cấp được cgroup thì lượt
+          # này KHÔNG đo lớp vùng chứa, và một lượt xanh như thế là lời khai sai
+          # về độ phủ. Thà đỏ ở đây — đỏ thì có người đọc.
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, ".claude/dev")
+          import gate_lifecycle as gl
+          cg = gl._tao_cgroup_gate()
+          print("cap cgroup:", "DUOC" if cg is not None else "KHONG DUOC")
+          if cg is None:
+              sys.exit(1)
+          gl._don_cgroup(cg)
+          PY
+          python .claude/dev/gate_lifecycle_test.py
+      - name: gate lifecycle selftest (nen khong co cgroup)
+        if: runner.os != 'Linux'
+        run: python .claude/dev/gate_lifecycle_test.py
       # `--all` soi TOÀN BỘ index, không chỉ tệp đang stage — đây là thứ duy nhất bắt được nợ
       # CRLF có sẵn (hook cũ so với HEAD nên mù hoàn toàn với nó).
       #
@@ -153,8 +226,81 @@ jobs:
         run: python .github/checks/bundle_fragment_check.py --json
       - name: gen_instructions selftest
         run: python scripts/gen_instructions.py --selftest
-      - name: tl selftest
+      # BỌC selftest qua `gate_lifecycle.py run` thay vì gọi thẳng — KHÔNG thêm lượt
+      # chạy nào, chỉ thêm bằng chứng. Vì sao cần: `.claude/commands/gate-targeted.md`
+      # bước 4 bảo reviewer tải artifact `gate-evidence-<OS>-<attempt>` để tái dùng
+      # thay cho một lượt full local, mà TRƯỚC ĐỢT NÀY không có gì trong CI sinh ra nó
+      # (P2 cross-review PR "#141"). Tài liệu mô tả một đường không tồn tại thì người
+      # làm theo sẽ rơi xuống nhánh dự phòng mà không hiểu vì sao — cùng họ "cổng
+      # không nói dối, nó VẮNG MẶT".
+      # `--positive-regex` đòi N/N hai số BẰNG NHAU: rc=0 một mình không phải bằng chứng.
+      # ĐỊNH DANH PHẢI KHỚP ĐÚNG BỘ VALIDATOR ghi trong `gate-targeted.md` — tên tệp
+      # `tl-selftest-<OS>`, `--name tl-selftest`, `--selected-test full-selftest`, và
+      # `base_sha` là MERGE-BASE với master. Lượt trước tôi sinh ra artefact với bộ
+      # định danh KHÁC (`selftest`, `$GITHUB_SHA`), nên `validate` báo mismatch ngay
+      # cả với artefact thành công và đường tái dùng vẫn luôn rơi xuống `/gate`
+      # (P2 cross-review PR "#141"). Tôi đã kiểm artefact TỒN TẠI rồi tuyên bố xong,
+      # mà chưa kiểm nó DÙNG ĐƯỢC bởi đúng lệnh tài liệu chỉ — lại đúng lỗi "đo sự
+      # có mặt thay vì đo khả năng".
+      # CHI SINH BẰNG CHỨNG Ở LƯỢT MÀ `HEAD` LÀ COMMIT THẬT.
+      #
+      # Trên `pull_request`, `actions/checkout` lấy commit MERGE TỔNG HỢP, nên
+      # `git rev-parse HEAD` KHÔNG phải head của PR. Đo được: lượt `pull_request`
+      # trên `91a027d` ĐỎ ngay ở bước này trong khi `workflow_dispatch` cùng SHA
+      # xanh. Tôi đã đổi một mỏ neo sai (`$GITHUB_SHA`) lấy một mỏ neo sai khác
+      # (PR head, trong khi cây là merge) — cả hai đều khai một thứ KHÔNG PHẢI thứ
+      # vừa đo.
+      #
+      # Không có cách nào làm đúng ở lượt PR mà không đổi thứ CI đang test: cây
+      # merge chính là thứ đáng test trước khi vào master. Nên bằng chứng chỉ sinh
+      # ở `push`/`workflow_dispatch`, đúng luồng `gate-targeted.md` mô tả ("T1
+      # push/handoff: chờ CI tạo full evidence exact-head"). Lượt PR vẫn chạy
+      # selftest, chỉ không giả vờ sinh ra chứng cho một commit không có trong lịch sử.
+      - name: tl selftest (luot PR — khong sinh bang chung)
+        if: ${{ github.event_name == 'pull_request' }}
         run: python scripts/tl.py --selftest
+      - name: tl selftest (co bang chung exact-identity)
+        if: ${{ github.event_name != 'pull_request' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p scripts/.tl_state/gate
+          # KHÔNG dùng `--depth`: checkout ở trên cố ý đặt `fetch-depth: 0` cho
+          # `doc-claims` L2 (`cat-file -e` trượt mọi SHA cũ trên clone nông). Một
+          # `--depth=50` ở đây có thể làm nông lại chính thứ bước kia cần, và tệ hơn
+          # là `merge-base` sẽ trượt khi nhánh rẽ xa hơn 50 commit (P2 review "#141").
+          # FAIL-CLOSE: `base_sha` sai làm bằng chứng vô dụng một cách IM LẶNG.
+          git fetch --no-tags origin master
+          # HEAD ĐÚNG LÀ HEAD CỦA PR, không phải `$GITHUB_SHA`. Trên `pull_request`,
+          # `$GITHUB_SHA` là commit MERGE TỔNG HỢP do GitHub dựng — dòng 73 của chính
+          # tệp này đã cảnh báo đúng điều đó, và tôi vẫn viết sai ở đây (P2 review
+          # "#141"). Evidence neo vào commit tổng hợp thì không ai validate lại được
+          # vì commit ấy không có trong lịch sử nhánh.
+          # `HEAD` của cây, không phải biến nào cả: bằng chứng phải khai ĐÚNG
+          # thứ vừa đo. Bước này chỉ chạy khi HEAD là commit thật (xem `if:` trên).
+          HEAD_SHA="$(git rev-parse HEAD)"
+          BASE_SHA="$(git merge-base FETCH_HEAD "$HEAD_SHA")"
+          echo "head_sha = $HEAD_SHA"
+          echo "base_sha = $BASE_SHA"
+          NEN="${RUNNER_OS}"
+          python .claude/dev/gate_lifecycle.py run \
+            --kind heavy --name tl-selftest --repo . \
+            --evidence "scripts/.tl_state/gate/tl-selftest-${NEN}.json" \
+            --output "scripts/.tl_state/gate/tl-selftest-${NEN}.out" \
+            --expected-head "$HEAD_SHA" --base-sha "$BASE_SHA" --require-clean \
+            --selected-test full-selftest \
+            --wait-seconds 60 --timeout-seconds 2400 \
+            --positive-regex '(?m)^.*\b([1-9][0-9]*)/\1\b[^\r\n]*\r?\n?\Z' \
+            -- python scripts/tl.py --selftest
+      # `if: always()` — bằng chứng của một lượt ĐỎ còn đáng tải hơn của lượt xanh.
+      - name: tai len gate-evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-evidence-${{ matrix.os }}-${{ github.run_attempt }}
+          # Lượt PR không sinh evidence (xem trên) => không có tệp là ĐÚNG, không phải lỗi.
+          path: scripts/.tl_state/gate/
+          if-no-files-found: warn
       - name: workflow-audit strict
         run: python scripts/tl.py workflow-audit --strict --json
       - name: golden-test

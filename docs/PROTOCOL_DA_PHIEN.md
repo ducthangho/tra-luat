@@ -490,6 +490,14 @@ thể chạy song song an toàn, và shadow 2–4 tuần chứng minh affected s
 Trước activation, T1/T2 vẫn chạy full theo policy hiện hành. Lọc output sau khi eager harness đã chạy hoặc shard
 theo modulo không được coi là tối ưu hay isolation hợp lệ.
 
+Trong giai đoạn pre-selector, “T1/T2 vẫn chạy full” nghĩa là **một full oracle trên mỗi exact identity**, không
+phải Executor, Reviewer và CI đều lặp cùng lệnh trên cùng SHA. Executor chạy targeted/component/probe trước; CI
+checkout đúng PR head và phát artifact gồm JSON + output của full selftest; Reviewer validate positive marker,
+output hash, SHA/tree/base/runner/command/OS/runtime rồi tái dùng lane phù hợp, đồng thời tự chạy probe đối nghịch. Evidence thiếu, đỏ, stale hoặc lệch bất kỳ
+identity nào phải fallback full. Mỗi physical host giữ tối đa một heavy gate; timeout/busy là trạng thái thiếu gate,
+không được đổi thành pass. Cơ chế dev-side là `.claude/dev/gate_lifecycle.py` và `/gate-targeted`; nó chỉ chống chạy
+trùng và ghi/validate evidence, **không** tự chọn affected tests và không được quảng bá là A2-05/A2-06 đã activate.
+
 ### 10.2 Worker/land gate và trạng thái hoàn tất
 
 Worker gate kiểm generation/spec/write-set, EOL, security paths, offline tests và manifest tạm ngoài repo. Gate

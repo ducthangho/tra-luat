@@ -145,3 +145,4 @@ lease_song_khac_luc_cap: 'Lease lượt 1 và 2 của chính PR này đã đóng
 canh_bao_moi_truong_luc_cap: >-
   Thiếu `pwsh` thì khai KHÔNG ĐO ĐƯỢC. Hai lượt trước phải đặt `TMPDIR=/dev/shm` vì sandbox
   khoá `/tmp`.
+posted_comment_id: 5316544820   # workflow ghi, ĐỪNG sửa tay

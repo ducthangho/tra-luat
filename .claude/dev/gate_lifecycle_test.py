@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 from pathlib import Path
@@ -1153,13 +1154,6 @@ def case_khong_do_duoc_khong_duoc_khai_thanh_da_sach() -> None:
     """
     if os.name == "nt":
         raise BoQua("fixture POSIX")
-    lenh = (
-        "import subprocess,sys;"
-        "subprocess.Popen([sys.executable,'-c','import os,time;os.setsid();time.sleep(20)'],"
-        "stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,close_fds=True);"
-        "print('1/1 ok')"
-    )
-
     def _chay(tat_cgroup: bool):
         with tempfile.TemporaryDirectory(prefix="gate_lifecycle_null_") as raw:
             root = Path(raw)
@@ -1167,6 +1161,22 @@ def case_khong_do_duoc_khong_duoc_khai_thanh_da_sach() -> None:
             repo.mkdir()
             head, _ = _repo(repo)
             evidence = root / "evidence.json"
+            # CA NAY TU NO LA MOT LUOT RO — PHAI TU GAT LAY.
+            #
+            # Trên đường `quet-cay`, gate KHÔNG dọn được con tách rời (đó chính là
+            # thứ ca này đo). Nên nếu fixture không giữ PID lại mà giết, nó bỏ lại
+            # một tiến trình mồ côi chạy tiếp sang các ca sau và sang cả bước CI
+            # kế tiếp — tức bộ ca chống rò tiến trình lại tự rò (P2 cross-review
+            # trên `a64ca0b`). Con ghi PID của nó ra tệp để ta còn với tới.
+            pid_tep = root / "pid-con-tach-roi"
+            lenh = (
+                "import subprocess,sys;"
+                "p=subprocess.Popen([sys.executable,'-c',"
+                "'import os,time;os.setsid();time.sleep(20)'],"
+                "stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,close_fds=True);"
+                f"open({str(pid_tep)!r},'w').write(str(p.pid));"
+                "print('1/1 ok')"
+            )
             moi_truong = dict(os.environ)
             if tat_cgroup:
                 moi_truong["TL_GATE_TAT_CGROUP"] = "1"
@@ -1180,9 +1190,16 @@ def case_khong_do_duoc_khong_duoc_khai_thanh_da_sach() -> None:
                 "--expected-head", head, "--base-sha", head, "--require-clean",
                 "--", sys.executable, "-c", lenh,
             ]
-            ran = subprocess.run([sys.executable, str(RUNNER), *argv], cwd=repo,
-                                 text=True, capture_output=True, timeout=90, env=moi_truong)
-            return ran, json.loads(evidence.read_text(encoding="utf-8"))
+            try:
+                ran = subprocess.run([sys.executable, str(RUNNER), *argv], cwd=repo,
+                                     text=True, capture_output=True, timeout=90,
+                                     env=moi_truong)
+                return ran, json.loads(evidence.read_text(encoding="utf-8"))
+            finally:
+                # Gặt con tách rời dù ca đỏ hay xanh. `SIGKILL` vì nó cố ý sống dai.
+                if pid_tep.is_file():
+                    with contextlib.suppress(OSError, ValueError):
+                        os.kill(int(pid_tep.read_text().strip()), signal.SIGKILL)
 
     ran, ban_ghi = _chay(True)
     assert ran.returncode == 0, "lenh gate dat ma gate tra %r" % (ran.returncode,)

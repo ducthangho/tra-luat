@@ -179,7 +179,10 @@ jobs:
           # Mở tạm ở CHA đúng để bước vào...
           sudo chown "$(id -u):$(id -g)" "$CHA/cgroup.procs"
           echo $$ > "$RIENG/cgroup.procs"
-          # ...rồi KHOÁ LẠI NGAY. Con cháu sinh sau không còn đường ghi ngược ra.
+          # ...rồi TRẢ LẠI root ngay. Việc này đóng đúng MỘT đường: ghi thẳng vào
+          # `CHA/cgroup.procs`. Con cháu vẫn ghi ngược lên `RIENG` được vì
+          # `RIENG/cgroup.procs` phải thuộc UID runner mới chuyển vào được — xem
+          # khối trên. ĐỪNG đọc dòng này thành "đã hết đường ra".
           sudo chown root:root "$CHA/cgroup.procs"
           echo "da vao $(awk -F: '$1=="0"{print $3}' /proc/self/cgroup)"
           # FAIL-CLOSE CHO CHÍNH PHÉP ĐO: Linux mà không cấp được cgroup thì lượt

@@ -92,19 +92,22 @@ khi sửa mã (bẫy đã trả giá ba lần trong một phiên).
 
 ---
 
-## 4. Nợ "ca BO QUA tính vào tổng" ở `launcher_test.py`
+## 4. Nợ "ca BO QUA tính vào tổng" ở `launcher_test.py` — ĐÃ ĐÓNG
 
-`gate_lifecycle_test.py` đã sửa (lớp `BoQua`, harness đếm riêng). Kết quả đọc
-được ngay: Windows CI từ `23/23` phẳng thành `23/23 ca (qua 14, bo qua 9, hong 0)`
-— chín ca trước giờ vẫn được tính là đạt.
+`gate_lifecycle_test.py` sửa trước (lớp `BoQua`, harness đếm riêng): Windows CI từ
+`23/23` phẳng thành `23/23 ca (qua 14, bo qua 9, hong 0)` — chín ca trước giờ vẫn
+được tính là đạt.
 
-`launcher_test.py` **còn nguyên** nợ ấy: `104/104 ca (qua 92, bo qua 12, hong 0)`
-— con số đầu vẫn nuốt phần bỏ qua. Bàn giao đã ghi cho `t19`/`t62`.
+`launcher_test.py` **đã được đóng ở nhánh khác** (`W0-M1`, land qua #153/#156).
+Đầu ra nay:
 
-**Xong khi:** con số đầu không còn nuốt phần bỏ qua, hoặc CI từ chối số skip nằm
-ngoài danh sách nền tảng cho phép.
+```
+118/119 ca QUA (bo qua 1, hong 0) - KHONG DU: 1 ca BO QUA, chua do gi
+```
 
----
+Đi xa hơn điều kiện mục này đặt ra: con số đầu không những hết nuốt phần bỏ qua,
+mà harness còn **tự khai "KHÔNG ĐỦ"** khi có ca bỏ qua — tức người đọc không phải
+tự trừ. Đóng mục.
 
 ## 5. Hook phiên KHÔNG chạy lần nào — và `doctor` không nói được điều đó
 
@@ -166,10 +169,18 @@ Sweep 30 lượt (0,02→0,30s, bước 0,02s, 2 lượt/mốc) trên bản đã
 | con gate sống sót | **0** |
 | cgroup rác để lại | **0** |
 
-Chỉ còn HAI kết cục, và `-15` là tín hiệu tới **trước khi `pthread_sigmask` kịp
-chặn** — tức trước cả handler, trước cả cgroup, trước cả con gate. Ở đó **không
-có gì để rò**: thiệt hại duy nhất là mất bản ghi của một lượt chưa kịp bắt đầu,
-kèm mã thoát `-15` khác với `143` của mọi pha sau.
+Trong lưới ấy chỉ còn HAI kết cục, và `-15` là tín hiệu tới **trước khi
+`pthread_sigmask` kịp chặn** — tức trước cả handler, trước cả cgroup, trước cả con
+gate. Ở đó **không có gì để rò**: thiệt hại duy nhất là mất bản ghi của một lượt
+chưa kịp bắt đầu, kèm mã thoát `-15` khác với `143` của mọi pha sau.
+
+**"Hai kết cục" là phạm vi của LƯỚI, không phải lời khai phổ quát** (P3 review
+`same_provider_approved` trên `f38a090`). Còn một pha ĐUÔI mà lưới 0,02–0,30s
+không chạm tới: tín hiệu đến **sau khi gate đã xong** — `finally` đã trả handler
+về mặc định trong khi tiến trình chưa kịp thoát — cho kết cục thứ ba là `-15`
+**kèm bằng chứng ĐẦY ĐỦ** của một lượt đã hoàn tất. Vô hại (bằng chứng tả đúng
+một gate đã chạy xong), nhưng vế "Xong khi" số 1 nói "mọi mốc bắn" thì phải kể
+tên pha này, nếu không lại là lời khai rộng hơn thứ đã đo.
 
 ### Vì sao không vá nốt
 
@@ -222,8 +233,38 @@ hai bên. Giả thuyết còn lại là **tranh chấp tài nguyên** khi chạy
 tin được**, và lần sau ai gặp sẽ mất thời gian đúng chỗ tôi vừa mất. Ghi lại để
 người sau không phải khám phá lại từ đầu.
 
-**Xong khi:** hoặc bắt được tên ca (chạy loạt có ghi log đầy đủ, không chỉ dòng
-tổng) rồi xử lý; hoặc chạy đủ nhiều lượt để kết luận nó không tái phát và đóng
-mục kèm số lượt đã chạy. Việc đầu tiên nên làm: cho runner của `launcher_test.py`
-in tên ca hỏng ra stdout thay vì chỉ đếm — hiện `hong 1` không nói được ca nào.
+### Đính chính: runner ĐÃ in tên ca hỏng
+
+Bản trước của mục này viết "việc đầu tiên nên làm: cho runner in tên ca hỏng —
+hiện `hong 1` không nói được ca nào". **Sai** (P3 review `same_provider_approved`
+trên `f38a090`). Runner đã in `HONG {ten}: {ly_do}` sẵn ở `launcher_test.py`;
+tên ca không bắt được là do **cách giữ log của lượt chạy loạt** (chỉ giữ dòng
+tổng bằng `tail -1`), không phải do runner thiếu khả năng. Tôi đọc giới hạn của
+phép đo mình dựng thành thuộc tính của thứ được đo — đúng lỗi tệp này tồn tại để
+chặn.
+
+### CẢNH BÁO CHỮ KÝ TRÙNG — đừng nhận nhầm
+
+Trên host **không có `codex`** (đúng loại host chạy các phiên
+`same_provider_approved`), ca `t53_doctor_bao_du_khi_du` đỏ **tất định** vì
+`doctor` thoát 12 — cho ra **đúng** dòng tổng `hong 1`. Người chạy lại loạt trên
+host như vậy sẽ tưởng vừa tái hiện được flake này, trong khi gặp một ca môi
+trường khác hẳn. Kiểm `command -v codex` TRƯỚC khi kết luận đã tái hiện.
+
+### Manh mối thật: chính `doctor` mới là thứ chớp
+
+Đo được sau đó: `python .claude/dev/launcher.py doctor` **thoát 12 rồi ngay sau
+đó thoát 0** — cùng lệnh, cùng máy, cách nhau hai phút, `ok=True`,
+`thieu_bat_buoc=[]`. Mà `t53` khẳng định `returncode == 0`, nên **doctor chớp là
+`t53` đỏ là `hong 1`**. `t53` chỉ là nơi nó lộ ra.
+
+Thử gọi lại: 12 lượt không tải + 12 lượt dưới tải CPU ⇒ **24/24 đều thoát 0**.
+Chưa gọi ra được — tải thật lúc nó chớp là **churn tiến trình/cgroup** (chạy ngay
+sau bộ gate), không phải tải CPU.
+
+**Xong khi:** gọi ra được `doctor` thoát khác 0 trên máy đủ công cụ (nghi trước:
+một lượt `--version` của công cụ nào đó hết hạn dưới churn tiến trình ⇒ bị đếm là
+thiếu), rồi hoặc vá cho nó tất định, hoặc khai rõ `doctor` có thể chớp và `t53`
+phải chịu được điều đó. Nếu chạy đủ nhiều lượt mà không tái phát thì đóng mục
+**kèm số lượt đã chạy** — đừng đóng bằng im lặng.
 

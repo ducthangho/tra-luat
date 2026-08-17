@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -46,16 +46,82 @@ cd "$GOC"
 # `command -v` chứ không `which`: có sẵn ở mọi shell POSIX và không phụ thuộc gói ngoài.
 co() { command -v "$1" >/dev/null 2>&1; }
 
+# Interpreter dùng cho mọi probe bên dưới. Windows KHÔNG có `python3`, nên nhận cả
+# hai tên; thiếu cả hai thì DỪNG — hook không probe được thì mọi kết luận sau đó
+# chỉ là phỏng đoán, và một hook đoán còn tệ hơn hook không chạy.
+if co python3; then PY=python3
+elif co python; then PY=python
+else
+  echo "[session-start] HONG: khong co python/python3 de probe"
+  exit 1
+fi
+
+# CÓ MẶT ≠ CHẠY ĐƯỢC. `command -v` chỉ chứng minh có đường dẫn: audit dựng hai tệp
+# RỖNG tên git.exe/python.exe mà doctor vẫn báo xanh, và trên Windows `rg.exe` nằm
+# trong PATH nhưng chạy ra "Access is denied". Probe thật: có timeout, đòi rc=0 VÀ
+# có đầu ra — rc=0 mà im lặng là đúng chữ ký của "chạy nhưng chẳng làm gì" (r244).
+co_chay() {
+  local duong
+  duong="$(command -v "$1" 2>/dev/null || true)"
+  [ -n "$duong" ] || return 1
+  "$PY" -c 'import subprocess,sys
+try:
+ p=subprocess.run([sys.argv[1],"--version"],capture_output=True,text=True,timeout=8)
+except (OSError,subprocess.SubprocessError):
+ raise SystemExit(1)
+raise SystemExit(0 if p.returncode == 0 and (p.stdout+p.stderr).strip() else 1)' "$duong"
+}
+
+# --- ĐỌC BIẾN MÔI TRƯỜNG TRƯỚC KHI KẾT LUẬN VỀ CÔNG CỤ (bài học 15-08-2026).
+# Chỉ giữ TRẠNG THÁI và NGUỒN; tuyệt đối không echo giá trị credential.
+#
+# Thứ tự chọn CỐ Ý KHÁC tài liệu của gh, và lý do đo được 17-08-2026: trong
+# container này `GH_TOKEN` `GITHUB_TOKEN` `AWS_*` `CLOUDSDK_*` mang CÙNG một chuỗi
+# giữ chỗ 14 ký tự, còn credential thật nằm ở `GITHUB_PAT` (93 ký tự). Lấy
+# `GH_TOKEN` trước là xuất khẩu đúng bản giữ chỗ, rồi `gh` báo "sai thông tin đăng
+# nhập" thay vì "chưa đăng nhập" — biến giữ chỗ TỆ HƠN biến chưa đặt.
+# Dấu hiệu máy đọc được: "token GitHub" mà TRÙNG BYTE với một biến chẳng liên quan
+# tới GitHub thì không phải credential. So bằng băm để không giá trị nào bị in ra.
+# Luật này phải GIỐNG `_doc_moi_truong` trong launcher.py — hai bản của cùng một
+# quy tắc sẽ trôi lệch, và bên quên cập nhật chính là bên đẩy lọt.
+CODEX_AUTH_CO=0; [ -n "${CODEX_AUTH_JSON:-}" ] && CODEX_AUTH_CO=1
+GITHUB_AUTH_SOURCE="$(
+  "$PY" -c '
+import hashlib, os, secrets
+khoa = secrets.token_bytes(16)
+def vt(v): return hashlib.blake2s(v.encode("utf-8","replace"), key=khoa).hexdigest()
+ngoai = {vt(os.environ[t]) for t in
+         ("AWS_ACCESS_KEY_ID","AWS_SECRET_ACCESS_KEY","CLOUDSDK_AUTH_ACCESS_TOKEN")
+         if os.environ.get(t)}
+for ten in ("GH_TOKEN","GITHUB_TOKEN","GITHUB_PAT"):
+    v = os.environ.get(ten)
+    if v and vt(v) not in ngoai:
+        print(ten); break
+else:
+    print("none")'
+)"
+case "$GITHUB_AUTH_SOURCE" in
+  none)
+    # Thà KHÔNG có còn hơn có bản giữ chỗ.
+    unset GH_TOKEN GITHUB_TOKEN 2>/dev/null || true ;;
+  GH_TOKEN) : ;;
+  *)
+    # `gh` không đọc tên biến lịch sử `GITHUB_PAT`. Ánh xạ trong tiến trình hook,
+    # không ghi token xuống đĩa và không in giá trị.
+    eval "export GH_TOKEN=\"\${$GITHUB_AUTH_SOURCE}\"" ;;
+esac
+echo "[session-start] moi truong: da doc truoc tool; GitHub auth source=$GITHUB_AUTH_SOURCE; CODEX_AUTH_JSON present=$CODEX_AUTH_CO"
+
 echo "[session-start] goc du an: $GOC"
 
 # --- CLI agent chính thức. Idempotent: đã có thì không đụng (container được
 # cache sau khi hook xong, nên lần sau vào thẳng).
 if co npm; then
-  if ! co codex; then
+  if ! co_chay codex; then
     echo "[session-start] cai @openai/codex ..."
     npm install -g @openai/codex >/dev/null 2>&1 || echo "[session-start] CANH BAO: cai codex that bai"
   fi
-  if ! co claude; then
+  if ! co_chay claude; then
     echo "[session-start] cai @anthropic-ai/claude-code ..."
     npm install -g @anthropic-ai/claude-code >/dev/null 2>&1 || echo "[session-start] CANH BAO: cai claude that bai"
   fi
@@ -69,7 +135,7 @@ fi
 #
 # Ba đường cài, thử lần lượt: apt-get (có/không sudo), rồi cargo. Không đường nào
 # chạy thì nói THẲNG là phiên sẽ thiếu — đừng để nó lộ ra giữa chừng.
-if ! co rg; then
+if ! co_chay rg; then
   echo "[session-start] cai ripgrep ..."
   if co apt-get; then
     apt-get install -y -qq ripgrep >/dev/null 2>&1 \
@@ -97,8 +163,9 @@ fi
 # duong nao mo, de khong ai ket luan "GitHub khong goi duoc" tu duong hong.
 
 # --- phụ thuộc Python của kho
-PY=python3
-co python3 || PY=python
+# (`PY` đã được chọn Ở ĐẦU tệp, cùng chỗ với `co_chay`. Trước đây nó được gán LẠI
+# ở đây; hai chỗ gán cùng một biến là hai bản của một quy tắc, và bản dưới sẽ âm
+# thầm thắng bản trên nếu ai đó sửa một bên. Giữ đúng MỘT chỗ chọn interpreter.)
 # Chi cai lai khi requirements.txt DOI. Audit codex: hook chay pip moi lan
 # SessionStart la khong idempotent that su - vua cham vua co the keo ve ban khac
 # (pypdf>=4.0 khong ghim tran).

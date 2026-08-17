@@ -2475,8 +2475,12 @@ def _do_claude() -> tuple[str, str]:
 _RE_SLUG_GITHUB = re.compile(r"github\.com[:/]+([^/]+/[^/\s]+?)(?:\.git)?/*$")
 
 
-def _do_rest_github(url: str, timeout: float = 6.0) -> tuple[str, str]:
-    """Đo MỘT đường REST. Trả (`mo` | `chan` | `khong_do_duoc`, mô tả).
+def _do_rest_github(url: str, timeout: float = 6.0) -> tuple[str, str, bool]:
+    """Đo MỘT đường REST. Trả (`mo`|`chan`|`khong_do_duoc`, mô tả, THAO TÁC THÀNH CÔNG).
+
+    Ba giá trị vì có BA câu hỏi khác nhau, và gộp chúng là lỗi đã trả giá: đường
+    có thông không · nó hỏng vì ai · và ta có LÀM ĐƯỢC VIỆC không. Một 404 kho
+    riêng tư trả lời "thông" cho câu một và "không" cho câu ba.
 
     DẤU HIỆU PHÂN BIỆT là HEADER `X-GitHub-*`, KHÔNG phải mã trạng thái. Đo
     17-08-2026: `/repos/<kho>` trả 403 **không header GitHub nào**, còn
@@ -2496,14 +2500,19 @@ def _do_rest_github(url: str, timeout: float = 6.0) -> tuple[str, str]:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             co_gh = any(k.lower().startswith("x-github") for k in r.headers)
             return ("mo" if co_gh else "chan",
-                    f"HTTP {r.status}" + ("" if co_gh else " (KHONG header GitHub -> proxy tu sinh)"))
+                    f"HTTP {r.status}" + ("" if co_gh else " (KHONG header GitHub -> proxy tu sinh)"),
+                    co_gh and 200 <= int(r.status) < 300)
     except urllib.error.HTTPError as e:
         co_gh = any(k.lower().startswith("x-github") for k in e.headers)
+        # 4xx CÓ header GitHub = TỚI NƠI nhưng THAO TÁC HỎNG. `mo` đúng cho câu
+        # "đường có thông không"; `thanh_cong=False` đúng cho câu "làm được việc
+        # không". Gộp hai câu ấy chính là lỗi P1 mà cross-review bắt trên PR "#143".
         return ("mo" if co_gh else "chan",
                 f"HTTP {e.code}" + (" (toi GitHub, thieu quyen)" if co_gh
-                                    else " (KHONG header GitHub -> proxy tu sinh)"))
+                                    else " (KHONG header GitHub -> proxy tu sinh)"),
+                False)
     except Exception as e:                       # mạng/DNS/quá hạn = KHÔNG ĐO ĐƯỢC
-        return ("khong_do_duoc", f"{type(e).__name__}")
+        return ("khong_do_duoc", f"{type(e).__name__}", False)
 
 
 def _do_github(ws: str | None) -> tuple[str, str]:
@@ -2555,7 +2564,7 @@ def _do_github(ws: str | None) -> tuple[str, str]:
     # Đo 17-08-2026: đường một `mo`, đường hai `chan`. Nên câu đúng KHÔNG phải
     # "REST bị chặn" mà là "REST bị chặn ĐÚNG CHỖ làm việc", và đó mới là điều đáng
     # nói với người đọc.
-    tt_chung, mt_chung = _do_rest_github("https://api.github.com/rate_limit")
+    tt_chung, mt_chung, _ = _do_rest_github("https://api.github.com/rate_limit")
     # CHẨN ĐOÁN, KHÔNG TÍNH vào kết luận "dùng được" — xem `_tinh_kha_dung` dưới.
     duong.append(("rest-chung", tt_chung == "mo", mt_chung))
     slug = None
@@ -2565,8 +2574,10 @@ def _do_github(ws: str | None) -> tuple[str, str]:
             k = _RE_SLUG_GITHUB.search((url_o or "").strip())
             slug = k.group(1) if k else None
     if slug:
-        tt_kho, mt_kho = _do_rest_github(f"https://api.github.com/repos/{slug}")
-        duong.append(("rest-kho", tt_kho == "mo", mt_kho))
+        tt_kho, mt_kho, ok_kho = _do_rest_github(f"https://api.github.com/repos/{slug}")
+        # `ok` ở đây là THAO TÁC THÀNH CÔNG, không phải "đường thông". Một 404 kho
+        # riêng tư vẫn là `mo` (tới GitHub) nhưng KHÔNG làm được việc.
+        duong.append(("rest-kho", ok_kho, mt_kho if ok_kho else f"{mt_kho} [{tt_kho}]"))
     else:
         duong.append(("rest-kho", False, "khong doc duoc slug origin -> KHONG DO DUOC"))
 
@@ -2575,6 +2586,25 @@ def _do_github(ws: str | None) -> tuple[str, str]:
     # rồi MỌI lệnh việc thật (`gh pr view`, `gh api repos/...`) ăn 403. Một công cụ
     # qua được phép tự kiểm mà không làm nổi việc thì tệ hơn công cụ vắng mặt —
     # cùng họ `codex login status`. Nói thẳng ra đây thay vì để người đọc tự vấp.
+    # `gh` LÀM ĐƯỢC VIỆC hay không phải đo bằng MỘT THAO TÁC MỨC KHO, không bằng
+    # `gh auth status`. Chính phiên này đo được `auth status` hỏi `/user` — đường
+    # proxy CHO PHÉP — nên nó xanh trong khi mọi lệnh việc thật 403. Đếm nó là
+    # "đường mở" là lần THỨ BA cùng một hình dạng trong kho: trước là
+    # `shutil.which("gh")`, rồi `rest-chung`, giờ tới `gh auth status`. Ba lần thì
+    # sai nằm ở ĐỊNH NGHĨA, không ở từng bản vá — nên "làm được việc" từ đây neo
+    # vào một thao tác kho ĐÃ THÀNH CÔNG, không neo vào probe.
+    if shutil.which("gh") and slug:
+        try:
+            pk = subprocess.run(["gh", "api", f"repos/{slug}", "--jq", ".full_name"],
+                                capture_output=True, text=True,
+                                stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)
+            duong.append(("gh-kho", pk.returncode == 0 and bool((pk.stdout or "").strip()),
+                          "doc duoc kho" if pk.returncode == 0 else f"rc={pk.returncode}"))
+        except (OSError, subprocess.SubprocessError) as e:
+            duong.append(("gh-kho", False, type(e).__name__))
+    elif shutil.which("gh"):
+        duong.append(("gh-kho", False, "khong doc duoc slug origin"))
+
     gh_ok = next((ok for t, ok, _ in duong if t == "gh-cli"), False)
     kho_chan = any(t == "rest-kho" and not ok for t, ok, _ in duong)
     canh = " · gh BAO da xac thuc nhung duong kho bi chan -> dung lam duong viec" \
@@ -2587,7 +2617,9 @@ def _do_github(ws: str | None) -> tuple[str, str]:
     # đường ấy, và nó là ĐÚNG MỘT lớp với lỗi cũ mà chính `t103` sinh ra để chặn:
     # bản trước đếm `shutil.which("gh")` là một đường mở. Hai lần, hai cái tên khác
     # nhau, cùng một sai lầm — đếm SỰ CÓ MẶT của một đường thay vì KHẢ NĂNG của nó.
-    LAM_DUOC_VIEC = {"git", "gh-cli", "rest-kho"}
+    # `gh-cli` ĐÃ BỊ LOẠI khỏi tập này (P1 cross-review PR "#143"): nó chỉ chứng
+    # minh ĐÃ XÁC THỰC, không chứng minh làm được việc. `gh-kho` mới là thao tác thật.
+    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho"}
     return (("DUNG_DUOC" if any(ok for t, ok, _ in duong if t in LAM_DUOC_VIEC)
              else "CHUA_XAC_THUC"),
             " · ".join(f"{t}={'OK' if ok else 'khong'}" for t, ok, _ in duong) + canh)

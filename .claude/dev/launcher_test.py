@@ -3129,7 +3129,7 @@ def t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI():
         return f
 
     dat(_ném(403, {"Content-Type": "text/plain"}))
-    tt, mo_ta = m._do_rest_github("https://x/y")
+    tt, mo_ta, _ = m._do_rest_github("https://x/y")
     bang(tt == "chan" and "proxy" in mo_ta, f"403 khong header phai la `chan`: {tt} {mo_ta}")
     # 4xx CÓ header GitHub = tới nơi, chỉ thiếu quyền. Gọi nó là `chan` thì ta đẩy
     # người đọc đi sửa proxy trong khi thứ hỏng là quyền token.
@@ -3141,6 +3141,72 @@ def t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI():
     dat(_no)
     bang(m._do_rest_github("https://x/y")[0] == "khong_do_duoc",
          "mang hong bi gop vao `chan` (None != False)")
+
+    # GIA TRI THU BA: "duong co thong" KHAC "lam duoc viec". Mot 404 kho rieng tu
+    # toi duoc GitHub (`mo`) ma KHONG doc noi kho. Gop hai cau ay chinh la P1 mà
+    # cross-review bat tren PR "#143".
+    dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+    bang(m._do_rest_github("https://x/y")[2] is True, "2xx co header ma khong tinh la thanh cong")
+    dat(_ném(404, {"X-GitHub-Request-Id": "abc"}))
+    tt, _mt, ok = m._do_rest_github("https://x/y")
+    bang(tt == "mo" and ok is False,
+         f"404 co header GitHub phai la `mo` NHUNG khong thanh cong: {tt} {ok}")
+    dat(_no)
+    bang(m._do_rest_github("https://x/y")[2] is False, "khong do duoc ma tinh la thanh cong")
+
+
+@ca
+def t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec():
+    """`gh auth status` xanh mà mọi thao tác kho 403 thì GitHub KHÔNG dùng được.
+
+    P1 cross-review PR "#143", và là lần THỨ BA cùng một hình dạng trong kho:
+    trước là `shutil.which("gh")` được đếm là đường mở (`t103` sinh ra vì nó), rồi
+    `rest-chung` (`/rate_limit` mở nhưng không đọc nổi PR nào), giờ tới
+    `gh auth status`. Ba lần thì sai nằm ở ĐỊNH NGHĨA "đường làm được việc", không
+    ở từng bản vá — nên nó phải neo vào một THAO TÁC KHO đã thành công.
+
+    Đo được ngay trong phiên viết ca này: `gh auth status` hỏi `/user`, là đường
+    proxy CHO PHÉP, nên nó xanh trong khi `/repos/...` trả 403 do proxy tự sinh.
+    """
+    m = _tai_launcher_thu()
+
+    # `remote get-url` PHAI thanh cong (de co slug), con `ls-remote` PHAI hong —
+    # ta dang dung canh "git khong dung duoc", de xem gh mot minh co du hay khong.
+    def gia_git(ws, *a):
+        if a[:1] == ("remote",):
+            return (0, "https://github.com/o/r.git", "")
+        return (128, "", "fatal: unable to access")
+
+    m._git = gia_git
+    m.shutil.which = lambda t: "/gia/gh" if t == "gh" else None
+
+    class P:
+        def __init__(self, rc, out=""):
+            self.returncode, self.stdout, self.stderr = rc, out, ""
+
+    # gh CO va DA XAC THUC, nhung thao tac muc kho HONG; REST kho cung hong.
+    def chay(cmd, **_k):
+        if cmd[:3] == ["gh", "auth", "status"]:
+            return P(0, "Logged in")
+        if cmd[:2] == ["gh", "api"]:
+            return P(1)                      # 403 o duong viec that
+        return P(1)
+
+    m.subprocess.run = chay
+    m._do_rest_github = lambda url, **_k: (
+        ("mo", "HTTP 200", True) if "rate_limit" in url else ("chan", "HTTP 403", False))
+    nhan, mo_ta = m._do_github("/gia/ws")     # co ws de lay slug, nhung git se hong
+    bang(nhan == "CHUA_XAC_THUC",
+         f"gh xac thuc + rate_limit mo ma da goi la DUNG_DUOC: {nhan} | {mo_ta}")
+
+    # Chieu NGUOC: thao tac muc kho THANH CONG thi phai la DUNG_DUOC.
+    def chay2(cmd, **_k):
+        if cmd[:2] == ["gh", "api"]:
+            return P(0, "o/r\n")
+        return P(0, "Logged in")
+    m.subprocess.run = chay2
+    nhan2, mo_ta2 = m._do_github("/gia/ws")
+    bang(nhan2 == "DUNG_DUOC", f"thao tac kho thanh cong ma van CHUA_XAC_THUC: {nhan2} | {mo_ta2}")
 
 
 @ca
@@ -3177,12 +3243,39 @@ def t103_nam_finding_cua_bot_review_PR128():
         def __init__(self, rc):
             self.returncode, self.stdout, self.stderr = rc, "", ""
 
-    for rc_gh, mong in ((1, False), (0, True)):
+    # KY VONG DA DOI, co chu dinh — P1 cross-review tren PR "#143".
+    #
+    # Ban dau ca nay khang dinh `gh auth status` rc=0 => `DUNG_DUOC`. Do la mot buoc
+    # TIEN BO so voi ban truoc no (chi dem `shutil.which("gh")`), nhung van con dung
+    # mot nua: no van dem KET QUA MOT PROBE lam bang chung LAM DUOC VIEC. Do duoc
+    # 17-08-2026: `gh auth status` hoi `/user` — duong proxy CHO PHEP, tra 200 — nen
+    # no xanh trong khi moi thao tac muc kho tra 403 do proxy tu sinh.
+    #
+    # Nen ca hai dong duoi day deu mong `False`: khong co workspace thi khong goi
+    # duoc ten kho, tuc KHONG CO cach nao chung minh lam duoc viec — va "chua chung
+    # minh duoc" phai doc la chua, khong duoc doc thanh dat.
+    for rc_gh in (1, 0):
         m.subprocess.run = lambda *_a, **_k: (goi.append(1), Rc(rc_gh))[1]
-        tt, mo_ta = m._do_github(None)      # KHONG co workspace => chi con duong gh
-        bang((tt == "DUNG_DUOC") is mong,
-             f"gh rc={rc_gh} ma ket luan {tt} (mong kha dung={mong}): {mo_ta!r}")
+        tt, mo_ta = m._do_github(None)      # KHONG co workspace => khong co duong kho
+        bang(tt != "DUNG_DUOC",
+             f"gh rc={rc_gh} ma van goi la DUNG_DUOC khi chua lam noi viec gi: {mo_ta!r}")
     bang(goi, "khong he goi `gh auth status` — van dang do CO MAT")
+
+    # Y DINH GOC cua ca nay VAN duoc giu: phai co phep do THAT, khong duoc suy tu
+    # su co mat. Nay them chieu DUONG — thao tac muc kho thanh cong thi phai xanh —
+    # de ca nay khong tro thanh "luon do", tuc mot ca khong the xanh cung vo dung
+    # nhu mot ca khong the do.
+    m._git = lambda ws, *a: (0, "https://github.com/o/r.git", "")
+    m._do_rest_github = lambda url, **_k: ("chan", "HTTP 403", False)
+
+    def chay_kho(cmd, **_k):
+        goi.append(1)
+        return Rc(0) if cmd[:2] == ["gh", "api"] else Rc(0)
+
+    m.subprocess.run = chay_kho
+    tt_kho, mo_ta_kho = m._do_github("/gia/ws")
+    bang(tt_kho == "DUNG_DUOC",
+         f"thao tac muc kho thanh cong ma van {tt_kho}: {mo_ta_kho!r}")
     m.subprocess.run = goc_run          # tra lai TRUOC khi phan (e) goi bash that
 
     # (c) SO MOC THAT, khong so tuoi da lam tron (0,1h = 6 phut)
@@ -3759,10 +3852,16 @@ DOT_BIEN = [
     ("claude_dem_ca_BIEN_RONG_la_credential",
      ('            and v.strip()]', '            ]'),
      ["t103_nam_finding_cua_bot_review_PR128"]),
+    # NEO LAI: `gh-cli` khong con quyet dinh `DUNG_DUOC` (P1 PR "#143"), nen dot bien
+    # cu — ep `gh-cli` luon True — khong con ca nao chet, tuc no da MAT RANG. Cua that
+    # su quyet dinh nay la `gh-kho`; dot bien phai bam vao do.
     ("github_dem_CO_MAT_gh_la_da_xac_thuc",
-     ('            duong.append(("gh-cli", pg.returncode == 0,',
-      '            duong.append(("gh-cli", True,'),
-     ["t103_nam_finding_cua_bot_review_PR128"]),
+     ('            duong.append(("gh-kho", pk.returncode == 0 and bool((pk.stdout or "").strip()),',
+      '            duong.append(("gh-kho", True,'),
+     # CHI khai `t111`: `t103` mo phong `subprocess.run` tra 0 cho MOI lenh, nen ep
+     # `gh-kho` thanh True khong doi ket qua cua no. Khai mot ca KHONG THE chet cung
+     # la mot loi khai sai ve do phu — runner bao `giet 1/2` chu khong im lang.
+     ["t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec"]),
     ("moc_refresh_MAT_DO_PHAN_GIAI",
      ('        moc = datetime.fromisoformat(last_refresh.strip().replace("Z", "+00:00"))',
       '        moc = datetime.fromisoformat(last_refresh.strip().replace("Z", "+00:00")'
@@ -3953,16 +4052,26 @@ DOT_BIEN = [
     # thanh "GitHub tu choi", va 4xx that cua GitHub bi doc thanh "proxy chan".
     ("rest_phan_loai_theo_ma_trang_thai",
      ('        co_gh = any(k.lower().startswith("x-github") for k in e.headers)\n'
-      '        return ("mo" if co_gh else "chan",\n'
-      '                f"HTTP {e.code}"',
+      '        # 4xx CÓ header GitHub = TỚI NƠI nhưng THAO TÁC HỎNG.',
       '        co_gh = e.code < 400\n'
-      '        return ("mo" if co_gh else "chan",\n'
-      '                f"HTTP {e.code}"'),
+      '        # 4xx CÓ header GitHub = TỚI NƠI nhưng THAO TÁC HỎNG.'),
      ["t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI"]),
     # Gop "khong do duoc" vao "chan" — dung loi `None != False` kho da ghi so.
+    # Dem `gh auth status` la duong lam duoc viec => lan thu BA cung mot hinh dang.
+    ("github_dem_gh_auth_la_lam_duoc_viec",
+     ('    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho"}',
+      '    LAM_DUOC_VIEC = {"git", "gh-cli", "rest-kho"}'),
+     ["t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec"]),
     ("rest_gop_khong_do_duoc_vao_chan",
-     ('        return ("khong_do_duoc", f"{type(e).__name__}")',
-      '        return ("chan", f"{type(e).__name__}")'),
+     ('        return ("khong_do_duoc", f"{type(e).__name__}", False)',
+      '        return ("chan", f"{type(e).__name__}", False)'),
+     ["t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI"]),
+    # Coi "toi duoc" la "lam duoc viec": 404 kho rieng tu se thanh bang chung xanh.
+    ("rest_toi_duoc_la_lam_duoc_viec",
+     ('                False)\n    except Exception as e:',
+      '                True)\n    except Exception as e:'),
+     # CHI `t110`: `t111` thay han `_do_rest_github` bang ban gia, nen dot bien vao
+     # ban that khong toi duoc no.
      ["t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI"]),
     ("worktree_bo_qua_tep_moi",
      ('"--untracked-files=all"', '"--untracked-files=no"'),

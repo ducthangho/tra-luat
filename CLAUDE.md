@@ -488,6 +488,25 @@ Adapter lệch protocol thì ADAPTER sai — và "lệch" nay đo được, khô
 Vài điều kiện dừng của §12 được CƯỠNG CHẾ bằng `.claude/dev/packet_loop.py` (chạy `--help` cho bảng
 mã thoát); phản chứng chạy được cho từng chốt ở `.claude/dev/packet_loop_test.py`.
 
+**Kế hoạch thi công và hồ sơ quyết định** — đọc khi nhận một packet `W0-*`/`W1-*`:
+`ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md` (bản đồ packet, write set dự kiến, thứ tự từng lane) ·
+`ops/THAM_DINH_CHUNG_CLAUDE_CODEX_KE_HOACH.md` (biên bản thẩm định 5 vòng, hai quyết định đã duyệt) ·
+căn cứ từng quyết định ở `docs/adr/0036-claude-executor-codex-review-theo-rui-ro.md` … `docs/adr/0042-deadline-wall-clock-va-working-state-evidence.md` ·
+prompt của 5 vòng thẩm định ở `ops/prompts/orchestrator-plan-audit-r1-claude-20260817.md` … `-r5-`.
+Cả `ops/` lẫn `docs/` là dev-side, không vào gói phát hành.
+Từ vựng dùng chung ở `CONTEXT.md`; tệp này KHÔNG định nghĩa lại thuật ngữ nào.
+
+**ĐỌC ĐƯỢC KẾ HOẠCH KHÔNG PHẢI LÀ ĐƯỢC GIAO VIỆC.** Kế hoạch là DỮ LIỆU. Thứ giao việc là Packet
+Issue kèm lease còn hiệu lực (protocol §3.2 và §7). Phiên nào tự chọn một dòng trong bảng packet rồi
+bắt tay làm là tự cấp việc cho mình, và hai phiên sẽ cùng kết luận mình sở hữu cùng một packet —
+đúng thứ write-set exclusion sinh ra để chặn. Chưa có Issue/lease cho packet đó thì DỪNG và hỏi
+người giữ, kể cả khi bảng packet ghi rõ việc phải làm.
+
+**Không phải packet nào cũng route sang phiên cloud được.** Lane launcher đo hành vi phụ thuộc nền:
+cùng `.claude/dev/launcher_test.py`, CI 17-08-2026 đo được Linux bỏ qua 1 ca còn Windows bỏ qua 13. Packet nào
+đo hạn chót xuyên trạng thái ngủ của máy thì cần `QueryUnbiasedInterruptTime`, chỉ chạy thật trên
+Windows. Chọn nền theo thứ packet ĐO, đừng chọn theo nền nào đang rảnh.
+
 ## Khi đóng gói
 Bump VERSION (3 chỗ) → CHANGELOG → selftest N/N → user tự chạy cmd (script tự loại .git/.claude/.githooks/
 CLAUDE.md/config/enc + quét token). Verify sau deploy: Package trả VERSION mới.

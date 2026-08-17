@@ -2226,6 +2226,17 @@ def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None]:
     # `{"mcpServers": {"github": "x"}}` deu duoc tuyen la "da khai server". Cung mot
     # hinh dang loi voi P2 cua luot 1 — chi tut xuong SAU mot tang. Do la dau hieu
     # nen kiem TUNG TANG mot lan cho het thay vi va dan theo bao cao.
+    # NHIEU TEN CUNG KHOP CASEFOLD => TU CHOI, khong chon theo thu tu khai bao.
+    # Ta khop `casefold()` nen `github` va `GitHub` cung duoc nhan, nhung `claude mcp
+    # get` coi chung la HAI server KHAC NHAU (do duoc: no goi y "Did you mean"). Ban
+    # truoc tra `ten[0]` — tuc server duoc do phu thuoc THU TU KHOA trong JSON, nen
+    # hai tep cung tap server ma dao thu tu se cho hai nhan khac nhau. Do la bat dinh
+    # nup trong mot phep do, va mot phep do bat dinh thi khong phai phep do (finding
+    # cross-review luot 4). Cau tra loi trung thuc la: cau hinh nay MO HO, noi thang.
+    if len(ten) > 1:
+        return False, (f".mcp.json [{nguon}] khai {len(ten)} server cung khop `github` sau "
+                       f"chuan hoa hoa/thuong ({', '.join(sorted(ten))}) — MO HO, khong biet "
+                       f"do cai nao; `claude mcp get` coi chung la hai server khac nhau"), None
     xau = [k for k in ten if not isinstance(srv[k], dict)]
     if xau:
         return False, (f".mcp.json [{nguon}] khai `{', '.join(xau)}` nhung gia tri khong "

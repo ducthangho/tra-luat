@@ -1,0 +1,127 @@
+# Lease REVIEWER lượt 2 — PR #150. PHẠM VI ĐÓNG BĂNG.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+#
+# LƯỢT 1 RA `changes_requested` VỚI ĐÚNG MỘT FINDING, và finding ấy ĐÚNG: `gh` thoát khác 0
+# mà vẫn in JSON hợp lệ thì fail-close bị mở toang — reviewer CHẠY được ca ấy, script trả
+# rc=0 và xoá thật. Người vá đã tái hiện độc lập (bản `5bc635d` ⇒ 11/13, đỏ đúng t10) rồi vá.
+#
+# VÌ SAO ĐÓNG BĂNG PHẠM VI. Chuỗi `doctor-github-mcp` dài CHÍN lượt, nguyên nhân chính là
+# người vá nới phạm vi mỗi lượt — lượt 8 cả hai finding đều nhắm một ca do chính lượt 8 đẻ
+# ra. Lượt 9 đóng băng và `approve` ngay, Findings TRỐNG. Lượt này lặp lại cách ấy có chủ
+# đích: chỉ hỏi finding đã đóng chưa và bản vá có đẻ ra gì mới không.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: don-nhanh-base-review-2-codex-20260817
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+reviewer_note: người vá là `claude` ⇒ §8 bắt reviewer khác nhà cung cấp
+assurance_target: cross_approved
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: 1511dd75a5a4f65c623738f2dc91e384b96bad9a
+branch: ops/don-nhanh-giu-base-pr
+base_sha: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+sha_luot_truoc: 5bc635d2ea64bcedd41378cc33c6b4cdbf03f164
+target_branch_neu_land: master
+target_pull_request: 150
+
+pham_vi_dong_bang: true
+scope_files_can_xet: 2
+scope_note: >-
+  Delta `5bc635d..1511dd7` có 4 tệp, nhưng CHỈ HAI tệp là mã cần xét:
+  `scripts/don-nhanh.ps1` (+21) và `scripts/don-nhanh_test.ps1` (+79). Hai tệp còn lại là
+  HỒ SƠ OPS (lease + prompt lượt 1) — không phải mã. Finding NGOÀI hai tệp ấy phải xuống
+  `Nợ khai báo`, không lên `Findings`.
+
+prompt_path: ops/prompts/don-nhanh-base-review-2-codex-20260817.md
+prompt_sha256_required: 16778be2cce7a92fe154e4fd9659409233d6687da039415bafecef4390cfea6b
+
+granted_by: ducthangho
+granted_on_instruction: direct, in-session, 2026-08-17 ("cấp lease lượt 2 rồi chạy đi")
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  Phiên ghi lease này CHÍNH LÀ phiên đã vá. Lượt 1 đã chứng minh điều đó có hậu quả thật:
+  người vá chạy ba đột biến, reviewer tìm ra cái THỨ TƯ và nó là P1. Nên mục kiểm 3 lại
+  đòi tìm đột biến sống sót — nhưng lần này BÓ trong đúng hai tệp, để câu hỏi ấy không
+  biến thành cửa nới phạm vi.
+
+leased_at_utc: '2026-08-17T13:00:00Z'
+lease_expires_at_utc: '2026-08-18T13:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 0
+attempts_note: Việc dev-side ngoài packet nên KHÔNG tiêu lượt.
+
+muc_kiem:
+- id: finding-luot-1-da-dong-chua
+  note: >-
+    Dựng lại ĐÚNG ca của lượt 1 (`gh` in `[]`, `exit 1`) rồi chạy `-Xoa`. Đòi HAI vế:
+    `rc=13` VÀ remote KHÔNG đổi. Chỉ đo mã thoát thì một bản "in lỗi rồi vẫn xoá" vẫn xanh.
+- id: chot-thu-hai-co-chan-oan-khong
+  note: >-
+    Bản vá thêm chốt "rc=0 mà đầu ra RỖNG cũng là KHÔNG ĐO ĐƯỢC". Đường bình thường
+    (`gh` in `[]`, rc=0) có VẪN xoá được không? `t13` là đối chứng dương cho việc này.
+- id: stderr-lan-vao-json
+  note: >-
+    CÂU NGƯỜI VÁ TỰ NGHI NHẤT VỀ BẢN VÁ CỦA MÌNH. `$tho` gom cả `2>&1`. Một dòng CẢNH BÁO
+    trên stderr đi kèm JSON hợp lệ thì `ConvertFrom-Json` còn parse được không, hay bản vá
+    vừa làm hỏng một ca THỰC TẾ (`gh` rất hay in cảnh báo cập nhật phiên bản)?
+- id: tim-dot-bien-song-sot-TRONG-hai-tep
+  note: >-
+    Người vá chạy bốn (bản 5bc635d + M4 + M5 + M6), mỗi cái giết đúng ca. Có cái thứ NĂM
+    trong ĐÚNG hai tệp không? "Không tìm được" là kết luận hợp lệ, không phải thất bại.
+
+so_lieu_nguoi_va_bao:
+  bo_test: 13/13 — pwsh 7.4.6, TMPDIR=/dev/shm
+  bang_chung_duong: >-
+    Chạy bộ 13 ca lên BẢN 5bc635d (đúng SHA lượt 1 đã review) ⇒ 11/13, ĐỎ t10 và t12. Đây
+    là tái hiện ĐỘC LẬP finding của reviewer, không phải tin lời.
+  dot_bien: 'M4 bỏ kiểm mã thoát gh ⇒ 12/13 (đỏ t10) · M5 bỏ kiểm đầu ra RỖNG ⇒ 12/13 (đỏ t12) · M6 catch vẫn đặt doDuocPR=true ⇒ 10/13 (đỏ t10 t11 t12)'
+  ca_moi: 't10 gh rc≠0 + JSON hợp lệ → từ chối · t11 rác → từ chối · t12 rỗng → từ chối · t13 ĐỐI CHỨNG DƯƠNG: rc=0 + JSON hợp lệ → VẪN xoá'
+  cong_khac: 'actionlint rc=0 · eol ok=true checked=379 violations=0 · lease_publish 31/31 · release-verify ok=true failed=0 extra=0 · golden rc=0 và 0 dòng đổi · file_count 179 KHÔNG đổi'
+
+loi_cua_chinh_luot_va_nay_tu_khai:
+- id: string-null-thanh-chuoi-rong
+  note: >-
+    `[string]$X = $null` trong PowerShell cho CHUỖI RỖNG chứ không cho `$null`, nên
+    `$null -ne $X` LUÔN đúng và `gh` giả in RỖNG ở khắp nơi — `t1 t2 t3` đột ngột đòi
+    rc=13. Sửa bằng `$PSBoundParameters.ContainsKey`. KIỂM LỜI KHAI: cách sửa ấy còn lỗ
+    không (ví dụ truyền `-ThoNguyen $null` tường minh)?
+  vi_sao_ghi_ra: >-
+    Nếu chỉ chạy t10-t12 thì chúng VẪN XANH — vì lý do SAI — và lỗi này đi thẳng vào
+    commit. Thứ bắt được nó là chạy TRỌN bộ, không phải chạy các ca mới.
+
+no_da_khai_KHONG_neu_lai:
+- id: bo-qua-lop-pr-khong-kiem-gi
+- id: phu-thuoc-gh
+- id: hai-duong-se-troi-lech
+- id: tl-selftest-khong-do-duoc
+  note: >-
+    Lượt 1 reviewer cũng KHÔNG xác nhận được. Giữ nguyên trạng thái "chưa ai đo" — đừng
+    đoán theo chiều nào.
+
+ngoai_pham_vi_da_biet:
+- id: ho-so-ops-trong-delta
+  note: Lease + prompt lượt 1 nằm trong delta nhưng KHÔNG phải mã. Bỏ qua.
+- id: khong-doi-hanh-vi-ops-don-ref
+  note: '`ops-don-ref.yml` KHÔNG bị đụng ở cả hai lượt.'
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T12:57:47Z'
+master_sha_at_grant: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+lease_song_khac_luc_cap: >-
+  Lease lượt 1 của chính PR này đã đóng (`changes_requested`, đã vá). Không có lease review
+  nào khác đang mở.
+canh_bao_moi_truong_luc_cap: >-
+  Lượt 1 reviewer phải đặt `TMPDIR=/dev/shm` vì sandbox khoá `/tmp` — giữ nguyên cách ấy.
+  Thiếu `pwsh` thì khai KHÔNG ĐO ĐƯỢC, đừng suy từ đọc code.

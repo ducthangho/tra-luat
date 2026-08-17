@@ -1,0 +1,117 @@
+# BIÊN NHẬN — lượt XÉT LẠI KIẾN TRÚC cách `don-nhanh.ps1` đọc danh sách PR đang mở.
+#
+# KHÔNG PHẢI LƯỢT DUYỆT. Không cấp điều kiện land cho #150 (xem caveat
+# `same-provider-khong-du-land` ở biên nhận lượt 3 — cùng lý do).
+#
+# CHỖ ĐÁNG ĐỌC NHẤT KHÔNG PHẢI KẾT LUẬN MÀ LÀ CÁCH NÓ ĐƯỢC RÚT RA: bằng chứng người vá đưa
+# vào lease để ỦNG HỘ phương án MCP đã CHẾT trong ~12 phút, và chính việc nó chết là lý do
+# mạnh nhất để KHÔNG đổi sang MCP. Xem caveat `mcp-do-duoc-roi-mat`.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+lease_id: don-nhanh-kien-truc-gh-1-claude-20260817
+loai_luot: xet_lai_kien_truc
+provider: claude
+role: reviewer
+verdict: giu_nguyen
+assurance: same_provider_approved
+assurance_KHONG_dat: cross_approved
+cross_provider: false
+khong_cap_dieu_kien_land: true
+reviewed_sha: bfeedfc4435efde13b81e4370c84f97a5d5afc19
+
+verdict_path: ops/reviews/don-nhanh-kien-truc-gh-1-claude-verdict.md
+verdict_sha256: 2ff6ffb19ac489837f8ee2fcb8e3694658414949b2402d80249df2eee58939c3
+verdict_bytes: 11695
+verdict_nguon: 'scratchpad/runs/644c69b2/stdout.log (launcher, ma_thoat=0, 675.4s)'
+verdict_doi_chieu: '`diff -q` nguồn ↔ tệp đã chép: khớp từng byte'
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/e872e98e7b3612baf71fc177b54ce8b3bafd033d/ops/reviews/don-nhanh-kien-truc-gh-1-claude-verdict.md
+
+published_first:
+  branch: ops/don-nhanh-giu-base-pr
+  commit: e872e98e7b3612baf71fc177b54ce8b3bafd033d
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_tag: null
+
+chot_read_only_DO_chu_khong_tin_co:
+  head_sau: bfeedfc4435efde13b81e4370c84f97a5d5afc19
+  head_khop_neo: true
+  thay_doi_cay: 0
+
+cau_hoi: 'Cách đọc danh sách PR đang mở có nên đổi kiến trúc không (A `gh` · B REST thẳng · C MCP JSON-RPC)?'
+ket_luan: 'GIỮ `gh` (A) cho CẢ HAI nền — máy Windows của chủ kho lẫn container/CI.'
+
+bon_can_cu_reviewer_TU_DO:
+  1_bat_doi_xung_moi_truong: >-
+    Đo được nhưng KHÔNG đổi kết luận, và lý do là chỗ NGƯỜI VÁ NGHĨ SAI: người vá coi bất
+    đối xứng môi trường là lý do MCP có thể thắng ở container. Reviewer chỉ ra phạm vi quyền
+    là thuộc tính của TOKEN, không phải của MÁY — nên bất đối xứng ấy không cứu được B/C.
+  2_so_lop_giai_ma: >-
+    MCP = 4 lớp (initialize → notifications/initialized 202 → tools/call → SSE `data:` →
+    phong bì JSON-RPC → `content[0].text` chuỗi → parse JSON LẦN HAI). Người vá đếm 3, tức
+    ĐẾM THIẾU. `gh pr list --json` = 1 lớp. ⇒ MCP DỜI chỗ hỏng, không ĐÓNG.
+  3_isError_vang_mat_do_HAI_CHIEU: >-
+    Người vá chỉ đo một chiều. Reviewer đo cả hai: lời gọi THÀNH CÔNG (`search_repositories`,
+    `total_count:1`) trả `result` KHÔNG CÓ khoá `isError`; lời gọi LỖI thì `isError: true`
+    xuất hiện. ⇒ `if ($r.isError)` đọc "vắng" thành "không lỗi" — phương án C TÁI TẠO NGUYÊN
+    VẸN lớp lỗi của lượt 1 (`rc=0` nói dối) mà nó được đề xuất để chữa.
+  4_ranh_gioi_credential: >-
+    Hiện script KHÔNG cầm token nào (dựa `gh auth login`, lưu ngoài biến môi trường). B/C
+    đòi PAT đúng scope trong môi trường một script XOÁ NHÁNH — và token tiện tay nhất ở đây
+    KHÔNG đủ scope, nên đó không phải bước rẻ.
+
+hinh_dang_loi_thu_tu:
+  co: true
+  noi_dung: >-
+    `gh pr list --limit 200` đặt trần cứng. Kho >200 PR mở ⇒ rc=0 + JSON hợp lệ +
+    `$doDuocPR=true` với danh sách THIẾU ⇒ giữ hụt base ⇒ xoá nhầm. Cùng họ "rỗng-vs-vắng"
+    của `t16`, khác ở NGƯỠNG thay vì SỐ ĐẾM.
+  trang_thai: ĐANG MỞ, latent
+  vi_sao_khong_doi_verdict: >-
+    (a) latent — số PR mở đo được gần nhất là 11, cách rất xa 200; (b) nó là tham số BÊN
+    TRONG phương án A (`--paginate` / nâng limit + đối chiếu đủ trang), không phải lý do đổi
+    backend: B/C có `perPage`/`page` cùng bản chất rủi ro.
+  reviewer_khai_thang: >-
+    KẾT LUẬN NÀY LÀ SUY LUẬN TỪ TÀI LIỆU `gh`, KHÔNG PHẢI PHÉP ĐO SỐNG. Reviewer đã cài `gh`
+    2.45.0 vào container để đo thật nhưng bị proxy chặn cả REST lẫn GraphQL.
+  no_theo_doi_rieng: true
+
+verdict_usage_caveats:
+- id: mcp-do-duoc-roi-mat
+  noi_dung: >-
+    Verdict này nói reviewer KHÔNG tái lập được phép đo trong lease (`11 PR qua MCP, đủ head
+    và base`). **Người vá đã tự kiểm và reviewer ĐÚNG.** Chạy lại lúc 14:56 UTC bằng CÙNG
+    token (vân tay `49933df4`, độ dài 93) và CÙNG đoạn mã ⇒ `isError: true`, `403 Resource
+    not accessible by personal access token`. Phép đo gốc chạy ~14:44, tức nó **chết trong
+    ~12 phút**, KHÔNG phải "vài giờ" như verdict ước. Vân tay token KHÔNG đổi ⇒ không phải
+    token xoay vòng mà là trạng thái UỶ QUYỀN phía server đổi. **Đừng chạy lại lệnh MCP
+    trong verdict rồi kết luận gì từ kết quả** — đường ấy đã trôi, và chính sự trôi ấy là
+    một phần của kết luận `giu_nguyen`.
+
+no_khai_bao_cua_reviewer:
+- 'Chưa đo trực tiếp truncation `--limit 200` — `gh` bị proxy container chặn ngay cả sau khi cài.'
+- 'Chưa đo B (`Invoke-RestMethod` từ PowerShell thật) — không có máy Windows; chỉ đo REST bằng `urllib`.'
+- 'Chưa đo PowerShell 5.1 cho bất kỳ phương án nào — kế thừa nguyên trạng "chưa kiểm".'
+- '`get_me` qua MCP trả 503 "No server is currently available" — CÓ header X-GitHub-* ⇒ trục trặc phía GitHub thật, KHÔNG phải proxy container. Khai riêng để không ai đọc nhầm thành lỗi phạm vi quyền.'
+
+no_cua_nguoi_va:
+- id: lease-mang-mot-phep-do-da-chet
+  noi_dung: >-
+    Người vá đưa `mcp_list_pull_requests: 11 PR` vào lease làm CĂN CỨ SỰ THẬT cho cả lượt.
+    Căn cứ ấy bốc hơi trước khi reviewer kịp đọc. Bài học: một phép đo về TRẠNG THÁI DỊCH VỤ
+    BÊN NGOÀI có hạn dùng, và đưa nó vào lease như dữ kiện tĩnh là sai loại. Lease nên ghi
+    kèm thời điểm đo và nói rõ nó có thể trôi — hoặc bảo reviewer TỰ ĐO thay vì đưa số sẵn.
+
+delivered: true
+delivered_by: claude-reviewer-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-17T15:05:00Z'
+receipt_khong_khai:
+- 'Không khai `giu_nguyen` là điều kiện land cho #150. Nó KHÔNG.'
+- 'Không khai MCP "không dùng được" — nó ĐÃ dùng được lúc 14:44 và hết dùng được lúc 14:56. Trạng thái đúng là TRÔI, không phải HỎNG.'
+- 'Không khai nợ `--limit 200` đã đóng. Nó đang mở.'

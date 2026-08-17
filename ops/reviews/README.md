@@ -16,6 +16,8 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 |---|---|---|
 | `pr134-ci-lease-gate-codex-verdict.md` | `windows-chua-do-that` | Verdict báo `30/30`, nhưng con số ấy **đo trên Linux** — reviewer từ chối gọi Windows là đạt vì chưa chạy thật. **CẬP NHẬT sau khi verdict được ghi:** lượt Windows THẬT đầu tiên đã chạy (`workflow_dispatch` run `31968805678`, head `3ee62330`) và **xanh** — bước `lease-publish selftest` `success` trên `windows-latest`. Nhưng phần reviewer cảnh báo thì **vẫn chưa chứng minh được**: `t19_symlink_tro_RA_NGOAI_kho_thi_CHAN` bắt `OSError`/`NotImplementedError` rồi `return`, mà harness **vẫn tính ca đó vào số đạt**, nên một lượt Windows xanh có thể chứa một ca CÓ MẶT mà KHÔNG ĐO (đúng bệnh `t24`). Không đọc được đầu ra in ra của bước ấy để xác nhận — `get_job_logs` chỉ trả phần đuôi, và đuôi không chạm tới bước đó. **Xanh trên Windows ⇒ bộ chạy được; KHÔNG ⇒ mọi ca đều đo.** Nợ có sẵn của bộ test, **không** do PR "#134" tạo ra; cách chữa reviewer đề nghị là cho `t19` báo `SKIP` riêng và không tính vào số đạt. |
 | `wp55-r2-review-5-codex-verdict.md` | `mutable-master-ref-in-repro-command` | Khối bash tái hiện `merged-tree-doctrine-false-positive` dùng `origin/master`, một ref **DI ĐỘNG**. Master lúc đo là `3d2c52d62696b0c7c190fd891115f543b0f9cb55`. **Thay cả hai chỗ `origin/master` bằng SHA đó**, nếu không bạn đang đo một cây khác. |
+| `don-nhanh-base-review-3-claude-verdict.md` | `same-provider-khong-du-land` | Verdict này ghi `assurance: same_provider_approved` — reviewer là **`claude`**, **cùng nhà cung cấp** với người vá. §8 nói mức ấy **một mình không thay** mức assurance bắt buộc cho phạm vi workflow, và #150 sửa `.github/workflows/ci.yml`. **Đừng đọc verdict này — hay verdict `don-nhanh-kien-truc-gh-1` cùng chuỗi — thành điều kiện land.** Muốn land cần cross-review `codex` khi có quota, hoặc human review có audit của chủ kho. Sai lệch §8 do chủ kho chấp nhận trong phiên (lý do: `codex` sắp hết quota), đã khai trong lease. |
+| `don-nhanh-kien-truc-gh-1-claude-verdict.md` | `mcp-do-duoc-roi-mat` | Verdict nói reviewer **không tái lập được** phép đo trong lease (`11 PR qua MCP, đủ head và base`). **Người vá đã tự kiểm và reviewer ĐÚNG:** chạy lại lúc `14:56Z` bằng **cùng token** (vân tay `49933df4`, độ dài 93) và **cùng đoạn mã** ⇒ `isError: true`, `403 Resource not accessible by personal access token`. Phép đo gốc chạy `~14:44Z` ⇒ nó **chết trong ~12 phút**, không phải "vài giờ" như verdict ước. Vân tay token **không đổi** ⇒ không phải token xoay vòng mà là trạng thái **uỷ quyền phía server** đổi. **Đừng chạy lại lệnh MCP trong verdict rồi kết luận gì từ kết quả** — đường ấy đã trôi, và chính sự trôi ấy là một phần của kết luận `giu_nguyen`. |
 | `tao-tag-luu-tru-review-1-codex-verdict.md` | `so-do-thieu-actionlint` | Mọi con số trong verdict (`81/82`, `73/74`, `79/82`, `80/82`) đo ở môi trường **KHÔNG có `actionlint`**, nên đã trừ sẵn đúng một ca — phép `actionlint` fail-close. Ở máy **có** `actionlint` thì cộng 1 vào từng số (`82/82`, `74/74`, `80/82`, `81/82`); chính verdict đã quy đổi sẵn cho hai số đột biến. **Đừng đọc `81/82` thành "có một ca hỏng"** — nó là bằng chứng chốt fail-close CHẠY. Hệ quả thật: `actionlint` trên bản vá này chỉ có **một** nguồn (người vá), reviewer khai `KHÔNG ĐO ĐƯỢC` và từ chối thay bằng PyYAML. |
 
 ## Mục lục
@@ -33,6 +35,35 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 | [`doctor-github-mcp-review-6-codex-verdict.md`](doctor-github-mcp-review-6-codex-verdict.md) | [`.receipt.yaml`](doctor-github-mcp-review-6-codex-verdict.receipt.yaml) | `doctor-github-mcp-review-6-codex-20260817` | `approve` | `45a06e48` | 2160 |
 | [`doctor-github-mcp-review-9-codex-verdict.md`](doctor-github-mcp-review-9-codex-verdict.md) | [`.receipt.yaml`](doctor-github-mcp-review-9-codex-verdict.receipt.yaml) | `doctor-github-mcp-review-9-codex-20260817` | `approve` | `0826629a` | 1156 |
 | [`tao-tag-luu-tru-review-1-codex-verdict.md`](tao-tag-luu-tru-review-1-codex-verdict.md) | [`.receipt.yaml`](tao-tag-luu-tru-review-1-codex-verdict.receipt.yaml) | `tao-tag-luu-tru-review-1-codex-20260817` | `approve` | `525c824e` | 2841 |
+| [`don-nhanh-base-review-1-codex-verdict.md`](don-nhanh-base-review-1-codex-verdict.md) | [`.receipt.yaml`](don-nhanh-base-review-1-codex-verdict.receipt.yaml) | `don-nhanh-base-review-1-codex-20260817` | `changes_requested` | `5bc635d2` | 3579 |
+| [`don-nhanh-base-review-2-codex-verdict.md`](don-nhanh-base-review-2-codex-verdict.md) | [`.receipt.yaml`](don-nhanh-base-review-2-codex-verdict.receipt.yaml) | `don-nhanh-base-review-2-codex-20260817` | `changes_requested` | `1511dd75` | 2545 |
+| [`don-nhanh-base-review-3-claude-verdict.md`](don-nhanh-base-review-3-claude-verdict.md) | [`.receipt.yaml`](don-nhanh-base-review-3-claude-verdict.receipt.yaml) | `don-nhanh-base-review-3-claude-20260817` | `changes_requested` | `0ce4d491` | 7829 |
+| [`don-nhanh-kien-truc-gh-1-claude-verdict.md`](don-nhanh-kien-truc-gh-1-claude-verdict.md) | [`.receipt.yaml`](don-nhanh-kien-truc-gh-1-claude-verdict.receipt.yaml) | `don-nhanh-kien-truc-gh-1-claude-20260817` | `giu_nguyen` | `bfeedfc4` | 11695 |
+
+### Bốn hàng `don-nhanh-*` — chuỗi ĐẦU TIÊN của bảng này KHÔNG có hàng `approve` nào
+
+Bốn hàng ấy thuộc **PR #150** và tới lúc ghi thì **PR chưa land**. Đọc chúng theo thứ tự,
+vì cái đáng học nằm ở **chuỗi**, không ở từng hàng:
+
+| lượt | reviewer | finding | lớp lỗi |
+|---|---|---|---|
+| 1 | `codex` | `gh` thoát khác 0 mà in JSON hợp lệ ⇒ fail-close mở toang, **xoá thật** | mã thoát bị bỏ qua |
+| 2 | `codex` | `2>&1` trộn stderr vào JSON ⇒ thao tác hợp lệ **bị từ chối oan** | hai luồng gộp làm một |
+| 3 | `claude` | đếm **số dòng thô** thay vì **nội dung đã tách** vẫn qua bộ test | rỗng-vs-vắng |
+
+**Không finding nào là lỗi nghiệp vụ.** Cả ba nằm ở **kênh đọc đầu ra của một tiến trình
+con**, và **lượt 2 là hồi quy do chính bản vá lượt 1 đẻ ra** — hình dạng `CLAUDE.md` gọi là
+*"vá một lỗ mà mở lỗ khác trong cùng hàm"*.
+
+Ba lần cùng một hình dạng là ngưỡng mà `CLAUDE.md` bảo dừng lại hỏi *"có nên làm việc này
+không"* thay vì *"vá thế nào"*. Hàng thứ tư (`kien-truc-gh-1`) là lượt đặt câu hỏi ấy, và nó
+trả lời **`giu_nguyen`** — nhưng bằng một đường không ai thiết kế: bằng chứng người vá đưa
+vào lease để **ủng hộ** phương án MCP đã chết trong ~12 phút, và chính sự bốc hơi ấy thành
+lý do mạnh nhất để **không** thay một fail-close đã cứng qua ba vòng.
+
+**Hai hàng cuối chỉ đạt `same_provider_approved`** — reviewer cùng nhà cung cấp với người vá.
+Bảng này không có cột assurance, nên đừng đọc chúng ngang hàng với các hàng `cross_approved`
+phía trên; xem hai hàng cảnh báo tương ứng.
 
 Hàng `tao-tag-luu-tru-review-1` là hàng **`approve` ở lượt 1** duy nhất của bảng này, nên
 nó dễ bị đọc sai theo hướng ngược lại: không phải "việc dễ", mà là lượt đầu tiên áp

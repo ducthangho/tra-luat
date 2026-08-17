@@ -1,0 +1,76 @@
+# BIÊN NHẬN — cross-review lượt 2 của PR #150. `changes_requested`, ĐÚNG MỘT finding.
+#
+# ĐÁNG ĐỌC VÌ: finding lượt 2 là HỒI QUY DO CHÍNH BẢN VÁ LƯỢT 1 ĐẺ RA. Hai lượt liên tiếp,
+# hai finding, CÙNG MỘT HÀM — đó là dữ kiện dẫn tới lượt xét lại kiến trúc sau này.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+lease_id: don-nhanh-base-review-2-codex-20260817
+provider: codex
+role: reviewer
+verdict: changes_requested
+assurance: cross_approved
+reviewed_sha: 1511dd75a5a4f65c623738f2dc91e384b96bad9a
+
+verdict_path: ops/reviews/don-nhanh-base-review-2-codex-verdict.md
+verdict_sha256: b212a681879621eeeee41d060d62952431a3eb42c9fb7d91795e47e091077f2f
+verdict_bytes: 2545
+verdict_nguon: 'scratchpad/runs/bb19f50b/stdout.log (launcher, ma_thoat=0, 123.1s)'
+verdict_doi_chieu: '`diff -q` nguồn ↔ tệp đã chép: khớp từng byte'
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/e872e98e7b3612baf71fc177b54ce8b3bafd033d/ops/reviews/don-nhanh-base-review-2-codex-verdict.md
+
+published_first:
+  branch: ops/don-nhanh-giu-base-pr
+  commit: e872e98e7b3612baf71fc177b54ce8b3bafd033d
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_tag: null
+truy_xuat_ghi_chu: '#150 CHƯA land, chưa có tag. Xem biên nhận lượt 1.'
+
+xac_nhan_luot_truoc:
+  finding_luot_1: ĐÓNG
+  phep_do: 'dựng lại đúng ca lượt 1 (`gh` in `[]`, exit 1) ⇒ rc=13 VÀ danh sách nhánh remote trước/sau giống nhau'
+
+finding:
+  noi_dung: >-
+    HỒI QUY MỚI do chính bản vá lượt 1: `$tho = & gh … 2>&1` trộn stderr vào JSON trước
+    `ConvertFrom-Json` ⇒ một dòng CẢNH BÁO của `gh` làm parse chết ⇒ THAO TÁC HỢP LỆ BỊ TỪ
+    CHỐI OAN.
+  reviewer_chay_that: 'rc=0, stdout `[]`, stderr `warning-from-gh` ⇒ chuỗi nhận được `"[]\nwarning-from-gh"`, parse thất bại "Additional text encountered…"'
+  vi_sao_khong_phai_ca_hiem: '`gh` thật in cảnh báo cập nhật phiên bản rất thường xuyên'
+  hinh_dang: >-
+    VÁ MỘT LỖ MÀ MỞ LỖ KHÁC TRONG CÙNG HÀM — hình dạng `CLAUDE.md` đã ghi ở writer "nguyên
+    tử". Đây là lần thứ HAI liên tiếp cho cùng một hàm.
+  da_dong: true
+  dong_o_sha: 0ce4d4917afb955c76b17df44657e88eccc6a39f
+  nguoi_va_tai_hien_doc_lap: 'chạy bộ 15 ca lên bản 1511dd7 ⇒ 14/15, ĐỎ đúng t14'
+  cach_va: >-
+    Tách hai luồng theo KIỂU (`System.Management.Automation.ErrorRecord`), không nối chung
+    thành một chuỗi. ĐO TRƯỚC KHI SỬA trên pwsh 7.4.6: gh in cảnh báo + `[]`, rc=0 ⇒ 2 dòng
+    (1 ErrorRecord, 1 stdout), stdout nối lại `"[]"`, parse OK.
+
+reviewer_xac_nhan_khong_chan_oan: '`t13` đạt — đường bình thường (`[]` trên stdout, rc=0) vẫn xoá nhánh đích'
+reviewer_khong_tim_duoc: 'đột biến sống sót thứ năm trong đúng hai tệp thuộc phạm vi'
+
+no_reviewer_neu_va_DUNG:
+- id: lease-khong-nam-trong-cay-duoc-review
+  noi_dung: >-
+    Cây checkout ở `reviewed_sha_required` KHÔNG chứa lease của chính lượt ấy (lease commit
+    SAU), nên reviewer đọc `ops/leases/` trong cây lại thấy lease LƯỢT TRƯỚC rồi báo lệch
+    băm — trong khi prompt dặn "nguồn có thẩm quyền là tệp lease trong kho".
+  danh_gia: >-
+    ĐÚNG, và quy ước ấy TỰ MÂU THUẪN ở mọi lượt N>1; lượt 1 không lộ chỉ vì chưa có lease cũ
+    để nhầm. Chữa TẠM ở lượt 3 và lượt kiến trúc: prompt nêu đích danh
+    `git show origin/<nhánh>:ops/leases/<lease của lượt>`. CHỮA GỐC CHƯA LÀM.
+
+delivered: true
+delivered_by: codex-reviewer-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-17T15:05:00Z'
+receipt_khong_khai:
+- 'Không khai bản vá lượt 2 là bản cuối: lượt 3 còn tìm ra một lỗ trong BỘ TEST của chính nó.'
+- 'Không khai `evidence_url` là bền: #150 chưa land, chưa có tag.'

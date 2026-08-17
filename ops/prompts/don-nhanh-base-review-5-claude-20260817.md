@@ -113,6 +113,31 @@ Thiếu `pwsh` ⇒ khai **KHÔNG ĐO ĐƯỢC**, đừng suy từ đọc code.
 xác nhận được) · lease không nằm trong cây được review · hành vi phân trang THẬT của `gh` ở
 kho >1000 PR chưa ai đo · `gh` bị proxy container chặn cả REST lẫn GraphQL.
 
+## MỖI FINDING PHẢI KÈM GỢI Ý CÁCH VÁ — yêu cầu MỚI từ lượt này
+
+Chủ kho yêu cầu reviewer nêu luôn **nên vá thế nào**. Không phải để người vá làm theo mù,
+mà để cái giá của bản vá được cân **ngay lúc phát hiện** thay vì một lượt sau.
+
+Với **mỗi** mục trong `## Findings`, thêm khối `**Gợi ý vá:**` gồm bốn phần:
+
+1. **Vá ở đâu** — tệp + hàm/ca cụ thể, và **tại sao ở đó** chứ không phải chỗ khác.
+2. **Vá thế nào** — mô tả thay đổi. Đoạn mã ngắn thì được, nhưng **đừng viết cả bản vá**:
+   viết hộ cả bản vá là bạn tự biến mình thành người vá, và lượt sau bạn sẽ đang review
+   chính đề xuất của mình.
+3. **Ca test khoá nó** — phép thử nào làm bản vá ấy có răng, và **đột biến nào phải chết**
+   sau khi vá. Không nêu được ca test thì nói thẳng là chưa nghĩ ra.
+4. **Bản vá này có thể đẻ ra gì** — hình dạng lỗi nào nó có nguy cơ mở. Kho này đã có
+   **hai lần liên tiếp** bản vá đẻ ra lỗi mới trong cùng một hàm; câu hỏi ấy không phải
+   nghi lễ.
+
+**Xếp hạng gợi ý:** nếu có nhiều đường vá, nêu đường **RẺ NHẤT mà vẫn đóng lớp**, rồi nói
+đường đắt hơn mua thêm được gì. Nếu bạn cho rằng **không nên vá** (finding thật nhưng cái
+giá lớn hơn cái lợi) thì nói thẳng — "khai thành nợ" là một gợi ý hợp lệ.
+
+**Gợi ý là GỢI Ý, không phải chỉ thị.** Người vá được phép làm khác, và nếu làm khác thì
+lượt sau bạn **không** được coi "đã làm đúng theo gợi ý của tôi" là bằng chứng đúng — vẫn
+phải đo.
+
 ## Định dạng trả lời
 
 ```
@@ -127,8 +152,11 @@ F1 và F2: ĐÓNG hay CHƯA, kèm phép thử đã chạy cho từng đột bi�
 ## Findings
 
 CHỈ nhận: hồi quy · lỗ an ninh MỚI · đột biến SỐNG SÓT — trong ĐÚNG tệp `don-nhanh_test.ps1`.
+MỖI mục kèm khối `**Gợi ý vá:**` bốn phần như trên.
 
 ## Nợ khai báo
+
+Mục nào ở đây mà bạn thấy đáng vá thì cũng kèm gợi ý — ngắn hơn cũng được.
 
 ## Phép đo đã chạy
 ```

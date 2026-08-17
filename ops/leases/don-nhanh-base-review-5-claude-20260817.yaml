@@ -55,7 +55,23 @@ scope_note: >-
   và hồ sơ lease/prompt — không phải mã ⇒ `Nợ khai báo`.
 
 prompt_path: ops/prompts/don-nhanh-base-review-5-claude-20260817.md
-prompt_sha256_required: 6a838f13cdcd661d52284cc0be1a9fe5cdb1b72d9754ea4d21c4d40e7f38c4ce
+prompt_sha256_required: 3aaa0f617add17a9c02d01f047419825aa2b69d1d823c25682d9ef2ced77c00a
+
+# ---- SỬA LEASE SAU KHI ĐÃ ĐĂNG, TRƯỚC KHI CÓ VERDICT ----
+sua_lease:
+  luc_utc: '2026-08-17T17:00:00Z'
+  ly_do: >-
+    Chủ kho yêu cầu reviewer nêu luôn GỢI Ý CÁCH VÁ cho mỗi finding. Prompt được bổ sung một
+    mục bắt buộc (`**Gợi ý vá:**` bốn phần), nên băm prompt đổi
+    `6a838f13cdcd…` → `3aaa0f617add…`.
+  trang_thai_khi_sua: >-
+    Lượt chạy đầu đã bị DỪNG sau ~1 phút, CHƯA sinh verdict nào. Sửa lease trước khi có
+    verdict là sửa một hợp đồng chưa ai thực hiện — khác hẳn sửa sau khi đã có kết luận.
+  ban_chieu_da_lech: >-
+    Comment `posted_comment_id` trên #55 đã đăng với băm CŨ ⇒ bản chiếu ấy nay LỆCH. Đúng
+    quy ước của kho: nguồn có thẩm quyền là TỆP CÓ BĂM trong kho, comment chỉ là bản chiếu.
+    KHÔNG sửa tay `posted_comment_id`.
+  khong_lam_gi: 'KHÔNG đổi `reviewed_sha_required`, KHÔNG đổi phạm vi, KHÔNG đổi mức assurance.'
 
 granted_by: ducthangho
 granted_on_instruction: 'direct, in-session, 2026-08-17 ("Chạy trong phiên mới đi. Codex đã hết quota, thay Fable 5 Max reviewer")'

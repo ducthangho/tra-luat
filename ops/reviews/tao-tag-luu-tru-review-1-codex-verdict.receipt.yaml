@@ -1,0 +1,127 @@
+# BIÊN NHẬN GIAO HÀNG cho verdict cross-review lượt 1 của PR #147:
+# `approve`, Findings TRỐNG, Nợ khai báo có HAI mục (chép nguyên vào `no_khai_bao` dưới).
+#
+# MỘT LƯỢT DUY NHẤT. Ghi rõ vì bảng mục lục rất dễ đọc "approve lượt 1" thành "dễ duyệt":
+# bản vá này chỉ đụng HAI tệp (+36/−4), phạm vi đóng băng từ đầu, và lease hỏi ĐÚNG bốn
+# câu ĐO ĐƯỢC. Đây là cùng một cách làm đã kéo chuỗi `doctor-github-mcp` từ tám lượt
+# `changes_requested` xuống `approve` ngay lượt kế tiếp (xem biên nhận lượt 9).
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+lease_id: tao-tag-luu-tru-review-1-codex-20260817
+provider: codex
+role: reviewer
+verdict: approve
+reviewed_sha: 525c824e29cdf035af5b4061ffd492be0a783f4a
+
+verdict_path: ops/reviews/tao-tag-luu-tru-review-1-codex-verdict.md
+verdict_sha256: be342cc414a115af7fc5e7b188d90bf539453d448f872e2f1b7d5667a3109cfb
+verdict_bytes: 2841
+verdict_nguon: 'scratchpad/runs/374519fd/stdout.log (launcher run, ma_thoat=0, 115.6s)'
+verdict_doi_chieu: 'diff -u nguồn <-> tệp đã chép: 0 dòng lệch'
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/9d3e3e9e399397ee958e0f87c1af60f8cf2621fb/ops/reviews/tao-tag-luu-tru-review-1-codex-verdict.md
+evidence_url_han_che: >-
+  Trỏ commit ĐẦU TIÊN chứa tệp verdict. Commit ấy hiện chỉ được nhánh `ops/**` giữ; nó
+  BỀN khi PR #147 land bằng MERGE COMMIT (squash sẽ làm nó mất tổ tiên). Xem `truy_xuat_*`.
+
+published_first:
+  branch: ops/tao-tag-luu-tru
+  commit: 9d3e3e9e399397ee958e0f87c1af60f8cf2621fb
+
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_ghi_chu: >-
+  CHƯA có tag `luu-tru/*` — và đó chính là thứ PR NÀY sửa: chốt `tao-tag` của
+  `ops-don-ref.yml` đang cấm đúng không gian tên `luu-tru/`, tức trình tự lưu trữ do
+  `CLAUDE.md` quy định TỰ CHẶN chính nó. Sau khi #147 land thì mới tạo được tag, nên
+  biên nhận này (và biên nhận lượt 9 của #146) là hai mục đầu tiên dùng được đường ấy.
+
+# BẢN VÁ NÀY MỞ MỘT CHỐT AN NINH — mục kiểm 1 của lease là câu hỏi quan trọng nhất.
+pham_vi_mo_reviewer_do_duoc:
+  tao_tag_luu_tru_thuong: QUA
+  tao_tag_LUU_TRU_hoa: 'QUA (chuẩn hoá bằng `tr` ⇒ cùng chính sách với chữ thường)'
+  xoa_tag_luu_tru: 'VẪN DỪNG rc=2 — kể cả khi giả lập có tag giữ cùng commit'
+  xoa_nhanh_luu_tru: >-
+    KHÔNG bị nới: chỉ QUA khi đọc được SHA nhánh VÀ danh sách tag có SHA ấy; không tag,
+    không đọc được SHA, hoặc lỗi giữa phân trang đều DỪNG (đúng doctrine `None ≠ False`).
+  danh_sach_cam_con_lai: 'ops/ claude/ codex/ agent/ mission/ dispatcher/ — VẪN DỪNG cho tao-tag'
+  khong_khop_oan_tien_to: '`tao-tag luu-tru-gia/x` và `tao-tag xluu-tru/x` đều QUA'
+
+# MỤC KIỂM 3: reviewer được giao BÁC lập luận của người vá nếu nó sai. Họ bác một nửa.
+lap_luan_dat_ten_khac_bi_bac_mot_nua:
+  reviewer_dong_y_voi_phan_ky_thuat: >-
+    ĐÚNG như người vá tự khai trong lease: chốt `xoa-nhanh` chỉ so SHA và KHÔNG kiểm tên
+    tag, nên một tag tên khác VẪN qua được chốt ấy. Về mặt kỹ thuật, bản vá không bắt buộc.
+  vi_sao_van_can: >-
+    `CLAUDE.md` khai `luu-tru/*` là không gian ref BỀN DUY NHẤT giữ commit công bố verdict.
+    "Đặt tên khác" qua được chốt nhưng phá quy ước lưu trữ — tag tên khác không phải chỗ ai
+    đi tìm khi truy `published_*`. Bản vá cần để trình tự chính thức tuân thủ quy ước đó.
+  ghi_ra_day_vi: >-
+    Đây là chỗ một bản vá "không cần thiết" dễ được biện minh sau. Lý do THẬT là quy ước,
+    KHÔNG phải "workflow không chạy được" — nói thẳng để lần sau không ai trích sai.
+
+so_lieu_reviewer_tu_do:
+  suite_nhanh: '81/82 — chỉ đỏ đúng phép `actionlint` fail-close'
+  suite_nen_f9730f6: '73/74 trên bản sao tạm — cũng chỉ đỏ vì thiếu `actionlint`'
+  delta_ca_do: '+8 ca đo được, 0 ca chức năng đỏ'
+  dot_bien_reviewer_tu_chay:
+    - 'cấm lại `luu-tru/*` ⇒ 79/82: đỏ ĐÚNG hai ca chữ thường + chữ hoa (tương đương 80/82 khi có actionlint)'
+    - 'gỡ `codex/*` khỏi danh sách cấm ⇒ 80/82: đỏ ĐÚNG ca `tao-tag codex/ vẫn DỪNG` (tương đương 81/82)'
+  ghi_chu_dot_bien: >-
+    Cả hai đột biến neo vào TOÀN BỘ khối `case` của riêng `tao-tag`, không neo mẫu ngắn —
+    mẫu ngắn khớp 2 chỗ và `chay_dot_bien` chỉ thay chỗ khớp ĐẦU TIÊN, tức có thể tước răng
+    một chốt khác mà không ai thấy (bài học đã trả giá ở chuỗi `doctor-github-mcp`).
+
+# HAI NGUỒN CHO CÙNG MỘT SỐ, KHÁC NHAU VÌ MÔI TRƯỜNG — không phải mâu thuẫn.
+hai_nguon_so_lieu:
+  nguoi_va_do: '82/82 nhánh · 74/74 nền — CÓ `actionlint` 1.7.7 tải về /dev/shm'
+  reviewer_do: '81/82 nhánh · 73/74 nền — KHÔNG có `actionlint` trong môi trường họ'
+  hieu_dung: >-
+    Lệch đúng MỘT ca ở cả hai phía, và ca đó là phép `actionlint` fail-close. Bộ test cố ý
+    ĐỎ khi thiếu công cụ thay vì bỏ qua êm — "một cổng tự tắt khi thiếu công cụ là cổng
+    không tồn tại đúng lúc nó cần nhất". Nên 81/82 là bằng chứng chốt fail-close CHẠY,
+    không phải bằng chứng mã hỏng.
+  actionlint_ai_da_chay: >-
+    CHỈ người vá. Reviewer khai KHÔNG ĐO ĐƯỢC và TỪ CHỐI thay bằng PyYAML — đúng như lease
+    yêu cầu, và đúng bài học sáu lượt cross-review kết luận "YAML ok" bằng PyYAML trong khi
+    GitHub từ chối chính tệp ấy.
+
+no_khai_bao:
+- id: bien-luu-tru-gia-va-xluu-tru-chua-vao-bo-test
+  noi_dung: >-
+    Bộ test thường trực chưa khoá hai biên `luu-tru-gia/*` và `xluu-tru/*`. Reviewer chạy
+    thêm hai phép thử TẠM cho cả hai: đều QUA. Không phải lỗi của mã hiện tại.
+  vi_sao_khong_dong_o_luot_nay: >-
+    Verdict `approve` neo vào `525c824`. Thêm ca sau khi duyệt là land một cây KHÁC cây đã
+    duyệt — đúng thói quen nới phạm vi đã kéo chuỗi #146 dài chín lượt. Ghi thành nợ, đóng
+    ở một lượt riêng nếu chủ kho muốn.
+- id: actionlint-khong-do-duoc-ben-reviewer
+  noi_dung: >-
+    `actionlint` KHÔNG ĐO ĐƯỢC ở môi trường reviewer. Con số 81/82 và 73/74 của họ đều
+    thiếu đúng phép đó; xác nhận `actionlint` chỉ có MỘT nguồn là người vá.
+
+verdict_usage_caveats:
+- id: so-do-thieu-actionlint
+  noi_dung: >-
+    Các con số trong verdict (`81/82`, `73/74`, `79/82`, `80/82`) đo trong môi trường
+    KHÔNG có `actionlint`, nên đã trừ sẵn một ca fail-close. Chạy lại ở máy CÓ `actionlint`
+    thì cộng 1 vào mỗi số (82/82, 74/74, 80/82, 81/82) — verdict tự nêu quy đổi này cho
+    hai số đột biến. Đừng đọc `81/82` thành "có một ca hỏng".
+
+delivered: true
+delivered_by: codex-reviewer-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-17T11:20:00Z'
+receipt_basis: >-
+  sha256 và số byte đo trên chính tệp verdict; `diff -u` giữa `stdout.log` và tệp đã chép;
+  `lease_id`/`verdict`/`reviewed_sha` từ tệp lease; `published_first` là commit đầu tiên
+  chứa tệp verdict, đo bằng `git log --oneline -1` ngay sau khi commit.
+receipt_khong_khai:
+- Không khai `evidence_url` là BỀN — nó chỉ bền sau khi #147 land bằng MERGE COMMIT.
+- Không khai bản vá này làm `xoa-nhanh` an toàn hơn; nó KHÔNG đụng `xoa-nhanh`.
+- Không khai hai nợ trên đã đóng. Chúng còn nguyên.
+- Không khai `actionlint` xanh ở môi trường reviewer — ở đó nó KHÔNG ĐO ĐƯỢC.

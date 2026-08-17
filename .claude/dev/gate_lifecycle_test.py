@@ -896,6 +896,93 @@ def _mount_cgroup2_co_that() -> bool:
     return False
 
 
+def case_khong_do_duoc_khong_duoc_khai_thanh_da_sach() -> None:
+    """Không có vùng chứa ⇒ `giet_tron_ven` phải là `null`, KHÔNG được là `true`.
+
+    P1 cross-review trên `052d100`. Đường ĐẠT không hề gọi `_terminate_process_tree`
+    (nó chỉ chạy ở đường huỷ/quá hạn), nên khi không có vùng chứa thì KHÔNG có
+    phép đo nào cả — mà bản trước vẫn ghi `giet_tron_ven: true`, tức bản ghi ĐẠT
+    và TÁI DÙNG ĐƯỢC trong khi con tách rời vẫn sống sau lúc khoá đã nhả.
+
+    Ba giá trị, ba nghĩa khác nhau, và gộp cái đầu vào cái cuối đúng là lỗi kho
+    đã trả giá nhiều lần:
+      · `null`  — chưa đo lần nào
+      · `false` — đo và thấy còn sót
+      · `true`  — đo và xác nhận sạch
+    """
+    if os.name == "nt":
+        raise BoQua("fixture POSIX")
+    def _chay(tat_cgroup: bool):
+        with tempfile.TemporaryDirectory(prefix="gate_lifecycle_null_") as raw:
+            root = Path(raw)
+            repo = root / "repo"
+            repo.mkdir()
+            head, _ = _repo(repo)
+            evidence = root / "evidence.json"
+            # KHONG DE CON TACH ROI TRONG CA NAY — va day la ly do.
+            #
+            # Ban dau fixture co tinh de mot daemon `setsid` de "cho thay nguy
+            # hiem". No keo theo BA vong va lien tiep tu cross-review: (1) khong
+            # gat nen bo lai tien trinh mo coi; (2) gat bang PID TRAN nen co the
+            # giet nham sau khi PID doi chu; (3) doc `/proc/<pid>/stat` nen hong
+            # tren macOS. Cung mot hinh dang lap ba lan thi cau hoi dung la *co
+            # nen lam viec nay khong* — cau tra loi la KHONG.
+            #
+            # Vi dieu ca nay khang dinh la GIA TRI TRONG BAN GHI (`giet_tron_ven`
+            # phai la `null` khi khong do duoc, `true` khi do va sach), chu KHONG
+            # phai su ton tai cua mot ke song sot. Mot lenh gate tam thuong do
+            # dung y het ma khong sinh ra thu gi can gat. Nguy hiem that su da
+            # duoc do o `case_gate_dat_ma_bo_lai_daemon_van_bi_don_va_khai` (o do
+            # CO vung chua nen gate don duoc) va khai o `ops/NO_KY_THUAT.md` muc 1.
+            lenh = "print('1/1 ok')"
+            moi_truong = dict(os.environ)
+            if tat_cgroup:
+                moi_truong["TL_GATE_TAT_CGROUP"] = "1"
+            else:
+                moi_truong.pop("TL_GATE_TAT_CGROUP", None)
+            argv = [
+                "run", "--kind", "heavy", "--name", "fixture", "--repo", str(repo),
+                "--evidence", str(evidence), "--output", str(evidence.with_suffix(".out")),
+                "--wait-seconds", "1.0", "--timeout-seconds", "30",
+                "--selected-test", "fixture",
+                "--expected-head", head, "--base-sha", head, "--require-clean",
+                "--", sys.executable, "-c", "print('1/1 ok')",
+            ]
+            subprocess.run([sys.executable, str(RUNNER), *argv], cwd=repo,
+                           text=True, capture_output=True, timeout=60, env=moi_truong)
+            return json.loads(evidence.read_text(encoding="utf-8")).get("co_che_cach_ly")
+
+        khi_tat = _chay(True)
+        assert khi_tat == "quet-cay", (
+            "tat cgroup ma van khai co_che_cach_ly=%r — ban ghi khai mot vung chua "
+            "chua tung ton tai" % (khi_tat,)
+        )
+
+        khi_bat = _chay(False)
+        # KHẢ NĂNG, KHÔNG PHẢI KỲ VỌNG: máy chạy CI có thể không cấp được cgroup, và
+        # ép `cgroup2` ở đây là biến ca này thành phép đo môi trường chứ không phải
+        # phép đo mã. Chỉ đòi: khai `cgroup2` thì cgroup phải THẬT SỰ dùng được.
+        if khi_bat == "cgroup2":
+            assert _mount_cgroup2_co_that(), (
+                "khai cgroup2 nhung khong dinh vi duoc diem gan cgroup v2"
+            )
+        else:
+            assert khi_bat == "quet-cay", "co che la %r, ngoai hai gia tri POSIX" % (khi_bat,)
+
+
+def _mount_cgroup2_co_that() -> bool:
+    """Có định vị được điểm gắn cgroup v2 thật không (đọc `mountinfo`, không đoán)."""
+    try:
+        noi_dung = Path("/proc/self/mountinfo").read_text(encoding="utf-8")
+    except OSError:
+        return False
+    for dong in noi_dung.splitlines():
+        phan = dong.split(" - ", 1)
+        if len(phan) == 2 and phan[1].split()[:1] == ["cgroup2"]:
+            return True
+    return False
+
+
 def case_don_khong_tron_ven_lam_do_luot_gate() -> None:
     """Dọn không trọn vẹn thì lượt gate ĐỎ — không chỉ ghi vào bản ghi rồi thôi.
 
@@ -1136,107 +1223,6 @@ def case_tien_trinh_trong_cgroup_con_khong_duoc_bo_sot() -> None:
             proc.wait(timeout=5)
         gl._don_cgroup(cg)
     assert not cg.exists(), "cgroup con lam _don_cgroup that bai — de lai rac"
-
-
-def case_khong_do_duoc_khong_duoc_khai_thanh_da_sach() -> None:
-    """Không có vùng chứa ⇒ `giet_tron_ven` phải là `null`, KHÔNG được là `true`.
-
-    P1 cross-review trên `052d100`. Đường ĐẠT không hề gọi `_terminate_process_tree`
-    (nó chỉ chạy ở đường huỷ/quá hạn), nên khi không có vùng chứa thì KHÔNG có
-    phép đo nào cả — mà bản trước vẫn ghi `giet_tron_ven: true`, tức bản ghi ĐẠT
-    và TÁI DÙNG ĐƯỢC trong khi con tách rời vẫn sống sau lúc khoá đã nhả.
-
-    Ba giá trị, ba nghĩa khác nhau, và gộp cái đầu vào cái cuối đúng là lỗi kho
-    đã trả giá nhiều lần:
-      · `null`  — chưa đo lần nào
-      · `false` — đo và thấy còn sót
-      · `true`  — đo và xác nhận sạch
-    """
-    if os.name == "nt":
-        raise BoQua("fixture POSIX")
-    def _chay(tat_cgroup: bool):
-        with tempfile.TemporaryDirectory(prefix="gate_lifecycle_null_") as raw:
-            root = Path(raw)
-            repo = root / "repo"
-            repo.mkdir()
-            head, _ = _repo(repo)
-            evidence = root / "evidence.json"
-            # CA NAY TU NO LA MOT LUOT RO — PHAI TU GAT LAY.
-            #
-            # Trên đường `quet-cay`, gate KHÔNG dọn được con tách rời (đó chính là
-            # thứ ca này đo). Nên nếu fixture không giữ PID lại mà giết, nó bỏ lại
-            # một tiến trình mồ côi chạy tiếp sang các ca sau và sang cả bước CI
-            # kế tiếp — tức bộ ca chống rò tiến trình lại tự rò (P2 cross-review
-            # trên `a64ca0b`). Con ghi PID của nó ra tệp để ta còn với tới.
-            # GHI CA PID LAN KHOA DANH TINH, khong ghi mot minh PID.
-            #
-            # PID quay vong. "PID nay con ton tai" KHONG tra loi duoc cau ta can
-            # hoi la "co con DUNG tien trinh cu khong" — va ban `SIGKILL` vao mot
-            # PID da doi chu la giet nham nguoi ngoai. Day dung la bai hoc kho da
-            # ghi so cho `_khoa_pid`, va fixture cung phai theo (P2 cross-review
-            # tren `80c760e`). Cha cua no doc `/proc/<pid>/stat` ngay sau khi sinh
-            # nen lay duoc `starttime` — moc do khong tai su dung duoc.
-            pid_tep = root / "pid-con-tach-roi"
-            lenh = (
-                "import subprocess,sys;"
-                "p=subprocess.Popen([sys.executable,'-c',"
-                "'import os,time;os.setsid();time.sleep(20)'],"
-                "stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,close_fds=True);"
-                "nd=open('/proc/%d/stat' % p.pid).read();"
-                "kh=nd[nd.rindex(')')+2:].split()[19];"
-                f"open({str(pid_tep)!r},'w').write('%d %s' % (p.pid, kh));"
-                "print('1/1 ok')"
-            )
-            moi_truong = dict(os.environ)
-            if tat_cgroup:
-                moi_truong["TL_GATE_TAT_CGROUP"] = "1"
-            else:
-                moi_truong.pop("TL_GATE_TAT_CGROUP", None)
-            argv = [
-                "run", "--kind", "heavy", "--name", "fixture", "--repo", str(repo),
-                "--evidence", str(evidence), "--output", str(evidence.with_suffix(".out")),
-                "--wait-seconds", "1.0", "--timeout-seconds", "30",
-                "--selected-test", "fixture",
-                "--expected-head", head, "--base-sha", head, "--require-clean",
-                "--", sys.executable, "-c", lenh,
-            ]
-            try:
-                ran = subprocess.run([sys.executable, str(RUNNER), *argv], cwd=repo,
-                                     text=True, capture_output=True, timeout=90,
-                                     env=moi_truong)
-                return ran, json.loads(evidence.read_text(encoding="utf-8"))
-            finally:
-                # Gặt con tách rời dù ca đỏ hay xanh. `SIGKILL` vì nó cố ý sống dai
-                # — NHƯNG chỉ bắn khi khoá danh tính còn KHỚP. Không khớp nghĩa là
-                # PID đã đổi chủ: thà để sót còn hơn giết nhầm tiến trình vô can.
-                if pid_tep.is_file():
-                    with contextlib.suppress(OSError, ValueError, IndexError):
-                        thô = pid_tep.read_text().split()
-                        q, khoa = int(thô[0]), thô[1]
-                        nd = Path("/proc/%d/stat" % q).read_text()
-                        if nd[nd.rindex(")") + 2:].split()[19] == khoa:
-                            with contextlib.suppress(ProcessLookupError, PermissionError):
-                                os.kill(q, signal.SIGKILL)
-
-    ran, ban_ghi = _chay(True)
-    assert ran.returncode == 0, "lenh gate dat ma gate tra %r" % (ran.returncode,)
-    assert ban_ghi.get("co_che_cach_ly") == "quet-cay", (
-        "cong tac khong an: co_che=%r" % (ban_ghi.get("co_che_cach_ly"),)
-    )
-    assert ban_ghi.get("giet_tron_ven") is None, (
-        "KHONG do duoc ma khai giet_tron_ven=%r — ban ghi noi doi"
-        % (ban_ghi.get("giet_tron_ven"),)
-    )
-
-    # Vế đối chứng: có vùng chứa thì PHẢI khai `true`, nếu không thì bản vá này
-    # chỉ là đổi một lời khai sai thành một lời khai vô dụng.
-    ran2, ban_ghi2 = _chay(False)
-    if ban_ghi2.get("co_che_cach_ly") != "cgroup2":
-        raise BoQua("may khong cap duoc cgroup nen khong doi chung duoc")
-    assert ban_ghi2.get("giet_tron_ven") is True, (
-        "co vung chua, da quet va sach, ma khai giet_tron_ven=%r"
-        % (ban_ghi2.get("giet_tron_ven"),)
-    )
 
 
 def case_dirty_run_is_allowed_but_never_reusable() -> None:

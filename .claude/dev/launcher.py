@@ -1702,8 +1702,20 @@ MODULE_PY = [
 ]
 
 
-DOCTOR_TIMEOUT_GIAY = 30.0
-PROBE_TIMEOUT_GIAY = 8.0
+# HẠN PROBE PHỤ THUỘC NỀN — đo trên `windows-latest` 17-08-2026, KHÔNG phải đoán.
+#
+# Mốc 8s đặt theo cảm giác trên Linux đã dán nhãn SAI cho hai công cụ có thật và chạy
+# được: `gh.EXE` và `npm.CMD` đều báo `KHONG chay duoc: timeout sau 8.0s`. Khởi động
+# NGUỘI một `.EXE`/`.CMD` trên runner Windows (Defender quét lần đầu, `.CMD` còn phải
+# qua `cmd.exe`) vượt xa 8s. Trên máy người dùng `gh` là BẮT BUỘC, nên mốc ấy làm
+# `doctor` đỏ oan đúng chỗ nó phải đáng tin nhất.
+#
+# Đây là cùng lớp "chạy được ở đây" với hằng số: một con số hợp lý ở nền này là một
+# chốt nói dối ở nền kia. Trần TỔNG cũng phải giãn theo, kẻo nới hạn từng probe rồi
+# lại đụng trần chung và ra đúng nhãn sai ấy bằng đường khác.
+_LA_WINDOWS = platform.system() == "Windows"
+DOCTOR_TIMEOUT_GIAY = 120.0 if _LA_WINDOWS else 30.0
+PROBE_TIMEOUT_GIAY = 25.0 if _LA_WINDOWS else 8.0
 
 
 def _bat_buoc(c: dict, moi_truong: dict[str, str]) -> bool:

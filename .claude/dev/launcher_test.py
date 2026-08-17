@@ -3006,6 +3006,14 @@ def t108_hook_phai_probe_CHAY_DUOC_khong_chi_CO_MAT():
     """
     hook = (LAUNCHER.parent.parent / "hooks" / "session-start.sh").read_text(encoding="utf-8")
     bang("co_chay()" in hook, "hook khong con ham co_chay")
+    if LA_WINDOWS:
+        # ĐO ĐƯỢC trên windows-latest: ba fixture là script `#!/bin/sh` KHÔNG phần mở
+        # rộng, nên `command -v totqua` trong Git Bash thấy nhưng CreateProcess của
+        # Windows không chạy được ⇒ `co_chay` trả "không chạy được" cho binary mà ca
+        # này khẳng định là chạy được, và ca đỏ vì FIXTURE chứ không vì mã. Phần khai
+        # báo (hook còn `co_chay`, ba chỗ đã đổi) VẪN đo ở trên — chỉ phần chạy thật
+        # là POSIX. Muốn đo trên Windows thì phải dựng shim `.cmd`, cùng nợ với `t03`.
+        return "bo qua tren Windows (can shim .cmd cho fixture)"
     for ten in ("codex", "claude", "rg"):
         bang(f"co_chay {ten}" in hook, f"hook van dung `co` thay vi `co_chay` cho {ten}")
 

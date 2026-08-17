@@ -21195,15 +21195,35 @@ def run() -> int:
         # ĐÃ TRẢ GIÁ: `release-manifest` vẫn báo `file_count: 179` sau khi thêm tệp docs này, nên
         # lượt chạy cổng phát hành TRƯỚC push xanh và tôi tưởng đã đủ — chính ca này mới là chỗ ghi
         # con số docs, và nó chỉ đỏ ở `tl selftest`. Cổng khác nhau trả lời câu hỏi khác nhau.
-        # KÊ KHAI SLOT (GLS-D1 / PR #160 — cứu research doc từ `codex/gate-lifecycle`): 57 → **58**
+        # KÊ KHAI SLOT (W0-D1 — đưa kế hoạch orchestrator vào canonical): 57 → **64** Markdown dưới
+        # `docs/`. Thêm đúng BẢY ADR dev-side/ngoài gói, đều nằm ở `docs/adr/` (vế ok4 tự chứng minh):
+        #   + `0036-claude-executor-codex-review-theo-rui-ro.md`
+        #   + `0037-review-rescue-va-tach-stable-slice.md`
+        #   + `0038-review-class-fail-closed.md`
+        #   + `0039-thin-orchestration-va-nguong-promote.md`
+        #   + `0040-tach-model-reviewer-va-github-submitter.md`
+        #   + `0041-ngan-sach-executor-claude-70-codex-30.md`
+        #   + `0042-deadline-wall-clock-va-working-state-evidence.md`
+        # Cùng đợt còn BẢY tệp `ops/**` (2 kế hoạch + 5 prompt audit) và `CONTEXT.md`: `ops` cũng nằm
+        # trong `_RELEASE_EXCLUDE_DIRS` nhưng ratchet này CHỈ đếm `docs/**/*.md`, nên chúng không ăn khe
+        # nào ở đây — và cũng KHÔNG có ratchet nào khác đếm `ops/` (đã tra: không có).
+        # Package giữ **179** (không tệp runtime nào được thêm) nên trần 200 không nhúc nhích;
+        # cây thật = 179 + 64 = 243.
+        # ĐÃ TRẢ GIÁ ĐÚNG NẾP GHI Ở TRÊN: tôi đã đo `ops`/`docs` đều nằm trong `_RELEASE_EXCLUDE_DIRS`,
+        # `release-manifest` giữ 179, `doc-claims-check --strict` delta 0 — rồi kết luận "docs không
+        # ảnh hưởng gói". Ba cổng ấy đều xanh và đều trả lời câu hỏi KHÁC: không cổng nào trong số đó
+        # ghi CON SỐ docs. Chỗ ghi con số là đúng ca này, và nó chỉ đỏ ở `tl selftest`.
+        # KÊ KHAI SLOT (GLS-D1 / PR #160 — cứu research doc từ `codex/gate-lifecycle`): 64 → **65**
         # Markdown dưới `docs/`. Thêm đúng `docs/research/2026-08-16-github-cli-claude-codex-local.md`
-        # (port nguyên văn từ `ec8d08c`, dev-side/ngoài gói). Package giữ 179, cây thật = 179 + 58 = 237.
-        # Trả giá LẶP đúng bài dòng "ĐÃ TRẢ GIÁ" trên: local chỉ chạy `doc-claims-check --strict`
-        # (xanh) mà không chạy selftest ⇒ gate CI của PR #160 mới là nơi ca này đỏ lần đầu.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 58 == 237
+        # (port nguyên văn từ `ec8d08c`, dev-side/ngoài gói). Package giữ 179, cây thật = 179 + 65 = 244.
+        # Trả giá LẶP đúng bài "ĐÃ TRẢ GIÁ" ngay trên — và W0-D1 cũng vừa dẫm cùng bẫy, hai phiên độc
+        # lập trong một ngày: lượt gate 1 của PR #160 (head `36700cb`) local chỉ chạy `doc-claims-check
+        # --strict` (xanh) mà không chạy selftest ⇒ CI mới là nơi ca này đỏ. Số 57→58 khai ở lượt ấy
+        # chết non vì W0-D1 (PR #155) land 57→64 trước — kê lại trên nền 64, giải khi hoà master.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 65 == 244
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 58
+        ok4 = (len(tren_dia) == 65
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

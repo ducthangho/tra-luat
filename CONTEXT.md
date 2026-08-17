@@ -17,6 +17,26 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
 - **Executor** — vai trò duy nhất được ghi vào branch/worktree của generation để thực hiện Packet Spec.
 - **Reviewer** — vai trò độc lập, read-only với branch Executor, kiểm Spec và Standards/Security trên exact SHA
   rồi ghi verdict. Cùng provider chỉ được tính là độc lập khi dùng một phiên khác và assurance thấp hơn.
+- **Model Reviewer Identity** — danh tính provider/model/session đã thực sự đọc diff và tạo verdict; không suy từ
+  tài khoản đăng comment hoặc ghi receipt.
+- **GitHub Submitter Identity** — actor vận chuyển verdict/comment/check lên GitHub; không tự chứng minh actor đó
+  là model reviewer hoặc có quyền approval độc lập.
+- **Review Delivery Receipt** — biên nhận bền neo verdict path/hash, exact reviewed SHA, Model Reviewer
+  Identity, GitHub Submitter Identity và cường độ mỏ neo. Receipt v1 là lịch sử read-only; chỉ v2 đã
+  validate mới đủ cho identity gate mới. _Tránh dùng:_ receipt là required check, submitter là reviewer.
+- **Wall Deadline / Working-state Evidence** — deadline bắt buộc tính theo absolute wall clock; working-state
+  time chỉ là bằng chứng phân biệt process chậm với máy ngủ, không thay deadline và không tự void attempt.
+- **Review Class** — mức assurance/reviewer tối thiểu của một Packet sau khi đối chiếu khai báo với phạm vi thay
+  đổi thật: `routine`, `systemic` hoặc `sensitive`. Mức không biết được xử lý như `sensitive`.
+- **Thin Orchestration** — lớp điều phối tối thiểu tái dùng launcher, packet loop, ba skill và GitHub Issue/PR;
+  chỉ tự động hóa kiểm tra/state transition tất định, còn quyết định tách, đổi thiết kế, land và cấp quyền chặn
+  thuộc human cho tới khi đủ bằng chứng promote. _Tránh dùng:_ orchestrator mới, autopilot.
+- **Review Rescue Checkpoint** — điểm quyết định bắt buộc khi một PR đã hết review budget hoặc chưa hội tụ sau
+  ba vòng code/review; kết quả là tách phần độc lập, revision kế hoạch, fallback đúng assurance hoặc pause.
+- **Stable Slice** — phần thay đổi hữu ích độc lập, đạt acceptance/evidence riêng và không phụ thuộc phần đang có
+  finding; chỉ được tích hợp qua Packet/PR sạch và review trên exact head của chính nó.
+- **Remediation Slice** — phần chưa hội tụ được tách khỏi Stable Slice thành successor Packet/PR, giữ finding IDs
+  và lịch sử để sửa hoặc thiết kế lại. _Tránh dùng:_ phần thừa, phần để sau.
 - **Approver** — người có thẩm quyền chấp nhận exact SHA và điều kiện land; output của agent không tự tạo quyền này.
 - **Land Operator** — người hoặc agent chỉ thực hiện thao tác land đã được Approver ủy quyền bền và có điều kiện.
   Executor có thể kiêm Land Operator nhưng không nhờ đó trở thành Reviewer hay Approver của code mình.

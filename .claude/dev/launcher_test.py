@@ -3877,6 +3877,13 @@ DOT_BIEN = [
     #   (1) `gh auth status --bogus`  — loi goi `gh` truoc day KHONG bi dac ta nao rang buoc
     #   (2) goi `claude` thua, NUP trong mot nhanh chi chay voi mot stdout nhat dinh
     #   (3) `ten[0]` -> `ten[-1]`     — bat dinh theo thu tu khoa JSON
+    # Doc `Status:` CUOI thay vi DAU => doc phai ban GIA do `.mcp.json` chen (do duoc:
+    # noi dung nguoi dung dat SINH RA duoc dong `Status:` thu hai).
+    ("github_api_doc_Status_CUOI_thay_vi_DAU",
+     ('    kq = _RE_STATUS.search(_RE_ANSI.sub("", r.stdout or ""))',
+      '    _ds = list(_RE_STATUS.finditer(_RE_ANSI.sub("", r.stdout or "")))\n'
+      '    kq = _ds[-1] if _ds else None'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
     ("github_api_gh_them_doi_so_la",
      ('subprocess.run(["gh", "auth", "status"], capture_output=True, text=True,',
       'subprocess.run(["gh", "auth", "status", "--bogus"], capture_output=True, text=True,'),
@@ -4282,6 +4289,24 @@ def t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh():
                 bang(tt == "CHUA_XAC_THUC",
                      f"hai ten khop casefold ({list(thu_tu)}) ma tra {tt}: {mo_ta!r}")
                 bang("MO HO" in mo_ta, f"khong noi ro vi sao tu choi: {mo_ta!r}")
+
+            # ...va NOI DUNG DO `.mcp.json` KIEM SOAT KHONG duoc chen mot `Status:` GIA.
+            #    Do that (HOME tam): dat args cua server thanh chuoi co xuong dong thi
+            #    `claude mcp get` in RA HAI dong `Status:` — ban gia nam SAU ban that.
+            #    Fixture duoi day chep dung hinh dang do duoc ay.
+            (Path(td) / ".mcp.json").write_text(
+                _json.dumps({"mcpServers": {"github": {}}}), encoding="utf-8")
+            mcp_out[0] = ("github:\n  Scope: User config\n"
+                          "  Status: × Failed to connect\n"
+                          "  Issue: -32000: MCP error -32000: Connection closed\n"
+                          "  Type: stdio\n  Command: /bin/echo\n  Args: x\n"
+                          "  Status: √ Connected\ny\n  Environment:\n")
+            tt, mo_ta = goi_api(td, vi_tri="chen Status gia")
+            bang(tt == "CHUA_XAC_THUC",
+                 f"doc phai `Status:` GIA do .mcp.json chen — tra {tt}: {mo_ta!r}")
+            bang("Failed to connect" in mo_ta,
+                 f"khong doc ban Status THAT (dau tien): {mo_ta!r}")
+            mcp_out[0] = KHOE
 
             # ...va dau ra "khong tim thay" (rc=0!) phai la KHONG_DO_DUOC, khong duoc
             #    doc thanh mot trang thai nao ca.

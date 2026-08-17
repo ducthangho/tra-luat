@@ -2328,6 +2328,24 @@ def _suc_khoe_mcp_github(ten: str = "github") -> tuple[str, str]:
                            text=True, timeout=30)
     except (OSError, subprocess.SubprocessError) as e:
         return ("khong_do_duoc", f"`claude mcp get {ten}` khong chay duoc: {type(e).__name__}")
+    # LAY `Status:` DAU TIEN — va day la lua chon CO TAI TRONG, khong phai tinh co.
+    # DO DUOC (HOME tam): noi dung do `.mcp.json` kiem soat CHEN DUOC mot dong `Status:`
+    # thu hai. Dat args cua server thanh chuoi co xuong dong:
+    #     probe:
+    #       Scope:  ...
+    #       Status: × Failed to connect      <- THAT
+    #       Issue:  ...
+    #       Type:   stdio
+    #       Command:/bin/echo
+    #       Args:   x
+    #       Status: √ Connected              <- GIA, do nguoi khai .mcp.json dat
+    # `grep -c "Status:"` = 2. Ban gia nam SAU ban that vi CLI in `Status` truoc moi
+    # truong co gia tri do nguoi dung dat (`Type` `URL` `Headers` `Command` `Args`), va
+    # thu duy nhat in TRUOC no — dong tieu de (ten server) va `Scope:` — thi ten phai
+    # casefold ra dung `github` nen khong chua duoc xuong dong. Vi vay `.search` (khop
+    # DAU TIEN) doc dung ban that, con `findall()[-1]` thi doc phai ban gia.
+    # Cross-review luot 4 khai muc nay la KHONG DO DUOC; nay do duoc roi, va khoa bang
+    # ca test + dot bien `github_api_doc_Status_CUOI_thay_vi_DAU`.
     kq = _RE_STATUS.search(_RE_ANSI.sub("", r.stdout or ""))
     if not kq:
         return ("khong_do_duoc",

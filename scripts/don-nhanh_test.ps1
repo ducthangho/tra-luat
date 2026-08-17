@@ -119,7 +119,19 @@ function Dung-Gh-Gia {
     # Duong dan TUYET DOI, khong dung `dirname "$0"`: `gh` duoc tim qua PATH nen `$0` chi la
     # `gh`, `dirname` cho `.`, va argv.txt roi vao cwd (worktree) thay vi thu muc gh gia —
     # do duoc: chot doi argv bao "khong ghi duoc argv.txt" o lan chay dau.
-    $dong += ("printf '%s\n' " + '"$@"' + " > '" + (Join-Path $d 'argv.txt') + "'")
+    # NGAN CACH BANG NUL, khong bang xuong dong. Ly do do duoc (luot 7, tu kiem truoc khi
+    # giao): voi `\n` thi RANH GIOI DOI SO bien mat khoi ban ghi — gop `--json` va gia tri
+    # thanh MOT doi so (`"--json headRefName,baseRefName"`) ghi ra Y HET hai doi so roi,
+    # nen chot doi argv KHONG THE thay. Do that: dot bien ay song 21/21.
+    # NUL la ngan cach DUY NHAT chung minh duoc la khong nhap nhang: execve CAM byte NUL
+    # trong doi so, nen khong doi so nao chua duoc no. Chon `\n` la chon mot ky tu ma doi
+    # so HOP LE co the chua — tuc lai la danh-sach-cam, dung lop loi da tra gia hai lan.
+    # MOT dau gach cheo, khong hai: PowerShell KHONG coi `\` la ky tu thoat (no dung
+    # backtick), nen "\\0" di thang ra tep thanh HAI ky tu `\` `0` va `printf` in ra
+    # literal thay vi byte NUL. Da tra gia: chot argv do ra "1 doi so" thay vi 8, tuc
+    # ca t21 DO THUONG TRUC — va bon dot bien van "chet" 20/21 nen nhin y het dang chay
+    # dung. Chi lo ra khi chay BASELINE. Do: `printf '%s\0' a bb | od -c` => `a \0 b b \0`.
+    $dong += ("printf '%s\0' " + '"$@"' + " > '" + (Join-Path $d 'argv.txt') + "'")
     # stderr NGUYEN VAN — `gh` that hay in canh bao cap nhat phien ban ra day.
     if ($PSBoundParameters.ContainsKey('CanhBaoStderr')) {
         $dong += "printf '%s\n' '$($CanhBaoStderr -replace "'", "'\''")' >&2"
@@ -516,11 +528,15 @@ ca 't21_MAC_DINH_phai_TU_CHOI_o_1000_PR' {
     #   => 21/21 (dot bien SONG LAI). Khong co phep thu ay thi khong biet ca nay dang
     #   do ARGV hay do thu khac.
     #
-    # Chuoi ky vong duoi day DO duoc, khong doan: dump `$tok -join ' '` o HEAD ra 8 token.
-    # `printf '%s\n' "$@"` cua gh gia ghi MOI token mot dong nen join lai la nguyen cau.
-    # Danh doi da biet: neu mai kia mot token CHINH DANG chua khoang trang thi phep join
-    # nhap nhang va ca nay phai doi cach ghi. No hong theo huong DO (an toan), khong phai
-    # theo huong xanh — nen day la no, khong phai lo dang chay mau.
+    # SO TUNG PHAN TU, KHONG so chuoi da JOIN. Ban dau ca nay so `$tok -join ' '` voi mot
+    # chuoi ky vong; tu kiem truoc khi giao thi thay no THUNG dung lop no sinh ra de vá:
+    # JOIN xoa mat RANH GIOI DOI SO, nen gop `--json` va gia tri thanh MOT doi so
+    # (`"--json headRefName,baseRefName"` — 7 doi so) join lai Y HET 8 doi so. Do that:
+    # dot bien ay SONG 21/21. Dem + so tung phan tu thi no CHET (7 != 8).
+    # Cong voi ngan cach NUL o `Dung-Gh-Gia`, ban ghi va phep so nay khong con nhap nhang
+    # o BAT KY doi so nao — ke ca doi so chua khoang trang hay xuong dong.
+    #
+    # Danh sach ky vong DO duoc, khong doan: dump argv o HEAD ra dung 8 doi so.
     #
     # CO Y: them mot co chinh dang (vd `--repo`) SE lam ca nay DO. Doi cau hoi gui `gh` la
     # doi HOP DONG, phai co nguoi sua test va noi ly do — do khong phai do oan.
@@ -529,10 +545,19 @@ ca 't21_MAC_DINH_phai_TU_CHOI_o_1000_PR' {
     # `Dung-Gh-Gia` tra ve THU MUC (de dat len PATH), khong phai duong dan tep `gh`.
     $argv = Join-Path $gh 'argv.txt'
     bang (Test-Path $argv) "gh gia khong ghi duoc argv.txt — chot nay dang khong do gi"
-    $tok = @(Get-Content -Path $argv)
-    $mong = 'pr list --state open --limit 1000 --json headRefName,baseRefName'
-    bang (($tok -join ' ') -ceq $mong) `
-        "cau hoi gui gh KHAC hop dong.`n  mong : [$mong]`n  thuc : [$($tok -join ' ')]"
+    # Doc RAW roi tach o NUL — KHONG `Get-Content` (no tach theo DONG, tuc lai lam mat
+    # ranh gioi dung cho ta vua bo cong dung lai). Phan tu rong cuoi cung la do moi doi
+    # so deu co NUL dang sau, khong phai mot doi so that.
+    $raw = [System.IO.File]::ReadAllText($argv)
+    $tok = @($raw -split "`0")
+    if ($tok.Count -gt 0 -and $tok[-1] -eq '') { $tok = @($tok[0..($tok.Count - 2)]) }
+    $mong = @('pr', 'list', '--state', 'open', '--limit', '1000', '--json', 'headRefName,baseRefName')
+    bang ($tok.Count -eq $mong.Count) `
+        "gh duoc goi voi $($tok.Count) doi so, hop dong doi $($mong.Count).`n  mong : [$($mong -join '|')]`n  thuc : [$($tok -join '|')]"
+    for ($i = 0; $i -lt $mong.Count; $i++) {
+        bang ($tok[$i] -ceq $mong[$i]) `
+            "doi so thu $i KHAC hop dong: mong [$($mong[$i])], thuc [$($tok[$i])].`n  ca dong: [$($tok -join '|')]"
+    }
 }
 
 # ---------------------------------------------------------------- chạy

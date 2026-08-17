@@ -117,15 +117,32 @@ finding_2:
     Để lại cho lượt sau — xem `viec_con_lai`.
 
 va_P1_sau_verdict:
-  commit: 'xem commit kế tiếp trên nhánh này'
-  huong: >-
-    Theo gợi ý reviewer: thay vòng `foreach … -contains` bằng MỘT phép so NGUYÊN CÂU
-    `-ceq`. Phải `-ceq` chứ không `-eq` — `-eq` chuỗi của PowerShell mù hoa-thường
-    (đo: `'--STATE OPEN' -eq '--state open'` ⇒ True). So nguyên câu tự khắc ghim luôn
-    `pr list`, cấm token thừa/lặp/đảo chỗ.
+  commit: 'a75f1dc (bản đầu) + commit kế tiếp (tự sửa, xem `tu_bat_duoc_LO_MOI`)'
+  huong_cuoi_cung: >-
+    So TỪNG PHẦN TỬ (đếm + `-ceq` từng đối số) trên bản ghi argv NGĂN CÁCH BẰNG NUL —
+    KHÔNG phải so chuỗi đã join như gợi ý ban đầu của reviewer. Reviewer gợi ý so nguyên
+    câu `-ceq`; đường ấy đóng được token thừa nhưng ĐẺ RA một lỗ khác, xem dưới.
+  tu_bat_duoc_LO_MOI_truoc_khi_giao:
+    lo: >-
+      Bản đầu (`a75f1dc`) so `($tok -join ' ') -ceq $mong`. Phép JOIN XOÁ MẤT RANH GIỚI
+      ĐỐI SỐ, nên gộp `--json` và giá trị thành MỘT đối số (`"--json headRefName,baseRefName"`,
+      7 đối số) join lại Y HỆT 8 đối số. ĐO ĐƯỢC: đột biến ấy SỐNG 21/21 — đúng lớp lỗi
+      mà cả PR #150 sinh ra để vá, do chính bản vá của tôi đẻ ra. Lần thứ TƯ trong kho này
+      một bản vá mở lỗ mới trong cùng hàm.
+    chua: >-
+      Hai lớp, mỗi lớp có phản chứng RIÊNG: (1) đếm + so từng phần tử; (2) ngăn cách NUL
+      thay vì xuống dòng, vì `\n` là ký tự mà một đối số HỢP LỆ có thể chứa (lại là
+      danh-sách-cấm) còn NUL thì execve CẤM — đóng theo KIẾN TRÚC, không theo liệt kê ca.
+  loi_thu_hai_tu_bat: >-
+    Lần sửa NUL đầu viết `"printf '%s\\0'"` trong chuỗi PowerShell. PowerShell KHÔNG coi
+    `\` là ký tự thoát (nó dùng backtick) nên tệp nhận HAI ký tự `\` `0`, `printf` in ra
+    literal, và chốt argv đọc được ĐÚNG 1 đối số ⇒ `t21` ĐỎ THƯỜNG TRỰC. Bốn đột biến vẫn
+    "chết" 20/21 nên bảng nhìn Y HỆT đang chạy đúng — CHỈ BASELINE lộ ra. Từ đó mọi bảng
+    đột biến ở đây đều chạy baseline TRƯỚC mỗi con.
   nguoi_va_KHONG_phai_reviewer: >-
     Bản vá do phiên chính viết SAU khi verdict đã được ghi thành tệp và commit RIÊNG —
-    verdict không bị sửa để hợp với bản vá. Reviewer chỉ gợi ý; §"Gợi ý là gợi ý".
+    verdict không bị sửa để hợp với bản vá. Reviewer chỉ gợi ý, và ở đây gợi ý ấy KHÔNG
+    đủ: người vá phải đo rồi đi xa hơn. §"Gợi ý là gợi ý".
 
 verdict_usage_caveats:
 - id: same-provider-khong-du-land

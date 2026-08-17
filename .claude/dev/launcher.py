@@ -87,7 +87,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 
 # launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu
 #
@@ -123,10 +123,11 @@ MA_CHUA_XAC_THUC = 13
 # gần 0 mà vẫn xanh. Đặt ở mã được đột biến (không đặt trong chính runner test).
 TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI = 7
 
-# Ảnh chụp Windows: tiến trình CÓ MẶT nhưng không đọc được `CreationDate`, tức
-# không lấy được khoá danh tính cho nó. Đánh dấu thay vì bỏ qua im lặng — bỏ qua
-# thì một hậu duệ biến mất khỏi ảnh rồi ảnh rỗng thành "cả cây đã chết".
-KHONG_DOC_DUOC_KHOA = "\x00khong-doc-duoc-khoa"
+# (Đã bỏ `KHONG_DOC_DUOC_KHOA`.) Ảnh chụp Windows không còn quét cả máy qua WMI
+# rồi mang cờ "không đọc được khoá" đi kèm: nay `_chup_cay` dựng quan hệ cha-con
+# bằng Toolhelp32, và CHỈ hỏi khoá danh tính cho các PID ĐÃ nằm trong cây. Phạm
+# vi fail-closed vì thế đo thẳng được, không cần cờ mang theo — và một tiến trình
+# hệ thống ngoài cây không còn làm hỏng ảnh của cây vô can.
 
 # Trạng thái CUỐI của một lượt chạy — `stop` không được ghi đè lên chúng.
 TRANG_THAI_KET_THUC = {"xong", "qua_han", "bi_ngat", "hong", "da_dung"}
@@ -221,17 +222,40 @@ def _khoa_danh_tinh(pid: int) -> str | None:
             v = p.stdout.strip()
             return f"darwin:{v}" if v else None
         if he == "Windows":
-            # Win32_Process.CreationDate chu KHONG Get-Process.StartTime: `_chup_cay`
-            # phai lay ca cay trong MOT lan goi, ma nguon duy nhat cho ca pid lan
-            # ParentProcessId lan thoi diem tao la CIM. Hai nguon khac nhau thi
-            # `.Ticks` lech dinh dang/epoch, khoa khong bao gio khop, va chot hoa ra
-            # LUON tu choi giet - hong am tham theo chieu nguoc lai.
-            p = subprocess.run(
-                ["powershell", "-NoProfile", "-NonInteractive", "-Command",
-                 f'(Get-CimInstance Win32_Process -Filter "ProcessId={pid}").CreationDate.Ticks'],
-                capture_output=True, text=True, timeout=30)
-            v = p.stdout.strip()
-            return f"win:{v}" if v.isdigit() else None
+            # KHÔNG qua PowerShell/WMI. Đã đo 15-08-2026: Get-CimInstance trả
+            # Access denied trong sandbox dù chính tiến trình con do ta sinh ra,
+            # làm mọi deadline tụt về rc=10. GetProcessTimes chỉ cần quyền query
+            # trên đúng PID, không cần dịch vụ WMI hay external tool.
+            import ctypes
+            from ctypes import wintypes
+            k32 = ctypes.windll.kernel32
+
+            class _FILETIME(ctypes.Structure):
+                _fields_ = [("dwLowDateTime", wintypes.DWORD),
+                            ("dwHighDateTime", wintypes.DWORD)]
+
+            k32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+            k32.OpenProcess.restype = wintypes.HANDLE
+            k32.GetProcessTimes.argtypes = [wintypes.HANDLE,
+                                            ctypes.POINTER(_FILETIME),
+                                            ctypes.POINTER(_FILETIME),
+                                            ctypes.POINTER(_FILETIME),
+                                            ctypes.POINTER(_FILETIME)]
+            k32.GetProcessTimes.restype = wintypes.BOOL
+            k32.CloseHandle.argtypes = [wintypes.HANDLE]
+            k32.CloseHandle.restype = wintypes.BOOL
+            h = k32.OpenProcess(0x1000, False, int(pid))  # QUERY_LIMITED_INFORMATION
+            if not h:
+                return None
+            try:
+                tao, thoat, kernel, user = _FILETIME(), _FILETIME(), _FILETIME(), _FILETIME()
+                if not k32.GetProcessTimes(h, ctypes.byref(tao), ctypes.byref(thoat),
+                                           ctypes.byref(kernel), ctypes.byref(user)):
+                    return None
+                ticks = (int(tao.dwHighDateTime) << 32) | int(tao.dwLowDateTime)
+                return f"win:{ticks}" if ticks else None
+            finally:
+                k32.CloseHandle(h)
     except (OSError, ValueError, IndexError):
         return None
     return None
@@ -344,42 +368,14 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
             except ValueError:
                 continue
     elif he == "Windows":
-        # Windows KHONG co process group, nen chi con duong lien ket CHA-CON.
-        # Mot lan goi lay het pid|ppid|ticks; loc hau due o duoi dung chung khuon
-        # voi POSIX. Day la thu thay cho `_thanh_vien_nhom` (von tra None o day).
-        try:
-            pr = subprocess.run(
-                ["powershell", "-NoProfile", "-NonInteractive", "-Command",
-                 "Get-CimInstance Win32_Process | ForEach-Object { if ($_.CreationDate) "
-                 "{ \"OK|$($_.ProcessId)|$($_.ParentProcessId)|$($_.CreationDate.Ticks)\" } "
-                 "else { \"ERR|$($_.ProcessId)|$($_.ParentProcessId)|NO_CREATION_DATE\" } }"],
-                capture_output=True, text=True, timeout=60)
-        except (OSError, subprocess.SubprocessError):
+        # Toolhelp lấy pid/ppid bằng Win32 API, không qua WMI (WMI bị sandbox từ
+        # chối). Chỉ lấy khoá thời gian cho CÁC PID TRONG CÂY sau khi duyệt quan
+        # hệ cha-con, nên một tiến trình hệ thống không query được không làm hỏng
+        # phép đo của cây vô can.
+        cha_theo_pid = _cac_pid_cha_windows()
+        if cha_theo_pid is None:
             return None
-        if pr.returncode != 0:
-            return None
-        tt = {}
-        for dong in pr.stdout.splitlines():
-            phan = dong.strip().split("|")
-            # Thiếu CreationDate là "không đo được", KHÔNG phải "tiến trình
-            # không tồn tại". Bỏ qua im lặng có thể làm mất đúng một hậu duệ rồi
-            # ảnh rỗng được đọc thành bằng chứng cả cây đã chết.
-            #
-            # NHƯNG fail-closed phải CÓ PHẠM VI. Bản đầu (vòng 7) trả None ngay khi
-            # BẤT KỲ tiến trình nào trên máy thiếu `CreationDate` — kể cả tiến trình
-            # hệ thống chẳng liên quan gì tới cây ta sắp giết. Như thế ảnh chụp có
-            # dùng được hay không lại phụ thuộc trạng thái máy ở chỗ khác, mà từ khi
-            # `_giet_cay` lấy ảnh rỗng làm bằng chứng "đã tắt" trên Windows thì đó là
-            # đường quyết định 0-hay-125. Nên: giữ nguyên tiến trình mù TRONG cây (có
-            # ppid nên nối được cây), đánh dấu bằng `KHONG_DOC_DUOC_KHOA`, rồi CHỈ trả
-            # None nếu dấu đó thật sự rơi vào cây — kiểm ở cuối hàm.
-            if len(phan) != 4 or phan[0] not in ("OK", "ERR"):
-                return None
-            try:
-                tt[int(phan[1])] = (int(phan[2]), 0,
-                                    f"win:{phan[3]}" if phan[0] == "OK" else KHONG_DOC_DUOC_KHOA)
-            except ValueError:
-                return None
+        tt = {q: (cha, 0, "") for q, cha in cha_theo_pid.items()}
     else:
         return None
     con = {}
@@ -397,12 +393,69 @@ def _chup_cay(pid: int) -> dict[int, str] | None:
             if nhom == pid:
                 ra.setdefault(q, khoa)
     ra.pop(os.getpid(), None)                          # tuyệt đối không tự giết mình
-    # Fail-closed CÓ PHẠM VI (xem nhánh Windows ở trên): chỉ khi một tiến trình
-    # KHÔNG đọc được danh tính nằm TRONG cây thì ảnh mới là "không đo được". Kiểm
-    # SAU khi đã bỏ chính mình ra, để tiến trình của ta không tự làm hỏng ảnh.
-    if KHONG_DOC_DUOC_KHOA in ra.values():
-        return None
+    # Fail-closed CÓ PHẠM VI, nay đo THẲNG thay vì mang cờ: chỉ các PID ĐÃ nằm
+    # trong cây mới bị hỏi khoá danh tính. Hỏi được hết thì ảnh dùng được; một
+    # PID trong cây không đọc nổi khoá thì ảnh là "không đo được" (None), chứ
+    # KHÔNG phải "cây đã chết". Tiến trình hệ thống ngoài cây không còn ảnh
+    # hưởng tới kết luận — đó là điều bản cũ (quét toàn máy) không tách được.
+    if he == "Windows":
+        for q in list(ra):
+            khoa = _khoa_danh_tinh(q)
+            if khoa is None:
+                return None
+            ra[q] = khoa
     return ra
+
+
+def _cac_pid_cha_windows() -> dict[int, int] | None:
+    """Ảnh pid->ppid bằng Toolhelp32; None = không đo được."""
+    if platform.system() != "Windows":
+        return None
+    try:
+        import ctypes
+        from ctypes import wintypes
+        k32 = ctypes.windll.kernel32
+
+        class _PROCESSENTRY32W(ctypes.Structure):
+            _fields_ = [("dwSize", wintypes.DWORD),
+                        ("cntUsage", wintypes.DWORD),
+                        ("th32ProcessID", wintypes.DWORD),
+                        ("th32DefaultHeapID", ctypes.c_size_t),
+                        ("th32ModuleID", wintypes.DWORD),
+                        ("cntThreads", wintypes.DWORD),
+                        ("th32ParentProcessID", wintypes.DWORD),
+                        ("pcPriClassBase", wintypes.LONG),
+                        ("dwFlags", wintypes.DWORD),
+                        ("szExeFile", wintypes.WCHAR * 260)]
+
+        k32.CreateToolhelp32Snapshot.argtypes = [wintypes.DWORD, wintypes.DWORD]
+        k32.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
+        k32.Process32FirstW.argtypes = [wintypes.HANDLE,
+                                        ctypes.POINTER(_PROCESSENTRY32W)]
+        k32.Process32FirstW.restype = wintypes.BOOL
+        k32.Process32NextW.argtypes = [wintypes.HANDLE,
+                                       ctypes.POINTER(_PROCESSENTRY32W)]
+        k32.Process32NextW.restype = wintypes.BOOL
+        k32.CloseHandle.argtypes = [wintypes.HANDLE]
+        k32.CloseHandle.restype = wintypes.BOOL
+        snap = k32.CreateToolhelp32Snapshot(0x00000002, 0)  # TH32CS_SNAPPROCESS
+        if snap == wintypes.HANDLE(-1).value:
+            return None
+        try:
+            e = _PROCESSENTRY32W()
+            e.dwSize = ctypes.sizeof(e)
+            if not k32.Process32FirstW(snap, ctypes.byref(e)):
+                return None
+            ra = {}
+            while True:
+                ra[int(e.th32ProcessID)] = int(e.th32ParentProcessID)
+                if not k32.Process32NextW(snap, ctypes.byref(e)):
+                    break
+            return ra
+        finally:
+            k32.CloseHandle(snap)
+    except (OSError, AttributeError, ValueError):
+        return None
 
 
 def _con_song_dung_khoa(pid: int, khoa: str) -> bool:
@@ -1532,12 +1585,25 @@ CONG_CU = [
      "cai": {"Windows": "winget install --id Python.Python.3.12 -e",
              "Darwin": "brew install python@3.12",
              "Linux": "sudo apt-get install -y python3"}},
-    {"ten": "claude", "bat_buoc": False, "ung_vien": ["claude"],
+    {"ten": "claude", "bat_buoc": True, "ung_vien": ["claude"],
      "vi_sao": "CLI chinh thuc de goi phien Claude (khong tu viet script spawn)",
-     "cai": {"*": "npm install -g @anthropic-ai/claude-code"}},
-    {"ten": "codex", "bat_buoc": False, "ung_vien": ["codex"],
+     "cai": {"*": "npm install -g @anthropic-ai/claude-code"},
+     # `claude auth status` in JSON co cau truc (`loggedIn`, `authMethod`), tuc
+     # co the DOC va doi chieu — khac han `codex login status` ngay duoi.
+     "xac_thuc": ["auth", "status"]},
+    {"ten": "codex", "bat_buoc": True, "ung_vien": ["codex"],
      "vi_sao": "CLI chinh thuc de goi phien Codex (khong tu viet script spawn)",
      "cai": {"*": "npm install -g @openai/codex"}},
+    # CO Y KHONG khai `xac_thuc` cho codex, du nhanh nguon co khai `["login","status"]`.
+    # CLAUDE.md ghi thang: **`codex login status` NOI DOI** — rc=0 "Logged in" trong khi
+    # moi loi goi tra 401, va kho DA TRA GIA HAI lan vi tin no. `_xac_thuc` ket luan
+    # "dat" khi rc=0 va co dau ra, dung hai dieu ma ban noi doi thoa man => no bien
+    # tin hieu SAI THANH XANH thanh mot cong. Do 17-08-2026 tai container nay:
+    # `codex login status` rc=0 "Logged in using ChatGPT" VA `codex exec` that su chay
+    # (rc=0) — hai ben DONG Y hom nay. Mot mau dong y KHONG chung minh probe dang tin;
+    # kho da do no BAT DONG truoc day. Cong chi duoc dung tin hieu KIEM CHUNG DUOC.
+    # Muon do auth cua codex thi phai do bang mot loi goi THAT (vd `codex exec` mot
+    # cau lenh re) chu khong hoi `login status` — viec do thuoc buoc 3.
     # rg (ripgrep): codex và Claude Code đều gọi nó để tìm trong mã. Nhanh hơn grep
     # nhiều lần, tôn trọng .gitignore, và đọc UTF-8 đúng — quan trọng với kho tiếng
     # Việt, nơi `findstr` của Windows đọc sai dấu.
@@ -1555,10 +1621,27 @@ CONG_CU = [
     # bash: `.claude/settings.json` gọi hook qua bash và session-start.sh là bash
     # script. Máy Windows KHÔNG có Git Bash thì hook hỏng, mà doctor cũ vẫn in
     # "DU CONG CU BAT BUOC" — đo thiếu đúng chỗ môi trường phụ thuộc (audit vòng 3).
-    {"ten": "bash", "bat_buoc": False, "ung_vien": ["bash"],
+    {"ten": "bash", "bat_buoc": True, "ung_vien": ["bash"],
      "vi_sao": "hook SessionStart la bash script; Windows can Git Bash",
      "cai": {"Windows": "winget install --id Git.Git -e  (kem Git Bash)",
              "Darwin": "co san", "Linux": "sudo apt-get install -y bash"}},
+    # gh — CO MAT trong bang de DO va BAO CAO, nhung `bat_buoc: False`.
+    #
+    # Nhanh nguon khai `bat_buoc: True`. DO 17-08-2026 trong chinh container remote
+    # nay, va phep do NOI NGUOC: `gh` KHONG duoc cai, va cai cung vo ich vi no di
+    # `api.github.com` — duong ma proxy egress tra 403 ngay o tang CONNECT
+    # (`__agentproxy/status` ghi `connect_rejected` cho ca `api.github.com` lan
+    # `api.githubcopilot.com`). Nen `bat_buoc: True` lam `check`/`doctor` tra 12 tren
+    # MOI phien remote, theo HAI duong doc lap: thieu binary, va (neu co binary) probe
+    # auth that bai. Do la dung lop "chay duoc o day" ma kho da tra gia nhieu lan —
+    # chot fail-close dat vao thu ma nen nay KHONG THE co.
+    # Giu muc nay de `doctor` van noi "co/khong" (huu ich tren may Windows cua nguoi
+    # dung, noi gh chay that); viec CO NEN bat buoc hay khong thuoc BUOC 3, va phai
+    # quyet kem phep do tren tung nen chu khong quyet chung mot lan.
+    {"ten": "gh", "bat_buoc": False, "ung_vien": ["gh"],
+     "vi_sao": "duong du phong/chan doan GitHub; kho di bang MCP github + git",
+     "cai": {"Windows": "winget install --id GitHub.cli -e  (hoac: choco install gh -y)",
+             "Darwin": "brew install gh", "Linux": "sudo apt-get install -y gh"}},
     # npm: session-start.sh rẽ nhánh trên `co npm`, không phải trên `node`.
     {"ten": "npm", "bat_buoc": False, "ung_vien": ["npm"],
      "vi_sao": "hook cai hai CLI agent bang npm; co node chua chac co npm",
@@ -1595,23 +1678,180 @@ MODULE_PY = [
 ]
 
 
-def _phien_ban(duong_dan: str) -> tuple[bool, str]:
+DOCTOR_TIMEOUT_GIAY = 30.0
+PROBE_TIMEOUT_GIAY = 8.0
+
+
+def _doc_moi_truong() -> tuple[dict[str, str], dict]:
+    """Chụp môi trường MỘT LẦN, trước khi resolve/chạy bất kỳ công cụ nào.
+
+    Bản công khai chỉ ghi CÓ/KHÔNG và nguồn credential, tuyệt đối không ghi giá
+    trị. Bản đầy đủ chỉ truyền cho tiến trình con. `GITHUB_PAT` là tên biến cũ
+    của kho; gh chính thức đọc `GH_TOKEN`, nên ánh xạ trong môi trường CON thay
+    vì ghi credential xuống đĩa hoặc sửa môi trường cha.
+
+    Thứ tự "đọc env TRƯỚC khi hỏi công cụ" là chốt của bài học 15-08-2026: gặp
+    `Not logged in` mà chưa biết công cụ xác thực bằng ĐƯỜNG NÀO thì kết luận
+    "không dùng được" là đoán, không phải đo.
+    """
+    con = dict(os.environ)                 # thao tác đầu tiên: đọc toàn bộ env
+    path = con.get("PATH", "")
+
+    # BIẾN GIỮ CHỖ TỆ HƠN BIẾN CHƯA ĐẶT — và ở đây nó đổi hẳn kết luận.
+    #
+    # Thứ tự "GH_TOKEN trước, GITHUB_PAT sau" là thứ tự ĐÚNG THEO TÀI LIỆU của gh,
+    # nhưng SAI trong container này, và đã ĐO 17-08-2026: `GH_TOKEN` `GITHUB_TOKEN`
+    # (cùng `AWS_*`, `CLOUDSDK_*`) đều mang CÙNG một chuỗi giữ chỗ 14 ký tự, còn
+    # credential GitHub thật nằm ở `GITHUB_PAT` (93 ký tự). Lấy theo thứ tự tài liệu
+    # là chọn đúng cái giữ chỗ, rồi báo `nguon_xac_thuc_github: GH_TOKEN` — một dòng
+    # đọc như "đã có credential" trong khi công cụ sẽ nhận "sai thông tin đăng nhập".
+    # CLAUDE.md ghi sẵn cái bẫy này; nó chỉ lộ ra vì lượt đo đầu tiên in ra dòng ấy.
+    #
+    # DẤU HIỆU máy đọc được, không cần đoán danh sách tên: một "token GitHub" mà
+    # TRÙNG BYTE với một biến chẳng liên quan gì tới GitHub (khoá AWS, token gcloud)
+    # thì không phải credential — đó là chuỗi giữ chỗ dùng chung. So bằng `_van_tay`
+    # (HMAC khoá phiên) nên KHÔNG bao giờ có giá trị nào rời khỏi tiến trình.
+    khong_lien_quan = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY",
+                       "CLOUDSDK_AUTH_ACCESS_TOKEN")
+    van_tay_ngoai = {_van_tay(con[t]) for t in khong_lien_quan if con.get(t)}
+    giu_cho = []
+    nguon_gh = "none"
+    for ten in ("GH_TOKEN", "GITHUB_TOKEN", "GITHUB_PAT"):
+        v = con.get(ten)
+        if not v:
+            continue
+        if _van_tay(v) in van_tay_ngoai:
+            giu_cho.append(ten)          # CHỈ tên, không bao giờ giá trị
+            continue
+        nguon_gh = ten if ten == "GH_TOKEN" else f"{ten}->GH_TOKEN"
+        con["GH_TOKEN"] = v              # ghi đè cả khi GH_TOKEN cũ là giữ chỗ
+        break
+    if nguon_gh == "none":
+        con.pop("GH_TOKEN", None)        # thà KHÔNG có còn hơn có bản giữ chỗ:
+        con.pop("GITHUB_TOKEN", None)    # "chưa đăng nhập" đọc đúng, "sai thông
+        # tin đăng nhập" đẩy người đọc đi sai hướng.
+    con["TL_LAUNCHER_ENV_DA_DOC"] = "1"
+    ten_bien = (
+        "CODEX_HOME", "CODEX_AUTH_JSON", "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY", "GH_TOKEN", "GITHUB_TOKEN", "GITHUB_PAT",
+        "CLAUDE_CODE_REMOTE", "CLAUDE_PROJECT_DIR", "TL_WORKSPACE",
+    )
+    cong_khai = {
+        "da_doc_truoc_cong_cu": True,
+        "path_co": bool(path),
+        "so_muc_path": len([x for x in path.split(os.pathsep) if x]),
+        # CHỈ bool — không bao giờ giá trị. Biến giữ chỗ và biến thật nhìn giống
+        # nhau ở đây, đó là chủ ý: `moi-truong` mới là chỗ gom theo vân tay.
+        "bien_co": {ten: bool(os.environ.get(ten)) for ten in ten_bien},
+        "nguon_xac_thuc_github": nguon_gh,
+        # Tên các biến bị loại vì trùng byte với credential không liên quan. Rỗng
+        # là "không phát hiện", KHÔNG phải "đã kiểm và sạch" — phép đo này chỉ
+        # thấy được chuỗi giữ chỗ nào DÙNG CHUNG với biến khác.
+        "bien_giu_cho": giu_cho,
+    }
+    return con, cong_khai
+
+
+def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]:
+    """Mọi executable khớp trong PATH chụp sẵn, rồi các vị trí nền chuẩn.
+
+    Trả CẶP `(ten_ung_vien, duong_dan)`, không trả riêng đường dẫn: `doctor` báo
+    `goi_bang` = TÊN gọi được (`python` khi máy không có `python3`) và `duong_dan`
+    = binary cụ thể. Hai trường trả lời hai câu khác nhau và `t55` ghim trường
+    đầu, nên gộp chúng lại là lặng lẽ đổi hợp đồng của một lệnh đã có người gọi.
+
+    `shutil.which('rg')` chỉ trả mục ĐẦU TIÊN. Trên Windows 15-08-2026 mục đó là
+    rg của Codex Desktop trong WindowsApps và CreateProcess trả Access denied;
+    dừng ở đó che mất bản tốt phía sau. Hàm này giữ thứ tự nhưng không dừng sớm.
+    """
+    ra: list[tuple[str, str]] = []
+
+    def them(ten: str, duong) -> None:
+        if not duong:
+            return
+        s = str(duong)
+        khoa = os.path.normcase(os.path.abspath(s))
+        if khoa not in {os.path.normcase(os.path.abspath(x)) for _, x in ra}:
+            ra.append((ten, s))
+
+    path = moi_truong.get("PATH", "")
+    for ten in c["ung_vien"]:
+        for muc in path.split(os.pathsep):
+            if not muc:
+                continue
+            try:
+                them(ten, shutil.which(ten, path=muc))
+            except OSError:
+                continue
+
+    if platform.system() == "Windows":
+        pf = moi_truong.get("ProgramFiles", r"C:\Program Files")
+        local = moi_truong.get("LOCALAPPDATA", "")
+        ten0 = c["ung_vien"][0]
+        if c["ten"] == "bash":
+            them(ten0, Path(pf) / "Git" / "bin" / "bash.exe")
+            them(ten0, Path(pf) / "Git" / "usr" / "bin" / "bash.exe")
+        elif c["ten"] == "rg" and local:
+            them(ten0, Path(local) / "Microsoft" / "WinGet" / "Links" / "rg.exe")
+        elif c["ten"] == "gh":
+            them(ten0, Path(pf) / "GitHub CLI" / "gh.exe")
+    return [(t, x) for t, x in ra if Path(x).is_file()]
+
+
+def _phien_ban(duong_dan: str, *, env=None, timeout=PROBE_TIMEOUT_GIAY) -> tuple[bool, str]:
     """Chạy thử `--version`. Trả (chay_duoc, dong_dau).
 
     `shutil.which()` KHÔNG phải bằng chứng công cụ dùng được — audit codex dựng hai
     tệp RỖNG tên git.exe/python.exe rồi doctor báo xanh; và ngay trên máy đó `rg.exe`
     có trong PATH nhưng chạy ra "Access is denied". Có mặt ≠ chạy được.
+
+    `stdin=DEVNULL`: một công cụ chờ stdin sẽ TREO tới hết deadline thay vì trả
+    lời. Cùng họ với bẫy `$Args` (r244) — tiến trình đọc stdin, EOF, rc=0, đầu ra
+    rỗng: cổng xanh mà chẳng đo gì.
     """
     try:
         p = subprocess.run([duong_dan, "--version"], capture_output=True, text=True,
-                           timeout=15, encoding="utf-8", errors="replace")
-    except (OSError, subprocess.SubprocessError):
-        return (False, "")
+                           stdin=subprocess.DEVNULL, env=env, timeout=max(0.1, timeout),
+                           encoding="utf-8", errors="replace")
+    except subprocess.TimeoutExpired:
+        return (False, f"timeout sau {timeout:.1f}s")
+    except (OSError, subprocess.SubprocessError) as e:
+        return (False, str(e)[:120])
     ra = (p.stdout or "") + (p.stderr or "")   # nhiều CLI in phiên bản ra stderr
     dong = [d.strip() for d in ra.splitlines() if d.strip()]
     if p.returncode != 0 or not dong:
         return (False, dong[0][:80] if dong else f"rc={p.returncode}, khong in gi")
     return (True, dong[0][:80])
+
+
+def _xac_thuc(duong_dan: str, doi_so: list[str], *, env=None,
+              timeout=PROBE_TIMEOUT_GIAY) -> tuple[bool, str]:
+    """Probe auth không tương tác; không bao giờ trả stdout/stderr có credential.
+
+    `rc=0` MỘT MÌNH không phải bằng chứng — đúng doctrine "đòi BẰNG CHỨNG DƯƠNG,
+    đừng tin rc". Một CLI thiếu subcommand có thể thoát 0 và không in gì; đọc thế
+    là "đã xác thực" thì cổng tự bịa ra một kết luận.
+
+    GIỚI HẠN CÓ THẬT, khai thẳng: hàm này chỉ phân biệt được "chạy và có nói gì
+    đó" với "không". Nó KHÔNG biết nội dung ấy đúng hay sai, nên một lệnh trả
+    rc=0 kèm câu khẳng định SAI (vd `codex login status` — xem chú thích ở
+    `CONG_CU`) vẫn qua. Vì thế chỉ gắn `xac_thuc` cho công cụ có đầu ra KIỂM
+    CHỨNG ĐƯỢC, đừng gắn đại trà.
+    """
+    try:
+        p = subprocess.run([duong_dan, *doi_so], capture_output=True, text=True,
+                           stdin=subprocess.DEVNULL, env=env, timeout=max(0.1, timeout),
+                           encoding="utf-8", errors="replace")
+    except subprocess.TimeoutExpired:
+        return (False, f"timeout sau {timeout:.1f}s")
+    except (OSError, subprocess.SubprocessError) as e:
+        return (False, type(e).__name__)
+    co_loi_ra = bool(((p.stdout or "") + (p.stderr or "")).strip())
+    if p.returncode != 0:
+        return (False, f"rc={p.returncode}")
+    if not co_loi_ra:
+        return (False, "rc=0 nhung khong co bang chung xac thuc")
+    return (True, "ok")
 
 
 def _in_an_toan(chuoi: str) -> bool:
@@ -2432,28 +2672,54 @@ def _ma_doctor(thieu_bat_buoc, chua_xac_thuc, doi_kha_dung: bool,
 
 
 def lenh_doctor(a) -> int:
+    # ĐỌC MÔI TRƯỜNG TRƯỚC MỌI PHÉP HỎI CÔNG CỤ — thứ tự này là nội dung, không
+    # phải nếp code: kết luận "công cụ không dùng được" chỉ có nghĩa khi đã biết
+    # nó xác thực bằng đường nào (bài học 15-08-2026).
+    moi_truong, moi_truong_cong_khai = _doc_moi_truong()
     he = platform.system()
     ket = []
     thieu_bat_buoc = []
+    # Trần tổng cho cả vòng đo: `doctor` là thứ người ta chạy KHI đã nghi ngờ môi
+    # trường, nên nó không được phép treo — mỗi probe có hạn riêng, và cả lượt có
+    # hạn chung.
+    het_han = time.monotonic() + DOCTOR_TIMEOUT_GIAY
     for c in CONG_CU:
         thay = None
         co_mat_nhung_hong = None
-        for ten in c["ung_vien"]:
-            d = shutil.which(ten)
-            if not d:
-                continue
-            chay_duoc, pb = _phien_ban(d)
-            if chay_duoc:
-                thay = {"goi_bang": ten, "duong_dan": d, "phien_ban": pb}
+        xac_thuc_ok = None
+        loi_xac_thuc = None
+        for ten_uv, d in _cac_duong_dan(c, moi_truong):
+            con_lai = het_han - time.monotonic()
+            if con_lai <= 0:
+                co_mat_nhung_hong = {"goi_bang": ten_uv,
+                                     "duong_dan": d, "loi": "doctor vuot han 30s"}
                 break
-            co_mat_nhung_hong = {"goi_bang": ten, "duong_dan": d, "loi": pb}
+            chay_duoc, pb = _phien_ban(d, env=moi_truong,
+                                       timeout=min(PROBE_TIMEOUT_GIAY, con_lai))
+            if chay_duoc:
+                thay = {"goi_bang": ten_uv, "duong_dan": d, "phien_ban": pb}
+                break
+            co_mat_nhung_hong = {"goi_bang": ten_uv,
+                                 "duong_dan": d, "loi": pb}
+        if thay is not None and c.get("xac_thuc"):
+            con_lai = het_han - time.monotonic()
+            if con_lai <= 0:
+                xac_thuc_ok, loi_xac_thuc = False, "doctor vuot han 30s"
+            else:
+                xac_thuc_ok, loi_xac_thuc = _xac_thuc(
+                    thay["duong_dan"], c["xac_thuc"], env=moi_truong,
+                    timeout=min(PROBE_TIMEOUT_GIAY, con_lai))
         cai = c["cai"].get(he) or c["cai"].get("*") or ""
         muc = {"ten": c["ten"], "bat_buoc": c["bat_buoc"], "co": thay is not None,
                "vi_sao": c["vi_sao"], "lenh_cai": cai, **(thay or {})}
+        if c.get("xac_thuc"):
+            muc["xac_thuc_ok"] = xac_thuc_ok
+            if xac_thuc_ok is False:
+                muc["loi_xac_thuc"] = loi_xac_thuc
         if thay is None and co_mat_nhung_hong:
             muc["co_mat_nhung_khong_chay_duoc"] = co_mat_nhung_hong
         ket.append(muc)
-        if thay is None and c["bat_buoc"]:
+        if c["bat_buoc"] and (thay is None or xac_thuc_ok is False):
             thieu_bat_buoc.append(c["ten"])
 
     # --- KHẢ DỤNG, không chỉ CÓ MẶT.
@@ -2527,6 +2793,7 @@ def lenh_doctor(a) -> int:
                                                and not chua_chung_minh,
                                 "he_dieu_hanh": he,
                                 "python_dang_chay": sys.version.split()[0],
+                                "moi_truong": moi_truong_cong_khai,
                                 "cong_cu": ket, "mo_dun_python": mo_dun,
                                 "thieu_bat_buoc": thieu_bat_buoc,
                                 "kha_nang": kha_nang, "chua_xac_thuc": chua_xac_thuc,
@@ -2551,6 +2818,9 @@ def lenh_doctor(a) -> int:
                     f"        co o {hong['duong_dan']} nhung KHONG chay duoc: {hong['loi']}")
             if not c["co"] and con_ong:
                 con_ong = _in_an_toan(f"        cai bang: {c['lenh_cai']}")
+            if c.get("xac_thuc_ok") is False and con_ong:
+                con_ong = _in_an_toan(
+                    f"        xac thuc KHONG dung: {c.get('loi_xac_thuc', 'khong ro')}")
         # In NGAY SAU bảng công cụ vì cùng trả lời câu "đủ đồ chưa", chỉ khác tầng:
         # bảng trên là LỆNH trên PATH, bảng này là MODULE của interpreter đang chạy.
         if mo_dun:

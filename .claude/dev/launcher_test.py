@@ -1842,7 +1842,7 @@ def t80_job_pid_tang_buffer_khi_qua_suc_chua():
 
 @ca
 def t81_chup_cay_windows_thieu_creationdate_phai_fail_closed():
-    """CIM thiếu CreationDate: fail-closed, nhưng CHỈ khi nó ở TRONG cây.
+    """Không lấy được creation time: fail-closed, nhưng CHỈ khi ở TRONG cây.
 
     Hai vế cố ý ngược nhau. Vế (a) là bảo đảm gốc: một hậu duệ mà ta không lấy
     được khoá danh tính thì cả ảnh không đủ bằng chứng — bỏ qua im lặng sẽ làm
@@ -1850,23 +1850,32 @@ def t81_chup_cay_windows_thieu_creationdate_phai_fail_closed():
     không liên quan gì tới thứ ta sắp giết; để nó phá ảnh thì ảnh có dùng được
     hay không lại tuỳ trạng thái máy ở chỗ khác — mà từ khi ảnh rỗng là bằng
     chứng "đã tắt" trên Windows, đó chính là đường quyết định 0-hay-125.
+
+    NEO ĐÃ CHUYỂN cùng bản vá bỏ WMI: nguồn quan hệ cha-con nay là
+    `_cac_pid_cha_windows` (Toolhelp32) và khoá danh tính hỏi RIÊNG từng PID qua
+    `_khoa_danh_tinh`. Vì thế vế (b) mạnh hơn trước: PID mù ngoài cây không chỉ
+    "không phá ảnh" mà còn KHÔNG ĐƯỢC HỎI — phạm vi giờ đo được, không chỉ suy ra.
     """
     m = _tai_launcher_thu()
     m.platform.system = lambda: "Windows"
+    da_hoi = []
+    khoa = {10: "win:123", 11: None, 12: "win:456"}
 
-    def _ra(dong):
-        class P:
-            returncode = 0
-            stdout = dong
-        m.subprocess.run = lambda *_a, **_k: P()
+    def _khoa(pid):
+        da_hoi.append(pid)
+        return khoa.get(pid)
+
+    m._khoa_danh_tinh = _khoa
 
     # (a) tien trinh mu la CON cua 10 => khong do duoc
-    _ra("OK|10|1|123\nERR|11|10|NO_CREATION_DATE\n")
-    bang(m._chup_cay(10) is None, "hau due thieu CreationDate bi bo qua im lang")
+    m._cac_pid_cha_windows = lambda: {10: 1, 11: 10}
+    bang(m._chup_cay(10) is None, "hau due khong lay duoc khoa bi bo qua im lang")
     # (b) tien trinh mu thuoc nhanh KHAC (cha = 1) => anh van dung duoc
-    _ra("OK|10|1|123\nOK|12|10|456\nERR|11|1|NO_CREATION_DATE\n")
+    da_hoi.clear()
+    m._cac_pid_cha_windows = lambda: {10: 1, 12: 10, 11: 1}
     bang(m._chup_cay(10) == {10: "win:123", 12: "win:456"},
          "tien trinh mu NGOAI cay khong duoc lam hong ca anh")
+    bang(11 not in da_hoi, f"da hoi khoa cua PID ngoai cay: {da_hoi}")
 
 
 @ca
@@ -2851,6 +2860,184 @@ def t104_khong_duoc_dung_API_CHI_CO_TREN_MOT_NEN_ma_khong_hoi_truoc():
 
 
 @ca
+def t105_doctor_auth_hong_thi_DO_du_binary_chay_duoc():
+    """CÓ binary chạy được KHÁC xác thực được — doctor phải tách hai tầng ấy.
+
+    `codex --version` in số phiên bản ngon lành trong khi `codex` chưa có
+    credential nào; cả ngày 15-08-2026 mất đúng vì khoảng cách đó. Ca này khoá:
+    một công cụ BẮT BUỘC có `xac_thuc` mà probe auth hỏng thì `doctor` phải ĐỎ
+    (rc=12) và JSON phải nói rõ `co: true` + `xac_thuc_ok: false` — hai trường
+    riêng, vì gộp lại thì người đọc không phân biệt được "chưa cài" với "cài rồi
+    mà chưa đăng nhập", và hai thứ đó chữa bằng hai lệnh khác nhau.
+
+    Dùng seam nội bộ: thứ cần đo là THỨ TỰ và QUYẾT ĐỊNH trong cùng tiến trình,
+    không phải hành vi của một CLI thật.
+    """
+    m = _tai_launcher_thu()
+    su_kien = []
+    m.CONG_CU = [{
+        "ten": "gia", "bat_buoc": True, "ung_vien": ["gia"],
+        "vi_sao": "thu", "cai": {"*": "cai gia"},
+        "xac_thuc": ["auth", "status"],
+    }]
+    m.MO_DUN_PY = []
+    m._doc_moi_truong = lambda: (
+        su_kien.append("moi_truong") or
+        ({"PATH": "P", "TL_LAUNCHER_ENV_DA_DOC": "1"}, {"da_doc_truoc_cong_cu": True})
+    )
+    m._cac_duong_dan = lambda _c, _env: (
+        su_kien.append("resolve") or [("gia", "/gia/bin")]
+    )
+    m._phien_ban = lambda *_a, **_k: (su_kien.append("version") or (True, "gia 1"))
+    m._xac_thuc = lambda *_a, **_k: (su_kien.append("auth") or (False, "rc=1"))
+    a = type("A", (), {"json": True, "workspace": None, "doi_kha_dung": False})()
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        rc = m.lenh_doctor(a)
+    d = json.loads(out.getvalue())
+    # ĐỌC ENV TRƯỚC khi hỏi công cụ — không phải nếp code, mà là điều kiện để câu
+    # "công cụ không dùng được" có nghĩa.
+    bang(su_kien[0] == "moi_truong", f"thu tu sai: {su_kien}")
+    bang(rc == MA_THIEU_CONG_CU and d["thieu_bat_buoc"] == ["gia"],
+         f"auth hong ma doctor van xanh: rc={rc}, thieu={d['thieu_bat_buoc']}")
+    muc = [x for x in d["cong_cu"] if x["ten"] == "gia"][0]
+    bang(muc["co"] is True and muc.get("xac_thuc_ok") is False,
+         f"khong tach binary voi auth: {muc}")
+
+
+@ca
+def t106_doctor_binary_hong_dau_PATH_khong_duoc_che_binary_tot():
+    """WindowsApps có rg.exe nhưng Access denied; phải thử ứng viên KẾ TIẾP.
+
+    `shutil.which` chỉ trả mục ĐẦU TIÊN, nên một binary hỏng đứng trước che mất
+    bản chạy được đứng sau — đo được trên Windows 15-08-2026. Ca này đòi doctor
+    duyệt hết, và đòi ĐÚNG THỨ TỰ (không phải "tìm thấy bản tốt ở đâu cũng được"):
+    thứ tự PATH là thứ tự người dùng khai, đảo nó là đổi ý nghĩa của PATH.
+    """
+    m = _tai_launcher_thu()
+    da_thu = []
+    m.CONG_CU = [{
+        "ten": "rg", "bat_buoc": True, "ung_vien": ["rg"],
+        "vi_sao": "thu", "cai": {"*": "cai rg"},
+    }]
+    m.MO_DUN_PY = []
+    m._doc_moi_truong = lambda: (
+        {"PATH": "P", "TL_LAUNCHER_ENV_DA_DOC": "1"}, {"da_doc_truoc_cong_cu": True})
+    m._cac_duong_dan = lambda _c, _env: [("rg", "/hong/rg"), ("rg", "/tot/rg")]
+
+    def pb(duong, **_kwargs):
+        da_thu.append(duong)
+        return (duong == "/tot/rg", "rg 99" if duong == "/tot/rg" else "Access denied")
+
+    m._phien_ban = pb
+    a = type("A", (), {"json": True, "workspace": None, "doi_kha_dung": False})()
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        rc = m.lenh_doctor(a)
+    d = json.loads(out.getvalue())
+    muc = [x for x in d["cong_cu"] if x["ten"] == "rg"][0]
+    bang(rc == MA_OK and muc["duong_dan"] == "/tot/rg",
+         f"khong lui sang binary tot: {muc}")
+    bang(da_thu == ["/hong/rg", "/tot/rg"], f"khong thu dung thu tu: {da_thu}")
+
+
+@ca
+def t107_doc_moi_truong_KHONG_duoc_chon_bien_giu_cho():
+    """Token GitHub trùng byte với khoá AWS thì đó là CHUỖI GIỮ CHỖ, không phải credential.
+
+    ĐO 17-08-2026 trong container remote: `GH_TOKEN` `GITHUB_TOKEN` `AWS_*`
+    `CLOUDSDK_*` mang CÙNG một chuỗi giữ chỗ 14 ký tự, credential thật ở
+    `GITHUB_PAT` (93 ký tự). Lấy theo thứ tự tài liệu của gh (GH_TOKEN trước) là
+    chọn đúng bản giữ chỗ, rồi báo `nguon_xac_thuc_github: GH_TOKEN` — dòng ấy
+    đọc như "đã có credential" trong khi công cụ sẽ nhận "sai thông tin đăng
+    nhập". Biến giữ chỗ TỆ HƠN biến chưa đặt, đúng như CLAUDE.md ghi.
+
+    Ba vế: (a) loại đúng bản giữ chỗ và chọn bản thật; (b) môi trường CON phải
+    mang giá trị THẬT; (c) khi CHỈ có giữ chỗ thì phải là `none` và phải GỠ biến
+    ra khỏi môi trường con — "chưa đăng nhập" đọc đúng, "sai thông tin đăng nhập"
+    đẩy người đọc đi sai hướng.
+    """
+    m = _tai_launcher_thu()
+    GIU_CHO, THAT = "x" * 14, "p" * 93
+
+    def dat(**bien):
+        m.os.environ = dict(bien)
+
+    # (a)+(b) co ca giu cho lan ban that
+    dat(GH_TOKEN=GIU_CHO, GITHUB_TOKEN=GIU_CHO, AWS_ACCESS_KEY_ID=GIU_CHO,
+        GITHUB_PAT=THAT, PATH="/bin")
+    con, ck = m._doc_moi_truong()
+    bang(ck["nguon_xac_thuc_github"] == "GITHUB_PAT->GH_TOKEN",
+         f"chon nham nguon: {ck['nguon_xac_thuc_github']}")
+    bang(ck["bien_giu_cho"] == ["GH_TOKEN", "GITHUB_TOKEN"],
+         f"khong nhan ra bien giu cho: {ck['bien_giu_cho']}")
+    bang(con["GH_TOKEN"] == THAT, "moi truong con khong mang credential that")
+    # Khong duoc ro ri gia tri ra ban cong khai, du la ban giu cho.
+    bang(GIU_CHO not in json.dumps(ck) and THAT not in json.dumps(ck),
+         "ban cong khai co chua gia tri bien")
+
+    # (c) CHI co giu cho
+    dat(GH_TOKEN=GIU_CHO, GITHUB_TOKEN=GIU_CHO, AWS_ACCESS_KEY_ID=GIU_CHO, PATH="/bin")
+    con2, ck2 = m._doc_moi_truong()
+    bang(ck2["nguon_xac_thuc_github"] == "none",
+         f"giu cho bi doc thanh credential: {ck2['nguon_xac_thuc_github']}")
+    bang("GH_TOKEN" not in con2 and "GITHUB_TOKEN" not in con2,
+         "van truyen bien giu cho xuong tien trinh con")
+
+    # Chieu NGUOC: khong co bien la khong lien quan thi KHONG duoc goi la giu cho.
+    dat(GH_TOKEN=THAT, PATH="/bin")
+    _con3, ck3 = m._doc_moi_truong()
+    bang(ck3["nguon_xac_thuc_github"] == "GH_TOKEN" and ck3["bien_giu_cho"] == [],
+         f"bao giu cho oan: {ck3}")
+
+
+@ca
+def t108_hook_phai_probe_CHAY_DUOC_khong_chi_CO_MAT():
+    """`co_chay` của hook phải giết được binary CÓ MẶT mà KHÔNG chạy được.
+
+    Hook từng rẽ nhánh trên `command -v`, tức chỉ chứng minh có đường dẫn. Một
+    tệp rỗng, một script `exit 1`, hay `rg.exe` của WindowsApps trả Access denied
+    đều lọt — và hook sẽ BỎ QUA phần cài đặt vì tưởng đã có. Sai ở đây im lặng:
+    phiên chạy tiếp với công cụ hỏng.
+
+    Thân hàm được TRÍCH TỪ CHÍNH tệp hook rồi `eval`, không chép lại — hai bản
+    của một hàm sẽ trôi lệch, và bên quên cập nhật chính là bên đẩy lọt. Ba vế
+    cố ý gồm cả vế XANH (`--version` thật) để ca này không thể đỏ-vì-mọi-thứ.
+    """
+    hook = (LAUNCHER.parent.parent / "hooks" / "session-start.sh").read_text(encoding="utf-8")
+    bang("co_chay()" in hook, "hook khong con ham co_chay")
+    for ten in ("codex", "claude", "rg"):
+        bang(f"co_chay {ten}" in hook, f"hook van dung `co` thay vi `co_chay` cho {ten}")
+
+    dau = hook.index("co_chay() {")
+    than = hook[dau:hook.index("\n}\n", dau) + 3]
+
+    with tempfile.TemporaryDirectory() as td:
+        t = Path(td)
+        hong = t / "hongqua"
+        hong.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+        cam = t / "camlang"                       # rc=0 nhung KHONG in gi
+        cam.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        tot = t / "totqua"
+        tot.write_text("#!/bin/sh\necho 'totqua 1.0'\n", encoding="utf-8")
+        for f in (hong, cam, tot):
+            f.chmod(0o755)
+
+        def thu(ten: str) -> int:
+            kich = f'PY={sys.executable}\n{than}\nco_chay {ten}\n'
+            r = subprocess.run(["bash", "-c", kich], capture_output=True, text=True,
+                               env={**os.environ, "PATH": f"{td}{os.pathsep}{os.environ['PATH']}"},
+                               timeout=120)
+            return r.returncode
+
+        bang(thu("totqua") == 0, "co_chay tu choi binary CHAY DUOC")
+        bang(thu("hongqua") != 0, "co_chay nhan binary rc!=0 la chay duoc")
+        # rc=0 + im lang = chu ky cua "chay nhung chang lam gi" (bay $Args, r244).
+        bang(thu("camlang") != 0, "co_chay nhan rc=0-nhung-rong la chay duoc")
+        bang(thu("khong_ton_tai_gi_ca") != 0, "co_chay nhan binary KHONG CO")
+
+
+@ca
 def t103_nam_finding_cua_bot_review_PR128():
     """Năm mục bot codex nêu trên PR #128 — cả năm ĐO LẠI đều đúng, nên khoá cả năm.
 
@@ -3608,8 +3795,16 @@ DOT_BIEN = [
      ('    return MA_THAM_SO if hong else MA_OK', '    return MA_OK'),
      ["t52_so_hong_KHONG_duoc_im_lang"]),
     ("doctor_luon_xanh",
-     ('        if thay is None and c["bat_buoc"]:', '        if False:'),
+     ('        if c["bat_buoc"] and (thay is None or xac_thuc_ok is False):',
+      '        if False:'),
      ["t54_doctor_thieu_cong_cu_bat_buoc_thi_DO"]),
+    # Chiều hẹp hơn: giữ phép kiểm CÓ MẶT, bỏ riêng phép kiểm XÁC THỰC. Bản cũ chỉ
+    # có một đột biến "luôn xanh", nên nếu ai lỡ tay bỏ vế `xac_thuc_ok` thì không
+    # mutant nào đỏ — cửa mới mà không có mutant riêng là cửa sẽ âm thầm hở lại.
+    ("doctor_bo_qua_auth_hong",
+     ('        if c["bat_buoc"] and (thay is None or xac_thuc_ok is False):',
+      '        if c["bat_buoc"] and thay is None:'),
+     ["t105_doctor_auth_hong_thi_DO_du_binary_chay_duoc"]),
     ("khong_chup_prompt",
      ('        if any("{PROMPT_FILE}" in x for x in lenh_con):',
       '        if False:'),
@@ -3619,8 +3814,21 @@ DOT_BIEN = [
       '"ten": a.name, "lenh": [str(x) for x in a.lenh], "trang_thai": "dang_chay",'),
      ["t59_so_KHONG_luu_doi_so_nguyen_van"]),
     ("doctor_tin_which",
-     ('            chay_duoc, pb = _phien_ban(d)', '            chay_duoc, pb = True, ""'),
+     ('            chay_duoc, pb = _phien_ban(d, env=moi_truong,\n'
+      '                                       timeout=min(PROBE_TIMEOUT_GIAY, con_lai))',
+      '            chay_duoc, pb = True, ""'),
      ["t60_doctor_KHONG_tin_which_khi_cong_cu_khong_chay_duoc"]),
+    # Dừng ở binary ĐẦU TIÊN trong PATH = đúng hành vi `shutil.which` cũ, tức dựng
+    # lại lỗi đã đo trên Windows (rg của WindowsApps che mất bản chạy được).
+    ("doctor_chi_thu_binary_dau",
+     ('        for ten_uv, d in _cac_duong_dan(c, moi_truong):',
+      '        for ten_uv, d in _cac_duong_dan(c, moi_truong)[:1]:'),
+     ["t106_doctor_binary_hong_dau_PATH_khong_duoc_che_binary_tot"]),
+    # Lấy credential theo THỨ TỰ TÀI LIỆU thay vì loại chuỗi giữ chỗ => chọn đúng
+    # bản giữ chỗ 14 ký tự trong container này. Xem `_doc_moi_truong`.
+    ("moi_truong_tin_gh_token_giu_cho",
+     ('        if _van_tay(v) in van_tay_ngoai:', '        if False:'),
+     ["t107_doc_moi_truong_KHONG_duoc_chon_bien_giu_cho"]),
     ("worktree_bo_qua_tep_moi",
      ('"--untracked-files=all"', '"--untracked-files=no"'),
      ["t12_tep_khong_theo_doi_van_tinh_la_ban"]),
@@ -3700,7 +3908,7 @@ DOT_BIEN = [
       '        ban_ghi["trang_thai"] = ("xong" if bi_ngat'),
      ["t72_bi_ngat_KHONG_duoc_ghi_thanh_xong"]),
     ("doctor_bo_do_bash",
-     ('    {"ten": "bash", "bat_buoc": False, "ung_vien": ["bash"],',
+     ('    {"ten": "bash", "bat_buoc": True, "ung_vien": ["bash"],',
       '    {"ten": "bash_da_dot_bien", "bat_buoc": False, "ung_vien": ["bash"],'),
      ["t73_doctor_phai_do_bash_va_npm"]),
     ("khong_quet_ban_chup_qua_han",
@@ -3732,15 +3940,12 @@ DOT_BIEN = [
      ('            suc_chua = max(suc_chua * 2, can)',
       '            return None  # DOT BIEN: bo doc lai khi buffer thieu'),
      ["t80_job_pid_tang_buffer_khi_qua_suc_chua"]),
-    # CHUYEN NEO (khong noi dieu kien): dong thieu CreationDate khong con bi loai o
-    # cho doc nua ma duoc GIU LAI kem dau `KHONG_DOC_DUOC_KHOA`, de fail-closed co
-    # PHAM VI (chi do khi no nam trong cay). Y DINH GIU NGUYEN - lam tien trinh mu
-    # lan vao anh nhu mot tien trinh binh thuong. Day la LOP KHAC voi
-    # `chup_cay_khong_fail_closed_trong_cay`: mot ben bo DAU, ben kia bo phep KIEM.
-    ("chup_cay_bo_qua_dong_thieu",
-     ('                                    f"win:{phan[3]}" if phan[0] == "OK" else KHONG_DOC_DUOC_KHOA)',
-      '                                    f"win:{phan[3]}")'),
-     ["t81_chup_cay_windows_thieu_creationdate_phai_fail_closed"]),
+    # (Đã bỏ `chup_cay_bo_qua_dong_thieu`.) Nó neo vào dòng phân tích đầu ra WMI —
+    # dòng ấy KHÔNG CÒN TỒN TẠI sau khi `_chup_cay` chuyển sang Toolhelp32. Giữ lại
+    # một đột biến không còn chỗ bám là giữ một PHÉP ĐO RỖNG: runner không thay được
+    # gì, mutant "sống sót", và bảng đột biến vẫn báo đủ tỷ lệ. Đúng bệnh đã trả giá
+    # ở `.pyc` (mutant chưa từng được chạy) và ở PR #141 (đột biến bơm vào tên hàm
+    # không tồn tại). Lớp mà nó canh nay do `chup_cay_fail_closed_ca_may` giữ.
     ("san_dot_bien_chi_can_mot",
      ('TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI = 7',
       'TY_LE_DOT_BIEN_TOI_THIEU_PHAN_MUOI = 0'),
@@ -3751,16 +3956,17 @@ DOT_BIEN = [
     ("windows_khong_co_duong_bang_chung_me_da_tat",
      ('            rong = con == {}', '            rong = False'),
      ["t83_windows_me_da_tat_va_anh_chup_RONG_la_du_bang_chung"]),
-    # Bo dau "khong doc duoc khoa" => hau due mu lot vao anh voi khoa rong, roi
-    # `_con_song_dung_khoa` khong bao gio khop => bao la da chet.
+    # Hau due khong query duoc creation time phai lam anh fail-closed. Bo phep kiem
+    # => hau due mu lot vao anh voi khoa rong, roi `_con_song_dung_khoa` khong bao
+    # gio khop => bao la da chet.
     ("chup_cay_khong_fail_closed_trong_cay",
-     ('    if KHONG_DOC_DUOC_KHOA in ra.values():', '    if False:'),
+     ('            if khoa is None:\n                return None\n            ra[q] = khoa',
+      '            if False:\n                return None\n            ra[q] = khoa'),
      ["t81_chup_cay_windows_thieu_creationdate_phai_fail_closed"]),
-    # Chieu NGUOC LAI: fail-closed mat pham vi, tro lai "bat ky tien trinh nao tren
-    # may thieu CreationDate cung lam hong anh". Xanh ma vo dung.
+    # Chieu NGUOC LAI: hoi khoa cho CA MAY thay vi chi cay => fail-closed mat pham
+    # vi, mot tien trinh he thong vo can lam hong anh. Xanh ma vo dung.
     ("chup_cay_fail_closed_ca_may",
-     ('            if len(phan) != 4 or phan[0] not in ("OK", "ERR"):',
-      '            if len(phan) != 4 or phan[0] != "OK":'),
+     ('        for q in list(ra):', '        for q in list(tt):'),
      ["t81_chup_cay_windows_thieu_creationdate_phai_fail_closed"]),
 ]
 

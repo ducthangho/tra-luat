@@ -400,12 +400,24 @@ def _terminate_process_tree(proc: subprocess.Popen[Any], windows_job: _WindowsJo
         # Gốc duyệt: là CHÍNH TA khi đã làm subreaper (đứa mồ côi rơi về đây), còn
         # không thì là con gốc. Chọn sai gốc thì vòng lặp dưới mù đúng ca cần bắt.
         goc = os.getpid() if _CO_SUBREAPER else proc.pid
+        # LẶP TỚI KHI CÂY LẶNG, chặn bằng ĐỒNG HỒ — không phải đếm vòng.
+        #
+        # Bản trước cắt cứng ở 6 lượt (P1 cross-review PR "#141"): một kẻ đẻ lại
+        # liên tục chỉ cần sống lâu hơn 6 lượt là thoát, và ta KHÔNG hề biết — vòng
+        # lặp kết thúc êm y như khi cây đã lặng thật. Hai kết cục khác hẳn nhau mà
+        # nhìn giống nhau, đúng bệnh "vắng mặt vì sạch" và "vắng mặt vì chưa chạy"
+        # trông như một. Hết hạn mà còn đứa mới là DỮ KIỆN, phải ghi chứ không nuốt.
+        global _GIET_KHONG_TRON_VEN
         da_gui: dict[int, str] = {}
-        for _vong in range(6):
+        han_lang = time.monotonic() + 10.0
+        while True:
             anh = _cac_hau_due(goc)             # cha còn sống nên cây còn truy được
             moi = {q: k for q, k in anh.items() if da_gui.get(q) != k}
             if not moi:
                 break                            # cây đã lặng
+            if time.monotonic() > han_lang:
+                _GIET_KHONG_TRON_VEN = True      # KHÔNG im lặng bỏ qua
+                break
             for q, khoa in moi.items():
                 if _khoa_pid(q) == khoa:         # đúng tiến trình cũ, không phải PID tái dùng
                     with contextlib.suppress(ProcessLookupError, PermissionError):
@@ -430,6 +442,11 @@ def _terminate_process_tree(proc: subprocess.Popen[Any], windows_job: _WindowsJo
 
 # Đặt ở đường `run` TRƯỚC khi sinh con; xem `_dat_subreaper`.
 _CO_SUBREAPER = False
+
+# Bật khi `_terminate_process_tree` HẾT HẠN mà cây vẫn còn đứa mới sinh. Đi thẳng
+# vào bằng chứng: "đã gọi lệnh dọn" KHÔNG phải "đã dọn xong", và người đọc bản ghi
+# phải phân biệt được hai thứ đó.
+_GIET_KHONG_TRON_VEN = False
 
 
 def _dat_subreaper() -> bool:
@@ -466,7 +483,19 @@ def _khoa_pid(pid: int) -> str | None:
     PID quay vòng. "PID này còn tồn tại" KHÔNG trả lời được câu ta cần hỏi là "có
     còn ĐÚNG tiến trình cũ không" — và giết nhầm một tiến trình vô can của cùng
     người dùng là hỏng nặng hơn nhiều so với để sót một tiến trình.
+
+    ĐỘ PHÂN GIẢI LÀ NỘI DUNG, KHÔNG PHẢI CHI TIẾT (P1 cross-review PR "#141").
+    Bản trước dùng `ps -o lstart=`, mà nó chỉ tới GIÂY — đo được:
+    `Mon Aug 17 02:50:06 2026`. Hai tiến trình cùng PID sinh trong CÙNG một giây
+    là không phân biệt được, tức khoá không đóng nổi đúng ca nó sinh ra để đóng,
+    và trên máy có tốc độ tạo tiến trình cao thì đó không phải giả thuyết.
+    Linux có `/proc/<pid>/stat` trường 22 (`starttime`) tính bằng TICK — mặc định
+    100 tick/giây, tức mịn gấp 100 lần. Dùng nó khi có; nơi khác lùi về `lstart`
+    và CHẤP NHẬN độ phân giải thô — nhưng khai ra ở đây thay vì im lặng.
     """
+    v = _khoa_pid_proc(pid)
+    if v is not None:
+        return v
     try:
         p = subprocess.run(["ps", "-o", "lstart=", "-p", str(pid)],
                            capture_output=True, text=True,
@@ -474,7 +503,21 @@ def _khoa_pid(pid: int) -> str | None:
     except (OSError, subprocess.SubprocessError):
         return None
     v = (p.stdout or "").strip()
-    return v if (p.returncode == 0 and v) else None
+    return ("giay:" + v) if (p.returncode == 0 and v) else None
+
+
+def _khoa_pid_proc(pid: int) -> str | None:
+    """`starttime` (tick) từ `/proc/<pid>/stat`; None nếu nền không có `/proc`.
+
+    `comm` có thể chứa khoảng trắng và dấu ')' nên cắt từ ')' CUỐI CÙNG — cùng
+    khuôn `launcher.py` đã dùng, và cùng lý do.
+    """
+    try:
+        nd = Path(f"/proc/{pid}/stat").read_text()
+        sau = nd[nd.rindex(")") + 2:].split()
+        return "tick:" + sau[19]
+    except (OSError, ValueError, IndexError):
+        return None
 
 
 def _cac_hau_due(pid: int) -> dict[int, str]:
@@ -486,26 +529,43 @@ def _cac_hau_due(pid: int) -> dict[int, str]:
     Dùng `ps` chứ không `/proc` để chạy được cả trên macOS. Không đo được thì trả
     rỗng — phía gọi vẫn `killpg`, tức không tệ hơn bản không có hàm này.
     """
-    try:
-        p = subprocess.run(["ps", "-A", "-o", "pid=,ppid=,lstart="],
-                           capture_output=True, text=True,
-                           stdin=subprocess.DEVNULL, timeout=10)
-    except (OSError, subprocess.SubprocessError):
-        return {}
-    if p.returncode != 0:
-        return {}
     con: dict[int, list[int]] = {}
     khoa: dict[int, str] = {}
-    for dong in (p.stdout or "").splitlines():
-        phan = dong.split(None, 2)
-        if len(phan) < 3:
-            continue
+    goc_proc = Path("/proc")
+    if goc_proc.is_dir():
+        # MỘT NGUỒN cho cả quan hệ cha-con lẫn khoá, và khoá mịn tới tick. Hai
+        # nguồn khác nhau thì khoá đo ở đây và khoá đo lúc bắn lệch định dạng,
+        # chốt hoá ra LUÔN từ chối bắn — hỏng âm thầm theo chiều ngược lại.
+        for muc in goc_proc.iterdir():
+            if not muc.name.isdigit():
+                continue
+            try:
+                nd = (muc / "stat").read_text()
+                sau = nd[nd.rindex(")") + 2:].split()
+                q, cha = int(muc.name), int(sau[1])
+            except (OSError, ValueError, IndexError):
+                continue
+            con.setdefault(cha, []).append(q)
+            khoa[q] = "tick:" + sau[19]
+    else:
         try:
-            q, cha = int(phan[0]), int(phan[1])
-        except ValueError:
-            continue
-        con.setdefault(cha, []).append(q)
-        khoa[q] = phan[2].strip()
+            p = subprocess.run(["ps", "-A", "-o", "pid=,ppid=,lstart="],
+                               capture_output=True, text=True,
+                               stdin=subprocess.DEVNULL, timeout=10)
+        except (OSError, subprocess.SubprocessError):
+            return {}
+        if p.returncode != 0:
+            return {}
+        for dong in (p.stdout or "").splitlines():
+            phan = dong.split(None, 2)
+            if len(phan) < 3:
+                continue
+            try:
+                q, cha = int(phan[0]), int(phan[1])
+            except ValueError:
+                continue
+            con.setdefault(cha, []).append(q)
+            khoa[q] = "giay:" + phan[2].strip()
     ra: dict[int, str] = {}
     hang, ta = list(con.get(pid, [])), os.getpid()
     while hang:
@@ -692,6 +752,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                 returncode=returncode,
                 error="gate exceeded timeout",
             )
+            payload["giet_tron_ven"] = not _GIET_KHONG_TRON_VEN
         except BaseException as exc:
             # NGẮT (Ctrl-C) VÀ MỌI ĐƯỜNG THOÁT BẤT THƯỜNG PHẢI GIẾT CÂY TRƯỚC KHI NHẢ KHOÁ.
             #
@@ -721,6 +782,8 @@ def cmd_run(args: argparse.Namespace) -> int:
                 returncode=returncode,
                 error="gate interrupted: %s" % type(exc).__name__,
             )
+            # SỰ THẬT VỀ LƯỢT DỌN đi vào bằng chứng, kể cả khi nó khó nghe.
+            payload["giet_tron_ven"] = not _GIET_KHONG_TRON_VEN
             with contextlib.suppress(OSError):
                 _atomic_json(evidence, payload)   # ghi bằng chứng TRƯỚC khi ném tiếp
             raise

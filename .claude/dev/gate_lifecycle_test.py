@@ -529,12 +529,14 @@ def case_descendant_spawned_during_shutdown_is_contained() -> None:
         evidence = root / "evidence.json"
         spawned = root / "spawned"
         doi = root / "doi-sinh-luc-dong"          # đứa đẻ TRONG lúc dọn
+        da_ban = root / "handler-da-chay"          # BẰNG CHỨNG handler thật sự chạy
         # Cháu: setsid, cài handler SIGTERM. Bị bắn thì đẻ thêm một tiến trình
         # setsid nữa rồi mới chết — đúng kịch bản reviewer mô tả.
         chau = (
             "import os, signal, subprocess, sys, time\n"
             "os.setsid()\n"
             "def de_them(_s, _f):\n"
+            f"    open({str(da_ban)!r}, 'w').write('ran')\n"
             "    subprocess.Popen([sys.executable, '-c',\n"
             "        \"import os,time;os.setsid();time.sleep(2.5);\"\n"
             f"        \"open({str(doi)!r},'w').write('song')\"],\n"
@@ -570,6 +572,15 @@ def case_descendant_spawned_during_shutdown_is_contained() -> None:
         proc.communicate(timeout=40)
 
         time.sleep(3.5)                            # qua han dua moi dinh ghi
+
+        # ĐÒI BẰNG CHỨNG DƯƠNG TRƯỚC KHI ĐỌC VẮNG MẶT (P2 cross-review PR "#141").
+        # Không có vế này thì ca xanh cả khi handler CHƯA TỪNG chạy — cháu chết vì
+        # `killpg` trước lúc kịp cài, và ta đọc `doi` vắng mặt thành "đã chặn được".
+        # Đúng bệnh "vắng mặt vì sạch" và "vắng mặt vì chưa chạy" nhìn như nhau; ca
+        # này sinh ra để chống một lỗi cùng họ nên càng không được mắc.
+        assert da_ban.is_file(), (
+            "handler SIGTERM chua tung chay — ca nay dang xanh RONG, khong do gi"
+        )
         assert not doi.exists(), "dua de TRONG luc don song sot sau khi nha khoa"
 
 

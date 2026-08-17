@@ -178,21 +178,32 @@ jobs:
       # có mặt thay vì đo khả năng".
       - name: tl selftest (co bang chung exact-identity)
         shell: bash
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           mkdir -p scripts/.tl_state/gate
-          # Cây checkout nông không có `origin/master` => merge-base không tính được.
-          # FAIL-CLOSE: `base_sha` sai làm bằng chứng vô dụng một cách IM LẶNG, nên
-          # thà dừng ở đây còn hơn sinh ra artefact không ai validate nổi.
-          git fetch --no-tags --depth=50 origin master
-          BASE_SHA="$(git merge-base FETCH_HEAD HEAD)"
+          # KHÔNG dùng `--depth`: checkout ở trên cố ý đặt `fetch-depth: 0` cho
+          # `doc-claims` L2 (`cat-file -e` trượt mọi SHA cũ trên clone nông). Một
+          # `--depth=50` ở đây có thể làm nông lại chính thứ bước kia cần, và tệ hơn
+          # là `merge-base` sẽ trượt khi nhánh rẽ xa hơn 50 commit (P2 review "#141").
+          # FAIL-CLOSE: `base_sha` sai làm bằng chứng vô dụng một cách IM LẶNG.
+          git fetch --no-tags origin master
+          # HEAD ĐÚNG LÀ HEAD CỦA PR, không phải `$GITHUB_SHA`. Trên `pull_request`,
+          # `$GITHUB_SHA` là commit MERGE TỔNG HỢP do GitHub dựng — dòng 73 của chính
+          # tệp này đã cảnh báo đúng điều đó, và tôi vẫn viết sai ở đây (P2 review
+          # "#141"). Evidence neo vào commit tổng hợp thì không ai validate lại được
+          # vì commit ấy không có trong lịch sử nhánh.
+          HEAD_SHA="${PR_HEAD_SHA:-$GITHUB_SHA}"
+          BASE_SHA="$(git merge-base FETCH_HEAD "$HEAD_SHA")"
+          echo "head_sha = $HEAD_SHA"
           echo "base_sha = $BASE_SHA"
           NEN="${RUNNER_OS}"
           python .claude/dev/gate_lifecycle.py run \
             --kind heavy --name tl-selftest --repo . \
             --evidence "scripts/.tl_state/gate/tl-selftest-${NEN}.json" \
             --output "scripts/.tl_state/gate/tl-selftest-${NEN}.out" \
-            --expected-head "$GITHUB_SHA" --base-sha "$BASE_SHA" --require-clean \
+            --expected-head "$HEAD_SHA" --base-sha "$BASE_SHA" --require-clean \
             --selected-test full-selftest \
             --wait-seconds 60 --timeout-seconds 2400 \
             --positive-regex '(?m)^.*\b([1-9][0-9]*)/\1\b[^\r\n]*\r?\n?\Z' \

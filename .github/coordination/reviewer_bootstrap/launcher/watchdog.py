@@ -482,6 +482,36 @@ def descendants_of(root_pid: int, table: Mapping[int, int] | None = None) -> lis
 # --------------------------------------------------------------------------- the fence
 
 
+class _RealGroupProbe:
+    """The live process table, behind the same interface the controls use.
+
+    Existing as an object rather than as three inline calls is what lets the group-identity logic be
+    exercised with a supplied table — so the control runs on a platform with no process groups
+    instead of being skipped there, which is the difference between a covered case and a declared one.
+    """
+
+    @staticmethod
+    def pids() -> list[int]:
+        return sorted(live_pids())
+
+    @staticmethod
+    def pgid(pid: int):
+        try:
+            return os.getpgid(pid)
+        except (OSError, AttributeError):
+            return None
+
+    @staticmethod
+    def session(pid: int):
+        try:
+            return os.getsid(pid)
+        except (OSError, AttributeError):
+            return None
+
+
+_real_group_probe = _RealGroupProbe()
+
+
 class ProcessFence:
     """Owns one child process tree and can prove it is gone."""
 
@@ -529,18 +559,64 @@ class ProcessFence:
             "captured_while_root_alive": True,
         }
 
-    def group_members(self) -> list[int]:
-        """Live pids whose process group is ours, read from the process table, not from the root."""
-        if IS_WINDOWS or self.pgid is None:
+    def group_members(self, probe=None) -> list[int]:
+        """Live pids whose process group is ours, read from the process table, not from the root.
+
+        ``probe`` exists so the identity logic can be exercised with a supplied table; it is the same
+        code path either way, which keeps the control executable on a platform that has no process
+        groups instead of skipping it.
+        """
+        if self.pgid is None:
             return []
+        if probe is None:
+            if IS_WINDOWS:
+                return []
+            probe = _real_group_probe
         members: list[int] = []
-        for pid in live_pids():
-            try:
-                if os.getpgid(pid) == self.pgid:
-                    members.append(pid)
-            except OSError:
-                continue
+        for pid in probe.pids():
+            if probe.pgid(pid) == self.pgid:
+                members.append(pid)
         return sorted(members)
+
+    def group_identity_is_intact(self, probe=None) -> dict[str, object]:
+        """Refuse an ambiguous or drifted group before signalling or counting it.
+
+        WP125-RV-010-R4.  Round 4 captured the session and never used it, and then signalled a bare
+        numeric pgid.  A pgid is a small integer the kernel reuses, so "the group with that number"
+        and "our group" are different claims — and killing the first while believing the second is
+        how a fence terminates something it never launched.  The recorded session is the
+        discriminator: our group's members belong to our session, and a recycled pgid's members do
+        not.
+        """
+        if self.pgid is None:
+            return {"applicable": True, "intact": False, "reason": "identity_never_captured"}
+        if probe is None:
+            if IS_WINDOWS:
+                return {"applicable": False, "intact": True, "reason": "windows_uses_job_object"}
+            probe = _real_group_probe
+
+        members = self.group_members(probe)
+        if not members:
+            return {"applicable": True, "intact": True, "reason": "group_empty", "members": []}
+
+        sessions = {probe.session(pid) for pid in members}
+        foreign = {value for value in sessions if value is not None and value != self.session}
+        if foreign:
+            return {
+                "applicable": True,
+                "intact": False,
+                "reason": "process_group_number_was_reused_by_another_session",
+                "members": members,
+                "recorded_session": self.session,
+                "observed_sessions": sorted(str(value) for value in sessions),
+            }
+        return {
+            "applicable": True,
+            "intact": True,
+            "reason": "session_matches_recorded_identity",
+            "members": members,
+            "recorded_session": self.session,
+        }
 
     def group_census(self) -> dict[str, object]:
         """Independent census of the POSIX process group.
@@ -563,6 +639,16 @@ class ProcessFence:
                 "members": None,
                 "reason": "process_group_identity_was_never_captured",
             }
+        identity = self.group_identity_is_intact()
+        if not identity["intact"]:
+            # An ambiguous group cannot be counted as ours, so it cannot be counted as empty either.
+            return {
+                "applicable": True,
+                "ok": False,
+                "members": identity.get("members"),
+                "pgid": self.pgid,
+                "reason": identity["reason"],
+            }
         members = self.group_members()
         return {
             "applicable": True,
@@ -570,13 +656,30 @@ class ProcessFence:
             "members": members,
             "empty": not members,
             "pgid": self.pgid,
-            "reason": "measured",
+            "session": self.session,
+            "reason": "measured_for_the_recorded_identity",
         }
 
-    def terminate_group(self) -> dict[str, object]:
-        """Kill the recorded process group, whatever the root is doing."""
-        if IS_WINDOWS or self.pgid is None:
+    def terminate_group(self, probe=None) -> dict[str, object]:
+        """Kill the recorded process group — after proving it is still the group we recorded.
+
+        A supplied ``probe`` drives the identity decision on any platform, so the refusal path is
+        reachable where there are no real process groups.  Only the actual signal is POSIX-only.
+        """
+        if self.pgid is None or (IS_WINDOWS and probe is None):
             return {"applicable": not IS_WINDOWS, "signalled": False}
+        identity = self.group_identity_is_intact(probe)
+        if not identity["intact"]:
+            # Never signal an ambiguous group. Declining to kill is recoverable; killing an unrelated
+            # process that inherited the number is not.
+            return {
+                "applicable": True,
+                "signalled": False,
+                "pgid": self.pgid,
+                "refused": identity["reason"],
+            }
+        if IS_WINDOWS:
+            return {"applicable": False, "signalled": False, "identity_checked": True}
         try:
             os.killpg(self.pgid, signal.SIGKILL)
             return {"applicable": True, "signalled": True, "pgid": self.pgid}
@@ -587,6 +690,7 @@ class ProcessFence:
                 "pgid": self.pgid,
                 "error": type(exc).__name__,
             }
+
 
     # -- containment ------------------------------------------------------
     def open(self) -> None:

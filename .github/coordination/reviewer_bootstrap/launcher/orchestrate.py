@@ -211,8 +211,18 @@ def authenticate_delegated_job(job: object, context: Mapping[str, object]) -> di
             "only the closed run_test operation may be dispatched on the delegated surface",
         )
 
-    # An eligible Linux runner is required before anything else. §7 makes this the whole point of the
-    # surface, and a Windows runner answering to a Linux-declared job is fabricated evidence.
+    # WP125-RV-008-R4.  An *eligible transport* to a Linux runner, declared by the Dispatcher in the
+    # sealed inputs — not merely "the local machine happens to be Linux".  A Windows controller with
+    # no configured route to Linux has no delegated surface at all, and the honest outcome is to
+    # pause as environment-unavailable.  Running the job locally and labelling the result Linux is
+    # the fabrication §7 forbids, and running it locally on a Linux box would still not be the
+    # Windows-controller-to-Linux route the contract describes.
+    transport = context.get("delegated_linux_transport")
+    if not transport:
+        raise reject(
+            "sandbox_unavailable",
+            "no eligible Linux transport is configured; the delegated surface is environment-unavailable",
+        )
     runner_os = platform.system()
     if runner_os != "Linux":
         raise reject(

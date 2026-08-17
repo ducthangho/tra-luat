@@ -144,37 +144,145 @@ def _root_error(message: str):
     return reject("delegation_scope", message)
 
 
-def safe_directory_args(*paths: object) -> tuple[str, ...]:
-    """Per-command ``safe.directory`` entries for exactly the paths this command will touch.
+def trust_paths(*paths: object) -> tuple[str, ...]:
+    """Every directory git must be allowed to open in order to serve these worktrees.
 
-    WP125-GATE-001-R3.  A linked checkout keeps its ``.git`` as a file pointing at a gitdir that git
-    treats as a separate ownership domain, and under a Unicode path the two are easy to get wrong
-    together.  The alternative fixes are both unacceptable here: ``git config --global
-    safe.directory`` mutates the user's configuration, and writing into the repository's own config
-    mutates the thing under review.  ``-c`` supplies the trust for one invocation and leaves nothing
-    behind — the trust boundary is exactly as wide as the command, and no wider.
+    WP125-GATE-001-R4.  Round 3 declared the worktree and its linked gitdir and stopped there, which
+    is enough for a direct ``rev-parse`` and *not* enough for a clone.  A linked worktree's gitdir
+    holds only that worktree's refs and HEAD; the object database lives in the **common** gitdir, and
+    a clone — including the ``upload-pack`` the ``file://`` transport starts inside the source — has
+    to open it.  So the direct check went green while the nested clone was refused, which is exactly
+    the split the round-4 evidence reports.
 
-    Both the worktree and its linked gitdir are declared, because the checkout is trusted only if git
-    can open both.
+    Measured on this host: the source worktree's gitdir is
+    ``D:/Quốc hội/tra-luat/.git/worktrees/<name>`` and its common dir is ``D:/Quốc hội/tra-luat/.git``
+    — both non-ASCII, and only the first was ever declared.
+
+    The ``commondir`` pointer is usually relative (``../..``), so it is resolved against the linked
+    gitdir rather than used as written; a relative path handed to ``safe.directory`` matches nothing.
     """
-    args: list[str] = []
+    found: list[str] = []
+
+    def add(value: object) -> None:
+        if value is None:
+            return
+        text = pathlib.Path(str(value)).as_posix()
+        if text and text not in found:
+            found.append(text)
+
     for raw in paths:
         if not raw:
             continue
-        path = pathlib.Path(str(raw))
-        args.extend(("-c", "safe.directory=%s" % path.as_posix()))
-        git_marker = path / ".git"
+        path = pathlib.Path(str(raw)).resolve()
+        add(path)
+        marker = path / ".git"
         try:
-            if git_marker.is_file():
-                pointer = git_marker.read_text(encoding="utf-8").strip()
-                if pointer.startswith("gitdir:"):
-                    linked = pathlib.Path(pointer.split(":", 1)[1].strip())
-                    args.extend(("-c", "safe.directory=%s" % linked.as_posix()))
-            elif git_marker.is_dir():
-                args.extend(("-c", "safe.directory=%s" % git_marker.as_posix()))
+            if marker.is_dir():
+                add(marker)
+                continue
+            if not marker.is_file():
+                continue
+            pointer = marker.read_text(encoding="utf-8").strip()
+            if not pointer.startswith("gitdir:"):
+                continue
+            linked_raw = pointer.split(":", 1)[1].strip()
+            linked = pathlib.Path(linked_raw)
+            if not linked.is_absolute():
+                linked = (path / linked).resolve()
+            add(linked)
+
+            # The common gitdir: where the objects actually are.
+            common_file = linked / "commondir"
+            if common_file.is_file():
+                common_raw = common_file.read_text(encoding="utf-8").strip()
+                common = pathlib.Path(common_raw)
+                if not common.is_absolute():
+                    common = (linked / common).resolve()
+                add(common)
+                # And the main worktree that owns that common dir, since git checks the enclosing
+                # directory when it resolves a repository through it.
+                if common.name == ".git":
+                    add(common.parent)
         except OSError:
             continue
-    return tuple(args)
+    return tuple(found)
+
+
+_AMBIENT_TRUST: dict[str, object] = {}
+
+
+def ambient_trust_env(*paths: object, base: Mapping[str, str] | None = None) -> dict[str, str]:
+    """Trust environment for direct git calls, backed by one per-process ephemeral config.
+
+    ``safe_directory_args`` used to live here and produced ``-c safe.directory=`` arguments.  Those
+    do work for the process they configure, but they cannot be handed to the RA-02 reader, which
+    takes no extra arguments and no environment — so one inheritable mechanism is used everywhere
+    rather than two that differ by call site.
+    """
+    import tempfile
+
+    entries = trust_paths(*paths)
+    directory = _AMBIENT_TRUST.get("dir")
+    if directory is None:
+        directory = tempfile.mkdtemp(prefix="wp125-trust-")
+        _AMBIENT_TRUST["dir"] = directory
+        _AMBIENT_TRUST["entries"] = []
+    known = list(_AMBIENT_TRUST["entries"])
+    for entry in entries:
+        if entry not in known:
+            known.append(entry)
+    _AMBIENT_TRUST["entries"] = known
+    config = pathlib.Path(str(directory)) / "ambient.gitconfig"
+    config.write_text(
+        "[safe]\n" + "".join("\tdirectory = %s\n" % entry for entry in known),
+        encoding="utf-8",
+        newline="\n",
+    )
+    return trust_env(config, base)
+
+
+def write_trust_config(directory: object, *paths: object) -> str:
+    """Write an ephemeral git *global* config granting trust for exactly these paths.
+
+    WP125-GATE-001-R4.  Measured, with the ownership check forced on via
+    ``GIT_TEST_ASSUME_DIFFERENT_OWNER``:
+
+    * ``-c safe.directory=…`` **does** configure the process it is given to — a direct
+      ``rev-parse`` succeeds with it.  That is exactly why round 3's direct verification was green.
+    * It does **not** reach the ``upload-pack`` git starts *inside the source repository* for a
+      ``file://`` clone, and neither does this ephemeral global config.  The nested clone fails there
+      with "Could not read from remote repository" — the split the round-4 evidence reports.
+
+    So the grant is not the defect; the transport is (see :func:`clone_source_argument`).  This file
+    exists because the grant should still be complete and inheritable for everything else, and
+    because ``GIT_CONFIG_GLOBAL`` lets us supply it without touching the user's real global config or
+    the repository's own.  The substitute lives in the run's scratch directory and dies with it.
+    """
+    target = pathlib.Path(str(directory)) / "wp125-trust.gitconfig"
+    entries = trust_paths(*paths)
+    body = "[safe]\n" + "".join("\tdirectory = %s\n" % entry for entry in entries)
+    target.write_text(body, encoding="utf-8", newline="\n")
+    return str(target)
+
+
+def trust_env(config_path: object, base: Mapping[str, str] | None = None) -> dict[str, str]:
+    """Environment that points git at the ephemeral global config, and only at that."""
+    env = dict(base if base is not None else os.environ)
+    env["GIT_CONFIG_GLOBAL"] = str(config_path)
+    return env
+
+
+def clone_source_argument(source: object) -> str:
+    """The plain local path, never a ``file://`` URL.
+
+    WP125-GATE-001-R4.  ``file://`` selects the transport machinery, which starts ``upload-pack``
+    *inside the source repository* — a separate process that performs its own ownership check and
+    does not inherit the caller's grant.  Measured against a git forced to run the check: the
+    ``file://`` clone fails in that child with "Could not read from remote repository" while a clone
+    of the same source by plain path succeeds.  The URL bought nothing here and cost the whole
+    nested boundary.
+    """
+    return str(pathlib.Path(str(source)))
 
 
 def verify_read_only_root(
@@ -227,15 +335,25 @@ def verify_read_only_root(
     # On this host that is cp1258, and a delegated root under a Unicode path makes git quote bytes it
     # cannot represent — which would surface as a decoding crash instead of a typed rejection, from
     # the one call whose whole job is to answer an identity question about that path.
-    trust = safe_directory_args(path)
-    head = (
-        git(path, *trust, "rev-parse", "HEAD", error=_root_error, binary=True).decode("utf-8").strip()
+    # The shared RA-02 reader does not take an environment, so the trust is installed into this
+    # process's own environment for the duration of the two reads. Nothing is written to any git
+    # configuration file that outlives the run.
+    previous = os.environ.get("GIT_CONFIG_GLOBAL")
+    os.environ.update(
+        {"GIT_CONFIG_GLOBAL": ambient_trust_env(path)["GIT_CONFIG_GLOBAL"]}
     )
-    tree = (
-        git(path, *trust, "rev-parse", "HEAD^{tree}", error=_root_error, binary=True)
-        .decode("utf-8")
-        .strip()
-    )
+    try:
+        head = git(path, "rev-parse", "HEAD", error=_root_error, binary=True).decode("utf-8").strip()
+        tree = (
+            git(path, "rev-parse", "HEAD^{tree}", error=_root_error, binary=True)
+            .decode("utf-8")
+            .strip()
+        )
+    finally:
+        if previous is None:
+            os.environ.pop("GIT_CONFIG_GLOBAL", None)
+        else:
+            os.environ["GIT_CONFIG_GLOBAL"] = previous
     if head != candidate_head:
         raise _root_error("the delegated root is at a different commit than the candidate")
     if tree != candidate_tree:

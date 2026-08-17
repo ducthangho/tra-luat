@@ -40,14 +40,19 @@ from launcher import environment as environment_module  # noqa: E402
 from launcher import inventory as inventory_module  # noqa: E402
 from launcher import parity as parity_module  # noqa: E402
 from launcher import registry as registry_module  # noqa: E402
+from launcher import sourcepin as sourcepin_module  # noqa: E402
 from launcher.argv import build_launch_plan, describe as describe_plan  # noqa: E402
 from launcher.delegation import (  # noqa: E402
     MARKER_NAME,
     audit_job_report,
     build_job,
     run_job,
-    safe_directory_args,
+    ambient_trust_env,
+    clone_source_argument,
+    trust_env,
+    trust_paths,
     validate_operation,
+    write_trust_config,
     verify_read_only_root,
 )
 from launcher.environment import (  # noqa: E402
@@ -80,12 +85,16 @@ REPOSITORY = "ducthangho/tra-luat"
 # authority — the g1 spec hash and the g1 branch — and that fixture identity flowed straight into
 # the retained production evidence, so the artifact set described a Packet generation that was not
 # the one under review. A fixture is not neutral when its values are what gets retained.
-MISSION_PLAN_HASH = "ac5d5180be3de124dce002041683c3d6926aa60b36d39c7cad02136fd0776b9a"
-PACKET_SPEC_HASH = "b8e3387d13cf60974a3e7a35350557605df52b282666a401b7b5b4100e42f3f3"
-INTEGRATION_HEAD = "60446be6467347e7242d5e03c001c19794e6e96d"
-INTEGRATION_TREE = "5d19b56a32d5fd127141ad0cd0824b8c976ba877"
-CANDIDATE_REF = "refs/heads/agent/wp125-g2-claude"
-PACKET_GENERATION = 2
+SOURCE_PIN = sourcepin_module.PIN
+MISSION_PLAN_HASH = SOURCE_PIN.mission_plan_hash
+PACKET_SPEC_HASH = SOURCE_PIN.packet_spec_hash
+# The candidate's own start commit is the generation-2 repair base, not the integration observation.
+REPAIR_BASE_HEAD = SOURCE_PIN.repair_base.head
+REPAIR_BASE_TREE = SOURCE_PIN.repair_base.tree
+INTEGRATION_HEAD = SOURCE_PIN.integration_observation.head
+INTEGRATION_TREE = SOURCE_PIN.integration_observation.tree
+CANDIDATE_REF = SOURCE_PIN.candidate_ref
+PACKET_GENERATION = SOURCE_PIN.packet_generation
 LEASE_STOP = "2099-01-01T00:00:00Z"
 WRITE_PREFIX = inventory_module.LAUNCHER_PREFIX
 
@@ -237,11 +246,13 @@ def fixture(**overrides: object) -> Iterator[dict[str, object]]:
             "authority": authority_document(),
             "expected_authority": expected_authority(),
             "lease": {
-                "lease_id": "wp125-r1-g2-a1-lease-3556468f-b8e3387d",
+                "lease_id": SOURCE_PIN.lease_id,
                 "effective_stop_utc": LEASE_STOP,
                 "generation": PACKET_GENERATION,
                 "candidate_ref": CANDIDATE_REF,
-                "candidate_start_head": INTEGRATION_HEAD,
+                # The candidate starts at the generation-2 repair base. The integration commit is an
+                # observation and is never the candidate's own start.
+                "candidate_start_head": REPAIR_BASE_HEAD,
             },
             "expected_candidate_ref": CANDIDATE_REF,
             "source_pin_path": str(pin_path),
@@ -326,22 +337,25 @@ def read_only_candidate_root() -> dict[str, object]:
     clone = unicode_dir / "candidate"
     # Bytes everywhere: these commands name a Unicode path, and the console code page cannot decode
     # it. See the note in `_build_detached_unicode_checkout`.
-    source_trust = safe_directory_args(CANDIDATE_ROOT)
+    # Trust through an ephemeral global config, and a plain-path source so no `upload-pack` child is
+    # spawned. See `delegation.write_trust_config` and `delegation.clone_source_argument`.
+    trust_config = write_trust_config(base, CANDIDATE_ROOT, clone)
+    source_env = trust_env(trust_config)
     result = subprocess.run(
-        ["git", *source_trust, "clone", "--quiet", "--depth", "1", "--no-hardlinks",
-         CANDIDATE_ROOT.as_uri(), str(clone)],
+        ["git", "clone", "--quiet", "--no-hardlinks",
+         clone_source_argument(CANDIDATE_ROOT), str(clone)],
         capture_output=True,
+        env=source_env,
     )
     ensure(
         result.returncode == 0,
         "the read-only root clone failed: %s" % result.stderr.decode("utf-8", "replace")[-200:],
     )
-    clone_trust = safe_directory_args(clone)
     head = subprocess.run(
-        ["git", "-C", str(clone), *clone_trust, "rev-parse", "HEAD"], capture_output=True
+        ["git", "-C", str(clone), "rev-parse", "HEAD"], capture_output=True, env=source_env
     ).stdout.decode("utf-8", "replace").strip()
     tree = subprocess.run(
-        ["git", "-C", str(clone), *clone_trust, "rev-parse", "HEAD^{tree}"], capture_output=True
+        ["git", "-C", str(clone), "rev-parse", "HEAD^{tree}"], capture_output=True, env=source_env
     ).stdout.decode("utf-8", "replace").strip()
     user = getpass.getuser()
     # Deny only the two rights that constitute "can create things here": WD (write data / add file)
@@ -366,6 +380,8 @@ def read_only_candidate_root() -> dict[str, object]:
             "base": str(base),
             "user": user,
             "unicode_path": any(ord(ch) > 127 for ch in str(clone)),
+            "trust_config": trust_config,
+            "trust_env": source_env,
         }
     )
     return _READ_ONLY_ROOT
@@ -382,7 +398,9 @@ def release_read_only_root() -> None:
     # Detached linked checkouts are registered in the clone's gitdir; prune them before the tree goes
     # away so nothing is left pointing at a path that no longer exists.
     subprocess.run(
-        ["git", "-C", clone, *safe_directory_args(clone), "worktree", "prune"], capture_output=True
+        ["git", "-C", clone, "worktree", "prune"],
+        capture_output=True,
+        env=ambient_trust_env(clone),
     )
     subprocess.run(
         ["icacls", clone, "/remove:d", str(_READ_ONLY_ROOT["user"])],
@@ -2243,24 +2261,14 @@ def _meaningful_payload(locator: str) -> dict[str, object]:
 
 
 def authority_input_payload() -> dict[str, object]:
-    """The generation-2 authority payload, in the exact nested shape the strict predicate reads.
+    """The generation-2 authority payload, straight from the one authoritative source pin.
 
-    Built from the same constants the fixture uses, so a drift in either direction is a red rather
-    than two independent stories that happen to agree.
+    WP125-RV-006-R4.  This used to assemble the payload from the fixture's own constants, and those
+    constants named the *integration* commit — so the retained evidence described the wrong commit
+    while every check agreed with it, because the checks read the same wrong copy.  There is one
+    structure now, and both production validation and retained evidence read it.
     """
-    return {
-        "authority": authority_document(),
-        "expected_authority": expected_authority(),
-        "lease": {
-            "lease_id": "wp125-r1-g2-a1-lease-3556468f-b8e3387d",
-            "effective_stop_utc": LEASE_STOP,
-            "generation": PACKET_GENERATION,
-            "candidate_ref": CANDIDATE_REF,
-            "candidate_start_head": INTEGRATION_HEAD,
-        },
-        "candidate_ref": CANDIDATE_REF,
-        "candidate_start_tree": INTEGRATION_TREE,
-    }
+    return dict(SOURCE_PIN.retained_identity())
 
 
 @case("WP125-RV-006-every-required-artifact-class-is-present")
@@ -2490,7 +2498,7 @@ def rv008_delegated_routing() -> dict[str, object]:
             )
             ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
             result = expect_rejection(
-                "delegation_scope",
+                "sandbox_unavailable",
                 lambda: launch_reviewer(
                     context,
                     ledger=ledger,
@@ -2801,7 +2809,9 @@ def release_detached_checkout() -> None:
 
     clone = str(_DETACHED["clone"])
     subprocess.run(
-        ["git", "-C", clone, *safe_directory_args(clone), "worktree", "prune"], capture_output=True
+        ["git", "-C", clone, "worktree", "prune"],
+        capture_output=True,
+        env=ambient_trust_env(clone),
     )
     shutil.rmtree(str(_DETACHED["base"]), ignore_errors=True)
     _DETACHED.clear()
@@ -2830,10 +2840,13 @@ def _build_detached_unicode_checkout() -> dict[str, object]:
     unicode_dir = base / "nguồn-liên-kết"
     unicode_dir.mkdir()
     clone = unicode_dir / "candidate"
+    detached_trust = write_trust_config(base, CANDIDATE_ROOT, clone)
+    detached_env = trust_env(detached_trust)
     cloned = subprocess.run(
-        ["git", *safe_directory_args(CANDIDATE_ROOT), "clone", "--quiet", "--depth", "1",
-         "--no-hardlinks", CANDIDATE_ROOT.as_uri(), str(clone)],
+        ["git", "clone", "--quiet", "--no-hardlinks",
+         clone_source_argument(CANDIDATE_ROOT), str(clone)],
         capture_output=True,
+        env=detached_env,
     )
     ensure(
         cloned.returncode == 0,
@@ -2848,9 +2861,9 @@ def _build_detached_unicode_checkout() -> dict[str, object]:
         # than a decoding fault in the harness. This is the exact class of breakage the gate exists
         # to find, so the harness must not contain it either.
         result = subprocess.run(
-            ["git", "-C", str(clone), *safe_directory_args(clone), "worktree", "add", "--detach",
-             str(detached), "HEAD"],
+            ["git", "-C", str(clone), "worktree", "add", "--detach", str(detached), "HEAD"],
             capture_output=True,
+            env=detached_env,
         )
         ensure(
             result.returncode == 0,
@@ -2981,15 +2994,19 @@ def rv003r3_environment_values() -> dict[str, object]:
         ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
 
         refused = {}
-        for label, mutation in (
-            ("path_repointed", {"PATH": "C:\\evil"}),
-            ("temp_moved", {"TEMP": "C:\\evil"}),
-            ("name_added", {"WP125_RUN_ID": "smuggled"}),
+        # Two different controls catch these, and both are named explicitly rather than accepting
+        # "some rejection". Replacing a value keeps the name count intact and is caught by the
+        # rebuild; adding a name changes the count and is caught earlier, by the receipt's own
+        # self-consistency. A case that accepted either would stop noticing if one control vanished.
+        for label, mutation, category in (
+            ("path_repointed", {"PATH": "C:\\evil"}, "child_environment"),
+            ("temp_moved", {"TEMP": "C:\\evil"}, "child_environment"),
+            ("name_added", {"WP125_RUN_ID": "smuggled"}, "preflight_incomplete"),
         ):
             swapped = dict(genuine.environment)
             swapped.update(mutation)
             refused[label] = expect_rejection(
-                "preflight_incomplete",
+                category,
                 lambda swapped=swapped, label=label: mint_claim(
                     _dataclasses.replace(genuine, environment=swapped),
                     ledger,
@@ -3004,30 +3021,45 @@ def rv003r3_environment_values() -> dict[str, object]:
 
 @case("WP125-RV-003-R3-mint-capability-is-not-module-callable")
 def rv003r3_mint_not_callable() -> dict[str, object]:
-    """The signing capability must not be reachable as candidate module state."""
+    """No signing capability exists anywhere in the candidate-importable package.
+
+    WP125-RV-003-R4.  Rounds 3 and 4 each moved the capability somewhere less obvious and each time
+    it stayed reachable — a closure bound to a module name, then an object sitting beside its own
+    capability token.  In a language where every attribute is reachable, and where the candidate
+    shares the process, that game cannot be won.  So the capability was removed: this walks every
+    module in the package and asserts that nothing which could mint a durable authorization exists.
+    """
+    import importlib
+
+    modules = (
+        "argv", "controller", "delegation", "environment", "errors", "inputs", "inventory",
+        "orchestrate", "parity", "preflight", "registry", "sourcepin", "watchdog",
+    )
+    # A signing capability needs a *secret*. Any module-level `bytes` is one, whatever it is called —
+    # this is the check that does not depend on guessing the name the next round would have used.
+    secrets_found = []
+    for name in modules:
+        module = importlib.import_module("launcher.%s" % name)
+        for attribute in dir(module):
+            if attribute.startswith("__"):
+                continue
+            value = getattr(module, attribute)
+            if isinstance(value, (bytes, bytearray)) and len(value) >= 16:
+                secrets_found.append("%s.%s" % (name, attribute))
+    ensure(
+        not secrets_found,
+        "a module-level secret usable for signing is reachable: %s" % secrets_found,
+    )
+
     from launcher import preflight as preflight_module
 
-    ensure(
-        not hasattr(preflight_module, "_mint_binding"),
-        "a module-level mint function is still importable and callable",
-    )
-    ensure(not hasattr(preflight_module, "_PROVENANCE"), "a candidate-visible table is still present")
-    ensure(not hasattr(preflight_module, "_SEAL"), "the retired sentinel is still present")
-
-    # Reaching the class is harmless: minting needs the capability token, and verification uses the
-    # module's own authority, so a signature from any other secret does not verify.
-    forged_authority = preflight_module._SigningAuthority(b"attacker-token")
-    blob = b"anything"
-    forged_signature = forged_authority.mint(b"attacker-token", blob)
-    ensure(
-        not preflight_module._verify_binding(blob, forged_signature),
-        "a signature minted by a foreign authority verified",
-    )
-    without_token = expect_rejection(
-        "preflight_incomplete",
-        lambda: preflight_module._AUTHORITY.mint(b"wrong-token", blob),
-    )
-    return {"foreign_signature_rejected": True, "mint_without_capability": without_token["category"]}
+    for retired in ("_SEAL", "_PROVENANCE", "_mint_binding", "_AUTHORITY", "_MINT_TOKEN",
+                    "_SigningAuthority", "_verify_binding"):
+        ensure(
+            not hasattr(preflight_module, retired),
+            "the retired capability %r is still present" % retired,
+        )
+    return {"modules_scanned": len(modules), "secrets_found": 0, "retired_names_absent": True}
 
 
 @case("WP125-RV-006-R3-one-strict-authority-predicate")
@@ -3081,12 +3113,12 @@ def rv008r3_windows_runner_refused() -> dict[str, object]:
             expected_os="Linux",
         )
         result = expect_rejection(
-            "delegation_scope",
+            "sandbox_unavailable",
             lambda: orchestrate_module.authenticate_delegated_job(job, context),
         )
         ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
         expect_rejection(
-            "delegation_scope",
+            "sandbox_unavailable",
             lambda: launch_reviewer(
                 context,
                 ledger=ledger,
@@ -3259,44 +3291,280 @@ def gate001r3_safe_directory() -> dict[str, object]:
     two easy fixes are both out of bounds: a global ``safe.directory`` edits the user's config, and a
     repository-level one edits the thing under review.  ``-c`` scopes the grant to one invocation.
     """
+    import subprocess as _subprocess
+    import tempfile as _tempfile
+
     from launcher import delegation as delegation_module
 
-    checkout = _build_detached_unicode_checkout()
-    detached = pathlib.Path(str(checkout["detached"]))
-    trust = delegation_module.safe_directory_args(detached)
-    ensure(trust, "no safe-directory arguments were produced for the linked checkout")
-    ensure(all(part == "-c" or part.startswith("safe.directory=") for part in trust),
-           "the trust arguments are not per-command -c declarations")
-    declared = [part.split("=", 1)[1] for part in trust if part.startswith("safe.directory=")]
-    ensure(len(declared) >= 2, "the worktree and its linked gitdir were not both declared")
+    # Force git to actually run the ownership check. Without this the control is vacuous on a
+    # machine where the runner owns every path — which is precisely why rounds 3 and 4 shipped a
+    # declaration git never reads and saw nothing but green.
+    hostile = dict(os.environ)
+    hostile["GIT_TEST_ASSUME_DIFFERENT_OWNER"] = "1"
+    baseline = _subprocess.run(
+        ["git", "-C", str(CANDIDATE_ROOT), "rev-parse", "HEAD"], capture_output=True, env=hostile
+    )
     ensure(
-        any(any(ord(ch) > 127 for ch in item) for item in declared),
+        baseline.returncode != 0,
+        "the ownership check could not be forced on; this control would prove nothing",
+    )
+
+    entries = trust_paths(CANDIDATE_ROOT)
+    ensure(len(entries) >= 3, "the trust set omits the linked gitdir or the common gitdir")
+    ensure(
+        any(any(ord(ch) > 127 for ch in item) for item in entries),
         "no declared trust path carries the Unicode gitdir",
     )
+    common = [item for item in entries if item.endswith("/.git")]
+    ensure(common, "the common gitdir — where the objects live — is not declared")
 
-    # The declaration works: a git command that needs it succeeds, and nothing was written anywhere.
-    import subprocess as _subprocess
+    scratch = pathlib.Path(_tempfile.mkdtemp(prefix="wp125-gate001-"))
+    try:
+        config = write_trust_config(scratch, CANDIDATE_ROOT)
+        granted = trust_env(config, base=hostile)
 
-    probe = _subprocess.run(
-        ["git", "-C", str(detached), *trust, "rev-parse", "HEAD"], capture_output=True
-    )
-    ensure(probe.returncode == 0, "git refused the linked Unicode gitdir even with the declaration")
-
-    for scope in ("--global", "--local"):
-        shown = _subprocess.run(
-            ["git", "config", scope, "--get-all", "safe.directory"], capture_output=True
+        # 1. `-c safe.directory` does configure the process it is given to. That is worth pinning:
+        #    it is why the round-3 direct verification went green, and why the green said nothing
+        #    about the nested clone.
+        switches = []
+        for entry in entries:
+            switches.extend(("-c", "safe.directory=%s" % entry))
+        by_switch = _subprocess.run(
+            ["git", *switches, "-C", str(CANDIDATE_ROOT), "rev-parse", "HEAD"],
+            capture_output=True,
+            env=hostile,
         )
-        values = shown.stdout.decode("utf-8", "replace")
         ensure(
-            str(detached) not in values,
-            "%s git configuration was mutated with a safe.directory entry" % scope,
+            by_switch.returncode == 0,
+            "-c safe.directory did not configure even the direct process; the note is stale",
         )
+
+        # 2. The ephemeral global config is honoured for the direct process.
+        direct = _subprocess.run(
+            ["git", "-C", str(CANDIDATE_ROOT), "rev-parse", "HEAD"],
+            capture_output=True,
+            env=granted,
+        )
+        ensure(direct.returncode == 0, "the ephemeral global trust did not reach the direct process")
+
+        # 3. The nested clone. `file://` starts upload-pack inside the source and fails; the plain
+        #    path clone — what the fixtures now use — succeeds with the same grant.
+        via_url = _subprocess.run(
+            ["git", "clone", "--quiet", "--no-hardlinks", CANDIDATE_ROOT.as_uri(),
+             str(scratch / "viaurl")],
+            capture_output=True,
+            env=granted,
+        )
+        ensure(
+            via_url.returncode != 0,
+            "the file:// transport unexpectedly succeeded; the transport note is stale",
+        )
+        via_path = _subprocess.run(
+            ["git", "clone", "--quiet", "--no-hardlinks",
+             delegation_module.clone_source_argument(CANDIDATE_ROOT), str(scratch / "viapath")],
+            capture_output=True,
+            env=granted,
+        )
+        ensure(
+            via_path.returncode == 0,
+            "the nested plain-path clone was refused: %s"
+            % via_path.stderr.decode("utf-8", "replace")[-300:],
+        )
+
+        # Nothing was written to any real configuration.
+        for scope in ("--global", "--local"):
+            shown = _subprocess.run(
+                ["git", "config", scope, "--get-all", "safe.directory"], capture_output=True
+            )
+            values = shown.stdout.decode("utf-8", "replace")
+            ensure(
+                str(CANDIDATE_ROOT) not in values,
+                "%s git configuration was mutated with a safe.directory entry" % scope,
+            )
+        return {
+            "trust_paths": len(entries),
+            "common_gitdir_declared": True,
+            "switch_form_configures_direct_process": True,
+            "file_url_transport_refused_despite_trust": True,
+            "plain_path_clone_succeeded": True,
+            "global_config_mutated": False,
+            "repository_config_mutated": False,
+        }
+    finally:
+        import shutil as _shutil
+
+        _shutil.rmtree(scratch, ignore_errors=True)
+
+
+@case("WP125-RV-008-R4-no-linux-transport-fails-closed")
+def rv008r4_no_transport() -> dict[str, object]:
+    """With no Dispatcher-declared Linux transport, the delegated surface is environment-unavailable.
+
+    This is the honest state of this Packet on this host and it is stated as a measurement rather
+    than worked around: there is no configured Windows-controller-to-Linux route, so the surface
+    pauses.  Fabricating one — running the closed job locally and labelling the result Linux — is
+    exactly what §7 forbids, and it is what a "runner OS == Linux" check alone would permit on a
+    Linux box while still not being the route the contract describes.
+    """
+    from launcher import orchestrate as orchestrate_module
+
+    with fixture(
+        surface={
+            "platform": sys.platform,
+            "windows_sandbox_available": False,
+            "delegation_eligible": True,
+        }
+    ) as context:
+        ensure(
+            not context.get("delegated_linux_transport"),
+            "the fixture declares a Linux transport; this control would prove nothing",
+        )
+        root = read_only_candidate_root()
+        job = build_job(
+            operation="run_test",
+            candidate_head=root["head"],
+            candidate_tree=root["tree"],
+            test_selection=("launcher_import_smoke",),
+            read_only_root=root["path"],
+            eligible=True,
+            candidate_root=str(CANDIDATE_ROOT),
+            expected_os="Linux",
+        )
+        result = expect_rejection(
+            "sandbox_unavailable",
+            lambda: orchestrate_module.authenticate_delegated_job(job, context),
+        )
+        ledger = Ledger(pathlib.Path(str(context["temp_root"])) / "ledger.json")
+        expect_rejection(
+            "sandbox_unavailable",
+            lambda: launch_reviewer(
+                context,
+                ledger=ledger,
+                reconcile_key="wp125-no-transport",
+                claim_payload={"role": "executor"},
+                timeout_seconds=10.0,
+                delegated_job=job,
+            ),
+        )
+        ensure(len(ledger) == 0, "a claim was minted with no delegated transport")
+        return {
+            "transport_configured": False,
+            "environment_unavailable": True,
+            "claim_objects": 0,
+            "children": 0,
+            "delegated_jobs": 0,
+            "category": result["category"],
+        }
+
+
+@case("WP125-RV-006-R4-one-source-pin-feeds-validation-and-evidence")
+def rv006r4_one_source_pin() -> dict[str, object]:
+    """Validation and retained evidence read the same structure, and it names the repair base.
+
+    Round 4 kept three copies of these values and the retained one drifted to the *integration*
+    commit — the observation, not the candidate's own start. Both now come from `sourcepin.PIN`, and
+    the two commits are asserted to be different so a future copy-paste cannot quietly merge them.
+    """
+    from launcher import controller as controller_module
+
+    pin = sourcepin_module.PIN
+    ensure(pin.repair_base.head != pin.integration_observation.head,
+           "the repair base and the integration observation are the same commit")
+    ensure(pin.repair_base.head == "3556468f25c31ff8a0fad651559cd20b67f4becf",
+           "the repair base head is not the durable generation-2 base")
+    ensure(pin.repair_base.tree == "e46a231ea0686bde717f9f681143cd38d2ddb67e",
+           "the repair base tree is not the durable generation-2 base tree")
+
+    # Production validation reads it.
+    with fixture() as context:
+        ensure(context["lease"]["candidate_start_head"] == pin.repair_base.head,
+               "the fixture start head is not the repair base")
+        receipt = run_preflight(context)
+        ensure(receipt.complete, "preflight refused the pinned identity")
+        drifted = dict(context["lease"])
+        drifted["candidate_start_head"] = pin.integration_observation.head
+        context["lease"] = drifted
+        refused = run_preflight(context)
+        ensure(refused.complete is False, "the integration commit was accepted as the candidate start")
+
+    # Retained evidence reads it, and the strict predicate accepts only that.
+    payload = authority_input_payload()
+    ensure(payload["candidate_start_head"] == pin.repair_base.head,
+           "the retained evidence does not name the repair base")
+    ensure(controller_module._authority_is_generation_2(payload) is True,
+           "the strict predicate rejected the payload built from the pin")
+    swapped = dict(payload)
+    swapped["candidate_start_tree"] = pin.integration_observation.tree
+    ensure(controller_module._authority_is_generation_2(swapped) is False,
+           "the strict predicate accepted the integration tree as the candidate start tree")
     return {
-        "declared_paths": len(declared),
-        "per_command": True,
-        "global_config_mutated": False,
-        "repository_config_mutated": False,
-        "head": probe.stdout.decode("utf-8", "replace").strip(),
+        "single_structure": "launcher.sourcepin.PIN",
+        "repair_base": pin.repair_base.head,
+        "integration_observation": pin.integration_observation.head,
+        "distinct": True,
+    }
+
+
+class _FakeGroupProbe:
+    """A supplied process table, so the group-identity logic runs on every platform."""
+
+    def __init__(self, table):
+        self._table = dict(table)
+
+    def pids(self):
+        return sorted(self._table)
+
+    def pgid(self, pid):
+        return self._table[pid][0]
+
+    def session(self, pid):
+        return self._table[pid][1]
+
+
+@case("WP125-RV-010-R4-reused-pgid-from-another-session-is-refused")
+def rv010r4_pgid_reuse() -> dict[str, object]:
+    """A recycled process-group number must not be signalled or counted as ours.
+
+    Round 4 captured the session and never consulted it, then signalled a bare numeric pgid.  The
+    number is small and the kernel reuses it, so "the group with that number" and "our group" are
+    different claims — and a fence that conflates them terminates something it never launched.  The
+    table is supplied here so the identity logic executes on Windows too, rather than being skipped
+    on the platform that has no process groups.
+    """
+    from launcher import watchdog as watchdog_module
+
+    fence = watchdog_module.ProcessFence("pgid-reuse")
+    fence.pgid = 4242
+    fence.session = 1001
+
+    ours = _FakeGroupProbe({4242: (4242, 1001), 4243: (4242, 1001)})
+    intact = fence.group_identity_is_intact(ours)
+    ensure(intact["intact"] is True, "our own group was rejected: %s" % intact["reason"])
+
+    # Same number, different session: the kernel handed the pgid to someone else.
+    reused = _FakeGroupProbe({4242: (4242, 2002), 9001: (4242, 2002)})
+    drifted = fence.group_identity_is_intact(reused)
+    ensure(drifted["intact"] is False, "a reused process-group number was accepted as ours")
+    ensure(
+        drifted["reason"] == "process_group_number_was_reused_by_another_session",
+        "the reuse was not named: %s" % drifted["reason"],
+    )
+
+    refused = fence.terminate_group(reused)
+    ensure(refused["signalled"] is False, "an unrelated reused group was signalled")
+    ensure(refused["refused"] == drifted["reason"], "the refusal did not carry the reason")
+
+    empty = fence.group_identity_is_intact(_FakeGroupProbe({}))
+    ensure(empty["intact"] is True, "an empty group was treated as drifted")
+
+    uncaptured = watchdog_module.ProcessFence("never-captured")
+    never = uncaptured.group_identity_is_intact(ours)
+    ensure(never["intact"] is False, "a fence with no captured identity claimed an intact group")
+    return {
+        "our_group_accepted": True,
+        "reused_number_refused": True,
+        "signal_withheld": True,
+        "reason": drifted["reason"],
     }
 
 

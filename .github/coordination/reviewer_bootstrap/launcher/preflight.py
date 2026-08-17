@@ -36,6 +36,7 @@ from .argv import build_launch_plan, describe as describe_plan
 from .environment import build_child_environment, describe as describe_environment
 from .errors import reject
 from .inputs import read_sealed_bytes, read_sealed_json
+from .sourcepin import PIN
 from .watchdog import parse_utc
 
 GIT_OID_LENGTH = 40
@@ -178,48 +179,27 @@ def _receipt_binding_blob(
     ).encode("utf-8")
 
 
-class _SigningAuthority:
-    """The mint/verify authority, deliberately not reachable as candidate module state.
-
-    WP125-RV-003-R3.  Round 3 put the secret in a closure but bound the two closures to
-    module-level names, so ``launcher.preflight._mint_binding`` was importable and callable: any
-    candidate code could mint an authorization for any blob it liked.  A closure hides the *value*
-    and leaves the *capability* in plain sight, and the capability is the part that matters.
-
-    The authority now lives in an instance held by this module's private registry keyed by a token
-    generated at import.  Nothing exports a mint function; ``mint`` is reachable only from inside
-    :func:`_run_steps`, which passes the token it captured at import time.  A caller who reaches the
-    class can still construct their *own* authority — and that is harmless, because verification uses
-    this one, and a signature from a different secret does not verify.
-    """
-
-    __slots__ = ("_secret", "_token")
-
-    def __init__(self, token: bytes):
-        self._secret = secrets.token_bytes(32)
-        self._token = token
-
-    def mint(self, token: bytes, blob: bytes) -> str:
-        if not hmac.compare_digest(token, self._token):
-            raise reject(
-                "preflight_incomplete", "an authorization was requested without the mint capability"
-            )
-        return hmac.new(self._secret, blob, hashlib.sha256).hexdigest()
-
-    def verify(self, blob: bytes, presented: object) -> bool:
-        if not isinstance(presented, str):
-            return False
-        return hmac.compare_digest(
-            hmac.new(self._secret, blob, hashlib.sha256).hexdigest(), presented
-        )
+# WP125-RV-003-R4.  There is no signing capability here any more, and that is the repair.
+#
+# Round 3 hid a secret in a closure and left the closure callable from module scope.  Round 4 moved
+# the secret into an object and put the object *and its capability token* side by side as module
+# attributes, so `preflight._AUTHORITY.mint(preflight._MINT_TOKEN, blob)` minted an authorization for
+# any bytes at all.  Each round moved the capability somewhere slightly less obvious, and in a
+# language where every attribute is reachable that is a losing game: candidate code shares the
+# process, so any capability the process holds, the candidate holds.
+#
+# So the capability is gone.  Authorization is not a token the receipt carries; it is the controller
+# re-deriving, at the moment the durable object is created, that the receipt's canonical bytes
+# describe a preflight that really passed against the pinned authority and the sealed inputs still on
+# disk.  Candidate code can produce observations — it cannot produce a claim, because there is
+# nothing to steal that would make an unsatisfying receipt satisfying.
 
 
-_MINT_TOKEN = secrets.token_bytes(32)
-_AUTHORITY = _SigningAuthority(_MINT_TOKEN)
-
-
-def _verify_binding(blob: bytes, presented: object) -> bool:
-    return _AUTHORITY.verify(blob, presented)
+def canonical_receipt_bytes(
+    steps: Sequence["StepResult"], plan: object, environment: Mapping[str, str], surface: str
+) -> bytes:
+    """The complete canonical serialization the controller re-computes at the commit point."""
+    return _receipt_binding_blob(steps, plan, environment, surface)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -641,6 +621,28 @@ def _bind_observations_to_pins(
         raise reject("authority_mismatch", "observed candidate_ref is not the pinned value")
     if observed.get("integration_head") != context["expected_integration_head"]:
         raise reject("authority_mismatch", "observed integration_head is not the pinned value")
+
+    # WP125-RV-006-R4: identity, not shape. Round 4 accepted the candidate start head and tree as
+    # merely 40-hex, and `"0" * 40` is 40-hex. They are now compared against the one authoritative
+    # source pin, along with repository equality, which was omitted entirely.
+    if observed.get("repository") != PIN.repository:
+        raise reject("authority_mismatch", "the observed repository is not the pinned repository")
+    if observed.get("candidate_start_head") != PIN.repair_base.head:
+        raise reject(
+            "authority_mismatch",
+            "the candidate start head is not the generation-2 repair base",
+        )
+    start_tree = observed.get("candidate_start_tree")
+    if start_tree is not None and start_tree != PIN.repair_base.tree:
+        raise reject(
+            "authority_mismatch",
+            "the candidate start tree is not the generation-2 repair base tree",
+        )
+    if observed.get("integration_head") == PIN.repair_base.head:
+        raise reject(
+            "authority_mismatch",
+            "the integration observation was adopted as the candidate start; they are not the same commit",
+        )
     if observed.get("effective_write_prefix") != WRITE_PREFIX:
         raise reject("write_set", "observed write prefix is not the sole permitted prefix")
     if observed.get("worktree_clean") is not True:
@@ -743,15 +745,9 @@ def _run_steps(
         StepResult(name="value_binding", index=len(STEP_NAMES) + 1, observations=binding)
     )
     steps_tuple = tuple(results)
-    # Only the trusted path is given an authorization, and it is keyed over the *whole* binding —
-    # observations, plan, environment and surface — so none of them can change afterwards.
-    authorization = (
-        _AUTHORITY.mint(
-            _MINT_TOKEN, _receipt_binding_blob(steps_tuple, plan, environment, surface)
-        )
-        if provenance == PROVENANCE_TRUSTED
-        else None
-    )
+    # The trusted path records that it *is* the trusted path. This is descriptive: `mint_claim`
+    # re-derives everything and never takes this on trust, so there is no capability here to steal.
+    authorization = PROVENANCE_TRUSTED if provenance == PROVENANCE_TRUSTED else None
     return PreflightReceipt(
         complete=True,
         steps=steps_tuple,
@@ -823,16 +819,66 @@ def mint_claim(
     if not isinstance(context, Mapping) or not context:
         raise reject("preflight_incomplete", "a claim was attempted without the pinned context")
 
-    # Keyed authorization over the complete binding as it stands *now*: observations, plan,
-    # environment and surface. A receipt whose plan or environment was swapped after preflight fails
-    # here, because the blob it is verified against is recomputed from what is actually present.
-    if not _verify_binding(
-        _receipt_binding_blob(receipt.steps, receipt.plan, receipt.environment, receipt.surface),
-        receipt.authorization,
+    # WP125-RV-003-R4.  Internal consistency of the canonical bytes, re-derived here rather than
+    # attested by a token. A receipt whose plan, environment or surface was swapped after preflight
+    # no longer agrees with the observations it carries, and the disagreement is what refuses it.
+    canonical = canonical_receipt_bytes(
+        receipt.steps, receipt.plan, receipt.environment, receipt.surface
+    )
+    observed: dict[str, object] = {}
+    for step in receipt.steps:
+        observed.update(step.observations)
+
+    if receipt.surface != observed.get("selected_surface"):
+        raise reject(
+            "preflight_incomplete", "the receipt surface disagrees with its own observations"
+        )
+    if len(receipt.environment) != observed.get("environment_name_count"):
+        raise reject(
+            "preflight_incomplete", "the receipt environment disagrees with its own observations"
+        )
+    if receipt.environment.get("CLAUDE_CODE_DISABLE_AUTO_MEMORY") != observed.get(
+        "environment_memory_value"
     ):
         raise reject(
-            "preflight_incomplete",
-            "the receipt does not carry a valid controller authorization for its current binding",
+            "preflight_incomplete", "the receipt environment value disagrees with its observations"
+        )
+    plan_argv = getattr(receipt.plan, "argv", None)
+    if plan_argv is None or len(plan_argv) != observed.get("argument_count"):
+        raise reject("preflight_incomplete", "the receipt plan disagrees with its own observations")
+    if getattr(receipt.plan, "executable", None) is None:
+        raise reject("preflight_incomplete", "the receipt plan carries no executable")
+
+    # WP125-RV-003-R4.  Re-derivation, not attestation. The controller rebuilds the environment and
+    # the launch plan from the sealed inputs it has just re-read, and requires them to equal what the
+    # receipt carries — every name and every *value*. A signature could only say "these bytes were
+    # blessed once"; this says "these bytes are what the inputs produce right now", which is the
+    # claim a commit point actually needs and which no stolen capability can fake.
+    rebuilt_environment = build_child_environment(
+        context["parent_environment"],
+        candidate_root=context["candidate_root"],
+        extra=context.get("extra_environment"),
+    )
+    if dict(rebuilt_environment) != dict(receipt.environment):
+        raise reject(
+            "child_environment",
+            "the receipt environment is not what the sealed inputs rebuild at commit time",
+        )
+    sealed = _seal_launch_inputs(context)
+    rebuilt_plan = build_launch_plan(
+        sealed["document"],
+        prompt_path=sealed["prompt_path"],
+        candidate_root=context["candidate_root"],
+    )
+    if rebuilt_plan.command() != receipt.plan.command():
+        raise reject(
+            "sealed_input",
+            "the receipt launch vector is not what the sealed inputs rebuild at commit time",
+        )
+    if rebuilt_plan.working_directory != receipt.plan.working_directory:
+        raise reject(
+            "sealed_input",
+            "the receipt working directory is not what the sealed inputs rebuild at commit time",
         )
 
     # WP125-RV-007-R2: byte-for-byte readback of the sealed inputs immediately before the claim.
@@ -857,6 +903,7 @@ def mint_claim(
 
     record = dict(payload)
     record["preflight_receipt_sha256"] = receipt.receipt_hash()
+    record["canonical_receipt_sha256"] = hashlib.sha256(canonical).hexdigest()
     record["revalidated_at_commit"] = True
     record["sealed_input_readback"] = readback["readback"]
     created, stored = ledger.record(reconcile_key, record)

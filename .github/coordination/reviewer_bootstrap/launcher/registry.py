@@ -149,6 +149,10 @@ CASES: Mapping[str, str] = {
     "WP125-RV-009-R3-negative-delegated-routing-mints-nothing": "preflight_before_claim_ordering",
     "WP125-RV-010-R3-process-group-identity-survives-a-dead-root": "process_tree_cleanup_and_stale_generation_rejection",
     "WP125-GATE-001-R3-nested-git-carries-explicit-safe-directory": "real_windows_delegated_parity",
+    # -- review round 5 ------------------------------------------------------
+    "WP125-RV-010-R4-reused-pgid-from-another-session-is-refused": "process_tree_cleanup_and_stale_generation_rejection",
+    "WP125-RV-006-R4-one-source-pin-feeds-validation-and-evidence": "launcher_source_inventory_and_write_set",
+    "WP125-RV-008-R4-no-linux-transport-fails-closed": "credential_free_delegated_run_test",
     "WP125-RV-006-stale-generation-1-authority-is-red": "launcher_source_inventory_and_write_set",
     "WP125-RV-006-empty-delegation-payload-is-red": "launcher_source_inventory_and_write_set",
     "WP125-RV-006-red-matrix-cannot-verify-green": "launcher_source_inventory_and_write_set",

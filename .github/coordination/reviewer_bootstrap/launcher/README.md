@@ -43,7 +43,8 @@ properties proves nothing there — every check in this Packet is an explicit br
 | `parity.py` | denominators compared before outcomes; an undeclared skip is red |
 | `inventory.py` | per-file SHA-256 reduced to one digest; static boundary scan for shell strings and bare `assert` |
 | `orchestrate.py` | the one trusted preflight → claim → contained launch path |
-| `registry.py` | the single registry of all 122 case IDs and their required check |
+| `sourcepin.py` | the one authoritative source-pin structure, read by validation and evidence alike |
+| `registry.py` | the single registry of all 125 case IDs and their required check |
 | `selftest.py` | the executable matrix; separate `scheduled`/`executed`/`passed`/`failed`/`skipped`/`not_run` |
 
 ## Three things this Packet paid for
@@ -166,6 +167,40 @@ delegated surface requires a real Linux runner, so on this Windows host the cont
 is a **refusal before any operation**. `WP125-RV-008-delegated-surface-dispatches-only-run-test`
 asserts exactly that here and asserts the dispatch on a Linux runner. Fabricating a Linux dispatch on
 Windows is what §7 forbids, so the case branches on the measured runner rather than skipping.
+
+## Review round 5 — what the Unicode gate was actually about
+
+The round-4 evidence reported 107/122 from a fresh detached Unicode linked-worktree while direct
+`rev-parse` was green. Reproducing that split, with `GIT_TEST_ASSUME_DIFFERENT_OWNER=1` to make the
+ownership check fire on a machine where the runner owns everything, produced three measurements that
+between them explain it — and two of them contradicted the obvious reading:
+
+1. **`-c safe.directory=` does work** for the process it configures. That is why round 3's direct
+   verification was green, and why the green said nothing about anything else. An earlier probe here
+   suggested git ignored it entirely; that probe only ever tested clones, and the case now pins the
+   true behaviour so the note cannot drift back.
+2. **The grant does not reach the transport child.** `file://` starts `upload-pack` *inside the
+   source repository*, and that process performs its own ownership check. Neither `-c` nor an
+   ephemeral `GIT_CONFIG_GLOBAL` rescues it: the clone dies with "Could not read from remote
+   repository."
+3. **The trust set was incomplete anyway.** A linked worktree's gitdir holds refs and HEAD; the
+   objects live in the **common** gitdir. Measured here: the source gitdir is
+   `D:/Quốc hội/tra-luat/.git/worktrees/<name>` and the common dir is `D:/Quốc hội/tra-luat/.git` —
+   both non-ASCII, and only the first was ever declared.
+
+So the repair is the transport, not the declaration: the fixtures clone by plain local path, which
+spawns no `upload-pack`, and the trust set now names the worktree, the linked gitdir, the common
+gitdir and the main worktree — resolving a relative `commondir` pointer rather than using it as
+written. Nothing is written to global or repository configuration; where an inheritable grant is
+still wanted, `GIT_CONFIG_GLOBAL` points at a scratch file that dies with the run.
+
+| cluster | what round 4 left open | closed by |
+|---|---|---|
+| `GATE-001-R4` | above | plain-path clone, complete trust set, and a control that forces the ownership check on so it cannot be vacuous |
+| `RV-003-R4` | the authorization object and its capability token sat side by side as module attributes — `_AUTHORITY.mint(_MINT_TOKEN, …)` minted anything | the signing capability is **gone**. The commit point rebuilds the environment and the launch plan from the sealed inputs and requires equality, so authorization is re-derivation rather than attestation and there is nothing left to steal |
+| `RV-006-R4` | start head and tree were accepted as merely OID-shaped, repository equality was omitted, and the retained evidence named the *integration* commit | one typed `sourcepin.PIN` feeds production validation and retained evidence, and the repair base and the integration observation are asserted to be different commits |
+| `RV-008-R4` | a local OS check is not a Windows-controller-to-Linux route | the surface requires a Dispatcher-declared transport and **fails closed as environment-unavailable** without one — which is this host's honest state |
+| `RV-010-R4` | the session was captured and never used; kill and census trusted a reusable numeric pgid | the group identity is pgid *plus* session, checked before any signal or census, with a supplied-table probe so the logic executes on Windows too |
 
 ## What this launcher does not claim
 

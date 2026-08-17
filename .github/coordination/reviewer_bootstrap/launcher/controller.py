@@ -200,10 +200,12 @@ def _contains_stale_marker(payload: object) -> bool:
     return False
 
 
-MISSION_ISSUE = 76
-MISSION_REVISION = 6
-PACKET_ATTEMPT = 1
-LEASE_ID = "wp125-r1-g2-a1-lease-3556468f-b8e3387d"
+from launcher.sourcepin import PIN as SOURCE_PIN  # noqa: E402
+
+MISSION_ISSUE = SOURCE_PIN.mission_issue
+MISSION_REVISION = SOURCE_PIN.mission_revision
+PACKET_ATTEMPT = SOURCE_PIN.packet_attempt
+LEASE_ID = SOURCE_PIN.lease_id
 
 
 def _authority_is_generation_2(payload: object) -> bool:
@@ -252,8 +254,14 @@ def _authority_is_generation_2(payload: object) -> bool:
         # Candidate ref, start head and start tree.
         payload.get("candidate_ref") == CANDIDATE_REF,
         lease.get("candidate_ref") == CANDIDATE_REF,
+        # WP125-RV-006-R4: the exact repair base, not merely something OID-shaped. `"0"*40` is
+        # OID-shaped, and so is the integration commit — which is what the retained evidence drifted
+        # to when these were only shape checks.
         _is_oid(lease.get("candidate_start_head")),
         _is_oid(payload.get("candidate_start_tree")),
+        lease.get("candidate_start_head") == SOURCE_PIN.repair_base.head,
+        payload.get("candidate_start_head") == SOURCE_PIN.repair_base.head,
+        payload.get("candidate_start_tree") == SOURCE_PIN.repair_base.tree,
         # Lease identity.
         lease.get("lease_id") == LEASE_ID,
         lease.get("generation") == GENERATION,
@@ -343,11 +351,18 @@ def _repo_identity() -> dict[str, str]:
     def fail(message: str) -> RuntimeError:
         return RuntimeError(message)
 
-    from launcher.delegation import safe_directory_args
+    from launcher.delegation import ambient_trust_env
 
-    trust = safe_directory_args(REPOSITORY_ROOT)
-    head = safe_git(REPOSITORY_ROOT, *trust, "rev-parse", "HEAD", error=fail).strip()
-    tree = safe_git(REPOSITORY_ROOT, *trust, "rev-parse", "HEAD^{tree}", error=fail).strip()
+    previous = os.environ.get("GIT_CONFIG_GLOBAL")
+    os.environ["GIT_CONFIG_GLOBAL"] = ambient_trust_env(REPOSITORY_ROOT)["GIT_CONFIG_GLOBAL"]
+    try:
+        head = safe_git(REPOSITORY_ROOT, "rev-parse", "HEAD", error=fail).strip()
+        tree = safe_git(REPOSITORY_ROOT, "rev-parse", "HEAD^{tree}", error=fail).strip()
+    finally:
+        if previous is None:
+            os.environ.pop("GIT_CONFIG_GLOBAL", None)
+        else:
+            os.environ["GIT_CONFIG_GLOBAL"] = previous
     return {"head": head, "tree": tree}
 
 

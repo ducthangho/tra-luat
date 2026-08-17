@@ -3884,6 +3884,19 @@ DOT_BIEN = [
       '    _ds = list(_RE_STATUS.finditer(_RE_ANSI.sub("", r.stdout or "")))\n'
       '    kq = _ds[-1] if _ds else None'),
      ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
+    # HAI DOT BIEN DOI NGHICH CUA REVIEWER LUOT 5 — ca hai song sot qua ban "allowlist
+    # tung loi goi", va chung lot CUNG mot lo: dac ta noi ve TUNG loi goi chu khong noi
+    # ve CA DAY. Mot cai THEM (boi so khong bi chan), mot cai BOT (khong ai doi loi goi
+    # phai xay ra). Giu ca hai de day mong doi khong am tham long ra mot dau nao.
+    ("github_api_gh_goi_THUA_mot_lan_y_het",
+     ('            phu.append("gh-cli=" + ("da xac thuc"',
+      '            subprocess.run(["gh", "auth", "status"], capture_output=True, text=True,\n'
+      '                           timeout=20)\n'
+      '            phu.append("gh-cli=" + ("da xac thuc"'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
+    ("github_api_gh_KHONG_BAO_GIO_duoc_goi",
+     ('    if shutil.which("gh"):', '    if False:'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
     ("github_api_gh_them_doi_so_la",
      ('subprocess.run(["gh", "auth", "status"], capture_output=True, text=True,',
       'subprocess.run(["gh", "auth", "status", "--bogus"], capture_output=True, text=True,'),
@@ -4144,19 +4157,29 @@ def t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh():
         return Rc(0)                                    # gh LUON "da xac thuc"
 
     def goi_api(td, mong_claude=1, vi_tri=""):
-        """Duong DUY NHAT de goi `_do_github_api` trong ca nay — dem luon so loi goi.
+        """Duong DUY NHAT de goi `_do_github_api` — so KHOP CA DAY loi goi, dung thu tu.
 
-        Do gia da chan sai LECH HINH DANG; con SO LAN goi thi phai dem, va dem o
-        NGOAI. Bat buoc di qua day (thay vi goi thang `m._do_github_api`) chinh la
-        cho sua that: chot cu de moi ca tu quyet dinh co kiem hay khong, nen ca nao
-        quen la mot lo. Nay khong ca nao quen duoc, vi khong con duong khac.
+        LUOT 5 khep not lo cuoi cua lop nay, va reviewer noi ro no KHAC bon luot truoc:
+        "Chot khong sai tu goc o vi tri dat trong do gia, nhung con thieu dieu kien ve
+        trace day du: so lan goi cho tung dac ta." Dung — ban truoc kiem THANH VIEN
+        (moi loi goi phai thuoc allowlist) roi dem RIENG `claude`, nen hai dot bien
+        DOI NGHICH cung song:
+          · them mot loi goi `gh auth status` Y HET  -> allowlist khong chan BOI SO
+          · `if shutil.which("gh")` -> `if False`    -> khong ai doi loi goi `gh` PHAI
+            xay ra; mot phep do bien mat ma cong van xanh
+        Hai chieu nguoc nhau lot cung mot lo: dac ta noi ve TUNG loi goi, khong noi ve
+        CA DAY. Nay so `nhat_ky` BANG DUNG day mong doi — thua, thieu, sai thu tu, sai
+        kwargs deu do. `_do_github_api` goi `gh` TRUOC roi moi do suc khoe, nen day la:
+            [gh]                      khi dung truoc buoc suc khoe (chua khai / luoc do sai)
+            [gh, claude mcp get <ten>] khi di het
+        Bo luon phep loc `"claude" in " ".join(...)` — no tung la mot lo rieng (mot lenh
+        co chu `claude` o duong dan hay doi so se lam sai so dem).
         """
         nhat_ky.clear()
         kq = m._do_github_api(td)
-        goi_claude = [g for g in nhat_ky if "claude" in " ".join(g[0])]
-        bang(len(goi_claude) == mong_claude,
-             f"[{vi_tri}] mong {mong_claude} loi goi `claude`, do duoc {len(goi_claude)}: "
-             f"{goi_claude!r}")
+        mong = [GOI_GH] + ([GOI_MONG_DOI()] if mong_claude else [])
+        bang(nhat_ky == mong,
+             f"[{vi_tri}] day loi goi phai BANG DUNG\n  mong : {mong!r}\n  do   : {nhat_ky!r}")
         return kq
 
     m.subprocess.run = gia_run

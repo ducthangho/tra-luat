@@ -122,3 +122,4 @@ lease_song_khac_luc_cap: Lease lượt 1..7 đã đóng. Không có lease review
 canh_bao_moi_truong_luc_cap: >-
   `codex` KHÔNG bị chặn. `CODEX_AUTH_JSON` cũ ~31h (refresh token xoay vòng) — nếu reviewer
   không khởi động được thì đọc `launcher.py doctor` trước khi nghi thứ khác.
+posted_comment_id: 5314781327   # workflow ghi, ĐỪNG sửa tay

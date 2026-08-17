@@ -1168,13 +1168,23 @@ def case_khong_do_duoc_khong_duoc_khai_thanh_da_sach() -> None:
             # một tiến trình mồ côi chạy tiếp sang các ca sau và sang cả bước CI
             # kế tiếp — tức bộ ca chống rò tiến trình lại tự rò (P2 cross-review
             # trên `a64ca0b`). Con ghi PID của nó ra tệp để ta còn với tới.
+            # GHI CA PID LAN KHOA DANH TINH, khong ghi mot minh PID.
+            #
+            # PID quay vong. "PID nay con ton tai" KHONG tra loi duoc cau ta can
+            # hoi la "co con DUNG tien trinh cu khong" — va ban `SIGKILL` vao mot
+            # PID da doi chu la giet nham nguoi ngoai. Day dung la bai hoc kho da
+            # ghi so cho `_khoa_pid`, va fixture cung phai theo (P2 cross-review
+            # tren `80c760e`). Cha cua no doc `/proc/<pid>/stat` ngay sau khi sinh
+            # nen lay duoc `starttime` — moc do khong tai su dung duoc.
             pid_tep = root / "pid-con-tach-roi"
             lenh = (
                 "import subprocess,sys;"
                 "p=subprocess.Popen([sys.executable,'-c',"
                 "'import os,time;os.setsid();time.sleep(20)'],"
                 "stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,close_fds=True);"
-                f"open({str(pid_tep)!r},'w').write(str(p.pid));"
+                "nd=open('/proc/%d/stat' % p.pid).read();"
+                "kh=nd[nd.rindex(')')+2:].split()[19];"
+                f"open({str(pid_tep)!r},'w').write('%d %s' % (p.pid, kh));"
                 "print('1/1 ok')"
             )
             moi_truong = dict(os.environ)
@@ -1196,10 +1206,17 @@ def case_khong_do_duoc_khong_duoc_khai_thanh_da_sach() -> None:
                                      env=moi_truong)
                 return ran, json.loads(evidence.read_text(encoding="utf-8"))
             finally:
-                # Gặt con tách rời dù ca đỏ hay xanh. `SIGKILL` vì nó cố ý sống dai.
+                # Gặt con tách rời dù ca đỏ hay xanh. `SIGKILL` vì nó cố ý sống dai
+                # — NHƯNG chỉ bắn khi khoá danh tính còn KHỚP. Không khớp nghĩa là
+                # PID đã đổi chủ: thà để sót còn hơn giết nhầm tiến trình vô can.
                 if pid_tep.is_file():
-                    with contextlib.suppress(OSError, ValueError):
-                        os.kill(int(pid_tep.read_text().strip()), signal.SIGKILL)
+                    with contextlib.suppress(OSError, ValueError, IndexError):
+                        thô = pid_tep.read_text().split()
+                        q, khoa = int(thô[0]), thô[1]
+                        nd = Path("/proc/%d/stat" % q).read_text()
+                        if nd[nd.rindex(")") + 2:].split()[19] == khoa:
+                            with contextlib.suppress(ProcessLookupError, PermissionError):
+                                os.kill(q, signal.SIGKILL)
 
     ran, ban_ghi = _chay(True)
     assert ran.returncode == 0, "lenh gate dat ma gate tra %r" % (ran.returncode,)

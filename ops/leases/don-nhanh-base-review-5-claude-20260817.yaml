@@ -156,3 +156,4 @@ lease_song_khac_luc_cap: 'Lease lượt 1-4 và lượt kiến trúc của #150 
 uy_quyen_lien_quan: >-
   `ops/uy-quyen-150-same-provider-20260817.yaml` đã HẾT HIỆU LỰC (neo `05568de`, head đã
   đổi — §9). Nếu lượt này `approve` thì chủ kho cần cấp uỷ quyền MỚI neo `12dd16e`.
+posted_comment_id: 5317942337   # workflow ghi, ĐỪNG sửa tay

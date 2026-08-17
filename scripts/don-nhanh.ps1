@@ -164,8 +164,25 @@ $doDuocPR = $false
 $lyDoKhongDo = ''
 if (Get-Command gh -ErrorAction SilentlyContinue) {
     try {
-        $js = (& gh pr list --state open --limit 200 --json headRefName,baseRefName |
-               ConvertFrom-Json)
+        # BAT MA THOAT NGAY SAU LOI GOI, TRUOC MOI PIPELINE/PARSE.
+        #
+        # Finding cross-review luot 1 (#150), da chay: `gh` THOAT KHAC 0 nhung van in JSON
+        # HOP LE thi `ConvertFrom-Json` thanh cong, `$doDuocPR` thanh $true, va fail-close bi
+        # MO TOANG — script tra rc=0 roi xoa that. Do duoc: gh in `[]` + exit 1 -> nhanh da
+        # merge bi xoa, trong khi phai la rc=13 va remote khong doi.
+        #
+        # Chinh ham `Chay-Git` phia tren da dan dung dieu nay ("dung `$LASTEXITCODE` sau mot
+        # pipeline") va loi goi nay vi pham no. Mot loi dan chi bao ve doan ma no duoc VIET
+        # RA, khong bao ve doan ke ben.
+        $tho = & gh pr list --state open --limit 200 --json headRefName,baseRefName 2>&1
+        $ghRc = $LASTEXITCODE
+        if ($ghRc -ne 0) { throw "gh thoat rc=$ghRc : $($tho -join ' ')" }
+        # RONG cung la KHONG DO DUOC. `gh` chay dung phai in `[]` khi khong co PR nao; rc=0
+        # kem dau ra rong la bat thuong, khong phai "khong co PR". Doctrine `rc=0 ma stdout
+        # RONG` cua kho: chi kiem rc la lot.
+        $vanBan = ($tho -join "`n").Trim()
+        if ([string]::IsNullOrWhiteSpace($vanBan)) { throw 'gh rc=0 nhung dau ra RONG' }
+        $js = ConvertFrom-Json $vanBan
         # `ConvertFrom-Json` tra $null khi mang rong, va mot phan tu don KHONG phai mang.
         # Ep [object[]] de hai truong hop bien do khong lam `.headRefName` no ra sai.
         $js = @($js)

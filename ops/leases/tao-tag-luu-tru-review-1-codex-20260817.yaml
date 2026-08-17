@@ -1,0 +1,124 @@
+# Lease REVIEWER — `ops-don-ref`: cho `tao-tag` tạo được `luu-tru/*`.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+#
+# VÌ SAO CÓ LƯỢT NÀY. Workflow `ops-don-ref.yml` TỰ CHẶN TRÌNH TỰ CHÍNH NÓ QUY ĐỊNH:
+# nhánh `xoa-nhanh` dặn "Tạo tag TRƯỚC (hành động tao-tag), rồi mới xoá", mà `tao-tag`
+# lại từ chối đúng không gian tên `luu-tru/`. Đo trên lượt chạy THẬT (thử khô):
+#   tao-tag luu-tru/doctor-github-mcp-verdict-6 -> "DỪNG: … Đặt tên khác." (rc=2)
+# Và đây là đường DUY NHẤT để phiên web tạo tag — đẩy `refs/tags/*` bị proxy chặn 403.
+#
+# CHỖ ĐÁNG SOI NHẤT: đây là bản vá MỞ một chốt an ninh. Mở đúng chỗ thì trình tự chạy
+# được; mở rộng một li thì thành lỗ. Nên mục kiểm 1 hỏi thẳng: mở `tao-tag` có kéo theo
+# mở `xoa-tag` hay `xoa-nhanh` không.
+#
+# VÀ MỘT CẢNH BÁO VỀ CÁCH VÁ SAI TRÔNG NHƯ ĐÚNG: chốt `xoa-nhanh` hỏi "còn tag nào giữ
+# commit ấy không" chứ KHÔNG hỏi tag tên gì — nên "đặt tên khác cho xong" VẪN QUA được
+# chốt ấy, workflow vẫn chạy, ca vẫn xanh, mà quy ước không gian tên (`CLAUDE.md`: ref
+# BỀN duy nhất giữ commit verdict) thì đã hỏng. Mục kiểm 3 giao cho reviewer bác nếu sai.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: tao-tag-luu-tru-review-1-codex-20260817
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+reviewer_note: người vá là `claude` ⇒ §8 bắt reviewer khác nhà cung cấp
+assurance_target: cross_approved
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: 525c824e29cdf035af5b4061ffd492be0a783f4a
+branch: ops/tao-tag-luu-tru
+base_sha: f9730f68d37d7c200772b7774f36b34ed307b897
+target_branch_neu_land: master
+target_pull_request: 147
+
+da_hoa_master_TRUOC_khi_review: >-
+  Nhánh rẽ từ `c7ad260`; #146 land làm master thành `f9730f6`. ĐÃ merge master vào nhánh
+  TRƯỚC khi cấp lease, cố ý: chuỗi review của #146 mất một `approve` đúng vì nền đổi giữa
+  chừng (lượt 6 duyệt trên `e38b0be`, rồi #143 land). Không lặp lại lỗi ấy ở đây.
+
+scope_files: 2
+scope_note: >-
+  Diff so với master `f9730f6`: ĐÚNG hai tệp — `.github/workflows/ops-don-ref.yml`
+  (+25/−4) và `ops/don_ref_chot_test.sh` (+15). Tệp thứ ba là finding.
+
+prompt_path: ops/prompts/tao-tag-luu-tru-review-1-codex-20260817.md
+prompt_sha256_required: 0f969a94f66d2a80a90282daaaf645fa47cfdf035a1de6389ceac0676f885208
+
+granted_by: ducthangho
+granted_on_instruction: direct, in-session, 2026-08-17 ("cấp lease review cho #147 rồi chạy đi")
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  KHAI THẲNG: phiên ghi lease này CHÍNH LÀ phiên đã vá. `granted_by` là `ducthangho`.
+  Bản vá này MỞ một chốt an ninh, nên chỗ nguy hiểm không phải "thiếu tính năng" mà là
+  "mở rộng hơn ý định" — và người tự vá là người dễ đọc bản vá của mình theo ý ĐỊNH thay
+  vì theo thứ mã THẬT SỰ cho phép. Vì vậy mục kiểm 1 và 2 đều là câu hỏi ĐO, không phải
+  câu hỏi ý kiến.
+
+leased_at_utc: '2026-08-17T11:00:00Z'
+lease_expires_at_utc: '2026-08-18T11:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 0
+attempts_note: Việc dev-side ngoài packet nên KHÔNG tiêu lượt.
+
+muc_kiem:
+- id: mo-tao-tag-co-mo-them-gi-ngoai-y-muon-khong
+  note: >-
+    CÂU QUAN TRỌNG NHẤT. `xoa-tag luu-tru/*` có còn CẤM TUYỆT ĐỐI không? `xoa-nhanh
+    luu-tru/*` có còn đòi "phải có tag giữ commit" không? Một bản vá cẩu thả nới cả ba.
+- id: danh-sach-cam-con-lai-co-bi-noi-theo-khong
+  note: >-
+    `ops/ claude/ codex/ agent/ mission/ dispatcher/` phải VẪN DỪNG cho `tao-tag`. Chốt hạ
+    hoa/thường có mở oan gì không (`luu-tru-gia/`, `xluu-tru/`)?
+- id: lap-luan-khong-dat-ten-khac-co-dung-vung-khong
+  note: >-
+    Nếu lập luận sai thì bản vá này KHÔNG CẦN THIẾT — nói thẳng. Chốt `xoa-nhanh` hỏi "còn
+    tag nào giữ commit" chứ không hỏi TÊN, nên tag tên khác vẫn qua; câu hỏi là quy ước
+    không gian tên có đáng giữ tới mức phải mở chốt không.
+- id: actionlint-chu-khong-phai-PyYAML
+  note: >-
+    Kho đã trả giá: workflow PyYAML parse được mà GitHub TỪ CHỐI, và SÁU lượt cross-review
+    đều kết luận "YAML ok" vì chỉ kiểm bằng PyYAML. Không có `actionlint` thì khai KHÔNG ĐO
+    ĐƯỢC, đừng thay bằng PyYAML.
+
+so_lieu_nguoi_va_bao:
+  bo_chot: 82/82 đạt (chốt + bước làm) — CÓ `actionlint` 1.7.7
+  nen_master: 74/74 đạt — f9730f6, đo cùng lúc cùng máy
+  delta: +8 ca, 0 đỏ
+  actionlint_nen: rc=0 trên toàn bộ workflow của master
+  canh_bao_ve_so: >-
+    82/82 là số CÓ công cụ. Thiếu `actionlint` thì bộ test fail-close và ra 81/82 kèm dòng
+    KHÔNG ĐO ĐƯỢC — đã đo đúng thế trước khi tải công cụ về. Đừng đọc 82/82 thành "đã kiểm"
+    nếu môi trường bạn thiếu công cụ.
+  dot_bien: >-
+    2/2 bị bắt, mỗi cái bởi ĐÚNG ca sinh ra để bắt nó — cấm lại `luu-tru/` ⇒ 80/82; nới thêm
+    `codex/` ⇒ 81/82. Neo bằng khối `case` ĐẦY ĐỦ vì mẫu ngắn khớp 2 chỗ.
+
+ngoai_pham_vi_da_biet:
+- id: gh-trong-workflows
+  note: Runner GitHub không có MCP; `GITHUB_TOKEN` ở đó là đường sạch.
+- id: workflow-cap-lai-quyen-sandbox-khong-cho
+  note: CÓ CHỦ Ý, đã khai ở đầu tệp kèm sáu lớp chốt.
+- id: lo-da-biet-cua-chot-proxy
+  note: >-
+    Proxy chặn theo HÌNH DẠNG chứ không theo HẬU QUẢ — `git push --force` vẫn được phép,
+    mà ép lùi cũng làm commit thành không tra được. Đã ghi trong `CLAUDE.md`.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T10:59:58Z'
+master_sha_at_grant: f9730f68d37d7c200772b7774f36b34ed307b897
+lease_song_khac_luc_cap: >-
+  Chuỗi lease `doctor-github-mcp-review-1..9` đã đóng (#146 đã land). Không có lease review
+  nào khác đang mở.
+canh_bao_moi_truong_luc_cap: >-
+  `codex` KHÔNG bị chặn. Môi trường reviewer có thể THIẾU `actionlint` — nếu vậy khai KHÔNG
+  ĐO ĐƯỢC cho mục đó thay vì hạ tiêu chuẩn.

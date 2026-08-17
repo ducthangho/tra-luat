@@ -103,6 +103,23 @@ function Dung-Gh-Gia {
             else { ConvertTo-Json -InputObject @($PR) -Compress -Depth 5 }
     $p = Join-Path $d 'gh'
     $dong = @("#!/bin/sh")
+    # GHI LAI ARGV. Finding P2 cua cross-review luot 5: `gh` gia MU VOI ARGV — no in cung
+    # mot JSON bat ke duoc hoi gi. No mo phong TRANG THAI (dung doctrine kho) nhung KHONG mo
+    # phong HOP DONG TRUY VAN, nen MOI dot bien vao dong goi `gh` cua script song tron. Do
+    # duoc, ca bon deu 21/21 xanh:
+    #   --limit $TranPR -> --limit 200   (gh that tra dung 200; `200 -ge 1000` khong bao gio
+    #                                     no => chot cham-tran thanh do trang tri)
+    #   bo han --limit                   (mac dinh cua `gh pr list` la 30)
+    #   --state open -> --state closed   (giu base cua PR DA DONG, bo roi PR dang mo)
+    #   --json headRefName,baseRefName -> --json headRefName
+    #        ^ TAI TAO DUNG LO GOC MA CA PR #150 SINH RA DE VA, bang MOT token.
+    #
+    # Phan biet voi no da khai `gh-phan-trang-that-chua-ai-do`: no ay noi ve CAU TRA LOI cua
+    # gh that (khong do duoc vi proxy). Cai nay noi ve CAU HOI cua script — do duoc ngay.
+    # Duong dan TUYET DOI, khong dung `dirname "$0"`: `gh` duoc tim qua PATH nen `$0` chi la
+    # `gh`, `dirname` cho `.`, va argv.txt roi vao cwd (worktree) thay vi thu muc gh gia —
+    # do duoc: chot doi argv bao "khong ghi duoc argv.txt" o lan chay dau.
+    $dong += ("printf '%s\n' " + '"$@"' + " > '" + (Join-Path $d 'argv.txt') + "'")
     # stderr NGUYEN VAN — `gh` that hay in canh bao cap nhat phien ban ra day.
     if ($PSBoundParameters.ContainsKey('CanhBaoStderr')) {
         $dong += "printf '%s\n' '$($CanhBaoStderr -replace "'", "'\''")' >&2"
@@ -397,8 +414,17 @@ ca 't18_gh_tra_ve_DUOI_TRAN_thi_VAN_chay' {
 }
 
 function Nhieu-PR {
-    <#  Sinh $So PR gia, base deu la `master` (khong lam ban danh sach GIU cua ca goi).  #>
+    <#  Sinh $So PR gia, base deu la `master` (khong lam ban danh sach GIU cua ca goi).
+
+        HAI BAY, cross-review luot 5 do duoc — ca hai NGOAI mien goi hien tai (10/999/1000)
+        nhung vao tay lan sau thi can:
+          `Nhieu-PR 0` -> `1..0` chay NGUOC (pr/1, pr/0) = 2 phan tu, khong phai 0.
+          `Nhieu-PR 1` -> PowerShell unwrap mang mot phan tu thanh hashtable TRAN, roi
+                          `.Count` dem KEY = 2. Dung ho bay mang-don ma chinh tep nay ghi o
+                          `t9`; hien duoc bien `[object[]]` cua `Dung-Gh-Gia` trung hoa.
+        Guard duoi day dong bay thu nhat tai nguon; bay thu hai da co `@()` bao o `return`.  #>
     param([int]$So)
+    if ($So -lt 1) { return @() }
     return @(1..$So | ForEach-Object { @{ headRefName = "pr/$_"; baseRefName = 'master' } })
 }
 
@@ -410,8 +436,17 @@ ca 't19_dem_VUOT_TRAN_thi_TU_CHOI_va_so_sanh_phai_la_SO_HOC' {
     #   M16  so sanh CHUOI  : `"10" -ge "9"` la $false => vuot tran ma van cho qua.
     #
     # Ca nay giet CA HAI trong MOT: 10 PR, tran 9. `10 -ge 9` dung ve SO HOC nhung sai ve
-    # CHUOI, va 10 khac 9 nen `-eq` cung khong bat. Chon 10/9 co chu dich — day la cap so
-    # nho nhat phan biet duoc so hoc voi chuoi.
+    # CHUOI, va 10 khac 9 nen `-eq` cung khong bat.
+    #
+    # LOI KHAI CU O DAY SAI, cross-review luot 5 bat duoc va DO phan chung: ban dau viet
+    # "10/9 la CAP SO nho nhat phan biet so hoc voi chuoi". Sai — do tren pwsh 7.4.6:
+    #   (10,9) so hoc True / chuoi False -> phan biet duoc
+    #   (10,2) so hoc True / chuoi False -> CUNG phan biet duoc
+    #   (9,2)  so hoc True / chuoi True  -> KHONG phan biet duoc
+    # Tuc moi cap (10,2)..(10,9) deu phan biet duoc, va thu NHO NHAT that su la DEM = 10
+    # (buoc HAI chu so so voi MOT); moi cap mot-chu-so deu mu. Chon tran 9 la de SAT BIEN,
+    # khong phai vi 9 co gi dac biet.
+    # Ghi lai vi kho nay DO loi khai trong chu thich — chinh nguoi va vua do loi khai t21.
     $k = Dung-Kho
     Them-Nhanh $k 'nen/tichhop' $true
     Them-Nhanh $k 'ops/rac' $true
@@ -437,6 +472,11 @@ ca 't20_MAC_DINH_phai_cho_qua_o_999_PR' {
     $con = Nhanh-Tren-Remote $k
     bang ($r.rc -eq 0) "rc=$($r.rc), doi 0 — mac dinh co the da bi ha xuong duoi 1000. Ra:`n$($r.ra)"
     bang (-not ($con -contains 'ops/rac')) "nhanh rac khong bi xoa. Con lai: $($con -join ', ')"
+    # DOI DUNG SO PR DOC DUOC. No khai bao cua luot 5: neu helper tra `@()` thi ca nay VAN
+    # XANH (0 < 1000 => di tiep, rac bi xoa, rc=0) — tuc "doc duoc THAT" dang la thuoc tinh
+    # cua CAP t20/t21 chu khong cua rieng ca nay, va t21 thanh diem hong DON cua ca phep
+    # ghim. Chot duoi day tra tinh doc lap cho t20.
+    bang ($r.ra -match 'cua\s+999\s+PR dang mo') "khong thay '999 PR dang mo' trong dau ra — danh sach co the doc RONG chu khong phai doc duoc 999. Ra:`n$($r.ra)"
 }
 
 ca 't21_MAC_DINH_phai_TU_CHOI_o_1000_PR' {
@@ -450,6 +490,20 @@ ca 't21_MAC_DINH_phai_TU_CHOI_o_1000_PR' {
     $sau = Nhanh-Tren-Remote $k
     bang ($r.rc -eq 13) "rc=$($r.rc), doi 13 — cham mac dinh 1000 ma van tin la danh sach DU. Ra:`n$($r.ra)"
     bang (($truoc -join ',') -eq ($sau -join ',')) "CO nhanh bi xoa du cham tran mac dinh"
+
+    # CHOT ARGV — F1 cua cross-review luot 5. Ca nay la ca DUY NHAT di du bo ba tham so voi
+    # GIA TRI MAC DINH, tuc "loi hoi cuoi cung truoc khi tin". Doi tung TOKEN chu khong so
+    # nguyen dong (khoang trang se giet phep so nguyen dong).
+    #
+    # CO Y: them mot co chinh dang (vd `--repo`) SE lam ca nay DO. Doi cau hoi gui `gh` la
+    # doi HOP DONG, phai co nguoi sua test va noi ly do — do khong phai do oan.
+    # `Dung-Gh-Gia` tra ve THU MUC (de dat len PATH), khong phai duong dan tep `gh`.
+    $argv = Join-Path $gh 'argv.txt'
+    bang (Test-Path $argv) "gh gia khong ghi duoc argv.txt — chot nay dang khong do gi"
+    $tok = @(Get-Content -Path $argv)
+    foreach ($c in @('--state', 'open', '--limit', '1000', '--json', 'headRefName,baseRefName')) {
+        bang ($tok -contains $c) "dong lenh hoi gh THIEU token '$c'. argv thuc: [$($tok -join ' ')]"
+    }
 }
 
 # ---------------------------------------------------------------- chạy

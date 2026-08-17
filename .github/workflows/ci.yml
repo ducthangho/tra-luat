@@ -168,15 +168,32 @@ jobs:
       # làm theo sẽ rơi xuống nhánh dự phòng mà không hiểu vì sao — cùng họ "cổng
       # không nói dối, nó VẮNG MẶT".
       # `--positive-regex` đòi N/N hai số BẰNG NHAU: rc=0 một mình không phải bằng chứng.
+      # ĐỊNH DANH PHẢI KHỚP ĐÚNG BỘ VALIDATOR ghi trong `gate-targeted.md` — tên tệp
+      # `tl-selftest-<OS>`, `--name tl-selftest`, `--selected-test full-selftest`, và
+      # `base_sha` là MERGE-BASE với master. Lượt trước tôi sinh ra artefact với bộ
+      # định danh KHÁC (`selftest`, `$GITHUB_SHA`), nên `validate` báo mismatch ngay
+      # cả với artefact thành công và đường tái dùng vẫn luôn rơi xuống `/gate`
+      # (P2 cross-review PR "#141"). Tôi đã kiểm artefact TỒN TẠI rồi tuyên bố xong,
+      # mà chưa kiểm nó DÙNG ĐƯỢC bởi đúng lệnh tài liệu chỉ — lại đúng lỗi "đo sự
+      # có mặt thay vì đo khả năng".
       - name: tl selftest (co bang chung exact-identity)
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p scripts/.tl_state/gate
+          # Cây checkout nông không có `origin/master` => merge-base không tính được.
+          # FAIL-CLOSE: `base_sha` sai làm bằng chứng vô dụng một cách IM LẶNG, nên
+          # thà dừng ở đây còn hơn sinh ra artefact không ai validate nổi.
+          git fetch --no-tags --depth=50 origin master
+          BASE_SHA="$(git merge-base FETCH_HEAD HEAD)"
+          echo "base_sha = $BASE_SHA"
+          NEN="${RUNNER_OS}"
           python .claude/dev/gate_lifecycle.py run \
-            --kind heavy --name selftest --repo . \
-            --evidence scripts/.tl_state/gate/selftest.json \
-            --output scripts/.tl_state/gate/selftest.out \
-            --expected-head "$GITHUB_SHA" --base-sha "$GITHUB_SHA" --require-clean \
-            --selected-test selftest \
+            --kind heavy --name tl-selftest --repo . \
+            --evidence "scripts/.tl_state/gate/tl-selftest-${NEN}.json" \
+            --output "scripts/.tl_state/gate/tl-selftest-${NEN}.out" \
+            --expected-head "$GITHUB_SHA" --base-sha "$BASE_SHA" --require-clean \
+            --selected-test full-selftest \
             --wait-seconds 60 --timeout-seconds 2400 \
             --positive-regex '(?m)^.*\b([1-9][0-9]*)/\1\b[^\r\n]*\r?\n?\Z' \
             -- python scripts/tl.py --selftest

@@ -380,63 +380,139 @@ def _terminate_process_tree(proc: subprocess.Popen[Any], windows_job: _WindowsJo
         #
         # Chụp cây TRƯỚC khi giết: nhóm chết xong, hậu duệ mồ côi được `init` nhận
         # nuôi và quan hệ cha-con biến mất — chụp sau là chụp một cái cây đã bị cắt.
-        hau_due = _hau_due_posix(proc.pid)
+        # LÀM LẶNG CÂY TRƯỚC, GIẾT CHA SAU — và đó là toàn bộ mấu chốt.
+        #
+        # Bản trước chụp cây MỘT LẦN rồi giết. Hai lỗ, cross-review bắt cả hai với
+        # bằng chứng tươi trên `47d10b0`:
+        #   · một hậu duệ có thể cài handler SIGTERM và ĐẺ THÊM tiến trình `setsid()`
+        #     ngay khi bị bắn — đứa mới sinh SAU ảnh chụp nên không ai với tới;
+        #   · PID trong ảnh có thể chết rồi được CẤP LẠI cho tiến trình vô can, và
+        #     `os.kill(SIGKILL)` sau đó giết nhầm người ngoài.
+        #
+        # Vì sao phải giữ cha sống trong lúc dọn: giết nhóm cha xong thì mọi cháu mồ
+        # côi được `init` nhận nuôi, quan hệ cha-con ĐỨT, và không còn cách nào truy
+        # chúng là hậu duệ nữa. Cha là cái MỎ NEO duy nhất để lần ra cây; bỏ neo
+        # trước rồi mới đi tìm là tự làm mù mình.
+        #
+        # Nên: lặp {chụp → bắn đứa MỚI} khi cha CÒN SỐNG, tới khi một vòng không
+        # thấy ai mới (cây đã lặng) — đứa đẻ trong lúc dọn vì thế vẫn bị bắt ở vòng
+        # sau. Rồi mới giết nhóm cha. Mọi tín hiệu đều KIỂM DANH TÍNH trước khi bắn.
+        # Gốc duyệt: là CHÍNH TA khi đã làm subreaper (đứa mồ côi rơi về đây), còn
+        # không thì là con gốc. Chọn sai gốc thì vòng lặp dưới mù đúng ca cần bắt.
+        goc = os.getpid() if _CO_SUBREAPER else proc.pid
+        da_gui: dict[int, str] = {}
+        for _vong in range(6):
+            anh = _cac_hau_due(goc)             # cha còn sống nên cây còn truy được
+            moi = {q: k for q, k in anh.items() if da_gui.get(q) != k}
+            if not moi:
+                break                            # cây đã lặng
+            for q, khoa in moi.items():
+                if _khoa_pid(q) == khoa:         # đúng tiến trình cũ, không phải PID tái dùng
+                    with contextlib.suppress(ProcessLookupError, PermissionError):
+                        os.kill(q, signal.SIGTERM)
+                    da_gui[q] = khoa
+            time.sleep(0.2)
+
         with contextlib.suppress(ProcessLookupError):
             os.killpg(proc.pid, signal.SIGTERM)
-        for q in hau_due:                       # kể cả đứa đã sang nhóm khác
-            with contextlib.suppress(ProcessLookupError, PermissionError):
-                os.kill(q, signal.SIGTERM)
         try:
             proc.wait(timeout=2)
         except subprocess.TimeoutExpired:
             with contextlib.suppress(ProcessLookupError):
                 os.killpg(proc.pid, signal.SIGKILL)
-        # "Đã gọi lệnh giết" ≠ "đã chết" — kiểm lại rồi mới nâng lên SIGKILL.
-        for q in hau_due:
-            if _con_song(q):
+        # "Đã gọi lệnh giết" ≠ "đã chết". Leo thang có KIỂM DANH TÍNH: so lại khoá
+        # thời điểm tạo, vì giữa SIGTERM và đây PID có thể đã đổi chủ.
+        for q, khoa in da_gui.items():
+            if _khoa_pid(q) == khoa:
                 with contextlib.suppress(ProcessLookupError, PermissionError):
                     os.kill(q, signal.SIGKILL)
 
 
-def _con_song(pid: int) -> bool:
-    try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
+# Đặt ở đường `run` TRƯỚC khi sinh con; xem `_dat_subreaper`.
+_CO_SUBREAPER = False
+
+
+def _dat_subreaper() -> bool:
+    """Nhận nuôi mọi hậu duệ mồ côi (Linux `PR_SET_CHILD_SUBREAPER`).
+
+    VÌ SAO CẦN, và vì sao lặp-phát-hiện KHÔNG đủ: một cháu có thể đẻ thêm rồi CHẾT
+    NGAY. Đứa mới lập tức mồ côi và được `init` nhận nuôi, nên quan hệ cha-con tới
+    cây của ta ĐỨT — duyệt bao nhiêu vòng cũng không thấy nó nữa. Ảnh chụp không
+    sai vì chụp thiếu; nó sai vì thứ cần tìm đã rời khỏi cây trước khi ta nhìn lại.
+    (Đo được: ca `case_descendant_spawned_during_shutdown_is_contained` ĐỎ với bản
+    chỉ lặp-phát-hiện.)
+
+    Đặt tiến trình NÀY làm subreaper thì mọi hậu duệ mồ côi trong cả cây rơi về
+    ĐÂY thay vì về `init`, nên chúng vẫn truy được — đó là lý do phải duyệt từ
+    `os.getpid()` chứ không từ `proc.pid`.
+
+    KHAI THẲNG PHẠM VI: đây là chốt của Linux (và FreeBSD). macOS/Windows KHÔNG có
+    nguyên thuỷ này, nên ở đó vẫn còn lỗ "đẻ trong lúc dọn" — nói ra thay vì đặt
+    cho cơ chế một cái tên to hơn thứ nó làm được.
+    """
+    if platform.system() != "Linux":
         return False
-    except PermissionError:
-        return True                             # có thật, chỉ là ta không với tới
-    return True
+    try:
+        import ctypes
+        libc = ctypes.CDLL("libc.so.6", use_errno=True)
+        return libc.prctl(36, 1, 0, 0, 0) == 0      # 36 = PR_SET_CHILD_SUBREAPER
+    except (OSError, AttributeError, ValueError):
+        return False
 
 
-def _hau_due_posix(pid: int) -> list[int]:
-    """Mọi hậu duệ của `pid`, KỂ CẢ đứa đã sang nhóm/session khác.
+def _khoa_pid(pid: int) -> str | None:
+    """Khoá danh tính của MỘT pid — thời điểm tạo. None = không xác định được.
 
-    Dựng quan hệ cha-con từ `ps` (có trên mọi POSIX, không chỉ Linux như `/proc`).
-    Không đo được thì trả rỗng — phía gọi vẫn `killpg`, nên ta không tệ hơn bản cũ.
+    PID quay vòng. "PID này còn tồn tại" KHÔNG trả lời được câu ta cần hỏi là "có
+    còn ĐÚNG tiến trình cũ không" — và giết nhầm một tiến trình vô can của cùng
+    người dùng là hỏng nặng hơn nhiều so với để sót một tiến trình.
     """
     try:
-        p = subprocess.run(["ps", "-A", "-o", "pid=,ppid="],
+        p = subprocess.run(["ps", "-o", "lstart=", "-p", str(pid)],
                            capture_output=True, text=True,
                            stdin=subprocess.DEVNULL, timeout=10)
     except (OSError, subprocess.SubprocessError):
-        return []
+        return None
+    v = (p.stdout or "").strip()
+    return v if (p.returncode == 0 and v) else None
+
+
+def _cac_hau_due(pid: int) -> dict[int, str]:
+    """Hậu duệ của `pid` -> khoá danh tính, KỂ CẢ đứa đã sang nhóm/session khác.
+
+    Một lần gọi `ps` lấy cả quan hệ cha-con LẪN thời điểm tạo: hai nguồn khác nhau
+    thì khoá đo ở đây và khoá đo lúc bắn có thể lệch định dạng và không bao giờ
+    khớp — chốt hoá ra LUÔN từ chối bắn, hỏng âm thầm theo chiều ngược lại.
+    Dùng `ps` chứ không `/proc` để chạy được cả trên macOS. Không đo được thì trả
+    rỗng — phía gọi vẫn `killpg`, tức không tệ hơn bản không có hàm này.
+    """
+    try:
+        p = subprocess.run(["ps", "-A", "-o", "pid=,ppid=,lstart="],
+                           capture_output=True, text=True,
+                           stdin=subprocess.DEVNULL, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return {}
     if p.returncode != 0:
-        return []
+        return {}
     con: dict[int, list[int]] = {}
+    khoa: dict[int, str] = {}
     for dong in (p.stdout or "").splitlines():
-        phan = dong.split()
-        if len(phan) < 2:
+        phan = dong.split(None, 2)
+        if len(phan) < 3:
             continue
         try:
-            con.setdefault(int(phan[1]), []).append(int(phan[0]))
+            q, cha = int(phan[0]), int(phan[1])
         except ValueError:
             continue
-    ra, hang, ta = [], list(con.get(pid, [])), os.getpid()
+        con.setdefault(cha, []).append(q)
+        khoa[q] = phan[2].strip()
+    ra: dict[int, str] = {}
+    hang, ta = list(con.get(pid, [])), os.getpid()
     while hang:
         q = hang.pop()
         if q in ra or q == ta:                  # tuyệt đối không tự giết mình
             continue
-        ra.append(q)
+        ra[q] = khoa.get(q, "")
         hang.extend(con.get(q, []))
     return ra
 
@@ -550,6 +626,10 @@ def cmd_run(args: argparse.Namespace) -> int:
             if not args.quiet:
                 print(json.dumps({"ok": False, "status": "infra_error", "error": str(exc)}))
             return returncode
+        # PHẢI đặt TRƯỚC khi sinh con: subreaper chỉ nhận nuôi những đứa mồ côi
+        # SAU khi cờ có hiệu lực. Đặt sau thì đúng ca cần bắt vẫn rơi về `init`.
+        global _CO_SUBREAPER
+        _CO_SUBREAPER = _dat_subreaper()
         try:
             proc = subprocess.Popen(
                 payload["command"],

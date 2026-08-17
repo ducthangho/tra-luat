@@ -506,6 +506,73 @@ def case_interrupt_kills_tree_before_releasing_lock() -> None:
         )
 
 
+def case_descendant_spawned_during_shutdown_is_contained() -> None:
+    """Cháu ĐẺ THÊM khi bị bắn cũng phải chết trước khi khoá được nhả.
+
+    Cross-review P1 `:388`, bằng chứng tươi trên `47d10b0`. Bản vá trước chụp cây
+    MỘT LẦN rồi giết; một hậu duệ tách rời có thể cài handler SIGTERM và sinh ra
+    tiến trình `setsid()` MỚI ngay lúc nhận tín hiệu — đứa ấy ra đời SAU ảnh chụp
+    và nằm ngoài nhóm của `proc.pid`, nên cả vòng lặp PID lẫn `killpg` đều trượt.
+
+    Đây là ca mà ảnh chụp một-lần KHÔNG THỂ bắt được, nên nó đo đúng thứ bản vá
+    mới thêm: vòng lặp {chụp → bắn đứa mới} chạy trong lúc cha CÒN SỐNG, tới khi
+    một vòng không thấy ai mới.
+    """
+    if os.name == "nt":
+        print("  BO QUA case_descendant_spawned_during_shutdown_is_contained: fixture POSIX")
+        return
+    with tempfile.TemporaryDirectory(prefix="gate_lifecycle_shut_") as raw:
+        root = Path(raw)
+        repo = root / "repo"
+        repo.mkdir()
+        head, _ = _repo(repo)
+        evidence = root / "evidence.json"
+        spawned = root / "spawned"
+        doi = root / "doi-sinh-luc-dong"          # đứa đẻ TRONG lúc dọn
+        # Cháu: setsid, cài handler SIGTERM. Bị bắn thì đẻ thêm một tiến trình
+        # setsid nữa rồi mới chết — đúng kịch bản reviewer mô tả.
+        chau = (
+            "import os, signal, subprocess, sys, time\n"
+            "os.setsid()\n"
+            "def de_them(_s, _f):\n"
+            "    subprocess.Popen([sys.executable, '-c',\n"
+            "        \"import os,time;os.setsid();time.sleep(2.5);\"\n"
+            f"        \"open({str(doi)!r},'w').write('song')\"],\n"
+            "        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, close_fds=True)\n"
+            "    raise SystemExit(0)\n"
+            "signal.signal(signal.SIGTERM, de_them)\n"
+            "time.sleep(30)\n"
+        )
+        cha = (
+            "import pathlib,subprocess,sys,time;"
+            f"subprocess.Popen([sys.executable,'-c',{chau!r}],"
+            "stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,close_fds=True);"
+            f"pathlib.Path({str(spawned)!r}).write_text('spawned');"
+            "time.sleep(30)"
+        )
+        argv = [
+            "run", "--kind", "heavy", "--name", "fixture", "--repo", str(repo),
+            "--evidence", str(evidence), "--output", str(evidence.with_suffix(".out")),
+            "--wait-seconds", "1.0", "--timeout-seconds", "30",
+            "--selected-test", "fixture",
+            "--expected-head", head, "--base-sha", head, "--require-clean",
+            "--", sys.executable, "-c", cha,
+        ]
+        proc = subprocess.Popen([sys.executable, str(RUNNER), *argv], cwd=repo,
+                                text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        for _ in range(100):
+            if spawned.is_file():
+                break
+            time.sleep(0.1)
+        assert spawned.is_file(), "chau chua kip sinh — fixture khong do duoc gi"
+        time.sleep(0.5)                            # cho chau kip cai handler
+        proc.send_signal(signal.SIGINT)
+        proc.communicate(timeout=40)
+
+        time.sleep(3.5)                            # qua han dua moi dinh ghi
+        assert not doi.exists(), "dua de TRONG luc don song sot sau khi nha khoa"
+
+
 def case_dirty_run_is_allowed_but_never_reusable() -> None:
     """Bỏ `--require-clean` thì gate CHẠY ĐƯỢC trên cây bẩn, nhưng chứng KHÔNG tái dùng.
 
@@ -680,6 +747,7 @@ CASES = [
     case_timeout_is_not_rewritten_green,
     case_timeout_kills_descendant_process,
     case_interrupt_kills_tree_before_releasing_lock,
+    case_descendant_spawned_during_shutdown_is_contained,
     case_dirty_run_is_allowed_but_never_reusable,
     case_validate_reuse_is_fail_closed,
 ]

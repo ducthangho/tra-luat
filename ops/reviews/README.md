@@ -106,6 +106,33 @@ dung vẫn tải về được, đúng byte.
 
 **Xoá tag = biến `published_*` thành SHA không tra được.** Đó giờ là ref bền duy nhất giữ chúng.
 
+### Hai tag của 17-08 — và chỗ trang này từng nói một điều không còn đúng
+
+| commit | tag giữ nó | verdict |
+|---|---|---|
+| `de86c247` | `luu-tru/doctor-github-mcp-verdict-9` | `doctor-github-mcp-review-9` |
+| `9d3e3e9e` | `luu-tru/tao-tag-luu-tru-verdict-1` | `tao-tag-luu-tru-review-1` |
+
+Cùng phép đo với sáu tag `wp55-r4` ở trên — `git init` kho **trống**, fetch **đúng một** ref
+`refs/tags/…`, băm lại tệp verdict trong kho ấy: **2/2 khớp cả `verdict_sha256` lẫn
+`verdict_bytes`** (`0923678b…` 1156 byte · `be342cc4…` 2841 byte). Một kho không có gì
+ngoài cái tag vẫn dựng lại được verdict đúng từng byte.
+
+**Chỗ đáng ghi không phải hai cái tag, mà là vì sao suốt một thời gian không tạo được
+cái nào.** Chốt `tao-tag` của `ops-don-ref.yml` cấm đúng không gian tên `luu-tru/`, trong
+khi chốt `xoa-nhanh` của **cùng tệp ấy** dặn nguyên văn *"Tạo tag TRƯỚC (hành động
+tao-tag), rồi mới xoá"*. Không lượt chạy nào thoả được cả hai vế — workflow tự chặn trình
+tự do chính nó quy định, và câu "chưa có tag" trong ba biên nhận không phải vì ai quên.
+PR #147 gỡ đúng chỗ đó; hai tag trên là hai lượt `tao-tag` **đầu tiên** chạy được trong
+`luu-tru/`. Một trong hai neo chính verdict đã duyệt bản vá ấy.
+
+**Biên nhận `review-6` KHÔNG có tag riêng, và điều đó không tương đương.** Commit
+`4920113a` bền nhờ **dòng dõi master** (đã đo `git merge-base --is-ancestor` → rc=0), chứ
+không nhờ mỏ neo tag. Hai thứ đó hỏng theo hai cách khác nhau: dòng dõi mất nếu master bị
+ép lùi — mà proxy egress chặn *xoá* ref lại **vẫn cho** `git push --force`, đã ghi trong
+`CLAUDE.md` — còn tag thì `xoa-tag` dưới `luu-tru/` cấm tuyệt đối. `truy_xuat_tag` của
+biên nhận ấy để `null`, không để `false`.
+
 Riêng `wp55-r4-review-1` có **hai** mốc, tách thành hai khoá: `published_first` (`b4e5c5f9`,
 commit **thêm** tệp, băm `7dd8e203…`) và `published_ban_hien_hanh` (`872679c3`, commit **sửa**
 tệp khi reviewer tự rút một finding, băm `fe002e5b…` — bản trùng byte với master).

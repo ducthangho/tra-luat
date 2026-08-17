@@ -53,6 +53,28 @@ _PERMISSION_SPELLINGS = frozenset(
     }
 )
 
+# Every BARE value that a permission-mode option would accept.  Rejecting only the option token
+# was half a control: a variable slot holding `auto` still lands next to `--permission-mode` if any
+# consumer ever reorders or re-parses the vector, and `dontAsk` was the only value the previous
+# rule caught. Folded, so case is not a way through.
+PERMISSION_MODE_VALUES = frozenset(
+    {
+        "dontask",
+        "default",
+        "acceptedits",
+        "bypasspermissions",
+        "plan",
+        "auto",
+        "ask",
+        "always",
+        "never",
+        "allow",
+        "deny",
+        "yes",
+        "no",
+    }
+)
+
 _CONTROL_CHARACTERS = re.compile(r"[\x00-\x1f\x7f]")
 
 
@@ -114,10 +136,14 @@ def audit_argument_vector(vector: object) -> dict[str, object]:
 
     for index in VARIABLE_SLOTS:
         element = vector[index]
+        folded = _fold(element)
+        if folded in PERMISSION_MODE_VALUES or folded in _PERMISSION_SPELLINGS:
+            # Checked BEFORE the dash rule so that `-y` in a variable slot reports as a permission
+            # injection rather than as a generic option: the specific category is the one that
+            # tells a reader which control fired.
+            raise reject("argument_permission_injection", "argument %d injects a permission value" % index)
         if element.startswith("-"):
             raise reject("argument_option_smuggling", "argument %d smuggles an option" % index)
-        if _fold(element) == _fold(PERMISSION_MODE):
-            raise reject("argument_permission_injection", "argument %d injects a permission value" % index)
 
     return {
         "length": len(vector),

@@ -28,16 +28,43 @@ SHA256_HEX = re.compile(r"[0-9a-f]{64}\Z")
 
 @dataclass(frozen=True)
 class SealedInput:
-    """One controller-selected file, bound to the bytes that were actually read."""
+    """One controller-selected file, bound to the bytes that were actually read.
+
+    `content` is the verified byte snapshot, retained on purpose.  Handing RA-04B a pathname and a
+    digest would hand it a promise about a file that any later write can break: between this
+    module's last look and the consumer's first read there is a window, and a window is all a
+    replacement needs.  Carrying the bytes forward removes the window instead of narrowing it, and
+    `identity` carries the (device, inode, size) triple so a consumer that MUST re-open the file
+    can still tell whether it is looking at the same object.
+    """
 
     label: str
     path: str
     sha256: str
     size: int
     max_bytes: int
+    content: bytes
+    identity: dict[str, int]
 
     def as_evidence(self) -> dict[str, object]:
-        return {"label": self.label, "path": self.path, "sha256": self.sha256, "size": self.size}
+        """Identity and digest only; the retained bytes are never serialised into evidence."""
+
+        return {
+            "label": self.label,
+            "path": self.path,
+            "sha256": self.sha256,
+            "size": self.size,
+            "identity": dict(self.identity),
+        }
+
+
+def identity_of(info) -> dict[str, int]:
+    return {
+        "device": int(info.st_dev),
+        "inode": int(info.st_ino),
+        "size": int(info.st_size),
+        "links": int(info.st_nlink),
+    }
 
 
 def digest(raw: bytes) -> str:
@@ -95,23 +122,33 @@ def load_sealed_input(
     actual = digest(raw)
     if actual != sha256:
         raise reject("sealed_input_digest", "%s does not match its controller digest" % label)
+    info = inspect_sealed_file(target, label, max_bytes=max_bytes)
     return SealedInput(
         label=label,
         path=str(target),
         sha256=actual,
         size=len(raw),
         max_bytes=max_bytes,
+        content=bytes(raw),
+        identity=identity_of(info),
     )
 
 
-def reverify(sealed: SealedInput) -> None:
-    """Read the file again and demand the same bytes.
+def reverify(sealed: SealedInput) -> dict[str, object]:
+    """Read the file again and demand the same bytes AND the same file.
 
-    Validation that happens once describes the filesystem at one instant.  The controller input
-    is re-read after the whole envelope has been assembled so that a path or content replacement
-    performed during assembly cannot ride out on an envelope that was already approved.
+    Validation that happens once describes the filesystem at one instant.  Re-reading after the
+    envelope is otherwise complete means a path or content replacement performed during assembly
+    cannot ride out on an envelope that was already approved — and comparing the retained
+    (device, inode) pair means a same-length, same-digest file swapped in at a new inode is still
+    a different file, which a digest alone would happily accept.
     """
 
-    raw = read_sealed_bytes(pathlib.Path(sealed.path), sealed.label, max_bytes=sealed.max_bytes)
-    if len(raw) != sealed.size or digest(raw) != sealed.sha256:
+    target = pathlib.Path(sealed.path)
+    raw = read_sealed_bytes(target, sealed.label, max_bytes=sealed.max_bytes)
+    if len(raw) != sealed.size or digest(raw) != sealed.sha256 or raw != sealed.content:
         raise reject("sealed_input_replaced", "%s was replaced after validation" % sealed.label)
+    current = identity_of(inspect_sealed_file(target, sealed.label, max_bytes=sealed.max_bytes))
+    if current != sealed.identity:
+        raise reject("sealed_input_replaced", "%s no longer has its verified file identity" % sealed.label)
+    return current

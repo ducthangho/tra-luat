@@ -78,6 +78,7 @@ ALLOWED_IMPORT_ROOTS = frozenset(
         "types",
         "typing",
         "unittest",
+        "weakref",
     }
 )
 
@@ -207,6 +208,38 @@ def _finding(filename: str, category: str, detail: str, lineno: int) -> dict[str
     return {"file": filename, "category": category, "detail": detail, "line": lineno}
 
 
+def canonical_chain(node, modules, funcs) -> str | None:
+    """Resolve an attribute / subscript / call chain down to one canonical dotted name.
+
+    RA-01's `_dotted` stops at the first `Call` or `Subscript` and returns None, which is why
+    `pathlib.Path(1).write_text(2)` and `environ["GH_TOKEN"]` both read as "nothing to see".  This
+    walker keeps descending through those nodes and then rewrites the head through the SAME alias
+    tables RA-01 built, so `from os import environ`, `import os as x` and `from subprocess import
+    run as r` all land on their real names.
+
+    It is local rather than pushed into `core/scanner.py` because that module is fenced RA-01
+    surface for this Packet; `selftest.py::WP149-POS-018` still pins the shared tables so the two
+    cannot drift apart silently.
+    """
+
+    parts: list[str] = []
+    current = node
+    while True:
+        if isinstance(current, ast.Attribute):
+            parts.append(current.attr)
+            current = current.value
+        elif isinstance(current, ast.Call):
+            current = current.func
+        elif isinstance(current, ast.Subscript):
+            current = current.value
+        elif isinstance(current, ast.Name):
+            head = current.id
+            parts.append(funcs.get(head) or modules.get(head, head))
+            return ".".join(reversed(parts))
+        else:
+            return None
+
+
 def _classify_import(full: str, extra: str) -> tuple[str, str] | None:
     """Return (category, detail) when the imported name is refused, else None."""
 
@@ -275,7 +308,9 @@ def scan_source(source: str, filename: str, *, allow_filesystem_mutation: bool =
                 if verdict is not None:
                     findings.append(_finding(filename, verdict[0], verdict[1], node.lineno))
         elif isinstance(node, ast.Call):
-            called = _resolve_call(node.func, modules, funcs) or ""
+            called = canonical_chain(node.func, modules, funcs) or _resolve_call(
+                node.func, modules, funcs
+            ) or ""
             basename = called.split(".")[-1]
             root = called.split(".")[0]
             if called in _OS_PROCESS_CALLS or root == "subprocess":
@@ -299,9 +334,20 @@ def scan_source(source: str, filename: str, *, allow_filesystem_mutation: bool =
             ):
                 findings.append(_finding(filename, "filesystem_mutation", called, node.lineno))
         elif isinstance(node, ast.Attribute):
-            dotted = _dotted(node) or ""
+            dotted = canonical_chain(node, modules, funcs) or _dotted(node) or ""
             if dotted in _AMBIENT_ENVIRONMENT:
                 findings.append(_finding(filename, "ambient_environment_read", dotted, node.lineno))
+        elif isinstance(node, ast.Subscript):
+            # `from os import environ; environ["GH_TOKEN"]` is a credential read wearing an
+            # ordinary-looking index expression.  Nothing above visits Subscript, so without this
+            # branch the whole spelling is invisible.
+            dotted = canonical_chain(node.value, modules, funcs) or ""
+            if dotted in _AMBIENT_ENVIRONMENT:
+                findings.append(_finding(filename, "ambient_environment_read", dotted, node.lineno))
+        elif isinstance(node, ast.Name):
+            resolved = funcs.get(node.id)
+            if resolved in _AMBIENT_ENVIRONMENT and resolved != node.id:
+                findings.append(_finding(filename, "ambient_environment_read", resolved, node.lineno))
 
     findings.sort(key=lambda item: (item["file"], item["line"], item["category"], item["detail"]))
     return findings
@@ -313,23 +359,29 @@ SUITE_FILENAME = "selftest.py"
 
 def implementation_modules(root: pathlib.Path | None = None) -> list[pathlib.Path]:
     base = HERE if root is None else pathlib.Path(root)
-    return [path for path in sorted(base.glob("*.py")) if path.name != SUITE_FILENAME]
+    return [path for path in sorted(base.rglob("*.py")) if path.name != SUITE_FILENAME]
 
 
 def scan_prefix(root: pathlib.Path | None = None) -> dict[str, object]:
-    """Scan every module under the prefix and return the complete finding list."""
+    """Scan EVERY Python source below the prefix, at any depth.
 
-    base = HERE if root is None else pathlib.Path(root)
+    A top-level `*.py` glob is a scanner with a published bypass: put the module in a
+    subdirectory.  `rglob` closes it, and the reported names are prefix-relative so a nested file
+    is visible as nested rather than collapsed onto its basename.
+    """
+
+    base = (HERE if root is None else pathlib.Path(root)).resolve()
     findings: list[dict[str, object]] = []
     scanned: list[str] = []
-    for path in sorted(base.glob("*.py")):
+    for path in sorted(base.rglob("*.py")):
+        relative = path.relative_to(base).as_posix()
         source = path.read_text(encoding="utf-8")
-        scanned.append(path.name)
+        scanned.append(relative)
         findings.extend(
             scan_source(
                 source,
-                path.name,
-                allow_filesystem_mutation=path.name == SUITE_FILENAME,
+                relative,
+                allow_filesystem_mutation=relative == SUITE_FILENAME,
             )
         )
     return {"scanned": scanned, "findings": findings, "clean": not findings}

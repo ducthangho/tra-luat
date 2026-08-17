@@ -101,35 +101,101 @@ def check_path_text(value: object, label: str) -> str:
     return value
 
 
-def _reject_linked_ancestors(target: pathlib.Path, label: str) -> None:
-    """A symlinked or reparsed parent relocates the whole sealed directory in one move.
+def _lexical_parts(target: pathlib.Path) -> tuple[str, ...]:
+    """Case-folded lexical parts, for containment tests that never touch the filesystem."""
 
-    Checking only the final component would leave that move invisible, so every existing ancestor
-    is inspected as well.
+    return tuple(part.casefold() for part in target.parts)
+
+
+def _is_lexically_inside(target: pathlib.Path, root: pathlib.Path) -> bool:
+    inner, outer = _lexical_parts(target), _lexical_parts(root)
+    return inner[: len(outer)] == outer
+
+
+def require_sealed_ancestry(
+    target: pathlib.Path,
+    label: str,
+    *,
+    trusted_roots: tuple[pathlib.Path, ...] = (),
+    require_readonly_parent: bool = True,
+) -> dict[str, object]:
+    """Inspect EVERY component above `target` with `lstat`, from the anchor downwards.
+
+    Checking only the final component leaves the cheapest attack untouched: swap a directory two
+    levels up and the whole sealed set moves with it, while the leaf still passes every test.  The
+    walk is lexical — `resolve()` is never called here — because resolving is exactly what would
+    replace the ancestry under inspection with the ancestry it points at.
     """
 
-    for ancestor in target.parents:
+    ancestors = list(reversed(target.parents))
+    if not ancestors:
+        raise reject("path_ancestor_missing", "%s has no inspectable parent" % label)
+    for ancestor in ancestors:
         try:
             info = ancestor.lstat()
-        except OSError:
-            continue
+        except OSError as exc:
+            raise reject("path_ancestor_missing", "%s has an uninspectable parent" % label) from exc
         if stat.S_ISLNK(info.st_mode):
             raise reject("path_symlink_ancestor", "%s has a symlinked parent directory" % label)
         if getattr(info, "st_file_attributes", 0) & _FILE_ATTRIBUTE_REPARSE_POINT:
             raise reject("path_reparse_ancestor", "%s has a reparse-point parent" % label)
+        if not stat.S_ISDIR(info.st_mode):
+            raise reject("path_ancestor_not_directory", "%s has a non-directory parent" % label)
+        if _is_lexically_inside(ancestor, CANDIDATE_ROOT):
+            raise reject("path_inside_candidate", "%s has a candidate-controlled parent" % label)
+
+    # Scoped to SEALED FILES.  A trusted root and a working directory both live inside ordinary
+    # writable directories by their nature — a temp root's parent is the temp area, and a working
+    # directory the child writes into cannot be read-only.  Demanding it everywhere would not be a
+    # stronger control, it would be a control nobody can satisfy, and one that gets deleted.
+    parent = target.parent
+    parent_info = parent.lstat()
+    if require_readonly_parent and parent_info.st_mode & (
+        stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
+    ):
+        # Windows reports this from the READONLY attribute, not from an ACL evaluation, and
+        # ADR-0021 puts the controller and the candidate under one unprivileged account. The
+        # control is therefore a declared, measured attribute check — see README "Declared
+        # non-coverage" — not a proof that no other principal can write here.
+        raise reject("path_writable_parent", "%s sits in a writable directory" % label)
+
+    if trusted_roots:
+        if not any(_is_lexically_inside(target, root) for root in trusted_roots):
+            raise reject("path_untrusted_root", "%s is outside every controller trusted root" % label)
+    return {
+        "ancestors_inspected": len(ancestors),
+        "parent_readonly": bool(require_readonly_parent),
+        "trusted_root_bound": bool(trusted_roots),
+    }
 
 
-def admit_external_path(value: object, label: str) -> pathlib.Path:
-    """Text checks, candidate-tree exclusion and ancestor identity, in that order.
+def admit_external_path(
+    value: object,
+    label: str,
+    *,
+    trusted_roots: tuple[pathlib.Path, ...] = (),
+    require_readonly_parent: bool = True,
+) -> pathlib.Path:
+    """Text checks, LEXICAL candidate exclusion, then ancestry — in that order.
 
-    The returned path is NORMALISED but not link-resolved.  Resolving first would be the quiet
-    end of symlink control: `resolve()` on a symlink hands back its target, so the `lstat` that
-    was supposed to see a link sees a perfectly ordinary regular file instead.  The candidate-tree
-    check below still runs against the resolved form — there a link must not become a way in.
+    The returned path is normalised but never link-resolved.  Resolving first would be the quiet
+    end of symlink control: `resolve()` on a symlink hands back its target, so the `lstat` that was
+    supposed to see a link sees a perfectly ordinary regular file instead.  Containment is decided
+    lexically for the same reason, and the ancestry walk below is what makes the lexical answer
+    trustworthy: with no link anywhere in the chain, the lexical path IS the real path.
     """
 
     text = check_path_text(value, label)
     declared = pathlib.Path(os.path.normpath(text))
+    if _is_lexically_inside(declared, CANDIDATE_ROOT):
+        raise reject("path_inside_candidate", "%s must live outside the candidate checkout" % label)
+    require_sealed_ancestry(
+        declared,
+        label,
+        trusted_roots=trusted_roots,
+        require_readonly_parent=require_readonly_parent,
+    )
+    # Resolved cross-check runs LAST, once ancestry is established, so it can only add a refusal.
     require_outside_tree(
         declared,
         CANDIDATE_ROOT,
@@ -138,7 +204,6 @@ def admit_external_path(value: object, label: str) -> pathlib.Path:
             "path_inside_candidate", "%s must live outside the candidate checkout" % label
         ),
     )
-    _reject_linked_ancestors(declared, label)
     return declared
 
 
@@ -176,3 +241,35 @@ def inspect_directory(target: pathlib.Path, label: str):
     if not stat.S_ISDIR(info.st_mode):
         raise reject("path_not_directory", "%s must be a directory" % label)
     return info
+
+
+def admit_directory_entry(
+    value: str,
+    label: str,
+    *,
+    trusted_roots: tuple[pathlib.Path, ...],
+) -> pathlib.Path:
+    """A search-path entry must be a real directory the controller vouched for.
+
+    Absolute and outside-the-candidate is a weak pair of properties: a file, a dangling name or
+    any directory on the machine satisfies both, and each of them still decides what the child
+    executes.  The entry must therefore exist, be a directory rather than a link to one, and sit
+    inside a root the sealed plan named.
+    """
+
+    entry = pathlib.Path(os.path.normpath(value))
+    if _is_lexically_inside(entry, CANDIDATE_ROOT):
+        raise reject("path_entry_inside_candidate", "%s points inside the candidate checkout" % label)
+    try:
+        info = entry.lstat()
+    except OSError as exc:
+        raise reject("path_entry_missing", "%s names a directory that is not there" % label) from exc
+    if stat.S_ISLNK(info.st_mode):
+        raise reject("path_entry_symlink", "%s entry is a symlink" % label)
+    if getattr(info, "st_file_attributes", 0) & _FILE_ATTRIBUTE_REPARSE_POINT:
+        raise reject("path_entry_reparse_point", "%s entry is a reparse point" % label)
+    if not stat.S_ISDIR(info.st_mode):
+        raise reject("path_entry_not_directory", "%s entry is not a directory" % label)
+    if not any(_is_lexically_inside(entry, root) for root in trusted_roots):
+        raise reject("path_entry_untrusted_root", "%s entry is outside every trusted root" % label)
+    return entry

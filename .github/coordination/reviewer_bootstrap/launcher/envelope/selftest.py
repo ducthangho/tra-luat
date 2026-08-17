@@ -30,6 +30,13 @@ import tempfile
 from collections.abc import Callable, Iterator
 from unittest import mock
 
+# Set BEFORE the package is imported.  Issue 149 §7 says the inventory covers every regular file
+# below the prefix, so the honest inventory has no exclusion list — which means the suite must not
+# manufacture files the inventory would then have to pretend not to see.  Importing this package
+# would drop `__pycache__` into the owned tree; refusing to write bytecode removes the conflict at
+# the source instead of hiding it behind a skip rule.
+sys.dont_write_bytecode = True
+
 HERE = pathlib.Path(__file__).resolve().parent
 CANDIDATE_ROOT = HERE.parents[4]
 BOOTSTRAP_ROOT = HERE.parents[1]
@@ -42,6 +49,7 @@ from launcher.envelope import ALLOWED_ENVIRONMENT_NAMES  # noqa: E402
 from launcher.envelope import arguments as arguments_module  # noqa: E402
 from launcher.envelope import boundary as boundary_module  # noqa: E402
 from launcher.envelope import environment as environment_module  # noqa: E402
+from launcher.envelope import envelope as envelope_module  # noqa: E402
 from launcher.envelope import inventory as inventory_module  # noqa: E402
 from launcher.envelope import paths as paths_module  # noqa: E402
 from launcher.envelope import sealed as sealed_module  # noqa: E402
@@ -56,6 +64,14 @@ PLAN_NAME = "launch plan.json"
 EXECUTABLE_NAME = "claude launcher.bin"
 SETTINGS_NAME = "settings.json"
 PROMPT_NAME = "prompt.md"
+
+BINDING = {
+    "artifact": "wp149-ra04a-launch-envelope",
+    "source_pin_sha256": "d" * 64,
+    "run_id": "wp149-r1-g1-a1-repair-1",
+    "head": "0" * 40,
+    "tree": "1" * 40,
+}
 
 EXECUTABLE_BYTES = b"#!fake-reviewer-launcher\nthis fixture is never executed\n"
 SETTINGS_BYTES = b'{"permissions":{"defaultMode":"dontAsk"}}\n'
@@ -94,6 +110,21 @@ def sha256_of(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
+def verify_launch_envelope(envelope: object) -> dict[str, object]:
+    """Resolved late so a MISSING contract is one red case, not a dead suite.
+
+    If the package stops exporting the verifier, every case that depends on it fails by name and
+    the denominator holds.  An import-time binding would instead take the whole matrix down and
+    report nothing at all, which is the failure mode that hides a removed control.
+    """
+
+    package = sys.modules["launcher.envelope"]
+    function = getattr(package, "verify_launch_envelope", None)
+    if function is None:
+        raise AssertionError("launcher.envelope does not export verify_launch_envelope")
+    return function(envelope)
+
+
 class Fixture:
     """A sealed controller directory outside the candidate checkout.
 
@@ -121,7 +152,14 @@ class Fixture:
     def unseal(self, path: pathlib.Path) -> None:
         path.chmod(stat.S_IREAD | stat.S_IWRITE)
 
-    def create(self, *, mutate=None, seal_plan: bool = True, plan_bytes: bytes | None = None) -> None:
+    def create(
+        self,
+        *,
+        mutate=None,
+        seal_plan: bool = True,
+        plan_bytes: bytes | None = None,
+        seal_root: bool = True,
+    ) -> None:
         self.controller.mkdir()
         self.workspace.mkdir()
         self.tools.mkdir()
@@ -135,6 +173,9 @@ class Fixture:
         self.plan.write_bytes(raw)
         if seal_plan:
             self.plan.chmod(stat.S_IREAD)
+        if seal_root:
+            # Sealed LAST: the directory attribute is set once its contents exist.
+            self.controller.chmod(stat.S_IREAD)
 
     @staticmethod
     def encode(document: object) -> bytes:
@@ -142,15 +183,16 @@ class Fixture:
 
     def plan_document(self) -> dict[str, object]:
         return {
-            "schema_version": 1,
+            "schema_version": 2,
             "permission_mode": "dontAsk",
+            "binding": dict(BINDING),
+            "trusted_roots": [str(self.root)],
             "executable": {"path": str(self.executable), "sha256": sha256_of(EXECUTABLE_BYTES)},
             "settings": {"path": str(self.settings), "sha256": sha256_of(SETTINGS_BYTES)},
             "prompt": {"path": str(self.prompt), "sha256": sha256_of(PROMPT_BYTES)},
             "working_directory": str(self.workspace),
             "environment": {
                 "PATH": [str(self.tools)],
-                "TEMP": str(self.root),
                 "LANG": "vi_VN.UTF-8",
             },
         }
@@ -190,11 +232,19 @@ class Fixture:
 
 
 @contextlib.contextmanager
-def controller_fixture(mutate=None, *, seal_plan: bool = True, plan_bytes: bytes | None = None) -> Iterator[Fixture]:
+def controller_fixture(
+    mutate=None,
+    *,
+    seal_plan: bool = True,
+    plan_bytes: bytes | None = None,
+    seal_root: bool = True,
+) -> Iterator[Fixture]:
     temp = tempfile.TemporaryDirectory(prefix="wp149-envelope-")
     fixture = Fixture(temp)
     try:
-        fixture.create(mutate=mutate, seal_plan=seal_plan, plan_bytes=plan_bytes)
+        fixture.create(
+            mutate=mutate, seal_plan=seal_plan, plan_bytes=plan_bytes, seal_root=seal_root
+        )
         yield fixture
     finally:
         fixture.release()
@@ -221,10 +271,13 @@ def plan_rejection(
     prepare=None,
     seal_plan: bool = True,
     plan_bytes: bytes | None = None,
+    seal_root: bool = True,
 ) -> dict[str, object]:
     """Reject, and prove the rejection touched nothing on the way out."""
 
-    with controller_fixture(mutate=mutate, seal_plan=seal_plan, plan_bytes=plan_bytes) as fixture:
+    with controller_fixture(
+        mutate=mutate, seal_plan=seal_plan, plan_bytes=plan_bytes, seal_root=seal_root
+    ) as fixture:
         if prepare is not None:
             prepare(fixture)
         before = fixture.snapshot()
@@ -253,9 +306,10 @@ def positive_structured_envelope():
     with controller_fixture() as fixture:
         envelope = fixture.build()
         ensure(isinstance(envelope, LaunchEnvelope), "builder did not return a launch envelope")
-        ensure(envelope.is_sealed(), "returned envelope is not sealed")
+        attested = verify_launch_envelope(envelope)
+        ensure(attested["verified"] is True, "a freshly built envelope did not verify")
         ensure(isinstance(envelope.arguments, tuple), "argument vector is not a tuple")
-        ensure(envelope.schema_version == 1, "envelope schema revision is not one")
+        ensure(envelope.schema_version == 2, "envelope schema revision is not two")
         ensure(envelope.executable == str(fixture.executable), "executable path mismatch")
         ensure(envelope.working_directory == str(fixture.workspace), "working directory mismatch")
         ensure(envelope.stdin_path == str(fixture.prompt), "prompt is not bound to stdin")
@@ -408,14 +462,18 @@ def positive_separator_spellings():
 def positive_inventory():
     measured = inventory_module.envelope_inventory()
     names = [item["path"] for item in measured["files"]]
+    # Compared against a RECURSIVE walk with no filter of its own.  A flat `iterdir` would agree
+    # with a flat inventory and would keep agreeing with it after a nested file appeared, which is
+    # the shape of agreement that hides a gap rather than measuring one.
     on_disk = sorted(
-        path.name for path in HERE.iterdir() if path.is_file() and path.name != "__pycache__"
+        path.relative_to(HERE).as_posix() for path in HERE.rglob("*") if path.is_file()
     )
     ensure(measured["prefix"] == inventory_module.ENVELOPE_PREFIX, "inventory prefix is not the write set")
     ensure(names == on_disk, "the inventory does not cover every file below the prefix")
     ensure(measured["file_count"] == len(on_disk), "inventory file count disagrees with the prefix")
     for item in measured["files"]:
-        ensure("/" not in item["path"], "an inventory entry escaped the prefix root")
+        ensure(not item["path"].startswith("/"), "an inventory entry escaped the prefix root")
+        ensure(".." not in item["path"].split("/"), "an inventory entry escaped the prefix root")
         ensure(len(item["sha256"]) == 64, "an inventory entry has no digest")
     ensure(
         inventory_module.envelope_inventory()["digest"] == measured["digest"],
@@ -716,15 +774,16 @@ def positive_forged_subclass():
     class ForgedEnvelope(LaunchEnvelope):
         def __init__(self):
             object.__setattr__(self, "executable", "C:\\attacker\\claude.exe")
-            object.__setattr__(self, "_seal", None)
 
         def __post_init__(self):
             pass
 
     forged = ForgedEnvelope()
-    ensure(not forged.is_sealed(), "a forged subclass reports itself as sealed")
-    ensure(not LaunchEnvelope.is_sealed(forged), "the seal check can be answered by the subclass")
-    return {"forged_is_sealed": forged.is_sealed()}
+    return expect_rejection(
+        "WP149-POS-021-forged-subclass-is-not-sealed",
+        lambda: verify_launch_envelope(forged),
+        "envelope_unattested",
+    )
 
 
 # ── negatives: permission mode and argument vector ──────────────────────────
@@ -1299,7 +1358,7 @@ def negative_direct_construction():
     return expect_rejection(
         "WP149-NEG-054-direct-construction",
         lambda: LaunchEnvelope(
-            schema_version=1,
+            schema_version=2,
             executable="C:\\attacker\\claude.exe",
             arguments=("claude",),
             working_directory="C:\\attacker",
@@ -1307,10 +1366,12 @@ def negative_direct_construction():
             environment={},
             sealed_inputs=(),
             inventory_digest="0" * 64,
+            payload_sha256="0" * 64,
+            binding_sha256="0" * 64,
             evidence_json="{}",
             evidence_sha256="0" * 64,
         ),
-        "envelope_unsealed",
+        "envelope_unattested",
     )
 
 
@@ -1321,7 +1382,7 @@ def negative_dataclass_replace():
         return expect_rejection(
             "WP149-NEG-055-dataclass-replace",
             lambda: dataclasses.replace(envelope, executable="C:\\attacker\\claude.exe"),
-            "envelope_unsealed",
+            "envelope_unattested",
         )
 
 
@@ -1332,7 +1393,7 @@ def negative_shallow_copy():
         return expect_rejection(
             "WP149-NEG-056-shallow-copy",
             lambda: copy.copy(envelope),
-            "envelope_unsealed",
+            "envelope_unattested",
         )
 
 
@@ -1343,7 +1404,7 @@ def negative_deep_copy():
         return expect_rejection(
             "WP149-NEG-057-deep-copy",
             lambda: copy.deepcopy(envelope),
-            "envelope_unsealed",
+            "envelope_unattested",
         )
 
 
@@ -1399,6 +1460,379 @@ def negative_inventory_prefix():
             "WP149-NEG-060-inventory-prefix-must-be-the-write-set",
             inventory_module.envelope_inventory,
             "inventory_prefix",
+        )
+
+
+# ── repair round 1: counterexamples for verdict 5317388737 ──────────────────
+#
+# Each case below names the finding it closes.  They were written against the REPAIRED contract
+# before the repair existed, so on the pre-repair tree every one of them fails.
+
+
+@case("WP149-R1-001-attestation-binds-payload-to-sealed-inputs", "immutable_launch_envelope_interface")
+def repair_attestation_binds_payload():
+    """Finding 1: verification must be against controller-owned inputs, not a sentinel."""
+
+    with controller_fixture() as fixture:
+        envelope = fixture.build()
+        attested = verify_launch_envelope(envelope)
+        ensure(attested["verified"] is True, "a freshly built envelope did not verify")
+        ensure(attested["payload_sha256"] == envelope.payload_sha256, "payload digest is not bound")
+        ensure(attested["binding"]["artifact"] == BINDING["artifact"], "artifact name is not bound")
+        ensure(attested["binding"]["head"] == BINDING["head"], "HEAD identity is not bound")
+        ensure(attested["binding"]["tree"] == BINDING["tree"], "tree identity is not bound")
+        ensure(
+            attested["binding"]["source_pin_sha256"] == BINDING["source_pin_sha256"],
+            "source pin identity is not bound",
+        )
+        ensure(len(attested["binding_sha256"]) == 64, "the binding block has no digest")
+        return {"attested": attested["binding"], "payload_sha256": attested["payload_sha256"]}
+
+
+@case("WP149-R1-002-setattr-replacement-is-detected", "immutable_launch_envelope_interface")
+def repair_setattr_detected():
+    """Finding 1: object.__setattr__ must not survive verification."""
+
+    with controller_fixture() as fixture:
+        envelope = fixture.build()
+        object.__setattr__(envelope, "executable", "C:\\attacker\\claude.exe")
+        return expect_rejection(
+            "WP149-R1-002-setattr-replacement-is-detected",
+            lambda: verify_launch_envelope(envelope),
+            "envelope_payload_mismatch",
+        )
+
+
+@case("WP149-R1-003-private-fabrication-is-rejected", "immutable_launch_envelope_interface")
+def repair_private_fabrication_rejected():
+    """Finding 1: the private constructor must not mint authority from arbitrary data."""
+
+    forged = object.__new__(LaunchEnvelope)
+    for name, value in (
+        ("schema_version", 2),
+        ("executable", "C:\\attacker\\claude.exe"),
+        ("arguments", ("claude", "-p", "--permission-mode", "bypassPermissions")),
+        ("working_directory", "C:\\attacker"),
+        ("stdin_path", "C:\\attacker\\prompt.md"),
+        ("environment", {}),
+        ("sealed_inputs", ()),
+        ("inventory_digest", "0" * 64),
+        ("payload_sha256", "0" * 64),
+        ("binding_sha256", "0" * 64),
+        ("evidence_json", "{}"),
+        ("evidence_sha256", "0" * 64),
+    ):
+        object.__setattr__(forged, name, value)
+    return expect_rejection(
+        "WP149-R1-003-private-fabrication-is-rejected",
+        lambda: verify_launch_envelope(forged),
+        "envelope_unattested",
+    )
+
+
+@case("WP149-R1-004-pickle-is-refused", "immutable_launch_envelope_interface")
+def repair_pickle_refused():
+    """Finding 1: a serialisation round trip would rebuild an unattested twin."""
+
+    with controller_fixture() as fixture:
+        envelope = fixture.build()
+        return expect_rejection(
+            "WP149-R1-004-pickle-is-refused",
+            envelope.__reduce__,
+            "envelope_unattested",
+        )
+
+
+@case("WP149-R1-005-sealed-bytes-are-retained", "sealed_input_path_and_content_integrity")
+def repair_sealed_bytes_retained():
+    """Finding 2: a pathname after one re-read leaves a replacement window for RA-04B."""
+
+    with controller_fixture() as fixture:
+        envelope = fixture.build()
+        by_label = {item.label: item for item in envelope.sealed_inputs}
+        prompt = by_label["reviewer prompt"]
+        ensure(prompt.content == PROMPT_BYTES, "the verified prompt bytes were not retained")
+        ensure(isinstance(prompt.content, bytes), "retained content is not an immutable bytes value")
+        ensure(prompt.sha256 == sha256_of(prompt.content), "retained bytes disagree with the digest")
+        ensure(prompt.identity is not None, "no stable file identity was retained")
+        ensure(prompt.identity["size"] == len(PROMPT_BYTES), "retained identity has no size")
+        return {
+            "labels": sorted(by_label),
+            "prompt_identity": prompt.identity,
+            "retained_bytes": len(prompt.content),
+        }
+
+
+@case("WP149-R1-006-binding-must-come-from-the-sealed-plan", "sealed_input_path_and_content_integrity")
+def repair_binding_from_plan():
+    """Finding 2: identity bindings are controller-sealed, never free caller fields."""
+
+    signature = inspect.signature(build_launch_envelope)
+    names = [parameter.name for parameter in signature.parameters.values()]
+    ensure(names == ["controller_root", "plan_name"], "the builder grew a caller-supplied field")
+    with controller_fixture() as fixture:
+        evidence = fixture.build().as_evidence()
+        ensure(evidence["binding"]["run_id"] == BINDING["run_id"], "run identity is not from the plan")
+        return {"parameters": names, "binding": evidence["binding"]}
+
+
+@case("WP149-R1-007-binding-tamper-is-detected", "sealed_input_path_and_content_integrity")
+def repair_binding_tamper():
+    """Finding 2: a plan whose binding block is malformed cannot produce an envelope."""
+
+    return plan_rejection(
+        "WP149-R1-007-binding-tamper-is-detected",
+        "plan_schema",
+        lambda plan: plan["binding"].__setitem__("head", "not-an-object-id"),
+    )
+
+
+@case("WP149-R1-008-symlinked-parent-is-rejected", "hostile_argument_environment_and_path_controls")
+def repair_symlinked_parent():
+    """Finding 3: ancestry must be lstat'd, not erased by an early resolve."""
+
+    linked = os.stat_result((stat.S_IFLNK | 0o777, 0, 0, 1, 0, 0, 0, 0, 0, 0))
+    with controller_fixture() as fixture:
+        with mock.patch.object(pathlib.Path, "lstat", return_value=linked):
+            result = expect_rejection(
+                "WP149-R1-008-symlinked-parent-is-rejected",
+                lambda: paths_module.require_sealed_ancestry(
+                    fixture.settings, "launcher settings", trusted_roots=(fixture.root,)
+                ),
+                "path_symlink_ancestor",
+            )
+        result["fixture"] = "portable_ancestor_lstat"
+        return result
+
+
+@case("WP149-R1-009-writable-controller-root-is-rejected", "hostile_argument_environment_and_path_controls")
+def repair_writable_controller_root():
+    """Finding 3: a candidate-writable parent is a candidate-controlled parent."""
+
+    return plan_rejection(
+        "WP149-R1-009-writable-controller-root-is-rejected",
+        "path_writable_parent",
+        seal_root=False,
+    )
+
+
+@case("WP149-R1-010-path-entry-must-be-a-directory", "memory_disabled_and_closed_environment")
+def repair_path_entry_directory():
+    """Finding 4: absolute and outside-candidate is not enough for a PATH entry."""
+
+    with controller_fixture() as fixture:
+        document = fixture.plan_document()
+        document["environment"]["PATH"] = [str(fixture.settings)]
+        fixture.reseal_plan(document)
+        return expect_rejection(
+            "WP149-R1-010-path-entry-must-be-a-directory",
+            fixture.build,
+            "path_entry_not_directory",
+        )
+
+
+@case("WP149-R1-011-path-entry-must-sit-in-a-trusted-root", "memory_disabled_and_closed_environment")
+def repair_path_entry_trusted_root():
+    """Finding 4: entries must be controller-bound, not merely outside the candidate."""
+
+    with tempfile.TemporaryDirectory(prefix="wp149-untrusted-") as untrusted:
+        outside = pathlib.Path(untrusted).resolve()
+        with controller_fixture() as fixture:
+            document = fixture.plan_document()
+            document["environment"]["PATH"] = [str(outside)]
+            fixture.reseal_plan(document)
+            return expect_rejection(
+                "WP149-R1-011-path-entry-must-sit-in-a-trusted-root",
+                fixture.build,
+                "path_entry_untrusted_root",
+            )
+
+
+CONFIG_LOADING_NAMES = ("HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "COMSPEC", "TEMP")
+
+
+@case("WP149-R1-012-config-loading-names-are-omitted", "memory_disabled_and_closed_environment")
+def repair_config_loading_omitted():
+    """Finding 4: config-loading and shell-bearing names leave the allowlist entirely."""
+
+    still_allowed = sorted(set(CONFIG_LOADING_NAMES) & set(ALLOWED_ENVIRONMENT_NAMES))
+    ensure(still_allowed == [], "a config-loading name is still allowlisted")
+    with controller_fixture() as fixture:
+        child = fixture.build().environment
+        present = sorted(name for name in CONFIG_LOADING_NAMES if name in child)
+        ensure(present == [], "a config-loading name reached the child environment")
+        ensure(child[environment_module.MEMORY_FLAG_NAME] == "1", "the memory flag was lost")
+        return {"omitted": list(CONFIG_LOADING_NAMES), "allowlist": sorted(ALLOWED_ENVIRONMENT_NAMES)}
+
+
+@case("WP149-R1-013-config-loading-name-is-rejected", "memory_disabled_and_closed_environment")
+def repair_config_loading_rejected():
+    return environment_rejection(
+        "WP149-R1-013-config-loading-name-is-rejected",
+        "environment_name_not_allowed",
+        "APPDATA",
+        "C:\\Users\\admin\\AppData\\Roaming",
+    )
+
+
+PERMISSION_VALUE_MATRIX = (
+    "dontAsk", "dontask", "DONTASK", "default", "acceptEdits", "acceptedits",
+    "bypassPermissions", "BYPASSPERMISSIONS", "plan", "auto", "AUTO", "ask", "yes",
+)
+
+
+@case("WP149-R1-014-permission-value-matrix-in-every-slot", "permission_mode_exact_dontask")
+def repair_permission_value_matrix():
+    """Finding 6: every supported bare permission value, in every variable slot."""
+
+    observed = []
+    for value in PERMISSION_VALUE_MATRIX:
+        for slot, vector in (
+            ("executable", (value, "-p", "--permission-mode", "dontAsk", "--settings", "s")),
+            ("settings", ("claude", "-p", "--permission-mode", "dontAsk", "--settings", value)),
+        ):
+            result = expect_rejection(
+                "WP149-R1-014-permission-value-matrix-in-every-slot",
+                lambda vector=vector: arguments_module.audit_argument_vector(vector),
+                "argument_permission_injection",
+            )
+            observed.append({"slot": slot, "value": value, "rejection": result["actual_rejection"]})
+    ensure(len(observed) == len(PERMISSION_VALUE_MATRIX) * 2, "the matrix lost a combination")
+    return {"combinations": len(observed), "observed": observed}
+
+
+SCANNER_TAIL_SNIPPETS = (
+    ("ambient_environment_read", "from os import environ\ntoken = environ['GH_TOKEN']\n"),
+    ("ambient_environment_read", "import os as x\ntoken = x.environ['GH_TOKEN']\n"),
+    ("ambient_environment_read", "from os import environ as e\ntoken = e.get('GH_TOKEN')\n"),
+    ("filesystem_mutation", "import pathlib\npathlib.Path(1).write_text(2)\n"),
+    ("filesystem_mutation", "import pathlib as p\np.Path('x').unlink()\n"),
+    ("process_spawn", "from subprocess import run as r\nr(['claude'])\n"),
+)
+
+
+@case("WP149-R1-015-scanner-resolves-aliases-and-tails", "source_inventory_and_static_boundary")
+def repair_scanner_tails():
+    """Finding 5: imported aliases and attribute/subscript/call tails must resolve."""
+
+    observed = []
+    for expected, snippet in SCANNER_TAIL_SNIPPETS:
+        findings = boundary_module.scan_source(snippet, "hostile.py")
+        categories = sorted({item["category"] for item in findings})
+        ensure(
+            expected in categories,
+            "the scanner missed %s in %r (saw %s)" % (expected, snippet, categories),
+        )
+        observed.append({"expected": expected, "categories": categories})
+    return {"snippets": len(SCANNER_TAIL_SNIPPETS), "observed": observed}
+
+
+@case("WP149-R1-016-nested-source-is-scanned-and-inventoried", "source_inventory_and_static_boundary")
+def repair_nested_source():
+    """Finding 5 and 7: a nested module must not escape either the scan or the inventory."""
+
+    with tempfile.TemporaryDirectory(prefix="wp149-nested-") as temporary:
+        root = pathlib.Path(temporary).resolve()
+        nested = root / "inner"
+        nested.mkdir()
+        (root / "top.py").write_bytes(b"value = 1\n")
+        (nested / "hostile.py").write_bytes(b"import subprocess\nsubprocess.run(['claude'])\n")
+        measured = inventory_module.inventory_of(root)
+        names = [item["path"] for item in measured["files"]]
+        ensure("inner/hostile.py" in names, "the inventory missed a nested source file")
+        report = boundary_module.scan_prefix(root)
+        ensure("inner/hostile.py" in report["scanned"], "the scan missed a nested source file")
+        categories = sorted({item["category"] for item in report["findings"]})
+        ensure("process_spawn" in categories, "the nested hostile module was not flagged")
+        return {"inventoried": names, "scanned": report["scanned"], "categories": categories}
+
+
+@case("WP149-R1-017-owned-tree-has-no-generated-cache", "source_inventory_and_static_boundary")
+def repair_no_generated_cache():
+    """Finding 7: the inventory excludes nothing, so nothing generated may be present."""
+
+    generated = sorted(
+        path.relative_to(HERE).as_posix()
+        for path in HERE.rglob("*")
+        if path.is_file() and (path.suffix in (".pyc", ".pyo") or "__pycache__" in path.parts)
+    )
+    ensure(
+        generated == [],
+        "generated cache is present in the owned tree: %s" % generated,
+    )
+    ensure(
+        sys.dont_write_bytecode is True,
+        "the suite is not preventing bytecode from entering the owned tree",
+    )
+    measured = inventory_module.envelope_inventory()
+    on_disk = [path for path in HERE.rglob("*") if path.is_file()]
+    ensure(
+        measured["file_count"] == len(on_disk),
+        "the inventory does not cover every regular file below the prefix",
+    )
+    ensure(measured["excluded"] == [], "the inventory still declares an exclusion list")
+    return {
+        "generated": generated,
+        "file_count": measured["file_count"],
+        "dont_write_bytecode": sys.dont_write_bytecode,
+    }
+
+
+@case("WP149-R1-018-readme-claims-match-measured-controls", "eol_policy")
+def repair_readme_claims():
+    """Finding 8: the README may not claim coverage the suite does not measure."""
+
+    text = (HERE / "README.md").read_text(encoding="utf-8")
+    ensure("ADR-0021" in text, "the README does not reconcile with ADR-0021")
+    ensure(
+        "read-only attribute" in text,
+        "the README does not say that Windows write checks are an attribute, not an ACL",
+    )
+    for forbidden in ("spawn", "watchdog", "Job Object", "claim", "delegation"):
+        ensure(forbidden in text, "the README stopped naming a non-goal: %s" % forbidden)
+    ensure(
+        "portable_symlink_lstat" in text or "portable fallback" in text,
+        "the README does not disclose the portable symlink fallback",
+    )
+    return {"readme_bytes": len(text.encode("utf-8"))}
+
+
+@case("WP149-R1-019-no-authority-token-is-exported", "immutable_launch_envelope_interface")
+def repair_no_exported_token():
+    """Finding 1: nothing a candidate can mint may leave the module."""
+
+    package = sys.modules["launcher.envelope"]
+    for name in package.__all__:
+        member = getattr(package, name)
+        ensure(
+            not (isinstance(member, object) and type(member).__name__ == "object"),
+            "%s exports a bare sentinel object" % name,
+        )
+    ensure(not hasattr(package, "_SEAL"), "the package re-exports a seal sentinel")
+    ensure(not hasattr(envelope_module, "is_sealed"), "a mintable seal predicate is still public")
+    ensure(
+        not hasattr(LaunchEnvelope, "is_sealed"),
+        "the envelope still answers a boolean seal question about itself",
+    )
+    return {"exports": sorted(package.__all__)}
+
+
+@case("WP149-R1-020-verification-rereads-controller-inputs", "sealed_input_path_and_content_integrity")
+def repair_verification_rereads():
+    """Finding 1 and 2: verification consults disk, not only the object's own claims."""
+
+    with controller_fixture() as fixture:
+        envelope = fixture.build()
+        verify_launch_envelope(envelope)
+        fixture.unseal(fixture.controller)
+        fixture.unseal(fixture.prompt)
+        fixture.prompt.write_bytes(PROMPT_BYTES + b"replaced after the envelope was built\n")
+        fixture.prompt.chmod(stat.S_IREAD)
+        fixture.controller.chmod(stat.S_IREAD)
+        return expect_rejection(
+            "WP149-R1-020-verification-rereads-controller-inputs",
+            lambda: verify_launch_envelope(envelope),
+            "sealed_input_replaced",
         )
 
 

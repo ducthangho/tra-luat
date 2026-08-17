@@ -28,7 +28,7 @@ from typing import Mapping
 from oracle.safe_io import require_outside_tree
 
 from .errors import EnvelopeRejected, reject
-from .paths import CANDIDATE_ROOT, check_path_text
+from .paths import CANDIDATE_ROOT, admit_directory_entry, check_path_text
 
 MEMORY_FLAG_NAME = "CLAUDE_CODE_DISABLE_AUTO_MEMORY"
 MEMORY_FLAG_VALUE = "1"
@@ -47,24 +47,42 @@ ALLOWED_ENVIRONMENT_NAMES = frozenset(
     {
         "PATH",
         "PATHEXT",
-        "HOME",
-        "USERPROFILE",
         "SYSTEMROOT",
         "WINDIR",
-        "COMSPEC",
-        "TEMP",
-        "TMP",
-        "TMPDIR",
+        "LANG",
+        "LC_ALL",
+        "TZ",
+        "NUMBER_OF_PROCESSORS",
+        "PROCESSOR_ARCHITECTURE",
+    }
+)
+
+# Removed from the allowlist rather than validated harder, because "absolute and outside the
+# candidate" was never the property that mattered for them:
+#
+#   HOME, USERPROFILE, APPDATA, LOCALAPPDATA, PROGRAMDATA, PROGRAMFILES
+#       roots from which tools load configuration, credentials and plugins before reaching their
+#       own entry point.  A trustworthy path here is not enough; the CONTENTS decide behaviour.
+#   COMSPEC
+#       hands the child a shell interpreter, which is the one capability this Packet exists to
+#       keep out of the launch description.
+#   TEMP, TMP, TMPDIR
+#       a writable scratch root is a side effect, and RA-04A is side-effect-free.
+#   TERM
+#       no console is attached to a headless run (ADR-0021), so it decides nothing.
+OMITTED_CONFIG_LOADING_NAMES = frozenset(
+    {
+        "HOME",
+        "USERPROFILE",
         "APPDATA",
         "LOCALAPPDATA",
         "PROGRAMDATA",
         "PROGRAMFILES",
-        "LANG",
-        "LC_ALL",
-        "TZ",
+        "COMSPEC",
+        "TEMP",
+        "TMP",
+        "TMPDIR",
         "TERM",
-        "NUMBER_OF_PROCESSORS",
-        "PROCESSOR_ARCHITECTURE",
     }
 )
 
@@ -72,23 +90,9 @@ ALLOWED_ENVIRONMENT_NAMES = frozenset(
 # place to hide a relative entry behind a separator.
 PATH_LIST_NAMES = frozenset({"PATH"})
 
-# Single absolute path values.  They are admitted with the same text rules as an argument path.
-PATH_VALUE_NAMES = frozenset(
-    {
-        "HOME",
-        "USERPROFILE",
-        "SYSTEMROOT",
-        "WINDIR",
-        "COMSPEC",
-        "TEMP",
-        "TMP",
-        "TMPDIR",
-        "APPDATA",
-        "LOCALAPPDATA",
-        "PROGRAMDATA",
-        "PROGRAMFILES",
-    }
-)
+# Single directory values.  Admitted with the same directory rules as a PATH entry: they must
+# exist, be a real directory rather than a link to one, and sit inside a controller trusted root.
+PATH_VALUE_NAMES = frozenset({"SYSTEMROOT", "WINDIR"})
 
 # Names that load code or configuration into the child before it reaches its own entry point.
 INJECTION_NAMES = frozenset(
@@ -139,7 +143,7 @@ def _reject_value_text(name: str, value: object) -> str:
     return value
 
 
-def _admit_path_entry(entry: object, name: str) -> str:
+def _admit_path_entry(entry: object, name: str, trusted_roots: tuple) -> str:
     if not isinstance(entry, str):
         raise reject("path_entry_type", "%s contains a non-string entry" % name)
     if not entry:
@@ -154,19 +158,19 @@ def _admit_path_entry(entry: object, name: str) -> str:
         if exc.category == "path_not_absolute":
             raise reject("path_entry_relative", "%s contains a relative entry" % name) from exc
         raise
-    resolved = os.path.normpath(entry)
+    admitted = admit_directory_entry(entry, name, trusted_roots=trusted_roots)
     require_outside_tree(
-        resolved,
+        admitted,
         CANDIDATE_ROOT,
         "%s entry" % name,
         lambda _message: reject(
             "path_entry_inside_candidate", "%s points inside the candidate checkout" % name
         ),
     )
-    return resolved
+    return str(admitted)
 
 
-def _admit_path_list(name: str, value: object) -> str:
+def _admit_path_list(name: str, value: object, trusted_roots: tuple) -> str:
     if isinstance(value, str):
         raise reject("environment_path_not_list", "%s must be declared as a list of entries" % name)
     if not isinstance(value, list) or not value:
@@ -175,7 +179,7 @@ def _admit_path_list(name: str, value: object) -> str:
         raise reject("environment_path_oversized", "%s declares too many entries" % name)
     entries: list[str] = []
     for entry in value:
-        admitted = _admit_path_entry(entry, name)
+        admitted = _admit_path_entry(entry, name, trusted_roots)
         if admitted not in entries:
             entries.append(admitted)
     return os.pathsep.join(entries)
@@ -198,8 +202,12 @@ def _reject_hostile_name(name: str) -> str:
     return folded
 
 
-def build_child_environment(declared: object) -> Mapping[str, str]:
-    """Build the closed child environment from the plan's declared names only."""
+def build_child_environment(declared: object, trusted_roots: tuple = ()) -> Mapping[str, str]:
+    """Build the closed child environment from the plan's declared names only.
+
+    `trusted_roots` arrives from the sealed plan, never from a caller argument: it is the set of
+    directories the controller vouched for, and every directory-shaped value must sit inside one.
+    """
 
     if not isinstance(declared, dict):
         raise reject("environment_shape", "the declared environment must be an object")
@@ -221,19 +229,13 @@ def build_child_environment(declared: object) -> Mapping[str, str]:
     for name, value in declared.items():
         folded = _reject_hostile_name(name)
         if folded in PATH_LIST_NAMES:
-            child[folded] = _admit_path_list(folded, value)
+            child[folded] = _admit_path_list(folded, value, trusted_roots)
             continue
         text = _reject_value_text(folded, value)
         if folded in PATH_VALUE_NAMES:
             check_path_text(text, folded)
-            require_outside_tree(
-                os.path.normpath(text),
-                CANDIDATE_ROOT,
-                folded,
-                lambda _message, folded=folded: reject(
-                    "path_entry_inside_candidate", "%s points inside the candidate checkout" % folded
-                ),
-            )
+            child[folded] = str(admit_directory_entry(text, folded, trusted_roots=trusted_roots))
+            continue
         child[folded] = text
 
     child[MEMORY_FLAG_NAME] = MEMORY_FLAG_VALUE

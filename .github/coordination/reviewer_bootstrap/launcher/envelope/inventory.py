@@ -24,7 +24,13 @@ ENVELOPE_PREFIX = LAUNCHER_PREFIX + "envelope/"
 
 HERE = pathlib.Path(__file__).resolve().parent
 
-IGNORED_DIRECTORY_NAMES = frozenset({"__pycache__"})
+# Issue 149 §7 says "every regular file below the exact envelope prefix", so there is no exclusion
+# list here at all.  The previous version quietly skipped `__pycache__`, which meant the digest
+# described a tree that did not exist on disk — and the one directory it skipped is the one an
+# attacker can write into without touching a tracked file.  The conflict is resolved at the source
+# instead: `selftest.py` sets `sys.dont_write_bytecode` before importing the package, so the owned
+# tree never acquires a cache, and `WP149-R1-017` fails loudly if one appears anyway.
+EXCLUDED_NAMES: tuple[str, ...] = ()
 
 _FILE_ATTRIBUTE_REPARSE_POINT = 0x400
 
@@ -38,8 +44,6 @@ def _walk(root: pathlib.Path) -> list[pathlib.Path]:
             # file outside the prefix be counted as if it were inside it.
             raise reject("inventory_link", "the inventory prefix contains a link")
         if stat.S_ISDIR(info.st_mode):
-            if entry.name in IGNORED_DIRECTORY_NAMES:
-                continue
             found.extend(_walk(entry))
             continue
         if not stat.S_ISREG(info.st_mode):
@@ -69,6 +73,7 @@ def inventory_of(root: pathlib.Path) -> dict[str, object]:
     return {
         "file_count": len(files),
         "files": files,
+        "excluded": list(EXCLUDED_NAMES),
         "digest": hashlib.sha256(canonical.encode("utf-8")).hexdigest(),
     }
 

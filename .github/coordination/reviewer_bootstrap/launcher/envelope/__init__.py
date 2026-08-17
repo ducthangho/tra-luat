@@ -6,9 +6,19 @@ would be a change outside the authorised set — a small convenience is not wort
 path in the diff.
 """
 
-from .arguments import PERMISSION_FLAG, PERMISSION_MODE, audit_argument_vector
-from .environment import ALLOWED_ENVIRONMENT_NAMES, MEMORY_FLAG_NAME, MEMORY_FLAG_VALUE
-from .envelope import LaunchEnvelope, build_launch_envelope
+from .arguments import (
+    PERMISSION_FLAG,
+    PERMISSION_MODE,
+    PERMISSION_MODE_VALUES,
+    audit_argument_vector,
+)
+from .environment import (
+    ALLOWED_ENVIRONMENT_NAMES,
+    MEMORY_FLAG_NAME,
+    MEMORY_FLAG_VALUE,
+    OMITTED_CONFIG_LOADING_NAMES,
+)
+from .envelope import LaunchEnvelope, build_launch_envelope, verify_launch_envelope
 from .errors import EnvelopeRejected
 from .inventory import ENVELOPE_PREFIX, envelope_inventory
 from .paths import CANDIDATE_ROOT
@@ -21,9 +31,12 @@ __all__ = [
     "LaunchEnvelope",
     "MEMORY_FLAG_NAME",
     "MEMORY_FLAG_VALUE",
+    "OMITTED_CONFIG_LOADING_NAMES",
     "PERMISSION_FLAG",
     "PERMISSION_MODE",
+    "PERMISSION_MODE_VALUES",
     "audit_argument_vector",
     "build_launch_envelope",
     "envelope_inventory",
+    "verify_launch_envelope",
 ]

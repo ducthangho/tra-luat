@@ -3857,8 +3857,8 @@ DOT_BIEN = [
     # DUNG mot dac ta, nen ca nam chet bang MOT chot — va ca nhung cach sai chua ai nghi
     # ra cung chet theo. Giu ca nam trong bang de chot ay khong am tham long ra.
     ("github_api_mcp_mat_capture_output",
-     ('        r = subprocess.run(["claude", "mcp", "get", "github"], capture_output=True,',
-      '        r = subprocess.run(["claude", "mcp", "get", "github"], capture_output=False,'),
+     ('        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True,',
+      '        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=False,'),
      ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
     ("github_api_mcp_mat_timeout",
      ('                           text=True, timeout=30)', '                           text=True)'),
@@ -3867,15 +3867,22 @@ DOT_BIEN = [
      ('                           text=True, timeout=30)',
       '                           text=True, timeout=0.001)'),
      ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
+    # FINDING TU DO (chua ai bao): `mcp get` PHAN BIET HOA THUONG, ma `.mcp.json` thi
+    # ta khop casefold — dung san chuoi "github" lam mot khai bao HOP LE (`GitHub`) bi
+    # bao la khong do duoc. Dot bien nay dung lai dung ban da hong.
+    ("github_api_hoi_ten_dung_san_thay_vi_ten_da_khai",
+     ('        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True,',
+      '        r = subprocess.run(["claude", "mcp", "get", "github"], capture_output=True,'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
     ("github_api_mcp_them_doi_so_la",
-     ('        r = subprocess.run(["claude", "mcp", "get", "github"], capture_output=True,',
-      '        r = subprocess.run(["claude", "mcp", "get", "github", "--bogus"], capture_output=True,'),
+     ('        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True,',
+      '        r = subprocess.run(["claude", "mcp", "get", ten, "--bogus"], capture_output=True,'),
      ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
     ("github_api_mcp_goi_thua_mot_lan",
-     ('        r = subprocess.run(["claude", "mcp", "get", "github"], capture_output=True,',
-      '        subprocess.run(["claude", "mcp", "get", "github"], capture_output=True,\n'
+     ('        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True,',
+      '        subprocess.run(["claude", "mcp", "get", ten], capture_output=True,\n'
       '                       text=True, timeout=30)\n'
-      '        r = subprocess.run(["claude", "mcp", "get", "github"], capture_output=True,'),
+      '        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True,'),
      ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
 ]
 
@@ -4072,8 +4079,11 @@ def t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh():
     # ky phai BANG DUNG mot dac ta, nen bat ky sai lech nao — them doi so, doi doi so,
     # goi them mot lan, doi/bo bat ky kwarg nao — deu do, ke ca thu toi chua nghi ra.
     nhat_ky = []
-    GOI_MONG_DOI = (("claude", "mcp", "get", "github"),
-                    {"capture_output": True, "text": True, "timeout": 30})
+    ten_mong_doi = ["github"]      # o chua: ten PHAI lay tu `.mcp.json`, khong dung san
+
+    def GOI_MONG_DOI():
+        return (("claude", "mcp", "get", ten_mong_doi[0]),
+                {"capture_output": True, "text": True, "timeout": 30})
 
     def gia_run(cmd, *_a, **_k):
         nhat_ky.append((tuple(cmd), dict(_k)))
@@ -4084,8 +4094,8 @@ def t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh():
     def doi_goi_claude_dung_dac_ta(vi_tri):
         """Nhat ky loi goi `claude` phai BANG DUNG `[GOI_MONG_DOI]` — khong hon kem."""
         goi = [g for g in nhat_ky if g[0][:1] == ("claude",)]
-        bang(goi == [GOI_MONG_DOI],
-             f"[{vi_tri}] loi goi `claude` phai BANG DUNG {GOI_MONG_DOI!r}, do duoc {goi!r}")
+        bang(goi == [GOI_MONG_DOI()],
+             f"[{vi_tri}] loi goi `claude` phai BANG DUNG {GOI_MONG_DOI()!r}, do duoc {goi!r}")
         nhat_ky.clear()
 
     m.subprocess.run = gia_run
@@ -4197,11 +4207,30 @@ def t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh():
             tt, mo_ta = m._do_github_api(td)
             bang(tt == "CHUA_XAC_THUC",
                  f"ten `not-github-backup` ma tinh la khai github: {tt} {mo_ta!r}")
-            # ...nhung HOA/THUONG thi van phai nhan
+            # ...nhung HOA/THUONG thi van phai nhan, VA phai HOI CLI BANG DUNG TEN AY.
+            #    `claude mcp get` PHAN BIET HOA THUONG — do that: khai `GitHub` roi hoi
+            #    `mcp get github` thi CLI dap `No MCP server named "github". Did you mean
+            #    "GitHub"?` va VAN rc=0. Ban truoc dung san chuoi "github" nen mot khai
+            #    bao HOP LE se bi bao la khong do duoc. Hai noi phai dung CUNG mot ten.
             (Path(td) / ".mcp.json").write_text(
                 _json.dumps({"mcpServers": {"GitHub": {}}}), encoding="utf-8")
+            mcp_out[0] = KHOE
+            nhat_ky.clear()
+            ten_mong_doi[0] = "GitHub"
             tt, _ = m._do_github_api(td)
+            doi_goi_claude_dung_dac_ta("ten-hoa-thuong")
             bang(tt != "CHUA_XAC_THUC", f"ten `GitHub` bi chan oan: {tt}")
+            ten_mong_doi[0] = "github"
+
+            # ...va dau ra "khong tim thay" (rc=0!) phai la KHONG_DO_DUOC, khong duoc
+            #    doc thanh mot trang thai nao ca.
+            (Path(td) / ".mcp.json").write_text(
+                _json.dumps({"mcpServers": {"github": {}}}), encoding="utf-8")
+            mcp_out[0] = 'No MCP server named "github". Did you mean "GitHub"?\n'
+            tt, mo_ta = m._do_github_api(td)
+            bang(tt == "KHONG_DO_DUOC",
+                 f"dau ra khong-tim-thay (rc=0) ma tra {tt}: {mo_ta!r}")
+            mcp_out[0] = KHOE
 
             # (4c) JSON HOP LE ma SAI KIEU — khong duoc nem loi, khong duoc doc nham.
             #      Hai hinh dang cuoi (`github` co gia tri null / chuoi) la finding P2

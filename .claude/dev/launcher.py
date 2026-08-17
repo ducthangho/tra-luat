@@ -2172,7 +2172,7 @@ def _do_claude() -> tuple[str, str]:
     return ("CHUA_XAC_THUC", "khong co ~/.claude/.credentials.json va khong co bien")
 
 
-def _doc_mcp_json(ws: str | None) -> tuple[bool, str]:
+def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None]:
     """`.mcp.json` của DỰ ÁN có khai server `github` không.
 
     Đây là phép đo CÓ MẶT, không phải DÙNG ĐƯỢC — và nói thẳng như vậy ở chỗ dùng.
@@ -2190,17 +2190,17 @@ def _doc_mcp_json(ws: str | None) -> tuple[bool, str]:
         goc, nguon = Path(__file__).resolve().parents[2], "goc cua launcher (khong co workspace)"
     tep = goc / ".mcp.json"
     if not tep.is_file():
-        return False, f"khong thay .mcp.json o {goc} [{nguon}]"
+        return False, f"khong thay .mcp.json o {goc} [{nguon}]", None
     try:
         d = json.loads(tep.read_text(encoding="utf-8"))
     except (OSError, ValueError) as e:
-        return False, f".mcp.json [{nguon}] khong doc/parse duoc: {type(e).__name__}"
+        return False, f".mcp.json [{nguon}] khong doc/parse duoc: {type(e).__name__}", None
     # KIEM KIEU. JSON hop le van co the sai lươc do: mang o goc lam `d.get` nem
     # AttributeError, va `mcpServers` la MANG thi vong lap duyet PHAN TU (chuoi) chu
     # khong duyet KHOA — mot tep sai kieu se duoc doc thanh "da khai server". Ca hai
     # deu la finding P2 cua cross-review, ca hai deu tai lap duoc.
     if not isinstance(d, dict):
-        return False, f".mcp.json [{nguon}] khong phai object o goc (la {type(d).__name__})"
+        return False, f".mcp.json [{nguon}] khong phai object o goc (la {type(d).__name__})", None
     # PHÂN BIỆT "KHÔNG CÓ KHOÁ" VỚI "CÓ KHOÁ MÀ GIÁ TRỊ HỎNG". Bản trước viết
     # `d.get("mcpServers") or d.get("servers") or {}`, và `or` nuốt mọi giá trị FALSY:
     # `{"mcpServers": null, "servers": {...}}` lặng lẽ rơi sang `servers` rồi tuyên là
@@ -2211,16 +2211,16 @@ def _doc_mcp_json(ws: str | None) -> tuple[bool, str]:
             srv = d[khoa]
             break
     else:
-        return False, f".mcp.json [{nguon}] khong co khoa `mcpServers` lan `servers`"
+        return False, f".mcp.json [{nguon}] khong co khoa `mcpServers` lan `servers`", None
     if not isinstance(srv, dict):
-        return False, f".mcp.json [{nguon}] khoa `{khoa}` khong phai object (la {type(srv).__name__})"
+        return False, f".mcp.json [{nguon}] khoa `{khoa}` khong phai object (la {type(srv).__name__})", None
     # KHOP CHINH XAC, khong khop chuoi con: `not-github-backup` tung duoc tinh la
     # "da khai server github". Doi thanh DANH SACH CHO PHEP — dung doctrine cua kho:
     # danh sach cam khong bao gio du, danh sach cho phep thi biet truoc va nho.
     ten = [k for k in srv if k.casefold() == "github"]
     if not ten:
         return False, (f".mcp.json [{nguon}] KHONG khai server ten dung bang `github` "
-                       f"(co: {', '.join(srv) or 'khong co server nao'})")
+                       f"(co: {', '.join(srv) or 'khong co server nao'})"), None
     # KIEM CA GIA TRI, khong chi khoa. Cross-review luot 2 (P2): ban truoc kiem BANG
     # server la object roi dung, nen `{"mcpServers": {"github": null}}` va
     # `{"mcpServers": {"github": "x"}}` deu duoc tuyen la "da khai server". Cung mot
@@ -2229,8 +2229,13 @@ def _doc_mcp_json(ws: str | None) -> tuple[bool, str]:
     xau = [k for k in ten if not isinstance(srv[k], dict)]
     if xau:
         return False, (f".mcp.json [{nguon}] khai `{', '.join(xau)}` nhung gia tri khong "
-                       f"phai object (la {', '.join(type(srv[k]).__name__ for k in xau)})")
-    return True, f".mcp.json [{nguon}] khai server: {', '.join(ten)}"
+                       f"phai object (la {', '.join(type(srv[k]).__name__ for k in xau)})"), None
+    # TRA VE TEN NGUYEN VAN, khong tra chuoi "github" dung san. `claude mcp get` PHAN
+    # BIET HOA THUONG — do duoc: khai ten `GitHub` roi hoi `mcp get github` thi CLI
+    # dap "No MCP server named "github". Did you mean "GitHub"?" va van rc=0. Ta chap
+    # nhan `GitHub` o `.mcp.json` (khop casefold) nen neu hoi bang chu thuong dung san
+    # thi mot khai bao HOP LE se bi bao la khong do duoc. Hai noi phai dung CUNG mot ten.
+    return True, f".mcp.json [{nguon}] khai server: {', '.join(ten)}", ten[0]
 
 
 def _do_git_day_keo(ws: str | None) -> tuple[str, str]:
@@ -2265,7 +2270,7 @@ _MCP_HONG = ("failed to connect", "pending approval", "not connected",
              "disconnected", "needs authentication")   # khớp TIỀN TỐ (có đuôi chi tiết)
 
 
-def _suc_khoe_mcp_github() -> tuple[str, str]:
+def _suc_khoe_mcp_github(ten: str = "github") -> tuple[str, str]:
     """Hỏi `claude mcp get github` xem server đang ở trạng thái nào.
 
     VÌ SAO CÓ HÀM NÀY — nó bác một lời khai của chính tôi. Bản đầu viết rằng tiến
@@ -2308,14 +2313,14 @@ def _suc_khoe_mcp_github() -> tuple[str, str]:
     if not shutil.which("claude"):
         return ("khong_do_duoc", "khong co `claude` de hoi `mcp get`")
     try:
-        r = subprocess.run(["claude", "mcp", "get", "github"], capture_output=True,
+        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True,
                            text=True, timeout=30)
     except (OSError, subprocess.SubprocessError) as e:
-        return ("khong_do_duoc", f"`claude mcp get github` khong chay duoc: {type(e).__name__}")
+        return ("khong_do_duoc", f"`claude mcp get {ten}` khong chay duoc: {type(e).__name__}")
     kq = _RE_STATUS.search(_RE_ANSI.sub("", r.stdout or ""))
     if not kq:
         return ("khong_do_duoc",
-                f"`claude mcp get github` khong in truong `Status:` (rc={r.returncode})")
+                f"`claude mcp get {ten}` khong in truong `Status:` (rc={r.returncode}) — CHU Y rc=0 KHONG co nghia la tim thay: CLI tra rc=0 ca khi bao \"No MCP server named\"")
     tho = kq.group(1)
     # Chuẩn hoá: bỏ ký hiệu trang trí ở đầu, hạ hoa/thường, gộp khoảng trắng.
     chuan = " ".join(_RE_TRANG_TRI.sub("", tho.casefold()).split())
@@ -2358,7 +2363,7 @@ def _do_github_api(ws: str | None) -> tuple[str, str]:
     nối MCP, `doctor` báo GitHub dùng được trong khi đường thật của kho đã chết. Nó
     đo đúng một đường mà kho cố ý không cấp phát, rồi khai thay cho đường được cấp.
     """
-    co_khai, chi_tiet_mcp = _doc_mcp_json(ws)
+    co_khai, chi_tiet_mcp, ten_server = _doc_mcp_json(ws)
     phu = []
     if shutil.which("gh"):
         try:
@@ -2378,7 +2383,7 @@ def _do_github_api(ws: str | None) -> tuple[str, str]:
         return ("CHUA_XAC_THUC", chi_tiet_mcp + duoi)
 
     # ĐÃ KHAI thì hỏi tiếp sức khoẻ — đừng dừng ở "có khai" rồi gọi là không đo được.
-    tt_mcp, chi_tiet_suc_khoe = _suc_khoe_mcp_github()
+    tt_mcp, chi_tiet_suc_khoe = _suc_khoe_mcp_github(ten_server or "github")
     if tt_mcp == "hong":
         # KHAI RO PHAM VI. Do duoc trong chinh container nay: CLI bao `Pending approval`
         # trong khi PHIEN dang goi `mcp__github__*` binh thuong. Khong mau thuan — hai

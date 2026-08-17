@@ -124,3 +124,4 @@ canh_bao_moi_truong_luc_cap: >-
   Ngoài ra `claude` sẽ báo "Ignoring 14 permissions.allow entries… workspace has not been
   trusted" — allowlist của kho KHÔNG áp dụng cho phiên reviewer; đó là bình thường, không
   phải lỗi.
+posted_comment_id: 5317557156   # workflow ghi, ĐỪNG sửa tay

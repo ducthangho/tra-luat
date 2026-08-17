@@ -24,20 +24,38 @@ verdict_doi_chieu: 'diff -u nguồn <-> tệp đã chép: 0 dòng lệch'
 evidence_channel: repo_file
 evidence_url: https://github.com/ducthangho/tra-luat/blob/9d3e3e9e399397ee958e0f87c1af60f8cf2621fb/ops/reviews/tao-tag-luu-tru-review-1-codex-verdict.md
 evidence_url_han_che: >-
-  Trỏ commit ĐẦU TIÊN chứa tệp verdict. Commit ấy hiện chỉ được nhánh `ops/**` giữ; nó
-  BỀN khi PR #147 land bằng MERGE COMMIT (squash sẽ làm nó mất tổ tiên). Xem `truy_xuat_*`.
+  Trỏ commit ĐẦU TIÊN chứa tệp verdict. ĐIỀU KIỆN NÊU Ở BẢN ĐẦU NAY ĐÃ THOẢ: PR #147
+  land bằng MERGE COMMIT (`64451c5`), không squash, nên commit giữ nguyên tổ tiên.
+  Ngoài ra đã có tag neo — xem `truy_xuat_*`.
 
 published_first:
   branch: ops/tao-tag-luu-tru
   commit: 9d3e3e9e399397ee958e0f87c1af60f8cf2621fb
 
+# BA TRẠNG THÁI, KHÔNG PHẢI HAI. Khoá `_tai_lan_do` giữ nguyên `false` vì nó nói về
+# LÚC ĐO; sửa một khoá lịch sử cho hợp hiện tại là làm hỏng chính thứ nó ghi.
 truy_xuat_published_qua_tag_tai_lan_do: false
-truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_published_duoc_bao_dam_lau_dai: true
+truy_xuat_tag: luu-tru/tao-tag-luu-tru-verdict-1
+truy_xuat_tag_tao_luc_utc: '2026-08-17T11:23:46Z'
+truy_xuat_tag_tao_bang: >-
+  `ops-don-ref.yml` (`workflow_dispatch`, run 32024701327, job `don` success), sau một
+  lượt THỬ KHÔ in đúng hai cặp. Workflow tự đọc lại ref sau khi tạo và ĐỎ nếu SHA lệch.
+truy_xuat_do_doc_lap: >-
+  KHÔNG tin log của lượt chạy, và KHÔNG dừng ở liệt kê ref — liệt kê chỉ chứng minh cái
+  TÊN còn đó. Dùng đúng phép đo tiền lệ của `README.md`: `git init` một kho TRỐNG, fetch
+  ĐÚNG một ref `refs/tags/luu-tru/tao-tag-luu-tru-verdict-1`, rồi băm lại tệp verdict
+  trong kho ấy. Kết quả `9d3e3e9e399397ee958e0f87c1af60f8cf2621fb`, băm
+  `be342cc414a115af7fc5e7b188d90bf539453d448f872e2f1b7d5667a3109cfb`, 2841 byte — khớp
+  `verdict_sha256` và `verdict_bytes` ở trên. Tức một kho KHÔNG có gì ngoài tag này vẫn
+  dựng lại được verdict đúng từng byte.
 truy_xuat_ghi_chu: >-
-  CHƯA có tag `luu-tru/*` — và đó chính là thứ PR NÀY sửa: chốt `tao-tag` của
-  `ops-don-ref.yml` đang cấm đúng không gian tên `luu-tru/`, tức trình tự lưu trữ do
-  `CLAUDE.md` quy định TỰ CHẶN chính nó. Sau khi #147 land thì mới tạo được tag, nên
-  biên nhận này (và biên nhận lượt 9 của #146) là hai mục đầu tiên dùng được đường ấy.
+  ĐÂY LÀ VÒNG KHÉP KÍN CỦA CHÍNH BẢN VÁ NÀY. Bản đầu của biên nhận khai CHƯA có tag, vì
+  chốt `tao-tag` khi ấy cấm đúng không gian tên `luu-tru/` — trình tự lưu trữ do
+  `CLAUDE.md` quy định TỰ CHẶN chính nó. #147 gỡ đúng chỗ đó, rồi hai tag đầu tiên
+  (`luu-tru/doctor-github-mcp-verdict-9` và tag này) được tạo bằng chính đường vừa mở.
+  Nói cách khác: verdict duyệt bản vá này được neo bền bằng chính bản vá nó duyệt.
+  Tag này KHÔNG xoá được qua `ops-don-ref` — `xoa-tag` dưới `luu-tru/` cấm tuyệt đối.
 
 # BẢN VÁ NÀY MỞ MỘT CHỐT AN NINH — mục kiểm 1 của lease là câu hỏi quan trọng nhất.
 pham_vi_mo_reviewer_do_duoc:
@@ -121,7 +139,10 @@ receipt_basis: >-
   `lease_id`/`verdict`/`reviewed_sha` từ tệp lease; `published_first` là commit đầu tiên
   chứa tệp verdict, đo bằng `git log --oneline -1` ngay sau khi commit.
 receipt_khong_khai:
-- Không khai `evidence_url` là BỀN — nó chỉ bền sau khi #147 land bằng MERGE COMMIT.
+- >-
+    Điều kiện của bản đầu ("chỉ bền sau khi #147 land bằng MERGE COMMIT") ĐÃ THOẢ, và nay
+    còn thêm tag neo. Vẫn KHÔNG khai là bất khả xâm — proxy chặn xoá ref nhưng VẪN cho
+    `git push --force`, nên dòng dõi master có thể mất; thứ giữ được là TAG.
 - Không khai bản vá này làm `xoa-nhanh` an toàn hơn; nó KHÔNG đụng `xoa-nhanh`.
 - Không khai hai nợ trên đã đóng. Chúng còn nguyên.
 - Không khai `actionlint` xanh ở môi trường reviewer — ở đó nó KHÔNG ĐO ĐƯỢC.

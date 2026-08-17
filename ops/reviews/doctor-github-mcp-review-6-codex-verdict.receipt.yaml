@@ -40,21 +40,32 @@ evidence_channel: repo_file
 # đang tạo ra nó.
 evidence_url: https://github.com/ducthangho/tra-luat/blob/4920113a639d81385c0f98b1488c0f497776d2ff/ops/reviews/doctor-github-mcp-review-6-codex-verdict.md
 evidence_url_han_che: >-
-  Commit này hiện CHỈ được giữ bởi nhánh `ops/doctor-github-qua-mcp`. Nếu nhánh ấy bị xoá
-  mà chưa có tag `luu-tru/*` hay chưa land lên master thì URL trên thành SHA không tra
-  được. Đọc `truy_xuat_*` bên dưới.
+  KHÔNG còn phụ thuộc nhánh `ops/doctor-github-qua-mcp`: #146 đã land bằng merge commit
+  nên `4920113a` là tổ tiên của master. Nhưng bảo đảm ở đây là DÒNG DÕI, không phải tag —
+  yếu hơn hai biên nhận `review-9` và `tao-tag-luu-tru-review-1`. Đọc `truy_xuat_*`.
 
 published_first:
   branch: ops/doctor-github-qua-mcp
   commit: 4920113a639d81385c0f98b1488c0f497776d2ff
 
+# Khoá `_tai_lan_do` nói về LÚC ĐO, giữ nguyên. Trạng thái hiện nay ở khoá dưới.
 truy_xuat_published_qua_tag_tai_lan_do: false
-truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_published_duoc_bao_dam_lau_dai: true
+truy_xuat_bao_dam_bang: master-ancestry
+truy_xuat_tag: null
+truy_xuat_do_doc_lap: >-
+  `git merge-base --is-ancestor 4920113a639d81385c0f98b1488c0f497776d2ff origin/master`
+  -> rc=0. Tệp verdict giải từ `origin/master` và từ chính `4920113a` cùng băm
+  `9a43439d16aade70697704d7caaec99a331cf625b1e302d382431410c87fd169`.
 truy_xuat_ghi_chu: >-
-  CHƯA có tag `luu-tru/*` cho commit này, và verdict chưa land lên master — nên hiện
-  KHÔNG có ref bền nào giữ nó ngoài nhánh `ops/**`. Trước khi xoá nhánh: tạo tag lưu trữ
-  HOẶC land lên master, rồi cập nhật `evidence_url`. Đúng thứ tự mà các biên nhận
-  `wp55-r4-*` đã phải học bằng cách làm sai một lần.
+  ĐÃ LAND: PR #146 merge bằng MERGE COMMIT `f9730f6`, nên `4920113a` là tổ tiên của
+  master và `evidence_url` tra được không phụ thuộc nhánh `ops/**`.
+  NÓI RÕ CHỖ YẾU HƠN HAI BIÊN NHẬN KIA: commit này KHÔNG có tag `luu-tru/*` riêng —
+  bảo đảm của nó là DÒNG DÕI master, không phải mỏ neo tag. Hai thứ đó không tương
+  đương: dòng dõi mất nếu master bị ép lùi (proxy chặn xoá ref nhưng VẪN cho
+  `git push --force`, đã ghi trong `CLAUDE.md`), còn tag thì `xoa-tag` dưới `luu-tru/`
+  cấm tuyệt đối. Muốn ngang bằng thì tạo thêm một tag trỏ `4920113a` — CHƯA làm, và
+  chưa làm thì đừng khai là đã làm.
 
 # CHUỖI SÁU LƯỢT — ghi ra vì mục lục chỉ có một hàng thì người đọc sẽ tưởng bản vá này
 # được duyệt ngay lượt đầu. Nó KHÔNG. Năm lượt `changes_requested` liên tiếp, và bốn lượt

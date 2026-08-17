@@ -1,13 +1,19 @@
 # Kế hoạch triển khai Protocol đa phiên Claude–Codex
 
 - **Trạng thái:** Kế hoạch thi công chi tiết
-- **Ngày chốt:** 2026-08-03
-- **Nguồn chuẩn:** `docs/PROTOCOL_DA_PHIEN.md`, ADR-0017–ADR-0034
+- **Ngày chốt gốc:** 2026-08-03; **hồ sơ điều chỉnh:** 2026-08-17
+- **Nguồn chuẩn:** `docs/PROTOCOL_DA_PHIEN.md`, ADR-0017–ADR-0042; bundle A–G và D1/D2 được chủ kho
+  duyệt sau thẩm định chung Claude–Codex ngày 2026-08-17
 - **Mục tiêu:** từ repo hiện tại đi tới hai executor Claude/Codex chạy song song an toàn, tự bàn giao,
   tiếp tục qua Windows/cloud/Android và land có phê duyệt.
 
 Tài liệu này là kế hoạch thi công, không thay thế protocol. Ký hiệu
 `planned:<repo-relative-path>` chỉ tệp/thư mục sẽ tạo trong pha tương ứng, chưa khẳng định nó đang tồn tại.
+
+> **Active rollout amendment (2026-08-17):** M1–M3 tại §4.1–§4.5 và execution dossier
+> `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md` điều chỉnh thứ tự thi công hiện tại. Runbook §7–§9 là thiết kế
+> long-horizon có từ bản gốc, không phải lệnh để chạy M1–M3. Khi khác nhau, protocol thắng; dossier chỉ giữ cú
+> pháp/capability route và không tạo authority.
 
 ## 1. Kết quả cuối cùng cần đạt
 
@@ -36,6 +42,13 @@ Kiểm tại 2026-08-03:
 - `.gitattributes` vẫn `* -text`; `CLAUDE.md` vẫn bắt mọi phiên bump release metadata;
 - chưa có fragment harness, change-impact policy, Issue Forms, adapters, dispatcher, reconciler, local controller
   hay `land apply` operation.
+
+Đo lại trong worktree kế hoạch ngày 2026-08-17, base `1a6aedf6`: Claude Code `2.1.233` có `opus`/effort `max`;
+Codex CLI `0.146.0` có mặt nhưng doctor trong sandbox chưa live-prove được. Thẩm định sau đó đo trên host
+rằng candidate `codex.CMD login status` chạy được, còn GitHub/PyYAML cũng khác theo môi trường. Hai câu cùng
+đúng theo fingerprint riêng; mỗi fingerprint phải kèm actor/environment/time và candidate path/error, không được
+ghi đè thành kết luận vĩnh viễn về kho hay tài khoản. Mỗi Mission phải chạy lại `launcher.py doctor` và ghi
+kết quả; W0-M3 sửa probe candidate trước khi dùng doctor để kết luận auth.
 
 Hệ quả: chưa được chạy hai **writer code** theo protocol ngay. Trước activation, chỉ cho phép hai phiên
 read-only hoặc pilot thủ công với write set do người giữ đối chiếu.
@@ -82,6 +95,121 @@ flowchart LR
 `Foundation complete` chỉ ở F4. `Mission automation complete` chỉ sau A8. A9 là pha hardening mở rộng,
 không được chặn hoặc chen vào critical path A2–A8.
 
+### 4.1 Điều chỉnh ưu tiên 2026-08-17 — evidence trước, authority sau
+
+Điều chỉnh này bổ sung các Packet nhỏ vào roadmap hiện hữu, không đổi đích D0–A9. Mỗi Wave chỉ cho tối đa hai
+Executor writer và chỉ chạy song song khi effective write set không giao; integration/land vẫn single-writer.
+
+| Wave/Packet | Giá trị độc lập | Ràng buộc triển khai |
+|---|---|---|
+| **W0-M1** | Sửa summary `launcher_test`: `BO QUA` không được tính là qua | Packet nhỏ, phản chứng pass→skip làm tử số giảm; không gộp với thay đổi launcher khác |
+| **W0-M3** | Doctor gọi đúng candidate path và thử candidate kế | Ghi path+lỗi từng candidate; phân biệt probe hỏng với auth không khả dụng; không gộp decode |
+| **W0-M4** | Deadline absolute wall-clock sống qua Modern Standby | Wait theo lát, so lại wall deadline; ghi working-state clock đã kiểm chứng; không auto-void |
+| **W0-M2** | Làm `launcher.py doctor --json` sạch encoding trên Windows | Đã tái hiện reader thread `cp1258` ném `UnicodeDecodeError` nhưng rc=0; fixture byte không giải mã được phải cho JSON/stderr tất định |
+| **W0-R1** | Tách review-call/executor-call/valid-round + Review Rescue Checkpoint trong state machine/tests | Call review đã tốn token tách khỏi round hợp lệ và executor ceiling; Codex review call thứ ba bị từ chối; slice sai dependency/assurance phải đỏ |
+| **W0-R2** | Nâng `review_delivery_receipt` hiện có lên v2 | Tách model reviewer/submitter, anchor strength và allowlist 11 legacy receipt; không sửa cổng lease |
+| **W0-R3** | Packet state chỉ nhận receipt ID/hash đã validate | Không sao chép raw identity fields thành schema song song; v1 không nâng quyền thành evidence v2 |
+| **W0-C1** | Offline fixtures/verifier cho connector | Chưa workflow blocking, chưa credential; cover stale, finding exact-head, missing/ambiguous/API error |
+| **W1-P1** | Thống nhất prompt transport launcher và structured verdict schema | Chứng minh prompt thật sự tới model/consumer; schema đúng shape nhưng sai SHA/semantics vẫn đỏ |
+| **W1-G1** | Dựng lại base behavior của `gate_lifecycle` trên master mới | Chỉ lấy hành vi/fixture từ WIP cũ; review/land base trước mutation |
+| **W1-G2** | Mutation matrix cho `gate_lifecycle.py` | PR riêng sau W1-G1; survivor/mutant không chạy không được biến mất khỏi mẫu số |
+| **W1-C2a** | Shadow aggregator thuần từ connector verifier | Không workflow/credential/authority; là Codex Executor candidate nếu budget cho phép |
+| **W1-C2b** | Nối verifier vào workflow shadow từ mã default branch | Không execute mã PR; đo positive/finding/missing channels trước khi có quyền chặn; Claude làm Executor |
+| **W1-S1** | Đồng bộ `cross-review` adapter với prompt/receipt/state contract đã land | Chỉ sau W1-P1+W0-R3; trước đó giữ prepared sandbox/closed read scope hiện tại và khai transport caveat |
+| **W2-A1** | Quyết định positive provider contract sau số đo shadow | Không suy clean từ absence, reaction hoặc `COMMENTED` |
+| **W2-A2** | Dedicated App/check blocking nếu W2-A1 chứng minh có nhu cầu | App chỉ là publisher exact-head; không tự nhận là model provenance |
+
+Không cài `gh-aw` trên critical path. Nếu sau này thử, nó chỉ là canary adapter có billing/WIF được duyệt,
+feature flag, quota, kill switch và đường lùi như protocol §6.
+
+Nhánh `origin/codex/gate-lifecycle` tại thời điểm điều chỉnh chậm master 158 commit và có ba commit riêng, diff
+21 tệp. W1-G1 không rebase/merge nguyên nhánh này: Executor lập inventory behavior/fixture, đối chiếu master rồi
+chuyển từng capability còn thiếu thành thay đổi tối thiểu trên base mới. Mỗi capability phải có phản chứng chạy
+được; code đã có trong WIP nhưng không còn cần trên master phải bị loại có lý do, không port theo sự hiện diện.
+
+### 4.2 Ba Mission thi công, không dùng mega-Mission
+
+| Mission | Packet | Điều kiện mở | Điều kiện land/đóng |
+|---|---|---|---|
+| **M1 — Evidence Truth** | W0-M1, W0-M3, W0-M4, W0-M2, W0-R1, W0-R2, W0-R3, W0-C1 | plan/MCR được duyệt; base từ canonical mới nhất | từng capability có phản chứng; land PR riêng; canonical readback trước M2 |
+| **M2 — Execution & Shadow** | W1-P1, W1-G1, W1-G2, W1-C2a, W1-C2b, W1-S1 | M1 đã landed và readback; không còn lease M1 | prompt/evidence exact; gate lifecycle base trước mutation; adapter sau contract; shadow không có blocking authority |
+| **M3 — Blocking Authority** | W2-A1; W2-A2 chỉ khi A1 chứng minh cần | số đo shadow đủ và threat model được duyệt | canary exact-head/readback/negative fixtures; App/required check chỉ bật sau human approval |
+
+Mỗi Mission có Issue, integration branch và draft land PR riêng; tối đa hai Executor writer với effective write
+set không giao. Dependency giữa Mission chỉ được coi là đạt sau canonical readback của Mission trước, không chỉ
+vì PR đã merge vào integration. M2/M3 bị pause không giữ lại giá trị của M1; M3 không cần mở nếu connector/provider
+contract đã đáp ứng nhu cầu mà không thêm publisher mới.
+
+### 4.3 Ranh giới tự động hóa: Thin Orchestration
+
+V1 không xây thêm daemon/TUI/orchestrator tổng quát và không cài một dự án orchestrator ngoài. Nó mở rộng các
+seam hiện có trong `launcher.py`, `packet_loop.py`, ba skill và GitHub Issue/PR bằng thay đổi nhỏ có phản chứng.
+Máy chỉ tự quyết định phần tất định: validate schema/state, tính Review Class, giữ budget, neo evidence/exact SHA,
+phát hiện Review Rescue Checkpoint và kiểm state transition. Human giữ các quyết định có thể đổi outcome hoặc
+authority: chọn Stable Slice, revision Packet/Mission/thiết kế, land và bật Dedicated App/required check.
+
+Auto-dispatch chỉ được đưa ra quyết định promote sau tối thiểu ba Mission thực tế liên tiếp đã landed và canonical
+readback, không có stale review/lease, out-of-effective-write-set hay reviewer/publisher identity mismatch. Mỗi
+vi phạm reset chuỗi; đủ ba Mission vẫn chỉ tạo promotion proposal cho human duyệt sau negative fixtures, canary
+và kill switch. Trong M1–M2, handoff/prompt còn là artifact sao chép được và human là authority điều phối.
+
+Quy tắc này ưu tiên năng lực đã chứng minh hơn sự hiện diện của hạ tầng: mỗi automation mới phải chỉ ra thao tác
+thủ công hiện hữu mà nó thay thế, fixture âm chống đường fail-open và phép readback xác nhận kết quả thực tế.
+
+### 4.4 Hai writer slot và hàng đợi ưu tiên
+
+Mỗi Packet dùng một worktree/branch riêng; chỉ chạy tối đa hai Executor writer có effective write set không giao.
+Claude Opus/max là mặc định và chiếm ít nhất 70% ngân sách Executor dự kiến mỗi Mission. Codex Executor có trần
+30%, chỉ nhận Packet `routine`/`systemic` nhỏ, đóng, độc lập sau khi đã reserve Codex review cho các PR `sensitive`
+được chọn và chỉ định human audit cho phần còn lại; tỷ lệ Codex thực có thể bằng 0. Reviewer read-only không chiếm
+writer slot, nhưng branch phải đóng băng tại exact PR head cho tới khi verdict được ghi. Không lấp slot bằng việc
+chưa đủ dependency/lease hoặc có write-set overlap.
+
+Rework không preempt writer đang chạy. Khi slot kế tiếp mở: cùng priority thì rework đi trước Packet chưa
+mở; khác priority thì P cao hơn đi trước rework P thấp hơn. Mọi write set dùng path/prefix repo-relative
+có thể so máy; `planned:` chỉ đánh dấu path chưa tồn tại, không thay path bằng prose.
+
+Deadline khởi điểm là 90 phút cho cả Executor và Reviewer, absolute wall clock và fail-closed. Không
+tự sửa power policy hay đổi sang active-time. W0-M4 ghi wall/working-state evidence bằng clock đã kiểm
+chứng, không auto-void; profile chỉ được xem lại sau 3–5 run thật.
+
+Thứ tự cấp slot là:
+
+1. M1 mở song song **W0-M1** và **W0-R1** bằng Claude. Hai lane serial là
+   `W0-M1 → W0-M3 → W0-M4 → W0-M2` và `W0-R1 → W0-R2 → W0-R3`. **W0-C1** là ứng viên
+   Codex Executor, lấy slot an toàn đầu tiên sau khi một lane đóng/yield nếu review reservation/trần Mission
+   còn đủ; nếu không dùng Claude.
+2. M2 mở song song **W1-P1** và **W1-G1** bằng Claude. **W1-G2** chỉ ready sau W1-G1; **W1-C2a** là ứng viên
+   Codex Executor, còn **W1-C2b** chỉ ready sau C2a và do Claude thực hiện. **W1-S1** chỉ ready sau
+   W1-P1+W0-R3. P0 luôn đứng trước P1.
+3. M3 chỉ mở sau M2 canonical readback và quyết định W2-A1; W2-A2 không được giữ slot nếu chưa có bằng chứng cần
+   publisher mới.
+
+Khi một Packet vào review, Executor của Packet đó ngừng ghi nhưng writer slot có thể cấp cho Packet độc lập khác.
+Sau `changes_requested`, cùng Executor gom finding thành một lượt vá trước rereview; không gọi Codex xen giữa từng
+finding. Scheduler phải ghi lý do khi bỏ qua Packet ưu tiên cao hơn, không chỉ ghi rằng một slot đang trống.
+
+Path map M1/M2 được đóng băng chi tiết trong `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md`; đáng chú ý,
+W0-R2 không chạm `ops/lease_publish.py`, W1-G2 chỉ sửa test/mutation runner và W1-S1 chỉ sửa
+`.claude/skills/cross-review/SKILL.md`.
+
+### 4.5 Evidence review chưa phải GitHub authority
+
+Trong M1–M2, Codex review chạy read-only qua `launcher.py`; evidence neo exact PR head, output hash và
+`model_reviewer_identity`. Nếu một human/Claude session chép hoặc đăng kết quả, nó ghi đúng
+`github_submitter_identity` riêng. Evidence hợp lệ có thể đạt assurance `cross_approved` trong Packet state nhưng
+không phát required check, không tự authorize merge và không được đọc tài khoản tác giả thành reviewer độc lập.
+Packet `sensitive` cần human Land Approver readback verdict/receipt trên exact head trước khi land.
+
+W2-A1 chỉ quyết định contract positive sau shadow. W2-A2 chỉ dựng Dedicated App/Check Run khi cần publisher
+authority độc lập; canary phải chứng minh exact-head, identity readback và negative path trước human activation.
+Receipt nằm trên PR branch chỉ là mirror, không phải trust root của required check.
+
+W0-R2 nâng receipt hiện có lên v2 thay vì dựng record song song. Identity bắt buộc cho receipt mới; 11 receipt
+v1 cũ giữ nguyên, historical/read-only và không đủ cho identity required check mới. Miễn trừ legacy dùng
+allowlist đóng băng filename+hash, không tin `schema_version` do tác giả tự khai. W0-R3 nối receipt ID/hash đã
+validate vào state; không sao chép raw identity fields.
+
 ## 5. Kế hoạch work packet chi tiết
 
 ### D0 — Bootstrap tài liệu trên worktree sạch
@@ -100,7 +228,7 @@ canonical bằng reset.
 | Packet | Nội dung | Phụ thuộc | Nghiệm thu |
 |---|---|---|---|
 | T0-01 | Gỡ cài Claude npm bị lệch platform; cài một bản native/WinGet duy nhất | D0 | `claude --version`, `claude doctor`, login và workspace trust qua |
-| T0-02 | Kiểm Codex CLI/app, Git, GitHub CLI, Python 3.12, PowerShell 7 | D0 | tất cả `--version`/`gh auth status` xanh; không lộ token |
+| T0-02 | Kiểm Codex CLI/app, Git, Python, PowerShell và GitHub capability route bằng launcher doctor | D0 | đo khả dụng chứ không chỉ PATH; remote dùng MCP GitHub + git khi đó là route khỏe; không cài `gh` để chữa môi trường không dùng nó |
 | T0-03 | Chốt nhãn, environment và actor allowlist trên GitHub | D0 | có owner, backup owner và test account không quyền |
 | T0-04 | Kiểm kê worktree/PR/branch đang sống | D0 | mỗi writer có owner và quyết định finish/push/close |
 
@@ -147,8 +275,8 @@ Sau F2, có thể chạy tối đa hai packet trong các nhóm ghi không giao. 
 | Packet | Nhóm ghi | Nội dung | Phụ thuộc |
 |---|---|---|---|
 | F3-00 | Governance contract | glossary; MCR/revision; durable orchestration; `gh-aw` adapter boundary; tiered selftest; manual successor prompt; review/land authority; ADR | MCR-54-02 |
-| F3-01 | GitHub schema | Issue Forms mission/packet/change request, JSON schema handoff/review/land/state/command | F2, F3-00 |
-| F3-02 | Impact policy | policy/schema/stdlib validator, closure có hướng, candidate report read-only | F2, F3-00 |
+| F3-01 | GitHub schema | Issue Forms mission/packet/change request, JSON schema handoff/review/land/state/command, `review_class` khai báo + effective | F2, F3-00 |
+| F3-02 | Impact policy | policy/schema/stdlib validator, closure có hướng, review-class classifier fail-closed, candidate report read-only | F2, F3-00 |
 | F3-03 | Agent adapters | `work-packet`, `cross-review`, `land-packets`; `CLAUDE.md` và `AGENTS.md` chỉ trỏ protocol | F2, F3-00 |
 | F3-04 | Security | permissions tối thiểu, security paths, CODEOWNERS, cấm LIVE credential trong worker | F2, F3-00 |
 | F3-05 | Derived metadata | `planned:changelog.d/`, worker cấm version/r number, land-owned metadata | F1, F2, F3-00 |
@@ -228,7 +356,9 @@ Nếu tài khoản không có credential automation được hỗ trợ, A4 `pau
 
 ### A5 — Dual provider và review phân tầng
 
-- A5-01: adapter Claude và Codex cùng executor contract.
+- A5-01: adapter Claude và Codex cùng executor contract; cấu hình vận hành mặc định Claude Code
+  `--model opus --effort max` làm Executor code chính; Mission budget dành Claude tối thiểu 70%, trần Codex
+  Executor 30% sau khi reserve review, không ép tiêu đủ trần.
 - A5-02: reconciler nhận Executor evidence, validate exact identity rồi tự dispatch reviewer context/worktree mới,
   read-only; verdict schema `approve|changes_requested|blocked`.
 - A5-03: `cross_approved`, `human_audited` (GitHub identity bền, độc lập, audit evidence + verdict trên exact SHA),
@@ -237,6 +367,19 @@ Nếu tài khoản không có credential automation được hỗ trợ, A4 `pau
 - A5-05: canary hai packet không giao; Claude review Codex và Codex review Claude.
 - A5-06: `changes_requested` trả stable finding IDs cho Executor generation hợp lệ; commit mới tự thu hồi verdict,
   CI và authorization cũ; approve mới cho phép frontier kế tiếp.
+- A5-07: review-budget router chỉ cấp Codex cho Packet giá trị/rủi ro cao và tối đa hai lượt mỗi PR; lượt hai
+  chưa approve sinh checkpoint tách/xem lại thiết kế, không tự gọi lượt ba. Fixture phải chứng minh Packet thường
+  fallback đúng `same_provider_approved`/`human_audited`, còn phạm vi nhạy cảm vẫn dừng chờ Codex hoặc human audit.
+- A5-07a: state tách `codex_review_calls_used`, `codex_executor_calls_used` và `review_rounds_used`; call review đã
+  sinh output/token vẫn tiêu review cap khi timeout/sai schema, còn preflight/permission/rate-limit trước generation
+  không tiêu call. Raw output sai schema fail-closed, không auto-retry; đổi prompt/session không reset bộ đếm.
+  Review cap và executor ceiling không vay lẫn nhau.
+- A5-08: Review Rescue Checkpoint dựng Stable Slice thành Packet/PR sạch và Remediation Slice thành successor,
+  bảo toàn finding IDs/dependency/audit. Fixture phải làm đỏ khi slice phụ thuộc phần lỗi, thiếu acceptance riêng,
+  làm yếu gate, tái dùng review SHA cũ hoặc cùng hình dạng lỗi lần ba vẫn bị đưa về rework thường.
+- A5-09: review-class router lấy mức cao hơn giữa khai báo và classifier; unknown/error thành `sensitive`,
+  Executor không hạ lớp. Fixture cover ba lớp, ngưỡng ba downstream consumer, path authority/security và human
+  override có audit; quota reservation/report tách theo lớp để chứng minh Codex không bị dùng cho `routine`.
 
 ### A6 — Successor tự động và Android
 
@@ -360,6 +503,10 @@ network surface ngoài allowlist; riêng pilot A9-06 xét theo đúng tiểu m�
 | A9 skill engineering | 2 nếu write set không giao | core skill/eval single-writer; upstream research/pilot chỉ read-only hoặc sandbox độc lập |
 
 ## 7. Runbook cài đặt và kiểm tra Windows
+
+> **Không dùng mục 7–9 để khởi động M1–M3.** Đây là runbook đích của kế hoạch gốc. Rollout hiện tại dùng
+> `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md`, chạy `launcher.py doctor` trước rồi chọn route theo capability thực;
+> không gỡ/cài công cụ hay dùng `gh` chỉ vì ví dụ lịch sử dưới đây có lệnh đó.
 
 ### 7.1 Sửa Claude Code trước
 

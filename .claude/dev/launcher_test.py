@@ -3795,6 +3795,162 @@ def t116_moi_ham_ca_phai_duoc_DANG_KY_bang_decorator():
 
 
 @ca
+def t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua():
+    """`N/N` chỉ được xuất hiện khi ĐÚNG N ca đã CHẠY và QUA.
+
+    Dòng kết luận cũ lấy `qua + bo_qua` làm tử số, nên trên Windows — nơi nhiều ca
+    tự bỏ qua vì cần POSIX — nó in `118/118 ca` với `bo qua 13` nằm trong ngoặc.
+    CLAUDE.md dạy đúng cách đọc bằng chứng dương là "đòi `N/N` với hai số BẰNG
+    NHAU", nên chính dòng ấy trao cho người đọc dấu hiệu tin được của một lượt
+    chạy mà 13 ca chưa hề đo. (Bộ số neo tại `99ba7857`, ba kênh độc lập cùng
+    ra `qua=105, bo_qua=13, tong=118`: máy dev cp1258, CI windows-latest, PR
+    #153. Bản đầu của docstring này ghi `117/117` với `bo qua 14` — không khớp
+    phép đo nào tại head ấy; nếu từng là số thật thì thuộc một tree cũ không
+    còn định danh được — review W0-M1 bắt, P3.) Đây là
+    `t116` ở tầng BÁO CÁO: ở đó tổng tụt một mà
+    vẫn in `114/114`; ở đây tổng đúng mà tử số phồng lên bằng số ca không chạy.
+
+    Ca này KHÔNG gọi CLI vì thứ cần đo là một phép tính thuần: `dong_ket_qua` đã
+    được tách khỏi `main` đúng vì lý do đó (cùng lý lẽ khiến `chay_bo_ca` được
+    tách cho `t99`). Khối (c) vẫn đi qua ĐƯỜNG ĐẾM THẬT `chay_bo_ca`, nên nó đo
+    hành vi chứ không đo lại một hằng số tôi vừa gõ.
+
+    GIỚI HẠN — khai thẳng: ca này khoá SỰ THẬT CỦA DÒNG BÁO CÁO, không khoá mã
+    thoát. `main` vẫn `return 1 if hong_ds else 0`, tức ca bỏ qua vẫn cho rc=0;
+    bản vá này CỐ Ý không đổi điều đó, và ca này cũng không chứng minh được điều
+    đó (muốn chứng minh phải chạy CLI trên một nền có ca tự bỏ qua — mà cổng phụ
+    thuộc nơi chạy thì chưa phải cổng). Đổi rc là quyết định riêng, Packet riêng.
+    """
+    # (a) khong bo qua, khong hong: N/N la HOP LE va phai duoc giu nguyen suc nang
+    d = dong_ket_qua(10, 10, 0, 0)
+    bang(d.startswith("10/10 "), f"da lam mat N/N cua luot chay SACH: {d!r}")
+    bang("BO QUA" not in d, f"khong co ca bo qua ma van canh bao: {d!r}")
+
+    # (b) co ca bo qua: tu so PHAI la so ca qua, KHONG duoc la `qua + bo_qua`
+    d = dong_ket_qua(10, 7, 3, 0)
+    bang(d.startswith("7/10 "),
+         f"tu so dem ca BO QUA la da qua - dong doc thanh N/N gia: {d!r}")
+    bang("10/10" not in d,
+         f"con nguyen hinh dang N/N du 3 ca chua chay: {d!r}")
+    bang("3" in d and "BO QUA" in d, f"khong noi ro co ca bo qua: {d!r}")
+    # Ngay ca cau canh bao cung khong duoc chua cap so - nguoi doc luot qua se
+    # bat lai dung hinh dang vua go.
+    import re as _re
+    bang(not _re.search(r"(\d+)/\1(?!\d)", d),
+         f"dong con chua mot cap N/N o dau do: {d!r}")
+
+    # (c) PHAN CHUNG: bien DUNG MOT ca qua thanh BO QUA, di qua duong dem THAT.
+    def ca_qua_1():
+        pass
+
+    def ca_qua_2():
+        pass
+
+    def ca_moc():          # luot 1: qua
+        pass
+
+    def ca_moc_bo_qua():   # luot 2: cung vi tri, nhung tu bo qua
+        return "co tinh bo qua"
+
+    def dem(ds):
+        cu = sys.stdout
+        sys.stdout = io.StringIO()      # nuot dong "BO QUA ..." cua ca gia
+        try:
+            return chay_bo_ca(ds)
+        finally:
+            sys.stdout = cu
+
+    q1, b1, h1 = dem([ca_qua_1, ca_qua_2, ca_moc])
+    q2, b2, h2 = dem([ca_qua_1, ca_qua_2, ca_moc_bo_qua])
+    bang((q1, b1, len(h1)) == (3, 0, 0),
+         f"fixture hong: luot dau phai 3 qua/0 bo qua/0 hong, duoc {q1}/{b1}/{len(h1)}")
+    bang((q2, b2, len(h2)) == (2, 1, 0),
+         f"fixture hong: luot sau phai 2 qua/1 bo qua/0 hong, duoc {q2}/{b2}/{len(h2)}")
+    bang(q2 == q1 - 1,
+         f"doi mot ca QUA thanh BO QUA ma so passed KHONG giam: {q1} -> {q2}")
+    truoc = dong_ket_qua(3, q1, b1, len(h1))
+    sau = dong_ket_qua(3, q2, b2, len(h2))
+    bang(truoc.startswith("3/3 "), f"luot sach phai la N/N: {truoc!r}")
+    bang(not sau.startswith("3/3 "),
+         f"van bao N/N sau khi mot ca thanh BO QUA: {sau!r}")
+
+
+@ca
+def t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua():
+    """`dong_ket_qua` đúng mà `main` không GỌI nó thì headline vẫn nói dối được.
+
+    Finding P3 của review W0-M1 (PR #153, head `99ba7857`), tái lập được: mutant
+    thay lời gọi `dong_ket_qua(...)` ở cuối `main` bằng chính f-string cũ
+    `{qua + bo_qua}/{tong}` cho rc=0 mà `t118` vẫn xanh — `t118` đo HÀM, không
+    đo DÂY NỐI, và không ca nào khác đọc headline của nhánh mặc định (đã grep:
+    `main()` chỉ được gọi ở `sys.exit(main())`, chuỗi "ca QUA (" chỉ sinh ở
+    `dong_ket_qua`). Bệnh `t24`/`t116` thêm một tầng: hàm CÓ MẶT trong tệp,
+    có test riêng, mà lượt chạy thật không đi qua nó.
+
+    Đo bằng HÀNH VI, không grep nguồn: assert "nguồn `main` chứa `dong_ket_qua(`"
+    sẽ tha mutant gọi-mà-không-in (`_ = dong_ket_qua(...)` — nguồn vẫn chứa
+    chuỗi ấy mà stdout mất headline). Cũng KHÔNG spawn `--lap-ca` như finding
+    gợi ý: nhánh `--lap-ca` in dòng `LAP ...` riêng của nó, KHÔNG đi qua
+    `dong_ket_qua` (xem `main`) — đo rồi mới thấy gợi ý ấy trỏ nhầm máy in.
+
+    Cách đo: nạp BẢN SAO module này (`_nap_sach`, seam sẵn có của bộ đột biến),
+    thay `CA` bằng ca giả, stub khối tự-khai/tách-nhóm (mỗi khối đã có ca riêng
+    đo nó), rồi gọi `main()` THẬT và đọc stdout. Ba nhánh: sạch (headline phải
+    là N/N đúng nghĩa), có BO QUA (cảnh báo phải RA TỚI stdout và rc giữ 0 —
+    biến câu "Mã thoát KHÔNG đổi" mà `t118` chỉ khai suông thành phép đo), có
+    HONG (rc phải 1).
+
+    GIỚI HẠN — khai thẳng: stub nghĩa là tổ hợp này không đo `khai_moi_truong`
+    lẫn `_tu_tach_nhom_neu_can`; và `sys.exit(main())` dưới `__main__` vẫn
+    ngoài tầm — ca này đo GIÁ TRỊ TRẢ VỀ của `main`, không đo mã thoát tiến
+    trình. Đổi phối hợp (sửa cả `main` lẫn ca này) thì không chống được — cùng
+    giới hạn đã khai ở `t116`.
+    """
+    def _chay_main_voi(ds_ca):
+        m = _nap_sach(Path(__file__))
+        m.CA = list(ds_ca)
+        m.khai_moi_truong = lambda: {}
+        m._mot_dong_moi_truong = lambda mt: "moi truong: (ca thu, da stub)"
+        m._tu_tach_nhom_neu_can = lambda: "bo qua (ca thu, da stub)"
+        m.phan_tich_doi_so = lambda argv: argparse.Namespace(
+            dot_bien=False, moi_truong=False, lap_ca=None, lan=20, nhat_ky=None)
+        ra = io.StringIO()
+        with contextlib.redirect_stdout(ra):
+            rc = m.main()
+        return rc, ra.getvalue()
+
+    def ca_qua():
+        pass
+
+    def ca_bo_qua():
+        return "thieu POSIX (gia lap)"
+
+    def ca_hong():
+        raise AssertionError("hong co tinh")
+
+    # (a) nhanh sach: headline THAT tren stdout phai dung tung byte
+    rc, ra = _chay_main_voi([ca_qua])
+    cuoi = ra.rstrip().splitlines()[-1]
+    bang(rc == 0, f"nhanh sach phai rc=0, duoc {rc}")
+    bang(cuoi == "1/1 ca QUA (bo qua 0, hong 0)",
+         f"headline nhanh mac dinh KHONG di qua dong_ket_qua: {cuoi!r}")
+
+    # (b) co BO QUA: canh bao phai ra toi stdout, va rc GIU 0 (spec W0-M1)
+    rc, ra = _chay_main_voi([ca_qua, ca_bo_qua])
+    cuoi = ra.rstrip().splitlines()[-1]
+    bang(cuoi == "1/2 ca QUA (bo qua 1, hong 0) - KHONG DU: 1 ca BO QUA, chua do gi",
+         f"canh bao BO QUA khong toi duoc stdout: {cuoi!r}")
+    bang(rc == 0, f"bo qua khong duoc doi ma thoat (spec W0-M1) ma rc={rc}")
+
+    # (c) co HONG: rc phai 1 va headline dem dung
+    rc, ra = _chay_main_voi([ca_qua, ca_hong])
+    cuoi = ra.rstrip().splitlines()[-1]
+    bang(rc == 1, f"co ca hong ma rc={rc}")
+    bang(cuoi == "1/2 ca QUA (bo qua 0, hong 1)",
+         f"headline dem hong sai: {cuoi!r}")
+
+
+@ca
 def t101_phan_tich_doi_so_phai_do_NGAY_khong_doi_chay_het_suite():
     """Công cụ chẩn đoán dễ xanh giả thì tệ hơn không có.
 
@@ -4918,6 +5074,36 @@ def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
     return qua, bo_qua, hong_ds
 
 
+def dong_ket_qua(tong: int, qua: int, bo_qua: int, so_hong: int) -> str:
+    """Dòng kết luận của một lượt chạy. TÁCH khỏi `main` để đo được TRỰC TIẾP.
+
+    ĐÃ TRẢ GIÁ: tử số cũ là `qua + bo_qua`, nên một lượt Windows bỏ qua 13 ca vẫn
+    in `118/118 ca` (số ĐO tại `99ba7857`: `qua=105, bo_qua=13, tong=118` — máy
+    dev cp1258, CI windows-latest và PR #153 cùng ra một bộ; bản đầu ghi
+    `117/117`/`bỏ qua 14`, không khớp phép đo nào tại head ấy — review W0-M1
+    bắt, P3) — ĐÚNG hình dạng "N/N với hai số BẰNG NHAU" mà CLAUDE.md dạy
+    là bằng chứng dương đáng tin. Người đọc nhận một câu khẳng định mọi ca đã qua,
+    trong khi có ca chưa hề chạy. Cùng họ với `t24` của kho ("ca CÓ MẶT khác ca có
+    ĐO") và với `t116` ("suite vẫn in 114/114 mà tổng đã tụt một"): chỗ VẮNG MẶT
+    bị chính dòng headline che đi, và "vắng mặt vì sạch" với "vắng mặt vì chưa
+    chạy" trông giống hệt nhau.
+
+    Nay tử số chỉ đếm ca THỰC SỰ qua, và khi còn ca bỏ qua thì dòng nói thẳng ra.
+    Mã thoát KHÔNG đổi (xem `main`): bỏ qua vẫn không làm đỏ. Đây là sửa SỰ THẬT
+    của báo cáo, không phải siết chuẩn ngầm — siết chuẩn là quyết định khác và
+    phải đi qua Packet khác.
+
+    Chuỗi trả về là ASCII: console máy Việt là cp1258 và một câu `print` có dấu
+    ném `UnicodeEncodeError`, giết cả lượt chạy trước khi logic kịp sai. Câu cảnh
+    báo cũng KHÔNG được chứa cặp số nào — nhét "118/118" vào đây là tự dựng lại
+    đúng hình dạng vừa gỡ, cho người đọc lướt qua thấy lại N/N.
+    """
+    dong = f"{qua}/{tong} ca QUA (bo qua {bo_qua}, hong {so_hong})"
+    if bo_qua:
+        dong += f" - KHONG DU: {bo_qua} ca BO QUA, chua do gi"
+    return dong
+
+
 def phan_tich_doi_so(argv):
     """Phân tích đối số TRƯỚC KHI làm bất cứ việc gì. Trả `argparse.Namespace`.
 
@@ -5042,8 +5228,7 @@ def main() -> int:
     tong = len(CA)
     for ten, ly_do in hong_ds:
         print(f"  HONG {ten}: {ly_do}", flush=True)
-    print(f"\n{qua + bo_qua}/{tong} ca (qua {qua}, bo qua {bo_qua}, hong {len(hong_ds)})",
-          flush=True)
+    print("\n" + dong_ket_qua(tong, qua, bo_qua, len(hong_ds)), flush=True)
     return 1 if hong_ds else 0
 
 

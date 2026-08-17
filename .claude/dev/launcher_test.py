@@ -3513,6 +3513,14 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
     for phai_co in ("git", "gh-kho", "rest-kho"):
         bang(phai_co in khoi, f"LAM_DUOC_VIEC thieu duong `{phai_co}`: {khoi!r}")
 
+    # (1b) `rest-kho` khi KHONG DOC DUOC SLUG phai day co `None`, khong phai `False`.
+    #      Chi tiet cua chinh dong ay tu khai "KHONG DO DUOC" — de co `False` thi nhan
+    #      in ra `rest-kho=khong`, tuc noi NGUOC voi chi tiet ngay canh no. Doc THANG
+    #      ma nguon vi goi `_do_github` that se cham mang.
+    bang('("rest-kho", None, "khong doc duoc slug' in nguon,
+         "nhanh khong-doc-duoc-slug cua `rest-kho` phai day co None (chua do duoc), "
+         "khong phai False (da do va hong)")
+
     # (5) BA trang thai phai ket xuat KHAC NHAU — `None` != `False`.
     bang([m._nhan_duong(v) for v in (True, False, None)] == ["OK", "khong", "chua-do-duoc"],
          "ket xuat khong phan biet du ba trang thai cua mot duong")
@@ -3524,6 +3532,7 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
     goc_run, goc_which = m.subprocess.run, m.shutil.which
     mcp_out, co_claude, nhat_ky = [KHOE], [True], []
     ten_mong_doi = ["github"]
+    ENV_SENTINEL = [None]        # dat khi ca TU truyen env; None = goi theo mac dinh
 
     class Rc:
         def __init__(self, rc, out=""):
@@ -3543,7 +3552,18 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
         thay = (tuple(cmd), {k: v for k, v in _k.items() if k != "env" and k != "stdin"})
         nhat_ky.append(thay)
         bang(thay == dac_ta(), f"loi goi `claude` lech dac ta\n  mong: {dac_ta()!r}\n  do  : {thay!r}")
-        bang("env" in _k, "phai truyen env DA CHUAN HOA (bai hoc P2 cua PR #143)")
+        # KIEM GIA TRI, khong chi kiem KHOA CO MAT. Cross-review luot 7 tim duoc dot
+        # bien thu NAM cua lop "do DO GIA" o dung day: `env=moi_truong -> env=None`
+        # SONG SOT, vi chot chi hoi `"env" in _k`. Ma `subprocess.run(env=None)` ke
+        # thua `os.environ` THO — dung lop P2 ma #143 da va.
+        bang(_k.get("env") is not None,
+             f"env=None se ke thua os.environ THO (bien giu cho!) — kwargs={_k!r}")
+        # ...va phai DUNG object da truyen. Doi "la dict" thoi thi mot ban va bo qua
+        # tham so roi lay `os.environ` van qua — `os.environ` cung la dict. Dot bien
+        # `env_da_chuan_tra_ve_os_environ_THO` SONG SOT dung mot luot vi le do.
+        if ENV_SENTINEL[0] is not None:
+            bang(_k["env"] is ENV_SENTINEL[0],
+                 f"env KHONG phai object da truyen — tham so bi bo qua? {_k['env']!r}")
         bang(_k.get("stdin") is not None, "phai dong stdin, kheo CLI treo cho nhap")
         return Rc(0, mcp_out[0])
 
@@ -3557,7 +3577,9 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
                 nhat_ky.clear()
                 kq = m._doc_mcp_json(td)
                 if kq[0]:
-                    kq = (kq[0], kq[1], kq[2], m._suc_khoe_mcp_github(kq[2], {}))
+                    ENV_SENTINEL[0] = {"TL_ENV_DA_CHUAN": "1"}
+                    kq = (kq[0], kq[1], kq[2],
+                          m._suc_khoe_mcp_github(kq[2], ENV_SENTINEL[0]))
                 bang(len(nhat_ky) == mong_goi,
                      f"[{vi_tri}] mong {mong_goi} loi goi `claude`, do {len(nhat_ky)}")
                 return kq
@@ -3630,6 +3652,17 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
                 *_, (tt, mo) = do(1, f"trang thai {xau!r}")
                 bang(tt == mong, f"trang thai {xau!r}: mong {mong}, do {tt} ({mo!r})")
 
+            # GOI THANG THEO MAC DINH (khong truyen env) — ham phai TU chuan hoa,
+            # khong duoc de `None` roi xuong `subprocess.run`. Day la duong ma
+            # cross-review luot 7 chi ra: chot phai bao ve HOP DONG, khong dua vao
+            # viec moi call-site deu nho truyen env.
+            ghi({"mcpServers": {"github": {}}})
+            mcp_out[0] = KHOE
+            nhat_ky.clear()
+            ENV_SENTINEL[0] = None
+            tt, _mo = m._suc_khoe_mcp_github("github")
+            bang(tt == "khoe", f"goi thang theo mac dinh ma tra {tt}")
+
             # ...khong co `claude` de hoi -> KHONG DO DUOC, va KHONG duoc goi gi
             co_claude[0] = False
             mcp_out[0] = KHOE
@@ -3655,6 +3688,13 @@ def t116_moi_ham_ca_phai_duoc_DANG_KY_bang_decorator():
     phép đo nào của lượt chạy thường nhìn thấy chỗ mất ấy.
 
     Chốt này rẻ và tất định: đọc chính tệp này, đếm hai thứ, đòi bằng nhau.
+
+    GIỚI HẠN — KHAI THẲNG, vì cross-review lượt 7 CHỨNG MINH ĐƯỢC chứ không phải suy:
+    chốt lấy CẢ đặc tả LẪN bằng chứng từ cùng một tệp, nên một thay đổi PHỐI HỢP (gỡ
+    `@ca` của `t115` ĐỒNG THỜI sửa bộ quét cho bỏ qua `def t115_`) vẫn qua. Nó bắt được
+    lỗi VÔ TÌNH mất decorator — đúng ca đã xảy ra thật — chứ không chống được sửa đổi có
+    chủ ý. Muốn chống tự-lừa phải neo danh sách ca ở NGUỒN ĐỘC LẬP; chưa làm, và không
+    khai là đã làm.
     """
     import re as _re
     dong = Path(__file__).read_text(encoding="utf-8").splitlines()
@@ -4602,6 +4642,23 @@ DOT_BIEN = [
     ("mcp_hoi_ten_dung_san_thay_vi_ten_da_khai",
      ('        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True, text=True,',
       '        r = subprocess.run(["claude", "mcp", "get", "github"], capture_output=True, text=True,'),
+     ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    # ĐỘT BIẾN CỦA REVIEWER LƯỢT 7 — lượt thứ NĂM của lớp "đo đồ giả", và là lượt đầu
+    # tìm được sau khi chốt đã đảo thành danh sách CHO PHÉP. Giữ cả hai chiều: bỏ chuẩn
+    # hoá trong hàm, và ép `env=None` ở lời gọi.
+    ("mcp_bo_chuan_hoa_env_trong_ham",
+     ('    moi_truong = _env_da_chuan(moi_truong)\n    try:', '    try:'),
+     ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("env_da_chuan_tra_ve_os_environ_THO",
+     ('    if mt is not None:\n        return mt', '    if False:\n        return mt'),
+     ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_ep_env_None_o_loi_goi",
+     ('                           env=moi_truong, stdin=subprocess.DEVNULL,',
+      '                           env=None, stdin=subprocess.DEVNULL,'),
+     ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("rest_kho_khong_do_duoc_bi_gop_thanh_hong",
+     ('        duong.append(("rest-kho", None, "khong doc duoc slug origin -> KHONG DO DUOC"))',
+      '        duong.append(("rest-kho", False, "khong doc duoc slug origin -> KHONG DO DUOC"))'),
      ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_mat_env_da_chuan_hoa",
      ('                           env=moi_truong, stdin=subprocess.DEVNULL,',

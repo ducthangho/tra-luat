@@ -2572,6 +2572,24 @@ _MCP_HONG = ("failed to connect", "pending approval", "not connected",
              "disconnected", "needs authentication")   # khớp TIỀN TỐ (có đuôi chi tiết)
 
 
+def _env_da_chuan(mt: dict[str, str] | None) -> dict[str, str]:
+    """Trả môi trường ĐÃ CHUẨN HOÁ, không bao giờ trả `None`.
+
+    VÌ SAO LÀ HÀM RIÊNG chứ không chép hai dòng như `_do_github`: chép thì đoạn mã
+    TRÙNG KHÍT nhau, mà `chay_dot_bien` thay chỗ khớp ĐẦU TIÊN — nên một đột biến nhắm
+    `_do_github` sẽ lặng lẽ nhảy sang bản sao đứng trước nó, và ca đích không chết nữa.
+    ĐÃ XẢY RA THẬT ở đúng bản vá này: `probe_github_bo_qua_moi_truong_chuan_hoa` (đột
+    biến CÓ SẴN của master, canh `t113`) SỐNG SÓT ngay khi khối MCP được chèn vào phía
+    trên. Không dòng logic nào sai — chốt chỉ mất răng vì trùng chữ. Tách hàm làm hai
+    chỗ khác mặt nhau, nên mỗi đột biến lại nhắm đúng chỗ nó định nhắm.
+    """
+    if mt is not None:
+        return mt
+    if _MOI_TRUONG_DA_DOC is not None:
+        return _MOI_TRUONG_DA_DOC
+    return _doc_moi_truong()[0]
+
+
 def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None]:
     """`.mcp.json` của DỰ ÁN có khai server `github` không, và khai bằng TÊN NÀO.
 
@@ -2673,6 +2691,14 @@ def _suc_khoe_mcp_github(ten: str = "github",
     """
     if not shutil.which("claude"):
         return ("khong_do_duoc", "khong co `claude` de hoi `mcp get`")
+    # CHUAN HOA NGAY TAI DAY, khong tin call-site. `subprocess.run(env=None)` KE THUA
+    # `os.environ` THO — tuc dung bien GIU CHO ma `_doc_moi_truong` vua loai, dung lop
+    # P2 mà #143 đã vá một lần. Bản trước để mặc định `None` đi thẳng xuống, và
+    # cross-review lượt 7 hạ đúng nó: đường sản xuất hiện thời có chuẩn hoá trước khi
+    # gọi, nên chưa tái phát — nhưng chốt phải bảo vệ HỢP ĐỒNG, không dựa vào việc mọi
+    # call-site đều nhớ. Gọi thẳng `_suc_khoe_mcp_github()` theo mặc định là đủ để môi
+    # trường thô lọt xuống.
+    moi_truong = _env_da_chuan(moi_truong)
     try:
         r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True, text=True,
                            env=moi_truong, stdin=subprocess.DEVNULL,
@@ -2792,7 +2818,13 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
         # riêng tư vẫn là `mo` (tới GitHub) nhưng KHÔNG làm được việc.
         duong.append(("rest-kho", ok_kho, mt_kho if ok_kho else f"{mt_kho} [{tt_kho}]"))
     else:
-        duong.append(("rest-kho", False, "khong doc duoc slug origin -> KHONG DO DUOC"))
+        # `None` chứ KHÔNG `False`: không đọc được slug là CHƯA ĐO ĐƯỢC, và chi tiết
+        # đã tự khai thế — để cờ `False` thì `_nhan_duong` in `rest-kho=khong`, tức
+        # nhãn nói NGƯỢC với chi tiết ngay cạnh nó. Người vá bản hoà từng lấy cớ "đổi
+        # nó là đổi ngữ nghĩa một đường đang tính vào LAM_DUOC_VIEC" để không sửa;
+        # cross-review lượt 7 bác đúng: `any(...)` coi `None` và `False` NHƯ NHAU nên
+        # kết luận khả dụng KHÔNG đổi — cái cớ ấy quá rộng, và món nợ là có thật.
+        duong.append(("rest-kho", None, "khong doc duoc slug origin -> KHONG DO DUOC"))
 
     # `gh` mà "đã xác thực" TRONG KHI `rest-kho` bị chặn là bẫy, không phải tin vui:
     # `gh auth status` hỏi `/user` (đường được phép, 200) nên nó tự nhận đăng nhập,

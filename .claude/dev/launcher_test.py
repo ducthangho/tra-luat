@@ -2884,11 +2884,16 @@ def t103_nam_finding_cua_bot_review_PR128():
         def __init__(self, rc):
             self.returncode, self.stdout, self.stderr = rc, "", ""
 
-    for rc_gh, mong in ((1, False), (0, True)):
+    # HOP DONG DA DOI (chu kho chot: moi viec GitHub cua kho di bang MCP). `gh` khong
+    # con duoc lat nhan nua — no la THONG TIN. Ca nay gio doi dung dieu nguoc lai voi
+    # ban dau: `gh auth status` rc=0 KHONG duoc lam `github-api` thanh DUNG_DUOC.
+    # Van doi PHAI GOI `gh auth status` (khong lui ve dem CO MAT), vi phan biet
+    # "chua cai" voi "cai roi chua dang nhap" van la thong tin dang in.
+    for rc_gh in (1, 0):
         m.subprocess.run = lambda *_a, **_k: (goi.append(1), Rc(rc_gh))[1]
-        tt, mo_ta = m._do_github(None)      # KHONG co workspace => chi con duong gh
-        bang((tt == "DUNG_DUOC") is mong,
-             f"gh rc={rc_gh} ma ket luan {tt} (mong kha dung={mong}): {mo_ta!r}")
+        tt, mo_ta = m._do_github_api(None)
+        bang(tt != "DUNG_DUOC",
+             f"gh rc={rc_gh} ma `github-api` thanh {tt} — `gh` KHONG duoc lat nhan: {mo_ta!r}")
     bang(goi, "khong he goi `gh auth status` — van dang do CO MAT")
     m.subprocess.run = goc_run          # tra lai TRUOC khi phan (e) goi bash that
 
@@ -3897,6 +3902,76 @@ class NhatKyCa:
     def dong(self) -> None:
         self.ghi("# XONG TRON VEN")
         self.tep.close()
+
+
+@ca
+def t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh():
+    """`github-api` phải đo ĐÚNG ĐƯỜNG kho dùng (MCP), và khai đúng phạm vi đo được.
+
+    VÌ SAO CÓ CA NÀY. Bản trước gộp `git` + `gh` vào một nhãn `github` và cho BẤT KỲ
+    đường nào OK là `DUNG_DUOC`. Đo được trên master trước khi vá: máy CÓ `gh` đã xác
+    thực nhưng `.mcp.json` KHÔNG khai server github ⇒ `doctor` vẫn báo
+    `DUNG_DUOC github`, trong khi đường thật của kho đã chết. Nó đo đúng một đường mà
+    kho CỐ Ý không cấp phát (`CLAUDE.md`: hook KHÔNG cài `gh` vì "kho dùng GitHub qua
+    MCP") rồi khai thay cho đường được cấp.
+
+    Bốn điều ca này khoá:
+      1. `gh` OK MỘT MÌNH không lật nhãn (phần (a) — cũng đo ở `t103`)
+      2. chưa khai server github  -> CHUA_XAC_THUC (đo được, hỏng thật, chữa được)
+      3. đã khai                  -> KHONG_DO_DUOC, KHÔNG phải DUNG_DUOC
+      4. lời khai nêu rõ ĐỌC Ở GỐC NÀO — `[workspace]` khác `[goc cua launcher]`
+    """
+    import json as _json
+    m = _tai_launcher_thu()
+    goc_run = m.subprocess.run
+
+    class Rc:
+        def __init__(self, rc):
+            self.returncode, self.stdout, self.stderr = rc, "", ""
+
+    # GIA CA `which`, khong chi `run`. Ban dau toi chi gia `run`, va tren may KHONG co
+    # `gh` thi nhanh `if shutil.which("gh")` khong chay — ca nay bien thanh ca do MAY
+    # chu khong do HOP DONG. Do duoc: dot bien cho `gh` lat nhan tro lai VAN SONG SOT
+    # qua t105 (1/1 qua) truoc khi them dong nay.
+    goc_which = m.shutil.which
+    m.shutil.which = lambda t, *a, **k: ("/usr/bin/gh" if t == "gh" else goc_which(t, *a, **k))
+    m.subprocess.run = lambda *_a, **_k: Rc(0)          # gh LUON "da xac thuc"
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            # (2) khai RONG
+            (Path(td) / ".mcp.json").write_text('{"mcpServers":{}}', encoding="utf-8")
+            tt, mo_ta = m._do_github_api(td)
+            bang(tt == "CHUA_XAC_THUC",
+                 f"chua khai server github ma tra {tt} (mong CHUA_XAC_THUC): {mo_ta!r}")
+            bang("[workspace]" in mo_ta, f"khong khai doc o goc nao: {mo_ta!r}")
+
+            # (3) DA khai
+            (Path(td) / ".mcp.json").write_text(
+                _json.dumps({"mcpServers": {"github": {"command": "x"}}}), encoding="utf-8")
+            tt, mo_ta = m._do_github_api(td)
+            bang(tt == "KHONG_DO_DUOC",
+                 f"da khai server ma tra {tt} — tien trinh con KHONG goi duoc MCP nen "
+                 f"KHONG duoc khai DUNG_DUOC: {mo_ta!r}")
+            bang("get_me" in mo_ta,
+                 f"khong chi ra ai moi do duoc (phien goi mcp__github__get_me): {mo_ta!r}")
+
+            # (4) khong co .mcp.json
+            (Path(td) / ".mcp.json").unlink()
+            tt, mo_ta = m._do_github_api(td)
+            bang(tt == "CHUA_XAC_THUC", f"thieu .mcp.json ma tra {tt}: {mo_ta!r}")
+    finally:
+        m.subprocess.run = goc_run
+        m.shutil.which = goc_which
+
+    # (5) `git-day-keo` la nhan RIENG, va khong co workspace thi KHONG DO DUOC —
+    #     khong duoc im lang tra ve mot ket luan nao do.
+    tt, mo_ta = m._do_git_day_keo(None)
+    bang(tt == "KHONG_DO_DUOC", f"khong workspace ma `git-day-keo` tra {tt}: {mo_ta!r}")
+
+    # (6) hai nhan phai LA HAI MUC trong bang, khong con muc `github` gop
+    ten = [k["ten"] for k in m.KHA_NANG]
+    bang("git-day-keo" in ten and "github-api" in ten, f"bang KHA_NANG thieu muc: {ten}")
+    bang("github" not in ten, f"van con muc `github` gop hai duong: {ten}")
 
 
 def chay_bo_ca(ds_ca, nk=None, bat_dau=0):

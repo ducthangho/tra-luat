@@ -2172,44 +2172,98 @@ def _do_claude() -> tuple[str, str]:
     return ("CHUA_XAC_THUC", "khong co ~/.claude/.credentials.json va khong co bien")
 
 
-def _do_github(ws: str | None) -> tuple[str, str]:
-    """Đo GitHub theo BA ĐƯỜNG ĐỘC LẬP, vì chúng hỏng độc lập với nhau.
+def _doc_mcp_json(ws: str | None) -> tuple[bool, str]:
+    """`.mcp.json` của DỰ ÁN có khai server `github` không.
 
-    Đo được 15-08-2026 trong container remote:
-
-      git đẩy/kéo HTTPS   CHẠY  (credential qua $GIT_CONFIG_KEY_*)
-      công cụ MCP github  CHẠY  (đăng comment, đọc issue — dùng suốt ngày)
-      REST api.github.com CHẶN  403 do PROXY, kèm nguyên văn "GitHub access is not
-                                enabled for this session" — KHÔNG phải lỗi của
-                                GitHub, KHÔNG phải thiếu token: `GITHUB_PAT` thật
-                                cũng 403, mà `/user` lại 200. Chính sách theo
-                                ĐƯỜNG DẪN, không theo danh tính.
-      gh CLI              KHONG cai
-
-    Vì vậy "gọi GitHub không được" là KẾT LUẬN SAI ở container này: hai trong bốn
-    đường vẫn mở. Hàm này trả về ĐƯỜNG NÀO mở, để không ai kết luận theo đường hỏng.
+    Đây là phép đo CÓ MẶT, không phải DÙNG ĐƯỢC — và nói thẳng như vậy ở chỗ dùng.
+    Nhưng nó phân biệt được hai thứ mà bản trước gộp làm một: "chưa khai server
+    github" (đo được, hỏng thật, chữa được) khác hẳn "đã khai, chưa ai chứng minh
+    nó chạy".
     """
-    duong = []
+    # NÓI RÕ ĐỌC Ở GỐC NÀO. `doctor` chạy ngoài repo thì `ws` là None và ta lùi về gốc
+    # của chính launcher — hợp lý, nhưng nếu im lặng thì người đọc tưởng đang xem kho
+    # họ vừa trỏ tới. Đo một CÂY KHÁC cây người ta hỏi mà không khai là đúng lớp lỗi
+    # đã đốt cả buổi ở `refs/pull/*/merge`.
     if ws:
-        rc, out, _ = _git(ws, "ls-remote", "--heads", "origin", "HEAD")
-        duong.append(("git", rc == 0, "day/keo HTTPS" if rc == 0 else f"rc={rc}"))
-    # `gh` CÓ MẶT không chứng minh gì — `gh auth status` mới hỏi đúng câu "đã đăng nhập
-    # chưa" (nó thoát 1 khi có vấn đề xác thực). Bản trước đếm `shutil.which("gh")` là
-    # một ĐƯỜNG MỞ, nên ngoài repo thì chỉ cần CÀI `gh` là `any(...)` thành True và
-    # GitHub được gắn `DUNG_DUOC` mà không có lấy một đường đã xác thực nào.
+        goc, nguon = Path(ws), "workspace"
+    else:
+        goc, nguon = Path(__file__).resolve().parents[2], "goc cua launcher (khong co workspace)"
+    tep = goc / ".mcp.json"
+    if not tep.is_file():
+        return False, f"khong thay .mcp.json o {goc} [{nguon}]"
+    try:
+        d = json.loads(tep.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        return False, f".mcp.json [{nguon}] khong doc/parse duoc: {type(e).__name__}"
+    srv = d.get("mcpServers") or d.get("servers") or {}
+    ten = [k for k in srv if "github" in k.lower()]
+    if not ten:
+        return False, (f".mcp.json [{nguon}] KHONG khai server github "
+                       f"(co: {', '.join(srv) or 'khong co server nao'})")
+    return True, f".mcp.json [{nguon}] khai server: {', '.join(ten)}"
+
+
+def _do_git_day_keo(ws: str | None) -> tuple[str, str]:
+    """Đẩy/kéo qua git — ĐƯỜNG RIÊNG, hỏng độc lập với đường GitHub API.
+
+    Tách khỏi `github` là finding của chủ kho, và nó đúng: gộp hai đường vào một
+    nhãn thì `git ls-remote` chạy được đủ để cả nhãn thành `DUNG_DUOC`, trong khi
+    nó KHÔNG nói gì về việc đọc issue hay đăng comment có được không. Một nhãn
+    khai rộng hơn thứ nó đo là đúng cái bệnh mà chính nhãn `DUNG_DUOC` sinh ra để
+    chặn — chỉ dịch lên một tầng.
+    """
+    if not ws:
+        return ("KHONG_DO_DUOC", "khong co --workspace nen khong do duoc; chay trong mot kho de do")
+    rc, _, err = _git(ws, "ls-remote", "--heads", "origin", "HEAD")
+    if rc == 0:
+        return ("DUNG_DUOC", "git ls-remote origin OK (credential qua $GIT_CONFIG_KEY_*)")
+    return ("CHUA_XAC_THUC", f"git ls-remote rc={rc}: {(err or '').strip()[:120]}")
+
+
+def _do_github_api(ws: str | None) -> tuple[str, str]:
+    """Đường GitHub API của kho này là **MCP**, và launcher KHÔNG đo được nó.
+
+    NÓI TRƯỚC GIỚI HẠN, vì nó quyết định cả thiết kế hàm: công cụ MCP là năng lực
+    của PHIÊN AGENT, không phải của tiến trình con. Không có lệnh nào chạy trong
+    subprocess mà gọi được `mcp__github__*`. Nên câu trả lời trung thực ở đây là
+    trạng thái THỨ BA — `KHONG_DO_DUOC` — chứ không phải bịa ra một phép đo thay
+    thế rồi gắn nhãn như thể đã đo.
+
+    Ba đường, và vì sao chỉ một đường là đường của kho:
+
+      MCP github     ĐƯỜNG CHÍNH — dùng suốt ngày (đọc issue, đăng comment, PR)
+      REST thẳng     BỊ PROXY CHẶN 403 ("GitHub access is not enabled for this
+                     session"); `GITHUB_PAT` thật cũng 403 trong khi `/user` trả
+                     200 ⇒ chính sách theo ĐƯỜNG DẪN, không theo danh tính
+      gh CLI         KHONG phải đường của kho — `CLAUDE.md` ghi rõ hook KHÔNG cài
+                     `gh` vì "kho dùng GitHub qua MCP"
+
+    VÌ SAO `gh` CHỈ CÒN LÀ THÔNG TIN: bản trước cho `gh auth status` rc=0 lật nhãn
+    thành `DUNG_DUOC`. Hệ quả đo được: trên một máy CÓ `gh` đã xác thực nhưng KHÔNG
+    nối MCP, `doctor` báo GitHub dùng được trong khi đường thật của kho đã chết. Nó
+    đo đúng một đường mà kho cố ý không cấp phát, rồi khai thay cho đường được cấp.
+    """
+    co_khai, chi_tiet_mcp = _doc_mcp_json(ws)
+    phu = []
     if shutil.which("gh"):
         try:
             pg = subprocess.run(["gh", "auth", "status"], capture_output=True, text=True,
                                 timeout=20)
-            duong.append(("gh-cli", pg.returncode == 0,
-                          "da xac thuc" if pg.returncode == 0 else f"CHUA xac thuc (rc={pg.returncode})"))
+            phu.append("gh-cli=" + ("da xac thuc" if pg.returncode == 0 else f"CHUA xac thuc (rc={pg.returncode})"))
         except (OSError, subprocess.SubprocessError) as e:
-            duong.append(("gh-cli", False, f"khong chay duoc: {type(e).__name__}"))
+            phu.append(f"gh-cli=khong chay duoc ({type(e).__name__})")
     else:
-        duong.append(("gh-cli", False, "chua cai"))
-    return (("DUNG_DUOC" if any(ok for _, ok, _ in duong) else "CHUA_XAC_THUC"),
-            " · ".join(f"{t}={'OK' if ok else 'khong'}" for t, ok, _ in duong)
-            + " · REST truc tiep co the bi proxy chan (403) — dung cong cu MCP github")
+        phu.append("gh-cli=chua cai (DUNG THIET KE — kho dung MCP)")
+    phu.append("REST thang bi proxy chan 403")
+    duoi = " · " + " · ".join(phu)
+
+    if not co_khai:
+        # ĐO ĐƯỢC và là hỏng THẬT: không khai server thì phiên agent không có công cụ
+        # MCP github nào để gọi, bất kể máy có gì.
+        return ("CHUA_XAC_THUC", chi_tiet_mcp + duoi)
+    return ("KHONG_DO_DUOC",
+            chi_tiet_mcp + " — nhung MCP la nang luc cua PHIEN AGENT, tien trinh con "
+            "KHONG goi duoc; bang chung duong: phien goi `mcp__github__get_me`" + duoi)
 
 
 _RE_NANG_LUC_HOOK = re.compile(r"^#\s*hook-nang-luc:\s*(.+)$", re.MULTILINE)
@@ -2345,9 +2399,15 @@ KHA_NANG = [
     {"ten": "claude", "do": lambda ws, ks=False: _do_claude(),
      "vi_sao": "executor va phien dieu phoi",
      "khac_phuc": "dat ANTHROPIC_API_KEY / dang nhap lai claude"},
-    {"ten": "github", "do": lambda ws, ks=False: _do_github(ws),
-     "vi_sao": "dang handoff/verdict, doc issue, day nhanh",
-     "khac_phuc": "dung cong cu MCP github + git; REST thang bi proxy chan"},
+    # TÁCH LÀM HAI. Chúng hỏng ĐỘC LẬP với nhau: proxy chặn đường API mà git vẫn
+    # đẩy được, và ngược lại một kho chưa khai MCP vẫn `git push` bình thường. Gộp
+    # một nhãn thì đường nào chạy cũng đủ thắp xanh cho cả hai.
+    {"ten": "git-day-keo", "do": lambda ws, ks=False: _do_git_day_keo(ws),
+     "vi_sao": "day nhanh, keo master — KHONG noi gi ve doc/ghi issue",
+     "khac_phuc": "chay trong mot kho co remote origin; kiem $GIT_CONFIG_KEY_*"},
+    {"ten": "github-api", "do": lambda ws, ks=False: _do_github_api(ws),
+     "vi_sao": "doc issue, dang comment/verdict, PR — kho nay di bang MCP",
+     "khac_phuc": "khai server github trong .mcp.json; roi PHIEN goi mcp__github__get_me de co bang chung duong"},
     {"ten": "launcher-phien", "do": lambda ws, ks=False: _do_launcher_cu(ws),
      "vi_sao": "launcher dang chay cu hon master = so luot chay THIEU truong ma khong bao",
      "khac_phuc": "chay launcher tu cay da merge master, hoac merge master vao nhanh nay"},

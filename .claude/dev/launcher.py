@@ -2555,6 +2555,193 @@ def _do_rest_github(url: str, timeout: float = 6.0, *, token: str | None = None)
         return ("khong_do_duoc", f"{type(e).__name__}", False)
 
 
+# --- ĐƯỜNG MCP -------------------------------------------------------------------
+# VÌ SAO THÊM. `_do_github` đo `git`, `gh`, `rest` — nhưng đường mà kho THẬT SỰ dùng
+# hằng ngày (công cụ `mcp__github__*`) thì KHÔNG nằm trong phép đo nào, và launcher
+# chưa từng đọc `.mcp.json` (`grep -c mcp` = 0 trước bản này). Docstring của hàm ấy
+# LIỆT KÊ "công cụ MCP github CHẠY" như một dữ kiện đã đo — nhưng đó là quan sát
+# đóng băng trong chú thích, không phải phép đo chạy mỗi lượt. Đúng lớp bệnh mà chính
+# `_do_github` vừa chữa cho `rest` ("có thể bị chặn" không phải phép đo).
+
+_RE_ANSI = re.compile(r"\x1b\[[0-9;]*m")
+_RE_STATUS = re.compile(r"^\s*Status:\s*(.+?)\s*$", re.MULTILINE)
+# Ký hiệu trang trí ĐO ĐƯỢC: `√` `×` `⏸`. Cắt mọi thứ KHÔNG phải chữ/số ở đầu.
+_RE_TRANG_TRI = re.compile(r"^[^0-9a-z]+")
+_MCP_KHOE = ("connected",)                  # khớp ĐÚNG BẰNG, không phải tiền tố
+_MCP_HONG = ("failed to connect", "pending approval", "not connected",
+             "disconnected", "needs authentication")   # khớp TIỀN TỐ (có đuôi chi tiết)
+
+
+def _env_da_chuan(mt: dict[str, str] | None) -> dict[str, str]:
+    """Trả môi trường ĐÃ CHUẨN HOÁ, không bao giờ trả `None`.
+
+    VÌ SAO LÀ HÀM RIÊNG chứ không chép hai dòng như `_do_github`: chép thì đoạn mã
+    TRÙNG KHÍT nhau, mà `chay_dot_bien` thay chỗ khớp ĐẦU TIÊN — nên một đột biến nhắm
+    `_do_github` sẽ lặng lẽ nhảy sang bản sao đứng trước nó, và ca đích không chết nữa.
+    ĐÃ XẢY RA THẬT ở đúng bản vá này: `probe_github_bo_qua_moi_truong_chuan_hoa` (đột
+    biến CÓ SẴN của master, canh `t113`) SỐNG SÓT ngay khi khối MCP được chèn vào phía
+    trên. Không dòng logic nào sai — chốt chỉ mất răng vì trùng chữ. Tách hàm làm hai
+    chỗ khác mặt nhau, nên mỗi đột biến lại nhắm đúng chỗ nó định nhắm.
+    """
+    if mt is not None:
+        return mt
+    if _MOI_TRUONG_DA_DOC is not None:
+        return _MOI_TRUONG_DA_DOC
+    return _doc_moi_truong()[0]
+
+
+def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None]:
+    """`.mcp.json` của DỰ ÁN có khai server `github` không, và khai bằng TÊN NÀO.
+
+    Đây là phép đo CÓ MẶT, không phải DÙNG ĐƯỢC — và nói thẳng như vậy ở chỗ dùng.
+    Nhưng nó phân biệt được "chưa khai server" (đo được, hỏng thật, chữa được) với
+    "đã khai, chưa ai chứng minh nó chạy".
+
+    Trả `(có_khai, mô_tả, tên_nguyên_văn)`.
+    """
+    # NÓI RÕ ĐỌC Ở GỐC NÀO. `doctor` chạy ngoài repo thì `ws` là None và ta lùi về gốc
+    # của chính launcher — hợp lý, nhưng im lặng thì người đọc tưởng đang xem kho họ
+    # vừa trỏ tới. Đo một CÂY KHÁC cây người ta hỏi mà không khai là đúng lớp lỗi đã
+    # đốt cả buổi ở `refs/pull/*/merge`.
+    if ws:
+        goc, nguon = Path(ws), "workspace"
+    else:
+        goc, nguon = Path(__file__).resolve().parents[2], "goc cua launcher (khong co workspace)"
+    tep = goc / ".mcp.json"
+    if not tep.is_file():
+        return False, f"khong thay .mcp.json o {goc} [{nguon}]", None
+    try:
+        d = json.loads(tep.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        return False, f".mcp.json [{nguon}] khong doc/parse duoc: {type(e).__name__}", None
+    # KIỂM KIỂU BA TẦNG. JSON hợp lệ vẫn có thể sai lược đồ, và mỗi tầng là một
+    # finding RIÊNG của cross-review: gốc là mảng ⇒ `d.get` ném AttributeError; bảng
+    # server là mảng ⇒ vòng lặp duyệt PHẦN TỬ chứ không duyệt KHOÁ; giá trị của khoá
+    # `github` là `null`/chuỗi ⇒ vẫn được tuyên là "đã khai". Cùng một hình dạng lỗi
+    # tụt xuống sau mỗi tầng — nên kiểm hết một lượt thay vì vá dần theo báo cáo.
+    if not isinstance(d, dict):
+        return False, f".mcp.json [{nguon}] khong phai object o goc (la {type(d).__name__})", None
+    # PHÂN BIỆT "KHÔNG CÓ KHOÁ" VỚI "CÓ KHOÁ MÀ GIÁ TRỊ HỎNG": `or` nuốt mọi giá trị
+    # FALSY nên `{"mcpServers": null, "servers": {...}}` lặng lẽ rơi sang trường dự
+    # phòng rồi tuyên là đã khai — một trường CHÍNH sai kiểu bị trường DỰ PHÒNG che.
+    for khoa in ("mcpServers", "servers"):
+        if khoa in d:
+            srv = d[khoa]
+            break
+    else:
+        return False, f".mcp.json [{nguon}] khong co khoa `mcpServers` lan `servers`", None
+    if not isinstance(srv, dict):
+        return False, f".mcp.json [{nguon}] khoa `{khoa}` khong phai object (la {type(srv).__name__})", None
+    # KHỚP CHÍNH XÁC sau chuẩn hoá hoa/thường, KHÔNG khớp chuỗi con: `not-github-backup`
+    # từng được tính là "đã khai server github". Danh sách CHO PHÉP, không phải đoán
+    # xem còn bao nhiêu cách viết.
+    ten = [k for k in srv if k.casefold() == "github"]
+    if not ten:
+        return False, (f".mcp.json [{nguon}] KHONG khai server ten dung bang `github` "
+                       f"(co: {', '.join(srv) or 'khong co server nao'})"), None
+    # NHIỀU TÊN CÙNG KHỚP ⇒ TỪ CHỐI, không chọn theo thứ tự khai báo. `claude mcp get`
+    # coi `github` và `GitHub` là HAI server khác nhau (đo được: nó gợi ý "Did you
+    # mean"), nên chọn `ten[0]` làm server được đo phụ thuộc THỨ TỰ KHOÁ trong JSON —
+    # hai tệp cùng tập server mà đảo thứ tự sẽ cho hai nhãn khác nhau. Một phép đo bất
+    # định thì không phải phép đo.
+    if len(ten) > 1:
+        return False, (f".mcp.json [{nguon}] khai {len(ten)} server cung khop `github` sau "
+                       f"chuan hoa hoa/thuong ({', '.join(sorted(ten))}) — MO HO, khong biet "
+                       f"do cai nao; `claude mcp get` coi chung la hai server khac nhau"), None
+    xau = [k for k in ten if not isinstance(srv[k], dict)]
+    if xau:
+        return False, (f".mcp.json [{nguon}] khai `{', '.join(xau)}` nhung gia tri khong "
+                       f"phai object (la {', '.join(type(srv[k]).__name__ for k in xau)})"), None
+    # TRẢ TÊN NGUYÊN VĂN, không trả chuỗi dựng sẵn: `claude mcp get` PHÂN BIỆT HOA
+    # THƯỜNG — khai `GitHub` rồi hỏi `mcp get github` thì CLI đáp `No MCP server named
+    # "github". Did you mean "GitHub"?` và VẪN `rc=0`. Hai nơi phải dùng CÙNG một tên.
+    return True, f".mcp.json [{nguon}] khai server: {ten[0]}", ten[0]
+
+
+def _suc_khoe_mcp_github(ten: str = "github",
+                         moi_truong: dict[str, str] | None = None) -> tuple[str, str]:
+    """Hỏi `claude mcp get <tên>` xem server đang ở trạng thái nào.
+
+    VÌ SAO DÙNG `get` CHỨ KHÔNG `list` — chữa ở TẦNG, không vá thêm biểu thức. Ba bản
+    trước đều bổ dòng tóm tắt của `list` bằng dấu phân cách, và cả ba đều sai:
+      · dò chuỗi con cả dòng   -> `Disconnected` thành "khoẻ"
+      · `rpartition(" - ")`    -> `Connected - 3 tools` thành "hỏng"
+      · tiền tố `connected`    -> `Connected (stale)` thành "khoẻ"
+    Đo thật mới thấy dòng `list` KHÔNG THỂ bổ đúng, vì phần đứng TRƯỚC dấu phân cách
+    là câu lệnh của server, mà câu lệnh chứa được bất cứ thứ gì:
+
+        broken: /nonexistent/binary  - × Failed to connect — ENOENT: ...
+
+    `claude mcp get` trả TRƯỜNG CÓ NHÃN (`Status:`) nên hết phải đoán ranh giới.
+
+    BA TRẠNG THÁI ĐO ĐƯỢC (dựng server MCP thật trong HOME tạm, không đụng config
+    người dùng): `√ Connected` · `× Failed to connect` · `⏸ Pending approval`.
+
+    MẶC ĐỊNH LÀ `khong_do_duoc`, KHÔNG phải `hong`: ép mọi chuỗi vào nhị phân tốt/xấu
+    chính là cỗ máy sinh ra cả ba lỗi trên. Chỉ chuỗi ĐÃ ĐO mới được phân loại.
+
+    PHẠM VI — phải khai kẻo lại khai rộng hơn thứ đo được. `mcp get` đọc trạng thái
+    DUYỆT SERVER `.mcp.json` CHO DỰ ÁN NÀY theo con mắt CLI — tức thứ mà một tiến
+    trình `claude` MỚI SINH sẽ gặp — chứ KHÔNG phải công cụ của phiên đang chạy. Hai
+    thứ lệch nhau được: đo được `Pending approval` trong khi phiên vẫn gọi
+    `mcp__github__*` bình thường (cross-review đo độc lập, xác nhận). Với `launcher.py`
+    thì đó ĐÚNG là câu hỏi cần — việc của nó là SINH agent bằng CLI.
+
+    Trả (`khoe` | `hong` | `khong_do_duoc`, chi tiết).
+    """
+    if not shutil.which("claude"):
+        return ("khong_do_duoc", "khong co `claude` de hoi `mcp get`")
+    # CHUAN HOA NGAY TAI DAY, khong tin call-site. `subprocess.run(env=None)` KE THUA
+    # `os.environ` THO — tuc dung bien GIU CHO ma `_doc_moi_truong` vua loai, dung lop
+    # P2 mà #143 đã vá một lần. Bản trước để mặc định `None` đi thẳng xuống, và
+    # cross-review lượt 7 hạ đúng nó: đường sản xuất hiện thời có chuẩn hoá trước khi
+    # gọi, nên chưa tái phát — nhưng chốt phải bảo vệ HỢP ĐỒNG, không dựa vào việc mọi
+    # call-site đều nhớ. Gọi thẳng `_suc_khoe_mcp_github()` theo mặc định là đủ để môi
+    # trường thô lọt xuống.
+    moi_truong = _env_da_chuan(moi_truong)
+    try:
+        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True, text=True,
+                           env=moi_truong, stdin=subprocess.DEVNULL,
+                           timeout=PROBE_TIMEOUT_GIAY)
+    except (OSError, subprocess.SubprocessError) as e:
+        return ("khong_do_duoc", f"`claude mcp get {ten}` khong chay duoc: {type(e).__name__}")
+    # LẤY `Status:` ĐẦU TIÊN — lựa chọn CÓ TẢI TRỌNG, không phải tình cờ. Đo được:
+    # nội dung do `.mcp.json` kiểm soát CHÈN ĐƯỢC một dòng `Status:` thứ hai (đặt args
+    # của server thành chuỗi có xuống dòng ⇒ `grep -c "Status:"` = 2). Bản giả nằm SAU
+    # bản thật vì CLI in `Status` trước mọi trường có giá trị do người dùng đặt, và
+    # thứ in trước nó (tên server, `Scope:`) thì tên phải casefold ra `github` nên
+    # không chứa được xuống dòng. Cross-review dựng lại độc lập và xác nhận.
+    kq = _RE_STATUS.search(_RE_ANSI.sub("", r.stdout or ""))
+    if not kq:
+        return ("khong_do_duoc",
+                f"`claude mcp get {ten}` khong in truong `Status:` (rc={r.returncode}) — "
+                f"CHU Y rc=0 KHONG co nghia la tim thay: CLI tra rc=0 ca khi bao "
+                f'"No MCP server named"')
+    tho = kq.group(1)
+    chuan = " ".join(_RE_TRANG_TRI.sub("", tho.casefold()).split())
+    if chuan in _MCP_KHOE:
+        return ("khoe", f"Status: {tho}")
+    if chuan.startswith(_MCP_HONG):
+        return ("hong", f"Status: {tho}")
+    return ("khong_do_duoc", f"trang thai LA, chua tung do: Status: {tho}")
+
+
+def _nhan_duong(ok) -> str:
+    """Kết xuất BA trạng thái của một đường: mở · hỏng · CHƯA ĐO ĐƯỢC.
+
+    Bản trước ghi `'OK' if ok else 'khong'`, tức ép mọi thứ vào nhị phân — nên một
+    đường KHÔNG ĐO ĐƯỢC hiện ra y hệt một đường ĐÃ ĐO VÀ HỎNG. Đó chính là chỗ
+    `None != False` mà kho đã ghi sổ, và nó đắt đúng ở đây: người đọc thấy `mcp=khong`
+    sẽ đi chữa server, trong khi sự thật có thể là "máy này không có `claude` để hỏi".
+
+    CÒN MỘT CHỖ CÙNG BỆNH, khai ra để không ai tưởng đã quét hết: nhánh `rest-kho`
+    khi không đọc được slug origin tự mô tả là `KHONG DO DUOC` nhưng vẫn đẩy cờ
+    `False`. Sửa nó là thay đổi RIÊNG (nó đổi ngữ nghĩa một đường đang tính vào
+    `LAM_DUOC_VIEC`), nên bản này KHÔNG đụng — chỉ ghi ra.
+    """
+    return "chua-do-duoc" if ok is None else ("OK" if ok else "khong")
+
+
 def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tuple[str, str]:
     """Đo GitHub theo BA ĐƯỜNG ĐỘC LẬP, vì chúng hỏng độc lập với nhau.
 
@@ -2631,7 +2818,13 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
         # riêng tư vẫn là `mo` (tới GitHub) nhưng KHÔNG làm được việc.
         duong.append(("rest-kho", ok_kho, mt_kho if ok_kho else f"{mt_kho} [{tt_kho}]"))
     else:
-        duong.append(("rest-kho", False, "khong doc duoc slug origin -> KHONG DO DUOC"))
+        # `None` chứ KHÔNG `False`: không đọc được slug là CHƯA ĐO ĐƯỢC, và chi tiết
+        # đã tự khai thế — để cờ `False` thì `_nhan_duong` in `rest-kho=khong`, tức
+        # nhãn nói NGƯỢC với chi tiết ngay cạnh nó. Người vá bản hoà từng lấy cớ "đổi
+        # nó là đổi ngữ nghĩa một đường đang tính vào LAM_DUOC_VIEC" để không sửa;
+        # cross-review lượt 7 bác đúng: `any(...)` coi `None` và `False` NHƯ NHAU nên
+        # kết luận khả dụng KHÔNG đổi — cái cớ ấy quá rộng, và món nợ là có thật.
+        duong.append(("rest-kho", None, "khong doc duoc slug origin -> KHONG DO DUOC"))
 
     # `gh` mà "đã xác thực" TRONG KHI `rest-kho` bị chặn là bẫy, không phải tin vui:
     # `gh auth status` hỏi `/user` (đường được phép, 200) nên nó tự nhận đăng nhập,
@@ -2657,6 +2850,20 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     elif shutil.which("gh"):
         duong.append(("gh-kho", False, "khong doc duoc slug origin"))
 
+    # --- MCP: ĐƯỜNG KHO THẬT SỰ DÙNG, và tới bản này mới ĐO thay vì khai trong chú thích.
+    # Hai bước tách bạch, vì chúng hỏng khác nhau và chữa khác nhau:
+    #   `.mcp.json` chưa khai server  -> phiên agent KHÔNG có công cụ nào, bất kể máy có gì
+    #   đã khai nhưng CLI báo xấu     -> hỏng THẬT, chữa được (`claude` rồi duyệt)
+    co_khai, mt_mcp, ten_mcp = _doc_mcp_json(ws)
+    if not co_khai:
+        duong.append(("mcp", False, mt_mcp))
+    else:
+        tt_mcp, mt_khoe = _suc_khoe_mcp_github(ten_mcp or "github", mt)
+        # BA TRẠNG THÁI, và `khong_do_duoc` PHẢI đọc ra khác `hong` ở phần mô tả — cờ
+        # bool không chở nổi `None != False`, nên chữ phải chở.
+        # `None` cho "chưa đo được" — KHÔNG phải `False`. Xem chỗ kết xuất bên dưới.
+        duong.append(("mcp", None if tt_mcp == "khong_do_duoc" else tt_mcp == "khoe", mt_khoe))
+
     gh_ok = next((ok for t, ok, _ in duong if t == "gh-cli"), False)
     kho_chan = any(t == "rest-kho" and not ok for t, ok, _ in duong)
     canh = " · gh BAO da xac thuc nhung duong kho bi chan -> dung lam duong viec" \
@@ -2671,10 +2878,17 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     # nhau, cùng một sai lầm — đếm SỰ CÓ MẶT của một đường thay vì KHẢ NĂNG của nó.
     # `gh-cli` ĐÃ BỊ LOẠI khỏi tập này (P1 cross-review PR "#143"): nó chỉ chứng
     # minh ĐÃ XÁC THỰC, không chứng minh làm được việc. `gh-kho` mới là thao tác thật.
+    # `mcp` CỐ Ý KHÔNG có mặt ở đây, và đây là chỗ dễ thêm nhầm nhất. Phép đo MCP hỏi
+    # CLI xem server đã được duyệt chưa — nó chứng minh một tiến trình `claude` MỚI
+    # SINH sẽ thấy gì, KHÔNG chứng minh phiên nào đó gọi được `mcp__github__*`. Đưa
+    # nó vào tập này là lặp đúng lớp lỗi mà chính tập này sinh ra để chặn (đếm SỰ CÓ
+    # MẶT của một đường thay vì KHẢ NĂNG của nó — đã ba lần: `which("gh")`,
+    # `rest-chung`, `gh auth status`). Bằng chứng đường cuối cùng cho MCP là PHIÊN gọi
+    # được `mcp__github__get_me`, và không tiến trình con nào cấp được bằng chứng ấy.
     LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho"}
     return (("DUNG_DUOC" if any(ok for t, ok, _ in duong if t in LAM_DUOC_VIEC)
              else "CHUA_XAC_THUC"),
-            " · ".join(f"{t}={'OK' if ok else 'khong'}" for t, ok, _ in duong) + canh)
+            " · ".join(f"{t}={_nhan_duong(ok)}" for t, ok, _ in duong) + canh)
 
 
 _RE_NANG_LUC_HOOK = re.compile(r"^#\s*hook-nang-luc:\s*(.+)$", re.MULTILINE)
@@ -2812,7 +3026,8 @@ KHA_NANG = [
      "khac_phuc": "dat ANTHROPIC_API_KEY / dang nhap lai claude"},
     {"ten": "github", "do": lambda ws, ks=False: _do_github(ws, _MOI_TRUONG_DA_DOC),
      "vi_sao": "dang handoff/verdict, doc issue, day nhanh",
-     "khac_phuc": "dung cong cu MCP github + git; REST thang bi proxy chan"},
+     "khac_phuc": "khai server `github` trong .mcp.json; neu `claude mcp get github` bao "
+                  "Pending approval thi chay `claude` roi duyet; git + MCP la duong cua kho"},
     {"ten": "launcher-phien", "do": lambda ws, ks=False: _do_launcher_cu(ws),
      "vi_sao": "launcher dang chay cu hon master = so luot chay THIEU truong ma khong bao",
      "khac_phuc": "chay launcher tu cay da merge master, hoac merge master vao nhanh nay"},

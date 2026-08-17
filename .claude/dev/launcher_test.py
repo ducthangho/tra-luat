@@ -2881,6 +2881,11 @@ def t105_doctor_auth_hong_thi_DO_du_binary_chay_duoc():
         "xac_thuc": ["auth", "status"],
     }]
     m.MO_DUN_PY = []
+    # VÔ HIỆU bảng khả dụng: nó gọi `_do_github`, mà hàm ấy SINH `gh` THẬT bằng
+    # đúng cái env tí hon ta vừa cắm vào. ĐO ĐƯỢC trên windows-latest: `gh` không
+    # thấy `HOME`/`USERPROFILE` nên tự tạo `./.local/` NGAY TRONG KHO, và bước
+    # "cây phải sạch sau khi chạy test" đỏ. Ca test không được để lại dấu vết.
+    m.KHA_NANG = []
     m._doc_moi_truong = lambda: (
         su_kien.append("moi_truong") or
         ({"PATH": "P", "TL_LAUNCHER_ENV_DA_DOC": "1"}, {"da_doc_truoc_cong_cu": True})
@@ -2921,6 +2926,7 @@ def t106_doctor_binary_hong_dau_PATH_khong_duoc_che_binary_tot():
         "vi_sao": "thu", "cai": {"*": "cai rg"},
     }]
     m.MO_DUN_PY = []
+    m.KHA_NANG = []                 # xem chú thích ở t105: tránh sinh `gh` thật
     m._doc_moi_truong = lambda: (
         {"PATH": "P", "TL_LAUNCHER_ENV_DA_DOC": "1"}, {"da_doc_truoc_cong_cu": True})
     m._cac_duong_dan = lambda _c, _env: [("rg", "/hong/rg"), ("rg", "/tot/rg")]
@@ -3241,6 +3247,7 @@ def t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong():
     m2.CONG_CU = [{"ten": "cham", "bat_buoc": False, "ung_vien": ["cham"],
                    "vi_sao": "thu", "cai": {"*": "cai cham"}}]
     m2.MO_DUN_PY = []
+    m2.KHA_NANG = []                # xem chú thích ở t105: tránh sinh `gh` thật
     m2._doc_moi_truong = lambda: ({"PATH": "P"}, {"da_doc_truoc_cong_cu": True})
     m2._cac_duong_dan = lambda _c, _e: [("cham", "/gia/cham")]
     m2._tran_doctor = lambda: -1.0          # ngan sach am = het ngay tu dau

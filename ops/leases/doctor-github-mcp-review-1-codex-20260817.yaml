@@ -1,0 +1,131 @@
+# Lease REVIEWER — `doctor` đo GitHub theo đúng đường MCP.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# ĐÂY LÀ VIỆC DEV-SIDE, KHÔNG PHẢI NỘI DUNG CỦA PACKET. Nó sửa `.claude/dev/launcher.py`,
+# không đụng `write_set` của wp55, và `attempts_used: 0 / attempts_limit: 0` để sổ attempt
+# của packet không bị lẫn — cùng khuôn với ba lease phụ trợ `di-tru`/`viet-lai`/`rebase`.
+# `packet_issue: 55` giữ nguyên vì đó là nơi cổng đăng bản chiếu, không phải lời khai rằng
+# việc này thuộc packet.
+#
+# VÌ SAO CÓ LƯỢT NÀY. Chủ kho chốt: mọi việc GitHub của kho đi bằng MCP. Đọc lại
+# `_do_github` thì nó KHÔNG khớp — nó đo `git ls-remote` và `gh auth status`, cho bất kỳ
+# đường nào OK là `DUNG_DUOC`, trong khi đường kho thật sự dùng (MCP) không nằm trong phép
+# đo nào, và `launcher.py` chưa từng đọc `.mcp.json`.
+#
+# ĐO ĐƯỢC TRƯỚC KHI VÁ, cùng một kịch bản (máy CÓ `gh` đã xác thực, `.mcp.json` KHÔNG khai
+# server github):
+#   TRƯỚC:  DUNG_DUOC     github       git=OK · gh-cli=OK
+#   SAU:    DUNG_DUOC     git-day-keo  git ls-remote origin OK
+#           CHUA_XAC_THUC github-api   .mcp.json [workspace] KHÔNG khai server github
+# Tức bản trước báo GitHub dùng được trong khi đường thật của kho đã chết.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: doctor-github-mcp-review-1-codex-20260817
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+reviewer_note: người vá là `claude` ⇒ §8 bắt reviewer khác nhà cung cấp
+assurance_target: cross_approved
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: 4ff2c6bfe04a205e5989642bc527bc5341db3e0f
+branch: ops/doctor-github-qua-mcp
+base_sha: e38b0bed7c95d2a9ab97d6ec09f047de5fc05978
+target_branch_neu_land: master
+target_pull_request_note: 'Chưa mở PR lúc cấp lease — review neo thẳng vào SHA.'
+
+scope_files: 2
+scope_note: >-
+  ĐÚNG hai tệp: `.claude/dev/launcher.py` và `.claude/dev/launcher_test.py`. Tệp thứ ba
+  trong diff là finding.
+
+prompt_path: ops/prompts/doctor-github-mcp-review-1-codex-20260817.md
+prompt_sha256_required: 0b90037c0adf7cd7f521dd71d06d9a5e5816df47e11435a1078dabc5bf2c9115
+
+granted_by: ducthangho
+granted_on_instruction: direct, in-session, 2026-08-17 ("vá bốn điểm đó đi, rồi cấp lease review")
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  KHAI THẲNG: phiên ghi lease này CHÍNH LÀ phiên đã vá. Nó KHÔNG tự cấp quyền —
+  `granted_by` là `ducthangho`, duyệt trực tiếp, và `ops/lease_publish.py` chặn cứng mọi
+  tên provider ở trường ấy. Ghi ra để dấu vết thẩm quyền ĐỌC ĐƯỢC chứ không phải suy, và
+  để reviewer soi kỹ hơn phần khai trong commit lẫn trong lease — cả hai do chính phiên
+  thực thi viết.
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc chủ kho
+
+leased_at_utc: '2026-08-17T05:00:00Z'
+lease_expires_at_utc: '2026-08-18T05:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+attempts_note: >-
+  Việc dev-side ngoài packet nên KHÔNG tiêu lượt. Ghi 0/0 để sổ không lẫn với trần attempt
+  của revision 4.
+
+muc_kiem:
+- id: khong-do-duoc-co-phai-cau-tra-loi-trung-thuc-khong
+  note: >-
+    `github-api` trả `KHONG_DO_DUOC` khi `.mcp.json` đã khai server. Reviewer xét: còn cách
+    nào đo MCP TỪ TIẾN TRÌNH CON mà người vá bỏ sót không? Nếu có thì đây là finding — vì
+    khi ấy `KHONG_DO_DUOC` là lười, không phải trung thực.
+- id: gh-con-lat-duoc-nhan-o-duong-nao-khong
+  note: >-
+    Đọc `_do_github_api` VÀ tầng tiêu thụ (`ok_kha_dung`, `--doi-kha-dung`,
+    `chua_chung_minh`). Lượt trước đã có P1 đúng lớp này: tầng ĐO thôi nâng nhãn mà tầng
+    TIÊU THỤ nâng lại nguyên vẹn.
+- id: doc-mcp-json-co-cho-nao-sai
+  note: >-
+    `mcpServers` vs `servers`; tên server viết hoa/thường; tệp hỏng; `ws=None` lùi về gốc
+    launcher — lời khai có nêu đủ GỐC ĐÃ ĐỌC không.
+- id: bo-test-co-ca-nao-do-MAY-thay-vi-do-HOP-DONG
+  note: >-
+    Người vá tự bắt được một ca như thế: `t105` ban đầu chỉ giả `subprocess.run`, nên trên
+    máy không có `gh` thì nhánh `if shutil.which("gh")` không chạy và đột biến "cho `gh`
+    lật nhãn" SỐNG SÓT. Soi xem còn ca nào mắc đúng bệnh ấy.
+
+so_lieu_nguoi_va_bao:
+  suite: 101/105 (4 ca hỏng)
+  ca_hong: [t85, t93, t94, t96]
+  nen_master: 100/104 — CÙNG bốn ca ấy
+  giai_thich_nen: >-
+    Bốn ca đều về codex, đỏ do cờ chặn `~/.codex/tra-luat-CHAN-CODEX` mà hook phiên này đặt
+    (config codex còn khối `shell_environment_policy` cũ), KHÔNG phải do bản vá. Delta = 0
+    ca đỏ, +1 ca xanh (`t105`).
+  dot_bien: 4/4 bị bắt (cho `gh` lật nhãn · chưa khai → KHONG_DO_DUOC · đã khai → DUNG_DUOC
+    · bỏ phần khai nguồn gốc)
+
+ngoai_pham_vi_da_biet:
+- id: gh-trong-github-actions
+  note: >-
+    `.github/workflows/**` vẫn dùng `gh` — ĐÚNG, không phải chỗ cần sửa: runner GitHub không
+    có MCP, và `GITHUB_TOKEN` ở đó là đường sạch. Phạm vi lượt này là phía DEV.
+- id: gh-trong-skill-va-docs
+  note: >-
+    `.claude/skills/**` và `docs/**` còn nhiều lệnh `gh` (đọc issue, comment). Chúng lệch
+    với "mọi việc GitHub đi bằng MCP" nhưng NGOÀI phạm vi lượt này. Nêu ra để không ai tưởng
+    đã quét hết.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T04:58:00Z'
+master_sha_at_grant: e38b0bed7c95d2a9ab97d6ec09f047de5fc05978
+lease_song_khac_luc_cap: >-
+  Không có lease review nào khác đang mở cho việc dev-side này.
+
+canh_bao_moi_truong_luc_cap: >-
+  ĐO ĐƯỢC lúc cấp: `codex` đang BỊ CHẶN trong container của phiên cấp lease
+  (`~/.codex/tra-luat-CHAN-CODEX` tồn tại vì `~/.codex/config.toml` còn khối
+  `shell_environment_policy` cũ với `inherit = "all"`). Bản đã gỡ đã được dựng sẵn ở
+  `~/.codex/config.toml.tra-luat-da-go`; công cụ CỐ Ý không tự thay tệp của người dùng.
+  Lease này vẫn có hiệu lực — nó là bản ghi THẨM QUYỀN, không phải bản ghi "đã chạy" —
+  nhưng reviewer chưa khởi động được cho tới khi chặn ấy được gỡ.

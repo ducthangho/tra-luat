@@ -16,6 +16,7 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 |---|---|---|
 | `pr134-ci-lease-gate-codex-verdict.md` | `windows-chua-do-that` | Verdict báo `30/30`, nhưng con số ấy **đo trên Linux** — reviewer từ chối gọi Windows là đạt vì chưa chạy thật. **CẬP NHẬT sau khi verdict được ghi:** lượt Windows THẬT đầu tiên đã chạy (`workflow_dispatch` run `31968805678`, head `3ee62330`) và **xanh** — bước `lease-publish selftest` `success` trên `windows-latest`. Nhưng phần reviewer cảnh báo thì **vẫn chưa chứng minh được**: `t19_symlink_tro_RA_NGOAI_kho_thi_CHAN` bắt `OSError`/`NotImplementedError` rồi `return`, mà harness **vẫn tính ca đó vào số đạt**, nên một lượt Windows xanh có thể chứa một ca CÓ MẶT mà KHÔNG ĐO (đúng bệnh `t24`). Không đọc được đầu ra in ra của bước ấy để xác nhận — `get_job_logs` chỉ trả phần đuôi, và đuôi không chạm tới bước đó. **Xanh trên Windows ⇒ bộ chạy được; KHÔNG ⇒ mọi ca đều đo.** Nợ có sẵn của bộ test, **không** do PR "#134" tạo ra; cách chữa reviewer đề nghị là cho `t19` báo `SKIP` riêng và không tính vào số đạt. |
 | `wp55-r2-review-5-codex-verdict.md` | `mutable-master-ref-in-repro-command` | Khối bash tái hiện `merged-tree-doctrine-false-positive` dùng `origin/master`, một ref **DI ĐỘNG**. Master lúc đo là `3d2c52d62696b0c7c190fd891115f543b0f9cb55`. **Thay cả hai chỗ `origin/master` bằng SHA đó**, nếu không bạn đang đo một cây khác. |
+| `tao-tag-luu-tru-review-1-codex-verdict.md` | `so-do-thieu-actionlint` | Mọi con số trong verdict (`81/82`, `73/74`, `79/82`, `80/82`) đo ở môi trường **KHÔNG có `actionlint`**, nên đã trừ sẵn đúng một ca — phép `actionlint` fail-close. Ở máy **có** `actionlint` thì cộng 1 vào từng số (`82/82`, `74/74`, `80/82`, `81/82`); chính verdict đã quy đổi sẵn cho hai số đột biến. **Đừng đọc `81/82` thành "có một ca hỏng"** — nó là bằng chứng chốt fail-close CHẠY. Hệ quả thật: `actionlint` trên bản vá này chỉ có **một** nguồn (người vá), reviewer khai `KHÔNG ĐO ĐƯỢC` và từ chối thay bằng PyYAML. |
 
 ## Mục lục
 
@@ -31,6 +32,18 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 | [`pr134-ci-lease-gate-codex-verdict.md`](pr134-ci-lease-gate-codex-verdict.md) | [`.receipt.yaml`](pr134-ci-lease-gate-codex-verdict.receipt.yaml) | — (không lease) | `approve_with_findings` | `ae755d10` | 7975 |
 | [`doctor-github-mcp-review-6-codex-verdict.md`](doctor-github-mcp-review-6-codex-verdict.md) | [`.receipt.yaml`](doctor-github-mcp-review-6-codex-verdict.receipt.yaml) | `doctor-github-mcp-review-6-codex-20260817` | `approve` | `45a06e48` | 2160 |
 | [`doctor-github-mcp-review-9-codex-verdict.md`](doctor-github-mcp-review-9-codex-verdict.md) | [`.receipt.yaml`](doctor-github-mcp-review-9-codex-verdict.receipt.yaml) | `doctor-github-mcp-review-9-codex-20260817` | `approve` | `0826629a` | 1156 |
+| [`tao-tag-luu-tru-review-1-codex-verdict.md`](tao-tag-luu-tru-review-1-codex-verdict.md) | [`.receipt.yaml`](tao-tag-luu-tru-review-1-codex-verdict.receipt.yaml) | `tao-tag-luu-tru-review-1-codex-20260817` | `approve` | `525c824e` | 2841 |
+
+Hàng `tao-tag-luu-tru-review-1` là hàng **`approve` ở lượt 1** duy nhất của bảng này, nên
+nó dễ bị đọc sai theo hướng ngược lại: không phải "việc dễ", mà là lượt đầu tiên áp
+**phạm vi đóng băng** ngay từ đầu — hai tệp, `+36/−4`, lease hỏi đúng bốn câu ĐO ĐƯỢC, và
+mọi thứ không phải hồi quy/lỗ an ninh/P1 bị bắt vào `## Nợ khai báo` thay vì `## Findings`.
+Đây là cùng cách làm đã kéo chuỗi `doctor-github-mcp` ra khỏi tám lượt `changes_requested`.
+Nội dung nó duyệt là bản vá **MỞ một chốt an ninh** (`tao-tag` được tạo `luu-tru/*`), nên
+biên nhận ghi riêng từng biên đã đo: `xoa-tag luu-tru/*` **vẫn DỪNG**, `xoa-nhanh` **không
+bị nới**, và `luu-tru-gia/` `xluu-tru/` **không khớp oan**. Reviewer cũng **bác một nửa**
+lập luận của người vá — về kỹ thuật thì "đặt tên tag khác" vẫn qua được chốt `xoa-nhanh`;
+lý do thật để vá là **quy ước không gian tên**, không phải "workflow không chạy được".
 
 Hai hàng `doctor-github-mcp-review-*` là việc **dev-side ngoài packet** — nó sửa
 `.claude/dev/launcher.py`, không đụng `write_set` của wp55, và lease ghi `attempts 0/0`.

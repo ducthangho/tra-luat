@@ -1281,7 +1281,59 @@ CASES = [
 ]
 
 
+def _chan_doan_cach_ly() -> None:
+    """In RA cơ chế cách ly mà máy này THẬT SỰ cấp được, kèm lý do nếu không.
+
+    VÌ SAO PHẢI IN: đo được trên runner `ubuntu-latest` của GitHub — bộ ca ra
+    `21/21` XANH trong khi hai ca cgroup lặng lẽ `BO QUA` vì máy không cấp được
+    cgroup. Tức con số xanh ấy nói về đường QUÉT CÂY, không nói gì về vùng chứa.
+    Đây đúng bệnh kho đã trả giá bốn lần: đếm SỰ CÓ MẶT của một đường thay vì
+    KHẢ NĂNG của nó, và "vắng mặt vì sạch" trông y hệt "vắng mặt vì chưa chạy".
+
+    Nên tổng N/N KHÔNG được đứng một mình: dòng này đứng cạnh nó và nói thẳng
+    lượt vừa rồi đo cơ chế nào.
+    """
+    sys.path.insert(0, str(RUNNER.parent))
+    import gate_lifecycle as gl
+
+    mount = gl._mount_cgroup2()
+    print("[cach-ly] nen            : %s" % platform.system())
+    if os.environ.get("TL_GATE_TAT_CGROUP") == "1":
+        # Nói thẳng: tắt bằng công tắc KHÁC HẲN máy không cấp được. Gộp hai thứ
+        # ấy vào một dòng là tự tay dựng lại đúng cái mơ hồ ta đang đi đóng.
+        print("[cach-ly] TL_GATE_TAT_CGROUP=1 — TAT BANG CONG TAC, khong phai may thieu")
+    print("[cach-ly] mount cgroup v2: %s" % (mount or "KHONG CO"))
+    if mount is not None:
+        rieng = gl._cgroup_cua_ta()
+        cha = mount / rieng.lstrip("/")
+        print("[cach-ly] cgroup cua ta  : %s (ton tai: %s)" % (rieng, cha.is_dir()))
+        thu = gl._tao_cgroup_gate()
+        if thu is None:
+            # Phân biệt HAI lý do khác hẳn nhau: không tạo nổi thư mục, hay tạo
+            # được mà không ghi nổi pid vào. Gộp chúng lại là mất đúng manh mối.
+            ly_do = "khong ro"
+            goc = cha if cha.is_dir() else mount
+            try:
+                tam = goc / "tl-chan-doan"
+                tam.mkdir()
+                ly_do = ("mkdir OK nhung cgroup.procs KHONG ghi duoc"
+                         if not os.access(tam / "cgroup.procs", os.W_OK) else "mkdir OK, khong ro")
+                tam.rmdir()
+            except OSError as exc:
+                ly_do = "mkdir that bai: %s" % exc
+            print("[cach-ly] cap cgroup     : KHONG DUOC (%s)" % ly_do)
+        else:
+            print("[cach-ly] cap cgroup     : DUOC (%s)" % thu.name)
+            gl._don_cgroup(thu)
+    co_che = "cgroup2" if gl._tao_cgroup_gate_thu() else ("job-object" if os.name == "nt" else "quet-cay")
+    print("[cach-ly] CO CHE THAT SU : %s" % co_che)
+    if co_che != "cgroup2" and os.name != "nt":
+        print("[cach-ly] ⚠ luot nay do duong DU PHONG (quet cay) — con so duoi KHONG")
+        print("[cach-ly]   noi gi ve lop cgroup. Lo 'de trong luc don' con nguyen.")
+
+
 def main() -> int:
+    _chan_doan_cach_ly()
     failures: list[str] = []
     for case in CASES:
         try:

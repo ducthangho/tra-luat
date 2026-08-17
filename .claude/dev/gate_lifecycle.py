@@ -478,6 +478,15 @@ def _tao_cgroup_gate() -> Path | None:
     return cg
 
 
+def _tao_cgroup_gate_thu() -> bool:
+    """Thử cấp rồi trả lại ngay — chỉ để CHẨN ĐOÁN, không giữ cgroup nào."""
+    cg = _tao_cgroup_gate()
+    if cg is None:
+        return False
+    _don_cgroup(cg)
+    return True
+
+
 def _vao_cgroup(cg: Path) -> None:
     """Tự đưa mình vào cgroup. Gọi trong `preexec_fn`, tức SAU `fork` TRƯỚC `exec`.
 

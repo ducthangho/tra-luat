@@ -1539,6 +1539,70 @@ def case_validate_reuse_is_fail_closed() -> None:
         assert incomplete.returncode == 2
 
 
+def case_headline_khong_duoc_dem_ca_bo_qua_la_da_qua() -> None:
+    """`N/N` chỉ được xuất hiện khi ĐÚNG N ca đã CHẠY và QUA.
+
+    Bộ này đã tách `BoQua` và đếm riêng từ PR #141 — nhưng dòng kết luận vẫn lấy
+    `len(CASES) - len(failures)` làm tử số, tức `qua + bỏ-qua`. Đo trên Windows
+    (18-08-2026): `25/25 ca (qua 14, bo qua 11, hong 0)` — ĐÚNG hình dạng "N/N
+    với hai số BẰNG NHAU" mà CLAUDE.md dạy là bằng chứng dương đáng tin, trong
+    khi 11 ca chưa hề chạy. Trớ trêu: comment cũ ngay trên câu print ghi "Cùng
+    khuôn với `launcher_test.py`" — launcher đã đổi khuôn (PR #153, tử số chỉ
+    đếm ca thực sự qua, khoá bằng `t118`), nên câu ấy vừa sai vừa chỉ đúng vào
+    chỗ chưa sửa. Ca này là `t118` của bộ này, cùng ba khối (a)(b)(c) để hai bộ
+    không trôi lệch lần nữa.
+
+    GIỚI HẠN — khai thẳng: ca này khoá SỰ THẬT CỦA DÒNG BÁO CÁO, không khoá mã
+    thoát. `main` vẫn `return 1 if failures else 0`, tức ca bỏ qua vẫn cho rc=0;
+    bản vá này CỐ Ý không đổi điều đó. Đổi rc là quyết định riêng, Packet riêng.
+    """
+    # (a) khong bo qua, khong hong: N/N la HOP LE va phai duoc giu nguyen suc nang
+    d = dong_ket_qua(10, 10, 0, 0)
+    assert d.startswith("10/10 "), f"da lam mat N/N cua luot chay SACH: {d!r}"
+    assert "BO QUA" not in d, f"khong co ca bo qua ma van canh bao: {d!r}"
+
+    # (b) co ca bo qua: tu so PHAI la so ca qua, KHONG duoc la `qua + bo_qua`
+    d = dong_ket_qua(10, 7, 3, 0)
+    assert d.startswith("7/10 "), \
+        f"tu so dem ca BO QUA la da qua - dong doc thanh N/N gia: {d!r}"
+    assert "10/10" not in d, f"con nguyen hinh dang N/N du 3 ca chua chay: {d!r}"
+    assert "3" in d and "BO QUA" in d, f"khong noi ro co ca bo qua: {d!r}"
+    # Ngay ca cau canh bao cung khong duoc chua cap so — nguoi doc luot qua se
+    # bat lai dung hinh dang vua go.
+    import re as _re
+    assert not _re.search(r"(\d+)/\1(?!\d)", d), \
+        f"dong con chua mot cap N/N o dau do: {d!r}"
+
+    # (c) PHAN CHUNG: bien DUNG MOT ca qua thanh BO QUA, di qua duong dem THAT.
+    def ca_qua_1() -> None:
+        pass
+
+    def ca_qua_2() -> None:
+        pass
+
+    def ca_moc() -> None:          # luot 1: qua
+        pass
+
+    def ca_moc_bo_qua() -> None:   # luot 2: cung vi tri, nhung tu bo qua
+        raise BoQua("co tinh bo qua")
+
+    b1, h1 = chay_bo_ca([ca_qua_1, ca_qua_2, ca_moc])
+    b2, h2 = chay_bo_ca([ca_qua_1, ca_qua_2, ca_moc_bo_qua])
+    q1 = 3 - len(b1) - len(h1)
+    q2 = 3 - len(b2) - len(h2)
+    assert (q1, len(b1), len(h1)) == (3, 0, 0), \
+        f"fixture hong: luot dau phai 3 qua/0 bo qua/0 hong, duoc {q1}/{len(b1)}/{len(h1)}"
+    assert (q2, len(b2), len(h2)) == (2, 1, 0), \
+        f"fixture hong: luot sau phai 2 qua/1 bo qua/0 hong, duoc {q2}/{len(b2)}/{len(h2)}"
+    assert q2 == q1 - 1, \
+        f"doi mot ca QUA thanh BO QUA ma so passed KHONG giam: {q1} -> {q2}"
+    truoc = dong_ket_qua(3, q1, len(b1), len(h1))
+    sau = dong_ket_qua(3, q2, len(b2), len(h2))
+    assert truoc.startswith("3/3 "), f"luot sach phai la N/N: {truoc!r}"
+    assert not sau.startswith("3/3 "), \
+        f"van bao N/N sau khi mot ca thanh BO QUA: {sau!r}"
+
+
 CASES = [
     case_success_records_exact_identity,
     case_head_mismatch_fails_before_command,
@@ -1565,6 +1629,7 @@ CASES = [
     case_sigterm_cung_phai_giet_cay_truoc_khi_nha_khoa,
     case_dirty_run_is_allowed_but_never_reusable,
     case_validate_reuse_is_fail_closed,
+    case_headline_khong_duoc_dem_ca_bo_qua_la_da_qua,
 ]
 
 
@@ -1619,11 +1684,16 @@ def _chan_doan_cach_ly() -> None:
         print("[cach-ly]   noi gi ve lop cgroup. Lo 'de trong luc don' con nguyen.")
 
 
-def main() -> int:
-    _chan_doan_cach_ly()
-    failures: list[str] = []
+def chay_bo_ca(ds_ca: list) -> tuple[list[str], list[str]]:
+    """Chạy danh sách ca, trả `(bo_qua, hong)` — mỗi bên là danh sách thông điệp.
+
+    TÁCH khỏi `main` để ca phản chứng đi qua ĐƯỜNG ĐẾM THẬT thay vì đo lại một
+    hằng số tự gõ — cùng lý lẽ khiến `chay_bo_ca` của `launcher_test.py` được
+    tách cho `t99`/`t118`. In ấn vẫn ở `main`: hàm này chỉ ĐẾM.
+    """
     bo_qua: list[str] = []
-    for case in CASES:
+    failures: list[str] = []
+    for case in ds_ca:
         try:
             case()
         except BoQua as ly_do:
@@ -1631,14 +1701,45 @@ def main() -> int:
             bo_qua.append(f"{case.__name__}: {ly_do}")
         except BaseException as exc:  # behavior runner must report every named case
             failures.append(f"{case.__name__}: {exc!r}")
+    return bo_qua, failures
+
+
+def dong_ket_qua(tong: int, qua: int, bo_qua: int, so_hong: int) -> str:
+    """Dòng kết luận của một lượt chạy. TÁCH khỏi `main` để đo được TRỰC TIẾP.
+
+    ĐÃ TRẢ GIÁ (đo 18-08-2026, Windows): tử số cũ là `len(CASES) - len(failures)`
+    = qua + bỏ-qua, nên lượt có 11 ca tự bỏ qua vẫn in `25/25 ca` — ĐÚNG hình
+    dạng "N/N với hai số BẰNG NHAU" mà CLAUDE.md dạy là bằng chứng dương đáng
+    tin. Comment cũ ngay trên câu print còn ghi "Cùng khuôn với
+    `launcher_test.py`" — launcher đã đổi khuôn (PR #153: `dong_ket_qua` +
+    `t118`), nên câu ấy vừa sai vừa che đúng chỗ chưa sửa. Nay hai bộ CÙNG KHUÔN
+    THẬT: tử số chỉ đếm ca THỰC SỰ qua, còn ca bỏ qua thì dòng nói thẳng.
+
+    Mã thoát KHÔNG đổi (xem `main`): bỏ qua vẫn không làm đỏ. Đây là sửa SỰ THẬT
+    của báo cáo, không phải siết chuẩn ngầm — siết chuẩn là quyết định khác và
+    phải đi qua Packet khác.
+
+    Chuỗi trả về là ASCII: console máy Việt là cp1258 và một câu `print` có dấu
+    ném `UnicodeEncodeError`, giết cả lượt chạy trước khi logic kịp sai. Câu
+    cảnh báo cũng KHÔNG được chứa cặp số nào — nhét "25/25" vào đây là tự dựng
+    lại đúng hình dạng vừa gỡ, cho người đọc lướt qua thấy lại N/N.
+    """
+    dong = f"{qua}/{tong} ca QUA (bo qua {bo_qua}, hong {so_hong})"
+    if bo_qua:
+        dong += f" - KHONG DU: {bo_qua} ca BO QUA, chua do gi"
+    return dong
+
+
+def main() -> int:
+    _chan_doan_cach_ly()
+    bo_qua, failures = chay_bo_ca(CASES)
     for b in bo_qua:
         print(f"[BO QUA] {b}")
     for failure in failures:
         print(f"[FAIL] {failure}")
     qua = len(CASES) - len(failures) - len(bo_qua)
-    # Cùng khuôn với `launcher_test.py`: tổng KHÔNG được nuốt phần bỏ qua.
-    print("gate lifecycle tests: %d/%d ca (qua %d, bo qua %d, hong %d)"
-          % (len(CASES) - len(failures), len(CASES), qua, len(bo_qua), len(failures)))
+    print("gate lifecycle tests: "
+          + dong_ket_qua(len(CASES), qua, len(bo_qua), len(failures)))
     return 1 if failures else 0
 
 

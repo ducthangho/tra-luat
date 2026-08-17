@@ -198,12 +198,29 @@ jobs:
                   echo "DỪNG: '$r' thuộc vùng làm việc được bảo vệ (ops/ claude/ codex/ agent/ mission/ dispatcher/). Nhánh ở đây thường mang hồ sơ chưa vào master — xoá phải do người, không qua workflow."; exit 2 ;;
               esac
             else
-              # TẠO TAG cũng chịu danh sách bảo vệ. Bản đầu miễn trừ hẳn — reviewer hỏi
-              # đúng: một tag tên `ops/...` không xoá được nhánh nào, nhưng nó dựng một
-              # cái tên gây hiểu nhầm ngay trong vùng đang được bảo vệ. Cấm cho nhất quán.
+              # TẠO TAG cũng chịu danh sách bảo vệ — TRỪ `luu-tru/`, và chỗ trừ này là
+              # một bản vá, không phải một ngoại lệ tiện tay.
+              #
+              # BẢN TRƯỚC CẤM CẢ `luu-tru/`, và như thế là workflow TỰ CHẶN TRÌNH TỰ MÀ
+              # CHÍNH NÓ QUY ĐỊNH: nhánh `xoa-nhanh` ở trên dặn nguyên văn "Tạo tag
+              # TRƯỚC (hành động tao-tag), rồi mới xoá" — mà `tao-tag` thì từ chối đúng
+              # không gian tên ấy. Không lệnh nào chạy được cả hai vế. ĐO ĐƯỢC 17-08-2026:
+              #   tao-tag luu-tru/doctor-github-mcp-verdict-6 -> "DỪNG: … Đặt tên khác."
+              # Sáu tag `luu-tru/wp55-r4-*` đang có phải được tạo bằng đường khác.
+              #
+              # VÌ SAO KHÔNG "ĐẶT TÊN KHÁC" CHO XONG: `CLAUDE.md` khai `luu-tru/*` là ref
+              # BỀN duy nhất giữ commit công bố verdict, và chính chốt `xoa-nhanh` phía
+              # trên đọc danh sách tag để quyết định có cho xoá nhánh lưu trữ hay không.
+              # Một tag đặt tên khác vẫn qua được chốt ấy nhưng phá quy ước không gian
+              # tên mà nó dựa vào — sửa kiểu đó trông đúng mà làm hỏng bất biến.
+              #
+              # RỦI RO CỦA VIỆC MỞ, nói thẳng: từ đây một lượt `tao-tag` DỰNG ĐƯỢC tên
+              # trong `luu-tru/`. Đó là điều PHẢI cho phép để trình tự chạy được. Cái
+              # KHÔNG mở: `xoa-tag` dưới `luu-tru/` vẫn CẤM TUYỆT ĐỐI (chốt riêng ở
+              # nhánh trên) — tạo được không kéo theo xoá được, và tag mới là mỏ neo.
               rl="$(printf '%s' "$r" | tr '[:upper:]' '[:lower:]')"
               case "$rl" in
-                luu-tru/*|ops/*|claude/*|codex/*|agent/*|mission/*|dispatcher/*)
+                ops/*|claude/*|codex/*|agent/*|mission/*|dispatcher/*)
                   echo "DỪNG: tag '$r' mang tên vùng được bảo vệ. Đặt tên khác."; exit 2 ;;
               esac
             fi

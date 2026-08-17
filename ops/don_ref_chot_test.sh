@@ -147,6 +147,21 @@ ca "tên kết thúc .lock thì DỪNG"          2 xoa-nhanh 'a.lock' "" XOA
 ca "tên kết thúc bằng / thì DỪNG"         2 xoa-nhanh 'a/' "" XOA
 ca "tên dài 250 ký tự thì DỪNG"           2 xoa-nhanh "$(printf 'a%.0s' $(seq 250))" "" XOA
 ca "tạo TAG mang tên vùng bảo vệ thì DỪNG" 2 tao-tag ops/x "$SHA_THAT" TAO
+# `luu-tru/` LÀ NGOẠI LỆ CÓ CHỦ Ý, và phải khoá cả hai chiều.
+# Bản trước cấm luôn `luu-tru/`, nên workflow TỰ CHẶN TRÌNH TỰ CHÍNH NÓ QUY ĐỊNH:
+# nhánh `xoa-nhanh` dặn "Tạo tag TRƯỚC (hành động tao-tag), rồi mới xoá" mà `tao-tag`
+# lại từ chối đúng không gian tên ấy. ĐO ĐƯỢC 17-08-2026 trên run thật:
+#   tao-tag luu-tru/doctor-github-mcp-verdict-6 -> "DỪNG: … Đặt tên khác." (rc=2)
+ca "tạo tag luu-tru/ thì QUA (trình tự của chính workflow)" 0 tao-tag luu-tru/x "$SHA_THAT" TAO
+ca "tạo tag LUU-TRU/ hoa cũng QUA"        0 tao-tag LUU-TRU/x "$SHA_THAT" TAO
+# ...nhưng MỞ TẠO KHÔNG kéo theo MỞ XOÁ. Tag là mỏ neo; xoá nó vẫn cấm tuyệt đối.
+ca "mở tạo KHÔNG mở xoá: xoá tag luu-tru/ vẫn DỪNG" 2 xoa-tag luu-tru/x "" XOA GIA_SHA_NHANH="$S_LT" GIA_TAG_SHAS="$S_LT"
+# ...và các vùng còn lại KHÔNG được nới theo.
+ca "tạo tag claude/ vẫn DỪNG"             2 tao-tag claude/x "$SHA_THAT" TAO
+ca "tạo tag codex/ vẫn DỪNG"              2 tao-tag codex/x "$SHA_THAT" TAO
+ca "tạo tag dispatcher/ vẫn DỪNG"         2 tao-tag dispatcher/x "$SHA_THAT" TAO
+ca "tạo tag mission/ vẫn DỪNG"            2 tao-tag mission/x "$SHA_THAT" TAO
+ca "tạo tag agent/ vẫn DỪNG"              2 tao-tag agent/x "$SHA_THAT" TAO
 ca "tạo tag: sha sai dạng thì DỪNG"       2 tao-tag v1 "abc" TAO
 ca "tạo tag: sha CHỮ HOA thì DỪNG"        2 tao-tag v1 "B4E5C5F9EF85E652FA2CC98BB3474036519D663C" TAO
 ca "tạo tag: lệch số lượng thì DỪNG"      2 tao-tag 'v1,v2' "$SHA_THAT" TAO

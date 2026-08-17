@@ -1,0 +1,126 @@
+# Lease REVIEWER lượt 7 — đường MCP GHÉP vào `_do_github` của #143.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+#
+# VÌ SAO CÓ LƯỢT 7 DÙ LƯỢT 6 ĐÃ `approve`. Lượt 6 duyệt `45a06e48` trên nền `e38b0be`.
+# Trong lúc sáu lượt ấy chạy, PR #143 land lên master và sửa CHÍNH `_do_github` theo một
+# hướng KHÁC — mạnh hơn ở phần nó phủ. Bản đang xét là mã KHÁC trên nền `c7ad260`, nên
+# verdict lượt 6 KHÔNG phủ nó. Đây là lượt review ĐẦU TIÊN của bản hoà, không phải lượt
+# thứ bảy của cùng một bản vá.
+#
+# ĐIỀU ĐÁNG SOI NHẤT: bản hoà BỎ HẲN ba thứ của nhánh cũ, trong đó một thứ nếu giữ sẽ
+# LÙI một bản vá đã land (`"REST thang bi proxy chan 403"` nối vô điều kiện — chính là
+# thứ #143 gỡ với lý do "'Có thể' không phải phép đo"). Người vá tự đánh giá thiết kế
+# của #143 mạnh hơn thiết kế của mình rồi vứt phần mình — lời tự đánh giá ấy chưa ai soi.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: doctor-github-mcp-review-7-codex-20260817
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+reviewer_note: người vá là `claude` ⇒ §8 bắt reviewer khác nhà cung cấp
+assurance_target: cross_approved
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: fe55f2ce00ba97c01d98a99f388eb7ffdf0536ea
+branch: ops/doctor-github-qua-mcp
+base_sha: c7ad2600f6785fa39fce261765a7f02e266a5b1a
+target_branch_neu_land: master
+target_pull_request: 146
+
+nen_da_DOI_giua_chung: >-
+  Lease lượt 1..6 đều khai `base_sha: e38b0be`. Nền nay là `c7ad260` (sau khi #143 land).
+  Đây KHÔNG phải chi tiết sổ sách — nó là lý do lượt này tồn tại: cùng một nhánh, cùng
+  một mục tiêu, nhưng mã và nền đều đã khác.
+
+scope_files: 2
+scope_note: >-
+  Diff `c7ad260..fe55f2c` chỉ nên gồm `.claude/dev/launcher.py` và
+  `.claude/dev/launcher_test.py`. Mọi thứ NGOÀI phần thêm đường MCP phải trùng master
+  từng byte — mục kiểm số 1 đòi reviewer kiểm đúng điều đó.
+
+prompt_path: ops/prompts/doctor-github-mcp-review-7-codex-20260817.md
+prompt_sha256_required: a8011b983617806d415ccd396488636c5f17c9378cc663f5ae5c5825d1af2e91
+
+granted_by: ducthangho
+granted_on_instruction: direct, in-session, 2026-08-17 (chọn "Hoà nhập rồi review lượt 7")
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  KHAI THẲNG: phiên ghi lease này CHÍNH LÀ phiên đã vá. `granted_by` là `ducthangho`,
+  duyệt trực tiếp. Lượt này chỗ đáng ngại là một QUYẾT ĐỊNH THIẾT KẾ do người vá tự ra:
+  vứt ba phần việc của chính mình vì cho rằng #143 làm tốt hơn. Nếu đánh giá ấy sai thì
+  kho mất một thứ đáng giữ mà không ai biết — nên mục kiểm 1 và 3 bắt soi đúng chỗ đó.
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc chủ kho
+
+leased_at_utc: '2026-08-17T09:49:00Z'
+lease_expires_at_utc: '2026-08-18T09:49:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+attempts_note: Việc dev-side ngoài packet nên KHÔNG tiêu lượt.
+
+muc_kiem:
+- id: hoa-co-lam-mat-hay-LUI-thu-gi-cua-143-khong
+  note: >-
+    So `origin/master` với head chỉ `.claude/dev/**`. Ngoài phần THÊM, mọi dòng phải
+    trùng master từng byte. Một dòng của #143 bị đổi mà không khai = finding.
+- id: mcp-khong-duoc-vao-LAM_DUOC_VIEC
+  note: >-
+    Còn đường nào lách để `mcp` nâng được nhãn không — kể cả ở tầng tiêu thụ?
+- id: nhan-duong-ba-trang-thai-va-loi-khai-ve-rest-kho
+  note: >-
+    `_nhan_duong` đổi kết xuất của MỌI đường. Có làm sai nghĩa đường nào của #143 không?
+    Người vá KHAI `rest-kho` mắc cùng bệnh nhưng cố ý không sửa — đúng, hay né finding?
+- id: env-truyen-xuong-co-lui-ve-os-environ-tho-khong
+  note: >-
+    `_suc_khoe_mcp_github` nhận `env` từ `_do_github`. Truyền `None` có làm
+    `subprocess.run` lùi về `os.environ` THÔ — đúng bệnh P2 mà #143 vừa vá — không?
+- id: t115-t116-do-HOP-DONG-hay-do-DO-GIA
+  note: >-
+    Lớp này thủng BỐN lượt liên tiếp trước đây. Tìm lượt thứ năm. Và `t116` đọc chính
+    tệp test — có tự lừa được không?
+
+so_lieu_nguoi_va_bao:
+  suite: 116/116 (qua 115, bỏ qua 1, hỏng 0)
+  nen_master_suite: 114/114 — c7ad260, đo trên WORKTREE THẬT
+  dot_bien: 90/90
+  nen_master_dot_bien: 74/74 — c7ad260
+  delta: 0 ca đỏ · +2 ca xanh · +16 đột biến
+  canh_bao_ve_cach_do_nen: >-
+    Bản chép nền ĐẦU TIÊN của người vá thiếu `.claude/hooks/` làm `t103`/`t108` đỏ oan
+    (112/114) — suýt thành một NỀN SAI rồi báo delta sai theo. Phải đo trên worktree
+    thật. Ghi ra để reviewer không lặp lại.
+  cong_khac: eol 30/30 · violations=[] · doc-claims --strict rc=0 · doctrine-scan sạch ·
+    lease_publish 31/31
+
+ngoai_pham_vi_da_biet:
+- id: gh-trong-workflows-va-skills
+  note: '`.github/workflows/**` và `.claude/skills/**` còn dùng `gh`.'
+- id: loi-khai-pham-vi-nhan-MCP
+  note: Lượt 2 đo độc lập, lượt 5/6 xác nhận. Chỉ báo lại nếu có phép đo NGƯỢC LẠI.
+- id: chot-tao-tag-cam-luu-tru
+  note: >-
+    `ops-don-ref.yml` cấm tạo tag `luu-tru/*` trong khi chính nó dặn phải tạo trước khi
+    xoá. ĐÃ BIẾT; chủ kho chốt sửa bằng thay đổi RIÊNG, review riêng.
+- id: ci-yml-khong-chay-launcher-test
+  note: >-
+    ĐO ĐƯỢC (`grep -c launcher_test` = 0): `ci.yml` không chạy bộ ca của launcher; chỉ
+    `launcher-windows.yml` chạy, mà nó `skipped` trên PR không nhãn `windows`. Một lượt
+    `ci.yml` xanh KHÔNG nói gì về PR này.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T09:48:25Z'
+master_sha_at_grant: c7ad2600f6785fa39fce261765a7f02e266a5b1a
+lease_song_khac_luc_cap: Lease lượt 1..6 đã đóng. Không có lease review nào khác đang mở.
+canh_bao_moi_truong_luc_cap: >-
+  `codex` KHÔNG bị chặn. `CODEX_AUTH_JSON` cũ ~30h (refresh token xoay vòng) — nếu
+  reviewer không khởi động được thì đọc `launcher.py doctor` trước khi nghi thứ khác.

@@ -71,7 +71,7 @@ envelope:
   max_packets: 20
   max_successor_depth: 5
   max_attempts_per_packet: 3
-  max_run_minutes: 45
+  max_run_minutes: 90
   same_failure_limit: 2
   max_parallel_workers: 2
   max_agent_invocations: 30
@@ -79,6 +79,10 @@ envelope:
   max_inbox_backlog: 100
   provider_budgets: {}
 ```
+
+`max_run_minutes: 90` là profile khởi điểm đã duyệt cho cả Executor và Reviewer. Deadline luôn là
+absolute wall clock và fail-closed; không đổi sang active-time và không tự sửa power policy. Sau 3–5 run thật,
+Mission owner xem lại profile bằng số đo wall/working-state; dispatcher không tự nâng trần.
 
 Trạng thái mission: `proposed`, `running`, `paused`, `blocked`, `awaiting_land`, `complete`, `cancelled`. `plan_hash`
 đóng băng objective, acceptance, risk, requires_live, envelope và seed/constraint của Packet plan. Successor nằm
@@ -137,6 +141,7 @@ depends_on: []
 executor: claude | codex
 environment: cloud | local
 risk: normal | sensitive
+review_class: routine | systemic | sensitive
 acceptance_criteria: []
 ```
 
@@ -149,6 +154,7 @@ change_policy_sha: <canonical-policy-sha>
 effective_write_set: []
 required_checks: []
 land_obligations: []
+effective_review_class: routine | systemic | sensitive
 ```
 
 Các trường này cùng nằm trong `spec_hash`. Policy đổi làm closure thay đổi thì packet phải tạo revision và
@@ -361,6 +367,8 @@ generation: <integer>
 provider: claude | codex | human
 role: reviewer
 session_id: <stable-run-id>
+model_reviewer_identity: <provider/model/session attestation>
+github_submitter_identity: <github actor or null when not published>
 reviewed_sha: <git-oid>
 independent_from_executor_session: true
 review_axes: [spec, standards_security]
@@ -370,6 +378,19 @@ verdict: approve | changes_requested | blocked
 assurance: cross_approved | same_provider_approved | human_audited | review_deferred
 evidence_url: <pr-review-or-comment-url>
 ```
+
+Evidence trên là verdict contract; delivery/provenance bền dùng `review_delivery_receipt` hiện có. Đích v2 tối
+thiểu có `schema_version: 2`, receipt ID, `reviewed_sha`, verdict path/hash, hai identity ở trên, evidence URL
+và khai loại/cường độ mỏ neo. Mỏ neo có thể là canonical ancestry, protected evidence ref hoặc check
+object; không bắt mọi verdict phải có tag. Receipt mirror trên PR branch không tự tạo required-check
+authority. Packet state chỉ giữ receipt ID/hash sau validation, không chép raw identity fields thành một schema
+song song.
+
+Cutover v2 không viết lại 11 receipt v1 cũ: chúng là historical/read-only và không đủ tư cách làm
+identity evidence cho required check mới. Legacy exemption phải neo vào allowlist đóng băng đúng 11
+filename+hash tại cutover; `schema_version: 1` do tác giả tệp mới tự khai không tạo miễn trừ. Mọi receipt
+ngoài allowlist phải validate như v2. Bộ kiểm phải làm đỏ cả receipt mới tự khai v1 lẫn mutant nới allowlist
+để chứa tệp tấn công.
 
 Land evidence tách approval khỏi thao tác:
 
@@ -423,9 +444,51 @@ thời điểm reset. Dispatcher, không phải Executor, quyết định fallba
 Reviewer cùng provider phải tự đọc spec/diff, chạy lại check cần thiết và không chỉ tóm tắt báo cáo Executor.
 Approval luôn neo `reviewed_sha`; commit mới buộc review lại.
 
+`model_reviewer_identity` và `github_submitter_identity` là hai trường độc lập. Actor chép hoặc đăng output không
+được khai thành model reviewer; ngược lại một model review khác nền không tự cấp GitHub authority cho actor đăng.
+Trong M1–M2, verdict Codex do `launcher.py` neo exact SHA và hash output có thể là evidence `cross_approved`, nhưng
+comment/tệp/receipt do tài khoản tác giả vận chuyển không trở thành required check hay merge authorization. Human
+Land Approver phải readback exact-head verdict/receipt trước khi land Packet `sensitive`. Chỉ M3 mới được đề nghị
+Dedicated App/Check Run làm publisher authority, sau canary và human activation.
+
 Workflow, security paths, credential boundary, dispatcher, migration dữ liệu và LIVE adapter không được dùng
 `review_deferred`: phải có cross-review khác nền tảng hoặc human review có audit. `same_provider_approved` có thể
 là phản biện bổ sung nhưng một mình không thay mức assurance bắt buộc cho các phạm vi nhạy cảm này.
+
+Mặc định vận hành khi quota Codex hữu hạn: Claude Code `opus` với effort `max` là Executor code chính. Mỗi Mission
+dành ít nhất 70% ngân sách Executor dự kiến cho Claude và đặt trần Codex Executor ở 30%; đây là ceiling, không phải
+chỉ tiêu phải tiêu. Codex chỉ nhận Packet `routine`/`systemic` nhỏ, đóng và độc lập khi phần ngân sách review đã
+được reserve; tỷ lệ thực tế có thể là 0%. PR do Codex code phải được phiên Claude mới độc lập hoặc human review.
+Codex vẫn là Reviewer read-only trên exact PR head cho Packet giá trị hoặc rủi ro cao. Mỗi PR được dùng tối đa hai lượt Codex:
+một review đầu và một rereview sau khi Executor gom bản vá. Lượt hai chưa approve phải chuyển sang checkpoint
+tách phần đã ổn hoặc xem lại thiết kế, không tiếp tục gọi Codex theo quán tính. Packet thường có thể fallback
+sang phiên Claude mới độc lập với nhãn `same_provider_approved` hoặc sang `human_audited`; phạm vi nhạy cảm vẫn
+phải chờ Codex cross-review hoặc human audit.
+
+Review Class được tính fail-closed từ `risk`, effective write set và diff thật. Packet khai `review_class` là
+mức tối thiểu; dispatcher ghi `effective_review_class` bằng mức cao hơn giữa khai báo và classifier. Executor
+không được hạ lớp. Path không biết, classifier lỗi hoặc bằng chứng không đọc được đều thành `sensitive`; human
+chỉ override bằng quyết định có audit.
+
+- `sensitive`: workflow/CI authority, security/credential boundary, dispatcher/reconciler, review/land authority,
+  launcher hoặc gate lifecycle, migration dữ liệu và LIVE adapter. Phải có Codex `cross_approved` hoặc
+  `human_audited`; hết quota mà chưa có human thì pause.
+- `systemic`: protocol/schema/harness dùng chung hoặc enabler ảnh hưởng ít nhất ba downstream Packet/consumer.
+  Dùng Codex cho review đầu; chỉ cấp lượt hai khi còn P0/P1, finding cắt ngang hoặc cần xác minh lại. Trường hợp
+  khác fallback sang phiên Claude mới độc lập hoặc human audit đúng nhãn.
+- `routine`: thay đổi cô lập, docs hoặc test/report không đổi authority/security boundary. Mặc định dùng phiên
+  Claude mới độc lập hoặc human; Codex chỉ dùng khi dispatcher/human nâng lớp có audit.
+
+Trong rollout Thin Orchestration, tối đa hai Executor writer chạy đồng thời và chỉ khi effective write set không
+giao. Claude là mặc định; Codex writer còn phải qua trần ngân sách 30% và review-reservation gate. Mỗi Packet có
+worktree/branch riêng. Reviewer read-only không chiếm writer slot, nhưng từ lúc chốt
+`reviewed_sha` tới khi verdict được ghi, branch Packet bị đóng băng; commit mới hủy lượt review hiện hành và phải
+quay lại state rework/review đúng budget. Slot trống không phải lý do mở Packet khi dependency, lease hay write
+set chưa an toàn.
+
+Rework không preempt writer đang chạy. Khi có slot kế tiếp, cùng priority thì rework đi trước Packet chưa mở;
+khác priority thì Packet P cao hơn đi trước rework P thấp hơn. Scheduler phải ghi lý do bỏ qua Packet ưu tiên cao.
+Write set là path/prefix repo-relative có thể so máy; nhãn `planned:` chỉ cho path chưa tồn tại, không cho prose.
 
 ## 9. EOL và tệp phái sinh
 
@@ -564,7 +627,8 @@ có audit.
 
 ## 12. Stop conditions và budget
 
-Mặc định: 3 attempt/packet, 45 phút/run, cùng failure fingerprint nội dung hai lần thì blocked, tối đa 20 packet,
+Mặc định: 3 attempt/packet, 90 phút/run cho cả Executor và Reviewer, cùng failure fingerprint nội dung hai lần thì
+blocked, tối đa 20 packet,
 độ sâu kế nhiệm 5, hai worker song song, 30 agent invocation và 360 cloud minute. Các trần độc lập và trần chạm
 trước thắng: 20 packet là guard cấu trúc, không hứa đủ invocation cho 20 × 3 attempt cùng reviewer. Trước khi cấp
 lease/review, dispatcher ước tính `used / reserved / limit` cho packet đã biết dưới review policy hiện tại; phần
@@ -578,6 +642,32 @@ Khi chạm attempt/same-failure/quota/permission stop condition, phiên ghi fail
 Human/dispatcher có thể reroute bằng generation mới nhưng không hồi sinh lease cũ. Nếu stop condition cho thấy
 Packet Spec hoặc Mission Plan sai, phải đi qua Packet revision hoặc Mission Change Request; không thêm cờ nới bí
 mật. Việc mới phát hiện trong phiên chỉ được tiếp tục tại chỗ khi nó là substep cần thiết trong spec hiện hành.
+
+Hai lượt Codex review trên cùng PR là một stop condition riêng của review budget. Review Rescue Checkpoint được
+kích hoạt khi chạm trần này hoặc khi PR đã qua ba vòng code/review tổng cộng mà chưa approve. Chạm checkpoint
+không tự biến Packet thành thất bại nội dung và không cho phép gọi thêm bằng prompt/phiên khác để lách trần.
+
+State giữ riêng `codex_review_calls_used`, `codex_executor_calls_used` và `review_rounds_used`.
+`codex_review_calls_used` tăng khi launcher có bằng chứng lời gọi review đã bắt đầu sinh output/token, kể cả timeout
+hoặc output sai schema; tối đa hai trên một PR. Lỗi preflight, permission denial hoặc rate-limit trước khi model
+sinh output không tăng bộ đếm này. `codex_executor_calls_used` thuộc executor ceiling 30% và không vay/hoàn review
+cap. `review_rounds_used` chỉ tăng khi verdict qua schema, exact-SHA và receipt validation. Output sai schema
+fail-closed và không tự gọi lại; human chỉ được lập receipt có audit từ raw output bất biến khi verdict và SHA
+hoàn toàn rõ, nếu không đi Review Rescue Checkpoint. Đổi prompt, session hay tên attempt không reset các bộ đếm.
+
+Launcher cưỡng chế deadline bằng absolute wall clock: chờ theo lát bị chặn và so lại wall time sau mỗi lát, kể cả
+khi OS không tính low-power state vào wait timeout. Sổ ghi `wall_elapsed_seconds`, `working_elapsed_seconds`,
+`working_clock` và `timeout_clock=wall`. Trên Windows, chỉ được khai working-state time từ
+`QueryUnbiasedInterruptTime` sau khi probe symbol an toàn; QPC/`time.monotonic()` không phải awake clock. Nền chưa
+có clock đã kiểm chứng phải ghi `null/unavailable`. Launcher chỉ ghi bằng chứng và giữ kill-tree/rc `124/125`; nó
+không tự động `void-attempt`. Tự động phân loại infrastructure void cần Packet và phản chứng riêng ở packet-loop.
+
+Chỉ được tách Stable Slice khi phần đó hữu ích độc lập, đạt acceptance riêng, không phụ thuộc phần đang có finding,
+không làm yếu security/gate và có test/evidence dương của chính nó. Stable Slice phải đi qua Packet/PR sạch và
+review lại trên exact head mới; cấm merge branch trộn lẫn rồi hứa xử lý phần lỗi sau. Phần còn lại thành
+Remediation Slice kế nhiệm, giữ nguyên stable finding IDs và lịch sử. Finding cắt ngang bất biến lõi thì không
+tách: phải revision Packet/Mission, human audit hoặc pause để xem lại thiết kế. Cùng hình dạng lỗi xuất hiện lần
+thứ ba bắt buộc xem lại có nên tiếp tục cách làm đó, không chỉ vá lần thứ tư.
 
 ## 13. Hợp đồng ba skill
 
@@ -596,6 +686,11 @@ không sửa file; xuất verdict `approve | changes_requested | blocked` có se
 đã ghi vào PR và state nhận đúng review assurance.
 Reviewer dùng checkout/context độc lập, ghi exact `reviewed_sha`; nếu cùng provider thì phải là phiên mới và mang
 `same_provider_approved`, không giả thành cross-review.
+
+Trong bootstrap trước W1-S1, adapter hiện tại tiếp tục dùng prepared sandbox ngoài kho, closed read scope và bản
+sao writable chỉ để chạy phản chứng mà không chạm kho thật; mọi transport chưa chứng minh phải khai caveat. W1-S1
+chỉ cập nhật adapter mỏng sau khi prompt contract và receipt/state integration đã land; không được viết trước cú
+pháp cho capability chưa tồn tại.
 
 ### `land-packets` — user-invoked client
 
@@ -631,6 +726,16 @@ bundle nhưng vẫn phải qua `doc-claims-check --strict`, kiểm link/path và
 8. Local controller: Scheduled Task, offline queue, reboot/recovery/stale tests.
 9. Land automation: chỉ promote sau nhiều mission không có stale lease, out-of-effective-write-set, event mất
    hay duplicate packet.
+
+Phiên bản đầu dùng Thin Orchestration: tái dùng `launcher.py`, `packet_loop.py`, ba skill và GitHub Issue/PR;
+không thêm daemon, TUI hay orchestrator tổng quát và không cài dự án bên ngoài vào critical path. Automation chỉ
+được quyết định điều tất định như validate, classifier, budget, evidence và state transition. Human giữ quyền chọn
+Stable Slice, revision thiết kế/Packet/Mission, land và activation mọi Dedicated App/required check.
+
+Auto-dispatch chưa được promote chỉ vì shadow xanh. Trước khi cân nhắc promote, phải có ít nhất ba Mission thực tế
+liên tiếp đã landed và canonical readback mà không có stale review/lease, out-of-effective-write-set hoặc sai
+reviewer/publisher identity. Một vi phạm làm chuỗi đếm lại từ Mission kế tiếp; promotion vẫn cần human approval,
+negative fixtures và kill switch, nên ngưỡng ba Mission là điều kiện cần chứ không phải quyền tự động bật.
 
 Protocol cutover chọn zero legacy writer: trước activation, mọi PR kiểu cũ chạm version/changelog/manifest phải
 merge, đóng hoặc chuyển sang packet mới; chỉ activation PR còn được nhắm canonical. Ghi `protocol_cutover_sha`

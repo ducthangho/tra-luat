@@ -11,6 +11,19 @@ commit lọt khi gate ĐỎ. Mỗi gate ghi output ra FILE rồi mới parse; rc
 Mọi lệnh dưới đây đi qua `gate_lifecycle.py`, nên trên một physical host không có hai heavy gate chạy đồng thời;
 duration, exact identity và rc được ghi ở `scripts/.tl_state/gate/*.json`.
 
+**HAI CHẾ ĐỘ, và chọn sai thì hoặc không đo được gì hoặc rửa được bằng chứng.**
+
+Mặc định `--require-clean`: cây phải SẠCH, bằng chứng gắn vào đúng một commit và TÁI DÙNG ĐƯỢC.
+Nhưng luồng `release-checklist.md` chạy `/gate` ở **bước 5** rồi mới commit ở **bước 7**, nên ở
+đúng luồng ấy mặc định này làm MỌI subgate thoát `preflight` mã 2 trước khi chạy lệnh — tức
+**không test được thay đổi đang chờ**, đúng lúc cần test nhất (P1 cross-review PR "#141").
+
+Đặt `GATE_CAY_BAN=1` để chạy trên cây đang bẩn. Đánh đổi khai thẳng: bằng chứng lượt đó
+**KHÔNG BAO GIỜ tái dùng được** — `gate_lifecycle.py validate` từ chối bằng chứng sinh trên cây
+bẩn (mismatch `worktree_clean`, chốt có sẵn). Đó là chủ đích, không phải hạn chế: thứ vừa test là nội dung
+CHƯA có trong lịch sử, nên nó không thể là chứng cho bất kỳ commit nào. Muốn bằng chứng tái dùng
+được thì commit trước rồi chạy lại ở chế độ mặc định.
+
 Chạy đúng script này bằng Bash tool (1 call), làm việc tại repo tra-luat:
 
 ```bash
@@ -18,6 +31,15 @@ cd /c/qh/tra-luat && P=/c/Python313/python
 mkdir -p scripts/.tl_state/gate
 BASE_SHA=$(git merge-base origin/master HEAD 2>/dev/null || git rev-parse HEAD)
 HEAD_SHA=$(git rev-parse HEAD)
+# Chế độ cây bẩn phải là OPT-IN tường minh và phải NÓI RA, kẻo người đọc log sau này
+# tưởng đây là lượt gate bình thường rồi trích nó làm chứng cho một commit.
+if [ "${GATE_CAY_BAN:-0}" = "1" ]; then
+  SACH=()
+  echo "  [gate] CHE DO CAY BAN: dang test thay doi CHUA commit."
+  echo "  [gate] Bang chung luot nay KHONG tai dung duoc (validate se tu choi)."
+else
+  SACH=(--require-clean)
+fi
 declare -A RC
 g() {
   local n="$1" positive="$2"; shift 2
@@ -25,7 +47,7 @@ g() {
     --kind heavy --name "$n" --repo . \
     --evidence "scripts/.tl_state/gate/${n}.json" \
     --output "scripts/.tl_state/gate/${n}.out" \
-    --expected-head "$HEAD_SHA" --base-sha "$BASE_SHA" --require-clean \
+    --expected-head "$HEAD_SHA" --base-sha "$BASE_SHA" "${SACH[@]}" \
     --selected-test "$n" \
     --wait-seconds 900 --timeout-seconds 1200 --positive-regex "$positive" --quiet -- "$@"
   RC[$n]=$?

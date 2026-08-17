@@ -32,6 +32,9 @@ EXIT_PREFLIGHT = 2
 EXIT_NOT_REUSABLE = 3
 EXIT_BUSY = 75
 EXIT_TIMEOUT = 124
+# 128 + SIGINT(2), quy ước shell cho "bị ngắt". Tách khỏi `EXIT_TIMEOUT` vì hai
+# chuyện khác nhau: quá hạn là gate tự quyết, ngắt là người gõ Ctrl-C.
+EXIT_INTERRUPTED = 130
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
 _CATALOG_POLICY_PATHS = (
     ".claude/dev/gate_lifecycle.py",
@@ -548,6 +551,38 @@ def cmd_run(args: argparse.Namespace) -> int:
                 returncode=returncode,
                 error="gate exceeded timeout",
             )
+        except BaseException as exc:
+            # NGẮT (Ctrl-C) VÀ MỌI ĐƯỜNG THOÁT BẤT THƯỜNG PHẢI GIẾT CÂY TRƯỚC KHI NHẢ KHOÁ.
+            #
+            # Cross-review P1 trên PR "#141" (`gate_lifecycle.py:540`). Con được đặt ở
+            # SESSION MỚI nên nó KHÔNG nhận ngắt từ terminal; chỉ tiến trình cha nhận.
+            # Khối trên chỉ bắt `TimeoutExpired`, nên `proc.wait()` ném `KeyboardInterrupt`
+            # là stack unwind chạy thẳng qua đây, `_maybe_heavy_lock` NHẢ KHOÁ ở `finally`
+            # của nó, trong khi con và cả cây hậu duệ VẪN CHẠY. Lượt heavy gate kế tiếp
+            # lấy được khoá và chồng lên lượt "đã huỷ" — hai gate cùng ghi vào một kho.
+            # Khoá mà nhả trong lúc thứ nó bảo vệ còn sống thì không phải khoá.
+            #
+            # `BaseException` chứ KHÔNG phải `Exception`: `KeyboardInterrupt` và
+            # `SystemExit` đều KHÔNG kế thừa `Exception`, nên `except Exception` trượt
+            # đúng ca cần bắt. Đây là lý do duy nhất dùng `BaseException` ở đây.
+            #
+            # Giết XONG rồi `wait` rồi mới `raise` lại: "đã gọi lệnh giết" ≠ "đã chết"
+            # (bài học `taskkill`). Không nuốt ngoại lệ — Ctrl-C vẫn phải là Ctrl-C với
+            # người gõ nó; ta chỉ chèn việc dọn vào TRƯỚC lúc nhả khoá.
+            _terminate_process_tree(proc, windows_job)
+            with contextlib.suppress(subprocess.TimeoutExpired):
+                proc.wait(timeout=5)
+            returncode = EXIT_INTERRUPTED
+            _finish(
+                payload,
+                started,
+                status="interrupted",
+                returncode=returncode,
+                error="gate interrupted: %s" % type(exc).__name__,
+            )
+            with contextlib.suppress(OSError):
+                _atomic_json(evidence, payload)   # ghi bằng chứng TRƯỚC khi ném tiếp
+            raise
         finally:
             if windows_job is not None:
                 windows_job.close()

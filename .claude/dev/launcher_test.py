@@ -3815,11 +3815,17 @@ def t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua():
     tách cho `t99`). Khối (c) vẫn đi qua ĐƯỜNG ĐẾM THẬT `chay_bo_ca`, nên nó đo
     hành vi chứ không đo lại một hằng số tôi vừa gõ.
 
-    GIỚI HẠN — khai thẳng: ca này khoá SỰ THẬT CỦA DÒNG BÁO CÁO, không khoá mã
-    thoát. `main` vẫn `return 1 if hong_ds else 0`, tức ca bỏ qua vẫn cho rc=0;
-    bản vá này CỐ Ý không đổi điều đó, và ca này cũng không chứng minh được điều
-    đó (muốn chứng minh phải chạy CLI trên một nền có ca tự bỏ qua — mà cổng phụ
-    thuộc nơi chạy thì chưa phải cổng). Đổi rc là quyết định riêng, Packet riêng.
+    GIỚI HẠN — khai thẳng, và đã bị bắt vì khai RỘNG QUÁ: ca này chỉ khoá CÔNG
+    THỨC của `dong_ket_qua`, KHÔNG khoá việc `main` có gọi nó hay không, cũng
+    KHÔNG khoá mã thoát. Bản đầu viết "ca này khoá SỰ THẬT CỦA DÒNG BÁO CÁO" —
+    rộng hơn hẳn thứ nó làm được, và review W0-M1 (PR #153, head `99ba7857`)
+    chứng minh bằng đột biến: hoàn nguyên ĐÚNG MỘT dòng ở cuối `main` về
+    `{qua + bo_qua}/{tong}`, giữ nguyên `dong_ket_qua` lẫn ca này, thì ca này
+    VẪN XANH và headline in lại `118/118` với 13 ca chưa hề đo.
+    Dây nối ấy nay do `t119` khoá — và `t119` đo bằng HÀNH VI (gọi `main()` trên
+    bản sao rồi đọc stdout), nên nó cũng đo luôn "bỏ qua vẫn cho rc=0", thứ ca
+    này chỉ khai suông. Đổi rc là quyết định riêng, Packet riêng.
+    Đây đúng nếp `t116`/`t117` của tệp này: chưa làm thì đừng khai là đã làm.
     """
     # (a) khong bo qua, khong hong: N/N la HOP LE va phai duoc giu nguyen suc nang
     d = dong_ket_qua(10, 10, 0, 0)

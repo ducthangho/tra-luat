@@ -30,8 +30,9 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 | [`wp55-r4-review-2-codex-verdict.md`](wp55-r4-review-2-codex-verdict.md) | [`.receipt.yaml`](wp55-r4-review-2-codex-verdict.receipt.yaml) | `wp55-r4-review-2-codex-20260816` | `approve` | `817598e2` | 4525 |
 | [`pr134-ci-lease-gate-codex-verdict.md`](pr134-ci-lease-gate-codex-verdict.md) | [`.receipt.yaml`](pr134-ci-lease-gate-codex-verdict.receipt.yaml) | — (không lease) | `approve_with_findings` | `ae755d10` | 7975 |
 | [`doctor-github-mcp-review-6-codex-verdict.md`](doctor-github-mcp-review-6-codex-verdict.md) | [`.receipt.yaml`](doctor-github-mcp-review-6-codex-verdict.receipt.yaml) | `doctor-github-mcp-review-6-codex-20260817` | `approve` | `45a06e48` | 2160 |
+| [`doctor-github-mcp-review-9-codex-verdict.md`](doctor-github-mcp-review-9-codex-verdict.md) | [`.receipt.yaml`](doctor-github-mcp-review-9-codex-verdict.receipt.yaml) | `doctor-github-mcp-review-9-codex-20260817` | `approve` | `0826629a` | 1156 |
 
-Hàng cuối (`doctor-github-mcp-review-6-*`) là việc **dev-side ngoài packet** — nó sửa
+Hai hàng `doctor-github-mcp-review-*` là việc **dev-side ngoài packet** — nó sửa
 `.claude/dev/launcher.py`, không đụng `write_set` của wp55, và lease ghi `attempts 0/0`.
 **Đọc kỹ chỗ này: nó là lượt THỨ SÁU, và năm lượt trước KHÔNG có tệp ở đây.** Cả năm đều
 `changes_requested`, và bốn lượt đầu reviewer đều tìm được đột biến SỐNG SÓT ở cùng một lớp
@@ -41,6 +42,12 @@ lập luận dẫn tới `approve` này **không tra lại được đầy đủ
 điều đó ở `luot_truoc_khong_duoc_ghi_thanh_tep`, kèm `lease_id`/`reviewed_sha`/`short_id`
 của từng lượt để ai muốn thì còn biết đường tìm. Một hàng `approve` đứng một mình ở bảng
 này rất dễ đọc thành "duyệt ngay lượt đầu"; nó không phải vậy.
+
+**Hàng `review-9` KHÔNG phải lượt thứ chín của cùng một bản vá.** Lượt 6 `approve`
+trên nền `e38b0be`; rồi #143 land và sửa CHÍNH hàm ấy, nên nền thành `c7ad260` và
+verdict lượt 6 không còn phủ mã. Lượt 7..9 xét **BẢN HOÀ** — mã khác, nền khác.
+Lượt 9 đóng băng phạm vi (không ca mới, không hàm mới) và ra `approve` với
+**Findings TRỐNG và Nợ khai báo TRỐNG** — chín lượt trước không lượt nào trống cả hai.
 
 Ba hàng đầu của revision 4 (`di-tru`, `viet-lai`, `rebase`) là việc **phụ trợ** — mỗi lượt
 review đúng một commit trên master, một tệp `CLAUDE.md` — chứ không phải lượt cross-review

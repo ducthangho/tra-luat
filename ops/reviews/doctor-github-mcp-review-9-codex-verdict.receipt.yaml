@@ -1,0 +1,92 @@
+# BIÊN NHẬN GIAO HÀNG cho verdict cross-review lượt 9 — lượt CHỐT của BẢN HOÀ:
+# `approve`, Findings TRỐNG, Nợ khai báo TRỐNG.
+#
+# ĐÂY LÀ VERDICT THỨ HAI CỦA CHUỖI ĐƯỢC GHI THÀNH TỆP. Lượt 6 cũng `approve` nhưng trên
+# NỀN KHÁC (`e38b0be`); #143 land rồi đổi nền nên verdict ấy không phủ bản hoà. Chín lượt
+# KHÔNG phải chín lượt của một bản vá: lượt 1..6 xét bản trên nền cũ, lượt 7..9 xét BẢN HOÀ
+# trên nền `c7ad260`.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+lease_id: doctor-github-mcp-review-9-codex-20260817
+provider: codex
+role: reviewer
+verdict: approve
+reviewed_sha: 0826629a9e550ea97f3ae46259e40772d32abc76
+
+verdict_path: ops/reviews/doctor-github-mcp-review-9-codex-verdict.md
+verdict_sha256: 0923678be4d33e0f498256317b5f30993dc3fbec9ec4e5d200fcb23ede0d6a5b
+verdict_bytes: 1156
+verdict_nguon: 'scratchpad/runs/20fd83d5/stdout.log (launcher run, ma_thoat=0, 111.6s)'
+verdict_doi_chieu: 'diff -u nguon <-> tệp đã chép: 0 dòng lệch'
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/de86c2475c1410f73874fb3f75f233ee3eecc962/ops/reviews/doctor-github-mcp-review-9-codex-verdict.md
+evidence_url_han_che: >-
+  Trỏ commit ĐẦU TIÊN chứa tệp verdict. Commit ấy hiện chỉ được nhánh `ops/**` giữ; nó
+  BỀN khi PR #146 land bằng MERGE COMMIT (squash sẽ làm nó mất tổ tiên). Xem `truy_xuat_*`.
+
+published_first:
+  branch: ops/doctor-github-qua-mcp
+  commit: de86c2475c1410f73874fb3f75f233ee3eecc962
+
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_ghi_chu: >-
+  CHƯA có tag `luu-tru/*` (chốt `tao-tag` cấm chính không gian tên ấy — đang sửa ở PR
+  #147). Đường bền cho verdict này là LAND lên master bằng merge commit.
+
+# LƯỢT NÀY LÀ PHÉP THỬ CỦA MỘT GIẢ THUYẾT, không phải của một bản vá.
+pham_vi_dong_bang:
+  gia_thuyet: >-
+    Chủ kho hỏi vì sao qua nhiều vòng vẫn chưa `approve`. Người vá tự chẩn: nguyên nhân
+    chính là CHÍNH MÌNH nới phạm vi mỗi lượt — bằng chứng là cả hai finding của lượt 8 đều
+    nói về `t117`, thứ người vá tự nghĩ ra khi CHUẨN BỊ lượt 8.
+  da_lam: >-
+    Đóng băng: không ca mới, không hàm mới, không gia cố nhân tiện. Diff so với SHA lượt 8
+    xét đúng MỘT tệp (+38/−15). Prompt hỏi ĐÚNG MỘT câu và bắt mọi thứ khác vào
+    `## Nợ khai báo` trừ hồi quy / P1 đường sản xuất.
+  ket_qua: >-
+    `approve` ngay lượt kế tiếp, Findings TRỐNG và Nợ khai báo TRỐNG. Giả thuyết được
+    xác nhận trong ĐÚNG MỘT lượt — chín lượt trước đó không lượt nào trống cả hai mục.
+
+# MỤC NGƯỜI VÁ KHAI LÀ KHÔNG ĐÓNG ĐƯỢC, MÀ REVIEWER ĐÓNG ĐƯỢC.
+muc_3_nguoi_va_khong_dong_duoc_nhung_reviewer_dong_duoc:
+  vi_sao_khai_khong_dong_duoc: >-
+    Mục 3 của lượt 8 là "chạy lại standard suite trong môi trường không bị ca process-tree
+    cắt". Sandbox reviewer bị cắt sau `t62` ở CẢ lượt 2, 3 và 8 nên họ khai KHÔNG ĐO ĐƯỢC
+    cho số tổng. Người vá không sửa được môi trường của họ từ đây, nên lease lượt 9 khai
+    thẳng rằng `117/117` chỉ có MỘT nguồn.
+  reviewer_do_duoc: 'standard suite chạy TRỌN: 117/117 (116 qua, 1 bỏ qua, 0 hỏng), exit 0'
+  y_nghia: >-
+    Con số `117/117` NAY CÓ NGUỒN THỨ HAI. Ghi riêng vì suốt chuỗi này nó là lời khai một
+    phía, và người vá đã nói thế trong ba lease liên tiếp.
+
+so_lieu_reviewer_tu_do:
+  suite_nhanh: '117/117 (116 qua, 1 bỏ qua, 0 hỏng), exit 0'
+  delta_ca_do: 0
+  phan_chung_reviewer_tu_chay:
+    - 'K1 (đếm=3, mong=2): `t117` ĐỎ'
+    - 'K2 (đếm=0, mong=2): `t117` ĐỎ'
+  # LƯU Ý CHO NGƯỜI SỬA TỆP NÀY: hai dòng trên từng bị RỖNG mất phần `t117` vì
+  # người viết dùng heredoc KHÔNG trích dẫn (`<<EOF`), nên bash CHẠY phần trong
+  # dấu nháy ngược rồi thay bằng chuỗi rỗng — `t117: command not found`. Sửa rồi.
+  # Dùng `<<'EOF'` khi thân có dấu nháy ngược.
+  ghi_chu: >-
+    K1/K2 chính là hai kịch bản reviewer lượt 8 NÊU RA nhưng không chạy được vì lease
+    read-only. Lượt 9 họ tự chạy trong bộ nhớ và xác nhận cả hai đỏ.
+
+delivered: true
+delivered_by: codex-reviewer-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-17T10:44:00Z'
+receipt_basis: >-
+  sha256 và số byte đo trên chính tệp verdict; `diff -u` giữa `stdout.log` và tệp đã
+  chép; `lease_id`/`verdict`/`reviewed_sha` từ tệp lease lượt 9.
+receipt_khong_khai:
+  - Không khai `evidence_url` là BỀN — nó chỉ bền sau khi #146 land bằng MERGE COMMIT.
+  - Không khai verdict này phủ các lượt trước. Nó phủ ĐÚNG `0826629a` trên nền `c7ad260`.
+  - Không khai bốn verdict `changes_requested` của lượt 7/8 (và 1..5) đã được ghi thành
+    tệp — chúng KHÔNG có, chỉ sống trong log chạy ngoài kho.

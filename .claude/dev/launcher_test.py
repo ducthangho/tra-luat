@@ -3063,6 +3063,26 @@ def t109_bat_buoc_giai_THEO_NEN_khong_phai_mot_bool_chung():
     bang(m._bat_buoc(c_bool, {"CLAUDE_CODE_REMOTE": "true"}) is True
          and m._bat_buoc(c_bool, {}) is True, "dang bool thuong bi hong")
 
+    # NỀN CI — đã trả giá: đặt `claude`/`codex` bắt buộc làm `doctor` trả 12 trên
+    # runner (nó chỉ cài `rg`), và `launcher-windows.yml` SKIP sạch mọi bước sau:
+    # 110 ca, 66 đột biến, bốn probe Windows đều không chạy. Fail-close đặt sai chỗ
+    # không chỉ báo nhầm — nó TẮT phép đo. Runner đo chính launcher, không chạy phiên
+    # agent, nên không được đòi chuỗi công cụ agent ở đó.
+    c_ci = {"ten": "claude", "bat_buoc": {"mac_dinh": True, "remote": True, "ci": False},
+            "ung_vien": ["claude"], "vi_sao": "thu", "cai": {"*": "cai"}}
+    bang(m._bat_buoc(c_ci, {"GITHUB_ACTIONS": "true"}) is False, "CI van doi claude")
+    bang(m._bat_buoc(c_ci, {"CI": "true"}) is False, "khoa CI chi nhan GITHUB_ACTIONS")
+    # CI phải THẮNG `remote` khi mang cả hai dấu: việc của runner hẹp hơn.
+    bang(m._bat_buoc(c_ci, {"GITHUB_ACTIONS": "true",
+                            "CLAUDE_CODE_REMOTE": "true"}) is False,
+         "mang ca hai dau ma khong uu tien CI")
+    bang(m._bat_buoc(c_ci, {}) is True, "may nguoi dung lai tha claude")
+    # Thiếu khoá `ci` thì LÙI VỀ `mac_dinh`, không được im lặng thành False.
+    c_thieu = {"ten": "x", "bat_buoc": {"mac_dinh": True, "remote": False},
+               "ung_vien": ["x"], "vi_sao": "thu", "cai": {"*": "cai"}}
+    bang(m._bat_buoc(c_thieu, {"GITHUB_ACTIONS": "true"}) is True,
+         "thieu khoa ci lai am tham thanh False")
+
 
 @ca
 def t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI():
@@ -3910,9 +3930,16 @@ DOT_BIEN = [
     # Quay lại MOT bool chung cho moi nen => remote lai doi `gh`, tuc fail-close
     # tren thu ma nen ay khong the co.
     ("bat_buoc_bo_qua_nen",
-     ('    la_remote = (moi_truong.get("CLAUDE_CODE_REMOTE", "") == "true")\n'
-      '    return bool(bb["remote"] if la_remote else bb["mac_dinh"])',
+     ('    if moi_truong.get("CLAUDE_CODE_REMOTE", "") == "true":\n'
+      '        return bool(bb["remote"])\n'
+      '    return bool(bb["mac_dinh"])',
       '    return bool(bb["mac_dinh"])'),
+     ["t109_bat_buoc_giai_THEO_NEN_khong_phai_mot_bool_chung"]),
+    # Bo nen CI => `doctor` doi chuoi cong cu agent tren runner, roi TAT luon phep do.
+    ("bat_buoc_bo_qua_nen_ci",
+     ('    if moi_truong.get("GITHUB_ACTIONS") == "true" or moi_truong.get("CI") == "true":\n'
+      '        return bool(bb.get("ci", bb["mac_dinh"]))\n',
+      ''),
      ["t109_bat_buoc_giai_THEO_NEN_khong_phai_mot_bool_chung"]),
     # Phan loai REST bang MA TRANG THAI thay vi HEADER => 403 cua proxy bi doc
     # thanh "GitHub tu choi", va 4xx that cua GitHub bi doc thanh "proxy chan".

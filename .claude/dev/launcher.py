@@ -1587,13 +1587,22 @@ CONG_CU = [
      "cai": {"Windows": "winget install --id Python.Python.3.12 -e",
              "Darwin": "brew install python@3.12",
              "Linux": "sudo apt-get install -y python3"}},
-    {"ten": "claude", "bat_buoc": True, "ung_vien": ["claude"],
+    # `ci: False` — KHÔNG phải nới tay, mà vì một fail-close đặt sai chỗ ở đây TẮT
+    # LUÔN PHÉP ĐO. Đã trả giá đúng một lượt: `launcher-windows.yml` chỉ cài `rg` rồi
+    # chạy `doctor`; đặt `claude`/`codex` bắt buộc làm `doctor` trả 12 trên CẢ hai nền,
+    # và mọi bước sau — 110 ca, 66 đột biến, bốn probe Windows — bị SKIP sạch. Runner CI
+    # ĐO chính launcher, nó không chạy phiên agent, nên đòi chuỗi công cụ agent ở đó là
+    # đòi sai thứ. Cùng câu kho đã ghi: cổng tự tắt khi thiếu công cụ là cổng không tồn
+    # tại đúng lúc nó cần nhất.
+    {"ten": "claude", "bat_buoc": {"mac_dinh": True, "remote": True, "ci": False},
+     "ung_vien": ["claude"],
      "vi_sao": "CLI chinh thuc de goi phien Claude (khong tu viet script spawn)",
      "cai": {"*": "npm install -g @anthropic-ai/claude-code"},
      # `claude auth status` in JSON co cau truc (`loggedIn`, `authMethod`), tuc
      # co the DOC va doi chieu — khac han `codex login status` ngay duoi.
      "xac_thuc": ["auth", "status"]},
-    {"ten": "codex", "bat_buoc": True, "ung_vien": ["codex"],
+    {"ten": "codex", "bat_buoc": {"mac_dinh": True, "remote": True, "ci": False},
+     "ung_vien": ["codex"],
      "vi_sao": "CLI chinh thuc de goi phien Codex (khong tu viet script spawn)",
      "cai": {"*": "npm install -g @openai/codex"}},
     # CO Y KHONG khai `xac_thuc` cho codex, du nhanh nguon co khai `["login","status"]`.
@@ -1652,7 +1661,7 @@ CONG_CU = [
     # thuc su), KHONG bat buoc o phien remote (noi no chi biet noi doi). Mot bool
     # chung se phai sai o mot trong hai noi. `doctor` van LUON do va in ca hai
     # duong REST, de khong ai ket luan tu duong hong.
-    {"ten": "gh", "bat_buoc": {"mac_dinh": True, "remote": False},
+    {"ten": "gh", "bat_buoc": {"mac_dinh": True, "remote": False, "ci": False},
      "ung_vien": ["gh"],
      "vi_sao": "duong du phong/chan doan GitHub; o remote kho di bang MCP github + git",
      "cai": {"Windows": "winget install --id GitHub.cli -e  (hoac: choco install gh -y)",
@@ -1712,8 +1721,13 @@ def _bat_buoc(c: dict, moi_truong: dict[str, str]) -> bool:
     bb = c["bat_buoc"]
     if isinstance(bb, bool):
         return bb
-    la_remote = (moi_truong.get("CLAUDE_CODE_REMOTE", "") == "true")
-    return bool(bb["remote"] if la_remote else bb["mac_dinh"])
+    # CI ĐỨNG TRƯỚC `remote`: một runner có thể mang cả hai dấu, mà việc của nó
+    # hẹp hơn hẳn — nó ĐO chính launcher, không phải chạy phiên agent.
+    if moi_truong.get("GITHUB_ACTIONS") == "true" or moi_truong.get("CI") == "true":
+        return bool(bb.get("ci", bb["mac_dinh"]))
+    if moi_truong.get("CLAUDE_CODE_REMOTE", "") == "true":
+        return bool(bb["remote"])
+    return bool(bb["mac_dinh"])
 
 
 def _doc_moi_truong() -> tuple[dict[str, str], dict]:

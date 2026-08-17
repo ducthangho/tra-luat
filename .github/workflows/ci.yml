@@ -176,10 +176,26 @@ jobs:
       # (P2 cross-review PR "#141"). Tôi đã kiểm artefact TỒN TẠI rồi tuyên bố xong,
       # mà chưa kiểm nó DÙNG ĐƯỢC bởi đúng lệnh tài liệu chỉ — lại đúng lỗi "đo sự
       # có mặt thay vì đo khả năng".
+      # CHI SINH BẰNG CHỨNG Ở LƯỢT MÀ `HEAD` LÀ COMMIT THẬT.
+      #
+      # Trên `pull_request`, `actions/checkout` lấy commit MERGE TỔNG HỢP, nên
+      # `git rev-parse HEAD` KHÔNG phải head của PR. Đo được: lượt `pull_request`
+      # trên `91a027d` ĐỎ ngay ở bước này trong khi `workflow_dispatch` cùng SHA
+      # xanh. Tôi đã đổi một mỏ neo sai (`$GITHUB_SHA`) lấy một mỏ neo sai khác
+      # (PR head, trong khi cây là merge) — cả hai đều khai một thứ KHÔNG PHẢI thứ
+      # vừa đo.
+      #
+      # Không có cách nào làm đúng ở lượt PR mà không đổi thứ CI đang test: cây
+      # merge chính là thứ đáng test trước khi vào master. Nên bằng chứng chỉ sinh
+      # ở `push`/`workflow_dispatch`, đúng luồng `gate-targeted.md` mô tả ("T1
+      # push/handoff: chờ CI tạo full evidence exact-head"). Lượt PR vẫn chạy
+      # selftest, chỉ không giả vờ sinh ra chứng cho một commit không có trong lịch sử.
+      - name: tl selftest (luot PR — khong sinh bang chung)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: python scripts/tl.py --selftest
       - name: tl selftest (co bang chung exact-identity)
+        if: ${{ github.event_name != 'pull_request' }}
         shell: bash
-        env:
-          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           mkdir -p scripts/.tl_state/gate
@@ -194,7 +210,9 @@ jobs:
           # tệp này đã cảnh báo đúng điều đó, và tôi vẫn viết sai ở đây (P2 review
           # "#141"). Evidence neo vào commit tổng hợp thì không ai validate lại được
           # vì commit ấy không có trong lịch sử nhánh.
-          HEAD_SHA="${PR_HEAD_SHA:-$GITHUB_SHA}"
+          # `HEAD` của cây, không phải biến nào cả: bằng chứng phải khai ĐÚNG
+          # thứ vừa đo. Bước này chỉ chạy khi HEAD là commit thật (xem `if:` trên).
+          HEAD_SHA="$(git rev-parse HEAD)"
           BASE_SHA="$(git merge-base FETCH_HEAD "$HEAD_SHA")"
           echo "head_sha = $HEAD_SHA"
           echo "base_sha = $BASE_SHA"
@@ -214,6 +232,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gate-evidence-${{ matrix.os }}-${{ github.run_attempt }}
+          # Lượt PR không sinh evidence (xem trên) => không có tệp là ĐÚNG, không phải lỗi.
           path: scripts/.tl_state/gate/
           if-no-files-found: warn
       - name: workflow-audit strict

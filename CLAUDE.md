@@ -255,6 +255,30 @@ không tra được.
   cũng 403 trong khi `/user` trả 200, tức chính sách theo ĐƯỜNG DẪN chứ không theo danh
   tính · `gh` không cài, và **cài cũng vô ích** vì nó đi đúng đường bị chặn. Việc của kho
   đi bằng **MCP github + git**, không bằng REST thẳng.
+  · **ĐO LẠI 17-08-2026 — dấu hiệu phân biệt là HEADER, không phải mã trạng thái.**
+  `/rate_limit` và `/user` → **200 CÓ `X-GitHub-*`** (tới GitHub thật); `/repos/<kho>` và
+  `/repos/<kho>/pulls/N` → **403 KHÔNG header GitHub nào** (proxy tự sinh, chưa từng tới
+  GitHub). Chạy cả **có token lẫn không token: kết quả Y HỆT** ⇒ khẳng định "theo ĐƯỜNG
+  DẪN, không theo danh tính" nay có phản chứng hai chiều. Nên câu đúng KHÔNG phải "REST bị
+  chặn" mà là **"REST bị chặn ĐÚNG CHỖ làm việc"** — và khác biệt ấy đổi hẳn kết luận về
+  `gh`: **`gh auth status` hỏi `/user`, tức đường ĐƯỢC PHÉP, nên nó báo "đã xác thực" rồi
+  MỌI lệnh việc thật ăn 403.** Một công cụ qua được phép tự kiểm mà không làm nổi việc thì
+  **tệ hơn công cụ vắng mặt**: nó biến lỗi hạ tầng thành lỗi "chắc tại quyền token" và đẩy
+  người đọc đi sai hướng — cùng họ `codex login status` NÓI DỐI. `launcher.py doctor` nay
+  **ĐO** hai đường REST đó (`rest-chung`/`rest-kho`) thay vì nối thêm câu "có thể bị chặn";
+  câu ấy là ĐOÁN, và nó từng được nối vào MỌI kết quả, vô điều kiện.
+  · **`api.githubcopilot.com` (điểm cuối MCP github) bị chặn NGAY Ở TẦNG CONNECT** khi gọi
+  từ trong container (`__agentproxy/status` ghi `connect_rejected`) — nên MCP chạy được là
+  nhờ client nằm NGOÀI sandbox, không phải nhờ container gọi tới được. Mất uỷ quyền MCP thì
+  phiên **không** tự dựng lại đường ấy bằng `curl` được.
+  · Hệ quả cho `bat_buoc`: **"công cụ này có bắt buộc không" không có MỘT câu trả lời cho
+  mọi nền.** `gh` bắt buộc ở máy người dùng, KHÔNG bắt buộc ở phiên remote — `CONG_CU` nay
+  nhận `{"mac_dinh": …, "remote": …}`. Ép một bool chung thì chắc chắn sai một nền, và cái
+  sai đó là fail-close: nó CHẶN phiên chứ không chỉ báo nhầm.
+  · **Đếm SỰ CÓ MẶT của một đường thay vì KHẢ NĂNG của nó — lỗi này đã tái phát.** `t103`
+  sinh ra vì bản cũ đếm `shutil.which("gh")` là "đường mở"; rồi chính tôi thêm `rest-chung`
+  (`/rate_limit`, MỞ nhưng không đọc nổi PR nào) vào `any(...)` và `t103` đỏ ngay. Chỉ đường
+  **LÀM ĐƯỢC VIỆC** (`git`, `gh-cli` đã xác thực, `rest-kho`) mới được tính vào `DUNG_DUOC`.
 - **Refresh token của codex XOAY VÒNG ⇒ `CODEX_AUTH_JSON` là ảnh chụp CHẾT NHANH.** Mỗi lần
   codex làm mới token, bản cũ bị vô hiệu — kể cả bản đang nằm trong biến. Đo 16-08: chuỗi
   vừa dán xong, đưa xuống đĩa khớp từng byte, vẫn `refresh_token_invalidated`. Chép base64

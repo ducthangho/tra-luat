@@ -83,11 +83,13 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.error
+import urllib.request
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 
 # launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu
 #
@@ -1625,21 +1627,34 @@ CONG_CU = [
      "vi_sao": "hook SessionStart la bash script; Windows can Git Bash",
      "cai": {"Windows": "winget install --id Git.Git -e  (kem Git Bash)",
              "Darwin": "co san", "Linux": "sudo apt-get install -y bash"}},
-    # gh — CO MAT trong bang de DO va BAO CAO, nhung `bat_buoc: False`.
+    # gh — BAT BUOC THEO NEN, khong phai mot bool chung cho moi noi.
     #
-    # Nhanh nguon khai `bat_buoc: True`. DO 17-08-2026 trong chinh container remote
-    # nay, va phep do NOI NGUOC: `gh` KHONG duoc cai, va cai cung vo ich vi no di
-    # `api.github.com` — duong ma proxy egress tra 403 ngay o tang CONNECT
-    # (`__agentproxy/status` ghi `connect_rejected` cho ca `api.github.com` lan
-    # `api.githubcopilot.com`). Nen `bat_buoc: True` lam `check`/`doctor` tra 12 tren
-    # MOI phien remote, theo HAI duong doc lap: thieu binary, va (neu co binary) probe
-    # auth that bai. Do la dung lop "chay duoc o day" ma kho da tra gia nhieu lan —
-    # chot fail-close dat vao thu ma nen nay KHONG THE co.
-    # Giu muc nay de `doctor` van noi "co/khong" (huu ich tren may Windows cua nguoi
-    # dung, noi gh chay that); viec CO NEN bat buoc hay khong thuoc BUOC 3, va phai
-    # quyet kem phep do tren tung nen chu khong quyet chung mot lan.
-    {"ten": "gh", "bat_buoc": False, "ung_vien": ["gh"],
-     "vi_sao": "duong du phong/chan doan GitHub; kho di bang MCP github + git",
+    # Day la ket luan cua BUOC 3, va no khac ca hai phia truoc do. Nhanh nguon khai
+    # `bat_buoc: True` (ADR-0017: PR/Issue la nguon su that dieu phoi, nen mat `gh`
+    # la mat duong du phong). Buoc 2 cua toi ha xuong `False` voi ly do "proxy chan
+    # api.github.com" — LY DO AY SAI VE CHI TIET, do lai 17-08-2026 moi ro:
+    #
+    #   /rate_limit          -> 200, CO header X-GitHub-*   (toi GitHub)
+    #   /user                -> 200, CO header X-GitHub-*   (toi GitHub)
+    #   /repos/<kho>         -> 403, KHONG header GitHub    (proxy tu sinh)
+    #   /repos/<kho>/pulls/N -> 403, KHONG header GitHub    (proxy tu sinh)
+    #   co token va khong token: KET QUA Y HET => chinh sach theo DUONG DAN,
+    #   khong theo danh tinh (dung nhu CLAUDE.md ghi).
+    #
+    # Nen su that KHONG phai "gh khong ket noi duoc" ma la mot thu NGUY HIEM HON:
+    # `gh auth status` hoi `/user` — duong DUOC PHEP — nen no bao "da xac thuc"
+    # ngon lanh, roi MOI lenh viec that (`gh pr view`, `gh api repos/...`) an 403.
+    # Mot cong cu qua duoc phep tu kiem ma khong lam noi viec thi TE HON cong cu
+    # vang mat: no bien mot loi ha tang thanh mot loi "chac tai quyen token", va
+    # nguoi doc di sai huong. Dung ho `codex login status` NOI DOI.
+    #
+    # Vi vay: BAT BUOC o may nguoi dung (noi gh chay that va la duong du phong
+    # thuc su), KHONG bat buoc o phien remote (noi no chi biet noi doi). Mot bool
+    # chung se phai sai o mot trong hai noi. `doctor` van LUON do va in ca hai
+    # duong REST, de khong ai ket luan tu duong hong.
+    {"ten": "gh", "bat_buoc": {"mac_dinh": True, "remote": False},
+     "ung_vien": ["gh"],
+     "vi_sao": "duong du phong/chan doan GitHub; o remote kho di bang MCP github + git",
      "cai": {"Windows": "winget install --id GitHub.cli -e  (hoac: choco install gh -y)",
              "Darwin": "brew install gh", "Linux": "sudo apt-get install -y gh"}},
     # npm: session-start.sh rẽ nhánh trên `co npm`, không phải trên `node`.
@@ -1680,6 +1695,25 @@ MODULE_PY = [
 
 DOCTOR_TIMEOUT_GIAY = 30.0
 PROBE_TIMEOUT_GIAY = 8.0
+
+
+def _bat_buoc(c: dict, moi_truong: dict[str, str]) -> bool:
+    """Giải `bat_buoc` — bool, hoặc bảng theo NỀN.
+
+    Vì sao cần: "công cụ này có bắt buộc không" KHÔNG có một câu trả lời đúng cho
+    mọi nơi. `gh` là đường dự phòng thật trên máy người dùng, và là thứ chỉ biết
+    nói dối trong container remote (xem chú thích tại mục `gh`). Ép một bool
+    chung thì chắc chắn sai ở một trong hai nền — và cái sai đó là fail-close,
+    tức nó CHẶN phiên chứ không chỉ báo nhầm.
+
+    Khoá `remote` đọc `CLAUDE_CODE_REMOTE`, đúng biến mà `session-start.sh` đã
+    dùng để quyết có cài gì không — một nguồn, không phải hai.
+    """
+    bb = c["bat_buoc"]
+    if isinstance(bb, bool):
+        return bb
+    la_remote = (moi_truong.get("CLAUDE_CODE_REMOTE", "") == "true")
+    return bool(bb["remote"] if la_remote else bb["mac_dinh"])
 
 
 def _doc_moi_truong() -> tuple[dict[str, str], dict]:
@@ -2412,6 +2446,40 @@ def _do_claude() -> tuple[str, str]:
     return ("CHUA_XAC_THUC", "khong co ~/.claude/.credentials.json va khong co bien")
 
 
+_RE_SLUG_GITHUB = re.compile(r"github\.com[:/]+([^/]+/[^/\s]+?)(?:\.git)?/*$")
+
+
+def _do_rest_github(url: str, timeout: float = 6.0) -> tuple[str, str]:
+    """Đo MỘT đường REST. Trả (`mo` | `chan` | `khong_do_duoc`, mô tả).
+
+    DẤU HIỆU PHÂN BIỆT là HEADER `X-GitHub-*`, KHÔNG phải mã trạng thái. Đo
+    17-08-2026: `/repos/<kho>` trả 403 **không header GitHub nào**, còn
+    `/rate_limit` và `/user` trả 200 **có** header — nghĩa là 403 kia do PROXY tự
+    sinh, phản hồi chưa từng tới GitHub. Phân loại bằng mã trạng thái đơn thuần
+    sẽ đọc nhầm nó thành "GitHub từ chối ta", rồi người đọc đi tìm quyền token —
+    sai hướng hoàn toàn, vì token KHÔNG đổi gì (đo cả có lẫn không: y hệt).
+
+    Một 4xx CÓ header GitHub vẫn là `mo`: đường tới nơi, chỉ là ta không có
+    quyền — hai chuyện khác nhau và phải chữa bằng hai cách khác nhau.
+
+    Trạng thái thứ ba `khong_do_duoc` (mạng hỏng, DNS, quá hạn) KHÔNG được gộp
+    vào `chan` — đúng doctrine `None ≠ False`.
+    """
+    req = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            co_gh = any(k.lower().startswith("x-github") for k in r.headers)
+            return ("mo" if co_gh else "chan",
+                    f"HTTP {r.status}" + ("" if co_gh else " (KHONG header GitHub -> proxy tu sinh)"))
+    except urllib.error.HTTPError as e:
+        co_gh = any(k.lower().startswith("x-github") for k in e.headers)
+        return ("mo" if co_gh else "chan",
+                f"HTTP {e.code}" + (" (toi GitHub, thieu quyen)" if co_gh
+                                    else " (KHONG header GitHub -> proxy tu sinh)"))
+    except Exception as e:                       # mạng/DNS/quá hạn = KHÔNG ĐO ĐƯỢC
+        return ("khong_do_duoc", f"{type(e).__name__}")
+
+
 def _do_github(ws: str | None) -> tuple[str, str]:
     """Đo GitHub theo BA ĐƯỜNG ĐỘC LẬP, vì chúng hỏng độc lập với nhau.
 
@@ -2440,16 +2508,63 @@ def _do_github(ws: str | None) -> tuple[str, str]:
     if shutil.which("gh"):
         try:
             pg = subprocess.run(["gh", "auth", "status"], capture_output=True, text=True,
-                                timeout=20)
+                                stdin=subprocess.DEVNULL, timeout=20)
             duong.append(("gh-cli", pg.returncode == 0,
                           "da xac thuc" if pg.returncode == 0 else f"CHUA xac thuc (rc={pg.returncode})"))
         except (OSError, subprocess.SubprocessError) as e:
             duong.append(("gh-cli", False, f"khong chay duoc: {type(e).__name__}"))
     else:
         duong.append(("gh-cli", False, "chua cai"))
-    return (("DUNG_DUOC" if any(ok for _, ok, _ in duong) else "CHUA_XAC_THUC"),
-            " · ".join(f"{t}={'OK' if ok else 'khong'}" for t, ok, _ in duong)
-            + " · REST truc tiep co the bi proxy chan (403) — dung cong cu MCP github")
+
+    # --- REST: ĐO, KHÔNG ĐOÁN.
+    # Bản trước NỐI THÊM câu "REST truc tiep co the bi proxy chan (403)" vào MỌI kết
+    # quả, vô điều kiện. "Có thể" không phải phép đo, và câu ấy đúng/sai tuỳ nền —
+    # nó chỉ là ghi chú của một lần quan sát bị đóng băng thành khẳng định. Tệ hơn:
+    # docstring khai "đo theo các đường độc lập" trong khi hàm chỉ đo `git` và `gh`,
+    # tức PHẠM VI TUYÊN BỐ lớn hơn phạm vi ĐO ĐƯỢC — đúng lỗi kho đã ghi sổ.
+    #
+    # Hai đường REST cố ý khác nhau, vì chính SỰ KHÁC NHAU giữa chúng mới là kết luận:
+    #   · `/rate_limit` — đường proxy CHO PHÉP
+    #   · `/repos/<kho>` — đường VIỆC THẬT (đọc PR, issue, nội dung kho)
+    # Đo 17-08-2026: đường một `mo`, đường hai `chan`. Nên câu đúng KHÔNG phải
+    # "REST bị chặn" mà là "REST bị chặn ĐÚNG CHỖ làm việc", và đó mới là điều đáng
+    # nói với người đọc.
+    tt_chung, mt_chung = _do_rest_github("https://api.github.com/rate_limit")
+    # CHẨN ĐOÁN, KHÔNG TÍNH vào kết luận "dùng được" — xem `_tinh_kha_dung` dưới.
+    duong.append(("rest-chung", tt_chung == "mo", mt_chung))
+    slug = None
+    if ws:
+        rc_u, url_o, _ = _git(ws, "remote", "get-url", "origin")
+        if rc_u == 0:
+            k = _RE_SLUG_GITHUB.search((url_o or "").strip())
+            slug = k.group(1) if k else None
+    if slug:
+        tt_kho, mt_kho = _do_rest_github(f"https://api.github.com/repos/{slug}")
+        duong.append(("rest-kho", tt_kho == "mo", mt_kho))
+    else:
+        duong.append(("rest-kho", False, "khong doc duoc slug origin -> KHONG DO DUOC"))
+
+    # `gh` mà "đã xác thực" TRONG KHI `rest-kho` bị chặn là bẫy, không phải tin vui:
+    # `gh auth status` hỏi `/user` (đường được phép, 200) nên nó tự nhận đăng nhập,
+    # rồi MỌI lệnh việc thật (`gh pr view`, `gh api repos/...`) ăn 403. Một công cụ
+    # qua được phép tự kiểm mà không làm nổi việc thì tệ hơn công cụ vắng mặt —
+    # cùng họ `codex login status`. Nói thẳng ra đây thay vì để người đọc tự vấp.
+    gh_ok = next((ok for t, ok, _ in duong if t == "gh-cli"), False)
+    kho_chan = any(t == "rest-kho" and not ok for t, ok, _ in duong)
+    canh = " · gh BAO da xac thuc nhung duong kho bi chan -> dung lam duong viec" \
+        if (gh_ok and kho_chan) else ""
+    # CHỈ ĐƯỜNG LÀM ĐƯỢC VIỆC mới được tính vào `DUNG_DUOC`.
+    #
+    # `rest-chung` (`/rate_limit`) MỞ trên container này, nhưng nó không đọc nổi một
+    # PR nào — đưa nó vào `any(...)` là dán nhãn "GitHub dùng được" cho một phiên
+    # không làm nổi việc gì với GitHub. `t103` bắt đúng lỗi này khi tôi vừa thêm
+    # đường ấy, và nó là ĐÚNG MỘT lớp với lỗi cũ mà chính `t103` sinh ra để chặn:
+    # bản trước đếm `shutil.which("gh")` là một đường mở. Hai lần, hai cái tên khác
+    # nhau, cùng một sai lầm — đếm SỰ CÓ MẶT của một đường thay vì KHẢ NĂNG của nó.
+    LAM_DUOC_VIEC = {"git", "gh-cli", "rest-kho"}
+    return (("DUNG_DUOC" if any(ok for t, ok, _ in duong if t in LAM_DUOC_VIEC)
+             else "CHUA_XAC_THUC"),
+            " · ".join(f"{t}={'OK' if ok else 'khong'}" for t, ok, _ in duong) + canh)
 
 
 _RE_NANG_LUC_HOOK = re.compile(r"^#\s*hook-nang-luc:\s*(.+)$", re.MULTILINE)
@@ -2710,8 +2825,13 @@ def lenh_doctor(a) -> int:
                     thay["duong_dan"], c["xac_thuc"], env=moi_truong,
                     timeout=min(PROBE_TIMEOUT_GIAY, con_lai))
         cai = c["cai"].get(he) or c["cai"].get("*") or ""
-        muc = {"ten": c["ten"], "bat_buoc": c["bat_buoc"], "co": thay is not None,
+        bb = _bat_buoc(c, moi_truong)
+        muc = {"ten": c["ten"], "bat_buoc": bb, "co": thay is not None,
                "vi_sao": c["vi_sao"], "lenh_cai": cai, **(thay or {})}
+        if not isinstance(c["bat_buoc"], bool):
+            # In CẢ bản khai lẫn bản đã giải: người đọc phải thấy con số này do
+            # NỀN quyết, kẻo lại tưởng bảng tự mâu thuẫn giữa hai máy.
+            muc["bat_buoc_khai"] = dict(c["bat_buoc"])
         if c.get("xac_thuc"):
             muc["xac_thuc_ok"] = xac_thuc_ok
             if xac_thuc_ok is False:
@@ -2719,7 +2839,7 @@ def lenh_doctor(a) -> int:
         if thay is None and co_mat_nhung_hong:
             muc["co_mat_nhung_khong_chay_duoc"] = co_mat_nhung_hong
         ket.append(muc)
-        if c["bat_buoc"] and (thay is None or xac_thuc_ok is False):
+        if bb and (thay is None or xac_thuc_ok is False):
             thieu_bat_buoc.append(c["ten"])
 
     # --- KHẢ DỤNG, không chỉ CÓ MẶT.

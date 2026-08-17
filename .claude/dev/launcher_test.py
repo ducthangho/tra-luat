@@ -3038,6 +3038,84 @@ def t108_hook_phai_probe_CHAY_DUOC_khong_chi_CO_MAT():
 
 
 @ca
+def t109_bat_buoc_giai_THEO_NEN_khong_phai_mot_bool_chung():
+    """`gh` bắt buộc ở máy người dùng, KHÔNG bắt buộc ở phiên remote.
+
+    Đo 17-08-2026: trong container remote, `gh auth status` hỏi `/user` (đường
+    proxy CHO PHÉP, 200) nên nó tự nhận đã xác thực, rồi mọi lệnh việc thật đi
+    `/repos/...` và ăn 403 do proxy tự sinh. Ép `bat_buoc` là MỘT bool thì chắc
+    chắn sai một trong hai nền, và cái sai đó CHẶN phiên chứ không chỉ báo nhầm.
+
+    Ba vế: hai chiều của bảng theo nền, cộng một vế chống hồi quy cho mục khai
+    bằng bool thường — nới cơ chế mà làm hỏng dạng cũ thì cũng là hỏng.
+    """
+    m = _tai_launcher_thu()
+    c_bang = {"ten": "gh", "bat_buoc": {"mac_dinh": True, "remote": False},
+              "ung_vien": ["gh"], "vi_sao": "thu", "cai": {"*": "cai gh"}}
+    c_bool = {"ten": "git", "bat_buoc": True, "ung_vien": ["git"],
+              "vi_sao": "thu", "cai": {"*": "cai git"}}
+    bang(m._bat_buoc(c_bang, {"CLAUDE_CODE_REMOTE": "true"}) is False,
+         "remote van doi gh")
+    bang(m._bat_buoc(c_bang, {}) is True, "may nguoi dung lai tha gh")
+    # Chỉ ĐÚNG chuỗi "true" mới là remote — `"false"`/`"1"` không được nhận nhầm.
+    bang(m._bat_buoc(c_bang, {"CLAUDE_CODE_REMOTE": "false"}) is True,
+         "doc bien remote qua rong")
+    bang(m._bat_buoc(c_bool, {"CLAUDE_CODE_REMOTE": "true"}) is True
+         and m._bat_buoc(c_bool, {}) is True, "dang bool thuong bi hong")
+
+
+@ca
+def t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI():
+    """403 của proxy và 403 của GitHub là HAI chuyện; phân biệt bằng header.
+
+    Đo 17-08-2026: `/repos/<kho>` trả 403 KHÔNG kèm header `X-GitHub-*` (proxy tự
+    sinh, chưa từng tới GitHub), còn `/rate_limit` trả 200 CÓ header. Token không
+    đổi gì — chính sách theo ĐƯỜNG DẪN. Đọc bằng mã trạng thái đơn thuần sẽ dịch
+    403 kia thành "GitHub từ chối ta", rồi người đọc đi truy quyền token: sai
+    hướng hoàn toàn. Cùng doctrine với "phân loại HTTP bằng văn bản tự do là ĐOÁN".
+
+    Vế thứ ba là trạng thái `khong_do_duoc` — nó KHÔNG được gộp vào `chan`
+    (`None ≠ False`), vì "mạng hỏng" và "proxy chặn" chữa bằng hai cách khác nhau.
+    """
+    m = _tai_launcher_thu()
+
+    class _Ph:
+        def __init__(self, status, headers):
+            self.status, self.headers = status, headers
+        def __enter__(self): return self
+        def __exit__(self, *_a): return False
+
+    def dat(ket):
+        m.urllib.request.urlopen = lambda *_a, **_k: ket()
+
+    dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+    bang(m._do_rest_github("https://x/y")[0] == "mo", "200 co header GitHub phai la `mo`")
+
+    # 200 mà KHÔNG có header GitHub = proxy trả lời thay; không phải đường tới nơi.
+    dat(lambda: _Ph(200, {"Content-Type": "application/json"}))
+    bang(m._do_rest_github("https://x/y")[0] == "chan", "200 khong header GitHub phai la `chan`")
+
+    def _ném(code, headers):
+        def f():
+            raise m.urllib.error.HTTPError("https://x/y", code, "loi", headers, None)
+        return f
+
+    dat(_ném(403, {"Content-Type": "text/plain"}))
+    tt, mo_ta = m._do_rest_github("https://x/y")
+    bang(tt == "chan" and "proxy" in mo_ta, f"403 khong header phai la `chan`: {tt} {mo_ta}")
+    # 4xx CÓ header GitHub = tới nơi, chỉ thiếu quyền. Gọi nó là `chan` thì ta đẩy
+    # người đọc đi sửa proxy trong khi thứ hỏng là quyền token.
+    dat(_ném(404, {"X-GitHub-Request-Id": "abc"}))
+    bang(m._do_rest_github("https://x/y")[0] == "mo", "4xx CO header GitHub phai la `mo`")
+
+    def _no():
+        raise OSError("mang hong")
+    dat(_no)
+    bang(m._do_rest_github("https://x/y")[0] == "khong_do_duoc",
+         "mang hong bi gop vao `chan` (None != False)")
+
+
+@ca
 def t103_nam_finding_cua_bot_review_PR128():
     """Năm mục bot codex nêu trên PR #128 — cả năm ĐO LẠI đều đúng, nên khoá cả năm.
 
@@ -3795,15 +3873,15 @@ DOT_BIEN = [
      ('    return MA_THAM_SO if hong else MA_OK', '    return MA_OK'),
      ["t52_so_hong_KHONG_duoc_im_lang"]),
     ("doctor_luon_xanh",
-     ('        if c["bat_buoc"] and (thay is None or xac_thuc_ok is False):',
+     ('        if bb and (thay is None or xac_thuc_ok is False):',
       '        if False:'),
      ["t54_doctor_thieu_cong_cu_bat_buoc_thi_DO"]),
     # Chiều hẹp hơn: giữ phép kiểm CÓ MẶT, bỏ riêng phép kiểm XÁC THỰC. Bản cũ chỉ
     # có một đột biến "luôn xanh", nên nếu ai lỡ tay bỏ vế `xac_thuc_ok` thì không
     # mutant nào đỏ — cửa mới mà không có mutant riêng là cửa sẽ âm thầm hở lại.
     ("doctor_bo_qua_auth_hong",
-     ('        if c["bat_buoc"] and (thay is None or xac_thuc_ok is False):',
-      '        if c["bat_buoc"] and thay is None:'),
+     ('        if bb and (thay is None or xac_thuc_ok is False):',
+      '        if bb and thay is None:'),
      ["t105_doctor_auth_hong_thi_DO_du_binary_chay_duoc"]),
     ("khong_chup_prompt",
      ('        if any("{PROMPT_FILE}" in x for x in lenh_con):',
@@ -3829,6 +3907,28 @@ DOT_BIEN = [
     ("moi_truong_tin_gh_token_giu_cho",
      ('        if _van_tay(v) in van_tay_ngoai:', '        if False:'),
      ["t107_doc_moi_truong_KHONG_duoc_chon_bien_giu_cho"]),
+    # Quay lại MOT bool chung cho moi nen => remote lai doi `gh`, tuc fail-close
+    # tren thu ma nen ay khong the co.
+    ("bat_buoc_bo_qua_nen",
+     ('    la_remote = (moi_truong.get("CLAUDE_CODE_REMOTE", "") == "true")\n'
+      '    return bool(bb["remote"] if la_remote else bb["mac_dinh"])',
+      '    return bool(bb["mac_dinh"])'),
+     ["t109_bat_buoc_giai_THEO_NEN_khong_phai_mot_bool_chung"]),
+    # Phan loai REST bang MA TRANG THAI thay vi HEADER => 403 cua proxy bi doc
+    # thanh "GitHub tu choi", va 4xx that cua GitHub bi doc thanh "proxy chan".
+    ("rest_phan_loai_theo_ma_trang_thai",
+     ('        co_gh = any(k.lower().startswith("x-github") for k in e.headers)\n'
+      '        return ("mo" if co_gh else "chan",\n'
+      '                f"HTTP {e.code}"',
+      '        co_gh = e.code < 400\n'
+      '        return ("mo" if co_gh else "chan",\n'
+      '                f"HTTP {e.code}"'),
+     ["t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI"]),
+    # Gop "khong do duoc" vao "chan" — dung loi `None != False` kho da ghi so.
+    ("rest_gop_khong_do_duoc_vao_chan",
+     ('        return ("khong_do_duoc", f"{type(e).__name__}")',
+      '        return ("chan", f"{type(e).__name__}")'),
+     ["t110_rest_github_phan_loai_theo_HEADER_khong_theo_MA_TRANG_THAI"]),
     ("worktree_bo_qua_tep_moi",
      ('"--untracked-files=all"', '"--untracked-files=no"'),
      ["t12_tep_khong_theo_doi_van_tinh_la_ban"]),

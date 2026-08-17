@@ -47,6 +47,11 @@ nửa vời vào #141 là làm bản ghi nói dối theo chiều mới.
 được — bắt được kẻ trèo ra thật, VÀ không hô oan trên lượt sạch có zombie. Nếu
 kết luận là không đáng làm thì ghi thẳng vào đây và đóng mục, đừng để treo.
 
+**Đã đóng phần khai báo** (head `052d100`+): chú thích trong `ci.yml` từng khai
+"từ đó trở đi đường ra ngoài đã khoá" — LỜI KHAI SAI, vì `RIENG/cgroup.procs` vẫn
+thuộc UID runner nên lệnh gate vẫn tự ghi mình ngược lên `RIENG` được. Đã sửa cho
+khớp sự thật.
+
 **Tạm thời:** mã đã KHAI THẲNG phạm vi (`gate_lifecycle.py`, khối "PHẠM VI CỦA
 CHÍNH LỚP CGROUP"). `giet_tron_ven: true` chỉ nói "cgroup đã rỗng và đã xác nhận
 rỗng" — KHÔNG bao gồm lời hứa "không ai trèo ra".

@@ -1137,6 +1137,74 @@ def case_tien_trinh_trong_cgroup_con_khong_duoc_bo_sot() -> None:
     assert not cg.exists(), "cgroup con lam _don_cgroup that bai — de lai rac"
 
 
+def case_khong_do_duoc_khong_duoc_khai_thanh_da_sach() -> None:
+    """Không có vùng chứa ⇒ `giet_tron_ven` phải là `null`, KHÔNG được là `true`.
+
+    P1 cross-review trên `052d100`. Đường ĐẠT không hề gọi `_terminate_process_tree`
+    (nó chỉ chạy ở đường huỷ/quá hạn), nên khi không có vùng chứa thì KHÔNG có
+    phép đo nào cả — mà bản trước vẫn ghi `giet_tron_ven: true`, tức bản ghi ĐẠT
+    và TÁI DÙNG ĐƯỢC trong khi con tách rời vẫn sống sau lúc khoá đã nhả.
+
+    Ba giá trị, ba nghĩa khác nhau, và gộp cái đầu vào cái cuối đúng là lỗi kho
+    đã trả giá nhiều lần:
+      · `null`  — chưa đo lần nào
+      · `false` — đo và thấy còn sót
+      · `true`  — đo và xác nhận sạch
+    """
+    if os.name == "nt":
+        raise BoQua("fixture POSIX")
+    lenh = (
+        "import subprocess,sys;"
+        "subprocess.Popen([sys.executable,'-c','import os,time;os.setsid();time.sleep(20)'],"
+        "stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,close_fds=True);"
+        "print('1/1 ok')"
+    )
+
+    def _chay(tat_cgroup: bool):
+        with tempfile.TemporaryDirectory(prefix="gate_lifecycle_null_") as raw:
+            root = Path(raw)
+            repo = root / "repo"
+            repo.mkdir()
+            head, _ = _repo(repo)
+            evidence = root / "evidence.json"
+            moi_truong = dict(os.environ)
+            if tat_cgroup:
+                moi_truong["TL_GATE_TAT_CGROUP"] = "1"
+            else:
+                moi_truong.pop("TL_GATE_TAT_CGROUP", None)
+            argv = [
+                "run", "--kind", "heavy", "--name", "fixture", "--repo", str(repo),
+                "--evidence", str(evidence), "--output", str(evidence.with_suffix(".out")),
+                "--wait-seconds", "1.0", "--timeout-seconds", "30",
+                "--selected-test", "fixture",
+                "--expected-head", head, "--base-sha", head, "--require-clean",
+                "--", sys.executable, "-c", lenh,
+            ]
+            ran = subprocess.run([sys.executable, str(RUNNER), *argv], cwd=repo,
+                                 text=True, capture_output=True, timeout=90, env=moi_truong)
+            return ran, json.loads(evidence.read_text(encoding="utf-8"))
+
+    ran, ban_ghi = _chay(True)
+    assert ran.returncode == 0, "lenh gate dat ma gate tra %r" % (ran.returncode,)
+    assert ban_ghi.get("co_che_cach_ly") == "quet-cay", (
+        "cong tac khong an: co_che=%r" % (ban_ghi.get("co_che_cach_ly"),)
+    )
+    assert ban_ghi.get("giet_tron_ven") is None, (
+        "KHONG do duoc ma khai giet_tron_ven=%r — ban ghi noi doi"
+        % (ban_ghi.get("giet_tron_ven"),)
+    )
+
+    # Vế đối chứng: có vùng chứa thì PHẢI khai `true`, nếu không thì bản vá này
+    # chỉ là đổi một lời khai sai thành một lời khai vô dụng.
+    ran2, ban_ghi2 = _chay(False)
+    if ban_ghi2.get("co_che_cach_ly") != "cgroup2":
+        raise BoQua("may khong cap duoc cgroup nen khong doi chung duoc")
+    assert ban_ghi2.get("giet_tron_ven") is True, (
+        "co vung chua, da quet va sach, ma khai giet_tron_ven=%r"
+        % (ban_ghi2.get("giet_tron_ven"),)
+    )
+
+
 def case_dirty_run_is_allowed_but_never_reusable() -> None:
     """Bỏ `--require-clean` thì gate CHẠY ĐƯỢC trên cây bẩn, nhưng chứng KHÔNG tái dùng.
 
@@ -1395,6 +1463,7 @@ CASES = [
     case_gate_dat_ma_bo_lai_daemon_van_bi_don_va_khai,
     case_doc_cgroup_hong_khong_duoc_coi_la_rong,
     case_tien_trinh_trong_cgroup_con_khong_duoc_bo_sot,
+    case_khong_do_duoc_khong_duoc_khai_thanh_da_sach,
     case_dirty_run_is_allowed_but_never_reusable,
     case_validate_reuse_is_fail_closed,
 ]

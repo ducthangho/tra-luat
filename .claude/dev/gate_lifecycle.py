@@ -419,6 +419,10 @@ _CO_CHE_CACH_LY = "quet-cay"
 # Cgroup riêng của lượt gate này; None = không cấp được, chạy đường dự phòng.
 _CGROUP_GATE: Path | None = None
 
+# Bật khi đã THẬT SỰ quét cgroup và xác nhận nó rỗng. Phân biệt "đo rồi, sạch"
+# với "chưa đo lần nào" — hai thứ mà đường ĐẠT không có vùng chứa hay bị gộp.
+_CGROUP_GATE_DA_QUET = False
+
 
 # MỐI NỐI KIỂM THỬ — liệt kê ở MỘT chỗ để còn khai được vào bằng chứng.
 #
@@ -1031,7 +1035,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         global _CO_SUBREAPER
         _CO_SUBREAPER = _dat_subreaper()
         # Cấp cgroup TRƯỚC khi sinh con; con vào cgroup ngay lúc `fork`.
-        global _CGROUP_GATE, _CO_CHE_CACH_LY, _GIET_KHONG_TRON_VEN
+        global _CGROUP_GATE, _CO_CHE_CACH_LY, _GIET_KHONG_TRON_VEN, _CGROUP_GATE_DA_QUET
         _CGROUP_GATE = _tao_cgroup_gate()
         if _CGROUP_GATE is not None:
             _CO_CHE_CACH_LY = "cgroup2"
@@ -1195,7 +1199,9 @@ def cmd_run(args: argparse.Namespace) -> int:
                 # Không đọc được thì ghi `null`, KHÔNG ghi 0: 0 là lời khai
                 # "đã đếm và không có", null là "không đếm được".
                 payload["so_sot_da_don"] = None if _sot is None else len(_sot)
-                if not _giet_cgroup(_CGROUP_GATE):
+                if _giet_cgroup(_CGROUP_GATE):
+                    _CGROUP_GATE_DA_QUET = True  # đã đo VÀ xác nhận rỗng
+                else:
                     _GIET_KHONG_TRON_VEN = True
                 _don_cgroup(_CGROUP_GATE)
                 _CGROUP_GATE = None              # atexit ở trên thành vô hại
@@ -1247,7 +1253,23 @@ def cmd_run(args: argparse.Namespace) -> int:
         # SỰ THẬT VỀ LƯỢT DỌN đi vào bằng chứng trên MỌI đường, không riêng
         # đường huỷ/quá hạn — nếu chỉ ghi ở hai đường kia thì đường đạt im lặng,
         # và im lặng lại bị đọc thành "đã dọn sạch".
-        payload["giet_tron_ven"] = not _GIET_KHONG_TRON_VEN
+        #
+        # "KHÔNG ĐO ĐƯỢC" KHÁC "ĐÃ SẠCH" (P1 cross-review trên `052d100`).
+        # Không có vùng chứa thì đường ĐẠT không hề gọi `_terminate_process_tree`
+        # (nó chỉ chạy ở đường huỷ/quá hạn), nên KHÔNG có phép đo nào cả — mà bản
+        # trước vẫn ghi `giet_tron_ven: true`. Đo được: `TL_GATE_TAT_CGROUP=1` +
+        # một lệnh gate đẻ con tách rời rồi thoát 0 ⇒ bản ghi ĐẠT và TÁI DÙNG
+        # ĐƯỢC, trong khi đứa con ghi dấu SAU khi khoá đã nhả.
+        #
+        # `null` = chưa đo, `false` = đo và thấy sót, `true` = đo và thấy sạch.
+        # Ba thứ khác nhau, và gộp cái đầu vào cái cuối chính là lỗi kho đã trả
+        # giá nhiều lần. Ai đòi vùng chứa thì dùng `validate --doi-cach-ly`.
+        if _GIET_KHONG_TRON_VEN:
+            payload["giet_tron_ven"] = False
+        elif _CGROUP_GATE_DA_QUET:
+            payload["giet_tron_ven"] = True
+        else:
+            payload["giet_tron_ven"] = None      # KHÔNG ĐO ĐƯỢC
         # FAIL-CLOSE. Trước đây sự thật này chỉ ĐI VÀO BẢN GHI: một lượt rò tiến
         # trình vẫn trả 0 và vẫn tái dùng được. Dọn không trọn vẹn thì lượt gate
         # ấy KHÔNG được tính là đạt.

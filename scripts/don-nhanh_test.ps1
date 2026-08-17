@@ -491,19 +491,48 @@ ca 't21_MAC_DINH_phai_TU_CHOI_o_1000_PR' {
     bang ($r.rc -eq 13) "rc=$($r.rc), doi 13 — cham mac dinh 1000 ma van tin la danh sach DU. Ra:`n$($r.ra)"
     bang (($truoc -join ',') -eq ($sau -join ',')) "CO nhanh bi xoa du cham tran mac dinh"
 
-    # CHOT ARGV — F1 cua cross-review luot 5. Ca nay la ca DUY NHAT di du bo ba tham so voi
-    # GIA TRI MAC DINH, tuc "loi hoi cuoi cung truoc khi tin". Doi tung TOKEN chu khong so
-    # nguyen dong (khoang trang se giet phep so nguyen dong).
+    # CHOT ARGV — F1 luot 5, va P1 luot 6 da va lai CHINH cho nay. Ca nay la ca DUY NHAT di
+    # du bo ba tham so voi GIA TRI MAC DINH, tuc "loi hoi cuoi cung truoc khi tin".
+    #
+    # VI SAO SO NGUYEN CAU chu khong `-contains` tung token (P1 cross-review luot 6):
+    # ban truoc duyet tung token bang `-contains`, tuc do su CO MAT cua token chu KHONG do
+    # CAU HOI duoc gui di. No mu voi token THUA, va bon dot bien song tron 21/21:
+    #   them `--limit 30` SAU `--limit $TranPR`  -> gh that: co SAU thang => limit = 30
+    #        ^ TAI SINH DUNG LO GOC MA CA PR #150 SINH RA DE VA, bang MOT token thua.
+    #   them `--state closed` cuoi dong          -> giu base PR DA DONG
+    #   them `--repo x/y`                        -> hop dong doi, test khong thay
+    #   `pr list` -> `issue list`                -> `pr`/`list` khong nam trong danh sach doi
+    # Danh-sach-cam-theo-token thua tu trong THIET KE: no phai doan truoc moi cach viet.
+    # So NGUYEN CAU thi chi phai biet DUNG mot chuoi — va no ghim luon `pr list`, cam token
+    # thua, cam lap co, cam dao thu tu, tat ca bang mot phep.
+    #
+    # PHAI `-ceq` CHU KHONG `-eq`: `-eq` tren chuoi cua PowerShell MU HOA-THUONG
+    # (do duoc tren pwsh 7.4.6: '--STATE OPEN' -eq '--state open' => True; -ceq => False).
+    # Phan chung cho chinh dieu do, da chay: dot bien `--state`->`--STATE` o dong 184
+    #   giu `-ceq` => 20/21, do dung ca nay   |   ha xuong `-eq` => 21/21, SONG.
+    # Tuc `-ceq` la thu dang giet no, khong phai thu khac.
+    #
+    # Phan chung cho ca chot: go han hai dong duoi + dot bien `--limit 30` sau
+    #   => 21/21 (dot bien SONG LAI). Khong co phep thu ay thi khong biet ca nay dang
+    #   do ARGV hay do thu khac.
+    #
+    # Chuoi ky vong duoi day DO duoc, khong doan: dump `$tok -join ' '` o HEAD ra 8 token.
+    # `printf '%s\n' "$@"` cua gh gia ghi MOI token mot dong nen join lai la nguyen cau.
+    # Danh doi da biet: neu mai kia mot token CHINH DANG chua khoang trang thi phep join
+    # nhap nhang va ca nay phai doi cach ghi. No hong theo huong DO (an toan), khong phai
+    # theo huong xanh — nen day la no, khong phai lo dang chay mau.
     #
     # CO Y: them mot co chinh dang (vd `--repo`) SE lam ca nay DO. Doi cau hoi gui `gh` la
     # doi HOP DONG, phai co nguoi sua test va noi ly do — do khong phai do oan.
+    # (Loi khai nay tung SAI o ban truoc — luot 6 do ra `--repo` van xanh. Nay no DUNG,
+    # va da do: dot bien `--repo x/y` => 20/21, do dung ca nay.)
     # `Dung-Gh-Gia` tra ve THU MUC (de dat len PATH), khong phai duong dan tep `gh`.
     $argv = Join-Path $gh 'argv.txt'
     bang (Test-Path $argv) "gh gia khong ghi duoc argv.txt — chot nay dang khong do gi"
     $tok = @(Get-Content -Path $argv)
-    foreach ($c in @('--state', 'open', '--limit', '1000', '--json', 'headRefName,baseRefName')) {
-        bang ($tok -contains $c) "dong lenh hoi gh THIEU token '$c'. argv thuc: [$($tok -join ' ')]"
-    }
+    $mong = 'pr list --state open --limit 1000 --json headRefName,baseRefName'
+    bang (($tok -join ' ') -ceq $mong) `
+        "cau hoi gui gh KHAC hop dong.`n  mong : [$mong]`n  thuc : [$($tok -join ' ')]"
 }
 
 # ---------------------------------------------------------------- chạy

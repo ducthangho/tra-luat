@@ -18,6 +18,9 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 | `wp55-r2-review-5-codex-verdict.md` | `mutable-master-ref-in-repro-command` | Khối bash tái hiện `merged-tree-doctrine-false-positive` dùng `origin/master`, một ref **DI ĐỘNG**. Master lúc đo là `3d2c52d62696b0c7c190fd891115f543b0f9cb55`. **Thay cả hai chỗ `origin/master` bằng SHA đó**, nếu không bạn đang đo một cây khác. |
 | `don-nhanh-base-review-3-claude-verdict.md` | `same-provider-khong-du-land` | Verdict này ghi `assurance: same_provider_approved` — reviewer là **`claude`**, **cùng nhà cung cấp** với người vá. §8 nói mức ấy **một mình không thay** mức assurance bắt buộc cho phạm vi workflow, và #150 sửa `.github/workflows/ci.yml`. **Đừng đọc verdict này — hay verdict `don-nhanh-kien-truc-gh-1` cùng chuỗi — thành điều kiện land.** Muốn land cần cross-review `codex` khi có quota, hoặc human review có audit của chủ kho. Sai lệch §8 do chủ kho chấp nhận trong phiên (lý do: `codex` sắp hết quota), đã khai trong lease. |
 | `don-nhanh-kien-truc-gh-1-claude-verdict.md` | `mcp-do-duoc-roi-mat` | Verdict nói reviewer **không tái lập được** phép đo trong lease (`11 PR qua MCP, đủ head và base`). **Người vá đã tự kiểm và reviewer ĐÚNG:** chạy lại lúc `14:56Z` bằng **cùng token** (vân tay `49933df4`, độ dài 93) và **cùng đoạn mã** ⇒ `isError: true`, `403 Resource not accessible by personal access token`. Phép đo gốc chạy `~14:44Z` ⇒ nó **chết trong ~12 phút**, không phải "vài giờ" như verdict ước. Vân tay token **không đổi** ⇒ không phải token xoay vòng mà là trạng thái **uỷ quyền phía server** đổi. **Đừng chạy lại lệnh MCP trong verdict rồi kết luận gì từ kết quả** — đường ấy đã trôi, và chính sự trôi ấy là một phần của kết luận `giu_nguyen`. |
+| `don-nhanh-base-review-6-claude-verdict.md` | `same-provider-khong-du-land` | Reviewer là **`claude`**, cùng nhà cung cấp với người vá. §8 nói mức ấy **một mình không thay** mức assurance bắt buộc cho phạm vi workflow, và #150 sửa `.github/workflows/ci.yml`. **Đừng đọc verdict này thành điều kiện land.** Muốn land cần cross-review `codex` khi có quota, hoặc human review có audit của chủ kho. Kèm một chỗ dễ sai: uỷ quyền `ops/uy-quyen-150-same-provider-20260817.yaml` neo `05568de` **đã hết hiệu lực** theo §9 — trỏ lại nó sang SHA mới là agent tự nới uỷ quyền, §2 cấm. |
+| `don-nhanh-base-review-6-claude-verdict.md` | `so-dot-bien-neo-o-99e9383-khong-tai-hien-tren-HEAD` | Mọi con số đột biến trong verdict (B1–B4 **sống 21/21**, A1–A4 20/21) neo ở `99e9383e9ff60bb8850f41242beb607808a821e9`. **Bản vá P1 nằm ngay sau trên cùng nhánh**, nên chạy lại trên HEAD nhánh sẽ **KHÔNG** tái hiện: B1–B4 phải **chết** (20/21, đỏ `t21`). Muốn tái hiện đúng verdict thì `git worktree add --detach <đích> 99e9383…` rồi đo ở đó. **Thấy B1 chết trên HEAD không phải bằng chứng verdict sai** — nó là bằng chứng bản vá chạy. |
+| `don-nhanh-base-review-6-claude-verdict.md` | `so-eol-checked-398-neo-theo-INDEX-luc-do` | Verdict đối chiếu `eol … checked=398` rồi kết luận "khớp". Số ấy đúng cho cây **trước khi stage** ba tệp `ops/` của đợt bàn giao. `eol_policy.py --all` đọc **INDEX của git**, nên nó đổi theo **thời điểm đo**, không theo mã: đo lại sau khi stage cho **401**, và mỗi tệp thêm vào lại cộng tiếp. **Đừng đọc một con số khác 398 thành hồi quy** — đọc `violations`, và ghi kèm neo (SHA + trạng thái index) cho mọi số cổng. |
 | `tao-tag-luu-tru-review-1-codex-verdict.md` | `so-do-thieu-actionlint` | Mọi con số trong verdict (`81/82`, `73/74`, `79/82`, `80/82`) đo ở môi trường **KHÔNG có `actionlint`**, nên đã trừ sẵn đúng một ca — phép `actionlint` fail-close. Ở máy **có** `actionlint` thì cộng 1 vào từng số (`82/82`, `74/74`, `80/82`, `81/82`); chính verdict đã quy đổi sẵn cho hai số đột biến. **Đừng đọc `81/82` thành "có một ca hỏng"** — nó là bằng chứng chốt fail-close CHẠY. Hệ quả thật: `actionlint` trên bản vá này chỉ có **một** nguồn (người vá), reviewer khai `KHÔNG ĐO ĐƯỢC` và từ chối thay bằng PyYAML. |
 
 ## Mục lục
@@ -39,10 +42,11 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 | [`don-nhanh-base-review-2-codex-verdict.md`](don-nhanh-base-review-2-codex-verdict.md) | [`.receipt.yaml`](don-nhanh-base-review-2-codex-verdict.receipt.yaml) | `don-nhanh-base-review-2-codex-20260817` | `changes_requested` | `1511dd75` | 2545 |
 | [`don-nhanh-base-review-3-claude-verdict.md`](don-nhanh-base-review-3-claude-verdict.md) | [`.receipt.yaml`](don-nhanh-base-review-3-claude-verdict.receipt.yaml) | `don-nhanh-base-review-3-claude-20260817` | `changes_requested` | `0ce4d491` | 7829 |
 | [`don-nhanh-kien-truc-gh-1-claude-verdict.md`](don-nhanh-kien-truc-gh-1-claude-verdict.md) | [`.receipt.yaml`](don-nhanh-kien-truc-gh-1-claude-verdict.receipt.yaml) | `don-nhanh-kien-truc-gh-1-claude-20260817` | `giu_nguyen` | `bfeedfc4` | 11695 |
+| [`don-nhanh-base-review-6-claude-verdict.md`](don-nhanh-base-review-6-claude-verdict.md) | [`.receipt.yaml`](don-nhanh-base-review-6-claude-verdict.receipt.yaml) | `don-nhanh-base-review-6-claude-20260817` | `changes_requested` | `99e9383e` | 13627 |
 
-### Bốn hàng `don-nhanh-*` — chuỗi ĐẦU TIÊN của bảng này KHÔNG có hàng `approve` nào
+### Năm hàng `don-nhanh-*` — chuỗi ĐẦU TIÊN của bảng này KHÔNG có hàng `approve` nào
 
-Bốn hàng ấy thuộc **PR #150** và tới lúc ghi thì **PR chưa land**. Đọc chúng theo thứ tự,
+Năm hàng ấy thuộc **PR #150** và tới lúc ghi thì **PR chưa land**. Đọc chúng theo thứ tự,
 vì cái đáng học nằm ở **chuỗi**, không ở từng hàng:
 
 | lượt | reviewer | finding | lớp lỗi |
@@ -50,6 +54,22 @@ vì cái đáng học nằm ở **chuỗi**, không ở từng hàng:
 | 1 | `codex` | `gh` thoát khác 0 mà in JSON hợp lệ ⇒ fail-close mở toang, **xoá thật** | mã thoát bị bỏ qua |
 | 2 | `codex` | `2>&1` trộn stderr vào JSON ⇒ thao tác hợp lệ **bị từ chối oan** | hai luồng gộp làm một |
 | 3 | `claude` | đếm **số dòng thô** thay vì **nội dung đã tách** vẫn qua bộ test | rỗng-vs-vắng |
+| 4 | `claude` | `-ge`→`-eq` và so-sánh-**chuỗi** đều sống 18/18; mặc định `TranPR` không ghim | test không phân biệt số/chuỗi |
+| 5 | `claude` | `gh` giả **mù với argv** ⇒ 4 đột biến sống 21/21, một con tái tạo đúng lỗ gốc | đồ giả mô phỏng TRẠNG THÁI, không mô phỏng HỢP ĐỒNG |
+| 6 | `claude` | chốt argv `-contains` mù với token **THỪA** ⇒ 4 đột biến mới sống 21/21 | danh-sách-cấm-theo-token |
+
+**Lượt 4 và 5 KHÔNG có tệp ở đây** — chúng chỉ sống trong log chạy dưới `scratchpad/`, tức
+NGOÀI kho, đúng lớp nợ mà chuỗi `doctor-github-mcp` đã khai. Nên đừng đọc bảng trên thành
+"ba lượt rồi nhảy sang lượt 6": hai lượt ở giữa **có thật, có finding thật**, chỉ là không
+tra lại được từ kho. `lease_id` của chúng còn trong `ops/leases/`.
+
+**Lượt 6 đáng đọc kỹ nhất, vì nó là hồi quy của chính bản vá lượt 5.** Lượt 5 bắt `gh` giả
+mù argv; bản vá cho nó dựng chốt đòi sáu token bằng `-contains`. Lượt 6 đo ra chốt ấy **đo
+sự CÓ MẶT của từng token, không đo CÂU HỎI** — nên thêm `--limit 30` **sau** `--limit 1000`
+vẫn 21/21, mà trên `gh` thật cờ-sau-thắng ⇒ limit hiệu lực 30 ⇒ **tái sinh đúng lỗ gốc mà
+cả PR #150 sinh ra để vá**. Cùng hình dạng "vá một lỗ mà mở lỗ khác" như lượt 2 với lượt 1.
+Nó còn bắt một **lời khai sai trong chú thích** (`t21` khai thêm `--repo` sẽ làm ca đỏ — đo
+được là không) đúng lúc bản vá ấy đang sửa một lời khai sai khác ở `t19`.
 
 **Không finding nào là lỗi nghiệp vụ.** Cả ba nằm ở **kênh đọc đầu ra của một tiến trình
 con**, và **lượt 2 là hồi quy do chính bản vá lượt 1 đẻ ra** — hình dạng `CLAUDE.md` gọi là

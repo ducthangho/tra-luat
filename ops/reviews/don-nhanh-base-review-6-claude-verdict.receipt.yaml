@@ -1,0 +1,189 @@
+# BIÊN NHẬN — cross-review lượt 6 của PR #150.
+#
+# ĐỌC DÒNG NÀY TRƯỚC MỌI DÒNG KHÁC: reviewer là `claude` TRONG KHI người vá cũng là
+# `claude`. `assurance: same_provider_approved`, KHÔNG phải `cross_approved`. §8 nói mức ấy
+# MỘT MÌNH không thay mức bắt buộc cho phạm vi workflow, và #150 sửa `.github/workflows/ci.yml`.
+# ⇒ Verdict này KHÔNG cấp điều kiện land. Xem caveat `same-provider-khong-du-land`.
+#
+# BẢY LƯỢT, BẢY LẦN TÌM RA THỨ THẬT. Lượt này ra một P1 — và P1 ấy tái sinh ĐÚNG lỗ gốc
+# mà cả PR #150 sinh ra để vá, bằng một token THỪA mà chốt `-contains` không thấy.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+lease_id: don-nhanh-base-review-6-claude-20260817
+provider: claude
+role: reviewer
+verdict: changes_requested
+assurance: same_provider_approved
+assurance_KHONG_dat: cross_approved
+cross_provider: false
+reviewed_sha: 99e9383e9ff60bb8850f41242beb607808a821e9
+
+verdict_path: ops/reviews/don-nhanh-base-review-6-claude-verdict.md
+verdict_sha256: efd8febdd5238c4f4bf7cd2069b56a587ae2d34b2ce0c99c2e11cd993696b311
+verdict_bytes: 13627
+verdict_nguon: 'scratchpad/runs/725ff967/stdout.log (launcher, ma_thoat=0, 1618.061s)'
+verdict_doi_chieu: '`diff -q` nguồn ↔ tệp đã chép: khớp từng byte'
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/ef0f9067899f56d9efcc41d248b94c7aa34d3277/ops/reviews/don-nhanh-base-review-6-claude-verdict.md
+
+published_first:
+  branch: ops/don-nhanh-giu-base-pr
+  commit: ef0f9067899f56d9efcc41d248b94c7aa34d3277
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_tag: null
+truy_xuat_ghi_chu: '#150 CHƯA land, chưa có tag.'
+
+sai_lech_giao_thuc:
+  dieu: '§8 — cross-provider bắt buộc cho phạm vi workflow'
+  ly_do: '`codex` hết quota'
+  ai_chap_nhan: ducthangho
+  chap_nhan_luc: 'direct, in-session, 2026-08-17 ("Cấp lượt 6. Sang phiên mới thực hiện tiếp")'
+  he_qua: >-
+    Lớp bảo vệ duy nhất còn lại là "phiên mới, read-only" (§2). Prompt nói THẲNG với
+    reviewer rằng họ có CÙNG thiên kiến với người vá, và rằng "không tìm được gì" nhiều
+    khả năng nghĩa là đang nhìn theo đúng cách người vá đã nhìn.
+
+chot_read_only_DO_chu_khong_tin_co:
+  head_sau: 99e9383e9ff60bb8850f41242beb607808a821e9
+  head_khop_neo: true
+  thay_doi_cay: 0
+  ghi_chu: >-
+    Đo bằng `git rev-parse HEAD` + `git status --porcelain` trong worktree dùng một lần
+    SAU khi tiến trình reviewer kết thúc — KHÔNG tin cờ quyền. `status` trả đúng một dòng
+    `?? nhiem_vu.txt` (tệp harness đặt vào trước khi chạy).
+
+xac_nhan_luot_truoc:
+  P2_luot_5_gh_gia_mu_argv: 'ĐÓNG cho bốn con đã nêu — CHƯA ĐÓNG LỚP (xem finding_1)'
+  phep_do: 'A1/A2/A3/A4 dựng lại: mỗi con 20/21, đỏ đúng t21 — khớp số người vá'
+  phan_chung_cho_chinh_chot: 'gỡ khối đòi argv + A1 ⇒ 21/21, A1 sống lại ⇒ t21 đang đo argv thật'
+  t20_doc_lap: 'helper-rỗng ⇒ 18/21, đỏ t19+t20+t21 — t20 độc lập thật, khớp người vá'
+  t20_giu_ghim_chuoi_la_DUNG: >-
+    Reviewer ĐO cả hai vế câu hỏi lượt 5 đặt ra, và kết luận NGƯỢC với gợi ý lượt 5:
+    dựng biến thể `t20` ghim-theo-HÀNH-VI đúng phác thảo lượt 5 rồi bơm helper-rỗng ⇒
+    biến thể XANH (19/21) — nó TRƯỢT đúng ca nó được đề xuất để bắt, vì PR đặc biệt không
+    đi qua helper. Ghim chuỗi rẻ hơn VÀ bắt được nhiều hơn; đỏ-oan là giá chấp nhận.
+  t19_chu_thich: 'ĐÓNG — (10,9)/(10,2)/(9,2) đo lại khớp từng giá trị với lời khai mới'
+  Nhieu_PR_guard: 'ĐÓNG MỘT NỬA — bẫy `1..0` đóng thật, nhưng xem finding_2'
+
+finding_1:
+  muc: P1
+  loai: 'ĐỘT BIẾN SỐNG SÓT — lỗ trong BỘ TEST, không phải bug trong mã HEAD'
+  noi_dung: >-
+    Chốt argv của `t21` dùng `-contains` trên TỪNG token nên mù với token THỪA: nó đo sự
+    CÓ MẶT của từng token, không đo CÂU HỎI được gửi đi. Bốn đột biến mới, CẢ BỐN sống 21/21:
+    B1 thêm `--limit 30` SAU `--limit $TranPR` · B2 thêm `--state closed` cuối dòng ·
+    B3 thêm `--repo x/y` · B4 `pr list`→`issue list`.
+  vi_sao_B1_la_P1: >-
+    Trên `gh` thật cờ-SAU-thắng (reviewer đo hai chiều, tầng parse cục bộ, gh 2.45.0):
+    `--limit 1000 --limit 0` ⇒ `invalid value for --limit: 0`; `--limit 0 --limit 1000` ⇒
+    không phàn nàn gì về 0. Nên B1 làm limit hiệu lực = 30 ⇒ danh sách cắt ở 30 ⇒
+    `30 -ge 1000` không bao giờ nổ ⇒ xoá base của PR ngoài 30 con đầu — TÁI SINH ĐÚNG LỖ
+    GỐC mà cả PR #150 sinh ra để vá, bằng MỘT token thừa.
+  B3_bat_mot_LOI_KHAI_SAI: >-
+    Chú thích `t21` khai "thêm một cờ chính đáng (vd `--repo`) SẼ làm ca này ĐỎ". Đo được
+    là SAI: B3 sống 21/21. Đúng họ lỗi lời-khai-trong-chú-thích mà CHÍNH lượt này vừa sửa
+    cho `t19` — hai lần cùng một hình dạng trong một bản vá.
+  goc_benh: >-
+    Danh-sách-cấm-theo-token thua từ thiết kế trước token thừa — cùng họ bài học allow-list
+    của kho ("phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN").
+  nguoi_ghi_da_TAI_HIEN_DOC_LAP: >-
+    Không tin lời reviewer: dựng lại B1 trong container này trên BẢN SAO TẠM (không đụng
+    cây repo), xác nhận diff đã áp trước khi chạy ⇒ baseline 21/21, B1 21/21 SỐNG TRỌN.
+  da_dong: true
+  dong_bang: 'xem `va_P1_sau_verdict` bên dưới'
+
+finding_2:
+  muc: P3
+  loai: 'ĐỘT BIẾN SỐNG SÓT + lời hứa sai trong mã mới'
+  noi_dung: >-
+    Xoá NGUYÊN DÒNG guard `if ($So -lt 1) { return @() }` mới thêm ⇒ suite vẫn 21/21:
+    guard là mã không phép đo nào canh (miền gọi hiện tại 10/999/1000 không chạm nó). Và
+    `return @()` qua pipeline bị THÁO RỖNG thành `$null` chứ không phải mảng rỗng như dòng
+    mã viết ⇒ qua binding `[object[]]$PR`, fake gh in `[null]` — thứ gh thật không bao giờ
+    in — mà script đọc thành 1 PR MA.
+  vi_sao_phep_nghiem_nguoi_va_MU: >-
+    Người vá nghiệm bằng `.Count` (−1→0, 0→0, 1→1, 2→2). Tái lập được, nhưng `$null.Count`
+    CŨNG bằng 0 ⇒ dụng cụ đo không thể đỏ ⇒ không phải bằng chứng (đúng doctrine kho:
+    "một phép kiểm không thể đỏ thì không phải bằng chứng").
+  latent: true
+  da_dong: false
+  ly_do_chua_dong: >-
+    Chưa caller nào gọi `Nhieu-PR 0`. Reviewer gợi ý vá ở BIÊN tiêu thụ (đầu `Dung-Gh-Gia`),
+    KHÔNG trong `Nhieu-PR`, và ĐO rồi bác hướng `,@()` (làm `@(Nhieu-PR 0).Count` thành 1).
+    Để lại cho lượt sau — xem `viec_con_lai`.
+
+va_P1_sau_verdict:
+  commit: 'xem commit kế tiếp trên nhánh này'
+  huong: >-
+    Theo gợi ý reviewer: thay vòng `foreach … -contains` bằng MỘT phép so NGUYÊN CÂU
+    `-ceq`. Phải `-ceq` chứ không `-eq` — `-eq` chuỗi của PowerShell mù hoa-thường
+    (đo: `'--STATE OPEN' -eq '--state open'` ⇒ True). So nguyên câu tự khắc ghim luôn
+    `pr list`, cấm token thừa/lặp/đảo chỗ.
+  nguoi_va_KHONG_phai_reviewer: >-
+    Bản vá do phiên chính viết SAU khi verdict đã được ghi thành tệp và commit RIÊNG —
+    verdict không bị sửa để hợp với bản vá. Reviewer chỉ gợi ý; §"Gợi ý là gợi ý".
+
+verdict_usage_caveats:
+- id: same-provider-khong-du-land
+  noi_dung: >-
+    Verdict này ghi `assurance: same_provider_approved` — reviewer là `claude`, cùng nhà
+    cung cấp với người vá. §8 nói mức ấy MỘT MÌNH không thay mức assurance bắt buộc cho
+    phạm vi workflow, và #150 sửa `.github/workflows/ci.yml`. **Đừng đọc verdict này thành
+    điều kiện land.** Muốn land cần cross-review `codex` khi có quota, hoặc human review
+    có audit của chủ kho. Uỷ quyền `ops/uy-quyen-150-same-provider-20260817.yaml` neo
+    `05568de` đã HẾT HIỆU LỰC (§9) — trỏ lại nó sang SHA mới là agent tự nới uỷ quyền.
+- id: so-dot-bien-neo-o-99e9383-khong-tai-hien-tren-HEAD
+  noi_dung: >-
+    Mọi con số đột biến trong verdict (B1–B4 **sống 21/21**, A1–A4 20/21) neo ở
+    `99e9383e9ff60bb8850f41242beb607808a821e9`. Bản vá P1 nằm NGAY SAU trên cùng nhánh,
+    nên chạy lại trên HEAD nhánh sẽ **KHÔNG** tái hiện: B1–B4 phải CHẾT (20/21, đỏ `t21`).
+    Muốn tái hiện đúng verdict thì `git worktree add --detach <đích> 99e9383…` rồi đo ở đó.
+    Thấy B1 chết trên HEAD **không** phải bằng chứng verdict sai — nó là bằng chứng bản vá
+    chạy.
+- id: so-eol-checked-398-neo-theo-INDEX-luc-do
+  noi_dung: >-
+    Verdict đối chiếu `eol … checked=398` và kết luận "khớp". Con số ấy đúng cho cây
+    **trước khi stage** ba tệp `ops/` của đợt bàn giao. `eol_policy.py --all` đọc **INDEX
+    của git**, nên số đổi theo thời điểm đo, không theo mã: đo lại sau khi stage cho
+    **401**, và mỗi tệp thêm vào đợt này lại cộng tiếp. **Đừng đọc một con số khác 398
+    thành hồi quy** — hãy đọc `violations`, và ghi kèm neo (SHA + trạng thái index) cho
+    mọi số cổng.
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-17T18:40:00Z'
+
+moi_truong_da_tra_gia_o_luot_nay:
+- id: kho-clone-SHALLOW-lam-neo-danh-tinh-KHONG-DOC-DUOC
+  noi_dung: >-
+    MỚI, bàn giao chưa biết. Container này clone **shallow** (`.git/shallow` có 5 mốc
+    ghép), nên `git rev-list --max-parents=0 HEAD` trả 5 "root commit" GIẢ và root commit
+    thật `394e9346…` **không có trong kho**. Launcher fail-close `rc=11` và TỪ CHỐI chạy.
+    Đó là chốt làm đúng việc: vân tay bền nhất của kho trở thành **không đọc được**, và
+    nếu neo lỏng hơn thì lượt đo đã chạy trên một cây không ai xác minh được. Chữa bằng
+    `git fetch --unshallow origin` ⇒ đúng MỘT root commit, khớp neo.
+- id: pwsh-mat-cung-dev-shm
+  noi_dung: >-
+    `/dev/shm` bị xoá giữa các phiên ⇒ mất `pwsh`. Tải lại 7.4.6 linux-x64; tarball giải
+    nén ra `pwsh` **thiếu bit exec** đúng như bàn giao cảnh báo ⇒ `chmod +x`. Đòi BẰNG
+    CHỨNG DƯƠNG trước khi đọc bất kỳ con số nào (`pwsh --version` **và** một biểu thức
+    thật trả `42`), vì `rc=127` + đầu ra rỗng trông y hệt "chạy xong sạch".
+
+receipt_khong_khai:
+- 'Không khai lượt này tương đương một lượt cross-provider. Nó KHÔNG.'
+- 'Không khai "phiên mới, read-only" là đủ thay cross-provider — nó chỉ là điều kiện TỐI THIỂU của §2.'
+- 'Không khai `evidence_url` là bền: #150 chưa land, chưa có tag.'
+- 'Không khai finding_2 (P3) đã đóng — nó CHƯA, và cố ý để lại cho lượt sau.'
+- >-
+  Không khai bản vá P1 đã được ai review. Nó chưa. Bản vá viết SAU verdict, chưa lượt
+  nào xét nó — và người viết nó chính là người ghi biên nhận này.
+- >-
+  Không khai `gh` phân trang THẬT đã được đo. Reviewer cài `gh` 2.45.0 (apt) nhưng chỉ
+  đo được tầng PARSE cục bộ; mạng vẫn bị proxy chặn 403. Nợ `gh-phan-trang-that-chua-ai-do`
+  GIỮ NGUYÊN.

@@ -132,3 +132,4 @@ canh_bao_moi_truong_luc_cap: >-
   `codex` KHÔNG bị chặn, nhưng ảnh chụp `CODEX_AUTH_JSON` đã CŨ ~33h — refresh token xoay
   vòng nên bản trong biến có thể đã vô hiệu. Môi trường reviewer có thể THIẾU `pwsh` và
   `actionlint`; thiếu thì khai KHÔNG ĐO ĐƯỢC cho đúng mục, đừng hạ tiêu chuẩn.
+posted_comment_id: 5316198183   # workflow ghi, ĐỪNG sửa tay

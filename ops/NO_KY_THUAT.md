@@ -128,18 +128,74 @@ sẽ đụng bản mới hơn trên master — lấy hook từ master trước.
 
 ---
 
-## 6. Khe TRƯỚC khi cắm handler tín hiệu
+## 6. Khe TRƯỚC khi CHẶN được tín hiệu — đã thu hẹp còn đúng một pha
 
-Đo được (sweep 14 mốc trên `8eca8d4`): bắn `SIGTERM` ở mốc **0,05s** — tức trong
-lúc preflight (các lệnh `git`), TRƯỚC khi handler được cắm — thì runner thoát
-`-15` và **không có tệp bằng chứng**.
+**Trạng thái: gần đóng.** Phần nguy hiểm đã vá trong PR "chặn tín hiệu sớm"; còn
+lại một pha vô hại nhưng khó đọc.
 
-**Vì sao để lại:** ở thời điểm ấy CHƯA có cgroup và CHƯA có con gate nào, nên
-không rò gì cả; thiệt hại duy nhất là "một lượt chưa kịp bắt đầu thì không có bản
-ghi". Cắm handler sớm hơn nữa (ngay đầu `cmd_run`) sẽ kéo theo phải dọn cả những
-trạng thái chưa dựng xong — đổi một khe vô hại lấy một lớp phức tạp mới.
+### Đã đóng cái gì
 
-**Xong khi:** hoặc cắm handler ngay đầu `cmd_run` kèm đường dọn chịu được trạng
-thái nửa vời, hoặc kết luận là không đáng làm và đóng mục này. Sweep ở trên là
-phản chứng sẵn có để đo lại.
+Trước bản vá, thứ tự trong `cmd_run` là: cắm handler → cấp cgroup → đăng ký dọn
+→ **rồi mới** chặn mặt nạ. Giữa "cắm handler" và "chặn mặt nạ" có một quãng mà
+`BiKetThuc` ném ra KHÔNG AI BẮT — nó bay thẳng qua `main()`.
 
+Đo được ở quãng ấy: `rc=1` · **traceback ra stderr** · **KHÔNG bằng chứng** · và
+nếu rơi đúng khoảng giữa `_tao_cgroup_gate()` với `atexit.register` thì **để lại
+hẳn một thư mục cgroup**.
+
+Quãng ấy rộng vài trăm micro-giây, nên lưới quét theo thời gian gần như không bao
+giờ chạm: sweep 87 lượt lưới 0,01s bắt được `rc=1` đúng **2 lượt**, và cửa sổ rò
+cgroup thì **không lượt nào** chạm — phải nới cửa sổ trên bản sao mới gọi ra được.
+
+Vá bằng cách **chặn mặt nạ TRƯỚC khi cắm handler**: từ đó tín hiệu tới lúc nào
+cũng nằm chờ (pending) tới khi gỡ mặt nạ, mà chỗ gỡ nằm BÊN TRONG khối `try` có
+`except BiKetThuc` và `finally`. Kèm đăng ký `atexit` dọn cgroup ngay dòng sau khi
+cấp (phòng thủ theo lớp). Ca `case_tin_hieu_giua_quang_dung_khong_duoc_lot_ra`
+dùng mối nối `TL_GATE_EP_CHAM_SAU_CGROUP` để nới cửa sổ nên nó **tất định** —
+không còn là nhánh chỉ đỏ được bằng cách sửa bản sao.
+
+### Còn lại cái gì
+
+Sweep 30 lượt (0,02→0,30s, bước 0,02s, 2 lượt/mốc) trên bản đã vá:
+
+| kết cục | số lượt |
+|---|---|
+| `rc=143`, có bằng chứng | 24 |
+| `rc=-15`, không bằng chứng | 6 |
+| traceback | **0** |
+| con gate sống sót | **0** |
+| cgroup rác để lại | **0** |
+
+Chỉ còn HAI kết cục, và `-15` là tín hiệu tới **trước khi `pthread_sigmask` kịp
+chặn** — tức trước cả handler, trước cả cgroup, trước cả con gate. Ở đó **không
+có gì để rò**: thiệt hại duy nhất là mất bản ghi của một lượt chưa kịp bắt đầu,
+kèm mã thoát `-15` khác với `143` của mọi pha sau.
+
+### Vì sao không vá nốt
+
+Chặn mặt nạ sớm hơn nữa nghĩa là chặn ngay dòng đầu `cmd_run`, trước cả khi
+`argparse` và preflight chạy. Khi ấy mọi lỗi preflight (repo sai, HEAD lệch, cây
+bẩn) cũng phải đi qua đường dọn tín hiệu, mà ở đó chưa có gì để dọn — đổi một khe
+không rò lấy một lớp phức tạp mới, đúng thứ doctrine bảo dừng lại mà hỏi.
+
+### Xong khi
+
+Một trong hai, và phải **kèm số đo**:
+
+1. Mọi mốc bắn cho **cùng một** mã thoát đọc được (`143`) và cùng một kết cục
+   bằng chứng — kể cả pha trước khi chặn được mặt nạ; hoặc
+2. Tài liệu này khai thẳng: "bắn trước khi `pthread_sigmask` chặn được thì `-15`
+   và không có bằng chứng là kết quả **CHẤP NHẬN ĐƯỢC**", rồi đóng mục.
+
+Phép nghiệm thu, neo vào PHA chứ không vào giây (ngưỡng giây trôi theo máy/tải):
+
+```
+luoi thoi gian : 0,02s -> 0,30s, buoc 0,02s, 2 luot moi moc
+goi ra co chu dich : dat TL_GATE_EP_CHAM_SAU_CGROUP=3 roi ban o giua quang do
+                     (luoi thoi gian mot minh KHONG cham noi cua so micro-giay)
+dem cgroup     : dem thu muc `tl-gate-*` DUOI diem gan cgroup v2, quet de quy
+                 (`rglob`) — KHONG dem o goc diem gan, vi `_tao_cgroup_gate` tao
+                 cgroup duoi nhanh cua CHINH tien trinh (`_cgroup_cua_ta()`),
+                 tren host systemd cho ay khong phai goc
+dat            : 0 traceback · 0 con song sot · 0 cgroup rac, o CA HAI cach goi
+```

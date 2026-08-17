@@ -455,13 +455,39 @@ _CGROUP_GATE_DA_QUET = False
 # nghiệm, không phải lượt gate thật). `TL_GATE_TAT_CGROUP` KHÔNG bơm lỗi — nó là
 # công tắc vận hành thật cho host cgroup hỏng — nên nó chỉ hạ `co_che_cach_ly`
 # xuống `quet-cay`, và ai cần vùng chứa thì đòi bằng `validate --doi-cach-ly`.
-_MOI_NOI_BOM_LOI = ("TL_GATE_EP_BAO_RO", "TL_GATE_EP_HONG_VAO_CGROUP")
+_MOI_NOI_BOM_LOI = ("TL_GATE_EP_BAO_RO", "TL_GATE_EP_HONG_VAO_CGROUP",
+                    "TL_GATE_EP_CHAM_SAU_CGROUP")
 _MOI_NOI_HA_CAP = ("TL_GATE_TAT_CGROUP",)
 
 
 def _moi_noi_dang_bat() -> list[str]:
-    return sorted(k for k in (_MOI_NOI_BOM_LOI + _MOI_NOI_HA_CAP)
-                  if os.environ.get(k) == "1")
+    # `TL_GATE_EP_CHAM_SAU_CGROUP` nhận SỐ GIÂY chứ không phải "1", nên phải xét
+    # riêng — nếu chỉ so `== "1"` thì mối nối bật mà bảng khai là tắt, tức đúng
+    # kiểu nói dối mà `moi_noi_kiem_thu` sinh ra để chặn.
+    ra = [k for k in (_MOI_NOI_BOM_LOI + _MOI_NOI_HA_CAP)
+          if k != "TL_GATE_EP_CHAM_SAU_CGROUP" and os.environ.get(k) == "1"]
+    if _cham_sau_cgroup_giay() > 0.0:
+        ra.append("TL_GATE_EP_CHAM_SAU_CGROUP")
+    return sorted(ra)
+
+
+def _cham_sau_cgroup_giay() -> float:
+    """Số giây chèn NGAY SAU khi cấp cgroup — chỉ để NỚI RỘNG cửa sổ khi kiểm thử.
+
+    Cửa sổ "đã cấp cgroup, chưa vào `try`" rộng vài trăm micro-giây trong đời
+    thật, nên lưới quét theo thời gian gần như không bao giờ chạm — review
+    `same_provider_approved` trên `e0e1a16` đã chỉ ra: sweep 87 lượt lưới 0,01s
+    KHÔNG chạm nó lần nào, phải nới cửa sổ trên bản sao mới gọi ra được.
+
+    Một cửa sổ chỉ gọi ra được bằng cách sửa bản sao thì KHÔNG có ca chạy được
+    trong kho, và nhánh vá nó là nhánh không thể đỏ. Mối nối này biến nó thành
+    ca tất định. Nó KHÔNG đổi kết cục, chỉ kéo dài một quãng — nhưng vẫn tính là
+    BƠM LỖI để bằng chứng của lượt ấy không tái dùng được.
+    """
+    try:
+        return max(0.0, float(os.environ.get("TL_GATE_EP_CHAM_SAU_CGROUP", "0")))
+    except ValueError:
+        return 0.0
 
 
 def _don_cgroup_con_sot() -> None:
@@ -1052,6 +1078,32 @@ def cmd_run(args: argparse.Namespace) -> int:
             return returncode
         # PHẢI đặt TRƯỚC khi sinh con: subreaper chỉ nhận nuôi những đứa mồ côi
         # SAU khi cờ có hiệu lực. Đặt sau thì đúng ca cần bắt vẫn rơi về `init`.
+        # CHẶN TÍN HIỆU TRƯỚC KHI CẮM HANDLER — thứ tự này là cả bản vá.
+        #
+        # Bản trước chặn mặt nạ MÃI TỚI ngay trước lúc sinh con, nên có một quãng
+        # "handler đã cắm, mặt nạ chưa chặn, chưa vào `try` nào" — và `BiKetThuc`
+        # ném ra ở đó KHÔNG AI BẮT: nó bay thẳng qua `main()`.
+        #
+        # Đo được (review `same_provider_approved` trên `e0e1a16`, rồi tác giả
+        # dựng lại bằng cách nới cửa sổ trên bản sao): tín hiệu rơi vào quãng ấy
+        # cho `rc=1` + traceback + KHÔNG bằng chứng, và nếu rơi đúng khoảng giữa
+        # `_tao_cgroup_gate()` với `atexit.register` thì còn ĐỂ LẠI HẲN một thư
+        # mục cgroup. Sweep 87 lượt bắt được 2 lượt `rc=1` mà không cần nới gì.
+        #
+        # Chặn TRƯỚC khi cắm thì không còn quãng hở nào: tín hiệu tới lúc nào cũng
+        # nằm CHỜ (pending) tới khi ta gỡ mặt nạ — mà chỗ gỡ nằm BÊN TRONG khối
+        # `try` có `except BiKetThuc` và `finally`. Không mất tín hiệu, chỉ hoãn.
+        #
+        # Mặt nạ DI TRUYỀN qua `fork`+`exec` nên con sẽ điếc `SIGTERM` nếu không
+        # gỡ; gỡ trong `preexec_fn` (chạy ở CON) — vì thế `preexec_fn` phải LUÔN
+        # có, kể cả khi không dùng cgroup.
+        mat_na = None
+        _bo_chan = [x for x in (getattr(signal, "SIGTERM", None),
+                                getattr(signal, "SIGHUP", None)) if x is not None]
+        if hasattr(signal, "pthread_sigmask") and _bo_chan:
+            with contextlib.suppress(OSError, ValueError):
+                mat_na = signal.pthread_sigmask(signal.SIG_BLOCK, set(_bo_chan))
+
         # BIẾN TÍN HIỆU KẾT THÚC THÀNH NGOẠI LỆ, đặt TRƯỚC khi sinh con.
         #
         # `SIGHUP` đi cùng vì cùng hình dạng: đóng terminal/ngắt phiên ssh cũng
@@ -1086,14 +1138,20 @@ def cmd_run(args: argparse.Namespace) -> int:
         # Cấp cgroup TRƯỚC khi sinh con; con vào cgroup ngay lúc `fork`.
         global _CGROUP_GATE, _CO_CHE_CACH_LY, _GIET_KHONG_TRON_VEN, _CGROUP_GATE_DA_QUET
         _CGROUP_GATE = _tao_cgroup_gate()
+        _cham = _cham_sau_cgroup_giay()
+        if _cham > 0.0:
+            time.sleep(_cham)            # MỐI NỐI KIỂM THỬ: nới cửa sổ, xem docstring
         if _CGROUP_GATE is not None:
+            # ĐĂNG KÝ DỌN NGAY, KHÔNG ĐỂ CÁCH MẤY DÒNG. Mặt nạ ở trên đã đóng khe
+            # này rồi, nhưng "đã cấp mà chưa đăng ký dọn" là một trạng thái không
+            # nên tồn tại dù chỉ vài dòng — phòng thủ theo lớp, và để ai đọc sau
+            # không phải tự chứng minh lại là khe ấy an toàn.
+            atexit.register(_don_cgroup_con_sot)
             _CO_CHE_CACH_LY = "cgroup2"
         elif os.name == "nt":
             _CO_CHE_CACH_LY = "job-object"
         payload["co_che_cach_ly"] = _CO_CHE_CACH_LY
         payload["moi_noi_kiem_thu"] = _moi_noi_dang_bat()
-        if _CGROUP_GATE is not None:
-            atexit.register(_don_cgroup_con_sot)
         # CHẶN TÍN HIỆU QUANH QUÃNG SINH CON — không phải bắt nó cho khéo hơn.
         #
         # Đo được trên `8eca8d4`: bắn `SIGTERM` đúng lúc `Popen` đang chạy thì con
@@ -1108,13 +1166,6 @@ def cmd_run(args: argparse.Namespace) -> int:
         # Mặt nạ tín hiệu DI TRUYỀN qua `fork`+`exec`, nên con sẽ điếc `SIGTERM`
         # nếu ta không gỡ. Gỡ trong `preexec_fn` (chạy ở CON, sau `fork` trước
         # `exec`) — và vì thế `preexec_fn` phải LUÔN có, kể cả khi không có cgroup.
-        mat_na = None
-        _bo_chan = [x for x in (getattr(signal, "SIGTERM", None),
-                                getattr(signal, "SIGHUP", None)) if x is not None]
-        if hasattr(signal, "pthread_sigmask") and _bo_chan:
-            with contextlib.suppress(OSError, ValueError):
-                mat_na = signal.pthread_sigmask(signal.SIG_BLOCK, set(_bo_chan))
-
         def _truoc_exec() -> None:
             if mat_na is not None:
                 with contextlib.suppress(OSError, ValueError):

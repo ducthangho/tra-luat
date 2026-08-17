@@ -3674,6 +3674,54 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
 
 
 @ca
+def t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho():
+    """Mẫu tìm-thay của MỖI đột biến phải khớp ĐÚNG MỘT chỗ trong `launcher.py`.
+
+    VÌ SAO CÓ CA NÀY — nó chặn một cách làm hỏng chốt mà KHÔNG sửa dòng nào của ai.
+    `chay_dot_bien` thay chỗ khớp ĐẦU TIÊN. Nên nếu mã mới TRÙNG CHỮ với đoạn mà một
+    đột biến cũ đang nhắm, VÀ đứng trước nó, thì đột biến ấy lặng lẽ nhảy sang bản sao:
+    ca đích không chết nữa, mà bảng vẫn báo "đạt".
+
+    ĐÃ XẢY RA THẬT trong chính đợt này: khối chuẩn hoá env chép vào
+    `_suc_khoe_mcp_github` trùng khít với khối của `_do_github` và đứng trước nó ⇒
+    `probe_github_bo_qua_moi_truong_chuan_hoa` (đột biến CÓ SẴN, canh `t113`) SỐNG SÓT.
+    Không dòng logic nào sai; chốt chỉ mất răng vì trùng chữ. Chữa bằng `_env_da_chuan`,
+    và chốt NÀY để lần sau không phải trông vào việc ai đó tình cờ chạy đột biến rồi
+    đọc kỹ dòng `SAI`.
+
+    Đây là ca đo CÔNG CỤ ĐO, không đo `launcher.py` — cùng họ với `t116`.
+    """
+    from pathlib import Path as _P
+    nguon = _P(LAUNCHER).read_text(encoding="utf-8")
+    # DANH SÁCH CHO PHÉP, không phải danh sách cấm: nêu đích danh chỗ ĐÃ BIẾT là trùng,
+    # kèm lý do. Bất cứ chỗ trùng nào KHÁC đều làm ca này ĐỎ.
+    #
+    # `hook_phien_bo_phep_so_nang_luc` trùng 2 chỗ — `_do_hook_cu` và `_do_launcher_cu`
+    # có cùng dòng `thieu = sorted(cua_master - dang_co)`. ĐO ĐƯỢC: nợ này CÓ SẴN trên
+    # master `c7ad260`, KHÔNG phải do bản vá MCP tạo ra. Nó đang LATENT chứ chưa hỏng:
+    # ca đích (`t88`) nói về HOOK, và `_do_hook_cu` tình cờ đứng TRƯỚC — tức chốt đang
+    # đúng NHỜ THỨ TỰ, không nhờ thiết kế. Dọn nó là thay đổi RIÊNG (đụng mã của #143);
+    # ghi ra đây để nó không nằm im mà không ai biết.
+    DA_BIET_TRUNG = {"hook_phien_bo_phep_so_nang_luc"}
+    la = []
+    for muc in DOT_BIEN:
+        ten, cap = muc[0], muc[1]
+        for c, _ in ([cap] if isinstance(cap, tuple) else cap):
+            n = nguon.count(c)
+            if n != 1 and ten not in DA_BIET_TRUNG:
+                la.append((ten, n, c.splitlines()[0][:60]))
+    bang(not la, "mau dot bien khong khop DUNG MOT cho (chot dang nham sai cho, hoac "
+                 f"khong con cho nao de nham): {la}")
+    # ...va chinh muc DA BIET phai VAN con trung — neu no da duoc don thi phai xoa khoi
+    # danh sach cho phep, keo danh sach thanh loi khai CHET.
+    for ten in DA_BIET_TRUNG:
+        muc = next(mu for mu in DOT_BIEN if mu[0] == ten)
+        cap = [muc[1]] if isinstance(muc[1], tuple) else muc[1]
+        bang(any(nguon.count(c) != 1 for c, _ in cap),
+             f"`{ten}` khong con trung nua — go no khoi DA_BIET_TRUNG")
+
+
+@ca
 def t116_moi_ham_ca_phai_duoc_DANG_KY_bang_decorator():
     """Mọi `def tNN_...` phải có `@ca` ngay trên nó — nếu không, ca ấy KHÔNG CHẠY.
 

@@ -481,10 +481,36 @@ def _pid_trong_cgroup(cg: Path) -> list[int] | None:
     Đây ĐÚNG hình dạng lỗi mà cả bản vá này sinh ra để đóng ("vắng mặt vì sạch"
     ≠ "vắng mặt vì chưa đo"), và tôi mắc lại nó ngay trong hàm đi đóng nó.
     """
+    # PHẢI QUÉT CẢ CÂY CON, không chỉ `cgroup.procs` ở tầng trên (P1 cross-review
+    # trên `19a9c0e`). Lệnh gate hoàn toàn có thể tự tạo cgroup CON bên trong
+    # cgroup của ta; tiến trình nằm trong đó KHÔNG xuất hiện ở `cgroup.procs`
+    # tầng trên. Đo được: tiến trình sống trong cgroup con mà `_giet_cgroup` khai
+    # `True` = "đã xác nhận rỗng". Lại đúng hình dạng cũ — hỏi sai chỗ rồi đọc
+    # câu trả lời rỗng thành "sạch".
+    #
+    # `rmdir` cũng hỏng khi còn cgroup con, nên không quét cây con thì vừa khai
+    # sai vừa để lại rác.
+    # TẦNG TRÊN và TẦNG CON chịu luật KHÁC NHAU — gộp lại là tự dựng lại đúng P1
+    # vừa vá. `FileNotFoundError` ở cgroup CON nghĩa là nó vừa biến mất giữa lúc
+    # quét (bình thường, bỏ qua được). Cũng lỗi ấy ở cgroup GỐC nghĩa là ta không
+    # đọc được thứ cần đọc — và im lặng bỏ qua nó thì hàm trả `[]` = "rỗng thật"
+    # cho một cgroup chưa từng đọc nổi. Bộ ca bắt đúng chỗ này.
     try:
-        return [int(x) for x in (cg / "cgroup.procs").read_text().split()]
+        tong = [int(x) for x in (cg / "cgroup.procs").read_text().split()]
     except (OSError, ValueError):
+        return None                      # gốc KHÔNG đọc được ⇒ không kết luận gì
+    try:
+        con = [q for q in cg.rglob("*") if q.is_dir()]
+    except OSError:
         return None
+    for muc in con:
+        try:
+            tong.extend(int(x) for x in (muc / "cgroup.procs").read_text().split())
+        except FileNotFoundError:
+            continue                     # cgroup con vừa biến mất giữa chừng
+        except (OSError, ValueError):
+            return None
+    return tong
 
 
 def _tao_cgroup_gate() -> Path | None:
@@ -594,6 +620,16 @@ def _giet_cgroup(cg: Path, han_giay: float = 5.0) -> bool:
 
 
 def _don_cgroup(cg: Path) -> None:
+    """Xoá cgroup, kể cả cgroup CON do lệnh gate tự tạo (sâu nhất trước).
+
+    `rmdir` một cgroup còn con sẽ hỏng, và hỏng ở đây bị `suppress` nuốt mất —
+    thành ra để lại nguyên cụm cgroup rác mà không ai biết.
+    """
+    with contextlib.suppress(OSError):
+        for muc in sorted((q for q in cg.rglob("*") if q.is_dir()),
+                          key=lambda q: len(q.parts), reverse=True):
+            with contextlib.suppress(OSError):
+                muc.rmdir()
     with contextlib.suppress(OSError):
         cg.rmdir()
 

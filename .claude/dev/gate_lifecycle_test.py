@@ -15,6 +15,20 @@ import time
 
 
 RUNNER = Path(__file__).with_name("gate_lifecycle.py")
+
+
+class BoQua(Exception):
+    """Ca KHÔNG chạy được trên nền/môi trường này — KHÔNG phải ca đã qua.
+
+    P2 cross-review trên `e480a93`: harness cũ tính `passed = len(CASES) - len(failures)`,
+    mà một ca `print("BO QUA ...")` rồi `return` thì không ném gì cả, nên nó rơi
+    thẳng vào `passed`. Kết quả `21/21` vì thế có thể chứa những ca mà phép đo
+    fail-close hoặc dọn daemon CHƯA TỪNG chạy — đúng nợ mà bàn giao đã ghi cho
+    `t19`/`t62` ("ca có MẶT khác ca có ĐO"), nay tái phát ở bộ này.
+
+    Ném cái này thay vì `return`: harness đếm riêng và IN RA, nên không còn cách
+    nào đọc một lượt bỏ qua thành một lượt đạt.
+    """
 STRICT_COUNT = r"(?m)^.*\b([1-9][0-9]*)/\1\b[^\r\n]*\r?\n?\Z"
 
 
@@ -474,8 +488,7 @@ def case_interrupt_kills_tree_before_releasing_lock() -> None:
           ngay, chứ không suy ra từ việc tệp khoá biến mất.
     """
     if os.name == "nt":                     # SIGINT tới nhóm khác hẳn trên Windows
-        print("  BO QUA case_interrupt_kills_tree_before_releasing_lock: fixture POSIX")
-        return
+        raise BoQua("fixture POSIX")
     with tempfile.TemporaryDirectory(prefix="gate_lifecycle_intr_") as raw:
         root = Path(raw)
         repo = root / "repo"
@@ -549,8 +562,7 @@ def case_descendant_spawned_during_shutdown_is_contained() -> None:
     một vòng không thấy ai mới.
     """
     if os.name == "nt":
-        print("  BO QUA case_descendant_spawned_during_shutdown_is_contained: fixture POSIX")
-        return
+        raise BoQua("fixture POSIX")
     with tempfile.TemporaryDirectory(prefix="gate_lifecycle_shut_") as raw:
         root = Path(raw)
         repo = root / "repo"
@@ -705,8 +717,7 @@ def case_ke_de_lai_lien_tuc_khong_thoat_duoc() -> None:
         vì sạch và vắng mặt vì chưa chạy không được phép nhìn giống nhau.
     """
     if os.name == "nt":
-        print("  BO QUA case_ke_de_lai_lien_tuc_khong_thoat_duoc: fixture POSIX")
-        return
+        raise BoQua("fixture POSIX")
     with tempfile.TemporaryDirectory(prefix="gate_lifecycle_dela_") as raw:
         root = Path(raw)
         repo = root / "repo"
@@ -825,8 +836,7 @@ def case_co_che_cach_ly_khai_dung_thu_da_chay() -> None:
           chứa chưa từng tồn tại, tức nói dối đúng chỗ nguy hiểm nhất.
     """
     if os.name == "nt":
-        print("  BO QUA case_co_che_cach_ly_khai_dung_thu_da_chay: fixture POSIX")
-        return
+        raise BoQua("fixture POSIX")
     with tempfile.TemporaryDirectory(prefix="gate_lifecycle_coche_") as raw:
         root = Path(raw)
         repo = root / "repo"
@@ -902,8 +912,7 @@ def case_don_khong_tron_ven_lam_do_luot_gate() -> None:
     sai về độ phủ, đúng lỗi kho đã ghi sổ.
     """
     if os.name == "nt":
-        print("  BO QUA case_don_khong_tron_ven_lam_do_luot_gate: fixture POSIX")
-        return
+        raise BoQua("fixture POSIX")
     with tempfile.TemporaryDirectory(prefix="gate_lifecycle_ro_") as raw:
         root = Path(raw)
         repo = root / "repo"
@@ -928,8 +937,7 @@ def case_don_khong_tron_ven_lam_do_luot_gate() -> None:
         # Chỉ có nghĩa khi cơ chế THẬT là cgroup; máy không cấp được thì mối nối
         # không nằm trên đường chạy và ca này không đo được gì — nói thẳng ra.
         if ban_ghi.get("co_che_cach_ly") != "cgroup2":
-            print("  BO QUA case_don_khong_tron_ven_lam_do_luot_gate: may khong cap duoc cgroup")
-            return
+            raise BoQua("may khong cap duoc cgroup")
 
         assert ban_ghi.get("giet_tron_ven") is False, (
             "ep bao ro ma ban ghi van khai giet_tron_ven=%r" % (ban_ghi.get("giet_tron_ven"),)
@@ -954,8 +962,7 @@ def case_vao_cgroup_hong_thi_tut_ve_quet_cay_va_khai_dung() -> None:
     tiếp mà vẫn khai `cgroup2` thì bản ghi nói dối về vùng chứa không tồn tại.
     """
     if os.name == "nt":
-        print("  BO QUA case_vao_cgroup_hong_thi_tut_ve_quet_cay_va_khai_dung: fixture POSIX")
-        return
+        raise BoQua("fixture POSIX")
     with tempfile.TemporaryDirectory(prefix="gate_lifecycle_hong_") as raw:
         root = Path(raw)
         repo = root / "repo"
@@ -998,8 +1005,7 @@ def case_gate_dat_ma_bo_lai_daemon_van_bi_don_va_khai() -> None:
     bản ghi, mà đó đúng là thứ người đọc cần để biết lệnh gate của mình bẩn.
     """
     if os.name == "nt":
-        print("  BO QUA case_gate_dat_ma_bo_lai_daemon_van_bi_don_va_khai: fixture POSIX")
-        return
+        raise BoQua("fixture POSIX")
     with tempfile.TemporaryDirectory(prefix="gate_lifecycle_daemon_") as raw:
         root = Path(raw)
         repo = root / "repo"
@@ -1035,8 +1041,7 @@ def case_gate_dat_ma_bo_lai_daemon_van_bi_don_va_khai() -> None:
                              text=True, capture_output=True, timeout=90)
         ban_ghi = json.loads(evidence.read_text(encoding="utf-8"))
         if ban_ghi.get("co_che_cach_ly") != "cgroup2":
-            print("  BO QUA case_gate_dat_ma_bo_lai_daemon_van_bi_don_va_khai: khong co vung chua")
-            return
+            raise BoQua("khong co vung chua")
 
         assert ran.returncode == 0, "lenh gate dat ma gate tra %r" % (ran.returncode,)
         assert ban_ghi.get("status") == "pass", "status=%r" % (ban_ghi.get("status"),)
@@ -1061,8 +1066,7 @@ def case_doc_cgroup_hong_khong_duoc_coi_la_rong() -> None:
     để hàm biết cây đã sạch.
     """
     if os.name == "nt" or not _mount_cgroup2_co_that():
-        print("  BO QUA case_doc_cgroup_hong_khong_duoc_coi_la_rong: khong co cgroup v2")
-        return
+        raise BoQua("khong co cgroup v2")
     sys.path.insert(0, str(RUNNER.parent))
     import gate_lifecycle as gl
 
@@ -1082,6 +1086,55 @@ def case_doc_cgroup_hong_khong_duoc_coi_la_rong() -> None:
             assert gl._giet_cgroup(that, han_giay=1.0) is True, "rong that ma khai khong xong"
         finally:
             gl._don_cgroup(that)
+
+
+def case_tien_trinh_trong_cgroup_con_khong_duoc_bo_sot() -> None:
+    """Tiến trình nằm trong cgroup CON vẫn phải bị thấy, bị giết, và cgroup con bị dọn.
+
+    P1 cross-review trên `19a9c0e`. Lệnh gate hoàn toàn có thể tự tạo cgroup con
+    bên trong cgroup của ta (systemd-run, container-in-container, hoặc chỉ là một
+    `mkdir`). Bản trước chỉ đọc `cgroup.procs` ở TẦNG TRÊN, nên tiến trình sống
+    trong cgroup con là vô hình — đo được: `_giet_cgroup` khai `True` = "đã xác
+    nhận rỗng" trong khi tiến trình vẫn sống.
+
+    Lại đúng hình dạng cũ: hỏi sai chỗ rồi đọc câu trả lời rỗng thành "sạch". Và
+    `rmdir` cũng hỏng khi còn cgroup con, nên không quét cây con thì vừa khai sai
+    vừa bỏ lại rác.
+    """
+    if os.name == "nt" or not _mount_cgroup2_co_that():
+        raise BoQua("khong co cgroup v2")
+    sys.path.insert(0, str(RUNNER.parent))
+    import gate_lifecycle as gl
+
+    cg = gl._tao_cgroup_gate()
+    if cg is None:
+        raise BoQua("may khong cap duoc cgroup")
+    proc = None
+    try:
+        con = cg / "con"
+        con.mkdir()
+        proc = subprocess.Popen(
+            [sys.executable, "-c", "import time; time.sleep(60)"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            preexec_fn=lambda: (con / "cgroup.procs").write_text(str(os.getpid())),
+        )
+        for _ in range(50):
+            if proc.pid in (gl._pid_trong_cgroup(cg) or []):
+                break
+            time.sleep(0.1)
+        # CHỨNG DƯƠNG: phải THẤY nó trước đã, nếu không ca này xanh rỗng.
+        thay = gl._pid_trong_cgroup(cg)
+        assert thay is not None and proc.pid in thay, (
+            "khong THAY tien trinh trong cgroup con (thay=%r) — ca dang xanh RONG" % (thay,)
+        )
+        assert gl._giet_cgroup(cg, han_giay=5.0) is True, "giet ca cay con ma khai chua xong"
+        assert gl._pid_trong_cgroup(cg) == [], "van con tien trinh sau khi khai da xong"
+    finally:
+        if proc is not None and proc.poll() is None:
+            proc.kill()
+            proc.wait(timeout=5)
+        gl._don_cgroup(cg)
+    assert not cg.exists(), "cgroup con lam _don_cgroup that bai — de lai rac"
 
 
 def case_dirty_run_is_allowed_but_never_reusable() -> None:
@@ -1341,6 +1394,7 @@ CASES = [
     case_vao_cgroup_hong_thi_tut_ve_quet_cay_va_khai_dung,
     case_gate_dat_ma_bo_lai_daemon_van_bi_don_va_khai,
     case_doc_cgroup_hong_khong_duoc_coi_la_rong,
+    case_tien_trinh_trong_cgroup_con_khong_duoc_bo_sot,
     case_dirty_run_is_allowed_but_never_reusable,
     case_validate_reuse_is_fail_closed,
 ]
@@ -1400,15 +1454,23 @@ def _chan_doan_cach_ly() -> None:
 def main() -> int:
     _chan_doan_cach_ly()
     failures: list[str] = []
+    bo_qua: list[str] = []
     for case in CASES:
         try:
             case()
+        except BoQua as ly_do:
+            # BỎ QUA KHÔNG PHẢI ĐẠT. Đếm riêng và in riêng.
+            bo_qua.append(f"{case.__name__}: {ly_do}")
         except BaseException as exc:  # behavior runner must report every named case
             failures.append(f"{case.__name__}: {exc!r}")
+    for b in bo_qua:
+        print(f"[BO QUA] {b}")
     for failure in failures:
         print(f"[FAIL] {failure}")
-    passed = len(CASES) - len(failures)
-    print(f"gate lifecycle tests: {passed}/{len(CASES)}")
+    qua = len(CASES) - len(failures) - len(bo_qua)
+    # Cùng khuôn với `launcher_test.py`: tổng KHÔNG được nuốt phần bỏ qua.
+    print("gate lifecycle tests: %d/%d ca (qua %d, bo qua %d, hong %d)"
+          % (len(CASES) - len(failures), len(CASES), qua, len(bo_qua), len(failures)))
     return 1 if failures else 0
 
 

@@ -1218,6 +1218,82 @@ def case_khong_do_duoc_khong_duoc_khai_thanh_da_sach() -> None:
     )
 
 
+def case_sigterm_cung_phai_giet_cay_truoc_khi_nha_khoa() -> None:
+    """`SIGTERM` cũng phải giết cây và ghi bằng chứng, y như Ctrl-C.
+
+    P1 cross-review trên `e0a4cb9`. Bản vá cũ chỉ che `KeyboardInterrupt` (SIGINT).
+    Mặc định `SIGTERM` GIẾT NGAY tiến trình Python — không `finally`, không
+    `atexit`, không ngoại lệ nào được ném. Đo được trước khi vá: runner thoát
+    `-15`, KHÔNG có tệp bằng chứng, con gate SỐNG SÓT qua mốc tuyệt đối, và hệ
+    điều hành đã nhả `flock` ⇒ lượt heavy gate kế tiếp vào được trong lúc con của
+    lượt "đã huỷ" vẫn ghi vào kho.
+
+    Đó ĐÚNG hình dạng P1 mở đầu PR này, chỉ khác lối vào — và lối vào này mới là
+    lối THẬT trên CI (huỷ job, hết giờ, tắt dịch vụ đều gửi `SIGTERM`, không ai
+    gõ Ctrl-C vào runner cả).
+
+    Ba vế, thiếu vế nào cũng chưa đủ: cây phải chết · bằng chứng phải có · mã
+    thoát phải KHỚP với bản ghi (bản ghi khai 143 mà shell thấy 1 là hai con số
+    cho cùng một lượt).
+    """
+    if os.name == "nt":
+        raise BoQua("fixture POSIX")
+    with tempfile.TemporaryDirectory(prefix="gate_lifecycle_term_") as raw:
+        root = Path(raw)
+        repo = root / "repo"
+        repo.mkdir()
+        head, _ = _repo(repo)
+        evidence = root / "evidence.json"
+        da_chay = root / "da-chay"
+        song_sot = root / "song-sot"
+        # MỐC TUYỆT ĐỐI: chỉ kẻ CÒN SỐNG sau khi runner đã thoát hẳn mới ghi được.
+        moc = time.time() + 20.0
+        lenh = (
+            "import pathlib,time;"
+            f"pathlib.Path({str(da_chay)!r}).write_text('x');"
+            f"time.sleep(max(0.0,{moc!r}-time.time()));"
+            f"pathlib.Path({str(song_sot)!r}).write_text('song')"
+        )
+        argv = [
+            "run", "--kind", "heavy", "--name", "fixture", "--repo", str(repo),
+            "--evidence", str(evidence), "--output", str(evidence.with_suffix(".out")),
+            "--wait-seconds", "1.0", "--timeout-seconds", "120",
+            "--selected-test", "fixture",
+            "--expected-head", head, "--base-sha", head, "--require-clean",
+            "--", sys.executable, "-c", lenh,
+        ]
+        proc = subprocess.Popen([sys.executable, str(RUNNER), *argv], cwd=repo,
+                                text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            for _ in range(150):
+                if da_chay.is_file():
+                    break
+                time.sleep(0.1)
+            # CHỨNG DƯƠNG: con gate phải THẬT SỰ chạy, nếu không ca này xanh rỗng.
+            assert da_chay.is_file(), "con gate chua kip chay — ca dang xanh RONG"
+            time.sleep(0.5)
+            proc.send_signal(signal.SIGTERM)
+            _, loi = proc.communicate(timeout=60)
+        finally:
+            if proc.poll() is None:
+                proc.kill()
+                proc.communicate()
+
+        assert evidence.is_file(), "SIGTERM lam MAT tep bang chung"
+        ban_ghi = json.loads(evidence.read_text(encoding="utf-8"))
+        assert ban_ghi.get("status") == "interrupted", "status=%r" % (ban_ghi.get("status"),)
+        assert ban_ghi.get("returncode") == 143, "returncode=%r" % (ban_ghi.get("returncode"),)
+        assert proc.returncode == ban_ghi.get("returncode"), (
+            "ma thoat %r KHONG khop ban ghi %r — hai con so cho cung mot luot"
+            % (proc.returncode, ban_ghi.get("returncode"))
+        )
+        assert "Traceback" not in (loi or ""), "SIGTERM lam ro traceback ra stderr"
+
+        while time.time() < moc + 1.5:
+            time.sleep(0.2)
+        assert not song_sot.exists(), "con gate SONG SOT sau khi runner thoat va nha khoa"
+
+
 def case_dirty_run_is_allowed_but_never_reusable() -> None:
     """Bỏ `--require-clean` thì gate CHẠY ĐƯỢC trên cây bẩn, nhưng chứng KHÔNG tái dùng.
 
@@ -1477,6 +1553,7 @@ CASES = [
     case_doc_cgroup_hong_khong_duoc_coi_la_rong,
     case_tien_trinh_trong_cgroup_con_khong_duoc_bo_sot,
     case_khong_do_duoc_khong_duoc_khai_thanh_da_sach,
+    case_sigterm_cung_phai_giet_cay_truoc_khi_nha_khoa,
     case_dirty_run_is_allowed_but_never_reusable,
     case_validate_reuse_is_fail_closed,
 ]

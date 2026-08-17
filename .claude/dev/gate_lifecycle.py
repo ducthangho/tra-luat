@@ -42,6 +42,26 @@ EXIT_INTERRUPTED = 130
 # phải khoá" — trước đây sự thật ấy chỉ ĐI VÀO BẢN GHI mà không đổi mã thoát, nên
 # một lượt rò tiến trình vẫn đi qua như đạt.
 EXIT_GIET_KHONG_TRON_VEN = 4
+# 128 + SIGTERM(15), quy ước shell. Tách khỏi `EXIT_INTERRUPTED` vì hai chuyện
+# khác nhau: Ctrl-C là người gõ, SIGTERM là hệ thống (CI huỷ, job hết giờ, máy
+# tắt dịch vụ) — và chỉ đường thứ hai mới đi qua handler dưới đây.
+EXIT_BI_KET_THUC = 143
+
+
+class BiKetThuc(BaseException):
+    """Nhận `SIGTERM`/`SIGHUP`. Kế thừa `BaseException`, KHÔNG phải `Exception`.
+
+    Vì sao cần cả một lớp riêng: mặc định `SIGTERM` GIẾT NGAY tiến trình Python —
+    không `finally`, không `atexit`, không ngoại lệ nào được ném. Đo được trên
+    `e0a4cb9`: bắn `SIGTERM` vào runner đang `proc.wait()` thì nó thoát `-15`,
+    KHÔNG ghi tệp bằng chứng, con gate SỐNG SÓT qua mốc tuyệt đối, và hệ điều
+    hành đã nhả `flock` — tức lượt heavy gate kế tiếp vào được trong lúc con của
+    lượt "đã huỷ" vẫn ghi vào kho.
+
+    Đó ĐÚNG hình dạng P1 mở đầu PR này ("ngắt phải giết cây trước khi nhả khoá"),
+    chỉ khác lối vào: bản vá cũ chỉ che `KeyboardInterrupt` (SIGINT). Biến tín
+    hiệu thành ngoại lệ thì khối `except BaseException` sẵn có xử lý được cả hai.
+    """
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
 _CATALOG_POLICY_PATHS = (
     ".claude/dev/gate_lifecycle.py",
@@ -1032,6 +1052,20 @@ def cmd_run(args: argparse.Namespace) -> int:
             return returncode
         # PHẢI đặt TRƯỚC khi sinh con: subreaper chỉ nhận nuôi những đứa mồ côi
         # SAU khi cờ có hiệu lực. Đặt sau thì đúng ca cần bắt vẫn rơi về `init`.
+        # BIẾN TÍN HIỆU KẾT THÚC THÀNH NGOẠI LỆ, đặt TRƯỚC khi sinh con.
+        #
+        # `SIGHUP` đi cùng vì cùng hình dạng: đóng terminal/ngắt phiên ssh cũng
+        # giết ngay mà không chạy dọn. Không có trên Windows nên bọc `suppress`.
+        tin_hieu_cu: list[tuple[Any, Any]] = []
+
+        def _ket_thuc(so_hieu, _khung):
+            raise BiKetThuc("tin hieu %d" % so_hieu)
+
+        for _ten in ("SIGTERM", "SIGHUP"):
+            _sh = getattr(signal, _ten, None)
+            if _sh is not None:
+                with contextlib.suppress(OSError, ValueError):
+                    tin_hieu_cu.append((_sh, signal.signal(_sh, _ket_thuc)))
         global _CO_SUBREAPER
         _CO_SUBREAPER = _dat_subreaper()
         # Cấp cgroup TRƯỚC khi sinh con; con vào cgroup ngay lúc `fork`.
@@ -1167,7 +1201,10 @@ def cmd_run(args: argparse.Namespace) -> int:
             _terminate_process_tree(proc, windows_job)
             with contextlib.suppress(subprocess.TimeoutExpired):
                 proc.wait(timeout=5)
-            returncode = EXIT_INTERRUPTED
+            # SIGTERM và Ctrl-C đi CÙNG đường dọn nhưng KHÔNG cùng mã thoát:
+            # người đọc bản ghi phải phân biệt được "người gõ Ctrl-C" với "hệ
+            # thống bảo dừng".
+            returncode = EXIT_BI_KET_THUC if isinstance(exc, BiKetThuc) else EXIT_INTERRUPTED
             _finish(
                 payload,
                 started,
@@ -1179,8 +1216,17 @@ def cmd_run(args: argparse.Namespace) -> int:
             payload["giet_tron_ven"] = not _GIET_KHONG_TRON_VEN
             with contextlib.suppress(OSError):
                 _atomic_json(evidence, payload)   # ghi bằng chứng TRƯỚC khi ném tiếp
+            # Ctrl-C VẪN PHẢI LÀ Ctrl-C với người gõ nó: ném lại nguyên vẹn.
+            # Nhưng `SIGTERM` thì phía gọi là MÁY, và máy đọc MÃ THOÁT — ném lại
+            # `BiKetThuc` sẽ cho traceback + mã 1, tức bản ghi khai 143 còn shell
+            # thấy 1. Hai con số cho cùng một lượt là đúng thứ kho cấm.
+            if isinstance(exc, BiKetThuc):
+                raise SystemExit(EXIT_BI_KET_THUC)
             raise
         finally:
+            for _sh, _cu in tin_hieu_cu:      # trả handler về như cũ
+                with contextlib.suppress(OSError, ValueError, TypeError):
+                    signal.signal(_sh, _cu)
             if windows_job is not None:
                 windows_job.close()
             output_stream.close()

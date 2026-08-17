@@ -1,0 +1,142 @@
+# Lease REVIEWER lượt 5 — PR #150. PHẠM VI ĐÓNG BĂNG, ĐÚNG MỘT TỆP.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+#
+# `codex` ĐÃ HẾT QUOTA — không còn đường cross-provider. §8 đòi cross-provider cho phạm vi
+# workflow và #150 sửa `.github/workflows/ci.yml`, nên lượt này KHÔNG cấp điều kiện land.
+# Chủ kho chấp nhận sai lệch, có ghi.
+#
+# XÉT GÌ: bản vá cho HAI đột biến SỐNG SÓT mà lượt 4 tìm ra. Delta THUẦN TEST — và đó chính
+# là chỗ hai lượt gần nhất liên tiếp có finding, nên "thuần test" KHÔNG phải "ít rủi ro".
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: don-nhanh-base-review-5-claude-20260817
+role: reviewer
+provider: claude
+reviewer: claude
+executor: claude
+
+cross_provider: false
+sai_lech_giao_thuc: true
+sai_lech_dieu: '§8 — cross-provider bắt buộc cho phạm vi workflow'
+sai_lech_ly_do: '`codex` ĐÃ HẾT quota (lượt 3-4 ghi "sắp hết"; nay hết hẳn)'
+sai_lech_ai_chap_nhan: ducthangho
+sai_lech_chap_nhan_luc: 'direct, in-session, 2026-08-17 ("Codex đã hết quota, thay Fable 5 Max reviewer")'
+assurance_target: same_provider_approved
+assurance_KHONG_dat: cross_approved
+khong_cap_dieu_kien_land: true
+
+reviewer_model: claude-fable-5
+reviewer_effort: max
+reviewer_model_do_chu_kho_chi_dinh: true
+reviewer_phien_moi: >-
+  Chủ kho yêu cầu "chạy trong phiên mới". Launcher sinh một tiến trình `claude` RIÊNG, không
+  chia sẻ ngữ cảnh nào với phiên người vá — đó là điều kiện §2 cho reviewer cùng provider.
+  Read-only sẽ ĐO sau khi chạy (HEAD không đổi + `git status --porcelain` rỗng), không tin cờ.
+
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: 12dd16ea6d92a177898a78fb9a547bda1d601dbb
+branch: ops/don-nhanh-giu-base-pr
+base_sha: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+sha_luot_truoc: 05568de6ad054a5f0c9991ecac7e38805d1227c3
+target_branch_neu_land: master
+target_pull_request: 150
+
+pham_vi_dong_bang: true
+scope_files_can_xet: 1
+scope_note: >-
+  Delta `05568de..12dd16e` trong `scripts/`: CHỈ `don-nhanh_test.ps1` (+56).
+  `don-nhanh.ps1` KHÔNG đổi. Delta toàn bộ còn có `ops/uy-quyen-150-same-provider-20260817.yaml`
+  và hồ sơ lease/prompt — không phải mã ⇒ `Nợ khai báo`.
+
+prompt_path: ops/prompts/don-nhanh-base-review-5-claude-20260817.md
+prompt_sha256_required: 6a838f13cdcd661d52284cc0be1a9fe5cdb1b72d9754ea4d21c4d40e7f38c4ce
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-17 ("Chạy trong phiên mới đi. Codex đã hết quota, thay Fable 5 Max reviewer")'
+recorded_by: claude-session
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  Phiên ghi lease CHÍNH LÀ phiên đã vá. Với `codex` hết quota, lớp bảo vệ còn lại CHỈ là
+  "phiên mới, read-only" cộng một model khác. Prompt nói thẳng với reviewer rằng họ cùng
+  thiên kiến với người vá, và rằng "không tìm được gì" nhiều khả năng nghĩa là đang nhìn
+  theo đúng cách người vá đã nhìn.
+
+leased_at_utc: '2026-08-17T16:55:00Z'
+lease_expires_at_utc: '2026-08-18T16:55:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 0
+
+boi_canh_luot_4:
+  F1_P2: >-
+    Cặp `t17`/`t18` chỉ ghim biên TỪ PHÍA DƯỚI ⇒ `M12` (`-ge`→`-eq`) và `M16` (so sánh
+    CHUỖI) đều SỐNG SÓT 18/18. M12 fail-open THẬT: `-Xoa -TranPR 0` với 1 PR mở ⇒ rc=0 và
+    XOÁ THẬT.
+  F2_P3: >-
+    Mặc định `TranPR = 1000` không được ghim ⇒ `M13` (→200) và `M13b` (→3) sống sót 18/18,
+    vì MỌI ca đa-PR đều truyền `-TranPR` tường minh.
+  ban_va: 't19 (10 PR, trần 9) · t20 (999 PR, mặc định) · t21 (1000 PR, mặc định) · helper `Nhieu-PR`'
+
+muc_kiem:
+- id: ba-ca-moi-co-that-su-giet-bon-dot-bien-khong
+  note: >-
+    Tự dựng lại M12/M16/M13/M13b trên bản sao tạm và CHẠY. Người vá báo M12⇒20/21(đỏ t19),
+    M16⇒19/21(đỏ t19+t20), M13⇒20/21(đỏ t20), M13b⇒20/21(đỏ t20). Đừng tin, chạy.
+- id: t19-co-do-dung-HAI-thu-no-khai-khong
+  note: >-
+    Nó khai giết cả `-eq` lẫn so-sánh-chuỗi bằng cặp 10/9. 10/9 có thật là cặp NHỎ NHẤT phân
+    biệt số học với chuỗi? Có đột biến nào `t19` KHÔNG phân biệt được (ví dụ so `[string]`
+    nhưng pad số)?
+- id: t20-t21-ghim-mac-dinh-chat-toi-dau
+  note: >-
+    Chúng ghim 1000 từ hai phía. Đột biến đổi mặc định thành 1001? 999? Có đột biến đổi mặc
+    định nào cặp này KHÔNG bắt được không? Nếu có thì cặp ấy ghim LỎNG hơn lời khai.
+- id: helper-Nhieu-PR-la-MA-MOI-no-co-tu-dung-khong
+  note: >-
+    CÂU ĐÁNG SOI NHẤT. `t20` xoá được `ops/rac` nghĩa là danh sách PR đọc ĐƯỢC THẬT, hay
+    nghĩa là nó đọc RỖNG rồi rơi vào đường khác? Phân biệt bằng phép đo. Một helper sinh SAI
+    dữ liệu làm cả ba ca xanh VÌ LÝ DO SAI — đúng hình dạng lượt 3 đã bắt
+    (`[string]$X = $null` làm `gh` giả in rỗng ở khắp nơi).
+- id: dot-bien-song-sot-thu-ba
+  note: >-
+    Lượt 4 tìm ra hai. Còn nữa không? Gợi ý: `Nhieu-PR` trả N−1; `1..$So`→`0..$So`; bỏ
+    `-TranPR` khỏi t19; đổi 999→998 trong t20.
+
+so_lieu_nguoi_va_bao:
+  bo_test: 21/21 — pwsh 7.4.6, TMPDIR=/dev/shm, ~14s
+  dot_bien_luot_4_nay_da_chet: 'M12⇒20/21(t19) · M16⇒19/21(t19,t20) · M13⇒20/21(t20) · M13b⇒20/21(t20)'
+  dot_bien_cu_van_chet: 'M10⇒18/21 · M11⇒19/21 · M14⇒18/21'
+  do_loi_khai_trong_chu_thich: 'nâng mặc định lên 2000 ⇒ 20/21, đỏ t21 — chú thích khẳng định thì phải đo'
+  cong_khac: 'eol ok=true checked=396 violations=0 · lease_publish 31/31 · release-verify ok=true failed=0 · golden rc=0 · file_count 179'
+
+canh_bao_moi_truong_luc_cap: >-
+  `pwsh` KHÔNG cài sẵn — tải 7.4.6 linux-x64; TARBALL GIẢI NÉN RA `pwsh` THIẾU BIT EXEC
+  (rc=126), phải `chmod +x` (KHÔNG phải `/dev/shm` noexec — reviewer lượt 4 đã chẩn đoán
+  nhầm hướng này rồi sửa lại). Đặt `TMPDIR=/dev/shm`. `/dev/shm` BỊ XOÁ khi phiên khởi động
+  lại: một lượt đo của người vá trả rc=127 với đầu ra RỖNG, trông y hệt "chạy xong sạch" —
+  kiểm công cụ có mặt TRƯỚC khi đọc số. `release-verify --strict` trong worktree review sẽ
+  ĐỎ vì `nhiem_vu.txt` của harness nằm trong `extra_files`; đo trên `git archive HEAD` thì xanh.
+
+no_da_khai_KHONG_neu_lai:
+- id: bo-qua-lop-pr-khong-kiem-gi
+- id: phu-thuoc-gh
+- id: hai-duong-se-troi-lech
+- id: tl-selftest-khong-do-duoc
+  note: Bốn lượt trước không ai xác nhận được. Giữ nguyên "chưa ai đo".
+- id: lease-khong-nam-trong-cay-duoc-review
+- id: gh-phan-trang-that-chua-ai-do
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T16:53:03Z'
+master_sha_at_grant: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+lease_song_khac_luc_cap: 'Lease lượt 1-4 và lượt kiến trúc của #150 đã đóng. Không có lease nào khác đang mở.'
+uy_quyen_lien_quan: >-
+  `ops/uy-quyen-150-same-provider-20260817.yaml` đã HẾT HIỆU LỰC (neo `05568de`, head đã
+  đổi — §9). Nếu lượt này `approve` thì chủ kho cần cấp uỷ quyền MỚI neo `12dd16e`.

@@ -3521,19 +3521,34 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
     # nguon` — cross-review lượt 8 hạ đúng: giữ chuỗi ấy trong một comment rồi để hành
     # vi thật trả `False` thì ca vẫn xanh. Một phép kiểm NGUỒN không chứng minh HÀNH VI.
     goc_rest, goc_git = m._do_rest_github, m._git
+    goc_run_g, goc_which_g = m.subprocess.run, m.shutil.which
 
     def git_gia(ws, *a, **k):
         if a[:2] == ("remote", "get-url"):
             return (0, "https://gitlab.example/khong-phai-github/x.git", "")
         return (1, "", "")
 
+    class _Rc0:
+        returncode, stdout, stderr = 1, "", ""
+
+    # PHẢI GIẢ CẢ `subprocess.run`, KHÔNG chỉ giả `_git`/`_do_rest_github`.
+    # ĐÃ TRẢ GIÁ: bản đầu của khối này để `_do_github` chạy THẬT `gh auth status` với
+    # `env={}` — không HOME, không PATH — nên trên runner (nơi CÓ `gh`) `gh` ghi
+    # `.local/` vào chính cây làm việc và bước "cây phải sạch" của `launcher-windows`
+    # ĐỎ trên CẢ ubuntu LẪN windows (`BAN: ?? .local/`). Ở máy dev thì XANH, vì máy dev
+    # KHÔNG cài `gh` nên nhánh ấy không chạy — đúng bệnh "ca đo MÁY chứ không đo HỢP
+    # ĐỒNG" mà chuỗi review này đã gặp năm lần, lần này ở chiều ngược: ca chỉ HỎNG ở nơi
+    # công cụ CÓ MẶT. Không lời đọc mã nào bắt được; chỉ lượt chạy thật trên runner.
     m._do_rest_github = lambda *a, **k: ("mo", "gia", True)
     m._git = git_gia
+    m.shutil.which = lambda t, *a, **k: None      # không đường phụ nào được gọi
+    m.subprocess.run = lambda *a, **k: _Rc0()     # và nếu có, nó KHÔNG ra tiến trình thật
     try:
         with tempfile.TemporaryDirectory() as td_g:
             _tt, mo_ta_g = m._do_github(td_g, {})
     finally:
         m._do_rest_github, m._git = goc_rest, goc_git
+        m.subprocess.run, m.shutil.which = goc_run_g, goc_which_g
     bang("rest-kho=chua-do-duoc" in mo_ta_g,
          f"khong doc duoc slug thi `rest-kho` phai la CHUA DO DUOC, khong phai `khong` "
          f"(da do va hong): {mo_ta_g!r}")

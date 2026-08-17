@@ -1,0 +1,140 @@
+# BIÊN NHẬN GIAO HÀNG cho verdict cross-review lượt 6 của việc dev-side
+# `doctor` đo GitHub theo đúng đường MCP — lượt CHỐT: `approve` trên `45a06e48`.
+#
+# ĐÂY LÀ VERDICT ĐẦU TIÊN CỦA CHUỖI NÀY ĐƯỢC GHI THÀNH TỆP. Năm lượt trước đều
+# `changes_requested`, và người vá KHÔNG ghi chúng vào `ops/reviews/` — chúng chỉ sống
+# trong log chạy dưới scratchpad, tức NGOÀI kho. Khai thẳng chỗ đó ở
+# `luot_truoc_khong_duoc_ghi_thanh_tep` bên dưới thay vì để mục lục trông như thể lượt 6
+# là lượt duy nhất đã xảy ra.
+#
+# Mọi trường dưới đây ĐO TỪ KHO hoặc từ log chạy có băm, không có trường nào là lời khai
+# suông của reviewer.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+lease_id: doctor-github-mcp-review-6-codex-20260817
+provider: codex
+role: reviewer
+verdict: approve
+reviewed_sha: 45a06e4872d165aabc1a7078edaf3281490d6b0d
+
+verdict_path: ops/reviews/doctor-github-mcp-review-6-codex-verdict.md
+verdict_sha256: 9a43439d16aade70697704d7caaec99a331cf625b1e302d382431410c87fd169
+verdict_bytes: 2160
+
+# NGUYÊN VĂN, đo chứ không nói: tệp verdict được chép từ `stdout.log` của lượt chạy
+# `8b15e79c` dưới `--run-root`, rồi `diff -u` giữa nguồn và bản đã chép — KHÔNG một dòng
+# lệch. Làm bước này vì bài học "tầng vận chuyển cũng chuẩn hoá chuỗi": băm phải đo trên
+# thứ ĐÃ ĐẾN, không phải thứ đã gửi.
+verdict_nguon: 'scratchpad/runs/8b15e79c/stdout.log (launcher run, ma_thoat=0, 331.0s)'
+verdict_doi_chieu: 'diff -u nguon <-> tệp đã chép: 0 dòng lệch'
+
+# Giao bằng TỆP TRÊN NHÁNH, không phải comment/PR review: lease khai
+# `target_pull_request_note: "Chưa mở PR lúc cấp lease — review neo thẳng vào SHA."`
+evidence_channel: repo_file
+# Neo vào COMMIT (bất biến), KHÔNG vào tên nhánh (di động) — nhánh `ops/**` là thứ bị xoá
+# sau khi land, và một URL trỏ nhánh sắp xoá chính là lớp lỗi mà lease #3 đã trả giá.
+# URL này trỏ commit ĐẦU TIÊN chứa tệp verdict; commit ấy được tạo RIÊNG, trước biên nhận,
+# vì `t26` đòi `evidence_url` dạng https mà URL thì không thể tự trỏ vào chính commit
+# đang tạo ra nó.
+evidence_url: https://github.com/ducthangho/tra-luat/blob/4920113a639d81385c0f98b1488c0f497776d2ff/ops/reviews/doctor-github-mcp-review-6-codex-verdict.md
+evidence_url_han_che: >-
+  Commit này hiện CHỈ được giữ bởi nhánh `ops/doctor-github-qua-mcp`. Nếu nhánh ấy bị xoá
+  mà chưa có tag `luu-tru/*` hay chưa land lên master thì URL trên thành SHA không tra
+  được. Đọc `truy_xuat_*` bên dưới.
+
+published_first:
+  branch: ops/doctor-github-qua-mcp
+  commit: 4920113a639d81385c0f98b1488c0f497776d2ff
+
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_ghi_chu: >-
+  CHƯA có tag `luu-tru/*` cho commit này, và verdict chưa land lên master — nên hiện
+  KHÔNG có ref bền nào giữ nó ngoài nhánh `ops/**`. Trước khi xoá nhánh: tạo tag lưu trữ
+  HOẶC land lên master, rồi cập nhật `evidence_url`. Đúng thứ tự mà các biên nhận
+  `wp55-r4-*` đã phải học bằng cách làm sai một lần.
+
+# CHUỖI SÁU LƯỢT — ghi ra vì mục lục chỉ có một hàng thì người đọc sẽ tưởng bản vá này
+# được duyệt ngay lượt đầu. Nó KHÔNG. Năm lượt `changes_requested` liên tiếp, và bốn lượt
+# đầu reviewer đều tìm được đột biến SỐNG SÓT ở CÙNG một lớp (`t105` đo ĐỒ GIẢ chứ không
+# đo HỢP ĐỒNG) — mỗi lần người vá phải đổi KIẾN TRÚC chốt, không phải thêm điều kiện.
+luot_truoc_khong_duoc_ghi_thanh_tep:
+  ghi_chu: >-
+    Năm verdict `changes_requested` (lượt 1..5) KHÔNG có tệp trong `ops/reviews/`. Chúng
+    nằm ở `scratchpad/runs/<short_id>/stdout.log` — NGOÀI kho, và scratchpad không bền.
+    Nói thẳng: chuỗi lập luận dẫn tới `approve` này hiện KHÔNG tra lại được đầy đủ từ kho.
+    Ai muốn khôi phục thì đọc thông điệp commit của `fc48421` `109c427` `9d79e5f` `9683d91`
+    `a1d47a0` `bf24fe4` `45a06e4` — mỗi commit chép lại finding mà nó vá, nhưng đó là bản
+    THUẬT LẠI của người vá, KHÔNG phải nguyên văn reviewer.
+  cac_luot:
+    - {luot: 1, lease: doctor-github-mcp-review-1-codex-20260817, reviewed_sha: 4ff2c6bfe04a205e5989642bc527bc5341db3e0f,
+       verdict: changes_requested, so_finding: 3, dot_bien_song_sot: 2, run: 52c9c105}
+    - {luot: 2, lease: doctor-github-mcp-review-2-codex-20260817, reviewed_sha: fc4842130dd4514d4a4e0d013429fa97743cbf7c,
+       verdict: changes_requested, so_finding: 2, dot_bien_song_sot: 2, run: 23152293}
+    - {luot: 3, lease: doctor-github-mcp-review-3-codex-20260817, reviewed_sha: 109c427895122c50501f675a1aa132d1881e8816,
+       verdict: changes_requested, so_finding: 3, dot_bien_song_sot: 3, run: 6b338b5b}
+    - {luot: 4, lease: doctor-github-mcp-review-4-codex-20260817, reviewed_sha: 9683d916ceca64741861a4752ecbeb3a2c6ed84d,
+       verdict: changes_requested, so_finding: 2, dot_bien_song_sot: 2, run: 34a7661d}
+    - {luot: 5, lease: doctor-github-mcp-review-5-codex-20260817, reviewed_sha: bf24fe44fcf926bf2b64fa4cb91065646b0599f1,
+       verdict: changes_requested, so_finding: 1, dot_bien_song_sot: 2, run: 546440ce}
+
+# BA ĐIỀU LƯỢT 6 KHAI, và vì sao mỗi điều đáng ghi riêng.
+ket_luan_luot_6:
+  khong_con_finding: 'Không có finding P1/P2/P3.'
+  dong_lop_chu_khong_het_huong: >-
+    Người vá HỎI THẲNG trong prompt (mục 5) để không đọc nhầm một lượt im lặng thành một
+    lượt bảo đảm. Reviewer trả lời rõ: "Không tìm thấy đột biến sống sót vì điều kiện trace
+    đã đóng được lớp đang xét, không phải vì hết hướng" — và chứng minh bằng hai đột biến
+    MỚI ở hai nhánh khác nhau, cả hai đều bị giết (`gh timeout=20 -> 30`;
+    `if shutil.which("gh")` -> `... and co_khai`).
+  da_toi_nguong_land: >-
+    "Bản vá đã tới ngưỡng land; không còn danh sách điều kiện bắt buộc nào cần đóng trong
+    phạm vi lease này." Câu này trả lời mục 5 của prompt — câu chưa lượt nào hỏi.
+
+# MỤC TỪNG MỞ, NAY ĐÓNG — và đóng bằng nguồn THỨ HAI, đó mới là điểm.
+phep_do_injection_da_duoc_dung_lai_doc_lap:
+  vi_sao_can: >-
+    Phép đo chống lưng cho `.search` (nội dung `.mcp.json` chèn được dòng `Status:` thứ hai
+    nhưng nằm SAU bản thật) trước lượt này chỉ có MỘT nguồn: chính người vá. Lượt 4 khai
+    KHÔNG ĐO ĐƯỢC; lượt 5 xác nhận không thấy lỗ TĨNH nhưng khai rằng dựng lại đầu ra CLI
+    thật một cách độc lập là KHÔNG ĐO ĐƯỢC. Người vá tự cung cấp bằng chứng cho chính phần
+    mình khai là đúng thứ cross-review sinh ra để chặn.
+  reviewer_do_duoc:
+    - 'claude mcp add: rc=0'
+    - 'claude mcp get probe: rc=0'
+    - 'có ĐÚNG 2 dòng `Status:`'
+    - 'bản THẬT `Status: × Failed to connect` ở dòng 3'
+    - 'bản CHÈN `Status: √ Connected` ở dòng 8'
+  ket_luan: 'Vì vậy `.search` lấy bản thật đứng trước — khớp phép đo của người vá.'
+
+so_lieu_reviewer_tu_do:
+  suite_nhanh: '105/105 (qua 104, bỏ qua 1, hỏng 0)'
+  suite_master_e38b0be: '104/104 (qua 103, bỏ qua 1, hỏng 0)'
+  dot_bien_nhanh: '85/85 (1 không đo được trên nền POSIX)'
+  dot_bien_master_e38b0be: '61/61 (1 không đo được)'
+  delta_ca_do: 0
+  ghi_chu: >-
+    Reviewer TỰ chạy trên bản sao đầy đủ của master, không lấy số của người vá. Lượt 2 và
+    lượt 3 từng bị sandbox cắt tiến trình nên phải khai KHÔNG ĐO ĐƯỢC cho số tổng; lượt 4,
+    5 và 6 chạy trọn.
+
+delivered: true
+delivered_by: codex-reviewer-session
+authoritative_source: repo_file
+
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-17T08:36:32Z'
+receipt_basis: >-
+  sha256 và số byte đo trên chính tệp verdict; `diff -u` giữa `stdout.log` của lượt chạy và
+  tệp đã chép; `lease_id`/`verdict`/`reviewed_sha` từ
+  `ops/leases/doctor-github-mcp-review-6-codex-20260817.yaml`; danh sách năm lượt trước từ
+  các tệp lease trong `ops/leases/` và `short_id` của các lượt chạy.
+receipt_khong_khai:
+  - Không khai rằng `evidence_url` là BỀN. Nó trỏ một commit hiện chỉ được giữ bởi nhánh
+    `ops/**`; xem `evidence_url_han_che` và `truy_xuat_*`. URL ĐÚNG ≠ URL SỐNG LÂU.
+  - Không khai verdict này đã land lên master — lúc viết thì CHƯA.
+  - Không khai năm verdict trước là "không tồn tại" — chúng CÓ, chạy được, nhưng nằm ngoài
+    kho và người vá đã không ghi chúng thành tệp. Xem `luot_truoc_khong_duoc_ghi_thanh_tep`.
+  - Không khai verdict này đã đăng ở bất kỳ đâu NGOÀI kho. Không quét comment/review nào.

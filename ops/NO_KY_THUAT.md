@@ -103,8 +103,12 @@ có ca bỏ qua, khoá bằng `t118`.
 "Windows CI từ `23/23` phẳng thành `23/23 ca (qua 14, bo qua 9, hong 0)`" —
 nhưng tử số 23 ĐÓ vẫn là `len(CASES) - len(failures)` = qua + bỏ-qua, tức chính
 câu khoe còn nguyên hình dạng N/N với 9 ca chưa chạy. Harness đếm riêng THẬT
-(lớp `BoQua`); chỉ DÒNG KẾT LUẬN nói dối. Nửa này đổi cùng khuôn ở packet W0-M2
-(18-08-2026): đo trên Windows, `25/25 ca (qua 14, bo qua 11, hong 0)` thành
+(lớp `BoQua`); chỉ DÒNG KẾT LUẬN nói dối. Nửa này đổi cùng khuôn ở PR #157
+(18-08-2026; packet điều phối trực tiếp, KHÔNG nằm trong bảng W0/W1 của
+`ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md` — bản đầu của câu này gọi nó là
+"W0-M2" theo suy luận, sai: kế hoạch land sau đó ở #155 cho thấy `W0-M2` là
+packet doctor-JSON bên launcher): đo trên Windows,
+`25/25 ca (qua 14, bo qua 11, hong 0)` thành
 `15/26 ca QUA (bo qua 11, hong 0) - KHONG DU: ...`, khoá bằng
 `case_headline_khong_duoc_dem_ca_bo_qua_la_da_qua`, mã thoát giữ nguyên.
 

@@ -3517,9 +3517,26 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
     #      Chi tiet cua chinh dong ay tu khai "KHONG DO DUOC" — de co `False` thi nhan
     #      in ra `rest-kho=khong`, tuc noi NGUOC voi chi tiet ngay canh no. Doc THANG
     #      ma nguon vi goi `_do_github` that se cham mang.
-    bang('("rest-kho", None, "khong doc duoc slug' in nguon,
-         "nhanh khong-doc-duoc-slug cua `rest-kho` phai day co None (chua do duoc), "
-         "khong phai False (da do va hong)")
+    # ĐO HÀNH VI, không dò chuỗi nguồn. Bản trước chỉ tìm `'("rest-kho", None, …' in
+    # nguon` — cross-review lượt 8 hạ đúng: giữ chuỗi ấy trong một comment rồi để hành
+    # vi thật trả `False` thì ca vẫn xanh. Một phép kiểm NGUỒN không chứng minh HÀNH VI.
+    goc_rest, goc_git = m._do_rest_github, m._git
+
+    def git_gia(ws, *a, **k):
+        if a[:2] == ("remote", "get-url"):
+            return (0, "https://gitlab.example/khong-phai-github/x.git", "")
+        return (1, "", "")
+
+    m._do_rest_github = lambda *a, **k: ("mo", "gia", True)
+    m._git = git_gia
+    try:
+        with tempfile.TemporaryDirectory() as td_g:
+            _tt, mo_ta_g = m._do_github(td_g, {})
+    finally:
+        m._do_rest_github, m._git = goc_rest, goc_git
+    bang("rest-kho=chua-do-duoc" in mo_ta_g,
+         f"khong doc duoc slug thi `rest-kho` phai la CHUA DO DUOC, khong phai `khong` "
+         f"(da do va hong): {mo_ta_g!r}")
 
     # (5) BA trang thai phai ket xuat KHAC NHAU — `None` != `False`.
     bang([m._nhan_duong(v) for v in (True, False, None)] == ["OK", "khong", "chua-do-duoc"],
@@ -3690,6 +3707,14 @@ def t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho():
     đọc kỹ dòng `SAI`.
 
     Đây là ca đo CÔNG CỤ ĐO, không đo `launcher.py` — cùng họ với `t116`.
+
+    GIỚI HẠN — cùng phạm vi phải khai như `t116`, và cross-review lượt 8 đúng khi bảo
+    lời khai cũ ("cùng họ với `t116`") HẸP HƠN thứ cần công bố. Nói cho đủ: ca này lấy
+    CẢ đặc tả (`DOT_BIEN` và `DA_BIET_TRUNG` ngay trong tệp test) LẪN bằng chứng
+    (`launcher.py`) từ những tệp mà một thay đổi PHỐI HỢP sửa được cùng lúc — thêm một
+    bản sao rồi nới `DA_BIET_TRUNG` cho khớp thì ca vẫn xanh. Nó chặn được việc TÌNH CỜ
+    dựng ra chỗ trùng (đúng ca đã xảy ra thật), KHÔNG chặn được sửa đổi có chủ ý. Muốn
+    chặn thì phải neo kỳ vọng ở NGUỒN ĐỘC LẬP; chưa làm, và không khai là đã làm.
     """
     from pathlib import Path as _P
     nguon = _P(LAUNCHER).read_text(encoding="utf-8")
@@ -3702,23 +3727,21 @@ def t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho():
     # ca đích (`t88`) nói về HOOK, và `_do_hook_cu` tình cờ đứng TRƯỚC — tức chốt đang
     # đúng NHỜ THỨ TỰ, không nhờ thiết kế. Dọn nó là thay đổi RIÊNG (đụng mã của #143);
     # ghi ra đây để nó không nằm im mà không ai biết.
-    DA_BIET_TRUNG = {"hook_phien_bo_phep_so_nang_luc"}
+    # KHOA DUNG SO LUONG, khong phai "khac 1". Cross-review luot 8 ha dung cho nay:
+    # `!= 1` cho qua CA 0 LAN 3 — nen mot ban sao THU BA dat truoc `_do_hook_cu` se
+    # tuoc rang `t88` ma ca nay VAN XANH. Mot ngoai le khai "dang no 2 cho" thi phai
+    # khoa o DUNG 2; moi con so khac deu la trang thai chua ai xet.
+    DA_BIET_TRUNG = {"hook_phien_bo_phep_so_nang_luc": 2}
     la = []
     for muc in DOT_BIEN:
         ten, cap = muc[0], muc[1]
         for c, _ in ([cap] if isinstance(cap, tuple) else cap):
             n = nguon.count(c)
-            if n != 1 and ten not in DA_BIET_TRUNG:
-                la.append((ten, n, c.splitlines()[0][:60]))
-    bang(not la, "mau dot bien khong khop DUNG MOT cho (chot dang nham sai cho, hoac "
-                 f"khong con cho nao de nham): {la}")
-    # ...va chinh muc DA BIET phai VAN con trung — neu no da duoc don thi phai xoa khoi
-    # danh sach cho phep, keo danh sach thanh loi khai CHET.
-    for ten in DA_BIET_TRUNG:
-        muc = next(mu for mu in DOT_BIEN if mu[0] == ten)
-        cap = [muc[1]] if isinstance(muc[1], tuple) else muc[1]
-        bang(any(nguon.count(c) != 1 for c, _ in cap),
-             f"`{ten}` khong con trung nua — go no khoi DA_BIET_TRUNG")
+            mong = DA_BIET_TRUNG.get(ten, 1)
+            if n != mong:
+                la.append((ten, f"dem={n} mong={mong}", c.splitlines()[0][:55]))
+    bang(not la, "mau dot bien khong khop dung so cho da khai (chot dang nham sai cho, "
+                 f"hoac ngoai le da doi so luong ma chua ai xet lai): {la}")
 
 
 @ca

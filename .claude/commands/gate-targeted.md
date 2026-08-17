@@ -14,6 +14,15 @@ Trình tự:
    tín hiệu.
 4. T2 review: tải artifact `gate-evidence-<OS>-<attempt>` của run `gate`; validate exact identity bằng runner dưới.
    Reviewer vẫn chạy adversarial probes và coverage-gap tests độc lập.
+   **PHẠM VI CỦA ARTEFACT ẤY — đọc trước khi trích nó làm chứng:** nó chứa bằng chứng của
+   **`selftest`**, không phải của cả tám cổng `/gate`. Các cổng còn lại (`workflow-audit`,
+   `golden`, `doc-claims`, `determinism`, `release-check`, `release-verify`, `gen_instructions`)
+   vẫn chạy trong CI nhưng KHÔNG đi qua `gate_lifecycle.py` nên không có evidence exact-identity
+   để tái dùng. Cần chứng cho những cổng đó thì phải chạy `/gate`.
+   Ghi phạm vi ra đây vì chính mục này từng mô tả một đường KHÔNG TỒN TẠI: trước đợt này không
+   có bước CI nào sinh hay tải lên artefact đó (P2 cross-review PR "#141"), nên người làm theo
+   rơi xuống nhánh dự phòng mà không hiểu vì sao. Nay bước sinh đã có — và phạm vi phải khai
+   đúng bằng phạm vi đo được, kẻo lại thay một lời khai sai bằng một lời khai quá tay.
 5. CI thiếu/red/stale, identity không khớp, hoặc packet thuộc fallback class ⇒ chạy `/gate`.
 
 Chạy một targeted suite có evidence (thay lệnh sau `--` bằng suite của packet):

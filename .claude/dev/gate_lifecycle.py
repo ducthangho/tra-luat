@@ -371,13 +371,74 @@ def _terminate_process_tree(proc: subprocess.Popen[Any], windows_job: _WindowsJo
                 check=False,
             )
     else:
+        # HẬU DUỆ RỜI NHÓM VẪN PHẢI CHẾT (P1 cross-review PR "#141").
+        #
+        # `killpg` chỉ với tới nhóm của đứa con gốc. Một cháu gọi `setsid()` hoặc
+        # `start_new_session=True` sang NHÓM MỚI và sống sót nguyên vẹn — rồi
+        # `_maybe_heavy_lock` nhả khoá trong khi nó vẫn ghi vào kho. Khoá mà nhả
+        # lúc thứ nó bảo vệ còn sống thì không phải khoá.
+        #
+        # Chụp cây TRƯỚC khi giết: nhóm chết xong, hậu duệ mồ côi được `init` nhận
+        # nuôi và quan hệ cha-con biến mất — chụp sau là chụp một cái cây đã bị cắt.
+        hau_due = _hau_due_posix(proc.pid)
         with contextlib.suppress(ProcessLookupError):
             os.killpg(proc.pid, signal.SIGTERM)
+        for q in hau_due:                       # kể cả đứa đã sang nhóm khác
+            with contextlib.suppress(ProcessLookupError, PermissionError):
+                os.kill(q, signal.SIGTERM)
         try:
             proc.wait(timeout=2)
         except subprocess.TimeoutExpired:
             with contextlib.suppress(ProcessLookupError):
                 os.killpg(proc.pid, signal.SIGKILL)
+        # "Đã gọi lệnh giết" ≠ "đã chết" — kiểm lại rồi mới nâng lên SIGKILL.
+        for q in hau_due:
+            if _con_song(q):
+                with contextlib.suppress(ProcessLookupError, PermissionError):
+                    os.kill(q, signal.SIGKILL)
+
+
+def _con_song(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True                             # có thật, chỉ là ta không với tới
+    return True
+
+
+def _hau_due_posix(pid: int) -> list[int]:
+    """Mọi hậu duệ của `pid`, KỂ CẢ đứa đã sang nhóm/session khác.
+
+    Dựng quan hệ cha-con từ `ps` (có trên mọi POSIX, không chỉ Linux như `/proc`).
+    Không đo được thì trả rỗng — phía gọi vẫn `killpg`, nên ta không tệ hơn bản cũ.
+    """
+    try:
+        p = subprocess.run(["ps", "-A", "-o", "pid=,ppid="],
+                           capture_output=True, text=True,
+                           stdin=subprocess.DEVNULL, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return []
+    if p.returncode != 0:
+        return []
+    con: dict[int, list[int]] = {}
+    for dong in (p.stdout or "").splitlines():
+        phan = dong.split()
+        if len(phan) < 2:
+            continue
+        try:
+            con.setdefault(int(phan[1]), []).append(int(phan[0]))
+        except ValueError:
+            continue
+    ra, hang, ta = [], list(con.get(pid, [])), os.getpid()
+    while hang:
+        q = hang.pop()
+        if q in ra or q == ta:                  # tuyệt đối không tự giết mình
+            continue
+        ra.append(q)
+        hang.extend(con.get(q, []))
+    return ra
 
 
 def _base_payload(args: argparse.Namespace, root: Path | None, identity: dict[str, Any]) -> dict[str, Any]:

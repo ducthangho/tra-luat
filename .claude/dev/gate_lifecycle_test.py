@@ -430,7 +430,7 @@ def case_timeout_kills_descendant_process() -> None:
 
 
 def case_interrupt_kills_tree_before_releasing_lock() -> None:
-    """Ctrl-C phải giết cây TRƯỚC khi nhả khoá heavy-gate.
+    """Ctrl-C phải giết cây TRƯỚC khi nhả khoá — KỂ CẢ cháu đã rời nhóm.
 
     Cross-review P1 trên PR "#141". Con nằm ở SESSION MỚI nên nó không nhận ngắt
     từ terminal — chỉ tiến trình cha nhận. Bản cũ chỉ bắt `TimeoutExpired`, nên
@@ -454,8 +454,13 @@ def case_interrupt_kills_tree_before_releasing_lock() -> None:
         evidence = root / "evidence.json"
         spawned = root / "spawned"
         survived = root / "descendant-survived"
+        # CHÁU RỜI NHÓM — đây mới là ca cần đo, và ca cũ của tôi KHÔNG đo nó.
+        # Cross-review nói thẳng: "the added test misses this because its descendant
+        # remains in the parent's process group". Đúng. `setsid()` đưa cháu sang
+        # session/nhóm MỚI, nên `killpg` của nhóm cha không với tới — nếu chốt chỉ
+        # `killpg` thì cháu này sống sót và ca phải ĐỎ.
         child_code = (
-            "import time; from pathlib import Path; time.sleep(2.5); "
+            "import os, time; from pathlib import Path; os.setsid(); time.sleep(2.5); "
             f"Path({str(survived)!r}).write_text('survived')"
         )
         parent_code = (

@@ -160,8 +160,34 @@ jobs:
         run: python .github/checks/bundle_fragment_check.py --json
       - name: gen_instructions selftest
         run: python scripts/gen_instructions.py --selftest
-      - name: tl selftest
-        run: python scripts/tl.py --selftest
+      # BỌC selftest qua `gate_lifecycle.py run` thay vì gọi thẳng — KHÔNG thêm lượt
+      # chạy nào, chỉ thêm bằng chứng. Vì sao cần: `.claude/commands/gate-targeted.md`
+      # bước 4 bảo reviewer tải artifact `gate-evidence-<OS>-<attempt>` để tái dùng
+      # thay cho một lượt full local, mà TRƯỚC ĐỢT NÀY không có gì trong CI sinh ra nó
+      # (P2 cross-review PR "#141"). Tài liệu mô tả một đường không tồn tại thì người
+      # làm theo sẽ rơi xuống nhánh dự phòng mà không hiểu vì sao — cùng họ "cổng
+      # không nói dối, nó VẮNG MẶT".
+      # `--positive-regex` đòi N/N hai số BẰNG NHAU: rc=0 một mình không phải bằng chứng.
+      - name: tl selftest (co bang chung exact-identity)
+        run: |
+          mkdir -p scripts/.tl_state/gate
+          python .claude/dev/gate_lifecycle.py run \
+            --kind heavy --name selftest --repo . \
+            --evidence scripts/.tl_state/gate/selftest.json \
+            --output scripts/.tl_state/gate/selftest.out \
+            --expected-head "$GITHUB_SHA" --base-sha "$GITHUB_SHA" --require-clean \
+            --selected-test selftest \
+            --wait-seconds 60 --timeout-seconds 2400 \
+            --positive-regex '(?m)^.*\b([1-9][0-9]*)/\1\b[^\r\n]*\r?\n?\Z' \
+            -- python scripts/tl.py --selftest
+      # `if: always()` — bằng chứng của một lượt ĐỎ còn đáng tải hơn của lượt xanh.
+      - name: tai len gate-evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-evidence-${{ matrix.os }}-${{ github.run_attempt }}
+          path: scripts/.tl_state/gate/
+          if-no-files-found: warn
       - name: workflow-audit strict
         run: python scripts/tl.py workflow-audit --strict --json
       - name: golden-test

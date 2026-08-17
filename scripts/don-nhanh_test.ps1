@@ -95,7 +95,7 @@ function Dung-Gh-Gia {
     # nen `$null -ne $ThoNguyen` LUON dung va moi ca se dung nhanh "in tho" — do duoc: ca ba
     # ca binh thuong (t1 t2 t3) dot ngot doi rc=13 vi `gh` gia in RONG o KHAP NOI. Dung
     # `$PSBoundParameters` de phan biet "khong truyen" voi "truyen chuoi rong".
-    param([object[]]$PR, [int]$Ma = 0, [string]$ThoNguyen)
+    param([object[]]$PR, [int]$Ma = 0, [string]$ThoNguyen, [string]$CanhBaoStderr)
     $d = Join-Path ([System.IO.Path]::GetTempPath()) ("gh-" + [guid]::NewGuid().ToString('N').Substring(0, 10))
     New-Item -ItemType Directory -Path $d -Force | Out-Null
     # `ConvertTo-Json` tren mang RONG cho "[]" — dung thu that `gh` tra ve.
@@ -103,6 +103,10 @@ function Dung-Gh-Gia {
             else { ConvertTo-Json -InputObject @($PR) -Compress -Depth 5 }
     $p = Join-Path $d 'gh'
     $dong = @("#!/bin/sh")
+    # stderr NGUYEN VAN — `gh` that hay in canh bao cap nhat phien ban ra day.
+    if ($PSBoundParameters.ContainsKey('CanhBaoStderr')) {
+        $dong += "printf '%s\n' '$($CanhBaoStderr -replace "'", "'\''")' >&2"
+    }
     if ([string]::IsNullOrEmpty($than)) { $dong += ":" }
     else { $dong += @("cat <<'JSONEOF'", $than, "JSONEOF") }
     $dong += "exit $Ma"
@@ -287,6 +291,39 @@ ca 't13_gh_rc0_JSON_hop_le_thi_VAN_xoa_binh_thuong' {
     $con = Nhanh-Tren-Remote $k
     bang ($r.rc -eq 0) "rc=$($r.rc), doi 0. Ra:`n$($r.ra)"
     bang (-not ($con -contains 'ops/xong-viec')) "duong binh thuong khong xoa duoc gi — chot moi da chan oan"
+}
+
+ca 't14_gh_in_CANH_BAO_stderr_kem_JSON_hop_le_thi_VAN_chay' {
+    # HOI QUY DO CROSS-REVIEW LUOT 2 BAT (#150). Ban truoc gop `2>&1` roi noi tat ca lai,
+    # nen mot dong canh bao cua `gh` lam chuoi thanh "[]\nwarning-…" va `ConvertFrom-Json`
+    # chet -> THAO TAC HOP LE BI TU CHOI. `gh` that in canh bao cap nhat phien ban rat
+    # thuong xuyen, nen day khong phai ca hiem.
+    #
+    # Do CA HAI ve: base cua PR dang mo phai duoc GIU (tuc danh sach PR doc duoc THAT),
+    # va nhanh rac phai bi XOA (tuc khong bi tu choi oan).
+    $k = Dung-Kho
+    Them-Nhanh $k 'nen/tichhop' $true
+    Them-Nhanh $k 'ops/rac' $true
+    $gh = Dung-Gh-Gia -PR @(@{ headRefName = 'con/x'; baseRefName = 'nen/tichhop' }) `
+                      -CanhBaoStderr 'warning: a new release of gh is available'
+    $r = Chay-KichBan $k $gh @('-Xoa')
+    $con = Nhanh-Tren-Remote $k
+    bang ($r.rc -eq 0) "rc=$($r.rc), doi 0 — canh bao stderr lam thao tac hop le bi tu choi. Ra:`n$($r.ra)"
+    bang ($con -contains 'nen/tichhop') "BASE bi xoa: danh sach PR khong doc duoc that. Con lai: $($con -join ', ')"
+    bang (-not ($con -contains 'ops/rac')) "nhanh rac khong bi xoa. Con lai: $($con -join ', ')"
+}
+
+ca 't15_gh_in_CANH_BAO_stderr_NHUNG_thoat_khac_0_thi_VAN_TU_CHOI' {
+    # Chot chong "vá qua tay theo chieu nguoc lai": tach luong stderr KHONG duoc lam mat
+    # phep kiem ma thoat. Neu ai do sua thanh "bo qua stderr" roi lo luon rc thi ca nay do.
+    $k = Dung-Kho
+    Them-Nhanh $k 'ops/xong-viec' $true
+    $truoc = Nhanh-Tren-Remote $k
+    $gh = Dung-Gh-Gia -PR @() -Ma 1 -CanhBaoStderr 'warning: rate limit gan het'
+    $r = Chay-KichBan $k $gh @('-Xoa')
+    $sau = Nhanh-Tren-Remote $k
+    bang ($r.rc -eq 13) "rc=$($r.rc), doi 13. Ra:`n$($r.ra)"
+    bang (($truoc -join ',') -eq ($sau -join ',')) "CO nhanh bi xoa du gh thoat khac 0"
 }
 
 # ---------------------------------------------------------------- chạy

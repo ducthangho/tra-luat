@@ -174,14 +174,27 @@ if (Get-Command gh -ErrorAction SilentlyContinue) {
         # Chinh ham `Chay-Git` phia tren da dan dung dieu nay ("dung `$LASTEXITCODE` sau mot
         # pipeline") va loi goi nay vi pham no. Mot loi dan chi bao ve doan ma no duoc VIET
         # RA, khong bao ve doan ke ben.
-        $tho = & gh pr list --state open --limit 200 --json headRefName,baseRefName 2>&1
+        $het = & gh pr list --state open --limit 200 --json headRefName,baseRefName 2>&1
         $ghRc = $LASTEXITCODE
-        if ($ghRc -ne 0) { throw "gh thoat rc=$ghRc : $($tho -join ' ')" }
+        # TACH HAI LUONG THEO KIEU, khong nem chung vao mot chuoi.
+        #
+        # Hoi quy cua cross-review luot 2 (#150), da CHAY: ban truoc gop `2>&1` roi noi tat
+        # ca lai, nen mot dong CANH BAO cua `gh` tren stderr (vi du "a new release of gh is
+        # available") lam chuoi thanh "[]\nwarning-…" va `ConvertFrom-Json` chet — tuc mot
+        # thao tac HOP LE bi tu choi. Va mot lo roi mo lo khac trong cung ham; day la hinh
+        # dang loi CLAUDE.md da ghi o writer "nguyen tu".
+        #
+        # PowerShell gan nhan ErrorRecord cho dong stderr cua lenh native, nen loc theo KIEU
+        # tach sach — DA DO tren pwsh 7.4.6: gh in canh bao + `[]`, rc=0 => 2 dong (1 loi,
+        # 1 stdout), stdout noi lai = "[]", parse OK. Giu van ban loi de con chan doan.
+        $loiGh = @($het | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] })
+        $raGh  = @($het | Where-Object { -not ($_ -is [System.Management.Automation.ErrorRecord]) })
+        if ($ghRc -ne 0) { throw "gh thoat rc=$ghRc : $(($loiGh + $raGh) -join ' ')" }
         # RONG cung la KHONG DO DUOC. `gh` chay dung phai in `[]` khi khong co PR nao; rc=0
         # kem dau ra rong la bat thuong, khong phai "khong co PR". Doctrine `rc=0 ma stdout
         # RONG` cua kho: chi kiem rc la lot.
-        $vanBan = ($tho -join "`n").Trim()
-        if ([string]::IsNullOrWhiteSpace($vanBan)) { throw 'gh rc=0 nhung dau ra RONG' }
+        $vanBan = ($raGh -join "`n").Trim()
+        if ([string]::IsNullOrWhiteSpace($vanBan)) { throw 'gh rc=0 nhung STDOUT rong' }
         $js = ConvertFrom-Json $vanBan
         # `ConvertFrom-Json` tra $null khi mang rong, va mot phan tu don KHONG phai mang.
         # Ep [object[]] de hai truong hop bien do khong lam `.headRefName` no ra sai.

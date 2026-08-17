@@ -3481,6 +3481,320 @@ def t103_nam_finding_cua_bot_review_PR128():
 
 
 @ca
+def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
+    """Đường MCP — đường kho THẬT SỰ dùng — phải được ĐO, và đo đúng phạm vi.
+
+    VÌ SAO CÓ CA NÀY. `_do_github` đo `git`/`gh`/`rest` nhưng KHÔNG đo MCP; docstring
+    của nó LIỆT KÊ "công cụ MCP github CHẠY" như dữ kiện — một quan sát đóng băng
+    trong chú thích, không phải phép đo chạy mỗi lượt. Đúng lớp bệnh mà chính hàm ấy
+    vừa chữa cho `rest` ("có thể bị chặn" không phải phép đo).
+
+    Ca này khoá năm điều, và mỗi điều là một finding đã trả giá qua sáu lượt cross-review:
+      1. `mcp` KHÔNG được nằm trong `LAM_DUOC_VIEC` — CLI duyệt server không chứng
+         minh PHIÊN gọi được `mcp__github__*`
+      2. đọc `.mcp.json`: khớp tên CHÍNH XÁC, kiểm kiểu BA TẦNG, từ chối khi MƠ HỒ
+      3. hỏi CLI bằng ĐÚNG tên đã khai (CLI phân biệt hoa/thường, `rc=0` cả khi
+         không tìm thấy)
+      4. `Status:` lấy bản ĐẦU TIÊN — nội dung `.mcp.json` chèn được bản GIẢ phía sau
+      5. trạng thái LẠ -> `khong_do_duoc`, và nó phải kết xuất KHÁC `hong`
+    """
+    import json as _json
+    m = _tai_launcher_thu()
+
+    # (1) `mcp` KHONG duoc tinh la "lam duoc viec". Doc THANG ma nguon: mot ca doc
+    #     bang cach goi `_do_github` roi suy tu nhan se khong phan biet duoc "mcp
+    #     khong tinh" voi "mcp tinh nhung tinh co dang hong".
+    nguon = Path(m.__file__).read_text(encoding="utf-8")
+    khoi = nguon[nguon.index("LAM_DUOC_VIEC = {"):]
+    khoi = khoi[:khoi.index("}") + 1]
+    bang('"mcp"' not in khoi and "'mcp'" not in khoi,
+         f"`mcp` bi tinh vao LAM_DUOC_VIEC — CLI duyet server KHONG chung minh PHIEN "
+         f"goi duoc cong cu: {khoi!r}")
+    for phai_co in ("git", "gh-kho", "rest-kho"):
+        bang(phai_co in khoi, f"LAM_DUOC_VIEC thieu duong `{phai_co}`: {khoi!r}")
+
+    # (1b) `rest-kho` khi KHONG DOC DUOC SLUG phai day co `None`, khong phai `False`.
+    #      Chi tiet cua chinh dong ay tu khai "KHONG DO DUOC" — de co `False` thi nhan
+    #      in ra `rest-kho=khong`, tuc noi NGUOC voi chi tiet ngay canh no. Doc THANG
+    #      ma nguon vi goi `_do_github` that se cham mang.
+    # ĐO HÀNH VI, không dò chuỗi nguồn. Bản trước chỉ tìm `'("rest-kho", None, …' in
+    # nguon` — cross-review lượt 8 hạ đúng: giữ chuỗi ấy trong một comment rồi để hành
+    # vi thật trả `False` thì ca vẫn xanh. Một phép kiểm NGUỒN không chứng minh HÀNH VI.
+    goc_rest, goc_git = m._do_rest_github, m._git
+    goc_run_g, goc_which_g = m.subprocess.run, m.shutil.which
+
+    def git_gia(ws, *a, **k):
+        if a[:2] == ("remote", "get-url"):
+            return (0, "https://gitlab.example/khong-phai-github/x.git", "")
+        return (1, "", "")
+
+    class _Rc0:
+        returncode, stdout, stderr = 1, "", ""
+
+    # PHẢI GIẢ CẢ `subprocess.run`, KHÔNG chỉ giả `_git`/`_do_rest_github`.
+    # ĐÃ TRẢ GIÁ: bản đầu của khối này để `_do_github` chạy THẬT `gh auth status` với
+    # `env={}` — không HOME, không PATH — nên trên runner (nơi CÓ `gh`) `gh` ghi
+    # `.local/` vào chính cây làm việc và bước "cây phải sạch" của `launcher-windows`
+    # ĐỎ trên CẢ ubuntu LẪN windows (`BAN: ?? .local/`). Ở máy dev thì XANH, vì máy dev
+    # KHÔNG cài `gh` nên nhánh ấy không chạy — đúng bệnh "ca đo MÁY chứ không đo HỢP
+    # ĐỒNG" mà chuỗi review này đã gặp năm lần, lần này ở chiều ngược: ca chỉ HỎNG ở nơi
+    # công cụ CÓ MẶT. Không lời đọc mã nào bắt được; chỉ lượt chạy thật trên runner.
+    m._do_rest_github = lambda *a, **k: ("mo", "gia", True)
+    m._git = git_gia
+    m.shutil.which = lambda t, *a, **k: None      # không đường phụ nào được gọi
+    m.subprocess.run = lambda *a, **k: _Rc0()     # và nếu có, nó KHÔNG ra tiến trình thật
+    try:
+        with tempfile.TemporaryDirectory() as td_g:
+            _tt, mo_ta_g = m._do_github(td_g, {})
+    finally:
+        m._do_rest_github, m._git = goc_rest, goc_git
+        m.subprocess.run, m.shutil.which = goc_run_g, goc_which_g
+    bang("rest-kho=chua-do-duoc" in mo_ta_g,
+         f"khong doc duoc slug thi `rest-kho` phai la CHUA DO DUOC, khong phai `khong` "
+         f"(da do va hong): {mo_ta_g!r}")
+
+    # (5) BA trang thai phai ket xuat KHAC NHAU — `None` != `False`.
+    bang([m._nhan_duong(v) for v in (True, False, None)] == ["OK", "khong", "chua-do-duoc"],
+         "ket xuat khong phan biet du ba trang thai cua mot duong")
+
+    KHOE = "github:\n  Scope: User config\n  Status: √ Connected\n  Type: stdio\n"
+    PENDING = ("github:\n  Scope: Project config (shared via .mcp.json)\n"
+               "  Status: ⏸ Pending approval (run `claude` to approve)\n")
+
+    goc_run, goc_which = m.subprocess.run, m.shutil.which
+    mcp_out, co_claude, nhat_ky = [KHOE], [True], []
+    ten_mong_doi = ["github"]
+    ENV_SENTINEL = [None]        # dat khi ca TU truyen env; None = goi theo mac dinh
+
+    class Rc:
+        def __init__(self, rc, out=""):
+            self.returncode, self.stdout, self.stderr = rc, out, ""
+
+    def dac_ta():
+        return (("claude", "mcp", "get", ten_mong_doi[0]),
+                {"capture_output": True, "text": True, "timeout": m.PROBE_TIMEOUT_GIAY})
+
+    def gia_run(cmd, *_a, **_k):
+        if list(cmd)[:2] != ["claude", "mcp"]:
+            return Rc(1)                       # gh/git: ngoai pham vi ca nay
+        # DO GIA TU TU CHOI loi goi lech dac ta — chot TOAN PHAN, khong opt-in. Bon
+        # luot cross-review lien tiep tim duoc dot bien song sot o dung lop nay, va
+        # ca bon lan vi ca test cham diem le te nhung gi nguoi va NGHI RA phai dung,
+        # tuc mot danh sach CAM. Nay dao thanh danh sach CHO PHEP.
+        thay = (tuple(cmd), {k: v for k, v in _k.items() if k != "env" and k != "stdin"})
+        nhat_ky.append(thay)
+        bang(thay == dac_ta(), f"loi goi `claude` lech dac ta\n  mong: {dac_ta()!r}\n  do  : {thay!r}")
+        # KIEM GIA TRI, khong chi kiem KHOA CO MAT. Cross-review luot 7 tim duoc dot
+        # bien thu NAM cua lop "do DO GIA" o dung day: `env=moi_truong -> env=None`
+        # SONG SOT, vi chot chi hoi `"env" in _k`. Ma `subprocess.run(env=None)` ke
+        # thua `os.environ` THO — dung lop P2 ma #143 da va.
+        bang(_k.get("env") is not None,
+             f"env=None se ke thua os.environ THO (bien giu cho!) — kwargs={_k!r}")
+        # ...va phai DUNG object da truyen. Doi "la dict" thoi thi mot ban va bo qua
+        # tham so roi lay `os.environ` van qua — `os.environ` cung la dict. Dot bien
+        # `env_da_chuan_tra_ve_os_environ_THO` SONG SOT dung mot luot vi le do.
+        if ENV_SENTINEL[0] is not None:
+            bang(_k["env"] is ENV_SENTINEL[0],
+                 f"env KHONG phai object da truyen — tham so bi bo qua? {_k['env']!r}")
+        bang(_k.get("stdin") is not None, "phai dong stdin, kheo CLI treo cho nhap")
+        return Rc(0, mcp_out[0])
+
+    m.shutil.which = lambda t, *a, **k: (
+        ("/usr/bin/claude" if co_claude[0] else None) if t == "claude"
+        else None if t == "gh" else goc_which(t, *a, **k))
+    m.subprocess.run = gia_run
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            def do(mong_goi=1, vi_tri=""):
+                nhat_ky.clear()
+                kq = m._doc_mcp_json(td)
+                if kq[0]:
+                    ENV_SENTINEL[0] = {"TL_ENV_DA_CHUAN": "1"}
+                    kq = (kq[0], kq[1], kq[2],
+                          m._suc_khoe_mcp_github(kq[2], ENV_SENTINEL[0]))
+                bang(len(nhat_ky) == mong_goi,
+                     f"[{vi_tri}] mong {mong_goi} loi goi `claude`, do {len(nhat_ky)}")
+                return kq
+
+            def ghi(o):
+                (Path(td) / ".mcp.json").write_text(_json.dumps(o), encoding="utf-8")
+
+            # (2) LUOC DO — moi hinh dang duoi day tung duoc tinh la "da khai server"
+            for xau in ([], {"mcpServers": ["github"]}, {"mcpServers": "github"},
+                        {"mcpServers": {"github": None}}, {"mcpServers": {"github": "x"}},
+                        {"mcpServers": {"not-github-backup": {}}},
+                        {"mcpServers": None, "servers": {"github": {}}},
+                        {"mcpServers": {}, "servers": {"github": {}}},
+                        "mcpServers", 7):
+                ghi(xau)
+                co, mo_ta, ten = do(0, f"luoc do {xau!r}")
+                bang(not co and ten is None, f"luoc do sai {xau!r} ma tinh la da khai: {mo_ta!r}")
+            bang("[workspace]" in mo_ta, f"khong khai doc o goc nao: {mo_ta!r}")
+
+            # ...JSON HONG CU PHAP: phai bat, khong duoc nem ra ngoai. (Ca nay tung bi
+            # bo quen luc viet lai t115 cho ban hoa nhap, va dot bien
+            # `mcp_bo_bat_loi_json_hong` SONG SOT dung mot luot vi the.)
+            (Path(td) / ".mcp.json").write_text("{khong phai json", encoding="utf-8")
+            co, mo_ta, ten = do(0, "json hong cu phap")
+            bang(not co and ten is None, f".mcp.json hong ma tinh la da khai: {mo_ta!r}")
+
+            # ...THIEU HAN tep
+            (Path(td) / ".mcp.json").unlink()
+            co, mo_ta, ten = do(0, "thieu .mcp.json")
+            bang(not co and ten is None, f"thieu .mcp.json ma tinh la da khai: {mo_ta!r}")
+
+            # ...MO HO thi TU CHOI, va khong duoc phu thuoc THU TU KHOA JSON
+            for thu_tu in ({"github": {}, "GitHub": {}}, {"GitHub": {}, "github": {}}):
+                ghi({"mcpServers": thu_tu})
+                co, mo_ta, _ = do(0, f"mo ho {list(thu_tu)}")
+                bang(not co and "MO HO" in mo_ta, f"hai ten khop casefold ma nhan: {mo_ta!r}")
+
+            # (3) HOI BANG DUNG TEN DA KHAI — CLI phan biet hoa/thuong
+            ghi({"mcpServers": {"GitHub": {}}})
+            ten_mong_doi[0] = "GitHub"
+            *_, (tt, _mo) = do(1, "ten hoa/thuong")
+            bang(tt == "khoe", f"ten `GitHub` ma tra {tt}")
+            ten_mong_doi[0] = "github"
+
+            ghi({"mcpServers": {"github": {}}})
+            # ...va dau ra "khong tim thay" (rc=0!) phai la KHONG DO DUOC
+            mcp_out[0] = 'No MCP server named "github". Did you mean "GitHub"?\n'
+            *_, (tt, mo) = do(1, "khong tim thay")
+            bang(tt == "khong_do_duoc", f"dau ra khong-tim-thay (rc=0) ma tra {tt}: {mo!r}")
+
+            # (4) `Status:` GIA do `.mcp.json` chen — phai doc ban DAU TIEN
+            mcp_out[0] = ("github:\n  Scope: User config\n"
+                          "  Status: × Failed to connect\n  Issue: ENOENT\n"
+                          "  Type: stdio\n  Command: /bin/echo\n  Args: x\n"
+                          "  Status: √ Connected\ny\n")
+            *_, (tt, mo) = do(1, "chen Status gia")
+            bang(tt == "hong" and "Failed to connect" in mo,
+                 f"doc phai `Status:` GIA do .mcp.json chen: {tt} {mo!r}")
+
+            # (5) TRANG THAI XAU / LA / TOT
+            for xau, mong in (("⏸ Pending approval (run `claude` to approve)", "hong"),
+                              ("× Failed to connect", "hong"),
+                              ("Disconnected", "hong"), ("not connected", "hong"),
+                              ("√ Connected", "khoe"), ("Connected", "khoe"),
+                              ("\x1b[32mConnected\x1b[0m", "khoe"),
+                              ("Connected (stale)", "khong_do_duoc"),
+                              ("Connected - 3 tools", "khong_do_duoc"),
+                              ("Reconnecting", "khong_do_duoc")):
+                mcp_out[0] = f"github:\n  Status: {xau}\n"
+                *_, (tt, mo) = do(1, f"trang thai {xau!r}")
+                bang(tt == mong, f"trang thai {xau!r}: mong {mong}, do {tt} ({mo!r})")
+
+            # GOI THANG THEO MAC DINH (khong truyen env) — ham phai TU chuan hoa,
+            # khong duoc de `None` roi xuong `subprocess.run`. Day la duong ma
+            # cross-review luot 7 chi ra: chot phai bao ve HOP DONG, khong dua vao
+            # viec moi call-site deu nho truyen env.
+            ghi({"mcpServers": {"github": {}}})
+            mcp_out[0] = KHOE
+            nhat_ky.clear()
+            ENV_SENTINEL[0] = None
+            tt, _mo = m._suc_khoe_mcp_github("github")
+            bang(tt == "khoe", f"goi thang theo mac dinh ma tra {tt}")
+
+            # ...khong co `claude` de hoi -> KHONG DO DUOC, va KHONG duoc goi gi
+            co_claude[0] = False
+            mcp_out[0] = KHOE
+            *_, (tt, _mo) = do(0, "khong co claude")
+            bang(tt == "khong_do_duoc", f"khong co `claude` ma tra {tt}")
+            co_claude[0] = True
+    finally:
+        m.subprocess.run, m.shutil.which = goc_run, goc_which
+
+
+@ca
+def t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho():
+    """Mẫu tìm-thay của MỖI đột biến phải khớp ĐÚNG MỘT chỗ trong `launcher.py`.
+
+    VÌ SAO CÓ CA NÀY — nó chặn một cách làm hỏng chốt mà KHÔNG sửa dòng nào của ai.
+    `chay_dot_bien` thay chỗ khớp ĐẦU TIÊN. Nên nếu mã mới TRÙNG CHỮ với đoạn mà một
+    đột biến cũ đang nhắm, VÀ đứng trước nó, thì đột biến ấy lặng lẽ nhảy sang bản sao:
+    ca đích không chết nữa, mà bảng vẫn báo "đạt".
+
+    ĐÃ XẢY RA THẬT trong chính đợt này: khối chuẩn hoá env chép vào
+    `_suc_khoe_mcp_github` trùng khít với khối của `_do_github` và đứng trước nó ⇒
+    `probe_github_bo_qua_moi_truong_chuan_hoa` (đột biến CÓ SẴN, canh `t113`) SỐNG SÓT.
+    Không dòng logic nào sai; chốt chỉ mất răng vì trùng chữ. Chữa bằng `_env_da_chuan`,
+    và chốt NÀY để lần sau không phải trông vào việc ai đó tình cờ chạy đột biến rồi
+    đọc kỹ dòng `SAI`.
+
+    Đây là ca đo CÔNG CỤ ĐO, không đo `launcher.py` — cùng họ với `t116`.
+
+    GIỚI HẠN — cùng phạm vi phải khai như `t116`, và cross-review lượt 8 đúng khi bảo
+    lời khai cũ ("cùng họ với `t116`") HẸP HƠN thứ cần công bố. Nói cho đủ: ca này lấy
+    CẢ đặc tả (`DOT_BIEN` và `DA_BIET_TRUNG` ngay trong tệp test) LẪN bằng chứng
+    (`launcher.py`) từ những tệp mà một thay đổi PHỐI HỢP sửa được cùng lúc — thêm một
+    bản sao rồi nới `DA_BIET_TRUNG` cho khớp thì ca vẫn xanh. Nó chặn được việc TÌNH CỜ
+    dựng ra chỗ trùng (đúng ca đã xảy ra thật), KHÔNG chặn được sửa đổi có chủ ý. Muốn
+    chặn thì phải neo kỳ vọng ở NGUỒN ĐỘC LẬP; chưa làm, và không khai là đã làm.
+    """
+    from pathlib import Path as _P
+    nguon = _P(LAUNCHER).read_text(encoding="utf-8")
+    # DANH SÁCH CHO PHÉP, không phải danh sách cấm: nêu đích danh chỗ ĐÃ BIẾT là trùng,
+    # kèm lý do. Bất cứ chỗ trùng nào KHÁC đều làm ca này ĐỎ.
+    #
+    # `hook_phien_bo_phep_so_nang_luc` trùng 2 chỗ — `_do_hook_cu` và `_do_launcher_cu`
+    # có cùng dòng `thieu = sorted(cua_master - dang_co)`. ĐO ĐƯỢC: nợ này CÓ SẴN trên
+    # master `c7ad260`, KHÔNG phải do bản vá MCP tạo ra. Nó đang LATENT chứ chưa hỏng:
+    # ca đích (`t88`) nói về HOOK, và `_do_hook_cu` tình cờ đứng TRƯỚC — tức chốt đang
+    # đúng NHỜ THỨ TỰ, không nhờ thiết kế. Dọn nó là thay đổi RIÊNG (đụng mã của #143);
+    # ghi ra đây để nó không nằm im mà không ai biết.
+    # KHOA DUNG SO LUONG, khong phai "khac 1". Cross-review luot 8 ha dung cho nay:
+    # `!= 1` cho qua CA 0 LAN 3 — nen mot ban sao THU BA dat truoc `_do_hook_cu` se
+    # tuoc rang `t88` ma ca nay VAN XANH. Mot ngoai le khai "dang no 2 cho" thi phai
+    # khoa o DUNG 2; moi con so khac deu la trang thai chua ai xet.
+    DA_BIET_TRUNG = {"hook_phien_bo_phep_so_nang_luc": 2}
+    la = []
+    for muc in DOT_BIEN:
+        ten, cap = muc[0], muc[1]
+        for c, _ in ([cap] if isinstance(cap, tuple) else cap):
+            n = nguon.count(c)
+            mong = DA_BIET_TRUNG.get(ten, 1)
+            if n != mong:
+                la.append((ten, f"dem={n} mong={mong}", c.splitlines()[0][:55]))
+    bang(not la, "mau dot bien khong khop dung so cho da khai (chot dang nham sai cho, "
+                 f"hoac ngoai le da doi so luong ma chua ai xet lai): {la}")
+
+
+@ca
+def t116_moi_ham_ca_phai_duoc_DANG_KY_bang_decorator():
+    """Mọi `def tNN_...` phải có `@ca` ngay trên nó — nếu không, ca ấy KHÔNG CHẠY.
+
+    VÌ SAO CÓ CA NÀY: tôi vừa tự gây ra đúng lỗi ấy khi chèn `t115`. Điểm chèn rơi vào
+    GIỮA `@ca` và `def t101_...`, nên decorator của `t101` quay sang trang trí `t115`:
+    một ca được thêm, một ca lặng lẽ MẤT. Suite vẫn in `114/114` — hai số BẰNG NHAU,
+    đúng thứ kho dạy là dấu hiệu tin được — mà thật ra tổng đã tụt một.
+
+    Đó là bệnh `t24` của kho ("ca CÓ MẶT khác ca có ĐO") ở một mặt khác: ca có mặt
+    trong TỆP, chạy được bằng `--lap-ca`, thậm chí giết được đột biến (vì bộ đột biến
+    gọi ca THEO TÊN chứ không qua `CA`) — nhưng suite thì không bao giờ chạy nó. Không
+    phép đo nào của lượt chạy thường nhìn thấy chỗ mất ấy.
+
+    Chốt này rẻ và tất định: đọc chính tệp này, đếm hai thứ, đòi bằng nhau.
+
+    GIỚI HẠN — KHAI THẲNG, vì cross-review lượt 7 CHỨNG MINH ĐƯỢC chứ không phải suy:
+    chốt lấy CẢ đặc tả LẪN bằng chứng từ cùng một tệp, nên một thay đổi PHỐI HỢP (gỡ
+    `@ca` của `t115` ĐỒNG THỜI sửa bộ quét cho bỏ qua `def t115_`) vẫn qua. Nó bắt được
+    lỗi VÔ TÌNH mất decorator — đúng ca đã xảy ra thật — chứ không chống được sửa đổi có
+    chủ ý. Muốn chống tự-lừa phải neo danh sách ca ở NGUỒN ĐỘC LẬP; chưa làm, và không
+    khai là đã làm.
+    """
+    import re as _re
+    dong = Path(__file__).read_text(encoding="utf-8").splitlines()
+    ham = [(i, l) for i, l in enumerate(dong) if _re.match(r"^def t\d+_", l)]
+    thieu = [l.split("(")[0][4:] for i, l in ham if i == 0 or dong[i - 1].strip() != "@ca"]
+    bang(not thieu, f"ca co mat trong TEP ma KHONG duoc dang ky (thieu `@ca`): {thieu}")
+    # ...va so ca DA DANG KY phai khop so ham. Hai phep dem doc lap: mot doc TEP, mot
+    # doc bang `CA` da nap. Lech nhau nghia la co ca bi trang tri hai lan, hoac co
+    # `@ca` gan cho thu khong phai ca.
+    bang(len(ham) == len(CA),
+         f"{len(ham)} ham `tNN_` nhung `CA` co {len(CA)} muc — co cho dang ky lech")
+
+
+@ca
 def t101_phan_tich_doi_so_phai_do_NGAY_khong_doi_chay_het_suite():
     """Công cụ chẩn đoán dễ xanh giả thì tệ hơn không có.
 
@@ -4368,6 +4682,73 @@ DOT_BIEN = [
     ("chup_cay_fail_closed_ca_may",
      ('        for q in list(ra):', '        for q in list(tt):'),
      ["t81_chup_cay_windows_thieu_creationdate_phai_fail_closed"]),
+    # --- MƯỜI SÁU ĐỘT BIẾN CHO ĐƯỜNG MCP -------------------------------------------
+    # Chúng đến từ SÁU lượt cross-review, và phần lớn từng SỐNG SÓT một lần — nên
+    # chúng ở đây để cái lỗ ấy không âm thầm hở lại. Ba nhóm: `.mcp.json` · bộ phân
+    # loại trạng thái · hợp đồng subprocess.
+    ("mcp_tinh_vao_LAM_DUOC_VIEC",
+     ('    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho"}',
+      '    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho", "mcp"}'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_ket_xuat_gop_chua_do_duoc_thanh_hong",
+     ('    return "chua-do-duoc" if ok is None else ("OK" if ok else "khong")',
+      '    return "OK" if ok else "khong"'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_ten_server_khop_chuoi_con",
+     ('k.casefold() == "github"', '"github" in k.casefold()'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_ten_server_phan_biet_hoa_thuong",
+     ('k.casefold() == "github"', 'k == "github"'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_bo_bat_loi_json_hong",
+     ('    except (OSError, ValueError) as e:\n        return False, f".mcp.json',
+      '    except OSError as e:\n        return False, f".mcp.json'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_bo_kiem_kieu_goc",
+     ('    if not isinstance(d, dict):', '    if False:'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_bo_kiem_kieu_bang_server",
+     ('    if not isinstance(srv, dict):', '    if False:'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_bo_kiem_kieu_gia_tri_server",
+     ('    xau = [k for k in ten if not isinstance(srv[k], dict)]', '    xau = []'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_servers_che_khuat_mcpServers_sai_kieu",
+     ('    for khoa in ("mcpServers", "servers"):\n        if khoa in d:\n'
+      '            srv = d[khoa]\n            break\n    else:',
+      '    srv = d.get("mcpServers") or d.get("servers") or {}\n    khoa = "mcpServers"\n'
+      '    if False:'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_chon_ten_theo_thu_tu_khoa_JSON",
+     ('    if len(ten) > 1:', '    if False:'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_suc_khoe_do_chuoi_con_ca_dong",
+     ('    if chuan in _MCP_KHOE:',
+      '    thap = (r.stdout or "").casefold()\n'
+      '    if "connected" in thap and "not connected" not in thap:'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_suc_khoe_khop_TIEN_TO_thay_vi_bang_dung",
+     ('    if chuan in _MCP_KHOE:', '    if chuan.startswith(_MCP_KHOE):'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_trang_thai_LA_bi_doan_thanh_hong",
+     ('    return ("khong_do_duoc", f"trang thai LA, chua tung do: Status: {tho}")',
+      '    return ("hong", f"trang thai LA, chua tung do: Status: {tho}")'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_doc_Status_CUOI_thay_vi_DAU",
+     ('    kq = _RE_STATUS.search(_RE_ANSI.sub("", r.stdout or ""))',
+      '    _ds = list(_RE_STATUS.finditer(_RE_ANSI.sub("", r.stdout or "")))\n'
+      '    kq = _ds[-1] if _ds else None'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_hoi_ten_dung_san_thay_vi_ten_da_khai",
+     ('        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True, text=True,',
+      '        r = subprocess.run(["claude", "mcp", "get", "github"], capture_output=True, text=True,'),
+     ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    # ĐỘT BIẾN CỦA REVIEWER LƯỢT 7 — lượt thứ NĂM của lớp "đo đồ giả", và là lượt đầu
+    # tìm được sau khi chốt đã đảo thành danh sách CHO PHÉP. Giữ cả hai chiều: bỏ chuẩn
+    # hoá trong hàm, và ép `env=None` ở lời gọi.
+    ("mcp_bo_chuan_hoa_env_trong_ham",
+     ('    moi_truong = _env_da_chuan(moi_truong)\n    try:', '    try:'),
+     ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("env_da_chuan_tra_ve_os_environ_THO",
+     ('    if mt is not None:\n        return mt', '    if False:\n        return mt'),
+     ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_ep_env_None_o_loi_goi",
+     ('                           env=moi_truong, stdin=subprocess.DEVNULL,',
+      '                           env=None, stdin=subprocess.DEVNULL,'),
+     ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("rest_kho_khong_do_duoc_bi_gop_thanh_hong",
+     ('        duong.append(("rest-kho", None, "khong doc duoc slug origin -> KHONG DO DUOC"))',
+      '        duong.append(("rest-kho", False, "khong doc duoc slug origin -> KHONG DO DUOC"))'),
+     ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_mat_env_da_chuan_hoa",
+     ('                           env=moi_truong, stdin=subprocess.DEVNULL,',
+      '                           stdin=subprocess.DEVNULL,'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
 ]
 
 

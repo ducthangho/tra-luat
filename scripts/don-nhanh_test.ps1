@@ -548,9 +548,14 @@ ca 't21_MAC_DINH_phai_TU_CHOI_o_1000_PR' {
     # Doc RAW roi tach o NUL — KHONG `Get-Content` (no tach theo DONG, tuc lai lam mat
     # ranh gioi dung cho ta vua bo cong dung lai). Phan tu rong cuoi cung la do moi doi
     # so deu co NUL dang sau, khong phai mot doi so that.
+    # `Select-Object -SkipLast 1`, KHONG phai `$tok[0..($tok.Count-2)]`: voi tep RONG thi
+    # `$tok.Count` la 1 nen bieu thuc kia thanh `$tok[0..-1]`, ma trong PowerShell day la
+    # DAY 0,-1 (dem NGUOC) chu khong phai "day rong" — no tra ve HAI phan tu, tuc dem 0
+    # doi so bao thanh 2. Do duoc: raw='' => sau=2. Hong theo huong DO nen khong phai lo,
+    # nhung mot phep dem noi sai thi thong diep chan doan cung noi sai.
     $raw = [System.IO.File]::ReadAllText($argv)
     $tok = @($raw -split "`0")
-    if ($tok.Count -gt 0 -and $tok[-1] -eq '') { $tok = @($tok[0..($tok.Count - 2)]) }
+    if ($tok.Count -ge 1 -and $tok[-1] -eq '') { $tok = @($tok | Select-Object -SkipLast 1) }
     $mong = @('pr', 'list', '--state', 'open', '--limit', '1000', '--json', 'headRefName,baseRefName')
     bang ($tok.Count -eq $mong.Count) `
         "gh duoc goi voi $($tok.Count) doi so, hop dong doi $($mong.Count).`n  mong : [$($mong -join '|')]`n  thuc : [$($tok -join '|')]"

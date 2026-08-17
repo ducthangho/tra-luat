@@ -326,6 +326,33 @@ ca 't15_gh_in_CANH_BAO_stderr_NHUNG_thoat_khac_0_thi_VAN_TU_CHOI' {
     bang (($truoc -join ',') -eq ($sau -join ',')) "CO nhanh bi xoa du gh thoat khac 0"
 }
 
+ca 't16_gh_rc0_STDOUT_rong_nhung_STDERR_CO_noi_dung_thi_TU_CHOI' {
+    # LO TRONG BO TEST, do cross-review luot 3 tim ra bang mot DOT BIEN SONG SOT (M9).
+    #
+    # `t12` kiem "rc=0 + rong" bang mot `gh` gia khong in GI CA — ke ca stderr. O ca do,
+    # kiem NOI DUNG (`$vanBan`, da tach stderr) va kiem SO DONG THO (`$het.Count`) TRUNG
+    # NHAU, nen khong ca nao phan biet duoc chung: doi phep kiem sang `$het.Count -eq 0`
+    # van cho 15/15.
+    #
+    # Ca nay tach hai cach kiem ra: stdout RONG nhung stderr CO mot dong, tuc
+    # `$het.Count = 1` (khong phai 0) trong khi `$vanBan` rong. Dot bien M9 se thay
+    # `$het.Count -ne 0` => tuong la doc duoc => `$doDuocPR = $true` voi danh sach GIU RONG
+    # => XOA CA BASE cua PR dang mo. Reviewer da chay end-to-end va thay dung the.
+    #
+    # Vi sao `ConvertFrom-Json ''` khong cuu duoc: no tra `$null` chu KHONG nem, ke ca voi
+    # `$ErrorActionPreference='Stop'`; va `@($null).Count` trong PowerShell bang 1, khong
+    # phai 0 — cung bay mang-don da ghi ngay trong ham nay.
+    $k = Dung-Kho
+    Them-Nhanh $k 'nen/tichhop' $true
+    Them-Nhanh $k 'ops/rac' $true
+    $truoc = Nhanh-Tren-Remote $k
+    $gh = Dung-Gh-Gia -PR @() -ThoNguyen '' -CanhBaoStderr 'warning: something on stderr'
+    $r = Chay-KichBan $k $gh @('-Xoa')
+    $sau = Nhanh-Tren-Remote $k
+    bang ($r.rc -eq 13) "rc=$($r.rc), doi 13 — stdout RONG ma van duoc tin. Ra:`n$($r.ra)"
+    bang (($truoc -join ',') -eq ($sau -join ',')) "CO nhanh bi xoa: truoc=[$($truoc -join ', ')] sau=[$($sau -join ', ')]"
+}
+
 # ---------------------------------------------------------------- chạy
 $ten = @($script:CA.Keys)
 if ($LapCa) { $ten = @($ten | Where-Object { $_ -eq $LapCa }) }

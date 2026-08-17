@@ -1272,6 +1272,15 @@ def case_sigterm_cung_phai_giet_cay_truoc_khi_nha_khoa() -> None:
             # CHỨNG DƯƠNG: con gate phải THẬT SỰ chạy, nếu không ca này xanh rỗng.
             assert da_chay.is_file(), "con gate chua kip chay — ca dang xanh RONG"
             time.sleep(0.5)
+            # BẮN BA PHÁT, không phải một (P1 cross-review `8eca8d4`): handler còn
+            # cắm thì phát thứ hai ném `BiKetThuc` từ BÊN TRONG khối `except
+            # BaseException` — mà ngoại lệ ném ra từ trong một `except` thì chính
+            # `except` ấy không bắt lại được, nên luồng nhảy tới `finally` và nhả
+            # khoá khi cây chưa dọn xong. Một phát thì ca này mù với lỗi đó.
+            proc.send_signal(signal.SIGTERM)
+            time.sleep(0.02)
+            proc.send_signal(signal.SIGTERM)
+            time.sleep(0.05)
             proc.send_signal(signal.SIGTERM)
             _, loi = proc.communicate(timeout=60)
         finally:

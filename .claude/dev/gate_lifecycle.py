@@ -1057,8 +1057,22 @@ def cmd_run(args: argparse.Namespace) -> int:
         # `SIGHUP` đi cùng vì cùng hình dạng: đóng terminal/ngắt phiên ssh cũng
         # giết ngay mà không chạy dọn. Không có trên Windows nên bọc `suppress`.
         tin_hieu_cu: list[tuple[Any, Any]] = []
+        _da_cam: list[Any] = []
+        _dang_ket_thuc: list[bool] = []
 
         def _ket_thuc(so_hieu, _khung):
+            # TÍN HIỆU THỨ HAI KHÔNG ĐƯỢC NÉM LẦN NỮA (P1 cross-review `8eca8d4`).
+            #
+            # Nếu `SIGTERM` thứ hai tới trong lúc đang dọn, handler vẫn còn cắm sẽ
+            # ném `BiKetThuc` từ BÊN TRONG khối `except BaseException` — mà ngoại
+            # lệ ném ra từ trong một `except` thì chính `except` ấy KHÔNG bắt lại
+            # được, nên luồng nhảy thẳng tới `finally` và nhả khoá khi cây chưa
+            # dọn xong. Đo được bằng probe bắn hai phát: con còn sống, không bằng
+            # chứng. Nên: nhận phát đầu là LÀM NGƠ ngay các phát sau.
+            _dang_ket_thuc.append(True)
+            for _s2 in _da_cam:
+                with contextlib.suppress(OSError, ValueError):
+                    signal.signal(_s2, signal.SIG_IGN)
             raise BiKetThuc("tin hieu %d" % so_hieu)
 
         for _ten in ("SIGTERM", "SIGHUP"):
@@ -1066,6 +1080,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             if _sh is not None:
                 with contextlib.suppress(OSError, ValueError):
                     tin_hieu_cu.append((_sh, signal.signal(_sh, _ket_thuc)))
+                    _da_cam.append(_sh)
         global _CO_SUBREAPER
         _CO_SUBREAPER = _dat_subreaper()
         # Cấp cgroup TRƯỚC khi sinh con; con vào cgroup ngay lúc `fork`.
@@ -1079,10 +1094,40 @@ def cmd_run(args: argparse.Namespace) -> int:
         payload["moi_noi_kiem_thu"] = _moi_noi_dang_bat()
         if _CGROUP_GATE is not None:
             atexit.register(_don_cgroup_con_sot)
+        # CHẶN TÍN HIỆU QUANH QUÃNG SINH CON — không phải bắt nó cho khéo hơn.
+        #
+        # Đo được trên `8eca8d4`: bắn `SIGTERM` đúng lúc `Popen` đang chạy thì con
+        # ĐÃ fork nhưng biến `proc` CHƯA được gán (và có thể chưa kịp vào cgroup),
+        # nên nhánh dọn không với tới nó — bằng chứng ghi được mà con vẫn sống.
+        # Sweep 14 mốc thời gian: đúng một mốc (0,10s) rơi vào khe ấy.
+        #
+        # Bắt cho khéo hơn không đóng được khe này: nó là khe GIỮA fork và sổ sách.
+        # Chặn thì tín hiệu nằm chờ (pending) tới khi ta đã nhất quán rồi mới nhận
+        # — không mất tín hiệu, chỉ hoãn nó vài dòng.
+        #
+        # Mặt nạ tín hiệu DI TRUYỀN qua `fork`+`exec`, nên con sẽ điếc `SIGTERM`
+        # nếu ta không gỡ. Gỡ trong `preexec_fn` (chạy ở CON, sau `fork` trước
+        # `exec`) — và vì thế `preexec_fn` phải LUÔN có, kể cả khi không có cgroup.
+        mat_na = None
+        _bo_chan = [x for x in (getattr(signal, "SIGTERM", None),
+                                getattr(signal, "SIGHUP", None)) if x is not None]
+        if hasattr(signal, "pthread_sigmask") and _bo_chan:
+            with contextlib.suppress(OSError, ValueError):
+                mat_na = signal.pthread_sigmask(signal.SIG_BLOCK, set(_bo_chan))
+
+        def _truoc_exec() -> None:
+            if mat_na is not None:
+                with contextlib.suppress(OSError, ValueError):
+                    signal.pthread_sigmask(signal.SIG_SETMASK, mat_na)
+            if _CGROUP_GATE is not None:
+                _vao_cgroup(_CGROUP_GATE)
+
         vao_cgroup = None
-        if _CGROUP_GATE is not None:
-            cg_gate = _CGROUP_GATE
-            vao_cgroup = lambda: _vao_cgroup(cg_gate)
+        if os.name != "nt" and (mat_na is not None or _CGROUP_GATE is not None):
+            vao_cgroup = _truoc_exec
+        # Khai TRƯỚC khối `try` để nhánh bắt tín hiệu biết con đã sinh hay chưa.
+        proc: subprocess.Popen[Any] | None = None
+
         def _sinh_con(vao: Any) -> subprocess.Popen[Any]:
             return subprocess.Popen(
                 payload["command"],
@@ -1118,7 +1163,13 @@ def cmd_run(args: argparse.Namespace) -> int:
                 _CGROUP_GATE = None
                 _CO_CHE_CACH_LY = "quet-cay"
                 payload["co_che_cach_ly"] = _CO_CHE_CACH_LY
-                proc = _sinh_con(None)
+                # Vẫn cần `preexec` để GỠ MẶT NẠ cho con, chỉ bỏ phần vào cgroup.
+                def _chi_go_mat_na() -> None:
+                    if mat_na is not None:
+                        with contextlib.suppress(OSError, ValueError):
+                            signal.pthread_sigmask(signal.SIG_SETMASK, mat_na)
+
+                proc = _sinh_con(_chi_go_mat_na if (os.name != "nt" and mat_na is not None) else None)
             windows_job = _WindowsJob.attach(proc)
             if os.name == "nt":
                 if windows_job is None:
@@ -1131,6 +1182,41 @@ def cmd_run(args: argparse.Namespace) -> int:
                     windows_job.close()
                     proc.wait(timeout=5)
                     raise
+            # SỔ SÁCH ĐÃ NHẤT QUÁN: `proc` có rồi, job/cgroup gắn rồi. Giờ mới
+            # nhận tín hiệu đang chờ — nó rơi vào `except BiKetThuc` ngay dưới,
+            # nơi `proc` đã dùng được.
+            if mat_na is not None:
+                with contextlib.suppress(OSError, ValueError):
+                    signal.pthread_sigmask(signal.SIG_SETMASK, mat_na)
+        except BiKetThuc:
+            # TÍN HIỆU RƠI VÀO ĐÚNG QUÃNG SINH CON (P1 cross-review `8eca8d4`).
+            #
+            # Khối này trước chỉ bắt `OSError`, nên `BiKetThuc` ném ra giữa
+            # `Popen` và khối `proc.wait()` sẽ bay thẳng qua cả `except
+            # BaseException` lẫn `finally` của khối dưới — hai thứ đó CHƯA vào
+            # phạm vi. Đo được: bắn tín hiệu ngay sau khi `_sinh_con` trả về thì
+            # không có bằng chứng và con gate sống sót sau khi khoá đã nhả.
+            #
+            # Con có thể đã sinh hoặc chưa; cả hai đường đều phải dọn.
+            if proc is not None:
+                with contextlib.suppress(Exception):
+                    _terminate_process_tree(proc, None)
+            if _CGROUP_GATE is not None:
+                if not _giet_cgroup(_CGROUP_GATE):
+                    _GIET_KHONG_TRON_VEN = True
+                _don_cgroup(_CGROUP_GATE)
+                _CGROUP_GATE = None
+            for _sh2, _cu2 in tin_hieu_cu:
+                with contextlib.suppress(OSError, ValueError, TypeError):
+                    signal.signal(_sh2, _cu2)
+            output_stream.close()
+            _finish(payload, started, status="interrupted",
+                    returncode=EXIT_BI_KET_THUC,
+                    error="gate interrupted while spawning: BiKetThuc")
+            payload["giet_tron_ven"] = not _GIET_KHONG_TRON_VEN
+            with contextlib.suppress(OSError):
+                _atomic_json(evidence, payload)
+            raise SystemExit(EXIT_BI_KET_THUC)
         except OSError as exc:
             output_stream.close()
             # DỌN CGROUP Ở ĐÂY NỮA: nhánh này `return` SỚM, không đi qua khối
@@ -1224,9 +1310,16 @@ def cmd_run(args: argparse.Namespace) -> int:
                 raise SystemExit(EXIT_BI_KET_THUC)
             raise
         finally:
-            for _sh, _cu in tin_hieu_cu:      # trả handler về như cũ
-                with contextlib.suppress(OSError, ValueError, TypeError):
-                    signal.signal(_sh, _cu)
+            # KHÔNG TRẢ HANDLER VỀ MẶC ĐỊNH KHI ĐANG TẮT (P1 tự tìm sau khi nâng ca
+            # lên ba phát `SIGTERM`). Với cgroup, lượt dọn xong trong vài mili-giây,
+            # nên phát thứ hai/thứ ba tới SAU khi `finally` đã trả `SIG_DFL` —
+            # tiến trình chết `-15` dù bằng chứng vừa khai `143`. Hai con số cho
+            # cùng một lượt, đúng thứ vế khẳng định mã thoát sinh ra để chặn.
+            # Đã tắt rồi thì cứ để `SIG_IGN` tới lúc thoát hẳn.
+            if not _dang_ket_thuc:
+                for _sh, _cu in tin_hieu_cu:  # trả handler về như cũ
+                    with contextlib.suppress(OSError, ValueError, TypeError):
+                        signal.signal(_sh, _cu)
             if windows_job is not None:
                 windows_job.close()
             output_stream.close()

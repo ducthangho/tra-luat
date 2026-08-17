@@ -125,3 +125,21 @@ hook ghi một dấu vết (kèm danh sách năng lực + thời điểm) và `d
 ấy. Lưu ý: hook trên nhánh này đang CŨ HƠN master (`doctor` báo thiếu
 `co-chay-probe`, `github-nguon-that`, `moi-truong-doc-truoc`), nên sửa hook ở đây
 sẽ đụng bản mới hơn trên master — lấy hook từ master trước.
+
+---
+
+## 6. Khe TRƯỚC khi cắm handler tín hiệu
+
+Đo được (sweep 14 mốc trên `8eca8d4`): bắn `SIGTERM` ở mốc **0,05s** — tức trong
+lúc preflight (các lệnh `git`), TRƯỚC khi handler được cắm — thì runner thoát
+`-15` và **không có tệp bằng chứng**.
+
+**Vì sao để lại:** ở thời điểm ấy CHƯA có cgroup và CHƯA có con gate nào, nên
+không rò gì cả; thiệt hại duy nhất là "một lượt chưa kịp bắt đầu thì không có bản
+ghi". Cắm handler sớm hơn nữa (ngay đầu `cmd_run`) sẽ kéo theo phải dọn cả những
+trạng thái chưa dựng xong — đổi một khe vô hại lấy một lớp phức tạp mới.
+
+**Xong khi:** hoặc cắm handler ngay đầu `cmd_run` kèm đường dọn chịu được trạng
+thái nửa vời, hoặc kết luận là không đáng làm và đóng mục này. Sweep ở trên là
+phản chứng sẵn có để đo lại.
+

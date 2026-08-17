@@ -14,9 +14,10 @@ observations against a per-step required key set and against the expected values
 an empty observation record fails the audit, which is what makes the impostor detectable by machine
 rather than by reading the code.
 
-The claim is a separate commit point.  :func:`run_preflight` never writes; :func:`mint_claim`
-refuses to run without a complete positive receipt and is the only function here that touches the
-ledger.
+The claim is a separate commit point, and after round 5 it is not a commit point *here* at all.
+:func:`verify_claim_authorization` re-derives everything and returns a
+:class:`ClaimVerification`; creating the durable object is the job of a commit adapter this package
+does not hold, cannot construct and never imports.  See that function for why nothing weaker works.
 """
 
 from __future__ import annotations
@@ -26,17 +27,16 @@ import datetime
 import hashlib
 import hmac
 import json
+import os
 import pathlib
 import secrets
 from collections.abc import Callable, Mapping, Sequence
-
-from core.ledger import Ledger
 
 from .argv import build_launch_plan, describe as describe_plan
 from .environment import build_child_environment, describe as describe_environment
 from .errors import reject
 from .inputs import read_sealed_bytes, read_sealed_json
-from .sourcepin import PIN
+from .sourcepin import PIN, PinMismatch
 from .watchdog import parse_utc
 
 GIT_OID_LENGTH = 40
@@ -79,6 +79,12 @@ REQUIRED_OBSERVATIONS: Mapping[str, tuple[str, ...]] = {
         "source_pin_bytes",
         "integration_head",
         "integration_tree",
+        "integration_ref",
+        "sealed_repair_base_head",
+        "sealed_repair_base_tree",
+        "sealed_lease_id",
+        "sealed_lease_effective_stop_utc",
+        "sealed_fields_compared",
         "effective_write_prefix",
     ),
     "worktree_and_write_set": (
@@ -128,7 +134,7 @@ class StepResult:
 #      finds the table cannot make it say anything useful: the id is worthless unless the receipt
 #      presented alongside it hashes to the digest recorded against it, so an authorization can never
 #      be re-attached to fabricated observations.
-#   2. Live re-validation at the durable commit point.  `mint_claim` re-derives the binding itself —
+#   2. Live re-validation at the durable commit point.  `verify_claim_authorization` re-derives it —
 #      re-reading the sealed pin from disk, re-comparing every observation against the caller's pins,
 #      and re-checking the lease — so "authorized" means "still true right now", not "was stamped
 #      true earlier".
@@ -311,32 +317,68 @@ def _step_lease_and_branch(context: Mapping[str, object]) -> dict[str, object]:
     }
 
 
-def _step_source_pin(context: Mapping[str, object]) -> dict[str, object]:
+def read_sealed_authority(context: Mapping[str, object]) -> dict[str, object]:
+    """Read the sealed Dispatcher pin from disk and validate it against the one typed pin.
+
+    WP125-RV-003-R5.  Round 5 only ever *hashed* this file.  A digest answers "are these the bytes we
+    were told about"; it answers nothing about what the bytes say, so every expectation the run
+    compared against still came from the caller's own context dict — and a caller comparing its
+    expectations to its own observations is checking an input against itself.  That is precisely how
+    a complete fault-injection receipt reached durable claim commit.
+
+    So the sealed document is now *parsed*, and every pinned field in it is compared to
+    :data:`launcher.sourcepin.PIN`.  The returned table is the only expectation table the binding
+    stage uses.  A caller may still supply its own expectations — they are compared against this one
+    and a disagreement is a rejection — but they can no longer be the source of truth for anything.
+    """
     path = context["source_pin_path"]
     raw = read_sealed_bytes(path, "source pin", candidate_root=context["candidate_root"])
     digest = hashlib.sha256(raw).hexdigest()
-    _equal(digest, context["expected_source_pin_sha256"], "authority_mismatch", "source pin sha256")
-    pin = read_sealed_json(
+    document = read_sealed_json(
         path,
         "source pin",
         candidate_root=context["candidate_root"],
-        required_keys=("source", "bounds"),
+        required_keys=("repository", "candidate_ref", "effective_write_prefix"),
     )
-    source = pin["source"]
-    bounds = pin["bounds"]
+    try:
+        compared = PIN.validate_sealed_document(document)
+    except PinMismatch as exc:
+        raise reject("authority_mismatch", str(exc)) from exc
+    return {
+        "sha256": digest,
+        "bytes": len(raw),
+        "document": document,
+        "compared": compared,
+        "expected_authority": PIN.expected_authority(),
+    }
+
+
+def _step_source_pin(context: Mapping[str, object]) -> dict[str, object]:
+    sealed = read_sealed_authority(context)
+    digest = sealed["sha256"]
+    _equal(digest, context["expected_source_pin_sha256"], "authority_mismatch", "source pin sha256")
+    document = sealed["document"]
     _equal(
-        _oid(source["integration_head"], "integration_head"),
-        context["expected_integration_head"],
+        _oid(document["integration_head_observed_only"], "integration_head"),
+        PIN.integration_observation.head,
         "authority_mismatch",
         "integration_head",
     )
-    prefix = bounds["effective_write_prefix"]
+    prefix = document["effective_write_prefix"]
     _equal(prefix, WRITE_PREFIX, "write_set", "effective_write_prefix")
     return {
         "source_pin_sha256": digest,
-        "source_pin_bytes": len(raw),
-        "integration_head": source["integration_head"],
-        "integration_tree": _oid(source["integration_tree"], "integration_tree"),
+        "source_pin_bytes": sealed["bytes"],
+        "integration_head": document["integration_head_observed_only"],
+        "integration_tree": _oid(
+            document["integration_tree_observed_only"], "integration_tree"
+        ),
+        "integration_ref": document["integration_ref"],
+        "sealed_repair_base_head": document["repair_base_commit"],
+        "sealed_repair_base_tree": document["repair_base_tree"],
+        "sealed_lease_id": document["lease_id"],
+        "sealed_lease_effective_stop_utc": document["lease_effective_stop_utc"],
+        "sealed_fields_compared": sealed["compared"]["sealed_fields_compared"],
         "effective_write_prefix": prefix,
     }
 
@@ -612,15 +654,58 @@ def _bind_observations_to_pins(
     for step in results:
         observed.update(step.observations)
 
-    expected = context["expected_authority"]
-    for key, want in dict(expected).items():
+    # WP125-RV-003-R5.  The left-hand side is the sealed pin on disk, validated field-for-field
+    # against the typed pin; it is not `context["expected_authority"]`.  Round 5 took the caller's
+    # expectation dict as authority, so a caller who supplied consistent expectations and consistent
+    # observations passed a comparison that never left its own inputs.
+    sealed = read_sealed_authority(context)
+    authority = dict(sealed["expected_authority"])
+    for key, want in authority.items():
         if observed.get(key) != want:
             raise reject("authority_mismatch", "observed %s is not the pinned value" % key)
 
-    if observed.get("candidate_ref") != context["expected_candidate_ref"]:
+    # A caller may still declare its expectations. They are now checked *against* the sealed pin
+    # rather than believed: a caller that expects the wrong thing is refused even when the run it
+    # describes would otherwise be correct.
+    declared = context.get("expected_authority")
+    if not isinstance(declared, Mapping) or dict(declared) != authority:
+        raise reject(
+            "authority_mismatch",
+            "the caller's expected authority is not what the sealed source pin states",
+        )
+    if context.get("expected_candidate_ref") != PIN.candidate_ref:
+        raise reject(
+            "authority_mismatch", "the caller's expected candidate ref is not the pinned ref"
+        )
+    if context.get("expected_integration_head") != PIN.integration_observation.head:
+        raise reject(
+            "authority_mismatch",
+            "the caller's expected integration head is not the pinned observation",
+        )
+
+    if observed.get("candidate_ref") != PIN.candidate_ref:
         raise reject("authority_mismatch", "observed candidate_ref is not the pinned value")
-    if observed.get("integration_head") != context["expected_integration_head"]:
+    if observed.get("integration_head") != PIN.integration_observation.head:
         raise reject("authority_mismatch", "observed integration_head is not the pinned value")
+    if observed.get("integration_tree") != PIN.integration_observation.tree:
+        raise reject("authority_mismatch", "observed integration_tree is not the pinned value")
+    if observed.get("integration_ref") != PIN.integration_ref:
+        raise reject("authority_mismatch", "observed integration_ref is not the pinned value")
+    # The lease the run is bounded by has to be the lease the sealed pin names, by id and by absolute
+    # stop.  Round 5's retained evidence omitted the stop entirely, so a run bounded by a different
+    # clock produced an artifact indistinguishable from one bounded by the right clock.
+    if observed.get("sealed_lease_id") != PIN.lease_id:
+        raise reject("authority_mismatch", "the sealed lease id is not the pinned lease")
+    if observed.get("sealed_lease_effective_stop_utc") != PIN.lease_effective_stop_utc:
+        raise reject("lease_expired", "the sealed lease stop is not the pinned absolute stop")
+    if observed.get("lease_id") != PIN.lease_id:
+        raise reject("authority_mismatch", "the observed lease id is not the pinned lease")
+    if observed.get("sealed_repair_base_head") != PIN.repair_base.head:
+        raise reject("authority_mismatch", "the sealed repair base is not the pinned repair base")
+    if observed.get("sealed_repair_base_tree") != PIN.repair_base.tree:
+        raise reject(
+            "authority_mismatch", "the sealed repair base tree is not the pinned repair base tree"
+        )
 
     # WP125-RV-006-R4: identity, not shape. Round 4 accepted the candidate start head and tree as
     # merely 40-hex, and `"0" * 40` is 40-hex. They are now compared against the one authoritative
@@ -680,6 +765,8 @@ def _bind_observations_to_pins(
         "bound_keys": len(observed),
         "source_pin_rebound_sha256": rebound,
         "independent_rebind": True,
+        "sealed_authority": authority,
+        "sealed_fields_compared": observed.get("sealed_fields_compared"),
     }
 
 
@@ -745,8 +832,9 @@ def _run_steps(
         StepResult(name="value_binding", index=len(STEP_NAMES) + 1, observations=binding)
     )
     steps_tuple = tuple(results)
-    # The trusted path records that it *is* the trusted path. This is descriptive: `mint_claim`
-    # re-derives everything and never takes this on trust, so there is no capability here to steal.
+    # The trusted path records that it *is* the trusted path. This is descriptive:
+    # `verify_claim_authorization` re-derives everything and never takes this on trust, so there is
+    # no capability here to steal.
     authorization = PROVENANCE_TRUSTED if provenance == PROVENANCE_TRUSTED else None
     return PreflightReceipt(
         complete=True,
@@ -775,34 +863,201 @@ def run_preflight_fault_injection(
 ) -> PreflightReceipt:
     """Test-only seam for substituting steps.
 
-    Substitution stays reachable for the fault-injection controls, but every receipt it produces is
-    stamped ``fault_injection`` and :func:`mint_claim` refuses those outright.  So an impostor step
-    map can be *studied* and can never mint a durable operation, which is the property §5 actually
-    needs — stronger than hiding the seam, because it holds even for a caller who finds it.
+    Substitution stays reachable for the fault-injection controls, and nothing about the stamp it
+    carries is what stops it.  :func:`verify_claim_authorization` re-runs the *trusted* step map over
+    the same context and requires the presented receipt to be what that run produces, so an impostor
+    map can be studied and can never reach a durable operation — a property that holds for a caller
+    who finds this seam, reads it, and calls it deliberately.
     """
     return _run_steps(context, steps, PROVENANCE_FAULT_INJECTION)
 
 
-def mint_claim(
+# WP125-RV-003-R5.  The clock is the one observation that legitimately differs between two honest
+# runs of the same preflight, so it is excluded from the comparison below by name rather than by
+# tolerance.  Every other observation must be identical, and a new volatile field cannot be added
+# without adding it here, in this file, where a reviewer reads it.
+VOLATILE_OBSERVATIONS = frozenset({"lease_seconds_remaining"})
+
+# The contract an outside commit adapter answers to.  This is a *name*, not a capability: nothing in
+# this package can construct an adapter, and holding this string grants nothing.
+CLAIM_COMMIT_CONTRACT = "wp125.claim_commit_capability.v1"
+
+
+def measure_candidate_identity(candidate_root: object) -> dict[str, object]:
+    """Measure the candidate repository at the commit boundary.  Nothing here is passed in.
+
+    WP125-RV-003-R5.  Every other identity the commit point checks arrives as an observation — the
+    caller states the worktree is clean, states the write paths, states the surface — and the sealed
+    pin is what stops those statements from being self-authenticating.  This is the one measurement
+    the commit boundary makes for itself: it opens the candidate repository, reads its head and tree,
+    and requires that head to **descend from the generation-2 repair base the pin names**.
+
+    Descent rather than equality on purpose.  The head moves with every commit of the repair; what
+    must never move is which commit the repair grew from.  A run against an unrelated repository, a
+    grafted history, or a candidate cut from a different base fails here and cannot reach a claim.
+    """
+    from oracle.safe_io import git as safe_git
+
+    from .delegation import ambient_trust_env
+
+    root = pathlib.Path(str(candidate_root))
+
+    def fail(message: str):
+        return reject("authority_mismatch", message)
+
+    previous = os.environ.get("GIT_CONFIG_GLOBAL")
+    os.environ["GIT_CONFIG_GLOBAL"] = ambient_trust_env(root)["GIT_CONFIG_GLOBAL"]
+    try:
+        head = safe_git(root, "rev-parse", "HEAD", error=fail, binary=True).decode("utf-8").strip()
+        tree = (
+            safe_git(root, "rev-parse", "HEAD^{tree}", error=fail, binary=True)
+            .decode("utf-8")
+            .strip()
+        )
+        try:
+            safe_git(
+                root,
+                "merge-base",
+                "--is-ancestor",
+                PIN.repair_base.head,
+                "HEAD",
+                error=fail,
+                binary=True,
+            )
+            descends = True
+        except Exception:  # noqa: BLE001 - a non-zero exit here means "not an ancestor"
+            descends = False
+    finally:
+        if previous is None:
+            os.environ.pop("GIT_CONFIG_GLOBAL", None)
+        else:
+            os.environ["GIT_CONFIG_GLOBAL"] = previous
+
+    if not descends:
+        raise reject(
+            "authority_mismatch",
+            "the candidate head does not descend from the generation-2 repair base",
+        )
+    return {
+        "candidate_head_measured": head,
+        "candidate_tree_measured": tree,
+        "descends_from_repair_base": True,
+        "repair_base": PIN.repair_base.head,
+        "measured_by": "commit_boundary",
+    }
+
+
+def stable_receipt_bytes(receipt: PreflightReceipt) -> bytes:
+    """Canonical receipt bytes with the clock removed, for receipt-against-receipt comparison."""
+    steps = tuple(
+        StepResult(
+            name=step.name,
+            index=step.index,
+            observations={
+                key: value
+                for key, value in step.observations.items()
+                if key not in VOLATILE_OBSERVATIONS
+            },
+        )
+        for step in receipt.steps
+    )
+    return canonical_receipt_bytes(steps, receipt.plan, receipt.environment, receipt.surface)
+
+
+@dataclasses.dataclass(frozen=True)
+class ClaimVerification:
+    """A controller-verifiable result.  Creates nothing and can create nothing.
+
+    This is what candidate-importable code is allowed to produce: the complete canonical evidence
+    that a claim *would* be authorized, hashed so an outside adapter can check it independently.  The
+    durable object is created by that adapter, which this package does not hold and cannot build.
+    """
+
+    contract: str
+    reconcile_key: str
+    record: Mapping[str, object]
+    canonical_receipt_sha256: str
+    stable_receipt_sha256: str
+    receipt_sha256: str
+    authority: Mapping[str, object]
+    revalidated: Mapping[str, object]
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "contract": self.contract,
+            "reconcile_key": self.reconcile_key,
+            "record": dict(self.record),
+            "canonical_receipt_sha256": self.canonical_receipt_sha256,
+            "stable_receipt_sha256": self.stable_receipt_sha256,
+            "receipt_sha256": self.receipt_sha256,
+            "authority": dict(self.authority),
+            "revalidated": dict(self.revalidated),
+        }
+
+    def verification_hash(self) -> str:
+        blob = json.dumps(
+            self.as_dict(), ensure_ascii=False, sort_keys=True, separators=(",", ":"), default=str
+        )
+        return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+def bind_commit_result(
+    verification: ClaimVerification, result: object
+) -> dict[str, object]:
+    """Check that what the outside adapter returned actually answers *this* verification.
+
+    The adapter is trusted to own the durable store and nothing else.  A result that does not carry
+    the reconcile key and the exact record this verification authorized is refused here, so a
+    mis-wired or hostile adapter cannot report a claim that was never authorized as though it were.
+    """
+    if not isinstance(result, Mapping):
+        raise reject("duplicate_claim", "the commit adapter returned no claim record")
+    if result.get("reconcile_key") != verification.reconcile_key:
+        raise reject("duplicate_claim", "the commit adapter answered a different reconcile key")
+    stored = result.get("record")
+    if not isinstance(stored, Mapping):
+        raise reject("duplicate_claim", "the commit adapter stored no record")
+    if dict(stored) != dict(verification.record):
+        raise reject(
+            "duplicate_claim", "the commit adapter stored a record this verification did not authorize"
+        )
+    if not isinstance(result.get("created"), bool):
+        raise reject("duplicate_claim", "the commit adapter did not report whether it created")
+    return {
+        "created": result["created"],
+        "reconcile_key": verification.reconcile_key,
+        "record": dict(stored),
+        "verification_sha256": verification.verification_hash(),
+    }
+
+
+def verify_claim_authorization(
     receipt: PreflightReceipt,
-    ledger: Ledger,
-    reconcile_key: str,
-    payload: Mapping[str, object],
     *,
     context: Mapping[str, object],
-) -> dict[str, object]:
-    """The separate commit point.  Re-derives authorization here; trusts no flag.
+    reconcile_key: str,
+    payload: Mapping[str, object],
+) -> ClaimVerification:
+    """Re-derive, at commit time, everything a durable claim depends on.  Write nothing.
 
-    ``context`` is required.  Generation 2 authenticated a field on the receipt, which meant the
-    commit point believed a claim the caller had written down.  Now the commit point does the work
-    again: it re-reads the sealed pin from disk, re-compares every observation against the pins, and
-    re-checks the lease.  "Authorized" therefore means "still true at the moment the durable object
-    is created", which is the only tense that matters for a fence.
+    WP125-RV-003-R5.  The predecessor of this function took a ledger and created the claim itself.
+    Two things were wrong with that and only one of them was the ledger.
 
-    Idempotent by ``reconcile_key`` via the integrated RA-01 ledger: an identical retry returns the
-    existing record and creates nothing.  A *conflicting* payload under the same key is a rejection
-    rather than an overwrite, because two different runs answering to one key is precisely the state
-    a reconcile key exists to prevent.
+    The first: candidate-importable code owned the durable capability.  ``from launcher.preflight
+    import mint_claim`` and a store handle was the whole ceremony.  There is now no function in this
+    package that touches a durable store, and no module here imports one; the adapter is supplied by
+    an outside controller and this file names only its contract.
+
+    The second, and the one round 5 actually exploited: a *complete fault-injection receipt* reached
+    the commit point.  Every check it faced was satisfiable by a caller who wrote consistent values
+    into both sides of the comparison, because the expectations came from the caller's own context.
+    That is closed twice over.  Expectations now come from the sealed pin on disk, validated against
+    the typed pin (see :func:`read_sealed_authority`).  And the presented receipt is compared against
+    a freshly-run *trusted* preflight over the same context: a receipt whose observations were
+    fabricated rather than made differs from what the trusted step map produces right now, and the
+    difference is what refuses it.  There is no flag, name, token or object identity involved, so
+    finding this code buys nothing — the only receipt that passes is one whose content the trusted
+    path independently reproduces.
     """
     if not isinstance(receipt, PreflightReceipt) or not receipt.complete:
         raise reject("preflight_incomplete", "a claim was attempted before preflight completed")
@@ -901,12 +1156,46 @@ def mint_claim(
     if (stop - now).total_seconds() <= 0:
         raise reject("lease_expired", "the lease reached its absolute stop before the claim")
 
+    # WP125-RV-003-R5.  The presented receipt against a freshly-run *trusted* preflight over the same
+    # context.  This is the check a fault-injected receipt cannot survive: an impostor step map does
+    # not perform the observations, so its record differs from what the trusted map produces — and if
+    # it does not differ, then what it presented is byte-for-byte the trusted path's own output and
+    # nothing has been forged.  `run_preflight` has no `steps` parameter, so "freshly-run trusted"
+    # cannot be redirected by the caller either.
+    fresh = run_preflight(context)
+    if not fresh.complete:
+        failure = fresh.failure or {}
+        raise reject(
+            failure.get("category", "preflight_incomplete"),
+            "the trusted preflight re-run refused at step %s" % failure.get("step"),
+        )
+    if stable_receipt_bytes(fresh) != stable_receipt_bytes(receipt):
+        raise reject(
+            "preflight_incomplete",
+            "the presented receipt is not what the trusted preflight produces for this context",
+        )
+
+    measured = measure_candidate_identity(context["candidate_root"])
+
     record = dict(payload)
     record["preflight_receipt_sha256"] = receipt.receipt_hash()
     record["canonical_receipt_sha256"] = hashlib.sha256(canonical).hexdigest()
     record["revalidated_at_commit"] = True
     record["sealed_input_readback"] = readback["readback"]
-    created, stored = ledger.record(reconcile_key, record)
-    if not created and stored != record:
-        raise reject("duplicate_claim", "a conflicting payload already answers to this reconcile key")
-    return {"created": created, "record": stored, "reconcile_key": reconcile_key}
+    return ClaimVerification(
+        contract=CLAIM_COMMIT_CONTRACT,
+        reconcile_key=reconcile_key,
+        record=record,
+        canonical_receipt_sha256=record["canonical_receipt_sha256"],
+        stable_receipt_sha256=hashlib.sha256(stable_receipt_bytes(receipt)).hexdigest(),
+        receipt_sha256=receipt.receipt_hash(),
+        authority=dict(rebound["sealed_authority"]),
+        revalidated={
+            "sealed_input_readback": readback["readback"],
+            "source_pin_rebound_sha256": rebound["source_pin_rebound_sha256"],
+            "trusted_preflight_reproduced": True,
+            "lease_stop_utc": lease.get("effective_stop_utc"),
+            "surface": receipt.surface,
+            "candidate": measured,
+        },
+    )

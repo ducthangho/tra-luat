@@ -39,6 +39,13 @@ from .watchdog import Deadline, python_executable, run_supervised
 
 DELEGABLE_OPERATIONS = frozenset({"run_test"})
 
+# Read once from the one typed pin, so this module states no identity of its own.  A second copy of
+# the repository name here is exactly the parallel constant table WP125-RV-006-R5 is about.
+from .sourcepin import PIN as _PIN  # noqa: E402
+
+PIN_REPOSITORY = _PIN.repository
+PIN_CANDIDATE_REF = _PIN.candidate_ref
+
 # Named refusals.  Each of these is a thing someone could plausibly want to delegate on a bad day,
 # and each would move authority off the controller and onto a runner the Packet does not trust.
 FORBIDDEN_OPERATIONS = (
@@ -572,6 +579,288 @@ def run_job(
             "delegation_evidence",
             "%d of %d declared delegated tests returned a non-zero code"
             % (len(failed), len(per_test)),
+        )
+    evidence["evidence_sha256"] = hashlib.sha256(
+        json.dumps(evidence, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    return evidence
+
+
+# --------------------------------------------------------------------------- the transport
+#
+# WP125-RV-008-R5.  Round 4 declared a transport and never called it.  `context` carried
+# ``delegated_linux_transport``, the controller asked whether it was truthy, and then ran the job on
+# whatever machine it happened to be sitting on — so on Linux the delegated result was a local
+# result with a Linux label, and on Windows the surface was unreachable by construction.  A declared
+# transport that is never invoked is not a boundary; it is a comment with a truthiness check.
+#
+# What follows is the boundary.  An envelope is a sealed object bound to the pin, carrying exactly
+# one closed operation and a `dispatch` method the controller *calls*.  What crosses is a request
+# naming the operation, the pin digest, the closed test-ID selection and the read-only root — no
+# command line, no model invocation, no claim, no ref, no credential.  What comes back is measured
+# at the far side and re-bound here against the pin and against the controller's own closed map, so
+# a far side that lies about its OS, its root, its head, its tree, its selection or its return codes
+# is refused rather than believed.
+
+TRANSPORT_CONTRACT = "wp125.linux_run_test_transport.v1"
+
+# The two honest modes a piece of transport evidence can be in, and they are not interchangeable.
+# `production_linux` is a real authenticated Linux runner.  `offline_test_double` is a controller-
+# owned stand-in that exists to prove the contract is actually called and actually rejects bad
+# answers; §7 forbids it from ever standing in for the first, so the mode travels with the evidence
+# and the retained receipt names it.
+TRANSPORT_MODES = ("production_linux", "offline_test_double")
+
+
+@dataclasses.dataclass(frozen=True)
+class TransportRequest:
+    """Exactly what may cross the boundary.  Frozen, and it is evidence."""
+
+    contract: str
+    operation: str
+    pin_digest: str
+    receipt_sha256: str
+    repository: str
+    candidate_ref: str
+    candidate_head: str
+    candidate_tree: str
+    read_only_root: str
+    test_selection: tuple[str, ...]
+    deadline_seconds: float
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "contract": self.contract,
+            "operation": self.operation,
+            "pin_digest": self.pin_digest,
+            "receipt_sha256": self.receipt_sha256,
+            "repository": self.repository,
+            "candidate_ref": self.candidate_ref,
+            "candidate_head": self.candidate_head,
+            "candidate_tree": self.candidate_tree,
+            "read_only_root": self.read_only_root,
+            "test_selection": list(self.test_selection),
+            "deadline_seconds": self.deadline_seconds,
+        }
+
+    def request_hash(self) -> str:
+        return hashlib.sha256(
+            json.dumps(
+                self.as_dict(), ensure_ascii=False, sort_keys=True, separators=(",", ":")
+            ).encode("utf-8")
+        ).hexdigest()
+
+
+def pin_digest() -> str:
+    """A digest of the one typed pin, so evidence can be bound to it without restating it."""
+    from .sourcepin import PIN
+
+    return hashlib.sha256(
+        json.dumps(
+            PIN.sealed_document(), ensure_ascii=False, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+    ).hexdigest()
+
+
+def authenticate_transport(envelope: object, context: Mapping[str, object]) -> dict[str, object]:
+    """Authenticate a transport envelope against the sealed pin, or fail closed.
+
+    A truthy value is not a transport.  An arbitrary callable is not a transport either: a bare
+    callable can be handed a request and return anything, and "the caller supplied a function" is not
+    an authority statement.  What is required is an object that declares this contract, declares the
+    one closed operation, binds itself to the pin digest this controller computes for itself, and
+    exposes ``dispatch``.
+    """
+    if envelope is None:
+        raise reject(
+            "sandbox_unavailable",
+            "environment_unavailable: no authenticated Linux transport is configured",
+        )
+    if getattr(envelope, "contract", None) != TRANSPORT_CONTRACT:
+        raise reject("transport_authority", "the transport does not declare the closed contract")
+    if getattr(envelope, "operation", None) != "run_test":
+        raise reject(
+            "transport_authority", "the transport is not bound to the closed run_test operation"
+        )
+    mode = getattr(envelope, "mode", None)
+    if mode not in TRANSPORT_MODES:
+        raise reject("transport_authority", "the transport declares no known evidence mode")
+    expected = pin_digest()
+    if getattr(envelope, "pin_digest", None) != expected:
+        raise reject("transport_authority", "the transport is not sealed to this Packet's pin")
+    dispatch = getattr(envelope, "dispatch", None)
+    if not callable(dispatch):
+        raise reject("transport_authority", "the transport exposes no dispatch capability")
+    if getattr(envelope, "repository", None) != str(context.get("repository", PIN_REPOSITORY)):
+        raise reject("transport_authority", "the transport names a different repository")
+    return {
+        "contract": TRANSPORT_CONTRACT,
+        "operation": "run_test",
+        "mode": mode,
+        "pin_digest": expected,
+        "dispatch_is_callable": True,
+        "authenticated_before_dispatch": True,
+    }
+
+
+def _remote_error(message: str):
+    return reject("delegation_evidence", message)
+
+
+def dispatch_run_test(
+    envelope: object,
+    *,
+    job: DelegatedJob,
+    context: Mapping[str, object],
+    deadline: Deadline,
+    receipt_sha256: str,
+    authentication: Mapping[str, object],
+) -> dict[str, object]:
+    """Call the authenticated transport, then bind what it returns.  Nothing runs locally here.
+
+    Every transport/authentication/routing/root/selection check has already finished, and
+    :func:`authenticate_transport` is called again immediately below so the window between the last
+    check and the dispatch contains no unchecked state.  The evidence that comes back is treated as
+    an untrusted claim: the OS, root, head, tree, selection and return codes are all re-derived
+    against the controller's own closed map and the sealed pin before any of it is retained.
+    """
+    identity = authenticate_transport(envelope, context)
+    if identity != dict(authentication["transport_identity"]):
+        raise reject("transport_authority", "the transport identity changed before dispatch")
+
+    request = TransportRequest(
+        contract=TRANSPORT_CONTRACT,
+        operation="run_test",
+        pin_digest=identity["pin_digest"],
+        receipt_sha256=receipt_sha256,
+        repository=PIN_REPOSITORY,
+        candidate_ref=PIN_CANDIDATE_REF,
+        candidate_head=job.candidate_head,
+        candidate_tree=job.candidate_tree,
+        read_only_root=job.read_only_root,
+        test_selection=tuple(job.test_selection),
+        deadline_seconds=round(float(deadline.requested_seconds), 3),
+    )
+    # Nothing forbidden may be named in a request. This is a closed set on the way out as well as on
+    # the way in, so a request that acquired an extra field cannot quietly carry one.
+    for forbidden in FORBIDDEN_OPERATIONS:
+        if forbidden in request.as_dict():
+            raise reject("delegation_scope", "the transport request names a forbidden operation")
+
+    answer = envelope.dispatch(request)
+    return bind_transport_evidence(
+        answer, request=request, job=job, mode=identity["mode"], deadline=deadline
+    )
+
+
+def bind_transport_evidence(
+    answer: object,
+    *,
+    request: TransportRequest,
+    job: DelegatedJob,
+    mode: str,
+    deadline: Deadline,
+) -> dict[str, object]:
+    """Re-derive every load-bearing field of a transport answer.  The far side is not believed.
+
+    The far side measured; this decides.  Each check below names a way an answer could be wrong that
+    a weaker check would have accepted — most of all ``runner_os``, which round 4 read from
+    ``platform.system()`` on the *controller* and therefore never learned anything about the runner.
+    """
+    if not isinstance(answer, Mapping):
+        raise _remote_error("the transport returned no evidence")
+    if answer.get("request_hash") != request.request_hash():
+        raise _remote_error("the transport evidence answers a different request")
+    if answer.get("runner_os") != "Linux":
+        raise reject(
+            "delegation_scope",
+            "the transport ran on %r; the delegated surface is Linux-only" % (answer.get("runner_os"),),
+        )
+    if answer.get("measured_at") != "remote_runner":
+        raise _remote_error("the transport evidence was not measured at the runner")
+    if answer.get("head") != request.candidate_head or answer.get("tree") != request.candidate_tree:
+        raise reject("delegation_scope", "the runner is not at the candidate commit and tree")
+    if answer.get("read_only_root_probe") != "refused":
+        raise reject("delegation_scope", "the runner did not prove a read-only root by writing to it")
+    if answer.get("credential_marker_present") is not False:
+        raise reject("delegation_credential", "a credential reached the delegated runner")
+    if answer.get("credential_shaped_names"):
+        raise reject(
+            "delegation_credential",
+            "%d credential-shaped names were observed at the runner"
+            % len(answer["credential_shaped_names"]),
+        )
+    # The child-environment contract holds across the boundary too, and a field that is retained but
+    # never compared is the shape every one of these rounds has been about.
+    if answer.get("automatic_memory") != "1":
+        raise reject("child_environment", "the runner did not observe the memory variable as 1")
+    fingerprint = answer.get("runner")
+    if not isinstance(fingerprint, Mapping) or fingerprint.get("system") != "Linux":
+        raise _remote_error("the runner fingerprint disagrees with the reported runner OS")
+
+    # The selection is reconstructed from the controller's closed map, not read out of the answer.
+    reconstructed = tuple(job.test_selection)
+    reported = tuple(answer.get("test_selection") or ())
+    if reported != reconstructed:
+        raise reject("delegation_scope", "the runner ran a different selection than the closed map")
+    unknown = [item for item in reported if item not in DELEGATED_TESTS]
+    if unknown:
+        raise reject("delegation_scope", "the runner reports %d tests outside the map" % len(unknown))
+
+    codes = answer.get("return_codes")
+    if not isinstance(codes, Mapping) or sorted(codes) != sorted(reconstructed):
+        raise _remote_error("the transport evidence has no return code for each declared test")
+    if not all(isinstance(value, int) for value in codes.values()):
+        raise _remote_error("the transport evidence carries a return code that is not an integer")
+    failed = sorted(test for test, value in codes.items() if value != 0)
+
+    if answer.get("deadline_source") != "controller":
+        raise _remote_error("the runner did not run under the controller's deadline")
+    if answer.get("cleanup_proven") is not True:
+        raise reject("watchdog_cleanup", "the runner did not prove it cleaned up")
+    if deadline.expired():
+        raise reject("lease_expired", "the controller deadline passed while the transport ran")
+
+    evidence = {
+        "transport_contract": TRANSPORT_CONTRACT,
+        "transport_invoked": True,
+        "transport_mode": mode,
+        "is_real_production_linux_transport": mode == "production_linux",
+        "request": request.as_dict(),
+        "request_hash": request.request_hash(),
+        "runner_os": "Linux",
+        "expected_os": job.expected_os,
+        "job": job.as_dict(),
+        "test_selection": list(reconstructed),
+        "return_codes": dict(codes),
+        "tests_executed": len(reconstructed),
+        "tests_failed": len(failed),
+        "per_test": [
+            {"test_id": test, "return_code": codes[test], "measured_at": "remote_runner"}
+            for test in reconstructed
+        ],
+        "status": "passed" if not failed else "failed",
+        "timeout_source": "controller",
+        "deadline_source": "controller",
+        "cleanup": {"cleanup_proven": True, "measured_at": "remote_runner"},
+        "runner": answer.get("runner"),
+        "credential_marker_planted": True,
+        "marker_name": MARKER_NAME,
+        "environment_memory_variable": MEMORY_VARIABLE,
+        "job_report": {
+            "observed_from_inside_job": True,
+            "credential_marker_present": False,
+            "credential_shaped_names": [],
+            "automatic_memory": answer.get("automatic_memory"),
+            "runner": answer.get("runner"),
+        },
+        "candidate_summary_is_proof": False,
+    }
+    if failed:
+        raise reject(
+            "delegation_evidence",
+            "%d of %d delegated tests returned a non-zero code at the runner"
+            % (len(failed), len(reconstructed)),
         )
     evidence["evidence_sha256"] = hashlib.sha256(
         json.dumps(evidence, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")

@@ -508,6 +508,17 @@ class _RealGroupProbe:
         except (OSError, AttributeError):
             return None
 
+    @staticmethod
+    def created(pid: int):
+        """The creation stamp, behind the same interface as pgid and session.
+
+        WP125-RV-010-R5.  Creation identity has to travel with the rest of the group observation.
+        Reading it out-of-band from the module function would mean the identity controls could only
+        run where the pids under test are real, i.e. not on the platform this Packet runs on — and a
+        control that cannot execute is a control that is not proving anything.
+        """
+        return creation_stamp(pid)
+
 
 _real_group_probe = _RealGroupProbe()
 
@@ -535,6 +546,11 @@ class ProcessFence:
         # session at adoption means the fence can still name, signal and census the group afterwards.
         self.pgid: int | None = None
         self.session: int | None = None
+        self.leader_pid: int | None = None
+        self.leader_created: int | None = None
+        # pid -> creation stamp observed at adoption. A pid alone cannot survive its own reuse, so
+        # the members are retained by identity and not by number (WP125-RV-010-R5).
+        self.adopted_members: dict[int, object] = {}
 
     def attach_child(self, child) -> None:
         self._child = child
@@ -552,10 +568,35 @@ class ProcessFence:
             self.session = os.getsid(pid)
         except (OSError, AttributeError):
             self.session = None
+        # WP125-RV-010-R5: the leader is named by its creation stamp as well as its number, and the
+        # members present at adoption are retained.  A pgid is reused, and so is a pid; the creation
+        # stamp is what makes "the leader we launched" a different claim from "whatever holds that
+        # number now".
+        self.leader_pid = pid
+        self.leader_created = creation_stamp(pid)
+        self.adopted_members = {
+            member: _real_group_probe.created(member) for member in self.group_members()
+        }
+        # WP125-RV-010-R5.  An adoption observation that could not read what it needed is not an
+        # adoption observation.  Round 5 stored `None` and carried on, so a fence that never learned
+        # its own session went on to compare every later observation against nothing.
+        captured = (
+            self.pgid is not None
+            and self.session is not None
+            and self.leader_created is not None
+            and all(value is not None for value in self.adopted_members.values())
+        )
         return {
             "applicable": True,
+            "captured": captured,
             "pgid": self.pgid,
             "session": self.session,
+            "leader_pid": self.leader_pid,
+            "leader_created": self.leader_created,
+            "adopted_members": sorted(self.adopted_members),
+            "adopted_member_identities": {
+                str(member): stamp for member, stamp in sorted(self.adopted_members.items())
+            },
             "captured_while_root_alive": True,
         }
 
@@ -595,12 +636,45 @@ class ProcessFence:
                 return {"applicable": False, "intact": True, "reason": "windows_uses_job_object"}
             probe = _real_group_probe
 
+        # WP125-RV-010-R5.  If the leader is still alive it must still be *our* leader: same pid and
+        # same creation stamp. A pid that has been recycled onto a different process is the case a
+        # numeric comparison cannot see.
+        if self.leader_pid is not None:
+            current = probe.created(self.leader_pid)
+            if current is not None and self.leader_created is not None and current != self.leader_created:
+                return {
+                    "applicable": True,
+                    "intact": False,
+                    "reason": "leader_pid_was_reused_by_a_different_process",
+                    "recorded_leader": {"pid": self.leader_pid, "created": self.leader_created},
+                    "observed_created": current,
+                }
+            if self.leader_created is None:
+                return {
+                    "applicable": True,
+                    "intact": False,
+                    "reason": "leader_creation_identity_was_never_readable",
+                    "recorded_leader": {"pid": self.leader_pid, "created": None},
+                }
+
         members = self.group_members(probe)
         if not members:
             return {"applicable": True, "intact": True, "reason": "group_empty", "members": []}
 
-        sessions = {probe.session(pid) for pid in members}
-        foreign = {value for value in sessions if value is not None and value != self.session}
+        sessions = {pid: probe.session(pid) for pid in members}
+        # An unreadable session is not agreement. Round 5 skipped `None` before comparing, so a
+        # member whose session could not be observed counted as one of ours — the fence would then
+        # signal a group it had not actually identified. Unavailable is now fail-closed.
+        unreadable = sorted(pid for pid, value in sessions.items() if value is None)
+        if unreadable:
+            return {
+                "applicable": True,
+                "intact": False,
+                "reason": "member_session_could_not_be_observed",
+                "members": members,
+                "unreadable_members": unreadable,
+            }
+        foreign = {value for value in sessions.values() if value != self.session}
         if foreign:
             return {
                 "applicable": True,
@@ -608,14 +682,49 @@ class ProcessFence:
                 "reason": "process_group_number_was_reused_by_another_session",
                 "members": members,
                 "recorded_session": self.session,
-                "observed_sessions": sorted(str(value) for value in sessions),
+                "observed_sessions": sorted(str(value) for value in sessions.values()),
             }
+        if self.session is None:
+            return {
+                "applicable": True,
+                "intact": False,
+                "reason": "recorded_session_identity_is_missing",
+                "members": members,
+            }
+
+        # WP125-RV-010-R5.  Every member we adopted and can still see must still be the process we
+        # adopted.  Session equality alone cannot see a member pid the kernel recycled *within* our
+        # own session, which is the likeliest reuse of all on a busy machine — and an unreadable
+        # stamp for a pid that is still listed as a member is an ambiguous observation, not an
+        # agreement.
+        for member, adopted_stamp in sorted(self.adopted_members.items()):
+            if member not in members:
+                continue
+            now = probe.created(member)
+            if now is None:
+                return {
+                    "applicable": True,
+                    "intact": False,
+                    "reason": "member_creation_identity_could_not_be_observed",
+                    "members": members,
+                    "member": member,
+                }
+            if adopted_stamp is not None and now != adopted_stamp:
+                return {
+                    "applicable": True,
+                    "intact": False,
+                    "reason": "member_pid_was_reused_by_a_different_process",
+                    "members": members,
+                    "member": member,
+                }
         return {
             "applicable": True,
             "intact": True,
-            "reason": "session_matches_recorded_identity",
+            "reason": "leader_creation_and_member_sessions_match_recorded_identity",
             "members": members,
             "recorded_session": self.session,
+            "recorded_leader": {"pid": self.leader_pid, "created": self.leader_created},
+            "adopted_members_revalidated": sorted(self.adopted_members),
         }
 
     def group_census(self) -> dict[str, object]:

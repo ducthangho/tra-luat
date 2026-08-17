@@ -6,15 +6,20 @@ but nothing tied them together, so the only callers that ever ran the real seque
 assembling it slightly differently.  That is how an ordering invariant rots: not by being violated,
 but by never being expressed anywhere a reviewer can point at.
 
-:func:`launch_reviewer` is that place.  It runs the trusted preflight, mints the claim from the
-receipt it just produced, and launches exactly the plan that preflight authorised — ``plan.command()``
-with ``receipt.environment`` in ``plan.working_directory`` under a deadline bounded by the lease.
-Nothing in between can substitute a different vector, because nothing in between is given the
-opportunity: the plan object the watchdog receives is the one the receipt carries.
+:func:`launch_reviewer` is that place.  It runs the trusted preflight, verifies the claim against the
+receipt it just produced, hands that verification to the outside commit adapter, and launches exactly
+the plan that preflight authorised — ``plan.command()`` with ``receipt.environment`` in
+``plan.working_directory`` under a deadline bounded by the lease.  Nothing in between can substitute
+a different vector, because nothing in between is given the opportunity: the plan object the watchdog
+receives is the one the receipt carries.
 
 The order is claim-before-launch, and it is enforced by control flow rather than by comment.  If
-:func:`~launcher.preflight.mint_claim` raises, no child is created, and the caller can prove zero
-children the same way it proves zero claims.
+:func:`~launcher.preflight.verify_claim_authorization` raises, no child is created, and the caller
+can prove zero children the same way it proves zero claims.
+
+WP125-RV-003-R5: this module holds no durable store.  ``commit_capability`` is a required keyword
+argument supplied by the outside trusted controller; there is no default, no factory, no registry and
+no fallback, so importing this module and calling :func:`launch_reviewer` cannot create a claim.
 """
 
 from __future__ import annotations
@@ -22,16 +27,16 @@ from __future__ import annotations
 import dataclasses
 from collections.abc import Mapping
 
-from core.ledger import Ledger
-
 from .argv import describe as describe_plan
 from .environment import describe as describe_environment
 from .errors import reject
 from .preflight import (
+    ClaimVerification,
     PreflightReceipt,
     assert_launch_inputs_unchanged,
-    mint_claim,
+    bind_commit_result,
     run_preflight,
+    verify_claim_authorization,
 )
 from .watchdog import RunOutcome, build_deadline
 
@@ -64,26 +69,52 @@ class LaunchRecord:
             "child_environment": describe_environment(self.receipt.environment),
             "deadline_source": "trusted_preflight_lease_observation",
             "outcome": self.outcome.as_dict() if self.outcome is not None else {},
+            # The order this record was actually produced in, named step by step.  WP125-RV-008-R5
+            # adds the two transport steps explicitly: an auditor should be able to see that the
+            # route was authenticated before the claim *and* again immediately before the dispatch,
+            # rather than infer it from the absence of a complaint.
             "ordering": [
                 "preflight",
                 "value_binding",
                 "routing_validation",
-                "claim",
+                "transport_authentication",
+                "claim_verification",
+                "claim_commit_by_outside_capability",
                 "sealed_input_readback",
+                "transport_reauthentication",
                 "launch",
             ],
         }
 
 
+def commit_claim(commit_capability: object, verification: ClaimVerification) -> dict[str, object]:
+    """Call the outside adapter, and check that what came back answers this verification.
+
+    Deliberately tiny, and deliberately incapable.  It cannot make an adapter, find one, or proceed
+    without one: a missing capability is a named rejection before anything durable, and a capability
+    that answers with someone else's record is rejected by
+    :func:`~launcher.preflight.bind_commit_result`.
+    """
+    if commit_capability is None:
+        raise reject(
+            "claim_authority",
+            "no outside commit capability was supplied; a claim cannot be created here",
+        )
+    if not callable(commit_capability):
+        raise reject("claim_authority", "the supplied commit capability is not callable")
+    return bind_commit_result(verification, commit_capability(verification))
+
+
 def launch_reviewer(
     context: Mapping[str, object],
     *,
-    ledger: Ledger,
+    commit_capability: object,
     reconcile_key: str,
     claim_payload: Mapping[str, object],
     timeout_seconds: float,
     label: str = "reviewer-child",
     delegated_job=None,
+    linux_transport: object = None,
 ) -> LaunchRecord:
     """Preflight, then claim, then one contained child on the surface preflight selected.
 
@@ -110,7 +141,9 @@ def launch_reviewer(
     surface = receipt.surface
     delegated_authentication: dict[str, object] | None = None
     if surface == "delegated_linux_run_test":
-        delegated_authentication = authenticate_delegated_job(delegated_job, context)
+        delegated_authentication = authenticate_delegated_job(
+            delegated_job, context, transport=linux_transport
+        )
         launched = "delegated_run_test"
     elif surface == "windows":
         if delegated_job is not None:
@@ -128,7 +161,10 @@ def launch_reviewer(
     lease_stop = str(receipt.steps[1].observations["lease_effective_stop_utc"])
     deadline = build_deadline(timeout_seconds, lease_stop)
 
-    claim = mint_claim(receipt, ledger, reconcile_key, claim_payload, context=context)
+    verification = verify_claim_authorization(
+        receipt, context=context, reconcile_key=reconcile_key, payload=claim_payload
+    )
+    claim = commit_claim(commit_capability, verification)
 
     # WP125-RV-007-R2: the second readback, immediately before anything is spawned or dispatched.
     assert_launch_inputs_unchanged(context, receipt)
@@ -137,23 +173,26 @@ def launch_reviewer(
         # WP125-RV-009-R3: the *same* sealed job is authenticated again immediately before dispatch.
         # The first pass happened before the claim; between then and now a claim was minted and the
         # sealed inputs were re-read, and any of that time is time for the root or the job to move.
-        redispatch = authenticate_delegated_job(delegated_job, context)
+        redispatch = authenticate_delegated_job(
+            delegated_job, context, transport=linux_transport
+        )
         if redispatch["root_evidence"]["head"] != delegated_authentication["root_evidence"]["head"]:
             raise reject("delegation_scope", "the delegated root moved between claim and dispatch")
 
-        # WP125-RV-008-R2.  The delegated surface goes through the complete existing validator and
-        # runner, not a hand-picked command out of the job.  Round 2 pulled `commands[0]` and ran it
-        # directly, which skipped the Linux identity check, the read-only-root proof, the credential
-        # probe, the per-test real return codes and the cleanup receipt — every control that makes a
-        # delegated result mean anything.
-        from .delegation import run_job
+        # WP125-RV-008-R5.  The authenticated transport is *invoked*.  Round 5 required the transport
+        # to be truthy and then ran the job locally, so a Windows controller with a declared Linux
+        # route produced a local result wearing a Linux label — which is the one thing §7 forbids
+        # outright.  The dispatch below crosses the boundary or it fails closed; there is no third
+        # branch, and in particular there is no branch that runs the tests here.
+        from .delegation import dispatch_run_test
 
-        evidence = run_job(
-            delegated_job,
-            parent_environment=dict(context.get("parent_environment") or {}),
-            candidate_root=str(context["candidate_root"]),
-            working_directory=delegated_job.read_only_root,
+        evidence = dispatch_run_test(
+            redispatch["transport"],
+            job=delegated_job,
+            context=context,
             deadline=deadline,
+            receipt_sha256=verification.receipt_sha256,
+            authentication=redispatch,
         )
         return LaunchRecord(
             receipt=receipt,
@@ -176,7 +215,9 @@ def launch_reviewer(
     return LaunchRecord(receipt=receipt, claim=claim, outcome=outcome, launched=launched)
 
 
-def authenticate_delegated_job(job: object, context: Mapping[str, object]) -> dict[str, object]:
+def authenticate_delegated_job(
+    job: object, context: Mapping[str, object], *, transport: object = None
+) -> dict[str, object]:
     """Re-derive the delegated job from the controller's own inputs (WP125-RV-008-R3).
 
     Round 3 checked the job against *itself*: it asked whether the commands covered the selection and
@@ -184,16 +225,17 @@ def authenticate_delegated_job(job: object, context: Mapping[str, object]) -> di
     consistent and entirely fabricated passed every one of those questions, because the answers came
     from the same object being examined.
 
-    Nothing here trusts the job.  The runner OS is required to be Linux and is read from the machine.
-    Every command is reconstructed from the closed test-ID map and compared to what the job carries,
+    Nothing here trusts the job.  The transport envelope is authenticated against the sealed pin,
+    every command is reconstructed from the closed test-ID map and compared to what the job carries,
     so a caller-authored command cannot survive.  The read-only root is re-probed live, and the
-    candidate commit, tree and credential surface are measured again from the root itself.
+    candidate commit, tree and credential surface are measured again from the root itself.  The
+    runner OS is *not* read from this machine: it is a property of the far side and is measured there
+    and re-bound when the evidence comes back (WP125-RV-008-R5).
     """
-    import platform
-
     from .delegation import (
         DELEGATED_TESTS,
         DelegatedJob,
+        authenticate_transport,
         build_expected_commands,
         verify_read_only_root,
     )
@@ -211,24 +253,19 @@ def authenticate_delegated_job(job: object, context: Mapping[str, object]) -> di
             "only the closed run_test operation may be dispatched on the delegated surface",
         )
 
-    # WP125-RV-008-R4.  An *eligible transport* to a Linux runner, declared by the Dispatcher in the
-    # sealed inputs — not merely "the local machine happens to be Linux".  A Windows controller with
-    # no configured route to Linux has no delegated surface at all, and the honest outcome is to
-    # pause as environment-unavailable.  Running the job locally and labelling the result Linux is
-    # the fabrication §7 forbids, and running it locally on a Linux box would still not be the
-    # Windows-controller-to-Linux route the contract describes.
-    transport = context.get("delegated_linux_transport")
-    if not transport:
-        raise reject(
-            "sandbox_unavailable",
-            "no eligible Linux transport is configured; the delegated surface is environment-unavailable",
-        )
-    runner_os = platform.system()
-    if runner_os != "Linux":
-        raise reject(
-            "delegation_scope",
-            "the delegated surface requires an eligible Linux runner; this runner is %r" % runner_os,
-        )
+    # WP125-RV-008-R5.  An *authenticated transport envelope*, not a truthy value.  Round 4 read
+    # `context["delegated_linux_transport"]` and asked only whether it was truthy — the string
+    # ``"yes"`` configured a Linux route — and then required the *local* machine to be Linux, which
+    # on a Windows controller meant the delegated surface could never be exercised at all and, on a
+    # Linux one, meant "local" was silently accepted as "delegated".  Both readings are wrong for the
+    # same reason: the runner OS is a property of the far side, so it has to be measured there and
+    # returned, not measured here.
+    #
+    # The envelope is authenticated against the sealed pin below.  If none is configured the surface
+    # is environment-unavailable and the run pauses; nothing local stands in for it.
+    envelope = transport if transport is not None else context.get("delegated_linux_transport")
+    authenticated = authenticate_transport(envelope, context)
+
     if job.expected_os != "Linux":
         raise reject("delegation_scope", "the delegated job was not built for a Linux runner")
 
@@ -266,7 +303,9 @@ def authenticate_delegated_job(job: object, context: Mapping[str, object]) -> di
         )
 
     return {
-        "runner_os": runner_os,
+        "transport": envelope,
+        "transport_identity": authenticated,
+        "runner_os_is_measured_at_the_far_side": True,
         "root_evidence": root_evidence,
         "commands_reconstructed": True,
         "selection": list(job.test_selection),

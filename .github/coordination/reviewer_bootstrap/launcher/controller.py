@@ -159,20 +159,29 @@ BINDING_KEYS = (
     "candidate_branch",
 )
 
-# WP125-RV-006, review round 2.  Exact-name structural verification was satisfied by a set that was
-# structurally perfect and semantically stale: generation-1 authority, an empty delegation payload,
-# and a red matrix all passed, because "the file is present and its hash matches" says nothing about
-# what the file says.  These are the generation-2 values every retained class must name, and the
-# predicates below are the meaning the hashes cannot carry.
-MISSION_PLAN_HASH = "ac5d5180be3de124dce002041683c3d6926aa60b36d39c7cad02136fd0776b9a"
-PACKET_SPEC_HASH = "b8e3387d13cf60974a3e7a35350557605df52b282666a401b7b5b4100e42f3f3"
-GENERATION = 2
-CANDIDATE_BRANCH = "agent/wp125-g2-claude"
+# WP125-RV-006-R5.  Every one of these used to be a literal written out here, beside a second copy in
+# `launcher.selftest` and a third in the preflight expectations.  Three copies of one identity is
+# three chances to drift, and round 4 duly drifted: the retained evidence carried the integration
+# commit where the repair base belonged.  Round 5 kept the literals and merely added the pin beside
+# them, which fixed nothing structural — a parallel constant table is still parallel when one of the
+# tables is called a source pin.
+#
+# There is now exactly one table.  Everything below is *read from* it and nothing restates a value.
+from launcher.sourcepin import PIN as SOURCE_PIN  # noqa: E402
 
+MISSION_PLAN_HASH = SOURCE_PIN.mission_plan_hash
+PACKET_SPEC_HASH = SOURCE_PIN.packet_spec_hash
+GENERATION = SOURCE_PIN.packet_generation
+CANDIDATE_BRANCH = SOURCE_PIN.candidate_ref.split("refs/heads/", 1)[-1]
 
-PACKET_ISSUE = 125
-PACKET_REVISION = 1
-CANDIDATE_REF = "refs/heads/agent/wp125-g2-claude"
+PACKET_ISSUE = SOURCE_PIN.packet_issue
+PACKET_REVISION = SOURCE_PIN.packet_revision
+CANDIDATE_REF = SOURCE_PIN.candidate_ref
+MISSION_ISSUE = SOURCE_PIN.mission_issue
+MISSION_REVISION = SOURCE_PIN.mission_revision
+PACKET_ATTEMPT = SOURCE_PIN.packet_attempt
+LEASE_ID = SOURCE_PIN.lease_id
+LEASE_EFFECTIVE_STOP_UTC = SOURCE_PIN.lease_effective_stop_utc
 
 # WP125-RV-006-R2.  Round 2 checked the *wrapper*: generation, spec hash and branch in the binding
 # header.  A payload carrying generation-1 fixture semantics inside a correct generation-2 header
@@ -200,74 +209,106 @@ def _contains_stale_marker(payload: object) -> bool:
     return False
 
 
-from launcher.sourcepin import PIN as SOURCE_PIN  # noqa: E402
+def build_retained_identity(
+    *,
+    run_id: str,
+    identity: Mapping[str, str],
+    surface: object,
+    runner: object,
+    raw_outcomes: object,
+) -> dict[str, object]:
+    """The one retained identity document, assembled from the one pin plus this run's measurements."""
+    return SOURCE_PIN.retained_identity(
+        current_head=identity["head"],
+        current_tree=identity["tree"],
+        sole_parent=identity["sole_parent"],
+        write_prefix=inventory_module.LAUNCHER_PREFIX,
+        surface=surface,
+        runner=runner,
+        test_selection=sorted(registry_module.CASES),
+        raw_outcomes=raw_outcomes,
+        run_id=run_id,
+        artifact_identity={
+            "required_classes": len(REQUIRED_ARTIFACTS),
+            "locators": sorted(locator for locator, _c, _s in REQUIRED_ARTIFACTS),
+        },
+    )
 
-MISSION_ISSUE = SOURCE_PIN.mission_issue
-MISSION_REVISION = SOURCE_PIN.mission_revision
-PACKET_ATTEMPT = SOURCE_PIN.packet_attempt
-LEASE_ID = SOURCE_PIN.lease_id
+
+# The exact nested paths the retained identity must reproduce, and the value each one must hold.
+# Expressed as data rather than as a wall of booleans because the round-5 finding was not that a
+# comparison was wrong — it was that whole fields (repository, lease stop, integration observation)
+# were *absent from the comparison*, which a list of hand-written `and`s hides and a total field
+# walk cannot.  Anything the builder puts in the document and this table does not name would be
+# unchecked, so :func:`_retained_identity_findings` walks the rebuilt document instead of this list
+# and reports every leaf that disagrees.
+_RUN_DEPENDENT_PATHS = (
+    ("execution", "runner"),
+    ("execution", "raw_outcomes"),
+    ("execution", "surface"),
+)
 
 
-def _authority_is_generation_2(payload: object) -> bool:
-    """The single strict predicate for the authority class (WP125-RV-006-R3).
+def _walk(document: object, prefix: tuple[str, ...] = ()) -> dict[tuple[str, ...], object]:
+    """Flatten a nested document to leaf-path -> value, so two documents compare totally."""
+    flat: dict[tuple[str, ...], object] = {}
+    if isinstance(document, Mapping):
+        for key, value in document.items():
+            flat.update(_walk(value, prefix + (str(key),)))
+        if not document:
+            flat[prefix] = {}
+        return flat
+    flat[prefix] = document
+    return flat
 
-    There used to be two entries for ``authority_input.json`` in the requirements table.  Python keeps
-    the last one, so the permissive ``_nonempty`` silently replaced this predicate and every check
-    below became dead code — a validator that was written, reviewed and never executed.  Measured on
-    the head this repairs: ``{"authority": "anything"}`` verified green.  One key, one predicate, and
-    the predicate names every nested value it depends on.
+
+def _retained_identity_findings(
+    payload: object, *, identity: Mapping[str, str], run_id: str | None
+) -> list[dict[str, object]]:
+    """Compare a retained identity payload, leaf for leaf, against the rebuilt expectation.
+
+    WP125-RV-006-R5.  Round 5's predicate checked a hand-written list of fields and therefore proved
+    exactly the fields somebody remembered to write down: the repository, the lease's absolute stop
+    and the integration observation were all missing from it, and a nested payload that was valid but
+    wrong verified green.  The comparison is now total in one direction — every leaf the builder
+    produces must be present and equal — and the run-dependent leaves are the only exceptions, named
+    above and checked separately for meaning rather than for value.
     """
     if not isinstance(payload, Mapping) or not payload:
-        return False
-    authority = payload.get("authority")
-    expected = payload.get("expected_authority")
-    lease = payload.get("lease")
-    if not isinstance(authority, Mapping) or not isinstance(lease, Mapping):
-        return False
-    if not isinstance(expected, Mapping):
-        return False
-    packet = authority.get("packet")
-    mission = authority.get("mission")
-    if not isinstance(packet, Mapping) or not isinstance(mission, Mapping):
-        return False
+        return [{"kind": "retained_identity_absent"}]
 
-    checks = (
-        # Mission identity, nested.
-        mission.get("issue") == MISSION_ISSUE,
-        mission.get("revision") == MISSION_REVISION,
-        mission.get("plan_hash") == MISSION_PLAN_HASH,
-        # Packet identity, nested.
-        packet.get("issue") == PACKET_ISSUE,
-        packet.get("revision") == PACKET_REVISION,
-        packet.get("generation") == GENERATION,
-        packet.get("attempt") == PACKET_ATTEMPT,
-        packet.get("spec_hash") == PACKET_SPEC_HASH,
-        # The expectation table the preflight bound against must agree, field by field.
-        expected.get("mission_issue") == MISSION_ISSUE,
-        expected.get("mission_revision") == MISSION_REVISION,
-        expected.get("mission_plan_hash") == MISSION_PLAN_HASH,
-        expected.get("packet_issue") == PACKET_ISSUE,
-        expected.get("packet_revision") == PACKET_REVISION,
-        expected.get("packet_generation") == GENERATION,
-        expected.get("packet_attempt") == PACKET_ATTEMPT,
-        expected.get("packet_spec_hash") == PACKET_SPEC_HASH,
-        # Candidate ref, start head and start tree.
-        payload.get("candidate_ref") == CANDIDATE_REF,
-        lease.get("candidate_ref") == CANDIDATE_REF,
-        # WP125-RV-006-R4: the exact repair base, not merely something OID-shaped. `"0"*40` is
-        # OID-shaped, and so is the integration commit — which is what the retained evidence drifted
-        # to when these were only shape checks.
-        _is_oid(lease.get("candidate_start_head")),
-        _is_oid(payload.get("candidate_start_tree")),
-        lease.get("candidate_start_head") == SOURCE_PIN.repair_base.head,
-        payload.get("candidate_start_head") == SOURCE_PIN.repair_base.head,
-        payload.get("candidate_start_tree") == SOURCE_PIN.repair_base.tree,
-        # Lease identity.
-        lease.get("lease_id") == LEASE_ID,
-        lease.get("generation") == GENERATION,
-        bool(lease.get("effective_stop_utc")),
+    expected = build_retained_identity(
+        run_id=run_id if run_id is not None else str(payload.get("run", {}).get("run_id")),
+        identity=identity,
+        surface=None,
+        runner=None,
+        raw_outcomes=None,
     )
-    return all(checks)
+    want = _walk(expected)
+    have = _walk(payload)
+    findings: list[dict[str, object]] = []
+    for path, value in sorted(want.items()):
+        if path in _RUN_DEPENDENT_PATHS:
+            continue
+        if path not in have:
+            findings.append({"kind": "retained_field_missing", "path": ".".join(path)})
+        elif have[path] != value:
+            findings.append({"kind": "retained_field_wrong", "path": ".".join(path)})
+
+    # The run-dependent leaves are still required to *mean* something. An absent runner or an absent
+    # outcome record is the empty-payload shape round 2 accepted under a correct wrapper.
+    execution = payload.get("execution")
+    if not isinstance(execution, Mapping):
+        findings.append({"kind": "retained_execution_absent"})
+        return findings
+    if not execution.get("runner"):
+        findings.append({"kind": "retained_runner_absent"})
+    outcomes = execution.get("raw_outcomes")
+    if not _matrix_is_green(outcomes):
+        findings.append({"kind": "retained_outcomes_not_green"})
+    if execution.get("surface") not in ("windows", "delegated_linux_run_test"):
+        findings.append({"kind": "retained_surface_unknown"})
+    return findings
 
 
 def _is_oid(value: object) -> bool:
@@ -305,11 +346,27 @@ def _delegation_is_real(payload: object) -> bool:
     if not isinstance(payload, Mapping) or not payload:
         return False
     codes = payload.get("return_codes")
-    return (
+    if not (
         isinstance(codes, Mapping)
         and bool(codes)
         and all(isinstance(value, int) for value in codes.values())
         and int(payload.get("tests_executed") or 0) > 0
+    ):
+        return False
+    # WP125-RV-008-R5.  The receipt has to say, in the retained artifact and not only in a case's
+    # evidence, whether an authenticated Linux transport really ran or a controller-owned offline
+    # double stood in for it.  §7 forbids the two from being reported by one green, and a receipt
+    # that simply omits the question reports them by one green.
+    transport = payload.get("linux_transport")
+    return (
+        isinstance(transport, Mapping)
+        and transport.get("transport_invoked") is True
+        and transport.get("transport_mode") in ("production_linux", "offline_test_double")
+        and isinstance(transport.get("is_real_production_linux_transport"), bool)
+        and (
+            transport["is_real_production_linux_transport"]
+            == (transport["transport_mode"] == "production_linux")
+        )
     )
 
 
@@ -319,22 +376,39 @@ def _return_codes_are_real(payload: object) -> bool:
     )
 
 
-# locator -> predicate the payload must satisfy
+def _predicate(kind: str, function):
+    """Adapt a boolean payload predicate to the findings signature every requirement now speaks.
+
+    One signature, so the strict class and the shallow ones cannot be given different treatment by
+    accident — which is how round 3's duplicate key made the strict authority predicate dead code.
+    """
+
+    def check(payload: object, _run: Mapping[str, object]) -> list[dict[str, object]]:
+        return [] if function(payload) else [{"kind": kind}]
+
+    return check
+
+
+# locator -> the findings a payload produces, empty when it is meaningful
 SEMANTIC_REQUIREMENTS = {
-    "authority_input.json": _authority_is_generation_2,
-    "case_matrix.json": _matrix_is_green,
-    "parity_report.json": lambda payload: isinstance(payload, Mapping) and bool(payload.get("ok")),
-    "delegation_receipt.json": _delegation_is_real,
-    "return_codes.json": _return_codes_are_real,
-    "launcher_inventory.json": _nonempty,
-    "sealed_source_pin.json": _nonempty,
-    "argument_vector.json": _nonempty,
-    "environment_names.json": _nonempty,
-    "watchdog_timing.json": _nonempty,
-    "watchdog_cleanup.json": _nonempty,
-    "case_registry.json": _nonempty,
-    "static_boundary_scan.json": _nonempty,
-    "runner_fingerprint.json": _nonempty,
+    "authority_input.json": lambda payload, run: _retained_identity_findings(
+        payload, identity=run["identity"], run_id=run["run_id"]
+    ),
+    "case_matrix.json": _predicate("matrix_not_green", _matrix_is_green),
+    "parity_report.json": _predicate(
+        "parity_not_ok", lambda payload: isinstance(payload, Mapping) and bool(payload.get("ok"))
+    ),
+    "delegation_receipt.json": _predicate("delegation_not_real", _delegation_is_real),
+    "return_codes.json": _predicate("return_codes_not_real", _return_codes_are_real),
+    "launcher_inventory.json": _predicate("payload_empty", _nonempty),
+    "sealed_source_pin.json": _predicate("payload_empty", _nonempty),
+    "argument_vector.json": _predicate("payload_empty", _nonempty),
+    "environment_names.json": _predicate("payload_empty", _nonempty),
+    "watchdog_timing.json": _predicate("payload_empty", _nonempty),
+    "watchdog_cleanup.json": _predicate("payload_empty", _nonempty),
+    "case_registry.json": _predicate("payload_empty", _nonempty),
+    "static_boundary_scan.json": _predicate("payload_empty", _nonempty),
+    "runner_fingerprint.json": _predicate("payload_empty", _nonempty),
 }
 
 # One key, one predicate. A duplicate is how the strict authority check became unreachable, so the
@@ -346,7 +420,12 @@ if len(SEMANTIC_REQUIREMENTS) != len({locator for locator, _c, _s in REQUIRED_AR
 
 
 def _repo_identity() -> dict[str, str]:
-    """Head and tree of the repository the artifacts describe, measured, not passed in."""
+    """Head, tree and sole parent of the repository the artifacts describe, measured, not passed in.
+
+    WP125-RV-006-R5 adds the parent.  "This artifact set was produced at head X" and "head X descends
+    from exactly the commit we said it would" are different claims, and only the second one can catch
+    a set produced from a rewritten or grafted history at a coincidentally-correct head.
+    """
 
     def fail(message: str) -> RuntimeError:
         return RuntimeError(message)
@@ -358,12 +437,18 @@ def _repo_identity() -> dict[str, str]:
     try:
         head = safe_git(REPOSITORY_ROOT, "rev-parse", "HEAD", error=fail).strip()
         tree = safe_git(REPOSITORY_ROOT, "rev-parse", "HEAD^{tree}", error=fail).strip()
+        parents = safe_git(REPOSITORY_ROOT, "rev-list", "--parents", "-n", "1", "HEAD", error=fail)
+        fields = parents.split()
     finally:
         if previous is None:
             os.environ.pop("GIT_CONFIG_GLOBAL", None)
         else:
             os.environ["GIT_CONFIG_GLOBAL"] = previous
-    return {"head": head, "tree": tree}
+    if len(fields) != 2:
+        # A merge (or a root commit) is not the shape this Packet's candidate history may have, and
+        # reporting "the parent" for a commit with two of them would be a quiet lie.
+        raise RuntimeError("the candidate head does not have exactly one parent")
+    return {"head": head, "tree": tree, "sole_parent": fields[1]}
 
 
 def _bound(schema: str, run_id: str, identity: Mapping[str, str], test_selection, payload) -> str:
@@ -417,11 +502,31 @@ def command_produce(out: str, run_id: str) -> int:
         "wp125.sealed_source_pin.v1",
         matrix.get("sealed_source_pin", {}),
     )
+    # WP125-RV-006-R5.  Built here, from the one pin and this run's own measurements, rather than
+    # accepted from whatever the matrix happened to collect.  The producer and the verifier now call
+    # the same builder, so a field can only be omitted from the evidence by being omitted from the
+    # comparison in the same edit.
     add(
         "authority_input.json",
         "source",
         "wp125.authority_input.v1",
-        matrix.get("authority_input", {}),
+        build_retained_identity(
+            run_id=run_id,
+            identity=identity,
+            surface=matrix.get("selected_surface"),
+            runner=_runner_fingerprint(),
+            raw_outcomes={
+                "ok": matrix.get("ok"),
+                "scheduled": matrix.get("scheduled"),
+                "executed": matrix.get("executed"),
+                "passed": matrix.get("passed"),
+                "failed": matrix.get("failed"),
+                "skipped": matrix.get("skipped"),
+                "not_run": matrix.get("not_run"),
+                "optimized": matrix.get("optimized"),
+                "return_codes": matrix.get("return_codes", {}),
+            },
+        ),
     )
     add(
         "argument_vector.json",
@@ -583,8 +688,20 @@ def verify_bindings(root: str, *, run_id: str | None = None) -> dict[str, object
             findings.append({"kind": "stale_payload_semantics", "locator": locator})
             continue
         predicate = SEMANTIC_REQUIREMENTS.get(locator)
-        if predicate is not None and not predicate(payload):
-            findings.append({"kind": "payload_not_meaningful", "locator": locator})
+        semantic = (
+            predicate(payload, {"identity": identity, "run_id": document["run_id"]})
+            if predicate is not None
+            else []
+        )
+        if semantic:
+            findings.append(
+                {
+                    "kind": "payload_not_meaningful",
+                    "locator": locator,
+                    "detail": semantic[:8],
+                    "detail_count": len(semantic),
+                }
+            )
             continue
         verified += 1
 

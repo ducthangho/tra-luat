@@ -25,6 +25,14 @@ CATEGORIES = (
     "write_set",
     "stale_generation",
     "duplicate_claim",
+    # WP125-RV-003-R5.  "No outside commit capability was supplied" and "this claim would be a
+    # duplicate" are different failures with different remedies, and round 5 had no way to say the
+    # first one at all — because the capability lived in the package and could not be absent.
+    "claim_authority",
+    # WP125-RV-008-R5.  Likewise for the transport: an unauthenticated or unconfigured route is not
+    # the same event as a job whose scope is wrong, and an auditor reading the matrix should not have
+    # to guess which one a `delegation_scope` meant.
+    "transport_authority",
     "sandbox_unavailable",
     "delegation_scope",
     "delegation_credential",

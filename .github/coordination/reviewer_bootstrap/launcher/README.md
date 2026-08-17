@@ -202,6 +202,51 @@ still wanted, `GIT_CONFIG_GLOBAL` points at a scratch file that dies with the ru
 | `RV-008-R4` | a local OS check is not a Windows-controller-to-Linux route | the surface requires a Dispatcher-declared transport and **fails closed as environment-unavailable** without one — which is this host's honest state |
 | `RV-010-R4` | the session was captured and never used; kill and census trusted a reusable numeric pgid | the group identity is pgid *plus* session, checked before any signal or census, with a supplied-table probe so the logic executes on Windows too |
 
+## Review round 6 — five clusters, and the two that were the same mistake
+
+Two of the five clusters were the same defect at different altitudes: **a comparison whose two sides
+came from the same place.**
+
+`RV-003-R5` was the sharp one. A complete fault-injection receipt reached durable claim commit under
+both interpreters, and every check it faced was satisfiable, because claim-time authority was
+rederived from `context["expected_authority"]` — the caller's own dictionary — and compared against
+observations the same caller supplied. The sealed source pin was on disk the whole time and was only
+ever *hashed*. A digest answers "are these the bytes we were told about"; it answers nothing about
+what the bytes say, and nobody read a field of it.
+
+The repair has two halves and both are structural:
+
+- **The sealed pin is parsed.** `sourcepin.PIN.validate_sealed_document` compares eighteen pinned
+  fields, and the resulting table is the only expectation table the binding stage uses. A caller may
+  still declare expectations; they are checked *against* the pin, so a caller who expects the wrong
+  thing is refused even when its run would otherwise be correct.
+- **The commit capability left the package.** There is no `mint_claim`; no launcher module imports a
+  durable store; `launch_reviewer` takes a required `commit_capability` with no default, no factory
+  and no registry. The importable path produces a `ClaimVerification` and cannot create a claim. And
+  because hiding a capability has failed three rounds running, the forgery defence is not a hidden
+  name at all: `verify_claim_authorization` re-runs the **trusted** step map over the same context
+  and requires the presented receipt to reproduce it, modulo the one declared volatile field. A
+  fabricated receipt differs; a receipt that does not differ is the trusted path's own output.
+
+`RV-006-R5` was the same shape one level out: the retained semantic check verified a hand-written
+list of fields, so it proved exactly the fields somebody remembered to write down — repository,
+absolute lease stop and integration observation were all absent from it, and a nested payload that
+was valid and wrong verified green. The comparison is now a **total leaf walk** against a document
+rebuilt by the same builder `produce` uses, with only the run-dependent leaves (runner, raw outcomes,
+surface) excepted by name and checked for meaning instead.
+
+| cluster | what round 5 left open | closed by |
+|---|---|---|
+| `GATE-001-R5` | the Unicode gate re-ran the whole suite twice, nested, each nested run rebuilding its own clones — 770.9 s measured, and the Reviewer's optimized matrix was cut off past 14 minutes with no denominator. The ACL command's exit code was treated as proof of a read-only root | every fixture operation carries a controller-owned deadline; the gate uses a **bounded non-recursive probe** and the complete matrix from that boundary is a controller gate rather than a case inside itself; the root proves itself by **attempting a write** and fails closed when the write succeeds |
+| `RV-003-R5` | above | above |
+| `RV-006-R5` | above | above |
+| `RV-008-R5` | the declared Linux transport was only checked for truthiness and never invoked; execution stayed local and the runner OS was read from `platform.system()` on the *controller* | a sealed transport envelope bound to the pin digest, **actually called** with a closed request carrying no command line and no credential; the answer's OS, root, head, tree, selection and return codes are re-derived here before anything is retained; unconfigured is `environment_unavailable` and the evidence names `production_linux` or `offline_test_double` so the two can never be one green |
+| `RV-010-R5` | leader creation identity was absent and an unreadable member session counted as agreement | leader **and** member identity are pid *plus* creation stamp, captured at adoption and revalidated before every signal and census; unreadable is fail-closed; the orphaned group stays nameable after the root exits because the identity is not a naked pgid |
+
+The honest statement about `RV-008-R5` on this host: **no authenticated production Linux transport is
+configured here, so the production path fails closed.** The offline double proves the contract is
+called and that wrong answers are refused; it is not Linux evidence and the retained receipt says so.
+
 ## What this launcher does not claim
 
 - The static scan cannot see a forbidden callable reached through a name built at run time, or a

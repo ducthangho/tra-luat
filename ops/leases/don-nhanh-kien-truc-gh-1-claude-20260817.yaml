@@ -128,3 +128,4 @@ canh_bao_moi_truong_luc_cap: >-
   Thiếu `pwsh` thì khai KHÔNG ĐO ĐƯỢC. `/dev/shm` bị xoá khi phiên khởi động lại — người vá
   đã mất `pwsh` giữa chừng và một lượt đo trả rc=127 với đầu ra RỖNG, trông y hệt "chạy xong
   sạch". Kiểm công cụ có mặt TRƯỚC khi đọc bất kỳ con số nào.
+posted_comment_id: 5317137609   # workflow ghi, ĐỪNG sửa tay

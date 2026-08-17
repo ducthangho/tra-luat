@@ -1,0 +1,126 @@
+# Lease REVIEWER lượt 4 — PR #150. PHẠM VI ĐÓNG BĂNG. CÙNG NHÀ CUNG CẤP — SAI LỆCH §8.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+#
+# ĐỌC KHỐI NÀY TRƯỚC MỌI SỐ BÊN DƯỚI. Reviewer là `claude` trong khi người vá cũng là
+# `claude`. §8 đòi cross-provider và nói `same_provider_approved` "một mình KHÔNG thay mức
+# assurance bắt buộc" cho phạm vi workflow. #150 sửa `.github/workflows/ci.yml`.
+# ⇒ `assurance_target: same_provider_approved`, và lượt này KHÔNG cấp điều kiện land.
+#
+# XÉT GÌ: đóng nợ `--limit` — nợ CUỐI CÙNG của chuỗi #150, do lượt xét lại kiến trúc nêu ra
+# và reviewer lượt ấy khai thẳng là SUY LUẬN TỪ TÀI LIỆU chứ không phải phép đo sống.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: don-nhanh-base-review-4-claude-20260817
+role: reviewer
+provider: claude
+reviewer: claude
+executor: claude
+
+cross_provider: false
+sai_lech_giao_thuc: true
+sai_lech_dieu: '§8 — cross-provider bắt buộc cho phạm vi workflow'
+sai_lech_ly_do: '`codex` sắp hết quota'
+sai_lech_ai_chap_nhan: ducthangho
+sai_lech_chap_nhan_luc: 'direct, in-session, 2026-08-17 ("cấp lease Claude lượt 4 (Fable 5 Max) rồi chạy đi")'
+assurance_target: same_provider_approved
+assurance_KHONG_dat: cross_approved
+khong_cap_dieu_kien_land: true
+
+# Mô hình reviewer khai TƯỜNG MINH — lượt 3 và lượt kiến trúc dùng model mặc định; lượt này
+# chủ kho chỉ định KHÁC. Ghi ra để so sánh kết quả giữa các lượt có nghĩa: nếu lượt này tìm
+# ra thứ lượt 3 bỏ sót, biến số ấy là MODEL chứ không phải "đọc kỹ hơn".
+reviewer_model: claude-fable-5
+reviewer_effort: max
+reviewer_model_do_chu_kho_chi_dinh: true
+
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: 05568de6ad054a5f0c9991ecac7e38805d1227c3
+branch: ops/don-nhanh-giu-base-pr
+base_sha: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+sha_luot_truoc: bfeedfc4435efde13b81e4370c84f97a5d5afc19
+target_branch_neu_land: master
+target_pull_request: 150
+
+pham_vi_dong_bang: true
+scope_files_can_xet: 2
+scope_note: >-
+  Delta `bfeedfc..05568de` trong `scripts/`: `don-nhanh.ps1` (+27/−2) và
+  `don-nhanh_test.ps1` (+43). Không gì khác. Delta TOÀN BỘ còn có `ops/reviews/**` (bốn
+  verdict + biên nhận vừa ghi) — KHÔNG phải mã, ⇒ `Nợ khai báo`.
+
+prompt_path: ops/prompts/don-nhanh-base-review-4-claude-20260817.md
+prompt_sha256_required: 1906eabde9bbbfe2970e9b5bea6c56a59af393d34c2bf80d88bfccc5eeaf0924
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-17 ("cấp lease Claude lượt 4 (Fable 5 Max) rồi chạy đi")'
+recorded_by: claude-session
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  Phiên ghi lease này CHÍNH LÀ phiên đã vá, VÀ reviewer cùng nhà cung cấp. Lớp bảo vệ duy
+  nhất còn lại là "phiên mới, read-only" (§2) — sẽ ĐO sau khi chạy, không tin cờ quyền.
+
+leased_at_utc: '2026-08-17T16:20:00Z'
+lease_expires_at_utc: '2026-08-18T16:20:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 0
+
+muc_kiem:
+- id: chot-co-dung-bien-va-co-chan-oan-khong
+  note: >-
+    `t17` (đếm = trần ⇒ từ chối 13, không xoá gì) và `t18` (đếm < trần ⇒ VẪN xoá). Chạy cả
+    hai. Tự dựng thêm `trần−1` và `trần+1` nếu cho là 18 ca chưa phủ.
+- id: TranPR-la-tham-so-CONG-KHAI-moi
+  note: >-
+    CÂU ĐÁNG SOI NHẤT. `-TranPR` vừa được thêm vào một script XOÁ NHÁNH, và người vá khai nó
+    tồn tại "chủ yếu để bộ test dựng ca chạm trần". Thử `0`, `1`, `-5`, giá trị khổng lồ.
+    CÓ giá trị nào làm cổng LỎNG hơn (xoá NHIỀU hơn) không? Nếu có ⇒ P1.
+- id: tim-dot-bien-song-sot-TRONG-hai-tep
+  note: >-
+    Người vá chạy ba (bfeedfc, M10 bỏ chốt, M11 `-ge`→`-gt`). Có cái thứ tư? Gợi ý: đổi
+    `$js.Count` thành `$prMo.Count`; đặt chốt SAU khi nạp `$GiuMau`; ép kiểu `$TranPR`.
+- id: js-Count-dem-cai-gi
+  note: >-
+    `$js` là mảng PR; `$prMo` là ref đã gộp head+base rồi `Sort-Object -Unique`. Chốt so
+    `$js.Count` với `$TranPR` — ĐÚNG đại lượng mà `gh --limit` giới hạn chứ? Sai đại lượng
+    thì biên nằm sai chỗ.
+
+so_lieu_nguoi_va_bao:
+  bo_test: 18/18 — pwsh 7.4.6, TMPDIR=/dev/shm
+  bang_chung_duong: 'bản bfeedfc (SHA lượt kiến trúc đã review) ⇒ 16/18, ĐỎ t17 và t18'
+  dot_bien: 'M10 bỏ chốt chạm trần ⇒ 17/18 (đỏ t17) · M11 đổi `-ge` thành `-gt` ⇒ 17/18 (đỏ t17) — M11 chứng minh t17 đo ĐÚNG BIÊN, không chỉ đo "có tồn tại một phép kiểm"'
+  cong_khac: 'eol ok=true checked=393 violations=0 · lease_publish 31/31 · release-verify ok=true failed=0 · golden rc=0 · file_count 179'
+  lap_luan_cua_nguoi_va: 'nâng số chỉ DỜI biên; chốt `>= trần ⇒ từ chối` mới ĐÓNG lớp'
+
+no_da_khai_KHONG_neu_lai:
+- id: bo-qua-lop-pr-khong-kiem-gi
+- id: phu-thuoc-gh
+- id: hai-duong-se-troi-lech
+- id: tl-selftest-khong-do-duoc
+  note: Ba lượt trước không ai xác nhận được. Giữ nguyên "chưa ai đo".
+- id: lease-khong-nam-trong-cay-duoc-review
+  note: 'Chữa tạm: prompt nêu đích danh `git show origin/<nhánh>:...`. Chữa gốc chưa làm.'
+- id: gh-phan-trang-that-chua-ai-do
+  note: >-
+    Bản vá đo hành vi của SCRIPT khi chạm trần, KHÔNG đo hành vi phân trang thật của `gh` ở
+    kho >1000 PR. `gh` bị proxy container chặn cả REST lẫn GraphQL nên không đo sống được —
+    reviewer lượt kiến trúc đã cài `gh` 2.45.0 vào rồi vẫn bị chặn.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T16:13:41Z'
+master_sha_at_grant: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+lease_song_khac_luc_cap: 'Lease lượt 1, 2, 3 và lượt kiến trúc của #150 đã đóng. Không có lease nào khác đang mở.'
+canh_bao_moi_truong_luc_cap: >-
+  `pwsh` KHÔNG cài sẵn — tải 7.4.6 linux-x64 rồi đặt `TMPDIR=/dev/shm`. `/dev/shm` bị XOÁ khi
+  phiên khởi động lại: người vá đã mất `pwsh` giữa chừng và một lượt đo trả rc=127 với đầu ra
+  RỖNG, trông y hệt "chạy xong sạch". Kiểm công cụ có mặt TRƯỚC khi đọc bất kỳ con số nào.
+  Ngoài ra `claude` sẽ báo "Ignoring 14 permissions.allow entries… workspace has not been
+  trusted" — allowlist của kho KHÔNG áp dụng cho phiên reviewer; đó là bình thường, không
+  phải lỗi.

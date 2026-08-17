@@ -125,3 +125,4 @@ lease_song_khac_luc_cap: >-
 canh_bao_moi_truong_luc_cap: >-
   Lượt 1 reviewer phải đặt `TMPDIR=/dev/shm` vì sandbox khoá `/tmp` — giữ nguyên cách ấy.
   Thiếu `pwsh` thì khai KHÔNG ĐO ĐƯỢC, đừng suy từ đọc code.
+posted_comment_id: 5316389438   # workflow ghi, ĐỪNG sửa tay

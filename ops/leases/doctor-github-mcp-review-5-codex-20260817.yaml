@@ -1,0 +1,186 @@
+# Lease REVIEWER lượt 5 — `doctor` đo GitHub theo đúng đường MCP.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# VÌ SAO CÓ LƯỢT 5. Lượt 4 trả `changes_requested` trên `9683d916` với hai finding P2 và
+# hai đột biến sống sót. Đã vá ở `a1d47a0`, cộng `bf24fe4` đóng mục mà chính lượt 4 khai là
+# KHÔNG ĐO ĐƯỢC.
+#
+# LƯỢT NÀY LÀ PHÉP THỬ CỦA MỘT CÁCH SỬA, KHÔNG PHẢI CỦA MỘT BẢN VÁ. Bốn lượt liên tiếp
+# reviewer đều tìm được đột biến sống sót ở CÙNG một lớp (`t105` đo ĐỒ GIẢ chứ không đo HỢP
+# ĐỒNG), và lượt 4 nêu đúng nguyên nhân: oracle chỉ đặc tả một TẬP CON lời gọi. Người vá đã
+# viết sẵn trong lease lượt 4 rằng nếu chốt "danh sách cho phép" vẫn thủng thì đó là bằng
+# chứng CÁCH TIẾP CẬN sai — nó thủng, nên lượt này sửa CHỖ ĐẶT chốt chứ không thêm điều
+# kiện: đồ giả TỰ từ chối mọi lời gọi lệch đặc tả, và `goi_api()` là đường DUY NHẤT gọi
+# `_do_github_api`. Câu hỏi của lượt 5 vì thế không phải "còn lỗ nào" mà là "cách sửa này
+# có đóng được cả LỚP không" — và prompt hỏi thẳng reviewer điều đó ở mục 6.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: doctor-github-mcp-review-5-codex-20260817
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+reviewer_note: người vá là `claude` ⇒ §8 bắt reviewer khác nhà cung cấp
+assurance_target: cross_approved
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: bf24fe44fcf926bf2b64fa4cb91065646b0599f1
+branch: ops/doctor-github-qua-mcp
+base_sha: e38b0bed7c95d2a9ab97d6ec09f047de5fc05978
+target_branch_neu_land: master
+target_pull_request_note: 'Chưa mở PR lúc cấp lease — review neo thẳng vào SHA.'
+
+luot_truoc:
+- lease_id: doctor-github-mcp-review-1-codex-20260817
+  reviewed_sha: 4ff2c6bfe04a205e5989642bc527bc5341db3e0f
+  verdict: changes_requested
+  finding: [p1-mcp-co-the-do-tu-tien-trinh-con, p2-ten-server-github-khop-chuoi-con,
+    p2-mcp-json-sai-kieu-lam-phep-do-nem-loi]
+  dot_bien_reviewer_bao_song_sot: 2
+  da_va_o_commit: fc4842130dd4514d4a4e0d013429fa97743cbf7c
+- lease_id: doctor-github-mcp-review-2-codex-20260817
+  reviewed_sha: fc4842130dd4514d4a4e0d013429fa97743cbf7c
+  verdict: changes_requested
+  finding: [github-server-value-khong-duoc-kiem-kieu, disconnected-bi-doc-thanh-khoe]
+  dot_bien_reviewer_bao_song_sot: 2
+  da_va_o_commit: 109c427895122c50501f675a1aa132d1881e8816
+- lease_id: doctor-github-mcp-review-3-codex-20260817
+  reviewed_sha: 109c427895122c50501f675a1aa132d1881e8816
+  verdict: changes_requested
+  finding: [p2-trang-thai-mcp-van-phan-loai-sai-hai-chieu,
+    p2-mcpservers-sai-kieu-bi-servers-che-khuat, p2-t105-van-do-do-gia-thay-vi-hop-dong]
+  dot_bien_reviewer_bao_song_sot: 3
+  da_va_o_commit: 9d79e5f7b327af21d4518f1317e475f8042781fa
+- lease_id: doctor-github-mcp-review-4-codex-20260817
+  reviewed_sha: 9683d916ceca64741861a4752ecbeb3a2c6ed84d
+  verdict: changes_requested
+  finding: [p2-t105-allowlist-van-khong-phu-toan-bo-loi-goi,
+    p2-ten-server-trung-casefold-phu-thuoc-thu-tu-json]
+  dot_bien_reviewer_bao_song_sot: 2
+  dot_bien_song_sot_chi_tiet: >-
+    `gh auth status --bogus` · một lời gọi `claude` THỪA nấp trong nhánh chỉ chạy khi stdout
+    chứa `Connected (stale)`. Cả hai lọt qua đúng MỘT lỗ: chốt cũ OPT-IN nên chỉ soi những
+    lời gọi mà ca tự nguyện đưa ra. Đã đo lại bằng ĐÚNG hai lệnh nguyên văn của reviewer:
+    sau bản vá cả hai làm suite 104/105.
+  dot_bien_thu_ba_la_TUONG_DUONG: >-
+    Reviewer báo `ten[0]` -> `ten[-1]` sống sót. NGƯỜI VÁ BÁC, và bác bằng phép đo chứ không
+    bằng lập luận: sau chốt mơ-hồ thì chỗ `ten[x]` chạy chỉ còn `len(ten) == 1` nên hai biểu
+    thức bằng nhau. Chạy cả hai bản trên bốn cấu hình (`github` · `GitHub` · cả hai theo hai
+    thứ tự): 0 ca lệch. Đột biến ĐÚNG cho bản vá ấy là gỡ chính chốt mơ-hồ — và nó CHẾT.
+    Mục 3 của prompt yêu cầu reviewer KIỂM LẠI lời khai này.
+  da_va_o_commit: a1d47a0c357b6b940d3872753890a9c8c362361f
+
+scope_files: 2
+scope_note: >-
+  Diff `9683d91..bf24fe4` gồm ĐÚNG hai tệp: `.claude/dev/launcher.py` và
+  `.claude/dev/launcher_test.py`, qua hai commit (`a1d47a0` vá lượt 4, `bf24fe4` đóng mục
+  KHÔNG ĐO ĐƯỢC). Tệp thứ ba là finding.
+
+prompt_path: ops/prompts/doctor-github-mcp-review-5-codex-20260817.md
+prompt_sha256_required: 7d43895fb2cc2794c25e4669c51ce567a3e910d6ba67f9886173358fef0e171c
+
+granted_by: ducthangho
+granted_on_instruction: direct, in-session, 2026-08-17 ("cấp lease luot 5 rồi chạy review đi")
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  KHAI THẲNG: phiên ghi lease này CHÍNH LÀ phiên đã vá. Nó KHÔNG tự cấp quyền —
+  `granted_by` là `ducthangho`, duyệt trực tiếp, và `ops/lease_publish.py` chặn cứng mọi tên
+  provider ở trường ấy. Lượt này lời khai đáng ngại hơn mọi lượt trước, vì lần đầu người vá
+  BÁC một finding của reviewer (đột biến `ten[-1]` là TƯƠNG ĐƯƠNG). Người vá tự chấm mình
+  đúng là đúng thứ cross-review sinh ra để chặn — nên mục 3 của prompt bắt kiểm lại chính
+  lời khai ấy, và lease ghi kèm phép đo để reviewer chạy lại được.
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc chủ kho
+
+leased_at_utc: '2026-08-17T07:49:00Z'
+lease_expires_at_utc: '2026-08-18T07:49:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+attempts_note: >-
+  Việc dev-side ngoài packet nên KHÔNG tiêu lượt. Ghi 0/0 để sổ không lẫn với trần attempt
+  của revision 4.
+
+muc_kiem:
+- id: tim-luot-thu-NAM-cua-benh-do-DO-GIA
+  note: >-
+    TRỌNG TÂM. Chốt nay TOÀN PHẦN: `gia_run` tự từ chối mọi lời gọi lệch đặc tả, và
+    `goi_api()` là đường DUY NHẤT gọi `_do_github_api` (14 chỗ). Bốn hướng trong prompt:
+    `goi_api` lọc bằng `"claude" in " ".join(...)` · đặc tả dựng lại từ `ten_mong_doi` ·
+    `bang()` ném từ TRONG mã đang thử (có ai nuốt ngoại lệ không) · còn hàm/ca nào gọi
+    `subprocess` mà không qua đường này.
+- id: muc-luot-4-khai-KHONG-DO-DUOC-nay-da-do
+  note: >-
+    Đo được: `.mcp.json` CHÈN ĐƯỢC dòng `Status:` thứ hai, nhưng nằm SAU bản thật nên
+    `.search` đọc đúng. Xét lập luận chống lưng (CLI in `Status` trước mọi trường người dùng
+    đặt; tên server không chứa được xuống dòng vì phải casefold ra `github`) — có lỗ nào,
+    transport khác có trường nào in trước `Status` không, fixture có trung thực không.
+- id: kiem-lai-loi-khai-BAC-finding-cua-reviewer
+  note: >-
+    Người vá bác đột biến `ten[0]` -> `ten[-1]` của lượt 4, gọi nó là TƯƠNG ĐƯƠNG, kèm phép
+    đo trên bốn cấu hình. Kiểm lại. Nếu lời khai ấy SAI thì đây là finding nặng — người vá
+    tự chấm mình đúng trên chính chỗ reviewer đã chỉ.
+- id: chot-mo-ho-co-chan-oan-khong
+  note: >-
+    Nhiều tên khớp casefold ⇒ từ chối, nói `MO HO`. Có cấu hình HỢP LỆ nào bị chặn oan không.
+- id: gh-con-lat-duoc-nhan-o-duong-nao-khong
+  note: >-
+    Giữ từ bốn lượt trước — đừng bỏ vì đã hỏi bốn lần. `_do_github_api` VÀ tầng tiêu thụ.
+- id: cau-hoi-TONG-dong-lop-hay-het-huong
+  note: >-
+    Nếu lượt này KHÔNG tìm được đột biến sống sót, nói rõ đó là vì chốt đã đóng được LỚP hay
+    vì hết hướng tấn công — hai điều đó khác nhau và người vá cần biết mình đang ở điều nào.
+    Nếu TÌM ĐƯỢC, nói thêm: lọt vì chốt thiếu điều kiện, hay vì cách chốt sai từ gốc.
+
+so_lieu_nguoi_va_bao:
+  suite: 105/105 (qua 104, bỏ qua 1, hỏng 0)
+  nen_master_suite: 104/104 (qua 103, bỏ qua 1, hỏng 0) — e38b0be, ĐO CÙNG LÚC, CÙNG MÁY
+  dot_bien: 83/83 đạt (1 không đo được trên nền này)
+  nen_master_dot_bien: 61/61 đạt — e38b0be, ĐO CÙNG LÚC, CÙNG MÁY
+  delta: 0 ca đỏ · +1 ca xanh (`t105`) · +22 đột biến
+  cong_khac: eol selftest 30/30 · eol survey violations=[] · doc-claims --strict rc=0 ·
+    doctrine-scan sạch · doctor `--doi-kha-dung` rc=13 fail-close
+  canh_bao_ve_so_nen: >-
+    Lượt 2 VÀ lượt 3 bị sandbox cắt tiến trình ở nhóm ca thao tác cây tiến trình nên báo
+    KHÔNG ĐO ĐƯỢC cho số tổng; lượt 4 chạy trọn. Nếu lượt 5 bị cắt thì làm y hệt lượt 2/3.
+
+ngoai_pham_vi_da_biet:
+- id: gh-trong-github-actions
+  note: >-
+    `.github/workflows/**` vẫn dùng `gh` — ĐÚNG, runner GitHub không có MCP. Phạm vi lượt
+    này là phía DEV.
+- id: gh-trong-skill-va-docs
+  note: >-
+    `.claude/skills/**` và `docs/**` còn lệnh `gh`. NGOÀI phạm vi lượt này.
+- id: loi-khai-pham-vi-da-duoc-xac-nhan
+  note: >-
+    "Nhãn nói về AGENT SẮP SINH, không phải phiên đang chạy" — lượt 2 đã đo ĐỘC LẬP và xác
+    nhận. Chỉ báo lại nếu có phép đo NGƯỢC LẠI.
+- id: ba-dieu-luot-3-va-4-deu-xac-nhan-DUNG
+  note: >-
+    `gh` không lật được nhãn · đột biến chết bằng `JSONDecodeError`/`AttributeError`/
+    `TypeError` là oracle hợp lệ · đường tiêu thụ fail-close (rc=13). Chỉ báo lại nếu bản vá
+    mới làm hỏng một trong ba.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T07:48:15Z'
+master_sha_at_grant: e38b0bed7c95d2a9ab97d6ec09f047de5fc05978
+lease_song_khac_luc_cap: >-
+  Lease lượt 1, 2, 3 và 4 đều đã đóng bằng verdict `changes_requested`. Không có lease review
+  nào khác đang mở cho việc dev-side này.
+
+canh_bao_moi_truong_luc_cap: >-
+  ĐO ĐƯỢC lúc cấp: `codex` KHÔNG bị chặn (`~/.codex/tra-luat-CHAN-CODEX` không tồn tại; hook
+  báo "khong co khoi nao do ta quan ly", đã đăng nhập bằng ChatGPT). Cảnh báo còn lại là
+  `SAP_HET_HAN`: ảnh chụp `CODEX_AUTH_JSON` đã cũ ~28h, mà refresh token xoay vòng — nếu
+  reviewer không khởi động được thì đọc `launcher.py doctor` trước khi nghi thứ khác. Bốn
+  lượt trước vẫn khởi động được với cùng cảnh báo này.

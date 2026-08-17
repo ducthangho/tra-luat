@@ -2211,6 +2211,15 @@ def _doc_mcp_json(ws: str | None) -> tuple[bool, str]:
     if not ten:
         return False, (f".mcp.json [{nguon}] KHONG khai server ten dung bang `github` "
                        f"(co: {', '.join(srv) or 'khong co server nao'})")
+    # KIEM CA GIA TRI, khong chi khoa. Cross-review luot 2 (P2): ban truoc kiem BANG
+    # server la object roi dung, nen `{"mcpServers": {"github": null}}` va
+    # `{"mcpServers": {"github": "x"}}` deu duoc tuyen la "da khai server". Cung mot
+    # hinh dang loi voi P2 cua luot 1 — chi tut xuong SAU mot tang. Do la dau hieu
+    # nen kiem TUNG TANG mot lan cho het thay vi va dan theo bao cao.
+    xau = [k for k in ten if not isinstance(srv[k], dict)]
+    if xau:
+        return False, (f".mcp.json [{nguon}] khai `{', '.join(xau)}` nhung gia tri khong "
+                       f"phai object (la {', '.join(type(srv[k]).__name__ for k in xau)})")
     return True, f".mcp.json [{nguon}] khai server: {', '.join(ten)}"
 
 
@@ -2229,6 +2238,13 @@ def _do_git_day_keo(ws: str | None) -> tuple[str, str]:
     if rc == 0:
         return ("DUNG_DUOC", "git ls-remote origin OK (credential qua $GIT_CONFIG_KEY_*)")
     return ("CHUA_XAC_THUC", f"git ls-remote rc={rc}: {(err or '').strip()[:120]}")
+
+
+# DANH SÁCH CHO PHÉP THẬT, neo ĐẦU phần trạng thái. `[^a-z]*` chỉ tha cho ký hiệu
+# trang trí (`✓`, `⏸`, khoảng trắng), nên `disconnected` (chữ đứng trước) và
+# `not connected` (từ `not` đứng trước) đều KHÔNG khớp, còn `✓ Connected` thì khớp.
+# `\b` chặn `connectedness` và họ hàng.
+_RE_MCP_KHOE = re.compile(r"[^a-z]*connected\b")
 
 
 def _suc_khoe_mcp_github() -> tuple[str, str]:
@@ -2269,10 +2285,21 @@ def _suc_khoe_mcp_github() -> tuple[str, str]:
         return ("khong_do_duoc",
                 f"`claude mcp list` khong co dong nao cho `github` (rc={r.returncode})")
     d = dong[0]
-    thap = d.casefold()
-    # HỎNG là danh sách CHO PHÉP ngược: nêu đích danh các trạng thái xấu ta biết, và
-    # bất cứ thứ gì KHÔNG phải "connected" đều KHÔNG được coi là khoẻ.
-    if "connected" in thap and "not connected" not in thap:
+    # TÁCH PHẦN TRẠNG THÁI RỒI MỚI KHỚP. Dòng CLI có dạng
+    #     github: <url> (HTTP) - <trạng thái>
+    # Bản trước dò chuỗi con trên CẢ DÒNG (`"connected" in thap and "not connected"
+    # not in thap`) và cross-review lượt 2 hạ đúng nó: `Disconnected` chứa
+    # `connected` mà không chứa `not connected` ⇒ được xếp `khoe`. Chú thích của
+    # chính bản ấy tự nhận là "danh sách CHO PHÉP" trong khi mã là danh sách CẤM
+    # dò chuỗi con — đúng thứ `CLAUDE.md` bảo sẽ thua từ trong thiết kế, và nó thua
+    # ngay ở biến thể ĐẦU TIÊN người khác nghĩ ra. Cùng họ với `doctrine-scan` và
+    # với việc phân loại HTTP bằng văn bản tự do: khớp trên VĂN BẢN TỰ DO là đoán.
+    _, sep, trang_thai = d.rpartition(" - ")
+    if not sep:
+        # KHÔNG tách được ⇒ chưa đo được trạng thái. Trạng thái THỨ BA, không phải
+        # "hỏng": một CLI đổi định dạng thì ta mù, và mù phải nói là mù.
+        return ("khong_do_duoc", f"khong tach duoc phan trang thai tu dong CLI: {d}")
+    if _RE_MCP_KHOE.match(trang_thai.casefold().strip()):
         return ("khoe", d)
     return ("hong", d)
 

@@ -3471,10 +3471,16 @@ DOT_BIEN = [
     ("claude_dem_ca_BIEN_RONG_la_credential",
      ('            and v.strip()]', '            ]'),
      ["t103_nam_finding_cua_bot_review_PR128"]),
-    ("github_dem_CO_MAT_gh_la_da_xac_thuc",
-     ('            duong.append(("gh-cli", pg.returncode == 0,',
-      '            duong.append(("gh-cli", True,'),
-     ["t103_nam_finding_cua_bot_review_PR128"]),
+    # `github_dem_CO_MAT_gh_la_da_xac_thuc` ĐÃ GỠ khỏi bảng, KHÔNG phải vì hết cần
+    # đo — vì đoạn nó nhắm (`duong.append(("gh-cli", pg.returncode == 0, …`) không
+    # còn tồn tại sau khi `_do_github` tách thành `_do_git_day_keo` + `_do_github_api`.
+    # Ý ĐỊNH của nó (cho sự CÓ MẶT của `gh` lật nhãn) nay do
+    # `github_api_cho_gh_lat_nhan_tro_lai` giữ, và mạnh hơn: bản cũ chỉ ép một đường
+    # phụ thành "đã xác thực", bản mới cho `gh` lật thẳng cả nhãn thành `DUNG_DUOC`.
+    # GHI RA ĐÂY vì một dòng biến mất khỏi bảng đột biến trông y hệt một chốt bị bỏ.
+    # Chính `chay_dot_bien` bắt được lúc gỡ: nó in `SAI - khong tim thay doan de dot
+    # bien` và tính là HỎNG chứ không im lặng bỏ qua — đúng thứ mà một bộ chạy đột
+    # biến ngoài kho không chứng minh được là mình có.
     ("moc_refresh_MAT_DO_PHAN_GIAI",
      ('        moc = datetime.fromisoformat(last_refresh.strip().replace("Z", "+00:00"))',
       '        moc = datetime.fromisoformat(last_refresh.strip().replace("Z", "+00:00")'
@@ -3767,6 +3773,65 @@ DOT_BIEN = [
      ('            if len(phan) != 4 or phan[0] not in ("OK", "ERR"):',
       '            if len(phan) != 4 or phan[0] != "OK":'),
      ["t81_chup_cay_windows_thieu_creationdate_phai_fail_closed"]),
+    # --- CHÍN ĐỘT BIẾN CHO `github-api` (t105). ---------------------------------
+    # VÌ SAO VÀO BẢNG chứ không nằm trong một script ngoài kho: lượt 1 và lượt 2 của
+    # cross-review đều phải TỰ nghĩ lại đột biến, và lượt 2 kết luận thẳng rằng bộ
+    # chạy đột biến của người vá là **KHÔNG ĐO ĐƯỢC** — nó nằm ngoài kho nên reviewer
+    # chỉ có LỜI KHAI trong thông điệp commit, không có mã. Reviewer đúng, và cách
+    # chữa không phải viết lời khai kỹ hơn: đưa đột biến vào đúng chỗ kho đã có sẵn
+    # cổng cho chúng. Ở đây chúng được CHẠY mỗi lượt `--dot-bien`, đọc được, và chịu
+    # chung mọi chốt của `chay_dot_bien` (bản sao tạm, tên tệp riêng, chống va `.pyc`).
+    # Cùng bài học với "ca test đi chết trong prompt/README": chỗ duy nhất một phép
+    # thử sống được là chỗ có người chạy nó.
+    ("github_api_cho_gh_lat_nhan_tro_lai",
+     ('    if not co_khai:', '    if not co_khai:\n        if shutil.which("gh"):\n'
+      '            return ("DUNG_DUOC", "gh OK" + duoi)'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
+    ("github_api_ten_server_khop_chuoi_con",
+     ('k.casefold() == "github"', '"github" in k.casefold()'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
+    ("github_api_ten_server_phan_biet_hoa_thuong",
+     ('k.casefold() == "github"', 'k == "github"'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
+    ("github_api_bo_bat_loi_json_hong",
+     ('    except (OSError, ValueError) as e:\n        return False, f".mcp.json',
+      '    except OSError as e:\n        return False, f".mcp.json'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
+    ("github_api_bo_kiem_kieu_goc",
+     ('    if not isinstance(d, dict):', '    if False:'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
+    ("github_api_bo_kiem_kieu_bang_server",
+     ('    if not isinstance(srv, dict):', '    if False:'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
+    # P2 cua cross-review luot 2: kieu o BANG duoc kiem ma kieu o GIA TRI thi khong,
+    # nen `{"mcpServers": {"github": null}}` van duoc tuyen la "da khai server".
+    ("github_api_bo_kiem_kieu_gia_tri_server",
+     ('    xau = [k for k in ten if not isinstance(srv[k], dict)]', '    xau = []'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
+    # P2 cua cross-review luot 2: dò chuoi con tren CA DONG lam `Disconnected` thanh
+    # `khoe`. Dot bien nay dung lai DUNG ban da bi bac.
+    ("github_api_suc_khoe_do_chuoi_con_ca_dong",
+     ('    if _RE_MCP_KHOE.match(trang_thai.casefold().strip()):',
+      '    thap = d.casefold()\n'
+      '    if "connected" in thap and "not connected" not in thap:'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
+    ("github_api_khoe_lat_thanh_dung_duoc",
+     ('    if tt_mcp == "khoe":',
+      '    if tt_mcp == "khoe":\n        return ("DUNG_DUOC", chi_tiet_mcp + duoi)'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
+    # HAI DOT BIEN CUOI la cua chinh REVIEWER (luot 2, M12/M13) — chung SONG SOT o
+    # ban truoc, vi do gia `subprocess.run` nuot moi kwargs nen mat `capture_output`
+    # (phep do thanh mu) hay mat `timeout` (mot CLI treo se treo luon `doctor`) deu
+    # khong ai thay. Ca do KET QUA cua mot do gia de dai thi no do DO GIA chu khong
+    # do ma — cung benh voi ca chi gia `run` ma khong gia `which` o luot 1. Nay do
+    # gia doi dung hop dong, va hai dot bien nay o lai bang de no khong hong lai.
+    ("github_api_mcp_list_mat_capture_output",
+     ('        r = subprocess.run(["claude", "mcp", "list"], capture_output=True, text=True,',
+      '        r = subprocess.run(["claude", "mcp", "list"], capture_output=False, text=True,'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
+    ("github_api_mcp_list_mat_timeout",
+     ('                           timeout=30)', '                           )'),
+     ["t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh"]),
 ]
 
 
@@ -3948,9 +4013,23 @@ def t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh():
     # — chinh hai nhanh cua finding P1 — khong bao gio duoc chay.
     mcp_out = [""]
 
+    # ĐÒI ĐÚNG HỢP ĐỒNG SUBPROCESS, khong chi doi ket qua. Cross-review luot 2 tim ra
+    # HAI dot bien song sot vi do gia CU NHAN moi kwargs: bo `capture_output=True`
+    # (mat stdout — phep do thanh mu ma van "xanh") va bo `timeout=30` (mot `claude`
+    # treo se treo luon `doctor`). Ca do KET QUA cua mot do gia de dai thi do chinh
+    # DO GIA, khong do ma. Nay do gia doi dung nhung gi ban that phai truyen.
     def gia_run(cmd, *_a, **_k):
         if list(cmd)[:3] == ["claude", "mcp", "list"]:
+            bang(_k.get("capture_output") is True,
+                 f"`claude mcp list` phai capture_output=True (khong thu stdout thi "
+                 f"phep do suc khoe la mu): kwargs={_k!r}")
+            bang(isinstance(_k.get("timeout"), (int, float)) and _k["timeout"] > 0,
+                 f"`claude mcp list` phai co timeout duong — mot CLI treo se treo "
+                 f"luon `doctor`: kwargs={_k!r}")
+            bang(_k.get("text") is True, f"phai text=True de doc stdout ra str: {_k!r}")
             return Rc(0, mcp_out[0])
+        bang(_k.get("capture_output") is True and _k.get("timeout"),
+             f"`gh auth status` cung phai capture_output + timeout: kwargs={_k!r}")
         return Rc(0)                                    # gh LUON "da xac thuc"
 
     m.subprocess.run = gia_run
@@ -3992,10 +4071,28 @@ def t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh():
             # do khong noi ro no noi ve AI se bi doc thanh "phien toi mat cong cu".
             bang("AGENT SAP SINH" in mo_ta, f"khong khai nhan nay noi ve AI: {mo_ta!r}")
 
-            # (3c) `not connected` KHONG duoc lot qua chi vi co chuoi con `connected`.
-            mcp_out[0] = "github: https://api.githubcopilot.com/mcp/ (HTTP) - not connected\n"
+            # (3c) MOI TRANG THAI XAU deu phai xuong CHUA_XAC_THUC, khong duoc lot qua
+            #      chi vi co chuoi con `connected`. `Disconnected` la finding P2 cua
+            #      cross-review luot 2: ban truoc dò chuoi con tren CA DONG nen no
+            #      duoc xep `khoe`. Danh sach CAM thua o bien the DAU TIEN nguoi khac
+            #      nghi ra — nen nay khop DANH SACH CHO PHEP, neo dau phan trang thai.
+            for xau in ("not connected", "Disconnected", "disconnected",
+                        "⏸ Pending approval", "failed to connect", "needs authentication"):
+                mcp_out[0] = f"github: https://api.githubcopilot.com/mcp/ (HTTP) - {xau}\n"
+                tt, mo_ta = m._do_github_api(td)
+                bang(tt == "CHUA_XAC_THUC", f"trang thai xau {xau!r} ma tra {tt}: {mo_ta!r}")
+            # ...va `connected` PHAI van duoc nhan, ke ca khong co ky hieu trang tri.
+            for tot in ("✓ Connected", "Connected", "connected"):
+                mcp_out[0] = f"github: https://api.githubcopilot.com/mcp/ (HTTP) - {tot}\n"
+                tt, _ = m._do_github_api(td)
+                bang(tt == "KHONG_DO_DUOC", f"trang thai tot {tot!r} bi doc thanh {tt}")
+
+            # (3c2) DONG CLI KHONG TACH DUOC phan trang thai -> KHONG do duoc, chu
+            #       KHONG duoc doan la hong. CLI doi dinh dang thi ta MU, va mu phai
+            #       noi la mu (`None` != `False`).
+            mcp_out[0] = "github: mot dinh dang la khong co dau phan cach\n"
             tt, mo_ta = m._do_github_api(td)
-            bang(tt == "CHUA_XAC_THUC", f"`not connected` ma tra {tt}: {mo_ta!r}")
+            bang(tt == "KHONG_DO_DUOC", f"dong CLI khong tach duoc ma tra {tt}: {mo_ta!r}")
 
             # (3d) HOI MA KHONG CO CAU TRA LOI XAC DANG -> moi la KHONG_DO_DUOC.
             #      Hai duong: CLI khong in dong `github:`, va khong co `claude` de hoi.
@@ -4022,8 +4119,14 @@ def t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh():
             tt, _ = m._do_github_api(td)
             bang(tt != "CHUA_XAC_THUC", f"ten `GitHub` bi chan oan: {tt}")
 
-            # (4c) JSON HOP LE ma SAI KIEU — khong duoc nem loi, khong duoc doc nham
-            for xau in ([], {"mcpServers": ["github"]}, {"mcpServers": "github"}):
+            # (4c) JSON HOP LE ma SAI KIEU — khong duoc nem loi, khong duoc doc nham.
+            #      Hai hinh dang cuoi (`github` co gia tri null / chuoi) la finding P2
+            #      cua cross-review luot 2: luot 1 vá kieu o BANG server, luot 2 lo ra
+            #      rang kieu o GIA TRI van thung. Cung mot hinh dang loi, tut xuong
+            #      sau mot tang — nen nay liet ke ca ba tang trong cung mot vong.
+            for xau in ([], {"mcpServers": ["github"]}, {"mcpServers": "github"},
+                        {"mcpServers": {"github": None}}, {"mcpServers": {"github": "x"}},
+                        {"mcpServers": {"github": []}}):
                 (Path(td) / ".mcp.json").write_text(_json.dumps(xau), encoding="utf-8")
                 tt, mo_ta = m._do_github_api(td)
                 bang(tt == "CHUA_XAC_THUC",

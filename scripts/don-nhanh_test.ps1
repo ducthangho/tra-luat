@@ -396,6 +396,62 @@ ca 't18_gh_tra_ve_DUOI_TRAN_thi_VAN_chay' {
     bang (-not ($con -contains 'ops/rac')) "nhanh rac khong bi xoa. Con lai: $($con -join ', ')"
 }
 
+function Nhieu-PR {
+    <#  Sinh $So PR gia, base deu la `master` (khong lam ban danh sach GIU cua ca goi).  #>
+    param([int]$So)
+    return @(1..$So | ForEach-Object { @{ headRefName = "pr/$_"; baseRefName = 'master' } })
+}
+
+ca 't19_dem_VUOT_TRAN_thi_TU_CHOI_va_so_sanh_phai_la_SO_HOC' {
+    # F1 cua cross-review luot 4 (P2). Cap t17/t18 chi ghim bien TU PHIA DUOI, nen HAI dot
+    # bien lam chot FAIL-OPEN van song sot 18/18:
+    #   M12  `-ge` -> `-eq` : chi chan khi dem BANG DUNG tran. Do duoc: `-TranPR 0` voi 1 PR
+    #        mo => rc=0 va XOA THAT, trong khi HEAD tu choi.
+    #   M16  so sanh CHUOI  : `"10" -ge "9"` la $false => vuot tran ma van cho qua.
+    #
+    # Ca nay giet CA HAI trong MOT: 10 PR, tran 9. `10 -ge 9` dung ve SO HOC nhung sai ve
+    # CHUOI, va 10 khac 9 nen `-eq` cung khong bat. Chon 10/9 co chu dich — day la cap so
+    # nho nhat phan biet duoc so hoc voi chuoi.
+    $k = Dung-Kho
+    Them-Nhanh $k 'nen/tichhop' $true
+    Them-Nhanh $k 'ops/rac' $true
+    $truoc = Nhanh-Tren-Remote $k
+    $gh = Dung-Gh-Gia -PR (Nhieu-PR 10)
+    $r = Chay-KichBan $k $gh @('-Xoa', '-TranPR', '9')
+    $sau = Nhanh-Tren-Remote $k
+    bang ($r.rc -eq 13) "rc=$($r.rc), doi 13 — dem 10 VUOT tran 9 ma van duoc tin. Ra:`n$($r.ra)"
+    bang (($truoc -join ',') -eq ($sau -join ',')) "CO nhanh bi xoa du danh sach VUOT tran: truoc=[$($truoc -join ', ')] sau=[$($sau -join ', ')]"
+}
+
+ca 't20_MAC_DINH_phai_cho_qua_o_999_PR' {
+    # F2 cua cross-review luot 4 (P3). MOI ca da-PR deu truyen `-TranPR` tuong minh, nen nua
+    # "nang tran 200 -> 1000" cua ban va KHONG co bang chung duong nao: dot bien ha mac dinh
+    # ve 200 (M13) hoac ve 3 (M13b) deu song sot 18/18.
+    #
+    # Ghim bang HANH VI, khong bang chuoi nguon — kho nay da ghi "chot chi tim chuoi nguon la
+    # chot rat yeu". Cap t20/t21 ghim mac dinh DUNG tai 1000: 999 phai QUA, 1000 phai DUNG.
+    $k = Dung-Kho
+    Them-Nhanh $k 'ops/rac' $true
+    $gh = Dung-Gh-Gia -PR (Nhieu-PR 999)
+    $r = Chay-KichBan $k $gh @('-Xoa')          # KHONG truyen -TranPR: dung MAC DINH
+    $con = Nhanh-Tren-Remote $k
+    bang ($r.rc -eq 0) "rc=$($r.rc), doi 0 — mac dinh co the da bi ha xuong duoi 1000. Ra:`n$($r.ra)"
+    bang (-not ($con -contains 'ops/rac')) "nhanh rac khong bi xoa. Con lai: $($con -join ', ')"
+}
+
+ca 't21_MAC_DINH_phai_TU_CHOI_o_1000_PR' {
+    # Ve tren cua cap ghim mac dinh. Cung F2. Neu ai nang mac dinh len 2000 thi ca nay DO —
+    # co y: doi tran la doi HANH VI CONG BO, phai co nguoi sua ca test va noi ly do.
+    $k = Dung-Kho
+    Them-Nhanh $k 'ops/rac' $true
+    $truoc = Nhanh-Tren-Remote $k
+    $gh = Dung-Gh-Gia -PR (Nhieu-PR 1000)
+    $r = Chay-KichBan $k $gh @('-Xoa')          # KHONG truyen -TranPR
+    $sau = Nhanh-Tren-Remote $k
+    bang ($r.rc -eq 13) "rc=$($r.rc), doi 13 — cham mac dinh 1000 ma van tin la danh sach DU. Ra:`n$($r.ra)"
+    bang (($truoc -join ',') -eq ($sau -join ',')) "CO nhanh bi xoa du cham tran mac dinh"
+}
+
 # ---------------------------------------------------------------- chạy
 $ten = @($script:CA.Keys)
 if ($LapCa) { $ten = @($ten | Where-Object { $_ -eq $LapCa }) }

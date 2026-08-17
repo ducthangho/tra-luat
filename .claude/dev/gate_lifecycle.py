@@ -25,6 +25,7 @@ import sys
 import tempfile
 import time
 import uuid
+import atexit
 from typing import Any, Iterator
 
 
@@ -396,6 +397,42 @@ _CO_CHE_CACH_LY = "quet-cay"
 _CGROUP_GATE: Path | None = None
 
 
+# MỐI NỐI KIỂM THỬ — liệt kê ở MỘT chỗ để còn khai được vào bằng chứng.
+#
+# P1 cross-review trên `e480a93`: ba biến này nằm trong MÃ SẢN XUẤT và kế thừa
+# thẳng từ môi trường, nên một lượt gate có thể bị hạ cấp (hoặc bị bơm lỗi) rồi
+# vẫn sinh ra bằng chứng TÁI DÙNG ĐƯỢC. Đó là đường lách cổng, và tệ hơn là nó
+# có thể bị bật NGOÀI Ý MUỐN bởi môi trường shell/CI.
+#
+# Chốt: hai biến BƠM LỖI làm bằng chứng KHÔNG tái dùng được (đó là lượt thí
+# nghiệm, không phải lượt gate thật). `TL_GATE_TAT_CGROUP` KHÔNG bơm lỗi — nó là
+# công tắc vận hành thật cho host cgroup hỏng — nên nó chỉ hạ `co_che_cach_ly`
+# xuống `quet-cay`, và ai cần vùng chứa thì đòi bằng `validate --doi-cach-ly`.
+_MOI_NOI_BOM_LOI = ("TL_GATE_EP_BAO_RO", "TL_GATE_EP_HONG_VAO_CGROUP")
+_MOI_NOI_HA_CAP = ("TL_GATE_TAT_CGROUP",)
+
+
+def _moi_noi_dang_bat() -> list[str]:
+    return sorted(k for k in (_MOI_NOI_BOM_LOI + _MOI_NOI_HA_CAP)
+                  if os.environ.get(k) == "1")
+
+
+def _don_cgroup_con_sot() -> None:
+    """Dọn cgroup nếu đường chính chưa kịp dọn. Đăng ký qua `atexit`.
+
+    P2 cross-review trên `e480a93`: cgroup được cấp TRƯỚC khi sinh con, nhưng
+    khối `finally` dọn tổng quát chỉ bắt đầu SAU khi sinh con xong. Một
+    `KeyboardInterrupt` rơi vào đúng quãng giữa thì cgroup ở lại vĩnh viễn — nên
+    câu "dọn ở mọi đường thoát" là khai rộng hơn thứ mã làm được.
+    Dùng `atexit` thay vì bọc thêm một tầng `try` quanh cả khối: nó phủ được cả
+    ngắt, `SystemExit`, lẫn mọi `return` sớm mai sau ai đó thêm vào.
+    """
+    if _CGROUP_GATE is not None:
+        with contextlib.suppress(Exception):
+            _giet_cgroup(_CGROUP_GATE, han_giay=2.0)
+        _don_cgroup(_CGROUP_GATE)
+
+
 def _mount_cgroup2() -> Path | None:
     """Điểm gắn cgroup v2, dò từ `/proc/self/mountinfo`.
 
@@ -433,11 +470,21 @@ def _cgroup_cua_ta() -> str:
     return "/"
 
 
-def _pid_trong_cgroup(cg: Path) -> list[int]:
+def _pid_trong_cgroup(cg: Path) -> list[int] | None:
+    """PID trong cgroup. `[]` = RỖNG THẬT. `None` = KHÔNG ĐỌC ĐƯỢC — khác hẳn nhau.
+
+    P1 cross-review trên `e480a93`: bản trước trả `[]` cho CẢ HAI, nên một lượt
+    đọc hỏng (`EACCES`, `EIO`, cgroup bị xoá mất giữa chừng) được `_giet_cgroup`
+    đọc thành "cgroup đã rỗng" rồi khai `giet_tron_ven: true` — xanh giả. Tác giả
+    đã tự dựng lại: `_giet_cgroup(<cgroup khong doc duoc>)` trả `True`.
+
+    Đây ĐÚNG hình dạng lỗi mà cả bản vá này sinh ra để đóng ("vắng mặt vì sạch"
+    ≠ "vắng mặt vì chưa đo"), và tôi mắc lại nó ngay trong hàm đi đóng nó.
+    """
     try:
         return [int(x) for x in (cg / "cgroup.procs").read_text().split()]
     except (OSError, ValueError):
-        return []
+        return None
 
 
 def _tao_cgroup_gate() -> Path | None:
@@ -517,9 +564,9 @@ def _giet_cgroup(cg: Path, han_giay: float = 5.0) -> bool:
             (cg / "cgroup.freeze").write_text("1")
         for _ in range(50):
             pids = _pid_trong_cgroup(cg)
-            if not pids:
+            if pids == []:                       # RỖNG THẬT, không phải đọc hỏng
                 break
-            for q in pids:
+            for q in (pids or []):
                 with contextlib.suppress(ProcessLookupError, PermissionError):
                     os.kill(q, signal.SIGKILL)
             time.sleep(0.1)
@@ -529,7 +576,9 @@ def _giet_cgroup(cg: Path, han_giay: float = 5.0) -> bool:
     het = time.monotonic() + han_giay
     xong = False
     while True:
-        if not _pid_trong_cgroup(cg):
+        # CHỈ `[]` mới là "đã xác nhận rỗng". `None` là không đọc được, và không
+        # đọc được thì KHÔNG được kết luận gì — cứ đợi tới hết hạn rồi khai thua.
+        if _pid_trong_cgroup(cg) == []:
             xong = True
             break
         if time.monotonic() > het:
@@ -930,6 +979,9 @@ def cmd_run(args: argparse.Namespace) -> int:
         elif os.name == "nt":
             _CO_CHE_CACH_LY = "job-object"
         payload["co_che_cach_ly"] = _CO_CHE_CACH_LY
+        payload["moi_noi_kiem_thu"] = _moi_noi_dang_bat()
+        if _CGROUP_GATE is not None:
+            atexit.register(_don_cgroup_con_sot)
         vao_cgroup = None
         if _CGROUP_GATE is not None:
             cg_gate = _CGROUP_GATE
@@ -1080,10 +1132,14 @@ def cmd_run(args: argparse.Namespace) -> int:
                 # trình" là tín hiệu người đọc cần, và giết lặng lẽ thì tín hiệu
                 # ấy biến mất. Trên đường huỷ/quá hạn `_terminate_process_tree`
                 # đã dọn rồi nên số này là 0 — chỗ nó có nghĩa là đường ĐẠT.
-                payload["so_sot_da_don"] = len(_pid_trong_cgroup(_CGROUP_GATE))
+                _sot = _pid_trong_cgroup(_CGROUP_GATE)
+                # Không đọc được thì ghi `null`, KHÔNG ghi 0: 0 là lời khai
+                # "đã đếm và không có", null là "không đếm được".
+                payload["so_sot_da_don"] = None if _sot is None else len(_sot)
                 if not _giet_cgroup(_CGROUP_GATE):
                     _GIET_KHONG_TRON_VEN = True
                 _don_cgroup(_CGROUP_GATE)
+                _CGROUP_GATE = None              # atexit ở trên thành vô hại
 
         payload["output_sha256"] = _file_sha256(output)
         payload["artifact_identity"] = {
@@ -1206,6 +1262,14 @@ def cmd_validate(args: argparse.Namespace) -> int:
         # lỗi "vắng mặt vì sạch" ≠ "vắng mặt vì chưa chạy" mà kho đã trả giá.
         if payload.get("giet_tron_ven") is False:
             mismatches.append("giet_tron_ven")
+        # BẰNG CHỨNG SINH RA TỪ LƯỢT CÓ BƠM LỖI KHÔNG PHẢI BẰNG CHỨNG.
+        moi_noi = payload.get("moi_noi_kiem_thu") or []
+        if any(k in _MOI_NOI_BOM_LOI for k in moi_noi):
+            mismatches.append("moi_noi_kiem_thu")
+        # AI CẦN VÙNG CHỨA THÌ ĐÒI THẲNG. Không bật mặc định: macOS/FreeBSD không
+        # có vùng chứa nào cả, ép cứng ở đây là chặn oan cả một nền hợp lệ.
+        if args.doi_cach_ly and payload.get("co_che_cach_ly") not in ("cgroup2", "job-object"):
+            mismatches.append("co_che_cach_ly")
         if payload.get("positive_verified") is not True:
             mismatches.append("positive_verified")
         if payload.get("positive_regex") != args.expected_positive_regex:
@@ -1327,6 +1391,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--require-current-runner",
         action="store_true",
         help="compatibility flag; current-runner validation is always fail-closed",
+    )
+    validate.add_argument(
+        "--doi-cach-ly",
+        action="store_true",
+        help=("doi bang chung phai sinh ra tu mot VUNG CHUA that (cgroup2/job-object). "
+              "Khong bat mac dinh: macOS/FreeBSD khong co vung chua nao, ep cung se chan oan."),
     )
     validate.set_defaults(handler=cmd_validate)
     return parser

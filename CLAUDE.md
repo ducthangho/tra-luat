@@ -278,6 +278,31 @@ không tra được.
 - `rg` là công cụ **BẮT BUỘC** (từ 15-08-2026). Thiếu nó lệnh tìm của agent gãy giữa
   chừng chứ KHÔNG tự lùi về `grep` — phiên vẫn "chạy" nhưng tra cứu mù. Hook phiên thử
   apt-get (có/không sudo, có/không `update`) rồi cargo, và đòi bằng chứng `rg --version`.
+- **MỞ PHIÊN CODE LÀ ĐỌC `launcher.py` RỒI CHẠY `doctor` — TRƯỚC MỌI VIỆC KHÁC.**
+  Không phải "khi nghi ngờ" mà là bước đầu tiên, vì thiếu công cụ không lộ ra lúc
+  thiếu, nó lộ ra giữa chừng ở chỗ khó đọc. Ba lệnh, theo đúng thứ tự:
+  ```
+  sed -n '1,140p' .claude/dev/launcher.py     # hợp đồng: mã thoát, 4 bẫy đa nền
+  python .claude/dev/launcher.py doctor       # đo công cụ + KHẢ DỤNG + biến
+  python .claude/dev/launcher.py chuan-bi     # khôi phục xác thực khi hook không chạy
+  ```
+  Thiếu gì thì **cài ngay ở bước này**, đừng đợi tới lúc cần: `doctor` in sẵn lệnh
+  cài cho từng nền. `codex` là **tuỳ chọn với launcher nhưng BẮT BUỘC với
+  cross-review** — thiếu nó thì tới lúc cần review chéo mới phát hiện, mà lúc ấy
+  việc đã làm xong và không lùi được.
+- **HOOK PHIÊN CÓ THỂ KHÔNG CHẠY LẦN NÀO — và `doctor` KHÔNG nói cho bạn biết
+  điều đó.** Đo được 17-08-2026 trong phiên remote: `CLAUDE_PROJECT_DIR` **KHÔNG
+  được đặt**, nên lệnh hook trong `.claude/settings.json`
+  (`bash "${CLAUDE_PROJECT_DIR}/.claude/hooks/session-start.sh"`) giải ra
+  `/.claude/hooks/session-start.sh` — không có tệp, hook **vắng mặt lặng lẽ**, và
+  không có `codex` nào được cài. Xảy ra khi kho được gắn/clone GIỮA phiên chứ
+  không phải là project dir lúc phiên mở (phiên remote, `add_repo`).
+  · `doctor` có mục `hook-phien`, nhưng nó so BĂM tệp hook đang checkout với
+  `origin/master` — tức đo **tệp có mới không**, KHÔNG đo **hook đã chạy chưa**.
+  Hai câu hỏi khác nhau, và đúng lỗi "đếm sự CÓ MẶT thay vì KHẢ NĂNG" mà kho đã
+  trả giá bốn lần. Tệp mới tinh vẫn có thể chưa từng chạy.
+  · Nên: **đừng suy "hook đã lo rồi" từ bất cứ thứ gì**. Bằng chứng duy nhất là
+  công cụ thật sự có mặt và thật sự gọi được — `doctor` + `chuan-bi` ở trên.
 - `python .claude/dev/launcher.py doctor` trước khi nghi ngờ bất cứ thứ gì khác.
   Thoát 12 = thiếu công cụ bắt buộc. Container Claude Code web ĐÃ ĐO 12-08-2026:
   có python/git/node/claude/rg, **KHÔNG** có codex/gh/pwsh — `.claude/hooks/session-start.sh`

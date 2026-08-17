@@ -1049,6 +1049,41 @@ def case_gate_dat_ma_bo_lai_daemon_van_bi_don_va_khai() -> None:
         assert not con_song.exists(), "daemon song sot sau khi gate DAT va nha khoa"
 
 
+def case_doc_cgroup_hong_khong_duoc_coi_la_rong() -> None:
+    """Đọc `cgroup.procs` HỎNG không được kết luận là cgroup đã rỗng.
+
+    P1 cross-review trên `e480a93`, và là lỗi CÙNG HÌNH DẠNG với thứ cả PR này đi
+    đóng: `_pid_trong_cgroup` trả `[]` cho cả "rỗng thật" lẫn "không đọc được",
+    nên `_giet_cgroup` khai `True` = "đã xác nhận rỗng" cho một cgroup nó chưa
+    từng đọc nổi. Bằng chứng khi ấy ghi `giet_tron_ven: true` — bản ghi nói dối.
+
+    Đo bằng một cgroup KHÔNG TỒN TẠI: đọc chắc chắn hỏng, và không có đường nào
+    để hàm biết cây đã sạch.
+    """
+    if os.name == "nt" or not _mount_cgroup2_co_that():
+        print("  BO QUA case_doc_cgroup_hong_khong_duoc_coi_la_rong: khong co cgroup v2")
+        return
+    sys.path.insert(0, str(RUNNER.parent))
+    import gate_lifecycle as gl
+
+    khong_co = Path("/sys/fs/cgroup/khong-he-ton-tai-%d" % os.getpid())
+    assert gl._pid_trong_cgroup(khong_co) is None, (
+        "doc hong phai tra None (khong doc duoc), KHONG phai [] (rong that)"
+    )
+    assert gl._giet_cgroup(khong_co, han_giay=0.3) is False, (
+        "cgroup KHONG doc duoc ma _giet_cgroup khai da xac nhan rong"
+    )
+    # Và vế còn lại: rỗng THẬT vẫn phải trả True, nếu không thì bản vá này chỉ là
+    # đổi một lời khai sai thành một lời khai sai khác.
+    that = gl._tao_cgroup_gate()
+    if that is not None:
+        try:
+            assert gl._pid_trong_cgroup(that) == [], "cgroup moi tao phai RONG THAT"
+            assert gl._giet_cgroup(that, han_giay=1.0) is True, "rong that ma khai khong xong"
+        finally:
+            gl._don_cgroup(that)
+
+
 def case_dirty_run_is_allowed_but_never_reusable() -> None:
     """Bỏ `--require-clean` thì gate CHẠY ĐƯỢC trên cây bẩn, nhưng chứng KHÔNG tái dùng.
 
@@ -1241,6 +1276,35 @@ def case_validate_reuse_is_fail_closed() -> None:
         assert van_dung.returncode == 0, van_dung.stdout
         assert json.loads(van_dung.stdout)["reusable"] is True, van_dung.stdout
 
+        # BẰNG CHỨNG SINH TỪ LƯỢT CÓ BƠM LỖI KHÔNG PHẢI BẰNG CHỨNG (P1 cross-review).
+        # Không có vế này thì `TL_GATE_EP_HONG_VAO_CGROUP=1` là một đường hạ cấp cổng
+        # mà bằng chứng vẫn tái dùng được — tức lách cổng bằng biến môi trường.
+        bom = json.loads(evidence.read_text(encoding="utf-8"))
+        bom["moi_noi_kiem_thu"] = ["TL_GATE_EP_HONG_VAO_CGROUP"]
+        ev_bom = evidence.with_name("evidence-bom.json")
+        ev_bom.write_text(json.dumps(bom), encoding="utf-8")
+        tc_bom = _run(["validate", "--evidence", str(ev_bom), "--output",
+                       str(evidence.with_suffix(".out")), "--expected-head", head, *envelope],
+                      cwd=repo)
+        assert tc_bom.returncode == 3, tc_bom.stdout
+        assert "moi_noi_kiem_thu" in json.loads(tc_bom.stdout)["mismatches"], tc_bom.stdout
+
+        # `--doi-cach-ly`: ai cần vùng chứa thì đòi thẳng, và lời đòi phải có RĂNG.
+        quet = json.loads(evidence.read_text(encoding="utf-8"))
+        quet["co_che_cach_ly"] = "quet-cay"
+        ev_quet = evidence.with_name("evidence-quet.json")
+        ev_quet.write_text(json.dumps(quet), encoding="utf-8")
+        tc_quet = _run(["validate", "--evidence", str(ev_quet), "--output",
+                        str(evidence.with_suffix(".out")), "--expected-head", head,
+                        *envelope, "--doi-cach-ly"], cwd=repo)
+        assert tc_quet.returncode == 3, tc_quet.stdout
+        assert "co_che_cach_ly" in json.loads(tc_quet.stdout)["mismatches"], tc_quet.stdout
+        # KHÔNG có cờ thì vẫn tái dùng được: macOS/FreeBSD hợp lệ, chặn oan cũng là nói dối.
+        tc_quet2 = _run(["validate", "--evidence", str(ev_quet), "--output",
+                         str(evidence.with_suffix(".out")), "--expected-head", head, *envelope],
+                        cwd=repo)
+        assert tc_quet2.returncode == 0, tc_quet2.stdout
+
         incomplete = _run(
             [
                 "validate",
@@ -1276,6 +1340,7 @@ CASES = [
     case_don_khong_tron_ven_lam_do_luot_gate,
     case_vao_cgroup_hong_thi_tut_ve_quet_cay_va_khai_dung,
     case_gate_dat_ma_bo_lai_daemon_van_bi_don_va_khai,
+    case_doc_cgroup_hong_khong_duoc_coi_la_rong,
     case_dirty_run_is_allowed_but_never_reusable,
     case_validate_reuse_is_fail_closed,
 ]

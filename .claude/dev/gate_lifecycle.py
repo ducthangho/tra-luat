@@ -24,6 +24,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import uuid
 from typing import Any, Iterator
 
 
@@ -35,6 +36,11 @@ EXIT_TIMEOUT = 124
 # 128 + SIGINT(2), quy ước shell cho "bị ngắt". Tách khỏi `EXIT_TIMEOUT` vì hai
 # chuyện khác nhau: quá hạn là gate tự quyết, ngắt là người gõ Ctrl-C.
 EXIT_INTERRUPTED = 130
+# FAIL-CLOSE: lượt dọn KHÔNG trọn vẹn thì lượt gate ấy hỏng, kể cả khi lệnh gate
+# đã chạy xong và trả 0. "Khoá mà nhả trong lúc thứ nó bảo vệ còn sống thì không
+# phải khoá" — trước đây sự thật ấy chỉ ĐI VÀO BẢN GHI mà không đổi mã thoát, nên
+# một lượt rò tiến trình vẫn đi qua như đạt.
+EXIT_GIET_KHONG_TRON_VEN = 4
 _SHA40 = re.compile(r"^[0-9a-f]{40}$")
 _CATALOG_POLICY_PATHS = (
     ".claude/dev/gate_lifecycle.py",
@@ -357,7 +363,197 @@ def _maybe_heavy_lock(kind: str, root: Path, wait_seconds: float) -> Iterator[tu
             lock.release()
 
 
+# ---------------------------------------------------------------------------
+# CÁCH LY BẰNG CGROUP v2 — ĐỔI KIẾN TRÚC, KHÔNG PHẢI VÁ TIẾP
+#
+# Vòng quét cây đã qua BỐN vòng vá cùng một hình dạng (`killpg` → chụp một lần →
+# subreaper + khoá danh tính → điều kiện lặng), và vòng nào cross-review cũng lộ
+# một lỗ mới. Đo được trên `38f1253`: một kẻ ĐẺ LẠI LIÊN TỤC vẫn thoát — 33 kẻ
+# sinh ra, 5 sống sót, kẻ sớm nhất sinh lúc t=11,4s tức SAU khi hạn 10s vỡ, trong
+# cửa sổ `killpg` → `proc.wait(2)`. Hạn đồng hồ 10s CÙNG HÌNH DẠNG với bộ đếm 6
+# lượt mà nó thay thế: kẻ đẻ lại chỉ cần sống lâu hơn cái hạn là thoát.
+#
+# Không có bản vá thứ năm nào đóng được lớp ấy, vì lỗ nằm ở CHỖ KHÁC: mọi cơ chế
+# quét đều phải hỏi "ai là hậu duệ của ta", mà câu hỏi ấy trả lời được hay không
+# lại do chính đối tượng bị quét quyết định (`setsid`, mồ côi, đẻ trong lúc dọn).
+# cgroup lật ngược quan hệ: thành viên là THEO CẤU TRÚC, gán lúc sinh và kế thừa
+# không thể từ chối, nên không còn gì để quét và không còn cửa sổ để lách.
+# Đo được: `cgroup.kill` giết sạch đúng kẻ đẻ lại ấy trong 0,0002s, 0 sống sót.
+#
+# PHẠM VI, KHAI THẲNG: chỉ Linux có cgroup v2. Windows đã có Job Object — cùng
+# một kiến trúc "vùng chứa, giết cả vùng". macOS và FreeBSD KHÔNG có cả hai, nên
+# ở đó vẫn là vòng quét cây và lỗ "đẻ trong lúc dọn" CÒN NGUYÊN; `giet_tron_ven`
+# và `co_che_cach_ly` là thứ nói thật về điều đó.
+# ---------------------------------------------------------------------------
+
+# Cơ chế THỰC SỰ đã dùng cho lượt này, đi thẳng vào bằng chứng. Không có trường
+# này thì một lần tụt về quét cây sẽ đi qua y hệt một lượt cgroup thành công —
+# đúng bẫy "đếm sự CÓ MẶT của một đường thay vì KHẢ NĂNG của nó" mà kho đã trả giá
+# bốn lần.
+_CO_CHE_CACH_LY = "quet-cay"
+
+# Cgroup riêng của lượt gate này; None = không cấp được, chạy đường dự phòng.
+_CGROUP_GATE: Path | None = None
+
+
+def _mount_cgroup2() -> Path | None:
+    """Điểm gắn cgroup v2, dò từ `/proc/self/mountinfo`.
+
+    KHÔNG hardcode `/sys/fs/cgroup`: máy lai (v1 và v2 song song) gắn v2 ở chỗ
+    khác — đo được trong container của phiên này là `/sys/fs/cgroup/unified`.
+    Hardcode thì cgroup hoá ra "không có" ở đúng nơi nó đang có, và ta lặng lẽ
+    tụt về đường quét cây trong khi đường tốt vẫn nằm đó.
+
+    Cắt theo dấu `" - "` chứ KHÔNG đếm cột: `mountinfo` có số trường tuỳ biến
+    (optional fields) trước dấu ấy, đếm cột là lệch trên đúng máy có chúng.
+    """
+    try:
+        noi_dung = Path("/proc/self/mountinfo").read_text()
+    except OSError:
+        return None
+    for dong in noi_dung.splitlines():
+        try:
+            trai, phai = dong.split(" - ", 1)
+        except ValueError:
+            continue
+        sau = phai.split()
+        truoc = trai.split()
+        if sau and sau[0] == "cgroup2" and len(truoc) >= 5:
+            return Path(truoc[4])
+    return None
+
+
+def _cgroup_cua_ta() -> str:
+    """Đường cgroup v2 của CHÍNH tiến trình này (dòng `0::` trong `/proc/self/cgroup`)."""
+    with contextlib.suppress(OSError):
+        for dong in Path("/proc/self/cgroup").read_text().splitlines():
+            phan = dong.split(":", 2)
+            if len(phan) == 3 and phan[0] == "0":
+                return phan[2]
+    return "/"
+
+
+def _pid_trong_cgroup(cg: Path) -> list[int]:
+    try:
+        return [int(x) for x in (cg / "cgroup.procs").read_text().split()]
+    except (OSError, ValueError):
+        return []
+
+
+def _tao_cgroup_gate() -> Path | None:
+    """Cấp một cgroup riêng cho lượt gate. None = không cấp được (chạy dự phòng).
+
+    Tạo DƯỚI cgroup của chính ta, KHÔNG phải ở gốc điểm gắn: trên host systemd
+    chạy non-root ta chỉ được uỷ quyền trong nhánh của mình, `mkdir` ở gốc trả
+    `EACCES`. Tạo ở gốc "chạy được trong container này" là đúng kiểu kết luận từ
+    một nền rồi khai cho mọi nền — lỗi kho đã ghi sổ.
+    """
+    # CÔNG TẮC TẮT — để đường DỰ PHÒNG có thể kiểm được.
+    #
+    # Không có công tắc này thì đường quét cây (thứ macOS/FreeBSD thực sự chạy)
+    # KHÔNG kiểm được trên Linux, và "có nhánh dự phòng trong mã" lại bị đọc thành
+    # "nhánh dự phòng chạy được" — đúng lỗi đếm SỰ CÓ MẶT thay vì KHẢ NĂNG. Nó
+    # cũng có ích thật ngoài đời: host nào cgroup hành xử lạ thì tắt mà chạy tiếp.
+    if os.environ.get("TL_GATE_TAT_CGROUP") == "1":
+        return None
+    if platform.system() != "Linux":
+        return None
+    mount = _mount_cgroup2()
+    if mount is None:
+        return None
+    cha = mount / _cgroup_cua_ta().lstrip("/")
+    if not cha.is_dir():
+        cha = mount                      # lệch cgroup-namespace: lùi về gốc điểm gắn
+    cg = cha / ("tl-gate-%d-%s" % (os.getpid(), uuid.uuid4().hex[:8]))
+    try:
+        cg.mkdir()
+    except OSError:
+        return None
+    # KHẢ NĂNG, KHÔNG PHẢI SỰ CÓ MẶT: thư mục tạo được KHÔNG có nghĩa là ghi được
+    # pid vào. Hỏi "thứ này đã làm được việc chưa", đừng hỏi "nó có ở đó không".
+    if not os.access(cg / "cgroup.procs", os.W_OK):
+        with contextlib.suppress(OSError):
+            cg.rmdir()
+        return None
+    return cg
+
+
+def _vao_cgroup(cg: Path) -> None:
+    """Tự đưa mình vào cgroup. Gọi trong `preexec_fn`, tức SAU `fork` TRƯỚC `exec`.
+
+    Phải là con tự ghi pid của nó, không phải cha ghi hộ sau khi `Popen` trả về:
+    ghi sau là có một khoảng con đã chạy mà chưa thuộc cgroup, và đúng khoảng ấy
+    nó kịp đẻ ra thứ nằm ngoài vùng chứa. Vào lúc `fork` thì không có khoảng nào.
+    """
+    # MỐI NỐI KIỂM THỬ: ép hỏng đúng lúc `fork` để nhánh tụt-về-quét-cây có ca
+    # chạy được. Ca ấy không dựng lại được theo ý muốn trên máy thường.
+    if os.environ.get("TL_GATE_EP_HONG_VAO_CGROUP") == "1":
+        raise OSError(16, "ep hong khi vao cgroup (moi noi kiem thu)")
+    (cg / "cgroup.procs").write_text(str(os.getpid()))
+
+
+def _giet_cgroup(cg: Path, han_giay: float = 5.0) -> bool:
+    """Giết TOÀN BỘ cgroup. True = đã XÁC NHẬN rỗng, không phải "đã gọi lệnh giết".
+
+    `cgroup.kill` (nhân ≥ 5.14) bắn `SIGKILL` cho mọi thành viên trong MỘT thao
+    tác của nhân — không quét, không đua, và `SIGKILL` thì không handler nào phớt
+    lờ được. Nhân cũ hơn không có tệp ấy: ĐÓNG BĂNG trước rồi mới bắn, vì đóng
+    băng xong thì không ai đẻ thêm được nữa nên vòng quét dưới đây HỘI TỤ — khác
+    hẳn quét một cây đang chạy tự do, chỗ mà bốn vòng vá trước đã chết.
+    """
+    try:
+        (cg / "cgroup.kill").write_text("1")
+    except OSError:
+        with contextlib.suppress(OSError):
+            (cg / "cgroup.freeze").write_text("1")
+        for _ in range(50):
+            pids = _pid_trong_cgroup(cg)
+            if not pids:
+                break
+            for q in pids:
+                with contextlib.suppress(ProcessLookupError, PermissionError):
+                    os.kill(q, signal.SIGKILL)
+            time.sleep(0.1)
+        with contextlib.suppress(OSError):
+            (cg / "cgroup.freeze").write_text("0")
+    # "ĐÃ GỌI LỆNH GIẾT" ≠ "ĐÃ CHẾT" (bài học `taskkill`): đòi cgroup RỖNG.
+    het = time.monotonic() + han_giay
+    xong = False
+    while True:
+        if not _pid_trong_cgroup(cg):
+            xong = True
+            break
+        if time.monotonic() > het:
+            break
+        time.sleep(0.05)
+    # MỐI NỐI KIỂM THỬ: ép BÁO rò (vẫn giết thật ở trên) để nhánh fail-close có
+    # ca chạy được. Nhánh ấy chỉ tự nhiên xảy ra khi `cgroup.kill` không hội tụ
+    # trong hạn — không dựng lại được theo ý muốn, mà một nhánh KHÔNG THỂ đỏ thì
+    # lời khai về độ phủ của nó là lời khai sai. Không bao giờ làm rò thật.
+    if os.environ.get("TL_GATE_EP_BAO_RO") == "1":
+        return False
+    return xong
+
+
+def _don_cgroup(cg: Path) -> None:
+    with contextlib.suppress(OSError):
+        cg.rmdir()
+
+
 def _terminate_process_tree(proc: subprocess.Popen[Any], windows_job: _WindowsJob | None = None) -> None:
+    global _GIET_KHONG_TRON_VEN
+    # CGROUP TRƯỚC MỌI THỨ KHÁC — và KHÔNG thoát sớm theo `proc.poll()`.
+    #
+    # Con gốc chết KHÔNG có nghĩa là cây đã sạch: hậu duệ `setsid` sống lâu hơn
+    # cha là đúng ca ta đang đóng. Đường quét cây buộc phải thoát sớm ở đây vì
+    # mất cha là mất mỏ neo để truy cây; cgroup thì không cần mỏ neo nào, thành
+    # viên là theo cấu trúc, nên vẫn dọn được sau khi cha đã chết.
+    if _CGROUP_GATE is not None:
+        if not _giet_cgroup(_CGROUP_GATE):
+            _GIET_KHONG_TRON_VEN = True
+        with contextlib.suppress(subprocess.TimeoutExpired):
+            proc.wait(timeout=2)
+        return
     if proc.poll() is not None:
         return
     if os.name == "nt":
@@ -407,7 +603,6 @@ def _terminate_process_tree(proc: subprocess.Popen[Any], windows_job: _WindowsJo
         # lặp kết thúc êm y như khi cây đã lặng thật. Hai kết cục khác hẳn nhau mà
         # nhìn giống nhau, đúng bệnh "vắng mặt vì sạch" và "vắng mặt vì chưa chạy"
         # trông như một. Hết hạn mà còn đứa mới là DỮ KIỆN, phải ghi chứ không nuốt.
-        global _GIET_KHONG_TRON_VEN
         da_gui: dict[int, str] = {}
         han_lang = time.monotonic() + 10.0
         # "KHÔNG AI MỚI" KHÔNG PHẢI "CÂY ĐÃ LẶNG" (P1 cross-review PR "#141").
@@ -718,15 +913,54 @@ def cmd_run(args: argparse.Namespace) -> int:
         # SAU khi cờ có hiệu lực. Đặt sau thì đúng ca cần bắt vẫn rơi về `init`.
         global _CO_SUBREAPER
         _CO_SUBREAPER = _dat_subreaper()
-        try:
-            proc = subprocess.Popen(
+        # Cấp cgroup TRƯỚC khi sinh con; con vào cgroup ngay lúc `fork`.
+        global _CGROUP_GATE, _CO_CHE_CACH_LY, _GIET_KHONG_TRON_VEN
+        _CGROUP_GATE = _tao_cgroup_gate()
+        if _CGROUP_GATE is not None:
+            _CO_CHE_CACH_LY = "cgroup2"
+        elif os.name == "nt":
+            _CO_CHE_CACH_LY = "job-object"
+        payload["co_che_cach_ly"] = _CO_CHE_CACH_LY
+        vao_cgroup = None
+        if _CGROUP_GATE is not None:
+            cg_gate = _CGROUP_GATE
+            vao_cgroup = lambda: _vao_cgroup(cg_gate)
+        def _sinh_con(vao: Any) -> subprocess.Popen[Any]:
+            return subprocess.Popen(
                 payload["command"],
                 cwd=root,
                 creationflags=creationflags,
                 start_new_session=os.name != "nt",
                 stdout=output_stream,
                 stderr=subprocess.STDOUT,
+                preexec_fn=vao,
             )
+
+        try:
+            try:
+                proc = _sinh_con(vao_cgroup)
+            except subprocess.SubprocessError:
+                # VÀO CGROUP HỎNG NGAY LÚC `fork`. `preexec_fn` ném thì Python gói
+                # lại thành `SubprocessError`, KHÔNG phải `OSError` — đo được, nên
+                # khối `except OSError` bên dưới KHÔNG bắt được ca này và nó sẽ
+                # thoát ra ngoài, mất luôn tệp bằng chứng.
+                #
+                # `os.access(W_OK)` lúc tạo cgroup KHÔNG đủ để loại ca này: chạy
+                # root thì `access` bỏ qua kiểm quyền, mà `write` vẫn hỏng được vì
+                # lý do khác (`EBUSY` do luật "no internal processes", cgroup bị
+                # xoá mất giữa chừng). Lại đúng bài "sự CÓ MẶT của một đường không
+                # phải KHẢ NĂNG của nó".
+                #
+                # Bỏ vùng chứa, chạy tiếp bằng đường dự phòng, và KHAI ĐÚNG là
+                # `quet-cay` — chạy quét cây mà khai `cgroup2` mới là hỏng thật.
+                if vao_cgroup is None:
+                    raise
+                if _CGROUP_GATE is not None:
+                    _don_cgroup(_CGROUP_GATE)
+                _CGROUP_GATE = None
+                _CO_CHE_CACH_LY = "quet-cay"
+                payload["co_che_cach_ly"] = _CO_CHE_CACH_LY
+                proc = _sinh_con(None)
             windows_job = _WindowsJob.attach(proc)
             if os.name == "nt":
                 if windows_job is None:
@@ -741,6 +975,13 @@ def cmd_run(args: argparse.Namespace) -> int:
                     raise
         except OSError as exc:
             output_stream.close()
+            # DỌN CGROUP Ở ĐÂY NỮA: nhánh này `return` SỚM, không đi qua khối
+            # `finally` bên dưới, nên cgroup vừa cấp sẽ ở lại vĩnh viễn. Đo được
+            # bằng ca `case_spawn_error_records_infra_error`: mỗi lượt sinh con
+            # hỏng để lại một thư mục cgroup rỗng, tích dần trên runner CI.
+            if _CGROUP_GATE is not None:
+                _don_cgroup(_CGROUP_GATE)
+                _CGROUP_GATE = None
             returncode = EXIT_PREFLIGHT
             _finish(
                 payload,
@@ -819,6 +1060,21 @@ def cmd_run(args: argparse.Namespace) -> int:
             if windows_job is not None:
                 windows_job.close()
             output_stream.close()
+            # DỌN CẢ TRÊN ĐƯỜNG ĐẠT, không chỉ khi huỷ/quá hạn.
+            #
+            # Lệnh gate trả 0 rồi bỏ lại một daemon vẫn ghi vào kho thì khoá vẫn
+            # bị nhả trong lúc thứ nó bảo vệ còn sống — cùng một lỗi với ca huỷ,
+            # chỉ khác lối vào. Đường quét cây không làm nổi việc này (mất cha là
+            # mất mỏ neo); cgroup thì làm được, nên đóng luôn.
+            if _CGROUP_GATE is not None:
+                # ĐẾM THỨ CÒN SÓT rồi mới giết: "gate đạt nhưng bỏ lại 3 tiến
+                # trình" là tín hiệu người đọc cần, và giết lặng lẽ thì tín hiệu
+                # ấy biến mất. Trên đường huỷ/quá hạn `_terminate_process_tree`
+                # đã dọn rồi nên số này là 0 — chỗ nó có nghĩa là đường ĐẠT.
+                payload["so_sot_da_don"] = len(_pid_trong_cgroup(_CGROUP_GATE))
+                if not _giet_cgroup(_CGROUP_GATE):
+                    _GIET_KHONG_TRON_VEN = True
+                _don_cgroup(_CGROUP_GATE)
 
         payload["output_sha256"] = _file_sha256(output)
         payload["artifact_identity"] = {
@@ -862,6 +1118,23 @@ def cmd_run(args: argparse.Namespace) -> int:
                 status="infra_error",
                 returncode=returncode,
                 error="cannot read back repository identity: %s" % exc,
+            )
+
+        # SỰ THẬT VỀ LƯỢT DỌN đi vào bằng chứng trên MỌI đường, không riêng
+        # đường huỷ/quá hạn — nếu chỉ ghi ở hai đường kia thì đường đạt im lặng,
+        # và im lặng lại bị đọc thành "đã dọn sạch".
+        payload["giet_tron_ven"] = not _GIET_KHONG_TRON_VEN
+        # FAIL-CLOSE. Trước đây sự thật này chỉ ĐI VÀO BẢN GHI: một lượt rò tiến
+        # trình vẫn trả 0 và vẫn tái dùng được. Dọn không trọn vẹn thì lượt gate
+        # ấy KHÔNG được tính là đạt.
+        if _GIET_KHONG_TRON_VEN and returncode == 0:
+            returncode = EXIT_GIET_KHONG_TRON_VEN
+            _finish(
+                payload,
+                started,
+                status="fail",
+                returncode=returncode,
+                error="gate leaked processes: cleanup was not complete",
             )
 
         payload["first_failure"] = _first_failure(output, returncode)
@@ -918,6 +1191,12 @@ def cmd_validate(args: argparse.Namespace) -> int:
             mismatches.append("returncode")
         if payload.get("first_failure") is not None:
             mismatches.append("first_failure")
+        # FAIL-CLOSE Ở ĐƯỜNG TÁI DÙNG. `giet_tron_ven` VẮNG MẶT là bản ghi cũ hơn
+        # trường này, không phải lời khai "đã dọn sạch" — chỉ từ chối khi nó khai
+        # THẲNG là false. Vắng mặt và false không được nhập làm một; đó đúng là
+        # lỗi "vắng mặt vì sạch" ≠ "vắng mặt vì chưa chạy" mà kho đã trả giá.
+        if payload.get("giet_tron_ven") is False:
+            mismatches.append("giet_tron_ven")
         if payload.get("positive_verified") is not True:
             mismatches.append("positive_verified")
         if payload.get("positive_regex") != args.expected_positive_regex:

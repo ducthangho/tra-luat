@@ -3210,6 +3210,91 @@ def t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec():
 
 
 @ca
+def t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong():
+    """Trần tổng phải lớn theo bảng, và hết ngân sách không được gọi là hỏng.
+
+    P2 cross-review PR "#143". Con số 120s tôi chọn tay không đủ: bảng có thể chạy
+    9+ probe `--version` cộng probe auth, mỗi cái được phép tới 25s trên Windows.
+    Một chuỗi khởi động nguội HỢP LỆ vét sạch trần TRƯỚC khi đo tới cuối bảng, rồi
+    các công cụ cuối bị báo thiếu dù KHÔNG cái nào vượt hạn riêng — trần tổng biến
+    "hết ngân sách" thành "công cụ hỏng", đúng cái nhãn sai đợt này đi sửa.
+
+    Hai vế: (a) trần suy TỪ SỐ PHÉP ĐO nên thêm công cụ là trần tự giãn; (b) khi
+    hết ngân sách thật thì mục ấy phải vào `chua_do_duoc`, KHÔNG vào
+    `co_mat_nhung_khong_chay_duoc` — `None ≠ False`, "chưa đo" khác "đo được là hỏng".
+    """
+    m = _tai_launcher_thu()
+    goc = m._tran_doctor()
+    m.CONG_CU = list(m.CONG_CU) + [
+        {"ten": "them1", "bat_buoc": False, "ung_vien": ["them1"],
+         "vi_sao": "thu", "cai": {"*": "x"}},
+        {"ten": "them2", "bat_buoc": False, "ung_vien": ["them2"],
+         "vi_sao": "thu", "cai": {"*": "x"}, "xac_thuc": ["a"]},
+    ]
+    sau = m._tran_doctor()
+    # +2 muc, trong do 1 co xac_thuc => +3 phep do
+    bang(sau == goc + 3 * m.PROBE_TIMEOUT_GIAY,
+         f"tran khong gian theo bang: {goc} -> {sau}")
+
+    # (b) het ngan sach => `chua_do_duoc`, khong phai `co_mat_nhung_khong_chay_duoc`
+    m2 = _tai_launcher_thu()
+    m2.CONG_CU = [{"ten": "cham", "bat_buoc": False, "ung_vien": ["cham"],
+                   "vi_sao": "thu", "cai": {"*": "cai cham"}}]
+    m2.MO_DUN_PY = []
+    m2._doc_moi_truong = lambda: ({"PATH": "P"}, {"da_doc_truoc_cong_cu": True})
+    m2._cac_duong_dan = lambda _c, _e: [("cham", "/gia/cham")]
+    m2._tran_doctor = lambda: -1.0          # ngan sach am = het ngay tu dau
+    a_ = type("A", (), {"json": True, "workspace": None, "doi_kha_dung": False})()
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        m2.lenh_doctor(a_)
+    d = json.loads(out.getvalue())
+    muc = [c for c in d["cong_cu"] if c["ten"] == "cham"][0]
+    bang("chua_do_duoc" in muc,
+         f"het ngan sach ma khong khai la chua do duoc: {muc}")
+    bang("co_mat_nhung_khong_chay_duoc" not in muc,
+         f"het ngan sach bi dan nhan CONG CU HONG: {muc}")
+
+
+@ca
+def t113_probe_github_phai_nhan_credential_DA_CHUAN_HOA():
+    """Sửa xong biến giữ chỗ mà không nối vào chỗ DÙNG thì bản sửa vô nghĩa.
+
+    P2 cross-review PR "#143". `_doc_moi_truong` loại `GH_TOKEN` giữ chỗ và ánh xạ
+    `GITHUB_PAT` thật sang `GH_TOKEN`, nhưng bản đã chuẩn hoá ấy chỉ nằm trong giá
+    trị trả về. `_do_github` không nhận nó nên probe vẫn đi bằng chuỗi giữ chỗ lấy
+    từ `os.environ` — với kho RIÊNG TƯ và git hỏng, cả `gh api` lẫn REST đều trượt
+    dù PAT thật đọc được.
+    """
+    m = _tai_launcher_thu()
+    thay = {}
+
+    def gia_git(ws, *a):
+        return (0, "https://github.com/o/r.git", "") if a[:1] == ("remote",) else (128, "", "")
+
+    m._git = gia_git
+    m.shutil.which = lambda t: "/gia/gh" if t == "gh" else None
+    m.os.environ = {"GH_TOKEN": "GIU_CHO"}          # bản CŨ, chưa chuẩn hoá
+
+    class P:
+        returncode, stdout, stderr = 0, "o/r", ""
+
+    def chay(cmd, **k):
+        thay.setdefault("env", []).append((k.get("env") or {}).get("GH_TOKEN"))
+        return P()
+
+    m.subprocess.run = chay
+    m._do_rest_github = lambda url, **k: (
+        thay.setdefault("tok", []).append(k.get("token")) or ("mo", "HTTP 200", True))
+
+    m._do_github("/gia/ws", {"GH_TOKEN": "THAT"})   # bản ĐÃ chuẩn hoá
+    bang(thay.get("tok") and all(t == "THAT" for t in thay["tok"]),
+         f"REST probe khong nhan credential da chuan hoa: {thay.get('tok')}")
+    bang(thay.get("env") and all(v == "THAT" for v in thay["env"]),
+         f"probe `gh` van chay bang bien giu cho: {thay.get('env')}")
+
+
+@ca
 def t103_nam_finding_cua_bot_review_PR128():
     """Năm mục bot codex nêu trên PR #128 — cả năm ĐO LẠI đều đúng, nên khoá cả năm.
 
@@ -4062,6 +4147,22 @@ DOT_BIEN = [
      ('    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho"}',
       '    LAM_DUOC_VIEC = {"git", "gh-cli", "rest-kho"}'),
      ["t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec"]),
+    # Quay ve mot con so chon tay: bang lon len ma tran dung yen => cong cu cuoi
+    # bang bi bao thieu vi HET NGAN SACH chu khong vi no hong.
+    ("tran_tong_chon_tay",
+     ('    so_probe = len(CONG_CU) + sum(1 for c in CONG_CU if c.get("xac_thuc"))\n'
+      '    return max(30.0, PROBE_TIMEOUT_GIAY * so_probe + 30.0)',
+      '    return 120.0'),
+     ["t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong"]),
+    # Het ngan sach bi dan nhan "cong cu hong" — dung cai nhan sai dot nay di sua.
+    ("het_ngan_sach_thanh_cong_cu_hong",
+     ('                het_ngan_sach = {"goi_bang": ten_uv, "duong_dan": d,',
+      '                co_mat_nhung_hong = {"goi_bang": ten_uv, "duong_dan": d,'),
+     ["t112_tran_tong_suy_tu_SO_PROBE_va_het_ngan_sach_KHONG_phai_hong"]),
+    # Khong noi credential da chuan hoa vao probe => van di bang chuoi giu cho.
+    ("probe_github_bo_qua_moi_truong_chuan_hoa",
+     ('    mt = moi_truong or dict(os.environ)', '    mt = dict(os.environ)'),
+     ["t113_probe_github_phai_nhan_credential_DA_CHUAN_HOA"]),
     ("rest_gop_khong_do_duoc_vao_chan",
      ('        return ("khong_do_duoc", f"{type(e).__name__}", False)',
       '        return ("chan", f"{type(e).__name__}", False)'),

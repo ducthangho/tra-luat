@@ -1713,9 +1713,30 @@ MODULE_PY = [
 # Đây là cùng lớp "chạy được ở đây" với hằng số: một con số hợp lý ở nền này là một
 # chốt nói dối ở nền kia. Trần TỔNG cũng phải giãn theo, kẻo nới hạn từng probe rồi
 # lại đụng trần chung và ra đúng nhãn sai ấy bằng đường khác.
+# Bản môi trường ĐÃ CHUẨN HOÁ của lượt `doctor` đang chạy — đặt trong `lenh_doctor`.
+# Bảng KHA_NANG gọi `_do_github` qua lambda nên không nhận được tham số; để `None`
+# thì probe lại rơi về `os.environ` tức đúng bản giữ chỗ mà ta vừa loại.
+_MOI_TRUONG_DA_DOC: dict[str, str] | None = None
+
 _LA_WINDOWS = platform.system() == "Windows"
-DOCTOR_TIMEOUT_GIAY = 120.0 if _LA_WINDOWS else 30.0
 PROBE_TIMEOUT_GIAY = 25.0 if _LA_WINDOWS else 8.0
+
+
+def _tran_doctor() -> float:
+    """Trần TỔNG suy từ SỐ PHÉP ĐO, không phải một con số chọn tay.
+
+    Lỗi của bản trước (P2 cross-review PR "#143"): 120s là số tôi chọn cho "có vẻ
+    rộng", trong khi bảng có thể chạy 9+ probe `--version` cộng probe auth, mỗi cái
+    được phép tới 25s. Một chuỗi khởi động nguội HỢP LỆ ~13–20s là đủ vét sạch 120s
+    TRƯỚC KHI đo tới các công cụ cuối bảng — rồi chúng bị báo là thiếu dù KHÔNG cái
+    nào vượt hạn riêng. Tức trần tổng biến "hết ngân sách" thành "công cụ hỏng":
+    đúng cái nhãn sai mà đợt này vừa đi sửa, chỉ khác đường tới.
+
+    Nên trần phải LỚN LÊN THEO BẢNG. Cộng cả mục `xac_thuc` vì chúng cũng tiêu hạn,
+    và cộng biên cho phần đo khả dụng chạy SAU vòng lặp.
+    """
+    so_probe = len(CONG_CU) + sum(1 for c in CONG_CU if c.get("xac_thuc"))
+    return max(30.0, PROBE_TIMEOUT_GIAY * so_probe + 30.0)
 
 
 def _bat_buoc(c: dict, moi_truong: dict[str, str]) -> bool:
@@ -2475,7 +2496,7 @@ def _do_claude() -> tuple[str, str]:
 _RE_SLUG_GITHUB = re.compile(r"github\.com[:/]+([^/]+/[^/\s]+?)(?:\.git)?/*$")
 
 
-def _do_rest_github(url: str, timeout: float = 6.0) -> tuple[str, str, bool]:
+def _do_rest_github(url: str, timeout: float = 6.0, *, token: str | None = None) -> tuple[str, str, bool]:
     """Đo MỘT đường REST. Trả (`mo`|`chan`|`khong_do_duoc`, mô tả, THAO TÁC THÀNH CÔNG).
 
     Ba giá trị vì có BA câu hỏi khác nhau, và gộp chúng là lỗi đã trả giá: đường
@@ -2495,7 +2516,14 @@ def _do_rest_github(url: str, timeout: float = 6.0) -> tuple[str, str, bool]:
     Trạng thái thứ ba `khong_do_duoc` (mạng hỏng, DNS, quá hạn) KHÔNG được gộp
     vào `chan` — đúng doctrine `None ≠ False`.
     """
-    req = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json"})
+    dau = {"Accept": "application/vnd.github+json"}
+    # Credential ĐÃ CHUẨN HOÁ phải đi tới ĐÂY. `_doc_moi_truong` loại bản giữ chỗ và
+    # ánh xạ `GITHUB_PAT` thật sang `GH_TOKEN`, nhưng sửa xong mà không nối vào chỗ
+    # DÙNG thì bản sửa chỉ nằm trong biến trả về: probe vẫn đi bằng chuỗi giữ chỗ, và
+    # một kho RIÊNG TƯ sẽ báo `chan` trong khi PAT thật đọc được (P2 PR "#143").
+    if token:
+        dau["Authorization"] = f"Bearer {token}"
+    req = urllib.request.Request(url, headers=dau)
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             co_gh = any(k.lower().startswith("x-github") for k in r.headers)
@@ -2515,7 +2543,7 @@ def _do_rest_github(url: str, timeout: float = 6.0) -> tuple[str, str, bool]:
         return ("khong_do_duoc", f"{type(e).__name__}", False)
 
 
-def _do_github(ws: str | None) -> tuple[str, str]:
+def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tuple[str, str]:
     """Đo GitHub theo BA ĐƯỜNG ĐỘC LẬP, vì chúng hỏng độc lập với nhau.
 
     Đo được 15-08-2026 trong container remote:
@@ -2532,6 +2560,8 @@ def _do_github(ws: str | None) -> tuple[str, str]:
     Vì vậy "gọi GitHub không được" là KẾT LUẬN SAI ở container này: hai trong bốn
     đường vẫn mở. Hàm này trả về ĐƯỜNG NÀO mở, để không ai kết luận theo đường hỏng.
     """
+    mt = moi_truong or dict(os.environ)
+    tok = mt.get("GH_TOKEN") or None
     duong = []
     if ws:
         rc, out, _ = _git(ws, "ls-remote", "--heads", "origin", "HEAD")
@@ -2543,7 +2573,7 @@ def _do_github(ws: str | None) -> tuple[str, str]:
     if shutil.which("gh"):
         try:
             pg = subprocess.run(["gh", "auth", "status"], capture_output=True, text=True,
-                                stdin=subprocess.DEVNULL, timeout=20)
+                                env=mt, stdin=subprocess.DEVNULL, timeout=20)
             duong.append(("gh-cli", pg.returncode == 0,
                           "da xac thuc" if pg.returncode == 0 else f"CHUA xac thuc (rc={pg.returncode})"))
         except (OSError, subprocess.SubprocessError) as e:
@@ -2564,7 +2594,7 @@ def _do_github(ws: str | None) -> tuple[str, str]:
     # Đo 17-08-2026: đường một `mo`, đường hai `chan`. Nên câu đúng KHÔNG phải
     # "REST bị chặn" mà là "REST bị chặn ĐÚNG CHỖ làm việc", và đó mới là điều đáng
     # nói với người đọc.
-    tt_chung, mt_chung, _ = _do_rest_github("https://api.github.com/rate_limit")
+    tt_chung, mt_chung, _ = _do_rest_github("https://api.github.com/rate_limit", token=tok)
     # CHẨN ĐOÁN, KHÔNG TÍNH vào kết luận "dùng được" — xem `_tinh_kha_dung` dưới.
     duong.append(("rest-chung", tt_chung == "mo", mt_chung))
     slug = None
@@ -2574,7 +2604,8 @@ def _do_github(ws: str | None) -> tuple[str, str]:
             k = _RE_SLUG_GITHUB.search((url_o or "").strip())
             slug = k.group(1) if k else None
     if slug:
-        tt_kho, mt_kho, ok_kho = _do_rest_github(f"https://api.github.com/repos/{slug}")
+        tt_kho, mt_kho, ok_kho = _do_rest_github(
+            f"https://api.github.com/repos/{slug}", token=tok)
         # `ok` ở đây là THAO TÁC THÀNH CÔNG, không phải "đường thông". Một 404 kho
         # riêng tư vẫn là `mo` (tới GitHub) nhưng KHÔNG làm được việc.
         duong.append(("rest-kho", ok_kho, mt_kho if ok_kho else f"{mt_kho} [{tt_kho}]"))
@@ -2596,7 +2627,7 @@ def _do_github(ws: str | None) -> tuple[str, str]:
     if shutil.which("gh") and slug:
         try:
             pk = subprocess.run(["gh", "api", f"repos/{slug}", "--jq", ".full_name"],
-                                capture_output=True, text=True,
+                                capture_output=True, text=True, env=mt,
                                 stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)
             duong.append(("gh-kho", pk.returncode == 0 and bool((pk.stdout or "").strip()),
                           "doc duoc kho" if pk.returncode == 0 else f"rc={pk.returncode}"))
@@ -2758,7 +2789,7 @@ KHA_NANG = [
     {"ten": "claude", "do": lambda ws, ks=False: _do_claude(),
      "vi_sao": "executor va phien dieu phoi",
      "khac_phuc": "dat ANTHROPIC_API_KEY / dang nhap lai claude"},
-    {"ten": "github", "do": lambda ws, ks=False: _do_github(ws),
+    {"ten": "github", "do": lambda ws, ks=False: _do_github(ws, _MOI_TRUONG_DA_DOC),
      "vi_sao": "dang handoff/verdict, doc issue, day nhanh",
      "khac_phuc": "dung cong cu MCP github + git; REST thang bi proxy chan"},
     {"ten": "launcher-phien", "do": lambda ws, ks=False: _do_launcher_cu(ws),
@@ -2849,23 +2880,30 @@ def lenh_doctor(a) -> int:
     # phải nếp code: kết luận "công cụ không dùng được" chỉ có nghĩa khi đã biết
     # nó xác thực bằng đường nào (bài học 15-08-2026).
     moi_truong, moi_truong_cong_khai = _doc_moi_truong()
+    global _MOI_TRUONG_DA_DOC
+    _MOI_TRUONG_DA_DOC = moi_truong
     he = platform.system()
     ket = []
     thieu_bat_buoc = []
     # Trần tổng cho cả vòng đo: `doctor` là thứ người ta chạy KHI đã nghi ngờ môi
     # trường, nên nó không được phép treo — mỗi probe có hạn riêng, và cả lượt có
     # hạn chung.
-    het_han = time.monotonic() + DOCTOR_TIMEOUT_GIAY
+    het_han = time.monotonic() + _tran_doctor()
     for c in CONG_CU:
         thay = None
         co_mat_nhung_hong = None
+        het_ngan_sach = None
         xac_thuc_ok = None
         loi_xac_thuc = None
         for ten_uv, d in _cac_duong_dan(c, moi_truong):
             con_lai = het_han - time.monotonic()
             if con_lai <= 0:
-                co_mat_nhung_hong = {"goi_bang": ten_uv,
-                                     "duong_dan": d, "loi": "doctor vuot han 30s"}
+                # HẾT NGÂN SÁCH KHÔNG PHẢI "CÔNG CỤ HỎNG" — trạng thái thứ ba.
+                # Bản trước ghi nó vào `co_mat_nhung_khong_chay_duoc`, tức dán đúng
+                # cái nhãn sai mà đợt này đi sửa: người đọc sẽ đi cài lại một công cụ
+                # chưa hề được đo. `None ≠ False`, và "chưa đo" ≠ "đo được là hỏng".
+                het_ngan_sach = {"goi_bang": ten_uv, "duong_dan": d,
+                                 "ly_do": "doctor het ngan sach truoc khi do toi day"}
                 break
             chay_duoc, pb = _phien_ban(d, env=moi_truong,
                                        timeout=min(PROBE_TIMEOUT_GIAY, con_lai))
@@ -2877,7 +2915,8 @@ def lenh_doctor(a) -> int:
         if thay is not None and c.get("xac_thuc"):
             con_lai = het_han - time.monotonic()
             if con_lai <= 0:
-                xac_thuc_ok, loi_xac_thuc = False, "doctor vuot han 30s"
+                # Cũng vậy: chưa đo được auth thì để `None`, đừng khai là SAI.
+                xac_thuc_ok, loi_xac_thuc = None, "doctor het ngan sach"
             else:
                 xac_thuc_ok, loi_xac_thuc = _xac_thuc(
                     thay["duong_dan"], c["xac_thuc"], env=moi_truong,
@@ -2896,6 +2935,8 @@ def lenh_doctor(a) -> int:
                 muc["loi_xac_thuc"] = loi_xac_thuc
         if thay is None and co_mat_nhung_hong:
             muc["co_mat_nhung_khong_chay_duoc"] = co_mat_nhung_hong
+        if thay is None and het_ngan_sach:
+            muc["chua_do_duoc"] = het_ngan_sach
         ket.append(muc)
         if bb and (thay is None or xac_thuc_ok is False):
             thieu_bat_buoc.append(c["ten"])

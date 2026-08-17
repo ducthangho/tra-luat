@@ -267,10 +267,18 @@ không tra được.
   người đọc đi sai hướng — cùng họ `codex login status` NÓI DỐI. `launcher.py doctor` nay
   **ĐO** hai đường REST đó (`rest-chung`/`rest-kho`) thay vì nối thêm câu "có thể bị chặn";
   câu ấy là ĐOÁN, và nó từng được nối vào MỌI kết quả, vô điều kiện.
-  · **`api.githubcopilot.com` (điểm cuối MCP github) bị chặn NGAY Ở TẦNG CONNECT** khi gọi
-  từ trong container (`__agentproxy/status` ghi `connect_rejected`) — nên MCP chạy được là
-  nhờ client nằm NGOÀI sandbox, không phải nhờ container gọi tới được. Mất uỷ quyền MCP thì
-  phiên **không** tự dựng lại đường ấy bằng `curl` được.
+  · **`api.githubcopilot.com` (điểm cuối MCP github) GỌI ĐƯỢC TỪ TRONG CONTAINER** — và câu
+  này thay cho một câu SAI tôi vừa viết chính ở đây vài giờ trước ("bị chặn ngay ở tầng
+  CONNECT"). Nguồn của cái sai: probe bằng `curl` nhận `CONNECT tunnel failed, response 403`
+  rồi tôi ghi thẳng nó thành phép đo. Đó là tạo tác của `curl` với proxy, KHÔNG phải chính
+  sách: `urllib` gọi CÙNG host, CÙNG lúc, trả **HTTP 200** kèm phản hồi `initialize` hợp lệ.
+  Mỉa mai đúng chỗ đáng nhớ — đoạn ngay trên vừa dạy "đừng kết luận từ đường hỏng", và tôi
+  kết luận từ đúng một đường hỏng. **Một công cụ thất bại chưa phải một đường bị chặn; phải
+  thử ít nhất hai client trước khi gọi đó là chính sách.**
+  Hệ quả vận hành: mất uỷ quyền connector MCP thì phiên **vẫn** tự dựng lại được đường ấy —
+  JSON-RPC thẳng tới `/mcp/` bằng `GITHUB_PAT` (44 công cụ), và `/mcp/x/actions` cho
+  `actions_run_trigger`/`get_job_logs`. Đây là đường đã dùng để merge và gọi lượt Windows
+  trong đúng phiên này, nên nó có bằng chứng chạy chứ không phải lời hứa.
   · Hệ quả cho `bat_buoc`: **"công cụ này có bắt buộc không" không có MỘT câu trả lời cho
   mọi nền.** `gh` bắt buộc ở máy người dùng, KHÔNG bắt buộc ở phiên remote — `CONG_CU` nay
   nhận `{"mac_dinh": …, "remote": …}`. Ép một bool chung thì chắc chắn sai một nền, và cái

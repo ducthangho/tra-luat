@@ -129,6 +129,20 @@ jobs:
         run: python -m pip install --quiet PyYAML==6.0.3
       - name: lease-publish selftest (cổng đăng lease)
         run: python ops/lease_publish_test.py
+      # `don-nhanh.ps1` XOÁ NHÁNH REMOTE — thao tác không hoàn tác được ở phía PR: xoá
+      # nhầm một nhánh đang là BASE của PR đang mở thì GitHub ĐÓNG các PR ấy, và tạo lại
+      # nhánh không mở lại chúng. Bộ này khoá đúng chỗ đó, cộng chốt fail-close khi không
+      # đọc được danh sách PR.
+      #
+      # VÌ SAO NỐI VÀO CI: script này land ngày 17-08 KHÔNG có phản chứng nào, và cùng
+      # ngày lộ ra một lỗ (base) mà không phép đo tự động nào bắt được. Cùng bài học với
+      # `eol-policy` ngay dưới — guard không nối vào đường TỰ ĐỘNG thì guard chỉ là tài liệu.
+      #
+      # Chạy trên CẢ ubuntu lẫn windows: cả lớp hỏng của script này là lớp hỏng theo NỀN.
+      # `pwsh` có sẵn trên runner GitHub ở cả hai nền, nên không cài gì thêm.
+      - name: don-nhanh selftest (chốt xoá nhánh)
+        shell: pwsh
+        run: pwsh -NoProfile -File scripts/don-nhanh_test.ps1
       # `--all` soi TOÀN BỘ index, không chỉ tệp đang stage — đây là thứ duy nhất bắt được nợ
       # CRLF có sẵn (hook cũ so với HEAD nên mù hoàn toàn với nó).
       #

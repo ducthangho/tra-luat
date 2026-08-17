@@ -13,9 +13,30 @@
     1. Chỉ xoá nhánh mà `git merge-base --is-ancestor <nhánh> origin/master` trả 0,
        tức mọi commit của nó ĐÃ nằm trong master. Xoá một nhánh như vậy không mất
        commit nào; muốn dựng lại chỉ cần trỏ tên vào SHA cũ.
-    2. Danh sách GIỮ theo mẫu (`master`, `luu-tru/**`, HEAD của PR đang mở…).
+    2. Danh sách GIỮ theo mẫu (`master`, `luu-tru/**`, HEAD *và* BASE của PR đang mở…).
     3. Mặc định DRY RUN. Phải nêu `-Xoa` mới thật sự xoá.
     4. Đối chiếu SAU khi xoá: hỏi lại remote và báo nhánh nào còn sót.
+
+  LỖ ĐÃ VÁ 17-08-2026 — BASE, KHÔNG PHẢI HEAD
+  Bản đầu chỉ đọc `headRefName`. Nhưng xoá một nhánh đang là BASE của PR đang mở thì
+  GitHub ĐÓNG LUÔN các PR nhắm vào nó — mất cả review lẫn thảo luận, và không có
+  thao tác "hoàn tác nhánh" nào dựng lại được trạng thái mở ấy.
+
+  Lớp 1 KHÔNG che được ca này, và lý do đáng đọc: lớp 1 loại nhánh CHƯA merge, mà
+  một nhánh tích hợp (`mission/**/integration`) hoàn toàn có thể ĐÃ vào master trong
+  khi vẫn còn PR mở nhắm vào nó. Lúc ấy lớp 1 nói "xoá được" và nó đúng về mặt
+  commit — không mất commit nào — nhưng sai về mặt HẬU QUẢ.
+
+  Đo lúc vá: kho có 4 PR mở nhắm `mission/76/integration`; nhánh ấy CHƯA vào master
+  nên lớp 1 tình cờ giữ lại. Tức lỗ này chưa cắn, và "chưa cắn" không phải "không có"
+  — nó chỉ đang được che bởi một điều kiện có thể đổi bất cứ lúc nào.
+
+  VÀ VÌ SAO LỚP NÀY PHẢI FAIL-CLOSE
+  Với HEAD, thiếu `gh` chỉ làm mất một lớp thừa: PR mở thì head chưa merge, lớp 1 che.
+  Với BASE thì KHÔNG có lớp nào khác che. Nên khi `-Xoa` mà không đọc được danh sách
+  PR, script TỪ CHỐI XOÁ (thoát 13) thay vì xoá rồi mong không sao — "không đo được"
+  khác "không có", đúng doctrine `None ≠ False` của kho. Muốn bỏ qua thì phải nêu
+  tường minh `-BoQuaLopPR`, tức có người chịu trách nhiệm cho quyết định ấy.
 
 .PARAMETER Xoa
   Thật sự xoá. Không nêu thì chỉ in ra sẽ xoá gì.
@@ -28,6 +49,11 @@
 
 .PARAMETER CoLo
   Số nhánh mỗi lượt `git push --delete`. Mặc định 25.
+
+.PARAMETER BoQuaLopPR
+  Xoá kể cả khi KHÔNG đọc được danh sách PR đang mở. Chỉ dùng khi bạn đã tự kiểm
+  rằng không nhánh nào trong danh sách xoá là base của một PR còn mở. Không nêu cờ
+  này thì `-Xoa` sẽ TỪ CHỐI (thoát 13) trong tình huống ấy.
 
 .EXAMPLE
   .\scripts\don-nhanh.cmd
@@ -65,7 +91,8 @@ param(
     [switch]$Xoa,
     [string[]]$GiuThem = @(),
     [string]$Remote = 'origin',
-    [int]$CoLo = 25
+    [int]$CoLo = 25,
+    [switch]$BoQuaLopPR
 )
 
 $ErrorActionPreference = 'Stop'
@@ -120,17 +147,43 @@ $GiuMau = @(
 # HEAD cua PR dang MO. Ve nguyen tac lop 1 da che (PR mo thi head chua merge), nhung
 # mot PR VAN co the mo trong khi head da vao master bang duong khac — luc do lop 1
 # khong che nua. Hai lop doc lap, va lop nay chi chay duoc khi co `gh`.
+# HEAD *VA* BASE cua PR dang MO.
+#
+# HEAD: ve nguyen tac lop 1 da che (PR mo thi head chua merge), nhung mot PR VAN co the
+# mo trong khi head da vao master bang duong khac — luc do lop 1 khong che nua.
+#
+# BASE: lop 1 KHONG che, va day moi la ca nguy hiem. Xoa mot nhanh dang la base cua PR
+# dang mo thi GitHub DONG LUON cac PR nham vao no. Mot nhanh tich hop hoan toan co the
+# DA vao master trong khi van con PR mo nham vao no — luc ay lop 1 noi "xoa duoc" va no
+# dung ve COMMIT (khong mat commit nao) nhung sai ve HAU QUA.
+#
+# `$doDuocPR` la TRANG THAI THU BA: khong phai "co PR" / "khong co PR" ma la "KHONG DO
+# DUOC". No phai chan viec xoa, khong duoc lang le thanh danh sach rong.
 $prMo = @()
+$doDuocPR = $false
+$lyDoKhongDo = ''
 if (Get-Command gh -ErrorAction SilentlyContinue) {
     try {
-        $prMo = (& gh pr list --state open --limit 200 --json headRefName |
-                 ConvertFrom-Json).headRefName
-        Ghi "giu them $($prMo.Count) head cua PR dang mo (doc bang gh)"
-    } catch { Ghi 'gh co nhung khong doc duoc PR — bo qua lop nay' 'Yellow' }
+        $js = (& gh pr list --state open --limit 200 --json headRefName,baseRefName |
+               ConvertFrom-Json)
+        # `ConvertFrom-Json` tra $null khi mang rong, va mot phan tu don KHONG phai mang.
+        # Ep [object[]] de hai truong hop bien do khong lam `.headRefName` no ra sai.
+        $js = @($js)
+        $prMo = @($js | ForEach-Object { $_.headRefName; $_.baseRefName }) |
+                Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+                Sort-Object -Unique
+        $doDuocPR = $true
+        Ghi "giu them $($prMo.Count) ref cua $($js.Count) PR dang mo (head VA base, doc bang gh)"
+    } catch {
+        $lyDoKhongDo = "gh co nhung khong doc duoc PR: $($_.Exception.Message)"
+        Ghi $lyDoKhongDo 'Yellow'
+    }
 } else {
-    Ghi 'KHONG co `gh`: khong doc duoc head cua PR dang mo.' 'Yellow'
-    Ghi '  Lop 1 (chi xoa nhanh DA MERGE) van che duoc gan het;' 'Yellow'
-    Ghi '  neu muon chac, them tay: -GiuThem nhanh-a,nhanh-b' 'Yellow'
+    $lyDoKhongDo = 'KHONG co `gh` tren PATH'
+    Ghi 'KHONG co `gh`: khong doc duoc head/base cua PR dang mo.' 'Yellow'
+    Ghi '  HEAD: lop 1 (chi xoa nhanh DA MERGE) van che duoc gan het.' 'Yellow'
+    Ghi '  BASE: KHONG lop nao che. Xoa nham base cua PR dang mo se DONG cac PR do.' 'Red'
+    Ghi '  Cach chua: cai gh, hoac neu tay -GiuThem <base-a>,<base-b>' 'Yellow'
 }
 $GiuMau += $prMo
 
@@ -175,10 +228,44 @@ if ($seXoa.Count -eq 0) { Ghi 'Khong co nhanh nao de xoa.' 'Green'; exit 0 }
 Ghi '--- se xoa ---' 'Green'
 $seXoa | ForEach-Object { Ghi "  $_" }
 
+if (-not $doDuocPR) {
+    Ghi ''
+    Ghi 'CANH BAO: danh sach tren CHUA loai base cua PR dang mo.' 'Red'
+    Ghi "  ly do: $lyDoKhongDo" 'Red'
+}
+
 if (-not $Xoa) {
     Ghi ''
     Ghi 'DRY RUN — chua xoa gi. Them -Xoa de xoa that.' 'Cyan'
     exit 0
+}
+
+# FAIL-CLOSE, dat TRUOC moi lenh xoa.
+#
+# Vi sao khong "canh bao roi chay tiep": CLAUDE.md ghi thang — "Tu choi ma van de duong
+# nguy hiem chay tiep la FAIL-OPEN, khong phai than trong". Xoa mot base la thao tac
+# KHONG hoan tac duoc ve mat PR: GitHub dong cac PR nham vao no, va tao lai nhanh khong
+# mo lai chung.
+#
+# Cua thoat phai TUONG MINH (`-BoQuaLopPR`) chu khong phai mac dinh, de quyet dinh ay co
+# nguoi chiu trach nhiem thay vi tro thanh hanh vi im lang cua cong cu.
+if (-not $doDuocPR -and -not $BoQuaLopPR) {
+    Ghi ''
+    Ghi 'TU CHOI XOA — khong do duoc danh sach PR dang mo.' 'Red'
+    Ghi "  $lyDoKhongDo" 'Red'
+    Ghi '  Xoa nham mot nhanh dang la BASE cua PR dang mo se DONG cac PR do,' 'Red'
+    Ghi '  va tao lai nhanh KHONG mo lai chung.' 'Red'
+    Ghi ''
+    Ghi '  Chon mot:' 'Yellow'
+    Ghi '    - cai `gh` roi chay lai (duong nen dung)' 'Yellow'
+    Ghi '    - neu tay:  -GiuThem base-a,base-b' 'Yellow'
+    Ghi '    - da tu kiem va chap nhan:  -BoQuaLopPR' 'Yellow'
+    exit 13
+}
+if (-not $doDuocPR -and $BoQuaLopPR) {
+    Ghi ''
+    Ghi 'BO QUA LOP PR theo yeu cau tuong minh (-BoQuaLopPR).' 'Yellow'
+    Ghi 'Neu mot trong cac nhanh tren la base cua PR dang mo, PR do se BI DONG.' 'Yellow'
 }
 
 # ---------------------------------------------------------------- xoá

@@ -545,8 +545,28 @@ def case_descendant_spawned_during_shutdown_is_contained() -> None:
             "signal.signal(signal.SIGTERM, de_them)\n"
             "time.sleep(30)\n"
         )
+        # HANDLER CHỜ 0,6s RỒI MỚI ĐẺ — dài hơn nhịp quét 0,2s. Đây đúng ca P1
+        # cross-review nêu: bản trước thoát vòng lặp vì "không ai mới", rồi đứa
+        # muộn sinh trong lúc `proc.wait(2)` và không bao giờ được quét lại — mà
+        # bản ghi vẫn khai `giet_tron_ven: true`. Không có độ trễ này thì ca test
+        # đo trúng ca DỄ, và bản vá sai vẫn xanh.
+        chau = chau.replace("def de_them(_s, _f):\n",
+                            "def de_them(_s, _f):\n    time.sleep(0.6)\n")
+        # CHA PHỚT LỜ SIGTERM + handler chờ 0,6s = cố dựng lại kịch bản cross-review.
+        #
+        # NHƯNG PHẢI KHAI THẲNG: ca này **KHÔNG phân biệt được** bản vá điều kiện
+        # lặng. Đã đo, không phải phỏng đoán — bơm đột biến "coi không-ai-mới là
+        # lặng" (khớp đúng 1 lần, đã kiểm) thì suite VẪN 16/16. Nghĩa là vế `doi`
+        # dưới đây đang xanh vì một lý do khác, chưa rõ lý do gì.
+        #
+        # Vì vậy bản vá `con_song` trong `_terminate_process_tree` hiện dựa trên
+        # PHÂN TÍCH của reviewer + lập luận, KHÔNG dựa trên ca test này. Ghi ra đây
+        # để không ai đọc "16/16" thành "đã chứng minh": một phép kiểm không thể đỏ
+        # thì không phải bằng chứng, và ca này đã được chứng minh là không đỏ được.
+        # Việc còn lại: dựng cho được ca đỏ, hoặc chuyển sang cgroup và bỏ cả lớp này.
         cha = (
-            "import pathlib,subprocess,sys,time;"
+            "import pathlib,signal,subprocess,sys,time;"
+            "signal.signal(signal.SIGTERM, signal.SIG_IGN);"
             f"subprocess.Popen([sys.executable,'-c',{chau!r}],"
             "stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,close_fds=True);"
             f"pathlib.Path({str(spawned)!r}).write_text('spawned');"

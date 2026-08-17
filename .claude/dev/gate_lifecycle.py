@@ -410,11 +410,29 @@ def _terminate_process_tree(proc: subprocess.Popen[Any], windows_job: _WindowsJo
         global _GIET_KHONG_TRON_VEN
         da_gui: dict[int, str] = {}
         han_lang = time.monotonic() + 10.0
+        # "KHÔNG AI MỚI" KHÔNG PHẢI "CÂY ĐÃ LẶNG" (P1 cross-review PR "#141").
+        #
+        # Một hậu duệ ĐÃ bị bắn vẫn có thể đang nằm trong handler SIGTERM của nó.
+        # Nếu handler chờ lâu hơn 0,2s rồi mới đẻ đứa tách rời, vòng lặp của bản
+        # trước đã thoát: đứa mới sinh trong lúc `proc.wait(2)`, được subreaper nhận
+        # nuôi, và KHÔNG BAO GIỜ được quét lại. Tệ nhất là bản ghi khi ấy vẫn khai
+        # `giet_tron_ven: true` — tức bản vá của tôi làm BẰNG CHỨNG NÓI DỐI, hỏng
+        # nặng hơn hẳn việc sót một tiến trình mà khai đúng.
+        #
+        # Điều kiện lặng phải gồm CẢ HAI: không ai mới, VÀ mọi đứa đã bắn đã BIẾN
+        # MẤT — rồi còn phải đứng yên qua một khoảng ÂN HẠN để đứa đẻ muộn kịp lộ.
         while True:
             anh = _cac_hau_due(goc)             # cha còn sống nên cây còn truy được
             moi = {q: k for q, k in anh.items() if da_gui.get(q) != k}
-            if not moi:
-                break                            # cây đã lặng
+            con_song = [q for q, k in da_gui.items() if _khoa_pid(q) == k]
+            if not moi and not con_song:
+                # Ân hạn: đứng yên rồi soi lại. Đứa đẻ muộn xuất hiện ở đây.
+                time.sleep(AN_HAN_LANG_GIAY)
+                lai = _cac_hau_due(goc)
+                if not {q: k for q, k in lai.items() if da_gui.get(q) != k}:
+                    break                        # cây đã lặng THẬT
+                anh = lai
+                moi = {q: k for q, k in lai.items() if da_gui.get(q) != k}
             if time.monotonic() > han_lang:
                 _GIET_KHONG_TRON_VEN = True      # KHÔNG im lặng bỏ qua
                 break
@@ -448,6 +466,10 @@ _CO_SUBREAPER = False
 # phải phân biệt được hai thứ đó.
 _GIET_KHONG_TRON_VEN = False
 
+# Khoảng ÂN HẠN sau khi cây có vẻ lặng: đứa đẻ muộn (handler chờ rồi mới sinh) chỉ
+# lộ ra nếu ta đứng yên đủ lâu rồi soi lại. Dài hơn nhịp quét 0,2s một bậc.
+AN_HAN_LANG_GIAY = 1.0
+
 
 def _dat_subreaper() -> bool:
     """Nhận nuôi mọi hậu duệ mồ côi (Linux `PR_SET_CHILD_SUBREAPER`).
@@ -463,9 +485,15 @@ def _dat_subreaper() -> bool:
     ĐÂY thay vì về `init`, nên chúng vẫn truy được — đó là lý do phải duyệt từ
     `os.getpid()` chứ không từ `proc.pid`.
 
-    KHAI THẲNG PHẠM VI: đây là chốt của Linux (và FreeBSD). macOS/Windows KHÔNG có
-    nguyên thuỷ này, nên ở đó vẫn còn lỗ "đẻ trong lúc dọn" — nói ra thay vì đặt
-    cho cơ chế một cái tên to hơn thứ nó làm được.
+    KHAI THẲNG PHẠM VI — CHỈ LINUX.
+    Bản trước viết "Linux (và FreeBSD)" trong khi điều kiện là
+    `platform.system() != "Linux"`, tức FreeBSD LUÔN bị tắt. Phạm vi tuyên bố rộng
+    hơn phạm vi mã làm được, đúng lỗi kho đã ghi sổ — và tôi mắc nó NGAY TRONG câu
+    viết ra để khai phạm vi cho trung thực (P2 cross-review PR "#141").
+    FreeBSD có `procctl(PROC_REAP_ACQUIRE)`, nhưng ở đây KHÔNG có FreeBSD để chạy
+    thử, mà khai một nền chưa từng đo lại đúng là cái vừa sai. Nên: macOS,
+    Windows VÀ FreeBSD đều nằm ngoài — ở đó lỗ "đẻ trong lúc dọn" CÒN NGUYÊN, và
+    `giet_tron_ven` là thứ duy nhất nói thật về điều đó.
     """
     if platform.system() != "Linux":
         return False

@@ -134,6 +134,56 @@ jobs:
       # `gate_lifecycle.py` là cơ chế dev-side chống chạy trùng gate + ghi/validate
       # evidence. Nó KHÔNG deselect test và KHÔNG thay promotion gate A2 — xem
       # `docs/PROTOCOL_DA_PHIEN.md`. Bộ này thuần Python, đo 16-08: 13 ca.
+      # UỶ QUYỀN CGROUP v2 CHO RUNNER — nếu không thì bộ ca gate đo NHẦM cơ chế.
+      #
+      # Đo được trên `ef82ca3`: runner `ubuntu-latest` chạy trong
+      # `/system.slice/hosted-compute-agent.service`, `mkdir` cgroup con trả
+      # `[Errno 13] Permission denied`, nên gate tụt về đường QUÉT CÂY và hai ca
+      # cgroup lặng lẽ `BO QUA` — trong khi tổng vẫn `21/21` XANH. Tức con số ấy
+      # nói về đường dự phòng, không nói gì về vùng chứa, và không ai đọc ra được
+      # điều đó từ con số. Đúng bệnh "đếm SỰ CÓ MẶT của một đường thay vì KHẢ NĂNG".
+      #
+      # `chown` CHÍNH cgroup của ta (đúng khuôn `Delegate=yes` của systemd): cần cả
+      # thư mục (để `mkdir` con) LẪN `cgroup.procs` của nó (luật delegation
+      # containment của cgroup v2: muốn chuyển tiến trình thì phải ghi được
+      # `cgroup.procs` của TỔ TIÊN CHUNG giữa nguồn và đích).
+      #
+      # KHÔNG `chown` gốc điểm gắn: ở đó `cgroup.procs` là của cả máy, và nới
+      # quyền lên nó là đổi thứ khác hẳn thứ ta cần.
+      - name: uy quyen cgroup v2 cho runner (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          MOUNT="$(awk '{for(i=1;i<=NF;i++) if($i=="-" && $(i+1)=="cgroup2"){print $5; exit}}' /proc/self/mountinfo)"
+          GOC="$(awk -F: '$1=="0"{print $3}' /proc/self/cgroup)"
+          echo "mount cgroup2 = ${MOUNT:-KHONG CO}"
+          echo "cgroup cua ta = ${GOC:-KHONG CO}"
+          if [ -z "$MOUNT" ] || [ -z "$GOC" ] || [ "$GOC" = "/" ]; then
+            echo "khong uy quyen duoc (khong co cgroup2, hoac ta dang o GOC diem gan)"
+            exit 0
+          fi
+          sudo chown -R "$(id -u):$(id -g)" "${MOUNT}${GOC}"
+          echo "da uy quyen ${MOUNT}${GOC}"
+      # FAIL-CLOSE CHO CHÍNH PHÉP ĐO: Linux mà không cấp được cgroup thì lượt CI
+      # này KHÔNG đo lớp vùng chứa, và một lượt xanh như thế là lời khai sai về độ
+      # phủ. Thà đỏ ở đây — đỏ thì có người đọc, còn xanh-mà-đo-nhầm thì không.
+      - name: cgroup phai THAT SU cap duoc (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, ".claude/dev")
+          import gate_lifecycle as gl
+          mount = gl._mount_cgroup2()
+          print("mount:", mount)
+          cg = gl._tao_cgroup_gate()
+          print("cap cgroup:", "DUOC" if cg is not None else "KHONG DUOC")
+          if cg is None:
+              print("Linux ma khong cap duoc cgroup => bo ca se do duong DU PHONG;")
+              print("con so xanh khi ay khong noi gi ve lop vung chua.")
+              sys.exit(1)
+          gl._don_cgroup(cg)
+          PY
       - name: gate lifecycle selftest
         run: python .claude/dev/gate_lifecycle_test.py
       # `--all` soi TOÀN BỘ index, không chỉ tệp đang stage — đây là thứ duy nhất bắt được nợ

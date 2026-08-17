@@ -129,3 +129,4 @@ canh_bao_moi_truong_luc_cap: >-
   `~/.codex/config.toml.tra-luat-da-go`; công cụ CỐ Ý không tự thay tệp của người dùng.
   Lease này vẫn có hiệu lực — nó là bản ghi THẨM QUYỀN, không phải bản ghi "đã chạy" —
   nhưng reviewer chưa khởi động được cho tới khi chặn ấy được gỡ.
+posted_comment_id: 5312016553   # workflow ghi, ĐỪNG sửa tay

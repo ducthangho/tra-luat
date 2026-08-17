@@ -21195,10 +21195,15 @@ def run() -> int:
         # ĐÃ TRẢ GIÁ: `release-manifest` vẫn báo `file_count: 179` sau khi thêm tệp docs này, nên
         # lượt chạy cổng phát hành TRƯỚC push xanh và tôi tưởng đã đủ — chính ca này mới là chỗ ghi
         # con số docs, và nó chỉ đỏ ở `tl selftest`. Cổng khác nhau trả lời câu hỏi khác nhau.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 57 == 236
+        # KÊ KHAI SLOT (GLS-D1 / PR #160 — cứu research doc từ `codex/gate-lifecycle`): 57 → **58**
+        # Markdown dưới `docs/`. Thêm đúng `docs/research/2026-08-16-github-cli-claude-codex-local.md`
+        # (port nguyên văn từ `ec8d08c`, dev-side/ngoài gói). Package giữ 179, cây thật = 179 + 58 = 237.
+        # Trả giá LẶP đúng bài dòng "ĐÃ TRẢ GIÁ" trên: local chỉ chạy `doc-claims-check --strict`
+        # (xanh) mà không chạy selftest ⇒ gate CI của PR #160 mới là nơi ca này đỏ lần đầu.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 58 == 237
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 57
+        ok4 = (len(tren_dia) == 58
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

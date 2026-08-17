@@ -47,12 +47,24 @@ python3 .claude/dev/launcher.py run \
 | bộ test | `21/21` (pwsh 7.4.6, `TMPDIR=/dev/shm`, ~15s) |
 | cổng | eol ok=true checked=398 · lease_publish 31/31 · release-verify ok=true · golden rc=0 · `file_count` 179 |
 
-> **Đính chính một con số trong lịch sử commit.** Thông điệp của commit `9a133a4` ghi
-> `eol … checked=400`; phép đo thật in **398**. Người vá gõ số trước khi đo. Commit đã đẩy
-> nên không sửa được tại chỗ (sửa lịch sử đã công bố là thứ khác hẳn, đắt hơn nhiều so với
-> một dòng đính chính). **Số đúng ở bảng trên.** Ghi ra vì kho này đo lời khai, và một con
-> số sai trong thông điệp commit là một lời khai sai trong bản ghi vĩnh viễn — dù nó chỉ
-> lệch 2.
+> **Đính chính một con số — và bài học đắt hơn con số.**
+>
+> Thông điệp commit `9a133a4` ghi `eol … checked=400`. Người vá **gõ số trước khi đo**; phép
+> đo lúc ấy in **398**. Đó là lỗi thứ nhất, tầm thường.
+>
+> Lỗi thứ hai mới đáng ghi: `398` cũng **không** mô tả cây của commit ấy.
+> **`eol_policy.py --all` đọc INDEX của git**, nên đo *trước* `git add` là đo một cây
+> **khác** với cây sắp commit — ba tệp `ops/` mới (lease 6, prompt 6, bàn giao) chưa vào
+> index nên không được đếm. Đo lại sau khi đã stage: **`checked=401`**.
+>
+> Tức một con số có thể sai theo **hai kiểu độc lập**: sai vì đoán, và sai vì đo đúng lệnh
+> nhưng **sai thời điểm**. Kiểu thứ hai nguy hiểm hơn vì nó *có* phép đo đằng sau và trông
+> hoàn toàn đáng tin.
+>
+> **Nếp rút ra:** mọi số cổng phải ghi kèm **neo** — đo ở SHA/trạng thái index nào. Số đúng
+> cho commit `4a22cec` là `checked=401`; số `398` đúng cho cây **trước khi stage** ba tệp ops.
+> Commit `9a133a4` đã đẩy nên không sửa tại chỗ; sửa lịch sử đã công bố đắt hơn nhiều so với
+> một dòng đính chính.
 
 ## SÁU LƯỢT, SÁU LẦN TÌM RA THỨ THẬT — đọc bảng này trước khi nghĩ "chắc sạch rồi"
 

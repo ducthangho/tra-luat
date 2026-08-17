@@ -353,6 +353,49 @@ ca 't16_gh_rc0_STDOUT_rong_nhung_STDERR_CO_noi_dung_thi_TU_CHOI' {
     bang (($truoc -join ',') -eq ($sau -join ',')) "CO nhanh bi xoa: truoc=[$($truoc -join ', ')] sau=[$($sau -join ', ')]"
 }
 
+ca 't17_gh_tra_ve_DUNG_BANG_TRAN_thi_TU_CHOI' {
+    # HÌNH DẠNG LỖI THỨ TƯ, do cross-review lượt kiến trúc nêu — và ho khai thang do la
+    # SUY LUAN TU TAI LIEU chu khong phai phep do song (`gh` bi proxy container chan ca
+    # REST lan GraphQL nen khong do that duoc).
+    #
+    # Ca nay do THU DUNG: khong do hanh vi cua `gh`, ma do HANH VI CUA SCRIPT khi dem tra
+    # ve cham tran. Do la thu duy nhat script kiem soat duoc, va cung la thu that su quan
+    # trong: `gh pr list --limit N` lay dung N phan tu va KHONG canh bao khi con nua, nen
+    # "co dung N" va "BI CAT o N" cho ra CUNG mot ket qua. Khong phan biet duoc => TU CHOI.
+    #
+    # Dung `-TranPR 3` de khoi phai sinh 1000 PR gia. Bien co that su cham hay khong la
+    # thuoc tinh cua PHEP SO SANH, khong phai cua con so.
+    $k = Dung-Kho
+    Them-Nhanh $k 'nen/tichhop' $true
+    Them-Nhanh $k 'ops/rac' $true
+    $truoc = Nhanh-Tren-Remote $k
+    $gh = Dung-Gh-Gia -PR @(
+        @{ headRefName = 'a'; baseRefName = 'nen/tichhop' },
+        @{ headRefName = 'b'; baseRefName = 'master' },
+        @{ headRefName = 'c'; baseRefName = 'master' })
+    $r = Chay-KichBan $k $gh @('-Xoa', '-TranPR', '3')
+    $sau = Nhanh-Tren-Remote $k
+    bang ($r.rc -eq 13) "rc=$($r.rc), doi 13 — cham tran ma van tin la danh sach DU. Ra:`n$($r.ra)"
+    bang (($truoc -join ',') -eq ($sau -join ',')) "CO nhanh bi xoa du danh sach co the DA BI CAT: truoc=[$($truoc -join ', ')] sau=[$($sau -join ', ')]"
+}
+
+ca 't18_gh_tra_ve_DUOI_TRAN_thi_VAN_chay' {
+    # DOI CHUNG DUONG cho t17. Khong co no, mot ban "luon tu choi khi co PR" cho t17 xanh
+    # ma cong cu thanh vo dung. Cung 3 PR nhu tren nhung tran = 4 => duoi tran.
+    $k = Dung-Kho
+    Them-Nhanh $k 'nen/tichhop' $true
+    Them-Nhanh $k 'ops/rac' $true
+    $gh = Dung-Gh-Gia -PR @(
+        @{ headRefName = 'a'; baseRefName = 'nen/tichhop' },
+        @{ headRefName = 'b'; baseRefName = 'master' },
+        @{ headRefName = 'c'; baseRefName = 'master' })
+    $r = Chay-KichBan $k $gh @('-Xoa', '-TranPR', '4')
+    $con = Nhanh-Tren-Remote $k
+    bang ($r.rc -eq 0) "rc=$($r.rc), doi 0 — chot tran chan OAN duong binh thuong. Ra:`n$($r.ra)"
+    bang ($con -contains 'nen/tichhop') "BASE bi xoa. Con lai: $($con -join ', ')"
+    bang (-not ($con -contains 'ops/rac')) "nhanh rac khong bi xoa. Con lai: $($con -join ', ')"
+}
+
 # ---------------------------------------------------------------- chạy
 $ten = @($script:CA.Keys)
 if ($LapCa) { $ten = @($ten | Where-Object { $_ -eq $LapCa }) }

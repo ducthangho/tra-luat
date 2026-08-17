@@ -70,7 +70,24 @@ hinh_dang_loi_thu_tu:
     `gh pr list --limit 200` đặt trần cứng. Kho >200 PR mở ⇒ rc=0 + JSON hợp lệ +
     `$doDuocPR=true` với danh sách THIẾU ⇒ giữ hụt base ⇒ xoá nhầm. Cùng họ "rỗng-vs-vắng"
     của `t16`, khác ở NGƯỠNG thay vì SỐ ĐẾM.
-  trang_thai: ĐANG MỞ, latent
+  trang_thai_khi_verdict: ĐANG MỞ, latent
+  trang_thai_hien_nay: ĐÃ ĐÓNG
+  dong_luc_utc: '2026-08-17T15:30:00Z'
+  dong_bang: >-
+    `--limit` nâng 200 → 1000 (`-TranPR`), VÀ thêm chốt: `gh` trả về đếm >= trần ⇒ TỪ CHỐI
+    (thoát 13). Lý do chốt chứ không chỉ nâng số: chạm trần thì "có đúng bằng ấy PR" và
+    "danh sách BỊ CẮT" cho ra CÙNG một kết quả — không phân biệt được từ bên trong, nên
+    đối xử như KHÔNG ĐO ĐƯỢC. Nâng số chỉ dời biên; chốt mới đóng lớp.
+  ca_khoa: 't17 (đếm = trần ⇒ từ chối 13, không xoá gì) · t18 ĐỐI CHỨNG DƯƠNG (đếm < trần ⇒ vẫn xoá)'
+  phan_chung: >-
+    bản `bfeedfc` (SHA lượt kiến trúc đã review) ⇒ 16/18, đỏ t17+t18 · M10 bỏ chốt chạm trần
+    ⇒ 17/18 đỏ t17 · M11 đổi `-ge` thành `-gt` (off-by-one) ⇒ 17/18 đỏ t17 — M11 là cái
+    chứng minh t17 đo ĐÚNG BIÊN chứ không chỉ đo "có tồn tại một phép kiểm".
+  van_giu_nguyen_khai_bao_cua_reviewer: >-
+    Reviewer khai kết luận về `--limit` là SUY LUẬN TỪ TÀI LIỆU `gh`, không phải phép đo
+    sống — điều đó VẪN ĐÚNG và không bị bản vá này lật. Bản vá đo THỨ KHÁC: hành vi của
+    SCRIPT khi chạm trần, thứ duy nhất script kiểm soát được. Hành vi phân trang thật của
+    `gh` ở kho >1000 PR vẫn CHƯA ai đo.
   vi_sao_khong_doi_verdict: >-
     (a) latent — số PR mở đo được gần nhất là 11, cách rất xa 200; (b) nó là tham số BÊN
     TRONG phương án A (`--paginate` / nâng limit + đối chiếu đủ trang), không phải lý do đổi
@@ -114,4 +131,7 @@ receipt_written_at_utc: '2026-08-17T15:05:00Z'
 receipt_khong_khai:
 - 'Không khai `giu_nguyen` là điều kiện land cho #150. Nó KHÔNG.'
 - 'Không khai MCP "không dùng được" — nó ĐÃ dùng được lúc 14:44 và hết dùng được lúc 14:56. Trạng thái đúng là TRÔI, không phải HỎNG.'
-- 'Không khai nợ `--limit 200` đã đóng. Nó đang mở.'
+- >-
+    Nợ `--limit 200` NAY ĐÃ ĐÓNG (xem `hinh_dang_loi_thu_tu.trang_thai_hien_nay`), nhưng
+    KHÔNG khai là đã đo hành vi phân trang THẬT của `gh`. Cái đóng được là hành vi của
+    SCRIPT khi chạm trần; hành vi của `gh` ở kho >1000 PR vẫn chưa ai đo.

@@ -50,6 +50,12 @@
 .PARAMETER CoLo
   Số nhánh mỗi lượt `git push --delete`. Mặc định 25.
 
+.PARAMETER TranPR
+  Trần `--limit` khi hỏi `gh pr list`. Mặc định 1000 (bản trước ghim 200).
+  Nếu `gh` trả về ĐÚNG bằng trần này thì script TỪ CHỐI (thoát 13) — chạm trần nghĩa là
+  "có đúng bằng ấy PR" và "danh sách BỊ CẮT" cho ra cùng một kết quả, tức KHÔNG ĐO ĐƯỢC.
+  Tham số này tồn tại chủ yếu để bộ test dựng được ca chạm trần mà không phải sinh 1000 PR giả.
+
 .PARAMETER BoQuaLopPR
   Xoá kể cả khi KHÔNG đọc được danh sách PR đang mở. Chỉ dùng khi bạn đã tự kiểm
   rằng không nhánh nào trong danh sách xoá là base của một PR còn mở. Không nêu cờ
@@ -92,7 +98,8 @@ param(
     [string[]]$GiuThem = @(),
     [string]$Remote = 'origin',
     [int]$CoLo = 25,
-    [switch]$BoQuaLopPR
+    [switch]$BoQuaLopPR,
+    [int]$TranPR = 1000
 )
 
 $ErrorActionPreference = 'Stop'
@@ -174,7 +181,7 @@ if (Get-Command gh -ErrorAction SilentlyContinue) {
         # Chinh ham `Chay-Git` phia tren da dan dung dieu nay ("dung `$LASTEXITCODE` sau mot
         # pipeline") va loi goi nay vi pham no. Mot loi dan chi bao ve doan ma no duoc VIET
         # RA, khong bao ve doan ke ben.
-        $het = & gh pr list --state open --limit 200 --json headRefName,baseRefName 2>&1
+        $het = & gh pr list --state open --limit $TranPR --json headRefName,baseRefName 2>&1
         $ghRc = $LASTEXITCODE
         # TACH HAI LUONG THEO KIEU, khong nem chung vao mot chuoi.
         #
@@ -199,6 +206,22 @@ if (Get-Command gh -ErrorAction SilentlyContinue) {
         # `ConvertFrom-Json` tra $null khi mang rong, va mot phan tu don KHONG phai mang.
         # Ep [object[]] de hai truong hop bien do khong lam `.headRefName` no ra sai.
         $js = @($js)
+        # CHAM TRAN = KHONG DO DUOC, khong phai "dung bang nay PR".
+        #
+        # `gh pr list --limit N` lay DUNG N phan tu qua bao nhieu trang can thiet va KHONG
+        # canh bao khi tong so PR mo that su lon hon N. Nen khi dem tra ve = N, hai trang
+        # thai KHAC NHAU cho ra CUNG mot ket qua:
+        #     "co dung N PR mo"      -> danh sach DU
+        #     "co nhieu hon N"       -> danh sach BI CAT, thieu base => XOA NHAM
+        # Khong the phan biet tu ben trong, nen doi xu nhu KHONG DO DUOC va TU CHOI.
+        #
+        # Cung ho "rong-vs-vang" cua t16, khac o NGUONG thay vi SO DEM. Do la hinh dang loi
+        # THU TU, do cross-review luot kien truc neu ra — va ho khai thang no la SUY LUAN TU
+        # TAI LIEU chu khong phai phep do song (proxy container chan `gh` ca REST lan
+        # GraphQL). Chot nay do HANH VI CUA SCRIPT khi cham tran, khong do hanh vi cua `gh`.
+        if ($js.Count -ge $TranPR) {
+            throw "gh tra ve $($js.Count) PR = cham tran --limit $TranPR; khong phan biet duoc 'dung $TranPR' voi 'BI CAT'"
+        }
         $prMo = @($js | ForEach-Object { $_.headRefName; $_.baseRefName }) |
                 Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
                 Sort-Object -Unique

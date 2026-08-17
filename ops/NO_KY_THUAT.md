@@ -199,3 +199,31 @@ dem cgroup     : dem thu muc `tl-gate-*` DUOI diem gan cgroup v2, quet de quy
                  tren host systemd cho ay khong phai goc
 dat            : 0 traceback · 0 con song sot · 0 cgroup rac, o CA HAI cach goi
 ```
+
+---
+
+## 7. `launcher_test.py` chớp một lượt `hong 1` — chưa tái hiện được
+
+**Đo được** (phiên 17-08, nhánh `ops/tin-hieu-chan-som`): trong một lượt chạy
+loạt `gate BẬT → gate TẮT → launcher`, `launcher_test.py` ra
+`116/117 ca (qua 115, bo qua 1, hong 1)`. Tên ca hỏng **không bắt được** vì lượt
+ấy chỉ giữ dòng tổng.
+
+**Không tái hiện được:** 6 lượt sau đó đều `117/117`, kể cả một lượt chạy **đúng
+lại thứ tự loạt** đã sinh ra nó.
+
+**Không phải do thay đổi của nhánh này:** diff chỉ chạm `gate_lifecycle.py`,
+`gate_lifecycle_test.py` và tệp này; còn `launcher_test.py` lẫn `launcher.py` có
+**0 lần** nhắc `gate_lifecycle` (đo bằng `grep -c`). Không có đường mã nào nối
+hai bên. Giả thuyết còn lại là **tranh chấp tài nguyên** khi chạy ngay sau bộ gate
+(bộ ấy sinh nhiều tiến trình và cgroup), nhưng đó mới là giả thuyết — chưa đo.
+
+**Vì sao đáng ghi thay vì bỏ qua:** một cổng chớp đỏ rồi tự xanh là cổng **không
+tin được**, và lần sau ai gặp sẽ mất thời gian đúng chỗ tôi vừa mất. Ghi lại để
+người sau không phải khám phá lại từ đầu.
+
+**Xong khi:** hoặc bắt được tên ca (chạy loạt có ghi log đầy đủ, không chỉ dòng
+tổng) rồi xử lý; hoặc chạy đủ nhiều lượt để kết luận nó không tái phát và đóng
+mục kèm số lượt đã chạy. Việc đầu tiên nên làm: cho runner của `launcher_test.py`
+in tên ca hỏng ra stdout thay vì chỉ đếm — hiện `hong 1` không nói được ca nào.
+

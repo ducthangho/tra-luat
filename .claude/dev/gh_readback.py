@@ -3,13 +3,20 @@
 
 VÌ SAO CÓ TỆP NÀY (mỗi mục là một lần đã trả giá, ngày 17–18/08/2026)
 
-1. TẦNG VẬN CHUYỂN ĂN MẤT NỘI DUNG, IM LẶNG.
-   Đăng PR body chứa `git cat-file -e HEAD:<path>`. Lời gọi trả THÀNH CÔNG. Bản đã
-   đến mất sạch `<path>` — nó bị xử lý như một thẻ HTML và bị xoá. Các dấu `>` khác
-   trong cùng body vẫn còn (dạng `&gt;`), nên đây là XOÁ chứ không phải escape.
-   Câu lệnh trong tài liệu thành `git cat-file -e HEAD:` — ai chép về sẽ chạy hỏng.
-   Chỉ lộ vì đã đọc ngược body về và diff. Cùng họ với sự cố `co\\u0308dex` ở PR #92:
-   một lớp mà ta không coi là lớp.
+1. CHÍNH CÁI THƯỚC CŨNG LÀM MẤT NỘI DUNG — bẫy sâu hơn hẳn mấy cái dưới.
+   Đăng PR body chứa `git cat-file -e HEAD:<path>` rồi đọc ngược về bằng bộ đọc MCP
+   `pull_request_read`: `<path>` BIẾN MẤT, body hiện thành `git cat-file -e HEAD:`.
+   Tôi đọc thành "tầng vận chuyển đã xoá nó lúc đăng", rồi đi SỬA một thứ KHÔNG HỎNG.
+   Đo A/B trên CÙNG một đối tượng (PR #158) mới ra sự thật:
+     · `gh api repos/O/R/pulls/N --jq .body`  ->  `<path>` CÒN ĐỦ
+     · MCP `pull_request_read`                ->  `<path>` MẤT SẠCH
+   GitHub LƯU ĐÚNG. Bộ đọc MCP mới là thứ nuốt token dạng thẻ (và HTML-escape dấu
+   nháy, dấu `>`). Nên bài học KHÔNG phải "đừng dùng ngoặc nhọn", mà là:
+   **"đo thứ ĐÃ ĐẾN" chỉ đúng khi CÁI THƯỚC trung thực.** Đo bằng dụng cụ có mất mát
+   thì sinh dương tính giả, và dương tính giả khiến ta sửa hỏng bản vốn đang đúng.
+   Vì vậy công cụ này đọc ngược BẰNG `gh api --jq .body` (REST thô), tuyệt đối không
+   qua bộ đọc MCP. Cùng họ với `co\\u0308dex` ở PR #92 — một lớp không được coi là
+   lớp — nhưng lần này lớp ấy nằm ở phía ĐỌC chứ không phải phía GHI.
 
 2. DÒ BẰNG CÁCH GÕ TAY CHUỖI TIẾNG VIỆT = BÁO ĐỘNG GIẢ.
    Hai lần liên tiếp báo "MẤT" cho nội dung còn nguyên, chỉ vì chuỗi dò gõ sai dấu
@@ -88,7 +95,8 @@ def _canh_bao_ky_tu(s: str) -> list[str]:
     import re
     the = sorted(set(re.findall(r"<[A-Za-z_][A-Za-z0-9_.-]*>", s)))
     if the:
-        ra.append(f"co {len(the)} chuoi dang the HTML se BI XOA: {the[:6]}")
+        ra.append(f"co {len(the)} chuoi dang the HTML — bo doc MCP se NUOT chung; "
+                  f"doc nguoc bang gh api --jq .body moi trung thuc: {the[:6]}")
     if "\\u" in s:
         ra.append("co chuoi thoat kieu \\uXXXX — tang van chuyen co the GIAI MA no")
     return ra

@@ -3799,10 +3799,15 @@ def t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua():
     """`N/N` chỉ được xuất hiện khi ĐÚNG N ca đã CHẠY và QUA.
 
     Dòng kết luận cũ lấy `qua + bo_qua` làm tử số, nên trên Windows — nơi nhiều ca
-    tự bỏ qua vì cần POSIX — nó in `117/117 ca` với `bo qua 14` nằm trong ngoặc.
+    tự bỏ qua vì cần POSIX — nó in `118/118 ca` với `bo qua 13` nằm trong ngoặc.
     CLAUDE.md dạy đúng cách đọc bằng chứng dương là "đòi `N/N` với hai số BẰNG
     NHAU", nên chính dòng ấy trao cho người đọc dấu hiệu tin được của một lượt
-    chạy mà 14 ca chưa hề đo. Đây là `t116` ở tầng BÁO CÁO: ở đó tổng tụt một mà
+    chạy mà 13 ca chưa hề đo. (Bộ số neo tại `99ba7857`, ba kênh độc lập cùng
+    ra `qua=105, bo_qua=13, tong=118`: máy dev cp1258, CI windows-latest, PR
+    #153. Bản đầu của docstring này ghi `117/117` với `bo qua 14` — không khớp
+    phép đo nào tại head ấy; nếu từng là số thật thì thuộc một tree cũ không
+    còn định danh được — review W0-M1 bắt, P3.) Đây là
+    `t116` ở tầng BÁO CÁO: ở đó tổng tụt một mà
     vẫn in `114/114`; ở đây tổng đúng mà tử số phồng lên bằng số ca không chạy.
 
     Ca này KHÔNG gọi CLI vì thứ cần đo là một phép tính thuần: `dong_ket_qua` đã
@@ -3868,6 +3873,81 @@ def t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua():
     bang(truoc.startswith("3/3 "), f"luot sach phai la N/N: {truoc!r}")
     bang(not sau.startswith("3/3 "),
          f"van bao N/N sau khi mot ca thanh BO QUA: {sau!r}")
+
+
+@ca
+def t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua():
+    """`dong_ket_qua` đúng mà `main` không GỌI nó thì headline vẫn nói dối được.
+
+    Finding P3 của review W0-M1 (PR #153, head `99ba7857`), tái lập được: mutant
+    thay lời gọi `dong_ket_qua(...)` ở cuối `main` bằng chính f-string cũ
+    `{qua + bo_qua}/{tong}` cho rc=0 mà `t118` vẫn xanh — `t118` đo HÀM, không
+    đo DÂY NỐI, và không ca nào khác đọc headline của nhánh mặc định (đã grep:
+    `main()` chỉ được gọi ở `sys.exit(main())`, chuỗi "ca QUA (" chỉ sinh ở
+    `dong_ket_qua`). Bệnh `t24`/`t116` thêm một tầng: hàm CÓ MẶT trong tệp,
+    có test riêng, mà lượt chạy thật không đi qua nó.
+
+    Đo bằng HÀNH VI, không grep nguồn: assert "nguồn `main` chứa `dong_ket_qua(`"
+    sẽ tha mutant gọi-mà-không-in (`_ = dong_ket_qua(...)` — nguồn vẫn chứa
+    chuỗi ấy mà stdout mất headline). Cũng KHÔNG spawn `--lap-ca` như finding
+    gợi ý: nhánh `--lap-ca` in dòng `LAP ...` riêng của nó, KHÔNG đi qua
+    `dong_ket_qua` (xem `main`) — đo rồi mới thấy gợi ý ấy trỏ nhầm máy in.
+
+    Cách đo: nạp BẢN SAO module này (`_nap_sach`, seam sẵn có của bộ đột biến),
+    thay `CA` bằng ca giả, stub khối tự-khai/tách-nhóm (mỗi khối đã có ca riêng
+    đo nó), rồi gọi `main()` THẬT và đọc stdout. Ba nhánh: sạch (headline phải
+    là N/N đúng nghĩa), có BO QUA (cảnh báo phải RA TỚI stdout và rc giữ 0 —
+    biến câu "Mã thoát KHÔNG đổi" mà `t118` chỉ khai suông thành phép đo), có
+    HONG (rc phải 1).
+
+    GIỚI HẠN — khai thẳng: stub nghĩa là tổ hợp này không đo `khai_moi_truong`
+    lẫn `_tu_tach_nhom_neu_can`; và `sys.exit(main())` dưới `__main__` vẫn
+    ngoài tầm — ca này đo GIÁ TRỊ TRẢ VỀ của `main`, không đo mã thoát tiến
+    trình. Đổi phối hợp (sửa cả `main` lẫn ca này) thì không chống được — cùng
+    giới hạn đã khai ở `t116`.
+    """
+    def _chay_main_voi(ds_ca):
+        m = _nap_sach(Path(__file__))
+        m.CA = list(ds_ca)
+        m.khai_moi_truong = lambda: {}
+        m._mot_dong_moi_truong = lambda mt: "moi truong: (ca thu, da stub)"
+        m._tu_tach_nhom_neu_can = lambda: "bo qua (ca thu, da stub)"
+        m.phan_tich_doi_so = lambda argv: argparse.Namespace(
+            dot_bien=False, moi_truong=False, lap_ca=None, lan=20, nhat_ky=None)
+        ra = io.StringIO()
+        with contextlib.redirect_stdout(ra):
+            rc = m.main()
+        return rc, ra.getvalue()
+
+    def ca_qua():
+        pass
+
+    def ca_bo_qua():
+        return "thieu POSIX (gia lap)"
+
+    def ca_hong():
+        raise AssertionError("hong co tinh")
+
+    # (a) nhanh sach: headline THAT tren stdout phai dung tung byte
+    rc, ra = _chay_main_voi([ca_qua])
+    cuoi = ra.rstrip().splitlines()[-1]
+    bang(rc == 0, f"nhanh sach phai rc=0, duoc {rc}")
+    bang(cuoi == "1/1 ca QUA (bo qua 0, hong 0)",
+         f"headline nhanh mac dinh KHONG di qua dong_ket_qua: {cuoi!r}")
+
+    # (b) co BO QUA: canh bao phai ra toi stdout, va rc GIU 0 (spec W0-M1)
+    rc, ra = _chay_main_voi([ca_qua, ca_bo_qua])
+    cuoi = ra.rstrip().splitlines()[-1]
+    bang(cuoi == "1/2 ca QUA (bo qua 1, hong 0) - KHONG DU: 1 ca BO QUA, chua do gi",
+         f"canh bao BO QUA khong toi duoc stdout: {cuoi!r}")
+    bang(rc == 0, f"bo qua khong duoc doi ma thoat (spec W0-M1) ma rc={rc}")
+
+    # (c) co HONG: rc phai 1 va headline dem dung
+    rc, ra = _chay_main_voi([ca_qua, ca_hong])
+    cuoi = ra.rstrip().splitlines()[-1]
+    bang(rc == 1, f"co ca hong ma rc={rc}")
+    bang(cuoi == "1/2 ca QUA (bo qua 0, hong 1)",
+         f"headline dem hong sai: {cuoi!r}")
 
 
 @ca
@@ -4997,8 +5077,11 @@ def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
 def dong_ket_qua(tong: int, qua: int, bo_qua: int, so_hong: int) -> str:
     """Dòng kết luận của một lượt chạy. TÁCH khỏi `main` để đo được TRỰC TIẾP.
 
-    ĐÃ TRẢ GIÁ: tử số cũ là `qua + bo_qua`, nên một lượt Windows bỏ qua 14 ca vẫn
-    in `117/117 ca` — ĐÚNG hình dạng "N/N với hai số BẰNG NHAU" mà CLAUDE.md dạy
+    ĐÃ TRẢ GIÁ: tử số cũ là `qua + bo_qua`, nên một lượt Windows bỏ qua 13 ca vẫn
+    in `118/118 ca` (số ĐO tại `99ba7857`: `qua=105, bo_qua=13, tong=118` — máy
+    dev cp1258, CI windows-latest và PR #153 cùng ra một bộ; bản đầu ghi
+    `117/117`/`bỏ qua 14`, không khớp phép đo nào tại head ấy — review W0-M1
+    bắt, P3) — ĐÚNG hình dạng "N/N với hai số BẰNG NHAU" mà CLAUDE.md dạy
     là bằng chứng dương đáng tin. Người đọc nhận một câu khẳng định mọi ca đã qua,
     trong khi có ca chưa hề chạy. Cùng họ với `t24` của kho ("ca CÓ MẶT khác ca có
     ĐO") và với `t116` ("suite vẫn in 114/114 mà tổng đã tụt một"): chỗ VẮNG MẶT
@@ -5012,7 +5095,7 @@ def dong_ket_qua(tong: int, qua: int, bo_qua: int, so_hong: int) -> str:
 
     Chuỗi trả về là ASCII: console máy Việt là cp1258 và một câu `print` có dấu
     ném `UnicodeEncodeError`, giết cả lượt chạy trước khi logic kịp sai. Câu cảnh
-    báo cũng KHÔNG được chứa cặp số nào — nhét "117/117" vào đây là tự dựng lại
+    báo cũng KHÔNG được chứa cặp số nào — nhét "118/118" vào đây là tự dựng lại
     đúng hình dạng vừa gỡ, cho người đọc lướt qua thấy lại N/N.
     """
     dong = f"{qua}/{tong} ca QUA (bo qua {bo_qua}, hong {so_hong})"

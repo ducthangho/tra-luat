@@ -107,7 +107,15 @@ def lenh_dang(a) -> int:
     if not nguon.is_file():
         print(f"khong doc duoc tep nguon: {nguon}", file=sys.stderr)
         return MA_NGUON
-    noi_dung = nguon.read_text(encoding="utf-8")
+    try:
+        noi_dung = nguon.read_text(encoding="utf-8")
+    except UnicodeDecodeError as e:
+        # Bang ma thoat o dau tep hua `6` cho "tep nguon khong doc duoc". Ban dau
+        # de ngoai le nay bay ra ngoai va tien trinh chet rc=1 kem traceback —
+        # sai chinh hop dong minh vua cong bo (review W0-T1 do duoc). May Windows
+        # day tep cp1252/UTF-16 nen day khong phai ca hiem.
+        print(f"tep nguon khong phai UTF-8: {e}", file=sys.stderr)
+        return MA_NGUON
     if not noi_dung.strip():
         print("tep nguon RONG — tu choi dang", file=sys.stderr)
         return MA_NGUON
@@ -159,6 +167,18 @@ def lenh_chay(a) -> int:
 
 
 def main(argv=None) -> int:
+    # CHINH CAI THUOC KHONG DUOC LAM HONG PHEP DO — lan thu hai trong cung mot tep.
+    # `run` co dung mot muc dich: in ra rc THAT cua lenh con. Ban dau no in stdout
+    # cua con ra `sys.stdout` dang strict, nen mot ky tu console khong ma hoa duoc
+    # (console may Viet la cp1258) lam chinh cong cu nem UnicodeEncodeError va
+    # thoat rc=1 — TRONG KHI con thoat rc=0. Review W0-T1 do duoc bang mot con in
+    # U+21D2. Loi TRINH BAY thay mat ket qua DO: dung thu no sinh ra de chan.
+    # `backslashreplace` giu nguyen thong tin (hien dang chuoi thoat) thay vi mat.
+    for _f in (sys.stdout, sys.stderr):
+        try:
+            _f.reconfigure(errors="backslashreplace")
+        except (AttributeError, OSError, ValueError):
+            pass  # stream da bi thay the (redirect_stdout trong test) — khong sao
     p = argparse.ArgumentParser(prog="gh_readback.py", allow_abbrev=False,
                                 description="dang len GitHub roi CHUNG MINH thu da den")
     sub = p.add_subparsers(dest="lenh_con", required=True)

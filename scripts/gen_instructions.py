@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -21,25 +22,49 @@ for _s in (getattr(sys, "stdout", None), getattr(sys, "stderr", None)):
     except Exception:
         pass
 
-def _detect_version() -> str:
-    """Lấy version thật của gói skill khi chạy standalone.
 
-    gen_instructions.py có thể được gọi trực tiếp từ scripts/ nên không được hard-code
-    version cũ; ưu tiên file VERSION ở root gói, fallback về mốc tối thiểu.
+class VersionResolutionError(RuntimeError):
+    """Không thể giải quyết phiên bản gói hợp lệ từ tệp VERSION."""
+    pass
+
+
+def _detect_version(allow_unversioned_dev: bool = False, root_override: Path | str | None = None) -> str:
+    """Lấy version thật của gói skill khi chạy standalone (fail-closed).
+
+    gen_instructions.py có thể được gọi trực tiếp từ scripts/ nên BẮT BUỘC đọc file
+    VERSION ở root gói. Tuyệt đối không fallback về một release lịch sử cứng.
+    Thiếu / rỗng / sai định dạng -> ném VersionResolutionError.
     """
     here = Path(__file__).resolve()
-    for base in (here.parent.parent, here.parent):
+    candidates = [Path(root_override)] if root_override else [here.parent.parent, here.parent]
+    for base in candidates:
+        if base is None:
+            continue
         vf = base / "VERSION"
-        try:
-            v = vf.read_text(encoding="utf-8", errors="replace").strip()
-            if v:
-                return v
-        except Exception:
-            pass
-    return "1.33.49"
+        if vf.is_file():
+            try:
+                v = vf.read_text(encoding="utf-8", errors="replace").strip()
+            except Exception as exc:
+                raise VersionResolutionError(f"VERSION_UNREADABLE: Không thể đọc tệp {vf}: {exc}") from exc
+            if not v:
+                raise VersionResolutionError(f"VERSION_EMPTY: Tệp {vf} rỗng.")
+            if not re.match(r"^\d+\.\d+\.\d+(?:[-+].+)?$", v):
+                raise VersionResolutionError(f"VERSION_INVALID: Định dạng version trong {vf} không hợp lệ: {v!r}")
+            return v
+
+    if allow_unversioned_dev:
+        return "0.0.0-DEV+unversioned"
+
+    raise VersionResolutionError(
+        "VERSION_MISSING: Không tìm thấy tệp VERSION hợp lệ ở root gói hoặc thư mục cha. "
+        "Dùng --allow-unversioned-dev nếu chỉ đang phát triển/thử nghiệm cục bộ."
+    )
 
 
-VERSION = _detect_version()
+try:
+    VERSION = _detect_version()
+except VersionResolutionError:
+    VERSION = "VERSION_UNREADABLE"
 
 
 def _skill_of_record(skill_version: str) -> str:
@@ -951,15 +976,60 @@ def selftest() -> int:
     bad = "research_start có thể import nguồn vào NotebookLM khi cần."
     cases.append(("audit_bad_project_instruction_fails", not audit(bad, "project")["ok"]))
     cases.append(("audit_bad_nlm_prompt_fails", not audit(bad, "nlm")["ok"]))
+
+    # v1.36.68+ (Packet B): Kiểm tra fail-closed cho _detect_version
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        tdp = Path(td)
+        # 1. Thiếu VERSION -> ném VersionResolutionError (VERSION_MISSING)
+        try:
+            _detect_version(root_override=tdp)
+            cases.append(("version_fail_closed_missing_raises", False))
+        except VersionResolutionError as e:
+            cases.append(("version_fail_closed_missing_raises", "VERSION_MISSING" in str(e)))
+
+        # 2. VERSION rỗng -> ném VersionResolutionError (VERSION_EMPTY)
+        (tdp / "VERSION").write_text("", encoding="utf-8")
+        try:
+            _detect_version(root_override=tdp)
+            cases.append(("version_fail_closed_empty_raises", False))
+        except VersionResolutionError as e:
+            cases.append(("version_fail_closed_empty_raises", "VERSION_EMPTY" in str(e)))
+
+        # 3. VERSION sai định dạng -> ném VersionResolutionError (VERSION_INVALID)
+        (tdp / "VERSION").write_text("invalid_ver_string", encoding="utf-8")
+        try:
+            _detect_version(root_override=tdp)
+            cases.append(("version_fail_closed_invalid_raises", False))
+        except VersionResolutionError as e:
+            cases.append(("version_fail_closed_invalid_raises", "VERSION_INVALID" in str(e)))
+
+        # 4. VERSION hợp lệ -> đọc đúng chuỗi
+        (tdp / "VERSION").write_text("1.99.99", encoding="utf-8")
+        cases.append(("version_valid_returns_exact", _detect_version(root_override=tdp) == "1.99.99"))
+
+        # 5. Cờ allow_unversioned_dev -> trả 0.0.0-DEV+unversioned
+        (tdp / "VERSION").unlink()
+        cases.append(("version_allow_unversioned_dev", _detect_version(allow_unversioned_dev=True, root_override=tdp) == "0.0.0-DEV+unversioned"))
+
+        # 6. Tuyệt đối không còn chuỗi fallback cứng lịch sử trong mã nguồn
+        _src = Path(__file__).read_text(encoding="utf-8")
+        _banned_hist = "1.33" + ".49"
+        cases.append(("no_historical_fallback_literal", f'"{_banned_hist}"' not in _src and f"'{_banned_hist}'" not in _src))
+
     ok = sum(1 for _, passed in cases if passed)
     for name, passed in cases:
         print(f"  [{'OK' if passed else 'FAIL'}] {name}")
     print(f"== gen_instructions selftest {ok}/{len(cases)} ==")
     return 0 if ok == len(cases) else 1
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--target", choices=["project", "nlm", "both", "config", "style-template"], default="both")
-    ap.add_argument("--skill-version", default=VERSION)
+    ap.add_argument("--skill-version", default=None, help="Ghi đè skill version (mặc định đọc từ tệp VERSION)")
+    ap.add_argument("--allow-unversioned-dev", action="store_true",
+                    help="Cho phép chạy với version dev khi thiếu tệp VERSION")
     ap.add_argument("--profile", default="vbqppl", help="vbqppl (mặc định) hoặc tên profile dự án (văn bản thường)")
     ap.add_argument("--notebook", "--notebook-id", dest="notebook", help="notebookId NotebookLM của profile dự án")
     ap.add_argument("--folder-name", dest="folder_name", help="tên folder trong Van_ban_thuong (mặc định = tên profile)")
@@ -981,6 +1051,18 @@ def main(argv: list[str]) -> int:
         res = audit(text, _audit_target)
         print(json.dumps(res, ensure_ascii=False, indent=2) if a.json else ("OK" if res["ok"] else "MISSING: " + ", ".join(res["missing"])))
         return 0 if res["ok"] else 2
+
+    # Giải quyết version an toàn (fail-closed)
+    skill_version = a.skill_version
+    if not skill_version:
+        try:
+            skill_version = _detect_version(allow_unversioned_dev=a.allow_unversioned_dev)
+        except VersionResolutionError as exc:
+            sys.stderr.write(f"LỖI FAIL-CLOSED: {exc}\n")
+            return 12
+    elif skill_version == "VERSION_UNREADABLE" and a.allow_unversioned_dev:
+        skill_version = "0.0.0-DEV+unversioned"
+
     target = a.target
     brief_low = (a.brief or "").lower()
     if a.brief and target == "both":
@@ -988,7 +1070,7 @@ def main(argv: list[str]) -> int:
             target = "nlm"
         elif any(k in brief_low for k in ("claude", "project", "instruction")) and not any(k in brief_low for k in ("nlm", "notebooklm", "notebook lm")):
             target = "project"
-    text = generate(target, a.skill_version, a.profile, a.notebook, a.folder_name, a.root_folder_id, a.brief, a.he, a.tier)
+    text = generate(target, skill_version, a.profile, a.notebook, a.folder_name, a.root_folder_id, a.brief, a.he, a.tier)
     if a.out:
         Path(a.out).write_text(text, encoding="utf-8")
     print(json.dumps({"target": target, "text": text}, ensure_ascii=False, indent=2) if a.json else text)

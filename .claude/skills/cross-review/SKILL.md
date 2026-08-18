@@ -20,23 +20,24 @@ Dưới đây chỉ có cú pháp của nền.
 
 ## Bước 0 — CÔNG CỤ, làm TRƯỚC khi đọc diff
 
-Skill này chạy được hay không phụ thuộc `codex`, mà container phiên **không có sẵn**
-(đo 17-08-2026: `codex` vắng, `gh` vắng — hook phiên không chạy vì
-`CLAUDE_PROJECT_DIR` không được đặt khi kho gắn giữa phiên).
+Skill này chạy được hay không phụ thuộc `codex` (hoặc provider reviewer được chỉ định),
+mà container phiên **không có sẵn** (đo 17-08-2026: `codex` vắng, `gh` vắng — hook phiên
+không chạy vì `CLAUDE_PROJECT_DIR` không được đặt khi kho gắn giữa phiên).
 
 ```bash
-python .claude/dev/launcher.py doctor            # thiếu gì, lệnh cài in sẵn
+python .claude/dev/launcher.py doctor            # kiểm tra toàn bộ công cụ (CONG_CU)
 npm install -g @openai/codex                     # nếu doctor báo `khong codex`
 python .claude/dev/launcher.py chuan-bi          # CODEX_AUTH_JSON -> ~/.codex/auth.json
-codex login status                               # bằng chứng THẬT, không đoán
+codex --version                                  # bằng chứng THẬT về phiên bản codex CLI
 ```
 
-`doctor` thoát **0 dù thiếu `codex`** (nó là công cụ tuỳ chọn với launcher), nên
-đừng đọc mã thoát thành "đủ đồ" — đọc dòng `khong codex` và mục `KHA DUNG`.
+`doctor` in rõ bảng trạng thái `KHA DUNG` và các công cụ còn thiếu — đọc kỹ mục `KHA DUNG`
+thay vì chỉ dựa vào mã thoát tiến trình.
 
 Làm bước này ở ĐẦU phiên, không phải lúc sắp review: phát hiện thiếu `codex` sau khi
 đã viết xong thay đổi thì không lùi lại được, và cám dỗ khi ấy là tự duyệt bài của
-chính mình — thứ §8 không cho.
+chính mình — thứ §8 không cho. (Khi cả Claude lẫn Codex hết quota, xem hướng dẫn
+Antigravity Reviewer lane trong `AGENTS.md` theo cơ chế `same_provider_approved`.)
 
 ## Khi PAT là chính tài khoản tác giả PR
 

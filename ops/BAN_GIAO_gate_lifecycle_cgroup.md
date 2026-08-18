@@ -30,7 +30,7 @@ khai thẳng trong mã, đừng lặng lẽ bỏ dòng khai ấy).
   `python .claude/dev/launcher.py chuan-bi`, kiểm bằng `codex login status`.
 - **`codex` BẮT BUỘC ở phiên remote và mặc định — thiếu là `doctor` THOÁT 12.**
   Bảng `CONG_CU` ghi `{"ten": "codex", "bat_buoc": {"mac_dinh": True,
-  "remote": True, "ci": False}}` (`launcher.py:1598-1612`) và phép giải hạng
+  "remote": True, "ci": False}}` (`launcher.py:1604-1607`) và phép giải hạng
   đọc `GITHUB_ACTIONS`/`CI` → `bb["ci"]`, `CLAUDE_CODE_REMOTE` → `bb["remote"]`,
   còn lại → `bb["mac_dinh"]` (`launcher.py:1766-1780`). Nên: **chỉ CI** mới hạ
   `codex` xuống tuỳ chọn (in `khong codex`, thoát 0); phiên remote/mặc định in

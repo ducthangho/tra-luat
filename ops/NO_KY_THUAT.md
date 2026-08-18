@@ -312,15 +312,67 @@ phải ca host-thiếu-codex.
 
 **Săn có chủ đích, thất bại:** dựng 6 vòng `gate_lifecycle_test.py` → 4 lượt
 `doctor --json` ngay sau, giữ stdout của lượt nào thoát khác 0 ⇒ **24/24 đều
-thoát 0**, không bắt được lượt nào. Cộng dồn: **48 lượt gọi lại, 0 lần tái
-hiện**, qua hai giả thuyết tải (CPU và churn gate).
+thoát 0**, không bắt được lượt nào.
+
+Đừng gộp mẫu số. Ba nhóm lượt gọi lại KHÁC ĐIỀU KIỆN nhau:
+
+| nguồn | số lượt | điều kiện |
+|---|---|---|
+| đoạn trên | 12 | **không tải** — nền trắng, không thuộc giả thuyết nào |
+| đoạn trên | 12 | dưới tải CPU |
+| đoạn này | 24 | **sau khi** bộ gate đã thoát |
+
+Cộng lại là 48 lượt, 0 lần tái hiện — nhưng chỉ **24** lượt dính tới churn gate,
+và **12** lượt không nằm dưới giả thuyết nào cả. Bản trước viết "48 lượt … qua
+hai giả thuyết tải" rồi đặt ngay trước một kết luận về churn gate, tức mượn mẫu
+số của phép đo khác để đỡ cho kết luận này (P3 review lượt 3 trên `15bb415`).
 
 Vậy nên **KHÔNG đóng mục này**: hai lần chớp đều là tai nạn quan sát được, chưa
-lần nào gọi ra được theo ý muốn. Nhưng phạm vi nghi ngờ hẹp lại: churn gate
-**một mình nó không đủ** để gây chớp — nếu đủ thì 24 lượt đã bắt được. Thứ còn
-thiếu là chính `launcher_test.py` chạy cùng lúc (nó tự sinh nhiều tiến trình và
-sân tạm), tức lần săn tới nên là **chạy cả bộ `launcher_test.py` nhiều lượt liền
-sau bộ gate** rồi mới đọc `t53`, thay vì gọi `doctor` trần như tôi vừa làm.
+lần nào gọi ra được theo ý muốn.
+
+### ĐÍNH CHÍNH: 24 lượt ấy KHÔNG loại được churn gate
+
+Bản trước viết "churn gate **một mình nó không đủ** — nếu đủ thì 24 lượt đã bắt
+được". **Sai, và sai đúng kiểu dòng 258-260 vừa dựng lên để chặn** (P2 review
+lượt 3): đọc *giới hạn của phép đo mình dựng* thành *thuộc tính của thứ được đo*.
+Hai chỗ hỏng độc lập:
+
+**(a) Phép đo chưa từng đặt `doctor` vào trong cửa sổ churn.** Thiết kế là "chạy
+bộ gate xong → gọi `doctor` NGAY SAU", mà churn của bộ gate **cạn ngay lúc nó
+thoát** — bộ gate fail-close đúng ở chỗ dọn trọn vẹn, nên không còn gì để churn.
+Đo bằng cách lấy mẫu số mục `/proc` mỗi 50ms:
+
+```
+--- bo gate        nen=85  dinh TRONG luc chay=93   NGAY SAU: 86
+    => churn TRONG luc chay = 8    NGAY SAU = 1
+--- launcher_test  nen=86  dinh TRONG luc chay=100  NGAY SAU: 87
+    => churn TRONG luc chay = 14   NGAY SAU = 1
+```
+
+Cả hai bộ về nền NGAY khi thoát. Tức 24 lượt `doctor` ấy chạy trên máy **đã
+yên**. Một phép đo không áp điều kiện X thì không kết luận được gì về X — không
+"đủ", cũng không "không đủ".
+
+**(b) Kể cả có áp đúng điều kiện, 0/24 vẫn không đỡ nổi chữ "không đủ".** Chớp
+mới quan sát được 2 lần, cả hai đều tình cờ, nên tần suất nền chưa biết:
+
+```
+24 luot: can tren 95% cua p = 11.7%      48 luot: 6.1%
+p= 2%  P(0/24)=0.616   p= 5%  P(0/24)=0.292   p=10%  P(0/24)=0.080
+```
+
+0/24 chỉ loại được tần suất **trên ~12%/lượt**. Một hiện tượng chớp ở mức 2-5%
+cho 0/24 với xác suất 0,29-0,62 — hoàn toàn bình thường. Suy "không tái hiện"
+thành "đã bác bỏ" là bịa ra một kết luận âm.
+
+**Giả thuyết cho lần săn tới** (giả thuyết, KHÔNG phải phạm vi đã hẹp lại):
+`launcher_test.py` mới là nguồn churn đáng kể — đỉnh **+14** so với nền, gần gấp
+đôi bộ gate — và `t53` gọi `doctor` từ **bên trong** nó. Lưu ý cơ chế: `main()`
+chạy `chay_bo_ca(CA, nk)` **tuần tự** (`launcher_test.py:5224`), nên lúc `t53`
+gọi `doctor` thì không có ca nào chạy song song; thứ tác động là **dư chấn và
+sân tạm của các ca trước**, không phải tải đồng thời. Nên lần săn tới phải là
+**chạy cả bộ `launcher_test.py` nhiều lượt liền nhau** rồi đọc `t53`, chứ không
+gọi `doctor` trần như tôi vừa làm.
 
 **Xong khi:** gọi ra được `doctor` thoát khác 0 trên máy đủ công cụ (nghi trước:
 một lượt `--version` của công cụ nào đó hết hạn dưới churn tiến trình ⇒ bị đếm là

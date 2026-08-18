@@ -1,0 +1,198 @@
+# Lease REVIEWER lượt 7 — PR #150. PHẠM VI ĐÓNG BĂNG, ĐÚNG MỘT TỆP.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+#
+# `codex` HẾT QUOTA — lần này ĐO ĐƯỢC chứ không nghe kể: `codex exec` chạm API và trả
+# `You've hit your usage limit … try again at Aug 20th, 2026 6:23 AM`. Tức KHÔNG phải lỗi
+# xác thực (auth còn sống), và có NGÀY VỀ cụ thể. §8 đòi cross-provider cho phạm vi
+# workflow ⇒ lượt này KHÔNG cấp điều kiện land.
+# (Chi tiết đáng nhớ: `codex exec` in ERROR nhưng thoát `rc=0` — đúng doctrine kho.)
+#
+# XÉT GÌ: bản vá cho finding P1 lượt 6 — chốt argv `-contains` mù với token THỪA.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: don-nhanh-base-review-7-claude-20260817
+role: reviewer
+provider: claude
+reviewer: claude
+executor: claude
+
+cross_provider: false
+sai_lech_giao_thuc: true
+sai_lech_dieu: '§8 — cross-provider bắt buộc cho phạm vi workflow'
+sai_lech_ly_do: '`codex` hết quota — đo được, hết hạn tới 2026-08-20T06:23 (giờ ChatGPT báo)'
+sai_lech_ai_chap_nhan: ducthangho
+sai_lech_chap_nhan_luc: 'direct, in-session, 2026-08-17 ("Thực hiện bước tiếp theo khuyến nghị" — bước khuyến nghị nêu rõ là chạy lượt 7)'
+assurance_target: same_provider_approved
+assurance_KHONG_dat: cross_approved
+khong_cap_dieu_kien_land: true
+
+reviewer_model: claude-fable-5
+reviewer_effort: max
+reviewer_model_do_chu_kho_chi_dinh: false
+reviewer_model_ghi_chu: 'Giữ nguyên cấu hình lượt 4-6 (chủ kho chỉ định từ lượt 4).'
+
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: a66cad6940516fe339af83cac645e3ac15d8afae
+branch: ops/don-nhanh-giu-base-pr
+base_sha: 5b3e67a14f3ac51a6186b362f645e6330bd996d9
+sha_luot_truoc: 99e9383e9ff60bb8850f41242beb607808a821e9
+target_branch_neu_land: master
+target_pull_request: 150
+
+pham_vi_dong_bang: true
+scope_files_can_xet: 1
+scope_note: >-
+  Delta `99e9383..a66cad6` trong `scripts/`: CHỈ `don-nhanh_test.ps1` (+66/−7).
+  `don-nhanh.ps1` KHÔNG đổi. Phần còn lại của delta là `ops/**` (verdict lượt 6, biên
+  nhận, mục lục, bàn giao) ⇒ `Nợ khai báo`.
+
+prompt_path: ops/prompts/don-nhanh-base-review-7-claude-20260817.md
+prompt_sha256_required: d760897742b28eca15c27d88123ae1602adc3298a68129eacf795650b1d36dd4
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-17 ("Thực hiện bước tiếp theo khuyến nghị")'
+recorded_by: claude-session
+recorder_cung_la_nguoi_va: true
+
+leased_at_utc: '2026-08-17T19:40:00Z'
+lease_expires_at_utc: '2026-08-18T19:40:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 0
+
+boi_canh_luot_6:
+  finding_P1: >-
+    Chốt argv của `t21` duyệt TỪNG token bằng `-contains` — đo sự CÓ MẶT của token chứ
+    không đo CÂU HỎI gửi đi ⇒ mù với token THỪA. Bốn đột biến sống 21/21, trong đó
+    `--limit 30` thêm SAU `--limit 1000` tái sinh ĐÚNG lỗ gốc của PR #150 (gh thật:
+    cờ SAU thắng ⇒ limit hiệu lực 30).
+  finding_P3_CON_MO: >-
+    Guard `Nhieu-PR` xoá hẳn vẫn 21/21, và `return @()` qua pipeline tháo thành `$null`
+    ⇒ fake in `[null]` ⇒ 1 PR ma. CỐ Ý CHƯA VÁ, đã khai nợ.
+  ban_va_hien_tai_BA_LOP:
+  - 'đếm + so `-ceq` TỪNG đối số (thay cho so chuỗi đã join)'
+  - '`Dung-Gh-Gia` ghi argv ngăn cách byte NUL (thay cho xuống dòng)'
+  - '`Select-Object -SkipLast 1` thay cho `$tok[0..(n-2)]`'
+
+nguoi_va_TU_BAT_BA_LOI_truoc_khi_giao:
+- id: goi-y-luot-6-KHONG-du
+  note: >-
+    Reviewer lượt 6 đề nghị so NGUYÊN CÂU `-ceq` trên `$tok -join ' '`. Người vá làm theo
+    rồi tự đo: JOIN xoá mất RANH GIỚI ĐỐI SỐ nên gộp `--json`+giá trị thành MỘT đối số
+    (7 đối số) join lại Y HỆT 8 ⇒ đột biến ấy SỐNG 21/21. Lần thứ TƯ trong kho một bản vá
+    mở lỗ mới trong cùng hàm. Reviewer lượt 7 phải xét cả đường vá MỚI, không phải đường
+    reviewer lượt 6 gợi ý.
+- id: hai-dau-gach-trong-chuoi-PowerShell-KHONG-phai-NUL
+  note: >-
+    `"\\0"` — PowerShell không coi `\` là ký tự thoát ⇒ tệp nhận HAI ký tự, printf in
+    literal, chốt đọc được ĐÚNG 1 đối số ⇒ `t21` ĐỎ THƯỜNG TRỰC. Bốn đột biến VẪN "chết"
+    20/21 nên bảng nhìn y hệt đang chạy đúng — CHỈ BASELINE lộ ra. Từ đó mọi bảng đột biến
+    chạy baseline TRƯỚC từng con.
+- id: 0..-1-dem-NGUOC-khi-tep-rong
+  note: >-
+    `$tok[0..($tok.Count-2)]` với tệp RỖNG: Count=1 ⇒ `$tok[0..-1]`, mà `0..-1` là dãy
+    `0,-1` chứ không phải dãy rỗng ⇒ trả HAI phần tử. Hỏng theo hướng ĐỎ nên không phải lỗ,
+    nhưng phép đếm nói sai thì chẩn đoán cũng nói sai. Đổi sang `Select-Object -SkipLast 1`.
+
+muc_kiem:
+- id: ba-lop-co-rang-RIENG-khong
+  note: >-
+    Dựng lại 10 đột biến (B1-B4, A1-A4, J1-J2) VÀ phản chứng cho TỪNG lớp: gỡ chốt + B1
+    phải sống lại · `--STATE` giữ `-ceq` chết / hạ `-eq` sống · J3 (một đối số chứa xuống
+    dòng) có NUL chết / hạ NUL về `\n` sống · đối chứng hạ NUL mà không đột biến vẫn xanh.
+    Một lớp không có phản chứng riêng là lớp có thể đang KHÔNG có răng.
+- id: moi-bang-phai-mo-dau-bang-BASELINE
+  note: 'Xem lỗi tự bắt thứ hai — đột biến "chết" nhìn y hệt khi chốt đỏ thường trực.'
+- id: dot-bien-song-sot-thu-N
+  note: 'Câu chính. Ba lượt gần nhất mỗi lượt tìm ra ít nhất một; lượt này người vá tự tìm thêm một.'
+- id: chot-van-chi-nam-o-MOT-ca
+  note: >-
+    Lượt 6 đo ra không có đường chết lặng, NHƯNG mã đã đổi hoàn toàn từ lúc ấy nên phép đo
+    đó không còn phủ. Đo lại.
+- id: loi-khai-trong-chu-thich
+  note: >-
+    Kho đã cháy BỐN lần vì câu khẳng định sai trong comment. Chú thích mới khẳng định:
+    "execve cấm NUL trong đối số" · "`-eq` mù hoa-thường" · "`0..-1` đếm ngược" ·
+    "`printf '%s\0'` sinh NUL thật, hai gạch thì không" · "hỏng theo hướng ĐỎ". Kiểm TỪNG câu.
+- id: argv-txt-ghi-de-va-rac-giua-cac-ca
+  note: 'Lượt 6 đo 1 lời gọi/lượt, 19 thư mục GUID riêng, 0 rác. Sau khi đổi cách ghi còn đúng không?'
+
+do_windows:
+  vi_sao_do: >-
+    SÁU lượt trước KHÔNG lượt nào hỏi câu này. `ci.yml` nhánh này chạy bộ test trên CẢ
+    ubuntu LẪN windows và chú thích ngay đó khai "cả lớp hỏng của script này là lớp hỏng
+    theo NỀN" — nhưng `Dung-Gh-Gia` dựng `gh` giả là script `#!/bin/sh` rồi `chmod +x`.
+  bo_test_va_buoc_CI_CHI_co_tren_nhanh_nay: >-
+    ĐO ĐƯỢC: `git ls-tree origin/master scripts/` có `don-nhanh.ps1` và `.cmd` nhưng
+    KHÔNG có `don-nhanh_test.ps1`; `master:.github/workflows/ci.yml` KHÔNG có bước
+    `don-nhanh`. PR thường chỉ chạy `ubuntu` ⇒ bộ này CHƯA TỪNG chạy trên Windows.
+  lan_do_dau_tien: 'workflow_dispatch trên ref nhánh, run 32060230138, head a66cad69'
+  ket_qua_ubuntu: 'gate (ubuntu-latest): bước `don-nhanh selftest` = success'
+  ket_qua_windows: 'gate (windows-latest): bước `don-nhanh selftest` = FAILURE, job = failure'
+  so_do_duoc: 'don-nhanh: 3/21 dat  (18 ca ĐỎ)'
+  che_do_hong: >-
+    18 ca đỏ cùng một thông điệp `THIEU git tren PATH.` và `rc=12`. Tức hỏng ở TẦNG TRƯỚC
+    lời gọi `gh` — không phải ở chốt argv.
+  co_phai_do_ban_va_khong: >-
+    KHÔNG, theo suy luận từ hai dữ kiện ĐO ĐƯỢC (nói rõ đây là SUY LUẬN, không phải phép
+    đo trên SHA cũ — chưa ai chạy Windows trên SHA cũ vì bước CI chỉ mới có ở nhánh này):
+    (a) các ca đỏ gồm `t7`, `t10`-`t19` mà bản vá lượt 6/7 KHÔNG đụng tới;
+    (b) cơ chế hỏng (`THIEU git tren PATH`, rc=12) nằm HOÀN TOÀN trước khối argv.
+    Reviewer được yêu cầu tự kết luận bản vá làm Windows XẤU ĐI / KHÔNG ĐỔI / TỐT LÊN.
+  he_qua_cho_land: >-
+    master chạy CẢ HAI nền. Nếu merge #150 nguyên trạng thì gate master sẽ ĐỎ ở
+    `windows-latest`. Đây đúng lớp `CLAUDE.md` đã trả giá (`0/103` trên windows-latest;
+    "lần merge chính là lần đo Windows ĐẦU TIÊN"). CHƯA VÁ — chờ chủ kho quyết.
+
+so_lieu_nguoi_va_bao:
+  bo_test_linux: '21/21 (pwsh 7.4.6, TMPDIR=/dev/shm); chạy 8 lượt riêng: 8/8 sạch'
+  bo_test_windows: '3/21 — xem `do_windows`'
+  muoi_dot_bien: 'B1-B4, A1-A4, J1-J2: mỗi con 20/21, đỏ t21 (J1 TRƯỚC khi vá: SỐNG 21/21)'
+  phan_chung_chot: 'gỡ chốt + B1 ⇒ 21/21 (B1 sống lại)'
+  phan_chung_ceq: '`--STATE` giữ -ceq ⇒ 20/21 | hạ xuống -eq ⇒ 21/21 (sống)'
+  phan_chung_NUL: 'J3 có NUL ⇒ 20/21 | hạ NUL về `\n` ⇒ 21/21 (sống)'
+  doi_chung: 'hạ NUL về `\n` mà KHÔNG đột biến ⇒ 21/21'
+  printf: "`printf '%s\\0' a bb | od -c` => a \\0 b b \\0  |  bản hai gạch => a \\ 0 b b \\ 0"
+  dem_khi_rong: "raw='' ⇒ 0 (trước khi sửa: 2)"
+  cong_khac: 'lease_publish 31/31 · eol ok=true violations=[] scanned=425'
+  luu_y_scanned: >-
+    `scanned=425` KHÔNG phải 398/401 của các lượt trước — `eol_policy.py --all` đọc INDEX
+    của git nên số đổi theo thời điểm đo, không theo mã.
+
+no_da_khai_KHONG_neu_lai:
+- id: bo-qua-lop-pr-khong-kiem-gi
+- id: phu-thuoc-gh
+- id: hai-duong-se-troi-lech
+- id: tl-selftest-khong-do-duoc
+- id: lease-khong-nam-trong-cay-duoc-review
+- id: gh-phan-trang-that-chua-ai-do
+- id: hang-999-1000-khong-tu-canh
+- id: dot-bien-pad-chuoi-tuong-duong-hanh-vi
+- id: guard-Nhieu-PR-va-null
+  note: 'finding_2 lượt 6 — CÒN MỞ, cố ý chưa vá.'
+- id: verdict-luot-4-va-5-khong-co-tep-trong-kho
+
+canh_bao_moi_truong_luc_cap: >-
+  `pwsh` KHÔNG cài sẵn và `/dev/shm` BỊ XOÁ giữa các phiên — tải 7.4.6 linux-x64, tarball
+  giải nén ra `pwsh` THIẾU BIT EXEC (`chmod +x`), KHÔNG phải noexec. Kiểm công cụ chạy được
+  TRƯỚC khi đọc số (một lượt từng trả rc=127 + đầu ra rỗng, trông y hệt "chạy xong sạch").
+  KHO CÓ THỂ CLONE SHALLOW: root commit thật `394e9346…` vắng ⇒ neo danh tính không đọc
+  được, launcher fail-close rc=11; chữa bằng `git fetch --unshallow origin`.
+  `TMPDIR=/dev/shm`. REST tới `api.github.com/repos/...` bị proxy chặn 403 bất kể token —
+  đi bằng MCP github + git.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T19:35:00Z'
+master_sha_at_grant: 5b3e67a14f3ac51a6186b362f645e6330bd996d9
+lease_song_khac_luc_cap: 'Lease lượt 1-6 và lượt kiến trúc của #150 đã đóng. Không có lease nào khác đang mở.'
+uy_quyen_lien_quan: >-
+  `ops/uy-quyen-150-same-provider-20260817.yaml` HẾT HIỆU LỰC (neo `05568de`; head đã đổi
+  nhiều lần từ đó — §9). Muốn land thì chủ kho cấp uỷ quyền MỚI neo SHA cuối cùng — và
+  xem `do_windows` trước khi quyết, vì land nguyên trạng làm gate master ĐỎ.

@@ -1675,6 +1675,9 @@ CONG_CU = [
      "vi_sao": "can de cai hai CLI tren",
      "cai": {"Windows": "winget install --id OpenJS.NodeJS.LTS -e",
              "Darwin": "brew install node", "Linux": "sudo apt-get install -y nodejs npm"}},
+    {"ten": "agy", "bat_buoc": False, "ung_vien": ["agy"],
+     "vi_sao": "CLI Google Antigravity (lane du phong khi Claude/Codex het quota)",
+     "cai": {"*": "cai dat qua Google Antigravity IDE / CLI package"}},
 ]
 
 # MODULE PYTHON — bảng RIÊNG, cố ý không nhét vào `CONG_CU`.
@@ -2702,7 +2705,8 @@ def _suc_khoe_mcp_github(ten: str = "github",
     try:
         r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True, text=True,
                            env=moi_truong, stdin=subprocess.DEVNULL,
-                           timeout=PROBE_TIMEOUT_GIAY)
+                           timeout=PROBE_TIMEOUT_GIAY,
+                           encoding="utf-8", errors="replace")
     except (OSError, subprocess.SubprocessError) as e:
         return ("khong_do_duoc", f"`claude mcp get {ten}` khong chay duoc: {type(e).__name__}")
     # LẤY `Status:` ĐẦU TIÊN — lựa chọn CÓ TẢI TRỌNG, không phải tình cờ. Đo được:
@@ -2781,7 +2785,8 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     if shutil.which("gh"):
         try:
             pg = subprocess.run(["gh", "auth", "status"], capture_output=True, text=True,
-                                env=mt, stdin=subprocess.DEVNULL, timeout=20)
+                                env=mt, stdin=subprocess.DEVNULL, timeout=20,
+                                encoding="utf-8", errors="replace")
             duong.append(("gh-cli", pg.returncode == 0,
                           "da xac thuc" if pg.returncode == 0 else f"CHUA xac thuc (rc={pg.returncode})"))
         except (OSError, subprocess.SubprocessError) as e:
@@ -2842,7 +2847,8 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
         try:
             pk = subprocess.run(["gh", "api", f"repos/{slug}", "--jq", ".full_name"],
                                 capture_output=True, text=True, env=mt,
-                                stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)
+                                stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY,
+                                encoding="utf-8", errors="replace")
             duong.append(("gh-kho", pk.returncode == 0 and bool((pk.stdout or "").strip()),
                           "doc duoc kho" if pk.returncode == 0 else f"rc={pk.returncode}"))
         except (OSError, subprocess.SubprocessError) as e:

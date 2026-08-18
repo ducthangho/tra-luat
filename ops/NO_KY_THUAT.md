@@ -125,9 +125,15 @@ là hàng rào bằng chữ.
 
 **Xong khi:** `doctor` phân biệt được "hook chưa từng chạy" với "hook cũ" — ví dụ
 hook ghi một dấu vết (kèm danh sách năng lực + thời điểm) và `doctor` đọc dấu vết
-ấy. Lưu ý: hook trên nhánh này đang CŨ HƠN master (`doctor` báo thiếu
-`co-chay-probe`, `github-nguon-that`, `moi-truong-doc-truoc`), nên sửa hook ở đây
-sẽ đụng bản mới hơn trên master — lấy hook từ master trước.
+ấy. **Lời khai cũ đã HẾT ĐÚNG, đính chính** (P3 review lượt 2 trên `e37e1f6`): bản
+trước viết "hook trên nhánh này đang CŨ HƠN master, `doctor` báo thiếu
+`co-chay-probe`/`github-nguon-that`/`moi-truong-doc-truoc`". Sau khi hoà master
+thì không còn đo ra được nữa: `git diff origin/master -- .claude/hooks` **rỗng**,
+và `doctor` in `DUNG_DUOC hook-phien du nang luc so voi master`.
+
+Chính lượt hoà master là lúc phải rà lại lời khai này mà tôi để nguyên — sổ nợ
+tự đặt chuẩn "lời khai phải khớp phép đo tại head hiện hành", nên đây là chỗ lệch
+còn sót của chính nó.
 
 ---
 
@@ -208,8 +214,18 @@ dem cgroup     : dem thu muc `tl-gate-*` DUOI diem gan cgroup v2, quet de quy
                  (`rglob`) — KHONG dem o goc diem gan, vi `_tao_cgroup_gate` tao
                  cgroup duoi nhanh cua CHINH tien trinh (`_cgroup_cua_ta()`),
                  tren host systemd cho ay khong phai goc
-dat            : 0 traceback · 0 con song sot · 0 cgroup rac, o CA HAI cach goi
+goi ra pha DUOI : chen quang ngu SAU `_atomic_json(evidence, payload)` cuoi
+                  `cmd_run` (BAN SAO, khong sua kho), doi bang chung `status=pass`
+                  hien tren dia roi moi ban SIGTERM
+dat            : 0 traceback · 0 con song sot · 0 cgroup rac, o CA BA cach goi
 ```
+
+**Ba cách gọi, không phải hai** (P3 review lượt 2 trên `e37e1f6`). Đoạn trên vừa
+kể tên pha ĐUÔI, nhưng công thức nghiệm thu lúc ấy chỉ có lưới thời gian và mối
+nối `TL_GATE_EP_CHAM_SAU_CGROUP` — **cả hai đều không chạm pha ĐUÔI**. Ai chạy
+đúng công thức thiếu ấy rồi tuyên "đạt vế 1" sẽ lại khai rộng hơn thứ đã đo, đúng
+hình dạng lỗi mà chính đoạn ấy vừa gọi tên — lùi một tầng. Cách gọi thứ ba ở trên
+đã đo được: `rc=-15`, bằng chứng đầy đủ, 0 traceback.
 
 ---
 
@@ -254,13 +270,109 @@ trường khác hẳn. Kiểm `command -v codex` TRƯỚC khi kết luận đã 
 ### Manh mối thật: chính `doctor` mới là thứ chớp
 
 Đo được sau đó: `python .claude/dev/launcher.py doctor` **thoát 12 rồi ngay sau
-đó thoát 0** — cùng lệnh, cùng máy, cách nhau hai phút, `ok=True`,
-`thieu_bat_buoc=[]`. Mà `t53` khẳng định `returncode == 0`, nên **doctor chớp là
-`t53` đỏ là `hong 1`**. `t53` chỉ là nơi nó lộ ra.
+đó thoát 0** — cùng lệnh, cùng máy, cách nhau hai phút. Mà `t53` khẳng định
+`returncode == 0`, nên **doctor chớp là `t53` đỏ là `hong 1`**. `t53` chỉ là nơi
+nó lộ ra.
+
+**ĐÍNH CHÍNH — bản trước ghép số của HAI lượt vào một câu** (P3 review lượt 2 trên
+`e37e1f6`). Nó viết "thoát 12 ... `ok=True`, `thieu_bat_buoc=[]`", mà hai thứ ấy
+**không thể cùng thuộc một lượt**: theo `_ma_doctor` (`launcher.py:3085`, docstring
+ghi thẳng "Thiếu công cụ BẮT BUỘC luôn là 12"), thoát 12 ⇔ `thieu_bat_buoc` KHÁC
+RỖNG. Hai trường sạch kia là của **lượt thoát 0 ngay sau**. Câu ghép ấy khiến
+người sau đọc thành "JSON của lượt 12 vẫn sạch" rồi đi nghi ngờ nhầm `_ma_doctor`.
+
+**JSON của lượt thoát 12 KHÔNG được chụp lại** — và chính nó mới nêu tên thủ phạm.
+Review lượt 2 dựng lại bằng shim cưỡng bức timeout: lượt thoát 12 cho
+`ok=False`, `thieu_bat_buoc=['codex']`, kèm
+`co_mat_nhung_khong_chay_duoc: {loi: "timeout sau 8.0s"}` — tức cơ chế đúng là
+**một lượt `--version` hết hạn** rồi bị đếm là thiếu, khớp nghi ngờ ban đầu.
+
+**Việc phải làm khi nó chớp lần tới:** chạy `doctor --json` và **giữ nguyên
+stdout** của đúng lượt thoát khác 0. Chỉ cần thế là mục này tự đóng được nửa
+đường — đừng chỉ ghi lại mã thoát như tôi đã làm.
 
 Thử gọi lại: 12 lượt không tải + 12 lượt dưới tải CPU ⇒ **24/24 đều thoát 0**.
 Chưa gọi ra được — tải thật lúc nó chớp là **churn tiến trình/cgroup** (chạy ngay
 sau bộ gate), không phải tải CPU.
+
+### LẦN CHỚP THỨ HAI — và `codex` CÓ MẶT
+
+Phiên 18-08 (nhánh `ops/so-no-vong-3`) chạy đúng thứ tự loạt cũ — gate BẬT, gate
+TẮT, rồi `launcher_test.py` — và ra `117/119 ca QUA (bo qua 1, hong 1)` với
+`HONG t53_doctor_bao_du_khi_du: 12`. Hai lượt `launcher_test.py` ngay sau đó đều
+`118/119 ... hong 0`.
+
+**Lần này loại được lời giải thích "trùng chữ ký"**: `command -v codex` chạy
+TRONG CÙNG khối lệnh, trước bộ chạy, trả `/opt/node22/bin/codex` (rc=0). Nên đây
+là `doctor` thoát 12 **trên máy đủ công cụ** — đúng thứ mục này đi tìm, không
+phải ca host-thiếu-codex.
+
+**Nhưng vẫn hụt đúng thứ cần**: lượt đỏ ấy nằm trong bộ chạy nên **stdout của
+`doctor` không được giữ**. Lại đúng lỗi đoạn trên vừa dặn đừng lặp.
+
+**Săn có chủ đích, thất bại:** dựng 6 vòng `gate_lifecycle_test.py` → 4 lượt
+`doctor --json` ngay sau, giữ stdout của lượt nào thoát khác 0 ⇒ **24/24 đều
+thoát 0**, không bắt được lượt nào.
+
+Đừng gộp mẫu số. Ba nhóm lượt gọi lại KHÁC ĐIỀU KIỆN nhau:
+
+| nguồn | số lượt | điều kiện |
+|---|---|---|
+| đoạn trên | 12 | **không tải** — nền trắng, không thuộc giả thuyết nào |
+| đoạn trên | 12 | dưới tải CPU |
+| đoạn này | 24 | **sau khi** bộ gate đã thoát |
+
+Cộng lại là 48 lượt, 0 lần tái hiện — nhưng chỉ **24** lượt dính tới churn gate,
+và **12** lượt không nằm dưới giả thuyết nào cả. Bản trước viết "48 lượt … qua
+hai giả thuyết tải" rồi đặt ngay trước một kết luận về churn gate, tức mượn mẫu
+số của phép đo khác để đỡ cho kết luận này (P3 review lượt 3 trên `15bb415`).
+
+Vậy nên **KHÔNG đóng mục này**: hai lần chớp đều là tai nạn quan sát được, chưa
+lần nào gọi ra được theo ý muốn.
+
+### ĐÍNH CHÍNH: 24 lượt ấy KHÔNG loại được churn gate
+
+Bản trước viết "churn gate **một mình nó không đủ** — nếu đủ thì 24 lượt đã bắt
+được". **Sai, và sai đúng kiểu dòng 258-260 vừa dựng lên để chặn** (P2 review
+lượt 3): đọc *giới hạn của phép đo mình dựng* thành *thuộc tính của thứ được đo*.
+Hai chỗ hỏng độc lập:
+
+**(a) Phép đo chưa từng đặt `doctor` vào trong cửa sổ churn.** Thiết kế là "chạy
+bộ gate xong → gọi `doctor` NGAY SAU", mà churn của bộ gate **cạn ngay lúc nó
+thoát** — bộ gate fail-close đúng ở chỗ dọn trọn vẹn, nên không còn gì để churn.
+Đo bằng cách lấy mẫu số mục `/proc` mỗi 50ms:
+
+```
+--- bo gate        nen=85  dinh TRONG luc chay=93   NGAY SAU: 86
+    => churn TRONG luc chay = 8    NGAY SAU = 1
+--- launcher_test  nen=86  dinh TRONG luc chay=100  NGAY SAU: 87
+    => churn TRONG luc chay = 14   NGAY SAU = 1
+```
+
+Cả hai bộ về nền NGAY khi thoát. Tức 24 lượt `doctor` ấy chạy trên máy **đã
+yên**. Một phép đo không áp điều kiện X thì không kết luận được gì về X — không
+"đủ", cũng không "không đủ".
+
+**(b) Kể cả có áp đúng điều kiện, 0/24 vẫn không đỡ nổi chữ "không đủ".** Chớp
+mới quan sát được 2 lần, cả hai đều tình cờ, nên tần suất nền chưa biết:
+
+```
+24 luot: can tren 95% cua p = 11.7%      48 luot: 6.1%
+p= 2%  P(0/24)=0.616   p= 5%  P(0/24)=0.292   p=10%  P(0/24)=0.080
+```
+
+0/24 chỉ loại được tần suất **trên ~12%/lượt**. Một hiện tượng chớp ở mức 2-5%
+cho 0/24 với xác suất 0,29-0,62 — hoàn toàn bình thường. Suy "không tái hiện"
+thành "đã bác bỏ" là bịa ra một kết luận âm.
+
+**Giả thuyết cho lần săn tới** (giả thuyết, KHÔNG phải phạm vi đã hẹp lại):
+`launcher_test.py` mới là nguồn churn đáng kể — đỉnh **+14** so với nền, gần gấp
+đôi bộ gate — và `t53` gọi `doctor` từ **bên trong** nó. Lưu ý cơ chế: `main()`
+chạy `chay_bo_ca(CA, nk)` **tuần tự** (`launcher_test.py:5224`), nên lúc `t53`
+gọi `doctor` thì không có ca nào chạy song song; thứ tác động là **dư chấn và
+sân tạm của các ca trước**, không phải tải đồng thời. Nên lần săn tới phải là
+**chạy cả bộ `launcher_test.py` nhiều lượt liền nhau** rồi đọc `t53`, chứ không
+gọi `doctor` trần như tôi vừa làm.
 
 **Xong khi:** gọi ra được `doctor` thoát khác 0 trên máy đủ công cụ (nghi trước:
 một lượt `--version` của công cụ nào đó hết hạn dưới churn tiến trình ⇒ bị đếm là

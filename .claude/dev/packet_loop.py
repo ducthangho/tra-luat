@@ -40,6 +40,25 @@ from pathlib import Path
 # khi người gọi không khai; envelope của mission mới là nguồn.
 MAC_DINH_TRAN_ATTEMPT = 3
 MAC_DINH_TRAN_SAME_FAILURE = 2
+# Trần LỜI GỌI reviewer, tách hẳn khỏi trần attempt của executor. Hai ngân sách
+# KHÔNG vay của nhau: một lượt review hỏng không được ăn vào trần executor, và
+# ngược lại. Mặc định 2 = "review đầu + rereview sau vá"; lời gọi thứ ba bị từ
+# chối và packet về `checkpoint`.
+MAC_DINH_TRAN_REVIEW_CALL = 2
+
+# --- Kết cục của MỘT lời gọi reviewer ----------------------------------------
+# Ranh giới TIÊU/KHÔNG TIÊU là: đã SINH RA chưa. Một lời gọi đã tốn token rồi
+# mới timeout hay trả sai schema thì đã tiêu tài nguyên thật — nó PHẢI tiêu một
+# call. Một lời gọi chết ở preflight/permission/rate-limit thì chưa hề tới model.
+KET_CUC_TIEU = ("ok", "timeout-sau-sinh", "sai-schema")
+KET_CUC_KHONG_TIEU = ("preflight", "permission", "rate-limit")
+
+# CHỐT CHỐNG LÁCH, và nó là lý do duy nhất khiến bảng trên không phải trang trí.
+# Nhãn do người gõ khai; nếu chỉ đọc nhãn thì mọi call hỏng sẽ được khai là
+# `rate-limit` và trần thành đồ trang trí — ĐÚNG bệnh mà `void-attempt` đã phải
+# vá ("mọi lượt hỏng đều biến thành 'quota'"). Nên nhãn phải khớp một SỐ ĐO:
+# chưa sinh ra thì output PHẢI bằng 0; đã sinh ra thì output PHẢI khác 0. Khai
+# `rate-limit` kèm 400 byte đầu ra là mâu thuẫn tự thân, và bị từ chối.
 
 # --- Mã thoát ----------------------------------------------------------------
 RC_OK = 0
@@ -127,12 +146,17 @@ CHUYEN_HOP_LE = {
     "reviewing": (),
     "accepted": (),
     "blocked": (),
+    # `checkpoint` — Review Rescue Checkpoint. Vào ĐƯỢC chỉ bằng đường cạn ngân
+    # sách review, RA thì không: đây là chỗ dừng để tách phần ổn ra commit riêng,
+    # không phải một state chạy tiếp. Cho `transition` ra khỏi đây là mở lại đúng
+    # vòng review vừa bị chặn.
+    "checkpoint": (),
 }
 
 # Các state chỉ được ghi bởi luồng review, không bao giờ bởi `transition`.
 # `reviewing` không nằm đây vì nó VÀO được bằng `transition` (từ `running`); thứ bị
 # cấm là đường RA. Bảng `CHUYEN_HOP_LE` ở trên đã cưỡng chế điều đó.
-STATE_CHI_DO_REVIEW_GHI = ("accepted",)
+STATE_CHI_DO_REVIEW_GHI = ("accepted", "checkpoint")
 
 # --- (a) same-failure theo ID ỔN ĐỊNH ----------------------------------------
 # Vì sao không dùng vân tay văn xuôi: ba lượt review liên tiếp lách được nó bằng
@@ -603,6 +627,16 @@ def cmd_init(a, state_dir: Path) -> int:
         "lease": None,
         "attempts_used": 0,
         "attempts_limit": a.attempts_limit,
+        # NGÂN SÁCH REVIEW — đếm riêng, trần riêng, không dính attempts_*.
+        "codex_review_calls_used": 0,
+        "codex_review_calls_limit": a.review_calls_limit,
+        # Đếm lời gọi EXECUTOR của nền codex. Chỉ để quan sát tỷ lệ executor
+        # giữa hai nền; nó KHÔNG mang trần và không bị ngân sách review chạm tới.
+        "codex_executor_calls_used": 0,
+        # Số VÒNG review đã khép (một vòng = một `record-review` ghi được).
+        # Khác `codex_review_calls_used`: một vòng có thể tốn nhiều lời gọi.
+        "review_rounds_used": 0,
+        "review_calls": [],
         "same_failure_limit": a.same_failure_limit,
         "finding_counts": {},
         "attempt_open": False,
@@ -816,6 +850,11 @@ def cmd_begin_attempt(a, state_dir: Path) -> int:
             f"Ghi failure evidence + handoff rồi dừng; reroute là việc của bên điều phối.",
         )
     st["attempts_used"] += 1
+    # Đếm THÔNG TIN, không mang trần — nên `.get` mặc định 0 ở đây là hợp lệ với
+    # state cũ. Chỗ MANG TRẦN (`record-review-call`) thì fail-closed, không `.get`:
+    # một state cũ đã đốt call mà đọc ra 0 là đường vòng qua chính cái trần đó.
+    if a.provider == "codex":
+        st["codex_executor_calls_used"] = st.get("codex_executor_calls_used", 0) + 1
     st["state"] = "running"
     st["attempt_open"] = True
     # Head cũ hết hiệu lực ngay khi mở lượt mới: có commit mới thì bản duyệt
@@ -958,6 +997,7 @@ def cmd_record_review(a, state_dir: Path) -> int:
             f"ghi failure evidence + handoff rồi dừng.",
         )
 
+    st["review_rounds_used"] = st.get("review_rounds_used", 0) + 1
     st["state"] = {"approve": "accepted", "changes_requested": "running", "blocked": "blocked"}[a.verdict]
     if a.verdict == "approve":
         st["accepted_sha"] = a.reviewed_sha
@@ -969,6 +1009,100 @@ def cmd_record_review(a, state_dir: Path) -> int:
     print(
         f"đã ghi review {a.verdict} bởi {a.provider} — "
         f"{len(ids_duy_nhat)} finding, state {st['state']}"
+    )
+    return RC_OK
+
+
+def cmd_record_review_call(a, state_dir: Path) -> int:
+    """Ghi MỘT lời gọi reviewer, và tiêu ngân sách review nếu lời gọi đã SINH RA.
+
+    Vì sao lệnh này tồn tại tách khỏi `record-review`: `record-review` ghi một
+    KẾT LUẬN, mà một kết luận có thể phải trả giá bằng nhiều lời gọi — timeout,
+    schema sai, phải gọi lại. Trước packet này, những lời gọi ấy không tốn gì cả
+    trong sổ, nên trần "reviewer tối đa 2 lượt" đo bằng thứ không ai đếm.
+
+    Ngân sách này KHÔNG vay ngân sách executor và ngược lại: cạn review call thì
+    packet về `checkpoint`, không đụng `attempts_used`; cạn attempt thì về
+    `blocked`, không đụng `codex_review_calls_used`.
+    """
+    st = _load(state_dir, a.packet)
+    if a.provider != st["reviewer"]:
+        _die(
+            RC_PROVIDER,
+            f"provider {a.provider!r} không phải reviewer của packet này ({st['reviewer']!r})",
+        )
+    # FAIL-CLOSED với state cũ. Cùng doctrine `legacy-lease-bypass`: một state
+    # sinh trước packet này có thể ĐÃ đốt lời gọi review mà không ghi; đọc nó ra
+    # 0 bằng `.get` là cấp lại trần đã tiêu. Di trú là việc TƯỜNG MINH của bên
+    # điều phối (generation mới), không phải việc lặng lẽ của lệnh này.
+    for khoa in ("codex_review_calls_used", "codex_review_calls_limit"):
+        if khoa not in st:
+            _die(
+                RC_STATE,
+                f"state thiếu {khoa!r} — state này có TRƯỚC ngân sách review, nên "
+                f"số lời gọi đã tiêu không tra được. Cấp generation mới với "
+                f"--state-dir mới; KHÔNG nâng cấp ngầm.",
+            )
+    if st["state"] in ("accepted", "blocked", "checkpoint"):
+        _die(RC_STATE, f"packet đã ở state cuối {st['state']!r} — không gọi review thêm")
+
+    if a.output_bytes < 0:
+        _die(RC_ARG, f"--output-bytes {a.output_bytes} không âm được")
+    tieu = a.outcome in KET_CUC_TIEU
+    # Nhãn phải khớp SỐ ĐO — xem chú thích ở KET_CUC_KHONG_TIEU.
+    if not tieu and a.output_bytes != 0:
+        _die(
+            RC_ARG,
+            f"mâu thuẫn: kết cục {a.outcome!r} nghĩa là hỏng TRƯỚC khi sinh, mà "
+            f"--output-bytes = {a.output_bytes}. Đã có đầu ra thì lời gọi ĐÃ sinh "
+            f"ra và phải tiêu một call ({'/'.join(KET_CUC_TIEU)}).",
+        )
+    if tieu and a.outcome != "ok" and a.output_bytes == 0:
+        _die(
+            RC_ARG,
+            f"mâu thuẫn: kết cục {a.outcome!r} nghĩa là ĐÃ sinh ra rồi mới hỏng, mà "
+            f"--output-bytes = 0. Không có đầu ra thì đó là hỏng trước khi sinh "
+            f"({'/'.join(KET_CUC_KHONG_TIEU)}).",
+        )
+
+    if not tieu:
+        st["review_calls"].append(
+            {"outcome": a.outcome, "output_bytes": a.output_bytes, "tieu": False}
+        )
+        st["history"].append({"event": "review_call_khong_tieu", "outcome": a.outcome})
+        _save(state_dir, st)
+        print(
+            f"lời gọi review hỏng TRƯỚC khi sinh ({a.outcome}) — KHÔNG tiêu trần; "
+            f"vẫn {st['codex_review_calls_used']}/{st['codex_review_calls_limit']}"
+        )
+        return RC_OK
+
+    if st["codex_review_calls_used"] >= st["codex_review_calls_limit"]:
+        st["state"] = "checkpoint"
+        st["history"].append(
+            {"event": "checkpoint_review_calls_exhausted",
+             "used": st["codex_review_calls_used"]}
+        )
+        _save(state_dir, st)
+        _die(
+            RC_TRAN,
+            f"đã dùng hết {st['codex_review_calls_used']}/{st['codex_review_calls_limit']} "
+            f"lời gọi review — packet về checkpoint. Dừng gọi reviewer cho packet này; "
+            f"tách phần ổn ra commit riêng, phần chưa ổn đi packet mới. "
+            f"Đổi prompt hay mở phiên khác KHÔNG mở lại trần này.",
+        )
+    st["codex_review_calls_used"] += 1
+    st["review_calls"].append(
+        {"outcome": a.outcome, "output_bytes": a.output_bytes, "tieu": True}
+    )
+    st["history"].append(
+        {"event": "review_call", "outcome": a.outcome,
+         "used": st["codex_review_calls_used"]}
+    )
+    _save(state_dir, st)
+    print(
+        f"đã tiêu lời gọi review {st['codex_review_calls_used']}/"
+        f"{st['codex_review_calls_limit']} (kết cục {a.outcome})"
     )
     return RC_OK
 
@@ -1137,6 +1271,7 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--reviewer", required=True)
     q.add_argument("--attempts-limit", type=int, default=MAC_DINH_TRAN_ATTEMPT)
     q.add_argument("--same-failure-limit", type=int, default=MAC_DINH_TRAN_SAME_FAILURE)
+    q.add_argument("--review-calls-limit", type=int, default=MAC_DINH_TRAN_REVIEW_CALL)
     q.set_defaults(fn=cmd_init)
 
     q = sub.add_parser("record-lease",
@@ -1178,6 +1313,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="mô tả tự do, CHỈ để đọc — không tham gia phép đếm.",
     )
     q.set_defaults(fn=cmd_record_review)
+
+    q = sub.add_parser("record-review-call",
+                       help="ghi MỘT lời gọi reviewer; tiêu trần review nếu đã sinh ra")
+    q.add_argument("--packet", type=int, required=True)
+    q.add_argument("--provider", required=True)
+    q.add_argument("--outcome", required=True, choices=KET_CUC_TIEU + KET_CUC_KHONG_TIEU,
+                   help="đã sinh ra rồi mới hỏng thì TIÊU; hỏng trước khi sinh thì không")
+    q.add_argument("--output-bytes", type=int, required=True,
+                   help="số byte reviewer đã sinh. 0 = chưa sinh gì. Nhãn phải khớp số này.")
+    q.set_defaults(fn=cmd_record_review_call)
 
     q = sub.add_parser("transition", help="chuyển state, đòi dấu vết comment bền")
     q.add_argument("--packet", type=int, required=True)

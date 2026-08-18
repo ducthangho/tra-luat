@@ -833,6 +833,12 @@ def _kich_ban_in(c: Ctx, codepage: str):
           "--granted-by", "ducthangho",
           "--evidence", "https://github.com/o/r/issues/55#issuecomment-1",
           "--expires-utc", _han_tuong_lai()], sd),
+        # `record-review-call` in tiếng Việt ở CẢ HAI nhánh (tiêu / không tiêu),
+        # nên cả hai phải nằm trong ma trận — phủ một nhánh là để nhánh kia mù.
+        (["record-review-call", "--packet", 55, "--provider", REVIEWER,
+          "--outcome", "rate-limit", "--output-bytes", 0], sd),
+        (["record-review-call", "--packet", 55, "--provider", REVIEWER,
+          "--outcome", "ok", "--output-bytes", 500], sd),
         (["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd),
         (["next-comment", "--packet", 55], sd),
         (["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "7770000009"], sd),
@@ -1839,6 +1845,124 @@ def case_ac21_hai_cua_CUNG_luoc_do(c: Ctx):
                 f"record-lease rc={rc_ghi}, begin-attempt rc={rc_mo}")
 
 
+def goi_review(c: Ctx, sd, packet, outcome, byte, provider=REVIEWER):
+    """Một lời gọi reviewer. `byte` = số byte reviewer đã sinh ra."""
+    return run(c.script, ["record-review-call", "--packet", packet, "--provider", provider,
+                          "--outcome", outcome, "--output-bytes", byte], sd)
+
+
+def _so(c: Ctx, sd, packet, khoa):
+    import json
+    rc, o, e = run(c.script, ["status", "--packet", packet], sd)
+    _doi(0, rc, e, "status")
+    return json.loads(o.decode("utf-8"))[khoa]
+
+
+def case_review_call_da_sinh_ra_roi_hong_van_tieu(c: Ctx):
+    """Đã tốn token rồi mới timeout/sai schema thì VẪN tiêu một lời gọi.
+
+    Đây là nửa đắt nhất của trần review: nếu lời gọi hỏng được tha, thì hai lượt
+    reviewer biến thành vô hạn — cứ trả sai schema là được gọi lại miễn phí.
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    _doi(0, *goi_review(c, sd, 55, "sai-schema", 400)[0:1], b"", "sai-schema")
+    if _so(c, sd, 55, "codex_review_calls_used") != 1:
+        raise AssertionError("sai-schema ĐÃ sinh ra output mà không tiêu call")
+    _doi(0, *goi_review(c, sd, 55, "timeout-sau-sinh", 90)[0:1], b"", "timeout")
+    if _so(c, sd, 55, "codex_review_calls_used") != 2:
+        raise AssertionError("timeout SAU khi sinh mà không tiêu call")
+
+
+def case_review_call_hong_truoc_khi_sinh_khong_tieu(c: Ctx):
+    """Preflight/permission/rate-limit chưa tới model thì không tiêu trần."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    for kc in ("preflight", "permission", "rate-limit"):
+        _doi(0, *goi_review(c, sd, 55, kc, 0)[0:1], b"", kc)
+    if _so(c, sd, 55, "codex_review_calls_used") != 0:
+        raise AssertionError("hỏng TRƯỚC khi sinh mà vẫn bị tính vào trần")
+    # …và trần vẫn còn nguyên để dùng thật.
+    _doi(0, *goi_review(c, sd, 55, "ok", 1000)[0:1], b"", "call that")
+    if _so(c, sd, 55, "codex_review_calls_used") != 1:
+        raise AssertionError("trần đã bị ăn mòn bởi các lần hỏng trước khi sinh")
+
+
+def case_review_call_thu_ba_bi_tu_choi_va_ve_checkpoint(c: Ctx):
+    """Lời gọi review thứ BA thoát 3 và packet về `checkpoint`."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    for n in (1, 2):
+        _doi(0, *goi_review(c, sd, 55, "ok", 500)[0:1], b"", f"call {n}")
+    rc, _, e = goi_review(c, sd, 55, "ok", 500)
+    _doi(3, rc, e, "lời gọi review thứ ba phải thoát 3")
+    if c.state(sd, 55) != "checkpoint":
+        raise AssertionError(f"state phải là checkpoint, đang là {c.state(sd, 55)!r}")
+
+
+def case_doi_prompt_hay_phien_khong_mo_lai_tran_review(c: Ctx):
+    """PHẢN CHỨNG của kế hoạch: raw output sai schema HAI lần rồi prompt mới vẫn
+    không mở được lời gọi thứ ba.
+
+    Trần neo vào STATE trên đĩa, không neo vào phiên hay prompt — nên mở phiên
+    khác, đổi prompt, đổi kết cục đều không reset được nó.
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    for n in (1, 2):
+        _doi(0, *goi_review(c, sd, 55, "sai-schema", 400)[0:1], b"", f"sai-schema {n}")
+    # "prompt mới" = một lời gọi hoàn toàn khác kết cục, chạy như một tiến trình
+    # mới hoàn toàn (suite này vốn gọi qua subprocess, nên đây đúng là phiên mới).
+    rc, _, e = goi_review(c, sd, 55, "ok", 2000)
+    _doi(3, rc, e, "prompt mới KHÔNG được mở lại lời gọi thứ ba")
+    if _so(c, sd, 55, "codex_review_calls_used") != 2:
+        raise AssertionError("bộ đếm bị reset bởi lời gọi mới")
+
+
+def case_nhan_khong_tieu_ma_co_output_bi_tu_choi(c: Ctx):
+    """Nhãn phải khớp SỐ ĐO — cả hai chiều.
+
+    Không có chốt này thì mọi lời gọi hỏng sẽ được khai là `rate-limit` và trần
+    thành đồ trang trí: đúng bệnh mà `void-attempt` đã phải vá ("mọi lượt hỏng
+    đều biến thành 'quota'").
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, _, e = goi_review(c, sd, 55, "rate-limit", 400)
+    _doi(2, rc, e, "khai chưa-sinh mà CÓ output phải bị từ chối")
+    rc, _, e = goi_review(c, sd, 55, "sai-schema", 0)
+    _doi(2, rc, e, "khai đã-sinh mà output = 0 phải bị từ chối")
+    if _so(c, sd, 55, "codex_review_calls_used") != 0:
+        raise AssertionError("lời gọi mâu thuẫn không được ghi vào sổ")
+
+
+def case_ngan_sach_review_khong_vay_ngan_sach_executor(c: Ctx):
+    """Hai ngân sách độc lập: tiêu bên này không làm hụt bên kia."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    for _ in (1, 2):
+        _doi(0, *goi_review(c, sd, 55, "ok", 500)[0:1], b"", "call review")
+    if _so(c, sd, 55, "attempts_used") != 0:
+        raise AssertionError("tiêu trần review đã ăn vào attempts_used của executor")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "cạn trần review KHÔNG được chặn executor mở lượt")
+    if _so(c, sd, 55, "codex_review_calls_used") != 2:
+        raise AssertionError("mở lượt executor đã đụng vào bộ đếm review")
+
+
+def case_void_attempt_khong_hoan_lai_tran_review(c: Ctx):
+    """Hoàn một lượt executor KHÔNG trả lại lời gọi review đã tiêu."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    _doi(0, *goi_review(c, sd, 55, "ok", 500)[0:1], b"", "call review")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "begin-attempt")
+    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota"], sd)
+    _doi(0, rc, e, "void-attempt")
+    if _so(c, sd, 55, "codex_review_calls_used") != 1:
+        raise AssertionError("void-attempt đã hoàn nhầm một lời gọi review")
+
+
 CASES = [
     ("init_KHONG_duoc_tu_cap_lease", case_init_KHONG_duoc_tu_cap_lease),
     ("tu_cap_lease_bang_ten_provider_bi_chan", case_tu_cap_lease_bang_ten_provider_bi_chan),
@@ -1849,6 +1973,14 @@ CASES = [
     ("init_cung_provider_thoat_4", case_init_cung_provider_thoat_4),
     ("review_sai_provider_thoat_4", case_review_sai_provider_thoat_4),
     ("cap_lan_4_thoat_3", case_cap_lan_4_thoat_3),
+    # --- W0-R1: ngân sách review tách khỏi ngân sách executor ---
+    ("review_call_da_sinh_ra_roi_hong_van_tieu", case_review_call_da_sinh_ra_roi_hong_van_tieu),
+    ("review_call_hong_truoc_khi_sinh_khong_tieu", case_review_call_hong_truoc_khi_sinh_khong_tieu),
+    ("review_call_thu_ba_bi_tu_choi_va_ve_checkpoint", case_review_call_thu_ba_bi_tu_choi_va_ve_checkpoint),
+    ("doi_prompt_hay_phien_khong_mo_lai_tran_review", case_doi_prompt_hay_phien_khong_mo_lai_tran_review),
+    ("nhan_khong_tieu_ma_co_output_bi_tu_choi", case_nhan_khong_tieu_ma_co_output_bi_tu_choi),
+    ("ngan_sach_review_khong_vay_ngan_sach_executor", case_ngan_sach_review_khong_vay_ngan_sach_executor),
+    ("void_attempt_khong_hoan_lai_tran_review", case_void_attempt_khong_hoan_lai_tran_review),
     ("begin_attempt_lap_khong_tieu_them_tran", case_begin_attempt_lap_khong_tieu_them_tran),
     ("init_khong_ghi_de_state_da_blocked", case_init_khong_ghi_de_state_da_blocked),
     ("init_khong_co_co_ghi_de", case_init_khong_co_co_ghi_de),
@@ -1924,6 +2056,26 @@ CASES += [(f"ac19_{ten}", _ca_doctrine(nd, f"ac19_{ten}", 0)) for ten, nd in LOP
 # Đột biến nới ngưỡng: mỗi cái BẮT BUỘC giết đúng những ca dưới đây. Ca không
 # chết được nghĩa là nó không đo cái nó khai.
 MUTANTS = {
+    # --- W0-R1 ---
+    "noi_tran_review_call_thanh_lon_hon": (
+        '    if st["codex_review_calls_used"] >= st["codex_review_calls_limit"]:\n',
+        '    if st["codex_review_calls_used"] > st["codex_review_calls_limit"]:\n',
+        ["review_call_thu_ba_bi_tu_choi_va_ve_checkpoint",
+         "doi_prompt_hay_phien_khong_mo_lai_tran_review"],
+    ),
+    "tha_sai_schema_thanh_khong_tieu": (
+        'KET_CUC_TIEU = ("ok", "timeout-sau-sinh", "sai-schema")\n'
+        'KET_CUC_KHONG_TIEU = ("preflight", "permission", "rate-limit")\n',
+        'KET_CUC_TIEU = ("ok", "timeout-sau-sinh")\n'
+        'KET_CUC_KHONG_TIEU = ("preflight", "permission", "rate-limit", "sai-schema")\n',
+        ["review_call_da_sinh_ra_roi_hong_van_tieu",
+         "doi_prompt_hay_phien_khong_mo_lai_tran_review"],
+    ),
+    "bo_chot_nhan_phai_khop_so_do": (
+        "    if not tieu and a.output_bytes != 0:\n",
+        "    if False:\n",
+        ["nhan_khong_tieu_ma_co_output_bi_tu_choi"],
+    ),
     # Cùng họ với đột biến trên, nhưng RỘNG HƠN — đây là hình dạng generation 4:
     # tha cụm ấy VÔ ĐIỀU KIỆN, không cần ngắt dòng. Nói cách khác: "cứ cho hẳn cụm
     # này vào danh sách miễn". Đó là cách sửa mà người ta thật sự hay chọn khi gate

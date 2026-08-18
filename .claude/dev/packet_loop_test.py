@@ -1963,6 +1963,89 @@ def case_void_attempt_khong_hoan_lai_tran_review(c: Ctx):
         raise AssertionError("void-attempt đã hoàn nhầm một lời gọi review")
 
 
+def _ghi_state_tho(sd, packet, sua):
+    """Sửa THẲNG tệp state — dựng đúng thứ mà lệnh không tự sinh ra được.
+
+    Cần cho các ca "state cũ": chúng phải mô phỏng state sinh TRƯỚC khi có ngân
+    sách review, mà `init` bây giờ luôn sinh đủ khoá.
+    """
+    import json
+    f = sd / f"wp{packet}.json"
+    d = json.loads(f.read_text(encoding="utf-8"))
+    sua(d)
+    f.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
+
+
+def case_state_cu_thieu_khoa_ngan_sach_bi_chan(c: Ctx):
+    """State có TRƯỚC ngân sách review phải bị CHẶN, không được đọc thành 0.
+
+    Cùng doctrine `legacy-lease-bypass`: một state cũ có thể ĐÃ đốt lời gọi mà
+    không ghi; `.get(...,0)` ở đây là cấp lại trần đã tiêu.
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    _ghi_state_tho(sd, 55, lambda d: [d.pop("codex_review_calls_used", None),
+                                      d.pop("codex_review_calls_limit", None)])
+    rc, _, e = goi_review(c, sd, 55, "ok", 500)
+    _doi(8, rc, e, "state thiếu khoá ngân sách phải bị chặn rc=8")
+    if b"Traceback" in e:
+        raise AssertionError("chốt vỡ bằng traceback là chốt CHƯA fail-closed")
+
+
+def case_thieu_review_calls_van_fail_closed(c: Ctx):
+    """Thiếu `review_calls` cũng phải rc=8, KHÔNG được vỡ KeyError.
+
+    Đo được trước khi vá: rc=1 kèm `KeyError: 'review_calls'` — đúng thứ chuẩn của
+    chính tệp này gọi là "chốt chưa fail-closed, nó chỉ đang vỡ".
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    _ghi_state_tho(sd, 55, lambda d: d.pop("review_calls", None))
+    rc, _, e = goi_review(c, sd, 55, "ok", 500)
+    _doi(8, rc, e, "thiếu review_calls phải rc=8")
+    if b"Traceback" in e:
+        raise AssertionError("vỡ bằng traceback, chưa fail-closed")
+
+
+def case_vong_review_cham_tran_van_duoc_dem(c: Ctx):
+    """Một review ĐÃ GHI ĐƯỢC phải được đếm, kể cả khi ngay sau đó chạm trần.
+
+    Đo được trước khi vá: `len(reviews)=2` mà `review_rounds_used=1` — bộ đếm nằm
+    SAU nhánh `_die` của same-failure, nên vòng cuối cùng biến mất khỏi sổ.
+    """
+    import json
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    for n in (1, 2):
+        c.den_reviewing(sd, 55, n)
+        # CÙNG một finding-id ⇒ lượt 2 chạm trần same-failure (mặc định 2).
+        c.review(sd, 55, ["cung-mot-loi"], luot=n)
+    rc, o, e = run(c.script, ["status", "--packet", 55], sd)
+    _doi(0, rc, e, "status")
+    st = json.loads(o.decode("utf-8"))
+    if len(st["reviews"]) != st["review_rounds_used"]:
+        raise AssertionError(
+            f"review ĐÃ ghi mà không được đếm: len(reviews)={len(st['reviews'])} "
+            f"nhưng review_rounds_used={st['review_rounds_used']}")
+
+
+def case_void_attempt_bi_chan_o_state_cuoi(c: Ctx):
+    """`void-attempt` không được ghi sổ trên packet đã ở state cuối."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "begin-attempt")
+    for _ in (1, 2, 3):
+        goi_review(c, sd, 55, "ok", 50)
+    if c.state(sd, 55) != "checkpoint":
+        raise AssertionError(f"tiền đề sai: phải ở checkpoint, đang {c.state(sd, 55)!r}")
+    truoc = _so(c, sd, 55, "attempts_used")
+    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota"], sd)
+    _doi(8, rc, e, "void-attempt ở state cuối phải bị chặn")
+    if _so(c, sd, 55, "attempts_used") != truoc:
+        raise AssertionError("void-attempt đã ghi sổ trên một state cuối")
+
+
 CASES = [
     ("init_KHONG_duoc_tu_cap_lease", case_init_KHONG_duoc_tu_cap_lease),
     ("tu_cap_lease_bang_ten_provider_bi_chan", case_tu_cap_lease_bang_ten_provider_bi_chan),
@@ -1981,6 +2064,11 @@ CASES = [
     ("nhan_khong_tieu_ma_co_output_bi_tu_choi", case_nhan_khong_tieu_ma_co_output_bi_tu_choi),
     ("ngan_sach_review_khong_vay_ngan_sach_executor", case_ngan_sach_review_khong_vay_ngan_sach_executor),
     ("void_attempt_khong_hoan_lai_tran_review", case_void_attempt_khong_hoan_lai_tran_review),
+    # --- vá 5 finding của review lượt 1 (fable-5 xhigh) ---
+    ("state_cu_thieu_khoa_ngan_sach_bi_chan", case_state_cu_thieu_khoa_ngan_sach_bi_chan),
+    ("thieu_review_calls_van_fail_closed", case_thieu_review_calls_van_fail_closed),
+    ("vong_review_cham_tran_van_duoc_dem", case_vong_review_cham_tran_van_duoc_dem),
+    ("void_attempt_bi_chan_o_state_cuoi", case_void_attempt_bi_chan_o_state_cuoi),
     ("begin_attempt_lap_khong_tieu_them_tran", case_begin_attempt_lap_khong_tieu_them_tran),
     ("init_khong_ghi_de_state_da_blocked", case_init_khong_ghi_de_state_da_blocked),
     ("init_khong_co_co_ghi_de", case_init_khong_co_co_ghi_de),
@@ -2070,6 +2158,26 @@ MUTANTS = {
         'KET_CUC_KHONG_TIEU = ("preflight", "permission", "rate-limit", "sai-schema")\n',
         ["review_call_da_sinh_ra_roi_hong_van_tieu",
          "doi_prompt_hay_phien_khong_mo_lai_tran_review"],
+    ),
+    "bo_vong_fail_closed_state_cu": (
+        '    for khoa in ("codex_review_calls_used", "codex_review_calls_limit", "review_calls"):\n',
+        "    for khoa in ():\n",
+        ["state_cu_thieu_khoa_ngan_sach_bi_chan", "thieu_review_calls_van_fail_closed"],
+    ),
+    "bo_chot_nhan_CHIEU_HAI": (
+        '    if tieu and a.outcome != "ok" and a.output_bytes == 0:\n',
+        '    if False and a.outcome != "ok" and a.output_bytes == 0:\n',
+        ["nhan_khong_tieu_ma_co_output_bi_tu_choi"],
+    ),
+    "bo_dem_vong_review": (
+        '    st["review_rounds_used"] = st.get("review_rounds_used", 0) + 1\n',
+        '    st["review_rounds_used"] = st.get("review_rounds_used", 0)\n',
+        ["vong_review_cham_tran_van_duoc_dem"],
+    ),
+    "bo_chan_void_o_state_cuoi": (
+        '    if st["state"] in ("accepted", "blocked", "checkpoint"):\n',
+        "    if False:\n",
+        ["void_attempt_bi_chan_o_state_cuoi"],
     ),
     "bo_chot_nhan_phai_khop_so_do": (
         "    if not tieu and a.output_bytes != 0:\n",

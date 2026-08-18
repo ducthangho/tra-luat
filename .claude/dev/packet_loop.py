@@ -870,6 +870,15 @@ def cmd_void_attempt(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     if a.reason not in LY_DO_VOID:
         _die(RC_ARG, f"lý do {a.reason!r} không thuộc allowlist {LY_DO_VOID}")
+    # State CUỐI thì không hoàn lượt được. Thiếu chốt này, `void-attempt` vẫn rc=0 và
+    # vẫn giảm `attempts_used` trên một packet đã `checkpoint`/`blocked`/`accepted` —
+    # đo được: cạn trần review ⇒ checkpoint, rồi void-attempt đưa attempts_used 1→0.
+    # Không mở được đường chạy tiếp (mọi cửa vẫn từ chối state cuối) nên đây là bất
+    # nhất về SỔ SÁCH, không phải lỗ thoát; nhưng một cửa còn ghi được vào state cuối
+    # là cửa sẽ bị dựa vào. `accepted`/`blocked` dính y hệt và có TRƯỚC packet này.
+    # (review lượt 1, `void-attempt-van-ghi-so-o-checkpoint`)
+    if st["state"] in ("accepted", "blocked", "checkpoint"):
+        _die(RC_STATE, f"packet đã ở state cuối {st['state']!r} — không hoàn lượt được")
     if st["attempts_used"] <= 0:
         _die(RC_STATE, "chưa có lượt nào để hoàn")
     # Lượt ĐÃ được review thì không hoàn được — nếu không, mọi lượt hỏng đều
@@ -979,6 +988,13 @@ def cmd_record_review(a, state_dir: Path) -> int:
         }
     )
 
+    # Vòng này đã được GHI (`reviews` vừa append ở trên), nên nó PHẢI được đếm —
+    # kể cả khi ngay sau đây chạm trần same-failure và `_die`. Bản đầu tăng bộ đếm
+    # ở dưới nhánh `_die` nên một review CÓ THẬT không được đếm: đo được
+    # `len(reviews)=2` mà `review_rounds_used=1`, tức chính chú thích ở `init`
+    # ("một vòng = một record-review ghi được") thành lời khai sai.
+    # (review lượt 1, `review-rounds-khong-dem-vong-cham-tran`)
+    st["review_rounds_used"] = st.get("review_rounds_used", 0) + 1
     cham_tran = []
     for fid in ids_duy_nhat:
         st["finding_counts"][fid] = st["finding_counts"].get(fid, 0) + 1
@@ -997,7 +1013,6 @@ def cmd_record_review(a, state_dir: Path) -> int:
             f"ghi failure evidence + handoff rồi dừng.",
         )
 
-    st["review_rounds_used"] = st.get("review_rounds_used", 0) + 1
     st["state"] = {"approve": "accepted", "changes_requested": "running", "blocked": "blocked"}[a.verdict]
     if a.verdict == "approve":
         st["accepted_sha"] = a.reviewed_sha
@@ -1035,7 +1050,11 @@ def cmd_record_review_call(a, state_dir: Path) -> int:
     # sinh trước packet này có thể ĐÃ đốt lời gọi review mà không ghi; đọc nó ra
     # 0 bằng `.get` là cấp lại trần đã tiêu. Di trú là việc TƯỜNG MINH của bên
     # điều phối (generation mới), không phải việc lặng lẽ của lệnh này.
-    for khoa in ("codex_review_calls_used", "codex_review_calls_limit"):
+    # `review_calls` nằm trong danh sách này vì thiếu nó thì `.append` phía dưới vỡ
+    # bằng KeyError traceback rc=1 — mà chuẩn của chính tệp này là "một chốt vỡ bằng
+    # traceback là chốt chưa fail-closed, nó chỉ đang vỡ".
+    # (review lượt 1, `review-calls-key-thieu-trace-tho`)
+    for khoa in ("codex_review_calls_used", "codex_review_calls_limit", "review_calls"):
         if khoa not in st:
             _die(
                 RC_STATE,

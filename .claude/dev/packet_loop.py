@@ -1039,6 +1039,22 @@ def cmd_record_review_call(a, state_dir: Path) -> int:
     Ngân sách này KHÔNG vay ngân sách executor và ngược lại: cạn review call thì
     packet về `checkpoint`, không đụng `attempts_used`; cạn attempt thì về
     `blocked`, không đụng `codex_review_calls_used`.
+
+    GIỚI HẠN ĐÃ BIẾT, KHAI THẲNG — trần này hiện là TỰ NGUYỆN.
+    `record-review` KHÔNG đọc sổ lời gọi, nên bỏ qua hẳn lệnh này thì ba vòng review
+    vẫn khép trọn với `codex_review_calls_used = 0`. ĐO ĐƯỢC: init → 3×(begin-attempt;
+    record-post; transition reviewing; record-review) → rc=0 toàn chuỗi, rounds=3,
+    used=0/2. Mọi bộ đếm khác của tệp này được DỆT vào đường bắt buộc (không
+    `begin-attempt` thì không có đường tới `accepted`); riêng lệnh này thì không, nên
+    trần lách được bằng THIẾU SÓT im lặng chứ không cần khai gian.
+    (review lượt 2, `record-review-khong-doc-so-loi-goi`)
+
+    Vì sao CHƯA vá ở đây: dệt sổ vào `record-review` là đổi cách HAI trần hợp thành
+    nhau — mặc định `attempts_limit=3` mà `review_calls_limit=2`, nên đòi mỗi vòng một
+    lời gọi sẽ khiến một packet KHÔNG BAO GIỜ đạt 3 vòng review, và 21 ca đang dùng
+    `c.review(...)` phải đổi tiền đề. Đó là quyết định thiết kế của một packet riêng,
+    không phải bản vá kèm. Tới lúc đó, ĐỪNG đọc `codex_review_calls_used` như một
+    phép đo đầy đủ: nó chỉ đếm những lời gọi CÓ AI GHI.
     """
     st = _load(state_dir, a.packet)
     if a.provider != st["reviewer"]:

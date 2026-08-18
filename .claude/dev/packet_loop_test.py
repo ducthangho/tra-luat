@@ -2046,6 +2046,61 @@ def case_void_attempt_bi_chan_o_state_cuoi(c: Ctx):
         raise AssertionError("void-attempt đã ghi sổ trên một state cuối")
 
 
+def case_record_review_call_bi_chan_o_state_cuoi(c: Ctx):
+    """Cửa state cuối của CHÍNH `record-review-call` — trước đây không ca nào chạm.
+
+    Lượt 1 vá cửa ấy cho `void-attempt`; cửa này viết cùng một dòng nên nhìn như
+    đã được canh, nhưng needle của đột biến kia trùng nguyên văn ở HAI dòng mà
+    runner chỉ `replace(..., 1)` — nên nó chỉ vô hiệu cửa `void-attempt`.
+    (review lượt 2, `cua-state-cuoi-record-review-call-khong-phan-chung-mutant-neo-lech`)
+    """
+    import json
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    for _ in (1, 2, 3):
+        goi_review(c, sd, 55, "ok", 50)
+    if c.state(sd, 55) != "checkpoint":
+        raise AssertionError(f"tiền đề sai: phải ở checkpoint, đang {c.state(sd, 55)!r}")
+    rc, o, e = run(c.script, ["status", "--packet", 55], sd)
+    truoc = json.loads(o.decode("utf-8"))["review_calls"]
+    # CẢ HAI nhánh: tiêu và không-tiêu. Nhánh không-tiêu là chỗ nguy hiểm hơn — nó
+    # ghi sổ rồi rc=0, tức còn GHI ĐƯỢC vào một state cuối.
+    rc, _, e = goi_review(c, sd, 55, "ok", 50)
+    _doi(8, rc, e, "nhánh tiêu ở state cuối phải rc=8")
+    rc, _, e = goi_review(c, sd, 55, "rate-limit", 0)
+    _doi(8, rc, e, "nhánh KHÔNG-tiêu ở state cuối phải rc=8, không được ghi sổ")
+    rc, o, e = run(c.script, ["status", "--packet", 55], sd)
+    if json.loads(o.decode("utf-8"))["review_calls"] != truoc:
+        raise AssertionError("đã ghi thêm vào sổ trên một packet ở state cuối")
+
+
+def case_codex_executor_calls_duoc_dem_that(c: Ctx):
+    """`codex_executor_calls_used` là trường OUTCOME của spec mà TRƯỚC ĐÂY không ca
+    nào đọc, và trong cả suite nó không bao giờ nhích khỏi 0 vì mọi fixture đều
+    dùng executor `claude`. Một trường xanh rỗng.
+    (review lượt 2, `codex-executor-calls-khong-ca-nao-do`)
+
+    Ca này cũng đo được một điều khác: nó đếm LỜI GỌI chứ không đếm attempt —
+    `void-attempt` trả lại attempt nhưng lời gọi thì đã xảy ra rồi.
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd, executor="codex", reviewer="claude")[0:1], b"", "init codex-executor")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex"], sd)
+    _doi(0, rc, e, "begin-attempt 1")
+    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota"], sd)
+    _doi(0, rc, e, "void-attempt")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", "codex"], sd)
+    _doi(0, rc, e, "begin-attempt 2")
+    if _so(c, sd, 55, "codex_executor_calls_used") != 2:
+        raise AssertionError(
+            f"codex_executor_calls_used = {_so(c, sd, 55, 'codex_executor_calls_used')}, "
+            f"phải là 2 — nó đếm LỜI GỌI, void-attempt không xoá một lời gọi đã xảy ra")
+    if _so(c, sd, 55, "attempts_used") != 1:
+        raise AssertionError("tiền đề sai: void-attempt phải đã trả lại một attempt")
+    if _so(c, sd, 55, "codex_review_calls_used") != 0:
+        raise AssertionError("mở lượt executor đã đụng vào ngân sách review")
+
+
 CASES = [
     ("init_KHONG_duoc_tu_cap_lease", case_init_KHONG_duoc_tu_cap_lease),
     ("tu_cap_lease_bang_ten_provider_bi_chan", case_tu_cap_lease_bang_ten_provider_bi_chan),
@@ -2069,6 +2124,9 @@ CASES = [
     ("thieu_review_calls_van_fail_closed", case_thieu_review_calls_van_fail_closed),
     ("vong_review_cham_tran_van_duoc_dem", case_vong_review_cham_tran_van_duoc_dem),
     ("void_attempt_bi_chan_o_state_cuoi", case_void_attempt_bi_chan_o_state_cuoi),
+    # --- vá 2 finding rẻ của review lượt 2 (fable-5 max) ---
+    ("record_review_call_bi_chan_o_state_cuoi", case_record_review_call_bi_chan_o_state_cuoi),
+    ("codex_executor_calls_duoc_dem_that", case_codex_executor_calls_duoc_dem_that),
     ("begin_attempt_lap_khong_tieu_them_tran", case_begin_attempt_lap_khong_tieu_them_tran),
     ("init_khong_ghi_de_state_da_blocked", case_init_khong_ghi_de_state_da_blocked),
     ("init_khong_co_co_ghi_de", case_init_khong_co_co_ghi_de),
@@ -2174,10 +2232,26 @@ MUTANTS = {
         '    st["review_rounds_used"] = st.get("review_rounds_used", 0)\n',
         ["vong_review_cham_tran_van_duoc_dem"],
     ),
+    # Needle PHẢI kèm dòng `_die`: dòng `if` đứng một mình trùng nguyên văn ở HAI cửa
+    # (void-attempt và record-review-call), mà runner chỉ `replace(..., 1)` nên neo
+    # ngắn sẽ luôn trúng cửa đầu và để cửa sau không ai canh.
     "bo_chan_void_o_state_cuoi": (
-        '    if st["state"] in ("accepted", "blocked", "checkpoint"):\n',
-        "    if False:\n",
+        '    if st["state"] in ("accepted", "blocked", "checkpoint"):\n'
+        '        _die(RC_STATE, f"packet đã ở state cuối {st[\'state\']!r} — không hoàn lượt được")\n',
+        "    if False:\n        pass\n",
         ["void_attempt_bi_chan_o_state_cuoi"],
+    ),
+    "bo_chan_record_review_call_o_state_cuoi": (
+        '    if st["state"] in ("accepted", "blocked", "checkpoint"):\n'
+        '        _die(RC_STATE, f"packet đã ở state cuối {st[\'state\']!r} — không gọi review thêm")\n',
+        "    if False:\n        pass\n",
+        ["record_review_call_bi_chan_o_state_cuoi"],
+    ),
+    "bo_dem_executor_call_cua_codex": (
+        '    if a.provider == "codex":\n'
+        '        st["codex_executor_calls_used"] = st.get("codex_executor_calls_used", 0) + 1\n',
+        "    if False:\n        pass\n",
+        ["codex_executor_calls_duoc_dem_that"],
     ),
     "bo_chot_nhan_phai_khop_so_do": (
         "    if not tieu and a.output_bytes != 0:\n",
@@ -2663,6 +2737,24 @@ def main() -> int:
             if thieu:
                 print(f"  ĐỎ  đột biến {ten_mut}: không tìm thấy mỏ neo {thieu!r}")
                 that_bai_tong += len(thieu)
+                continue
+            # …và mỏ neo phải khớp ĐÚNG MỘT chỗ, không chỉ "có tìm thấy".
+            #
+            # `replace(t, th, 1)` ngay dưới chỉ đổi lần khớp ĐẦU TIÊN. Một mẫu trùng ở
+            # hai nơi vì thế luôn đột biến chỗ đầu và để chỗ sau KHÔNG AI CANH — trong
+            # khi bảng vẫn báo `ok` vì ca đích (của chỗ đầu) chết đúng như khai. Đo được:
+            # `if st["state"] in ("accepted", "blocked", "checkpoint"):` đứng một mình
+            # trùng nguyên văn ở CẢ `cmd_void_attempt` LẪN `cmd_record_review_call`, nên
+            # đột biến cửa `void` để cửa `record-review-call` hở suốt một lượt vá.
+            # (review lượt 2, `cua-state-cuoi-record-review-call-...-mutant-neo-lech`)
+            #
+            # Chốt này ở RUNNER chứ không ở từng mục: một mục quên thì cả bảng vẫn an
+            # toàn, và mọi đột biến thêm về sau được canh miễn phí.
+            mo_ho = [(t[:60], goc.count(t)) for t, _ in cap if goc.count(t) != 1]
+            if mo_ho:
+                print(f"  ĐỎ  đột biến {ten_mut}: mỏ neo MƠ HỒ {mo_ho!r} — "
+                      f"phải khớp ĐÚNG MỘT chỗ, kẻo chỉ chỗ đầu bị đột biến")
+                that_bai_tong += len(mo_ho)
                 continue
             mut_dir = tmp / f"mut_{ten_mut}"
             mut_dir.mkdir(parents=True, exist_ok=True)

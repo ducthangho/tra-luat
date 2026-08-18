@@ -295,6 +295,33 @@ Thử gọi lại: 12 lượt không tải + 12 lượt dưới tải CPU ⇒ **
 Chưa gọi ra được — tải thật lúc nó chớp là **churn tiến trình/cgroup** (chạy ngay
 sau bộ gate), không phải tải CPU.
 
+### LẦN CHỚP THỨ HAI — và `codex` CÓ MẶT
+
+Phiên 18-08 (nhánh `ops/so-no-vong-3`) chạy đúng thứ tự loạt cũ — gate BẬT, gate
+TẮT, rồi `launcher_test.py` — và ra `117/119 ca QUA (bo qua 1, hong 1)` với
+`HONG t53_doctor_bao_du_khi_du: 12`. Hai lượt `launcher_test.py` ngay sau đó đều
+`118/119 ... hong 0`.
+
+**Lần này loại được lời giải thích "trùng chữ ký"**: `command -v codex` chạy
+TRONG CÙNG khối lệnh, trước bộ chạy, trả `/opt/node22/bin/codex` (rc=0). Nên đây
+là `doctor` thoát 12 **trên máy đủ công cụ** — đúng thứ mục này đi tìm, không
+phải ca host-thiếu-codex.
+
+**Nhưng vẫn hụt đúng thứ cần**: lượt đỏ ấy nằm trong bộ chạy nên **stdout của
+`doctor` không được giữ**. Lại đúng lỗi đoạn trên vừa dặn đừng lặp.
+
+**Săn có chủ đích, thất bại:** dựng 6 vòng `gate_lifecycle_test.py` → 4 lượt
+`doctor --json` ngay sau, giữ stdout của lượt nào thoát khác 0 ⇒ **24/24 đều
+thoát 0**, không bắt được lượt nào. Cộng dồn: **48 lượt gọi lại, 0 lần tái
+hiện**, qua hai giả thuyết tải (CPU và churn gate).
+
+Vậy nên **KHÔNG đóng mục này**: hai lần chớp đều là tai nạn quan sát được, chưa
+lần nào gọi ra được theo ý muốn. Nhưng phạm vi nghi ngờ hẹp lại: churn gate
+**một mình nó không đủ** để gây chớp — nếu đủ thì 24 lượt đã bắt được. Thứ còn
+thiếu là chính `launcher_test.py` chạy cùng lúc (nó tự sinh nhiều tiến trình và
+sân tạm), tức lần săn tới nên là **chạy cả bộ `launcher_test.py` nhiều lượt liền
+sau bộ gate** rồi mới đọc `t53`, thay vì gọi `doctor` trần như tôi vừa làm.
+
 **Xong khi:** gọi ra được `doctor` thoát khác 0 trên máy đủ công cụ (nghi trước:
 một lượt `--version` của công cụ nào đó hết hạn dưới churn tiến trình ⇒ bị đếm là
 thiếu), rồi hoặc vá cho nó tất định, hoặc khai rõ `doctor` có thể chớp và `t53`

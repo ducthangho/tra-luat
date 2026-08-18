@@ -145,6 +145,26 @@ function Dung-Gh-Gia {
     # 21/21. Voi `>>`, phep dem san co TU KHAC thanh chot "dung MOT loi goi" — hai loi goi
     # cho 16 ban ghi != 8 => do. Mot ky tu, dong ca lop, khong them phep so nao.
     $dong += ("printf '%s\0' " + '"$@"' + " >> '" + (Join-Path $d 'argv.txt') + "'")
+    # GHI LAI CA MOI TRUONG — F2 cross-review luot 7. Cau hoi that gui `gh` la argv CONG
+    # ENV: `GH_REPO=x/y` doi hep repo DICH ma KHONG token nao doi, nen chot argv du hoan
+    # hao den may cung mu (do that: dot bien ay song 21/21).
+    #
+    # KHONG doi hai bien theo TEN. Doi theo ten la DANH-SACH-CAM, ma `GH_HOST`
+    # `GH_CONFIG_DIR` `GH_TOKEN` `XDG_CONFIG_HOME`... cung doi hanh vi — liet ke mai khong
+    # du, dung lop loi CLAUDE.md da tra gia (`codex-dispatcher` lot chot vi chot phan biet
+    # CACH VIET chu khong phan biet THAM QUYEN).
+    #
+    # Dao thanh DANH-SACH-CHO-PHEP, va tap cho phep o day nho va DO DUOC: tien trinh con
+    # KHONG duoc THEM bien nao, va chi duoc khac harness o dung `PATH` (Chay-KichBan co y
+    # dat lai) va `PWD` (Push-Location). Do nen: 138 bien ca hai ben, THEM MOI = 0,
+    # KHAC GIA TRI = {PATH, PWD}. Bat ky bien nao script tu dat deu lo ra, KHONG CAN biet
+    # ten no truoc — do la thu danh-sach-cam khong lam duoc.
+    #
+    # `env -0` (NUL) chu khong `env`: gia tri bien CHUA duoc xuong dong, nen tach theo dong
+    # lai la dung cai bay ranh-gioi vua sua o tren.
+    # Ghi `>` (de) chu khong `>>`: chot dem argv o tren da bat truong hop goi >1 lan roi,
+    # va no chay TRUOC chot nay.
+    $dong += ("env -0 > '" + (Join-Path $d 'env.txt') + "'")
     # stderr NGUYEN VAN — `gh` that hay in canh bao cap nhat phien ban ra day.
     if ($PSBoundParameters.ContainsKey('CanhBaoStderr')) {
         $dong += "printf '%s\n' '$($CanhBaoStderr -replace "'", "'\''")' >&2"
@@ -576,6 +596,29 @@ ca 't21_MAC_DINH_phai_TU_CHOI_o_1000_PR' {
         bang ($tok[$i] -ceq $mong[$i]) `
             "doi so thu $i KHAC hop dong: mong [$($mong[$i])], thuc [$($tok[$i])].`n  ca dong: [$($tok -join '|')]"
     }
+
+    # CHOT MOI TRUONG — F2 cross-review luot 7. Danh-sach-CHO-PHEP, khong phai theo ten bien.
+    # Tien trinh con KHONG duoc THEM bien nao, va chi duoc khac harness o `PATH` (Chay-KichBan
+    # co y dat lai) va `PWD` (Push-Location). Bat ky bien nao script tu dat deu lo ra ma
+    # KHONG CAN biet ten no truoc.
+    $tepEnv = Join-Path $gh 'env.txt'
+    bang (Test-Path $tepEnv) "gh gia khong ghi duoc env.txt — chot nay dang khong do gi"
+    $moiTruongCon = @{}
+    foreach ($muc in ([System.IO.File]::ReadAllText($tepEnv) -split "`0")) {
+        if ($muc -match '^([^=]+)=(.*)$') { $moiTruongCon[$Matches[1]] = $Matches[2] }
+    }
+    bang ($moiTruongCon.Count -gt 0) "env.txt khong doc ra bien nao — chot nay dang khong do gi"
+    $MIEN_TRU = @('PATH', 'PWD')
+    $harness = @{}
+    Get-ChildItem env: | ForEach-Object { $harness[$_.Name] = $_.Value }
+    $themMoi = @($moiTruongCon.Keys | Where-Object { -not $harness.ContainsKey($_) } | Sort-Object)
+    $doiGiaTri = @($moiTruongCon.Keys |
+        Where-Object { $harness.ContainsKey($_) -and $harness[$_] -cne $moiTruongCon[$_] -and $MIEN_TRU -notcontains $_ } |
+        Sort-Object)
+    bang ($themMoi.Count -eq 0) `
+        "script THEM bien moi truong cho gh: [$($themMoi -join ', ')] — doi tuong/danh tinh truy van co the da bi doi ma argv KHONG he doi"
+    bang ($doiGiaTri.Count -eq 0) `
+        "script DOI gia tri bien moi truong cho gh: [$($doiGiaTri -join ', ')] — ngoai PATH/PWD la co y"
 }
 
 # ---------------------------------------------------------------- chạy

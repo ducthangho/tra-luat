@@ -126,12 +126,25 @@ function Dung-Gh-Gia {
     # NUL la ngan cach DUY NHAT chung minh duoc la khong nhap nhang: execve CAM byte NUL
     # trong doi so, nen khong doi so nao chua duoc no. Chon `\n` la chon mot ky tu ma doi
     # so HOP LE co the chua — tuc lai la danh-sach-cam, dung lop loi da tra gia hai lan.
-    # MOT dau gach cheo, khong hai: PowerShell KHONG coi `\` la ky tu thoat (no dung
-    # backtick), nen "\\0" di thang ra tep thanh HAI ky tu `\` `0` va `printf` in ra
-    # literal thay vi byte NUL. Da tra gia: chot argv do ra "1 doi so" thay vi 8, tuc
-    # ca t21 DO THUONG TRUC — va bon dot bien van "chet" 20/21 nen nhin y het dang chay
-    # dung. Chi lo ra khi chay BASELINE. Do: `printf '%s\0' a bb | od -c` => `a \0 b b \0`.
-    $dong += ("printf '%s\0' " + '"$@"' + " > '" + (Join-Path $d 'argv.txt') + "'")
+    # MOT dau gach cheo, khong hai. PHAI TACH HAI TANG, dung gop lam mot:
+    #   tang TEP SCRIPT : PowerShell KHONG coi `\` la ky tu thoat (no dung backtick) nen
+    #                     "\\0" giu nguyen BA ky tu `\` `\` `0`, va Set-Content ghi y
+    #                     nguyen. Do: "\\0".Length = 3; od tep script => `' % s \ \ 0 '`.
+    #   tang BAN GHI    : `printf` co `\\` thanh `\`, nen argv.txt nhan HAI ky tu literal
+    #                     `\` `0` thay vi byte NUL. Do: od argv.txt => `a \ 0 b b \ 0`.
+    # Ban dau cho nay viet "di thang ra tep thanh HAI ky tu" — SAI, cross-review luot 7 bat
+    # duoc (F3): no gan so dem cua tang BAN GHI cho tang TEP SCRIPT. Ai debug bang `od` dung
+    # tep ma cau chi vao se thay 3 chu khong phai 2 — ngay tai cho chu thich dang day bai
+    # hoc dem ky tu. Lop loi "loi khai sai trong comment" la lop kho da tra gia nhieu lan;
+    # xem CLAUDE.md. Da tra gia o day: chot argv do ra "1 doi so" thay vi 8, tuc ca t21 DO
+    # THUONG TRUC — ma bon dot bien VAN "chet" 20/21 nen bang nhin y het dang chay dung.
+    # Chi BASELINE lo ra. Do: `printf '%s\0' a bb | od -c` => `a \0 b b \0`.
+    # NOI THEM (`>>`) chu khong DE (`>`) — F1 cross-review luot 7. Voi `>`, mot loi goi
+    # TRANG TRI dung hop dong dat NGAY SAU loi goi that (sai hop dong, ket qua DUOC DUNG)
+    # xoa sach dau vet: chot doc argv.txt chi thay lan CUOI. Do that: dot bien ay SONG
+    # 21/21. Voi `>>`, phep dem san co TU KHAC thanh chot "dung MOT loi goi" — hai loi goi
+    # cho 16 ban ghi != 8 => do. Mot ky tu, dong ca lop, khong them phep so nao.
+    $dong += ("printf '%s\0' " + '"$@"' + " >> '" + (Join-Path $d 'argv.txt') + "'")
     # stderr NGUYEN VAN — `gh` that hay in canh bao cap nhat phien ban ra day.
     if ($PSBoundParameters.ContainsKey('CanhBaoStderr')) {
         $dong += "printf '%s\n' '$($CanhBaoStderr -replace "'", "'\''")' >&2"

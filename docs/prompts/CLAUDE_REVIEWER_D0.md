@@ -72,7 +72,9 @@ sau dấu `:` tại đúng `{{HEAD_SHA}}`.
 ### Giai đoạn 1 — cơ học
 
 Xác minh SHA/ancestor/status, write-set, derived-file diff, numstat/EOL,
-`git diff --check` và hai gate JSON. Nếu có lỗi blocking rõ ràng, có thể kết
+`git diff --check`, hai gate JSON và CI full-evidence artifact. Validate artifact bằng
+`.claude/dev/gate_lifecycle.py validate` với positive marker + output hash và exact head/tree/base/name/system/command/runner; không chạy lại cùng full
+local khi evidence khớp. Nếu có lỗi blocking rõ ràng, có thể kết
 thúc `changes_requested` ngay với evidence, không đốt token đọc toàn bộ tài liệu.
 
 ### Giai đoạn 2 — acceptance
@@ -101,6 +103,10 @@ Kiểm cả Standards, Spec và Security:
 
 Chạy các gate read-only phù hợp và kiểm lại `git status --short` sau cùng. Không
 dùng `--fix`, formatter ghi file hoặc cờ tự cập nhật snapshot.
+
+Reviewer tự chạy test component, regression fixture, paired control và adversarial probe liên quan diff. Full CI
+không thay các probe này. Nếu CI/artifact thiếu, đỏ hoặc lệch identity thì fallback full; mọi heavy gate local đi qua
+`gate_lifecycle.py run --kind heavy` để không tranh tài nguyên với phiên khác trên host.
 
 Kiểm cơ học tối thiểu:
 

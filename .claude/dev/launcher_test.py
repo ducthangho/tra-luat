@@ -3815,9 +3815,10 @@ def t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua():
     tách cho `t99`). Khối (c) vẫn đi qua ĐƯỜNG ĐẾM THẬT `chay_bo_ca`, nên nó đo
     hành vi chứ không đo lại một hằng số tôi vừa gõ.
 
-    GIỚI HẠN — khai thẳng, và đã bị bắt vì khai RỘNG QUÁ: ca này chỉ khoá CÔNG
-    THỨC của `dong_ket_qua`, KHÔNG khoá việc `main` có gọi nó hay không, cũng
-    KHÔNG khoá mã thoát. Bản đầu viết "ca này khoá SỰ THẬT CỦA DÒNG BÁO CÁO" —
+    GIỚI HẠN — khai thẳng, và đã bị bắt HAI LẦN, hai chiều ngược nhau: ca này
+    khoá CÔNG THỨC của `dong_ket_qua` VÀ — qua khối (c) — phép đếm bỏ-qua của
+    `chay_bo_ca`; nhưng KHÔNG khoá việc `main` có gọi nó hay không, cũng KHÔNG
+    khoá mã thoát. Bản đầu viết "ca này khoá SỰ THẬT CỦA DÒNG BÁO CÁO" —
     rộng hơn hẳn thứ nó làm được, và review W0-M1 (PR #153, head `99ba7857`)
     chứng minh bằng đột biến: hoàn nguyên ĐÚNG MỘT dòng ở cuối `main` về
     `{qua + bo_qua}/{tong}`, giữ nguyên `dong_ket_qua` lẫn ca này, thì ca này
@@ -3825,6 +3826,11 @@ def t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua():
     Dây nối ấy nay do `t119` khoá — và `t119` đo bằng HÀNH VI (gọi `main()` trên
     bản sao rồi đọc stdout), nên nó cũng đo luôn "bỏ qua vẫn cho rc=0", thứ ca
     này chỉ khai suông. Đổi rc là quyết định riêng, Packet riêng.
+    Rồi review W0-M1b (PR #159) bắt tiếp chiều NGƯỢC LẠI: câu vá đầu viết "CHỈ
+    khoá CÔNG THỨC" — HẸP hơn thực tế. Đột biến tầng đếm (`bo_qua += 1` thành
+    `qua += 1` trong `chay_bo_ca`, để `dong_ket_qua` nguyên vẹn) làm ca này ĐỎ,
+    tức nó khoá nhiều hơn công thức. Khai hẹp không tái phát bệnh khai rộng,
+    nhưng vẫn sai: người sau sẽ thêm ca thừa cho thứ đã có người canh.
     Đây đúng nếp `t116`/`t117` của tệp này: chưa làm thì đừng khai là đã làm.
     """
     # (a) khong bo qua, khong hong: N/N la HOP LE va phai duoc giu nguyen suc nang

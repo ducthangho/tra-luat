@@ -959,7 +959,11 @@ def t53_doctor_bao_du_khi_du():
     tầng của bản vá, t131 khoá chiều ngược (hỏng thật vẫn 12).
     """
     r = chay("doctor", "--json")
-    bang(r.returncode == MA_OK, f"{r.returncode}: {r.stderr}")
+    # GIỮ NGUYÊN stdout của đúng lượt thoát khác 0 — hai lần săn flake này đều hụt
+    # vì bộ chạy nuốt mất JSON, mà JSON mới là thứ nêu tên thủ phạm (ops/NO_KY_THUAT.md
+    # dặn tường minh). Đừng bao giờ rút gọn thông điệp này về chỉ còn stderr.
+    bang(r.returncode == MA_OK,
+         f"rc={r.returncode} · stderr={r.stderr!r} · stdout JSON cua luot hong: {r.stdout}")
     d = json.loads(r.stdout)
     ten = {c["ten"] for c in d["cong_cu"]}
     bang({"git", "python", "claude", "codex", "rg"} <= ten, f"thieu muc trong bang: {ten}")

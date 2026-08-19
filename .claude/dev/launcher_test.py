@@ -3572,7 +3572,9 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
 
     def dac_ta():
         return (("claude", "mcp", "get", ten_mong_doi[0]),
-                {"capture_output": True, "text": True, "timeout": m.PROBE_TIMEOUT_GIAY})
+                {"capture_output": True, "text": True,
+                 "encoding": "utf-8", "errors": "replace",
+                 "timeout": m.PROBE_TIMEOUT_GIAY})
 
     def gia_run(cmd, *_a, **_k):
         if list(cmd)[:2] != ["claude", "mcp"]:
@@ -3948,6 +3950,42 @@ def t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua():
     bang(rc == 1, f"co ca hong ma rc={rc}")
     bang(cuoi == "1/2 ca QUA (bo qua 0, hong 1)",
          f"headline dem hong sai: {cuoi!r}")
+
+
+@ca
+def t120_subprocess_decoding_chong_loi_charmap_tren_windows():
+    """Subprocess helpers phải xử lý an toàn Unicode, tránh UnicodeDecodeError trên cp1258/cp1252.
+
+    Trên Windows console hoặc môi trường tiếng Việt (cp1258), gọi `text=True` mà không
+    có `encoding="utf-8", errors="replace"` làm `_readerthread` của `subprocess.run` ném
+    `UnicodeDecodeError: 'charmap' codec can't decode byte 0x...`.
+
+    Ca này đo trực tiếp:
+    (a) `_chay_van_ban_an_toan` đọc tiến trình in ký tự Unicode/ANSI/Emoji mà không crash;
+    (b) `_chay_json_chat_che` đọc JSON UTF-8 đúng và từ chối JSON méo mó.
+    """
+    m = _tai_launcher_thu()
+    # (a) Văn bản có ký tự tiếng Việt có dấu, emoji, ký hiệu pháp luật
+    chuoi_test = "✓ Đã thẩm định: Điều 12 Luật Ban hành VBQPPL 🚀 ⚖️"
+    p = m._chay_van_ban_an_toan([PY, "-c", f"import sys; sys.stdout.buffer.write({chuoi_test.encode('utf-8')!r})"])
+    bang(p.returncode == 0, f"chay_van_ban_an_toan bi loi rc={p.returncode}")
+    bang("Đã thẩm định" in p.stdout, f"khong giai ma duoc chuoi Unicode: {p.stdout!r}")
+
+    # (b) JSON chặt chẽ
+    rc_j, data_j, err_j = m._chay_json_chat_che([
+        PY, "-c", "import sys; sys.stdout.buffer.write(b'{\"status\": \"ok\", \"muc\": \"phap_luat\"}')"
+    ])
+    bang(rc_j == 0, f"JSON hop le ma rc={rc_j}: {err_j}")
+    bang(isinstance(data_j, dict) and data_j.get("status") == "ok",
+         f"du lieu parse JSON sai: {data_j}")
+
+    # (c) JSON méo mó / lỗi parse
+    rc_bad, data_bad, err_bad = m._chay_json_chat_che([
+        PY, "-c", "import sys; sys.stdout.buffer.write(b'{invalid_json}')"
+    ])
+    bang(rc_bad == -1, f"JSON meo mo phai tra -1, duoc {rc_bad}")
+    bang(data_bad is None, f"JSON meo mo khong duoc tra data hop le: {data_bad}")
+    bang("loi phan tich JSON" in err_bad, f"thong bao loi sai: {err_bad}")
 
 
 @ca

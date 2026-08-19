@@ -103,6 +103,13 @@ GENERATED_SPECS = [
          {"flags": ["--top"], "help": "tên thư mục top-level trong zip; mặc định tên root"},
          {"flags": ["--json"], "action": "store_true"},
      ]},
+    {"name": "registry-coverage", "handler": "cmd_registry_coverage",
+     "help": "READ-ONLY: báo cáo độ phủ hai chiều cây lệnh parser ↔ command registry (Packet AG-T0-03)",
+     "args": [
+         {"flags": ["--json"], "action": "store_true"},
+         {"flags": ["--strict"], "action": "store_true", "help": "fail (rc=1) nếu có lệnh thiếu metadata"},
+         {"flags": ["--unregistered-only"], "action": "store_true", "help": "chỉ in danh sách lệnh chưa có metadata"},
+     ]},
     # ── I7 wave-1 (v1.34.10): sinh CƠ HỌC từ build_parser (converter AST; flags/help NGUYÊN VĂN) ──
     {"name": 'push-overflow', "handler": 'cmd_push_overflow',
      "help": 'sharding: sau source_add vào shard overflow → cập nhật registry (row_kind=overflow)',
@@ -1920,6 +1927,7 @@ COMMAND_META = {
     "the-thuc-check":        _m("low", True, "none", False, False, True, None, None, False, "the_thuc", generated=True),   # R2 v1.34.75 — PURE offline, đọc docx local, envelope deterministic
     "the-thuc-build":       _m("low", False, "local", False, False, True, None, None, False, "the_thuc", generated=True),
     "the-thuc-normalize":    _m("low", False, "local", False, False, True, None, None, False, "the_thuc", generated=True),   # R4 v1.34.78 — ghi file OUT local (không Drive/registry/NLM)
+    "registry-coverage":     _m("low", True, "none", False, False, True, "workflow_audit", None, False, "workflow", generated=True),
 }
 
 
@@ -1982,6 +1990,144 @@ def _parser_for_path(sub, name: str):
         nxt = next((a for a in p._actions if isinstance(a, argparse._SubParsersAction)), None)
         p = nxt.choices.get(seg) if nxt else None
     return p
+
+
+def collect_parser_tree(parser) -> list[dict]:
+    """Duyệt đệ quy toàn bộ cây lệnh Argparse (top-level + nested subparsers).
+
+    Trả danh sách các node có thứ tự tất định (sort theo path).
+    """
+    nodes = []
+
+    def _walk(p, prefix="", parent=None, depth=1):
+        sub_actions = [a for a in p._actions if isinstance(a, argparse._SubParsersAction)]
+        for sub_act in sub_actions:
+            helps = {ca.dest: ca.help for ca in getattr(sub_act, "_choices_actions", [])}
+            for choice_name, sub_p in sorted(sub_act.choices.items()):
+                path = f"{prefix} {choice_name}".strip() if prefix else choice_name
+                child_subs = [a for a in sub_p._actions if isinstance(a, argparse._SubParsersAction)]
+                is_container = len(child_subs) > 0
+                opts = sorted(set(getattr(sub_p, "_option_string_actions", {}).keys()))
+                pos = sorted([a.dest for a in sub_p._actions if not isinstance(a, argparse._SubParsersAction) and not a.option_strings])
+                fn = sub_p.get_default("fn")
+                has_handler = fn is not None
+                help_text = (helps.get(choice_name) or getattr(sub_p, "description", "") or getattr(sub_p, "help", "") or "").strip()
+                nodes.append({
+                    "path": path,
+                    "name": choice_name,
+                    "parent": parent,
+                    "depth": depth,
+                    "is_container": is_container,
+                    "help": help_text,
+                    "options": opts,
+                    "positionals": pos,
+                    "has_handler": has_handler,
+                })
+                if is_container:
+                    _walk(sub_p, prefix=path, parent=path, depth=depth + 1)
+
+    _walk(parser)
+    return sorted(nodes, key=lambda x: x["path"])
+
+
+def compute_parser_coverage(parser, tl_module=None, *, strict: bool = False, unregistered_only: bool = False) -> dict:
+    """Báo cáo độ phủ hai chiều cây lệnh parser ↔ command registry (Packet AG-T0-03).
+
+    Schema: parser_tree_coverage.v1
+    """
+    tree = collect_parser_tree(parser)
+    if tl_module is not None and (hasattr(tl_module, "COMMAND_META") or hasattr(tl_module, "NESTED_COMMAND_META")):
+        raw_top = getattr(tl_module, "COMMAND_META", {})
+        raw_nested = getattr(tl_module, "NESTED_COMMAND_META", {})
+        meta = {**raw_top, **raw_nested}
+    else:
+        meta = all_command_meta()
+
+    containers = [n for n in tree if n["is_container"]]
+    leaf_nodes = [n for n in tree if not n["is_container"]]
+
+    leaf_paths = {n["path"]: n for n in leaf_nodes}
+    meta_paths = set(meta.keys())
+
+    covered_paths = sorted(set(leaf_paths.keys()) & meta_paths)
+    unregistered_paths = sorted(set(leaf_paths.keys()) - meta_paths)
+    registry_not_in_parser = sorted(meta_paths - set(leaf_paths.keys()) - {c["path"] for c in containers})
+
+    total_leaf = len(leaf_nodes)
+    covered_count = len(covered_paths)
+    unregistered_count = len(unregistered_paths)
+    pct = round((covered_count / total_leaf * 100), 2) if total_leaf else 0.0
+
+    commands_detail = []
+    for node in leaf_nodes:
+        p = node["path"]
+        m = meta.get(p)
+        if unregistered_only and m is not None:
+            continue
+        entry = {
+            "path": p,
+            "name": node["name"],
+            "parent": node["parent"],
+            "depth": node["depth"],
+            "has_meta": m is not None,
+            "options": node["options"],
+            "positionals": node["positionals"],
+            "has_handler": node["has_handler"],
+        }
+        if m:
+            entry["risk"] = m.get("risk", "low")
+            entry["read_only"] = m.get("read_only", True)
+            entry["write_scope"] = m.get("write_scope", "none")
+            entry["requires_confirm"] = m.get("requires_confirm", False)
+            entry["supports_dry_run"] = m.get("supports_dry_run", False)
+            entry["workflow_task"] = m.get("workflow_task", None)
+            entry["idempotency_contract"] = m.get("idempotency_contract", None)
+            entry["generated"] = m.get("generated", False)
+            entry["module"] = m.get("module", None)
+        else:
+            entry["risk"] = "unregistered"
+            entry["read_only"] = None
+            entry["write_scope"] = "unregistered"
+            entry["requires_confirm"] = None
+            entry["supports_dry_run"] = None
+            entry["workflow_task"] = None
+            entry["idempotency_contract"] = None
+            entry["generated"] = False
+            entry["module"] = None
+        commands_detail.append(entry)
+
+    high_risk_unregistered = [
+        p for p in unregistered_paths
+        if any(flag in leaf_paths[p]["options"] for flag in ("--apply", "--delete", "--trash", "--write", "--purge"))
+    ]
+
+    ok = True
+    if strict:
+        if unregistered_paths or registry_not_in_parser:
+            ok = False
+
+    return {
+        "schema": "parser_tree_coverage.v1",
+        "ok": ok,
+        "summary": {
+            "total_nodes": len(tree),
+            "container_commands": len(containers),
+            "total_leaf_commands": total_leaf,
+            "registered_leaf_commands": covered_count,
+            "unregistered_leaf_commands": unregistered_count,
+            "coverage_percent": pct,
+            "registry_orphaned_commands": len(registry_not_in_parser),
+            "high_risk_unregistered_count": len(high_risk_unregistered),
+        },
+        "categories": {
+            "covered": covered_paths,
+            "unregistered": unregistered_paths,
+            "containers": sorted([c["path"] for c in containers]),
+            "registry_not_in_parser": registry_not_in_parser,
+            "high_risk_unregistered": sorted(high_risk_unregistered),
+        },
+        "commands": commands_detail,
+    }
 
 
 def validate_registry(parser, tl_module, *, load_card=None, contracts=None) -> dict:
@@ -2057,5 +2203,8 @@ def validate_registry(parser, tl_module, *, load_card=None, contracts=None) -> d
     for _s in RASOAT_SPECS:
         if f"rasoat {_s['name']}" not in NESTED_COMMAND_META:
             issues.append(f"RASOAT_SUB_NOT_IN_REGISTRY:{_s['name']}")
+    cov = compute_parser_coverage(parser, tl_module=tl_module)
+    for hr_cmd in cov["categories"]["high_risk_unregistered"]:
+        warnings.append(f"UNREGISTERED_HIGH_RISK_PARSER_CMD:{hr_cmd}")
     return {"schema": "registry_validate.v1", "ok": not issues, "issues": issues, "warnings": warnings,
-            "checked_commands": len(all_command_meta())}
+            "checked_commands": len(all_command_meta()), "coverage": cov["summary"]}

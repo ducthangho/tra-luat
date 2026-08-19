@@ -1661,7 +1661,7 @@ _STUB_MAP = {
     "workflow": [
         '_available_commands_from_parser', '_first_text_diff', '_idempotency_contract_for_workflow', '_script_docstrings', '_unique_preserve_order',   # I11
         '_golden_test', '_load_workflow_card', '_workflow_cards_audit', 'cmd_golden_test', 'cmd_route_task', 'cmd_tool_inventory',
-        'cmd_workflow_audit',
+        'cmd_workflow_audit', 'cmd_registry_coverage',
         # r218 doc-claims-check (chỉ FUNCTION vào stub — hằng `_DOC_CLAIMS_*` là module-level, GOTCHAS §2)
         '_doc_claims_check', '_doc_claims_context', '_doc_claims_lineno', '_doc_claims_linestarts',
         '_doc_claims_mask', '_doc_claims_noisy', '_doc_claims_rel', '_doc_claims_scan_one',

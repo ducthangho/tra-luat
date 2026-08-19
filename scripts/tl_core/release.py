@@ -415,6 +415,7 @@ _RELEASE_EXCLUDE_NAMES_ANYWHERE = {"CLAUDE.md", "tra_luat_config.json", "tra_lua
                                    # Cowork khong bao gio goi no. Cung ranh gioi voi bon
                                    # script deploy ngay tren: GIU trong kho, LOAI khoi goi.
                                    "don-nhanh.ps1", "don-nhanh.cmd", "don-nhanh_test.ps1",
+                                   "command_registry_test.py",  # AG-T0-03: unit-test dev-side, giu trong repo, loai khoi goi de giu file_count <= 200
                                    "Code.2.21.2k.gs",   # v1.34.69: GAS bản cũ 0-ref (193KB) — best-practice trim
                                    "Code.2.21.2l.gs", "Code.2.21.2m.gs", "Code.2.21.2n.gs"}   # r194: bản cũ = dead-weight bundle, GIỮ repo/git chỉ loại khỏi GÓI (tiền lệ 2.21.2k); r198: current nay 2.21.2o — 2.21.2n xuống hàng cũ
 

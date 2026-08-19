@@ -176,7 +176,7 @@ Mission trước đã merge vào integration.
 | W0-R1 | P0 | Claude | sensitive | `.claude/dev/packet_loop.py`, `.claude/dev/packet_loop_test.py` | không |
 | W0-R2 | P1 | Claude | sensitive | `ops/lease_publish_test.py`, `ops/reviews/README.md`, `planned:.github/coordination/schemas/review_delivery_receipt.v2.schema.json`, `planned:ops/review_receipt.py` | W0-R1 integrated |
 | W0-R3 | P1 | Claude | sensitive | `.claude/dev/packet_loop.py`, `.claude/dev/packet_loop_test.py` | W0-R2 integrated |
-| W0-C1 | P1 | Codex candidate, Claude fallback | systemic | `planned:.claude/dev/review_connector.py`, `planned:.claude/dev/review_connector_test.py` | không |
+| W0-C1 | **[ĐÃ BỎ: lane Codex — codex hết quota là vật cản thường trực]** P1 | Codex candidate, Claude fallback | systemic | `planned:.claude/dev/review_connector.py`, `planned:.claude/dev/review_connector_test.py` | không |
 
 Hai lane serial được chạy song song tối đa hai writer:
 
@@ -275,8 +275,8 @@ M1 land khi từng Packet có phản chứng chạy được, integration gate x
 | W1-P1 | P0 | Claude | sensitive | `.claude/dev/launcher.py`, `.claude/dev/launcher_test.py`, `planned:.github/coordination/schemas/review_verdict.v1.schema.json` | M1 |
 | W1-G1 | P0 | Claude | sensitive | `planned:.claude/dev/gate_lifecycle.py`, `planned:.claude/dev/gate_lifecycle_test.py` | M1 |
 | W1-G2 | P1 | Claude | sensitive | `.claude/dev/gate_lifecycle_test.py` | W1-G1 integrated |
-| W1-C2a | P1 | Codex candidate, Claude fallback | systemic | `.claude/dev/review_connector.py`, `.claude/dev/review_connector_test.py` | W0-C1 |
-| W1-C2b | P1 | Claude | sensitive | `planned:.github/workflows/review-connector-shadow.yml` | W1-C2a integrated |
+| W1-C2a | **[ĐÃ BỎ: lane Codex]** P1 | Codex candidate, Claude fallback | systemic | `.claude/dev/review_connector.py`, `.claude/dev/review_connector_test.py` | W0-C1 |
+| W1-C2b | **[ĐÃ BỎ: lane Codex]** P1 | Claude | sensitive | `planned:.github/workflows/review-connector-shadow.yml` | W1-C2a integrated |
 | W1-S1 | P1 | Claude | systemic | `.claude/skills/cross-review/SKILL.md` | W1-P1 và W0-R3 integrated |
 
 W1-P1 và W1-G1 mở song song. W1-G2 không cùng branch/PR với W1-G1. Tách W1-C2a khỏi W1-C2b để verifier thuần
@@ -316,6 +316,12 @@ transport caveat.
 - Promotion input: tỷ lệ kênh positive/finding/missing/ambiguous và lỗi identity theo exact head.
 
 M2 land khi prompt/evidence exact, base gate lifecycle land trước mutation suite và connector vẫn ở shadow.
+
+### M3 — ĐÃ BỎ (quyết định 19-08-2026)
+
+> **Toàn bộ Mission 3 đã BỎ.** Chính mục này đã gác nó sau điều kiện *chỉ khi số đo yêu
+> cầu*; tới nay **chưa có số đo nào yêu cầu**, và kế hoạch đa provider không cần nó. Giữ
+> bảng dưới làm hồ sơ, KHÔNG nhận việc từ nó.
 
 ### M3 — Blocking Authority, chỉ khi số đo yêu cầu
 

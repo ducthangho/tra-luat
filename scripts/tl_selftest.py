@@ -21226,10 +21226,16 @@ def run() -> int:
         # KÊ LẠI hai lần vì master trôi dưới chân (57→58 chết non vì W0-D1 land 57→64; 65/244 chết
         # non vì AG-T0-02 nâng package 179→180) — số trong ratchet là số CỦA MỘT TREE; hoà master
         # là kê lại. Đó là cách ratchet vận hành, không phải nó hỏng.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 65 == 245
+        # KÊ KHAI SLOT (GLS-B1 — bridge SessionStart + hồ sơ incident từ nhánh đã khai tử): 65 → **66**
+        # Markdown dưới `docs/`. Thêm đúng `docs/incidents/2026-08-15-launcher-codex-github-toolchain.md`
+        # (thân nguyên văn blob `99a80208…` + header ghi chú port có nhãn; dev-side/ngoài gói — thư mục
+        # `docs/incidents/` mới nhưng ratchet đếm đệ quy nên không cần khe riêng). Package giữ nguyên số
+        # tệp; cây thật = số gói + 66. Hai tệp code cùng đợt (.claude/hooks/session_start.py,
+        # .claude/settings.json) nằm dưới `.claude/` — khoá `_RELEASE_EXCLUDE_DIRS` sẵn, không ăn khe.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 66 == 246
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 65
+        ok4 = (len(tren_dia) == 66
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

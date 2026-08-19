@@ -1,0 +1,152 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TemporaryChatGPTReviewNoteV0",
+  "type": "object",
+  "required": [
+    "format",
+    "provider",
+    "execution_surface",
+    "transport",
+    "account_plan",
+    "bundle_id",
+    "reviewed_sha",
+    "reviewed_tree",
+    "verdict",
+    "review_axes",
+    "findings",
+    "tests",
+    "limitations",
+    "assurance"
+  ],
+  "properties": {
+    "format": {
+      "type": "string",
+      "const": "temporary_chatgpt_review_note.v0"
+    },
+    "provider": {
+      "type": "string",
+      "const": "openai_chatgpt"
+    },
+    "execution_surface": {
+      "type": "string",
+      "const": "chatgpt_web"
+    },
+    "transport": {
+      "type": "string",
+      "const": "human_mediated"
+    },
+    "account_plan": {
+      "type": "string",
+      "enum": [
+        "pro",
+        "plus",
+        "team",
+        "enterprise"
+      ]
+    },
+    "bundle_id": {
+      "type": "string"
+    },
+    "bundle_sha256": {
+      "type": "string"
+    },
+    "reviewed_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "reviewed_tree": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "approve",
+        "changes_requested",
+        "blocked"
+      ]
+    },
+    "review_axes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "finding_id",
+          "severity",
+          "evidence",
+          "recommendation"
+        ],
+        "properties": {
+          "finding_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "P0",
+              "P1",
+              "P2",
+              "P3"
+            ]
+          },
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "line": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "tests": {
+      "type": "object",
+      "required": [
+        "independently_run"
+      ],
+      "properties": {
+        "independently_run": {
+          "type": "boolean",
+          "const": false
+        },
+        "evidence_reviewed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assurance": {
+      "type": "string",
+      "const": "advisory_review"
+    }
+  },
+  "additionalProperties": false
+}

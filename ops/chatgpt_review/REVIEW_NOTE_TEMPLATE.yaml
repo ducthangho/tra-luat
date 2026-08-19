@@ -1,0 +1,28 @@
+format: temporary_chatgpt_review_note.v0
+provider: openai_chatgpt
+execution_surface: chatgpt_web
+transport: human_mediated
+account_plan: pro
+bundle_id: <bundle-id>
+bundle_sha256: <sha256>
+reviewed_sha: <40-char-git-oid>
+reviewed_tree: <40-char-tree-oid>
+verdict: approve # approve | changes_requested | blocked
+review_axes:
+  - spec
+  - standards_security
+findings: []
+  # - finding_id: example-finding-id
+  #   severity: P1 # P0 | P1 | P2 | P3
+  #   path: relative/path/to/file.py # or null
+  #   line: 100 # or null
+  #   evidence: "Description of issue"
+  #   recommendation: "Suggested fix"
+tests:
+  independently_run: false
+  evidence_reviewed: []
+limitations:
+  - human_mediated_transport
+  - model_identity_not_machine_verified
+  - tests_not_run_by_chatgpt
+assurance: advisory_review

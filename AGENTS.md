@@ -12,11 +12,11 @@ Theo thứ tự:
 3. `CLAUDE.md` — quy tắc phát triển, test và deploy của repository.
 4. Packet Issue/Spec hiện hành hoặc chỉ thị điều phối bền của người có thẩm quyền —
    objective, revision, generation, base SHA, write set, acceptance, risk và authority.
-5. Kế hoạch provider tương ứng:
-   - `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md`;
-   - `ops/OPENAI_LLM_PROVIDER.md` khi dùng OpenAI API qua `llm`;
-   - `ops/KE_HOACH_THI_CONG_ANTIGRAVITY.md` chỉ để đọc lịch sử chuyển tiếp.
-6. `SKILL.md` — bắt buộc khi Packet liên quan pháp luật, corpus, Drive,
+5. `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` — chính sách provider chuyển tiếp.
+6. Hợp đồng provider tương ứng:
+   - `ops/KE_HOACH_THI_CONG_ANTIGRAVITY.md` cho lịch sử và phạm vi AG;
+   - `ops/chatgpt_review/README.md` khi dùng ChatGPT Pro qua Web.
+7. `SKILL.md` — bắt buộc khi Packet liên quan pháp luật, corpus, Drive,
    NotebookLM, registry hoặc hành vi runtime của skill.
 
 Đọc được kế hoạch không đồng nghĩa được giao việc. Không có Packet Spec hoặc
@@ -24,13 +24,13 @@ authority được protocol hiện hành thừa nhận thì dừng.
 
 ## 2. Preflight bắt buộc
 
-Trước khi sửa:
+Trước khi sửa hoặc review:
 
 - xác minh đúng repository, branch/worktree và exact base Git OID;
 - xác minh Packet revision/spec hash/generation;
 - xác minh effective write set;
 - xác minh Review Class và capability cần thiết;
-- xác minh provider, execution surface và exact model ID;
+- xác minh provider và execution surface thực tế;
 - giữ worktree sạch ngoài thay đổi thuộc Packet.
 
 Lệch một điều kiện trên thì không tự sửa cho khớp; báo người điều phối.
@@ -52,7 +52,7 @@ Lệch một điều kiện trên thì không tự sửa cho khớp; báo ngư�
 - scratch hoặc bản sao phục vụ phản chứng phải nằm ngoài repository được review;
 - không sửa branch Executor;
 - verdict phải neo exact `reviewed_sha` bằng Git OID đầy đủ, khớp head hiện hành;
-- khai đúng model, provider và execution surface thực tế;
+- khai đúng model, provider, execution surface và transport thực tế;
 - không suy model reviewer identity từ tài khoản dùng để đăng verdict lên GitHub.
 
 ### Approver / Land Operator
@@ -61,55 +61,46 @@ Lệch một điều kiện trên thì không tự sửa cho khớp; báo ngư�
 - approval, audit và thao tác land là các vai độc lập;
 - merge không tự đồng nghĩa `landed` hoặc Mission `complete`.
 
-## 4. Provider, model và assurance
+## 4. Provider, transport và assurance
 
-Assurance được suy từ cặp Executor–Reviewer và protocol hiện hành, không gắn
-cố định theo tên agent hoặc tên công cụ.
+Assurance được suy từ cặp Executor–Reviewer, evidence và protocol hiện hành;
+không gắn cố định theo tên agent hoặc tên công cụ.
 
 ### Google Antigravity
 
 Antigravity có thể làm Executor hoặc Reviewer theo Packet. AG–AG là
 same-provider review.
 
-### OpenAI qua `llm`
+### ChatGPT Pro qua Web
 
-Khi gọi mô hình OpenAI bằng `llm`, phải khai:
+Khi dùng ChatGPT Pro qua Web, phải khai:
 
 ```yaml
-provider: openai_api
-execution_surface: llm_cli
-model_id: <exact-model-id>
+provider: openai_chatgpt
+execution_surface: chatgpt_web
+transport: human_mediated
 ```
 
-`llm` chỉ là client/transport, không phải provider. Không khai provider là
-`chatgpt` hoặc `llm`. Không dùng model mặc định hoặc model alias trong một
-Packet có authority.
+ChatGPT Web có thể:
 
-OpenAI–OpenAI là same-provider review. AG–OpenAI hoặc Claude/Codex–OpenAI
-chỉ được ghi `cross_approved` khi provider registry, runtime và receipt hiện
-hành đã hỗ trợ bằng chứng đó. Trước thời điểm ấy, review chỉ là advisory
-evidence và authoritative assurance vẫn theo protocol hiện hành.
+- review một review bundle đóng băng;
+- đề xuất finding, test và remediation;
+- sinh patch hoặc patch plan cho tác vụ nhỏ.
 
-Không khai AG hoặc OpenAI thành Claude/Codex để đi qua state machine.
+ChatGPT Web không được:
 
-## 5. Quy tắc riêng cho external API reviewer
+- trực tiếp ghi repository;
+- chạy shell hoặc công cụ cục bộ;
+- tự khai đã chạy test;
+- commit, push, merge, land hoặc gọi LIVE;
+- tự tạo `cross_approved`, `same_provider_approved` hoặc `human_audited`.
 
-Reviewer gọi qua external API phải:
+Review của ChatGPT Web được ghi là `advisory_review`. Local validator chỉ xác minh
+schema, bundle hash và exact SHA; nó không chứng minh model/session identity.
 
-- dùng exact model ID;
-- tắt prompt/response logging cục bộ;
-- không được cấp tools, shell hoặc quyền ghi repository;
-- chỉ nhận review bundle đóng băng, không tự quét máy;
-- trả output có cấu trúc;
-- được validate lại bằng schema tại local controller;
-- ghi model ID, client version, prompt hash và response hash;
-- không nhận secret ngoài credential cần cho chính API transport.
+Không khai AG hoặc ChatGPT Web thành Claude/Codex để đi qua state machine.
 
-Executor gọi qua external API mặc định chỉ được sinh patch hoặc patch plan.
-Quyền chạy shell, sửa file hoặc gọi tool chỉ được mở bởi một Packet riêng có
-sandbox, allowlist và negative security tests.
-
-## 6. Gate và bằng chứng
+## 5. Gate và bằng chứng
 
 Chạy đúng gate do Packet Spec, `CLAUDE.md` và phạm vi thay đổi yêu cầu.
 
@@ -123,24 +114,23 @@ Báo cáo phải ghi:
 - mã thoát thật;
 - bằng chứng dương;
 - `passed`, `failed`, `skipped`, `not_run` tách riêng;
-- provider, execution surface, exact model ID;
-- phiên bản client và môi trường;
-- phần chưa đo được.
+- provider, execution surface và transport;
+- môi trường và phần chưa đo được.
 
 Required check bị `skipped`, không được tạo, chạy trên SHA khác hoặc thiếu
 positive evidence không được coi là pass. Không chạy hoặc không đo được không
 phải là pass.
 
-## 7. Dừng ngay khi
+## 6. Dừng ngay khi
 
 - thiếu hoặc stale Packet/lease/spec/generation;
 - head SHA đổi sau review hoặc sau CI; review, gate và authorization cũ đều stale;
-- provider/model khác với Packet Spec;
-- external model dùng default model hoặc alias không được khóa;
+- provider hoặc transport khác Packet Spec;
 - cần ghi ngoài write set;
 - cần secret, LIVE, merge, deploy hoặc authority chưa được cấp;
 - reviewer phải sửa branch mới có thể tiếp tục;
-- reviewer yêu cầu shell/tool ngoài contract;
+- ChatGPT review note không khớp bundle hoặc exact SHA;
+- ChatGPT output khai đã chạy test nhưng không có bằng chứng độc lập;
 - gate thiếu bằng chứng dương;
 - cùng finding lặp đến stop condition;
 - tài liệu tại đây mâu thuẫn protocol.

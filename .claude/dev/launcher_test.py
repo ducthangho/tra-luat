@@ -3572,7 +3572,9 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
 
     def dac_ta():
         return (("claude", "mcp", "get", ten_mong_doi[0]),
-                {"capture_output": True, "text": True, "timeout": m.PROBE_TIMEOUT_GIAY})
+                {"capture_output": True, "text": True,
+                 "encoding": "utf-8", "errors": "replace",
+                 "timeout": m.PROBE_TIMEOUT_GIAY})
 
     def gia_run(cmd, *_a, **_k):
         if list(cmd)[:2] != ["claude", "mcp"]:
@@ -3799,10 +3801,15 @@ def t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua():
     """`N/N` chỉ được xuất hiện khi ĐÚNG N ca đã CHẠY và QUA.
 
     Dòng kết luận cũ lấy `qua + bo_qua` làm tử số, nên trên Windows — nơi nhiều ca
-    tự bỏ qua vì cần POSIX — nó in `117/117 ca` với `bo qua 14` nằm trong ngoặc.
+    tự bỏ qua vì cần POSIX — nó in `118/118 ca` với `bo qua 13` nằm trong ngoặc.
     CLAUDE.md dạy đúng cách đọc bằng chứng dương là "đòi `N/N` với hai số BẰNG
     NHAU", nên chính dòng ấy trao cho người đọc dấu hiệu tin được của một lượt
-    chạy mà 14 ca chưa hề đo. Đây là `t116` ở tầng BÁO CÁO: ở đó tổng tụt một mà
+    chạy mà 13 ca chưa hề đo. (Bộ số neo tại `99ba7857`, ba kênh độc lập cùng
+    ra `qua=105, bo_qua=13, tong=118`: máy dev cp1258, CI windows-latest, PR
+    #153. Bản đầu của docstring này ghi `117/117` với `bo qua 14` — không khớp
+    phép đo nào tại head ấy; nếu từng là số thật thì thuộc một tree cũ không
+    còn định danh được — review W0-M1 bắt, P3.) Đây là
+    `t116` ở tầng BÁO CÁO: ở đó tổng tụt một mà
     vẫn in `114/114`; ở đây tổng đúng mà tử số phồng lên bằng số ca không chạy.
 
     Ca này KHÔNG gọi CLI vì thứ cần đo là một phép tính thuần: `dong_ket_qua` đã
@@ -3868,6 +3875,202 @@ def t118_headline_KHONG_duoc_dem_ca_BO_QUA_la_da_qua():
     bang(truoc.startswith("3/3 "), f"luot sach phai la N/N: {truoc!r}")
     bang(not sau.startswith("3/3 "),
          f"van bao N/N sau khi mot ca thanh BO QUA: {sau!r}")
+
+
+@ca
+def t119_main_nhanh_mac_dinh_PHAI_in_headline_bang_dong_ket_qua():
+    """`dong_ket_qua` đúng mà `main` không GỌI nó thì headline vẫn nói dối được.
+
+    Finding P3 của review W0-M1 (PR #153, head `99ba7857`), tái lập được: mutant
+    thay lời gọi `dong_ket_qua(...)` ở cuối `main` bằng chính f-string cũ
+    `{qua + bo_qua}/{tong}` cho rc=0 mà `t118` vẫn xanh — `t118` đo HÀM, không
+    đo DÂY NỐI, và không ca nào khác đọc headline của nhánh mặc định (đã grep:
+    `main()` chỉ được gọi ở `sys.exit(main())`, chuỗi "ca QUA (" chỉ sinh ở
+    `dong_ket_qua`). Bệnh `t24`/`t116` thêm một tầng: hàm CÓ MẶT trong tệp,
+    có test riêng, mà lượt chạy thật không đi qua nó.
+
+    Đo bằng HÀNH VI, không grep nguồn: assert "nguồn `main` chứa `dong_ket_qua(`"
+    sẽ tha mutant gọi-mà-không-in (`_ = dong_ket_qua(...)` — nguồn vẫn chứa
+    chuỗi ấy mà stdout mất headline). Cũng KHÔNG spawn `--lap-ca` như finding
+    gợi ý: nhánh `--lap-ca` in dòng `LAP ...` riêng của nó, KHÔNG đi qua
+    `dong_ket_qua` (xem `main`) — đo rồi mới thấy gợi ý ấy trỏ nhầm máy in.
+
+    Cách đo: nạp BẢN SAO module này (`_nap_sach`, seam sẵn có của bộ đột biến),
+    thay `CA` bằng ca giả, stub khối tự-khai/tách-nhóm (mỗi khối đã có ca riêng
+    đo nó), rồi gọi `main()` THẬT và đọc stdout. Ba nhánh: sạch (headline phải
+    là N/N đúng nghĩa), có BO QUA (cảnh báo phải RA TỚI stdout và rc giữ 0 —
+    biến câu "Mã thoát KHÔNG đổi" mà `t118` chỉ khai suông thành phép đo), có
+    HONG (rc phải 1).
+
+    GIỚI HẠN — khai thẳng: stub nghĩa là tổ hợp này không đo `khai_moi_truong`
+    lẫn `_tu_tach_nhom_neu_can`; và `sys.exit(main())` dưới `__main__` vẫn
+    ngoài tầm — ca này đo GIÁ TRỊ TRẢ VỀ của `main`, không đo mã thoát tiến
+    trình. Đổi phối hợp (sửa cả `main` lẫn ca này) thì không chống được — cùng
+    giới hạn đã khai ở `t116`.
+    """
+    def _chay_main_voi(ds_ca):
+        m = _nap_sach(Path(__file__))
+        m.CA = list(ds_ca)
+        m.khai_moi_truong = lambda: {}
+        m._mot_dong_moi_truong = lambda mt: "moi truong: (ca thu, da stub)"
+        m._tu_tach_nhom_neu_can = lambda: "bo qua (ca thu, da stub)"
+        m.phan_tich_doi_so = lambda argv: argparse.Namespace(
+            dot_bien=False, moi_truong=False, lap_ca=None, lan=20, nhat_ky=None)
+        ra = io.StringIO()
+        with contextlib.redirect_stdout(ra):
+            rc = m.main()
+        return rc, ra.getvalue()
+
+    def ca_qua():
+        pass
+
+    def ca_bo_qua():
+        return "thieu POSIX (gia lap)"
+
+    def ca_hong():
+        raise AssertionError("hong co tinh")
+
+    # (a) nhanh sach: headline THAT tren stdout phai dung tung byte
+    rc, ra = _chay_main_voi([ca_qua])
+    cuoi = ra.rstrip().splitlines()[-1]
+    bang(rc == 0, f"nhanh sach phai rc=0, duoc {rc}")
+    bang(cuoi == "1/1 ca QUA (bo qua 0, hong 0)",
+         f"headline nhanh mac dinh KHONG di qua dong_ket_qua: {cuoi!r}")
+
+    # (b) co BO QUA: canh bao phai ra toi stdout, va rc GIU 0 (spec W0-M1)
+    rc, ra = _chay_main_voi([ca_qua, ca_bo_qua])
+    cuoi = ra.rstrip().splitlines()[-1]
+    bang(cuoi == "1/2 ca QUA (bo qua 1, hong 0) - KHONG DU: 1 ca BO QUA, chua do gi",
+         f"canh bao BO QUA khong toi duoc stdout: {cuoi!r}")
+    bang(rc == 0, f"bo qua khong duoc doi ma thoat (spec W0-M1) ma rc={rc}")
+
+    # (c) co HONG: rc phai 1 va headline dem dung
+    rc, ra = _chay_main_voi([ca_qua, ca_hong])
+    cuoi = ra.rstrip().splitlines()[-1]
+    bang(rc == 1, f"co ca hong ma rc={rc}")
+    bang(cuoi == "1/2 ca QUA (bo qua 0, hong 1)",
+         f"headline dem hong sai: {cuoi!r}")
+
+
+@ca
+def t120_subprocess_decoding_chong_loi_charmap_tren_windows():
+    """Subprocess helpers phải xử lý an toàn Unicode, tránh UnicodeDecodeError trên cp1258/cp1252.
+
+    Trên Windows console hoặc môi trường tiếng Việt (cp1258), gọi `text=True` mà không
+    có `encoding="utf-8", errors="replace"` làm `_readerthread` của `subprocess.run` ném
+    `UnicodeDecodeError: 'charmap' codec can't decode byte 0x...`.
+
+    Ca này đo trực tiếp:
+    (a) `_chay_van_ban_an_toan` đọc tiến trình in ký tự Unicode/ANSI/Emoji mà không crash;
+    (b) `_chay_json_chat_che` đọc JSON UTF-8 đúng và từ chối JSON méo mó.
+    """
+    m = _tai_launcher_thu()
+    # (a) Văn bản có ký tự tiếng Việt có dấu, emoji, ký hiệu pháp luật
+    chuoi_test = "✓ Đã thẩm định: Điều 12 Luật Ban hành VBQPPL 🚀 ⚖️"
+    p = m._chay_van_ban_an_toan([PY, "-c", f"import sys; sys.stdout.buffer.write({chuoi_test.encode('utf-8')!r})"])
+    bang(p.returncode == 0, f"chay_van_ban_an_toan bi loi rc={p.returncode}")
+    bang("Đã thẩm định" in p.stdout, f"khong giai ma duoc chuoi Unicode: {p.stdout!r}")
+
+    # (b) JSON chặt chẽ
+    rc_j, data_j, err_j = m._chay_json_chat_che([
+        PY, "-c", "import sys; sys.stdout.buffer.write(b'{\"status\": \"ok\", \"muc\": \"phap_luat\"}')"
+    ])
+    bang(rc_j == 0, f"JSON hop le ma rc={rc_j}: {err_j}")
+    bang(isinstance(data_j, dict) and data_j.get("status") == "ok",
+         f"du lieu parse JSON sai: {data_j}")
+
+    # (c) JSON méo mó / lỗi parse
+    rc_bad, data_bad, err_bad = m._chay_json_chat_che([
+        PY, "-c", "import sys; sys.stdout.buffer.write(b'{invalid_json}')"
+    ])
+    bang(rc_bad == -1, f"JSON meo mo phai tra -1, duoc {rc_bad}")
+    bang(data_bad is None, f"JSON meo mo khong duoc tra data hop le: {data_bad}")
+    bang("loi phan tich JSON" in err_bad, f"thong bao loi sai: {err_bad}")
+
+
+@ca
+def t121_do_openai_llm_qua_cli_khong_fail_open_va_khong_log():
+    """Đo công cụ llm cho provider openai_api: không fail-open, không tự gọi API trả phí,
+    và bắt buộc `--no-log` khi kiểm sống.
+
+    Giao thức:
+      - Provider: openai_api (§4, §5 ops/OPENAI_LLM_PROVIDER.md)
+      - Surface: llm_cli
+      - Mặc định: CO_CREDENTIAL (chưa chứng minh dùng được), không gọi API
+      - Kiểm sống: gọi thật có `--no-log` và exact model
+    """
+    m = _tai_launcher_thu()
+
+    # (1) Bảng CONG_CU và KHA_NANG phải có llm / openai-llm
+    muc_cc = [c for c in m.CONG_CU if c["ten"] == "llm"]
+    bang(len(muc_cc) == 1, f"CONG_CU thieu muc llm: {m.CONG_CU}")
+    bang(muc_cc[0]["bat_buoc"] is False, "llm khong duoc dat bat buoc mac dinh")
+
+    muc_kn = [k for k in m.KHA_NANG if k["ten"] == "openai-llm"]
+    bang(len(muc_kn) == 1, f"KHA_NANG thieu muc openai-llm: {m.KHA_NANG}")
+
+    goc_which = m.shutil.which
+    goc_run = m._chay_van_ban_an_toan
+    lenh_chay = []
+
+    class _P:
+        def __init__(self, rc=0, out="", err=""):
+            self.returncode, self.stdout, self.stderr = rc, out, err
+
+    def run_gia(cmd, **k):
+        lenh_chay.append((list(cmd), k))
+        if list(cmd) == ["llm", "--version"]:
+            return _P(0, "llm, version 0.19.1\n")
+        if list(cmd) == ["llm", "keys", "list"]:
+            return _P(0, "openai\n")
+        if list(cmd)[:2] == ["llm", "prompt"]:
+            # Phải có --no-log để chống rò rỉ prompt vào SQLite cục bộ
+            bang("--no-log" in cmd, f"loi goi llm THIEU --no-log: {cmd}")
+            bang("-m" in cmd, f"loi goi llm THIEU -m exact model: {cmd}")
+            return _P(0, "ok\n")
+        return _P(1, "", "khong ro lenh")
+
+    # (a) THIEU khi which tra None
+    m.shutil.which = lambda t, *a, **k: None if t == "llm" else goc_which(t)
+    tt, mo_ta = m._do_openai_llm({})
+    bang(tt == "THIEU", f"chua cai llm ma bao {tt}: {mo_ta}")
+
+    # (b) CHUA_XAC_THUC khi co llm nhung khong co OPENAI_API_KEY
+    m.shutil.which = lambda t, *a, **k: "/usr/bin/llm" if t == "llm" else goc_which(t)
+    def run_khong_key(cmd, **k):
+        if list(cmd) == ["llm", "--version"]:
+            return _P(0, "llm, version 0.19.1\n")
+        if list(cmd) == ["llm", "keys", "list"]:
+            return _P(0, "")
+        return _P(1)
+    m._chay_van_ban_an_toan = run_khong_key
+    tt, mo_ta = m._do_openai_llm({})
+    bang(tt == "CHUA_XAC_THUC", f"khong co key ma khong bao CHUA_XAC_THUC: {tt}, {mo_ta}")
+
+    # (c) CO_CREDENTIAL khi co OPENAI_API_KEY nhung kiem_song=False (khong goi API)
+    m._chay_van_ban_an_toan = run_gia
+    lenh_chay.clear()
+    tt, mo_ta = m._do_openai_llm({"OPENAI_API_KEY": "sk-mock-key"}, False)
+    bang(tt == "CO_CREDENTIAL", f"co key mac dinh phai CO_CREDENTIAL: {tt}")
+    bang(not any("prompt" in c[0] for c in lenh_chay),
+         f"mac dinh KHONG duoc tu dong goi API tinh phi: {lenh_chay}")
+
+    # (d) DUNG_DUOC khi kiem_song=True va p_song thanh cong
+    lenh_chay.clear()
+    tt, mo_ta = m._do_openai_llm({"OPENAI_API_KEY": "sk-mock-key"}, True)
+    bang(tt == "DUNG_DUOC", f"kiem song thanh cong ma bao {tt}: {mo_ta}")
+    bang(any("prompt" in c[0] for c in lenh_chay), "kiem_song=True nhung khong goi probe")
+
+    # (e) CHUA_XAC_THUC khi kiem_song=True nhung api loi
+    def run_loi(cmd, **k):
+        if list(cmd) == ["llm", "--version"]:
+            return _P(0, "llm, version 0.19.1\n")
+        if list(cmd)[:2] == ["llm", "prompt"]:
+            return _P(1, "", "Error: 401 Unauthorized")
+        return _P(0)
+    m._chay_van_ban_an_toan = run_loi
+    tt, mo_ta = m._do_openai_llm({"OPENAI_API_KEY": "sk-mock-key"}, True)
+    bang(tt == "CHUA_XAC_THUC", f"kiem song loi phai tra CHUA_XAC_THUC: {tt}")
 
 
 @ca
@@ -4997,8 +5200,11 @@ def chay_bo_ca(ds_ca, nk=None, bat_dau=0):
 def dong_ket_qua(tong: int, qua: int, bo_qua: int, so_hong: int) -> str:
     """Dòng kết luận của một lượt chạy. TÁCH khỏi `main` để đo được TRỰC TIẾP.
 
-    ĐÃ TRẢ GIÁ: tử số cũ là `qua + bo_qua`, nên một lượt Windows bỏ qua 14 ca vẫn
-    in `117/117 ca` — ĐÚNG hình dạng "N/N với hai số BẰNG NHAU" mà CLAUDE.md dạy
+    ĐÃ TRẢ GIÁ: tử số cũ là `qua + bo_qua`, nên một lượt Windows bỏ qua 13 ca vẫn
+    in `118/118 ca` (số ĐO tại `99ba7857`: `qua=105, bo_qua=13, tong=118` — máy
+    dev cp1258, CI windows-latest và PR #153 cùng ra một bộ; bản đầu ghi
+    `117/117`/`bỏ qua 14`, không khớp phép đo nào tại head ấy — review W0-M1
+    bắt, P3) — ĐÚNG hình dạng "N/N với hai số BẰNG NHAU" mà CLAUDE.md dạy
     là bằng chứng dương đáng tin. Người đọc nhận một câu khẳng định mọi ca đã qua,
     trong khi có ca chưa hề chạy. Cùng họ với `t24` của kho ("ca CÓ MẶT khác ca có
     ĐO") và với `t116` ("suite vẫn in 114/114 mà tổng đã tụt một"): chỗ VẮNG MẶT
@@ -5012,7 +5218,7 @@ def dong_ket_qua(tong: int, qua: int, bo_qua: int, so_hong: int) -> str:
 
     Chuỗi trả về là ASCII: console máy Việt là cp1258 và một câu `print` có dấu
     ném `UnicodeEncodeError`, giết cả lượt chạy trước khi logic kịp sai. Câu cảnh
-    báo cũng KHÔNG được chứa cặp số nào — nhét "117/117" vào đây là tự dựng lại
+    báo cũng KHÔNG được chứa cặp số nào — nhét "118/118" vào đây là tự dựng lại
     đúng hình dạng vừa gỡ, cho người đọc lướt qua thấy lại N/N.
     """
     dong = f"{qua}/{tong} ca QUA (bo qua {bo_qua}, hong {so_hong})"

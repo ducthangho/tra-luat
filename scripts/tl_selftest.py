@@ -21195,10 +21195,31 @@ def run() -> int:
         # ĐÃ TRẢ GIÁ: `release-manifest` vẫn báo `file_count: 179` sau khi thêm tệp docs này, nên
         # lượt chạy cổng phát hành TRƯỚC push xanh và tôi tưởng đã đủ — chính ca này mới là chỗ ghi
         # con số docs, và nó chỉ đỏ ở `tl selftest`. Cổng khác nhau trả lời câu hỏi khác nhau.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 57 == 236
+        # KÊ KHAI SLOT (W0-D1 — đưa kế hoạch orchestrator vào canonical): 57 → **64** Markdown dưới
+        # `docs/`. Thêm đúng BẢY ADR dev-side/ngoài gói, đều nằm ở `docs/adr/` (vế ok4 tự chứng minh):
+        #   + `0036-claude-executor-codex-review-theo-rui-ro.md`
+        #   + `0037-review-rescue-va-tach-stable-slice.md`
+        #   + `0038-review-class-fail-closed.md`
+        #   + `0039-thin-orchestration-va-nguong-promote.md`
+        #   + `0040-tach-model-reviewer-va-github-submitter.md`
+        #   + `0041-ngan-sach-executor-claude-70-codex-30.md`
+        #   + `0042-deadline-wall-clock-va-working-state-evidence.md`
+        # Cùng đợt còn BẢY tệp `ops/**` (2 kế hoạch + 5 prompt audit) và `CONTEXT.md`: `ops` cũng nằm
+        # trong `_RELEASE_EXCLUDE_DIRS` nhưng ratchet này CHỈ đếm `docs/**/*.md`, nên chúng không ăn khe
+        # nào ở đây — và cũng KHÔNG có ratchet nào khác đếm `ops/` (đã tra: không có).
+        # Package giữ **179** (không tệp runtime nào được thêm) nên trần 200 không nhúc nhích;
+        # cây thật = 179 + 64 = 243.
+        # ĐÃ TRẢ GIÁ ĐÚNG NẾP GHI Ở TRÊN: tôi đã đo `ops`/`docs` đều nằm trong `_RELEASE_EXCLUDE_DIRS`,
+        # `release-manifest` giữ 179, `doc-claims-check --strict` delta 0 — rồi kết luận "docs không
+        # ảnh hưởng gói". Ba cổng ấy đều xanh và đều trả lời câu hỏi KHÁC: không cổng nào trong số đó
+        # ghi CON SỐ docs. Chỗ ghi con số là đúng ca này, và nó chỉ đỏ ở `tl selftest`.
+        # KÊ KHAI SLOT (AG-T0-02/Packet 2 — thêm AGENTS.md vào gốc kho): 179 → **180**.
+        # Thêm đúng AGENTS.md (hướng dẫn đa agent); package = 180 (dưới trần 200, còn 20 khe);
+        # cây thật = 180 + 64 = 244.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 64 == 244
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 57
+        ok4 = (len(tren_dia) == 64
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

@@ -1,5 +1,8 @@
 # Kế Hoạch Thi Công & Điều Phối Antigravity — tra-luat
 
+> **Lưu ý lịch sử:** Kế hoạch này là hồ sơ chuyển tiếp dành riêng cho Antigravity.
+> Kế hoạch đa provider hiện hành nằm tại `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md`.
+>
 > **Metadata Snapshot:**
 > - `observed_at_utc`: 2026-08-18T17:05:00Z
 > - `source_commit`: `4fe64b8168e5fa1d2273ed1a1766a479fdf47193`

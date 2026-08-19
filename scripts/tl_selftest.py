@@ -29788,6 +29788,55 @@ def run() -> int:
     _t110("wp44_missing_bundled_module_named",
           lambda: _release_fixture44()["missing_named"])
 
+    # r332 — ĐỘ PHỦ REGISTRY PHẢI ĐO Ở ĐƯỜNG NGƯỜI TA THẬT SỰ CHẠY.
+    # Bối cảnh: trong AG-T0-03, bản vá F8 đổi `compute_parser_coverage` từ
+    # `getattr(tl_module, "COMMAND_META", all_command_meta())` sang `getattr(..., {})`, tức vứt mất
+    # fallback đang gánh việc. Đường sản xuất truyền `tl_module=_TL` = chính `scripts/tl.py`, mà
+    # tl.py KHÔNG export bảng metadata nào (chúng là hằng của `tl_core/command_registry.py`), nên
+    # meta thành RỖNG: `tl registry-coverage` báo 0/196 = 0.0% trong khi số thật là 166/196 = 84.69%,
+    # và `golden-test` đỏ vì golden còn giữ 84.69. Lỗi đã được chặn trước khi land (guard `hasattr`
+    # hiện hành), NHƯNG land xong vẫn KHÔNG có ca nào giữ nó — nên nó quay lại được bất cứ lúc nào.
+    #
+    # Vì sao 7 ca unit của packet không bắt được: ca nào cũng hoặc gọi
+    # `compute_parser_coverage(parser)` (tl_module=None → nhánh đúng), hoặc truyền một MockTLModule
+    # CÓ SẴN `COMMAND_META`. Mock dựng đúng cái mà module thật thiếu, nên nó che chính xác chỗ thủng.
+    # Cùng họ với bài học "ca có MẶT khác ca có ĐO".
+    #
+    # Ca này KHÔNG import hàm và KHÔNG mock: chạy `scripts/tl.py registry-coverage --json` bằng
+    # subprocess đúng như người vận hành và CI gọi, rồi đòi hai điều mà bản hỏng không thể thoả:
+    #   (a) coverage_percent > 0 VÀ registered_leaf_commands > 0 — phản chứng trực tiếp;
+    #   (b) số của đường CLI KHỚP số của `validate_registry` (đường sinh golden `workflow_audit`) —
+    #       chặn tái diễn "hai đường cho hai đáp số" mà chỉ một đường bị golden soi.
+    def _c332_registry_coverage_duong_san_xuat():
+        import subprocess as _sp332, json as _js332, sys as _sy332
+        _r = _sp332.run([_sy332.executable, str(_ROOT209 / "scripts" / "tl.py"),
+                         "registry-coverage", "--json"],
+                        capture_output=True, text=True, encoding="utf-8", errors="replace",
+                        timeout=300, cwd=str(_ROOT209))
+        if _r.returncode != 0:
+            return False
+        _i = _r.stdout.find("{")
+        if _i < 0:
+            return False
+        _j = _js332.loads(_r.stdout[_i:])
+        if _j.get("schema") != "parser_tree_coverage.v1":
+            return False
+        _s = _j.get("summary") or {}
+        _leaf = _s.get("total_leaf_commands") or 0
+        _reg = _s.get("registered_leaf_commands") or 0
+        _pct = _s.get("coverage_percent") or 0.0
+        # (a) bản hỏng cho _reg=0 / _pct=0.0 trên một cây parser gần 200 lệnh
+        if not (_leaf > 0 and _reg > 0 and _pct > 0.0):
+            return False
+        # (b) đường CLI phải khớp đường validate_registry (thứ sinh ra golden workflow_audit)
+        import tl_core.command_registry as _reg332
+        _rv = _reg332.validate_registry(_TL_MODULE.build_parser(), _TL_MODULE)
+        _cov = (_rv.get("coverage") or {})
+        return (_cov.get("registered_leaf_commands") == _reg
+                and _cov.get("total_leaf_commands") == _leaf
+                and _cov.get("coverage_percent") == _pct)
+    _t110("r332_registry_coverage_duong_san_xuat", _c332_registry_coverage_duong_san_xuat)
+
     # F1-02 / wp42 rev2 (late-duplicate RED) — PHẢI là đăng ký cuối cùng trước tally:
     # guard chụp toàn bộ cases runtime rồi tự thêm ID của chính nó đúng một lần.
     def _c42_complete_runtime_test_ids_unique():

@@ -21216,10 +21216,20 @@ def run() -> int:
         # KÊ KHAI SLOT (AG-T0-02/Packet 2 — thêm AGENTS.md vào gốc kho): 179 → **180**.
         # Thêm đúng AGENTS.md (hướng dẫn đa agent); package = 180 (dưới trần 200, còn 20 khe);
         # cây thật = 180 + 64 = 244.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 64 == 244
+        # KÊ KHAI SLOT (GLS-D1 / PR #160 — cứu research doc từ `codex/gate-lifecycle`): 64 → **65**
+        # Markdown dưới `docs/`. Thêm đúng `docs/research/2026-08-16-github-cli-claude-codex-local.md`
+        # (port nguyên văn từ `ec8d08c`, dev-side/ngoài gói). Package giữ 180 (theo AG-T0-02),
+        # cây thật = 180 + 65 = 245.
+        # Trả giá LẶP đúng bài "ĐÃ TRẢ GIÁ" trên — và W0-D1 cũng dẫm cùng bẫy, hai phiên độc lập
+        # một ngày: lượt gate 1 của PR #160 (head `36700cb`) local chỉ chạy `doc-claims-check
+        # --strict` (xanh) mà không chạy selftest ⇒ CI mới là nơi ca này đỏ. Kê khai này đã phải
+        # KÊ LẠI hai lần vì master trôi dưới chân (57→58 chết non vì W0-D1 land 57→64; 65/244 chết
+        # non vì AG-T0-02 nâng package 179→180) — số trong ratchet là số CỦA MỘT TREE; hoà master
+        # là kê lại. Đó là cách ratchet vận hành, không phải nó hỏng.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 65 == 245
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 64
+        ok4 = (len(tren_dia) == 65
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

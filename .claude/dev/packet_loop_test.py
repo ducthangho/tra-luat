@@ -2216,6 +2216,72 @@ def case_ok_khong_byte_bi_tu_choi(c: Ctx):
         raise AssertionError("ok+0byte vẫn tiêu trần")
 
 
+def case_khong_thoat_duoc_checkpoint_bang_record_lease(c: Ctx):
+    """Lối thoát checkpoint thứ HAI: cấp một lease mới.
+
+    Lượt 3 chỉ đóng cửa `transition`. Đột biến gỡ cửa state của `record-lease` sống
+    sót trọn 205 ca, và chuỗi khai thác chạy được: checkpoint → `leased` →
+    `begin-attempt` → `reviewing` → `approve` = **accepted** trong khi trần review
+    đã cạn 2/2. Trần bắn rồi vẫn về đích được thì trần chỉ là trang trí.
+    (review lượt 4, `checkpoint-khong-kin-cua-record-lease`)
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    _den_checkpoint(c, sd)
+    rc, _, e = c.cap_lease(sd, 55, lease_id="wp55-lease-thu-hai")
+    _doi(8, rc, e, "cấp lease MỚI tại checkpoint phải bị chặn")
+    if c.state(sd, 55) != "checkpoint":
+        raise AssertionError(f"đã rời checkpoint: {c.state(sd, 55)!r}")
+
+
+def case_khong_thoat_duoc_checkpoint_bang_begin_attempt(c: Ctx):
+    """Lối thoát checkpoint thứ BA: mở thẳng một lượt executor.
+
+    Đột biến nới tuple thành `("leased", "running", "checkpoint")` sống sót trọn
+    205 ca; trên bản đột biến `begin-attempt` tại checkpoint rc=0 và GHI ĐÈ state
+    thành `running`.
+    (review lượt 4, `checkpoint-khong-kin-cua-begin-attempt`)
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    _den_checkpoint(c, sd)
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(8, rc, e, "begin-attempt tại checkpoint phải bị chặn")
+    if c.state(sd, 55) != "checkpoint":
+        raise AssertionError(f"đã rời checkpoint: {c.state(sd, 55)!r}")
+
+
+def case_record_review_call_bi_chan_o_CA_BA_state_cuoi(c: Ctx):
+    """Tuple state cuối của `record-review-call` phải neo CẢ BA, không chỉ checkpoint.
+
+    Ca cũ chỉ dựng `checkpoint`, nên đột biến thu tuple về `("checkpoint",)` sống
+    sót. Hậu quả đo được của đột biến ấy: trên một packet ĐÃ `accepted`, một lời gọi
+    review làm state bị GHI ĐÈ thành `checkpoint` — packet đã hoàn tất bị giáng cấp.
+    (review lượt 4, `record-review-call-state-cuoi-chi-neo-checkpoint`)
+    """
+    # accepted
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    c.review(sd, 55, [], verdict="approve", luot=1)
+    if c.state(sd, 55) != "accepted":
+        raise AssertionError(f"tiền đề sai: phải accepted, đang {c.state(sd, 55)!r}")
+    rc, _, e = goi_review(c, sd, 55, "ok", 100)
+    _doi(8, rc, e, "record-review-call trên packet accepted phải bị chặn")
+    if c.state(sd, 55) != "accepted":
+        raise AssertionError(f"packet accepted bị GHI ĐÈ thành {c.state(sd, 55)!r}")
+    # blocked (cùng finding-id hai lượt ⇒ chạm trần same-failure)
+    sd2 = c.sd()
+    _doi(0, *c.init(sd2)[0:1], b"", "init")
+    for n in (1, 2):
+        c.den_reviewing(sd2, 55, n)
+        c.review(sd2, 55, ["cung-mot-loi"], luot=n)
+    if c.state(sd2, 55) != "blocked":
+        raise AssertionError(f"tiền đề sai: phải blocked, đang {c.state(sd2, 55)!r}")
+    rc, _, e = goi_review(c, sd2, 55, "rate-limit", 0)
+    _doi(8, rc, e, "record-review-call trên packet blocked phải bị chặn")
+
+
 CASES = [
     ("init_KHONG_duoc_tu_cap_lease", case_init_KHONG_duoc_tu_cap_lease),
     ("tu_cap_lease_bang_ten_provider_bi_chan", case_tu_cap_lease_bang_ten_provider_bi_chan),
@@ -2250,6 +2316,10 @@ CASES = [
     ("output_bytes_am_bi_tu_choi", case_output_bytes_am_bi_tu_choi),
     ("ledger_ghi_dung_co_tieu", case_ledger_ghi_dung_co_tieu),
     ("ok_khong_byte_bi_tu_choi", case_ok_khong_byte_bi_tu_choi),
+    # --- vá 3 cửa THUỘC W0-R1 (review lượt 4) — 9 finding còn lại là nợ có sẵn ---
+    ("khong_thoat_duoc_checkpoint_bang_record_lease", case_khong_thoat_duoc_checkpoint_bang_record_lease),
+    ("khong_thoat_duoc_checkpoint_bang_begin_attempt", case_khong_thoat_duoc_checkpoint_bang_begin_attempt),
+    ("record_review_call_bi_chan_o_CA_BA_state_cuoi", case_record_review_call_bi_chan_o_CA_BA_state_cuoi),
     ("begin_attempt_lap_khong_tieu_them_tran", case_begin_attempt_lap_khong_tieu_them_tran),
     ("init_khong_ghi_de_state_da_blocked", case_init_khong_ghi_de_state_da_blocked),
     ("init_khong_co_co_ghi_de", case_init_khong_co_co_ghi_de),
@@ -2341,6 +2411,23 @@ MUTANTS = {
          "doi_prompt_hay_phien_khong_mo_lai_tran_review"],
     ),
     # --- 7 đột biến cho 7 cửa lượt 3 phát hiện là không ai canh ---
+    "record_lease_nhan_moi_state": (
+        '    if st["state"] != "awaiting_lease":\n',
+        "    if False:\n",
+        ["khong_thoat_duoc_checkpoint_bang_record_lease"],
+    ),
+    "begin_attempt_nhan_ca_checkpoint": (
+        '    if st["state"] not in ("leased", "running"):\n',
+        '    if st["state"] not in ("leased", "running", "checkpoint"):\n',
+        ["khong_thoat_duoc_checkpoint_bang_begin_attempt"],
+    ),
+    "record_review_call_state_cuoi_chi_neo_checkpoint": (
+        '    if st["state"] in ("accepted", "blocked", "checkpoint"):\n'
+        '        _die(RC_STATE, f"packet đã ở state cuối {st[\'state\']!r} — không gọi review thêm")\n',
+        '    if st["state"] in ("checkpoint",):\n'
+        '        _die(RC_STATE, f"packet đã ở state cuối {st[\'state\']!r} — không gọi review thêm")\n',
+        ["record_review_call_bi_chan_o_CA_BA_state_cuoi"],
+    ),
     "bo_cua_provider_cua_record_review_call": (
         '    if a.provider != st["reviewer"]:\n'
         '        _die(\n'

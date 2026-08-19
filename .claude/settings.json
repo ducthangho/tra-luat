@@ -38,8 +38,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-start.sh\"",
-            "shell": "bash"
+            "command": "python",
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/session_start.py"],
+            "timeout": 630
           }
         ]
       }

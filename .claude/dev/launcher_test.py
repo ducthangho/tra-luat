@@ -4085,6 +4085,247 @@ def t121_do_openai_llm_qua_cli_khong_fail_open_va_khong_log():
     bang(tt == "CHUA_XAC_THUC", f"kiem song loi phai tra CHUA_XAC_THUC: {tt}")
 
 
+# ------------------------------------------------- bridge SessionStart (GLS-B1)
+#
+# VÌ SAO — incident 2026-08-15 (docs/incidents/2026-08-15-launcher-codex-github-toolchain.md),
+# nguyên nhân gốc số 4: hook SessionStart shell-form gọi tên trần `bash`; trên Windows tên
+# ấy có thể là WSL shim trả Access denied trong khi Git Bash tốt nằm ở Program Files —
+# phiên mở ra không có codex/rg mà không ai biết vì hook chết im. Bridge exec-form
+# (.claude/hooks/session_start.py) đọc env trước, probe từng ứng viên bash, lấy đường dẫn
+# THẬT. Cùng họ t106 của doctor, ở tầng hook. Port từ nhánh codex/gate-lifecycle đã khai
+# tử (blob ea85526b) — phần code duy nhất của nhánh ấy còn giá trị sau phép đo collision
+# (hồ sơ: PR #160).
+
+def _duong_bridge() -> Path:
+    return Path(__file__).resolve().parents[1] / "hooks" / "session_start.py"
+
+
+def _chay_bridge(env, timeout=60):
+    return subprocess.run([PY, str(_duong_bridge())], env=env, capture_output=True,
+                          text=True, encoding="utf-8", errors="replace", timeout=timeout)
+
+
+def _bash_gia(duong: Path, noi_dung: str) -> Path:
+    """Tạo executable tên `bash` tìm được bởi shutil.which trong thư mục đã cho."""
+    if LA_WINDOWS:
+        p = duong / "bash.exe"
+        p.write_text(noi_dung, encoding="utf-8")
+    else:
+        p = duong / "bash"
+        p.write_text(noi_dung, encoding="utf-8")
+        os.chmod(p, 0o755)
+    return p
+
+
+@ca
+def t122_ung_vien_bash_thu_tu_PATH_dedup_va_fallback_ProgramFiles():
+    """Resolver của bridge: đúng thứ tự PATH, không trùng, chỉ nhận tệp có thật.
+
+    Hàm thuần `_ung_vien_bash(env)` nhận CẢ ProgramFiles từ env — cố ý, để đo được
+    trên mọi nền không cần máy có Git Bash thật. Nhánh Program Files chỉ tồn tại
+    trên Windows nên vế đó kiểm CÓ ĐIỀU KIỆN theo nền, khai thẳng thay vì giả vờ
+    đo được ở nơi không có.
+    """
+    m = _nap_sach(_duong_bridge())
+    with San() as s:
+        d1 = s / "d1"; d2 = s / "d2"; rong = s / "rong"; pf = s / "pf"
+        for d in (d1, d2, rong, pf):
+            d.mkdir()
+        b1 = _bash_gia(d1, "#!/bin/sh\nexit 1\n")
+        b2 = _bash_gia(d2, "#!/bin/sh\nexit 1\n")
+        (pf / "Git" / "bin").mkdir(parents=True)
+        pf_bash = pf / "Git" / "bin" / "bash.exe"
+        pf_bash.write_text("x", encoding="utf-8")
+        env = {"PATH": os.pathsep.join([str(d1), str(rong), str(d2), str(d1)]),
+               "ProgramFiles": str(pf)}
+        ra = m._ung_vien_bash(env)
+        chuan = [str(b1), str(b2)]
+        if platform.system() == "Windows":
+            chuan.append(str(pf_bash))
+        bang([os.path.normcase(x) for x in ra] == [os.path.normcase(x) for x in chuan],
+             f"thu tu/dedup/fallback sai: {ra!r} != {chuan!r}")
+        # PHAN CHUNG cho bug da bat khi viet t124: dict(os.environ) Windows viet hoa
+        # khoa; ban goc ec8d08c tra env.get("ProgramFiles") case-sensitive nen LUON
+        # truot va roi ve default cung C:\Program Files. Khoa viet hoa phai duoc
+        # ton trong y het khoa dung chu.
+        ra_hoa = m._ung_vien_bash({"PATH": str(d1), "PROGRAMFILES": str(pf)})
+        chuan_hoa = [str(b1)] + ([str(pf_bash)] if platform.system() == "Windows" else [])
+        bang([os.path.normcase(x) for x in ra_hoa] == [os.path.normcase(x) for x in chuan_hoa],
+             f"khoa PROGRAMFILES viet hoa bi bo qua: {ra_hoa!r} != {chuan_hoa!r}")
+
+
+@ca
+def t123_bridge_thieu_session_start_sh_phai_rc12_truoc_khi_probe():
+    """Không thấy hook thì đỏ NGAY với lời chẩn đoán, đừng đi probe bash vô ích."""
+    with San() as s:
+        (s / "trong").mkdir()
+        env = dict(os.environ)
+        env["CLAUDE_PROJECT_DIR"] = str(s / "trong")
+        r = _chay_bridge(env)
+        bang(r.returncode == 12, f"mong 12, duoc {r.returncode}: {r.stderr[:120]}")
+        bang("khong thay hook" in r.stdout, f"thieu chan doan: {r.stdout!r}")
+
+
+@ca
+def t124_bridge_khong_co_bash_chay_duoc_phai_rc12_khong_fail_open():
+    """Không ứng viên bash nào ⇒ rc=12 kèm lý do — đây chính là ca fail-closed
+    mà hook shell-form cũ KHÔNG thể có: shell-form chết trước khi kịp nói gì.
+
+    PATH và ProgramFiles đều trỏ thư mục rỗng nên resolver hết đường; SystemRoot
+    và các biến hệ thống giữ nguyên để python con còn khởi động được (bài t120:
+    đừng phá môi trường quá tay rồi đo nhầm cái chết khác).
+
+    ĐÃ TRẢ GIÁ HAI TẦNG ngay lượt viết đầu, cả hai đo được bằng spawn thật:
+    (1) `dict(os.environ)` Windows VIẾT HOA khoá — tra case-sensitive trong bridge
+    gốc `ec8d08c` LUÔN trượt và rơi về default cứng: bug tiềm ẩn thật, đã vá bằng
+    `_lay_env` (phản chứng nằm ở `t122`). (2) Xoá `PROGRAMFILES` thôi CHƯA đủ:
+    Windows TÁI SINH họ biến ProgramFiles cho tiến trình mới từ `PROGRAMW6432` /
+    `PROGRAMFILES(X86)` — cha gửi fixture, con vẫn nhận `C:\\Program Files` thật.
+    Phải xoá TRỌN HỌ rồi mới đặt; đã đo: xoá trọn thì fixture sống sót sang con.
+    """
+    with San() as s:
+        du_an = s / "da"; (du_an / ".claude" / "hooks").mkdir(parents=True)
+        (du_an / ".claude" / "hooks" / "session-start.sh").write_text(
+            "echo hook\n", encoding="utf-8")
+        rong = s / "rong"; rong.mkdir()
+        env = dict(os.environ)
+        for k in [k for k in env
+                  if k.upper() in ("PROGRAMFILES", "PROGRAMW6432",
+                                   "PROGRAMFILES(X86)", "PATH", "CLAUDE_PROJECT_DIR")]:
+            del env[k]
+        env.update({"CLAUDE_PROJECT_DIR": str(du_an), "PATH": str(rong),
+                    "ProgramFiles": str(rong)})
+        r = _chay_bridge(env)
+        bang(r.returncode == 12, f"mong 12, duoc {r.returncode}: {r.stderr[:120]}")
+        bang("khong co bash chay duoc" in r.stdout, f"thieu ly do: {r.stdout!r}")
+
+
+@ca
+def t125_bridge_bo_bash_hong_dau_PATH_va_truyen_rc_hook_ve_nguyen_ven():
+    """Binary hỏng đầu PATH không được che binary tốt phía sau — t106 ở tầng hook.
+
+    Đo bằng fake bash thật sự CHẠY: ứng viên 1 probe rớt (exit 1, có ghi log để
+    chứng minh NÓ ĐÃ ĐƯỢC THỬ chứ không phải bị bỏ qua vì bug thứ tự), ứng viên 2
+    probe đạt rồi exec hook; hook thoát 7 và rc phải về 7 nguyên vẹn.
+    """
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can fake bash .exe chay duoc; duong POSIX do o CI ubuntu)"
+    with San() as s:
+        du_an = s / "da"; (du_an / ".claude" / "hooks").mkdir(parents=True)
+        (du_an / ".claude" / "hooks" / "session-start.sh").write_text(
+            "echo DA_CHAY_HOOK_GLS_B1\nexit 7\n", encoding="utf-8")
+        d_hong = s / "hong"; d_tot = s / "tot"
+        d_hong.mkdir(); d_tot.mkdir()
+        log = s / "probe.log"
+        _bash_gia(d_hong, f"#!/bin/sh\necho probed >> {log}\nexit 1\n")
+        _bash_gia(d_tot,
+                  '#!/bin/sh\nif [ "$1" = "--version" ]; then echo fake-bash 9.9; exit 0; fi\n'
+                  'exec /bin/sh "$@"\n')
+        env = dict(os.environ)
+        env.update({"CLAUDE_PROJECT_DIR": str(du_an),
+                    "PATH": os.pathsep.join([str(d_hong), str(d_tot)]),
+                    "ProgramFiles": str(s)})
+        r = _chay_bridge(env)
+        bang(r.returncode == 7, f"rc hook phai ve nguyen ven 7, duoc {r.returncode}: {r.stdout!r}")
+        bang("DA_CHAY_HOOK_GLS_B1" in r.stdout, f"hook khong duoc chay: {r.stdout!r}")
+        bang(log.is_file() and "probed" in log.read_text(encoding="utf-8"),
+             "ung vien hong khong he duoc thu — thu tu resolver dang sai kieu khac")
+
+
+@ca
+def t126_bridge_hook_vuot_han_phai_rc124_khong_phai_treo_hay_0():
+    """Quá hạn là 124 — cùng kỷ luật tách 124/125 của launcher (taskkill lesson).
+
+    Trần đọc từ TL_HOOK_TIMEOUT_GIAY (một trong hai chỉnh sửa khai so blob gốc
+    ea85526b, xem docstring bridge) — không có nó thì phản chứng này phải chờ
+    600s, tức là không bao giờ được chạy thật.
+
+    ĐÃ TRẢ GIÁ ở CI lượt 1 (job 96035756400): fixture đầu dùng `sleep 5`, mà env
+    của ca này cắt PATH còn đúng thư mục fake-bash ⇒ /bin/sh không tìm thấy
+    `sleep`, thoát 127 TỨC THÌ — đo nhầm cái chết khác thay vì đo timeout (đúng
+    lời t120 cảnh báo). Hook fixture phải THUẦN BUILTIN: busy-wait `while :`.
+    """
+    if LA_WINDOWS:
+        return "bo qua tren Windows (can fake bash .exe chay duoc; duong POSIX do o CI ubuntu)"
+    with San() as s:
+        du_an = s / "da"; (du_an / ".claude" / "hooks").mkdir(parents=True)
+        (du_an / ".claude" / "hooks" / "session-start.sh").write_text(
+            "while :; do :; done\n", encoding="utf-8")
+        d_tot = s / "tot"; d_tot.mkdir()
+        _bash_gia(d_tot,
+                  '#!/bin/sh\nif [ "$1" = "--version" ]; then echo fake-bash 9.9; exit 0; fi\n'
+                  'exec /bin/sh "$@"\n')
+        env = dict(os.environ)
+        env.update({"CLAUDE_PROJECT_DIR": str(du_an), "PATH": str(d_tot),
+                    "ProgramFiles": str(s), "TL_HOOK_TIMEOUT_GIAY": "1"})
+        r = _chay_bridge(env, timeout=30)
+        bang(r.returncode == 124, f"qua han phai 124, duoc {r.returncode}: {r.stdout!r}")
+        bang("vuot han" in r.stdout, f"thieu chan doan qua han: {r.stdout!r}")
+
+
+@ca
+def t127_settings_phai_noi_day_bridge_exec_form_va_khong_dung_den_PreToolUse():
+    """Bridge đúng mà settings không GỌI nó thì mọi thứ trên vẫn là đồ trưng bày —
+    cùng bệnh dây-nối t119. Đọc settings.json THẬT của kho.
+
+    Đòi exec-form (`args`, không `shell`): schema hooks chính thức ghi rõ args là
+    "spawned directly — no shell", placeholder thay theo từng phần tử; đó chính là
+    thứ vá nguyên nhân gốc số 4 của incident. Timeout 630 CỐ Ý > trần 600 mặc định
+    của bridge, để rc=124 của bridge còn tới được harness thay vì bị harness giết
+    trước. PreToolUse phải GIỮ NGUYÊN shell-form cũ — packet này không đụng nó;
+    vế đó là chốt phạm vi, đổi PreToolUse phải là packet khác.
+
+    GIỚI HẠN — khai thẳng (họ t116): đặc tả lẫn bằng chứng cùng nằm trong repo;
+    đổi phối hợp settings + ca này thì không chống được. Và ca này đo TỆP, không
+    đo việc harness thật sự nạp tệp — thứ đó chỉ đo được bằng một phiên thật.
+    """
+    duong = Path(__file__).resolve().parents[1] / "settings.json"
+    j = json.loads(duong.read_text(encoding="utf-8"))
+    ss = j["hooks"]["SessionStart"][0]["hooks"][0]
+    bang(ss.get("type") == "command" and ss.get("command") == "python",
+         f"SessionStart khong phai exec-form python: {ss!r}")
+    bang(ss.get("args") == ["${CLAUDE_PROJECT_DIR}/.claude/hooks/session_start.py"],
+         f"args khong tro bridge: {ss.get('args')!r}")
+    bang("shell" not in ss, f"exec-form ma con truong shell: {ss!r}")
+    bang(ss.get("timeout") == 630,
+         f"timeout hook phai 630 (> tran 600 cua bridge): {ss.get('timeout')!r}")
+    bang(_duong_bridge().is_file(), "settings tro bridge ma tep khong ton tai")
+    pt = j["hooks"]["PreToolUse"][0]["hooks"][0]
+    bang(pt.get("shell") == "bash" and "pretooluse_guard.py" in pt.get("command", ""),
+         f"PreToolUse bi dung den — ngoai pham vi packet nay: {pt!r}")
+
+
+@ca
+def t128_bridge_duong_loi_khong_duoc_chet_UnicodeEncodeError_cp1258():
+    """Nhánh lỗi với đường dẫn CÓ DẤU phải ra rc=12 + chẩn đoán, không phải rc=1 traceback.
+
+    P2 của review PR #173 (comment 5341020065), ĐO THẬT chứ không suy: bridge
+    thiếu ép UTF-8 thì trên console cp1258, `print` đường dẫn kiểu "Quốc hội"
+    (đúng hình đường repo thật) ném UnicodeEncodeError — nhánh lỗi chết rc=1
+    trước khi kịp nói mình chết vì gì. Đây là bài học ĐẦU BẢNG của launcher
+    trong CLAUDE.md, và t123/t124 không bắt được vì fixture của chúng nằm ở
+    %TEMP% toàn ASCII. Ca này dựng đúng cái tổ hợp đó: project dir có dấu +
+    hook thiếu, và TƯỚC PYTHONUTF8/PYTHONIOENCODING của con để mặc định
+    cp1258 cắn thật.
+
+    GIỚI HẠN — khai thẳng: trên POSIX/CI ubuntu mặc định IO đã là UTF-8 nên ca
+    này qua được cả khi thiếu chốt — phép đo THẬT của nó là chân Windows
+    (máy dev + launcher-windows.yml, nơi vốn cố ý KHÔNG đặt hai biến ấy).
+    """
+    with San() as s:
+        du_an = s / "Quốc hội thử"
+        du_an.mkdir()
+        env = dict(os.environ)
+        for k in [k for k in env if k.upper() in ("PYTHONUTF8", "PYTHONIOENCODING")]:
+            del env[k]
+        env["CLAUDE_PROJECT_DIR"] = str(du_an)
+        r = _chay_bridge(env)
+        bang("Traceback" not in (r.stderr or ""),
+             f"duong loi chet UnicodeEncodeError thay vi chan doan: {r.stderr[:200]!r}")
+        bang(r.returncode == 12, f"mong 12, duoc {r.returncode}")
+        bang("khong thay hook" in r.stdout, f"thieu chan doan: {r.stdout!r}")
+
+
 @ca
 def t101_phan_tich_doi_so_phai_do_NGAY_khong_doi_chay_het_suite():
     """Công cụ chẩn đoán dễ xanh giả thì tệ hơn không có.

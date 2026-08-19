@@ -75,6 +75,25 @@ khai thẳng trong mã, đừng lặng lẽ bỏ dòng khai ấy).
 - `gh` KHÔNG có và kho cố ý không dùng. GitHub đi qua **MCP JSON-RPC** tới
   `https://api.githubcopilot.com/mcp/` với `GITHUB_PAT`, dùng **`urllib`** —
   KHÔNG `curl` (curl bị proxy chặn 403, urllib cùng host trả 200).
+- **ĐỌC CI: dùng endpoint `x/actions`, ĐỪNG suy từ `mergeable_state`.**
+  `https://api.githubcopilot.com/mcp/x/actions` → `actions_list`, `actions_get`,
+  `actions_run_trigger`, `get_job_logs` (đo 18-08-2026: sống, 4 công cụ):
+
+  ```
+  actions_list  {owner, repo, method: "list_workflow_runs",
+                 workflow_id: "ci.yml", perPage: 60}
+  # -> workflow_runs[]: head_branch, head_sha, event, status, conclusion
+  # LUU Y: tham so `branch` bi BO QUA — tu loc head_branch phia client.
+  #        run chua xong thi KHONG CO khoa `conclusion` — dung w.get(), dung w[].
+  ```
+
+  Trên endpoint chính, `pull_request_read method=get_check_runs` trả **403**
+  ("Resource not accessible by personal access token") và `get_status` trả
+  `total_count: 0` (Actions báo qua check-runs, không qua commit-status) — nên
+  dễ tưởng không đọc được CI rồi quay sang chờ `mergeable_state` chuyển
+  `blocked`→`clean`. **Tôi đã mất thời gian đúng chỗ này ngày 18-08**; endpoint
+  `x/actions` đã có sẵn trong bàn giao cũ `ops/BAN_GIAO_pr141_pr143.md` §1 mà
+  tôi không đọc.
   Endpoint này **chập chờn**: gặp 503/404 thì thử lại vài lần rồi mới kết luận.
   `REST /repos/**` luôn 403 — chính sách theo ĐƯỜNG DẪN, không theo danh tính.
 

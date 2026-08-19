@@ -1,9 +1,18 @@
-# BÀN GIAO — PR #141 và #143 (phiên 17-08-2026)
+# BÀN GIAO — PR #141 và #143 (phiên 17-08-2026) — **ĐÃ HẾT HIỆU LỰC**
 
-Đọc tệp này TRƯỚC khi làm gì. Nó là **bản chiếu**; nguồn có thẩm quyền vẫn là
-lịch sử git và các comment trên PR.
+> ## ⛔ ĐỪNG LÀM THEO TỆP NÀY
+>
+> **Cả #141 lẫn #143 đã merge** (#143 → `c7ad260`, #141 → `a70f481`). Mọi câu
+> "chờ merge", "còn treo", và con số `16/16` bên dưới đều **đã chết**. Giữ tệp
+> lại làm **hiện vật** vì §1 (đường đi GitHub) và §4 (bài học) còn giá trị —
+> KHÔNG phải làm chỉ dẫn.
+>
+> **Bản đang có hiệu lực: `ops/BAN_GIAO_gate_lifecycle_cgroup.md`.**
+>
+> Đánh dấu 18-08-2026. PR #145 định cập nhật tệp này lúc #141 còn mở; #141 merge
+> trước nên #145 đã **đóng vì tiền đề hết hiệu lực**, không phải vì sai.
 
-## 0. Việc còn lại, đúng một câu
+## 0. ~~Việc còn lại, đúng một câu~~ (đã xong — giữ để đối chiếu lịch sử)
 
 Chờ CI + `launcher-windows` + review chéo trên hai head mới; **sạch cả hai phía thì
 merge cả hai PR**. Người dùng đã duyệt merge với điều kiện xanh (không chỉ cổng

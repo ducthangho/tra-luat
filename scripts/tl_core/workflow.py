@@ -524,6 +524,46 @@ def cmd_tool_inventory(a) -> int:
     return 0 if out.get("ok", True) else 2
 
 
+def cmd_registry_coverage(a, tl_module=None) -> int:
+    """READ-ONLY: báo cáo độ phủ hai chiều cây lệnh parser ↔ command registry (Packet AG-T0-03)."""
+    import tl_core.command_registry as _reg
+    parser = build_parser()
+    strict = getattr(a, "strict", False)
+    unreg_only = getattr(a, "unregistered_only", False)
+    as_json = getattr(a, "json", False)
+
+    report = _reg.compute_parser_coverage(parser, tl_module=tl_module or _TL, strict=strict, unregistered_only=unreg_only)
+
+    if as_json:
+        _print_json_or_text(report, True)
+    else:
+        summ = report["summary"]
+        print(f"=== Argparse Parser-Tree Coverage (Schema: {report['schema']}) ===")
+        print(f"Total Nodes: {summ['total_nodes']} (Containers: {summ['container_commands']}, Leaf Commands: {summ['total_leaf_commands']})")
+        print(f"Registered Leaf Commands: {summ['registered_leaf_commands']} / {summ['total_leaf_commands']} ({summ['coverage_percent']}%)")
+        print(f"Unregistered Leaf Commands: {summ['unregistered_leaf_commands']}")
+        print(f"High-Risk Unregistered Commands: {summ['high_risk_unregistered_count']}")
+        print(f"Registry Orphaned Commands: {summ['registry_orphaned_commands']}")
+        print()
+        if report["categories"]["unregistered"]:
+            print(f"Unregistered Commands ({len(report['categories']['unregistered'])}):")
+            for u in report["categories"]["unregistered"]:
+                hr = " [HIGH-RISK]" if u in report["categories"]["high_risk_unregistered"] else ""
+                print(f"  - {u}{hr}")
+            print()
+        if report["categories"]["registry_not_in_parser"]:
+            print(f"Registry Commands Missing from Parser ({len(report['categories']['registry_not_in_parser'])}):")
+            for o in report["categories"]["registry_not_in_parser"]:
+                print(f"  - {o}")
+            print()
+        if not report["ok"]:
+            print("STATUS: FAILED (strict mode violation: unregistered or orphaned commands detected)")
+        else:
+            print("STATUS: OK")
+
+    return 0 if report.get("ok", True) else 1
+
+
 def cmd_route_task(a) -> int:
     # v1.33.54 (merge determinism-53): nhận task ở CẢ positional lẫn --task — bundle bắt buộc --task làm gãy
     # cách gọi `route-task ingest_local` trong doc/log cũ (cùng lớp ma sát S8/A1: drift doc↔CLI).

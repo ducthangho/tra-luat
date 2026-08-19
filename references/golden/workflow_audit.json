@@ -1193,7 +1193,7 @@
     "basis": "trần mount ~343KB/file (lớp sự cố #5 cắt cụt); WARN=đệm advisory, FAIL chỉ chặn --strict; waiver tl_selftest.py (không import trên Cowork)",
     "fail": [],
     "fail_limit": 327680,
-    "files_scanned": 72,
+    "files_scanned": 73,
     "size_ok": true,
     "waived": [
       "scripts/tl_selftest.py"
@@ -1202,15 +1202,30 @@
     "warn_limit": 286720
   },
   "registry": {
-    "checked_commands": 165,
+    "checked_commands": 166,
+    "coverage": {
+      "container_commands": 2,
+      "coverage_percent": 84.69,
+      "high_risk_unregistered_count": 4,
+      "registered_leaf_commands": 166,
+      "registry_orphaned_commands": 0,
+      "total_leaf_commands": 196,
+      "total_nodes": 198,
+      "unregistered_leaf_commands": 30
+    },
     "issues": [],
     "ok": true,
     "schema": "registry_validate.v1",
-    "warnings": []
+    "warnings": [
+      "UNREGISTERED_HIGH_RISK_PARSER_CMD:hygiene plan",
+      "UNREGISTERED_HIGH_RISK_PARSER_CMD:hygiene reconcile",
+      "UNREGISTERED_HIGH_RISK_PARSER_CMD:profile-file-add",
+      "UNREGISTERED_HIGH_RISK_PARSER_CMD:reconcile"
+    ]
   },
   "schema": "workflow_audit.v2",
   "summary": {
-    "available_commands": 188,
+    "available_commands": 189,
     "cards": 26,
     "groups": 11,
     "tasks": 60

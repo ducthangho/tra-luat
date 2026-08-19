@@ -5,10 +5,10 @@
   "skill_version": "1.36.68",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 180,
-  "total_bytes": 7905166,
-  "package_hash": "0bdf4432ec5933dfd10a9af570848e15904de852022370f78024da3d2f535a54",
-  "content_hash": "0bdf4432ec5933dfd10a9af570848e15904de852022370f78024da3d2f535a54",
+  "file_count": 181,
+  "total_bytes": 7920877,
+  "package_hash": "061b48ef6223594b4b0f7ba379ec8e838fbfe7e028b4555a51e8c6fee4e1de29",
+  "content_hash": "061b48ef6223594b4b0f7ba379ec8e838fbfe7e028b4555a51e8c6fee4e1de29",
   "required_missing": [],
   "files": [
     {
@@ -313,8 +313,8 @@
     },
     {
       "path": "references/golden/parser_surface.json",
-      "size": 16792,
-      "sha256": "35866a89086e358f7e5c89973c471ef107534ea30543822e870d767ce0380efc"
+      "size": 16882,
+      "sha256": "9c5ea696c980d459830f25efff9d32cb02ae52490e4f039e515851ca1e8c036d"
     },
     {
       "path": "references/golden/route_task_ingest_zip.json",
@@ -333,8 +333,8 @@
     },
     {
       "path": "references/golden/tool_inventory_inventory_decision.json",
-      "size": 53614,
-      "sha256": "7210aec6d9ada1e0274477059f9396b523c72dabca7d5eb7701ef546235b47ce"
+      "size": 53935,
+      "sha256": "b9f8e1cfe0f9a2debc17e1cc292829bee3952b048d184862534fd4e2bb0ef4ba"
     },
     {
       "path": "references/golden/topology_vectors.json",
@@ -343,8 +343,8 @@
     },
     {
       "path": "references/golden/workflow_audit.json",
-      "size": 30704,
-      "sha256": "a14b9201bda3a4202492c9bf80ef640ab59a3f564d9eaed33322696d24e9064b"
+      "size": 31245,
+      "sha256": "fe7d101ea90e1198267ca7e17d155f98c2dfd20d7be986c493f5b59f8d4bafa8"
     },
     {
       "path": "references/linhvuc_phapdien.json",
@@ -683,8 +683,8 @@
     },
     {
       "path": "scripts/tl.py",
-      "size": 229775,
-      "sha256": "2fe061e895151bd03ab9aed896c9edaee527a0c800ba3c4616a5045ab54e8f85"
+      "size": 229800,
+      "sha256": "ae0e4f07d7a346da28f4a4d3191de08a5821a34ed3a02df4cf092433c851f8c1"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -713,8 +713,13 @@
     },
     {
       "path": "scripts/tl_core/command_registry.py",
-      "size": 175898,
-      "sha256": "e29fc4a4d7f43c8438643a95a65d3708d54587a8420d3d6eacc8951824b799d9"
+      "size": 182240,
+      "sha256": "dd1af3678d05e7285d7f70435e9122c2d57146651ea08f3b0e2be7af0f8ab60e"
+    },
+    {
+      "path": "scripts/tl_core/command_registry_test.py",
+      "size": 6267,
+      "sha256": "b984e9d66a6ff56502b64ad159eeb87d64488d82b70bdb0f4f39a39097739773"
     },
     {
       "path": "scripts/tl_core/deterministic.py",
@@ -838,8 +843,8 @@
     },
     {
       "path": "scripts/tl_core/workflow.py",
-      "size": 123683,
-      "sha256": "03f178d61b89eda55acf90b5fd935e673bade289d499aa2caa1518d73660b86d"
+      "size": 125808,
+      "sha256": "e76954d5ab08a209a9a3f00e0f24578e4f8f653111f42cdc2d6535c1a8be47cf"
     },
     {
       "path": "scripts/tl_core/zip_ingest.py",

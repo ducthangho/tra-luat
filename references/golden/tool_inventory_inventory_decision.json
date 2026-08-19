@@ -145,6 +145,7 @@
     "reg-delete",
     "reg-query",
     "register",
+    "registry-coverage",
     "registry-doctor",
     "registry-map",
     "relation-backfill",
@@ -1504,6 +1505,16 @@
         "workflow_task": null,
         "write_scope": "registry"
       },
+      "registry-coverage": {
+        "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": "workflow_audit",
+        "write_scope": "none"
+      },
       "registry-doctor": {
         "generated": true,
         "idempotency_contract": null,
@@ -1896,10 +1907,10 @@
       }
     },
     "counts": {
-      "generated_parsers": 153,
+      "generated_parsers": 154,
       "high_risk": 28,
       "nested": 5,
-      "total": 165,
+      "total": 166,
       "write_commands": 87
     },
     "schema": "command_registry.v1"

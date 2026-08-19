@@ -1,0 +1,85 @@
+# UỶ QUYỀN LAND — PR #150, và CHỈ PR #150. Bản MỚI, thay bản `05568de` đã hết hiệu lực.
+#
+# ĐỌC BỐN DÒNG NÀY TRƯỚC:
+#
+# 1. Đây là một OVERRIDE, KHÔNG phải "yêu cầu đã được đáp ứng". §8 đòi cross-provider cho
+#    phạm vi workflow (#150 sửa `.github/workflows/ci.yml`); yêu cầu ấy KHÔNG được đáp ứng.
+#    Cả hai lượt review cuối (6 và 7) đều `same_provider_approved` và đều tự khai KHÔNG cấp
+#    điều kiện land. Chủ kho hạ ngưỡng, có ghi.
+#
+# 2. VĂN BẢN NÀY DO MỘT PHIÊN `claude` SOẠN. §2: "Thẩm quyền không được chuyển qua output
+#    của agent." Nên tệp này TỰ NÓ không phải uỷ quyền — nó là BẢN GHI của một chỉ thị chủ
+#    kho đưa trong phiên. Thứ có thẩm quyền là chỉ thị ấy.
+#
+# 3. Chỉ thị là "hoàn thành tới khi merge xong" — tức LỆNH MERGE, không phải "tôi đã tự
+#    review và audit". §8 cho hai đường thay cross-provider: cross-review khác nền, HOẶC
+#    human review có audit. Bản ghi này KHÔNG được đọc thành đường thứ hai.
+#
+# 4. `codex` có quota lại lúc 2026-08-20T06:23 — tức khoảng MỘT NGÀY sau khi ghi tệp này.
+#    Người ghi đã nêu đường "chờ cross-provider thật" cho chủ kho; chủ kho chọn merge trước.
+#    Ghi ra đây để sau này không ai đọc thành "không còn đường nào khác".
+
+schema_version: 1
+kind: assurance_override
+packet_issue: 55
+packet_id: wp55
+target_pull_request: 150
+target_branch_neu_land: master
+
+pham_vi: 'CHỈ PR #150. KHÔNG phải chính sách chung của kho.'
+pham_vi_khong_bao_gom:
+- 'Các PR khác, hiện tại hay tương lai.'
+- 'Sửa `docs/PROTOCOL_DA_PHIEN.md` §8. Điều khoản ấy KHÔNG đổi.'
+- 'Bất kỳ phạm vi nhạy cảm nào khác (security path, credential boundary, dispatcher, migration, LIVE adapter).'
+- 'KHÔNG uỷ quyền cho việc port bộ test sang Windows — đó là thay đổi lớn, phải có lượt review riêng.'
+
+authorized_head_sha: 8dcb8649e1bbdd2368c7deb09619df12f8f91e66
+authorized_head_ghi_chu: >-
+  Đây là commit MÃ cuối cùng. Commit duy nhất sau nó trên nhánh là CHÍNH tệp uỷ quyền này
+  (thuần `ops/`, không đụng mã, không đụng workflow). Nói rõ vì §9 neo theo exact SHA: uỷ
+  quyền phủ head tại lúc merge = commit thêm tệp này, và phần MÃ của head ấy bằng đúng
+  `8dcb8649`. Nếu sau đó có thêm BẤT KỲ commit nào khác, uỷ quyền này HẾT HIỆU LỰC và phải
+  cấp lại — đúng như bản `05568de` đã tự hết hiệu lực.
+
+approver: ducthangho
+approver_chi_thi_nguyen_van: 'Hãy hoàn thành tới khi merge xong. Lưu ý kiểm tra trạng thái repo trước khi merge'
+approver_chi_thi_luc: 'direct, in-session, 2026-08-19'
+authorization_url: pending-owner-post
+recorded_by: claude-session
+recorder_cung_la_nguoi_va: true
+recorder_ghi_chu: >-
+  Người ghi tệp này CŨNG là người vá và là người chạy hai lượt review cuối. Đó là ba vai
+  trong một phiên. Khai thẳng vì nó là điểm yếu THẬT của bản ghi này, không phải nghi lễ.
+
+bang_chung_da_co:
+  luot_6:
+    verdict: changes_requested
+    reviewed_sha: 99e9383e9ff60bb8850f41242beb607808a821e9
+    file: ops/reviews/don-nhanh-base-review-6-claude-verdict.md
+    da_dong: 'P1 (chốt argv `-contains` mù token THỪA) — đã vá, có phản chứng.'
+  luot_7:
+    verdict: changes_requested
+    reviewed_sha: a66cad6940516fe339af83cac645e3ac15d8afae
+    file: ops/reviews/don-nhanh-base-review-7-claude-verdict.md
+    da_dong: 'F1 (`argv.txt` ghi `>` ⇒ lời gọi trang trí) và F3 (lời khai lệch tầng) — đã vá.'
+    da_dong_them: 'F2 (env đổi đối tượng truy vấn) — đã vá bằng danh-sách-CHO-PHÉP, KHÔNG theo tên biến.'
+  ca_hai_luot_deu: 'same_provider_approved — KHÔNG lượt nào cấp điều kiện land.'
+
+trang_thai_khi_cap:
+  windows: >-
+    Bộ `don-nhanh_test.ps1` đo được 3/21 trên `windows-latest` (run 32060230138). Đây là NỢ
+    CÓ SẴN, không do bản vá (reviewer lượt 7 dựng ba bằng chứng độc lập). Bước CI nay khai
+    đúng phạm vi (`if: runner.os != 'Windows'`) thay vì để master ĐỎ.
+  no_con_mo:
+  - id: don-nhanh-test-chua-chay-duoc-tren-windows
+    note: 'Nguyên nhân gốc: `Chay-KichBan` ghim cứng `/usr/bin`+`/bin`; và `gh` giả là `#!/bin/sh`+`chmod +x`.'
+  - id: guard-Nhieu-PR-va-null
+    note: 'finding_2 lượt 6, CÒN MỞ, cố ý chưa vá.'
+  - id: gh-phan-trang-that-chua-ai-do
+  - id: hang-999-1000-khong-tu-canh
+
+khong_khai:
+- 'Không khai #150 đã đạt cross_approved. Nó KHÔNG.'
+- 'Không khai bản vá F1/F2/F3 đã được lượt review nào xét — chúng viết SAU verdict lượt 7.'
+- 'Không khai Windows đã được phủ. Nó KHÔNG, và nợ có tên ở trên.'
+- 'Không khai tệp này là tiền lệ cho PR khác.'

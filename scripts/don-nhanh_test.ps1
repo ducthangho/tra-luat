@@ -608,10 +608,23 @@ ca 't21_MAC_DINH_phai_TU_CHOI_o_1000_PR' {
         if ($muc -match '^([^=]+)=(.*)$') { $moiTruongCon[$Matches[1]] = $Matches[2] }
     }
     bang ($moiTruongCon.Count -gt 0) "env.txt khong doc ra bien nao — chot nay dang khong do gi"
-    $MIEN_TRU = @('PATH', 'PWD')
+    # MIEN TRU = bien do CHINH VO SO (shell/harness) quan ly, khong phai bang chung script
+    # tu dat. Mien tru o CA HAI phep kiem (them moi VA doi gia tri) — bai hoc tra gia ngay
+    # tren CI: ban dau chi mien tru o phep "doi gia tri", va lượt ubuntu DO that voi
+    # `script THEM bien moi truong cho gh: [PWD]`.
+    # Vi sao chi lo tren runner ma khong lo o may dev: `PWD` co nam trong env cua pwsh hay
+    # khong TUY cach pwsh duoc khoi dong. Trong container dev (pwsh chay tu bash) thi co san
+    # ⇒ `/bin/sh` khong "them" gi (do: sh 137 bien, pwsh 137, hieu = rong). Tren runner
+    # GitHub thi env cua pwsh KHONG co `PWD`, ma `/bin/sh` LUON tu dat no ⇒ bi dem thanh
+    # THEM MOI ⇒ do oan. Dung lop "chay duoc o day" ma CLAUDE.md da ghi.
+    # `SHLVL` `OLDPWD` `_` cung do shell tu quan ly nen mien tru luon — chua thay chung lo
+    # ra o hai noi da do, nhung chung cung ho voi `PWD` va mien tru chung KHONG lam chot cun
+    # di: dot bien bom `GH_REPO`/`GH_HOST`/`GH_CONFIG_DIR` van chet (da do lai sau khi sua).
+    $MIEN_TRU = @('PATH', 'PWD', 'SHLVL', 'OLDPWD', '_')
     $harness = @{}
     Get-ChildItem env: | ForEach-Object { $harness[$_.Name] = $_.Value }
-    $themMoi = @($moiTruongCon.Keys | Where-Object { -not $harness.ContainsKey($_) } | Sort-Object)
+    $themMoi = @($moiTruongCon.Keys |
+        Where-Object { -not $harness.ContainsKey($_) -and $MIEN_TRU -notcontains $_ } | Sort-Object)
     $doiGiaTri = @($moiTruongCon.Keys |
         Where-Object { $harness.ContainsKey($_) -and $harness[$_] -cne $moiTruongCon[$_] -and $MIEN_TRU -notcontains $_ } |
         Sort-Object)

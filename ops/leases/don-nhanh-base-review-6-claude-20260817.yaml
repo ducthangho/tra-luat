@@ -1,0 +1,150 @@
+# Lease REVIEWER lượt 6 — PR #150. PHẠM VI ĐÓNG BĂNG, ĐÚNG MỘT TỆP.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+#
+# `codex` HẾT QUOTA — không còn đường cross-provider. §8 đòi cross-provider cho phạm vi
+# workflow và #150 sửa `.github/workflows/ci.yml` ⇒ lượt này KHÔNG cấp điều kiện land.
+#
+# XÉT GÌ: bản vá cho finding P2 lượt 5 — `gh` giả MÙ VỚI ARGV. Bốn đột biến vào dòng gọi
+# `gh` từng sống 21/21, trong đó một con TÁI TẠO ĐÚNG LỖ GỐC mà cả PR #150 sinh ra để vá.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: don-nhanh-base-review-6-claude-20260817
+role: reviewer
+provider: claude
+reviewer: claude
+executor: claude
+
+cross_provider: false
+sai_lech_giao_thuc: true
+sai_lech_dieu: '§8 — cross-provider bắt buộc cho phạm vi workflow'
+sai_lech_ly_do: '`codex` hết quota'
+sai_lech_ai_chap_nhan: ducthangho
+sai_lech_chap_nhan_luc: 'direct, in-session, 2026-08-17 ("Cấp lượt 6. Sang phiên mới thực hiện tiếp")'
+assurance_target: same_provider_approved
+assurance_KHONG_dat: cross_approved
+khong_cap_dieu_kien_land: true
+
+reviewer_model: claude-fable-5
+reviewer_effort: max
+reviewer_model_do_chu_kho_chi_dinh: true
+
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: 99e9383e9ff60bb8850f41242beb607808a821e9
+branch: ops/don-nhanh-giu-base-pr
+base_sha: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+sha_luot_truoc: 12dd16ea6d92a177898a78fb9a547bda1d601dbb
+target_branch_neu_land: master
+target_pull_request: 150
+
+pham_vi_dong_bang: true
+scope_files_can_xet: 1
+scope_note: >-
+  Delta `12dd16e..99e9383` trong `scripts/`: CHỈ `don-nhanh_test.ps1` (+57/−3).
+  `don-nhanh.ps1` KHÔNG đổi. Mọi thứ khác ⇒ `Nợ khai báo`.
+
+prompt_path: ops/prompts/don-nhanh-base-review-6-claude-20260817.md
+prompt_sha256_required: 84f32f22e150b2464daade9d2df1ec1ec39f1f6cad24a3cc0c9413314943e42f
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-17 ("Cấp lượt 6. Sang phiên mới thực hiện tiếp")'
+recorded_by: claude-session
+recorder_cung_la_nguoi_va: true
+
+leased_at_utc: '2026-08-17T17:45:00Z'
+lease_expires_at_utc: '2026-08-18T17:45:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 0
+
+boi_canh_luot_5:
+  finding_P2: >-
+    `Dung-Gh-Gia` sinh `gh` giả MÙ VỚI ARGV — in cùng một JSON bất kể được hỏi gì. Mô phỏng
+    TRẠNG THÁI nhưng không mô phỏng HỢP ĐỒNG TRUY VẤN. Bốn đột biến sống 21/21:
+    `--limit $TranPR`→`--limit 200` · bỏ hẳn `--limit` (mặc định gh là 30) ·
+    `--state open`→`--state closed` · `--json headRefName,baseRefName`→`--json headRefName`
+    — con cuối TÁI TẠO ĐÚNG LỖ GỐC của PR #150, bằng MỘT token.
+  ban_va: '`gh` giả ghi `"$@"` ra `argv.txt` (đường dẫn TUYỆT ĐỐI); `t21` đòi đủ sáu token.'
+  ba_thu_nho_kem_theo:
+  - '`t20` đòi dòng `cua 999 PR dang mo` — trước nó xanh-vì-lý-do-sai khi helper trả rỗng, và chỉ `t21` bắt được (t21 là ĐIỂM HỎNG ĐƠN).'
+  - '`Nhieu-PR` guard `$So -lt 1` (bẫy `1..0` chạy ngược; bẫy unwrap mảng-đơn `.Count` đếm KEY).'
+  - 'Chú thích `t19` sửa một LỜI KHAI SAI của người vá: "10/9 là cặp nhỏ nhất" là sai; nhỏ nhất là ĐẾM = 10.'
+
+muc_kiem:
+- id: chot-argv-co-that-su-giet-bon-con-khong
+  note: >-
+    Dựng lại cả bốn và CHẠY. VÀ phản chứng cho chính chốt: gỡ ba dòng đòi argv rồi chạy
+    `--limit 200` — nó phải SỐNG LẠI 21/21. Không có phản chứng ấy thì không biết `t21`
+    đang đo argv hay đo thứ khác.
+- id: chot-argv-chi-nam-o-MOT-ca
+  note: >-
+    Đúng bệnh vừa chữa cho `t20` (điểm hỏng đơn). Đột biến nào làm `t21` KHÔNG CHẠY TỚI phần
+    đòi argv (ném sớm hơn) mà suite vẫn xanh? Thứ tự các `bang` trong `t21` có làm chốt argv
+    thành CHẾT LẶNG trong ca nào không?
+- id: argv-txt-ghi-de-moi-lan-goi
+  note: >-
+    Script gọi `gh` mấy lần một lượt? Nếu >1 thì tệp chỉ giữ lần CUỐI — chốt đang đo lời gọi
+    nào? Giữa các CA, thư mục `gh` giả là mới hay dùng lại (rác ca trước lọt sang ca sau)?
+- id: contains-khong-kiem-thu-tu-va-token-thua
+  note: >-
+    CÂU ĐÁNG SOI NHẤT. `-contains` không kiểm thứ tự, không kiểm token THỪA. Thêm
+    `--limit 30` SAU `--limit 1000` (cờ sau thắng ở nhiều CLI) — `t21` còn đỏ không?
+    NẾU KHÔNG thì đây là P1, vì đúng lớp `--limit` vừa vá.
+- id: t20-ghim-theo-CAU-CHU-dau-ra
+  note: >-
+    Đổi câu in trong `don-nhanh.ps1` (việc chính đáng) sẽ làm `t20` đỏ oan. Cái giá ấy chấp
+    nhận được không, hay có đường ghim theo HÀNH VI rẻ tương đương? Lượt 5 gợi ý một đường
+    (cho một PR trỏ base là nhánh thật rồi đòi nhánh ấy được giữ) — rẻ hơn hay đắt hơn?
+- id: dot-bien-song-sot-thu-tu
+  note: 'Ba lượt gần nhất mỗi lượt tìm ra ít nhất một. Còn không?'
+
+so_lieu_nguoi_va_bao:
+  bo_test: 21/21 — pwsh 7.4.6, TMPDIR=/dev/shm
+  bon_dot_bien_argv_nay_da_chet: 'A1 --limit 200 · A2 bỏ --limit · A3 --state closed · A4 bỏ baseRefName — mỗi con 20/21, đỏ t21'
+  phan_chung_cho_chinh_chot: 'gỡ chốt argv + A1 ⇒ 21/21, tức A1 SỐNG LẠI'
+  t20_doc_lap: 'helper-rỗng ⇒ 18/21, `t20` ĐỎ thật (trước chỉ `t21` bắt)'
+  helper_guard: '`Nhieu-PR`: −1→0, 0→0, 1→1, 2→2'
+  cong_khac: 'eol ok=true checked=398 violations=0 · lease_publish 31/31 · release-verify ok=true failed=0 · golden rc=0 · file_count 179'
+
+hai_loi_cua_nguoi_va_o_luot_truoc_tu_khai:
+- id: loi-khai-sai-trong-chu-thich-t19
+  note: >-
+    Người vá viết "10/9 là CẶP SỐ nhỏ nhất phân biệt số học với chuỗi" — SAI, reviewer lượt 5
+    bắt được. Đo lại: (10,2) và (10,8) cũng phân biệt; (9,2) thì không. Nhỏ nhất thật là
+    ĐẾM = 10. Cay ở chỗ commit ngay trước đó người vá vừa ĐO lời khai của `t21`.
+- id: chot-argv-lan-dau-khong-do-duoc-gi
+  note: >-
+    Báo "gh giả không ghi được argv.txt" — HAI lỗi chồng nhau: `dirname "$0"` cho `.` vì `gh`
+    tìm qua PATH, và `Dung-Gh-Gia` trả về THƯ MỤC nên `Split-Path -Parent` trỏ lên một cấp.
+    Nếu chốt ấy IM LẶNG thay vì báo "đang không đo gì" thì cả hai đã vào commit.
+
+no_da_khai_KHONG_neu_lai:
+- id: bo-qua-lop-pr-khong-kiem-gi
+- id: phu-thuoc-gh
+- id: hai-duong-se-troi-lech
+- id: tl-selftest-khong-do-duoc
+- id: lease-khong-nam-trong-cay-duoc-review
+- id: gh-phan-trang-that-chua-ai-do
+- id: hang-999-cua-t20-khong-tu-canh
+  note: 'Lượt 5 khuyên KHÔNG vá — test không tự canh được hằng của chính nó. Người vá theo.'
+- id: dot-bien-pad-chuoi-tuong-duong-hanh-vi
+
+canh_bao_moi_truong_luc_cap: >-
+  `pwsh` KHÔNG cài sẵn; tarball giải nén ra `pwsh` THIẾU BIT EXEC (rc=126) — `chmod +x`,
+  KHÔNG phải `/dev/shm` noexec. `TMPDIR=/dev/shm`. `/dev/shm` BỊ XOÁ khi phiên khởi động lại
+  — kiểm công cụ có mặt TRƯỚC khi đọc số. `release-verify --strict` trong worktree review đỏ
+  vì `nhiem_vu.txt` của harness; đo trên `git archive HEAD` thì xanh.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T17:40:56Z'
+master_sha_at_grant: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+lease_song_khac_luc_cap: 'Lease lượt 1-5 và lượt kiến trúc của #150 đã đóng. Không có lease nào khác đang mở.'
+uy_quyen_lien_quan: >-
+  `ops/uy-quyen-150-same-provider-20260817.yaml` HẾT HIỆU LỰC (neo `05568de`; head đã đổi
+  HAI lần từ đó — §9). Muốn land thì chủ kho cấp uỷ quyền MỚI neo SHA cuối cùng.

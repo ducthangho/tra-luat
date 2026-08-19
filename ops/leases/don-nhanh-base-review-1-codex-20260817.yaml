@@ -1,0 +1,135 @@
+# Lease REVIEWER — PR #150: `don-nhanh` giữ cả BASE của PR đang mở + fail-close.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+#
+# VÌ SAO CÓ LƯỢT NÀY. `don-nhanh.ps1` XOÁ NHÁNH REMOTE. Bản trước chỉ loại `headRefName`
+# của PR đang mở khỏi danh sách xoá; xoá nhầm một nhánh đang là BASE thì GitHub ĐÓNG các
+# PR nhắm vào nó, và tạo lại nhánh KHÔNG mở lại chúng — tức thao tác không hoàn tác được
+# ở phía PR. Lớp "chỉ xoá nhánh đã merge" KHÔNG che ca này: một nhánh tích hợp có thể ĐÃ
+# vào master trong khi vẫn còn PR mở nhắm vào nó.
+#
+# CHỖ ĐÁNG SOI NHẤT KHÔNG PHẢI BẢN VÁ MÀ LÀ BỘ TEST. Script này land ngày 17-08 mà KHÔNG
+# có phản chứng nào, nên lượt này thêm 9 ca đầu tiên cho nó. Một bộ test mới do chính
+# người vá viết là chỗ dễ đo ĐỒ GIẢ thay vì đo HỢP ĐỒNG — đúng lớp đã kéo chuỗi
+# `doctor-github-mcp` dài tám lượt. Mục kiểm 1 và 2 nhắm thẳng vào đó.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: don-nhanh-base-review-1-codex-20260817
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+reviewer_note: người vá là `claude` ⇒ §8 bắt reviewer khác nhà cung cấp
+assurance_target: cross_approved
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: 5bc635d2ea64bcedd41378cc33c6b4cdbf03f164
+branch: ops/don-nhanh-giu-base-pr
+base_sha: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+target_branch_neu_land: master
+target_pull_request: 150
+
+scope_files: 6
+scope_note: >-
+  Diff so master `1a6aedf`: `.github/workflows/ci.yml` (+14) · `RELEASE_MANIFEST.json` (±5
+  dòng, tái sinh vì `release.py` đổi) · `scripts/don-nhanh.cmd` (+7/−1, bảng mã thoát) ·
+  `scripts/don-nhanh.ps1` (+105/−13) · `scripts/don-nhanh_test.ps1` (MỚI, 240) ·
+  `scripts/tl_core/release.py` (+1/−1, thêm tên tệp test vào danh sách loại khỏi GÓI).
+  Tệp thứ bảy là finding.
+
+prompt_path: ops/prompts/don-nhanh-base-review-1-codex-20260817.md
+prompt_sha256_required: 5fb34f0571fa10d0eae2b6b3f606f1820f44ced8ab6c87ec0b6a41431090d2d1
+
+granted_by: ducthangho
+granted_on_instruction: direct, in-session, 2026-08-17 ("cấp lease review cho #150 rồi chạy đi")
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  KHAI THẲNG: phiên ghi lease này CHÍNH LÀ phiên đã vá, và cũng là phiên viết bộ test.
+  Đó là lý do mục kiểm 1-2 không hỏi "bộ test có đủ không" (câu hỏi ý kiến) mà đòi
+  reviewer TỰ TÌM một đột biến sống sót — ba đột biến trong PR do chính người viết test
+  nghĩ ra, nên chúng chỉ chứng minh test khớp với trí tưởng tượng của người ấy.
+
+leased_at_utc: '2026-08-17T12:45:00Z'
+lease_expires_at_utc: '2026-08-18T12:45:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 0
+attempts_note: Việc dev-side ngoài packet nên KHÔNG tiêu lượt.
+
+muc_kiem:
+- id: bo-test-do-hop-dong-hay-do-do-gia
+  note: >-
+    `git` là git THẬT, "remote" là kho bare THẬT, chỉ `gh` là giả. Đồ giả ấy có mô phỏng
+    TRẠNG THÁI hay đang diễn KỊCH BẢN? Tiền lệ đã trả giá: đồ giả của `ops-don-ref` cho
+    40/40 trong khi đột biến XOÁ HẲN lệnh xoá vẫn qua.
+- id: tim-mot-dot-bien-song-sot
+  note: >-
+    CÂU QUAN TRỌNG NHẤT. Ba đột biến trong PR đều chết đúng ca — nhưng do chính người viết
+    test nghĩ ra. Tìm cái THỨ TƯ mà bộ test không bắt được. Prompt gợi ý sáu hướng, không
+    giới hạn ở đó.
+- id: glob-trong-danh-sach-giu
+  note: >-
+    `Duoc-Giu` khớp bằng `-like` (GLOB) và tên nhánh PR KHÔNG được thoát. Hỏi ĐÚNG câu:
+    điều đó làm cổng CHẶT hơn (giữ oan, vô hại) hay LỎNG hơn (xoá oan, chết người)?
+    Trả lời bằng phép thử chạy được.
+- id: fail-close-co-dung-truoc-moi-lenh-xoa-khong
+  note: >-
+    Đọc THỨ TỰ THỰC THI, không đọc ý định. Có đường nào tới `git push --delete` mà không
+    đi qua chốt ấy không?
+- id: buoc-CI-moi-va-actionlint
+  note: >-
+    `shell: pwsh` + `run: pwsh -NoProfile -File …` — có gọi pwsh LỒNG NHAU không, và mã
+    thoát lượt trong có tới runner không (lớp `rc=0 mà rỗng`)? Dùng `actionlint` THẬT;
+    thiếu thì khai KHÔNG ĐO ĐƯỢC, đừng thay bằng PyYAML.
+
+so_lieu_nguoi_va_bao:
+  bo_test: 9/9 — pwsh 7.4.6 tải vào container, chạy THẬT
+  bang_chung_duong: >-
+    Chạy CHÍNH bộ test này lên BẢN MASTER CHƯA VÁ ⇒ 5/9, đỏ đúng t1 t5 t6 t9. Đây là thứ
+    chứng minh lỗ có thật VÀ test có răng, mạnh hơn mọi số 9/9.
+  dot_bien: 'M1 chỉ giữ headRefName ⇒ 7/9 (đỏ t1 t9) · M2 gỡ fail-close ⇒ 8/9 (đỏ t5) · M3 không nạp PR vào danh sách giữ ⇒ 6/9 (đỏ t1 t2 t9)'
+  actionlint: rc=0 trên 5 workflow của nhánh; nền master cũng rc=0 ⇒ delta 0
+  cong_khac: 'eol-policy ok=true checked=377 violations=0 · eol selftest 30/30 · lease_publish 31/31 · release-verify ok=true failed=0 · golden-test rc=0 và references/golden/ 0 dòng đổi · determinism/doc-claims/workflow-audit/release-check rc=0'
+  file_count: 179 — KHÔNG đổi (tệp test vào `_RELEASE_EXCLUDE_NAMES_ANYWHERE`)
+  canh_bao_ve_so: >-
+    9/9 là số CÓ `pwsh`. Môi trường thiếu `pwsh` thì mọi mục cần nó là KHÔNG ĐO ĐƯỢC —
+    đừng suy từ đọc code, và đừng đọc 9/9 thành "đã kiểm" ở máy không chạy được nó.
+
+no_nguoi_va_tu_khai:
+- id: tl-selftest-khong-do-duoc
+  note: >-
+    `pyo3_runtime.PanicException` khi tiến trình con nạp `cryptography`. Nền `origin/master`
+    SẠCH hỏng Y HỆT ⇒ delta 0. KIỂM LỜI KHAI NÀY — nếu nền master không hỏng thì đó là finding.
+- id: bo-qua-lop-pr-khong-kiem-gi
+  note: Cờ `-BoQuaLopPR` tin người gõ. Có chủ đích, nhưng nói thẳng.
+- id: phu-thuoc-gh
+  note: Không có `gh` thì không đọc được base bằng git thuần ⇒ regression tiện dụng CÓ CHỦ ĐÍCH.
+- id: hai-duong-se-troi-lech
+  note: '`.cmd` chỉ chạy Windows; CI gọi thẳng `.ps1`.'
+
+ngoai_pham_vi_da_biet:
+- id: khong-doi-hanh-vi-xoa-nhanh-cua-workflow
+  note: '`ops-don-ref.yml` KHÔNG bị đụng. Vùng `ops/**` vẫn cấm xoá qua workflow.'
+- id: manifest-tai-sinh
+  note: >-
+    `RELEASE_MANIFEST.json` đổi 5 dòng vì `release.py` đổi — băm tệp ấy + 3 tổng hợp dẫn
+    xuất. `file_count` giữ 179, golden 0 dòng đổi. Không phải thay đổi nội dung gói.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T12:40:42Z'
+master_sha_at_grant: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+lease_song_khac_luc_cap: >-
+  Chuỗi `doctor-github-mcp-review-1..9` và `tao-tag-luu-tru-review-1` đã đóng (#146, #147
+  đã land). Không có lease review nào khác đang mở.
+canh_bao_moi_truong_luc_cap: >-
+  `codex` KHÔNG bị chặn, nhưng ảnh chụp `CODEX_AUTH_JSON` đã CŨ ~33h — refresh token xoay
+  vòng nên bản trong biến có thể đã vô hiệu. Môi trường reviewer có thể THIẾU `pwsh` và
+  `actionlint`; thiếu thì khai KHÔNG ĐO ĐƯỢC cho đúng mục, đừng hạ tiêu chuẩn.
+posted_comment_id: 5316198183   # workflow ghi, ĐỪNG sửa tay

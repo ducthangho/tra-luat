@@ -1,0 +1,69 @@
+# BIÊN NHẬN — cross-review lượt 1 của PR #150 (`don-nhanh` giữ BASE của PR đang mở).
+# `changes_requested`, ĐÚNG MỘT finding, và finding ấy là P1 thật.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+lease_id: don-nhanh-base-review-1-codex-20260817
+provider: codex
+role: reviewer
+verdict: changes_requested
+assurance: cross_approved
+reviewed_sha: 5bc635d2ea64bcedd41378cc33c6b4cdbf03f164
+
+verdict_path: ops/reviews/don-nhanh-base-review-1-codex-verdict.md
+verdict_sha256: 79ddef62b62da4c4cebf382a1e33b146577927486231c66ccbfc4a8e0f2e4376
+verdict_bytes: 3579
+verdict_nguon: 'scratchpad/runs/a2a5ed4a/stdout.log (launcher, ma_thoat=0, 347.1s)'
+verdict_doi_chieu: '`diff -q` nguồn ↔ tệp đã chép: khớp từng byte'
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/e872e98e7b3612baf71fc177b54ce8b3bafd033d/ops/reviews/don-nhanh-base-review-1-codex-verdict.md
+
+published_first:
+  branch: ops/don-nhanh-giu-base-pr
+  commit: e872e98e7b3612baf71fc177b54ce8b3bafd033d
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_tag: null
+truy_xuat_ghi_chu: >-
+  #150 CHƯA land. Commit công bố hiện chỉ được nhánh `ops/**` giữ. Bền khi #150 merge bằng
+  MERGE COMMIT, hoặc khi tạo tag `luu-tru/*` trỏ `e872e98`. Chưa làm cái nào.
+
+finding:
+  noi_dung: >-
+    `gh` THOÁT KHÁC 0 nhưng vẫn in JSON HỢP LỆ ⇒ fail-close bị MỞ TOANG. Script không kiểm
+    `$LASTEXITCODE`, `ConvertFrom-Json` thành công, `$doDuocPR = $true`, rồi nhánh đã merge
+    BỊ XOÁ THẬT.
+  reviewer_chay_that: 'gh in `[]` + exit 1 ⇒ script rc=0 và xoá `ops/xong-viec`; ca đòi rc=13 + remote không đổi'
+  vi_sao_nguy_hiem_nhat_trong_ho: >-
+    JSON HỢP LỆ làm mọi phép kiểm NỘI DUNG đều xanh; chỉ mã thoát tố cáo. Đây là biến thể
+    khó thấy nhất của "rc=0 nói dối".
+  cho_cay: >-
+    Hàm `Chay-Git` trong CHÍNH TỆP ẤY đã dặn "đừng dùng `$LASTEXITCODE` sau một pipeline —
+    bắt NGAY sau lời gọi", và lời gọi `gh` ngay bên dưới vi phạm nó. MỘT LỜI DẶN CHỈ BẢO VỆ
+    ĐOẠN MÃ NÓ ĐƯỢC VIẾT RA, KHÔNG BẢO VỆ ĐOẠN KẾ BÊN.
+  da_dong: true
+  dong_o_sha: 1511dd75a5a4f65c623738f2dc91e384b96bad9a
+  nguoi_va_tai_hien_doc_lap: 'chạy bộ 13 ca lên bản 5bc635d ⇒ 11/13, ĐỎ đúng t10 — không tin lời'
+
+reviewer_dong_ba_cau_hoi_bang_phep_do:
+  do_gia_gh: 'mô phỏng TRẠNG THÁI (danh sách PR bất biến trong một lượt), KHÔNG diễn kịch bản'
+  glob_injection: >-
+    KHÔNG khả thi: tên ref Git không cho `* ? [ \`. Họ đo `"x-other" -like "x*"` = True
+    nhưng `x*` không thể là tên ref ⇒ glob chỉ làm cổng CHẶT hơn, không lỏng hơn.
+  fail_close_dung_truoc: 'nằm trước vòng DUY NHẤT gọi `git push --delete`; không có đường vượt'
+  pwsh_long_nhau: 'có, nhưng `exit 7` bên trong ⇒ tiến trình ngoài rc=1 ⇒ runner VẪN đỏ'
+
+reviewer_khong_xac_nhan_duoc:
+- id: tl-selftest
+  note: 'lượt chạy so sánh không trả báo cáo diễn giải được ⇒ KHÔNG xác nhận và KHÔNG bác lời khai `PanicException` của người vá'
+
+delivered: true
+delivered_by: codex-reviewer-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-17T15:05:00Z'
+receipt_khong_khai:
+- 'Không khai finding này là finding DUY NHẤT có thể có ở SHA ấy — lượt 3 sau đó còn tìm ra một lỗ khác trong bộ test.'
+- 'Không khai `evidence_url` là bền: #150 chưa land, chưa có tag.'

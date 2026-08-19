@@ -220,6 +220,34 @@ Ba lần thất bại không chứng minh **không tồn tại** — chúng ch�
 không đi được. Đường thứ tư đã nằm sẵn trong kho từ 16-08, kèm chú thích giải thích chính
 xác vì sao nó tồn tại. Cùng họ với bài học đã ghi ở §1.3: **đo đúng thứ mình đang hỏi.**
 
+### 1.7 Bẫy thực thể hoá của GitHub — danh sách ký tự RỘNG HƠN thứ đã ghi
+
+Bản ghi cũ nêu tầng vận chuyển GitHub đổi `"` thành thực thể và `<` thành thực thể. **Danh
+sách đó THIẾU.** Đo được 19-08 khi đăng Issue #188:
+
+```
+'   ⇒  &#39;      6 lần
+>   ⇒  &gt;       4 lần
+```
+
+Và chúng nằm trong **KHỐI MÃ CÓ RÀO** (ba dấu huyền), không phải code span nội dòng. Trong
+khối rào, GitHub **không giải mã** thực thể ⇒ nó hiện nguyên văn ra màn hình.
+
+**Phép tiền kiểm sai ở đâu.** Tôi soi bằng một biểu thức chỉ khớp span nội dòng, và chỉ tìm
+ba ký tự. Nó báo *sạch* trên một thân có **10** thực thể. Sai hai tầng cùng lúc: **hẹp về
+ký tự** và **hẹp về vùng**.
+
+**Phép kiểm đúng — bốn ký tự, hai vùng:**
+
+```
+ky tu can soi : dau nhay don · dau nhay kep · dau bé hon · dau lon hon
+vung can soi  : khoi ma co rao  VA  span noi dong
+```
+
+**Và phép đo cuối cùng vẫn là ĐỌC NGƯỢC VỀ, so sha256 của thân gửi với thân đọc về.** Chính
+nó bắt được lần này, sau khi tiền kiểm đã cho qua. Tiền kiểm là tiện lợi; đọc-ngược mới là
+bằng chứng.
+
 ## 2. Thẩm định AG-T0-03: một lỗi làm hỏng đúng tính năng của chính packet
 
 ### 2.1 Phép đo

@@ -268,10 +268,22 @@ Việc hai lease không chồng lấn hoàn toàn dựa vào **người cấp le
 thì rủi ro thấp; với hai executor song song thì rủi ro nhân đôi trong khi chốt vẫn **bằng
 không**.
 
-**Ứng viên packet mới — `PLAT-X1`:** thêm cổng cơ học kiểm giao write-set giữa các lease
-đang mở, chặn khi chồng lấn. Write set gọn (`.claude/dev/packet_loop.py` + test),
-`sensitive`. **Đây là điều kiện tiên quyết nếu số executor song song vượt quá hai.** Chưa
-mở Issue — chờ người giữ quyết.
+**Packet `PLAT-X1` — Issue #188, `state:ready`, chưa được bắt đầu.** Thêm cổng cơ học
+kiểm giao write-set giữa các lease đang mở, chặn khi chồng lấn. **Đây là điều kiện tiên
+quyết nếu số executor song song vượt quá hai.**
+
+Write set là **`ops/lease_publish.py` + test**, KHÔNG phải `packet_loop.py` như bản nháp
+đầu của mục này ghi. Đo lại mới thấy chỗ đúng:
+
+```
+ops/leases/*.yaml       ⇒ đã khai write_set, scope_files, scope_note (YAML máy đọc được)
+ops/lease_publish.py    ⇒ đã LÀ cổng đăng lease, đã có hàm kiem, đã có 31/31 test
+                          nhưng grep write_set trong nó ⇒ RỖNG
+```
+
+Tiền đề có sẵn, nên chốt đặt vào chỗ đã có thay vì dựng tầng mới. Issue #188 nêu bốn quyết
+định thiết kế phải chốt trước khi viết mã, trong đó nặng nhất là *thế nào là một lease đang
+mở* — vì state của `packet_loop` không liên phiên, mà bài toán thì liên phiên.
 
 ## 8. Ràng buộc áp cho mọi packet trong kế hoạch này
 

@@ -201,11 +201,41 @@ Kế hoạch ghi `scripts/test_fragments/<packet>.py`; thi công làm khác, và
 được là test tàng hình với cả selftest lẫn CI (§3.2). Phải chọn một: cưỡng chế quy ước
 fragment, hoặc bắt buộc khai bước CI trong Packet Spec. Bản vá hiện tại đi đường thứ hai.
 
-**(c) Ngân sách review MÂU THUẪN giữa hai kế hoạch.**
-Kế hoạch mới: tối đa **2 vòng** model review mỗi PR. `W0-R1` của kế hoạch cũ vừa xây
-xong "ngân sách review tách khỏi ngân sách executor + Review Rescue Checkpoint" và đã
-chạy **4 vòng**. Hai mô hình không tương thích — phải quyết một trước khi nhận packet
-review tiếp theo.
+**(c) Ngân sách review — ĐÃ CHỐT: 2 vòng.**
+
+Người giữ kho đã quyết: lấy trần **2 vòng** của kế hoạch mới làm **trần canon của cả
+kho**, áp mọi lane và mọi provider. Đã ghi vào cả ba tài liệu kế hoạch.
+
+Ba chi tiết phải nói rõ, vì đo được và không hiển nhiên:
+
+**1. Kế hoạch cũ không phải "4 vòng" — nó là 3.** §8 của
+`ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md` ghi *"chưa approve sau call 2 **hoặc ba vòng
+code/review tổng**, dừng"*. Tức trần cũ là **3 vòng**, đếm lẫn với một trần **2 lời
+gọi**. Vậy `W0-R1` chạy **4 vòng** là **vượt cả trần cũ**, không chỉ vượt trần mới.
+
+**2. Không có gì chặn nó — và đó chính là tiền đề của `#177`.** Đo được trên
+`.claude/dev/packet_loop.py`: `review_rounds_used` chỉ được khởi tạo (dòng 638) và
+**tăng** (dòng 997). Không có `review_rounds_limit`, không nơi nào đọc nó để chặn.
+
+**3. "2 vòng" rơi vào trục CHƯA CÓ TRẦN, không phải trục đang có trần 2.**
+Hai bộ đếm, hai trục khác nhau, đã bị lẫn một lần:
+
+| trục | bộ đếm | hằng | cưỡng chế |
+|---|---|---|---|
+| **vòng** — thứ vừa chốt | `review_rounds_used` | *không có* | **không có gì cả** |
+| **lời gọi** — trục chi phí | `codex_review_calls_used` | `MAC_DINH_TRAN_REVIEW_CALL = 2` | có — `checkpoint` + `RC_TRAN` |
+
+Chính chú thích trong `W0-R1` viết: *"Khác `codex_review_calls_used`: một vòng có thể
+tốn nhiều lời gọi."* Nên trần 2 lời gọi sẵn có **không** thoả điều khoản 2 vòng.
+
+**Hệ quả cho phạm vi `#177`.** `#177` (W0-R1B) vốn chỉ nhắm làm cho trần **lời gọi**
+hết tự nguyện. Quyết định này **mở rộng nó**: phải thêm cả `review_rounds_limit`
+(mặc định 2) và dệt nó vào đường bắt buộc, với lượt `void` thuộc `LY_DO_VOID` **không**
+tính vào trần vòng. Không làm phần này thì điều khoản vừa chốt vẫn chỉ là kỷ luật của
+người vận hành, không phải cổng.
+
+**Không hồi tố `W0-R1`.** Bốn vòng đã chạy là sự thật lịch sử, không xoá được và không
+cần xoá. Trần mới áp cho packet nhận từ thời điểm chốt trở đi.
 
 **(d) Kế hoạch Antigravity §3 tự mâu thuẫn với kế hoạch đa provider §12.**
 §12 cấm lưu trạng thái động (số PR, đã land chưa, nợ review) trong tài liệu kế hoạch

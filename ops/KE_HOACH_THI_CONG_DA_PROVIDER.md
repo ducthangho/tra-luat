@@ -242,9 +242,34 @@ Receipt không được nâng review thành `cross_approved`.
 
 ## 10. Non-convergence
 
+> **ĐÃ CHỐT (quyết định của người giữ kho).** Điều khoản này là **trần review CANON
+> của cả kho**, áp cho mọi lane và mọi provider — không riêng luồng ChatGPT. Nó thay
+> thế trần của `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md` §8 (2 lời gọi *hoặc* ba vòng
+> code/review tổng). Khi hai tài liệu lệch nhau, **điều khoản này thắng**.
+
 Mỗi PR tối đa:
 
 `2 model review rounds`
+
+**Đếm theo VÒNG, không theo LỜI GỌI.** Hai đại lượng này khác nhau và đã bị lẫn một
+lần: một vòng có thể tốn nhiều lời gọi (reviewer bị void vì quota/hạ tầng rồi gọi lại
+vẫn là **một** vòng). Ánh xạ sang bộ đếm trong `.claude/dev/packet_loop.py`:
+
+| đại lượng | bộ đếm | trạng thái cưỡng chế |
+|---|---|---|
+| **vòng** — thứ điều khoản này chốt | `review_rounds_used` | **CHƯA CÓ TRẦN** — xem nợ bên dưới |
+| lời gọi — trục chi phí, khác trục này | `codex_review_calls_used` / `..._limit` | có trần (mặc định 2), cạn thì `checkpoint` + `RC_TRAN` |
+
+Một **vòng** = một lượt reviewer trả verdict trên một exact head, cộng lượt executor
+sửa theo verdict đó. Lượt reviewer bị `void` vì lý do thuộc `LY_DO_VOID`
+(quota · rate_limit · infrastructure · permission) **không tính** vào trần vòng.
+
+**NỢ CƯỠNG CHẾ — trần này hiện là TỰ NGUYỆN.** Đo được trên
+`.claude/dev/packet_loop.py`: `review_rounds_used` chỉ được khởi tạo và **tăng**, không
+có `review_rounds_limit` và không nơi nào đọc nó để chặn. Bằng chứng lịch sử: packet
+`W0-R1` đã chạy **4 vòng** review — vượt cả trần 3 vòng của kế hoạch cũ lẫn trần 2 vòng
+ở đây — và không có gì dừng nó lại. Cho tới khi trần được dệt vào đường bắt buộc,
+**đừng đọc con số này như một cổng**; nó là kỷ luật của người vận hành.
 
 Sau vòng hai chưa approve:
 

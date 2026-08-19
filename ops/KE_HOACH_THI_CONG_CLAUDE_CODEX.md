@@ -483,7 +483,16 @@ Một PR được chọn Codex có nhịp:
 2. Đóng băng branch; Codex call 1 review toàn diff theo hai trục.
 3. Executor nhận toàn bộ stable finding IDs, sửa một batch, chạy lại phản chứng và tạo exact head mới.
 4. Chỉ dùng Codex call 2 khi policy Review Class cho phép và còn P0/P1/cross-cutting hoặc cần reverify.
-5. Nếu chưa approve sau call 2 hoặc ba vòng code/review tổng, dừng Codex và mở Review Rescue Checkpoint.
+5. Nếu chưa approve sau **2 vòng review**, dừng và mở Review Rescue Checkpoint.
+
+> **TRẦN ĐÃ ĐỔI — đọc kỹ.** Nhịp 5 bước trên vẫn đúng, nhưng con số thì không còn.
+> Bản gốc của mục này ghi *"sau call 2 **hoặc ba vòng** code/review tổng"* — tức trần
+> **3 vòng**, đếm lẫn với trần **2 lời gọi**. Người giữ kho đã chốt trần CANON là
+> **2 VÒNG**, đếm theo `review_rounds_used`, quy định tại
+> `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10. Điều khoản đó thắng mục này.
+>
+> Trần lời gọi (`codex_review_calls_used`, mặc định 2) **không bị bỏ** — nó là trục
+> CHI PHÍ, khác trục vòng, và vẫn cưỡng chế độc lập. Đừng gộp hai trục làm một.
 
 Tại checkpoint, human chọn một trong ba đường:
 
@@ -492,7 +501,8 @@ Tại checkpoint, human chọn một trong ba đường:
 - **Remediation Slice:** successor giữ finding IDs/history/dependency; xử lý riêng hoặc redesign.
 - **Không tách:** finding cắt invariant/contract chung ⇒ revision Packet/Mission bằng MCR hoặc pause thiết kế.
 
-Cùng error shape lần ba phải đưa ra quyết định về cách làm, không mở vòng vá thứ tư. Reviewer không bao giờ sửa
+Cùng error shape lần hai phải đưa ra quyết định về cách làm, không mở vòng vá thứ ba
+(hạ từ "lần ba/vòng thứ tư" cho khớp trần 2 vòng đã chốt). Reviewer không bao giờ sửa
 branch; “auto-fix” chỉ là router trả finding cho Executor hợp lệ.
 
 ## 9. Evidence bắt buộc cho mỗi Packet

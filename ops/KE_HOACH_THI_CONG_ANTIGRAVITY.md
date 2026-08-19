@@ -77,7 +77,7 @@ graph TD
 5. **Publishing & Readback:** Đăng PR và review note qua GitHub route đã chứng minh; đọc ngược để đối soát byte/hash.
 6. **CI Gate Verification:** Tất cả required checks chạy trên exact head; required check bị skipped hoặc failed $\rightarrow$ **BLOCKED**.
 7. **Human Land:** Human Approver duyệt và land exact SHA; head đổi $\rightarrow$ toàn bộ review và CI cũ bị vô hiệu (stale).
-8. **Non-Convergence Stop:** Tối đa 2 vòng review AG cho cùng một PR. Sau 2 vòng chưa đạt approve $\rightarrow$ dừng phiên, tách Stable Slice hoặc revision Packet Spec.
+8. **Non-Convergence Stop:** Tối đa 2 vòng review cho cùng một PR — **không riêng AG**, đây là trần canon của cả kho (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10). Đếm theo `review_rounds_used`, KHÔNG theo `codex_review_calls_used` (một vòng có thể tốn nhiều lời gọi). Sau 2 vòng chưa đạt approve $\rightarrow$ dừng phiên, tách Stable Slice hoặc revision Packet Spec. Lưu ý: trần này hiện CHƯA được cưỡng chế bằng mã — xem nợ ở §10 của tài liệu canon.
 
 ---
 

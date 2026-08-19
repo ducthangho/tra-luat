@@ -19,10 +19,15 @@ rem
 rem  Double-click                -> CHI IN se xoa gi (mac dinh AN TOAN, khong xoa)
 rem  don-nhanh.cmd -Xoa          -> xoa that
 rem  don-nhanh.cmd -GiuThem a,b  -> giu them nhanh a va b
-rem  Moi doi so deu chuyen thang cho don-nhanh.ps1.
+rem  Moi doi so deu chuyen thang cho don-nhanh.ps1 (qua %*).
 rem
 rem  rc: 0 = xong (hoac dry-run) | 1 = con nhanh sot sau khi xoa
 rem      3 = khong phai kho git / git that bai | 12 = thieu git
+rem      13 = TU CHOI XOA vi khong doc duoc danh sach PR dang mo.
+rem           Xoa nham mot nhanh dang la BASE cua PR dang mo se DONG cac PR do, va
+rem           tao lai nhanh KHONG mo lai chung — nen day la fail-close co chu dich,
+rem           khong phai loi. Cach chua: cai `gh`, hoac -GiuThem <base>, hoac neu
+rem           tuong minh -BoQuaLopPR khi da tu kiem.
 rem ============================================================================
 
 set "HERE=%~dp0"

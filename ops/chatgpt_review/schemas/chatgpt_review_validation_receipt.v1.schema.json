@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ChatGPTReviewValidationReceiptV1",
+  "type": "object",
+  "required": [
+    "format",
+    "review_note_sha256",
+    "bundle_id",
+    "bundle_sha256",
+    "schema_valid",
+    "bundle_valid",
+    "reviewed_sha_matches_bundle",
+    "reviewed_tree_matches_bundle",
+    "local_head_matches",
+    "github_pr_head_matches",
+    "provider_claim_valid",
+    "transport_claim_valid",
+    "finding_ids_valid",
+    "model_identity_verified",
+    "session_identity_verified",
+    "authoritative_assurance",
+    "advisory_assurance",
+    "validator_version",
+    "validated_at_utc"
+  ],
+  "properties": {
+    "format": {
+      "type": "string",
+      "const": "chatgpt_review_validation_receipt.v1"
+    },
+    "review_note_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "bundle_id": {
+      "type": "string"
+    },
+    "bundle_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "schema_valid": {
+      "type": "boolean"
+    },
+    "bundle_valid": {
+      "type": "boolean"
+    },
+    "reviewed_sha_matches_bundle": {
+      "type": "boolean"
+    },
+    "reviewed_tree_matches_bundle": {
+      "type": "boolean"
+    },
+    "local_head_matches": {
+      "type": "boolean"
+    },
+    "github_pr_head_matches": {
+      "type": [
+        "boolean",
+        "string"
+      ]
+    },
+    "provider_claim_valid": {
+      "type": "boolean"
+    },
+    "transport_claim_valid": {
+      "type": "boolean"
+    },
+    "finding_ids_valid": {
+      "type": "boolean"
+    },
+    "model_identity_verified": {
+      "type": "boolean",
+      "const": false
+    },
+    "session_identity_verified": {
+      "type": "boolean",
+      "const": false
+    },
+    "authoritative_assurance": {
+      "type": "string",
+      "const": "review_deferred"
+    },
+    "advisory_assurance": {
+      "type": "string",
+      "const": "advisory_review"
+    },
+    "validator_version": {
+      "type": "string"
+    },
+    "validated_at_utc": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

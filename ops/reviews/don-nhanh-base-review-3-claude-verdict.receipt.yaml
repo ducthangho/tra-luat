@@ -1,0 +1,97 @@
+# BIÊN NHẬN — cross-review lượt 3 của PR #150.
+#
+# ĐỌC DÒNG NÀY TRƯỚC MỌI DÒNG KHÁC: lượt này reviewer là `claude` TRONG KHI người vá cũng là
+# `claude`. `assurance: same_provider_approved`, KHÔNG phải `cross_approved`. §8 nói mức ấy
+# MỘT MÌNH không thay mức bắt buộc cho phạm vi workflow, và #150 sửa `.github/workflows/ci.yml`.
+# ⇒ Verdict này KHÔNG cấp điều kiện land. Xem caveat `same-provider-khong-du-land`.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+lease_id: don-nhanh-base-review-3-claude-20260817
+provider: claude
+role: reviewer
+verdict: changes_requested
+assurance: same_provider_approved
+assurance_KHONG_dat: cross_approved
+cross_provider: false
+reviewed_sha: 0ce4d4917afb955c76b17df44657e88eccc6a39f
+
+verdict_path: ops/reviews/don-nhanh-base-review-3-claude-verdict.md
+verdict_sha256: 350f389465ceed4d0d2b0974fc2f99785044a0f80ae2cc173246ff8eb4566de2
+verdict_bytes: 7829
+verdict_nguon: 'scratchpad/runs/8cfdc292/stdout.log (launcher, ma_thoat=0, 657.1s)'
+verdict_doi_chieu: '`diff -q` nguồn ↔ tệp đã chép: khớp từng byte'
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/e872e98e7b3612baf71fc177b54ce8b3bafd033d/ops/reviews/don-nhanh-base-review-3-claude-verdict.md
+
+published_first:
+  branch: ops/don-nhanh-giu-base-pr
+  commit: e872e98e7b3612baf71fc177b54ce8b3bafd033d
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_tag: null
+truy_xuat_ghi_chu: '#150 CHƯA land, chưa có tag.'
+
+sai_lech_giao_thuc:
+  dieu: '§8 — cross-provider bắt buộc cho phạm vi workflow'
+  ly_do: '`codex` sắp hết quota'
+  ai_chap_nhan: ducthangho
+  chap_nhan_luc: 'direct, in-session, 2026-08-17'
+  he_qua: >-
+    Lớp bảo vệ duy nhất còn lại là "phiên mới, read-only" (§2), mỏng hơn hai lượt trước rất
+    nhiều. Prompt nói THẲNG với reviewer rằng họ có CÙNG thiên kiến với người vá.
+
+chot_read_only_DO_chu_khong_tin_co:
+  head_sau: 0ce4d4917afb955c76b17df44657e88eccc6a39f
+  head_khop_neo: true
+  thay_doi_cay: 0
+  ghi_chu: 'Đo bằng `git rev-parse HEAD` + `git status --porcelain` trong worktree dùng một lần, KHÔNG tin cờ quyền.'
+
+xac_nhan_luot_truoc:
+  hoi_quy_luot_2: ĐÓNG
+  phep_do: 'ba vế trên script HEAD thật, kịch bản end-to-end riêng: rc=0 ✓, base `nen/tichhop` giữ ✓, nhánh rác `ops/rac` bị xoá ✓'
+  khop_so_nguoi_va: 'M7 ⇒ 14/15 đỏ t14; M8 ⇒ 13/15 đỏ t10+t15; bản 1511dd7 ⇒ 14/15 đỏ t14 — cả ba khớp'
+
+finding:
+  loai: 'ĐỘT BIẾN SỐNG SÓT (M9) — lỗ trong BỘ TEST, KHÔNG phải bug trong mã'
+  noi_dung: >-
+    Đổi phép kiểm RỖNG từ kiểm NỘI DUNG (`$vanBan`, đã tách stderr) sang kiểm SỐ DÒNG THÔ
+    (`$het.Count -eq 0`) vẫn cho 15/15. Vì `t12` — ca DUY NHẤT kiểm "rc=0 + rỗng" — dùng
+    `gh` giả không in GÌ CẢ kể cả stderr, nên ở đó `$het.Count` CŨNG bằng 0.
+  hanh_vi_HEAD_dung: true
+  hau_qua_that_neu_refactor: >-
+    Reviewer chạy end-to-end: với M9, script in "giu them 0 ref cua 1 PR dang mo" rồi XOÁ
+    THẬT cả base của PR đang mở lẫn nhánh rác. Cơ chế: `ConvertFrom-Json ''` KHÔNG ném (kể
+    cả với `$ErrorActionPreference='Stop'`) mà trả `$null`; `@($null).Count` = 1 chứ không
+    phải 0 — đúng bẫy mảng-đơn đã ghi ngay trong hàm ấy.
+  da_dong: true
+  dong_bang: 't16 (rc=0, stdout RỖNG, stderr CÓ nội dung ⇒ từ chối 13, không xoá gì)'
+  phan_chung: 'M9 trên bản sao tạm ⇒ 15/16, ĐỎ đúng t16; HEAD ⇒ 16/16'
+
+loi_cua_luot_va_do_nguoi_va_tu_bat:
+  id: do-hong-vi-cong-cu-bien-mat
+  noi_dung: >-
+    Lượt đo đầu của người vá trả rc=127 và dòng tổng kết TRỐNG — `/dev/shm` bị xoá khi phiên
+    khởi động lại nên mất cả `pwsh` lẫn `actionlint`. "Không chạy được" trông y hệt "chạy
+    xong sạch" nếu chỉ liếc dòng cuối. Tải lại rồi mới đo thật.
+
+verdict_usage_caveats:
+- id: same-provider-khong-du-land
+  noi_dung: >-
+    Verdict này ghi `assurance: same_provider_approved` — reviewer là `claude`, cùng nhà
+    cung cấp với người vá. §8 nói mức ấy MỘT MÌNH không thay mức assurance bắt buộc cho
+    phạm vi workflow, và #150 sửa `.github/workflows/ci.yml`. **Đừng đọc verdict này (hay
+    verdict kiến trúc cùng chuỗi) thành điều kiện land.** Muốn land cần cross-review `codex`
+    khi có quota, hoặc human review có audit của chủ kho.
+
+delivered: true
+delivered_by: claude-reviewer-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-17T15:05:00Z'
+receipt_khong_khai:
+- 'Không khai lượt này tương đương một lượt cross-provider. Nó KHÔNG.'
+- 'Không khai "phiên mới, read-only" là đủ thay cross-provider — nó chỉ là điều kiện TỐI THIỂU của §2.'
+- 'Không khai `evidence_url` là bền: #150 chưa land, chưa có tag.'

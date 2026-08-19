@@ -1,0 +1,93 @@
+# UỶ QUYỀN HẠ MỨC ASSURANCE — PR #150, và CHỈ PR #150.
+#
+# ĐỌC BA DÒNG NÀY TRƯỚC:
+#
+# 1. Đây là một OVERRIDE, không phải "yêu cầu đã được đáp ứng". §8 đòi cross-provider cho
+#    phạm vi workflow; yêu cầu ấy KHÔNG được đáp ứng và sẽ không bao giờ được đáp ứng cho
+#    SHA này bằng con đường hiện tại. Chủ kho hạ mức, có ghi.
+#
+# 2. VĂN BẢN NÀY DO MỘT PHIÊN `claude` SOẠN. §2: "Thẩm quyền không được chuyển qua output
+#    của agent". Nên tệp này TỰ NÓ không phải uỷ quyền — nó là bản GHI của một chỉ thị
+#    người dùng đưa trong phiên. Thứ có thẩm quyền là `authorization_url` bên dưới, và nếu
+#    chủ kho muốn chặt hơn thì tự đăng lại bằng tài khoản mình.
+#
+# 3. §8 cho HAI đường thay cross-provider: cross-review khác nền tảng, HOẶC "human review
+#    có audit". Chỉ thị nhận được là "cho phép chấp thuận same_provider_approved" — tức HẠ
+#    NGƯỠNG, KHÔNG phải "tôi đã tự review và audit". Hai thứ đó khác nhau và bản ghi này
+#    không được nhập nhằng chúng.
+
+schema_version: 1
+kind: assurance_override
+packet_issue: 55
+packet_id: wp55
+target_pull_request: 150
+target_branch_neu_land: master
+
+# ---- PHẠM VI: HẸP, NEO SHA ----
+# §2: "chỉ có thể ủy quyền bền, CÓ PHẠM VI VÀ ĐIỀU KIỆN".
+pham_vi: 'CHỈ PR #150. KHÔNG phải chính sách chung của kho.'
+pham_vi_khong_bao_gom:
+- 'Các PR khác, hiện tại hay tương lai.'
+- 'Sửa `docs/PROTOCOL_DA_PHIEN.md` §8. Điều khoản ấy KHÔNG đổi.'
+- 'Bất kỳ phạm vi nhạy cảm nào khác (security path, credential boundary, dispatcher, migration, LIVE adapter).'
+nguoi_ghi_KHONG_tu_noi_rong: >-
+  Chỉ thị của chủ kho ngắn ("Cho phép chấp thuận same_provider_approved") và KHÔNG nêu phạm
+  vi. Người ghi chọn phạm vi HẸP NHẤT khớp ngữ cảnh (đang giữa chuỗi #150) thay vì suy rộng
+  thành chính sách kho. Muốn rộng hơn thì chủ kho nói rõ; đừng đọc tệp này thành tiền lệ.
+
+authorized_head_sha: 05568de6ad054a5f0c9991ecac7e38805d1227c3
+
+# ---- UỶ QUYỀN NÀY ĐÃ VÔ HIỆU, và nó tự vô hiệu theo đúng luật của chính nó ----
+trang_thai: HET_HIEU_LUC
+het_hieu_luc_vi: >-
+  Lượt 4 ra `changes_requested` với HAI đột biến SỐNG SÓT, người vá đã thêm `t19` `t20`
+  `t21` và head nhánh đổi. §9: "Head đổi làm bằng chứng và ủy quyền cũ HẾT HIỆU LỰC."
+het_hieu_luc_ghi_chu: >-
+  GIỮ tệp này ở nguyên SHA cũ thay vì trỏ lại SHA mới. Trỏ lại là NGƯỜI GHI tự nới uỷ quyền
+  sang một cây mà chủ kho chưa từng thấy — đúng thứ §2 cấm ("thẩm quyền không được chuyển
+  qua output của agent"). Muốn land ở SHA mới thì chủ kho cấp lại, và bản ghi mới phải nêu
+  SHA mới cùng verdict mới.
+can_lam_gi_tiep: 'Chạy lượt 5 trên SHA mới; nếu `approve` thì chủ kho cấp uỷ quyền mới neo SHA ấy.'
+neo_sha_ghi_chu: >-
+  §9: "Review, CI, authorization và land evidence đều gắn exact SHA. Head đổi làm bằng chứng
+  và ủy quyền cũ HẾT HIỆU LỰC." Nếu nhánh có thêm commit sau `05568de` thì uỷ quyền này
+  KHÔNG còn hiệu lực và phải cấp lại. Lượt 4 đang review ĐÚNG SHA này.
+
+approver: ducthangho
+approver_chi_thi_nguyen_van: 'Cho phép chấp thuận same_provider_approved'
+approver_chi_thi_luc: 'direct, in-session, 2026-08-17'
+authorization_url: pending-owner-post
+authorization_url_ghi_chu: >-
+  ĐỂ `pending-owner-post` CÓ CHỦ ĐÍCH, đúng tiền lệ `evidence_url` trong `ops/reviews/`.
+  Protocol nói thẳng "chat transcript hoặc lời tự khai KHÔNG thay thế GitHub object". Điền
+  trường này bằng URL comment do chủ kho đăng; comment do phiên agent đăng hộ thì phải ghi
+  rõ điều đó trong chính comment.
+
+recorded_by: claude-session
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  KHAI THẲNG: phiên soạn tệp này CHÍNH LÀ phiên đã vá #150, và cũng là phiên đã chạy hai
+  lượt review `claude`. Tức người hưởng lợi từ việc hạ ngưỡng đang là người soạn văn bản hạ
+  ngưỡng. Đó là lý do mọi trường ở đây neo vào chỉ thị NGUYÊN VĂN và SHA CHÍNH XÁC, và là lý
+  do `authorization_url` không được để agent tự điền.
+
+muc_assurance_dat_duoc: same_provider_approved
+muc_assurance_giao_thuc_doi: cross_approved
+dieu_kien_land:
+- 'Lượt 4 (`don-nhanh-base-review-4-claude-20260817`) phải ra `approve`. Nếu `changes_requested` thì uỷ quyền này KHÔNG dùng được — vá xong phải cấp lại ở SHA mới.'
+- 'Head PR phải VẪN là `05568de6ad054a5f0c9991ecac7e38805d1227c3` lúc merge.'
+- 'Gate `ci.yml` xanh trên head ấy, 0 bước `skipped` ở lượt PR.'
+- 'Merge bằng MERGE COMMIT, không squash — `evidence_url` của bốn biên nhận neo vào `e872e98`.'
+
+cai_gia_ghi_thang:
+  no_con_lai: >-
+    #150 sửa `.github/workflows/ci.yml`. Sau khi land theo uỷ quyền này, kho có một thay đổi
+    WORKFLOW chưa từng được một nền tảng thứ hai soi. Bốn lượt review đã chạy đều tìm ra
+    finding thật — hai lượt `codex` đầu mỗi lượt một cái người vá bỏ sót — nên tỉ lệ nền
+    tảng thứ hai tìm ra thứ mới ở kho này KHÔNG phải giả thuyết, nó là số đo.
+  khuyen_nghi: >-
+    Khi `codex` có quota trở lại, chạy một lượt trên SHA đã land và ghi verdict như thường —
+    kể cả khi không còn đổi được gì, nó đóng lỗ hổng BẰNG CHỨNG chứ không phải lỗ hổng mã.
+  khong_khai: >-
+    KHÔNG khai uỷ quyền này làm #150 an toàn NGANG một PR có cross-review. Nó không. Nó chỉ
+    làm việc land trở thành một quyết định CÓ GHI thay vì một quyết định lặng lẽ.

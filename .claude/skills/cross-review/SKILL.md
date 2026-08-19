@@ -18,6 +18,37 @@ python .claude/dev/packet_loop.py doctrine-scan --root .
 
 Dưới đây chỉ có cú pháp của nền.
 
+## Bước 0 — CÔNG CỤ, làm TRƯỚC khi đọc diff
+
+Skill này chạy được hay không phụ thuộc `codex` (hoặc provider reviewer được chỉ định),
+mà container phiên **không có sẵn** (đo 17-08-2026: `codex` vắng, `gh` vắng — hook phiên
+không chạy vì `CLAUDE_PROJECT_DIR` không được đặt khi kho gắn giữa phiên).
+
+```bash
+python .claude/dev/launcher.py doctor            # kiểm tra toàn bộ công cụ (CONG_CU)
+npm install -g @openai/codex                     # nếu doctor báo `khong codex`
+python .claude/dev/launcher.py chuan-bi          # CODEX_AUTH_JSON -> ~/.codex/auth.json
+codex --version                                  # bằng chứng THẬT về phiên bản codex CLI
+```
+
+`doctor` in rõ bảng trạng thái `KHA DUNG` và các công cụ còn thiếu — đọc kỹ mục `KHA DUNG`
+thay vì chỉ dựa vào mã thoát tiến trình.
+
+Làm bước này ở ĐẦU phiên, không phải lúc sắp review: phát hiện thiếu `codex` sau khi
+đã viết xong thay đổi thì không lùi lại được, và cám dỗ khi ấy là tự duyệt bài của
+chính mình — thứ §8 không cho. (Khi cả Claude lẫn Codex hết quota, xem hướng dẫn
+Antigravity Reviewer lane trong `AGENTS.md` theo cơ chế `same_provider_approved`.)
+
+## Khi PAT là chính tài khoản tác giả PR
+
+`pull_request_review_write` với `event=REQUEST_CHANGES` sẽ bị GitHub từ chối:
+*"Can not request changes on your own pull request"* (đo trên PR #141). Đường còn
+lại là **comment** (`add_issue_comment`). Verdict đăng kiểu ấy **không** mang trạng
+thái review chính thức của GitHub — ghi rõ điều đó trong chính verdict, và nói rõ
+nó chưa đủ cho mức assurance nào nếu §8 đòi reviewer có danh tính khác.
+
+Trigger reviewer bot của kho: comment `@codex review` trên PR.
+
 ## Lấy diff của ĐÚNG head SHA
 
 ```bash

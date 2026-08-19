@@ -267,6 +267,14 @@ jobs:
         run: python .github/checks/bundle_fragment_check.py --json
       - name: gen_instructions selftest
         run: python scripts/gen_instructions.py --selftest
+      # AG-T0-03: bộ unit test của packet KHÔNG nằm trong `scripts/test_fragments/` nên
+      # `tl.py --selftest` KHÔNG khám phá ra nó — đo được ở lượt land: cùng một lượt, selftest đếm
+      # 1697/1697 trên CẢ master lẫn nhánh packet, tức 7 ca mới không hề được tính. Không có bước
+      # này thì bằng chứng "7/7 ca" chỉ tái lập được bằng tay, và CI sẽ không bao giờ đỏ khi ai đó
+      # làm hỏng `compute_parser_coverage`. Giữ bước riêng (thay vì chuyển tệp sang
+      # `test_fragments/`) để không đụng vào topology gói đang sát trần 200.
+      - name: command-registry unit test (AG-T0-03)
+        run: python scripts/tl_core/command_registry_test.py
       # BỌC selftest qua `gate_lifecycle.py run` thay vì gọi thẳng — KHÔNG thêm lượt
       # chạy nào, chỉ thêm bằng chứng. Vì sao cần: `.claude/commands/gate-targeted.md`
       # bước 4 bảo reviewer tải artifact `gate-evidence-<OS>-<attempt>` để tái dùng

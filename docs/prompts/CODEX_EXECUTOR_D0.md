@@ -134,8 +134,9 @@ ADR-0020 hoặc one-executor-per-packet.
 
 ## Kiểm chứng
 
-Chạy trên đúng worktree sẽ push. Đòi **5 cổng JSON** và selftest; không tin exit
-code sau pipe:
+Chạy targeted-first trên đúng worktree sẽ push. Đòi **5 cổng JSON**, test của gate lifecycle và các fixture trực
+tiếp của packet; không tin exit code sau pipe. Không lặp full selftest local trước push: CI sẽ chạy full đúng một
+lần trên exact head và phát artifact evidence. Chỉ fallback full local nếu CI thiếu/đỏ hoặc identity không validate:
 
 ```powershell
 Set-Location '{{WORKTREE}}'
@@ -151,27 +152,23 @@ $Rv = Join-Path $Evidence 'rv.json'
 $Wa = Join-Path $Evidence 'wa.json'
 $Gt = Join-Path $Evidence 'gt.json'
 $Da = Join-Path $Evidence 'da.json'
-$Selftest = Join-Path $Evidence 'selftest.log'
 
 python scripts/tl.py doc-claims-check --strict --json > $Dc
 python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json > $Rv
 python scripts/tl.py workflow-audit --strict --json > $Wa
 python scripts/tl.py golden-test --json > $Gt
 python scripts/tl.py determinism-audit --strict --json > $Da
+python .claude/dev/gate_lifecycle_test.py
 
 Get-ChildItem $Evidence -Filter '*.json' | ForEach-Object {
     $Result = Get-Content -LiteralPath $_.FullName -Raw | ConvertFrom-Json
     [pscustomobject]@{ file = $_.Name; ok = $Result.ok }
 }
 
-python scripts/tl_selftest.py *> $Selftest
-Select-String -Path $Selftest -Pattern '== tl selftest'
-(Select-String -Path $Selftest -SimpleMatch '[FAIL]').Count
 ```
 
-Mọi JSON phải `ok: true`; marker `[FAIL]` phải bằng 0. Không dùng `| tail`,
-không đếm chữ `FAIL` trần vì tên test có thể chứa từ đó. Không đóng đinh tổng
-advisory cũ: chỉ so delta và điều tra advisory trỏ vào tệp D0.
+Mọi JSON phải `ok: true`; gate lifecycle phải đạt N/N. Không đóng đinh tổng advisory cũ: chỉ so delta và điều tra
+advisory trỏ vào tệp D0.
 
 Trước commit, hygiene phải so working tree (gồm staged + unstaged) với base đóng
 băng; không dùng `BASE..HEAD` khi HEAD vẫn còn bằng base:
@@ -209,6 +206,34 @@ git diff '{{BASE_SHA}}..HEAD' -- VERSION CHANGELOG.md SKILL.md RELEASE_MANIFEST.
 git status --short
 ```
 
+CI `gate` phải kết luận success trên đúng `head_sha`. Tải artifact `gate-evidence-ubuntu-latest-<attempt>` của run
+đó (tên theo `matrix.os` trong ci.yml — TỆP bên trong mới mang tên `RUNNER_OS`: `tl-selftest-Linux.json`) và
+validate trước khi phát `REVIEW_READY`; artifact gắn SHA khác hoặc thiếu exact identity không được dùng lại:
+
+```powershell
+$Head = (git rev-parse HEAD).Trim()
+$Tree = (git rev-parse 'HEAD^{tree}').Trim()
+$CiEvidence = Get-Content -LiteralPath '<downloaded-artifact>\tl-selftest-Linux.json' -Raw | ConvertFrom-Json
+$CiPython = $CiEvidence.identity.python_version
+$CiSystemRelease = $CiEvidence.identity.system_release
+$CiMachine = $CiEvidence.identity.machine
+$CiPythonImplementation = $CiEvidence.identity.python_implementation
+if ($CiPython -notlike '3.12.*') { throw "CI runtime ngoài policy: $CiPython" }
+python .claude/dev/gate_lifecycle.py validate `
+  --evidence '<downloaded-artifact>\tl-selftest-Linux.json' `
+  --output '<downloaded-artifact>\tl-selftest-Linux.out' `
+  --expected-head $Head --expected-tree $Tree --expected-base-sha '{{BASE_SHA}}' --expected-name tl-selftest `
+  --expected-system Linux --expected-python $CiPython `
+  --expected-system-release $CiSystemRelease --expected-machine $CiMachine `
+  --expected-python-implementation $CiPythonImplementation --expected-selected-test full-selftest `
+  --expected-command-json '["python","scripts/tl.py","--selftest"]' `
+  --expected-positive-regex '(?m)^.*\b([1-9][0-9]*)/\1\b[^\r\n]*\r?\n?\Z' `
+  --require-current-runner
+```
+
+Nếu packet có risk Windows (codepage/path/symlink/process), cần lane/artifact Windows hoặc targeted Windows
+evidence theo classifier; evidence Linux không được đổi nhãn thành Windows.
+
 ```text
 REVIEW_READY
 packet_id: {{PACKET_ID}}
@@ -227,8 +252,8 @@ residual_risks:
 ```
 
 Trong `changed_files`, liệt kê đủ đường thực tế và xác nhận chúng là tập con
-của write-set Issue. Ghi 5 cổng JSON, selftest N/N + `[FAIL]`=0, diffstat,
-derived diff rỗng và CI. PR phải ghi Claude review read-only; không merge trước
+của write-set Issue. Ghi 5 cổng JSON, targeted tests, CI run/artifact và kết quả validate exact identity, diffstat,
+derived diff rỗng. PR phải ghi Claude review read-only; không merge trước
 `cross_approved` gắn đúng head SHA.
 
 Thay `<HEAD_SHA_THỰC>` trong `reviewer_fill_command` bằng SHA vừa commit. Người

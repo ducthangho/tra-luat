@@ -26,6 +26,12 @@ gate_tier: T0 | T1 | T2 | T3 | T4 | T5
 selector_policy_sha: <git-oid-or-policy-hash>
 selected_groups: []
 tests: []
+full_evidence:
+  workflow_run: <url-or-null>
+  artifact: <name-or-null>
+  output_sha256: <sha256-or-null>
+  positive_match: <N/N-or-null>
+  validated_identity: <true|false>
 findings_closed: []
 remaining_work: []
 next_role: reviewer | executor | land_operator | human
@@ -55,7 +61,9 @@ rebase/chọn head khác.
 
 Chỉ giữ vai Reviewer: read-only, không sửa file, không push, không chuyển sang Executor/Land Operator, không
 approve/merge/deploy. Review hai trục Spec và Standards/Security; kiểm changed paths/evidence và chạy lại gate
-read-only phù hợp ở tier {{GATE_TIER}}. Ghi finding bằng stable ID, severity, file/line/evidence. Đăng verdict
+read-only phù hợp ở tier {{GATE_TIER}}. Chạy targeted/adversarial probes trước; nếu CI có full artifact đúng exact
+head/tree/base/runner/command/OS/runtime, output hash và positive marker thì validate và reuse, không lặp full local. Artifact thiếu/đỏ/stale/mismatch
+phải fallback full; một host chỉ chạy một heavy gate. Ghi finding bằng stable ID, severity, file/line/evidence. Đăng verdict
 approve|changes_requested|blocked lên Packet và PR, kèm provider/role/session/generation/reviewed exact SHA,
 tests và assurance đúng thực tế. Human_audited chỉ dùng khi có GitHub identity bền, độc lập, audit evidence và
 verdict cùng neo exact SHA.
@@ -82,7 +90,8 @@ generation/spec hash, worktree sạch và effective write set. Nếu drift, perm
 báo blocker; không tự rebase/chọn head/mở rộng doctrine.
 
 Sửa tối thiểu đúng findings trong effective write set bằng apply_patch. Chạy T0/T1 và gate bắt buộc theo
-classifier; unknown/shared/security/release/EOL/policy change phải fallback full. Trước push đọc lại remote head;
+classifier, targeted-first; unknown/shared/security/release/EOL/policy change phải fallback full. Không lặp full
+local nếu CI sẽ chạy nó trên exact new head; trước push đọc lại remote head;
 commit/push generation hợp lệ và đăng Executor evidence với exact new head, changed paths, tier/policy/groups,
 rc + bằng chứng dương, findings closed và verdict ready_for_rereview. Giữ PR Draft; không merge/LIVE.
 

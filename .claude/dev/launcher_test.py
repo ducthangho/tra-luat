@@ -4296,6 +4296,37 @@ def t127_settings_phai_noi_day_bridge_exec_form_va_khong_dung_den_PreToolUse():
 
 
 @ca
+def t128_bridge_duong_loi_khong_duoc_chet_UnicodeEncodeError_cp1258():
+    """Nhánh lỗi với đường dẫn CÓ DẤU phải ra rc=12 + chẩn đoán, không phải rc=1 traceback.
+
+    P2 của review PR #173 (comment 5341020065), ĐO THẬT chứ không suy: bridge
+    thiếu ép UTF-8 thì trên console cp1258, `print` đường dẫn kiểu "Quốc hội"
+    (đúng hình đường repo thật) ném UnicodeEncodeError — nhánh lỗi chết rc=1
+    trước khi kịp nói mình chết vì gì. Đây là bài học ĐẦU BẢNG của launcher
+    trong CLAUDE.md, và t123/t124 không bắt được vì fixture của chúng nằm ở
+    %TEMP% toàn ASCII. Ca này dựng đúng cái tổ hợp đó: project dir có dấu +
+    hook thiếu, và TƯỚC PYTHONUTF8/PYTHONIOENCODING của con để mặc định
+    cp1258 cắn thật.
+
+    GIỚI HẠN — khai thẳng: trên POSIX/CI ubuntu mặc định IO đã là UTF-8 nên ca
+    này qua được cả khi thiếu chốt — phép đo THẬT của nó là chân Windows
+    (máy dev + launcher-windows.yml, nơi vốn cố ý KHÔNG đặt hai biến ấy).
+    """
+    with San() as s:
+        du_an = s / "Quốc hội thử"
+        du_an.mkdir()
+        env = dict(os.environ)
+        for k in [k for k in env if k.upper() in ("PYTHONUTF8", "PYTHONIOENCODING")]:
+            del env[k]
+        env["CLAUDE_PROJECT_DIR"] = str(du_an)
+        r = _chay_bridge(env)
+        bang("Traceback" not in (r.stderr or ""),
+             f"duong loi chet UnicodeEncodeError thay vi chan doan: {r.stderr[:200]!r}")
+        bang(r.returncode == 12, f"mong 12, duoc {r.returncode}")
+        bang("khong thay hook" in r.stdout, f"thieu chan doan: {r.stdout!r}")
+
+
+@ca
 def t101_phan_tich_doi_so_phai_do_NGAY_khong_doi_chay_het_suite():
     """Công cụ chẩn đoán dễ xanh giả thì tệ hơn không có.
 

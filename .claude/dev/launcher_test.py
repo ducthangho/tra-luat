@@ -4236,16 +4236,21 @@ def t125_bridge_bo_bash_hong_dau_PATH_va_truyen_rc_hook_ve_nguyen_ven():
 def t126_bridge_hook_vuot_han_phai_rc124_khong_phai_treo_hay_0():
     """Quá hạn là 124 — cùng kỷ luật tách 124/125 của launcher (taskkill lesson).
 
-    Trần đọc từ TL_HOOK_TIMEOUT_GIAY (chỉnh sửa DUY NHẤT so blob gốc ea85526b,
-    khai trong docstring bridge) — không có nó thì phản chứng này phải chờ 600s,
-    tức là không bao giờ được chạy thật.
+    Trần đọc từ TL_HOOK_TIMEOUT_GIAY (một trong hai chỉnh sửa khai so blob gốc
+    ea85526b, xem docstring bridge) — không có nó thì phản chứng này phải chờ
+    600s, tức là không bao giờ được chạy thật.
+
+    ĐÃ TRẢ GIÁ ở CI lượt 1 (job 96035756400): fixture đầu dùng `sleep 5`, mà env
+    của ca này cắt PATH còn đúng thư mục fake-bash ⇒ /bin/sh không tìm thấy
+    `sleep`, thoát 127 TỨC THÌ — đo nhầm cái chết khác thay vì đo timeout (đúng
+    lời t120 cảnh báo). Hook fixture phải THUẦN BUILTIN: busy-wait `while :`.
     """
     if LA_WINDOWS:
         return "bo qua tren Windows (can fake bash .exe chay duoc; duong POSIX do o CI ubuntu)"
     with San() as s:
         du_an = s / "da"; (du_an / ".claude" / "hooks").mkdir(parents=True)
         (du_an / ".claude" / "hooks" / "session-start.sh").write_text(
-            "sleep 5\n", encoding="utf-8")
+            "while :; do :; done\n", encoding="utf-8")
         d_tot = s / "tot"; d_tot.mkdir()
         _bash_gia(d_tot,
                   '#!/bin/sh\nif [ "$1" = "--version" ]; then echo fake-bash 9.9; exit 0; fi\n'

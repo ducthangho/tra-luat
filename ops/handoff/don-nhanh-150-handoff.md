@@ -1,3 +1,43 @@
+> # ⛔ BÀN GIAO NÀY ĐÃ ĐÓNG — 19-08-2026. ĐỪNG LÀM THEO.
+>
+> **PR #150 đã merge** (`6d8fce5`, `2026-08-19T09:08:57Z`). Lượt 6 **đã chạy**, và sau nó
+> còn một lượt 7 nữa — cả hai đã có verdict + biên nhận trong `ops/reviews/`. Mọi việc mà
+> trang này giao cho "phiên mới" **đã xong**.
+>
+> **Lệnh ĐẦU TIÊN của trang này nay GÃY**, và đó là điều đáng học chứ không phải một chỗ
+> lỗi thời tầm thường: nó `git fetch origin ops/don-nhanh-giu-base-pr`, mà nhánh ấy **đã bị
+> xoá khi PR merge**. Ai chạy theo sẽ dừng ngay ở dòng đầu và không có cách nào biết phần
+> còn lại đúng hay sai. Đúng bài học `CLAUDE.md` đã trả giá: *"thứ định danh tệp là BĂM,
+> không phải tên nhánh — tên nhánh là thứ trôi và bị xoá."* Trang này neo theo **tên nhánh**
+> ở khắp nơi, nên nó hết hạn đúng vào lúc merge. Muốn đọc các tệp nó nhắc tới thì tra bằng
+> **SHA** (`git show 99e9383:…`), đừng tra bằng tên nhánh.
+>
+> **Ba việc "còn nợ chủ kho" ở cuối trang — trạng thái đo được ngày 19-08:**
+>
+> 1. *Xoá 9 nhánh remote* — **XONG**. Đo lại: `git branch -r --merged origin/master` trả về
+>    rỗng (đối chứng dương: lệnh vẫn liệt kê `origin/master`, nên nó không im vì hỏng), và
+>    cả 9 tên trong danh sách đều không còn. `mission/76/integration` — nhánh trang này và
+>    PR #179 nói **tuyệt đối không được xoá** vì là base của 5 PR đang mở — **vẫn còn**.
+> 2. *Cấp uỷ quyền mới để land bằng `same_provider_approved`* — **KHÔNG CÒN Ý NGHĨA**: chủ
+>    kho đã tự merge #150, nên không còn quyết định nào chờ uỷ quyền. Nói cho ĐÚNG hai tệp,
+>    vì suýt nữa dòng này gộp chúng làm một: `ops/uy-quyen-150-same-provider-20260817.yaml`
+>    **VẪN CÒN** trong kho, neo `05568de`, tự ghi `trang_thai: HET_HIEU_LUC` và
+>    `authorization_url: pending-owner-post` — tức nó chưa từng được chủ kho đăng công khai.
+>    Tệp bị **gỡ** ở `ec17a83` là một tệp **KHÁC**, `ops/uy-quyen-150-land-20260819.yaml`,
+>    do agent tự soạn; chính thông điệp commit gọi đó là *"LỖI THAO TÁC của tôi"*. Đừng đọc
+>    tệp còn lại thành một uỷ quyền đang có hiệu lực: nó tự khai là không.
+> 3. *Chạy một lượt `codex` trên SHA đã land* — **CÒN MỞ**. Đây là lỗ hổng **bằng chứng**,
+>    không phải lỗ hổng mã: bảy lượt review của #150 đều `same_provider_approved`, chưa lượt
+>    nào là cross-provider, trong khi §8 đòi cross-provider cho phạm vi workflow. Verdict
+>    lượt 7 đo được đường ấy mở lại **2026-08-20 06:23** (quota, không phải auth chết).
+>
+> **Bảng "SÁU LƯỢT" bên dưới nay thiếu**: đã có **bảy** lượt. Verdict lượt 4 và 5 — trang
+> này viết khi chúng còn nằm ngoài kho — nay **đã ở trong** `ops/reviews/`, kèm cảnh báo
+> rằng dụng cụ đo của chúng đã mất. Xem `ops/reviews/README.md`.
+>
+> Giữ trang này thay vì xoá: nó là bản ghi của một đợt làm việc thật, và chính chỗ nó gãy
+> là bằng chứng cho bài học neo-theo-băm ở trên.
+
 # BÀN GIAO — PR #150 `don-nhanh`, sang phiên mới
 
 Chủ kho: *"Cấp lượt 6. Sang phiên mới thực hiện tiếp"* (17-08-2026).

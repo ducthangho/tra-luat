@@ -1,0 +1,152 @@
+verdict: changes_requested
+reviewed_sha: 4ff2c6bfe04a205e5989642bc527bc5341db3e0f
+
+## Findings
+
+### p1-mcp-co-the-do-tu-tien-trinh-con
+
+Mức: P1
+
+`_do_github_api` khai tuyệt đối rằng tiến trình con “KHÔNG gọi/đo được MCP”, nhưng máy hiện tại có phép đo MCP trực tiếp qua Claude CLI:
+
+```bash
+command -v claude
+timeout 20 claude mcp list
+echo $?
+```
+
+Kết quả đo được:
+
+```text
+/opt/node22/bin/claude
+Checking MCP server health…
+
+github: https://api.githubcopilot.com/mcp/ (HTTP) - ⏸ Pending approval (run `claude` to approve)
+0
+```
+
+Lệnh con đo được server, endpoint và trạng thái health/approval. `rc=0` không đủ để nâng thành `DUNG_DUOC`, nhưng nội dung `Connected`/`Pending approval`/lỗi kết nối là bằng chứng tốt hơn việc luôn trả `KHONG_DO_DUOC`.
+
+Vì vậy hợp đồng mới chưa khai đúng phạm vi đo được. Cần tích hợp hoặc ít nhất thừa nhận phép đo này; chỉ trả `KHONG_DO_DUOC` khi CLI không cung cấp được trạng thái xác đáng.
+
+### p2-ten-server-github-khop-chuoi-con
+
+Mức: P2
+
+Đoạn:
+
+```python
+ten = [k for k in srv if "github" in k.lower()]
+```
+
+nhận mọi tên chứa chuỗi `github`, nên một server không phải server chính cũng làm trạng thái chuyển từ lỗi cấu hình sang `KHONG_DO_DUOC`.
+
+Lệnh tái lập:
+
+```bash
+TMPDIR=/dev/shm python3 - <<'PY'
+import importlib.util, json, tempfile
+from pathlib import Path
+
+s = importlib.util.spec_from_file_location("m", Path(".claude/dev/launcher.py"))
+m = importlib.util.module_from_spec(s)
+s.loader.exec_module(m)
+m.shutil.which = lambda _: None
+
+with tempfile.TemporaryDirectory() as td:
+    (Path(td) / ".mcp.json").write_text(
+        json.dumps({"mcpServers": {"not-github-backup": {}}})
+    )
+    print(m._do_github_api(td))
+PY
+```
+
+Kết quả:
+
+```text
+('KHONG_DO_DUOC', '.mcp.json [workspace] khai server: not-github-backup ...')
+```
+
+Tên nên khớp chính xác sau khi chuẩn hóa hoa/thường, chẳng hạn `k.casefold() == "github"`.
+
+### p2-mcp-json-sai-kieu-lam-phep-do-nem-loi
+
+Mức: P2
+
+JSON hợp lệ nhưng sai schema chưa được xử lý nhất quán. Top-level array làm `_doc_mcp_json` ném `AttributeError`; `mcpServers` là array lại được coi như khai đúng server.
+
+Lệnh tái lập:
+
+```bash
+TMPDIR=/dev/shm python3 - <<'PY'
+import importlib.util, json, tempfile
+from pathlib import Path
+
+s = importlib.util.spec_from_file_location("m", Path(".claude/dev/launcher.py"))
+m = importlib.util.module_from_spec(s)
+s.loader.exec_module(m)
+m.shutil.which = lambda _: None
+
+for value in ([], {"mcpServers": ["github"]}):
+    with tempfile.TemporaryDirectory() as td:
+        (Path(td) / ".mcp.json").write_text(json.dumps(value))
+        try:
+            print(m._do_github_api(td))
+        except Exception as e:
+            print(type(e).__name__, e)
+PY
+```
+
+Kết quả:
+
+```text
+AttributeError 'list' object has no attribute 'get'
+('KHONG_DO_DUOC', '.mcp.json [workspace] khai server: github ...')
+```
+
+Cần xác thực top-level và bảng server đều là object. Tệp hỏng cú pháp hiện được xử lý đúng; tên `GitHub` cũng được nhận không phân biệt hoa/thường. Lời khai nguồn gốc `[workspace]`/`[goc cua launcher ...]` có mặt.
+
+## Phép đo đã chạy
+
+- `git diff e38b0be..4ff2c6b -- .claude/dev/launcher.py .claude/dev/launcher_test.py`
+  - Bản vá chỉ đổi hai tệp, tách đúng `git-day-keo` và `github-api`.
+
+- `git diff --check HEAD^ HEAD`
+  - Không có lỗi whitespace.
+
+- `TMPDIR=/dev/shm python3 .claude/dev/launcher_test.py`
+  - `rc=0`
+  - `105/105 ca (qua 104, bo qua 1, hong 0)`
+  - Lần chạy không đặt `TMPDIR` chỉ đạt `24/105` vì sandbox không có thư mục tạm ghi được; đó là lỗi hạ tầng, không dùng làm delta.
+  - Bốn ca nền `t85`, `t93`, `t94`, `t96` không đỏ trong môi trường review này. Delta so với nền lease vì thế KHÔNG ĐO ĐƯỢC trực tiếp; số đo hiện tại là sạch.
+
+- Đo tầng tiêu thụ:
+
+```bash
+TMPDIR=/dev/shm python3 .claude/dev/launcher.py doctor \
+  --workspace "$PWD" --json --doi-kha-dung
+```
+
+  - `rc=13`
+  - `github-api.trang_thai = KHONG_DO_DUOC`
+  - `ok_kha_dung = false`
+  - `github-api` nằm trong `chua_chung_minh`
+  - `gh` không còn đường lật nhãn; `--doi-kha-dung` fail-closed.
+
+- Mutation 1 trên bản sao tạm: đổi nhận diện tên thành phân biệt hoa/thường:
+
+```python
+"github" in k.lower()  ->  "github" in k
+```
+
+  - `t105` vẫn PASS: không bắt được trường hợp `GitHub`.
+
+- Mutation 2 trên bản sao tạm: bỏ bắt lỗi JSON:
+
+```python
+except (OSError, ValueError)  ->  except OSError
+```
+
+  - `t105` vẫn PASS: không khóa hành vi với `.mcp.json` hỏng.
+
+Hai mutation đều cho thấy `t105` còn đo đường thuận cố định, chưa khóa đủ các biến thể schema mà hợp đồng mới tuyên bố hỗ trợ.

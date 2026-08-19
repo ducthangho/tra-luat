@@ -1,0 +1,19 @@
+{
+ "run_id": "52c9c10532ed4d8bb283fd49bd97df1f",
+ "short_id": "52c9c105",
+ "ten": "codex-review-doctor-mcp",
+ "trang_thai": "xong",
+ "ma_thoat": 0,
+ "bat_dau_utc": "2026-08-17T05:02:51.041628+00:00",
+ "ket_thuc_utc": "2026-08-17T05:09:38.932363+00:00",
+ "head": "4ff2c6bfe04a205e5989642bc527bc5341db3e0f",
+ "commit_goc": [
+  "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+ ],
+ "prompt_sha256": "0b90037c0adf7cd7f521dd71d06d9a5e5816df47e11435a1078dabc5bf2c9115",
+ "thoi_luong_giay": 407.891,
+ "stdout_byte": 5012,
+ "remotes": [
+  "github.com/ducthangho/tra-luat"
+ ]
+}

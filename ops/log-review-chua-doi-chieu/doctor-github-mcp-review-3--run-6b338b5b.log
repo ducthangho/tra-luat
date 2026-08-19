@@ -1,0 +1,124 @@
+verdict: changes_requested  
+reviewed_sha: 109c427895122c50501f675a1aa132d1881e8816
+
+## Findings
+
+### `p2-trang-thai-mcp-van-phan-loai-sai-hai-chieu`
+
+`_suc_khoe_mcp_github` vẫn phân loại sai theo cả hai chiều:
+
+- Xấu → `khoe`: `Connected (stale)`
+- Tốt → `hong`: `Connected - 3 tools`
+- Một trạng thái tốt có ANSI `\x1b[32mConnected\x1b[0m` cũng thành `hong`.
+
+Lệnh tái lập: import `launcher.py`, giả `claude mcp list` lần lượt trả các dòng trên rồi gọi `_suc_khoe_mcp_github()`.
+
+Kết quả đo:
+
+```text
+'Connected (stale)'       => khoe
+'Connected - 3 tools'     => hong
+'\x1b[32mConnected\x1b[0m' => hong
+'Connected\r'             => khoe
+```
+
+Nguyên nhân:
+
+- Regex chỉ neo đầu từ `connected`, không kiểm phần hậu tố mang nghĩa xấu.
+- `rpartition(" - ")` giả định dấu phân cách cuối cùng luôn đứng trước trạng thái.
+- `[^a-z]*` không xử lý ANSI vì chuỗi escape có chữ `m`.
+
+### `p2-mcpservers-sai-kieu-bi-servers-che-khuat`
+
+Biểu thức:
+
+```python
+srv = d.get("mcpServers") or d.get("servers") or {}
+```
+
+cho phép trường `mcpServers` hiện diện nhưng `null` hoặc rỗng bị bỏ qua, rồi dùng `servers.github` để tuyên bố đã khai MCP GitHub.
+
+Phép đo:
+
+```text
+{"mcpServers": null, "servers": {"github": {}}} => True
+{"mcpServers": {},   "servers": {"github": {}}} => True
+```
+
+Như vậy bản vá kiểm kiểu giá trị chưa kín: một trường chính sai kiểu vẫn được che bởi trường fallback. Nên phân biệt “không có khóa `mcpServers`” với “khóa có mặt nhưng giá trị không hợp lệ/rỗng”.
+
+Các biên còn lại đo được:
+
+```text
+{"mcpServers":{"github":{},"GitHub":null}} => False
+{"mcpServers":{"github":{}}}               => True
+```
+
+Object server rỗng hiện được chấp nhận; điều này có thể hợp lý nếu hàm chỉ đo khai báo và giao việc kiểm sức khỏe cho CLI.
+
+### `p2-t105-van-do-do-gia-thay-vi-hop-dong`
+
+Ba đột biến tự nghĩ trên các bản sao `/dev/shm` đều sống sót:
+
+1. Đổi command thành:
+
+```python
+["claude", "mcp", "list", "--bogus"]
+```
+
+2. Gọi `claude mcp list` thêm một lần trước lời gọi thật.
+3. Đổi `timeout=30` thành `timeout=0.001`.
+
+Lệnh đo cho mỗi bản sao:
+
+```text
+TMPDIR=/dev/shm python3 launcher_test.py --lap-ca t105 --lan 1
+```
+
+Cả ba kết quả:
+
+```text
+1/1 qua, 0 hong
+```
+
+`t105` chỉ kiểm ba phần tử đầu của `cmd`, không đếm số lần gọi, và chỉ yêu cầu timeout dương. Vì vậy nó vẫn không ghim chính xác hợp đồng subprocess.
+
+## Phép đo đã chạy
+
+- Suite SHA xét:
+
+```text
+105/105 ca (qua 104, bo qua 1, hong 0)
+```
+
+- Đột biến SHA xét:
+
+```text
+DOT BIEN: 71/71 dat (1 khong do duoc tren nen nay)
+```
+
+- Nền `e38b0be`, chạy từ archive đầy đủ:
+
+```text
+104/104 ca (qua 103, bo qua 1, hong 0)
+DOT BIEN: 61/61 dat (1 khong do duoc tren nen nay)
+```
+
+Delta đỏ = 0; tăng 1 ca và 10 đột biến ròng đúng như khai báo.
+
+- Đường tiêu thụ fail-close, chạy doctor thật:
+
+```text
+ok_kha_dung: false
+chua_chung_minh: ["codex"]
+chua_xac_thuc: ["git-day-keo", "github-api"]
+rc=13
+```
+
+`KHONG_DO_DUOC` vẫn đi vào `chua_chung_minh`; `--doi-kha-dung` đỏ đúng.
+
+- `gh` không còn lật nhãn: đột biến `github_api_cho_gh_lat_nhan_tro_lai` bị `t105` giết. Mục kế thừa này phủ ý định cũ và mạnh hơn chốt đã gỡ.
+
+- Ba đột biến chết với `JSONDecodeError`, `AttributeError`, `TypeError` là oracle hợp lệ: chúng chủ ý gỡ các guard bảo đảm dữ liệu JSON hỏng/sai kiểu không làm phép đo ném lỗi. Crash chính là vi phạm hợp đồng đích, không phải lỗi cú pháp hay `NameError` ngoài ý định.
+
+- Không ghi tệp vào worktree; các bản sao đột biến chỉ nằm trong `/dev/shm`.

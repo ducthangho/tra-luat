@@ -280,8 +280,48 @@ hình thực thi vì phép ghép theo dòng không bảo đảm thứ tự/ngữ
 
 Mỗi mission có `mission/<issue>/integration` từ base SHA cố định. Packet PR vào integration, không vào canonical.
 Dispatcher merge tuần tự packet đã accepted. Packet có dependency chỉ chạy sau predecessor đã integrated; packet
-độc lập có thể chạy song song nhưng phải rebase và chạy lại gate trước khi merge. Mỗi mission chỉ có một draft
+độc lập có thể chạy song song nhưng phải rebase và chạy lại gate trước khi merge — **trừ
+ngoại lệ MASTER DRIFT ở §5.1**. Mỗi mission chỉ có một draft
 land PR từ integration vào canonical.
+
+### 5.1 Ngoại lệ master drift — merge thẳng, không chạy lại gate
+
+Áp khi **đủ cả ba**: reviewer đã `approve`; required gate đã xanh trên **exact head của
+nhánh**; và thứ thay đổi kể từ lúc đó là **master**, không phải head nhánh.
+
+Trường hợp này **không chạy lại gate**. Merge thẳng. Merge sạch, không conflict ⇒ xong.
+
+Vì sao không phá bất biến exact-SHA: quy tắc `head đổi ⇒ evidence stale` (§8, và điều
+kiện reuse ở phần selector) nói về **head của nhánh được review**. Ở đây head nhánh
+**không đổi** — review vẫn neo đúng SHA nó đã duyệt, gate vẫn đo đúng head nó đã chạy.
+Không bằng chứng nào bị vô hiệu. Trước điều khoản này, hai sự kiện *head nhánh đổi* và
+*master đổi* bị đọc lẫn, nên mọi lượt master drift đều phải trả giá một lượt gate đầy
+đủ dù không có gì để đo lại.
+
+**Nhưng merge sạch là bảo đảm VĂN BẢN, không phải NGỮ NGHĨA.** Git chỉ biết dòng đụng
+dòng; nó không biết hai thay đổi ở hai chỗ khác nhau có làm hỏng nhau không. Nên ngoại
+lệ chỉ mở khi **không trúng dòng nào** trong danh sách kích hoạt dưới đây. Trúng bất kỳ
+dòng nào ⇒ **chạy lại gate SAU khi merge**.
+
+Đặt `BASE` = merge-base của nhánh với master tại lượt gate xanh;
+`DRIFT` = `git diff --name-only BASE origin/master`.
+
+| # | kích hoạt | vì sao |
+|---|---|---|
+| 1 | `git merge` báo conflict | không còn là merge sạch |
+| 2 | `DRIFT` giao **write set** của packet ≠ rỗng | hai bên cùng sửa một tệp; merge dòng không chứng minh ngữ nghĩa |
+| 3 | `DRIFT` chạm **artefact phái sinh** (manifest phát hành, golden, VERSION) | tệp SINH RA; hai bên tái sinh độc lập thì bản gộp khác bản sinh lại |
+| 4 | `DRIFT` đổi bất kỳ **bộ đếm ratchet** (số tệp gói, khe slot, số lệnh đã kiểm) | ratchet đếm toàn cây; hai bên cùng +1 thì tổng phải +2, merge dòng không cộng hộ |
+| 5 | `DRIFT` chạm tệp mà nhánh **import hoặc gọi**, kể cả khác tên/thư mục | đổi chữ ký ở master + thêm lời gọi ở nhánh = gãy, git không thấy |
+| 6 | `DRIFT` chạm định nghĩa workflow hoặc hook | đổi chính ĐỊNH NGHĨA cổng: lượt gate cũ đo bằng luật cũ |
+
+Kích hoạt 3 và 4 không phải giả định: đã đo được một packet đẩy số lệnh đã kiểm từ 165
+lên 166 trong golden. Hai packet cùng thêm một lệnh sẽ sửa **dòng khác nhau** nên git
+merge sạch, mà tổng thì sai — và cổng golden sẽ đỏ trên canonical khi không còn ai chạy.
+
+**Ghi lại cho đọc được sau.** Merge theo ngoại lệ này thì thông điệp merge phải nêu
+`BASE`, `DRIFT` gồm mấy tệp, và **đã đối chiếu sáu kích hoạt, không trúng dòng nào**.
+Không viết được câu đó nghĩa là chưa đối chiếu — thì chạy lại gate.
 
 ## 6. Định tuyến cloud và local
 
@@ -378,6 +418,18 @@ verdict: approve | changes_requested | blocked
 assurance: cross_approved | same_provider_approved | human_audited | review_deferred
 evidence_url: <pr-review-or-comment-url>
 ```
+
+Mỗi phần tử của `findings` **bắt buộc** kèm gợi ý cách vá gồm bốn phần: **vá ở đâu**
+(tệp + hàm/ca, và tại sao ở đó chứ không chỗ khác); **vá thế nào** (mô tả thay đổi —
+đoạn mã ngắn thì được, nhưng không viết cả bản vá: viết hộ cả bản vá là Reviewer tự biến
+mình thành người vá, và lượt sau đang review chính đề xuất của mình); **ca test khoá nó**
+(phép thử nào làm bản vá có răng, và đột biến nào phải chết sau khi vá — không nêu được
+thì nói thẳng là chưa nghĩ ra); **bản vá này có thể đẻ ra gì** (hình dạng lỗi nào nó có
+nguy cơ mở). Nhiều đường vá thì nêu đường rẻ nhất mà vẫn đóng lớp, rồi nói đường đắt hơn
+mua thêm được gì; cho rằng không nên vá thì nói thẳng — khai thành nợ là một gợi ý hợp
+lệ. Gợi ý là gợi ý, không phải chỉ thị: người vá được làm khác, và lượt sau Reviewer
+không được coi *đã làm theo gợi ý của tôi* là bằng chứng đúng — vẫn phải đo. Finding
+không có gợi ý, hoặc gợi ý chỉ nhắc lại chính finding, thì verdict **chưa hoàn chỉnh**.
 
 Evidence trên là verdict contract; delivery/provenance bền dùng `review_delivery_receipt` hiện có. Đích v2 tối
 thiểu có `schema_version: 2`, receipt ID, `reviewed_sha`, verdict path/hash, hai identity ở trên, evidence URL

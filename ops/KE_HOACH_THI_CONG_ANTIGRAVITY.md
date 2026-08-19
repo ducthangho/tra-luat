@@ -22,19 +22,32 @@
 
 ---
 
-## 2. Danh Mục Các Packet & Trạng Thái Lịch Sử
+## 2. Danh Mục Các Packet
 
-| Seq | Packet ID | Tên Packet / Nhiệm vụ | Phạm vi Write-Set Thực Tế | Review Class | Trạng Thái Đề Xuất |
-| :---: | :--- | :--- | :--- | :---: | :---: |
-| 1 | `AG-T0-04` | Version generator fail-closed | `scripts/gen_instructions.py`, `RELEASE_MANIFEST.json` | `routine` | `landed_reaudit_pending` (PR #163) |
-| 2 | `AG-T0-02` | Clean cross-review adapter & Root AGENTS.md | `.claude/skills/cross-review/SKILL.md`, `AGENTS.md`, `RELEASE_MANIFEST.json`, `scripts/tl_selftest.py` | `systemic` | `landed_reaudit_pending` (PR #164) |
-| 3A | `AG-T0-01A` | Windows subprocess decoding policy | `.claude/dev/launcher.py`, `.claude/dev/launcher_test.py` | `systemic` | `ready_for_branch` |
-| 3B | `AG-T0-01B` | Antigravity tool discovery (`agy`) | `.claude/dev/launcher.py`, `.claude/dev/launcher_test.py` | `systemic` | `planned_experimental` |
-| 3C | `AG-T0-01C` | Antigravity plan & Lean AGENTS pointer | `AGENTS.md`, `ops/KE_HOACH_THI_CONG_ANTIGRAVITY.md` | `systemic` | `ready_for_branch` |
-| 4 | `AG-T0-03` | Argparse parser-tree coverage report | `scripts/tl_core/command_registry.py`, `scripts/tl_core/workflow.py`, `scripts/test_fragments/<packet>.py` | `systemic` | `planned` (depends on baseline remeasure) |
-| 5 | `AG-T0-05` | Registry ratchet & generated golden projection | `scripts/tl_core/command_registry.py`, `scripts/tl_core/workflow.py`, `scripts/test_fragments/<packet>.py`, `references/golden/parser_surface.json` | `systemic` | `planned` (depends on `AG-T0-03`) |
+> **CỘT TRẠNG THÁI ĐÃ BỊ BỎ — có lý do đo được.** Bản trước của bảng này có cột
+> *Trạng Thái Đề Xuất*, và tới 19-08-2026 nó **sai 3/7 dòng**: `AG-T0-01A`, `AG-T0-01C`
+> và `AG-T0-03` đều đã land nhưng bảng vẫn ghi `ready_for_branch` / `planned`. Nguyên
+> nhân kép: packet land dưới **tên khác** tên trong bảng (`Packet 1` = `AG-T0-04`,
+> `Packet 2` = `AG-T0-02`, `Packet 3C` = `AG-T0-01C`), và trạng thái là **dữ liệu động**
+> mà `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §12 đã cấm lưu trong tài liệu tĩnh.
+>
+> Sửa tay cột ấy chỉ đẩy sai lệch sang lần sau. **Đọc trạng thái từ GitHub facts.**
 
----
+| Packet ID | Tên Packet / Nhiệm vụ | Phạm vi Write-Set Thực Tế | Review Class |
+| :--- | :--- | :--- | :---: |
+| `AG-T0-04` | Version generator fail-closed *(land dưới tên `Packet 1`)* | `scripts/gen_instructions.py`, `RELEASE_MANIFEST.json` | `routine` |
+| `AG-T0-02` | Clean cross-review adapter & Root AGENTS.md *(land dưới tên `Packet 2`)* | `.claude/skills/cross-review/SKILL.md`, `AGENTS.md`, `RELEASE_MANIFEST.json`, `scripts/tl_selftest.py` | `systemic` |
+| `AG-T0-01A` | Windows subprocess decoding policy | `.claude/dev/launcher.py`, `.claude/dev/launcher_test.py` | `systemic` |
+| `AG-T0-01B` | Antigravity tool discovery (`agy`) | `.claude/dev/launcher.py`, `.claude/dev/launcher_test.py` | `systemic` |
+| `AG-T0-01C` | Antigravity plan & Lean AGENTS pointer *(land dưới tên `Packet 3C`)* | `AGENTS.md`, `ops/KE_HOACH_THI_CONG_ANTIGRAVITY.md` | `systemic` |
+| `AG-T0-03` | Argparse parser-tree coverage report | `scripts/tl_core/command_registry.py`, `scripts/tl_core/workflow.py`, + **derived set** | `systemic` |
+| `AG-T0-05` | Registry ratchet & generated golden projection | `scripts/tl_core/command_registry.py`, `scripts/tl_core/workflow.py`, `references/golden/parser_surface.json` | `systemic` |
+
+**WRITE SET và DERIVED SET là hai thứ khác nhau** — bài học đo được từ `AG-T0-03`: packet
+khai 3 tệp, thực tế đụng 10. Sáu tệp chênh lệch là **tái sinh cơ học bắt buộc**
+(`RELEASE_MANIFEST.json`, `references/golden/*.json`) khi thêm một lệnh, **không phải vi
+phạm phạm vi**. Packet Spec phải khai hai tập riêng, nếu không cổng phạm vi sẽ báo vi phạm
+giả ở mọi packet có thêm lệnh.
 
 ## 3. Quản Lý Nợ Review (Review Debt Policy)
 
@@ -73,11 +86,11 @@ graph TD
 1. **Authority:** Human/dispatcher xác lập Packet Spec bền vững (mục tiêu, exact base SHA, write-set, review class, acceptance criteria).
 2. **Executor:** AG session A trên worktree A độc lập; chỉ ghi trong effective write-set.
 3. **Freeze:** Commit, push, ghi nhận exact 40-character hexadecimal Git OID và tree hash.
-4. **Independent Reviewer:** AG session B trên checkout/worktree B độc lập (không fork conversation context từ Executor, repository read-only, cho phép scratch ngoài repository để mutation test); verdict bắt buộc neo exact 40-character Git OID.
+4. **Independent Reviewer:** AG session B trên checkout/worktree B độc lập (không fork conversation context từ Executor, repository read-only, cho phép scratch ngoài repository để mutation test); verdict bắt buộc neo exact 40-character Git OID, và **mỗi finding bắt buộc kèm khối `Gợi ý vá` bốn phần** theo `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10c.
 5. **Publishing & Readback:** Đăng PR và review note qua GitHub route đã chứng minh; đọc ngược để đối soát byte/hash.
 6. **CI Gate Verification:** Tất cả required checks chạy trên exact head; required check bị skipped hoặc failed $\rightarrow$ **BLOCKED**.
-7. **Human Land:** Human Approver duyệt và land exact SHA; head đổi $\rightarrow$ toàn bộ review và CI cũ bị vô hiệu (stale).
-8. **Non-Convergence Stop:** Tối đa 2 vòng review AG cho cùng một PR. Sau 2 vòng chưa đạt approve $\rightarrow$ dừng phiên, tách Stable Slice hoặc revision Packet Spec.
+7. **Human Land:** Human Approver duyệt và land exact SHA; **head của NHÁNH** đổi $\rightarrow$ toàn bộ review và CI cũ bị vô hiệu (stale). **MASTER drift KHÔNG phải head nhánh đổi** — trường hợp đó merge thẳng, không chạy lại CI, theo `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10b (kèm danh sách 6 kích hoạt bắt buộc chạy lại).
+8. **Non-Convergence Stop:** Tối đa 2 vòng review cho cùng một PR — **không riêng AG**, đây là trần canon của cả kho (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10). Đếm theo `review_rounds_used`, KHÔNG theo `codex_review_calls_used` (một vòng có thể tốn nhiều lời gọi). Sau 2 vòng chưa đạt approve $\rightarrow$ dừng phiên, tách Stable Slice hoặc revision Packet Spec. Lưu ý: trần này hiện CHƯA được cưỡng chế bằng mã — xem nợ ở §10 của tài liệu canon.
 
 ---
 
@@ -97,7 +110,8 @@ reviewer_worktree_path: "<isolated_worktree_path>"
 executor_session_id: "<different_executor_session_uuid>"
 github_submitter: "<github_actor_login>"
 verdict: "approve" # approve | changes_requested | blocked
-findings: []
+findings: []   # mỗi finding BẮT BUỘC kèm `recommendation` chứa 4 phần của §10c
+               # (vá ở đâu · vá thế nào · ca test khoá nó · bản vá đẻ ra gì)
 test_evidence:
   gate_name: "PASS / FAIL (positive output marker)"
 limitations:

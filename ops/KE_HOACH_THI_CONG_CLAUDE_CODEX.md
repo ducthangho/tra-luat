@@ -176,7 +176,7 @@ Mission trước đã merge vào integration.
 | W0-R1 | P0 | Claude | sensitive | `.claude/dev/packet_loop.py`, `.claude/dev/packet_loop_test.py` | không |
 | W0-R2 | P1 | Claude | sensitive | `ops/lease_publish_test.py`, `ops/reviews/README.md`, `planned:.github/coordination/schemas/review_delivery_receipt.v2.schema.json`, `planned:ops/review_receipt.py` | W0-R1 integrated |
 | W0-R3 | P1 | Claude | sensitive | `.claude/dev/packet_loop.py`, `.claude/dev/packet_loop_test.py` | W0-R2 integrated |
-| W0-C1 | P1 | Codex candidate, Claude fallback | systemic | `planned:.claude/dev/review_connector.py`, `planned:.claude/dev/review_connector_test.py` | không |
+| W0-C1 | **[ĐÃ BỎ: lane Codex — codex hết quota là vật cản thường trực]** P1 | Codex candidate, Claude fallback | systemic | `planned:.claude/dev/review_connector.py`, `planned:.claude/dev/review_connector_test.py` | không |
 
 Hai lane serial được chạy song song tối đa hai writer:
 
@@ -275,8 +275,8 @@ M1 land khi từng Packet có phản chứng chạy được, integration gate x
 | W1-P1 | P0 | Claude | sensitive | `.claude/dev/launcher.py`, `.claude/dev/launcher_test.py`, `planned:.github/coordination/schemas/review_verdict.v1.schema.json` | M1 |
 | W1-G1 | P0 | Claude | sensitive | `planned:.claude/dev/gate_lifecycle.py`, `planned:.claude/dev/gate_lifecycle_test.py` | M1 |
 | W1-G2 | P1 | Claude | sensitive | `.claude/dev/gate_lifecycle_test.py` | W1-G1 integrated |
-| W1-C2a | P1 | Codex candidate, Claude fallback | systemic | `.claude/dev/review_connector.py`, `.claude/dev/review_connector_test.py` | W0-C1 |
-| W1-C2b | P1 | Claude | sensitive | `planned:.github/workflows/review-connector-shadow.yml` | W1-C2a integrated |
+| W1-C2a | **[ĐÃ BỎ: lane Codex]** P1 | Codex candidate, Claude fallback | systemic | `.claude/dev/review_connector.py`, `.claude/dev/review_connector_test.py` | W0-C1 |
+| W1-C2b | **[ĐÃ BỎ: lane Codex]** P1 | Claude | sensitive | `planned:.github/workflows/review-connector-shadow.yml` | W1-C2a integrated |
 | W1-S1 | P1 | Claude | systemic | `.claude/skills/cross-review/SKILL.md` | W1-P1 và W0-R3 integrated |
 
 W1-P1 và W1-G1 mở song song. W1-G2 không cùng branch/PR với W1-G1. Tách W1-C2a khỏi W1-C2b để verifier thuần
@@ -316,6 +316,12 @@ transport caveat.
 - Promotion input: tỷ lệ kênh positive/finding/missing/ambiguous và lỗi identity theo exact head.
 
 M2 land khi prompt/evidence exact, base gate lifecycle land trước mutation suite và connector vẫn ở shadow.
+
+### M3 — ĐÃ BỎ (quyết định 19-08-2026)
+
+> **Toàn bộ Mission 3 đã BỎ.** Chính mục này đã gác nó sau điều kiện *chỉ khi số đo yêu
+> cầu*; tới nay **chưa có số đo nào yêu cầu**, và kế hoạch đa provider không cần nó. Giữ
+> bảng dưới làm hồ sơ, KHÔNG nhận việc từ nó.
 
 ### M3 — Blocking Authority, chỉ khi số đo yêu cầu
 
@@ -483,7 +489,16 @@ Một PR được chọn Codex có nhịp:
 2. Đóng băng branch; Codex call 1 review toàn diff theo hai trục.
 3. Executor nhận toàn bộ stable finding IDs, sửa một batch, chạy lại phản chứng và tạo exact head mới.
 4. Chỉ dùng Codex call 2 khi policy Review Class cho phép và còn P0/P1/cross-cutting hoặc cần reverify.
-5. Nếu chưa approve sau call 2 hoặc ba vòng code/review tổng, dừng Codex và mở Review Rescue Checkpoint.
+5. Nếu chưa approve sau **2 vòng review**, dừng và mở Review Rescue Checkpoint.
+
+> **TRẦN ĐÃ ĐỔI — đọc kỹ.** Nhịp 5 bước trên vẫn đúng, nhưng con số thì không còn.
+> Bản gốc của mục này ghi *"sau call 2 **hoặc ba vòng** code/review tổng"* — tức trần
+> **3 vòng**, đếm lẫn với trần **2 lời gọi**. Người giữ kho đã chốt trần CANON là
+> **2 VÒNG**, đếm theo `review_rounds_used`, quy định tại
+> `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10. Điều khoản đó thắng mục này.
+>
+> Trần lời gọi (`codex_review_calls_used`, mặc định 2) **không bị bỏ** — nó là trục
+> CHI PHÍ, khác trục vòng, và vẫn cưỡng chế độc lập. Đừng gộp hai trục làm một.
 
 Tại checkpoint, human chọn một trong ba đường:
 
@@ -492,7 +507,8 @@ Tại checkpoint, human chọn một trong ba đường:
 - **Remediation Slice:** successor giữ finding IDs/history/dependency; xử lý riêng hoặc redesign.
 - **Không tách:** finding cắt invariant/contract chung ⇒ revision Packet/Mission bằng MCR hoặc pause thiết kế.
 
-Cùng error shape lần ba phải đưa ra quyết định về cách làm, không mở vòng vá thứ tư. Reviewer không bao giờ sửa
+Cùng error shape lần hai phải đưa ra quyết định về cách làm, không mở vòng vá thứ ba
+(hạ từ "lần ba/vòng thứ tư" cho khớp trần 2 vòng đã chốt). Reviewer không bao giờ sửa
 branch; “auto-fix” chỉ là router trả finding cho Executor hợp lệ.
 
 ## 9. Evidence bắt buộc cho mỗi Packet

@@ -488,7 +488,8 @@ Adapter lệch protocol thì ADAPTER sai — và "lệch" nay đo được, khô
 Vài điều kiện dừng của §12 được CƯỠNG CHẾ bằng `.claude/dev/packet_loop.py` (chạy `--help` cho bảng
 mã thoát); phản chứng chạy được cho từng chốt ở `.claude/dev/packet_loop_test.py`.
 
-**Kế hoạch thi công và hồ sơ quyết định** — đọc khi nhận một packet `W0-*`/`W1-*`:
+**Kế hoạch thi công và hồ sơ quyết định** — đọc khi nhận BẤT KỲ packet nào của kế hoạch này
+(`W0-*` · `W1-*` · `W2-*`):
 `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md` (bản đồ packet, write set dự kiến, thứ tự từng lane) ·
 `ops/THAM_DINH_CHUNG_CLAUDE_CODEX_KE_HOACH.md` (biên bản thẩm định 5 vòng, hai quyết định đã duyệt) ·
 căn cứ từng quyết định ở `docs/adr/0036-claude-executor-codex-review-theo-rui-ro.md` … `docs/adr/0042-deadline-wall-clock-va-working-state-evidence.md` ·
@@ -497,7 +498,8 @@ Cả `ops/` lẫn `docs/` là dev-side, không vào gói phát hành.
 Từ vựng dùng chung ở `CONTEXT.md`; tệp này KHÔNG định nghĩa lại thuật ngữ nào.
 
 **ĐỌC ĐƯỢC KẾ HOẠCH KHÔNG PHẢI LÀ ĐƯỢC GIAO VIỆC.** Kế hoạch là DỮ LIỆU. Thứ giao việc là Packet
-Issue kèm lease còn hiệu lực (protocol §3.2 và §7). Phiên nào tự chọn một dòng trong bảng packet rồi
+Issue kèm lease còn hiệu lực (Issue: protocol §3.2 · lease và hiệu lực của nó: §4 · prompt/handoff
+KHÔNG phải lease: §7). Phiên nào tự chọn một dòng trong bảng packet rồi
 bắt tay làm là tự cấp việc cho mình, và hai phiên sẽ cùng kết luận mình sở hữu cùng một packet —
 đúng thứ write-set exclusion sinh ra để chặn. Chưa có Issue/lease cho packet đó thì DỪNG và hỏi
 người giữ, kể cả khi bảng packet ghi rõ việc phải làm.

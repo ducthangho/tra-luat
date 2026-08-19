@@ -121,8 +121,18 @@ bằng sự HIỆN DIỆN của `dong_ket_qua` + ca phản chứng trong từng 
 `t119` bên launcher: ĐÃ có; `case_headline_…` bên gate: land cùng PR #157),
 đừng kiểm bằng tên nhánh hay trạng thái PR — tên nhánh là thứ trôi. Còn lại
 sau khi đóng, tách quyết định riêng: (i) chốt DÂY NỐI bên gate (P3 verdict
-#157, phác thảo có sẵn trong verdict); (ii) vế "CI từ chối số skip nằm ngoài
-danh sách nền tảng cho phép" là SIẾT CHUẨN (đổi rc), chưa làm ở cả hai bộ.
+#157, comment 5319042626) — ĐÃ ĐÓNG tại PR #174 (packet điều phối trực tiếp,
+cùng cách gọi với #157): ca
+`case_main_phai_in_headline_bang_dong_ket_qua_va_giu_rc` đi qua `main()` THẬT
+của một bản sao module, đọc CẢ stdout LẪN rc trên ba nhánh sạch/bỏ-qua/hỏng —
+mutant (d) f-string cũ trong `main` lẫn (f) `return 0` vô điều kiện đều đỏ
+(verdict #157 đo được cả hai đang SỐNG). Kiểm bằng sự HIỆN DIỆN của ca ấy
+trong `.claude/dev/gate_lifecycle_test.py`: thấy ca là vế (i) đã đóng, chưa
+thấy thì nợ còn mở — phải kiểm thế vì chính vế "Xong khi" ở trên kiểm bằng
+hiện diện `dong_ket_qua` + ca phản chứng, mà hai thứ đó MÙ với dây nối
+(verdict #157 dặn ghi chú này khi làm follow-up); (ii) vế "CI từ chối số skip
+nằm ngoài danh sách nền tảng cho phép" là SIẾT CHUẨN (đổi rc), chưa làm ở cả
+hai bộ.
 
 ---
 

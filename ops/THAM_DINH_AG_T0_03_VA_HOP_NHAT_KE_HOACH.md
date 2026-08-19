@@ -43,6 +43,54 @@ lịch sử mà bỏ qua điều này sẽ kết luận "master đang đỏ" —
 
 ---
 
+### 1.3 `doctor` báo `mcp=khong` — ĐÚNG với thứ nó đo, SAI với câu người đọc đang hỏi
+
+Đo được trong phiên remote 19-08:
+
+```
+launcher.py doctor --kiem-song  ->  github: ... mcp=khong
+claude mcp get github           ->  Status: ⏸ Pending approval (run `claude` to approve)
+POST https://api.githubcopilot.com/mcp/  ->  HTTP 200 · server: github.com
+                                            · mcp-session-id · x-github-request-id
+                                            · 44 công cụ dùng được
+```
+
+Ba dòng trên **không mâu thuẫn**. `_suc_khoe_mcp_github` hỏi `claude mcp get`, tức nó đo
+**CLI đã nối server chưa** — và câu trả lời `Pending approval` là đúng: server khai trong
+`.mcp.json` cấp dự án cần một lượt duyệt tương tác, mà phiên remote thì không có.
+
+Nhưng câu người vận hành đang hỏi khi đọc `mcp=khong` là **endpoint có dùng được không**.
+Hai câu khác nhau, và ở phiên không tương tác thì câu thứ hai mới quyết định làm được việc
+hay không: endpoint **thông hoàn toàn** khi gọi thẳng bằng `GITHUB_PAT`.
+
+Cái giá đã trả thật: một phiên đọc `mcp=khong` cộng với `rest-kho=khong` đã kết luận
+**GitHub bị chặn cứng** và báo không đọc được `#177`/`#178` — trong khi đường MCP mở suốt.
+Mất trọn một lượt.
+
+Đây là **biến thể thứ ba** của cùng một bệnh mà chính `launcher.py` đã chữa hai lần trước
+đó: *đo sự CÓ MẶT thay vì đo KHẢ NĂNG* (`_do_github` chữa cho `rest`), và *ca có MẶT khác
+ca có ĐO*. Lần này là **đo DÂY NỐI thay vì đo ĐẦU KIA CỦA DÂY**.
+
+Đề xuất (chưa thi công, cần packet riêng): tách `mcp` thành hai trường như `_do_github` đã
+làm với `rest` — `mcp-cli` (`claude mcp get`, đo dây nối) và `mcp-endpoint` (một lượt
+`initialize` thật tới URL khai trong `.mcp.json`, đo đầu kia). Áp đúng tiêu chí sẵn có của
+`_do_github`: 4xx **có** header `x-github-*` là *tới nơi, thiếu quyền*; **không có** header
+là *proxy tự sinh*.
+
+### 1.4 Bản đồ đường GitHub thực đo được ở phiên remote
+
+| đường | kết quả | phán quyết theo tiêu chí `_do_github` |
+|---|---|---|
+| `git` clone/fetch/push | thông | dùng được (nhưng `fetch` có cache — xem §1.1) |
+| `git push --delete` | 403 | **chặn** — proxy không cho xoá ref |
+| REST chung (`/user`) | 200, `X-Ratelimit-Limit: 15000` | thông, token thật |
+| REST theo kho (`/repos/...`) | 403, **không header GitHub** | **chặn** — proxy tự sinh, chưa tới GitHub |
+| `gh` (mọi lệnh theo kho) | 403 | chặn (đi cùng đường REST theo kho) |
+| **GitHub MCP** (`api.githubcopilot.com`) | **200, header GitHub đầy đủ** | **thông — đây là đường làm việc** |
+
+Kết luận vận hành: ở phiên remote của kho này, **đường theo kho phải đi bằng MCP**, không
+bằng `gh` và không bằng REST `api.github.com`. `git` vẫn đi đường git, trừ xoá ref.
+
 ## 2. Thẩm định AG-T0-03: một lỗi làm hỏng đúng tính năng của chính packet
 
 ### 2.1 Phép đo

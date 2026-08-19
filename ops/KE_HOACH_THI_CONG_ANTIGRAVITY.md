@@ -1,12 +1,12 @@
 # Kế Hoạch Thi Công & Điều Phối Antigravity — tra-luat
 
-> **Lưu ý lịch sử:** Kế hoạch này là hồ sơ chuyển tiếp dành riêng cho Antigravity.
-> Kế hoạch đa provider hiện hành nằm tại `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md`.
+> **Trạng thái:** Hồ sơ chuyển tiếp dành riêng cho Google Antigravity.
 >
-> **Metadata Snapshot:**
-> - `observed_at_utc`: 2026-08-18T17:05:00Z
-> - `source_commit`: `4fe64b8168e5fa1d2273ed1a1766a479fdf47193`
-> - `status_is_non_authoritative`: true (trạng thái động tức thời được ghi nhận tại GitHub Actions / Mission Issue)
+> Kế hoạch điều phối đa provider hiện hành nằm tại
+> `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md`.
+>
+> Trạng thái PR, CI, quota và review debt phải đọc từ GitHub facts;
+> không coi snapshot trong file này là trạng thái có thẩm quyền.
 
 ---
 

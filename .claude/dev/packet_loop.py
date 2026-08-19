@@ -1092,10 +1092,16 @@ def cmd_record_review_call(a, state_dir: Path) -> int:
             f"--output-bytes = {a.output_bytes}. Đã có đầu ra thì lời gọi ĐÃ sinh "
             f"ra và phải tiêu một call ({'/'.join(KET_CUC_TIEU)}).",
         )
-    if tieu and a.outcome != "ok" and a.output_bytes == 0:
+    # `ok` KHÔNG còn được miễn chiều này. Bản đầu viết `and a.outcome != "ok"`, nên
+    # `--outcome ok --output-bytes 0` đi lọt và TIÊU một call — trong khi chú thích ở
+    # `KET_CUC_TIEU` hứa thẳng "đã sinh ra thì output PHẢI khác 0". Một lời gọi thành
+    # công mà không sinh ra byte nào là mâu thuẫn tự thân y hệt hai ca kia; giữ ngoại
+    # lệ chỉ để chú thích nói một đằng code làm một nẻo.
+    # (review lượt 3, `ok-khong-byte-trai-chu-thich-nhan-phai-khop-so-do`)
+    if tieu and a.output_bytes == 0:
         _die(
             RC_ARG,
-            f"mâu thuẫn: kết cục {a.outcome!r} nghĩa là ĐÃ sinh ra rồi mới hỏng, mà "
+            f"mâu thuẫn: kết cục {a.outcome!r} nghĩa là lời gọi ĐÃ sinh ra, mà "
             f"--output-bytes = 0. Không có đầu ra thì đó là hỏng trước khi sinh "
             f"({'/'.join(KET_CUC_KHONG_TIEU)}).",
         )

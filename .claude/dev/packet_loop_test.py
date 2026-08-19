@@ -2101,6 +2101,121 @@ def case_codex_executor_calls_duoc_dem_that(c: Ctx):
         raise AssertionError("mở lượt executor đã đụng vào ngân sách review")
 
 
+def _den_checkpoint(c: Ctx, sd, packet=55):
+    """Đưa packet tới `checkpoint` bằng ĐƯỜNG THẬT THÀ: cạn trần lời gọi review."""
+    for _ in (1, 2, 3):
+        goi_review(c, sd, packet, "ok", 50)
+    if c.state(sd, packet) != "checkpoint":
+        raise AssertionError(f"tiền đề sai: phải ở checkpoint, đang {c.state(sd, packet)!r}")
+
+
+def case_record_review_call_sai_provider_thoat_4(c: Ctx):
+    """Cửa provider của `record-review-call` — trước đây không ca nào đổi provider
+    cho lệnh này (ca cũ chỉ đo `record-review`)."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, _, e = goi_review(c, sd, 55, "ok", 500, provider=EXECUTOR)
+    _doi(4, rc, e, "executor tự ghi lời gọi review phải thoát 4")
+    if _so(c, sd, 55, "codex_review_calls_used") != 0:
+        raise AssertionError("lời gọi sai provider vẫn tiêu trần")
+
+
+def case_co_review_calls_limit_duoc_ton_trong(c: Ctx):
+    """Cờ `--review-calls-limit` chưa từng được ca nào truyền, nên `init` nuốt cờ
+    mà suite vẫn xanh. Ca này ghim trần theo ĐÚNG số được khai."""
+    sd = c.sd()
+    _doi(0, *c.init(sd, extra=("--review-calls-limit", "1"))[0:1], b"", "init limit=1")
+    if _so(c, sd, 55, "codex_review_calls_limit") != 1:
+        raise AssertionError("init không nhận --review-calls-limit")
+    _doi(0, *goi_review(c, sd, 55, "ok", 100)[0:1], b"", "call 1")
+    rc, _, e = goi_review(c, sd, 55, "ok", 100)
+    _doi(3, rc, e, "trần khai là 1 thì lời gọi THỨ HAI phải bị từ chối")
+
+
+def case_khong_thoat_duoc_checkpoint_bang_transition(c: Ctx):
+    """`checkpoint` phải là ngõ cụt — kể cả với một dấu vết comment HỢP LỆ.
+
+    Đột biến `CHUYEN_HOP_LE["checkpoint"] = ("running",)` từng sống sót trọn 198 ca:
+    thoát ra rồi khép được vòng review THỨ BA khi trần đã 2/2. Checkpoint là một
+    trong ba kết quả chính của packet này mà không có phản chứng nào.
+    (review lượt 3, `checkpoint-loi-ra-transition-khong-phan-chung`)
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    _den_checkpoint(c, sd)
+    rc, _, e = run(c.script, ["record-post", "--packet", 55, "--for", "running",
+                              "--comment-id", "7770009911"], sd)
+    _doi(0, rc, e, "record-post")
+    rc, _, e = run(c.script, ["transition", "--packet", 55, "--to", "running",
+                              "--comment-id", "7770009911"], sd)
+    _doi(8, rc, e, "transition ra khỏi checkpoint phải bị chặn")
+    if c.state(sd, 55) != "checkpoint":
+        raise AssertionError(f"đã rời checkpoint: {c.state(sd, 55)!r}")
+
+
+def case_record_review_bi_chan_o_state_cuoi(c: Ctx):
+    """`record-review` ở `checkpoint` phải rc=8 — và ca này phải ĐO ĐÚNG CỬA ĐÓ.
+
+    Bản đầu của ca này tới checkpoint mà KHÔNG có lượt nào đang mở, nên gỡ cửa
+    `reviewing` ra thì `record-review` vẫn chết ở chốt `attempt_open` kế tiếp: ca
+    xanh, đột biến sống, và ca ấy KHÔNG đo cửa nó khai là đang đo. Phải dựng đúng
+    tình huống: mở lượt, vào `reviewing` (head đã neo), RỒI mới cạn trần lời gọi —
+    lúc đó chỉ còn cửa state chặn được.
+    (review lượt 3, `record-review-khong-co-ca-state-cuoi`)
+    """
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)          # attempt_open=True, reviewing_head_sha đã neo
+    sha = "%040x" % 1
+    _den_checkpoint(c, sd)              # cạn trần lời gọi ⇒ checkpoint
+    rc, _, e = run(c.script, ["record-review", "--packet", 55, "--provider", REVIEWER,
+                              "--verdict", "approve", "--reviewed-sha", sha], sd)
+    _doi(8, rc, e, "record-review ở checkpoint phải bị chặn bởi CỬA STATE")
+    if c.state(sd, 55) != "checkpoint":
+        raise AssertionError(f"đã rời checkpoint: {c.state(sd, 55)!r}")
+
+
+def case_output_bytes_am_bi_tu_choi(c: Ctx):
+    """Số byte âm là số vô nghĩa — chốt có sẵn nhưng chưa ca nào đo."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, _, e = goi_review(c, sd, 55, "sai-schema", -400)
+    _doi(2, rc, e, "--output-bytes âm phải bị từ chối")
+    if _so(c, sd, 55, "codex_review_calls_used") != 0:
+        raise AssertionError("lời gọi có số âm vẫn tiêu trần")
+
+
+def case_ledger_ghi_dung_co_tieu(c: Ctx):
+    """Sổ cái `review_calls` phải khớp bộ đếm — không ca nào đọc NỘI DUNG sổ.
+
+    Đột biến khai gian `tieu: True` ở nhánh KHÔNG-tiêu từng sống sót: sổ tự mâu
+    thuẫn với bộ đếm (`used` vẫn 0) mà suite xanh.
+    """
+    import json
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    _doi(0, *goi_review(c, sd, 55, "rate-limit", 0)[0:1], b"", "khong tieu")
+    _doi(0, *goi_review(c, sd, 55, "ok", 300)[0:1], b"", "tieu")
+    rc, o, e = run(c.script, ["status", "--packet", 55], sd)
+    _doi(0, rc, e, "status")
+    st = json.loads(o.decode("utf-8"))
+    co = [m["tieu"] for m in st["review_calls"]]
+    if co != [False, True]:
+        raise AssertionError(f"cờ tiêu trong sổ sai: {co} (phải là [False, True])")
+    if sum(1 for m in st["review_calls"] if m["tieu"]) != st["codex_review_calls_used"]:
+        raise AssertionError("sổ cái mâu thuẫn với bộ đếm")
+
+
+def case_ok_khong_byte_bi_tu_choi(c: Ctx):
+    """`ok` mà 0 byte là mâu thuẫn tự thân — một lời gọi thành công không sinh gì."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, _, e = goi_review(c, sd, 55, "ok", 0)
+    _doi(2, rc, e, "ok + 0 byte phải bị từ chối")
+    if _so(c, sd, 55, "codex_review_calls_used") != 0:
+        raise AssertionError("ok+0byte vẫn tiêu trần")
+
+
 CASES = [
     ("init_KHONG_duoc_tu_cap_lease", case_init_KHONG_duoc_tu_cap_lease),
     ("tu_cap_lease_bang_ten_provider_bi_chan", case_tu_cap_lease_bang_ten_provider_bi_chan),
@@ -2127,6 +2242,14 @@ CASES = [
     # --- vá 2 finding rẻ của review lượt 2 (fable-5 max) ---
     ("record_review_call_bi_chan_o_state_cuoi", case_record_review_call_bi_chan_o_state_cuoi),
     ("codex_executor_calls_duoc_dem_that", case_codex_executor_calls_duoc_dem_that),
+    # --- vá 7 cửa KHÔNG CÓ PHẢN CHỨNG (review lượt 3, fable-5 max, đo động) ---
+    ("record_review_call_sai_provider_thoat_4", case_record_review_call_sai_provider_thoat_4),
+    ("co_review_calls_limit_duoc_ton_trong", case_co_review_calls_limit_duoc_ton_trong),
+    ("khong_thoat_duoc_checkpoint_bang_transition", case_khong_thoat_duoc_checkpoint_bang_transition),
+    ("record_review_bi_chan_o_state_cuoi", case_record_review_bi_chan_o_state_cuoi),
+    ("output_bytes_am_bi_tu_choi", case_output_bytes_am_bi_tu_choi),
+    ("ledger_ghi_dung_co_tieu", case_ledger_ghi_dung_co_tieu),
+    ("ok_khong_byte_bi_tu_choi", case_ok_khong_byte_bi_tu_choi),
     ("begin_attempt_lap_khong_tieu_them_tran", case_begin_attempt_lap_khong_tieu_them_tran),
     ("init_khong_ghi_de_state_da_blocked", case_init_khong_ghi_de_state_da_blocked),
     ("init_khong_co_co_ghi_de", case_init_khong_co_co_ghi_de),
@@ -2217,15 +2340,57 @@ MUTANTS = {
         ["review_call_da_sinh_ra_roi_hong_van_tieu",
          "doi_prompt_hay_phien_khong_mo_lai_tran_review"],
     ),
+    # --- 7 đột biến cho 7 cửa lượt 3 phát hiện là không ai canh ---
+    "bo_cua_provider_cua_record_review_call": (
+        '    if a.provider != st["reviewer"]:\n'
+        '        _die(\n'
+        '            RC_PROVIDER,\n'
+        '            f"provider {a.provider!r} không phải reviewer của packet này ({st[\'reviewer\']!r})",\n'
+        '        )\n',
+        "    if False:\n        pass\n",
+        ["record_review_call_sai_provider_thoat_4"],
+    ),
+    "init_nuot_co_review_calls_limit": (
+        '        "codex_review_calls_limit": a.review_calls_limit,\n',
+        '        "codex_review_calls_limit": 2,\n',
+        ["co_review_calls_limit_duoc_ton_trong"],
+    ),
+    "checkpoint_co_loi_ra": (
+        '    "checkpoint": (),\n',
+        '    "checkpoint": ("running",),\n',
+        ["khong_thoat_duoc_checkpoint_bang_transition"],
+    ),
+    "record_review_nhan_ca_state_cuoi": (
+        '    if st["state"] != "reviewing":\n'
+        '        _die(RC_STATE, f"chỉ ghi review khi state là \'reviewing\' (đang là {st[\'state\']!r})")\n',
+        "    if False:\n        pass\n",
+        ["record_review_bi_chan_o_state_cuoi"],
+    ),
+    "bo_chan_output_bytes_am": (
+        '    if a.output_bytes < 0:\n'
+        '        _die(RC_ARG, f"--output-bytes {a.output_bytes} không âm được")\n',
+        "    if False:\n        pass\n",
+        ["output_bytes_am_bi_tu_choi"],
+    ),
+    "so_cai_khai_gian_co_tieu": (
+        '            {"outcome": a.outcome, "output_bytes": a.output_bytes, "tieu": False}\n',
+        '            {"outcome": a.outcome, "output_bytes": a.output_bytes, "tieu": True}\n',
+        ["ledger_ghi_dung_co_tieu"],
+    ),
+    "mien_ok_khoi_chot_nhan_khop_so_do": (
+        "    if tieu and a.output_bytes == 0:\n",
+        '    if tieu and a.outcome != "ok" and a.output_bytes == 0:\n',
+        ["ok_khong_byte_bi_tu_choi"],
+    ),
     "bo_vong_fail_closed_state_cu": (
         '    for khoa in ("codex_review_calls_used", "codex_review_calls_limit", "review_calls"):\n',
         "    for khoa in ():\n",
         ["state_cu_thieu_khoa_ngan_sach_bi_chan", "thieu_review_calls_van_fail_closed"],
     ),
     "bo_chot_nhan_CHIEU_HAI": (
-        '    if tieu and a.outcome != "ok" and a.output_bytes == 0:\n',
-        '    if False and a.outcome != "ok" and a.output_bytes == 0:\n',
-        ["nhan_khong_tieu_ma_co_output_bi_tu_choi"],
+        "    if tieu and a.output_bytes == 0:\n",
+        "    if False and a.output_bytes == 0:\n",
+        ["nhan_khong_tieu_ma_co_output_bi_tu_choi", "ok_khong_byte_bi_tu_choi"],
     ),
     "bo_dem_vong_review": (
         '    st["review_rounds_used"] = st.get("review_rounds_used", 0) + 1\n',

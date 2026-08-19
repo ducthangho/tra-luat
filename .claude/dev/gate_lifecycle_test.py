@@ -1303,6 +1303,90 @@ def case_sigterm_cung_phai_giet_cay_truoc_khi_nha_khoa() -> None:
         assert not song_sot.exists(), "con gate SONG SOT sau khi runner thoat va nha khoa"
 
 
+def case_tin_hieu_giua_quang_dung_khong_duoc_lot_ra() -> None:
+    """Tín hiệu rơi vào quãng DỰNG (đã cấp cgroup, chưa vào `try`) không được lọt.
+
+    Review `same_provider_approved` trên `e0e1a16` tìm ra, tác giả dựng lại được.
+    Bản trước chặn mặt nạ tín hiệu MÃI TỚI ngay trước lúc sinh con, nên còn một
+    quãng "handler đã cắm, mặt nạ chưa chặn, chưa vào `try` nào" — `BiKetThuc`
+    ném ra ở đó KHÔNG AI BẮT, nó bay thẳng qua `main()`. Đo được ở quãng ấy:
+    `rc=1` · traceback ra stderr · KHÔNG bằng chứng · và nếu rơi đúng khoảng giữa
+    `_tao_cgroup_gate()` với `atexit.register` thì ĐỂ LẠI HẲN một thư mục cgroup.
+
+    VÌ SAO CẦN MỐI NỐI: cửa sổ này rộng vài trăm micro-giây trong đời thật —
+    sweep 87 lượt lưới 0,01s KHÔNG chạm nó lần nào. Một cửa sổ chỉ gọi ra được
+    bằng cách sửa bản sao thì nhánh vá nó là nhánh KHÔNG THỂ ĐỎ, mà lời khai về
+    độ phủ của một nhánh không thể đỏ là lời khai sai. `TL_GATE_EP_CHAM_SAU_CGROUP`
+    nới cửa sổ ra để ca này tất định.
+
+    Bốn vế, thiếu vế nào cũng chưa đóng: mã thoát đúng · có bằng chứng · không
+    traceback · KHÔNG để lại cgroup rác.
+    """
+    if os.name == "nt":
+        raise BoQua("fixture POSIX")
+    if not _mount_cgroup2_co_that():
+        raise BoQua("khong co cgroup v2")
+    sys.path.insert(0, str(RUNNER.parent))
+    import gate_lifecycle as gl
+    goc = gl._mount_cgroup2()
+
+    def _dem_cgroup() -> int:
+        try:
+            return len([q for q in goc.rglob("tl-gate-*") if q.is_dir()])
+        except OSError:
+            return -1
+
+    with tempfile.TemporaryDirectory(prefix="gate_lifecycle_quang_") as raw:
+        root = Path(raw)
+        repo = root / "repo"
+        repo.mkdir()
+        head, _ = _repo(repo)
+        evidence = root / "evidence.json"
+        moi_truong = dict(os.environ)
+        moi_truong["TL_GATE_EP_CHAM_SAU_CGROUP"] = "3"     # nới cửa sổ ra 3 giây
+        moi_truong.pop("TL_GATE_TAT_CGROUP", None)
+        argv = [
+            "run", "--kind", "heavy", "--name", "fixture", "--repo", str(repo),
+            "--evidence", str(evidence), "--output", str(evidence.with_suffix(".out")),
+            "--wait-seconds", "1.0", "--timeout-seconds", "60",
+            "--selected-test", "fixture",
+            "--expected-head", head, "--base-sha", head, "--require-clean",
+            "--", sys.executable, "-c", "import time; time.sleep(30)",
+        ]
+        truoc = _dem_cgroup()
+        proc = subprocess.Popen([sys.executable, str(RUNNER), *argv], cwd=repo,
+                                text=True, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, env=moi_truong)
+        try:
+            time.sleep(1.2)                 # ĐANG Ở GIỮA quãng vừa nới
+            proc.send_signal(signal.SIGTERM)
+            _, loi = proc.communicate(timeout=90)
+        finally:
+            if proc.poll() is None:
+                proc.kill()
+                proc.communicate()
+        time.sleep(0.5)
+
+        assert evidence.is_file(), (
+            "tin hieu giua quang dung lam MAT tep bang chung: %s" % ((loi or "")[-300:],)
+        )
+        ban_ghi = json.loads(evidence.read_text(encoding="utf-8"))
+        if ban_ghi.get("co_che_cach_ly") != "cgroup2":
+            raise BoQua("may khong cap duoc cgroup")
+        assert "Traceback" not in (loi or ""), "tin hieu giua quang dung lam ro traceback"
+        assert proc.returncode == 143, "ma thoat %r, doi 143" % (proc.returncode,)
+        assert ban_ghi.get("returncode") == 143, "ban ghi returncode=%r" % (ban_ghi.get("returncode"),)
+        sau = _dem_cgroup()
+        assert sau == truoc, (
+            "de lai %d thu muc cgroup rac (truoc=%d sau=%d)" % (sau - truoc, truoc, sau)
+        )
+        # Mối nối bơm lỗi phải ĐI VÀO bằng chứng, nếu không nó là đường lách cổng.
+        assert "TL_GATE_EP_CHAM_SAU_CGROUP" in (ban_ghi.get("moi_noi_kiem_thu") or []), (
+            "moi noi da bat ma ban ghi khai moi_noi_kiem_thu=%r"
+            % (ban_ghi.get("moi_noi_kiem_thu"),)
+        )
+
+
 def case_dirty_run_is_allowed_but_never_reusable() -> None:
     """Bỏ `--require-clean` thì gate CHẠY ĐƯỢC trên cây bẩn, nhưng chứng KHÔNG tái dùng.
 
@@ -1627,6 +1711,7 @@ CASES = [
     case_tien_trinh_trong_cgroup_con_khong_duoc_bo_sot,
     case_khong_do_duoc_khong_duoc_khai_thanh_da_sach,
     case_sigterm_cung_phai_giet_cay_truoc_khi_nha_khoa,
+    case_tin_hieu_giua_quang_dung_khong_duoc_lot_ra,
     case_dirty_run_is_allowed_but_never_reusable,
     case_validate_reuse_is_fail_closed,
     case_headline_khong_duoc_dem_ca_bo_qua_la_da_qua,

@@ -21213,7 +21213,10 @@ def run() -> int:
         # `release-manifest` giữ 179, `doc-claims-check --strict` delta 0 — rồi kết luận "docs không
         # ảnh hưởng gói". Ba cổng ấy đều xanh và đều trả lời câu hỏi KHÁC: không cổng nào trong số đó
         # ghi CON SỐ docs. Chỗ ghi con số là đúng ca này, và nó chỉ đỏ ở `tl selftest`.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 64 == 243
+        # KÊ KHAI SLOT (AG-T0-02/Packet 2 — thêm AGENTS.md vào gốc kho): 179 → **180**.
+        # Thêm đúng AGENTS.md (hướng dẫn đa agent); package = 180 (dưới trần 200, còn 20 khe);
+        # cây thật = 180 + 64 = 244.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 64 == 244
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
         ok4 = (len(tren_dia) == 64

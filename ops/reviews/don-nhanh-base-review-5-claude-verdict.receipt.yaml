@@ -1,0 +1,174 @@
+# BIÊN NHẬN — cross-review lượt 5 của PR #150.
+#
+# ĐỌC BỐN DÒNG NÀY TRƯỚC MỌI DÒNG KHÁC:
+#
+# 1. Reviewer là `claude` TRONG KHI người vá cũng là `claude`. `same_provider_approved`.
+#    #150 ĐÃ MERGE trước khi biên nhận này được ghi ⇒ verdict này KHÔNG gác cổng lần ấy.
+# 2. Biên nhận ghi NGƯỢC, hai ngày sau lượt chạy. Không phải bản ghi đương thời.
+# 3. Người ghi chính là người vá của lượt ấy. Không có lớp độc lập nào.
+# 4. Lượt này chạy tới LẦN THỨ HAI (`l5b`). Lần đầu (`l5`) chết không ra verdict —
+#    xem `lan_chay_dau_that_bai`. Ghi ra đây để không ai đọc `l5b` thành "chạy lại tới
+#    khi được câu trả lời vừa ý".
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+lease_id: don-nhanh-base-review-5-claude-20260817
+provider: claude
+role: reviewer
+reviewer_model: claude-fable-5
+verdict: changes_requested
+assurance: same_provider_approved
+assurance_KHONG_dat: cross_approved
+cross_provider: false
+reviewed_sha: 12dd16ea6d92a177898a78fb9a547bda1d601dbb
+
+verdict_path: ops/reviews/don-nhanh-base-review-5-claude-verdict.md
+verdict_sha256: 9f26f53484511f1fef8e40cdeb2818b22bf1a717cc747ea99c323c1bffd9d023
+verdict_bytes: 12157
+verdict_nguon: 'scratchpad/runs/ecf76610/stdout.log (launcher v1.2.0, ma_thoat=0, 1782.798s)'
+verdict_doi_chieu: '`diff -q` nguồn ↔ tệp đã chép: KHỚP TỪNG BYTE'
+
+chuoi_bang_chung_da_DO:
+  lease_doi_prompt: 3aaa0f617add17a9c02d01f047419825aa2b69d1d823c25682d9ef2ced77c00a
+  sha256_tep_prompt_tren_cay: 3aaa0f617add17a9c02d01f047419825aa2b69d1d823c25682d9ef2ced77c00a
+  run_json_prompt_sha256: 3aaa0f617add17a9c02d01f047419825aa2b69d1d823c25682d9ef2ced77c00a
+  lease_doi_reviewed_sha: 12dd16ea6d92a177898a78fb9a547bda1d601dbb
+  reviewed_sha_trong_than_verdict: 12dd16ea6d92a177898a78fb9a547bda1d601dbb
+  run_json_head: 12dd16ea6d92a177898a78fb9a547bda1d601dbb
+
+lan_chay_dau_that_bai:
+  run: 'scratchpad/runs/ddf46456 — tên `claude-fable5-review-150-l5`'
+  bat_dau_utc: '2026-08-17T16:56:18Z'
+  stdout: '15 byte, đúng chuỗi `Execution error`, KHÔNG có verdict, KHÔNG có finding'
+  stderr: >-
+    Cảnh báo tin cậy workspace của Claude Code ("Ignoring 14 permissions.allow entries …
+    this workspace has not been trusted").
+  ma_thoat: null
+  ma_thoat_doc_the_nao: >-
+    `trang_thai` còn kẹt ở `dang_chay` và `ma_thoat` là `null` — tức launcher CHƯA BAO
+    GIỜ ghi được kết thúc cho lượt ấy. Theo doctrine `None ≠ False` của kho, đây là
+    **KHÔNG ĐO ĐƯỢC**, không phải "đã thất bại sạch". Đừng ghi nó thành rc≠0.
+  lan_hai: 'runs/ecf76610 — tên `l5b`, bắt đầu 16:59:34Z, CÙNG head `12dd16ea…`, rc=0'
+  vi_sao_ghi_ra_day: >-
+    Tên `l5b` một mình sẽ làm người đọc sau này ngờ có một `l5a` cho câu trả lời khác rồi
+    bị bỏ đi. Đo được là KHÔNG: lần đầu không sinh ra verdict nào để mà chọn — 15 byte
+    lỗi khởi động, cách lần hai đúng 3 phút, cùng một SHA neo. Chạy lại sau một cú chết
+    khởi động là hợp lệ; chạy lại sau một verdict KHÔNG vừa ý thì không, và ở đây là
+    trường hợp thứ nhất.
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/03f12ac63284dd814dcf14664968af4872ef7f8a/ops/reviews/don-nhanh-base-review-5-claude-verdict.md
+
+published_first:
+  branch: claude/wp55-r2g2-executor-p4tee0
+  commit: 03f12ac63284dd814dcf14664968af4872ef7f8a
+do_thu_DA_DEN_chu_khong_tin_loi_goi: >-
+  Đọc ngược qua MCP neo `sha=03f12ac6…`; blob SHA của lượt 4 GitHub trả khớp
+  `git hash-object` cục bộ. Lượt 5 cùng commit, cùng đường đẩy.
+
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_tag: null
+truy_xuat_ghi_chu: >-
+  Y HỆT lượt 4: commit chỉ sống trên nhánh `claude/wp55-r2g2-executor-p4tee0`, KHÔNG
+  trong lịch sử `master` (#150 merge TRƯỚC commit này). Xoá nhánh ⇒ link chết ⇒ nợ mở lại.
+  Cần land vào `master` hoặc gắn tag `luu-tru/*`; phiên web không tạo được tag (proxy 403).
+
+ghi_nguoc_SAU_khi_PR_da_merge:
+  chay_luc_utc: '2026-08-17T16:59:34Z → 2026-08-17T17:29:17Z'
+  pr_150_merged_luc_utc: '2026-08-19T09:08:57Z'
+  bien_nhan_ghi_luc_utc: '2026-08-19T12:20:00Z'
+  he_qua_phai_noi_thang: >-
+    Verdict này KHÔNG tham gia quyết định merge. Bản ghi lịch sử, không phải cổng.
+
+nguoi_ghi_KHONG_doc_lap:
+  su_that: 'Người ghi biên nhận này là người vá của lượt 5 — cùng phiên, cùng nhà cung cấp.'
+
+noi_dung_verdict_tom_tat:
+  xac_nhan_luot_4: >-
+    F1 và F2 của lượt 4 ĐÓNG. Reviewer tự dựng lại M12/M16/M13/M13b trên bản sao tạm,
+    mỗi con một thư mục, xác nhận diff đã áp TRƯỚC khi chạy (chống bệnh "đột biến chưa
+    từng được chạy" của kho) — số khớp từng ca đỏ với lời khai người vá.
+  finding_P2:
+    loai: 'ĐỘT BIẾN SỐNG SÓT — một HỌ BỐN CON'
+    noi_dung: >-
+      `Dung-Gh-Gia` sinh `gh` giả MÙ VỚI ARGV: in cùng một JSON bất kể được hỏi gì. Nó mô
+      phỏng TRẠNG THÁI (đúng doctrine kho) nhưng không mô phỏng HỢP ĐỒNG TRUY VẤN, nên cả
+      bốn đột biến vào dòng gọi `gh` sống 21/21 — `--limit $TranPR`→`--limit 200` · bỏ hẳn
+      `--limit` (mặc định `gh` là 30) · `--state open`→`--state closed` ·
+      `--json headRefName,baseRefName`→`--json headRefName`.
+    vi_sao_dang_so: >-
+      Con thứ tư TÁI TẠO ĐÚNG LỖ GỐC mà cả PR #150 sinh ra để vá, bằng MỘT token: `t1` vẫn
+      xanh vì `gh` giả in đủ hai trường kể cả khi script đã thôi hỏi trường base.
+    phan_biet_voi_no_da_khai: >-
+      Reviewer tách rạch ròi: nợ `gh-phan-trang-that-chua-ai-do` nói về CÂU TRẢ LỜI của
+      `gh` thật (không đo được vì proxy); finding này nói về CÂU HỎI của script — đo được
+      ngay trong container, và đã đo.
+    da_dong: true
+    dong_o_dau: >-
+      Bản vá argv-log + `t21` (commit `99e9383`). NHƯNG lượt 6 đo ra chốt ấy vẫn hở với
+      token THỪA (`-contains` không kiểm thứ tự/token thừa) ⇒ P1 mới; rồi lượt 7 đo ra
+      `argv.txt` ghi `>` nên lời gọi trang trí xoá dấu vết. Tức lớp này phải vá BA lượt
+      mới kín — xem README, đây là hình dạng "vá một lỗ mà mở lỗ khác trong cùng hàm".
+  no_moi_khai_them: >-
+    Bốn mục dưới ngưỡng finding, tất cả ĐO ĐƯỢC — `t20` xanh-vì-lý-do-sai khi danh sách
+    rỗng (⇒ `t21` là ĐIỂM HỎNG ĐƠN của cả phép ghim) · hằng `999` của `t20` không tự canh
+    (998 sống 21/21; reviewer khuyên KHÔNG vá vì test không tự canh được hằng của chính
+    nó) · `Nhieu-PR` hai bẫy ngoài miền gọi · chú thích `t19` khai SAI ("10/9 là cặp nhỏ
+    nhất" — đo phản chứng: (10,2)…(10,8) cũng phân biệt, nhỏ nhất thật là ĐẾM = 10).
+  bat_loi_khai_sai_cua_nguoi_va: >-
+    Mục cuối đáng ghi riêng: reviewer bắt một LỜI KHAI SAI nằm trong chú thích của người
+    vá, và người vá đã sửa. Kho này đo cả lời khai trong chú thích, không chỉ đo mã.
+
+verdict_usage_caveats:
+- id: same-provider-khong-du-land
+  noi_dung: >-
+    Reviewer là `claude`, CÙNG nhà cung cấp với người vá. §8 nói mức ấy MỘT MÌNH không
+    thay mức assurance bắt buộc cho phạm vi workflow, và #150 sửa
+    `.github/workflows/ci.yml`. **Đừng đọc verdict này thành điều kiện land.** Và đừng đọc
+    theo chiều ngược lại: #150 merge ngày 19-08, verdict chạy 17-08, biên nhận ghi SAU khi
+    merge — sự có mặt của tệp này KHÔNG phải bằng chứng lượt 5 đã gác cổng cho lần merge.
+- id: P2-cua-luot-5-DA-DONG-nhung-phai-BA-LUOT-moi-kin
+  noi_dung: >-
+    Bốn đột biến argv trong verdict được ghi là SỐNG 21/21. Chúng đã CHẾT sau bản vá
+    `99e9383` — chạy lại trên `master` thấy chúng chết là bằng chứng bản vá chạy, KHÔNG
+    phải bằng chứng verdict sai. Nhưng đừng đọc thành "lớp argv đã kín từ lượt 5": lượt 6
+    tìm ra chốt `-contains` mù với token THỪA (P1, tái sinh lại đúng lỗ gốc), lượt 7 tìm ra
+    `argv.txt` ghi đè `>` làm lời gọi trang trí xoá dấu vết. Ba lượt cho một lớp.
+- id: so-luot-5-neo-o-12dd16e-KHONG-tai-hien-tren-master
+  noi_dung: >-
+    Mọi con số neo ở `12dd16ea6d92a177898a78fb9a547bda1d601dbb` với bộ test **21 ca**. Bộ
+    ấy đã đổi nhiều lần và #150 đã merge vào `master`. Muốn tái hiện thì
+    `git worktree add --detach <đích> 12dd16ea…`. Riêng dụng cụ đo của lượt này (đột biến
+    trong `/dev/shm/rv5`) đã MẤT cùng scratchpad — các số probe không tra lại được từ kho.
+- id: so-eol-checked-396-neo-theo-INDEX
+  noi_dung: >-
+    Verdict ghi `eol … checked=396`. `eol_policy.py --all` đọc **INDEX của git** nên số ấy
+    đổi theo THỜI ĐIỂM ĐO chứ không theo mã — lượt 4 ghi 393, lượt 6 ghi 398, đo lại sau
+    khi stage cho 401. Ba con số khác nhau, KHÔNG con nào là hồi quy. Đọc `violations`.
+- id: luot-5-chay-lan-hai-l5b
+  noi_dung: >-
+    Tên run là `l5b`. Lần đầu (`l5`, `runs/ddf46456`) chết ở khởi động Claude Code sau ~3
+    phút, stdout đúng 15 byte `Execution error`, KHÔNG sinh verdict, và `ma_thoat` là
+    `null` (`trang_thai` kẹt `dang_chay`) ⇒ theo `None ≠ False` phải đọc là **KHÔNG ĐO
+    ĐƯỢC**, không phải "thất bại sạch". Nêu ra để không ai đọc `l5b` thành chạy-lại-tới-
+    khi-vừa-ý: không có verdict lần đầu để mà chọn.
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-19T12:20:00Z'
+
+receipt_khong_khai:
+- 'Không khai lượt này tương đương một lượt cross-provider. Nó KHÔNG.'
+- 'Không khai verdict này đã gác cổng cho lần merge #150.'
+- 'Không khai người ghi biên nhận độc lập với người vá.'
+- 'Không khai `evidence_url` là bền — xem `truy_xuat_ghi_chu`.'
+- >-
+  Không khai đã kiểm lại NỘI DUNG phép đo của reviewer. Chỉ kiểm chép nguyên văn +
+  verdict thuộc đúng lease. Đột biến của lượt này chạy trong `/dev/shm`, nay đã mất.
+- >-
+  Không khai `gh` phân trang THẬT đã được đo. Chính verdict tách rạch ròi rằng nó đo CÂU
+  HỎI của script chứ không đo CÂU TRẢ LỜI của `gh` thật. Nợ ấy GIỮ NGUYÊN.

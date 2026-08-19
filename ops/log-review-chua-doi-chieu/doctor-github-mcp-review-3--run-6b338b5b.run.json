@@ -1,0 +1,19 @@
+{
+ "run_id": "6b338b5bdf1a434cbabb12370b2521e5",
+ "short_id": "6b338b5b",
+ "ten": "review3-mcp",
+ "trang_thai": "xong",
+ "ma_thoat": 0,
+ "bat_dau_utc": "2026-08-17T06:48:23.618560+00:00",
+ "ket_thuc_utc": "2026-08-17T06:53:45.436351+00:00",
+ "head": "8f25ea94a8487e8f09bf6359bbed71e101143cdc",
+ "commit_goc": [
+  "394e93468fc8d84ec20938e6df8fb7ab72b2cc37"
+ ],
+ "prompt_sha256": "1cd3cf8cef0a9a3fbce22bad350a18e1dc7c032650a7527bc78198dfb4c47d27",
+ "thoi_luong_giay": 321.818,
+ "stdout_byte": 3958,
+ "remotes": [
+  "github.com/ducthangho/tra-luat"
+ ]
+}

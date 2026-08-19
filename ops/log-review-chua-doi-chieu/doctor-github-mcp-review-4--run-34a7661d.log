@@ -1,0 +1,107 @@
+verdict: changes_requested
+reviewed_sha: 9683d916ceca64741861a4752ecbeb3a2c6ed84d
+
+## Findings
+
+- `p2-t105-allowlist-van-khong-phu-toan-bo-loi-goi`
+
+  Chốt “danh sách cho phép” chưa đo toàn bộ hợp đồng subprocess:
+
+  - Chỉ lọc lời gọi có `cmd[0] == "claude"`.
+  - Chỉ được gọi tại `(3a)`, `(3b)` và ca hoa/thường.
+  - Các lần gọi trong `(3c)`, `(3c2)`, `(3d)` và ca CLI trả “No MCP server” không được chốt.
+  - Toàn bộ lời gọi `gh` bị loại khỏi đặc tả.
+
+  Hai đột biến độc lập sống sót qua toàn suite:
+
+  1. Đổi lời gọi thành `gh auth status --bogus`.
+  2. Riêng khi stdout chứa `Connected (stale)`, gọi thêm `claude mcp get github --bogus`.
+
+  Lệnh tái lập đột biến 1:
+
+  ```sh
+  mkdir /dev/shm/r4ghfull
+  cp -a . /dev/shm/r4ghfull/repo
+  sed -i 's/\["gh", "auth", "status"\]/["gh", "auth", "status", "--bogus"]/' \
+    /dev/shm/r4ghfull/repo/.claude/dev/launcher.py
+  TMPDIR=/dev/shm python3 /dev/shm/r4ghfull/repo/.claude/dev/launcher_test.py
+  ```
+
+  Kết quả:
+
+  ```text
+  105/105 ca (qua 104, bo qua 1, hong 0)
+  ```
+
+  Lệnh tái lập đột biến 2:
+
+  ```sh
+  mkdir /dev/shm/r4branchfull
+  cp -a . /dev/shm/r4branchfull/repo
+  sed -i '/text=True, timeout=30)/a\
+          if "Connected (stale)" in (r.stdout or ""):\
+              subprocess.run(["claude", "mcp", "get", ten, "--bogus"], capture_output=True, text=True, timeout=30)' \
+    /dev/shm/r4branchfull/repo/.claude/dev/launcher.py
+  TMPDIR=/dev/shm python3 /dev/shm/r4branchfull/repo/.claude/dev/launcher_test.py
+  ```
+
+  Kết quả:
+
+  ```text
+  105/105 ca (qua 104, bo qua 1, hong 0)
+  ```
+
+  Đây là lượt thứ tư liên tiếp có đột biến cùng hình dạng sống sót: oracle vẫn đặc tả một tập con lời gọi của đồ giả, chưa đặc tả toàn bộ tương tác quan sát được.
+
+- `p2-ten-server-trung-casefold-phu-thuoc-thu-tu-json`
+
+  `_doc_mcp_json` chấp nhận mọi khóa có `casefold() == "github"` nhưng chỉ trả `ten[0]`. Khi đồng thời có `github` và `GitHub`, CLI coi chúng là hai tên phân biệt; server được đo phụ thuộc thứ tự khóa JSON. Hai cấu hình có cùng tập server nhưng đảo thứ tự có thể đo hai server khác nhau và cho nhãn khác nhau.
+
+  Đột biến đổi lựa chọn từ `ten[0]` sang `ten[-1]` vẫn xanh:
+
+  ```sh
+  mkdir /dev/shm/review4-mut-order-run
+  cp -a . /dev/shm/review4-mut-order-run/repo
+  sed -i 's/ten\[0\]$/ten[-1]/' \
+    /dev/shm/review4-mut-order-run/repo/.claude/dev/launcher.py
+  TMPDIR=/dev/shm python3 \
+    /dev/shm/review4-mut-order-run/repo/.claude/dev/launcher_test.py \
+    --lap-ca t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh --lan 1
+  ```
+
+  Kết quả:
+
+  ```text
+  LAP t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh: 1/1 qua, 0 bo qua, 0 hong
+  ```
+
+  Cần quy định rõ collision này, chẳng hạn từ chối nhiều tên khớp casefold thay vì chọn theo thứ tự khai báo.
+
+## Phép đo đã chạy
+
+```sh
+TMPDIR=/dev/shm python3 .claude/dev/launcher_test.py
+```
+
+```text
+105/105 ca (qua 104, bo qua 1, hong 0)
+```
+
+Delta ca đỏ so với nền được báo: `0`.
+
+```sh
+TMPDIR=/dev/shm python3 .claude/dev/launcher_test.py --dot-bien
+```
+
+```text
+DOT BIEN: 79/79 dat (1 khong do duoc tren nen nay)
+```
+
+Ca không đo được là mutation nhắm fixture Windows `t62`; suite POSIX tương ứng vẫn chạy.
+
+Đã kiểm tra thêm:
+
+- `_doc_mcp_json` trả đủ ba giá trị ở mọi nhánh hiện tại.
+- Trạng thái lạ/không có `Status:` đi theo `khong_do_duoc`; tầng tiêu thụ vẫn fail-close.
+- Bản vá mới không làm `gh` lật nhãn kết quả.
+- Không tìm được phép đo chứng minh nội dung do server kiểm soát có thể chèn một dòng `Status:` giả trước trường thật; phần này **KHÔNG ĐO ĐƯỢC**.

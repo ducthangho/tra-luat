@@ -203,6 +203,47 @@ def _git_mot_dong(workspace, *doi_so) -> tuple[int, str, str]:
     return (0, dong[0].strip(), "")
 
 
+def _chay_van_ban_an_toan(lenh: list[str], *, env: dict[str, str] | None = None,
+                          stdin=subprocess.DEVNULL, timeout: float = 30.0,
+                          cwd: Path | str | None = None) -> subprocess.CompletedProcess:
+    """Chạy tiến trình lấy đầu ra văn bản an toàn đa nền tảng.
+
+    Bắt buộc `encoding="utf-8", errors="replace"` để chống lỗi UnicodeDecodeError
+    ('charmap' codec) trên Windows khi tiến trình con in ký tự ngoài code page cp1258/cp1252.
+    """
+    return subprocess.run(lenh, capture_output=True, text=True,
+                          encoding="utf-8", errors="replace",
+                          env=env, stdin=stdin, timeout=timeout, cwd=cwd)
+
+
+def _chay_json_chat_che(lenh: list[str], *, env: dict[str, str] | None = None,
+                        stdin=subprocess.DEVNULL, timeout: float = 30.0,
+                        cwd: Path | str | None = None) -> tuple[int, dict | list | None, str]:
+    """Chạy tiến trình và phân tích JSON nghiêm ngặt từ đầu ra UTF-8.
+
+    Không dùng errors="replace" làm biến dạng dữ liệu cấu trúc máy đọc.
+    Trả về: (ma_thoat, parsed_json, thong_bao_loi).
+    """
+    try:
+        p = subprocess.run(lenh, capture_output=True, text=True,
+                           encoding="utf-8", errors="strict",
+                           env=env, stdin=stdin, timeout=timeout, cwd=cwd)
+    except UnicodeDecodeError as e:
+        return (-1, None, f"loi giai ma UTF-8: {e}")
+    except subprocess.TimeoutExpired:
+        return (124, None, f"qua han {timeout}s")
+    except (OSError, subprocess.SubprocessError) as e:
+        return (-1, None, f"loi tien trinh: {e}")
+
+    if p.returncode != 0:
+        return (p.returncode, None, p.stderr.strip() or p.stdout.strip())
+    try:
+        data = json.loads(p.stdout)
+        return (0, data, "")
+    except json.JSONDecodeError as e:
+        return (-1, None, f"loi phan tich JSON: {e}")
+
+
 # --------------------------------------------------- danh tính tiến trình (kill an toàn)
 
 def _khoa_danh_tinh(pid: int) -> str | None:
@@ -700,7 +741,8 @@ def _giet_windows(pid: int, khoa: str | None = None,
                 buoc.append("job: khong doc duoc danh sach pid")
     try:
         p = subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"],
-                           capture_output=True, text=True, timeout=30)
+                           capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", timeout=30)
         ma_tk = p.returncode
     except (OSError, subprocess.SubprocessError):
         ma_tk = None             # treo/không chạy được: coi như /T KHÔNG chạy
@@ -2701,6 +2743,7 @@ def _suc_khoe_mcp_github(ten: str = "github",
     moi_truong = _env_da_chuan(moi_truong)
     try:
         r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True, text=True,
+                           encoding="utf-8", errors="replace",
                            env=moi_truong, stdin=subprocess.DEVNULL,
                            timeout=PROBE_TIMEOUT_GIAY)
     except (OSError, subprocess.SubprocessError) as e:
@@ -2781,6 +2824,7 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     if shutil.which("gh"):
         try:
             pg = subprocess.run(["gh", "auth", "status"], capture_output=True, text=True,
+                                encoding="utf-8", errors="replace",
                                 env=mt, stdin=subprocess.DEVNULL, timeout=20)
             duong.append(("gh-cli", pg.returncode == 0,
                           "da xac thuc" if pg.returncode == 0 else f"CHUA xac thuc (rc={pg.returncode})"))
@@ -2841,7 +2885,8 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     if shutil.which("gh") and slug:
         try:
             pk = subprocess.run(["gh", "api", f"repos/{slug}", "--jq", ".full_name"],
-                                capture_output=True, text=True, env=mt,
+                                capture_output=True, text=True,
+                                encoding="utf-8", errors="replace", env=mt,
                                 stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)
             duong.append(("gh-kho", pk.returncode == 0 and bool((pk.stdout or "").strip()),
                           "doc duoc kho" if pk.returncode == 0 else f"rc={pk.returncode}"))

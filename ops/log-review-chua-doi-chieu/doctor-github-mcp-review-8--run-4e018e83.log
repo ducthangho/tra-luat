@@ -1,0 +1,43 @@
+verdict: changes_requested
+reviewed_sha: 897b7fab3a702088e817e5976f4d0b6fae7c01a3
+
+## Findings
+
+- **P2 — chốt ngược của `t117` không khóa đúng trạng thái được cho phép.** Với mục `hook_phien_bo_phep_so_nang_luc`, điều kiện là `any(count != 1)`. Vì vậy 0, 2, 3… chỗ khớp đều xanh, trong khi lời khai chỉ cho phép đúng món nợ hiện tại là 2 chỗ. Một bản sao thứ ba đặt trước `_do_hook_cu` có thể tước răng `t88` mà `t117` vẫn xanh. Cần khóa cardinality cụ thể của ngoại lệ, tối thiểu `count == 2`; tốt hơn nữa khóa cả vị trí/đích dự kiến.
+
+- **P2 — docstring `t117` chưa “khai thẳng” giới hạn tự-lừa như prompt nói.** Nó nói đây là phép đo công cụ, nhưng không nói cả đặc tả (`DOT_BIEN`, allowlist) và bằng chứng đều nằm trong tệp test/nguồn có thể sửa phối hợp. `t116` khai giới hạn này chính xác; `t117` chỉ nói “cùng họ với `t116`”, hẹp hơn điều cần công bố.
+
+- `_env_da_chuan()` đã trả răng cho đột biến hiện hữu: `probe_github_bo_qua_moi_truong_chuan_hoa` giết đúng `t113`. Oracle sentinel + `is` khóa được đường bỏ qua hoặc sao chép **tham số được truyền rõ ràng**, kể cả thay bằng `os.environ`. Tuy nhiên đường gọi mặc định chỉ đòi `env is not None`; `_env_da_chuan(None) -> {}` vẫn có thể qua dù bỏ mất môi trường chuẩn hóa. Đây không phải đường “bỏ qua tham số” vì không có tham số explicit, nhưng phạm vi oracle nên được mô tả đúng như vậy.
+
+- Lời khai “latent chứ chưa hỏng” của `hook_phien_bo_phep_so_nang_luc` hiện đúng: mẫu xuất hiện hai lần, `_do_hook_cu` đứng trước `_do_launcher_cu`, và đột biến hiện tại giết `t88`. Nó đang đúng nhờ thứ tự.
+
+- `rest-kho: False → None` không đổi kết luận khả dụng hay cảnh báo hiện tại: cả `any(ok ...)` và `not ok` coi hai giá trị như nhau. Nó chỉ sửa biểu diễn từ “đã đo và hỏng” sang “chưa đo được”, phù hợp chi tiết xuất ra.
+
+- Chốt `rest-kho` rất yếu: nó chỉ tìm chuỗi nguồn. Có thể giữ chuỗi đó trong comment/dead string rồi để hành vi thật trả `False`; ca vẫn xanh. Đột biến có sẵn hiện bị giết, nhưng phép kiểm nguồn không chứng minh hành vi.
+
+- Hai đột biến ưu tiên `t117` đã xét:
+
+  1. tăng mẫu ngoại lệ từ 2 lên 3 bản sao, đặt bản mới trước `_do_hook_cu`: predicate `t117` vẫn xanh, còn runner sẽ nhắm sai và `t88` sống;
+  2. làm mẫu ngoại lệ biến mất hoàn toàn: chốt ngược vẫn xanh vì `0 != 1`.
+
+  Không sửa tệp để chạy hai bản đột biến này vì lease yêu cầu chỉ đọc; predicate đã được đo trực tiếp theo mã hiện tại. Đột biến hiện hữu của t113 và t88 đã chạy thật.
+
+Danh sách đóng được trước khi land:
+
+1. Khóa ngoại lệ `hook_phien_bo_phep_so_nang_luc` ở đúng cardinality đã khai, không dùng `!= 1`.
+2. Bổ sung giới hạn tự-lừa của `t117` vào docstring với phạm vi tương đương `t116`.
+3. Chạy lại standard suite trong môi trường không bị ca quản lý process-tree cắt mất phiên gọi, và xác nhận delta nền bằng 0.
+
+## Phép đo đã chạy
+
+- Băm prompt: khớp `f06c957e…c73e0`.
+- Hai tệp `.claude/dev/**` khớp từng byte với SHA neo `897b7fa`; HEAD `e90a37d` chỉ bổ sung hồ sơ ops.
+- Đếm AST + `str.count` độc lập:
+
+  - nhánh: 95 mục `DOT_BIEN`, 1 mục không đơn nhất;
+  - master `c7ad260`: 75 mục, cùng đúng 1 mục;
+  - mục đó là `hook_phien_bo_phep_so_nang_luc`, số lần khớp = 2 trên cả hai.
+
+- Nhánh `--dot-bien`: **94/94**, rc=0; t113 và t88 đều chết đúng mục tiêu.
+- Master thật tại `c7ad260`, `--dot-bien`: **74/74**, rc=0.
+- Standard suite nhánh và master: **KHÔNG ĐO ĐƯỢC số tổng**. Cả hai lần đều chạy đến dòng bỏ qua `t62`, sau đó phiên thực thi bị chấm dứt trước dòng tổng kết; vì vậy tôi không xác nhận độc lập được `117/117`, `114/114`, hay delta standard = 0.

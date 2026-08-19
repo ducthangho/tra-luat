@@ -1,0 +1,75 @@
+verdict: changes_requested
+reviewed_sha: fe55f2ce00ba97c01d98a99f388eb7ffdf0536ea
+
+## Findings
+
+1. **P1 — `t115` vẫn thủng hợp đồng `env`; đã tìm được lượt thứ năm.**
+
+   Fake chỉ kiểm `"env" in _k`, không kiểm giá trị. Tôi đột biến:
+
+   ```python
+   env=moi_truong
+   ```
+
+   thành:
+
+   ```python
+   env=None
+   ```
+
+   Kết quả `t115` vẫn qua **20/20**. Với `subprocess.run`, `env=None` kế thừa `os.environ` thô—đúng lớp P2 mà #143 đã vá.
+
+   Đường sản xuất hiện tại trong `_do_github` có chuẩn hóa `moi_truong` trước khi gọi, nên bản hiện tại chưa tái phát qua đường gọi ấy. Tuy nhiên chốt không bảo vệ hợp đồng: chỉ cần call-site đổi thành `None`, hoặc gọi trực tiếp `_suc_khoe_mcp_github()` theo giá trị mặc định, là môi trường thô lọt xuống.
+
+   Danh sách đóng được:
+
+   - Trong `_suc_khoe_mcp_github`, không cho `None` đi thẳng vào `subprocess.run`; chuẩn hóa/fail-closed ngay tại hàm.
+   - Trong `t115`, kiểm `env` đúng object/giá trị mong đợi, không chỉ kiểm khóa có mặt.
+   - Thêm đột biến `env=moi_truong → env=None` hoặc tương đương vào `DOT_BIEN`.
+
+2. **P2 — lời khai về `rest-kho` đúng về bệnh, nhưng lý do không sửa không đứng vững.**
+
+   Khi không đọc được slug, mã vẫn ghi:
+
+   ```python
+   ("rest-kho", False, "... KHONG DO DUOC")
+   ```
+
+   nên `_nhan_duong` xuất `rest-kho=khong`, trái với chi tiết “KHONG DO DUOC”. Đây đúng là cùng bệnh `None ≠ False`.
+
+   Đổi cờ đó từ `False` sang `None` không làm `rest-kho` nâng `DUNG_DUOC`: `any(...)` vẫn coi cả hai là không thành công. Nó chỉ sửa kết xuất ba trạng thái. Vì vậy lời giải thích “đổi ngữ nghĩa một đường đang tính vào `LAM_DUOC_VIEC`” là quá rộng; đây là khoản nợ có thật, không phải khác biệt tất yếu. Tuy nhiên bệnh đã có trên master, không phải hồi quy của bản hòa.
+
+3. **`t116` có thể tự lừa, nhưng đây không phải hồi quy sản xuất.**
+
+   Tôi bỏ `@ca` của `t115`, đồng thời làm phép quét nguồn của `t116` bỏ qua `def t115_`; `t116` vẫn qua **20/20**. Do nó lấy cả đặc tả lẫn bằng chứng từ chính tệp test, một thay đổi phối hợp có thể làm hai phía cùng sai.
+
+   Chốt hiện tại vẫn bắt tốt lỗi vô tình “mất decorator” đơn lẻ. Muốn chống tự-lừa mạnh hơn cần neo danh sách ca/kỳ vọng ở nguồn độc lập; tôi không coi riêng điểm này là lý do chặn land.
+
+4. **Không thấy hồi quy nào của #143 trong phần hòa.**
+
+   So `c7ad260..fe55f2c`, chỉ hai tệp trong `.claude/dev/**` đổi. Hai dòng bị thay/xóa đều có lý do trực tiếp:
+
+   - Kết xuất nhị phân inline được thay bằng `_nhan_duong`.
+   - Gợi ý cố định `"REST thang bi proxy chan 403"` được thay bằng hướng dẫn MCP có đo—đúng phần #143 yêu cầu bỏ.
+
+   Các phần còn lại là đoạn thêm; không thấy dòng #143 bị âm thầm sửa hoặc lùi.
+
+5. **`mcp` không lách vào kết luận khả dụng.**
+
+   `LAM_DUOC_VIEC` vẫn chính xác là `{"git", "gh-kho", "rest-kho"}`. `_do_github` chỉ có thể trả `DUNG_DUOC` từ tập này. Khi không có đường làm việc được chứng minh, tầng tiêu thụ đưa `github` vào `chua_xac_thuc`; nhãn ngoài whitelist đi vào `chua_chung_minh`; `ok_kha_dung` thành false và `--doi-kha-dung` trả mã fail-closed. Không tìm thấy đường để trạng thái MCP nâng nhãn.
+
+6. **Parser MCP đạt các yêu cầu nội dung được nêu.**
+
+   `_doc_mcp_json` khớp chính xác sau `casefold`, kiểm kiểu gốc/bảng server/giá trị server, không cho khóa dự phòng che khóa chính sai kiểu, và từ chối nhiều tên mơ hồ. `_suc_khoe_mcp_github` lấy `Status:` đầu tiên, chỉ nhận `connected` chính xác, phân loại các tiền tố hỏng đã biết, và mặc định trạng thái lạ là `khong_do_duoc`.
+
+## Phép đo đã chạy
+
+- `sha256sum` prompt: khớp `a8011b983617806d415ccd396488636c5f17c9378cc663f5ae5c5825d1af2e91`.
+- Neo mã: `fe55f2ce00ba97c01d98a99f388eb7ffdf0536ea`.
+- Nền: `c7ad2600f6785fa39fce261765a7f02e266a5b1a`.
+- `git diff --name-status c7ad260 fe55f2c -- .claude/dev`: chỉ `launcher.py`, `launcher_test.py`.
+- `git diff --check c7ad260 fe55f2c -- .claude/dev`: sạch.
+- `TMPDIR=/dev/shm PYTHONPATH=/tmp/cryp python3 .claude/dev/launcher_test.py`: **116/116**, qua 115, bỏ qua 1, hỏng 0.
+- `TMPDIR=/dev/shm PYTHONPATH=/tmp/cryp python3 .claude/dev/launcher_test.py --dot-bien`: **90/90**, 1 không đo được trên POSIX.
+- Đột biến A, `env=moi_truong → env=None`: `t115` **20/20 qua** — đột biến sống sót.
+- Đột biến B, bỏ decorator `t115` và làm bộ quét `t116` bỏ qua chính hàm ấy: `t116` **20/20 qua** — xác nhận khả năng tự-lừa.

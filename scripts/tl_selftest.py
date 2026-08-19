@@ -21213,14 +21213,20 @@ def run() -> int:
         # `release-manifest` giữ 179, `doc-claims-check --strict` delta 0 — rồi kết luận "docs không
         # ảnh hưởng gói". Ba cổng ấy đều xanh và đều trả lời câu hỏi KHÁC: không cổng nào trong số đó
         # ghi CON SỐ docs. Chỗ ghi con số là đúng ca này, và nó chỉ đỏ ở `tl selftest`.
+        # KÊ KHAI SLOT (AG-T0-02/Packet 2 — thêm AGENTS.md vào gốc kho): 179 → **180**.
+        # Thêm đúng AGENTS.md (hướng dẫn đa agent); package = 180 (dưới trần 200, còn 20 khe);
+        # cây thật = 180 + 64 = 244.
         # KÊ KHAI SLOT (GLS-D1 / PR #160 — cứu research doc từ `codex/gate-lifecycle`): 64 → **65**
         # Markdown dưới `docs/`. Thêm đúng `docs/research/2026-08-16-github-cli-claude-codex-local.md`
-        # (port nguyên văn từ `ec8d08c`, dev-side/ngoài gói). Package giữ 179, cây thật = 179 + 65 = 244.
-        # Trả giá LẶP đúng bài "ĐÃ TRẢ GIÁ" ngay trên — và W0-D1 cũng vừa dẫm cùng bẫy, hai phiên độc
-        # lập trong một ngày: lượt gate 1 của PR #160 (head `36700cb`) local chỉ chạy `doc-claims-check
-        # --strict` (xanh) mà không chạy selftest ⇒ CI mới là nơi ca này đỏ. Số 57→58 khai ở lượt ấy
-        # chết non vì W0-D1 (PR #155) land 57→64 trước — kê lại trên nền 64, giải khi hoà master.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 65 == 244
+        # (port nguyên văn từ `ec8d08c`, dev-side/ngoài gói). Package giữ 180 (theo AG-T0-02),
+        # cây thật = 180 + 65 = 245.
+        # Trả giá LẶP đúng bài "ĐÃ TRẢ GIÁ" trên — và W0-D1 cũng dẫm cùng bẫy, hai phiên độc lập
+        # một ngày: lượt gate 1 của PR #160 (head `36700cb`) local chỉ chạy `doc-claims-check
+        # --strict` (xanh) mà không chạy selftest ⇒ CI mới là nơi ca này đỏ. Kê khai này đã phải
+        # KÊ LẠI hai lần vì master trôi dưới chân (57→58 chết non vì W0-D1 land 57→64; 65/244 chết
+        # non vì AG-T0-02 nâng package 179→180) — số trong ratchet là số CỦA MỘT TREE; hoà master
+        # là kê lại. Đó là cách ratchet vận hành, không phải nó hỏng.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 65 == 245
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
         ok4 = (len(tren_dia) == 65

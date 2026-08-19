@@ -5,10 +5,10 @@
   "skill_version": "1.36.68",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 179,
-  "total_bytes": 7893416,
-  "package_hash": "14c44a5000f3473d4646e5f364626462b868128ae13a6f03536103f69ebaeb9d",
-  "content_hash": "14c44a5000f3473d4646e5f364626462b868128ae13a6f03536103f69ebaeb9d",
+  "file_count": 180,
+  "total_bytes": 7904447,
+  "package_hash": "5d7c14efc61471b3ae550a67074afeab1cf0c1b65120dc0876e837c6006e12c7",
+  "content_hash": "5d7c14efc61471b3ae550a67074afeab1cf0c1b65120dc0876e837c6006e12c7",
   "required_missing": [],
   "files": [
     {
@@ -20,6 +20,11 @@
       "path": ".gitignore",
       "size": 1259,
       "sha256": "7640fa50281652e3b22d9870daedf5f8b257368fd57dc60be2e1282265a03f8e"
+    },
+    {
+      "path": "AGENTS.md",
+      "size": 5683,
+      "sha256": "c54b2f2e8afe5bd573fe7d905da61b125b4d2e21bf2efcefacc96f2358ce6b9d"
     },
     {
       "path": "CHANGELOG.md",
@@ -573,8 +578,8 @@
     },
     {
       "path": "scripts/gen_instructions.py",
-      "size": 69871,
-      "sha256": "e79f5b2c9131eafbefc3acc8cebbcdf6b2c42c008257103bf32d58da58d72251"
+      "size": 73942,
+      "sha256": "7ebcb77404f6ad18884d3089c7e5a776d5db6fc2c54acf26b94d7453d1898412"
     },
     {
       "path": "scripts/gws_bridge.py",
@@ -853,8 +858,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2116956,
-      "sha256": "c5b61cacb60d4b0b0fec28f97f048b5d3446bad67bb43cb16dab8d26bcbda3ba"
+      "size": 2118233,
+      "sha256": "e7ce8831c142fd1f4f217b62ee0d6b3eb5fbb68e4b4cc8f39823a9e0f0290a24"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",

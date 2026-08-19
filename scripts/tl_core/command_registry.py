@@ -2036,7 +2036,12 @@ def compute_parser_coverage(parser, tl_module=None, *, strict: bool = False, unr
     Schema: parser_tree_coverage.v1
     """
     tree = collect_parser_tree(parser)
-    meta = getattr(tl_module, "COMMAND_META", all_command_meta()) if tl_module is not None else all_command_meta()
+    if tl_module is not None:
+        raw_top = getattr(tl_module, "COMMAND_META", {})
+        raw_nested = getattr(tl_module, "NESTED_COMMAND_META", {})
+        meta = {**raw_top, **raw_nested}
+    else:
+        meta = all_command_meta()
 
     containers = [n for n in tree if n["is_container"]]
     leaf_nodes = [n for n in tree if not n["is_container"]]

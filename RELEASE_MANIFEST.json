@@ -5,10 +5,10 @@
   "skill_version": "1.36.68",
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
-  "file_count": 181,
-  "total_bytes": 7922638,
-  "package_hash": "742ebb0a2ac37a0f923bca0e5e53774ee69d37743542c08afc4bcfc5b32dfa04",
-  "content_hash": "742ebb0a2ac37a0f923bca0e5e53774ee69d37743542c08afc4bcfc5b32dfa04",
+  "file_count": 180,
+  "total_bytes": 7915463,
+  "package_hash": "313ac90bcabcfc0eb18f542109d2323fdb968464e6b1c4db5641254125623b9e",
+  "content_hash": "313ac90bcabcfc0eb18f542109d2323fdb968464e6b1c4db5641254125623b9e",
   "required_missing": [],
   "files": [
     {
@@ -713,13 +713,8 @@
     },
     {
       "path": "scripts/tl_core/command_registry.py",
-      "size": 182431,
-      "sha256": "648c425a10c9581d0e69aacdae3f4dbfb3efbe6b9bbf9d6da0992f999590ac9d"
-    },
-    {
-      "path": "scripts/tl_core/command_registry_test.py",
-      "size": 7564,
-      "sha256": "0423ffee9a028db66067d6287c3f4f8987045eae918fb7ff8b92e5734bcac4dd"
+      "size": 182555,
+      "sha256": "46d0b917531afcb4d44bf7485eb026737f93972e2e33d2f7f19a2ec57dd99fe9"
     },
     {
       "path": "scripts/tl_core/deterministic.py",
@@ -813,8 +808,8 @@
     },
     {
       "path": "scripts/tl_core/release.py",
-      "size": 83185,
-      "sha256": "a76349456d14d5186d03fd0a13877bea610e57b69f0b1c100850f2dcbc2a4f9d"
+      "size": 83336,
+      "sha256": "a76c2dfb98b436bc0466a6446c73c4c7c96959fdeb987bc464f4f14fff6bd354"
     },
     {
       "path": "scripts/tl_core/resolve.py",
@@ -863,8 +858,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2119203,
-      "sha256": "96ec4ceeb415afb9f190d6b4fa05f89ca5b3ad77b0e74cf165576f6c78e200a4"
+      "size": 2119317,
+      "sha256": "cfae71a999de4e8af250e8c41a03c7d0afeccbf1f47bfd00dcfb092a6ec4b1e0"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",

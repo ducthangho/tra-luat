@@ -73,10 +73,10 @@ graph TD
 1. **Authority:** Human/dispatcher xác lập Packet Spec bền vững (mục tiêu, exact base SHA, write-set, review class, acceptance criteria).
 2. **Executor:** AG session A trên worktree A độc lập; chỉ ghi trong effective write-set.
 3. **Freeze:** Commit, push, ghi nhận exact 40-character hexadecimal Git OID và tree hash.
-4. **Independent Reviewer:** AG session B trên checkout/worktree B độc lập (không fork conversation context từ Executor, repository read-only, cho phép scratch ngoài repository để mutation test); verdict bắt buộc neo exact 40-character Git OID.
+4. **Independent Reviewer:** AG session B trên checkout/worktree B độc lập (không fork conversation context từ Executor, repository read-only, cho phép scratch ngoài repository để mutation test); verdict bắt buộc neo exact 40-character Git OID, và **mỗi finding bắt buộc kèm khối `Gợi ý vá` bốn phần** theo `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10c.
 5. **Publishing & Readback:** Đăng PR và review note qua GitHub route đã chứng minh; đọc ngược để đối soát byte/hash.
 6. **CI Gate Verification:** Tất cả required checks chạy trên exact head; required check bị skipped hoặc failed $\rightarrow$ **BLOCKED**.
-7. **Human Land:** Human Approver duyệt và land exact SHA; head đổi $\rightarrow$ toàn bộ review và CI cũ bị vô hiệu (stale).
+7. **Human Land:** Human Approver duyệt và land exact SHA; **head của NHÁNH** đổi $\rightarrow$ toàn bộ review và CI cũ bị vô hiệu (stale). **MASTER drift KHÔNG phải head nhánh đổi** — trường hợp đó merge thẳng, không chạy lại CI, theo `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10b (kèm danh sách 6 kích hoạt bắt buộc chạy lại).
 8. **Non-Convergence Stop:** Tối đa 2 vòng review cho cùng một PR — **không riêng AG**, đây là trần canon của cả kho (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10). Đếm theo `review_rounds_used`, KHÔNG theo `codex_review_calls_used` (một vòng có thể tốn nhiều lời gọi). Sau 2 vòng chưa đạt approve $\rightarrow$ dừng phiên, tách Stable Slice hoặc revision Packet Spec. Lưu ý: trần này hiện CHƯA được cưỡng chế bằng mã — xem nợ ở §10 của tài liệu canon.
 
 ---
@@ -97,7 +97,8 @@ reviewer_worktree_path: "<isolated_worktree_path>"
 executor_session_id: "<different_executor_session_uuid>"
 github_submitter: "<github_actor_login>"
 verdict: "approve" # approve | changes_requested | blocked
-findings: []
+findings: []   # mỗi finding BẮT BUỘC kèm `recommendation` chứa 4 phần của §10c
+               # (vá ở đâu · vá thế nào · ca test khoá nó · bản vá đẻ ra gì)
 test_evidence:
   gate_name: "PASS / FAIL (positive output marker)"
 limitations:

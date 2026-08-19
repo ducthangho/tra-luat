@@ -282,6 +282,36 @@ Sau vòng hai chưa approve:
 
 Không đổi conversation, prompt hoặc tên Packet để lách review budget.
 
+## 10b. Master drift sau khi gate đã xanh — merge thẳng
+
+> **ĐÃ CHỐT (quyết định của người giữ kho).** Luật nằm ở `docs/PROTOCOL_DA_PHIEN.md`
+> §5.1. Mục này **không chép lại** — chỉ nêu điều kiện áp và điều cần nhớ.
+
+Áp khi đủ cả ba: reviewer đã `approve`; required gate đã xanh trên **exact head của
+nhánh**; và thứ đổi kể từ đó là **master**, không phải head nhánh. Khi ấy **không chạy
+lại gate** — merge thẳng, sạch là xong.
+
+Hai điều dễ đọc sai:
+
+1. Điều này **không** hạ chuẩn exact-SHA. Head nhánh không đổi, nên review và gate cũ
+   vẫn neo đúng thứ chúng đã đo. Quy tắc `head đổi ⇒ stale` nói về head NHÁNH.
+2. "Nghi ngờ" **không phải cảm tính** — §5.1 có danh sách **sáu kích hoạt đo được**.
+   Trúng bất kỳ dòng nào ⇒ chạy lại gate SAU merge. Đọc danh sách ở đó, đừng đoán.
+
+## 10c. Reviewer bắt buộc kèm gợi ý cách vá
+
+> **ĐÃ CHỐT (quyết định của người giữ kho).** Luật nằm ở `docs/PROTOCOL_DA_PHIEN.md`,
+> ngay dưới verdict contract. Nâng từ một yêu cầu ad-hoc trong prompt lease lượt 5 của
+> `#150` lên thành luật thường trực, áp mọi reviewer và mọi provider.
+
+Bốn phần bắt buộc cho **mỗi** finding: vá ở đâu · vá thế nào · ca test khoá nó · bản vá
+này có thể đẻ ra gì. Chi tiết và lý do từng phần: xem protocol.
+
+**Ánh xạ sang schema của tài liệu này:** trường `recommendation` trong
+`temporary_chatgpt_review_note.v0` (§8) là **nơi chứa bốn phần đó**, không phải một câu
+khuyến nghị trần. Note có finding mà `recommendation` rỗng, hoặc chỉ nhắc lại chính
+finding, là note **chưa hoàn chỉnh** — validator trả lại, không đăng lên PR.
+
 ## 11. Review debt
 
 Review debt được tính từ:

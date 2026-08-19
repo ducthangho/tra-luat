@@ -138,9 +138,36 @@ jobs:
       # ngày lộ ra một lỗ (base) mà không phép đo tự động nào bắt được. Cùng bài học với
       # `eol-policy` ngay dưới — guard không nối vào đường TỰ ĐỘNG thì guard chỉ là tài liệu.
       #
-      # Chạy trên CẢ ubuntu lẫn windows: cả lớp hỏng của script này là lớp hỏng theo NỀN.
-      # `pwsh` có sẵn trên runner GitHub ở cả hai nền, nên không cài gì thêm.
+      # CHỈ CHẠY TRÊN LINUX — và đây là một lời KHAI NỢ, không phải một lựa chọn thiết kế.
+      #
+      # Bản đầu của bước này khai "Chạy trên CẢ ubuntu lẫn windows: cả lớp hỏng của script
+      # này là lớp hỏng theo NỀN". Câu ấy MÔ TẢ Ý ĐỊNH, không mô tả thực tế, và không ai đo
+      # nó: bộ test + bước CI này CHỈ có trên nhánh của #150 (master không có cả hai), mà
+      # PR thường chỉ chạy `ubuntu` ⇒ nó CHƯA TỪNG chạy trên Windows. Lần đo Windows đầu
+      # tiên là một `workflow_dispatch` gọi tay trước khi merge, và kết quả là:
+      #
+      #     windows-latest ⇒ `don-nhanh: 3/21 dat`   (run 32060230138, head a66cad69)
+      #     ubuntu-latest  ⇒ `don-nhanh: 21/21 dat`  (cùng run)
+      #
+      # 18 ca đỏ cùng một thông điệp `THIEU git tren PATH.` rc=12. Nguyên nhân gốc nằm
+      # trong `Chay-KichBan` của bộ test: nó dựng lại PATH thành `<gh-giả>;/usr/bin;/bin`
+      # — dùng `[IO.Path]::PathSeparator` nên DẤU PHÂN CÁCH đúng nền, nhưng ĐƯỜNG DẪN thì
+      # ghim cứng POSIX. Port MỘT NỬA, nên đọc lướt thì nó *trông* đã cross-platform.
+      # Còn một blocker thứ hai nằm xa hơn, chưa lượt chạy nào chạm tới: `gh` giả là script
+      # `#!/bin/sh` cài bằng `chmod +x` — trên Windows không có `chmod`, và tệp không phần
+      # mở rộng không chạy được qua `PATH` (`PATHEXT`).
+      #
+      # VÌ SAO CHẶN Ở ĐÂY thay vì vá ngay: master chạy CẢ HAI nền, nên để nguyên là đẩy
+      # một cổng ĐỎ vào master; còn port bộ giả sang Windows là thay đổi lớn, phải có lượt
+      # review riêng (và §8 đòi cross-provider cho phạm vi workflow). Giữa "cổng đỏ" và
+      # "cổng khai đúng phạm vi mình phủ", chọn cái thứ hai — nhưng KHÔNG được đọc nó thành
+      # "đã phủ Windows".
+      #
+      # NỢ CÓ TÊN: `don-nhanh-test-chua-chay-duoc-tren-windows`. Đáng trả, vì `don-nhanh.ps1`
+      # vốn là script CHO Windows (có `don-nhanh.cmd` đi kèm) — tức hiện tại thứ duy nhất
+      # KHÔNG được đo lại chính là nền nó chạy thật.
       - name: don-nhanh selftest (chốt xoá nhánh)
+        if: runner.os != 'Windows'
         shell: pwsh
         run: pwsh -NoProfile -File scripts/don-nhanh_test.ps1
       # `--all` soi TOÀN BỘ index, không chỉ tệp đang stage — đây là thứ duy nhất bắt được nợ

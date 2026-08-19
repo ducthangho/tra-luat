@@ -1,0 +1,67 @@
+# BIÊN NHẬN GIAO HÀNG — verdict lượt 4/4 của packet W0-R1.
+#
+# ĐO ĐƯỢC — nhưng 9/12 finding là NỢ CÓ SẴN
+# 7/7 bản vá lượt 3 xác minh là THẬT, kể cả ca Executor tự chỉ đích danh cho soi.
+# 12/13 đột biến mới sống sót. ĐỌC KỸ CHỖ NÀY: chỉ **3** thuộc W0-R1 (checkpoint chưa kín
+# ở `record-lease`/`begin-attempt`, và tuple state-cuối của `record-review-call` chỉ neo
+# checkpoint) — đã vá tại `3545e055`. **9 cái còn lại là nợ CÓ SẴN của
+# `packet_loop_test.py`**, không do lane R sinh ra, đã tách sang Issue #178.
+# Đừng đọc "12 finding" thành "packet có 12 lỗi".
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: W0-R1
+lease_id: null   # KHÔNG có lease: W0-R1 chưa từng có Packet Issue nên không ai cấp lease.
+                 # Khai thẳng thay vì bịa một id — tiền lệ: pr134-ci-lease-gate.
+provider: claude
+role: reviewer
+model: claude-fable-5
+effort: max
+verdict: changes_requested
+reviewed_sha: c9042bfe1df8e27a76ec685b89122701eeabe538
+
+# ASSURANCE — đọc kỹ trước khi dùng verdict này để land.
+assurance: same_provider_approved
+assurance_ly_do: >-
+  Reviewer là Fable 5, CÙNG NỀN Claude với executor. Protocol §8 (:417, :426-428): phạm vi
+  nhạy cảm phải có cross-review khác nền hoặc human audit; same_provider_approved một mình
+  KHÔNG thay được mức assurance bắt buộc. Bậc model KHÔNG phải một trục assurance.
+assurance_nguoi_giu_chap_nhan: >-
+  Người giữ tạm chấp nhận cho phiên 19-08 và tự chạy cross-review sau. Codex hết quota,
+  đo được: `You've hit your usage limit ... try again at Aug 20th, 2026 6:23 AM`.
+cross_review_con_no: true
+
+verdict_path: ops/reviews/w0r1-review-4-claude-verdict.md
+verdict_sha256: 4fcbeb8b8b3c6c78dc9b744c12a4ea465516b1e58655e9cfc44f39c9dc0ad808
+verdict_bytes: 12754
+verdict_nguon: 'scratchpad/w0r1-review/runs/00687a61/stdout.log (launcher run, trang_thai=xong, ma_thoat=0, 2044.0s)'
+verdict_doi_chieu: 'diff -u nguồn <-> tệp đã chép: 0 dòng lệch'
+
+prompt_path: ops/prompts/w0r1-review-4-claude-20260819.md
+prompt_sha256_neo_luc_chay: 5fae140efacc10fb7fc103e6d1e71554152e0e4bc483775f1d2f803be1acb27a
+prompt_sha256_ban_da_chep: 5fae140efacc10fb7fc103e6d1e71554152e0e4bc483775f1d2f803be1acb27a
+prompt_bytes: 4416
+prompt_neo_bang: >-
+  `launcher.py run --expected-prompt-sha256`; con đọc BẢN CHỤP bất biến qua {PROMPT_FILE}
+  (`prompt_kin_hoan_toan: true` trong sổ lượt chạy) nên không có cửa sổ TOCTOU.
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/0782997613f3fed63df54e155325b169a68ae5e4/ops/reviews/w0r1-review-4-claude-verdict.md
+evidence_url_han_che: >-
+  Trỏ commit ĐẦU TIÊN chứa tệp verdict. Nhánh packet có thể bị xoá sau khi land, và
+  proxy chặn xoá ref nhưng VẪN cho `git push --force`, nên dòng dõi có thể mất. Muốn
+  bền thì phải neo bằng tag `luu-tru/*` — CHƯA làm cho bốn verdict này.
+published_first:
+  branch: claude/tra-luat-deployment-d1-d2-otcxau
+  commit: 0782997613f3fed63df54e155325b169a68ae5e4
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_duoc_bao_dam_lau_dai: false
+
+receipt_written_by: claude-session
+receipt_basis: >-
+  sha256 và số byte đo trên chính tệp đã chép; `diff -u` giữa stdout.log của lượt chạy và
+  tệp trong kho; thời lượng/mã thoát/trạng thái đọc từ run.json của launcher.
+receipt_khong_khai:
+- Không khai verdict này đủ mức assurance để land. Nó KHÔNG đủ.
+- Không khai reviewer độc lập về NỀN — chỉ độc lập về phiên/context/worktree.
+- Không khai các finding đã được Executor tái hiện hết; xem phần ghi chú đầu tệp.

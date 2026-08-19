@@ -1,4 +1,8 @@
-# Dọn nhánh remote — 10 nhánh, ảnh chụp 2026-08-19
+# Dọn nhánh remote — danh sách đối chiếu, ảnh chụp 2026-08-19
+
+> **Số lượng KHÔNG nằm trong tiêu đề, có chủ đích.** Bản đầu tên là `..._10_NHANH_...` và
+> chỉ trong hơn một giờ nó đã thành lời khai sai: `agent/w0-m2-g1-claude` bị xoá mất, còn 9.
+> Nhét một con số trôi được vào tên tệp là tự hẹn ngày nói dối, nên bỏ hẳn.
 
 **Tệp này là BẢN ĐỐI CHIẾU, không phải danh sách để xoá mù.** Thứ có thẩm quyền vẫn là
 `scripts/don-nhanh.ps1` chạy trên máy có `gh` đọc được PR. Dùng tệp này để **so** với thứ
@@ -17,7 +21,7 @@ script in ra — khớp thì chạy, lệch thì dừng lại tìm hiểu, đừ
 5–8 phút một PR. Nên ảnh chụp này **hết hạn nhanh**. Nếu ông chạy sau đây vài ngày thì cứ
 tin script, và đọc tệp này như bối cảnh chứ không phải chân lý.
 
-## 10 nhánh — đã merge trọn vào master, KHÔNG phải head/base của PR nào đang mở
+## 9 nhánh — đã merge trọn vào master, KHÔNG phải head/base của PR nào đang mở
 
 ```
 agent/cg-t0-01-bundle-builder    58a21f7
@@ -25,15 +29,21 @@ agent/cg-t0-02-note-validator    b90481c
 agent/gls-d1-g1-claude           96b24d0
 agent/mp-t0-01-chatgpt-docs      f926835
 agent/w0-m1b-g1-claude           6c84064
-agent/w0-m2-g1-claude            c97d741
 agent/w0-t1-g1-claude            2515ef2
 ops/don-nhanh-giu-base-pr        35c63d0
 ops/so-no-vong-3                 2845669
 ops/tin-hieu-chan-som            d9faa14
 ```
 
-Mỗi dòng đã kiểm bằng `git merge-base --is-ancestor <tip> origin/master` ⇒ **10/10 merged**.
+Mỗi dòng đã kiểm bằng `git merge-base --is-ancestor <tip> origin/master` ⇒ **9/9 merged**,
+soát lại lần cuối trên master `4262de4` lúc `2026-08-19T11:45Z`.
 Commit không mất đi đâu khi xoá nhánh: chúng nằm trong master.
+
+**Bản đầu ghi 10.** Nhánh thứ 10 là `agent/w0-m2-g1-claude` (`c97d741`) — đã bị xoá bởi ai
+đó/cái gì đó trong khoảng 10:00Z–11:40Z, tức **hơn một giờ sau khi chụp**. Không phải đo
+sai: nó đúng ở thời điểm đo, và sai ở thời điểm đọc. Đó chính là thứ mục "Neo phép đo" cảnh
+báo, chỉ là nó đến nhanh hơn dự tính — giữ lại đoạn này làm bằng chứng sống cho lời cảnh báo
+ấy thay vì lặng lẽ xoá một dòng.
 
 ## Chạy trên Windows
 
@@ -97,7 +107,7 @@ git branch -r --merged origin/master        # lop 1: da merge
 Lệnh trên **không** biết gì về PR — nó chỉ thay được lớp 1. Lớp 2 (giữ head/base của PR
 đang mở) bắt buộc phải có nguồn dữ liệu PR; không có thì đừng xoá.
 
-## Đã kiểm: xoá 10 nhánh này không làm mất bằng chứng
+## Đã kiểm: xoá các nhánh này không làm mất bằng chứng
 
 `ops/reviews/don-nhanh-base-review-6|7-claude-verdict.receipt.yaml` neo `evidence_url` vào
 hai commit `ef0f906` và `a8c1d1d` trên nhánh `ops/don-nhanh-giu-base-pr`. Đã kiểm **cả hai
@@ -113,7 +123,7 @@ dòng dõi master, không nhờ tag.)
 |---|---|
 | `git push origin --delete` | **HTTP 403** — proxy egress chặn xoá ref |
 | MCP github | có `create_branch`, **không có** tool xoá nhánh/ref |
-| `.github/workflows/ops-don-ref.yml` | **từ chối 10/10** — 7 nhánh `agent/*` + 3 nhánh `ops/*` |
+| `.github/workflows/ops-don-ref.yml` | **từ chối TẤT CẢ** — mọi nhánh trong danh sách đều là `agent/*` hoặc `ops/*` |
 
 `ops-don-ref.yml` từ chối bằng câu viết sẵn trong chính nó (dòng 197–198): *"thuộc vùng làm
 việc được bảo vệ (ops/ claude/ codex/ agent/ mission/ dispatcher/) — **xoá phải do người,

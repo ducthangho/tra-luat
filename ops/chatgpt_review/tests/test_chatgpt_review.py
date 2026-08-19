@@ -20,6 +20,14 @@ from ops.chatgpt_review.build_bundle import (
     _sha256_file,
     build_bundle,
 )
+from ops.chatgpt_review.validate_note import (
+    VALIDATOR_VERSION,
+    DuplicateKeyError,
+    NoteValidationError,
+    parse_yaml_strict,
+    render_markdown_comment,
+    validate_review_note,
+)
 
 
 class TestChatGPTReviewBundleBuilder(unittest.TestCase):
@@ -294,6 +302,232 @@ write_set:
                 allow_dirty=True,
             )
         self.assertIn("nam ngoai write-set", str(ctx.exception))
+
+
+class TestChatGPTReviewNoteValidator(unittest.TestCase):
+    """Test suite for ChatGPT review note validator."""
+
+    def setUp(self) -> None:
+        self.tmp_dir = Path(tempfile.mkdtemp(prefix="test_cg_val_"))
+        self.bundle_dir = self.tmp_dir / "bundle"
+        self.spec_file = self.tmp_dir / "SPEC.md"
+        self.evidence_file = self.tmp_dir / "evidence.json"
+
+        self.spec_file.write_text(
+            """# Spec
+Packet ID: VAL-TEST
+review_class: systemic
+write_set:
+  - AGENTS.md
+  - ops/KE_HOACH_THI_CONG_DA_PROVIDER.md
+  - ops/KE_HOACH_THI_CONG_ANTIGRAVITY.md
+  - ops/chatgpt_review/README.md
+  - ops/chatgpt_review/REVIEW_PROMPT.md
+  - ops/chatgpt_review/REVIEW_NOTE_TEMPLATE.yaml
+  - RELEASE_MANIFEST.json
+""",
+            encoding="utf-8",
+        )
+        self.evidence_file.write_text(
+            json.dumps({"test_run": "PASS"}, indent=2),
+            encoding="utf-8",
+        )
+
+        self.base_sha = "3b7c83694b7b15e8f80cfd358c57c336d751120b"
+        self.head_sha = "f926835b3c45dd5d17f7c7fa0342bf8fb65de021"
+
+        # Build real bundle for validator tests
+        res = build_bundle(
+            packet_spec_path=self.spec_file,
+            base_sha=self.base_sha,
+            head_sha=self.head_sha,
+            test_evidence_path=self.evidence_file,
+            out_dir=self.bundle_dir,
+            repo_dir=REPO_ROOT,
+            allow_dirty=True,
+            packet_id="VAL-TEST",
+        )
+        self.manifest_path = self.bundle_dir / "00_BUNDLE_MANIFEST.json"
+        manifest = json.loads(self.manifest_path.read_text(encoding="utf-8"))
+        self.tree_sha = manifest["tree_sha"]
+        self.bundle_id = manifest["bundle_id"]
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.tmp_dir, ignore_errors=True)
+
+    def _create_valid_note_text(self) -> str:
+        return f"""format: temporary_chatgpt_review_note.v0
+provider: openai_chatgpt
+execution_surface: chatgpt_web
+transport: human_mediated
+account_plan: pro
+bundle_id: {self.bundle_id}
+bundle_sha256: {_sha256_file(self.manifest_path)}
+reviewed_sha: {self.head_sha}
+reviewed_tree: {self.tree_sha}
+verdict: approve
+review_axes:
+  - spec
+  - standards_security
+findings:
+  - finding_id: sample-finding-one
+    severity: P2
+    path: ops/chatgpt_review/README.md
+    line: 15
+    evidence: "Sample evidence text"
+    recommendation: "Sample recommendation fix"
+tests:
+  independently_run: false
+  evidence_reviewed:
+    - "06_TEST_EVIDENCE.json"
+limitations:
+  - human_mediated_transport
+  - model_identity_not_machine_verified
+  - tests_not_run_by_chatgpt
+assurance: advisory_review
+"""
+
+    def test_valid_review_note_passes(self) -> None:
+        note_file = self.tmp_dir / "valid_note.yaml"
+        note_file.write_text(self._create_valid_note_text(), encoding="utf-8")
+
+        receipt, note = validate_review_note(
+            note_path=note_file,
+            bundle_manifest_path=self.manifest_path,
+            repo_dir=REPO_ROOT,
+        )
+
+        self.assertEqual(receipt["format"], "chatgpt_review_validation_receipt.v1")
+        self.assertTrue(receipt["schema_valid"])
+        self.assertTrue(receipt["bundle_valid"])
+        self.assertTrue(receipt["reviewed_sha_matches_bundle"])
+        self.assertTrue(receipt["reviewed_tree_matches_bundle"])
+        self.assertEqual(receipt["authoritative_assurance"], "review_deferred")
+        self.assertEqual(receipt["advisory_assurance"], "advisory_review")
+        self.assertFalse(receipt["model_identity_verified"])
+        self.assertFalse(receipt["session_identity_verified"])
+
+        # Test render markdown
+        md = render_markdown_comment(receipt, note)
+        self.assertIn("ChatGPT Pro Advisory Review Verdict: ✅ APPROVE", md)
+        self.assertIn(self.head_sha, md)
+
+    def test_duplicate_yaml_key_fails(self) -> None:
+        duplicate_key_yaml = """format: temporary_chatgpt_review_note.v0
+provider: openai_chatgpt
+provider: openai_chatgpt_duplicate
+"""
+        with self.assertRaises(DuplicateKeyError):
+            parse_yaml_strict(duplicate_key_yaml)
+
+    def test_invalid_format_fails(self) -> None:
+        txt = self._create_valid_note_text().replace("temporary_chatgpt_review_note.v0", "invalid_format.v99")
+        note_file = self.tmp_dir / "note_bad_format.yaml"
+        note_file.write_text(txt, encoding="utf-8")
+
+        with self.assertRaises(NoteValidationError) as ctx:
+            validate_review_note(note_file, self.manifest_path, repo_dir=REPO_ROOT)
+        self.assertIn("format khong hop le", str(ctx.exception))
+
+    def test_short_sha_fails(self) -> None:
+        txt = self._create_valid_note_text().replace(self.head_sha, "abc1234")
+        note_file = self.tmp_dir / "note_short_sha.yaml"
+        note_file.write_text(txt, encoding="utf-8")
+
+        with self.assertRaises(NoteValidationError) as ctx:
+            validate_review_note(note_file, self.manifest_path, repo_dir=REPO_ROOT)
+        self.assertIn("reviewed_sha khong du 40 ky tu", str(ctx.exception))
+
+    def test_mismatched_sha_fails(self) -> None:
+        stale_sha = "a" * 40
+        txt = self._create_valid_note_text().replace(self.head_sha, stale_sha)
+        note_file = self.tmp_dir / "note_stale_sha.yaml"
+        note_file.write_text(txt, encoding="utf-8")
+
+        with self.assertRaises(NoteValidationError) as ctx:
+            validate_review_note(note_file, self.manifest_path, repo_dir=REPO_ROOT)
+        self.assertIn("reviewed_sha trong note", str(ctx.exception))
+
+    def test_bundle_tampering_detected(self) -> None:
+        # Tamper with 01_PACKET_SPEC.md in bundle
+        spec_in_bundle = self.bundle_dir / "01_PACKET_SPEC.md"
+        spec_in_bundle.write_text("TAMPERED DATA", encoding="utf-8")
+
+        note_file = self.tmp_dir / "valid_note.yaml"
+        note_file.write_text(self._create_valid_note_text(), encoding="utf-8")
+
+        with self.assertRaises(NoteValidationError) as ctx:
+            validate_review_note(note_file, self.manifest_path, repo_dir=REPO_ROOT)
+        self.assertIn("bi sua doi", str(ctx.exception))
+
+    def test_invalid_verdict_fails(self) -> None:
+        txt = self._create_valid_note_text().replace("verdict: approve", "verdict: looks_good_to_me")
+        note_file = self.tmp_dir / "note_bad_verdict.yaml"
+        note_file.write_text(txt, encoding="utf-8")
+
+        with self.assertRaises(NoteValidationError) as ctx:
+            validate_review_note(note_file, self.manifest_path, repo_dir=REPO_ROOT)
+        self.assertIn("verdict khong hop le", str(ctx.exception))
+
+    def test_duplicate_finding_ids_fail(self) -> None:
+        txt = self._create_valid_note_text().replace(
+            "findings:\n  - finding_id: sample-finding-one\n    severity: P2\n    path: ops/chatgpt_review/README.md\n    line: 15\n    evidence: \"Sample evidence text\"\n    recommendation: \"Sample recommendation fix\"",
+            "findings:\n  - finding_id: dup-finding\n    severity: P2\n    evidence: a\n    recommendation: b\n  - finding_id: dup-finding\n    severity: P1\n    evidence: c\n    recommendation: d",
+        )
+        note_file = self.tmp_dir / "note_dup_findings.yaml"
+        note_file.write_text(txt, encoding="utf-8")
+
+        with self.assertRaises(NoteValidationError) as ctx:
+            validate_review_note(note_file, self.manifest_path, repo_dir=REPO_ROOT)
+        self.assertIn("Trung lap finding_id", str(ctx.exception))
+
+    def test_invalid_finding_id_format_fails(self) -> None:
+        txt = self._create_valid_note_text().replace("finding_id: sample-finding-one", "finding_id: NOT_KEBAB_CASE 123")
+        note_file = self.tmp_dir / "note_bad_finding_id.yaml"
+        note_file.write_text(txt, encoding="utf-8")
+
+        with self.assertRaises(NoteValidationError) as ctx:
+            validate_review_note(note_file, self.manifest_path, repo_dir=REPO_ROOT)
+        self.assertIn("khong dung format kebab-case", str(ctx.exception))
+
+    def test_path_traversal_in_finding_fails(self) -> None:
+        txt = self._create_valid_note_text().replace("path: ops/chatgpt_review/README.md", "path: ../../etc/passwd")
+        note_file = self.tmp_dir / "note_traversal.yaml"
+        note_file.write_text(txt, encoding="utf-8")
+
+        with self.assertRaises(NoteValidationError) as ctx:
+            validate_review_note(note_file, self.manifest_path, repo_dir=REPO_ROOT)
+        self.assertIn("path traversal", str(ctx.exception))
+
+    def test_independently_run_true_fails(self) -> None:
+        txt = self._create_valid_note_text().replace("independently_run: false", "independently_run: true")
+        note_file = self.tmp_dir / "note_falsely_claimed_tests.yaml"
+        note_file.write_text(txt, encoding="utf-8")
+
+        with self.assertRaises(NoteValidationError) as ctx:
+            validate_review_note(note_file, self.manifest_path, repo_dir=REPO_ROOT)
+        self.assertIn("tests.independently_run phai la false", str(ctx.exception))
+
+    def test_invalid_assurance_fails(self) -> None:
+        txt = self._create_valid_note_text().replace("assurance: advisory_review", "assurance: cross_approved")
+        note_file = self.tmp_dir / "note_falsely_claimed_assurance.yaml"
+        note_file.write_text(txt, encoding="utf-8")
+
+        with self.assertRaises(NoteValidationError) as ctx:
+            validate_review_note(note_file, self.manifest_path, repo_dir=REPO_ROOT)
+        self.assertIn("assurance khong hop le", str(ctx.exception))
+
+    def test_empty_limitations_fails(self) -> None:
+        txt = self._create_valid_note_text().replace(
+            "limitations:\n  - human_mediated_transport\n  - model_identity_not_machine_verified\n  - tests_not_run_by_chatgpt",
+            "limitations: []",
+        )
+        note_file = self.tmp_dir / "note_empty_limitations.yaml"
+        note_file.write_text(txt, encoding="utf-8")
+
+        with self.assertRaises(NoteValidationError) as ctx:
+            validate_review_note(note_file, self.manifest_path, repo_dir=REPO_ROOT)
+        self.assertIn("Truong 'limitations' phai la danh sach khong rong", str(ctx.exception))
 
 
 if __name__ == "__main__":

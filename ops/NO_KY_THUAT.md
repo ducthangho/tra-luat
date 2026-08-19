@@ -294,6 +294,32 @@ Trên host **không có `codex`** (đúng loại host chạy các phiên
 host như vậy sẽ tưởng vừa tái hiện được flake này, trong khi gặp một ca môi
 trường khác hẳn. Kiểm `command -v codex` TRƯỚC khi kết luận đã tái hiện.
 
+### Phép đo 19-08-2026 — CHỚP ĐÃ ĐƯỢC XÁC NHẬN, và nó là cái bẫy cho lượt sửa
+
+Đo trên phiên cloud Linux, `core.abbrev=7`, `codex` CÓ mặt (`codex-cli 0.148.0`) nên
+**không phải** ca host-thiếu-codex đã cảnh báo ở trên:
+
+```
+tại 47847b1   ->  126/128 ca QUA (bo qua 1, hong 1) · rc=1 · HONG t53_doctor_bao_du_khi_du: 12
+tại d390b7e   ->  127/128 ca QUA (bo qua 1, hong 0) · rc=0     (ba lượt liên tiếp, đều xanh)
+```
+
+**`git diff 47847b1 d390b7e -- .claude/dev/launcher.py .claude/dev/launcher_test.py` là
+RỖNG** — không một dòng nào đổi giữa hai mốc. Cùng mã, cùng máy, cùng bộ công cụ, kết
+quả lật từ đỏ sang xanh và **giữ xanh qua ba lượt liên tiếp**.
+
+Đây là bằng chứng trực tiếp nhất tới nay rằng `t53` chớp, chứ không đỏ tất định.
+
+**CÁI BẪY CHO LƯỢT SỬA — đọc trước khi nhận packet này.** Chuỗi xanh dài không chứng
+minh đã sửa xong, và cũng không chứng minh không tái hiện được. Một lượt thi công chạy
+bộ test vài lần, thấy xanh, rồi kết luận *"không tái hiện được"* hoặc *"bản vá có tác
+dụng"* thì **cả hai kết luận đều chưa có căn cứ**. Ba lượt xanh liên tiếp ở đây xảy ra
+trên mã HOÀN TOÀN KHÔNG ĐỔI.
+
+Cần một phép đo chịu được chớp: chạy N lượt (N đủ lớn, khai N ra), đếm tỉ lệ đỏ trước và
+sau bản vá, và **giữ nguyên stdout/stderr của TỪNG lượt `doctor`** — đúng thứ hai lượt
+trước đã hụt vì bộ chạy nuốt mất đầu ra.
+
 ### Manh mối thật: chính `doctor` mới là thứ chớp
 
 Đo được sau đó: `python .claude/dev/launcher.py doctor` **thoát 12 rồi ngay sau

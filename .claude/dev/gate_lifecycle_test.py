@@ -1687,6 +1687,128 @@ def case_headline_khong_duoc_dem_ca_bo_qua_la_da_qua() -> None:
         f"van bao N/N sau khi mot ca thanh BO QUA: {sau!r}"
 
 
+def case_main_phai_in_headline_bang_dong_ket_qua_va_giu_rc() -> None:
+    """`main` phải NỐI DÂY vào `dong_ket_qua`, và mã thoát phải là PHÉP ĐO — chốt cả hai một lượt.
+
+    P3 verdict PR #157 (comment 5319042626), reviewer đo được tại head đó: mutant
+    (d) — thay lời gọi `dong_ket_qua(...)` trong `main` bằng chính f-string cũ —
+    SỐNG qua cả bộ: headline quay về dạng dối `1/1 ca (qua 0, bo qua 1, hong 0)`
+    mà suite vẫn xanh. Mutant (f) — `return 0` vô điều kiện — cũng sống. Lý do
+    cấu trúc: `case_headline_khong_duoc_dem_ca_bo_qua_la_da_qua` đo HÀM
+    `dong_ket_qua`, không đo DÂY NỐI, và chưa ca nào đọc GIÁ TRỊ TRẢ VỀ của
+    `main`. Cùng bệnh `t24`/`t116` bên launcher: hàm CÓ MẶT trong tệp, có ca
+    riêng đo nó, mà lượt chạy thật không đi qua nó. Bên launcher lỗ này đã đóng
+    bằng `t119` (PR #156); đây là `t119` của bộ này.
+
+    Cách đo — theo bộ xương trong verdict: bộ này KHÔNG có seam `_nap_sach` như
+    launcher nên tự nạp BẢN SAO của chính tệp này (chép ra thư mục tạm mới rồi
+    `spec_from_file_location` với tên duy nhất theo `time_ns`, tắt ghi bytecode
+    trong lúc nạp — lớp xoá `.pyc` của `_nap_sach` là thừa ở đây vì thư mục tạm
+    mới không thể chứa `.pyc` cũ; module thật đang chạy không bị đụng), thay
+    `CASES` bằng ca giả, stub `_chan_doan_cach_ly`, gọi `main()` THẬT rồi đọc CẢ
+    stdout LẪN rc trên ba nhánh sạch / có bỏ-qua / có hỏng. Ca giả bỏ-qua phải
+    ném `BoQua` CỦA BẢN SAO — `BoQua` của module ngoài là lớp khác danh tính,
+    ném nhầm thì `chay_bo_ca` của bản sao đếm thành hỏng.
+
+    Headline so HAI TẦNG, mỗi tầng canh một thứ: (1) dòng cuối phải BẰNG
+    `"gate lifecycle tests: " + dong_ket_qua(...)` của chính bản sao — đo dây
+    nối, `main` in đúng thứ hàm trả về; (2) literal tử số + đuôi ` - KHONG DU:`
+    — đo NGHĨA trên stdout, để ai sửa CẢ `main` lẫn `dong_ket_qua` cho khớp
+    nhau quay về khuôn dối vẫn bị bắt. Mã thoát đọc từ GIÁ TRỊ TRẢ VỀ: sạch=0,
+    bỏ-qua=0 (câu "mã thoát KHÔNG đổi" của ca t118-gate thành phép đo thay vì
+    lời khai suông), hỏng=1. Thứ tự in khoá theo NHÓM `[BO QUA]` trước `[FAIL]`
+    — ca hỏng đứng ĐẦU danh sách giả, nên `main` mà in theo thứ tự ca chạy thay
+    vì theo nhóm là ca này đỏ.
+
+    GIỚI HẠN — khai thẳng: `raise SystemExit(main())` dưới `__main__` vẫn ngoài
+    tầm — ca này đo GIÁ TRỊ TRẢ VỀ của `main`, không đo mã thoát tiến trình.
+    Stub `_chan_doan_cach_ly` nghĩa là tổ hợp này KHÔNG đo khối chẩn đoán cách
+    ly; khối đó chưa có ca nào đo riêng — nó vẫn chạy thật (không stub) ở mọi
+    lượt suite thật, output đọc bằng mắt trên log, còn các helper
+    `gate_lifecycle` nó gọi đã có ca riêng đo. Đổi phối hợp (sửa cả `main` lẫn
+    ca này) thì không chống được — cùng giới hạn `t119` đã khai.
+    """
+    import importlib.util
+    import io
+    import shutil
+
+    with tempfile.TemporaryDirectory(prefix="gate_lifecycle_daynoi_") as raw:
+        ban_sao = Path(raw) / "gate_lifecycle_test_ban_sao.py"
+        shutil.copyfile(Path(__file__).resolve(), ban_sao)
+
+        def _nap_ban_sao():
+            truoc = sys.dont_write_bytecode
+            sys.dont_write_bytecode = True
+            try:
+                importlib.invalidate_caches()
+                ten = "gate_lifecycle_test_ban_sao_%d" % time.time_ns()
+                spec = importlib.util.spec_from_file_location(ten, ban_sao)
+                m = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(m)
+                return m
+            finally:
+                sys.dont_write_bytecode = truoc
+
+        def _chay_main_voi(tao_ds_ca):
+            m = _nap_ban_sao()
+            m._chan_doan_cach_ly = lambda: None      # xem GIỚI HẠN trong docstring
+            m.CASES = tao_ds_ca(m)
+            hung = io.StringIO()
+            with contextlib.redirect_stdout(hung):
+                rc = m.main()
+            return rc, hung.getvalue(), m
+
+        def ca_qua_a() -> None:
+            pass
+
+        def ca_qua_b() -> None:
+            pass
+
+        def ca_hong() -> None:
+            raise AssertionError("co tinh hong")
+
+        def _ca_bo_qua_cua(bs):
+            def ca_bo_qua() -> None:
+                raise bs.BoQua("co tinh bo qua")
+            return ca_bo_qua
+
+        # (a) SACH: headline N/N dung nghia va phai DI QUA khuon dong_ket_qua; rc=0.
+        rc, ra, m = _chay_main_voi(lambda bs: [ca_qua_a, ca_qua_b])
+        cuoi = ra.rstrip().splitlines()[-1]
+        assert rc == 0, "nhanh SACH phai rc=0, duoc %r" % (rc,)
+        assert cuoi == "gate lifecycle tests: " + m.dong_ket_qua(2, 2, 0, 0), (
+            "headline nhanh SACH khong di qua dong_ket_qua: %r" % (cuoi,))
+        assert "2/2 ca QUA (bo qua 0, hong 0)" in cuoi, (
+            "N/N cua luot SACH bi doi dang: %r" % (cuoi,))
+        assert "[BO QUA]" not in ra and "[FAIL]" not in ra, (
+            "luot SACH in thua [BO QUA]/[FAIL]: %r" % (ra,))
+
+        # (b) CO BO QUA: tu so khong nuot, duoi KHONG DU ra toi stdout, rc GIU 0.
+        rc, ra, m = _chay_main_voi(lambda bs: [ca_qua_a, _ca_bo_qua_cua(bs), ca_qua_b])
+        cuoi = ra.rstrip().splitlines()[-1]
+        assert rc == 0, "bo qua khong duoc doi ma thoat, ma main tra %r" % (rc,)
+        assert cuoi == "gate lifecycle tests: " + m.dong_ket_qua(3, 2, 1, 0), (
+            "headline nhanh BO QUA khong di qua dong_ket_qua: %r" % (cuoi,))
+        assert "2/3 ca QUA (bo qua 1, hong 0)" in cuoi, (
+            "tu so nuot ca bo qua: %r" % (cuoi,))
+        assert " - KHONG DU:" in cuoi, (
+            "duoi canh bao KHONG DU khong ra toi stdout: %r" % (cuoi,))
+        assert "3/3" not in ra, "con hinh dang N/N du co ca bo qua: %r" % (ra,)
+        assert "[BO QUA] ca_bo_qua:" in ra, "dong [BO QUA] khong duoc in: %r" % (ra,)
+
+        # (c) CO HONG: [BO QUA] in TRUOC [FAIL] du ca hong CHAY truoc; rc=1.
+        rc, ra, m = _chay_main_voi(lambda bs: [ca_hong, _ca_bo_qua_cua(bs), ca_qua_a])
+        cuoi = ra.rstrip().splitlines()[-1]
+        assert rc == 1, "co ca hong ma main tra %r" % (rc,)
+        assert cuoi == "gate lifecycle tests: " + m.dong_ket_qua(3, 1, 1, 1), (
+            "headline nhanh HONG khong di qua dong_ket_qua: %r" % (cuoi,))
+        assert "1/3 ca QUA (bo qua 1, hong 1)" in cuoi, (
+            "headline dem hong sai: %r" % (cuoi,))
+        assert "[FAIL] ca_hong:" in ra, "dong [FAIL] khong duoc in: %r" % (ra,)
+        assert ra.index("[BO QUA]") < ra.index("[FAIL]"), (
+            "dao thu tu nhom: [FAIL] in truoc [BO QUA]: %r" % (ra,))
+
+
 CASES = [
     case_success_records_exact_identity,
     case_head_mismatch_fails_before_command,
@@ -1715,6 +1837,7 @@ CASES = [
     case_dirty_run_is_allowed_but_never_reusable,
     case_validate_reuse_is_fail_closed,
     case_headline_khong_duoc_dem_ca_bo_qua_la_da_qua,
+    case_main_phai_in_headline_bang_dong_ket_qua_va_giu_rc,
 ]
 
 

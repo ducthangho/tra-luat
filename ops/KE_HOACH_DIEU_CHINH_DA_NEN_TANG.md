@@ -133,6 +133,10 @@ khi hết quota **hoặc** người giữ cho phép, và **luôn sinh một nợ
 - **Độ phức tạp:** trung bình–cao (phải có fixture cho cả hai trạng thái).
 - **Mô hình:** Executor **Opus 5 @ `xhigh`** · Reviewer **Codex**
 - **Review class:** `sensitive`
+- **⛔ NỐI TIẾP `A3`, KHÔNG SONG SONG.** Write set của `A4` **trùng khít** write set của
+  `A3` (`.claude/dev/launcher.py`, `.claude/dev/launcher_test.py`). Bản đầu của kế hoạch
+  này xếp cả hai vào cùng một cột "song song" — **sai**, và sai vì soạn xong không kiểm
+  giao write set. Chỉ mở `A4` sau khi `A3` đã `integrated`.
 
 ### A5 · Script chỉ chạy một nền — `PLAT-M5` (ưu tiên thấp hơn)
 
@@ -185,29 +189,89 @@ khi hết quota **hoặc** người giữ cho phép, và **luôn sinh một nợ
 
 ---
 
-## 7. Thứ tự thi công đề nghị
+## 7. Thứ tự thi công, và ĐIỀU KIỆN để chạy song song
+
+### 7.1 Ba luồng song song ĐƯỢC — write set rời nhau, đã kiểm
 
 ```
-NGAY (không cần review):
-  dọn nhánh mồ côi qua ops-don-ref.yml
-  merge PR #182, #183
+luồng 1   A3  t53 flake         Fable 5 @xhigh    .claude/dev/launcher*.py
+luồng 2   A2  launcher vào CI   Sonnet 5 @medium  .github/workflows/ci.yml
+luồng 3   A1  macOS vào matrix  Opus 5 @high      .github/workflows/launcher-windows.yml
+────────────────────────────────────────────────────────────────────────────
+NỐI TIẾP, không song song:
+   A4  sau A3        (TRÙNG write set với A3)
+   A5  sau cùng      scripts/*.ps1
+   B4 #178 sau B3 #177   (cùng đụng .claude/dev/packet_loop_test.py)
 
-SONG SONG 1 — đa nền tảng          SONG SONG 2 — nợ
-  A3  t53 flake      Fable 5 xhigh   B1  cross-review codex   (từ 20-08 06:23)
-   │                                  │
-  A2  launcher vào CI  Sonnet 5       B2  re-audit #163/#164
-   │                                  │
-  A1  macOS vào matrix Opus 5         B3  #177   Fable 5 xhigh
-   │                                  │
-  A4  mcp-endpoint     Opus 5 xhigh   B4  #178   Opus 5 xhigh
-
-SAU:
-  A5 script một nền · nhóm C
+Lane B chạy song song với lane A — write set rời hoàn toàn:
+   B1 cross-review codex → B2 re-audit #163/#164 → B3 #177 → B4 #178
 ```
 
 `A3` đứng trước `A2` vì đưa một bộ test đang đỏ vào cổng PR sẽ chặn mọi PR.
 
----
+### 7.2 Vì sao ba luồng ấy an toàn — hai phép đo, không phải phán đoán
+
+**(a) Write set rời nhau.** Ba tệp đích khác nhau hoàn toàn, không giao.
+
+**(b) DERIVED SET RỖNG — đây mới là điều kiện ít ai kiểm.** Đo trên `RELEASE_MANIFEST.json`
+(180 tệp trong gói):
+
+```
+.claude/dev/launcher.py            — KHÔNG trong gói
+.claude/dev/launcher_test.py       — KHÔNG
+.claude/dev/packet_loop.py         — KHÔNG
+.claude/dev/packet_loop_test.py    — KHÔNG
+.github/workflows/ci.yml           — KHÔNG
+.github/workflows/launcher-windows.yml — KHÔNG
+scripts/don-nhanh.ps1              — KHÔNG
+```
+
+Không packet nào của lane A/B đụng gói ⇒ **không tái sinh `RELEASE_MANIFEST.json` hay
+golden** ⇒ không có lớp va chạm ngầm kiểu `AG-T0-03`, nơi hai bên sửa **dòng khác nhau**
+của cùng một tệp sinh, git merge sạch, mà **con số gộp lại thì sai**.
+
+**Ngược lại — `AG-T0-05` PHẢI CHẠY MỘT MÌNH.** Nó chạm `scripts/tl_core/command_registry.py`
+và `references/golden/parser_surface.json`, **cả hai đều TRONG gói**. Bất cứ packet nào
+khác cũng đụng gói mà chạy song song với nó sẽ va trên trục derived set.
+
+### 7.3 Ai chạy luồng nào — theo Review Class, không theo mô hình rảnh
+
+| luồng | class | Antigravity tự chủ được? |
+|---|---|---|
+| `A2` | `routine` | **CÓ** — AG executor + AG reviewer đủ |
+| `A1` | `systemic` | tạm được, **nhưng sinh nợ re-audit** bởi Claude/Codex/Human |
+| `A3` `A4` | `sensitive` | **KHÔNG** — cấm land bằng AG–AG; bắt buộc cross-provider hoặc human audit exact SHA |
+
+Phân công đề nghị: **AG/Gemini Flash → `A2`** (rẻ nhất, AG tự chủ trọn vẹn) ·
+**Opus 5 → `A1`** · **Fable 5 → `A3`** · **Codex** review `A1` và `A3`.
+
+### 7.4 NÚT CỔ CHAI THẬT không phải executor — mà là reviewer
+
+Thêm executor **không** tăng thông lượng quá một mức, vì cross-provider reviewer duy nhất
+là **Codex**, và nó bị giới hạn quota. Hai packet `sensitive` xong cùng lúc thì **xếp hàng
+chờ Codex**. Đó là hàng đợi, không phải lỗi — nhưng phải tính vào lịch, đừng mở nhiều luồng
+`sensitive` hơn số lượt review Codex thực có.
+
+### 7.5 NỢ CHẶN nếu muốn nâng số luồng song song
+
+**Không tầng nào cưỡng chế write-set exclusion giữa các packet.** Đo được:
+
+```
+grep 'write.?set|overlap|giao|conflict'  .claude/dev/packet_loop.py
+  -> chỉ MỘT chuỗi, nằm trong câu thông báo cho người đọc
+
+grep 'write.?set|scope|pham vi'  .github/workflows/ci.yml
+  -> RỖNG
+```
+
+Việc hai lease không chồng lấn hoàn toàn dựa vào **người cấp lease nhớ**. Với một executor
+thì rủi ro thấp; với hai executor song song thì rủi ro nhân đôi trong khi chốt vẫn **bằng
+không**.
+
+**Ứng viên packet mới — `PLAT-X1`:** thêm cổng cơ học kiểm giao write-set giữa các lease
+đang mở, chặn khi chồng lấn. Write set gọn (`.claude/dev/packet_loop.py` + test),
+`sensitive`. **Đây là điều kiện tiên quyết nếu số executor song song vượt quá hai.** Chưa
+mở Issue — chờ người giữ quyết.
 
 ## 8. Ràng buộc áp cho mọi packet trong kế hoạch này
 

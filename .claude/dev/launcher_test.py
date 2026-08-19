@@ -3989,6 +3989,91 @@ def t120_subprocess_decoding_chong_loi_charmap_tren_windows():
 
 
 @ca
+def t121_do_openai_llm_qua_cli_khong_fail_open_va_khong_log():
+    """Đo công cụ llm cho provider openai_api: không fail-open, không tự gọi API trả phí,
+    và bắt buộc `--no-log` khi kiểm sống.
+
+    Giao thức:
+      - Provider: openai_api (§4, §5 ops/OPENAI_LLM_PROVIDER.md)
+      - Surface: llm_cli
+      - Mặc định: CO_CREDENTIAL (chưa chứng minh dùng được), không gọi API
+      - Kiểm sống: gọi thật có `--no-log` và exact model
+    """
+    m = _tai_launcher_thu()
+
+    # (1) Bảng CONG_CU và KHA_NANG phải có llm / openai-llm
+    muc_cc = [c for c in m.CONG_CU if c["ten"] == "llm"]
+    bang(len(muc_cc) == 1, f"CONG_CU thieu muc llm: {m.CONG_CU}")
+    bang(muc_cc[0]["bat_buoc"] is False, "llm khong duoc dat bat buoc mac dinh")
+
+    muc_kn = [k for k in m.KHA_NANG if k["ten"] == "openai-llm"]
+    bang(len(muc_kn) == 1, f"KHA_NANG thieu muc openai-llm: {m.KHA_NANG}")
+
+    goc_which = m.shutil.which
+    goc_run = m._chay_van_ban_an_toan
+    lenh_chay = []
+
+    class _P:
+        def __init__(self, rc=0, out="", err=""):
+            self.returncode, self.stdout, self.stderr = rc, out, err
+
+    def run_gia(cmd, **k):
+        lenh_chay.append((list(cmd), k))
+        if list(cmd) == ["llm", "--version"]:
+            return _P(0, "llm, version 0.19.1\n")
+        if list(cmd) == ["llm", "keys", "list"]:
+            return _P(0, "openai\n")
+        if list(cmd)[:2] == ["llm", "prompt"]:
+            # Phải có --no-log để chống rò rỉ prompt vào SQLite cục bộ
+            bang("--no-log" in cmd, f"loi goi llm THIEU --no-log: {cmd}")
+            bang("-m" in cmd, f"loi goi llm THIEU -m exact model: {cmd}")
+            return _P(0, "ok\n")
+        return _P(1, "", "khong ro lenh")
+
+    # (a) THIEU khi which tra None
+    m.shutil.which = lambda t, *a, **k: None if t == "llm" else goc_which(t)
+    tt, mo_ta = m._do_openai_llm({})
+    bang(tt == "THIEU", f"chua cai llm ma bao {tt}: {mo_ta}")
+
+    # (b) CHUA_XAC_THUC khi co llm nhung khong co OPENAI_API_KEY
+    m.shutil.which = lambda t, *a, **k: "/usr/bin/llm" if t == "llm" else goc_which(t)
+    def run_khong_key(cmd, **k):
+        if list(cmd) == ["llm", "--version"]:
+            return _P(0, "llm, version 0.19.1\n")
+        if list(cmd) == ["llm", "keys", "list"]:
+            return _P(0, "")
+        return _P(1)
+    m._chay_van_ban_an_toan = run_khong_key
+    tt, mo_ta = m._do_openai_llm({})
+    bang(tt == "CHUA_XAC_THUC", f"khong co key ma khong bao CHUA_XAC_THUC: {tt}, {mo_ta}")
+
+    # (c) CO_CREDENTIAL khi co OPENAI_API_KEY nhung kiem_song=False (khong goi API)
+    m._chay_van_ban_an_toan = run_gia
+    lenh_chay.clear()
+    tt, mo_ta = m._do_openai_llm({"OPENAI_API_KEY": "sk-mock-key"}, False)
+    bang(tt == "CO_CREDENTIAL", f"co key mac dinh phai CO_CREDENTIAL: {tt}")
+    bang(not any("prompt" in c[0] for c in lenh_chay),
+         f"mac dinh KHONG duoc tu dong goi API tinh phi: {lenh_chay}")
+
+    # (d) DUNG_DUOC khi kiem_song=True va p_song thanh cong
+    lenh_chay.clear()
+    tt, mo_ta = m._do_openai_llm({"OPENAI_API_KEY": "sk-mock-key"}, True)
+    bang(tt == "DUNG_DUOC", f"kiem song thanh cong ma bao {tt}: {mo_ta}")
+    bang(any("prompt" in c[0] for c in lenh_chay), "kiem_song=True nhung khong goi probe")
+
+    # (e) CHUA_XAC_THUC khi kiem_song=True nhung api loi
+    def run_loi(cmd, **k):
+        if list(cmd) == ["llm", "--version"]:
+            return _P(0, "llm, version 0.19.1\n")
+        if list(cmd)[:2] == ["llm", "prompt"]:
+            return _P(1, "", "Error: 401 Unauthorized")
+        return _P(0)
+    m._chay_van_ban_an_toan = run_loi
+    tt, mo_ta = m._do_openai_llm({"OPENAI_API_KEY": "sk-mock-key"}, True)
+    bang(tt == "CHUA_XAC_THUC", f"kiem song loi phai tra CHUA_XAC_THUC: {tt}")
+
+
+@ca
 def t101_phan_tich_doi_so_phai_do_NGAY_khong_doi_chay_het_suite():
     """Công cụ chẩn đoán dễ xanh giả thì tệ hơn không có.
 

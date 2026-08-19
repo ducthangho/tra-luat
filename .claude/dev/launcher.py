@@ -1717,6 +1717,9 @@ CONG_CU = [
      "vi_sao": "can de cai hai CLI tren",
      "cai": {"Windows": "winget install --id OpenJS.NodeJS.LTS -e",
              "Darwin": "brew install node", "Linux": "sudo apt-get install -y nodejs npm"}},
+    {"ten": "llm", "bat_buoc": False, "ung_vien": ["llm"],
+     "vi_sao": "CLI client goi OpenAI API (provider: openai_api, surface: llm_cli)",
+     "cai": {"*": "pip install llm  (hoac: uv tool install llm / brew install llm)"}},
 ]
 
 # MODULE PYTHON — bảng RIÊNG, cố ý không nhét vào `CONG_CU`.
@@ -2547,6 +2550,55 @@ def _do_claude() -> tuple[str, str]:
     return ("CHUA_XAC_THUC", "khong co ~/.claude/.credentials.json va khong co bien")
 
 
+def _do_openai_llm(moi_truong: dict[str, str] | None = None,
+                   kiem_song: bool = False) -> tuple[str, str]:
+    """Đo năng lực gọi OpenAI API qua `llm` CLI.
+
+    Giao thức (§4, §5 `ops/OPENAI_LLM_PROVIDER.md`):
+      Provider: openai_api
+      Execution surface: llm_cli
+      Logging: bắt buộc `--no-log`
+    Không bao giờ gọi API trả phí trong doctor mặc định; chỉ gọi khi có `--kiem-song`.
+    """
+    mt = _env_da_chuan(moi_truong)
+
+    if not shutil.which("llm"):
+        return ("THIEU", "chua cai llm CLI — pip install llm")
+
+    p_ver = _chay_van_ban_an_toan(["llm", "--version"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
+    ver = p_ver.stdout.strip() if p_ver.returncode == 0 else "llm"
+
+    # Kiểm tra OPENAI_API_KEY trong môi trường hoặc keys.json của llm
+    tok = mt.get("OPENAI_API_KEY", "").strip()
+    co_key_file = False
+    if not tok:
+        try:
+            p_k = _chay_van_ban_an_toan(["llm", "keys", "list"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
+            if p_k.returncode == 0 and "openai" in p_k.stdout.lower():
+                co_key_file = True
+        except (OSError, subprocess.SubprocessError):
+            pass
+
+    if not tok and not co_key_file:
+        return ("CHUA_XAC_THUC", f"{ver} · khong co OPENAI_API_KEY va chua co `llm keys set openai`")
+
+    if not kiem_song:
+        return ("CO_CREDENTIAL", f"{ver} · co credential OpenAI (chua chung minh dung duoc, them --kiem-song)")
+
+    # Kiểm sống: gọi probe qua prompt không lưu log (--no-log)
+    try:
+        p_song = _chay_van_ban_an_toan(
+            ["llm", "prompt", "in ra: ok", "-m", "gpt-4o-mini", "--no-log"],
+            env=mt, timeout=30)
+    except (OSError, subprocess.SubprocessError) as e:
+        return ("KHONG_DO_DUOC", f"kiem song khong chay duoc: {type(e).__name__}")
+
+    if p_song.returncode == 0:
+        return ("DUNG_DUOC", f"{ver} · kiem song: thanh cong (gpt-4o-mini)")
+    err_msg = p_song.stderr.strip() or p_song.stdout.strip()
+    return ("CHUA_XAC_THUC", f"{ver} · kiem song HONG (rc={p_song.returncode}): {err_msg[:60]}")
+
+
 _RE_SLUG_GITHUB = re.compile(r"github\.com[:/]+([^/]+/[^/\s]+?)(?:\.git)?/*$")
 
 
@@ -3080,6 +3132,9 @@ KHA_NANG = [
      "vi_sao": "hook cu hon master = thieu chot ma master da co (nguyen nhan goc 15-08)",
      "khac_phuc": "git show origin/master:.claude/hooks/session-start.sh > <tep>  "
                   "roi chay no; hoac merge master vao nhanh nay"},
+    {"ten": "openai-llm", "do": lambda ws, ks=False: _do_openai_llm(_MOI_TRUONG_DA_DOC, ks),
+     "vi_sao": "provider openai_api qua execution_surface llm_cli (§4, §5 ops/OPENAI_LLM_PROVIDER.md)",
+     "khac_phuc": "pip install llm && export OPENAI_API_KEY=... (hoac llm keys set openai)"},
 ]
 
 

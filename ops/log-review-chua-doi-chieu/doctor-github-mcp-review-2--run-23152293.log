@@ -1,0 +1,139 @@
+verdict: changes_requested
+reviewed_sha: fc4842130dd4514d4a4e0d013429fa97743cbf7c
+
+## Findings
+
+- `github-server-value-khong-duoc-kiem-kieu` — P2
+
+  `_doc_mcp_json` chỉ kiểm bảng `mcpServers` là object, nhưng không kiểm giá trị của khóa `github`. Vì vậy `{"mcpServers":{"github":null}}` và `{"mcpServers":{"github":"x"}}` đều được tuyên bố là đã khai server rồi chuyển sang đo health. Đây vẫn là JSON sai lược đồ lọt qua bản vá.
+
+  Tái lập:
+
+  ```bash
+  python3 - <<'PY'
+  import importlib.util, json, tempfile
+  from pathlib import Path
+  s=importlib.util.spec_from_file_location("L",".claude/dev/launcher.py")
+  m=importlib.util.module_from_spec(s); s.loader.exec_module(m)
+  class R:
+      returncode=0; stdout="github: url - Connected\n"; stderr=""
+  m.shutil.which=lambda _: "/x"
+  m.subprocess.run=lambda *a,**k: R()
+  for obj in (
+      {"mcpServers":{"github":None}},
+      {"mcpServers":{"github":"x"}},
+  ):
+      with tempfile.TemporaryDirectory(dir="/dev/shm") as d:
+          Path(d,".mcp.json").write_text(json.dumps(obj))
+          print(m._do_github_api(d))
+  PY
+  ```
+
+  Đo được: cả hai trả `KHONG_DO_DUOC` với mô tả `.mcp.json ... khai server: github`, thay vì `CHUA_XAC_THUC` vì schema sai.
+
+- `disconnected-bi-doc-thanh-khoe` — P2
+
+  `_suc_khoe_mcp_github` nhận khỏe bằng phép thử chuỗi con:
+
+  ```python
+  "connected" in thap and "not connected" not in thap
+  ```
+
+  Vì thế biến thể CLI `Disconnected` bị phân loại `khoe`. Hậu quả hiện vẫn fail-closed thành `KHONG_DO_DUOC`, không thành `DUNG_DUOC`, nên xếp P2 thay vì P1; nhưng phép đo health và lời giải thích sẽ sai.
+
+  Tái lập:
+
+  ```bash
+  python3 - <<'PY'
+  import importlib.util
+  s=importlib.util.spec_from_file_location("L",".claude/dev/launcher.py")
+  m=importlib.util.module_from_spec(s); s.loader.exec_module(m)
+  class R:
+      returncode=0; stdout="github: url - Disconnected\n"; stderr=""
+  m.shutil.which=lambda _: "/x"
+  m.subprocess.run=lambda *a,**k: R()
+  print(m._suc_khoe_mcp_github())
+  PY
+  ```
+
+  Đo được:
+
+  ```text
+  ('khoe', 'github: url - Disconnected')
+  ```
+
+## Phép đo đã chạy
+
+- Neo và nguồn:
+
+  ```text
+  prompt sha256 = 7f6a74a3694e59a00959add1022b4fdb816fa46c8a6217d2d3bb3188503a3547
+  reviewed SHA = fc4842130dd4514d4a4e0d013429fa97743cbf7c
+  git diff fc48421..HEAD -- .claude/dev/* = rỗng
+  ```
+
+- Lời khai phạm vi: **ĐÚNG và tái hiện được trong môi trường này**.
+
+  ```bash
+  timeout 35 claude mcp list
+  ```
+
+  cho:
+
+  ```text
+  github: https://api.githubcopilot.com/mcp/ (HTTP) - Pending approval
+  rc=0
+  ```
+
+  Trong cùng phiên review, công cụ GitHub MCP đọc thành công commit `fc48421` từ `ducthangho/tra-luat`. Hai phép đo thực sự lệch nhau. Output doctor nói rõ `AGENT SAP SINH bang CLI` và còn nói phiên đang chạy có thể gọi được, nên `CHUA_XAC_THUC` đã được giới hạn phạm vi đủ rõ.
+
+- Nhánh `Connected → KHONG_DO_DUOC`: chưa có bằng chứng tái lập được để nâng thành `DUNG_DUOC`. Môi trường hiện chỉ có `Pending approval`; khả năng một tiến trình Claude mới gọi thật công cụ khi `Connected` là **KHÔNG ĐO ĐƯỢC** tại đây. Giữ fail-closed là hợp lý vì `Connected` chưa tự chứng minh một tool call thành công.
+
+- Khớp tên `casefold() == "github"` sửa đúng lỗi chuỗi con và vẫn nhận `GitHub`. Các tên như `github-copilot` có thể là tên MCP tùy ý, nhưng không đủ chứng minh đó là server GitHub mà hợp đồng kho yêu cầu; không thấy chặn oan trong hợp đồng hiện tại.
+
+- Các hình dạng khác:
+
+  - gốc là mảng và bảng server là mảng/chuỗi: bị chặn đúng.
+  - `{"servers":["github"]}`: bị chặn đúng.
+  - `mcpServers: null` kèm `servers` hợp lệ: hiện fallback sang `servers`; không đủ căn cứ để kết luận đây là lỗi.
+  - giá trị khóa `github` không phải object: lọt, là finding trên.
+
+- `gh` không lật được nhãn. Đọc producer và consumer cho thấy chỉ `DUNG_DUOC` thuộc `DA_CHUNG_MINH_KHA_DUNG`; `KHONG_DO_DUOC` đi vào `chua_chung_minh`. Lệnh thật:
+
+  ```bash
+  python3 .claude/dev/launcher.py doctor --workspace "$PWD" --json --doi-kha-dung
+  ```
+
+  đo được:
+
+  ```text
+  github-api = CHUA_XAC_THUC
+  ok_kha_dung = false
+  rc=13
+  ```
+
+  Dù chi tiết phụ có nhắc trạng thái `gh`, nó không nâng nhãn.
+
+- Bộ test đầy đủ:
+
+  ```bash
+  TMPDIR=/dev/shm python3 .claude/dev/launcher_test.py
+  ```
+
+  bị môi trường sandbox cắt tiến trình chạy ngay sau `t62` khi sang nhóm ca thao tác cây tiến trình. Do đó số `105/105`, baseline `104/104`, và delta 0 ca đỏ đều **KHÔNG ĐO ĐƯỢC** tại đây.
+
+  Chạy riêng phần thay đổi:
+
+  ```text
+  t105: 1/1 qua
+  t96:  1/1 qua
+  ```
+
+- Hai đột biến mới trên bản sao `/dev/shm`, đều sống sót qua `t105`:
+
+  - M12: đổi `capture_output=True` thành `capture_output=False` → `t105` vẫn 1/1.
+  - M13: bỏ `timeout=30` khỏi `claude mcp list` → `t105` vẫn 1/1.
+
+  Hai ca cho thấy fixture vẫn có thể xanh dù hợp đồng subprocess mất thu stdout hoặc mất giới hạn thời gian.
+
+- Bộ chạy đột biến ngoài kho: phần triển khai là **KHÔNG ĐO ĐƯỢC**. Lời khai “bỏ chấm nếu `sed` không đổi gì” chỉ che trường hợp zero-match; nó không tự phát hiện nhiều match ngoài ý muốn, thay đổi một phần, hay một đột biến có áp dụng nhưng không còn biểu diễn lỗi dự định. Vì chỉ có mô tả commit, không thể xác nhận các chốt đó có hay không.

@@ -1,0 +1,157 @@
+# BIÊN NHẬN — cross-review lượt 4 của PR #150.
+#
+# ĐỌC BA DÒNG NÀY TRƯỚC MỌI DÒNG KHÁC:
+#
+# 1. Reviewer là `claude` TRONG KHI người vá cũng là `claude`. `same_provider_approved`,
+#    KHÔNG phải `cross_approved`. Verdict này KHÔNG cấp điều kiện land — và tới lúc ghi
+#    biên nhận thì #150 ĐÃ MERGE RỒI, nên câu ấy không còn là lời khuyên mà là mô tả:
+#    verdict này KHÔNG gác cổng cho lần merge đã xảy ra.
+# 2. Biên nhận này ghi NGƯỢC, hai ngày sau lượt chạy (chạy 17-08, ghi 19-08). Nó KHÔNG
+#    phải bản ghi đương thời. Xem `ghi_nguoc_SAU_khi_PR_da_merge`.
+# 3. Người ghi biên nhận CHÍNH LÀ người vá của lượt ấy. Không có lớp độc lập nào ở đây.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+lease_id: don-nhanh-base-review-4-claude-20260817
+provider: claude
+role: reviewer
+reviewer_model: claude-fable-5
+verdict: changes_requested
+assurance: same_provider_approved
+assurance_KHONG_dat: cross_approved
+cross_provider: false
+reviewed_sha: 05568de6ad054a5f0c9991ecac7e38805d1227c3
+
+verdict_path: ops/reviews/don-nhanh-base-review-4-claude-verdict.md
+verdict_sha256: f4e1f5351e03d302013a4a10c05a3e7e0d237b5f028adb29276515e9578be256
+verdict_bytes: 9327
+verdict_nguon: 'scratchpad/runs/990338cb/stdout.log (launcher v1.2.0, ma_thoat=0, 1066.082s)'
+verdict_doi_chieu: '`diff -q` nguồn ↔ tệp đã chép: KHỚP TỪNG BYTE'
+
+# Chuỗi bằng chứng — mỗi mắt xích một phép đo ĐỘC LẬP, không mắt nào suy ra từ mắt khác.
+chuoi_bang_chung_da_DO:
+  lease_doi_prompt: 1906eabde9bbbfe2970e9b5bea6c56a59af393d34c2bf80d88bfccc5eeaf0924
+  sha256_tep_prompt_tren_cay: 1906eabde9bbbfe2970e9b5bea6c56a59af393d34c2bf80d88bfccc5eeaf0924
+  run_json_prompt_sha256: 1906eabde9bbbfe2970e9b5bea6c56a59af393d34c2bf80d88bfccc5eeaf0924
+  lease_doi_reviewed_sha: 05568de6ad054a5f0c9991ecac7e38805d1227c3
+  reviewed_sha_trong_than_verdict: 05568de6ad054a5f0c9991ecac7e38805d1227c3
+  run_json_head: 05568de6ad054a5f0c9991ecac7e38805d1227c3
+  ket_luan: >-
+    Ba nguồn độc lập cùng nói một chuỗi cho prompt, ba nguồn độc lập cùng nói một chuỗi
+    cho SHA được review. Đây là thứ chứng minh verdict này thuộc VỀ lease này — không
+    phải một đầu ra bất kỳ được dán nhãn lượt 4.
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/03f12ac63284dd814dcf14664968af4872ef7f8a/ops/reviews/don-nhanh-base-review-4-claude-verdict.md
+
+published_first:
+  branch: claude/wp55-r2g2-executor-p4tee0
+  commit: 03f12ac63284dd814dcf14664968af4872ef7f8a
+do_thu_DA_DEN_chu_khong_tin_loi_goi: >-
+  Đẩy xong ĐỌC NGƯỢC về qua MCP `get_file_contents` neo `sha=03f12ac6…`, rồi so BLOB SHA
+  GitHub trả (`bf0024b407f73c6141a473e83a58ae47ca808611`) với `git hash-object` cục bộ —
+  BẰNG NHAU. Đo thứ ĐÃ ĐẾN, không dừng ở "lệnh push trả thành công" (bài học tầng vận
+  chuyển tự chuẩn hoá chuỗi, CLAUDE.md).
+
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_tag: null
+truy_xuat_ghi_chu: >-
+  CẢNH BÁO BỀN VỮNG — đọc kỹ. `evidence_url` neo vào một commit chỉ tồn tại trên nhánh
+  `claude/wp55-r2g2-executor-p4tee0`. #150 đã merge TRƯỚC commit này, nên hai verdict
+  lượt 4/5 KHÔNG nằm trong lịch sử `master`. Xoá nhánh ấy ⇒ commit không tra được ⇒
+  `evidence_url` chết, và ta quay lại đúng tình trạng nợ mà bản ghi này sinh ra để đóng.
+  Muốn bền thì phải land nhánh này vào `master` HOẶC tạo tag `luu-tru/*` trỏ commit.
+  Phiên web KHÔNG tạo được tag (proxy 403) — việc này thuộc chủ kho.
+
+ghi_nguoc_SAU_khi_PR_da_merge:
+  chay_luc_utc: '2026-08-17T16:17:14Z → 2026-08-17T16:35:00Z'
+  pr_150_merged_luc_utc: '2026-08-19T09:08:57Z'
+  bien_nhan_ghi_luc_utc: '2026-08-19T12:20:00Z'
+  he_qua_phai_noi_thang: >-
+    Verdict này KHÔNG tham gia quyết định merge. Nó là bản ghi lịch sử, không phải cổng.
+    Đừng đọc sự có mặt của nó trong `ops/reviews/` thành "lượt 4 đã duyệt cho #150 land".
+  vi_sao_van_ghi: >-
+    Hai tệp log chỉ còn sống trong scratchpad của MỘT container ephemeral. `README.md`
+    đã khai đây là nợ ("Lượt 4 và 5 KHÔNG có tệp ở đây"). Lời khai ấy đúng, nhưng khai
+    một nợ không đóng nó — và cửa sổ đóng được đang hẹp dần theo thời gian chờ của
+    container. Ghi muộn + nói rõ là muộn > mất hẳn.
+
+nguoi_ghi_KHONG_doc_lap:
+  su_that: 'Người ghi biên nhận này là người vá của lượt 4 — cùng phiên, cùng nhà cung cấp.'
+  he_qua: >-
+    Mọi lời "khớp số người vá" trong verdict là reviewer tự đối chiếu với số của TÔI.
+    Biên nhận này KHÔNG thêm một lớp kiểm nào lên nội dung verdict; nó chỉ chứng minh
+    verdict được chép nguyên văn và thuộc về đúng lease.
+
+noi_dung_verdict_tom_tat:
+  F1:
+    muc: P2
+    loai: ĐỘT BIẾN SỐNG SÓT
+    noi_dung: >-
+      Cặp `t17`/`t18` ghim biên chỉ từ PHÍA DƯỚI. M12 (`-ge`→`-eq`) sống 18/18, và dưới
+      M12 đường fail-open kích hoạt được bằng chính tham số công khai (`-Xoa -TranPR 0`
+      với 1 PR mở ⇒ rc=0 và XOÁ THẬT). M16 (ép so sánh CHUỖI) cũng sống 18/18 — `"10" <
+      "9"` nên vượt trần mà không nổ.
+    da_dong: true
+    dong_o_dau: 'lượt 5 xác nhận ĐÓNG (M12 20/21 đỏ t19 · M16 19/21 đỏ t19+t20)'
+  F2:
+    muc: P3
+    loai: ĐỘT BIẾN SỐNG SÓT
+    noi_dung: >-
+      Mặc định `TranPR = 1000` không ca nào ghim: M13 (→200, đúng trần cũ) và M13b (→3)
+      đều sống 18/18. Chiều sai này fail-close-hơn nên chỉ P3, nhưng nghĩa là tiêu đề
+      của bản vá có thể bị lùi ÂM THẦM.
+    da_dong: true
+    dong_o_dau: 'lượt 5 xác nhận ĐÓNG (M13 và M13b mỗi con 20/21, đỏ t20)'
+  doi_chung_suite_khong_mu_toan_phan: >-
+    M14 và M15 BỊ BẮT (17/18, đỏ t17). M15 đồng thời chứng minh VỊ TRÍ chốt hiện tại
+    (trước `$prMo`/`$doDuocPR`) là bắt buộc chứ không tình cờ.
+
+verdict_usage_caveats:
+- id: same-provider-khong-du-land
+  noi_dung: >-
+    Reviewer là `claude`, CÙNG nhà cung cấp với người vá. §8 nói mức ấy MỘT MÌNH không
+    thay mức assurance bắt buộc cho phạm vi workflow, và #150 sửa
+    `.github/workflows/ci.yml`. **Đừng đọc verdict này thành điều kiện land.** Thêm một
+    chỗ dễ đọc sai theo chiều NGƯỢC: #150 đã merge ngày 19-08, còn verdict này chạy ngày
+    17-08 và biên nhận ghi SAU khi merge — nên sự có mặt của tệp này trong `ops/reviews/`
+    KHÔNG phải bằng chứng lượt 4 đã gác cổng cho lần merge ấy. Nó không gác.
+- id: so-luot-4-neo-o-05568de-KHONG-tai-hien-tren-master
+  noi_dung: >-
+    Mọi con số trong verdict (18/18 · M12/M13/M13b/M16 SỐNG · M10/M11/M14/M15 chết ·
+    probe 30/30) neo ở `05568de6ad054a5f0c9991ecac7e38805d1227c3`, khi bộ test còn **18
+    ca**. Bộ ấy sau đó lên 21 ca rồi tiếp tục đổi, và #150 đã merge vào `master`. Chạy
+    lại trên `master` sẽ KHÔNG ra 18/18 — không phải vì verdict sai mà vì cây đã khác.
+    Muốn tái hiện thì `git worktree add --detach <đích> 05568de6…` rồi đo ở đó.
+- id: bang-chung-phu-cua-luot-4-DA-MAT
+  noi_dung: >-
+    Verdict tự khai: 12 ca probe (`p19`–`p29`) và các đột biến M12–M16 nằm trong
+    scratchpad của phiên reviewer, KHÔNG trong cây. Scratchpad ấy nay đã mất. Nên các số
+    probe (24/30, 29/30, 30/30) là những con số **không ai tái lập lại được từ kho** —
+    chúng dựa vào dụng cụ đo đã biến mất. Đọc chúng như lời khai của reviewer, không như
+    phép đo tra lại được. Đúng bài học của kho: nghĩ ra một phép thử mà không đưa nó vào
+    suite thì phép thử ấy không tồn tại — ở đây nó đã tồn tại đúng một lần, rồi thôi.
+- id: so-eol-checked-393-neo-theo-INDEX
+  noi_dung: >-
+    Verdict ghi `eol … checked=393`. `eol_policy.py --all` đọc **INDEX của git** nên số
+    ấy đổi theo THỜI ĐIỂM ĐO chứ không theo mã. Đừng đọc một con số khác 393 thành hồi
+    quy — đọc `violations`. (Cùng bệnh với caveat `398`/`401` của lượt 6.)
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-19T12:20:00Z'
+
+receipt_khong_khai:
+- 'Không khai lượt này tương đương một lượt cross-provider. Nó KHÔNG.'
+- 'Không khai verdict này đã gác cổng cho lần merge #150. Nó ghi trước, được chép vào kho SAU.'
+- 'Không khai người ghi biên nhận độc lập với người vá. Cùng một phiên.'
+- >-
+  Không khai `evidence_url` là bền. Nó neo vào nhánh `claude/wp55-r2g2-executor-p4tee0`;
+  xoá nhánh là chết link. Xem `truy_xuat_ghi_chu`.
+- >-
+  Không khai đã kiểm lại NỘI DUNG các phép đo của reviewer. Chỉ kiểm: chép nguyên văn,
+  và verdict thuộc đúng lease. Nội dung là lời khai của lượt 4, và dụng cụ đo của nó đã mất.

@@ -1,0 +1,77 @@
+verdict: changes_requested
+reviewed_sha: bf24fe44fcf926bf2b64fa4cb91065646b0599f1
+
+## Findings
+
+### p2-t105-khong-kiem-so-lan-goi-gh
+
+Chốt mới vẫn chưa đặc tả toàn bộ trace `subprocess`: `gia_run` chỉ yêu cầu từng lời gọi thuộc allowlist, còn `goi_api` chỉ đếm lời gọi có chuỗi `claude`. Số lần gọi `gh` không được kiểm tra.
+
+Hai đột biến đối nghịch đều sống sót:
+
+1. Thêm một lời gọi y hệt:
+
+```python
+subprocess.run(
+    ["gh", "auth", "status"],
+    capture_output=True,
+    text=True,
+    timeout=20,
+)
+```
+
+ngay sau lời gọi hiện hữu.
+
+2. Đổi:
+
+```python
+if shutil.which("gh"):
+```
+
+thành:
+
+```python
+if False:
+```
+
+Lệnh tái lập trên hai bản sao tạm:
+
+```text
+TMPDIR=/dev/shm python3 <ban-dup>/.claude/dev/launcher_test.py --lap-ca t105 --lan 1
+TMPDIR=/dev/shm python3 <ban-drop>/.claude/dev/launcher_test.py --lap-ca t105 --lan 1
+```
+
+Kết quả đo được cho cả hai:
+
+```text
+LAP t105_github_api_do_dung_duong_MCP_chu_khong_phai_gh:
+1/1 qua, 0 bo qua, 0 hong
+```
+
+Đột biến thứ nhất chứng minh allowlist không giới hạn bội số. Đột biến thứ hai chứng minh test cũng không yêu cầu lời gọi `gh` phải xảy ra khi `which("gh")` thành công.
+
+Đây vẫn là cùng lớp “`t105` đo đồ giả thay vì hợp đồng”. Chốt không sai từ gốc ở vị trí đặt trong đồ giả, nhưng còn thiếu điều kiện về trace đầy đủ: số lần gọi cho từng đặc tả. Cách đóng trực tiếp là so toàn bộ `nhat_ky` với multiset/sequence mong đợi, thay vì chỉ kiểm membership rồi đếm riêng `claude`.
+
+## Phép đo đã chạy
+
+- Lease yêu cầu `bf24fe44…`; `.claude/dev/launcher.py` trong worktree khớp byte với SHA này.
+- SHA-256 prompt: `7d43895fb2cc2794c25e4669c51ce567a3e910d6ba67f9886173358fef0e171c`, khớp lease.
+- Suite nền:
+
+```text
+105/105 ca (qua 104, bo qua 1, hong 0)
+```
+
+Delta ca đỏ: `0`.
+
+- Đột biến nền:
+
+```text
+DOT BIEN: 83/83 dat (1 khong do duoc tren nen nay)
+```
+
+- `AssertionError` từ `gia_run` không bị nuốt: hai khối liên quan chỉ bắt `OSError` và `subprocess.SubprocessError`.
+- `ten[0] → ten[-1]` là TƯƠNG ĐƯƠNG: sau `if len(ten) > 1: return`, đường tới biểu thức chỉ có `len(ten) == 1`. Lời bác finding lượt 4 của người vá là đúng.
+- Chốt nhiều tên casefold không chặn oan một cấu hình đơn hợp lệ; hai tên khác casing là hai server CLI phân biệt nhưng cùng tranh vai trò logic `github`, nên fail-close vì mơ hồ là hợp lý.
+- Tên server không thể chèn xuống dòng mà vẫn thỏa `k.casefold() == "github"`. Lập luận lấy `Status:` đầu tiên không thấy lỗ tĩnh qua `stdio`, `sse` hay `http`: các trường URL/header/command/args đều thuộc phần sau trạng thái. Fixture phản ánh đúng thứ tự đã mô tả; phép dựng lại đầu ra CLI thật độc lập ở lượt này: **KHÔNG ĐO ĐƯỢC**.
+- `gh` vẫn chỉ bổ sung chuỗi mô tả, không tham gia quyết định nhãn. Các trạng thái xấu tiếp tục đi tới `CHUA_XAC_THUC`; tầng tiêu thụ vẫn fail-close với mã `13`.

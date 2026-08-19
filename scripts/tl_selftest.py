@@ -21232,7 +21232,10 @@ def run() -> int:
         # `docs/incidents/` mới nhưng ratchet đếm đệ quy nên không cần khe riêng). Package giữ nguyên số
         # tệp; cây thật = số gói + 66. Hai tệp code cùng đợt (.claude/hooks/session_start.py,
         # .claude/settings.json) nằm dưới `.claude/` — khoá `_RELEASE_EXCLUDE_DIRS` sẵn, không ăn khe.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 66 == 246
+        # KÊ KHAI SLOT (AG-T0-03 / PR #175 — parser tree coverage & command_registry_test.py): 180 → **181**
+        # Thêm `scripts/tl_core/command_registry_test.py` vào gói. Package = 181 (dưới trần 200, còn 19 khe);
+        # cây thật = 181 + 66 = 247.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 66 == 247
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
         ok4 = (len(tren_dia) == 66

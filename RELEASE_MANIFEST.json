@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 181,
-  "total_bytes": 7920877,
-  "package_hash": "061b48ef6223594b4b0f7ba379ec8e838fbfe7e028b4555a51e8c6fee4e1de29",
-  "content_hash": "061b48ef6223594b4b0f7ba379ec8e838fbfe7e028b4555a51e8c6fee4e1de29",
+  "total_bytes": 7922638,
+  "package_hash": "742ebb0a2ac37a0f923bca0e5e53774ee69d37743542c08afc4bcfc5b32dfa04",
+  "content_hash": "742ebb0a2ac37a0f923bca0e5e53774ee69d37743542c08afc4bcfc5b32dfa04",
   "required_missing": [],
   "files": [
     {
@@ -713,13 +713,13 @@
     },
     {
       "path": "scripts/tl_core/command_registry.py",
-      "size": 182240,
-      "sha256": "dd1af3678d05e7285d7f70435e9122c2d57146651ea08f3b0e2be7af0f8ab60e"
+      "size": 182431,
+      "sha256": "648c425a10c9581d0e69aacdae3f4dbfb3efbe6b9bbf9d6da0992f999590ac9d"
     },
     {
       "path": "scripts/tl_core/command_registry_test.py",
-      "size": 6267,
-      "sha256": "b984e9d66a6ff56502b64ad159eeb87d64488d82b70bdb0f4f39a39097739773"
+      "size": 7564,
+      "sha256": "0423ffee9a028db66067d6287c3f4f8987045eae918fb7ff8b92e5734bcac4dd"
     },
     {
       "path": "scripts/tl_core/deterministic.py",
@@ -863,8 +863,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2118930,
-      "sha256": "5e8b16b6772868e0136bff2e4cbbc5180346b582d61a420f7f6b9ab6b3b941db"
+      "size": 2119203,
+      "sha256": "96ec4ceeb415afb9f190d6b4fa05f89ca5b3ad77b0e74cf165576f6c78e200a4"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",

@@ -7,8 +7,6 @@ Kiểm thử toàn diện:
 - Kiểm tra tính tất định, schema parser_tree_coverage.v1, cờ --strict và --unregistered-only
 """
 import argparse
-import json
-import os
 import sys
 from pathlib import Path
 import unittest
@@ -18,17 +16,13 @@ SCRIPTS_DIR = HERE.parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-import tl
 from tl import build_parser
 from tl_core.command_registry import (
     COMMAND_META,
     GENERATED_SPECS,
-    NESTED_COMMAND_META,
     all_command_meta,
     collect_parser_tree,
     compute_parser_coverage,
-    registry_summary,
-    validate_registry,
 )
 
 
@@ -68,19 +62,25 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         self.assertEqual(node_kw["depth"], 2)
         self.assertIn("--json", node_kw["options"])
 
+        # Kiểm tra help text được trích xuất
+        nodes_with_help = [n for n in tree if n["help"]]
+        self.assertGreater(len(nodes_with_help), 150)
+
     def test_compute_parser_coverage_schema_and_metrics(self):
         report = compute_parser_coverage(self.parser, strict=False)
         self.assertEqual(report["schema"], "parser_tree_coverage.v1")
         self.assertTrue(report["ok"])
 
         summary = report["summary"]
-        self.assertGreater(summary["total_nodes"], 190)
+        self.assertEqual(summary["total_nodes"], 198)
         self.assertEqual(summary["container_commands"], 2)
-        self.assertEqual(summary["total_leaf_commands"], summary["total_nodes"] - summary["container_commands"])
-        self.assertEqual(summary["registered_leaf_commands"], len(report["categories"]["covered"]))
-        self.assertEqual(summary["unregistered_leaf_commands"], len(report["categories"]["unregistered"]))
+        self.assertEqual(summary["total_leaf_commands"], 196)
+        self.assertEqual(summary["registered_leaf_commands"], 166)
+        self.assertEqual(summary["unregistered_leaf_commands"], 30)
         self.assertEqual(summary["registry_orphaned_commands"], 0)
-        self.assertGreaterEqual(summary["coverage_percent"], 80.0)
+        expected_pct = round(166 / 196 * 100, 2)
+        self.assertEqual(summary["coverage_percent"], expected_pct)
+        self.assertEqual(summary["coverage_percent"], 84.69)
 
         # 0 lệnh trong registry bị mồ côi (mọi metadata đều trỏ đến lệnh thật trong parser)
         self.assertEqual(report["categories"]["registry_not_in_parser"], [])
@@ -128,6 +128,7 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         tree = collect_parser_tree(mock_p)
         self.assertEqual(len(tree), 3)  # cmd_a, container_b, container_b sub1
         self.assertEqual([n["path"] for n in tree], ["cmd_a", "container_b", "container_b sub1"])
+        self.assertEqual(tree[0]["help"], "cmd a help")
 
         cov = compute_parser_coverage(mock_p)
         self.assertEqual(cov["summary"]["total_nodes"], 3)
@@ -136,6 +137,29 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         # Vì mock_p không nằm trong tl registry nên 2 leaf là unregistered
         self.assertEqual(cov["summary"]["unregistered_leaf_commands"], 2)
         self.assertIn("container_b sub1", cov["categories"]["high_risk_unregistered"])
+
+    def test_orphan_detection_strict_fail_closed(self):
+        # Phản chứng khoá nhánh orphan của strict mode (Finding F1)
+        mock_p = argparse.ArgumentParser(prog="test_tl")
+        subs = mock_p.add_subparsers(dest="cmd")
+        subs.add_parser("cmd_a")
+
+        # Mock module có cmd_a (khớp parser) VÀ cmd_orphan (không có trong parser)
+        class MockTLModule:
+            COMMAND_META = {
+                "cmd_a": {"read_only": True, "risk": "low"},
+                "cmd_orphan": {"read_only": True, "risk": "low"},
+            }
+
+        cov_non_strict = compute_parser_coverage(mock_p, tl_module=MockTLModule, strict=False)
+        self.assertTrue(cov_non_strict["ok"])
+        self.assertEqual(cov_non_strict["categories"]["unregistered"], [])
+        self.assertEqual(cov_non_strict["categories"]["registry_not_in_parser"], ["cmd_orphan"])
+        self.assertEqual(cov_non_strict["summary"]["registry_orphaned_commands"], 1)
+
+        # Khi strict=True: unregistered rỗng nhưng orphan > 0 => PHẢI fail-closed (ok=False)
+        cov_strict = compute_parser_coverage(mock_p, tl_module=MockTLModule, strict=True)
+        self.assertFalse(cov_strict["ok"])
 
 
 if __name__ == "__main__":

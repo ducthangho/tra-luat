@@ -2002,6 +2002,7 @@ def collect_parser_tree(parser) -> list[dict]:
     def _walk(p, prefix="", parent=None, depth=1):
         sub_actions = [a for a in p._actions if isinstance(a, argparse._SubParsersAction)]
         for sub_act in sub_actions:
+            helps = {ca.dest: ca.help for ca in getattr(sub_act, "_choices_actions", [])}
             for choice_name, sub_p in sorted(sub_act.choices.items()):
                 path = f"{prefix} {choice_name}".strip() if prefix else choice_name
                 child_subs = [a for a in sub_p._actions if isinstance(a, argparse._SubParsersAction)]
@@ -2010,9 +2011,7 @@ def collect_parser_tree(parser) -> list[dict]:
                 pos = sorted([a.dest for a in sub_p._actions if not isinstance(a, argparse._SubParsersAction) and not a.option_strings])
                 fn = sub_p.get_default("fn")
                 has_handler = fn is not None
-                help_text = (getattr(sub_p, "description", "") or "").strip()
-                if not help_text and hasattr(sub_p, "help"):
-                    help_text = (getattr(sub_p, "help", "") or "").strip()
+                help_text = (helps.get(choice_name) or getattr(sub_p, "description", "") or getattr(sub_p, "help", "") or "").strip()
                 nodes.append({
                     "path": path,
                     "name": choice_name,
@@ -2037,7 +2036,7 @@ def compute_parser_coverage(parser, tl_module=None, *, strict: bool = False, unr
     Schema: parser_tree_coverage.v1
     """
     tree = collect_parser_tree(parser)
-    meta = all_command_meta()
+    meta = getattr(tl_module, "COMMAND_META", all_command_meta()) if tl_module is not None else all_command_meta()
 
     containers = [n for n in tree if n["is_container"]]
     leaf_nodes = [n for n in tree if not n["is_container"]]
@@ -2071,15 +2070,15 @@ def compute_parser_coverage(parser, tl_module=None, *, strict: bool = False, unr
             "has_handler": node["has_handler"],
         }
         if m:
-            entry["risk"] = m["risk"]
-            entry["read_only"] = m["read_only"]
-            entry["write_scope"] = m["write_scope"]
-            entry["requires_confirm"] = m["requires_confirm"]
-            entry["supports_dry_run"] = m["supports_dry_run"]
-            entry["workflow_task"] = m["workflow_task"]
-            entry["idempotency_contract"] = m["idempotency_contract"]
-            entry["generated"] = m["generated"]
-            entry["module"] = m["module"]
+            entry["risk"] = m.get("risk", "low")
+            entry["read_only"] = m.get("read_only", True)
+            entry["write_scope"] = m.get("write_scope", "none")
+            entry["requires_confirm"] = m.get("requires_confirm", False)
+            entry["supports_dry_run"] = m.get("supports_dry_run", False)
+            entry["workflow_task"] = m.get("workflow_task", None)
+            entry["idempotency_contract"] = m.get("idempotency_contract", None)
+            entry["generated"] = m.get("generated", False)
+            entry["module"] = m.get("module", None)
         else:
             entry["risk"] = "unregistered"
             entry["read_only"] = None

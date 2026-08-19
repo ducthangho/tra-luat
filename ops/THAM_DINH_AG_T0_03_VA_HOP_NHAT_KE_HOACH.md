@@ -113,7 +113,7 @@ Hệ quả vận hành: **đừng đi tìm quyền.** Đổi đường.
 | đường | kết quả | dùng được? |
 |---|---|---|
 | `git` clone · fetch · **push tạo/cập nhật ref** | thông (credential riêng, ngoài sandbox) | **có** |
-| `git push --delete` ref · đẩy tag | 403 | không — phạm vi credential loại hai việc này |
+| `git push --delete` ref · đẩy tag | 403 | không qua git — **nhưng có đường khác, xem §1.6** |
 | REST `api.github.com` — `/user`, `/rate_limit` | 200 | có, nhưng vô dụng cho việc kho |
 | REST `api.github.com/repos/**`, `/search/**`, `/user/repos` | 403, 0 header | **không** — kể cả kho công khai |
 | `gh` (mọi lệnh theo kho) | 403 | không — nó đi đường REST ở trên |
@@ -121,8 +121,8 @@ Hệ quả vận hành: **đừng đi tìm quyền.** Đổi đường.
 
 **GitHub MCP là đường duy nhất chạm được dữ liệu kho.** Mặc định trả 44 công cụ; thêm
 header `X-MCP-Toolsets: all` mở lên **89** (có nhóm Actions: `actions_list`,
-`actions_run_trigger`, `get_job_logs`). Vẫn **không có** công cụ xoá ref/nhánh — đã kiểm
-cả 89.
+`actions_run_trigger`, `get_job_logs`). Không có công cụ xoá ref/nhánh **trực tiếp** —
+đã kiểm cả 89 — nhưng `actions_run_trigger` mở được đường **gián tiếp**, xem §1.6.
 
 ### 1.5 `GH_TOKEN` giả đang che credential thật
 
@@ -142,6 +142,83 @@ thì `gh api repos/...` vẫn 403, vì nó vẫn đi đường bị chặn ở �
 `launcher.py` đã ghi sẵn bẫy này (thứ tự `GH_TOKEN` → `GITHUB_TOKEN` → `GITHUB_PAT`),
 nhưng `doctor` chỉ báo `gh-kho=khong` — không nói ra rằng `gh` đang **đọc nhầm biến**.
 Đề xuất cho `PLAT-M4`: `doctor` khai thẳng độ dài và biến đang được dùng.
+
+### 1.6 CÓ đường xoá ref từ phiên cloud — đính chính §1.4
+
+**Bản trước của hồ sơ này kết luận sai** rằng phiên cloud không xoá được ref. Đúng phần
+*đường git*, sai phần *kết luận chung*: `git push --delete` bị chặn, nhưng kho **đã có
+sẵn** một đường khác, và phiên cloud **kích hoạt được nó**.
+
+#### Cơ chế
+
+`.github/workflows/ops-don-ref.yml` chạy trên runner GitHub với `GITHUB_TOKEN` —
+**không đi qua proxy egress**, nên nó có đúng quyền mà sandbox cố ý không cấp. Chú thích
+đầu tệp gọi nó là *đường sạch DUY NHẤT để một phiên web làm hai việc trên*.
+
+Cái còn thiếu trong hồ sơ trước là: **phiên cloud kích hoạt được workflow đó** bằng
+`actions_run_trigger` của GitHub MCP (chỉ hiện khi gửi header `X-MCP-Toolsets: all`).
+
+**Đã đo, không suy luận:**
+
+```
+actions_run_trigger  run_workflow  ops-don-ref.yml  ref=master  chi_thu=true
+  -> 204 No Content · "Workflow run has been queued"
+  -> run 32276889527 · completed / success
+```
+
+#### Cách dùng
+
+```
+workflow_id: ops-don-ref.yml      ref: master
+inputs:
+  hanh_dong : xoa-nhanh | xoa-tag | tao-tag
+  ref       : tên ref, KHÔNG tiền tố refs/heads; nhiều cái cách nhau dấu phẩy
+  xac_nhan  : XOA (hoặc TAO cho tao-tag) — sai một ký tự là dừng
+  chi_thu   : true (MẶC ĐỊNH, thử khô) — phải đặt false mới xoá thật
+  ly_do     : đi vào log
+```
+
+#### Nó TỪ CHỐI gì — và đó là thiết kế, không phải thiếu sót
+
+| vùng | xử lý |
+|---|---|
+| nhánh mặc định | `exit 2`; đo lúc chạy, không ghi cứng `master`; chặn cả `Master` khác hoa thường |
+| `ops/**` `claude/**` `codex/**` `agent/**` `mission/**` `dispatcher/**` | `exit 2` — *nhánh ở đây thường mang hồ sơ chưa vào master, xoá phải do người* |
+| `luu-tru/**` dạng NHÁNH | chỉ cho xoá **nếu còn tag giữ commit ấy**; đo bằng `repos/O/R/tags` (đã dereference) |
+| `luu-tru/**` dạng TAG | cấm tuyệt đối — tag là mỏ neo của verdict đã công bố |
+
+Nên: nhánh `fix/**`, `docs/**`, `probe-**`… **phiên cloud xoá được**; nhánh trong sáu
+vùng bảo vệ thì **vẫn phải do người**.
+
+#### Hai công cụ KHÔNG phải đường này
+
+- **`scripts/don-nhanh.ps1`** — dọn hàng loạt nhánh đã merge, tự đo mỗi lần chạy, bốn
+  lớp chốt (ancestor-of-master · danh sách giữ gồm cả **BASE** của PR đang mở · mặc định
+  dry-run · đối chiếu lại sau khi xoá). **Không chạy được ở phiên cloud**: cần `pwsh`
+  (không có trong ảnh) và `gh` theo đường kho (bị proxy chặn). Đây là công cụ máy local.
+- **`launcher.py`** — không dính gì tới xoá ref. `grep -niE 'xoa.?(ref|nhanh|tag)|delete|receive-pack|don-ref'`
+  trả **rỗng**. Nó lo vòng đời tiến trình và dò công cụ.
+
+#### Lỗ mà chính kho đã khai — chốt proxy KHÔNG kín
+
+Chú thích `ops-don-ref.yml` ghi thẳng: proxy chặn theo **HÌNH DẠNG** chứ không theo
+**HẬU QUẢ** — `git push --force` (ép lùi) **vẫn được phép**, mà ép lùi cũng làm commit
+thành không tra được y như xoá. Đo cùng ngày 16-08.
+
+Ghi ra để biết ranh giới thật, **không phải để dùng**. Ép lùi một nhánh chung là hành
+động phá hoại dù cổng có cho qua.
+
+Cùng họ, `don-nhanh.ps1` tự khai một lỗ khác: xoá nhánh đang là **BASE** của PR đang mở
+khiến GitHub **đóng luôn** các PR nhắm vào nó — mất cả review lẫn thảo luận, và không
+thao tác nào dựng lại được trạng thái mở ấy. Lớp *ancestor-of-master* **không** che ca
+này, vì một nhánh tích hợp có thể đã vào master trong khi vẫn còn PR mở nhắm vào nó.
+
+#### Bài học phương pháp
+
+Hồ sơ trước kết luận *không có đường* sau khi thử ba đường (git · REST · MCP trực tiếp).
+Ba lần thất bại không chứng minh **không tồn tại** — chúng chỉ chứng minh **ba đường đó**
+không đi được. Đường thứ tư đã nằm sẵn trong kho từ 16-08, kèm chú thích giải thích chính
+xác vì sao nó tồn tại. Cùng họ với bài học đã ghi ở §1.3: **đo đúng thứ mình đang hỏi.**
 
 ## 2. Thẩm định AG-T0-03: một lỗi làm hỏng đúng tính năng của chính packet
 
@@ -392,7 +469,8 @@ CÓ   .claude/dev/gate_lifecycle.py · gate_lifecycle_test.py
 3. **`fix/ag-t0-03-regression-guard` chưa land** — chờ review rồi human land trên
    exact SHA, đúng §12.
 
-4. **Nhánh `agent/ag-t0-03-parser-coverage` là nhánh mồ côi.** GitHub đã xoá nó khi
-   merge PR #175; một lượt push sau đó đã hồi sinh nó ở `83cd05a`. Nội dung không còn
-   giá trị (phần hữu ích đã nằm trong master + nhánh vá). Cần xoá bằng tay: proxy của
-   phiên remote CHẶN xoá ref (403) dù cho phép tạo/cập nhật.
+4. ~~**Nhánh `agent/ag-t0-03-parser-coverage` là nhánh mồ côi.**~~ **ĐÃ XONG** — người
+   giữ kho đã xoá tay ba nhánh (`agent/ag-t0-03-parser-coverage`,
+   `fix/ag-t0-03-regression-guard`, `ops/tham-dinh-ag-t0-03-hop-nhat-ke-hoach`), và đã
+   bật *Automatically delete head branches* nên từ nay nhánh đã merge tự dọn. Lưu ý:
+   tuỳ chọn đó **chỉ áp cho lần merge SAU**, không dọn ngược nhánh đã merge trước đó.

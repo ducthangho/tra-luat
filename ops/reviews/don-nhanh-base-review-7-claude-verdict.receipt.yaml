@@ -1,0 +1,171 @@
+# BIÊN NHẬN — cross-review lượt 7 của PR #150.
+#
+# ĐỌC DÒNG NÀY TRƯỚC MỌI DÒNG KHÁC: reviewer là `claude`, CÙNG nhà cung cấp với người vá.
+# `assurance: same_provider_approved`, KHÔNG phải `cross_approved`. §8 đòi cross-provider
+# cho phạm vi workflow và #150 sửa `.github/workflows/ci.yml`.
+# ⇒ Verdict này KHÔNG cấp điều kiện land. Xem caveat `same-provider-khong-du-land`.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: wp55
+lease_id: don-nhanh-base-review-7-claude-20260817
+provider: claude
+role: reviewer
+verdict: changes_requested
+assurance: same_provider_approved
+assurance_KHONG_dat: cross_approved
+cross_provider: false
+reviewed_sha: a66cad6940516fe339af83cac645e3ac15d8afae
+
+verdict_path: ops/reviews/don-nhanh-base-review-7-claude-verdict.md
+verdict_sha256: 8dfac88229b3bf11cd2640a96c6650dc7a3c89149ea78746721a2cc6f89244a0
+verdict_bytes: 16270
+verdict_nguon: 'scratchpad/runs/bbabdefa/stdout.log (launcher, ma_thoat=0, 1776.059s)'
+verdict_doi_chieu: '`diff -q` nguồn ↔ tệp đã chép: khớp từng byte'
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/a8c1d1dfe1eb5f493951d82a135bcfac82fa370a/ops/reviews/don-nhanh-base-review-7-claude-verdict.md
+
+published_first:
+  branch: ops/don-nhanh-giu-base-pr
+  commit: a8c1d1dfe1eb5f493951d82a135bcfac82fa370a
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_tag: null
+truy_xuat_ghi_chu: '#150 CHƯA land, chưa có tag.'
+
+sai_lech_giao_thuc:
+  dieu: '§8 — cross-provider bắt buộc cho phạm vi workflow'
+  ly_do: '`codex` hết quota'
+  ly_do_DO_duoc: >-
+    Khác các lượt trước ở chỗ lượt này ĐO chứ không nghe kể: `codex exec` chạm API và trả
+    `You've hit your usage limit … try again at Aug 20th, 2026 6:23 AM`. Auth CÒN SỐNG
+    (không phải lỗi đăng nhập), và có NGÀY VỀ cụ thể — tức đường cross-provider mở lại
+    2026-08-20. Ghi chú: lệnh ấy in ERROR mà thoát `rc=0`.
+  ai_chap_nhan: ducthangho
+  chap_nhan_luc: 'direct, in-session, 2026-08-17 ("Thực hiện bước tiếp theo khuyến nghị")'
+
+chot_read_only_DO_chu_khong_tin_co:
+  head_sau: a66cad6940516fe339af83cac645e3ac15d8afae
+  head_khop_neo: true
+  thay_doi_cay: 0
+  ghi_chu: 'Đo SAU khi tiến trình reviewer kết thúc; `status --porcelain` đúng một dòng `?? nhiem_vu.txt`.'
+
+xac_nhan_luot_truoc:
+  P1_luot_6: 'ĐÓNG — và đóng bằng đường TỐT HƠN đường lượt 6 gợi ý (xem dưới)'
+  muoi_dot_bien: 'B1-B4, A1-A4, J1-J2: mỗi con 20/21 đỏ t21 — khớp từng số người vá'
+  ba_lop_deu_co_rang_RIENG:
+    chot_argv: 'gỡ chốt + B1 ⇒ 21/21, B1 sống lại'
+    ceq: '`--STATE` giữ -ceq ⇒ 20/21 | hạ -eq ⇒ 21/21 sống'
+    NUL: 'J3 có NUL ⇒ 20/21 | hạ NUL ⇒ 21/21 sống | đối chứng hạ NUL không đột biến ⇒ 21/21'
+  diem_hong_don_cau_3: >-
+    S1 (không bao giờ gọi gh, vẫn rc=13) ⇒ 13/21, t21 chết đúng tại `Test-Path` — khớp y hệt
+    NOGH lượt 6 ⇒ KHÔNG có đường chết lặng trên mã MỚI.
+  ba_loi_nguoi_va_tu_bat: >-
+    Reviewer XÁC NHẬN cả ba bằng HÀNH VI chứ không grep chuỗi — kể cả dựng lại bản printf
+    hai-gạch để thấy `t21` ĐỎ THƯỜNG TRỰC với đúng thông điệp "1 doi so, hop dong doi 8",
+    và chồng B1 lên vẫn 20/21 (bảng nhìn y hệt đang chạy đúng, chỉ baseline lộ).
+
+finding_1:
+  muc: P2
+  id: C1-loi-goi-TRANG-TRI-xoa-dau-vet
+  noi_dung: >-
+    `argv.txt` ghi bằng `>` (ĐÈ). Đột biến C1: lời gọi THẬT đổi `--state closed` và kết quả
+    của nó ĐƯỢC DÙNG, rồi thêm một lời gọi thứ hai ĐÚNG hợp đồng ngay sau, vứt kết quả.
+    Suite 21/21 SỐNG. Chốt đang đo LỜI GỌI CUỐI chứ không đo lời gọi mà kết quả được dùng.
+  khong_phai_hoi_quy: 'Bản `-contains` cũ mù y hệt.'
+  ghi_chu_sac: >-
+    Lượt 6 khai "ghi `>` vô hại hôm nay vì script hỏi đúng 1 lần/lượt". Reviewer chỉ ra:
+    "đúng 1 lần" là thuộc tính KHÔNG CÓ CHỐT NÀO CANH — và kẻ đột biến chính là người thêm
+    lời gọi thứ hai. Đo lại ở HEAD: vẫn 1 lời gọi/lượt (19/19), 0 rác ⇒ chưa chảy máu,
+    nhưng chốt không đóng nó.
+  duong_va_re_nhat: '`>` → `>>`: phép đếm sẵn có tự thành chốt "đúng một lời gọi" (2 lời gọi ⇒ 16 ≠ 8).'
+  da_va: true
+
+finding_2:
+  muc: P2
+  id: C2-ENV-doi-doi-tuong-truy-van
+  noi_dung: >-
+    Đột biến C2 chèn `$env:GH_REPO = 'x/y'` ngay trước lời gọi. Suite 21/21 SỐNG, argv.txt
+    vẫn ĐÚNG 8 đối số hợp đồng. Trên `gh` thật `GH_REPO` override repo suy từ remote ⇒
+    `pr list` trả PR của repo KHÁC ⇒ cùng hậu quả B3 nhưng KHÔNG token nào đổi, nên phép so
+    nguyên câu hoàn hảo đến đâu cũng mù. `GH_HOST` cùng lớp.
+  bai_hoc: >-
+    Chốt tự mô tả là đo "CÂU HỎI được gửi đi", nhưng nó đo đúng MỘT KÊNH của câu hỏi.
+    Câu hỏi thật = argv CỘNG env (và cwd, và config).
+  reviewer_noi_thang_ve_duong_va: >-
+    Vá theo TÊN BIẾN là danh-sách-cấm — doctrine kho đã ghi danh sách cấm không bao giờ đủ
+    (`GH_TOKEN` đổi danh tính, `XDG_CONFIG_HOME` tráo config…). Reviewer nói rõ
+    "khai TOÀN BỘ thành nợ cũng là kết cục HỢP LỆ" và "quyết là của người vá".
+  da_va: false
+  ly_do_chua_va: 'Là lựa chọn kiến trúc — đã nêu để chủ kho quyết, xem `viec_cho_chu_kho`.'
+
+finding_3:
+  muc: P3
+  id: loi-khai-lech-TANG-trong-chu-thich
+  noi_dung: >-
+    Chú thích do CHÍNH người vá viết ở lượt trước khai `"\\0"` "đi thẳng ra tệp thành HAI
+    ký tự". ĐO: ra TỆP SCRIPT là BA ký tự (`\` `\` `0` — PowerShell không escape backslash
+    nên `"\\0".Length` = 3, `Set-Content` ghi y nguyên); chỉ SAU khi `printf` co `\\`→`\`
+    thì BẢN GHI `argv.txt` mới còn hai ký tự.
+  vi_sao_dang_ke: >-
+    Câu văn gán số đếm của TẦNG BẢN GHI cho TẦNG TỆP SCRIPT. Ai debug bằng `od` đúng tệp mà
+    câu chỉ vào sẽ thấy 3 ≠ 2 — ngay tại chỗ chú thích đang dạy bài học đếm ký tự. Đúng lớp
+    lỗi kho đã cháy BỐN lần, và lần này người mắc là người vừa viết ba đoạn cảnh báo về nó.
+  co_che_tong_van_DUNG: 'printf in literal ⇒ chốt đo "1 đối số" ⇒ t21 đỏ thường trực — reviewer xác nhận.'
+  da_va: true
+
+windows_reviewer_ket_luan_DOC_LAP:
+  ket_luan: 'KHÔNG ĐỔI — nợ CÓ SẴN, KHÔNG phải do bản vá.'
+  ba_bang_chung_hai_loai:
+  - 'tĩnh: `git show 99e9383:…` xác nhận `#!/bin/sh` + `chmod +x` + `printf` đã có sẵn; mọi dòng PowerShell MỚI (`ReadAllText`/`-split`/`-SkipLast`) là .NET thuần, chạy được cả hai nền'
+  - 'CI: windows-latest 3/21, 18 ca đỏ cùng `THIEU git tren PATH` rc=12 — chết tại `don-nhanh.ps1:128`, TRƯỚC cả `Dung-Gh-Gia` lẫn khối argv ⇒ phần bản vá đổi KHÔNG BAO GIỜ chạy tới trên Windows'
+  - 'diff: dòng PATH cứng `/usr/bin:/bin` trong `Chay-KichBan` — thủ phạm — KHÔNG nằm trong diff'
+  suy_ra_3_ca_dat: >-
+    t4/t8/t9 — ba ca duy nhất không kiểm `rc`, chỉ đòi "nhánh còn"; script chết sớm nên
+    không xoá gì nên chúng xanh. Đúng nghĩa "ca có MẶT khác ca có ĐO". (Reviewer khai đây là
+    SUY LUẬN từ mã + thông điệp lỗi, không phải log từng ca.)
+  he_qua_land: 'master chạy CẢ HAI nền ⇒ merge nguyên trạng thì gate master ĐỎ ở windows.'
+
+verdict_usage_caveats:
+- id: same-provider-khong-du-land
+  noi_dung: >-
+    Reviewer là `claude`, CÙNG nhà cung cấp với người vá. §8 nói mức ấy MỘT MÌNH không thay
+    mức assurance bắt buộc cho phạm vi workflow, và #150 sửa `.github/workflows/ci.yml`.
+    **Đừng đọc verdict này thành điều kiện land.** Đường cross-provider mở lại
+    **2026-08-20 06:23** (đo được từ chính `codex`). Uỷ quyền
+    `ops/uy-quyen-150-same-provider-20260817.yaml` neo `05568de` đã HẾT HIỆU LỰC (§9).
+- id: hai-finding-P2-CON-MO-khi-doc-verdict-nay
+  noi_dung: >-
+    Verdict liệt kê C1 và C2 là đột biến SỐNG. **C1 đã được vá NGAY SAU** (`>` → `>>`), nên
+    chạy lại C1 trên HEAD nhánh sẽ thấy nó **CHẾT** — đó là bằng chứng bản vá chạy, KHÔNG
+    phải verdict sai. **C2 (`GH_REPO`) CÒN MỞ, cố ý chưa vá** — đừng đọc verdict này thành
+    "đã đóng hết". Muốn tái hiện đúng verdict thì
+    `git worktree add --detach <đích> a66cad69…` rồi đo ở đó.
+- id: windows-3-tren-21-va-so-do-neo-theo-INDEX
+  noi_dung: >-
+    Bộ test này **3/21 trên `windows-latest`** (run 32060230138) — nợ CÓ SẴN, không do bản
+    vá, nhưng **merge #150 nguyên trạng sẽ làm gate `master` ĐỎ** vì master chạy cả hai nền.
+    Nguyên nhân gốc: `Chay-KichBan` ghim cứng `/usr/bin` và `/bin` vào PATH (dấu phân cách
+    thì lại dùng `[IO.Path]::PathSeparator` — port MỘT NỬA). Ngoài ra `scanned=425` của
+    `eol` neo theo INDEX lúc đo, không theo mã — đừng đọc số khác thành hồi quy.
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-17T20:20:00Z'
+
+viec_cho_chu_kho:
+- 'Finding 2 (`GH_REPO`): vá theo tên biến (danh-sách-cấm) hay khai thành nợ? Reviewer nói cả hai đều hợp lệ.'
+- 'Windows 3/21: vá cho chạy được trên Windows, hay tắt bước ấy trên Windows và khai nợ? Lưu ý `don-nhanh.ps1` vốn là script CHO Windows.'
+- 'Uỷ quyền land MỚI neo SHA cuối, nếu muốn land bằng same_provider — hoặc chờ 2026-08-20 để có cross-provider thật.'
+
+receipt_khong_khai:
+- 'Không khai lượt này tương đương một lượt cross-provider. Nó KHÔNG.'
+- 'Không khai `evidence_url` là bền: #150 chưa land, chưa có tag.'
+- 'Không khai Finding 2 đã đóng — nó CHƯA.'
+- 'Không khai Windows đã đóng — nó CHƯA, và nó CHẶN land.'
+- >-
+  Không khai bản vá C1/F3 (viết SAU verdict này) đã được ai review. Nó chưa — và người
+  viết nó chính là người ghi biên nhận này.

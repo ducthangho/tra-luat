@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 180,
-  "total_bytes": 7903417,
-  "package_hash": "8343c34a4f3caeda306e5fb4ce89c71ad3b9a631fddfff1bcca4f1a0ff13f30b",
-  "content_hash": "8343c34a4f3caeda306e5fb4ce89c71ad3b9a631fddfff1bcca4f1a0ff13f30b",
+  "total_bytes": 7903439,
+  "package_hash": "d874c2af71bc4ac1a69206527565517822012652575222e695503f1d3457d084",
+  "content_hash": "d874c2af71bc4ac1a69206527565517822012652575222e695503f1d3457d084",
   "required_missing": [],
   "files": [
     {
@@ -808,8 +808,8 @@
     },
     {
       "path": "scripts/tl_core/release.py",
-      "size": 83163,
-      "sha256": "1129d2379d831295e32ff9d301168167f991ef9dded31e061f0f2900d1216267"
+      "size": 83185,
+      "sha256": "a76349456d14d5186d03fd0a13877bea610e57b69f0b1c100850f2dcbc2a4f9d"
     },
     {
       "path": "scripts/tl_core/resolve.py",

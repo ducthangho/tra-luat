@@ -129,6 +129,47 @@ jobs:
         run: python -m pip install --quiet PyYAML==6.0.3
       - name: lease-publish selftest (cổng đăng lease)
         run: python ops/lease_publish_test.py
+      # `don-nhanh.ps1` XOÁ NHÁNH REMOTE — thao tác không hoàn tác được ở phía PR: xoá
+      # nhầm một nhánh đang là BASE của PR đang mở thì GitHub ĐÓNG các PR ấy, và tạo lại
+      # nhánh không mở lại chúng. Bộ này khoá đúng chỗ đó, cộng chốt fail-close khi không
+      # đọc được danh sách PR.
+      #
+      # VÌ SAO NỐI VÀO CI: script này land ngày 17-08 KHÔNG có phản chứng nào, và cùng
+      # ngày lộ ra một lỗ (base) mà không phép đo tự động nào bắt được. Cùng bài học với
+      # `eol-policy` ngay dưới — guard không nối vào đường TỰ ĐỘNG thì guard chỉ là tài liệu.
+      #
+      # CHỈ CHẠY TRÊN LINUX — và đây là một lời KHAI NỢ, không phải một lựa chọn thiết kế.
+      #
+      # Bản đầu của bước này khai "Chạy trên CẢ ubuntu lẫn windows: cả lớp hỏng của script
+      # này là lớp hỏng theo NỀN". Câu ấy MÔ TẢ Ý ĐỊNH, không mô tả thực tế, và không ai đo
+      # nó: bộ test + bước CI này CHỈ có trên nhánh của #150 (master không có cả hai), mà
+      # PR thường chỉ chạy `ubuntu` ⇒ nó CHƯA TỪNG chạy trên Windows. Lần đo Windows đầu
+      # tiên là một `workflow_dispatch` gọi tay trước khi merge, và kết quả là:
+      #
+      #     windows-latest ⇒ `don-nhanh: 3/21 dat`   (run 32060230138, head a66cad69)
+      #     ubuntu-latest  ⇒ `don-nhanh: 21/21 dat`  (cùng run)
+      #
+      # 18 ca đỏ cùng một thông điệp `THIEU git tren PATH.` rc=12. Nguyên nhân gốc nằm
+      # trong `Chay-KichBan` của bộ test: nó dựng lại PATH thành `<gh-giả>;/usr/bin;/bin`
+      # — dùng `[IO.Path]::PathSeparator` nên DẤU PHÂN CÁCH đúng nền, nhưng ĐƯỜNG DẪN thì
+      # ghim cứng POSIX. Port MỘT NỬA, nên đọc lướt thì nó *trông* đã cross-platform.
+      # Còn một blocker thứ hai nằm xa hơn, chưa lượt chạy nào chạm tới: `gh` giả là script
+      # `#!/bin/sh` cài bằng `chmod +x` — trên Windows không có `chmod`, và tệp không phần
+      # mở rộng không chạy được qua `PATH` (`PATHEXT`).
+      #
+      # VÌ SAO CHẶN Ở ĐÂY thay vì vá ngay: master chạy CẢ HAI nền, nên để nguyên là đẩy
+      # một cổng ĐỎ vào master; còn port bộ giả sang Windows là thay đổi lớn, phải có lượt
+      # review riêng (và §8 đòi cross-provider cho phạm vi workflow). Giữa "cổng đỏ" và
+      # "cổng khai đúng phạm vi mình phủ", chọn cái thứ hai — nhưng KHÔNG được đọc nó thành
+      # "đã phủ Windows".
+      #
+      # NỢ CÓ TÊN: `don-nhanh-test-chua-chay-duoc-tren-windows`. Đáng trả, vì `don-nhanh.ps1`
+      # vốn là script CHO Windows (có `don-nhanh.cmd` đi kèm) — tức hiện tại thứ duy nhất
+      # KHÔNG được đo lại chính là nền nó chạy thật.
+      - name: don-nhanh selftest (chốt xoá nhánh)
+        if: runner.os != 'Windows'
+        shell: pwsh
+        run: pwsh -NoProfile -File scripts/don-nhanh_test.ps1
       # Cùng doctrine với bước ngay trên và với hai bước eol/pre-push: guard không nối
       # vào đường TỰ ĐỘNG thì guard chỉ là tài liệu (bài học r225).
       # `gate_lifecycle.py` là cơ chế dev-side chống chạy trùng gate + ghi/validate

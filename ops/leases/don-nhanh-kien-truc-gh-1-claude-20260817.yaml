@@ -1,0 +1,131 @@
+# Lease XÉT LẠI KIẾN TRÚC — cách `don-nhanh.ps1` đọc danh sách PR đang mở.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên #55 chỉ là bản chiếu.
+#
+# ĐÂY KHÔNG PHẢI LƯỢT DUYỆT. Nó không cấp điều kiện land cho #150 và không thay thế lượt
+# cross-review `codex` mà §8 đòi cho phạm vi workflow. Nó trả lời đúng MỘT câu thiết kế:
+# cách đọc `gh` có nên đổi kiến trúc không.
+#
+# VÌ SAO CÓ LƯỢT NÀY — ĐẾM HÌNH DẠNG LỖI, KHÔNG ĐẾM LỖI.
+# Ba lượt cross-review liên tiếp, ba finding, CÙNG MỘT HÀM:
+#   lượt 1 (codex): `gh` thoát khác 0 mà in JSON hợp lệ ⇒ fail-close mở toang, XOÁ THẬT
+#   lượt 2 (codex): `2>&1` trộn stderr vào JSON ⇒ thao tác hợp lệ bị TỪ CHỐI OAN
+#   lượt 3 (claude): đếm SỐ DÒNG THÔ thay vì NỘI DUNG ĐÃ TÁCH ⇒ đột biến sống sót
+# Không cái nào là lỗi NGHIỆP VỤ. Cả ba ở KÊNH ĐỌC ĐẦU RA CỦA TIẾN TRÌNH CON.
+# `CLAUDE.md`: "cùng một hình dạng lặp ba lần trở lên thì câu hỏi đúng là 'có nên làm việc
+# này không', không phải 'vá thế nào'". Ba lần rồi — đây là lượt đặt câu hỏi ấy.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 55
+packet_id: wp55
+lease_id: don-nhanh-kien-truc-gh-1-claude-20260817
+role: reviewer
+loai_luot: xet_lai_kien_truc
+provider: claude
+reviewer: claude
+executor: claude
+
+cross_provider: false
+sai_lech_giao_thuc: true
+sai_lech_dieu: '§8 — cross-provider bắt buộc cho phạm vi workflow'
+sai_lech_ly_do: '`codex` sắp hết quota'
+sai_lech_ai_chap_nhan: ducthangho
+sai_lech_chap_nhan_luc: 'direct, in-session, 2026-08-17'
+assurance_target: same_provider_approved
+assurance_KHONG_dat: cross_approved
+khong_cap_dieu_kien_land: true
+assurance_ghi_chu: >-
+  Lượt này KHÔNG cấp điều kiện land cho #150 và KHÔNG thay lượt cross-review `codex` mà §8
+  đòi. Nó là đầu vào THIẾT KẾ. Kể cả kết luận "giữ nguyên" cũng không làm #150 đủ điều kiện.
+
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: bfeedfc4435efde13b81e4370c84f97a5d5afc19
+branch: ops/don-nhanh-giu-base-pr
+base_sha: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+target_pull_request: 150
+
+prompt_path: ops/prompts/don-nhanh-kien-truc-gh-1-claude-20260817.md
+prompt_sha256_required: 50921e2b34a95891c7544bee05ea1de41ba00dc3b8b274fbf78ac3bc3151ec58
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-17 ("mở lượt xét lại kiến trúc đọc gh đi, thử dùng Github MCP
+  như trong launcher.py xem có xử lý được không")
+recorded_by: claude-session
+recorder_cung_la_nguoi_va: true
+
+leased_at_utc: '2026-08-17T14:45:00Z'
+lease_expires_at_utc: '2026-08-18T14:45:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 0
+
+# ---- PHÉP ĐO NGƯỜI VÁ ĐÃ CHẠY, để reviewer khỏi phải dựng lại từ đầu ----
+do_ba_duong_17_08:
+  moi_truong: 'container Claude Code web; `GITHUB_PAT` dài 93; `gh` KHÔNG có'
+  rest_rate_limit: 'HTTP 200, 4 header X-GitHub-* ⇒ tới GitHub thật'
+  rest_repo: 'HTTP 403, 0 header X-GitHub-* ⇒ proxy container TỰ SINH, chưa từng tới GitHub'
+  rest_pulls: 'HTTP 403, 0 header X-GitHub-*, thân "GitHub access is not enabled for this session"'
+  mcp_initialize: 'POST https://api.githubcopilot.com/mcp/ ⇒ HTTP 200, có Mcp-Session-Id'
+  mcp_list_pull_requests: 'tools/call ⇒ 11 PR, ĐỦ cả `head.ref` lẫn `base.ref` — tức MCP LÀM ĐƯỢC việc script cần'
+  ket_luan_tho: >-
+    MCP xử lý được ngay trong container, nơi `gh` vắng mặt và REST-tới-kho bị chặn. Nhưng
+    đó là kết luận về CONTAINER, không phải về máy người dùng — xem mục kiểm 1.
+
+muc_kiem:
+- id: bat-doi-xung-moi-truong
+  note: >-
+    CÂU DỄ KẾT LUẬN SAI NHẤT. `don-nhanh.ps1` chạy trên máy WINDOWS của chủ kho, không chạy
+    trong container. 403 ở trên là chính sách proxy CỦA CONTAINER. Phương án tốt nhất cho
+    máy người dùng và cho CI có thể KHÁC NHAU — chọn theo nơi script THẬT SỰ chạy.
+- id: mcp-bot-lop-hay-doi-lop
+  note: >-
+    Đếm lớp giải mã: MCP = HTTP → SSE (`data:`) → `content[0].text` (chuỗi) → JSON = BA lớp,
+    cộng bắt tay `initialize` + `Mcp-Session-Id`. `gh pr list --json` = MỘT lớp. Nhiều lớp
+    hơn thì nó DỜI chỗ hỏng chứ không ĐÓNG lớp hỏng.
+- id: isError-vang-mat
+  note: >-
+    Lời gọi thành công trả `isError: None` — trường VẮNG MẶT. `if ($r.isError)` đọc "vắng"
+    thành "không lỗi", ĐÚNG lớp lỗi của lượt 1 (`rc=0` nói dối) và đúng doctrine `None ≠
+    False`. Phương án C có TÁI TẠO chính lớp lỗi nó được đề xuất để chữa không?
+- id: ranh-gioi-credential
+  note: >-
+    Hiện script KHÔNG đọc token nào — nó dựa vào `gh` đã đăng nhập. B và C đều đòi token
+    trong môi trường của một script XOÁ NHÁNH. Cân bằng lợi/hại bằng phạm vi quyền cụ thể.
+- id: fail-close-con-giu-duoc-khong
+  note: >-
+    "Không đọc được ⇒ TỪ CHỐI XOÁ (rc=13)" là bất biến. Với B/C, "không đọc được" có bao
+    nhiêu hình dạng MỚI (timeout, 5xx, SSE đứt, session hết hạn, PHÂN TRANG thiếu)? Một hình
+    dạng rơi vào nhánh "coi như không có PR" là lỗ y hệt lượt 1.
+- id: giu-nguyen-la-ket-luan-hop-le
+  note: >-
+    Đừng đề xuất đổi chỉ vì lượt này TÊN LÀ "xét lại kiến trúc" — đó là thiên kiến của chính
+    khung câu hỏi. Nhưng nếu giữ `gh` thì phải nêu HÌNH DẠNG THỨ TƯ đã tìm và loại trừ được,
+    để kết luận có răng.
+
+rang_buoc_cho_moi_de_xuat:
+- 'Chạy được trên Windows PowerShell 5.1 LẪN pwsh 7+ (5.1 là đường lùi và CHƯA được kiểm).'
+- 'Không làm mất bất biến fail-close.'
+- 'Nêu bộ test đi kèm trông thế nào — phương án khó dựng đồ giả TRẠNG THÁI hơn thì ĐẮT hơn.'
+- 'Nếu đổi: nêu đường di trú, và nói rõ có làm hỏng `-BoQuaLopPR` / bảng mã thoát `.cmd` không.'
+
+no_da_khai_KHONG_neu_lai:
+- id: bo-qua-lop-pr-khong-kiem-gi
+- id: hai-duong-se-troi-lech
+- id: tl-selftest-khong-do-duoc
+- id: lease-khong-nam-trong-cay-duoc-review
+  note: 'Chữa tạm: prompt nêu đích danh lệnh `git show origin/<nhánh>:...`. Chữa gốc chưa làm.'
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-17T14:40:50Z'
+master_sha_at_grant: 1a6aedf6b92ff271bf07a8b9deee2f83d430ed49
+lease_song_khac_luc_cap: 'Lease lượt 1, 2, 3 của #150 đã đóng. Không có lease review nào khác đang mở.'
+canh_bao_moi_truong_luc_cap: >-
+  Thiếu `pwsh` thì khai KHÔNG ĐO ĐƯỢC. `/dev/shm` bị xoá khi phiên khởi động lại — người vá
+  đã mất `pwsh` giữa chừng và một lượt đo trả rc=127 với đầu ra RỖNG, trông y hệt "chạy xong
+  sạch". Kiểm công cụ có mặt TRƯỚC khi đọc bất kỳ con số nào.
+posted_comment_id: 5317137609   # workflow ghi, ĐỪNG sửa tay

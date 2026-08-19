@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 180,
-  "total_bytes": 7915463,
-  "package_hash": "313ac90bcabcfc0eb18f542109d2323fdb968464e6b1c4db5641254125623b9e",
-  "content_hash": "313ac90bcabcfc0eb18f542109d2323fdb968464e6b1c4db5641254125623b9e",
+  "total_bytes": 7915549,
+  "package_hash": "cfded077fe397a1f3aa40834149599db59f302bae7d0b9529208808b11055d4e",
+  "content_hash": "cfded077fe397a1f3aa40834149599db59f302bae7d0b9529208808b11055d4e",
   "required_missing": [],
   "files": [
     {
@@ -713,8 +713,8 @@
     },
     {
       "path": "scripts/tl_core/command_registry.py",
-      "size": 182555,
-      "sha256": "46d0b917531afcb4d44bf7485eb026737f93972e2e33d2f7f19a2ec57dd99fe9"
+      "size": 182641,
+      "sha256": "fc6b6d00265966e2b04b9f19e4184004318080fba7e3c8e292429f6c1b6c94c2"
     },
     {
       "path": "scripts/tl_core/deterministic.py",

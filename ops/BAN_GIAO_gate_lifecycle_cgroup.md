@@ -3,13 +3,27 @@
 Đọc tệp này TRƯỚC khi làm gì. Nó là **bản chiếu**; nguồn có thẩm quyền vẫn là
 lịch sử git, `ops/NO_KY_THUAT.md`, và comment trên PR.
 
-Viết lúc PR sổ-nợ vòng 3 (`ops/so-no-vong-3`) **chưa merge**; mọi thứ khác đã ở
-trên master.
+Cập nhật 18-08-2026 11:50Z trên `4262de4`. PR sổ-nợ vòng 3 (#162) **đã merge**
+(`6d17c1b`, approved lượt 4 tại đúng sha ấy).
 
 ## 0. Việc còn lại, đúng một câu
 
-Merge PR sổ-nợ vòng 3, rồi xử sổ nợ `ops/NO_KY_THUAT.md` (còn 6 mục) — **không
-mở vòng vá thứ n cho lớp cách ly tiến trình**, xem §4.
+Xử sổ nợ `ops/NO_KY_THUAT.md` (nay **7 mục mở**: 1,2,3,5,6,7,8 — mục 4 do phiên
+khác mở lại và đóng lại rộng hơn) — **không mở vòng vá thứ n cho lớp cách ly
+tiến trình**, xem §4.
+
+### Cảnh báo cho người đọc tệp này
+
+Master chạy rất nhanh: **113 commit trong 9 giờ** sau khi #162 merge, từ nhiều
+phiên song song. Hệ quả đã đo:
+
+- **Con số ở §3 là ảnh chụp có ngày**, không phải hằng số — bản trước sai cả số
+  lẫn định dạng chỉ sau một ngày (PR #157 đổi headline gate).
+- **Dẫn theo số dòng thì mục ngay** — năm dẫn của #162 hỏng hết trong cùng ngày;
+  đó là **mục 8** sổ nợ, và tệp này nay dẫn bằng ký hiệu + lệnh tìm.
+
+Gặp số lệch thì `git log --oneline <ngày ghi>..HEAD -- .claude/dev/` TRƯỚC, đừng
+đi tìm hồi quy.
 
 ## 1. Đã land gì (đừng làm lại)
 
@@ -30,9 +44,13 @@ khai thẳng trong mã, đừng lặng lẽ bỏ dòng khai ấy).
   `python .claude/dev/launcher.py chuan-bi`, kiểm bằng `codex login status`.
 - **`codex` BẮT BUỘC ở phiên remote và mặc định — thiếu là `doctor` THOÁT 12.**
   Bảng `CONG_CU` ghi `{"ten": "codex", "bat_buoc": {"mac_dinh": True,
-  "remote": True, "ci": False}}` (`launcher.py:1604-1607`) và phép giải hạng
-  đọc `GITHUB_ACTIONS`/`CI` → `bb["ci"]`, `CLAUDE_CODE_REMOTE` → `bb["remote"]`,
-  còn lại → `bb["mac_dinh"]` (`launcher.py:1766-1780`). Nên: **chỉ CI** mới hạ
+  "remote": True, "ci": False}}` (tìm:
+  `grep -n '"ten": "codex", "bat_buoc"' .claude/dev/launcher.py`) và phép giải
+  hạng đọc `GITHUB_ACTIONS`/`CI` → `bb.get("ci", bb["mac_dinh"])`,
+  `CLAUDE_CODE_REMOTE` → `bb["remote"]`, còn lại → `bb["mac_dinh"]` (tìm:
+  `grep -n 'def _bat_buoc' .claude/dev/launcher.py`).
+  **Dẫn bằng ký hiệu, không bằng số dòng** — hai dẫn số dòng cũ ở đây hỏng
+  trong vòng một ngày; xem mục 8 sổ nợ. Nên: **chỉ CI** mới hạ
   `codex` xuống tuỳ chọn (in `khong codex`, thoát 0); phiên remote/mặc định in
   `THIEU codex` và **thoát 12**. Bản trước của tệp này viết ngược lại — mục 7 sổ
   nợ ngay trong PR ấy nói đúng, còn dòng bàn giao thì sai.
@@ -63,30 +81,45 @@ khai thẳng trong mã, đừng lặng lẽ bỏ dòng khai ấy).
 ## 3. Chạy tại chỗ
 
 Chép **cả phần bỏ qua**, đừng rút về mẫu số chung — bộ chạy cố ý tách
-`qua`/`bo qua`/`hong` ra, và mục 4 sổ nợ vừa đóng CHÍNH VÌ lỗi nuốt phần ấy:
+`qua`/`bo qua`/`hong` ra, và mục 4 sổ nợ tồn tại CHÍNH VÌ lỗi nuốt phần ấy.
+
+**Con số dưới đây là ẢNH CHỤP, không phải hằng số** — ghi kèm nền và ngày theo
+đúng đòi hỏi của mục 4 sổ nợ. Đo **ubuntu, 18-08-2026, trên `4262de4`**, máy
+**cấp được cgroup**:
 
 ```
 python .claude/dev/gate_lifecycle_test.py
-#   26/26 ca (qua 26, bo qua 0, hong 0)          [máy cấp được cgroup]
+#   28/28 ca QUA (bo qua 0, hong 0)              [may cap duoc cgroup]
 TL_GATE_TAT_CGROUP=1 python .claude/dev/gate_lifecycle_test.py
-#   26/26 ca (qua 24, bo qua 2, hong 0)          (giả lập macOS — hai ca cgroup TỰ BỎ QUA)
+#   26/28 ca QUA (bo qua 2, hong 0) - KHONG DU   (gia lap macOS)
 python scripts/tl.py --selftest                  # 1697/1697
 python .claude/dev/launcher_test.py
-#   118/119 ca QUA (bo qua 1, hong 0) - KHONG DU
+#   127/128 ca QUA (bo qua 1, hong 0) - KHONG DU
 python .claude/dev/launcher_test.py --dot-bien
 #   DOT BIEN: 94/94 dat  (1 khong do duoc tren nen nay)
-python .claude/dev/packet_loop.py doctrine-scan --root .       # sạch
+python .claude/dev/packet_loop.py doctrine-scan --root .       # sach
 ```
 
-Hai dòng `26/26` KHÔNG cùng nghĩa: lượt sau **chưa đo gì về lớp cgroup**, hai ca
-`case_gate_dat_ma_bo_lai_daemon_van_bi_don_va_khai` và
+**Bản trước của tệp này ghi `26/26 ca (qua 26, …)` và `118/119` — nay SAI cả
+số lẫn ĐỊNH DẠNG.** PR #157 (merge 18-08) đổi headline gate từ
+`N/N ca (qua X, bo qua Y, hong Z)` sang `N/N ca QUA (bo qua Y, hong Z)` và thêm
+hai ca (26 → 28); `launcher_test` lên 128 ca. Không phải hồi quy — là bản sửa
+đúng khuôn mục 4. Bài học: **so hình dạng và phần bỏ qua trước, đừng so con số
+tuyệt đối với một tệp bàn giao có thể đã cũ.** Nếu số bạn đo lệch bảng trên,
+việc đầu tiên là `git log --oneline <ngày ghi>..HEAD -- .claude/dev/`, không
+phải đi tìm hồi quy.
+
+Hai lượt gate KHÔNG cùng nghĩa: lượt `TL_GATE_TAT_CGROUP=1` **chưa đo gì về lớp
+cgroup**, hai ca `case_gate_dat_ma_bo_lai_daemon_van_bi_don_va_khai` và
 `case_tien_trinh_trong_cgroup_con_khong_duoc_bo_sot` tự bỏ qua. Bộ chạy in
 `[cach-ly] CO CHE THAT SU : ...` trước dòng tổng — **đọc dòng ấy trước con số**.
 
-`118/119` chỉ đúng khi **đã cài `codex`**; thiếu nó thì `t53_doctor_bao_du_khi_du`
-đỏ tất định (`doctor` thoát 12, xem mục 2) ⇒ `117/119 ... hong 1`. Chữ ký ấy
-TRÙNG với flake `t53` ở mục 7 sổ nợ — `command -v codex` trước khi kết luận.
-Còn `- KHONG DU` ở đuôi là bộ chạy tự khai 1 ca bỏ qua (`t62` là fixture Windows),
+Dòng launcher chỉ xanh khi **đã cài `codex`**; thiếu nó thì
+`t53_doctor_bao_du_khi_du` đỏ tất định (`doctor` thoát 12, xem mục 2) ⇒ tụt một
+ca thành `hong 1`. Chữ ký ấy TRÙNG với flake `t53` ở mục 7 sổ nợ —
+`command -v codex` trước khi kết luận đã tái hiện được flake.
+
+`- KHONG DU` ở đuôi là bộ chạy tự khai còn ca bỏ qua (`t62` là fixture Windows),
 không phải lời than — cũng như `(1 khong do duoc tren nen nay)` ở dòng đột biến.
 **Chép cả cái đuôi ấy.** Rút `94/94` trần ra là lại giấu đúng thứ nó cố khai.
 
@@ -152,6 +185,7 @@ trước còn liệt `ops/gate-lifecycle` sau khi nó đã bị xoá. **Đo, đ�
 git ls-remote --heads origin 'refs/heads/ops/*'
 ```
 
-Đo lúc viết tệp này (`ops/gate-lifecycle` đã KHÔNG còn): các nhánh của loạt việc
-này còn chờ xoá là `ops/no-ky-thuat-muc6` và `ops/tin-hieu-chan-som`, cộng
-`ops/so-no-vong-3` sau khi PR #162 merge.
+Đo 18-08-2026 11:50Z: `ops/gate-lifecycle` đã KHÔNG còn; ba nhánh còn chờ xoá là
+`ops/no-ky-thuat-muc6`, `ops/tin-hieu-chan-som`, `ops/so-no-vong-3` (PR #162 đã
+merge lúc ~02:50Z, nhánh chưa xoá). PR #179 của phiên khác đang dựng danh sách
+đối chiếu cho `don-nhanh.cmd` — xem nó trước khi tự dựng lại.

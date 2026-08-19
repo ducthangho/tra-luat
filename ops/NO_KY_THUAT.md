@@ -58,12 +58,14 @@ rỗng" — KHÔNG bao gồm lời hứa "không ai trèo ra".
 
 ---
 
-## 2. Cặp `gate-targeted.md:16` ↔ `ci.yml` — sửa cái này làm nặng cái kia
+## 2. Cặp `gate-targeted.md` (mục 4, dòng "T2 review") ↔ `ci.yml` — sửa cái này làm nặng cái kia
 
 Hai thread cross-review còn mở, và chúng **dính nhau**:
 
-- `gate-targeted.md:16` — tài liệu chỉ người review tái dùng bằng chứng gate của
-  CI, nhưng CI không sinh/đăng artefact ấy ở lượt `pull_request`.
+- `gate-targeted.md`, mục 4 (tìm: `grep -n 'T2 review' .claude/commands/gate-targeted.md`)
+  — tài liệu chỉ người review tái dùng bằng chứng gate của CI, nhưng CI không
+  sinh/đăng artefact ấy ở lượt `pull_request`. (Bản trước dẫn `:16`; câu ấy ở
+  dòng **15**, và số dòng thì trôi — xem mục 8.)
 - `ci.yml` — trên `pull_request`, `actions/checkout` để cây ở commit MERGE tổng
   hợp, nên đòi `head.sha` sẽ đỏ ở preflight.
 
@@ -256,7 +258,7 @@ hình dạng lỗi mà chính đoạn ấy vừa gọi tên — lùi một tần
 
 ---
 
-## 7. `launcher_test.py` chớp một lượt `hong 1` — chưa tái hiện được
+## 7. `launcher_test.py` chớp `hong 1` — ba lần, chưa lần nào gọi ra được
 
 **Đo được** (phiên 17-08, nhánh `ops/tin-hieu-chan-som`): trong một lượt chạy
 loạt `gate BẬT → gate TẮT → launcher`, `launcher_test.py` ra
@@ -303,7 +305,7 @@ nó lộ ra.
 
 **ĐÍNH CHÍNH — bản trước ghép số của HAI lượt vào một câu** (P3 review lượt 2 trên
 `e37e1f6`). Nó viết "thoát 12 ... `ok=True`, `thieu_bat_buoc=[]`", mà hai thứ ấy
-**không thể cùng thuộc một lượt**: theo `_ma_doctor` (`launcher.py:3085`, docstring
+**không thể cùng thuộc một lượt**: theo `_ma_doctor` (tìm: `grep -n 'def _ma_doctor' .claude/dev/launcher.py`; docstring
 ghi thẳng "Thiếu công cụ BẮT BUỘC luôn là 12"), thoát 12 ⇔ `thieu_bat_buoc` KHÁC
 RỖNG. Hai trường sạch kia là của **lượt thoát 0 ngay sau**. Câu ghép ấy khiến
 người sau đọc thành "JSON của lượt 12 vẫn sạch" rồi đi nghi ngờ nhầm `_ma_doctor`.
@@ -395,15 +397,117 @@ thành "đã bác bỏ" là bịa ra một kết luận âm.
 **Giả thuyết cho lần săn tới** (giả thuyết, KHÔNG phải phạm vi đã hẹp lại):
 `launcher_test.py` mới là nguồn churn đáng kể — đỉnh **+14** so với nền, gần gấp
 đôi bộ gate — và `t53` gọi `doctor` từ **bên trong** nó. Lưu ý cơ chế: `main()`
-chạy `chay_bo_ca(CA, nk)` **tuần tự** (`launcher_test.py:5224`), nên lúc `t53`
-gọi `doctor` thì không có ca nào chạy song song; thứ tác động là **dư chấn và
-sân tạm của các ca trước**, không phải tải đồng thời. Nên lần săn tới phải là
-**chạy cả bộ `launcher_test.py` nhiều lượt liền nhau** rồi đọc `t53`, chứ không
-gọi `doctor` trần như tôi vừa làm.
+chạy `chay_bo_ca(CA, nk)` **tuần tự** (tìm: `grep -n 'chay_bo_ca(CA' .claude/dev/launcher_test.py`), nên lúc `t53`
+gọi `doctor` thì không có ca nào chạy song song — nên **không phải tải đồng
+thời**. Vế phủ định ấy đo được; vế khẳng định thì phải tách đôi, và bản trước
+gộp cả hai dưới chữ "cơ chế" như thể đã biết (P3 review lượt 4 trên `2845669`).
+Đo được (review lượt 4 đo hộ, tôi chưa đo lại):
+
+```
+"du chan" tien trinh sau khi launcher_test thoat — gan nhu KHONG CO
+  t=+0s tong=79 (nen=76)   t=+2s..+10s tong=77  => con 1 pid, cmdline RONG
+"san tam" — CO THAT, va KHONG don khi thoat
+  so muc /tmp  nen=227  dinh TRONG luc chay=245  NGAY SAU=244
+  => don len 18 muc trong luot chay, 17 muc SONG SOT sau khi thoat
+```
+
+Tức **sân tạm tích luỹ đơn điệu** (17/18 mục sống sót), còn **dư chấn tiến
+trình ≈ 0**. Hai thứ khác hẳn nhau; chỉ cái đầu đáng theo. Nên lần săn tới phải
+là **chạy cả bộ `launcher_test.py` nhiều lượt liền nhau** rồi đọc `t53`, chứ
+không gọi `doctor` trần như tôi đã làm.
+
+### LẦN CHỚP THỨ BA — 18-08-2026, trên `4262de4`, `codex` CÓ MẶT
+
+Chạy `launcher_test.py` ngay sau bộ gate trên master: **`126/128 ca QUA (bo qua
+1, hong 1)`**. Chạy lại ngay: `127/128 … hong 0`.
+
+**Lại mất tên ca** — tôi cắt log bằng `tail -1`, đúng cái lỗi mục này catalog ở
+đoạn "Đính chính: runner ĐÃ in tên ca hỏng". Ba lần chớp, hai lần mất tên ca.
+**Người sau: giữ NGUYÊN log, đừng `tail`.**
+
+**Săn theo đúng giả thuyết hiện hành, thất bại:** chạy **8 lượt `launcher_test.py`
+liền nhau**, giữ trọn log mỗi lượt, và nếu lượt nào đỏ thì chụp luôn
+`doctor --json` ngay sau ⇒ **8/8 đều `127/128 … hong 0`**, không bắt được lượt
+nào. Đây là lần đầu điều kiện săn khớp giả thuyết (chạy CẢ BỘ, không gọi `doctor`
+trần) — và nó vẫn không gọi ra được.
+
+0/8 chỉ loại được tần suất **trên ~31%/lượt** — yếu hơn hẳn 0/24 (~12%). Tức
+**8 lượt là quá ít để kết luận gì**; đừng đọc nó thành "giả thuyết sân tạm đã
+sai". Lần sau cần vài chục lượt mới nói được.
+
+Cộng dồn các lượt gọi lại, tách theo điều kiện (đừng gộp mẫu số):
+
+| điều kiện | số lượt | kết quả |
+|---|---|---|
+| `doctor` trần, không tải | 12 | 0 tái hiện |
+| `doctor` trần, dưới tải CPU | 12 | 0 tái hiện |
+| `doctor` trần, sau khi bộ gate thoát | 24 | 0 tái hiện (máy đã yên — xem đính chính trên) |
+| **cả bộ `launcher_test.py`, 8 lượt liền** | **8** | **0 tái hiện** |
 
 **Xong khi:** gọi ra được `doctor` thoát khác 0 trên máy đủ công cụ (nghi trước:
 một lượt `--version` của công cụ nào đó hết hạn dưới churn tiến trình ⇒ bị đếm là
 thiếu), rồi hoặc vá cho nó tất định, hoặc khai rõ `doctor` có thể chớp và `t53`
 phải chịu được điều đó. Nếu chạy đủ nhiều lượt mà không tái phát thì đóng mục
-**kèm số lượt đã chạy** — đừng đóng bằng im lặng.
+**kèm số lượt đã chạy VÀ cận trên tương ứng** — 0/8 hay 0/24 đều chưa đủ để
+đóng; đừng đóng bằng im lặng.
 
+
+---
+
+## 8. Dẫn theo SỐ DÒNG vào tệp nhiều phiên cùng sửa — hỏng trong vài giờ
+
+**Đo được (18-08-2026, ubuntu, trên `4262de4`).** PR #162 merge lúc ~02:50Z với
+năm dẫn dòng, bốn trong số đó **đúng lúc merge** vì đã kiểm bằng `sed -n`. Đo
+lại cùng ngày, `master` đi trước 113 commit:
+
+| dẫn trong tệp | đúng lúc merge? | thực tế lúc đo lại |
+|---|---|---|
+| `launcher.py:1604-1607` (mục `codex`) | có | **1646** |
+| `launcher.py:1766-1780` (`_bat_buoc`) | tràn 5 dòng sang hàm khác | **1799** |
+| `launcher.py:3085` (`_ma_doctor`) | có | **3185** |
+| `launcher_test.py:5224` (`chay_bo_ca`) | có | **5600** |
+| `gate-targeted.md:16` | không (đúng là 15) | **15** |
+
+`launcher.py` nhận **+104 dòng**, `launcher_test.py` **+388** từ các phiên khác
+trong cùng ngày. Riêng `chay_bo_ca` trôi **hai lần trong chín giờ**: 5224 → 5347
+(đo 02:50Z) → 5600 (đo 11:50Z).
+
+**Vì sao đáng ghi thay vì sửa lặng lẽ.** Bốn lượt review của #162 tốn một phần
+đáng kể để chỉnh số dòng cho đúng — lượt 3 bắt `1598-1612` trỏ nhầm sang mục
+`claude`, lượt 4 bắt `1766-1780` tràn sang `_doc_moi_truong`. Cả hai phát hiện
+đều **đúng**, và cả hai bản sửa đều **đã hỏng lại** trước khi ai đọc tới. Sửa
+từng số là trả tiền mãi cho một lớp lỗi; kho này nhiều phiên chạy song song trên
+cùng tệp nên số dòng KHÔNG phải mỏ neo ổn định.
+
+Cùng một bệnh mục 4 vừa chữa cho *con số suite* ("trích vào sổ là phải ghi nền +
+ngày") và §7 bàn giao vừa chữa cho *danh sách nhánh* ("đo, đừng chép"). Đây là
+nhánh thứ ba của nó.
+
+**Cách làm thay thế — dẫn bằng KÝ HIỆU + lệnh tìm**, để người đọc tự đo:
+
+```
+mục `codex` trong bảng `CONG_CU`
+  (tìm: grep -n '"ten": "codex", "bat_buoc"' .claude/dev/launcher.py)
+```
+
+Ký hiệu sống lâu bằng mã; số dòng sống bằng lượt merge kế tiếp. Khi buộc phải
+dẫn số dòng (trích một khối không có tên), **ghi kèm commit đã đo** để người sau
+biết nó neo vào đâu.
+
+**Xong khi:** không còn dẫn `tệp:NNNN` nào trong tài liệu **SỐNG** của `ops/`
+trỏ vào tệp mã đang được sửa song song. Kiểm bằng:
+
+```
+grep -rnE '`[A-Za-z_/.-]+\.(py|yml)[:][0-9]+' ops/ \
+  --exclude-dir=reviews --exclude-dir=prompts --exclude-dir=leases \
+  --exclude-dir=handoff
+```
+
+**Phạm vi cố ý hẹp.** `ops/reviews/**`, `ops/prompts/**`, `ops/leases/**`,
+`ops/handoff/**` là **bản đóng băng** — một verdict review neo vào commit nó
+xét, và sửa số dòng trong đó là sửa lời chứng của người khác. Chúng được loại
+trừ, KHÔNG phải vì sạch mà vì **không được đụng**. Bảng đối chứng ngay trên
+trong mục này cũng cố ý giữ số dòng cũ: nó là hiện vật, không phải chỉ dẫn.
+
+Mỗi chỗ còn lại sau bộ lọc phải có **lệnh tìm đi kèm** hoặc **commit neo**.
+**Đừng đóng bằng cách sửa một lượt số dòng** — lượt merge sau sẽ mở lại nó.

@@ -1,102 +1,76 @@
-# Packet Spec — W0-R1B (Issue #177), phạm vi ĐÃ MỞ RỘNG
+# W0-R1B (#177) — PHỤ LỤC QUYẾT ĐỊNH, không phải spec thay thế
 
-**TRẠNG THÁI: CHƯA ĐƯỢC BẮT ĐẦU.** Tệp này là bản mô tả thay thế cho thân Issue `#177`.
-Nội dung dưới đây soạn để **dán thẳng** vào Issue. Sau khi dán, đọc ngược về và đối
-chiếu: tầng vận chuyển của GitHub chuẩn hoá dấu nháy kép thành thực thể HTML, và **trong
-code span thì thực thể KHÔNG được giải mã** nên nó hiện nguyên văn ra màn hình. Bản này
-đã tránh sẵn dấu nháy kép và dấu ngoặc nhọn bên trong mọi code span.
+**Authority là thân Issue `#177`.** Tệp này chỉ ghi *quyết định chốt trần 2 vòng ảnh hưởng
+tới `#177` như thế nào*. Nó **không** thay thế, không mở rộng write set, không đổi
+acceptance của Issue.
 
-**Vì sao phải mở rộng:** người giữ kho đã chốt trần review canon là **2 VÒNG**
-(`docs/PROTOCOL_DA_PHIEN.md`, và `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10). Trần đó
-rơi vào một trục đếm mà `packet_loop.py` **chưa có trần nào cả** — khác với trục mà
-`#177` bản gốc nhắm tới. Chi tiết ở mục 2.
+## 0. Đính chính bản trước của chính tệp này
 
----
+Bản đầu của tệp này được soạn khi phiên **chưa đọc được** thân `#177` (đường REST theo kho
+bị proxy chặn). Nó đề xuất thêm `review_rounds_limit` như một **trần độc lập** cho
+`review_rounds_used`. Sau khi đọc được thân Issue qua GitHub MCP, đề xuất đó là **sai
+hướng** và đã bị gỡ:
 
-## THÂN ISSUE — dán từ đây
+- `#177` mục 3 đã thiết kế sẵn hai hướng (1 và 2) trong đó **mỗi vòng review phải tiêu ít
+  nhất một lời gọi**. Khi đó số vòng ≤ số lời gọi ≤ trần lời gọi. Trần vòng có được
+  **bắc cầu**, không cần cơ chế thứ hai.
+- Thêm một trần độc lập là dựng hai cơ chế cho một việc, và làm `#177` phải khai quan hệ
+  giữa **ba** trần thay vì hai — ngược đúng thứ mục 4 đòi (*quan hệ giữa chúng được khai
+  tường minh*).
 
-### W0-R1B — Trần review đang TỰ NGUYỆN ở cả hai trục đếm
+Bài học giữ lại: phần phân tích *hai trục đếm khác nhau* vẫn đúng và hữu ích — nhưng
+**cách đóng** thì Issue đã có sẵn và tốt hơn.
 
-Phụ thuộc: `W0-R1 integrated`.
-Write set: `.claude/dev/packet_loop.py`, `.claude/dev/packet_loop_test.py`.
-Review class: `sensitive`.
+## 1. Quyết định chốt trần 2 vòng gỡ đúng nút thắt của mục 3
 
-### 1. Trục LỜI GỌI — có trần, nhưng trần không có răng
+Mục 3 của `#177` nêu cái giá của hướng 1 và 2 như sau:
 
-`record-review` **không đọc sổ lời gọi**. Bỏ qua `record-review-call` thì nhiều vòng
-review vẫn khép trọn với `used=0/2`.
+> Mặc định `attempts_limit = 3` nhưng `review_calls_limit = 2`. Nếu `record-review` đòi mỗi
+> vòng ít nhất một lời gọi đã tiêu, thì một packet ở mặc định **không bao giờ đạt 3 vòng
+> review** — trần review cắn trước trần attempt.
 
-Phản chứng chạy được: `init` rồi lặp ba lần cặp `begin-attempt` + `record-review`, không
-gọi `record-review-call` lần nào. Kết quả: packet khép, `codex_review_calls_used` vẫn
-bằng 0, trần 2 chưa từng được chạm.
+Đó là cái giá **khi chưa có trần vòng canon**. Nay người giữ kho đã chốt trần canon là
+**2 vòng** (`docs/PROTOCOL_DA_PHIEN.md`; `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10).
 
-Nguyên nhân: mọi bộ đếm khác của tệp này được **dệt vào đường bắt buộc** — không đi qua
-chúng thì không đi tiếp được. Riêng `codex_review_calls_used` nằm trên một lệnh **rời**,
-người vận hành phải tự nhớ gọi. Bộ đếm nào cần người nhớ thì nó là tài liệu, không phải cổng.
+Vậy *"không bao giờ đạt 3 vòng review"* **thôi là khuyết điểm và trở thành ĐÚNG SPEC**.
+Phản đối chính với hướng 1 và 2 mất hiệu lực.
 
-### 2. Trục VÒNG — không có trần nào để mà tự nguyện
+## 2. Hệ quả trực tiếp: hướng 3 bị LOẠI
 
-Đây là phần **mới**, sinh ra từ quyết định chốt trần 2 vòng.
+Hướng 3 của mục 3 là *giữ nguyên + hạ lời hứa* — khai `codex_review_calls_used` là **sổ tự
+khai**, và **bỏ chữ `trần`** khỏi mọi chỗ mô tả nó.
 
-Đo trên `packet_loop.py`: `review_rounds_used` chỉ được khởi tạo (dòng 638) và **tăng**
-(dòng 997). Không có `review_rounds_limit`. Không nơi nào đọc nó để chặn.
+Hướng đó nay **mâu thuẫn trực tiếp với canon**: canon quy định một trần **được cưỡng chế**,
+không phải một con số tham khảo. Chọn hướng 3 là để canon không có chỗ bám trong mã.
 
-Hai bộ đếm này là **hai trục khác nhau**, và chính chú thích trong `W0-R1` đã ghi:
-*Khác `codex_review_calls_used`: một vòng có thể tốn nhiều lời gọi.*
+Còn lại **hướng 1 hoặc hướng 2**. Chọn cái nào vẫn là quyết định của người giữ khi cấp
+lease — phụ lục này **không** chọn hộ.
 
-| trục | bộ đếm | hằng | cưỡng chế |
-|---|---|---|---|
-| vòng — thứ vừa được chốt trần 2 | `review_rounds_used` | không có | **không có gì cả** |
-| lời gọi — trục chi phí | `codex_review_calls_used` | `MAC_DINH_TRAN_REVIEW_CALL` = 2 | có, nhưng **né được** (mục 1) |
+## 3. Điều `#177` phải trả lời thêm, do canon sinh ra
 
-Nên trần 2 lời gọi sẵn có **không** thoả điều khoản 2 vòng. Không được coi việc đã có
-trần lời gọi là đã xong việc.
+Mục 3 đòi hướng 1 và 2 trả lời: *trần nào cắn trước, và người vận hành đọc ra điều đó ở đâu.*
+Canon làm câu trả lời **hẹp lại**, và thêm một câu phải trả lời:
 
-**Bằng chứng lịch sử:** packet `W0-R1` đã chạy **4 vòng** review. Trần của kế hoạch cũ là
-**3 vòng** (`ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md` §8). Tức nó vượt cả trần cũ, và không
-có gì dừng nó lại.
+1. Trần **vòng** phải cắn trước trần **attempt** ở cấu hình mặc định. Đây nay là hành vi
+   ĐÚNG, phải có phản chứng khẳng định nó, không phải phản chứng chống nó.
+2. Lượt bị `void` vì lý do thuộc `LY_DO_VOID` (quota · rate_limit · infrastructure ·
+   permission) **không** được tính vào trần vòng — nếu không, một lần hết quota sẽ ăn mất
+   một trong hai vòng mà reviewer chưa hề nói gì. Cần phản chứng riêng cho miễn trừ này.
+3. Ca `cap_lan_4_thoat_3` và **21 ca** dùng `c.review(...)` phải đổi tiền đề theo canon
+   2 vòng, và **ghi rõ lý do đổi** — đúng ràng buộc mục 4 (*không ca nào bị vô hiệu hoá để
+   cho qua*).
 
-### 3. Phải làm gì
+## 4. Hai luật mới khác áp cho chính packet này
 
-1. Dệt `codex_review_calls_used` vào đường bắt buộc, hoặc để `record-review` tự đọc sổ
-   lời gọi. Sau thay đổi, không còn đường nào khép một vòng review mà bộ đếm không nhúc nhích.
-2. Thêm `review_rounds_limit`, mặc định 2, và cưỡng chế nó y như trần lời gọi đang làm:
-   cạn thì đưa packet về `checkpoint` và thoát `RC_TRAN`.
-3. Lượt bị `void` vì lý do thuộc `LY_DO_VOID` (quota, rate_limit, infrastructure,
-   permission) **không** tính vào trần vòng. Một vòng là một lượt reviewer trả verdict
-   trên một exact head, cộng lượt executor sửa theo verdict đó.
-4. Hai trần cưỡng chế **độc lập**. Cạn trần nào cũng dừng. Không gộp chúng làm một.
+- **Mỗi finding của reviewer phải kèm gợi ý cách vá bốn phần** (vá ở đâu · vá thế nào · ca
+  test khoá nó + đột biến nào phải chết · bản vá này có thể đẻ ra gì). Luật ở verdict
+  contract trong `docs/PROTOCOL_DA_PHIEN.md`.
+- **Master drift sau khi gate xanh ⇒ merge thẳng**, theo `docs/PROTOCOL_DA_PHIEN.md` §5.1,
+  kèm sáu kích hoạt bắt buộc chạy lại. Riêng packet này, kích hoạt số 2 gần như chắc chắn
+  trúng nếu `#178` land trước — hai packet dùng chung `packet_loop_test.py`.
 
-### 4. Tiêu chí nghiệm thu
+## 5. Không đổi
 
-- Phản chứng ở mục 1 phải **đỏ** sau bản vá: ba vòng review không gọi
-  `record-review-call` không còn khép được với `used=0/2`.
-- Có phản chứng cho trần vòng: vòng thứ ba bị chặn, packet về `checkpoint`, mã thoát
-  `RC_TRAN`.
-- Có phản chứng cho miễn trừ `void`: một lượt `void` vì quota **không** làm tăng
-  `review_rounds_used`, và không đẩy packet tới trần sớm.
-- Có phản chứng cho tính độc lập: cạn trần vòng khi trần lời gọi **chưa** cạn thì vẫn
-  phải dừng, và ngược lại.
-- Mỗi lớp lách phải có đột biến của nó, theo đúng khuôn `AC 18` mà bộ test hiện dùng.
-- `python3 .claude/dev/packet_loop_test.py` xanh toàn bộ, số ca và số đột biến **chép từ
-  đầu ra của máy**, không gõ tay.
-
-### 5. Ràng buộc
-
-- Write set đúng hai tệp trên, kiểm trên **TỪNG commit**, không chỉ trên diff gộp.
-- Chạy bộ test **trong** `.claude/dev/`. Chạy từ thư mục tạm cho **đỏ giả**: vài ca tìm
-  tệp kho theo đường dẫn tương đối và tìm lịch sử git.
-- Đặt `core.abbrev` bằng 7 trước khi chạy bất kỳ cổng nào, đúng như CI ghim. Không đặt
-  thì hai ca doc-claims **đỏ oan** trên clone đủ lịch sử, và đỏ oan đó đứng trước mọi
-  cổng khác nên nó che mất phép đo thật.
-- Trần review áp cho chính packet này: **2 vòng**.
-- Mỗi finding của reviewer phải kèm gợi ý cách vá bốn phần, theo verdict contract trong
-  `docs/PROTOCOL_DA_PHIEN.md`.
-
-### 6. Không thuộc phạm vi
-
-- Không đụng `#178` (W0-RC). Hai packet dùng chung tệp nên **không chạy song song**.
-- Không đổi ngữ nghĩa `attempts_used` hay trần executor.
-- Không đổi định nghĩa `LY_DO_VOID`.
-
-## THÂN ISSUE — hết
+`required_review_assurance: cross_approved` và `required_independent_reviewer: codex` của
+`#177` **giữ nguyên**. Quyết định chốt trần vòng không đụng tới mức assurance, và không
+biến `same_provider_approved` thành đủ.

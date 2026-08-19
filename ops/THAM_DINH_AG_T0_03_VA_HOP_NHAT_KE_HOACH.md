@@ -77,19 +77,71 @@ làm với `rest` — `mcp-cli` (`claude mcp get`, đo dây nối) và `mcp-endp
 `_do_github`: 4xx **có** header `x-github-*` là *tới nơi, thiếu quyền*; **không có** header
 là *proxy tự sinh*.
 
-### 1.4 Bản đồ đường GitHub thực đo được ở phiên remote
+### 1.4 Bản đồ đường GitHub ở phiên remote — và vì sao THÔNG ĐIỆP LỖI NÓI SAI CƠ CHẾ
 
-| đường | kết quả | phán quyết theo tiêu chí `_do_github` |
+403 trên đường theo kho trả về nguyên văn:
+
+> *GitHub access is not enabled for this session. An org admin must connect the Claude
+> GitHub App for this organization.*
+
+Câu đó dẫn người đọc tới kết luận sai: *thiếu quyền, phải nhờ admin nối App*. **Phép đo
+bác bỏ nó.** Thử một kho **CÔNG KHAI của người khác** — thứ không cần quyền gì, không
+thuộc org nào của người dùng:
+
+```
+GET /user                      -> 200 · 4 header x-github · Server: github.com
+GET /rate_limit                -> 200 · 4 header x-github
+GET /repos/ducthangho/tra-luat -> 403 · 0 header x-github     (kho riêng)
+GET /repos/cli/cli             -> 403 · 0 header x-github     (CÔNG KHAI)
+GET /repos/torvalds/linux      -> 403 · 0 header x-github     (CÔNG KHAI)
+GET /user/repos                -> 403 · 0 header x-github
+GET /search/repositories       -> 403 · 0 header x-github
+```
+
+Kho công khai cũng chặn ⇒ **không phải chuyện quyền, cũng không phải chuyện org**. Theo
+đúng tiêu chí của `_do_github` trong `launcher.py` (4xx CÓ header `x-github-*` là *tới
+nơi, thiếu quyền*; KHÔNG có header là *proxy tự sinh*), cả năm dòng 403 đều có **0**
+header ⇒ **GitHub chưa từng nhìn thấy những yêu cầu này**.
+
+Cơ chế thật: **proxy egress cho phép theo DANH SÁCH ĐƯỜNG DẪN**, không theo kho và không
+theo quyền. `api.github.com` chỉ mở vài đường danh tính/hạn mức (`/user`, `/rate_limit`);
+mọi đường chạm dữ liệu kho đều đóng. Nối Claude GitHub App **có thể** không đổi được gì,
+vì chặn không nằm ở tầng cấp quyền.
+
+Hệ quả vận hành: **đừng đi tìm quyền.** Đổi đường.
+
+| đường | kết quả | dùng được? |
 |---|---|---|
-| `git` clone/fetch/push | thông | dùng được (nhưng `fetch` có cache — xem §1.1) |
-| `git push --delete` | 403 | **chặn** — proxy không cho xoá ref |
-| REST chung (`/user`) | 200, `X-Ratelimit-Limit: 15000` | thông, token thật |
-| REST theo kho (`/repos/...`) | 403, **không header GitHub** | **chặn** — proxy tự sinh, chưa tới GitHub |
-| `gh` (mọi lệnh theo kho) | 403 | chặn (đi cùng đường REST theo kho) |
-| **GitHub MCP** (`api.githubcopilot.com`) | **200, header GitHub đầy đủ** | **thông — đây là đường làm việc** |
+| `git` clone · fetch · **push tạo/cập nhật ref** | thông (credential riêng, ngoài sandbox) | **có** |
+| `git push --delete` ref · đẩy tag | 403 | không — phạm vi credential loại hai việc này |
+| REST `api.github.com` — `/user`, `/rate_limit` | 200 | có, nhưng vô dụng cho việc kho |
+| REST `api.github.com/repos/**`, `/search/**`, `/user/repos` | 403, 0 header | **không** — kể cả kho công khai |
+| `gh` (mọi lệnh theo kho) | 403 | không — nó đi đường REST ở trên |
+| **GitHub MCP** `api.githubcopilot.com/mcp/` | 200, header GitHub đầy đủ | **CÓ — đây là đường làm việc** |
 
-Kết luận vận hành: ở phiên remote của kho này, **đường theo kho phải đi bằng MCP**, không
-bằng `gh` và không bằng REST `api.github.com`. `git` vẫn đi đường git, trừ xoá ref.
+**GitHub MCP là đường duy nhất chạm được dữ liệu kho.** Mặc định trả 44 công cụ; thêm
+header `X-MCP-Toolsets: all` mở lên **89** (có nhóm Actions: `actions_list`,
+`actions_run_trigger`, `get_job_logs`). Vẫn **không có** công cụ xoá ref/nhánh — đã kiểm
+cả 89.
+
+### 1.5 `GH_TOKEN` giả đang che credential thật
+
+```
+GH_TOKEN      13 ký tự   ← gh đọc CÁI NÀY trước, theo đúng thứ tự tài liệu của gh
+GITHUB_TOKEN  13 ký tự
+GITHUB_PAT    92 ký tự   ← credential THẬT
+```
+
+`gh auth status` báo *"The token in GH_TOKEN is invalid"* — đúng, nhưng nó khiến người
+đọc kết luận **sai** rằng phiên không có credential GitHub. Đặt `GH_TOKEN="$GITHUB_PAT"`
+thì `gh api user` chạy được ngay (trả `ducthangho`).
+
+Đây là lỗi thật, nhưng **không phải nguyên nhân** của việc không vào được kho: vá xong
+thì `gh api repos/...` vẫn 403, vì nó vẫn đi đường bị chặn ở §1.4.
+
+`launcher.py` đã ghi sẵn bẫy này (thứ tự `GH_TOKEN` → `GITHUB_TOKEN` → `GITHUB_PAT`),
+nhưng `doctor` chỉ báo `gh-kho=khong` — không nói ra rằng `gh` đang **đọc nhầm biến**.
+Đề xuất cho `PLAT-M4`: `doctor` khai thẳng độ dài và biến đang được dùng.
 
 ## 2. Thẩm định AG-T0-03: một lỗi làm hỏng đúng tính năng của chính packet
 

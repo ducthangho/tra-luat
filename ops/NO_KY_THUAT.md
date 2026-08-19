@@ -92,22 +92,39 @@ khi sửa mã (bẫy đã trả giá ba lần trong một phiên).
 
 ---
 
-## 4. Nợ "ca BO QUA tính vào tổng" ở `launcher_test.py` — ĐÃ ĐÓNG
+## 4. Nợ "ca BO QUA tính vào tổng" — hoá ra ở CẢ HAI bộ, hai nửa cùng một khuôn
 
-`gate_lifecycle_test.py` sửa trước (lớp `BoQua`, harness đếm riêng): Windows CI từ
-`23/23` phẳng thành `23/23 ca (qua 14, bo qua 9, hong 0)` — chín ca trước giờ vẫn
-được tính là đạt.
+Nợ gốc ghi cho `launcher_test.py`: `104/104 ca (qua 92, bo qua 12, hong 0)` —
+con số đầu nuốt phần bỏ qua; bàn giao ghi cho `t19`/`t62`. Nửa ấy ĐÃ ĐÓNG:
+PR #153 (W0-M1 — tách `dong_ket_qua`, tử số chỉ đếm ca thực sự qua) + PR #156
+(W0-M1F — `t119` chốt dây nối); đầu ra nay còn tự khai `KHONG DU` khi có ca
+bỏ qua — người đọc không phải tự trừ. Số trích từ suite này phụ thuộc NỀN
+(ubuntu bỏ qua ~1 ca, Windows ~13), nên trích vào sổ là phải ghi nền + ngày;
+bản trước của mục này treo `118/119` không nền — re-review #154 xếp P3, đã gỡ.
 
-`launcher_test.py` **đã được đóng ở nhánh khác** (`W0-M1`, land qua #153/#156).
-Đầu ra nay:
+Nửa gate: bản trước của mục này (kể cả bản "ĐÃ ĐÓNG" land kèm #154) trưng
+"Windows CI từ `23/23` phẳng thành `23/23 ca (qua 14, bo qua 9, hong 0)`" làm
+mẫu ĐÃ SỬA — nhưng tử số 23 ĐÓ vẫn là `len(CASES) - len(failures)` = qua +
+bỏ-qua: chính câu khoe mang hình dạng N/N với 9 ca chưa chạy (re-review #154
+xếp P2 sau khi PR đó merge; đo lại 18-08 trên Windows tại head nó:
+`26/26 ca (qua 14, bo qua 12, hong 0)`). Harness đếm riêng THẬT (lớp `BoQua`);
+chỉ DÒNG KẾT LUẬN nói dối. Nửa này đổi cùng khuôn ở PR #157 (18-08-2026;
+packet điều phối trực tiếp, KHÔNG nằm trong bảng W0/W1 của
+`ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md` — bản đầu gọi nhầm là "W0-M2", kế
+hoạch land ở #155 cho thấy tên đó thuộc packet doctor-JSON bên launcher):
+đo trên Windows 18-08, `25/25 ca (qua 14, bo qua 11, hong 0)` thành
+`15/26 ca QUA (bo qua 11, hong 0) - KHONG DU: ...`, khoá bằng
+`case_headline_khong_duoc_dem_ca_bo_qua_la_da_qua`, mã thoát giữ nguyên.
 
-```
-118/119 ca QUA (bo qua 1, hong 0) - KHONG DU: 1 ca BO QUA, chua do gi
-```
+**Xong khi:** trên master, CẢ HAI tệp có tử số không nuốt phần bỏ qua — kiểm
+bằng sự HIỆN DIỆN của `dong_ket_qua` + ca phản chứng trong từng tệp (`t118`/
+`t119` bên launcher: ĐÃ có; `case_headline_…` bên gate: land cùng PR #157),
+đừng kiểm bằng tên nhánh hay trạng thái PR — tên nhánh là thứ trôi. Còn lại
+sau khi đóng, tách quyết định riêng: (i) chốt DÂY NỐI bên gate (P3 verdict
+#157, phác thảo có sẵn trong verdict); (ii) vế "CI từ chối số skip nằm ngoài
+danh sách nền tảng cho phép" là SIẾT CHUẨN (đổi rc), chưa làm ở cả hai bộ.
 
-Đi xa hơn điều kiện mục này đặt ra: con số đầu không những hết nuốt phần bỏ qua,
-mà harness còn **tự khai "KHÔNG ĐỦ"** khi có ca bỏ qua — tức người đọc không phải
-tự trừ. Đóng mục.
+---
 
 ## 5. Hook phiên KHÔNG chạy lần nào — và `doctor` không nói được điều đó
 

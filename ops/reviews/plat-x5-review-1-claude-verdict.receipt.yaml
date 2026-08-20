@@ -1,0 +1,207 @@
+# BIÊN NHẬN — cross-review lượt 1 của `PLAT-X5` (#206 / PR "#207").
+#
+# ĐẢO VAI so với các packet trước: executor là `codex`, reviewer là `claude`.
+# Vẫn CROSS-PROVIDER ⇒ §8 thoả. Nhưng verdict là `changes_requested`, nên
+# `cross_approved` KHÔNG đạt và packet KHÔNG có điều kiện land.
+#
+# ĐỌC KÈM: executor đã dùng HẾT trần attempt (2/2). `changes_requested` ở đây
+# KHÔNG mở ra một lượt vá nữa — nó là CHECKPOINT về chủ kho. Xem `viec_cho_chu_kho`.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: PLAT-X5
+packet_issue: 206
+lease_id: plat-x5-review-1-claude-20260820
+provider: claude
+role: reviewer
+executor_provider: codex
+verdict: changes_requested
+assurance: cross_changes_requested
+assurance_KHONG_dat: cross_approved
+cross_provider: true
+reviewed_sha: e071e0aae6bdc4d270a42fbc534ad3f05dcba0fa
+base_sha: a09aae627533f59e6b2e817858a6db50b999d41c
+target_pull_request: 207
+
+verdict_path: ops/reviews/plat-x5-review-1-claude-verdict.md
+verdict_sha256: ba6d0ea7017ddb16c69b682c70513bca919ff267ddfb933ff7963224c22170a8
+verdict_bytes: 19864
+verdict_nguon: 'scratchpad/runs/d073f0ee/stdout.log (launcher v1.3.0, ma_thoat=0, 1316.238s)'
+verdict_doi_chieu: '`cmp` nguồn ↔ tệp đã chép: khớp từng byte (không sửa một ký tự nào)'
+
+evidence_channel: repo_file
+authoritative_source: repo_file
+
+published_first:
+  branch: ops/verdict-x5-review-1
+  commit: SE-DUOC-GHI-SAU-KHI-COMMIT
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_tag: null
+truy_xuat_ghi_chu: '#207 CHƯA land, chưa có tag `luu-tru/*`.'
+
+chot_read_only_DO_chu_khong_tin_co:
+  head_sau: e071e0aae6bdc4d270a42fbc534ad3f05dcba0fa
+  head_khop_neo: true
+  thay_doi_cay_cuoi_luot: 0
+  ghi_chu: >-
+    `git -C kho status --short` rỗng sau khi tiến trình reviewer kết thúc, HEAD khớp neo.
+  SAI_LECH_REVIEWER_TU_KHAI:
+    su_viec: >-
+      Giữa phiên reviewer chạy `git --git-dir=<gitdir thật> --work-tree=<bản sao> checkout
+      a09aae62 -- .` để dựng cây base. Lệnh ấy GHI VÀO INDEX của worktree `kho` (`status`
+      hiện `MM` trên 4 tệp) — tức đã ghi vào kho, trong một lượt khai là read-only.
+    khac_phuc_da_lam: '`git -C kho reset -q HEAD -- .`, kiểm lại sạch, rồi dựng lại cây base bằng `git -C kho archive` (thuần đọc) và ĐO LẠI TỪ ĐẦU.'
+    pham_vi_anh_huong: 'Không tệp nào trong cây làm việc bị đổi; HEAD không đổi. Mọi số liệu trong verdict đo trên cây base dựng bằng `archive`.'
+    vi_sao_ghi_vao_day: >-
+      Reviewer TỰ KHAI trong verdict. Chốt "cây sạch" chỉ có nghĩa khi cả lần lỡ tay cũng
+      được khai — biên nhận này không được im chỗ đó chỉ vì kết cục đã sạch.
+
+so_sach_ngan_sach:
+  review_rounds_used: 1
+  review_rounds_limit: 2
+  executor_attempts_used: 2
+  executor_attempts_limit: 2
+  he_qua: >-
+    Trần attempt của executor ĐÃ CẠN. Theo trục đã chốt (attempt = một lần TUYÊN BỐ DONE),
+    `changes_requested` lượt này KHÔNG được tự động biến thành lượt vá thứ ba. Quyết định
+    tiếp theo thuộc chủ kho — xem `viec_cho_chu_kho`.
+
+finding_1:
+  muc: P1
+  id: t25-khong-con-thay-loi-goi-bo-kiem
+  noi_dung: >-
+    Diff đổi lời gọi bộ kiểm trong `ops-publish-lease.yml` từ `python3 "$NEO/…_test.py"` sang
+    `bash "$NEO/ops/chay_lease_publish_test.sh"`. Regex của `t25` chỉ nhận
+    `python3?\s+(\S*lease_publish(?:_test)?\.py)` nên lời gọi mới VÔ HÌNH với nó. Mã hôm nay
+    vẫn đúng; thứ bị gỡ là cái máy giữ cho nó đúng ngày mai.
+  bang_chung_hai_chieu: >-
+    Trên `base2` (archive `a09aae62`): đột biến bỏ `$NEO` ⇒ 37/38, ĐỎ `t25`. Trên `mut1`
+    (bản sao `e071e0aa`): cùng đột biến trên lời gọi wrapper ⇒ 40/40 ĐẠT, cổng im.
+  chot_chong_xanh_rong_khong_bu_duoc: >-
+    `bang(thay >= 3, …)` vẫn qua nhờ ba lời gọi `lease_publish.py` còn lại, nhưng chú thích của
+    nó ghi "chờ ít nhất 3 (test, check, body)" — `test` KHÔNG còn trong ba cái đó.
+  da_va: false
+
+finding_2:
+  muc: P2
+  id: no-PLAT-X5-required-status-check-khong-vao-so-no
+  noi_dung: >-
+    Nợ chỉ nằm ở 3 chú thích/docstring, trong khi kho có `ops/NO_KY_THUAT.md` là SỔ NỢ với
+    tiền lệ đúng khuôn (mục 8, PLAT-X2). Người đi rà "còn nợ gì" mở sổ nợ và thấy trống.
+  no_nay_ganh_tai_that: 'Đo trên `mut1`: thêm `if: false` vào bước wrapper của `ci.yml` ⇒ 40/40 ĐẠT, rc=0. Phần dư của F2 (cổng VẮNG MẶT thay vì đỏ) ký gửi hoàn toàn cho required status check.'
+  duong_dung: >-
+    `ops/NO_KY_THUAT.md` NẰM NGOÀI write set ⇒ theo §6 phải xuất handoff, không tự sửa.
+    Reviewer kèm một chốt RẺ nằm TRONG write set: đòi bước gọi wrapper không có khoá `if:`.
+  da_va: false
+
+finding_3:
+  muc: P2
+  id: t34-khai-hep-hon-thuc-te-bon-dang-goi-thang-py-van-lot
+  noi_dung: >-
+    `t34` tự nhận canh "lời gọi THẲNG `lease_publish_test.py`" và chỉ khai một ngoại lệ
+    (`python -m`). ĐO: bốn dạng nữa vẫn lọt — `python3 -u <đường dẫn>`, `./…_test.py`,
+    `uv run …`, `python -X utf8 …`. Nguyên nhân: `\S*` trong `_CHAY_BO_TEST` không vượt được
+    khoảng trắng nên bất kỳ CỜ nào chen giữa cũng làm phép khớp trượt.
+  bang_chung: '8 biến thể, rc đọc trực tiếp: A/B/D/E/F rc=0 KHÔNG-ĐO · C/G/H rc=1 ĐỎ t34.'
+  invariant_bi_cat: '`CLAUDE.md` — "PHẠM VI TUYÊN BỐ phải bằng phạm vi ĐO ĐƯỢC".'
+  hai_duong_va: 'sửa lời khai cho khớp phép đo (rẻ), HOẶC đảo thành DANH SÁCH CHO PHÉP (đúng doctrine hơn — giết cả 5 dạng).'
+  da_va: false
+
+finding_4:
+  muc: P3
+  id: GOI_WRAPPER-gac-mot-NGHIA-VU-nen-ra-ngoai-danh-sach-la-duoc-MIEN
+  noi_dung: >-
+    `t35` đòi bước gọi wrapper khai `AL_VER`, nhưng chỉ với bước có phần lệnh BẰNG ĐÚNG một
+    trong hai chuỗi `GOI_WRAPPER`; không khớp thì `continue` — tức RA NGOÀI danh sách là ĐƯỢC
+    MIỄN, fail-OPEN ngược chiều ý định.
+  bang_chung: 'N1 (bỏ `AL_VER`) ⇒ 39/40 ĐỎ t35. N2 (bỏ `AL_VER` + đổi `bash ops/…` thành `bash ./ops/…`) ⇒ 40/40 IM. Khác đúng hai ký tự.'
+  vi_sao_P3: 'Hậu quả không im lặng — installer trả rc=2 lúc chạy thật.'
+  da_va: false
+
+finding_5:
+  muc: P3
+  id: mkdir-hong-tra-rc1-dung-ma-thoat-cua-bo-test
+  noi_dung: >-
+    `mkdir -p "$AL_DICH"` trong `ops/cai_actionlint.sh` không có `|| loi N` nên rơi vào `set -e`
+    và thoát rc=1 — trùng mã thoát của `lease_publish_test.py` khi có ca đỏ. Người gọi không
+    phân biệt được "cổng đỏ" với "không tạo nổi thư mục cài", trong khi đầu tệp tự khai các mã
+    thoát là "RIENG BIET de nguoi goi khang dinh duoc LY DO".
+  bang_chung: 'AL_DICH trỏ một TỆP thường ⇒ rc=1, marker=KHONG.'
+  da_va: false
+
+huong_da_DO_va_SACH_noi_ro_de_im_lang_khong_bi_doc_thanh_chua_thu:
+  nen: '40/40 · SUITE_RC=0 · ACTIONLINT_RC=0 (cả 5 workflow) · PYCOMPILE_RC=0 (hai tệp)'
+  wrapper_chay_that_end_to_end: 'tải gói từ mạng, cổng băm qua, WRAPPER_RC=0, 40/40'
+  truc_1_khong_tach_roi_duoc_wrapper: 'rc 1/2/4/9 đều marker=KHONG — bộ test không bao giờ chạy khi installer hỏng'
+  truc_2_exec_giu_rc: 'rc 0/1/23/143/255 giữ nguyên; hai đột biến nuốt rc bị giết (39/40 ĐỎ t40)'
+  truc_3_ma_10_11: 'đúng ca, không ca nào oan'
+  truc_4_ba_nhanh_python: 'python · python3 · py -3 đo CẢ BA bằng `env -i`; không nhánh nào rơi vào rc=11 oan'
+  truc_5_magic_bytes: '11 ca fail-close có thông điệp phân biệt được; thiếu `od` ⇒ rc=5, thiếu `sha256sum`+`shasum` ⇒ rc=8'
+  truc_6_t40_co_rang: '6 đột biến, mỗi con giết 1/1; khôi phục nền ⇒ 40/40'
+  ba_finding_vong_3: 'F3 ĐÓNG (ba tên ZIP đều rc=0, vòng 3 là 5·5·0) · F2 hết đường cũ, phần dư ở finding 2 · F1 ở finding 3'
+  hai_phan_chung_vong_2: 'V2a, V2b vẫn ĐỎ t34 (39/40)'
+  t34_khong_mac_benh_t24: 'neo `HERE.parent/.github/workflows`, nhánh "không thấy thì thôi" có chốt `not (HERE.parent/".git").exists()`'
+  diff_trung_thuc: 'sha256(diff.patch) == sha256(git diff a09aae62 HEAD) = 9040854e5914b190aea31ae389dbbae67ca7808adee312e41ec8e98c00987d4d; write set đúng 5 tệp; 38 → 40 ca, không tụt'
+  khong_sinh_no_deploy: '`ops` và `.github` nằm trong `_RELEASE_EXCLUDE_DIRS`; `grep -c "ops/" RELEASE_MANIFEST.json` = 0'
+
+reviewer_tu_khai_CHUA_DO_DUOC:
+  - id: nhanh-Windows-cua-t40
+    noi_dung: >-
+      Sandbox không có Windows. Reviewer ĐỌC mã và thấy nhánh ấy fail-close đúng hướng
+      (`bang(...)` ĐỎ chứ không `return`), nhưng ĐỌC ≠ ĐO.
+  - id: CI-xanh-tren-exact-head
+    noi_dung: >-
+      Kết luận "cả hai job success" reviewer LẤY NGUYÊN từ packet, KHÔNG tự xác minh. Lượt
+      `workflow_dispatch` 32395054494 do phiên điều phối đo.
+  - id: branch-protection-required-status-check
+    noi_dung: 'Ngoài kho, không kiểm được từ sandbox.'
+
+verdict_usage_caveats:
+- id: attempt-da-CAN-verdict-nay-khong-mo-luot-va
+  noi_dung: >-
+    Executor `codex` đã dùng 2/2 attempt. **Đừng đọc `changes_requested` này thành "codex vá
+    tiếp".** Theo trục đã chốt trong phiên (attempt = một lần TUYÊN BỐ DONE, không phải một
+    lần gọi CLI), lượt vá thứ ba cần chủ kho nới trần hoặc đổi cách xử. Ai tự phát lease
+    executor thứ ba từ verdict này là tự cấp việc — §2 cấm.
+- id: so-do-neo-o-e071e0aa-40-ca
+  noi_dung: >-
+    Mọi con số trong verdict (40/40, các đột biến 39/40, 38/40) neo ở
+    `e071e0aae6bdc4d270a42fbc534ad3f05dcba0fa` khi `ops/lease_publish_test.py` có **40 ca**.
+    Bộ ấy sẽ đổi. Tái hiện bằng `git worktree add --detach <đích> e071e0aa…` rồi đo ở đó;
+    chạy trên `master` sẽ KHÔNG ra 40/40 và đó không phải verdict sai.
+- id: nam-finding-CON-MO-toan-bo
+  noi_dung: >-
+    Không finding nào được vá sau verdict này (trần attempt đã cạn). Khác các verdict trước
+    trong thư mục này — ở đó vài finding đã đóng ngay sau. Ở đây: **P1 · 2×P2 · 2×P3 đều CÒN
+    MỞ** tại thời điểm ghi biên nhận.
+- id: Windows-va-CI-xanh-la-LOI-KHAI-KHONG-phai-do-cua-reviewer
+  noi_dung: >-
+    Verdict nói packet CI xanh trên cả hai job — reviewer LẤY TỪ PACKET, không tự đo, và tự
+    khai như vậy. Nhánh Windows của `t40` cũng chỉ được ĐỌC. **Đừng trích verdict này làm bằng
+    chứng Windows đã đo.** Bằng chứng Windows nằm ở lượt `workflow_dispatch` 32395054494, và
+    `get_job_logs` chỉ trả phần ĐUÔI nên `N/N` của bước ấy vẫn CHƯA ai đọc được.
+- id: reviewer-da-GHI-vao-index-giua-luot
+  noi_dung: >-
+    Lượt này khai `access: read-only-kho-ban-sao-ghi-duoc`, và reviewer đã lỡ ghi vào INDEX của
+    worktree rồi khôi phục, ĐO LẠI toàn bộ trên cây dựng bằng `git archive`. Chi tiết ở
+    `chot_read_only_DO_chu_khong_tin_co.SAI_LECH_REVIEWER_TU_KHAI`. Nêu ra vì "cây sạch cuối
+    lượt" một mình KHÔNG chứng minh lượt ấy không ghi.
+
+delivered: true
+delivered_by: claude-session
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-20T17:45:00Z'
+
+viec_cho_chu_kho:
+- 'Trần attempt đã cạn (2/2). Chọn: (a) nới trần cho codex vá lượt 3 · (b) chuyển P1 sang packet riêng và land phần còn lại kèm nợ · (c) dừng packet.'
+- 'Finding 3 — hai đường vá khác hẳn nhau về chi phí và về doctrine: sửa LỜI KHAI cho khớp phép đo (rẻ), hay đảo `t34` thành DANH SÁCH CHO PHÉP (đúng doctrine kho, đắt hơn). Đây là quyết kiến trúc, không phải quyết kỹ thuật.'
+- 'Finding 2 đòi `ops/NO_KY_THUAT.md` vào write set — cần revision lease, không agent nào tự nới được.'
+- 'Nhánh Windows của `t40` và `N/N` của bước Windows: vẫn CHƯA ai đọc được. Muốn đóng thì cần một đường đọc log đầy đủ, không phải `get_job_logs`.'
+
+receipt_khong_khai:
+- 'Không khai lượt này đạt `cross_approved`. Nó KHÔNG — verdict là `changes_requested`.'
+- 'Không khai finding nào đã đóng. Cả năm CÒN MỞ.'
+- 'Không khai Windows đã được reviewer đo. Reviewer chỉ ĐỌC mã, và tự khai như vậy.'
+- 'Không khai `evidence_url` bền: #207 chưa land, chưa có tag `luu-tru/*`.'
+- 'Không khai lượt này là read-only sạch từ đầu tới cuối — reviewer đã lỡ ghi vào index và tự khai.'

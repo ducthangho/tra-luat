@@ -1,0 +1,122 @@
+# Lease EXECUTOR — `PLAT-M4` (#194), lượt 1/3. Neo head xuất phát 50d8d12e.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên "#194" chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt
+# cụt giá trị — đã mất dữ liệu IM LẶNG một lần ở lease exec-4 của wp55.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 194
+packet_id: PLAT-M4
+phase_key: PLAT-M4
+revision: 1
+generation: 1
+lease_id: plat-m4-exec-1-claude-20260820
+
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/plat-m4-packet-issue-nhap.md
+spec_sha256_required: b90bfefe41b4d047d703889320ac0ce14558d6ba439001dec30549dcd27b2c50
+spec_status: da_duyet
+spec_duyet_boi: ducthangho
+spec_duyet_luc: 'direct, in-session, 2026-08-20 ("các nội dung khác, đồng ý theo đề xuất")'
+spec_note: >-
+  AUTHORITY LÀ THÂN ISSUE "#194"; tệp trên chỉ là BẢN CHIẾU đọc offline, nội dung khớp từng
+  mục. Tìm nó ở `master` trước; chưa thấy thì fetch nhánh `claude/opus-5-plan-steps-y5r6ci`
+  (câu này viết để đúng ở CẢ HAI phía của lần merge, đúng bài học đã trả giá).
+
+write_set:
+  - .claude/dev/launcher.py
+  - .claude/dev/launcher_test.py
+write_set_note: >-
+  ĐÚNG hai tệp. Tệp thứ ba trong diff là finding, không phải "tiện tay dọn". Trùng khít write
+  set của `PLAT-M3` (#185) nên hai packet KHÔNG chạy song song — #185 đã `integrated` (PR
+  "#189"), điều kiện mở đã thoả.
+
+branch: claude/plat-m4-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: 50d8d12e146792368e7100f732ff15a8d32fe48d
+reviewed_sha_note: >-
+  Đây là head XUẤT PHÁT, không phải head đưa ra review — cùng quy ước với lease exec của
+  wp55. Trường mang tên `reviewed_sha_*` vì cổng dùng CHUNG một validator cho lease executor
+  lẫn reviewer. Head để review sẽ ghi ở lease REVIEWER sau khi lượt này xong.
+base_sha: 50d8d12e146792368e7100f732ff15a8d32fe48d
+start_from_sha: 50d8d12e146792368e7100f732ff15a8d32fe48d
+
+prompt_path: ops/prompts/plat-m4-exec-1-claude-20260820.md
+prompt_sha256_required: 75b69e13d354aef9834d673c1903b2389e0462b0362107a718800b6a2b1a4db9
+
+granted_by: ducthangho          # CHỦ KHO — §2 "người có thẩm quyền"
+granted_on_instruction: 'direct, in-session, 2026-08-20 ("cấp lease và bắt đầu cho tôi")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_note: >-
+  KHAI THẲNG: phiên ghi lease này CHÍNH LÀ phiên sẽ thi công. Nó KHÔNG tự cấp quyền —
+  `granted_by` là `ducthangho`, duyệt trực tiếp trong phiên, và `ops/lease_publish.py` chặn
+  cứng mọi tên provider ở trường ấy (rc=4). Ghi ra để dấu vết thẩm quyền ĐỌC ĐƯỢC chứ không
+  phải suy, và để reviewer soi kỹ hơn phần khai trong commit lẫn trong lease — cả hai do
+  chính phiên thi công viết.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-20T06:45:00Z'
+lease_expires_at_utc: '2026-08-21T06:45:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+reviewer_note: 'executor là claude ⇒ §8 bắt reviewer khác nhà cung cấp'
+review_rounds_limit: 2
+review_rounds_note: >-
+  Trần CANON là 2 VÒNG (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10), đếm theo
+  `review_rounds_used`. Trần LỜI GỌI (`codex_review_calls_used`, mặc định 2) là trục CHI PHÍ
+  riêng, cưỡng chế độc lập — đừng gộp hai trục.
+
+muc_tieu:
+  - 'Tách trường `mcp` thành `mcp-cli` (dây nối, `claude mcp get`) và `mcp-endpoint` (một lượt `initialize` THẬT tới URL khai trong `.mcp.json`)'
+  - 'Phân loại theo HEADER `X-GitHub-*`, ba trạng thái, `chua-do-duoc` đọc khác `khong`'
+  - 'Mở rộng `t115` sang CẢ HAI tên mới — nếu không, ca ấy vẫn xanh mà không còn canh gì'
+  - 'GIỮ NGUYÊN `LAM_DUOC_VIEC` = {git, gh-kho, rest-kho}'
+  - 'Bảy phản chứng ở §5 thân Issue, mỗi đột biến giết 1/1'
+  - 'Suite offline, không tụt dưới 137 ca, `N/N` hai số bằng nhau'
+
+gate_bat_buoc:
+  - 'launcher_test.py trên nhánh -> rc=0, N/N hai số bằng nhau, không tụt dưới 137 ca'
+  - 'launcher_test.py --dot-bien -> mọi đột biến của lượt này giết 1/1'
+  - 'doctor và doctor --json -> JSON parse được, KHÔNG chứa token sentinel'
+  - 'doctrine-scan --root . -> rc=0'
+  - 'git diff --stat 50d8d12..<head-moi> -> ĐÚNG 2 tệp'
+  - 'lượt Windows trên ref của nhánh (workflow_dispatch launcher-windows.yml)'
+
+dieu_kien_dung:
+  - 'Chốt phải nằm ngoài hai tệp write set ⇒ DỪNG, xuất handoff, mở packet riêng'
+  - 'Cùng một hình dạng lỗi lần thứ hai ⇒ quyết định về CÁCH LÀM, không mở vòng vá thứ ba'
+  - 'Thấy một chốt ở §3 thân Issue là sai ⇒ DỪNG và mở revision, không tự đổi giữa đường'
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-20T06:31:02Z'
+master_sha_at_grant: 50d8d12e146792368e7100f732ff15a8d32fe48d
+lease_song_khac_luc_cap: >-
+  ĐO ĐƯỢC lúc cấp: không lease nào khác đang mở neo `.claude/dev/launcher*.py`. Lease gần
+  nhất chạm hai tệp ấy là lượt `PLAT-M3` (#185), đã kết thúc — PR "#189" đã merge vào master.
+
+canh_bao_moi_truong_luc_cap: >-
+  `doctor` trong container của phiên này báo `codex` là SAP_HET_HAN (ảnh chụp
+  `CODEX_AUTH_JSON` cũ ~99h, refresh token xoay vòng nên bản trong biến có thể đã bị vô
+  hiệu). Lease này vẫn có hiệu lực — nó là bản ghi THẨM QUYỀN, không phải bản ghi "đã chạy" —
+  nhưng phải kiểm lại đường codex TRƯỚC khi cấp lease REVIEWER, kẻo cấp một lease cho một
+  công cụ không khởi động được. `codex login status` KHÔNG trả lời được câu đó (nó chỉ kiểm
+  tệp đọc được); đường đo thật là `launcher.py doctor --kiem-song`.

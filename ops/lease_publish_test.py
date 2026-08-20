@@ -1580,6 +1580,75 @@ def t37_goi_tai_ve_phai_qua_DOI_CHIEU_BAM_truoc_khi_chay():
     bang(not loi, "cổng đối chiếu băm không cưỡng chế:\n  - " + "\n  - ".join(loi))
 
 
+@ca
+def t38_bam_phai_dung_khi_DUONG_DAN_co_dau_cheo_nguoc():
+    """Cổng băm phải cho kết quả ĐÚNG khi đường dẫn gói chứa dấu chéo ngược.
+
+    CA NÀY SINH TỪ MỘT LƯỢT WINDOWS ĐỎ THẬT — và đỏ vì CHÍNH BẢN VÁ băm vừa thêm, không
+    phải vì gói sai. Lượt `32371632630`, job `96433323614`, bước `cài actionlint`:
+
+        cai_actionlint: bam goi KHONG KHOP:
+          mong '7f12f1801bca3d480d67aaf7774f4c2a6359a3ca8eebe382c95c10c9704aa731'
+          thuc '\7f12f1801bca3d480d67aaf7774f4c2a6359a3ca8eebe382c95c10c9704aa731'
+                ^ đúng MỘT ký tự: một dấu chéo ngược ở đầu
+
+    Băm khớp từng ký tự còn lại. Thứ sai là **định dạng đầu ra của `sha256sum`**: GNU
+    coreutils THOÁT cả dòng khi TÊN TỆP chứa dấu chéo ngược (hoặc xuống dòng) — nó thêm
+    `\` vào đầu dòng rồi escape tên. Đường dẫn runner Windows là `D:\a\_temp/...` nên
+    dính đúng luật ấy, và `cut -d" " -f1` lấy về băm CÓ THÊM một ký tự.
+
+    Cùng họ với những bài học escaping đã ghi trong `CLAUDE.md`: **một lớp mà ta không coi
+    là lớp**. Ở đây lớp ấy là định dạng đầu ra của chính công cụ đo.
+
+    Chữa: đọc từ **stdin** (`sha256sum < tệp`) — đầu ra không còn tên tệp thì không còn gì
+    để thoát. Không phải "gỡ dấu chéo ở đầu": đó lại là vá theo HÌNH DẠNG, mà tên tệp có
+    xuống dòng còn làm đầu ra méo kiểu khác.
+
+    ĐO ĐƯỢC TRÊN LINUX, không cần Windows: dấu chéo ngược là ký tự HỢP LỆ trong tên tệp
+    POSIX, nên `sha256sum 'co\cheo.bin'` in ra `\<băm>` y hệt. Ca này dựng đúng tình
+    huống đó.
+    """
+    import os
+    import shutil
+    import subprocess
+    import tempfile
+    from pathlib import Path as _P
+
+    kich = HERE.parent / "ops" / "cai_actionlint.sh"
+    bang(kich.is_file(), f"không thấy {kich}")
+    bash = shutil.which("bash")
+    bang(bash, "KHÔNG ĐO ĐƯỢC: thiếu `bash`")
+
+    if os.name == "nt":
+        # Windows KHÔNG cho dấu chéo ngược trong TÊN tệp (nó là dấu phân cách), nhưng
+        # đường dẫn runner tự nó đã có — tức ca thật đã chạy ở đó. Ở đây dựng bản POSIX.
+        bang(True, "")
+        return
+
+    VER = "1.7.7"
+    with tempfile.TemporaryDirectory() as tam:
+        tam = _P(tam)
+        goc = _goi_actionlint_gia(tam, VER, f"#!/bin/sh\necho {VER}")
+        # TÊN TỆP chứa dấu chéo ngược — hợp lệ trên POSIX, và là thứ làm `sha256sum`
+        # thoát cả dòng đầu ra.
+        goi = tam / "co\\cheo.tar.gz"
+        goi.write_bytes(goc.read_bytes())
+
+        mt = dict(os.environ)
+        mt.update({"AL_VER": VER, "AL_DICH": str(tam / "dich"), "AL_NEN": "Linux",
+                   "AL_GOI": str(goi), "AL_SHA256": _bam_tep(goi)})
+        mt.pop("GITHUB_PATH", None)
+        r = subprocess.run([bash, str(kich)], env=mt, timeout=180,
+                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        rc, ra = r.returncode, (r.stdout or "")
+
+    bang(rc == 0,
+         f"gói ĐÚNG ở đường dẫn có dấu chéo ngược mà cổng băm từ chối (rc={rc}). `sha256sum`"
+         f" thoát cả dòng khi tên tệp chứa `\\` — đọc từ stdin thì đầu ra không có tên tệp. "
+         f"Đây đúng lỗi đã làm `gate (windows-latest)` đỏ ở lượt 32371632630:\n"
+         f"{ra.strip()[:400]}")
+
+
 def main() -> int:
     qua, hong = 0, []
     for fn in CA:

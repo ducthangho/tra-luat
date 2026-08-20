@@ -75,11 +75,20 @@ bam_ghim() {
 
 # `sha256sum` (GNU/Git Bash) hoac `shasum -a 256` (macOS). Thieu CA HAI thi FAIL-CLOSE:
 # mot cong tu tat khi thieu cong cu la cong khong ton tai dung luc no can nhat.
+# DOC TU STDIN, dung truyen TEN TEP. Ly do da tra gia tren Windows (luot 32371632630):
+# GNU coreutils THOAT dong ket qua khi TEN TEP chua dau cheo nguoc hoac xuong dong — no
+# them mot `\` vao DAU DONG roi escape ten. Duong dan runner Windows la `D:\a\_temp/...`
+# nen dau ra thanh:
+#     \7f12f180...  D:\\a\\_temp/actionlint/goi.zip
+# va `cut -d" " -f1` lay ve `\7f12f180...` — lech dung MOT KY TU so voi ban ghim. Cong bam
+# bao KHONG KHOP tren mot goi HOAN TOAN DUNG.
+# Tai lap duoc tren Linux: dau cheo nguoc la ky tu HOP LE trong ten tep POSIX (xem t38).
+# Doc tu stdin thi khong co ten tep trong dau ra, nen khong con gi de thoat.
 bam_cua() {
   if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum "$1" | cut -d" " -f1
+    sha256sum < "$1" | cut -d" " -f1
   elif command -v shasum >/dev/null 2>&1; then
-    shasum -a 256 "$1" | cut -d" " -f1
+    shasum -a 256 < "$1" | cut -d" " -f1
   else
     echo ""
   fi

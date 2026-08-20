@@ -44,3 +44,4 @@ canh_bao_song_song: >-
   .claude/dev/launcher*.py) và "#199" (PROTO-01-FIX). Giao write set với packet này được
   đo là RỖNG lúc cấp, nhưng phiên thi công PHẢI đo lại trước khi sửa dòng nào — kho đang
   có nhiều phiên chạy song song và trạng thái trôi nhanh.
+posted_comment_id: 5354557545   # workflow ghi, ĐỪNG sửa tay

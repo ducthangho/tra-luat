@@ -73,8 +73,61 @@ lease_expires_at_utc: '2026-08-21T15:40:00Z'
 run_minutes: 1440
 heartbeat_required_minutes: 30
 
-attempts_used: 0
-attempts_limit: 3
+# ═══ HAI TRỤC, CƯỠNG CHẾ ĐỘC LẬP — chốt của người giữ kho, 2026-08-20 ═══
+#
+# ĐỊNH NGHĨA (viết ra vì lượt trước phiên điều phối đã GỘP hai trục và đếm sai):
+#
+#   attempt = MỘT LẦN EXECUTOR TUYÊN BỐ DONE — tức trình ra một head nó tin là xong.
+#             KHÔNG phải một lần gọi tiến trình. Executor iterate bên trong bao nhiêu
+#             lần cũng được (code, tự review, vá, chạy lại) cho tới khi nó tuyên bố xong.
+#             CI ĐỎ sau khi đã tuyên bố DONE ⇒ attempt ấy ĐÃ TIÊU.
+#             Báo BỊ CHẶN (spec hỏng, chốt ngoài write set) KHÔNG tiêu attempt — không
+#             có head nào được trình ra.
+#
+#   call    = trục CHI PHÍ. Đếm lần gọi tiến trình / token. Cưỡng chế RIÊNG.
+#
+# VÌ SAO TÁCH: đây đúng doctrine kho đã có cho phía review — §10 định nghĩa một VÒNG là
+# "một lượt reviewer trả verdict trên một exact head", neo vào HEAD chứ không neo vào lần
+# gọi, và tách `review_rounds` (canon) khỏi `review_calls` (chi phí) kèm câu "hai trục
+# cưỡng chế độc lập, đừng gộp hai trục". Phía executor phải đối xứng.
+#
+# VÌ SAO KHÔNG ĐẾM LẦN GỌI: số lần gọi là TẠO TÁC CỦA HẠ TẦNG, không nói gì về công việc.
+# Lượt này phải gọi lại codex chỉ vì sandbox của nó mount `.git` read-only nên không
+# commit được. Một ngân sách phụ thuộc chuyện đó là đo NHIỄU, không đo hội tụ.
+#
+# TÍN HIỆU MÀ TRẦN NÀY BẢO VỆ: "hai lần anh nói XONG mà chưa xong" — đó mới là dấu hiệu
+# về CÁCH LÀM. Hết trần ⇒ DỪNG, xử cách khác, không tự nới.
+
+attempts_used: 1
+attempts_limit: 2
+attempts_so_sach:
+  - luot: 'lease r1'
+    tuyen_bo: blocked
+    ly_do: 'đặc tả #206 tự mâu thuẫn (lỗi của phiên điều phối) — không trình head nào'
+    tinh_attempt: false
+  - luot: 'lease r2, lần 1'
+    tuyen_bo: done
+    head: 3ad75553
+    ket_qua: 'Windows ĐỎ (t40 rc=32) — Ubuntu xanh sau khi loại flake curl(35)'
+    tinh_attempt: true
+  - luot: 'lease r2, lần 2'
+    tuyen_bo: 'đang chạy'
+    ghi_chu: 'tuyên bố DONE sẽ tiêu attempt thứ 2 — tức attempt CUỐI'
+
+executor_calls_used: 3
+executor_calls_limit: 8
+executor_calls_note: >-
+  Trục CHI PHÍ, độc lập với `attempts`. Cần vì "iterate bao nhiêu lần cũng được" không có
+  phanh nào nếu thiếu trục này. Đã tiêu: lượt r1 ~174k token, r2 lần 1 ~295k, r2 lần 2 đang
+  chạy. Cạn trần ⇒ checkpoint, KHÔNG tự nới.
+
+dieu_kien_ready_to_review: >-
+  CI XANH TRÊN EXACT HEAD là điều kiện CẦN để packet được coi là sẵn sàng review — chốt của
+  người giữ kho. Review trên một head CI đỏ thì verdict nói về một cây không ai chạy được.
+  Cụ thể phải có: lượt `workflow_dispatch` `ci.yml` trên đúng head, CẢ HAI job `success`, và
+  KHÔNG job nào có bước hỏng. "PR xanh" KHÔNG đủ — `ci.yml` chỉ chạy ubuntu cho PR thường.
+  Phiên điều phối KHÔNG cấp lease reviewer trước khi điều kiện này thoả, kể cả khi mọi phép
+  đo cục bộ đều xanh (đã trả giá: `40/40` cục bộ vẫn che một ca chỉ đỏ trên Windows).
 
 reviewer_provider: claude
 reviewer_note: >-

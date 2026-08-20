@@ -433,3 +433,49 @@ thiếu), rồi hoặc vá cho nó tất định, hoặc khai rõ `doctor` có t
 phải chịu được điều đó. Nếu chạy đủ nhiều lượt mà không tái phát thì đóng mục
 **kèm số lượt đã chạy** — đừng đóng bằng im lặng.
 
+---
+
+## 8. `PLAT-X2` (#195) LAND KÈM NỢ RE-AUDIT — đầu cuối chưa reviewer nào nhìn
+
+**Người giữ kho quyết định 20-08-2026**, sau khi cả hai trần review đã cạn: `2/2` vòng và
+`2/2` lời gọi codex. Đây là lựa chọn ở **Review Rescue Checkpoint**, không phải bỏ sót.
+
+**Đo được — cross-review đã chạy thật, hai vòng:**
+
+| vòng | head được review | verdict | kết quả |
+|---|---|---|---|
+| 1 | `c869796` | `changes_requested` | **P1**: diff mang 5 tệp trong khi write set khai 3 |
+| 2 | `23588c9` | `changes_requested` | **không P1**; **P2**: fixture kế thừa cấu hình ký commit của host |
+
+Cả hai finding **đã đóng** (`23588c9`, `17cb889`). Reviewer vòng 2 tự xác minh độc lập:
+`base..HEAD` đúng ba tệp · `c869796..HEAD` chỉ hai mục xoá, mã không đổi lén · mutant của
+CHÍNH NÓ khôi phục quét toàn `ops/leases/` làm `t32` đỏ · giả lập thiếu `actionlint` làm
+`t33` đỏ · worktree cuối phiên sạch, HEAD không đổi.
+
+**Nợ chính xác là gì — nói hẹp, đừng nói rộng hơn:** phần thêm **SAU** lần review cuối
+(`23588c9`) chưa reviewer nào nhìn. Phần ấy gồm:
+
+1. `17cb889` — vá P2: `-c commit.gpgsign=false` cho fixture, cộng lớp tự khoá đặt cấu hình
+   thù địch ngay trong kho tạm;
+2. revision 2 — thêm bước cài `actionlint` vào `ci.yml`, và chính mục nợ này.
+
+Không phần nào đụng **logic mang thẩm quyền** của cổng đăng lease. Đó là lý do người giữ
+chọn land kèm nợ thay vì override cả hai trần.
+
+**Một sự thật đắt trong đó, chép ra để khỏi phải trả lại:** lớp tự khoá ở (1) **bản đầu
+không có răng**. Nó đặt `gpg.program` — khoá của định dạng **openpgp** — trong khi máy dựng
+fixture khai `gpg.format=ssh`, nên nó bám vào một khoá KHÔNG AI ĐỌC. Đột biến `M5` (gỡ
+`-c commit.gpgsign=false`) **SỐNG SÓT**, `giet 0/1`. Một chốt chống "kế thừa cấu hình host"
+mà chính nó đọc sai khoá của host thì không chặn gì; và câu "ca này tự khoá chốt" trong bản
+nháp là **lời khai không có phép đo**. Sau khi ép `gpg.format=ssh` + `gpg.ssh.program`:
+`M5` giết 1/1.
+
+**Điều kiện coi là XONG:**
+
+- một lượt review chéo (`codex`, hoặc provider khác `claude`) trên **đúng đầu đã land** của
+  `#195`, kết luận không còn P1/P2 mở; **hoặc**
+- một packet kế thừa chạm lại `ops/lease_publish_test.py` hay bước `tìm lease vừa đổi` được
+  review chéo, và lượt ấy khai rõ đã soi cả phần nợ này.
+
+Cho tới lúc đó, assurance thực của `#195` là **`same_provider_approved` cho phần đuôi**,
+KHÔNG phải `cross_approved` cho toàn bộ. Đừng viện `#195` làm tiền lệ "đã được review chéo".

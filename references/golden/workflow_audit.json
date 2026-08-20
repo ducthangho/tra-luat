@@ -1216,11 +1216,7 @@
     "issues": [],
     "ok": true,
     "schema": "registry_validate.v1",
-    "warnings": [
-      "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:hygiene plan",
-      "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:hygiene reconcile",
-      "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:reconcile"
-    ]
+    "warnings": []
   },
   "schema": "workflow_audit.v2",
   "summary": {

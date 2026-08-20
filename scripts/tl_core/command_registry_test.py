@@ -135,7 +135,8 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         self.assertEqual(meta_all["nlm-get"]["nlm_fallback"], "unverified")
 
         self.assertIn("reconcile", meta_all)
-        self.assertEqual(meta_all["reconcile"]["risk"], "high")
+        self.assertEqual(meta_all["reconcile"]["risk"], "medium")
+        self.assertTrue(meta_all["reconcile"]["requires_confirm"])
         self.assertEqual(meta_all["reconcile"]["module"], "hygiene")
 
         self.assertIn("cache-build", meta_all)
@@ -148,13 +149,15 @@ class CommandRegistryCoverageTest(unittest.TestCase):
 
         self.assertIn("hygiene plan", NESTED_COMMAND_META)
         self.assertFalse(NESTED_COMMAND_META["hygiene plan"]["read_only"])
-        self.assertEqual(NESTED_COMMAND_META["hygiene plan"]["risk"], "high")
+        self.assertEqual(NESTED_COMMAND_META["hygiene plan"]["risk"], "medium")
+        self.assertTrue(NESTED_COMMAND_META["hygiene plan"]["requires_confirm"])
 
         self.assertIn("hygiene query", NESTED_COMMAND_META)
         self.assertTrue(NESTED_COMMAND_META["hygiene query"]["read_only"])
 
         self.assertIn("hygiene reconcile", NESTED_COMMAND_META)
-        self.assertEqual(NESTED_COMMAND_META["hygiene reconcile"]["risk"], "high")
+        self.assertEqual(NESTED_COMMAND_META["hygiene reconcile"]["risk"], "medium")
+        self.assertTrue(NESTED_COMMAND_META["hygiene reconcile"]["requires_confirm"])
 
     def test_validate_registry_full_tree_passes(self):
         # validate_registry trên live tree phải trả ok=True, issues=[]

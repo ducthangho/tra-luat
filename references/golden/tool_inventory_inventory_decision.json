@@ -829,8 +829,8 @@
         "generated": false,
         "idempotency_contract": null,
         "read_only": false,
-        "requires_confirm": false,
-        "risk": "high",
+        "requires_confirm": true,
+        "risk": "medium",
         "supports_dry_run": true,
         "workflow_task": null,
         "write_scope": "drive_registry"
@@ -849,8 +849,8 @@
         "generated": false,
         "idempotency_contract": null,
         "read_only": false,
-        "requires_confirm": false,
-        "risk": "high",
+        "requires_confirm": true,
+        "risk": "medium",
         "supports_dry_run": true,
         "workflow_task": null,
         "write_scope": "drive_registry"
@@ -1729,8 +1729,8 @@
         "generated": false,
         "idempotency_contract": null,
         "read_only": false,
-        "requires_confirm": false,
-        "risk": "high",
+        "requires_confirm": true,
+        "risk": "medium",
         "supports_dry_run": true,
         "workflow_task": null,
         "write_scope": "drive_registry"
@@ -2208,7 +2208,7 @@
     },
     "counts": {
       "generated_parsers": 154,
-      "high_risk": 32,
+      "high_risk": 29,
       "nested": 9,
       "total": 196,
       "write_commands": 104

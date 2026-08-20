@@ -1957,7 +1957,7 @@ COMMAND_META = {
     "reg-query":             _m("low", True, "local", False, False, False, None, None, False, "ops_misc"),
     "instructions":          _m("low", False, "local", False, False, False, None, None, False, "ops_misc"),
     "profile-file-add":      _m("high", False, "drive_registry_nlm", True, True, False, "ingest_local", "profile_ingest", True, "ingest_ops", nlm_fallback="defer"),
-    "reconcile":             _m("high", False, "drive_registry", False, True, False, None, None, False, "hygiene"),
+    "reconcile":             _m("medium", False, "drive_registry", True, True, False, None, None, False, "hygiene"),
     "cache-build":           _m("low", False, "local", False, False, False, None, None, False, "extract_cache"),
 }
 
@@ -1976,9 +1976,9 @@ NESTED_COMMAND_META = {
     "rasoat phuluc":      _m("low", False, "local", False, False, False, None, None, False, "lookup_ops"),
     # ── AG-T0-05: hygiene nested commands metadata ──
     "hygiene scan":       _m("low", True, "none", False, False, False, None, None, False, "hygiene"),
-    "hygiene plan":       _m("high", False, "drive_registry", False, True, False, None, None, False, "hygiene"),
+    "hygiene plan":       _m("medium", False, "drive_registry", True, True, False, None, None, False, "hygiene"),
     "hygiene query":      _m("low", True, "none", False, False, False, None, None, False, "hygiene"),
-    "hygiene reconcile":  _m("high", False, "drive_registry", False, True, False, None, None, False, "hygiene"),
+    "hygiene reconcile":  _m("medium", False, "drive_registry", True, True, False, None, None, False, "hygiene"),
 }
 
 

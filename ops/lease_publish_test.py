@@ -1565,7 +1565,7 @@ def t37_goi_tai_ve_phai_qua_DOI_CHIEU_BAM_truoc_khi_chay():
 
 @ca
 def t38_bam_phai_dung_khi_DUONG_DAN_co_dau_cheo_nguoc():
-    """Cổng băm phải cho kết quả ĐÚNG khi đường dẫn gói chứa dấu chéo ngược.
+    r"""Cổng băm phải cho kết quả ĐÚNG khi đường dẫn gói chứa dấu chéo ngược.
 
     CA NÀY SINH TỪ MỘT LƯỢT WINDOWS ĐỎ THẬT — và đỏ vì CHÍNH BẢN VÁ băm vừa thêm, không
     phải vì gói sai. Lượt `32371632630`, job `96433323614`, bước `cài actionlint`:
@@ -1683,15 +1683,21 @@ def t39_loai_archive_phai_do_NOI_DUNG_khong_doan_tu_ten():
 def t40_wrapper_phai_CAI_truoc_CHAY_va_giu_rc_cua_bo_test():
     """Chạy wrapper thật trong cây tạm và đo trạng thái, không mô phỏng kịch bản.
 
-    Cây tạm chứa chính wrapper + installer, một gói actionlint giả có hành vi thật, và
-    một selftest nhỏ tự tìm/call binary trên PATH rồi ghi marker. Ba hậu điều có răng:
+    Cây tạm chứa chính wrapper + installer, một gói actionlint có executable chạy thật,
+    và một selftest nhỏ tự tìm/call binary trên PATH rồi ghi marker. Ba hậu điều có răng:
 
     * gói đúng: test thấy binary đúng bản và marker xuất hiện;
     * installer sai bản: rc=7 và marker KHÔNG xuất hiện — test không chạy trước/cạnh lỗi;
     * test chủ động rc=23: wrapper trả đúng 23 — không pipeline nuốt mã thoát.
 
-    PATH đầu vào được chèn một `actionlint` trạng thái SAI bản. Installer đúng phải đặt
-    binary mới lên trước nó; xoá installer hoặc quên cập nhật PATH sẽ gọi đúng mồi sai ấy.
+    POSIX dùng shell stub trạng thái; Windows đóng gói lại chính `actionlint.exe` PE mà
+    wrapper ngoài vừa cài — không bắt Windows chạy một shell script không đuôi rồi gọi đó
+    là binary Windows. Cả hai nền đều đòi executable được tìm thấy nằm TRONG `AL_DICH`,
+    nên xoá installer hoặc quên cập nhật PATH vẫn chết kể cả mồi tình cờ cùng phiên bản.
+
+    PATH mồi được ghép BÊN TRONG Bash bằng `:`, không dùng `os.pathsep` của Python host
+    cho một giá trị mà Bash sẽ tiêu thụ. Mỗi nhánh trên đều chạy đủ ba hậu điều; không có
+    nhánh return/skip được harness đếm thành đạt.
     """
     import os
     import shutil
@@ -1714,42 +1720,96 @@ def t40_wrapper_phai_CAI_truoc_CHAY_va_giu_rc_cua_bo_test():
         shutil.copy2(wrapper, ops / wrapper.name)
         shutil.copy2(installer, ops / installer.name)
         (ops / "lease_publish_test.py").write_text(
-            """import os, pathlib, subprocess
-p = subprocess.run(["bash", "-c", "command -v actionlint && actionlint --version"],
-                   capture_output=True, text=True)
-lines = p.stdout.strip().splitlines()
-if p.returncode != 0 or not lines or lines[-1] != os.environ["AL_VER"]:
+            """import os, pathlib, shutil, subprocess, sys
+
+def sai(ly_do):
+    print(f"T40_STUB_SAI: {ly_do}", file=sys.stderr)
     raise SystemExit(32)
+
+duong = shutil.which("actionlint")
+if not duong:
+    sai("shutil.which khong tim thay actionlint")
+dich = pathlib.Path(os.environ["AL_DICH"]).resolve()
+binary = pathlib.Path(duong).resolve()
+try:
+    binary.relative_to(dich)
+except ValueError:
+    sai(f"PATH tro ra ngoai AL_DICH: {binary} (dich {dich})")
+p = subprocess.run([duong, "--version"], capture_output=True, text=True)
+lines = p.stdout.strip().splitlines()
+if p.returncode != 0 or not lines or lines[0] != os.environ["AL_VER"]:
+    sai(f"version rc={p.returncode}, stdout={p.stdout!r}, stderr={p.stderr!r}")
 pathlib.Path(os.environ["WRAPPER_MARKER"]).write_text("da-chay", encoding="utf-8")
 print("WRAPPER_SELFTEST_OK")
 raise SystemExit(int(os.environ.get("WRAPPER_TEST_RC", "0")))
 """, encoding="utf-8")
 
-        # Đồ giả mô phỏng TRẠNG THÁI "có binary nhưng sai bản", không trả lời theo lượt.
-        # Wrapper đúng phải cài rồi đặt binary đúng LÊN TRƯỚC mồi này trong PATH.
+        # Đồ mồi mô phỏng TRẠNG THÁI "PATH đã có actionlint ở nơi khác", không trả lời
+        # theo lượt. Stub còn đòi đường tìm được thuộc AL_DICH, nên mồi cùng phiên bản
+        # cũng không thể diễn kịch để làm ca xanh.
         path_ban_dau = goc / "path-ban-dau"
         path_ban_dau.mkdir()
-        moi = path_ban_dau / "actionlint"
-        moi.write_text("#!/bin/sh\necho 0.0.0\n", encoding="utf-8")
-        moi.chmod(0o755)
-        mt_goc = dict(os.environ,
-                      PATH=f"{path_ban_dau}{os.pathsep}{os.environ.get('PATH', '')}",
-                      AL_VER=VER, AL_NEN="Linux")
+        if os.name == "nt":
+            # Nhánh Windows đo executable Windows THẬT. Wrapper ngoài phải vừa cài nó
+            # để t33 chạy được; thiếu/không đúng bản là ĐỎ, không return sớm.
+            actionlint_ngoai = shutil.which("actionlint")
+            bang(actionlint_ngoai and actionlint_ngoai.lower().endswith(".exe"),
+                 "[Windows] KHÔNG ĐO ĐƯỢC: PATH không có `actionlint.exe` thật")
+            do_ban = subprocess.run([actionlint_ngoai, "--version"],
+                                    capture_output=True, text=True)
+            dong = (do_ban.stdout or "").strip().splitlines()
+            bang(do_ban.returncode == 0 and dong and dong[0] == VER,
+                 f"[Windows] actionlint ngoài không đúng {VER}: rc={do_ban.returncode}, "
+                 f"stdout={do_ban.stdout!r}, stderr={do_ban.stderr!r}")
+
+            # Gói dương chứa đúng loại file của archive chính thức: `actionlint.exe`.
+            # Copy PE thật thay vì đổi đuôi một shell script rồi giả định Windows chạy nó.
+            import zipfile
+            goi_dung = goc / "actionlint-windows-dung.zip"
+            with zipfile.ZipFile(goi_dung, "w", zipfile.ZIP_DEFLATED) as z:
+                z.write(actionlint_ngoai, "actionlint.exe")
+            shutil.copy2(actionlint_ngoai, path_ban_dau / "actionlint.exe")
+            nen = "Windows"
+        else:
+            moi = path_ban_dau / "actionlint"
+            moi.write_text("#!/bin/sh\necho 0.0.0\n", encoding="utf-8")
+            moi.chmod(0o755)
+            thu_muc_dung = goc / "goi-dung"
+            thu_muc_dung.mkdir()
+            goi_dung = _goi_actionlint_gia(
+                thu_muc_dung, VER, f"#!/bin/sh\necho {VER}")
+            nen = "Linux"
+
+        mt_goc = dict(os.environ, AL_VER=VER, AL_NEN=nen)
         mt_goc.pop("GITHUB_PATH", None)
 
-        def chay(goi, dich, marker, rc_test=None):
+        # `subprocess` đầu tiên cần PATH native để tìm Git Bash; chỉ sau khi đã ở TRONG
+        # Bash mới ghép mồi bằng dấu `:`. `exec` giữ rc wrapper làm rc trực tiếp của r.
+        lenh_wrapper = r"""set -euo pipefail
+moi="$1"
+wrapper="$2"
+bash_that="$3"
+if command -v cygpath >/dev/null 2>&1; then
+  moi="$(cygpath -u "$moi")"
+  wrapper="$(cygpath -u "$wrapper")"
+  bash_that="$(cygpath -u "$bash_that")"
+fi
+export PATH="$moi:$PATH"
+exec "$bash_that" "$wrapper"
+"""
+
+        def chay(goi, dich, marker, rc_test=None, ver=VER):
             mt = dict(mt_goc, AL_GOI=str(goi), AL_DICH=str(dich),
-                      AL_SHA256=_bam_tep(goi), WRAPPER_MARKER=str(marker))
+                      AL_SHA256=_bam_tep(goi), WRAPPER_MARKER=str(marker), AL_VER=ver)
             if rc_test is not None:
                 mt["WRAPPER_TEST_RC"] = str(rc_test)
-            r = subprocess.run([bash, str(ops / wrapper.name)], cwd=goc, env=mt,
-                               timeout=180, stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT, text=True)
+            r = subprocess.run(
+                [bash, "-c", lenh_wrapper, "t40", str(path_ban_dau),
+                 str(ops / wrapper.name), bash],
+                cwd=goc, env=mt, timeout=180, stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT, text=True)
             return r.returncode, (r.stdout or "")
 
-        thu_muc_dung = goc / "goi-dung"
-        thu_muc_dung.mkdir()
-        goi_dung = _goi_actionlint_gia(thu_muc_dung, VER, f"#!/bin/sh\necho {VER}")
         marker_dung = goc / "marker-dung"
         rc, ra = chay(goi_dung, goc / "dich-dung", marker_dung)
         bang(rc == 0 and marker_dung.is_file()
@@ -1758,11 +1818,18 @@ raise SystemExit(int(os.environ.get("WRAPPER_TEST_RC", "0")))
              f"wrapper không cài rồi chạy test thật: rc={rc}, marker={marker_dung.exists()}:\n"
              f"{ra.strip()[:400]}")
 
-        thu_muc_sai = goc / "goi-sai"
-        thu_muc_sai.mkdir()
-        goi_sai = _goi_actionlint_gia(thu_muc_sai, VER, "#!/bin/sh\necho 0.0.0")
+        if os.name == "nt":
+            # Cùng PE khai 1.7.7 nhưng hợp đồng đòi 0.0.0: trạng thái sai, không phải
+            # mock trả lời theo số lượt. Installer phải tự đo mismatch và trả 7.
+            goi_sai, ver_sai = goi_dung, "0.0.0"
+        else:
+            thu_muc_sai = goc / "goi-sai"
+            thu_muc_sai.mkdir()
+            goi_sai = _goi_actionlint_gia(
+                thu_muc_sai, VER, "#!/bin/sh\necho 0.0.0")
+            ver_sai = VER
         marker_sai = goc / "marker-sai"
-        rc, ra = chay(goi_sai, goc / "dich-sai", marker_sai)
+        rc, ra = chay(goi_sai, goc / "dich-sai", marker_sai, ver=ver_sai)
         bang(rc == 7 and not marker_sai.exists(),
              f"installer sai phải dừng TRƯỚC selftest: rc={rc}, "
              f"marker={marker_sai.exists()}:\n{ra.strip()[:400]}")

@@ -1,0 +1,98 @@
+# Lease REVIEWER — `PLAT-X4` (#203), lượt **3**. Neo exact head a09aae62.
+#
+# LƯỢT NÀY VƯỢT TRẦN 2 VÒNG của `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10.
+# Đọc `nang_tran` bên dưới TRƯỚC khi đọc gì khác.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 203
+packet_id: PLAT-X4
+lease_id: plat-x4-review-3-codex-20260820
+revision: 1
+
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+
+reviewed_sha_required: a09aae627533f59e6b2e817858a6db50b999d41c
+branch: claude/plat-x4-exec-1
+base_sha: 909d3e171d7b37a734c1100b3fdc3c48e1b66d19
+target_branch_neu_land: master
+target_pull_request: 205
+scope_files: 4
+
+pham_vi_soi:
+  kieu: delta
+  tu_sha: 1d37861ec419d1c3a25cfbdb1b07689bbf42504c
+  den_sha: a09aae627533f59e6b2e817858a6db50b999d41c
+  tep: ['ops/cai_actionlint.sh', 'ops/lease_publish_test.py']
+  do_lon: '+100 / -16'
+  ghi_chu: >-
+    Soi DELTA, không soi lại toàn packet — hai lượt trước đã phủ phần còn lại và cả hai đều
+    có verdict trong `ops/reviews/`. Bối cảnh toàn bộ vẫn được cấp (`diff_toanbo.patch`).
+
+prompt_path: ops/prompts/plat-x4-review-3-codex-20260820.md
+prompt_sha256_required: 2bf4733c7c285868271e4d933d7fd61a6b7c65ad9f909c8362d63d04e2849f18
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-20 ("nới trần, chạy vòng 3 soi delta rev3")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+nang_tran:
+  tran_cu: 2
+  tran_moi: 3
+  ai_nang: ducthangho
+  khi_nao: 'human checkpoint sau verdict lượt 2 (changes_requested)'
+  can_cu: >-
+    §10 `KE_HOACH_THI_CONG_DA_PROVIDER.md` liệt kê "human checkpoint" và "Remediation Packet"
+    là đường sau vòng hai chưa approve. Chủ kho đã chọn Remediation Slice, rồi nới trần để soi
+    RIÊNG phần vá.
+  trang_thai_cuong_che_cua_tran: >-
+    NÓI CHO ĐÚNG: trần vòng hiện là KỶ LUẬT VẬN HÀNH, CHƯA CÓ CƯỠNG CHẾ MÁY. Chính §10 khai
+    nợ ấy: `review_rounds_used` chỉ được khởi tạo và tăng, không có `review_rounds_limit` và
+    không nơi nào đọc nó để chặn; tiền lệ `W0-R1` đã chạy 4 vòng mà không gì dừng lại. Nên
+    "nới trần" ở đây là một quyết định GHI LẠI ĐƯỢC của chủ kho, không phải mở một cổng máy.
+  khong_lach_budget: >-
+    §10 cấm "đổi conversation, prompt hoặc tên Packet để lách review budget". Lượt này KHÔNG
+    làm thế: cùng packet `#203`, cùng PR `#205`, cùng nhánh, khai thẳng là lượt 3 trong
+    `lease_id` lẫn trong prompt. Ai đọc sổ sẽ thấy đúng ba lượt review, không phải hai.
+
+leased_at_utc: '2026-08-20T15:05:00Z'
+lease_expires_at_utc: '2026-08-21T15:05:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+
+review_rounds_limit: 3
+review_rounds_used_truoc_luot_nay: 2
+review_calls_limit: 5
+review_calls_used_truoc_luot_nay: 3
+
+review_dau_vao:
+  lease_id: plat-x4-review-2-codex-20260820
+  reviewed_sha: 1d37861ec419d1c3a25cfbdb1b07689bbf42504c
+  verdict: changes_requested
+  finding_phai_dong:
+    - id: t34-rang-theo-tep-khong-theo-job
+      mo_ta: 'installer ở JOB KHÁC vẫn cho 38/38 rc=0 — mỗi job một runner, PATH không truyền qua'
+    - id: duoi-goi-lay-ca-duong-dan-khi-ten-khong-co-dau-cham
+      mo_ta: '`${TEN_GOI##*.}` trả cả đường dẫn ⇒ `cp` chết rc=5 trên tar hợp lệ tên `nodot`'
+
+canh_bao_cho_reviewer: >-
+  Packet này có VẾT: HAI lần liên tiếp người vá đóng đúng lỗ được chỉ ra rồi để hở một lỗ CÙNG
+  HỌ ngay cạnh (lượt 1 → đổi CHỖ khớp chuỗi; lượt 2 → đổi MỨC ràng buộc). Câu hỏi đáng giá nhất
+  ở lượt này là "bản vá thứ ba có phải là lần thứ ba không", chứ không phải "hai finding đóng
+  chưa". Prompt nêu 7 hướng cụ thể; đừng dừng ở đó.
+
+kiem_duong_codex_truoc_khi_cap: >-
+  ĐÃ KIỂM bằng lời gọi THẬT (`codex exec`, rc=0, có phản hồi + `tokens used`) ngay trước khi cấp.
+  Nhãn `SAP_HET_HAN` của `doctor` (ảnh chụp 107h) SAI lần thứ ba liên tiếp trong đợt này.

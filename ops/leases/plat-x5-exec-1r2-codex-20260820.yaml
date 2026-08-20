@@ -1,0 +1,124 @@
+# Lease EXECUTOR — `PLAT-X5` (#206), lượt 1/3. Neo head xuất phát a09aae62.
+#
+# ĐẢO VAI so với các packet trước: executor `codex`, reviewer `claude`. Vẫn cross-provider ⇒
+# §8 thoả.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 206
+packet_id: PLAT-X5
+phase_key: PLAT-X5
+revision: 2
+generation: 1
+lease_id: plat-x5-exec-1r2-codex-20260820
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+model_ghi_chu: >-
+  "Mức cao nhất" ĐO ĐƯỢC, không phải khai theo cảm tính. `model_reasoning_effort` được cưỡng
+  chế ở phía API chứ KHÔNG ở CLI: banner của `codex exec` IN LẠI NGUYÊN VĂN mọi giá trị truyền
+  vào (thử `sieu-cao-vo-doi` thì banner vẫn in `reasoning effort: sieu-cao-vo-doi`), nên đọc
+  banner là ĐOÁN. Thứ phân biệt là MÃ THOÁT: giá trị bịa ⇒ rc=1 kèm ERROR từ API; `max`,
+  `xhigh`, `high` ⇒ rc=0. Vậy `max` là thật và là mức cao nhất.
+  Model: `gpt-5.6-sol` là mặc định của tài khoản. KHÔNG liệt kê được model phi tương tác
+  (`codex models` đòi TTY), nên KHÔNG khai là "model mạnh nhất hiện có" — chỉ khai là mặc định.
+assurance_target: cross_approved
+access: read-write
+
+spec_path: null
+spec_note: >-
+  AUTHORITY LÀ THÂN ISSUE "#206". Bản chiếu đọc offline được cấp trong sandbox
+  (`PACKET_ISSUE_206.md`), đã đối chiếu khớp từng byte sau khi đăng.
+
+write_set:
+  - ops/lease_publish_test.py
+  - ops/cai_actionlint.sh
+  - .github/workflows/ci.yml
+  - .github/workflows/ops-publish-lease.yml
+  - planned:ops/chay_lease_publish_test.sh
+
+branch: codex/plat-x5-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: a09aae627533f59e6b2e817858a6db50b999d41c
+base_sha: a09aae627533f59e6b2e817858a6db50b999d41c
+start_from_sha: a09aae627533f59e6b2e817858a6db50b999d41c
+base_ghi_chu: >-
+  BASE LÀ MỘT PR CHƯA MERGE — nói thẳng vì nó có hệ quả. `ops/cai_actionlint.sh` chỉ tồn tại
+  trên nhánh của `#203` (PR "#205"), CHƯA có trên master (đo: `git cat-file -e
+  origin/master:ops/cai_actionlint.sh` thất bại). Wrapper phải gọi lại script ấy, nên packet
+  này XẾP TẦNG trên `a09aae62`. Thứ tự land: "#205" trước, rồi mới tới đây. Nếu người giữ kho
+  quyết KHÔNG land "#205" (Stable Slice) thì nhánh này phải rebase.
+
+prompt_path: ops/prompts/plat-x5-exec-1r2-codex-20260820.md
+prompt_sha256_required: 4bab67ea768f4f94e52d56a9ad90990ee273f0d511a7349a20a3ef7aeb0beddf
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-20 ("Thêm file vào write set #206" — phân xử tại checkpoint phạm vi)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_note: >-
+  Phiên ghi lease này KHÔNG thi công packet — executor là `codex`. Nhưng nó LÀ phiên đã thi công
+  `#203`, tức packet mà `#206` sinh ra để sửa hướng. Khai ra để reviewer soi kỹ phần đặc tả:
+  người viết prompt executor chính là người đã ba lần vá hỏng cùng một chỗ.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-20T15:40:00Z'
+lease_expires_at_utc: '2026-08-21T15:40:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: claude
+reviewer_note: >-
+  ĐẢO VAI: executor `codex` ⇒ reviewer phải khác nền ⇒ `claude`. §8 đòi cross-provider cho
+  phạm vi workflow, và packet này chạm `.github/workflows/**`.
+review_rounds_limit: 2
+
+muc_tieu:
+  - 'Wrapper `ops/chay_lease_publish_test.sh` gộp cài + chạy vào MỘT lời gọi; GỌI LẠI `ops/cai_actionlint.sh`, không chép'
+  - 'Hai workflow chỉ còn gọi wrapper'
+  - 'QUYẾT LẠI `t34` theo một trong ba lựa chọn ở §4 Issue, kèm biện hộ; nếu thu hẹp thì KHAI THẲNG nó vẫn thua `python -m`'
+  - 'Nợ "CI có thật sự chạy gate không" phải được KHAI TÊN, không để thành khoảng lặng'
+  - 'Ba phản chứng vòng 3 ĐỎ hoặc VÔ NGHĨA-có-giải-thích; hai phản chứng vòng 2 vẫn ĐỎ'
+
+gate_bat_buoc:
+  - 'ops/lease_publish_test.py -> rc=0, N/N hai số bằng nhau, không tụt dưới 38 ca'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'mỗi chốt mới có đột biến giết 1/1, chạy trên BẢN SAO TẠM'
+  - 'lượt Windows gọi tay workflow_dispatch trên ref của nhánh (ci.yml chỉ chạy ubuntu cho PR thường)'
+
+dieu_kien_dung:
+  - 'Gặp lại ĐÚNG hình dạng ấy lần thứ tư (một dạng cú pháp shell mới làm phép kiểm thua) ⇒ DỪNG, không vá, báo cáo — dừng đúng lúc ở đây có giá trị hơn một bản vá nữa'
+  - 'Chốt phải nằm ngoài write set ⇒ DỪNG, xuất handoff, mở packet riêng'
+  - 'Thấy một tiêu chí ở §5 Issue là sai ⇒ DỪNG và mở revision, không tự đổi giữa đường'
+
+khong_chay_song_song_voi: >-
+  `#203` (PR "#205") — write set giao nhau ở `ops/lease_publish_test.py` và cả hai workflow.
+  `#203` hiện KHÔNG có phiên thi công nào đang chạy; nếu mở lại thì phải dừng một trong hai.
+
+vi_sao_r2: >-
+  Lượt 1 KHÔNG sinh commit nào — executor `codex` dừng theo ĐIỀU KIỆN PHẠM VI, và dừng ĐÚNG.
+  Nó phát hiện `#206` tự mâu thuẫn: §5 đòi xử "ba phản chứng vòng 3" nhưng chỉ liệt kê nhóm
+  `t34`, trong khi finding thứ ba (ZIP) cần sửa `ops/cai_actionlint.sh` — ngoài write set. Nó
+  TÁI HIỆN được ZIP (`zip không đuôi` rc=5, `.ZIP` rc=5) rồi dừng thay vì lách phạm vi.
+  Khuyết tật thuộc về NGƯỜI VIẾT ĐẶC TẢ, không thuộc executor: người viết đếm PHẢN CHỨNG (3)
+  còn người đọc đếm FINDING (3), và hai bộ ba ấy khác nhau. Comment chốt trên `#203` lại nói
+  "ba finding vòng 3 chuyển sang #206", tức hứa cả ZIP mà write set không kham được.
+  Phân xử của người giữ kho: thêm `ops/cai_actionlint.sh` vào write set, `#206` xử cả ba.
+  Chi phí lượt 1: 174.290 token, 54 lượt exec, 0 dòng mã — nhưng nó bắt lỗi đặc tả TRƯỚC khi
+  có mã, rẻ hơn một vòng review.
+
+giao_write_set_voi_203: >-
+  `ops/cai_actionlint.sh` thuộc write set của `#203`. `#203` hiện ĐÓNG BĂNG (không phiên nào
+  chạy) và `#206` xếp tầng trên chính head của nó, nên không va chạm thực tế. Nếu `#203` mở
+  lại thì PHẢI DỪNG một trong hai — ghi ra để lần sau không ai phải suy.
+
+baseline_luot_1_do_duoc: '38/38 rc=0 · actionlint rc=0 cả 5 workflow · worktree sạch, HEAD không đổi'

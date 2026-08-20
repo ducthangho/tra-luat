@@ -5337,8 +5337,17 @@ def t97_nap_ban_sao_khong_duoc_an_phai_BYTECODE_CU():
 
 
 @ca
-def t138_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec():
+def t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec():
     """`mcp-endpoint` — PLAT-M4 (#194). Đo đầu kia của dây, phân loại bằng HEADER.
+
+    SỐ CA LÀ `t143`, KHÔNG PHẢI `t138` — và đây là va chạm THẬT, không phải chuyện đặt
+    tên. Packet này viết ca ấy khi `t137` còn là số cuối; trong lúc nó chờ, `#196` (PR
+    "#202") land bốn ca `t138`–`t142`. Hai nhánh cùng chọn `t138`, và git merge SẠCH: hai
+    hàm khác tên đầy đủ nên không dòng nào đụng dòng nào. Suite vẫn chạy cả hai (decorator
+    `@ca` giữ đối tượng hàm), nên KHÔNG cổng nào đỏ — chỉ có `--lap-ca t138` là mơ hồ và
+    bảng đột biến trỏ vào một cái tên không còn duy nhất.
+    Ghi ra vì đúng lớp "merge sạch là bảo đảm VĂN BẢN, không phải NGỮ NGHĨA" mà §5.1
+    protocol nói: thứ bắt được nó là ĐỌC, không phải cổng.
 
     VÌ SAO CÓ CA NÀY. Trước PLAT-M4, cả hai bước của đường MCP (`.mcp.json` và
     `claude mcp get`) đều hỏi phía CLI — DÂY NỐI. Đo được trong chính container này:
@@ -6134,33 +6143,33 @@ DOT_BIEN = [
     ("mcp_endpoint_tinh_vao_LAM_DUOC_VIEC",
      ('    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho"}',
       '    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho", "mcp-endpoint"}'),
-     ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec", "t138_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+     ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec", "t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     # --- SÁU ĐỘT BIẾN CHO `_do_mcp_endpoint` (PLAT-M4, #194) -------------------------
     ("mcp_endpoint_phan_loai_theo_MA_thay_vi_HEADER",
      ('            co_gh_ep = any(k.lower().startswith("x-github") for k in r.headers)',
-      '            co_gh_ep = 200 <= int(r.status) < 300'), ["t138_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+      '            co_gh_ep = 200 <= int(r.status) < 300'), ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_endpoint_toi_duoc_la_LAM_DUOC_VIEC",
      ('        return (("mo" if co_gh_ep else "chan"), f"HTTP {e.code}{vi_sao_ep}", False)',
       '        return (("mo" if co_gh_ep else "chan"), f"HTTP {e.code}{vi_sao_ep}", True)'),
-     ["t138_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_endpoint_gop_khong_do_duoc_vao_chan",
      ('        return ("khong_do_duoc", f"{type(e).__name__} khi POST initialize", False)',
-      '        return ("chan", f"{type(e).__name__} khi POST initialize", False)'), ["t138_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+      '        return ("chan", f"{type(e).__name__} khi POST initialize", False)'), ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_endpoint_bo_kiem_scheme_cho_phep",
      ('    if not str(url).lower().startswith(("http://", "https://")):',
-      '    if False:'), ["t138_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+      '    if False:'), ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_endpoint_in_token_vao_mo_ta",
      ('        return (("mo" if co_gh_ep else "chan"), f"HTTP {e.code}{vi_sao_ep}", False)',
       '        return (("mo" if co_gh_ep else "chan"), f"HTTP {e.code}{vi_sao_ep} [{dau}]", False)'),
-     ["t138_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_endpoint_nuot_ly_do_o_chuoi_tom_tat",
      ('        if co_ep is not True:\n            canh_ep = f" · mcp-endpoint: {mt_ep}"',
       '        if False:\n            canh_ep = f" · mcp-endpoint: {mt_ep}"'),
-     ["t138_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_endpoint_chua_biet_URL_bi_ke_thanh_HONG",
      ('        duong.append(("mcp-endpoint", None, "khong biet URL — .mcp.json chua khai server"))',
       '        duong.append(("mcp-endpoint", False, "khong biet URL — .mcp.json chua khai server"))'),
-     ["t138_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_ket_xuat_gop_chua_do_duoc_thanh_hong",
      ('    return "chua-do-duoc" if ok is None else ("OK" if ok else "khong")',
       '    return "OK" if ok else "khong"'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),

@@ -1,0 +1,104 @@
+# Lease EXECUTOR — `PLAT-X2` (#195), lượt 1/3. Neo head xuất phát 50d8d12e.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Bản chiếu trên "#195" sẽ do
+# `.github/workflows/ops-publish-lease.yml` đăng — NHƯNG chính cổng ấy đang HỎNG, và đó
+# là thứ packet này sửa. Nói thẳng vòng luẩn quẩn ra đây thay vì để người sau tự đoán:
+# lease này KHÔNG có bản chiếu cho tới khi bản vá land.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 195
+packet_id: PLAT-X2
+phase_key: PLAT-X2
+revision: 1
+generation: 1
+lease_id: plat-x2-exec-1-claude-20260820
+
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+assurance_target: cross_approved
+access: read-write
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/lease_publish_test.py
+  - .gitignore
+write_set_note: >-
+  `.gitignore` là NGOẠI LỆ KHAI TRƯỚC, đúng một dòng — lý do ở §6 thân Issue. KHÔNG đụng
+  `ops/lease_publish.py`: logic cổng không sai, sai ở chỗ CHỌN tệp để kiểm; và tệp ấy là
+  write set của "#188" (PLAT-X1), nên hai packet cố ý KHÔNG giao nhau.
+
+branch: claude/plat-x2-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: 50d8d12e146792368e7100f732ff15a8d32fe48d
+reviewed_sha_note: >-
+  Head XUẤT PHÁT, không phải head đưa ra review — cùng quy ước với lease exec của wp55.
+base_sha: 50d8d12e146792368e7100f732ff15a8d32fe48d
+start_from_sha: 50d8d12e146792368e7100f732ff15a8d32fe48d
+
+prompt_path: ops/prompts/plat-x2-exec-1-claude-20260820.md
+prompt_sha256_required: c074027f82ac7e6f8e0abd99423b0c1586e2c0a78d8eae19191f4e3e7a9697a7
+
+granted_by: ducthangho          # CHỦ KHO — §2 "người có thẩm quyền"
+granted_on_instruction: 'direct, in-session, 2026-08-20 ("Tôi theo hướng b")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_note: >-
+  Phiên ghi lease này CHÍNH LÀ phiên thi công, và cũng là phiên vấp phải lỗi mà packet này
+  sửa. Khai ra để reviewer soi kỹ: người báo lỗi, người viết spec, người vá và người ghi
+  lease đều là một. `granted_by` là `ducthangho`, duyệt trực tiếp trong phiên.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-20T07:30:00Z'
+lease_expires_at_utc: '2026-08-21T07:30:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+reviewer_note: 'executor là claude ⇒ §8 bắt reviewer khác nhà cung cấp'
+review_rounds_limit: 2
+
+muc_tieu:
+  - 'Bỏ đường dự phòng quét CẢ thư mục ở bước `tìm lease vừa đổi`'
+  - 'Nhánh mới ⇒ so với `git merge-base origin/$MAC_DINH $NAY`; push thường ⇒ vẫn diff before..sha'
+  - 'Không phân giải được mốc so ⇒ ĐỎ (bỏ `|| true`), đúng doctrine ba trạng thái'
+  - 'Đưa `${{ }}` ra khỏi thân `run`, khai qua `env:`'
+  - '.gitignore: thêm `.claude/.packet_state/`'
+  - 'Phản chứng TRÍCH THÂN BƯỚC TỪ CHÍNH YAML, chạy trên kho git tạm; mỗi đột biến giết 1/1'
+
+gate_bat_buoc:
+  - 'ops/lease_publish_test.py -> rc=0, N/N hai số bằng nhau, không tụt dưới 28 ca'
+  - 'actionlint trên workflow -> rc=0, fail-close khi thiếu công cụ'
+  - 'lease_publish.py check trên MỘT lease thật -> rc không đổi so với nền'
+  - 'git status --short rỗng sau khi chạy test'
+  - 'git diff --stat 50d8d12..<head-moi> -> ĐÚNG 3 tệp'
+
+dieu_kien_dung:
+  - 'Chốt phải nằm ngoài ba tệp write set ⇒ DỪNG, xuất handoff, mở packet riêng'
+  - 'Cùng hình dạng lỗi lần thứ hai ⇒ quyết định về CÁCH LÀM, không mở vòng vá thứ ba'
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-20T07:28:15Z'
+master_sha_at_grant: 50d8d12e146792368e7100f732ff15a8d32fe48d
+lease_song_khac_luc_cap: >-
+  ĐO ĐƯỢC lúc cấp: lease `plat-m4-exec-1-claude-20260820` (#194) đang mở, nhưng write set
+  của nó là `.claude/dev/launcher*.py` — GIAO RỖNG với write set này. Hai writer slot là
+  trần, và đây đúng là slot thứ hai.
+
+bang_chung_loi:
+  luot_chay: 32342373756
+  ket_luan: 'failure, rc=8, 2026-08-20T07:05Z, push nhánh ops/lease-plat-m4-exec-1'
+  vi_sao_do_duoc: >-
+    Log liệt kê BẢY tệp lease KHÔNG nằm trong push đó ⇒ lượt chạy đi vào đường dự phòng
+    quét cả thư mục. Tệp làm chết cổng là `don-nhanh-base-review-6-claude-20260817.yaml`:
+    KHÔNG có `posted_comment_id`, hạn `2026-08-18T17:45Z`.
+  luot_dang_thanh_cong_gan_nhat: '32086409126 — 2026-08-18T00:56Z'

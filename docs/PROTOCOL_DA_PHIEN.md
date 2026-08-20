@@ -222,6 +222,11 @@ Sau 30 phút không có tiến triển, dispatcher thu hồi lease, tăng genera
 không thể heartbeat, push hợp lệ hoặc handoff. Branch/PR cũ chuyển `stale`; generation mới được đọc diff cũ nhưng
 không tự cherry-pick. Commit SHA cuối được giữ trong state projection và event journal.
 
+Khi packet ở state `reviewing`, lease vào chế độ *treo theo review*: đồng hồ thu-hồi-30-phút tạm dừng, tối đa tới
+`review_sla` (mặc định: thời điểm reviewer khả dụng gần nhất + 2 giờ). Verdict `changes_requested` đổ về thì
+executor phải heartbeat trong 15 phút, không thì thu hồi như thường. Quá `review_sla` mà chưa có verdict: lease
+trở lại đồng hồ thường — phiên ấm là TỐI ƯU HOÁ, không phải quyền.
+
 Local worktree stale được dọn khi process dừng. Remote branch/PR stale giữ đến khi mission kết thúc cộng 30 ngày;
 `/packet preserve` kéo dài thời hạn. Cleanup chỉ bắt đầu sau khi báo cáo cuối và final state hash trên canonical
 đã được readback khớp; artifact hết hạn không được dùng làm bằng chứng mission complete.
@@ -371,6 +376,11 @@ test_selection:
   selected_groups: []
   full_fallback_reason: <reason-or-null>
 remaining_work: []
+hint_provenance:          # tuỳ chọn — chỉ khai khi có hunk bắt nguồn từ hint của reviewer (§8)
+  - finding_id: <slug>
+    reviewer: claude | codex | human
+    paths: []             # hunk/tệp bắt nguồn từ hint
+    da_tai_dan_xuat: true # executor đã re-derive + tự đo, không chép mù
 next_role: reviewer | executor | land_operator | human | null
 manual_next_action: <action-or-null>
 copyable_prompt: <prompt-or-null>
@@ -391,7 +401,13 @@ Executor đăng handoff/evidence lên Packet Issue và PR trước khi state r�
 rc đọc trực tiếp và bằng chứng dương (`N/N`, `ok=true`, số file/hash...), không chỉ “passed”. `changed_paths` phải
 khớp diff của exact `head_sha`; `tested_sha` phải bằng head được đề nghị review; test không chạy phải ghi
 `not_run` cùng lý do. Selector evidence phải ghi tier, policy/catalog identity, nhóm đã chọn và lý do fallback;
-không được chỉ ghi “affected tests passed”.
+không được chỉ ghi “affected tests passed”. `hint_provenance` là trường TUỲ CHỌN: handoff không dùng hint vẫn
+hợp lệ khi vắng trường này; quy tắc dùng hint ở §8.
+
+Phiên executor ĐƯỢC giữ ấm chờ verdict, với điều kiện handoff §7 đã đăng ĐẦY ĐỦ TRƯỚC khi vào chờ
+(`status: needs_followup`, `next_role: reviewer`). Đường phục-hồi-nguội luôn phải đủ sống một mình: phiên ấm chết
+giữa chừng không được làm mất gì. Trong cửa sổ đóng băng, phiên ấm chỉ được đọc/phân tích/soạn nháp ngoài cây;
+không commit/push vào nhánh packet.
 
 Khi dispatcher/reviewer automation chưa được promote, mỗi phiên còn phải điền `next_role`,
 `manual_next_action` và `copyable_prompt` đủ để người giữ tạo một phiên Claude/Codex mới. Prompt phải neo
@@ -420,9 +436,9 @@ evidence_url: <pr-review-or-comment-url>
 ```
 
 Mỗi phần tử của `findings` **bắt buộc** kèm gợi ý cách vá gồm bốn phần: **vá ở đâu**
-(tệp + hàm/ca, và tại sao ở đó chứ không chỗ khác); **vá thế nào** (mô tả thay đổi —
-đoạn mã ngắn thì được, nhưng không viết cả bản vá: viết hộ cả bản vá là Reviewer tự biến
-mình thành người vá, và lượt sau đang review chính đề xuất của mình); **ca test khoá nó**
+(tệp + hàm/ca, và tại sao ở đó chứ không chỗ khác); **vá thế nào** (với MÃ SẢN PHẨM:
+chỉ mô tả hướng, không viết cả bản vá; với TEST/ĐỘT BIẾN/SCRIPT ĐO: được ở mức mã chạy
+được, vì bản chất của chúng là đặc tả phản chứng); **ca test khoá nó**
 (phép thử nào làm bản vá có răng, và đột biến nào phải chết sau khi vá — không nêu được
 thì nói thẳng là chưa nghĩ ra); **bản vá này có thể đẻ ra gì** (hình dạng lỗi nào nó có
 nguy cơ mở). Nhiều đường vá thì nêu đường rẻ nhất mà vẫn đóng lớp, rồi nói đường đắt hơn
@@ -495,6 +511,30 @@ reviewer sửa branch. Lỗi quota/rate-limit không tiêu thụ attempt nội d
 thời điểm reset. Dispatcher, không phải Executor, quyết định fallback/reroute; cấm đổi provider để lách budget.
 Reviewer cùng provider phải tự đọc spec/diff, chạy lại check cần thiết và không chỉ tóm tắt báo cáo Executor.
 Approval luôn neo `reviewed_sha`; commit mới buộc review lại.
+
+Finding của reviewer NÊN kèm *bằng chứng chạy được*: cặp neo/thay đột biến nguyên văn, phác thảo ca test
+(fixture + khẳng định), script đo A/B — tất cả đã CHẠY trong sandbox/cây riêng của reviewer và ghi kết quả chạy
+kèm theo. Chúng là DỮ LIỆU trong verdict, không phải commit và không mang quyền ghi. Executor tái dẫn xuất trên
+cây thật (mỏ neo, tính duy nhất, tương tác với ca sẵn có), tự chạy gate, tự viết commit — bước chép-lại là một
+bước KIỂM, không được bỏ.
+
+Reviewer muốn đi xa hơn được đính `goi-y-<finding>.patch` sinh từ cây riêng của mình — đính dạng ARTIFACT
+(comment/tệp), không push ref vào kho. Ba ràng buộc:
+
+1. Patch phải mang nhãn nguyên văn: *“chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu trách nhiệm
+   commit”*. Executor không được `git am` mù; worker gate chạy đủ như mọi diff khác.
+2. Handoff/PR của executor phải khai `hint_provenance` (§7): hunk nào bắt nguồn từ hint của reviewer nào. Thiếu
+   khai thì lượt review kế phải coi là vi phạm quy trình.
+3. Với packet `sensitive`: patch-as-hint chỉ áp cho TEST/tooling; hunk MÃ SẢN PHẨM vẫn đi đường mô tả hướng.
+   Lý do: reviewer lượt kế thường là chính tác giả hint — mã sản phẩm do reviewer viết rồi reviewer duyệt là
+   self-review đội lốt cross-review, đúng thứ nhãn assurance tồn tại để chặn.
+
+Điều KHÔNG đổi theo các cơ chế trên (nói tường minh để khỏi bị đọc rộng):
+
+- Reviewer vẫn không có quyền ghi vào nhánh packet, không push ref hint vào kho.
+- Đường ra khỏi `reviewing` vẫn chỉ là verdict của reviewer khai báo (packet_loop đã cưỡng chế — giữ nguyên).
+- Trần 2 lượt Codex/PR, các bộ đếm §12, và mức assurance theo class không đổi.
+- `same_provider_approved` vẫn không thay `cross_approved` cho class `sensitive`.
 
 `model_reviewer_identity` và `github_submitter_identity` là hai trường độc lập. Actor chép hoặc đăng output không
 được khai thành model reviewer; ngược lại một model review khác nền không tự cấp GitHub authority cho actor đăng.
@@ -687,6 +727,11 @@ lease/review, dispatcher ước tính `used / reserved / limit` cho packet đã 
 còn lại không đủ thì `paused: budget_infeasible` với phép tính hiển thị. Provider phải có hard quota ngày và
 tháng; 80% cảnh báo, 100% pause. Không tự đổi provider để lách budget.
 
+Thời gian CHỜ verdict không tính vào 90 phút/run (đồng hồ run đo THỜI GIAN LÀM, cùng doctrine
+wall-clock/working-clock của launcher). Phiên chờ phải chờ bằng cơ chế đánh thức (alarm/monitor/notification),
+không poll chủ động; thức dậy phải ĐO LẠI trước khi làm: `git ls-remote` head, hạn lease, state packet, sáu kích
+hoạt drift — trí nhớ ấm không thay được phép đo (bài học “phiên sau phải đo lại”).
+
 Mission không được complete khi còn packet `ready`, `leased`, `running`, `reviewing`, `blocked` hoặc khi land gate
 chưa xanh. Land thất bại quay về `paused` hoặc sinh packet sửa lỗi trong envelope.
 
@@ -734,8 +779,9 @@ completion criteria. Phiên `work-packet` không chuyển vai sang reviewer ho�
 ### `cross-review` — model-invoked
 
 Trigger khi PR vào `reviewing`. Đọc protocol/spec/diff/gate evidence; review hai trục `Spec` và `Standards/Security`;
-không sửa file; xuất verdict `approve | changes_requested | blocked` có severity/evidence. Hoàn tất khi verdict
-đã ghi vào PR và state nhận đúng review assurance.
+không sửa file; xuất verdict `approve | changes_requested | blocked` có severity/evidence. Finding nên kèm
+*bằng chứng chạy được* và patch-as-hint (nếu dùng) phải theo đúng ràng buộc §8 — đính dạng artifact, không push
+ref. Hoàn tất khi verdict đã ghi vào PR và state nhận đúng review assurance.
 Reviewer dùng checkout/context độc lập, ghi exact `reviewed_sha`; nếu cùng provider thì phải là phiên mới và mang
 `same_provider_approved`, không giả thành cross-review.
 

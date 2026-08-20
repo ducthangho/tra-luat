@@ -315,6 +315,16 @@
         "workflow_task": null,
         "write_scope": "local"
       },
+      "bootstrap": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
       "bundle-export": {
         "generated": true,
         "idempotency_contract": null,
@@ -323,6 +333,16 @@
         "risk": "low",
         "supports_dry_run": false,
         "workflow_task": "bundle_export",
+        "write_scope": "local"
+      },
+      "cache-build": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
         "write_scope": "local"
       },
       "cache-snapshot": {
@@ -595,6 +615,26 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "download": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
+      "drive-parity": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
+      },
       "drive-push": {
         "generated": false,
         "idempotency_contract": "drive_push",
@@ -614,6 +654,16 @@
         "supports_dry_run": true,
         "workflow_task": null,
         "write_scope": "local"
+      },
+      "exists": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
       },
       "external-ingest": {
         "generated": true,
@@ -725,8 +775,88 @@
         "workflow_task": "workflow_audit",
         "write_scope": "local"
       },
+      "gws-auth-load": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
+      "gws-auth-stage": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "drive"
+      },
+      "gws-bootstrap-cowork": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
+      "gws-ping": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
+      },
       "header-verify": {
         "generated": true,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
+      },
+      "hygiene plan": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "drive_registry"
+      },
+      "hygiene query": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
+      },
+      "hygiene reconcile": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "drive_registry"
+      },
+      "hygiene scan": {
+        "generated": false,
         "idempotency_contract": null,
         "read_only": true,
         "requires_confirm": false,
@@ -825,6 +955,26 @@
         "workflow_task": null,
         "write_scope": "local"
       },
+      "instruction-audit": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
+      },
+      "instructions": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
       "journal": {
         "generated": true,
         "idempotency_contract": null,
@@ -895,6 +1045,16 @@
         "workflow_task": "live_state_snapshot",
         "write_scope": "local"
       },
+      "locate": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
+      },
       "loop": {
         "generated": true,
         "idempotency_contract": null,
@@ -945,6 +1105,36 @@
         "workflow_task": null,
         "write_scope": "local"
       },
+      "nlm-auth-load": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
+      "nlm-auth-pull": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
+      "nlm-auth-stage": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "drive"
+      },
       "nlm-auth-status": {
         "generated": true,
         "idempotency_contract": null,
@@ -974,6 +1164,26 @@
         "supports_dry_run": false,
         "workflow_task": null,
         "write_scope": "none"
+      },
+      "nlm-get": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
+      },
+      "nlm-install": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
       },
       "nlm-links": {
         "generated": true,
@@ -1105,6 +1315,16 @@
         "workflow_task": null,
         "write_scope": "none"
       },
+      "overlap": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
+      },
       "perf": {
         "generated": true,
         "idempotency_contract": null,
@@ -1195,6 +1415,16 @@
         "workflow_task": null,
         "write_scope": "drive_local"
       },
+      "profile-file-add": {
+        "generated": false,
+        "idempotency_contract": "profile_ingest",
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "high",
+        "supports_dry_run": true,
+        "workflow_task": "ingest_local",
+        "write_scope": "drive_registry_nlm"
+      },
       "profile-file-remove": {
         "generated": true,
         "idempotency_contract": null,
@@ -1204,6 +1434,16 @@
         "supports_dry_run": true,
         "workflow_task": null,
         "write_scope": "drive_registry"
+      },
+      "profile-files": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "none"
       },
       "profile-from-nlm": {
         "generated": true,
@@ -1485,6 +1725,16 @@
         "workflow_task": null,
         "write_scope": "drive_registry"
       },
+      "reconcile": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": true,
+        "risk": "medium",
+        "supports_dry_run": true,
+        "workflow_task": null,
+        "write_scope": "drive_registry"
+      },
       "reg-delete": {
         "generated": true,
         "idempotency_contract": "reg_delete",
@@ -1494,6 +1744,16 @@
         "supports_dry_run": false,
         "workflow_task": null,
         "write_scope": "registry"
+      },
+      "reg-query": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
       },
       "register": {
         "generated": false,
@@ -1635,6 +1895,26 @@
         "workflow_task": "workflow_audit",
         "write_scope": "none"
       },
+      "secrets-set": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "drive"
+      },
+      "secrets-stage": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": false,
+        "requires_confirm": false,
+        "risk": "medium",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "drive"
+      },
       "shared-source-fix": {
         "generated": true,
         "idempotency_contract": "shared_source_fix",
@@ -1664,6 +1944,16 @@
         "supports_dry_run": false,
         "workflow_task": null,
         "write_scope": "drive_registry_nlm"
+      },
+      "source-map": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
+        "write_scope": "local"
       },
       "source-rename": {
         "generated": true,
@@ -1783,6 +2073,16 @@
         "risk": "low",
         "supports_dry_run": false,
         "workflow_task": "workflow_audit",
+        "write_scope": "none"
+      },
+      "transport-info": {
+        "generated": false,
+        "idempotency_contract": null,
+        "read_only": true,
+        "requires_confirm": false,
+        "risk": "low",
+        "supports_dry_run": false,
+        "workflow_task": null,
         "write_scope": "none"
       },
       "tvpl-url": {
@@ -1908,10 +2208,10 @@
     },
     "counts": {
       "generated_parsers": 154,
-      "high_risk": 28,
-      "nested": 5,
-      "total": 166,
-      "write_commands": 87
+      "high_risk": 29,
+      "nested": 9,
+      "total": 196,
+      "write_commands": 104
     },
     "schema": "command_registry.v1"
   },

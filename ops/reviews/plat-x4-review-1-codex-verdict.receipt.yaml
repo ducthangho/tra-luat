@@ -1,0 +1,86 @@
+# BIÊN NHẬN — cross-review lượt 1 của PR #205 (packet PLAT-X4, #203).
+#
+# Reviewer `codex`, KHÁC nền với người vá ⇒ §8 thoả về nền. Verdict `changes_requested`
+# (3 finding P2) ⇒ `cross_approved` CHƯA đạt, không cấp điều kiện land.
+#
+# ĐỌC CAVEAT `windows-do-SAU-verdict` TRƯỚC KHI TIN DÒNG "cổng sạch" NÀO TRONG VERDICT.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: PLAT-X4
+packet_issue: 203
+lease_id: plat-x4-review-1r2-codex-20260820
+provider: codex
+role: reviewer
+verdict: changes_requested
+cross_provider: true
+assurance_dat: null
+assurance_KHONG_dat: cross_approved
+reviewed_sha: d0acd79f8bf22acf12d226283f176f2e7cc81508
+
+verdict_path: ops/reviews/plat-x4-review-1-codex-verdict.md
+verdict_sha256: 08a2e0d2c688a2169c88161aa34f7d6d46dfab88d7d2ed9f4da41d53c4a1fcad
+verdict_bytes: 5519
+verdict_nguon: 'scratchpad/x4-review-r2.log — stdout cua `codex exec`, tien trinh thoat 0'
+verdict_doi_chieu: 'Cat mot ban duy nhat; da kiem DUNG MOT `VERDICT:` va DUNG MOT `Reviewed commit:`.'
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/c2889b23c9dd5fe973d698a35cfe5912189cb7c3/ops/reviews/plat-x4-review-1-codex-verdict.md
+published_first:
+  branch: ops/lease-review-m4-x4
+  commit: c2889b23c9dd5fe973d698a35cfe5912189cb7c3
+truy_xuat_tag: null
+truy_xuat_ghi_chu: 'PR #205 CHUA land, chua co tag luu-tru.'
+
+ban_chieu_tren_pr:
+  kenh: issue_comment
+  comment_id: 5355847913
+  mang_trang_thai_review_github: false
+  dinh_chinh_comment_id: 5355868165
+  rut_lai_tieu_chi_comment_id: 5355880415
+  doi_chieu_da_den: 'LECH — xem caveat `ban-chieu-mat-mot-dong`.'
+
+base_sha_da_SUA:
+  sai: 75131662d2b6f49b8fe43cc503b8367b4be8ad17
+  dung: 909d3e171d7b37a734c1100b3fdc3c48e1b66d19
+  ghi_chu: >-
+    Lease luot 1 chep `base_sha` tu lease EXECUTOR ma KHONG do. 75131662 la TO TIEN nhung
+    khong phai diem re; diff theo no ra BAY tep thay vi BON. Neu khong bat, reviewer se bao
+    mot P1 "vuot write set" KHONG CO THAT. Reviewer da XAC NHAN ban sua: merge-base dung
+    909d3e17, diff dung 4 tep.
+
+chot_read_only_sau_luot:
+  git_status_short: RONG
+  head_khong_doi: true
+  ghi_chu: 'Moi dot bien cua reviewer chay tren ban sao duoi thu muc tam.'
+
+luot_truoc_bi_bo:
+  lease_id: plat-x4-review-1-codex-20260820
+  verdict: blocked
+  ly_do: 'Cung loi dung sandbox nhu PLAT-M4 — 5 tep artefact nam trong cay worktree.'
+  tieu_mot_loi_goi: true
+
+verdict_usage_caveats:
+  - id: ban-chieu-mat-mot-dong
+    noi_dung: >-
+      Ban chieu tren PR (comment 5355847913) LECH nguon DUNG MOT DONG: trong Phat hien 2,
+      hai cho-trong dat trong DAU NGOAC NHON (`AL_GOI=...`, `AL_DICH=...`) BIEN MAT, con
+      lai `AL_GOI=` va `AL_DICH=/d8` — tuc lenh trong ban chieu KHONG CHAY LAI DUOC. Chi lo
+      ra vi da doc nguoc ve va `diff`. CHUA quy duoc cho tang nao: duong GHI cua phien la
+      tep -> `json.dumps` -> HTTP (khong co buoc xu ly HTML), nhung bo DOC cua MCP thi co
+      bien doi (tra `&#34;` cho dau nhay). Mot phep do nhung da chay va KHONG phan giai duoc
+      (ca hai gia thuyet du doan cung ket qua) — da RUT LAI tieu chi do o comment 5355880415.
+      REST thang toi `repos/...` bi proxy chan 403 nen khong co client thu hai.
+      **Chay lai thi doc tu TEP TRONG KHO, dung doc tu comment.**
+  - id: windows-do-SAU-verdict
+    noi_dung: >-
+      Verdict ket luan cac cong "sach" — DUNG, nhung CHI TREN LINUX. Sau khi verdict duoc
+      ghi, phien dieu phoi goi tay `workflow_dispatch` `ci.yml` tren ref cua nhanh (luot
+      `32368383473`) va chan `gate (windows-latest)` (job `96423003418`) **DO** o buoc
+      `lease-publish selftest`: `t35` bao ban DUNG bi tu choi rc=5 vi
+      `tar (child): Cannot connect to C: resolve failed`. Nguyen nhan: `cai_actionlint.sh:69`
+      goi `tar -xzf "$TEN_GOI"` voi duong dan mang KY TU O DIA, ma GNU tar doc `HOST:PATH` la
+      may o xa. Duong `*.zip` (dong 67) dung `tar` khi thieu `unzip` nen thung y het. Tren
+      Windows script LUON tra rc=5. `ops-publish-lease.yml` chay ubuntu nen cong dang lease
+      KHONG hong; thu hong la chan windows cua `ci.yml` — chan se chay khi vao master.
+      Verdict KHONG sai; no chi khong phu nen do. Bao cao day du: comment 5355915112.

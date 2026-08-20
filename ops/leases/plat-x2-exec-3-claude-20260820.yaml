@@ -1,0 +1,99 @@
+# Lease EXECUTOR — `PLAT-X2` (#195) **revision 3**, lượt 3/3. Neo head xuất phát 6afd88c4.
+#
+# THAY `plat-x2-exec-2-claude-20260820` (và qua đó cả `-exec-1`). Revision 3 thêm ĐÚNG MỘT
+# đường dẫn: `RELEASE_MANIFEST.json` — hệ quả cơ học của `.gitignore` đã nằm trong write set
+# từ revision 1, vì `.gitignore` là tệp ĐƯỢC ĐÓNG GÓI.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 195
+packet_id: PLAT-X2
+phase_key: PLAT-X2
+revision: 3
+generation: 1
+supersedes_lease: plat-x2-exec-2-claude-20260820
+lease_id: plat-x2-exec-3-claude-20260820
+
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+assurance_target: same_provider_approved
+assurance_note: >-
+  KHÔNG ĐỔI so với revision 2: hai vòng cross-review đã chạy thật (`c869796`, `23588c9`),
+  cả hai finding đã đóng, và cả hai trần (2/2 vòng, 2/2 lời gọi) đã cạn. Người giữ chọn
+  LAND KÈM NỢ; nợ ở `ops/NO_KY_THUAT.md` §8.
+access: read-write
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/lease_publish_test.py
+  - .gitignore
+  - .github/workflows/ci.yml
+  - ops/NO_KY_THUAT.md
+  - RELEASE_MANIFEST.json
+write_set_note: >-
+  `RELEASE_MANIFEST.json` là tệp thứ SÁU và là artefact PHÁI SINH — thêm vào vì
+  `release-verify --strict` bắt đúng một tệp lệch băm: `.gitignore` (1259 -> 1282 byte,
+  `7640fa50…` -> `28e4f7ee…`), `checked_file_count: 180/180` nên KHÔNG thêm/bớt tệp nào.
+  `CLAUDE.md` §Quy ước deploy mục 5 quy định đổi cây thì phải tái sinh manifest.
+
+branch: claude/plat-x2-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: 6afd88c4967a33f5b7d82b43b609edd133a9c728
+reviewed_sha_note: 'Head XUẤT PHÁT của revision 3 — commit gộp master (58900b2) đã chạy lại gate.'
+base_sha: 58900b2578f7d2b0ebb063ace73e1ec712b6f4fe
+start_from_sha: 6afd88c4967a33f5b7d82b43b609edd133a9c728
+
+prompt_path: ops/prompts/plat-x2-exec-3-claude-20260820.md
+prompt_sha256_required: 60726ce79b0c987f5278da2aaa942a91e1f3ff50ed7bbfb400285d0a162ac737
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-20 — người giữ chốt "(a) mở write set" và "land kèm nợ"; lượt
+  này áp đúng nguyên tắc ấy cho tệp thứ sáu, là HỆ QUẢ CƠ HỌC của `.gitignore` đã duyệt.
+  Phiên đã báo cáo và nêu đường lùi (rút `.gitignore` khỏi packet) trước khi làm.
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-20T08:50:00Z'
+lease_expires_at_utc: '2026-08-21T08:50:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 2
+attempts_limit: 3
+attempts_note: 'Revision 1 và 2 đã tiêu hai lượt. Đây là lượt CUỐI trong trần.'
+
+review_rounds_used: 2
+review_rounds_limit: 2
+codex_review_calls_used: 2
+
+dinh_chinh_loi_khai_truoc:
+  cau_sai: 'CI đỏ vì runner thiếu `actionlint`.'
+  vi_sao_sai: >-
+    Có HAI nguyên nhân độc lập chồng lên nhau (thiếu `actionlint` VÀ `.gitignore` lệch băm
+    manifest), và phiên kết luận khi mới thấy một. Nền master xanh (58900b2) nên cả hai đều
+    là lỗi của lượt này, không phải đỏ sẵn.
+  bai_hoc: >-
+    "Tìm được MỘT nguyên nhân" khác "tìm được nguyên nhân". Cổng đỏ một lần có thể đang
+    nói về nhiều thứ; đọc đủ mã thoát của TỪNG bước trước khi khai nguyên nhân.
+
+gate_bat_buoc:
+  - 'release-verify RELEASE_MANIFEST.json --strict -> "ok": true'
+  - 'golden-test · determinism-audit --strict · workflow-audit --strict -> "ok": true'
+  - 'release-check -> "ok": true'
+  - 'ops/lease_publish_test.py -> rc=0, 33/33'
+  - 'actionlint 5 workflow -> rc=0'
+  - 'diff manifest ĐÚNG 5 dòng (total_bytes, package_hash, content_hash, size+sha256 .gitignore)'
+  - 'git diff 58900b2..<head> -> ĐÚNG 6 tệp write set'
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-20T08:48:00Z'
+master_sha_at_grant: 58900b2578f7d2b0ebb063ace73e1ec712b6f4fe
+packet_head_at_grant: 6afd88c4967a33f5b7d82b43b609edd133a9c728

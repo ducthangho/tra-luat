@@ -1,0 +1,101 @@
+# Lease REVIEWER — `PLAT-X2` (#195), lượt 2/2. Neo exact head 23588c97.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 195
+packet_id: PLAT-X2
+lease_id: plat-x2-review-2-codex-20260820
+
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+access_note: >-
+  Kho THẬT: read-only. Reviewer đứng trên một `git worktree` TÁCH RỜI ở exact head, và cây
+  ấy GHI ĐƯỢC — cố ý, đúng §7.4b kế hoạch ("bản sao writable chỉ để reviewer tự chạy phản
+  chứng mà không chạm kho thật"). Lý do có thật: lượt 1 chạy `-s read-only` nên `tempfile`
+  không tạo được thư mục tạm và bộ test chỉ chạy nổi `8/33` — reviewer TỰ KHAI điều đó, và
+  khai đúng. Một reviewer không chạy được phản chứng thì chỉ đọc được mã, không đo được nó.
+  CHỐT: sau lượt, `git status --short` của cây ấy phải RỖNG và HEAD phải không đổi; bẩn
+  hoặc drift ⇒ verdict coi như hỏng, không được dùng.
+branch_ownership: none
+
+reviewed_sha_required: 23588c9723515669147dd7bfea530c4863f50556
+branch: claude/plat-x2-exec-1
+base_sha: 50d8d12e146792368e7100f732ff15a8d32fe48d
+target_branch_neu_land: master
+target_pull_request: 198
+
+scope_files: 3
+scope_note: >-
+  ĐÚNG ba tệp: `.github/workflows/ops-publish-lease.yml`, `ops/lease_publish_test.py`,
+  `.gitignore`. Chính đây là finding P1 của lượt 1 — nên lượt này ĐO lại, không tin lời khai.
+
+prompt_path: ops/prompts/plat-x2-review-2-codex-20260820.md
+prompt_sha256_required: 73cc64d210ed3d15f800acfc05b985c048cd92d682f6c4575a077d12f9993515
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-20 ("Đồng ý theo đề xuất. Merge #195 đi rồi tiếp tục.")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-20T08:15:00Z'
+lease_expires_at_utc: '2026-08-21T08:15:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 1
+review_calls_limit: 2
+review_calls_used_truoc_luot_nay: 1
+tran_note: >-
+  Đây là vòng CUỐI trong trần canon 2 vòng (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10).
+  `changes_requested` ở lượt này KHÔNG mở vòng 3 — nó đưa packet sang Review Rescue
+  Checkpoint để người giữ chọn Stable Slice / Remediation Slice / revision.
+
+review_dau_vao:
+  lease_id: plat-x2-review-1-codex-20260820
+  reviewed_sha: c869796f5f052e2b564cf8c1d4bdd2dcd940cb47
+  verdict: changes_requested
+  so_finding_con_lai: 0
+
+finding_phai_dong:
+- id: diff-vuot-effective-write-set
+  muc: P1
+  nguyen_van_reviewer: >-
+    "đây là lease và prompt dùng để chứng minh chính quyền thực thi của phiên, nên không thể
+    hợp thức hoá chúng bằng chính commit executor đang được review"
+  da_dong_the_nao: >-
+    Xoá hai artefact khỏi nhánh packet bằng một commit MỚI (23588c97) — không force-push,
+    không rebase, lịch sử không bị viết lại. `git diff 50d8d12..23588c97` nay ĐÚNG 3 tệp.
+    Bốn artefact chuyển sang nhánh `ops/lease-plat-x2` rẽ từ master, không mang mã.
+  executor_tu_nhan: >-
+    Executor ĐÃ KHAI lệch này trong thân PR #198 rồi vẫn sai. Minh bạch không thay được uỷ
+    quyền — cùng họ với bài học "nghĩ ra được phép thử mà không chạy thì phép thử ấy không
+    tồn tại": viết ra một rủi ro cho cảm giác đã lo tới nó, nhưng thứ đóng được lỗ là HÀNH ĐỘNG.
+
+muc_kiem:
+- id: p1-da-dong-that-chua
+  note: 'ĐO `git diff --name-status base..HEAD` — đúng ba tệp. Đừng tin lời khai.'
+- id: ban-va-co-bi-doi-len-khong
+  note: '`git diff c869796..23588c97` phải CHỈ có hai mục xoá; không được sửa mã ở lượt vá này.'
+- id: cac-truc-cua-luot-1-nay-moi-do-duoc
+  note: >-
+    Lượt 1 không chạy nổi bộ test (8/33 vì sandbox read-only). Nay chạy thật:
+    `python3 ops/lease_publish_test.py` chờ rc=0 và 33/33, cộng `actionlint`.
+- id: dot-bien-doc-lap
+  note: >-
+    Tự đột biến `ops-publish-lease.yml` TRÊN BẢN SAO của reviewer rồi xem `t32` có đỏ không —
+    đừng tin bảng đột biến của executor.
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-20T08:14:00Z'
+master_sha_at_grant: 50d8d12e146792368e7100f732ff15a8d32fe48d
+packet_head_at_grant: 23588c9723515669147dd7bfea530c4863f50556

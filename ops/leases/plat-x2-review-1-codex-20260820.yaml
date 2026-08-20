@@ -1,0 +1,84 @@
+# Lease REVIEWER — `PLAT-X2` (#195), lượt 1/2. Neo exact head c869796f.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Bản chiếu trên "#195" chỉ đăng được SAU KHI chính bản vá mà
+# lease này đi review đã land — vòng luẩn quẩn ấy khai thẳng ở đây, đừng để người sau đoán.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 195
+packet_id: PLAT-X2
+lease_id: plat-x2-review-1-codex-20260820
+
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+reviewer_note: 'người vá là `claude` ⇒ §8 bắt reviewer khác nhà cung cấp'
+assurance_target: cross_approved
+access: read-only
+branch_ownership: none
+
+reviewed_sha_required: c869796f5f052e2b564cf8c1d4bdd2dcd940cb47
+branch: claude/plat-x2-exec-1
+base_sha: 50d8d12e146792368e7100f732ff15a8d32fe48d
+target_branch_neu_land: master
+target_pull_request_note: 'Review neo THẲNG vào SHA; PR mở sau, không phải mỏ neo.'
+
+scope_files: 3
+scope_note: >-
+  ĐÚNG ba tệp: `.github/workflows/ops-publish-lease.yml`, `ops/lease_publish_test.py`,
+  `.gitignore`. Tệp thứ tư trong diff là finding.
+
+prompt_path: ops/prompts/plat-x2-review-1-codex-20260820.md
+prompt_sha256_required: 82d8c35d284dc9c98dc44a5ce97ae6fbdbc1e78005c45bb26650a970debb0c5d
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-20 ("Đồng ý theo đề xuất. Merge #195 đi rồi tiếp tục.")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  Phiên ghi lease này CHÍNH LÀ phiên đã vá. Nó KHÔNG tự cấp quyền — `granted_by` là
+  `ducthangho`, và cổng chặn cứng mọi tên provider ở trường ấy. Ghi ra để reviewer soi kỹ
+  hơn phần khai trong commit lẫn trong lease: cả hai do chính phiên thi công viết.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-20T07:50:00Z'
+lease_expires_at_utc: '2026-08-21T07:50:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+attempts_note: 'Lượt review không tiêu attempt của executor — ghi 0/0 để sổ không lẫn.'
+
+review_rounds_limit: 2
+review_calls_limit: 2
+
+muc_kiem:
+- id: ban-va-co-noi-chot-nao-khong
+  note: >-
+    Cổng chạy bằng `GITHUB_TOKEN` với `contents: write` + `issues: write` — push được thành
+    đăng được. Bất cứ đường nào làm một lease CHƯA AI REVIEW đăng được là P1.
+- id: moc-so-co-bo-sot-hoac-lay-thua-khong
+  note: >-
+    Bỏ sót ⇒ cổng im lặng không đăng lease hợp lệ (tệ hơn đỏ). Lấy thừa ⇒ dựng lại đúng lỗi cũ.
+- id: con-fail-open-o-dau-khong
+  note: 'Ba trạng thái: có · không · KHÔNG ĐO ĐƯỢC; trạng thái thứ ba phải ĐỎ. `|| true` còn sót ở đâu?'
+- id: t32-co-that-su-DO-khong
+  note: >-
+    Nó trích thân bước từ YAML rồi chạy. Có nhánh nào làm nó `return` sớm mà vẫn tính ĐẠT?
+    Đồ giả mô phỏng TRẠNG THÁI hay diễn kịch bản?
+- id: yaml-con-hop-le-voi-GITHUB-khong
+  note: 'PyYAML không biết luật GitHub. `${{ }}` trong CHÚ THÍCH của `run` cũng làm hỏng cả tệp.'
+
+neo_sha_bat_bien_required: true
+preconditions_measured_at_utc: '2026-08-20T07:48:00Z'
+master_sha_at_grant: 50d8d12e146792368e7100f732ff15a8d32fe48d
+packet_head_at_grant: c869796f5f052e2b564cf8c1d4bdd2dcd940cb47
+
+canh_bao_moi_truong_luc_cap: >-
+  ĐO ĐƯỢC lúc cấp (`doctor --kiem-song`, 2026-08-20T07:2x): codex `kiem song: rc=0 (VAN dung
+  duoc)` — công cụ chạy được THẬT trong container này, không phải chỉ có mặt. Nhưng ảnh chụp
+  `CODEX_AUTH_JSON` đã 100 giờ và refresh token xoay vòng, nên nó có thể chết giữa chừng.
+  Chết giữa lượt ⇒ `void-attempt --reason quota`, KHÔNG tính vào trần vòng.

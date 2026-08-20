@@ -1161,149 +1161,47 @@ def _dong_lenh(than: str) -> list:
 
 
 @ca
-def t34_MOI_workflow_goi_bo_test_deu_phai_duoc_cap_actionlint():
-    """Workflow nào ĐỘNG tới bộ test này thì phải gọi `ops/cai_actionlint.sh` — KHÔNG trừ ai.
+def t34_workflow_khong_duoc_goi_THANG_tep_bo_test():
+    """Phương án (1): chỉ canh lời gọi thẳng tệp `.py`, không phân tích shell.
 
-    VÌ SAO CÓ CA NÀY, và nó không phải giả thiết. `t33` được thêm ở `#195`, mà bộ test này
-    được HAI workflow gọi: `ci.yml` (được cấp công cụ) và `ops-publish-lease.yml` (KHÔNG).
-    Đo được ở run `32351892214`:
+    Wrapper đã gộp installer + selftest thành một tiến trình. Vì vậy chốt này KHÔNG còn
+    tuyên bố "đã chứng minh job cài công cụ trước khi chạy"; nó chỉ bắt một hồi quy hẹp,
+    đọc được: workflow gọi thẳng `lease_publish_test.py` thay vì đi qua wrapper.
 
-        ĐỎ  t33_workflow_dang_lease_phai_qua_actionlint: KHÔNG ĐO ĐƯỢC: thiếu `actionlint`
-        lease_publish: 32/33 đạt
-        ##[error]Process completed with exit code 1.
+    Hai phản chứng vòng 2 vẫn đỏ vì cả hai đều đưa lời gọi thẳng `.py` trở lại job chạy
+    test, dù installer nằm ở job khác hay nằm sau nó. `bash -c "python ...py"` cũng đỏ vì
+    vẫn chứa chính lời gọi thẳng ấy.
 
-    Hệ quả: cổng đăng lease vẫn chết, chỉ ĐỔI LÝ DO — `rc=8` vì lease cũ hết hạn thành
-    `rc=1` vì thiếu công cụ. Người đẩy lease vẫn không đăng được gì.
+    GIỚI HẠN BẮT BUỘC KHAI: `python -m ops.lease_publish_test` VẪN lọt. Không thêm regex
+    mới để đuổi theo cú pháp thứ năm. Đổi wrapper thành dạng đó có cùng nghĩa với xoá wiring
+    của gate; một selftest không thể tự chứng minh nó đã được CI gọi.
 
-    VÌ SAO VIẾT LẠI (cross-review `#200`, codex, P2-1). Bản trước cố ĐOÁN dòng nào là
-    "người gọi thật" bằng một danh sách `SOI` khớp CHUỖI CON TRÊN CẢ DÒNG. Đo được:
-
-        run: echo preparing; python ops/lease_publish_test.py     -> 35/35 đạt, rc=0
-
-    Cả dòng chứa `echo ` nên bị loại khỏi tập người gọi — trong khi nó GỌI THẬT. Đo tiếp,
-    và đây mới là chỗ đau: bỏ HẲN bước cài `actionlint` khỏi `ci.yml` rồi giấu người gọi
-    sau `echo ` thì bộ test VẪN `35/35`, tức ca này im lặng đúng lúc regression
-    `32351892214` quay lại. Fail-OPEN.
-
-    Nên KHÔNG siết mẫu chuỗi thêm lần nữa — đó là lần thứ tư cùng một hình dạng lỗi. Đổi
-    NGHĨA VỤ cho nó không cần đoán: hễ một dòng lệnh có NHẮC tới bộ test thì workflow ấy
-    phải gọi `ops/cai_actionlint.sh`. Không phân biệt "gọi thật" với "chỉ soi" nữa — phân
-    biệt sai hướng nào cũng ra fail-open, còn nghĩa vụ thừa thì rẻ (thêm một dòng gọi
-    script). Chỉ còn MỘT token canonical để khớp, và `t35` mới là chỗ đo HÀNH VI.
-
-    VÀ LẦN VIẾT LẠI ẤY VẪN CHƯA ĐÓNG ĐƯỢC NÓ (cross-review `#203`, codex, P2-1 mở lại).
-    Câu "chỉ còn MỘT token canonical để khớp" ở ngay trên là chỗ hỏng: **vẫn là khớp
-    chuỗi**, chỉ đổi chỗ khớp — từ "caller" sang "installer". Phản chứng đo được:
-
-        run: echo ops/cai_actionlint.sh      ->  35/35 đạt, rc=0
-
-    Token vẫn còn nguyên trên dòng nên workflow được tính là đã cấp công cụ, trong khi nó
-    KHÔNG chạy gì cả. Lần thứ tư cùng một hình dạng, và lần này nằm trong chính packet
-    sinh ra để chấm dứt hình dạng đó.
-
-    Nên bỏ hẳn phép khớp chuỗi: đảo thành **DANH SÁCH CHO PHÉP** (`GOI_CANON`). Một bước
-    được tính là THỰC THI installer chỉ khi TOÀN BỘ phần lệnh của nó — đã bỏ chú thích và
-    dòng trắng — bằng ĐÚNG một mục trong danh sách. Danh sách CẤM phải đoán trước mọi cách
-    viết của kẻ gian nên thua từ trong thiết kế; danh sách CHO PHÉP chỉ phải liệt kê một
-    tập nhỏ và biết trước. Cần thêm biến thể thì thêm vào `GOI_CANON` — tường minh, đọc
-    được, và ai thêm phải nói rõ vì sao.
-
-    ĐỘT BIẾN ĐÃ CHẠY: đổi cả hai workflow sang `run: echo ops/cai_actionlint.sh` ⇒ ca này
-    ĐỎ (`35/36`, rc=1). Trước bản vá, chính đột biến ấy cho `35/35` rc=0.
-
-    VÀ LẦN ẤY VẪN CÒN HỞ — cross-review `#203` **lượt 2**, cùng finding, cửa khác. Bản vá
-    danh-sách-cho-phép ở trên đúng, nhưng nó buộc nghĩa vụ ở mức **TỆP**. Phản chứng:
-
-        job `gate`                  : run: echo ops/cai_actionlint.sh
-        job `installer-o-runner-khac`: run: bash ops/cai_actionlint.sh   (canonical)
-        -> 38/38 đạt, rc=0
-
-    Mỗi job chạy trên MỘT runner riêng; filesystem và `PATH` KHÔNG truyền sang nhau. Nên
-    job chạy bộ test vẫn không có `actionlint`, và regression `32351892214` quay lại y
-    nguyên — chỉ đi qua một cửa khác. Đây là lần thứ HAI trong cùng packet mà tôi đóng
-    đúng lỗ được chỉ ra rồi để hở một lỗ CÙNG HỌ ngay cạnh: lần đầu đổi chỗ khớp chuỗi,
-    lần này đổi MỨC ràng buộc.
-
-    Nay duyệt theo `(workflow, job)`, và đòi thêm THỨ TỰ: installer phải đứng TRƯỚC bước
-    chạy bộ test — "có cài" không phải "đã cài TRƯỚC KHI CẦN".
+    NỢ CÓ TÊN `PLAT-X5-required-status-check`: branch protection phải require status của
+    job `gate` (và lượt đăng lease tương ứng). Chốt ngoài kho ấy mới trả lời "CI có thật sự
+    chạy gate không". `t34` chỉ là lan can chống hồi quy vô ý, không phải security boundary.
     """
     import yaml
     goc = HERE.parent / ".github" / "workflows"
     if not goc.is_dir():
-        # KHÔNG có nhánh "không thấy thì bỏ qua" trong kho thật: chỉ tha cho BẢN SAO rời.
         bang(not (HERE.parent / ".git").exists(),
              f"kho thật mà không thấy {goc} — ca này sẽ xanh mà không đo gì")
         return
-
-    # DANH SÁCH CHO PHÉP, không phải phép khớp chuỗi. Một bước được tính là THỰC THI
-    # installer chỉ khi TOÀN BỘ phần lệnh của nó (đã bỏ chú thích, bỏ dòng trắng) bằng
-    # ĐÚNG một mục dưới đây. Cần thêm biến thể thì THÊM VÀO ĐÂY — tường minh, đọc được.
-    GOI_CANON = (
-        ["bash ops/cai_actionlint.sh"],
-    )
-
-    def _thuc_thi_installer(than: str) -> bool:
-        return [x.strip() for x in _dong_lenh(than) if x.strip()] in [list(x) for x in GOI_CANON]
-
-    # RÀNG THEO (workflow, JOB) — KHÔNG theo tệp. Mỗi job chạy trên MỘT runner riêng:
-    # filesystem và `PATH` KHÔNG truyền từ job này sang job khác. Nên "trong tệp này có
-    # một bước cài" KHÔNG đáp ứng nghĩa vụ cho job thật sự chạy bộ test.
-    nhac_bo_test, thieu_cong_cu, sai_thu_tu = [], [], []
+    goi_thang = []
     for tep in sorted(goc.glob("*.yml")) + sorted(goc.glob("*.yaml")):
         d = yaml.safe_load(tep.read_text(encoding="utf-8")) or {}
         for ten_job, job in (d.get("jobs") or {}).items():
-            buoc = [b for b in (job.get("steps") or []) if isinstance(b.get("run"), str)]
-            i_nhac = i_chay = i_cai = None
-            for i, b in enumerate(buoc):
-                # BỎ CHÚ THÍCH TRƯỚC (`_dong_lenh`), nếu không một dòng
-                # `# ops/cai_actionlint.sh` sẽ được tính là đã cấp công cụ — phép kiểm
-                # không phân biệt được LỆNH với CHÚ THÍCH thì nó đọc tài liệu, không đọc
-                # hành vi.
-                dl = _dong_lenh(b["run"])
-                if i_nhac is None and any("lease_publish_test.py" in x for x in dl):
-                    i_nhac = i
-                if i_chay is None and any(_CHAY_BO_TEST.fullmatch(x.strip()) for x in dl):
-                    i_chay = i
-                if i_cai is None and _thuc_thi_installer(b["run"]):
-                    i_cai = i
-            if i_nhac is None:
-                continue
-            khoa = f"{tep.name}:{ten_job}"
-            nhac_bo_test.append(khoa)
-            if i_cai is None:
-                thieu_cong_cu.append(khoa)
-            elif i_chay is not None and i_cai > i_chay:
-                # "Có cài" nhưng cài SAU khi CHẠY test thì lúc test chạy vẫn thiếu công cụ.
-                #
-                # DÙNG `i_chay`, KHÔNG dùng `i_nhac`. Bản đầu của chốt thứ tự này so với
-                # NHẮC, và nó BÁO NHẦM ngay lần chạy đầu: bước `neo bộ kiểm vào nhánh mặc
-                # định` của `ops-publish-lease.yml` có `test -s .../lease_publish_test.py`
-                # và `sha256sum ...` — chỉ NHẮC đường dẫn, không chạy gì — nên bị tính là
-                # "test ở bước 1" trong khi lượt chạy thật ở bước 3, sau installer.
-                # Tức chính tôi vừa tái lập đúng bệnh mà `t34` sinh ra để chặn: đếm sự CÓ
-                # MẶT của chuỗi rồi tuyên là đã đo HÀNH VI.
-                sai_thu_tu.append(f"{khoa} (cài ở bước {i_cai}, CHẠY test ở bước {i_chay})")
-
-    # KHÔNG cho "không tìm thấy workflow nào" âm thầm thành ĐẠT: một lượt quét hỏng và một
-    # kho thật sự không ai gọi bộ test cho cùng màu xanh, mà nghĩa thì ngược nhau.
-    bang(nhac_bo_test,
-         "không thấy workflow nào nhắc `lease_publish_test.py` — phép quét đang hỏng, "
-         "hoặc bộ test này đã mồ côi; cả hai đều phải ĐỎ chứ không phải xanh rỗng")
-    bang(not sai_thu_tu,
-         f"job {sai_thu_tu} cài `actionlint` SAU khi đã chạy `lease_publish_test.py`. "
-         f"Lúc bộ test chạy thì công cụ chưa có, nên `t33` vẫn fail-close — 'có cài' không "
-         f"phải 'đã cài TRƯỚC KHI CẦN'.")
-    bang(not thieu_cong_cu,
-         f"job {thieu_cong_cu} động tới `lease_publish_test.py` mà KHÔNG có bước nào "
-         f"THỰC THI `ops/cai_actionlint.sh`. Một bước được tính chỉ khi phần lệnh của nó "
-         f"bằng ĐÚNG một mục trong `GOI_CANON` — `echo ops/cai_actionlint.sh` KHÔNG tính, "
-         f"và đó chính là phản chứng đã lọt ở cross-review #203 lượt 1. Nghĩa vụ ràng theo "
-         f"JOB chứ KHÔNG theo tệp: mỗi job chạy trên runner riêng, filesystem và `PATH` "
-         f"không truyền qua — đặt installer ở job khác trong CÙNG tệp KHÔNG tính (phản "
-         f"chứng lọt ở lượt 2). Bộ test ĐÒI `actionlint` "
-         f"(t33 fail-close), nên workflow không cấp thì cổng chết vì thiếu công cụ chứ "
-         f"không phải vì lease sai — đúng regression run 32351892214. Cần một biến thể "
-         f"lệnh khác thì THÊM vào `GOI_CANON`, đừng nới phép so.")
+            for i, b in enumerate(job.get("steps") or []):
+                than = b.get("run")
+                if not isinstance(than, str):
+                    continue
+                for lenh in _dong_lenh(than):
+                    if _CHAY_BO_TEST.search(lenh):
+                        goi_thang.append(
+                            f"{tep.name}:{ten_job}:bước {i} ({b.get('name') or 'không tên'})")
+    bang(not goi_thang,
+         f"workflow gọi THẲNG `lease_publish_test.py` thay vì wrapper: {goi_thang}. "
+         f"Chuyển cài + chạy về `ops/chay_lease_publish_test.sh`; không mở rộng regex "
+         f"để giả vờ chứng minh mọi cú pháp shell.")
 
 
 def _bam_tep(duong_dan):
@@ -1316,15 +1214,11 @@ def _bam_tep(duong_dan):
     return h.hexdigest()
 
 
-# NHẬN DIỆN MỘT LƯỢT CHẠY THẬT bộ test — dùng cho chốt THỨ TỰ, không dùng cho nghĩa vụ.
-# Hai trục cố ý bất đối xứng:
-#   · nghĩa vụ "job này phải có installer" bấu vào NHẮC (over-approximate) ⇒ fail-CLOSED,
-#     đoán thừa thì chỉ tốn một dòng gọi script;
-#   · chốt THỨ TỰ bấu vào CHẠY (positive recognition) ⇒ đoán thừa ở đây là BÁO NHẦM và
-#     chặn oan một workflow đúng.
-# Nhận thêm dạng gọi mới thì THÊM vào mẫu này — tường minh, đọc được.
+# Chỉ nhận diện lời gọi THẲNG tệp `.py` cho hợp đồng hẹp của t34. Đây không phải parser
+# shell và CỐ Ý không nhận `python -m`: gặp thêm cú pháp qua được thì không nối regex nữa;
+# nợ "CI có chạy gate không" thuộc required status check được nêu ngay trong t34.
 _CHAY_BO_TEST = __import__("re").compile(
-    r"""(?:python3?|py)\s+["']?\S*lease_publish_test\.py["']?""")
+    r"""(?<![\w.])(?:python3?|py)\s+["']?\S*lease_publish_test\.py["']?""")
 
 
 def _goi_actionlint_gia(dich, ver, than):
@@ -1346,6 +1240,18 @@ def _goi_actionlint_gia(dich, ver, than):
             ti = tarfile.TarInfo("actionlint")
             ti.size, ti.mode = len(b), 0o755
         t.addfile(ti, io.BytesIO(b))
+    return goi
+
+
+def _goi_actionlint_zip_gia(dich, ver):
+    """Dựng ZIP chứa binary giả đúng bản, giữ mode executable cho đường `tar` dự phòng."""
+    import zipfile
+    goi = dich / f"actionlint_{ver}_gia.zip"
+    info = zipfile.ZipInfo("actionlint")
+    info.create_system = 3
+    info.external_attr = 0o100755 << 16
+    with zipfile.ZipFile(goi, "w") as z:
+        z.writestr(info, f"#!/bin/sh\necho {ver}\n".encode("utf-8"))
     return goi
 
 
@@ -1464,10 +1370,14 @@ def t35_script_cai_actionlint_phai_TU_CHOI_ban_sai():
                            f"người gọi dùng để khẳng định LÝ DO từ chối, nêu nhầm mã thì "
                            f"họ khẳng định nhầm chuyện")
 
-    # ——— GIỮ TẦNG: workflow chỉ được GỌI script, không được cài lại tại chỗ.
+    # ——— GIỮ TẦNG: workflow chỉ gọi wrapper; wrapper gọi installer, không cài lại tại chỗ.
     goc = HERE.parent / ".github" / "workflows"
     if goc.is_dir():
         LAY_VE = ("curl", "wget", "choco install", "brew install", "go install")
+        GOI_WRAPPER = {
+            "bash ops/chay_lease_publish_test.sh",
+            'bash "$NEO/ops/chay_lease_publish_test.sh"',
+        }
         for tep in sorted(goc.glob("*.yml")) + sorted(goc.glob("*.yaml")):
             d = yaml.safe_load(tep.read_text(encoding="utf-8")) or {}
             for job in (d.get("jobs") or {}).values():
@@ -1481,12 +1391,12 @@ def t35_script_cai_actionlint_phai_TU_CHOI_ban_sai():
                            for x in dong_lenh):
                         loi.append(f"{ten}: cài `actionlint` TẠI CHỖ. Chép logic ra khỏi "
                                    f"`ops/cai_actionlint.sh` là dựng lại đúng chỗ hỏng — "
-                                   f"bản chép sẽ không được ca này chạy thử. Gọi script.")
-                    if "ops/cai_actionlint.sh" not in than:
+                                   f"bản chép sẽ không được ca này chạy thử. Gọi wrapper.")
+                    if not any(x.strip() in GOI_WRAPPER for x in dong_lenh):
                         continue
                     ban = str((b.get("env") or {}).get("AL_VER") or "")
                     if not re.fullmatch(r"\d+\.\d+\.\d+", ban):
-                        loi.append(f"{ten}: gọi `ops/cai_actionlint.sh` mà thiếu `AL_VER` "
+                        loi.append(f"{ten}: gọi wrapper mà thiếu `AL_VER` "
                                    f"dạng X.Y.Z (được {ban!r})")
 
     bang(not loi, "cài `actionlint` không cưỡng chế bản ghim:\n  - " + "\n  - ".join(loi))
@@ -1726,6 +1636,142 @@ def t38_bam_phai_dung_khi_DUONG_DAN_co_dau_cheo_nguoc():
          f" thoát cả dòng khi tên tệp chứa `\\` — đọc từ stdin thì đầu ra không có tên tệp. "
          f"Đây đúng lỗi đã làm `gate (windows-latest)` đỏ ở lượt 32371632630:\n"
          f"{ra.strip()[:400]}")
+
+
+@ca
+def t39_loai_archive_phai_do_NOI_DUNG_khong_doan_tu_ten():
+    """ZIP hợp lệ phải chạy được khi tên không đuôi hoặc dùng `.ZIP` viết hoa.
+
+    Finding vòng 3 đo cả hai ca đều rc=5 vì script cũ dùng `*.zip`, rồi mặc định mọi tên
+    còn lại là tar.gz. Hợp đồng `AL_GOI` chỉ nói "đường dẫn tới một gói"; tên tệp không
+    phải trường loại. Ca này dùng CÙNG byte ZIP dưới hai tên để buộc phân loại theo magic
+    bytes. Có ca dương thật: binary sau giải nén phải chạy và khai đúng bản.
+    """
+    import os
+    import shutil
+    import subprocess
+    import tempfile
+    from pathlib import Path as _P
+
+    kich = HERE.parent / "ops" / "cai_actionlint.sh"
+    bang(kich.is_file(), f"không thấy {kich}")
+    bash = shutil.which("bash")
+    bang(bash, "KHÔNG ĐO ĐƯỢC: thiếu `bash`")
+
+    VER = "1.7.7"
+    loi = []
+    with tempfile.TemporaryDirectory() as tam:
+        tam = _P(tam)
+        goc = _goi_actionlint_zip_gia(tam, VER)
+        for k, ten in enumerate(("goi-khong-duoi", "goi.ZIP")):
+            goi = tam / ten
+            goi.write_bytes(goc.read_bytes())
+            mt = dict(os.environ)
+            mt.update({"AL_VER": VER, "AL_DICH": str(tam / f"dich-{k}"),
+                       "AL_NEN": "Linux", "AL_GOI": str(goi),
+                       "AL_SHA256": _bam_tep(goi)})
+            mt.pop("GITHUB_PATH", None)
+            r = subprocess.run([bash, str(kich)], env=mt, timeout=180,
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            rc, ra = r.returncode, (r.stdout or "")  # rc TRỰC TIẾP từ tiến trình
+            if rc != 0:
+                loi.append(f"ZIP tên {ten!r} bị từ chối rc={rc}: {ra.strip()[:300]}")
+    bang(not loi, "loại archive vẫn bị suy từ suffix:\n  - " + "\n  - ".join(loi))
+
+
+@ca
+def t40_wrapper_phai_CAI_truoc_CHAY_va_giu_rc_cua_bo_test():
+    """Chạy wrapper thật trong cây tạm và đo trạng thái, không mô phỏng kịch bản.
+
+    Cây tạm chứa chính wrapper + installer, một gói actionlint giả có hành vi thật, và
+    một selftest nhỏ tự tìm/call binary trên PATH rồi ghi marker. Ba hậu điều có răng:
+
+    * gói đúng: test thấy binary đúng bản và marker xuất hiện;
+    * installer sai bản: rc=7 và marker KHÔNG xuất hiện — test không chạy trước/cạnh lỗi;
+    * test chủ động rc=23: wrapper trả đúng 23 — không pipeline nuốt mã thoát.
+
+    PATH đầu vào được chèn một `actionlint` trạng thái SAI bản. Installer đúng phải đặt
+    binary mới lên trước nó; xoá installer hoặc quên cập nhật PATH sẽ gọi đúng mồi sai ấy.
+    """
+    import os
+    import shutil
+    import subprocess
+    import tempfile
+    from pathlib import Path as _P
+
+    bash = shutil.which("bash")
+    bang(bash, "KHÔNG ĐO ĐƯỢC: thiếu `bash`")
+    wrapper = HERE.parent / "ops" / "chay_lease_publish_test.sh"
+    installer = HERE.parent / "ops" / "cai_actionlint.sh"
+    bang(wrapper.is_file(), f"không thấy {wrapper}")
+    bang(installer.is_file(), f"không thấy {installer}")
+
+    VER = "1.7.7"
+    with tempfile.TemporaryDirectory() as tam:
+        goc = _P(tam)
+        ops = goc / "ops"
+        ops.mkdir()
+        shutil.copy2(wrapper, ops / wrapper.name)
+        shutil.copy2(installer, ops / installer.name)
+        (ops / "lease_publish_test.py").write_text(
+            """import os, pathlib, subprocess
+p = subprocess.run(["bash", "-c", "command -v actionlint && actionlint --version"],
+                   capture_output=True, text=True)
+lines = p.stdout.strip().splitlines()
+if p.returncode != 0 or not lines or lines[-1] != os.environ["AL_VER"]:
+    raise SystemExit(32)
+pathlib.Path(os.environ["WRAPPER_MARKER"]).write_text("da-chay", encoding="utf-8")
+print("WRAPPER_SELFTEST_OK")
+raise SystemExit(int(os.environ.get("WRAPPER_TEST_RC", "0")))
+""", encoding="utf-8")
+
+        # Đồ giả mô phỏng TRẠNG THÁI "có binary nhưng sai bản", không trả lời theo lượt.
+        # Wrapper đúng phải cài rồi đặt binary đúng LÊN TRƯỚC mồi này trong PATH.
+        path_ban_dau = goc / "path-ban-dau"
+        path_ban_dau.mkdir()
+        moi = path_ban_dau / "actionlint"
+        moi.write_text("#!/bin/sh\necho 0.0.0\n", encoding="utf-8")
+        moi.chmod(0o755)
+        mt_goc = dict(os.environ,
+                      PATH=f"{path_ban_dau}{os.pathsep}{os.environ.get('PATH', '')}",
+                      AL_VER=VER, AL_NEN="Linux")
+        mt_goc.pop("GITHUB_PATH", None)
+
+        def chay(goi, dich, marker, rc_test=None):
+            mt = dict(mt_goc, AL_GOI=str(goi), AL_DICH=str(dich),
+                      AL_SHA256=_bam_tep(goi), WRAPPER_MARKER=str(marker))
+            if rc_test is not None:
+                mt["WRAPPER_TEST_RC"] = str(rc_test)
+            r = subprocess.run([bash, str(ops / wrapper.name)], cwd=goc, env=mt,
+                               timeout=180, stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, text=True)
+            return r.returncode, (r.stdout or "")
+
+        thu_muc_dung = goc / "goi-dung"
+        thu_muc_dung.mkdir()
+        goi_dung = _goi_actionlint_gia(thu_muc_dung, VER, f"#!/bin/sh\necho {VER}")
+        marker_dung = goc / "marker-dung"
+        rc, ra = chay(goi_dung, goc / "dich-dung", marker_dung)
+        bang(rc == 0 and marker_dung.is_file()
+             and marker_dung.read_text(encoding="utf-8") == "da-chay"
+             and "WRAPPER_SELFTEST_OK" in ra,
+             f"wrapper không cài rồi chạy test thật: rc={rc}, marker={marker_dung.exists()}:\n"
+             f"{ra.strip()[:400]}")
+
+        thu_muc_sai = goc / "goi-sai"
+        thu_muc_sai.mkdir()
+        goi_sai = _goi_actionlint_gia(thu_muc_sai, VER, "#!/bin/sh\necho 0.0.0")
+        marker_sai = goc / "marker-sai"
+        rc, ra = chay(goi_sai, goc / "dich-sai", marker_sai)
+        bang(rc == 7 and not marker_sai.exists(),
+             f"installer sai phải dừng TRƯỚC selftest: rc={rc}, "
+             f"marker={marker_sai.exists()}:\n{ra.strip()[:400]}")
+
+        marker_rc = goc / "marker-rc"
+        rc, ra = chay(goi_dung, goc / "dich-rc", marker_rc, rc_test=23)
+        bang(rc == 23 and marker_rc.exists(),
+             f"wrapper nuốt rc selftest: chờ 23, được {rc}, marker={marker_rc.exists()}:\n"
+             f"{ra.strip()[:400]}")
 
 
 def main() -> int:

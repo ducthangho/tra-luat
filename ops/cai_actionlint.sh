@@ -133,33 +133,44 @@ THUC="$(bam_cua "$TEN_GOI")"
 # (`AL_GOI=/duong/we:ird.tar.gz`), va luc ay basename van dinh dung luat tren.
 # Ten dich duoi day do TA dat nen chac chan khong co dau hai cham — do la thu lam chot,
 # khong phai phep loc chuoi tren dau vao.
-# Chon ten cuc bo theo LOAI ARCHIVE, KHONG lay suffix tu duong dan.
-# Ban truoc viet `DUOI_GOI="${TEN_GOI##*.}"`, va no thung khi ten goi KHONG CO DAU CHAM:
-# phep mo rong ay tra lai CA DUONG DAN (gom dau gach cheo), nen ten dich thanh
-#   goi_giai_nen./tmp/.../nodot
-# va `cp` chet: `No such file or directory` (rc=5) tren mot tar HOAN TOAN HOP LE.
-# Do duoc o cross-review #203 luot 2; doi chung: cung goi ay doi ten thanh `co.tar.gz` -> rc=0.
-# `AL_GOI` duoc khai la "duong dan toi mot goi co san" — no KHONG doi ten phai co phan mo rong.
-# Day cung la REGRESSION do chinh rev2 sinh ra: truoc do goi khong duoi di thang nhanh tar
-# mac dinh va chua bao gio can toi phan mo rong.
-case "$TEN_GOI" in
-  *.zip) GOI_CUC_BO="goi_giai_nen.zip" ;;
-  *)     GOI_CUC_BO="goi_giai_nen.tar.gz" ;;
+# Chon ten cuc bo theo NOI DUNG ARCHIVE, KHONG theo suffix. Ban truoc mac dinh moi ten
+# khong khop dung `*.zip` la tar.gz. Cross-review #203 luot 3 do duoc CUNG mot zip hop le:
+# ten khong duoi -> rc=5, ten `.ZIP` -> rc=5, ten `.zip` -> rc=0. `AL_GOI` chi hua mot
+# duong dan toi goi co san; no khong hua quy uoc ten hay cach viet hoa.
+#
+# Doc bon magic byte dau: ba chu ky ZIP chuan va chu ky gzip. `od` co tren GNU, BSD va
+# Git Bash; thieu no thi fail-close rc=5, khong doan "khong zip thi chac la tar".
+command -v od >/dev/null 2>&1 \
+  || loi 5 "KHONG DO DUOC loai goi: thieu \`od\` de doc magic bytes"
+if ! DAU_THO="$(LC_ALL=C od -An -N4 -tx1 "$TEN_GOI")"; then
+  loi 5 "khong doc duoc magic bytes cua goi '$TEN_GOI'"
+fi
+DAU_GOI="${DAU_THO//[[:space:]]/}"
+case "$DAU_GOI" in
+  504b0304|504b0506|504b0708)
+    LOAI_GOI="zip"
+    GOI_CUC_BO="goi_giai_nen.zip"
+    ;;
+  1f8b*)
+    LOAI_GOI="tar.gz"
+    GOI_CUC_BO="goi_giai_nen.tar.gz"
+    ;;
+  *) loi 5 "khong nhan dien duoc loai goi tu magic bytes '$DAU_GOI'" ;;
 esac
 if [ "$TEN_GOI" != "$AL_DICH/$GOI_CUC_BO" ]; then
   cp "$TEN_GOI" "$AL_DICH/$GOI_CUC_BO" || loi 5 "khong chep duoc goi vao '$AL_DICH'"
 fi
 
-# Chon bo giai nen theo DUOI CUA GOI THAT, khong theo nen — goi co san co the la .tar.gz
-# ngay tren Windows. `unzip` khong co san trong Git Bash, nen co duong lui sang `tar`.
-case "$GOI_CUC_BO" in
-  *.zip)
+# Chon bo giai nen theo LOAI DA DO TU NOI DUNG, khong theo nen hay ten tep. `unzip`
+# khong co san trong Git Bash, nen co duong lui sang `tar`.
+case "$LOAI_GOI" in
+  zip)
     if command -v unzip >/dev/null 2>&1; then
       ( cd "$AL_DICH" && unzip -q -o "$GOI_CUC_BO" ) || loi 5 "giai nen zip that bai"
     else
       ( cd "$AL_DICH" && tar -xf "$GOI_CUC_BO" ) || loi 5 "giai nen zip bang tar that bai"
     fi ;;
-  *) ( cd "$AL_DICH" && tar -xzf "$GOI_CUC_BO" ) || loi 5 "giai nen tar that bai" ;;
+  tar.gz) ( cd "$AL_DICH" && tar -xzf "$GOI_CUC_BO" ) || loi 5 "giai nen tar that bai" ;;
 esac
 
 BIN=""

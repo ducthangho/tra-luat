@@ -4419,7 +4419,7 @@ def t130_qua_han_luot_dau_retry_thanh_cong_van_la_CO():
     goi = []
 
     def pb(_d, **_k):
-        goi.append(1)
+        goi.append(_k.get("timeout"))
         if len(goi) == 1:
             return (False, "timeout sau 0.1s", True)
         return (True, "cham 9.9", False)
@@ -4433,6 +4433,12 @@ def t130_qua_han_luot_dau_retry_thanh_cong_van_la_CO():
          f"retry thanh cong ma van bi liet ke: {d['thieu_bat_buoc']}, "
          f"{d.get('chua_do_bat_buoc')}")
     bang(len(goi) == 2, f"phai probe dung 2 luot, duoc {len(goi)}")
+    # Hệ số GẤP ĐÔI là tầng thiết kế đã khai (lặp cùng hạn là tung lại đồng xu) —
+    # finding `han-gap-doi-khong-ghim` (review vòng 1): tham số chưa ai ghim thì
+    # refactor sau sẽ lặng lẽ đánh rơi. Khẳng định QUAN HỆ giữa hai lượt, không
+    # khẳng định số tuyệt đối (PROBE_TIMEOUT khác nhau theo nền).
+    bang(goi[0] and goi[1] and abs(goi[1] - 2 * goi[0]) < 1e-6,
+         f"luot retry phai duoc han GAP DOI luot 1: {goi}")
 
 
 @ca
@@ -4472,7 +4478,8 @@ def t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU():
     m._phien_ban = lambda *_a, **_k: (True, "gia 1", False)
     goi = []
     m._xac_thuc = lambda *_a, **_k: (
-        goi.append(1) or (False, "probe xac thuc timeout sau 0.1s", True))
+        goi.append(_k.get("timeout")) or
+        (False, "probe xac thuc timeout sau 0.1s", True))
     rc, d = _doctor_json(m)
     bang(rc == MA_OK and d["thieu_bat_buoc"] == [],
          f"auth qua han van thanh THIEU: rc={rc}, thieu={d['thieu_bat_buoc']}")
@@ -4482,6 +4489,9 @@ def t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU():
     bang(muc.get("xac_thuc_ok") is None and "QUA HAN" in muc.get("loi_xac_thuc", ""),
          f"None != False: qua han phai la CHUA DO kem ly do: {muc}")
     bang(len(goi) == 2, f"auth phai probe dung 2 luot, duoc {len(goi)}")
+    # Cùng finding `han-gap-doi-khong-ghim` — phủ luôn phía auth (xem t130).
+    bang(goi[0] and goi[1] and abs(goi[1] - 2 * goi[0]) < 1e-6,
+         f"retry auth phai duoc han GAP DOI luot 1: {goi}")
 
     m._xac_thuc = lambda *_a, **_k: (False, "rc=1", False)
     rc2, d2 = _doctor_json(m)
@@ -4594,6 +4604,103 @@ def t135_phien_ban_va_xac_thuc_bao_qua_han_bang_CO_KIEU():
         ket = m._xac_thuc(chet, ["auth"], timeout=30)
         bang(ket[0] is False and ket[2] is False,
              f"_xac_thuc hong that lai mang co qua_han: {ket}")
+
+
+@ca
+def t136_qua_han_roi_hong_that_o_luot_retry_van_la_THIEU():
+    """Finding `qua-han-roi-hong-that-khong-ghim` (review vòng 1, P3): chuỗi
+    "QUÁ HẠN lượt 1 → lượt retry HOÀN TẤT với thất bại THẬT" phải ra THIẾU (12).
+
+    Mã đang đúng nhưng trước ca này KHÔNG chốt nào ghim — hai đột biến của reviewer
+    (nuốt điều kiện `xt_qua_han` ở kiểm tra sau retry; vứt cờ `qua_han` của lượt
+    retry) đều sống sót cả suite. Nếu ai vấp phải khi refactor: thất bại ĐO ĐƯỢC ở
+    lượt retry bị nuốt thành "chưa đo" ⇒ mất mã 12/13 với điều kiện thời gian —
+    fail-open có tiền đề. Phủ CẢ hai phía version lẫn auth, kèm đòi thông điệp giữ
+    dấu vết "luot 1 … luot 2" (JSON của lượt hỏng phải tự nêu thủ phạm).
+    """
+    # --- phía version: timeout lượt 1, Access denied lượt 2
+    m = _tai_launcher_thu()
+    _san_doctor_mot_cong_cu(m)
+    goi = []
+
+    def pb(_d, **_k):
+        goi.append(1)
+        if len(goi) == 1:
+            return (False, "timeout sau 0.1s", True)
+        return (False, "Access denied", False)
+
+    m._phien_ban = pb
+    rc, d = _doctor_json(m)
+    bang(rc == MA_THIEU_CONG_CU and d["thieu_bat_buoc"] == ["cham"],
+         f"hong that o luot retry ma khong la THIEU: rc={rc}, "
+         f"thieu={d['thieu_bat_buoc']}, chua_do={d.get('chua_do_bat_buoc')}")
+    muc = [x for x in d["cong_cu"] if x["ten"] == "cham"][0]
+    hong = muc.get("co_mat_nhung_khong_chay_duoc")
+    bang(hong is not None and "chua_do_duoc" not in muc,
+         f"phai mang nhan HONG, khong phai chua-do: {muc}")
+    bang("luot 1" in hong["loi"] and "luot 2" in hong["loi"],
+         f"thong diep phai giu dau vet ca hai luot: {hong}")
+    bang(len(goi) == 2, f"phai dung 2 luot probe, duoc {len(goi)}")
+
+    # --- phía auth: timeout lượt 1, rc=1 lượt 2
+    m2 = _tai_launcher_thu()
+    _san_doctor_mot_cong_cu(m2, co_xac_thuc=True)
+    m2._phien_ban = lambda *_a, **_k: (True, "gia 1", False)
+    goi2 = []
+
+    def xt(*_a, **_k):
+        goi2.append(1)
+        if len(goi2) == 1:
+            return (False, "probe xac thuc timeout sau 0.1s", True)
+        return (False, "rc=1", False)
+
+    m2._xac_thuc = xt
+    rc2, d2 = _doctor_json(m2)
+    bang(rc2 == MA_THIEU_CONG_CU and d2["thieu_bat_buoc"] == ["cham"],
+         f"auth hong that o luot retry ma khong la THIEU: rc={rc2}, "
+         f"thieu={d2['thieu_bat_buoc']}, chua_do={d2.get('chua_do_bat_buoc')}")
+    muc2 = [x for x in d2["cong_cu"] if x["ten"] == "cham"][0]
+    bang(muc2.get("xac_thuc_ok") is False
+         and "luot 1" in muc2.get("loi_xac_thuc", "")
+         and "luot 2" in muc2.get("loi_xac_thuc", ""),
+         f"xac_thuc_ok phai False kem dau vet hai luot: {muc2}")
+    bang(len(goi2) == 2, f"auth phai dung 2 luot probe, duoc {len(goi2)}")
+
+
+@ca
+def t137_ung_vien_hong_that_cong_ung_vien_qua_han_la_CHUA_DO():
+    """Finding `hon-hop-ung-vien-khong-ghim` (review vòng 1, P3): công cụ có hai
+    ứng viên — một HỎNG THẬT, một QUÁ HẠN cả hai lượt — thì kết luận là CHƯA ĐO
+    ĐƯỢC, không phải THIẾU.
+
+    Vì sao ngữ nghĩa này đúng (ghim ở đây để người sau khỏi "sửa cho gọn"): ứng
+    viên chưa đo được nghĩa là tính khả dụng của CÔNG CỤ chưa chứng minh xong; xử
+    ngược lại (hỏng-thật thắng) thì máy có binary hỏng đứng trước + binary chậm
+    đứng sau sẽ chớp 12/0 trở lại theo giờ — đúng flake mà packet này diệt.
+    JSON giữ CẢ hai dấu vết để người đọc thấy đủ hai chuyện.
+    """
+    m = _tai_launcher_thu()
+    _san_doctor_mot_cong_cu(m)
+    m._cac_duong_dan = lambda _c, _e: [("cham", "/hong/cham"), ("cham", "/treo/cham")]
+    goi = {"/hong/cham": 0, "/treo/cham": 0}
+
+    def pb(duong, **_k):
+        goi[duong] += 1
+        if duong == "/hong/cham":
+            return (False, "Access denied", False)
+        return (False, "timeout sau 0.1s", True)
+
+    m._phien_ban = pb
+    rc, d = _doctor_json(m)
+    bang(rc == MA_OK and d["thieu_bat_buoc"] == []
+         and d.get("chua_do_bat_buoc") == ["cham"],
+         f"hon hop phai la CHUA DO: rc={rc}, thieu={d['thieu_bat_buoc']}, "
+         f"chua_do={d.get('chua_do_bat_buoc')}")
+    muc = [x for x in d["cong_cu"] if x["ten"] == "cham"][0]
+    bang("co_mat_nhung_khong_chay_duoc" in muc and "chua_do_duoc" in muc,
+         f"JSON phai giu CA HAI dau vet: {muc}")
+    bang(goi == {"/hong/cham": 1, "/treo/cham": 2},
+         f"hong that khong retry, qua han retry dung 1 luot: {goi}")
 
 
 @ca
@@ -5396,6 +5503,54 @@ DOT_BIEN = [
       '                _in_an_toan("                 --kiem-song DA chay ma van chua co bang "\n'
       '                            "chung — xem chi tiet tung muc o tren")'),
      ["t134_kiem_song_dang_bat_thi_footer_khong_khuyen_bat_lai"]),
+    # --- Review vòng 1 (same_provider, Fable 5 max) tự nghĩ 5 đột biến, 3 SỐNG SÓT
+    # ⇒ 3 finding P3. Năm mục dưới đây nối các mutant ấy vào bảng — kiểm bằng tay thì
+    # dùng một lần rồi tàn; nằm vào bảng thì mỗi lần chạy đều đòi (đúng tiền lệ t84-t86).
+    # `auth_hong_that_sau_retry…`: nuốt điều kiện `xt_qua_han` ở kiểm tra SAU retry —
+    # auth hỏng thật đo được ở lượt 2 bị đọc thành "chưa đo" (fail-open có tiền đề).
+    # Cùng mỏ neo với `xac_thuc_qua_han_van_la_THIEU` nhưng thay HẸP hơn (giữ nhánh,
+    # chỉ nới điều kiện) nên cần ca t136 mới giết được.
+    ("auth_hong_that_sau_retry_thanh_chua_do",
+     ('                    if not xac_thuc_ok and xt_qua_han:\n'
+      '                        # `None ≠ False`: quá hạn cả hai lượt là CHƯA ĐO ĐƯỢC,\n'
+      '                        # không phải "xác thực sai".\n'
+      '                        xac_thuc_ok = None',
+      '                    if not xac_thuc_ok:\n'
+      '                        # `None ≠ False`: quá hạn cả hai lượt là CHƯA ĐO ĐƯỢC,\n'
+      '                        # không phải "xác thực sai".\n'
+      '                        xac_thuc_ok = None'),
+     ["t136_qua_han_roi_hong_that_o_luot_retry_van_la_THIEU"]),
+    ("vut_co_qua_han_cua_luot_retry",
+     ('                    chay_duoc, pb2, qua_han = _phien_ban(\n'
+      '                        d, env=moi_truong,\n'
+      '                        timeout=min(2 * PROBE_TIMEOUT_GIAY, con_lai))',
+      '                    chay_duoc, pb2, qua_han_2 = _phien_ban(\n'
+      '                        d, env=moi_truong,\n'
+      '                        timeout=min(2 * PROBE_TIMEOUT_GIAY, con_lai))'),
+     ["t136_qua_han_roi_hong_that_o_luot_retry_van_la_THIEU"]),
+    # Hỗn hợp ứng viên: cho "hỏng thật" THẮNG "quá hạn" — dựng lại đúng cấu hình sẽ
+    # chớp 12/0 theo giờ (binary hỏng đứng trước + binary chậm đứng sau).
+    ("hong_that_thang_qua_han",
+     ('        if bb and thay is None and (het_ngan_sach is not None\n'
+      '                                    or qua_han_probe is not None):',
+      '        if bb and thay is None and co_mat_nhung_hong is None and (het_ngan_sach is not None\n'
+      '                                    or qua_han_probe is not None):'),
+     ["t137_ung_vien_hong_that_cong_ung_vien_qua_han_la_CHUA_DO"]),
+    # Hệ số GẤP ĐÔI của retry — hai phía, hai mỏ neo (indent khác nhau nên khớp đúng
+    # một chỗ mỗi mục). Mutant không phá tất định, chỉ đánh rơi tham số chất lượng —
+    # đúng phân tích của reviewer; ca đo QUAN HỆ hai lượt nên giết được.
+    ("retry_van_cung_han",
+     ('                        d, env=moi_truong,\n'
+      '                        timeout=min(2 * PROBE_TIMEOUT_GIAY, con_lai))',
+      '                        d, env=moi_truong,\n'
+      '                        timeout=min(PROBE_TIMEOUT_GIAY, con_lai))'),
+     ["t130_qua_han_luot_dau_retry_thanh_cong_van_la_CO"]),
+    ("retry_auth_van_cung_han",
+     ('                            thay["duong_dan"], c["xac_thuc"], env=moi_truong,\n'
+      '                            timeout=min(2 * PROBE_TIMEOUT_GIAY, con_lai))',
+      '                            thay["duong_dan"], c["xac_thuc"], env=moi_truong,\n'
+      '                            timeout=min(PROBE_TIMEOUT_GIAY, con_lai))'),
+     ["t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU"]),
     ("probe_github_bo_qua_moi_truong_chuan_hoa",
      ('    if moi_truong is None:\n        moi_truong = _MOI_TRUONG_DA_DOC',
       '    if True:\n        moi_truong = dict(os.environ)'),

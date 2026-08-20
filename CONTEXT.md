@@ -44,6 +44,17 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
 - **Integrated** — Packet đã được merge tuần tự vào mission integration branch sau worker gate và review.
 - **Landed** — kết quả đã xuất hiện trên canonical ở exact SHA được duyệt, hậu-merge gate xanh và bookkeeping xong.
 - **Mission complete** — mọi Packet cần thiết đã landed, final acceptance/readback đạt và không còn lease/công việc mở.
+- **Bằng chứng chạy được** — dữ liệu reviewer kèm theo finding: cặp neo/thay đột biến nguyên văn, phác thảo ca test,
+  script đo A/B — đã chạy trong sandbox/cây riêng của reviewer, ghi kết quả chạy kèm theo. Là DỮ LIỆU trong verdict,
+  không phải commit, không mang quyền ghi; Executor tái dẫn xuất trên cây thật rồi tự đo. _Tránh dùng:_ bản vá hộ.
+- **Patch-as-hint** — patch reviewer sinh từ cây riêng, đính dạng artifact (comment/tệp) kèm nhãn "chưa chạy trên
+  cây thật"; Executor tự áp, tự đo, tự chịu trách nhiệm commit — cấm `git am` mù, cấm push ref vào kho.
+- **hint_provenance** — trường TUỲ CHỌN trong handoff Executor: khai hunk nào bắt nguồn từ hint của reviewer nào
+  và xác nhận đã tái dẫn xuất. Đã dùng hint mà thiếu khai là vi phạm quy trình; không dùng hint thì được vắng.
+- **Treo theo review** — chế độ lease khi packet ở `reviewing`: đồng hồ thu-hồi-30-phút tạm dừng, tối đa tới trần
+  `review_sla`; quá trần chưa có verdict thì lease trở lại đồng hồ thường.
+- **Phiên ấm / phục-hồi-nguội** — phiên executor giữ context sống chờ verdict (tối ưu hoá, không phải quyền) đối lại
+  đường dựng phiên mới từ handoff. Đường nguội luôn phải đủ sống một mình; phiên ấm thức dậy phải đo lại trước khi làm.
 
 ## Bản thể & phát hành
 

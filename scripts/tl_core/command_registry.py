@@ -1928,6 +1928,37 @@ COMMAND_META = {
     "the-thuc-build":       _m("low", False, "local", False, False, True, None, None, False, "the_thuc", generated=True),
     "the-thuc-normalize":    _m("low", False, "local", False, False, True, None, None, False, "the_thuc", generated=True),   # R4 v1.34.78 — ghi file OUT local (không Drive/registry/NLM)
     "registry-coverage":     _m("low", True, "none", False, False, True, "workflow_audit", None, False, "workflow", generated=True),
+    # ── AG-T0-05: 26 top-level commands metadata ──
+    "gws-ping":              _m("low", True, "none", False, False, False, None, None, False, "gws"),
+    "download":              _m("low", False, "local", False, False, False, None, None, False, "gws"),
+    "gws-bootstrap-cowork":  _m("low", False, "local", False, False, False, None, None, False, "gws"),
+    "drive-parity":          _m("low", True, "none", False, False, False, None, None, False, "gws"),
+    "bootstrap":             _m("low", False, "local", False, False, False, None, None, False, "gws"),
+    "nlm-install":           _m("low", False, "local", False, False, False, None, None, False, "gws"),
+    "overlap":               _m("low", True, "none", False, False, False, None, None, False, "lookup_ops"),
+    "nlm-auth-pull":         _m("low", False, "local", False, False, False, None, None, False, "gws"),
+    "secrets-stage":         dict(_m("medium", False, "drive", False, False, False, None, None, False, "gws"),
+                                  builtin_gate="secrets_master_key_gate"),
+    "secrets-set":           dict(_m("medium", False, "drive", False, False, False, None, None, False, "gws"),
+                                  builtin_gate="secrets_master_key_gate"),
+    "gws-auth-stage":        dict(_m("medium", False, "drive", False, False, False, None, None, False, "gws"),
+                                  builtin_gate="gws_auth_stage_gate"),
+    "gws-auth-load":         _m("low", False, "local", False, False, False, None, None, False, "gws"),
+    "nlm-auth-stage":        dict(_m("medium", False, "drive", False, False, False, None, None, False, "gws"),
+                                  builtin_gate="nlm_auth_stage_gate"),
+    "nlm-auth-load":         _m("low", False, "local", False, False, False, None, None, False, "gws"),
+    "transport-info":        _m("low", True, "none", False, False, False, None, None, False, "gws"),
+    "profile-files":         _m("low", True, "none", False, False, False, None, None, False, "profile_mgmt"),
+    "locate":                _m("low", True, "none", False, False, False, None, None, False, "lookup_ops"),
+    "exists":                _m("low", True, "none", False, False, False, None, None, False, "lookup_ops"),
+    "source-map":            _m("low", True, "local", False, False, False, None, None, False, "lookup_ops"),
+    "instruction-audit":     _m("low", True, "none", False, False, False, None, None, False, "ops_misc"),
+    "nlm-get":               _m("low", True, "local", False, False, False, None, None, False, "nlm_ops", nlm_fallback="unverified"),
+    "reg-query":             _m("low", True, "local", False, False, False, None, None, False, "ops_misc"),
+    "instructions":          _m("low", False, "local", False, False, False, None, None, False, "ops_misc"),
+    "profile-file-add":      _m("high", False, "drive_registry_nlm", True, True, False, "ingest_local", "profile_ingest", True, "ingest_ops", nlm_fallback="defer"),
+    "reconcile":             _m("medium", False, "drive_registry", True, True, False, None, None, False, "hygiene"),
+    "cache-build":           _m("low", False, "local", False, False, False, None, None, False, "extract_cache"),
 }
 
 
@@ -1943,6 +1974,11 @@ NESTED_COMMAND_META = {
     # worksheet/phuluc chỉ sinh file trong --out-dir ⇒ write_scope local, không cần cổng ngoài-repo.
     "rasoat worksheet":   _m("low", False, "local", False, False, False, None, None, False, "lookup_ops"),
     "rasoat phuluc":      _m("low", False, "local", False, False, False, None, None, False, "lookup_ops"),
+    # ── AG-T0-05: hygiene nested commands metadata ──
+    "hygiene scan":       _m("low", True, "none", False, False, False, None, None, False, "hygiene"),
+    "hygiene plan":       _m("medium", False, "drive_registry", True, True, False, None, None, False, "hygiene"),
+    "hygiene query":      _m("low", True, "none", False, False, False, None, None, False, "hygiene"),
+    "hygiene reconcile":  _m("medium", False, "drive_registry", True, True, False, None, None, False, "hygiene"),
 }
 
 
@@ -2204,6 +2240,8 @@ def validate_registry(parser, tl_module, *, load_card=None, contracts=None) -> d
         if f"rasoat {_s['name']}" not in NESTED_COMMAND_META:
             issues.append(f"RASOAT_SUB_NOT_IN_REGISTRY:{_s['name']}")
     cov = compute_parser_coverage(parser, tl_module=tl_module)
+    for unreg in cov["categories"]["unregistered"]:
+        issues.append(f"UNREGISTERED_PARSER_CMD:{unreg}")
     for hr_cmd in cov["categories"]["high_risk_unregistered"]:
         warnings.append(f"UNREGISTERED_HIGH_RISK_PARSER_CMD:{hr_cmd}")
     return {"schema": "registry_validate.v1", "ok": not issues, "issues": issues, "warnings": warnings,

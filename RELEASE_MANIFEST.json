@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 180,
-  "total_bytes": 7920463,
-  "package_hash": "da9023ac916c4fbfc1543aa33f04a373cd4e2988073811b96ad32470790760d8",
-  "content_hash": "da9023ac916c4fbfc1543aa33f04a373cd4e2988073811b96ad32470790760d8",
+  "total_bytes": 7932550,
+  "package_hash": "1f00c55900c422b83d86148fd367958d92f93a8838ce85c105164fdaf9940a7c",
+  "content_hash": "1f00c55900c422b83d86148fd367958d92f93a8838ce85c105164fdaf9940a7c",
   "required_missing": [],
   "files": [
     {
@@ -333,8 +333,8 @@
     },
     {
       "path": "references/golden/tool_inventory_inventory_decision.json",
-      "size": 53935,
-      "sha256": "b9f8e1cfe0f9a2debc17e1cc292829bee3952b048d184862534fd4e2bb0ef4ba"
+      "size": 62439,
+      "sha256": "036597f9e95ff08ebcef71f1ebc63758c7b60f76bf243bc7caaba77e037a8be6"
     },
     {
       "path": "references/golden/topology_vectors.json",
@@ -343,8 +343,8 @@
     },
     {
       "path": "references/golden/workflow_audit.json",
-      "size": 31245,
-      "sha256": "fe7d101ea90e1198267ca7e17d155f98c2dfd20d7be986c493f5b59f8d4bafa8"
+      "size": 31010,
+      "sha256": "9129cab5c4f6611c564618e7216a1ad466ae0d29b4c422b0aa654e5918827b17"
     },
     {
       "path": "references/linhvuc_phapdien.json",
@@ -713,8 +713,8 @@
     },
     {
       "path": "scripts/tl_core/command_registry.py",
-      "size": 182641,
-      "sha256": "fc6b6d00265966e2b04b9f19e4184004318080fba7e3c8e292429f6c1b6c94c2"
+      "size": 186459,
+      "sha256": "362ca7cb88ee6e5a0a0d01100e6ed97a210871e71f62e5957351dd7548937b5a"
     },
     {
       "path": "scripts/tl_core/deterministic.py",

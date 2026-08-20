@@ -70,3 +70,4 @@ no_da_khai_boi_executor:
     noi_dung: '"CI có thật sự chạy gate không" — `python -m`, `if: false` trên bước wrapper, `echo wrapper`. Không thuộc thẩm quyền một bộ test tự kiểm YAML của chính nó.'
   - id: curl-retry-khong-bao-loi-35
     noi_dung: '`curl --retry 2` có thể không bao lỗi 35 nếu thiếu `--retry-all-errors`. CÓ SẴN TỪ TRƯỚC, ngoài phạm vi packet. Đã ăn một flake thật ở lượt CI đầu.'
+posted_comment_id: 5359227293   # workflow ghi, ĐỪNG sửa tay

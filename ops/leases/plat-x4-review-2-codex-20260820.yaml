@@ -87,3 +87,4 @@ kiem_duong_codex_truoc_khi_cap: >-
   ĐÃ KIỂM bằng lời gọi THẬT (`codex exec`, rc=0, có phản hồi + `tokens used`) lúc
   2026-08-20T13:5xZ, KHÔNG hỏi `codex login status`. Nhãn `SAP_HET_HAN` của `doctor` (ảnh chụp
   106h) lại SAI lần nữa — đường thật chạy được.
+posted_comment_id: 5356717061   # workflow ghi, ĐỪNG sửa tay

@@ -165,3 +165,4 @@ reviewer_luot_1_TU_KHAI_chua_do_duoc:
   - 'nhánh Windows của `t40` — reviewer chỉ ĐỌC mã, sandbox không có Windows'
   - '"CI xanh cả hai job" — reviewer lấy nguyên từ packet, KHÔNG tự xác minh'
   - 'branch protection / required status check — ngoài kho'
+posted_comment_id: 5359707117   # workflow ghi, ĐỪNG sửa tay

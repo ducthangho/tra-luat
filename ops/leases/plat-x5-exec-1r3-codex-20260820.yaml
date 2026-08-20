@@ -1,0 +1,167 @@
+# Lease EXECUTOR — `PLAT-X5` (#206), lượt 1 **revision 3**. Neo head xuất phát e071e0aa.
+#
+# ĐÂY LÀ ATTEMPT CUỐI (3/3). Trần được người giữ kho nới ĐÚNG MỘT lần sau cross-review lượt 1.
+# Phạm vi đã THU HẸP: 2 trong 5 finding đã tách sang `#209`.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 206
+packet_id: PLAT-X5
+phase_key: PLAT-X5
+revision: 3
+generation: 1
+lease_id: plat-x5-exec-1r3-codex-20260820
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+model_ghi_chu: >-
+  "Mức cao nhất" ĐO ĐƯỢC chứ không khai theo cảm tính: banner của `codex exec` IN LẠI NGUYÊN VĂN
+  mọi giá trị truyền vào, nên đọc banner là ĐOÁN. Thứ phân biệt là MÃ THOÁT — giá trị bịa ⇒ rc=1
+  kèm ERROR từ API; `max` ⇒ rc=0. Model `gpt-5.6-sol` là MẶC ĐỊNH của tài khoản; KHÔNG khai là
+  "model mạnh nhất hiện có" vì `codex models` đòi TTY nên không liệt kê được phi tương tác.
+assurance_target: cross_approved
+access: read-write
+
+spec_path: null
+spec_note: >-
+  AUTHORITY LÀ THÂN ISSUE `#206`, mục `REVISION 3`. Verdict cross-review là BẰNG CHỨNG, không
+  phải danh sách việc — bốn việc phải làm nằm ở REVISION 3. Bản chiếu đọc offline được cấp trong
+  sandbox (`PACKET_ISSUE_206.md`), đã đối chiếu khớp từng byte sau khi cập nhật thân issue.
+
+write_set:
+  - ops/lease_publish_test.py
+  - ops/cai_actionlint.sh
+  - ops/chay_lease_publish_test.sh
+  - .github/workflows/ci.yml
+  - .github/workflows/ops-publish-lease.yml
+write_set_KHONG_gom:
+  - tep: ops/NO_KY_THUAT.md
+    ly_do: >-
+      Finding 2 của cross-review đòi tệp này. Người giữ kho CỐ Ý không thêm — nó đi cùng việc đảo
+      `t34` thành danh sách cho phép sang packet `#209`. Executor chạm vào nó là lách phạm vi.
+
+branch: codex/plat-x5-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: e071e0aae6bdc4d270a42fbc534ad3f05dcba0fa
+start_from_sha: e071e0aae6bdc4d270a42fbc534ad3f05dcba0fa
+base_sha: a09aae627533f59e6b2e817858a6db50b999d41c
+base_ghi_chu: >-
+  BASE VẪN LÀ MỘT PR CHƯA MERGE (`#205`, packet `#203`) — `ops/cai_actionlint.sh` chỉ tồn tại
+  trên nhánh ấy. Thứ tự land: `#205` trước, rồi tới đây. Không đổi so với revision 2.
+
+prompt_path: ops/prompts/plat-x5-exec-1r3-codex-20260820.md
+prompt_sha256_required: 9a8a8e487a80ac1252a8f9dee9ca77fed525e0ace5a0123c1d79efc76959d555
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-20 ("Đồng ý khuyến nghị, thực hiện đi. Codex vá với max effort.")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_note: >-
+  Phiên ghi lease này CŨNG là phiên đã chạy reviewer `claude` cho lượt 1 và đã ghi verdict vào kho.
+  Khai ra vì nó có hệ quả: người viết đặc tả lượt này chính là người viết verdict mà đặc tả dựa
+  vào. Reviewer lượt sau nên soi phần ĐẶC TẢ, không chỉ soi mã.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-20T17:55:00Z'
+lease_expires_at_utc: '2026-08-21T17:55:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+# ═══ HAI TRỤC, CƯỠNG CHẾ ĐỘC LẬP ═══
+#   attempt = MỘT LẦN EXECUTOR TUYÊN BỐ DONE (trình ra một head nó tin là xong). KHÔNG phải
+#             một lần gọi tiến trình. CI ĐỎ sau khi đã tuyên bố DONE ⇒ attempt ĐÃ TIÊU.
+#             Báo BỊ CHẶN không tiêu attempt.
+#   call    = trục CHI PHÍ. Cưỡng chế RIÊNG.
+# Định nghĩa đầy đủ + lý lẽ: xem lease revision 2 (`plat-x5-exec-1r2-codex-20260820.yaml`).
+
+attempts_used: 2
+attempts_limit: 3
+attempts_limit_truoc_khi_noi: 2
+noi_tran_boi: ducthangho
+noi_tran_ly_do: >-
+  Cross-review lượt 1 trả `changes_requested` với 5 finding, trong đó P1 là một chốt bị VÔ HIỆU
+  chứ không phải mã sai. Người giữ kho nới ĐÚNG MỘT attempt và ĐỔI LẠI thu hẹp phạm vi: 2 finding
+  sang `#209`. Nới trần mà không thu hẹp phạm vi thì chỉ là dời cột mốc.
+attempts_so_sach:
+  - luot: 'lease r1'
+    tuyen_bo: blocked
+    ly_do: 'đặc tả #206 tự mâu thuẫn (lỗi của phiên điều phối) — không trình head nào'
+    tinh_attempt: false
+  - luot: 'lease r2, lần 1'
+    tuyen_bo: done
+    head: 3ad75553
+    ket_qua: 'Windows ĐỎ (t40 rc=32)'
+    tinh_attempt: true
+  - luot: 'lease r2, lần 2'
+    tuyen_bo: done
+    head: e071e0aa
+    ket_qua: 'CI XANH cả hai job; cross-review lượt 1 ⇒ changes_requested (5 finding)'
+    tinh_attempt: true
+  - luot: 'lease r3 (lượt này)'
+    tuyen_bo: 'chưa'
+    ghi_chu: 'ATTEMPT CUỐI. Tuyên bố DONE mà CI đỏ hoặc review lại changes_requested ⇒ hết trần, checkpoint.'
+
+executor_calls_used: 4
+executor_calls_limit: 8
+executor_calls_note: 'Trục CHI PHÍ, độc lập. Đã tiêu: r1 ~174k, r2 lần 1 ~295k, r2 lần 2, và lượt này là lần gọi thứ 5.'
+
+pham_vi_luot_nay:
+  trong:
+    - id: P1-t25-khong-con-thay-loi-goi-bo-kiem
+      viec: 'Mở `t25` sang lời gọi thực thi wrapper; giữ tính chất "đo ĐỐI SỐ có `$NEO`", không viết bộ phân tích shell. Sửa chú thích chốt chống-xanh-rỗng (câu "test, check, body" nay SAI).'
+    - id: P3-GOI_WRAPPER-gac-mot-NGHIA-VU
+      viec: 'Đảo nhánh `continue` thành nhánh báo lỗi — ra ngoài danh sách phải bị TỪ CHỐI, không được MIỄN.'
+    - id: P3-mkdir-hong-tra-rc1
+      viec: 'Mã thoát RIÊNG cho `mkdir -p "$AL_DICH"` hỏng, khác 1 và khác mã bộ test.'
+    - id: P2-t34-khai-hep-hon-thuc-te
+      viec: 'CHỈ sửa LỜI KHAI cho khớp phép đo — liệt kê đủ NĂM dạng đã ĐO là lọt. KHÔNG nối regex.'
+  ngoai:
+    - id: P2-no-required-status-check-khong-vao-so-no
+      di_dau: '#209'
+    - id: dao-t34-thanh-danh-sach-CHO-PHEP
+      di_dau: '#209'
+      ly_do: 'Quyết KIẾN TRÚC, không phải quyết kỹ thuật — không để executor tự quyết trong một attempt cuối.'
+
+gate_bat_buoc:
+  - 'ops/lease_publish_test.py -> rc=0, N/N hai số bằng nhau, KHÔNG tụt dưới 40 ca'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'BỐN đột biến mới, mỗi cái giết 1/1, chạy trên BẢN SAO TẠM (chi tiết §4 prompt)'
+  - 'hai phản chứng vòng 2 vẫn ĐỎ'
+  - 'lượt Windows gọi tay workflow_dispatch trên ref của nhánh'
+
+dieu_kien_ready_to_review: >-
+  CI XANH TRÊN EXACT HEAD — `workflow_dispatch` trên đúng head, CẢ HAI job `success`, KHÔNG job
+  nào có bước hỏng. "PR xanh" không đủ: `ci.yml` chỉ chạy ubuntu cho PR thường. Lease reviewer
+  KHÔNG được cấp trước khi điều kiện này thoả.
+
+dieu_kien_dung:
+  - 'Đường vá đòi `ops/NO_KY_THUAT.md` hoặc đòi đảo `t34` ⇒ DỪNG, xuất handoff (thuộc #209)'
+  - 'Chốt phải nằm ngoài write set ⇒ DỪNG'
+  - 'Thấy một tiêu chí là sai ⇒ DỪNG và mở revision, không tự đổi giữa đường'
+  - 'Gặp lại đúng hình dạng "cú pháp shell mới làm phép kiểm thua" ở chỗ `t34` ⇒ DỪNG'
+
+reviewer_provider: claude
+review_rounds_limit: 2
+review_rounds_used: 1
+
+verdict_luot_1:
+  path: ops/reviews/plat-x5-review-1-claude-verdict.md
+  sha256: ba6d0ea7017ddb16c69b682c70513bca919ff267ddfb933ff7963224c22170a8
+  bytes: 19864
+  ket_luan: changes_requested
+  reviewed_sha: e071e0aae6bdc4d270a42fbc534ad3f05dcba0fa
+  nhanh: ops/verdict-x5-review-1
+  commit: 76272812942c9f96c024f96956239300574d3b94
+
+baseline_do_duoc_tren_head_e071e0aa: '40/40 rc=0 · actionlint rc=0 cả 5 workflow · wrapper chạy thật end-to-end rc=0'
+
+reviewer_luot_1_TU_KHAI_chua_do_duoc:
+  - 'nhánh Windows của `t40` — reviewer chỉ ĐỌC mã, sandbox không có Windows'
+  - '"CI xanh cả hai job" — reviewer lấy nguyên từ packet, KHÔNG tự xác minh'
+  - 'branch protection / required status check — ngoài kho'

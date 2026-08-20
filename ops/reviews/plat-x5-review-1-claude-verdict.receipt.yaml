@@ -31,10 +31,11 @@ verdict_doi_chieu: '`cmp` nguồn ↔ tệp đã chép: khớp từng byte (khô
 
 evidence_channel: repo_file
 authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/76272812942c9f96c024f96956239300574d3b94/ops/reviews/plat-x5-review-1-claude-verdict.md
 
 published_first:
   branch: ops/verdict-x5-review-1
-  commit: SE-DUOC-GHI-SAU-KHI-COMMIT
+  commit: 76272812942c9f96c024f96956239300574d3b94
 truy_xuat_published_qua_tag_tai_lan_do: false
 truy_xuat_published_duoc_bao_dam_lau_dai: false
 truy_xuat_tag: null
@@ -192,6 +193,9 @@ delivered: true
 delivered_by: claude-session
 receipt_written_by: claude-session
 receipt_written_at_utc: '2026-08-20T17:45:00Z'
+evidence_url_ghi_chu: >-
+  URL neo vào commit ĐẦU TIÊN chứa tệp verdict, không vào commit chứa chính dòng này —
+  một commit không thể chứa băm của chính nó. Đây là lý do biên nhận được ghi làm HAI commit.
 
 viec_cho_chu_kho:
 - 'Trần attempt đã cạn (2/2). Chọn: (a) nới trần cho codex vá lượt 3 · (b) chuyển P1 sang packet riêng và land phần còn lại kèm nợ · (c) dừng packet.'

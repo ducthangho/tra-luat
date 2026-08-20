@@ -908,6 +908,398 @@ def t31_moi_workflow_cai_pyyaml_phai_GHIM_va_ghim_CUNG_MOT_ban():
          f"khác nhau, và chỗ quên nâng bản chính là chỗ không ai đo")
 
 
+def _than_buoc_chon_lease() -> str:
+    """Trích THÂN bước `tìm lease vừa đổi` TỪ CHÍNH tệp workflow.
+
+    Chép lại thân bước vào test là dựng hai bản sẽ trôi lệch, và bên quên cập nhật
+    chính là bên đẩy lọt — cùng nếp mà `ops/don_ref_chot_test.sh` đã phải học.
+    """
+    import yaml
+    goc = HERE.parent / ".github" / "workflows"
+    if not goc.is_dir():
+        # Cùng chốt với t24/t25: chỉ tha khi đây rõ ràng là BẢN SAO rời. Trong kho thật
+        # mà thiếu thư mục workflow thì phải ĐỎ, kẻo ca xanh rỗng.
+        assert not (HERE.parent / ".git").exists(), \
+            f"kho thật mà không thấy {goc} — ca này sẽ xanh mà không đo gì"
+        return ""
+    tep = goc / "ops-publish-lease.yml"
+    assert tep.is_file(), f"không thấy {tep} — ca này sẽ xanh mà không đo gì"
+    d = yaml.safe_load(tep.read_text(encoding="utf-8"))
+    buoc = [b for b in d["jobs"]["dang"]["steps"] if b.get("name") == "tìm lease vừa đổi"]
+    assert len(buoc) == 1, f"chờ ĐÚNG một bước `tìm lease vừa đổi`, thấy {len(buoc)}"
+    b = buoc[0]
+    # ĐIỀU KIỆN ĐỂ CA NÀY TỒN TẠI: thân bước không còn `${{ }}`. Còn biểu thức thì nó
+    # KHÔNG chạy lại được ngoài Actions, và ta sẽ chỉ đo một bản chép tay.
+    assert "${{" not in b["run"], \
+        "thân `run` còn nội suy biểu thức Actions — GitHub nội suy trên TOÀN BỘ thân " \
+        "trước khi shell thấy nó (một cặp rỗng trong CHÚ THÍCH đã làm hỏng cả " \
+        "ops-don-ref.yml, run 31971137920: 0 job), và thân có biểu thức thì không " \
+        "chạy lại được ở đây. Khai qua `env:`."
+    assert set(b.get("env") or {}) >= {"TRUOC", "NAY", "MAC_DINH"}, \
+        f"bước phải khai TRUOC/NAY/MAC_DINH qua `env:`, thấy {list(b.get('env') or {})}"
+    return b["run"]
+
+
+def _kho_thu(tmp: Path):
+    """Dựng kho có `origin` THẬT: master mang một lease CŨ, HẾT HẠN, CHƯA TỪNG ĐĂNG.
+
+    `commit.gpgsign=false` KHÔNG phải cho gọn — nó đóng một finding P2 của cross-review
+    lượt 2 (codex, head `23588c97`). Trên máy có `commit.gpgsign=true` toàn cục mà signer
+    không gọi được, fixture chết bằng `fatal: failed to write commit object` và `t32` ĐỎ vì
+    **cấu hình của host**, không vì thứ nó đo. Reviewer đo được cả hai chiều: `rc=1 32/33`
+    với signing bật, `rc=0 33/33` khi tắt.
+
+    Một cổng đỏ vì lý do không liên quan tệ ngang một cổng xanh giả: cả hai đều làm người
+    đọc đi sai hướng. Phạm vi tắt signing chỉ trong kho fixture tạm — không đụng kho thật,
+    không che ca nào về chữ ký.
+    """
+    def g(cay, *a):
+        return subprocess.run(["git", "-c", "user.email=a@b", "-c", "user.name=c",
+                               "-c", "commit.gpgsign=false",
+                               "-C", str(cay), *a],
+                              capture_output=True, text=True, check=True)
+    goc = tmp / "origin.git"
+    subprocess.run(["git", "init", "-q", "--bare", str(goc)], check=True)
+    cay = tmp / "cay"
+    subprocess.run(["git", "clone", "-q", str(goc), str(cay)], check=True)
+    # DỰNG LẠI ĐÚNG MÁY ĐÃ LÀM t32 ĐỎ, ngay trong fixture — nếu không thì chốt trên chỉ là
+    # lời hứa: nó chạy xanh cả khi ai đó gỡ `-c commit.gpgsign=false` ra, trên một máy
+    # không bật signing. Đặt ở LOCAL config vì `-c` dòng lệnh thắng config tệp; gỡ `-c` ra
+    # là fixture chết ngay, tức ca này ĐO chốt chứ không chỉ mang chốt.
+    # BÁM ĐÚNG KHOÁ, và đây là chỗ bản đầu SAI: nó đặt `gpg.program` — khoá của định dạng
+    # **openpgp** — trong khi máy dựng fixture khai `gpg.format=ssh`, nên chốt giả bám vào
+    # một khoá không ai đọc và mutant "gỡ `-c commit.gpgsign=false`" SỐNG SÓT (đo được:
+    # `giet 0/1`). Ép luôn `gpg.format=ssh` để fixture không phụ thuộc cấu hình host, rồi
+    # trỏ `gpg.ssh.program` vào một đường dẫn không tồn tại.
+    for k, v in (("commit.gpgsign", "true"),
+                 ("gpg.format", "ssh"),
+                 ("user.signingkey", "khong-phai-khoa-that"),
+                 ("gpg.ssh.program", str(tmp / "signer-khong-ton-tai"))):
+        subprocess.run(["git", "-C", str(cay), "config", k, v], check=True)
+    (cay / "ops" / "leases").mkdir(parents=True)
+    # Chính hình dạng đã giết cổng ngày 20-08: hết hạn, KHÔNG `posted_comment_id`.
+    (cay / "ops" / "leases" / "cu-het-han.yaml").write_text(
+        f"lease_id: cu-het-han\nlease_expires_at_utc: '{khi_truoc(48)}'\n", encoding="utf-8")
+    g(cay, "add", "-A")
+    g(cay, "commit", "-qm", "nen")
+    g(cay, "branch", "-M", "master")
+    g(cay, "push", "-q", "origin", "master")
+    return cay, g
+
+
+def _bash_posix() -> str:
+    """Trả đường dẫn `bash` POSIX THẬT — KHÔNG phải `bash` của WSL.
+
+    ĐÃ TRẢ GIÁ (master `e03c6d28`, run 32351777642, job `gate (windows-latest)`):
+    `subprocess.run(["bash", ...])` trên runner Windows phân giải sang
+    `C:\\Windows\\System32\\bash.exe` — cửa vào WSL — và nó trả
+
+        Windows Subsystem for Linux has no installed distributions.
+
+    với `rc=1`. Ca `t32` đọc mã ấy thành "bước chọn lease ĐỎ" và báo một finding KHÔNG CÓ
+    THẬT, trong khi thứ hỏng là **trình thông dịch**, không phải thân bước.
+
+    Cùng họ với bài học `taskkill` của kho: một cái TÊN phân giải sang thứ khác trên nền
+    khác. Nên ở đây dùng DANH SÁCH CHO PHÉP (Git Bash), và loại thẳng `System32`.
+
+    Nói rõ phạm vi: bước được đo chạy trong job `runs-on: ubuntu-latest`, nên Windows chỉ
+    là nơi bộ test tình cờ chạy. Nhưng "tình cờ" mà báo finding giả thì vẫn phải chữa.
+    """
+    import os
+    import shutil
+    if os.name != "nt":
+        return "bash"
+    ung_vien = [
+        r"C:\Program Files\Git\bin\bash.exe",
+        r"C:\Program Files (x86)\Git\bin\bash.exe",
+        r"C:\Program Files\Git\usr\bin\bash.exe",
+    ]
+    for d in ung_vien:
+        if Path(d).is_file():
+            return d
+    tim = shutil.which("bash")
+    # `System32\bash.exe` LÀ WSL. Nhận nó là tự chuốc một finding giả.
+    if tim and "system32" not in tim.replace("/", "\\").lower():
+        return tim
+    return ""
+
+
+def _chay_than(than: str, cay: Path, truoc: str, nay: str, mac_dinh: str = "master"):
+    import os
+    mt = dict(os.environ, TRUOC=truoc, NAY=nay, MAC_DINH=mac_dinh)
+    vo = _bash_posix()
+    # KHÔNG ĐO ĐƯỢC ≠ ĐẠT: thiếu bash POSIX thì ném, để `t32` ĐỎ với đúng lý do — chứ
+    # không lặng lẽ trả một kết quả rỗng rồi được đếm là qua.
+    if not vo:
+        raise AssertionError(
+            "KHÔNG ĐO ĐƯỢC: không tìm thấy `bash` POSIX (Git Bash). `bash` trong "
+            "System32 là WSL, không dùng được để chạy thân bước.")
+    p = subprocess.run([vo, "-c", than], cwd=str(cay), env=mt,
+                       capture_output=True, text=True)
+    ds = (cay / "ds.txt")
+    return p.returncode, (ds.read_text(encoding="utf-8").split() if ds.is_file() else []), p.stderr + p.stdout
+
+
+ZERO40 = "0" * 40
+
+
+@ca
+def t32_buoc_chon_lease_KHONG_duoc_quet_CA_THU_MUC():
+    """Push MỞ NHÁNH MỚI chỉ được xử lý lease mà NHÁNH ẤY thêm — không phải cả thư mục.
+
+    VÌ SAO CÓ CA NÀY, và nó không phải giả thiết: lượt chạy `32342373756`
+    (2026-08-20T07:05Z, push nhánh `ops/lease-plat-m4-exec-1`) ĐỎ `rc=8`. Log liệt kê
+    BẢY tệp lease KHÔNG nằm trong push đó ⇒ nó đi vào đường dự phòng
+    `find ops/leases -type f`. Tệp giết cổng là `don-nhanh-base-review-6-…`: KHÔNG có
+    `posted_comment_id`, hạn `2026-08-18T17:45Z`.
+
+    Hệ quả: từ 18-08 tới 20-08, MỌI lease mới không đăng được, và không ai biết — cổng
+    không nói dối, nó VẮNG MẶT. Chú thích cũ khai "chốt `posted_comment_id` lo phần
+    không đăng trùng": đúng cho lease ĐÃ đăng (rc=9), sai cho lease CHƯA TỪNG đăng.
+
+    Và mọi lease đều đi bằng một nhánh MỚI theo `ops/README.md`, nên đường "dự phòng"
+    ấy thật ra là đường CHÍNH — đúng lớp bệnh "nhánh không-thấy-thì-bỏ-qua nằm im tới
+    đúng lúc cần".
+    """
+    than = _than_buoc_chon_lease()
+    if not than:
+        return
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        cay, g = _kho_thu(tmp)
+        g(cay, "checkout", "-qb", "ops/lease-moi")
+        (cay / "ops" / "leases" / "moi.yaml").write_text(
+            f"lease_id: moi\nlease_expires_at_utc: '{mai_sau()}'\n", encoding="utf-8")
+        g(cay, "add", "-A")
+        g(cay, "commit", "-qm", "lease moi")
+        head1 = g(cay, "rev-parse", "HEAD").stdout.strip()
+
+        # (1) NHÁNH MỚI: `before` toàn số 0. Chỉ được thấy lease nhánh này thêm.
+        rc, ds, ra = _chay_than(than, cay, ZERO40, head1)
+        assert rc == 0, f"nhánh mới mà bước chọn lease ĐỎ (rc={rc}): {ra}"
+        assert ds == ["ops/leases/moi.yaml"], \
+            f"chờ ĐÚNG lease nhánh này thêm, được {ds} — quét cả thư mục thì một lease " \
+            f"cũ hết hạn sẽ giết cả lượt đăng (bug #195)"
+
+        # (2) PUSH THƯỜNG trên cùng nhánh: vẫn phải diff `before`..`sha`, không lùi về
+        # merge-base — lùi về đó là kéo theo cả lease của commit TRƯỚC, đã đăng rồi.
+        (cay / "ops" / "leases" / "moi2.yaml").write_text(
+            f"lease_id: moi2\nlease_expires_at_utc: '{mai_sau()}'\n", encoding="utf-8")
+        g(cay, "add", "-A")
+        g(cay, "commit", "-qm", "lease moi 2")
+        head2 = g(cay, "rev-parse", "HEAD").stdout.strip()
+        rc, ds, ra = _chay_than(than, cay, head1, head2)
+        assert rc == 0, f"push thường mà ĐỎ (rc={rc}): {ra}"
+        assert ds == ["ops/leases/moi2.yaml"], f"push thường: chờ moi2.yaml, được {ds}"
+
+        # (3) KHÔNG ĐO ĐƯỢC ≠ KHÔNG CÓ GÌ. Mốc so không phân giải được thì phải ĐỎ, chứ
+        # không được trả danh sách rỗng — rỗng đọc y hệt "không có lease nào để đăng".
+        rc, ds, ra = _chay_than(than, cay, ZERO40, head2, mac_dinh="nhanh-khong-ton-tai")
+        assert rc != 0, f"mốc so không phân giải được mà rc=0, ds={ds}: {ra}"
+        assert "KHONG DO DUOC" in ra, f"đỏ mà không nói KHÔNG ĐO ĐƯỢC: {ra!r}"
+
+        # ...và nhánh mặc định RỖNG cũng là không đo được, không phải "quét tất".
+        rc, _ds, ra = _chay_than(than, cay, ZERO40, head2, mac_dinh="")
+        assert rc != 0, f"MAC_DINH rỗng mà vẫn chạy tiếp: {ra}"
+
+
+@ca
+def t33_workflow_dang_lease_phai_qua_actionlint():
+    """`actionlint` phải XANH trên mọi workflow — và THIẾU công cụ là ĐỎ, không phải bỏ qua.
+
+    "YAML parse được" KHÁC "GitHub NHẬN". Đo 16-08-2026: `ops-don-ref.yml` bị GitHub từ
+    chối, dấu hiệu là một run mang tên ĐƯỜNG DẪN TỆP, 0 job, `conclusion: failure` — lỗi
+    XÁC THỰC ĐỊNH NGHĨA, không phải một job đỏ. SÁU lượt cross-review đều kết luận "YAML
+    ok" vì cả sáu chỉ kiểm bằng PyYAML, mà PyYAML không biết luật của GitHub.
+
+    Một cổng tự tắt khi thiếu công cụ là cổng không tồn tại đúng lúc nó cần nhất, nên ca
+    này ĐỎ khi không có `actionlint` — trừ khi đây là bản sao rời không có `.git`.
+    """
+    import shutil
+    goc = HERE.parent / ".github" / "workflows"
+    if not goc.is_dir():
+        assert not (HERE.parent / ".git").exists(), \
+            f"kho thật mà không thấy {goc} — ca này sẽ xanh mà không đo gì"
+        return
+    duong = shutil.which("actionlint")
+    assert duong, (
+        "KHÔNG ĐO ĐƯỢC: thiếu `actionlint`. PyYAML không thay được nó — nó không biết "
+        "luật của GitHub. Cài: go install github.com/rhysd/actionlint/cmd/actionlint@latest "
+        "(hoặc `brew install actionlint`, hoặc tải bản dựng sẵn từ releases).")
+    p = subprocess.run([duong, str(goc / "ops-publish-lease.yml")],
+                       capture_output=True, text=True)
+    assert p.returncode == 0, f"actionlint ĐỎ (rc={p.returncode}):\n{p.stdout}{p.stderr}"
+
+
+def _dong_lenh(than: str) -> list:
+    """Tách thân `run` thành các LỆNH: nối dòng bị ngắt bằng `\\`, rồi bỏ chú thích.
+
+    NỐI TRƯỚC, LỌC SAU — và thứ tự ấy là một finding của chính bộ test này chứ không phải
+    lý thuyết: bản đầu khớp theo TỪNG DÒNG, nên lệnh
+
+        curl -fsSL -o "$DICH/goi" \\
+          "https://…/actionlint/releases/download/v${AL_VER}/${GOI}"
+
+    có `curl` ở dòng một và `actionlint` ở dòng hai ⇒ không dòng nào chứa CẢ HAI, và phép
+    kiểm kết luận "workflow không cài actionlint" trong khi nó cài. Một phép quét đọc lệnh
+    mà không hiểu dấu nối dòng thì nó đang đọc VĂN BẢN, không đọc LỆNH.
+    """
+    noi, dem = [], ""
+    for d in than.splitlines():
+        if d.lstrip().startswith("#"):
+            continue
+        dem = f"{dem} {d.strip()}" if dem else d.strip()
+        if dem.endswith("\\"):
+            dem = dem[:-1].rstrip()
+            continue
+        if dem:
+            noi.append(dem)
+        dem = ""
+    if dem:
+        noi.append(dem)
+    return noi
+
+
+@ca
+def t34_MOI_workflow_goi_bo_test_deu_phai_duoc_cap_actionlint():
+    """Ai gọi bộ test này thì người ấy phải cấp `actionlint` — KHÔNG trừ ai.
+
+    VÌ SAO CÓ CA NÀY, và nó không phải giả thiết. `t33` được thêm ở `#195`, mà bộ test này
+    được HAI workflow gọi: `ci.yml` (được cấp công cụ) và `ops-publish-lease.yml` (KHÔNG).
+    Đo được ở run `32351892214`:
+
+        ĐỎ  t33_workflow_dang_lease_phai_qua_actionlint: KHÔNG ĐO ĐƯỢC: thiếu `actionlint`
+        lease_publish: 32/33 đạt
+        ##[error]Process completed with exit code 1.
+
+    Hệ quả: cổng đăng lease vẫn chết, chỉ ĐỔI LÝ DO — `rc=8` vì lease cũ hết hạn thành
+    `rc=1` vì thiếu công cụ. Người đẩy lease vẫn không đăng được gì.
+
+    Đây là mặt LẬT NGƯỢC của bài học đã ghi sổ *"chốt mà chỉ một trong nhiều cửa đọc thì
+    không phải chốt"*: một PHỤ THUỘC mà chỉ một trong nhiều NGƯỜI GỌI cấp. Cùng gốc — đếm
+    MỘT cửa rồi tưởng đã đếm hết cửa.
+
+    Nên ca này KHÔNG kiểm hai tên workflow đã biết (danh sách viết tay sẽ lỗi thời đúng lúc
+    có cửa thứ ba). Nó QUÉT: tìm mọi workflow gọi bộ test, rồi đòi từng cái có bước cài.
+    """
+    import yaml
+    goc = HERE.parent / ".github" / "workflows"
+    if not goc.is_dir():
+        # KHÔNG có nhánh "không thấy thì bỏ qua" trong kho thật: chỉ tha cho BẢN SAO rời.
+        bang(not (HERE.parent / ".git").exists(),
+             f"kho thật mà không thấy {goc} — ca này sẽ xanh mà không đo gì")
+        return
+
+    goi_bo_test, thieu_cong_cu = [], []
+    for tep in sorted(goc.glob("*.yml")) + sorted(goc.glob("*.yaml")):
+        noi_dung = tep.read_text(encoding="utf-8")
+        d = yaml.safe_load(noi_dung) or {}
+        than_chay = []
+        for job in (d.get("jobs") or {}).values():
+            for b in (job.get("steps") or []):
+                if isinstance(b.get("run"), str):
+                    than_chay.append(b["run"])
+        # BỎ CHÚ THÍCH TRƯỚC, rồi mới xét — cross-review lượt 1 (codex, `fd76921`) đo
+        # được bản trước coi một thân `run` CHỈ CÓ chú thích `# actionlint install` là "đã
+        # cấp công cụ". Một phép kiểm không phân biệt được LỆNH với CHÚ THÍCH thì nó đang
+        # đọc tài liệu, không đọc hành vi.
+        dong_lenh = [d for than in than_chay for d in _dong_lenh(than)]
+
+        # AI LÀ NGƯỜI GỌI — mặc định là CÓ, trừ vài lệnh SOI đã biết.
+        # Bản trước đòi thấy chữ `python`, nên bỏ sót `py ops/…` và `$PY ops/…` (cả hai đều
+        # do cross-review đo). Ở đây hướng hỏng là BỎ SÓT một người gọi, tức fail-OPEN —
+        # nên mặc định phải nghiêng về "có gọi", và chỉ loại những dòng ta CHẮC CHẮN không
+        # thực thi. Đây KHÔNG phải "danh sách cấm chống kẻ gian" (thứ luôn thiếu); tập cần
+        # loại ở đây là các lệnh soi của chính kho, biết trước và nhỏ.
+        SOI = ("test -s", "test -f", "sha256sum", "md5sum", "ls ", "cat ", "wc ",
+               "rg ", "grep ", "stat ", "echo ")
+        chay_bo_test = any(
+            "lease_publish_test.py" in d and not any(k in d for k in SOI)
+            for d in dong_lenh)
+        if not chay_bo_test:
+            continue
+        goi_bo_test.append(tep.name)
+
+        # CẤP CÔNG CỤ phải là một LỆNH LẤY VỀ, trên một dòng thực thi.
+        LAY_VE = ("curl", "wget", "choco install", "brew install", "go install",
+                  "apt-get install", "gh release download")
+        if not any("actionlint" in d and any(k in d for k in LAY_VE) for d in dong_lenh):
+            thieu_cong_cu.append(tep.name)
+
+    # KHÔNG cho "không tìm thấy workflow nào" âm thầm thành ĐẠT: một lượt quét hỏng và một
+    # kho thật sự không ai gọi bộ test cho cùng màu xanh, mà nghĩa thì ngược nhau.
+    bang(goi_bo_test,
+         "không thấy workflow nào chạy `lease_publish_test.py` — phép quét đang hỏng, "
+         "hoặc bộ test này đã mồ côi; cả hai đều phải ĐỎ chứ không phải xanh rỗng")
+    bang(not thieu_cong_cu,
+         f"workflow {thieu_cong_cu} chạy `lease_publish_test.py` mà KHÔNG cài `actionlint`. "
+         f"Bộ test ĐÒI công cụ ấy (t33 fail-close), nên workflow không cấp thì cổng chết vì "
+         f"thiếu công cụ chứ không phải vì lease sai — đúng regression đã đo ở run "
+         f"32351892214. Cấp công cụ, đừng hạ chuẩn t33.")
+
+
+@ca
+def t35_buoc_cai_actionlint_phai_CUONG_CHE_ban_ghim():
+    """"Ghim exact" phải là HÀNH VI, không phải một câu trong chú thích.
+
+    VÌ SAO CÓ CA NÀY — cross-review lượt 1 (codex, `fd76921`, P2) đo được:
+
+        actionlint(){ echo "actionlint fake-0.0.0"; }
+        if command -v actionlint; then actionlint --version; exit 0; fi
+        -> actionlint fake-0.0.0 · EARLY_EXIT_RC=0
+
+    Nhánh thoát sớm nhận BẤT KỲ `actionlint` nào có sẵn trên `PATH`, không đối chiếu bản đã
+    ghim. Mà `t33` gọi đúng binary trên `PATH`, nên một binary giả chỉ cần trả `0` cho
+    `--version` là làm cổng xanh RỖNG. Chú thích ngay trên bước ấy khai "GHIM EXACT" —
+    tức LỜI KHAI RỘNG HƠN THỨ ĐO ĐƯỢC, đúng lỗi kho đã ghi sổ.
+
+    Ca này đòi mọi bước cài `actionlint`:
+      1. khai một phiên bản exact (`AL_VER: X.Y.Z`);
+      2. KHÔNG có nhánh thoát sớm kiểu `command -v … exit 0`;
+      3. có đối chiếu phiên bản sau khi cài (bằng chứng dương, không phải `command -v`).
+    """
+    import re
+    import yaml
+    goc = HERE.parent / ".github" / "workflows"
+    if not goc.is_dir():
+        bang(not (HERE.parent / ".git").exists(),
+             f"kho thật mà không thấy {goc} — ca này sẽ xanh mà không đo gì")
+        return
+
+    thay_buoc, loi = 0, []
+    for tep in sorted(goc.glob("*.yml")) + sorted(goc.glob("*.yaml")):
+        d = yaml.safe_load(tep.read_text(encoding="utf-8")) or {}
+        for job in (d.get("jobs") or {}).values():
+            for b in (job.get("steps") or []):
+                than = b.get("run")
+                if not isinstance(than, str) or "actionlint" not in than:
+                    continue
+                if not any(k in than for k in ("curl", "wget", "choco install",
+                                               "brew install", "go install")):
+                    continue                      # bước DÙNG, không phải bước CÀI
+                thay_buoc += 1
+                ten = f"{tep.name}:{b.get('name') or '(không tên)'}"
+                mt = (b.get("env") or {})
+                ban = str(mt.get("AL_VER") or "")
+                if not re.fullmatch(r"\d+\.\d+\.\d+", ban):
+                    loi.append(f"{ten}: thiếu `AL_VER` dạng X.Y.Z (được {ban!r})")
+                dong_lenh = _dong_lenh(than)
+                if any("command -v actionlint" in x for x in dong_lenh) and \
+                   any(re.search(r"\bexit 0\b", x) for x in dong_lenh):
+                    loi.append(f"{ten}: còn nhánh THOÁT SỚM nhận `actionlint` có sẵn trên "
+                               f"PATH mà không đối chiếu bản ghim — một binary giả trả 0 "
+                               f"cho `--version` làm cổng xanh rỗng (P2 cross-review)")
+                if not any('"$AL_VER"' in x or "${AL_VER}" in x or "$AL_VER" in x
+                           for x in dong_lenh if "--version" in x or "grep" in x
+                           or "case" in x or "!=" in x):
+                    loi.append(f"{ten}: cài xong mà KHÔNG đối chiếu `--version` với "
+                               f"`AL_VER` — 'đã cài' không phải 'đã cài ĐÚNG BẢN'")
+    bang(thay_buoc,
+         "không thấy bước cài `actionlint` nào — phép quét đang hỏng, hoặc công cụ đã "
+         "biến mất khỏi mọi workflow; cả hai phải ĐỎ chứ không xanh rỗng")
+    bang(not loi, "bước cài `actionlint` không cưỡng chế bản ghim:\n  - " + "\n  - ".join(loi))
+
+
 def main() -> int:
     qua, hong = 0, []
     for fn in CA:

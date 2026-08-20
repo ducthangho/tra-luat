@@ -89,9 +89,9 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 
-# launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu
+# launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu probe-qua-han-ba-trang-thai
 #
 # CÙNG CƠ CHẾ với `# hook-nang-luc:` trong `.claude/hooks/session-start.sh`, áp cho
 # CHÍNH TỆP NÀY. Vì sao cần: sự cố 15-08 là hook của nhánh packet cũ hơn hook master;
@@ -1936,8 +1936,9 @@ def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]
     return [(t, x) for t, x in ra if Path(x).is_file()]
 
 
-def _phien_ban(duong_dan: str, *, env=None, timeout=PROBE_TIMEOUT_GIAY) -> tuple[bool, str]:
-    """Chạy thử `--version`. Trả (chay_duoc, dong_dau).
+def _phien_ban(duong_dan: str, *, env=None,
+               timeout=PROBE_TIMEOUT_GIAY) -> tuple[bool, str, bool]:
+    """Chạy thử `--version`. Trả (chay_duoc, dong_dau, qua_han).
 
     `shutil.which()` KHÔNG phải bằng chứng công cụ dùng được — audit codex dựng hai
     tệp RỖNG tên git.exe/python.exe rồi doctor báo xanh; và ngay trên máy đó `rg.exe`
@@ -1946,24 +1947,32 @@ def _phien_ban(duong_dan: str, *, env=None, timeout=PROBE_TIMEOUT_GIAY) -> tuple
     `stdin=DEVNULL`: một công cụ chờ stdin sẽ TREO tới hết deadline thay vì trả
     lời. Cùng họ với bẫy `$Args` (r244) — tiến trình đọc stdin, EOF, rc=0, đầu ra
     rỗng: cổng xanh mà chẳng đo gì.
+
+    `qua_han` là TÍN HIỆU KIỂU riêng, không phải chuỗi để phía gọi dò: TimeoutExpired
+    nghĩa là "KHÔNG ĐO ĐƯỢC trong hạn" — khác hẳn "đo được là hỏng" (rc != 0, OSError,
+    không in gì). Đây là NGUỒN CHỚP của `t53` (ops/NO_KY_THUAT.md, "doctor chớp"):
+    một lượt `--version` hết hạn dưới churn tiến trình từng bị đếm là THIẾU công cụ
+    rồi hai phút sau lại đủ — cùng lệnh, cùng máy. Phân loại bằng cách dò chữ
+    "timeout" trong mô tả là ĐOÁN, không phải ĐO (bài học phân loại HTTP bằng văn
+    bản tự do); nên cờ này phải là phần tử trả về riêng.
     """
     try:
         p = subprocess.run([duong_dan, "--version"], capture_output=True, text=True,
                            stdin=subprocess.DEVNULL, env=env, timeout=max(0.1, timeout),
                            encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:
-        return (False, f"timeout sau {timeout:.1f}s")
+        return (False, f"timeout sau {timeout:.1f}s", True)
     except (OSError, subprocess.SubprocessError) as e:
-        return (False, str(e)[:120])
+        return (False, str(e)[:120], False)
     ra = (p.stdout or "") + (p.stderr or "")   # nhiều CLI in phiên bản ra stderr
     dong = [d.strip() for d in ra.splitlines() if d.strip()]
     if p.returncode != 0 or not dong:
-        return (False, dong[0][:80] if dong else f"rc={p.returncode}, khong in gi")
-    return (True, dong[0][:80])
+        return (False, dong[0][:80] if dong else f"rc={p.returncode}, khong in gi", False)
+    return (True, dong[0][:80], False)
 
 
 def _xac_thuc(duong_dan: str, doi_so: list[str], *, env=None,
-              timeout=PROBE_TIMEOUT_GIAY) -> tuple[bool, str]:
+              timeout=PROBE_TIMEOUT_GIAY) -> tuple[bool, str, bool]:
     """Probe auth không tương tác; không bao giờ trả stdout/stderr có credential.
 
     `rc=0` MỘT MÌNH không phải bằng chứng — đúng doctrine "đòi BẰNG CHỨNG DƯƠNG,
@@ -1975,21 +1984,27 @@ def _xac_thuc(duong_dan: str, doi_so: list[str], *, env=None,
     rc=0 kèm câu khẳng định SAI (vd `codex login status` — xem chú thích ở
     `CONG_CU`) vẫn qua. Vì thế chỉ gắn `xac_thuc` cho công cụ có đầu ra KIỂM
     CHỨNG ĐƯỢC, đừng gắn đại trà.
+
+    Phần tử thứ ba `qua_han` cùng hợp đồng với `_phien_ban`: quá hạn là "KHÔNG ĐO
+    ĐƯỢC trong hạn", không phải "đo được là sai" — probe auth cũng gọi CLI chậm
+    (node) nên cũng là một đường chớp của `t53` y như probe `--version`.
+    Thông điệp quá hạn cố ý KHÁC chữ với `_phien_ban` để mỗi mỏ neo đột biến
+    khớp đúng một chỗ (chốt `moi mau dot bien phai khop DUNG MOT cho`).
     """
     try:
         p = subprocess.run([duong_dan, *doi_so], capture_output=True, text=True,
                            stdin=subprocess.DEVNULL, env=env, timeout=max(0.1, timeout),
                            encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:
-        return (False, f"timeout sau {timeout:.1f}s")
+        return (False, f"probe xac thuc timeout sau {timeout:.1f}s", True)
     except (OSError, subprocess.SubprocessError) as e:
-        return (False, type(e).__name__)
+        return (False, type(e).__name__, False)
     co_loi_ra = bool(((p.stdout or "") + (p.stderr or "")).strip())
     if p.returncode != 0:
-        return (False, f"rc={p.returncode}")
+        return (False, f"rc={p.returncode}", False)
     if not co_loi_ra:
-        return (False, "rc=0 nhung khong co bang chung xac thuc")
-    return (True, "ok")
+        return (False, "rc=0 nhung khong co bang chung xac thuc", False)
+    return (True, "ok", False)
 
 
 def _in_an_toan(chuoi: str) -> bool:
@@ -2409,20 +2424,25 @@ def _co_chan_codex() -> str | None:
             f"`python3 .claude/dev/codex_env_policy.py --go` roi TU thay tep")
 
 
-def _do_codex_song(han_giay: int = 90) -> tuple[bool, str]:
+def _do_codex_song(han_giay: int = 90, duong_dan: str | None = None) -> tuple[bool, str]:
     """Phép thử SỐNG: gọi `codex` thật và soi lỗi xác thực.
 
     ĐẮT (tốn quota + mạng) nên KHÔNG chạy mặc định — chỉ khi phía gọi đòi
     `--kiem-song`. Nhưng đây là thứ DUY NHẤT chứng minh được credential còn dùng được:
     refresh token bị THU HỒI phía máy chủ thì không phép kiểm offline nào thấy.
+
+    `duong_dan`: spawn bằng ĐƯỜNG DẪN ĐÃ RESOLVE, không spawn tên trần — xem chú
+    thích tại `_do_codex` (Windows: CreateProcess không tra PATHEXT nên tên trần
+    "codex" chết FileNotFoundError trong khi `codex.cmd` vẫn nằm ngay trên PATH).
     """
     bi_chan = _co_chan_codex()
     if bi_chan:
         # Đây là cửa THẬT SỰ chạy `codex exec`. Bản trước bỏ sót đúng cửa này.
         return (False, bi_chan)
+    lenh = duong_dan or shutil.which("codex") or "codex"
     try:
         with open(os.devnull) as rong:
-            p = subprocess.run(["codex", "exec", "--skip-git-repo-check", "in ra: ok"],
+            p = subprocess.run([lenh, "exec", "--skip-git-repo-check", "in ra: ok"],
                                stdin=rong, capture_output=True, text=True,
                                timeout=han_giay, encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:
@@ -2453,14 +2473,23 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
     Nay: `rc != 0` là CHƯA XÁC THỰC, dứt khoát; chữ chỉ dùng để giải thích, và tìm
     trong TOÀN BỘ đầu ra chứ không riêng dòng nào.
     """
-    if not shutil.which("codex"):
+    duong_codex = shutil.which("codex")
+    if not duong_codex:
         return ("THIEU", "chua cai — npm install -g @openai/codex")
     bi_chan = _co_chan_codex()
     if bi_chan:
         return ("CHUA_XAC_THUC", bi_chan)
     try:
-        p = subprocess.run(["codex", "login", "status"], capture_output=True, text=True,
-                           timeout=30, encoding="utf-8", errors="replace")
+        # Spawn bằng ĐƯỜNG DẪN `which` đã trả, KHÔNG spawn tên trần. ĐO 19-08-2026
+        # trên Windows (packet PLAT-M3, #185): `shutil.which` thấy
+        # `...\nodejs\codex.CMD` (tra PATHEXT), nhưng CreateProcessW với tên trần
+        # "codex" chỉ tự thêm ".exe" ⇒ FileNotFoundError — trong khi bảng `CONG_CU`
+        # ngay trên đo CÙNG công cụ bằng đường dẫn resolve và ra version ngon lành.
+        # Một `doctor` mà hai probe của nó phân giải cùng một tên ra hai kết quả
+        # ngược nhau là doctor tự mâu thuẫn; mọi spawn CLI agent (.cmd shim của
+        # npm) phải đi qua đường dẫn resolve.
+        p = subprocess.run([duong_codex, "login", "status"], capture_output=True,
+                           text=True, timeout=30, encoding="utf-8", errors="replace")
         ra = ((p.stdout or "") + (p.stderr or ""))
         rc = p.returncode
     except (OSError, subprocess.SubprocessError) as e:
@@ -2512,7 +2541,7 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
             # đây, nên đòi kiểm sống mà KHÔNG BAO GIỜ kiểm — phép đo bị chính cảnh báo
             # nuốt mất. "Sắp hết hạn" và "còn dùng được không" là HAI câu hỏi khác nhau.
             if kiem_song:
-                song, ly_do = _do_codex_song()
+                song, ly_do = _do_codex_song(duong_dan=duong_codex)
                 if not song:
                     return ("CHUA_XAC_THUC", f"kiem song HONG: {ly_do} · {chi_tiet}")
                 vi_sao.append(f"kiem song: {ly_do} (VAN dung duoc)")
@@ -2520,7 +2549,7 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
         if not kiem_song:
             return ("CO_CREDENTIAL",
                     f"{chi_tiet} · CHUA chung minh dung duoc (them --kiem-song de goi that)")
-        song, vi_sao = _do_codex_song()
+        song, vi_sao = _do_codex_song(duong_dan=duong_codex)
         if song:
             return ("DUNG_DUOC", f"{chi_tiet} · kiem song: {vi_sao}")
         return ("CHUA_XAC_THUC", f"kiem song HONG: {vi_sao} · {chi_tiet}")
@@ -3230,8 +3259,10 @@ def lenh_doctor(a) -> int:
         thay = None
         co_mat_nhung_hong = None
         het_ngan_sach = None
+        qua_han_probe = None
         xac_thuc_ok = None
         loi_xac_thuc = None
+        xac_thuc_chua_do = None
         for ten_uv, d in _cac_duong_dan(c, moi_truong):
             con_lai = het_han - time.monotonic()
             if con_lai <= 0:
@@ -3242,11 +3273,37 @@ def lenh_doctor(a) -> int:
                 het_ngan_sach = {"goi_bang": ten_uv, "duong_dan": d,
                                  "ly_do": "doctor het ngan sach truoc khi do toi day"}
                 break
-            chay_duoc, pb = _phien_ban(d, env=moi_truong,
-                                       timeout=min(PROBE_TIMEOUT_GIAY, con_lai))
+            chay_duoc, pb, qua_han = _phien_ban(d, env=moi_truong,
+                                                timeout=min(PROBE_TIMEOUT_GIAY, con_lai))
+            if not chay_duoc and qua_han:
+                # NGUỒN CHỚP CỦA `t53` — vá tất định (packet PLAT-M3, #185).
+                # Đo được (ops/NO_KY_THUAT.md): `doctor` thoát 12 rồi 0, cùng lệnh,
+                # cùng máy, cách nhau hai phút — vì MỘT lượt `--version` hết hạn
+                # dưới churn tiến trình bị đếm là THIẾU. Quá hạn phụ thuộc đồng hồ
+                # tường nên mọi cách đếm nó là THIẾU đều không tất định. Hai lớp vá:
+                #   1. retry MỘT lượt với hạn GẤP ĐÔI (chớp đã đo là khởi động nguội
+                #      dưới tải — lặp cùng hạn là tung lại đồng xu, không phải đo lại);
+                #   2. vẫn quá hạn ⇒ "CHƯA ĐO ĐƯỢC" (`chua_do_duoc`/`chua_do_bat_buoc`),
+                #      KHÔNG rơi vào `thieu_bat_buoc` — cùng doctrine với nhánh hết
+                #      ngân sách ngay trên: `None ≠ False`.
+                # Hỏng THẬT (rc != 0, OSError, không in gì) vẫn là THIẾU như cũ —
+                # nhánh này chỉ tách QUA_HAN, không nới cho công cụ hỏng.
+                con_lai = het_han - time.monotonic()
+                if con_lai > 0:
+                    chay_duoc, pb2, qua_han = _phien_ban(
+                        d, env=moi_truong,
+                        timeout=min(2 * PROBE_TIMEOUT_GIAY, con_lai))
+                    # Retry ĐẠT thì phien_ban là của lượt 2 — giữ thông điệp lỗi
+                    # lượt 1 làm "phiên bản" là chép nhầm bệnh án vào tên thuốc
+                    # (t130 bắt được đúng lỗi này ở bản nháp đầu).
+                    pb = pb2 if chay_duoc else f"luot 1: {pb} · luot 2: {pb2}"
             if chay_duoc:
                 thay = {"goi_bang": ten_uv, "duong_dan": d, "phien_ban": pb}
                 break
+            if qua_han:
+                qua_han_probe = {"goi_bang": ten_uv, "duong_dan": d,
+                                 "ly_do": f"probe --version QUA HAN, chua do duoc: {pb}"}
+                continue
             co_mat_nhung_hong = {"goi_bang": ten_uv,
                                  "duong_dan": d, "loi": pb}
         if thay is not None and c.get("xac_thuc"):
@@ -3254,10 +3311,29 @@ def lenh_doctor(a) -> int:
             if con_lai <= 0:
                 # Cũng vậy: chưa đo được auth thì để `None`, đừng khai là SAI.
                 xac_thuc_ok, loi_xac_thuc = None, "doctor het ngan sach"
+                xac_thuc_chua_do = loi_xac_thuc
             else:
-                xac_thuc_ok, loi_xac_thuc = _xac_thuc(
+                xac_thuc_ok, loi_xac_thuc, xt_qua_han = _xac_thuc(
                     thay["duong_dan"], c["xac_thuc"], env=moi_truong,
                     timeout=min(PROBE_TIMEOUT_GIAY, con_lai))
+                if not xac_thuc_ok and xt_qua_han:
+                    # ĐƯỜNG CHỚP THỨ HAI của `t53`, cùng cơ chế với probe `--version`
+                    # ngay trên: probe auth cũng gọi CLI chậm, quá hạn từng rơi thẳng
+                    # vào `xac_thuc_ok is False` ⇒ `thieu_bat_buoc` ⇒ thoát 12.
+                    # Cùng hai lớp vá: retry hạn gấp đôi, rồi mới nhận là CHƯA ĐO ĐƯỢC.
+                    con_lai = het_han - time.monotonic()
+                    if con_lai > 0:
+                        xac_thuc_ok, loi_2, xt_qua_han = _xac_thuc(
+                            thay["duong_dan"], c["xac_thuc"], env=moi_truong,
+                            timeout=min(2 * PROBE_TIMEOUT_GIAY, con_lai))
+                        if not xac_thuc_ok:
+                            loi_xac_thuc = f"luot 1: {loi_xac_thuc} · luot 2: {loi_2}"
+                    if not xac_thuc_ok and xt_qua_han:
+                        # `None ≠ False`: quá hạn cả hai lượt là CHƯA ĐO ĐƯỢC,
+                        # không phải "xác thực sai".
+                        xac_thuc_ok = None
+                        xac_thuc_chua_do = f"probe xac thuc QUA HAN, chua do duoc: {loi_xac_thuc}"
+                        loi_xac_thuc = xac_thuc_chua_do
         cai = c["cai"].get(he) or c["cai"].get("*") or ""
         bb = _bat_buoc(c, moi_truong)
         muc = {"ten": c["ten"], "bat_buoc": bb, "co": thay is not None,
@@ -3268,19 +3344,31 @@ def lenh_doctor(a) -> int:
             muc["bat_buoc_khai"] = dict(c["bat_buoc"])
         if c.get("xac_thuc"):
             muc["xac_thuc_ok"] = xac_thuc_ok
-            if xac_thuc_ok is False:
+            # Ghi lý do cho CẢ `False` (đo được là sai) LẪN `None` có lý do (chưa đo
+            # được vì hết ngân sách/quá hạn) — JSON của lượt hỏng là thứ đã hụt HAI
+            # lần khi săn flake này, đừng để nó câm thêm lần nữa.
+            if xac_thuc_ok is not True and loi_xac_thuc:
                 muc["loi_xac_thuc"] = loi_xac_thuc
         if thay is None and co_mat_nhung_hong:
             muc["co_mat_nhung_khong_chay_duoc"] = co_mat_nhung_hong
         if thay is None and het_ngan_sach:
             muc["chua_do_duoc"] = het_ngan_sach
+        if thay is None and qua_han_probe:
+            muc["chua_do_duoc"] = qua_han_probe
         ket.append(muc)
         # HẾT NGÂN SÁCH KHÔNG PHẢI THIẾU CÔNG CỤ (P2 review "#143"). Lượt trước tôi
         # tách được cái NHÃN (`chua_do_duoc`) nhưng chưa tách cái QUYẾT ĐỊNH: mục ấy
         # vẫn rơi vào `thieu_bat_buoc` nên `doctor` vẫn trả 12 và vẫn nói "THIEU".
         # Đổi tên chỗ hỏng mà giữ nguyên kết luận thì chưa sửa gì. Chưa đo được thì
         # phải nói CHƯA ĐO ĐƯỢC — `None ≠ False`.
-        if bb and het_ngan_sach is not None and thay is None:
+        # Từ v1.3.0, `qua_han_probe` và `xac_thuc_chua_do` đi CÙNG nhánh với hết
+        # ngân sách: cả ba đều là "chưa đo được", và đây chính là chỗ từng biến
+        # một lượt probe quá hạn thành `doctor` thoát 12 (nguồn chớp của `t53`).
+        # Chỉ khi CÓ phép đo hoàn tất (hỏng thật / xác thực sai) mới được nói THIẾU.
+        if bb and thay is None and (het_ngan_sach is not None
+                                    or qua_han_probe is not None):
+            chua_do_bat_buoc.append(c["ten"])
+        elif bb and thay is not None and xac_thuc_chua_do is not None:
             chua_do_bat_buoc.append(c["ten"])
         elif bb and (thay is None or xac_thuc_ok is False):
             thieu_bat_buoc.append(c["ten"])
@@ -3352,6 +3440,16 @@ def lenh_doctor(a) -> int:
 
     bien = quet_bien_moi_truong()
 
+    # Mã thoát tính MỘT LẦN cho cả hai dạng in — hai bản sao của cùng một lời gọi
+    # là hai bản sẽ trôi lệch. `chua_do_bat_buoc` đi vào vế fail-closed của
+    # `--doi-kha-dung`: mặc định "chưa đo được" không chặn (đúng nhánh hết ngân
+    # sách đã chọn từ trước), nhưng phía gọi đã ĐÒI khả dụng thì một công cụ bắt
+    # buộc CHƯA ĐO ĐƯỢC không được lặng lẽ tính là đủ — không nối thì bản vá
+    # "quá hạn ≠ thiếu" tự mở một fail-open mới cho đúng chế độ nghiêm nhất.
+    ma_thoat = _ma_doctor(thieu_bat_buoc, chua_xac_thuc,
+                          getattr(a, "doi_kha_dung", False),
+                          chua_chung_minh + chua_do_bat_buoc)
+
     if a.json:
         # `ok` GIU NGHIA CU: đủ công cụ BẮT BUỘC hay không. Bản trước tôi đổi nó
         # thành "đủ công cụ VÀ đã xác thực", làm `t53` đỏ — và đúng ra là phải đỏ:
@@ -3364,8 +3462,13 @@ def lenh_doctor(a) -> int:
         # nâng lại nguyên vẹn — `ok_kha_dung=true` cho đúng credential mà lệnh gọi
         # thật trả 401. Sửa một đầu mà để đầu kia y nguyên thì chưa sửa gì.
         _in_an_toan(json.dumps({"ok": not thieu_bat_buoc,
+                                # `chua_do_bat_buoc` cũng phủ định `ok_kha_dung`:
+                                # "khả dụng" là nhãn ĐÃ CHỨNG MINH, mà công cụ bắt
+                                # buộc chưa đo được thì chưa chứng minh được gì —
+                                # cùng lý do nó vào vế fail-closed của mã thoát.
                                 "ok_kha_dung": not thieu_bat_buoc and not chua_xac_thuc
-                                               and not chua_chung_minh,
+                                               and not chua_chung_minh
+                                               and not chua_do_bat_buoc,
                                 "he_dieu_hanh": he,
                                 "python_dang_chay": sys.version.split()[0],
                                 "moi_truong": moi_truong_cong_khai,
@@ -3378,8 +3481,7 @@ def lenh_doctor(a) -> int:
                                 "chua_chung_minh": chua_chung_minh,
                                 "bien_moi_truong": bien},
                                ensure_ascii=False, indent=2))
-        return _ma_doctor(thieu_bat_buoc, chua_xac_thuc,
-                          getattr(a, "doi_kha_dung", False), chua_chung_minh)
+        return ma_thoat
     else:
         con_ong = _in_an_toan(
             f"he dieu hanh : {he}  |  python dang chay: {sys.version.split()[0]}")
@@ -3442,9 +3544,16 @@ def lenh_doctor(a) -> int:
         if chua_chung_minh:
             _in_an_toan("  CHUA CHUNG MINH KHA DUNG (co mat, chua ai goi that): "
                         + ", ".join(chua_chung_minh))
-            _in_an_toan("                 chay lai voi --kiem-song de doi bang chung that")
-    return _ma_doctor(thieu_bat_buoc, chua_xac_thuc,
-                      getattr(a, "doi_kha_dung", False), chua_chung_minh)
+            # Đừng khuyên bật một cờ ĐANG bật: `--kiem-song` đã chạy mà vẫn chưa có
+            # bằng chứng thì lời khuyên "chạy lại với --kiem-song" là gợi ý sai —
+            # một gợi ý sai còn tệ hơn không gợi ý (đo 19-08-2026: chân trang này
+            # in y nguyên trong một lượt ĐÃ truyền cờ, đẩy người đọc chạy lại vô ích).
+            if getattr(a, "kiem_song", False):
+                _in_an_toan("                 --kiem-song DA chay ma van chua co bang "
+                            "chung — xem chi tiet tung muc o tren")
+            else:
+                _in_an_toan("                 chay lai voi --kiem-song de doi bang chung that")
+    return ma_thoat
 
 
 # ----------------------------------------------------------------------- CLI

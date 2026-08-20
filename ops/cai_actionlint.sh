@@ -26,15 +26,22 @@
 #   2 thieu/sai `AL_VER`      5 giai nen hong hoac khong thay binary
 #   3 nen khong duoc ho tro   6 binary khong chay duoc (`--version` rc != 0)
 #   4 tai ve that bai         7 CAI XONG NHUNG SAI BAN (hoac khong phai actionlint)
+#   8 KHONG CO BAM de doi chieu goi   9 BAM GOI KHONG KHOP
 set -euo pipefail
 
 loi() { ma="$1"; shift; printf '%s\n' "cai_actionlint: $*" >&2; exit "$ma"; }
 
 AL_VER="${AL_VER-}"
-case "$AL_VER" in
-  [0-9]*.[0-9]*.[0-9]*) : ;;
-  *) loi 2 "thieu \`AL_VER\` dang X.Y.Z (duoc '${AL_VER}')" ;;
-esac
+# DUNG REGEX DAY DU, khong dung glob cua `case`. Ban truoc viet
+#   [0-9]*.[0-9]*.[0-9]*
+# va no LOT: trong glob, `*` khop MOI ky tu (ke ca chu cai) chu khong phai "nhieu chu so",
+# con `.` la ky tu THUONG chu khong phai metachar. Do duoc o cross-review #203:
+#   AL_VER=1x.2y.3z  ->  rc=0, script CAI BINH THUONG
+# tuc mot ban ghim khong phai so van qua cong. `[[ =~ ]]` la cua bash, va tep nay khai
+# `#!/usr/bin/env bash` ngay dong dau nen dung duoc.
+if [[ ! "$AL_VER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  loi 2 "thieu \`AL_VER\` dang X.Y.Z (duoc '${AL_VER}')"
+fi
 
 AL_DICH="${AL_DICH:-${RUNNER_TEMP:-/tmp}/actionlint}"
 AL_BASE_URL="${AL_BASE_URL:-https://github.com/rhysd/actionlint/releases/download}"
@@ -47,6 +54,42 @@ case "$NEN" in
   *) loi 3 "nen la '${NEN}', chua co goi cho nen nay" ;;
 esac
 
+# ─────────────────────── DOI CHIEU BAM GOI (cross-review #203, P2-3) ───────────────────────
+# VI SAO. Truoc do goi tai tu mang duoc chay NGAY sau khi giai nen, va thu duy nhat "xac
+# minh" no la `actionlint --version` — tuc BINARY TU KHAI. Mot binary bi thay the tu in
+# `1.7.7` cung qua. Ma binary nay chay trong job co `contents: write` + `issues: write`.
+#
+# NOI THANG GIOI HAN, dung de ai doc rong hon thuc te: bam duoi day duoc TINH TU CHINH ban
+# tai ve luc ghim, khong phai tu mot trust root doc lap (actionlint khong cong bo tep
+# checksum ky). Nen no chan DRIFT va chan THAY THE VE SAU — dung muc bao dam cua
+# `pip install X==1.2.3` co hash, KHONG hon. No khong chung minh ban goc sach tai thoi
+# diem ghim.
+bam_ghim() {
+  case "$1" in
+    actionlint_1.7.7_linux_amd64.tar.gz)  echo "023070a287cd8cccd71515fedc843f1985bf96c436b7effaecce67290e7e0757" ;;
+    actionlint_1.7.7_darwin_arm64.tar.gz) echo "2693315b9093aeacb4ebd91a993fea54fc215057bf0da2659056b4bc033873db" ;;
+    actionlint_1.7.7_windows_amd64.zip)   echo "7f12f1801bca3d480d67aaf7774f4c2a6359a3ca8eebe382c95c10c9704aa731" ;;
+    *) echo "" ;;
+  esac
+}
+
+# `sha256sum` (GNU/Git Bash) hoac `shasum -a 256` (macOS). Thieu CA HAI thi FAIL-CLOSE:
+# mot cong tu tat khi thieu cong cu la cong khong ton tai dung luc no can nhat.
+bam_cua() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | cut -d" " -f1
+  elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$1" | cut -d" " -f1
+  else
+    echo ""
+  fi
+}
+
+MONG="${AL_SHA256:-$(bam_ghim "$GOI")}"
+# FAIL SOM: khong co bam thi DUNG NGAY, dung tai ve roi moi phat hien. Tai mot thu ta
+# khong doi chieu duoc rat de thanh "thoi cai dai" o lan sua sau.
+[ -n "$MONG" ] || loi 8 "khong co bam de doi chieu goi '$GOI'. Ghim bam trong \`bam_ghim\` cho ban nay, hoac truyen \`AL_SHA256\`. KHONG co duong bo qua — day la ma se duoc CHAY."
+
 mkdir -p "$AL_DICH"
 if [ -n "${AL_GOI:-}" ]; then
   [ -f "$AL_GOI" ] || loi 4 "khong thay goi co san '$AL_GOI'"
@@ -57,16 +100,46 @@ else
   TEN_GOI="$AL_DICH/goi.${GOI##*.}"
 fi
 
+# Doi chieu bam TREN TEP DA CO (tai ve hoac `AL_GOI`). Luu y: khi dung `AL_GOI` ma khong
+# truyen `AL_SHA256`, moc so van la BAM GHIM CUA GOI CHINH THUC — tuc ban cai offline cung
+# phai la dung artefact ay. Do la CO Y, khong phai lo hong.
+THUC="$(bam_cua "$TEN_GOI")"
+[ -n "$THUC" ] || loi 8 "KHONG DO DUOC bam: thieu ca \`sha256sum\` lan \`shasum\`. Cap mot trong hai cho runner, dung bo qua buoc nay."
+[ "$THUC" = "$MONG" ] || loi 9 "bam goi KHONG KHOP: mong '$MONG', thuc '$THUC' (goi '$TEN_GOI')"
+
+# DUA GOI VE THU MUC DICH DUOI MOT TEN KHONG CO DAU HAI CHAM, roi giai nen tu TRONG
+# thu muc ay bang TEN TRAN. Nghe thua mot buoc chep, nhung day la chot chong mot loi
+# DA LAM DO WINDOWS THAT (luot 32368383473, job 96423003418):
+#
+#   tar (child): Cannot connect to C: resolve failed
+#
+# GNU tar doc doi so cua `-f` theo dang `HOST:PATH` khi co dau hai cham DUNG TRUOC dau
+# gach cheo dau tien. Tren Windows duong dan mang ky tu o dia (`C:\...`) nen tar khong mo
+# tep — no di PHAN GIAI TEN MAY `C`. Hau qua: tren Windows script LUON tra rc=5, tuc
+# installer khong bao gio cai duoc, va `ci.yml` chan windows do.
+#
+# VI SAO KHONG dung `--force-local`: co cua GNU tar, KHONG co o bsdtar (tar.exe cua
+# Windows 10+ va cua macOS) — vá bằng nó là đổi một lỗi nền này lấy một lỗi nền khác.
+# VI SAO KHONG chi dung `basename`: ten tep cung co the chua dau hai cham
+# (`AL_GOI=/duong/we:ird.tar.gz`), va luc ay basename van dinh dung luat tren.
+# Ten dich duoi day do TA dat nen chac chan khong co dau hai cham — do la thu lam chot,
+# khong phai phep loc chuoi tren dau vao.
+DUOI_GOI="${TEN_GOI##*.}"
+GOI_CUC_BO="goi_giai_nen.${DUOI_GOI}"
+if [ "$TEN_GOI" != "$AL_DICH/$GOI_CUC_BO" ]; then
+  cp "$TEN_GOI" "$AL_DICH/$GOI_CUC_BO" || loi 5 "khong chep duoc goi vao '$AL_DICH'"
+fi
+
 # Chon bo giai nen theo DUOI CUA GOI THAT, khong theo nen — goi co san co the la .tar.gz
 # ngay tren Windows. `unzip` khong co san trong Git Bash, nen co duong lui sang `tar`.
-case "$TEN_GOI" in
+case "$GOI_CUC_BO" in
   *.zip)
     if command -v unzip >/dev/null 2>&1; then
-      unzip -q -o "$TEN_GOI" -d "$AL_DICH" || loi 5 "giai nen zip that bai"
+      ( cd "$AL_DICH" && unzip -q -o "$GOI_CUC_BO" ) || loi 5 "giai nen zip that bai"
     else
-      tar -xf "$TEN_GOI" -C "$AL_DICH" || loi 5 "giai nen zip bang tar that bai"
+      ( cd "$AL_DICH" && tar -xf "$GOI_CUC_BO" ) || loi 5 "giai nen zip bang tar that bai"
     fi ;;
-  *) tar -xzf "$TEN_GOI" -C "$AL_DICH" || loi 5 "giai nen tar that bai" ;;
+  *) ( cd "$AL_DICH" && tar -xzf "$GOI_CUC_BO" ) || loi 5 "giai nen tar that bai" ;;
 esac
 
 BIN=""

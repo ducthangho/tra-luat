@@ -174,13 +174,42 @@ Còn một nhiễu vô hại: proxy **không hỗ trợ nâng cấp WebSocket** 
 nói thẳng), nên codex thử `wss://` 5 lần, in 5 dòng `ERROR ... 401`, rồi mới lùi về
 HTTPS. Dễ đọc nhầm thành lỗi xác thực ở tầng mạng — không phải.
 
-### `gh`: cài được, nhưng mọi lời gọi API bị chặn ở tầng phiên
+### `gh` / API GitHub: token là THẬT, nhưng mọi điểm cuối theo KHO bị chặn
 
-`gh 2.63.2` cài xong chạy được. `gh api repos/{owner}/{repo}` và
-`gh workflow run` đều trả `403 GitHub access is not enabled for this session. An
-org admin must connect the Claude GitHub App for this organization.`; `gh pr list`
-trả `403` từ GraphQL với ghi chú chỉ phục vụ "the pinned set of PR-review
-operations". `GH_TOKEN` trong môi trường là chuỗi giữ chỗ `proxy-inject`.
+`gh 2.63.2` cài xong chạy được. `GH_TOKEN` trong môi trường là chuỗi giữ chỗ
+`proxy-inject` — nhưng proxy **có tiêm token thật**, và là danh tính của chính chủ
+kho. Ranh giới không nằm ở token mà ở một danh sách cho phép, đo từng điểm cuối:
+
+| điểm cuối | kết quả |
+|---|---|
+| `GET /user` | **200** — `login: ducthangho`, `type: User` |
+| `GET /rate_limit` | **200** |
+| `GET /user/repos` | 403 |
+| `GET /user/installations` | 403 |
+| `GET /repos/{owner}/{repo}` | 403 |
+| `GET /repos/{owner}/{repo}/branches` | 403 |
+| `GET /repos/{owner}/{repo}/pulls` | 403 |
+| `POST /repos/{owner}/{repo}/pulls` | 403 |
+| `GET /repos/{owner}/{repo}/actions/workflows` | 403 |
+| GraphQL `query { viewer { login } }` | 403 |
+
+Mọi lần 403 đều kèm đúng một câu: *"GitHub access is not enabled for this session.
+An org admin must connect the Claude GitHub App for this organization."* GraphQL
+thì thêm: chỉ phục vụ *"the pinned set of PR-review operations"* — và một truy vấn
+`viewer` tối thiểu cũng không nằm trong tập đó.
+
+Nói cách khác: **danh tính thì có, quyền theo kho thì không.** Đây không phải lỗi
+cấu hình sửa được từ trong phiên.
+
+**Còn "chỉ MCP đi được" thì đúng một nửa, và nửa sai mới là nửa nguy hiểm.**
+Công cụ MCP của nền (`list_repos`) liệt kê được đủ 15 kho trong đúng phiên mà
+`GET /user/repos` trả 403 ⇒ đường MCP có backend riêng, không đi qua token bị giới
+hạn ở trên. Nhưng rà hết bề mặt MCP thì phần dính tới GitHub chỉ có `add_repo`,
+`list_repos`, `subscribe_pr_activity`, `unsubscribe_pr_activity` — **không có công
+cụ nào TẠO PR, gắn nhãn, hay gọi `workflow_dispatch`**. Danh sách connector của tài
+khoản cũng không hề có GitHub (chỉ AI Tra Cứu Luật, Gmail, Google Calendar, Google
+Drive), và tra sổ đăng ký connector cũng không ra GitHub. Vậy MCP đi được cho việc
+ĐỌC danh sách kho, không đi được cho bất kỳ việc GHI nào.
 
 Hệ quả cụ thể: **một phiên như phiên này không mở được PR, không gắn được nhãn
 `windows`, không gọi được `workflow_dispatch`.** Chỉ `git push` đi được, vì nó qua

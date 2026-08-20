@@ -487,3 +487,58 @@ Hook `SessionStart` **không chặn được phiên**: thoát khác 0 chỉ hi�
 *Claude không thấy stderr*. Nhưng **stdout của `SessionStart` được đưa vào ngữ cảnh**
 — nên bảng `doctor` và dòng `THIEU CONG CU BAT BUOC` phải in ra **stdout**, đừng
 "dọn" mấy dòng `echo` đó đi.
+
+## Chế độ hỏi/duyệt của phiên agent — Claude Code, Codex, AG
+
+Bệnh "phiên hỏi xác nhận liên miên, không duyệt thì đứng" đã chữa MỘT lần (commit
+`7c51e84`: bỏ `git commit/push` khỏi ask) rồi **tái phát 20-08-2026**. Nguyên nhân
+gốc đo được: bản vá cũ sửa `settings.json` COMMITTED, nhưng sau đó một khối ~51 rule
+`ask` (mọi git/gh write op) mọc vào `settings.local.json` của checkout chính — tệp
+**gitignored, per-checkout**, và **đè lên** allow của bản committed. Worktree mới thì
+không có tệp local nên rơi về allowlist tối thiểu → hỏi lại từ đầu. Cộng bài học cũ:
+trong don't-ask-mode, rule `ask` thoái hoá thành **DENY cứng** — phiên chết đứng.
+
+Kiến trúc chống tái phát (một chỗ cho mỗi việc, đừng đảo lại):
+
+| tầng | vai | luật |
+|---|---|---|
+| `settings.json` (committed) | ALLOW rộng cho việc thường ngày + `defaultMode: acceptEdits` | mọi worktree/checkout kế thừa; muốn thêm quyền lâu dài thì thêm VÀO ĐÂY và đi qua PR |
+| `pretooluse_guard.py` (hook) | ASK theo HÌNH DẠNG lệnh, quét CẢ CHUỖI | chốt thật nằm đây (force-push, `gh pr merge`, `gh api` mutate, `--dangerously-*`, `--apply`…) — regex không dính bẫy prefix-pattern (`git push origin --force` thoát rule `git push --force:*` nhưng không thoát regex) |
+| `deny` trong settings | thứ KHÔNG BAO GIỜ tự chạy | secrets, `rm -rf` |
+| `settings.local.json` | **cache máy, KHÔNG phải nơi đặt chốt** | thấy khối `ask` mọc trong này là bệnh đang tái phát — xoá và thăng rule cần thiết vào bản committed |
+
+Nói thẳng giới hạn: RISKY của hook là danh sách HÌNH DẠNG để hỏi lại người giữ,
+**không phải hàng rào an ninh** chống kẻ gian ("danh sách cấm không bao giờ đủ") —
+phiên agent là người nhà, mục tiêu là chặn tay trót, không phải chặn tấn công.
+
+**Codex.** KHÔNG ghi `~/.codex/config.toml` của người dùng (kiến trúc chốt sau bảy
+finding — xem mục Các chốt). Chế độ duyệt truyền BẰNG CỜ theo từng lượt:
+
+```bash
+codex exec -s workspace-write --skip-git-repo-check ... - < PROMPT.md   # exec KHONG hoi — khong can -a
+codex -a on-failure -s workspace-write                                   # phien tuong tac: chi hoi khi lenh HONG
+```
+
+Đừng dùng `--dangerously-bypass-approvals-and-sandbox` (đã ghi ở mục Các chốt);
+`-a` chỉ tồn tại ở lệnh top-level, truyền vào `exec` là chết parse.
+
+**Claude Code headless (`claude -p`).** Đừng `--dangerously-skip-permissions` (hook
+sẽ hỏi, classifier của harness cũng chặn — đo 20-08). Cấp allowlist HẸP theo lượt:
+
+```bash
+claude -p --model claude-fable-5 --effort max \
+  --allowedTools "Read" "Glob" "Grep" "Edit" "Write" "Bash(python:*)" ... < PROMPT.md
+```
+
+Lưu ý: phiên headless chạy Ở NGOÀI kho (sandbox review) không thừa kế
+`settings.json` của kho — allowlist per-run là đường duy nhất. Và **đừng kèm
+`--bare`**: nó bỏ qua cả cấu hình xác thực, phiên chết `Not logged in` (đo 20-08).
+
+**Antigravity (AG).** Chế độ duyệt của AG nằm trong CÀI ĐẶT APP (Agent auto-run),
+kho không cấu hình hộ được. Khuyến nghị khi mở phiên AG cho packet của kho: bật
+auto-run cho lệnh ĐỌC + chạy test; giữ hỏi cho terminal ghi ngoài worktree, mọi thao
+tác đẩy/xoá ref, và browse ngoài workspace. Các chốt HÌNH DẠNG ở trên không chạy
+trong AG — bù bằng chốt phía kho vẫn còn nguyên: `ops-don-ref` đòi gõ `XOA`/`TAO`,
+cổng đăng lease theo danh sách cho phép, và `packet_loop` guard. Con trỏ từ
+`AGENTS.md` sang mục này sẽ bổ sung ở packet sau (AGENTS.md nằm trong
+RELEASE_MANIFEST — sửa nó kéo theo tái sinh manifest, tránh va write set đang mở).

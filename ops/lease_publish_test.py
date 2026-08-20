@@ -1087,6 +1087,71 @@ def t33_workflow_dang_lease_phai_qua_actionlint():
     assert p.returncode == 0, f"actionlint ĐỎ (rc={p.returncode}):\n{p.stdout}{p.stderr}"
 
 
+@ca
+def t34_MOI_workflow_goi_bo_test_deu_phai_duoc_cap_actionlint():
+    """Ai gọi bộ test này thì người ấy phải cấp `actionlint` — KHÔNG trừ ai.
+
+    VÌ SAO CÓ CA NÀY, và nó không phải giả thiết. `t33` được thêm ở `#195`, mà bộ test này
+    được HAI workflow gọi: `ci.yml` (được cấp công cụ) và `ops-publish-lease.yml` (KHÔNG).
+    Đo được ở run `32351892214`:
+
+        ĐỎ  t33_workflow_dang_lease_phai_qua_actionlint: KHÔNG ĐO ĐƯỢC: thiếu `actionlint`
+        lease_publish: 32/33 đạt
+        ##[error]Process completed with exit code 1.
+
+    Hệ quả: cổng đăng lease vẫn chết, chỉ ĐỔI LÝ DO — `rc=8` vì lease cũ hết hạn thành
+    `rc=1` vì thiếu công cụ. Người đẩy lease vẫn không đăng được gì.
+
+    Đây là mặt LẬT NGƯỢC của bài học đã ghi sổ *"chốt mà chỉ một trong nhiều cửa đọc thì
+    không phải chốt"*: một PHỤ THUỘC mà chỉ một trong nhiều NGƯỜI GỌI cấp. Cùng gốc — đếm
+    MỘT cửa rồi tưởng đã đếm hết cửa.
+
+    Nên ca này KHÔNG kiểm hai tên workflow đã biết (danh sách viết tay sẽ lỗi thời đúng lúc
+    có cửa thứ ba). Nó QUÉT: tìm mọi workflow gọi bộ test, rồi đòi từng cái có bước cài.
+    """
+    import yaml
+    goc = HERE.parent / ".github" / "workflows"
+    if not goc.is_dir():
+        # KHÔNG có nhánh "không thấy thì bỏ qua" trong kho thật: chỉ tha cho BẢN SAO rời.
+        bang(not (HERE.parent / ".git").exists(),
+             f"kho thật mà không thấy {goc} — ca này sẽ xanh mà không đo gì")
+        return
+
+    goi_bo_test, thieu_cong_cu = [], []
+    for tep in sorted(goc.glob("*.yml")) + sorted(goc.glob("*.yaml")):
+        noi_dung = tep.read_text(encoding="utf-8")
+        d = yaml.safe_load(noi_dung) or {}
+        than_chay = []
+        for job in (d.get("jobs") or {}).values():
+            for b in (job.get("steps") or []):
+                if isinstance(b.get("run"), str):
+                    than_chay.append(b["run"])
+        # CHỈ tính dòng THỰC SỰ chạy bộ test, không tính chú thích nhắc tên nó — cùng nếp
+        # với `t25`: cấm cả chú thích thì không viết nổi tài liệu, và một ca bắt oan là một
+        # ca sắp bị gỡ.
+        chay_bo_test = any(
+            "lease_publish_test.py" in dong and not dong.lstrip().startswith("#")
+            and ("python" in dong or "python3" in dong)
+            for than in than_chay for dong in than.splitlines())
+        if not chay_bo_test:
+            continue
+        goi_bo_test.append(tep.name)
+        if not any("actionlint" in than and ("curl" in than or "install" in than)
+                   for than in than_chay):
+            thieu_cong_cu.append(tep.name)
+
+    # KHÔNG cho "không tìm thấy workflow nào" âm thầm thành ĐẠT: một lượt quét hỏng và một
+    # kho thật sự không ai gọi bộ test cho cùng màu xanh, mà nghĩa thì ngược nhau.
+    bang(goi_bo_test,
+         "không thấy workflow nào chạy `lease_publish_test.py` — phép quét đang hỏng, "
+         "hoặc bộ test này đã mồ côi; cả hai đều phải ĐỎ chứ không phải xanh rỗng")
+    bang(not thieu_cong_cu,
+         f"workflow {thieu_cong_cu} chạy `lease_publish_test.py` mà KHÔNG cài `actionlint`. "
+         f"Bộ test ĐÒI công cụ ấy (t33 fail-close), nên workflow không cấp thì cổng chết vì "
+         f"thiếu công cụ chứ không phải vì lease sai — đúng regression đã đo ở run "
+         f"32351892214. Cấp công cụ, đừng hạ chuẩn t33.")
+
+
 def main() -> int:
     qua, hong = 0, []
     for fn in CA:

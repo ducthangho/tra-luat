@@ -58,3 +58,4 @@ vi_sao_r2: >-
   `review_calls_limit` nâng 2 -> 3 vì lượt hỏng đã tiêu một LỜI GỌI; trục VÒNG canon vẫn
   là 2 và `review_rounds_used` vẫn 0 — lượt blocked không đọc được mã nên không phải một
   vòng review. Hai trục cưỡng chế độc lập, đừng gộp.
+posted_comment_id: 5355733140   # workflow ghi, ĐỪNG sửa tay

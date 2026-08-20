@@ -68,3 +68,4 @@ kiem_duong_codex_truoc_khi_cap: >-
   lần. Nhãn `SAP_HET_HAN` của `doctor` là suy đoán theo tuổi ảnh chụp `CODEX_AUTH_JSON`; ở
   lượt này nó SAI, đường thật chạy được. Lease exec của packet dặn phải kiểm trước khi cấp
   lease REVIEWER — đây là bản ghi phép kiểm đó.
+posted_comment_id: 5355651535   # workflow ghi, ĐỪNG sửa tay

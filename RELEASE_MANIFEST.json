@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 180,
-  "total_bytes": 7932550,
-  "package_hash": "1f00c55900c422b83d86148fd367958d92f93a8838ce85c105164fdaf9940a7c",
-  "content_hash": "1f00c55900c422b83d86148fd367958d92f93a8838ce85c105164fdaf9940a7c",
+  "total_bytes": 7932573,
+  "package_hash": "28a454e3481e0c287ffbb181b08a7a9631839e1a061be4e6d446f06f50f3b3d9",
+  "content_hash": "28a454e3481e0c287ffbb181b08a7a9631839e1a061be4e6d446f06f50f3b3d9",
   "required_missing": [],
   "files": [
     {
@@ -18,8 +18,8 @@
     },
     {
       "path": ".gitignore",
-      "size": 1259,
-      "sha256": "7640fa50281652e3b22d9870daedf5f8b257368fd57dc60be2e1282265a03f8e"
+      "size": 1282,
+      "sha256": "28e4f7ee763a4bec4fc3ba130d85a77ad56d2c8c173644348fa79cbadd937d43"
     },
     {
       "path": "AGENTS.md",

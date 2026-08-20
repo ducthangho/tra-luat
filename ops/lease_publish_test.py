@@ -1619,20 +1619,25 @@ def t38_bam_phai_dung_khi_DUONG_DAN_co_dau_cheo_nguoc():
     bash = shutil.which("bash")
     bang(bash, "KHÔNG ĐO ĐƯỢC: thiếu `bash`")
 
-    if os.name == "nt":
-        # Windows KHÔNG cho dấu chéo ngược trong TÊN tệp (nó là dấu phân cách), nhưng
-        # đường dẫn runner tự nó đã có — tức ca thật đã chạy ở đó. Ở đây dựng bản POSIX.
-        bang(True, "")
-        return
-
     VER = "1.7.7"
     with tempfile.TemporaryDirectory() as tam:
         tam = _P(tam)
         goc = _goi_actionlint_gia(tam, VER, f"#!/bin/sh\necho {VER}")
-        # TÊN TỆP chứa dấu chéo ngược — hợp lệ trên POSIX, và là thứ làm `sha256sum`
-        # thoát cả dòng đầu ra.
-        goi = tam / "co\\cheo.tar.gz"
-        goi.write_bytes(goc.read_bytes())
+        if os.name == "nt":
+            # KHÔNG bỏ qua trên Windows. Dấu chéo ngược là DẤU PHÂN CÁCH ở đó, nên MỌI
+            # đường dẫn tuyệt đối đã mang sẵn nó (`D:\\a\\_temp\\...`) — tức chạy bản
+            # thường ở đây LÀ đo đúng ca cần đo, không cần dựng tên tệp dị.
+            #
+            # Bản đầu của ca này viết `bang(True, ""); return` cho Windows. SAI, và sai
+            # đúng kiểu kho đã ghi sổ: harness này KHÔNG có cơ chế bỏ qua — một ca
+            # `return` sớm vẫn được đếm là ĐẠT. Nghĩa là trên chính nền sinh ra lỗi, ca
+            # canh nó lại không đo gì mà vẫn xanh. Đúng bệnh `t24`.
+            goi = goc
+        else:
+            # POSIX: dấu chéo ngược là ký tự HỢP LỆ trong TÊN tệp, nên dựng thẳng một tên
+            # có nó — cùng luật thoát của coreutils, tái lập đúng lỗi Windows.
+            goi = tam / "co\\cheo.tar.gz"
+            goi.write_bytes(goc.read_bytes())
 
         mt = dict(os.environ)
         mt.update({"AL_VER": VER, "AL_DICH": str(tam / "dich"), "AL_NEN": "Linux",
@@ -1643,7 +1648,8 @@ def t38_bam_phai_dung_khi_DUONG_DAN_co_dau_cheo_nguoc():
         rc, ra = r.returncode, (r.stdout or "")
 
     bang(rc == 0,
-         f"gói ĐÚNG ở đường dẫn có dấu chéo ngược mà cổng băm từ chối (rc={rc}). `sha256sum`"
+         f"[nền={os.name}] gói ĐÚNG ở đường dẫn có dấu chéo ngược mà cổng băm từ chối "
+         f"(rc={rc}). `sha256sum`"
          f" thoát cả dòng khi tên tệp chứa `\\` — đọc từ stdin thì đầu ra không có tên tệp. "
          f"Đây đúng lỗi đã làm `gate (windows-latest)` đỏ ở lượt 32371632630:\n"
          f"{ra.strip()[:400]}")

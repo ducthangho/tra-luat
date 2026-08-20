@@ -543,8 +543,9 @@ def t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head():
     `checkout` lấy head đó, workflow chạy bộ kiểm đã bị sửa, cả `granted_by` lẫn
     `GITHUB_ACTOR` đều qua. Bộ kiểm nằm cùng nhánh với thứ nó kiểm thì nó không kiểm gì.
 
-    Ca này canh phần MÁY canh được: mọi lời gọi `lease_publish.py` / `lease_publish_test.py`
-    trong workflow phải đi qua bản neo (`$NEO/…`), không được gọi thẳng `ops/…`.
+    Ca này canh phần MÁY canh được: mọi lời gọi `lease_publish.py`,
+    `lease_publish_test.py` hoặc wrapper chạy bộ kiểm trong workflow phải đi qua bản
+    neo (`$NEO/…`), không được gọi thẳng `ops/…`.
 
     KHÔNG canh được ở đây, và phải nói thẳng: với sự kiện `push`, GitHub lấy chính
     tệp workflow từ head, nên ai sửa được bộ kiểm cũng sửa được ca này lẫn mỏ neo.
@@ -562,26 +563,36 @@ def t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head():
     tep = goc / "ops-publish-lease.yml"
     bang(tep.is_file(), f"không thấy {tep} — ca này sẽ xanh mà không đo gì")
     noi_dung = tep.read_text(encoding="utf-8")
-    # Chỉ soi dòng THỰC SỰ chạy python, không soi chú thích — chú thích giải thích về
-    # `ops/lease_publish.py` là hợp lệ và cần thiết (cả khối "vì sao có lớp 4" ở đầu
-    # tệp nhắc tên ấy). Cấm luôn thì không viết nổi tài liệu, và một ca bắt oan là
-    # một ca sắp bị gỡ.
-    goi = re.compile(r"python3?\s+(\S*lease_publish(?:_test)?\.py)")
-    thay = 0
+    # Chỉ soi đối số đứng sau một token lệnh thực thi đã biết, không bó theo việc dòng
+    # có NHẮC tên tệp. Dòng `sha256sum ops/…` cố ý in băm của head và cố ý không có
+    # `$NEO`; coi nó là lời gọi sẽ báo oan. Đây vẫn là phép đo đối số, không phải parser
+    # shell: thêm một token lệnh mới phải là quyết định có chủ ý và có phản chứng.
+    goi = re.compile(
+        r"(?:^|\s)(?:python3?|py|bash|sh|exec)\s+"
+        r"(\S*(?:lease_publish(?:_test)?\.py|chay_lease_publish_test\.sh))")
+    thay = thay_wrapper = 0
     for so, dong in enumerate(noi_dung.splitlines(), 1):
         if dong.lstrip().startswith("#"):
             continue
         for duong in goi.findall(dong):
             thay += 1
+            if duong.endswith("chay_lease_publish_test.sh"):
+                thay_wrapper += 1
             bang("$NEO" in duong or "${NEO}" in duong,
                  f"ops-publish-lease.yml:{so} chạy {duong!r} — bộ kiểm này đến TỪ HEAD "
                  f"ĐƯỢC ĐẨY, tức từ chính nhánh nó đang kiểm (finding P1, PR #104). "
                  f"Phải gọi qua bản neo vào nhánh mặc định: \"$NEO/ops/…\"")
-    # Không cho "workflow không gọi bộ kiểm lần nào" âm thầm thành ĐẠT: một tệp đã bị
-    # gỡ sạch lời gọi và một tệp gọi đúng cho cùng màu xanh, mà nghĩa thì ngược nhau.
-    bang(thay >= 3,
-         f"chỉ thấy {thay} lời gọi lease_publish* trong workflow — chờ ít nhất 3 "
-         f"(test, check, body); ca này đang không đo cái nó tưởng nó đo")
+    # Chốt riêng cho wiring bộ kiểm: đừng để việc gỡ hẳn wrapper chỉ rơi vào thông điệp
+    # đếm chung, vì ba lời gọi `lease_publish.py` khác vẫn đủ làm ngưỡng cũ xanh.
+    bang(thay_wrapper >= 1,
+         "không thấy lời gọi thực thi `chay_lease_publish_test.sh` trong workflow — "
+         "cổng đăng lease đã gỡ hẳn bộ tự kiểm mà t25 vẫn đang chạy")
+    # Bốn lời gọi thật hiện tại là wrapper + check + body + mark. Ngưỡng cũ là 3 và chú
+    # thích gọi chúng là (test, check, body), nhưng `test` đã chuyển sang wrapper nên ba
+    # lời gọi `lease_publish.py` còn lại tự chúng thoả ngưỡng, làm cổng xanh rỗng.
+    bang(thay >= 4,
+         f"chỉ thấy {thay} lời gọi cổng/wrapper trong workflow — chờ ít nhất 4 "
+         f"(wrapper, check, body, mark); ca này đang không đo cái nó tưởng nó đo")
     # Mỏ neo phải CÓ THẬT, không chỉ là biến `$NEO` trỏ vào hư không.
     bang("git worktree add" in noi_dung and "default_branch" in noi_dung,
          "không thấy bước dựng worktree từ `default_branch` — `$NEO` phải được neo "
@@ -1172,9 +1183,16 @@ def t34_workflow_khong_duoc_goi_THANG_tep_bo_test():
     test, dù installer nằm ở job khác hay nằm sau nó. `bash -c "python ...py"` cũng đỏ vì
     vẫn chứa chính lời gọi thẳng ấy.
 
-    GIỚI HẠN BẮT BUỘC KHAI: `python -m ops.lease_publish_test` VẪN lọt. Không thêm regex
-    mới để đuổi theo cú pháp thứ năm. Đổi wrapper thành dạng đó có cùng nghĩa với xoá wiring
-    của gate; một selftest không thể tự chứng minh nó đã được CI gọi.
+    PHẠM VI ĐO ĐƯỢC: t34 chỉ nhận canonical
+    `python|python3|py <đường-dẫn>/lease_publish_test.py` KHÔNG CỜ. Năm dạng đã đo là
+    lọt: `python -m ops.lease_publish_test`; `python3 -u ops/lease_publish_test.py`;
+    shebang trực tiếp `./ops/lease_publish_test.py`; `uv run ops/lease_publish_test.py`;
+    và `python -X utf8 ops/lease_publish_test.py`. Runner khác ngoài ba token canonical
+    cũng không thuộc lời hứa. Lời khai được hạ xuống đúng phép đo thay vì nối regex để
+    đuổi theo cú pháp shell; quyết định danh sách cho phép đã tách sang packet `#209`.
+
+    Đổi wrapper thành một trong các dạng lọt vẫn có cùng nghĩa với xoá wiring của gate;
+    một selftest không thể tự chứng minh nó đã được CI gọi.
 
     NỢ CÓ TÊN `PLAT-X5-required-status-check`: branch protection phải require status của
     job `gate` (và lượt đăng lease tương ứng). Chốt ngoài kho ấy mới trả lời "CI có thật sự
@@ -1214,9 +1232,10 @@ def _bam_tep(duong_dan):
     return h.hexdigest()
 
 
-# Chỉ nhận diện lời gọi THẲNG tệp `.py` cho hợp đồng hẹp của t34. Đây không phải parser
-# shell và CỐ Ý không nhận `python -m`: gặp thêm cú pháp qua được thì không nối regex nữa;
-# nợ "CI có chạy gate không" thuộc required status check được nêu ngay trong t34.
+# Chỉ nhận diện canonical `python|python3|py <tệp>.py` KHÔNG CỜ cho hợp đồng hẹp của
+# t34. Đây không phải parser shell; năm dạng lọt đã đo được khai ngay trong docstring,
+# và không được nối regex ở packet này. Nợ "CI có chạy gate không" thuộc required
+# status check được nêu ngay trong t34.
 _CHAY_BO_TEST = __import__("re").compile(
     r"""(?<![\w.])(?:python3?|py)\s+["']?\S*lease_publish_test\.py["']?""")
 
@@ -1370,6 +1389,18 @@ def t35_script_cai_actionlint_phai_TU_CHOI_ban_sai():
                            f"người gọi dùng để khẳng định LÝ DO từ chối, nêu nhầm mã thì "
                            f"họ khẳng định nhầm chuyện")
 
+        # `mkdir` hỏng từng rơi thẳng qua `set -e` với rc=1 — trùng đúng mã của chính
+        # suite khi có ca đỏ. Người gọi vì thế không phân biệt được hạ tầng cài đặt hỏng
+        # với cổng nội dung đỏ. Đích là một tệp thường để tái hiện được cả khi chạy root.
+        dich_la_tep = tam / "dich-la-tep"
+        dich_la_tep.write_text("không phải thư mục\n", encoding="utf-8")
+        rc, ra = chay(VER, _goi_actionlint_gia(
+            tam, VER, f"#!/bin/sh\necho {VER}"), dich_la_tep)
+        if rc != 12 or "khong tao duoc thu muc cai" not in ra:
+            loi.append(f"`AL_DICH` là tệp phải trả rc=12 riêng cùng thông điệp phân "
+                       f"biệt được, không được trùng rc=1 của suite: rc={rc}, "
+                       f"output={ra.strip()[:300]!r}")
+
     # ——— GIỮ TẦNG: workflow chỉ gọi wrapper; wrapper gọi installer, không cài lại tại chỗ.
     goc = HERE.parent / ".github" / "workflows"
     if goc.is_dir():
@@ -1378,6 +1409,12 @@ def t35_script_cai_actionlint_phai_TU_CHOI_ban_sai():
             "bash ops/chay_lease_publish_test.sh",
             'bash "$NEO/ops/chay_lease_publish_test.sh"',
         }
+        # Nhận diện theo token lệnh dẫn đầu để không báo oan dòng `sha256sum` chỉ in
+        # băm wrapper. Ngoài hai dạng canonical vẫn là một LỜI GỌI, và vì allowlist
+        # đang gác nghĩa vụ `AL_VER`, dạng ngoài danh sách phải ĐỎ chứ không được miễn.
+        GOI_WRAPPER_THUC_THI = re.compile(
+            r"^(?:(?:bash|sh)\s+|exec\s+(?:(?:bash|sh)\s+)?|)"
+            r"[\"']?\S*chay_lease_publish_test\.sh[\"']?(?:\s|$)")
         for tep in sorted(goc.glob("*.yml")) + sorted(goc.glob("*.yaml")):
             d = yaml.safe_load(tep.read_text(encoding="utf-8")) or {}
             for job in (d.get("jobs") or {}).values():
@@ -1392,8 +1429,16 @@ def t35_script_cai_actionlint_phai_TU_CHOI_ban_sai():
                         loi.append(f"{ten}: cài `actionlint` TẠI CHỖ. Chép logic ra khỏi "
                                    f"`ops/cai_actionlint.sh` là dựng lại đúng chỗ hỏng — "
                                    f"bản chép sẽ không được ca này chạy thử. Gọi wrapper.")
-                    if not any(x.strip() in GOI_WRAPPER for x in dong_lenh):
+                    goi_wrapper = [x.strip() for x in dong_lenh
+                                   if GOI_WRAPPER_THUC_THI.search(x.strip())]
+                    if not goi_wrapper:
                         continue
+                    ngoai_danh_sach = [x for x in goi_wrapper if x not in GOI_WRAPPER]
+                    if ngoai_danh_sach:
+                        loi.append(f"{ten}: có lệnh gọi wrapper ngoài danh sách canonical "
+                                   f"{ngoai_danh_sach}. Allowlist này gác nghĩa vụ "
+                                   f"`AL_VER`, nên ngoài danh sách phải bị từ chối chứ "
+                                   f"không được miễn")
                     ban = str((b.get("env") or {}).get("AL_VER") or "")
                     if not re.fullmatch(r"\d+\.\d+\.\d+", ban):
                         loi.append(f"{ten}: gọi wrapper mà thiếu `AL_VER` "

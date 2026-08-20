@@ -27,6 +27,7 @@
 #   3 nen khong duoc ho tro   6 binary khong chay duoc (`--version` rc != 0)
 #   4 tai ve that bai         7 CAI XONG NHUNG SAI BAN (hoac khong phai actionlint)
 #   8 KHONG CO BAM de doi chieu goi   9 BAM GOI KHONG KHOP
+#  12 khong tao duoc thu muc cai
 set -euo pipefail
 
 loi() { ma="$1"; shift; printf '%s\n' "cai_actionlint: $*" >&2; exit "$ma"; }
@@ -99,7 +100,7 @@ MONG="${AL_SHA256:-$(bam_ghim "$GOI")}"
 # khong doi chieu duoc rat de thanh "thoi cai dai" o lan sua sau.
 [ -n "$MONG" ] || loi 8 "khong co bam de doi chieu goi '$GOI'. Ghim bam trong \`bam_ghim\` cho ban nay, hoac truyen \`AL_SHA256\`. KHONG co duong bo qua — day la ma se duoc CHAY."
 
-mkdir -p "$AL_DICH"
+mkdir -p "$AL_DICH" || loi 12 "khong tao duoc thu muc cai '$AL_DICH'"
 if [ -n "${AL_GOI:-}" ]; then
   [ -f "$AL_GOI" ] || loi 4 "khong thay goi co san '$AL_GOI'"
   TEN_GOI="$AL_GOI"

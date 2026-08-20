@@ -127,38 +127,14 @@ jobs:
         shell: bash
         env:
           AL_VER: 1.7.7
-        run: |
-          set -euo pipefail
-          # KHÔNG có nhánh thoát sớm "đã có actionlint trên PATH thì thôi". Cross-review
-          # lượt 1 (codex, `fd76921`, P2) đo được: một hàm giả tên `actionlint` trả `0` cho
-          # `--version` là đủ để nhánh ấy thoát xanh — mà `t33` gọi đúng binary trên PATH,
-          # nên cổng thành XANH RỖNG. Chú thích cũ khai "GHIM EXACT" trong khi hành vi thì
-          # nhận bất kỳ bản nào: lời khai rộng hơn thứ đo được.
-          case "${RUNNER_OS}" in
-            Linux)   GOI="actionlint_${AL_VER}_linux_amd64.tar.gz" ;;
-            macOS)   GOI="actionlint_${AL_VER}_darwin_arm64.tar.gz" ;;
-            Windows) GOI="actionlint_${AL_VER}_windows_amd64.zip" ;;
-            *) echo "KHONG DO DUOC: nen la '${RUNNER_OS}', chua co goi cho nen nay"; exit 1 ;;
-          esac
-          DICH="$RUNNER_TEMP/actionlint"
-          mkdir -p "$DICH"
-          curl -fsSL -o "$DICH/goi" \
-            "https://github.com/rhysd/actionlint/releases/download/v${AL_VER}/${GOI}"
-          if [ "${RUNNER_OS}" = "Windows" ]; then
-            unzip -q -o "$DICH/goi" -d "$DICH"
-          else
-            tar -xzf "$DICH/goi" -C "$DICH"
-          fi
-          echo "$DICH" >> "$GITHUB_PATH"
-          # ĐỐI CHIẾU BẢN GHIM: "đã cài" KHÁC "đã cài ĐÚNG BẢN". Đây là bằng chứng dương
-          # thay cho `command -v` (có mặt != đúng bản != chạy được).
-          BAN="$("$DICH/actionlint" --version 2>/dev/null || "$DICH/actionlint.exe" --version)"
-          printf '%s\n' "$BAN" | head -1
-          printf '%s\n' "$BAN" | head -1 | grep -qx "$AL_VER" || {
-            echo "::error::actionlint cai xong nhung KHONG khop ban ghim '$AL_VER'"
-            exit 1
-          }
-
+        # HÀNH VI cài + đối chiếu bản ghim nằm trong `ops/cai_actionlint.sh` — MỘT chỗ cho
+        # cả hai workflow. Trước đó khối này được CHÉP vào hai nơi và thứ duy nhất canh nó
+        # là một phép so khớp CHUỖI trong `t35`; cross-review `#200` đo được phép ấy chỉ
+        # kiểm sự ĐỒNG HIỆN của token trên một dòng, nên một khối KHÔNG đối chiếu gì vẫn
+        # làm `t35` xanh. Nay `t35` CHẠY THẬT script ấy với `actionlint` giả (bản sai · rc=0
+        # mà không phải actionlint · thiếu binary) rồi đòi nó TỪ CHỐI. ĐỪNG đưa logic ngược
+        # trở lại đây: chép lại là dựng lại đúng chỗ hỏng.
+        run: bash ops/cai_actionlint.sh
 
       - name: tự kiểm cổng trước khi tin nó
         # Cổng này là thứ DUY NHẤT đứng giữa một tệp YAML và một comment mang danh

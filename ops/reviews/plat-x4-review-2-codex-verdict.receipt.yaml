@@ -75,6 +75,17 @@ huong_da_do_va_KHONG_thanh_finding:
     - 'subshell `( cd && tar )` KHÔNG nuốt mã thoát: gói hỏng ⇒ rc=5'
 
 verdict_usage_caveats:
+  - id: ban-chieu-mat-mot-dong-lan-3
+    noi_dung: >-
+      Bản chiếu trên PR (comment 5356863974) LỆCH nguồn ĐÚNG MỘT DÒNG: ở Phát hiện 2, chỗ-trống
+      đặt trong DẤU NGOẶC NHỌN sau `AL_SHA256=` BIẾN MẤT, làm lệnh trong comment không chạy lại
+      được. Đính chính ở comment 5356874554. Đây là lần thứ BA cùng hiện tượng trong đợt này,
+      và nó BÁC BỎ một quan sát tôi nêu ở lượt trước: tôi từng ghi rằng khối ```text có thể an
+      toàn hơn dòng thường — SAI, cả ba lần mất đều nằm trong fence. Vẫn CHƯA quy được cho tầng
+      nào (đường ghi không xử lý HTML; bộ đọc MCP có biến đổi; REST thẳng bị proxy chặn 403 nên
+      không có client thứ hai) ⇒ trạng thái đúng là KHÔNG ĐO ĐƯỢC.
+      NẾP: đừng viết chỗ-trống bằng ngoặc nhọn trong nội dung đi qua đường comment.
+      Chạy lại thì đọc TỆP TRONG KHO, đừng đọc comment.
   - id: windows-khong-doc-duoc-N-tren-N
     noi_dung: >-
       Verdict và EVIDENCE đều nói Windows XANH trên head này (`gate (windows-latest)` success,

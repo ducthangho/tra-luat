@@ -1,0 +1,85 @@
+# BIÊN NHẬN — cross-review lượt 2/2 của PR #205 (packet PLAT-X4, #203).
+#
+# VÒNG CUỐI trong trần canon. `changes_requested` ⇒ `cross_approved` CHƯA đạt, và KHÔNG mở
+# vòng 3 — packet sang Review Rescue Checkpoint.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: PLAT-X4
+packet_issue: 203
+lease_id: plat-x4-review-2-codex-20260820
+provider: codex
+role: reviewer
+verdict: changes_requested
+cross_provider: true
+assurance_dat: null
+assurance_KHONG_dat: cross_approved
+reviewed_sha: 1d37861ec419d1c3a25cfbdb1b07689bbf42504c
+
+verdict_path: ops/reviews/plat-x4-review-2-codex-verdict.md
+verdict_sha256: 100ed50b2d44472f66c983a5ebc717417beb6f6a8d727a1493dd2c7379c54bd9
+verdict_bytes: 7220
+verdict_nguon: 'scratchpad/x4-review2.log — stdout `codex exec`, tiến trình thoát 0, 19 lượt exec'
+verdict_doi_chieu: 'Cắt một bản duy nhất; đã kiểm ĐÚNG MỘT `VERDICT:` và ĐÚNG MỘT `Reviewed commit:`.'
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/3026f73f826e9c19ac6d98a7432b2379a134ec09/ops/reviews/plat-x4-review-2-codex-verdict.md
+published_first:
+  branch: ops/lease-review-m4-x4
+  commit: 3026f73f826e9c19ac6d98a7432b2379a134ec09
+truy_xuat_tag: null
+truy_xuat_ghi_chu: 'PR #205 CHƯA land, chưa có tag lưu-tru.'
+
+chot_read_only_sau_luot:
+  git_status_short: RONG
+  head_khong_doi: true
+
+vong_canon:
+  so_vong: 2
+  tran: 2
+  la_vong_cuoi: true
+  he_qua: >-
+    Review Rescue Checkpoint. Người giữ kho chọn Stable Slice / Remediation Slice / revision.
+    KHÔNG mở vòng 3 bằng cách cấp thêm lease reviewer.
+
+finding_luot_2:
+  - id: t34-rang-theo-tep-khong-theo-job
+    muc: P2
+    da_do_lai_boi_phien_dieu_phoi: true
+    bang_chung_do_lai: >-
+      Dựng đột biến trên BẢN SAO TẠM: chuyển installer canonical sang một job riêng
+      (`installer-o-runner-khac`) và để job chạy bộ test chỉ còn `run: echo
+      ops/cai_actionlint.sh`. Kết quả `lease_publish: 38/38`, rc=0 — FAIL-OPEN. Xác nhận
+      finding đúng từng chữ.
+  - id: duoi-goi-lay-ca-duong-dan-khi-ten-khong-co-dau-cham
+    muc: P2
+    da_do_lai_boi_phien_dieu_phoi: true
+    bang_chung_do_lai: >-
+      `AL_GOI` trỏ một tar HỢP LỆ tên `nodot` (không phần mở rộng), băm đúng ⇒ rc=5:
+      `cp: cannot create regular file '<đích>/goi_giai_nen./tmp/.../nodot'`.
+      ĐỐI CHỨNG: cùng gói ấy đổi tên thành `co.tar.gz` ⇒ rc=0. Thuần tuý do CÁI TÊN.
+    la_regression_do_rev2: true
+
+finding_luot_1_da_dong:
+  - t34-khop-chuoi-installer          # `echo` ở cả hai workflow -> 37/38 rc=1
+  - al-ver-glob-nhan-ban-khong-phai-so # 1x.2y.3z -> rc=2
+  - goi-tai-ve-khong-kiem-checksum     # 8 / 8 / 9 / 0 đúng bốn trạng thái
+
+huong_da_do_va_KHONG_thanh_finding:
+  ghi_chu: >-
+    Ghi lại vì một hướng IM LẶNG đọc giống hệt một hướng CHƯA AI THỬ — prompt lượt này đòi
+    reviewer nói rõ đã đo mà sạch.
+  muc:
+    - 'GOI_CANON cố ý chặt: `set -e; bash ...` và `bash -lc ...` bị từ chối; `env:`/`shell:` không đổi thân `run` nên vẫn nhận'
+    - 'AL_SHA256 là override thật, nhưng workflow không ánh xạ input/`vars.*` vào nó ⇒ không phải finding mới trong mô hình đe doạ hiện tại'
+    - 'subshell `( cd && tar )` KHÔNG nuốt mã thoát: gói hỏng ⇒ rc=5'
+
+verdict_usage_caveats:
+  - id: windows-khong-doc-duoc-N-tren-N
+    noi_dung: >-
+      Verdict và EVIDENCE đều nói Windows XANH trên head này (`gate (windows-latest)` success,
+      lượt 32375120142) — nhưng KHÔNG ai đọc được dòng `N/N` của Windows: `get_job_logs` chỉ
+      trả phần ĐUÔI log và đuôi không chạm bước `lease-publish selftest`. Thứ khẳng định được
+      là mức BƯỚC: bước ấy đỏ ở `d0acd79f`, `skipped` ở `22236f5b`, success ở `2348710b` và
+      `1d37861e` — cùng workflow cùng bước nên nó phân biệt được, KHÔNG xanh rỗng. Đừng đọc
+      rộng hơn thế. Cùng hạn chế đã ghi cho `pr134-ci-lease-gate-codex-verdict.md`.

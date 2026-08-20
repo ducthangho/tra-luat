@@ -133,8 +133,19 @@ THUC="$(bam_cua "$TEN_GOI")"
 # (`AL_GOI=/duong/we:ird.tar.gz`), va luc ay basename van dinh dung luat tren.
 # Ten dich duoi day do TA dat nen chac chan khong co dau hai cham — do la thu lam chot,
 # khong phai phep loc chuoi tren dau vao.
-DUOI_GOI="${TEN_GOI##*.}"
-GOI_CUC_BO="goi_giai_nen.${DUOI_GOI}"
+# Chon ten cuc bo theo LOAI ARCHIVE, KHONG lay suffix tu duong dan.
+# Ban truoc viet `DUOI_GOI="${TEN_GOI##*.}"`, va no thung khi ten goi KHONG CO DAU CHAM:
+# phep mo rong ay tra lai CA DUONG DAN (gom dau gach cheo), nen ten dich thanh
+#   goi_giai_nen./tmp/.../nodot
+# va `cp` chet: `No such file or directory` (rc=5) tren mot tar HOAN TOAN HOP LE.
+# Do duoc o cross-review #203 luot 2; doi chung: cung goi ay doi ten thanh `co.tar.gz` -> rc=0.
+# `AL_GOI` duoc khai la "duong dan toi mot goi co san" — no KHONG doi ten phai co phan mo rong.
+# Day cung la REGRESSION do chinh rev2 sinh ra: truoc do goi khong duoi di thang nhanh tar
+# mac dinh va chua bao gio can toi phan mo rong.
+case "$TEN_GOI" in
+  *.zip) GOI_CUC_BO="goi_giai_nen.zip" ;;
+  *)     GOI_CUC_BO="goi_giai_nen.tar.gz" ;;
+esac
 if [ "$TEN_GOI" != "$AL_DICH/$GOI_CUC_BO" ]; then
   cp "$TEN_GOI" "$AL_DICH/$GOI_CUC_BO" || loi 5 "khong chep duoc goi vao '$AL_DICH'"
 fi

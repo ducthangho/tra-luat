@@ -1210,6 +1210,22 @@ def t34_MOI_workflow_goi_bo_test_deu_phai_duoc_cap_actionlint():
 
     ĐỘT BIẾN ĐÃ CHẠY: đổi cả hai workflow sang `run: echo ops/cai_actionlint.sh` ⇒ ca này
     ĐỎ (`35/36`, rc=1). Trước bản vá, chính đột biến ấy cho `35/35` rc=0.
+
+    VÀ LẦN ẤY VẪN CÒN HỞ — cross-review `#203` **lượt 2**, cùng finding, cửa khác. Bản vá
+    danh-sách-cho-phép ở trên đúng, nhưng nó buộc nghĩa vụ ở mức **TỆP**. Phản chứng:
+
+        job `gate`                  : run: echo ops/cai_actionlint.sh
+        job `installer-o-runner-khac`: run: bash ops/cai_actionlint.sh   (canonical)
+        -> 38/38 đạt, rc=0
+
+    Mỗi job chạy trên MỘT runner riêng; filesystem và `PATH` KHÔNG truyền sang nhau. Nên
+    job chạy bộ test vẫn không có `actionlint`, và regression `32351892214` quay lại y
+    nguyên — chỉ đi qua một cửa khác. Đây là lần thứ HAI trong cùng packet mà tôi đóng
+    đúng lỗ được chỉ ra rồi để hở một lỗ CÙNG HỌ ngay cạnh: lần đầu đổi chỗ khớp chuỗi,
+    lần này đổi MỨC ràng buộc.
+
+    Nay duyệt theo `(workflow, job)`, và đòi thêm THỨ TỰ: installer phải đứng TRƯỚC bước
+    chạy bộ test — "có cài" không phải "đã cài TRƯỚC KHI CẦN".
     """
     import yaml
     goc = HERE.parent / ".github" / "workflows"
@@ -1229,31 +1245,62 @@ def t34_MOI_workflow_goi_bo_test_deu_phai_duoc_cap_actionlint():
     def _thuc_thi_installer(than: str) -> bool:
         return [x.strip() for x in _dong_lenh(than) if x.strip()] in [list(x) for x in GOI_CANON]
 
-    nhac_bo_test, thieu_cong_cu = [], []
+    # RÀNG THEO (workflow, JOB) — KHÔNG theo tệp. Mỗi job chạy trên MỘT runner riêng:
+    # filesystem và `PATH` KHÔNG truyền từ job này sang job khác. Nên "trong tệp này có
+    # một bước cài" KHÔNG đáp ứng nghĩa vụ cho job thật sự chạy bộ test.
+    nhac_bo_test, thieu_cong_cu, sai_thu_tu = [], [], []
     for tep in sorted(goc.glob("*.yml")) + sorted(goc.glob("*.yaml")):
         d = yaml.safe_load(tep.read_text(encoding="utf-8")) or {}
-        than_chay = [b["run"] for job in (d.get("jobs") or {}).values()
-                     for b in (job.get("steps") or []) if isinstance(b.get("run"), str)]
-        # BỎ CHÚ THÍCH TRƯỚC (`_dong_lenh`), nếu không một dòng `# ops/cai_actionlint.sh`
-        # sẽ được tính là đã cấp công cụ — phép kiểm không phân biệt được LỆNH với CHÚ
-        # THÍCH thì nó đang đọc tài liệu, không đọc hành vi.
-        dong_lenh = [x for than in than_chay for x in _dong_lenh(than)]
-        if not any("lease_publish_test.py" in x for x in dong_lenh):
-            continue
-        nhac_bo_test.append(tep.name)
-        if not any(_thuc_thi_installer(than) for than in than_chay):
-            thieu_cong_cu.append(tep.name)
+        for ten_job, job in (d.get("jobs") or {}).items():
+            buoc = [b for b in (job.get("steps") or []) if isinstance(b.get("run"), str)]
+            i_nhac = i_chay = i_cai = None
+            for i, b in enumerate(buoc):
+                # BỎ CHÚ THÍCH TRƯỚC (`_dong_lenh`), nếu không một dòng
+                # `# ops/cai_actionlint.sh` sẽ được tính là đã cấp công cụ — phép kiểm
+                # không phân biệt được LỆNH với CHÚ THÍCH thì nó đọc tài liệu, không đọc
+                # hành vi.
+                dl = _dong_lenh(b["run"])
+                if i_nhac is None and any("lease_publish_test.py" in x for x in dl):
+                    i_nhac = i
+                if i_chay is None and any(_CHAY_BO_TEST.fullmatch(x.strip()) for x in dl):
+                    i_chay = i
+                if i_cai is None and _thuc_thi_installer(b["run"]):
+                    i_cai = i
+            if i_nhac is None:
+                continue
+            khoa = f"{tep.name}:{ten_job}"
+            nhac_bo_test.append(khoa)
+            if i_cai is None:
+                thieu_cong_cu.append(khoa)
+            elif i_chay is not None and i_cai > i_chay:
+                # "Có cài" nhưng cài SAU khi CHẠY test thì lúc test chạy vẫn thiếu công cụ.
+                #
+                # DÙNG `i_chay`, KHÔNG dùng `i_nhac`. Bản đầu của chốt thứ tự này so với
+                # NHẮC, và nó BÁO NHẦM ngay lần chạy đầu: bước `neo bộ kiểm vào nhánh mặc
+                # định` của `ops-publish-lease.yml` có `test -s .../lease_publish_test.py`
+                # và `sha256sum ...` — chỉ NHẮC đường dẫn, không chạy gì — nên bị tính là
+                # "test ở bước 1" trong khi lượt chạy thật ở bước 3, sau installer.
+                # Tức chính tôi vừa tái lập đúng bệnh mà `t34` sinh ra để chặn: đếm sự CÓ
+                # MẶT của chuỗi rồi tuyên là đã đo HÀNH VI.
+                sai_thu_tu.append(f"{khoa} (cài ở bước {i_cai}, CHẠY test ở bước {i_chay})")
 
     # KHÔNG cho "không tìm thấy workflow nào" âm thầm thành ĐẠT: một lượt quét hỏng và một
     # kho thật sự không ai gọi bộ test cho cùng màu xanh, mà nghĩa thì ngược nhau.
     bang(nhac_bo_test,
          "không thấy workflow nào nhắc `lease_publish_test.py` — phép quét đang hỏng, "
          "hoặc bộ test này đã mồ côi; cả hai đều phải ĐỎ chứ không phải xanh rỗng")
+    bang(not sai_thu_tu,
+         f"job {sai_thu_tu} cài `actionlint` SAU khi đã chạy `lease_publish_test.py`. "
+         f"Lúc bộ test chạy thì công cụ chưa có, nên `t33` vẫn fail-close — 'có cài' không "
+         f"phải 'đã cài TRƯỚC KHI CẦN'.")
     bang(not thieu_cong_cu,
-         f"workflow {thieu_cong_cu} động tới `lease_publish_test.py` mà KHÔNG có bước nào "
+         f"job {thieu_cong_cu} động tới `lease_publish_test.py` mà KHÔNG có bước nào "
          f"THỰC THI `ops/cai_actionlint.sh`. Một bước được tính chỉ khi phần lệnh của nó "
          f"bằng ĐÚNG một mục trong `GOI_CANON` — `echo ops/cai_actionlint.sh` KHÔNG tính, "
-         f"và đó chính là phản chứng đã lọt ở cross-review #203. Bộ test ĐÒI `actionlint` "
+         f"và đó chính là phản chứng đã lọt ở cross-review #203 lượt 1. Nghĩa vụ ràng theo "
+         f"JOB chứ KHÔNG theo tệp: mỗi job chạy trên runner riêng, filesystem và `PATH` "
+         f"không truyền qua — đặt installer ở job khác trong CÙNG tệp KHÔNG tính (phản "
+         f"chứng lọt ở lượt 2). Bộ test ĐÒI `actionlint` "
          f"(t33 fail-close), nên workflow không cấp thì cổng chết vì thiếu công cụ chứ "
          f"không phải vì lease sai — đúng regression run 32351892214. Cần một biến thể "
          f"lệnh khác thì THÊM vào `GOI_CANON`, đừng nới phép so.")
@@ -1267,6 +1314,17 @@ def _bam_tep(duong_dan):
         for khoi in iter(lambda: f.read(65536), b""):
             h.update(khoi)
     return h.hexdigest()
+
+
+# NHẬN DIỆN MỘT LƯỢT CHẠY THẬT bộ test — dùng cho chốt THỨ TỰ, không dùng cho nghĩa vụ.
+# Hai trục cố ý bất đối xứng:
+#   · nghĩa vụ "job này phải có installer" bấu vào NHẮC (over-approximate) ⇒ fail-CLOSED,
+#     đoán thừa thì chỉ tốn một dòng gọi script;
+#   · chốt THỨ TỰ bấu vào CHẠY (positive recognition) ⇒ đoán thừa ở đây là BÁO NHẦM và
+#     chặn oan một workflow đúng.
+# Nhận thêm dạng gọi mới thì THÊM vào mẫu này — tường minh, đọc được.
+_CHAY_BO_TEST = __import__("re").compile(
+    r"""(?:python3?|py)\s+["']?\S*lease_publish_test\.py["']?""")
 
 
 def _goi_actionlint_gia(dich, ver, than):
@@ -1359,6 +1417,21 @@ def t35_script_cai_actionlint_phai_TU_CHOI_ban_sai():
         if rc != 0:
             loi.append(f"bản ĐÚNG mà script vẫn từ chối (rc={rc}) — ca âm bên dưới sẽ vô "
                        f"nghĩa vì 'luôn từ chối' cũng qua hết:\n{ra.strip()[:400]}")
+
+        # ——— CA DƯƠNG 2: gói có tên KHÔNG CÓ DẤU CHẤM vẫn phải nhận.
+        # Phản chứng của cross-review `#203` lượt 2: bản trước dựng tên cục bộ bằng
+        # `${TEN_GOI##*.}`, mà khi đường dẫn không có dấu chấm thì phép mở rộng ấy trả lại
+        # CẢ ĐƯỜNG DẪN (gồm `/`) ⇒ `cp` chết, rc=5, trên một tar HOÀN TOÀN HỢP LỆ.
+        # `AL_GOI` được khai là "đường dẫn tới một gói có sẵn" — nó KHÔNG đòi tên phải có
+        # phần mở rộng. Đây cũng là regression do chính lượt vá trước sinh ra.
+        _g = _goi_actionlint_gia(tam, VER, f"#!/bin/sh\necho {VER}")
+        _kd = tam / "goikhongduoi"
+        _kd.write_bytes(_g.read_bytes())
+        rc, ra = chay(VER, _kd, tam / "d-khongduoi")
+        if rc != 0:
+            loi.append(f"gói tên KHÔNG có dấu chấm mà script từ chối (rc={rc}) — tên tệp "
+                       f"không phải hợp đồng, `AL_GOI` chỉ khai là một đường dẫn:"
+                       f"\n{ra.strip()[:300]}")
 
         # ——— CA ÂM: mỗi ca là một kiểu 'đã cài' mà KHÔNG phải 'đã cài ĐÚNG BẢN'.
         AM = [

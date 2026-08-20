@@ -102,3 +102,4 @@ dieu_kien_dung:
 khong_chay_song_song_voi: >-
   `#203` (PR "#205") — write set giao nhau ở `ops/lease_publish_test.py` và cả hai workflow.
   `#203` hiện KHÔNG có phiên thi công nào đang chạy; nếu mở lại thì phải dừng một trong hai.
+posted_comment_id: 5358128012   # workflow ghi, ĐỪNG sửa tay

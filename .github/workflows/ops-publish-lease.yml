@@ -122,17 +122,51 @@ jobs:
 
       - name: tìm lease vừa đổi
         id: tim
+        # KHÔNG nội suy `${{ }}` vào THÂN `run`, khai qua `env:` như bước neo ở trên.
+        # Hai lý do, cả hai đã trả giá: (a) GitHub nội suy biểu thức trên TOÀN BỘ thân
+        # `run` trước khi shell thấy nó — một cặp RỖNG nằm trong một dòng CHÚ THÍCH làm
+        # cả tệp không hợp lệ (`ops-don-ref.yml`, run 31971137920: một run mang tên
+        # đường dẫn tệp, 0 job, `conclusion: failure`); (b) thân bước chỉ CHẠY LẠI ĐƯỢC
+        # ngoài Actions khi nó không còn biểu thức — đó là điều kiện để `t32` trích
+        # THÂN BƯỚC TỪ CHÍNH TỆP NÀY rồi chạy thật, thay vì chép lại rồi trôi lệch.
+        env:
+          TRUOC: ${{ github.event.before }}
+          NAY: ${{ github.sha }}
+          MAC_DINH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
-          TRUOC='${{ github.event.before }}'
-          # Nhánh mới: `before` là toàn số 0, không diff được. Khi đó liệt kê tất cả
-          # lease trong cây — chốt `posted_comment_id` lo phần không đăng trùng.
-          if [ -z "$TRUOC" ] || [ "$TRUOC" = "0000000000000000000000000000000000000000" ]; then
-            find ops/leases -type f \( -name '*.yaml' -o -name '*.yml' \) > ds.txt || true
-          else
-            git diff --name-only --diff-filter=ACM "$TRUOC" '${{ github.sha }}' -- \
-              'ops/leases/*.yaml' 'ops/leases/*.yml' > ds.txt || true
+          test -n "${NAY:-}"
+          test -n "${MAC_DINH:-}"
+          # MỐC SO. Push thường: `before`..`sha`. Push MỞ NHÁNH MỚI: `before` toàn số 0,
+          # không diff được — mốc đúng khi ấy là điểm nhánh này rẽ khỏi nhánh mặc định.
+          #
+          # BẢN TRƯỚC QUÉT CẢ `ops/leases/`, và đó là lỗi đã trả giá (#195): mọi lease
+          # đều đăng bằng một nhánh MỚI theo `ops/README.md`, nên đường "dự phòng" ấy
+          # thật ra là đường CHÍNH. Một lease cũ CHƯA TỪNG ĐĂNG mà đã hết hạn nằm trong
+          # cây làm cả lượt chạy `rc=8` ⇒ MỌI lease mới không đăng được, từ 18-08-2026
+          # tới 20-08-2026 mà không ai biết. Chú thích cũ khai "chốt `posted_comment_id`
+          # lo phần không đăng trùng" — đúng cho lease ĐÃ đăng (rc=9, bỏ qua), sai cho
+          # lease chưa từng đăng. Cổng không nói dối, nó VẮNG MẶT.
+          TU=""
+          if [ -n "${TRUOC:-}" ] \
+             && [ "$TRUOC" != "0000000000000000000000000000000000000000" ] \
+             && git cat-file -e "${TRUOC}^{commit}" 2>/dev/null; then
+            TU="$TRUOC"
+          elif git rev-parse --verify --quiet "origin/$MAC_DINH^{commit}" >/dev/null; then
+            TU="$(git merge-base "origin/$MAC_DINH" "$NAY" || true)"
           fi
+          # KHÔNG ĐO ĐƯỢC ≠ KHÔNG CÓ GÌ. Bản trước nối `|| true` vào `git diff`, nên một
+          # lỗi biến thành danh sách RỖNG — mà rỗng đọc y hệt "không có lease nào để
+          # đăng". Ba trạng thái: có · không · KHÔNG ĐO ĐƯỢC; trạng thái thứ ba phải làm
+          # cổng ĐỎ, đúng doctrine `None ≠ False`.
+          if [ -z "$TU" ]; then
+            echo "::error::KHONG DO DUOC moc so (before=${TRUOC:-<rong>}," \
+                 "origin/$MAC_DINH khong phan giai duoc) — khong dang gi"
+            exit 1
+          fi
+          echo "moc so: $TU..$NAY"
+          git diff --name-only --diff-filter=ACM "$TU" "$NAY" -- \
+            'ops/leases/*.yaml' 'ops/leases/*.yml' > ds.txt
           echo "tìm thấy $(wc -l < ds.txt) tệp:"; cat ds.txt
 
       - name: đăng

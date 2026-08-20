@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Unit tests for tl_core/command_registry.py (Packet AG-T0-03).
+"""Unit tests for tl_core/command_registry.py (Packet AG-T0-03 & AG-T0-05).
 
 Kiểm thử toàn diện:
 - Duyệt đệ quy cây lệnh Argparse (collect_parser_tree)
 - Báo cáo độ phủ hai chiều cây lệnh ↔ metadata (compute_parser_coverage)
 - Kiểm tra tính tất định, schema parser_tree_coverage.v1, cờ --strict và --unregistered-only
+- Ratchet 100.0% coverage (196/196 lệnh lá), 0 unregistered, 0 high-risk unregistered
+- Kiểm thử các lệnh mới đăng ký và ratchet fail-closed trong validate_registry & compute_parser_coverage
 """
 import argparse
 import sys
@@ -20,9 +22,11 @@ from tl import build_parser
 from tl_core.command_registry import (
     COMMAND_META,
     GENERATED_SPECS,
+    NESTED_COMMAND_META,
     all_command_meta,
     collect_parser_tree,
     compute_parser_coverage,
+    validate_registry,
 )
 
 
@@ -55,6 +59,8 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         self.assertIn("rasoat phuluc", leaf_nodes)
         self.assertIn("hygiene scan", leaf_nodes)
         self.assertIn("hygiene plan", leaf_nodes)
+        self.assertIn("hygiene query", leaf_nodes)
+        self.assertIn("hygiene reconcile", leaf_nodes)
 
         # Node con phải có parent và depth > 1
         node_kw = leaf_nodes["rasoat keywords"]
@@ -75,33 +81,29 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         self.assertEqual(summary["total_nodes"], 198)
         self.assertEqual(summary["container_commands"], 2)
         self.assertEqual(summary["total_leaf_commands"], 196)
-        self.assertEqual(summary["registered_leaf_commands"], 166)
-        self.assertEqual(summary["unregistered_leaf_commands"], 30)
+        self.assertEqual(summary["registered_leaf_commands"], 196)
+        self.assertEqual(summary["unregistered_leaf_commands"], 0)
+        self.assertEqual(summary["high_risk_unregistered_count"], 0)
         self.assertEqual(summary["registry_orphaned_commands"], 0)
-        expected_pct = round(166 / 196 * 100, 2)
-        self.assertEqual(summary["coverage_percent"], expected_pct)
-        self.assertEqual(summary["coverage_percent"], 84.69)
+        self.assertEqual(summary["coverage_percent"], 100.0)
 
         # 0 lệnh trong registry bị mồ côi (mọi metadata đều trỏ đến lệnh thật trong parser)
         self.assertEqual(report["categories"]["registry_not_in_parser"], [])
+        self.assertEqual(report["categories"]["unregistered"], [])
+        self.assertEqual(report["categories"]["high_risk_unregistered"], [])
 
     def test_compute_parser_coverage_strict_mode(self):
-        # Khi strict=True, nếu còn lệnh chưa đăng ký thì ok=False
+        # Khi strict=True và coverage 100% (0 unregistered, 0 orphaned), ok=True
         report_strict = compute_parser_coverage(self.parser, strict=True)
-        if report_strict["summary"]["unregistered_leaf_commands"] > 0:
-            self.assertFalse(report_strict["ok"])
-        else:
-            self.assertTrue(report_strict["ok"])
+        self.assertTrue(report_strict["ok"])
+        self.assertEqual(report_strict["summary"]["unregistered_leaf_commands"], 0)
 
     def test_compute_parser_coverage_unregistered_only_filter(self):
         report_all = compute_parser_coverage(self.parser, unregistered_only=False)
         report_unreg = compute_parser_coverage(self.parser, unregistered_only=True)
 
-        self.assertEqual(len(report_all["commands"]), report_all["summary"]["total_leaf_commands"])
-        self.assertEqual(len(report_unreg["commands"]), report_unreg["summary"]["unregistered_leaf_commands"])
-        for cmd in report_unreg["commands"]:
-            self.assertFalse(cmd["has_meta"])
-            self.assertEqual(cmd["risk"], "unregistered")
+        self.assertEqual(len(report_all["commands"]), 196)
+        self.assertEqual(len(report_unreg["commands"]), 0)
 
     def test_registry_coverage_command_registered(self):
         # Lệnh mới registry-coverage phải có trong GENERATED_SPECS và COMMAND_META
@@ -113,6 +115,70 @@ class CommandRegistryCoverageTest(unittest.TestCase):
         self.assertTrue(meta["read_only"])
         self.assertEqual(meta["risk"], "low")
         self.assertEqual(meta["module"], "workflow")
+
+    def test_newly_registered_commands_metadata(self):
+        meta_all = all_command_meta()
+        # Top-level commands
+        self.assertIn("gws-ping", meta_all)
+        self.assertTrue(meta_all["gws-ping"]["read_only"])
+        self.assertEqual(meta_all["gws-ping"]["risk"], "low")
+        self.assertEqual(meta_all["gws-ping"]["module"], "gws")
+
+        self.assertIn("profile-file-add", meta_all)
+        self.assertFalse(meta_all["profile-file-add"]["read_only"])
+        self.assertEqual(meta_all["profile-file-add"]["risk"], "high")
+        self.assertEqual(meta_all["profile-file-add"]["idempotency_contract"], "profile_ingest")
+        self.assertEqual(meta_all["profile-file-add"]["nlm_fallback"], "defer")
+
+        self.assertIn("nlm-get", meta_all)
+        self.assertTrue(meta_all["nlm-get"]["read_only"])
+        self.assertEqual(meta_all["nlm-get"]["nlm_fallback"], "unverified")
+
+        self.assertIn("reconcile", meta_all)
+        self.assertEqual(meta_all["reconcile"]["risk"], "high")
+        self.assertEqual(meta_all["reconcile"]["module"], "hygiene")
+
+        self.assertIn("cache-build", meta_all)
+        self.assertEqual(meta_all["cache-build"]["module"], "extract_cache")
+
+        # Nested hygiene commands
+        self.assertIn("hygiene scan", NESTED_COMMAND_META)
+        self.assertTrue(NESTED_COMMAND_META["hygiene scan"]["read_only"])
+        self.assertEqual(NESTED_COMMAND_META["hygiene scan"]["risk"], "low")
+
+        self.assertIn("hygiene plan", NESTED_COMMAND_META)
+        self.assertFalse(NESTED_COMMAND_META["hygiene plan"]["read_only"])
+        self.assertEqual(NESTED_COMMAND_META["hygiene plan"]["risk"], "high")
+
+        self.assertIn("hygiene query", NESTED_COMMAND_META)
+        self.assertTrue(NESTED_COMMAND_META["hygiene query"]["read_only"])
+
+        self.assertIn("hygiene reconcile", NESTED_COMMAND_META)
+        self.assertEqual(NESTED_COMMAND_META["hygiene reconcile"]["risk"], "high")
+
+    def test_validate_registry_full_tree_passes(self):
+        # validate_registry trên live tree phải trả ok=True, issues=[]
+        import tl
+        from tl_core.workflow import _IDEMPOTENCY_CONTRACTS, _load_workflow_card
+        rv = validate_registry(self.parser, tl, load_card=_load_workflow_card, contracts=_IDEMPOTENCY_CONTRACTS)
+        self.assertTrue(rv["ok"], f"validate_registry failed with issues: {rv.get('issues')}")
+        self.assertEqual(rv["issues"], [])
+        self.assertEqual(rv["coverage"]["coverage_percent"], 100.0)
+        self.assertEqual(rv["coverage"]["unregistered_leaf_commands"], 0)
+
+    def test_validate_registry_ratchet_fail_closed(self):
+        # Mock parser có lệnh cmd_unreg không nằm trong registry => validate_registry PHẢI fail-closed
+        mock_p = argparse.ArgumentParser(prog="test_tl")
+        subs = mock_p.add_subparsers(dest="cmd")
+        subs.add_parser("cmd_unreg")
+
+        class MockTL:
+            COMMAND_META = {}
+            NESTED_COMMAND_META = {}
+
+        rv = validate_registry(mock_p, MockTL)
+        self.assertFalse(rv["ok"])
+        self.assertIn("UNREGISTERED_PARSER_CMD:cmd_unreg", rv["issues"])
 
     def test_synthetic_subparser_coverage(self):
         # Test với parser giả lập độc lập

@@ -1202,25 +1202,24 @@
     "warn_limit": 286720
   },
   "registry": {
-    "checked_commands": 166,
+    "checked_commands": 196,
     "coverage": {
       "container_commands": 2,
-      "coverage_percent": 84.69,
-      "high_risk_unregistered_count": 4,
-      "registered_leaf_commands": 166,
+      "coverage_percent": 100.0,
+      "high_risk_unregistered_count": 0,
+      "registered_leaf_commands": 196,
       "registry_orphaned_commands": 0,
       "total_leaf_commands": 196,
       "total_nodes": 198,
-      "unregistered_leaf_commands": 30
+      "unregistered_leaf_commands": 0
     },
     "issues": [],
     "ok": true,
     "schema": "registry_validate.v1",
     "warnings": [
-      "UNREGISTERED_HIGH_RISK_PARSER_CMD:hygiene plan",
-      "UNREGISTERED_HIGH_RISK_PARSER_CMD:hygiene reconcile",
-      "UNREGISTERED_HIGH_RISK_PARSER_CMD:profile-file-add",
-      "UNREGISTERED_HIGH_RISK_PARSER_CMD:reconcile"
+      "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:hygiene plan",
+      "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:hygiene reconcile",
+      "HIGH_RISK_WRITE_NO_IDEMPOTENCY_CONTRACT:reconcile"
     ]
   },
   "schema": "workflow_audit.v2",

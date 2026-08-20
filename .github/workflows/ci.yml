@@ -147,7 +147,11 @@ jobs:
           AL_VER: 1.7.7
         run: |
           set -euo pipefail
-          if command -v actionlint >/dev/null 2>&1; then actionlint --version; exit 0; fi
+          # KHÔNG có nhánh thoát sớm "đã có actionlint trên PATH thì thôi". Cross-review
+          # lượt 1 (codex, `fd76921`, P2) đo được: một hàm giả tên `actionlint` trả `0` cho
+          # `--version` là đủ để nhánh ấy thoát xanh — mà `t33` gọi đúng binary trên PATH,
+          # nên cổng thành XANH RỖNG. Chú thích cũ khai "GHIM EXACT" trong khi hành vi thì
+          # nhận bất kỳ bản nào: lời khai rộng hơn thứ đo được.
           case "${RUNNER_OS}" in
             Linux)   GOI="actionlint_${AL_VER}_linux_amd64.tar.gz" ;;
             macOS)   GOI="actionlint_${AL_VER}_darwin_arm64.tar.gz" ;;
@@ -164,10 +168,15 @@ jobs:
             tar -xzf "$DICH/goi" -C "$DICH"
           fi
           echo "$DICH" >> "$GITHUB_PATH"
-          # BẰNG CHỨNG DƯƠNG: `command -v` là CÓ MẶT, `--version` mới là CHẠY ĐƯỢC.
-          # Trên Windows tệp là `actionlint.exe`; msys thường tự thêm đuôi, nhưng "thường"
-          # không phải phép đo nên thử thẳng cả hai tên.
-          "$DICH/actionlint" --version || "$DICH/actionlint.exe" --version
+          # ĐỐI CHIẾU BẢN GHIM: "đã cài" KHÁC "đã cài ĐÚNG BẢN". Đây là bằng chứng dương
+          # thay cho `command -v` (có mặt != đúng bản != chạy được).
+          BAN="$("$DICH/actionlint" --version 2>/dev/null || "$DICH/actionlint.exe" --version)"
+          printf '%s\n' "$BAN" | head -1
+          printf '%s\n' "$BAN" | head -1 | grep -qx "$AL_VER" || {
+            echo "::error::actionlint cai xong nhung KHONG khop ban ghim '$AL_VER'"
+            exit 1
+          }
+
       - name: lease-publish selftest (cổng đăng lease)
         run: python ops/lease_publish_test.py
       # `don-nhanh.ps1` XOÁ NHÁNH REMOTE — thao tác không hoàn tác được ở phía PR: xoá

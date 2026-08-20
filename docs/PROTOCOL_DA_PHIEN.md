@@ -222,10 +222,12 @@ Sau 30 phút không có tiến triển, dispatcher thu hồi lease, tăng genera
 không thể heartbeat, push hợp lệ hoặc handoff. Branch/PR cũ chuyển `stale`; generation mới được đọc diff cũ nhưng
 không tự cherry-pick. Commit SHA cuối được giữ trong state projection và event journal.
 
-Khi packet ở state `reviewing`, lease vào chế độ *treo theo review*: đồng hồ thu-hồi-30-phút tạm dừng, tối đa tới
-`review_sla` (mặc định: thời điểm reviewer khả dụng gần nhất + 2 giờ). Verdict `changes_requested` đổ về thì
-executor phải heartbeat trong 15 phút, không thì thu hồi như thường. Quá `review_sla` mà chưa có verdict: lease
-trở lại đồng hồ thường — phiên ấm là TỐI ƯU HOÁ, không phải quyền.
+Khi packet vào state `reviewing`, `review_sla` là absolute timestamp do dispatcher/người giữ ghi vào lease/state
+bằng audit bền; mặc định khi đo được là thời điểm vào `reviewing` + 2 giờ. Thiếu trường, không parse được
+hoặc cơ sở giờ mơ hồ thì KHÔNG treo lease; đồng hồ thu-hồi-30-phút tiếp tục chạy theo xử lý fail-closed. Với
+`review_sla` hợp lệ, lease vào chế độ *treo theo review* tối đa tới timestamp đó. Verdict `changes_requested`
+đổ về thì executor phải heartbeat trong 15 phút, không thì thu hồi như thường. Quá `review_sla` mà chưa có verdict:
+lease trở lại đồng hồ thường — phiên ấm là TỐI ƯU HOÁ, không phải quyền.
 
 Local worktree stale được dọn khi process dừng. Remote branch/PR stale giữ đến khi mission kết thúc cộng 30 ngày;
 `/packet preserve` kéo dài thời hạn. Cleanup chỉ bắt đầu sau khi báo cáo cuối và final state hash trên canonical
@@ -405,8 +407,9 @@ không được chỉ ghi “affected tests passed”. `hint_provenance` là tr�
 hợp lệ khi vắng trường này; quy tắc dùng hint ở §8.
 
 Phiên executor ĐƯỢC giữ ấm chờ verdict, với điều kiện handoff §7 đã đăng ĐẦY ĐỦ TRƯỚC khi vào chờ
-(`status: needs_followup`, `next_role: reviewer`). Đường phục-hồi-nguội luôn phải đủ sống một mình: phiên ấm chết
-giữa chừng không được làm mất gì. Trong cửa sổ đóng băng, phiên ấm chỉ được đọc/phân tích/soạn nháp ngoài cây;
+và dùng đúng tổ hợp kích hoạt review (`status: needs_followup`, `next_role: reviewer`). Đường phục-hồi-nguội luôn
+phải đủ sống một mình: phiên ấm chết giữa chừng không được làm mất gì. Trong cửa sổ đóng băng, phiên ấm
+chỉ được đọc/phân tích/soạn nháp ngoài cây;
 không commit/push vào nhánh packet.
 
 Khi dispatcher/reviewer automation chưa được promote, mỗi phiên còn phải điền `next_role`,
@@ -489,8 +492,9 @@ dispatcher tính từ mission, packet cha, generation và `successor_key`; chạ
 Packet cloud hợp lệ chạy ngay; packet local tự chạy khi host lên. Hệ thống chỉ hỏi người dùng ở `paused`,
 `blocked`, quyền LIVE hoặc land/deploy.
 
-Với handoff Executor `status: done`, reconciler phải đọc lại PR head và so đồng thời mission revision, Packet
-revision/spec hash, generation, lease, `head_sha`, `tested_sha`, changed paths và gate policy. Chỉ khi tất cả khớp,
+Với handoff Executor `status: done` HOẶC tổ hợp `status: needs_followup` VÀ `next_role: reviewer`, reconciler phải
+đọc lại PR head và so đồng thời mission revision, Packet revision/spec hash, generation, lease, `head_sha`,
+`tested_sha`, changed paths và gate policy. Chỉ khi tất cả khớp,
 nó mới ghi transition `running → reviewing` idempotent rồi dispatch một Reviewer mới, context/worktree độc lập và
 read-only mặc định. Executor không tự tạo review có thẩm quyền; nếu chưa có automation, nó chỉ xuất prompt thủ
 công nói trên và dừng. Reviewer `changes_requested` tạo finding có stable ID; reconciler trả đúng Packet/generation
@@ -525,9 +529,12 @@ Reviewer muốn đi xa hơn được đính `goi-y-<finding>.patch` sinh từ c�
    commit”*. Executor không được `git am` mù; worker gate chạy đủ như mọi diff khác.
 2. Handoff/PR của executor phải khai `hint_provenance` (§7): hunk nào bắt nguồn từ hint của reviewer nào. Thiếu
    khai thì lượt review kế phải coi là vi phạm quy trình.
-3. Với packet `sensitive`: patch-as-hint chỉ áp cho TEST/tooling; hunk MÃ SẢN PHẨM vẫn đi đường mô tả hướng.
-   Lý do: reviewer lượt kế thường là chính tác giả hint — mã sản phẩm do reviewer viết rồi reviewer duyệt là
-   self-review đội lốt cross-review, đúng thứ nhãn assurance tồn tại để chặn.
+3. Với packet `sensitive`, patch-as-hint chỉ đủ điều kiện cho (a) tệp TEST thuần hoặc (b) tooling không tham gia
+   authority/gate/runtime. `.github/workflows/`, launcher, gate lifecycle, dispatcher/reconciler và LIVE adapter
+   bị loại trừ tường minh. Hunk hỗn hợp, path không phân loại được hoặc `paths` rỗng khi có hint cũng KHÔNG đủ
+   điều kiện; các trường hợp bị loại trừ đi đường mô tả hướng. Lý do: reviewer lượt kế thường là chính tác giả hint
+   — hunk không đủ điều kiện do reviewer viết rồi reviewer duyệt là self-review đội lốt cross-review, đúng thứ
+   nhãn assurance tồn tại để chặn.
 
 Điều KHÔNG đổi theo các cơ chế trên (nói tường minh để khỏi bị đọc rộng):
 
@@ -727,10 +734,10 @@ lease/review, dispatcher ước tính `used / reserved / limit` cho packet đã 
 còn lại không đủ thì `paused: budget_infeasible` với phép tính hiển thị. Provider phải có hard quota ngày và
 tháng; 80% cảnh báo, 100% pause. Không tự đổi provider để lách budget.
 
-Thời gian CHỜ verdict không tính vào 90 phút/run (đồng hồ run đo THỜI GIAN LÀM, cùng doctrine
-wall-clock/working-clock của launcher). Phiên chờ phải chờ bằng cơ chế đánh thức (alarm/monitor/notification),
-không poll chủ động; thức dậy phải ĐO LẠI trước khi làm: `git ls-remote` head, hạn lease, state packet, sáu kích
-hoạt drift — trí nhớ ấm không thay được phép đo (bài học “phiên sau phải đo lại”).
+Executor đăng handoff đầy đủ rồi KẾT THÚC run hiện hành; thời gian CHỜ verdict nằm ngoài run. Việc chờ dùng
+cơ chế đánh thức (alarm/monitor/notification), không poll chủ động. Khi verdict đổ về, lượt xử lý tiếp theo là RUN MỚI
+với trần 90 phút và đồng hồ absolute wall clock riêng; run mới phải ĐO LẠI trước khi làm: `git ls-remote` head, hạn lease,
+state packet, sáu kích hoạt drift — trí nhớ ấm không thay được phép đo (bài học “phiên sau phải đo lại”).
 
 Mission không được complete khi còn packet `ready`, `leased`, `running`, `reviewing`, `blocked` hoặc khi land gate
 chưa xanh. Land thất bại quay về `paused` hoặc sinh packet sửa lỗi trong envelope.

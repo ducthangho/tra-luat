@@ -941,15 +941,41 @@ def _than_buoc_chon_lease() -> str:
 
 
 def _kho_thu(tmp: Path):
-    """Dựng kho có `origin` THẬT: master mang một lease CŨ, HẾT HẠN, CHƯA TỪNG ĐĂNG."""
+    """Dựng kho có `origin` THẬT: master mang một lease CŨ, HẾT HẠN, CHƯA TỪNG ĐĂNG.
+
+    `commit.gpgsign=false` KHÔNG phải cho gọn — nó đóng một finding P2 của cross-review
+    lượt 2 (codex, head `23588c97`). Trên máy có `commit.gpgsign=true` toàn cục mà signer
+    không gọi được, fixture chết bằng `fatal: failed to write commit object` và `t32` ĐỎ vì
+    **cấu hình của host**, không vì thứ nó đo. Reviewer đo được cả hai chiều: `rc=1 32/33`
+    với signing bật, `rc=0 33/33` khi tắt.
+
+    Một cổng đỏ vì lý do không liên quan tệ ngang một cổng xanh giả: cả hai đều làm người
+    đọc đi sai hướng. Phạm vi tắt signing chỉ trong kho fixture tạm — không đụng kho thật,
+    không che ca nào về chữ ký.
+    """
     def g(cay, *a):
         return subprocess.run(["git", "-c", "user.email=a@b", "-c", "user.name=c",
+                               "-c", "commit.gpgsign=false",
                                "-C", str(cay), *a],
                               capture_output=True, text=True, check=True)
     goc = tmp / "origin.git"
     subprocess.run(["git", "init", "-q", "--bare", str(goc)], check=True)
     cay = tmp / "cay"
     subprocess.run(["git", "clone", "-q", str(goc), str(cay)], check=True)
+    # DỰNG LẠI ĐÚNG MÁY ĐÃ LÀM t32 ĐỎ, ngay trong fixture — nếu không thì chốt trên chỉ là
+    # lời hứa: nó chạy xanh cả khi ai đó gỡ `-c commit.gpgsign=false` ra, trên một máy
+    # không bật signing. Đặt ở LOCAL config vì `-c` dòng lệnh thắng config tệp; gỡ `-c` ra
+    # là fixture chết ngay, tức ca này ĐO chốt chứ không chỉ mang chốt.
+    # BÁM ĐÚNG KHOÁ, và đây là chỗ bản đầu SAI: nó đặt `gpg.program` — khoá của định dạng
+    # **openpgp** — trong khi máy dựng fixture khai `gpg.format=ssh`, nên chốt giả bám vào
+    # một khoá không ai đọc và mutant "gỡ `-c commit.gpgsign=false`" SỐNG SÓT (đo được:
+    # `giet 0/1`). Ép luôn `gpg.format=ssh` để fixture không phụ thuộc cấu hình host, rồi
+    # trỏ `gpg.ssh.program` vào một đường dẫn không tồn tại.
+    for k, v in (("commit.gpgsign", "true"),
+                 ("gpg.format", "ssh"),
+                 ("user.signingkey", "khong-phai-khoa-that"),
+                 ("gpg.ssh.program", str(tmp / "signer-khong-ton-tai"))):
+        subprocess.run(["git", "-C", str(cay), "config", k, v], check=True)
     (cay / "ops" / "leases").mkdir(parents=True)
     # Chính hình dạng đã giết cổng ngày 20-08: hết hạn, KHÔNG `posted_comment_id`.
     (cay / "ops" / "leases" / "cu-het-han.yaml").write_text(

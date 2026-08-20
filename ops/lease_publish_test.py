@@ -987,10 +987,54 @@ def _kho_thu(tmp: Path):
     return cay, g
 
 
+def _bash_posix() -> str:
+    """Trả đường dẫn `bash` POSIX THẬT — KHÔNG phải `bash` của WSL.
+
+    ĐÃ TRẢ GIÁ (master `e03c6d28`, run 32351777642, job `gate (windows-latest)`):
+    `subprocess.run(["bash", ...])` trên runner Windows phân giải sang
+    `C:\\Windows\\System32\\bash.exe` — cửa vào WSL — và nó trả
+
+        Windows Subsystem for Linux has no installed distributions.
+
+    với `rc=1`. Ca `t32` đọc mã ấy thành "bước chọn lease ĐỎ" và báo một finding KHÔNG CÓ
+    THẬT, trong khi thứ hỏng là **trình thông dịch**, không phải thân bước.
+
+    Cùng họ với bài học `taskkill` của kho: một cái TÊN phân giải sang thứ khác trên nền
+    khác. Nên ở đây dùng DANH SÁCH CHO PHÉP (Git Bash), và loại thẳng `System32`.
+
+    Nói rõ phạm vi: bước được đo chạy trong job `runs-on: ubuntu-latest`, nên Windows chỉ
+    là nơi bộ test tình cờ chạy. Nhưng "tình cờ" mà báo finding giả thì vẫn phải chữa.
+    """
+    import os
+    import shutil
+    if os.name != "nt":
+        return "bash"
+    ung_vien = [
+        r"C:\Program Files\Git\bin\bash.exe",
+        r"C:\Program Files (x86)\Git\bin\bash.exe",
+        r"C:\Program Files\Git\usr\bin\bash.exe",
+    ]
+    for d in ung_vien:
+        if Path(d).is_file():
+            return d
+    tim = shutil.which("bash")
+    # `System32\bash.exe` LÀ WSL. Nhận nó là tự chuốc một finding giả.
+    if tim and "system32" not in tim.replace("/", "\\").lower():
+        return tim
+    return ""
+
+
 def _chay_than(than: str, cay: Path, truoc: str, nay: str, mac_dinh: str = "master"):
     import os
     mt = dict(os.environ, TRUOC=truoc, NAY=nay, MAC_DINH=mac_dinh)
-    p = subprocess.run(["bash", "-c", than], cwd=str(cay), env=mt,
+    vo = _bash_posix()
+    # KHÔNG ĐO ĐƯỢC ≠ ĐẠT: thiếu bash POSIX thì ném, để `t32` ĐỎ với đúng lý do — chứ
+    # không lặng lẽ trả một kết quả rỗng rồi được đếm là qua.
+    if not vo:
+        raise AssertionError(
+            "KHÔNG ĐO ĐƯỢC: không tìm thấy `bash` POSIX (Git Bash). `bash` trong "
+            "System32 là WSL, không dùng được để chạy thân bước.")
+    p = subprocess.run([vo, "-c", than], cwd=str(cay), env=mt,
                        capture_output=True, text=True)
     ds = (cay / "ds.txt")
     return p.returncode, (ds.read_text(encoding="utf-8").split() if ds.is_file() else []), p.stderr + p.stdout

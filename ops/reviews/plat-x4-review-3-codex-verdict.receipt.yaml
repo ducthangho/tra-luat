@@ -1,0 +1,93 @@
+# BIÊN NHẬN — cross-review lượt 3 của PR #205 (packet PLAT-X4, #203).
+#
+# LƯỢT NÀY VƯỢT TRẦN 2 VÒNG, chủ kho nâng 2 -> 3 tại human checkpoint. Căn cứ đầy đủ ở
+# `ops/leases/plat-x4-review-3-codex-20260820.yaml`, khoá `nang_tran`.
+#
+# ĐỌC `ket_luan_kien_truc` TRƯỚC KHI AI ĐỊNH VÁ LẦN THỨ TƯ.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: PLAT-X4
+packet_issue: 203
+lease_id: plat-x4-review-3-codex-20260820
+provider: codex
+role: reviewer
+verdict: changes_requested
+cross_provider: true
+assurance_dat: null
+assurance_KHONG_dat: cross_approved
+reviewed_sha: a09aae627533f59e6b2e817858a6db50b999d41c
+
+verdict_path: ops/reviews/plat-x4-review-3-codex-verdict.md
+verdict_sha256: e05a32a8eb2945094d8e0ac31960f25760dff9b1c1e28c9861326ee45a998925
+verdict_bytes: 7257
+verdict_nguon: 'scratchpad/x4-review3.log — stdout `codex exec`, thoát 0, 10 lượt exec'
+verdict_doi_chieu: 'Cắt một bản duy nhất; đã kiểm ĐÚNG MỘT `VERDICT:` và ĐÚNG MỘT `Reviewed commit:`.'
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/cd8a3fdac010e0126907c468fbd56a6d285c4012/ops/reviews/plat-x4-review-3-codex-verdict.md
+published_first:
+  branch: ops/lease-review-m4-x4
+  commit: cd8a3fdac010e0126907c468fbd56a6d285c4012
+truy_xuat_tag: null
+
+pham_vi: 'delta 1d37861e..a09aae62 — 2 tệp, +100/-16'
+vuot_tran:
+  tran_cu: 2
+  tran_moi: 3
+  ai_nang: ducthangho
+  ghi_chu: 'Trần vòng là kỷ luật vận hành, CHƯA có cưỡng chế máy (§10 tự khai nợ đó).'
+
+chot_read_only_sau_luot:
+  git_status_short: RONG
+  head_khong_doi: true
+
+finding_luot_3:
+  - id: t34-fail-open-voi-dang-goi-ngoai-regex
+    muc: P2
+    da_do_lai_boi_phien_dieu_phoi: true
+    bang_chung_do_lai: >-
+      Bỏ installer khỏi job `ci.yml:gate` và đổi lệnh thành `run: python -m
+      ops.lease_publish_test` ⇒ `lease_publish: 38/38`, rc=0. Chuỗi `lease_publish_test.py`
+      KHÔNG xuất hiện nên cả `i_nhac` lẫn `i_chay` đều None: nghĩa vụ installer BIẾN MẤT.
+      `bash -c "python ops/lease_publish_test.py"` có `i_nhac` nhưng không khớp
+      `_CHAY_BO_TEST` ⇒ chốt THỨ TỰ im lặng bỏ qua.
+  - id: installer-if-false-van-duoc-tinh
+    muc: P2
+    da_do_lai_boi_phien_dieu_phoi: true
+    bang_chung_do_lai: 'Thêm `if: false` vào installer của `ci.yml` ⇒ `38/38`, rc=0. `t34` chỉ đọc thân `run`, không đọc `if:`.'
+  - id: suy-loai-archive-tu-suffix
+    muc: P2
+    da_do_lai_boi_phien_dieu_phoi: false
+    ghi_chu: >-
+      Reviewer đo: zip tên không đuôi ⇒ rc=5; `.ZIP` hoa ⇒ rc=5; `.tgz` chạy được nhưng do
+      RƠI VÀO nhánh tar chứ không phải do nhận diện riêng. Chưa đo lại độc lập — khai đúng
+      như vậy, đừng đọc thành đã xác nhận.
+
+finding_luot_2_da_dong:
+  - t34-rang-theo-tep-khong-theo-job      # job-split ⇒ 37/38 rc=1
+  - duoi-goi-lay-ca-duong-dan-khi-ten-khong-co-dau-cham
+
+ket_luan_kien_truc:
+  hinh_dang_lap: 3
+  mo_ta: >-
+    BA lượt, BA lần người vá tinh chỉnh phép PHÂN TÍCH TĨNH trên thân `run` của YAML, và BA
+    lần reviewer tìm ra một dạng shell khác làm nó thua: lượt 1 tiền tố `echo`; lượt 2 tách
+    JOB + thứ tự; lượt 3 `python -m`, `bash -c`, `if: false`.
+  doctrine: >-
+    `CLAUDE.md`: "Đếm hình dạng lỗi, đừng chỉ đếm lỗi — cùng một hình dạng lặp ba lần trở lên
+    thì câu hỏi đúng là 'có nên làm việc này không', không phải 'vá thế nào'."
+  reviewer_dong_y: >-
+    Reviewer độc lập đi tới cùng kết luận: "Không duy trì danh sách regex dương cho các shell
+    invocation." Đề xuất: một WRAPPER duy nhất (`bash ops/chay_lease_publish_test.sh`) tự
+    cài/kiểm `actionlint`, hoặc một COMPOSITE ACTION chứa cả installer lẫn selftest — bỏ hẳn
+    việc đoán ý định từ cú pháp shell.
+  he_qua: >-
+    Lượt này DỪNG, không vá lần thứ tư. Quyết định về CÁCH LÀM thuộc chủ kho.
+
+verdict_usage_caveats:
+  - id: finding-3-chua-do-lai-doc-lap
+    noi_dung: >-
+      Hai finding đầu đã được phiên điều phối dựng lại và xác nhận (`38/38` rc=0 cả hai).
+      Finding 3 (suy loại archive từ suffix) CHƯA đo lại độc lập — số trong verdict là của
+      reviewer. Đừng trích nó như một phép đo hai nguồn.

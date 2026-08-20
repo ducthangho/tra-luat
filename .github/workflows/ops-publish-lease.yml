@@ -114,6 +114,52 @@ jobs:
           echo "bản trong head được đẩy — KHÔNG chạy:"
           sha256sum ops/lease_publish.py ops/lease_publish_test.py
 
+      # `actionlint` LÀ PHỤ THUỘC CỦA BỘ TEST NGAY DƯỚI, không phải tiện ích.
+      # REGRESSION ĐÃ ĐO (#200, run 32351892214): `t33` được thêm ở #195 vào
+      # `ops/lease_publish_test.py`, mà bộ ấy được HAI workflow gọi — `ci.yml` được cấp
+      # công cụ, workflow NÀY thì không. Kết quả: cổng đăng lease vẫn chết, chỉ đổi lý do
+      # (rc=8 vì lease cũ hết hạn -> rc=1 vì thiếu công cụ), và người đẩy lease vẫn không
+      # đăng được gì. Cùng gốc với bài học đã ghi sổ: đếm MỘT cửa rồi tưởng đã đếm hết cửa.
+      # `t34` khoá lại phần máy canh được; bước này là phần phải cấp.
+      # GHIM EXACT như `PyYAML==6.0.3` ngay trên. Ghim PHIÊN BẢN, chưa kiểm BĂM gói tải về —
+      # cùng mức bảo đảm với dòng `pip install`, không hơn.
+      - name: cài actionlint (bộ kiểm dưới đây ĐÒI nó — xem t33/t34)
+        shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: |
+          set -euo pipefail
+          # KHÔNG có nhánh thoát sớm "đã có actionlint trên PATH thì thôi". Cross-review
+          # lượt 1 (codex, `fd76921`, P2) đo được: một hàm giả tên `actionlint` trả `0` cho
+          # `--version` là đủ để nhánh ấy thoát xanh — mà `t33` gọi đúng binary trên PATH,
+          # nên cổng thành XANH RỖNG. Chú thích cũ khai "GHIM EXACT" trong khi hành vi thì
+          # nhận bất kỳ bản nào: lời khai rộng hơn thứ đo được.
+          case "${RUNNER_OS}" in
+            Linux)   GOI="actionlint_${AL_VER}_linux_amd64.tar.gz" ;;
+            macOS)   GOI="actionlint_${AL_VER}_darwin_arm64.tar.gz" ;;
+            Windows) GOI="actionlint_${AL_VER}_windows_amd64.zip" ;;
+            *) echo "KHONG DO DUOC: nen la '${RUNNER_OS}', chua co goi cho nen nay"; exit 1 ;;
+          esac
+          DICH="$RUNNER_TEMP/actionlint"
+          mkdir -p "$DICH"
+          curl -fsSL -o "$DICH/goi" \
+            "https://github.com/rhysd/actionlint/releases/download/v${AL_VER}/${GOI}"
+          if [ "${RUNNER_OS}" = "Windows" ]; then
+            unzip -q -o "$DICH/goi" -d "$DICH"
+          else
+            tar -xzf "$DICH/goi" -C "$DICH"
+          fi
+          echo "$DICH" >> "$GITHUB_PATH"
+          # ĐỐI CHIẾU BẢN GHIM: "đã cài" KHÁC "đã cài ĐÚNG BẢN". Đây là bằng chứng dương
+          # thay cho `command -v` (có mặt != đúng bản != chạy được).
+          BAN="$("$DICH/actionlint" --version 2>/dev/null || "$DICH/actionlint.exe" --version)"
+          printf '%s\n' "$BAN" | head -1
+          printf '%s\n' "$BAN" | head -1 | grep -qx "$AL_VER" || {
+            echo "::error::actionlint cai xong nhung KHONG khop ban ghim '$AL_VER'"
+            exit 1
+          }
+
+
       - name: tự kiểm cổng trước khi tin nó
         # Cổng này là thứ DUY NHẤT đứng giữa một tệp YAML và một comment mang danh
         # nghĩa kho. Chạy phản chứng của chính nó trước mỗi lượt đăng — rẻ hơn
@@ -122,17 +168,51 @@ jobs:
 
       - name: tìm lease vừa đổi
         id: tim
+        # KHÔNG nội suy `${{ }}` vào THÂN `run`, khai qua `env:` như bước neo ở trên.
+        # Hai lý do, cả hai đã trả giá: (a) GitHub nội suy biểu thức trên TOÀN BỘ thân
+        # `run` trước khi shell thấy nó — một cặp RỖNG nằm trong một dòng CHÚ THÍCH làm
+        # cả tệp không hợp lệ (`ops-don-ref.yml`, run 31971137920: một run mang tên
+        # đường dẫn tệp, 0 job, `conclusion: failure`); (b) thân bước chỉ CHẠY LẠI ĐƯỢC
+        # ngoài Actions khi nó không còn biểu thức — đó là điều kiện để `t32` trích
+        # THÂN BƯỚC TỪ CHÍNH TỆP NÀY rồi chạy thật, thay vì chép lại rồi trôi lệch.
+        env:
+          TRUOC: ${{ github.event.before }}
+          NAY: ${{ github.sha }}
+          MAC_DINH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
-          TRUOC='${{ github.event.before }}'
-          # Nhánh mới: `before` là toàn số 0, không diff được. Khi đó liệt kê tất cả
-          # lease trong cây — chốt `posted_comment_id` lo phần không đăng trùng.
-          if [ -z "$TRUOC" ] || [ "$TRUOC" = "0000000000000000000000000000000000000000" ]; then
-            find ops/leases -type f \( -name '*.yaml' -o -name '*.yml' \) > ds.txt || true
-          else
-            git diff --name-only --diff-filter=ACM "$TRUOC" '${{ github.sha }}' -- \
-              'ops/leases/*.yaml' 'ops/leases/*.yml' > ds.txt || true
+          test -n "${NAY:-}"
+          test -n "${MAC_DINH:-}"
+          # MỐC SO. Push thường: `before`..`sha`. Push MỞ NHÁNH MỚI: `before` toàn số 0,
+          # không diff được — mốc đúng khi ấy là điểm nhánh này rẽ khỏi nhánh mặc định.
+          #
+          # BẢN TRƯỚC QUÉT CẢ `ops/leases/`, và đó là lỗi đã trả giá (#195): mọi lease
+          # đều đăng bằng một nhánh MỚI theo `ops/README.md`, nên đường "dự phòng" ấy
+          # thật ra là đường CHÍNH. Một lease cũ CHƯA TỪNG ĐĂNG mà đã hết hạn nằm trong
+          # cây làm cả lượt chạy `rc=8` ⇒ MỌI lease mới không đăng được, từ 18-08-2026
+          # tới 20-08-2026 mà không ai biết. Chú thích cũ khai "chốt `posted_comment_id`
+          # lo phần không đăng trùng" — đúng cho lease ĐÃ đăng (rc=9, bỏ qua), sai cho
+          # lease chưa từng đăng. Cổng không nói dối, nó VẮNG MẶT.
+          TU=""
+          if [ -n "${TRUOC:-}" ] \
+             && [ "$TRUOC" != "0000000000000000000000000000000000000000" ] \
+             && git cat-file -e "${TRUOC}^{commit}" 2>/dev/null; then
+            TU="$TRUOC"
+          elif git rev-parse --verify --quiet "origin/$MAC_DINH^{commit}" >/dev/null; then
+            TU="$(git merge-base "origin/$MAC_DINH" "$NAY" || true)"
           fi
+          # KHÔNG ĐO ĐƯỢC ≠ KHÔNG CÓ GÌ. Bản trước nối `|| true` vào `git diff`, nên một
+          # lỗi biến thành danh sách RỖNG — mà rỗng đọc y hệt "không có lease nào để
+          # đăng". Ba trạng thái: có · không · KHÔNG ĐO ĐƯỢC; trạng thái thứ ba phải làm
+          # cổng ĐỎ, đúng doctrine `None ≠ False`.
+          if [ -z "$TU" ]; then
+            echo "::error::KHONG DO DUOC moc so (before=${TRUOC:-<rong>}," \
+                 "origin/$MAC_DINH khong phan giai duoc) — khong dang gi"
+            exit 1
+          fi
+          echo "moc so: $TU..$NAY"
+          git diff --name-only --diff-filter=ACM "$TU" "$NAY" -- \
+            'ops/leases/*.yaml' 'ops/leases/*.yml' > ds.txt
           echo "tìm thấy $(wc -l < ds.txt) tệp:"; cat ds.txt
 
       - name: đăng

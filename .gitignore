@@ -29,3 +29,4 @@ dist/
 # v1.34.68 (Q1 kế hoạch instruction-refactor-va-kho-tham-chieu): kho tham chiếu Claude Code clone dev-only
 # local (~1.495 commit + media) — KHÔNG commit vào skill git, KHÔNG vào bundle (đã loại ở _RELEASE_EXCLUDE_DIRS)
 claude-code-best-practice/
+.claude/.packet_state/

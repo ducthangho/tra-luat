@@ -96,3 +96,4 @@ canh_bao_cho_reviewer: >-
 kiem_duong_codex_truoc_khi_cap: >-
   ĐÃ KIỂM bằng lời gọi THẬT (`codex exec`, rc=0, có phản hồi + `tokens used`) ngay trước khi cấp.
   Nhãn `SAP_HET_HAN` của `doctor` (ảnh chụp 107h) SAI lần thứ ba liên tiếp trong đợt này.
+posted_comment_id: 5357337512   # workflow ghi, ĐỪNG sửa tay

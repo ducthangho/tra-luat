@@ -83,6 +83,15 @@ khi hết quota **hoặc** người giữ cho phép, và **luôn sinh một nợ
 
 ### A1 · macOS chưa từng được đo — `PLAT-M1`
 
+> **⛔ TẠM HOÃN — người giữ kho quyết định 20-08-2026: tạm thời bỏ macOS.**
+> Mục này giữ nguyên làm hồ sơ, **không nhận việc từ nó**. Hai lỗi đo được trong lượt
+> soạn nháp cũng ngủ theo (cả hai chỉ cắn khi macOS quay lại), chép ra đây để lần sau
+> không phải tìm lại: `if:` gác **cả matrix** chứ không gác từng phần tử ⇒ nhãn
+> `windows` sẽ kéo theo runner macOS và không gọi riêng macOS được; và bước cài
+> `ripgrep` chạy `apt-get` ở nhánh `else` ⇒ trên macOS `doctor` thoát **12**, nhánh
+> macOS đỏ vì lý do không liên quan gì tới macOS. Chi tiết:
+> `ops/specs/plat-m1-packet-issue-nhap.md`.
+
 - **Write set:** `.github/workflows/launcher-windows.yml` (đổi tên thành `launcher-nen.yml`)
 - **Việc:** thêm `macos-latest` vào matrix; khai **số ca bỏ qua trên TỪNG nền** thành đầu
   ra dương, không để ẩn. Nếu macOS lộ ca hỏng thật thì **DỪNG** và mở packet riêng — sửa
@@ -163,6 +172,7 @@ khi hết quota **hoặc** người giữ cho phép, và **luôn sinh một nợ
 
 | việc | quyết |
 |---|---|
+| `A1` · `PLAT-M1` macOS vào matrix | **hoãn** — người giữ quyết định 20-08-2026. §3 và §7 (kể cả bản đính chính ở PR #187) vẫn vẽ A1 trong luồng đa nền; **dòng này thắng** |
 | `AG-T0-05` registry ratchet | **hoãn** — phụ thuộc `AG-T0-03`, không chặn đa nền tảng |
 | `AG-T0-01B` Antigravity `agy` discovery | **hoãn** — `planned_experimental` |
 | `W0-R2` review receipt · `W0-R3` | **hoãn** sau nhóm A |

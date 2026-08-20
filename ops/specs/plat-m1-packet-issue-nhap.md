@@ -1,5 +1,11 @@
 # BẢN NHÁP Packet Issue — `PLAT-M1` (A1): macOS chưa từng được đo
 
+> **⛔ TẠM HOÃN — người giữ kho quyết định 20-08-2026: tạm thời bỏ macOS.**
+> Tệp này **không** còn là hàng đợi; nó là **hồ sơ** của hai lỗi đã đo được (§3.1 và
+> §3.2) để lần sau mở lại không phải đo lại từ đầu. Không mở Issue từ nó, không cấp
+> lease cho nó. Quyết định ghi tại `ops/KE_HOACH_DIEU_CHINH_DA_NEN_TANG.md` §3 mục A1
+> và bảng §5.
+>
 > **⛔ CHƯA ĐƯỢC BẮT ĐẦU. ĐÂY LÀ BẢN NHÁP, KHÔNG PHẢI AUTHORITY.**
 > Phiên Claude soạn để người giữ kho duyệt rồi tự mở Issue và cấp lease. Thứ giao việc là
 > Packet Issue kèm lease còn hiệu lực (`docs/PROTOCOL_DA_PHIEN.md` §3.2 và §4); prompt,

@@ -1,9 +1,10 @@
 # BẢN NHÁP Packet Issue — `PLAT-M4` (A4): tách `mcp` thành `mcp-cli` và `mcp-endpoint`
 
-> **⛔ CHƯA ĐƯỢC BẮT ĐẦU. ĐÂY LÀ BẢN NHÁP, KHÔNG PHẢI AUTHORITY.**
-> Phiên Claude soạn để người giữ kho duyệt rồi tự mở Issue và cấp lease. Thứ giao việc là
-> Packet Issue kèm lease còn hiệu lực (`docs/PROTOCOL_DA_PHIEN.md` §3.2 và §4); prompt,
-> handoff và tệp nháp này **không phải lease** (§7).
+> **⛔ CHƯA ĐƯỢC BẮT ĐẦU — dù NỘI DUNG đã được người giữ duyệt 20-08-2026.**
+> Duyệt nội dung **không phải** giao việc, và tệp này **không phải** authority: còn thiếu
+> đúng hai thứ — **Packet Issue** (nơi neo `spec_hash`) và **lease** còn hiệu lực
+> (`docs/PROTOCOL_DA_PHIEN.md` §3.2 và §4). Prompt, handoff và tệp nháp này **không phải
+> lease** (§7).
 > Nguồn của packet: `ops/KE_HOACH_DIEU_CHINH_DA_NEN_TANG.md` §3 mục A4.
 
 ## 1. Packet Spec đề nghị
@@ -21,6 +22,7 @@ risk: sensitive
 review_class: sensitive
 depends_on:
   - PLAT-M3            # #185, đã `state:integrated` (PR #189)
+                       # KHÔNG phụ thuộc PLAT-M1 (macOS đã tạm hoãn 20-08-2026)
 effective_write_set:
   - .claude/dev/launcher.py
   - .claude/dev/launcher_test.py
@@ -62,9 +64,13 @@ Khuôn để tái dùng đã có sẵn và đã đúng: `_do_rest_github` phân 
 `rest-chung` (đường proxy cho phép) và `rest-kho` (đường việc thật). A4 làm **đúng phép tách
 ấy** cho MCP.
 
-## 3. Năm quyết định phải chốt TRƯỚC khi viết mã
+## 3. Năm quyết định — **ĐÃ CHỐT** (người giữ duyệt 20-08-2026, theo khuyến nghị)
 
-### 3.1 `t115` sẽ NGỪNG GÁC MÀ VẪN XANH sau khi đổi tên — đây là lỗ nguy hiểm nhất của packet
+Chúng không còn là câu hỏi mở. Lượt thi công **thực hiện đúng** năm chốt dưới đây; thấy
+chốt nào sai thì **DỪNG và mở revision**, không tự đổi giữa đường (đổi acceptance là
+đổi `spec_hash`).
+
+### 3.1 CHỐT: mở rộng `t115` sang cả hai tên mới — lỗ nguy hiểm nhất của packet
 
 `t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec` chốt điều số 1 bằng cách
 đọc thẳng mã nguồn:
@@ -82,33 +88,34 @@ Nó tìm **đúng chuỗi `"mcp"` có dấu nháy hai đầu**. Sau khi đổi t
 ⇒ Mở rộng `t115` sang **cả hai tên mới** là **việc bắt buộc**, không phải việc kèm theo. Nó
 là phản chứng số 1 ở §5.
 
-### 3.2 `mcp-endpoint` có được tính vào `LAM_DUOC_VIEC` không?
+### 3.2 CHỐT: `mcp-endpoint` **KHÔNG** vào `LAM_DUOC_VIEC`
 
-**Khuyến nghị: KHÔNG** — trừ khi probe thực hiện một thao tác **mức kho**.
+Tập ấy giữ nguyên **`{git, gh-kho, rest-kho}`**. `mcp-endpoint` là **chẩn đoán**, in ra
+cho người đọc, không có quyền quyết định nhãn `DUNG_DUOC`.
 
 Lý do là lịch sử: kho đã ba lần đếm **sự CÓ MẶT** của một đường thay vì **KHẢ NĂNG** của nó
 (`shutil.which("gh")` · `rest-chung` · `gh auth status`), và `t103` sinh ra từ đó. Một lượt
 `initialize` chứng minh **endpoint sống và token được nhận**, không chứng minh đọc được kho
 này — nó cùng hạng với `rest-chung`, không cùng hạng với `rest-kho`.
 
-Nếu người giữ muốn nó **được** tính, thì probe phải neo vào một thao tác kho đã thành công
-(gọi một tool mức kho, không phải handshake), và khi ấy tên đúng phải là `mcp-kho`, để cái
-tên nói đúng thứ nó đo. Chốt hướng nào cũng được — nhưng **phải chốt trước**, vì nó đổi cả
-tên trường lẫn hình dạng phản chứng.
+Hệ quả ràng buộc lượt thi công: muốn MCP được tính là *làm được việc* thì phải là một
+packet KHÁC, probe neo vào **thao tác mức kho đã thành công** (gọi một tool thật, không
+phải handshake) và trường ấy phải mang tên `mcp-kho` để cái tên nói đúng thứ nó đo.
+Trong packet này: **không**.
 
-### 3.3 `initialize` có tác dụng phụ không, và chờ bao lâu
+### 3.3 CHỐT: `initialize`, timeout theo hằng có sẵn, **không** auto-retry
 
 `initialize` là handshake JSON-RPC, không ghi gì. Vẫn phải khai tường minh trong docstring,
 đặt timeout theo hằng `PROBE_TIMEOUT_GIAY` đang dùng, và **không auto-retry** — `doctor` là
 phép đo, không phải nỗ lực kết nối.
 
-### 3.4 Bí mật: `GITHUB_PAT` đi trong header của chính lời gọi này
+### 3.4 CHỐT: ca sentinel cho `GITHUB_PAT` — đo, không suy luận
 
 Phải có ca chốt: đặt token **sentinel**, chạy `doctor` và `doctor --json`, rồi khẳng định
 chuỗi sentinel **không xuất hiện trong bất kỳ byte nào** của stdout/stderr. Không suy luận
 “urllib đâu có in header”; đo.
 
-### 3.5 Bộ test KHÔNG được gọi mạng thật
+### 3.5 CHỐT: suite chạy **offline**, bốn fixture, không gọi mạng thật
 
 Suite phải chạy offline, tất định. Cần lớp giả cho `urlopen` (kiểu đã dùng ở các ca hiện có)
 và fixture cho **bốn** trạng thái ở §5. Một ca “chỉ chạy khi có mạng” là ca sẽ im lặng biến
@@ -122,8 +129,7 @@ mất đúng lúc cần nhất.
 - Phân loại bằng **header** `X-GitHub-*`: 4xx **có** header = *tới nơi, thiếu quyền*
   (`mo`, thao tác không thành công); **không** header = *proxy tự sinh* (`chan`).
 - `doctor --json` có hai khoá tương ứng, parse được, **không** lộ token.
-- `LAM_DUOC_VIEC` **không đổi**, trừ khi §3.2 chốt ngược — và khi ấy phải neo vào thao tác
-  mức kho.
+- `LAM_DUOC_VIEC` **không đổi**: vẫn đúng `{git, gh-kho, rest-kho}` (chốt §3.2).
 - Suite **không tụt dưới 137 ca** (nền đo hôm nay: `rg -c '^def t[0-9]+_' launcher_test.py`
   = 137). Kết quả `N/N` hai số **bằng nhau**, `rc=0`. Suite chạy được **offline**.
 - Cây làm việc sạch sau khi chạy test.
@@ -153,7 +159,7 @@ vào cùng một tệp tạm và CPython dùng lại `.pyc` theo *(mtime giây, 
 
 - **Không** đổi ngữ nghĩa `_do_rest_github` đang có; chỉ **tái dùng** khuôn phân loại của nó.
 - **Không** sửa `.mcp.json`, không thêm server, không đụng credential.
-- **Không** đổi `LAM_DUOC_VIEC` khi §3.2 chưa được người giữ chốt.
+- **Không** đổi `LAM_DUOC_VIEC` — chốt §3.2 đã đóng cửa này; muốn mở thì là packet khác.
 - **Không** đụng workflow (A1/A2), không cài `gh`, không dựng đường REST mới cho kho.
 - Thấy chốt phải nằm ngoài hai tệp write set ⇒ **DỪNG**, xuất handoff, mở packet riêng.
 

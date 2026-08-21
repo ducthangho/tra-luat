@@ -1,0 +1,125 @@
+# Lease EXECUTOR — `DONREF-XOA-AN-TOAN` (#217), lease **r2**. Neo head fa4b0dd.
+#
+# KHÔNG PHẢI REWORK MỘT BẢN VÁ HỎNG. Lượt 1 đã được `approve` (cross-provider). Lease này vá
+# BA FINDING mà reviewer nêu, cả ba là KHOẢNG TRỐNG RĂNG KIỂM CHỨNG — không phải lỗ đang mở.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 217
+packet_id: DONREF-XOA-AN-TOAN
+revision: 2
+generation: 1
+lease_id: donref-xoa-an-toan-exec-1r2-codex-20260821
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/DONREF-XOA-AN-TOAN.md
+spec_sha256: 1add3edf165faa2b53d6b52212ea34d7a73934367fd73bbca91e5518a9a664de
+spec_KHONG_DOI: true
+spec_vi_sao_khong_can_ban_sua_doi: >-
+  `§nghiem_thu` khai TỐI THIỂU một tiêu chí cho mỗi mục tiêu. Ca `T8` phục vụ ĐÚNG `muc_tieu` 3
+  đã có ("ba trạng thái — mọi thứ không đo được rơi vào C kèm lý do") ở CẤP TOÀN KHO, chỗ hiện
+  chỉ có `T4` phủ ở cấp từng ref. Đây là LÀM ĐẦY một mục tiêu sẵn có, không phải thêm mục tiêu
+  mới. Prompt dặn executor DỪNG và nói nếu thấy lập luận này sai — không tự mở rộng đặc tả.
+
+nguon_cap_viec: 'verdict cross-review lượt 1 (claude) trên `fa4b0dd` — VERDICT: approve, ba finding'
+
+write_set:
+  - ops/nhanh_don_duoc_test.py
+write_set_ghi_chu: >-
+  ĐÚNG MỘT TỆP. `ops/nhanh_don_duoc.py` KHÔNG nằm trong write set lượt này — cả ba finding đều
+  sửa được trong tệp test. Cần đụng tệp kia ⇒ DỪNG. Write set HẸP HƠN lượt 1 (2 tệp → 1).
+
+branch: codex/donref-xoa-an-toan-1
+branch_ownership: exclusive
+reviewed_sha_required: fa4b0dd879f0cf7ae589989863670d2a8200839c
+base_sha: fa4b0dd879f0cf7ae589989863670d2a8200839c
+start_from_sha: fa4b0dd879f0cf7ae589989863670d2a8200839c
+target_branch_neu_land: master
+
+prompt_path: ops/prompts/donref-xoa-an-toan-exec-1r2-codex-20260821.md
+prompt_sha256_required: ab0dfd2329177e103905fa90c74b9c496cc11695ad967c7f9f684b3b7ac00ca0
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("cấp lease vá ba finding")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T09:45:00Z'
+lease_expires_at_utc: '2026-08-22T09:45:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 1
+attempts_limit: 2
+attempts_ghi_chu: >-
+  attempt = một lần TUYÊN BỐ DONE. Lượt 1 đã tiêu attempt 1 và được `approve`. Đây là attempt
+  CUỐI trong trần hiện tại.
+executor_calls_used: 1
+executor_calls_limit: 6
+
+reviewer_provider: claude
+review_rounds_limit: 2
+review_rounds_used: 1
+
+ba_finding_phai_va:
+  - id: P2-cap-toan-kho-chua-co-rang
+    muc: P2
+    noi_dung: >-
+      Ba nhánh rẽ trong `main()` — `fetch` thất bại · kho NÔNG · `loi_head or base_oid !=
+      remote_oid` — là cơ chế DUY NHẤT hiện thực hoá `muc_tieu` 3 ở cấp toàn kho, và KHÔNG đột
+      biến nào nhắm vào chúng. Hành vi hôm nay ĐÚNG; thứ thiếu là RĂNG giữ cho nó đúng.
+    phai_lam: 'Thêm `T8` (ref cục bộ CŨ + fetch lần này thất bại) và BA đột biến nhắm đúng ba nhánh rẽ.'
+    reviewer_da_do: >-
+      Dựng repro thật: `ops/a` dù dữ liệu cục bộ cũ nói đủ điều kiện A vẫn rơi vào C kèm lý do
+      `fetch loi: …`, lệnh in ra RỖNG. Executor phải DỰNG LẠI, không chép kết luận.
+  - id: P3-T3-chua-do-phep-loc-C-trong-lo-TRON
+    muc: P3
+    noi_dung: >-
+      `T3` có cả B lẫn C trong CÙNG một lần chạy không suy biến, nhưng chỉ khẳng định nhóm, không
+      khẳng định `"ops/c-mot" not in lenh`. Mutant `in-ca-C` hiện chỉ bị bắt qua `T5` — kịch bản
+      SUY BIẾN (mọi nhánh đều C). Phép lọc chưa từng được đo khi A/B/C CÙNG tồn tại.
+    phai_lam: 'Thêm khẳng định `"ops/c-mot" not in lenh` vào `T3`.'
+  - id: P3-prompt-luot-1-khai-SAI-rc-1
+    muc: P3
+    noi_dung: >-
+      `nhiem_vu.txt` lượt 1 nói "kho nông ⇒ rc=1". SAI: tool chỉ có `return 2` và `return 0`.
+    nguyen_nhan_goc: >-
+      Con số `1` là TẠO TÁC CỦA `| head`: ống đóng sớm ⇒ `BrokenPipeError` ⇒ Python thoát 1.
+      Phiên điều phối đo bằng `| head -30` rồi đọc `PIPESTATUS[0]`, và đưa con số ấy vào prompt.
+    do_lai_boi_phien_dieu_phoi: 'chạy KHÔNG qua ống ⇒ `RC_THAT=0`; chạy qua `| head` ⇒ `PIPESTATUS[0]=1`; `grep return` ⇒ chỉ có 2 và 0.'
+    phai_lam: >-
+      KHÔNG sửa `nhiem_vu.txt` — prompt đã đóng băng, băm đã công bố trong lease; sửa nó là làm
+      băm trỏ vào thứ không còn tồn tại. Chỉ sửa nếu TỆP TEST có chỗ khai/ám chỉ `rc=1`; không có
+      thì NÓI THẲNG là không có.
+
+hinh_dang_dang_theo_doi:
+  ten: 'lời khai rộng hơn phép đo'
+  dem_hien_tai: 5
+  luot_1_cua_codex_KHONG_lam_tang: true
+  ghi_chu_ve_finding_P3_thu_ba: >-
+    Lỗi `rc=1` là CỦA PHIÊN ĐIỀU PHỐI (`claude`), ở tầng prompt — ngoài write set, ngoài đặc tả.
+    Reviewer phân xử KHÔNG tính vào bộ đếm, và phiên điều phối ĐỒNG Ý với cách đếm ấy. Ghi ra để
+    lần sau không ai đếm lại thành 6 rồi kết luận sai về executor.
+  chot: 'Lần thứ SÁU trong write set ⇒ DỪNG, không vá.'
+
+gate_bat_buoc:
+  - 'ops/nhanh_don_duoc_test.py -> rc=0, N/N hai số bằng nhau, KHÔNG tụt dưới 8 ca'
+  - 'mỗi đột biến giết ĐÚNG ca của nó; giết nhiều ca ⇒ nói ra'
+  - '`T8` dùng KHO BARE THẬT, không đồ giả diễn kịch bản'
+  - 'mọi đột biến chạy trên BẢN SAO TẠM'
+  - 'chạy tool trên kho này, đọc `rc` TRỰC TIẾP — KHÔNG qua ống (bài học vừa trả giá)'
+
+dieu_kien_dung:
+  - 'Cần sửa `ops/nhanh_don_duoc.py` hay tệp nào ngoài write set ⇒ DỪNG'
+  - 'Thấy lập luận "thêm ca test không cần sửa đặc tả" là SAI ⇒ DỪNG, mở revision'
+  - 'Hình dạng "lời khai rộng hơn phép đo" lần thứ SÁU trong write set ⇒ DỪNG, không vá'
+
+khong_push: true

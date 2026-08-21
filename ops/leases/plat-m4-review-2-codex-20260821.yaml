@@ -84,3 +84,4 @@ no_da_khai_boi_executor:
     noi_dung: >-
       Ca mới chỉ đo được trên Linux ở phiên vá. Bằng chứng Windows đến từ lượt CI dẫn ở trên;
       đừng trích lời khai của phiên vá thay cho nó.
+posted_comment_id: 5364470120   # workflow ghi, ĐỪNG sửa tay

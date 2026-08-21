@@ -1,0 +1,71 @@
+# Lease REVIEWER — `PLAT-M4` (#194), lượt 1/2. Neo exact head 5813fc45.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên "#194" chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được push lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt
+# cụt giá trị — đã mất dữ liệu IM LẶNG một lần ở lease exec-4 của wp55.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 194
+packet_id: PLAT-M4
+lease_id: plat-m4-review-1-codex-20260820
+
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+access_note: >-
+  Kho THẬT: read-only. Reviewer đứng trên `git worktree` TÁCH RỜI ở exact head, cây ấy GHI
+  ĐƯỢC — cố ý, để reviewer tự chạy phản chứng mà không chạm kho thật. CHỐT: sau lượt,
+  `git status --short` của cây ấy phải RỖNG và HEAD không đổi; bẩn hoặc drift ⇒ verdict coi
+  như hỏng, không được dùng.
+branch_ownership: none
+
+reviewed_sha_required: 5813fc450efe3cb349b082044708d27a589b69fb
+branch: claude/plat-m4-exec-1
+base_sha: 2663477dfc63b68dbe34ff684f11213d95bcb8b9
+target_branch_neu_land: master
+target_pull_request: 204
+
+scope_files: 2
+scope_note: >-
+  ĐÚNG hai tệp: `.claude/dev/launcher.py`, `.claude/dev/launcher_test.py`. Tệp thứ ba trong
+  diff là finding, không phải "tiện tay dọn" — ĐO, đừng tin lời khai.
+
+prompt_path: ops/prompts/plat-m4-review-1-codex-20260820.md
+prompt_sha256_required: 28d530b8ff2ff498e0331574e361a4ef3313fa56337538093dbcddc5d34a77dc
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-20 ("Mở PR + cấp lease review codex")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-20T12:10:00Z'
+lease_expires_at_utc: '2026-08-21T12:10:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+review_calls_limit: 2
+review_calls_used_truoc_luot_nay: 0
+tran_note: >-
+  Trần CANON là 2 VÒNG (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10), đếm theo
+  `review_rounds_used`. Trần LỜI GỌI (`codex_review_calls_used`) là trục CHI PHÍ riêng,
+  cưỡng chế độc lập — đừng gộp hai trục.
+
+kiem_duong_codex_truoc_khi_cap: >-
+  ĐÃ KIỂM bằng một lời gọi THẬT (`codex exec`, rc=0, có phản hồi + `tokens used`) lúc
+  2026-08-20T11:33Z, KHÔNG hỏi `codex login status` — lệnh ấy nói dối, kho đã trả giá hai
+  lần. Nhãn `SAP_HET_HAN` của `doctor` là suy đoán theo tuổi ảnh chụp `CODEX_AUTH_JSON`; ở
+  lượt này nó SAI, đường thật chạy được. Lease exec của packet dặn phải kiểm trước khi cấp
+  lease REVIEWER — đây là bản ghi phép kiểm đó.
+posted_comment_id: 5355651535   # workflow ghi, ĐỪNG sửa tay

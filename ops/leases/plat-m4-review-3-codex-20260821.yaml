@@ -1,0 +1,103 @@
+# Lease REVIEWER — `PLAT-M4` (#194 / PR "#204"), lượt 3/3. Neo exact head 825e9704.
+#
+# LƯỢT CUỐI. Trần vòng đã được người giữ kho nâng 2→3 cho packet này; lời gọi 3→4 theo sau.
+# Không có lượt bốn.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 194
+packet_id: PLAT-M4
+lease_id: plat-m4-review-3-codex-20260821
+revision: 1
+
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+review_class: systemic
+
+reviewed_sha_required: 825e97042b86f5e200c2ab8a00b58d8642510353
+branch: claude/plat-m4-exec-1
+base_sha: 7a2320fe13b4aad3e7b298d070125a01762a8e54
+target_branch_neu_land: master
+target_pull_request: 204
+scope_files: 2
+
+spec_path: ops/specs/plat-m4-v0.md
+spec_sha256: 63ff22bcc2427850ddd66322ed4a5ac5dcaa03f8d242cc857d12825b601953d1
+
+prompt_path: ops/prompts/plat-m4-review-3-codex-20260821.md
+prompt_sha256_required: 8aadd9292def3ab2211c68826d2b468fc5748c1ee00f5087e50d75dacfa046aa
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-21 ("Duyệt theo thứ tự trên, làm đi" — mục 1 của thứ tự đã duyệt là
+  "cấp lease vòng 3 #204 → chạy codex"). Việc nâng trần vòng 2→3 cho packet này người giữ kho đã
+  duyệt riêng trước đó ("Trần vòng 2->3 vẫn giữ như đã duyệt").
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_ghi_chu: >-
+  Phiên ghi lease này CŨNG là phiên đã vá. Khai thẳng vì `ADR-0034` đòi tách vai. Cái đỡ được:
+  reviewer khác nhà cung cấp, prompt bị neo băm, verdict neo exact head, và lượt này khác hai
+  lượt trước ở một điểm ĐO ĐƯỢC — đặc tả cùng cả hai verdict cũ đều đã nằm TRONG cây được review,
+  nên reviewer không còn phải tin lời phiên vá kể lại.
+
+leased_at_utc: '2026-08-21T06:20:00Z'
+lease_expires_at_utc: '2026-08-22T06:20:00Z'
+run_minutes: 90
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 3
+review_rounds_used_truoc_luot_nay: 2
+review_calls_limit: 4
+review_calls_used_truoc_luot_nay: 3
+ngan_sach_ghi_chu: >-
+  Trần vòng canon là 2 (`docs/adr/0043-tran-vong-review-canon-la-hai.md`). Người giữ kho nâng
+  2→3 cho packet này. Trần LỜI GỌI phải nâng 3→4 theo — KHAI THẲNG chỗ này thay vì để nó trôi
+  theo: hai trần là HAI TRỤC ĐỘC LẬP, và lượt 1 đã tiêu một lời gọi mà không sinh vòng nào (hỏng
+  ở preflight, xem lease `plat-m4-review-1r2`). Nâng vòng mà quên nâng lời gọi thì cổng chặn đúng
+  lượt được phép chạy. Lượt này là vòng 3 và lời gọi 4: CẢ HAI TRẦN CÙNG CHẠM.
+  `changes_requested` hoặc `blocked` ở đây ⇒ human checkpoint, KHÔNG tự mở lượt bốn.
+
+executor_so_sach:
+  attempts_used: 2
+  attempts_limit: 3
+  ghi_chu: >-
+    Executor còn 1 attempt (`plat-m4-exec-2-claude-20260821`, hạn 2026-08-22T02:05:00Z). Điều kiện
+    "dự trữ khắc phục" THOẢ nhưng chỉ vừa đủ: một verdict `changes_requested` còn đúng một đường
+    vá, và trần VÒNG thì cạn — nên đường vá ấy phải đi qua quyết định của chủ kho, không tự động.
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: 'CI xanh trên exact head — cả hai job của `gate`, không job nào có bước hỏng'
+  bang_chung: >-
+    Trên 825e9704: gate(ubuntu-latest) success (run 32449473832, job 96675072270) ·
+    gate(windows-latest) success (cùng run, job 96675072593) · launcher(ubuntu-latest) success ·
+    launcher(windows-latest) success (run 32449479100). Tổng 7 check run, 5 success, 2 skipped
+    (job có điều kiện), 0 failure.
+  ghi_chu: >-
+    Chốt của người giữ kho: review trên một head CI ĐỎ thì verdict nói về một cây không ai chạy
+    được. Lease này CHỈ được đăng sau khi điều kiện trên thoả.
+
+canh_bao_cho_reviewer: >-
+  Prompt do CHÍNH PHIÊN ĐÃ VÁ soạn. Lượt 2 ra `blocked` với ba finding, trong đó F2 là lỗ rò bí
+  mật SỐNG mà bản vá đầu của phiên vá chỉ đóng được MỘT NỬA (đóng đường mạng, để hở đường chẩn
+  đoán). Đừng đọc lời khai "đã đóng" thay cho phép đo.
+
+no_da_khai_boi_executor:
+  - id: PLAT-M4-windows-chi-qua-CI
+    noi_dung: >-
+      Ca mới chỉ đo được trên Linux ở phiên vá. Bằng chứng Windows đến từ lượt CI dẫn ở trên;
+      đừng trích lời khai của phiên vá thay cho nó.
+  - id: PLAT-M4-F1-luot-2-la-loi-BUNDLE
+    noi_dung: >-
+      Finding P1 của lượt 2 ("không có đặc tả có thẩm quyền") KHÔNG phải lỗi của packet: tệp
+      `ops/specs/plat-m4-v0.md` khi ấy còn nằm trên một nhánh chưa merge, nên cây reviewer không
+      có nó. Đo được: spec lên master lúc 2026-08-21T03:58:21Z (`d27337b`), mà lease trích nó
+      được cấp lúc 02:05Z và 02:30Z — lệch −1h53m và −1h28m. Nay spec đã có TRONG cây 825e9704,
+      đúng băm. Đây là sự cố thuộc lớp DỰNG BUNDLE của phiên chính, đã được ghi thành việc phải
+      làm riêng (Packet 1 của bản thẩm định vòng lặp tri thức, 21-08-2026).

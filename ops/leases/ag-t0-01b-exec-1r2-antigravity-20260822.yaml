@@ -164,3 +164,4 @@ no_da_khai:
       Mục 6.4 là mã CHỈ chạy trên Windows, và trong suite nó chỉ đo được bằng `os.name` GIẢ.
       Bằng chứng Windows thật phải đến từ lượt CI trên đúng head; gắn nhãn `windows` KHÔNG
       sinh lượt chạy nào — phải gọi tay `workflow_dispatch`.
+posted_comment_id: 5368360002   # workflow ghi, ĐỪNG sửa tay

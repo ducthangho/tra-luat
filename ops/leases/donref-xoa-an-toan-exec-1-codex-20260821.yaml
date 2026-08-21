@@ -1,0 +1,129 @@
+# Lease EXECUTOR — `DONREF-XOA-AN-TOAN` (#217), lượt 1. Neo ĐẶC TẢ ĐÓNG BĂNG.
+#
+# Executor `codex`, reviewer `claude` ⇒ cross-provider, §8 thoả.
+#
+# Packet này thay cho PR "#213" đã ĐÓNG BĂNG sau hai lượt cross-review, hai P1.
+# Quyết định gốc của đặc tả: KHÔNG tự động hoá việc xoá ref.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 217
+packet_id: DONREF-XOA-AN-TOAN
+revision: 1
+generation: 1
+lease_id: donref-xoa-an-toan-exec-1-codex-20260821
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/DONREF-XOA-AN-TOAN.md
+spec_sha256: 1add3edf165faa2b53d6b52212ea34d7a73934367fd73bbca91e5518a9a664de
+spec_vi_tri: >-
+  Câu này phải ĐÚNG Ở CẢ HAI PHÍA của lần merge, nên nó viết như sau: tìm ở `master` TRƯỚC;
+  CHƯA THẤY thì fetch nhánh `ops/spec-donref-xoa-an-toan`. Thứ định danh tệp là **BĂM**, không
+  phải tên nhánh — tên nhánh là thứ trôi và bị xoá. Kho đã trả giá vì một câu mô tả vị trí chỉ
+  đúng ở một phía: ba bản chiếu chết chỉ vì một câu chữ.
+spec_ghi_chu: >-
+  Cổng `lease_publish.py` KHÔNG cưỡng chế `spec_path`/`spec_sha256` (đo: hai trường này không
+  xuất hiện trong mã cổng). Nên việc đối chiếu băm là của EXECUTOR và của phiên điều phối, và
+  prompt đặt nó làm VIỆC ĐẦU TIÊN. Khai ra để không ai tưởng cổng đã kiểm hộ.
+
+nguon_cap_viec: 'ops/reviews/donref-review-2-codex-verdict.receipt.yaml + PR "#213" (đóng băng)'
+nguon_ghi_chu: >-
+  Packet KHẮC PHỤC. Sinh ra sau khi hai lượt cross-review trả `changes_requested` với hai P1, và
+  người giữ kho quyết đóng băng `#213` thay vì vá lần ba.
+
+write_set:
+  - ops/nhanh_don_duoc.py
+  - ops/nhanh_don_duoc_test.py
+write_set_ghi_chu: >-
+  ĐÚNG HAI TỆP, cả hai đều MỚI. Không `CLAUDE.md`, không `.github/workflows/ops-don-ref.yml`.
+  Kích thước dự kiến ≤ 400 dòng thêm — ngưỡng ADR-0044 cho packet thường là ≤ 6 tệp / ≤ 1.000
+  dòng, nên packet này ở xa dưới. Nêu số để đối chiếu: `#213` đo được 3 tệp +293/−21, tức SÁT
+  trần 300 của packet `sensitive`.
+
+branch: codex/donref-xoa-an-toan-1
+branch_ownership: exclusive
+reviewed_sha_required: 03339486bc44d533c0a2b5a69ef9beb6d91daee2
+base_sha: 03339486bc44d533c0a2b5a69ef9beb6d91daee2
+base_sha_ghi_chu: >-
+  `master` tại lúc cấp lease. Cổng ĐÒI một SHA ghim (`reviewed_sha_required`), nên không thể để
+  trống — nhưng `master` đang tiến nhanh trong đợt này, nên executor phải ĐO LẠI lúc bắt đầu.
+  Base tiến lên KHÔNG phải lỗi; base LÙI, hoặc nhánh mọc trên một PR chưa merge, thì mới là lỗi
+  (ADR-0044 nêu đúng cái bẫy ấy cho chuỗi `#203`→`#206`).
+target_branch_neu_land: master
+
+prompt_path: ops/prompts/donref-xoa-an-toan-exec-1-codex-20260821.md
+prompt_sha256_required: 0dabeb437733185d4cb0312c4fc6efaf342ea4e8ce012f34c51e8d882d1fdbd1
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("cấp lease cho codex theo spec")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_note: >-
+  Phiên ghi lease KHÔNG thi công packet này — executor là `codex`. Nhưng nó LÀ phiên đã viết
+  `#213` (bản bị đóng băng) và LÀ phiên soạn đặc tả. Khai ra vì đặc tả là thứ executor phải tin.
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T07:30:00Z'
+lease_expires_at_utc: '2026-08-22T07:30:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 2
+attempts_ghi_chu: >-
+  attempt = một lần TUYÊN BỐ DONE, không phải một lần gọi tiến trình. Executor iterate bên trong
+  bao nhiêu lần cũng được. Báo BỊ CHẶN (spec hỏng, chốt ngoài write set) KHÔNG tiêu attempt.
+executor_calls_used: 0
+executor_calls_limit: 6
+
+reviewer_provider: claude
+reviewer_ghi_chu: 'Executor `codex` ⇒ reviewer phải khác nền ⇒ `claude`.'
+review_rounds_limit: 2
+
+VI_SAO_EXECUTOR_LA_CODEX:
+  can_cu: >-
+    L4 của lượt soạn spec đếm được **NĂM lần cùng một hình dạng lỗi** — "lời khai rộng hơn phép
+    đo" — và cả năm đều do executor `claude`: PLAT-X5 lượt 1/2/3, DONREF lượt 1/2.
+  gia_thuyet_dang_thu: 'Hình dạng ấy bám NGƯỜI VIẾT, không bám bài toán.'
+  neu_codex_cung_mac: >-
+    Giả thuyết SAI, và vấn đề nằm ở ĐẶC TẢ chứ không ở người. Trường hợp ấy CÓ GIÁ TRỊ HƠN một
+    bản vá — prompt dặn executor báo cáo, đừng che.
+  chot: 'Gặp hình dạng ấy lần thứ SÁU ⇒ DỪNG, không vá, xuất handoff.'
+
+review_class_vi_sao_cross_approved: >-
+  Packet KHÔNG chạm `.github/workflows/` hay bất kỳ đường authority nào — nhưng ĐẦU RA của công cụ
+  là MỘT LỆNH PHÁ mà người ta sẽ dán vào terminal. Một phân loại sai làm mất commit y hệt tự tay
+  xoá nhầm. Rủi ro nằm ở ĐẦU RA, không ở quyền ghi, nên không hạ mức chỉ vì tệp trông vô hại.
+  Fail-closed theo §3 của skill soạn spec.
+
+CO_Y_DE_MO:
+  id: P1-luot-2-cua-213-nhanh-mac-dinh-lui-sau-phep-do
+  noi_dung: >-
+    Nhánh mặc định có thể bị ép lùi giữa lúc đo và lúc chủ kho dán lệnh. Công cụ chỉ đọc KHÔNG
+    đóng được và cũng KHÔNG CẦN — nó KHAI ra trong chính đầu ra (mục tiêu 4 của đặc tả).
+  canh_bao_cho_executor: 'VÁ nó là quay lại hướng đã bị Q1 bỏ. Khai, đừng vá.'
+
+gate_bat_buoc:
+  - 'python3 ops/nhanh_don_duoc_test.py -> rc=0, N/N hai số bằng nhau, phủ đủ 7 tiêu chí §nghiem_thu'
+  - 'phản chứng dựng KHO BARE THẬT, không đồ giả diễn kịch bản'
+  - 'mỗi đột biến giết ĐÚNG ca của nó; giết nhiều ca ⇒ nói ra, không làm tròn thành đạt'
+  - 'mọi đột biến chạy trên BẢN SAO TẠM'
+  - 'chạy công cụ trên chính kho này và in kết quả; số đã đo 21-08: A=13 B=4 C=70 tại master 03339486'
+
+dieu_kien_dung:
+  - 'Cần sửa tệp ngoài hai tệp write set ⇒ DỪNG, báo cáo — đặc tả hứa thứ write set không kham được là LỖI CỦA ĐẶC TẢ'
+  - 'Một tiêu chí §nghiem_thu sai hoặc KHÔNG THỂ ĐỎ ⇒ DỪNG, mở revision'
+  - 'Hình dạng "lời khai rộng hơn phép đo" lần thứ SÁU ⇒ DỪNG, không vá'
+  - 'Băm đặc tả LỆCH ⇒ DỪNG, không đoán'
+
+khong_push: true
+khong_push_ghi_chu: 'Executor commit nhưng KHÔNG push. Phiên điều phối đo lại độc lập rồi mới đẩy.'

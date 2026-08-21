@@ -25,15 +25,23 @@ assurance_target: cross_approved
 access: read-write
 review_class: sensitive
 
-# VÌ SAO KHAI `model` — đây là lease ĐẦU TIÊN của kho khai trường này, và nó không phải
-# trang trí. Đo 21-08-2026: `agy models` liệt kê `claude-sonnet-4-6` và
+# VÌ SAO KHAI `model`. ĐÍNH CHÍNH tại chỗ, ghi thẳng vì phiên ghi lease này đã khai SAI ở
+# lần viết đầu: bản đầu nói đây là lease "ĐẦU TIÊN của kho khai trường `model`" và "0/42
+# lease có trường này". Đo lại: **5/44 lease trước đó ĐÃ khai** — `plat-x4-exec-1` (`opus-5`)
+# và bốn bản của `plat-x5-exec-1` (`gpt-5.6-sol`). Sai vì đoán từ trí nhớ thay vì grep.
+#
+# Thứ CÒN ĐÚNG sau khi đo lại, và là lý do thật của trường này: năm lease kia đều
+# same-provider–same-family (claude⇒opus, codex⇒gpt), nơi `provider` đã HÀM Ý họ model, nên
+# lời khai `model` ở đó là thông tin thêm. Ở đây thì KHÔNG: đo 21-08-2026, `agy models` liệt kê
+# `claude-sonnet-4-6` và
 # `claude-opus-4-6-thinking`. Tức chọn reviewer theo TÊN CÔNG CỤ là đếm cái VỎ thay vì cái
 # ĐANG CHẠY — một phiên AG chạy model Anthropic rồi được phiên Claude review là
 # same_provider đội lốt cross_approved. `docs/PROTOCOL_DA_PHIEN.md:429` đã khai
 # `model_reviewer_identity` gồm provider/model/session; lane AG chưa ai nối vào.
 # Chốt của lease này: executor `gemini-3.1-pro-high`, reviewer `codex` ⇒ khác họ model.
-# Cổng CHƯA cưỡng chế lời khai này (đo: 0/42 lease có trường `model`); việc cưỡng chế là
-# packet riêng — xem `no_da_khai` bên dưới.
+# Cổng CHƯA cưỡng chế lời khai này — đo: `grep model ops/lease_publish.py` = **0**. Đó mới là
+# con số có nghĩa, không phải số lease đã khai. Việc cưỡng chế là packet riêng (`PLAT-X6`,
+# Issue "#220") — xem `no_da_khai` bên dưới.
 model_ghi_chu: >-
   Executor đổi model giữa chừng là làm lease sai sự thật ⇒ phải đi qua revision mới, không
   đổi trong lượt. Reviewer khai `model_reviewer_identity` đủ provider/model/session.
@@ -123,8 +131,9 @@ no_da_khai:
     noi_dung: >-
       Tiêu chí N14 đòi executor và reviewer khác họ model, nhưng KHÔNG cổng nào kiểm được
       phiên AG thật sự chạy model gì — trường `model` ở trên là LỜI KHAI, không phải phép đo.
-      Cưỡng chế đụng `ops/lease_publish.py` nên nằm ngoài write set của packet này; đã mở
-      packet riêng `PLAT-X6`.
+      Đo được: `grep model ops/lease_publish.py` = 0, tức cổng chưa từng đọc trường ấy, dù
+      5/44 lease trước đã khai nó. Cưỡng chế đụng `ops/lease_publish.py` nên nằm ngoài write
+      set của packet này; đã mở packet riêng `PLAT-X6` (Issue "#220").
   - id: AG-T0-01B-windows-chi-qua-CI
     noi_dung: >-
       Mục 6.4 là mã CHỈ chạy trên Windows, và trong suite nó chỉ đo được bằng `os.name` GIẢ.

@@ -1,0 +1,106 @@
+# Lease REVIEWER — `DONREF-XOA-AN-TOAN` (#217), lượt 1. Neo exact head fa4b0dd.
+#
+# Executor `codex`, reviewer `claude` ⇒ cross-provider, §8 thoả.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 217
+packet_id: DONREF-XOA-AN-TOAN
+lease_id: donref-xoa-an-toan-review-1-claude-20260821
+revision: 1
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: codex
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+
+reviewed_sha_required: fa4b0dd879f0cf7ae589989863670d2a8200839c
+branch: codex/donref-xoa-an-toan-1
+base_sha: a7a45119ede566393ad2a88e64987e6dfee99081
+target_branch_neu_land: master
+scope_files: 2
+
+spec_path: ops/specs/DONREF-XOA-AN-TOAN.md
+spec_sha256: 1add3edf165faa2b53d6b52212ea34d7a73934367fd73bbca91e5518a9a664de
+spec_vi_tri: >-
+  Tìm ở `master` TRƯỚC; chưa thấy thì fetch nhánh `ops/spec-donref-xoa-an-toan`. Thứ định danh
+  tệp là BĂM, không phải tên nhánh. Bản sao đã cấp sẵn trong sandbox là `DAC_TA.md`.
+
+prompt_path: ops/prompts/donref-xoa-an-toan-review-1-claude-20260821.md
+prompt_sha256_required: b71edc06527cebcfb4f0a4d220f720e90c63aedf09f1ee7b774e650df00184d4
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("chạy review claude luôn")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T09:00:00Z'
+lease_expires_at_utc: '2026-08-22T09:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+
+executor_so_sach:
+  attempts_used: 1
+  attempts_limit: 2
+  ghi_chu: 'Executor còn 1 attempt nếu lượt này trả `changes_requested`.'
+
+vi_sao_cross_approved_du_khong_cham_authority: >-
+  Packet KHÔNG chạm `.github/workflows/` hay đường authority nào — nhưng ĐẦU RA của công cụ là
+  MỘT LỆNH PHÁ mà người ta sẽ dán vào terminal. Một phân loại sai làm mất commit y hệt tự tay xoá
+  nhầm. Rủi ro nằm ở ĐẦU RA, không ở quyền ghi. Đặc tả §review_class quyết fail-closed.
+
+nen_do_boi_NGUOI_VA:
+  - 'ops/nhanh_don_duoc_test.py -> 7/7, rc=0'
+  - '7 đột biến, mỗi con giết ĐÚNG một ca; executor khai không con nào giết nhiều ca'
+  - 'chạy trên kho ĐẦY ĐỦ: A=15 · B=3 · C=72 @ master a7a45119'
+nen_ghi_chu: 'LỜI KHAI của executor. Reviewer phải tự chạy lại.'
+
+nen_do_boi_PHIEN_DIEU_PHOI:
+  - id: kho-nong-thi-fail-close
+    do_duoc: >-
+      Chạy công cụ trên `/home/user/tra-luat` — kho NÔNG (395 commit): TOÀN BỘ 90 nhánh vào C với
+      lý do in ra `kho nong; lich su khong du de phan loai an toan`; lệnh xoá in ra RỖNG; rc=1.
+    y_nghia: >-
+      Đây là mục `chua_do_duoc` số 5 của đặc tả. Công cụ KHÔNG đoán khi lịch sử cụt — nếu nó đoán
+      thì người dán lệnh sẽ mất commit.
+  - id: dong-duoc-finding-executor-KHONG-quy-duoc-ten
+    do_duoc: >-
+      Executor thấy lệch `+1 A / −1 B` so mốc `13/4/70 @ 03339486` và khai KHÔNG quy được tên vì
+      không có danh sách thành viên của mốc cũ. Phiên điều phối CÓ danh sách ấy và truy ra:
+      `ops/lease-x5-exec` chuyển B → A (master đã tiến 23 commit và nay chứa commit
+      `posted_comment_id` ấy); `ops/lease-review-3-m4` là A mới sau khi #218 merge.
+      Cộng lại: A 13→15, B 4→3 — KHỚP TRỌN, không còn gì chưa giải thích.
+    canh_bao: >-
+      Reviewer KHÔNG cần đo lại chuyện này, nhưng cũng đừng đọc nó thành "mọi con số đã được kiểm".
+
+pham_vi_NGOAI:
+  - id: P1-luot-2-cua-213
+    noi_dung: >-
+      Nhánh mặc định bị ép lùi sau phép đo. Đặc tả §ngoai_pham_vi ghi CỐ Ý ĐỂ MỞ — công cụ KHAI
+      nó trong đầu ra, không vá. Nêu như finding CHẶN là sai phạm vi.
+  - 'Sửa `ops-don-ref.yml`, `CLAUDE.md`; dọn nhánh; rà nội dung 72 nhánh C; bảy trục cũ của `#213`'
+
+hinh_dang_dang_theo_doi:
+  ten: 'lời khai rộng hơn phép đo'
+  dem_hien_tai: 5
+  ghi_chu: >-
+    Cả năm lần đều do executor `claude`. Lượt này executor là `codex` — đó là phép thử cho giả
+    thuyết "hình dạng bám người viết". Reviewer soi trục 3.4 kỹ chính vì lý do ấy; nếu tìm thấy
+    lần thứ SÁU thì đó là DỮ KIỆN QUAN TRỌNG, không phải một finding thường.
+
+gate_bat_buoc:
+  - 'ops/nhanh_don_duoc_test.py -> rc=0, N/N hai số bằng nhau, không tụt dưới 7 ca'
+  - 'mọi đột biến chạy trên BẢN SAO TẠM'
+
+nghia_cua_approve: >-
+  Reviewer đã TÌM và KHÔNG THẤY đường nào làm một nhánh CÒN COMMIT RIÊNG lọt vào lệnh xoá.
+  Không phải "đọc thấy hợp lý".

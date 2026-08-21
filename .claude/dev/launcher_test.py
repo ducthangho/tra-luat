@@ -3543,9 +3543,15 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
     nguon = Path(m.__file__).read_text(encoding="utf-8")
     khoi = nguon[nguon.index("LAM_DUOC_VIEC = {"):]
     khoi = khoi[:khoi.index("}") + 1]
-    bang('"mcp"' not in khoi and "'mcp'" not in khoi,
-         f"`mcp` bi tinh vao LAM_DUOC_VIEC — CLI duyet server KHONG chung minh PHIEN "
-         f"goi duoc cong cu: {khoi!r}")
+    # BA TEN, KHONG PHAI MOT. Ban truoc chi tim chuoi `"mcp"` co dau nhay hai dau;
+    # sau khi PLAT-M4 tach truong thanh `mcp-cli`/`mcp-endpoint` thi mau ay khong con
+    # khop ten nao — ca canh VAN XANH ma khong con canh gi, va dot bien them
+    # `"mcp-endpoint"` vao `LAM_DUOC_VIEC` SONG SOT. Do la lo do duoc TRUOC khi viet ma,
+    # nen no o day: moi ten moi phai duoc them vao danh sach nay.
+    for _ten_mcp in ("mcp", "mcp-cli", "mcp-endpoint"):
+        bang(f'"{_ten_mcp}"' not in khoi and f"'{_ten_mcp}'" not in khoi,
+             f"`{_ten_mcp}` bi tinh vao LAM_DUOC_VIEC — do MCP KHONG chung minh PHIEN "
+             f"goi duoc cong cu: {khoi!r}")
     for phai_co in ("git", "gh-kho", "rest-kho"):
         bang(phai_co in khoi, f"LAM_DUOC_VIEC thieu duong `{phai_co}`: {khoi!r}")
 
@@ -3646,10 +3652,17 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
             def do(mong_goi=1, vi_tri=""):
                 nhat_ky.clear()
                 kq = m._doc_mcp_json(td)
+                bang(len(kq) == 4,
+                     f"`_doc_mcp_json` phai tra 4 phan tu (them `url`), do {len(kq)}")
                 if kq[0]:
                     ENV_SENTINEL[0] = {"TL_ENV_DA_CHUAN": "1"}
-                    kq = (kq[0], kq[1], kq[2],
+                    kq = (kq[0], kq[1], kq[2], kq[3],
                           m._suc_khoe_mcp_github(kq[2], ENV_SENTINEL[0]))
+                else:
+                    # NHANH AM: `url` phai la None. Ba phan tu dau giu nguyen hop dong cu
+                    # de phan con lai cua ca nay doc y het truoc khi co PLAT-M4.
+                    bang(kq[3] is None, f"chua khai server ma van tra url: {kq[3]!r}")
+                    kq = kq[:3]
                 bang(len(nhat_ky) == mong_goi,
                      f"[{vi_tri}] mong {mong_goi} loi goi `claude`, do {len(nhat_ky)}")
                 return kq
@@ -5323,6 +5336,281 @@ def t97_nap_ban_sao_khong_duoc_an_phai_BYTECODE_CU():
              f"nap xong con de lai {pyc.name} — lop tat ghi bytecode da bi go")
 
 
+@ca
+def t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec():
+    """`mcp-endpoint` — PLAT-M4 (#194). Đo đầu kia của dây, phân loại bằng HEADER.
+
+    SỐ CA LÀ `t143`, KHÔNG PHẢI `t138` — và đây là va chạm THẬT, không phải chuyện đặt
+    tên. Packet này viết ca ấy khi `t137` còn là số cuối; trong lúc nó chờ, `#196` (PR
+    "#202") land bốn ca `t138`–`t142`. Hai nhánh cùng chọn `t138`, và git merge SẠCH: hai
+    hàm khác tên đầy đủ nên không dòng nào đụng dòng nào. Suite vẫn chạy cả hai (decorator
+    `@ca` giữ đối tượng hàm), nên KHÔNG cổng nào đỏ — chỉ có `--lap-ca t138` là mơ hồ và
+    bảng đột biến trỏ vào một cái tên không còn duy nhất.
+    Ghi ra vì đúng lớp "merge sạch là bảo đảm VĂN BẢN, không phải NGỮ NGHĨA" mà §5.1
+    protocol nói: thứ bắt được nó là ĐỌC, không phải cổng.
+
+    VÌ SAO CÓ CA NÀY. Trước PLAT-M4, cả hai bước của đường MCP (`.mcp.json` và
+    `claude mcp get`) đều hỏi phía CLI — DÂY NỐI. Đo được trong chính container này:
+    `mcp-cli=khong` (CLI báo `Pending approval`) trong khi `mcp-endpoint=OK` (POST
+    `initialize` trả HTTP 200 kèm header GitHub). Một phiên đọc trường gộp cũ sẽ kết
+    luận "GitHub bị chặn" rồi dừng — ĐÃ XẢY RA, mất trọn một lượt.
+
+    Ca này khoá CHÍN điều. Sáu điều đầu là phản chứng ở §5 thân Issue #194; điều 7 và 8
+    đến từ lượt cross-review 2/2 và khoá BIÊN CẤU TRÚC của `userinfo` — xem (5c)–(5g):
+      7. URL MÉO mang credential (không parse ra `userinfo`) phải bị từ chối MÀ KHÔNG
+         làm lộ bí mật qua MÔ TẢ — "không gọi mạng" KHÔNG bằng "không làm lộ".
+      8. Biên phải đo theo CẤU TRÚC, không theo ký tự: `@` trong path/query vẫn probe
+         được, còn username RỖNG + password CÓ vẫn là credential và phải bị chặn.
+    (Điều thứ chín, đo bằng HÀNH VI, nằm ở cuối docstring này — nó đánh số 9, KHÔNG
+    phải 7. Bản trước đánh nó HAI SỐ cùng lúc và khai tổng là TÁM trong khi khoá chín;
+    lượt review 3 bắt được, và đó là LẦN THỨ HAI liên tiếp lời khai số đếm của chính ca
+    này trôi — lượt 2 đã bắt bản 'sáu điều'. Cả chín điều ĐỀU có phép đo thật; thứ sai
+    chỉ là con số, mà con số sai vẫn là lời khai sai.)
+      1. 200 CÓ header  -> `mo` + THÀNH CÔNG          (phân loại theo header, không theo mã)
+      2. 4xx KHÔNG header -> `chan`, nói rõ "proxy tự sinh"
+      3. 4xx CÓ header  -> `mo` NHƯNG không thành công (hai câu hỏi khác nhau)
+      4. mạng hỏng/quá hạn -> `khong_do_duoc`, KHÔNG gộp vào `chan` (`None ≠ False`)
+      5. thiếu `url` / `url` không phải http(s) -> `khong_do_duoc` CÓ LÝ DO, và
+         KHÔNG được gọi `urlopen` lấy một lần (`file:///` là lượt đọc đĩa trá hình)
+      6. token KHÔNG lộ ra bất kỳ byte mô tả nào — kể cả khi đi qua `_do_github`
+    Và điều thứ CHÍN, đo bằng HÀNH VI chứ không bằng đọc mã: `mcp-endpoint=OK` một mình
+    KHÔNG được nâng nhãn lên `DUNG_DUOC`.
+    """
+    import json as _json
+    m = _tai_launcher_thu()
+    SENT = "TL-SENTINEL-KHONG-DUOC-LO-9f3c1a"
+    goc_urlopen = m.urllib.request.urlopen
+    goc_git, goc_which = m._git, m.shutil.which
+    nhat_ky = []
+
+    class _Ph:
+        def __init__(self, status, headers):
+            self.status, self.headers = status, headers
+        def __enter__(self): return self
+        def __exit__(self, *_a): return False
+
+    def dat(ket):
+        def gia(req, *_a, **_k):
+            nhat_ky.append(req)
+            return ket()
+        m.urllib.request.urlopen = gia
+
+    def _nem(code, headers):
+        def f():
+            raise m.urllib.error.HTTPError("https://x/mcp/", code, "loi", headers, None)
+        return f
+
+    try:
+        # (1) 200 CO header -> `mo` + thanh cong
+        dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+        tt, mo_ta, ok = m._do_mcp_endpoint("https://x/mcp/", token=SENT)
+        bang(tt == "mo" and ok is True, f"200 co header phai `mo`+thanh cong: {tt} {ok} {mo_ta!r}")
+
+        # ...va LOI GOI phai dung hinh dang: POST, than la JSON-RPC `initialize`.
+        # Khong khang dinh dieu nay thi mot ban va "do" bang GET van qua ca tren.
+        req = nhat_ky[-1]
+        bang(req.get_method() == "POST", f"phai POST, do {req.get_method()}")
+        than = _json.loads(req.data.decode("utf-8"))
+        bang(than.get("method") == "initialize", f"than khong phai initialize: {than!r}")
+        bang(req.headers.get("Authorization") == f"Bearer {SENT}",
+             "token da truyen ma khong len header Authorization")
+
+        # (6) MO TA khong duoc chua token. Do THU DA DEN, khong suy luan "urllib dau co in".
+        bang(SENT not in mo_ta, f"MO TA CHUA TOKEN: {mo_ta!r}")
+
+        # 200 KHONG header = proxy tra loi thay, khong phai duong toi noi.
+        dat(lambda: _Ph(200, {"Content-Type": "application/json"}))
+        tt, mo_ta, ok = m._do_mcp_endpoint("https://x/mcp/")
+        bang(tt == "chan" and ok is False, f"200 khong header phai `chan`: {tt} {ok}")
+        # ...va khong token thi KHONG duoc tu bia header Authorization
+        bang(nhat_ky[-1].headers.get("Authorization") is None,
+             "khong co token ma van gui Authorization")
+
+        # (2) 403 KHONG header -> `chan`, va phai NOI RA la proxy tu sinh
+        dat(_nem(403, {"Content-Type": "text/plain"}))
+        tt, mo_ta, ok = m._do_mcp_endpoint("https://x/mcp/")
+        bang(tt == "chan" and "proxy" in mo_ta,
+             f"403 khong header phai `chan` + noi proxy: {tt} {mo_ta!r}")
+
+        # (3) 401 CO header -> `mo` (toi noi) NHUNG khong thanh cong (thieu quyen)
+        dat(_nem(401, {"X-GitHub-Request-Id": "abc"}))
+        tt, mo_ta, ok = m._do_mcp_endpoint("https://x/mcp/", token=SENT)
+        bang(tt == "mo" and ok is False,
+             f"401 co header phai `mo` NHUNG khong thanh cong: {tt} {ok}")
+        bang("thieu quyen" in mo_ta, f"401 co header ma khong noi thieu quyen: {mo_ta!r}")
+        bang(SENT not in mo_ta, f"MO TA nhanh loi CHUA TOKEN: {mo_ta!r}")
+
+        # (4) mang hong / qua han -> KHONG DO DUOC, khong phai `chan`
+        def _no():
+            raise OSError("mang hong")
+        dat(_no)
+        tt, mo_ta, ok = m._do_mcp_endpoint("https://x/mcp/")
+        bang(tt == "khong_do_duoc" and ok is False,
+             f"mang hong bi gop vao `chan` (None != False): {tt} {mo_ta!r}")
+
+        # (5) THIEU url / url khong phai http(s) -> KHONG DO DUOC, va KHONG goi urlopen.
+        # `urlopen` nhan ca `file://`, nen mot `.mcp.json` tro `file:///etc/passwd` se
+        # bien probe mang thanh luot DOC DIA. Chan bang danh sach CHO PHEP.
+        for xau in (None, "", "file:///etc/passwd", "ftp://x/y", " javascript:x"):
+            nhat_ky.clear()
+            dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+            tt, mo_ta, ok = m._do_mcp_endpoint(xau)
+            bang(tt == "khong_do_duoc" and ok is False,
+                 f"url {xau!r} phai la KHONG DO DUOC, duoc {tt}")
+            bang(mo_ta.strip() != "", f"url {xau!r}: KHONG DO DUOC ma khong noi ly do")
+            bang(not nhat_ky, f"url {xau!r} ma VAN goi urlopen {len(nhat_ky)} lan")
+
+        # (5b) CREDENTIAL TRONG `userinfo` -> TU CHOI, va KHONG probe. Finding P2 cua
+        # cross-review luot 1: khop TIEN TO CHUOI cho `https://user:SECRET@host` di qua,
+        # roi bi mat vao CA `req.full_url` LAN `req.host` — tuc no roi khoi tien trinh.
+        # Ba khang dinh, khong phai mot: nhan dung · urlopen KHONG duoc goi · MO TA khong
+        # cho bi mat (mot ban va "tu choi" ma van in URL ra thi van la ro ri).
+        for xau in ("http://user:" + SENT + "@127.0.0.1/mcp",
+                    "https://user:" + SENT + "@example.test/mcp",
+                    "https://" + SENT + "@example.test/mcp"):
+            nhat_ky.clear()
+            dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+            tt, mo_ta, ok = m._do_mcp_endpoint(xau, token=SENT)
+            bang(tt == "khong_do_duoc" and ok is False,
+                 f"url co userinfo phai bi TU CHOI, duoc {tt} {ok}")
+            bang(not nhat_ky,
+                 f"url co userinfo ma VAN goi urlopen {len(nhat_ky)} lan — bi mat da roi "
+                 f"khoi tien trinh truoc khi ai kip tu choi")
+            bang(SENT not in mo_ta, f"MO TA cua nhanh userinfo CHO BI MAT: {mo_ta!r}")
+
+        # ...va DUONG THUAN khong duoc hong theo: URL sach van probe duoc. Khong co ca
+        # nay thi mot ban va "tu choi tat ca" cung xanh.
+        nhat_ky.clear()
+        dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+        tt, mo_ta, ok = m._do_mcp_endpoint("https://x/mcp/", token=SENT)
+        bang(tt == "mo" and ok is True and len(nhat_ky) == 1,
+             f"url SACH bi chan nham: {tt} {ok} {len(nhat_ky)} loi goi")
+
+        # (5c) URL MEO — luot review 2/2 tim ra, va no la NUA THU HAI cua cung finding.
+        # Bon dang duoi day KHONG phan tich duoc thanh `userinfo`, nen chung TRUOT khoi
+        # nhanh userinfo va roi xuong nhanh scheme/hostname. Truoc ban va, hai nhanh ay
+        # noi suy `{url!r}` ⇒ khong probe nua NHUNG van lam lo bi mat qua MO TA.
+        # Bai hoc: "khong goi mang" khong bang "khong lam lo" — dem CA HAI duong ra.
+        for xau in (f"http:///user:{SENT}@host/mcp",
+                    f"javascript:user:{SENT}@host",
+                    f"http ://user:{SENT}@host/mcp",
+                    f"http://?u=user:{SENT}@host"):
+            nhat_ky.clear()
+            dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+            tt, mo_ta, ok = m._do_mcp_endpoint(xau, token=SENT)
+            bang(tt == "khong_do_duoc" and ok is False,
+                 f"url meo phai la KHONG DO DUOC, duoc {tt}")
+            bang(not nhat_ky, f"url meo ma VAN goi urlopen {len(nhat_ky)} lan")
+            bang(SENT not in mo_ta,
+                 f"MO TA nhanh tu choi CHO BI MAT — khong goi mang nhung van lam lo: {mo_ta!r}")
+
+        # (5d) BIEN CAU TRUC, chieu THUAN: `@` trong path/query KHONG phai userinfo, nen
+        # url ay phai ĐƯỢC probe. Khong co ca nay thi mot ban cai do bang KY TU
+        # (`if "@" in url`) van xanh, va no chan oan url hop le.
+        for sach in ("https://host.test/mcp/@lich-su", "https://host.test/mcp?ai=a@b.test"):
+            nhat_ky.clear()
+            dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+            tt, _mt, ok = m._do_mcp_endpoint(sach)
+            bang(tt == "mo" and ok is True and len(nhat_ky) == 1,
+                 f"`@` trong path/query KHONG phai credential — {sach!r} bi chan oan: {tt}")
+
+        # (5e) BIEN CAU TRUC, chieu NGHICH: username RONG ma password CO thi van la
+        # credential. Mot ban cai doc `username` theo tinh CHAN LY (`if p_ep.username:`)
+        # se cho no di qua, va bi mat vao ca `full_url` lan `host`.
+        nhat_ky.clear()
+        dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+        tt, mo_ta, ok = m._do_mcp_endpoint(f"https://:{SENT}@host.test/mcp", token=SENT)
+        bang(tt == "khong_do_duoc" and ok is False and not nhat_ky,
+             f"username RONG + password CO van la credential, phai tu choi: {tt} "
+             f"{len(nhat_ky)} loi goi")
+        bang(SENT not in mo_ta, f"MO TA cho bi mat o ca username rong: {mo_ta!r}")
+
+        # (5f) BIEN CAU TRUC, khe THU BA: VI TRI PORT. Finding R1 cua luot review 3.
+        # `urlsplit` chi gan `username`/`password` khi co dau `@`, nen bi mat dat o cho
+        # port di qua HET ba chot cu (khong userinfo, scheme https, co hostname). Ban
+        # truoc KHONG lo o runtime that — nhung chi vi `http.client` nem `InvalidURL`
+        # truoc khi mo socket, tuc mot chot cua NGUOI KHAC. Doc `p_ep.port` trong `try`
+        # bien no thanh chot CUA TA. Dot bien lam ca nay do: bo dong `_ = p_ep.port`.
+        nhat_ky.clear()
+        dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+        tt, mo_ta, ok = m._do_mcp_endpoint(f"https://host.test:{SENT}/mcp", token=SENT)
+        bang(tt == "khong_do_duoc" and ok is False and not nhat_ky,
+             f"bi mat o VI TRI PORT phai bi tu choi TRUOC khi probe: {tt} "
+             f"{len(nhat_ky)} loi goi")
+        bang(SENT not in mo_ta, f"MO TA cho bi mat o ca port: {mo_ta!r}")
+
+        # (5g) `_doc_mcp_json` KHONG duoc noi suy `url` NGUYEN VAN vao mo ta. Finding R3.
+        # Ham do o NGAY BEN CANH va dung chuan khac han `_do_mcp_endpoint`; hien caller
+        # vut chuoi ay o nhanh duong nen chua lo, nhung do la may man cua CALLER chu khong
+        # phai bat bien cua HAM. Dot bien lam ca nay do: tra lai `f" @ {url}"`.
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / ".mcp.json").write_text(
+                _json.dumps({"mcpServers": {
+                    "github": {"url": f"https://nguoi:{SENT}@host.test/mcp"}}}),
+                encoding="utf-8")
+            co_khai, mt_mcp, _ten, _url = m._doc_mcp_json(td)
+            bang(co_khai is True, f"`.mcp.json` hop le ma bao khong khai: {mt_mcp!r}")
+            bang(SENT not in mt_mcp,
+                 f"MO TA cua `_doc_mcp_json` CHUA bi mat lay tu `url`: {mt_mcp!r}")
+            bang("host.test" in mt_mcp,
+                 f"cat het thi nguoi doc khong biet no tro DI DAU — phai con host: {mt_mcp!r}")
+
+        # --- DIEU THU CHIN, do bang HANH VI: endpoint OK mot minh KHONG nang duoc nhan.
+        # Doc ma nguon (khuc dau ca t115) chi bat duoc dot bien SUA DUNG dong
+        # `LAM_DUOC_VIEC`; ca nay bat ca nhung duong vong khac dan toi cung hau qua.
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / ".mcp.json").write_text(
+                _json.dumps({"mcpServers": {"github": {"url": "https://x/mcp/"}}}),
+                encoding="utf-8")
+            m._git = lambda *_a, **_k: (1, "", "khong phai kho")
+            m.shutil.which = lambda t, *a, **k: None
+            m._do_rest_github = lambda *_a, **_k: ("chan", "HTTP 403 (KHONG header GitHub)", False)
+            m._suc_khoe_mcp_github = lambda *_a, **_k: ("hong", "Status: Pending approval")
+            dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+            nhan, chi_tiet = m._do_github(td, {"GH_TOKEN": SENT})
+            bang("mcp-cli=" in chi_tiet and "mcp-endpoint=" in chi_tiet,
+                 f"doctor phai in CA HAI truong: {chi_tiet!r}")
+            bang("mcp=" not in chi_tiet,
+                 f"con sot truong gop `mcp=` — hai cau hoi khac nhau phai la hai truong: {chi_tiet!r}")
+            bang("mcp-endpoint=OK" in chi_tiet, f"endpoint 200 co header ma khong OK: {chi_tiet!r}")
+            bang(nhan == "CHUA_XAC_THUC",
+                 f"CHI co mcp-endpoint OK ma nhan len {nhan} — `initialize` chung minh endpoint "
+                 f"TRA LOI, khong chung minh doc duoc kho nay: {chi_tiet!r}")
+            bang(SENT not in chi_tiet, f"CHI TIET cua _do_github CHUA TOKEN: {chi_tiet!r}")
+
+            # LY DO PHAI DI RA TOI NGUOI DOC. Do duoc o luot dau PLAT-M4: chuoi tom
+            # tat chi noi `ten=nhan`, nen 401 CO header (endpoint song, token sai) va
+            # 403 KHONG header (proxy chan) in ra Y HET nhau — `mcp-endpoint=khong`.
+            # Phan loai dung o TRONG ma ket xuat gop o NGOAI thi nguoi doc van di chua
+            # nham cho, tuc packet nay moi chua duoc nua duong.
+            dat(_nem(401, {"X-GitHub-Request-Id": "abc"}))
+            _n401, ct401 = m._do_github(td, {"GH_TOKEN": SENT})
+            dat(_nem(403, {"Content-Type": "text/plain"}))
+            _n403, ct403 = m._do_github(td, {"GH_TOKEN": SENT})
+            bang(ct401 != ct403,
+                 f"401 TOI NOI va 403 PROXY in ra Y HET nhau — nguoi doc khong phan biet "
+                 f"duoc: {ct401!r}")
+            bang("thieu quyen" in ct401, f"401 co header ma dau ra khong noi ly do: {ct401!r}")
+            bang("proxy" in ct403, f"403 khong header ma dau ra khong noi proxy: {ct403!r}")
+            bang(SENT not in ct401 and SENT not in ct403, "CHI TIET CHUA TOKEN")
+
+            # ...duong XANH thi KHONG duoc noi them chu: dong thuong phai ngan.
+            dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+            _nok, ctok = m._do_github(td, {"GH_TOKEN": SENT})
+            bang("mcp-endpoint: " not in ctok,
+                 f"duong xanh ma van noi them mo ta: {ctok!r}")
+
+            # ...va khi `.mcp.json` chua khai server thi endpoint la CHUA DO DUOC,
+            # KHONG phai `khong`: ta khong biet URL nao de hoi.
+            (Path(td) / ".mcp.json").write_text("{}", encoding="utf-8")
+            _nhan2, chi_tiet2 = m._do_github(td, {"GH_TOKEN": SENT})
+            bang("mcp-endpoint=chua-do-duoc" in chi_tiet2,
+                 f"chua khai server ma endpoint khong phai chua-do-duoc: {chi_tiet2!r}")
+    finally:
+        m.urllib.request.urlopen = goc_urlopen
+        m._git, m.shutil.which = goc_git, goc_which
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -5952,9 +6240,74 @@ DOT_BIEN = [
     # Chúng đến từ SÁU lượt cross-review, và phần lớn từng SỐNG SÓT một lần — nên
     # chúng ở đây để cái lỗ ấy không âm thầm hở lại. Ba nhóm: `.mcp.json` · bộ phân
     # loại trạng thái · hợp đồng subprocess.
-    ("mcp_tinh_vao_LAM_DUOC_VIEC",
+    # ĐỔI TỪ `"mcp"` SANG `"mcp-endpoint"` (PLAT-M4): sau khi trường được tách, không còn
+    # đường nào tên `mcp` để mà thêm vào — mutant cũ sẽ đo một cái tên đã chết, tức là
+    # KHÔNG đo gì. `mcp-endpoint` mới là cám dỗ thật: nó CÓ chạm máy chủ thật.
+    # Hai ca giết nó theo hai đường độc lập: `t115` đọc MÃ NGUỒN, `t143` đo HÀNH VI
+    # (`t138` ở dòng này là SAI và đã sửa ở lượt review 3: `t138` nay là ca THẬT của
+    #  #196 — `t138_auth_het_ngan_sach_phai_vao_CHUA_DO` — không đo gì về mcp-endpoint.
+    #  Trỏ vào một tên ĐANG SỐNG mà sai nghĩa còn tệ hơn trỏ vào tên đã chết.)
+    # HAI ĐỘT BIẾN TỪ LƯỢT REVIEW 3 (R1, R3). Mỗi chốt mới phải có mutant RIÊNG — một
+    # cửa không có mutant là một cửa sẽ âm thầm hở lại; kho đã trả giá đúng bài này.
+    ("mcp_endpoint_bo_doc_PORT",
+     ('        _ = p_ep.port\n', ''),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_json_noi_suy_url_NGUYEN_VAN_vao_mo_ta",
+     ('        _duoi = f" @ {_noi}"', '        _duoi = f" @ {url}"'),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    # (endpoint OK một mình mà nhãn vẫn phải là CHUA_XAC_THUC).
+    ("mcp_endpoint_tinh_vao_LAM_DUOC_VIEC",
      ('    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho"}',
-      '    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho", "mcp"}'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+      '    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho", "mcp-endpoint"}'),
+     ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec", "t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    # --- SÁU ĐỘT BIẾN CHO `_do_mcp_endpoint` (PLAT-M4, #194) -------------------------
+    ("mcp_endpoint_phan_loai_theo_MA_thay_vi_HEADER",
+     ('            co_gh_ep = any(k.lower().startswith("x-github") for k in r.headers)',
+      '            co_gh_ep = 200 <= int(r.status) < 300'), ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_endpoint_toi_duoc_la_LAM_DUOC_VIEC",
+     ('        return (("mo" if co_gh_ep else "chan"), f"HTTP {e.code}{vi_sao_ep}", False)',
+      '        return (("mo" if co_gh_ep else "chan"), f"HTTP {e.code}{vi_sao_ep}", True)'),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_endpoint_gop_khong_do_duoc_vao_chan",
+     ('        return ("khong_do_duoc", f"{type(e).__name__} khi POST initialize", False)',
+      '        return ("chan", f"{type(e).__name__} khi POST initialize", False)'), ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_endpoint_bo_kiem_scheme_cho_phep",
+     ('    if chu_ep not in ("http", "https"):',
+      '    if False:'), ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    # --- HAI DOT BIEN CHO BAN VA userinfo (PLAT-M4 vong V0) -------------------------
+    ("mcp_endpoint_bo_kiem_userinfo",
+     ('    if ai_ep != (None, None):',
+      '    if False:'), ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    # --- BA DOT BIEN CUA LUOT REVIEW 2/2 (bien cau truc + ro ri qua MO TA) ----------
+    ("mcp_endpoint_userinfo_do_bang_KY_TU_thay_vi_CAU_TRUC",
+     ('    if ai_ep != (None, None):',
+      '    if "@" in str(url):'), ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_endpoint_userinfo_chi_doc_username_theo_tinh_chan_ly",
+     ('    if ai_ep != (None, None):',
+      '    if p_ep.username:'), ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_endpoint_nhanh_scheme_in_lai_url_ra_mo_ta",
+     ('        return ("khong_do_duoc", "`url` khong phai http(s) — scheme ngoai danh sach cho "\n'
+      '                                 "phep (KHONG in `url` ra day: no co the dang cho bi mat)",\n'
+      '                False)',
+      '        return ("khong_do_duoc", f"`url` khong phai http(s): {url!r}", False)'),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_endpoint_tu_choi_userinfo_MA_VAN_in_url",
+     ('        return ("khong_do_duoc", "`url` nhung credential trong userinfo — TU CHOI, KHONG "\n'
+      '                                 "probe (bi mat se di vao URL va header Host)", False)',
+      '        return ("khong_do_duoc", f"`url` co userinfo: {url!r}", False)'),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_endpoint_in_token_vao_mo_ta",
+     ('        return (("mo" if co_gh_ep else "chan"), f"HTTP {e.code}{vi_sao_ep}", False)',
+      '        return (("mo" if co_gh_ep else "chan"), f"HTTP {e.code}{vi_sao_ep} [{dau}]", False)'),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_endpoint_nuot_ly_do_o_chuoi_tom_tat",
+     ('        if co_ep is not True:\n            canh_ep = f" · mcp-endpoint: {mt_ep}"',
+      '        if False:\n            canh_ep = f" · mcp-endpoint: {mt_ep}"'),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_endpoint_chua_biet_URL_bi_ke_thanh_HONG",
+     ('        duong.append(("mcp-endpoint", None, "khong biet URL — .mcp.json chua khai server"))',
+      '        duong.append(("mcp-endpoint", False, "khong biet URL — .mcp.json chua khai server"))'),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_ket_xuat_gop_chua_do_duoc_thanh_hong",
      ('    return "chua-do-duoc" if ok is None else ("OK" if ok else "khong")',
       '    return "OK" if ok else "khong"'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),

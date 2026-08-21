@@ -1,0 +1,103 @@
+# BIÊN NHẬN — cross-review `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 1, reviewer `claude`.
+#
+# Ghi TRƯỚC khi có bất kỳ bản vá nào. Verdict `can_sua`, và một trong hai P1 là CHẶN LAND:
+# nếu land nguyên trạng thì cổng đăng lease TỰ KHOÁ ngay lượt push `ops/**` kế tiếp.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+packet_issue: 227
+lease_id: lease-dang-review-1-claude-20260821
+provider: claude
+role: reviewer
+executor_provider: codex
+verdict: changes_requested
+cross_provider: true
+review_class: sensitive
+reviewed_sha: fefa15b67a2691cf90ee8bfd0ab3880adc5f35d9
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+target_pull_request: null
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN.md
+spec_sha256: e1026adb569f5b4732197afac9c0f35cdd5a8945d46301b1d4cb062624e7c72c
+
+verdict_path: ops/reviews/lease-dang-review-1-claude-verdict.md
+verdict_sha256: 42b438ad15fc1a8978dcd3bef023aa1f41d0926b8b87dc9c4d521229c9d6ae41
+verdict_bytes: 15507
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/PLACEHOLDER_COMMIT/ops/reviews/lease-dang-review-1-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Điền sau khi biết commit ĐẦU TIÊN chứa tệp verdict — một commit không chứa được băm của
+  chính nó, nên biên nhận này đi HAI commit, đúng tiền lệ.
+
+verdict_nguon: >-
+  stdout của `claude -p` do `launcher.py` giữ, run `ac6e8b18`, `ma_thoat=0`,
+  `thoi_luong_giay=835.6`, `stdout_byte=15507`, `stderr_byte=0`.
+  Chốt read-only sau lượt: `git status --porcelain` ở cây review RỖNG, HEAD vẫn `fefa15b6`.
+verdict_doi_chieu: >-
+  Bản chép giữ NGUYÊN VĂN, KHÔNG đụng một byte nào — băm ở trên đo trực tiếp trên
+  `stdout.log`. Không có đường dẫn tuyệt đối nào của thư mục phiên trong thân, nên bước rút
+  gọn thường lệ KHÔNG chạy (đo được: phép thay thế trả về chuỗi y hệt).
+
+so_finding: 7
+tom_tat_finding: >-
+  P1 bộ tự kiểm của chính cổng ĐỎ khi chạy TRONG Actions (46/52) ⇒ land là cổng tự khoá ·
+  P1 `đăng` vẫn chết giữa vòng trên mọi đường KHÔNG qua mã thoát của `check` ⇒ Q4 và Q5 đều
+  hẹp hơn lời khai · P2 mỏ neo comment không kiểm TÁC GIẢ và `lease_id` không kiểm DẠNG ⇒
+  người ngoài bịt được một lease chính đáng mà cổng vẫn XANH · P3 `T49` là danh sách cấm một
+  tên (đột biến sống sót) · P3 `T52` khớp CHUỖI `if:` chứ không đo HÀNH VI · P3 `[]` từ
+  `--slurp` sập thành "chưa đăng" · P3 nhánh chẩn đoán của `T43` có thể không tồn tại thật.
+da_xu_ly: >-
+  CHƯA. Ngân sách packet đã cạn (+298/300 dòng thêm) nên MỌI bản vá đều vượt trần ADR-0044.
+  Theo chính đặc tả (§write_set, ngân sách): vượt trần ⇒ DỪNG, xuất handoff, người giữ kho
+  quyết. Đang chờ quyết định.
+
+verdict_usage_caveats:
+- id: gia-thuyet-Q8-DA-BI-BAC-BO
+  noi_dung: >-
+    Hình dạng *"lời khai rộng hơn phép đo"* trước lượt này đếm 5 lần, CẢ NĂM cùng tác giả
+    `claude`, và đó là lý do đặc tả (Q8) đổi executor sang `codex`. Lượt này `codex` MẮC nó:
+    P1 thứ hai đo được rằng Q5 ("ghi ngược chạy kể cả khi bước đăng đỏ") chỉ đúng cho ĐÚNG
+    MỘT đường đỏ, và `T52` — phép đo canh chính lời khai ấy — chỉ khớp CHUỖI `always()` trong
+    `if:` nên KHÔNG THỂ đỏ. Bộ đếm nay là **6, hai tác giả**. Giả thuyết *"hình dạng bám
+    người viết, không bám bài toán"* **BỊ BÁC BỎ**. Mục `bo-dem-hinh-dang-loi-van-o-5` trong
+    `ops/reviews/README.md` (từ biên nhận `donref-xoa-an-toan-review-2`) nay KHÔNG còn đúng —
+    nó đúng tại thời điểm ghi, và được thay thế bởi mục này, KHÔNG bị sửa.
+- id: P1-thu-nhat-CHAN-LAND-khong-phai-gop-y
+  noi_dung: >-
+    `kiem()` gọi `gh api` khi `GITHUB_ACTIONS` có mặt, mà CẢ HAI workflow chạy chính bộ test
+    ấy BÊN TRONG Actions và KHÔNG bước nào cấp `GH_TOKEN`. Đo lại độc lập bởi phiên điều phối
+    trên `fefa15b6`: `GITHUB_ACTIONS=true python3 ops/lease_publish_test.py` ⇒ **46/52, rc=1**
+    (6 ca ĐỎ, cùng lý do `KHÔNG ĐO ĐƯỢC loại số hiệu`). `chay_lease_publish_test.sh` giữ rc
+    và bước `tự kiểm cổng` có `set -euo pipefail` ⇒ job `dang` chết TRƯỚC bước `tìm lease`.
+    Land nguyên trạng = cổng đăng lease **tự khoá vĩnh viễn**, và `ci.yml` cũng đỏ. Đây là
+    lỗi mà cả executor lẫn phiên điều phối đều KHÔNG thấy; chỉ lượt review độc lập thấy.
+- id: phien-dieu-phoi-DA-TIM-DUOC-mot-nua-P1-thu-hai-TRUOC-review
+  noi_dung: >-
+    Phiên điều phối đo được nửa đầu của P1 thứ hai (403 ở đường POST làm `DA_DOI` không được
+    xuất) TRƯỚC khi phóng reviewer, và CỐ Ý KHÔNG đưa vào prompt để đo xem review độc lập có
+    tự tìm ra không. Reviewer tìm ra, và MỞ RỘNG: `lenh_body` nay cũng gọi mạng (đo: `check`
+    2 lời gọi, `body` 2 lời gọi), nên có thêm một khe `check`→`body` mà khi thua thì `body`
+    trả rc=9 và GIẾT CẢ BƯỚC. Ghi ra để không ai đọc verdict thành "reviewer chỉ xác nhận lại
+    thứ đã biết".
+- id: dot-bien-T46-giet-HAI-ca
+  noi_dung: >-
+    Reviewer khai thẳng: đột biến "chỉ dò `posted_comment_id` như cũ" giết `t46` VÀ `t48`
+    (50/52). Hai ca chưa tách đủ khỏi nhau. Không làm tròn thành đạt — đúng đòi hỏi của
+    `nghiem_thu` trong đặc tả.
+- id: mot-luot-HONG-khong-tinh-vong
+  noi_dung: >-
+    Lượt review 1 phóng lần đầu (`run 94b89d6b`) CHẾT sau 1.1 giây, `stdout` 0 byte:
+    `--permission-mode bypassPermissions` giải ra `--dangerously-skip-permissions`, thứ
+    `claude` TỪ CHỐI chạy dưới quyền root. Lần phóng thứ hai lại hỏng theo cách khác:
+    `--allowedTools` là cờ NHẬN NHIỀU GIÁ TRỊ nên nó NUỐT LUÔN chuỗi prompt đứng sau, và
+    `claude` báo "Input must be provided either through stdin or as a prompt argument" —
+    một thông báo nói về stdin cho một lỗi về THỨ TỰ ĐỐI SỐ. Cả hai không sinh verdict,
+    không tính là một vòng (cùng cách kho xử `l5`/`l5b`).
+- id: ba-con-so-nen-DA-KIEM-BA-LAN
+  noi_dung: >-
+    `+298/−11` · `52/52` · `actionlint` 5/5 — executor khai, phiên điều phối chạy lại độc
+    lập, reviewer chạy lại lần nữa. Ba lần khớp. Nhắc kèm một bẫy môi trường đã đụng thật:
+    `ops/cai_actionlint.sh` chết nếu `/tmp/actionlint` TỒN TẠI mà không phải thư mục (ở đây
+    là một tệp `hello` 6 byte sót lại từ phiên trước). Lỗi đó NGOÀI write set của packet.

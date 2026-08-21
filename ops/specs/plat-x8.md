@@ -3,6 +3,14 @@
 Đặc tả này ĐÓNG BĂNG bằng băm. Lease neo vào `spec_sha256`. Sửa nội dung ⇒ băm đổi ⇒ lease trỏ
 vào thứ không còn tồn tại, phải đi qua bản sửa đổi mới. Soạn bằng skill `soan-spec`, 21-08-2026.
 
+**BẢN ĐÓNG BĂNG THỨ HAI, 21-08-2026.** Bản đầu (`9cb54a2e4e7c…`) đã đăng ở PR "#226" và ăn **hai
+P1** của cross-review lượt 1 (`codex`, neo commit `c9a1b4e90d`); người giữ kho chọn **sửa đặc tả**
+thay vì bác hoặc đẩy sang packet sau. Ba chỗ đổi, không chỗ nào là chữ nghĩa: **mục tiêu 6** tra
+bằng bộ định danh thay vì `packet_id` một mình (P1 fail-open, đo được **3/5** packet có nhiều lease
+executor) · **§6** thêm `A13`/`A14` làm phản chứng cho đúng ca ấy · **§9.3** khai thẳng rằng cổng
+KHÔNG đọc `risk` và `diff thật`, hai trong ba đầu vào §8:567 đòi. Bản đầu **không** còn hiệu lực;
+nó ở lại trong lịch sử `git` làm bằng chứng, không phải làm bản dùng được.
+
 | khoá | giá trị |
 |---|---|
 | `packet_id` | `PLAT-X8` |
@@ -113,9 +121,23 @@ land**. Nên không lease nào đang giữ hai tệp này ⇒ va chạm là **th
 5. Lease `role: executor`, `schema_version >= 2`: đòi `write_set` không rỗng; tính lớp; đòi lease khai
    `effective_review_class` **BẰNG** `max(review_class đã khai, lớp tính được)`. Khai thấp hơn ⇒
    `RC_LOP`. Đây là chỗ cưỡng chế §8:567 *"Executor không được hạ lớp."* → `ops/lease_publish.py`
-6. Lease `role: reviewer`, `schema_version >= 2`: quét `ops/leases/` tìm lease `role: executor` cùng
-   `packet_id`; thấy ⇒ kế thừa `effective_review_class` của nó (Q1); **không thấy, thấy nhiều bản
-   mâu thuẫn, hoặc bản tìm thấy không đọc được ⇒ `sensitive`** (Q2, Q6). → `ops/lease_publish.py`
+6. Lease `role: reviewer`, `schema_version >= 2`: quét `ops/leases/` tìm lease `role: executor` khớp
+   **BỘ ĐỊNH DANH** `(packet_issue, packet_id, generation, spec_sha256_required)` — **KHÔNG** tra bằng
+   `packet_id` một mình. Khớp đúng MỘT ⇒ kế thừa `effective_review_class` của nó (Q1). **Không thấy,
+   thấy nhiều bản mâu thuẫn, bản tìm thấy không đọc được, hoặc ứng viên THIẾU bất kỳ trường định danh
+   nào ⇒ `sensitive`** (Q2, Q6). Ứng viên thiếu trường định danh **không** được hạ xuống làm bản dự
+   phòng — thiếu là loại, không phải là tha. → `ops/lease_publish.py`
+
+   **VÌ SAO KHÔNG TRA BẰNG `packet_id` MỘT MÌNH — đây là bản sửa sau P1 của cross-review lượt 1
+   (codex, PR "#226"), không phải thiết kế gốc.** Bản gốc giả định mỗi packet có nhiều nhất một lease
+   executor. Đo trên `ops/leases/` bác giả định ấy: **3/5 packet có nhiều hơn một** — `PLAT-X5` có
+   **4** (`r1`…`r4`), `AG-T0-01B` có **2**, `wp55` có **2** *và hai bản khai `generation` KHÁC nhau*
+   (`None` và `2`). Nên tra bằng `packet_id` là chuyện thường gặp chứ không phải ca biên: reviewer sẽ
+   thừa kế lớp của một **tiền nhiệm đã chết**, kể cả khi thế hệ hiện tại chưa có lease executor nào —
+   tức đi vòng qua đúng nhánh fail-closed của Q6. Chốt "thấy nhiều bản mâu thuẫn ⇒ `sensitive`"
+   **không** cứu được ca này: nó chỉ bắn khi các bản KHÁC lớp nhau, còn một tiền nhiệm lớp THẤP đứng
+   một mình thì im lặng cấp lớp thấp ấy. Đó là fail-**open**, và nó nằm trong chính cơ chế sinh ra để
+   fail-closed.
 7. Lease `schema_version: 1` hoặc thiếu trường: **BỎ QUA** chốt lớp, `rc` không đổi. Nếu nó khai
    `leased_at_utc` sau `2026-08-21T00:00:00Z` thì in **CẢNH BÁO** ra stderr, **không** đổi `rc`.
    → `ops/lease_publish.py`
@@ -130,7 +152,9 @@ land**. Nên không lease nào đang giữ hai tệp này ⇒ va chạm là **th
 | A1 | lease executor `schema_version: 2`, `write_set: [.claude/dev/launcher.py]`, khai `review_class: systemic` + `effective_review_class: systemic` ⇒ `rc == RC_LOP` | đột biến: đổi nhánh mặc định của `_tinh_lop_tu_write_set` từ `sensitive` sang `systemic` ⇒ ca ĐỎ |
 | A2 | **phản chứng của `PLAT-M4`**: dựng lại đúng nội dung `plat-m4-exec-2-claude-20260821` với `schema_version: 2` ⇒ `rc == RC_LOP`; đổi đúng một trường thành `sensitive` ⇒ `rc == 0` | đột biến: bỏ so sánh `max(khai, tính)` chỉ còn kiểm enum ⇒ ca ĐỎ |
 | A3 | lease reviewer `schema_version: 2`, `packet_id: KHONG-CO-EXEC` ⇒ lớp hiệu lực `sensitive` | đột biến: nhánh "không tìm thấy" trả `routine` ⇒ ca ĐỎ |
-| A4 | lease reviewer cùng `packet_id` với một executor `sensitive` ⇒ kế thừa `sensitive`; với executor `routine` ⇒ `routine` | đột biến: bỏ tra `packet_id`, luôn trả `sensitive` ⇒ **vế thứ hai** ĐỎ (vế đầu vẫn xanh — nên ca phải có CẢ HAI vế, một vế không đo được đột biến này) |
+| A4 | lease reviewer khớp ĐỦ bộ định danh với một executor `sensitive` ⇒ kế thừa `sensitive`; với executor `routine` ⇒ **`routine`** (vế dương phải GIỮ — không có nó thì mọi bản vá "cho chắc" đều biến cổng thành máy trả `sensitive`) | đột biến: bỏ tra định danh, luôn trả `sensitive` ⇒ **vế thứ hai** ĐỎ (vế đầu vẫn xanh — nên ca phải có CẢ HAI vế, một vế không đo được đột biến này) |
+| A13 | **tiền nhiệm chết**: một executor `routine` khai `generation: 1`, một reviewer khai `generation: 2`, cùng `packet_id` và `packet_issue` ⇒ **`sensitive`**, KHÔNG kế thừa `routine` | đột biến: tra bằng `packet_id` một mình (thiết kế trước bản sửa) ⇒ ca ĐỎ. Đây là phản chứng của P1 cross-review lượt 1 |
+| A14 | executor ứng viên **thiếu** `generation` hoặc `spec_sha256_required` ⇒ `sensitive`, và nó KHÔNG được dùng làm bản dự phòng | đột biến: coi trường thiếu là "khớp mọi giá trị" ⇒ ca ĐỎ. Thiếu là loại, không phải là tha |
 | A5 | `write_set: ['planned:ops/chay_lease_publish_test.sh']` phân đúng như bản không có tiền tố | đột biến: bỏ dòng cắt `planned:` ⇒ ca ĐỎ |
 | A6 | `write_set: []` và lease thiếu hẳn `write_set` ⇒ cả hai ra `sensitive` | đột biến: coi rỗng là `routine` ⇒ ca ĐỎ |
 | A7 | **đột biến NỚI BẢNG**: thêm `.claude/dev/launcher.py → routine` vào `_BANG_LOP` ⇒ ca đích ĐỎ | không có đột biến này thì không biết ca đang đo **bảng** hay đo thứ khác (doctrine `v1.36.68`) |
@@ -192,12 +216,25 @@ riêng đối chiếu §8, và đó là quyết định của người giữ kho
    và kho **không có** `plat-m4-exec-1` nào). (b) Packet do người giữ kho tự làm executor **không bao
    giờ** có lease executor (§2), nên mọi reviewer lease của nó thành `sensitive`. Chưa biết trong 39
    lease reviewer hiện có, bao nhiêu rơi vào (b) — chưa đếm.
-3. **Cảnh báo của mục tiêu 7 đứng trên `leased_at_utc`, một trường không cổng nào kiểm.** Cố ý để nó
+3. **Cổng này KHÔNG đọc `risk`, và KHÔNG đọc `diff thật` — hai trong ba đầu vào §8:567 đòi.** Ghi
+   sau P1 của cross-review lượt 1 (codex, PR "#226"), và ghi thẳng vì lời khai cũ của đặc tả rộng hơn
+   thứ nó làm được. Nguyên văn §8:567: *"Review Class được tính fail-closed từ `risk`, effective write
+   set và diff thật."* Đo được: **`risk` KHÔNG TỒN TẠI trong dữ liệu** — `grep '^risk:' ops/leases/` =
+   **0/49 tệp** — nên không có gì để đọc; `review_class` khai là thứ gần nhất, và đặc tả này dùng đúng
+   nó làm vế `max`. Còn **`diff thật` KHÔNG TỒN TẠI tại thời điểm cổng chạy**: cổng chạy lúc ĐĂNG
+   lease, tức TRƯỚC khi executor viết dòng nào. Hệ quả phải nói rõ, không giấu: **một packet khai
+   `write_set` sạch rồi diff thật chạm đường nhạy cảm NGOÀI write set vẫn qua cổng này** — nó đo LỜI
+   KHAI VỀ PHẠM VI, không đo phạm vi ĐÃ XẢY RA. Đúng hình dạng §7 mà packet này đang chữa, chỉ lùi
+   một bậc. Chốt hậu-diff trên **exact head** (phân lớp lại từ `git diff base...head`, chặn land nếu
+   cao hơn lớp hiệu lực) là **gói riêng**, không nhét vào đây: nó chạy ở lượt LAND chứ không ở lượt
+   đăng lease, tức khác thời điểm, khác trigger, khác tệp — nhét chung là làm packet vượt trần
+   `sensitive` của ADR-0044 và trộn hai vòng đời vào một cổng.
+4. **Cảnh báo của mục tiêu 7 đứng trên `leased_at_utc`, một trường không cổng nào kiểm.** Cố ý để nó
    là CẢNH BÁO chứ không phải chốt: một chốt đứng trên dữ liệu tự khai là chốt lừa được. Chốt thật
    cho trường ấy thuộc mục D.
-4. **`schema_version: 2` không tự lan.** Ai quên bump thì được tha im lặng, và mục tiêu 7 chỉ in cảnh
+5. **`schema_version: 2` không tự lan.** Ai quên bump thì được tha im lặng, và mục tiêu 7 chỉ in cảnh
    báo. Chốt cứng cho việc này đòi một mốc kiểm được — chưa có.
-5. **Không đo được lease có bị sửa sau khi đăng không.** Ngoài phạm vi cổng hiện tại, và ngoài packet này.
+6. **Không đo được lease có bị sửa sau khi đăng không.** Ngoài phạm vi cổng hiện tại, và ngoài packet này.
 
 ---
 

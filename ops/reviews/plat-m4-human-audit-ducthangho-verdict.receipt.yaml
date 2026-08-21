@@ -1,0 +1,121 @@
+# BIÊN NHẬN — lượt `human_audited` của `PLAT-M4` (#194 / PR "#204").
+#
+# ĐÂY LÀ MỨC ASSURANCE THẬT SỰ ĐẠT ĐƯỢC CỦA PACKET NÀY. Ba lượt review mô hình trước đó
+# KHÔNG lượt nào đủ để land: lượt 1 và 2 là `codex` (cross-provider, ĐỦ về nhà cung cấp)
+# nhưng neo ở SHA cũ hơn; lượt 3 là `claude` cùng nhà với người vá nên không đủ cho class
+# `sensitive`. Chữ ký của người giữ kho THAY cho `cross_approved`, không cộng vào nó.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: PLAT-M4
+packet_issue: 194
+lease_id: null
+lease_ghi_chu: >-
+  KHÔNG có lease cho lượt này, và đó là ĐÚNG. Lease là công cụ cấp việc cho một PHIÊN
+  agent; người giữ kho không tự cấp lease cho chính mình. Thẩm quyền ở đây đến từ §2
+  ("start/pause/resume/reroute/override/authorize thuộc chủ kho"), không từ một tệp YAML.
+provider: human
+role: auditor
+nguoi_audit: ducthangho
+executor_provider: claude
+verdict: approve
+cross_provider: false
+assurance_dat: human_audited
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  `human_audited` là MỘT TRONG HAI đường §8 cho phép với class `sensitive` — đường kia là
+  `cross_approved`, và nó đo được là không đạt được trên nhà cung cấp hiện có. Đây KHÔNG
+  phải một mức hạ; nó là mức ngang hàng trong danh sách của §8. Khác hẳn
+  `ops/uy-quyen-194-same-provider-20260821.yaml`, thứ đã VÔ HIỆU và cũng chưa từng đủ.
+reviewed_sha: a9e021de28d03e7edc9077b42678f6af22a3b684
+base_sha: 825e97042b86f5e200c2ab8a00b58d8642510353
+target_pull_request: 204
+review_class_hieu_luc: sensitive
+review_class_ghi_chu: >-
+  Class ĐÚNG là `sensitive`, KHÔNG phải `systemic` như `ops/specs/plat-m4-v0.md:11` khai.
+  Xem `ops/DINH_CHINH_REVIEW_CLASS_PLAT_M4.md`.
+
+# ---- NGUỒN CÓ THẨM QUYỀN: ĐẢO CHIỀU SO VỚI MỌI BIÊN NHẬN KHÁC ----
+authoritative_source: github_comment
+authoritative_source_ghi_chu: >-
+  Với verdict của một MÔ HÌNH, nguồn có thẩm quyền là tệp có băm trong kho và comment chỉ
+  là bản chiếu. Ở đây NGƯỢC LẠI: thứ §8 đòi là DANH TÍNH BỀN TRÊN GITHUB của người audit,
+  mà danh tính ấy chỉ tồn tại ở phía GitHub. Một tệp trong kho không mang được nó — bất kỳ
+  phiên nào có quyền ghi cũng tạo được tệp ấy. Nên comment là nguồn, tệp là bản chiếu.
+evidence_channel: github_comment
+evidence_url: https://github.com/ducthangho/tra-luat/pull/204#issuecomment-5367254650
+posted_comment_id: 5367254650
+posted_at_utc: '2026-08-21T08:16:14Z'
+author_association: OWNER
+
+verdict_path: ops/reviews/plat-m4-human-audit-ducthangho-verdict.md
+verdict_sha256: 8fab199518ea01e0ee3e60acee9c88c8df1111a3585fd18013fdb501fd414f4e
+verdict_bytes: 3140
+verdict_path_ghi_chu: >-
+  Bản CHIẾU để tra ngoại tuyến. Băm này là băm của bản chiếu, KHÔNG phải của comment gốc.
+
+# ---- ĐO THỨ ĐÃ ĐẾN, không dừng ở lời khai ----
+doi_chieu_boi_phien_chinh:
+  cach_do: >-
+    Đọc NGƯỢC comment về qua API sau khi người giữ kho báo đã đăng, thay vì tin lời báo.
+    Đúng chốt "đo thứ ĐÃ ĐẾN, đừng dừng ở lời gọi trả thành công".
+  tac_gia: 'ducthangho, author_association OWNER — không phải bot, không phải phiên agent'
+  so_lan_VERDICT: 1
+  so_lan_Reviewed_commit: 2
+  lech_quy_uoc_KHAI_THANG: >-
+    Quy ước của kho là "đúng hai dòng, mỗi dòng xuất hiện ĐÚNG MỘT LẦN". Thân comment có
+    `Reviewed commit:` HAI lần. Nguyên nhân: MẪU DO PHIÊN CHÍNH SOẠN đặt dòng neo ở cả đầu
+    lẫn cuối — lỗi của phiên soạn mẫu, không phải của người ký. KHÔNG gây mơ hồ vì cả hai
+    dòng mang CÙNG một SHA và SHA ấy khớp head hiện tại. Ghi ra thay vì khai "đúng một",
+    vì khai tròn một con số đã đo được là 2 chính là hình dạng lỗi packet này vừa vá.
+  sha_khop_head: true
+
+# ---- NHỮNG GÌ CHỮ KÝ NÀY CHẤP NHẬN — người ký nêu TƯỜNG MINH trong thân ----
+da_chap_nhan_tuong_minh:
+- id: R2-hoan-chua-va
+  noi_dung: >-
+    Hai đột biến còn sống (bỏ `timeout` khỏi `urlopen`; `jsonrpc` 2.0->1.0). Nợ
+    `mcp-probe-thieu-mutant-canh-timeout-va-than-JSONRPC`, cò trả THEO WRITE SET, chi tiết
+    ở `no_hoan_co_can_cu` trong `plat-m4-review-3-claude-verdict.receipt.yaml`.
+- id: vuot-tran-kich-thuoc-sensitive
+  noi_dung: >-
+    ADR-0044 cho `sensitive` trần <=3 tệp / <=300 dòng thêm; thực tế +543 trên hai tệp.
+    Chấp nhận có ghi, không tách packet — tách sau ba vòng review làm mất hiệu lực bằng
+    chứng đã có. Đây là ĐÁNH ĐỔI được nêu ra và được chọn, không phải một thứ trôi qua.
+- id: head-cuoi-chua-qua-nha-cung-cap-thu-hai
+  noi_dung: >-
+    Lượt 1 và 2 là `codex` nhưng neo `5813fc4` và `7a2320f`, cả hai CŨ hơn head hiện tại.
+    `cross_approved` trên `a9e021d` không đạt được.
+
+bang_chung_may_tren_exact_head:
+  ci_run: 32460168667
+  gate_ubuntu: success
+  gate_windows: success
+  buoc_loi: 0
+  launcher_ca_hai_nen: success
+  launcher_test: '142/142 ca đã chạy qua (tổng 143, bỏ 1 = t62 Windows-only)'
+  dot_bien: '139/139 đạt (nền 137/137); hai mutant mới giết 1/1 đúng ca đích'
+  tl_selftest: '1698/1698'
+  buoc_skipped_da_kiem: >-
+    Bốn bước `skipped` đều CÓ ĐIỀU KIỆN và skip đúng thiết kế: `PR head contains required
+    EOL base` (chỉ chạy ở `pull_request`, lượt này là `workflow_dispatch`) · `don-nhanh` và
+    `cgroup` skip trên Windows · `gate lifecycle` skip trên Linux. Mỗi cặp chạy đúng nền
+    của nó. Kiểm chỗ này vì "0 bước lỗi" một mình KHÔNG loại được ca cổng vắng mặt.
+
+verdict_usage_caveats:
+- id: khong-doc-thanh-cross-provider
+  noi_dung: >-
+    ĐỪNG đọc lượt này thành cross-review, và đừng viện nó làm tiền lệ "packet `sensitive`
+    land được bằng chữ ký người". Nó land được vì §8 cho `human_audited` NGANG HÀNG với
+    `cross_approved` — và vì đường kia đo được là bị chặn. Packet khác phải tự chứng minh
+    lại điều đó, không thừa hưởng.
+- id: no-R2-van-mo
+  noi_dung: >-
+    `approve` này KHÔNG đóng R2. Nợ vẫn mở, và packet kế tiếp chạm
+    `.claude/dev/launcher.py` hoặc `launcher_test.py` phải trả nó — vá CẢ HAI hàm
+    (`_do_mcp_endpoint` VÀ `_do_rest_github`), vá một là để nợ lại.
+- id: chot-tinh-class-van-KHONG-TON-TAI
+  noi_dung: >-
+    Packet này bị phân class sai và KHÔNG cổng nào bắt được. Lý do gốc chưa được sửa: chốt
+    fail-closed tính `effective_review_class` không tồn tại (0/41 lease khai trường ấy).
+    Ca tiếp theo sẽ lọt y hệt.

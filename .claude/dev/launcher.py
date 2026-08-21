@@ -84,14 +84,15 @@ import sys
 import tempfile
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.3.0"
+VERSION = "1.4.2"
 
-# launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu probe-qua-han-ba-trang-thai
+# launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu probe-qua-han-ba-trang-thai mcp-endpoint
 #
 # CÙNG CƠ CHẾ với `# hook-nang-luc:` trong `.claude/hooks/session-start.sh`, áp cho
 # CHÍNH TỆP NÀY. Vì sao cần: sự cố 15-08 là hook của nhánh packet cũ hơn hook master;
@@ -2713,14 +2714,20 @@ def _env_da_chuan(mt: dict[str, str] | None) -> dict[str, str]:
     return _doc_moi_truong()[0]
 
 
-def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None]:
-    """`.mcp.json` của DỰ ÁN có khai server `github` không, và khai bằng TÊN NÀO.
+def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None, str | None]:
+    """`.mcp.json` của DỰ ÁN có khai server `github` không, khai bằng TÊN NÀO, ở URL NÀO.
 
     Đây là phép đo CÓ MẶT, không phải DÙNG ĐƯỢC — và nói thẳng như vậy ở chỗ dùng.
     Nhưng nó phân biệt được "chưa khai server" (đo được, hỏng thật, chữa được) với
     "đã khai, chưa ai chứng minh nó chạy".
 
-    Trả `(có_khai, mô_tả, tên_nguyên_văn)`.
+    Trả `(có_khai, mô_tả, tên_nguyên_văn, url)`.
+
+    `url` LÀ THỨ RIÊNG, và `có_khai` KHÔNG phụ thuộc nó. Hai câu hỏi khác nhau:
+    `mcp-cli` chỉ cần TÊN (nó hỏi CLI), `mcp-endpoint` mới cần URL. Gộp lại thì một
+    `.mcp.json` khai server kiểu `stdio` (không có `url`, hoàn toàn hợp lệ) sẽ bị
+    tuyên là "chưa khai server" — sai, và sai ở phía làm người đọc đi chữa nhầm chỗ.
+    URL hỏng/thiếu ⇒ `url is None`, và bên đo endpoint tự khai `khong_do_duoc`.
     """
     # NÓI RÕ ĐỌC Ở GỐC NÀO. `doctor` chạy ngoài repo thì `ws` là None và ta lùi về gốc
     # của chính launcher — hợp lý, nhưng im lặng thì người đọc tưởng đang xem kho họ
@@ -2732,18 +2739,18 @@ def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None]:
         goc, nguon = Path(__file__).resolve().parents[2], "goc cua launcher (khong co workspace)"
     tep = goc / ".mcp.json"
     if not tep.is_file():
-        return False, f"khong thay .mcp.json o {goc} [{nguon}]", None
+        return False, f"khong thay .mcp.json o {goc} [{nguon}]", None, None
     try:
         d = json.loads(tep.read_text(encoding="utf-8"))
     except (OSError, ValueError) as e:
-        return False, f".mcp.json [{nguon}] khong doc/parse duoc: {type(e).__name__}", None
+        return False, f".mcp.json [{nguon}] khong doc/parse duoc: {type(e).__name__}", None, None
     # KIỂM KIỂU BA TẦNG. JSON hợp lệ vẫn có thể sai lược đồ, và mỗi tầng là một
     # finding RIÊNG của cross-review: gốc là mảng ⇒ `d.get` ném AttributeError; bảng
     # server là mảng ⇒ vòng lặp duyệt PHẦN TỬ chứ không duyệt KHOÁ; giá trị của khoá
     # `github` là `null`/chuỗi ⇒ vẫn được tuyên là "đã khai". Cùng một hình dạng lỗi
     # tụt xuống sau mỗi tầng — nên kiểm hết một lượt thay vì vá dần theo báo cáo.
     if not isinstance(d, dict):
-        return False, f".mcp.json [{nguon}] khong phai object o goc (la {type(d).__name__})", None
+        return False, f".mcp.json [{nguon}] khong phai object o goc (la {type(d).__name__})", None, None
     # PHÂN BIỆT "KHÔNG CÓ KHOÁ" VỚI "CÓ KHOÁ MÀ GIÁ TRỊ HỎNG": `or` nuốt mọi giá trị
     # FALSY nên `{"mcpServers": null, "servers": {...}}` lặng lẽ rơi sang trường dự
     # phòng rồi tuyên là đã khai — một trường CHÍNH sai kiểu bị trường DỰ PHÒNG che.
@@ -2752,16 +2759,16 @@ def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None]:
             srv = d[khoa]
             break
     else:
-        return False, f".mcp.json [{nguon}] khong co khoa `mcpServers` lan `servers`", None
+        return False, f".mcp.json [{nguon}] khong co khoa `mcpServers` lan `servers`", None, None
     if not isinstance(srv, dict):
-        return False, f".mcp.json [{nguon}] khoa `{khoa}` khong phai object (la {type(srv).__name__})", None
+        return False, f".mcp.json [{nguon}] khoa `{khoa}` khong phai object (la {type(srv).__name__})", None, None
     # KHỚP CHÍNH XÁC sau chuẩn hoá hoa/thường, KHÔNG khớp chuỗi con: `not-github-backup`
     # từng được tính là "đã khai server github". Danh sách CHO PHÉP, không phải đoán
     # xem còn bao nhiêu cách viết.
     ten = [k for k in srv if k.casefold() == "github"]
     if not ten:
         return False, (f".mcp.json [{nguon}] KHONG khai server ten dung bang `github` "
-                       f"(co: {', '.join(srv) or 'khong co server nao'})"), None
+                       f"(co: {', '.join(srv) or 'khong co server nao'})"), None, None
     # NHIỀU TÊN CÙNG KHỚP ⇒ TỪ CHỐI, không chọn theo thứ tự khai báo. `claude mcp get`
     # coi `github` và `GitHub` là HAI server khác nhau (đo được: nó gợi ý "Did you
     # mean"), nên chọn `ten[0]` làm server được đo phụ thuộc THỨ TỰ KHOÁ trong JSON —
@@ -2770,15 +2777,35 @@ def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None]:
     if len(ten) > 1:
         return False, (f".mcp.json [{nguon}] khai {len(ten)} server cung khop `github` sau "
                        f"chuan hoa hoa/thuong ({', '.join(sorted(ten))}) — MO HO, khong biet "
-                       f"do cai nao; `claude mcp get` coi chung la hai server khac nhau"), None
+                       f"do cai nao; `claude mcp get` coi chung la hai server khac nhau"), None, None
     xau = [k for k in ten if not isinstance(srv[k], dict)]
     if xau:
         return False, (f".mcp.json [{nguon}] khai `{', '.join(xau)}` nhung gia tri khong "
-                       f"phai object (la {', '.join(type(srv[k]).__name__ for k in xau)})"), None
+                       f"phai object (la {', '.join(type(srv[k]).__name__ for k in xau)})"), None, None
     # TRẢ TÊN NGUYÊN VĂN, không trả chuỗi dựng sẵn: `claude mcp get` PHÂN BIỆT HOA
     # THƯỜNG — khai `GitHub` rồi hỏi `mcp get github` thì CLI đáp `No MCP server named
     # "github". Did you mean "GitHub"?` và VẪN `rc=0`. Hai nơi phải dùng CÙNG một tên.
-    return True, f".mcp.json [{nguon}] khai server: {ten[0]}", ten[0]
+    # URL: lấy nếu có, KHÔNG bắt buộc. `str.strip()` trước khi trả để một giá trị
+    # toàn khoảng trắng không đi tiếp thành "đã có URL".
+    url = srv[ten[0]].get("url")
+    url = url.strip() if isinstance(url, str) and url.strip() else None
+    # KHONG noi suy `url` NGUYEN VAN vao mo ta. Finding R3 cua luot review 3: mot
+    # `.mcp.json` khai `https://user:GOCSPX-abc@host/mcp` lam mo ta CHUA bi mat. Hien
+    # caller duy nhat (`_do_github`) vut chuoi nay o nhanh duong nen chua lo ra ngoai —
+    # nhung bat bien viet ngay trong `_do_mcp_endpoint` la "KHONG mot nhanh nao duoc mang
+    # DU LIEU LAY TU url", va mot ham ben canh dung chuan khac la khau sung da nap dan:
+    # them mot caller, hoac ai in truong nay vao JSON cua `doctor`, la lo ngay.
+    # Chi in scheme + host — du de nguoi doc biet no tro DI DAU ma khong cho duoc bi mat.
+    if url:
+        try:
+            _p = urllib.parse.urlsplit(url)
+            _noi = f"{_p.scheme}://{_p.hostname}" if _p.hostname else "(url khong co ten may)"
+        except ValueError:
+            _noi = "(url khong phan tich duoc)"
+        _duoi = f" @ {_noi}"
+    else:
+        _duoi = " (khong khai `url`)"
+    return (True, f".mcp.json [{nguon}] khai server: {ten[0]}" + _duoi, ten[0], url)
 
 
 def _suc_khoe_mcp_github(ten: str = "github",
@@ -2848,6 +2875,123 @@ def _suc_khoe_mcp_github(ten: str = "github",
     if chuan.startswith(_MCP_HONG):
         return ("hong", f"Status: {tho}")
     return ("khong_do_duoc", f"trang thai LA, chua tung do: Status: {tho}")
+
+
+# --- ĐẦU KIA CỦA DÂY MCP ----------------------------------------------------------
+# VÌ SAO THÊM (PLAT-M4, #194). Khối trên đo `.mcp.json` + `claude mcp get`, tức CẢ HAI
+# đều hỏi phía CLI — DÂY NỐI. Không bước nào chạm tới đầu kia. Đo được: `claude mcp get
+# github` trả `Pending approval` trong khi POST `initialize` thẳng tới chính URL ấy trả
+# HTTP 200 kèm header GitHub đầy đủ. Một phiên web/điện thoại đọc `mcp=khong` rồi kết
+# luận "GitHub bị chặn" và dừng — ĐÃ XẢY RA, mất trọn một lượt — trong khi đường vẫn
+# thông. Hai câu hỏi khác nhau thì phải là HAI trường, đúng phép tách mà `_do_github` đã
+# làm cho `rest` (`rest-chung` / `rest-kho`).
+
+_MCP_GIAO_THUC = "2025-06-18"
+
+
+def _do_mcp_endpoint(url: str | None, *, token: str | None = None,
+                     timeout: float = PROBE_TIMEOUT_GIAY) -> tuple[str, str, bool]:
+    """Một lượt `initialize` JSON-RPC tới endpoint MCP. Trả (`mo`|`chan`|`khong_do_duoc`,
+    mô tả, THAO TÁC THÀNH CÔNG).
+
+    PHẠM VI — khai trước kẻo lại tuyên rộng hơn thứ đo được. Nó chứng minh **endpoint
+    TRẢ LỜI và token được nhận**; nó KHÔNG chứng minh phiên nào đó gọi được
+    `mcp__github__*`, cũng không chứng minh đọc được kho này. Vì vậy `mcp-endpoint`
+    CỐ Ý đứng ngoài `LAM_DUOC_VIEC` — cùng hạng `rest-chung`, không cùng hạng
+    `rest-kho`. Kho đã ba lần đếm SỰ CÓ MẶT của một đường thay vì KHẢ NĂNG của nó
+    (`shutil.which("gh")` · `rest-chung` · `gh auth status`); đây là chỗ thứ tư dễ tái
+    phạm nhất.
+
+    `initialize` là HANDSHAKE: không tạo, không sửa, không xoá gì phía máy chủ. Một
+    lượt, **không auto-retry** — `doctor` là phép ĐO, không phải nỗ lực kết nối; retry
+    làm số đo nhoè và làm một lượt `doctor` dài gấp đôi khi mạng hỏng.
+
+    DẤU HIỆU PHÂN LOẠI LÀ HEADER `X-GitHub-*`, KHÔNG phải mã trạng thái — cùng tiêu chí
+    `_do_rest_github` đã trả giá để có: 403 KHÔNG header là proxy tự sinh (phản hồi chưa
+    từng tới GitHub), còn 4xx CÓ header là tới nơi nhưng thiếu quyền. Hai chuyện ấy chữa
+    bằng hai cách khác hẳn nhau.
+    """
+    # KHÔNG CÓ URL / URL KHÔNG PHẢI HTTP ⇒ CHƯA ĐO ĐƯỢC, không phải HỎNG. Server kiểu
+    # `stdio` không có `url` là khai hợp lệ; gọi nó là "hỏng" thì đẩy người đọc đi chữa
+    # một thứ không gãy. Và `urlopen` nhận cả `file://` — một `.mcp.json` trỏ `file:///`
+    # sẽ biến probe mạng thành lượt ĐỌC ĐĨA, nên chặn theo danh sách CHO PHÉP.
+    if not url:
+        return ("khong_do_duoc", "`.mcp.json` khong khai `url` cho server nay "
+                                 "(server kieu stdio thi dieu do la BINH THUONG)", False)
+    # KHOP TIEN TO CHUOI KHONG PHAI PHAN TICH URL — bai hoc PLAT-M4 luot 1 (P2).
+    # `https://user:SECRET@host/mcp` qua duoc `startswith`, roi bi mat di NGUYEN VAN vao
+    # `req.full_url` VA `req.host`. Nen phan tich CAU TRUC, va bat `userinfo` TRUOC scheme.
+    #
+    # VA MOT NUA THU HAI, do luot review 2/2 tim ra: doi thu tu THOI VAN CHUA DU.
+    # Nhanh `userinfo` chi bat duoc URL PHAN TICH DUOC thanh userinfo. URL MEO —
+    # `http:///user:S@h`, `javascript:user:S@h`, `http ://user:S@h`, `http://?u=user:S@h` —
+    # khong co `username`/`password`, nen chung roi xuong nhanh scheme/hostname, va hai
+    # nhanh ay tung noi suy `{url!r}`: KHONG probe nua nhung VAN lam lo bi mat qua MO TA.
+    # Cung HINH DANG voi chinh finding goc, chi doi duong ra.
+    # ⇒ LUAT O DAY: KHONG mot nhanh TU CHOI nao duoc mang DU LIEU LAY TU `url`. Ke ca
+    # `scheme`: `urlsplit("GOCSPX-abc:x")` cho scheme `gocspx-abc`, tuc chinh bi mat.
+    # Chan doan mat do CHINH XAC va duoc lai mot bao dam CAU TRUC — doi ay la co y.
+    try:
+        p_ep = urllib.parse.urlsplit(str(url))
+        chu_ep, may_ep = p_ep.scheme.lower(), p_ep.hostname
+        ai_ep = (p_ep.username, p_ep.password)
+        # `.port` PHAI duoc doc TRONG `try` nay. Ly do la mot finding cua luot review 3
+        # (R1): `urlsplit` chi gan `username`/`password` khi co dau `@`, nen mot bi mat
+        # dat o VI TRI PORT — `https://host:GOCSPX-abc/mcp` — di qua het ba chot duoi
+        # (khong userinfo, scheme https, co hostname) roi vao thang `Request`.
+        # Runtime that KHONG lo: `http.client` nem `InvalidURL` truoc khi mo socket. Nhung
+        # do la chot cua NGUOI KHAC, khong phai chot cua ta — cung ho voi bai hoc "cong
+        # khong noi doi, no VANG MAT". `.port` la property ném `ValueError` voi port phi
+        # so, nen doc no o day la du: ca dong roi vao nhanh `khong_do_duoc` ngay ben duoi,
+        # va khong nhanh nao mang du lieu tu `url` ra.
+        _ = p_ep.port
+    except ValueError as e:
+        # Ten LOP ngoai le la tap dong, khong lay tu `url`.
+        return ("khong_do_duoc", f"`url` khong phan tich duoc ({type(e).__name__})", False)
+    if ai_ep != (None, None):
+        return ("khong_do_duoc", "`url` nhung credential trong userinfo — TU CHOI, KHONG "
+                                 "probe (bi mat se di vao URL va header Host)", False)
+    if chu_ep not in ("http", "https"):
+        return ("khong_do_duoc", "`url` khong phai http(s) — scheme ngoai danh sach cho "
+                                 "phep (KHONG in `url` ra day: no co the dang cho bi mat)",
+                False)
+    if not may_ep:
+        return ("khong_do_duoc", "`url` khong co ten may (KHONG in `url` ra day: no co the "
+                                 "dang cho bi mat)", False)
+    dau = {"Content-Type": "application/json",
+           "Accept": "application/json, text/event-stream"}
+    if token:
+        dau["Authorization"] = f"Bearer {token}"
+    than = json.dumps({
+        "jsonrpc": "2.0", "id": 1, "method": "initialize",
+        "params": {"protocolVersion": _MCP_GIAO_THUC, "capabilities": {},
+                   "clientInfo": {"name": "tra-luat-launcher-doctor", "version": VERSION}},
+    }).encode("utf-8")
+    req = urllib.request.Request(url, data=than, headers=dau, method="POST")
+    # MÔ TẢ KHÔNG BAO GIỜ CHỞ TOKEN. Không nội suy `dau`, không in `req.headers`, và
+    # cũng không in thân phản hồi — máy chủ đầu kia quyết định thân ấy, và đã có tiền lệ
+    # một chuỗi trong thân bị đọc thành trạng thái.
+    # TÊN BIẾN `*_ep` LÀ CÓ CHỦ ĐÍCH (xem chú thích ở nhánh `except` cuối): trùng chữ với
+    # `_do_rest_github` thì mọi mẫu đột biến viết cho ĐƯỜNG NÀY sẽ vá nhầm sang đường kia.
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            co_gh_ep = any(k.lower().startswith("x-github") for k in r.headers)
+            ma_ep = int(r.status)
+            ghi_chu_ep = "" if co_gh_ep else " (KHONG header GitHub -> proxy tu sinh)"
+            return (("mo" if co_gh_ep else "chan"), f"HTTP {ma_ep}{ghi_chu_ep}",
+                    co_gh_ep and 200 <= ma_ep < 300)
+    except urllib.error.HTTPError as e:
+        co_gh_ep = any(k.lower().startswith("x-github") for k in e.headers)
+        vi_sao_ep = (" (toi GitHub, thieu quyen)" if co_gh_ep
+                     else " (KHONG header GitHub -> proxy tu sinh)")
+        # 4xx/5xx: tới nơi hay không thì THAO TÁC vẫn hỏng — hai câu hỏi, hai giá trị.
+        return (("mo" if co_gh_ep else "chan"), f"HTTP {e.code}{vi_sao_ep}", False)
+    except Exception as e:                       # mạng/DNS/quá hạn = KHÔNG ĐO ĐƯỢC
+        # VIẾT KHÁC CHỮ với `_do_rest_github` LÀ CÓ CHỦ ĐÍCH, không phải ngẫu nhiên:
+        # `t117` đòi mỗi mẫu đột biến khớp ĐÚNG MỘT chỗ, nên một dòng mới trùng chữ với
+        # dòng mà một mutant đang nhắm sẽ tước răng của mutant đó (nó vá nhầm chỗ). Đã
+        # ĐỎ thật ở lượt đầu của PLAT-M4 với đúng hai mẫu `rest_*`.
+        return ("khong_do_duoc", f"{type(e).__name__} khi POST initialize", False)
 
 
 def _nhan_duong(ok) -> str:
@@ -2980,15 +3124,33 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     # Hai bước tách bạch, vì chúng hỏng khác nhau và chữa khác nhau:
     #   `.mcp.json` chưa khai server  -> phiên agent KHÔNG có công cụ nào, bất kể máy có gì
     #   đã khai nhưng CLI báo xấu     -> hỏng THẬT, chữa được (`claude` rồi duyệt)
-    co_khai, mt_mcp, ten_mcp = _doc_mcp_json(ws)
+    canh_ep = ""
+    co_khai, mt_mcp, ten_mcp, url_mcp = _doc_mcp_json(ws)
     if not co_khai:
-        duong.append(("mcp", False, mt_mcp))
+        duong.append(("mcp-cli", False, mt_mcp))
+        # KHÔNG suy "endpoint hỏng" từ "chưa khai server": ta không biết URL nào để hỏi.
+        # Đó là CHƯA ĐO ĐƯỢC, và nhãn phải nói đúng thế.
+        duong.append(("mcp-endpoint", None, "khong biet URL — .mcp.json chua khai server"))
     else:
         tt_mcp, mt_khoe = _suc_khoe_mcp_github(ten_mcp or "github", mt)
         # BA TRẠNG THÁI, và `khong_do_duoc` PHẢI đọc ra khác `hong` ở phần mô tả — cờ
         # bool không chở nổi `None != False`, nên chữ phải chở.
         # `None` cho "chưa đo được" — KHÔNG phải `False`. Xem chỗ kết xuất bên dưới.
-        duong.append(("mcp", None if tt_mcp == "khong_do_duoc" else tt_mcp == "khoe", mt_khoe))
+        duong.append(("mcp-cli", None if tt_mcp == "khong_do_duoc" else tt_mcp == "khoe", mt_khoe))
+        # ĐẦU KIA CỦA DÂY. Tách hẳn khỏi `mcp-cli` vì hai đường này HỎNG ĐỘC LẬP: CLI
+        # chưa duyệt server mà endpoint vẫn trả 200 là ca ĐÃ ĐO ĐƯỢC, không phải giả định.
+        tt_ep, mt_ep, ok_ep = _do_mcp_endpoint(url_mcp, token=tok)
+        co_ep = None if tt_ep == "khong_do_duoc" else (tt_ep == "mo" and ok_ep)
+        duong.append(("mcp-endpoint", co_ep, mt_ep))
+        # LÝ DO PHẢI ĐI RA TỚI NGƯỜI ĐỌC, không chỉ nằm trong hàm. ĐO ĐƯỢC ngay ở lượt
+        # đầu của PLAT-M4: chuỗi tóm tắt chỉ nối `ten=nhan`, nên 401 CÓ header GitHub
+        # (endpoint sống, token sai) và 403 KHÔNG header (proxy chặn) in ra Y HỆT nhau
+        # — `mcp-endpoint=khong`. Phân loại đúng ở trong mà kết xuất gộp ở ngoài thì
+        # người đọc vẫn đi chữa nhầm chỗ, tức packet này chỉ chữa được nửa đường. Nối
+        # thêm mô tả khi cờ KHÔNG phải `True`, đúng khuôn `canh` mà `gh` đã dùng dưới
+        # đây; đường xanh thì không thêm chữ, để dòng thường vẫn ngắn.
+        if co_ep is not True:
+            canh_ep = f" · mcp-endpoint: {mt_ep}"
 
     gh_ok = next((ok for t, ok, _ in duong if t == "gh-cli"), False)
     kho_chan = any(t == "rest-kho" and not ok for t, ok, _ in duong)
@@ -3004,7 +3166,10 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     # nhau, cùng một sai lầm — đếm SỰ CÓ MẶT của một đường thay vì KHẢ NĂNG của nó.
     # `gh-cli` ĐÃ BỊ LOẠI khỏi tập này (P1 cross-review PR "#143"): nó chỉ chứng
     # minh ĐÃ XÁC THỰC, không chứng minh làm được việc. `gh-kho` mới là thao tác thật.
-    # `mcp` CỐ Ý KHÔNG có mặt ở đây, và đây là chỗ dễ thêm nhầm nhất. Phép đo MCP hỏi
+    # `mcp-cli` VÀ `mcp-endpoint` CỐ Ý KHÔNG có mặt ở đây, và đây là chỗ dễ thêm nhầm
+    # nhất. `mcp-endpoint` mới cám dỗ hơn cả — nó CÓ chạm tới máy chủ thật — nhưng một
+    # lượt `initialize` chỉ chứng minh endpoint TRẢ LỜI, y hệt `rate_limit` chứng minh
+    # REST trả lời mà không đọc nổi một PR nào. Phép đo MCP hỏi
     # CLI xem server đã được duyệt chưa — nó chứng minh một tiến trình `claude` MỚI
     # SINH sẽ thấy gì, KHÔNG chứng minh phiên nào đó gọi được `mcp__github__*`. Đưa
     # nó vào tập này là lặp đúng lớp lỗi mà chính tập này sinh ra để chặn (đếm SỰ CÓ
@@ -3014,7 +3179,7 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho"}
     return (("DUNG_DUOC" if any(ok for t, ok, _ in duong if t in LAM_DUOC_VIEC)
              else "CHUA_XAC_THUC"),
-            " · ".join(f"{t}={_nhan_duong(ok)}" for t, ok, _ in duong) + canh)
+            " · ".join(f"{t}={_nhan_duong(ok)}" for t, ok, _ in duong) + canh + canh_ep)
 
 
 _RE_NANG_LUC_HOOK = re.compile(r"^#\s*hook-nang-luc:\s*(.+)$", re.MULTILINE)

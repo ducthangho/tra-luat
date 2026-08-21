@@ -1,0 +1,68 @@
+# BIÊN NHẬN — cross-review lượt 1 của PR #204 (packet PLAT-M4, #194).
+#
+# Reviewer là `codex`, KHÁC nhà cung cấp với người vá (`claude`) ⇒ §8 thoả về mặt nền.
+# Nhưng verdict là `changes_requested`, nên KHÔNG cấp điều kiện land: `cross_approved`
+# CHƯA đạt. Đạt hay không do lượt sau quyết, sau khi finding P2 được đóng.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: PLAT-M4
+packet_issue: 194
+lease_id: plat-m4-review-1r2-codex-20260820
+provider: codex
+role: reviewer
+verdict: changes_requested
+cross_provider: true
+assurance_dat: null
+assurance_KHONG_dat: cross_approved
+reviewed_sha: 5813fc450efe3cb349b082044708d27a589b69fb
+
+verdict_path: ops/reviews/plat-m4-review-1-codex-verdict.md
+verdict_sha256: d41b9eb0e1c20a8cb81e9c082e416360e0a5c0d1044d7b4b07d7af1fde24642b
+verdict_bytes: 2345
+verdict_nguon: 'scratchpad/m4-review-r2.log — stdout cua `codex exec`, tien trinh thoat 0'
+verdict_doi_chieu: >-
+  Cat tu lan xuat hien CUOI cua dong `codex` den dong `Reviewed commit:` DAU TIEN. codex in
+  than verdict HAI lan (mot lan la message, mot lan la ban tong ket cuoi); da kiem ban chep
+  chi con DUNG MOT `VERDICT:` va DUNG MOT `Reviewed commit:`.
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/c2889b23c9dd5fe973d698a35cfe5912189cb7c3/ops/reviews/plat-m4-review-1-codex-verdict.md
+published_first:
+  branch: ops/lease-review-m4-x4
+  commit: c2889b23c9dd5fe973d698a35cfe5912189cb7c3
+truy_xuat_tag: null
+truy_xuat_ghi_chu: 'PR #204 CHUA land, chua co tag luu-tru.'
+
+ban_chieu_tren_pr:
+  kenh: issue_comment
+  comment_id: 5355847659
+  mang_trang_thai_review_github: false
+  ly_do: >-
+    PAT cua phien chinh la tai khoan TAC GIA PR, GitHub tu choi REQUEST_CHANGES tren PR cua
+    chinh minh. Nen ban chieu la comment thuong, khong mang trang thai review chinh thuc.
+  doi_chieu_da_den: >-
+    DA doc nguoc ve va diff: khop tung byte SAU khi `html.unescape` — bo DOC cua MCP tra
+    `&#34;` cho dau nhay that. Khong co mat mat noi dung.
+
+chot_read_only_sau_luot:
+  git_status_short: RONG
+  head_khong_doi: true
+
+luot_truoc_bi_bo:
+  lease_id: plat-m4-review-1-codex-20260820
+  verdict: blocked
+  ly_do: >-
+    LOI DUNG SANDBOX cua phien dieu phoi, khong phai loi ma: 5 tep artefact dat NGAY TRONG
+    cay worktree nen `git status --short` ban truoc khi reviewer doc dong nao. Reviewer dung
+    o preflight va KHONG tu xoa tep la de chay tiep — dung.
+  tieu_mot_loi_goi: true
+
+verdict_usage_caveats:
+  - id: so-cua-reviewer-do-tren-linux
+    noi_dung: >-
+      Moi con so trong verdict (142/142, dot bien 132/132, TOKEN_LEAK=NO) reviewer do tren
+      LINUX. Bang chung Windows KHONG nam trong verdict — no den tu luot CI
+      `32361685311` (job `96402421129`, head y het), noi suite chay `128/128` va in
+      `t62: QUA`. Chay lai verdict tren Windows se ra so KHAC (Windows bo qua 15 ca, Linux
+      bo qua 1); so lech la BINH THUONG, khong phai dau hieu hong.

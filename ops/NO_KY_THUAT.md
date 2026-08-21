@@ -479,3 +479,53 @@ nháp là **lời khai không có phép đo**. Sau khi ép `gpg.format=ssh` + `g
 
 Cho tới lúc đó, assurance thực của `#195` là **`same_provider_approved` cho phần đuôi**,
 KHÔNG phải `cross_approved` cho toàn bộ. Đừng viện `#195` làm tiền lệ "đã được review chéo".
+
+---
+
+## 9. `PLAT-X5-required-status-check` — nợ **THƯỜNG TRỰC**, không phải nợ có hạn
+
+**Người quyết:** `ducthangho`, 21-08-2026 (Q7 = **KHÔNG BẬT**). Trước đó Q7 nằm ở trạng thái
+thứ ba (`chưa quyết`); nay nó là một QUYẾT ĐỊNH, và hệ quả khác hẳn — nên mục này ghi *nợ
+thường trực*, không ghi *nợ chờ xử*. Đừng để ai đọc nó thành "sẽ làm sau".
+
+**Đo được, còn đỏ tại lúc mở mục này:** `.github/workflows/ci.yml` khai **2** chuỗi
+`NỢ CÓ TÊN` (dòng 135 và 177) trong khi sổ này có **0** mục tương ứng. Nợ được đặt tên trong
+mã mà không có nhà trong sổ là nợ **không ai đọc**. Mục 9 và mục 10 đóng đúng khoảng lệch ấy.
+
+**Cái MẤT — nói thẳng:** câu hỏi *"CI có thật sự chạy gate không"* **vĩnh viễn không có nhà**.
+Một selftest không thể tự chứng minh nó đã được GitHub gọi; thứ trả lời được câu ấy là branch
+protection require status của job `gate`, và nó nằm NGOÀI kho. Không bật thì không ai trả lời.
+
+**Cái KHÔNG mất — cũng phải nói thẳng, kẻo đọc rộng hơn thực tế:** với `PATH` thiếu
+`actionlint` vẫn còn **8 ca đỏ**. Thứ mất là **DETECTION**, không phải **PROTECTION**. Đây
+KHÔNG phải "bỏ ngỏ cổng".
+
+**Phạm vi thật của `t34`, bằng số:** `t34` che **3/8 = 37,5%** dạng gọi đã biết. Nó là lan can
+chống hồi quy vô ý, **không phải security boundary**. Năm dạng đã ĐO là lọt được liệt kê
+nguyên văn trong docstring của nó, và từ packet `SLICE-B-C` (#215) có một ca máy đòi docstring
+ấy chứa đủ năm dạng — để lời khai không trôi rộng ra lần nữa.
+
+**Điều kiện coi là XONG:** người giữ kho đảo Q7 và bật required status check cho job `gate`.
+Chừng nào Q7 còn là KHÔNG, mục này **không có điều kiện xong** — và đó chính là nghĩa của
+"thường trực". Mỗi lần đổi cách gọi bộ test vẫn sẽ đẻ một finding; đó là giá đã biết trước.
+
+---
+
+## 10. `don-nhanh-test-chua-chay-duoc-tren-windows` — nền nó CHẠY THẬT là nền duy nhất không được đo
+
+**Đo được:** bước `don-nhanh selftest (chốt xoá nhánh)` trong `.github/workflows/ci.yml` mang
+`if: runner.os != 'Windows'` — tức nó chạy ở mọi nền TRỪ Windows.
+
+**Vì sao đáng trả, không phải nợ vặt:** `don-nhanh.ps1` **vốn là script CHO Windows** (có
+`don-nhanh.cmd` đi kèm). Nên hiện trạng là: thứ duy nhất KHÔNG được đo lại chính là nền nó
+sinh ra để chạy. Đây cùng một hình dạng với bài học đã trả giá của kho — *một job CI mặc định
+SKIP là một cổng KHÔNG TỒN TẠI* — chỉ khác là ở đây `skip` được khai tường minh trong `if:`
+chứ không núp sau một nhãn.
+
+**Đừng đọc rộng hơn:** ca vẫn chạy trên Linux qua `pwsh`, nên hồi quy logic thuần vẫn bắt
+được. Thứ chưa đo là **hành vi phụ thuộc nền** — và kho đã có tiền lệ đo được rằng con số ấy
+không nhỏ: cùng `.claude/dev/launcher_test.py`, CI 17-08-2026 đo Linux bỏ qua **1** ca còn
+Windows bỏ qua **13**.
+
+**Điều kiện coi là XONG:** bước ấy chạy được trên `windows-latest` với bằng chứng DƯƠNG
+(`N/N` hai số bằng nhau) trên một lượt CI thật, và `if:` được gỡ hoặc thu hẹp kèm lý do.

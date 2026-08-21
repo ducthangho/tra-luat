@@ -1291,9 +1291,15 @@ def t34_workflow_khong_duoc_goi_THANG_tep_bo_test():
     Đổi wrapper thành một trong các dạng lọt vẫn có cùng nghĩa với xoá wiring của gate;
     một selftest không thể tự chứng minh nó đã được CI gọi.
 
+    PHẠM VI BẰNG SỐ: `t34` che **3/8 = 37,5%** dạng gọi đã biết (3 canonical nhận được,
+    5 dạng đã đo là lọt). Nói bằng số vì "che phần lớn" là lời khai không có phép đo, và
+    kho đã trả giá đúng hình dạng ấy nhiều lần.
+
     NỢ CÓ TÊN `PLAT-X5-required-status-check`: branch protection phải require status của
     job `gate` (và lượt đăng lease tương ứng). Chốt ngoài kho ấy mới trả lời "CI có thật sự
     chạy gate không". `t34` chỉ là lan can chống hồi quy vô ý, không phải security boundary.
+    Q7 ĐÃ QUYẾT (21-08-2026, `ducthangho`): KHÔNG BẬT ⇒ nợ này là THƯỜNG TRỰC, ghi ở
+    `ops/NO_KY_THUAT.md` §9. `t42` bên dưới canh cho docstring này không trôi rộng ra.
     """
     import yaml
     goc = HERE.parent / ".github" / "workflows"
@@ -1995,6 +2001,50 @@ exec "$bash_that" "$wrapper"
         bang(rc == 23 and marker_rc.exists(),
              f"wrapper nuốt rc selftest: chờ 23, được {rc}, marker={marker_rc.exists()}:\n"
              f"{ra.strip()[:400]}")
+
+
+# Năm dạng gọi ĐÃ ĐO là lọt khỏi `_CHAY_BO_TEST`. Bảng này là NGUỒN của `t42`; đổi nó mà
+# không đổi docstring `t34` thì `t42` đỏ, và ngược lại. Cố ý buộc hai chỗ vào nhau: lời
+# khai về phạm vi và phạm vi thật phải chết cùng lúc, kẻo lời khai trôi rộng ra một mình.
+_DANG_DA_DO_LA_LOT = (
+    "python -m ops.lease_publish_test",
+    "python3 -u ops/lease_publish_test.py",
+    "./ops/lease_publish_test.py",
+    "uv run ops/lease_publish_test.py",
+    "python -X utf8 ops/lease_publish_test.py",
+)
+
+
+@ca
+def t42_docstring_t34_phai_liet_ke_DU_nam_dang_da_do_la_lot():
+    """Lời khai về phạm vi phải BẰNG phạm vi đo được — và phải chết khi nó trôi.
+
+    VÌ SAO CÓ CA NÀY — đã trả giá hai lần, cùng một hình dạng, ở hai chỗ khác nhau:
+    lượt review 2 của `PLAT-M4` bắt được docstring `t143` khai "sáu điều" trong khi bản vá
+    đã thêm ràng buộc mới; và chính `t34` từng tuyên bố "đã chứng minh job cài công cụ trước
+    khi chạy" trong khi nó chỉ bắt một hồi quy hẹp. Cả hai lần, MÃ đúng còn LỜI KHAI sai —
+    nên không cổng nào bắt được, vì mọi cổng khi ấy chỉ đo mã.
+
+    Q7 (không bật required status check) làm `t34` SỐNG LÂU DÀI thay vì bị xoá sau khi đọc
+    lại cấu hình. Một lời khai sống lâu là một lời khai có thời gian để trôi. Ca này neo nó.
+
+    PHẠM VI CỦA CHÍNH CA NÀY, khai thẳng để không lặp lại đúng lỗi nó đang chặn: nó đo
+    docstring có CHỨA năm chuỗi ấy và có nêu con số `3/8`. Nó KHÔNG chứng minh năm dạng ấy
+    thật sự lọt — phép đo ấy nằm ở chỗ khác (`_CHAY_BO_TEST` và bảng trên). Đây là ca đo
+    LỜI KHAI, không phải ca đo HÀNH VI, và hai thứ đó không thay thế nhau.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ bất kỳ dạng nào khỏi docstring `t34`, hoặc bỏ con số `3/8`.
+    Không có đột biến ấy thì không biết ca đang đo lời khai hay đo thứ khác.
+    """
+    doc = t34_workflow_khong_duoc_goi_THANG_tep_bo_test.__doc__ or ""
+    thieu = [d for d in _DANG_DA_DO_LA_LOT if d not in doc]
+    bang(not thieu,
+         f"docstring `t34` thiếu {len(thieu)}/{len(_DANG_DA_DO_LA_LOT)} dạng đã ĐO là lọt: "
+         f"{thieu}. Lời khai về phạm vi phải bằng phạm vi đo được — thêm lại nguyên văn, "
+         f"đừng viết gọn thành 'và các dạng tương tự'.")
+    bang("3/8" in doc,
+         "docstring `t34` không còn nêu con số `3/8` — phạm vi phải nói bằng SỐ, không bằng "
+         "chữ. 'che phần lớn' là lời khai không có phép đo.")
 
 
 def main() -> int:

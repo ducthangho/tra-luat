@@ -1,0 +1,153 @@
+# BIÊN NHẬN — cross-review PR "#213" (`ops-don-ref`), lượt **2/2**, và HỒ SƠ ĐÓNG BĂNG.
+#
+# Executor `claude`, reviewer `codex` ⇒ cross-provider. Cả hai lượt đều `changes_requested`,
+# mỗi lượt một **P1**, và lượt sau sâu hơn lượt trước. `cross_approved` KHÔNG đạt.
+#
+# PR "#213" ĐÓNG BĂNG theo quyết của người giữ kho (2026-08-21). Phần xoá-an-toàn chuyển
+# sang một packet riêng có đặc tả soạn trước.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: DONREF-CHOT-DO-DUOC
+packet_issue: 213
+lease_id: donref-review-2-codex-20260821
+provider: codex
+role: reviewer
+executor_provider: claude
+verdict: changes_requested
+assurance: cross_changes_requested
+assurance_KHONG_dat: cross_approved
+cross_provider: true
+reviewed_sha: 9588bb1ef57209da02562928893f544d7d447db1
+head_luot_truoc: cbc57214be1f33b93c5d04e4363c2bcce87439b6
+target_pull_request: 213
+
+verdict_path: ops/reviews/donref-review-2-codex-verdict.md
+verdict_sha256: 0b35d867c4ec592db8bc4d791180e1412935f557b4fdd3a8065f751b1fc70e75
+verdict_bytes: 3076
+verdict_nguon: 'scratchpad/rvdonref2/runs/ef6b74e2/stdout.log (launcher, ma_thoat=0, 648.441s)'
+verdict_doi_chieu: '`cmp` nguồn ↔ tệp đã chép: khớp từng byte'
+
+evidence_channel: repo_file
+authoritative_source: repo_file
+
+BAN_GOC_LUOT_1_DA_MAT:
+  su_viec: >-
+    Verdict lượt 1 (`runs/4b31278d/stdout.log`, 3926 byte) nằm trong sandbox, và sandbox bị xoá
+    khi phiên điều phối khởi động lại. Nó CHƯA TỪNG được ghi vào kho.
+  loi_cua_ai: >-
+    Phiên điều phối. Chính nó đã cảnh báo người khác đúng rủi ro này ở PR "#211" — và rồi mắc lại.
+  da_lam_gi: >-
+    Dựng lại từ ngữ cảnh phiên và lưu dưới tên `donref-review-1-codex-verdict-DUNG-LAI.md` —
+    TÊN TỆP mang sẵn cảnh báo, và dòng đầu tệp nói rõ nó KHÔNG phải bản gốc byte-cho-byte.
+  cai_gi_VAN_tra_duoc: >-
+    Kết luận (`changes_requested` trên `cbc57214`), finding P1, và các số đo — vì chúng được
+    trích trong thân commit `9588bb1e` và trong bản chiếu đã đăng trên PR.
+  cai_gi_MAT_HAN: 'Bản gốc neo bằng băm. Không có băm nào của lượt 1 để đối chiếu.'
+  ban_dung_lai:
+    path: ops/reviews/donref-review-1-codex-verdict-DUNG-LAI.md
+    sha256: e555d7ba0c20580570b3ad64dec0effdc1ec57ac4f3249618cdf5305f27a4251
+    bytes: 3663
+    canh_bao: 'Băm này là băm của BẢN DỰNG LẠI, KHÔNG phải của bản gốc. Đừng trích nó như nguyên văn reviewer.'
+
+hai_P1_cua_hai_luot:
+  P1_luot_1:
+    id: ghim-doc-lai-van-la-TOCTOU
+    noi_dung: >-
+      Bước làm đọc SHA → so → RỒI MỚI `DELETE`. Push chen giữa thì commit mới bị xoá mà chưa
+      từng được đo. REST `DELETE /git/refs` chỉ nhận TÊN ref, không có CAS.
+    reviewer_do_the_nao: 'đồ giả GIỮ TRẠNG THÁI, nhánh nhảy S1 → S2 sau lần GET cuối; bản cũ rc=0, DELETE gọi 1 lần, xoá chính S2.'
+    da_va: true
+    va_bang: '`git push --force-with-lease=<ref>:<sha ghim>` — old-oid trong CÙNG giao dịch.'
+  P1_luot_2:
+    id: lease-bao-ve-dung-MOT-NUA-giao-dich
+    noi_dung: >-
+      Phép đo an toàn là "mọi commit đã nằm trong nhánh mặc định", nhưng bản vá chỉ ghim/lease
+      REF BỊ XOÁ, không ghim REF LÀM CĂN CỨ. Nhánh mặc định đổi sau phép đo thì căn cứ bốc hơi
+      mà lệnh xoá vẫn chạy.
+    reviewer_do_the_nao: >-
+      Kho bare thật `A → S → D`, `ops/work=S`, `master=D`. Chốt qua, ghim `S`. Ép `master: D → A`.
+      Bước làm vẫn rc=0, xoá `ops/work`. Sau đó `for-each-ref --contains=S` RỖNG.
+    phien_dieu_phoi_tai_hien_doc_lap: >-
+      CÓ — dựng lại fixture và chạy: `- [deleted] work`, rc=0, `for-each-ref --contains=S` = 0 ref.
+    da_va: false
+
+duong_va_DA_DO_nhung_CHUA_lam:
+  ten: atomic-multi-ref-lease
+  cach: >-
+    Đưa CẢ nhánh mặc định vào cùng một giao dịch:
+    `git push --atomic --force-with-lease=refs/heads/<mặc định>:<D ghim>
+    --force-with-lease=refs/heads/<ref>:<S ghim> origin <D>:refs/heads/<mặc định> :refs/heads/<ref>`
+  do_hai_chieu_boi_phien_dieu_phoi:
+    - 'mặc định còn ở D ⇒ `- [deleted] work`, rc=0, mặc định KHÔNG đổi'
+    - 'mặc định bị lùi ⇒ `! [rejected] … (stale info)` + `! [rejected] (delete) … (atomic push failed)`, rc=1, CẢ HAI ref còn nguyên'
+  trang_thai: 'CHƯA đưa vào mã. Trần review đã cạn 2/2, nên nó thuộc packet mới.'
+
+reviewer_XAC_NHAN_GIUP_mot_cho:
+  id: tag-co-chu-giai
+  noi_dung: >-
+    `git/ref/tags/X --jq .object.sha` trả SHA của ĐỐI TƯỢNG TAG, còn `repos/…/tags` trả COMMIT.
+    Reviewer đo: lease bằng commit SHA ⇒ stale, tag còn; lease bằng tag-object SHA ⇒ xoá được.
+    ⇒ cách người vá đọc SHA cho tag là ĐÚNG.
+
+reviewer_tu_khai_CHUA_DO_DUOC:
+  ly_do: 'Dừng theo điều kiện phạm vi ngay khi thấy P1 — cả hai lượt.'
+  danh_sach:
+    - 'tám mutant người vá đã khai (N1–N5, M1, M4, đối chứng) — CHƯA chạy lại'
+    - 'multi-ref dở dang (ref đầu xoá xong, ref sau lease trượt)'
+    - '`actions/checkout`: credential, dispatch-ref trùng nhánh sắp xoá'
+    - 'lịch sử rời (`compare` khi không có tổ tiên chung)'
+    - 'ngưỡng 250 commit của `compare`'
+    - 'đột biến chèn bước YAML'
+    - 'lập luận `M2`'
+    - 'các race quanh đầu nhánh mặc định (ngoài cái đã thành P1)'
+  reviewer_noi_thang: 'Không mục nào trong số này được coi là sạch.'
+
+nen_do_boi_nguoi_va:
+  - 'ops/don_ref_chot_test.sh -> 105/105, rc=0'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'lease nguồn thật: SHA cũ ⇒ rc=1 ref còn; SHA đúng ⇒ rc=0 ref mất; chạy từ kho 0 object'
+nen_ghi_chu: 'Reviewer xác nhận các số này trên archive của nó.'
+
+so_sach_ngan_sach:
+  review_rounds_used: 2
+  review_rounds_limit: 2
+  reviewer_noi: 'Lượt 2/2 đã hết; cần Review Rescue/human checkpoint, KHÔNG gọi Codex lượt ba.'
+
+quyet_dinh_cua_nguoi_giu_kho:
+  luc: 'direct, in-session, 2026-08-21'
+  noi_dung: 'chọn (3) — đóng băng #213, mở packet riêng cho phần xoá-an-toàn'
+  vi_sao_khong_va_tiep: >-
+    HAI lượt liên tiếp cùng MỘT hình dạng lỗi: người vá đóng khe ở chỗ mình nhìn thấy, rồi KHAI
+    là đã đóng, trong khi khe thật nằm ở một ref khác. Doctrine kho: cùng hình dạng lặp lại thì
+    câu hỏi đúng là "có nên làm việc này không", không phải "vá thế nào".
+
+verdict_usage_caveats:
+- id: KHONG-dat-cross_approved-va-KHONG-duoc-merge
+  noi_dung: >-
+    Cả hai lượt `changes_requested`, mỗi lượt một P1, và P1 lượt 2 CÒN MỞ. PR "#213" **đóng băng**,
+    không merge. Đừng đọc sự có mặt của hồ sơ này thành "đã xử xong".
+- id: ban-goc-luot-1-DA-MAT-ban-trong-kho-la-DUNG-LAI
+  noi_dung: >-
+    `donref-review-1-codex-verdict-DUNG-LAI.md` là **bản dựng lại từ ngữ cảnh phiên**, không có
+    băm gốc để đối chiếu. **Đừng trích nó như nguyên văn reviewer.** Bản gốc mất vì phiên điều
+    phối không ghi verdict vào kho ngay — cùng rủi ro nó đã cảnh báo ở PR "#211".
+- id: duong-va-atomic-lease-DA-DO-nhung-CHUA-vao-ma
+  noi_dung: >-
+    Phép đo hai chiều của atomic multi-ref lease là THẬT và tra lại được, nhưng nó **chưa nằm
+    trong mã**. Đừng đọc biên nhận này thành "P1 lượt 2 đã có bản vá".
+- id: bay-truc-CHUA-AI-DO
+  noi_dung: >-
+    Reviewer dừng sớm ở CẢ HAI lượt. Tám mutant, multi-ref dở dang, checkout credential, lịch sử
+    rời, ngưỡng 250, YAML insertion, `M2` — **chưa ai đo**. Packet mới phải phủ chúng, không được
+    thừa hưởng cảm giác "đã được review kỹ".
+
+delivered: true
+delivered_by: claude-session
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-21T06:40:00Z'
+
+viec_cho_chu_kho:
+- 'Packet mới: đặc tả soạn trước (`/soan-spec`) rồi mới cấp lease — hai P1 liên tiếp là dấu hiệu đặc tả chưa đủ chặt, không phải mã ẩu.'
+- '16 nhánh `ops/**` đã land vẫn CHƯA dọn được; đường không phụ thuộc packet nào là chạy `git push origin --delete` trên máy chủ kho.'
+- '`ops-publish-lease.yml` thiếu `pull-requests: write` — lease của PR này phải đăng TAY hai lượt.'

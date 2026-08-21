@@ -2789,8 +2789,23 @@ def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None, str | None]:
     # toàn khoảng trắng không đi tiếp thành "đã có URL".
     url = srv[ten[0]].get("url")
     url = url.strip() if isinstance(url, str) and url.strip() else None
-    return (True, f".mcp.json [{nguon}] khai server: {ten[0]}"
-            + (f" @ {url}" if url else " (khong khai `url`)"), ten[0], url)
+    # KHONG noi suy `url` NGUYEN VAN vao mo ta. Finding R3 cua luot review 3: mot
+    # `.mcp.json` khai `https://user:GOCSPX-abc@host/mcp` lam mo ta CHUA bi mat. Hien
+    # caller duy nhat (`_do_github`) vut chuoi nay o nhanh duong nen chua lo ra ngoai —
+    # nhung bat bien viet ngay trong `_do_mcp_endpoint` la "KHONG mot nhanh nao duoc mang
+    # DU LIEU LAY TU url", va mot ham ben canh dung chuan khac la khau sung da nap dan:
+    # them mot caller, hoac ai in truong nay vao JSON cua `doctor`, la lo ngay.
+    # Chi in scheme + host — du de nguoi doc biet no tro DI DAU ma khong cho duoc bi mat.
+    if url:
+        try:
+            _p = urllib.parse.urlsplit(url)
+            _noi = f"{_p.scheme}://{_p.hostname}" if _p.hostname else "(url khong co ten may)"
+        except ValueError:
+            _noi = "(url khong phan tich duoc)"
+        _duoi = f" @ {_noi}"
+    else:
+        _duoi = " (khong khai `url`)"
+    return (True, f".mcp.json [{nguon}] khai server: {ten[0]}" + _duoi, ten[0], url)
 
 
 def _suc_khoe_mcp_github(ten: str = "github",
@@ -2920,6 +2935,16 @@ def _do_mcp_endpoint(url: str | None, *, token: str | None = None,
         p_ep = urllib.parse.urlsplit(str(url))
         chu_ep, may_ep = p_ep.scheme.lower(), p_ep.hostname
         ai_ep = (p_ep.username, p_ep.password)
+        # `.port` PHAI duoc doc TRONG `try` nay. Ly do la mot finding cua luot review 3
+        # (R1): `urlsplit` chi gan `username`/`password` khi co dau `@`, nen mot bi mat
+        # dat o VI TRI PORT — `https://host:GOCSPX-abc/mcp` — di qua het ba chot duoi
+        # (khong userinfo, scheme https, co hostname) roi vao thang `Request`.
+        # Runtime that KHONG lo: `http.client` nem `InvalidURL` truoc khi mo socket. Nhung
+        # do la chot cua NGUOI KHAC, khong phai chot cua ta — cung ho voi bai hoc "cong
+        # khong noi doi, no VANG MAT". `.port` la property ném `ValueError` voi port phi
+        # so, nen doc no o day la du: ca dong roi vao nhanh `khong_do_duoc` ngay ben duoi,
+        # va khong nhanh nao mang du lieu tu `url` ra.
+        _ = p_ep.port
     except ValueError as e:
         # Ten LOP ngoai le la tap dong, khong lay tu `url`.
         return ("khong_do_duoc", f"`url` khong phan tich duoc ({type(e).__name__})", False)

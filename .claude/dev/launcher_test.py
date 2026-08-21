@@ -5355,13 +5355,17 @@ def t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec():
     `initialize` trả HTTP 200 kèm header GitHub). Một phiên đọc trường gộp cũ sẽ kết
     luận "GitHub bị chặn" rồi dừng — ĐÃ XẢY RA, mất trọn một lượt.
 
-    Ca này khoá TÁM điều. Sáu điều đầu là phản chứng ở §5 thân Issue #194; điều 7 và 8
-    đến từ lượt cross-review 2/2 và khoá BIÊN CẤU TRÚC của `userinfo` — xem (5c)–(5e):
+    Ca này khoá CHÍN điều. Sáu điều đầu là phản chứng ở §5 thân Issue #194; điều 7 và 8
+    đến từ lượt cross-review 2/2 và khoá BIÊN CẤU TRÚC của `userinfo` — xem (5c)–(5g):
       7. URL MÉO mang credential (không parse ra `userinfo`) phải bị từ chối MÀ KHÔNG
          làm lộ bí mật qua MÔ TẢ — "không gọi mạng" KHÔNG bằng "không làm lộ".
       8. Biên phải đo theo CẤU TRÚC, không theo ký tự: `@` trong path/query vẫn probe
          được, còn username RỖNG + password CÓ vẫn là credential và phải bị chặn.
-    (Điều thứ chín, đo bằng HÀNH VI, vẫn giữ nguyên ở cuối ca.)
+    (Điều thứ chín, đo bằng HÀNH VI, nằm ở cuối docstring này — nó đánh số 9, KHÔNG
+    phải 7. Bản trước đánh nó HAI SỐ cùng lúc và khai tổng là TÁM trong khi khoá chín;
+    lượt review 3 bắt được, và đó là LẦN THỨ HAI liên tiếp lời khai số đếm của chính ca
+    này trôi — lượt 2 đã bắt bản 'sáu điều'. Cả chín điều ĐỀU có phép đo thật; thứ sai
+    chỉ là con số, mà con số sai vẫn là lời khai sai.)
       1. 200 CÓ header  -> `mo` + THÀNH CÔNG          (phân loại theo header, không theo mã)
       2. 4xx KHÔNG header -> `chan`, nói rõ "proxy tự sinh"
       3. 4xx CÓ header  -> `mo` NHƯNG không thành công (hai câu hỏi khác nhau)
@@ -5369,7 +5373,7 @@ def t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec():
       5. thiếu `url` / `url` không phải http(s) -> `khong_do_duoc` CÓ LÝ DO, và
          KHÔNG được gọi `urlopen` lấy một lần (`file:///` là lượt đọc đĩa trá hình)
       6. token KHÔNG lộ ra bất kỳ byte mô tả nào — kể cả khi đi qua `_do_github`
-    Và điều thứ bảy, đo bằng HÀNH VI chứ không bằng đọc mã: `mcp-endpoint=OK` một mình
+    Và điều thứ CHÍN, đo bằng HÀNH VI chứ không bằng đọc mã: `mcp-endpoint=OK` một mình
     KHÔNG được nâng nhãn lên `DUNG_DUOC`.
     """
     import json as _json
@@ -5521,7 +5525,37 @@ def t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec():
              f"{len(nhat_ky)} loi goi")
         bang(SENT not in mo_ta, f"MO TA cho bi mat o ca username rong: {mo_ta!r}")
 
-        # --- DIEU THU BAY, do bang HANH VI: endpoint OK mot minh KHONG nang duoc nhan.
+        # (5f) BIEN CAU TRUC, khe THU BA: VI TRI PORT. Finding R1 cua luot review 3.
+        # `urlsplit` chi gan `username`/`password` khi co dau `@`, nen bi mat dat o cho
+        # port di qua HET ba chot cu (khong userinfo, scheme https, co hostname). Ban
+        # truoc KHONG lo o runtime that — nhung chi vi `http.client` nem `InvalidURL`
+        # truoc khi mo socket, tuc mot chot cua NGUOI KHAC. Doc `p_ep.port` trong `try`
+        # bien no thanh chot CUA TA. Dot bien lam ca nay do: bo dong `_ = p_ep.port`.
+        nhat_ky.clear()
+        dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+        tt, mo_ta, ok = m._do_mcp_endpoint(f"https://host.test:{SENT}/mcp", token=SENT)
+        bang(tt == "khong_do_duoc" and ok is False and not nhat_ky,
+             f"bi mat o VI TRI PORT phai bi tu choi TRUOC khi probe: {tt} "
+             f"{len(nhat_ky)} loi goi")
+        bang(SENT not in mo_ta, f"MO TA cho bi mat o ca port: {mo_ta!r}")
+
+        # (5g) `_doc_mcp_json` KHONG duoc noi suy `url` NGUYEN VAN vao mo ta. Finding R3.
+        # Ham do o NGAY BEN CANH va dung chuan khac han `_do_mcp_endpoint`; hien caller
+        # vut chuoi ay o nhanh duong nen chua lo, nhung do la may man cua CALLER chu khong
+        # phai bat bien cua HAM. Dot bien lam ca nay do: tra lai `f" @ {url}"`.
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / ".mcp.json").write_text(
+                _json.dumps({"mcpServers": {
+                    "github": {"url": f"https://nguoi:{SENT}@host.test/mcp"}}}),
+                encoding="utf-8")
+            co_khai, mt_mcp, _ten, _url = m._doc_mcp_json(td)
+            bang(co_khai is True, f"`.mcp.json` hop le ma bao khong khai: {mt_mcp!r}")
+            bang(SENT not in mt_mcp,
+                 f"MO TA cua `_doc_mcp_json` CHUA bi mat lay tu `url`: {mt_mcp!r}")
+            bang("host.test" in mt_mcp,
+                 f"cat het thi nguoi doc khong biet no tro DI DAU — phai con host: {mt_mcp!r}")
+
+        # --- DIEU THU CHIN, do bang HANH VI: endpoint OK mot minh KHONG nang duoc nhan.
         # Doc ma nguon (khuc dau ca t115) chi bat duoc dot bien SUA DUNG dong
         # `LAM_DUOC_VIEC`; ca nay bat ca nhung duong vong khac dan toi cung hau qua.
         with tempfile.TemporaryDirectory() as td:
@@ -6209,7 +6243,18 @@ DOT_BIEN = [
     # ĐỔI TỪ `"mcp"` SANG `"mcp-endpoint"` (PLAT-M4): sau khi trường được tách, không còn
     # đường nào tên `mcp` để mà thêm vào — mutant cũ sẽ đo một cái tên đã chết, tức là
     # KHÔNG đo gì. `mcp-endpoint` mới là cám dỗ thật: nó CÓ chạm máy chủ thật.
-    # Hai ca giết nó theo hai đường độc lập: `t115` đọc MÃ NGUỒN, `t138` đo HÀNH VI
+    # Hai ca giết nó theo hai đường độc lập: `t115` đọc MÃ NGUỒN, `t143` đo HÀNH VI
+    # (`t138` ở dòng này là SAI và đã sửa ở lượt review 3: `t138` nay là ca THẬT của
+    #  #196 — `t138_auth_het_ngan_sach_phai_vao_CHUA_DO` — không đo gì về mcp-endpoint.
+    #  Trỏ vào một tên ĐANG SỐNG mà sai nghĩa còn tệ hơn trỏ vào tên đã chết.)
+    # HAI ĐỘT BIẾN TỪ LƯỢT REVIEW 3 (R1, R3). Mỗi chốt mới phải có mutant RIÊNG — một
+    # cửa không có mutant là một cửa sẽ âm thầm hở lại; kho đã trả giá đúng bài này.
+    ("mcp_endpoint_bo_doc_PORT",
+     ('        _ = p_ep.port\n', ''),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_json_noi_suy_url_NGUYEN_VAN_vao_mo_ta",
+     ('        _duoi = f" @ {_noi}"', '        _duoi = f" @ {url}"'),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     # (endpoint OK một mình mà nhãn vẫn phải là CHUA_XAC_THUC).
     ("mcp_endpoint_tinh_vao_LAM_DUOC_VIEC",
      ('    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho"}',

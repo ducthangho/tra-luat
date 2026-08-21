@@ -70,6 +70,17 @@ jobs:
   don:
     runs-on: ubuntu-latest
     steps:
+      # CẦN cho `git push --force-with-lease`: bước làm xoá ref bằng LEASE qua git
+      # transport chứ không bằng `DELETE /git/refs` (REST không nhận SHA kỳ vọng, xem
+      # chú thích ở bước làm). `actions/checkout` đặt credential vào git config dạng
+      # header, KHÔNG nhét token vào URL remote — đường kia là một chỗ rò credential.
+      # `fetch-depth: 1`: ĐO ĐƯỢC 21-08-2026 rằng `--force-with-lease` với giá trị kỳ
+      # vọng nêu TƯỜNG MINH (`ref:sha`) chạy được cả từ một kho KHÔNG có object nào —
+      # nên không cần lịch sử, chỉ cần một remote có xác thực.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: khai đầu vào vào log
         env:
           HANH_DONG: ${{ inputs.hanh_dong }}
@@ -197,6 +208,7 @@ jobs:
                   fi
                   if gh api --paginate "repos/$GITHUB_REPOSITORY/tags" --jq '.[].commit.sha' 2>/dev/null | grep -qxF "$sha_nhanh"; then
                     echo "cho phép: '$r' ($sha_nhanh) vẫn còn tag giữ commit ấy"
+                    sha_ghim="$sha_nhanh"
                   else
                     echo "DỪNG: '$r' trỏ $sha_nhanh mà KHÔNG tag nào giữ commit ấy. Xoá nhánh này là làm published_* trong ops/reviews/*.receipt.yaml thành SHA không tra được. Tạo tag TRƯỚC (hành động tao-tag), rồi mới xoá."; exit 2
                   fi
@@ -251,14 +263,29 @@ jobs:
                     echo "DỪNG: '$r' còn $sau_lung commit CHƯA có trong $MAC_DINH. Xoá là làm chúng không tra được. Merge vào $MAC_DINH trước, hoặc tạo tag giữ chúng."; exit 2
                   fi
                   echo "cho phép: '$r' ($sha_nhanh) — 0 commit ngoài $MAC_DINH"
-                  # GHIM SHA cho bước làm. Giữa lúc đo và lúc xoá, ai đó vẫn có thể đẩy
-                  # commit mới lên nhánh — khe ấy có thật và không đóng được bằng API
-                  # (`DELETE /git/refs` không nhận SHA mong đợi, tức không có
-                  # `--force-with-lease` cho việc xoá). Cái đóng được: bước làm đọc lại
-                  # đầu nhánh và ĐÒI đúng SHA đã đo. Nhánh nhúc nhích một cái là ĐỎ.
-                  printf '%s %s\n' "$r" "$sha_nhanh" >> "$NEO_TEP"
+                  sha_ghim="$sha_nhanh"
                   ;;
               esac
+
+              # ═══ GHIM SHA cho MỌI ref sắp xoá, không riêng vùng làm việc ═══
+              # Bước làm xoá bằng LEASE (`--force-with-lease=ref:sha`), nên nó cần một
+              # giá trị KỲ VỌNG — và giá trị ấy phải là thứ ta vừa ĐO ở đây, không phải
+              # thứ đọc lại sau. Đọc lại rồi so rồi xoá vẫn là TOCTOU: cross-review lượt 1
+              # trên PR "#213" dựng đồ giả cho nhánh nhảy SHA ĐÚNG GIỮA lần đọc cuối và
+              # lệnh xoá, và bản trước xoá mất commit chưa từng được đo. Lease thì gửi
+              # old-oid TRONG CÙNG giao dịch, nên không có khe.
+              #
+              # Không đọc được SHA ⇒ DỪNG. Không có giá trị ghim thì không dựng được
+              # lease, mà xoá không lease là quay lại đúng lỗ vừa vá.
+              LOAI_REF=heads; [ "$HANH_DONG" = xoa-tag ] && LOAI_REF=tags
+              if [ -z "${sha_ghim:-}" ]; then
+                sha_ghim="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/$LOAI_REF/$r" --jq .object.sha 2>/dev/null || true)"
+              fi
+              if ! printf '%s' "${sha_ghim:-}" | grep -Eq '^[0-9a-f]{40}$'; then
+                echo "DỪNG: KHÔNG ĐO ĐƯỢC SHA của '$r' — không có giá trị nào để ghim, mà lease của bước làm thì bắt buộc."; exit 2
+              fi
+              printf '%s %s\n' "$r" "$sha_ghim" >> "$NEO_TEP"
+              unset sha_ghim
             else
               # TẠO TAG cũng chịu danh sách bảo vệ — TRỪ `luu-tru/`, và chỗ trừ này là
               # một bản vá, không phải một ngoại lệ tiện tay.
@@ -372,28 +399,25 @@ jobs:
                 khong) echo "ĐỎ: $LOAI/$r KHÔNG tồn tại — không xoá được thứ không có"; exit 1 ;;
                 *) echo "ĐỎ: KHÔNG ĐO ĐƯỢC $LOAI/$r trước khi xoá — dừng, không xoá mù. $truoc"; exit 1 ;;
               esac
-              # GHIM: với nhánh trong vùng làm việc, bước chốt đã ĐO rằng mọi commit
-              # của nó nằm trong nhánh mặc định, và đã ghi lại SHA đo được. Ở đây đọc
-              # lại đầu nhánh và ĐÒI đúng SHA ấy. Không có phép này thì phép đo kia chỉ
-              # nói về QUÁ KHỨ: ai đẩy thêm commit giữa hai bước là commit ấy bị xoá mà
-              # chưa từng được đo. Thiếu ghim ⇒ ĐỎ, không phải bỏ qua — một nhánh vùng
-              # làm việc tới được đây mà không có ghim nghĩa là chốt đã bị gỡ.
-              case "$(printf '%s' "$r" | tr '[:upper:]' '[:lower:]')" in
-                ops/*|claude/*|codex/*|agent/*|mission/*|dispatcher/*)
-                  neo="$(awk -v k="$r" '$1==k{print $2}' "$NEO_TEP" 2>/dev/null | tail -1)"
-                  if ! printf '%s' "$neo" | grep -Eq '^[0-9a-f]{40}$'; then
-                    echo "ĐỎ: '$r' thuộc vùng làm việc mà KHÔNG có SHA ghim từ bước chốt — chốt tổ-tiên đã không chạy cho ref này."; exit 1
-                  fi
-                  gio="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$r" --jq .object.sha 2>/dev/null || true)"
-                  if ! printf '%s' "$gio" | grep -Eq '^[0-9a-f]{40}$'; then
-                    echo "ĐỎ: KHÔNG ĐO ĐƯỢC đầu nhánh '$r' ngay trước khi xoá — dừng."; exit 1
-                  fi
-                  if [ "$gio" != "$neo" ]; then
-                    echo "ĐỎ: '$r' đã nhúc nhích giữa lúc đo và lúc xoá (đo $neo, nay $gio). Commit mới CHƯA được đo — chạy lại."; exit 1
-                  fi
-                  ;;
-              esac
-              gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/$LOAI/$r"
+              # ═══ XOÁ BẰNG LEASE, KHÔNG bằng REST ═══
+              # `DELETE /repos/{o}/{r}/git/refs/{ref}` chỉ nhận TÊN ref — không có tham
+              # số SHA kỳ vọng, tức không có CAS. Bản trước đọc lại SHA rồi so rồi mới
+              # gọi DELETE; cross-review lượt 1 trên PR "#213" dựng đồ giả GIỮ TRẠNG THÁI
+              # cho nhánh nhảy SHA ĐÚNG GIỮA lần đọc cuối và lệnh xoá, và bản ấy xoá mất
+              # commit chưa từng được đo. "Đọc lại" THU HẸP khe, KHÔNG đóng nó — câu cũ
+              # viết là "đóng" và câu ấy sai.
+              #
+              # `git push --force-with-lease=<ref>:<sha> origin :<ref>` gửi old-oid
+              # TRONG CÙNG giao dịch với lệnh xoá, nên máy chủ từ chối nếu ref đã đổi.
+              # ĐO ĐƯỢC 21-08-2026 trên kho bare dựng tại chỗ, cả nhánh lẫn tag:
+              #   lease neo SHA CŨ  -> `! [rejected] (delete) … (stale info)`, rc=1, ref CÒN
+              #   lease neo SHA ĐÚNG -> `- [deleted]`, rc=0, ref MẤT
+              # và nó chạy được cả từ kho KHÔNG có object nào (0 objects) — chỉ cần remote.
+              neo="$(awk -v k="$r" '$1==k{print $2}' "$NEO_TEP" 2>/dev/null | tail -1)"
+              if ! printf '%s' "$neo" | grep -Eq '^[0-9a-f]{40}$'; then
+                echo "ĐỎ: '$r' KHÔNG có SHA ghim từ bước chốt — không dựng được lease, và xoá không lease là quay lại đúng lỗ vừa vá."; exit 1
+              fi
+              git push --force-with-lease="refs/$LOAI/$r:$neo" origin ":refs/$LOAI/$r"
               # Không có gì ở đây bảo đảm lệnh trên ĐÃ CHẠY nếu ai đó xoá nó đi — phép
               # đọc lại phía dưới sẽ vẫn xanh khi ref tình cờ đã biến mất vì lý do khác.
               # Chốt thật nằm ở bộ test (đòi đúng một lời gọi DELETE trong nhật ký).

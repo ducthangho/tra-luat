@@ -114,7 +114,11 @@ SHA_THAT=b4e5c5f9ef85e652fa2cc98bb3474036519d663c
 ca "xac_nhan sai thì DỪNG"                2 xoa-nhanh tmp-probe-2 "" xoa
 ca "xac_nhan rỗng thì DỪNG"               2 xoa-nhanh tmp-probe-2 "" ""
 ca "xac_nhan TAO cho lệnh XOÁ thì DỪNG"   2 xoa-nhanh tmp-probe-2 "" TAO
-ca "ref thường + XOA thì QUA"             0 xoa-nhanh tmp-probe-2 "" XOA
+# Từ bản vá CAS: MỌI ref sắp xoá đều được đọc SHA để ghim, vì bước làm xoá bằng lease.
+# Không cấp SHA giả ⇒ chốt DỪNG, và đó là hành vi ĐÚNG (không ghim được thì không xoá).
+S_THUONG=dddddddddddddddddddddddddddddddddddddddd
+ca "ref thường + XOA thì QUA"             0 xoa-nhanh tmp-probe-2 "" XOA GIA_SHA_NHANH="$S_THUONG"
+ca "ref thường mà KHÔNG đọc được SHA thì DỪNG" 2 xoa-nhanh tmp-probe-2 "" XOA
 ca "nhánh MẶC ĐỊNH thì DỪNG"              2 xoa-nhanh master "" XOA
 # BẤT BIẾN mới cho `luu-tru/**`: xoá NHÁNH được, nhưng CHỈ KHI commit của nó còn tag
 # giữ. Năm ca dưới khoá đúng hợp đồng ấy — cả chiều cho phép lẫn ba chiều từ chối.
@@ -181,7 +185,7 @@ ca "dấu phẩy ở CUỐI thì DỪNG"             2 xoa-nhanh 'a,' "" XOA
 ca "dấu phẩy ở ĐẦU thì DỪNG"              2 xoa-nhanh ',a' "" XOA
 ca "hai dấu phẩy liền thì DỪNG"           2 xoa-nhanh 'a,,b' "" XOA
 ca "sha có dấu phẩy cuối thì DỪNG"        2 tao-tag v1 "$SHA_THAT," TAO
-ca "hai ref hợp lệ thì QUA"               0 xoa-nhanh 'tmp-probe-2, tmp-probe-delete' "" XOA
+ca "hai ref hợp lệ thì QUA"               0 xoa-nhanh 'tmp-probe-2, tmp-probe-delete' "" XOA GIA_SHA_NHANH="$S_THUONG"
 ca "xoá TAG dưới luu-tru/ thì DỪNG"       2 xoa-tag luu-tru/wp55-r4-verdict-review-1 "" XOA GIA_SHA_NHANH=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa GIA_TAG_SHAS=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 # Bốn ca dưới khoá finding P2 `protection-is-exact-case-only`. Git PHÂN BIỆT hoa thường
 # nên `Ops/x` đúng là nhánh khác `ops/x` — nhưng người đọc log thì không phân biệt, và
@@ -277,14 +281,73 @@ exit 0
 GHEOF
 chmod +x "$TAM/bin/gh"
 
+# `git` GIẢ — GIỮ TRẠNG THÁI, không diễn kịch bản. Kho này đã trả giá đúng chỗ đó: một
+# bản `gh` giả diễn kịch bản từng cho 40/40 trong khi đột biến XOÁ HẲN lệnh phá vẫn qua.
+# Ở đây trạng thái là tệp `GIA_REF_STATE` (mỗi dòng `refs/loai/ten <sha>`), và lease
+# được cưỡng chế ĐÚNG như git thật: so old-oid, lệch thì `stale info` + rc=1 + ref CÒN.
+S1=b4e5c5f9ef85e652fa2cc98bb3474036519d663c
+S2=872679c360a43a4b12221749901aa0cf231566ac
+
+cat > "$TAM/bin/git" <<'GITEOF'
+#!/usr/bin/env bash
+DONG="$*"
+echo "git $DONG" >> "${GIA_LOG:-/dev/null}"
+case "$DONG" in
+  push*--force-with-lease=*)
+      lease=$(printf '%s' "$DONG" | tr ' ' '\n' | sed -n 's/^--force-with-lease=//p')
+      ref="${lease%%:*}"; mong="${lease##*:}"
+      ST="${GIA_REF_STATE:-/dev/null}"
+      hien=$(awk -v k="$ref" '$1==k{print $2}' "$ST" 2>/dev/null | tail -1)
+      if [ -z "$hien" ]; then
+        printf ' ! [remote rejected] (delete) -> %s (no such ref)\n' "${ref##*/}" >&2; exit 1
+      fi
+      if [ "$hien" != "$mong" ]; then
+        printf ' ! [rejected] (delete) -> %s (stale info)\n' "${ref##*/}" >&2; exit 1
+      fi
+      # GIA_PUSH_KHONG_AN_GI=1: lease KHOP, bao thanh cong, nhung KHONG doi trang thai.
+      # Khoa phep "DO LAI sau khi xoa" — khong co no thi mot lenh xoa im lang vo hieu
+      # van cho cong xanh.
+      if [ "${GIA_PUSH_KHONG_AN_GI:-0}" != 1 ]; then
+        grep -v "^$ref " "$ST" > "$ST.tmp" 2>/dev/null; mv "$ST.tmp" "$ST" 2>/dev/null
+        printf '%s\n' "${ref#refs/}" >> "${GIA_LOG}.daxoa"
+      fi
+      printf ' - [deleted]         %s\n' "${ref##*/}"
+      exit 0 ;;
+esac
+exit 0
+GITEOF
+chmod +x "$TAM/bin/git"
+
 lam() {
   local ten="$1" mong="$2" hd="$3" ref="$4" sha="$5" thu="$6"; shift 6
   : > "$TAM/gialog"; rm -f "$TAM/gialog.daxoa" "$TAM/gialog.sha"
+  # Trạng thái ref + tệp ghim MẶC ĐỊNH: mọi ref trong `$ref` đang ở `$S1`, và ghim cũng
+  # `$S1` ⇒ lease khớp. Ca nào muốn dựng ĐUA thì tự cấp `GIA_REF_STATE`/`NEO_TEP` khác.
+  local loai=heads; [ "$hd" != xoa-nhanh ] && loai=tags
+  if ! printf '%s\n' "$@" | grep -q '^GIA_REF_STATE='; then
+    : > "$TAM/refstate"
+    local x; IFS=',' read -ra _rr <<< "$ref"
+    for x in "${_rr[@]}"; do x="${x//[[:space:]]/}"; [ -n "$x" ] && printf 'refs/%s/%s %s\n' "$loai" "$x" "$S1" >> "$TAM/refstate"; done
+    set -- "$@" GIA_REF_STATE="$TAM/refstate"
+  fi
+  if ! printf '%s\n' "$@" | grep -q '^NEO_TEP='; then
+    : > "$TAM/neo_auto"
+    local y; IFS=',' read -ra _r2 <<< "$ref"
+    for y in "${_r2[@]}"; do y="${y//[[:space:]]/}"; [ -n "$y" ] && printf '%s %s\n' "$y" "$S1" >> "$TAM/neo_auto"; done
+    set -- "$@" NEO_TEP="$TAM/neo_auto"
+  fi
   env GIA_LOG="$TAM/gialog" HANH_DONG="$hd" REF="$ref" SHA="$sha" CHI_THU="$thu" \
       GITHUB_REPOSITORY=ducthangho/tra-luat "$@" bash "$TAM/lam.sh" >"$TAM/out" 2>&1
   local rc=$?
   if [ "$rc" = "$mong" ]; then QUA=$((QUA+1)); printf '  QUA   %s\n' "$ten"
   else HONG=$((HONG+1)); printf '  ĐỎ    %s  (rc=%s, mong %s)\n' "$ten" "$rc" "$mong"; sed 's/^/          /' "$TAM/out" | tail -4; fi
+}
+
+# Đo THÔNG ĐIỆP của bước làm — phân biệt "từ chối vì lease" với mọi kiểu ĐỎ khác.
+doi_ra_lam() {
+  local ten="$1" mau="$2"
+  if grep -q -- "$mau" "$TAM/out" 2>/dev/null; then QUA=$((QUA+1)); printf '  QUA   %s\n' "$ten"
+  else HONG=$((HONG+1)); printf '  ĐỎ    %s  (không thấy %q)\n' "$ten" "$mau"; sed 's/^/          /' "$TAM/out" | tail -3; fi
 }
 
 # Đo NHẬT KÝ, không đo mã thoát: đây là thứ duy nhất phân biệt "đã gọi lệnh xoá" với
@@ -298,49 +361,61 @@ doi_log() {
 
 echo
 echo "bước LÀM của ops-don-ref.yml — phản chứng"
-S1=b4e5c5f9ef85e652fa2cc98bb3474036519d663c
-S2=872679c360a43a4b12221749901aa0cf231566ac
 
 lam "thử khô: KHÔNG gọi gh lần nào"       0 xoa-nhanh 'a,b' ""    true
 doi_log "thử khô: nhật ký gh RỖNG"        "." 0
 
 lam "xoá: có trước, mất sau -> XANH"      0 xoa-nhanh a "" false
-doi_log "xoá: ĐÚNG MỘT lời gọi DELETE"    "-X DELETE" 1
-doi_log "xoá: DELETE đi đúng endpoint"    "git/refs/heads/a" 1
+doi_log "xoá: ĐÚNG MỘT lệnh push có lease" "force-with-lease" 1
+doi_log "xoá: lease neo ĐÚNG refs/heads/a" "force-with-lease=refs/heads/a:" 1
 
-lam "xoá HAI ref -> hai lời gọi DELETE"   0 xoa-nhanh 'a,b' "" false
-doi_log "xoá hai: đếm DELETE = 2"         "-X DELETE" 2
+lam "xoá HAI ref -> hai lệnh push"        0 xoa-nhanh 'a,b' "" false
+doi_log "xoá hai: đếm push có lease = 2"  "force-with-lease" 2
 
 # ═══ GHIM SHA — bước LÀM phải đòi đúng SHA mà bước CHỐT đã đo ═══
 # Không có ba ca này thì phép đo tổ-tiên chỉ nói về QUÁ KHỨ: ai đẩy commit mới giữa hai
 # bước là commit ấy bị xoá mà chưa từng được đo. Khe ấy KHÔNG đóng được bằng API
 # (`DELETE /git/refs` không nhận SHA mong đợi), nên nó phải đóng bằng phép đọc lại.
+# ═══ LEASE (CAS) — finding P1 của cross-review lượt 1 trên PR "#213" ═══
+# Bản trước đọc lại SHA rồi so rồi mới gọi `DELETE`. Reviewer dựng đồ giả GIỮ TRẠNG THÁI
+# cho nhánh nhảy SHA ĐÚNG GIỮA lần đọc cuối và lệnh xoá, và bản ấy XOÁ MẤT commit chưa
+# từng được đo. "Đọc lại" THU HẸP khe, KHÔNG đóng nó.
+# Nay xoá bằng `git push --force-with-lease=<ref>:<sha ghim>`: old-oid đi TRONG CÙNG giao
+# dịch, nên không còn khe nào để chen.
 NEO="$TAM/neo_lam.txt"
 printf 'ops/da-land %s\n' "$S1" > "$NEO"
-lam "vùng làm việc: ghim KHỚP -> XANH"    0 xoa-nhanh ops/da-land "" false NEO_TEP="$NEO" GIA_TAG_SHA="$S1"
-doi_log "…và CÓ gọi DELETE đúng một lần"  "-X DELETE" 1
+printf 'refs/heads/ops/da-land %s\n' "$S1" > "$TAM/rs_khop"
+lam "lease KHỚP -> XANH"                  0 xoa-nhanh ops/da-land "" false NEO_TEP="$NEO" GIA_REF_STATE="$TAM/rs_khop"
+doi_log "…và CÓ push có lease đúng 1 lần" "force-with-lease" 1
 
-lam "vùng làm việc: ghim LỆCH -> ĐỎ"      1 xoa-nhanh ops/da-land "" false NEO_TEP="$NEO" GIA_TAG_SHA="$S2"
-doi_log "…và KHÔNG gọi DELETE"            "-X DELETE" 0
+# ĐÂY LÀ CA CỦA REVIEWER: ghim đo được `S1`, nhưng lúc xoá nhánh đã ở `S2`.
+printf 'refs/heads/ops/da-land %s\n' "$S2" > "$TAM/rs_lech"
+lam "nhánh nhảy SHA giữa ĐO và XOÁ -> ĐỎ" 1 xoa-nhanh ops/da-land "" false NEO_TEP="$NEO" GIA_REF_STATE="$TAM/rs_lech"
+doi_ra_lam "…và git từ chối vì stale info" "stale info"
+if grep -qxF "refs/heads/ops/da-land $S2" "$TAM/rs_lech"; then
+  QUA=$((QUA+1)); printf '  QUA   %s\n' "…và ref VẪN CÒN, không bị xoá"
+else
+  HONG=$((HONG+1)); printf '  ĐỎ    %s\n' "…và ref VẪN CÒN, không bị xoá"
+fi
 
+# MỌI ref sắp xoá đều cần ghim, không riêng vùng làm việc: không có giá trị kỳ vọng thì
+# không dựng được lease, mà xoá không lease là quay lại đúng lỗ vừa vá.
 : > "$TAM/neo_rong.txt"
-lam "vùng làm việc: KHÔNG có ghim -> ĐỎ"  1 xoa-nhanh ops/da-land "" false NEO_TEP="$TAM/neo_rong.txt" GIA_TAG_SHA="$S1"
-doi_log "…và KHÔNG gọi DELETE"            "-X DELETE" 0
-
-# Nhánh NGOÀI vùng làm việc không bị đòi ghim — nếu bị đòi thì chốt đang bắt oan, và ca
-# `xoá: có trước, mất sau -> XANH` phía trên đã chạy KHÔNG có tệp ghim nào.
-lam "ngoài vùng: không cần ghim -> XANH"  0 xoa-nhanh tmp-thuong "" false NEO_TEP="$TAM/neo_rong.txt"
+lam "KHÔNG có ghim -> ĐỎ (vùng làm việc)" 1 xoa-nhanh ops/da-land "" false NEO_TEP="$TAM/neo_rong.txt"
+doi_log "…và KHÔNG push"                 "force-with-lease" 0
+lam "KHÔNG có ghim -> ĐỎ (ref thường)"    1 xoa-nhanh tmp-thuong "" false NEO_TEP="$TAM/neo_rong.txt"
+doi_log "…và KHÔNG push"                 "force-with-lease" 0
 
 lam "xoá TAG: đi đường refs/tags"         0 xoa-tag t1 "" false
-doi_log "xoá tag: endpoint là refs/tags"  "git/refs/tags/t1" 1
+doi_log "xoá tag: lease neo refs/tags/t1" "force-with-lease=refs/tags/t1:" 1
 
 lam "xoá: ref không tồn tại -> ĐỎ"        1 xoa-nhanh a "" false GIA_MISSING=1
-doi_log "không tồn tại: KHÔNG gọi DELETE" "-X DELETE" 0
+doi_log "không tồn tại: KHÔNG push"      "force-with-lease" 0
 
 lam "xoá: đọc TRƯỚC lỗi 500 -> ĐỎ"        1 xoa-nhanh a "" false GIA_GET_ERR=1
-doi_log "lỗi đọc trước: KHÔNG gọi DELETE" "-X DELETE" 0
+doi_log "lỗi đọc trước: KHÔNG push"      "force-with-lease" 0
 
-lam "xoá: DELETE không ăn gì -> ĐỎ"       1 xoa-nhanh a "" false GIA_DELETE_KHONG_AN_GI=1
+lam "xoá: push báo XANH mà ref VẪN CÒN -> ĐỎ" 1 xoa-nhanh a "" false GIA_PUSH_KHONG_AN_GI=1
 lam "xoá: đọc SAU lỗi 500 -> ĐỎ (fail-close)" 1 xoa-nhanh a "" false GIA_GET_ERR=2
 lam "xoá: 500 mà thân có chữ Not Found -> vẫn ĐỎ" 1 xoa-nhanh a "" false GIA_GET_500_NOTFOUND=2
 lam "xoá: 500-có-Not-Found ở lần đọc TRƯỚC -> ĐỎ" 1 xoa-nhanh a "" false GIA_GET_500_NOTFOUND=1

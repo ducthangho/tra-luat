@@ -426,10 +426,20 @@ vòng quanh nó (đo được 21-08-2026: 16 nhánh `ops/**` đã land hết mà
 `luu-tru/**` xoá được khi commit CÒN TAG GIỮ; nhánh vùng làm việc xoá được khi `behind_by = 0` so với
 nhánh mặc định — tức mọi commit của nó đã nằm trong đó. **Ba trạng thái, không phải hai**: là tổ tiên ·
 không phải · KHÔNG ĐO ĐƯỢC, và cái thứ ba làm cổng ĐỎ. Xoá **TAG** mang tên các vùng ấy thì vẫn CẤM —
-tag không có quan hệ tổ-tiên để mà đo. Kèm chốt GHIM: bước làm đọc lại đầu nhánh và đòi đúng SHA bước
-chốt đã đo, vì `DELETE /git/refs` không nhận SHA mong đợi (không có `--force-with-lease` cho việc xoá)
-nên khe giữa lúc đo và lúc xoá chỉ đóng được bằng phép đọc lại. Phản chứng: `ops/don_ref_chot_test.sh`
-(102 ca, 6 đột biến mỗi con giết đúng ca của nó).
+tag không có quan hệ tổ-tiên để mà đo. Kèm chốt GHIM + **LEASE**: bước chốt ghi lại SHA đã đo, bước
+làm xoá bằng `git push --force-with-lease=<ref>:<sha ghim> origin :<ref>` chứ KHÔNG bằng
+`DELETE /git/refs` — REST chỉ nhận TÊN ref, không có SHA kỳ vọng, tức không có CAS.
+**Bản đầu của mục này viết SAI và cross-review bắt được**: nó nói "đọc lại đầu nhánh rồi so" là
+**đóng** khe giữa lúc ĐO và lúc XOÁ. Không đóng — chỉ THU HẸP. Reviewer dựng đồ giả GIỮ TRẠNG THÁI
+cho nhánh nhảy SHA đúng giữa lần đọc cuối và lệnh xoá, và bản ấy **xoá mất commit chưa từng được đo**
+(`rc=0`, DELETE gọi đúng một lần, nhật ký xác nhận chính SHA mới bị xoá). Lease thì gửi old-oid
+**trong cùng giao dịch**, nên không còn khe. Đo được 21-08-2026 trên kho bare dựng tại chỗ, cả nhánh
+lẫn tag: lease neo SHA cũ ⇒ `! [rejected] … (stale info)`, `rc=1`, ref CÒN; lease neo SHA đúng ⇒
+`- [deleted]`, `rc=0`, ref MẤT — và chạy được cả từ kho **0 object**, nên runner chỉ cần một remote
+có xác thực, không cần lịch sử. Bài học chung, không riêng chỗ này: **"thu hẹp" mà viết thành "đóng"
+là một lời khai rộng hơn phép đo** — đúng lớp lỗi mà chính tệp này dạy, và người viết câu sai là
+người vừa đọc nó. Phản chứng: `ops/don_ref_chot_test.sh` (105 ca; đột biến quay về REST DELETE làm
+ca "nhánh nhảy SHA giữa ĐO và XOÁ" ĐỎ đúng như reviewer đã dựng).
 
 **`luu-tru/*` là ref BỀN duy nhất** giữ các commit công bố verdict sau khi nhánh `ops/**` bị xoá — xem
 `ops/reviews/README.md`. Xoá tag ấy là làm `published_*` trong `ops/reviews/*.receipt.yaml` thành SHA

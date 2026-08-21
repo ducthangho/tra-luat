@@ -1,0 +1,103 @@
+# Lease EXECUTOR — `PLAT-X5` (#206), lease **r4**. Neo head xuất phát 2284b465.
+#
+# NỚI ĐÚNG MỘT ATTEMPT, PHẠM VI ĐÓNG. Người giữ kho phân xử sau cross-review lượt 2/2.
+#
+# ĐỌC TRƯỚC MỌI DÒNG KHÁC: trần REVIEW đã cạn (2/2). Bản vá của lượt này sẽ KHÔNG có
+# lượt review chéo nào nữa. Vì vậy phạm vi bị khoá chặt và bằng chứng đòi cao hơn bình
+# thường — không có ai soi lại giúp.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 206
+packet_id: PLAT-X5
+revision: 4
+generation: 1
+lease_id: plat-x5-exec-1r4-codex-20260821
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+assurance_target: cross_approved
+access: read-write
+
+write_set:
+  - ops/lease_publish_test.py
+write_set_ghi_chu: >-
+  ĐÚNG MỘT TỆP. Cả hai việc đều nằm trong nó. `ops/cai_actionlint.sh` KHÔNG còn trong write
+  set của lượt này — không việc nào chạm tới nó.
+
+branch: codex/plat-x5-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: claude/plat-x4-exec-1
+target_pull_request: 207
+
+reviewed_sha_required: 2284b4657304d0229e95d1f64ebd0c22035d201d
+base_sha: a09aae627533f59e6b2e817858a6db50b999d41c
+start_from_sha: 2284b4657304d0229e95d1f64ebd0c22035d201d
+
+prompt_path: ops/prompts/plat-x5-exec-1r4-codex-20260821.md
+prompt_sha256_required: 5be36701de9db5a275fb4f5906590171ad8011c917271253de72fdc26e747283
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("nới một lượt vá nhỏ, gộp luôn P3")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T01:50:00Z'
+lease_expires_at_utc: '2026-08-22T01:50:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 3
+attempts_limit: 4
+attempts_ghi_chu: >-
+  Nới ĐÚNG MỘT. attempt = một lần TUYÊN BỐ DONE. Ba attempt trước: r2 lần 1 (`3ad75553`,
+  Windows đỏ) · r2 lần 2 (`e071e0aa`, CI xanh, review lượt 1 changes_requested) · r3
+  (`2284b465`, CI xanh, review lượt 2 changes_requested). Cạn lần nữa ⇒ không nới tiếp.
+
+executor_calls_used: 4
+executor_calls_limit: 9
+
+review_rounds_used: 2
+review_rounds_limit: 2
+KHONG_CON_REVIEW_CHEO: true
+he_qua_khong_con_review: >-
+  Bản vá này sẽ KHÔNG được review chéo. Đó là lý do phạm vi chỉ có hai việc, write set chỉ có
+  một tệp, và mục "bằng chứng bắt buộc" trong prompt đòi cả phản chứng CHỐNG CẮT QUÁ TAY chứ
+  không chỉ phản chứng thuận. Phiên điều phối sẽ tự đo lại độc lập trước khi đẩy.
+
+hai_viec:
+  - id: sua-LOI-KHAI-GOI_WRAPPER_THUC_THI
+    tu_finding: 'P2 lượt 2'
+    noi_dung: >-
+      Chú thích khẳng định "Ngoài hai dạng canonical vẫn là một LỜI GỌI" — phép đo nói NGƯỢC.
+      Viết lại cho đúng bằng phạm vi đo được, liệt kê 4 dạng lọt + 2 dạng đối chứng bị bắt.
+    cam: 'KHÔNG mở regex nhận diện — việc đó thuộc `#209`.'
+    kem: 'khai `NỢ CÓ TÊN PLAT-X5-nhan-dien-loi-goi-wrapper`, theo lối nợ `PLAT-X5-required-status-check` đã có.'
+  - id: t25-khong-bao-oan-chu-thich-DI-SAU-lenh
+    tu_finding: 'P3 lượt 2'
+    noi_dung: '`goi.findall` quét cả dòng, không cắt phần sau `#` ⇒ ĐỎ GIẢ với chú thích đi sau lệnh.'
+    cam_bay_bat_buoc_xu_ly: >-
+      `#` chỉ mở chú thích khi đứng đầu dòng hoặc sau khoảng trắng. Cắt ngây thơ đổi một ĐỎ GIẢ
+      lấy một XANH GIẢ — đắt hơn hẳn. Không chắc thì GIỮ NGUYÊN báo oan và khai nợ: fail-closed
+      chấp nhận được, fail-open thì không.
+
+gate_bat_buoc:
+  - 'ops/lease_publish_test.py -> rc=0, N/N hai số bằng nhau, không tụt dưới 40 ca'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'hai ca báo oan (chú thích đi sau lệnh) -> rc=0'
+  - 'ba dạng vốn an toàn -> vẫn rc=0'
+  - 'một lời gọi THẬT thiếu $NEO -> vẫn ĐỎ t25 (phản chứng chống cắt quá tay)'
+  - 'đột biến gỡ phép cắt -> ca mới ĐỎ 1/1, chạy trên BẢN SAO TẠM'
+
+dieu_kien_dung:
+  - 'Cần sửa tệp ngoài `ops/lease_publish_test.py` ⇒ DỪNG, báo cáo, không tự nới'
+  - 'Mọi cách cắt `#` đều có nguy cơ fail-open ⇒ DỪNG việc 2, giữ nguyên hành vi, khai nợ, VẪN làm việc 1'
+  - 'Thấy một tiêu chí gate là sai ⇒ DỪNG và mở revision, không tự đổi giữa đường'
+
+khong_push: true
+khong_push_ghi_chu: 'Executor commit nhưng KHÔNG push. Phiên điều phối đo lại độc lập rồi mới đẩy và gọi CI.'
+posted_comment_id: 5364816259   # workflow ghi, ĐỪNG sửa tay

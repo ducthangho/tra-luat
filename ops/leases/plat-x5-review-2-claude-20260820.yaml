@@ -1,0 +1,110 @@
+# Lease REVIEWER — `PLAT-X5` (#206 / PR "#207"), lượt **2/2** — LƯỢT REVIEW CUỐI.
+#
+# ĐẢO VAI: executor `codex`, reviewer `claude`. Vẫn cross-provider ⇒ §8 thoả.
+#
+# ĐỌC TRƯỚC MỌI DÒNG KHÁC: CẢ HAI trần đều đã ở đáy — executor 3/3 attempt, reviewer 2/2 vòng.
+# `changes_requested` ở lượt này KHÔNG mở ra lượt vá nào; nó đẩy packet lên checkpoint.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 206
+packet_id: PLAT-X5
+lease_id: plat-x5-review-2-claude-20260820
+revision: 1
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: codex
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+
+reviewed_sha_required: 2284b4657304d0229e95d1f64ebd0c22035d201d
+head_luot_truoc: e071e0aae6bdc4d270a42fbc534ad3f05dcba0fa
+branch: codex/plat-x5-exec-1
+base_sha: a09aae627533f59e6b2e817858a6db50b999d41c
+target_branch_neu_land: claude/plat-x4-exec-1
+target_pull_request: 207
+delta_scope_files: 2
+
+prompt_path: ops/prompts/plat-x5-review-2-claude-20260820.md
+prompt_sha256_required: c327a474473b88ca5e8b8cf88a0788478f36c96f39ccc370efc6793727cfc60b
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-20 ("CI xanh thì cấp lease review claude luôn")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-20T18:30:00Z'
+lease_expires_at_utc: '2026-08-21T18:30:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 1
+la_luot_review_CUOI: true
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: 'CI xanh trên exact head — cả hai job success, KHÔNG job nào có bước hỏng'
+  bang_chung_do_boi: 'phiên điều phối (claude-session), KHÔNG phải reviewer'
+  run_id: 32402136904
+  event: workflow_dispatch
+  head: 2284b4657304d0229e95d1f64ebd0c22035d201d
+  ket_qua:
+    - 'gate (ubuntu-latest): success · 31 bước · 0 bước hỏng'
+    - 'gate (windows-latest): success · 31 bước · 0 bước hỏng'
+  buoc_then_chot: '`lease-publish selftest (cài công cụ + chạy cổng)` success trên CẢ HAI nền ⇒ wrapper đã chạy thật trên Windows'
+  buoc_skipped_da_giai_thich:
+    - '`PR head contains required EOL base` — `if: github.event_name == ''pull_request''`, đây là lượt `workflow_dispatch`'
+    - '`bo ca gate chay TRONG cgroup duoc uy quyen (Linux)` — skipped trên Windows, chạy trên Ubuntu'
+    - '`gate lifecycle selftest (nen khong co cgroup)` — ngược lại: skipped trên Ubuntu, chạy trên Windows'
+    - '`tl selftest (luot PR — khong sinh bang chung)` — không phải lượt PR'
+    - '`don-nhanh selftest (chốt xoá nhánh)` — skipped trên Windows, NỢ CÓ SẴN (xem verdict `don-nhanh-base-review-7`)'
+  ghi_chu: >-
+    Tiêu chí "không bước nào skipped" CHỈ đúng cho lượt PR. Trên lượt `workflow_dispatch` có
+    bước skipped hợp lệ theo `if:`; bê nguyên tiêu chí của lượt PR sang đây là tự báo động giả
+    (bài học 14-08). Vì vậy lease này liệt kê TỪNG bước skipped kèm lý do, thay vì đếm.
+
+executor_so_sach:
+  attempts_used: 3
+  attempts_limit: 3
+  ghi_chu: >-
+    Trần attempt đã CẠN HOÀN TOÀN. Lượt r3 nới thêm ĐÚNG MỘT attempt kèm thu hẹp phạm vi, và
+    attempt ấy đã tiêu bằng head `2284b465`. Không còn đường vá trong packet này.
+
+pham_vi_review_DA_PHAN_XU:
+  trong_pham_vi:
+    - 'P1 — `t25` nhận lời gọi wrapper, đòi `$NEO`, ngưỡng 4, chốt `thay_wrapper >= 1`'
+    - 'P3 — `GOI_WRAPPER` đảo `continue` thành TỪ CHỐI'
+    - 'P3 — `mkdir` hỏng trả mã riêng 12'
+    - 'P2 — `t34` sửa LỜI KHAI cho khớp phép đo (đường RẺ), regex KHÔNG đổi'
+  da_tach_sang_209:
+    - 'P2 — nợ `PLAT-X5-required-status-check` vào `ops/NO_KY_THUAT.md` (ngoài write set `#206`)'
+    - 'P2 — đảo `t34` thành DANH SÁCH CHO PHÉP (quyết kiến trúc)'
+  phan_xu_boi: ducthangho
+  phan_xu_luc: 'direct, in-session, 2026-08-20 ("Đồng ý khuyến nghị, thực hiện đi")'
+  canh_bao_cho_reviewer: >-
+    Nêu lại hai mục đã tách như finding CHẶN của `#206` là SAI PHẠM VI — quyết định đã có, và
+    reviewer nhắc lại quyết định đã phân xử thì đang review người giữ kho chứ không review bản
+    vá. Được phép ghi vào mục "còn mở, đã có chỗ xử".
+
+canh_bao_cho_reviewer_ve_chinh_minh: >-
+  Lượt 1 do CHÍNH reviewer này chạy, và nó tự khai đã lỡ ghi vào INDEX của worktree. Lượt này
+  phải dựng đột biến bằng `git archive` (thuần đọc), không bằng `checkout --work-tree`.
+  Ngoài ra: bản vá được viết ĐỂ ĐÓNG chính năm finding của lượt 1 — cám dỗ lớn nhất là xác nhận
+  kết luận cũ của mình thay vì đo lại. Bốn đột biến executor khai đã giết: XÁC NHẬN, đừng tin.
+
+gate_bat_buoc:
+  - 'ops/lease_publish_test.py -> rc=0, N/N hai số bằng nhau, không tụt dưới 40 ca'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'mỗi chốt mới phải có đột biến giết 1/1 trên bản sao tạm, VÀ cùng đột biến ấy IM trên e071e0aa'
+
+nghia_cua_approve_o_luot_nay: >-
+  Bốn việc trong phạm vi đã đóng, không hồi quy, mọi thứ còn hở đều đã ĐƯỢC KHAI TÊN (ở đây hoặc
+  ở `#209`). KHÔNG có nghĩa `t34` đã kín — nó chưa, và cả hai bên đều biết. Giữ
+  `changes_requested` chỉ vì một lỗ đã được khai và đã có packet xử là dùng sai mức verdict.
+posted_comment_id: 5364816383   # workflow ghi, ĐỪNG sửa tay

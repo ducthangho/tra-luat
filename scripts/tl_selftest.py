@@ -21236,10 +21236,23 @@ def run() -> int:
         # Tệp `scripts/tl_core/command_registry_test.py` là dev-side unit test, được loại khỏi gói qua
         # `_RELEASE_EXCLUDE_NAMES_ANYWHERE` (tiền lệ deploy scripts / don-nhanh). Package giữ 180
         # (dưới trần 200, còn 20 khe); cây thật = 180 + 66 = 246.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 66 == 246
+        # KÊ KHAI SLOT (thẩm định kế hoạch 3 bên, PR "#210"): 66 → **69** Markdown dưới `docs/`.
+        # Thêm đúng BA ADR dev-side/ngoài gói, đều ở `docs/adr/` (vế ok4 tự chứng minh):
+        #   + `0043-tran-vong-review-canon-la-hai.md`         — trần vòng review canon = 2, một chỗ ở
+        #   + `0044-nguong-kich-thuoc-packet-theo-do-luong.md` — ngưỡng kích thước neo từ số đo của kho
+        #   + `0045-ngoai-le-dao-vai-executor-reviewer.md`     — đảo vai là ngoại lệ CÓ VẾT
+        # Package giữ 180 (`RELEASE_MANIFEST.json` KHÔNG đổi); cây thật = 180 + 69 = 249; trần 200
+        # không nhúc nhích. Ba skill cùng đợt (`.claude/skills/**`) nằm dưới `.claude/` — đã có khoá
+        # trong `_RELEASE_EXCLUDE_DIRS` nên KHÔNG ăn khe nào.
+        # LẶP LẠI ĐÚNG CÁI GIÁ ĐÃ TRẢ Ở KHỐI TRÊN: tôi đã kiểm `RELEASE_MANIFEST.json` thấy KHÔNG đổi
+        # rồi kết luận "thêm docs không sinh nợ" — y hệt lời khai "ĐÃ TRẢ GIÁ" cách đây vài chục dòng,
+        # do người khác viết sau khi vấp cùng chỗ. Manifest trả lời "gói có đổi không"; ca NÀY mới trả
+        # lời "số docs có đổi không". Cổng khác nhau trả lời câu hỏi khác nhau — và đọc một cổng rồi
+        # suy sang cổng kia là lỗi, kể cả khi bài học ấy đã nằm sẵn ngay trong tệp mình đang sửa.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 69 == 249
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 66
+        ok4 = (len(tren_dia) == 69
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

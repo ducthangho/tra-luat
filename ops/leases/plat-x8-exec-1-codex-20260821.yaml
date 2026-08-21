@@ -1,24 +1,24 @@
-# BẢN NHÁP LEASE — `PLAT-X8` (#225), lượt 1/3, executor `codex`. **CHƯA CÓ HIỆU LỰC.**
+# Lease EXECUTOR — `PLAT-X8` (#225), lượt 1/3, provider `codex`. Nền: OpenAI Codex CLI.
 #
-# NẰM Ở `ops/nhap/` CÓ CHỦ ĐÍCH, KHÔNG PHẢI `ops/leases/`. `t23` quét MỌI tệp `.yaml` trong
-# `ops/leases/` và đòi từng tệp qua cổng; thả một bản nháp còn ô trống vào đó là làm cổng ĐỎ
-# trên master vì một tệp chưa ai định đăng. Bản nháp phải nằm ngoài vùng cổng quét.
+# LỊCH SỬ CỦA TỆP NÀY, ghi vì nó giải thích ba băm khác nhau đã đi qua đây: bản đầu soạn dưới
+# dạng NHÁP ở `ops/nhap/` với ba ô mang giá trị KHÔNG hợp lệ (`CHUA_DIEN`) — cố ý chọn giá trị
+# hỏng chứ không để trống, để một bản chưa ký KHÔNG THỂ đăng nhầm (đo: `rc=8`). Nó nằm ngoài
+# `ops/leases/` suốt thời gian ấy vì `t23` quét MỌI `.yaml` trong thư mục đó và đòi từng tệp qua
+# cổng; thả một bản còn ô trống vào đó là làm master ĐỎ vì một tệp chưa ai định đăng.
 #
-# BA Ô CÒN TRỐNG mang giá trị `CHUA_DIEN` — cố ý chọn giá trị KHÔNG hợp lệ để cổng chặn
-# (`reviewed_sha_required` không phải 40 hex ⇒ `RC_NOI_DUNG = 8`; `lease_expires_at_utc` không
-# phân tích được ⇒ chặn). Nếu để trống hoặc đoán một giá trị "trông đúng" thì bản nháp có thể
-# đăng nhầm mà không ai biết. Fail-closed: chưa điền thì KHÔNG đăng được.
+# Đặc tả đi qua BA bản đóng băng trước khi lease này được ký, và lease neo lại băm ở CẢ BA lần
+# — chưa lần nào phải sửa sau lưng một lease đang sống:
+#   1  9cb54a2e4e7c…  2 P1 ở cross-review lượt 1 (neo `c9a1b4e90d`)
+#   2  b88c53dfd211…  2 P1 nữa ở lượt 2 (neo `3bafef75d6`), cả hai đánh vào đường kế thừa
+#   3  328a74facb84…  Q1 THU HỒI — gỡ hẳn đường kế thừa, không vá tiếp (§10 đặc tả)
 #
-# BA BƯỚC ĐỂ NÓ THÀNH LEASE THẬT — người giữ kho làm, không phải phiên này:
-#   1. Merge PR "#226" (đặc tả + bàn giao lên master). Người giữ kho đã chọn mốc hiệu lực là
-#      SAU lần merge ấy, để executor fetch đặc tả từ nhánh mặc định chứ không từ nhánh feature.
-#   2. Điền ba ô: `reviewed_sha_required` = `base_sha` = `git rev-parse origin/master` SAU merge
-#      (ĐỦ 40 ký tự — rút gọn là mỏ neo GIẢ, đã có finding P2 về đúng chuyện này);
-#      `leased_at_utc` = thời điểm ký; `lease_expires_at_utc` = +24h.
-#   3. `git mv` sang `ops/leases/`, đẩy lên một nhánh `ops/**` để
-#      `.github/workflows/ops-publish-lease.yml` đăng bản chiếu lên "#225".
+# PHẢI ĐỌC TRƯỚC KHI SỬA `ops/lease_publish.py`: bản 3 CHƯA được cross-review. §8 protocol cho
+# tối đa hai lượt codex mỗi PR và cả hai đã dùng ở "#226"; lượt 2 chưa approve nên đã chuyển
+# checkpoint "xem lại thiết kế" thay vì gọi lượt 3 theo quán tính. Ngân sách review của PACKET
+# (2 vòng, 2 lời gọi, khai bên dưới) là ngân sách RIÊNG, chưa tiêu đồng nào.
 #
-# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên "#225" chỉ là bản chiếu.
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên "#225" chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được đẩy lên nhánh `ops/**`.
 #
 # NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt
 # cụt giá trị — đã mất dữ liệu IM LẶNG một lần ở lease exec-4 của wp55.
@@ -113,9 +113,9 @@ branch: codex/plat-x8-exec-1
 branch_ownership: exclusive
 target_branch_neu_land: master
 
-reviewed_sha_required: CHUA_DIEN
-base_sha: CHUA_DIEN
-start_from_sha: CHUA_DIEN
+reviewed_sha_required: 20c6c6335c7bfdb2ab72f4deff52ab3d5eb5be6f
+base_sha: 20c6c6335c7bfdb2ab72f4deff52ab3d5eb5be6f
+start_from_sha: 20c6c6335c7bfdb2ab72f4deff52ab3d5eb5be6f
 base_ghi_chu: >-
   Base KHÔNG xếp tầng: phải là `origin/master` SAU khi PR "#226" merge, không mọc trên PR nào
   chưa merge. `reviewed_sha_required` bằng base vì nhánh packet chưa tồn tại; head thật sẽ neo
@@ -126,7 +126,7 @@ prompt_path: ops/prompts/plat-x8-exec-1-codex-20260821.md
 prompt_sha256_required: ede71405a4247c4b1dddde9a3dc04a845b8b12b4626c3e246313a869e8c5b5fd
 
 granted_by: ducthangho
-granted_on_instruction: 'CHUA KY — bản nháp, xem ba bước ở đầu tệp'
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("đồng ý, làm cả 3" cho ba việc §3 bản bàn giao; chọn nền `codex` + reviewer `claude`; chọn THU HỒI Q1 sau cross-review lượt 2)'
 recorded_by: claude-session
 recorder_is_dispatcher: false
 recorder_cung_la_nguoi_va: false
@@ -135,8 +135,8 @@ recorder_ghi_chu: >-
   sạch. Phiên soạn spec cũng không tự cấp lease được: `granted_by` phải là người giữ kho, cổng
   trả `rc=4` cho lease tự cấp, và đó là danh sách CHO PHÉP chứ không phải danh sách cấm.
 
-leased_at_utc: CHUA_DIEN
-lease_expires_at_utc: CHUA_DIEN
+leased_at_utc: '2026-08-21T13:45:00Z'
+lease_expires_at_utc: '2026-08-22T13:45:00Z'
 run_minutes: 90
 cua_so_chong_lan_ghi_chu: >-
   Cửa sổ chồng lấn = 0 dù bắt đầu ngay: đo được không lease nào đang giữ `ops/lease_publish*`.

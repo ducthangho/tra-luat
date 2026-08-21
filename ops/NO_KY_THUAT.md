@@ -497,8 +497,20 @@ Một selftest không thể tự chứng minh nó đã được GitHub gọi; th
 protection require status của job `gate`, và nó nằm NGOÀI kho. Không bật thì không ai trả lời.
 
 **Cái KHÔNG mất — cũng phải nói thẳng, kẻo đọc rộng hơn thực tế:** với `PATH` thiếu
-`actionlint` vẫn còn **8 ca đỏ**. Thứ mất là **DETECTION**, không phải **PROTECTION**. Đây
-KHÔNG phải "bỏ ngỏ cổng".
+`actionlint` bộ kiểm **fail-close**: `t33_workflow_dang_lease_phai_qua_actionlint` trả
+`KHÔNG ĐO ĐƯỢC` và suite ra **`41/42`, rc=1**. Thứ mất là **DETECTION**, không phải
+**PROTECTION**. Đây KHÔNG phải "bỏ ngỏ cổng".
+
+**ĐÍNH CHÍNH ngay trong lượt cross-review đầu tiên của chính mục này (codex, P2).** Bản nháp
+viết *"vẫn còn **8 ca đỏ**"*. Con số ấy **SAI** và cách nó sai đáng ghi hơn bản thân nó: đo
+thật với `PATH=/usr/bin:/bin` cho **ĐÚNG MỘT** ca đỏ, không phải tám. Nó cũng mâu thuẫn với
+`ops/THAM_DINH_KE_HOACH_20260821.md:242`, nơi chính con số ấy được khai là **suy** từ việc đọc
+mã chứ không phải chạy. Tôi đã chép một SUY LUẬN vào một **sổ nợ SỐNG** dưới dạng số đo —
+đúng cái bệnh mà `t42` ở packet này sinh ra để chặn, chỉ khác chỗ đứng.
+
+Và đừng đọc "1" thành một tin xấu hơn "8": tám lỗi **cùng chết vì thiếu một dependency**
+không phải tám lớp bảo vệ độc lập. Một chốt fail-close nói `KHÔNG ĐO ĐƯỢC` là chốt **đang làm
+đúng việc** — nó từ chối báo xanh khi không đo được, chứ không phải nó yếu đi.
 
 **Phạm vi thật của `t34`, bằng số:** `t34` che **3/8 = 37,5%** dạng gọi đã biết. Nó là lan can
 chống hồi quy vô ý, **không phải security boundary**. Năm dạng đã ĐO là lọt được liệt kê

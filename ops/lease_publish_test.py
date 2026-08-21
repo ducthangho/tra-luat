@@ -2014,6 +2014,16 @@ _DANG_DA_DO_LA_LOT = (
     "python -X utf8 ops/lease_publish_test.py",
 )
 
+# Ba dạng CANONICAL mà `_CHAY_BO_TEST` PHẢI bắt. Có bảng này thì tỷ lệ `3/8` không còn là một
+# chuỗi ai đó gõ vào docstring — nó được SINH RA từ hai tập, và `t42` đo hành vi THẬT của
+# regex trên cả tám dạng. Đây là bản vá cho finding P2 của lượt cross-review 1 (codex):
+# bản trước chỉ tìm chuỗi "3/8" nên nới regex làm phép đo đổi (3/8 → 4/8) mà suite vẫn 42/42.
+_DANG_CANONICAL_BI_BAT = (
+    "python ops/lease_publish_test.py",
+    "python3 ops/lease_publish_test.py",
+    "py ops/lease_publish_test.py",
+)
+
 
 @ca
 def t42_docstring_t34_phai_liet_ke_DU_nam_dang_da_do_la_lot():
@@ -2042,9 +2052,85 @@ def t42_docstring_t34_phai_liet_ke_DU_nam_dang_da_do_la_lot():
          f"docstring `t34` thiếu {len(thieu)}/{len(_DANG_DA_DO_LA_LOT)} dạng đã ĐO là lọt: "
          f"{thieu}. Lời khai về phạm vi phải bằng phạm vi đo được — thêm lại nguyên văn, "
          f"đừng viết gọn thành 'và các dạng tương tự'.")
-    bang("3/8" in doc,
-         "docstring `t34` không còn nêu con số `3/8` — phạm vi phải nói bằng SỐ, không bằng "
-         "chữ. 'che phần lớn' là lời khai không có phép đo.")
+
+    # --- ĐO HÀNH VI, không đọc chữ. Đây là phần bản trước THIẾU và cross-review bắt được.
+    lot_that = [d for d in _DANG_DA_DO_LA_LOT if not _CHAY_BO_TEST.search(d)]
+    bat_that = [d for d in _DANG_CANONICAL_BI_BAT if _CHAY_BO_TEST.search(d)]
+    bang(len(lot_that) == len(_DANG_DA_DO_LA_LOT),
+         f"bảng `_DANG_DA_DO_LA_LOT` khai {len(_DANG_DA_DO_LA_LOT)} dạng LỌT, nhưng regex "
+         f"`_CHAY_BO_TEST` bắt được {len(_DANG_DA_DO_LA_LOT) - len(lot_that)} trong số đó: "
+         f"{[d for d in _DANG_DA_DO_LA_LOT if d not in lot_that]}. Regex đã đổi hành vi mà "
+         f"bảng và docstring chưa đổi theo — sửa CẢ BA, đừng sửa một.")
+    bang(len(bat_that) == len(_DANG_CANONICAL_BI_BAT),
+         f"regex KHÔNG còn bắt {len(_DANG_CANONICAL_BI_BAT) - len(bat_that)} dạng canonical: "
+         f"{[d for d in _DANG_CANONICAL_BI_BAT if d not in bat_that]}. Đây là hồi quy THẬT: "
+         f"`t34` mất răng ở đúng thứ nó hứa bắt.")
+
+    # Tỷ lệ được SINH RA từ hai tập, không phải chuỗi gõ tay. Nới regex làm số này đổi ⇒ ĐỎ.
+    tong = len(_DANG_CANONICAL_BI_BAT) + len(_DANG_DA_DO_LA_LOT)
+    ty_le = f"{len(bat_that)}/{tong}"
+    bang(ty_le in doc,
+         f"docstring `t34` phải nêu tỷ lệ ĐO ĐƯỢC `{ty_le}` (bắt {len(bat_that)} trong {tong} "
+         f"dạng đã biết); nó không có. Con số này SINH từ hai bảng — đổi regex mà không đổi "
+         f"docstring là để lại một lời khai đã chết. 'che phần lớn' là lời khai không có phép đo.")
+
+
+# Marker `NỢ CÓ TÊN` trong workflow, và tiêu đề mục trong sổ nợ. Cố ý HAI mẫu riêng và cả hai
+# đều bó vào ĐÚNG hình dạng đang dùng: marker chỉ nhận khi đứng trong một dòng CHÚ THÍCH, mục
+# chỉ nhận khi là TIÊU ĐỀ `## <số>.`. Không bó thì một câu văn xuôi có chữ "NỢ CÓ TÊN" — như
+# chính các câu giải thích trong hai tệp ấy — sẽ bị đếm nhầm, và cổng lại thành cổng nói dối.
+_MARKER_NO = __import__("re").compile(r"^\s*#.*NỢ CÓ TÊN\b[^`]*`([^`]+)`")
+_MUC_SO_NO = __import__("re").compile(r"^##\s*\d+\.\s*`([^`]+)`")
+
+
+@ca
+def t43_moi_marker_NO_CO_TEN_phai_co_DUNG_MOT_muc_trong_so_no():
+    """Nợ được ĐẶT TÊN trong mã phải có NHÀ trong sổ, và ngược lại. So TẬP, không so TỔNG.
+
+    VÌ SAO CÓ CA NÀY — cross-review lượt 1 của `SLICE-B-C` (codex, P2) chỉ ra: tiêu chí
+    `2 = 2` mà packet này tự đặt ra chỉ là một ẢNH CHỤP, không phải một cổng. Reviewer đo
+    được: thêm marker thứ ba vào `ci.yml` mà KHÔNG thêm mục sổ nợ ⇒ `ci_markers=3`,
+    `ledger=2`, mà `lease_publish` vẫn `42/42`, `actionlint` rc=0, `doc-claims-check` ok.
+    Không cổng nào đỏ. Một nợ mới sinh ra là một nợ KHÔNG AI ĐỌC.
+
+    Đúng bài học của kho: một tiêu chí chỉ sống trong Issue hay trong lời khai của PR là
+    một tiêu chí sẽ chết lặng lẽ. Ca này biến nó thành phép kiểm chạy được.
+
+    SO TẬP, KHÔNG SO TỔNG — có chủ đích: đổi tên một marker và đổi tên một mục khác cho
+    "bù" nhau sẽ giữ nguyên hai con số mà phá đúng bất biến. Đếm hai bên bằng nhau là một
+    cổng lừa được; so tập thì không.
+
+    MỘT CHIỀU, và chiều ấy được chọn bằng PHÉP ĐO chứ không bằng đối xứng. Bản đầu của ca
+    này kiểm cả hai chiều và **ĐỎ NGAY LƯỢT CHẠY ĐẦU** — nó tố `PLAT-X2` (§8) và
+    `launcher_test.py` (§7) là "mục thừa". Cả hai là nợ CÓ THẬT, chỉ không có marker trong
+    `ci.yml`. Tức chiều nghịch KHÔNG phải bất biến: một khoản nợ tồn tại được mà không cần
+    ai đặt tên nó trong mã, và §1–§8 là bằng chứng sẵn có ngay trong tệp ấy. Giữ chiều
+    nghịch là dựng một cổng BÁO ĐỘNG GIẢ thường trực — thứ người ta sẽ tắt, rồi cả ca chết
+    theo. Bất biến THẬT chỉ có một chiều: **marker ⊆ sổ nợ**.
+
+    PHẠM VI, khai thẳng để không lặp lại lỗi nó đang chặn: ca này chỉ đo `ci.yml` ↔
+    `ops/NO_KY_THUAT.md`. Nợ đặt tên ở tệp khác KHÔNG được canh. Đây là tập đã ĐO, không
+    phải lời hứa về mọi nơi trong kho.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: thêm một marker `NỢ CÓ TÊN` vào `ci.yml` mà không thêm mục
+    tương ứng; hoặc đổi tên một trong hai mục đang khớp (§9, §10) — đổi tên phá được bất
+    biến mà KHÔNG đổi hai con số, nên đây đúng là ca mà phép "đếm hai bên bằng nhau" thua.
+    """
+    goc = HERE.parent
+    wf = goc / ".github" / "workflows" / "ci.yml"
+    so = goc / "ops" / "NO_KY_THUAT.md"
+    if not wf.is_file() or not so.is_file():
+        bang(not (goc / ".git").exists(),
+             f"kho thật mà thiếu {wf} hoặc {so} — ca này sẽ xanh mà không đo gì")
+        return
+    trong_ma = {m.group(1) for d in wf.read_text(encoding="utf-8").splitlines()
+                if (m := _MARKER_NO.match(d))}
+    trong_so = {m.group(1) for d in so.read_text(encoding="utf-8").splitlines()
+                if (m := _MUC_SO_NO.match(d))}
+    thieu_nha = sorted(trong_ma - trong_so)
+    bang(not thieu_nha,
+         f"nợ ĐƯỢC ĐẶT TÊN trong `ci.yml` mà KHÔNG có mục trong `ops/NO_KY_THUAT.md`: "
+         f"{thieu_nha}. Nợ có tên mà không có nhà là nợ KHÔNG AI ĐỌC — thêm mục, đừng gỡ marker.")
 
 
 def main() -> int:

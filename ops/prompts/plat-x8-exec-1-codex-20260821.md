@@ -3,7 +3,7 @@
 Bạn là NGƯỜI THI CÔNG packet này. Reviewer sẽ là `claude` — khác họ model, tiêu chí N14 thoả.
 
 **ĐẶC TẢ CÓ THẨM QUYỀN là `ops/specs/plat-x8.md`**, băm
-`b88c53dfd2118ea95a1f753b1924f4502e84a5d8f82263a0272b9b83c17eb42c`. Prompt này KHÔNG chép lại đặc
+`328a74facb8440c11326cd074796ec7a23d2c509d8e2b0a2b63325951c0e3e24`. Prompt này KHÔNG chép lại đặc
 tả — chép là dựng hai bản trôi lệch. Đọc đặc tả TRƯỚC, rồi đọc prompt này để biết nếp của kho.
 Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
 
@@ -12,7 +12,7 @@ Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
 | trường | giá trị |
 |---|---|
 | packet | `#225` — `[PLAT-X8]` |
-| đặc tả | `ops/specs/plat-x8.md` — bản đóng băng **THỨ HAI** (băm ở trên; **kiểm bằng `sha256sum` trước khi đọc**). Bản đầu `9cb54a2e…` KHÔNG còn hiệu lực |
+| đặc tả | `ops/specs/plat-x8.md` — bản đóng băng **THỨ BA** (băm ở trên; **kiểm bằng `sha256sum` trước khi đọc**). Hai bản trước (`9cb54a2e…`, `b88c53df…`) KHÔNG còn hiệu lực |
 | write set | `ops/lease_publish.py` · `ops/lease_publish_test.py` — **ĐÚNG hai tệp** |
 | base | xem `base_sha` trong lease — neo vào `master` sau khi PR `#226` merge |
 | nhánh | `codex/plat-x8-exec-1` |
@@ -41,9 +41,13 @@ làm nó ĐỎ** — đó không phải gợi ý, đó là phần bắt buộc c
    thích hay thông điệp commit nói rộng hơn thế. Cùng kỷ luật ấy áp cho §9.3: cổng đo **lời khai
    về phạm vi**, KHÔNG đo phạm vi ĐÃ XẢY RA — nó không đọc `risk` (0/49 lease có trường ấy) và
    không đọc `diff thật` (chưa tồn tại lúc đăng lease). Đừng viết câu nào hàm ý nó đọc.
-4. **Mục tiêu 6 tra bằng BỘ ĐỊNH DANH, không bằng `packet_id` một mình** — đây là bản vá một P1
-   fail-open, đo được 3/5 packet có nhiều lease executor. Thiếu trường định danh là **LOẠI**,
-   không phải là **THA**: đừng viết nhánh dự phòng.
+4. **Mục tiêu 6 KHÔNG tra cứu gì cả.** Lease reviewer `schema_version >= 2` ⇒ `sensitive` **vô
+   điều kiện**; cổng **không** mở `ops/leases/`, **không** tra lease executor, **không** kế thừa.
+   Q1 đã bị THU HỒI sau bốn P1 trên cùng một đường (§10 đặc tả). **Đừng dựng lại đường kế thừa**,
+   kể cả khi nó trông hiển nhiên đúng — `A3` và `A13` khoá đúng sự VẮNG MẶT của cơ chế ấy, nên
+   chúng sẽ ĐỎ nếu bạn thêm bất kỳ lượt đọc thư mục nào vào đường reviewer.
+5. **`A14` là vế DƯƠNG, phải sống.** Không có nó thì mọi bản vá "cho chắc" biến cổng thành máy trả
+   `sensitive` mà không ai đo được.
 
 ## 3. Nếp của kho này — KHÔNG phải tuỳ chọn
 

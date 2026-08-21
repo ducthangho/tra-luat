@@ -73,7 +73,7 @@ model_ghi_chu: >-
   Reviewer khai `model_reviewer_identity` đủ provider/model/session.
 
 spec_path: ops/specs/plat-x8.md
-spec_sha256_required: b88c53dfd2118ea95a1f753b1924f4502e84a5d8f82263a0272b9b83c17eb42c
+spec_sha256_required: 328a74facb8440c11326cd074796ec7a23d2c509d8e2b0a2b63325951c0e3e24
 spec_status: da_duyet
 spec_duyet_boi: ducthangho
 spec_duyet_luc: 'direct, in-session, 2026-08-21 (soan-spec: hai vòng chất vấn, 6 câu, duyệt cả 6)'
@@ -82,9 +82,10 @@ spec_note: >-
   claude/opus-5-plan-steps-y5r6ci`. Câu này cố ý đúng ở CẢ HAI phía của lần merge PR "#226".
   Thứ định danh tệp là BĂM, không phải tên nhánh — tên nhánh là thứ trôi và bị xoá.
   Băm trên đã kiểm trên bản ĐÃ ĐẾN (`git cat-file -p origin/<nhánh>:… | sha256sum`), và trỏ bản
-  đóng băng **THỨ HAI**. Bản đầu `9cb54a2e…` ăn hai P1 của cross-review lượt 1 (`codex`, neo
-  `c9a1b4e90d`); người giữ kho chọn SỬA đặc tả, nên băm đã đổi TRƯỚC khi cấp lease — đúng thứ tự,
-  không phải sửa sau lưng một lease đang sống. Việc nới `_BANG_LOP` vẫn GIỮ NGUYÊN ở
+  đóng băng **THỨ BA**. Hai bản trước hết hiệu lực: `9cb54a2e…` ăn 2 P1 ở cross-review lượt 1
+  (neo `c9a1b4e90d`), `b88c53df…` ăn 2 P1 nữa ở lượt 2 (neo `3bafef75d6`) — cả hai lượt người giữ
+  kho chọn SỬA đặc tả, và lượt 2 dẫn tới THU HỒI Q1 (§10 đặc tả). Băm đổi TRƯỚC khi cấp lease ở cả
+  ba lần — đúng thứ tự, chưa lần nào phải sửa sau lưng một lease đang sống. Việc nới `_BANG_LOP` vẫn GIỮ NGUYÊN ở
   `ngoai_pham_vi` §4.2 theo quyết định cùng ngày.
 
 nguon_cap_viec: >-
@@ -122,7 +123,7 @@ base_ghi_chu: >-
   mỏ neo GIẢ: reviewer đọc một head khác với head mà lease tưởng đang nói tới.
 
 prompt_path: ops/prompts/plat-x8-exec-1-codex-20260821.md
-prompt_sha256_required: 7a1de7c1ce636690a3d312fe0f61eb2fb5752c03b2dd17ada8163784c1c35da0
+prompt_sha256_required: ede71405a4247c4b1dddde9a3dc04a845b8b12b4626c3e246313a869e8c5b5fd
 
 granted_by: ducthangho
 granted_on_instruction: 'CHUA KY — bản nháp, xem ba bước ở đầu tệp'
@@ -177,6 +178,14 @@ no_da_khai:
       `routine`/`systemic`, trong khi §8 mặc định *"Codex chỉ nhận Packet routine/systemic
       nhỏ"*. Người giữ kho đã có con số này trên bàn ngày 21-08-2026 và quyết GIỮ NGUYÊN; việc
       nới bảng là packet riêng, phải có lập luận cho TỪNG đường dẫn đối chiếu §8.
+  - id: PLAT-X8-reviewer-luon-sensitive-cho-toi-khi-co-trang-thai-BEN
+    noi_dung: >-
+      Q1 đã THU HỒI: lease reviewer ra `sensitive` VÔ ĐIỀU KIỆN, cổng không tra lease nào. Đo
+      được cái giá hôm nay là **0**: dưới bảng seed, 15/15 đường dẫn đã ra `sensitive` nên kế
+      thừa không mua được trường hợp nào. Cái giá TƯƠNG LAI thì có thật — sau khi bảng được nới,
+      mọi reviewer lease vẫn `sensitive` cho tới khi kho có một cơ chế trạng thái BỀN để neo
+      thay vì neo vào lời khai. Việc dựng cơ chế ấy là gói riêng, chưa mở Issue. Đừng dựng lại
+      đường kế thừa cũ: `A3`/`A13` khoá sự VẮNG MẶT của nó và sẽ ĐỎ khi nó quay lại.
   - id: PLAT-X8-Q6-that-thu-tu-cap-lease
     noi_dung: >-
       Q6 (không thấy lease executor ⇒ `sensitive`) thắt thứ tự cấp lease: executor TRƯỚC,
@@ -200,7 +209,13 @@ no_da_khai:
       diff thật chạm đường nhạy cảm NGOÀI write set vẫn qua. Cổng đo LỜI KHAI VỀ PHẠM VI, không
       đo phạm vi ĐÃ XẢY RA. Chốt hậu-diff trên exact head là gói RIÊNG — nó chạy ở lượt LAND,
       khác thời điểm và khác trigger; nhét chung là vượt trần `sensitive` của ADR-0044.
-      Nguồn: P1 cross-review lượt 1 (codex) trên PR "#226", đã khai vào §9.3 đặc tả.
+      NÓI CHO ĐÚNG VAI, vì bản trước của nợ này khai SAI và cross-review lượt 2 bác đúng chỗ:
+      câu "diff thật không tồn tại lúc cổng chạy" chỉ đúng với lease EXECUTOR. Trên đường
+      REVIEWER thì exact head có thật và neo ngay trong lease — đo: **39/39** lease reviewer khai
+      `reviewed_sha_required` 40-hex khác `base_sha`. Lý do vẫn không phân lớp diff ấy: sau khi
+      thu hồi Q1, lớp của lease reviewer đã ở TRẦN, nên thiếu phép đo ấy không HẠ được gì. Lỗ còn
+      lại nằm ở đường executor, và chốt hậu-diff ở lượt LAND là gói riêng.
+      Nguồn: P1 cross-review lượt 1 và lượt 2 (codex) trên PR "#226", đã khai vào §9.3 đặc tả.
   - id: PLAT-X8-schema-version-KHONG-TU-LAN
     noi_dung: >-
       `schema_version: 2` không tự lan. Ai quên bump thì được tha im lặng và mục tiêu 7 chỉ in

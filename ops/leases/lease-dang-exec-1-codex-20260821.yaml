@@ -117,3 +117,4 @@ khong_chay_song_song_voi: >-
   Bất kỳ packet nào chạm `ops/lease_publish*.py` hoặc `.github/workflows/ops-publish-lease.yml`.
   Đo 2026-08-21: không có packet nào đang mở giao write set này (#213 đóng băng ở
   `ops-don-ref.yml`; #209 ở phạm vi khác).
+posted_comment_id: 5369369498   # workflow ghi, ĐỪNG sửa tay

@@ -1,0 +1,89 @@
+# Lease EXECUTOR — `SLICE-B-C` (#215). Phần còn lại DUY NHẤT của Slice B.
+#
+# Packet này GIAO write set với gói spec-gate (mục D) tại `ops/lease_publish_test.py`.
+# Theo ADR-0044: chạy SONG SONG với Packet 1 (`packet_loop*`) được; gói spec-gate phải
+# NỐI TIẾP sau khi packet này land.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 215
+packet_id: SLICE-B-C
+phase_key: SLICE-B
+revision: 1
+generation: 1
+lease_id: slice-b-c-exec-1-claude-20260821
+
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+
+nguon_cap_viec: ops/THAM_DINH_KE_HOACH_20260821.md
+nguon_ghi_chu: >-
+  Mục C của bảng A–F. Việc phái sinh từ MỘT PHÉP ĐO còn đỏ hôm nay, không phải từ một dòng
+  bảng kế hoạch đọc suông: `ci.yml` khai 2 chuỗi "NỢ CÓ TÊN" mà `ops/NO_KY_THUAT.md` có 0 mục
+  tương ứng. Hai số ấy không khớp nhau.
+
+write_set:
+  - ops/NO_KY_THUAT.md
+  - ops/lease_publish_test.py
+
+branch: claude/slice-b-c-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: 0333948669bb0fdbfef8f5cbcf14a95b1b0e8bd4
+base_sha: 0333948669bb0fdbfef8f5cbcf14a95b1b0e8bd4
+start_from_sha: 0333948669bb0fdbfef8f5cbcf14a95b1b0e8bd4
+base_ghi_chu: >-
+  Base là `origin/master` tại lúc cấp. KHÔNG xếp tầng trên PR nào — đúng điều kiện dừng #4 của
+  bản thẩm định ("slice mọc trên một PR chưa merge thay vì trên nhánh nền ⇒ DỪNG").
+
+prompt_path: ops/prompts/slice-b-c-exec-1-claude-20260821.md
+prompt_sha256_required: bbaffa98070b7e7ca0fa21808fd997b276b185856a7fe95ea4a409b6e098a59c
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-21 ("Duyệt theo thứ tự trên, làm đi" — mục 3 của thứ tự đã duyệt
+  là "Mở Issue + lease mục C (song song, không phụ thuộc 1–2)").
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_ghi_chu: >-
+  Phiên ghi lease này CŨNG là phiên sẽ vá. Khai thẳng vì `ADR-0034` đòi tách vai. Cái đỡ được:
+  reviewer là nhà cung cấp KHÁC, prompt bị neo băm, và tiêu chí hoàn tất trong prompt là các
+  con SỐ chứ không phải mô tả — nên phiên vá không tự nới việc cho mình mà không để vết.
+
+leased_at_utc: '2026-08-21T06:40:00Z'
+lease_expires_at_utc: '2026-08-22T06:40:00Z'
+run_minutes: 90
+
+attempts_used: 0
+attempts_limit: 3
+tran_ghi_chu: >-
+  Trần 3 là mặc định của protocol, KHÔNG phải con số chọn hôm nay. Xem
+  `ops/DINH_CHINH_TRAN_ATTEMPT_PLAT_X5.md`: lần hạ 3→2 ở packet khác là sai sổ.
+
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+review_calls_limit: 2
+review_calls_used_truoc_luot_nay: 0
+ngan_sach_ghi_chu: >-
+  Trần vòng canon là 2 (`docs/adr/0043-tran-vong-review-canon-la-hai.md`). Packet này nhỏ và
+  không chạm authority ở phía MÃ (chỉ bộ test + sổ nợ), nên không có lý do gì nới trước.
+
+du_tru_khac_phuc: true
+du_tru_ghi_chu: >-
+  Còn 3 attempt và 2 vòng review tại lúc cấp ⇒ một verdict `changes_requested` vẫn còn đường vá.
+
+hinh_dang_ke_thua: khong_ap_dung
+
+no_da_khai:
+  - id: SLICE-B-C-giao-write-set-voi-goi-spec-gate
+    noi_dung: >-
+      `ops/lease_publish_test.py` cũng là write set của gói spec-gate (mục D). Gói ấy KHÔNG
+      được mở song song với packet này; phải nối tiếp sau khi packet này land. Mở song song là
+      tái tạo đúng hình dạng chuỗi `#203→#206` mà ADR-0044 sinh ra để chặn.

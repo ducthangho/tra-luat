@@ -1,0 +1,61 @@
+# Lease REVIEWER — `PLAT-M4` (#194), lượt 1 **bản sửa r2**. Thay cho
+# `plat-m4-review-1-codex-20260820`, lượt ấy trả `blocked` vì lỗi DỰNG SANDBOX của phiên
+# điều phối, KHÔNG phải lỗi mã. Giữ lease cũ nguyên vẹn làm bản ghi; đây là revision theo
+# §protocol dòng 166 ("thấy chính spec thiếu thì verdict là blocked và đi qua revision mới").
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 194
+packet_id: PLAT-M4
+lease_id: plat-m4-review-1r2-codex-20260820
+revision: 2
+thay_cho_lease: plat-m4-review-1-codex-20260820
+
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+
+reviewed_sha_required: 5813fc450efe3cb349b082044708d27a589b69fb
+branch: claude/plat-m4-exec-1
+base_sha: 2663477dfc63b68dbe34ff684f11213d95bcb8b9
+target_branch_neu_land: master
+target_pull_request: 204
+scope_files: 2
+
+prompt_path: ops/prompts/plat-m4-review-1r2-codex-20260820.md
+prompt_sha256_required: fc0a16e3530aa92c54d200f673640c02681c06101a769707cbd9a4454613c9d9
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-20 ("Mở PR + cấp lease review codex" / "Làm luôn như #194")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-20T12:25:00Z'
+lease_expires_at_utc: '2026-08-21T12:25:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+review_calls_limit: 3
+review_calls_used_truoc_luot_nay: 1
+
+vi_sao_r2: >-
+  Lượt 1 trả `blocked` ở PREFLIGHT: prompt đòi `git status --short` RỖNG, trong khi phiên
+  điều phối đặt cả 5 tệp artefact (nhiem_vu.txt, EVIDENCE.md, diff.patch, numstat.txt,
+  PROTOCOL_TRICH.md) NGAY TRONG cây worktree — nên cây bẩn từ trước khi reviewer đọc dòng mã
+  nào. Reviewer nêu đúng và dừng đúng: nó KHÔNG tự xoá tệp lạ để chạy tiếp. Bàn giao PR
+  "#150" đã ghi sẵn nếp đúng ("chỉ được còn ?? nhiem_vu.txt") và phiên này không làm theo.
+  r2 dời 5 tệp ra NGOÀI cây; bản sao kho nằm ở `./kho`, chốt sạch cây đo bằng
+  `git -C kho status --short`.
+  `review_calls_limit` nâng 2 -> 3 vì lượt hỏng đã tiêu một LỜI GỌI; trục VÒNG canon vẫn
+  là 2 và `review_rounds_used` vẫn 0 — lượt blocked không đọc được mã nên không phải một
+  vòng review. Hai trục cưỡng chế độc lập, đừng gộp.
+posted_comment_id: 5355732980   # workflow ghi, ĐỪNG sửa tay

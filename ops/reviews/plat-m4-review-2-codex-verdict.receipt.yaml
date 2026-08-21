@@ -1,0 +1,131 @@
+# BIÊN NHẬN — cross-review lượt 2/2 của `PLAT-M4` (#194 / PR "#204").
+#
+# VERDICT `blocked`. Trần VÒNG và trần LỜI GỌI CÙNG CHẠM ở lượt này ⇒ đây là
+# CHECKPOINT VỀ CHỦ KHO, không phải một lượt vá tự động. Executor còn 2/3 attempt
+# nên vẫn CÓ đường vá — nhưng đường ấy phải do chủ kho mở.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: PLAT-M4
+packet_issue: 194
+lease_id: plat-m4-review-2-codex-20260821
+provider: codex
+role: reviewer
+executor_provider: claude
+verdict: blocked
+cross_provider: true
+assurance_dat: null
+assurance_KHONG_dat: cross_approved
+reviewed_sha: 7a2320fe13b4aad3e7b298d070125a01762a8e54
+base_sha: 5813fc450efe3cb349b082044708d27a589b69fb
+target_pull_request: 204
+
+verdict_path: ops/reviews/plat-m4-review-2-codex-verdict.md
+verdict_sha256: 456b2b0a79879a982648f1d2362607ef639afc264b014130a0095aedfa161bef
+verdict_bytes: 3428
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/d27337b48e3748225a12d18432d8c1bd8295882d/ops/reviews/plat-m4-review-2-codex-verdict.md
+evidence_url_ghi_chu: >-
+  URL neo vao commit DAU TIEN chua tep verdict, khong vao commit chua chinh dong nay — mot
+  commit khong the chua bam cua chinh no. Day la ly do bien nhan duoc ghi lam HAI commit.
+published_first:
+  branch: ops/ho-so-m4
+  commit: d27337b48e3748225a12d18432d8c1bd8295882d
+truy_xuat_tag: null
+truy_xuat_ghi_chu: 'PR "#204" CHUA land, chua co tag luu-tru/*.'
+
+verdict_nguon: 'scratchpad/runs/c633ee58/stdout.log — launcher v1.3.0, ma_thoat=0, 1034.225s, stdout 3677 byte'
+verdict_doi_chieu: >-
+  Đã kiểm ĐÚNG MỘT `VERDICT:` và ĐÚNG MỘT `Reviewed commit:`. Bản chép khác nguồn ĐÚNG một
+  phép biến đổi: cắt các đường dẫn tuyệt đối của sandbox trong ngoặc đơn (`diff` xác nhận
+  không còn khác biệt nào khác). Không sửa một chữ nào của nội dung.
+
+# ── HAI FINDING P2 ĐÃ ĐƯỢC PHIÊN ĐIỀU PHỐI ĐO LẠI ĐỘC LẬP ──────────────────────────
+finding_da_do_lai:
+  - id: F2-url-meo-van-lo-bi-mat-qua-MO-TA
+    muc: P2
+    reviewer_noi: 'bốn URL méo trả `khong_do_duoc`, không probe, NHƯNG `desc_has_secret=true`'
+    phien_dieu_phoi_do_lai: XAC_NHAN
+    bang_chung_do_lai: >-
+      Chạy trên chính head 7a2320fe với `urlopen` giả:
+      `http:///user:S@host/mcp` · `javascript:user:S@host` · `http ://user:S@host/mcp` ·
+      `http://?u=user:S@host` — cả bốn: `khong_do_duoc`, probe=0, MÔ TẢ CHỨA BÍ MẬT.
+    y_nghia: >-
+      Bản vá đóng ĐƯỜNG MẠNG nhưng KHÔNG đóng ĐƯỜNG CHẨN ĐOÁN. Nhánh `userinfo` cố ý không in
+      `url`, nhưng nó chỉ bắt được URL PHÂN TÍCH ĐƯỢC thành `userinfo`; URL méo rơi xuống
+      nhánh scheme/hostname, và hai nhánh ấy vẫn nội suy `{url!r}`. Cùng HÌNH DẠNG với chính
+      finding gốc: dữ liệu có thể là credential đi tới chỗ nó không được tới.
+  - id: F3-test-chua-khoa-BIEN-CAU-TRUC-cua-userinfo
+    muc: P2
+    reviewer_noi: >-
+      hai mutant bổ sung (`if "@" in str(url)` và `if p_ep.username:`) VẪN cho t143 đạt 1/1
+    phien_dieu_phoi_do_lai: XAC_NHAN_VA_LAM_RO
+    bang_chung_do_lai: >-
+      Đo `https://:SENTINEL@host/mcp` trên bản vá HIỆN TẠI ⇒ `khong_do_duoc`, probe=0, KHÔNG lộ.
+      Tức MÃ ĐÚNG; thứ thiếu là RĂNG CỦA CA KIỂM. Một bản cài yếu hơn (`if p_ep.username:`)
+      sẽ probe và làm lộ bí mật qua cả `full_url` lẫn `host`, mà bộ test hiện tại KHÔNG bắt.
+    y_nghia: 'Đây là finding về TEST, không phải về một lỗ đang sống. Đừng đọc rộng hơn thế.'
+
+# ── FINDING P1 LÀ LỖI CỦA PHIÊN ĐIỀU PHỐI, KHÔNG PHẢI CỦA MÃ ─────────────────────
+finding_P1_la_loi_dieu_phoi:
+  id: P1-khong-co-dac-ta-co-tham-quyen-trong-cay-reviewer
+  su_viec: >-
+    Prompt reviewer trỏ đặc tả vào `kho/ops/specs/plat-m4-v0.md`, nhưng đặc tả nằm ở nhánh
+    `ops/lease-m4-v0`, còn cây reviewer neo ở head packet `7a2320fe` — nơi tệp ấy KHÔNG tồn tại.
+    Reviewer xử đúng: gọi băm là KHÔNG ĐO ĐƯỢC chứ không phải "khớp".
+  ai_gay_ra: 'phiên điều phối (soạn prompt), KHÔNG phải executor và KHÔNG phải mã'
+  da_bao_truoc_khi_co_ket_qua: true
+  ghi_chu_bao_truoc: >-
+    Dấu hiệu lộ ra ở giây thứ ~45 (`sha256sum: No such file or directory`) và đã được báo cho
+    chủ kho TRƯỚC khi verdict về, kèm cân nhắc dừng-hay-chạy-tiếp. Chọn chạy tiếp vì đây là lời
+    gọi 3/3; dừng rồi phóng lại là tiêu lời gọi thứ 4 mà trần chỉ có 3.
+  hinh_dang_lap: 3
+  hinh_dang_mo_ta: >-
+    LẦN THỨ BA trong hai ngày một lời gọi review bị hỏng vì CÁCH DỰNG SANDBOX/BUNDLE, không vì
+    mã: hai lượt `blocked` ở preflight hôm 20-08 (M4 r1 và X4 r1, cả hai ghi
+    `tieu_mot_loi_goi: true`) và lượt này. Theo luật đếm hình dạng của kho, ba lần cùng một
+    hình dạng ⇒ chỗ sửa là KIẾN TRÚC, không phải thêm một lời dặn vào prompt.
+  chot_da_de_xuat_ma_CHUA_dung: >-
+    Mục `V6` của bản hợp nhất — "sandbox reviewer thành SCRIPT fail-đóng" — do CẢ BA bên thẩm
+    định đề xuất. Nếu nó đã tồn tại, script sẽ vật chất hoá spec + prompt vào đường dẫn cố định
+    và tự ĐỎ khi thiếu, TRƯỚC khi tiêu một lời gọi nào. Nó chưa được dựng, nên nó không cứu ai.
+
+so_sach_ngan_sach:
+  review_rounds_used: 2
+  review_rounds_limit: 2
+  review_calls_used: 3
+  review_calls_limit: 3
+  executor_attempts_used: 1
+  executor_attempts_limit: 3
+  he_qua: >-
+    CẢ HAI trần review CÙNG CẠN. Executor còn 2 attempt nên đường vá TỒN TẠI, nhưng mở nó là
+    quyết định của chủ kho — không phiên nào được tự cấp lượt review thứ ba từ verdict này.
+
+chot_read_only:
+  git_status_short: RONG
+  head_khong_doi: true
+  ghi_chu: >-
+    Sandbox lần này đặt artefact NGOÀI cây kho (`DE_BAI.md` ở gốc, kho ở `./kho`) — đúng bài
+    học B9. Reviewer tự khai `git status --short` rỗng và HEAD không đổi; phiên điều phối kiểm
+    lại: khớp.
+
+verdict_usage_caveats:
+  - id: blocked-o-day-KHONG-phai-preflight-blocked
+    noi_dung: >-
+      Khác hai lượt `blocked` hôm 20-08: lượt ấy reviewer DỪNG ở preflight và không đọc được
+      dòng mã nào. Lượt này reviewer ĐÃ làm trọn việc — xác nhận finding lượt 1 đã đóng, đo ba
+      mutant khai sẵn, tự nghĩ thêm hai mutant mới, và tìm được hai P2 thật. `blocked` ở đây là
+      phán quyết về TRỤC SPEC, không phải về việc không làm được.
+  - id: F2-la-lo-that-F3-la-rang-cua-test
+    noi_dung: >-
+      Hai finding cùng mức P2 nhưng KHÁC LOẠI. F2 là một lỗ ĐANG SỐNG (đo lại được trên head).
+      F3 là mã ĐÚNG mà test THIẾU RĂNG. Gộp chúng làm một khi lập kế hoạch vá là hỏng việc.
+  - id: windows-van-chua-do
+    noi_dung: >-
+      Reviewer khai `KHÔNG ĐO ĐƯỢC` cho Windows và cho endpoint MCP thật. Bằng chứng Windows
+      của head này đến từ lượt CI `32439434714` (gate windows-latest success), KHÔNG từ verdict.
+
+delivered: true
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-21T03:15:00Z'

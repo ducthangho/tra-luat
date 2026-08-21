@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bay phan chung bang kho bare that, kem bay dot bien tach biet."""
+"""Phan chung bang kho bare that, kem bang dot bien tren ban sao tam."""
 from __future__ import annotations
 import importlib.util
 import os
@@ -101,7 +101,7 @@ def T3():
     try:
         nhom, lenh, _ = tool(work)
         assert nhom["ops/b"][0] == "B" and "ops/b" in lenh
-        assert nhom["ops/c-mot"][0] == "C"
+        assert nhom["ops/c-mot"][0] == "C" and "ops/c-mot" not in lenh
     finally:
         td.cleanup()
 def T4():
@@ -122,7 +122,7 @@ def T5():
         reader = Path(td.name) / "shallow"
         run(["git", "clone", "--depth", "1", "--no-single-branch", remote.as_uri(), str(reader)], Path(td.name))
         nhom, lenh, _ = tool(reader)
-        assert nhom and all(v[0] == "C" for v in nhom.values()) and not lenh
+        assert nhom and all(v[0] == "C" and "kho nong" in v[1] for v in nhom.values()) and not lenh
     finally:
         td.cleanup()
 def T6():
@@ -140,15 +140,34 @@ def T7():
         assert "KHONG co phep kiem nao luc chay" in out
     finally:
         td.cleanup()
-CA = [(f"T{i}", globals()[f"T{i}"]) for i in range(1, 8)]
+def T8():
+    td, remote, work = kho_bare(a=True)
+    try:
+        assert run(["git", "rev-parse", "--is-bare-repository"], remote).stdout.strip() == "true"
+        ref = "refs/remotes/origin/ops/a"
+        tip = run(["git", "rev-parse", ref], work).stdout.strip()
+        base_ref = "refs/remotes/origin/main"
+        base = run(["git", "rev-parse", base_ref], work).stdout.strip()
+        assert run(["git", "rev-list", "--count", f"{base}..{tip}"], work).stdout.strip() == "0"
+        assert run(["git", "merge-base", "--is-ancestor", tip, base], work, check=False).returncode == 0
+        remote.rename(Path(td.name) / "remote.offline")
+        nhom, lenh, _ = tool(work)
+        assert nhom["ops/a"][0] == "C" and "fetch loi:" in nhom["ops/a"][1]
+        assert "ops/a" not in lenh
+    finally:
+        td.cleanup()
+CA = [(f"T{i}", globals()[f"T{i}"]) for i in range(1, 9)]
 DOT_BIEN = [
-    ("dao-chieu-to-tien", "T1", 'p = _git(repo, "merge-base", "--is-ancestor", tip, base_oid)', 'p = _git(repo, "merge-base", "--is-ancestor", base_oid, tip)'),
-    ("bo-kiem-commit-rieng", "T2", 'return KetQua("C", f"con {so_rieng} commit rieng")', 'return KetQua("A", "dot bien bo kiem commit rieng")'),
-    ("noi-B-thanh-mot-commit", "T3", "if la_posted:", "if True:"),
-    ("loi-thanh-khong-commit-rieng", "T4", 'return KetQua("C", f"ref bien mat/khong doc duoc: {loi}")', 'return KetQua("A", "dot bien coi loi la khong co commit rieng")'),
-    ("in-ca-C", "T5", 'kq.nhom in {"A", "B"} and ten != mac_dinh', 'kq.nhom in {"A", "B", "C"} and ten != mac_dinh'),
-    ("bo-loai-mac-dinh", "T6", 'kq.nhom in {"A", "B"} and ten != mac_dinh', 'kq.nhom in {"A", "B"}'),
-    ("xoa-khai-gioi-han", "T7", '"GIOI HAN: lenh in ra KHONG co phep kiem nao luc chay; phai doc lai ket qua truoc khi dan lenh."', '"GIOI HAN: da bi dot bien xoa."'),
+    ("dao-chieu-to-tien", ("T1",), 'p = _git(repo, "merge-base", "--is-ancestor", tip, base_oid)', 'p = _git(repo, "merge-base", "--is-ancestor", base_oid, tip)'),
+    ("bo-kiem-commit-rieng", ("T2",), 'return KetQua("C", f"con {so_rieng} commit rieng")', 'return KetQua("A", "dot bien bo kiem commit rieng")'),
+    ("noi-B-thanh-mot-commit", ("T3",), "if la_posted:", "if True:"),
+    ("loi-thanh-khong-commit-rieng", ("T4",), 'return KetQua("C", f"ref bien mat/khong doc duoc: {loi}")', 'return KetQua("A", "dot bien coi loi la khong co commit rieng")'),
+    ("in-ca-C", ("T3", "T5", "T8"), 'kq.nhom in {"A", "B"} and ten != mac_dinh', 'kq.nhom in {"A", "B", "C"} and ten != mac_dinh'),
+    ("bo-loai-mac-dinh", ("T6",), 'kq.nhom in {"A", "B"} and ten != mac_dinh', 'kq.nhom in {"A", "B"}'),
+    ("xoa-khai-gioi-han", ("T7",), '"GIOI HAN: lenh in ra KHONG co phep kiem nao luc chay; phai doc lai ket qua truoc khi dan lenh."', '"GIOI HAN: da bi dot bien xoa."'),
+    ("bo-chan-fetch-loi", ("T8",), "if fetch.returncode:", "if False:"),
+    ("go-nhanh-kho-nong", ("T5",), '    elif shallow:\n        loi_chung = "kho nong; lich su khong du de phan loai an toan"\n', ""),
+    ("dao-khop-base-remote", ("T1", "T3", "T6"), "base_oid != remote_oid", "base_oid == remote_oid"),
 ]
 def chay_ca():
     do = []
@@ -188,23 +207,27 @@ def chay_dot_bien() -> int:
             tep.write_text(text.replace(neo, thay), encoding="utf-8", newline="\n")
             env = dict(os.environ, NHANH_DON_DUOC_KHONG_DOT_BIEN="1", PYTHONDONTWRITEBYTECODE="1")
             p = run([sys.executable, Path(__file__).name], ban_sao, check=False, env=env)
-            ca_do = re.findall(r"^CASE (T[1-7]): DO", p.stdout, re.M)
-            ok = p.returncode != 0 and ca_do == [dich]
-            dat += ok
-            print(f"MUTANT {ten} | {dich} | {'1/1' if ok else '0/1'}")
+            ca_do = re.findall(r"^CASE (T\d+): DO", p.stdout, re.M)
+            ok = p.returncode != 0 and ca_do == list(dich)
+            dat += int(ok)
+            so_ca = len(dich)
+            print(f"MUTANT {ten} | {','.join(dich)} | {f'{so_ca}/{so_ca}' if ok else f'0/{so_ca}'}")
             if not ok:
+                print(f"CA DO THUC TE: {','.join(ca_do) or '(rong)'} | rc={p.returncode}")
                 print(p.stdout)
+                print(p.stderr)
     return dat
 def main() -> int:
     do = chay_ca()
+    tong = len(CA)
     if do:
-        print(f"{7 - len(do)}/7")
+        print(f"{tong - len(do)}/{tong}")
         return 1
     if os.environ.get("NHANH_DON_DUOC_KHONG_DOT_BIEN"):
-        print("7/7")
+        print(f"{tong}/{tong}")
         return 0
     mutant_dat = chay_dot_bien()
-    print("7/7")
+    print(f"{tong}/{tong}")
     return 0 if mutant_dat == len(DOT_BIEN) else 1
 if __name__ == "__main__":
     raise SystemExit(main())

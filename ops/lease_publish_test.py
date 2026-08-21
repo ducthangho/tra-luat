@@ -15,6 +15,7 @@ Chạy: python3 ops/lease_publish_test.py
 
 from __future__ import annotations
 
+import re
 import subprocess
 import sys
 import tempfile
@@ -533,6 +534,69 @@ def t24_workflow_KHONG_duoc_nhet_dau_skip_ci_vao_commit():
                      f"trong lịch sử và sẽ tắt gate của PR nào có commit này làm HEAD")
 
 
+_GOI_CONG_LEASE_TRONG_WORKFLOW = re.compile(
+    r"(?:^|\s)(?:python3?|py|bash|sh|exec)\s+"
+    r"(\S*(?:lease_publish(?:_test)?\.py|chay_lease_publish_test\.sh))")
+_RUN_INLINE = re.compile(r"^\s*(?:-\s*)?run\s*:\s*")
+
+
+def _cat_chu_thich_run_inline(dong: str) -> str:
+    """Cắt chú thích chắc chắn của một dòng YAML ``run:`` dạng inline.
+
+    Shell chỉ mở chú thích ở ``#`` không được quote/escape và đứng đầu lệnh hoặc
+    sau khoảng trắng. Ta theo dõi nháy đơn, nháy kép và dấu chéo ngược trên đúng
+    dòng đó; ``#`` trong ``"a#b"``, ``'a#b'``, ``a\\#b`` hay ngay sau ``}}`` không
+    bị cắt.
+
+    Giới hạn có chủ ý: scalar YAML được quote, block scalar (``|``/``>``), quote
+    nhiều dòng và heredoc không được phân tích. Các dạng ấy được giữ nguyên để
+    t25 có thể báo oan (fail-closed), thay vì cắt khi chưa biết trạng thái quote và
+    làm mất một lời gọi thật (fail-open).
+    """
+    moc = _RUN_INLINE.match(dong)
+    if not moc:
+        return dong
+    lenh = dong[moc.end():]
+    if not lenh or lenh[0] in "|'\">":
+        return dong
+
+    nhay = None
+    thoat = False
+    for i, ky_tu in enumerate(lenh):
+        if thoat:
+            thoat = False
+            continue
+        if nhay == "'":
+            if ky_tu == "'":
+                nhay = None
+            continue
+        if ky_tu == "\\":
+            thoat = True
+            continue
+        if nhay == '"':
+            if ky_tu == '"':
+                nhay = None
+            continue
+        if ky_tu in "'\"":
+            nhay = ky_tu
+            continue
+        if ky_tu == "#" and (i == 0 or lenh[i - 1].isspace()):
+            return dong[:moc.end() + i].rstrip()
+    return dong
+
+
+def _cac_loi_goi_cong_lease(noi_dung: str) -> list[tuple[int, str]]:
+    """Trả ``(số dòng, đối số)`` từ đúng đường quét mà t25 sử dụng."""
+    ket_qua = []
+    for so, dong in enumerate(noi_dung.splitlines(), 1):
+        if dong.lstrip().startswith("#"):
+            continue
+        dong = _cat_chu_thich_run_inline(dong)
+        ket_qua.extend((so, duong)
+                       for duong in _GOI_CONG_LEASE_TRONG_WORKFLOW.findall(dong))
+    return ket_qua
+
+
 @ca
 def t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head():
     """Workflow đăng lease KHÔNG được chạy `lease_publish*.py` lấy từ head được đẩy.
@@ -552,7 +616,6 @@ def t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head():
     Phần ấy chỉ ruleset ngoài kho mới đóng. Ca này chặn TRÔI NGƯỢC do vô ý — bản vá
     bị "dọn cho gọn" về lại `ops/…` — chứ không chặn kẻ cố tình.
     """
-    import re
     goc = HERE.parent / ".github" / "workflows"
     if not goc.is_dir():
         # Cùng chốt với t24: chỉ tha khi đây rõ ràng là BẢN SAO rời (bộ đột biến chép
@@ -567,21 +630,15 @@ def t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head():
     # có NHẮC tên tệp. Dòng `sha256sum ops/…` cố ý in băm của head và cố ý không có
     # `$NEO`; coi nó là lời gọi sẽ báo oan. Đây vẫn là phép đo đối số, không phải parser
     # shell: thêm một token lệnh mới phải là quyết định có chủ ý và có phản chứng.
-    goi = re.compile(
-        r"(?:^|\s)(?:python3?|py|bash|sh|exec)\s+"
-        r"(\S*(?:lease_publish(?:_test)?\.py|chay_lease_publish_test\.sh))")
     thay = thay_wrapper = 0
-    for so, dong in enumerate(noi_dung.splitlines(), 1):
-        if dong.lstrip().startswith("#"):
-            continue
-        for duong in goi.findall(dong):
-            thay += 1
-            if duong.endswith("chay_lease_publish_test.sh"):
-                thay_wrapper += 1
-            bang("$NEO" in duong or "${NEO}" in duong,
-                 f"ops-publish-lease.yml:{so} chạy {duong!r} — bộ kiểm này đến TỪ HEAD "
-                 f"ĐƯỢC ĐẨY, tức từ chính nhánh nó đang kiểm (finding P1, PR #104). "
-                 f"Phải gọi qua bản neo vào nhánh mặc định: \"$NEO/ops/…\"")
+    for so, duong in _cac_loi_goi_cong_lease(noi_dung):
+        thay += 1
+        if duong.endswith("chay_lease_publish_test.sh"):
+            thay_wrapper += 1
+        bang("$NEO" in duong or "${NEO}" in duong,
+             f"ops-publish-lease.yml:{so} chạy {duong!r} — bộ kiểm này đến TỪ HEAD "
+             f"ĐƯỢC ĐẨY, tức từ chính nhánh nó đang kiểm (finding P1, PR #104). "
+             f"Phải gọi qua bản neo vào nhánh mặc định: \"$NEO/ops/…\"")
     # Chốt riêng cho wiring bộ kiểm: đừng để việc gỡ hẳn wrapper chỉ rơi vào thông điệp
     # đếm chung, vì ba lời gọi `lease_publish.py` khác vẫn đủ làm ngưỡng cũ xanh.
     bang(thay_wrapper >= 1,
@@ -597,6 +654,46 @@ def t25_workflow_dang_lease_phai_chay_bo_kiem_NEO_khong_lay_tu_head():
     bang("git worktree add" in noi_dung and "default_branch" in noi_dung,
          "không thấy bước dựng worktree từ `default_branch` — `$NEO` phải được neo "
          "vào nhánh mặc định, nếu không thì nó chỉ là một tên biến khác cho head")
+
+
+@ca
+def t41_t25_chi_cat_chu_thich_run_inline_khi_chac_chan():
+    """Khóa hai ĐỎ giả mà không đổi chúng lấy một XANH giả đắt hơn."""
+    an_toan = {
+        "chú thích nguyên dòng": "# sh chay_lease_publish_test.sh",
+        "echo nhắc tên": 'run: echo "info: chay_lease_publish_test.sh"',
+        "name nhắc tên": "name: kiểm tra chay_lease_publish_test.sh tồn tại",
+        "chú thích sau lệnh, dạng sh":
+            "run: echo ok # sh chay_lease_publish_test.sh",
+        "chú thích sau lệnh, dạng bash":
+            "run: echo ok # xem bash ops/chay_lease_publish_test.sh",
+    }
+    for ten, noi_dung in an_toan.items():
+        thay = _cac_loi_goi_cong_lease(noi_dung)
+        bang(not thay, f"t25 vẫn đếm oan {ten}: {thay}")
+
+    loi_goi_that = {
+        "thiếu NEO": "run: bash ops/chay_lease_publish_test.sh",
+        "# trong nháy kép":
+            'run: echo "a#b"; bash ops/chay_lease_publish_test.sh',
+        "# trong nháy đơn":
+            "run: echo 'a#b'; bash ops/chay_lease_publish_test.sh",
+        "# sau chéo ngược":
+            r"run: echo a\#b; bash ops/chay_lease_publish_test.sh",
+        "# liền sau biểu thức Actions":
+            "run: echo ${{ github.event.issue.number }}#x; "
+            "bash ops/chay_lease_publish_test.sh",
+    }
+    for ten, noi_dung in loi_goi_that.items():
+        thay = _cac_loi_goi_cong_lease(noi_dung)
+        bang(thay == [(1, "ops/chay_lease_publish_test.sh")],
+             f"t25 cắt quá tay ở ca {ten}, làm mất lời gọi thật: {thay}")
+
+    # Với block scalar/heredoc, helper không biết trạng thái xuyên dòng nên KHÔNG cắt.
+    # Giữ một ĐỎ giả ở vùng chưa hiểu vẫn rẻ hơn che mất một lời gọi thật.
+    dong_heredoc = "  echo ok # bash ops/chay_lease_publish_test.sh"
+    bang(_cat_chu_thich_run_inline(dong_heredoc) == dong_heredoc,
+         "helper đã lấn sang thân block/heredoc dù không có trạng thái xuyên dòng")
 
 
 def _doi_thu_muc_reviews():
@@ -1409,9 +1506,23 @@ def t35_script_cai_actionlint_phai_TU_CHOI_ban_sai():
             "bash ops/chay_lease_publish_test.sh",
             'bash "$NEO/ops/chay_lease_publish_test.sh"',
         }
-        # Nhận diện theo token lệnh dẫn đầu để không báo oan dòng `sha256sum` chỉ in
-        # băm wrapper. Ngoài hai dạng canonical vẫn là một LỜI GỌI, và vì allowlist
-        # đang gác nghĩa vụ `AL_VER`, dạng ngoài danh sách phải ĐỎ chứ không được miễn.
+        # PHẠM VI ĐO ĐƯỢC: regex neo `^`; ở nhánh `bash|sh` nó nhận đúng một token
+        # lệnh dẫn đầu rồi đòi một token đường dẫn liền mạch (`exec` là nhánh phụ được
+        # liệt kê riêng); `\S*` không vượt được khoảng trắng. Bốn dạng đã đo KHÔNG được
+        # nhận diện và rơi vào `continue`:
+        # `env AL_X=1 bash ops/chay_lease_publish_test.sh`;
+        # `bash -c 'bash ops/chay_lease_publish_test.sh'`;
+        # `command bash ops/chay_lease_publish_test.sh`; và
+        # `bash ${{ github.workspace }}/ops/chay_lease_publish_test.sh` (biểu thức có
+        # khoảng trắng). Hai đối chứng bị nhận diện rồi TỪ CHỐI đúng thiết kế là
+        # `bash /đường/dẫn/tuyệt/đối/ops/chay_lease_publish_test.sh` và
+        # `bash ${{github.workspace}}/ops/chay_lease_publish_test.sh` (không khoảng trắng).
+        #
+        # NỢ CÓ TÊN `PLAT-X5-nhan-dien-loi-goi-wrapper`: bốn dạng trên vẫn được miễn
+        # nghĩa vụ `AL_VER` ở tầng t35. Hậu quả bị chặn ở tầng sau vì
+        # `ops/cai_actionlint.sh` vẫn `loi 2` khi thiếu `AL_VER` bất kể cú pháp gọi.
+        # Nợ này cùng họ với việc đảo t34 thành danh sách cho phép và thuộc packet #209;
+        # không mở regex nhận diện trong lượt vá hẹp này.
         GOI_WRAPPER_THUC_THI = re.compile(
             r"^(?:(?:bash|sh)\s+|exec\s+(?:(?:bash|sh)\s+)?|)"
             r"[\"']?\S*chay_lease_publish_test\.sh[\"']?(?:\s|$)")

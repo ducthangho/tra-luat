@@ -1,0 +1,112 @@
+# Lease REVIEWER — `PLAT-X5` (#206 / PR "#207"), lượt **3**. Review DELTA của lease r4.
+#
+# NỚI TRẦN REVIEW 2 → 3, do người giữ kho quyết sau khi lượt vá r4 xong và CI xanh.
+#
+# ĐỌC TRƯỚC MỌI DÒNG KHÁC: bản vá `117e0c42` CHƯA TỪNG ĐƯỢC AI REVIEW. Nó được đẩy sau khi
+# phiên điều phối tự đo — mà phiên điều phối CŨNG là bên viết lease và prompt cho executor.
+# Lượt này là lớp soi độc lập ĐẦU TIÊN của delta ấy.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 206
+packet_id: PLAT-X5
+lease_id: plat-x5-review-3-claude-20260821
+revision: 1
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: codex
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+
+reviewed_sha_required: 117e0c4258c5029c7a330611786733c5a583e1c5
+head_truoc_delta: 2284b4657304d0229e95d1f64ebd0c22035d201d
+branch: codex/plat-x5-exec-1
+base_sha: a09aae627533f59e6b2e817858a6db50b999d41c
+target_branch_neu_land: claude/plat-x4-exec-1
+target_pull_request: 207
+delta_scope_files: 1
+delta_scope_ghi_chu: 'ĐÚNG MỘT TỆP `ops/lease_publish_test.py`, +129 −18. Review DELTA, không review lại cả packet.'
+
+prompt_path: ops/prompts/plat-x5-review-3-claude-20260821.md
+prompt_sha256_required: 3e0aa4121eab86600b5d0d8f286b73d66154358878c4a1b90ebb796db202d50f
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 (chọn (2) — review delta r4; và khi được hỏi thì chọn reviewer `claude` thay vì `codex`)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T02:30:00Z'
+lease_expires_at_utc: '2026-08-22T02:30:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 3
+review_rounds_used_truoc_luot_nay: 2
+noi_tran_review:
+  tu: 2
+  len: 3
+  ly_do: >-
+    Lượt vá r4 sinh ra một head MỚI (`117e0c42`) mà chưa lượt review nào chạm tới. Trần cũ (2)
+    đã tiêu hết cho `e071e0aa` và `2284b465`. Nếu không nới thì bản vá cuối land mà không ai soi.
+  quyet_boi: ducthangho
+
+VI_SAO_REVIEWER_LA_CLAUDE_CHU_KHONG_PHAI_CODEX:
+  boi_canh: >-
+    Người giữ kho ban đầu nói "review delta r4 bằng codex". Phiên điều phối nêu ngay rằng `codex`
+    CHÍNH LÀ tác giả của `117e0c42`, nên codex review delta ấy là TỰ REVIEW — không phải
+    cross-provider, và không cấp được `cross_approved` mà §8 đòi cho phạm vi này.
+  quyet_lai: 'ducthangho chọn `claude` — giữ đúng thế đảo vai của packet.'
+  ghi_ra_vi: >-
+    Một lease ghi "reviewer: claude" mà chỉ thị gốc nói "codex" sẽ làm người đọc sau tưởng lease
+    chép sai chỉ thị. Ghi cả hai bước để lịch sử tự giải thích.
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: 'CI xanh trên exact head — cả hai job success, KHÔNG job nào có bước hỏng'
+  bang_chung_do_boi: 'phiên điều phối (claude-session), KHÔNG phải reviewer'
+  run_id: 32439164265
+  event: workflow_dispatch
+  head: 117e0c4258c5029c7a330611786733c5a583e1c5
+  ket_qua:
+    - 'gate (ubuntu-latest): success · 31 bước · 0 bước hỏng · `lease-publish selftest` success'
+    - 'gate (windows-latest): success · 31 bước · 0 bước hỏng · `lease-publish selftest` success'
+
+hai_viec_cua_delta:
+  - id: sua-LOI-KHAI-GOI_WRAPPER_THUC_THI
+    tu_finding: 'P2 lượt 2'
+    cam: 'regex KHÔNG đổi — phiên điều phối đã kiểm bằng băm, reviewer xác nhận độc lập'
+  - id: t25-khong-bao-oan-chu-thich-DI-SAU-lenh
+    tu_finding: 'P3 lượt 2'
+    rui_ro_so_1: >-
+      Phép cắt `#` có thể đổi một ĐỎ GIẢ lấy một XANH GIẢ. Đây là trục soi nặng nhất của lượt này.
+
+canh_bao_cho_reviewer: >-
+  Bảng số ở mục 3.1 prompt do PHIÊN ĐIỀU PHỐI tạo ra — tức bên có động cơ muốn land, và cũng là
+  bên viết lease cho executor. Đừng để bảng đẹp làm đi nhanh: xác nhận từng dòng rồi đi xa hơn nó.
+
+pham_vi_NGOAI:
+  - 'Bốn dạng lọt `AL_VER` — đã thành nợ có tên `PLAT-X5-nhan-dien-loi-goi-wrapper` ở `#209 §7` kèm điều kiện XONG'
+  - 'Đảo `t34` thành danh sách cho phép — `#209`'
+  - 'Nợ `PLAT-X5-required-status-check` — `#209`'
+  - 'Nhánh Windows của `t40`, branch protection — ngoài tầm sandbox'
+canh_bao_pham_vi: 'Nêu lại các mục trên như finding CHẶN là sai phạm vi — quyết định đã có.'
+
+gate_bat_buoc:
+  - 'ops/lease_publish_test.py -> rc=0, N/N hai số bằng nhau, không tụt dưới 41 ca'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'đột biến gỡ phép cắt -> `t41` ĐỎ 1/1, chạy trên BẢN SAO TẠM'
+
+yeu_cau_dinh_dang_SIET_HON_LUOT_2: >-
+  Verdict phải IN RA STDOUT. Lượt 2 chỉ in 1531 byte tóm tắt rồi ghi verdict vào một tệp trong
+  sandbox — mà sandbox của lượt trước đó ĐÃ bị xoá sạch khi phiên khởi động lại. Đầu ra tiến trình
+  là thứ duy nhất launcher giữ lại.
+
+nghia_cua_approve_o_luot_nay: >-
+  Hai việc của delta đã đóng, phép cắt `#` KHÔNG fail-open, `t41` có răng, lời khai mới KHỚP phép
+  đo, không hồi quy. KHÔNG có nghĩa `t35` đã kín — phần chưa kín là nợ có tên ở `#209`.
+posted_comment_id: 5364816479   # workflow ghi, ĐỪNG sửa tay

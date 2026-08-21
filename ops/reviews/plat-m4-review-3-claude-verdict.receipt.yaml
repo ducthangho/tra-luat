@@ -117,6 +117,10 @@ verdict_usage_caveats:
     executor hạ lớp, mà người khai chính là phiên executor. Lý do gốc VẪN CÒN: chốt
     fail-closed tính `effective_review_class` KHÔNG TỒN TẠI — 0/41 lease khai trường ấy,
     và thứ duy nhất chạm nó chỉ CHÉP LẠI giá trị đã khai. Ca tiếp theo sẽ lọt y hệt.
+    ĐÃ ĐÍNH CHÍNH 21-08-2026 theo quyết định người giữ kho: class ĐÚNG là `sensitive`.
+    Bản có hiệu lực là `ops/DINH_CHINH_REVIEW_CLASS_PLAT_M4.md`; `ops/specs/plat-m4-v0.md:11`
+    CỐ Ý giữ nguyên vì bốn lease đang neo băm `63ff22bc` của tệp ấy — sửa một byte là làm
+    bốn lease trỏ vào một băm không tệp nào ứng với, đúng bệnh đã làm wp55 đứng im hai ngày.
 - id: R2-da-HOAN-co-can-cu-khong-phai-da-va
   noi_dung: >-
     Finding R2 trong verdict ghi P2; phiên chính đo lại và HẠ xuống P3 rồi HOÃN — không vá.

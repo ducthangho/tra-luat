@@ -1,0 +1,70 @@
+# Lease REVIEWER — bản thẩm định "vòng lặp tri thức" (PR "#214"), lượt 1. Neo 825558a5.
+#
+# PR THUẦN TÀI LIỆU. Class `routine` theo §8:576 ("docs hoặc test/report không đổi
+# authority/security boundary"). §8 cho routine dùng phiên claude mới hoặc human; người giữ kho
+# NÂNG LỚP sang cross-provider có audit — chính là chỉ thị dẫn ở `granted_on_instruction`.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 214
+packet_issue_ghi_chu: >-
+  KHÔNG có Packet Issue riêng — "packet" ở đây CHÍNH LÀ PR #214. Khai số PR vào trường này để
+  bản chiếu lease đăng đúng chỗ người đọc sẽ tìm. Khai thẳng thay vì mượn số issue của packet khác.
+packet_id: TRI-THUC-20260821
+lease_id: tri-thuc-review-1-codex-20260821
+revision: 1
+
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+assurance_target: cross_approved
+assurance_ghi_chu: >-
+  `cross_approved` ở đây là NÂNG LỚP tự nguyện, không phải yêu cầu của §8 cho class `routine`.
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+review_class: routine
+
+reviewed_sha_required: 825558a59fd93623dd2f2c9123577361e9e3abca
+branch: claude/opus-5-plan-steps-y5r6ci
+base_sha: 0333948669bb0fdbfef8f5cbcf14a95b1b0e8bd4
+target_branch_neu_land: master
+target_pull_request: 214
+scope_files: 12
+
+prompt_path: ops/prompts/tri-thuc-review-1-codex-20260821.md
+prompt_sha256_required: d97c3c59c5d8a5dbba372034c3946130fa386f548ddfe180de28fa06cf8e612c
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("Cross review #214 đi rồi merge" / "Cross-review cả #214, #216 nếu kịp")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_ghi_chu: >-
+  Phiên ghi lease CŨNG là phiên soạn tài liệu được review. Và nặng hơn: ba trong sáu báo cáo gốc
+  trong PR ấy là của một phiên CODEX — tức reviewer cùng nhà cung cấp với một phần NGUỒN. Prompt
+  nói thẳng chỗ này và dặn reviewer đừng coi đó là lợi thế.
+
+leased_at_utc: '2026-08-21T08:45:00Z'
+lease_expires_at_utc: '2026-08-22T08:45:00Z'
+run_minutes: 60
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+review_calls_limit: 2
+review_calls_used_truoc_luot_nay: 0
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: 'CI xanh trên exact head'
+  bang_chung: 'gate(ubuntu-latest) success trên 825558a5 (run 32454475761, job 96689019909).'
+  no_khai: 'Windows chưa chạy trên head này. PR thuần tài liệu, 0 dòng mã.'
+
+canh_bao_cho_reviewer: >-
+  RỦI RO ĐÃ ĐO của lượt này: nội dung PR BÀN VỀ một lỗ rò credential và có chứa chuỗi dạng
+  `user:SENTINEL@host`. Hôm nay bộ lọc nội dung của nhà cung cấp đã CẮT hai lượt codex khi
+  reviewer đọc chính diff ấy (hai mẫu dương + một đối chứng âm, ghi ở
+  `ops/reviews/plat-m4-review-3-claude-verdict.receipt.yaml`). Nếu lượt này cũng bị cắt thì đó
+  là ràng buộc CẤU TRÚC, KHÔNG phải lỗi của reviewer — khai đúng như vậy và chuyển sang phương
+  án khác, ĐỪNG thử lại lần hai.

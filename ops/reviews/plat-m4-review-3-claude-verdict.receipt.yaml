@@ -34,7 +34,7 @@ verdict_sha256: 8da9611a7a5f9be65481df8a484647445d252f3051387201980b0f25ffa6fe1b
 verdict_bytes: 4950
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: pending-first-commit
+evidence_url: https://github.com/ducthangho/tra-luat/blob/392bdbd35d9919ae9226a11a76a78537654f354e/ops/reviews/plat-m4-review-3-claude-verdict.md
 evidence_url_ghi_chu: >-
   Điền sau khi biết commit ĐẦU TIÊN chứa tệp verdict — một commit không thể chứa băm của
   chính nó, nên biên nhận này được ghi làm HAI commit, đúng tiền lệ lượt 2.

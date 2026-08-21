@@ -1,0 +1,47 @@
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 203
+packet_id: PLAT-X4
+phase_key: PLAT-X4
+revision: 1
+generation: 1
+lease_id: plat-x4-exec-1-claude-20260820
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+assurance_target: cross_approved
+access: read-write
+write_set:
+  - ops/lease_publish_test.py
+  - .github/workflows/ops-publish-lease.yml
+  - .github/workflows/ci.yml
+  - planned:ops/cai_actionlint.sh
+branch: claude/plat-x4-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+reviewed_sha_required: 75131662d2b6f49b8fe43cc503b8367b4be8ad17
+base_sha: 75131662d2b6f49b8fe43cc503b8367b4be8ad17
+start_from_sha: 75131662d2b6f49b8fe43cc503b8367b4be8ad17
+prompt_path: ops/prompts/plat-x4-exec-1-claude-20260820.md
+prompt_sha256_required: f4dfd97abf3a75750f56c4bd88a408a5bd50fc2c1887cc070fee682d94728c87
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-20 ("Chọn (b). Mở packet và xử lý ngay trên phiên mới")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+leased_at_utc: '2026-08-20T10:25:00Z'
+lease_expires_at_utc: '2026-08-21T10:25:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+reviewer_provider: codex
+review_rounds_limit: 2
+canh_bao_song_song: >-
+  Lúc cấp lease có HAI PR của phiên codex đang mở: "#202" (PLAT-M3-R, chạm
+  .claude/dev/launcher*.py) và "#199" (PROTO-01-FIX). Giao write set với packet này được
+  đo là RỖNG lúc cấp, nhưng phiên thi công PHẢI đo lại trước khi sửa dòng nào — kho đang
+  có nhiều phiên chạy song song và trạng thái trôi nhanh.
+posted_comment_id: 5354557545   # workflow ghi, ĐỪNG sửa tay

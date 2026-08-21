@@ -1,0 +1,73 @@
+# Lease REVIEWER — `PLAT-X5` (#206 / PR "#207"), lượt 1/2. Neo exact head e071e0aa.
+#
+# ĐẢO VAI: executor `codex`, reviewer `claude`. Vẫn cross-provider ⇒ §8 thoả.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 206
+packet_id: PLAT-X5
+lease_id: plat-x5-review-1-claude-20260820
+revision: 1
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: codex
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+
+reviewed_sha_required: e071e0aae6bdc4d270a42fbc534ad3f05dcba0fa
+branch: codex/plat-x5-exec-1
+base_sha: a09aae627533f59e6b2e817858a6db50b999d41c
+target_branch_neu_land: claude/plat-x4-exec-1
+target_pull_request: 207
+scope_files: 5
+
+prompt_path: ops/prompts/plat-x5-review-1-claude-20260820.md
+prompt_sha256_required: c09d4feb3e480cbe2d26c1985cd7ff019a30e31359cd36317e0e24a07b8ae236
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-20 ("thực hiện packet bằng codex advanced mức cao nhất, review = claude")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-20T17:20:00Z'
+lease_expires_at_utc: '2026-08-21T17:20:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: 'CI xanh trên exact head — cả hai job success, KHÔNG job nào có bước hỏng'
+  bang_chung: 'lượt 32395054494 (`workflow_dispatch`) trên e071e0aa: gate(windows-latest) success 0 bước hỏng · gate(ubuntu-latest) success 0 bước hỏng'
+  ghi_chu: >-
+    Chốt của người giữ kho: review trên một head CI ĐỎ thì verdict nói về một cây không ai chạy
+    được. Lease này CHỈ được cấp sau khi điều kiện trên thoả — và nó đã thoả TRƯỚC khi cấp.
+    "PR xanh" không đủ: `ci.yml` chỉ chạy ubuntu cho PR thường.
+
+executor_so_sach:
+  attempts_used: 2
+  attempts_limit: 2
+  ghi_chu: >-
+    Executor đã dùng HẾT trần attempt (2/2) theo trục đã chốt: attempt = một lần TUYÊN BỐ DONE.
+    Lượt 1 (lease r1) báo BỊ CHẶN vì đặc tả tự mâu thuẫn ⇒ không tính. Lượt r2 lần 1 trình
+    `3ad75553` (Windows đỏ) = attempt 1. Lượt r2 lần 2 trình `e071e0aa` (CI xanh) = attempt 2.
+    `changes_requested` ở lượt review này ⇒ KHÔNG còn attempt để vá; phải lên checkpoint.
+
+canh_bao_cho_reviewer: >-
+  Prompt do PHIÊN ĐIỀU PHỐI viết — chính phiên đã BA LẦN vá hỏng cùng một chỗ ở `#203`, và đã
+  để lọt một `invalid escape sequence` mà executor phải sửa hộ trong PR này. Soi phần ĐẶC TẢ,
+  không chỉ soi mã. Executor TỰ KHAI `python -m` vẫn lọt — lời khai thật thà vẫn phải ĐO.
+
+no_da_khai_boi_executor:
+  - id: PLAT-X5-required-status-check
+    noi_dung: '"CI có thật sự chạy gate không" — `python -m`, `if: false` trên bước wrapper, `echo wrapper`. Không thuộc thẩm quyền một bộ test tự kiểm YAML của chính nó.'
+  - id: curl-retry-khong-bao-loi-35
+    noi_dung: '`curl --retry 2` có thể không bao lỗi 35 nếu thiếu `--retry-all-errors`. CÓ SẴN TỪ TRƯỚC, ngoài phạm vi packet. Đã ăn một flake thật ở lượt CI đầu.'
+posted_comment_id: 5359227293   # workflow ghi, ĐỪNG sửa tay

@@ -11,7 +11,10 @@ tìm ra finding thật. Lượt 3 thì **không chạy được**: bộ lọc n�
 giữa lượt với `flagged for possible cybersecurity risk` — đo được là nó bắt vào **nội dung
 diff** (URL dạng `user:SENTINEL@host`), không phải vào prompt, nên viết lại prompt không cứu
 được. Chủ kho đã hạ mức assurance `cross_approved` → `same_provider_approved`, có ghi ở
-`kho/ops/uy-quyen-194-same-provider-20260821.yaml`.
+`ops/uy-quyen-194-same-provider-20260821.yaml` — tệp ấy nằm trên nhánh `ops/lease-review-3-m4`
+và **CỐ Ý KHÔNG có trong bản sao này**: thêm nó vào `./kho` sẽ làm cây BẨN, mà cây bẩn chính
+là thứ đã giết lượt review 1 của packet này. Bạn không cần đọc nó; nêu ra để bạn biết quyết
+định hạ mức có bản ghi, không phải lời phiên vá tự nói.
 
 **Hệ quả cho bạn, nói thẳng:** bạn CÙNG nhà cung cấp với người vá. Cái lợi thế "nền khác
 nhìn ra thứ nền này mù" — thứ đã tìm ra cả ba finding trước — **bạn không có**. Vậy nên

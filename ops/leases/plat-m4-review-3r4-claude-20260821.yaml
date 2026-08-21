@@ -1,0 +1,111 @@
+# Lease REVIEWER — `PLAT-M4` (#194 / PR "#204"), vòng 3, LỜI GỌI 6. Neo exact head 825e9704.
+#
+# ĐỔI NHÀ CUNG CẤP: codex -> claude (Fable 5). Assurance HẠ `cross_approved` ->
+# `same_provider_approved`, có uỷ quyền ghi ở `ops/uy-quyen-194-same-provider-20260821.yaml`.
+# Đây là OVERRIDE của chủ kho, KHÔNG phải yêu cầu §8 đã được đáp ứng.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 194
+packet_id: PLAT-M4
+lease_id: plat-m4-review-3r4-claude-20260821
+revision: 1
+thay_cho_lease: plat-m4-review-3r3-claude-20260821
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: claude
+assurance_target: same_provider_approved
+assurance_giao_thuc_doi: cross_approved
+uy_quyen_ha_muc: ops/uy-quyen-194-same-provider-20260821.yaml
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+review_class: systemic
+
+reviewed_sha_required: 825e97042b86f5e200c2ab8a00b58d8642510353
+branch: claude/plat-m4-exec-1
+base_sha: 7a2320fe13b4aad3e7b298d070125a01762a8e54
+target_branch_neu_land: master
+target_pull_request: 204
+scope_files: 2
+
+spec_path: ops/specs/plat-m4-v0.md
+spec_sha256: 63ff22bcc2427850ddd66322ed4a5ac5dcaa03f8d242cc857d12825b601953d1
+
+prompt_path: ops/prompts/plat-m4-review-3-fable-20260821.md
+prompt_sha256_required: fc553f932846050c015e8e34a379a9b23d9e8b0684d95cb753047f82b3ccef72
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-21 ("Chọn 1, đổi reviewer sang Fable" — trả lời cho hai đường
+  được nêu sau khi lời gọi 5 bị nhà cung cấp cắt).
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_ghi_chu: >-
+  Phiên ghi lease này CŨNG là phiên đã vá, VÀ nay reviewer lại cùng nhà cung cấp với nó.
+  Hai lớp trộn vai cùng lúc — khai thẳng thay vì đặt tên to hơn. Cái CÒN đỡ được: prompt bị
+  neo băm, verdict neo exact head, reviewer chạy trong tiến trình riêng trên bản sao chỉ
+  đọc, và prompt nói THẲNG với reviewer rằng nó không có lợi thế nền khác nên phải đo bằng
+  tay chứ đừng diễn vai cross-review. Cái KHÔNG đỡ được: mù chung của cùng nhà cung cấp.
+
+vi_sao_lease_id_MOI_thay_vi_sua_lease_cu: >-
+  `plat-m4-review-3r3-claude-20260821` ĐÃ ĐƯỢC ĐĂNG (comment 5366394981) với băm prompt
+  `b9ae7f7d`. Sau đó preflight phát hiện prompt ấy bảo reviewer đọc một tệp KHÔNG có trong
+  cây được review; chép tệp vào thì cây BẨN — và cây bẩn CHÍNH LÀ thứ đã giết lượt review 1
+  của packet này (lease `plat-m4-review-1r2`). Prompt được sửa, băm thành `fc553f93`.
+  KHÔNG sửa lease cũ tại chỗ, vì cổng trả `rc=9` (đã đăng) nên bản CHIẾU trên issue sẽ mãi
+  khai `b9ae7f7d` trong khi TỆP khai `fc553f93` — đúng hình dạng đã làm wp55 đứng im hai
+  ngày (băm công bố không khớp vật nó trỏ tới). Lease_id mới để bản chiếu và tệp khớp nhau
+  ngay từ lần đăng đầu.
+  KHÔNG lời gọi nào bị tiêu cho `3r3`: nó chưa từng được chạy.
+
+leased_at_utc: '2026-08-21T07:10:00Z'
+lease_expires_at_utc: '2026-08-22T07:10:00Z'
+run_minutes: 90
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 3
+review_rounds_used_truoc_luot_nay: 2
+review_calls_limit: 6
+review_calls_used_truoc_luot_nay: 5
+ngan_sach_ghi_chu: >-
+  LỜI GỌI 6, VÒNG VẪN LÀ 3 — chỉ nâng trục LỜI GỌI, đúng nếp lease `plat-m4-review-1r2`
+  ("hai trục cưỡng chế độc lập, đừng gộp"). Lời gọi 4 và 5 đều tiêu một lời gọi mà KHÔNG
+  sinh vòng nào: lời gọi 4 chết vì sandbox của phiên chính (đã sửa, đo được ở lời gọi 5:
+  `No usable temporary directory` = 0 lần), lời gọi 5 chết vì bộ lọc nội dung của nhà cung
+  cấp — và đó là lý do đổi provider chứ không phải thử lại. ĐÂY LÀ LỜI GỌI CUỐI.
+
+executor_so_sach:
+  attempts_used: 2
+  attempts_limit: 3
+  ghi_chu: >-
+    Executor còn 1 attempt (`plat-m4-exec-2-claude-20260821`, hạn 2026-08-22T02:05:00Z).
+    Dự trữ khắc phục THOẢ nhưng chỉ vừa đủ: `changes_requested` còn đúng một đường vá, và
+    trần VÒNG đã cạn nên đường ấy phải qua quyết định của chủ kho.
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: 'CI xanh trên exact head — cả hai job của `gate`, không job nào có bước hỏng'
+  bang_chung: >-
+    Trên 825e9704: gate(ubuntu-latest) success (run 32449473832, job 96675072270) ·
+    gate(windows-latest) success (job 96675072593) · launcher cả hai nền success (run
+    32449479100). Tổng 7 check run, 5 success, 2 skipped (job có điều kiện), 0 failure.
+
+canh_bao_cho_reviewer: >-
+  Prompt do CHÍNH PHIÊN ĐÃ VÁ soạn, và reviewer CÙNG nhà cung cấp với phiên ấy. Lượt 2 của
+  codex ra `blocked` với ba finding, trong đó F2 là lỗ rò bí mật SỐNG mà bản vá đầu chỉ
+  đóng được MỘT NỬA (đóng đường mạng, để hở đường chẩn đoán). Đừng đọc lời khai "đã đóng"
+  thay cho phép đo — ở lượt này lời khai lại càng rẻ, vì người khai và người kiểm cùng nhà.
+
+no_da_khai_boi_executor:
+- id: PLAT-M4-windows-chi-qua-CI
+  noi_dung: >-
+    Ca mới chỉ đo được trên Linux ở phiên vá. Bằng chứng Windows đến từ lượt CI dẫn ở trên;
+    đừng trích lời khai của phiên vá thay cho nó.
+- id: PLAT-M4-cross-provider-KHONG-dat-o-SHA-cuoi
+  noi_dung: >-
+    Hai lượt codex đã chạy thật ở SHA TRƯỚC và findings đã được vá + đo lại độc lập. Nhưng
+    SHA CUỐI (825e9704) chưa nền tảng thứ hai nào soi. Nợ này thuộc lớp BẰNG CHỨNG, không
+    phải lớp mã, và cách trả nằm ở `cai_gia_ghi_thang.khuyen_nghi` của tệp uỷ quyền.

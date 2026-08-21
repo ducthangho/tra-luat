@@ -3276,7 +3276,7 @@ def lenh_doctor(a) -> int:
             chay_duoc, pb, qua_han = _phien_ban(d, env=moi_truong,
                                                 timeout=min(PROBE_TIMEOUT_GIAY, con_lai))
             if not chay_duoc and qua_han:
-                # NGUỒN CHỚP CỦA `t53` — vá tất định (packet PLAT-M3, #185).
+                # v1.3.0 (#185 + phép đo 12→0) — nguồn chớp của `t53`; vá tất định.
                 # Đo được (ops/NO_KY_THUAT.md): `doctor` thoát 12 rồi 0, cùng lệnh,
                 # cùng máy, cách nhau hai phút — vì MỘT lượt `--version` hết hạn
                 # dưới churn tiến trình bị đếm là THIẾU. Quá hạn phụ thuộc đồng hồ
@@ -3489,18 +3489,28 @@ def lenh_doctor(a) -> int:
             if not con_ong:
                 break
             hong = c.get("co_mat_nhung_khong_chay_duoc")
-            dau = "co  " if c["co"] else ("HONG" if hong else
-                                          ("THIEU" if c["bat_buoc"] else "khong"))
-            mo_ta = c.get("phien_ban", "") if c["co"] else c["vi_sao"]
-            con_ong = _in_an_toan(f"  {dau:<5} {c['ten']:<8} {mo_ta}")
+            chua_do = c.get("chua_do_duoc")
+            xac_thuc_chua_do = (c.get("xac_thuc_ok") is None
+                                 and c.get("loi_xac_thuc"))
+            ly_do_chua_do = ((chua_do or {}).get("ly_do")
+                              or xac_thuc_chua_do)
+            dau = ("CHUA_DO" if ly_do_chua_do else
+                   ("co  " if c["co"] else ("HONG" if hong else
+                                             ("THIEU" if c["bat_buoc"] else "khong"))))
+            mo_ta = (ly_do_chua_do or
+                     (c.get("phien_ban", "") if c["co"] else c["vi_sao"]))
+            con_ong = _in_an_toan(f"  {dau:<8} {c['ten']:<8} {mo_ta}")
             if hong and con_ong:
                 con_ong = _in_an_toan(
                     f"        co o {hong['duong_dan']} nhung KHONG chay duoc: {hong['loi']}")
-            if not c["co"] and con_ong:
+            if not c["co"] and not ly_do_chua_do and con_ong:
                 con_ong = _in_an_toan(f"        cai bang: {c['lenh_cai']}")
             if c.get("xac_thuc_ok") is False and con_ong:
                 con_ong = _in_an_toan(
                     f"        xac thuc KHONG dung: {c.get('loi_xac_thuc', 'khong ro')}")
+            elif xac_thuc_chua_do and con_ong:
+                con_ong = _in_an_toan(
+                    f"        xac thuc CHUA DO: {xac_thuc_chua_do}")
         # In NGAY SAU bảng công cụ vì cùng trả lời câu "đủ đồ chưa", chỉ khác tầng:
         # bảng trên là LỆNH trên PATH, bảng này là MODULE của interpreter đang chạy.
         if mo_dun:
@@ -3522,10 +3532,15 @@ def lenh_doctor(a) -> int:
             _in_an_toan(f"  NGHI GIU CHO  {vt}  {len(ds)} bien cung gia tri: "
                         f"{', '.join(ds)}")
         if chua_do_bat_buoc:
-            _in_an_toan("CHUA DO DUOC (het ngan sach, KHONG phai thieu): "
+            _in_an_toan("CHUA DO DUOC: "
                         + ", ".join(chua_do_bat_buoc))
-        _in_an_toan("KET LUAN  : " + ("DU CONG CU BAT BUOC" if not thieu_bat_buoc
-                                      else "THIEU " + ", ".join(thieu_bat_buoc)))
+        if thieu_bat_buoc:
+            ket_luan = "THIEU " + ", ".join(thieu_bat_buoc)
+        elif chua_do_bat_buoc:
+            ket_luan = "CHUA DO DUOC " + ", ".join(chua_do_bat_buoc)
+        else:
+            ket_luan = "DU CONG CU BAT BUOC"
+        _in_an_toan("KET LUAN  : " + ket_luan)
         # Mỗi khả năng một cách chữa RIÊNG. Bản trước gợi ý `chuan-bi` cho MỌI mục —
         # sai với `hook-phien` (hook cũ không chữa bằng chuan-bi) và với `github`.
         # Một gợi ý sai còn tệ hơn không gợi ý: nó làm người đọc chạy nhầm rồi tin là

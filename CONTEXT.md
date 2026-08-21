@@ -51,8 +51,10 @@ File này là TỪ ĐIỂN — không chứa chi tiết triển khai. Quyết đ
   cây thật"; Executor tự áp, tự đo, tự chịu trách nhiệm commit — cấm `git am` mù, cấm push ref vào kho.
 - **hint_provenance** — trường TUỲ CHỌN trong handoff Executor: khai hunk nào bắt nguồn từ hint của reviewer nào
   và xác nhận đã tái dẫn xuất. Đã dùng hint mà thiếu khai là vi phạm quy trình; không dùng hint thì được vắng.
-- **Treo theo review** — chế độ lease khi packet ở `reviewing`: đồng hồ thu-hồi-30-phút tạm dừng, tối đa tới trần
-  `review_sla`; quá trần chưa có verdict thì lease trở lại đồng hồ thường.
+- **Treo theo review** — chế độ lease khi packet ở `reviewing`, với `review_sla` là absolute timestamp do
+  dispatcher/người giữ ghi vào lease/state bằng audit bền; mặc định khi đo được là thời điểm vào `reviewing` + 2 giờ.
+  Thiếu trường, không parse được hoặc cơ sở giờ mơ hồ thì chế độ treo không kích hoạt và đồng hồ thu hồi thường tiếp tục
+  chạy; quá timestamp hợp lệ mà chưa có verdict thì lease trở lại đồng hồ thường.
 - **Phiên ấm / phục-hồi-nguội** — phiên executor giữ context sống chờ verdict (tối ưu hoá, không phải quyền) đối lại
   đường dựng phiên mới từ handoff. Đường nguội luôn phải đủ sống một mình; phiên ấm thức dậy phải đo lại trước khi làm.
 

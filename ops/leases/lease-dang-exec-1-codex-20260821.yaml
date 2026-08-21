@@ -1,0 +1,119 @@
+# Lease EXECUTOR — `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 1/2. Neo head xuất phát cfaccff9.
+#
+# Executor `codex`, reviewer `claude` — ĐẢO VAI có chủ đích, xem `reviewer_note`.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 227
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+phase_key: LEASE-DANG-DUNG-MOT-LAN
+revision: 1
+generation: 1
+lease_id: lease-dang-exec-1-codex-20260821
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+model_ghi_chu: >-
+  `max` là mức ĐO ĐƯỢC chứ không phải khai theo cảm tính: banner của `codex exec` in lại nguyên
+  văn mọi giá trị truyền vào, nên đọc banner là ĐOÁN; thứ phân biệt là MÃ THOÁT (giá trị bịa ⇒
+  rc=1 kèm ERROR từ API). `gpt-5.6-sol` là mặc định của tài khoản — KHÔNG khai là "mạnh nhất
+  hiện có" vì `codex models` đòi TTY, không liệt kê được ở phiên phi tương tác.
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+review_class_ghi_chu: >-
+  Chạm `.github/workflows/**` và `ops/lease_publish*.py` — tức CHÍNH cổng đăng lease, đường
+  authority theo §8. Phân theo HẬU QUẢ, không theo vị trí.
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN.md
+spec_sha256_required: e1026adb569f5b4732197afac9c0f35cdd5a8945d46301b1d4cb062624e7c72c
+spec_note: >-
+  AUTHORITY LÀ ĐẶC TẢ ĐÓNG BĂNG, không phải thân Issue và không phải prompt. Lệch băm ⇒ DỪNG.
+  Sửa đặc tả ⇒ bản sửa đổi mới + lease mới; sửa đè làm băm này trỏ vào thứ không còn tồn tại.
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 300
+  don_vi: 'tệp trong write_set · dòng THÊM theo `git diff --numstat cfaccff9..HEAD`'
+  ghi_chu: >-
+    Trần ADR-0044 cho packet `sensitive`. Ba tệp là ĐÚNG trần, không còn chỗ cho tệp thứ tư.
+    Tính ra sẽ vượt ⇒ DỪNG + handoff, KHÔNG tự chia nhỏ packet và KHÔNG tự nới trần (§2).
+
+branch: codex/lease-dang-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: cfaccff9bb373274552042e01edb4bfee81dc0ed
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+start_from_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+base_ghi_chu: >-
+  Base là `master` sạch, KHÔNG xếp tầng trên PR nào. Nói ra vì lượt trước (`PLAT-X5`) xếp tầng
+  trên một PR chưa merge và thứ tự land trở thành ràng buộc.
+
+prompt_path: ops/prompts/lease-dang-exec-1-codex-20260821.md
+prompt_sha256_required: 23fb02227971e31fdf130f61649cc88ff60b211d97fcc1b42a8050bc22525e2d
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("triển khai đi" — backlog đã liệt kê; phương án A cho câu hỏi quyền token)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_note: >-
+  Phiên ghi lease KHÔNG thi công packet — executor là `codex`. Nhưng phiên này LÀ nơi hình dạng
+  lỗi kế thừa vừa tái phát lần thứ 5 (kết luận "#214 là ISSUE" từ API tiện tay thay vì từ
+  `html_url`), và nó cũng là phiên soạn đặc tả. Khai ra để reviewer soi kỹ ĐẶC TẢ, không chỉ soi
+  bản vá: chỗ đáng ngờ nhất là lời khai của chính người vừa mắc lỗi ấy.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T12:00:00Z'
+lease_expires_at_utc: '2026-08-22T12:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 2
+executor_calls_limit: 4
+executor_calls_used_truoc_luot_nay: 0
+
+reviewer_provider: claude
+reviewer_note: >-
+  ĐẢO VAI: executor `codex` ⇒ reviewer khác nhà cung cấp ⇒ `claude`. §8 đòi cross-provider cho
+  phạm vi workflow. Thêm một lý do ĐO ĐƯỢC: hình dạng "hỏi chỗ tiện tay thay vì chỗ kết luận
+  được ghi" đếm 5 lần, CẢ NĂM cùng tác giả `claude` — đổi nền ở vai executor là phép thử rẻ nhất
+  cho giả thuyết "hình dạng bám người viết, không bám bài toán". Cùng phép thử đã chạy ở #217.
+review_rounds_limit: 2
+review_calls_limit: 3
+
+muc_tieu:
+  - 'Lớp ĐO LOẠI SỐ HIỆU: issue / PR / KHÔNG ĐO ĐƯỢC — PR và KHÔNG ĐO ĐƯỢC đều CHẶN (Q1)'
+  - 'Idempotent HỎI COMMENT TRÊN ISSUE theo dấu `**Lease `<lease_id>`**`; `posted_comment_id` giữ lại làm lớp THÊM (Q2, Q3)'
+  - 'Cả hai lớp qua ĐÚNG MỘT mối nối thay được trong test; mối nối KHÔNG chọn được bằng biến môi trường hay bằng trường trong lease'
+  - 'Hai lớp chỉ áp trong Actions; khi vắng thì `check` phải NÓI RA là vắng'
+  - 'Vòng đăng xử HẾT danh sách, nhưng lượt chạy vẫn ĐỎ nếu có lease bị chặn (Q4)'
+  - 'Bước ghi ngược chạy `if: always()` (Q5)'
+
+gate_bat_buoc:
+  - 'python3 ops/lease_publish_test.py -> rc=0, N/N hai số BẰNG NHAU, >= 52 ca (nền 42)'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5; thiếu công cụ ⇒ in KHÔNG ĐO ĐƯỢC và ĐỎ'
+  - 'mỗi chốt mới có đột biến giết ĐÚNG ca của nó 1/1, chạy trên BẢN SAO TẠM'
+  - 'git diff --numstat cfaccff9..HEAD -> <= 3 tệp, <= 300 dòng thêm (báo cáo SỐ THẬT)'
+  - 'đồ giả `gh` GIỮ TRẠNG THÁI: "đăng" thêm vào danh sách comment; T46 xanh vì lần hỏi thứ hai THẤY thứ lần một vừa thêm'
+
+dieu_kien_dung:
+  - 'Ngân sách tính ra sẽ vượt 3 tệp hoặc 300 dòng thêm ⇒ DỪNG, xuất handoff, KHÔNG tự chia packet'
+  - 'Chốt phải nằm NGOÀI write_set ⇒ DỪNG, xuất handoff, mở packet riêng'
+  - 'Thấy một tiêu chí trong `nghiem_thu` là SAI ⇒ DỪNG và báo cáo để mở bản sửa đổi đặc tả — KHÔNG tự đổi giữa đường'
+  - 'Tự mắc lại hình dạng "lời khai rộng hơn phép đo" hoặc "hỏi chỗ tiện tay" ⇒ sửa và KHAI trong báo cáo; nếu mắc lặp lại thì giả thuyết Q8 SAI và vấn đề nằm ở đặc tả'
+
+khong_chay_song_song_voi: >-
+  Bất kỳ packet nào chạm `ops/lease_publish*.py` hoặc `.github/workflows/ops-publish-lease.yml`.
+  Đo 2026-08-21: không có packet nào đang mở giao write set này (#213 đóng băng ở
+  `ops-don-ref.yml`; #209 ở phạm vi khác).

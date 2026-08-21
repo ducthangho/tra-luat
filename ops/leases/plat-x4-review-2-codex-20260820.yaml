@@ -1,0 +1,90 @@
+# Lease REVIEWER — `PLAT-X4` (#203), lượt **2/2**. Neo exact head 1d37861e.
+#
+# VÒNG CUỐI trong trần canon 2 vòng (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §10).
+# `changes_requested` ở lượt này KHÔNG mở vòng 3 — nó đưa packet sang Review Rescue
+# Checkpoint để người giữ chọn Stable Slice / Remediation Slice / revision.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 203
+packet_id: PLAT-X4
+lease_id: plat-x4-review-2-codex-20260820
+revision: 1
+
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+
+reviewed_sha_required: 1d37861ec419d1c3a25cfbdb1b07689bbf42504c
+branch: claude/plat-x4-exec-1
+base_sha: 909d3e171d7b37a734c1100b3fdc3c48e1b66d19
+target_branch_neu_land: master
+target_pull_request: 205
+scope_files: 4
+
+prompt_path: ops/prompts/plat-x4-review-2-codex-20260820.md
+prompt_sha256_required: 0bf3d623d2921c2963bbf613092eb26eb6760261bd75011da4e1cc52f950d258
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-20 ("chạy lại review chéo codex vòng 2")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  KHAI THẲNG: phiên ghi lease này CHÍNH LÀ phiên đã vá 4 finding của lượt 1. Nó KHÔNG tự cấp
+  quyền — `granted_by` là `ducthangho`, duyệt trực tiếp trong phiên, và `ops/lease_publish.py`
+  chặn cứng mọi tên provider ở trường ấy (rc=4). Ghi ra để reviewer soi kỹ hơn phần khai
+  trong commit lẫn trong prompt — cả hai do chính người vá viết.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-20T14:05:00Z'
+lease_expires_at_utc: '2026-08-21T14:05:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 1
+review_calls_limit: 4
+review_calls_used_truoc_luot_nay: 2
+tran_note: >-
+  Trục VÒNG canon: đây là vòng 2/2, vòng CUỐI. Trục LỜI GỌI là chi phí, cưỡng chế độc lập —
+  đã tiêu 2 (một lượt `blocked` vì lỗi dựng sandbox của phiên điều phối, một lượt review thật).
+
+review_dau_vao:
+  lease_id: plat-x4-review-1r2-codex-20260820
+  reviewed_sha: d0acd79f8bf22acf12d226283f176f2e7cc81508
+  verdict: changes_requested
+  so_finding: 3
+  finding_phai_dong:
+    - id: t34-khop-chuoi-installer
+      mo_ta: '`run: echo ops/cai_actionlint.sh` vẫn cho 35/35 rc=0 — fail-open'
+    - id: al-ver-glob-nhan-ban-khong-phai-so
+      mo_ta: '`case` glob nhận `1x.2y.3z` (rc=0)'
+    - id: goi-tai-ve-khong-kiem-checksum
+      mo_ta: '`--version` là binary TỰ KHAI, không phải kiểm tính toàn vẹn'
+
+finding_ngoai_verdict_cung_phai_dong:
+  - id: windows-tar-hieu-o-dia-la-ten-may
+    nguon: 'phiên điều phối gọi tay workflow_dispatch, KHÔNG phải reviewer'
+    mo_ta: >-
+      `tar -xzf` với đường dẫn mang ký tự ổ đĩa ⇒ GNU tar đi phân giải TÊN MÁY `C`. Trên
+      Windows script LUÔN rc=5. Lượt 32368383473, job 96423003418.
+  - id: sha256sum-thoat-dong-khi-ten-tep-co-dau-cheo-nguoc
+    nguon: 'do CHÍNH bản vá checksum sinh ra, lộ ở lượt 32371632630'
+    mo_ta: >-
+      GNU coreutils thoát cả dòng khi tên tệp chứa `\`; đường dẫn runner Windows là
+      `D:\a\_temp/...` nên băm đọc về DÀI HƠN MỘT KÝ TỰ và cổng báo không khớp trên một gói
+      hoàn toàn đúng. Chữa bằng đọc từ stdin.
+
+kiem_duong_codex_truoc_khi_cap: >-
+  ĐÃ KIỂM bằng lời gọi THẬT (`codex exec`, rc=0, có phản hồi + `tokens used`) lúc
+  2026-08-20T13:5xZ, KHÔNG hỏi `codex login status`. Nhãn `SAP_HET_HAN` của `doctor` (ảnh chụp
+  106h) lại SAI lần nữa — đường thật chạy được.
+posted_comment_id: 5356717061   # workflow ghi, ĐỪNG sửa tay

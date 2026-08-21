@@ -3,7 +3,7 @@
 Bạn là NGƯỜI THI CÔNG packet này. Reviewer sẽ là `claude` — khác họ model, tiêu chí N14 thoả.
 
 **ĐẶC TẢ CÓ THẨM QUYỀN là `ops/specs/plat-x8.md`**, băm
-`9cb54a2e4e7c4d66c60f7717e1ca8aacd57785222777d30dbadab2448157c120`. Prompt này KHÔNG chép lại đặc
+`b88c53dfd2118ea95a1f753b1924f4502e84a5d8f82263a0272b9b83c17eb42c`. Prompt này KHÔNG chép lại đặc
 tả — chép là dựng hai bản trôi lệch. Đọc đặc tả TRƯỚC, rồi đọc prompt này để biết nếp của kho.
 Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
 
@@ -12,7 +12,7 @@ Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
 | trường | giá trị |
 |---|---|
 | packet | `#225` — `[PLAT-X8]` |
-| đặc tả | `ops/specs/plat-x8.md` (băm ở trên — **kiểm bằng `sha256sum` trước khi đọc**) |
+| đặc tả | `ops/specs/plat-x8.md` — bản đóng băng **THỨ HAI** (băm ở trên; **kiểm bằng `sha256sum` trước khi đọc**). Bản đầu `9cb54a2e…` KHÔNG còn hiệu lực |
 | write set | `ops/lease_publish.py` · `ops/lease_publish_test.py` — **ĐÚNG hai tệp** |
 | base | xem `base_sha` trong lease — neo vào `master` sau khi PR `#226` merge |
 | nhánh | `codex/plat-x8-exec-1` |
@@ -26,7 +26,8 @@ Cổng `ops/lease_publish.py` hiện **TÍNH 0 dòng** về lớp review — nó
 `rg review_class ops/lease_publish.py` = 0, `rg schema_version ops/lease_publish.py` = 0.
 Packet này thay lời khai bằng phép TÍNH từ `write_set`.
 
-Chín mục tiêu ở §5 đặc tả, mười hai tiêu chí nghiệm thu ở §6. **Mỗi tiêu chí đã nêu sẵn phép đo
+Chín mục tiêu ở §5 đặc tả, **mười bốn** tiêu chí nghiệm thu ở §6 (`A13`/`A14` là phản chứng
+của hai P1 cross-review lượt 1 — đừng bỏ). **Mỗi tiêu chí đã nêu sẵn phép đo
 làm nó ĐỎ** — đó không phải gợi ý, đó là phần bắt buộc của bằng chứng.
 
 **Ba chỗ dễ đọc lệch, nói trước:**
@@ -37,7 +38,12 @@ làm nó ĐỎ** — đó không phải gợi ý, đó là phần bắt buộc c
    **giữ nguyên** ngày 21-08-2026 sau khi có con số 15/15 trên bàn. Nới bảng là packet khác.
    A7 là đột biến **nới bảng để ca đích ĐỎ** — đó là phép đo, không phải lời mời sửa bảng.
 3. **Cổng này mua tính NHẤT QUÁN, không mua tính ĐÚNG của bảng** (§8 đặc tả). Đừng viết chú
-   thích hay thông điệp commit nói rộng hơn thế.
+   thích hay thông điệp commit nói rộng hơn thế. Cùng kỷ luật ấy áp cho §9.3: cổng đo **lời khai
+   về phạm vi**, KHÔNG đo phạm vi ĐÃ XẢY RA — nó không đọc `risk` (0/49 lease có trường ấy) và
+   không đọc `diff thật` (chưa tồn tại lúc đăng lease). Đừng viết câu nào hàm ý nó đọc.
+4. **Mục tiêu 6 tra bằng BỘ ĐỊNH DANH, không bằng `packet_id` một mình** — đây là bản vá một P1
+   fail-open, đo được 3/5 packet có nhiều lease executor. Thiếu trường định danh là **LOẠI**,
+   không phải là **THA**: đừng viết nhánh dự phòng.
 
 ## 3. Nếp của kho này — KHÔNG phải tuỳ chọn
 

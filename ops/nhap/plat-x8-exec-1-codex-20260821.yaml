@@ -73,7 +73,7 @@ model_ghi_chu: >-
   Reviewer khai `model_reviewer_identity` đủ provider/model/session.
 
 spec_path: ops/specs/plat-x8.md
-spec_sha256_required: 9cb54a2e4e7c4d66c60f7717e1ca8aacd57785222777d30dbadab2448157c120
+spec_sha256_required: b88c53dfd2118ea95a1f753b1924f4502e84a5d8f82263a0272b9b83c17eb42c
 spec_status: da_duyet
 spec_duyet_boi: ducthangho
 spec_duyet_luc: 'direct, in-session, 2026-08-21 (soan-spec: hai vòng chất vấn, 6 câu, duyệt cả 6)'
@@ -81,8 +81,11 @@ spec_note: >-
   Tìm đặc tả ở `master` TRƯỚC; chưa thấy thì `git fetch origin
   claude/opus-5-plan-steps-y5r6ci`. Câu này cố ý đúng ở CẢ HAI phía của lần merge PR "#226".
   Thứ định danh tệp là BĂM, không phải tên nhánh — tên nhánh là thứ trôi và bị xoá.
-  Băm trên đã kiểm trên bản ĐÃ ĐẾN, và KHÔNG đổi: người giữ kho quyết 21-08-2026 GIỮ NGUYÊN
-  việc nới `_BANG_LOP` ở `ngoai_pham_vi` §4.2, nên không có bản đóng băng lại.
+  Băm trên đã kiểm trên bản ĐÃ ĐẾN (`git cat-file -p origin/<nhánh>:… | sha256sum`), và trỏ bản
+  đóng băng **THỨ HAI**. Bản đầu `9cb54a2e…` ăn hai P1 của cross-review lượt 1 (`codex`, neo
+  `c9a1b4e90d`); người giữ kho chọn SỬA đặc tả, nên băm đã đổi TRƯỚC khi cấp lease — đúng thứ tự,
+  không phải sửa sau lưng một lease đang sống. Việc nới `_BANG_LOP` vẫn GIỮ NGUYÊN ở
+  `ngoai_pham_vi` §4.2 theo quyết định cùng ngày.
 
 nguon_cap_viec: >-
   Nợ #1 — caveat `chot-tinh-class-van-KHONG-TON-TAI` trong
@@ -119,7 +122,7 @@ base_ghi_chu: >-
   mỏ neo GIẢ: reviewer đọc một head khác với head mà lease tưởng đang nói tới.
 
 prompt_path: ops/prompts/plat-x8-exec-1-codex-20260821.md
-prompt_sha256_required: 530b88bf99ec3e99c3cee9877701129a1a61b88c4530c3c74eae6be89846adb4
+prompt_sha256_required: 7a1de7c1ce636690a3d312fe0f61eb2fb5752c03b2dd17ada8163784c1c35da0
 
 granted_by: ducthangho
 granted_on_instruction: 'CHUA KY — bản nháp, xem ba bước ở đầu tệp'
@@ -188,6 +191,16 @@ no_da_khai:
       đã tồn tại một lease khai mốc ở TƯƠNG LAI mà vẫn hợp lệ. Cố ý để nó là CẢNH BÁO chứ
       không phải chốt: chốt đứng trên dữ liệu tự khai là chốt lừa được. Chốt thật cho trường
       ấy thuộc gói spec-gate (mục D), chưa mở Issue.
+  - id: PLAT-X8-KHONG-doc-risk-va-diff-that
+    noi_dung: >-
+      §8:567 đòi BA đầu vào — `risk`, effective write set, `diff thật`. Cổng này chỉ có một rưỡi.
+      Đo: `grep '^risk:' ops/leases/` = **0/49 tệp**, tức trường ấy KHÔNG TỒN TẠI trong dữ liệu;
+      còn `diff thật` KHÔNG TỒN TẠI tại thời điểm cổng chạy, vì cổng chạy lúc ĐĂNG lease, trước
+      khi executor viết dòng nào. Hệ quả phải nói thẳng: một packet khai `write_set` sạch rồi
+      diff thật chạm đường nhạy cảm NGOÀI write set vẫn qua. Cổng đo LỜI KHAI VỀ PHẠM VI, không
+      đo phạm vi ĐÃ XẢY RA. Chốt hậu-diff trên exact head là gói RIÊNG — nó chạy ở lượt LAND,
+      khác thời điểm và khác trigger; nhét chung là vượt trần `sensitive` của ADR-0044.
+      Nguồn: P1 cross-review lượt 1 (codex) trên PR "#226", đã khai vào §9.3 đặc tả.
   - id: PLAT-X8-schema-version-KHONG-TU-LAN
     noi_dung: >-
       `schema_version: 2` không tự lan. Ai quên bump thì được tha im lặng và mục tiêu 7 chỉ in

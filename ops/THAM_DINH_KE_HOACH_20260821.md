@@ -28,10 +28,24 @@ Chép nguyên trạng, không diễn giải. Người quyết: `ducthangho`. Kê
 | Q8 | Hợp thức hoá đảo vai executor/reviewer | **Theo khuyến nghị** — ADR cho NGOẠI LỆ có vết, KHÔNG đổi mặc định |
 | Q9 | Commit bản hợp nhất vào `ops/` | **Có** |
 
-**Q7 (bật required status check cho job `gate`) CHƯA ĐƯỢC TRẢ LỜI.** Đây là trạng thái thứ ba —
-`chưa quyết`, không phải `không`. Hệ quả tất định: **mặc định là ĐƯỜNG B** cho tới khi có trả lời.
-Nghĩa là `t34` **SỐNG**, chỉ hạ lời khai; không ai được xoá nó dựa trên suy đoán rằng câu trả lời
-rồi sẽ là "có". Mọi mục khác của kế hoạch chạy nguyên vẹn.
+**Q7 — ĐÃ TRẢ LỜI 21-08-2026: KHÔNG BẬT.** Người quyết: `ducthangho`.
+
+Trước đó tệp này ghi Q7 ở trạng thái thứ ba (`chưa quyết`, không phải `không`). Nay nó thành một
+QUYẾT ĐỊNH, và hệ quả khác hẳn — nên phải viết lại chứ không để nguyên câu cũ:
+
+- **ĐƯỜNG B là đường CHÍNH THỨC, không còn là mặc định tạm.** Không còn nhánh A để chờ.
+- **`t34` SỐNG lâu dài.** Việc phải làm ở Authority Slice không còn là "xoá `t34` sau khi đọc lại
+  cấu hình" mà là **hạ lời khai của nó xuống đúng phạm vi đo được** — liệt kê nguyên văn năm dạng
+  gọi đã ĐO là lọt (`python -m` · `python3 -u` · shebang trực tiếp · `uv run` · `python -X`) — kèm
+  một ca máy đòi docstring chứa đủ năm dạng ấy, để lời khai không trôi rộng ra lần nữa.
+- **Giá phải trả, nói bằng số chứ không bằng chữ:** câu hỏi "CI có thật sự chạy gate không" **vĩnh
+  viễn không có nhà**; nợ `PLAT-X5-required-status-check` thành **nợ thường trực**, không phải nợ
+  có hạn, và phải được ghi vào `ops/NO_KY_THUAT.md` đúng như thế. `t34` che **3/8 = 37,5%** dạng
+  gọi đã biết, nên mỗi lần đổi cách gọi vẫn sẽ đẻ một finding.
+- **Cái KHÔNG mất:** với `PATH` thiếu `actionlint` vẫn có **8 ca đỏ**. Thứ mất là **DETECTION**,
+  không phải **PROTECTION** — đừng đọc quyết định này thành "bỏ ngỏ cổng".
+- Mọi mục khác của kế hoạch chạy nguyên vẹn: `t34` là mục DUY NHẤT từng treo vào việc ngoài kho,
+  và nay nó hết treo.
 
 ### Hệ quả ghi được ngay từ các quyết định trên
 - Q1 ⇒ `ops/DINH_CHINH_TRAN_ATTEMPT_PLAT_X5.md` (append-only, KHÔNG sửa lease cũ).

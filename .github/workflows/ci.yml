@@ -127,58 +127,19 @@ jobs:
       # Nâng bản là việc CÓ CHỦ ĐÍCH — đổi số ở đây, đừng để PyPI đổi hộ.
       - name: cài PyYAML (bộ cổng đăng lease cần)
         run: python -m pip install --quiet PyYAML==6.0.3
-      # `actionlint` LÀ CÔNG CỤ BẮT BUỘC CHO `t33`, không phải thứ tuỳ chọn cho đẹp.
-      # "YAML parse được" KHÁC "GitHub NHẬN": đo 16-08-2026, `ops-don-ref.yml` bị GitHub
-      # TỪ CHỐI — dấu hiệu là một run mang tên ĐƯỜNG DẪN TỆP, 0 job, `conclusion: failure`
-      # (run 31971137920). SÁU lượt cross-review đều kết luận "YAML ok" vì cả sáu chỉ kiểm
-      # bằng PyYAML, mà PyYAML không biết luật của GitHub.
+      # Cài + đối chiếu `actionlint` và chạy selftest trong MỘT lời gọi. Hai bước YAML
+      # riêng từng cho phép installer nằm ở job khác, sau selftest, hoặc bị `if: false`:
+      # có mặt trong YAML nhưng không cấp công cụ cho lần chạy. Wrapper gọi lại
+      # `cai_actionlint.sh`, không chép logic cài.
       #
-      # `t33` fail-close khi thiếu công cụ — một cổng tự tắt lúc thiếu công cụ là cổng
-      # không tồn tại đúng lúc nó cần nhất. Nên chữa bằng cách CẤP ĐỦ CÔNG CỤ cho runner,
-      # đúng tiền lệ `ripgrep` ở `launcher-windows.yml`, chứ không bằng cách hạ chuẩn `t33`.
-      #
-      # GHIM EXACT như `PyYAML==6.0.3` ngay trên: spec trần làm CÙNG MỘT SHA xanh hôm nay
-      # và đỏ ngày mai mà cây không đổi. KHAI THẲNG phần chưa làm: bước này ghim PHIÊN BẢN
-      # chứ chưa kiểm BĂM gói tải về — cùng mức bảo đảm với dòng `pip install` phía trên,
-      # không hơn. Nâng lên kiểm băm là việc riêng, đừng đọc rộng hơn thứ đang có.
-      - name: cài actionlint (bộ cổng đăng lease cần cho t33)
+      # NỢ CÓ TÊN `PLAT-X5-required-status-check`: selftest không thể tự chứng minh job
+      # này thật sự được GitHub gọi. Branch protection phải require status của job `gate`;
+      # t34 chỉ còn canh lời gọi thẳng tệp `.py`, không giả làm bộ phân tích shell.
+      - name: lease-publish selftest (cài công cụ + chạy cổng)
         shell: bash
         env:
           AL_VER: 1.7.7
-        run: |
-          set -euo pipefail
-          # KHÔNG có nhánh thoát sớm "đã có actionlint trên PATH thì thôi". Cross-review
-          # lượt 1 (codex, `fd76921`, P2) đo được: một hàm giả tên `actionlint` trả `0` cho
-          # `--version` là đủ để nhánh ấy thoát xanh — mà `t33` gọi đúng binary trên PATH,
-          # nên cổng thành XANH RỖNG. Chú thích cũ khai "GHIM EXACT" trong khi hành vi thì
-          # nhận bất kỳ bản nào: lời khai rộng hơn thứ đo được.
-          case "${RUNNER_OS}" in
-            Linux)   GOI="actionlint_${AL_VER}_linux_amd64.tar.gz" ;;
-            macOS)   GOI="actionlint_${AL_VER}_darwin_arm64.tar.gz" ;;
-            Windows) GOI="actionlint_${AL_VER}_windows_amd64.zip" ;;
-            *) echo "KHONG DO DUOC: nen la '${RUNNER_OS}', chua co goi cho nen nay"; exit 1 ;;
-          esac
-          DICH="$RUNNER_TEMP/actionlint"
-          mkdir -p "$DICH"
-          curl -fsSL -o "$DICH/goi" \
-            "https://github.com/rhysd/actionlint/releases/download/v${AL_VER}/${GOI}"
-          if [ "${RUNNER_OS}" = "Windows" ]; then
-            unzip -q -o "$DICH/goi" -d "$DICH"
-          else
-            tar -xzf "$DICH/goi" -C "$DICH"
-          fi
-          echo "$DICH" >> "$GITHUB_PATH"
-          # ĐỐI CHIẾU BẢN GHIM: "đã cài" KHÁC "đã cài ĐÚNG BẢN". Đây là bằng chứng dương
-          # thay cho `command -v` (có mặt != đúng bản != chạy được).
-          BAN="$("$DICH/actionlint" --version 2>/dev/null || "$DICH/actionlint.exe" --version)"
-          printf '%s\n' "$BAN" | head -1
-          printf '%s\n' "$BAN" | head -1 | grep -qx "$AL_VER" || {
-            echo "::error::actionlint cai xong nhung KHONG khop ban ghim '$AL_VER'"
-            exit 1
-          }
-
-      - name: lease-publish selftest (cổng đăng lease)
-        run: python ops/lease_publish_test.py
+        run: bash ops/chay_lease_publish_test.sh
       # `don-nhanh.ps1` XOÁ NHÁNH REMOTE — thao tác không hoàn tác được ở phía PR: xoá
       # nhầm một nhánh đang là BASE của PR đang mở thì GitHub ĐÓNG các PR ấy, và tạo lại
       # nhánh không mở lại chúng. Bộ này khoá đúng chỗ đó, cộng chốt fail-close khi không

@@ -84,12 +84,13 @@ import sys
 import tempfile
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.4.0"
+VERSION = "1.4.1"
 
 # launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu probe-qua-han-ba-trang-thai mcp-endpoint
 #
@@ -2902,8 +2903,24 @@ def _do_mcp_endpoint(url: str | None, *, token: str | None = None,
     if not url:
         return ("khong_do_duoc", "`.mcp.json` khong khai `url` cho server nay "
                                  "(server kieu stdio thi dieu do la BINH THUONG)", False)
-    if not str(url).lower().startswith(("http://", "https://")):
+    # KHOP TIEN TO CHUOI KHONG PHAI PHAN TICH URL — bai hoc PLAT-M4 luot 1 (P2).
+    # `https://user:SECRET@host/mcp` qua duoc `startswith`, roi bi mat di NGUYEN VAN vao
+    # `req.full_url` VA `req.host`. Phan tich cau truc, va doi thu tu kiem: `userinfo`
+    # phai bi bat TRUOC scheme, vi nhanh scheme in nguyen `url` ra mo ta.
+    try:
+        p_ep = urllib.parse.urlsplit(str(url))
+        chu_ep, may_ep = p_ep.scheme.lower(), p_ep.hostname
+        ai_ep = (p_ep.username, p_ep.password)
+    except ValueError as e:
+        return ("khong_do_duoc", f"`url` khong phan tich duoc ({type(e).__name__})", False)
+    if ai_ep != (None, None):
+        # KHONG in `url`, ke ca mot phan cua no: chinh no dang cho bi mat.
+        return ("khong_do_duoc", "`url` nhung credential trong userinfo — TU CHOI, KHONG "
+                                 "probe (bi mat se di vao URL va header Host)", False)
+    if chu_ep not in ("http", "https"):
         return ("khong_do_duoc", f"`url` khong phai http(s): {url!r}", False)
+    if not may_ep:
+        return ("khong_do_duoc", f"`url` khong co ten may: {url!r}", False)
     dau = {"Content-Type": "application/json",
            "Accept": "application/json, text/event-stream"}
     if token:

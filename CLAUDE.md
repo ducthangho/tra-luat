@@ -158,6 +158,25 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   chưa chạy" nhìn giống hệt nhau** nếu hỏi sai chỗ. Chốt chung, rẻ và luôn dùng được: trước khi kết
   luận từ một chỗ RỖNG, hỏi "nếu thứ tôi đang tìm CÓ THẬT thì nó sẽ được ghi ở đâu?" — rồi đi hỏi
   đúng chỗ đó. Máy không canh được mục này; nó là kỷ luật đọc.
+- **SỔ LEASE KHÔNG NẰM MỘT CHỖ — đo `ops/leases/` trên `master` là mù đúng chỗ lease MỚI NHẤT nằm.**
+  Đo 21-08-2026, trả giá bằng một lease chồng lấn đã ký: đặc tả `PLAT-X8` khai *"không lease nào đang
+  giữ `ops/lease_publish*`"* sau khi quét `ops/leases/` trên master ⇒ **0**. Quét đủ **98 nhánh
+  `ops/**`** ⇒ **7** lease còn sống chạm hai tệp ấy, trong đó `lease-dang-exec-2` (#227) **đã đăng**
+  và được cấp **15 phút trước**, giữ đúng cả hai tệp ⇒ cửa sổ hai writer ~23,75h. Lý do cấu trúc:
+  lease sống trên nhánh `ops/**` và **chỉ về master sau khi merge**, nên master luôn thiếu đúng những
+  lease mới nhất — tức những lease khả nghi nhất, y hệt lý do `t23` không được ghi cứng một tên tệp.
+  Chưa có lệnh nào trả lời *"lease nào đang giữ đường dẫn X"* trên toàn kho (nợ
+  `SO-LEASE-KHONG-NAM-MOT-CHO`, biên bản `ops/RUT_LEASE_PLAT_X8_20260821.md`); tới lúc có, phải quét
+  `refs/remotes/origin/ops/*` bằng tay TRƯỚC KHI cấp bất kỳ lease nào, và **không fetch được ref nào
+  thì ĐỎ** — "không đo được" không phải "không có". Cùng họ *"hỏi chỗ tiện tay thay vì hỏi chỗ kết
+  luận được ghi"*, và lần này nạn nhân là chính packet sinh ra để dạy cổng ĐO thay vì NHẬN LỜI KHAI.
+- **`paths:` của workflow KHÔNG đánh giá được trên lần đẩy TẠO NHÁNH MỚI — cổng vắng mặt, không đỏ.**
+  Cùng sự cố: đẩy nhánh `ops/**` MỚI kèm một tệp trong `ops/leases/` ⇒ `ops-publish-lease.yml` chạy
+  **0** lượt; đẩy tiếp lên nhánh ĐÃ TỒN TẠI, cùng bộ lọc ⇒ chạy ngay (lượt `32492493219`). Không có
+  commit "before" để so thì bộ lọc đường dẫn không khớp gì. Lần này nó tình cờ đứng về phía an toàn
+  (lease sai không bị đăng), nên đừng đọc thành chốt: **đây là hành vi chưa được khoá bằng phản
+  chứng**. Hệ quả hai chiều — một workflow bạn TRÔNG CẬY cũng sẽ im lặng không chạy ở đúng lần đẩy
+  đầu tiên. Muốn chắc thì đẩy nhánh trước, đẩy nội dung sau.
 - **Quét secrets: lọc theo PHẦN MỞ RỘNG là mù ĐÚNG CHỖ secrets nằm.** `Path('.env').suffix == ''` nên
   `.env` `.netrc` `credentials` (không mở rộng) bị bỏ qua SẠCH — bơm `GOCSPX-…` vào `.env` mà bộ quét
   trả rc=0. Cộng thêm `Get-ChildItem` thiếu `-Force` cũng bỏ y hệt: **hai lỗi ĐỘC LẬP mà CÙNG HƯỚNG** ⇒

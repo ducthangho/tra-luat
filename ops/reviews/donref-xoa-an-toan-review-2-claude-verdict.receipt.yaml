@@ -37,6 +37,7 @@ verdict_nguon: 'scratchpad/rv217b/runs/8e32be0f/stdout.log (launcher, ma_thoat=0
 
 evidence_channel: repo_file
 authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/df26d1eb74a69f09cbc2d626a1e0a3d93a669d0a/ops/reviews/donref-xoa-an-toan-review-2-claude-verdict.md
 
 LUOT_HONG_KHONG_TINH_VONG:
   run_id: 7c745075

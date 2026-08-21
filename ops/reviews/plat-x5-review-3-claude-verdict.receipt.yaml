@@ -1,0 +1,159 @@
+# BIÊN NHẬN — cross-review lượt **3** của `PLAT-X5` (#206 / PR "#207"), review DELTA của lease r4.
+#
+# ĐÂY LÀ LƯỢT ĐẦU TIÊN CỦA PACKET ĐẠT `cross_approved`. Executor `codex`, reviewer `claude`
+# ⇒ cross-provider, §8 thoả, verdict `approve`.
+#
+# ĐỌC KÈM: `approve` này nói về DELTA `2284b465..117e0c42` (một tệp, hai việc). Nó KHÔNG nói
+# `t35` đã kín — phần chưa kín là nợ có tên `PLAT-X5-nhan-dien-loi-goi-wrapper` ở `#209 §7`.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: PLAT-X5
+packet_issue: 206
+lease_id: plat-x5-review-3-claude-20260821
+provider: claude
+role: reviewer
+executor_provider: codex
+verdict: approve
+assurance: cross_approved
+cross_provider: true
+reviewed_sha: 117e0c4258c5029c7a330611786733c5a583e1c5
+head_truoc_delta: 2284b4657304d0229e95d1f64ebd0c22035d201d
+base_sha: a09aae627533f59e6b2e817858a6db50b999d41c
+target_pull_request: 207
+
+verdict_path: ops/reviews/plat-x5-review-3-claude-verdict.md
+verdict_sha256: ed9d46eb20da2d10a3a378d4bf65b78f13dc09fc972bc2441316ac87304fcd7e
+verdict_bytes: 6108
+verdict_nguon: 'scratchpad/rvx5c/runs/851b3c52/stdout.log (launcher, ma_thoat=0, 1007.747s)'
+verdict_doi_chieu: '`cmp` nguồn ↔ tệp đã chép: khớp từng byte'
+verdict_ghi_chu_dong_dau: >-
+  Dòng đầu tệp là `Cleanup isn't permitted in this sandbox …` — một câu của chính reviewer, KHÔNG
+  phải lỗi. Giữ NGUYÊN BYTE theo đúng lệ: verdict được neo bằng băm, sửa một ký tự là làm mọi lời
+  khai về băm ấy thành sai. Lượt này ĐÃ in verdict ra STDOUT như lease siết — khác lượt 2.
+
+evidence_channel: repo_file
+authoritative_source: repo_file
+
+published_first:
+  branch: ops/verdict-x5-review-3
+  commit: SE-DUOC-GHI-SAU-KHI-COMMIT
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_tag: null
+truy_xuat_ghi_chu: '#207 CHƯA land, chưa có tag `luu-tru/*`.'
+
+chot_read_only_DO_chu_khong_tin_co:
+  head_sau: 117e0c4258c5029c7a330611786733c5a583e1c5
+  head_khop_neo: true
+  thay_doi_cay_cuoi_luot: 0
+  reviewer_do_HEAD_hai_cach: 'đọc thẳng `.git/HEAD` VÀ `git rev-parse` qua subprocess — hai đường, cùng kết quả'
+  khong_lap_lai_loi_luot_1: 'không dùng `checkout --work-tree`; `status --porcelain` rỗng trước và sau.'
+
+so_sach_ngan_sach:
+  review_rounds_used: 3
+  review_rounds_limit: 3
+  executor_attempts_used: 4
+  executor_attempts_limit: 4
+  ghi_chu: 'Cả hai trục đều dùng hết, nhưng lần này kết thúc bằng `approve` chứ không phải checkpoint.'
+
+VI_SAO_REVIEWER_LA_CLAUDE_CHU_KHONG_PHAI_CODEX:
+  chi_thi_goc: 'ducthangho: "chọn (2), review delta r4 bằng codex"'
+  phien_dieu_phoi_neu: >-
+    `codex` CHÍNH LÀ tác giả của `117e0c42`, nên codex review delta ấy là TỰ REVIEW — không phải
+    cross-provider, và không cấp được `cross_approved` mà §8 đòi cho phạm vi này.
+  chu_kho_quyet_lai: '`claude` — giữ đúng thế đảo vai của packet.'
+  ghi_ra_vi: 'Lease ghi "reviewer: claude" trong khi chỉ thị gốc nói "codex"; không ghi thì người đọc sau tưởng lease chép sai.'
+
+ba_truc_reviewer_DA_DO:
+  truc_1_fail_open_phep_cat:
+    ket_qua: 'KHÔNG tìm được fail-open thật nào.'
+    pham_vi_da_thu: >-
+      Bốn ca phiên điều phối đã đo, CỘNG: nháy lồng nhau · dấu chéo ngược trước nháy · `$'…'` ·
+      quote không đóng tới EOL · `${{ }}` chứa `#` · nhiều `#` một dòng · dạng `- run:` · tab trước `#`.
+    lap_luan_CAU_TRUC_chu_khong_phai_MAY: >-
+      Reviewer đối chiếu MỖI ca với CẢ heuristic LẪN giá trị YAML thật sẽ parse ra, rồi chứng minh
+      điểm cắt của YAML LUÔN ≤ điểm cắt của heuristic (tiêu chí YAML yếu hơn: chỉ cần khoảng trắng
+      trước `#`, mù hoàn toàn về quote shell). Hệ quả: thứ gì heuristic "giấu" thì YAML đã giết
+      trước — không có lời gọi thật nào biến mất mà GitHub Actions còn thấy.
+  truc_2_t41_co_rang:
+    ket_qua: 'Đột biến thay dòng gọi bằng `pass` giết `t41` 1/1, đúng thông điệp.'
+    khong_mac_benh_t24: '`t41` không đụng filesystem/`.git`, không có nhánh "không thấy thì bỏ qua".'
+    reviewer_tu_khai_loi_cua_chinh_minh: >-
+      Lần thử đầu reviewer mắc lỗi thứ tự `sys.path` nên import nhầm module GỐC chưa đột biến;
+      tự phát hiện, sửa, chạy lại. Khai ra vì một đột biến "sống sót" kiểu đó là chẩn đoán SAI.
+  truc_3_loi_khai_moi:
+    ket_qua: 'Khớp phép đo 100%.'
+    cach_do: >-
+      Trích thẳng regex `GOI_WRAPPER_THUC_THI` từ nguồn rồi thử: 4 dạng khai "lọt" đều KHÔNG khớp;
+      2 đối chứng khai "bị bắt" đều khớp; 2 dạng canonical vẫn khớp.
+    y_nghia: >-
+      Lượt 2 rớt đúng ở chỗ này (lời khai rộng hơn phép đo). Lượt 3 đo lại từng câu và không còn.
+
+finding_1:
+  muc: P3
+  id: docstring-_cat_chu_thich_run_inline-overclaim-nhe-ve-ANSI-C-quoting
+  KHONG_CHAN: true
+  noi_dung: >-
+    Docstring nói "theo dõi nháy đơn, nháy kép và dấu chéo ngược" mà không nêu: bộ theo dõi coi
+    `$'…'` (ANSI-C quoting của bash) giống `'…'` thường, nên `\'` bên trong bị hiểu thành đóng
+    nháy sớm. ĐÂY LÀ BUG TRACKING THẬT.
+  vi_sao_KHONG_khai_thac_duoc: >-
+    Vì lý do CẤU TRÚC chứ không phải may: hàm chỉ chạy trên plain scalar không quote, mà với plain
+    scalar thì chính YAML đã cắt tại `#` đầu tiên có khoảng trắng trước — tiêu chí yếu hơn, nên
+    điểm cắt YAML luôn ≤ điểm cắt heuristic. Reviewer kiểm đúng ca `$'…'`: hai điểm cắt TRÙNG nhau.
+  duong_va_khong_cap_bach: 'nêu thêm giới hạn `$''…''` vào mục "Giới hạn có chủ ý", hoặc không đóng nháy đơn khi ký tự trước là `\` và scalar mở bằng `$''`.'
+  da_va: false
+
+reviewer_tu_khai_CHUA_DO_DUOC:
+  - id: CI-that-tren-exact-head
+    noi_dung: >-
+      Không xác minh được qua API (quyền `get_commit` chưa được cấp trong phiên headless). Reviewer
+      THAY bằng bằng chứng độc lập tương đương: tự cài `actionlint` vào PATH tiến trình con rồi chạy
+      lại TOÀN BỘ 41 ca offline trên đúng exact head ⇒ `41/41`. Nhưng nó khai rõ: điều đó KHÔNG
+      chứng minh wiring CI/branch-protection có thật sự gọi đúng job — đó là nợ
+      `PLAT-X5-required-status-check` ở `#209`, ngoài phạm vi.
+
+verdict_usage_caveats:
+- id: approve-nay-la-cua-DELTA-khong-phai-cua-ca-packet
+  noi_dung: >-
+    Lượt 3 soi `2284b465..117e0c42` — **một tệp, hai việc**. Phần còn lại của packet do lượt 1 và 2
+    soi, và cả hai đều `changes_requested`. **Đừng đọc `approve` này thành "cả packet đã được
+    approve"**; đọc nó là "delta cuối đã đóng, và các finding trước đó đã được xử hoặc đã thành nợ".
+- id: t35-CHUA-kin-va-do-la-co-y
+  noi_dung: >-
+    Bốn dạng `env X=1 bash …` · `bash -c '…'` · `command bash …` · `${{ github.workspace }}` có
+    khoảng trắng **vẫn được miễn `AL_VER`** ở tầng `t35`. Đây là **nợ có tên**
+    `PLAT-X5-nhan-dien-loi-goi-wrapper` ở `#209 §7` kèm điều kiện XONG, không phải chỗ mù.
+    Hậu quả bị chặn ở tầng sau: `ops/cai_actionlint.sh` vẫn `loi 2` bất kể cú pháp gọi.
+- id: mot-bug-tracking-quote-CON-SONG-trong-ma
+  noi_dung: >-
+    Finding P3 là **bug thật**, chỉ không khai thác được vì YAML cắt trước. **Đừng đọc `approve`
+    thành "hàm cắt đúng hoàn toàn"** — nếu sau này ai đó gọi `_cat_chu_thich_run_inline` từ một
+    đường KHÔNG đi qua YAML plain-scalar, lập luận cấu trúc ở trên **hết hiệu lực** và bug thành
+    khai thác được. Ràng buộc "chỉ dùng cho plain scalar" hiện KHÔNG có chốt nào canh.
+- id: so-do-neo-o-117e0c42-41-ca
+  noi_dung: >-
+    Mọi con số neo ở `117e0c4258c5029c7a330611786733c5a583e1c5` với bộ test **41 ca**. Tái hiện
+    bằng `git worktree add --detach <đích> 117e0c42…`.
+- id: CI-la-LOI-KHAI-cua-phien-dieu-phoi
+  noi_dung: >-
+    Run `32439164265` (cả hai job `success`, 0 bước hỏng) do **phiên điều phối** đo qua MCP Actions.
+    Reviewer khai không tự xác minh được và đã thay bằng phép chạy lại 41 ca offline.
+
+delivered: true
+delivered_by: claude-session
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-21T02:55:00Z'
+
+viec_cho_chu_kho:
+- '`cross_approved` đã đạt cho delta cuối. Quyết định land `#207` là của chủ kho — lưu ý `#207` XẾP TẦNG trên `#205`, nên `#205` phải land trước.'
+- 'Finding P3 (bug `$''…''`) chưa vá: gộp vào `#209` hay để riêng?'
+- '`#209` nay gánh BA mục: `required-status-check` · đảo `t34` · `nhan-dien-loi-goi-wrapper`. Cân nhắc có nên tách không.'
+
+receipt_khong_khai:
+- 'Không khai cả packet đã approve. Chỉ DELTA cuối được approve.'
+- 'Không khai `t35` đã kín. Nó CHƯA, và đó là cố ý.'
+- 'Không khai hàm cắt không còn bug. Nó CÒN một bug thật, chỉ không khai thác được qua đường hiện tại.'
+- 'Không khai reviewer đã đo CI. Nó KHÔNG, và tự khai như vậy.'
+- 'Không khai `evidence_url` bền: #207 chưa land, chưa có tag.'

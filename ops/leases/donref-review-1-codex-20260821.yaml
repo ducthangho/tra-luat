@@ -1,0 +1,105 @@
+# Lease REVIEWER — PR "#213" (`ops-don-ref`: đổi lệnh CẤM thành PHÉP ĐO), lượt 1.
+#
+# Executor `claude`, reviewer `codex` ⇒ cross-provider, §8 thoả.
+#
+# ĐỌC TRƯỚC MỌI DÒNG KHÁC: workflow bị sửa ở đây CẤP LẠI đúng quyền mà sandbox cố ý không
+# cho (xoá ref, ghi tag), và nó chỉ chạy khi có người bấm. Nếu chốt hỏng thì LƯỢT PHÁT HIỆN
+# ĐẦU TIÊN CHÍNH LÀ LƯỢT XOÁ NHẦM. Đó là lý do PR này được review chứ không merge thẳng.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 213
+packet_id: DONREF-CHOT-DO-DUOC
+lease_id: donref-review-1-codex-20260821
+revision: 1
+
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+
+reviewed_sha_required: cbc57214be1f33b93c5d04e4363c2bcce87439b6
+branch: ops/don-ref-chot-do-duoc
+base_branch: master
+target_pull_request: 213
+scope_files: 3
+write_set_da_do:
+  - .github/workflows/ops-don-ref.yml
+  - ops/don_ref_chot_test.sh
+  - CLAUDE.md
+
+prompt_path: ops/prompts/donref-review-1-codex-20260821.md
+prompt_sha256_required: 18bc3605231d4a3dccd64fd6439e94c73d7d259a0a707336941c92e4e8ec516d
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("có, cross-review bằng codex")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_note: >-
+  Phiên ghi lease này CHÍNH LÀ phiên viết bản vá. Nó cũng viết prompt cho reviewer. Khai ra vì
+  danh sách hướng soi trong prompt là "thứ người vá đã nghĩ tới", nên nó vừa là gợi ý vừa là
+  ĐIỂM MÙ — prompt nói thẳng điều đó với reviewer.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T04:10:00Z'
+lease_expires_at_utc: '2026-08-22T04:10:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+
+vi_sao_can_review_chu_khong_merge_thang:
+  - 'Workflow này cấp lại quyền PHÁ (xoá ref) mà proxy sandbox cố ý chặn.'
+  - 'Nó chỉ chạy theo `workflow_dispatch` ⇒ không có lượt CI nào canh nó; chốt hỏng thì lộ ra đúng lúc dùng.'
+  - 'Bản vá NỚI một lệnh cấm. Nới sai hướng là mở đường xoá nhánh còn commit chưa vào master.'
+  - 'Người vá và người viết prompt là MỘT — cần một cặp mắt khác nền.'
+
+trong_pham_vi:
+  - 'Có đường nào xoá được nhánh CÒN commit chưa vào nhánh mặc định không (trục số 1)'
+  - 'Chốt GHIM có đóng được khe giữa lúc ĐO và lúc XOÁ không'
+  - 'Bộ phản chứng 102 ca có RĂNG hay chỉ CÓ MẶT; `gh` giả mô phỏng TRẠNG THÁI hay diễn KỊCH BẢN'
+  - 'Cơ chế trích thân bước TỪ YAML có trung thực không'
+  - 'Câu mới trong `CLAUDE.md` có đúng bằng thứ mã làm không'
+
+ngoai_pham_vi:
+  - 'Proxy chặn xoá ref của phiên web — đã đo, đã ghi, không do PR này'
+  - '65 nhánh `ops/**` còn commit chưa vào master — việc rà riêng'
+  - 'Lỗ đã khai của chốt proxy (`git push --force` vẫn được phép) — CÓ SẴN'
+
+nen_do_boi_nguoi_va:
+  - 'ops/don_ref_chot_test.sh -> 102/102, rc=0 (92 ca trước bản vá)'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'ops/lease_publish_test.py -> 41/41, rc=0'
+  - 'packet_loop.py doctrine-scan -> sạch'
+  - '6 đột biến, mỗi con giết đúng ca của nó, chạy trên bản sao tạm bằng `git archive`'
+nen_ghi_chu: >-
+  Đây là LỜI KHAI của người vá, không phải phép đo của reviewer. Reviewer phải tự chạy lại.
+
+chua_do_duoc_nguoi_va_TU_KHAI:
+  - id: workflow-chua-chay-that-lan-nao
+    noi_dung: >-
+      `workflow_dispatch` CHƯA chạy. Mọi bằng chứng đến từ bộ phản chứng chạy thân bước TRÍCH TỪ
+      YAML với `gh` GIẢ, cộng `actionlint` xác nhận GitHub nhận tệp. "YAML parse được" khác
+      "GitHub nhận", và cả hai đều khác "chạy đúng khi bấm".
+  - id: compare-lich-su-roi
+    noi_dung: >-
+      KHÔNG tự đo được `compare` trả gì khi hai commit không có tổ tiên chung, và `behind_by` khi
+      ấy có bằng 0 hay không. Đây là hướng người vá NGHI NHẤT và đã nêu thẳng trong prompt.
+  - id: gioi-han-250-commit-cua-compare
+    noi_dung: 'Chưa đo `ahead_by`/`behind_by` còn đúng không khi diff vượt ngưỡng 250 commit.'
+
+gate_bat_buoc:
+  - 'ops/don_ref_chot_test.sh -> rc=0, N/N hai số bằng nhau, không tụt dưới 102 ca'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'mọi đột biến chạy trên BẢN SAO TẠM, không sửa cây kho'
+
+nghia_cua_approve: >-
+  Reviewer đã TÌM và KHÔNG THẤY đường xoá được một nhánh chưa an toàn. KHÔNG có nghĩa "đọc thấy
+  hợp lý" — workflow này cấp lại quyền phá, nên mức chứng minh phải cao hơn bình thường.

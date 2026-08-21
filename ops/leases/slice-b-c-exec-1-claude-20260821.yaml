@@ -87,3 +87,4 @@ no_da_khai:
       `ops/lease_publish_test.py` cũng là write set của gói spec-gate (mục D). Gói ấy KHÔNG
       được mở song song với packet này; phải nối tiếp sau khi packet này land. Mở song song là
       tái tạo đúng hình dạng chuỗi `#203→#206` mà ADR-0044 sinh ra để chặn.
+posted_comment_id: 5366070156   # workflow ghi, ĐỪNG sửa tay

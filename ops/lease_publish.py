@@ -22,18 +22,21 @@ MÃ THOÁT
   4  `granted_by` là tên một PROVIDER — agent tự cấp lease cho mình
   6  mỏ neo prompt hỏng (thiếu `prompt_path`, tệp không có, hoặc băm lệch)
   8  nội dung lease sai (thiếu trường, sai dạng, hết hạn, YAML hỏng)
-  9  lease ĐÃ đăng rồi (có `posted_comment_id`) — workflow phải BỎ QUA, không đăng lại
+  9  lease ĐÃ đăng rồi (trong tệp hoặc comment Issue) — BỎ QUA, không đăng lại
 """
 
 from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import os
 import re
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
+from urllib.parse import urlparse
 
 RC_OK = 0
 RC_THAM_SO = 2
@@ -41,6 +44,11 @@ RC_TU_CAP = 4
 RC_NEO = 6
 RC_NOI_DUNG = 8
 RC_DA_DANG = 9
+
+# Mối nối DUY NHẤT tới GitHub; test thay callable, không phải lease/biến môi trường.
+def GOI_GH(*doi_so):
+    return subprocess.run(["gh", "api", *doi_so], capture_output=True, text=True)
+
 
 # Cùng danh sách với `.claude/dev/packet_loop.py`. Hai chỗ cưỡng chế CÙNG một luật
 # ("không tự cấp lease") ở hai tầng khác nhau: một tầng cục bộ lúc chạy máy trạng
@@ -84,6 +92,7 @@ BAT_BUOC = (
 
 SHA40 = re.compile(r"^[0-9a-f]{40}$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
+REPO = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 
 class Chan(Exception):
@@ -127,6 +136,73 @@ def _doc_han(chuoi) -> datetime:
         # lease lệch 26 giờ thì cái hạn chỉ còn là trang trí.
         raise Chan(RC_NOI_DUNG, f"lease_expires_at_utc phải kèm múi giờ (thêm 'Z'): {s!r}")
     return d.astimezone(timezone.utc)
+
+
+def _doc_gh(mo_ta: str, *doi_so):
+    """Gọi `gh api` và trả JSON; mọi trạng thái không đo được đều CHẶN."""
+    try:
+        p = GOI_GH(*doi_so)
+    except OSError as e:
+        raise Chan(RC_NOI_DUNG,
+                   f"KHÔNG ĐO ĐƯỢC {mo_ta}: không gọi được `gh api`: {e}") from None
+    if p.returncode != 0:
+        ly = (p.stderr or p.stdout or "không có chẩn đoán").strip().splitlines()[0][:200]
+        raise Chan(RC_NOI_DUNG,
+                   f"KHÔNG ĐO ĐƯỢC {mo_ta}: `gh api` rc={p.returncode}: {ly}")
+    try:
+        return json.loads(p.stdout)
+    except (TypeError, json.JSONDecodeError):
+        raise Chan(RC_NOI_DUNG,
+                   f"KHÔNG ĐO ĐƯỢC {mo_ta}: `gh api` không trả JSON hợp lệ") from None
+
+
+def _repo_actions() -> str:
+    repo = (os.environ.get("GITHUB_REPOSITORY") or "").strip()
+    if not REPO.fullmatch(repo):
+        raise Chan(RC_NOI_DUNG,
+                   f"KHÔNG ĐO ĐƯỢC repository từ GITHUB_REPOSITORY={repo!r}")
+    return repo
+
+
+def _kiem_loai_so_hieu(repo: str, so: int) -> None:
+    d = _doc_gh("loại số hiệu", f"repos/{repo}/issues/{so}")
+    if not isinstance(d, dict) or not isinstance(d.get("html_url"), str):
+        raise Chan(RC_NOI_DUNG,
+                   "KHÔNG ĐO ĐƯỢC loại số hiệu: phản hồi thiếu `html_url`")
+    path = urlparse(d["html_url"]).path.rstrip("/")
+    if path.endswith(f"/pull/{so}"):
+        raise Chan(RC_NOI_DUNG,
+                   f"packet_issue #{so} là Pull Request — workflow cố ý không có "
+                   "`pull-requests: write`; quy ước bắt buộc trỏ tới Issue")
+    if not path.endswith(f"/issues/{so}"):
+        raise Chan(RC_NOI_DUNG,
+                   f"KHÔNG ĐO ĐƯỢC loại số hiệu từ html_url={d['html_url']!r}")
+
+
+def _kiem_comment_da_co(repo: str, lease: dict) -> None:
+    so, lease_id = lease["packet_issue"], str(lease["lease_id"])
+    cac_trang = _doc_gh("comment hiện có", "--paginate", "--slurp",
+                        f"repos/{repo}/issues/{so}/comments")
+    if not isinstance(cac_trang, list):
+        raise Chan(RC_NOI_DUNG,
+                   "KHÔNG ĐO ĐƯỢC comment hiện có: phản hồi không phải danh sách")
+    if all(isinstance(x, dict) for x in cac_trang):
+        comments = cac_trang
+    elif all(isinstance(x, list) for x in cac_trang):
+        comments = [x for trang in cac_trang for x in trang]
+    else:
+        raise Chan(RC_NOI_DUNG,
+                   "KHÔNG ĐO ĐƯỢC comment hiện có: cấu trúc phân trang lẫn kiểu")
+    if any(not isinstance(x, dict) or not isinstance(x.get("body"), str)
+           for x in comments):
+        raise Chan(RC_NOI_DUNG,
+                   "KHÔNG ĐO ĐƯỢC comment hiện có: phần tử thiếu `body`")
+    dau = f"**Lease `{lease_id}`**"
+    for comment in comments:
+        if dau in comment["body"]:
+            raise Chan(RC_DA_DANG,
+                       f"lease {lease_id!r} đã có comment {comment.get('id', '<không id>')} "
+                       f"trên issue #{so} — bỏ qua")
 
 
 def _goc_kho(tep: Path, goc) -> Path:
@@ -226,7 +302,7 @@ def _kiem_neo_prompt(lease: dict, tep: Path, goc) -> str:
 
 
 def kiem(lease: dict, tep=None, goc=None) -> tuple:
-    """Trả `(lease, băm prompt ĐÃ XÁC MINH)` nếu ĐĂNG ĐƯỢC; ném `Chan` nếu không.
+    """Trả `(lease, băm prompt, có áp lớp GitHub)` nếu đăng được; ném `Chan` nếu không.
 
     Trả kèm cái băm chứ không trả mỗi lease, để dòng "prompt … khớp băm" mà `check`
     in ra là BẰNG CHỨNG chứ không phải lời khen. Bản trước in dòng đó chỉ vì lease
@@ -302,7 +378,12 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
         raise Chan(RC_NOI_DUNG,
                    f"lease đã hết hạn lúc {han.isoformat()} — đăng một lease chết thì "
                    f"người nhận tưởng có quyền mà không có")
-    return lease, neo
+    trong_actions = "GITHUB_ACTIONS" in os.environ
+    if trong_actions:
+        repo = _repo_actions()
+        _kiem_loai_so_hieu(repo, so)
+        _kiem_comment_da_co(repo, lease)
+    return lease, neo, trong_actions
 
 
 def dung_than(lease: dict, duong_dan: str) -> str:
@@ -333,7 +414,9 @@ def _ghi_comment_id(duong_dan: str, comment_id: int) -> None:
 
 
 def lenh_check(a) -> int:
-    lease, neo = kiem(_doc_yaml(a.tep), a.tep, getattr(a, "goc", None))
+    lease, neo, trong_actions = kiem(_doc_yaml(a.tep), a.tep, getattr(a, "goc", None))
+    if not trong_actions:
+        print("VẮNG ngoài Actions: chưa áp lớp đo ISSUE/PR và lớp dò comment idempotent")
     print(f"lease {lease['lease_id']} ĐĂNG ĐƯỢC — issue #{lease['packet_issue']}, "
           f"neo {lease['reviewed_sha_required'][:12]}, hết hạn {lease['lease_expires_at_utc']}"
           + (f", prompt {lease['prompt_path']} khớp băm {neo[:12]}" if neo else ""))
@@ -343,7 +426,7 @@ def lenh_check(a) -> int:
 def lenh_body(a) -> int:
     # Đi qua ĐÚNG hàm kiểm của `check`. Nếu `body` có đường riêng, ai đó chỉ cần
     # gọi thẳng `body` là vòng qua được toàn bộ chốt.
-    lease, _ = kiem(_doc_yaml(a.tep), a.tep, getattr(a, "goc", None))
+    lease, _, _ = kiem(_doc_yaml(a.tep), a.tep, getattr(a, "goc", None))
     sys.stdout.write(dung_than(lease, a.tep))
     return RC_OK
 

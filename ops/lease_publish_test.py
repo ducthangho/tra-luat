@@ -35,9 +35,9 @@ def ca(fn):
     return fn
 
 
-def chay(*doi_so):
+def chay(*doi_so, env=None):
     p = subprocess.run([sys.executable, str(SCRIPT), *[str(x) for x in doi_so]],
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, env=env)
     return p.returncode, p.stdout, p.stderr
 
 
@@ -101,6 +101,77 @@ def dat_prompt(goc: Path, noi_dung: bytes, duong="ops/prompts/p.md") -> tuple[st
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_bytes(noi_dung)
     return duong, hashlib.sha256(noi_dung).hexdigest()
+
+
+def _nap_cong():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("lease_publish_thu", SCRIPT)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+class GhGia:
+    """GitHub giả giữ DANH SÁCH comment theo issue, không trả lời theo lượt."""
+    def __init__(self, loai=None, comments=None, loi_comment=()):
+        self.loai = loai or {}
+        self.comments = {int(k): list(v) for k, v in (comments or {}).items()}
+        self.loi_comment = set(loi_comment)
+        self.calls = []
+
+    def __call__(self, *args):
+        import json
+        self.calls.append(args)
+        endpoint = next((x for x in args if str(x).startswith("repos/")), "")
+        so = int(endpoint.split("/issues/", 1)[1].split("/", 1)[0])
+        if endpoint.endswith("/comments"):
+            if so in self.loi_comment:
+                return subprocess.CompletedProcess(args, 1, "", "comments hong")
+            return subprocess.CompletedProcess(
+                args, 0, json.dumps([self.comments.get(so, [])]), "")
+        loai = self.loai.get(so, "issue")
+        if loai == "loi":
+            return subprocess.CompletedProcess(args, 1, "", "issue hong")
+        doan = "pull" if loai == "pr" else "issues"
+        return subprocess.CompletedProcess(
+            args, 0, json.dumps({"html_url": f"https://github.com/o/r/{doan}/{so}"}), "")
+
+    def dang(self, so: int, body: str):
+        ds = self.comments.setdefault(so, [])
+        comment = {"id": 9000 + len(ds), "body": body}
+        ds.append(comment)
+        self.calls.append(("POST", so, comment["id"]))
+        return comment["id"]
+
+
+ENV_ACTIONS = {"GITHUB_ACTIONS": "true", "GITHUB_REPOSITORY": "o/r"}
+
+
+def _goi_lop_gh(gh: GhGia, ten: str, *args, env_them=None, bo_qua=()):
+    import os
+    from unittest import mock
+    mod = _nap_cong()
+    mod.GOI_GH = gh
+    for ten_bo_qua in bo_qua:
+        setattr(mod, ten_bo_qua, lambda *a: None)
+    moi = dict(os.environ)
+    moi.update(env_them or {})
+    try:
+        with mock.patch.dict(os.environ, moi, clear=True):
+            getattr(mod, ten)(*args)
+    except mod.Chan as ex:
+        return ex, mod
+    return None, mod
+
+
+def _buoc_workflow(ten: str) -> dict:
+    import yaml
+    tep = HERE.parent / ".github" / "workflows" / "ops-publish-lease.yml"
+    bang(tep.is_file(), f"không thấy {tep}")
+    d = yaml.safe_load(tep.read_text(encoding="utf-8"))
+    ds = [x for x in d["jobs"]["dang"]["steps"] if x.get("name") == ten]
+    bang(len(ds) == 1, f"chờ ĐÚNG một bước {ten!r}, thấy {len(ds)}")
+    return ds[0]
 
 
 # --- các ca ---------------------------------------------------------------------
@@ -2013,7 +2084,7 @@ exec "$bash_that" "$wrapper"
 # NỢ CÒN LẠI, khai thẳng chứ không giả vờ đã xong: mục tiêu gốc — canh cho lời khai phạm vi
 # của `t34` không trôi — VẪN CHƯA CÓ CỔNG NÀO. Xem `ops/NO_KY_THUAT.md` §11.
 #
-# `t43` bên dưới được GIỮ vì nó khác loại: nó đo QUAN HỆ GIỮA HAI TỆP, tức một SỰ KIỆN, không
+# `t42` bên dưới được GIỮ vì nó khác loại: nó đo QUAN HỆ GIỮA HAI TỆP, tức một SỰ KIỆN, không
 # phải một câu chữ ai đó gõ vào docstring.
 
 
@@ -2034,7 +2105,7 @@ _BACKLINK_NO = __import__("re").compile(r"^\*\*marker:\*\*\s*`([^`]+)`\s+trong\s
 
 
 @ca
-def t43_marker_NO_CO_TEN_va_muc_so_no_phai_khop_HAI_CHIEU():
+def t42_marker_NO_CO_TEN_va_muc_so_no_phai_khop_HAI_CHIEU():
     """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
 
     VÌ SAO CÓ CA NÀY — cross-review lượt 1 (codex, P2): tiêu chí `2 = 2` mà packet tự đặt ra
@@ -2088,6 +2159,132 @@ def t43_marker_NO_CO_TEN_va_muc_so_no_phai_khop_HAI_CHIEU():
          f"mục sổ nợ KHAI backlink tới marker mà marker ấy KHÔNG CÒN trong `ci.yml`: "
          f"{mat_marker}. Hoặc nợ đã trả mà mục chưa đóng, hoặc marker bị gỡ nhầm. Đừng làm ca "
          f"này im bằng cách xoá dòng backlink — đó là xoá đúng thứ đang canh.")
+
+
+@ca
+def t43_PR_phai_CHAN_va_neu_pull_requests():
+    ex, _ = _goi_lop_gh(GhGia({55: "pr"}), "kiem", lease_mau(), env_them=ENV_ACTIONS)
+    bang(ex and ex.ma == RC_NOI_DUNG and "pull-requests" in ex.thong_diep,
+         f"PR không bị chặn đúng lý do: {ex}")
+
+
+@ca
+def t44_loi_do_loai_phai_CHAN_khong_dang():
+    gh = GhGia({55: "loi"})
+    ex, _ = _goi_lop_gh(gh, "kiem", lease_mau(), env_them=ENV_ACTIONS)
+    bang(ex and ex.ma == RC_NOI_DUNG and "KHÔNG ĐO ĐƯỢC" in ex.thong_diep
+         and not any(x[0] == "POST" for x in gh.calls), f"fail-open: {ex}")
+
+
+@ca
+def t45_ISSUE_phai_QUA_lop_do_loai():
+    ex, _ = _goi_lop_gh(GhGia(), "kiem", lease_mau(), env_them=ENV_ACTIONS)
+    bang(ex is None, f"chặn oan Issue: {ex}")
+
+
+@ca
+def t46_comment_da_co_thi_BO_QUA_xuyen_nhanh():
+    lease, gh = lease_mau(lease_id="lease-lap"), GhGia()
+    ex, mod = _goi_lop_gh(gh, "kiem", lease, env_them=ENV_ACTIONS,
+                          bo_qua=("_kiem_loai_so_hieu",))
+    bang(ex is None, f"lượt đầu không đăng được: {ex}")
+    gh.dang(55, mod.dung_than(lease, "ops/leases/l.yaml"))
+    ex, _ = _goi_lop_gh(gh, "kiem", lease, env_them=ENV_ACTIONS,
+                        bo_qua=("_kiem_loai_so_hieu",))
+    posts = [x for x in gh.calls if x[0] == "POST"]
+    bang(ex and ex.ma == RC_DA_DANG and len(posts) == 1 and len(gh.comments[55]) == 1,
+         f"lượt hai không thấy comment lượt một: posts={posts}, {ex}")
+
+
+@ca
+def t47_dau_lease_KHAC_khong_duoc_chan():
+    comments = {55: [{"id": 1, "body": "**Lease `lease-10`**"}]}
+    ex, _ = _goi_lop_gh(GhGia(comments=comments), "kiem", lease_mau(lease_id="lease-1"),
+                        env_them=ENV_ACTIONS, bo_qua=("_kiem_loai_so_hieu",))
+    bang(ex is None, f"khớp substring lỏng đã chặn lease khác: {ex}")
+
+
+@ca
+def t48_loi_doc_comment_phai_CHAN_khong_dang():
+    gh = GhGia(loi_comment={55})
+    ex, _ = _goi_lop_gh(gh, "kiem", lease_mau(), env_them=ENV_ACTIONS,
+                        bo_qua=("_kiem_loai_so_hieu",))
+    bang(ex and ex.ma == RC_NOI_DUNG and "KHÔNG ĐO ĐƯỢC" in ex.thong_diep
+         and not any(x[0] == "POST" for x in gh.calls), f"fail-open: {ex}")
+
+
+@ca
+def t49_env_va_lease_khong_duoc_chon_moi_noi():
+    gh, env = GhGia(), {"LEASE_PUBLISH_GH": "/khong/duoc/chay"}
+    ex1, _ = _goi_lop_gh(gh, "_doc_gh", "loại số hiệu",
+                         "repos/o/r/issues/55", env_them=env)
+    ex2, _ = _goi_lop_gh(gh, "_kiem_comment_da_co", "o/r",
+                         lease_mau(goi_gh="/khong/duoc/chay"), env_them=env)
+    bang(ex1 is None and ex2 is None, f"đầu vào do head kiểm soát đã đổi mối nối: {ex1 or ex2}")
+
+
+@ca
+def t50_ngoai_Actions_phai_KHAI_hai_lop_vang():
+    with San() as s:
+        import os
+        moi = dict(os.environ)
+        moi.pop("GITHUB_ACTIONS", None)
+        rc, o, e = chay("check", viet(s, lease_mau()), env=moi)
+        bang(rc == RC_OK and "VẮNG" in o and "ISSUE/PR" in o and "comment" in o,
+             f"không khai lớp vắng: rc={rc}, out={o!r}, err={e!r}")
+
+
+@ca
+def t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO():
+    import json
+    import os
+    than = _buoc_workflow("đăng")["run"]
+    with tempfile.TemporaryDirectory() as t:
+        goc, neo = Path(t), Path(t) / "neo"
+        (goc / "ops" / "leases").mkdir(parents=True)
+        (neo / "ops").mkdir(parents=True)
+        (neo / "ops" / "lease_publish.py").write_text(
+            """import pathlib,sys,yaml
+p=pathlib.Path(sys.argv[2]); d=yaml.safe_load(p.read_text(encoding='utf-8')); cmd=sys.argv[1]
+if cmd=='check': raise SystemExit(8 if d['lease_id']=='giua' else 0)
+if cmd=='body': print(f\"**Lease `{d['lease_id']}`**\")
+if cmd=='mark': p.write_text(p.read_text(encoding='utf-8')+'posted_comment_id: '+sys.argv[4]+'\\n',encoding='utf-8')
+""", encoding="utf-8")
+        (neo / "ops" / "gh_gia.py").write_text(
+            """import json,os,pathlib,sys
+a=sys.argv[1:]; ep=next(x for x in a if x.startswith('repos/')); so=ep.split('/issues/')[1].split('/')[0]
+p=pathlib.Path(os.environ['GH_GIA_STATE']); d=json.loads(p.read_text(encoding='utf-8'))
+payload=pathlib.Path(a[a.index('--input')+1]); body=json.loads(payload.read_text(encoding='utf-8'))['body']
+ds=d.setdefault(so,[]); ds.append({'id':9000+len(ds),'body':body}); p.write_text(json.dumps(d),encoding='utf-8'); print(ds[-1]['id'])
+""", encoding="utf-8")
+        for ten in ("dau", "giua", "cuoi"):
+            viet(goc / "ops" / "leases", lease_mau(lease_id=ten), ten=f"{ten}.yaml")
+        (goc / "ds.txt").write_text(
+            "".join(f"ops/leases/{x}.yaml\n" for x in ("dau", "giua", "cuoi")),
+            encoding="utf-8")
+        state, ghe = goc / "state.json", goc / "github_env"
+        state.write_text("{}", encoding="utf-8")
+        py = Path(sys.executable).resolve().as_posix()
+        than = than.replace("python3 ", f"'{py}' ").replace(
+            "gh api ", f"'{py}' \"$NEO/ops/gh_gia.py\" api ")
+        mt = dict(os.environ, NEO=str(neo), REPO="o/r", GITHUB_ENV=str(ghe),
+                  GH_GIA_STATE=str(state))
+        p = subprocess.run([_bash_posix(), "-c", than], cwd=goc, env=mt,
+                           capture_output=True, text=True)
+        comments = json.loads(state.read_text(encoding="utf-8")).get("55", [])
+        bodies = "\n".join(x["body"] for x in comments)
+        bang(p.returncode != 0 and "`dau`" in bodies and "`cuoi`" in bodies
+             and "`giua`" not in bodies and "DA_DOI=1" in ghe.read_text(encoding="utf-8"),
+             f"không cô lập/không đỏ: rc={p.returncode}, bodies={bodies!r}, "
+             f"out={p.stdout}{p.stderr}")
+
+
+@ca
+def t52_buoc_ghi_nguoc_phai_chay_sau_buoc_dang_DO():
+    buoc = _buoc_workflow("ghi ngược comment id")
+    dieu_kien = str(buoc.get("if") or "")
+    bang("always()" in dieu_kien and "env.DA_DOI == '1'" in dieu_kien,
+         f"bước đăng đỏ sẽ làm mất posted_comment_id: if={dieu_kien!r}")
 
 
 def main() -> int:

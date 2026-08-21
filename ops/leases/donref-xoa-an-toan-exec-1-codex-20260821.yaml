@@ -127,3 +127,4 @@ dieu_kien_dung:
 
 khong_push: true
 khong_push_ghi_chu: 'Executor commit nhưng KHÔNG push. Phiên điều phối đo lại độc lập rồi mới đẩy.'
+posted_comment_id: 5367145976   # workflow ghi, ĐỪNG sửa tay

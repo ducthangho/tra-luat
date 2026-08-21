@@ -51,6 +51,12 @@ case "$DONG" in
       # SHA cua nhanh luu-tru. GIA_SHA_NHANH= rong => coi nhu doc KHONG duoc.
       [ -n "${GIA_SHA_NHANH:-}" ] && { echo "$GIA_SHA_NHANH"; exit 0; }
       exit 1 ;;
+  *"/compare/"*)
+      # `behind_by` cua phep do to-tien. GIA_BEHIND rong => coi nhu KHONG DO DUOC.
+      # GIA_BEHIND_RAC=1 => tra ra thu KHONG phai so, de khoa chot kiem dang.
+      [ "${GIA_BEHIND_RAC:-0}" = 1 ] && { echo "null"; exit 0; }
+      [ -n "${GIA_BEHIND:-}" ] && { echo "$GIA_BEHIND"; exit 0; }
+      exit 1 ;;
   *"repos/$GITHUB_REPOSITORY/tags"*)
       # Danh sach tag DA dereference. GIA_TAG_SHAS = trang MOT, cach nhau bang khoang trang.
       for s in ${GIA_TAG_SHAS:-}; do echo "$s"; done
@@ -78,6 +84,17 @@ ca() {
   local rc=$?
   if [ "$rc" = "$mong" ]; then QUA=$((QUA+1)); printf '  QUA   %s\n' "$ten"
   else HONG=$((HONG+1)); printf '  ĐỎ    %s  (rc=%s, mong %s)\n' "$ten" "$rc" "$mong"; sed 's/^/          /' "$TAM/out" | tail -3; fi
+}
+
+# Đo THÔNG ĐIỆP, không chỉ đo mã thoát. Cần vì ba trạng thái `là tổ tiên` / `không phải`
+# / `KHÔNG ĐO ĐƯỢC` cùng cho mã 2, nên mã thoát KHÔNG phân biệt được chúng. Đã đo: thiếu
+# phép này thì đột biến gỡ chốt kiểm DẠNG SỐ của `behind_by` vẫn cho 99/99 — vì `!= 0`
+# tự nó đã từ chối mọi thứ không phải "0", kể cả `null`. Quyết định thì giống, LÝ DO thì
+# khác, và kho này phân biệt "không có" với "không đo được".
+doi_ra() {
+  local ten="$1" mau="$2"
+  if grep -q -- "$mau" "$TAM/out" 2>/dev/null; then QUA=$((QUA+1)); printf '  QUA   %s\n' "$ten"
+  else HONG=$((HONG+1)); printf '  ĐỎ    %s  (không thấy %q trong đầu ra)\n' "$ten" "$mau"; sed 's/^/          /' "$TAM/out" | tail -3; fi
 }
 
 # Đo NHẬT KÝ của bước chốt. Cần vì mã thoát không phân biệt được "dừng vì không đọc
@@ -116,11 +133,43 @@ ca "luu-tru/**: xoá TAG thì vẫn CẤM"      2 xoa-tag luu-tru/wp55-r4/x "" X
 # nhưng KHÔNG ĐƯỢC KHOÁ — gỡ `--paginate` hay gỡ `pipefail` thì bộ test vẫn xanh.
 ca "luu-tru/**: tag giữ ở TRANG SAU vẫn QUA" 0 xoa-nhanh luu-tru/wp55-r4/x "" XOA GIA_SHA_NHANH="$S_LT" GIA_TAG_SHAS="bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" GIA_TAG_SHAS_TRANG2="$S_LT"
 ca "luu-tru/**: gh hỏng GIỮA phân trang thì DỪNG" 2 xoa-nhanh luu-tru/wp55-r4/x "" XOA GIA_SHA_NHANH="$S_LT" GIA_TAG_SHAS="$S_LT" GIA_TAG_HONG_GIUA=1
-ca "ops/** thì DỪNG"                      2 xoa-nhanh ops/wp55-r4-ho-so "" XOA
-ca "claude/** thì DỪNG"                   2 xoa-nhanh claude/abc "" XOA
-ca "codex/** thì DỪNG"                    2 xoa-nhanh codex/abc "" XOA
-ca "agent/** thì DỪNG"                    2 xoa-nhanh agent/abc "" XOA
-ca "mission/** thì DỪNG"                  2 xoa-nhanh mission/54/integration "" XOA
+# ═══ HỢP ĐỒNG MỚI cho vùng làm việc (21-08-2026): lệnh CẤM đổi thành PHÉP ĐO ═══
+# Bất biến giữ nguyên — "đừng làm commit thành không tra được" — nhưng nay ĐO thay vì
+# đoán: nhánh mà MỌI commit đã nằm trong nhánh mặc định thì xoá không mất gì.
+# Ba trạng thái: là tổ tiên · không phải · KHÔNG ĐO ĐƯỢC. Trạng thái thứ ba phải ĐỎ.
+S_VLV=cccccccccccccccccccccccccccccccccccccccc
+ca "ops/**: 0 commit ngoài mặc định thì QUA"   0 xoa-nhanh ops/wp55-r4-ho-so "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
+doi_log_chot "…và CÓ đọc SHA của nhánh"        "git/ref/heads/" 1
+doi_log_chot "…và CÓ gọi compare"              "/compare/" 1
+ca "claude/**: 0 commit ngoài mặc định thì QUA" 0 xoa-nhanh claude/abc "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
+ca "codex/**: 0 commit ngoài mặc định thì QUA"  0 xoa-nhanh codex/abc "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
+ca "agent/**: 0 commit ngoài mặc định thì QUA"  0 xoa-nhanh agent/abc "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
+ca "mission/**: 0 commit ngoài mặc định thì QUA" 0 xoa-nhanh mission/54/integration "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
+# Chiều TỪ CHỐI — ba đường, ba lý do khác nhau, cùng mã thoát 2 nên phải soi nhật ký.
+ca "ops/**: CÒN commit ngoài mặc định thì DỪNG" 2 xoa-nhanh ops/dang-lam "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND=3 NEO_TEP="$TAM/neo.txt"
+doi_ra "…và nói ĐÚNG lý do: còn 3 commit"      "còn 3 commit CHƯA có trong"
+ca "ops/**: không đọc được SHA thì DỪNG"       2 xoa-nhanh ops/dang-lam "" XOA GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
+# DỪNG SỚM: không đọc được SHA thì KHÔNG được đi hỏi compare. Mã thoát không phân biệt
+# được, chỉ nhật ký thấy — đúng lối `luu-tru/**` đã dùng.
+doi_log_chot "…và KHÔNG gọi compare (dừng sớm)" "/compare/" 0
+ca "ops/**: compare KHÔNG ĐO ĐƯỢC thì DỪNG"    2 xoa-nhanh ops/dang-lam "" XOA GIA_SHA_NHANH="$S_VLV" NEO_TEP="$TAM/neo.txt"
+doi_ra "…và nói ĐÚNG lý do: KHÔNG ĐO ĐƯỢC"    "KHÔNG ĐO ĐƯỢC quan hệ"
+# `null` là thứ `--jq` trả khi trường vắng mặt. Nó KHÔNG phải số, và đọc nó thành 0 là
+# đúng cách một cổng biến "không có dữ liệu" thành "đạt".
+ca "ops/**: compare trả RÁC (không phải số) thì DỪNG" 2 xoa-nhanh ops/dang-lam "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND_RAC=1 NEO_TEP="$TAM/neo.txt"
+doi_ra "…và nói ĐÚNG lý do: KHÔNG ĐO ĐƯỢC"    "KHÔNG ĐO ĐƯỢC quan hệ"
+# TAG mang tên vùng làm việc: KHÔNG có quan hệ tổ-tiên để đo ⇒ phép đo không thay được
+# lệnh cấm, và lệnh cấm ở đó giữ nguyên.
+ca "xoá TAG tên vùng làm việc thì vẫn CẤM"     2 xoa-tag ops/x "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
+# GHIM: bước chốt phải ghi lại SHA đã đo, vì bước làm sẽ đòi đúng SHA ấy ngay trước khi
+# xoá. Không ghim thì phép đo chỉ nói về QUÁ KHỨ.
+: > "$TAM/neo.txt"
+ca "ops/**: QUA thì phải GHIM SHA ra tệp"      0 xoa-nhanh ops/ho-so-x5 "" XOA GIA_SHA_NHANH="$S_VLV" GIA_BEHIND=0 NEO_TEP="$TAM/neo.txt"
+if grep -qxF "ops/ho-so-x5 $S_VLV" "$TAM/neo.txt"; then
+  QUA=$((QUA+1)); printf '  QUA   %s\n' "…và dòng ghim đúng 'ref sha'"
+else
+  HONG=$((HONG+1)); printf '  ĐỎ    %s\n' "…và dòng ghim đúng 'ref sha'"; sed 's/^/          /' "$TAM/neo.txt"
+fi
 ca "có tiền tố refs/ thì DỪNG"            2 xoa-nhanh refs/heads/x "" XOA
 ca "ký tự đại diện thì DỪNG"              2 xoa-nhanh 'tmp-*' "" XOA
 ca "dấu ? thì DỪNG"                       2 xoa-nhanh 'tmp-?' "" XOA
@@ -261,6 +310,26 @@ doi_log "xoá: DELETE đi đúng endpoint"    "git/refs/heads/a" 1
 
 lam "xoá HAI ref -> hai lời gọi DELETE"   0 xoa-nhanh 'a,b' "" false
 doi_log "xoá hai: đếm DELETE = 2"         "-X DELETE" 2
+
+# ═══ GHIM SHA — bước LÀM phải đòi đúng SHA mà bước CHỐT đã đo ═══
+# Không có ba ca này thì phép đo tổ-tiên chỉ nói về QUÁ KHỨ: ai đẩy commit mới giữa hai
+# bước là commit ấy bị xoá mà chưa từng được đo. Khe ấy KHÔNG đóng được bằng API
+# (`DELETE /git/refs` không nhận SHA mong đợi), nên nó phải đóng bằng phép đọc lại.
+NEO="$TAM/neo_lam.txt"
+printf 'ops/da-land %s\n' "$S1" > "$NEO"
+lam "vùng làm việc: ghim KHỚP -> XANH"    0 xoa-nhanh ops/da-land "" false NEO_TEP="$NEO" GIA_TAG_SHA="$S1"
+doi_log "…và CÓ gọi DELETE đúng một lần"  "-X DELETE" 1
+
+lam "vùng làm việc: ghim LỆCH -> ĐỎ"      1 xoa-nhanh ops/da-land "" false NEO_TEP="$NEO" GIA_TAG_SHA="$S2"
+doi_log "…và KHÔNG gọi DELETE"            "-X DELETE" 0
+
+: > "$TAM/neo_rong.txt"
+lam "vùng làm việc: KHÔNG có ghim -> ĐỎ"  1 xoa-nhanh ops/da-land "" false NEO_TEP="$TAM/neo_rong.txt" GIA_TAG_SHA="$S1"
+doi_log "…và KHÔNG gọi DELETE"            "-X DELETE" 0
+
+# Nhánh NGOÀI vùng làm việc không bị đòi ghim — nếu bị đòi thì chốt đang bắt oan, và ca
+# `xoá: có trước, mất sau -> XANH` phía trên đã chạy KHÔNG có tệp ghim nào.
+lam "ngoài vùng: không cần ghim -> XANH"  0 xoa-nhanh tmp-thuong "" false NEO_TEP="$TAM/neo_rong.txt"
 
 lam "xoá TAG: đi đường refs/tags"         0 xoa-tag t1 "" false
 doi_log "xoá tag: endpoint là refs/tags"  "git/refs/tags/t1" 1

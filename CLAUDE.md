@@ -418,8 +418,18 @@ xoá nhánh/tạo tag. **Lỗ đã biết của chốt ấy:** nó chặn theo H
 
 Đường dùng được: `.github/workflows/ops-don-ref.yml` (`workflow_dispatch`, kích hoạt được từ phiên web
 qua MCP `actions_run_trigger`). Nó **cấp lại đúng quyền sandbox cố ý không cho**, nên mặc định là THỬ
-KHÔ, đòi gõ `XOA`/`TAO`, và bảo vệ `luu-tru/** ops/** claude/** codex/** agent/** mission/**
-dispatcher/**` cùng nhánh mặc định. Phản chứng: `ops/don_ref_chot_test.sh`.
+KHÔ, đòi gõ `XOA`/`TAO`, và bảo vệ nhánh mặc định tuyệt đối. Với `luu-tru/**` và với vùng làm việc
+(`ops/** claude/** codex/** agent/** mission/** dispatcher/**`) nó KHÔNG cấm nữa mà **ĐO** — cùng một
+hình dạng bản vá, hai lần, vì cùng một lý do: bất biến cần giữ là *"đừng làm commit thành không tra
+được"*, không phải *"đừng đụng không gian tên này"*, và một chốt cấm cả việc ĐÚNG thì người ta sẽ đi
+vòng quanh nó (đo được 21-08-2026: 16 nhánh `ops/**` đã land hết mà không đường nào dọn). Nhánh
+`luu-tru/**` xoá được khi commit CÒN TAG GIỮ; nhánh vùng làm việc xoá được khi `behind_by = 0` so với
+nhánh mặc định — tức mọi commit của nó đã nằm trong đó. **Ba trạng thái, không phải hai**: là tổ tiên ·
+không phải · KHÔNG ĐO ĐƯỢC, và cái thứ ba làm cổng ĐỎ. Xoá **TAG** mang tên các vùng ấy thì vẫn CẤM —
+tag không có quan hệ tổ-tiên để mà đo. Kèm chốt GHIM: bước làm đọc lại đầu nhánh và đòi đúng SHA bước
+chốt đã đo, vì `DELETE /git/refs` không nhận SHA mong đợi (không có `--force-with-lease` cho việc xoá)
+nên khe giữa lúc đo và lúc xoá chỉ đóng được bằng phép đọc lại. Phản chứng: `ops/don_ref_chot_test.sh`
+(102 ca, 6 đột biến mỗi con giết đúng ca của nó).
 
 **`luu-tru/*` là ref BỀN duy nhất** giữ các commit công bố verdict sau khi nhánh `ops/**` bị xoá — xem
 `ops/reviews/README.md`. Xoá tag ấy là làm `published_*` trong `ops/reviews/*.receipt.yaml` thành SHA

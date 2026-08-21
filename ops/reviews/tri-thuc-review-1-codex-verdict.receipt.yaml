@@ -1,0 +1,53 @@
+# BIÊN NHẬN — cross-review `TRI-THUC-20260821` (PR "#214"), reviewer `codex`.
+#
+# Ghi SAU khi PR đã land. Đó là chuyện bình thường cho biên nhận, nhưng nói rõ để không ai
+# đọc nhầm rằng lượt review này chạy sau lần merge: nó chạy TRƯỚC, và verdict neo head cũ hơn.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: TRI-THUC-20260821
+packet_issue: 214
+lease_id: tri-thuc-review-1-codex-20260821
+provider: codex
+role: reviewer
+executor_provider: claude
+verdict: changes_requested
+cross_provider: true
+review_class: routine
+reviewed_sha: 825558a59fd93623dd2f2c9123577361e9e3abca
+base_sha: 0333948669bb0fdbfef8f5cbcf14a95b1b0e8bd4
+target_pull_request: 214
+
+verdict_path: ops/reviews/tri-thuc-review-1-codex-verdict.md
+verdict_sha256: 931cfaaae4b2929f2947c9c2d198730699c2670af4b7f03b3fbe3a1f032cf80d
+verdict_bytes: 11138
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/4585a4067ad08422e6f90656e49df8242255aea6/ops/reviews/tri-thuc-review-1-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Điền sau khi biết commit ĐẦU TIÊN chứa tệp verdict — một commit không chứa được băm của
+  chính nó, nên biên nhận này đi HAI commit, đúng tiền lệ.
+
+verdict_nguon: >-
+  stdout/stderr của `codex exec` do `launcher.py` giữ, run `5e0ec9f4`, `ma_thoat=0`.
+  Chốt read-only sau lượt: `worktree_sach=True`, `so_muc_ban=0`, HEAD không đổi.
+verdict_doi_chieu: >-
+  Bản chép giữ NGUYÊN VĂN; chỉ rút gọn đường dẫn tuyệt đối của thư mục phiên về `kho/…`
+  và bỏ dòng đếm token của CLI. Khai thẳng vì đây là hai chỗ DUY NHẤT bị đụng.
+
+so_finding: 5
+tom_tat_finding: >-
+  P1 'hội tụ hoàn toàn' xuyên tạc dissent · băm đề bài vòng 2 sai một nibble · chữ ĐỘC LẬP không chứng minh được từ hồ sơ đã commit · mục 4 nâng tự thuật thành sự kiện · mục 6 gọi là ĐO ĐƯỢC trong khi nguồn gắn nhãn SUY LUẬN.
+da_xu_ly: >-
+  Cả 5 đã vá ở `5a96c1a`, land trong #214 (`ba46a91`).
+
+verdict_usage_caveats:
+- id: quan-sat-thu-sau-KHONG-phai-finding
+  noi_dung: >-
+    Ngoài 5 finding, reviewer nêu một quan sát sắc hơn cả: `chi_la_chu` = 0 tại neo `0333948` nhưng 22 tại head PR, cả 22 do CHÍNH PR ấy thêm ⇒ câu 'ù0 occurrence toàn kho' TỰ VÔ HIỆU khi merge. Đã ghi rõ neo cạnh con số.
+- id: 1696-1698-la-do-MOI-TRUONG
+  noi_dung: >-
+    Reviewer đo `1696/1698` trên bản sao `/tmp` của họ và TỪ CHỐI xác nhận lại con số `1698/1698` của executor. Họ ĐÚNG khi từ chối. Đo lại trên CÙNG head với `core.abbrev=7`: `1698/1698`, cả hai ca đều `[OK]` — chênh do ghim `core.abbrev` không theo sang bản sao, và tên ca tự nói ra điều đó (`r226_nguong_l2_troi_theo_abbrev_va_ci_ghim`).
+- id: head-da-doi-sau-verdict
+  noi_dung: >-
+    Verdict neo `825558a5`; head được merge là `5a96c1a`. Theo §9 bằng chứng cũ HẾT HIỆU LỰC, nên bản vá 5 finding CHƯA AI REVIEW. Class `routine` nên §8 không đòi cross-provider; cross-review ở đây là nâng lớp tự nguyện.

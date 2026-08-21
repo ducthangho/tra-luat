@@ -1,0 +1,50 @@
+# BIÊN NHẬN — cross-review `SLICE-B-C` (PR "#216"), reviewer `codex`.
+#
+# Ghi SAU khi PR đã land. Đó là chuyện bình thường cho biên nhận, nhưng nói rõ để không ai
+# đọc nhầm rằng lượt review này chạy sau lần merge: nó chạy TRƯỚC, và verdict neo head cũ hơn.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: SLICE-B-C
+packet_issue: 215
+lease_id: slice-b-c-review-1-codex-20260821
+provider: codex
+role: reviewer
+executor_provider: claude
+verdict: changes_requested
+cross_provider: true
+review_class: sensitive
+reviewed_sha: 181bd7f822f84a528da4cfde810d240bcc726dbf
+base_sha: 0333948669bb0fdbfef8f5cbcf14a95b1b0e8bd4
+target_pull_request: 216
+
+verdict_path: ops/reviews/slice-b-c-review-1-codex-verdict.md
+verdict_sha256: 1cae61ad0787a312c2c66a56c6429a6d5da80f17f1b17d1636f2d70a9a46ded2
+verdict_bytes: 11093
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/4585a4067ad08422e6f90656e49df8242255aea6/ops/reviews/slice-b-c-review-1-codex-verdict.md
+evidence_url_ghi_chu: >-
+  Điền sau khi biết commit ĐẦU TIÊN chứa tệp verdict — một commit không chứa được băm của
+  chính nó, nên biên nhận này đi HAI commit, đúng tiền lệ.
+
+verdict_nguon: >-
+  stdout/stderr của `codex exec` do `launcher.py` giữ, run `9756518c`, `ma_thoat=0`.
+  Chốt read-only sau lượt: `worktree_sach=True`, `so_muc_ban=0`, HEAD không đổi.
+verdict_doi_chieu: >-
+  Bản chép giữ NGUYÊN VĂN; chỉ rút gọn đường dẫn tuyệt đối của thư mục phiên về `kho/…`
+  và bỏ dòng đếm token của CLI. Khai thẳng vì đây là hai chỗ DUY NHẤT bị đụng.
+
+so_finding: 3
+tom_tat_finding: >-
+  `t42` chưa neo lời khai vào HÀNH VI (đột biến NỚI regex sống sót) · con số '8 ca đỏ' trong §9 không đo được (chạy thật cho MỘT) · tiêu chí `2 = 2` chỉ là ẢNH CHỤP, không phải cổng.
+da_xu_ly: >-
+  Vá ở `175e95bd`; lượt 2 tìm thêm 4 finding nữa, dẫn tới quyết định GỠ `t42`.
+
+verdict_usage_caveats:
+- id: F1-va-roi-VAN-thua-o-luot-2
+  noi_dung: >-
+    Bản vá cho F1 KHÔNG đủ: lượt 2 tìm được đột biến SIẾT regex mà `t42` vẫn xanh. Đừng đọc verdict này thành 'đã đóng sau một lượt'.
+- id: F3-dan-toi-t43
+  noi_dung: >-
+    Finding F3 là thứ sinh ra `t43`. Bản `t43` đầu tiên lại có ba lỗ riêng, cũng do lượt 2 tìm ra.

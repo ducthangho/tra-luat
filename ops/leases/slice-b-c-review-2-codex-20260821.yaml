@@ -83,3 +83,4 @@ no_da_khai_boi_executor:
     Khai trước để lượt sau không đọc thành hồi quy của packet.
 - id: SLICE-B-C-windows-chua-do
   noi_dung: 'Chưa có bằng chứng Windows trên exact head; PR thường không tự bắn Windows.'
+posted_comment_id: 5368021552   # workflow ghi, ĐỪNG sửa tay

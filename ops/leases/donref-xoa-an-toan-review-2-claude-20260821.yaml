@@ -1,0 +1,128 @@
+# Lease REVIEWER — `DONREF-XOA-AN-TOAN` (#217), lượt **2/2** (CUỐI trong trần). Neo 5f2ff857.
+#
+# Executor `codex`, reviewer `claude` ⇒ cross-provider.
+# Delta là bản vá cho ĐÚNG ba finding mà chính reviewer nêu ở lượt 1 (verdict `approve`).
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 217
+packet_id: DONREF-XOA-AN-TOAN
+lease_id: donref-xoa-an-toan-review-2-claude-20260821
+revision: 1
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: codex
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+
+reviewed_sha_required: 5f2ff8573ed259c1a4df3030428a4ec9b0f99e2e
+head_luot_truoc: fa4b0dd879f0cf7ae589989863670d2a8200839c
+branch: codex/donref-xoa-an-toan-1
+target_branch_neu_land: master
+scope_files: 1
+delta_ghi_chu: 'ĐÚNG MỘT TỆP `ops/nhanh_don_duoc_test.py`, +41/−18. Mã sản phẩm KHÔNG đổi một byte.'
+
+spec_path: ops/specs/DONREF-XOA-AN-TOAN.md
+spec_sha256: 1add3edf165faa2b53d6b52212ea34d7a73934367fd73bbca91e5518a9a664de
+spec_KHONG_DOI: true
+
+prompt_path: ops/prompts/donref-xoa-an-toan-review-2-claude-20260821.md
+prompt_sha256_required: d26074cb002a425995f1bf8e315df240bc7e80cbf3ee542d56ee10af30ab4067
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("chạy review vòng 2")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2'
+
+leased_at_utc: '2026-08-21T10:10:00Z'
+lease_expires_at_utc: '2026-08-22T10:10:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 1
+la_luot_review_CUOI_TRONG_TRAN: true
+he_qua: '`changes_requested` ở lượt này đẩy packet lên CHECKPOINT chủ kho, không tự mở lượt vá.'
+
+executor_so_sach:
+  attempts_used: 2
+  attempts_limit: 2
+  ghi_chu: 'Trần attempt CẠN. Executor không còn lượt vá trong trần hiện tại.'
+
+luot_HONG_KHONG_TINH_VONG:
+  run_id: 7c745075
+  su_viec: >-
+    Lượt review 1 phóng lần đầu bị CHẾT: lệnh Bash của phiên điều phối quá hạn 2 phút và bị cắt
+    (`exit 143`), launcher là con của shell ấy nên chết theo cả nhóm. `stdout` 0 byte, `stderr`
+    0 byte, KHÔNG sinh verdict nào.
+  bay_dang_ke: >-
+    `run.json` vẫn ghi `trang_thai: dang_chay` vì launcher chưa kịp ghi trạng thái cuối ⇒ sổ nói
+    "đang chạy" trong khi tiến trình đã chết. `dang_chay` + pid chết = KHÔNG ĐO ĐƯỢC, không phải
+    "chưa xong" — đúng doctrine `None ≠ False`.
+  da_sua: >-
+    Phóng lại tách rời (`disown`, lệnh phóng không kèm việc gì khác); vòng đợi nay kiểm CẢ tiến
+    trình còn sống, thoát ngay với `KHÔNG ĐO ĐƯỢC` nếu sổ và thực tế lệch nhau.
+  phan_xu: >-
+    KHÔNG tính là một vòng review — không có verdict nào để mà chọn. Cùng cách kho đã xử ca
+    `l5`/`l5b` của `don-nhanh`.
+
+ba_finding_luot_1_va_cach_va:
+  - id: P2-cap-toan-kho-chua-co-rang
+    va_bang: 'thêm `T8` (kho bare thật, ref cục bộ CŨ + fetch hỏng) và ba mutant `bo-chan-fetch-loi` · `go-nhanh-kho-nong` · `dao-khop-base-remote`'
+  - id: P3-T3-chua-do-phep-loc-C-trong-lo-TRON
+    va_bang: 'thêm khẳng định `"ops/c-mot" not in lenh` vào `T3`'
+  - id: P3-prompt-luot-1-khai-SAI-rc-1
+    va_bang: >-
+      KHÔNG sửa prompt (đã đóng băng, băm đã công bố). Executor khai tệp test không hề ám chỉ
+      `rc=1`; `return 1` còn lại là mã thất bại của CHÍNH test runner. Reviewer phải KIỂM lời khai.
+
+nen_do_boi_NGUOI_VA:
+  - '8/8, rc=0; 10 mutant'
+  - 'hai mutant giết NHIỀU ca, executor TỰ KHAI: `in-ca-C` -> T3,T5,T8 (3/3) · `dao-khop-base-remote` -> T1,T3,T6 (3/3)'
+  - 'chạy tool trên kho thật, đọc rc TRỰC TIẾP: rc=0, A=15 B=3 C=76 @ master ba46a91c'
+nen_ghi_chu: 'LỜI KHAI. Reviewer phải tự chạy lại.'
+
+nen_do_boi_PHIEN_DIEU_PHOI:
+  - 'diff đúng MỘT tệp; `ops/nhanh_don_duoc.py` KHÔNG đổi (kiểm bằng `git diff --name-only`)'
+  - 'tự chạy suite: rc=0, 8/8, bảng 10 mutant khớp từng dòng với lời khai của executor'
+  - 'chạy tool đọc rc TRỰC TIẾP: rc=0 — xác nhận finding P3 về `rc=1` là đúng'
+
+cau_hoi_RIENG_cho_luot_nay:
+  - id: dao-khop-base-remote-giet-3-ca
+    noi_dung: >-
+      Đó là MỘT CHỐT PHỦ NHIỀU CA, hay ba ca đang ĐO CHUNG một thứ? Nếu là cái sau thì độ phủ
+      MỎNG HƠN con số 8 gợi ra. Đây là câu hỏi lease đặt riêng, không phải finding có sẵn.
+  - id: T8-co-DO-that-khong
+    noi_dung: >-
+      Ca sinh ra để đóng P2. Nếu nó rỗng thì P2 chưa đóng, chỉ TRÔNG như đã đóng. Harness tính
+      ĐẠT khi hàm không ném — `return` sớm vẫn thành ĐẠT (bệnh `t24`).
+  - id: co-che-co-lap-cua-runner-dot-bien
+    noi_dung: >-
+      Kho đã trả giá vì runner ghi mọi bản sao vào CÙNG một tệp tạm và CPython dùng lại `.pyc`
+      cũ ⇒ mutant chạy mã của bản trước, báo `giet 0/1` suốt ba lượt review.
+
+hinh_dang_dang_theo_doi:
+  ten: 'lời khai rộng hơn phép đo'
+  dem_hien_tai: 5
+  ghi_chu: >-
+    KHÔNG tăng qua hai lượt của `codex`. Lease đòi reviewer KIỂM LẠI điều đó (trục 3.4) chứ đừng
+    nhận cho xong — nếu bộ đếm sai chiều thì cả giả thuyết "hình dạng bám người viết" sai theo.
+
+pham_vi_NGOAI:
+  - 'P1 lượt 2 của `#213` — đặc tả ghi CỐ Ý ĐỂ MỞ; công cụ KHAI, không vá'
+  - 'Sửa `ops-don-ref.yml`, `CLAUDE.md`; dọn nhánh; rà 76 nhánh C'
+
+gate_bat_buoc:
+  - 'ops/nhanh_don_duoc_test.py -> rc=0, N/N hai số bằng nhau, KHÔNG tụt dưới 8 ca'
+  - 'mọi đột biến chạy trên BẢN SAO TẠM'
+  - 'chạy tool đọc rc TRỰC TIẾP, KHÔNG qua ống'
+
+nghia_cua_approve: >-
+  Ba finding đã đóng BẰNG ĐO, `T8` thật sự đo, ba mutant mới có răng, không hồi quy, và reviewer
+  vẫn KHÔNG tìm thấy đường nào làm một nhánh còn commit riêng lọt vào lệnh xoá.

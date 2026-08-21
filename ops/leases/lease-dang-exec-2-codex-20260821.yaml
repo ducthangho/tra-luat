@@ -119,3 +119,4 @@ dieu_kien_dung:
   - 'Chốt phải nằm NGOÀI write_set ⇒ DỪNG, xuất handoff'
   - 'Thấy một tiêu chí trong `nghiem_thu` là SAI ⇒ BÁO CÁO, không tự sửa giữa đường — bản 1 đã sai một mục, nên nghi ngờ là chính đáng, nhưng đường xử lý vẫn là báo cáo'
   - 'Hình dạng A ("lời khai rộng hơn phép đo") lần thứ 7, hoặc hình dạng B ("mượn tiền lệ mà không đo xem nó áp dụng được không") lần thứ 3 ⇒ DỪNG, không vá'
+posted_comment_id: 5370452295   # workflow ghi, ĐỪNG sửa tay

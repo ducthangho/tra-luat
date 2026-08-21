@@ -3,13 +3,17 @@
 Đặc tả này ĐÓNG BĂNG bằng băm. Lease neo vào `spec_sha256`. Sửa nội dung ⇒ băm đổi ⇒ lease trỏ
 vào thứ không còn tồn tại, phải đi qua bản sửa đổi mới. Soạn bằng skill `soan-spec`, 21-08-2026.
 
-**BẢN ĐÓNG BĂNG THỨ HAI, 21-08-2026.** Bản đầu (`9cb54a2e4e7c…`) đã đăng ở PR "#226" và ăn **hai
-P1** của cross-review lượt 1 (`codex`, neo commit `c9a1b4e90d`); người giữ kho chọn **sửa đặc tả**
-thay vì bác hoặc đẩy sang packet sau. Ba chỗ đổi, không chỗ nào là chữ nghĩa: **mục tiêu 6** tra
-bằng bộ định danh thay vì `packet_id` một mình (P1 fail-open, đo được **3/5** packet có nhiều lease
-executor) · **§6** thêm `A13`/`A14` làm phản chứng cho đúng ca ấy · **§9.3** khai thẳng rằng cổng
-KHÔNG đọc `risk` và `diff thật`, hai trong ba đầu vào §8:567 đòi. Bản đầu **không** còn hiệu lực;
-nó ở lại trong lịch sử `git` làm bằng chứng, không phải làm bản dùng được.
+**BẢN ĐÓNG BĂNG THỨ BA, 21-08-2026.** Hai lượt cross-review (`codex`), **bốn P1**, và người giữ kho
+chọn SỬA đặc tả ở cả hai lượt.
+
+| bản | băm | kết cục |
+|---|---|---|
+| 1 | `9cb54a2e4e7c…` | 2 P1 ở lượt 1 (neo `c9a1b4e90d`) — hết hiệu lực |
+| 2 | `b88c53dfd211…` | 2 P1 nữa ở lượt 2 (neo `3bafef75d6`), **cả hai** đánh vào đúng đường kế thừa — hết hiệu lực |
+| 3 | bản này | Q1 **THU HỒI**: đường kế thừa bị gỡ, không vá tiếp — §10 |
+
+Bốn phát hiện trên **một** đường là dấu hiệu sai ở QUYẾT ĐỊNH GỐC chứ không ở các bản vá. Các bản
+trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm bản dùng được.
 
 | khoá | giá trị |
 |---|---|
@@ -50,11 +54,11 @@ lease mang một lời khai sai.
 có chuỗi `effective_review_class`, nhưng đó là **tên biến cục bộ** — chỉ kiểm enum rồi **chép** giá
 trị đã khai vào manifest, không tính gì từ `write_set`. Không liên quan tới trường của §8.
 
-## 1. Bốn quyết định đã chốt (người giữ kho, 21-08-2026, in-session)
+## 1. Bốn quyết định đã chốt (người giữ kho, 21-08-2026, in-session) — **Q1 sau đó bị THU HỒI**
 
 | # | quyết | hệ quả kỹ thuật |
 |---|---|---|
-| Q1 | reviewer lease **kế thừa** lớp từ lease executor **cùng `packet_id`** | cổng phải quét `ops/leases/` tìm nguồn |
+| ~~Q1~~ | ~~reviewer lease **kế thừa** lớp từ lease executor~~ — **THU HỒI 21-08-2026** | cổng **KHÔNG** quét `ops/leases/`; reviewer `schema_version >= 2` ⇒ `sensitive` vô điều kiện. Lý do ở §10 |
 | Q2 | fail-closed đúng chữ §8:569 | không suy được ⇒ `sensitive` |
 | Q5 | neo forward-only bằng **`schema_version: 2`** | cổng phải bắt đầu đọc `schema_version` (nay đọc 0 dòng) |
 | Q6 | không tìm thấy lease executor ⇒ **`sensitive`** | thắt thứ tự cấp lease: executor trước, reviewer sau |
@@ -121,23 +125,17 @@ land**. Nên không lease nào đang giữ hai tệp này ⇒ va chạm là **th
 5. Lease `role: executor`, `schema_version >= 2`: đòi `write_set` không rỗng; tính lớp; đòi lease khai
    `effective_review_class` **BẰNG** `max(review_class đã khai, lớp tính được)`. Khai thấp hơn ⇒
    `RC_LOP`. Đây là chỗ cưỡng chế §8:567 *"Executor không được hạ lớp."* → `ops/lease_publish.py`
-6. Lease `role: reviewer`, `schema_version >= 2`: quét `ops/leases/` tìm lease `role: executor` khớp
-   **BỘ ĐỊNH DANH** `(packet_issue, packet_id, generation, spec_sha256_required)` — **KHÔNG** tra bằng
-   `packet_id` một mình. Khớp đúng MỘT ⇒ kế thừa `effective_review_class` của nó (Q1). **Không thấy,
-   thấy nhiều bản mâu thuẫn, bản tìm thấy không đọc được, hoặc ứng viên THIẾU bất kỳ trường định danh
-   nào ⇒ `sensitive`** (Q2, Q6). Ứng viên thiếu trường định danh **không** được hạ xuống làm bản dự
-   phòng — thiếu là loại, không phải là tha. → `ops/lease_publish.py`
+6. Lease `role: reviewer`, `schema_version >= 2`: `effective_review_class` = **`sensitive`, vô điều
+   kiện**. Cổng **KHÔNG** quét `ops/leases/`, **KHÔNG** tra lease executor, **KHÔNG** kế thừa gì.
+   Lease reviewer khai thấp hơn `sensitive` ⇒ `RC_LOP`. → `ops/lease_publish.py`
 
-   **VÌ SAO KHÔNG TRA BẰNG `packet_id` MỘT MÌNH — đây là bản sửa sau P1 của cross-review lượt 1
-   (codex, PR "#226"), không phải thiết kế gốc.** Bản gốc giả định mỗi packet có nhiều nhất một lease
-   executor. Đo trên `ops/leases/` bác giả định ấy: **3/5 packet có nhiều hơn một** — `PLAT-X5` có
-   **4** (`r1`…`r4`), `AG-T0-01B` có **2**, `wp55` có **2** *và hai bản khai `generation` KHÁC nhau*
-   (`None` và `2`). Nên tra bằng `packet_id` là chuyện thường gặp chứ không phải ca biên: reviewer sẽ
-   thừa kế lớp của một **tiền nhiệm đã chết**, kể cả khi thế hệ hiện tại chưa có lease executor nào —
-   tức đi vòng qua đúng nhánh fail-closed của Q6. Chốt "thấy nhiều bản mâu thuẫn ⇒ `sensitive`"
-   **không** cứu được ca này: nó chỉ bắn khi các bản KHÁC lớp nhau, còn một tiền nhiệm lớp THẤP đứng
-   một mình thì im lặng cấp lớp thấp ấy. Đó là fail-**open**, và nó nằm trong chính cơ chế sinh ra để
-   fail-closed.
+   **ĐÂY LÀ THU HỒI Q1, quyết định của người giữ kho sau cross-review lượt 2 — xem §10.** Bản trước
+   của mục này (tra bằng bộ định danh) đã ăn thêm hai P1 ở lượt 2, cả hai đánh vào **đúng** đường kế
+   thừa. Không vá nữa: bốn phát hiện trên cùng MỘT đường trong hai lượt là dấu hiệu sai ở QUYẾT ĐỊNH
+   GỐC, không ở các bản vá — doctrine "đếm hình dạng lỗi, đừng chỉ đếm lỗi". Cả lớp rủi ro chết theo
+   KIẾN TRÚC: không tra lease nào thì không có bộ định danh để giả mạo, không có tiền nhiệm để thừa,
+   và không có nhánh "không thấy thì…" để rẽ nhầm.
+
 7. Lease `schema_version: 1` hoặc thiếu trường: **BỎ QUA** chốt lớp, `rc` không đổi. Nếu nó khai
    `leased_at_utc` sau `2026-08-21T00:00:00Z` thì in **CẢNH BÁO** ra stderr, **không** đổi `rc`.
    → `ops/lease_publish.py`
@@ -151,10 +149,10 @@ land**. Nên không lease nào đang giữ hai tệp này ⇒ va chạm là **th
 |---|---|---|
 | A1 | lease executor `schema_version: 2`, `write_set: [.claude/dev/launcher.py]`, khai `review_class: systemic` + `effective_review_class: systemic` ⇒ `rc == RC_LOP` | đột biến: đổi nhánh mặc định của `_tinh_lop_tu_write_set` từ `sensitive` sang `systemic` ⇒ ca ĐỎ |
 | A2 | **phản chứng của `PLAT-M4`**: dựng lại đúng nội dung `plat-m4-exec-2-claude-20260821` với `schema_version: 2` ⇒ `rc == RC_LOP`; đổi đúng một trường thành `sensitive` ⇒ `rc == 0` | đột biến: bỏ so sánh `max(khai, tính)` chỉ còn kiểm enum ⇒ ca ĐỎ |
-| A3 | lease reviewer `schema_version: 2`, `packet_id: KHONG-CO-EXEC` ⇒ lớp hiệu lực `sensitive` | đột biến: nhánh "không tìm thấy" trả `routine` ⇒ ca ĐỎ |
-| A4 | lease reviewer khớp ĐỦ bộ định danh với một executor `sensitive` ⇒ kế thừa `sensitive`; với executor `routine` ⇒ **`routine`** (vế dương phải GIỮ — không có nó thì mọi bản vá "cho chắc" đều biến cổng thành máy trả `sensitive`) | đột biến: bỏ tra định danh, luôn trả `sensitive` ⇒ **vế thứ hai** ĐỎ (vế đầu vẫn xanh — nên ca phải có CẢ HAI vế, một vế không đo được đột biến này) |
-| A13 | **tiền nhiệm chết**: một executor `routine` khai `generation: 1`, một reviewer khai `generation: 2`, cùng `packet_id` và `packet_issue` ⇒ **`sensitive`**, KHÔNG kế thừa `routine` | đột biến: tra bằng `packet_id` một mình (thiết kế trước bản sửa) ⇒ ca ĐỎ. Đây là phản chứng của P1 cross-review lượt 1 |
-| A14 | executor ứng viên **thiếu** `generation` hoặc `spec_sha256_required` ⇒ `sensitive`, và nó KHÔNG được dùng làm bản dự phòng | đột biến: coi trường thiếu là "khớp mọi giá trị" ⇒ ca ĐỎ. Thiếu là loại, không phải là tha |
+| A3 | lease reviewer `schema_version: 2` ⇒ lớp hiệu lực `sensitive`, **kể cả khi** `ops/leases/` có một executor `routine` khớp mọi trường định danh | đột biến: dựng lại BẤT KỲ đường kế thừa nào (tra `packet_id`, tra bộ định danh, đọc lease khác) ⇒ ca ĐỎ. Ca này khoá **sự VẮNG MẶT** của một cơ chế, nên nó phải đỏ khi cơ chế ấy quay lại |
+| A4 | lease reviewer khai `effective_review_class: routine` (hoặc `systemic`) ⇒ `RC_LOP` | đột biến: bỏ chốt lớp cho vai reviewer ⇒ ca ĐỎ |
+| A13 | **`ops/leases/` KHÔNG được đọc trên đường reviewer** — dựng thư mục lease chứa một tệp YAML **hỏng cú pháp**; lease reviewer vẫn ra `sensitive`, `rc` không đổi | đột biến: thêm bất kỳ lượt đọc thư mục nào vào đường reviewer ⇒ ca ĐỎ (tệp hỏng sẽ ném). Đây là phép đo HÀNH VI cho "không quét", không phải lời hứa trong chú thích |
+| A14 | **vế DƯƠNG phải sống**: với `_BANG_LOP` được nới TẠM trong ca test (thêm `docs/** → routine`), một lease **executor** `write_set: ['docs/x.md']` ⇒ `routine`, `rc == 0` | không có ca này thì mọi bản vá "cho chắc" biến cổng thành máy trả `sensitive` mà không ai đo được — đúng cảnh báo của cross-review lượt 1. Đột biến: ép `_tinh_lop_tu_write_set` luôn trả `sensitive` ⇒ ca ĐỎ |
 | A5 | `write_set: ['planned:ops/chay_lease_publish_test.sh']` phân đúng như bản không có tiền tố | đột biến: bỏ dòng cắt `planned:` ⇒ ca ĐỎ |
 | A6 | `write_set: []` và lease thiếu hẳn `write_set` ⇒ cả hai ra `sensitive` | đột biến: coi rỗng là `routine` ⇒ ca ĐỎ |
 | A7 | **đột biến NỚI BẢNG**: thêm `.claude/dev/launcher.py → routine` vào `_BANG_LOP` ⇒ ca đích ĐỎ | không có đột biến này thì không biết ca đang đo **bảng** hay đo thứ khác (doctrine `v1.36.68`) |
@@ -169,7 +167,10 @@ land**. Nên không lease nào đang giữ hai tệp này ⇒ va chạm là **th
 **Hình dạng kế thừa:** *nhận LỜI KHAI thay cho PHÉP ĐO* — biến thể của *"đếm sự CÓ MẶT thay vì
 KHẢ NĂNG"*.
 
-**Bộ đếm chép sang: 6 → packet này là lần thứ 7.** Sáu lần đã ghi, nguồn `#220`:
+**Bộ đếm chép sang: 6 → packet này là lần thứ 7 — và trong CHÍNH quá trình soạn nó, lần thứ 8.**
+Bản đóng băng 1 và 2 định thay lời khai bằng phép đo, nhưng đường kế thừa của mục tiêu 6 lại đi
+SUY lớp từ **một tệp lease khác** — tức vẫn là lời khai, chỉ dời sang tệp bên cạnh. Hình dạng cũ
+tái phát ngay bên trong bản vá cho chính nó. Đó là lý do §10 gỡ hẳn thay vì siết tiếp. Sáu lần đã ghi, nguồn `#220`:
 `which(gh)` · `rest-chung` · `gh auth status` · `mcp-endpoint` · `shutil.which` trong `DUNG_DUOC` ·
 đếm cái vỏ công cụ thay vì model đang chạy.
 
@@ -211,30 +212,75 @@ riêng đối chiếu §8, và đó là quyết định của người giữ kho
 
 1. **Bảng đúng hay không thì packet này không đo được.** Xem §8. Không có phép thử nào trong write
    set biến một dòng bảng sai thành ĐỎ.
-2. **Hai cái giá của Q6 chưa đo hết.** (a) Thứ tự cấp lease bị thắt: executor trước, reviewer sau —
-   ca thật đã vi phạm (`plat-m4-review-1-codex-20260820` có trước `plat-m4-exec-2-claude-20260821`,
-   và kho **không có** `plat-m4-exec-1` nào). (b) Packet do người giữ kho tự làm executor **không bao
-   giờ** có lease executor (§2), nên mọi reviewer lease của nó thành `sensitive`. Chưa biết trong 39
-   lease reviewer hiện có, bao nhiêu rơi vào (b) — chưa đếm.
-3. **Cổng này KHÔNG đọc `risk`, và KHÔNG đọc `diff thật` — hai trong ba đầu vào §8:567 đòi.** Ghi
-   sau P1 của cross-review lượt 1 (codex, PR "#226"), và ghi thẳng vì lời khai cũ của đặc tả rộng hơn
-   thứ nó làm được. Nguyên văn §8:567: *"Review Class được tính fail-closed từ `risk`, effective write
-   set và diff thật."* Đo được: **`risk` KHÔNG TỒN TẠI trong dữ liệu** — `grep '^risk:' ops/leases/` =
-   **0/49 tệp** — nên không có gì để đọc; `review_class` khai là thứ gần nhất, và đặc tả này dùng đúng
-   nó làm vế `max`. Còn **`diff thật` KHÔNG TỒN TẠI tại thời điểm cổng chạy**: cổng chạy lúc ĐĂNG
-   lease, tức TRƯỚC khi executor viết dòng nào. Hệ quả phải nói rõ, không giấu: **một packet khai
-   `write_set` sạch rồi diff thật chạm đường nhạy cảm NGOÀI write set vẫn qua cổng này** — nó đo LỜI
-   KHAI VỀ PHẠM VI, không đo phạm vi ĐÃ XẢY RA. Đúng hình dạng §7 mà packet này đang chữa, chỉ lùi
-   một bậc. Chốt hậu-diff trên **exact head** (phân lớp lại từ `git diff base...head`, chặn land nếu
-   cao hơn lớp hiệu lực) là **gói riêng**, không nhét vào đây: nó chạy ở lượt LAND chứ không ở lượt
-   đăng lease, tức khác thời điểm, khác trigger, khác tệp — nhét chung là làm packet vượt trần
-   `sensitive` của ADR-0044 và trộn hai vòng đời vào một cổng.
+2. ~~**Hai cái giá của Q6 chưa đo hết.**~~ **HẾT HIỆU LỰC sau khi thu hồi Q1 (§10).** Cả hai cái
+   giá cũ đều mọc từ việc TRA CỨU lease executor: (a) thứ tự cấp lease bị thắt, (b) packet do người
+   giữ kho tự làm executor không bao giờ có lease executor. Không còn tra cứu thì không còn cái giá
+   nào — reviewer ra `sensitive` bất kể có hay không có lease executor, nên hai ca ấy không còn phân
+   biệt được với ca thường. Giữ dòng này ở dạng gạch bỏ thay vì xoá: nó là bằng chứng rằng cái giá
+   được GIẢI, không phải bị quên.
+3. **Cổng này KHÔNG đọc `risk`, và KHÔNG phân lớp `diff thật` — hai trong ba đầu vào §8:567 đòi.**
+   Bản viết trước của mục này **SAI**, và cross-review lượt 2 bác đúng chỗ; chép lại cái sai ở đây vì
+   nó là bài học, không phải vì thủ tục. Bản ấy viết *"`diff thật` không tồn tại tại thời điểm cổng
+   chạy"* — một khẳng định PHỔ QUÁT dựng từ MỘT trong hai vai. Đo lại: **39/39** lease reviewer khai
+   `reviewed_sha_required` là 40-hex **khác** `base_sha`, tức exact head **có thật và neo ngay trong
+   lease**, còn `ops/lease_publish.py` thì vốn đã đòi và kiểm trường ấy. Nên trên đường reviewer,
+   diff `base_sha...reviewed_sha_required` là thứ cổng **cầm trong tay**. Phần đúng còn lại: `risk`
+   **không tồn tại trong dữ liệu** (`grep '^risk:' ops/leases/` = **0/49 tệp**), và trên đường
+   **executor** thì head chưa tồn tại thật.
+
+   **Vì sao KHÔNG phân lớp diff ấy, và vì sao lần này không phải fail-open:** sau khi Q1 bị thu hồi
+   (§10), lớp của lease reviewer là `sensitive` **vô điều kiện** — tức đã ở TRẦN. Một phép đo thêm
+   không nâng được gì, và việc thiếu nó không HẠ được gì. Đó là khác biệt chịu tải so với bản trước:
+   ở thiết kế cũ, không phân lớp diff nghĩa là một lớp THẤP được cấp cho một diff nhạy cảm; ở thiết
+   kế này, không có lớp thấp nào để cấp. Lỗ chết theo kiến trúc, không theo lời hứa.
+
+   **Thứ vẫn còn hở, nói thẳng:** trên đường **executor**, một packet khai `write_set` sạch rồi diff
+   thật chạm đường nhạy cảm NGOÀI write set vẫn qua cổng này — nó đo LỜI KHAI VỀ PHẠM VI, không đo
+   phạm vi ĐÃ XẢY RA. Chốt hậu-diff trên exact head ở lượt LAND là **gói riêng**, chưa mở Issue.
 4. **Cảnh báo của mục tiêu 7 đứng trên `leased_at_utc`, một trường không cổng nào kiểm.** Cố ý để nó
    là CẢNH BÁO chứ không phải chốt: một chốt đứng trên dữ liệu tự khai là chốt lừa được. Chốt thật
    cho trường ấy thuộc mục D.
 5. **`schema_version: 2` không tự lan.** Ai quên bump thì được tha im lặng, và mục tiêu 7 chỉ in cảnh
    báo. Chốt cứng cho việc này đòi một mốc kiểm được — chưa có.
 6. **Không đo được lease có bị sửa sau khi đăng không.** Ngoài phạm vi cổng hiện tại, và ngoài packet này.
+
+---
+
+## 10. Vì sao THU HỒI Q1 — bốn phát hiện trên MỘT đường, trong hai lượt
+
+Quyết định của người giữ kho, 21-08-2026, sau cross-review lượt 2. Q1 (*"reviewer lease kế thừa lớp
+từ lease executor"*) **hết hiệu lực**; đường kế thừa bị gỡ bỏ, không phải vá tiếp.
+
+**Bốn phát hiện, cùng một đường:**
+
+| lượt | finding | thứ nó bác |
+|---|---|---|
+| 1 | tra bằng `packet_id` một mình ⇒ thừa kế lớp của tiền nhiệm đã chết | giả định "mỗi packet một lease executor" — đo bác: **3/5** packet có nhiều hơn một |
+| 2 | bộ định danh **toàn bộ** lấy từ chính tệp lease, không trường nào đối chiếu trạng thái bền ⇒ lease reviewer **dựng khéo** khai `generation` cũ + băm spec cũ sẽ khớp đúng một executor `routine` và thừa `routine`; nhánh fail-closed "thiếu trường" **không bao giờ chạy** vì mọi trường đều có mặt | chính bản vá của lượt 1 |
+| 2 | trên đường reviewer, exact head **có thật** (đo: **39/39** lease reviewer khai `reviewed_sha_required` 40-hex khác `base_sha`) nên lập luận *"chưa có diff để phân lớp"* sai ở đúng vai này | lập luận biện hộ của lượt 1 |
+| — | `generation` là trường **tự khai**, **0 dòng** cổng nào kiểm | tự nêu trước khi gọi lượt 2; lượt 2 xác nhận và làm sắc thêm |
+
+**Doctrine bắt phải hỏi từ lần thứ ba trở đi là *"có nên làm việc này không"*, không phải *"vá thế
+nào"*.** Mỗi lượt vá đều bảo toàn được thứ ta NGHĨ TỚI và làm hỏng thứ ta KHÔNG NGHĨ TỚI — đó chính
+là cách người ta ở lại quá lâu trong một cái hố. Kho này đã trả giá đúng bài ấy một lần với việc tự
+động ghi lại `~/.codex/config.toml`: **bảy** phát hiện, bốn lượt vá, và lời giải cuối cùng là **thôi
+làm việc đó**.
+
+**Trả lời: không nên SUY lớp của lease reviewer từ bất cứ thứ gì.** Suy từ lời khai là hình dạng §7.
+Suy từ một tệp lease khác chỉ là dời lời khai sang tệp bên cạnh — vẫn dữ liệu tự khai, chỉ khác chỗ
+đứng. Cấp thẳng trần là thứ duy nhất không suy.
+
+**Cái giá, nói bằng số chứ không bằng cảm giác.** Kế thừa lẽ ra mua được lớp THẤP cho reviewer của
+packet nhẹ. Đo dưới bảng seed: **15/15** đường dẫn từng xuất hiện trong `write_set` của mọi lease đều
+ra `sensitive`, nên hôm nay kế thừa mua được **0** trường hợp. Nó chỉ có giá sau khi bảng được nới —
+và nới bảng là packet KHÁC, chưa mở. Vậy giá phải trả bây giờ bằng không; giá phải trả trong tương
+lai là: mọi reviewer lease đều `sensitive` cho tới khi có một cơ chế trạng thái BỀN để neo, thay vì
+neo vào lời khai. Việc dựng cơ chế ấy là gói riêng, và §9.2 đã ghi lại thứ nó phải giải.
+
+**Cảnh báo cho người mở gói ấy:** đừng dựng lại đường kế thừa chỉ vì thấy nó "hiển nhiên đúng".
+`A3`/`A13` khoá sự **VẮNG MẶT** của cơ chế này — chúng ĐỎ khi cơ chế quay lại. Muốn khôi phục thì
+phải sửa hai ca ấy một cách CÓ Ý THỨC, và lúc đó bốn phát hiện trên là danh sách bắt buộc phải trả
+lời từng dòng.
 
 ---
 

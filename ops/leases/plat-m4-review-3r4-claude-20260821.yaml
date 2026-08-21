@@ -109,3 +109,4 @@ no_da_khai_boi_executor:
     Hai lượt codex đã chạy thật ở SHA TRƯỚC và findings đã được vá + đo lại độc lập. Nhưng
     SHA CUỐI (825e9704) chưa nền tảng thứ hai nào soi. Nợ này thuộc lớp BẰNG CHỨNG, không
     phải lớp mã, và cách trả nằm ở `cai_gia_ghi_thang.khuyen_nghi` của tệp uỷ quyền.
+posted_comment_id: 5366426305   # workflow ghi, ĐỪNG sửa tay

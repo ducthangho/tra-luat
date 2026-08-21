@@ -9,7 +9,7 @@ không, và có nên chuẩn hoá — tất định hoá nó thành một tính 
 | vòng | đề bài | băm prompt | codex | Fable |
 |---|---|---|---|---|
 | 1 | `DE_BAI.md` | `8b4690a0…` | run `5f124269`, rc=0 | task vòng 1 |
-| 2 | `DE_BAI_V2.md` | `3602eafe…` | run `75644324`, rc=0 | task vòng 2 |
+| 2 | `DE_BAI_V2.md` | `3602eaf14ec068fb2f2c597c451280311eb95cb0d4ae9faf30422a796971ac77` | run `75644324`, rc=0 | task vòng 2 |
 | 3 | `DE_BAI_V3.md` | `23cb6d57…` | run `838809f8`, rc=0 | task vòng 3 |
 
 ---
@@ -35,15 +35,23 @@ Bằng chứng quyết định là ba ca tái phát có thật của kho:
 điểm chuyển trạng thái** — đúng doctrine kho đã tự viết ("nghĩ ra phép thử mà không chạy thì phép thử ấy
 không tồn tại"), và đề bài này là bằng chứng kho chưa tuân doctrine của chính mình.
 
+**Về chữ "ĐỘC LẬP" dùng khắp tệp này (đính chính sau cross-review, codex P2):** thứ ĐO ĐƯỢC là
+*hai báo cáo RIÊNG cùng bác một khung*. Tính **cách ly phiên** — không đọc kết quả của nhau — là
+**lời khai của phiên điều phối**, KHÔNG kiểm được từ hồ sơ đã commit: thư mục nguồn chỉ có prompt,
+báo cáo và bảng băm, không có receipt hay manifest neo run ID. Ba run ID codex chỉ xuất hiện trong
+chính tệp này. Băm nội dung chứng minh tệp KHÔNG ĐỔI, nó **không** chứng minh provenance.
+
 ## 2. Ba đề xuất ban đầu của phiên chính — hai bị bác, một sống sót đã đổi hình
 
 | cạnh đề xuất | phán quyết | lý do (cả hai bên độc lập) |
 |---|---|---|
 | (1) kế thừa `hinh_dang_lap` + cổng `dem>=3` | **BÁC** | số TỰ KHAI; lách bằng cách đặt tên hình dạng khác; cổng chỉ kiểm SỰ CÓ MẶT của khối `quyet_dinh_kien_truc` — đúng lỗi kho đã trả giá 4 lần; thêm một điểm merge |
 | (2) `doi_ke_hoach.can` + chặn packet cùng seam | **BÁC** | `seam` = **0/24** receipt, **0/41** lease ⇒ vị từ KHÔNG máy-đọc-được ⇒ cổng GIẢ. Và `can:true` + MCR chờ người ⇒ dạy người ta khai `can:false`, tức dạy IM LẶNG |
-| (3) `rXX_` hoặc `chi_la_chu: true` | **ĐỔI HÌNH** | phần schema "cấm im lặng" giữ lại; riêng giá trị `chi_la_chu: true` là **CHỈ LÀ CHỮ** — 0 occurrence toàn kho, không phép đo nào làm nó ĐỎ. Fable **rút chữ ký vòng 1 của chính mình** ở vòng 2 |
+| (3) `rXX_` hoặc `chi_la_chu: true` | **ĐỔI HÌNH** | phần schema "cấm im lặng" giữ lại; riêng giá trị `chi_la_chu: true` là **CHỈ LÀ CHỮ** — **0** occurrence toàn kho **tại neo `0333948`** (ghi rõ neo vì chính tệp này thêm 22 occurrence, nên câu "0 toàn kho" sẽ TỰ VÔ HIỆU ngay khi nó được merge — codex bắt), không phép đo nào làm nó ĐỎ. Fable **rút chữ ký vòng 1 của chính mình** ở vòng 2 |
 
-Cùng bị bác bởi cả hai bên, cả ba vòng: chỗ đựng tri thức **thứ 8** · knowledge graph/vector DB · bộ phân
+Cùng bị bác bởi cả hai bên ở **vòng 1–2**; vòng 3 KHÔNG phải một lần tái xác nhận độc lập —
+đề bài vòng 3 ra lệnh không tranh lại các điểm đã chốt, nên sự im lặng ở đó là **tiền đề**,
+không phải bằng chứng (codex bắt, P1): chỗ đựng tri thức **thứ 8** · knowledge graph/vector DB · bộ phân
 loại LLM "cùng hình dạng" · auto-MCR · hook in hàng loạt lời nhắc theo cò.
 
 ## 3. PHÉP ĐO QUYẾT ĐỊNH — không vòng nào chạy nó, phiên chính chạy sau vòng 1
@@ -66,6 +74,15 @@ kiểm cho 0/0 rồi kết luận "không có bệnh" — đúng lỗi "hỏi ch
 
 ## 4. Thứ THẬT SỰ phải làm trước: hình dạng lỗi thứ tư đã vượt ngưỡng
 
+> **Đính chính sau cross-review (codex, P2).** Bảng dưới là **tự thuật có băm của phiên chính**
+> (`ops/tham-dinh/tri-thuc-20260821/do-doc-lap-v1.md`), KHÔNG phải bốn receipt độc lập. Phân biệt
+> cho đúng: sự cố **#1** có bằng chứng độc lập (receipt lượt 2 ghi spec vắng mặt) và **#4** cũng có
+> (báo cáo codex vòng 1 tự ghi sandbox chặn tạo tệp). Còn **tổng "bốn lần trong ba ngày"**, phép
+> **gom cả bốn vào CÙNG một hình dạng**, và kết luận **"không lần nào do reviewer"** là phân loại
+> của phiên chính — chưa ai đo độc lập. Điều này quan trọng vì chính ngưỡng `4 ≥ 3` là lý do đưa
+> Packet 1 lên trước. Riêng ca #4: codex VẪN xuất được toàn văn qua stdout, nên gọi nó là "lượt
+> review hỏng" là phán đoán QUY TRÌNH, không phải kết quả máy tự chứng minh.
+
 Trong 3 ngày, **4 lượt review bị hỏng vì cách PHIÊN CHÍNH dựng sandbox/bundle bằng tay** — không lần nào
 do reviewer:
 
@@ -80,7 +97,14 @@ Luật của kho: **cùng hình dạng ≥3 lần ⇒ câu hỏi đúng không c
 nữa không"**. Ngưỡng đã vượt ở 4. **Cả codex lẫn Fable, ở vòng 2, độc lập kết luận: CẤM dựng sandbox
 reviewer bằng tay, và việc này đi TRƯỚC mọi cạnh khác.** Cả hai bên đều **ĐỔI Ý** so với vòng 1 để tới đây.
 
-## 5. CHỐT SAU VÒNG 3 — hai bên hội tụ hoàn toàn về thiết kế
+## 5. CHỐT SAU VÒNG 3 — hội tụ về KIẾN TRÚC; còn BẤT ĐỒNG về check của lát 1
+
+> **Đính chính sau cross-review (codex, P1).** Bản đầu của tiêu đề này viết *"hai bên hội tụ
+> hoàn toàn"* rồi 31 dòng sau lại ghi *"khác biệt còn lại duy nhất"* — hai câu ấy mâu thuẫn
+> nhau **trong cùng một mục**. Và tệ hơn: khác biệt ấy KHÔNG phải câu chữ — nó quyết định sự
+> cố nào bị chặn ngay ở lát 1 (thiếu bundle X4, hay đích báo cáo không ghi được). Việc chọn
+> phương án codex là **phán quyết trọng tài của PHIÊN CHÍNH**, không phải đồng thuận của hai
+> nguồn. Viết "hội tụ hoàn toàn" là biến quyết định của mình thành lời của người khác.
 
 **Packet 1 = `packet_loop review-run`, có răng ngay từ lát 1.**
 
@@ -114,7 +138,14 @@ khác** — spec phải đóng băng TRƯỚC lease, nên spec-gate là hợp l�
 - *(Khác biệt còn lại duy nhất giữa hai bên: Fable xếp `a` vào lát 1, codex xếp `d`. Phiên chính chọn theo
   codex — `d` là ~10 dòng, `a` đòi dựng bundle closure; dưới trần cứng +300 thì `d` mua được nhiều hơn.)*
 
-## 6. Thứ tự thi công — cả hai bên đồng ý, và nó ĐO ĐƯỢC
+## 6. Thứ tự thi công — tách phần ĐO ĐƯỢC khỏi phần SUY LUẬN
+
+> **Đính chính sau cross-review (codex, P2).** Tiêu đề cũ gọi cả mục này là "ĐO ĐƯỢC", trong khi
+> **chính codex vòng 3 gắn nhãn `SUY LUẬN`** cho thứ tự mở packet. **ĐO ĐƯỢC**: vị trí `t34` và
+> giao điểm `C ∩ spec-gate` tại `ops/lease_publish_test.py`. **SUY LUẬN**: khuyến nghị "Packet 1 ∥
+> C, spec-gate sau C". Và lời khai *"write set rời nhau hoàn toàn"* giữa Packet 1 và C **chưa đo
+> được** — Fable tự khai write set CHÍNH XÁC của mục C chưa đóng băng, nên câu ấy chỉ đúng khi
+> Packet Spec của C tồn tại.
 
 - **Slice A ĐÃ LAND** (`t36`–`t40` có trong `ops/lease_publish_test.py`, bộ 41 ca).
 - **Slice B gần xong**: `t25`/`t34`/`t35` đã có; phần còn lại DUY NHẤT là **mục C** (2 mục sổ nợ +
@@ -169,6 +200,10 @@ thẳng, đừng đặt tên to hơn phạm vi đo được.
 - Fetch được `luu-tru/*` lúc chạy check neo không (thuộc gói spec-gate).
 - Hiệu quả HÀNH VI của mọi lớp văn xuôi — **không có baseline**, và cả ba vòng đều khai điều này.
 - Chi phí giờ-người của 4 lượt review hỏng — chỉ có lời kể, chưa có số.
+- **Tổng số lượt hỏng, phép gom "cùng một hình dạng", và quy kết nguyên nhân** — tự thuật của
+  phiên chính, chưa đo độc lập (codex P2; xem hộp ở mục 4).
+- **Cách ly phiên giữa hai bên review** — không kiểm được từ hồ sơ đã commit (codex P2).
+- **Write set chính xác của mục C** — chưa đóng băng, nên "rời nhau hoàn toàn" chưa đo được.
 
 ## 11. Nguồn có thẩm quyền
 

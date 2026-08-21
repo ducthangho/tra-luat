@@ -26,7 +26,7 @@ verdict_sha256: 42b438ad15fc1a8978dcd3bef023aa1f41d0926b8b87dc9c4d521229c9d6ae41
 verdict_bytes: 15507
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/blob/db3a295942a2a0f91d5fbdbb00fa4a35c59d4986/ops/reviews/lease-dang-review-1-claude-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/6bc9ef79cb89f87be56aeda5a1b328965b9b5039/ops/reviews/lease-dang-review-1-claude-verdict.md
 evidence_url_ghi_chu: >-
   Điền sau khi biết commit ĐẦU TIÊN chứa tệp verdict — một commit không chứa được băm của
   chính nó, nên biên nhận này đi HAI commit, đúng tiền lệ.
@@ -101,3 +101,12 @@ verdict_usage_caveats:
     lập, reviewer chạy lại lần nữa. Ba lần khớp. Nhắc kèm một bẫy môi trường đã đụng thật:
     `ops/cai_actionlint.sh` chết nếu `/tmp/actionlint` TỒN TẠI mà không phải thư mục (ở đây
     là một tệp `hello` 6 byte sót lại từ phiên trước). Lỗi đó NGOÀI write set của packet.
+- id: evidence_url-DA-CHET-MOT-LAN-vi-REBASE
+  noi_dung: >-
+    Lần điền `evidence_url` đầu tiên trỏ `db3a2959…` — commit ĐÚNG lúc điền, nhưng lần push
+    ngay sau đó bị từ chối (non-fast-forward) và một `git pull --rebase` đã VIẾT LẠI commit ấy
+    thành `6bc9ef79…`. `db3a2959` không nằm trên nhánh remote nào (đo: `git branch -r
+    --contains` trả RỖNG) ⇒ đường dẫn thành SHA không tra được, đúng thứ `ops/reviews/README.md`
+    cảnh báo về `luu-tru/*`. Bài học vận hành: **điền `evidence_url` SAU KHI ĐÃ PUSH THÀNH
+    CÔNG**, không phải sau khi commit. Băm verdict `42b438ad…` KHÔNG đổi qua rebase — nội dung
+    tệp là thứ bền, SHA commit là thứ trôi.

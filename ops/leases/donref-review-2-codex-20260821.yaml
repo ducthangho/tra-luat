@@ -1,0 +1,108 @@
+# Lease REVIEWER — PR "#213", lượt **2/2** (CUỐI trong trần). Review DELTA cbc57214..9588bb1e.
+#
+# Executor `claude`, reviewer `codex` ⇒ cross-provider, §8 thoả.
+#
+# Delta này là BẢN VÁ CHO ĐÚNG P1 mà chính reviewer tìm ra ở lượt 1.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 213
+packet_id: DONREF-CHOT-DO-DUOC
+lease_id: donref-review-2-codex-20260821
+revision: 1
+
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+
+reviewed_sha_required: 9588bb1ef57209da02562928893f544d7d447db1
+head_luot_truoc: cbc57214be1f33b93c5d04e4363c2bcce87439b6
+branch: ops/don-ref-chot-do-duoc
+base_branch: master
+target_pull_request: 213
+scope_files: 3
+so_ca_test: '102 -> 105'
+
+prompt_path: ops/prompts/donref-review-2-codex-20260821.md
+prompt_sha256_required: 5908bbed9ab8bbcde36aceeb75389e53aa606c8d221cd680db3497cad542618e
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("chạy vòng 2, codex soi delta")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_note: >-
+  Phiên ghi lease CHÍNH LÀ phiên viết bản vá và viết prompt. Prompt nói thẳng với reviewer rằng
+  danh sách hướng soi là "thứ người vá đã nghĩ tới", nên nó vừa là gợi ý vừa là ĐIỂM MÙ.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T06:00:00Z'
+lease_expires_at_utc: '2026-08-22T06:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 1
+la_luot_review_CUOI_TRONG_TRAN: true
+
+p1_luot_1_va_the_nao:
+  finding: 'GHIM vẫn TOCTOU — đọc SHA, so, RỒI MỚI DELETE; push chen giữa thì commit mới bị xoá mà chưa được đo.'
+  bang_chung_cua_reviewer: >-
+    Đồ giả GIỮ TRẠNG THÁI cho nhánh nhảy S1 -> S2 sau lần GET cuối, trước DELETE. Bản cũ: rc=0,
+    DELETE gọi đúng một lần, nhật ký xác nhận chính S2 bị xoá.
+  va_bang:
+    - 'Xoá bằng `git push --force-with-lease=<ref>:<sha ghim> origin :<ref>` — old-oid trong CÙNG giao dịch. Bỏ hẳn cặp đọc-lại/so.'
+    - '`$neo` là SHA đã GHIM ở bước chốt, không phải SHA đọc lại.'
+    - 'GHIM áp cho MỌI ref sắp xoá, không riêng vùng làm việc; không ghim được ⇒ DỪNG.'
+    - 'Thêm `actions/checkout@v4` (fetch-depth 1) để có remote xác thực.'
+    - '`CLAUDE.md`: sửa câu "đọc lại ĐÓNG khe" thành "chỉ THU HẸP", và nói rõ nó từng sai.'
+
+cau_SAI_da_sua:
+  noi_dung: >-
+    Người vá từng viết rằng phép đọc lại ĐÓNG khe đo↔xoá. Nó chỉ THU HẸP. Đây là lời khai rộng
+    hơn phép đo — đúng lớp lỗi CLAUDE.md dạy, và người viết câu sai là người vừa đọc nó.
+  da_sua_o: 'CLAUDE.md, kèm mô tả nó từng sai thế nào'
+
+nen_do_boi_nguoi_va:
+  - 'ops/don_ref_chot_test.sh -> 105/105, rc=0 (102 trước delta)'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'ops/lease_publish_test.py -> 41/41, rc=0'
+  - 'packet_loop.py doctrine-scan -> sạch'
+  - 'kho bare dựng tại chỗ: lease neo SHA cũ ⇒ stale info rc=1 ref CÒN; lease neo SHA đúng ⇒ deleted rc=0 ref MẤT; chạy được từ kho 0 object'
+  - '8 đột biến, mỗi con giết đúng ca của nó; N1 (quay về REST DELETE) làm CHÍNH ca của reviewer ĐỎ (rc=0, mong 1)'
+nen_ghi_chu: 'LỜI KHAI của người vá. Reviewer phải tự chạy lại.'
+
+truc_luot_1_BO_DO_phai_phu_o_luot_nay:
+  ly_do: >-
+    Lượt 1 dừng theo điều kiện phạm vi ngay khi thấy P1, và TỰ KHAI "không mục nào được coi là sạch".
+  danh_sach:
+    - 'lịch sử rời: `compare` khi hai commit không có tổ tiên chung — `behind_by` có thể bằng 0 không?'
+    - 'ngưỡng 250 commit của `compare` có làm `ahead_by`/`behind_by` sai không'
+    - 'đột biến chèn bước YAML (cơ chế trích thân bước có trung thực không)'
+    - 'lập luận `M2` (đột biến tương đương, chỉ khoá được bằng phép đo THÔNG ĐIỆP)'
+    - 'các race quanh đầu nhánh mặc định'
+
+truc_moi_cua_delta:
+  - 'TAG có chú giải: `git/ref/tags/X` trả SHA đối tượng TAG, `repos/…/tags` trả COMMIT — lease so với giá trị NÀO?'
+  - 'Nhiều ref một lượt: ref đầu xoá xong, ref sau lease trượt ⇒ trạng thái DỞ DANG, có khai không?'
+  - '`actions/checkout` là bề mặt MỚI: credential ở đâu, có lọt vào log không, dispatch trên chính nhánh sắp xoá thì sao'
+  - 'Helper `lam()` nay TỰ DỰNG trạng thái và ghim mặc định — có ca nào vì thế được cấp sẵn điều kiện lẽ ra phải tự chứng minh không'
+
+ngoai_pham_vi:
+  - 'Proxy chặn xoá ref của phiên web; 65 nhánh còn commit chưa vào master'
+  - '`ops-publish-lease.yml` thiếu `pull-requests: write` — đã biết, có PR riêng'
+
+gate_bat_buoc:
+  - 'ops/don_ref_chot_test.sh -> rc=0, N/N hai số bằng nhau, không tụt dưới 105 ca'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'mọi đột biến chạy trên BẢN SAO TẠM'
+
+nghia_cua_approve: >-
+  P1 đã đóng BẰNG ĐO; các trục lượt 1 bỏ dở đã được phủ; và reviewer KHÔNG tìm thấy đường xoá được
+  một ref chưa an toàn. Không phải "đọc thấy hợp lý".

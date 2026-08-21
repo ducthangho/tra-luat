@@ -90,7 +90,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.4.1"
+VERSION = "1.4.2"
 
 # launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu probe-qua-han-ba-trang-thai mcp-endpoint
 #
@@ -2905,22 +2905,34 @@ def _do_mcp_endpoint(url: str | None, *, token: str | None = None,
                                  "(server kieu stdio thi dieu do la BINH THUONG)", False)
     # KHOP TIEN TO CHUOI KHONG PHAI PHAN TICH URL — bai hoc PLAT-M4 luot 1 (P2).
     # `https://user:SECRET@host/mcp` qua duoc `startswith`, roi bi mat di NGUYEN VAN vao
-    # `req.full_url` VA `req.host`. Phan tich cau truc, va doi thu tu kiem: `userinfo`
-    # phai bi bat TRUOC scheme, vi nhanh scheme in nguyen `url` ra mo ta.
+    # `req.full_url` VA `req.host`. Nen phan tich CAU TRUC, va bat `userinfo` TRUOC scheme.
+    #
+    # VA MOT NUA THU HAI, do luot review 2/2 tim ra: doi thu tu THOI VAN CHUA DU.
+    # Nhanh `userinfo` chi bat duoc URL PHAN TICH DUOC thanh userinfo. URL MEO —
+    # `http:///user:S@h`, `javascript:user:S@h`, `http ://user:S@h`, `http://?u=user:S@h` —
+    # khong co `username`/`password`, nen chung roi xuong nhanh scheme/hostname, va hai
+    # nhanh ay tung noi suy `{url!r}`: KHONG probe nua nhung VAN lam lo bi mat qua MO TA.
+    # Cung HINH DANG voi chinh finding goc, chi doi duong ra.
+    # ⇒ LUAT O DAY: KHONG mot nhanh TU CHOI nao duoc mang DU LIEU LAY TU `url`. Ke ca
+    # `scheme`: `urlsplit("GOCSPX-abc:x")` cho scheme `gocspx-abc`, tuc chinh bi mat.
+    # Chan doan mat do CHINH XAC va duoc lai mot bao dam CAU TRUC — doi ay la co y.
     try:
         p_ep = urllib.parse.urlsplit(str(url))
         chu_ep, may_ep = p_ep.scheme.lower(), p_ep.hostname
         ai_ep = (p_ep.username, p_ep.password)
     except ValueError as e:
+        # Ten LOP ngoai le la tap dong, khong lay tu `url`.
         return ("khong_do_duoc", f"`url` khong phan tich duoc ({type(e).__name__})", False)
     if ai_ep != (None, None):
-        # KHONG in `url`, ke ca mot phan cua no: chinh no dang cho bi mat.
         return ("khong_do_duoc", "`url` nhung credential trong userinfo — TU CHOI, KHONG "
                                  "probe (bi mat se di vao URL va header Host)", False)
     if chu_ep not in ("http", "https"):
-        return ("khong_do_duoc", f"`url` khong phai http(s): {url!r}", False)
+        return ("khong_do_duoc", "`url` khong phai http(s) — scheme ngoai danh sach cho "
+                                 "phep (KHONG in `url` ra day: no co the dang cho bi mat)",
+                False)
     if not may_ep:
-        return ("khong_do_duoc", f"`url` khong co ten may: {url!r}", False)
+        return ("khong_do_duoc", "`url` khong co ten may (KHONG in `url` ra day: no co the "
+                                 "dang cho bi mat)", False)
     dau = {"Content-Type": "application/json",
            "Accept": "application/json, text/event-stream"}
     if token:

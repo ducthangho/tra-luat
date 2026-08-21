@@ -5355,7 +5355,13 @@ def t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec():
     `initialize` trả HTTP 200 kèm header GitHub). Một phiên đọc trường gộp cũ sẽ kết
     luận "GitHub bị chặn" rồi dừng — ĐÃ XẢY RA, mất trọn một lượt.
 
-    Ca này khoá sáu điều, mỗi điều một phản chứng ở §5 thân Issue #194:
+    Ca này khoá TÁM điều. Sáu điều đầu là phản chứng ở §5 thân Issue #194; điều 7 và 8
+    đến từ lượt cross-review 2/2 và khoá BIÊN CẤU TRÚC của `userinfo` — xem (5c)–(5e):
+      7. URL MÉO mang credential (không parse ra `userinfo`) phải bị từ chối MÀ KHÔNG
+         làm lộ bí mật qua MÔ TẢ — "không gọi mạng" KHÔNG bằng "không làm lộ".
+      8. Biên phải đo theo CẤU TRÚC, không theo ký tự: `@` trong path/query vẫn probe
+         được, còn username RỖNG + password CÓ vẫn là credential và phải bị chặn.
+    (Điều thứ chín, đo bằng HÀNH VI, vẫn giữ nguyên ở cuối ca.)
       1. 200 CÓ header  -> `mo` + THÀNH CÔNG          (phân loại theo header, không theo mã)
       2. 4xx KHÔNG header -> `chan`, nói rõ "proxy tự sinh"
       3. 4xx CÓ header  -> `mo` NHƯNG không thành công (hai câu hỏi khác nhau)
@@ -5475,6 +5481,45 @@ def t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec():
         tt, mo_ta, ok = m._do_mcp_endpoint("https://x/mcp/", token=SENT)
         bang(tt == "mo" and ok is True and len(nhat_ky) == 1,
              f"url SACH bi chan nham: {tt} {ok} {len(nhat_ky)} loi goi")
+
+        # (5c) URL MEO — luot review 2/2 tim ra, va no la NUA THU HAI cua cung finding.
+        # Bon dang duoi day KHONG phan tich duoc thanh `userinfo`, nen chung TRUOT khoi
+        # nhanh userinfo va roi xuong nhanh scheme/hostname. Truoc ban va, hai nhanh ay
+        # noi suy `{url!r}` ⇒ khong probe nua NHUNG van lam lo bi mat qua MO TA.
+        # Bai hoc: "khong goi mang" khong bang "khong lam lo" — dem CA HAI duong ra.
+        for xau in (f"http:///user:{SENT}@host/mcp",
+                    f"javascript:user:{SENT}@host",
+                    f"http ://user:{SENT}@host/mcp",
+                    f"http://?u=user:{SENT}@host"):
+            nhat_ky.clear()
+            dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+            tt, mo_ta, ok = m._do_mcp_endpoint(xau, token=SENT)
+            bang(tt == "khong_do_duoc" and ok is False,
+                 f"url meo phai la KHONG DO DUOC, duoc {tt}")
+            bang(not nhat_ky, f"url meo ma VAN goi urlopen {len(nhat_ky)} lan")
+            bang(SENT not in mo_ta,
+                 f"MO TA nhanh tu choi CHO BI MAT — khong goi mang nhung van lam lo: {mo_ta!r}")
+
+        # (5d) BIEN CAU TRUC, chieu THUAN: `@` trong path/query KHONG phai userinfo, nen
+        # url ay phai ĐƯỢC probe. Khong co ca nay thi mot ban cai do bang KY TU
+        # (`if "@" in url`) van xanh, va no chan oan url hop le.
+        for sach in ("https://host.test/mcp/@lich-su", "https://host.test/mcp?ai=a@b.test"):
+            nhat_ky.clear()
+            dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+            tt, _mt, ok = m._do_mcp_endpoint(sach)
+            bang(tt == "mo" and ok is True and len(nhat_ky) == 1,
+                 f"`@` trong path/query KHONG phai credential — {sach!r} bi chan oan: {tt}")
+
+        # (5e) BIEN CAU TRUC, chieu NGHICH: username RONG ma password CO thi van la
+        # credential. Mot ban cai doc `username` theo tinh CHAN LY (`if p_ep.username:`)
+        # se cho no di qua, va bi mat vao ca `full_url` lan `host`.
+        nhat_ky.clear()
+        dat(lambda: _Ph(200, {"X-GitHub-Request-Id": "abc"}))
+        tt, mo_ta, ok = m._do_mcp_endpoint(f"https://:{SENT}@host.test/mcp", token=SENT)
+        bang(tt == "khong_do_duoc" and ok is False and not nhat_ky,
+             f"username RONG + password CO van la credential, phai tu choi: {tt} "
+             f"{len(nhat_ky)} loi goi")
+        bang(SENT not in mo_ta, f"MO TA cho bi mat o ca username rong: {mo_ta!r}")
 
         # --- DIEU THU BAY, do bang HANH VI: endpoint OK mot minh KHONG nang duoc nhan.
         # Doc ma nguon (khuc dau ca t115) chi bat duoc dot bien SUA DUNG dong
@@ -6188,6 +6233,19 @@ DOT_BIEN = [
     ("mcp_endpoint_bo_kiem_userinfo",
      ('    if ai_ep != (None, None):',
       '    if False:'), ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    # --- BA DOT BIEN CUA LUOT REVIEW 2/2 (bien cau truc + ro ri qua MO TA) ----------
+    ("mcp_endpoint_userinfo_do_bang_KY_TU_thay_vi_CAU_TRUC",
+     ('    if ai_ep != (None, None):',
+      '    if "@" in str(url):'), ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_endpoint_userinfo_chi_doc_username_theo_tinh_chan_ly",
+     ('    if ai_ep != (None, None):',
+      '    if p_ep.username:'), ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_endpoint_nhanh_scheme_in_lai_url_ra_mo_ta",
+     ('        return ("khong_do_duoc", "`url` khong phai http(s) — scheme ngoai danh sach cho "\n'
+      '                                 "phep (KHONG in `url` ra day: no co the dang cho bi mat)",\n'
+      '                False)',
+      '        return ("khong_do_duoc", f"`url` khong phai http(s): {url!r}", False)'),
+     ["t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_endpoint_tu_choi_userinfo_MA_VAN_in_url",
      ('        return ("khong_do_duoc", "`url` nhung credential trong userinfo — TU CHOI, KHONG "\n'
       '                                 "probe (bi mat se di vao URL va header Host)", False)',

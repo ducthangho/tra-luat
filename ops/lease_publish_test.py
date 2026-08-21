@@ -2001,121 +2001,65 @@ exec "$bash_that" "$wrapper"
         bang(rc == 23 and marker_rc.exists(),
              f"wrapper nuốt rc selftest: chờ 23, được {rc}, marker={marker_rc.exists()}:\n"
              f"{ra.strip()[:400]}")
-
-
-# Năm dạng gọi ĐÃ ĐO là lọt khỏi `_CHAY_BO_TEST`. Bảng này là NGUỒN của `t42`; đổi nó mà
-# không đổi docstring `t34` thì `t42` đỏ, và ngược lại. Cố ý buộc hai chỗ vào nhau: lời
-# khai về phạm vi và phạm vi thật phải chết cùng lúc, kẻo lời khai trôi rộng ra một mình.
-_DANG_DA_DO_LA_LOT = (
-    "python -m ops.lease_publish_test",
-    "python3 -u ops/lease_publish_test.py",
-    "./ops/lease_publish_test.py",
-    "uv run ops/lease_publish_test.py",
-    "python -X utf8 ops/lease_publish_test.py",
-)
-
-# Ba dạng CANONICAL mà `_CHAY_BO_TEST` PHẢI bắt. Có bảng này thì tỷ lệ `3/8` không còn là một
-# chuỗi ai đó gõ vào docstring — nó được SINH RA từ hai tập, và `t42` đo hành vi THẬT của
-# regex trên cả tám dạng. Đây là bản vá cho finding P2 của lượt cross-review 1 (codex):
-# bản trước chỉ tìm chuỗi "3/8" nên nới regex làm phép đo đổi (3/8 → 4/8) mà suite vẫn 42/42.
-_DANG_CANONICAL_BI_BAT = (
-    "python ops/lease_publish_test.py",
-    "python3 ops/lease_publish_test.py",
-    "py ops/lease_publish_test.py",
-)
-
-
-@ca
-def t42_docstring_t34_phai_liet_ke_DU_nam_dang_da_do_la_lot():
-    """Lời khai về phạm vi phải BẰNG phạm vi đo được — và phải chết khi nó trôi.
-
-    VÌ SAO CÓ CA NÀY — đã trả giá hai lần, cùng một hình dạng, ở hai chỗ khác nhau:
-    lượt review 2 của `PLAT-M4` bắt được docstring `t143` khai "sáu điều" trong khi bản vá
-    đã thêm ràng buộc mới; và chính `t34` từng tuyên bố "đã chứng minh job cài công cụ trước
-    khi chạy" trong khi nó chỉ bắt một hồi quy hẹp. Cả hai lần, MÃ đúng còn LỜI KHAI sai —
-    nên không cổng nào bắt được, vì mọi cổng khi ấy chỉ đo mã.
-
-    Q7 (không bật required status check) làm `t34` SỐNG LÂU DÀI thay vì bị xoá sau khi đọc
-    lại cấu hình. Một lời khai sống lâu là một lời khai có thời gian để trôi. Ca này neo nó.
-
-    PHẠM VI CỦA CHÍNH CA NÀY, khai thẳng để không lặp lại đúng lỗi nó đang chặn: nó đo
-    docstring có CHỨA năm chuỗi ấy và có nêu con số `3/8`. Nó KHÔNG chứng minh năm dạng ấy
-    thật sự lọt — phép đo ấy nằm ở chỗ khác (`_CHAY_BO_TEST` và bảng trên). Đây là ca đo
-    LỜI KHAI, không phải ca đo HÀNH VI, và hai thứ đó không thay thế nhau.
-
-    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ bất kỳ dạng nào khỏi docstring `t34`, hoặc bỏ con số `3/8`.
-    Không có đột biến ấy thì không biết ca đang đo lời khai hay đo thứ khác.
-    """
-    doc = t34_workflow_khong_duoc_goi_THANG_tep_bo_test.__doc__ or ""
-    thieu = [d for d in _DANG_DA_DO_LA_LOT if d not in doc]
-    bang(not thieu,
-         f"docstring `t34` thiếu {len(thieu)}/{len(_DANG_DA_DO_LA_LOT)} dạng đã ĐO là lọt: "
-         f"{thieu}. Lời khai về phạm vi phải bằng phạm vi đo được — thêm lại nguyên văn, "
-         f"đừng viết gọn thành 'và các dạng tương tự'.")
-
-    # --- ĐO HÀNH VI, không đọc chữ. Đây là phần bản trước THIẾU và cross-review bắt được.
-    lot_that = [d for d in _DANG_DA_DO_LA_LOT if not _CHAY_BO_TEST.search(d)]
-    bat_that = [d for d in _DANG_CANONICAL_BI_BAT if _CHAY_BO_TEST.search(d)]
-    bang(len(lot_that) == len(_DANG_DA_DO_LA_LOT),
-         f"bảng `_DANG_DA_DO_LA_LOT` khai {len(_DANG_DA_DO_LA_LOT)} dạng LỌT, nhưng regex "
-         f"`_CHAY_BO_TEST` bắt được {len(_DANG_DA_DO_LA_LOT) - len(lot_that)} trong số đó: "
-         f"{[d for d in _DANG_DA_DO_LA_LOT if d not in lot_that]}. Regex đã đổi hành vi mà "
-         f"bảng và docstring chưa đổi theo — sửa CẢ BA, đừng sửa một.")
-    bang(len(bat_that) == len(_DANG_CANONICAL_BI_BAT),
-         f"regex KHÔNG còn bắt {len(_DANG_CANONICAL_BI_BAT) - len(bat_that)} dạng canonical: "
-         f"{[d for d in _DANG_CANONICAL_BI_BAT if d not in bat_that]}. Đây là hồi quy THẬT: "
-         f"`t34` mất răng ở đúng thứ nó hứa bắt.")
-
-    # Tỷ lệ được SINH RA từ hai tập, không phải chuỗi gõ tay. Nới regex làm số này đổi ⇒ ĐỎ.
-    tong = len(_DANG_CANONICAL_BI_BAT) + len(_DANG_DA_DO_LA_LOT)
-    ty_le = f"{len(bat_that)}/{tong}"
-    bang(ty_le in doc,
-         f"docstring `t34` phải nêu tỷ lệ ĐO ĐƯỢC `{ty_le}` (bắt {len(bat_that)} trong {tong} "
-         f"dạng đã biết); nó không có. Con số này SINH từ hai bảng — đổi regex mà không đổi "
-         f"docstring là để lại một lời khai đã chết. 'che phần lớn' là lời khai không có phép đo.")
+# `t42` ĐÃ BỊ GỠ ở lượt vá thứ hai — có chủ đích, không phải quên. Nó khẳng định "docstring
+# của `t34` có chứa chuỗi X", tức MỘT LỜI KHAI VỀ MỘT LỜI KHAI. Ba lượt liên tiếp cho cùng một
+# hình dạng lỗi: cross-review 1 tìm được đột biến nới regex mà nó không bắt; bản vá cho nó lại
+# đẻ ra hai docstring TỰ MÂU THUẪN với chính mã vừa viết cộng một con số chết ngay trong commit
+# sinh ra nó; cross-review 2 lại tìm được đột biến siết regex mà nó vẫn không bắt.
+#
+# `CLAUDE.md` nói thẳng về đúng tình huống này: "cùng một hình dạng lặp ba lần trở lên thì câu
+# hỏi đúng là CÓ NÊN LÀM VIỆC NÀY KHÔNG, không phải VÁ THẾ NÀO". Người giữ kho quyết bỏ.
+#
+# NỢ CÒN LẠI, khai thẳng chứ không giả vờ đã xong: mục tiêu gốc — canh cho lời khai phạm vi
+# của `t34` không trôi — VẪN CHƯA CÓ CỔNG NÀO. Xem `ops/NO_KY_THUAT.md` §11.
+#
+# `t43` bên dưới được GIỮ vì nó khác loại: nó đo QUAN HỆ GIỮA HAI TỆP, tức một SỰ KIỆN, không
+# phải một câu chữ ai đó gõ vào docstring.
 
 
 # Marker `NỢ CÓ TÊN` trong workflow, và tiêu đề mục trong sổ nợ. Cố ý HAI mẫu riêng và cả hai
 # đều bó vào ĐÚNG hình dạng đang dùng: marker chỉ nhận khi đứng trong một dòng CHÚ THÍCH, mục
 # chỉ nhận khi là TIÊU ĐỀ `## <số>.`. Không bó thì một câu văn xuôi có chữ "NỢ CÓ TÊN" — như
 # chính các câu giải thích trong hai tệp ấy — sẽ bị đếm nhầm, và cổng lại thành cổng nói dối.
-_MARKER_NO = __import__("re").compile(r"^\s*#.*NỢ CÓ TÊN\b[^`]*`([^`]+)`")
+# Marker phải đứng NGAY SAU dấu chú thích — `^\s*#\s*NỢ CÓ TÊN`, không cho chữ tuỳ ý chen
+# vào giữa. Bản trước dùng `^\s*#.*NỢ CÓ TÊN` nên một CÂU VĂN XUÔI có nhắc cụm ấy cũng bị nhận
+# làm marker; cross-review 2 đo được: chèn một dòng giải thích vào `ci.yml` là `t43` ĐỎ oan.
+# Một cổng báo động giả là cổng sẽ bị tắt, rồi cả ca chết theo.
+_MARKER_NO = __import__("re").compile(r"^\s*#\s*NỢ CÓ TÊN\s*:?\s*`([^`]+)`")
 _MUC_SO_NO = __import__("re").compile(r"^##\s*\d+\.\s*`([^`]+)`")
+# BACKLINK: mục sổ nợ TỰ KHAI nó là nhà của một marker trong mã. Chỉ mục có dòng này mới bị
+# đòi hai chiều — §1–§8 không có backlink nên không báo động giả, đúng lý do đã hạ `t43` xuống
+# một chiều ở lượt trước; nay giữ được cả hai chiều mà KHÔNG ép đối xứng lên toàn sổ.
+_BACKLINK_NO = __import__("re").compile(r"^\*\*marker:\*\*\s*`([^`]+)`\s+trong\s+`([^`]+)`")
 
 
 @ca
-def t43_moi_marker_NO_CO_TEN_phai_co_DUNG_MOT_muc_trong_so_no():
-    """Nợ được ĐẶT TÊN trong mã phải có NHÀ trong sổ, và ngược lại. So TẬP, không so TỔNG.
+def t43_marker_NO_CO_TEN_va_muc_so_no_phai_khop_HAI_CHIEU():
+    """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
 
-    VÌ SAO CÓ CA NÀY — cross-review lượt 1 của `SLICE-B-C` (codex, P2) chỉ ra: tiêu chí
-    `2 = 2` mà packet này tự đặt ra chỉ là một ẢNH CHỤP, không phải một cổng. Reviewer đo
-    được: thêm marker thứ ba vào `ci.yml` mà KHÔNG thêm mục sổ nợ ⇒ `ci_markers=3`,
-    `ledger=2`, mà `lease_publish` vẫn `42/42`, `actionlint` rc=0, `doc-claims-check` ok.
-    Không cổng nào đỏ. Một nợ mới sinh ra là một nợ KHÔNG AI ĐỌC.
+    VÌ SAO CÓ CA NÀY — cross-review lượt 1 (codex, P2): tiêu chí `2 = 2` mà packet tự đặt ra
+    chỉ là một ẢNH CHỤP. Thêm marker thứ ba vào `ci.yml` mà không thêm mục ⇒ mọi cổng vẫn
+    xanh. Một nợ mới sinh ra là một nợ KHÔNG AI ĐỌC.
 
-    Đúng bài học của kho: một tiêu chí chỉ sống trong Issue hay trong lời khai của PR là
-    một tiêu chí sẽ chết lặng lẽ. Ca này biến nó thành phép kiểm chạy được.
+    BA LỖ CỦA BẢN ĐẦU, cross-review lượt 2 đo được, nay đã vá — ghi cả ba vì mỗi cái là một
+    kiểu thua khác nhau:
 
-    SO TẬP, KHÔNG SO TỔNG — có chủ đích: đổi tên một marker và đổi tên một mục khác cho
-    "bù" nhau sẽ giữ nguyên hai con số mà phá đúng bất biến. Đếm hai bên bằng nhau là một
-    cổng lừa được; so tập thì không.
+    1. **Một chiều làm mất tín hiệu khi marker BỊ GỠ.** Gỡ `PLAT-X5-required-status-check`
+       khỏi `ci.yml` mà giữ nguyên §9 ⇒ `marker − sổ = ∅`, suite `43/43`, KHÔNG AI BẮT. Chiều
+       nghịch không thể ép lên toàn sổ (§1–§8 là nợ thật, không có marker), nên lời giải là
+       **backlink**: mục nào TỰ KHAI mình là nhà của một marker thì mới bị đòi hai chiều.
+    2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+       dòng giải thích cũng thành marker. Nay neo ngay sau `#`.
+    3. **`set` xoá dấu vết trùng.** Tên ca hứa "ĐÚNG MỘT mục" nhưng `set` biến hai tiêu đề
+       cùng ID thành một ⇒ chỉ kiểm được "ít nhất một". Nay đếm bằng `Counter`.
 
-    MỘT CHIỀU, và chiều ấy được chọn bằng PHÉP ĐO chứ không bằng đối xứng. Bản đầu của ca
-    này kiểm cả hai chiều và **ĐỎ NGAY LƯỢT CHẠY ĐẦU** — nó tố `PLAT-X2` (§8) và
-    `launcher_test.py` (§7) là "mục thừa". Cả hai là nợ CÓ THẬT, chỉ không có marker trong
-    `ci.yml`. Tức chiều nghịch KHÔNG phải bất biến: một khoản nợ tồn tại được mà không cần
-    ai đặt tên nó trong mã, và §1–§8 là bằng chứng sẵn có ngay trong tệp ấy. Giữ chiều
-    nghịch là dựng một cổng BÁO ĐỘNG GIẢ thường trực — thứ người ta sẽ tắt, rồi cả ca chết
-    theo. Bất biến THẬT chỉ có một chiều: **marker ⊆ sổ nợ**.
+    PHẠM VI, khai thẳng: ca này chỉ đo `.github/workflows/ci.yml` ↔ `ops/NO_KY_THUAT.md`. Nợ
+    đặt tên ở tệp khác KHÔNG được canh. Đây là tập đã ĐO, không phải lời hứa về mọi nơi.
 
-    PHẠM VI, khai thẳng để không lặp lại lỗi nó đang chặn: ca này chỉ đo `ci.yml` ↔
-    `ops/NO_KY_THUAT.md`. Nợ đặt tên ở tệp khác KHÔNG được canh. Đây là tập đã ĐO, không
-    phải lời hứa về mọi nơi trong kho.
-
-    ĐỘT BIẾN LÀM CA NÀY ĐỎ: thêm một marker `NỢ CÓ TÊN` vào `ci.yml` mà không thêm mục
-    tương ứng; hoặc đổi tên một trong hai mục đang khớp (§9, §10) — đổi tên phá được bất
-    biến mà KHÔNG đổi hai con số, nên đây đúng là ca mà phép "đếm hai bên bằng nhau" thua.
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: thêm marker không có nhà · GỠ một marker mà mục vẫn khai backlink
+    · thêm mục thứ hai trùng ID. VÀ MỘT CA ÂM PHẢI XANH: chèn câu văn xuôi có cụm `NỢ CÓ TÊN`.
     """
+    import collections
     goc = HERE.parent
     wf = goc / ".github" / "workflows" / "ci.yml"
     so = goc / "ops" / "NO_KY_THUAT.md"
@@ -2125,12 +2069,25 @@ def t43_moi_marker_NO_CO_TEN_phai_co_DUNG_MOT_muc_trong_so_no():
         return
     trong_ma = {m.group(1) for d in wf.read_text(encoding="utf-8").splitlines()
                 if (m := _MARKER_NO.match(d))}
-    trong_so = {m.group(1) for d in so.read_text(encoding="utf-8").splitlines()
-                if (m := _MUC_SO_NO.match(d))}
-    thieu_nha = sorted(trong_ma - trong_so)
+    dong_so = so.read_text(encoding="utf-8").splitlines()
+    dem_muc = collections.Counter(m.group(1) for d in dong_so if (m := _MUC_SO_NO.match(d)))
+    backlink = {m.group(1): m.group(2) for d in dong_so if (m := _BACKLINK_NO.match(d))}
+
+    trung = sorted(k for k, n in dem_muc.items() if n > 1)
+    bang(not trung,
+         f"sổ nợ có mục TRÙNG ID: {trung}. Hai mục cùng tên là hai bản ghi cùng tranh làm nhà "
+         f"của một khoản nợ — người đọc không biết bản nào có hiệu lực.")
+
+    thieu_nha = sorted(trong_ma - set(dem_muc))
     bang(not thieu_nha,
          f"nợ ĐƯỢC ĐẶT TÊN trong `ci.yml` mà KHÔNG có mục trong `ops/NO_KY_THUAT.md`: "
          f"{thieu_nha}. Nợ có tên mà không có nhà là nợ KHÔNG AI ĐỌC — thêm mục, đừng gỡ marker.")
+
+    mat_marker = sorted(k for k in backlink if k not in trong_ma)
+    bang(not mat_marker,
+         f"mục sổ nợ KHAI backlink tới marker mà marker ấy KHÔNG CÒN trong `ci.yml`: "
+         f"{mat_marker}. Hoặc nợ đã trả mà mục chưa đóng, hoặc marker bị gỡ nhầm. Đừng làm ca "
+         f"này im bằng cách xoá dòng backlink — đó là xoá đúng thứ đang canh.")
 
 
 def main() -> int:

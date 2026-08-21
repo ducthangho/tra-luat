@@ -37,11 +37,34 @@
 | :--- | :--- | :--- | :---: |
 | `AG-T0-04` | Version generator fail-closed *(land dưới tên `Packet 1`)* | `scripts/gen_instructions.py`, `RELEASE_MANIFEST.json` | `routine` |
 | `AG-T0-02` | Clean cross-review adapter & Root AGENTS.md *(land dưới tên `Packet 2`)* | `.claude/skills/cross-review/SKILL.md`, `AGENTS.md`, `RELEASE_MANIFEST.json`, `scripts/tl_selftest.py` | `systemic` |
-| `AG-T0-01A` | Windows subprocess decoding policy | `.claude/dev/launcher.py`, `.claude/dev/launcher_test.py` | `systemic` |
-| `AG-T0-01B` | Antigravity tool discovery (`agy`) | `.claude/dev/launcher.py`, `.claude/dev/launcher_test.py` | `systemic` |
+| `AG-T0-01A` | Windows subprocess decoding policy | `.claude/dev/launcher.py`, `.claude/dev/launcher_test.py` | **`sensitive`** ² |
+| `AG-T0-01B` | Antigravity tool discovery (`agy`) — Issue `#219` | `.claude/dev/launcher.py`, `.claude/dev/launcher_test.py` | **`sensitive`** ² |
 | `AG-T0-01C` | Antigravity plan & Lean AGENTS pointer *(land dưới tên `Packet 3C`)* | `AGENTS.md`, `ops/KE_HOACH_THI_CONG_ANTIGRAVITY.md` | `systemic` |
 | `AG-T0-03` | Argparse parser-tree coverage report | `scripts/tl_core/command_registry.py`, `scripts/tl_core/workflow.py`, + **derived set** | `systemic` |
 | `AG-T0-05` | Registry ratchet & generated golden projection | `scripts/tl_core/command_registry.py`, `scripts/tl_core/workflow.py`, `references/golden/parser_surface.json` | `systemic` |
+
+² **`review_class` của hai dòng `launcher` đã được SỬA `systemic` → `sensitive`** (21-08-2026).
+
+`docs/PROTOCOL_DA_PHIEN.md:572-573` liệt kê **`launcher`** đích danh trong `sensitive`. Lời khai
+`systemic` cũ phân loại theo thứ packet KHÔNG đụng thay vì thứ nó CÓ đụng — **theo VỊ TRÍ thay vì
+theo HẬU QUẢ**, đúng hình dạng đã bị đính chính ở `PLAT-M4`
+(`ops/DINH_CHINH_REVIEW_CLASS_PLAT_M4.md`). `:568-569`: *"Executor không được hạ lớp."*
+
+Cột này **không phải trạng thái động** nên nó thuộc về đây, khác hẳn cột *Trạng Thái Đề Xuất* đã bị
+bỏ: `review_class` suy ra từ **đường dẫn bị chạm**, không đổi theo PR/CI/quota. Sai ở đây là sai
+HỢP ĐỒNG, không phải sai ảnh chụp.
+
+Hệ quả cứng cho `AG-T0-01B`: **cấm AG–AG land**; và vì `agy models` (đo 21-08-2026) liệt kê cả
+`claude-sonnet-4-6` lẫn `gpt-oss-120b-medium`, chọn reviewer theo TÊN CÔNG CỤ là chưa đủ — xem
+§6 mục `AG-T0-01B` và Issue `#220` (`PLAT-X6`).
+
+`AG-T0-01A` **đã land** dưới lời khai cũ. Sửa ở đây là ghi cho đúng lớp, **không hồi tố** mức
+assurance của lần land ấy — muốn hồi tố thì phải qua re-audit, và nó chưa có.
+
+**Năm dòng còn lại CHƯA được đối chiếu lại với `docs/PROTOCOL_DA_PHIEN.md` §8.** Không im lặng nâng
+lớp cho chúng ở đây: nâng mà không đo là đổi một lời khai chưa kiểm lấy một lời khai chưa kiểm
+khác. `:569` đòi fail-closed (*"Path không biết, classifier lỗi hoặc bằng chứng không đọc được đều thành `sensitive`"*), nên khi có ai đụng lại một trong
+năm dòng ấy thì phải phân loại lại TRƯỚC, đừng đọc bảng này làm đã-đúng.
 
 **WRITE SET và DERIVED SET là hai thứ khác nhau** — bài học đo được từ `AG-T0-03`: packet
 khai 3 tệp, thực tế đụng 10. Sáu tệp chênh lệch là **tái sinh cơ học bắt buộc**
@@ -55,16 +78,40 @@ Hàm tính nợ review chính thức:
 
 $$\text{Review Debt} = f(\text{Review Class}, \text{Assurance Level}, \text{Exact SHA Validity}, \text{Identity Evidence}, \text{Gate Status}, \text{Head Staleness})$$
 
-### Hồ sơ nợ review hiện tại:
-1. **Packet 1 (`AG-T0-04` — PR #163):**
-   - Trạng thái: `landed_reaudit_pending`
-   - Lý do: `reviewed_sha` ban đầu (`125f8f0`) là SHA rút gọn và bị stale so với merge head cuối (`2995f7c...`). Cần 1 lượt re-audit đối chiếu base `6d17c1b...` tới merge commit `131ec17...` khi Claude/Codex hồi phục quota.
-2. **Packet 2 (`AG-T0-02` — PR #164):**
-   - Trạng thái: `landed_reaudit_pending`
-   - Lý do: Thay đổi `systemic` vào review orchestration và entrypoint root `AGENTS.md`; `reviewed_sha` dùng SHA rút gọn (`fe99d00`); chưa có machine-validated reviewer identity receipt. Cần 1 lượt re-audit bởi Claude hoặc Codex.
-3. **PR #165 cũ (Đã Đóng):**
-   - Trạng thái: `closed_blocked_ci`
-   - Lý do: Gộp 3 concerns khác nhau; gate release-verify fail do lệch băm gói khi sửa `AGENTS.md` chưa đồng bộ manifest; required Windows launcher gate bị skip.
+### Sổ nợ — TĨNH, và vì sao nó có hình dạng này
+
+Bản trước của mục này ghi mỗi khoản một dòng `Trạng thái: landed_reaudit_pending` /
+`closed_blocked_ci`. Đó là **trạng thái động viết tay** — `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md`
+§12 cấm đúng thứ ấy (*"Packet đã merge hay chưa"*), và nó là cùng cái bẫy đã làm cột *Trạng Thái
+Đề Xuất* ở §2 sai 3/7 dòng. Nội dung khi ấy tình cờ vẫn đúng; cái sai là **hình dạng**, và hình
+dạng ấy sai âm thầm cho tới lượt cập nhật nào đó bị bỏ quên.
+
+Một khoản nợ tách được làm hai phần, và **cả hai đều tĩnh**:
+
+- **Sự việc** — neo bằng SHA đầy đủ, bất biến, không đổi theo thời gian;
+- **Điều kiện đóng** — một phép đo trả lời có/không.
+
+Thứ động là *"đã đóng chưa"*, và câu trả lời đo bằng **sự tồn tại của biên nhận** trong
+`ops/reviews/`, không bằng một nhãn viết tay ở đây.
+
+| # | sự việc (bất biến) | điều kiện đóng (phép đo) |
+| :-- | :--- | :--- |
+| N1 | `AG-T0-04` — PR `#163`, hai commit `bea68ed92b0bdf29dfec8d5f3ff1b8165d80e8ac` và `2995f7cde727ecddcc4353e713caf866ee7d02b5`, merge `131ec17e6c7114f29cf2e18dda34bd85266923b4`, base `6d17c1b43d997edb50959b1a65f9a70ece46f27a` | tồn tại một biên nhận `ops/reviews/ag-t0-04-reaudit-*-verdict.receipt.yaml` neo `reviewed_sha` = `131ec17e…` (40 ký tự) |
+| N2 | `AG-T0-02` — PR `#164`, head `fe99d00b3d882009b2043b8309328e16946af3bb`; đổi `.claude/skills/cross-review/SKILL.md` (review orchestration) và `AGENTS.md` | tồn tại `ops/reviews/ag-t0-02-reaudit-*-verdict.receipt.yaml` neo `reviewed_sha` = `fe99d00b…` **và** khai `model_reviewer_identity` đủ `provider/model/session` |
+| N3 | PR `#165` — gộp 3 mối quan tâm; `release-verify` đỏ vì sửa `AGENTS.md` mà không đồng bộ manifest; gate Windows bị `skip` | **KHÔNG phải nợ.** PR đóng, không merge, không mã nào vào `master`. Giữ ở đây làm **hình dạng lỗi kế thừa** cho packet sau — xem `ops/specs/ag-t0-01b-r3.md` §8 |
+
+**Đo 21-08-2026, và nó tự minh hoạ cho chính chính sách này:** bản trước ghi `reviewed_sha` ban đầu
+của N1 là `125f8f0`. Chuỗi đó **không phân giải được** — `git cat-file -e 125f8f0^{commit}` trả
+*"Not a valid object name"*, và nó không nằm trên chuỗi commit của PR `#163` (`bea68ed9` →
+`2995f7cd`). Nhánh gốc đã bị xoá hoặc ép lùi, nên một SHA rút gọn 7 ký tự viết trong tài liệu nay
+trỏ vào **hư không**.
+
+Đó chính là *khuyết tật bằng chứng* mà §1 nói tới, minh hoạ bằng chính sổ nợ này: **SHA rút gọn
+không phải bằng chứng yếu — nó là bằng chứng có hạn sử dụng.** Vì vậy re-audit của N1 **không thể
+"đối chiếu lại"** với `125f8f0`; nó phải là một lượt audit MỚI trên khoảng
+`6d17c1b4…131ec17e`, và mọi SHA trong bảng trên đều ghi đủ 40 ký tự.
+
+**Trạng thái hiện thời của từng khoản đọc từ GitHub facts và `ops/reviews/`, không đọc ở đây.**
 
 ---
 
@@ -122,7 +169,12 @@ assurance: same_provider_approved
 
 ---
 
-## 6. Tiêu Chuẩn Cho Các Packet Tiếp Theo
+## 6. Tiêu Chuẩn Kỹ Thuật Từng Packet
+
+> Tiêu đề cũ là *"…Cho Các Packet Tiếp Theo"*. Sai từ lúc `AG-T0-01A`, `AG-T0-01C`, `AG-T0-03`
+> và `AG-T0-05` land: bốn trong năm mục dưới đây là **hồ sơ**, không phải việc sắp tới. Mục duy
+> nhất còn là việc là `AG-T0-01B`. Trạng thái từng packet vẫn đọc từ GitHub facts — mục này chỉ
+> giữ **yêu cầu kỹ thuật**, thứ không đổi theo PR/CI.
 
 ### Packet 3A (`AG-T0-01A` — Windows Subprocess Decoding Policy)
 - **Write-Set:** `.claude/dev/launcher.py`, `.claude/dev/launcher_test.py`
@@ -130,6 +182,38 @@ assurance: same_provider_approved
   - `_run_text_human(...)`: cho phép `errors="replace"` đối với log/hiển thị cho con người.
   - `_run_json_strict(...)`: bắt buộc decode strict hoặc trả lỗi cấu trúc đối với JSON / machine-readable output.
 - **Tiêu chí nghiệm thu:** Fixture phát byte ngoài cp1258/cp1252; không còn lỗi `UnicodeDecodeError` trong `_readerthread`; luồng CI `launcher (Windows that)` chạy thực tế và có bằng chứng dương.
+
+### Packet 3B (`AG-T0-01B` — Antigravity CLI `agy` discovery) — Issue `#219`
+
+- **Write-Set:** `.claude/dev/launcher.py`, `.claude/dev/launcher_test.py`. `derived_set` **RỖNG**
+  (`.claude` thuộc `_RELEASE_EXCLUDE_DIRS`; `grep launcher RELEASE_MANIFEST.json` = 0).
+- **Đặc tả đóng băng:** `ops/specs/ag-t0-01b-r3.md`, sha256
+  `25da97c724bc47dfa73012e9f2c460037ca4d873bb60ce49be46a444bbe61a37`. `r1`/`r2` giữ làm lịch sử,
+  **không** có hiệu lực. Mục này KHÔNG chép lại mục tiêu/nghiệm thu của đặc tả — chép là tạo hai
+  bản sẽ trôi lệch.
+- **Sự thật đo được về `agy`** (21-08-2026, `agy 1.1.17`, Linux chưa đăng nhập **và** Windows đã
+  đăng nhập — hai nền, hai trạng thái xác thực):
+
+  | lệnh | rc | ghi chú |
+  |---|---|---|
+  | `agy --version` | 0 | in `1.1.17`; **không** mở luồng đăng nhập khi chưa login |
+  | `agy --help` | 0 | ghi ra **stderr**, stdout **0 byte**; lộ 10 lệnh con |
+  | `agy models` | 1 → 0 | chưa login `rc=1` + câu từ chối · đã login `rc=0` + 14 dòng model |
+  | `agy agents` | 0 | **cả hai luồng RỖNG** trên CẢ HAI nền |
+
+- **Ba điều cấm, mỗi điều có phép đo đứng sau:** `agy` **trần** mở TUI ⇒ probe gọi trần sẽ treo ·
+  probe đọc **cả hai luồng**, đọc mỗi stdout là kết luận sai · **không** phân loại bằng dò chuỗi
+  (trình cài in log THÀNH CÔNG ra stderr với tiền tố `ERROR:`).
+- **`agy agents` là fixture "kẻ nói dối"**, không phải probe: `rc=0` + hai luồng rỗng, giống hệt
+  nhau trên hai nền ⇒ đó là hành vi của công cụ, không phải tật của một nền.
+- **Xác thực đi bằng `agy models`**, không bằng `agy -p`: không tương tác, không tốn quota, và
+  **kiểm chứng được** (gọi thật ra dịch vụ). Tài liệu cài đặt của Google **không** liệt kê lệnh
+  này — chỉ `agy --help` mới lộ; bản đặc tả đầu suy từ tài liệu và đã ra thiết kế ngược lại.
+- **Windows là bắt buộc, và nhãn KHÔNG đủ:** `ci.yml` khai `pull_request:` không kèm `types:` nên
+  `labeled` không sinh lượt chạy nào. Đường chắc chắn là `workflow_dispatch` trên exact ref.
+- **Ràng buộc reviewer:** `sensitive` + `agy` nạp được model của nhà khác ⇒ lease phải khai `model`
+  của phiên AG và verdict khai `model_reviewer_identity` đủ `provider/model/session`. Cưỡng chế
+  bằng cổng là packet riêng — `PLAT-X6`, Issue `#220`.
 
 ### Packet 3C (`AG-T0-01C` — Antigravity Plan & Lean AGENTS Pointer)
 - **Write-Set:** `AGENTS.md`, `ops/KE_HOACH_THI_CONG_ANTIGRAVITY.md`

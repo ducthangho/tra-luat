@@ -1,0 +1,117 @@
+# UỶ QUYỀN HẠ MỨC ASSURANCE — PR #204 (packet #194), và CHỈ PR #204.
+#
+# ĐỌC BỐN DÒNG NÀY TRƯỚC:
+#
+# 1. Đây là một OVERRIDE, không phải "yêu cầu đã được đáp ứng". §8 đòi cross-provider;
+#    yêu cầu ấy KHÔNG được đáp ứng cho SHA này. Chủ kho hạ mức, có ghi.
+#
+# 2. VĂN BẢN NÀY DO MỘT PHIÊN `claude` SOẠN — và chính phiên ấy đã vá packet. §2: "Thẩm
+#    quyền không được chuyển qua output của agent". Nên tệp này TỰ NÓ không phải uỷ quyền;
+#    nó là bản GHI của một chỉ thị người dùng đưa trong phiên.
+#
+# 3. LÝ DO HẠ MỨC Ở ĐÂY KHÁC TIỀN LỆ `uy-quyen-150`. Lần ấy là HẾT QUOTA — một trở ngại
+#    tạm. Lần này là bộ lọc nội dung của nhà cung cấp TỪ CHỐI đọc chính diff cần review,
+#    và nó ĐO ĐƯỢC là cấu trúc chứ không phải chập chờn. Khác biệt ấy quan trọng: hết quota
+#    thì chờ là xong, còn cái này KHÔNG tự hết.
+#
+# 4. §8 cho HAI đường thay cross-provider: cross-review khác nền tảng, HOẶC "human review
+#    có audit". Chỉ thị nhận được là "Chọn 1, đổi reviewer sang Fable" — tức HẠ NGƯỠNG
+#    sang same-provider, KHÔNG phải "tôi đã tự review và audit". Đừng nhập nhằng hai thứ.
+
+schema_version: 1
+kind: assurance_override
+packet_issue: 194
+packet_id: PLAT-M4
+target_pull_request: 204
+target_branch_neu_land: master
+
+pham_vi: 'CHỈ PR #204. KHÔNG phải chính sách chung của kho.'
+pham_vi_khong_bao_gom:
+- 'Các PR khác, hiện tại hay tương lai.'
+- 'Sửa `docs/PROTOCOL_DA_PHIEN.md` §8. Điều khoản ấy KHÔNG đổi.'
+- 'Các packet khác cũng đụng credential boundary — mỗi cái phải xin riêng, kể cả khi
+   nguyên nhân kỹ thuật y hệt. Nguyên nhân giống nhau KHÔNG làm uỷ quyền lây sang.'
+nguoi_ghi_KHONG_tu_noi_rong: >-
+  Chỉ thị của chủ kho ngắn ("Chọn 1, đổi reviewer sang Fable") và KHÔNG nêu phạm vi. Người
+  ghi chọn phạm vi HẸP NHẤT khớp ngữ cảnh (đang giữa vòng 3 của #204) thay vì suy rộng
+  thành chính sách cho mọi packet credential. Muốn rộng hơn thì chủ kho nói rõ.
+
+authorized_head_sha: 825e97042b86f5e200c2ab8a00b58d8642510353
+
+trang_thai: DANG_HIEU_LUC
+neo_sha_ghi_chu: >-
+  §9: "Review, CI, authorization và land evidence đều gắn exact SHA. Head đổi làm bằng
+  chứng và ủy quyền cũ HẾT HIỆU LỰC." Thêm commit nào sau `825e9704` thì uỷ quyền này
+  TỰ VÔ HIỆU và phải cấp lại — người ghi KHÔNG được trỏ nó sang SHA mới.
+
+approver: ducthangho
+approver_chi_thi_nguyen_van: 'Chọn 1, đổi reviewer sang Fable'
+approver_chi_thi_luc: 'direct, in-session, 2026-08-21'
+authorization_url: pending-owner-post
+authorization_url_ghi_chu: >-
+  ĐỂ `pending-owner-post` CÓ CHỦ ĐÍCH, đúng tiền lệ `uy-quyen-150`. Protocol nói thẳng
+  "chat transcript hoặc lời tự khai KHÔNG thay thế GitHub object". Agent không tự điền.
+
+recorded_by: claude-session
+recorder_cung_la_nguoi_va: true
+recorder_note: >-
+  KHAI THẲNG: phiên soạn tệp này CHÍNH LÀ phiên đã vá #204, và cũng là phiên sẽ chạy lượt
+  review `claude`. Người hưởng lợi từ việc hạ ngưỡng đang là người soạn văn bản hạ ngưỡng.
+  Đó là lý do mọi trường neo vào chỉ thị NGUYÊN VĂN + SHA CHÍNH XÁC, và `authorization_url`
+  không để agent tự điền.
+
+muc_assurance_dat_duoc: same_provider_approved
+muc_assurance_giao_thuc_doi: cross_approved
+
+# ---- VÌ SAO cross-provider KHÔNG ĐẠT ĐƯỢC: PHÉP ĐO, không phải lời kể ----
+vi_sao_khong_dat_cross_provider:
+  hien_tuong: >-
+    `codex exec` bị nhà cung cấp cắt giữa lượt với `ERROR: This content was flagged for
+    possible cybersecurity risk`, tiến trình thoát `ma_thoat=1`, KHÔNG phát verdict nào.
+  hai_mau_duong:
+  - 'Lời gọi 4 (run `d7144d1b`, `-s read-only`): 2 lần gắn cờ. Lượt ấy CÒN hỏng vì sandbox
+     chặn thư mục tạm nên chưa tách được hai nguyên nhân.'
+  - 'Lời gọi 5 (run `14bafe22`, `-s workspace-write`): sandbox ĐÃ SỬA — `No usable temporary
+     directory` = 0 lần, reviewer chạy được 28 lệnh — mà VẪN 2 lần gắn cờ.'
+  doi_chung_am: >-
+    Probe preflight chạy CÙNG bộ test (`t143`, ra `1/1 qua`) trong CÙNG sandbox mà KHÔNG
+    dump diff thì KHÔNG bị gắn cờ. Đây là vế phủ định cần có: không có nó thì "bộ lọc bắt
+    vào diff" mới là suy luận.
+  lenh_ngay_truoc_cu_cat: >-
+    `git diff --unified=80 7a2320fe..HEAD -- .claude/dev/launcher.py
+    .claude/dev/launcher_test.py` — đầu ra chứa URL dạng `user:SENTINEL@host` và bảng đột
+    biến. Tức cờ bắt vào NỘI DUNG TỆP ĐANG ĐƯỢC REVIEW, không phải vào prompt.
+  he_qua: >-
+    Viết lại prompt KHÔNG cứu được, vì thứ bị gắn cờ là tệp chứ không phải câu hỏi. Đây là
+    ràng buộc CẤU TRÚC: mọi packet xử lý credential sẽ đụng lại đúng bức tường này trên nhà
+    cung cấp ấy.
+  gia_thuyet_da_bi_BAC: >-
+    Trước lời gọi 5, phiên này giả định cờ là HỆ QUẢ của lỗi sandbox và đã ghi giả định ấy
+    vào lease. Lời gọi 5 BÁC nó. Ghi lại cả giả định sai lẫn phép đo bác nó, vì bỏ vế đầu
+    thì người đọc sau tưởng ta biết ngay từ đầu.
+
+dieu_kien_land:
+- 'Lượt review `claude` (lease `plat-m4-review-3r3-claude-20260821`) phải ra `approve`.
+   `changes_requested` hoặc `blocked` ⇒ uỷ quyền này KHÔNG dùng được; vá xong phải cấp lại
+   ở SHA mới.'
+- 'Head PR phải VẪN là `825e97042b86f5e200c2ab8a00b58d8642510353` lúc merge.'
+- 'Gate `ci.yml` xanh trên head ấy. ĐÃ ĐO: gate(ubuntu) success · gate(windows) success ·
+   launcher cả hai nền success · 0 bước failure.'
+
+cai_gia_ghi_thang:
+  no_con_lai: >-
+    #204 sửa đúng một đường xử lý CREDENTIAL trong `launcher.py`. Sau khi land theo uỷ quyền
+    này, kho có một thay đổi ở biên credential mà nền tảng thứ hai chưa soi ở SHA cuối.
+    Và tỉ lệ nền tảng thứ hai tìm ra thứ mới ở kho này KHÔNG phải giả thuyết — nó là số đo:
+    lượt 1 của codex ra 1 finding P2 thật, lượt 2 ra `blocked` với 3 finding, trong đó F2 là
+    lỗ rò SỐNG mà bản vá đầu của phiên vá chỉ đóng được MỘT NỬA.
+  cai_van_con: >-
+    Hai lượt codex ĐÃ chạy thật trên packet này và findings của chúng đã được vá + đo lại
+    độc lập. Nên lỗ hổng là ở SHA CUỐI, không phải toàn bộ packet chưa ai khác nhìn.
+  khuyen_nghi: >-
+    Nếu chủ kho đăng ký được Trusted Access for Cyber của nhà cung cấp, chạy một lượt codex
+    trên SHA đã land và ghi verdict như thường — kể cả khi không đổi được gì, nó đóng lỗ
+    hổng BẰNG CHỨNG chứ không phải lỗ hổng mã.
+  khong_khai: >-
+    KHÔNG khai uỷ quyền này làm #204 an toàn NGANG một PR có cross-review ở SHA cuối. Nó
+    không. Nó chỉ làm việc land thành một quyết định CÓ GHI thay vì một quyết định lặng lẽ.

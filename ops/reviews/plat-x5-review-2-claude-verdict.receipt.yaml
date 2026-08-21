@@ -29,10 +29,11 @@ verdict_doi_chieu: '`cmp` nguồn ↔ tệp đã chép: khớp từng byte'
 
 evidence_channel: repo_file
 authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/601143b26ea6fd459d82798388414f46950a705b/ops/reviews/plat-x5-review-2-claude-verdict.md
 
 published_first:
   branch: ops/verdict-x5-review-2
-  commit: SE-DUOC-GHI-SAU-KHI-COMMIT
+  commit: 601143b26ea6fd459d82798388414f46950a705b
 truy_xuat_published_qua_tag_tai_lan_do: false
 truy_xuat_published_duoc_bao_dam_lau_dai: false
 truy_xuat_tag: null

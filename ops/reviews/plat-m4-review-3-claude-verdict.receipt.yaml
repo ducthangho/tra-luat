@@ -1,0 +1,130 @@
+# BIÊN NHẬN — review lượt 3 của `PLAT-M4` (#194 / PR "#204"), reviewer `claude`.
+#
+# ĐỌC HAI DÒNG NÀY TRƯỚC:
+# 1. Lượt này KHÔNG đạt mức assurance nào dùng để land được. Packet là `sensitive`
+#    (§8:572 gọi đích danh `launcher` và `security/credential boundary`), mà §8:544 cấm
+#    `same_provider_approved` thay `cross_approved` cho class ấy. Verdict dưới đây là
+#    DỮ LIỆU tìm lỗi, KHÔNG phải căn cứ approve.
+# 2. Verdict là `changes_requested`. Ba trong bốn finding ĐÃ VÁ ở `a9e021d`; finding còn
+#    lại được HOÃN có căn cứ đo được — xem `no_hoan_co_can_cu` cuối tệp.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: PLAT-M4
+packet_issue: 194
+lease_id: plat-m4-review-3r4-claude-20260821
+provider: claude
+role: reviewer
+executor_provider: claude
+verdict: changes_requested
+cross_provider: false
+assurance_dat: null
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  KHÔNG khai `same_provider_approved`. Nó là mức có thật trong §8 nhưng KHÔNG áp dụng được
+  cho packet `sensitive` — §8:544 nói thẳng. `ops/uy-quyen-194-same-provider-20260821.yaml`
+  được soạn TRƯỚC khi phiên chính phát hiện packet bị phân class sai; uỷ quyền ấy vì vậy
+  KHÔNG đủ, và nó cũng đã tự vô hiệu theo §9 khi head đổi sang `a9e021d`.
+reviewed_sha: 825e97042b86f5e200c2ab8a00b58d8642510353
+base_sha: 7a2320fe13b4aad3e7b298d070125a01762a8e54
+target_pull_request: 204
+
+verdict_path: ops/reviews/plat-m4-review-3-claude-verdict.md
+verdict_sha256: 8da9611a7a5f9be65481df8a484647445d252f3051387201980b0f25ffa6fe1b
+verdict_bytes: 4950
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: pending-first-commit
+evidence_url_ghi_chu: >-
+  Điền sau khi biết commit ĐẦU TIÊN chứa tệp verdict — một commit không thể chứa băm của
+  chính nó, nên biên nhận này được ghi làm HAI commit, đúng tiền lệ lượt 2.
+truy_xuat_tag: null
+truy_xuat_ghi_chu: 'PR "#204" CHƯA land, chưa có tag `luu-tru/*`.'
+
+verdict_nguon: >-
+  Lượt subagent `claude` (Fable 5) chạy trên worktree detached chỉ đọc tại
+  `scratchpad/m4r3f/kho`, prompt neo băm `fc553f93…`. Cây sau lượt: `status --short` RỖNG,
+  HEAD không đổi.
+verdict_doi_chieu: >-
+  Đã kiểm ĐÚNG MỘT `VERDICT:` và ĐÚNG MỘT `Reviewed commit:` trong bản chép.
+
+# ---- PHIÊN CHÍNH ĐO LẠI, và phép đo HẠ MỨC một finding ----
+doi_chieu_doc_lap_boi_phien_chinh:
+  vi_sao: >-
+    Reviewer cùng nhà cung cấp với người vá, nên lời khai của nó rẻ hơn bình thường. Phiên
+    chính chạy lại ba đột biến nặng nhất trên BẢN SAO CẢ CÂY thay vì nhận nguyên.
+  ket_qua:
+  - 'R1/R3/R4: XÁC NHẬN ĐÚNG. `launcher.py:2792` quả có nội suy `url` thô; docstring `t143`
+     quả có một điều mang HAI SỐ (dòng 5364 gọi "thứ chín", dòng 5372 gọi chính nó "thứ
+     bảy") và tiêu đề đếm TÁM trong khi khoá CHÍN; `t138` ở dòng 6212 quả là tên sai.'
+  - 'R2: HẠ MỨC P2 -> P3, có số. Reviewer KHÔNG đo hàm cũ. Phiên chính đo: cùng thao tác bỏ
+     `timeout` trên `_do_rest_github` (mã CŨ, có sẵn trên master dòng 2663) CŨNG SỐNG SÓT
+     142/142. Tức lỗ ấy KHÔNG phải hồi quy của packet — theo doctrine "tiêu chí là DELTA so
+     master = 0, KHÔNG phải 0 tuyệt đối", nó là NỢ NỀN. Còn `mE` là mã mới nhưng hỏng theo
+     hướng FAIL-CLOSED (báo `mcp-endpoint` KHÔNG dùng được), tức âm tính giả — nó không thể
+     gây ra đúng cái tội packet này sinh ra để chặn.'
+
+da_va_o_commit: a9e021d
+da_va_gom:
+- 'R1 — đọc `p_ep.port` trong `try` quanh `urlsplit`; ca (5f) + đột biến `mcp_endpoint_bo_doc_PORT`'
+- 'R3 — `_doc_mcp_json` chỉ in `scheme://host`; ca (5g) + đột biến `mcp_json_noi_suy_url_NGUYEN_VAN_vao_mo_ta`'
+- 'R4 — TÁM->CHÍN, bỏ số kép, `t138`->`t143`'
+bang_chung_sau_va: >-
+  launcher_test 142/142 · --dot-bien 139/139 đạt (nền 137/137), hai mutant mới giết 1/1
+  đúng ca đích · tl selftest 1698/1698 · năm cổng `"ok": true` · delta đúng 2 tệp.
+
+# ---- NỢ HOÃN CÓ CĂN CỨ — mục `approve_co_no` ĐẦU TIÊN của kho ----
+no_hoan_co_can_cu:
+  id: mcp-probe-thieu-mutant-canh-timeout-va-than-JSONRPC
+  finding: R2
+  nguoi_duyet_hoan: ducthangho
+  duyet_luc: 'direct, in-session, 2026-08-21 ("Duyệt mục sổ nợ")'
+  bon_can_cu:
+  - 'KHÔNG phải hồi quy: hàm cũ trên master có y hệt lỗ (đo được, bảng trên).'
+  - 'KHÔNG chạm biên credential — R1 và R3 chạm, và cả hai ĐÃ vá.'
+  - 'KHÔNG có finding P0/P1 nào trong lượt.'
+  - 'Hình dạng này CHƯA tái phát 3 lần — ngưỡng của kho chưa chạm.'
+  xong_khi:
+  - 'Đồ giả `urlopen` của `t143` đảo thành danh sách CHO PHÉP như đồ giả của `claude mcp get`
+     (`launcher_test.py` ~3627 đã khai sẵn doctrine ấy): khẳng định `timeout ==
+     PROBE_TIMEOUT_GIAY` và thân JSON đủ `jsonrpc/2.0` + `protocolVersion`.'
+  - 'Vá CẢ HAI hàm: `_do_mcp_endpoint` VÀ `_do_rest_github`. Vá một là để nợ lại.'
+  - 'Ba đột biến vào bảng (bỏ `timeout` ở mỗi hàm + đổi phiên bản JSON-RPC), mỗi cái phải
+     làm ca đích ĐỎ.'
+  co_tra_no: >-
+    THEO WRITE SET, KHÔNG theo ngày: trả khi packet kế tiếp nào chạm
+    `.claude/dev/launcher.py` hoặc `.claude/dev/launcher_test.py`. Cố ý không đặt hạn ngày —
+    hạn ngày trôi im lặng, cò theo write set thì NỔ.
+  chua_do_duoc: >-
+    Kết luận "thiếu `timeout` thì `doctor` treo vô hạn" SUY từ ngữ nghĩa `urlopen` mặc định,
+    CHƯA có phản chứng chạy được. Ai trả nợ phải dựng nó TRƯỚC, kẻo lại vá theo một lời khai.
+  ghi_vao_so_no_khi: >-
+    `ops/NO_KY_THUAT.md` §11. CHƯA ghi được ở lượt này vì tệp ấy nằm trong write set của
+    packet `SLICE-B-C` (#215 / PR #216) đang mở — ghi vào là va chạm write set.
+
+verdict_usage_caveats:
+- id: same-provider-khong-du-land
+  noi_dung: >-
+    ĐỪNG đọc lượt này thành cross-review, và ĐỪNG dùng biên nhận này làm căn cứ land.
+    Reviewer CÙNG nhà cung cấp với người vá; lợi thế "nền khác nhìn ra thứ nền này mù" —
+    thứ đã tìm ra cả ba finding của hai lượt trước — KHÔNG có ở đây. Packet là `sensitive`,
+    §8 đòi `cross_approved` hoặc `human_audited`. `cross_approved` đang bị chặn bởi bộ lọc
+    nội dung của nhà cung cấp, đo được là CẤU TRÚC (hai mẫu dương + một đối chứng âm).
+- id: packet-bi-phan-class-SAI
+  noi_dung: >-
+    `ops/specs/plat-m4-v0.md:11` khai `review_class: systemic`, phân loại theo thứ packet
+    KHÔNG đụng, trong khi danh sách `sensitive` gọi ĐÍCH DANH `launcher`. §8:567 cấm
+    executor hạ lớp, mà người khai chính là phiên executor. Lý do gốc VẪN CÒN: chốt
+    fail-closed tính `effective_review_class` KHÔNG TỒN TẠI — 0/41 lease khai trường ấy,
+    và thứ duy nhất chạm nó chỉ CHÉP LẠI giá trị đã khai. Ca tiếp theo sẽ lọt y hệt.
+- id: R2-da-HOAN-co-can-cu-khong-phai-da-va
+  noi_dung: >-
+    Finding R2 trong verdict ghi P2; phiên chính đo lại và HẠ xuống P3 rồi HOÃN — không vá.
+    Đừng đọc verdict rồi tưởng nó đã được xử. Số làm căn cứ: cùng thao tác bỏ `timeout`
+    trên `_do_rest_github` (mã CŨ, có sẵn trên master dòng 2663) CŨNG SỐNG SÓT 142/142 ⇒
+    nợ NỀN, không phải hồi quy. Vá phải sửa CẢ HAI hàm — vá một là để nợ lại.
+- id: packet-vuot-tran-kich-thuoc-sensitive
+  noi_dung: >-
+    ADR-0044 cho `sensitive` trần <=3 tệp / <=300 dòng thêm; đo tại `825e970` là 2 tệp /
+    +473. Tình tiết: ADR-0044 land SAU khi packet bắt đầu, và nó trích chính PLAT-M4
+    (`+351/-25`) làm ví dụ cho ngưỡng — packet đã vượt qua chính con số từng làm ví dụ.

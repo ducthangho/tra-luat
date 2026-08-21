@@ -26,7 +26,7 @@ verdict_sha256: 42b438ad15fc1a8978dcd3bef023aa1f41d0926b8b87dc9c4d521229c9d6ae41
 verdict_bytes: 15507
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/blob/PLACEHOLDER_COMMIT/ops/reviews/lease-dang-review-1-claude-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/db3a295942a2a0f91d5fbdbb00fa4a35c59d4986/ops/reviews/lease-dang-review-1-claude-verdict.md
 evidence_url_ghi_chu: >-
   Điền sau khi biết commit ĐẦU TIÊN chứa tệp verdict — một commit không chứa được băm của
   chính nó, nên biên nhận này đi HAI commit, đúng tiền lệ.

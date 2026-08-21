@@ -28,6 +28,54 @@ Chép nguyên trạng, không diễn giải. Người quyết: `ducthangho`. Kê
 | Q8 | Hợp thức hoá đảo vai executor/reviewer | **Theo khuyến nghị** — ADR cho NGOẠI LỆ có vết, KHÔNG đổi mặc định |
 | Q9 | Commit bản hợp nhất vào `ops/` | **Có** |
 
+### CẬP NHẬT 21-08-2026, ~03:30Z — Q2 và Q3 ĐÃ BỊ THỰC TẾ VƯỢT QUA
+
+**Đo được:** `master` đi từ `2663477` → `dc1a939`. **PR #207 (`PLAT-X5`) đã land, và nuốt luôn
+`#203`/`#205`** — 11 commit, gồm cả `d0acd79`…`a09aae6` của X4 lẫn `3ad7555`…`e071e0a` của X5,
+cộng hai commit MỚI (`2284b46`, `117e0c4`) khoá `t25`/`t35` và tách `mkdir` thành `rc=12`.
+Nhánh `ops/verdict-x5-review-3` cho thấy X5 đã qua **một vòng review thứ ba** (reviewer `claude`)
+trước khi land.
+
+**Tư cách của việc này:** người giữ kho xác nhận **đã cho phép** phiên ấy. Nên Q2 ("đóng
+`#203`/`#206` là `superseded`") và Q3 ("hai slice từ integration branch") **không bị vi phạm** —
+chúng bị **thay bằng một ngoại lệ có phép**. Ghi cả hai vế: quyết định từng là gì, và thực tế đã
+đi đường nào. Xoá dấu vết một trong hai vế là làm hỏng chính thứ tài liệu này sinh ra để giữ.
+
+**Và phải ghi một điều bất lợi cho chính bản hợp nhất này.** Cách chuỗi thực sự được xử lý —
+MỘT VÒNG REVIEW THỨ BA TRÊN HEAD GỘP, rồi land cả cụm — gần đúng phương án `(d)` của **Fable 5**
+mà **Opus 5** đã bác và bản hợp nhất đã theo Opus. Thực tế cho thấy đường ấy đi được.
+Lập luận của Opus KHÔNG sai về dữ kiện: biên nhận X5 neo `base_sha: a09aae62`, nên 721 dòng của
+X4 chưa verdict nào phủ — điều đó vẫn đúng, và vòng 3 chính là thứ đã lấp chỗ ấy. Nhưng
+**kết cục thực nghiệm nghiêng về Fable**, và tài liệu này ghi điều đó thay vì im lặng.
+
+**BÀI HỌC SÂU NHẤT CỦA ĐỢT, và nó KHÔNG phải lỗi mã:**
+Bản hợp nhất này tốn khoảng ba giờ máy của ba bên độc lập, và **bị thực tế vượt qua trong vài
+giờ** — vì nó nằm trên một **PR CHƯA MERGE** trong khi công việc vẫn chạy. Phiên kia không có
+cách nào đọc được nó. Nói gọn: **một kế hoạch chưa vào master không phải kế hoạch, nó là một đề
+xuất.** Chốt rút ra, rẻ và dùng được ngay: **land tài liệu kế hoạch TRƯỚC, rồi mới thi hành từ
+nó** — ngược với thứ tự đã làm ngày 21-08.
+
+### Kế hoạch thi hành — BẢN THAY THẾ cho `V0`–`V6`
+
+`V1`/`V2`/`V3` **BỎ**. Đo được vì sao: phần lớn nội dung của Slice A/Slice B đã vào master theo
+lần land trên — `t25` P1 **đã đóng** (nay đếm `thay_wrapper`, thấy lời gọi wrapper), `t35` đã
+siết, `mkdir` đã tách mã thoát, wrapper + `cai_actionlint` + `t36`–`t40` đã có (bộ kiểm 41 ca).
+Còn lại của Slice B chỉ đủ một packet nhỏ, không phải một slice. `V1` (integration branch) sinh
+ra để chặn đúng cái chuỗi ấy, mà chuỗi đã land.
+
+| # | việc | vì sao là bây giờ |
+|---|---|---|
+| **A** | Sửa tài liệu này cho khớp thực tại + gộp master + **merge PR #210 NGAY** | tài liệu đang nói sai; và theo bài học trên, nó phải vào master TRƯỚC khi ai thi hành từ nó |
+| **B** | Xong `#204` (gộp master → gate → review vòng 3 → land) | đang dở; trần vòng 2→3 đã được duyệt |
+| **C** | Packet nhỏ: hai mục sổ nợ + hạ lời khai `t34` + ca máy đòi docstring liệt kê đủ 5 dạng đã ĐO là lọt | phần còn lại DUY NHẤT của Slice B; Q7 (không bật) làm nó thành nợ VĨNH VIỄN, nên phải vào sổ |
+| **D** | **Gói `lease_publish`** — spec_hash · cross-provider · băm tồn tại thật · 4 mức assurance · đổi/vượt trần phải có căn cứ · timestamp không ở tương lai · reservation gate · hình dạng kế thừa | **giá trị cao nhất còn lại**. Lần land vừa rồi càng chứng minh: thứ ràng buộc là CỔNG QUẢN TRỊ, không phải mã |
+| **E** | Sandbox reviewer thành SCRIPT fail-đóng | ba lần trả giá, lần thứ ba là lỗi của chính phiên điều phối ngày 21-08 |
+| **F** | Đồng bộ văn bản trần vòng + `so-canon` + xoá hai lời khai "ĐO ĐƯỢC" sai | rẻ, làm cuối |
+
+**ĐO ĐƯỢC, còn mở tại lúc viết:** `ops/NO_KY_THUAT.md` có **0** mục cho
+`PLAT-X5-required-status-check`, và `.github/workflows/ci.yml` khai **2** chuỗi "NỢ CÓ TÊN" mà sổ
+nợ có **0** mục tương ứng. Đó là đối tượng của mục **C**, và nó ĐỎ ngay hôm nay.
+
 **Q7 — ĐÃ TRẢ LỜI 21-08-2026: KHÔNG BẬT.** Người quyết: `ducthangho`.
 
 Trước đó tệp này ghi Q7 ở trạng thái thứ ba (`chưa quyết`, không phải `không`). Nay nó thành một

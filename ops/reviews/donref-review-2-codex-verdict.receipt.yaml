@@ -30,6 +30,7 @@ verdict_doi_chieu: '`cmp` nguồn ↔ tệp đã chép: khớp từng byte'
 
 evidence_channel: repo_file
 authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/a802f99e239eda73c44f7f4ca782c6f743182ffa/ops/reviews/donref-review-2-codex-verdict.md
 
 BAN_GOC_LUOT_1_DA_MAT:
   su_viec: >-

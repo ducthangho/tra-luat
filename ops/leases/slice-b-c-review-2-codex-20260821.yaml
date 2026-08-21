@@ -1,0 +1,85 @@
+# Lease REVIEWER — `SLICE-B-C` (#215 / PR "#216"), LƯỢT 2/2. Neo exact head 175e95bd.
+#
+# LƯỢT CUỐI TRONG NGÂN SÁCH. `changes_requested` hoặc `blocked` ⇒ human checkpoint.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 215
+packet_id: SLICE-B-C
+lease_id: slice-b-c-review-2-codex-20260821
+revision: 1
+thay_cho_lease: null
+tiep_noi_lease: slice-b-c-review-1-codex-20260821
+
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+review_class: sensitive
+review_class_ghi_chu: >-
+  `ops/lease_publish_test.py` là bộ phản chứng của CỔNG ĐĂNG LEASE, tức review/land authority
+  (§8:572). Với class này §8 ĐÒI `cross_approved` — khác #214 nơi cross-review chỉ là nâng lớp
+  tự nguyện. Nói rõ vì hai PR chạy cùng phiên và dễ bị đọc lẫn.
+
+reviewed_sha_required: 175e95bd68556d38a7dde517ce858cb27e821097
+branch: claude/slice-b-c-exec-1
+base_sha: 181bd7f822f84a528da4cfde810d240bcc726dbf
+target_branch_neu_land: master
+target_pull_request: 216
+scope_files: 2
+
+prompt_path: ops/prompts/slice-b-c-review-2-codex-20260821.md
+prompt_sha256_required: 30b55aa1aa3f095b6801255c4aec41380e22a80b982589f97bb4b406cd684bcf
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("Chạy review vòng 2 rồi merge")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_ghi_chu: >-
+  Phiên ghi lease CŨNG là phiên đã vá. Cái đỡ được: reviewer khác nhà cung cấp, prompt neo băm,
+  verdict neo exact head, và prompt nói THẲNG ba bản vá phải bị đo lại chứ không được đọc.
+
+leased_at_utc: '2026-08-21T09:20:00Z'
+lease_expires_at_utc: '2026-08-22T09:20:00Z'
+run_minutes: 60
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 1
+review_calls_limit: 2
+review_calls_used_truoc_luot_nay: 1
+ngan_sach_ghi_chu: >-
+  Vòng 2/2 và lời gọi 2/2 — CẢ HAI TRẦN CÙNG CHẠM. Trần vòng canon là 2
+  (`docs/adr/0043-tran-vong-review-canon-la-hai.md`); KHÔNG nới. Lượt 1 chạy trọn vẹn và ra ba
+  finding thật, nên không có lý do "lượt hỏng" để xin thêm lời gọi như ca `PLAT-M4`.
+
+executor_so_sach:
+  attempts_used: 1
+  attempts_limit: 3
+  ghi_chu: 'Executor còn 2 attempt ⇒ dự trữ khắc phục THOẢ; một `changes_requested` vẫn còn đường vá.'
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: 'CI xanh trên exact head'
+  bang_chung: >-
+    gate(ubuntu-latest) success trên 175e95bd (run 32466832288, job 96725101607,
+    09:13:16Z → 09:18:16Z, 0 bước lỗi). Windows CHƯA chạy trên head này — khai thẳng, xem
+    `no_da_khai_boi_executor`.
+
+canh_bao_cho_reviewer: >-
+  Ba bản vá ở lượt này ĐỀU do chính finding của bạn sinh ra, nên cám dỗ lớn nhất là đọc lời khai
+  "đã đóng" rồi ký. Đừng. Đặc biệt: bản vá F3 đã HẠ phạm vi từ hai chiều xuống MỘT chiều — đó là
+  một quyết định thiết kế, không phải một bản sửa lỗi, và nó đáng bị tấn công.
+
+no_da_khai_boi_executor:
+- id: SLICE-B-C-t43-doc-tep-NGOAI-write-set
+  noi_dung: >-
+    `t43` đọc `.github/workflows/ci.yml` — tệp NGOÀI write set của packet. Packet không sửa tệp
+    ấy, chỉ đọc; nhưng điều đó nghĩa là một thay đổi ở tệp ngoài write set có thể làm ca này đỏ.
+    Khai trước để lượt sau không đọc thành hồi quy của packet.
+- id: SLICE-B-C-windows-chua-do
+  noi_dung: 'Chưa có bằng chứng Windows trên exact head; PR thường không tự bắn Windows.'

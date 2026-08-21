@@ -1,0 +1,68 @@
+# BIÊN NHẬN — cross-review `DONREF-XOA-AN-TOAN` (#217), lượt **1/2**.
+#
+# Executor `codex`, reviewer `claude` ⇒ cross-provider. Verdict `approve` KÈM BA FINDING —
+# cả ba là KHOẢNG TRỐNG RĂNG KIỂM CHỨNG, không phải lỗ đang mở, và reviewer CỐ Ý không tự sửa.
+# Ba finding ấy đã được vá ở lượt r2 (`5f2ff857`) và duyệt ở lượt review 2 — xem biên nhận kia.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: DONREF-XOA-AN-TOAN
+packet_issue: 217
+lease_id: donref-xoa-an-toan-review-1-claude-20260821
+provider: claude
+role: reviewer
+executor_provider: codex
+verdict: approve
+assurance: cross_approved
+cross_provider: true
+reviewed_sha: fa4b0dd879f0cf7ae589989863670d2a8200839c
+
+verdict_path: ops/reviews/donref-xoa-an-toan-review-1-claude-verdict.md
+verdict_sha256: 2c2b3a1eada19f11dc157f90f481caa8011fa0a5915c0ba985857e1bba926187
+verdict_bytes: 8915
+verdict_doi_chieu: '`cmp` nguồn ↔ tệp đã chép: khớp từng byte'
+verdict_nguon: 'scratchpad/rv217/runs/1e28e90a/stdout.log (launcher, ma_thoat=0, 834.325s)'
+
+evidence_channel: repo_file
+authoritative_source: repo_file
+
+spec_path: ops/specs/DONREF-XOA-AN-TOAN.md
+spec_sha256: 1add3edf165faa2b53d6b52212ea34d7a73934367fd73bbca91e5518a9a664de
+
+ba_finding:
+  - muc: P2
+    id: cap-toan-kho-chua-co-rang
+    noi_dung: 'Ba nhánh rẽ cấp TOÀN KHO (`fetch` lỗi · kho nông · `base_oid != remote_oid`) không có đột biến nào nhắm vào.'
+    da_va_o: '5f2ff857 — thêm `T8` + ba mutant'
+  - muc: P3
+    id: T3-chua-do-phep-loc-C-trong-lo-TRON
+    noi_dung: '`T3` chỉ khẳng định nhóm, không khẳng định `"ops/c-mot" not in lenh`; `in-ca-C` khi ấy chỉ bị bắt qua `T5` — kịch bản SUY BIẾN.'
+    da_va_o: '5f2ff857'
+  - muc: P3
+    id: prompt-luot-1-khai-SAI-rc-1
+    noi_dung: 'Prompt lượt 1 khai "kho nông ⇒ rc=1". Tool chỉ có `return 2` và `return 0`.'
+    loi_cua_ai: 'PHIÊN ĐIỀU PHỐI — ngoài write set, ngoài đặc tả.'
+    nguyen_nhan_goc: 'Đo bằng `| head` ⇒ ống đóng sớm ⇒ `BrokenPipeError` ⇒ Python thoát 1; con số ấy đi vào prompt.'
+    khong_va_prompt: 'Prompt đã đóng băng, băm đã công bố trong lease — sửa nó là làm băm trỏ vào thứ không còn tồn tại.'
+
+reviewer_TU_DUNG_hai_kich_ban_ngoai_bo_test:
+  - 'Kho nông với lịch sử đa-commit ⇒ mọi nhánh vào C, lệnh rỗng.'
+  - >-
+    Kho có ref cục bộ CŨ từ lần fetch trước, rồi fetch LẦN NÀY thất bại: `ops/a` — dù dữ liệu cục
+    bộ cũ nói đủ điều kiện A — KHÔNG lọt lệnh, rơi vào C kèm lý do. Kịch bản này KHÔNG nằm trong
+    bất kỳ T-case nào lúc ấy, và nó chính là thứ sinh ra finding P2.
+
+verdict_usage_caveats:
+- id: approve-nay-KEM-ba-finding
+  noi_dung: >-
+    `approve` của lượt 1 đi KÈM ba finding. Đừng đọc nó thành "không còn gì phải làm" — cả ba đã
+    được vá ở `5f2ff857` và duyệt ở lượt 2, nên hồ sơ đầy đủ nằm ở CẢ HAI biên nhận.
+- id: so-do-neo-o-fa4b0dd-7-ca
+  noi_dung: >-
+    Mọi con số trong verdict lượt 1 (`7/7`, 7 mutant) neo ở `fa4b0dd879f0…`. Sau `5f2ff857` bộ test
+    có **8 ca và 10 mutant** — chạy lại trên head mới sẽ KHÔNG ra `7/7`, và đó không phải verdict sai.
+
+delivered: true
+delivered_by: claude-session
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-21T10:30:00Z'

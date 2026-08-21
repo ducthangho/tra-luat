@@ -1,0 +1,137 @@
+# BIÊN NHẬN — cross-review `DONREF-XOA-AN-TOAN` (#217), gộp CẢ HAI lượt.
+#
+# Executor `codex`, reviewer `claude` ⇒ cross-provider. **CẢ HAI lượt `approve`** ⇒
+# `cross_approved` ĐẠT. Đây là packet đầu tiên của kho neo một ĐẶC TẢ ĐÓNG BĂNG có băm.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: DONREF-XOA-AN-TOAN
+packet_issue: 217
+provider: claude
+role: reviewer
+executor_provider: codex
+verdict: approve
+assurance: cross_approved
+cross_provider: true
+
+spec_path: ops/specs/DONREF-XOA-AN-TOAN.md
+spec_sha256: 1add3edf165faa2b53d6b52212ea34d7a73934367fd73bbca91e5518a9a664de
+spec_KHONG_DOI_qua_ca_hai_luot: true
+
+luot_1_xem_bien_nhan_rieng: ops/reviews/donref-xoa-an-toan-review-1-claude-verdict.receipt.yaml
+luot_1_tom_tat:
+  reviewed_sha: fa4b0dd879f0cf7ae589989863670d2a8200839c
+  verdict: approve
+  ba_finding:
+    - 'P2 — ba nhánh rẽ cấp TOÀN KHO (`fetch` lỗi · kho nông · `base_oid != remote_oid`) không có đột biến nào nhắm vào'
+    - 'P3 — `T3` chưa đo phép lọc C trong lô TRỘN thật; `in-ca-C` khi ấy chỉ bị bắt qua `T5` (kịch bản SUY BIẾN)'
+    - 'P3 — prompt lượt 1 khai SAI `rc=1`; LỖI CỦA PHIÊN ĐIỀU PHỐI, ngoài write set'
+
+lease_id: donref-xoa-an-toan-review-2-claude-20260821
+reviewed_sha: 5f2ff8573ed259c1a4df3030428a4ec9b0f99e2e
+verdict_path: ops/reviews/donref-xoa-an-toan-review-2-claude-verdict.md
+verdict_sha256: 5a4b09d138add514b516a808e6bf2a56e662c88359615f12526fc7f1e9c194fb
+verdict_bytes: 8793
+verdict_doi_chieu: '`cmp` nguồn ↔ tệp đã chép: khớp từng byte'
+verdict_nguon: 'scratchpad/rv217b/runs/8e32be0f/stdout.log (launcher, ma_thoat=0, 366.179s)'
+
+evidence_channel: repo_file
+authoritative_source: repo_file
+
+LUOT_HONG_KHONG_TINH_VONG:
+  run_id: 7c745075
+  su_viec: >-
+    Lượt review 1 phóng lần đầu CHẾT: lệnh Bash của phiên điều phối quá hạn 2 phút và bị cắt
+    (`exit 143`); launcher là con của shell ấy nên chết theo cả nhóm. `stdout` 0 byte, `stderr`
+    0 byte, KHÔNG sinh verdict.
+  bay_dang_ghi_nho: >-
+    `run.json` VẪN ghi `trang_thai: dang_chay` vì launcher chưa kịp ghi trạng thái cuối — sổ nói
+    "đang chạy" trong khi tiến trình đã chết. `dang_chay` + pid chết = KHÔNG ĐO ĐƯỢC, không phải
+    "chưa xong". Vòng đợi chỉ hỏi sổ sẽ quay MÃI MÃI.
+  da_sua: 'Phóng tách rời (`disown`); vòng đợi nay kiểm CẢ tiến trình còn sống và thoát ngay với KHÔNG ĐO ĐƯỢC nếu sổ và thực tế lệch.'
+  phan_xu: 'KHÔNG tính là một vòng — không có verdict nào để mà chọn. Cùng cách kho đã xử ca `l5`/`l5b` của `don-nhanh`.'
+
+reviewer_KHONG_nhan_loi_khai_cho_xong:
+  - 'Câu "mã sản phẩm không đổi byte nào": reviewer đo bằng BLOB HASH (`bc9f4786…` ở cả hai commit), không đọc diff.'
+  - '`diff_delta.patch` do phiên điều phối cấp: reviewer `diff -u` với `git diff` thật ⇒ byte-identical.'
+  - 'Câu "tệp test không ám chỉ `rc=1`": reviewer grep và xác nhận `return 1` duy nhất là mã thất bại của CHÍNH test runner.'
+  - 'Điều kiện A của `ops/a` trong `T8`: xác nhận bằng git ĐỘC LẬP trước khi phá remote, không tin phép phân loại của tool.'
+
+ba_cau_hoi_RIENG_cua_lease_luot_2_va_cau_tra_loi:
+  - hoi: '`dao-khop-base-remote` giết 3 ca (T1,T3,T6) — chốt rộng hay ba ca ĐO CHUNG một thứ?'
+    dap: >-
+      CHỐT RỘNG. Nó lật một TIỀN ĐIỀU KIỆN DÙNG CHUNG ("không có `loi_chung`") mà ba ca cùng cần,
+      trong khi ba ca đo BA HÀNH VI KHÁC NHAU của `phan_loai`. Không phải độ phủ mỏng đội lốt số 8.
+  - hoi: '`T8` có ĐO thật không, hay chỉ CÓ MẶT (bệnh `t24`)?'
+    dap: >-
+      ĐO THẬT. Kho bare thật + ca TỰ khẳng định lại `--is-bare-repository == true`; tiền điều kiện
+      A xác nhận bằng git độc lập TRƯỚC khi phá remote; sau đó khẳng định CẢ HAI hậu điều kiện
+      (đúng nhóm + đúng lý do `fetch loi:` VÀ không lọt lệnh). Không có nhánh "không thấy thì bỏ qua".
+  - hoi: 'Cơ chế cô lập của runner đột biến có mắc bẫy `.pyc` cũ không?'
+    dap: >-
+      KHÔNG. `archive→tar` từng bản sao, `sys.dont_write_bytecode=True` VÀ `PYTHONDONTWRITEBYTECODE=1`.
+      Mỗi mutant còn tự `assert text.count(neo) == 1`, nên mutant "không bao giờ chạy tới dòng nó
+      sửa" sẽ tự làm suite đỏ.
+
+quan_sat_phu_KHONG_chan_duyet:
+  id: bo-chan-fetch-loi-giet-T8-mot-phan-nho-trung-hop
+  noi_dung: >-
+    Trong fixture của `T8`, phá remote làm CẢ `git fetch` LẪN `git ls-remote --symref origin HEAD`
+    cùng hỏng, nên tắt nhánh `if fetch.returncode:` thì nhánh `elif loi_head or …` vẫn bắt được
+    (thông điệp lý do đổi ⇒ assert của `T8` vẫn lật). CHƯA ca nào cô lập tình huống "fetch lỗi
+    ĐỘC LẬP trong khi `ls-remote` vẫn thành công".
+  muc: 'khoảng trống RĂNG rất hẹp, KHÔNG phải lỗ an toàn'
+  reviewer_khong_doi_va: true
+
+hinh_dang_dang_theo_doi:
+  ten: 'lời khai rộng hơn phép đo'
+  dem_hien_tai: 5
+  codex_qua_HAI_luot: 'KHÔNG mắc lần nào trong write set'
+  y_nghia: >-
+    Giả thuyết "hình dạng bám NGƯỜI VIẾT, không bám bài toán" — lý do Q7 của đặc tả đổi executor
+    sang `codex` — VẪN ĐỨNG VỮNG sau hai lượt. Đây là dữ kiện, không phải cảm giác.
+  ngoai_le_da_phan_xu: >-
+    Finding P3 thứ ba (`rc=1`) là lỗi của PHIÊN ĐIỀU PHỐI ở tầng prompt — ngoài write set, ngoài
+    đặc tả. Reviewer phân xử KHÔNG tính vào bộ đếm; phiên điều phối ĐỒNG Ý. Nguyên nhân gốc: đo
+    bằng `| head` ⇒ ống đóng sớm ⇒ `BrokenPipeError` ⇒ Python thoát 1, và con số ấy đi vào prompt.
+
+CO_Y_DE_MO:
+  id: P1-luot-2-cua-213
+  noi_dung: >-
+    Nhánh mặc định có thể bị ép lùi giữa lúc đo và lúc chủ kho dán lệnh. Công cụ chỉ đọc KHAI rủi
+    ro này trong đầu ra (`muc_tieu` 4) chứ KHÔNG vá. Cả hai reviewer xác nhận không nêu lại như
+    finding chặn — đúng `§ngoai_pham_vi`.
+
+chua_do_duoc:
+  - 'Lệnh in ra chạy đúng trên máy chủ kho hay không — phiên này bị proxy chặn xoá ref (403).'
+  - 'Chưa rà nội dung 76 nhánh nhóm C.'
+  - 'Bảy trục cũ của `#213` — thuộc hướng đã bị Q1 bỏ, không thành nợ của packet này.'
+  - 'Tình huống "fetch lỗi độc lập trong khi `ls-remote` vẫn tốt" — xem `quan_sat_phu`.'
+
+delivered: true
+delivered_by: claude-session
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-21T10:30:00Z'
+
+verdict_usage_caveats:
+- id: packet-DAU-TIEN-neo-DAC-TA-dong-bang
+  noi_dung: >-
+    Packet đầu tiên của kho neo một ĐẶC TẢ ĐÓNG BĂNG có băm thay vì đặc tả trong thân Issue.
+    Cả hai lượt `approve`, cross-provider ⇒ `cross_approved` đạt. Đặc tả KHÔNG đổi qua cả hai lượt.
+- id: mot-luot-HONG-khong-tinh-vong
+  noi_dung: >-
+    Lượt review 1 phóng lần đầu (`run 7c745075`) CHẾT vì lệnh Bash của phiên điều phối quá hạn;
+    `stdout` 0 byte, không sinh verdict. `run.json` VẪN ghi `dang_chay` — sổ nói đang chạy trong
+    khi tiến trình đã chết. KHÔNG tính là một vòng.
+- id: bo-dem-hinh-dang-loi-van-o-5
+  noi_dung: >-
+    `codex` không mắc hình dạng "lời khai rộng hơn phép đo" lần nào trong write set qua hai lượt.
+    Ngoại lệ đã phân xử: finding P3 về `rc=1` là lỗi của PHIÊN ĐIỀU PHỐI ở tầng prompt.
+- id: P1-luot-2-cua-213-CO-Y-DE-MO
+  noi_dung: >-
+    Nhánh mặc định có thể bị ép lùi giữa lúc đo và lúc dán lệnh. Công cụ KHAI, KHÔNG vá.
+    Đừng đọc `approve` thành "khe ấy đã đóng".
+- id: mot-khoang-trong-RANG-rat-hep-con-lai
+  noi_dung: >-
+    `bo-chan-fetch-loi` giết `T8` một phần nhờ trùng hợp; chưa ca nào cô lập "fetch lỗi độc lập
+    trong khi `ls-remote` vẫn tốt". Khoảng trống răng rất hẹp, KHÔNG phải lỗ an toàn.

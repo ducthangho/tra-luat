@@ -479,3 +479,113 @@ nháp là **lời khai không có phép đo**. Sau khi ép `gpg.format=ssh` + `g
 
 Cho tới lúc đó, assurance thực của `#195` là **`same_provider_approved` cho phần đuôi**,
 KHÔNG phải `cross_approved` cho toàn bộ. Đừng viện `#195` làm tiền lệ "đã được review chéo".
+
+---
+
+## 9. `PLAT-X5-required-status-check` — nợ **THƯỜNG TRỰC**, không phải nợ có hạn
+
+**marker:** `PLAT-X5-required-status-check` trong `.github/workflows/ci.yml`
+
+**Người quyết:** `ducthangho`, 21-08-2026 (Q7 = **KHÔNG BẬT**). Trước đó Q7 nằm ở trạng thái
+thứ ba (`chưa quyết`); nay nó là một QUYẾT ĐỊNH, và hệ quả khác hẳn — nên mục này ghi *nợ
+thường trực*, không ghi *nợ chờ xử*. Đừng để ai đọc nó thành "sẽ làm sau".
+
+**Đo được, còn đỏ tại lúc mở mục này:** `.github/workflows/ci.yml` khai **2** chuỗi
+`NỢ CÓ TÊN` (dòng 135 và 177) trong khi sổ này có **0** mục tương ứng. Nợ được đặt tên trong
+mã mà không có nhà trong sổ là nợ **không ai đọc**. Mục 9 và mục 10 đóng đúng khoảng lệch ấy.
+
+**Cái MẤT — nói thẳng:** câu hỏi *"CI có thật sự chạy gate không"* **vĩnh viễn không có nhà**.
+Một selftest không thể tự chứng minh nó đã được GitHub gọi; thứ trả lời được câu ấy là branch
+protection require status của job `gate`, và nó nằm NGOÀI kho. Không bật thì không ai trả lời.
+
+**Cái KHÔNG mất — cũng phải nói thẳng, kẻo đọc rộng hơn thực tế:** với `PATH` thiếu
+`actionlint` bộ kiểm **fail-close**: ca `t33_workflow_dang_lease_phai_qua_actionlint` trả
+`KHÔNG ĐO ĐƯỢC` và bộ test thoát **rc≠0**. Thứ mất là **DETECTION**, không phải **PROTECTION**.
+Đây KHÔNG phải "bỏ ngỏ cổng".
+
+**Neo theo TÊN CA, KHÔNG neo tổng suite — và đây là bản đính chính THỨ HAI của cùng một câu.**
+Bản đầu ghi *"vẫn còn **8 ca đỏ**"*: sai, chạy thật cho **đúng một**. Bản sửa ghi *"suite ra
+`41/42`"*: cũng sai, và sai **ngay trong chính commit tạo ra nó** — commit ấy thêm `t43` nên
+tổng thành `42/43`. Cross-review lượt 2 bắt được. Một con số neo vào **tổng suite** sẽ chết
+mỗi lần ai đó thêm một ca; neo vào **tên ca** thì không.
+
+Và câu *"tám lỗi cùng chết vì thiếu một dependency"* ở bản trước đã **BỎ**: nó thay một suy
+luận bằng một suy luận khác trong khi đang tự nhận là sửa bệnh suy luận. Lượt chạy chỉ quan
+sát **một** ca đỏ; nó không định danh tám lỗi nào, cũng không đo quan hệ nhân quả giữa chúng.
+
+**Phạm vi thật của `t34`, bằng số:** `t34` che **3/8 = 37,5%** dạng gọi đã biết. Nó là lan can
+chống hồi quy vô ý, **không phải security boundary**. Năm dạng đã ĐO là lọt được liệt kê
+nguyên văn trong docstring của nó, và từ packet `SLICE-B-C` (#215) có một ca máy đòi docstring
+ấy chứa đủ năm dạng — để lời khai không trôi rộng ra lần nữa.
+
+**Điều kiện coi là XONG:** người giữ kho đảo Q7 và bật required status check cho job `gate`.
+Chừng nào Q7 còn là KHÔNG, mục này **không có điều kiện xong** — và đó chính là nghĩa của
+"thường trực". Mỗi lần đổi cách gọi bộ test vẫn sẽ đẻ một finding; đó là giá đã biết trước.
+
+---
+
+## 10. `don-nhanh-test-chua-chay-duoc-tren-windows` — nền nó CHẠY THẬT là nền duy nhất không được đo
+
+**marker:** `don-nhanh-test-chua-chay-duoc-tren-windows` trong `.github/workflows/ci.yml`
+
+**Đo được:** bước `don-nhanh selftest (chốt xoá nhánh)` trong `.github/workflows/ci.yml` mang
+`if: runner.os != 'Windows'` — tức nó chạy ở mọi nền TRỪ Windows.
+
+**Vì sao đáng trả, không phải nợ vặt:** `don-nhanh.ps1` **vốn là script CHO Windows** (có
+`don-nhanh.cmd` đi kèm). Nên hiện trạng là: thứ duy nhất KHÔNG được đo lại chính là nền nó
+sinh ra để chạy. Đây cùng một hình dạng với bài học đã trả giá của kho — *một job CI mặc định
+SKIP là một cổng KHÔNG TỒN TẠI* — chỉ khác là ở đây `skip` được khai tường minh trong `if:`
+chứ không núp sau một nhãn.
+
+**Đừng đọc rộng hơn:** ca vẫn chạy trên Linux qua `pwsh`, nên hồi quy logic thuần vẫn bắt
+được. Thứ chưa đo là **hành vi phụ thuộc nền** — và kho đã có tiền lệ đo được rằng con số ấy
+không nhỏ: cùng `.claude/dev/launcher_test.py`, CI 17-08-2026 đo Linux bỏ qua **1** ca còn
+Windows bỏ qua **13**.
+
+**Điều kiện coi là XONG:** bước ấy chạy được trên `windows-latest` với bằng chứng DƯƠNG
+(`N/N` hai số bằng nhau) trên một lượt CI thật, và `if:` được gỡ hoặc thu hẹp kèm lý do.
+
+---
+
+## 11. `t34-loi-khai-pham-vi-khong-co-cong` — mục tiêu bị BỎ, không phải đã xong
+
+**Nợ này sinh ra từ một quyết định BỎ, và đó là điều đáng ghi nhất về nó.**
+
+Issue #215 đặt ba việc; việc thứ ba là *"một ca máy đòi docstring `t34` chứa đủ năm dạng đã ĐO
+là lọt"*. Ca ấy (`t42`) đã được viết, rồi **gỡ bỏ** ở lượt vá thứ hai theo quyết định của người
+giữ kho. Sổ này ghi lại **cái chưa xong**, không ghi lại một chiến thắng.
+
+### Đo được — ba lượt, cùng một hình dạng
+
+| lượt | kết quả |
+|---|---|
+| cross-review 1 | tìm được đột biến **nới** `_CHAY_BO_TEST` nhận thêm cờ đơn: hành vi đổi (`3 bắt/5 lọt` → `4/4`) mà suite vẫn `42/42` |
+| bản vá cho nó | đẻ ra **hai** docstring tự mâu thuẫn với chính mã vừa viết, **cộng** một con số chết ngay trong commit sinh ra nó |
+| cross-review 2 | tìm được đột biến **siết** `\S*` → `(?:ops/)?`: hành vi đổi mà `t42` vẫn xanh |
+
+### Vì sao BỎ chứ không vá tiếp
+
+`t42` là **một lời khai về một lời khai** — nó khẳng định *"docstring có chứa chuỗi X"*. Mỗi
+bản vá lại sinh một câu mới có thể trôi, và bằng chứng sạch nhất là con số chết **trong chính
+commit tạo ra nó**. `CLAUDE.md` nói thẳng về đúng tình huống này: *"cùng một hình dạng lặp ba
+lần trở lên thì câu hỏi đúng là **có nên làm việc này không**, không phải **vá thế nào**"*.
+
+Đối chiếu để thấy khác biệt: `t43` được **giữ** vì nó đo **quan hệ giữa hai tệp** — một sự
+kiện, không phải một câu chữ ai đó gõ vào docstring.
+
+### Cái MẤT, nói thẳng
+
+Docstring `t34` vẫn liệt kê năm dạng lọt và con số `3/8`, nhưng **không cổng nào canh** cho
+chúng khớp hành vi thật của `_CHAY_BO_TEST` nữa. Ai nới hoặc siết regex ấy mà quên sửa
+docstring sẽ để lại một lời khai đã chết, và **không gì đỏ**. Đây là nợ **DETECTION**, giống
+§9 — không phải lỗ bảo vệ, nhưng cũng đừng đọc thành "không sao".
+
+### Điều kiện coi là XONG
+
+Một thiết kế **khác** cho cùng mục tiêu, và nó phải thoả điều mà `t42` không thoả: **đo HÀNH VI
+của regex trên một ma trận có trục** (runner × đường dẫn tương đối/tuyệt đối × quoting × cờ),
+rồi **SINH** lời khai từ phép đo thay vì đối chiếu với một chuỗi gõ tay. Kèm phản chứng cả hai
+chiều: một đột biến **nới** và một đột biến **siết** đều phải làm ca đích ĐỎ. Thiếu vế "siết"
+thì đúng là lỗ mà cross-review 2 vừa tìm ra.
+
+**Đừng dựng lại `t42` nguyên dạng.** Ba lượt đã đo là nó thua ở thiết kế, không thua ở chi tiết.

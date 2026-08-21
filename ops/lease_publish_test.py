@@ -1291,9 +1291,15 @@ def t34_workflow_khong_duoc_goi_THANG_tep_bo_test():
     Đổi wrapper thành một trong các dạng lọt vẫn có cùng nghĩa với xoá wiring của gate;
     một selftest không thể tự chứng minh nó đã được CI gọi.
 
+    PHẠM VI BẰNG SỐ: `t34` che **3/8 = 37,5%** dạng gọi đã biết (3 canonical nhận được,
+    5 dạng đã đo là lọt). Nói bằng số vì "che phần lớn" là lời khai không có phép đo, và
+    kho đã trả giá đúng hình dạng ấy nhiều lần.
+
     NỢ CÓ TÊN `PLAT-X5-required-status-check`: branch protection phải require status của
     job `gate` (và lượt đăng lease tương ứng). Chốt ngoài kho ấy mới trả lời "CI có thật sự
     chạy gate không". `t34` chỉ là lan can chống hồi quy vô ý, không phải security boundary.
+    Q7 ĐÃ QUYẾT (21-08-2026, `ducthangho`): KHÔNG BẬT ⇒ nợ này là THƯỜNG TRỰC, ghi ở
+    `ops/NO_KY_THUAT.md` §9. `t42` bên dưới canh cho docstring này không trôi rộng ra.
     """
     import yaml
     goc = HERE.parent / ".github" / "workflows"
@@ -1995,6 +2001,93 @@ exec "$bash_that" "$wrapper"
         bang(rc == 23 and marker_rc.exists(),
              f"wrapper nuốt rc selftest: chờ 23, được {rc}, marker={marker_rc.exists()}:\n"
              f"{ra.strip()[:400]}")
+# `t42` ĐÃ BỊ GỠ ở lượt vá thứ hai — có chủ đích, không phải quên. Nó khẳng định "docstring
+# của `t34` có chứa chuỗi X", tức MỘT LỜI KHAI VỀ MỘT LỜI KHAI. Ba lượt liên tiếp cho cùng một
+# hình dạng lỗi: cross-review 1 tìm được đột biến nới regex mà nó không bắt; bản vá cho nó lại
+# đẻ ra hai docstring TỰ MÂU THUẪN với chính mã vừa viết cộng một con số chết ngay trong commit
+# sinh ra nó; cross-review 2 lại tìm được đột biến siết regex mà nó vẫn không bắt.
+#
+# `CLAUDE.md` nói thẳng về đúng tình huống này: "cùng một hình dạng lặp ba lần trở lên thì câu
+# hỏi đúng là CÓ NÊN LÀM VIỆC NÀY KHÔNG, không phải VÁ THẾ NÀO". Người giữ kho quyết bỏ.
+#
+# NỢ CÒN LẠI, khai thẳng chứ không giả vờ đã xong: mục tiêu gốc — canh cho lời khai phạm vi
+# của `t34` không trôi — VẪN CHƯA CÓ CỔNG NÀO. Xem `ops/NO_KY_THUAT.md` §11.
+#
+# `t43` bên dưới được GIỮ vì nó khác loại: nó đo QUAN HỆ GIỮA HAI TỆP, tức một SỰ KIỆN, không
+# phải một câu chữ ai đó gõ vào docstring.
+
+
+# Marker `NỢ CÓ TÊN` trong workflow, và tiêu đề mục trong sổ nợ. Cố ý HAI mẫu riêng và cả hai
+# đều bó vào ĐÚNG hình dạng đang dùng: marker chỉ nhận khi đứng trong một dòng CHÚ THÍCH, mục
+# chỉ nhận khi là TIÊU ĐỀ `## <số>.`. Không bó thì một câu văn xuôi có chữ "NỢ CÓ TÊN" — như
+# chính các câu giải thích trong hai tệp ấy — sẽ bị đếm nhầm, và cổng lại thành cổng nói dối.
+# Marker phải đứng NGAY SAU dấu chú thích — `^\s*#\s*NỢ CÓ TÊN`, không cho chữ tuỳ ý chen
+# vào giữa. Bản trước dùng `^\s*#.*NỢ CÓ TÊN` nên một CÂU VĂN XUÔI có nhắc cụm ấy cũng bị nhận
+# làm marker; cross-review 2 đo được: chèn một dòng giải thích vào `ci.yml` là `t43` ĐỎ oan.
+# Một cổng báo động giả là cổng sẽ bị tắt, rồi cả ca chết theo.
+_MARKER_NO = __import__("re").compile(r"^\s*#\s*NỢ CÓ TÊN\s*:?\s*`([^`]+)`")
+_MUC_SO_NO = __import__("re").compile(r"^##\s*\d+\.\s*`([^`]+)`")
+# BACKLINK: mục sổ nợ TỰ KHAI nó là nhà của một marker trong mã. Chỉ mục có dòng này mới bị
+# đòi hai chiều — §1–§8 không có backlink nên không báo động giả, đúng lý do đã hạ `t43` xuống
+# một chiều ở lượt trước; nay giữ được cả hai chiều mà KHÔNG ép đối xứng lên toàn sổ.
+_BACKLINK_NO = __import__("re").compile(r"^\*\*marker:\*\*\s*`([^`]+)`\s+trong\s+`([^`]+)`")
+
+
+@ca
+def t43_marker_NO_CO_TEN_va_muc_so_no_phai_khop_HAI_CHIEU():
+    """Nợ được ĐẶT TÊN trong mã phải có nhà trong sổ, và mục đã khai backlink phải còn marker.
+
+    VÌ SAO CÓ CA NÀY — cross-review lượt 1 (codex, P2): tiêu chí `2 = 2` mà packet tự đặt ra
+    chỉ là một ẢNH CHỤP. Thêm marker thứ ba vào `ci.yml` mà không thêm mục ⇒ mọi cổng vẫn
+    xanh. Một nợ mới sinh ra là một nợ KHÔNG AI ĐỌC.
+
+    BA LỖ CỦA BẢN ĐẦU, cross-review lượt 2 đo được, nay đã vá — ghi cả ba vì mỗi cái là một
+    kiểu thua khác nhau:
+
+    1. **Một chiều làm mất tín hiệu khi marker BỊ GỠ.** Gỡ `PLAT-X5-required-status-check`
+       khỏi `ci.yml` mà giữ nguyên §9 ⇒ `marker − sổ = ∅`, suite `43/43`, KHÔNG AI BẮT. Chiều
+       nghịch không thể ép lên toàn sổ (§1–§8 là nợ thật, không có marker), nên lời giải là
+       **backlink**: mục nào TỰ KHAI mình là nhà của một marker thì mới bị đòi hai chiều.
+    2. **Nhận nhầm văn xuôi.** `^\s*#.*NỢ CÓ TÊN` cho phép chữ tuỳ ý chen trước cụm, nên một
+       dòng giải thích cũng thành marker. Nay neo ngay sau `#`.
+    3. **`set` xoá dấu vết trùng.** Tên ca hứa "ĐÚNG MỘT mục" nhưng `set` biến hai tiêu đề
+       cùng ID thành một ⇒ chỉ kiểm được "ít nhất một". Nay đếm bằng `Counter`.
+
+    PHẠM VI, khai thẳng: ca này chỉ đo `.github/workflows/ci.yml` ↔ `ops/NO_KY_THUAT.md`. Nợ
+    đặt tên ở tệp khác KHÔNG được canh. Đây là tập đã ĐO, không phải lời hứa về mọi nơi.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: thêm marker không có nhà · GỠ một marker mà mục vẫn khai backlink
+    · thêm mục thứ hai trùng ID. VÀ MỘT CA ÂM PHẢI XANH: chèn câu văn xuôi có cụm `NỢ CÓ TÊN`.
+    """
+    import collections
+    goc = HERE.parent
+    wf = goc / ".github" / "workflows" / "ci.yml"
+    so = goc / "ops" / "NO_KY_THUAT.md"
+    if not wf.is_file() or not so.is_file():
+        bang(not (goc / ".git").exists(),
+             f"kho thật mà thiếu {wf} hoặc {so} — ca này sẽ xanh mà không đo gì")
+        return
+    trong_ma = {m.group(1) for d in wf.read_text(encoding="utf-8").splitlines()
+                if (m := _MARKER_NO.match(d))}
+    dong_so = so.read_text(encoding="utf-8").splitlines()
+    dem_muc = collections.Counter(m.group(1) for d in dong_so if (m := _MUC_SO_NO.match(d)))
+    backlink = {m.group(1): m.group(2) for d in dong_so if (m := _BACKLINK_NO.match(d))}
+
+    trung = sorted(k for k, n in dem_muc.items() if n > 1)
+    bang(not trung,
+         f"sổ nợ có mục TRÙNG ID: {trung}. Hai mục cùng tên là hai bản ghi cùng tranh làm nhà "
+         f"của một khoản nợ — người đọc không biết bản nào có hiệu lực.")
+
+    thieu_nha = sorted(trong_ma - set(dem_muc))
+    bang(not thieu_nha,
+         f"nợ ĐƯỢC ĐẶT TÊN trong `ci.yml` mà KHÔNG có mục trong `ops/NO_KY_THUAT.md`: "
+         f"{thieu_nha}. Nợ có tên mà không có nhà là nợ KHÔNG AI ĐỌC — thêm mục, đừng gỡ marker.")
+
+    mat_marker = sorted(k for k in backlink if k not in trong_ma)
+    bang(not mat_marker,
+         f"mục sổ nợ KHAI backlink tới marker mà marker ấy KHÔNG CÒN trong `ci.yml`: "
+         f"{mat_marker}. Hoặc nợ đã trả mà mục chưa đóng, hoặc marker bị gỡ nhầm. Đừng làm ca "
+         f"này im bằng cách xoá dòng backlink — đó là xoá đúng thứ đang canh.")
 
 
 def main() -> int:

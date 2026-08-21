@@ -34,10 +34,11 @@ verdict_ghi_chu_dong_dau: >-
 
 evidence_channel: repo_file
 authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/253ee58e645c56d8fd0d22c2e1df2fcd4f3bdf61/ops/reviews/plat-x5-review-3-claude-verdict.md
 
 published_first:
   branch: ops/verdict-x5-review-3
-  commit: SE-DUOC-GHI-SAU-KHI-COMMIT
+  commit: 253ee58e645c56d8fd0d22c2e1df2fcd4f3bdf61
 truy_xuat_published_qua_tag_tai_lan_do: false
 truy_xuat_published_duoc_bao_dam_lau_dai: false
 truy_xuat_tag: null

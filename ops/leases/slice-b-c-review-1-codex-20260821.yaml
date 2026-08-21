@@ -1,0 +1,63 @@
+# Lease REVIEWER — `SLICE-B-C` (#215 / PR "#216"), lượt 1. Neo exact head 181bd7f8.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 215
+packet_id: SLICE-B-C
+lease_id: slice-b-c-review-1-codex-20260821
+revision: 1
+
+role: reviewer
+provider: codex
+reviewer: codex
+executor: claude
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+review_class: sensitive
+review_class_ghi_chu: >-
+  `ops/lease_publish_test.py` là bộ phản chứng của CỔNG ĐĂNG LEASE, tức review/land authority
+  theo §8:572. Khai `sensitive` NGAY TỪ ĐẦU — cố ý, vì hôm nay packet `PLAT-M4` vừa bị phân
+  class sai theo VỊ TRÍ thay vì theo HẬU QUẢ và không cổng nào bắt được
+  (`ops/DINH_CHINH_REVIEW_CLASS_PLAT_M4.md`).
+
+reviewed_sha_required: 181bd7f822f84a528da4cfde810d240bcc726dbf
+branch: claude/slice-b-c-exec-1
+base_sha: 0333948669bb0fdbfef8f5cbcf14a95b1b0e8bd4
+target_branch_neu_land: master
+target_pull_request: 216
+scope_files: 2
+
+prompt_path: ops/prompts/slice-b-c-review-1-codex-20260821.md
+prompt_sha256_required: c1183755334d983b159aa690e11aa0c5b4ce5b68c94d5cde917354fd25b28f28
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("Cross-review cả #214, #216 nếu kịp")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: true
+recorder_ghi_chu: >-
+  Phiên ghi lease CŨNG là phiên đã vá. Cái đỡ được: reviewer khác nhà cung cấp, prompt neo băm,
+  verdict neo exact head.
+
+leased_at_utc: '2026-08-21T08:45:00Z'
+lease_expires_at_utc: '2026-08-22T08:45:00Z'
+run_minutes: 60
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+review_calls_limit: 2
+review_calls_used_truoc_luot_nay: 0
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: 'CI xanh trên exact head'
+  bang_chung: >-
+    gate(ubuntu-latest) success trên 181bd7f8 (run 32455269397, job 96691238211, 0 bước lỗi).
+    Windows CHƯA chạy trên head này — PR thường không tự bắn Windows; khai thẳng thay vì làm tròn.
+  no_khai: 'PR này chưa có bằng chứng Windows trên exact head.'
+
+canh_bao_cho_reviewer: >-
+  Prompt do CHÍNH PHIÊN ĐÃ VÁ soạn. Packet sinh ra để chặn "lời khai trôi rộng hơn phạm vi đo
+  được" — nên chỗ đáng ngờ nhất chính là lời khai của bản thân nó.

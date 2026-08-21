@@ -1,0 +1,136 @@
+# BIÊN NHẬN — lượt `human_audited` của `SLICE-B-C` (#215 / PR "#216").
+#
+# ĐỌC HAI DÒNG NÀY TRƯỚC — chúng phân biệt lượt này với lượt `human_audited` của `PLAT-M4`:
+# 1. ĐÂY KHÔNG PHẢI MỘT LẦN HẠ NGƯỠNG. `human_audited` là mức hợp lệ SẴN của §8 cho class
+#    `sensitive`, ngang hàng `cross_approved`. KHÔNG có tệp uỷ quyền nào, và không cần có.
+#    Khác `PLAT-M4`, nơi `cross_approved` KHÔNG ĐẠT ĐƯỢC nên phải có override có ghi.
+# 2. Cross-review ĐÃ CHẠY TRỌN VẸN HAI LƯỢT và tìm ra BẢY finding thật; cả bảy đã được xử.
+#    Trần vòng cạn đúng theo canon (2/2), không phải vì lượt nào hỏng.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: SLICE-B-C
+packet_issue: 215
+lease_id: null
+lease_ghi_chu: >-
+  KHÔNG có lease, và đó là ĐÚNG: lease là công cụ cấp việc cho một PHIÊN agent; người giữ kho
+  không tự cấp lease cho chính mình. Thẩm quyền đến từ §2, không từ một tệp YAML.
+provider: human
+role: auditor
+nguoi_audit: ducthangho
+executor_provider: claude
+verdict: approve
+cross_provider: false
+assurance_dat: human_audited
+assurance_ghi_chu: >-
+  §8 cho class `sensitive` HAI đường ngang hàng: `cross_approved` hoặc `human_audited`. Lượt
+  này đi đường thứ hai sau khi đường thứ nhất đã dùng hết ngân sách canon. KHÔNG khai
+  `cross_approved` — hai lượt codex neo `181bd7f8` và `175e95bd`, cả hai CŨ HƠN head được ký.
+reviewed_sha: 15f824d29b6e72b0b8f0bcc14328ba85531280ef
+base_sha: 175e95bd68556d38a7dde517ce858cb27e821097
+target_pull_request: 216
+review_class_hieu_luc: sensitive
+review_class_ghi_chu: >-
+  `ops/lease_publish_test.py` là bộ phản chứng của cổng đăng lease, tức review/land authority
+  (§8:572). Class này được khai `sensitive` NGAY TỪ LEASE ĐẦU — cố ý, sau bài học `PLAT-M4`.
+
+authoritative_source: github_comment
+authoritative_source_ghi_chu: >-
+  ĐẢO CHIỀU so với biên nhận của một MÔ HÌNH: thứ §8 đòi là DANH TÍNH BỀN TRÊN GITHUB, mà một
+  tệp trong kho không mang được nó — phiên nào có quyền ghi cũng tạo được tệp. Comment là nguồn.
+evidence_channel: github_comment
+evidence_url: https://github.com/ducthangho/tra-luat/pull/216#issuecomment-5368471633
+posted_comment_id: 5368471633
+posted_at_utc: '2026-08-21T10:07:58Z'
+author_association: OWNER
+
+verdict_path: ops/reviews/slice-b-c-human-audit-ducthangho-verdict.md
+verdict_sha256: 1754de4ff90fd947f672d6c349f69903aff766e7f1f8220f8f563300388ce430
+verdict_bytes: 3343
+verdict_path_ghi_chu: 'Bản CHIẾU. Băm này là băm của bản chiếu, KHÔNG phải của comment gốc.'
+
+doi_chieu_boi_phien_chinh:
+  cach_do: 'Đọc NGƯỢC comment về qua API sau khi được báo đã đăng, thay vì tin lời báo.'
+  so_lan_VERDICT: 1
+  so_lan_Reviewed_commit: 1
+  khop_quy_uoc: true
+  ghi_chu: >-
+    ĐÚNG quy ước "hai dòng, mỗi dòng đúng một lần". Ở `PLAT-M4` con số này là 2 vì mẫu do phiên
+    chính soạn đặt dòng neo ở cả đầu lẫn cuối; lần này mẫu chỉ đặt ở cuối. Ghi ra để thấy lỗi
+    ấy đã được sửa chứ không phải tự hết.
+  sha_khop_head: true
+
+# ---- HAI LƯỢT CROSS-REVIEW ĐÃ CHẠY: BẢY FINDING, KHÔNG LƯỢT NÀO HỎNG ----
+lich_su_cross_review:
+- luot: 1
+  lease: slice-b-c-review-1-codex-20260821
+  neo: 181bd7f822f84a528da4cfde810d240bcc726dbf
+  verdict: changes_requested
+  finding: 3
+  tom_tat: >-
+    `t42` chưa neo lời khai vào hành vi (đột biến NỚI regex sống sót) · con số "8 ca đỏ" trong
+    §9 không đo được (chạy thật cho MỘT) · tiêu chí `2 = 2` chỉ là ảnh chụp, không phải cổng.
+- luot: 2
+  lease: slice-b-c-review-2-codex-20260821
+  neo: 175e95bd68556d38a7dde517ce858cb27e821097
+  verdict: changes_requested
+  finding: 4
+  tom_tat: >-
+    `t42` vẫn thua đột biến SIẾT regex · `t43` một chiều mất tín hiệu khi marker BỊ GỠ ·
+    `_MARKER_NO` nhận nhầm văn xuôi và `set` xoá dấu vết trùng · bản đính chính "41/42" đã
+    CHẾT NGAY TRONG COMMIT SINH RA NÓ (cùng commit thêm `t43` làm tổng thành 42/43).
+
+quyet_dinh_thu_hep_pham_vi:
+  nguoi_quyet: ducthangho
+  quyet_luc: 'direct, in-session, 2026-08-21 ("Đường 2 đi")'
+  noi_dung: 'GỠ `t42`; giữ và vá `t43`; ghi mục tiêu bị bỏ thành nợ §11.'
+  can_cu: >-
+    Đếm HÌNH DẠNG lỗi, không đếm lỗi. Ba lượt liên tiếp cùng một khuôn: review 1 tìm đột biến
+    NỚI mà `t42` không bắt; bản vá cho nó đẻ HAI docstring tự mâu thuẫn với chính mã vừa viết
+    CỘNG một con số chết ngay trong commit sinh ra nó; review 2 tìm đột biến SIẾT mà nó vẫn
+    không bắt. `CLAUDE.md`: "cùng một hình dạng lặp ba lần trở lên thì câu hỏi đúng là CÓ NÊN
+    LÀM VIỆC NÀY KHÔNG, không phải VÁ THẾ NÀO".
+  chan_doan: >-
+    `t42` là MỘT LỜI KHAI VỀ MỘT LỜI KHAI — nó khẳng định "docstring có chứa chuỗi X". Mỗi bản
+    vá lại sinh một câu mới có thể trôi. `t43` được giữ vì nó đo QUAN HỆ GIỮA HAI TỆP, tức một
+    SỰ KIỆN.
+
+bang_chung_may_tren_exact_head:
+  ci_run: 32469332687
+  gate_ubuntu: success
+  buoc_loi: 0
+  lease_publish_test: '42/42'
+  tl_selftest: '1698/1698'
+  nam_cong_tl: 'ok: true'
+  dot_bien:
+  - 'gỡ marker đang có       -> 41/42, ĐỎ t43   (trước khi vá: 43/43, không ai bắt)'
+  - 'thêm mục TRÙNG ID       -> 41/42, ĐỎ t43   (trước khi vá: 43/43, `set` xoá dấu vết)'
+  - 'thêm marker không có nhà -> 41/42, ĐỎ t43'
+  - 'CA ÂM: chèn câu văn xuôi -> 42/42, XANH    (trước khi vá: ĐỎ OAN)'
+  dot_bien_ghi_chu: >-
+    Ca ÂM quan trọng ngang ba ca dương: một cổng báo động giả là cổng sẽ bị tắt, rồi cả ca chết
+    theo. Mọi đột biến chạy trên BẢN SAO CẢ CÂY — copy một tệp làm `HERE` lệch và cho kết quả
+    vô nghĩa, phiên chính đã mắc đúng lỗi ấy một lần trong đợt và khai trong commit.
+
+verdict_usage_caveats:
+- id: KHONG-phai-mot-lan-ha-nguong
+  noi_dung: >-
+    ĐỪNG đọc lượt này giống lượt `human_audited` của `PLAT-M4`. Ở đó `cross_approved` KHÔNG
+    ĐẠT ĐƯỢC (bộ lọc nhà cung cấp chặn, đo được là cấu trúc) nên phải có tệp uỷ quyền hạ mức.
+    Ở đây cross-review chạy trọn hai lượt, ra bảy finding thật, và trần cạn đúng canon —
+    `human_audited` là mức ngang hàng, không có ngưỡng nào bị hạ, không có tệp uỷ quyền nào.
+- id: packet-giao-IT-HON-Issue-dat-ra
+  noi_dung: >-
+    Issue #215 đặt BA việc; việc thứ ba (`ca máy đòi docstring t34 chứa đủ năm dạng`) ĐÃ BỊ BỎ
+    và chuyển thành nợ `t34-loi-khai-pham-vi-khong-co-cong` (§11). Đừng đọc `approve` này
+    thành "ba việc đã xong".
+- id: no-§11-van-mo
+  noi_dung: >-
+    Docstring `t34` vẫn liệt kê năm dạng lọt và con số `3/8`, nhưng KHÔNG cổng nào canh cho
+    chúng khớp hành vi thật của `_CHAY_BO_TEST` nữa. Ai nới hoặc siết regex ấy mà quên sửa
+    docstring sẽ để lại một lời khai đã chết, và KHÔNG GÌ ĐỎ. Nợ DETECTION, giống §9.
+- id: dung-dung-lai-t42-nguyen-dang
+  noi_dung: >-
+    §11 nêu điều kiện XONG cụ thể: ma trận có TRỤC (runner × đường dẫn tương đối/tuyệt đối ×
+    quoting × cờ), SINH lời khai từ phép đo, và phản chứng CẢ HAI CHIỀU — một đột biến nới VÀ
+    một đột biến siết đều phải làm ca đích ĐỎ. Thiếu vế "siết" đúng là lỗ review 2 tìm ra.

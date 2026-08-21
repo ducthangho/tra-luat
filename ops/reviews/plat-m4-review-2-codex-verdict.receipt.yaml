@@ -23,6 +23,18 @@ target_pull_request: 204
 verdict_path: ops/reviews/plat-m4-review-2-codex-verdict.md
 verdict_sha256: 456b2b0a79879a982648f1d2362607ef639afc264b014130a0095aedfa161bef
 verdict_bytes: 3428
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/d27337b48e3748225a12d18432d8c1bd8295882d/ops/reviews/plat-m4-review-2-codex-verdict.md
+evidence_url_ghi_chu: >-
+  URL neo vao commit DAU TIEN chua tep verdict, khong vao commit chua chinh dong nay — mot
+  commit khong the chua bam cua chinh no. Day la ly do bien nhan duoc ghi lam HAI commit.
+published_first:
+  branch: ops/ho-so-m4
+  commit: d27337b48e3748225a12d18432d8c1bd8295882d
+truy_xuat_tag: null
+truy_xuat_ghi_chu: 'PR "#204" CHUA land, chua co tag luu-tru/*.'
+
 verdict_nguon: 'scratchpad/runs/c633ee58/stdout.log — launcher v1.3.0, ma_thoat=0, 1034.225s, stdout 3677 byte'
 verdict_doi_chieu: >-
   Đã kiểm ĐÚNG MỘT `VERDICT:` và ĐÚNG MỘT `Reviewed commit:`. Bản chép khác nguồn ĐÚNG một

@@ -23,7 +23,7 @@ verdict_sha256: 931cfaaae4b2929f2947c9c2d198730699c2670af4b7f03b3fbe3a1f032cf80d
 verdict_bytes: 11138
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: pending-first-commit
+evidence_url: https://github.com/ducthangho/tra-luat/blob/4585a4067ad08422e6f90656e49df8242255aea6/ops/reviews/tri-thuc-review-1-codex-verdict.md
 evidence_url_ghi_chu: >-
   Điền sau khi biết commit ĐẦU TIÊN chứa tệp verdict — một commit không chứa được băm của
   chính nó, nên biên nhận này đi HAI commit, đúng tiền lệ.

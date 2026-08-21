@@ -90,3 +90,4 @@ no_da_khai:
     noi_dung: >-
       Ca mới chỉ đo được trên Linux ở phiên này. Bằng chứng Windows phải đến từ lượt CI trên
       đúng head; đừng trích lời khai của phiên vá thay cho nó.
+posted_comment_id: 5364368737   # workflow ghi, ĐỪNG sửa tay

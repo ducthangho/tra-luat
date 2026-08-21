@@ -78,16 +78,40 @@ Hàm tính nợ review chính thức:
 
 $$\text{Review Debt} = f(\text{Review Class}, \text{Assurance Level}, \text{Exact SHA Validity}, \text{Identity Evidence}, \text{Gate Status}, \text{Head Staleness})$$
 
-### Hồ sơ nợ review hiện tại:
-1. **Packet 1 (`AG-T0-04` — PR #163):**
-   - Trạng thái: `landed_reaudit_pending`
-   - Lý do: `reviewed_sha` ban đầu (`125f8f0`) là SHA rút gọn và bị stale so với merge head cuối (`2995f7c...`). Cần 1 lượt re-audit đối chiếu base `6d17c1b...` tới merge commit `131ec17...` khi Claude/Codex hồi phục quota.
-2. **Packet 2 (`AG-T0-02` — PR #164):**
-   - Trạng thái: `landed_reaudit_pending`
-   - Lý do: Thay đổi `systemic` vào review orchestration và entrypoint root `AGENTS.md`; `reviewed_sha` dùng SHA rút gọn (`fe99d00`); chưa có machine-validated reviewer identity receipt. Cần 1 lượt re-audit bởi Claude hoặc Codex.
-3. **PR #165 cũ (Đã Đóng):**
-   - Trạng thái: `closed_blocked_ci`
-   - Lý do: Gộp 3 concerns khác nhau; gate release-verify fail do lệch băm gói khi sửa `AGENTS.md` chưa đồng bộ manifest; required Windows launcher gate bị skip.
+### Sổ nợ — TĨNH, và vì sao nó có hình dạng này
+
+Bản trước của mục này ghi mỗi khoản một dòng `Trạng thái: landed_reaudit_pending` /
+`closed_blocked_ci`. Đó là **trạng thái động viết tay** — `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md`
+§12 cấm đúng thứ ấy (*"Packet đã merge hay chưa"*), và nó là cùng cái bẫy đã làm cột *Trạng Thái
+Đề Xuất* ở §2 sai 3/7 dòng. Nội dung khi ấy tình cờ vẫn đúng; cái sai là **hình dạng**, và hình
+dạng ấy sai âm thầm cho tới lượt cập nhật nào đó bị bỏ quên.
+
+Một khoản nợ tách được làm hai phần, và **cả hai đều tĩnh**:
+
+- **Sự việc** — neo bằng SHA đầy đủ, bất biến, không đổi theo thời gian;
+- **Điều kiện đóng** — một phép đo trả lời có/không.
+
+Thứ động là *"đã đóng chưa"*, và câu trả lời đo bằng **sự tồn tại của biên nhận** trong
+`ops/reviews/`, không bằng một nhãn viết tay ở đây.
+
+| # | sự việc (bất biến) | điều kiện đóng (phép đo) |
+| :-- | :--- | :--- |
+| N1 | `AG-T0-04` — PR `#163`, hai commit `bea68ed92b0bdf29dfec8d5f3ff1b8165d80e8ac` và `2995f7cde727ecddcc4353e713caf866ee7d02b5`, merge `131ec17e6c7114f29cf2e18dda34bd85266923b4`, base `6d17c1b43d997edb50959b1a65f9a70ece46f27a` | tồn tại một biên nhận `ops/reviews/ag-t0-04-reaudit-*-verdict.receipt.yaml` neo `reviewed_sha` = `131ec17e…` (40 ký tự) |
+| N2 | `AG-T0-02` — PR `#164`, head `fe99d00b3d882009b2043b8309328e16946af3bb`; đổi `.claude/skills/cross-review/SKILL.md` (review orchestration) và `AGENTS.md` | tồn tại `ops/reviews/ag-t0-02-reaudit-*-verdict.receipt.yaml` neo `reviewed_sha` = `fe99d00b…` **và** khai `model_reviewer_identity` đủ `provider/model/session` |
+| N3 | PR `#165` — gộp 3 mối quan tâm; `release-verify` đỏ vì sửa `AGENTS.md` mà không đồng bộ manifest; gate Windows bị `skip` | **KHÔNG phải nợ.** PR đóng, không merge, không mã nào vào `master`. Giữ ở đây làm **hình dạng lỗi kế thừa** cho packet sau — xem `ops/specs/ag-t0-01b-r3.md` §8 |
+
+**Đo 21-08-2026, và nó tự minh hoạ cho chính chính sách này:** bản trước ghi `reviewed_sha` ban đầu
+của N1 là `125f8f0`. Chuỗi đó **không phân giải được** — `git cat-file -e 125f8f0^{commit}` trả
+*"Not a valid object name"*, và nó không nằm trên chuỗi commit của PR `#163` (`bea68ed9` →
+`2995f7cd`). Nhánh gốc đã bị xoá hoặc ép lùi, nên một SHA rút gọn 7 ký tự viết trong tài liệu nay
+trỏ vào **hư không**.
+
+Đó chính là *khuyết tật bằng chứng* mà §1 nói tới, minh hoạ bằng chính sổ nợ này: **SHA rút gọn
+không phải bằng chứng yếu — nó là bằng chứng có hạn sử dụng.** Vì vậy re-audit của N1 **không thể
+"đối chiếu lại"** với `125f8f0`; nó phải là một lượt audit MỚI trên khoảng
+`6d17c1b4…131ec17e`, và mọi SHA trong bảng trên đều ghi đủ 40 ký tự.
+
+**Trạng thái hiện thời của từng khoản đọc từ GitHub facts và `ops/reviews/`, không đọc ở đây.**
 
 ---
 

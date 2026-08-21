@@ -1,0 +1,174 @@
+# BIÊN NHẬN — cross-review lượt **2/2** (CUỐI) của `PLAT-X5` (#206 / PR "#207").
+#
+# CẢ HAI TRẦN ĐÃ CẠN: reviewer 2/2 vòng, executor 3/3 attempt. Verdict là
+# `changes_requested` ⇒ `cross_approved` KHÔNG đạt và KHÔNG còn đường vá trong packet.
+# Đây là CHECKPOINT về chủ kho, không phải lời mời vá tiếp.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: PLAT-X5
+packet_issue: 206
+lease_id: plat-x5-review-2-claude-20260820
+provider: claude
+role: reviewer
+executor_provider: codex
+verdict: changes_requested
+assurance: cross_changes_requested
+assurance_KHONG_dat: cross_approved
+cross_provider: true
+reviewed_sha: 2284b4657304d0229e95d1f64ebd0c22035d201d
+head_luot_truoc: e071e0aae6bdc4d270a42fbc534ad3f05dcba0fa
+base_sha: a09aae627533f59e6b2e817858a6db50b999d41c
+target_pull_request: 207
+
+verdict_path: ops/reviews/plat-x5-review-2-claude-verdict.md
+verdict_sha256: b317226602a48c1647efbd0b4f203cbd4e041817a489f9821654b1422f8b20d2
+verdict_bytes: 17639
+verdict_nguon: 'scratchpad/rvx5b/VERDICT_LUOT_2.md (run be100fe9, ma_thoat=0, 1095.591s)'
+verdict_doi_chieu: '`cmp` nguồn ↔ tệp đã chép: khớp từng byte'
+
+evidence_channel: repo_file
+authoritative_source: repo_file
+
+published_first:
+  branch: ops/verdict-x5-review-2
+  commit: SE-DUOC-GHI-SAU-KHI-COMMIT
+truy_xuat_published_qua_tag_tai_lan_do: false
+truy_xuat_published_duoc_bao_dam_lau_dai: false
+truy_xuat_tag: null
+truy_xuat_ghi_chu: '#207 CHƯA land, chưa có tag `luu-tru/*`.'
+
+sai_lech_dinh_dang_PHAI_KHAI:
+  su_viec: >-
+    Prompt đòi ĐẦU RA kết thúc bằng đúng hai dòng `VERDICT:` và `Reviewed commit:`. STDOUT của
+    reviewer (1531 byte) là một bản TÓM TẮT và KHÔNG có dòng `Reviewed commit:`; verdict đầy đủ
+    được ghi ra tệp `VERDICT_LUOT_2.md` trong sandbox.
+  hau_qua_do_duoc: >-
+    Không mất nội dung — tệp 17639 byte KẾT THÚC đúng hai dòng ấy, và `Reviewed commit:` khớp
+    mỏ neo. Nhưng một phiên chỉ đọc stdout sẽ KHÔNG thấy commit đã review, tức mất neo.
+  vi_sao_ghi: >-
+    Nếu sandbox bị xoá trước khi ai đó chép tệp ra thì verdict mất hẳn — sandbox lượt trước
+    (`x5r3`) ĐÃ bị xoá sạch khi phiên khởi động lại trong chính đợt này. Ghi ra để lần sau
+    prompt nói rõ "in RA STDOUT", không chỉ "trả về".
+
+chot_read_only_DO_chu_khong_tin_co:
+  head_sau: 2284b4657304d0229e95d1f64ebd0c22035d201d
+  head_khop_neo: true
+  thay_doi_cay_cuoi_luot: 0
+  khong_lap_lai_loi_luot_1: >-
+    Lượt 1 lỡ ghi vào INDEX của worktree. Lượt này reviewer khai dùng `git -C kho archive <sha>
+    | tar -x` ra thư mục NGOÀI `kho` cho mọi đột biến; `status --short` rỗng cả trước lẫn sau,
+    và phiên điều phối đo lại sau lượt: 0 mục bẩn, HEAD không đổi.
+
+so_sach_ngan_sach:
+  review_rounds_used: 2
+  review_rounds_limit: 2
+  executor_attempts_used: 3
+  executor_attempts_limit: 3
+  he_qua: 'CẠN CẢ HAI TRỤC. Không còn lượt vá lẫn lượt review trong packet này.'
+
+bon_viec_trong_pham_vi_DEU_DONG:
+  ket_luan: 'Cả bốn có bằng chứng HAI CHIỀU, reviewer dựng lại độc lập chứ không tin lời khai executor.'
+  bang_chung:
+    - 'P1 bỏ `$NEO` khỏi wrapper: head 39/40 ĐỎ t25 · prev 40/40 IM'
+    - 'P1 gỡ hẳn lời gọi wrapper: head 39/40 ĐỎ t25 (chốt `thay_wrapper >= 1`) · prev 40/40 IM'
+    - 'P3 `bash ./ops/…` + thiếu `AL_VER` (đúng ca N2 lượt 1): head 39/40 ĐỎ t35 · prev 40/40 IM'
+    - 'P3 gỡ chốt mã `mkdir`: head 39/40 ĐỎ t35, thông điệp đúng · prev KHÔNG áp dụng hai chiều (ca rc=12 chưa tồn tại ở prev — reviewer khai rõ đây là "IM vì chưa có ca", không phải "IM vì chốt yếu")'
+  nguong_4_khong_thanh_cong_xanh_rong: >-
+    Gỡ wrapper rồi bù thêm một lời gọi `lease_publish.py` để giữ `thay=4`: vẫn 39/40 ĐỎ t25.
+    Chốt riêng `thay_wrapper >= 1` bắt được đúng vai trò nó tự nhận.
+  t34_giu_dung_cam_ket: >-
+    Năm dạng lượt 1 đo được lọt vẫn lọt y hệt (A,B,D,E,F), ba dạng đỏ vẫn đỏ (C,G,H), và
+    `_CHAY_BO_TEST` KHÔNG đổi một ký tự — đúng cam kết "không nối regex".
+
+finding_1:
+  muc: P2
+  id: GOI_WRAPPER_THUC_THI-buoc-NHAN-DIEN-hep-va-chu-thich-khai-NGUOC
+  noi_dung: >-
+    Chính cơ chế dựng ra để đóng finding #4 lượt 1 còn hở: bước NHẬN DIỆN lời gọi neo `^` với
+    token dẫn đầu hẹp và `\S*` không vượt khoảng trắng, nên dạng nào không khớp thì rơi vào
+    `continue` — ĐƯỢC MIỄN nghĩa vụ `AL_VER`, không phải bị từ chối. Lỗ cũ đổi chỗ: trước là
+    danh sách CHO PHÉP quá hẹp, nay là bước NHẬN DIỆN quá hẹp.
+  bang_chung_do_duoc: >-
+    Bốn/năm biến thể thiếu `AL_VER` vẫn 40/40 rc=0: `env AL_X=1 bash …` · `bash -c '…'` ·
+    `command bash …` · `bash ${{ github.workspace }}/ops/…` (có khoảng trắng). Đối chứng: đường
+    dẫn tuyệt đối và `${{github.workspace}}` KHÔNG khoảng trắng thì 39/40 ĐỎ t35 đúng thiết kế.
+  vi_sao_KHONG_chi_la_khai_thieu: >-
+    Chú thích dòng 1412-1414 khẳng định "Ngoài hai dạng canonical vẫn là một LỜI GỌI" — phép đo
+    nói ngược. Đây là khai NGƯỢC, không phải khai thiếu; khung nhiệm vụ đã tách rõ hai thứ đó.
+  hau_qua_noi_ro_de_khong_phong_dai: >-
+    `ops/cai_actionlint.sh` VẪN `loi 2` khi thiếu `AL_VER` bất kể cú pháp gọi ⇒ CI thật vẫn đỏ.
+    Cái mất là LỚP PHÒNG TRƯỚC (chạy được offline) và tính đúng của một lời khai trong write set.
+  duong_va_re_nhat_reviewer_de_xuat: 'sửa đúng ba dòng chú thích cho khớp phạm vi đo được, KHÔNG mở regex; phần còn lọt ghi thành nợ có tên, cùng nhà với `#209`.'
+  da_va: false
+
+finding_2:
+  muc: P3
+  id: t25-bao-oan-chu-thich-DI-SAU-lenh-tren-cung-dong-run
+  noi_dung: >-
+    `goi.findall` quét TOÀN BỘ dòng, không cắt phần sau `#`, nên `run: echo ok # xem bash
+    ops/chay_lease_publish_test.sh` bị đếm là một lời gọi thiếu `$NEO` ⇒ ĐỎ giả.
+  bang_chung: '3/5 ca an toàn (chú thích nguyên dòng, `echo` nhắc tên, tên bước nhắc tên); 2/5 ĐỎ oan.'
+  reviewer_tu_khai_KHONG_phai_hoi_quy: >-
+    Hành vi có từ trước — bản `python3?` gốc cũng đã oan với `# xem python3 ops/lease_publish.py`.
+    Delta chỉ thêm token `bash|sh|exec`. Fail-CLOSED (đỏ giả, không phải xanh giả).
+  da_va: false
+
+reviewer_tu_khai_CHUA_DO_DUOC:
+  - id: CI-workflow_dispatch-32402136904
+    noi_dung: >-
+      Sandbox không được cấp `gh`/token để tự truy vấn Actions API. Reviewer khai đây là LỜI KHAI
+      CỦA NGƯỜI KHÁC (phiên điều phối đo), không tự xác minh — đúng như lease đã lường trước.
+  - id: nhanh-Windows-that
+    noi_dung: 'Không có Windows. Đọc mã: delta không chạm phần rẽ nhánh theo hệ điều hành.'
+  - id: V2a-V2b-suy-luan-tu-MA-khong-dung-lai
+    noi_dung: >-
+      Hai phản chứng vòng 2 KHÔNG được dựng lại đúng hai tệp YAML nhiều-job của lượt 1. Reviewer
+      suy từ cấu trúc mã (`t34` quét mọi job, không phụ thuộc thứ tự) cộng phép đo trực tiếp rằng
+      lời gọi thẳng `.py` vẫn bị bắt. KHAI RÕ đây là suy luận có căn cứ, KHÔNG phải phép đo mới.
+  - id: branch-protection
+    noi_dung: 'Ngoài kho, không kiểm được từ sandbox.'
+
+verdict_usage_caveats:
+- id: CAN-CA-HAI-TRAN-khong-con-duong-va-trong-packet
+  noi_dung: >-
+    Reviewer 2/2 vòng, executor 3/3 attempt. **Đừng đọc `changes_requested` này thành "vá tiếp".**
+    Mọi lượt vá sau đây cần chủ kho nới trần hoặc đổi cách xử (§2). Tự phát lease từ verdict này
+    là tự cấp việc.
+- id: hai-finding-CON-MO-va-mot-trong-hai-la-khai-NGUOC
+  noi_dung: >-
+    P2 và P3 đều CÒN MỞ. Riêng P2 không phải "chốt yếu" thông thường mà là một **lời khai sai**
+    nằm trong write set của chính packet — ai đọc chú thích ấy sẽ tin chốt phủ rộng hơn thực tế.
+    Đây là lý do reviewer từ chối `approve` dù bốn việc trong phạm vi đều đóng.
+- id: so-do-neo-o-2284b465-40-ca
+  noi_dung: >-
+    Mọi con số neo ở `2284b4657304d0229e95d1f64ebd0c22035d201d` với bộ test **40 ca**. Tái hiện
+    bằng `git worktree add --detach <đích> 2284b465…`. Chạy trên `master` sẽ không ra `40/40`.
+- id: CI-xanh-la-LOI-KHAI-cua-phien-dieu-phoi-KHONG-phai-do-cua-reviewer
+  noi_dung: >-
+    Run `32402136904` (cả hai job `success`, 0 bước hỏng, bước `lease-publish selftest` success
+    trên CẢ Windows lẫn Ubuntu) do **phiên điều phối** đo qua MCP Actions. Reviewer khai không tự
+    xác minh được. **Đừng trích verdict này làm bằng chứng CI.**
+- id: verdict-nay-KHONG-in-ra-stdout-day-du
+  noi_dung: >-
+    STDOUT của lượt chỉ có 1531 byte tóm tắt, KHÔNG có dòng `Reviewed commit:`. Nội dung đầy đủ
+    nằm ở tệp sandbox và đã được chép vào kho (băm khớp). Ai đi tìm verdict trong log lượt chạy
+    sẽ thấy thiếu — xem `sai_lech_dinh_dang_PHAI_KHAI`.
+
+delivered: true
+delivered_by: claude-session
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-21T01:40:00Z'
+
+viec_cho_chu_kho:
+- 'Cạn cả hai trần. Chọn: (a) nới cho MỘT lượt vá nhỏ chỉ sửa 3 dòng chú thích + khai nợ · (b) land kèm hai nợ có tên · (c) dừng packet.'
+- 'Reviewer nói thẳng đường (a) là "một sửa nhỏ, không đòi thêm attempt vá lớn" — nhưng vẫn phải chạm write set nên nó không tự làm.'
+- 'Nếu chọn (a): cân nhắc gộp luôn P3 (cắt phần sau `#` trước khi `findall`) vì cùng tệp, cùng lớp.'
+- 'Khoảng hở còn lại của `GOI_WRAPPER_THUC_THI` cùng họ với "đảo `t34` thành danh sách cho phép" đã ở `#209` — reviewer đề nghị cho về cùng một chỗ.'
+
+receipt_khong_khai:
+- 'Không khai lượt này đạt `cross_approved`. Nó KHÔNG.'
+- 'Không khai finding nào đã đóng. Cả hai CÒN MỞ.'
+- 'Không khai reviewer đã đo CI hay Windows. Nó KHÔNG, và tự khai như vậy.'
+- 'Không khai V2a/V2b đã được đo lại. Chúng được SUY từ mã.'
+- 'Không khai `evidence_url` bền: #207 chưa land, chưa có tag.'

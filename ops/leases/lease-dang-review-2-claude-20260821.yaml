@@ -83,3 +83,4 @@ canh_bao_cho_reviewer: >-
   comment mang danh nghĩa kho, mà `check` KHÔNG còn gọi nó — ai quên gọi thì cổng biến mất
   trong khi suite vẫn xanh. Cùng họ "cổng không nói dối, nó VẮNG MẶT". Và vòng `đăng` nay bọc
   `set +e` quanh MỌI lệnh: hãy tìm đường mà một lỗi bị NUỐT.
+posted_comment_id: 5376760865   # workflow ghi, ĐỪNG sửa tay

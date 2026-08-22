@@ -26,7 +26,7 @@ HERE = Path(__file__).resolve().parent
 SCRIPT = HERE / "lease_publish.py"
 WORKFLOW_DANG = HERE.parent / ".github" / "workflows" / "ops-publish-lease.yml"
 
-RC_OK, RC_THAM_SO, RC_TU_CAP, RC_DA_DANG, RC_NOI_DUNG, RC_NEO = 0, 2, 4, 9, 8, 6
+RC_OK, RC_THAM_SO, RC_TU_CAP, RC_DA_DANG, RC_NOI_DUNG, RC_NEO, RC_LOP = 0, 2, 4, 9, 8, 6, 10
 
 CA: list = []
 
@@ -2651,6 +2651,188 @@ def t73_nen_posix_khong_duoc_bo_qua_ca_nao():
     rc, out = _chay_main_meta(bo, "posix")
     bang(rc == 1 and "ĐỎ" in out and "bỏ qua=0" in out,
          f"nền posix mà vẫn bỏ qua được: rc={rc}, {out!r}")
+
+
+def _lease_v2(role="executor", **doi):
+    d = lease_mau(schema_version=2, role=role, review_class="routine",
+                  effective_review_class="routine")
+    if role == "executor":
+        d["write_set"] = ["docs/x.md"]
+    d.update(doi)
+    return d
+
+
+@ca
+def t74_A1_A2_executor_khong_duoc_ha_lop_va_ve_dung_phai_QUA():
+    mod = _nap_cong()
+    x = _lease_v2(write_set=[".claude/dev/launcher.py"],
+                  review_class="systemic", effective_review_class="systemic")
+    try:
+        mod._kiem_lop_review(x)
+    except mod.Chan as ex:
+        bang(ex.ma == RC_LOP, f"A1 sai mã thoát: {ex.ma}")
+    else:
+        raise AssertionError("A1: launcher nhạy cảm mà systemic vẫn qua")
+    x["effective_review_class"] = "sensitive"
+    mod._kiem_lop_review(x)
+
+
+@ca
+def t75_A3_A13_reviewer_sensitive_va_KHONG_doc_thu_muc_lease():
+    with San() as s:
+        (s / "ops" / "leases").mkdir(parents=True)
+        viet(s / "ops" / "leases", _lease_v2(write_set=["docs/x.md"]), "khop.yaml")
+        (s / "ops" / "leases" / "hong.yaml").write_text("[: YAML hỏng", encoding="utf-8")
+        x = _lease_v2("reviewer", review_class="sensitive",
+                      effective_review_class="sensitive")
+        rc, _, e = chay("check", viet(s, x), "--root", s)
+        bang(rc == RC_OK, f"reviewer đã đọc thư mục lease hoặc bị chặn oan: rc={rc} {e}")
+
+
+@ca
+def t76_A4_reviewer_khai_thap_phai_bi_CHAN():
+    mod = _nap_cong()
+    for lop in ("routine", "systemic"):
+        try:
+            mod._kiem_lop_review(_lease_v2("reviewer", review_class=lop,
+                                           effective_review_class=lop))
+        except mod.Chan as ex:
+            bang(ex.ma == RC_LOP, f"reviewer {lop} sai rc={ex.ma}")
+        else:
+            raise AssertionError(f"reviewer {lop} lọt chốt")
+
+
+@ca
+def t77_A5_planned_duoc_cat_truoc_khi_tra_bang():
+    mod = _nap_cong()
+    thuong = mod._tinh_lop_tu_write_set(["ops/chay_lease_publish_test.sh"])
+    planned = mod._tinh_lop_tu_write_set(["planned:ops/chay_lease_publish_test.sh"])
+    bang(thuong == planned == "systemic",
+         f"planned phân khác bản thật: {thuong!r} / {planned!r}")
+
+
+@ca
+def t78_A6_write_set_thieu_rong_hong_deu_sensitive():
+    mod = _nap_cong()
+    for x in (None, [], "docs/x.md", [""], [None]):
+        bang(mod._tinh_lop_tu_write_set(x) == "sensitive",
+             f"write_set không đo được {x!r} không fail-closed")
+
+
+@ca
+def t79_A7_noi_bang_launcher_lam_ca_dich_DO():
+    mod = _nap_cong()
+    x = _lease_v2(write_set=[".claude/dev/launcher.py"],
+                  review_class="routine", effective_review_class="sensitive")
+    mod._kiem_lop_review(x)
+    mod._BANG_LOP = ((".claude/dev/launcher.py", "routine"),) + mod._BANG_LOP
+    try:
+        mod._kiem_lop_review(x)
+    except mod.Chan as ex:
+        bang(ex.ma == RC_LOP, f"đột biến nới bảng sai rc={ex.ma}")
+    else:
+        raise AssertionError("đột biến nới launcher xuống routine không làm ca đích ĐỎ")
+
+
+@ca
+def t80_A8_schema_v1_bo_qua_chot_va_co_canh_bao():
+    x = lease_mau(schema_version=1, leased_at_utc="2026-08-22T00:00:00Z",
+                  role="executor", write_set=[".claude/dev/launcher.py"],
+                  review_class="routine", effective_review_class="routine")
+    with San() as s:
+        rc, _, e = chay("check", viet(s, x))
+        bang(rc == RC_OK and "CẢNH BÁO" in e,
+             f"schema v1 không được bỏ qua kèm cảnh báo: rc={rc}, stderr={e!r}")
+
+
+@ca
+def t81_A14_ve_duong_executor_routine_phai_song():
+    mod = _nap_cong()
+    mod._BANG_LOP = (("docs/", "routine"),) + mod._BANG_LOP
+    x = _lease_v2(write_set=["docs/x.md"], review_class="routine",
+                  effective_review_class="routine")
+    mod._kiem_lop_review(x)
+
+
+@ca
+def t82_A10_dot_bien_A1_A8_tren_ban_sao_CA_CAY_ten_rieng():
+    """Mỗi mutant là tệp riêng trong một bản sao cả cây; không chạm cây thật."""
+    import importlib
+    import importlib.util
+    import shutil
+    with San() as s:
+        goc = s / "repo"
+        shutil.copytree(HERE.parent, goc,
+                        ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc"))
+        nguon = (goc / "ops" / "lease_publish.py").read_text(encoding="utf-8")
+        sys.dont_write_bytecode = True
+
+        def nap(ten, cu, moi):
+            bang(nguon.count(cu) == 1, f"neo mutant {ten} không còn duy nhất")
+            p = goc / "ops" / f"lease_publish_mut_{ten}.py"
+            p.write_text(nguon.replace(cu, moi), encoding="utf-8")
+            importlib.invalidate_caches()
+            spec = importlib.util.spec_from_file_location(f"lp_mut_{ten}", p)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            return mod
+
+        m1 = nap("a1", '(".claude/dev/launcher.py", "sensitive")',
+                 '(".claude/dev/launcher.py", "systemic")')
+        bang(m1._tinh_lop_tu_write_set([".claude/dev/launcher.py"]) != "sensitive",
+             "mutant A1 không đổi hành vi")
+
+        m2 = nap("a2", 'khai if khai in _THU_TU_LOP else "sensitive", tinh',
+                 'khai if khai in _THU_TU_LOP else "sensitive", "routine"')
+        x2 = _lease_v2(write_set=[".claude/dev/launcher.py"],
+                       review_class="systemic", effective_review_class="systemic")
+        m2._kiem_lop_review(x2)  # mutant sống ở đây; t74 là ca làm nó ĐỎ trên suite thật.
+
+        m3 = nap("a3", 'if role == "reviewer":\n        can = "sensitive"',
+                 'if role == "reviewer":\n        _doc_yaml("ops/leases/hong.yaml")\n        can = "sensitive"')
+        (goc / "ops" / "leases" / "hong.yaml").write_text("[:", encoding="utf-8")
+        try:
+            old_cwd = Path.cwd()
+            import os
+            os.chdir(goc)
+            m3._kiem_lop_review(_lease_v2("reviewer", review_class="sensitive",
+                                          effective_review_class="sensitive"))
+        except m3.Chan:
+            pass  # t75/A13 đòi bản thật không đi vào đường này.
+        else:
+            raise AssertionError("mutant A3 không đọc thư mục lease")
+        finally:
+            os.chdir(old_cwd)
+
+        m4 = nap("a4", 'if role == "reviewer":\n        can = "sensitive"',
+                 'if role == "reviewer":\n        can = hieu_luc')
+        m4._kiem_lop_review(_lease_v2("reviewer", review_class="routine",
+                                      effective_review_class="routine"))
+
+        m5 = nap("a5", 'if duong.startswith("planned:"):\n            duong = duong[len("planned:"):]',
+                 'if False and duong.startswith("planned:"):\n            duong = duong[len("planned:"): ]')
+        bang(m5._tinh_lop_tu_write_set(["planned:ops/chay_lease_publish_test.sh"]) == "sensitive",
+             "mutant A5 không đổi hành vi")
+
+        m6 = nap("a6", 'if not isinstance(write_set, list) or not write_set:\n        return "sensitive"',
+                 'if not isinstance(write_set, list) or not write_set:\n        return "routine"')
+        bang(m6._tinh_lop_tu_write_set([]) == "routine", "mutant A6 không đổi hành vi")
+
+        m7 = nap("a7", '(".claude/dev/launcher.py", "sensitive")',
+                 '(".claude/dev/launcher.py", "routine")')
+        bang(m7._tinh_lop_tu_write_set([".claude/dev/launcher.py"]) == "routine",
+             "mutant A7 không nới được bảng")
+
+        m8 = nap("a8", "if schema_version < 2:", "if schema_version < 1:")
+        try:
+            m8._kiem_lop_review(lease_mau(schema_version=1, role="executor",
+                                          write_set=[".claude/dev/launcher.py"],
+                                          review_class="routine",
+                                          effective_review_class="routine"))
+        except m8.Chan as ex:
+            bang(ex.ma == RC_LOP, f"mutant A8 sai rc={ex.ma}")
+        else:
+            raise AssertionError("mutant A8 không áp chốt ngược cho schema v1")
 
 
 def main() -> int:

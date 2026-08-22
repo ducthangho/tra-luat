@@ -22,6 +22,7 @@ MÃ THOÁT
   6  mỏ neo prompt hỏng (thiếu `prompt_path`, tệp không có, hoặc băm lệch)
   8  nội dung lease sai (thiếu trường, sai dạng, hết hạn, YAML hỏng)
   9  lease ĐÃ đăng rồi (trong tệp hoặc comment Issue) — BỎ QUA, không đăng lại
+ 10  lớp review khai không khớp lớp cổng tính từ write_set
 """
 
 from __future__ import annotations
@@ -43,6 +44,26 @@ RC_TU_CAP = 4
 RC_NEO = 6
 RC_NOI_DUNG = 8
 RC_DA_DANG = 9
+RC_LOP = 10
+
+_THU_TU_LOP = {"routine": 0, "systemic": 1, "sensitive": 2}
+
+# Danh sách CHO PHÉP cố ý hẹp: chỉ những đường mà Protocol §8 gọi tên đủ để
+# phân lớp. Đường không biết không được suy từ đuôi tệp hay tên thư mục; nó rơi
+# về `sensitive`. Nhờ vậy thêm một loại artefact mới không âm thầm hạ assurance.
+_BANG_LOP = (
+    (".github/workflows/", "sensitive"),
+    (".github/coordination/", "sensitive"),
+    (".claude/dev/packet_loop.py", "sensitive"),
+    (".claude/dev/launcher.py", "sensitive"),
+    (".claude/dev/gate_lifecycle.py", "sensitive"),
+    ("ops/lease_publish.py", "sensitive"),
+    ("scripts/tl_gws.py", "sensitive"),
+    ("docs/PROTOCOL_DA_PHIEN.md", "systemic"),
+    ("docs/adr/", "systemic"),
+    ("ops/lease_publish_test.py", "systemic"),
+    ("ops/chay_lease_publish_test.sh", "systemic"),
+)
 
 def GOI_GH(*doi_so):
     return subprocess.run(["gh", "api", *doi_so], capture_output=True, text=True)
@@ -99,6 +120,65 @@ class Chan(Exception):
         super().__init__(thong_diep)
         self.ma = ma
         self.thong_diep = thong_diep
+
+
+def _khop_tien_to(duong: str, tien_to: str) -> bool:
+    """Khớp một tệp chính xác hoặc một prefix thư mục có dấu `/` cuối."""
+    return duong.startswith(tien_to) if tien_to.endswith("/") else duong == tien_to
+
+
+def _tinh_lop_tu_write_set(write_set) -> str:
+    """Tính lớp cao nhất; thiếu/rỗng/không đọc được đều fail-closed."""
+    if not isinstance(write_set, list) or not write_set:
+        return "sensitive"
+    ket_qua = "routine"
+    for muc in write_set:
+        if not isinstance(muc, str) or not muc.strip():
+            return "sensitive"
+        duong = muc.strip()
+        if duong.startswith("planned:"):
+            duong = duong[len("planned:"):]
+        lop = next((gia_tri for tien_to, gia_tri in _BANG_LOP
+                    if _khop_tien_to(duong, tien_to)), "sensitive")
+        if _THU_TU_LOP[lop] > _THU_TU_LOP[ket_qua]:
+            ket_qua = lop
+    return ket_qua
+
+
+def _kiem_lop_review(lease: dict) -> None:
+    """Cưỡng chế lớp cho schema v2; dữ liệu cũ chỉ nhận cảnh báo có chủ ý."""
+    try:
+        schema_version = int(lease.get("schema_version", 1))
+    except (TypeError, ValueError):
+        schema_version = 1
+    if schema_version < 2:
+        moc = str(lease.get("leased_at_utc") or "").strip()
+        if moc:
+            try:
+                luc = datetime.fromisoformat(moc.replace("Z", "+00:00"))
+                if luc.tzinfo and luc.astimezone(timezone.utc) > datetime(
+                        2026, 8, 21, tzinfo=timezone.utc):
+                    print("CẢNH BÁO: lease sau 2026-08-21 vẫn dùng schema_version < 2; "
+                          "chốt lớp review chưa áp dụng", file=sys.stderr)
+            except ValueError:
+                pass  # Timestamp chưa có chốt riêng; mục D mới sở hữu việc đó.
+        return
+
+    role = str(lease.get("role") or "").strip().lower()
+    khai = str(lease.get("review_class") or "").strip().lower()
+    hieu_luc = str(lease.get("effective_review_class") or "").strip().lower()
+    if role == "reviewer":
+        can = "sensitive"
+    elif role == "executor":
+        tinh = _tinh_lop_tu_write_set(lease.get("write_set"))
+        can = max((khai if khai in _THU_TU_LOP else "sensitive", tinh),
+                  key=_THU_TU_LOP.get)
+    else:
+        can = "sensitive"
+    if hieu_luc != can:
+        raise Chan(RC_LOP,
+                   f"effective_review_class={hieu_luc or '<thiếu>'!r} không bằng lớp "
+                   f"cổng tính được {can!r} cho role={role or '<thiếu>'!r}")
 
 
 def _doc_yaml(duong_dan: str) -> dict:
@@ -367,6 +447,8 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
         # head mà lease tưởng đang nói tới, và không ai phát hiện ra.
         raise Chan(RC_NOI_DUNG,
                    f"reviewed_sha_required phải là 40 ký tự hex thường, được {sha!r}")
+
+    _kiem_lop_review(lease)
 
     neo = ""
     if tep is None:

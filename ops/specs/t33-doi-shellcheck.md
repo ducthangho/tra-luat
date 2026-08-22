@@ -1,0 +1,110 @@
+# ĐẶC TẢ PACKET — `T33-DOI-SHELLCHECK`
+
+```yaml
+packet_id: T33-DOI-SHELLCHECK
+packet_issue: 249
+revision: 1
+review_class: sensitive          # chạm workflow/CI authority (protocol §8), fail-closed
+executor: claude
+reviewer: codex
+assurance_target: cross_approved
+base_sha: 08bb4ecd6dbdb87267cb8179f52ac28c151eb4b9
+```
+
+## `nguon_cap_viec`
+
+- Verdict cross-review lượt 2/3 của `#238` (`LEASE-DANG-WINDOWS`) — nợ có tên, do executor `#238` nêu
+- Đo lại độc lập bởi phiên `tra-luat-3a` 22-08-2026, xem `muc_tieu`
+
+**KHÔNG có dòng kế hoạch nào cấp việc này** — cùng lý do với `LEASE-HOI-TOAN-KHO`: nó sinh từ phép đo,
+không từ kế hoạch. Ghi thẳng thay vì bịa.
+
+## `write_set`
+
+```
+ops/lease_publish_test.py
+ops/cai_actionlint.sh
+```
+
+Hai đường dẫn, liệt kê đủ, không ký tự đại diện.
+
+**`ops/cai_actionlint.sh` BẮT BUỘC nằm trong write set, không phải tuỳ chọn.** Nếu `t33` đòi
+`shellcheck` mà bộ cài không cấp nó thì lượt CI kế tiếp **ĐỎ trên master** — biến một bản vá cổng thành
+một sự cố. Hai mục tiêu phải đi cùng một packet vì chúng khoá lẫn nhau. Đây chính là luật L2 áp dụng
+đúng lúc: mục tiêu không chiếu được vào write set thì phải mở rộng write set **tại đây**, chứ không để
+phiên thi hành gặp rồi tự xoay.
+
+Đo 16:5xZ 22-08-2026: **0** lease `CÒN_HẠN` chạm hai đường dẫn này. Write set **rảnh** — khác
+`LEASE-HOI-TOAN-KHO`, packet này cấp lease được ngay.
+
+## `ngoai_pham_vi`
+
+| thứ | vì sao KHÔNG làm ở đây |
+|---|---|
+| Vá finding `SC2320` | **Đã được `#238` vá rồi.** Đo trên master: `actionlint` cho `rc=0` / 0 finding **cả khi có lẫn khi vắng** `shellcheck`. Nhắm vào finding là nhắm vào thứ không còn tồn tại |
+| Bệnh đăng trùng + `ai-dang-giu` | Packet `LEASE-HOI-TOAN-KHO`, Issue `#244` |
+| Mở rộng `t33` sang workflow khác | `t33` hiện chỉ kiểm `ops-publish-lease.yml`. Mở rộng phạm vi là thay đổi khác, đo riêng |
+| Ghim phiên bản `shellcheck` theo cách khác với `actionlint` | Bộ cài đã có nếp ghim `AL_VER`; theo nếp ấy, đừng chế nếp thứ hai |
+
+## `muc_tieu`
+
+| # | mục tiêu | đường dẫn |
+|---|---|---|
+| **M1** | `t33` đòi `shellcheck` **có mặt** và **fail-close** khi thiếu — đúng cách nó đã đòi `actionlint` | `ops/lease_publish_test.py` |
+| **M2** | Bộ cài cấp `shellcheck` cho CI, phiên bản **ghim**, theo đúng nếp `AL_VER` đang có | `ops/cai_actionlint.sh` |
+
+### Phép đo làm nên packet này
+
+Đo bằng `shellcheck` 0.9.0 + `actionlint` 1.7.7 cài thật trong container, trên workflow **trước `#238`**
+(`ba82b06f:.github/workflows/ops-publish-lease.yml`):
+
+```
+CO  shellcheck tren PATH  ->  rc=1,  1 finding  (SC2320)
+VANG shellcheck           ->  rc=0,  0 finding
+```
+
+**Cả tầng luật shell biến mất mà cổng vẫn xanh.** `actionlint` không báo rằng nó đã bỏ qua shellcheck —
+nó chỉ trả 0. Cùng họ *"cổng vắng mặt trông giống cổng xanh"*, và cùng họ chính `t33`: ca ấy sinh ra vì
+sáu lượt cross-review kết luận *"YAML ok"* bằng PyYAML, mà PyYAML không biết luật của GitHub.
+
+**Hai đính chính so với lời khai của `#238`, cả hai đo được:** mã finding là **`SC2320`** (không phải
+`SC1003`), và trên **master hiện tại** finding **đã được vá** — chỉ **lỗ cấu trúc** còn nguyên. Nhắm sai
+một mã finding là gửi người thi hành đi tìm thứ không có.
+
+## `nghiem_thu`
+
+**M1** — `B1` Chạy bộ test với `shellcheck` **vắng khỏi PATH** ⇒ `t33` **ĐỎ** kèm thông điệp
+`KHÔNG ĐO ĐƯỢC`, không phải bỏ qua. ĐỎ khi: đột biến đổi `assert duong_shellcheck` thành `if not ...:
+return` — tức biến fail-close thành bỏ qua êm. `B2` Chạy với **cả hai** công cụ có mặt trên một workflow
+**cố ý vi phạm shellcheck** (fixture, không phải tệp thật của kho) ⇒ `t33` **ĐỎ** và thông điệp **nêu mã
+`SC…`**. ĐỎ khi: đột biến bỏ phần in `stdout` của `actionlint` — cổng vẫn đỏ nhưng không nói vì sao, và
+một cổng không nói lý do là cổng phải chẩn đoán lại từ đầu. `B3` Chạy với cả hai công cụ trên workflow
+**thật** của master ⇒ `t33` **XANH**. ĐỎ khi: bản vá làm cổng đỏ thường trực.
+
+**M2** — `B4` Chạy bộ cài trong môi trường **không có sẵn** `shellcheck` ⇒ sau đó `shutil.which
+("shellcheck")` khác `None` **và** `shellcheck --version` in đúng phiên bản đã ghim. ĐỎ khi: đột biến bỏ
+dòng cài `shellcheck`; hoặc bỏ phần ghim phiên bản (khi ấy `B4` phải đỏ vì phiên bản không khớp hằng).
+`B5` Lượt CI trên `master` sau bản vá: job `gate` **xanh trên cả hai nền**, `lease_publish` in `N/N` với
+**hai số bằng nhau**. ĐỎ khi: `shellcheck` chỉ được cài trên một nền.
+
+**Ràng buộc chéo, phải kiểm như một tiêu chí:** `B1` và `B4` **cùng phải xanh trong một lượt**. Vá `t33`
+mà quên bộ cài ⇒ `B1` xanh, `B4` đỏ, master đỏ. Đó là lý do hai mục tiêu không tách được.
+
+## `hinh_dang_ke_thua`
+
+Chép từ thân Issue `#238` (**chưa** đối chiếu biên nhận): **A=7 · B=2 · C=1 · D=3 · E=2 · F=2**.
+
+Kế thừa vì nợ này do lượt `#238` nêu. **F = 2 đáng đọc trước khi bắt tay**: *"land trên một nền, đo trên
+nền khác"* — và `M2` chính là một thay đổi **phụ thuộc nền**. `#238` đã chốt F lần 3 là **DỪNG**. Nghiệm
+thu `B5` đòi bằng chứng **cả hai nền** đúng để đóng cửa ấy.
+
+## `chua_do_duoc`
+
+1. **Bản `shellcheck` mà CI sẽ nhận.** Container này cài `0.9.0` qua `apt`; runner GitHub có thể khác.
+   Phiên bản ghim phải chọn lúc thi hành và **đo trên runner thật**, không chép từ đây.
+2. **Có workflow nào KHÁC của kho sẽ đỏ khi shellcheck bật lên hay không.** Chưa đo — `t33` chỉ kiểm
+   `ops-publish-lease.yml`, nhưng nếu ai mở rộng phạm vi thì bốn workflow còn lại chưa từng qua shellcheck.
+   Đo trước khi mở rộng, đừng mở rồi mới đo.
+3. **`SC2320` là finding DUY NHẤT hay chỉ là finding ĐẦU TIÊN** trên bản trước `#238`. `actionlint` có thể
+   dừng sớm; chưa kiểm.
+4. **Bộ đếm hình dạng kế thừa đọc từ thân Issue, chưa đối chiếu biên nhận.** Biên nhận thắng nếu lệch.

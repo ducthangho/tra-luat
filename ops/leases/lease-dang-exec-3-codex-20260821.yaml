@@ -126,3 +126,4 @@ dieu_kien_dung:
   - 'Chốt phải nằm NGOÀI write_set ⇒ DỪNG, xuất handoff'
   - 'Hình dạng A lần thứ 7, B lần thứ 3, hoặc C ("phản chứng bắt buộc còn thiếu") lần thứ 2 ⇒ DỪNG, không vá'
   - 'C là hình dạng vừa mắc ở lượt 2. Trước khi báo xong: với MỖI chốt an ninh trong bản vá, hỏi "phép đo nào ĐỎ nếu ai đó gỡ nó?" — không trả lời được thì đó là C lần thứ hai'
+posted_comment_id: 5376896739   # workflow ghi, ĐỪNG sửa tay

@@ -1,0 +1,89 @@
+# Lease REVIEWER — `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 4 — REVIEW DELTA. Neo exact head 6eaa3755.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 227
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+lease_id: lease-dang-review-4-claude-20260822
+revision: 4
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: codex
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+review_class: sensitive
+
+reviewed_sha_required: 6eaa3755abd96ef6d8f820daaa6b9d96e2bdd7b5
+branch: codex/lease-dang-exec-1
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+nen_delta_sha: b32b424165c4a952661cf776bf953d91a7eaf814
+target_branch_neu_land: master
+scope_files: 1
+scope_ghi_chu: 'REVIEW DELTA. Lượt 6 chỉ chạm `ops/lease_publish_test.py` (+101/−9).'
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r6.md
+spec_sha256_required: 4ee67d54b5504c0b303dad3bf8470c912ad754e6bcda42e8cb4a2866475ba181
+spec_ke_thua:
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r5.md, sha256: 2c8fb5c68e45dbdcd3e21c316169623d4dcab33459934b575ae8c626b08cb796}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r4.md, sha256: abe7c292aba05aa772b77c246a570d72c9b8e97220247030ae15af8f750d0fce}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r3.md, sha256: c65d5dbd9d2b398978226f6863cf7cd4e4ddb219a7086be0005e65804a0f47da}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r2.md, sha256: 3f310582de59dce7c109717dbab13ef9467b80c67ffeafc0ac8e1484309e0093}
+
+verdict_luot_truoc:
+  path: ops/reviews/lease-dang-review-3-claude-verdict.md
+  sha256: 79f8bb2a48e92f9081cd50ba0d6d24a8f4bd7246d92ab0cc2d500e26ecfe24a0
+handoff_tham_khao:
+  - {path: ops/handoff/lease-dang-exec-4-codex-handoff.md, sha256: dfada28511f0b63e4922b98fa08b55cb03d57f28faccfb9709b227e316c291b7}
+  - {path: ops/handoff/lease-dang-exec-5-codex-handoff.md, sha256: d53e127f24c3620998dae322922ff7fabbdb5e9b754d05b9f22b5d0dd6c6be40}
+
+prompt_path: ops/prompts/lease-dang-review-4-claude-20260822.md
+prompt_sha256_required: 84002288cb3ff763affa48547041fe74685a9ec0e70ee5c364ec0721dadf7abe
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("Luot 6: dan xuat luon VE KHANG DINH")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-22T04:00:00Z'
+lease_expires_at_utc: '2026-08-23T04:00:00Z'
+run_minutes: 120
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 6
+review_rounds_used_truoc_luot_nay: 3
+review_calls_limit: 7
+review_calls_used_truoc_luot_nay: 3
+
+ngan_sach_con_lai:
+  dong_them_da_dung: 633
+  dong_them_toi_da: 660
+  con_lai: 27
+  ghi_chu: 'Nếu verdict là `can_sua`, reviewer PHẢI nói bản vá đề xuất có lọt 27 dòng không — người giữ kho cần con số ấy để quyết.'
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: 'suite hai môi trường + actionlint + ngân sách + PHÉP THỬ QUYẾT ĐỊNH M4, ĐO LẠI ĐỘC LẬP'
+  bang_chung: >-
+    Trên `6eaa3755`: `numstat cfaccff9..HEAD` = 3 tệp, +633/−19 (trần 660); suite thường và suite
+    với `GITHUB_ACTIONS`/`GITHUB_REPOSITORY`/`GITHUB_ACTOR` đặt + `gh` VẮNG (đã kiểm `command -v
+    gh` rỗng) đều `rc=0` `67/67`; `actionlint` `rc=0` trên 5 workflow.
+    **M4** — dời khối guard `check` từ TRƯỚC POST xuống NGAY SAU POST trong YAML, GIỮ NGUYÊN tập
+    vế: phép dẫn xuất xác nhận `check` nay ở dòng 71 còn POST ở dòng 58 (tức SAU POST), và suite
+    ⇒ **64/67**, ĐỎ `t51 t63 t67`. **PHÉP THỬ QUYẾT ĐỊNH ĐẠT** — vị trí thật sự dẫn xuất từ YAML.
+    Ba guard từng SỐNG SÓT `63/63` ở head trước (`mark`, `body`, `$GITHUB_ENV`) nay mỗi cái gỡ ra
+    ⇒ **66/67**, ĐỎ `t66`.
+  no_khai: 'CHƯA có lượt GitHub Actions THẬT nào trên bất kỳ head nào của packet, và CHƯA có Windows.'
+
+canh_bao_cho_reviewer: >-
+  Packet qua SÁU lượt vá, và hình dạng lỗi lặp lại nằm ở ĐẶC TẢ, không ở bản vá — ba lần liên
+  tiếp đặc tả liệt kê sai (hai lần sai độ phân giải, một lần sai pha thời gian). `r6` là nước đi
+  cuối: đặc tả THÔI liệt kê vế khẳng định, executor DẪN XUẤT. Việc của reviewer là kiểm xem nước
+  đi ấy CÓ THẬT hay chỉ DỜI CHỖ GHI CỨNG — tấn công phép dẫn xuất vị trí (POST nhận diện bằng gì?
+  hai lời gọi giống POST? chú thích chứa `gh api`? chiều ngược của M4?) và phép trích guard (hình
+  dạng guard khác: `set +e` cùng dòng · `|| rc=$?` · `if ! cmd` · guard trong hàm shell).
+posted_comment_id: 5377612439   # workflow ghi, ĐỪNG sửa tay

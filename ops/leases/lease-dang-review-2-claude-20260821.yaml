@@ -1,0 +1,86 @@
+# Lease REVIEWER — `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 2 (CUỐI). Neo exact head 90015a53.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 227
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+lease_id: lease-dang-review-2-claude-20260821
+revision: 2
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: codex
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+review_class: sensitive
+
+reviewed_sha_required: 90015a53c7407400f87c9f5a018067849fa1e842
+branch: codex/lease-dang-exec-1
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+nen_delta_sha: fefa15b67a2691cf90ee8bfd0ab3880adc5f35d9
+target_branch_neu_land: master
+scope_files: 3
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r2.md
+spec_sha256_required: 3f310582de59dce7c109717dbab13ef9467b80c67ffeafc0ac8e1484309e0093
+spec_note: >-
+  BẢN SỬA ĐỔI 2 là authority. Nó thay thế bản 1 (`e1026adb…`), thứ vẫn nằm trong kho làm hồ sơ.
+  Bản 1 CÓ MỘT LỖI THIẾT KẾ THẬT (mục tiêu 4 ghim cơ chế dò `GITHUB_ACTIONS`) và nó lọt qua lượt
+  1 vì không ai soi đặc tả. Prompt lượt 2 vì vậy đòi reviewer soi CHÍNH đặc tả r2 — mục C.
+
+verdict_luot_truoc:
+  path: ops/reviews/lease-dang-review-1-claude-verdict.md
+  sha256: 42b438ad15fc1a8978dcd3bef023aa1f41d0926b8b87dc9c4d521229c9d6ae41
+  ket_luan: changes_requested
+  so_finding: 7
+
+prompt_path: ops/prompts/lease-dang-review-2-claude-20260821.md
+prompt_sha256_required: e896c42f01f74b1df37ee0db6cabf317b33e9361dc60978eefd50ca551ae3834
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("Sửa ĐẶC TẢ trước, rồi vá lại" — vòng review cuối của packet)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: false
+recorder_ghi_chu: >-
+  Phiên ghi lease KHÔNG vá, nhưng ĐÃ SOẠN cả hai bản đặc tả — kể cả bản 1 gây ra P1 thứ nhất.
+  Reviewer được yêu cầu soi đặc tả TRƯỚC, bản vá SAU.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T15:00:00Z'
+lease_expires_at_utc: '2026-08-22T15:00:00Z'
+run_minutes: 120
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 1
+review_calls_limit: 3
+review_calls_used_truoc_luot_nay: 1
+vong_cuoi: true
+vong_cuoi_ghi_chu: >-
+  Hết vòng này packet HOẶC `cross_approved` và land, HOẶC trả về người giữ kho. Không còn vòng
+  thứ ba trong trần đã cấp.
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: 'suite (hai môi trường) + actionlint + ngân sách, ĐO LẠI ĐỘC LẬP bởi phiên điều phối'
+  bang_chung: >-
+    Trên `90015a53`: suite môi trường thường `rc=0` `58/58`; CÙNG suite với `GITHUB_ACTIONS`
+    `GITHUB_REPOSITORY` `GITHUB_ACTOR` đặt và `gh` VẮNG cũng `rc=0` `58/58` (ca T53, chốt của
+    P1 lượt 1). `actionlint` `rc=0` trên 5 workflow. `git diff --numstat cfaccff9..90015a53` =
+    3 tệp, +498/−19, trong trần 500 mà người giữ kho đã nới. Cấu trúc: `GITHUB_ACTIONS` không
+    còn dòng nào trong `lease_publish.py`; đồ thị lời gọi tĩnh cho thấy `kiem`/`lenh_check`/
+    `lenh_body` KHÔNG chạm lớp GitHub nào. Thân bước `đăng` chạy thật với `gh` giả 403 ở lease
+    GIỮA: 3 lần POST (lease cuối vẫn được thử), `GITHUB_ENV` có `DA_DOI=1`, bước `rc=1`.
+  no_khai: >-
+    CHƯA có lượt chạy GitHub Actions THẬT nào trên `90015a53`, và CHƯA có lượt Windows.
+    Mọi phép đo về workflow đều là thân bước trích từ YAML chạy ngoài Actions.
+
+canh_bao_cho_reviewer: >-
+  Bề mặt MỚI đáng ngờ nhất: `kiem-github` nay là thứ DUY NHẤT đứng giữa một tệp YAML và một
+  comment mang danh nghĩa kho, mà `check` KHÔNG còn gọi nó — ai quên gọi thì cổng biến mất
+  trong khi suite vẫn xanh. Cùng họ "cổng không nói dối, nó VẮNG MẶT". Và vòng `đăng` nay bọc
+  `set +e` quanh MỌI lệnh: hãy tìm đường mà một lỗi bị NUỐT.
+posted_comment_id: 5376760865   # workflow ghi, ĐỪNG sửa tay

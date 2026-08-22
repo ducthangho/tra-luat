@@ -1134,6 +1134,24 @@ _ADR_MUC_KE = re.compile(r"^##\s", re.M)
 # phản chứng cho đúng điều đó. Danh sách này chỉ được co lại, không được nới.
 _ADR_THA_THIEU_TRANG_THAI = frozenset({"0016"})
 
+# DẠNG TÊN TỆP ADR — bó CHẶT, và có lý do đo được. Bản đầu gom tệp bằng
+# `{f.name[:4]: f for f in glob("*.md")}`: hai tệp cùng bốn chữ số đầu thì cái sau
+# ĐÈ cái trước trong dict, nên `0001-goc.md` + `0001-ban-sao.md` cho ra **một** mục.
+# Cross-review (codex, P2 trên PR #233, head `cbd14439bb`) bắt được; đã dựng phản
+# chứng: 2 tệp trên đĩa, cổng in "1 ADR trên đĩa, 1 dòng trong §20" và trả `rc=0`.
+#
+# Chỗ đau nhất không phải con số sai mà là NÓ PHÁ ĐÚNG BẰNG CHỨNG DƯƠNG: hai số
+# "bằng nhau" đều rút ra từ CÙNG cái map đã bị nuốt, nên chúng bằng nhau bất kể có
+# bao nhiêu tệp bị nuốt. Hai số chỉ là bằng chứng khi chúng đến từ HAI phép đếm
+# ĐỘC LẬP. Nay đếm trên DANH SÁCH tệp, và số trùng làm cổng ĐỎ trước khi gom map.
+#
+# `f.name[:4].isdigit()` cũ còn im lặng bỏ mọi tên khác dạng — một ADR đặt tên sai
+# (`045-thieu-mot-so.md`) biến mất không dấu vết. Nay: khớp dạng thì là ADR; nằm
+# trong danh sách CHO PHÉP dưới đây thì cố ý không phải ADR; còn lại là trạng thái
+# thứ ba `không đo được` và phải ĐỎ.
+_ADR_TEN_TEP = re.compile(r"^(\d{4})-[0-9a-z]([0-9a-z-]*[0-9a-z])?\.md$")
+_ADR_TEP_KHONG_PHAI_ADR = frozenset({"README.md"})
+
 
 def cmd_adr_song(a, state_dir: Path) -> int:
     root = Path(a.root)
@@ -1150,8 +1168,22 @@ def cmd_adr_song(a, state_dir: Path) -> int:
     if not proto.is_file():
         _die(RC_ADR, f"không có {proto} — không đo được")
 
-    tep = {f.name[:4]: f for f in sorted(thu_muc.glob("*.md")) if f.name[:4].isdigit()}
-    if not tep:
+    cap: list[tuple[str, Path]] = []
+    la: list[str] = []
+    for f in sorted(thu_muc.iterdir()):
+        if f.is_file() and f.name in _ADR_TEP_KHONG_PHAI_ADR:
+            continue
+        m2 = _ADR_TEN_TEP.match(f.name) if f.is_file() else None
+        if m2 is None:
+            la.append(f.name)
+            continue
+        cap.append((m2.group(1), f))
+    if la:
+        for x in sorted(la):
+            print(f"{thu_muc}/{x}: không đúng dạng tên ADR và không thuộc danh sách "
+                  f"cho phép — không đo được", file=sys.stderr)
+        _die(RC_ADR, f"{len(la)} mục trong {thu_muc} không phân loại được")
+    if not cap:
         _die(RC_ADR, f"{thu_muc} không có tệp ADR nào — không đo được")
 
     raw = proto.read_text(encoding="utf-8")
@@ -1164,17 +1196,27 @@ def cmd_adr_song(a, state_dir: Path) -> int:
     trong_bang: list[str] = _ADR_HANG.findall(than)
     loi: list[str] = []
 
+    theo_so: dict[str, list[Path]] = {}
+    for s, f in cap:
+        theo_so.setdefault(s, []).append(f)
+    for s, fs in sorted(theo_so.items()):
+        if len(fs) > 1:
+            loi.append(
+                f"ADR-{s}: {len(fs)} tệp cùng số — {[x.name for x in fs]}. Một dòng §20 "
+                f"không phủ được nhiều tệp; đổi tên hoặc gộp trước khi chạy lại"
+            )
+
     trung = sorted({s for s in trong_bang if trong_bang.count(s) > 1})
     for s in trung:
         loi.append(f"ADR-{s}: có {trong_bang.count(s)} dòng trong §20 — phải đúng MỘT")
 
     co = set(trong_bang)
-    for s in sorted(set(tep) - co):
-        loi.append(f"ADR-{s}: có tệp `{tep[s].name}` mà KHÔNG có dòng nào trong §20")
-    for s in sorted(co - set(tep)):
+    for s in sorted(set(theo_so) - co):
+        loi.append(f"ADR-{s}: có tệp `{theo_so[s][0].name}` mà KHÔNG có dòng nào trong §20")
+    for s in sorted(co - set(theo_so)):
         loi.append(f"ADR-{s}: §20 có dòng mà KHÔNG có tệp trong docs/adr/ — con trỏ chết")
 
-    for s, f in sorted(tep.items()):
+    for s, f in sorted(cap):
         if _ADR_TRANG_THAI.search(f.read_text(encoding="utf-8")):
             continue
         if s in _ADR_THA_THIEU_TRANG_THAI:
@@ -1189,7 +1231,7 @@ def cmd_adr_song(a, state_dir: Path) -> int:
             print(d, file=sys.stderr)
         _die(RC_ADR, f"{len(loi)} chỗ lệch giữa docs/adr/ và §20 của {proto}")
     print(
-        f"adr-song: sạch — {len(tep)} ADR trên đĩa, {len(trong_bang)} dòng trong §20, khớp 1–1"
+        f"adr-song: sạch — {len(cap)} ADR trên đĩa, {len(trong_bang)} dòng trong §20, khớp 1–1"
         + (f" (tha thiếu trạng thái: {sorted(_ADR_THA_THIEU_TRANG_THAI)})"
            if _ADR_THA_THIEU_TRANG_THAI else "")
     )

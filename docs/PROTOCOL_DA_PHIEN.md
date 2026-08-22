@@ -1001,8 +1001,16 @@ python3 .claude/dev/packet_loop.py adr-song --root .
 ```
 
 Cổng ấy ĐỎ khi: một ADR không có dòng trong bảng · bảng trỏ một ADR không tồn tại · một ADR có
-hai dòng · một ADR không có dòng `Trạng thái` đọc được. Thêm ADR mà quên bảng ⇒ **gate đỏ**,
-không phải im lặng. Phản chứng cho từng luật ở `.claude/dev/packet_loop_test.py`.
+hai dòng · một ADR không có dòng `Trạng thái` đọc được · **hai tệp cùng một số ADR** · **một
+tên tệp không đúng dạng và không nằm trong danh sách cho phép**. Thêm ADR mà quên bảng ⇒
+**gate đỏ**, không phải im lặng. Phản chứng cho từng luật ở `.claude/dev/packet_loop_test.py`.
+
+Hai luật cuối sinh từ một finding cross-review (codex, P2 trên PR #233) và đáng đọc kỹ hơn
+phần còn lại, vì nó phá đúng thứ bảng này khoe là bằng chứng: bản đầu gom tệp bằng một map
+khoá theo bốn chữ số đầu, nên hai tệp cùng số thì cái sau ĐÈ cái trước — 2 tệp trên đĩa mà
+cổng in *"1 ADR trên đĩa, 1 dòng trong §20"* rồi trả `rc=0`. **Hai số bằng nhau chỉ là bằng
+chứng khi chúng đến từ HAI phép đếm ĐỘC LẬP;** ở bản đầu cả hai đều rút từ cùng cái map đã bị
+nuốt, nên chúng bằng nhau bất kể bao nhiêu tệp biến mất.
 
 ### Cột "cổng đã ĐO" nghĩa là gì — đọc trước khi dùng
 

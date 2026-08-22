@@ -2058,6 +2058,84 @@ CASES = [
     ("ac21_hai_cua_CUNG_luoc_do", case_ac21_hai_cua_CUNG_luoc_do),
 ]
 
+# --- (d2) adr-song: DẠNG TÊN TỆP và tệp TRÙNG SỐ -------------------------------
+#
+# Cả bốn ca dưới đây sinh từ MỘT finding cross-review (codex, P2 trên PR #233, head
+# `cbd14439bb`): bản đầu gom tệp bằng `{f.name[:4]: f for f in glob("*.md")}`, nên
+# hai tệp cùng bốn chữ số đầu thì cái sau ĐÈ cái trước. Phản chứng đã chạy trước
+# khi vá: 2 tệp trên đĩa, cổng in "1 ADR trên đĩa, 1 dòng trong §20", `rc=0`.
+#
+# Bài học ghi ở đây vì nó rộng hơn một bản vá: **hai số bằng nhau chỉ là bằng chứng
+# khi chúng đến từ HAI phép đếm ĐỘC LẬP.** Ở bản đầu cả hai số đều rút từ cùng cái
+# map đã bị nuốt, nên chúng bằng nhau bất kể bao nhiêu tệp biến mất — một "bằng
+# chứng dương" tự chứng minh chính nó.
+
+
+def _repo_adr_ten(tmp: Path, ten_tep, hang_bang, ten, co_git=True, thu_muc_con=None):
+    """Như `_repo_adr_gia` nhưng nhận TÊN TỆP nguyên văn, để dựng được tên lệch dạng."""
+    r = tmp / f"repo_adrten_{ten}"
+    d = r / "docs" / "adr"
+    d.mkdir(parents=True, exist_ok=True)
+    if co_git:
+        (r / ".git").mkdir(exist_ok=True)
+    for n in ten_tep:
+        (d / n).write_text(f"# ADR — {n}\n\n- **Trạng thái:** Accepted (2026-08-22)\n",
+                           encoding="utf-8", newline="\n")
+    if thu_muc_con:
+        (d / thu_muc_con).mkdir(exist_ok=True)
+    than = "# Protocol giả\n\n## 19. Mục trước\n\nNội dung.\n"
+    than += "\n## 20. Quy tắc đang hiệu lực — bảng định tuyến ADR\n\n"
+    than += "| ADR | luật | trạng thái | cổng đã ĐO |\n|---|---|---|---|\n"
+    for so in hang_bang:
+        than += f"| `ADR-{so}` | luật {so} | Accepted | 0 cổng |\n"
+    (r / "docs" / "PROTOCOL_DA_PHIEN.md").write_text(than, encoding="utf-8", newline="\n")
+    return r
+
+
+def case_adr_song_hai_tep_cung_so_thi_do(c: Ctx):
+    """FINDING CODEX P2, PR #233 — hai tệp cùng số bị gom thành một, cổng báo sạch.
+
+    Ca này là phản chứng ĐÃ CHẠY TRƯỚC KHI VÁ, không phải viết sau cho đẹp: bản
+    cũ trả `rc=0` và in "1 ADR trên đĩa" trong khi đĩa có 2 tệp.
+    """
+    r = _repo_adr_ten(c.tmp, ["0001-goc.md", "0001-ban-sao-len-lut.md"], ["0001"], "trungso")
+    rc, o, e = run(c.script, ["adr-song", "--root", r])
+    _doi(9, rc, e, "hai tệp cùng số ADR phải ĐỎ")
+    if "2 tệp cùng số" not in _txt(e):
+        raise AssertionError(f"thông điệp phải nói ra CẢ HAI tệp; được: {_txt(e)!r}")
+
+
+def case_adr_song_ten_tep_la_thi_do(c: Ctx):
+    """Tên lệch dạng là trạng thái THỨ BA (`không đo được`), không phải `bỏ qua`.
+
+    Bản cũ lọc `f.name[:4].isdigit()`, nên `045-thieu-mot-so.md` — một ADR đặt tên
+    sai — biến mất KHÔNG DẤU VẾT và cổng vẫn xanh. Cùng họ với bộ quét secrets lọc
+    theo phần mở rộng rồi mù với `.env`.
+    """
+    r = _repo_adr_ten(c.tmp, ["0001-ok.md", "045-thieu-mot-so.md"], ["0001"], "tenla")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(9, rc, e, "tên tệp lệch dạng phải ĐỎ, không được bỏ qua êm")
+
+
+def case_adr_song_thu_muc_con_thi_do(c: Ctx):
+    """Một thư mục con trong `docs/adr/` có thể GIẤU ADR — không phân loại được thì ĐỎ."""
+    r = _repo_adr_ten(c.tmp, ["0001-ok.md"], ["0001"], "thumuccon", thu_muc_con="kho-luu")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(9, rc, e, "thư mục con không phân loại được phải ĐỎ")
+
+
+def case_adr_song_readme_duoc_tha(c: Ctx):
+    """Chiều BẮT OAN: `README.md` cố ý không phải ADR, và nó nằm trong danh sách CHO PHÉP.
+
+    Không có ca này thì không phân biệt được "bó dạng tên" với "cấm mọi tệp không
+    phải ADR" — và cổng báo động giả là cổng sẽ bị tắt.
+    """
+    r = _repo_adr_ten(c.tmp, ["0001-ok.md", "README.md"], ["0001"], "readme")
+    rc, o, e = run(c.script, ["adr-song", "--root", r])
+    _doi(0, rc, e, "README.md trong danh sách cho phép phải XANH")
+    if "1 ADR trên đĩa" not in _txt(o):
+        raise AssertionError(f"README không được tính là ADR; được: {_txt(o)!r}")
+
 # --- (d) adr-song ---
 CASES += [
     ("adr_song_sach_xanh", case_adr_song_sach_xanh),
@@ -2071,6 +2149,10 @@ CASES += [
     ("adr_song_kho_that_thieu_thu_muc_thi_do", case_adr_song_kho_that_thieu_thu_muc_thi_do),
     ("adr_song_ban_sao_roi_duoc_tha", case_adr_song_ban_sao_roi_duoc_tha),
     ("adr_song_KHO_THAT_xanh", case_adr_song_KHO_THAT_xanh),
+    ("adr_song_hai_tep_cung_so_thi_do", case_adr_song_hai_tep_cung_so_thi_do),
+    ("adr_song_ten_tep_la_thi_do", case_adr_song_ten_tep_la_thi_do),
+    ("adr_song_thu_muc_con_thi_do", case_adr_song_thu_muc_con_thi_do),
+    ("adr_song_readme_duoc_tha", case_adr_song_readme_duoc_tha),
 ]
 
 # AC 18 — mỗi lớp trong danh sách đóng thành MỘT ca có tên riêng, để đột biến
@@ -2083,6 +2165,29 @@ CASES += [(f"ac19_{ten}", _ca_doctrine(nd, f"ac19_{ten}", 0)) for ten, nd in LOP
 # Đột biến nới ngưỡng: mỗi cái BẮT BUỘC giết đúng những ca dưới đây. Ca không
 # chết được nghĩa là nó không đo cái nó khai.
 MUTANTS = {
+    # --- adr-song: ba đột biến của finding cross-review PR #233 ------------------
+    #
+    # (1) DỰNG LẠI ĐÚNG BUG. Không phải "gỡ một chốt" mà là khôi phục nguyên văn cơ
+    # chế cũ — gom tệp vào dict theo bốn chữ số đầu. Đây là dạng đột biến mạnh nhất:
+    # nếu ai đó vô tình viết lại như cũ, ca đích ĐỎ ngay.
+    "adr_gom_map_de_bi_nuot": (
+        "    for f in sorted(thu_muc.iterdir()):\n",
+        "    for f in {x.name[:4]: x for x in sorted(thu_muc.glob('*.md'))}.values():\n",
+        ["adr_song_hai_tep_cung_so_thi_do", "adr_song_thu_muc_con_thi_do"],
+    ),
+    # (2) Tha tên lệch dạng trong im lặng — đúng bệnh `f.name[:4].isdigit()` cũ.
+    "adr_tha_ten_tep_la": (
+        "    if la:\n",
+        "    if False:                         # đột biến: bỏ qua tên lệch dạng\n",
+        ["adr_song_ten_tep_la_thi_do", "adr_song_thu_muc_con_thi_do"],
+    ),
+    # (3) Chiều BẮT OAN: rỗng danh sách cho phép thì `README.md` bị bắt oan. Chứng
+    # minh ca `readme_duoc_tha` đo danh sách CHO PHÉP chứ không đo thứ khác.
+    "adr_rong_allowlist_ten_tep": (
+        '_ADR_TEP_KHONG_PHAI_ADR = frozenset({"README.md"})\n',
+        "_ADR_TEP_KHONG_PHAI_ADR = frozenset()   # đột biến: bắt oan\n",
+        ["adr_song_readme_duoc_tha"],
+    ),
     # --- adr-song: MỖI luật một đột biến riêng ---------------------------------
     #
     # ĐỐI CHỨNG KHÁC HỌ, nói cho đúng cơ chế: `_la_ho_doctrine` chỉ nhận tiền tố
@@ -2096,12 +2201,12 @@ MUTANTS = {
     # tự-chứng-minh-không-rỗng mất hết độ phân giải — đúng lý do `ac18` phải tách
     # từng lớp thành ca riêng.
     "adr_bo_kiem_thieu_dong": (
-        "    for s in sorted(set(tep) - co):\n",
+        "    for s in sorted(set(theo_so) - co):\n",
         "    for s in []:                      # đột biến: thôi đòi phủ đủ\n",
         ["adr_song_thieu_dong_thi_do", "adr_song_van_xuoi_khong_tinh_la_dong"],
     ),
     "adr_bo_kiem_con_tro_chet": (
-        "    for s in sorted(co - set(tep)):\n",
+        "    for s in sorted(co - set(theo_so)):\n",
         "    for s in []:                      # đột biến: thôi bắt con trỏ chết\n",
         ["adr_song_con_tro_chet_thi_do"],
     ),

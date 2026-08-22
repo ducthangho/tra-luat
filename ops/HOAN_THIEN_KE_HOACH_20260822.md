@@ -233,7 +233,8 @@ python3 .claude/dev/packet_loop.py adr-song --root .                # 45/45 (SAU
 2. Dòng 7 thay bằng **đúng một dòng** trỏ §20 — cố ý giữ nguyên số dòng để `docs/PROTOCOL_DA_PHIEN.md:751`
    mà `ADR-0043` neo vào không xê dịch. Đã kiểm: dòng 751 sau khi sửa vẫn là câu cũ.
 3. `.claude/dev/packet_loop.py adr-song` (`RC_ADR = 9`) — ĐỎ khi: thiếu dòng · con trỏ chết · dòng
-   trùng · ADR không có dòng `Trạng thái` đọc được · thiếu §20 · kho thật mà thiếu `docs/adr/`.
+   trùng · ADR không có dòng `Trạng thái` đọc được · thiếu §20 · kho thật mà thiếu `docs/adr/` ·
+   **hai tệp cùng số ADR** · **tên tệp lệch dạng** (hai luật cuối: xem §4.2).
 
 **Bằng chứng dương, không phải `rc=0`:**
 
@@ -244,7 +245,7 @@ python3 .claude/dev/packet_loop.py adr-song --root .
 
 Hai số **BẰNG NHAU** và bằng số tệp thật, chứ không chỉ mã thoát.
 
-**Cổng có răng — 6 đột biến, mỗi luật một cái:**
+**Cổng có răng — 9 đột biến, mỗi luật một cái:**
 
 | đột biến | ca đích chết | đối chứng khác họ |
 |---|---|---|
@@ -254,6 +255,9 @@ Hai số **BẰNG NHAU** và bằng số tệp thật, chứ không chỉ mã th
 | `adr_noi_ngoai_le_cho_moi_ADR` | 1 | 3 còn sống |
 | `adr_tha_khi_thieu_thu_muc` | 1 | 3 còn sống |
 | `adr_hang_nhan_ca_van_xuoi` | 1 | 3 còn sống |
+| `adr_gom_map_de_bi_nuot` | 2 | 3 còn sống |
+| `adr_tha_ten_tep_la` | 2 | 3 còn sống |
+| `adr_rong_allowlist_ten_tep` | 1 | 3 còn sống |
 
 `adr_noi_ngoai_le_cho_moi_ADR` là hình dạng đã trả giá ở `v1.36.68`: **nới danh sách cho phép để
 chứa chính thứ đang tấn công**. Không có nó thì không biết ca đích đang đo danh sách hay đo thứ khác.
@@ -262,7 +266,7 @@ chứa chính thứ đang tấn công**. Không có nó thì không biết ca đ
 
 | bộ | master | nhánh này |
 |---|---|---|
-| `.claude/dev/packet_loop_test.py` | 185/185 đạt | **196/196 đạt** (+11 ca) |
+| `.claude/dev/packet_loop_test.py` | 185/185 đạt | **200/200 đạt** (+15 ca) |
 | `ops/lease_publish_test.py` | 41/42 (`t33` fail-close vì thiếu `actionlint`) | 41/42, **cùng nguyên nhân** |
 
 **Một cổng có sẵn đã bắt lỗi của tôi, và đó là bằng chứng nó đang sống:** ma trận codepage
@@ -272,6 +276,45 @@ Việt lúc thành công nên nó thuộc kịch bản ấy thật.
 
 **Hai nợ có tên mới:** `ops/NO_KY_THUAT.md` §13 (`ADR-0016-THIEU-DONG-TRANG-THAI`) và §14
 (`LEASE-KHAI-MA-CONG-KHONG-DOC`).
+
+### 4.2 Finding cross-review trên chính PR này — và vì sao nó đáng hơn một bản vá
+
+Codex review PR #233 ở exact head `cbd14439bb` và ra **một P2 thật**: cổng gom tệp bằng
+`{f.name[:4]: f for f in glob("*.md")}`, nên hai tệp cùng bốn chữ số đầu thì cái sau **ĐÈ** cái
+trước trong dict.
+
+**Không nhận lời khai của bot — đã dựng phản chứng TRƯỚC khi vá**, trên bản cổng lúc ấy:
+
+```
+docs/adr/0001-goc.md  +  docs/adr/0001-ban-sao-len-lut.md      (2 tệp trên đĩa)
+§20 có ĐÚNG MỘT dòng `ADR-0001`
+⇒ adr-song: sạch — 1 ADR trên đĩa, 1 dòng trong §20, khớp 1–1     rc=0
+```
+
+**Chỗ đau không phải con số sai, mà là nó phá đúng thứ tôi khoe.** §4 viết *"hai số BẰNG NHAU và
+bằng số tệp thật"* làm bằng chứng dương. Nhưng cả hai số đều rút ra từ **cùng cái map đã bị nuốt**,
+nên chúng bằng nhau **bất kể** bao nhiêu tệp biến mất. Luật rút ra rộng hơn ca này:
+
+> **Hai số bằng nhau chỉ là bằng chứng khi chúng đến từ HAI phép đếm ĐỘC LẬP.** Hai số cùng nguồn
+> thì phép so chỉ chứng minh nguồn ấy tự nhất quán với chính nó.
+
+Cùng họ với `rc=0` bị lừa, chỉ tinh vi hơn một bậc: ở đây có số, số khớp, và số vẫn nói dối.
+
+Bản vá còn đóng một lỗ **thứ hai** mà finding chỉ ra ở vế sau: `f.name[:4].isdigit()` im lặng bỏ mọi
+tên khác dạng, nên một ADR đặt tên sai (`045-thieu-mot-so.md`) biến mất **không dấu vết**. Nay ba
+trạng thái: khớp dạng ⇒ là ADR · nằm trong danh sách CHO PHÉP (`README.md`) ⇒ cố ý không phải ADR ·
+còn lại ⇒ **không đo được, ĐỎ**. Đã kiểm 45 tệp thật đều khớp dạng `^\d{4}-[0-9a-z-]+\.md$` trước
+khi siết, nên siết không gãy kho.
+
+**Bốn ca mới + ba đột biến**, trong đó `adr_gom_map_de_bi_nuot` **dựng lại nguyên văn cơ chế cũ** —
+ai vô tình viết lại như cũ thì ca đích ĐỎ ngay.
+
+**Một bẫy tự sập khi vá, ghi ra vì nó là bẫy đã có tên trong `CLAUDE.md`:** bản vá viết lại đúng hai
+dòng mà hai đột biến cũ (`adr_bo_kiem_thieu_dong`, `adr_bo_kiem_con_tro_chet`) neo vào, nên hai đột
+biến ấy **mất mỏ neo** — tức sẽ không mutate gì cả. Đúng họ *"đột biến CHƯA TỪNG ĐƯỢC CHẠY"*. Ở đây
+bộ test **có** lưới: `thieu = [t for t, _ in cap if t not in goc]` in ĐỎ khi mỏ neo vắng — nên nó
+đằng nào cũng lộ; tôi chỉ bắt sớm hơn bằng một lượt kiểm `count == 1` cho **cả 43** đột biến. Nói
+đúng công trạng: lưới đã có sẵn, không phải tôi dựng.
 
 ### 4.1 Cái Việc A KHÔNG chữa — nói thẳng
 
@@ -291,25 +334,25 @@ Việt lúc thành công nên nó thuộc kịch bản ấy thật.
 
 ## 5. Khai VƯỢT NGƯỠNG — theo đúng cửa thoát của `ADR-0044`
 
-Thay đổi của phiên này: **6 tệp · +838/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
+Thay đổi của phiên này: **6 tệp · +1036/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
 là **≤ 3 tệp và ≤ 300 dòng thêm**. Khai thay vì lờ đi, và tách hai phần vì rủi ro của chúng khác họ:
 
 | phần | tệp | dòng thêm | rủi ro |
 |---|---|---|---|
-| **mã + phản chứng** | `.claude/dev/packet_loop.py` · `.claude/dev/packet_loop_test.py` | +307 | chạy sai |
-| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +531 | viết sai chữ |
+| **mã + phản chứng** | `.claude/dev/packet_loop.py` · `.claude/dev/packet_loop_test.py` | +454 | chạy sai |
+| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +582 | viết sai chữ |
 
 ```
 git diff --cached --numstat
 ```
 
-**Phần mã: 2 tệp, +307 — vượt trần đúng 7 dòng.** Trong +307 ấy, **+207 là phản chứng**
-(`packet_loop_test.py`: 11 ca + 6 đột biến) và chỉ +100 là cổng. Cắt cho vừa 300 nghĩa là cắt phản
+**Phần mã: 2 tệp, +454.** Trong đó **phản chứng chiếm phần lớn**
+(`packet_loop_test.py` +312: 15 ca + 9 đột biến); cổng chỉ +142. Cắt cho vừa 300 nghĩa là cắt phản
 chứng, tức đổi một con số lấy chính thứ làm cổng có răng — `CLAUDE.md` gọi đúng cái đó là *"chỗ các
 ca đi chết"*. Đây cũng không phải authority theo nghĩa hẹp của `ADR-0044`: `packet_loop.py` không cấp
 lease và không gác đường đăng; thứ ấy là `ops/lease_publish.py`, mà phiên này **không đụng**.
 
-**Phần văn bản: +531 trên 4 tệp.** Không dòng nào nằm trên đường chạy của `scripts/tl.py` hay của
+**Phần văn bản: +582 trên 4 tệp.** Không dòng nào nằm trên đường chạy của `scripts/tl.py` hay của
 cổng đăng lease. Ngưỡng của `ADR-0044` neo từ số đo về **chi phí review MÃ** (`PLAT-M4` 2 tệp/+351 →
 một vòng một finding; `PLAT-X4` 4 tệp/+721 → ba vòng tám finding); áp nguyên si sang một thay đổi tài
 liệu là áp sai đối tượng. Tiền lệ đã được chấp nhận: PR #210 khai đúng lý lẽ này cho 13 tệp/+861.

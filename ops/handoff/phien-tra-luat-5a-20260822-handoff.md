@@ -21,7 +21,9 @@ master_luc_cap_nhat: 2ab3560a8a406c1b436221fb3c6d23234aefdde0  # đã đi 50 com
 nhanh_lam_viec: claude/opus-5-plan-steps-y5r6ci   # đã hết việc, reset về master
 pr_da_merge: 230
 pr_dang_mo_lien_quan: [233, 234, 229]
-hen_dang_chay: trig_0171iMNPHfQSn58J4VmPm6h1     # 06:00Z, kiểm #227
+hen_dang_chay: trig_01C6pjd3Xe1Px3tAuAVxwkVW     # 07:26Z — kiểm #238, xuất phát từ 3d.
+                                                # Hai hẹn TRƯỚC đã bị xoá vì tiêu chí sai;
+                                                # xem §5c. Đừng chép số hẹn từ tài liệu cũ.
 ```
 
 ## 2. Phiên này đã làm gì
@@ -227,6 +229,52 @@ master, và ba tệp ấy khớp **byte-identical** với `3f641673`.
 `workflow_dispatch` trước khi land**.
 
 **Bệnh đăng trùng lease QUAY LẠI master** cho tới lúc land lại. Ai cấp lease trong khoảng này phải biết.
+
+### 5c. CẬP NHẬT 06:5xZ — §5 trên kia ĐÃ LẠC HẬU BA CHỖ. Đọc mục này thay cho §5.
+
+Phiên thứ ba, `tra-luat-ae` (`session_014NW8Liw`), đang giữ chính `ops/specs/plat-x8.md`. Tin họ gửi,
+**tôi đã đo lại ba khẳng định chịu tải và cả ba khớp**:
+
+| §5 nói | thật ra | phép đo |
+|---|---|---|
+| xuất phát từ **3b** `308d0cf4…` | tệp đã lên **3d** = `f7f8e6209e4fb624fc19f72a4759b48551e8312fdbd34c7badb6c14309d036ea`, trên nhánh `claude/phien-tra-luat-5a-handoff-9o1cqp` **chưa merge** | `git show origin/claude/phien-tra-luat-5a-handoff-9o1cqp:ops/specs/plat-x8.md \| sha256sum` ⇒ khớp |
+| chờ **#227** | `#227` land rồi bị revert; điều kiện chờ nay là **#238** (`LEASE-DANG-WINDOWS`) | §5b |
+| **BỐN** chỗ trích băm | **NĂM**. Chỗ thứ năm là `ops/prompts/phien-hoan-thien-ke-hoach-20260822.md:65` — **tệp do chính tôi tạo**, và tôi đã khai "bốn" nhiều lần | `grep -n 308d0cf4 ops/prompts/phien-hoan-thien-ke-hoach-20260822.md` ⇒ dòng 65 |
+
+**VA CHẠM WRITE SET ĐANG SỐNG — không cấp lease `PLAT-X8` được.** Đo trên `origin/ops/pkg-windows`
+(nhánh chưa về master):
+
+```
+lease-dang-windows-exec-1-codex-20260822.yaml   LEASE-DANG-WINDOWS   hết 2026-08-23T10:00:00Z
+lease-dang-windows-exec-2-codex-20260822.yaml   LEASE-DANG-WINDOWS   hết 2026-08-23T11:00:00Z
+  write_set: .github/workflows/ops-publish-lease.yml · ops/lease_publish.py · ops/lease_publish_test.py
+```
+
+Tức **đúng cả hai** tệp `write_set` của `PLAT-X8`, cộng một tệp nữa.
+
+**Hộp ⛔ của 3d ghi MƯỜI HAI chỗ sai, không phải sáu** — và họ nói thẳng rằng chính hộp 3d cũng chỉ là
+ảnh chụp lúc 06:2xZ. **Đo lại từng chỗ, đừng chép từ hộp.**
+
+> **Bài học họ trả giá, chép sang vì nó đổi CÁCH LÀM chứ không chỉ một con số:** một phép đo **đúng**
+> tự bác chính nó **trong 20 phút**. Họ quét đủ **99** ref lúc 05:2xZ ra *"0 lease chồng lấn, cấp lease
+> được"*; hai mươi phút sau nhánh `ops/pkg-windows` xuất hiện mang đúng một lease chồng lấn ⇒ kết luận
+> đảo chiều. **Quét đủ ref là CẦN, không ĐỦ — phải quét NGAY TRƯỚC KHI CẤP.** Và số ref cũng phải đo
+> chứ đừng chép: **98 → 99 → 158** trong một buổi.
+
+Kèm một bẫy tên trường: hạn lease là `lease_expires_at_utc`. Lượt quét đầu của họ đoán `het_han`/
+`expires_at`, nhận `None` cho cả 42 tệp, mà `None` đọc thành *"không có hạn"* thì bảng ra
+**`0 lease còn hạn`** — đúng cái kết luận sai mà phép đo ấy sinh ra để chặn.
+
+**Một điều đáng nhớ về `actionlint`:** container này **thiếu `shellcheck`**, nên `actionlint` ở đây là
+phép đo **YẾU HƠN** CI. Ai báo `actionlint rc=0` phải nói kèm **có `shellcheck` hay không**.
+
+**Chưa đo, họ khai:** 12 chỗ sai · **29** trường SHA trong **21** lease trỏ commit không tra được
+(17/44 lease reviewer) — chạm **lập luận** của §9 chứ không chỉ một con số, vì `reviewed_sha_required`
+được cổng kiểm **HÌNH DẠNG** (40-hex) chứ không kiểm **TỒN TẠI** · `SLICE-B-C` đã land (PR #216) ·
+master `2ab3560` xanh cả hai nền.
+
+**Cam kết phạm vi bổ sung:** từ 06:5xZ tôi **không đụng `ops/specs/plat-x8.md`** — `tra-luat-ae` đang
+giữ nó.
 
 ## 6. Cam kết phạm vi với phiên #233 — GIỮ ĐÚNG
 

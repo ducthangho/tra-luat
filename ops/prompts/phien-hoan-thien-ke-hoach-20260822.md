@@ -61,8 +61,8 @@ master** · write set · thứ tự · chặn ai.
 **Kiểm PR #229 TRƯỚC** — nó đang dựng `ops/HANG_DOI_PACKET.md` cho THỨ TỰ packet; đừng dựng chỗ thứ
 hai nói cùng chuyện.
 
-**C — Mục D tách thành mấy packet?** Đã tách: `review_class` → `PLAT-X8` (#225, spec bản **3f**
-`497c68360de7…`, chưa lease — va chạm write set với lease sống của `#238`) · cross-provider theo họ model → `PLAT-X7` (#220, proposed) · phần còn lại
+**C — Mục D tách thành mấy packet?** Đã tách: `review_class` → `PLAT-X8` (#225, spec bản **3g**
+`f3a2f5595120…`, chưa lease — va chạm write set với lease sống của `#238`) · cross-provider theo họ model → `PLAT-X7` (#220, proposed) · phần còn lại
 → *"mục D"*, chưa mở Issue. Cắt phần còn lại cho vừa trần ADR-0044 (`sensitive` ≤3 tệp / ≤300 dòng
 thêm) rồi trình người giữ kho.
 
@@ -85,7 +85,7 @@ thêm) rồi trình người giữ kho.
 | thứ | trạng thái |
 |---|---|
 | ~~**PR #230**~~ | **ĐÃ MERGE** 22-08 (master `3f64167`). Dòng này giữ làm lịch sử |
-| **PLAT-X8** (#225) | chờ **`#238`** land (KHÔNG phải `#227` — nó land 05:16Z rồi bị revert qua PR #237); **mười ba** chỗ phải sửa, ghi trong hộp ⛔ đầu `ops/specs/plat-x8.md` bản **`3f`** (`497c68360de7…`). **Chưa cấp lease được**: **BA** lease của `#238` giữ đúng cả hai tệp `write_set` của `PLAT-X8` tới `2026-08-23T15:00:00Z`. Khi cấp: packet là `sensitive` + executor `codex` ⇒ **ngoại lệ `ADR-0045`**, lease phải khai rõ — và **chưa cổng nào kiểm việc ấy** (`§20` xếp `ADR-0045` là `0 cổng`), nên phải tự kiểm bằng tay |
+| **PLAT-X8** (#225) | chờ **`#238`** land (KHÔNG phải `#227` — nó land 05:16Z rồi bị revert qua PR #237); **mười ba** chỗ phải sửa, ghi trong hộp ⛔ đầu `ops/specs/plat-x8.md` bản **`3g`** (`f3a2f5595120…`). **Chưa cấp lease được**: **BA** lease của `#238` giữ đúng cả hai tệp `write_set` của `PLAT-X8` tới `2026-08-23T15:00:00Z`. Khi cấp: packet là `sensitive` + executor `codex` ⇒ **ngoại lệ `ADR-0045`**, lease phải khai rõ — và **chưa cổng nào kiểm việc ấy** (`§20` xếp `ADR-0045` là `0 cổng`), nên phải tự kiểm bằng tay |
 | **#227** | **land rồi REVERT**: PR #234 merge 05:16:40Z ⇒ master ĐỎ Windows `59/68` ⇒ PR #237 hoàn nguyên ba tệp mã, giữ hồ sơ. Land lại là packet **`#238`** |
 
 Bắt đầu bằng **đo lại** bảng "Nền đã đo". Cái nào không tái lập được thì **nói ra**, đừng lặng lẽ dùng.

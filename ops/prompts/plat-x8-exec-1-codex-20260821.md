@@ -22,15 +22,19 @@
 > **VÀ KHI CẤP LẠI:** packet này là `sensitive`, executor là `codex` ⇒ đó là **ngoại lệ theo
 > `ADR-0045`**, chỉ hợp lệ khi lease (a) do chủ kho chỉ định tường minh, (b) reviewer khác nền,
 > (c) khai `review_class`, **(d) khai RÕ rằng đây là ngoại lệ theo §2**, và (e) có human readback
-> trước land. Lease lượt 1 (`3c21bcd8`, đã rút) có (a)(b)(c) nhưng **thiếu (d)**. Xem chỗ thứ 13
-> trong hộp ⛔ của đặc tả.
+> trước land. Lease lượt 1 (`3c21bcd8`, đã rút) có (a)(b)(c) nhưng **thiếu (d)**.
+>
+> **KHÔNG CỔNG NÀO CANH VIỆC NÀY** — đo: `ops/lease_publish.py` có **0** chỗ nhắc `review_class`
+> hay `0045`; `docs/PROTOCOL_DA_PHIEN.md:1090` xếp `ADR-0045` đúng ô **`0 cổng`**. Nên (a)–(e) là
+> **preflight THỦ CÔNG** của người cấp lease, không phải thứ máy chặn. Thiếu nó thì lease vẫn đăng
+> được — và đó chính là lý do phải đọc dòng này. Xem chỗ thứ 13 trong hộp ⛔ của đặc tả.
 
 
 Bạn là NGƯỜI THI CÔNG packet này. Reviewer sẽ là `claude` — khác họ model, tiêu chí N14 thoả.
 
 **ĐẶC TẢ CÓ THẨM QUYỀN là `ops/specs/plat-x8.md`**, băm
-`497c68360de79db129ef5158fa21c4f01decf48edb9c5f96637232907e2a6560` — **BẢN 3f**, 22-08-2026.
-Bản 3e (`ce14fb0b75e4…`), 3d (`f7f8e6209e4f…`), 3c (`182ea7621d02…`), 3b (`308d0cf44fc1…`) và mọi bản trước KHÔNG còn hiệu lực. **Đặc tả vẫn mang hộp ⛔ ĐỪNG CẤP
+`f3a2f5595120938d58b6d91f69ad6d38455340c7f7bd337cf7bb2453337aa393` — **BẢN 3g**, 22-08-2026.
+Bản 3f (`497c68360de7…`), 3e (`ce14fb0b75e4…`), 3d (`f7f8e6209e4f…`), 3c (`182ea7621d02…`), 3b (`308d0cf44fc1…`) và mọi bản trước KHÔNG còn hiệu lực. **Đặc tả vẫn mang hộp ⛔ ĐỪNG CẤP
 LEASE** — đọc hộp trước khi làm bất cứ gì với prompt này. Prompt này KHÔNG chép lại đặc
 tả — chép là dựng hai bản trôi lệch. Đọc đặc tả TRƯỚC, rồi đọc prompt này để biết nếp của kho.
 Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
@@ -40,7 +44,7 @@ Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
 | trường | giá trị |
 |---|---|
 | packet | `#225` — `[PLAT-X8]` |
-| đặc tả | `ops/specs/plat-x8.md` — bản **`3f`** (băm ở trên; **kiểm bằng `sha256sum` trước khi đọc**). Các bản trước (`9cb54a2e…`, `b88c53df…`, `328a74fa…`, `308d0cf4…`, `182ea762…`, `f7f8e620…`) KHÔNG còn hiệu lực |
+| đặc tả | `ops/specs/plat-x8.md` — bản **`3g`** (băm ở trên; **kiểm bằng `sha256sum` trước khi đọc**). Các bản trước (`9cb54a2e…`, `b88c53df…`, `328a74fa…`, `308d0cf4…`, `182ea762…`, `f7f8e620…`) KHÔNG còn hiệu lực |
 | write set | `ops/lease_publish.py` · `ops/lease_publish_test.py` — **ĐÚNG hai tệp** |
 | base | xem `base_sha` trong lease — neo vào `master` sau khi PR `#226` merge |
 | nhánh | `codex/plat-x8-exec-1` |

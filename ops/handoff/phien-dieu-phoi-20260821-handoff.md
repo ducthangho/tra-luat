@@ -23,7 +23,7 @@ spec_da_kiem_tren_ban_DA_DEN: true   # git cat-file -p origin/<nhánh>:… | sha
 
 packet_issue: 225
 lease: CHUA CAP
-pr: CHUA MO
+pr: 230                            # https://github.com/ducthangho/tra-luat/pull/230
 ```
 
 > **CẬP NHẬT 22-08-2026 — đặc tả đã ĐÓNG BĂNG LẠI HAI LẦN sau khi bản bàn giao này viết xong.**

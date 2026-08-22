@@ -1,0 +1,41 @@
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 254
+packet_id: CI-NOI-BANG-VAO-GATE
+phase_key: M7
+revision: 1
+generation: 1
+lease_id: ci-noi-bang-vao-gate-exec-1-claude-20260822
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+assurance_target: cross_approved
+access: read-write
+write_set:
+  - .github/workflows/ci.yml
+branch: claude/ci-bang-phu-thuoc-handoff-vum08x
+branch_ownership: exclusive
+target_branch_neu_land: master
+reviewed_sha_required: 28543805b8b82c60a0cd1a1f0797c583eb01ab50
+base_sha: 28543805b8b82c60a0cd1a1f0797c583eb01ab50
+start_from_sha: 28543805b8b82c60a0cd1a1f0797c583eb01ab50
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-22 ("Duyet. Chot ca ba" — noi 5 dong vao ci.yml sau dong 373; tach nen; chay VO DIEU KIEN, duyet lech Q3 tai Packet Issue, KHONG doi -r2 cho M7)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuoc chu kho'
+leased_at_utc: '2026-08-22T20:15:32Z'
+lease_expires_at_utc: '2026-08-23T20:15:32Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+reviewer_provider: codex
+review_class: systemic
+dieu_kien_dung:
+  - 'Mo rong write set qua ngoai `.github/workflows/ci.yml` — doi revision moi.'
+  - 'Dung `ci_phamvi_test.py` de CHUNG MINH bo buoc nao do la an toan (fast-path) — do la CI-FASTPATH-THEO-DIFF, can -r2, KHONG thuoc packet nay.'
+  - 'Lam cong tac fast-path theo dif — VE TAP DOC KHONG TON TAI.'
+  - 'Sua `.github/checks/ci_phamvi*.py` — ngoai write set cua lease nay.'

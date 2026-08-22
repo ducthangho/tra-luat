@@ -8,8 +8,10 @@ that: mot luot bi cat giua chung de lai tep meo va luot sau doc ban meo lam ban 
 DOI CHUNG TRUOC, HIEU SO SAU: moi ca "dot bien X phai lam DO" deu chay ban SACH truoc va doi
 no XANH — do sach khong doi chung thi khong tach duoc "do vi dot bien" voi "do san".
 
-`khoi_phuc` don `__pycache__` truoc MOI ca: ca truoc de lai `.pyc` cua `release.py` da dot
-bien thi ca sau co the chay MA CU — co che CLAUDE.md ghi la tung tuoc rang moi mutant.
+`khoi_phuc` dua worktree ve SACH truoc MOI ca bang `git clean -fdq` + `git checkout -f`:
+ca `n5` thay mot tep TRACKED bang thu muc nen `git checkout -- <tep>` khong hoan nguyen duoc,
+va `clean` don luon `.pyc` cu — ca truoc de lai `.pyc` cua `release.py` da dot bien thi ca sau
+co the chay MA CU, co che CLAUDE.md ghi la tung tuoc rang moi mutant.
 """
 from __future__ import annotations
 

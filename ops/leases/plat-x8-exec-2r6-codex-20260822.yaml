@@ -374,5 +374,4 @@ no_da_khai:
       Đo được thành số ở lượt này: 9 lease CHƯA HẾT HẠN giữ `ops/lease_publish*` mà cả 9 thuộc packet
       ĐÃ LAND — 9 quyền ghi còn sống sau khi việc xong (lần đo trước: 5). Không trường nào trong tệp
       lease đánh dấu "việc đã xong", nên phân biệt sống/chết phải đi tìm HIỆN VẬT trên master.
-posted_comment_id: null
 posted_comment_id: 5382109316   # workflow ghi, ĐỪNG sửa tay

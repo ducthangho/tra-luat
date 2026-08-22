@@ -1,0 +1,125 @@
+# Lease EXECUTOR — `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 4. Neo head xuất phát 9f5b08e8.
+#
+# Lượt này tồn tại nhờ một PHÂN XỬ CÓ CHỦ ĐÍCH của người giữ kho đối với một chốt DỪNG mà chính
+# đặc tả r3 đã đăng ký trước — xem `phan_xu_chot_dung`.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 227
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+phase_key: LEASE-DANG-DUNG-MOT-LAN
+revision: 4
+generation: 1
+lease_id: lease-dang-exec-4-codex-20260821
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r4.md
+spec_sha256_required: abe7c292aba05aa772b77c246a570d72c9b8e97220247030ae15af8f750d0fce
+spec_ke_thua:
+  - path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r3.md
+    sha256: c65d5dbd9d2b398978226f6863cf7cd4e4ddb219a7086be0005e65804a0f47da
+  - path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r2.md
+    sha256: 3f310582de59dce7c109717dbab13ef9467b80c67ffeafc0ac8e1484309e0093
+
+phan_xu_chot_dung:
+  chot_da_dang_ky: 'r3: hình dạng C (phản chứng bắt buộc còn thiếu) lần thứ 2 ⇒ DỪNG, không vá, xuất handoff'
+  su_kien: 'P2 lượt 3 ĐÚNG là hình dạng C, ở đúng khối mà C lần 1 chỉ vào'
+  reviewer: 'nêu HAI cách đọc và TỪ CHỐI tự quyết, đẩy về người giữ kho (§2)'
+  quyet_dinh: 'đọc là "C lần 1 CHƯA ĐÓNG HẾT" — KHÔNG tăng bộ đếm C; cấp lượt vá 4'
+  can_cu: >-
+    r3 CHỈ đặt hàng T59/T60 (nửa "workflow CÓ gọi" và "tôn trọng rc!=0"); executor giao ĐỦ, còn
+    vượt — reviewer tự dựng D12/D13/D14/D15 và tất cả đều bị bắt. Nửa rc=9 KHÔNG nằm trong đơn
+    hàng ⇒ đây là ĐƠN HÀNG THIẾU, không phải executor bỏ sót. Chốt DỪNG sinh ra để chặn "vá tiếp
+    lần thứ n cùng một hình dạng do người THI CÔNG"; ở đây mắt xích yếu là ĐẶC TẢ.
+  khai_thang: >-
+    Đây là OVERRIDE có chủ đích một chốt DỪNG đã đăng ký trước. Ghi nguyên trạng để không ai đọc
+    thành "chốt ấy không tồn tại" hay "chốt ấy tự động mềm". Lần thứ BA đặc tả của phiên điều
+    phối là mắt xích yếu của packet (bản 1 gây P1 lượt 1 · prompt lượt 2 chứa tiền đề chưa đo ·
+    r3 đặt hàng thiếu nửa nhánh) — và r4 rút ra hình dạng D từ đó.
+
+verdict_phai_doc:
+  path: ops/reviews/lease-dang-review-3-claude-verdict.md
+  sha256: 79f8bb2a48e92f9081cd50ba0d6d24a8f4bd7246d92ab0cc2d500e26ecfe24a0
+  ket_luan: changes_requested
+  so_finding: 2
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 570
+  don_vi: 'tệp trong write_set · dòng THÊM theo `git diff --numstat cfaccff9..HEAD` (tính CẢ bốn lượt)'
+  con_lai_uoc_tinh: 47
+  ghi_chu: 'Head 9f5b08e8 đang +523. Người giữ kho nới 550 -> 570 (Q21). Vượt ⇒ DỪNG + handoff (§2).'
+
+mo_rong_pham_vi_co_chu_dich:
+  gi: 'nhánh `rc=9` của `check` (ca T63)'
+  vi_sao_ngoai_pham_vi_goc: 'reviewer đo D23 sống sót 61/61 nhưng delta = 0 so cfaccff9 ⇒ KHÔNG báo là finding, đúng doctrine "đo nền trước khi nghi bản vá của mình"'
+  ai_quyet: 'người giữ kho (Q22) — vá một thể rẻ hơn, hai nhánh cùng một lớp'
+  ghi_chu: 'Khai ra vì đây là mở rộng phạm vi CÓ CHỦ ĐÍCH, không phải phạm vi trôi.'
+
+branch: codex/lease-dang-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: 9f5b08e81a131a1c22d15b6d5809885eae11413f
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+start_from_sha: 9f5b08e81a131a1c22d15b6d5809885eae11413f
+
+prompt_path: ops/prompts/lease-dang-exec-4-codex-20260821.md
+prompt_sha256_required: 22eb3ea7b84368b65a29b6b293ffe9608e166a35fba2e530e8cd716648fd6df7
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("Cấp lượt 4, vá nốt nhánh rc=9")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T20:00:00Z'
+lease_expires_at_utc: '2026-08-22T20:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 3
+attempts_limit: 4
+executor_calls_limit: 8
+executor_calls_used_truoc_luot_nay: 3
+
+reviewer_provider: claude
+review_rounds_limit: 4
+review_rounds_used_truoc_luot_nay: 3
+review_calls_limit: 5
+review_calls_used_truoc_luot_nay: 3
+
+muc_tieu:
+  - 'T62: kiem-github trả 9 ⇒ lease đó KHÔNG POST, hai lease kia POST, bước rc=0 (bỏ qua != lỗi)'
+  - 'T63: check trả 9 ⇒ y hệt (mở rộng phạm vi có chủ đích, Q22)'
+  - 'Q23: sửa con số — đột biến "cho kiem() gọi mạng trở lại" giết 9 ca, không phải 8'
+  - 'Q24: bảng TỪNG NHÁNH RẼ của mã mới ↔ phép đo nào ĐỎ nếu gỡ nó — MỤC BẮT BUỘC của báo cáo'
+
+gate_bat_buoc:
+  - 'python3 ops/lease_publish_test.py -> rc=0, N/N hai số BẰNG NHAU, >= 63 ca'
+  - 'CÙNG suite với GITHUB_ACTIONS/GITHUB_REPOSITORY/GITHUB_ACTOR đặt và `gh` VẮNG -> N/N y hệt'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'D22 (rc=9 cua kiem-github thanh LOI) PHAI DO'
+  - 'D24 (rc=9 cua kiem-github DI TIEP) PHAI DO — hien SONG SOT 61/61'
+  - 'D23 (rc=9 cua check DI TIEP) PHAI DO — hien SONG SOT 61/61'
+  - 'git diff --numstat cfaccff9..HEAD -> <= 3 tệp, <= 570 dòng thêm'
+
+dieu_kien_dung:
+  - 'Ngân sách sẽ vượt 570 dòng thêm hoặc 3 tệp ⇒ DỪNG, xuất handoff'
+  - 'Chốt phải nằm NGOÀI write_set ⇒ DỪNG, xuất handoff'
+  - 'Hình dạng A lần 7 · B lần 3 · C lần 2 · D lần 2 ⇒ DỪNG, không vá'
+  - 'C lần 2 = một chốt an ninh KHÔNG thuộc đơn hàng T62/T63 mà thiếu phản chứng. BẢNG Q24 chính là thứ phát hiện ra nó — làm bảng ấy TRƯỚC khi tuyên bố xong.'

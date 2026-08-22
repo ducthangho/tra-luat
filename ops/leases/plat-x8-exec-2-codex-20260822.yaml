@@ -30,38 +30,19 @@
 # NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt cụt giá
 # trị — đã mất dữ liệu IM LẶNG một lần ở lease exec-4 của wp55.
 
-# ══ REVISION 2 (22-08-2026 ~15:5xZ) — VÌ SAO, ĐỌC TRƯỚC KHI SO BĂM VỚI BẢN CHIẾU TRÊN #225 ══
-#
-# Revision 1 neo đặc tả BẢN 4 và prompt `f74adeab…`. Cả hai HỎNG, bắt được lúc sắp giao prompt cho
-# executor — TRƯỚC khi codex chạy dòng nào:
-#   · Bản 4 khai *"sửa mười ba chỗ: xong"* mà BỎ SÓT ba chỗ mà chính hộp ⛔ liệt kê là việc phải làm
-#     KHI `#238` land: §0 bảng đo `42/42`, §5 mục 9, và **§6 `A9` sàn `N >= 42`**. Sàn ấy nằm **31 ca
-#     DƯỚI** thực tế (73) ⇒ một lượt xoá 31 test vẫn qua nghiệm thu. Đó là sàn CHẾT.
-#   · Prompt `f74adeab…` chỉ được đổi băm ở MỘT dòng, nên vẫn ghi *"CHƯA CÓ HIỆU LỰC — ĐỪNG DÙNG
-#     NGUYÊN TRẠNG"*, *"chưa cấp lease được"*, nhánh `codex/plat-x8-exec-1`, sàn `N >= 42`.
-#
-# NGUYÊN NHÂN GỐC, một câu: neo lại theo **BĂM** thì `grep` băm tìm được mọi chỗ TRÍCH băm, nhưng câu
-# khẳng định **TRẠNG THÁI** viết bằng CHỮ thì `grep` băm KHÔNG BAO GIỜ thấy. **Quét theo băm không
-# thay được quét theo TRẠNG THÁI.**
-#
-# Đây là lần ĐẦU packet này phải sửa đặc tả sau lưng một lease ĐANG SỐNG — lease lượt 1 từng khoe
-# *"chưa lần nào phải sửa sau lưng một lease đang sống"*. Nên nó đi qua REVISION, không sửa im lặng:
-# `revision: 1 → 2`, hai băm đổi, lý do ghi ở đây, và bản chiếu trên `#225` sẽ có comment thứ hai.
-# `posted_comment_id` bên dưới trỏ bản chiếu của revision 1 — **băm trong comment ấy đã CŨ**.
-#
 da_bi_thay_the: plat-x8-exec-2r2-codex-20260822
 da_bi_thay_the_ly_do: >-
   HẾT HIỆU LỰC từ ~15:5xZ 22-08. Tệp này neo đặc tả BẢN 4 và prompt `f74adeab…`; cả hai HỎNG
   (bản 4 bỏ sót ba con số phụ thuộc `#238` — nặng nhất là sàn `A9` `N >= 42` trong khi thực tế 73;
   prompt vẫn ghi *"chưa cấp lease được"* và nhánh lượt 1). Bắt được TRƯỚC khi executor chạy.
-  GIỮ nguyên trạng làm hồ sơ — nó đã đăng (comment 5380905569) và băm trong bản chiếu ấy đã CŨ.
+  GIỮ nguyên trạng làm hồ sơ — nó ĐÃ ĐĂNG (comment 5380905569) và băm trong bản chiếu ấy đã CŨ.
   Lease đang hiệu lực: `plat-x8-exec-2r2-codex-20260822.yaml`. ĐỪNG dùng tệp này để bắt tay.
 schema_version: 2
 event: executor_lease_granted
 packet_issue: 225
 packet_id: PLAT-X8
 phase_key: PLAT-X8
-revision: 2
+revision: 1
 generation: 2
 lease_id: plat-x8-exec-2-codex-20260822
 thay_the_lease: plat-x8-exec-1-codex-20260821
@@ -121,12 +102,12 @@ model_ghi_chu: >-
   (#220), khai `depends_on: [PLAT-X8]`. Executor đổi model giữa chừng ⇒ phải đi qua revision mới.
 
 spec_path: ops/specs/plat-x8.md
-spec_sha256_required: d85a75d835566c902cb62fead8521ad44851baa388d65329e4c94025b9bad6ca
+spec_sha256_required: 46d9a0299a0906b53af3eb023628eacadf37ce87d0b96debb36c84dae9f0277d
 spec_status: da_duyet
 spec_duyet_boi: ducthangho
 spec_duyet_luc: 'direct, in-session, 2026-08-22 (duyệt bản 4 + cấp lease: "đồng ý, tạo packet issue và lease đi")'
 spec_note: >-
-  BẢN 5. Tìm đặc tả ở `master` TRƯỚC; chưa thấy thì `git fetch origin
+  BẢN 4. Tìm đặc tả ở `master` TRƯỚC; chưa thấy thì `git fetch origin
   claude/phien-tra-luat-5a-handoff-9o1cqp` (PR #240, chưa merge lúc ký). Câu này cố ý đúng ở CẢ HAI
   phía của lần merge. Thứ định danh tệp là BĂM, không phải tên nhánh — tên nhánh là thứ trôi và bị
   xoá. Băm đã kiểm trên bản ĐÃ ĐẾN (`git cat-file -p <ref>:ops/specs/plat-x8.md | sha256sum`).
@@ -168,7 +149,7 @@ base_ghi_chu: >-
   reviewer. ĐỦ 40 ký tự hex thường — cổng từ chối bản rút gọn, và bản rút gọn là mỏ neo GIẢ.
 
 prompt_path: ops/prompts/plat-x8-exec-1-codex-20260821.md
-prompt_sha256_required: c59c1482095ed70f394aaee0444548fbf4830f5bd60cc214875387d74c75cd6c
+prompt_sha256_required: f74adeabae51894323cb7ffa77abeb3c9333a5fec7161bc8935214fe347cd1b4
 prompt_note: >-
   Tên tệp giữ hậu tố `-1-` của lượt 1 CÓ CHỦ Ý: nội dung prompt không đổi vai, chỉ neo lại băm sang
   bản 4 và bổ sung khối *KHÔNG CỔNG NÀO CANH VIỆC NÀY*. Đổi tên tệp sẽ làm mọi con trỏ cũ chết mà
@@ -186,11 +167,6 @@ recorder_ghi_chu: >-
 
 leased_at_utc: '2026-08-22T14:10:00Z'
 lease_expires_at_utc: '2026-08-23T14:10:00Z'
-revision_2_luc_utc: '2026-08-22T15:55:00Z'
-revision_2_ly_do: >-
-  Đặc tả bản 4 → bản 5 (ba con số phụ thuộc `#238` bị bỏ sót, nặng nhất là sàn `A9` 42 → 73) và
-  prompt executor viết lại (bản trước còn khai *"chưa cấp lease được"* + nhánh lượt 1). Hạn chót
-  KHÔNG dời — revision không mua thêm thời gian.
 run_minutes: 90
 cua_so_chong_lan_ghi_chu: >-
   Cửa sổ chồng lấn với lease CÒN HIỆU LỰC = 0 (đo 14:09:32Z, xem đầu tệp). Chồng lấn với lease

@@ -72,6 +72,11 @@
 # `revision: 1 → 2`, hai băm đổi, lý do ghi ở đây, và bản chiếu trên `#225` sẽ có comment thứ hai.
 # `posted_comment_id` bên dưới trỏ bản chiếu của revision 1 — **băm trong comment ấy đã CŨ**.
 #
+da_bi_thay_the: plat-x8-exec-2r4-codex-20260822
+da_bi_thay_the_ly_do: >-
+  HẾT HIỆU LỰC ~17:2xZ 22-08. Bản vá hai P1 làm tổng thành 313 dòng thêm, vượt trần `ADR-0044`
+  đúng 13 dòng; chủ kho duyệt ngoại lệ và ngoại lệ ấy phải có VẾT ⇒ revision 4.
+  GIỮ nguyên trạng làm hồ sơ; đã đăng. Lease hiệu lực: `plat-x8-exec-2r4-codex-20260822`.
 schema_version: 2
 event: executor_lease_granted
 packet_issue: 225

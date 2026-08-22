@@ -62,7 +62,7 @@ master** · write set · thứ tự · chặn ai.
 hai nói cùng chuyện.
 
 **C — Mục D tách thành mấy packet?** Đã tách: `review_class` → `PLAT-X8` (#225, spec bản **3i**
-`ca852d95ab59…`, chưa lease — va chạm write set với lease sống của `#238`) · cross-provider theo họ model → `PLAT-X7` (#220, proposed) · phần còn lại
+`46d9a0299a09…`, **đã cấp lease** `plat-x8-exec-2-codex-20260822`) · cross-provider theo họ model → `PLAT-X7` (#220, proposed) · phần còn lại
 → *"mục D"*, chưa mở Issue. Cắt phần còn lại cho vừa trần ADR-0044 (`sensitive` ≤3 tệp / ≤300 dòng
 thêm) rồi trình người giữ kho.
 
@@ -85,7 +85,7 @@ thêm) rồi trình người giữ kho.
 | thứ | trạng thái |
 |---|---|
 | ~~**PR #230**~~ | **ĐÃ MERGE** 22-08 (master `3f64167`). Dòng này giữ làm lịch sử |
-| **PLAT-X8** (#225) | chờ **`#238`** land (KHÔNG phải `#227` — nó land 05:16Z rồi bị revert qua PR #237); **mười ba** chỗ phải sửa, ghi trong hộp ⛔ đầu `ops/specs/plat-x8.md` bản **`3i`** (`ca852d95ab59…`). **Chưa cấp lease được**: **BA** lease của `#238` giữ đúng cả hai tệp `write_set` của `PLAT-X8` tới `2026-08-23T15:00:00Z`. Khi cấp: packet là `sensitive` + executor `codex` ⇒ **ngoại lệ `ADR-0045`**, lease phải khai rõ — và **chưa cổng nào kiểm việc ấy** (`§20` xếp `ADR-0045` là `0 cổng`), nên phải tự kiểm bằng tay |
+| **PLAT-X8** (#225) | **ĐANG CHẠY** — `#238` đã land 11:58:18Z 22-08 (PR #246, `563e0eb8`), vật cản hết. Đặc tả **bản 4** `46d9a0299a09…`; lease **`plat-x8-exec-2-codex-20260822`** đã cấp (executor `codex`, reviewer `claude`, khai **ngoại lệ `ADR-0045` §2** mà lượt 1 thiếu). Mười ba chỗ sai giữ trong hộp đầu đặc tả làm hồ sơ. **`ADR-0045` vẫn `0 cổng`** ⇒ preflight thủ công, không phải bằng chứng cổng dương tính. |
 | **#227** | **land rồi REVERT**: PR #234 merge 05:16:40Z ⇒ master ĐỎ Windows `59/68` ⇒ PR #237 hoàn nguyên ba tệp mã, giữ hồ sơ. Land lại là packet **`#238`** |
 
 Bắt đầu bằng **đo lại** bảng "Nền đã đo". Cái nào không tái lập được thì **nói ra**, đừng lặng lẽ dùng.

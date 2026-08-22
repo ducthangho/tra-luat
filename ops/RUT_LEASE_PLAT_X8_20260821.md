@@ -154,3 +154,19 @@ Hai thứ nữa suýt làm phép đo sai lần nữa:
   `ops/lease_publish.py` (`ai-dang-giu <đường-dẫn>`) quét mọi ref `refs/remotes/origin/ops/*`, và
   phải fail-close khi không fetch được ref nào — "không đo được" phải ĐỎ, không được thành "không có".
 - `PATHS-TREN-NHANH-MOI-CHUA-CO-PHAN-CHUNG` — xem phần đầu.
+
+---
+
+## PHỤ LỤC 22-08-2026 ~13:0xZ — hàng 2 của bảng trên nay đọc SAI
+
+Hàng 2 ghi *"ra bản `3i`, không phải bản 4 — nền còn đang đổi"*. **Đúng lúc viết, sai từ 11:58:18Z**,
+khi `#238` land (PR #246, `563e0eb8`). Nguyên văn ở trên **giữ nguyên** — biên bản là BẰNG CHỨNG, không
+phải con trỏ; sửa nó là xoá dấu vết của một quyết định đã đúng trong bối cảnh của nó.
+
+Kết cục thật: **bản 4** = `46d9a0299a0906b53af3eb023628eacadf37ce87d0b96debb36c84dae9f0277d`, và lease lượt **2** `plat-x8-exec-2-codex-20260822`
+đã cấp. Lease lượt 1 (`3c21bcd8`) vẫn RÚT như biên bản này ghi — lượt 2 là lease MỚI, không phải khôi
+phục lượt 1.
+
+**Nợ `SO-LEASE-KHONG-NAM-MOT-CHO` vẫn MỞ**, và lượt cấp này lại phải quét tay 162 ref. Cộng thêm một số
+đo được: **10** lease chưa hết hạn giữ `ops/lease_publish*` mà cả 10 thuộc packet ĐÃ LAND — tức nợ
+`AG-T0-01B-thu-hoi-lease-chua-co-duong` nay là **10** quyền ghi còn sống sau khi việc xong (trước đo được 5).

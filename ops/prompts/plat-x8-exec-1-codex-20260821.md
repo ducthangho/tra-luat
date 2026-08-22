@@ -33,7 +33,11 @@
 Bạn là NGƯỜI THI CÔNG packet này. Reviewer sẽ là `claude` — khác họ model, tiêu chí N14 thoả.
 
 **ĐẶC TẢ CÓ THẨM QUYỀN là `ops/specs/plat-x8.md`**, băm
-`ca852d95ab598de9f2fbbfcfaf3a4e0b3383540a9937e415fb13441fece0712c` — **BẢN 3i**, 22-08-2026.
+`46d9a0299a0906b53af3eb023628eacadf37ce87d0b96debb36c84dae9f0277d` — **BẢN 4**, 22-08-2026.
+Bản 4 là bản **lease `plat-x8-exec-2-codex-20260822` neo vào**: hộp ⛔ đổi từ *chặn* sang
+*đã giải* (`#238` land `563e0eb8` lúc 11:58:18Z, quét 13:01Z ra **0** lease còn hiệu lực), còn
+mười ba phát hiện **giữ nguyên văn** làm hồ sơ. Bản `3i` (`ca852d95ab59…`) và mọi bản trước đã
+HẾT HIỆU LỰC.
 Bản 3h (`3c9bff4f5410…`), 3g (`f3a2f5595120…`), 3f (`497c68360de7…`), 3e (`ce14fb0b75e4…`), 3d (`f7f8e6209e4f…`), 3c (`182ea7621d02…`), 3b (`308d0cf44fc1…`) và mọi bản trước KHÔNG còn hiệu lực. **Đặc tả vẫn mang hộp ⛔ ĐỪNG CẤP
 LEASE** — đọc hộp trước khi làm bất cứ gì với prompt này. Prompt này KHÔNG chép lại đặc
 tả — chép là dựng hai bản trôi lệch. Đọc đặc tả TRƯỚC, rồi đọc prompt này để biết nếp của kho.

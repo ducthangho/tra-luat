@@ -1,11 +1,21 @@
 # ĐẶC TẢ — `PLAT-X8`: cổng TÍNH `effective_review_class`, thôi nhận lời khai
 
-> # ⛔ ĐỪNG CẤP LEASE NEO VÀO BẢN NÀY
+> # ✅ BẢN 4 — VẬT CẢN ĐÃ HẾT; LEASE NEO VÀO ĐÚNG BẢN NÀY
 >
-> **Điều kiện chờ ĐÃ ĐỔI: nay chờ `#238`, KHÔNG phải `#227`.** Và số chỗ sai không phải sáu — đo lại
-> toàn bảng 22-08-2026 trên `origin/master` (đo lại trên `195a478d`) thì ra **mười ba**. Chỗ thứ 12 tìm được khi đi
-> kiểm một việc KHÁC (`SLICE-B-C` đã land chưa); chỗ thứ 13 do **cross-review trên PR #240** chỉ ra —
-> nó chỉ sai chỗ hở đúng, còn kết luận thì sai, xem cuối hộp.
+> **Bốn bản trước (`3b`…`3i`) mở đầu bằng `⛔ ĐỪNG CẤP LEASE NEO VÀO BẢN NÀY`. Điều kiện chờ ấy nay
+> đã MÃN:** `#238` land **11:58:18Z 22-08-2026** (PR #246, `563e0eb8`), và quét lúc **13:01Z** ra
+> **0** lease còn hiệu lực giữ `write_set` của `PLAT-X8`. Người giữ kho duyệt cấp lease in-session
+> cùng ngày.
+>
+> **Hộp này KHÔNG bị xoá, và đó là chủ ý.** Mười ba chỗ sai bên dưới ở lại NGUYÊN VĂN làm hồ sơ —
+> chúng là thứ đắt nhất packet này sản xuất ra, và **ba trong số đó là lỗi của chính phiên soạn đặc
+> tả** (một cổng không tồn tại · một con số phình 14 lần vì clone nông · một bằng chứng bịa). Thứ đổi
+> ở bản 4 là **TRẠNG THÁI** (chặn → thông), không phải danh sách phát hiện. Xoá hồ sơ đi là bỏ đúng
+> phần có giá trị và giữ lại phần chỉ mô tả một lúc đã qua.
+>
+> Số chỗ sai vẫn là **mười ba**, đo lại toàn bảng 22-08-2026. Chỗ thứ 12 tìm được khi đi kiểm một
+> việc KHÁC (`SLICE-B-C` đã land chưa); chỗ thứ 13 do **cross-review trên PR #240** chỉ ra — nó chỉ
+> sai chỗ hở đúng, còn kết luận thì sai, xem cuối hộp.
 >
 > ## Vì sao điều kiện đổi
 >
@@ -17,19 +27,32 @@
 > Nên mọi câu *"chờ `#227` land"* ở tài liệu khác nay đọc sai: `#227` **đã** land. Thứ chưa xảy ra là
 > ba tệp mã của nó **đứng được trên Windows**.
 >
-> ## VA CHẠM WRITE SET ĐANG SỐNG — đây là lý do cứng nhất để chưa cấp lease
+> ## VA CHẠM WRITE SET — ĐÃ GIẢI, đo 13:01Z 22-08-2026
 >
-> **BA** lease `LEASE-DANG-WINDOWS` (`exec-1` · `exec-2` · `exec-3`, packet `#238`,
-> `granted_by: ducthangho`) giữ `write_set`: `.github/workflows/ops-publish-lease.yml` ·
-> **`ops/lease_publish.py`** · **`ops/lease_publish_test.py`** — tức **ĐÚNG CẢ HAI** tệp `write_set`
-> của `PLAT-X8`. Hạn muộn nhất **`2026-08-23T15:00:00Z`** (`exec-3`, commit `3360f6da` lúc 07:56Z).
-> Cả ba nằm trên nhánh `ops/pkg-windows`, **chưa về master**. Cấp lease `PLAT-X8` bây giờ là dựng
-> lại đúng cửa sổ hai writer đã làm lease lượt 1 bị RÚT.
+> **Lý do chặn cũ, giữ nguyên để đối chiếu:** ba lease `LEASE-DANG-WINDOWS` (`exec-1` · `exec-2` ·
+> `exec-3`, packet `#238`, `granted_by: ducthangho`) giữ `.github/workflows/ops-publish-lease.yml` ·
+> **`ops/lease_publish.py`** · **`ops/lease_publish_test.py`** — tức ĐÚNG CẢ HAI tệp `write_set` của
+> `PLAT-X8`, hạn muộn nhất `2026-08-23T15:00:00Z`. Cấp lease lúc ấy là dựng lại đúng cửa sổ hai
+> writer đã làm lease lượt 1 bị RÚT.
 >
-> Đo 08:39:57Z trên clone đầy đủ, 159 ref, 100 tệp lease phân biệt, `KHÔNG_ĐO_ĐƯỢC = 0`:
-> **10** lease còn hạn giữ `ops/lease_publish*` — 7 của `LEASE-DANG-DUNG-MOT-LAN`, 3 của
-> `LEASE-DANG-WINDOWS`. Bản 3d/3e ghi *"hai lease… tới 11:00Z"*: thiếu `exec-3`, vì lúc quét nó
-> chưa được đẩy. **Riêng ba lease `LEASE-DANG-WINDOWS` đã đủ đỏ** — không cần phân loại bảy cái kia.
+> **Nay `#238` ĐÃ LAND** — merge `563e0eb8` lúc **11:58:18Z** qua PR #246. Bằng HIỆN VẬT trên master,
+> không bằng lời khai: `ops/lease_publish_test.py` có **73** ca, gồm cả `t43`–`t68` của `#227` lẫn
+> `t69`–`t73` mới của `#238`.
+>
+> Quét **13:01Z** (162 ref, **hai nguồn KHỚP**, 114 blob / 104 tệp lease, `KHÔNG_ĐO_ĐƯỢC = 0`):
+> **22** lease chạm `ops/lease_publish*`, **10 chưa hết hạn** — nhưng cả 10 thuộc
+> `LEASE-DANG-DUNG-MOT-LAN` (`#227`) và `LEASE-DANG-WINDOWS` (`#238`), **hai packet đã land**
+> ⇒ **0 lease CÒN HIỆU LỰC**.
+>
+> **"Chưa hết hạn" KHÔNG phải "còn hiệu lực" — và không trường nào trong tệp lease nói ra điều đó.**
+> Phải đi tìm HIỆN VẬT của packet trên master; Issue thì vẫn `open` cả sau khi land, nên hỏi Issue là
+> hỏi sai chỗ. Mười quyền ghi còn sống sau khi việc đã xong chính là nợ
+> `AG-T0-01B-thu-hoi-lease-chua-co-duong` đo được thành số.
+>
+> ⚠ **Con số 13:01Z này KHÔNG dùng lại được cho lần cấp sau.** Hai lần trước nó tự hết hạn trong
+> 20–30 phút (0 → 1 sau 20 phút; 2 → 3 sau nửa giờ). Quét đủ ref là **CẦN, không ĐỦ**: phải quét lại
+> NGAY TRƯỚC lúc cấp. Chưa có lệnh nào trong kho trả lời *"lease nào đang giữ đường dẫn X"* trên toàn
+> ref — nợ `SO-LEASE-KHONG-NAM-MOT-CHO`, xem `ops/RUT_LEASE_PLAT_X8_20260821.md`.
 >
 > **Trích số thì trích kèm ĐƠN VỊ SINH RA NÓ.** Bốn cặp dưới đây là những chỗ hai phiên đã đọc ra hai
 > con số khác nhau và suýt đi truy một bệnh không có. **Bảng này cố ý KHÔNG ghi giá trị** — giá trị
@@ -163,12 +186,23 @@
 > (`có` · `không` · **`không đo được`**) ánh xạ ra `rc` nào; và **`không đo được` phải bao gồm ca
 > clone nông**, vì đó chính là ca đã lừa được lượt đo đầu tiên.
 >
-> ## Việc phải làm, đúng thứ tự
+> ## Việc phải làm — ĐÃ LÀM XONG, từng bước kèm bằng chứng
 >
-> Chờ **`#238`** land (ba tệp mã đứng được trên Windows, có `run_id` của lượt `workflow_dispatch`
-> xanh cả hai job trên exact head) → **đo lại toàn bảng §0**, không vá lẻ → sửa mười ba chỗ → đóng
-> băng **bản 4** → quét lease trên **mọi** ref rồi mới cấp lease neo băm bản 4. Prompt
-> `ops/prompts/plat-x8-exec-1-codex-20260821.md` giữ lại nhưng phải neo lại băm trước khi dùng.
+> Bản 3i viết chuỗi này ở thì tương lai. Nó đã chạy hết; ghi lại kết cục ngay tại chỗ, vì một danh
+> sách việc còn đọc như đang treo là đúng thứ hộp này sinh ra để chống.
+>
+> | bước | bằng chứng |
+> |---|---|
+> | chờ `#238` land | merge `563e0eb8` **11:58:18Z 22-08** (PR #246). Nghiệm thu `W3` của `#238` đòi Windows xanh trên exact head — thuộc packet ấy, không phải packet này |
+> | đo lại toàn bảng §0, không vá lẻ | đã đo lại toàn bảng ở `3c`; các bản sau chỉ sửa chỗ ĐO SAI, có ghi nguyên nhân từng chỗ |
+> | sửa mười ba chỗ | xong ở `3c`…`3i`; **giữ nguyên văn** trong hộp này làm hồ sơ |
+> | đóng băng **bản 4** | bản này |
+> | quét lease trên **mọi** ref rồi mới cấp | quét **13:01Z**: 162 ref hai nguồn khớp, **0** lease còn hiệu lực. Xem mục *VA CHẠM WRITE SET* ở trên |
+> | prompt executor neo lại băm | `ops/prompts/plat-x8-exec-1-codex-20260821.md` giữ nguyên đường dẫn, neo lại băm bản 4 |
+>
+> Lease cấp theo chuỗi này: **`plat-x8-exec-2-codex-20260822`** — lượt **2**, vì lượt 1
+> (`plat-x8-exec-1-codex-20260821`, commit `3c21bcd8`) đã **RÚT**; biên bản
+> `ops/RUT_LEASE_PLAT_X8_20260821.md`.
 >
 > ## Chỗ thứ 13 — lease `codex` cho packet `sensitive` là NGOẠI LỆ CÓ ĐIỀU KIỆN, và KHÔNG cổng nào canh
 >
@@ -288,7 +322,8 @@ mà **nội dung yêu cầu vẫn không đổi một chữ** — thứ trôi l�
 | 3f | `497c68360de7…` | SỬA chỗ 12: `29 trường / 21 tệp` → **`2/2`** — con số cũ là tạo tác của **clone NÔNG**, không phải SHA giả; mệnh đề *"chỗ 12 chạm §9"* cũng sai (`reviewed_sha_required` **44/44** tồn tại). Cộng: nền đo → `195a478d`, va chạm → **3** lease tới `23-08T15:00Z`, bài học **0**. Hết hiệu lực ở cross-review lượt 2 |
 | 3g | `f3a2f5595120…` | vá 3 finding cross-review lượt 2 — nặng nhất: bản 3e khai một **cổng KHÔNG TỒN TẠI**, nay là preflight thủ công |
 | 3h | `3c9bff4f5410…` | ba đính chính từ hai phiên khác: tiêu đề bảng đếm sai, câu `--depth` sai kết cục, thêm bảng ĐƠN VỊ |
-| 3i | bản này | **Bảng ĐƠN VỊ tự phạm lỗi đơn vị, và lệnh đo trong nó CHẠY SAI.** (a) Hàng đầu ghi *"N lease bị sửa nội dung"* — chênh đếm **phiên bản thừa**, không phải số tệp; đo thật: **4** tệp / **14** phiên bản. (b) Bảng chép **giá trị**, mà giá trị trôi trong một giờ ⇒ bỏ hết giá trị, giữ **quan hệ bất biến** + lệnh đo. (c) Lệnh đo tôi viết **thiếu một `sort`** nên `uniq -c` chỉ đếm dòng liền kề — vẫn `rc=0`, vẫn in ra thứ trông hợp lý, mà **thiếu 3/4 kết quả**; chỉ lộ vì đã trích nguyên văn từ spec ra chạy. (d) Nêu manh mối `plat-x5-review-2` có **năm** phiên bản — nợ do `tra-luat-3a` ghi, ngoài packet này |
+| 3i | `ca852d95ab59…` | **Bảng ĐƠN VỊ tự phạm lỗi đơn vị, và lệnh đo trong nó CHẠY SAI.** (a) Hàng đầu ghi *"N lease bị sửa nội dung"* — chênh đếm **phiên bản thừa**, không phải số tệp; đo thật: **4** tệp / **14** phiên bản. (b) Bảng chép **giá trị**, mà giá trị trôi trong một giờ ⇒ bỏ hết giá trị, giữ **quan hệ bất biến** + lệnh đo. (c) Lệnh đo tôi viết **thiếu một `sort`** nên `uniq -c` chỉ đếm dòng liền kề — vẫn `rc=0`, vẫn in ra thứ trông hợp lý, mà **thiếu 3/4 kết quả**; chỉ lộ vì đã trích nguyên văn từ spec ra chạy. (d) Nêu manh mối `plat-x5-review-2` có **năm** phiên bản — nợ do `tra-luat-3a` ghi, ngoài packet này |
+| **4** | bản này | **VẬT CẢN HẾT.** `#238` land `563e0eb8` lúc 11:58:18Z (PR #246); quét 13:01Z ra **0** lease còn hiệu lực giữ `write_set`. Hộp ⛔ đổi từ *chặn* sang *đã giải* — **mười ba phát hiện GIỮ NGUYÊN làm hồ sơ**. Thêm khối khai ngoại lệ `ADR-0045` §2 mà lease lượt 1 thiếu. Đây là bản lease `plat-x8-exec-2-codex-20260822` neo vào
 
 Bốn phát hiện trên **một** đường là dấu hiệu sai ở QUYẾT ĐỊNH GỐC chứ không ở các bản vá. Các bản
 trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm bản dùng được.

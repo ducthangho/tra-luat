@@ -1,0 +1,126 @@
+# Lease EXECUTOR — `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 5. Neo head xuất phát b32b4241.
+#
+# Lượt này tồn tại nhờ OVERRIDE THỨ HAI của người giữ kho đối với một chốt DỪNG đăng ký trước —
+# và lần này HAI chốt cùng kêu. Xem `phan_xu_chot_dung`.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 227
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+phase_key: LEASE-DANG-DUNG-MOT-LAN
+revision: 5
+generation: 1
+lease_id: lease-dang-exec-5-codex-20260821
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r5.md
+spec_sha256_required: 2c8fb5c68e45dbdcd3e21c316169623d4dcab33459934b575ae8c626b08cb796
+spec_ke_thua:
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r4.md, sha256: abe7c292aba05aa772b77c246a570d72c9b8e97220247030ae15af8f750d0fce}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r3.md, sha256: c65d5dbd9d2b398978226f6863cf7cd4e4ddb219a7086be0005e65804a0f47da}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r2.md, sha256: 3f310582de59dce7c109717dbab13ef9467b80c67ffeafc0ac8e1484309e0093}
+
+handoff_phai_doc:
+  path: ops/handoff/lease-dang-exec-4-codex-handoff.md
+  sha256: dfada28511f0b63e4922b98fa08b55cb03d57f28faccfb9709b227e316c291b7
+  ghi_chu: 'Bảng Q24 trong đó là ĐẦU VÀO CHÍNH của lượt 5 — sáu nhánh guard còn hở do chính executor liệt.'
+
+phan_xu_chot_dung:
+  hai_chot_cung_keu:
+    - 'C lần 2 — executor tuyên ở lượt 4, và ĐÚNG: gỡ guard `mark rc!=0` sống sót 63/63 (phiên điều phối đo lại, xác nhận)'
+    - 'D lần 2 — phiên điều phối tự phát hiện: r2/Q11 đặt hàng "bọc set +e quanh MỌI lệnh" ở mức KHỐI mà không đặt hàng phản chứng cho TỪNG guard ⇒ sáu nhánh lọt. r4 đăng ký "D lần 2 ⇒ DỪNG".'
+  quyet_dinh: 'cấp lượt 5, NHƯNG ĐỔI CÁCH — không liệt kê nhánh nữa (Q25)'
+  can_cu: >-
+    Bốn lượt qua, thứ hỏng KHÔNG phải bản vá mà là CÁCH ĐẶC TẢ HỎI câu kiểm chứng. Vá bằng cách
+    LIỆT KÊ nhánh đã thất bại hai lượt liên tiếp — đúng ngưỡng "cùng một hình dạng >= 2-3 lần thì
+    hỏi CÓ NÊN LÀM KHÔNG, đừng hỏi VÁ THẾ NÀO". Nên lượt 5 để MÁY dẫn xuất danh sách từ YAML.
+  khai_thang: >-
+    OVERRIDE THỨ HAI đối với một chốt đăng ký trước. Ghi nguyên trạng để không ai đọc thành "chốt
+    ấy không tồn tại" hay "chốt ấy tự động mềm". CẢ HAI lần hình dạng D đều do PHIÊN ĐIỀU PHỐI
+    gây ra, không phải executor — đó là lý do lượt 5 đổi kiến trúc thay vì đổi người.
+  chot_moi_dang_ky_lan_dau: >-
+    Nếu ca meta T64 TỰ NÓ đo sai chỗ (M1 không giết được nó) thì DỪNG — khi ấy chính bản vá kiến
+    trúc cho D lại mắc D, và câu hỏi đúng không còn là "vá thế nào".
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 620
+  don_vi: 'tệp trong write_set · dòng THÊM theo `git diff --numstat cfaccff9..HEAD` (tính CẢ năm lượt)'
+  con_lai_uoc_tinh: 79
+  ghi_chu: 'Head b32b4241 đang +541. Người giữ kho nới 570 -> 620 (Q27). Vượt ⇒ DỪNG + handoff (§2).'
+
+branch: codex/lease-dang-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: b32b424165c4a952661cf776bf953d91a7eaf814
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+start_from_sha: b32b424165c4a952661cf776bf953d91a7eaf814
+
+prompt_path: ops/prompts/lease-dang-exec-5-codex-20260821.md
+prompt_sha256_required: 9cd7cd16ebea72ed39db3707091189d272089259709fae9577f23f9abdd8a94c
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("Lượt 5: giết hình dạng D bằng kiến trúc")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_note: >-
+  Phiên điều phối soạn cả năm bản đặc tả, và là tác giả của CẢ HAI lần hình dạng D. Reviewer lượt
+  5 phải soi ĐẶC TẢ trước, bản vá sau — đặc biệt là ca meta T64, thứ được đặt ra để giết chính
+  hình dạng mà phiên này mắc hai lần.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T22:00:00Z'
+lease_expires_at_utc: '2026-08-22T22:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 4
+attempts_limit: 5
+executor_calls_limit: 10
+executor_calls_used_truoc_luot_nay: 4
+
+reviewer_provider: claude
+review_rounds_limit: 5
+review_rounds_used_truoc_luot_nay: 3
+review_calls_limit: 6
+review_calls_used_truoc_luot_nay: 3
+
+muc_tieu:
+  - 'T64 ca META: tập guard DẪN XUẤT TỪ YAML phải BẰNG tập trong sổ đăng ký; lệch ⇒ ĐỎ'
+  - 'T65 T64 phải FAIL-CLOSE: bộ trích rỗng hoặc không phân tích được ⇒ ĐỎ (ba trạng thái)'
+  - 'T66 mỗi guard trong sổ có ca THẬT, khẳng định BỐN vế; bao đủ sáu nhánh còn hở'
+
+gate_bat_buoc:
+  - 'python3 ops/lease_publish_test.py -> rc=0, N/N hai số BẰNG NHAU, >= 66 ca'
+  - 'CÙNG suite với GITHUB_ACTIONS/GITHUB_REPOSITORY/GITHUB_ACTOR đặt và `gh` VẮNG -> N/N y hệt'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'M1 (thêm guard vào YAML, không đăng ký) PHẢI ĐỎ — PHÉP THỬ QUYẾT ĐỊNH'
+  - 'M2 (xoá một mục khỏi sổ đăng ký) PHẢI ĐỎ'
+  - 'M3 (bộ trích trả []) PHẢI ĐỎ'
+  - 'gỡ TỪNG guard trong sáu guard -> ca của guard đó PHẢI ĐỎ (mark/body/GITHUB_ENV hiện sống sót 63/63)'
+  - 'git diff --numstat cfaccff9..HEAD -> <= 3 tệp, <= 620 dòng thêm'
+
+khong_duoc_dung:
+  - '_doc_gh / _kiem_loai_so_hieu / _kiem_comment_da_co cho các nhánh bảng Q24 xếp "một phần" — chúng là HÀM PYTHON, không phải guard shell, nên NGOÀI đơn hàng T64-T66. Thấy đáng lo thì KHAI vào chua_do_duoc, đừng tự mở phạm vi.'
+  - 'ops/specs/** · finding đã đóng · khe race hai nhánh ops/** · nợ nền chay(env=None)'
+
+dieu_kien_dung:
+  - 'Ngân sách sẽ vượt 620 dòng thêm hoặc 3 tệp ⇒ DỪNG, xuất handoff'
+  - 'Chốt phải nằm NGOÀI write_set ⇒ DỪNG, xuất handoff'
+  - 'Hình dạng A lần 7 · B lần 3 · C lần 2 · D lần 3 ⇒ DỪNG, không vá'
+  - 'M1 KHÔNG giết được T64 ⇒ DỪNG — bản vá kiến trúc cho D lại mắc D'

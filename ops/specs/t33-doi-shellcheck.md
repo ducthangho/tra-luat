@@ -28,6 +28,17 @@ ops/cai_actionlint.sh
 
 Hai đường dẫn, liệt kê đủ, không ký tự đại diện.
 
+**Kích thước dự kiến — có MỐC NEO đo được, chưa có số của chính packet này.** Phạm vi tương đương gần
+nhất là `PLAT-X8` (PR #248): **cùng hai tệp**, `git diff --numstat` cho **2 tệp / +265 dòng thêm** lúc
+16:5xZ, và phiên thi hành báo đã lên **313** sau hai bản vá P1 — tức **một** mối quan tâm trên vùng này đã
+chạm trần `sensitive` của ADR-0044 (**≤ 3 tệp / ≤ 300 dòng thêm**).
+
+Đó là mốc neo, **không** phải số của packet này: chưa có diff triển khai nên chưa suy ra được. **Phải đo lại
+bằng `git diff --numstat` trước vòng review**, và vượt trần thì dừng để revision thiết kế hoặc khai lý do
+theo ADR-0044 — chưa có số đo thì chưa được cấp lease thi hành.
+
+Mốc neo ấy cũng là lý do packet này **không gộp** nợ của packet kia: xem `ngoai_pham_vi`.
+
 **`ops/cai_actionlint.sh` BẮT BUỘC nằm trong write set, không phải tuỳ chọn.** Nếu `t33` đòi
 `shellcheck` mà bộ cài không cấp nó thì lượt CI kế tiếp **ĐỎ trên master** — biến một bản vá cổng thành
 một sự cố. Hai mục tiêu phải đi cùng một packet vì chúng khoá lẫn nhau. Đây chính là luật L2 áp dụng

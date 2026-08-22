@@ -30,6 +30,17 @@ ops/lease_publish_test.py
 
 Hai đường dẫn, liệt kê đủ, không ký tự đại diện.
 
+**Kích thước dự kiến — có MỐC NEO đo được, chưa có số của chính packet này.** Phạm vi tương đương gần
+nhất là `PLAT-X8` (PR #248): **cùng hai tệp**, `git diff --numstat` cho **2 tệp / +265 dòng thêm** lúc
+16:5xZ, và phiên thi hành báo đã lên **313** sau hai bản vá P1 — tức **một** mối quan tâm trên vùng này đã
+chạm trần `sensitive` của ADR-0044 (**≤ 3 tệp / ≤ 300 dòng thêm**).
+
+Đó là mốc neo, **không** phải số của packet này: chưa có diff triển khai nên chưa suy ra được. **Phải đo lại
+bằng `git diff --numstat` trước vòng review**, và vượt trần thì dừng để revision thiết kế hoặc khai lý do
+theo ADR-0044 — chưa có số đo thì chưa được cấp lease thi hành.
+
+Mốc neo ấy cũng là lý do packet này **không gộp** nợ của packet kia: xem `ngoai_pham_vi`.
+
 **Write set này ĐANG BỊ GIỮ lúc đóng băng đặc tả.** Đo 16:5xZ 22-08-2026 trên 164 ref
 (`yaml.safe_load`, fail-close): `plat-x8-exec-2`, `-2r2`, `-2r3` khai đúng hai đường dẫn này, hết hạn
 `2026-08-23T14:10:00Z`, và `PLAT-X8` đang chạy thật (PR `#248`, +265/−1 trên đúng hai tệp).
@@ -165,6 +176,6 @@ khai" — đúng loại việc đẻ ra hình dạng A.
    đối chiếu lại bằng thân comment sẽ thấy khác, và khác đó là tạo tác của công cụ đọc.
 3. **Vì sao chỉ `plat-x5-*` dính** (3/90 lease có nhiều id). Chưa phân định được là do `PLAT-X5` chạy
    nhiều lượt review hơn hay do nhánh của nó fan-out rộng hơn.
-4. **6 lease `LEASE-DANG-*` "đã tiêu" không tự khai điều đó.** Kết luận ấy dựng bằng tay từ hiện vật trên
+4. **8 lease `LEASE-DANG-*` "đã tiêu" không tự khai điều đó.** Kết luận ấy dựng bằng tay từ hiện vật trên
    master (`kiem_github` = 1, bộ test 73 ca). Không trường nào trong tệp lease nói ra, và trạng thái Issue
    cũng không.

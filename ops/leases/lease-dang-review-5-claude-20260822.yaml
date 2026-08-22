@@ -81,3 +81,4 @@ canh_bao_cho_reviewer: >-
   chính của lượt này là tấn công đúng giả định ấy: dựng nhánh chặn KHÔNG đi qua `bao_chan`
   (`BI_CHAN=1` viết thẳng · `exit 1` · `continue` im lặng · đổi tên hàm). Lọt cái nào là E lần 2,
   và theo chốt r7 thì verdict phải là `dung_lai`.
+posted_comment_id: 5377860501   # workflow ghi, ĐỪNG sửa tay

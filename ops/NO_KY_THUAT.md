@@ -1066,10 +1066,11 @@ git ls-tree -r <ref> -- ops/leases/                          # gom (blob, duong 
 
 Máy chưa canh được mục này — chưa có cổng nào so biên nhận đăng giữa các nhánh.
 
-## 19. `LEASE-THAY-THE-CHUA-CHUAN-HOA` — 4/120 blob mang một trường không tài liệu nào biết
+## 19. `LEASE-THAY-THE-CHUA-CHUAN-HOA` — 5/121 blob mang một trường không tài liệu nào biết
 
-**Đo 22-08-2026, 165 ref.** `ops/leases/**` có **120** cặp `(blob, đường dẫn)` duy nhất trên **110**
-đường dẫn. Trong đó **4** blob mang trường `da_bi_thay_the`, và **cả 4** thuộc đúng một chuỗi:
+**Snapshot đo lại 22-08-2026 trên 166 nhánh remote (không tính symbolic `origin/HEAD`).** `ops/leases/**` có
+**121** cặp `(blob, đường dẫn)` duy nhất trên **111** đường dẫn. Trong đó **5** blob mang trường
+`da_bi_thay_the`, và **cả 5** thuộc đúng một chuỗi:
 
 ```
 plat-x8-exec-2 -> -2r2 -> -2r3 -> -2r4 -> -2r5 -> -2r6
@@ -1107,7 +1108,7 @@ hợp lệ.
 
 1. **Chưa có lược đồ.** `da_bi_thay_the` không nằm trong protocol, ADR, hay schema lease nào. Nó có
    thể được thu nhận, hoặc chết cùng packet đã đặt ra nó — chưa ai quyết.
-2. **Vắng trường KHÔNG phải bằng chứng còn hiệu lực.** 116/120 blob vắng nó vì trường **chưa tồn
+2. **Vắng trường KHÔNG phải bằng chứng còn hiệu lực.** 116/121 blob vắng nó vì trường **chưa tồn
    tại** lúc chúng được đúc, không phải vì chúng còn sống. Mọi bộ đọc phải dùng nó theo chiều
    **THU HẸP** tập người giữ, không bao giờ **MỞ RỘNG** — sai chiều là fail-open.
 3. **Chưa có đường thu hồi** (nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong`). `da_bi_thay_the` chỉ

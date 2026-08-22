@@ -1,6 +1,13 @@
 # ADR-0046 — Tác giả XUYÊN SUỐT, reviewer MỚI mỗi lượt, cắt phiên ở BIÊN PACKET
 
-- **Trạng thái:** Accepted (2026-08-22, đo trên 4 lượt cross-review PR #250; chủ kho phê duyệt)
+- **Trạng thái:** Proposed (2026-08-22)
+
+> **Vì sao PROPOSED chứ không Accepted, dù chủ kho đã duyệt mô hình.** Cross-review lượt 1 của PR #252
+> bắt đúng chỗ (`adr-accepted-tren-bang-chung-khong-tai-lap`, P1): phần lớn căn cứ dưới đây — các phép
+> đếm và bốn quan sát nhân quả của PR #250 — **chỉ sống trong comment GitHub**, không có biên nhận trong
+> `ops/reviews/` (39 biên nhận trên master, **0** cái cho #250). Không thể vừa dùng chúng để `Accepted`
+> vừa đòi reviewer *"không nhận lời khai của executor"*. **Điều kiện để promote lên `Accepted`:** đóng
+> băng bằng chứng bốn lượt ấy thành biên nhận trong `ops/reviews/`, rồi neo ADR này vào chúng.
 
 Mô hình phiên cho một chu kỳ soạn spec + review:
 
@@ -54,6 +61,9 @@ theo lịch hay theo độ dài context.
 
 ## Cổng
 
-**0 cổng.** Mô hình phiên không đọc được bằng máy từ trong kho: không hiện vật nào khai "phiên này có phải phiên
-đã viết spec không". Khoản 1–3 là kỷ luật vận hành. Khoản 4 có thể cưỡng chế một phần trong tương lai (đòi verdict
+**0 cổng VẬN HÀNH** — nói có điều kiện, vì câu tuyệt đối *"0 cổng"* ở bản đầu che mất một cổng đang có
+(cross-review PR #252, `khong-phai-khong-cong-tuyet-doi`): `adr-song` **có** canh ADR này — nó đòi ADR được
+đăng ký ở §20, đòi trạng thái hai bên khớp, và đòi có dòng `Trạng thái` đọc được. Cái nó **không** canh là
+bốn khoản của mô hình. Mô hình phiên chưa đọc được bằng máy từ trong kho: không hiện vật nào khai "phiên này
+có phải phiên đã viết spec không". Khoản 1–3 là kỷ luật vận hành. Khoản 4 có thể cưỡng chế một phần trong tương lai (đòi verdict
 mang thời điểm đo cho mọi con số) nhưng chưa có cổng nào làm việc ấy hôm nay — nói ra để không ai tưởng đã có.

@@ -292,12 +292,15 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
 - **REVIEWER KHÔNG ĐO ĐƯỢC THÌ REVIEW CHỈ LÀ SOÁT CHÍNH TẢ — đo được bằng số, 3 lượt/0 so 1 lượt/3.**
   Bốn lượt cross-review trên cùng một PR (#250): ba lượt đầu reviewer chỉ nhận **hai tệp `.md`** cộng
   tài liệu tham chiếu, tìm được `4 → 11 → 2` finding và **KHÔNG con số phân rã nào**. Lượt 4 cấp thêm
-  một **mirror git đầy đủ** trong sandbox (`git clone --bare` + bản làm việc, 165 nhánh, không nông) và
+  một **mirror git đầy đủ** trong sandbox (`git clone --bare` + bản làm việc; số nhánh là snapshot có thể
+  trôi, không phải bằng chứng bền) và
   đổi nhiệm vụ chính thành *đo lại từng con số*: ra **ba** con số phân rã ngay lượt đầu tiên có năng lực
   ấy. Không phải reviewer ba lượt đầu kém — họ **không có cách nào** kiểm một con số nào, nên cả một
   LỚP lỗi nằm ngoài tầm với. Giá của bản vá: một `clone --bare` vào thư mục sandbox. **Bắt reviewer tự
   vá + tự test cải thiện CHẤT LƯỢNG finding; chỉ năng lực ĐO mới cải thiện ĐỘ PHỦ** — hai đòn bẩy khác
   nhau, đừng nhầm cái này mua được cái kia.
+  Các số theo lượt trong đoạn này hiện chỉ có ở comment PR #250, chưa có biên nhận trong kho và KHÔNG
+  TÁI LẬP ĐƯỢC từ một bundle offline; đừng dùng chúng như một gate đã kiểm.
   · **Hệ luận: DANH SÁCH BẠN GIAO CHO REVIEWER TRỞ THÀNH TRẦN CỦA HỌ, trừ khi bạn tự khai nó thiên vị.**
   Lượt 4 tôi giao bảng 21 con số kèm **chính script đã trích ra nó**, và nói thẳng rằng script lọc theo
   **danh sách đơn vị đoán trước** (`lease` `ref` `blob` `tệp` `dòng`…) nên chắc chắn thiếu — mỗi số nó

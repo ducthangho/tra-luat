@@ -16,8 +16,8 @@
 > **ĐÍNH CHÍNH 22-08:** `#227` land 05:16Z **rồi bị revert** (PR #237, Windows đỏ) — master nay
 > `2ab3560`, bộ test về **42** ca. Land lại là **`#238`**, nên thứ tự thật là
 > **`#238` → `PLAT-X8` → `#209` → `PLAT-X7` → mục D**. Và lease của `#238` đang giữ **đúng cả hai**
-> tệp `write_set` của `PLAT-X8` tới `2026-08-23T11:00:00Z` (hai lease, lượt 1 và 2) ⇒ **chưa cấp lease
-> `PLAT-X8` được.**
+> tệp `write_set` của `PLAT-X8` tới **`2026-08-23T15:00:00Z`** (**BA** lease: `exec-1` · `exec-2` ·
+> `exec-3`) ⇒ **chưa cấp lease `PLAT-X8` được.**
 >
 > **VÀ KHI CẤP LẠI:** packet này là `sensitive`, executor là `codex` ⇒ đó là **ngoại lệ theo
 > `ADR-0045`**, chỉ hợp lệ khi lease (a) do chủ kho chỉ định tường minh, (b) reviewer khác nền,
@@ -29,8 +29,8 @@
 Bạn là NGƯỜI THI CÔNG packet này. Reviewer sẽ là `claude` — khác họ model, tiêu chí N14 thoả.
 
 **ĐẶC TẢ CÓ THẨM QUYỀN là `ops/specs/plat-x8.md`**, băm
-`ce14fb0b75e437491f184952c0b46a2b8f3ab5ebf8b93cd40afbb67708d92de4` — **BẢN 3e**, 22-08-2026.
-Bản 3d (`f7f8e6209e4f…`), 3c (`182ea7621d02…`), 3b (`308d0cf44fc1…`) và mọi bản trước KHÔNG còn hiệu lực. **Đặc tả vẫn mang hộp ⛔ ĐỪNG CẤP
+`497c68360de79db129ef5158fa21c4f01decf48edb9c5f96637232907e2a6560` — **BẢN 3f**, 22-08-2026.
+Bản 3e (`ce14fb0b75e4…`), 3d (`f7f8e6209e4f…`), 3c (`182ea7621d02…`), 3b (`308d0cf44fc1…`) và mọi bản trước KHÔNG còn hiệu lực. **Đặc tả vẫn mang hộp ⛔ ĐỪNG CẤP
 LEASE** — đọc hộp trước khi làm bất cứ gì với prompt này. Prompt này KHÔNG chép lại đặc
 tả — chép là dựng hai bản trôi lệch. Đọc đặc tả TRƯỚC, rồi đọc prompt này để biết nếp của kho.
 Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
@@ -40,7 +40,7 @@ Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
 | trường | giá trị |
 |---|---|
 | packet | `#225` — `[PLAT-X8]` |
-| đặc tả | `ops/specs/plat-x8.md` — bản **`3e`** (băm ở trên; **kiểm bằng `sha256sum` trước khi đọc**). Các bản trước (`9cb54a2e…`, `b88c53df…`, `328a74fa…`, `308d0cf4…`, `182ea762…`, `f7f8e620…`) KHÔNG còn hiệu lực |
+| đặc tả | `ops/specs/plat-x8.md` — bản **`3f`** (băm ở trên; **kiểm bằng `sha256sum` trước khi đọc**). Các bản trước (`9cb54a2e…`, `b88c53df…`, `328a74fa…`, `308d0cf4…`, `182ea762…`, `f7f8e620…`) KHÔNG còn hiệu lực |
 | write set | `ops/lease_publish.py` · `ops/lease_publish_test.py` — **ĐÚNG hai tệp** |
 | base | xem `base_sha` trong lease — neo vào `master` sau khi PR `#226` merge |
 | nhánh | `codex/plat-x8-exec-1` |

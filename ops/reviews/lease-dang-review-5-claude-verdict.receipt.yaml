@@ -90,3 +90,22 @@ verdict_usage_caveats:
     trong thân. Theo đúng chuẩn ấy: **E = 2**, và `r7` viết thẳng *"E lần 2 ⇒ DỪNG, không vá"*.
 - id: bo-dem-sau-luot-5
   noi_dung: 'A = 6 · B = 2 · C = 1 · D = 3 (giữ; P2 là hồi quy phạm vi đo, không phải đổi độ mịn câu hỏi) · E = 2.'
+- id: DINH-CHINH-chua_do_duoc-cua-r2-va-r3
+  noi_dung: >-
+    Nợ của PHIÊN ĐIỀU PHỐI, trả ở đây vì đặc tả có băm thì KHÔNG sửa đè. `chua_do_duoc` của **r2**
+    khai HẸP hơn thực tế: Q9 khai *"CHỈ bước `đăng` gọi `kiem-github`"*, nửa *"check/body KHÔNG
+    gọi"* có `t58` đo, còn nửa *"workflow CÓ gọi"* thì KHÔNG ai đo — và đó chính là P1 của lượt
+    review 2. `r3` cũng thiếu giới hạn của `T53` (khai "toàn suite" nhưng đo một lệnh). Cả hai đã
+    được đóng bằng mã ở các lượt sau (`T59`/`T60`, và `T53` hạ lời khai theo Q18), nhưng bản thân
+    hai đặc tả ấy vẫn mang lời khai hẹp — ai đọc r2/r3 rời khỏi hồ sơ này phải đọc kèm mục đính
+    chính đây.
+- id: PACKET-LAND-o-muc-KHONG-PHAI-cross_approved
+  noi_dung: >-
+    **Verdict cuối cùng của packet là `dung_lai`, KHÔNG phải `approve`.** Người giữ kho quyết
+    LAND `ba82b06f` (2026-08-22) với lý do: hành vi của bản vá ĐÚNG trên mọi trục đã đo và tốt hơn
+    `master` (nơi cổng đang đăng trùng comment và chết cả lượt khi `packet_issue` là PR), còn hai
+    finding còn lại đều là *"một lần sửa TƯƠNG LAI có thể âm thầm gỡ mất guard"*, không phải
+    *"mã hôm nay sai"*. **Vì vậy packet này KHÔNG đạt `cross_approved`** — nó land bằng
+    **quyết định của người giữ kho (§2)**, và mức đảm bảo thật là `human_audited` + bốn lượt
+    cross-review đã đóng 7+1+4 finding. Đừng đọc lịch sử này thành "cross_approved". Hai finding
+    còn lại (`E lần 2` và hồi quy bất biến `set +e`) chuyển sang một packet RIÊNG với đặc tả sạch.

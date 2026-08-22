@@ -23,7 +23,7 @@ verdict_sha256: 38b4986dac49c0207cd6c6ccf68e169491065552288169a790c0e7ba49589523
 verdict_bytes: 14201
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/blob/PLACEHOLDER_COMMIT/ops/reviews/lease-dang-windows-review-1-claude-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/5a4fcc21de8bd3f7978acb54dc25c462743a8b65/ops/reviews/lease-dang-windows-review-1-claude-verdict.md
 evidence_url_ghi_chu: 'Điền SAU KHI ĐÃ PUSH và sau khi `git branch -r --contains` xác nhận.'
 
 verdict_nguon: >-

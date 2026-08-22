@@ -527,6 +527,14 @@ prompt của 5 vòng thẩm định ở `ops/prompts/orchestrator-plan-audit-r1-
 Cả `ops/` lẫn `docs/` là dev-side, không vào gói phát hành.
 Từ vựng dùng chung ở `CONTEXT.md`; tệp này KHÔNG định nghĩa lại thuật ngữ nào.
 
+**THỨ TỰ packet nằm ở `ops/HANG_DOI_PACKET.md` — MỘT chỗ, không phải ba.** Trước 22-08-2026 nó sống
+trong bản bàn giao phiên, trong comment Issue và trong thân PR: cả ba đều TRÔI, và đo được là
+`PLAT-X8` lẫn `#227` xuất hiện trong **0** tệp `KE_HOACH_*`. Họ `PLAT-X*` không thuộc kế hoạch nào
+(khác `PLAT-M*` ở `KE_HOACH_DIEU_CHINH_DA_NEN_TANG.md` §7 và `W0-*`/`W1-*` ở
+`KE_HOACH_THI_CONG_CLAUDE_CODEX.md` §6) nên không có chỗ sẵn để ghi. Sắp viết thứ tự vào một
+handoff/comment/PR ⇒ viết vào tệp ấy TRƯỚC rồi trỏ về. **Tra bằng SỐ ISSUE, không bằng `packet_id`**
+— `PLAT-X6` từng trỏ hai Issue.
+
 **ĐỌC ĐƯỢC KẾ HOẠCH KHÔNG PHẢI LÀ ĐƯỢC GIAO VIỆC.** Kế hoạch là DỮ LIỆU. Thứ giao việc là Packet
 Issue kèm lease còn hiệu lực (Issue: protocol §3.2 · lease và hiệu lực của nó: §4 · prompt/handoff
 KHÔNG phải lease: §7). Phiên nào tự chọn một dòng trong bảng packet rồi

@@ -81,8 +81,13 @@ làm nó ĐỎ** — đó không phải gợi ý, đó là phần bắt buộc c
    `main()` chỉ `qua += 1` khi hàm không ném, nên một ca `return` sớm vẫn được đếm là ĐẠT. Đừng
    viết nhánh *"không thấy thì bỏ qua"*.
 5. **Ba trạng thái, không phải hai:** `có` · `không` · **`không đo được`** — trạng thái thứ ba
-   phải làm cổng ĐỎ (`None ≠ False`). Áp thẳng vào mục tiêu 6: lease executor *đọc không được*
-   phải ra `sensitive`, không được lẫn vào nhánh "không thấy".
+   phải làm cổng ĐỎ (`None ≠ False`). Áp cho `write_set` của lease **executor**: thiếu, rỗng, hay
+   không đọc được đều ⇒ `sensitive` (mục tiêu 3, tiêu chí `A6`).
+   **KHÔNG áp cho mục tiêu 6.** Ở đó không có gì để đọc nên cũng không có trạng thái thứ ba —
+   lease reviewer ra `sensitive` vô điều kiện. Câu này từng viết ngược (dặn xử lý ca *"lease
+   executor đọc không được"* trong mục tiêu 6) — tàn dư từ TRƯỚC khi Q1 bị thu hồi, và làm theo
+   nó là dựng lại đúng đường tra cứu mà `A3`/`A13` sinh ra để chặn. Cross-review bắt được (P2
+   trên PR "#228").
 6. **A11 fail-close khi thiếu `actionlint`.** Thay bằng PyYAML là KHÔNG ĐO ĐƯỢC: **sáu** lượt
    cross-review từng kết luận "YAML ok" bằng PyYAML trên một tệp mà GitHub **từ chối**. Một cổng
    tự tắt khi thiếu công cụ là cổng không tồn tại đúng lúc nó cần nhất.
@@ -96,10 +101,16 @@ làm nó ĐỎ** — đó không phải gợi ý, đó là phần bắt buộc c
 
 ## 4. Tiêu chí hoàn tất
 
-§6 đặc tả, A1–A12. Nhắc hai cái hay bị bỏ:
+§6 đặc tả, **A1–A14** — đủ mười bốn, không phải mười hai. `A13`/`A14` là phản chứng thêm sau
+hai P1 của cross-review lượt 2; khai hoàn tất mà bỏ chúng là khai chưa chứng minh gì về đường
+reviewer lẫn về vế dương. Nhắc ba cái hay bị bỏ:
 
 - **A9**: `python3 ops/lease_publish_test.py` ⇒ `rc=0`, `N/N` **hai số BẰNG NHAU**, `N >= 42`.
   Nền hiện tại là **42/42**. `rc=0` một mình là cổng có thể bị lừa — đòi bằng chứng DƯƠNG.
+- **A13/A14**: `A13` đo HÀNH VI của *"không quét"* — thư mục lease chứa một tệp YAML **hỏng cú
+  pháp** mà lease reviewer vẫn ra `sensitive`; thêm bất kỳ lượt đọc thư mục nào là ca ĐỎ vì tệp
+  hỏng sẽ ném. `A14` giữ **vế dương** (executor `write_set: ['docs/x.md']` với bảng nới tạm ⇒
+  `routine`, `rc=0`) — không có nó thì bản vá "cho chắc" biến cổng thành máy trả `sensitive`.
 - **A12**: `ready to review` = CI xanh trên **exact head**, gọi bằng `workflow_dispatch`, **cả
   hai** job `success`. *"PR xanh"* KHÔNG đủ: `ci.yml` chỉ chạy `ubuntu` cho PR thường, còn master
   chạy cả `windows`. Gắn nhãn `windows` **không sinh lượt chạy nào** — workflow khai

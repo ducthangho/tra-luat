@@ -71,12 +71,32 @@ Câu ấy đo `ops/leases/` **trên master**. Đúng với master, **sai với t
 các nhánh `ops/**` và chỉ về master sau khi merge. Quét đủ **98 nhánh `ops/**`** ra **7** lease còn
 sống chạm hai tệp đó:
 
-| lease | hết hạn | giữ |
-|---|---|---|
-| `plat-x5-exec-1` … `1r4` (#206) | tới 22-08 01:50 | `_test.py` |
-| `slice-b-c-exec-1` (#215) | 22-08 06:40 | `_test.py` |
-| `lease-dang-exec-1` (#227) | 22-08 12:00 | **cả hai** |
-| `lease-dang-exec-2` (#227) | 22-08 13:30 | **cả hai** |
+| lease | hết hạn | giữ | packet đã land? |
+|---|---|---|---|
+| `plat-x5-exec-1` … `1r4` (#206) | tới 22-08 01:50 | `_test.py` | **RỒI** — `ops/chay_lease_publish_test.sh` + `ops/cai_actionlint.sh` có trên master |
+| `slice-b-c-exec-1` (#215) | 22-08 06:40 | `_test.py` | **RỒI** — dấu của nó có trong `ops/NO_KY_THUAT.md` trên master |
+| `lease-dang-exec-1` (#227) | 22-08 12:00 | **cả hai** | **CHƯA** |
+| `lease-dang-exec-2` (#227) | 22-08 13:30 | **cả hai** | **CHƯA** |
+
+**ĐỌC CỘT CUỐI TRƯỚC KHI DÙNG SỐ 7.** Bản đầu của biên bản này đếm cả bảy là *"lease còn sống"*, và
+cross-review bắt đúng chỗ đó (P2 trên PR "#228"): **"chưa hết hạn" KHÔNG phải "còn hiệu lực"**. Năm
+lease đầu thuộc packet đã land — việc xong rồi, chỉ mốc hết hạn là chưa tới. Số va chạm THẬT với
+`PLAT-X8` là **2**, cả hai của `#227`.
+
+**Đừng đọc thành "vậy quét toàn nhánh là thừa".** Hai điều đứng nguyên, và điều thứ hai mới là gốc:
+
+1. Quét master ra **0**. Cả hai lease `#227` — kể cả bản **đã đăng**, cấp trước 15 phút — đều vô
+   hình ở đó. Con số đúng là 2 chứ không phải 7, và **2 vẫn lớn hơn 0**.
+2. **Không có cách nào ĐỌC ĐƯỢC để biết một lease đã tiêu hay chưa.** Cột cuối bảng trên phải dựng
+   BẰNG TAY, bằng cách đi tìm HIỆN VẬT của từng packet trên master — không phải bằng một trường
+   trong tệp lease. Trạng thái Issue cũng không trả lời được: đo 22-08, **cả bốn** Issue #206 #215
+   #225 #227 đều còn `open` trong khi hai packet đầu đã land. Đây chính là nợ
+   `AG-T0-01B-thu-hoi-lease-chua-co-duong` đã khai từ trước — *"mọi packet land sớm hơn hạn đều để
+   lại một quyền ghi còn sống"* — và nay đo được nó để lại **5** cái.
+
+Nên lệnh `ai-dang-giu` ở phần nợ phải trả **ba** trạng thái cho mỗi lease — `còn hiệu lực` ·
+`đã tiêu` · **`không xác định được`** — chứ không phải đếm đầu tệp. Trạng thái thứ ba phải làm người
+cấp lease DỪNG LẠI, không được lẳng lặng tính là `đã tiêu`.
 
 **Sổ lease KHÔNG nằm một chỗ.** Mọi câu "không lease nào đang giữ X" đo trên master là mù theo cấu
 trúc, và chỗ mù nằm đúng ở lease MỚI NHẤT — tức lease khả nghi nhất, y hệt lý do `t23` không được

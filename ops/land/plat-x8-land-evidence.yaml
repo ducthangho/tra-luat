@@ -66,7 +66,7 @@ xac_nhan_nguoi_giu_kho:
       bản vá KHÔI PHỤC bất biến đặc tả tuyên bố chứ không đặt chính sách mới.
 
 merge_method: merge
-merge_commit: null              # điền sau khi merge — xem `bookkeeping`
+merge_commit: 647cfead5381ab1e42797bdf10a0342a4e6619c7
 land_operator: ducthangho
 
 pre_merge_checks:
@@ -87,6 +87,28 @@ pre_merge_checks:
     ket_qua: >-
       1 vòng đã tiêu (lượt 4, `la_canonical: true`, `cross_approved`, receipt v2). Còn 1 vòng theo
       `ADR-0043`. Ba lượt trước `la_canonical: false`, mỗi lượt có lý do riêng đã ghi.
+
+post_merge_checks:
+  - ten: 'head đã vào master'
+    ket_qua: '`merge-base --is-ancestor 28f32f7c origin/master` ⇒ ĐÚNG; master = 647cfead'
+  - ten: 'mã đã land đúng thứ định merge'
+    ket_qua: >-
+      `_BANG_LOP` trên master: đúng 7 mục, **0** mục `systemic`/`routine`. Đo trên master chứ không
+      suy từ diff — thứ land được mới là thứ có hiệu lực.
+  - ten: 'CI master trên merge commit'
+    ket_qua: >-
+      Đang đo (run 32596660559). **Đây là phép đo MỚI, không phải A12**: A12 neo `28f32f7c`, còn
+      merge commit `647cfead` là SHA khác. Master chạy CẢ ubuntu LẪN windows. Đỏ ở đây là việc của
+      phiên land, không phải nhiễu.
+    canh_bao_doc_ket_qua: >-
+      Trên lượt master, bước `PR head contains required EOL base` LUÔN `skipped` vì nó có
+      `if: github.event_name == 'pull_request'`. Tiêu chí *"không bước nào skipped"* chỉ đúng cho
+      lượt PR; bê sang lượt master là tự báo động giả.
+
+bookkeeping:
+  - 'Packet follow-up cho `t88`: Issue #255, `depends_on: [PLAT-X8]`, chưa có lease.'
+  - 'Lease executor `plat-x8-exec-2r6-codex-20260822` và lease reviewer `plat-x8-review-4-claude-20260822` chưa thu hồi — nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong` (chưa có đường thu hồi).'
+  - 'Verdict + biên nhận cả bốn lượt nằm trên nhánh handoff, CHƯA vào master. Chúng chỉ về master khi nhánh này land.'
 
 no_mang_theo_khi_land:
   - id: PLAT-X8-t88-CHUYEN-PACKET-SAU

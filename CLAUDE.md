@@ -518,6 +518,13 @@ Adapter lệch protocol thì ADAPTER sai — và "lệch" nay đo được, khô
 Vài điều kiện dừng của §12 được CƯỠNG CHẾ bằng `.claude/dev/packet_loop.py` (chạy `--help` cho bảng
 mã thoát); phản chứng chạy được cho từng chốt ở `.claude/dev/packet_loop_test.py`.
 
+**ADR nào đang hiệu lực — hỏi `docs/PROTOCOL_DA_PHIEN.md` §20, đừng hỏi trí nhớ.** §20 có ĐÚNG một
+dòng cho MỖI tệp trong `docs/adr/`, kèm cột "cổng nào ĐỌC luật ấy". Trước 22-08-2026 chỗ này là một
+dòng PHẠM VI (`ADR-0017 đến ADR-0035`) và nó đã chết: 45 ADR tồn tại, protocol nhắc 4, trọn
+`0036`–`0045` — mười ADR quản trị — nằm ngoài. Nay máy canh:
+`python .claude/dev/packet_loop.py adr-song --root .` đỏ khi thêm ADR mà quên bảng, khi bảng trỏ ADR
+không tồn tại, hoặc khi một ADR không có dòng `Trạng thái` đọc được.
+
 **Kế hoạch thi công và hồ sơ quyết định** — đọc khi nhận BẤT KỲ packet nào của kế hoạch này
 (`W0-*` · `W1-*` · `W2-*`):
 `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md` (bản đồ packet, write set dự kiến, thứ tự từng lane) ·

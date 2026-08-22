@@ -50,6 +50,7 @@ RC_TRACE = 5
 RC_DOCTRINE = 6
 RC_GUARD = 7
 RC_STATE = 8
+RC_ADR = 9
 
 PROVIDERS = ("claude", "codex")
 
@@ -1103,6 +1104,98 @@ def cmd_doctrine_scan(a, state_dir: Path) -> int:
     return RC_OK
 
 
+# --- adr-song: bảng định tuyến ADR trong protocol phải PHỦ HẾT docs/adr/ ---------
+#
+# VÌ SAO CÓ CỔNG NÀY. Trước 22-08-2026 protocol trỏ ADR bằng một dòng PHẠM VI
+# (`ADR-0017 đến ADR-0035`). Phạm vi phải được người sửa tay mỗi lần thêm ADR, và
+# đo được ngày ấy: 45 ADR tồn tại, protocol nhắc tên 4, trọn `0036`–`0045` nằm
+# ngoài — trong đó ba ADR người giữ kho vừa duyệt. Đây là con trỏ chết thứ SÁU
+# cùng hình dạng trong kho (bốn cái ở PR #230, một cái là docstring `t34` trỏ
+# `t42` đã bị gỡ). Chữa bằng cách viết lại dòng ấy là chữa cái thứ sáu và chờ cái
+# thứ bảy; nên thay bằng một BẢNG mà máy đòi đầy đủ.
+#
+# ĐÂY LÀ DANH SÁCH CHO PHÉP, KHÔNG PHẢI DANH SÁCH CẤM. Cổng không đoán ADR nào
+# "đáng" có mặt — nó đòi MỌI tệp `docs/adr/*.md` có đúng một dòng. Bài học
+# `v1.36.68`: danh sách cấm phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN.
+#
+# CỔNG KHÔNG PHÁN XỬ HIỆU LỰC TỪ CHUỖI `Trạng thái`. Đo được bốn cách viết cho
+# cùng một nghĩa, và `ADR-0036` ghi "Superseded một phần bởi ADR-0041" — khớp
+# tiền tố `Superseded` sẽ loại một ADR VẪN CÒN HIỆU LỰC. Cổng chỉ đòi dòng ấy
+# ĐỌC ĐƯỢC; hiệu lực là việc của người đọc bảng.
+_ADR_HANG = re.compile(r"^\|\s*`ADR-(\d{4})`\s*\|", re.M)
+_ADR_TRANG_THAI = re.compile(
+    r"^\s*[-*]\s*\*\*Tr[aạ]ng th[aá]i:?\*\*:?\s*(\S.*)$", re.M | re.I
+)
+_ADR_MUC = re.compile(r"^##\s*20\.\s", re.M)
+_ADR_MUC_KE = re.compile(r"^##\s", re.M)
+
+# NỢ CÓ TÊN `ADR-0016-THIEU-DONG-TRANG-THAI`, xem `ops/NO_KY_THUAT.md`. Liệt kê
+# TƯỜNG MINH từng số: một ADR MỚI thiếu dòng `Trạng thái` vẫn phải ĐỎ, và có
+# phản chứng cho đúng điều đó. Danh sách này chỉ được co lại, không được nới.
+_ADR_THA_THIEU_TRANG_THAI = frozenset({"0016"})
+
+
+def cmd_adr_song(a, state_dir: Path) -> int:
+    root = Path(a.root)
+    thu_muc = root / "docs" / "adr"
+    proto = root / "docs" / "PROTOCOL_DA_PHIEN.md"
+
+    # "Không thấy thì bỏ qua" là cách một ca ĐẠT mà không ĐO gì (bài học `t24`).
+    # Chỉ tha khi cây rõ ràng là bản sao rời; trong kho thật mà thiếu thì ĐỎ.
+    if not thu_muc.is_dir():
+        if (root / ".git").exists():
+            _die(RC_ADR, f"kho thật mà không có {thu_muc} — không đo được, không phải sạch")
+        print(f"adr-song: bỏ qua — {thu_muc} không có và cây không phải kho git")
+        return RC_OK
+    if not proto.is_file():
+        _die(RC_ADR, f"không có {proto} — không đo được")
+
+    tep = {f.name[:4]: f for f in sorted(thu_muc.glob("*.md")) if f.name[:4].isdigit()}
+    if not tep:
+        _die(RC_ADR, f"{thu_muc} không có tệp ADR nào — không đo được")
+
+    raw = proto.read_text(encoding="utf-8")
+    m = _ADR_MUC.search(raw)
+    if not m:
+        _die(RC_ADR, f"{proto} không có §20 (bảng định tuyến ADR) — cổng này không có gì để đo")
+    ke = _ADR_MUC_KE.search(raw, m.end())
+    than = raw[m.start(): ke.start() if ke else len(raw)]
+
+    trong_bang: list[str] = _ADR_HANG.findall(than)
+    loi: list[str] = []
+
+    trung = sorted({s for s in trong_bang if trong_bang.count(s) > 1})
+    for s in trung:
+        loi.append(f"ADR-{s}: có {trong_bang.count(s)} dòng trong §20 — phải đúng MỘT")
+
+    co = set(trong_bang)
+    for s in sorted(set(tep) - co):
+        loi.append(f"ADR-{s}: có tệp `{tep[s].name}` mà KHÔNG có dòng nào trong §20")
+    for s in sorted(co - set(tep)):
+        loi.append(f"ADR-{s}: §20 có dòng mà KHÔNG có tệp trong docs/adr/ — con trỏ chết")
+
+    for s, f in sorted(tep.items()):
+        if _ADR_TRANG_THAI.search(f.read_text(encoding="utf-8")):
+            continue
+        if s in _ADR_THA_THIEU_TRANG_THAI:
+            continue
+        loi.append(
+            f"ADR-{s}: `{f.name}` không có dòng `Trạng thái` đọc được — "
+            f"trạng thái thứ ba (không đo được) làm cổng ĐỎ, không làm nó xanh"
+        )
+
+    if loi:
+        for d in loi:
+            print(d, file=sys.stderr)
+        _die(RC_ADR, f"{len(loi)} chỗ lệch giữa docs/adr/ và §20 của {proto}")
+    print(
+        f"adr-song: sạch — {len(tep)} ADR trên đĩa, {len(trong_bang)} dòng trong §20, khớp 1–1"
+        + (f" (tha thiếu trạng thái: {sorted(_ADR_THA_THIEU_TRANG_THAI)})"
+           if _ADR_THA_THIEU_TRANG_THAI else "")
+    )
+    return RC_OK
+
+
 def cmd_status(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     print(json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True))
@@ -1124,7 +1217,8 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=(
             "Mã thoát: 0 ok · 2 sai đối số · 3 chạm trần · 4 sai provider · "
             "5 dấu vết comment không hợp lệ · 6 adapter chép doctrine · "
-            "7 hành vi bị chặn cứng · 8 trạng thái không hợp lệ."
+            "7 hành vi bị chặn cứng · 8 trạng thái không hợp lệ · "
+            "9 bảng ADR §20 lệch với docs/adr/."
         ),
     )
     p.add_argument("--state-dir", default=".claude/.packet_state", help="nơi giữ state cục bộ")
@@ -1204,6 +1298,11 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--root", default=".")
     q.add_argument("--path", action="append", help="quét thêm tệp cụ thể")
     q.set_defaults(fn=cmd_doctrine_scan)
+
+    q = sub.add_parser("adr-song",
+                       help="bảng §20 của protocol phải phủ hết docs/adr/")
+    q.add_argument("--root", default=".")
+    q.set_defaults(fn=cmd_adr_song)
 
     q = sub.add_parser("status", help="in state đầy đủ")
     q.add_argument("--packet", type=int, required=True)

@@ -4,7 +4,7 @@
 - **Protocol version:** 1
 - **Governance baseline:** MCR-54-02, chấp thuận ngày 2026-08-08
 - **Phạm vi:** Claude Code, Codex, Windows local, cloud worker và Android
-- **Nguồn quyết định:** ADR-0017 đến ADR-0035
+- **Nguồn quyết định:** §20 là bảng định tuyến ADR đang hiệu lực — MỘT dòng cho MỖI ADR, máy canh bằng `packet_loop.py adr-song`. Dòng cũ ghi một PHẠM VI (`ADR-0017 đến ADR-0035`) và phạm vi ấy đã chết: 45 ADR tồn tại, 10 ADR quản trị nằm ngoài nó.
 - **Kế hoạch thi công:** `docs/KE_HOACH_TRIEN_KHAI_PROTOCOL_DA_PHIEN.md`
 
 ## 1. Mục tiêu và bất biến
@@ -985,3 +985,104 @@ Hệ thống chỉ được coi là triển khai xong khi chứng minh được:
   chuẩn bị, chưa thể hoàn tất mission theo protocol.
 - Repo đang có nhiều worktree/phiên hoạt động; maintenance EOL chỉ được bắt đầu sau operational freeze/drain do
   người vận hành cưỡng chế. Không viện dẫn `dispatcher PAUSE` trong bootstrap khi dispatcher chưa tồn tại.
+
+
+## 20. Quy tắc đang hiệu lực — bảng định tuyến ADR
+
+**Đây là chỗ DUY NHẤT trả lời câu "agent phải đọc gì để làm đúng".** Trước 22-08-2026 câu trả lời
+nằm ở dòng đầu tệp này dưới dạng một PHẠM VI (`ADR-0017 đến ADR-0035`), và phạm vi ấy đã chết:
+đo được ngày ấy có **45** ADR, protocol nhắc tên **4**, và trọn `0036`–`0045` — mười ADR quản trị,
+gồm cả ba ADR người giữ kho vừa duyệt — nằm ngoài. Một dòng phạm vi phải được người sửa tay mỗi
+lần thêm ADR; kho này vừa trả giá cho **năm** con trỏ chết cùng hình dạng (PR #230 bốn cái, cộng
+docstring `t34` trỏ `t42` đã bị gỡ). Nên bảng dưới đây **do máy canh**, không do kỷ luật:
+
+```
+python3 .claude/dev/packet_loop.py adr-song --root .
+```
+
+Cổng ấy ĐỎ khi: một ADR không có dòng trong bảng · bảng trỏ một ADR không tồn tại · một ADR có
+hai dòng · một ADR không có dòng `Trạng thái` đọc được. Thêm ADR mà quên bảng ⇒ **gate đỏ**,
+không phải im lặng. Phản chứng cho từng luật ở `.claude/dev/packet_loop_test.py`.
+
+### Cột "cổng đã ĐO" nghĩa là gì — đọc trước khi dùng
+
+Ba giá trị, và **hai trong ba là lời khai yếu**:
+
+- **`0 cổng`** — phép đo MẠNH: không tệp cổng nào (`ops/lease_publish.py`, `.claude/dev/packet_loop.py`,
+  `.claude/dev/launcher.py`, `.claude/dev/gate_lifecycle.py`, `ci.yml`, `ops-publish-lease.yml`) nhắc
+  tới khái niệm của ADR ấy dù chỉ một lần. Luật đó **chỉ sống bằng kỷ luật đọc**.
+- **`có nhắc: <tệp>×<n>`** — PROXY, **KHÔNG** phải bằng chứng cưỡng chế. Nó chứng minh cái TÊN có
+  mặt, không chứng minh cổng ĐỌC nó. Kho này đã trả giá bốn lần cho đúng chỗ đó
+  (`which(gh)` · `rest-chung` · `gh auth status` · `mcp` gộp). Muốn biết thật thì phải có phản chứng.
+- **`chưa đo`** — trạng thái THỨ BA, không được đọc thành `0` cũng không được đọc thành `có`.
+
+Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` §1.
+
+### A. ADR quản trị phiên đa agent
+
+| ADR | luật | trạng thái | cổng đã ĐO (22-08-2026) |
+|---|---|---|---|
+| `ADR-0017` | GitHub PR là bàn giao chính; canonical độc quyền phát hành | Accepted | có nhắc: rải khắp — chưa tách được cổng riêng |
+| `ADR-0018` | EOL canonical theo loại tệp | Accepted | có nhắc: `ci.yml`×19 |
+| `ADR-0019` | Ba skill, hai adapter, một protocol | Accepted | có nhắc: `packet_loop.py`×31 (`doctrine-scan`) |
+| `ADR-0020` | Ranh giới an ninh cho worker cloud | Accepted | chưa đo |
+| `ADR-0021` | Local controller headless trên Windows | Accepted | chưa đo |
+| `ADR-0022` | Hai cổng land và deploy | Accepted | chưa đo |
+| `ADR-0023` | Thẩm quyền lệnh điều phối | Accepted | có nhắc: `lease_publish.py`×12 · `packet_loop.py`×20 (`guard`) |
+| `ADR-0024` | Review phân tầng khi hết quota | Accepted | chưa đo |
+| `ADR-0025` | Issue contract và state machine | Accepted | có nhắc: `packet_loop.py`×173 (`transition`) |
+| `ADR-0026` | Rollout theo promotion gate | Accepted | chưa đo |
+| `ADR-0027` | Mission integration branch | Accepted | có nhắc: `packet_loop.py`×1 |
+| `ADR-0028` | Stale generation và retention | Accepted | có nhắc: `packet_loop.py`×6 |
+| `ADR-0029` | Budget guard cho agent | Accepted | có nhắc: `packet_loop.py`×62 · `launcher.py`×44 |
+| `ADR-0030` | Definition of done của mission | Accepted | có nhắc: `packet_loop.py`×2 |
+| `ADR-0031` | Test fragment thay khóa toàn cục selftest | Accepted | có nhắc: `ci.yml`×7 · `gate_lifecycle.py`×2 |
+| `ADR-0032` | Change-impact rule có hướng | Accepted | **0 cổng** |
+| `ADR-0033` | Durable inbox và reconciler | Accepted | có nhắc: `packet_loop.py`×3 |
+| `ADR-0034` | Change-control, review độc lập và thẩm quyền land | Accepted | có nhắc: `lease_publish.py`×10 · `packet_loop.py`×11 |
+| `ADR-0035` | Điều phối bền vững và selftest phân tầng | Accepted | chưa đo |
+| `ADR-0036` | Claude Executor mặc định, Codex review theo rủi ro | Superseded một phần bởi ADR-0041 | có nhắc: `packet_loop.py`×29 (`RC_PROVIDER`) |
+| `ADR-0037` | Review Rescue Checkpoint và tách Stable Slice | Accepted | **0 cổng** |
+| `ADR-0038` | Review Class fail-closed và phân bổ quota Codex | Accepted | **0 cổng** — `review_class` khai 10/49 lease |
+| `ADR-0039` | Thin Orchestration và ngưỡng promote auto-dispatch | Accepted | **0 cổng** |
+| `ADR-0040` | Tách Model Reviewer Identity khỏi GitHub Submitter Identity | Accepted | **0 cổng** |
+| `ADR-0041` | Ngân sách Executor Claude tối thiểu 70%, Codex tối đa 30% | Accepted | có nhắc: `launcher.py`×22 |
+| `ADR-0042` | Deadline wall-clock và working-state evidence | Accepted | có nhắc: `launcher.py`×11 · `gate_lifecycle.py`×3 |
+| `ADR-0043` | Trần vòng review canon là HAI, và nó chỉ có một chỗ ở | Accepted | **0 cổng** — `so-canon` chưa tồn tại |
+| `ADR-0044` | Ngưỡng kích thước packet, neo từ số đo của chính kho | Accepted | **0 cổng** |
+| `ADR-0045` | Đảo vai executor/reviewer là NGOẠI LỆ CÓ VẾT, không phải mặc định mới | Accepted | **0 cổng** |
+
+### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
+
+Liệt kê TỪNG SỐ, không dùng phạm vi: một phạm vi là thứ vừa giết dòng 7.
+
+| ADR | luật | trạng thái |
+|---|---|---|
+| `ADR-0001` | Chỉ canonical đánh version; nhánh song song giao nộp bundle không-version | Superseded by ADR-0017 |
+| `ADR-0002` | bind(tl) copy-globals là giàn giáo di cư, không phải kiến trúc đích | Accepted |
+| `ADR-0003` | Profile marker trên Drive là nguồn sự thật về tồn tại/định danh profile; config là cache | Accepted |
+| `ADR-0004` | Hợp nhất các đường ingest bằng engine chung có ngân sách hiệu năng | Accepted |
+| `ADR-0005` | Môi trường chạy sở hữu source policy, ingest engine sở hữu bất biến toàn vẹn | Accepted |
+| `ADR-0006` | Content-addressed ingest và thay thế tường minh | Accepted |
+| `ADR-0007` | Bundle tái tạo giống byte tuyệt đối, ưu tiên tính tất định hơn kích thước | Accepted |
+| `ADR-0008` | Topology shard hợp nhất (declared+observed) và partial trung thực | Chấp nhận |
+| `ADR-0009` | Đặc tả thể thức là nguồn sự thật duy nhất; thang thẩm quyền 3 bậc khi nguồn lệch nhau | accepted |
+| `ADR-0010` | nlm_status là từ vựng ĐÓNG ở cửa ghi; tách nlm_claim/nlm_due (desync ≠ coverage_gap) | accepted |
+| `ADR-0011` | SourceRevision tách khỏi Content Identity; claim key không đội lốt content_hash | Accepted |
+| `ADR-0012` | Marker write là transaction chứng minh được; schema v2 có fingerprint, rollout 2 pha | Accepted |
+| `ADR-0013` | ZIP ingest: immutable plan bundle — apply không được tự lập kế hoạch mới | Accepted |
+| `ADR-0014` | `ingest_commit`: gộp organize+rename+upsert+readback thành MỘT round-trip GAS | Accepted |
+| `ADR-0015` | Lane STAGED: hoãn cổng chất lượng có kỷ luật + verify PARITY + bulk-flip corpus | Accepted |
+| `ADR-0016` | Lớp điều phối rà soát hồ sơ: state LAI, một-người-ghi theo claim, anchor biến tái-rà thành phép tính | KHÔNG CÓ DÒNG TRẠNG THÁI |
+
+### Nợ có tên đã lộ ra khi dựng bảng này
+
+- **`ADR-0016-THIEU-DONG-TRANG-THAI`** — `docs/adr/0016-*.md` không có dòng `Trạng thái` nào. Đó là
+  trạng thái thứ ba (`không đo được`), nên cổng phải ĐỎ; nó hiện được tha bằng một danh sách
+  ngoại lệ **liệt kê tường minh** trong `packet_loop.py`, và một ADR MỚI thiếu dòng ấy vẫn ĐỎ
+  (có phản chứng). Ghi ở `ops/NO_KY_THUAT.md`.
+- **`TU-VUNG-TRANG-THAI-ADR-TROI`** — đo được bốn cách viết cho cùng một nghĩa: `Accepted` (39),
+  `accepted` (2), `Chấp nhận` (1), và `Superseded một phần bởi ADR-0041` (1) — chuỗi cuối bắt đầu
+  bằng `Superseded` nhưng ADR ấy **vẫn còn hiệu lực một phần**. Vì vậy cổng ở đây cố ý KHÔNG phán
+  xử hiệu lực từ chuỗi trạng thái; nó chỉ đòi **có mặt trong bảng**. Phán xử hiệu lực bằng cách
+  khớp tiền tố chuỗi là đúng hình dạng lỗi *"phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN"*.

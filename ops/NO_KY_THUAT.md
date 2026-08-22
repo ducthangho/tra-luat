@@ -589,3 +589,75 @@ chiều: một đột biến **nới** và một đột biến **siết** đều
 thì đúng là lỗ mà cross-review 2 vừa tìm ra.
 
 **Đừng dựng lại `t42` nguyên dạng.** Ba lượt đã đo là nó thua ở thiết kế, không thua ở chi tiết.
+
+## 13. `ADR-0016-THIEU-DONG-TRANG-THAI` — trạng thái thứ ba đang được tha bằng danh sách
+
+> Đánh số bắt đầu từ **13** vì `## 12.` thuộc PR #230 (`PLAT-X4-721-dong-chua-verdict-nao-phu`),
+> chưa land lúc viết. Nếu #230 không land thì đánh số lại — đây là chỗ DUY NHẤT của hai mục này
+> phụ thuộc vào PR ấy, và nói ra để nó không thành một khoảng trống không ai giải thích được.
+
+`docs/adr/0016-lop-dieu-phoi-rasoat-hoso-state-lai-single-writer-anchor.md` **không có dòng
+`Trạng thái` nào**. Đó là trạng thái thứ ba — `không đo được` — và theo doctrine `None ≠ False`
+nó phải làm cổng ĐỎ, không được đọc thành "chắc là còn hiệu lực".
+
+Cổng `packet_loop.py adr-song` hiện **tha** đúng số ấy bằng một danh sách liệt kê tường minh
+(`_ADR_THA_THIEU_TRANG_THAI`). Danh sách cho phép, không phải ngưỡng: một ADR MỚI thiếu dòng
+`Trạng thái` vẫn ĐỎ, và có phản chứng cho đúng điều đó
+(`adr_song_thieu_trang_thai_thi_do` ĐỎ với `0007`, `adr_song_ngoai_le_0016_van_xanh` XANH với
+`0016`), cộng một đột biến **nới danh sách cho phép để chứa số tấn công**
+(`adr_noi_ngoai_le_cho_moi_ADR`) làm ca đích chết — không có đột biến ấy thì không biết ca đang
+đo danh sách hay đo thứ khác.
+
+**Điều kiện coi là XONG:** người biết lịch sử quyết định ấy ghi đúng trạng thái vào tệp, rồi
+xoá `"0016"` khỏi danh sách. Danh sách này **chỉ được co lại, không được nới** — nới nó là quay
+về đúng cái bệnh nó đang che.
+
+**Lệnh tái lập:**
+
+```
+python3 .claude/dev/packet_loop.py adr-song --root .
+python3 - <<'PY'
+import pathlib,re
+for f in sorted(pathlib.Path("docs/adr").glob("*.md")):
+    if not re.search(r'^\s*[-*]\s*\*\*Tr[aạ]ng th[aá]i', f.read_text(encoding="utf-8"), re.M|re.I):
+        print("THIEU:", f.name)
+PY
+```
+
+## 14. `LEASE-KHAI-MA-CONG-KHONG-DOC` — 207/215 trường, không phải hai
+
+Bản bàn giao ngày 22-08 khai bệnh này bằng **hai** field (`review_class` 10/49 · `spec_sha256`
+11/49). Đo lại cùng ngày trên `a5bfe07` ra con số khác hẳn: **49 lease trên `master` dùng 215
+tên trường khác nhau; `ops/lease_publish.py` đọc 8; 207 trường được khai mà không cổng nào
+kiểm.**
+
+Nặng nhất không phải các field hiếm mà là **16 trường khai ở 100% lease** và vẫn không ai đọc:
+`access` · `assurance_target` · `attempts_limit` · `attempts_used` · `base_sha` · `branch` ·
+`branch_ownership` · `event` · `granted_on_instruction` · `leased_at_utc` · `packet_id` ·
+`provider` · `recorded_by` · `role` · `run_minutes` · `schema_version`.
+
+Vì sao đáng một mục sổ nợ riêng thay vì nằm trong đặc tả một packet: con số **2** làm việc này
+trông như một bản vá hai dòng, còn con số **207** cho thấy nó là một **quyết định phạm vi** —
+phải chọn tập trường nào lên hợp đồng và tập nào rớt xuống ghi chú tự do. `PLAT-X8` (#225) nhận
+`review_class`; `PLAT-X7` (#220) nhận danh tính model; phần còn lại chưa có Issue. Cắt phần
+còn lại cho vừa trần `ADR-0044` là việc của `ops/HOAN_THIEN_KE_HOACH_20260822.md` §3.
+
+**Cảnh báo đọc số:** 215 là số **tên trường**, không phải số **lỗ hổng**. Nhiều trường cố ý là
+ghi chú cho người đọc (`*_note`, `*_ghi_chu`, `canh_bao_*`) và không nên có cổng. Phép đo nói
+"không ai kiểm", nó **không** nói "phải kiểm hết" — đọc rộng ra là tự đặt cho mình một việc
+không ai duyệt.
+
+**Lệnh tái lập:**
+
+```
+python3 - <<'PY'
+import re,pathlib,collections
+d=collections.Counter(); src=pathlib.Path("ops/lease_publish.py").read_text(encoding="utf-8")
+for p in sorted(pathlib.Path("ops/leases").glob("*.yaml")):
+    for k in {m.group(1) for l in p.read_text(encoding="utf-8").splitlines()
+              if (m:=re.match(r'^([a-z_][a-z0-9_]*):',l))}: d[k]+=1
+doc=[k for k in d if re.search(r'["\']'+re.escape(k)+r'["\']',src)]
+print("truong:",len(d)," cong doc:",len(doc)," khong doc:",len(d)-len(doc))
+print("khai 100% ma khong doc:", sorted(k for k,c in d.items() if c==len(list(pathlib.Path("ops/leases").glob("*.yaml"))) and k not in doc))
+PY
+```

@@ -832,16 +832,25 @@ Nên phát biểu đúng là: **trục LỜI GỌI vượt gấp đôi; trục V
 `0` trên trục VÒNG không phải tin tốt: nó nghĩa là bốn lượt review ấy **không để lại verdict nào**,
 tức chúng tốn chi phí mà không sinh ra thứ canon đếm được.
 
-### `ADR-0043` là `Accepted` nhưng KHÔNG có mục nào được thi hành
+### `ADR-0043` là `Accepted` mà chưa được thi hành — 3/4 đã làm trong PR #233
 
-`ADR-0043` liệt kê bốn việc phải làm. Đo ngày 22-08-2026, cả bốn **chưa làm**:
+`ADR-0043` liệt kê bốn việc. Đo lúc phát hiện (22-08-2026), **cả bốn chưa làm**; ba việc chữ nghĩa đã
+được sửa trong PR này sau khi người giữ kho duyệt, việc thứ tư là mã và cần packet riêng:
 
-| việc `ADR-0043` giao | đo được |
-|---|---|
-| sửa `docs/PROTOCOL_DA_PHIEN.md:751` để trỏ về ADR | vẫn ghi *"ba vòng code/review tổng cộng"* |
-| sửa `docs/adr/0037` dòng 5 | vẫn ghi *"ba vòng code/review tổng cộng"* |
-| sửa mermaid `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md:156` | vẫn vẽ *"Hết 2 Codex call hoặc 3 vòng"* |
-| `doctrine-scan` mở rộng + chế độ `so-canon` | `so-canon` xuất hiện **0** lần trong `packet_loop.py`; `doctrine-scan` quét **7** tệp, không có `ops/KE_HOACH_*.md` |
+| việc `ADR-0043` giao | lúc phát hiện | nay |
+|---|---|---|
+| sửa `docs/PROTOCOL_DA_PHIEN.md:751` để trỏ về ADR | *"ba vòng code/review tổng cộng"* | **đã sửa** — trỏ `ADR-0043`, dòng vẫn ở `751` |
+| sửa `docs/adr/0037` dòng 5 | *"ba vòng code/review tổng cộng"* | **đã sửa** — trỏ `ADR-0043` |
+| sửa mermaid `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md:156` | *"Hết 2 Codex call hoặc 3 vòng"* | **đã sửa** — *"chạm trần vòng ADR-0043"* |
+| `doctrine-scan` mở rộng + chế độ `so-canon` | `so-canon` **0** lần trong `packet_loop.py`; `doctrine-scan` quét **7** tệp | **CHƯA** — là mã, cần lease riêng |
+
+Giữ nguyên `:751` đúng dòng số cũ là có chủ đích: `ADR-0043` **neo theo số dòng ấy**, nên đổi số dòng
+là làm chính con trỏ của ADR thành con trỏ chết — đúng bệnh mà `§20` sinh ra để chặn.
+
+**Hai chỗ CÒN chữ "ba vòng" là ĐÚNG, đừng sửa:** `ADR-0043` và
+`ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md:495-496` đang **trích dẫn** bản sai để giải thích. Một cổng
+`so-canon` viết bằng grep chuỗi sẽ báo động giả ở đúng hai chỗ này — nên nó phải phân biệt **phát biểu
+luật** với **trích dẫn**, và đó là lý do việc thứ tư không phải một dòng grep.
 
 Tái lập:
 
@@ -853,9 +862,15 @@ grep -c "so-canon" .claude/dev/packet_loop.py          # 0
 python3 .claude/dev/packet_loop.py doctrine-scan --root . | tail -1
 ```
 
-Vậy canon là **HAI** vòng theo `ADR-0043`, còn **ba** tài liệu vẫn nói **BA** — đúng tình trạng mà
-`ADR-0043` được viết ra để chấm dứt, và nó vẫn đang sống. Một phiên đọc protocol trước (đúng như
-dossier dạy) vẫn sẽ dùng ba vòng một cách **ngay tình**, y như ADR mô tả.
+Lúc phát hiện: canon là **HAI** vòng theo `ADR-0043`, còn **ba** tài liệu vẫn nói **BA** — đúng tình
+trạng `ADR-0043` được viết ra để chấm dứt, và nó vẫn đang sống. Một phiên đọc protocol trước (đúng như
+dossier dạy) sẽ dùng ba vòng một cách **ngay tình**, y như ADR mô tả. Đó là lý do ba dòng ấy được sửa
+ngay thay vì xếp hàng: mỗi ngày để nguyên là một ngày cái bẫy còn lên cò.
+
+Đã quét toàn kho để chắc chỉ có ba chỗ, không phải ba chỗ ADR **nhớ ra**:
+`grep -rn "ba vòng\|3 vòng" docs/ ops/*.md CLAUDE.md .claude/`. Hai chỗ còn lại sau khi sửa đều là
+**trích dẫn bản sai**, giữ nguyên. Một chỗ nữa (`ops/DINH_CHINH_REVIEW_CLASS_PLAT_M4.md:97`) nhắc "ba
+vòng" trong lúc **kể một ca cụ thể**, không phát biểu luật — cũng giữ.
 
 ### Bài học rộng hơn ô `0 cổng`: `Trạng thái: Accepted` KHÔNG có nghĩa ĐÃ THI HÀNH
 

@@ -748,7 +748,7 @@ Packet Spec hoặc Mission Plan sai, phải đi qua Packet revision hoặc Missi
 mật. Việc mới phát hiện trong phiên chỉ được tiếp tục tại chỗ khi nó là substep cần thiết trong spec hiện hành.
 
 Hai lượt Codex review trên cùng PR là một stop condition riêng của review budget. Review Rescue Checkpoint được
-kích hoạt khi chạm trần này hoặc khi PR đã qua ba vòng code/review tổng cộng mà chưa approve. Chạm checkpoint
+kích hoạt khi chạm trần này hoặc khi PR chạm trần vòng review canon của `ADR-0043` mà chưa approve. Chạm checkpoint
 không tự biến Packet thành thất bại nội dung và không cho phép gọi thêm bằng prompt/phiên khác để lách trần.
 
 State giữ riêng `codex_review_calls_used`, `codex_executor_calls_used` và `review_rounds_used`.

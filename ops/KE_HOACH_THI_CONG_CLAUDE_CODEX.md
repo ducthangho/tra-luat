@@ -153,7 +153,7 @@ flowchart TD
     K -- "Không, còn budget" --> M["Executor gom finding và vá một lượt"]
     M --> N["Exact head mới; rereview"]
     N --> K
-    K -- "Hết 2 Codex call hoặc 3 vòng" --> R["Review Rescue Checkpoint"]
+    K -- "Hết 2 Codex call hoặc chạm trần vòng ADR-0043" --> R["Review Rescue Checkpoint"]
     R --> S{"Có Stable Slice độc lập?"}
     S -- "Có" --> T["Packet + PR sạch riêng; review lại"]
     S -- "Không / finding cắt invariant" --> U["Revision Packet/Mission hoặc redesign"]

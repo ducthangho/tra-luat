@@ -422,20 +422,36 @@ Hai luật cùng một tệp, **kéo ngược chiều nhau**, không luật nào
 tuân thủ bất biến 9 và vượt trần mà không thấy mình đang vượt. Vì vậy tôi **không gọi lượt thứ năm**
 cho head `225d47d009`, dù nó có thay đổi đáng review.
 
-**Và có một tầng sâu hơn ô `0 cổng`: `ADR-0043` là `Accepted` nhưng KHÔNG mục nào được thi hành.** Nó
-liệt kê bốn việc; đo 22-08-2026 thì cả bốn chưa làm — `docs/PROTOCOL_DA_PHIEN.md:751` vẫn ghi *"ba
-vòng"*, `docs/adr/0037` dòng 5 vẫn ghi *"ba vòng"*, mermaid `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md:156`
-vẫn vẽ *"3 vòng"*, và chế độ `so-canon` xuất hiện **0** lần trong `packet_loop.py`. Canon là **HAI**,
-ba tài liệu vẫn nói **BA** — đúng tình trạng `ADR-0043` sinh ra để chấm dứt, vẫn đang sống.
+**Và có một tầng sâu hơn ô `0 cổng`: `ADR-0043` là `Accepted` mà KHÔNG mục nào được thi hành.** Nó liệt
+kê bốn việc; đo 22-08-2026 thì cả bốn chưa làm — `docs/PROTOCOL_DA_PHIEN.md:751` vẫn ghi *"ba vòng"*,
+`docs/adr/0037` dòng 5 vẫn ghi *"ba vòng"*, mermaid `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md:156` vẫn vẽ
+*"3 vòng"*, và chế độ `so-canon` xuất hiện **0** lần trong `packet_loop.py`. Canon là **HAI**, ba tài
+liệu vẫn nói **BA** — đúng tình trạng `ADR-0043` sinh ra để chấm dứt, vẫn đang sống.
 
 Đó là một khoảng mù **trước** cả câu hỏi mà `§20` đặt ra. `§20` hỏi *"cổng nào ĐỌC luật này"*; chưa ai
 hỏi *"mục **Thi hành** của ADR này đã làm chưa"*. `adr-song` hiện chỉ đòi mỗi ADR **có mặt** trong
 bảng và có dòng `Trạng thái` đọc được — lại đúng lỗi **đếm sự CÓ MẶT thay vì KHẢ NĂNG**.
 
-**Tôi KHÔNG sửa `:751`, `0037` và mermaid trong PR này.** Đó là thi hành `ADR-0043`, một packet riêng
-với write set riêng, và phiên này không có lease cho nó (`§7`: đọc được kế hoạch không phải được giao
-việc). Ghi thành nợ `REVIEW-BUDGET-KHONG-CO-CONG` (`ops/NO_KY_THUAT.md` §15) với hai điều kiện XONG
-tách rời: cổng đếm lời gọi, và thi hành `ADR-0043`.
+**Đã sửa 3/4 trong PR này sau khi người giữ kho duyệt**, vì đây là **thi hành** một ADR đã `Accepted`
+chứ không phải một quyết định mới — `ADR-0043` tự liệt kê đúng ba dòng ấy. Lý do làm ngay thay vì xếp
+hàng: PR này khiến `docs/PROTOCOL_DA_PHIEN.md` **tự mâu thuẫn** — `§20` tôi thêm vào ghi *"canon là
+HAI"* trong khi `:751` **của cùng tệp** ghi *"ba vòng"*. Trước PR này cái lệch nằm giữa hai tệp; sau
+PR này nó nằm trong **một** tệp, cách nhau 300 dòng.
+
+Ba điều kiện an toàn đã đo **trước** khi sửa, không sau:
+
+1. **0 lease** giữ bốn đường dẫn đích — quét **100 ref** (master + 99 nhánh `ops/**`), **99** tệp lease,
+   **24** còn hiệu lực, **0** tệp không đọc được (fail-close đạt).
+2. **Đúng ba chỗ**, không phải ba chỗ ADR *nhớ ra* — quét toàn kho rồi mới sửa. Hai chỗ còn chữ "ba
+   vòng" sau khi sửa đều là **trích dẫn bản sai** để giải thích; một chỗ nữa
+   (`ops/DINH_CHINH_REVIEW_CLASS_PLAT_M4.md:97`) nhắc "ba vòng" khi **kể một ca cụ thể**. Cả ba giữ nguyên.
+3. **`:751` vẫn ở đúng dòng 751** — `ADR-0043` neo theo số dòng ấy, nên đổi số dòng là biến chính con
+   trỏ của ADR thành con trỏ chết, đúng bệnh `§20` sinh ra để chặn.
+
+**Việc thứ tư — chế độ `so-canon` — KHÔNG làm ở đây.** Nó là mã, cần lease riêng. Và nó khó hơn một
+dòng `grep`: hai chỗ trích dẫn ở trên sẽ làm một cổng dò chuỗi báo động giả, nên nó phải phân biệt
+**phát biểu luật** với **trích dẫn** — cùng họ với `doctrine-scan`. Ghi ở nợ
+`REVIEW-BUDGET-KHONG-CO-CONG` (`ops/NO_KY_THUAT.md` §15) cùng điều kiện XONG cho cổng đếm lời gọi.
 
 
 **(b) Thẻ HTML trong comment bị nuốt — không phải luật protocol, là một tầng không ai coi là tầng.**
@@ -457,13 +473,13 @@ vào một luật đang bị vi phạm bởi chính người điền bảng.
 
 ## 5. Khai VƯỢT NGƯỠNG — theo đúng cửa thoát của `ADR-0044`
 
-Thay đổi của phiên này: **6 tệp · +1931/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
+Thay đổi của phiên này: **8 tệp · +2040/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
 là **≤ 3 tệp và ≤ 300 dòng thêm**. Khai thay vì lờ đi, và tách hai phần vì rủi ro của chúng khác họ:
 
 | phần | tệp | dòng thêm | rủi ro |
 |---|---|---|---|
 | **mã + phản chứng** | `.claude/dev/packet_loop.py` · `.claude/dev/packet_loop_test.py` | +1041 | chạy sai |
-| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +890 | viết sai chữ |
+| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +999 | viết sai chữ |
 
 Đo bằng **merge-base**, không bằng `origin/master` trần — master đã tiến hai lần trong lúc phiên
 này chạy, và đo theo đầu master cho ra số âm vô nghĩa (`−5911` ở một lượt).

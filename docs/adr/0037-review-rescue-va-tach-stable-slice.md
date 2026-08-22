@@ -2,8 +2,8 @@
 
 - **Trạng thái:** Accepted (2026-08-17, phiên `grill-with-docs`; chủ kho phê duyệt)
 
-Một PR phải vào Review Rescue Checkpoint khi đã dùng hết hai lượt Codex hoặc đã qua ba vòng code/review tổng
-cộng mà chưa approve. Phần đã ổn chỉ được tách thành Stable Slice khi hữu ích độc lập, có acceptance và evidence
+Một PR phải vào Review Rescue Checkpoint khi đã dùng hết hai lượt Codex hoặc đã chạm trần vòng review canon
+của `ADR-0043` mà chưa approve. Phần đã ổn chỉ được tách thành Stable Slice khi hữu ích độc lập, có acceptance và evidence
 riêng, không phụ thuộc phần còn lỗi và không làm yếu security/gate; nó phải được dựng thành Packet/PR sạch rồi
 review exact head mới. Phần chưa ổn thành Remediation Slice kế nhiệm, giữ finding IDs và lịch sử. Nếu finding cắt
 ngang bất biến lõi thì không tách mà revision Packet/Mission hoặc xem lại thiết kế; hình dạng lỗi xuất hiện lần

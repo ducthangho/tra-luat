@@ -11,8 +11,13 @@ của packet nào, nên bản này **không** theo schema §7 (`ops/handoff/wp55
 
 ## 1. Neo — đọc bằng BĂM, không bằng tên nhánh
 
+> ⚠ **`spec_sha256` TRONG KHỐI DƯỚI ĐÂY ĐÃ HẾT HIỆU LỰC.** Đặc tả ra **bản 3c** ngày 22-08, băm
+> `182ea7621d02…`. Khối neo còn hiệu lực nằm ở **cuối §1**, dưới nhãn *CẬP NHẬT 22-08-2026 06:0xZ*.
+> Khối cũ giữ nguyên làm bằng chứng — đừng vá lẻ nó, đừng lấy băm từ nó.
+
 ```yaml
 # MỌI trường dưới đây đo CÙNG MỘT LÚC, trên CÙNG MỘT commit. Đừng vá lẻ từng trường.
+# HẾT HIỆU LỰC 22-08 — xem khối CẬP NHẬT ở cuối §1.
 do_luc: '2026-08-22'
 nhanh: claude/opus-5-plan-steps-y5r6ci
 commit_gioi_thieu_bam_spec: 7c19850   # KHÔNG phải head của nhánh. Đây là commit ĐẦU TIÊN mà
@@ -49,13 +54,46 @@ pr: 230                            # https://github.com/ducthangho/tra-luat/pull
 > | 1 | `9cb54a2e4e7c…` | 2 P1 lượt 1 — hết hiệu lực |
 > | 2 | `b88c53dfd211…` | 2 P1 lượt 2 — hết hiệu lực |
 > | 3 | `328a74facb84…` | hết hiệu lực khi dán hộp cảnh báo |
-> | 3b | `308d0cf44fc1…` | **bản dùng được** — bản 3 + hộp cảnh báo; nội dung yêu cầu không đổi |
+> | 3b | `308d0cf44fc1…` | bản dùng được **khi ấy**; hết hiệu lực 22-08 khi `#227` land **rồi bị revert** |
 >
 > Nghĩa là **§3 dưới đây đã lệch một phần**: Q1 không còn là quyết định đang có hiệu lực. Hai thứ
-> còn lại (cấp lease, nới bảng phân loại) vẫn chờ. Đọc **bản 3b** làm chuẩn — băm
+> còn lại (cấp lease, nới bảng phân loại) vẫn chờ. *(Đoạn này viết 22-08 sáng; **bản 3b nay cũng hết
+> hiệu lực** — chuẩn hiện tại là **bản 3c** `182ea7621d02…`, xem khối CẬP NHẬT cuối §1.)*
+> Đọc **bản 3b** làm chuẩn — băm
 > `308d0cf44fc1fcca75bc4d8edb014f560293622334ef25cc621c1e7afe3b2129`, đúng giá trị ở hàng
 > `spec_sha256` của khối neo trên; hai chỗ ấy phải luôn khớp nhau. **Bản 3 (`328a74facb84…`) đã
 > HẾT HIỆU LỰC** — đọc nó là bỏ qua hộp ⛔ ĐỪNG CẤP LEASE ở đầu đặc tả. Đừng đọc bản bàn giao này.
+
+> **CẬP NHẬT 22-08-2026 06:0xZ — `#227` LAND RỒI BỊ REVERT. Đặc tả ra bản 3c, KHÔNG phải bản 4.**
+> Khối neo ở đầu bản bàn giao này là ảnh chụp 21/22-08; bài học P1 ngay phía trên — *"khối neo là MỘT
+> phép đo, không phải một danh sách trường"* — nên đây đo lại **cả khối** thay vì vá lẻ:
+>
+> ```yaml
+> # Đo cùng lúc, 22-08-2026.
+> commit_gioi_thieu_bam_spec: ebe9c92   # commit ĐẦU TIÊN mang băm bản 3c
+> base: 2ab3560                         # = origin/master lúc đo (SAU revert #237)
+> spec_path: ops/specs/plat-x8.md
+> spec_sha256: 182ea7621d02c9ed99ef3862f999d45a4fc46af5de29b06b81a95bc938c2132a   # BẢN 3c
+> packet_issue: 225
+> lease: CHUA CAP — VA CHAM lease song cua #238, xem duoi
+> ```
+>
+> | bản | băm | kết cục |
+> |---|---|---|
+> | 3b | `308d0cf44fc1…` | hết hiệu lực khi `#227` land rồi bị revert |
+> | 3c | `182ea7621d02…` | **bản dùng được** — hộp ⛔ đổi điều kiện chờ sang `#238`; yêu cầu kỹ thuật không đổi |
+>
+> **Vì sao KHÔNG ra bản 4.** `#227` merge 05:16:40Z (PR #234) ⇒ CI master **ĐỎ trên Windows**
+> (`gate(windows-latest)` 59/68) ⇒ revert PR #237, master **`2ab3560`**, bộ test về **42** ca. Land
+> lại là packet **`#238`**. Đóng băng bản 4 trên một nền đang đổi là dựng lại đúng bệnh của bản 3.
+>
+> **Chưa cấp lease được:** `lease-dang-windows-exec-1-codex-20260822` (packet `#238`, hết
+> `2026-08-23T10:00:00Z`, trên nhánh `ops/pkg-windows` chưa về master) giữ **đúng cả hai** tệp
+> `write_set` của `PLAT-X8`.
+>
+> **Một phép đo tự bác chính nó trong 20 phút, ghi lại vì nó rẻ và hay tái phát:** quét đủ **99** ref
+> lúc 05:2xZ ra *"0 lease chồng lấn"*; 20 phút sau nhánh thứ 99 xuất hiện mang đúng một lease chồng
+> lấn. Quét đủ ref là **cần**, không **đủ** — phải quét **ngay trước khi cấp**.
 
 **PR #230 đang mở** (mở 22-08-2026 theo yêu cầu người giữ kho) — xem trường `pr:` trong khối neo,
 và đọc lịch sử review của nó trước khi làm gì trên nhánh này. Nhánh đã đẩy, spec tra được bằng

@@ -12,12 +12,19 @@
 > 3. `base` sẽ là `master` SAU khi `#227` land, không phải `20c6c633`.
 >
 > Thứ tự chốt: `#227` → **`PLAT-X8` (#225)** → `#209` → `PLAT-X7` (#220) → gói spec-gate.
+>
+> **ĐÍNH CHÍNH 22-08:** `#227` land 05:16Z **rồi bị revert** (PR #237, Windows đỏ) — master nay
+> `2ab3560`, bộ test về **42** ca. Land lại là **`#238`**, nên thứ tự thật là
+> **`#238` → `PLAT-X8` → `#209` → `PLAT-X7` → mục D**. Và lease của `#238` đang giữ **đúng cả hai**
+> tệp `write_set` của `PLAT-X8` tới `2026-08-23T10:00:00Z` ⇒ **chưa cấp lease `PLAT-X8` được.**
 
 
 Bạn là NGƯỜI THI CÔNG packet này. Reviewer sẽ là `claude` — khác họ model, tiêu chí N14 thoả.
 
 **ĐẶC TẢ CÓ THẨM QUYỀN là `ops/specs/plat-x8.md`**, băm
-`308d0cf44fc1fcca75bc4d8edb014f560293622334ef25cc621c1e7afe3b2129`. Prompt này KHÔNG chép lại đặc
+`182ea7621d02c9ed99ef3862f999d45a4fc46af5de29b06b81a95bc938c2132a` — **BẢN 3c**, 22-08-2026.
+Bản 3b (`308d0cf44fc1…`) và mọi bản trước KHÔNG còn hiệu lực. **Đặc tả vẫn mang hộp ⛔ ĐỪNG CẤP
+LEASE** — đọc hộp trước khi làm bất cứ gì với prompt này. Prompt này KHÔNG chép lại đặc
 tả — chép là dựng hai bản trôi lệch. Đọc đặc tả TRƯỚC, rồi đọc prompt này để biết nếp của kho.
 Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
 
@@ -26,7 +33,7 @@ Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
 | trường | giá trị |
 |---|---|
 | packet | `#225` — `[PLAT-X8]` |
-| đặc tả | `ops/specs/plat-x8.md` — bản đóng băng **THỨ BA** (băm ở trên; **kiểm bằng `sha256sum` trước khi đọc**). Hai bản trước (`9cb54a2e…`, `b88c53df…`) KHÔNG còn hiệu lực |
+| đặc tả | `ops/specs/plat-x8.md` — bản **`3c`** (băm ở trên; **kiểm bằng `sha256sum` trước khi đọc**). Các bản trước (`9cb54a2e…`, `b88c53df…`, `328a74fa…`, `308d0cf4…`) KHÔNG còn hiệu lực |
 | write set | `ops/lease_publish.py` · `ops/lease_publish_test.py` — **ĐÚNG hai tệp** |
 | base | xem `base_sha` trong lease — neo vào `master` sau khi PR `#226` merge |
 | nhánh | `codex/plat-x8-exec-1` |

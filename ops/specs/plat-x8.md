@@ -2,46 +2,86 @@
 
 > # ⛔ ĐỪNG CẤP LEASE NEO VÀO BẢN NÀY
 >
-> **Đặc tả này ĐANG CHỜ BẢN 4 và có SÁU chỗ đã sai.** Đo 22-08-2026 trên `origin/master` `a5bfe07`.
+> **Điều kiện chờ ĐÃ ĐỔI: nay chờ `#238`, KHÔNG phải `#227`.** Và số chỗ sai không phải sáu — đo lại
+> toàn bảng 22-08-2026 05:5xZ trên `origin/master` `2ab3560` thì ra **mười một**.
 >
-> Lease `plat-x8-exec-1-codex-20260821` đã bị **RÚT**, chưa từng đăng — biên bản
-> `ops/RUT_LEASE_PLAT_X8_20260821.md`. Lý do: va chạm write set với **`#227`** trên
-> `ops/lease_publish.py` + `ops/lease_publish_test.py`, **cả cửa sổ lẫn nội dung**.
+> ## Vì sao điều kiện đổi
 >
-> | # | chỗ | đang ghi | sai vì |
+> `#227` **đã land rồi bị HOÀN NGUYÊN trong vòng 40 phút**: merge 05:16:40Z (PR #234, master
+> `b88744e`) ⇒ CI master **ĐỎ trên Windows**, `gate(windows-latest)` **59/68**, chín ca mới của
+> `#227` chưa ca nào từng chạy trên Windows ⇒ revert qua **PR #237**, master `2ab3560`. `#237` hoàn
+> nguyên **ba tệp mã**, **giữ nguyên hồ sơ**. Việc land lại là packet **`LEASE-DANG-WINDOWS` (#238)**.
+>
+> Nên mọi câu *"chờ `#227` land"* ở tài liệu khác nay đọc sai: `#227` **đã** land. Thứ chưa xảy ra là
+> ba tệp mã của nó **đứng được trên Windows**.
+>
+> ## VA CHẠM WRITE SET ĐANG SỐNG — đây là lý do cứng nhất để chưa cấp lease
+>
+> `ops/leases/lease-dang-windows-exec-1-codex-20260822.yaml` (packet `#238`, `granted_by: ducthangho`,
+> hết **`2026-08-23T10:00:00Z`**) giữ `write_set`: `.github/workflows/ops-publish-lease.yml` ·
+> **`ops/lease_publish.py`** · **`ops/lease_publish_test.py`** — tức **ĐÚNG CẢ HAI** tệp `write_set`
+> của `PLAT-X8`. Lease ấy nằm trên nhánh `ops/pkg-windows`, **chưa về master**. Cấp lease `PLAT-X8`
+> bây giờ là dựng lại đúng cửa sổ hai writer đã làm lease lượt 1 bị RÚT.
+>
+> ## Mười một chỗ đã sai — không phải sáu
+>
+> | # | chỗ | đang ghi | sự thật đo được trên `2ab3560` |
 > |---|---|---|---|
-> | 1 | §0 bảng đo | `bộ test tại 3db588c` = `42/42` | `#227` đưa bộ test **42 → 58** ca |
-> | 2 | §6 `A9` | `N >= 42` | sàn thật sẽ là **58** |
-> | 3 | §0 nền đo | `origin/master = 3db588c` | master nay **`a5bfe07`** |
-> | 4 | §3 bảng va chạm | ba dòng: `#209`, `#220`, mục D | **thiếu hẳn `#227`** — chính packet đã làm rút lease |
-> | 5 | §3 câu kết | *"không lease nào đang giữ hai tệp này"* | **câu này đã bị bác.** Nó đo `ops/leases/` trên `master`, mà lease sống nằm trên nhánh `ops/**`. Quét đủ 98 nhánh ra **2** lease còn hiệu lực giữ đúng hai tệp ấy, một cái cấp trước 15 phút |
-> | 6 | §3 thứ tự | `PLAT-X8 → #209 → PLAT-X7 → mục D` | thứ tự thật: **`#227` → `PLAT-X8` → `#209` → `PLAT-X7` → mục D** |
+> | 1 | §0 bảng đo | bộ test `42/42` | **vẫn 42/42** trên master sau revert. `#227` từng nâng lên 68; `#238` sẽ nâng lại. **Đo, đừng đoán** — hộp bản 3b dự báo `58`, số thật lúc `#227` còn trên master là **68** |
+> | 2 | §6 `A9` | `N >= 42` | đúng cho `2ab3560`; phải nâng theo lượt `#238`, đo lại lúc ấy |
+> | 3 | §0 nền đo | `3db588c` | master nay **`2ab3560`** |
+> | 4 | §3 bảng va chạm | ba dòng: `#209`, `#220`, mục D | thiếu `#227` **và** `#238`; `#238` là dòng có lease SỐNG |
+> | 5 | §3 câu kết | *"không lease nào đang giữ hai tệp này"* | **bị bác hai lần.** Quét đủ ref lúc 05:2xZ: 8 lease còn hạn; quét lại 05:5xZ: **9** |
+> | 6 | §3 thứ tự | `PLAT-X8 → #209 → …` | thật: **`#238` → `PLAT-X8` → `#209` → `PLAT-X7` → mục D** |
+> | 7 | §5 mục 9 | `t23` *"42/42 → N/N"* | số nền đúng hôm nay, nhưng nó **đi kèm** sàn A9 nên phải đổi cùng lượt |
+> | 8 | §4 mục 1 · §6 `A8` | *"49 lease cũ"* | **61** tệp |
+> | 9 | §8 | *"15/15 đường dẫn"*, *"10 lease khai lớp"* | **14/14** đường · **22** lease khai lớp (1 `routine` / 5 `systemic` / 16 `sensitive`); executor **17**, reviewer **44** |
+> | 10 | §9 | *"0/49 tệp có `risk`"*, *"39/39 reviewer"* | **0/61** · **44/44** |
+> | 11 | §2 | *"lần **đầu tiên** `ops/lease_publish.py` vào một `write_set` (0/49)"* | **MỆNH ĐỀ SỰ KIỆN, đã sai.** `#227` mở tệp ấy trước; nay **7/61** lease mang nó. `PLAT-X8` là packet **thứ hai** chạm nó, không phải thứ nhất |
 >
-> **Bốn quyết định ở §1 (Q1 thu hồi · Q2 · Q5 · Q6) và mọi §5–§10 KHÔNG bị ảnh hưởng** — sáu chỗ trên
-> đều là con số nền và bảng va chạm, không phải yêu cầu kỹ thuật. Đó là lý do bản này giữ nguyên nội
-> dung yêu cầu thay vì viết lại.
+> **Bốn quyết định ở §1 (Q1 thu hồi · Q2 · Q5 · Q6) và mọi §5–§10 KHÔNG bị ảnh hưởng** — mười một chỗ
+> trên đều là con số nền, bảng va chạm, và một mệnh đề sự kiện; không chỗ nào là yêu cầu kỹ thuật.
 >
-> **Việc phải làm, đúng thứ tự:** chờ `#227` land → đo lại `origin/master` → sửa sáu chỗ trên →
-> đóng băng **bản 4** → cấp lease neo băm bản 4. Prompt `ops/prompts/plat-x8-exec-1-codex-20260821.md`
-> giữ lại nhưng phải neo lại băm trước khi dùng.
+> ## Việc phải làm, đúng thứ tự
+>
+> Chờ **`#238`** land (ba tệp mã đứng được trên Windows, có `run_id` của lượt `workflow_dispatch`
+> xanh cả hai job trên exact head) → **đo lại toàn bảng §0**, không vá lẻ → sửa mười một chỗ → đóng
+> băng **bản 4** → quét lease trên **mọi** ref rồi mới cấp lease neo băm bản 4. Prompt
+> `ops/prompts/plat-x8-exec-1-codex-20260821.md` giữ lại nhưng phải neo lại băm trước khi dùng.
+>
+> ## Ba thứ lượt đo 22-08 trả giá mới biết — đọc trước khi đo lại
+>
+> 1. **Tên trường hạn lease là `lease_expires_at_utc`.** Lượt quét đầu đoán `het_han`/`expires_at`/
+>    `deadline`, nhận `None` cho **cả 42** tệp, và `None` đọc thành *"không có hạn"* thì bảng ra
+>    **0 lease còn hạn** — đúng cái kết luận sai mà hộp này sinh ra để chặn.
+> 2. **Phép đo ĐÚNG vẫn chết theo thời gian.** Quét đủ **99** ref lúc 05:2xZ ra *"0 lease chồng lấn,
+>    cấp lease được"*. **Hai mươi phút sau** nhánh `ops/pkg-windows` xuất hiện với đúng một lease
+>    chồng lấn ⇒ kết luận đảo chiều. Quét đủ ref là **cần**, không **đủ**: phải quét **ngay trước khi
+>    cấp**, và số ref phải đo chứ đừng chép (98 → 99 trong một lượt làm việc).
+> 3. **`actionlint` không có `shellcheck` là phép đo YẾU HƠN CI.** Container này thiếu `shellcheck`,
+>    nên `actionlint` ở đây xanh trong khi CI đỏ — đúng hình dạng **A** *"lời khai rộng hơn phép đo"*
+>    mà `#238` đếm lên **7**. Ai báo *"actionlint rc=0"* phải nói kèm có `shellcheck` hay không.
 >
 > *Hộp này tồn tại vì trước đó đặc tả — thứ DUY NHẤT có thẩm quyền, thứ lease neo vào — không mang
-> dấu hiệu nào cho biết các con số của nó sắp chết. Kế hoạch ra bản 4 chỉ được ghi ở biên bản rút
-> lease và ở prompt; ai đọc đúng chỗ có thẩm quyền thì không thấy gì.*
+> dấu hiệu nào cho biết các con số của nó sắp chết. Bản 3b đã liệt kê sáu chỗ; đo lại ra mười một.
+> **Một danh sách liệt kê không thay được một lượt đo lại toàn bảng** — cùng hình dạng với "danh sách
+> CẤM không bao giờ đủ".*
 
 
 Đặc tả này ĐÓNG BĂNG bằng băm. Lease neo vào `spec_sha256`. Sửa nội dung ⇒ băm đổi ⇒ lease trỏ
 vào thứ không còn tồn tại, phải đi qua bản sửa đổi mới. Soạn bằng skill `soan-spec`, 21-08-2026.
 
 **BẢN ĐÓNG BĂNG THỨ BA (+ hộp cảnh báo, 22-08-2026).** Hai lượt cross-review (`codex`), **bốn P1**, và người giữ kho
-chọn SỬA đặc tả ở cả hai lượt.
+chọn SỬA đặc tả ở cả hai lượt. Hộp cảnh báo đã qua **hai** lượt sửa (`3b` → `3c`) mà **nội dung yêu
+cầu vẫn không đổi một chữ** — thứ trôi là nền đo, không phải đặc tả.
 
 | bản | băm | kết cục |
 |---|---|---|
 | 1 | `9cb54a2e4e7c…` | 2 P1 ở lượt 1 (neo `c9a1b4e90d`) — hết hiệu lực |
 | 2 | `b88c53dfd211…` | 2 P1 nữa ở lượt 2 (neo `3bafef75d6`), **cả hai** đánh vào đúng đường kế thừa — hết hiệu lực |
 | 3 | `328a74facb84…` | Q1 **THU HỒI**: đường kế thừa bị gỡ, không vá tiếp — §10 |
-| 3b | bản này | **chỉ thêm hộp cảnh báo ở đầu.** Nội dung yêu cầu KHÔNG đổi so với bản 3; băm đổi nên mọi chỗ trích băm phải cập nhật theo |
+| 3b | `308d0cf44fc1…` | thêm hộp ⛔ cảnh báo, liệt kê **sáu** chỗ sai, điều kiện chờ = `#227` land — hết hiệu lực khi `#227` land **rồi bị revert** |
+| 3c | bản này | **chỉ sửa hộp ⛔.** Điều kiện chờ đổi `#227` → **`#238`**; sáu chỗ sai đo lại thành **mười một**; ghi va chạm lease SỐNG của `#238`. Nội dung yêu cầu KHÔNG đổi so với bản 3 |
 
 Bốn phát hiện trên **một** đường là dấu hiệu sai ở QUYẾT ĐỊNH GỐC chứ không ở các bản vá. Các bản
 trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm bản dùng được.

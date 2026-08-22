@@ -12,21 +12,53 @@ của packet nào, nên bản này **không** theo schema §7 (`ops/handoff/wp55
 ## 1. Neo — đọc bằng BĂM, không bằng tên nhánh
 
 ```yaml
+# MỌI trường dưới đây đo CÙNG MỘT LÚC, trên CÙNG MỘT commit. Đừng vá lẻ từng trường.
+do_luc: '2026-08-22'
 nhanh: claude/opus-5-plan-steps-y5r6ci
-commit: 38c2123
-base: 3db588c                      # = origin/master lúc phiên kết thúc
-diff_so_master: 1 tệp, +205 dòng   # chỉ ops/specs/plat-x8.md
+commit_gioi_thieu_bam_spec: 7c19850   # KHÔNG phải head của nhánh. Đây là commit ĐẦU TIÊN mà
+                                     # ops/specs/plat-x8.md mang băm ghi bên dưới. Head trôi
+                                     # theo mỗi commit; commit này thì không.
+base: a5bfe07                      # = origin/master lúc đo
+diff_so_master: xem PR 230           # con số này chết ở MỌI commit kế tiếp — đừng ghi cứng,
+                                     # đo sống: git diff origin/master...HEAD --shortstat
 
 spec_path: ops/specs/plat-x8.md
-spec_sha256: 9cb54a2e4e7c4d66c60f7717e1ca8aacd57785222777d30dbadab2448157c120
-spec_da_kiem_tren_ban_DA_DEN: true   # git cat-file -p origin/<nhánh>:… | sha256sum
+spec_sha256: 308d0cf44fc1fcca75bc4d8edb014f560293622334ef25cc621c1e7afe3b2129   # BẢN 3b (bản 3 + hộp cảnh báo)
+spec_da_kiem_tren_ban_DA_DEN: true   # git cat-file -p origin/<nhánh>:ops/specs/plat-x8.md | sha256sum
 
 packet_issue: 225
 lease: CHUA CAP
-pr: CHUA MO
+pr: 230                            # https://github.com/ducthangho/tra-luat/pull/230
 ```
 
-**Chưa mở PR** — người giữ kho chưa yêu cầu. Nhánh đã đẩy, spec tra được bằng
+> **P1 cross-review bắt được (PR #230, `chatgpt-codex-connector`) — khối neo trên từng TỰ MÂU THUẪN.**
+> Nó khai `commit: 38c2123` cạnh `spec_sha256: 308d0cf4…`, nhưng băm của `ops/specs/plat-x8.md`
+> **tại** `38c2123` là `9cb54a2e…` (bản 1). Đo thêm thì **ba** trường chết chứ không phải một:
+> `commit`, `base`, `diff_so_master`. Nguyên nhân: mỗi lượt sửa chỉ vá **đúng trường vừa được
+> nhắc tới** thay vì đo lại cả khối — nên `spec_sha256` luôn mới còn các trường quanh nó ở lại
+> quá khứ. Mỉa mai đúng chỗ: trường khai `spec_da_kiem_tren_ban_DA_DEN: true` nằm trong chính
+> khối không được đo lại. **Khối neo là MỘT phép đo, không phải một danh sách trường.**
+
+> **CẬP NHẬT 22-08-2026 — đặc tả đã ĐÓNG BĂNG LẠI HAI LẦN sau khi bản bàn giao này viết xong.**
+> Hai lượt cross-review (`codex`) ra **bốn P1**, cả bốn đánh vào **một** đường: kế thừa lớp cho lease
+> reviewer. Người giữ kho **THU HỒI Q1** — đường kế thừa bị gỡ hẳn, không vá tiếp; reviewer lease
+> `schema_version >= 2` nay là `sensitive` **vô điều kiện**. Lý do ở §10 của đặc tả.
+>
+> | bản | băm | kết cục |
+> |---|---|---|
+> | 1 | `9cb54a2e4e7c…` | 2 P1 lượt 1 — hết hiệu lực |
+> | 2 | `b88c53dfd211…` | 2 P1 lượt 2 — hết hiệu lực |
+> | 3 | `328a74facb84…` | hết hiệu lực khi dán hộp cảnh báo |
+> | 3b | `308d0cf44fc1…` | **bản dùng được** — bản 3 + hộp cảnh báo; nội dung yêu cầu không đổi |
+>
+> Nghĩa là **§3 dưới đây đã lệch một phần**: Q1 không còn là quyết định đang có hiệu lực. Hai thứ
+> còn lại (cấp lease, nới bảng phân loại) vẫn chờ. Đọc **bản 3b** làm chuẩn — băm
+> `308d0cf44fc1fcca75bc4d8edb014f560293622334ef25cc621c1e7afe3b2129`, đúng giá trị ở hàng
+> `spec_sha256` của khối neo trên; hai chỗ ấy phải luôn khớp nhau. **Bản 3 (`328a74facb84…`) đã
+> HẾT HIỆU LỰC** — đọc nó là bỏ qua hộp ⛔ ĐỪNG CẤP LEASE ở đầu đặc tả. Đừng đọc bản bàn giao này.
+
+**PR #230 đang mở** (mở 22-08-2026 theo yêu cầu người giữ kho) — xem trường `pr:` trong khối neo,
+và đọc lịch sử review của nó trước khi làm gì trên nhánh này. Nhánh đã đẩy, spec tra được bằng
 `git fetch origin claude/opus-5-plan-steps-y5r6ci`.
 
 ---
@@ -122,6 +154,11 @@ cổng từ chối cặp cùng họ model"*) **tiêu thụ** lớp review hiệu
    nhận** (biên nhận là bản ghi, không sửa đè): ghi *"0/41 lease"*, số thật là **0/49**; và câu *"thứ
    duy nhất chạm nó chỉ CHÉP LẠI giá trị đã khai"* đúng hành vi nhưng sai đối tượng — xem bẫy 3.
    Sự thật chịu tải không đổi: **0 lease khai**, **0 dòng cổng đọc**.
+
+5. **Băm đặc tả trong BẤT KỲ tài liệu nào cũng phải kiểm lại trước khi dùng.** `ops/specs/plat-x8.md`
+   đã đóng băng **ba lần trong hai ngày**. Chính bản bàn giao này từng trỏ vào băm bản 1 và trỏ sai
+   trong khoảng một ngày. Băm là thứ định danh, nhưng nó **không** bất biến theo thời gian — nó bất
+   biến theo NỘI DUNG. Đo `sha256sum` trên tệp thật, đừng chép băm từ tài liệu khác.
 
 ---
 

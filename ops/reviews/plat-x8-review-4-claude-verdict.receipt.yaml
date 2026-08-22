@@ -1,0 +1,184 @@
+# BIÊN NHẬN v2 — cross-review lượt 4 (VÒNG CANON) của `PLAT-X8` (#225 / PR #248), reviewer `claude`.
+#
+# ĐÂY LÀ RECEIPT v2 ĐẦU TIÊN CỦA KHO. Đo 22-08-2026 trước khi viết: 40/40 biên nhận trong
+# `ops/reviews/` đều `schema_version: 1`. Nên mọi thứ dưới đây là ĐƯỜNG CHƯA AI CHẠY, không phải
+# đường mòn — nói trước để người sau đừng đọc nó thành tiền lệ đã được kiểm nghiệm.
+#
+# VÌ SAO LƯỢT NÀY VIẾT ĐƯỢC v2 CÒN LƯỢT 3 THÌ KHÔNG: không phải vì lượt này có gì lượt 3 không có.
+# Lượt 3 CŨNG viết được — phiên điều phối khi ấy đọc sai `PROTOCOL:454`, tưởng "hai identity" là hai
+# BÊN chứng thực độc lập, nên tự kết luận là bất khả rồi viết v1. Đính chính đã ghi trong biên nhận
+# lượt 3. Hai identity thật là `model_reviewer_identity` + `github_submitter_identity` (`ADR-0040`),
+# và cả hai đều biết được ở cả hai lượt.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Bản chiếu trên PR/Issue chỉ là bản chiếu.
+
+schema_version: 2
+receipt_id: plat-x8-review-4-claude-20260822-8faf629f
+kind: review_delivery_receipt
+packet_id: PLAT-X8
+packet_issue: 225
+lease_id: plat-x8-review-4-claude-20260822
+role: reviewer
+provider: claude
+executor_provider: openai_codex
+executor_lease: plat-x8-exec-2r6-codex-20260822
+
+# --- HAI IDENTITY (PROTOCOL:454 · ADR-0040) ---
+model_reviewer_identity:
+  provider: anthropic
+  surface: claude_code_cli
+  cli_version: '2.1.240'
+  session_run_id: 8faf629f21194593bdcc475ab07365a1
+  session_khoa_danh_tinh: 'linux:521396'
+  bat_dau_utc: '2026-08-22T19:51:37Z'
+  ket_thuc_utc: '2026-08-22T20:06:02Z'
+  ma_thoat: 0
+  neo_boi_launcher: >-
+    `.claude/dev/launcher.py run` với `--expected-head 28f32f7c…`, `--require-clean`,
+    `--expected-prompt-sha256 090cf70e…`. Launcher TỪ CHỐI chạy nếu head/cây/prompt lệch, nên ba
+    thứ ấy là đo được chứ không phải lời khai.
+  KHONG_do_duoc: >-
+    ID MODEL CỤ THỂ. `claude --version` trả phiên bản CLI, không trả model đang phục vụ, và phiên
+    điều phối không có đường đo model của một phiên con. Khai `anthropic/claude_code_cli` là mức
+    CHÍNH XÁC NHẤT đo được; ai cần chính xác hơn phải dựng đường đo mới, đừng suy từ trường này.
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    Người vận chuyển KHÁC người review — đó là toàn bộ lý do `ADR-0040` tách hai trường. Và theo
+    chính `ADR-0040`: biên nhận do TÀI KHOẢN TÁC GIẢ đăng **KHÔNG** trở thành required check hay
+    merge authorization. Trường này ghi ai đã vận chuyển, KHÔNG cấp thẩm quyền gì.
+
+# --- MỎ NEO (PROTOCOL:454 đòi khai loại + cường độ) ---
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Verdict neo bằng `verdict_sha256` + commit chứa nó trong lịch sử nhánh. KHÔNG dùng protected
+    evidence ref, KHÔNG dùng check object, KHÔNG có tag `luu-tru/*`. Nghĩa là: mỏ neo này sống nếu
+    nhánh land vào master, và CHẾT nếu nhánh bị xoá trước khi land. Khai `trung_binh` chứ không
+    `manh` đúng vì chỗ đó.
+  no_kem: >-
+    Chưa dựng tag `luu-tru/*` cho verdict này. `ops/reviews/README.md` nói tag ấy là ref BỀN duy
+    nhất giữ commit verdict sau khi nhánh `ops/**` bị xoá. Không dựng ở đây vì phiên web KHÔNG đẩy
+    được `refs/tags/*` (đo 16-08: 403 do proxy egress, không phải thiếu quyền token).
+
+reviewed_sha: 28f32f7cfb393c759e73e8afbb566a54866fc4b4
+base_sha: 08bb4ecd6dbdb87267cb8179f52ac28c151eb4b9
+target_pull_request: 248
+luot_truoc: ops/reviews/plat-x8-review-3-claude-verdict.receipt.yaml
+
+verdict: changes_requested
+verdict_path: ops/reviews/plat-x8-review-4-claude-verdict.md
+verdict_sha256: f8096eba1b730aea8b6dbf7712dc09202c0a79d6a57952d676a90820d1eaa3df
+verdict_bytes: 24984
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/claude/phien-tra-luat-5a-handoff-9o1cqp/ops/reviews/plat-x8-review-4-claude-verdict.md
+evidence_url_ghi_chu: >-
+  ĐIỀN Ở COMMIT SAU, ghim theo commit ĐẦU TIÊN chứa tệp verdict — một commit không chứa được băm
+  của chính nó, mà `t26` đòi trường này có mặt dạng `https` trong CÙNG commit với biên nhận. Không
+  có đường một bước; lượt 2 và lượt 3 đều đi hai bước này.
+
+cross_provider: true
+assurance_dat: cross_approved
+assurance_ghi_chu: >-
+  Khai `cross_approved` — và đây là lần ĐẦU packet này khai một mức assurance thật, nên phải nói rõ
+  căn cứ từng điều kiện, không khai theo mục tiêu:
+  · CROSS-PROVIDER: executor `codex` (openai) · reviewer `claude` (anthropic). `PROTOCOL §8.1` định
+    nghĩa `cross_approved` đúng là "Claude review Codex hoặc Codex review Claude". ĐO ĐƯỢC.
+  · LEASE `role: reviewer`: `plat-x8-review-4-claude-20260822`, cấp TRƯỚC lượt chạy, đã đăng. Chính
+    reviewer tự kiểm nó tồn tại (bảng đo #1 trong verdict) thay vì nhận lời khai. ĐO ĐƯỢC.
+  · EXACT SHA: launcher neo `--expected-head 28f32f7c…` và từ chối chạy nếu lệch. ĐO ĐƯỢC.
+  · RECEIPT VALIDATION: biên nhận này là v2 với đủ trường `PROTOCOL:454` đòi. Đây là receipt v2 đầu
+    tiên của kho ⇒ CHƯA có bộ kiểm nào từng chạy trên một tệp v2. Xem `no_da_khai`.
+  KHÔNG khai `human_audited` — chưa có readback.
+  `cross_approved` KHÔNG phải giấy phép merge: `ADR-0040` nói thẳng biên nhận do tài khoản tác giả
+  đăng không thành required check, và packet `sensitive` vẫn cần human Land Approver readback.
+la_canonical: true
+la_canonical_ghi_chu: >-
+  Lượt CANON đầu tiên của packet. Ba lượt trước đều `false`: lượt 1 và 2 thiếu lease reviewer VÀ
+  người review là tác giả đặc tả; lượt 3 có lease và khác phiên nhưng biên nhận viết v1 (chi tiết +
+  đính chính lý do trong biên nhận lượt 3). Lượt này đủ cả ba.
+  ⇒ `review_rounds_used` TĂNG 1. Sau lượt này packet còn **1** vòng canon theo `ADR-0043`.
+review_rounds_used_truoc_luot_nay: 0
+review_rounds_used_sau_luot_nay: 1
+
+findings:
+  - id: chuan-hoa-traversal-mat-phep-do-sau-khi-vet-hazard-bi-xoa
+    muc: P2
+    trang_thai: KHAI_NO_KHONG_VA_TRONG_PACKET_NAY
+    tai_hien: true
+    chuyen_sang: 'packet follow-up — xem `no_da_khai.PLAT-X8-t88-CHUYEN-PACKET-SAU`'
+    tom_tat: >-
+      Bản vá lượt 3 xoá 4 mục khỏi `_BANG_LOP` là ĐÚNG về đầu ra, nhưng nó xoá luôn đích DUY NHẤT mà
+      traversal có thể hạ lớp xuống — nên bước `posixpath.normpath` trong `_tinh_lop_tu_write_set`
+      không còn ca nào đo. Xoá HẲN dòng ấy: suite vẫn `87/87 rc=0`, 0 ca ĐỎ. Mã sản phẩm ĐÚNG; thứ
+      mất là PHÉP ĐO. Đúng hình dạng `A14` ("vế DƯƠNG phải sống") mà chính packet này dựng ra để chống.
+    tai_hien_boi_dieu_phoi: >-
+      Đo lại độc lập bằng `git archive 28f32f7c` ra cây sạch, KHÔNG dùng cây của reviewer.
+      Bốn trạng thái: nền `87/87 rc=0` · xoá `normpath` không `t88` ⇒ `87/87 rc=0` (MÙ, 0 ca đỏ) ·
+      thêm `t88` mã nguyên vẹn ⇒ `88/88 rc=0` · `t88` + xoá `normpath` ⇒ `87/88 rc=1`, ĐÚNG và CHỈ
+      `t88` đỏ. `t83` XANH trong cả hai lượt đột biến — đó là bằng chứng dương tính rằng `t83` không
+      còn đo normalization nữa.
+  - id: ho-so-luot-3-mo-coi-nhanh
+    muc: P3
+    trang_thai: DA_DONG
+    tai_hien: true
+    dong_boi: c903792e
+    tom_tat: >-
+      Verdict + biên nhận lượt 3 chỉ nằm trên nhánh handoff, KHÔNG trên nhánh phối hợp packet.
+      Nhánh handoff từng gộp vào `ops/cap-lease-plat-x8-2` một lần lúc 18:09Z (`8cd2262b`) nhưng
+      commit lượt 3 (`247c6fb5`, 19:14Z) nằm SAU đó và không ai gộp lần hai.
+      Đo lại: `merge-base --is-ancestor 247c6fb5 origin/ops/cap-lease-plat-x8-2` ⇒ SAI trước khi vá,
+      ĐÚNG sau. Cùng hình dạng `SO-LEASE-KHONG-NAM-MOT-CHO`, đổi đối tượng từ lease sang verdict.
+
+nghiem_thu:
+  suite: 'rc=0, 87/87, bỏ qua=0 — điều phối chạy lại độc lập trên cây git archive'
+  A12: >-
+    run 32592693727 trên exact head 28f32f7c — `gate (ubuntu-latest)` VÀ `gate (windows-latest)` đều
+    `success`, 0 bước hỏng, đo THEO JOB. Đây là phép đo của PHIÊN ĐIỀU PHỐI, không phải của reviewer
+    (reviewer không có công cụ Actions và đã tự khai như vậy).
+  tran_ADR_0044: '328 dòng thêm — khớp `ngoai_le_ADR_0044` của lease r6; chủ kho duyệt LẦN HAI (313 → 328)'
+  reviewer_tuan_thu: '0 thay đổi ở sandbox VÀ kho thật, 0 commit lạ'
+  lease_tu_kiem: 'reviewer TỰ kiểm lease của chính nó tồn tại trước khi review, thay vì nhận lời khai'
+
+canh_bao_da_nang_len_muc_luc:
+  - id: luot-4-la-CANON-DAU-TIEN-va-la-receipt-v2-DAU-TIEN-cua-kho
+    noi_dung: >-
+      Hai cái "đầu tiên" trong một tệp. `review_rounds_used` 0 → 1; còn 1 vòng canon. Và đây là
+      receipt v2 đầu tiên (40/40 biên nhận trước đều v1) ⇒ chưa bộ kiểm nào từng chạy trên tệp v2.
+  - id: t88-KHONG-vao-packet-nay-CO-CHU-Y
+    noi_dung: >-
+      Chủ kho quyết land #248 ở 328 dòng và mở packet follow-up cho `t88`. Nghĩa là #248 land với
+      một nhánh bảo vệ KHÔNG có phép đo — biết trước, có vết, không phải bỏ sót.
+  - id: model_reviewer_identity-KHONG-co-ID-model
+    noi_dung: >-
+      Trường ấy khai `anthropic/claude_code_cli` + run id, KHÔNG có ID model cụ thể — không đo được
+      từ phiên điều phối. Đừng đọc nó thành bằng chứng về model.
+  - id: mo-neo-TRUNG-BINH-khong-phai-manh
+    noi_dung: >-
+      `canonical_ancestry` thôi: không tag `luu-tru/*`, không protected ref, không check object.
+      Mỏ neo chết nếu nhánh bị xoá trước khi land. Phiên web không đẩy được `refs/tags/*`.
+
+no_da_khai:
+  - id: PLAT-X8-t88-CHUYEN-PACKET-SAU
+    noi_dung: >-
+      `t88` (đã kiểm chứng đủ bốn trạng thái) KHÔNG áp vào #248. Lý do: +15 dòng đưa tổng lên 343,
+      vượt ngoại lệ 328 vừa được duyệt, và tiêu nốt attempt 3/3 của executor cho 15 dòng test.
+      Chuyển sang packet follow-up. RỦI RO ĐÃ BIẾT: nợ đóng một khoảng mù mutation thường bị bỏ
+      quên, và chính khoảng mù này đã sống sót BỐN lượt review.
+  - id: PLAT-X8-CHUA-CO-BO-KIEM-RECEIPT-V2
+    noi_dung: >-
+      Không bộ kiểm nào cưỡng chế lược đồ v2. `t26` chỉ đòi `verdict_path` + `verdict_sha256` khớp
+      và `evidence_url` dạng https — nó KHÔNG đọc `schema_version`, KHÔNG đòi hai identity, KHÔNG
+      đọc `anchor`. Nghĩa là tệp này qua cổng vì nó là một biên nhận HỢP LỆ THEO v1, chứ cổng chưa
+      hề xác nhận nó hợp lệ theo v2. Đừng đọc "cổng xanh" thành "v2 đã được validate".
+  - id: PLAT-X8-ADR-0045-e-human-readback-CHUA-XONG
+    noi_dung: 'Điều kiện (e) human readback trước land — vẫn mở, thuộc lượt LAND.'
+  - id: PLAT-X8-docs-adr-DAO-NGUOC-CHUA-CO-VET-CHU-KHO
+    noi_dung: >-
+      Việc xoá `docs/adr/` khỏi `_BANG_LOP` đảo ngược thứ hai lượt review trước coi là đúng, nhưng
+      không có dòng xác nhận tường minh nào của chủ kho — khác với ngoại lệ ADR-0044 (có vết rõ
+      trong lease r6). Rủi ro kỹ thuật đánh giá THẤP (spec bản 5 settle ba lần, và chủ kho đã duyệt
+      chính bản spec ấy) — nhưng đó là SUY LUẬN, không phải phép đo.

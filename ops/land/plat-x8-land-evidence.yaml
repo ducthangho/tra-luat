@@ -97,9 +97,11 @@ post_merge_checks:
       suy từ diff — thứ land được mới là thứ có hiệu lực.
   - ten: 'CI master trên merge commit'
     ket_qua: >-
-      Đang đo (run 32596660559). **Đây là phép đo MỚI, không phải A12**: A12 neo `28f32f7c`, còn
-      merge commit `647cfead` là SHA khác. Master chạy CẢ ubuntu LẪN windows. Đỏ ở đây là việc của
-      phiên land, không phải nhiễu.
+      **XANH CẢ HAI NỀN.** Run 32596660559 trên merge commit `647cfead`, đo THEO JOB:
+      `gate (ubuntu-latest)` = `success` · `gate (windows-latest)` = `success` · **0 bước hỏng**.
+      Đây là phép đo MỚI, KHÔNG phải A12: A12 neo `28f32f7c`, còn `647cfead` là SHA khác — merge
+      commit chưa từng được đo trước lúc merge, và với một PR thường thì lượt master CHÍNH LÀ lần
+      đo Windows đầu tiên của merge commit ấy.
     canh_bao_doc_ket_qua: >-
       Trên lượt master, bước `PR head contains required EOL base` LUÔN `skipped` vì nó có
       `if: github.event_name == 'pull_request'`. Tiêu chí *"không bước nào skipped"* chỉ đúng cho

@@ -928,6 +928,39 @@ khai xanh cho lượt `gate` bị huỷ. Đây không phải một ca biên hi�
 kênh này với mọi lần đẩy chồng. Một agent đẩy nhiều lượt trong một phiên sẽ gặp nó ở **mọi** lượt trừ
 lượt cuối.
 
+### Ca 4 — biến thể KHÁC, và nó đánh vào đúng head ta cần
+
+Ba ca trên đều là lượt **bị huỷ**. Ca thứ tư không có gì bị huỷ: `355a55dd566a8e3cdc2806c04c8db10f51810630`
+là head **CUỐI**, không bị đè bởi lần đẩy nào.
+
+```
+07:17:xx  đẩy 355a55dd
+07:18:42  check_suite.completed  success  head_sha 355a55dd   check_suite_id 88255207197
+07:20:46  ĐO THEO JOB:  gate · in_progress
+                          gate (ubuntu-latest)   27/30 bước
+                          gate (windows-latest)  15/30 bước
+07:23:36  check_suite.completed  success  head_sha 355a55dd   check_suite_id 88255207202
+07:23:47  ĐO THEO JOB:  gate · completed · success
+                          gate (ubuntu-latest)   success  29/31 chạy · 2 bỏ qua · 0 hỏng
+                          gate (windows-latest)  success  28/31 chạy · 3 bỏ qua · 0 hỏng
+```
+
+**HAI `check_suite_id` KHÁC NHAU cho CÙNG một head** — `…197` và `…202`. Đó là bằng chứng đo được cho
+cơ chế, không phải suy đoán: `gate` và `launcher` sinh **hai check suite riêng**, và suite của
+`launcher` xong trước rồi khai `success` cho head ấy trong khi suite của `gate` còn chạy dở.
+
+Chú thích của harness — *"No check in this GitHub App's check suite failed"* — **đúng nguyên văn**:
+không check nào trong **suite ĐÓ** hỏng. Nó không nói gì về suite kia, và nó không tự nhận là nói.
+
+**Vì sao ca này xấu hơn ba ca trên:** ba ca kia chỉ đánh vào head **trung gian**, thứ không ai cần
+xanh. Ca này đánh vào head **CUỐI** — đúng thứ ta chờ để merge. Một agent nhận thông báo lúc `07:18:42`
+rồi báo *"CI xanh, merge được"* sẽ **sai**, kể cả khi nó chưa đẩy chồng lần nào trong cả phiên.
+
+**Kết luận đổi ĐƠN VỊ, không chỉ đổi độ cẩn thận:** đếm **suite** là sai đơn vị. Đơn vị đúng là **JOB**,
+và phải liệt kê ĐỦ tập job cần (`gate (ubuntu-latest)` **và** `gate (windows-latest)`), rồi đòi từng job
+`conclusion == "success"`. Một thông báo `check_suite` **không bao giờ** trả lời được câu *"CI trên head
+này xong chưa"*, vì nó không biết về các suite khác — nên đừng hỏi nó câu ấy.
+
 Nguyên nhân: lần đẩy kế tiếp **đè** lên lượt đang chạy (concurrency), GitHub **huỷ** nó. `cancelled`
 không phải `failure`, nên câu *"không check nào HỎNG"* vẫn đúng **về mặt chữ** — và sai hoàn toàn về
 mặt việc. Ba trạng thái, không phải hai: `xanh` · `đỏ` · **`chưa chạy xong`**; gộp trạng thái thứ ba

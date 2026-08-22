@@ -912,7 +912,7 @@ Máy chưa canh được mục này — chưa có cổng nào đọc lại comme
 
 ---
 
-## 17. `CHECK-SUITE-BAO-XANH-CHO-LUOT-BI-HUY` — hai ca đo được trong một giờ
+## 17. `CHECK-SUITE-BAO-XANH-CHO-LUOT-BI-HUY` — 3/3 lần, không phải chuyện hiếm
 
 Thông báo webhook `check_suite.completed` gửi về `conclusion: success`, kèm chú thích *"No check in
 this GitHub App's check suite failed"*. Đo theo **JOB** thì lượt `gate` **chưa chạy xong**:
@@ -921,6 +921,12 @@ this GitHub App's check suite failed"*. Đo theo **JOB** thì lượt `gate` **c
 |---|---|---|---|
 | `225d47d0090cbe86940f2ad581e86ff551cf45ad` | **success** | `success` 29/31 | **`cancelled`** 21/31 |
 | `fd78ead6b79d18bd08f3947545b07d04f05abdde` | **success** | **`cancelled`** 29/31 | **`cancelled`** 20/31 |
+| `2d4986b5d5b0bbebd81abeabbbd0505cfdb8c23b` | **success** | **`cancelled`** 19/31 | **`cancelled`** 18/31 |
+
+**Ba trên ba.** Trong một giờ có đúng ba lần đẩy bị lần sau đè lên, và **cả ba** sinh ra một thông báo
+khai xanh cho lượt `gate` bị huỷ. Đây không phải một ca biên hiếm gặp — nó là **hành vi mặc định** của
+kênh này với mọi lần đẩy chồng. Một agent đẩy nhiều lượt trong một phiên sẽ gặp nó ở **mọi** lượt trừ
+lượt cuối.
 
 Nguyên nhân: lần đẩy kế tiếp **đè** lên lượt đang chạy (concurrency), GitHub **huỷ** nó. `cancelled`
 không phải `failure`, nên câu *"không check nào HỎNG"* vẫn đúng **về mặt chữ** — và sai hoàn toàn về

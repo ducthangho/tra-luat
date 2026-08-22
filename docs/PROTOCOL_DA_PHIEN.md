@@ -536,6 +536,42 @@ Reviewer muốn đi xa hơn được đính `goi-y-<finding>.patch` sinh từ c�
    — hunk không đủ điều kiện do reviewer viết rồi reviewer duyệt là self-review đội lốt cross-review, đúng thứ
    nhãn assurance tồn tại để chặn.
 
+Reviewer phải được cấp NĂNG LỰC ĐO LẠI HIỆN TRẠNG, không chỉ diff. Khi đóng review bundle, Dispatcher phải
+phân loại và ghi vào bundle mọi khẳng định định lượng trong đặc tả, handoff, bảng bằng chứng hoặc verdict mà
+giá trị phụ thuộc nội dung/lịch sử/ref của kho (số ref, số lease, số biên nhận, kích thước diff của một phạm vi
+khác). Chỉ cần có một khẳng định như vậy thì sandbox
+reviewer phải chứa một bản sao kho đủ để họ tự chạy lệnh đo — thực tế rẻ nhất là `git clone --bare` kèm một
+bản làm việc, đặt BÊN TRONG sandbox để ràng buộc "không đọc ra ngoài" vẫn giữ nguyên. Reviewer chỉ nhận diff
+và tài liệu tham chiếu thì **không có cách nào** kiểm một con số nào: cả một lớp lỗi — con số từng đúng rồi
+cũ đi — nằm ngoài tầm với, và ba lượt review liên tiếp có thể đọc qua nó mà không ai dừng lại. Đo được trên
+PR #250: ba lượt chỉ-đọc cho `4 → 11 → 2` finding và **0** con số phân rã; lượt đầu tiên có mirror cho **3**.
+Các số về lượt review này hiện chỉ có ở comment PR #250, chưa có biên nhận trong kho; chúng là nguồn ngoài
+không tái lập được từ review bundle offline, không phải điều kiện để luật trên có hiệu lực.
+Bắt reviewer tự vá và tự thử nghiệm nâng CHẤT LƯỢNG finding; chỉ năng lực đo mới nâng ĐỘ PHỦ — không đòn bẩy
+nào thay được đòn bẩy kia.
+
+Bản sao ấy phải TÁI LẬP MÔI TRƯỜNG CỔNG, không chỉ tái lập nội dung. Một clone sạch có cấu hình git khác cây
+gốc, và cổng của kho này đọc cấu hình ấy: `core.abbrev` **phải ghim = 7** trong sandbox. Đo được ngay ở lượt
+review đầu tiên dùng cơ chế này (PR #252): sandbox không ghim ⇒ `git rev-parse --short` trả **8** ⇒
+`doc-claims-check --strict` đổi năm SHA dài 8 ký tự từ *advisory* thành **cờ cứng** ⇒ `rc=2`, và reviewer
+báo "cổng bắt buộc không xanh" trong khi cây gốc `rc=0`. Ghim `core.abbrev=7` trong chính sandbox ấy ⇒ `rc=0`.
+Bẫy này đã có trong `CLAUDE.md` từ `v1.35.78` cho đường phát hành; cấp mirror cho reviewer là **mở lại đúng
+nó ở một cửa mới**. Nên: dựng sandbox xong thì chạy thử bộ cổng NGAY TRONG sandbox và đối chiếu với cây gốc
+trên cùng commit — **lệch là lỗi sandbox cho tới khi chứng minh ngược lại**, và đừng giao một mirror chưa
+đối chiếu.
+
+Từ lượt review thứ HAI trở đi, verdict phải có mục `ĐỐI CHIẾU LƯỢT TRƯỚC`: với TỪNG finding của lượt liền
+trước, reviewer tự kiểm trên cây hiện tại và phân loại `ĐÃ VÁ THẬT` · `VÁ HỜ` · `VÁ SINH LỖI MỚI` · `CHƯA VÁ`,
+kèm bằng chứng họ tự đo — không nhận lời khai của executor. Mục này rẻ và bắt được thứ không lượt nào khác
+nhìn tới: bản vá **tự sinh lỗi**. Ca thật (PR #250, lượt 3): executor sửa một con số ở một chỗ và sót chỗ thứ
+hai trong cùng tệp, để lại hai lời khai mâu thuẫn; chỉ mục đối chiếu bắt được, vì chỉ nó nhìn lại chỗ vừa sửa.
+
+Bảng bằng chứng do executor cung cấp phải TỰ KHAI GIỚI HẠN của nó. Danh sách khẳng định giao cho reviewer trở
+thành TRẦN của họ nếu không nói ngược lại: kèm chính lệnh/script đã dùng để trích danh sách, nói rõ nó lọc theo
+tiêu chí gì và do đó bỏ sót cái gì, và tuyên bố tường minh rằng **mỗi mục nó bỏ sót mà reviewer tìm ra được
+tính là finding**. Không khai thì bảng ấy vừa định hướng vừa giới hạn cùng lúc, và giới hạn là phần không ai
+thấy. Cùng gốc với "danh sách CẤM không bao giờ đủ", ở dạng bộ lọc trích dẫn.
+
 Điều KHÔNG đổi theo các cơ chế trên (nói tường minh để khỏi bị đọc rộng):
 
 - Reviewer vẫn không có quyền ghi vào nhánh packet, không push ref hint vào kho.
@@ -1088,6 +1124,7 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0043` | Trần vòng review canon là HAI, và nó chỉ có một chỗ ở | Accepted | **0 cổng** — `so-canon` chưa tồn tại |
 | `ADR-0044` | Ngưỡng kích thước packet, neo từ số đo của chính kho | Accepted | **0 cổng** |
 | `ADR-0045` | Đảo vai executor/reviewer là NGOẠI LỆ CÓ VẾT, không phải mặc định mới | Accepted | **0 cổng** |
+| `ADR-0046` | Tác giả xuyên suốt, reviewer mới mỗi lượt, cắt phiên ở biên packet | Proposed | **0 cổng vận hành**; `adr-song` chỉ canh đăng ký/trạng thái |
 
 ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
 

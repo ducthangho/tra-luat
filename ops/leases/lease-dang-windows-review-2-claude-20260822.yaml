@@ -1,0 +1,130 @@
+# Lease REVIEWER — `LEASE-DANG-WINDOWS` (#238), lượt 2. Neo exact head b0c8fb3.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 238
+packet_id: LEASE-DANG-WINDOWS
+lease_id: lease-dang-windows-review-2-claude-20260822
+revision: 3
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: codex
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+review_class: sensitive
+
+reviewed_sha_required: b0c8fb368d70f17bce5eb7e3d1fe02d810db8e19
+branch: codex/lease-dang-windows-1
+base_sha: 2ab3560a8a406c1b436221fb3c6d23234aefdde0
+nen_so_write_set: ba82b06f9df81fc2f13786fec590ec2110d046b7
+target_branch_neu_land: master
+scope_files: 2
+
+spec_path: ops/specs/LEASE-DANG-WINDOWS-r3.md
+spec_sha256_required: 130b6d29919db327ccc2d9ad8d53910e5dd74b2eef0f607d3e59a707647de40d
+spec_ke_thua:
+  - {path: ops/specs/LEASE-DANG-WINDOWS.md, sha256: f555cbe1a368c12040726dd706ce25ed8dd4041bd8a2f840590810a3c3908a26}
+  - {path: ops/specs/LEASE-DANG-WINDOWS-r2.md, sha256: d9da7705617c95c8dc394d773de8456712d3cc2a2975e5903e8cb28c934c0d83}
+spec_note: >-
+  r3 thay W6/W7 bằng W6'/W7', thêm W9 và Q8-Q11. W3'/W4/W5 đã ĐẠT ở lượt 2 — không đo lại.
+
+verdict_truoc:
+  path: ops/reviews/lease-dang-windows-review-1-claude-verdict.md
+  sha256: 38b4986dac49c0207cd6c6ccf68e169491065552288169a790c0e7ba49589523
+  phai_dong: ['P1-1', 'P1-2']
+handoff_executor:
+  path: ops/handoff/lease-dang-windows-exec-3-codex-handoff.md
+  sha256: 2d5302fc687ed9ffc8002bbef6c8f8647d1036cd0f688db0e3d85fcd83d122f4
+
+prompt_path: ops/prompts/lease-dang-windows-review-2-claude-20260822.md
+prompt_sha256_required: 263f8afc17a27752d1a0415a6ea9c2566801d4e6fedbc63763a059b5ef709ea6
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-22 ("Noi tran 90->120, va hai P1" — lượt review kế thừa của quyết định ấy)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: false
+recorder_ghi_chu: >-
+  Phiên điều phối viết r1, r2 VÀ r3. r2 do chính nó viết đã sinh cả bốn biểu hiện hình dạng E mà
+  verdict lượt 1 đếm. Q8 của r3 là bản tự sửa — và nó CHƯA CÓ CỔNG NÀO CƯỠNG CHẾ. Reviewer soi
+  ĐẶC TẢ trước, bản vá sau, và được yêu cầu thẳng là hãy tấn công Q8.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-22T09:30:00Z'
+lease_expires_at_utc: '2026-08-23T09:30:00Z'
+run_minutes: 120
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 1
+review_calls_limit: 3
+review_calls_used_truoc_luot_nay: 1
+
+ngan_sach_con_lai:
+  dong_them_da_dung: 116
+  dong_them_toi_da: 120
+  con_lai: 4
+  ghi_chu: '`can_sua` thì reviewer PHẢI nói bản vá đề xuất cần bao nhiêu dòng — người giữ kho cần con số ấy.'
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: "W3' — một lượt Actions THẬT có job windows-latest XANH trên exact head MỚI"
+  bang_chung: >-
+    `workflow_dispatch` run **32563904221** trên `codex/lease-dang-windows-1` @ `b0c8fb36`:
+    `conclusion: success`, `run_attempt: 1`, `total_count: 2`, không job nào ĐỎ.
+    `gate (windows-latest)` success · `gate (ubuntu-latest)` success; bước
+    `lease-publish selftest (cài công cụ + chạy cổng)` **success trên CẢ HAI**.
+    Log tải thẳng từ blob (không qua giới hạn 5000 dòng của công cụ MCP) cho SỐ DƯƠNG:
+    Ubuntu `lease_publish: 72/72 đạt; đã chạy=72, bỏ qua=0` (0 dòng `BỎ QUA`) ·
+    Windows `lease_publish: 64/64 đạt; đã chạy=64, bỏ qua=8`, và ĐÚNG 8 dòng `BỎ QUA`,
+    mỗi dòng in `runs-on đã đọc được: 'ubuntu-latest', phân giải thành ['ubuntu-latest']`.
+    64+8=72 khớp. Tám ca ấy là t51 t52 t59 t60 t62 t63 t66 t68 — **`t49` KHÔNG nằm trong**,
+    tức Q6 (t49 phải vá thật, cấm bỏ qua) vẫn giữ.
+    Các bước `skipped` đều thuộc loại CÓ SẴN (`PR head contains required EOL base` vì event là
+    workflow_dispatch; `don-nhanh selftest`; `bo ca gate chay TRONG cgroup (Linux)`;
+    `tl selftest (luot PR)`), KHÔNG phải skip mới.
+  do_doc_lap_boi_phien_dieu_phoi: >-
+    write-set delta ba82b06f..b0c8fb3 = +116/-20, 2 tệp (khớp lời khai) ·
+    suite trên b0c8fb3 = 72/72, bỏ qua=0, rc=0 ·
+    phản chứng P1-1 (BoQuaNen không mỏ neo) = 72/73, bỏ qua=0, rc=1 (verdict cũ: 72/72, bỏ qua=1, rc=0) ·
+    phản chứng P1-2 (hằng số trá hình) = 70/72, rc=1 ·
+    actionlint 5 workflow: origin/master rc=1 với ĐÚNG một finding y hệt (ops-don-ref.yml:106
+    SC1003:info), b0c8fb3 cũng vậy ⇒ DELTA = 0.
+  canh_bao_ve_chinh_phep_do_ay: >-
+    Lần dựng đột biến P1-1 đầu tiên của phiên điều phối chèn vào giữa dòng gạch ngang ⇒
+    SyntaxError ⇒ rc=1. Dừng ở rc thì đã tính là "đỏ đúng". Con số 72/73 ở trên là của lượt
+    dựng lại, đã qua ast.parse. Mọi đột biến của reviewer phải qua ast.parse trước khi tin số.
+
+phat_hien_cua_phien_dieu_phoi_can_reviewer_KIEM_LAI:
+  gi: '`t33` KHÔNG đòi `shellcheck` có mặt — chỉ đòi `actionlint`.'
+  do_the_nao: >-
+    Đọc t33 (ops/lease_publish_test.py:1312-1336): `shutil.which("actionlint")` là điều kiện duy
+    nhất; không có phép kiểm nào cho `shellcheck`. Nên actionlint chạy KHÔNG có shellcheck sẽ im
+    lặng bỏ toàn bộ luật nền ấy mà t33 vẫn XANH — đúng cơ chế đã sinh ra SC2320 và hình dạng A
+    lần 7. Trên lượt Windows vừa rồi chuỗi `shellcheck` KHÔNG xuất hiện lần nào trong log.
+  noi_cho_dung: >-
+    "shellcheck VẮNG trên runner Windows" là **KHÔNG ĐO ĐƯỢC** từ log này (có mặt mà không có
+    finding thì cũng không in gì). Thứ ĐO ĐƯỢC là: **dù có hay không, t33 cũng không cho ta
+    biết** — và đó mới là lỗ.
+  pham_vi: >-
+    NGOÀI phạm vi lượt 3 (t33 có từ #227, nằm trong nền ba82b06f; bản vá lượt 3 không làm nó
+    nặng thêm). Ghi ở đây để reviewer KIỂM LẠI phiên điều phối, và để nó vào packet kế tiếp
+    thay vì chết trong một câu văn.
+
+canh_bao_cho_reviewer: >-
+  Trọng tâm KHÔNG phải "có xanh không" — nó xanh trên cả hai nền, đo bằng lượt chạy thật kèm số
+  dương. Trọng tâm là: `Q8` — luật mà chính đặc tả này dựng lên để giết hình dạng E — CÓ CỔNG NÀO
+  CƯỠNG CHẾ KHÔNG, hay nó chỉ là một dòng trong handoff. Nếu không có, thì r3 tái tạo đúng hình
+  dạng nó định giết, chỉ ở tầng cao hơn. Đo rồi kết luận, kể cả khi bản vá đạt.
+
+hinh_dang_ke_thua:
+  A_loi_khai_rong_hon_phep_do: 7
+  B_muon_tien_le_khong_do: 2
+  C_phan_chung_bat_buoc_con_thieu: 1
+  D_sai_do_phan_giai_hoac_pha: 3
+  E_khoa_theo_thu_liet_ke_duoc: 3
+  F_land_mot_nen_do_nen_khac: 2
+  ghi_chu: 'Chốt: A lần 8 · B lần 3 · C lần 2 · D lần 4 · E lần 4 · F lần 3 ⇒ DỪNG, không vá.'

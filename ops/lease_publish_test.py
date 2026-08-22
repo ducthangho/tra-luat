@@ -31,7 +31,9 @@ RC_OK, RC_THAM_SO, RC_TU_CAP, RC_DA_DANG, RC_NOI_DUNG, RC_NEO = 0, 2, 4, 9, 8, 6
 CA: list = []
 
 
-class BoQuaNen(Exception): pass
+class BoQuaNen(Exception):
+    def __init__(self, tep=None, ten_job=None):
+        self.tep, self.ten_job = tep, ten_job
 
 def ca(fn):
     CA.append(fn)
@@ -2298,8 +2300,8 @@ def _chay_buoc_dang(check_hong="", post_hong="", kiem_github_hong="",
         check_hong = "giua"
     if guard_hong == "kiem-github":
         kiem_github_hong = "giua"
-    if ly_do := _ly_do_bo_qua_workflow(WORKFLOW_DANG, "dang"):
-        raise BoQuaNen(ly_do)
+    if _ly_do_bo_qua_workflow(WORKFLOW_DANG, "dang"):
+        raise BoQuaNen(WORKFLOW_DANG, "dang")
     than = _buoc_workflow("đăng")["run"]
     with tempfile.TemporaryDirectory() as t:
         goc, neo = Path(t), Path(t) / "neo"
@@ -2608,20 +2610,39 @@ def t70_W6_matrix_co_Windows_phai_chay_lai_tam_ca():
          f"matrix có Windows vẫn bỏ qua hoặc không dẫn xuất đủ tám ca: {ly_do!r}, {doc_than}")
 
 
+def _chay_main_meta(fn, nen=None):
+    import contextlib, io, os
+    from unittest import mock
+    cu, out = CA[:], io.StringIO()
+    CA[:] = [fn]
+    try:
+        with contextlib.redirect_stdout(out), (mock.patch.object(os, "name", nen)
+                                                if nen else contextlib.nullcontext()):
+            rc = main()
+    finally: CA[:] = cu
+    return rc, out.getvalue()
+
+
 @ca
 def t71_W7_workflow_khong_ubuntu_only_cam_bo_qua():
-    ly_do = _ly_do_bo_qua_workflow(WORKFLOW_DANG, "dang", nen="nt",
-                                   job={"runs-on": "windows-latest"})
-    bang(not ly_do, f"cửa sau bỏ qua workflow không ubuntu-only: {ly_do}")
+    with San() as s:
+        tep = s / "w.yml"
+        tep.write_text("jobs:\n  j:\n    runs-on: windows-latest\n", encoding="utf-8")
+        def sai(): raise BoQuaNen(tep, "j")
+        rc, out = _chay_main_meta(sai, "nt")
+        bang(rc == 1 and "ĐỎ" in out, f"main tin lời bỏ qua không dẫn xuất được: {out}")
 
 
 @ca
 def t72_W8_bo_qua_phai_in_runs_on_va_tong_ket():
-    ly_do = _ly_do_bo_qua_workflow(WORKFLOW_DANG, "dang", nen="nt")
-    dong, tong = f"BỎ QUA ca-gia: {ly_do}", _dong_tong_ket(64, 64, 8)
-    bang(ly_do and "runs-on đã đọc được" in dong and "ubuntu-latest" in dong
-         and "đã chạy=64" in tong and "bỏ qua=8" in tong,
-         f"bỏ qua im lặng hoặc tổng kết thiếu số: {dong!r}; {tong!r}")
+    with San() as s:
+        nhan = "ubuntu-" + next(tempfile._get_candidate_names())
+        tep = s / "w.yml"
+        tep.write_text(f"jobs:\n  j:\n    runs-on: {nhan}\n", encoding="utf-8")
+        def bo(): raise BoQuaNen(tep, "j")
+        rc, out = _chay_main_meta(bo, "nt")
+        bang(rc == 0 and nhan in out and "bỏ qua=1" in out,
+             f"main không in lý do tự dẫn xuất/tổng kết: rc={rc}, {out!r}")
 
 
 def main() -> int:
@@ -2631,7 +2652,12 @@ def main() -> int:
             fn()
             qua += 1
         except BoQuaNen as ex:
-            bo_qua.append((fn.__name__, str(ex)))
+            try: ly_do = _ly_do_bo_qua_workflow(ex.tep, ex.ten_job)
+            except Exception: ly_do = ""
+            if ly_do:
+                bo_qua.append((fn.__name__, ly_do))
+            else:
+                hong.append((fn.__name__, "bỏ qua không dẫn xuất được từ runs-on"))
         except AssertionError as ex:
             hong.append((fn.__name__, str(ex)))
         except Exception as ex:  # noqa: BLE001

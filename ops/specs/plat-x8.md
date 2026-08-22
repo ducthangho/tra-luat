@@ -3,7 +3,8 @@
 > # ⛔ ĐỪNG CẤP LEASE NEO VÀO BẢN NÀY
 >
 > **Điều kiện chờ ĐÃ ĐỔI: nay chờ `#238`, KHÔNG phải `#227`.** Và số chỗ sai không phải sáu — đo lại
-> toàn bảng 22-08-2026 05:5xZ trên `origin/master` `2ab3560` thì ra **mười một**.
+> toàn bảng 22-08-2026 trên `origin/master` `2ab3560` thì ra **mười hai** — và chỗ thứ 12 tìm được
+> khi đi kiểm một việc KHÁC (`SLICE-B-C` đã land chưa), không phải khi rà danh sách này.
 >
 > ## Vì sao điều kiện đổi
 >
@@ -36,16 +37,53 @@
 > | 7 | §5 mục 9 | `t23` *"42/42 → N/N"* | số nền đúng hôm nay, nhưng nó **đi kèm** sàn A9 nên phải đổi cùng lượt |
 > | 8 | §4 mục 1 · §6 `A8` | *"49 lease cũ"* | **61** tệp |
 > | 9 | §8 | *"15/15 đường dẫn"*, *"10 lease khai lớp"* | **14/14** đường · **22** lease khai lớp (1 `routine` / 5 `systemic` / 16 `sensitive`); executor **17**, reviewer **44** |
-> | 10 | §9 | *"0/49 tệp có `risk`"*, *"39/39 reviewer"* | **0/61** · **44/44** |
+> | 10 | §9 | *"0/49 tệp có `risk`"*, *"39/39 reviewer"* | **0/61** · **44/44** đo theo HÌNH DẠNG — nhưng xem mục **12**, đo theo TỒN TẠI ra **27/44** |
 > | 11 | §2 | *"lần **đầu tiên** `ops/lease_publish.py` vào một `write_set` (0/49)"* | **MỆNH ĐỀ SỰ KIỆN, đã sai.** `#227` mở tệp ấy trước; nay **7/61** lease mang nó. `PLAT-X8` là packet **thứ hai** chạm nó, không phải thứ nhất |
+> | 12 | §9 lập luận | *"exact head **CÓ THẬT** và neo ngay trong lease"* | **Chữ "có thật" do phép đo HÌNH DẠNG đỡ, không phải phép đo TỒN TẠI.** Đo tồn tại: **17/44** lease reviewer có `reviewed_sha_required` trỏ commit **không tra được**. Xem khối riêng bên dưới |
 >
-> **Bốn quyết định ở §1 (Q1 thu hồi · Q2 · Q5 · Q6) và mọi §5–§10 KHÔNG bị ảnh hưởng** — mười một chỗ
-> trên đều là con số nền, bảng va chạm, và một mệnh đề sự kiện; không chỗ nào là yêu cầu kỹ thuật.
+> **Bốn quyết định ở §1 (Q1 thu hồi · Q2 · Q5 · Q6) và §5–§8, §10 KHÔNG bị ảnh hưởng** — mười một chỗ
+> đầu đều là con số nền, bảng va chạm, và một mệnh đề sự kiện. **Chỗ thứ 12 thì khác: nó chạm một
+> LẬP LUẬN của §9**, không chỉ một con số — xem ngay dưới trước khi dùng §9 làm căn cứ.
+>
+> ## Chỗ thứ 12 — `reviewed_sha_required` được kiểm HÌNH DẠNG, không kiểm TỒN TẠI
+>
+> Đo 22-08-2026 06:2xZ trên `origin/master` `2ab3560`, **61** lease:
+>
+> | đo | số |
+> |---|---|
+> | trường SHA đã kiểm (`base_sha` · `reviewed_sha_required` · `start_from_sha`) | **141** |
+> | trường trỏ commit **không tra được** | **29** — trong **21** tệp lease, **20** SHA phân biệt |
+> | lease **reviewer** có `reviewed_sha_required` không tra được | **17/44** |
+> | lease **executor** có `reviewed_sha_required` không tra được | **2/17** |
+>
+> **Ba giả thuyết rẻ đã bị loại, theo thứ tự — đừng loại lại:**
+>
+> 1. *"chưa fetch đủ"* — fetch **toàn bộ** `refs/heads/*`: **158** ref remote + **35** tag. Số **không đổi**.
+> 2. *"commit mất ref trong clone, vẫn còn trên GitHub"* — hỏi API: `No commit found for SHA`. Không phải GC.
+> 3. *"SHA thật bị chép thiếu/thừa ký tự"* — chỉ **1/20** trùng tiền tố với một commit thật, và trùng
+>    đúng **8** ký tự rồi khác hẳn: lease khai `03339486`**`69bb0fdb…`**, commit thật là
+>    `03339486`**`bc44d533…`**. Một cái khác lộ hẳn: `18da1da6a07a3e6e4e3e8f`**`0e0e0e0e0e0e0e0e0e`** —
+>    mẫu lặp tới hết chuỗi. Đây là **SHA giữ chỗ**, không phải lỗi chép.
+>
+> **Vì sao điều này thuộc về `PLAT-X8` chứ không phải một packet khác.** §9 dùng câu *"exact head có
+> thật và neo ngay trong lease"* làm lý do KHÔNG phân lớp diff trên đường reviewer. Lý do ấy đứng
+> được là nhờ `ops/lease_publish.py` **đã đòi và kiểm** trường `reviewed_sha_required` — nhưng nó
+> kiểm **40-hex**, tức kiểm **cách viết**. Một chuỗi 40 ký tự hex bịa ra qua cổng y như một SHA thật.
+> Cùng hình dạng với *"danh sách CẤM phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN"* (`v1.36.68`),
+> và với `gh auth status` xanh trong khi mọi thao tác kho trả 403: **một phép kiểm qua được mà không
+> chứng minh được thứ nó có tên**.
+>
+> **Chưa quyết chỗ chữa, và CỐ Ý chưa quyết.** Thêm phép kiểm tồn tại vào cổng là mở rộng `write_set`
+> của `PLAT-X8` (`ops/lease_publish.py`) cho một mục Issue #225 không đặt ra, và **17/44** lease cũ sẽ
+> ĐỎ ngay — đúng thứ §4 mục 1 cấm (forward-only theo Q5). Nên đây là **nợ đã đo**, không phải yêu cầu
+> của packet này. Ai mở packet cho nó phải trả lời trước: cổng chặn **lease mới** hay chặn **mọi
+> lease**, và ba trạng thái (`có` · `không` · **`không đo được`**) ánh xạ ra `rc` nào — SHA của một
+> nhánh chưa fetch là `không đo được`, không phải `không có`.
 >
 > ## Việc phải làm, đúng thứ tự
 >
 > Chờ **`#238`** land (ba tệp mã đứng được trên Windows, có `run_id` của lượt `workflow_dispatch`
-> xanh cả hai job trên exact head) → **đo lại toàn bảng §0**, không vá lẻ → sửa mười một chỗ → đóng
+> xanh cả hai job trên exact head) → **đo lại toàn bảng §0**, không vá lẻ → sửa mười hai chỗ → đóng
 > băng **bản 4** → quét lease trên **mọi** ref rồi mới cấp lease neo băm bản 4. Prompt
 > `ops/prompts/plat-x8-exec-1-codex-20260821.md` giữ lại nhưng phải neo lại băm trước khi dùng.
 >
@@ -63,7 +101,8 @@
 >    mà `#238` đếm lên **7**. Ai báo *"actionlint rc=0"* phải nói kèm có `shellcheck` hay không.
 >
 > *Hộp này tồn tại vì trước đó đặc tả — thứ DUY NHẤT có thẩm quyền, thứ lease neo vào — không mang
-> dấu hiệu nào cho biết các con số của nó sắp chết. Bản 3b đã liệt kê sáu chỗ; đo lại ra mười một.
+> dấu hiệu nào cho biết các con số của nó sắp chết. Bản 3b liệt kê sáu chỗ; đo lại ra mười một; đi
+> kiểm một việc khác thì ra chỗ thứ mười hai.
 > **Một danh sách liệt kê không thay được một lượt đo lại toàn bảng** — cùng hình dạng với "danh sách
 > CẤM không bao giờ đủ".*
 
@@ -81,7 +120,8 @@ cầu vẫn không đổi một chữ** — thứ trôi là nền đo, không ph
 | 2 | `b88c53dfd211…` | 2 P1 nữa ở lượt 2 (neo `3bafef75d6`), **cả hai** đánh vào đúng đường kế thừa — hết hiệu lực |
 | 3 | `328a74facb84…` | Q1 **THU HỒI**: đường kế thừa bị gỡ, không vá tiếp — §10 |
 | 3b | `308d0cf44fc1…` | thêm hộp ⛔ cảnh báo, liệt kê **sáu** chỗ sai, điều kiện chờ = `#227` land — hết hiệu lực khi `#227` land **rồi bị revert** |
-| 3c | bản này | **chỉ sửa hộp ⛔.** Điều kiện chờ đổi `#227` → **`#238`**; sáu chỗ sai đo lại thành **mười một**; ghi va chạm lease SỐNG của `#238`. Nội dung yêu cầu KHÔNG đổi so với bản 3 |
+| 3c | `182ea7621d02…` | sửa hộp ⛔: điều kiện chờ đổi `#227` → **`#238`**; sáu chỗ sai đo lại thành **mười một**; ghi va chạm lease SỐNG của `#238` |
+| 3d | bản này | **chỉ thêm chỗ thứ 12 vào hộp ⛔:** `reviewed_sha_required` được kiểm HÌNH DẠNG chứ không kiểm TỒN TẠI — **29** trường SHA trong **21** lease trỏ commit không tra được. Chạm một **lập luận** của §9, không chỉ một con số. Nội dung yêu cầu KHÔNG đổi so với bản 3 |
 
 Bốn phát hiện trên **một** đường là dấu hiệu sai ở QUYẾT ĐỊNH GỐC chứ không ở các bản vá. Các bản
 trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm bản dùng được.

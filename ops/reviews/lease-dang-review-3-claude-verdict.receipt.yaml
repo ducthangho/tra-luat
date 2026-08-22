@@ -1,0 +1,108 @@
+# BIÊN NHẬN — cross-review `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 3 (REVIEW DELTA), reviewer `claude`.
+#
+# Verdict `can_sua` với ĐÚNG MỘT P2 + một P3. P1 và ba P3 của lượt 2 đều ĐÓNG.
+# P2 chạm đúng chốt DỪNG mà `r3` tự đăng ký trước — xem caveat đầu tiên.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+packet_issue: 227
+lease_id: lease-dang-review-3-claude-20260821
+provider: claude
+role: reviewer
+executor_provider: codex
+verdict: changes_requested
+cross_provider: true
+review_class: sensitive
+reviewed_sha: 9f5b08e81a131a1c22d15b6d5809885eae11413f
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+nen_delta_sha: 90015a53c7407400f87c9f5a018067849fa1e842
+target_pull_request: null
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r3.md
+spec_sha256: c65d5dbd9d2b398978226f6863cf7cd4e4ddb219a7086be0005e65804a0f47da
+
+verdict_path: ops/reviews/lease-dang-review-3-claude-verdict.md
+verdict_sha256: 79f8bb2a48e92f9081cd50ba0d6d24a8f4bd7246d92ab0cc2d500e26ecfe24a0
+verdict_bytes: 13554
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/80bbd1c0ce52d9b4d0738c3b850cd53c972e9770/ops/reviews/lease-dang-review-3-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Điền SAU KHI ĐÃ PUSH THÀNH CÔNG và sau khi `git branch -r --contains` xác nhận — biên nhận
+  lượt 1 đã chết một lần vì rebase viết lại commit sau khi điền.
+
+verdict_nguon: >-
+  stdout của `claude -p` do `launcher.py` giữ, run `cd6d9e6d`, `ma_thoat=0`,
+  `thoi_luong_giay=894.8`, `stdout_byte=13554`, `stderr_byte=0`.
+  Chốt read-only sau lượt: cây review sạch, HEAD vẫn `9f5b08e8`.
+verdict_doi_chieu: >-
+  NGUYÊN VĂN, không đụng một byte — băm đo trực tiếp trên `stdout.log`. Bước rút gọn đường dẫn
+  phiên KHÔNG chạy (đo được: phép thay thế trả về chuỗi y hệt).
+
+so_finding: 2
+tom_tat_finding: >-
+  P2 nhánh `rc=9` của `kiem-github` — chốt chống ĐĂNG TRÙNG XUYÊN NHÁNH, tức chính thứ packet
+  mang tên — KHÔNG có phản chứng nào; gỡ theo hướng fail-open thì lease bị đăng HAI LẦN mà suite
+  vẫn `61/61` · P3 `r3` khai đột biến "cho `kiem()` gọi mạng trở lại" giết **8** ca, đo được **9**
+  (sai số bắt nguồn từ verdict lượt 2 gộp `t02c`/`t02d` thành `t02`, rồi `r3` chép lại).
+da_xu_ly: >-
+  CHƯA. P2 chạm chốt DỪNG mà chính `r3` đăng ký trước. Trả về người giữ kho quyết — xem caveat
+  `P2-CHAM-CHOT-DUNG-ma-r3-TU-DANG-KY`.
+
+verdict_usage_caveats:
+- id: P2-CHAM-CHOT-DUNG-ma-r3-TU-DANG-KY
+  noi_dung: >-
+    `r3` đăng ký trước: *"hình dạng C (phản chứng bắt buộc còn thiếu) lần thứ 2 ⇒ DỪNG, không vá,
+    xuất handoff"*. P2 lượt này ĐÚNG là hình dạng C, ở đúng khối mà C lần 1 chỉ vào. Reviewer nêu
+    HAI cách đọc và TỪ CHỐI tự quyết: (a) **C lần thứ 2** — chốt khác, nhánh khác, đột biến khác
+    ⇒ verdict phải là `dung_lai`; (b) **C lần 1 chưa đóng hết** — `T59`/`T60` đóng nửa "có gọi /
+    tôn trọng rc≠0", nửa "tôn trọng rc=9" chưa ⇒ `can_sua`. Họ để `can_sua` vì phép vá là cơ học
+    và `r3` chỉ đặt hàng `T59`/`T60` (executor đã giao ĐỦ), nhưng ghi thẳng rằng việc tăng bộ đếm
+    là quyết định của NGƯỜI GIỮ KHO. Ghi ra nguyên trạng thay vì làm tròn theo hướng nào (L1).
+- id: P2-DO-DUOC-O-CA-HAI-TANG
+  noi_dung: >-
+    Không dừng ở suy luận. Phiên điều phối đo lại độc lập trên bản sao tạm dựng bằng `git archive`
+    head: đột biến D24 (đổi `if [ "$rc" = "9" ] … continue` + `if [ "$rc" != "0" ]` thành
+    `if [ "$rc" != "0" ] && [ "$rc" != "9" ]`) ⇒ suite **61/61**, `actionlint` **rc=0** — SỐNG SÓT
+    hoàn toàn. Rồi đo HÀNH VI bằng thân bước trích từ chính YAML, với `lease_publish.py` giả trả
+    `9` cho đúng lease `giua`: bản gốc **2 lần POST** (đúng — `giua` bị bỏ qua), D24 **3 lần POST**
+    (ĐĂNG TRÙNG). Chốt bị gỡ ⇒ lease đăng hai lần, bảng điểm vẫn xanh.
+- id: EXECUTOR-DA-GIAO-DU-thu-r3-dat-hang
+  noi_dung: >-
+    Đừng đọc `can_sua` thành "codex làm thiếu". `r3` đặt hàng `T59`/`T60` (nửa "workflow CÓ gọi"
+    và "tôn trọng rc≠0") và executor giao ĐỦ, còn vượt: reviewer tự dựng thêm D12 (đảo thứ tự),
+    D13 (bỏ đúng một lease), D14/D15 (tách hai vế của `t60`) — tất cả đều bị bắt. Nửa `rc=9`
+    KHÔNG nằm trong đơn hàng. Người viết `r3` là phiên điều phối; đây là lần thứ BA đặc tả của
+    phiên ấy là mắt xích yếu của packet (bản 1 gây P1 lượt 1 · prompt lượt 2 chứa tiền đề chưa
+    đo · `r3` đặt hàng thiếu nửa nhánh).
+- id: t59-t60-DOC-YAML-THAT-khong-phai-ban-chep
+  noi_dung: >-
+    Câu hỏi chính của prompt lượt 3 đã được trả lời bằng HÀNH VI, không bằng đọc code:
+    `_buoc_workflow()` đọc thẳng `HERE.parent/.github/workflows/ops-publish-lease.yml` và
+    `bang(tep.is_file(), …)` CHẾT CỨNG khi thiếu — không có nhánh "không thấy thì bỏ qua" kiểu
+    `t24`. Bằng chứng: D10–D15 và D21 CHỈ sửa YAML, và chúng làm `t59`/`t60` đỏ.
+- id: P3-so-8-la-cua-BIEN-NHAN-luot-2-roi-r3-chep-lai
+  noi_dung: >-
+    Đột biến "cho `kiem()` gọi mạng trở lại" giết **9** ca (`t01 t02c t02d t09 t14 t21 t50 t53
+    t58`), không phải 8 — trên CẢ `9f5b08e8` (52/61) lẫn `90015a53` (49/58), tức delta = 0.
+    Sai số sinh ra ở verdict lượt 2 (con số `49/58` ĐÚNG nhưng câu chữ gộp `t02c`/`t02d` thành
+    `t02`), rồi `r3` chép lại và biến nó thành TIÊU CHÍ NGHIỆM THU. Con số đúng là **9**.
+- id: D20-do-roi-BAC-khong-phai-finding
+  noi_dung: >-
+    Đột biến bỏ cờ `--root .` của `kiem-github` SỐNG SÓT `61/61`, nhưng chú thích trong YAML TỰ
+    KHAI cờ ấy là dư để rõ nghĩa (`_goc_kho` đi ngược tìm `.git` ra cùng chỗ). Lời khai ĐÚNG ⇒
+    không phải khuyết tật. Ghi ra vì một đột biến sống sót KHÔNG luôn nghĩa là test yếu.
+- id: nhanh-rc9-cua-check-CUNG-ho-nhung-delta-0
+  noi_dung: >-
+    Reviewer đo D23 (nhánh `rc=9` của `check`) cũng sống sót `61/61`, nhưng nhánh ấy CÓ TỪ
+    `cfaccff9` ⇒ delta = 0 ⇒ họ KHÔNG báo là finding của packet. Đúng doctrine "đo nền trước khi
+    nghi bản vá của mình". Nếu người giữ kho cho vá nửa `rc=9` thì vá một thể cả hai rẻ hơn.
+- id: reviewer-KHONG-doc-duoc-bao-cao-executor
+  noi_dung: >-
+    `r3` đòi executor khai rõ chọn đường Q18 nào và khai đột biến đa sát. Trong kho ở head KHÔNG
+    có tệp báo cáo nào và thông điệp commit chỉ một dòng; reviewer không được cấp quyền đọc PR
+    nên KHÔNG đo được lời khai ấy. Họ nói thẳng "không kết luận là chưa khai — chỉ là chưa đo
+    được". Phiên điều phối xác nhận: executor CÓ khai đủ trong báo cáo cuối (chọn đường (b), kèm
+    lý do; và danh sách đột biến đa sát). Kênh khai là stdout của lượt chạy, KHÔNG phải một tệp
+    trong kho — đó là một khoảng mù thật của quy trình, không phải lỗi của ai.

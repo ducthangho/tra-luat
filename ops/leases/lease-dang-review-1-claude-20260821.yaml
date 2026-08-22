@@ -1,0 +1,75 @@
+# Lease REVIEWER — `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 1. Neo exact head fefa15b6.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 227
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+lease_id: lease-dang-review-1-claude-20260821
+revision: 1
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: codex
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+review_class: sensitive
+review_class_ghi_chu: >-
+  Chạm `.github/workflows/ops-publish-lease.yml` và `ops/lease_publish*.py` — CHÍNH cổng đăng
+  lease, tức review/land authority theo §8. Phân theo HẬU QUẢ, không theo vị trí.
+
+reviewed_sha_required: fefa15b67a2691cf90ee8bfd0ab3880adc5f35d9
+branch: codex/lease-dang-exec-1
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+target_branch_neu_land: master
+scope_files: 3
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN.md
+spec_sha256_required: e1026adb569f5b4732197afac9c0f35cdd5a8945d46301b1d4cb062624e7c72c
+spec_note: >-
+  AUTHORITY LÀ ĐẶC TẢ ĐÓNG BĂNG, không phải prompt và không phải thân Issue. Mục
+  `ngoai_pham_vi` và `chua_do_duoc` của đặc tả giới hạn cái gì được tính là finding.
+
+prompt_path: ops/prompts/lease-dang-review-1-claude-20260821.md
+prompt_sha256_required: 011fcc5aeaba178640242af9dd8bc8af2a6c3501cf001503077e031db5190a3d
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("triển khai đi" — backlog đã liệt kê; đặc tả Q8 chốt reviewer = claude)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: false
+recorder_ghi_chu: >-
+  Phiên ghi lease KHÔNG vá packet (executor là `codex`) nhưng ĐÃ SOẠN đặc tả và prompt. Reviewer
+  cùng nhà cung cấp với phiên soạn đặc tả — nói thẳng vì nó là điểm yếu thật của lượt này: §8
+  đòi cross-provider giữa EXECUTOR và REVIEWER, và điều đó thoả; nó KHÔNG đòi gì về người soạn
+  đặc tả. Reviewer được yêu cầu soi cả đặc tả, không chỉ bản vá.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T12:30:00Z'
+lease_expires_at_utc: '2026-08-22T12:30:00Z'
+run_minutes: 90
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+review_calls_limit: 3
+review_calls_used_truoc_luot_nay: 0
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: 'suite + actionlint xanh trên exact head, ĐO LẠI ĐỘC LẬP bởi phiên điều phối'
+  bang_chung: >-
+    `python3 ops/lease_publish_test.py` -> rc=0, `lease_publish: 52/52 đạt` (chạy lại trên
+    fefa15b6 trong container của phiên điều phối, sau khi cài `actionlint` 1.7.7 bằng
+    `ops/cai_actionlint.sh`). `git diff --numstat cfaccff9..fefa15b6` -> 3 tệp, +298/−11,
+    trong ngân sách ADR-0044 (<=3 tệp, <=300 dòng thêm).
+  no_khai: >-
+    CHƯA có lượt chạy GitHub Actions thật nào trên bản vá này, và CHƯA có lượt Windows —
+    `ci.yml` chỉ chạy ubuntu cho PR thường. Khai thẳng thay vì làm tròn.
+
+canh_bao_cho_reviewer: >-
+  Đặc tả và prompt do phiên điều phối soạn, và chính phiên ấy vừa mắc lần thứ 5 của hình dạng
+  "hỏi chỗ tiện tay thay vì chỗ kết luận được ghi". Chỗ đáng ngờ nhất KHÔNG chỉ là bản vá — nó
+  là lời khai của đặc tả về những gì bản vá đã đóng.
+posted_comment_id: 5370024069   # workflow ghi, ĐỪNG sửa tay

@@ -1,0 +1,122 @@
+# Lease EXECUTOR — `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 2/2. Neo head xuất phát fefa15b6.
+#
+# Neo ĐẶC TẢ BẢN SỬA ĐỔI 2. Bản 1 KHÔNG bị sửa — nó là thứ lease lượt 1 và biên nhận lượt 1
+# trỏ tới, và một đặc tả sửa đè làm mọi băm đã cấp trỏ vào thứ không còn tồn tại.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 227
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+phase_key: LEASE-DANG-DUNG-MOT-LAN
+revision: 2
+generation: 1
+lease_id: lease-dang-exec-2-codex-20260821
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r2.md
+spec_sha256_required: 3f310582de59dce7c109717dbab13ef9467b80c67ffeafc0ac8e1484309e0093
+spec_thay_the: >-
+  Bản sửa đổi 2 THAY THẾ bản 1 (`ops/specs/LEASE-DANG-DUNG-MOT-LAN.md`, sha256 `e1026adb…`).
+  Bản 1 ở lại trong kho làm hồ sơ; executor KHÔNG làm theo nó.
+spec_note: >-
+  Bản sửa đổi này ra đời vì CHÍNH BẢN 1 gây ra P1 thứ nhất: mục tiêu 4 ghim cơ chế dò
+  `GITHUB_ACTIONS`, mượn tiền lệ lớp `GITHUB_ACTOR` mà không đo xem tiền lệ ấy có áp dụng được
+  không. `GITHUB_ACTOR` là so CHUỖI; hai lớp mới là LỜI GỌI MẠNG; và bộ selftest của chính cổng
+  chạy BÊN TRONG Actions không có `GH_TOKEN`. Q9 bỏ hẳn cơ chế ấy.
+
+verdict_phai_doc:
+  path: ops/reviews/lease-dang-review-1-claude-verdict.md
+  sha256: 42b438ad15fc1a8978dcd3bef023aa1f41d0926b8b87dc9c4d521229c9d6ae41
+  so_finding: 7
+  ghi_chu: 'Báo cáo cuối phải trả lời TỪNG finding: đã đóng (kèm phép đo) hay không đóng (kèm lý do).'
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 500
+  don_vi: 'tệp trong write_set · dòng THÊM theo `git diff --numstat cfaccff9..HEAD` (tính CẢ lượt 1)'
+  ghi_chu: >-
+    Người giữ kho nới trần 300 -> 500 trong phiên 2026-08-21, có chủ đích, vì bản sửa đổi 2 đòi
+    viết lại `T49`/`T52` và thêm 6 ca. Lượt 1 đã tiêu +298. Dòng XOÁ không tính vào trần — Q9
+    cho phép xoá lại nhiều thứ lượt 1 đã thêm. Vượt 500 ⇒ DỪNG + handoff (§2).
+
+branch: codex/lease-dang-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: fefa15b67a2691cf90ee8bfd0ab3880adc5f35d9
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+start_from_sha: fefa15b67a2691cf90ee8bfd0ab3880adc5f35d9
+
+prompt_path: ops/prompts/lease-dang-exec-2-codex-20260821.md
+prompt_sha256_required: 03d4f2730e8548d47cdcf07b650911af904bba364d7a5c8dd2fa06ee6dbed377
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("Sửa ĐẶC TẢ trước, rồi vá lại" — chọn sau khi đọc verdict lượt 1)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_note: >-
+  Phiên ghi lease KHÔNG thi công, nhưng ĐÃ SOẠN cả bản 1 lẫn bản 2 của đặc tả — và bản 1 chính
+  là nguyên nhân P1 thứ nhất. Khai thẳng: người viết bản sửa đổi này là người vừa viết cái lỗi
+  mà nó sửa. Reviewer lượt 2 phải soi ĐẶC TẢ trước, bản vá sau.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T13:30:00Z'
+lease_expires_at_utc: '2026-08-22T13:30:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 1
+attempts_limit: 2
+executor_calls_limit: 4
+executor_calls_used_truoc_luot_nay: 1
+
+reviewer_provider: claude
+reviewer_note: >-
+  §8 đòi cross-provider cho phạm vi workflow: executor `codex` ⇒ reviewer `claude`. KHÔNG còn là
+  phép thử giả thuyết — giả thuyết "hình dạng bám người viết" ĐÃ BỊ BÁC BỎ ở lượt 1 (codex mắc
+  hình dạng "lời khai rộng hơn phép đo", bộ đếm nay 6, hai tác giả). Executor giữ `codex` vì
+  liên tục ngữ cảnh mã, không vì giả thuyết.
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 1
+review_calls_limit: 3
+review_calls_used_truoc_luot_nay: 1
+
+muc_tieu:
+  - 'Q9: kiem() GIỮ THUẦN — không subprocess, không mạng, KHÔNG dò GITHUB_ACTIONS'
+  - 'Q9: hai lớp GitHub sang lệnh con `kiem-github`, CHỈ workflow gọi'
+  - 'Q11: DA_DOI=1 ghi vào $GITHUB_ENV NGAY SAU mỗi `mark`; kiem-github/body/POST/mark đều bọc `set +e` rẽ về BI_CHAN'
+  - 'Q12: mỏ neo comment neo TÁC GIẢ (github-actions[bot]) + dấu ở ĐẦU thân + kiểm dạng lease_id'
+  - 'Q13: `--slurp` trả [] ⇒ CHẶN; [[]] ⇒ cho qua'
+  - 'Q14: T49 đo bằng MẪU biến môi trường, không bằng một tên đoán trước'
+  - 'Q15: T52 đo HÀNH VI (chạy thân bước), không khớp chuỗi `if:`'
+  - 'Q16: thông báo khi đo loại số hiệu hỏng phải nêu PR là nguyên nhân CÓ THỂ, và khai rõ đó là phỏng đoán'
+
+gate_bat_buoc:
+  - 'python3 ops/lease_publish_test.py -> rc=0, N/N hai số BẰNG NHAU, >= 58 ca'
+  - 'CÙNG suite với GITHUB_ACTIONS/GITHUB_REPOSITORY/GITHUB_ACTOR ĐƯỢC ĐẶT và `gh` VẮNG -> N/N Y HỆT (ca T53)'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5; thiếu công cụ ⇒ KHÔNG ĐO ĐƯỢC và ĐỎ'
+  - 'đột biến `[os.environ.get("GH_PATH") or "gh", ...]` PHẢI CHẾT (lượt 1 nó SỐNG SÓT 52/52)'
+  - 'đột biến "cho kiem() gọi mạng trở lại" PHẢI CHẾT (ca T53)'
+  - 't46 và t48 phải TÁCH: một đột biến không được giết cả hai'
+  - 'git diff --numstat cfaccff9..HEAD -> <= 3 tệp, <= 500 dòng thêm'
+
+dieu_kien_dung:
+  - 'Ngân sách sẽ vượt 500 dòng thêm hoặc 3 tệp ⇒ DỪNG, xuất handoff'
+  - 'Chốt phải nằm NGOÀI write_set ⇒ DỪNG, xuất handoff'
+  - 'Thấy một tiêu chí trong `nghiem_thu` là SAI ⇒ BÁO CÁO, không tự sửa giữa đường — bản 1 đã sai một mục, nên nghi ngờ là chính đáng, nhưng đường xử lý vẫn là báo cáo'
+  - 'Hình dạng A ("lời khai rộng hơn phép đo") lần thứ 7, hoặc hình dạng B ("mượn tiền lệ mà không đo xem nó áp dụng được không") lần thứ 3 ⇒ DỪNG, không vá'
+posted_comment_id: 5370452295   # workflow ghi, ĐỪNG sửa tay

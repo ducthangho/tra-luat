@@ -11,8 +11,8 @@ của packet nào, nên bản này **không** theo schema §7 (`ops/handoff/wp55
 
 ## 1. Neo — đọc bằng BĂM, không bằng tên nhánh
 
-> ⚠ **`spec_sha256` TRONG KHỐI DƯỚI ĐÂY ĐÃ HẾT HIỆU LỰC.** Đặc tả ra **bản 3d** ngày 22-08, băm
-> `f7f8e6209e4f…`. Khối neo còn hiệu lực nằm ở **cuối §1**, dưới nhãn *CẬP NHẬT 22-08-2026*.
+> ⚠ **`spec_sha256` TRONG KHỐI DƯỚI ĐÂY ĐÃ HẾT HIỆU LỰC.** Đặc tả ra **bản 3e** ngày 22-08, băm
+> `ce14fb0b75e4…`. Khối neo còn hiệu lực nằm ở **cuối §1**, dưới nhãn *CẬP NHẬT 22-08-2026*.
 > Khối cũ giữ nguyên làm bằng chứng — đừng vá lẻ nó, đừng lấy băm từ nó.
 
 ```yaml
@@ -58,22 +58,22 @@ pr: 230                            # https://github.com/ducthangho/tra-luat/pull
 >
 > Nghĩa là **§3 dưới đây đã lệch một phần**: Q1 không còn là quyết định đang có hiệu lực. Hai thứ
 > còn lại (cấp lease, nới bảng phân loại) vẫn chờ. *(Đoạn này viết 22-08 sáng; **bản 3b nay cũng hết
-> hiệu lực** — chuẩn hiện tại là **bản 3d** `f7f8e6209e4f…`, xem khối CẬP NHẬT cuối §1.)*
+> hiệu lực** — chuẩn hiện tại là **bản 3e** `ce14fb0b75e4…`, xem khối CẬP NHẬT cuối §1.)*
 > Đọc **bản 3b** làm chuẩn — băm
 > `308d0cf44fc1fcca75bc4d8edb014f560293622334ef25cc621c1e7afe3b2129`, đúng giá trị ở hàng
 > `spec_sha256` của khối neo trên; hai chỗ ấy phải luôn khớp nhau. **Bản 3 (`328a74facb84…`) đã
 > HẾT HIỆU LỰC** — đọc nó là bỏ qua hộp ⛔ ĐỪNG CẤP LEASE ở đầu đặc tả. Đừng đọc bản bàn giao này.
 
-> **CẬP NHẬT 22-08-2026 — `#227` LAND RỒI BỊ REVERT. Đặc tả ra bản 3d, KHÔNG phải bản 4.**
+> **CẬP NHẬT 22-08-2026 — `#227` LAND RỒI BỊ REVERT. Đặc tả ra bản 3e, KHÔNG phải bản 4.**
 > Khối neo ở đầu bản bàn giao này là ảnh chụp 21/22-08; bài học P1 ngay phía trên — *"khối neo là MỘT
 > phép đo, không phải một danh sách trường"* — nên đây đo lại **cả khối** thay vì vá lẻ:
 >
 > ```yaml
 > # Đo cùng lúc, 22-08-2026.
-> commit_gioi_thieu_bam_spec: 5674a7d   # commit ĐẦU TIÊN mang băm bản 3d
+> commit_gioi_thieu_bam_spec: 36ff7df   # commit ĐẦU TIÊN mang băm bản 3e
 > base: 2ab3560                         # = origin/master lúc đo (SAU revert #237)
 > spec_path: ops/specs/plat-x8.md
-> spec_sha256: f7f8e6209e4fb624fc19f72a4759b48551e8312fdbd34c7badb6c14309d036ea   # BẢN 3d
+> spec_sha256: ce14fb0b75e437491f184952c0b46a2b8f3ab5ebf8b93cd40afbb67708d92de4   # BẢN 3e
 > packet_issue: 225
 > lease: CHUA CAP — VA CHAM lease song cua #238, xem duoi
 > ```
@@ -82,7 +82,8 @@ pr: 230                            # https://github.com/ducthangho/tra-luat/pull
 > |---|---|---|
 > | 3b | `308d0cf44fc1…` | hết hiệu lực khi `#227` land rồi bị revert |
 > | 3c | `182ea7621d02…` | hộp ⛔ đổi điều kiện chờ sang `#238` — hết hiệu lực khi thêm chỗ thứ 12 |
-> | 3d | `f7f8e6209e4f…` | **bản dùng được** — thêm chỗ thứ 12: `reviewed_sha_required` kiểm HÌNH DẠNG chứ không kiểm TỒN TẠI (29 trường / 21 lease trỏ commit không tra được) |
+> | 3d | `f7f8e6209e4f…` | thêm chỗ thứ 12 (`reviewed_sha_required` kiểm HÌNH DẠNG, không kiểm TỒN TẠI) — hết hiệu lực khi thêm chỗ 13 |
+> | 3e | `ce14fb0b75e4…` | **bản dùng được** — thêm chỗ thứ 13: lease `codex` cho packet `sensitive` là ngoại lệ CÓ ĐIỀU KIỆN theo `ADR-0045`, và điều kiện "khai là ngoại lệ §2" chưa được ghi ở đâu |
 >
 > **Vì sao KHÔNG ra bản 4.** `#227` merge 05:16:40Z (PR #234) ⇒ CI master **ĐỎ trên Windows**
 > (`gate(windows-latest)` 59/68) ⇒ revert PR #237, master **`2ab3560`**, bộ test về **42** ca. Land

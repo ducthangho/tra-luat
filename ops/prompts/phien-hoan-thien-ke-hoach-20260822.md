@@ -61,8 +61,8 @@ master** · write set · thứ tự · chặn ai.
 **Kiểm PR #229 TRƯỚC** — nó đang dựng `ops/HANG_DOI_PACKET.md` cho THỨ TỰ packet; đừng dựng chỗ thứ
 hai nói cùng chuyện.
 
-**C — Mục D tách thành mấy packet?** Đã tách: `review_class` → `PLAT-X8` (#225, spec bản **3d**
-`f7f8e6209e4f…`, chưa lease — va chạm write set với lease sống của `#238`) · cross-provider theo họ model → `PLAT-X7` (#220, proposed) · phần còn lại
+**C — Mục D tách thành mấy packet?** Đã tách: `review_class` → `PLAT-X8` (#225, spec bản **3e**
+`ce14fb0b75e4…`, chưa lease — va chạm write set với lease sống của `#238`) · cross-provider theo họ model → `PLAT-X7` (#220, proposed) · phần còn lại
 → *"mục D"*, chưa mở Issue. Cắt phần còn lại cho vừa trần ADR-0044 (`sensitive` ≤3 tệp / ≤300 dòng
 thêm) rồi trình người giữ kho.
 

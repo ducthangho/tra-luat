@@ -2835,6 +2835,43 @@ def t82_A10_dot_bien_A1_A8_tren_ban_sao_CA_CAY_ten_rieng():
             raise AssertionError("mutant A8 không áp chốt ngược cho schema v1")
 
 
+@ca
+def t83_traversal_duoc_chuan_hoa_truoc_khi_tra_bang():
+    mod = _nap_cong()
+    for tien_to in ("", "planned:"):
+        bang(mod._tinh_lop_tu_write_set(
+            [tien_to + "docs/adr/../../ops/lease_publish.py"]) == "sensitive",
+            f"traversal có tiền tố {tien_to!r} đã hạ lớp")
+    for duong in ("/ops/lease_publish.py", "ops\\lease_publish.py",
+                  "./ops/lease_publish.py"):
+        bang(mod._tinh_lop_tu_write_set([duong]) == "sensitive",
+             f"đường không repo-relative lọt chốt: {duong!r}")
+
+
+@ca
+def t84_schema_version_hong_vo_huong_phai_bi_CHAN():
+    mod = _nap_cong()
+    for gia_tri in ("v2", "2.0", 2.0, "abc", None):
+        try:
+            mod._kiem_lop_review(_lease_v2(schema_version=gia_tri))
+        except mod.Chan as ex:
+            bang(ex.ma == RC_LOP, f"schema {gia_tri!r} sai rc={ex.ma}")
+        else:
+            raise AssertionError(f"schema hỏng {gia_tri!r} vẫn qua")
+
+
+@ca
+def t85_schema_version_hong_container_phai_bi_CHAN():
+    mod = _nap_cong()
+    for gia_tri in ([], {}):
+        try:
+            mod._kiem_lop_review(_lease_v2(schema_version=gia_tri))
+        except mod.Chan as ex:
+            bang(ex.ma == RC_LOP, f"schema {gia_tri!r} sai rc={ex.ma}")
+        else:
+            raise AssertionError(f"schema container {gia_tri!r} vẫn qua")
+
+
 def main() -> int:
     qua, hong, bo_qua = 0, [], []
     for fn in CA:

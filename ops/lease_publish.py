@@ -31,6 +31,7 @@ import argparse
 import hashlib
 import json
 import os
+import posixpath
 import re
 import subprocess
 import sys
@@ -138,6 +139,13 @@ def _tinh_lop_tu_write_set(write_set) -> str:
         duong = muc.strip()
         if duong.startswith("planned:"):
             duong = duong[len("planned:"):]
+        # Chuẩn hoá traversal trước khi tra bảng; dạng không repo-relative vẫn
+        # fail-closed, còn `planned:` hợp lệ dùng cùng một đường phân loại.
+        if duong.startswith(("/", "./")) or "\\" in duong:
+            return "sensitive"
+        duong = posixpath.normpath(duong)
+        if duong == ".." or duong.startswith("../"):
+            return "sensitive"
         lop = next((gia_tri for tien_to, gia_tri in _BANG_LOP
                     if _khop_tien_to(duong, tien_to)), "sensitive")
         if _THU_TU_LOP[lop] > _THU_TU_LOP[ket_qua]:
@@ -147,10 +155,13 @@ def _tinh_lop_tu_write_set(write_set) -> str:
 
 def _kiem_lop_review(lease: dict) -> None:
     """Cưỡng chế lớp cho schema v2; dữ liệu cũ chỉ nhận cảnh báo có chủ ý."""
+    raw_schema = lease.get("schema_version", 1)
+    if isinstance(raw_schema, bool) or not isinstance(raw_schema, (int, str)):
+        raise Chan(RC_LOP, f"schema_version hỏng: {raw_schema!r}")
     try:
-        schema_version = int(lease.get("schema_version", 1))
+        schema_version = int(raw_schema)
     except (TypeError, ValueError):
-        schema_version = 1
+        raise Chan(RC_LOP, f"schema_version hỏng: {raw_schema!r}") from None
     if schema_version < 2:
         moc = str(lease.get("leased_at_utc") or "").strip()
         if moc:

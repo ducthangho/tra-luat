@@ -55,6 +55,43 @@ cách nào đọc được nó. Nói gọn: **một kế hoạch chưa vào mast
 xuất.** Chốt rút ra, rẻ và dùng được ngay: **land tài liệu kế hoạch TRƯỚC, rồi mới thi hành từ
 nó** — ngược với thứ tự đã làm ngày 21-08.
 
+### ĐÍNH CHÍNH 22-08-2026 — câu "vòng 3 đã lấp chỗ ấy" là SAI
+
+**Append-only. Không câu nào ở trên bị xoá hay sửa đè** — vế sai ở lại làm bằng chứng, đúng nếp
+mà chính mục `CẬP NHẬT ~03:30Z` đặt ra khi nó từ chối xoá dấu vết một trong hai vế.
+
+Mục trên viết:
+
+> *"…721 dòng của X4 chưa verdict nào phủ — điều đó vẫn đúng, và **vòng 3 chính là thứ đã lấp chỗ ấy**."*
+
+Vế in đậm **sai**. Đo 22-08-2026:
+
+| phép đo | kết quả |
+|---|---|
+| `base_sha` của `plat-x5-review-1-claude-verdict.receipt.yaml` | `a09aae62` |
+| `base_sha` của `plat-x5-review-2-…` | `a09aae62` |
+| `base_sha` của `plat-x5-review-3-…` (dòng 22) | **`a09aae62`** |
+| tệp verdict `plat-x4-*` trong `ops/reviews/` | **0** |
+| nhánh `ops/verdict-x4-*` trên remote | **0** |
+| review trên PR `#205` | **1**, của bot connector, neo `d0acd79f` = commit ĐẦU của X4 |
+
+Cả **ba** vòng neo cùng một `base_sha`. Vòng 3 chỉ đẩy `reviewed_sha` **về phía trước**
+(`e071e0aa` → `2284b465` → `117e0c42`); nó **không** hạ đáy vùng phủ. Vùng `909d3e17..a09aae62`
+— đúng 4 tệp, `+721/-159` — vẫn nằm **dưới** đáy của cả ba.
+
+**Vì sao lỗi này đáng ghi thay vì lặng lẽ sửa:** nó biến một nợ CÓ THẬT thành một nợ ĐÃ ĐÓNG trong
+sổ. Nợ chưa ghi thì còn có người vấp phải; nợ ghi nhầm là đã trả thì **không ai đi đòi nữa**. Và
+cơ chế gây ra nó rất rẻ để lặp lại: đọc `reviewed_sha` rồi kết luận về vùng phủ, trong khi thứ
+quyết định vùng phủ là `base_sha`.
+
+Nợ nay có tên và có nhà: `ops/NO_KY_THUAT.md` mục **12**
+(`PLAT-X4-721-dong-chua-verdict-nao-phu`), kèm điều kiện coi là XONG.
+
+Ghi thêm một điều bất lợi cho chính bản hợp nhất, cùng nếp với đoạn trên: mục `CẬP NHẬT ~03:30Z`
+kết luận *"kết cục thực nghiệm nghiêng về Fable"*. Kết luận ấy đứng trên giả định rằng vòng 3 đã
+phủ hết cụm gộp. Giả định ấy nay đo được là sai, nên **cán cân Fable/Opus của đoạn ấy chưa được
+phân định** — không phải nghiêng về Opus trở lại, mà là **chưa có phép đo nào phân định**.
+
 ### Kế hoạch thi hành — BẢN THAY THẾ cho `V0`–`V6`
 
 `V1`/`V2`/`V3` **BỎ**. Đo được vì sao: phần lớn nội dung của Slice A/Slice B đã vào master theo

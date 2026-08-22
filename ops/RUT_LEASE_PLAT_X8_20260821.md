@@ -115,7 +115,7 @@ với `gh auth status`: **một lớp mà ta không coi là lớp**.
    - §3 phải khai ĐÚNG bảng lease còn sống, đo trên **mọi nhánh `ops/**`**, không chỉ master.
    Bản 4 ⇒ băm đổi ⇒ lease mới neo băm mới. Prompt
    `ops/prompts/plat-x8-exec-1-codex-20260821.md` GIỮ LẠI nhưng phải neo lại băm đặc tả trước khi
-   dùng — nó đang trỏ bản 3 (`328a74facb84…`).
+   dùng — nó đang trỏ bản 3b (`308d0cf44fc1…`, tức bản 3 + hộp cảnh báo).
 3. **Trước khi cấp BẤT KỲ lease nào**: quét lease còn sống trên **mọi nhánh `ops/**`**, không chỉ
    master. Chưa có công cụ cho việc này — đó là một nợ, ghi ở dưới.
 

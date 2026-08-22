@@ -1,0 +1,92 @@
+# BIÊN NHẬN — cross-review `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 5 (REVIEW DELTA), reviewer `claude`.
+#
+# Verdict **`dung_lai`** — chốt DỪNG mà `r7` tự đăng ký (E lần 2) đã KÊU, và reviewer nêu thẳng
+# thay vì giấu sau chữ `can_sua`.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+packet_issue: 227
+lease_id: lease-dang-review-5-claude-20260822
+provider: claude
+role: reviewer
+executor_provider: codex
+verdict: dung_lai
+cross_provider: true
+review_class: sensitive
+reviewed_sha: ba82b06f9df81fc2f13786fec590ec2110d046b7
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+nen_delta_sha: 6eaa3755abd96ef6d8f820daaa6b9d96e2bdd7b5
+target_pull_request: null
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r7.md
+spec_sha256: 623b23555a6fa43dad2d9badeaac3a6f852c0be6b9927d4593992f6e10310cb4
+
+verdict_path: ops/reviews/lease-dang-review-5-claude-verdict.md
+verdict_sha256: d2b7eb935cde06034c7cce8975ab35bbf1f6fb06bf0284fb4faa2b4fbcf76ab3
+verdict_bytes: 10084
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/PLACEHOLDER_COMMIT/ops/reviews/lease-dang-review-5-claude-verdict.md
+evidence_url_ghi_chu: 'Điền SAU KHI ĐÃ PUSH và sau khi `git branch -r --contains` xác nhận.'
+
+verdict_nguon: >-
+  stdout của `claude -p`, run `428c0701`, `ma_thoat=0`, `thoi_luong_giay=897.8`,
+  `stdout_byte=10084`, `stderr_byte=0`. Cây review sạch, HEAD vẫn `ba82b06f`.
+verdict_doi_chieu: 'NGUYÊN VĂN, không đụng byte nào.'
+
+so_finding: 2
+tom_tat_finding: >-
+  P1 `bao_chan` KHÔNG phải dấu hiệu bắt buộc của nhánh chặn — ba trong bốn nhánh chặn dựng được
+  lọt `68/68`, trong đó MỘT là fail-open thật (lease lệch băm neo prompt bị bỏ qua IM LẶNG, bước
+  XANH) ⇒ **E lần 2** · P2 hồi quy trong 18 dòng bị xoá: mất bất biến `set +e … rc=$? … set -e`,
+  đột biến xoá `set -e` từ CHẾT ở head trước thành SỐNG SÓT ở head này.
+da_xu_ly: 'CHƯA. Chốt DỪNG của `r7` kêu. Trả về người giữ kho.'
+
+verdict_usage_caveats:
+- id: E-lan-2-DO-LAI-DOC-LAP-va-DUNG
+  noi_dung: >-
+    Phiên điều phối đo lại hai finding quyết định trên bản sao tạm dựng bằng `git archive` head.
+    **E3 (fail-open)**: chèn `if [ "$rc" = "6" ]; then echo "::endgroup::"; continue; fi` ngay sau
+    khối `check` — `RC_NEO = 6` là mã thoát khi **lệch băm neo prompt** — ⇒ suite **`68/68`**,
+    `actionlint` **rc=0**, đếm `bao_chan` vẫn **9**. Một lease có mỏ neo prompt HỎNG bị bỏ qua IM
+    LẶNG và bước XANH. **P2**: xoá `set -e` của khối `check` ⇒ ở head trước `66/67` ĐỎ `t64`, ở
+    head này **`68/68` SỐNG SÓT** — hồi quy thật, đo trên CẢ HAI head cùng một đột biến.
+- id: CHAN-DOAN-SAC-NHAT-cua-ca-packet
+  noi_dung: >-
+    Reviewer chỉ ra rằng lời khai của executor về THÂN HIỆN TẠI là ĐÚNG (đo lại độc lập và khớp:
+    `bao_chan`=9 · `continue`=13 · `exit`=1 nằm NGOÀI vòng lặp · `BI_CHAN=`=2). Cái sai không ở
+    lời khai mà ở **suy luận từ nó sang thiết kế cổng**: Q32 biến một mô tả về thân HÔM NAY thành
+    một giả định về mọi thân MAI SAU, và cổng không cưỡng chế giả định ấy. **`bao_chan` tự nó chỉ
+    là MỘT CÁCH VIẾT của "chặn"** — `BI_CHAN=1`, `exit 1`, `continue` im lặng là những cách viết
+    khác. Nguyên văn verdict lượt trước, vẫn đúng nguyên si sau khi đảo danh sách:
+    *"distinguishes spelling, not authority"*. Tức việc ĐẢO ban-list thành allow-list KHÔNG cứu
+    được, vì allow-list cũng khoá theo CÁCH VIẾT chứ không theo THẨM QUYỀN.
+- id: E4-la-cai-DUY-NHAT-bi-bat-va-vi-ly-do-SAI
+  noi_dung: >-
+    Trong bốn nhánh chặn dựng ra, chỉ `E4` (đổi tên hàm `bao_chan`) bị bắt — và reviewer nói
+    thẳng: nó bị bắt vì phá phép **ĐẾM CHUỖI**, KHÔNG phải vì cổng hiểu "chặn". Ba cái kia
+    (`BI_CHAN=1` viết thẳng · `exit 1` · `continue` im lặng) đều lọt `68/68`.
+- id: BAN-VA-DUY-NHAT-KHONG-CON-CACH-VIET-NAO-DE-LACH
+  noi_dung: >-
+    Reviewer đề xuất **khoá BĂM THÂN BƯỚC** (~9–10 dòng, LỌT ngân sách còn 15). Băm hiện tại
+    `sha256(run) = 397f64e4c0f01be7b8c54cefe1c017349013cdf70589a3d439512305b71eed1d` (2934 byte).
+    Lý lẽ: nó **không mô tả thân**, nó từ chối MỌI thay đổi chưa qua tay người, buộc đi lại
+    `t64/t66/t67`. Giá phải trả — đỏ cả với sửa mỹ phẩm — **chính là tính năng**. Phương án còn
+    lại (đảo sổ sang mọi lối ra vòng lặp, ~13–15 dòng) vẫn là liệt kê cách viết và vẫn lách được.
+- id: MUC-2-3-4-DEU-DAT-khong-finding
+  noi_dung: >-
+    Phép đếm CÓ ba trạng thái (đổi tên bước · thân rỗng · đếm ra 0 — cả ba ĐỎ). `t68` đo THẬT cả
+    ba vế, mỗi vế có đột biến giết riêng, và **vế `posts.count` chết ngay khi đồ giả chuyển từ
+    GIỮ TRẠNG THÁI sang DIỄN KỊCH BẢN**. Q34 có răng riêng (hai phản chứng, cùng ĐỎ `t65`). Q35
+    không làm ca nào yếu đi. Tách mục #6 thành `post_rc` + `case_id` làm bộ ca **mạnh lên**.
+    Sổ 9 mục = 9 `bao_chan`, không `+1`.
+- id: hai-cach-doc-E-nguoi-giu-kho-quyet
+  noi_dung: >-
+    Reviewer nêu hai cách đọc và để người giữ kho quyết, viện tiền lệ bộ đếm D ở lượt 6: **hẹp**
+    ("tìm được trong thân hiện tại") ⇒ KHÔNG kêu, thân sạch; **theo chuẩn đã dùng** ("DỰNG được
+    nhánh chặn mà cổng không thấy") ⇒ KÊU. Họ chỉ ra rằng chuẩn bằng chứng của chính packet này
+    cho hình dạng D/E luôn là **DỰNG** — P2-2 lượt 6 cũng dựng `if ! cmd` chứ không tìm thấy sẵn
+    trong thân. Theo đúng chuẩn ấy: **E = 2**, và `r7` viết thẳng *"E lần 2 ⇒ DỪNG, không vá"*.
+- id: bo-dem-sau-luot-5
+  noi_dung: 'A = 6 · B = 2 · C = 1 · D = 3 (giữ; P2 là hồi quy phạm vi đo, không phải đổi độ mịn câu hỏi) · E = 2.'

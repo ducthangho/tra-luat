@@ -18,13 +18,27 @@ base: 3db588c                      # = origin/master lúc phiên kết thúc
 diff_so_master: 1 tệp, +205 dòng   # chỉ ops/specs/plat-x8.md
 
 spec_path: ops/specs/plat-x8.md
-spec_sha256: 9cb54a2e4e7c4d66c60f7717e1ca8aacd57785222777d30dbadab2448157c120
+spec_sha256: 328a74facb8440c11326cd074796ec7a23d2c509d8e2b0a2b63325951c0e3e24   # BẢN 3
 spec_da_kiem_tren_ban_DA_DEN: true   # git cat-file -p origin/<nhánh>:… | sha256sum
 
 packet_issue: 225
 lease: CHUA CAP
 pr: CHUA MO
 ```
+
+> **CẬP NHẬT 22-08-2026 — đặc tả đã ĐÓNG BĂNG LẠI HAI LẦN sau khi bản bàn giao này viết xong.**
+> Hai lượt cross-review (`codex`) ra **bốn P1**, cả bốn đánh vào **một** đường: kế thừa lớp cho lease
+> reviewer. Người giữ kho **THU HỒI Q1** — đường kế thừa bị gỡ hẳn, không vá tiếp; reviewer lease
+> `schema_version >= 2` nay là `sensitive` **vô điều kiện**. Lý do ở §10 của đặc tả.
+>
+> | bản | băm | kết cục |
+> |---|---|---|
+> | 1 | `9cb54a2e4e7c…` | 2 P1 lượt 1 — hết hiệu lực |
+> | 2 | `b88c53dfd211…` | 2 P1 lượt 2 — hết hiệu lực |
+> | 3 | `328a74facb84…` | **bản dùng được** |
+>
+> Nghĩa là **§3 dưới đây đã lệch một phần**: Q1 không còn là quyết định đang có hiệu lực. Hai thứ
+> còn lại (cấp lease, nới bảng phân loại) vẫn chờ. Đọc đặc tả bản 3 làm chuẩn, đừng đọc bản này.
 
 **Chưa mở PR** — người giữ kho chưa yêu cầu. Nhánh đã đẩy, spec tra được bằng
 `git fetch origin claude/opus-5-plan-steps-y5r6ci`.
@@ -122,6 +136,11 @@ cổng từ chối cặp cùng họ model"*) **tiêu thụ** lớp review hiệu
    nhận** (biên nhận là bản ghi, không sửa đè): ghi *"0/41 lease"*, số thật là **0/49**; và câu *"thứ
    duy nhất chạm nó chỉ CHÉP LẠI giá trị đã khai"* đúng hành vi nhưng sai đối tượng — xem bẫy 3.
    Sự thật chịu tải không đổi: **0 lease khai**, **0 dòng cổng đọc**.
+
+5. **Băm đặc tả trong BẤT KỲ tài liệu nào cũng phải kiểm lại trước khi dùng.** `ops/specs/plat-x8.md`
+   đã đóng băng **ba lần trong hai ngày**. Chính bản bàn giao này từng trỏ vào băm bản 1 và trỏ sai
+   trong khoảng một ngày. Băm là thứ định danh, nhưng nó **không** bất biến theo thời gian — nó bất
+   biến theo NỘI DUNG. Đo `sha256sum` trên tệp thật, đừng chép băm từ tài liệu khác.
 
 ---
 

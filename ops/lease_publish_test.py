@@ -2264,7 +2264,7 @@ def t50_ngoai_Actions_phai_KHAI_hai_lop_vang():
              f"không khai lớp vắng: rc={rc}, out={o!r}, err={e!r}")
 
 
-def _chay_buoc_dang(check_hong="", post_hong="") -> dict:
+def _chay_buoc_dang(check_hong="", post_hong="", kiem_github_hong="") -> dict:
     import json
     import os
     than = _buoc_workflow("đăng")["run"]
@@ -2275,7 +2275,8 @@ def _chay_buoc_dang(check_hong="", post_hong="") -> dict:
         (neo / "ops" / "lease_publish.py").write_text(
             """import pathlib,sys,yaml
 p=pathlib.Path(sys.argv[2]); d=yaml.safe_load(p.read_text(encoding='utf-8')); cmd=sys.argv[1]
-if cmd=='kiem-github': raise SystemExit(0)
+with pathlib.Path(os.environ['LENH_GIA_LOG']).open('a',encoding='utf-8') as f: print(*sys.argv[1:],file=f)
+if cmd=='kiem-github': raise SystemExit(8 if d['lease_id']==os.environ.get('KIEM_GITHUB_HONG') else 0)
 if cmd=='check': raise SystemExit(8 if d['lease_id']==os.environ.get('CHECK_HONG') else 0)
 if cmd=='body': print(f\"**Lease `{d['lease_id']}`**\")
 if cmd=='mark': p.write_text(p.read_text(encoding='utf-8')+'posted_comment_id: '+sys.argv[4]+'\\n',encoding='utf-8')
@@ -2295,19 +2296,21 @@ ds=d['comments']; ds.append({'id':9000+len(ds),'body':body}); p.write_text(json.
         (goc / "ds.txt").write_text(
             "".join(f"ops/leases/{x}.yaml\n" for x in ("dau", "giua", "cuoi")),
             encoding="utf-8")
-        state, ghe = goc / "state.json", goc / "github_env"
+        state, ghe, log = goc / "state.json", goc / "github_env", goc / "argv.log"
         state.write_text('{"comments":[],"snapshots":[]}', encoding="utf-8")
         py = Path(sys.executable).resolve().as_posix()
         than = than.replace("python3 ", f"'{py}' ").replace(
             "gh api ", f"'{py}' \"$NEO/ops/gh_gia.py\" api ")
         mt = dict(os.environ, NEO=str(neo), REPO="o/r", GITHUB_ENV=str(ghe),
-                  GH_GIA_STATE=str(state), CHECK_HONG=check_hong, POST_HONG=post_hong)
+                  GH_GIA_STATE=str(state), CHECK_HONG=check_hong, POST_HONG=post_hong,
+                  KIEM_GITHUB_HONG=kiem_github_hong, LENH_GIA_LOG=str(log))
         p = subprocess.run([_bash_posix(), "-c", than], cwd=goc, env=mt,
                            capture_output=True, text=True)
         d = json.loads(state.read_text(encoding="utf-8"))
         return {"rc": p.returncode, "bodies": "\n".join(x["body"] for x in d["comments"]),
                 "snapshots": dict(d["snapshots"]),
                 "env": ghe.read_text(encoding="utf-8") if ghe.exists() else "",
+                "calls": [x.split()[:2] for x in log.read_text(encoding="utf-8").splitlines()],
                 "out": p.stdout + p.stderr}
 
 
@@ -2331,7 +2334,7 @@ def t52_buoc_ghi_nguoc_phai_chay_sau_buoc_dang_DO():
 
 
 @ca
-def t53_suite_trong_Actions_khong_gh_van_QUA():
+def t53_check_trong_Actions_khong_gh_van_QUA():
     import os
     with San() as s:
         rong = s / "bin-rong"
@@ -2353,16 +2356,20 @@ def t54_comment_nguoi_ngoai_khong_duoc_bit_lease():
 
 
 @ca
-def t55_thieu_tac_gia_CHAN_va_dau_khong_o_dau_thi_khong_tinh():
+def t55a_thieu_user_login_phai_CHAN():
     thieu = {55: [{"id": 1, "body": "không liên quan"}]}
-    ex1, _ = _goi_lop_gh(GhGia(comments=thieu), "_kiem_comment_da_co", "o/r",
-                         lease_mau(), env_them=ENV_GITHUB)
+    ex, _ = _goi_lop_gh(GhGia(comments=thieu), "_kiem_comment_da_co", "o/r",
+                        lease_mau(), env_them=ENV_GITHUB)
+    bang(ex and ex.ma == RC_NOI_DUNG, f"thiếu user.login không bị chặn: {ex}")
+
+
+@ca
+def t55b_dau_khong_o_dau_than_thi_khong_tinh():
     muon = {55: [{"id": 2, "body": "nhắc lại: **Lease `lease-that`**",
                   "user": {"login": "github-actions[bot]"}}]}
-    ex2, _ = _goi_lop_gh(GhGia(comments=muon), "_kiem_comment_da_co", "o/r",
-                         lease_mau(lease_id="lease-that"), env_them=ENV_GITHUB)
-    bang(ex1 and ex1.ma == RC_NOI_DUNG and ex2 is None,
-         f"ba trạng thái tác giả/neo đầu thân sai: thiếu={ex1}, neo muộn={ex2}")
+    ex, _ = _goi_lop_gh(GhGia(comments=muon), "_kiem_comment_da_co", "o/r",
+                        lease_mau(lease_id="lease-that"), env_them=ENV_GITHUB)
+    bang(ex is None, f"dấu không ở đầu thân bị tính là đã đăng: {ex}")
 
 
 @ca
@@ -2407,6 +2414,24 @@ def t58_check_body_thuan_va_check_khai_lop_chua_chay():
         bang(rc1 == rc2 == RC_OK and not gh.calls and "KHÔNG CHẠY" in ra_check.getvalue()
              and "kiem-github" in ra_check.getvalue() and "**Lease" in ra_body.getvalue(),
              f"check/body chạm GOI_GH hoặc khai thiếu: calls={gh.calls}, check={ra_check.getvalue()!r}")
+
+
+@ca
+def t59_moi_lease_goi_kiem_github_truoc_check():
+    kq = _chay_buoc_dang()
+    for ten in ("dau", "giua", "cuoi"):
+        tep = f"ops/leases/{ten}.yaml"
+        kiem, check = ["kiem-github", tep], ["check", tep]
+        bang(kq["calls"].count(kiem) == kq["calls"].count(check) == 1
+             and kq["calls"].index(kiem) < kq["calls"].index(check),
+             f"thiếu/sai thứ tự kiem-github cho {tep}: {kq['calls']}")
+
+
+@ca
+def t60_kiem_github_hong_khong_POST_va_lam_buoc_DO():
+    kq = _chay_buoc_dang(kiem_github_hong="giua")
+    bang(kq["rc"] != 0 and "`dau`" in kq["bodies"] and "`cuoi`" in kq["bodies"]
+         and "`giua`" not in kq["bodies"], f"kiem-github hỏng bị nuốt: {kq}")
 
 
 def main() -> int:

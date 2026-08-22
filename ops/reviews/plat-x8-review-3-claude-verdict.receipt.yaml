@@ -20,13 +20,28 @@ la_canonical_ghi_chu: >-
       qua `launcher.py` với `--expected-head` neo exact head; nó tìm được đúng thứ hai lượt do tác
       giả đặc tả tự làm đã bỏ sót, nên tính độc lập không chỉ là lời khai về quy trình.
   (b) "biên nhận không qua validation" — VẪN CHƯA THOẢ, và đây là lý do duy nhất còn lại.
-      `PROTOCOL:460-464` (đọc lại nguyên văn hôm nay, không nhớ lại): `schema_version: 1` do tác giả
-      tệp MỚI tự khai KHÔNG tạo miễn trừ; miễn trừ v1 neo vào allowlist ĐÓNG BĂNG đúng 11
-      filename+hash. Tệp này không nằm trong 11 tệp ấy ⇒ phải validate như v2. Mà v2 đòi receipt ID
-      và HAI danh tính chứng thực ĐỘC LẬP. Phiên reviewer và phiên điều phối đều là `claude`, cùng
-      container, cùng một người điều phối — đó KHÔNG phải hai danh tính độc lập, và khai là thì giả
-      mạo. Theo `PROTOCOL:755-760` (`review_rounds_used` chỉ tăng khi qua schema + exact-SHA +
-      receipt validation) ⇒ lượt này KHÔNG vào bộ đếm.
+      `PROTOCOL:460-464`: `schema_version: 1` do tác giả tệp MỚI tự khai KHÔNG tạo miễn trừ; miễn
+      trừ v1 neo vào allowlist ĐÓNG BĂNG đúng 11 filename+hash. Tệp này không nằm trong 11 tệp ấy
+      ⇒ phải validate như v2. **Biên nhận này được viết là v1, nên nó không validate. Đó là toàn bộ
+      lý do — và đó là THIẾU SÓT CỦA PHIÊN ĐIỀU PHỐI, không phải một rào cản cấu trúc.**
+
+      ĐÍNH CHÍNH (ghi 22-08 cùng ngày, sau khi đọc lại nguồn): bản đầu của trường này khai lý do là
+      *"v2 đòi receipt ID và HAI danh tính chứng thực ĐỘC LẬP, mà reviewer và điều phối đều là
+      `claude` cùng container nên không phải hai danh tính độc lập"*. **SAI, và sai theo hướng
+      nguy hiểm hơn: nó dựng một điều kiện bất khả rồi tự tha cho mình.** Hai identity của v2 KHÔNG
+      phải hai bên chứng thực độc lập — đọc `PROTOCOL:424-440` và `ADR-0040`, chúng là
+      `model_reviewer_identity` (provider/model/session đã TẠO verdict) và
+      `github_submitter_identity` (actor đã VẬN CHUYỂN nó lên GitHub). Cả hai đều biết được ở lượt
+      này. Chính `ADR-0040` tách chúng ra để tài khoản vận chuyển KHÔNG bị đọc thành bằng chứng
+      reviewer độc lập — tức mục đích của nó ngược hẳn với cách bản đầu diễn giải.
+      Hệ quả đúng: lượt 3 **lẽ ra đủ tư cách canon** nếu biên nhận được viết là v2. Nó không phải,
+      nên nó không canon — nhưng lý do là một việc CHƯA LÀM, không phải một việc KHÔNG LÀM ĐƯỢC.
+      Không sửa lùi nhãn `la_canonical`: nhãn đúng với hiện vật đang tồn tại; chỉ sửa LÝ DO.
+      Đo kèm, để không ai đọc "viết v2" thành đường mòn: 22-08-2026, **40/40** biên nhận trong
+      `ops/reviews/` đều `schema_version: 1` — kho CHƯA TỪNG có receipt v2 nào.
+
+      Theo `PROTOCOL:755-760` (`review_rounds_used` chỉ tăng khi qua schema + exact-SHA + receipt
+      validation) ⇒ lượt này KHÔNG vào bộ đếm.
   HỆ QUẢ: `PLAT-X8` vẫn còn NGUYÊN hai vòng canon. Con số này không đổi kể từ lượt 1.
 schema_version: 1
 schema_version_ghi_chu: >-

@@ -589,3 +589,102 @@ chiều: một đột biến **nới** và một đột biến **siết** đều
 thì đúng là lỗ mà cross-review 2 vừa tìm ra.
 
 **Đừng dựng lại `t42` nguyên dạng.** Ba lượt đã đo là nó thua ở thiết kế, không thua ở chi tiết.
+
+---
+
+## 12. `PLAT-X4-721-dong-chua-verdict-nao-phu` — nợ RE-AUDIT, và tài liệu đang khai là ĐÃ ĐÓNG
+
+**Sinh ra từ phép đo 22-08-2026**, khi rà bản hợp nhất `ops/THAM_DINH_KE_HOACH_20260821.md` so
+với thực tại. Chạm tệp này **ngoài packet** theo chuẩn thuận người giữ kho, in-session 22-08-2026
+(*"Cứ chạm ngoài packet, ghi nợ 721 dòng đi"*) — `ops/NO_KY_THUAT.md` thuộc write set dự kiến của
+**#209**, packet ấy `state:ready` và **0 lease**.
+
+### Đo được
+
+| phép đo | kết quả |
+|---|---|
+| `git diff --numstat 909d3e17 a09aae62` | **4 tệp, +721/-159** — đúng con số bản hợp nhất nêu |
+| `a09aae62` **có mặt trên** `master`? | **CÓ** — `git merge-base --is-ancestor` |
+| `a09aae62` đã ở trạng thái protocol `landed`? | **KHÔNG ĐO ĐƯỢC** — xem ghi chú ngay dưới bảng |
+| tệp verdict `plat-x4-*` trong `ops/reviews/` trên master | **0** |
+| nhánh `ops/verdict-x4-*` trên remote | **0** (có `verdict-x5-review-1/2/3`, `verdict-m4-review-2`, `verdict-donref`, `moi-truong-review-1…10`) |
+| lượt review đã cấp lease cho X4 | **BA**, không phải hai — `plat-x4-review-1r2`, `-review-2`, `-review-3`, tất cả `granted_by: ducthangho` |
+| kết quả lượt 1 · lượt 2 | **`changes_requested`** cả hai — ghi trong **thân lease lượt kế tiếp**, không phải trong `ops/reviews/` |
+| phạm vi lượt 3 | `tu_sha: 1d37861e` → `den_sha: a09aae62`, 2 tệp, `+100/-16` (soi DELTA) |
+| kết quả lượt 3 | **KHÔNG có ở đâu** — không tệp, không nhánh, không trường trong lease nào sau nó |
+| `base_sha` của **cả ba** verdict `PLAT-X5` | **`a09aae62`** — cả ba |
+
+> **"Có mặt trên master" KHÔNG phải "đã land".** Ancestry chỉ chứng minh commit đã vào lịch sử; nó
+> **không** chứng minh cổng sau merge và sổ sách của trạng thái `landed` đã chạy xong. Bản đầu của
+> mục này viết thẳng *"⇒ đã land"* và cross-review bắt đúng chỗ đó (P2 lượt 3 trên PR #230) — mỉa mai
+> ở chỗ đây là mục sổ nợ viết ra để chống đúng kiểu suy trạng thái từ tín hiệu gần nhất.
+
+### Nợ chính xác là gì
+
+**BẢN ĐẦU CỦA MỤC NÀY SAI, và cross-review lượt 3 bắt được (P2 trên PR #230).** Nó viết *"lease review
+đã được cấp hai lượt mà không để lại verdict ở đâu"*. Đo lại: **BA** lượt, và hai lượt đầu **CÓ** kết
+quả. Chép cái sai ra đây thay vì xoá, vì cái sai ấy có ích: nó cho thấy đọc `ops/reviews/` rồi kết
+luận về lịch sử review là **hỏi sai chỗ**.
+
+**Nợ thật, sau khi đo lại — và nó KHÁC bản đầu ở chỗ chịu tải:**
+
+Vùng phủ được **thiết kế là đủ**: lượt 1 + lượt 2 phủ tới `1d37861e`, lượt 3 phủ delta
+`1d37861e..a09aae62`. Cộng lại đúng bằng `909d3e17..a09aae62`. Nên nợ **không phải** *"chưa ai
+review"*.
+
+Nợ là: **ba lượt review đã tiêu, và KHÔNG lượt nào để lại HIỆN VẬT verdict.** Kết quả lượt 1 và
+lượt 2 chỉ tồn tại như một **trường trong thân lease của lượt kế tiếp**
+(`plat-x4-review-2.yaml:63` và `plat-x4-review-3.yaml:83`, cả hai `verdict: changes_requested`).
+Lượt 3 thì **không để lại gì** — không tệp, không nhánh, không trường trong bất kỳ lease nào sau nó.
+Không ai biết nó kết luận gì, hay có chạy không.
+
+**Và lease lượt 3 khai một điều SAI, đo được.** `plat-x4-review-3-codex-20260820.yaml:36` viết:
+
+> *"hai lượt trước đã phủ phần còn lại và cả hai đều **có verdict trong `ops/reviews/`**"*
+
+`ops/reviews/` có **0** tệp nào nhắc X4. Câu ấy là căn cứ để lượt 3 thu hẹp phạm vi xuống chỉ soi
+delta — tức **một lời khai sai đã được dùng làm lý do bỏ soi phần còn lại**. Cùng họ với câu
+*"vòng 3 đã lấp chỗ ấy"* ở `ops/THAM_DINH_KE_HOACH_20260821.md`: hai tài liệu độc lập, cùng một
+cách hỏng — khẳng định về hiện vật mà không mở chỗ chứa hiện vật ra xem.
+
+**Review duy nhất tìm thấy trên PR #205** là của bot connector `chatgpt-codex-connector`, neo
+`d0acd79f` (commit ĐẦU của X4). Bot ấy không sinh receipt, không mang `review_class`, không nằm
+trong ngân sách vòng — **không phải** verdict protocol, và không thay được lượt nào trong ba lượt trên.
+
+**Và điều làm nợ này khác mục 8:** `PLAT-X2` land kèm nợ re-audit một cách **có khai báo** — người
+giữ kho quyết ở Review Rescue Checkpoint, hai vòng đã chạy thật, hai finding đã đóng. Ở đây thì
+`ops/THAM_DINH_KE_HOACH_20260821.md` khai rằng chỗ trống **đã được lấp**:
+
+> *"biên nhận X5 neo `base_sha: a09aae62`, nên 721 dòng của X4 chưa verdict nào phủ — điều đó vẫn
+> đúng, và vòng 3 chính là thứ đã lấp chỗ ấy."*
+
+Vế sau **sai, đo được**: vòng 3 neo **đúng cái `base_sha` ấy** (`plat-x5-review-3-claude-verdict.receipt.yaml:22`).
+Đổi `reviewed_sha` mà giữ nguyên `base_sha` thì vùng phủ **không lùi xuống** — nó chỉ dài thêm về
+phía trước. Một nợ được ghi là đã trả thì không ai đi đòi: **nguy hơn nợ chưa ghi.**
+
+### Điều kiện coi là XONG
+
+1. **Hiện vật của lượt 3 được tìm thấy hoặc dựng lại.** Đây là chỗ trống duy nhất về NỘI DUNG:
+   lượt 1+2 đã có kết quả (dù chỉ ghi trong thân lease kế tiếp), lượt 3 thì không có gì. Tìm trước
+   khi dựng lại — quét mọi ref, mọi PR comment; **không tìm thấy phải nói là KHÔNG TÌM THẤY**, không
+   được lặng lẽ coi là chưa chạy.
+1b. **Ba verdict thành TỆP trong `ops/reviews/`** kèm receipt, `review_class`, `base_sha`. Hiện kết
+   quả lượt 1+2 sống ký sinh trong lease của lượt sau — một chỗ không ai đi tìm, và chính vì thế
+   bản đầu của mục này đọc ra "không có verdict nào". Đọc `base_sha` để kiểm vùng phủ, **đừng đọc
+   `reviewed_sha`**: chính chỗ lẫn hai trường ấy đẻ ra nợ này.
+1c. **Sửa lời khai sai ở `plat-x4-review-3-codex-20260820.yaml:36`** — append-only, lease đã đăng
+   là bản ghi bất biến. Câu ấy khai hai verdict "có trong `ops/reviews/`" trong khi ở đó có 0 tệp,
+   và nó là căn cứ để lượt 3 thu hẹp phạm vi.
+2. Hoặc: người giữ kho quyết **miễn** re-audit, và quyết định ấy được ghi đúng khuôn mục 8 — nêu rõ
+   trần nào đã cạn và vì sao chấp nhận. Miễn thì được, miễn **im lặng** thì không.
+3. Trong cả hai đường: câu sai ở `ops/THAM_DINH_KE_HOACH_20260821.md` phải được đính chính
+   **append-only** — đã làm 22-08-2026, xem mục `ĐÍNH CHÍNH 22-08-2026` trong chính tệp ấy.
+
+### Vì sao chưa ai thấy — và chốt máy còn thiếu
+
+Không lệnh nào trong kho trả lời được *"khoảng commit nào đã có verdict phủ"*. Muốn biết thì phải
+mở từng receipt đọc `base_sha`, mà receipt nằm rải trên master lẫn nhánh `ops/**` — cùng hình dạng
+với nợ `SO-LEASE-KHONG-NAM-MOT-CHO`. Nợ này là **anh em** của nợ ấy, đổi đối tượng từ lease sang
+verdict. Lệnh cần có: `phu-boi-verdict-nao <sha-tu>..<sha-den>`, quét mọi ref, và
+**fail-close khi không fetch được ref nào** — *"không đo được"* phải ĐỎ, không được thành
+*"không có"*.

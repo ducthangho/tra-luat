@@ -17,7 +17,7 @@
 Bạn là NGƯỜI THI CÔNG packet này. Reviewer sẽ là `claude` — khác họ model, tiêu chí N14 thoả.
 
 **ĐẶC TẢ CÓ THẨM QUYỀN là `ops/specs/plat-x8.md`**, băm
-`328a74facb8440c11326cd074796ec7a23d2c509d8e2b0a2b63325951c0e3e24`. Prompt này KHÔNG chép lại đặc
+`308d0cf44fc1fcca75bc4d8edb014f560293622334ef25cc621c1e7afe3b2129`. Prompt này KHÔNG chép lại đặc
 tả — chép là dựng hai bản trôi lệch. Đọc đặc tả TRƯỚC, rồi đọc prompt này để biết nếp của kho.
 Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
 

@@ -1204,7 +1204,56 @@ def _che_khong_render(raw: str) -> tuple:
     return "".join(ra2), van_de
 
 
-_ADR_HANG = re.compile(r"^\|\s*`ADR-(\d{4})`\s*\|", re.M)
+# DÒNG BẢNG chỉ được tính khi nó THUỘC MỘT BẢNG — không phải khi nó "trông giống".
+#
+# ĐO ĐƯỢC, và nó bác lập luận của chính tôi. Bản trước đếm mọi dòng khớp
+# `^| \`ADR-NNNN\` |` ở cột 0, ở BẤT KỲ đâu trong §20. Tôi từng lập luận rằng dù
+# vậy chốt chính (N tệp = N dòng) vẫn bắt được rủi ro THẬT là "quên một dòng",
+# vì kẻ khai thác phải CỐ Ý thêm dòng giả. Sai. Đo sáu dạng, mỗi dạng đặt một
+# dòng giả cho đúng cái ADR đang thiếu — `<pre>` `<div>` `<script>` `<textarea>`
+# `<p>` và một dòng TRẦN sau đoạn văn — CẢ SÁU cho `rc=0`. Dòng giả LẤP CHỖ của
+# dòng bị quên, nên chốt chính không còn bắt được gì.
+#
+# Dạng cuối đáng chú ý nhất vì không có HTML nào: một dòng `|…|` đứng sau một
+# đoạn văn KHÔNG render thành hàng bảng (GFM đòi header + dòng phân cách), nhưng
+# bản trước vẫn đếm. Vậy lỗ không phải "HTML" — mà là chưa bao giờ hỏi dòng ấy có
+# thuộc một BẢNG không.
+#
+# CHỮA Ở TẦNG, không vá thêm một dạng: tìm BẢNG (dòng tiêu đề `| ADR |` + dòng
+# phân cách), rồi chỉ đọc các dòng `|` LIỀN MẠCH ngay sau đó. Mọi dòng ngoài khối
+# liền mạch ấy — trong HTML, trong văn xuôi, ở đâu cũng vậy — không được tính.
+# Đây KHÔNG phải bộ phân tích Markdown; nó chỉ định vị đúng một cấu trúc đã biết.
+_ADR_BANG_TIEU_DE = re.compile(r"^\|\s*ADR\s*\|")
+_ADR_BANG_PHAN_CACH = re.compile(r"^\|[\s:|-]+\|\s*$")
+_ADR_O_DAU = re.compile(r"^\|\s*`ADR-(\d{4})`\s*\|")
+# GIỮ LẠI bản cũ CHỈ để đột biến `adr_dem_moi_dong_giong_hang_bang` có mỏ neo ổn
+# định. Nó KHÔNG được dùng ở đường chạy thật — dùng lại là dựng lại đúng cái lỗ
+# mà mười ca `quen_dong_*` sinh ra để chặn.
+_ADR_O_DAU_CU = re.compile(r"^\|\s*`ADR-(\d{4})`\s*\|", re.M)
+
+
+def _hang_adr_trong_bang(than: str) -> list:
+    """Số ADR của các dòng NẰM TRONG một bảng có tiêu đề `| ADR |`.
+
+    Trả về theo thứ tự gặp, KHÔNG khử trùng — phép đếm dòng trùng ở tầng trên
+    cần thấy cả hai lần.
+    """
+    dong = than.split("\n")
+    ra: list = []
+    i = 0
+    while i < len(dong):
+        if (_ADR_BANG_TIEU_DE.match(dong[i]) and i + 1 < len(dong)
+                and _ADR_BANG_PHAN_CACH.match(dong[i + 1])):
+            j = i + 2
+            while j < len(dong) and dong[j].startswith("|"):
+                m = _ADR_O_DAU.match(dong[j])
+                if m:
+                    ra.append(m.group(1))
+                j += 1
+            i = j
+            continue
+        i += 1
+    return ra
 # Bó về CỘT 0: đo được 44/45 tệp ADR thật đặt dòng này ở cột 0 (tệp còn lại là
 # nợ `ADR-0016-THIEU-DONG-TRANG-THAI`, không có dòng nào). Cho thụt lề tuỳ ý thì
 # một khối mã thụt 4 dấu cách cũng lọt — mà khối mã thụt lề KHÔNG có rào để che.
@@ -1283,7 +1332,7 @@ def cmd_adr_song(a, state_dir: Path) -> int:
     ke = _ADR_MUC_KE.search(raw, m.end())
     than = raw[m.start(): ke.start() if ke else len(raw)]
 
-    trong_bang: list[str] = _ADR_HANG.findall(than)
+    trong_bang: list[str] = _hang_adr_trong_bang(than)
     loi: list[str] = []
 
     theo_so: dict[str, list[Path]] = {}

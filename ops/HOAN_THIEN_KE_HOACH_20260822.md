@@ -252,29 +252,71 @@ python3 .claude/dev/packet_loop.py adr-song --root .
 
 Hai số **BẰNG NHAU** và bằng số tệp thật, chứ không chỉ mã thoát.
 
-**Cổng có răng — 14 đột biến, mỗi luật một cái:**
+**Cổng có răng — 19 đột biến của riêng `adr-song`, mỗi luật một cái.** Số ca chết là ĐO ĐƯỢC
+(chạy đột biến rồi lấy đúng những ca đổi màu), không kê tay:
 
-| đột biến | ca đích chết | đối chứng khác họ |
-|---|---|---|
-| `adr_bo_kiem_thieu_dong` | 2 | 3 còn sống |
-| `adr_bo_kiem_con_tro_chet` | 1 | 3 còn sống |
-| `adr_bo_kiem_trung_dong` | 1 | 3 còn sống |
-| `adr_noi_ngoai_le_cho_moi_ADR` | 1 | 3 còn sống |
-| `adr_tha_khi_thieu_thu_muc` | 1 | 3 còn sống |
-| `adr_hang_nhan_ca_van_xuoi` | 1 | 3 còn sống |
-| `adr_gom_map_de_bi_nuot` | 2 | 3 còn sống |
-| `adr_tha_ten_tep_la` | 2 | 3 còn sống |
-| `adr_rong_allowlist_ten_tep` | 1 | 3 còn sống |
+| đột biến | luật nó gỡ | ca đích chết | đối chứng khác họ |
+|---|---|---|---|
+| `adr_bo_kiem_thieu_dong` | ADR không có dòng trong bảng | 2 | 3 còn sống |
+| `adr_bo_kiem_con_tro_chet` | bảng trỏ ADR không tồn tại | 1 | 3 còn sống |
+| `adr_bo_kiem_trung_dong` | một ADR có hai dòng | 1 | 3 còn sống |
+| `adr_noi_ngoai_le_cho_moi_ADR` | nới danh sách tha thiếu `Trạng thái` | 1 | 3 còn sống |
+| `adr_tha_khi_thieu_thu_muc` | kho thật thiếu `docs/adr/` phải ĐỎ | 1 | 3 còn sống |
+| `adr_gom_map_de_bi_nuot` | hai tệp cùng số bị map nuốt | 2 | 3 còn sống |
+| `adr_tha_ten_tep_la` | tên tệp không đúng dạng | 2 | 3 còn sống |
+| `adr_rong_allowlist_ten_tep` | danh sách CHO PHÉP bị nới | 1 | 3 còn sống |
+| `adr_noi_ten_tep_ve_ban_quang_cao` | biên đầu/cuối slug | 1 | 3 còn sống |
+| `adr_thong_diep_chep_tay` | thông điệp lỗi in chính `pattern` | 1 | 3 còn sống |
+| `adr_bo_che_vung_khong_render` | che khối mã / comment HTML (phía §20) | 2 | 3 còn sống |
+| `adr_bo_che_o_phia_tep_adr` | che vùng ở phía tệp ADR | 1 | 3 còn sống |
+| `adr_bo_ca_hai_duong_phu_vung_khong_render` | **PHỐI HỢP** — che vùng + tầng bảng | 12 | 3 còn sống |
+| `adr_rao_hong_khong_do` | rào hỏng phải ĐỎ, không che êm | 1 | 3 còn sống |
+| `adr_dong_rao_khop_tien_to` | rào ĐÓNG khác luật rào MỞ | 1 | 3 còn sống |
+| `adr_bo_luat_backtick_trong_info` | backtick trong info string thì không mở | 1 | 3 còn sống |
+| `adr_hang_nhan_ca_van_xuoi` | dòng phải THUỘC VỀ một bảng (bỏ cả neo `^|`) | 9 | 3 còn sống |
+| `adr_dem_moi_dong_giong_hang_bang` | dòng phải thuộc bảng (GIỮ neo `^|`) | 6 | 3 còn sống |
+| `adr_bang_khong_bao_gio_khop` | chiều BẮT OAN — phép định vị bảng có định vị thật | 2 | 3 còn sống |
 
 `adr_noi_ngoai_le_cho_moi_ADR` là hình dạng đã trả giá ở `v1.36.68`: **nới danh sách cho phép để
 chứa chính thứ đang tấn công**. Không có nó thì không biết ca đích đang đo danh sách hay đo thứ khác.
 
-**Delta so `origin/master` = 0 ĐỎ, cả hai bộ:**
+**Ba đột biến cuối bảng là chỗ tôi đã SAI và phép đo sửa lại.** Tôi đề nghị — và ông duyệt — giữ
+phép đếm `45 = 45` làm chốt chính, với lập luận *"phép đếm bắt được rủi ro thật bất kể vùng không
+render"*. Đo thì lập luận ấy **sai**: dựng ca "quên một dòng trong bảng THẬT, bù một dòng giả ở
+vùng không render", **cả sáu dạng HTML** (`<pre>` `<div>` `<script>` `<textarea>` `<p>`) lẫn một
+dòng `|` trần sau đoạn văn đều cho hai số bằng nhau và `rc=0`. Gốc: cổng tìm dòng TRÔNG GIỐNG một
+dòng bảng, chứ không hỏi dòng ấy có THUỘC VỀ một bảng không. Chữa ở TẦNG — định vị bảng (tiêu đề
+`| ADR |` + dòng phân cách) rồi chỉ đọc khối `|` liền mạch ngay sau — nên ý ông chọn (không dựng
+bộ phân tích Markdown) vẫn giữ nguyên. Sau khi vá: 12/12 ca qua, gồm mười dạng và hai ca bắt-oan.
 
-| bộ | master | nhánh này |
+**Hai ca bị HAI đường cùng phủ ⇒ đột biến PHỐI HỢP, không khai ngoại lệ.** Sau khi có tầng bảng,
+`adr_bo_che_vung_khong_render` không còn giết được hai ca "dòng bảng trong khối mã / comment HTML"
+— gỡ một đường thì đường kia vẫn bắt. Đó đúng hình dạng mà cross-review lượt 7 đã cấm khai miễn,
+nên chúng chuyển sang `adr_bo_ca_hai_duong_phu_vung_khong_render` (gỡ đúng hai đường, không thêm).
+Cùng lúc, `adr_hang_nhan_ca_van_xuoi` mất mỏ neo vì `_ADR_HANG` không còn tồn tại; nó được
+**retarget** chứ không vá cho qua — giữ một đột biến của mã đã chết là giữ một phép đo không chạy.
+
+
+**Delta so `origin/master` = 0 ĐỎ, cả hai bộ.** Nền master ĐO TRONG WORKTREE của chính kho
+(`git worktree add --detach <tmp> origin/master`), không phải chép hai tệp ra thư mục rỗng: bốn ca
+của bộ này đọc tệp theo đường dẫn kho và lịch sử git, nên chạy ngoài cây trả **4 ĐỎ giả**. Đây là
+một phép đo tôi đã làm sai một lượt rồi sửa — chép ra đây để lần sau không lặp.
+
+| bộ | master `2ab3560a` | nhánh này |
 |---|---|---|
-| `.claude/dev/packet_loop_test.py` | 185/185 đạt | **208/208 đạt** (+23 ca) |
+| `.claude/dev/packet_loop_test.py` | 185/185 đạt · 34 đột biến · `TỔNG: ĐẠT` | **225/225 đạt · 53 đột biến · `TỔNG: ĐẠT`** (+40 ca, +19 đột biến) |
 | `ops/lease_publish_test.py` | 41/42 (`t33` fail-close vì thiếu `actionlint`) | 41/42, **cùng nguyên nhân** |
+
+Lệnh tái lập (cả bốn ô):
+
+```bash
+git worktree add --detach /tmp/wt-master origin/master
+python3 /tmp/wt-master/.claude/dev/packet_loop_test.py | tail -12   # nền master
+python3 /tmp/wt-master/ops/lease_publish_test.py        | tail -3
+python3 .claude/dev/packet_loop_test.py                 | tail -12   # nhánh này
+python3 ops/lease_publish_test.py                       | tail -3
+git worktree remove /tmp/wt-master
+```
 
 **Một cổng có sẵn đã bắt lỗi của tôi, và đó là bằng chứng nó đang sống:** ma trận codepage
 `cp1252`/`cp1258` lấy danh sách lệnh con từ chính `build_parser()` chứ không kê tay, nên lượt chạy
@@ -350,20 +392,26 @@ bộ test **có** lưới: `thieu = [t for t, _ in cap if t not in goc]` in Đ�
 
 ## 5. Khai VƯỢT NGƯỠNG — theo đúng cửa thoát của `ADR-0044`
 
-Thay đổi của phiên này: **6 tệp · +1450/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
+Thay đổi của phiên này: **6 tệp · +1755/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
 là **≤ 3 tệp và ≤ 300 dòng thêm**. Khai thay vì lờ đi, và tách hai phần vì rủi ro của chúng khác họ:
 
 | phần | tệp | dòng thêm | rủi ro |
 |---|---|---|---|
-| **mã + phản chứng** | `.claude/dev/packet_loop.py` · `.claude/dev/packet_loop_test.py` | +797 | chạy sai |
-| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +653 | viết sai chữ |
+| **mã + phản chứng** | `.claude/dev/packet_loop.py` · `.claude/dev/packet_loop_test.py` | +1041 | chạy sai |
+| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +714 | viết sai chữ |
+
+Đo bằng **merge-base**, không bằng `origin/master` trần — master đã tiến hai lần trong lúc phiên
+này chạy, và đo theo đầu master cho ra số âm vô nghĩa (`−5911` ở một lượt). Base là `2ab3560a`.
+Bảng này KHAI kích thước của CHÍNH nó, nên viết số vào thì số đổi: bốn số ấy đã được lặp tới
+ĐIỂM BẤT ĐỘNG và neo theo commit này. Muốn số hiện tại thì chạy lệnh, đừng tin con số chép —
+tự-quy-chiếu là đúng loại chỗ mà một con số cũ trông y hệt một con số đúng:
 
 ```
 git diff --numstat $(git merge-base origin/master HEAD)
 ```
 
-**Phần mã: 2 tệp, +797.** Trong đó **phản chứng chiếm phần lớn**
-(`packet_loop_test.py` +561: 27 ca + 16 đột biến); cổng chỉ +236. Cắt cho vừa 300 nghĩa là cắt phản
+**Phần mã: 2 tệp, +1041.** Trong đó **phản chứng chiếm phần lớn**
+(`packet_loop_test.py` +756: 40 ca + 19 đột biến); cổng chỉ +285. Cắt cho vừa 300 nghĩa là cắt phản
 chứng, tức đổi một con số lấy chính thứ làm cổng có răng — `CLAUDE.md` gọi đúng cái đó là *"chỗ các
 ca đi chết"*. Đây cũng không phải authority theo nghĩa hẹp của `ADR-0044`: `packet_loop.py` không cấp
 lease và không gác đường đăng; thứ ấy là `ops/lease_publish.py`, mà phiên này **không đụng**.

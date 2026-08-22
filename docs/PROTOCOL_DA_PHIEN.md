@@ -1017,6 +1017,19 @@ ba backtick rồi `not-a-close` **không** đóng được gì. Rào mở bằng
 chứa backtick; rào mở bằng **ngã** thì info string tuỳ ý. Hai luật ấy kéo cổng ngược chiều
 nhau — một cái siết, một cái nới — nên mỗi cái có ca riêng và đột biến riêng.
 
+**Một dòng chỉ được tính khi nó THUỘC VỀ một bảng.** Che vùng không-render là điều kiện CẦN
+chứ không đủ: Markdown còn nhiều cách để một dòng hiện ra mà không phải là dòng bảng —
+`<pre>` `<div>` `<script>` `<textarea>` `<p>`, hay đơn giản là một dòng bắt đầu bằng `|` đứng
+sau một đoạn văn. Đo được: **cả sáu dạng ấy** qua lọt phép đếm khi cổng chỉ tìm "dòng TRÔNG
+GIỐNG một dòng bảng". Đó cũng là lý do phép đếm `45 = 45` KHÔNG tự nó đủ — một dòng bị quên
+trong bảng thật, bù bằng một dòng giả ở vùng không render, vẫn cho hai số bằng nhau.
+Cổng vì thế định vị **bảng** (dòng tiêu đề `| ADR |` + dòng phân cách) rồi chỉ đọc các dòng
+`|` **liền mạch** ngay sau đó; mọi dòng ngoài khối liền mạch ấy không được tính, ở đâu cũng
+vậy. Đây KHÔNG phải bộ phân tích Markdown — nó chỉ định vị đúng một cấu trúc đã biết, và chốt
+ở TẦNG thay vì vá thêm từng dạng. Hai đột biến tách hai tính chất: `adr_hang_nhan_ca_van_xuoi`
+bỏ cả neo `^|` (nhận mọi lần nhắc ADR ở bất kỳ đâu), `adr_dem_moi_dong_giong_hang_bang` giữ neo
+mà bỏ tính thuộc-về-bảng — tức phân biệt *"TRÔNG GIỐNG một dòng bảng"* với *"THUỘC VỀ một bảng"*.
+
 Dạng tên tệp ADR, ghi ĐÚNG NHƯ MÃ (`_ADR_TEN_TEP`): `^(\d{4})-[0-9a-z]([0-9a-z-]*[0-9a-z])?\.md$` —
 chặt hơn `^\d{4}-[0-9a-z-]+\.md$` ở đúng một chỗ: ký tự đầu và cuối của slug phải
 là chữ-số. Thông điệp lỗi in ra chính `pattern` ấy, nên câu này không trôi khỏi mã được.

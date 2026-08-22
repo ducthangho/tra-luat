@@ -2262,6 +2262,7 @@ def case_adr_song_thong_diep_loi_IN_RA_chinh_regex(c: Ctx):
 _RAO_B = "`" * 3
 _RAO_T = "~" * 3
 _HANG_ADR = "| `ADR-0001` | luật | Accepted | 0 cổng |\n"
+_BANG_DAU = "| ADR | luật | trạng thái | cổng đã ĐO |\n|---|---|---|---|\n"
 
 
 def _repo_adr_than20(tmp: Path, than_20: str, ten: str):
@@ -2273,6 +2274,13 @@ def _repo_adr_than20(tmp: Path, than_20: str, ten: str):
     (d / "0001-ok.md").write_text(
         "# ADR-0001 — ca thử\n\n- **Trạng thái:** Accepted (2026-08-22)\n",
         encoding="utf-8", newline="\n")
+    # TIÊU ĐỀ + DÒNG PHÂN CÁCH là bắt buộc: từ bản vá "dòng bảng phải THUỘC một
+    # bảng", một dòng `|…|` trần KHÔNG được tính nữa. Fixture cũ viết khi dòng trần
+    # còn được đếm, và hai ca đã ĐỎ đúng lúc bản vá vào — đó là bộ test làm việc,
+    # không phải hồi quy.
+    # Mỗi ca tự đặt TIÊU ĐỀ + DÒNG PHÂN CÁCH đúng chỗ. Từ bản vá "dòng bảng phải
+    # THUỘC một bảng", một dòng `|…|` trần không được tính — nên VỊ TRÍ của tiêu đề
+    # so với cấu trúc đang thử LÀ một phần của phép đo, không phải khung nền.
     (r / "docs" / "PROTOCOL_DA_PHIEN.md").write_text(
         "# Protocol giả\n\n## 19. Mục trước\n\n"
         "## 20. Quy tắc đang hiệu lực — bảng định tuyến ADR\n\n" + than_20,
@@ -2282,7 +2290,7 @@ def _repo_adr_than20(tmp: Path, than_20: str, ten: str):
 
 def case_adr_song_rao_xen_ke_hang_gia_trong_khoi_ma(c: Ctx):
     """CA CỦA CODEX, nguyên trạng: rào xen kẽ đẩy dòng bảng giả ra ngoài vùng che."""
-    than = (f"{_RAO_B}\n{_RAO_B}not-a-close\n{_HANG_ADR}{_RAO_B}\n{_RAO_B}\n")
+    than = (f"{_BANG_DAU}{_RAO_B}\n{_RAO_B}not-a-close\n{_HANG_ADR}{_RAO_B}\n{_RAO_B}\n")
     r = _repo_adr_than20(c.tmp, than, "xenke")
     rc, _, e = run(c.script, ["adr-song", "--root", r])
     _doi(9, rc, e, "dòng bảng nằm TRONG khối mã không được tính là phủ")
@@ -2294,7 +2302,9 @@ def case_adr_song_rao_dong_hop_le_van_che_dung(c: Ctx):
     Không có ca này thì "siết rào đóng" có thể siết thành KHÔNG BAO GIỜ đóng, và
     mọi §20 có khối mã sẽ đỏ oan — kể cả §20 thật, vốn CÓ một khối mã.
     """
-    than = f"{_RAO_B}\n{_HANG_ADR}{_RAO_B}   \n{_HANG_ADR}"
+    # rào chứa RÁC (không phải dòng bảng), đóng ĐÚNG luật; bảng thật nằm SAU nó.
+    # Rào không đóng được ⇒ bảng bị che ⇒ ĐỎ. Đóng được ⇒ XANH.
+    than = f"{_RAO_B}\nrác trong khối mã\n{_RAO_B}   \n{_BANG_DAU}{_HANG_ADR}"
     r = _repo_adr_than20(c.tmp, than, "donghople")
     rc, _, e = run(c.script, ["adr-song", "--root", r])
     _doi(0, rc, e, "rào đóng hợp lệ phải đóng; dòng bảng sau nó là dòng THẬT")
@@ -2305,7 +2315,8 @@ def case_adr_song_backtick_mo_co_backtick_trong_info(c: Ctx):
 
     Nên dòng bảng phía sau là dòng THẬT — che nó đi là bắt oan.
     """
-    than = f"{_RAO_B}js`x\n{_HANG_ADR}"
+    # ```js`x KHÔNG mở khối mã ⇒ bảng ngay sau nó không bị che ⇒ XANH.
+    than = f"{_RAO_B}js`x\n{_BANG_DAU}{_HANG_ADR}"
     r = _repo_adr_than20(c.tmp, than, "infobacktick")
     rc, _, e = run(c.script, ["adr-song", "--root", r])
     _doi(0, rc, e, "```js`x không mở khối mã ⇒ dòng bảng sau nó là THẬT")
@@ -2317,10 +2328,117 @@ def case_adr_song_nga_mo_info_co_backtick_van_che(c: Ctx):
     Cặp với ca trên: cùng một ký tự backtick trong info, hai loại rào, hai kết quả.
     Đo được cả hai mới chứng minh luật bó đúng theo LOẠI RÀO chứ không theo ký tự.
     """
-    than = f"{_RAO_T} a`b\n{_HANG_ADR}{_RAO_T}\n"
+    than = f"{_BANG_DAU}{_RAO_T} a`b\n{_HANG_ADR}{_RAO_T}\n"
     r = _repo_adr_than20(c.tmp, than, "ngainfo")
     rc, _, e = run(c.script, ["adr-song", "--root", r])
     _doi(9, rc, e, "~~~ a`b LÀ rào mở ⇒ dòng bảng trong nó phải bị che")
+
+# --- (d4) dòng bảng chỉ được tính khi THUỘC MỘT BẢNG --------------------------
+#
+# Đây là ca đắt nhất của bộ này, và nó BÁC một lập luận tôi đã viết ra.
+#
+# Sau finding lượt 4 (`<pre>`), tôi lập luận với người giữ kho rằng có thể GIỮ
+# NGUYÊN và chỉ khai giới hạn, vì chốt chính (N tệp = N dòng) vẫn bắt được rủi ro
+# THẬT — "quên một dòng" — bất kể vùng không render. Rồi ĐO: dựng repo có 2 ADR,
+# §20 chỉ có 1 dòng thật, và một dòng GIẢ cho đúng cái ADR đang thiếu đặt trong
+# từng cấu trúc. SÁU/sáu dạng cho `rc=0`. Dòng giả LẤP CHỖ dòng bị quên.
+#
+# Lập luận sai, và cách nó sai đáng ghi: tôi suy ra "chỉ kẻ CỐ Ý mới khai thác
+# được" từ hình dạng của lỗ, chứ không ĐO xem chốt chính có còn đứng không. Một
+# mô hình đe doạ chưa đo là một lời khai, không phải một phép đo.
+#
+# Dạng đắt nhất KHÔNG có HTML nào: một dòng `|…|` đứng sau đoạn văn. GFM đòi
+# header + dòng phân cách mới thành bảng, nên nó KHÔNG render thành hàng — mà bản
+# trước vẫn đếm. Vậy lỗ chưa bao giờ là "HTML"; nó là chưa hỏi dòng ấy có thuộc
+# một BẢNG không.
+#
+# Chữa Ở TẦNG: định vị bảng (tiêu đề + dòng phân cách) rồi chỉ đọc dòng `|` LIỀN
+# MẠCH sau đó. Đóng cả MƯỜI dạng cùng lúc — bốn lỗ cross-review tìm ra và ba lỗ
+# tôi tự khai — mà không thêm một bộ phân tích Markdown nào.
+
+_HANG_GIA = "| `ADR-0002` | giả | Accepted | 0 cổng |\n"
+_RAO3 = "`" * 3
+
+# Mười dạng vùng-không-render, mỗi dạng đặt dòng GIẢ cho đúng ADR đang thiếu.
+# Tên phải nói ra HÌNH DẠNG, để khi một ca đỏ thì biết ngay dạng nào hở.
+LOP_VUNG_KHONG_RENDER = [
+    ("pre",            f"<pre>\n{_HANG_GIA}</pre>\n"),
+    ("div",            f"<div>\n{_HANG_GIA}</div>\n"),
+    ("script",         f"<script>\n{_HANG_GIA}</script>\n"),
+    ("textarea",       f"<textarea>\n{_HANG_GIA}</textarea>\n"),
+    ("the_p",          f"<p>\n{_HANG_GIA}</p>\n"),
+    ("dong_tran_sau_doan_van", f"Xem ví dụ:\n{_HANG_GIA}"),
+    ("rao_backtick",   f"{_RAO3}\n{_HANG_GIA}{_RAO3}\n"),
+    ("comment_html",   f"<!--\n{_HANG_GIA}-->\n"),
+    ("khoi_ma_thut_le", "    " + _HANG_GIA),
+    ("rao_trong_block_quote", f"> {_RAO3}\n> {_HANG_GIA}> {_RAO3}\n"),
+]
+
+
+def _repo_quen_dong(tmp: Path, chen: str, so_hang: int, ten: str):
+    """2 ADR trên đĩa; §20 chỉ có `so_hang` dòng THẬT, cộng `chen` phía sau."""
+    r = tmp / f"repo_quen_{ten}"
+    d = r / "docs" / "adr"
+    d.mkdir(parents=True, exist_ok=True)
+    (r / ".git").mkdir(exist_ok=True)
+    for n in ("0001", "0002"):
+        (d / f"{n}-ok.md").write_text(
+            f"# ADR-{n} — ca thử\n\n- **Trạng thái:** Accepted (2026-08-22)\n",
+            encoding="utf-8", newline="\n")
+    than = "| ADR | luật | trạng thái | cổng đã ĐO |\n|---|---|---|---|\n"
+    for n in ["0001", "0002"][:so_hang]:
+        than += f"| `ADR-{n}` | luật {n} | Accepted | 0 cổng |\n"
+    (r / "docs" / "PROTOCOL_DA_PHIEN.md").write_text(
+        "# Protocol giả\n\n## 19. Mục trước\n\n"
+        "## 20. Quy tắc đang hiệu lực — bảng định tuyến ADR\n\n" + than + "\n" + chen,
+        encoding="utf-8", newline="\n")
+    return r
+
+
+def _ca_quen_dong(chen: str, ten: str):
+    def ca(c: Ctx):
+        r = _repo_quen_dong(c.tmp, chen, 1, ten)
+        rc, _, e = run(c.script, ["adr-song", "--root", r])
+        _doi(9, rc, e, f"dòng giả trong `{ten}` LẤP CHỖ dòng bị quên — phải ĐỎ")
+    return ca
+
+
+def case_adr_song_trang_thai_rao_xen_ke_khong_tinh(c: Ctx):
+    """Luật rào đóng vẫn là lớp DUY NHẤT ở phía TỆP ADR — đo tại đó.
+
+    Bên §20 thì tầng "dòng bảng phải thuộc một bảng" đã bao trùm luật rào, nên
+    một đột biến rào không còn giết được ca bên ấy. Nhưng tệp ADR KHÔNG có bảng
+    nào để neo vào: dòng `Trạng thái` chỉ được che bởi `_che_khong_render`. Nếu
+    nhận nhầm rào đóng thì dòng `Trạng thái` trong khối mã lại được tính là thật.
+    """
+    r = _repo_adr_ten(c.tmp, [], ["0001"], "ttraoxenke")
+    (r / "docs" / "adr").mkdir(parents=True, exist_ok=True)
+    (r / "docs" / "adr" / "0001-ok.md").write_text(
+        "# ADR-0001 — ca thử\n\n"
+        + _RAO_B + "\n" + _RAO_B + "not-a-close\n"
+        + "- **Trạng thái:** Accepted (2026-08-22)\n"
+        + _RAO_B + "\n" + _RAO_B + "\n",
+        encoding="utf-8", newline="\n")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(9, rc, e, "dòng `Trạng thái` nằm trong khối mã không được tính là thật")
+
+
+def case_adr_song_du_dong_that_van_xanh(c: Ctx):
+    """Chiều BẮT OAN của cả lớp trên: bảng đủ dòng thì XANH."""
+    r = _repo_quen_dong(c.tmp, "", 2, "duhang")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(0, rc, e, "bảng đủ dòng thật phải XANH")
+
+
+def case_adr_song_pre_vo_hai_khong_bat_oan(c: Ctx):
+    """Bảng đủ dòng, và §20 có một `<pre>` KHÔNG chứa dòng ADR nào — phải XANH.
+
+    Không có ca này thì "chỉ đọc dòng trong bảng" có thể siết thành "từ chối mọi
+    §20 có HTML", và §20 thật sẽ đỏ oan.
+    """
+    r = _repo_quen_dong(c.tmp, "<pre>\nvi du\n</pre>\n", 2, "prevohai")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(0, rc, e, "<pre> không chứa dòng ADR không được làm cổng đỏ")
 
 # --- (d) adr-song ---
 CASES += [
@@ -2351,6 +2469,15 @@ CASES += [
     ("adr_song_rao_dong_hop_le_van_che_dung", case_adr_song_rao_dong_hop_le_van_che_dung),
     ("adr_song_backtick_mo_co_backtick_trong_info", case_adr_song_backtick_mo_co_backtick_trong_info),
     ("adr_song_nga_mo_info_co_backtick_van_che", case_adr_song_nga_mo_info_co_backtick_van_che),
+    ("adr_song_trang_thai_rao_xen_ke_khong_tinh", case_adr_song_trang_thai_rao_xen_ke_khong_tinh),
+    ("adr_song_du_dong_that_van_xanh", case_adr_song_du_dong_that_van_xanh),
+    ("adr_song_pre_vo_hai_khong_bat_oan", case_adr_song_pre_vo_hai_khong_bat_oan),
+]
+# Mười dạng vùng-không-render, mỗi dạng MỘT ca có tên riêng — để một đột biến chỉ
+# giết đúng dạng nó làm hở, không gộp thành một chỗ chết chung.
+CASES += [(f"adr_song_quen_dong_{ten}", _ca_quen_dong(chen, ten))
+          for ten, chen in LOP_VUNG_KHONG_RENDER]
+CASES += [
 ]
 
 # AC 18 — mỗi lớp trong danh sách đóng thành MỘT ca có tên riêng, để đột biến
@@ -2363,6 +2490,32 @@ CASES += [(f"ac19_{ten}", _ca_doctrine(nd, f"ac19_{ten}", 0)) for ten, nd in LOP
 # Đột biến nới ngưỡng: mỗi cái BẮT BUỘC giết đúng những ca dưới đây. Ca không
 # chết được nghĩa là nó không đo cái nó khai.
 MUTANTS = {
+    # --- dòng bảng phải THUỘC một bảng: đột biến dựng lại bản cũ -----------------
+    #
+    # Bản cũ đếm mọi dòng khớp `^| \`ADR-NNNN\` |` ở cột 0, bất kể nó có nằm trong
+    # bảng hay không. Đột biến này khôi phục ĐÚNG cơ chế ấy, nên nó phải giết SẠCH
+    # mười ca `quen_dong_*` — mỗi ca một hình dạng vùng-không-render.
+    "adr_dem_moi_dong_giong_hang_bang": (
+        "    trong_bang: list[str] = _hang_adr_trong_bang(than)\n",
+        "    trong_bang: list[str] = _ADR_O_DAU_CU.findall(than)   # đột biến: bản cũ\n",
+        # ĐO ĐƯỢC, không kê tay: chạy đột biến rồi lấy đúng những ca trả rc=0.
+        # SÁU, không phải mười — bốn dạng còn lại (`rao_backtick`, `comment_html`,
+        # `khoi_ma_thut_le`, `rao_trong_block_quote`) được bảo vệ bởi lớp KHÁC
+        # (che vùng không render, và neo `^|` ở cột 0), nên gỡ tầng bảng không
+        # làm chúng hở. Khai đúng sáu là khai đúng TẦNG NÀO che DẠNG NÀO.
+        ["adr_song_quen_dong_pre", "adr_song_quen_dong_div",
+         "adr_song_quen_dong_script", "adr_song_quen_dong_textarea",
+         "adr_song_quen_dong_the_p",
+         "adr_song_quen_dong_dong_tran_sau_doan_van"],
+    ),
+    # Chiều BẮT OAN: siết dòng phân cách thành "không bao giờ khớp" ⇒ không tìm
+    # thấy bảng nào ⇒ bảng THẬT chết. Đo rằng phép định vị bảng đang thực sự
+    # định vị, chứ không phải tình cờ đúng.
+    "adr_bang_khong_bao_gio_khop": (
+        '_ADR_BANG_PHAN_CACH = re.compile(r"^\\|[\\s:|-]+\\|\\s*$")\n',
+        '_ADR_BANG_PHAN_CACH = re.compile(r"^KHONG_BAO_GIO_KHOP$")  # đột biến\n',
+        ["adr_song_du_dong_that_van_xanh", "adr_song_pre_vo_hai_khong_bat_oan"],
+    ),
     # --- rào MỞ / rào ĐÓNG: hai luật, hai đột biến ------------------------------
     #
     # (1) DỰNG LẠI ĐÚNG BUG lượt 3: khớp rào đóng bằng TIỀN TỐ. Không phải "gỡ một
@@ -2371,7 +2524,9 @@ MUTANTS = {
     "adr_dong_rao_khop_tien_to": (
         "            mc = _RAO_DONG.match(d)\n",
         "            mc = _RAO_MO.match(d)   # đột biến: khớp tiền tố như bản cũ\n",
-        ["adr_song_rao_xen_ke_hang_gia_trong_khoi_ma"],
+        # Ca bên §20 nay được tầng bảng bao trùm nên không chết nữa; luật rào
+        # chỉ còn là lớp DUY NHẤT ở phía tệp ADR, nên đo tại đó.
+        ["adr_song_trang_thai_rao_xen_ke_khong_tinh"],
     ),
     # (2) Chiều NGƯỢC: bỏ luật "backtick trong info thì không mở". Ca đích là ca
     # BẮT OAN, nên đột biến này chứng minh luật ấy đang nới cổng đúng chỗ.
@@ -2383,12 +2538,35 @@ MUTANTS = {
     # --- adr-song: đột biến cho lượt cross-review THỨ HAI ------------------------
     #
     # (1) BỎ che vùng không-render — dựng lại nguyên văn bệnh codex bắt được.
+    #
+    # Danh sách phải-chết ĐO LẠI sau khi có tầng bảng (`_hang_adr_trong_bang`): HAI,
+    # không phải bốn. Hai ca "dòng bảng nằm trong vùng không render" nay được HAI
+    # đường cùng phủ — che vùng, và luật "dòng phải nằm trong khối `|` liền mạch
+    # ngay sau bảng" — nên gỡ MỘT đường thì ca vẫn xanh. Đó KHÔNG phải ca yếu: đúng
+    # hình dạng mà `_cap_thay_the` mô tả, và lượt 7 đã cấm khai ngoại lệ cho nó. Hai
+    # ca ấy chuyển sang đột biến PHỐI HỢP ngay dưới.
+    #
+    # Hai ca rào/comment KHÔNG ĐÓNG thì ở lại đây, vì che vùng là đường DUY NHẤT
+    # phủ chúng — tầng bảng không biết gì về một cái rào hỏng.
     "adr_bo_che_vung_khong_render": (
         '    raw, van_de = _che_khong_render(proto.read_text(encoding="utf-8"))\n',
         '    raw, van_de = proto.read_text(encoding="utf-8"), []   # đột biến\n',
+        ["adr_song_rao_khong_dong_thi_do", "adr_song_comment_khong_dong_thi_do"],
+    ),
+    # (1b) PHỐI HỢP — gỡ ĐÚNG hai đường cùng phủ, không gỡ thêm gì. Danh sách 12 ca
+    # là ĐO ĐƯỢC (chạy đột biến rồi lấy đúng những ca đổi màu), không kê tay.
+    "adr_bo_ca_hai_duong_phu_vung_khong_render": (
+        ('    raw, van_de = _che_khong_render(proto.read_text(encoding="utf-8"))\n',
+         "    trong_bang: list[str] = _hang_adr_trong_bang(than)\n"),
+        ('    raw, van_de = proto.read_text(encoding="utf-8"), []   # đột biến\n',
+         "    trong_bang: list[str] = _ADR_O_DAU_CU.findall(than)   # đột biến\n"),
         ["adr_song_dong_bang_trong_khoi_ma_khong_tinh",
          "adr_song_dong_bang_trong_comment_html_khong_tinh",
-         "adr_song_rao_khong_dong_thi_do", "adr_song_comment_khong_dong_thi_do"],
+         "adr_song_rao_khong_dong_thi_do", "adr_song_comment_khong_dong_thi_do",
+         "adr_song_quen_dong_pre", "adr_song_quen_dong_div",
+         "adr_song_quen_dong_script", "adr_song_quen_dong_textarea",
+         "adr_song_quen_dong_the_p", "adr_song_quen_dong_dong_tran_sau_doan_van",
+         "adr_song_quen_dong_rao_backtick", "adr_song_quen_dong_comment_html"],
     ),
     # (2) Chỉ bỏ che ở phía TỆP ADR — tách khỏi (1) để biết đúng phía nào hở.
     "adr_bo_che_o_phia_tep_adr": (
@@ -2478,12 +2656,29 @@ MUTANTS = {
         "        if False:                     # đột biến: kho thật cũng bỏ qua êm\n",
         ["adr_song_kho_that_thieu_thu_muc_thi_do"],
     ),
-    # Nới regex dòng bảng thành khớp cả VĂN XUÔI: cổng sẽ báo phủ đủ trong khi
+    # Nới phép nhận dòng bảng thành khớp cả VĂN XUÔI: cổng sẽ báo phủ đủ trong khi
     # bảng còn thiếu — chiều nguy hiểm hơn của cùng lỗi mà `t43` đã trả giá.
+    #
+    # MỎ NEO ĐỔI sau khi có tầng bảng: `_ADR_HANG` không còn tồn tại, nên đột biến
+    # cũ mất mỏ neo và bộ test báo thẳng ra. Giữ một đột biến của mã đã chết là giữ
+    # một phép đo không chạy, nên nó được RETARGET chứ không vá cho qua. Dạng tương
+    # đương ở kiến trúc mới là gỡ HẲN phép định vị bảng rồi nhận mọi lần nhắc
+    # `ADR-xxxx` ở bất kỳ đâu — đúng cách một người sẽ "sửa" khi cổng đỏ ở chỗ phiền.
+    # Nó khác `adr_dem_moi_dong_giong_hang_bang` ở chỗ bỏ CẢ neo `^|`, nên hai đột
+    # biến tách được "THUỘC VỀ một bảng" khỏi "TRÔNG GIỐNG một dòng bảng".
+    #
+    # Danh sách 9 ca là ĐO ĐƯỢC. Ba ca chiều BẮT OAN (`du_dong_that_van_xanh`,
+    # `pre_vo_hai_khong_bat_oan`, `khoi_ma_HOP_LE_van_xanh`) đã kiểm là VẪN XANH —
+    # đột biến này NỚI cổng, nên nó không được phép làm ca chiều tha đỏ.
     "adr_hang_nhan_ca_van_xuoi": (
-        '_ADR_HANG = re.compile(r"^\\|\\s*`ADR-(\\d{4})`\\s*\\|", re.M)\n',
-        '_ADR_HANG = re.compile(r"`ADR-(\\d{4})`", re.M)   # đột biến: nhận cả văn xuôi\n',
-        ["adr_song_van_xuoi_khong_tinh_la_dong"],
+        "    trong_bang: list[str] = _hang_adr_trong_bang(than)\n",
+        '    trong_bang: list[str] = re.findall(r"`ADR-(\d{4})`", than)   # đột biến\n',
+        ["adr_song_van_xuoi_khong_tinh_la_dong",
+         "adr_song_quen_dong_pre", "adr_song_quen_dong_div",
+         "adr_song_quen_dong_script", "adr_song_quen_dong_textarea",
+         "adr_song_quen_dong_the_p", "adr_song_quen_dong_dong_tran_sau_doan_van",
+         "adr_song_quen_dong_khoi_ma_thut_le",
+         "adr_song_quen_dong_rao_trong_block_quote"],
     ),
     # Cùng họ với đột biến trên, nhưng RỘNG HƠN — đây là hình dạng generation 4:
     # tha cụm ấy VÔ ĐIỀU KIỆN, không cần ngắt dòng. Nói cách khác: "cứ cho hẳn cụm

@@ -58,6 +58,36 @@ lỏng; (3) đọc `ops/reviews/` rồi kết luận về lịch sử review; (4
 gần nhất. Và trong tài liệu thì **bỏ số ghi cứng, thay bằng lệnh đo sống** — PR #230 ăn ba finding
 chỉ vì số ghi cứng chết ở commit kế tiếp, ba lần trong cùng một PR.
 
+### 3b. Bổ sung 05:23Z — bài học SẮC HƠN, do phiên #233 tìm ra
+
+Phiên `session_018YdsqSNdxorwxVYW2d2PkH` xác nhận con số **230** và tìm ra gốc lệch 15: regex của họ
+`^([a-z_][a-z0-9_]*):` đòi khoá **TOÀN CHỮ THƯỜNG**, mà kho dùng chữ HOA trong tên khoá để nhấn mạnh
+(`assurance_KHONG_dat`, `write_set_KHONG_gom`, `pham_vi_NGOAI`, `la_luot_review_CUOI`, …).
+
+Đã kiểm hai chiều, độc lập, trên `origin/master`: `yaml.safe_load` = **230** · regex = **215** ·
+`yaml \ regex` = **15** · `regex \ yaml` = **0**. Tập 230 **phủ** 215, không phải hai tập lệch nhau.
+
+> **Nguyên văn chỗ đáng nhớ nhất của họ:** bản đầu còn ship kèm một **lệnh tái lập dùng chính cái
+> regex hỏng ấy**. Lệnh chạy được, chạy nhanh, và tái lập **trung thành** một con số sai — nên nó
+> trông y hệt bằng chứng. **Một phép đo sai CÓ lệnh tái lập khó phát hiện hơn một phép đo sai không
+> có gì**, vì cái lệnh mua cho nó sự tin cậy mà nội dung không xứng.
+
+Điều này **sửa lại lời khuyên của chính bản bàn giao này**. §3 chốt *"thay số ghi cứng bằng lệnh đo
+sống"* — chưa đủ. Một lệnh đo sống dựng trên phép dò sai chỉ là lời khai sai chạy nhanh hơn. Chốt
+đúng có **hai** vế: (a) lệnh phải dùng **bộ phân tích CẤU TRÚC**, không phải regex trên văn bản thô;
+(b) lệnh phải **fail-close** — bản mới của họ đòi `khong parse == 0`, nên tệp hỏng làm phép đo ĐỎ chứ
+không lặng lẽ tụt số.
+
+**Thứ khoanh được vùng lỗi là IN CẢ BA CỘT.** Cột giữa (`cổng đọc 8`) khớp tuyệt đối giữa hai bên,
+nên lỗi bị dồn về cột đếm tên trường ngay lập tức. Nếu tôi chỉ nói *"215 sai"* thì họ phải truy cả
+phép dò cổng. **Báo một con số lệch thì báo luôn con số nào KHỚP** — chỗ khớp mới là thứ khoanh vùng.
+
+**Đếm hình dạng:** phiên #233 ghi nhận **ba lần trong MỘT ngày** cùng hình dạng *regex trên văn bản
+thô thay cho bộ phân tích cấu trúc* — bộ quét lease khớp nháy KÉP trong khi YAML ghi nháy ĐƠN (báo
+"0 va chạm" sai, giấu một va chạm thật) · `adr-song` đếm dòng bảng nằm trong khối mã có rào · và cái
+này. Ba lần ⇒ theo doctrine của kho, câu hỏi đúng không còn là *"vá regex thế nào"* mà là **"có nên
+dùng regex cho việc này không"**.
+
 ## 4. Hai con số tôi đã báo người giữ kho mà sau đó bị bác — đọc kỹ
 
 - **"Mục D là hai field"** — hụt **hai bậc**. Đo lại: **49** lease dùng **230** tên trường mức gốc,

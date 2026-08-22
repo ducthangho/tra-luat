@@ -56,7 +56,7 @@ HỢP ĐỒNG, không phải sai ảnh chụp.
 
 Hệ quả cứng cho `AG-T0-01B`: **cấm AG–AG land**; và vì `agy models` (đo 21-08-2026) liệt kê cả
 `claude-sonnet-4-6` lẫn `gpt-oss-120b-medium`, chọn reviewer theo TÊN CÔNG CỤ là chưa đủ — xem
-§6 mục `AG-T0-01B` và Issue `#220` (`PLAT-X6`).
+§6 mục `AG-T0-01B` và Issue `#220` (`PLAT-X7`).
 
 `AG-T0-01A` **đã land** dưới lời khai cũ. Sửa ở đây là ghi cho đúng lớp, **không hồi tố** mức
 assurance của lần land ấy — muốn hồi tố thì phải qua re-audit, và nó chưa có.
@@ -213,10 +213,11 @@ assurance: same_provider_approved
   `labeled` không sinh lượt chạy nào. Đường chắc chắn là `workflow_dispatch` trên exact ref.
 - **Ràng buộc reviewer:** `sensitive` + `agy` nạp được model của nhà khác ⇒ lease phải khai `model`
   của phiên AG và verdict khai `model_reviewer_identity` đủ `provider/model/session`. Cưỡng chế
-  bằng cổng là packet riêng — `PLAT-X6`, Issue `#220`.
+  bằng cổng là packet riêng — `PLAT-X7`, Issue `#220`.
 
 ### Packet 3C (`AG-T0-01C` — Antigravity Plan & Lean AGENTS Pointer)
 - **Write-Set:** `AGENTS.md`, `ops/KE_HOACH_THI_CONG_ANTIGRAVITY.md`
+- **Tệp này ĐÃ BỊ CHẠM ngoài packet, 22-08-2026:** hai dòng (`:59`, `:216`) đổi `PLAT-X6` → `PLAT-X7` sau khi Issue `#220` đổi định danh. Chỉ sửa TÊN packet, số Issue giữ nguyên; không dòng nào khác đổi. Ghi ở đây vì `AG-T0-01C` khai tệp này trong Write-Set và chưa có lease — nên nó KHÔNG phải người đầu tiên chạm tệp.
 - **Yêu cầu kỹ thuật:** Đồng bộ bản `AGENTS.md` tinh gọn (lean pointer) và kế hoạch thi công bán tĩnh vào repo, chạy `doc-claims-check` và `release-verify` sạch 100%.
 
 ### Packet 4 (`AG-T0-03` — Argparse Parser-Tree Coverage Report)

@@ -802,48 +802,81 @@ bỏ sót đầu vào trông y hệt một phép đo sạch.
 
 ---
 
-## 15. `REVIEW-BUDGET-KHONG-CO-CONG` — trần 2 lượt, PR này dùng 4, không gì kêu
+## 15. `REVIEW-BUDGET-KHONG-CO-CONG` — trục LỜI GỌI vượt trần, và `ADR-0043` chưa được THI HÀNH
 
-`docs/PROTOCOL_DA_PHIEN.md:750` viết thẳng: *"Hai lượt Codex review trên cùng PR là một stop
-condition riêng của review budget"*, và `:756` nói `codex_review_calls_used` **tối đa hai trên một
-PR**. Dòng ngay sau còn chặn đúng đường lách: *"không cho phép gọi thêm bằng prompt/phiên khác để
-lách trần"*.
+**Bản đầu của mục này TRỘN HAI TRỤC, đúng cái bệnh `ADR-0043` sinh ra để chấm dứt.** Nó viết *"trần 2
+lượt, PR này dùng 4"* — trong đó `2` là trần trục **LỜI GỌI** còn `4` là số **head đã có finding**.
+Một phiên khác (`tra-luat-5a`) đính chính khung này, tôi đo lại và xác nhận. Chép cái sai ra đây vì
+nó là bằng chứng mạnh nhất cho chính mục: **tôi trộn trục ngay trong lúc viết về việc trộn trục.**
 
-Đo trên PR #233 lúc 22-08-2026:
+`ADR-0043` nói thẳng ba trục là ĐỘC LẬP, trần nào chạm trước thì thắng:
 
-| | số |
+| trục | bộ đếm | trần | đo được trên PR #233 |
+|---|---|---|---|
+| **LỜI GỌI** (chi phí) | `codex_review_calls_used` | 2 | **≥ 4** — VƯỢT |
+| **VÒNG** (canon, kỷ luật) | `review_rounds_used` | 2 | **0** — không vượt |
+| **ATTEMPT** (số lần tuyên bố DONE) | — | — | ngoài phạm vi mục này |
+
+Hai con số ấy đo bằng ĐỊNH NGHĨA của protocol, không bằng cảm giác:
+
+- `:754` — `codex_review_calls_used` *"tăng khi có bằng chứng lời gọi review đã bắt đầu sinh
+  output/token, **kể cả** timeout hoặc output sai schema"*. Đo theo OUTPUT: **4 head** có finding
+  (`cbd14439bb` · `d17019628f` · `ef19e3b075` · `bc98b1f7`), **5 finding** trên 5 thread, và chỉ **3**
+  trong số đó có comment `@codex review` đi trước — lượt đầu sinh output mà không có lời gọi tường
+  minh nào của phiên này. Nên `≥ 4`, không phải `= 3`: đếm theo lời gọi tường minh là đếm THIẾU.
+- `:756` — `review_rounds_used` *"chỉ tăng khi verdict qua schema, exact-SHA và receipt validation"*.
+  Đo: `ops/reviews/` **không có** verdict hay receipt nào cho `#233`. Finding của connector codex
+  chưa từng đi qua đường ấy ⇒ **0**.
+
+Nên phát biểu đúng là: **trục LỜI GỌI vượt gấp đôi; trục VÒNG chưa chạm.** Và mỉa mai đúng chỗ —
+`0` trên trục VÒNG không phải tin tốt: nó nghĩa là bốn lượt review ấy **không để lại verdict nào**,
+tức chúng tốn chi phí mà không sinh ra thứ canon đếm được.
+
+### `ADR-0043` là `Accepted` nhưng KHÔNG có mục nào được thi hành
+
+`ADR-0043` liệt kê bốn việc phải làm. Đo ngày 22-08-2026, cả bốn **chưa làm**:
+
+| việc `ADR-0043` giao | đo được |
 |---|---|
-| lời gọi `@codex review` do phiên này đăng | **3** |
-| head khác nhau đã được codex review | **4** (`cbd14439bb` · `d17019628f` · `ef19e3b075` · `bc98b1f7`) |
-| finding codex trên PR | **5**, trên 5 thread |
-| trần theo protocol | **2** |
-| Review Rescue Checkpoint đã kích hoạt | **0 lần** |
+| sửa `docs/PROTOCOL_DA_PHIEN.md:751` để trỏ về ADR | vẫn ghi *"ba vòng code/review tổng cộng"* |
+| sửa `docs/adr/0037` dòng 5 | vẫn ghi *"ba vòng code/review tổng cộng"* |
+| sửa mermaid `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md:156` | vẫn vẽ *"Hết 2 Codex call hoặc 3 vòng"* |
+| `doctrine-scan` mở rộng + chế độ `so-canon` | `so-canon` xuất hiện **0** lần trong `packet_loop.py`; `doctrine-scan` quét **7** tệp, không có `ops/KE_HOACH_*.md` |
 
 Tái lập:
 
 ```bash
-# đếm lời gọi review (MCP github, method get_comments)
-#   lọc body bắt đầu bằng "@codex review"  -> 3
-#   thread có tác giả chatgpt-codex-connector -> 5 finding / 5 thread
+sed -n 751p docs/PROTOCOL_DA_PHIEN.md
+sed -n 5p docs/adr/0037-*.md
+sed -n 156p ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md
+grep -c "so-canon" .claude/dev/packet_loop.py          # 0
+python3 .claude/dev/packet_loop.py doctrine-scan --root . | tail -1
 ```
 
-**Người vi phạm là chính phiên viết mục này**, và nó không tự phát hiện — mỗi lượt đều thấy hợp lý
-tại chỗ (*"có finding thật, vá xong thì head đổi, §1 bất biến 9 đòi review lại head mới"*). Đó đúng
-hình dạng `CLAUDE.md` gọi tên: **vá tiếp lúc nào cũng có vẻ đúng vì lần nào cũng có lỗi thật** — chỉ
-khác là ở đây thứ vượt trần không phải số bản vá mà là số lượt review, và bất biến 9 (head đổi ⇒
-bằng chứng cũ hết hiệu lực) **kéo ngược chiều** với trần review. Hai luật cùng trong một tệp, không
-luật nào nhắc luật kia.
+Vậy canon là **HAI** vòng theo `ADR-0043`, còn **ba** tài liệu vẫn nói **BA** — đúng tình trạng mà
+`ADR-0043` được viết ra để chấm dứt, và nó vẫn đang sống. Một phiên đọc protocol trước (đúng như
+dossier dạy) vẫn sẽ dùng ba vòng một cách **ngay tình**, y như ADR mô tả.
 
-**Nợ:** `ADR-0043` (trần lượt review) nằm ở `§20` với cột đo là **`0 cổng`** — không tệp cổng nào
-đọc nó. Mục này là bằng chứng cho biết `0 cổng` KHÔNG phải một ô trống trong bảng: nó là một luật
-được viết ra, được nhắc lại ở hai chỗ, và bị vượt **gấp đôi** mà không gì kêu. Trần chỉ có nghĩa khi
-có ai đó ĐẾM.
+### Bài học rộng hơn ô `0 cổng`: `Trạng thái: Accepted` KHÔNG có nghĩa ĐÃ THI HÀNH
 
-**Điều kiện coi là XONG:** một cổng đọc được số lượt review đã dùng trên một PR và ĐỎ khi vượt trần,
-kèm phản chứng `rXX_` cho cả hai chiều (vượt ⇒ đỏ · trong trần ⇒ xanh) và một đột biến nới trần để
-chứng minh ca đích đang đo đúng thứ đó. Chưa ai làm; đừng đóng mục này bằng một câu trong tài liệu.
+`§20` đo *"cổng nào ĐỌC luật ấy"*. Mục này lộ ra một khoảng mù **trước** cả câu hỏi đó: một ADR có
+thể `Accepted`, có mục **Thi hành** liệt kê bốn việc cụ thể, và **không việc nào** được làm — mà
+không dòng nào trong kho nói ra. `adr-song` hiện chỉ đòi mỗi ADR **có mặt** trong bảng và có dòng
+`Trạng thái` đọc được; nó không hỏi mục Thi hành đã xong chưa. Đây là biến thể của lỗi kho đã trả
+giá bốn lần: **đếm sự CÓ MẶT thay vì KHẢ NĂNG.**
 
----
+**Điều kiện coi là XONG (hai phần rời nhau, đừng gộp):**
+
+1. **Trần lời gọi có cổng** — một cổng đọc được `codex_review_calls_used` trên một PR và ĐỎ khi vượt,
+   kèm phản chứng `rXX_` hai chiều (vượt ⇒ đỏ · trong trần ⇒ xanh) và một đột biến **nới trần** để
+   chứng minh ca đích đang đo đúng thứ đó.
+2. **`ADR-0043` được thi hành** — bốn việc trong mục Thi hành của nó, mỗi việc có phép đo tái lập
+   được như bảng trên. Việc này thuộc packet khác và cần lease riêng; **không** làm kèm trong một PR
+   tài liệu.
+
+Chưa ai làm phần nào. Đừng đóng mục này bằng một câu trong tài liệu — đó đúng là cách `ADR-0043`
+thành `Accepted` mà không ai thi hành.
+
 
 ## 16. `THE-HTML-TRONG-COMMENT-BI-NUOT` — dấu nháy ngược không phải hàng rào, lần thứ hai
 

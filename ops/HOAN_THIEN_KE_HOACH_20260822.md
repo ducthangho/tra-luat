@@ -1,7 +1,11 @@
 # Hoàn thiện kế hoạch + đồng bộ protocol — phiên 22-08-2026
 
 **Giao việc:** `ops/prompts/phien-hoan-thien-ke-hoach-20260822.md` (đã land ở PR #230).
-**Nền đo:** ban đầu `master` = `a5bfe07` lúc `03:05Z`; nhánh nay gộp tới `2ab3560a`.
+**Nền đo:** ban đầu `master` = `a5bfe07` lúc `03:05Z`; nhánh nay gộp tới
+`2ab3560a8a406c1b436221fb3c6d23234aefdde0` (`2ab3560a`). **Mọi con số trong tệp này neo theo OID ĐẦY ĐỦ ấy**, không
+theo tiền tố: tiền tố 7–8 ký tự hôm nay giải ra duy nhất chỉ vì kho hiện có bấy nhiêu đối
+tượng — đó là thuộc tính của một THỜI ĐIỂM, không phải một phép neo bền. Tiền tố trong phần
+còn lại chỉ để đọc cho gọn.
 Mỗi con số dưới đây neo SHA của chính lần đo nó — xem `ops/NO_KY_THUAT.md` §14 để biết vì sao.
 
 > **Tệp này KHÔNG phải lease và không cấp việc cho ai.** `docs/PROTOCOL_DA_PHIEN.md` §7: prompt và
@@ -395,19 +399,44 @@ bộ test **có** lưới: `thieu = [t for t, _ in cap if t not in goc]` in Đ�
 Không nằm trong bản giao việc; lộ ra vì §20 buộc phải điền cột "cổng đã ĐO" cho từng ADR, rồi hai
 trong số các ô `0 cổng` ấy hoá ra đang bị vượt **ngay trong phiên đang viết bảng**.
 
-**(a) Trần lượt review — `ADR-0043`, `§20` ghi `0 cổng`.** `docs/PROTOCOL_DA_PHIEN.md:750` và `:756`
-đặt trần **hai** lượt Codex review trên một PR, và chặn sẵn đường lách (*"không cho phép gọi thêm
-bằng prompt/phiên khác"*). Đo trên PR #233: **3** lời gọi `@codex review`, **4** head đã được
-review, **5** finding, **0** lần Review Rescue Checkpoint. Vượt gấp đôi, không gì kêu.
+**(a) Trần lượt review — `ADR-0043`, `§20` ghi `0 cổng`.** `ADR-0043` tách **ba trục độc lập**, trần
+nào chạm trước thì thắng. Đo trên PR #233 theo đúng định nghĩa của protocol, KHÔNG trộn trục:
 
-Đáng chú ý không phải con số mà là **vì sao nó không tự lộ**: mỗi lượt đều hợp lý tại chỗ — có
-finding thật, vá xong head đổi, và **`§1` bất biến 9 đòi review lại head mới**. Bất biến 9 và trần
-review **kéo ngược chiều nhau**, cùng nằm trong một tệp, không luật nào nhắc luật kia. Người đọc
-tuần tự sẽ tuân thủ bất biến 9 và vượt trần mà không thấy mình đang vượt.
+| trục | bộ đếm | trần | đo được |
+|---|---|---|---|
+| **LỜI GỌI** (chi phí) | `codex_review_calls_used` (`:754` — tăng khi lời gọi **bắt đầu sinh output**) | 2 | **≥ 4** — VƯỢT |
+| **VÒNG** (canon) | `review_rounds_used` (`:756` — chỉ tăng khi verdict qua schema + exact-SHA + receipt) | 2 | **0** — không vượt |
 
-Vì vậy tôi **không gọi lượt review thứ năm** cho head `225d47d009`, dù nó có thay đổi đáng review.
-Quyết định thuộc người giữ kho: hoặc mở Review Rescue Checkpoint theo `ADR-0037`, hoặc khai một
-ngoại lệ có ghi chép. Ghi thành nợ có tên `REVIEW-BUDGET-KHONG-CO-CONG` (`ops/NO_KY_THUAT.md` §15).
+`≥ 4` vì **4** head có finding (`cbd14439bb` · `d17019628f` · `ef19e3b075` · `bc98b1f7`) trong khi chỉ
+**3** có comment `@codex review` đi trước — đếm theo lời gọi tường minh là đếm THIẾU. `0` vì
+`ops/reviews/` không có verdict hay receipt nào cho `#233`; và `0` **không phải tin tốt** — nó nghĩa là
+bốn lượt ấy tốn chi phí mà không sinh ra thứ canon đếm được.
+
+**Bản đầu của mục này TRỘN HAI TRỤC** (*"trần 2, PR này dùng 4"* — `2` là trần LỜI GỌI, `4` là số
+head). Phiên `tra-luat-5a` đính chính, tôi đo lại và xác nhận. Giữ cái sai trong hồ sơ vì nó là bằng
+chứng mạnh nhất cho chính vấn đề: **tôi trộn trục ngay trong lúc viết về việc trộn trục** — mà trộn
+trục đúng là thứ `ADR-0043` được viết ra để chấm dứt.
+
+**Vì sao nó không tự lộ:** `§1` bất biến 9 đòi review lại mỗi head mới, và trần LỜI GỌI cấm gọi thêm.
+Hai luật cùng một tệp, **kéo ngược chiều nhau**, không luật nào nhắc luật kia. Người đọc tuần tự sẽ
+tuân thủ bất biến 9 và vượt trần mà không thấy mình đang vượt. Vì vậy tôi **không gọi lượt thứ năm**
+cho head `225d47d009`, dù nó có thay đổi đáng review.
+
+**Và có một tầng sâu hơn ô `0 cổng`: `ADR-0043` là `Accepted` nhưng KHÔNG mục nào được thi hành.** Nó
+liệt kê bốn việc; đo 22-08-2026 thì cả bốn chưa làm — `docs/PROTOCOL_DA_PHIEN.md:751` vẫn ghi *"ba
+vòng"*, `docs/adr/0037` dòng 5 vẫn ghi *"ba vòng"*, mermaid `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md:156`
+vẫn vẽ *"3 vòng"*, và chế độ `so-canon` xuất hiện **0** lần trong `packet_loop.py`. Canon là **HAI**,
+ba tài liệu vẫn nói **BA** — đúng tình trạng `ADR-0043` sinh ra để chấm dứt, vẫn đang sống.
+
+Đó là một khoảng mù **trước** cả câu hỏi mà `§20` đặt ra. `§20` hỏi *"cổng nào ĐỌC luật này"*; chưa ai
+hỏi *"mục **Thi hành** của ADR này đã làm chưa"*. `adr-song` hiện chỉ đòi mỗi ADR **có mặt** trong
+bảng và có dòng `Trạng thái` đọc được — lại đúng lỗi **đếm sự CÓ MẶT thay vì KHẢ NĂNG**.
+
+**Tôi KHÔNG sửa `:751`, `0037` và mermaid trong PR này.** Đó là thi hành `ADR-0043`, một packet riêng
+với write set riêng, và phiên này không có lease cho nó (`§7`: đọc được kế hoạch không phải được giao
+việc). Ghi thành nợ `REVIEW-BUDGET-KHONG-CO-CONG` (`ops/NO_KY_THUAT.md` §15) với hai điều kiện XONG
+tách rời: cổng đếm lời gọi, và thi hành `ADR-0043`.
+
 
 **(b) Thẻ HTML trong comment bị nuốt — không phải luật protocol, là một tầng không ai coi là tầng.**
 Đăng một reply lên #233: **gửi ~5000 ký tự, đến 466**; comment dừng giữa một dòng bảng. Bộ lọc HTML
@@ -428,16 +457,17 @@ vào một luật đang bị vi phạm bởi chính người điền bảng.
 
 ## 5. Khai VƯỢT NGƯỠNG — theo đúng cửa thoát của `ADR-0044`
 
-Thay đổi của phiên này: **6 tệp · +1868/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
+Thay đổi của phiên này: **6 tệp · +1931/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
 là **≤ 3 tệp và ≤ 300 dòng thêm**. Khai thay vì lờ đi, và tách hai phần vì rủi ro của chúng khác họ:
 
 | phần | tệp | dòng thêm | rủi ro |
 |---|---|---|---|
 | **mã + phản chứng** | `.claude/dev/packet_loop.py` · `.claude/dev/packet_loop_test.py` | +1041 | chạy sai |
-| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +827 | viết sai chữ |
+| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +890 | viết sai chữ |
 
 Đo bằng **merge-base**, không bằng `origin/master` trần — master đã tiến hai lần trong lúc phiên
-này chạy, và đo theo đầu master cho ra số âm vô nghĩa (`−5911` ở một lượt). Base là `2ab3560a`.
+này chạy, và đo theo đầu master cho ra số âm vô nghĩa (`−5911` ở một lượt).
+Base là `2ab3560a8a406c1b436221fb3c6d23234aefdde0`.
 Bảng này KHAI kích thước của CHÍNH nó, nên viết số vào thì số đổi: bốn số ấy đã được lặp tới
 ĐIỂM BẤT ĐỘNG và neo theo commit này. Muốn số hiện tại thì chạy lệnh, đừng tin con số chép —
 tự-quy-chiếu là đúng loại chỗ mà một con số cũ trông y hệt một con số đúng:

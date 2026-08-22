@@ -2264,7 +2264,8 @@ def t50_ngoai_Actions_phai_KHAI_hai_lop_vang():
              f"không khai lớp vắng: rc={rc}, out={o!r}, err={e!r}")
 
 
-def _chay_buoc_dang(check_hong="", post_hong="", kiem_github_hong="") -> dict:
+def _chay_buoc_dang(check_hong="", post_hong="", kiem_github_hong="",
+                    check_rc9="", kiem_github_rc9="") -> dict:
     import json
     import os
     than = _buoc_workflow("đăng")["run"]
@@ -2276,8 +2277,8 @@ def _chay_buoc_dang(check_hong="", post_hong="", kiem_github_hong="") -> dict:
             """import pathlib,sys,yaml
 p=pathlib.Path(sys.argv[2]); d=yaml.safe_load(p.read_text(encoding='utf-8')); cmd=sys.argv[1]
 with pathlib.Path(os.environ['LENH_GIA_LOG']).open('a',encoding='utf-8') as f: print(*sys.argv[1:],file=f)
-if cmd=='kiem-github': raise SystemExit(8 if d['lease_id']==os.environ.get('KIEM_GITHUB_HONG') else 0)
-if cmd=='check': raise SystemExit(8 if d['lease_id']==os.environ.get('CHECK_HONG') else 0)
+if cmd=='kiem-github': raise SystemExit(9 if d['lease_id']==os.environ.get('KIEM_GITHUB_RC9') else 8 if d['lease_id']==os.environ.get('KIEM_GITHUB_HONG') else 0)
+if cmd=='check': raise SystemExit(9 if d['lease_id']==os.environ.get('CHECK_RC9') else 8 if d['lease_id']==os.environ.get('CHECK_HONG') else 0)
 if cmd=='body': print(f\"**Lease `{d['lease_id']}`**\")
 if cmd=='mark': p.write_text(p.read_text(encoding='utf-8')+'posted_comment_id: '+sys.argv[4]+'\\n',encoding='utf-8')
 """.replace("import pathlib", "import os,pathlib"), encoding="utf-8")
@@ -2303,7 +2304,8 @@ ds=d['comments']; ds.append({'id':9000+len(ds),'body':body}); p.write_text(json.
             "gh api ", f"'{py}' \"$NEO/ops/gh_gia.py\" api ")
         mt = dict(os.environ, NEO=str(neo), REPO="o/r", GITHUB_ENV=str(ghe),
                   GH_GIA_STATE=str(state), CHECK_HONG=check_hong, POST_HONG=post_hong,
-                  KIEM_GITHUB_HONG=kiem_github_hong, LENH_GIA_LOG=str(log))
+                  KIEM_GITHUB_HONG=kiem_github_hong, CHECK_RC9=check_rc9,
+                  KIEM_GITHUB_RC9=kiem_github_rc9, LENH_GIA_LOG=str(log))
         p = subprocess.run([_bash_posix(), "-c", than], cwd=goc, env=mt,
                            capture_output=True, text=True)
         d = json.loads(state.read_text(encoding="utf-8"))
@@ -2432,6 +2434,22 @@ def t60_kiem_github_hong_khong_POST_va_lam_buoc_DO():
     kq = _chay_buoc_dang(kiem_github_hong="giua")
     bang(kq["rc"] != 0 and "`dau`" in kq["bodies"] and "`cuoi`" in kq["bodies"]
          and "`giua`" not in kq["bodies"], f"kiem-github hỏng bị nuốt: {kq}")
+
+
+@ca
+def t62_kiem_github_rc9_bo_qua_lease_va_buoc_XANH():
+    kq = _chay_buoc_dang(kiem_github_rc9="giua")
+    bang(kq["rc"] == 0 and kq["bodies"].count("`dau`") == 1
+         and kq["bodies"].count("`cuoi`") == 1 and "`giua`" not in kq["bodies"],
+         f"kiem-github rc=9 xử lý sai: {kq}")
+
+
+@ca
+def t63_check_rc9_bo_qua_lease_va_buoc_XANH():
+    kq = _chay_buoc_dang(check_rc9="giua")
+    bang(kq["rc"] == 0 and kq["bodies"].count("`dau`") == 1
+         and kq["bodies"].count("`cuoi`") == 1 and "`giua`" not in kq["bodies"],
+         f"check rc=9 xử lý sai: {kq}")
 
 
 def main() -> int:

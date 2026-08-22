@@ -1,0 +1,103 @@
+# BIÊN NHẬN — cross-review `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 4 (REVIEW DELTA), reviewer `claude`.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+packet_issue: 227
+lease_id: lease-dang-review-4-claude-20260822
+provider: claude
+role: reviewer
+executor_provider: codex
+verdict: changes_requested
+cross_provider: true
+review_class: sensitive
+reviewed_sha: 6eaa3755abd96ef6d8f820daaa6b9d96e2bdd7b5
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+nen_delta_sha: b32b424165c4a952661cf776bf953d91a7eaf814
+target_pull_request: null
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r6.md
+spec_sha256: 4ee67d54b5504c0b303dad3bf8470c912ad754e6bcda42e8cb4a2866475ba181
+
+verdict_path: ops/reviews/lease-dang-review-4-claude-verdict.md
+verdict_sha256: 0655b9d0caea1d49450b4b8013f79cd49af61adc62b261bdce2085b76b17614f
+verdict_bytes: 11044
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/PLACEHOLDER_COMMIT/ops/reviews/lease-dang-review-4-claude-verdict.md
+evidence_url_ghi_chu: 'Điền SAU KHI ĐÃ PUSH và sau khi `git branch -r --contains` xác nhận.'
+
+verdict_nguon: >-
+  stdout của `claude -p` do `launcher.py` giữ, run `be0e60ce`, `ma_thoat=0`,
+  `thoi_luong_giay=1297.4`, `stdout_byte=11044`, `stderr_byte=0`.
+  Chốt read-only: cây review sạch, HEAD vẫn `6eaa3755`.
+verdict_doi_chieu: 'NGUYÊN VĂN, không đụng byte nào — băm đo trực tiếp trên `stdout.log`.'
+
+so_finding: 4
+tom_tat_finding: >-
+  P2 một trong TÁM guard (khối POST) KHÔNG có ca nào chết khi gỡ nhánh chặn của nó — suite XANH
+  TRỌN VẸN 67/67 · P2 bộ trích guard phân biệt CÁCH VIẾT chứ không phân biệt NHÁNH CHẶN, nên hai
+  hình dạng guard người ta gõ thật (`if ! cmd`, `cmd || rc=$?`) lọt hoàn toàn · P3 `_ve_dan_xuat`
+  fail-close không có phản chứng · P3 hạt sạn `IsADirectoryError` ở đường khôi phục tệp.
+da_xu_ly: >-
+  Người giữ kho quyết: cấp lượt 7, ĐẢO sang danh sách CHO PHÉP. Xem caveat
+  `bo-dem-D-nguoi-giu-kho-QUYET-khong-tang`.
+
+verdict_usage_caveats:
+- id: PHAN-COT-LOI-cua-r6-DAT-va-do-lai-doc-lap
+  noi_dung: >-
+    Nước đi của `r6` — đặc tả THÔI liệt kê vế khẳng định, executor DẪN XUẤT tập vế từ vị trí, và
+    vị trí dẫn xuất từ YAML — là THẬT, không phải dời chỗ ghi cứng. Reviewer dựng TÁM hướng tấn
+    công vào chính phép dẫn xuất: `M4` và chiều NGƯỢC của nó, đổi tên biến `ID`, thêm khoảng
+    trắng, tách dòng bằng dấu chéo ngược, thêm lời gọi POST thứ hai, chú thích chứa nguyên văn
+    dòng POST — **bảy cái ĐỎ**, và cái thứ tám (chú thích chỉ chứa `gh api`) **xanh ĐÚNG**.
+    Trạng thái "không phân tích được" có bằng chứng dương: `ValueError: substring not found`.
+    Bằng chứng mạnh nhất: `t66` KHÔNG chết dưới `M4` — vì kỳ vọng của nó TRÔI THEO YAML — chỉ
+    `t67` (sổ đăng ký lệch) chết. Bốn đột biến "guard còn nhưng hành vi sai" cũng đều chết, kể cả
+    ở guard `$GITHUB_ENV` mà chính executor tự khai là yếu. KHÔNG ca nào trống ruột.
+- id: P2-thu-nhat-DO-LAI-DOC-LAP-va-DUNG
+  noi_dung: >-
+    Gỡ đúng NHÁNH CHẶN của khối POST (giữ nguyên `set +e`/`rc=$?`/`set -e`) ⇒ suite **67/67 XANH
+    TRỌN VẸN**, `actionlint` rc=0 (phiên điều phối đo lại, khớp). KHÔNG phải equivalent mutant:
+    đồ giả `gh` trả `rc=1` NHƯNG in một id SỐ hợp lệ — đúng tình huống nhánh ấy sinh ra để chặn —
+    và khi gỡ, lease `giua` ĐƯỢC `mark` bằng id đến từ một lời gọi HỎNG. Gốc: sổ khoá theo KHỐI
+    `set +e` còn thứ được khẳng định là NHÁNH chặn; mục #6 khoá vào khối POST nhưng ĐẶT TÊN
+    `case_id` và ca của nó bơm lỗi vào câu `case "$ID"` — một nhánh nằm NGOÀI mọi khối. Cái tên
+    đã che chỗ hở. Nên `T66′` đạt **7/8**, không phải 8/8.
+- id: P2-thu-hai-danh-sach-CAM-khong-bao-gio-du
+  noi_dung: >-
+    `_guard_dan_xuat` neo vào ĐÚNG MỘT mẫu (`^set +e$` … `^rc=$?$` … `^set -e$`). Phiên điều phối
+    đo lại: thêm một guard chặn THẬT (gọi `bao_chan` + `continue`) kiểu **`if ! cmd`** ⇒ **67/67
+    LỌT**; kiểu **`cmd || rc=$?`** ⇒ **67/67 LỌT**; kiểu chính tắc ⇒ 66/67 ĐỎ `t64` (bắt được).
+    Đúng hình dạng "danh sách CẤM không bao giờ đủ" của `CLAUDE.md`. Đo nền: **9** lời gọi
+    `bao_chan` vs **8** khối `set +e` — chênh đúng 1, là nhánh `case "$ID"` của P2 thứ nhất.
+- id: bo-dem-D-nguoi-giu-kho-QUYET-khong-tang
+  noi_dung: >-
+    Reviewer TÁCH câu hỏi D lần 4 làm hai trục và TỪ CHỐI tự quyết. **Trục vế: KHÔNG phải D** —
+    nhãn chỉ có hai nhưng `t66` tính HAI boolean độc lập (`co_post` theo vị trí POST, `da_mark`
+    theo vị trí `mark`) nên tập vế thực tế phân BA lớp; chiều ngược của `M4` chứng minh trục thứ
+    hai có răng. **Trục ĐƠN VỊ guard: đúng hình dạng D lần 1–2** (câu kiểm chứng ở độ phân giải
+    KHỐI trong khi thứ được khẳng định sống ở độ phân giải NHÁNH). Reviewer nêu thẳng rằng nếu
+    đọc bộ đếm theo HÌNH DẠNG thì đây là **D = 4** và chốt đã đăng ký của `r6` biến verdict thành
+    `dung_lai`. **Người giữ kho quyết: KHÔNG tăng bộ đếm** — lựa chọn "guard = khối `set +e`" là
+    của `r5`/Q25, đã qua hai lượt review, không phải nước đi mới của lượt 6; cái mới chỉ là một
+    nhánh sót chưa khai. Bộ đếm D giữ **3**.
+- id: hai-chot-rieng-cua-luot-6-KHONG-keu
+  noi_dung: >-
+    `M4` giết `T67` (đo lại độc lập: 64/67, ĐỎ `t51 t63 t67`), và KHÔNG guard nào có vế bất khả
+    thi. Hai chốt DỪNG mà `r6` đăng ký riêng cho lượt 6 đều không kích hoạt.
+- id: HOI-QUY-9-dong-xoa-tung-dong-co-ly-do
+  noi_dung: >-
+    Reviewer rà từng dòng trong 9 dòng bị xoá: cả 9 là VIẾT LẠI TẠI CHỖ, không dòng nào mất chức
+    năng. Hai đường lùi thêm vào `gh_gia.py` KHÔNG phải đồ giả diễn kịch bản — chúng chỉ hiện khi
+    guard bị GỠ, và khi ấy `gh` THẬT SỰ đã được gọi cho lease đó, tức chúng giữ TRẠNG THÁI cho
+    quan sát được. Bộ ca 63 → 67, không ca nào bị xoá hay đổi tên.
+- id: NGAN-SACH-ba-ban-va-LOT
+  noi_dung: >-
+    Reviewer trả lời đúng câu người giữ kho hỏi: ba bản vá cộng lại ≈ **15 dòng** (9 + 2 + 4),
+    LỌT trần còn **27** (`+633/660`). KHÔNG cần nới trần cho lượt 7 — lần đầu trong packet này.
+- id: reviewer-KHAI-pham-vi-KHONG-do
+  noi_dung: >-
+    Reviewer nói thẳng: ngoài delta, họ KHÔNG rà nội dung `ops/lease_publish.py` (+105/−7) và
+    phần YAML (+70/−8) của các lượt trước — chỉ đột biến chúng. Và mọi lượt đều đi qua đồ giả,
+    chưa đo `gh` thật. Ghi ra để `cross_approved` (nếu có) không bị đọc rộng hơn thực tế.

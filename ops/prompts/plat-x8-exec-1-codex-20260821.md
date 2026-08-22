@@ -33,8 +33,8 @@
 Bạn là NGƯỜI THI CÔNG packet này. Reviewer sẽ là `claude` — khác họ model, tiêu chí N14 thoả.
 
 **ĐẶC TẢ CÓ THẨM QUYỀN là `ops/specs/plat-x8.md`**, băm
-`3c9bff4f5410040948de53d6e18747f56b54cebd1c19bf18b758b07a9d395735` — **BẢN 3h**, 22-08-2026.
-Bản 3g (`f3a2f5595120…`), 3f (`497c68360de7…`), 3e (`ce14fb0b75e4…`), 3d (`f7f8e6209e4f…`), 3c (`182ea7621d02…`), 3b (`308d0cf44fc1…`) và mọi bản trước KHÔNG còn hiệu lực. **Đặc tả vẫn mang hộp ⛔ ĐỪNG CẤP
+`ca852d95ab598de9f2fbbfcfaf3a4e0b3383540a9937e415fb13441fece0712c` — **BẢN 3i**, 22-08-2026.
+Bản 3h (`3c9bff4f5410…`), 3g (`f3a2f5595120…`), 3f (`497c68360de7…`), 3e (`ce14fb0b75e4…`), 3d (`f7f8e6209e4f…`), 3c (`182ea7621d02…`), 3b (`308d0cf44fc1…`) và mọi bản trước KHÔNG còn hiệu lực. **Đặc tả vẫn mang hộp ⛔ ĐỪNG CẤP
 LEASE** — đọc hộp trước khi làm bất cứ gì với prompt này. Prompt này KHÔNG chép lại đặc
 tả — chép là dựng hai bản trôi lệch. Đọc đặc tả TRƯỚC, rồi đọc prompt này để biết nếp của kho.
 Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
@@ -44,7 +44,7 @@ Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
 | trường | giá trị |
 |---|---|
 | packet | `#225` — `[PLAT-X8]` |
-| đặc tả | `ops/specs/plat-x8.md` — bản **`3h`** (băm ở trên; **kiểm bằng `sha256sum` trước khi đọc**). Các bản trước (`9cb54a2e…`, `b88c53df…`, `328a74fa…`, `308d0cf4…`, `182ea762…`, `f7f8e620…`) KHÔNG còn hiệu lực |
+| đặc tả | `ops/specs/plat-x8.md` — bản **`3i`** (băm ở trên; **kiểm bằng `sha256sum` trước khi đọc**). Các bản trước (`9cb54a2e…`, `b88c53df…`, `328a74fa…`, `308d0cf4…`, `182ea762…`, `f7f8e620…`) KHÔNG còn hiệu lực |
 | write set | `ops/lease_publish.py` · `ops/lease_publish_test.py` — **ĐÚNG hai tệp** |
 | base | xem `base_sha` trong lease — neo vào `master` sau khi PR `#226` merge |
 | nhánh | `codex/plat-x8-exec-1` |

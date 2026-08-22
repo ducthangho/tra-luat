@@ -56,6 +56,11 @@
 # `revision: 1 → 2`, hai băm đổi, lý do ghi ở đây, và bản chiếu trên `#225` sẽ có comment thứ hai.
 # `posted_comment_id` bên dưới trỏ bản chiếu của revision 1 — **băm trong comment ấy đã CŨ**.
 #
+da_bi_thay_the: plat-x8-exec-2r3-codex-20260822
+da_bi_thay_the_ly_do: >-
+  HẾT HIỆU LỰC ~16:2xZ 22-08. Prompt nó neo (`plat-x8-exec-2r2-…md`) CHÉP LẠI danh tính của lease
+  và chép bản CŨ (`…exec-2`, comment 5380905569) — executor codex bắt được và DỪNG trước khi làm gì.
+  GIỮ nguyên trạng làm hồ sơ; đã đăng comment 5381339909. Lease hiệu lực: `…-2r3`.
 schema_version: 2
 event: executor_lease_granted
 packet_issue: 225

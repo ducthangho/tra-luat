@@ -1,0 +1,289 @@
+# Lease EXECUTOR — `PLAT-X8` (#225), LƯỢT 2 **REVISION 2** (`r2`), provider `codex`.
+#
+# VÌ SAO ĐỔI `lease_id` CHỨ KHÔNG SỬA TỆP CŨ: chốt chống đăng trùng của `ops/lease_publish.py` trả
+# `rc=9` cho một `lease_id` đã có `posted_comment_id` — đúng thiết kế, đăng hai lần cùng một id là
+# làm sổ nói hai điều. Nên revision đi bằng **id mới hậu tố `r2`**, theo tiền lệ
+# `ag-t0-01b-exec-1r2-antigravity-20260822`. Tệp cũ `plat-x8-exec-2-codex-20260822.yaml` GIỮ LẠI
+# nguyên trạng làm hồ sơ (nó đã đăng, comment 5380905569) và mang cờ `da_bi_thay_the`.
+# Hai tệp cùng khai `write_set` KHÔNG phải hai writer: tệp cũ đã bị thay thế, đọc `da_bi_thay_the`. Nền: OpenAI Codex CLI.
+#
+# LƯỢT 2, KHÔNG PHẢI KHÔI PHỤC LƯỢT 1. Lease lượt 1 (`plat-x8-exec-1-codex-20260821`, commit
+# `3c21bcd8`) đã bị RÚT — biên bản `ops/RUT_LEASE_PLAT_X8_20260821.md`. Lý do rút: đặc tả nó neo
+# đã hết hiệu lực, và một va chạm write set SỐNG bị bỏ sót lúc cấp. Đây là lease MỚI, đếm lại từ
+# `attempts_used: 0`; đừng cộng dồn với lượt 1.
+#
+# VÌ SAO CẤP ĐƯỢC BÂY GIỜ — đo, không suy:
+#   `#238` land `563e0eb8` lúc 11:58:18Z 22-08 (PR #246). Hiện vật trên master, không phải lời
+#   khai: `ops/lease_publish_test.py` có 73 ca, gồm cả `t43`–`t68` của `#227` lẫn `t69`–`t73` mới.
+#   Quét lease TOÀN REF lúc **14:09:32Z**, tức NGAY TRƯỚC khi ký tệp này (162 ref, hai nguồn
+#   `ls-remote`/`for-each-ref` KHỚP, 114 blob / 104 tệp lease phân biệt, `KHÔNG_ĐO_ĐƯỢC = 0`):
+#   22 lease chạm `ops/lease_publish*`, **9 chưa hết hạn**, và **cả 9 thuộc hai packet ĐÃ LAND**
+#   (`LEASE-DANG-DUNG-MOT-LAN` = `#227` · `LEASE-DANG-WINDOWS` = `#238`) ⇒ **0 lease CÒN HIỆU LỰC**.
+#
+# ĐỌC KỸ CHỖ NÀY TRƯỚC KHI HOẢNG: chín lease kia CHƯA HẾT HẠN, cái muộn nhất tới
+# `2026-08-23T15:00:00Z`. Ai quét bằng tiêu chí "chưa hết hạn = đang giữ" sẽ thấy CHỒNG LẤN và
+# tưởng lease này sai. Không sai: **"chưa hết hạn" KHÔNG phải "còn hiệu lực"**, và KHÔNG trường nào
+# trong tệp lease nói ra điều đó — phải đi tìm HIỆN VẬT của packet trên master. Issue thì vẫn `open`
+# cả sau khi land, nên hỏi Issue là hỏi sai chỗ. Chín quyền ghi còn sống sau khi việc đã xong chính
+# là nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong` đo được thành số.
+#
+# VÀ CON SỐ 14:09Z NÀY CŨNG SẼ CHẾT. Nó đã tự đổi 10 → 9 trong 68 phút (`lease-dang-exec-2` hết hạn
+# 13:30Z), và hai lần trước đó đổi trong 20–30 phút. Quét đủ ref là CẦN, không ĐỦ. Ai cấp lease kế
+# tiếp: quét lại NGAY TRƯỚC lúc cấp, đừng chép số ở đây.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên `#225` chỉ là bản chiếu do
+# `.github/workflows/ops-publish-lease.yml` đăng khi tệp này được đẩy lên nhánh `ops/**`.
+#
+# NHỚ ĐÓNG NHÁY cho mọi giá trị chứa `#`: không nháy thì `#` bắt đầu CHÚ THÍCH YAML và cắt cụt giá
+# trị — đã mất dữ liệu IM LẶNG một lần ở lease exec-4 của wp55.
+
+# ══ REVISION 3 (22-08-2026 ~16:2xZ) — CODEX DỪNG ĐÚNG, VÀ NÓ ĐÚNG ══
+#
+# Lượt gọi executor đầu tiên chạy **36 giây**, `trang_thai=xong`, `ma_thoat=0`, **0 dòng diff**.
+# Hai trường sổ xanh mà việc chưa làm — đúng ca `docs/GOI_AGENT_DA_NEN.md` đã ghi; thứ tố cáo là
+# THỜI LƯỢNG và KÍCH THƯỚC ĐẦU RA, không phải mã thoát.
+#
+# Codex dừng vì prompt r2 gọi lease hiện hành là `plat-x8-exec-2-codex-20260822` và dẫn
+# `posted_comment_id: 5380905569`, trong khi lease có thẩm quyền là `…-2r2` với `5381339909`.
+# Nó DỪNG, chưa đọc đặc tả, chưa sửa tệp, chưa commit. **Fail-closed hoạt động đúng.**
+#
+# NGUYÊN NHÂN CẤU TRÚC: prompt CHÉP LẠI danh tính của lease. Chuỗi thật trong một giờ:
+# `…exec-2` (rev1) → `rc=9` chống đăng trùng buộc đổi id thành `…exec-2r2` → prompt vừa viết xong
+# lập tức nói dối. Vá bằng cách "nhớ cập nhật cả hai" là mời hình dạng ấy quay lại.
+# CHỮA: prompt r3 BỎ HẲN tên lease, revision, `posted_comment_id`, hạn chót — đọc ở TỆP LEASE.
+# **Hai tài liệu cùng chép một sự thật thì sẽ trôi lệch, và bên quên cập nhật là bên nói dối.**
+#
+# ══ REVISION 2 (22-08-2026 ~15:5xZ) — VÌ SAO, ĐỌC TRƯỚC KHI SO BĂM VỚI BẢN CHIẾU TRÊN #225 ══
+#
+# Revision 1 neo đặc tả BẢN 4 và prompt `f74adeab…`. Cả hai HỎNG, bắt được lúc sắp giao prompt cho
+# executor — TRƯỚC khi codex chạy dòng nào:
+#   · Bản 4 khai *"sửa mười ba chỗ: xong"* mà BỎ SÓT ba chỗ mà chính hộp ⛔ liệt kê là việc phải làm
+#     KHI `#238` land: §0 bảng đo `42/42`, §5 mục 9, và **§6 `A9` sàn `N >= 42`**. Sàn ấy nằm **31 ca
+#     DƯỚI** thực tế (73) ⇒ một lượt xoá 31 test vẫn qua nghiệm thu. Đó là sàn CHẾT.
+#   · Prompt `f74adeab…` chỉ được đổi băm ở MỘT dòng, nên vẫn ghi *"CHƯA CÓ HIỆU LỰC — ĐỪNG DÙNG
+#     NGUYÊN TRẠNG"*, *"chưa cấp lease được"*, nhánh `codex/plat-x8-exec-1`, sàn `N >= 42`.
+#
+# NGUYÊN NHÂN GỐC, một câu: neo lại theo **BĂM** thì `grep` băm tìm được mọi chỗ TRÍCH băm, nhưng câu
+# khẳng định **TRẠNG THÁI** viết bằng CHỮ thì `grep` băm KHÔNG BAO GIỜ thấy. **Quét theo băm không
+# thay được quét theo TRẠNG THÁI.**
+#
+# Đây là lần ĐẦU packet này phải sửa đặc tả sau lưng một lease ĐANG SỐNG — lease lượt 1 từng khoe
+# *"chưa lần nào phải sửa sau lưng một lease đang sống"*. Nên nó đi qua REVISION, không sửa im lặng:
+# `revision: 1 → 2`, hai băm đổi, lý do ghi ở đây, và bản chiếu trên `#225` sẽ có comment thứ hai.
+# `posted_comment_id` bên dưới trỏ bản chiếu của revision 1 — **băm trong comment ấy đã CŨ**.
+#
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 225
+packet_id: PLAT-X8
+phase_key: PLAT-X8
+revision: 3
+generation: 2
+lease_id: plat-x8-exec-2r3-codex-20260822
+thay_the_lease: plat-x8-exec-2r2-codex-20260822        # r2 thay luot 2 rev1; rev1 thay plat-x8-exec-1 (da rut)
+
+role: executor
+provider: openai_codex
+executor: codex
+execution_surface: codex_cli
+model: gpt-5.6-sol
+reviewer: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+# ══ NGOẠI LỆ `ADR-0045` §2 — KHỐI MÀ LƯỢT 1 THIẾU, VÀ LÀ LÝ DO DUY NHẤT LƯỢT NÀY KHÁC LƯỢT 1 ══
+#
+# `docs/PROTOCOL_DA_PHIEN.md` §8 mặc định *"Codex chỉ nhận Packet routine/systemic nhỏ"*. Packet này
+# là `sensitive`. `ADR-0045` (Accepted 21-08, chủ kho duyệt Q8) cho phép Codex làm Executor cho một
+# packet `sensitive` **CÓ ĐIỀU KIỆN**, và đòi để lại VẾT ĐỌC ĐƯỢC BẰNG MÁY. Lượt 1 thoả ba trong bốn
+# điều kiện; thứ thiếu là chính lời khai này — `grep '0045\|ngoại lệ'` trên lease/đặc tả/prompt lượt 1
+# đều ra **0**. Cross-review lượt 1 trên PR #240 chỉ đúng chỗ hở đó (kết luận của nó — đổi executor
+# sang Claude — thì không theo, xem `ngoai_le_ADR_0045.ghi_chu`).
+ngoai_le_ADR_0045:
+  la_ngoai_le_muc_2: true
+  adr: docs/adr/0045-codex-executor-tren-packet-sensitive-la-ngoai-le-co-dieu-kien.md
+  dieu_kien:
+    a_chu_kho_chi_dinh_tuong_minh: true      # `granted_by` + `granted_on_instruction` bên dưới
+    b_reviewer_khac_nen: true                # provider `openai_codex` thi công · reviewer `claude`
+    c_human_readback_truoc_land: true        # bắt buộc; land mà thiếu readback là vi phạm ADR-0045
+    d_lease_khai_review_class: true          # `review_class` + `effective_review_class` = `sensitive`
+    e_lease_khai_day_la_ngoai_le: true       # chính khối này — thứ lượt 1 THIẾU
+  ghi_chu: >-
+    KHÔNG CỔNG NÀO CƯỠNG CHẾ KHỐI NÀY. Đo trên `origin/master` `08bb4ecd`:
+    `grep -c review_class ops/lease_publish.py` = 0 · `grep -c 0045 ops/lease_publish.py` = 0 ·
+    `docs/PROTOCOL_DA_PHIEN.md` §20 xếp `ADR-0045` đúng ô `0 cổng`. Nên đây là **PREFLIGHT THỦ CÔNG
+    của người cấp lease**, KHÔNG phải bằng chứng cổng dương tính — đừng đọc rộng hơn. Bản 3e của
+    đặc tả từng khai *"thiếu khối này ⇒ thoát khác 0"*; câu ấy SAI và đã bị cross-review lượt 2 bác,
+    nguyên nhân là đọc chữ *"Cưỡng chế:"* trong ADR thành *"đã cưỡng chế"*. Một ADR mô tả chốt CẦN
+    CÓ; chỉ MÃ mới nói chốt ĐÃ CÓ. Lời hứa fail-close cùng ca phản chứng thuộc về packet nào thật sự
+    cài chốt — không phải `PLAT-X8`, vì nó chưa có lease thì không thể tự dựng cổng chặn chính lease
+    của mình.
+  vi_sao_khong_doi_sang_claude: >-
+    Cross-review lượt 1 đề xuất đổi executor sang Claude, đọc `PROTOCOL:559` + `ADR-0041:8`. Chỗ có
+    thẩm quyền là `ADR-0045`: `ADR-0036` tự khai *"Superseded một phần bởi ADR-0041"*, và `ADR-0045`
+    chốt trên cả hai, sinh ra từ ĐÚNG tình huống này với `PLAT-X5`. Chủ kho đã chỉ định `codex` hai
+    lần (21-08 và 22-08). Thứ thiếu là VẾT, không phải người thi công — và vết ấy chính là khối này.
+    Thread review giữ MỞ để chủ kho phân xử; phiên soạn lease không tự đóng.
+
+lop_ghi_chu: >-
+  Executor KHÔNG được hạ lớp (§8:567). Muốn đổi lớp phải đi qua revision mới của lease, không đổi
+  trong lượt. Tính tay: `ops/lease_publish.py` thuộc `review/land authority` VÀ `gate lifecycle` —
+  hai mục §8:572 gọi đích danh ⇒ `sensitive`; `review_class` khai cũng `sensitive` ⇒ `max` nhất quán.
+model_ghi_chu: >-
+  Cặp `codex` (gpt) thi công · `claude` (opus) review là khác HỌ MODEL, tiêu chí N14 thoả. Cổng CHƯA
+  cưỡng chế lời khai `model` (`grep model ops/lease_publish.py` = 0); việc cưỡng chế là `PLAT-X7`
+  (#220), khai `depends_on: [PLAT-X8]`. Executor đổi model giữa chừng ⇒ phải đi qua revision mới.
+
+spec_path: ops/specs/plat-x8.md
+spec_sha256_required: d85a75d835566c902cb62fead8521ad44851baa388d65329e4c94025b9bad6ca
+spec_status: da_duyet
+spec_duyet_boi: ducthangho
+spec_duyet_luc: 'direct, in-session, 2026-08-22 (duyệt bản 4 + cấp lease: "đồng ý, tạo packet issue và lease đi")'
+spec_note: >-
+  BẢN 5. Tìm đặc tả ở `master` TRƯỚC; chưa thấy thì `git fetch origin
+  claude/phien-tra-luat-5a-handoff-9o1cqp` (PR #240, chưa merge lúc ký). Câu này cố ý đúng ở CẢ HAI
+  phía của lần merge. Thứ định danh tệp là BĂM, không phải tên nhánh — tên nhánh là thứ trôi và bị
+  xoá. Băm đã kiểm trên bản ĐÃ ĐẾN (`git cat-file -p <ref>:ops/specs/plat-x8.md | sha256sum`).
+  Bản 4 khác bản 3i ở TRẠNG THÁI, không ở yêu cầu kỹ thuật: hộp đầu đặc tả đổi từ *ĐỪNG CẤP LEASE*
+  sang *đã giải*, mục "Việc phải làm" ghi lại kết cục từng bước. §1 (Q1 thu hồi · Q2 · Q5 · Q6) và
+  §5–§10 KHÔNG đổi một chữ kể từ bản 3. Mười ba phát hiện giữ NGUYÊN VĂN trong hộp làm hồ sơ — ba
+  trong số đó là lỗi của chính phiên soạn đặc tả; đọc chúng trước khi tin bất kỳ con số nào.
+
+nguon_cap_viec: >-
+  Nợ #1 — caveat `chot-tinh-class-van-KHONG-TON-TAI` trong
+  `ops/reviews/plat-m4-human-audit-ducthangho-verdict.receipt.yaml`, và caveat
+  `packet-bi-phan-class-SAI` trong `ops/reviews/plat-m4-review-3-claude-verdict.receipt.yaml`.
+
+write_set:
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+write_set_note: >-
+  ĐÚNG hai tệp, KHÔNG đổi so với lượt 1. Trần `sensitive` của ADR-0044 là ≤3 tệp / ≤300 dòng thêm;
+  chừa suất thứ ba là CỐ Ý, để lượt vá sau verdict không phải xin mở rộng write set.
+  `derived_set` RỖNG: `ops/` là dev-side, không vào gói phát hành ⇒ không tái sinh
+  `RELEASE_MANIFEST.json`, không ghi lại golden.
+  ĐÃ ĐỔI SO VỚI LƯỢT 1 — nói thẳng: lượt 1 khai *"đây là lần ĐẦU TIÊN `ops/lease_publish.py` vào một
+  write set (0/49)"*. Mệnh đề sự kiện ấy nay SAI: `#227` mở tệp ấy trước. Đó là chỗ thứ 11 trong hộp
+  ⛔. Va chạm với `#209` · `PLAT-X7` · mục D vẫn là THEO KẾ HOẠCH, xử bằng THỨ TỰ:
+  `PLAT-X8` → `#209` → `PLAT-X7` (#220) → mục D.
+
+branch: codex/plat-x8-exec-2
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: 08bb4ecd6dbdb87267cb8179f52ac28c151eb4b9
+base_sha: 08bb4ecd6dbdb87267cb8179f52ac28c151eb4b9
+start_from_sha: 08bb4ecd6dbdb87267cb8179f52ac28c151eb4b9
+base_ghi_chu: >-
+  Base = `origin/master` lúc ký, tức SAU khi `#238` land (PR #246) và `#243` land. KHÔNG xếp tầng:
+  không mọc trên PR nào chưa merge — kể cả PR #240, dù bản 4 của đặc tả hiện chỉ nằm trên nhánh ấy.
+  Đặc tả là ĐẦU VÀO đọc theo băm, không phải mã nền, nên không cần nó có mặt trên master để bắt tay.
+  `reviewed_sha_required` bằng base vì nhánh packet chưa tồn tại; head thật sẽ neo lại ở lease
+  reviewer. ĐỦ 40 ký tự hex thường — cổng từ chối bản rút gọn, và bản rút gọn là mỏ neo GIẢ.
+
+prompt_path: ops/prompts/plat-x8-exec-3-codex-20260822.md
+prompt_sha256_required: ff01944378b0a99d374917774fa19498722df44d1fca67ad360590850d685c1e
+prompt_note: >-
+  TỆP MỚI, không phải bản sửa của prompt lượt 1. `plat-x8-exec-1-codex-20260821.md` GIỮ NGUYÊN
+  TRẠNG (`f74adeabae51…`) vì lease `plat-x8-exec-2-codex-20260822` đã ĐĂNG và neo vào đúng băm ấy.
+  Bản đầu của r2 sửa đè tệp kia và `t23` bắt ngay (*"LỆCH BĂM"*) — nó đúng: **một artefact đã bị
+  lease neo là BẤT BIẾN**. Lý lẽ *"giữ tên tệp để con trỏ cũ khỏi chết"* ở revision 1 SAI NGƯỢC:
+  con trỏ là BĂM, nên giữ tên mà đổi ruột chính là cách giết con trỏ; tên chỉ là chỗ dễ tìm.
+  Đáng ghi: `check` trên tệp lease cũ trả `rc=9` (đã đăng, bỏ qua) nên KHÔNG thấy lỗi này — chỉ
+  `t23` thấy, vì nó kiểm MỌI tệp trong `ops/leases/`, kể cả tệp đã đăng. Cổng nghiêm hơn cổng.
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-22 ("B. đồng ý, tạo packet issue và lease đi"), kèm ba lựa chọn cùng phiên: GIỮ executor `codex` + khai ngoại lệ ADR-0045 · đóng băng BẢN 4 và neo lease vào nó · cho phép đẩy nhánh `ops/**` để cổng chạy'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: false
+recorder_ghi_chu: >-
+  Phiên soạn lease này KHÔNG phải phiên thi hành — executor là `codex`, nền khác. Vai tách sạch.
+  Phiên soạn cũng không tự cấp lease được: `granted_by` phải là người giữ kho, cổng trả `rc=4` cho
+  lease tự cấp, và đó là danh sách CHO PHÉP chứ không phải danh sách cấm.
+
+leased_at_utc: '2026-08-22T14:10:00Z'
+lease_expires_at_utc: '2026-08-23T14:10:00Z'
+revision_2_luc_utc: '2026-08-22T15:55:00Z'
+revision_2_ly_do: >-
+  Đặc tả bản 4 → bản 5 (ba con số phụ thuộc `#238` bị bỏ sót, nặng nhất là sàn `A9` 42 → 73) và
+  prompt executor viết lại (bản trước còn khai *"chưa cấp lease được"* + nhánh lượt 1). Hạn chót
+  KHÔNG dời — revision không mua thêm thời gian.
+run_minutes: 90
+cua_so_chong_lan_ghi_chu: >-
+  Cửa sổ chồng lấn với lease CÒN HIỆU LỰC = 0 (đo 14:09:32Z, xem đầu tệp). Chồng lấn với lease
+  CHƯA HẾT HẠN nhưng đã chết = 9, cái muộn nhất tới `2026-08-23T15:00:00Z` — đây là nợ thu hồi
+  lease, không phải va chạm writer. Không cần dời hiệu lực.
+
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+review_calls_limit: 2
+review_calls_used_truoc_luot_nay: 0
+ngan_sach_ghi_chu: >-
+  Trần vòng canon là 2 (`docs/adr/0043-tran-vong-review-canon-la-hai.md`). Ngân sách này là của
+  PACKET và CHƯA tiêu đồng nào — hai lượt codex đã dùng trên PR #240 là ngân sách của PR HỒ SƠ, khác
+  ví. Đừng gộp hai thứ.
+
+du_tru_khac_phuc: true
+du_tru_ghi_chu: >-
+  Còn 3 attempt và 2 vòng review tại lúc cấp ⇒ một verdict `changes_requested` ở lượt đầu vẫn còn
+  đường vá.
+
+hinh_dang_ke_thua: ops/specs/plat-x8.md#7
+hinh_dang_ghi_chu: >-
+  Hình dạng *nhận LỜI KHAI thay cho PHÉP ĐO* — biến thể của *đếm sự CÓ MẶT thay vì KHẢ NĂNG*, lần
+  thứ 7; chi tiết §7 đặc tả, KHÔNG chép lại đây để hai bản khỏi trôi lệch.
+  CỘNG MỘT CA MỚI đo được trong lượt cấp này, cùng họ: phiên điều phối canh `#238` bằng
+  `grep -c '^RC_' ops/lease_publish.py` suốt BỐN phiếu hẹn, tin rằng `6` nghĩa là *chưa land*. Đo lại
+  mọi mốc — `3f641673`=6 · `b88744ea`=6 (`#227` land ĐẦY ĐỦ) · `2ab3560a`=6 · `195a478d`=6 · nay=6.
+  **Sáu ở MỌI trạng thái**: một hằng số mặc áo phép đo, không thể ĐỎ. Nó lại đứng cạnh một tín hiệu
+  THẬT (số ca: 42 → 68 → 42 → 73) nên cặp đôi TRÔNG như kiểm chéo hai nguồn trong khi một nguồn trơ.
+  Lần này cái trôi là tín hiệu thật nên bắt được; ngược lại thì cái trơ đã "xác nhận" kết luận sai.
+
+no_da_khai:
+  - id: PLAT-X8-bang-dung-hay-khong-KHONG-DO-DUOC
+    noi_dung: >-
+      Cổng mua tính NHẤT QUÁN, không mua tính ĐÚNG của `_BANG_LOP`. Không phép thử nào trong write
+      set biến một dòng bảng sai thành ĐỎ. Dưới bảng seed, 15/15 đường dẫn từng xuất hiện trong
+      `write_set` đều ra `sensitive`, và 6/10 lease khai lớp sẽ bị NÂNG. Người giữ kho đã có con số
+      này trên bàn 21-08 và quyết GIỮ NGUYÊN; nới bảng là packet riêng.
+  - id: PLAT-X8-reviewer-luon-sensitive-cho-toi-khi-co-trang-thai-BEN
+    noi_dung: >-
+      Q1 đã THU HỒI: lease reviewer ra `sensitive` VÔ ĐIỀU KIỆN. Giá hôm nay = 0; giá TƯƠNG LAI có
+      thật, sau khi bảng được nới. Đừng dựng lại đường kế thừa cũ — `A3`/`A13` khoá sự VẮNG MẶT của
+      nó và sẽ ĐỎ khi nó quay lại.
+  - id: PLAT-X8-Q6-that-thu-tu-cap-lease
+    noi_dung: >-
+      Q6 thắt thứ tự: executor TRƯỚC, reviewer SAU. Packet do người giữ kho tự làm executor không
+      bao giờ có lease executor ⇒ mọi reviewer lease của nó thành `sensitive`.
+  - id: PLAT-X8-canh-bao-dung-tren-du-lieu-TU-KHAI
+    noi_dung: >-
+      Cảnh báo của mục tiêu 7 đứng trên `leased_at_utc` — trường KHÔNG cổng nào kiểm, và đã tồn tại
+      một lease khai mốc ở TƯƠNG LAI mà vẫn hợp lệ. Cố ý để là CẢNH BÁO: chốt đứng trên dữ liệu tự
+      khai là chốt lừa được. Chốt thật thuộc gói spec-gate (mục D), chưa mở Issue.
+  - id: PLAT-X8-KHONG-doc-risk-va-diff-that
+    noi_dung: >-
+      §8:567 đòi BA đầu vào — `risk`, effective write set, `diff thật`. Cổng này có một rưỡi.
+      `grep '^risk:' ops/leases/` = 0 tệp. Với lease EXECUTOR, `diff thật` KHÔNG TỒN TẠI lúc cổng
+      chạy (cổng chạy lúc ĐĂNG, trước khi executor viết dòng nào) ⇒ cổng đo LỜI KHAI VỀ PHẠM VI,
+      không đo phạm vi ĐÃ XẢY RA. Trên đường REVIEWER thì exact head có thật. Chốt hậu-diff ở lượt
+      LAND là gói RIÊNG.
+  - id: PLAT-X8-schema-version-KHONG-TU-LAN
+    noi_dung: >-
+      `schema_version: 2` không tự lan. Ai quên bump được tha im lặng; mục tiêu 7 chỉ in cảnh báo.
+  - id: no-R2-KHONG-thuoc-packet-nay
+    noi_dung: >-
+      Nợ `no-R2-van-mo` chỉ kích hoạt khi packet chạm `.claude/dev/launcher*`. Write set này KHÔNG
+      chạm ⇒ nợ vẫn mở và KHÔNG phải việc của lượt này.
+  - id: SO-LEASE-KHONG-NAM-MOT-CHO
+    noi_dung: >-
+      Vẫn MỞ. Lượt cấp này lại phải quét tay 162 ref vì kho chưa có lệnh nào trả lời *"lease nào
+      đang giữ đường dẫn X"*. Biên bản `ops/RUT_LEASE_PLAT_X8_20260821.md`.
+  - id: AG-T0-01B-thu-hoi-lease-chua-co-duong
+    noi_dung: >-
+      Đo được thành số ở lượt này: 9 lease CHƯA HẾT HẠN giữ `ops/lease_publish*` mà cả 9 thuộc packet
+      ĐÃ LAND — 9 quyền ghi còn sống sau khi việc xong (lần đo trước: 5). Không trường nào trong tệp
+      lease đánh dấu "việc đã xong", nên phân biệt sống/chết phải đi tìm HIỆN VẬT trên master.

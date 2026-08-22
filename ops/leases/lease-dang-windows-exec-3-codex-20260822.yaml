@@ -1,0 +1,144 @@
+# Lease EXECUTOR — `LEASE-DANG-WINDOWS` (#238), lượt 3 — neo đặc tả r3.
+#
+# TIẾP TỤC công việc của lượt 2 (KHÔNG thay thế): lượt 2 đã chạy, đã bị review, kết luận
+# `can_sua`. Lượt này chỉ đóng HAI P1 của verdict lượt 1. Người giữ kho nới trần 90 -> 120.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 238
+packet_id: LEASE-DANG-WINDOWS
+phase_key: LEASE-DANG-WINDOWS
+revision: 3
+generation: 1
+lease_id: lease-dang-windows-exec-3-codex-20260822
+
+tiep_tuc_lease:
+  lease_id: lease-dang-windows-exec-2-codex-20260822
+  vi_sao: >-
+    Lượt 2 ĐÃ CHẠY và ĐÃ ĐƯỢC REVIEW (verdict `can_sua`,
+    38b4986dac49c0207cd6c6ccf68e169491065552288169a790c0e7ba49589523, đo trên edc1906c).
+    W3'/W4/W5 ĐẠT có bằng chứng sơ cấp — GIỮ NGUYÊN, không làm lại. W6/W7/W8 KHÔNG ĐẠT.
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+
+spec_path: ops/specs/LEASE-DANG-WINDOWS-r3.md
+spec_sha256_required: 130b6d29919db327ccc2d9ad8d53910e5dd74b2eef0f607d3e59a707647de40d
+spec_ke_thua:
+  - {path: ops/specs/LEASE-DANG-WINDOWS.md, sha256: f555cbe1a368c12040726dd706ce25ed8dd4041bd8a2f840590810a3c3908a26}
+  - {path: ops/specs/LEASE-DANG-WINDOWS-r2.md, sha256: d9da7705617c95c8dc394d773de8456712d3cc2a2975e5903e8cb28c934c0d83}
+spec_note: >-
+  r3 THAY W6/W7 của r2 bằng W6'/W7', thêm W9 và Q8-Q11. Mọi thứ r3 không nêu thì r2 (rồi r1)
+  nguyên hiệu lực. W3'/W4/W5 đã ĐẠT ở lượt 2 — KHÔNG đo lại.
+
+verdict_can_dong:
+  path: ops/reviews/lease-dang-windows-review-1-claude-verdict.md
+  sha256: 38b4986dac49c0207cd6c6ccf68e169491065552288169a790c0e7ba49589523
+  phai_dong: ['P1-1', 'P1-2']
+  co_y_de_ngoai: ['P2-1', 'P2-2', 'P2-3', 'P2-4', 'P3-1', 'P3-2', 'P3-3']
+  de_ngoai_vi_sao: >-
+    Ngân sách. Reviewer định giá P1 ~29 dòng, P1+P2 ~54. Người giữ kho chọn trần 120 (=90+30),
+    tức CHỈ đủ cho hai P1. Bảy mục còn lại vào packet kế tiếp CÓ TÊN — KHÔNG được nhặt thêm
+    "vì tiện tay": mỗi mục nhặt thêm là một mục không có ai review đúng phạm vi của nó.
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 120
+  don_vi: 'dòng THÊM theo `git diff --numstat ba82b06f..HEAD` — phần MỚI, không tính phần khôi phục'
+  da_dung: 90
+  con_lai: 30
+  ghi_chu: >-
+    r3/Q11 nới 90 -> 120 theo quyết định người giữ kho. Trần CỐ Ý CHẬT (còn 1 dòng dư sau ~29
+    dòng của hai P1) để không ai lấy chỗ thừa làm cớ nới phạm vi.
+
+branch: codex/lease-dang-windows-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: edc1906cf01fcceb15c646e1fdc4fcd8957644ed
+start_from_sha: edc1906cf01fcceb15c646e1fdc4fcd8957644ed
+base_sha: 2ab3560a8a406c1b436221fb3c6d23234aefdde0
+base_ghi_chu: >-
+  start_from = HEAD của lượt 2 (edc1906c) — cây ĐÃ có bằng chứng Windows XANH: run
+  32558427472, run_attempt 1, total_jobs 2, failed_jobs 0. Ngân sách vẫn đo từ ba82b06f.
+
+prompt_path: ops/prompts/lease-dang-windows-exec-3-codex-20260822.md
+prompt_sha256_required: 5e43afc9fce57b8c78ad70ec283c9bc67daa9874359ce8c550ca442124c0ef8b
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-22 ("Noi tran 90->120, va hai P1")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_note: >-
+  Phiên điều phối là bên VIẾT r2 — tức bên gây ra cả bốn biểu hiện hình dạng E mà verdict lượt 1
+  đếm. Q8 của r3 là bản tự sửa của chính nó. Reviewer lượt 2 soi ĐẶC TẢ r3 TRƯỚC, bản vá sau.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-22T15:00:00Z'
+lease_expires_at_utc: '2026-08-23T15:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 3
+executor_calls_limit: 4
+
+reviewer_provider: claude
+review_rounds_limit: 2
+review_calls_limit: 3
+
+muc_tieu:
+  - "Q9 (P1-1): BoQuaNen mang mỏ neo (tệp, tên job); main() ĐO LẠI lý do, KHÔNG nhận lời khai của ca; dẫn xuất rỗng ⇒ ca xếp HỎNG"
+  - "Q10 (P1-2): ca TỰ SINH chuỗi runs-on lúc chạy, đòi chính chuỗi ấy trong lý do; đối chứng nhãn không-ubuntu ⇒ lý do rỗng"
+  - "Q8/W9: với mỗi tiêu chí trong {W6', W7', W8}, gỡ ca gọi THẲNG hàm trợ giúp rồi chạy lại dưới đột biến của tiêu chí ⇒ vẫn ≥1 ca đỏ"
+
+gate_bat_buoc:
+  - 'python3 ops/lease_publish_test.py -> rc=0, N/N hai số BẰNG NHAU'
+  - 'CÙNG suite với ba biến GitHub đặt và `gh` VẮNG -> N/N y hệt'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'shellcheck PHẢI CÓ MẶT khi chạy actionlint; thiếu ⇒ in KHÔNG ĐO ĐƯỢC và ĐỎ'
+  - "P1-1 phản chứng: `raise BoQuaNen(\"khong lien quan runs-on\")` (mỏ neo trỏ job KHÔNG ubuntu-only, hoặc không mỏ neo) ⇒ suite PHẢI ĐỎ"
+  - "P1-2 phản chứng: thay lời đọc YAML bằng `job = job or {'runs-on': 'ubuntu-latest'}` ⇒ suite PHẢI ĐỎ"
+  - "P1-2 phản chứng 2: YAML đổi sang matrix[ubuntu,windows] KÈM hằng số trá hình ⇒ suite PHẢI ĐỎ"
+  - "W9 cho W6' ⇒ còn ≥1 ca đỏ sau khi gỡ ca gọi thẳng"
+  - "W9 cho W7' ⇒ còn ≥1 ca đỏ sau khi gỡ ca gọi thẳng"
+  - 'W9 cho W8 ⇒ còn ≥1 ca đỏ sau khi gỡ ca gọi thẳng; KHÔNG đỏ được thì khai W8 KHÔNG ĐẠT và DỪNG'
+  - 'M1-M4, A5, D3/D4, tám đột biến gỡ guard của #227 VẪN phải giết'
+  - 'git diff --numstat ba82b06f..HEAD -> <= 3 tệp, <= 120 dòng thêm'
+
+nghiem_thu_THAT_nam_ngoai_sandbox:
+  gi: "W3' — lượt workflow_dispatch THẬT trên head MỚI, job windows-latest XANH"
+  ai_chay: 'phiên điều phối (executor KHÔNG gọi được workflow_dispatch từ sandbox)'
+  ghi_chu: >-
+    W3' ĐÃ ĐẠT trên edc1906c (run 32558427472). Head đổi ⇒ bằng chứng cũ KHÔNG chuyển sang head
+    mới. Phải chạy lại trên head mới TRƯỚC khi land — #227 revert vì đúng chỗ này.
+
+khong_duoc_dung:
+  - 'bảy mục P2/P3 của verdict lượt 1 — chúng thuộc packet kế tiếp'
+  - 'hai finding của verdict #227 lượt 5 — chúng ở #235'
+  - 'ops/specs/**'
+  - 'ops/reviews/**'
+
+dieu_kien_dung:
+  - 'Ngân sách sẽ vượt 120 dòng thêm hoặc 3 tệp ⇒ DỪNG, báo SỐ DÒNG ĐO ĐƯỢC cần thiết. CẤM thu nhỏ phép đo cho vừa ngân sách.'
+  - "W9 không đỏ được cho một tiêu chí ⇒ khai KHÔNG ĐẠT cho tiêu chí ấy và DỪNG. CẤM thay bằng phép đo dễ hơn."
+  - 'Hình dạng A lần 8 · B lần 3 · C lần 2 · D lần 4 · E lần 4 · F lần 3 ⇒ DỪNG, không vá'
+
+handoff_bat_buoc:
+  path: ops/handoff/lease-dang-windows-exec-3-codex-handoff.md
+  vi_sao: >-
+    Verdict lượt 1 bắt handoff lượt 2 QUY KẾT SAI ("W6 | 1/1 | t70" — t70 không đỏ ở bất kỳ đột
+    biến runs-on nào; ca duy nhất đỏ là t72). Handoff lượt này phải nêu VỚI MỖI tiêu chí: đột
+    biến · TÊN CA đỏ · số N/N — và tên ca phải là tên ca ĐÃ ĐỎ THẬT, không phải ca ta nghĩ sẽ đỏ.

@@ -47,10 +47,12 @@ verdict_sha256: b5e9ea81f2d1669b15f29c1f2b73bcc86ba847adcb809e096a0180fb815e486d
 verdict_bytes: 6060
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: null
+evidence_url: https://github.com/ducthangho/tra-luat/blob/d7a1ea41405969473886cc2e0b565b7d64253cea/ops/reviews/plat-x8-review-1-claude-verdict.md
 evidence_url_ghi_chu: >-
-  Điền sau khi biết commit ĐẦU TIÊN chứa tệp verdict — một commit không thể chứa băm của chính nó,
-  nên biên nhận này ghi làm HAI commit, đúng tiền lệ `plat-m4-review-3`.
+  Trỏ commit ĐẦU TIÊN chứa tệp verdict (`d7a1ea41`) — một commit không thể chứa băm của chính nó,
+  nên biên nhận ghi làm HAI commit. Bản đầu để `null` và `t26` ĐỎ ngay: cổng đòi trường này phải là
+  https, đúng chỗ bản gốc từng để `pending-owner-post`. Tiền lệ `plat-m4-review-3` để trống được là
+  vì `t26` chưa tồn tại lúc ấy — chép tiền lệ mà không chạy cổng là cách bản này đỏ.
 projection_url: https://github.com/ducthangho/tra-luat/pull/248#issuecomment-5381470367
 projection_ghi_chu: >-
   Comment trên PR là BẢN CHIẾU. Nguồn có thẩm quyền là tệp verdict trong kho, neo bằng

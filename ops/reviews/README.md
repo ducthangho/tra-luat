@@ -126,6 +126,7 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 
 | tệp verdict | biên nhận | lease | kết luận | head đã review | byte |
 |---|---|---|---|---|---|
+| [`plat-x8-review-1-claude-verdict.md`](plat-x8-review-1-claude-verdict.md) | [`.receipt.yaml`](plat-x8-review-1-claude-verdict.receipt.yaml) | _KHÔNG CÓ lease reviewer — xem `lease_ghi_chu`_ | `changes_requested` — 2×P1 (cả hai do `codex` tìm, người review đọc qua) | `67a7fbe029d3fc9904322eda2452ce8deb5096c3` | 6060 |
 | [`lease-dang-review-5-claude-verdict.md`](lease-dang-review-5-claude-verdict.md) | [`.receipt.yaml`](lease-dang-review-5-claude-verdict.receipt.yaml) | `lease-dang-review-5-claude-20260822` | **`dung_lai`** | `ba82b06f` | 10084 |
 | [`lease-dang-review-4-claude-verdict.md`](lease-dang-review-4-claude-verdict.md) | [`.receipt.yaml`](lease-dang-review-4-claude-verdict.receipt.yaml) | `lease-dang-review-4-claude-20260822` | `changes_requested` | `6eaa3755` | 11044 |
 | [`lease-dang-review-3-claude-verdict.md`](lease-dang-review-3-claude-verdict.md) | [`.receipt.yaml`](lease-dang-review-3-claude-verdict.receipt.yaml) | `lease-dang-review-3-claude-20260821` | `changes_requested` | `9f5b08e8` | 13554 |

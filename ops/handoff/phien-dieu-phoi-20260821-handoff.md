@@ -52,7 +52,10 @@ pr: 230                            # https://github.com/ducthangho/tra-luat/pull
 > | 3b | `308d0cf44fc1…` | **bản dùng được** — bản 3 + hộp cảnh báo; nội dung yêu cầu không đổi |
 >
 > Nghĩa là **§3 dưới đây đã lệch một phần**: Q1 không còn là quyết định đang có hiệu lực. Hai thứ
-> còn lại (cấp lease, nới bảng phân loại) vẫn chờ. Đọc đặc tả bản 3 làm chuẩn, đừng đọc bản này.
+> còn lại (cấp lease, nới bảng phân loại) vẫn chờ. Đọc **bản 3b** làm chuẩn — băm
+> `308d0cf44fc1fcca75bc4d8edb014f560293622334ef25cc621c1e7afe3b2129`, đúng giá trị ở hàng
+> `spec_sha256` của khối neo trên; hai chỗ ấy phải luôn khớp nhau. **Bản 3 (`328a74facb84…`) đã
+> HẾT HIỆU LỰC** — đọc nó là bỏ qua hộp ⛔ ĐỪNG CẤP LEASE ở đầu đặc tả. Đừng đọc bản bàn giao này.
 
 **PR #230 đang mở** (mở 22-08-2026 theo yêu cầu người giữ kho) — xem trường `pr:` trong khối neo,
 và đọc lịch sử review của nó trước khi làm gì trên nhánh này. Nhánh đã đẩy, spec tra được bằng

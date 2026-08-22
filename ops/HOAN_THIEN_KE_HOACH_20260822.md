@@ -390,15 +390,51 @@ bộ test **có** lưới: `thieu = [t for t, _ in cap if t not in goc]` in Đ�
 
 ---
 
+### 4.3 Hai luật của protocol bị chính phiên này vượt — và cả hai đều là ô `0 cổng`
+
+Không nằm trong bản giao việc; lộ ra vì §20 buộc phải điền cột "cổng đã ĐO" cho từng ADR, rồi hai
+trong số các ô `0 cổng` ấy hoá ra đang bị vượt **ngay trong phiên đang viết bảng**.
+
+**(a) Trần lượt review — `ADR-0043`, `§20` ghi `0 cổng`.** `docs/PROTOCOL_DA_PHIEN.md:750` và `:756`
+đặt trần **hai** lượt Codex review trên một PR, và chặn sẵn đường lách (*"không cho phép gọi thêm
+bằng prompt/phiên khác"*). Đo trên PR #233: **3** lời gọi `@codex review`, **4** head đã được
+review, **5** finding, **0** lần Review Rescue Checkpoint. Vượt gấp đôi, không gì kêu.
+
+Đáng chú ý không phải con số mà là **vì sao nó không tự lộ**: mỗi lượt đều hợp lý tại chỗ — có
+finding thật, vá xong head đổi, và **`§1` bất biến 9 đòi review lại head mới**. Bất biến 9 và trần
+review **kéo ngược chiều nhau**, cùng nằm trong một tệp, không luật nào nhắc luật kia. Người đọc
+tuần tự sẽ tuân thủ bất biến 9 và vượt trần mà không thấy mình đang vượt.
+
+Vì vậy tôi **không gọi lượt review thứ năm** cho head `225d47d009`, dù nó có thay đổi đáng review.
+Quyết định thuộc người giữ kho: hoặc mở Review Rescue Checkpoint theo `ADR-0037`, hoặc khai một
+ngoại lệ có ghi chép. Ghi thành nợ có tên `REVIEW-BUDGET-KHONG-CO-CONG` (`ops/NO_KY_THUAT.md` §15).
+
+**(b) Thẻ HTML trong comment bị nuốt — không phải luật protocol, là một tầng không ai coi là tầng.**
+Đăng một reply lên #233: **gửi ~5000 ký tự, đến 466**; comment dừng giữa một dòng bảng. Bộ lọc HTML
+của GitHub gỡ thẻ `div` rồi nuốt sạch phần sau thẻ `script` (không có thẻ đóng) — **dấu nháy ngược
+không che được**, y hệt bài học dấu bỏ-qua-CI. Và nó **đã xảy ra trước đó bốn giờ mà không ai thấy**:
+comment `5378121537` dài 517 ký tự, cắt giữa câu. Một comment bị cắt trông y hệt một comment ngắn.
+
+Chốt duy nhất tin được là chốt (a) đã có sẵn trong `CLAUDE.md`: **đo thứ ĐÃ ĐẾN**. Bản đăng lại đo
+được **5300 ký tự, kết thúc đúng ở dòng footer**. Ghi thành nợ `THE-HTML-TRONG-COMMENT-BI-NUOT`
+(§16) — máy chưa canh được, chưa có cổng nào đọc lại comment vừa đăng.
+
+**Vì sao hai mục này thuộc về hồ sơ Việc A, không phải chuyện bên lề:** cả hai là bằng chứng cho
+biết ô `0 cổng` trong `§20` **không phải một ô trống**. Nó là một luật được viết ra, được nhắc ở hai
+chỗ, và bị vượt mà không gì kêu. Bảng `§20` sinh ra để đếm đúng thứ đó, và ngay lượt đầu nó đã chỉ
+vào một luật đang bị vi phạm bởi chính người điền bảng.
+
+---
+
 ## 5. Khai VƯỢT NGƯỠNG — theo đúng cửa thoát của `ADR-0044`
 
-Thay đổi của phiên này: **6 tệp · +1755/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
+Thay đổi của phiên này: **6 tệp · +1868/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
 là **≤ 3 tệp và ≤ 300 dòng thêm**. Khai thay vì lờ đi, và tách hai phần vì rủi ro của chúng khác họ:
 
 | phần | tệp | dòng thêm | rủi ro |
 |---|---|---|---|
 | **mã + phản chứng** | `.claude/dev/packet_loop.py` · `.claude/dev/packet_loop_test.py` | +1041 | chạy sai |
-| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +714 | viết sai chữ |
+| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +827 | viết sai chữ |
 
 Đo bằng **merge-base**, không bằng `origin/master` trần — master đã tiến hai lần trong lúc phiên
 này chạy, và đo theo đầu master cho ra số âm vô nghĩa (`−5911` ở một lượt). Base là `2ab3560a`.

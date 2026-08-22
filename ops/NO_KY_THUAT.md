@@ -799,3 +799,80 @@ PY
 
 **`khong parse` phải bằng 0.** Khác 0 mà vẫn in ra con số là đúng cái bẫy đã sập ở trên: một phép đo
 bỏ sót đầu vào trông y hệt một phép đo sạch.
+
+---
+
+## 15. `REVIEW-BUDGET-KHONG-CO-CONG` — trần 2 lượt, PR này dùng 4, không gì kêu
+
+`docs/PROTOCOL_DA_PHIEN.md:750` viết thẳng: *"Hai lượt Codex review trên cùng PR là một stop
+condition riêng của review budget"*, và `:756` nói `codex_review_calls_used` **tối đa hai trên một
+PR**. Dòng ngay sau còn chặn đúng đường lách: *"không cho phép gọi thêm bằng prompt/phiên khác để
+lách trần"*.
+
+Đo trên PR #233 lúc 22-08-2026:
+
+| | số |
+|---|---|
+| lời gọi `@codex review` do phiên này đăng | **3** |
+| head khác nhau đã được codex review | **4** (`cbd14439bb` · `d17019628f` · `ef19e3b075` · `bc98b1f7`) |
+| finding codex trên PR | **5**, trên 5 thread |
+| trần theo protocol | **2** |
+| Review Rescue Checkpoint đã kích hoạt | **0 lần** |
+
+Tái lập:
+
+```bash
+# đếm lời gọi review (MCP github, method get_comments)
+#   lọc body bắt đầu bằng "@codex review"  -> 3
+#   thread có tác giả chatgpt-codex-connector -> 5 finding / 5 thread
+```
+
+**Người vi phạm là chính phiên viết mục này**, và nó không tự phát hiện — mỗi lượt đều thấy hợp lý
+tại chỗ (*"có finding thật, vá xong thì head đổi, §1 bất biến 9 đòi review lại head mới"*). Đó đúng
+hình dạng `CLAUDE.md` gọi tên: **vá tiếp lúc nào cũng có vẻ đúng vì lần nào cũng có lỗi thật** — chỉ
+khác là ở đây thứ vượt trần không phải số bản vá mà là số lượt review, và bất biến 9 (head đổi ⇒
+bằng chứng cũ hết hiệu lực) **kéo ngược chiều** với trần review. Hai luật cùng trong một tệp, không
+luật nào nhắc luật kia.
+
+**Nợ:** `ADR-0043` (trần lượt review) nằm ở `§20` với cột đo là **`0 cổng`** — không tệp cổng nào
+đọc nó. Mục này là bằng chứng cho biết `0 cổng` KHÔNG phải một ô trống trong bảng: nó là một luật
+được viết ra, được nhắc lại ở hai chỗ, và bị vượt **gấp đôi** mà không gì kêu. Trần chỉ có nghĩa khi
+có ai đó ĐẾM.
+
+**Điều kiện coi là XONG:** một cổng đọc được số lượt review đã dùng trên một PR và ĐỎ khi vượt trần,
+kèm phản chứng `rXX_` cho cả hai chiều (vượt ⇒ đỏ · trong trần ⇒ xanh) và một đột biến nới trần để
+chứng minh ca đích đang đo đúng thứ đó. Chưa ai làm; đừng đóng mục này bằng một câu trong tài liệu.
+
+---
+
+## 16. `THE-HTML-TRONG-COMMENT-BI-NUOT` — dấu nháy ngược không phải hàng rào, lần thứ hai
+
+Đăng một reply dài lên PR #233: **gửi ~5000 ký tự, đến 466**. Comment dừng giữa một dòng bảng, và
+tôi chỉ biết vì đã đọc ngược về rồi đo — đúng chốt (a) của bài học *"tầng vận chuyển cũng chuẩn hoá
+chuỗi"* trong `CLAUDE.md`.
+
+Ranh giới cắt, đo bằng `repr()` trên bản ĐÃ ĐẾN:
+
+```
+GỬI : | `<pre>` `<div>` `<script>` `<textarea>` `<p>` | `rc=0` · ... |
+ĐẾN : | `<pre>` `` `
+```
+
+Đọc ra được hai việc riêng biệt: thẻ `div` **bị gỡ** (còn trơ hai dấu nháy ngược từng bao nó), rồi
+tại thẻ `script` **toàn bộ phần còn lại biến mất** — bộ phân tích HTML nuốt tới thẻ đóng, mà không
+có thẻ đóng. **Dấu nháy ngược không che được**: bộ lọc chạy trên thân THÔ, trước Markdown.
+
+**Không phải lần đầu, và lần đầu đã đi lọt.** Comment `5378121537` trên cùng PR dài **517** ký tự và
+kết thúc giữa câu — cùng bệnh, đăng lúc 05:11, không ai thấy suốt bốn giờ. Một comment bị cắt trông
+y hệt một comment ngắn.
+
+Cùng họ với dấu bỏ-qua-CI (`CLAUDE.md`): *"GitHub khớp CHUỖI trên toàn thông điệp, không đọc
+Markdown — dấu nháy ngược không phải hàng rào"*. Chỉ khác đối tượng: ở đó là chuỗi kích hoạt trong
+commit message, ở đây là thẻ HTML trong thân comment.
+
+**Cách viết an toàn:** nêu tên thẻ **không dùng ngoặc nhọn** (`pre` · `div` · `script`), hoặc đặt
+trong khối rào — đo được là thẻ nằm trong khối rào ba dấu nháy ngược **đã đi qua nguyên vẹn** ở các
+reply trước của cùng PR. **Chốt duy nhất tin được vẫn là đo thứ ĐÃ ĐẾN**: đăng xong đọc ngược về,
+so độ dài và kiểm vài mốc cuối bài; "lời gọi trả thành công" không nói gì về thứ người đọc nhìn thấy.
+
+Máy chưa canh được mục này — chưa có cổng nào đọc lại comment vừa đăng.

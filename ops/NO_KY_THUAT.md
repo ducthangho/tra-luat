@@ -589,3 +589,65 @@ chiều: một đột biến **nới** và một đột biến **siết** đều
 thì đúng là lỗ mà cross-review 2 vừa tìm ra.
 
 **Đừng dựng lại `t42` nguyên dạng.** Ba lượt đã đo là nó thua ở thiết kế, không thua ở chi tiết.
+
+---
+
+## 12. `PLAT-X4-721-dong-chua-verdict-nao-phu` — nợ RE-AUDIT, và tài liệu đang khai là ĐÃ ĐÓNG
+
+**Sinh ra từ phép đo 22-08-2026**, khi rà bản hợp nhất `ops/THAM_DINH_KE_HOACH_20260821.md` so
+với thực tại. Chạm tệp này **ngoài packet** theo chuẩn thuận người giữ kho, in-session 22-08-2026
+(*"Cứ chạm ngoài packet, ghi nợ 721 dòng đi"*) — `ops/NO_KY_THUAT.md` thuộc write set dự kiến của
+**#209**, packet ấy `state:ready` và **0 lease**.
+
+### Đo được
+
+| phép đo | kết quả |
+|---|---|
+| `git diff --numstat 909d3e17 a09aae62` | **4 tệp, +721/-159** — đúng con số bản hợp nhất nêu |
+| `a09aae62` là tổ tiên của `master`? | **CÓ** ⇒ đã land |
+| tệp verdict `plat-x4-*` trong `ops/reviews/` trên master | **0** |
+| nhánh `ops/verdict-x4-*` trên remote | **0** (có `verdict-x5-review-1/2/3`, `verdict-m4-review-2`, `verdict-donref`, `moi-truong-review-1…10`) |
+| lease review đã cấp cho X4 | **có** — `plat-x4-review-2-codex`, `plat-x4-review-3-codex`, cùng ba nhánh `ops/lease-plat-x4`, `ops/lease-review-x4-v2`, `ops/lease-review-x4-v3` |
+| review trên PR #205 | **đúng 1**, của bot connector `chatgpt-codex-connector`, neo `d0acd79f` — **commit ĐẦU** của X4, không phải `a09aae62` |
+| `base_sha` của **cả ba** verdict `PLAT-X5` | **`a09aae62`** — cả ba |
+
+### Nợ chính xác là gì
+
+**721 dòng của `PLAT-X4` đã vào master mà không verdict protocol nào phủ.** Cả ba lượt review của
+`PLAT-X5` đều neo `base_sha: a09aae62`, tức đáy vùng review của chúng **bắt đầu ở nơi X4 kết thúc**.
+
+Lease review cho X4 **đã được cấp hai lượt** mà không để lại verdict ở đâu — không trên master,
+không trên nhánh nào. Đó là trạng thái thứ ba của kho: không phải *"chưa review"*, cũng không phải
+*"đã review"*, mà **quyền review đã tiêu mà không có hiện vật**. Review duy nhất tìm được là của
+bot connector, và bot ấy không sinh receipt, không mang `review_class`, không nằm trong ngân sách
+vòng — nó **không phải** verdict protocol.
+
+**Và điều làm nợ này khác mục 8:** `PLAT-X2` land kèm nợ re-audit một cách **có khai báo** — người
+giữ kho quyết ở Review Rescue Checkpoint, hai vòng đã chạy thật, hai finding đã đóng. Ở đây thì
+`ops/THAM_DINH_KE_HOACH_20260821.md` khai rằng chỗ trống **đã được lấp**:
+
+> *"biên nhận X5 neo `base_sha: a09aae62`, nên 721 dòng của X4 chưa verdict nào phủ — điều đó vẫn
+> đúng, và vòng 3 chính là thứ đã lấp chỗ ấy."*
+
+Vế sau **sai, đo được**: vòng 3 neo **đúng cái `base_sha` ấy** (`plat-x5-review-3-claude-verdict.receipt.yaml:22`).
+Đổi `reviewed_sha` mà giữ nguyên `base_sha` thì vùng phủ **không lùi xuống** — nó chỉ dài thêm về
+phía trước. Một nợ được ghi là đã trả thì không ai đi đòi: **nguy hơn nợ chưa ghi.**
+
+### Điều kiện coi là XONG
+
+1. Một verdict protocol phủ **đúng khoảng `909d3e17..a09aae62`** — có receipt, có `review_class`,
+   có reviewer khác nền với executor của X4. Đọc `base_sha` của biên nhận để kiểm, **đừng đọc
+   `reviewed_sha`**: chính chỗ lẫn hai trường ấy đẻ ra nợ này.
+2. Hoặc: người giữ kho quyết **miễn** re-audit, và quyết định ấy được ghi đúng khuôn mục 8 — nêu rõ
+   trần nào đã cạn và vì sao chấp nhận. Miễn thì được, miễn **im lặng** thì không.
+3. Trong cả hai đường: câu sai ở `ops/THAM_DINH_KE_HOACH_20260821.md` phải được đính chính
+   **append-only** — đã làm 22-08-2026, xem mục `ĐÍNH CHÍNH 22-08-2026` trong chính tệp ấy.
+
+### Vì sao chưa ai thấy — và chốt máy còn thiếu
+
+Không lệnh nào trong kho trả lời được *"khoảng commit nào đã có verdict phủ"*. Muốn biết thì phải
+mở từng receipt đọc `base_sha`, mà receipt nằm rải trên master lẫn nhánh `ops/**` — cùng hình dạng
+với nợ `SO-LEASE-KHONG-NAM-MOT-CHO`. Nợ này là **anh em** của nợ ấy, đổi đối tượng từ lease sang
+verdict. Lệnh cần có: `phu-boi-verdict-nao <sha-tu>..<sha-den>`, quét mọi ref, và
+**fail-close khi không fetch được ref nào** — *"không đo được"* phải ĐỎ, không được thành
+*"không có"*.

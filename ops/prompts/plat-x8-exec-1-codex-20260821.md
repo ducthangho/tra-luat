@@ -1,5 +1,19 @@
 # Prompt BẤT BIẾN — EXECUTOR `PLAT-X8` (#225), lượt 1, provider `codex`
 
+> **CHƯA CÓ HIỆU LỰC — ĐỪNG DÙNG NGUYÊN TRẠNG.** Lease neo prompt này
+> (`plat-x8-exec-1-codex-20260821`) đã bị **RÚT** ngày 21-08-2026, chưa từng được đăng; biên bản
+> `ops/RUT_LEASE_PLAT_X8_20260821.md`. Lý do: va chạm write set với `#227` trên
+> `ops/lease_publish.py` + `ops/lease_publish_test.py`, cả về cửa sổ lẫn về nội dung.
+>
+> Giữ tệp này vì phần **nếp của kho** (§3) không mất giá trị. Nhưng ba thứ trong đây sẽ SAI sau khi
+> `#227` land, và phải sửa TRƯỚC khi dùng:
+> 1. băm đặc tả ở §1 đang trỏ **bản 3** — đặc tả phải ra **bản 4**, băm sẽ đổi;
+> 2. sàn số ca ở §4 ghi **42** — sàn thật sẽ là **58** (`#227` đưa bộ test 42 → 58 ca);
+> 3. `base` sẽ là `master` SAU khi `#227` land, không phải `20c6c633`.
+>
+> Thứ tự chốt: `#227` → **`PLAT-X8` (#225)** → `#209` → `PLAT-X7` (#220) → gói spec-gate.
+
+
 Bạn là NGƯỜI THI CÔNG packet này. Reviewer sẽ là `claude` — khác họ model, tiêu chí N14 thoả.
 
 **ĐẶC TẢ CÓ THẨM QUYỀN là `ops/specs/plat-x8.md`**, băm

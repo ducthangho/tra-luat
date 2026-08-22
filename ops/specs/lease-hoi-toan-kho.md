@@ -31,9 +31,10 @@ ops/lease_publish_test.py
 Hai đường dẫn, liệt kê đủ, không ký tự đại diện.
 
 **Kích thước dự kiến — có MỐC NEO đo được, chưa có số của chính packet này.** Phạm vi tương đương gần
-nhất là `PLAT-X8` (PR #248): **cùng hai tệp**, `git diff --numstat` cho **2 tệp / +265 dòng thêm** lúc
-16:5xZ, và phiên thi hành báo đã lên **313** sau hai bản vá P1 — tức **một** mối quan tâm trên vùng này đã
-chạm trần `sensitive` của ADR-0044 (**≤ 3 tệp / ≤ 300 dòng thêm**).
+nhất là `PLAT-X8` (PR #248), **cùng hai tệp**. Đo bằng khoảng commit, không mượn lời khai của ai:
+`08bb4ecd..67a7fbe0` ⇒ **2 tệp / +265/−1**; `08bb4ecd..86a55663` (head sau hai bản vá P1) ⇒
+**2 tệp / +313/−1**. Tức **một** mối quan tâm trên vùng này đã **VƯỢT** trần `sensitive` của ADR-0044
+(**≤ 3 tệp / ≤ 300 dòng thêm**) — vượt 13 dòng, không phải "chạm".
 
 Đó là mốc neo, **không** phải số của packet này: chưa có diff triển khai nên chưa suy ra được. **Phải đo lại
 bằng `git diff --numstat` trước vòng review**, và vượt trần thì dừng để revision thiết kế hoặc khai lý do
@@ -84,8 +85,10 @@ Mỗi mục chiếu vào **một** đường dẫn trong `write_set` (L2).
 | **M4** | Ca `rXX_` + đột biến cho M1–M3 | `ops/lease_publish_test.py` |
 
 **Đơn vị của mọi con số trong đặc tả này (L1):** "lease" = **cặp (blob, đường dẫn) duy nhất** trên toàn
-bộ ref, trừ khi ghi khác. Đếm theo **đường dẫn** cho số khác — đo 22-08: 117 cặp / 100 đường dẫn, chênh
-10 là **phiên bản thừa**, không phải 10 tệp. Con số nào cũng phải đi kèm đơn vị.
+bộ ref, trừ khi ghi khác. Đếm theo **đường dẫn** cho số khác — đo 18:4xZ 22-08 trên 165 ref: **120** cặp
+/ **110** đường dẫn, chênh **10** là **phiên bản thừa**, không phải 10 tệp. Con số nào cũng phải đi kèm
+đơn vị. (Bản đầu ghi `117 / 100`: cùng chênh 10, nhưng **cả hai số hạng đã phân rã** — cross-review lượt
+4 đo lại mới thấy. Chênh đúng mà số hạng sai thì phép đếm không tái lập được.)
 
 ## `nghiem_thu`
 
@@ -203,8 +206,9 @@ Hai đính chính so với bản đầu, cả hai đo được:
 
 - **`A` là 6, không phải 7.** Thân Issue ghi 7; biên nhận ghi 6. Biên nhận là hiện vật bền, thân Issue sửa
   được sau lưng — **biên nhận thắng**.
-- **`F` không tồn tại trong hồ sơ bền.** Quét **37** biên nhận trên `master`: **0** cái có bộ đếm `F`. Nó
-  chỉ có trong thân Issue `#238`.
+- **`F` không tồn tại trong hồ sơ bền.** Quét **39** biên nhận trên `master` (đo 18:4xZ 22-08; bản đầu
+  ghi 37 — mẫu số đã phân rã, kết luận `0` thì không đổi): **0** cái có bộ đếm `F`. Nó chỉ có trong thân
+  Issue `#238`.
 
 **Vì sao chỗ này nghiêm trọng hơn một con số lệch:** bản đầu dùng `F = 2` để tuyên bố *"F lần 3 ⇒ DỪNG"* —
 tức lấy một số **không có hiện vật** làm **cổng dừng thi công**. Đã bỏ câu ấy. Yêu cầu bằng chứng hai nền
@@ -221,8 +225,10 @@ khai" — đúng loại việc đẻ ra hình dạng A.
    (đo bởi phiên `#238`). Phép đo *"chỉ khác đúng một dòng `posted_comment_id`"* của packet này **KHÔNG**
    đi qua đường ấy — nó chạy `git cat-file -p` trên blob cục bộ, đã chạy lại và xác nhận — nhưng ai
    đối chiếu lại bằng thân comment sẽ thấy khác, và khác đó là tạo tác của công cụ đọc.
-3. **Vì sao chỉ `plat-x5-*` dính** (3/90 lease có nhiều id). Chưa phân định được là do `PLAT-X5` chạy
-   nhiều lượt review hơn hay do nhánh của nó fan-out rộng hơn.
+3. **Vì sao chỉ `plat-x5-*` dính.** Đo 18:4xZ 22-08: **100** `lease_id` có `posted_comment_id`, trong đó
+   **3** mang **nhiều hơn một** id — cả ba là `plat-x5-*`. (Bản đầu ghi `3/90`: tử số đúng, **mẫu số đã
+   phân rã**.) Chưa phân định được là do `PLAT-X5` chạy nhiều lượt review hơn hay do nhánh của nó
+   fan-out rộng hơn.
 4. **8 lease `LEASE-DANG-*` "đã tiêu" không tự khai điều đó.** Kết luận ấy dựng bằng tay từ hiện vật trên
    master (`kiem_github` = 1, bộ test 73 ca). Không trường nào trong tệp lease nói ra, và trạng thái Issue
    cũng không.

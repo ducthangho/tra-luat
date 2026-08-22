@@ -29,9 +29,10 @@ ops/cai_actionlint.sh
 Hai đường dẫn, liệt kê đủ, không ký tự đại diện.
 
 **Kích thước dự kiến — có MỐC NEO đo được, chưa có số của chính packet này.** Phạm vi tương đương gần
-nhất là `PLAT-X8` (PR #248): **cùng hai tệp**, `git diff --numstat` cho **2 tệp / +265 dòng thêm** lúc
-16:5xZ, và phiên thi hành báo đã lên **313** sau hai bản vá P1 — tức **một** mối quan tâm trên vùng này đã
-chạm trần `sensitive` của ADR-0044 (**≤ 3 tệp / ≤ 300 dòng thêm**).
+nhất là `PLAT-X8` (PR #248), **cùng hai tệp**. Đo bằng khoảng commit, không mượn lời khai của ai:
+`08bb4ecd..67a7fbe0` ⇒ **2 tệp / +265/−1**; `08bb4ecd..86a55663` (head sau hai bản vá P1) ⇒
+**2 tệp / +313/−1**. Tức **một** mối quan tâm trên vùng này đã **VƯỢT** trần `sensitive` của ADR-0044
+(**≤ 3 tệp / ≤ 300 dòng thêm**) — vượt 13 dòng, không phải "chạm".
 
 Đó là mốc neo, **không** phải số của packet này: chưa có diff triển khai nên chưa suy ra được. **Phải đo lại
 bằng `git diff --numstat` trước vòng review**, và vượt trần thì dừng để revision thiết kế hoặc khai lý do
@@ -95,6 +96,12 @@ CO  shellcheck tren PATH  ->  rc=1,  1 finding  (SC2320)
 VANG shellcheck           ->  rc=0,  0 finding
 ```
 
+**Bốn con số `rc`/finding trên là SỐ ĐO LỊCH SỬ, chưa ai tái kiểm độc lập.** Cross-review lượt 4 thử đo
+lại trên snapshot `767751f` và **KHÔNG ĐO ĐƯỢC**: sandbox có `shellcheck` 0.9.0 nhưng `actionlint` trả
+`rc=127` (không có executable). Chúng lọt khỏi cả danh mục đo của lượt ấy vì **không mang đơn vị nào**
+trong bộ lọc — đúng bệnh *"danh sách CẤM không bao giờ đủ"*, lần này ở dạng bộ lọc trích số. Người thi
+hành phải **đo lại bốn số này** trước khi dựa vào chúng, chứ đừng chép.
+
 **Cả tầng luật shell biến mất mà cổng vẫn xanh.** `actionlint` không báo rằng nó đã bỏ qua shellcheck —
 nó chỉ trả 0. Cùng họ *"cổng vắng mặt trông giống cổng xanh"*, và cùng họ chính `t33`: ca ấy sinh ra vì
 sáu lượt cross-review kết luận *"YAML ok"* bằng PyYAML, mà PyYAML không biết luật của GitHub.
@@ -142,7 +149,8 @@ mà quên bộ cài ⇒ `B1` xanh, `B4` đỏ, master đỏ. Đó là lý do hai
 (PR #250, P2) bác đúng chỗ đó. Đo trên `ops/reviews/lease-dang-review-5-claude-verdict.receipt.yaml`
 (`bo-dem-sau-luot-5`): **A = 6 · B = 2 · C = 1 · D = 3 · E = 2**.
 
-**Không có `F` trong biên nhận nào** — quét 37 biên nhận trên `master` ra **0**. Bản đầu ghi `F = 2` (lấy
+**Không có `F` trong biên nhận nào** — quét **39** biên nhận trên `master` ra **0** (đo 18:4xZ 22-08;
+bản đầu ghi 37 — mẫu số đã phân rã, kết luận `0` không đổi). Bản đầu ghi `F = 2` (lấy
 từ thân Issue) rồi dùng nó tuyên bố *"F lần 3 ⇒ DỪNG"*, tức lấy một số **không có hiện vật** làm **cổng
 dừng thi công**. Đã bỏ câu ấy.
 

@@ -1,0 +1,126 @@
+# BIÊN NHẬN — cross-review lượt 2 của `PLAT-X8` (#225 / PR #248), reviewer `claude`.
+#
+# ĐỌC BA DÒNG NÀY TRƯỚC:
+# 1. Verdict `approved` VỀ KỸ THUẬT: hai P1 của lượt 1 đã đóng, đo trên exact head, có cả ca đối
+#    chứng chống vá quá tay. `A12` đạt cả hai job.
+# 2. NHƯNG `la_canonical: false` — lượt này KHÔNG mang assurance và KHÔNG tăng `review_rounds_used`.
+#    `PLAT-X8` vẫn còn NGUYÊN hai vòng canon.
+# 3. Thêm một P2 MỚI (`thu-muc-tran-doi-lop`) — đổi hành vi có thật, chiều fail-closed, khai làm nợ
+#    chứ không vá: vá nó là dựng lại đúng chỗ "phân biệt cách viết" mà bản vá vừa xoá.
+
+la_canonical: false
+la_canonical_ghi_chu: >-
+  BẰNG CHỨNG CHẨN ĐOÁN, không phải vòng review canon. Ba lý do ĐỘC LẬP, mỗi lý do đủ một mình:
+  (a) không có lease `role: reviewer` — lượt này lại chạy dưới lease executor, y như lượt 1, và
+  không cấp lease lùi ngày; (b) biên nhận không qua validation — `PROTOCOL:460-464` nói
+  `schema_version: 1` do tác giả tệp MỚI tự khai KHÔNG tạo miễn trừ, mà nâng lên v2 đòi receipt ID
+  và HAI danh tính chứng thực độc lập, thứ phiên này không có và bịa ra là giả mạo hồi tố;
+  (c) người review là NGƯỜI SOẠN ĐẶC TẢ.
+  Theo `PROTOCOL:758-760` (`review_rounds_used` chỉ tăng khi qua receipt validation) ⇒ lượt này
+  KHÔNG vào bộ đếm.
+schema_version: 1
+schema_version_ghi_chu: >-
+  KHÔNG phải lời khai miễn trừ — xem `la_canonical_ghi_chu`. Ở lại v1 CÓ KHAI, không mặc áo v2.
+kind: review_delivery_receipt
+packet_id: PLAT-X8
+packet_issue: 225
+lease_id: null
+lease_ghi_chu: >-
+  Không có lease `role: reviewer`. Lease EXECUTOR đang hiệu lực lúc review là
+  `plat-x8-exec-2r4-codex-20260822` (revision 4, mang `ngoai_le_ADR_0044`); nó khai `reviewer: claude`
+  nhưng điều đó KHÔNG thay được một lease reviewer.
+provider: claude
+role: reviewer
+executor_provider: openai_codex
+verdict: approved
+verdict_ghi_chu: >-
+  `approved` chỉ nói về NỘI DUNG kỹ thuật của diff. Nó KHÔNG cấp assurance — xem `la_canonical`.
+  Đừng đọc trường này một mình.
+cross_provider: true
+assurance_dat: null
+assurance_KHONG_dat: cross_approved
+
+reviewed_sha: 86a556632f8464de06262efcc2aa7c0e88415f0e
+base_sha: 08bb4ecd6dbdb87267cb8179f52ac28c151eb4b9
+target_pull_request: 248
+luot_truoc: ops/reviews/plat-x8-review-1-claude-verdict.receipt.yaml
+
+verdict_path: ops/reviews/plat-x8-review-2-claude-verdict.md
+verdict_sha256: afdb3473404f4180701ba6f1c30fe46ca1dabe8a851d88e6c4bf9fde6edec6dd
+verdict_bytes: 6135
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/claude/phien-tra-luat-5a-handoff-9o1cqp/ops/reviews/plat-x8-review-2-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Neo theo NHÁNH ở commit này, ghim theo COMMIT ở commit kế tiếp — một commit không thể chứa băm của
+  chính nó. `t26` kiểm HÌNH DẠNG (`https://`) cộng băm tệp phải khớp thật, nên URL nhánh qua được
+  cổng; nhưng nhánh là thứ TRÔI và bị xoá, nên nó chưa phải mỏ neo. Thứ định danh là
+  `verdict_sha256` ở trên.
+projection_url: null
+projection_ghi_chu: >-
+  Bản chiếu trên PR #248 đăng ngay sau khi biên nhận này vào kho; điền URL ở commit ghim.
+truy_xuat_tag: null
+
+findings:
+  - id: duong-di-xuyen-thu-muc-ha-lop
+    muc: P1
+    trang_thai: DA_DONG
+    tai_hien: true
+    tom_tat: >-
+      Đo trên exact head: `docs/adr/../../ops/lease_publish.py` ⇒ `sensitive` (trước vá `systemic`),
+      kể cả với tiền tố `planned:`. Hai ca ĐỐI CHỨNG chống vá quá tay cũng đạt:
+      `planned:ops/lease_publish.py` vẫn `sensitive`, `docs/adr/0045-x.md` vẫn `systemic`.
+  - id: schema-version-hong-fail-open
+    muc: P1
+    trang_thai: DA_DONG
+    tai_hien: true
+    tom_tat: >-
+      Tám giá trị hỏng (`v2` `2.0` `2.0f` `abc` `None` `[]` `{}` `True`) đều CHẶN; `1`/`'1'`/vắng mặt
+      vẫn QUA (legacy có chủ ý); `2`/`'2'` ⇒ `rc=10`. Đáng ghi: `True` bị loại đúng — `bool` là lớp
+      con của `int` trong Python nên một bản vá chỉ kiểm `isinstance(x, int)` sẽ để nó lọt. Executor
+      bắt được chỗ đó mà finding gốc KHÔNG nêu.
+  - id: commit-message-mot-dong
+    muc: P2
+    trang_thai: DA_DONG
+    tai_hien: true
+    tom_tat: >-
+      Thông điệp commit mới có phép đo, đột biến, và ngoại lệ trần kèm người duyệt.
+  - id: thu-muc-tran-doi-lop
+    muc: P2
+    trang_thai: KHAI_NO_KHONG_VA
+    tai_hien: true
+    tom_tat: >-
+      `docs/adr/` (thư mục trần, có `/` cuối) đổi `systemic` → `sensitive`. Đo cả hai phía: TRƯỚC vá
+      `docs/adr/`=`systemic` nhưng `docs/adr`=`sensitive` — cùng thư mục, hai lớp, chỉ khác dấu `/`,
+      đúng hình dạng "phân biệt CÁCH VIẾT không phân biệt THẨM QUYỀN" (`v1.36.68`). Chuẩn hoá xoá chỗ
+      lệch và gộp về FAIL-CLOSED. Không phải lỗ, nhưng là đổi hành vi chưa ai khai. KHÔNG vá: vá là
+      dựng lại đúng chỗ vừa xoá. Rủi ro hôm nay đo được = 0 lease nào trong 136 blob khai mục thư mục
+      trần trong `write_set`. Gợi ý bốn phần §441 nằm trong verdict.
+
+nghiem_thu:
+  write_set: 'đúng hai tệp ops/lease_publish.py · ops/lease_publish_test.py'
+  tran_ADR_0044: '313 dòng thêm — khớp CHÍNH XÁC ngoai_le_ADR_0044 của lease …-2r4; chủ kho duyệt 13 dòng vượt'
+  A9: 'rc=0, 85/85 hai số bằng nhau, >= sàn 73'
+  A12: 'workflow_dispatch run 32587850266 trên exact head — ubuntu success 31 bước 0 hỏng · windows success 31 bước 0 hỏng, đo THEO JOB'
+  tu_quy_chieu_duong: 'cổng MỚI lên chính lease …-2r4 ⇒ rc=0'
+  tu_quy_chieu_am: 'hạ effective_review_class sensitive→systemic ⇒ rc=10'
+  lease_lich_su: '136 blob · 129 schema 1 · 7 schema 2 · KHÔNG giá trị hỏng ⇒ bản vá fail-closed không giết lease cũ nào'
+
+no_da_khai:
+  - id: PLAT-X8-luot-review-2-KHONG-TINH-VAO-CANON
+    noi_dung: 'Như lượt 1. Xem `la_canonical_ghi_chu`. Còn NGUYÊN hai vòng canon.'
+  - id: PLAT-X8-ngoai-le-ADR-0044-KHONG-CONG-NAO-CANH
+    noi_dung: >-
+      `lease_publish.py` không đọc số dòng. Người land phải TỰ ĐO `git diff --shortstat 08bb4ecd..<head>`
+      và đối chiếu 313; lệch lên trên ⇒ ngoại lệ KHÔNG phủ, phải xin lại.
+  - id: PLAT-X8-CHUA-CO-BO-KIEM-RECEIPT
+    noi_dung: >-
+      Hai bộ kiểm cross-review lượt 3 đề nghị (đỏ mọi receipt MỚI tự khai v1; đỏ finding thiếu bất kỳ
+      phần nào trong bốn phần §441) là MÁY MÓC MỚI, ngoài `write_set` và ngoài lease. Khai nợ thay vì
+      lặng lẽ dựng.
+  - id: PLAT-X8-ADR-0045-e-human-readback-CHUA-XONG
+    noi_dung: 'Điều kiện (e) human readback trước land — thuộc lượt LAND.'
+  - id: PLAT-X8-con-so-136-va-313-HET-HAN
+    noi_dung: >-
+      Cả hai là ảnh chụp. 136 hết hạn khi có lease mới; 313 hết hạn khi có commit mới. Thứ giữ chúng
+      là `t23` và một phép đo lại, không phải hai con số này.

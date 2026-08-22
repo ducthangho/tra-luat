@@ -115,6 +115,44 @@ Khi #227 land: sáu chỗ phải sửa cho bản 4 nằm sẵn trong **hộp ⛔
 Kèm gỡ hộp, thêm hàng `4` vào bảng phiên bản, và cập nhật **cả bốn** chỗ trích băm còn sống. **Hai
 bảng LỊCH SỬ giữ nguyên băm cũ.** Trước khi đổi băm: `grep -rl plat-x8 ops/leases/` phải RỖNG.
 
+### 5b. CẬP NHẬT 05:4x Z — #227 ĐÃ LAND RỒI BỊ REVERT, và điều đó BÁC tiêu chí canh ở §5
+
+Master đi **50 commit** kể từ `3f64167`. Chuỗi thật:
+
+| commit | việc |
+|---|---|
+| `b88744e` | **merge PR #234** — `#227` LAND |
+| — | master `b88744ea` ⇒ `gate(windows-latest)` **ĐỎ 59/68** |
+| `7e75156` → `2ab3560` | **PR #237 revert BA TỆP MÃ** của `#227` |
+
+Chín ca đỏ (`t49 t51 t52 t59 t60 t62 t63 t66 t68`) đều là ca **MỚI** của `#227` và **chưa ca nào từng
+chạy trên Windows** — `ci.yml` chỉ chạy ubuntu cho PR thường. Cùng một gốc: đồ giả không chạy được
+trên Windows ⇒ không log nào được ghi ⇒ `FileNotFoundError` khi đọc `argv.log`.
+
+**Đó đúng là bài học `CLAUDE.md` mà chính `#227` đã chép vào `r6 §chua_do_duoc`** — *"PR xanh không
+hàm ý master xanh; lần merge chính là lần đo Windows đầu tiên"* — và vẫn trôi. Đường đúng là gọi tay
+`workflow_dispatch` trước khi merge; đã không làm.
+
+Revert **cố ý thu hẹp**: chỉ ba tệp mã (`ops-publish-lease.yml`, `lease_publish.py`,
+`lease_publish_test.py`), **giữ toàn bộ hồ sơ** — đo được: 10 verdict + 12 lease `lease-dang` còn trên
+master, và ba tệp ấy khớp **byte-identical** với `3f641673`.
+
+> **TIÊU CHÍ CANH Ở §5 ĐÃ HỎNG — đây là lần thứ NĂM cùng họ.** Nó đo *hiện vật hiện tại*
+> (`grep -c "^(GOI_GH|def kiem_github|…)"` ⇒ `0` ⇒ "chưa land"). Phép đo ấy **không phân biệt được**
+> *chưa từng land* với *land rồi bị revert*. Ngay lúc này nó trả "chưa land" và **tình cờ** dẫn tới
+> hành động đúng (chưa viết bản 4), nhưng vì **lý do sai** — và lần sau nó sẽ đọc nhầm mà không ai biết.
+>
+> **Tiêu chí đúng phải đo LỊCH SỬ, không đo trạng thái:** `git log --oneline <mốc>..origin/master`
+> tìm cả commit land LẪN commit revert. Trạng thái hiện tại là một hàm của lịch sử, và hàm ấy
+> **không khả nghịch**.
+
+**Hệ quả cho bản 4:** sáu chỗ trong hộp ⛔ giả định `#227` land và nâng bộ test **42 → 58**. Giả định
+ấy nay **đã bị hoàn nguyên**. Bộ test lại là **39 `def t` / 42 đạt**. **Đừng viết bản 4** cho tới khi
+`#227` land LẦN HAI — và biên bản revert nói rõ lần ấy sẽ được **đo thật trên Windows bằng
+`workflow_dispatch` trước khi land**.
+
+**Bệnh đăng trùng lease QUAY LẠI master** cho tới lúc land lại. Ai cấp lease trong khoảng này phải biết.
+
 ## 6. Cam kết phạm vi với phiên #233 — GIỮ ĐÚNG
 
 Phiên `session_018YdsqSNdxorwxVYW2d2PkH` (PR #233) đang làm protocol §20 (bảng **định tuyến** ADR, do

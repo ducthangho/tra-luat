@@ -34,8 +34,22 @@ một sự cố. Hai mục tiêu phải đi cùng một packet vì chúng khoá 
 đúng lúc: mục tiêu không chiếu được vào write set thì phải mở rộng write set **tại đây**, chứ không để
 phiên thi hành gặp rồi tự xoay.
 
-Đo 16:5xZ 22-08-2026: **0** lease `CÒN_HẠN` chạm hai đường dẫn này. Write set **rảnh** — khác
-`LEASE-HOI-TOAN-KHO`, packet này cấp lease được ngay.
+Đo **17:38Z** 22-08-2026: **11** lease `CÒN_HẠN` chạm `ops/lease_publish_test.py` — 3 lease
+`plat-x8-exec-2`/`-2r2`/`-2r3` cộng 8 lease `LEASE-DANG-*`; **0** lease chạm `ops/cai_actionlint.sh`.
+Ba lease `PLAT-X8` **chưa tiêu**, nên write set **CHƯA RẢNH**: packet này chỉ được cấp lease sau khi
+`PLAT-X8` land hoặc rút. Tám lease `LEASE-DANG-*` thuộc packet đã land qua PR `#246`, nhưng bản thân tệp
+lease không tự khai trạng thái đã tiêu.
+
+**Bản đầu khai "0 lease, write set RẢNH, cấp lease được ngay" — SAI, và cross-review lượt 2 bắt
+(`write-set-khong-ranh`, P1).** Tác giả đo write set của `PLAT-X8` rồi **suy** rằng write set của packet
+này rảnh, không hề quét `ops/lease_publish_test.py`. Đó là hình dạng **A** — *lời khai rộng hơn phép đo* —
+và nếu chủ kho ký lease theo lời khai ấy thì có **hai writer** trên cùng một tệp, đúng tai nạn mà
+write-set exclusion sinh ra để chặn.
+
+**Hệ quả: hai packet KHÔNG chạy song song được.** Cả `LEASE-HOI-TOAN-KHO` lẫn packet này đều cần
+`ops/lease_publish_test.py`. Thứ tự bắt buộc: `PLAT-X8` nhả ⇒ rồi **một** trong hai, xong ⇒ mới tới cái
+kia. Con số lease phân rã theo giờ (9 lúc 16:5xZ · 8 lúc 17:38Z); **đo lại ngay trước khi cấp**, đừng
+tin số trong đặc tả.
 
 ## `ngoai_pham_vi`
 
@@ -76,17 +90,22 @@ một mã finding là gửi người thi hành đi tìm thứ không có.
 **M1** — `B1` Chạy bộ test với `shellcheck` **vắng khỏi PATH** ⇒ `t33` **ĐỎ** kèm thông điệp
 `KHÔNG ĐO ĐƯỢC`, không phải bỏ qua. ĐỎ khi: đột biến đổi `assert duong_shellcheck` thành `if not ...:
 return` — tức biến fail-close thành bỏ qua êm. `B2` Chạy với **cả hai** công cụ có mặt trên một workflow
-**cố ý vi phạm shellcheck** (fixture, không phải tệp thật của kho) ⇒ `t33` **ĐỎ** và thông điệp **nêu mã
-`SC…`**. ĐỎ khi: đột biến bỏ phần in `stdout` của `actionlint` — cổng vẫn đỏ nhưng không nói vì sao, và
+**cố ý vi phạm shellcheck** (fixture, không phải tệp thật của kho) ⇒ `t33` **ĐỎ** và thông điệp nêu **đúng
+mã SC cụ thể mà fixture tạo ra** (ghi mã ấy trong ca test, không chỉ khớp tiền tố `SC`). ĐỎ khi: đột biến
+bỏ phần in `stdout` của `actionlint`, hoặc thay mã thật bằng một chuỗi giả như `SC0000` — cổng vẫn đỏ nhưng không nói vì sao, và
 một cổng không nói lý do là cổng phải chẩn đoán lại từ đầu. `B3` Chạy với cả hai công cụ trên workflow
-**thật** của master ⇒ `t33` **XANH**. ĐỎ khi: bản vá làm cổng đỏ thường trực.
+**thật** của master ⇒ `t33` **XANH**; sau đó chép workflow ấy sang fixture, chèn lỗi shell đã biết của
+`B2` ⇒ chính `t33` **ĐỎ** với mã SC mong đợi. ĐỎ khi: bản vá làm cổng đỏ thường trực, hoặc miễn kiểm theo
+tên/đường dẫn của workflow thật để nó xanh mà không chạy `actionlint`.
 
 **M2** — `B4` Chạy bộ cài trong môi trường **không có sẵn** `shellcheck` ⇒ sau đó `shutil.which
-("shellcheck")` khác `None` **và** `shellcheck --version` in đúng phiên bản đã ghim. ĐỎ khi: đột biến bỏ
-dòng cài `shellcheck`; hoặc bỏ phần ghim phiên bản (khi ấy `B4` phải đỏ vì phiên bản không khớp hằng).
+("shellcheck")` khác `None`, `shellcheck --version` in đúng phiên bản đã ghim, **và chính executable vừa
+cài** làm fixture shell sai của `B2` phát đúng mã SC mong đợi. ĐỎ khi: đột biến bỏ dòng cài `shellcheck`;
+bỏ phần ghim phiên bản; hoặc cài một executable giả chỉ in đúng phiên bản rồi luôn thoát 0.
 `B5` Một lượt Actions **THẬT** trên **exact head của packet** (gọi bằng `workflow_dispatch` trên đúng ref
 ấy — gắn nhãn `windows` KHÔNG đủ, `ci.yml` không khai `types: [labeled]`): job `gate` xanh trên **cả
-`ubuntu-latest` LẪN `windows-latest`**, `lease_publish` in `N/N` với **hai số bằng nhau**, và bằng chứng
+`ubuntu-latest` LẪN `windows-latest`**, `lease_publish` in `N/N` (**số ca kiểm thử đạt / số ca kiểm thử
+đã chạy**) với **hai số bằng nhau**, và bằng chứng
 nêu `run_id` + `head_sha` + kết luận TỪNG job. ĐỎ khi: `shellcheck` chỉ được cài trên một nền; hoặc bằng
 chứng neo vào một SHA khác exact head.
 
@@ -123,4 +142,3 @@ cần một con số để biện minh.
    Đo trước khi mở rộng, đừng mở rồi mới đo.
 3. **`SC2320` là finding DUY NHẤT hay chỉ là finding ĐẦU TIÊN** trên bản trước `#238`. `actionlint` có thể
    dừng sớm; chưa kiểm.
-4. **Bộ đếm hình dạng kế thừa đọc từ thân Issue, chưa đối chiếu biên nhận.** Biên nhận thắng nếu lệch.

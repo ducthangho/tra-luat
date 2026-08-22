@@ -36,9 +36,15 @@ Hai đường dẫn, liệt kê đủ, không ký tự đại diện.
 **Lease cho packet này chỉ được cấp SAU khi `PLAT-X8` nhả** — land hoặc rút. Đặc tả không phải lease
 (protocol §7), nên đóng băng trước là hợp lệ; bắt tay trước thì không.
 
-Cùng lúc còn **9** lease `CÒN_HẠN` khác giao write set, thuộc `LEASE-DANG-*` — packet ấy **đã land**
-(`#238` qua PR `#246`) nên chúng là quyền ghi **đã tiêu**, không phải vật cản. Chúng không tự khai điều
-đó; xem `chua_do_duoc`.
+Cùng lúc còn **8** lease `CÒN_HẠN` khác giao write set (đo **17:38Z**), thuộc `LEASE-DANG-*` — packet ấy
+**đã land** (`#238` qua PR `#246`) nên chúng là quyền ghi **đã tiêu**, không phải vật cản. Chúng không tự
+khai điều đó; xem `chua_do_duoc`.
+
+**Con số 8 PHÂN RÃ theo giờ — đừng đọc nó như một hằng số.** Cùng phép quét cho **9** lúc 16:5xZ và **8**
+lúc 17:38Z, chỉ vì lease hết hạn dần. Bản đầu của mục này đóng băng "9" không kèm thời điểm, rồi
+`EVIDENCE.md` ghi "6", rồi đo lại ra "8" — **ba số cho một thứ**, và cross-review lượt 2 bắt đúng chỗ đó
+(`dem-lease-dang-sai`). Thứ **không** phân rã là bất biến bên dưới: **`PLAT-X8` đang giữ cả hai đường dẫn**.
+Neo quyết định vào bất biến ấy; con số chỉ để đối chiếu, và phải đo lại ngay trước khi cấp lease.
 
 ## `ngoai_pham_vi`
 
@@ -68,8 +74,11 @@ bộ ref, trừ khi ghi khác. Đếm theo **đường dẫn** cho số khác �
 
 Mỗi tiêu chí nêu phép đo làm nó **ĐỎ** (L3).
 
-**M1** — `A1` Gọi `ai-dang-giu ops/lease_publish.py` trên kho có ≥1 lease còn hạn ⇒ in đúng lease ấy và
-thoát **khác 0**. ĐỎ khi: đột biến bỏ một trạng thái khỏi bảng phân loại, hoặc đổi `sys.exit` thành `0`.
+**M1** — `A1` Gọi `ai-dang-giu ops/lease_publish.py` trên kho giả có **hai lease còn hạn ở hai ref khác
+nhau**, một lease hết hạn và một lease cho đường dẫn khác ⇒ in **đúng tập hai `lease_id` còn hạn của đường
+dẫn được hỏi, không thừa không thiếu**, và thoát **khác 0**. ĐỎ khi: đột biến dừng sau lease còn hạn đầu
+tiên, nhận nhầm lease hết hạn/khác đường dẫn, bỏ một trạng thái khỏi bảng phân loại, hoặc đổi `sys.exit`
+thành `0`.
 `A2` Bơm một tệp lease **YAML hỏng** ⇒ `KHÔNG_XÁC_ĐỊNH` **và** mã thoát khác 0. ĐỎ khi: đột biến thay
 `raise`/`exit` bằng `|| echo` — đúng cách hỏng lượt 3 của bộ quét hand-roll (fail-**OPEN** trong chốt viết
 ra để fail-**CLOSE**).
@@ -82,8 +91,12 @@ chỉ phủ đường không xác định. Thiếu `A2b` thì một cài đặt 
 `A1` không đổi màu. `M1` hứa ba trạng thái thì nghiệm thu phải chạm đủ ba.
 
 **M2** — `A3` Giả một `ls-remote` trả **thừa một nhánh** so với `for-each-ref` ⇒ `KHÔNG_XÁC_ĐỊNH`.
-`A4` Giả chiều ngược lại (thừa ở **cục bộ**) ⇒ **KHÔNG** báo động. `A5` Bơm một ref tượng trưng kiểu
-`origin/HEAD` ⇒ **không** báo động. ĐỎ khi: bỏ bước loại ref tượng trưng.
+`A4` Giả chiều ngược lại (thừa ở **cục bộ**) và đặt một lease còn hạn trên một ref chung ⇒ **KHÔNG** báo
+động vì ref cục bộ thừa, nhưng vẫn in lease còn hạn và thoát khác 0. ĐỎ khi: đột biến trả thành công sớm
+khi thấy ref cục bộ thừa, làm mất lượt quét lease. `A5` Bơm một ref tượng trưng kiểu `origin/HEAD`, đồng
+thời đặt một lease còn hạn trên một ref thường ⇒ **không** báo động vì ref tượng trưng, nhưng vẫn in lease
+còn hạn và thoát khác 0. ĐỎ khi: bỏ bước loại ref tượng trưng, hoặc trả thành công sớm khi gặp ref tượng
+trưng làm mất lượt quét lease.
 
 `A6` **LỰC LƯỢNG BẰNG NHAU, TÊN KHÁC NHAU** — máy chủ và cục bộ cùng `n` ref, nhưng một nhánh cục bộ **cũ**
 đã bị xoá trên máy chủ và một nhánh **mới** trên máy chủ chưa fetch. ⇒ **`KHÔNG_XÁC_ĐỊNH`**. ĐỎ khi: đột
@@ -100,15 +113,18 @@ phải đổi màu"* vì thế **sai**.
 mà không viết vào nghiệm thu"*.
 
 **M3** — `A7` Dựng hai nhánh mang **cùng một** `lease_id`, một bản đã có `posted_comment_id`, bản kia
-chưa; chạy cổng trên bản chưa có ⇒ **`RC_DA_DANG` (9)**. ĐỎ khi: đột biến đưa phép đọc dấu về chỉ đọc
-tệp cục bộ — tức khôi phục đúng hành vi hiện tại. **Ca này là phản chứng của chính nợ mục 18**: không có
-nó thì không biết đang đo cổng hay đo thứ khác.
+chưa, cùng một lease mồi có `lease_id` **khác** và cũng đã có `posted_comment_id`; chạy cổng trên bản chưa
+có ⇒ **`RC_DA_DANG` (9)** cho đúng `lease_id` được hỏi. ĐỎ khi: đột biến đưa phép đọc dấu về chỉ đọc tệp
+cục bộ, hoặc coi bất kỳ `posted_comment_id` nào trong kho là dấu của lease được hỏi. **Ca này là phản
+chứng của chính nợ mục 18**: không có nó thì không biết đang đo cổng hay đo thứ khác.
 
 **M4** — `A8` Mỗi ca trong `A1` `A2` `A2b` `A3` `A4` `A5` `A6` `A7` — liệt kê từng cái, vì `A2b` không
-nằm trong dãy số `A1`–`A7` và một dãy viết tắt là chỗ ca lẻ đi lạc — có **ít nhất một** đột biến khiến nó đổi màu, và bộ chạy đột biến in
-ra **cả hai** số (số đột biến chạy · số đột biến bị giết) — hai số **bằng nhau**. ĐỎ khi: một đột biến
-sống sót, hoặc hai số lệch. Nhắc `t97`: đột biến có thể **chưa từng chạy** do va chạm `.pyc`; bộ chạy phải
-tắt ghi bytecode và dùng tên tệp riêng từng đột biến.
+nằm trong dãy số `A1`–`A7` và một dãy viết tắt là chỗ ca lẻ đi lạc — có **ít nhất một đột biến trong mã
+sản phẩm `ops/lease_publish.py`** khiến nó đổi màu. Bộ chạy ghi mỏ neo + thay thế của từng đột biến, xác
+nhận mỏ neo xuất hiện đúng một lần và xác nhận tệp sau thay thế khác bản gốc, rồi in **cả hai** số (số
+đột biến mã sản phẩm đã chạy · số đột biến bị giết) — hai số **bằng nhau**. ĐỎ khi: runner chỉ sửa assertion
+trong test, một đột biến không áp được/sống sót, hoặc hai số lệch. Nhắc `t97`: đột biến có thể **chưa từng
+chạy** do va chạm `.pyc`; bộ chạy phải tắt ghi bytecode và dùng tên tệp riêng từng đột biến.
 
 ## `hinh_dang_ke_thua`
 
@@ -149,8 +165,6 @@ khai" — đúng loại việc đẻ ra hình dạng A.
    đối chiếu lại bằng thân comment sẽ thấy khác, và khác đó là tạo tác của công cụ đọc.
 3. **Vì sao chỉ `plat-x5-*` dính** (3/90 lease có nhiều id). Chưa phân định được là do `PLAT-X5` chạy
    nhiều lượt review hơn hay do nhánh của nó fan-out rộng hơn.
-4. **Bộ đếm hình dạng kế thừa đọc từ thân Issue `#238`, chưa đối chiếu biên nhận.** Nếu biên nhận có số
-   khác thì biên nhận thắng.
-5. **9 lease `LEASE-DANG-*` "đã tiêu" không tự khai điều đó.** Kết luận ấy dựng bằng tay từ hiện vật trên
+4. **6 lease `LEASE-DANG-*` "đã tiêu" không tự khai điều đó.** Kết luận ấy dựng bằng tay từ hiện vật trên
    master (`kiem_github` = 1, bộ test 73 ca). Không trường nào trong tệp lease nói ra, và trạng thái Issue
    cũng không.

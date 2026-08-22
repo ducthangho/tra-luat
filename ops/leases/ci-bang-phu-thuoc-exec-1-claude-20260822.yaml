@@ -1,0 +1,127 @@
+# Lease EXECUTOR — `CI-BANG-PHU-THUOC` (#245), lượt 1.
+#
+# Slice ĐẦU của việc cắt phút CI. Nó KHÔNG đổi hành vi CI: chỉ ghi bảng phụ thuộc và cỗ máy tự
+# dựng lại bảng. Công tắc (`ci.yml`) thuộc `CI-FASTPATH-THEO-DIFF`, và packet ấy CHƯA được cấp —
+# spec của nó tự đặt điều kiện phải có HIỆN VẬT của slice này trên master trước.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 245
+packet_id: CI-BANG-PHU-THUOC
+phase_key: CI-BANG-PHU-THUOC
+revision: 1
+generation: 1
+lease_id: ci-bang-phu-thuoc-exec-1-claude-20260822
+
+role: executor
+provider: claude
+executor: claude
+model: opus
+effort: max
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+
+spec_path: ops/specs/CI-BANG-PHU-THUOC.md
+spec_sha256_required: 14bd1425e89f6b304ce60f8ebd0246a7bf8020f3732647494daecc9f07bc8b7c
+
+nguon_quyet_dinh:
+  ai: 'người giữ kho ducthangho, in-session 2026-08-22'
+  duong: 'trực tiếp trong phiên session_018YdsqSNdxorwxVYW2d2PkH: "mở issue và cấp lease"'
+  da_kiem: >-
+    Ba vòng hỏi của lượt soạn spec đã chốt: master ĐƯỢC đi fast-path nhưng có điều kiện dây
+    chuyền · HAI nhóm luật · ca canh bảng chạy khi chạm ci.yml CỘNG một lượt định kỳ tuần.
+    Vòng hai chốt tách hai slice theo THỨ TỰ RỦI RO và cách khai nguon_cap_viec.
+
+write_set:
+  - .github/checks/ci_phamvi.py
+  - .github/checks/ci_phamvi_test.py
+
+write_set_da_do: >-
+  0 lease còn hiệu lực giữ hai đường dẫn này. Quét 100 ref (master + 99 nhánh ops/**), 99 tệp
+  lease, 16 còn hiệu lực, 0 tệp KHÔNG ĐỌC ĐƯỢC. Đọc TRƯỜNG write_set bằng yaml.safe_load, không
+  dò chuỗi trên thân tệp — lượt quét đầu dò thân tệp và BẮT OAN 2 lease (write set thật của chúng
+  là launcher.py).
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 350
+  don_vi: 'dòng THÊM theo `git diff --numstat $(git merge-base origin/master HEAD)..HEAD`'
+  ghi_chu: >-
+    VƯỢT trần ADR-0044 cho sensitive (<=3 tệp, <=300 dòng thêm) ở vế DÒNG, khai có chủ đích. Neo
+    từ tệp cùng loại trong kho: bundle_fragment_check.py = 224 dòng, pre_push_test.py = 431.
+    Phần lớn dòng là PHẢN CHỨNG; cắt cho vừa 300 là cắt đúng thứ làm cổng có răng. Vượt 50 khác
+    hẳn vượt 320 — đó là lý do tách slice thay vì làm một packet ~620 dòng.
+
+branch: claude/ci-bang-phu-thuoc-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: 195a478d7f083b67900777c6f4e8ada0860b3707
+base_sha: 195a478d7f083b67900777c6f4e8ada0860b3707
+start_from_sha: 195a478d7f083b67900777c6f4e8ada0860b3707
+base_ghi_chu: >-
+  master = 195a478d, tổ tiên của nhánh mặc định. CHƯA xác nhận lượt gate của nó xanh tại lúc cấp
+  — executor phải ĐO trước khi tin, đo theo JOB chứ không theo check_suite (nợ NO_KY_THUAT §17:
+  6 ca thông báo khai xanh sai trong một phiên, 2 trong đó trên head CUỐI).
+
+prompt_path: ops/prompts/ci-bang-phu-thuoc-exec-1-claude-20260822.md
+prompt_sha256_required: 0521ce451808908c165ab2abcb39e4f8441046303f7e6f71562b6af6bad12ce0
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-22 ("mở issue và cấp lease cho tôi")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_note: >-
+  Phiên ghi lease này CŨNG là phiên viết đặc tả. Nó KHÔNG được thi công packet này — executor phải
+  là một phiên Claude MỚI, độc lập. Reviewer soi ĐẶC TẢ trước, bản vá sau: nếu đặc tả sai thì bản
+  vá đúng theo đặc tả vẫn sai.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-22T09:30:00Z'
+lease_expires_at_utc: '2026-08-23T09:30:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 3
+executor_calls_limit: 6
+
+reviewer_provider: codex
+review_rounds_limit: 2
+review_calls_limit: 2
+review_ghi_chu: >-
+  HAI, theo canon ADR-0043 — KHÔNG phải 3/4 như một số lease đang mở. Ba tài liệu từng nói "ba
+  vòng" đã được sửa ở PR #233; trần lời gọi vẫn CHƯA có cổng nào đếm (nợ REVIEW-BUDGET-KHONG-CO-CONG,
+  NO_KY_THUAT §15), nên ở đây nó là KỶ LUẬT ĐỌC, không phải thứ máy chặn.
+
+muc_tieu:
+  - 'M1: bảng phụ thuộc thành DỮ LIỆU đọc được bằng máy'
+  - 'M2: vế BĂM DẪN XUẤT từ _RELEASE_EXCLUDE_*, lệch ⇒ ĐỎ'
+  - 'M3: vế ĐỌC dựng lại bằng audit hook, đọc thêm nhóm chưa khai ⇒ ĐỎ'
+  - 'M4: ba trạng thái — phụ thuộc · độc lập · KHÔNG ĐO ĐƯỢC; cái thứ ba làm cổng ĐỎ'
+  - 'M5: phản chứng cho từng luật + đột biến giết đúng ca của nó'
+
+gate_bat_buoc:
+  - 'python3 .github/checks/ci_phamvi_test.py -> rc=0, N/N hai số BẰNG NHAU'
+  - 'N1 đột biến xoá `ops` khỏi _RELEASE_EXCLUDE_DIRS ⇒ ĐỎ (chứng minh cổng đọc MÃ, không đọc bảng)'
+  - 'N2 đột biến xoá docs/ khỏi tập ĐỌC của tl-selftest ⇒ ĐỎ, thông điệp IN RA tên nhóm thiếu'
+  - 'N3 audit hook không cài được ⇒ rc khác 0 VÀ in KHONG DO DUOC'
+  - 'N5 đột biến bao_gio_cung_phu_thuoc ⇒ ca chiều BẮT OAN ĐỎ trong khi N1-N4 vẫn xanh'
+  - 'python3 scripts/tl.py --selftest -> 1698/1698 rc=0 (kiểm môi trường TRƯỚC mọi phép đo tập-đọc)'
+  - 'python3 .claude/dev/packet_loop_test.py + ops/lease_publish_test.py: delta so master = 0 ĐỎ'
+  - 'nền master đo TRONG worktree của chính kho — chép tệp ra thư mục rỗng cho 4 ĐỎ GIẢ'
+  - 'git diff --numstat $(git merge-base origin/master HEAD)..HEAD -> <= 2 tệp, <= 350 dòng thêm'
+
+khong_duoc_dung:
+  - '.github/workflows/ci.yml — công tắc thuộc packet kế nhiệm'
+  - 'ops/specs/** — đặc tả đã đóng băng'
+  - 'phép dò bằng đột biến CHÚ THÍCH để kết luận "độc lập" — nó đã sai BA lần'
+
+dieu_kien_dung:
+  - 'Ngân sách sẽ vượt 350 dòng thêm hoặc 2 tệp ⇒ DỪNG, xuất handoff'
+  - 'Thấy mình chứng minh "bỏ bước này an toàn" bằng thứ nhẹ hơn tập-đọc/tập-băm ⇒ lần thứ TƯ của
+     một hình dạng đã đếm ba ⇒ DỪNG, không vá'
+  - 'tl selftest không cho 1698/1698 ⇒ DỪNG: mọi phép đo tập-đọc sau đó là số của một lượt chưa
+     từng chạy tới phần test'

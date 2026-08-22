@@ -109,3 +109,34 @@ verdict_usage_caveats:
     **quyết định của người giữ kho (§2)**, và mức đảm bảo thật là `human_audited` + bốn lượt
     cross-review đã đóng 7+1+4 finding. Đừng đọc lịch sử này thành "cross_approved". Hai finding
     còn lại (`E lần 2` và hồi quy bất biến `set +e`) chuyển sang một packet RIÊNG với đặc tả sạch.
+- id: ACTIONLINT-CUA-PHIEN-DIEU-PHOI-YEU-HON-CUA-CI
+  noi_dung: >-
+    **Đính chính một lời khai của CHÍNH PHIÊN ĐIỀU PHỐI, lặp lại suốt bốn lượt và đã đi vào bốn
+    lease dưới mục `dieu_kien_ready_to_review_DA_THOA`.** Tôi khai *"`actionlint` rc=0 trên 5
+    workflow"* ở mọi lượt — nhưng `/tmp/actionlint/actionlint` trong container **KHÔNG có
+    `shellcheck`**, nên nó **im lặng bỏ qua toàn bộ luật nền `shellcheck`**. CI thì có. Kết quả:
+    lần chạy CI ĐẦU TIÊN của nhánh land ĐỎ ngay — `SC2320:warning` trên
+    `.github/workflows/ops-publish-lease.yml` (`rc=$?` đặt ngay sau `echo`, tức guard
+    `$GITHUB_ENV` đang đọc mã thoát của `echo`). Cài `shellcheck` rồi đo lại: `master` **sạch**,
+    `land/227` **ĐỎ** ⇒ lỗi do CHÍNH packet này sinh ra, không phải nợ nền. Đây là **hình dạng A**
+    (*lời khai rộng hơn phép đo*) do **phiên điều phối**, và nó là ca sạch nhất của bài học
+    *"cổng xanh ở máy ≠ cổng xanh ở nơi nó chạy"* — tôi trích bài học ấy cho người khác suốt cả
+    packet rồi tự mắc. **Chốt: `actionlint` không kèm `shellcheck` là phép đo YẾU HƠN CI; phải
+    khai rõ đã đo bằng bản nào.**
+- id: BAN-VA-SAU-REVIEW-do-phien-dieu-phoi
+  noi_dung: >-
+    Bản vá cho `SC2320` (**4 dòng mã + chú thích**) do **phiên điều phối** làm SAU khi năm lượt
+    review đã đóng — **không lượt review nào soi nó**. Nội dung: thay `set +e; echo …; rc=$?;
+    set -e` bằng `rc=0; if ! echo … ; then rc=1; fi`, giữ **nguyên văn** thông điệp chặn vì
+    `SO_GUARD_DANG` khoá theo chuỗi ấy. Đã đo lại trên cây đã vá: `actionlint` (CÓ `shellcheck`)
+    **sạch** · suite **68/68** · đếm `bao_chan` vẫn **9** · ba đột biến quyết định vẫn giết
+    (gỡ guard `$GITHUB_ENV` ⇒ 65/68 ĐỎ `t64 t66 t67`; gỡ guard `mark` ⇒ 65/68; `A5` gỡ nhánh chặn
+    của khối POST ⇒ 64/68 ĐỎ `t64 t66 t67 t68`).
+- id: t64-DEM-CHUOI-nen-mot-CHU-THICH-cung-lam-lech-so
+  noi_dung: >-
+    Đụng thật khi soạn bản vá trên: chú thích đầu tiên tôi viết có **nhắc tên hàm chặn**, và suite
+    tụt xuống `67/68` vì `t64` đếm tên ấy bằng **CHUỖI trên toàn thân bước** — một lần nhắc trong
+    comment cũng làm lệch sổ. Hai mặt: (a) `t64` **có răng thật**, kể cả với thay đổi vô hại;
+    (b) nó **củng cố P1** — phép khoá là **đếm cách viết**, không phải hiểu thẩm quyền, nên nó
+    nhạy với thứ không nên nhạy và mù với thứ nên thấy. Chú thích trong YAML nay ghi thẳng cảnh
+    báo này cho người sửa sau.

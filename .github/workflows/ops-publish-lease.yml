@@ -279,10 +279,15 @@ jobs:
               bao_chan "không ghi được comment id (rc=$rc)"
               continue
             fi
-            set +e
-            echo "DA_DOI=1" >> "$GITHUB_ENV"
-            rc=$?
-            set -e
+            # SC2320: shellcheck ĐỎ nếu `rc=$?` đặt ngay sau `echo` — nó cho rằng ta lỡ tay
+            # lấy mã thoát của `echo` khi định lấy của lệnh TRƯỚC đó. Ở đây ta THẬT SỰ muốn mã
+            # thoát của chính `echo`, vì nó là thứ bắt lỗi CHUYỂN HƯỚNG `>>`. Viết bằng `if !`
+            # để nói ý ấy bằng CÚ PHÁP, thay vì tắt cảnh báo bằng `disable=`.
+            #
+            # ĐỪNG nhắc tên hàm chặn trong chú thích này: `t64` đếm nó bằng CHUỖI trên toàn thân
+            # bước, nên một lần nhắc trong comment cũng làm lệch sổ và suite ĐỎ. Đã đụng thật.
+            rc=0
+            if ! echo "DA_DOI=1" >> "$GITHUB_ENV"; then rc=1; fi
             if [ "$rc" != "0" ]; then
               bao_chan "không ghi được GITHUB_ENV (rc=$rc)"
               continue

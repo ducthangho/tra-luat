@@ -1,8 +1,10 @@
 # ĐẶC TẢ — `PLAT-X8`: cổng TÍNH `effective_review_class`, thôi nhận lời khai
 
-> # ✅ BẢN 4 — VẬT CẢN ĐÃ HẾT; LEASE NEO VÀO ĐÚNG BẢN NÀY
+> # ✅ BẢN 5 — VẬT CẢN ĐÃ HẾT; LEASE (revision 2) NEO VÀO ĐÚNG BẢN NÀY
 >
-> **Bốn bản trước (`3b`…`3i`) mở đầu bằng `⛔ ĐỪNG CẤP LEASE NEO VÀO BẢN NÀY`. Điều kiện chờ ấy nay
+> **Bản 4 BỎ SÓT ba con số (chỗ 1 · 2 · 7) — bản 5 sửa; xem bảng phiên bản cuối tệp.**
+>
+> **Năm bản trước (`3b`…`3i`) mở đầu bằng `⛔ ĐỪNG CẤP LEASE NEO VÀO BẢN NÀY`. Điều kiện chờ ấy nay
 > đã MÃN:** `#238` land **11:58:18Z 22-08-2026** (PR #246, `563e0eb8`), và quét lúc **13:01Z** ra
 > **0** lease còn hiệu lực giữ `write_set` của `PLAT-X8`. Người giữ kho duyệt cấp lease in-session
 > cùng ngày.
@@ -98,13 +100,13 @@
 >
 > | # | chỗ | đang ghi | sự thật đo được trên `195a478d`, clone ĐẦY ĐỦ |
 > |---|---|---|---|
-> | 1 | §0 bảng đo | bộ test `42/42` | **vẫn 42/42** trên master sau revert. `#227` từng nâng lên 68; `#238` sẽ nâng lại. **Đo, đừng đoán** — hộp bản 3b dự báo `58`, số thật lúc `#227` còn trên master là **68** |
-> | 2 | §6 `A9` | `N >= 42` | đúng cho `195a478d`; phải nâng theo lượt `#238`, đo lại lúc ấy. **Đếm bằng `^def t[0-9]+` ra 42; bằng `^def t[0-9]+_` ra 39** — chênh ba ca hậu tố chữ (`t02b_` `t02c_` `t02d_`). Bộ test duyệt `for fn in CA` nên **42 là số ca thật chạy**; ghi kèm MẪU khi trích số, kẻo so chéo hai phiên ra `42 ≠ 39` rồi đọc thành *"#238 đã land"* |
+> | 1 | §0 bảng đo | bộ test `42/42` | **vẫn 42/42** trên master sau revert. `#227` từng nâng lên 68; `#238` sẽ nâng lại. **Đo, đừng đoán** — hộp bản 3b dự báo `58`, số thật lúc `#227` còn trên master là **68** **ĐÃ SỬA Ở BẢN 5: 73/73 trên `08bb4ecd`.** Bản 4 BỎ SÓT chỗ này. |
+> | 2 | §6 `A9` | `N >= 42` | đúng cho `195a478d`; phải nâng theo lượt `#238`, đo lại lúc ấy. **Đếm bằng `^def t[0-9]+` ra 42; bằng `^def t[0-9]+_` ra 39** — chênh ba ca hậu tố chữ (`t02b_` `t02c_` `t02d_`). Bộ test duyệt `for fn in CA` nên **42 là số ca thật chạy**; ghi kèm MẪU khi trích số, kẻo so chéo hai phiên ra `42 ≠ 39` rồi đọc thành *"#238 đã land"* **ĐÃ SỬA Ở BẢN 5: `N >= 73`.** Bản 4 BỎ SÓT — và đây là chỗ sót ĐẮT NHẤT: sàn 42 nằm 31 ca dưới thực tế. |
 > | 3 | §0 nền đo | `3db588c` | master nay **`195a478d`** (đã qua `2ab3560` → `99eb1d2` → đây trong ba giờ) |
 > | 4 | §3 bảng va chạm | ba dòng: `#209`, `#220`, mục D | thiếu `#227` **và** `#238`; `#238` là dòng có lease SỐNG |
 > | 5 | §3 câu kết | *"không lease nào đang giữ hai tệp này"* | **bị bác hai lần.** Quét đủ ref lúc 05:2xZ: 8 lease còn hạn; quét lại 05:5xZ: **9** |
 > | 6 | §3 thứ tự | `PLAT-X8 → #209 → …` | thật: **`#238` → `PLAT-X8` → `#209` → `PLAT-X7` → mục D** |
-> | 7 | §5 mục 9 | `t23` *"42/42 → N/N"* | số nền đúng hôm nay, nhưng nó **đi kèm** sàn A9 nên phải đổi cùng lượt |
+> | 7 | §5 mục 9 | `t23` *"42/42 → N/N"* | số nền đúng hôm nay, nhưng nó **đi kèm** sàn A9 nên phải đổi cùng lượt **ĐÃ SỬA Ở BẢN 5: `73/73 → N/N`.** Bản 4 BỎ SÓT. |
 > | 8 | §4 mục 1 · §6 `A8` | *"49 lease cũ"* | **61** tệp |
 > | 9 | §8 | *"15/15 đường dẫn"*, *"10 lease khai lớp"* | **14/14** đường · **22** lease khai lớp (1 `routine` / 5 `systemic` / 16 `sensitive`); executor **17**, reviewer **44** |
 > | 10 | §9 | *"0/49 tệp có `risk`"*, *"39/39 reviewer"* | **0/61** · **44/44** — và **44/44 theo CẢ HAI** cách đo (hình dạng lẫn tồn tại, trên clone đầy đủ). Bản 3d ghi *"27/44 theo tồn tại"*: **SAI**, xem mục 12 |
@@ -195,7 +197,7 @@
 > |---|---|
 > | chờ `#238` land | merge `563e0eb8` **11:58:18Z 22-08** (PR #246). Nghiệm thu `W3` của `#238` đòi Windows xanh trên exact head — thuộc packet ấy, không phải packet này |
 > | đo lại toàn bảng §0, không vá lẻ | đã đo lại toàn bảng ở `3c`; các bản sau chỉ sửa chỗ ĐO SAI, có ghi nguyên nhân từng chỗ |
-> | sửa mười ba chỗ | xong ở `3c`…`3i`; **giữ nguyên văn** trong hộp này làm hồ sơ |
+> | sửa mười ba chỗ | **mười ở `3c`…`3i`; BA chỗ (1 · 2 · 7) chỉ xong ở BẢN 5.** Ba chỗ ấy cố ý HOÃN tới khi `#238` land vì chúng là con số phụ thuộc lượt ấy — nhưng **bản 4 quên làm chúng trong khi bảng này lại khai đã xong cả mười ba**. Bắt được lúc sắp giao prompt cho executor. Nguyên nhân: neo lại theo BĂM thì `grep` băm tìm được mọi chỗ trích băm, nhưng câu khẳng định trạng thái viết bằng CHỮ (`bản 3i`, `N >= 42`, `chưa cấp lease được`) thì `grep` băm KHÔNG BAO GIỜ thấy. **Quét theo băm không thay được quét theo TRẠNG THÁI** — giữ nguyên văn làm hồ sơ |
 > | đóng băng **bản 4** | bản này |
 > | quét lease trên **mọi** ref rồi mới cấp | quét **13:01Z**: 162 ref hai nguồn khớp, **0** lease còn hiệu lực. Xem mục *VA CHẠM WRITE SET* ở trên |
 > | prompt executor neo lại băm | `ops/prompts/plat-x8-exec-1-codex-20260821.md` giữ nguyên đường dẫn, neo lại băm bản 4 |
@@ -323,7 +325,8 @@ mà **nội dung yêu cầu vẫn không đổi một chữ** — thứ trôi l�
 | 3g | `f3a2f5595120…` | vá 3 finding cross-review lượt 2 — nặng nhất: bản 3e khai một **cổng KHÔNG TỒN TẠI**, nay là preflight thủ công |
 | 3h | `3c9bff4f5410…` | ba đính chính từ hai phiên khác: tiêu đề bảng đếm sai, câu `--depth` sai kết cục, thêm bảng ĐƠN VỊ |
 | 3i | `ca852d95ab59…` | **Bảng ĐƠN VỊ tự phạm lỗi đơn vị, và lệnh đo trong nó CHẠY SAI.** (a) Hàng đầu ghi *"N lease bị sửa nội dung"* — chênh đếm **phiên bản thừa**, không phải số tệp; đo thật: **4** tệp / **14** phiên bản. (b) Bảng chép **giá trị**, mà giá trị trôi trong một giờ ⇒ bỏ hết giá trị, giữ **quan hệ bất biến** + lệnh đo. (c) Lệnh đo tôi viết **thiếu một `sort`** nên `uniq -c` chỉ đếm dòng liền kề — vẫn `rc=0`, vẫn in ra thứ trông hợp lý, mà **thiếu 3/4 kết quả**; chỉ lộ vì đã trích nguyên văn từ spec ra chạy. (d) Nêu manh mối `plat-x5-review-2` có **năm** phiên bản — nợ do `tra-luat-3a` ghi, ngoài packet này |
-| **4** | bản này | **VẬT CẢN HẾT.** `#238` land `563e0eb8` lúc 11:58:18Z (PR #246); quét 13:01Z ra **0** lease còn hiệu lực giữ `write_set`. Hộp ⛔ đổi từ *chặn* sang *đã giải* — **mười ba phát hiện GIỮ NGUYÊN làm hồ sơ**. Thêm khối khai ngoại lệ `ADR-0045` §2 mà lease lượt 1 thiếu. Đây là bản lease `plat-x8-exec-2-codex-20260822` neo vào
+| 4 | `46d9a0299a09…` | **VẬT CẢN HẾT.** `#238` land `563e0eb8` lúc 11:58:18Z (PR #246); quét 13:01Z ra **0** lease còn hiệu lực giữ `write_set`. Hộp ⛔ đổi từ *chặn* sang *đã giải* — **mười ba phát hiện GIỮ NGUYÊN làm hồ sơ**. Thêm khối khai ngoại lệ `ADR-0045` §2 mà lease lượt 1 thiếu. Đây là bản lease `plat-x8-exec-2-codex-20260822` neo vào
+| **5** | bản này | **Bản 4 khai *"sửa mười ba chỗ: xong"* mà BỎ SÓT ba chỗ** — `§0` bảng đo, `§6 A9`, `§5` mục 9. Cả ba là con số phụ thuộc `#238`, cố ý hoãn tới khi nó land, rồi bản 4 quên. Đắt nhất là **`A9` sàn `N >= 42` trong khi thực tế 73** — sàn nằm 31 ca DƯỚI thực tế, nên một lượt xoá 31 test vẫn qua nghiệm thu. Nguyên nhân: neo lại theo BĂM, mà `grep` băm không thấy câu khẳng định trạng thái viết bằng CHỮ. Bắt được lúc sắp giao prompt cho executor, trước khi codex chạy |
 
 Bốn phát hiện trên **một** đường là dấu hiệu sai ở QUYẾT ĐỊNH GỐC chứ không ở các bản vá. Các bản
 trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm bản dùng được.
@@ -354,7 +357,7 @@ trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm 
 | lease **reviewer** (không có `write_set`) | 39 | số tệp |
 | đường dẫn phân biệt trong `write_set` của mọi lease | 15 | số đường dẫn |
 | trong đó `ops/lease_publish.py` | 0 | số lần xuất hiện |
-| bộ test tại `3db588c` | 42/42 | số ca đạt / số ca chạy |
+| bộ test tại `08bb4ecd` (base của lease lượt 2) | **73/73** | số ca đạt / số ca chạy. Mốc cũ `3db588c` là `42/42`; `#227` nâng lên 68 rồi bị revert về 42; `#238` (PR #246) đưa lên **73** |
 | tám lần chạm gần nhất tới `ops/lease_publish*` | +50 … +187 | số dòng thêm mỗi commit |
 
 **Mâu thuẫn làm bằng chứng gốc** — hai lease executor, **cùng `write_set`**
@@ -453,7 +456,8 @@ land**. Nên không lease nào đang giữ hai tệp này ⇒ va chạm là **th
    `leased_at_utc` sau `2026-08-21T00:00:00Z` thì in **CẢNH BÁO** ra stderr, **không** đổi `rc`.
    → `ops/lease_publish.py`
 8. Ca `rXX_` khoá từng mục 2–7, và bảng đột biến khoá chúng. → `ops/lease_publish_test.py`
-9. `t23` (mọi lease thật phải qua) vẫn **42/42 → N/N**, không tụt số ca, sau khi thêm chốt.
+9. `t23` (mọi lease thật phải qua) vẫn **73/73 → N/N**, không tụt số ca, sau khi thêm chốt.
+   (Sàn 73 đo trên `08bb4ecd`, base của lease lượt 2 — KHÔNG phải 42; xem chỗ 1/2/7 trong hộp đầu tệp.)
    → `ops/lease_publish_test.py`
 
 ## 6. nghiem_thu — mỗi tiêu chí nêu phép đo làm nó ĐỎ (L3)
@@ -470,7 +474,7 @@ land**. Nên không lease nào đang giữ hai tệp này ⇒ va chạm là **th
 | A6 | `write_set: []` và lease thiếu hẳn `write_set` ⇒ cả hai ra `sensitive` | đột biến: coi rỗng là `routine` ⇒ ca ĐỎ |
 | A7 | **đột biến NỚI BẢNG**: thêm `.claude/dev/launcher.py → routine` vào `_BANG_LOP` ⇒ ca đích ĐỎ | không có đột biến này thì không biết ca đang đo **bảng** hay đo thứ khác (doctrine `v1.36.68`) |
 | A8 | lease `schema_version: 1` y hệt A2 ⇒ `rc == 0`, và stderr **có** chuỗi cảnh báo | đột biến: bỏ chốt `schema_version`, áp cho mọi lease ⇒ ca ĐỎ **và** `t23` ĐỎ (49 lease cũ) |
-| A9 | `python3 ops/lease_publish_test.py` ⇒ `rc=0`, `N/N` **hai số bằng nhau**, `N >= 42` | tụt số ca hoặc hai số lệch ⇒ ĐỎ |
+| A9 | `python3 ops/lease_publish_test.py` ⇒ `rc=0`, `N/N` **hai số bằng nhau**, **`N >= 73`** (đo trên `08bb4ecd`, base lease lượt 2; đếm bằng `^def t[0-9]+`) | tụt số ca hoặc hai số lệch ⇒ ĐỎ. **Sàn 42 của bản ≤4 là sàn CHẾT** — nó nằm 31 ca DƯỚI thực tế, nên một lượt xoá 31 test vẫn qua A9 |
 | A10 | mọi đột biến A1–A8 chạy trên **BẢN SAO CẢ CÂY** trong thư mục tạm, mỗi đột biến một tên tệp riêng | ghi vào tệp thật rồi khôi phục trong `finally` là bom hẹn giờ đã trả giá; bản sao một tệp làm `HERE` sai và số đo vô nghĩa |
 | A11 | `actionlint .github/workflows/*.yml` ⇒ `rc=0` cả 5, **fail-close khi thiếu công cụ** | thay bằng PyYAML ⇒ coi như KHÔNG ĐO ĐƯỢC, ĐỎ |
 | A12 | `ready to review` = CI xanh trên **exact head** qua `workflow_dispatch`, **cả hai** job `success` | *"PR xanh"* KHÔNG đủ: `ci.yml` chỉ chạy `ubuntu` cho PR thường |

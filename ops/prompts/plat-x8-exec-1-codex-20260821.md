@@ -1,45 +1,42 @@
-# Prompt BẤT BIẾN — EXECUTOR `PLAT-X8` (#225), lượt 1, provider `codex`
+# Prompt BẤT BIẾN — EXECUTOR `PLAT-X8` (#225), **lượt 2**, provider `codex`
 
-> **CHƯA CÓ HIỆU LỰC — ĐỪNG DÙNG NGUYÊN TRẠNG.** Lease neo prompt này
-> (`plat-x8-exec-1-codex-20260821`) đã bị **RÚT** ngày 21-08-2026, chưa từng được đăng; biên bản
-> `ops/RUT_LEASE_PLAT_X8_20260821.md`. Lý do: va chạm write set với `#227` trên
-> `ops/lease_publish.py` + `ops/lease_publish_test.py`, cả về cửa sổ lẫn về nội dung.
+> # ✅ CÓ HIỆU LỰC — lease `plat-x8-exec-2-codex-20260822`, revision 2
 >
-> Giữ tệp này vì phần **nếp của kho** (§3) không mất giá trị. Nhưng ba thứ trong đây sẽ SAI sau khi
-> `#227` land, và phải sửa TRƯỚC khi dùng:
-> 1. băm đặc tả ở §1 đang trỏ **bản 3** — đặc tả phải ra **bản 4**, băm sẽ đổi;
-> 2. sàn số ca ở §4 ghi **42** — sàn thật sẽ là **58** (`#227` đưa bộ test 42 → 58 ca);
-> 3. `base` sẽ là `master` SAU khi `#227` land, không phải `20c6c633`.
+> Lease lượt **1** (`plat-x8-exec-1-codex-20260821`) đã bị RÚT, chưa từng đăng — biên bản
+> `ops/RUT_LEASE_PLAT_X8_20260821.md`. Lượt **2** đã cấp VÀ đã đăng (`posted_comment_id: 5380905569`
+> trên `#225`), hết hạn **`2026-08-23T14:10:00Z`**. Tên tệp prompt giữ hậu tố `-1-` để con trỏ cũ
+> không chết; **nội dung là của lượt 2**.
 >
-> Thứ tự chốt: `#227` → **`PLAT-X8` (#225)** → `#209` → `PLAT-X7` (#220) → gói spec-gate.
+> **Vật cản đã hết.** `#238` land `563e0eb8` lúc 11:58:18Z 22-08 (PR #246). Quét lease toàn ref lúc
+> 14:09:32Z: 22 lease chạm `ops/lease_publish*`, 9 chưa hết hạn, **cả 9 thuộc packet ĐÃ LAND**
+> ⇒ **0 lease còn hiệu lực**. Đừng đọc *"chưa hết hạn"* thành *"đang giữ"*.
 >
-> **ĐÍNH CHÍNH 22-08:** `#227` land 05:16Z **rồi bị revert** (PR #237, Windows đỏ) — master nay
-> `2ab3560`, bộ test về **42** ca. Land lại là **`#238`**, nên thứ tự thật là
-> **`#238` → `PLAT-X8` → `#209` → `PLAT-X7` → mục D**. Và lease của `#238` đang giữ **đúng cả hai**
-> tệp `write_set` của `PLAT-X8` tới **`2026-08-23T15:00:00Z`** (**BA** lease: `exec-1` · `exec-2` ·
-> `exec-3`) ⇒ **chưa cấp lease `PLAT-X8` được.**
+> **NGOẠI LỆ `ADR-0045`.** Packet `sensitive` + executor `codex` là ngoại lệ CÓ ĐIỀU KIỆN, hợp lệ khi
+> lease (a) do chủ kho chỉ định tường minh · (b) reviewer khác nền · (c) khai `review_class` ·
+> (d) **khai RÕ là ngoại lệ theo §2** · (e) human readback trước land. Lease lượt 2 có ĐỦ (a)–(e) —
+> khối `ngoai_le_ADR_0045`. **KHÔNG cổng nào canh việc này** (đo: `lease_publish.py` có 0 chỗ nhắc
+> `review_class`/`0045`; `PROTOCOL §20` xếp `ADR-0045` là `0 cổng`) ⇒ preflight THỦ CÔNG, không phải
+> bằng chứng cổng dương tính. **(e) là việc của lượt LAND — đừng coi là đã xong.**
 >
-> **VÀ KHI CẤP LẠI:** packet này là `sensitive`, executor là `codex` ⇒ đó là **ngoại lệ theo
-> `ADR-0045`**, chỉ hợp lệ khi lease (a) do chủ kho chỉ định tường minh, (b) reviewer khác nền,
-> (c) khai `review_class`, **(d) khai RÕ rằng đây là ngoại lệ theo §2**, và (e) có human readback
-> trước land. Lease lượt 1 (`3c21bcd8`, đã rút) có (a)(b)(c) nhưng **thiếu (d)**.
+> ## Bản trước của chính prompt này đã SAI, và nó suýt tới tay bạn
 >
-> **KHÔNG CỔNG NÀO CANH VIỆC NÀY** — đo: `ops/lease_publish.py` có **0** chỗ nhắc `review_class`
-> hay `0045`; `docs/PROTOCOL_DA_PHIEN.md:1090` xếp `ADR-0045` đúng ô **`0 cổng`**. Nên (a)–(e) là
-> **preflight THỦ CÔNG** của người cấp lease, không phải thứ máy chặn. Thiếu nó thì lease vẫn đăng
-> được — và đó chính là lý do phải đọc dòng này. Xem chỗ thứ 13 trong hộp ⛔ của đặc tả.
-
+> Bản neo trước ghi *"CHƯA CÓ HIỆU LỰC — ĐỪNG DÙNG NGUYÊN TRẠNG"*, *"chưa cấp lease được"*,
+> *"đặc tả vẫn mang hộp ⛔ ĐỪNG CẤP LEASE"*, nhánh `codex/plat-x8-exec-1`, sàn `N >= 42`. **Tất cả
+> đã sai** vào lúc nó được neo. Nguyên nhân: phiên điều phối neo lại theo **BĂM**, nên `grep` băm tìm
+> được mọi chỗ trích băm nhưng **không bao giờ** thấy câu khẳng định trạng thái viết bằng CHỮ.
+> **Quét theo băm không thay được quét theo TRẠNG THÁI.** Nếu bạn thấy câu nào trong tệp này vẫn nói
+> ngược với lease hoặc đặc tả — **DỪNG và báo**, đừng tự hoà giải.
 
 Bạn là NGƯỜI THI CÔNG packet này. Reviewer sẽ là `claude` — khác họ model, tiêu chí N14 thoả.
 
 **ĐẶC TẢ CÓ THẨM QUYỀN là `ops/specs/plat-x8.md`**, băm
-`46d9a0299a0906b53af3eb023628eacadf37ce87d0b96debb36c84dae9f0277d` — **BẢN 4**, 22-08-2026.
-Bản 4 là bản **lease `plat-x8-exec-2-codex-20260822` neo vào**: hộp ⛔ đổi từ *chặn* sang
+`d85a75d835566c902cb62fead8521ad44851baa388d65329e4c94025b9bad6ca` — **BẢN 5**, 22-08-2026.
+Bản 5 là bản **lease `plat-x8-exec-2-codex-20260822` revision 2 neo vào**: hộp ⛔ đổi từ *chặn* sang
 *đã giải* (`#238` land `563e0eb8` lúc 11:58:18Z, quét 13:01Z ra **0** lease còn hiệu lực), còn
-mười ba phát hiện **giữ nguyên văn** làm hồ sơ. Bản `3i` (`ca852d95ab59…`) và mọi bản trước đã
-HẾT HIỆU LỰC.
-Bản 3h (`3c9bff4f5410…`), 3g (`f3a2f5595120…`), 3f (`497c68360de7…`), 3e (`ce14fb0b75e4…`), 3d (`f7f8e6209e4f…`), 3c (`182ea7621d02…`), 3b (`308d0cf44fc1…`) và mọi bản trước KHÔNG còn hiệu lực. **Đặc tả vẫn mang hộp ⛔ ĐỪNG CẤP
-LEASE** — đọc hộp trước khi làm bất cứ gì với prompt này. Prompt này KHÔNG chép lại đặc
+mười ba phát hiện **giữ nguyên văn** làm hồ sơ. Bản 4 (`46d9a0299a09…`), `3i` (`ca852d95ab59…`) và mọi bản trước đã HẾT HIỆU LỰC —
+**bản 4 bỏ sót ba con số phụ thuộc `#238`; bản 5 sửa.**
+Bản 3h (`3c9bff4f5410…`), 3g (`f3a2f5595120…`), 3f (`497c68360de7…`), 3e (`ce14fb0b75e4…`), 3d (`f7f8e6209e4f…`), 3c (`182ea7621d02…`), 3b (`308d0cf44fc1…`) và mọi bản trước KHÔNG còn hiệu lực. Hộp đầu đặc tả nay là **✅ ĐÃ GIẢI**, nhưng **vẫn phải đọc**: nó giữ nguyên văn
+mười ba chỗ từng sai, ba trong số đó là lỗi của chính phiên soạn đặc tả. Prompt này KHÔNG chép lại đặc
 tả — chép là dựng hai bản trôi lệch. Đọc đặc tả TRƯỚC, rồi đọc prompt này để biết nếp của kho.
 Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
 
@@ -48,10 +45,10 @@ Chỗ nào prompt này lệch đặc tả thì **đặc tả đúng**.
 | trường | giá trị |
 |---|---|
 | packet | `#225` — `[PLAT-X8]` |
-| đặc tả | `ops/specs/plat-x8.md` — bản **`3i`** (băm ở trên; **kiểm bằng `sha256sum` trước khi đọc**). Các bản trước (`9cb54a2e…`, `b88c53df…`, `328a74fa…`, `308d0cf4…`, `182ea762…`, `f7f8e620…`) KHÔNG còn hiệu lực |
+| đặc tả | `ops/specs/plat-x8.md` — bản **5** (băm ở trên; **kiểm bằng `sha256sum` trước khi đọc**). Các bản trước (`9cb54a2e…`, `b88c53df…`, `328a74fa…`, `308d0cf4…`, `182ea762…`, `f7f8e620…`) KHÔNG còn hiệu lực |
 | write set | `ops/lease_publish.py` · `ops/lease_publish_test.py` — **ĐÚNG hai tệp** |
-| base | xem `base_sha` trong lease — neo vào `master` sau khi PR `#226` merge |
-| nhánh | `codex/plat-x8-exec-1` |
+| base | **`08bb4ecd6dbdb87267cb8179f52ac28c151eb4b9`** = `origin/master` sau khi `#238`/`#246` land. Bằng `base_sha` trong lease |
+| nhánh | **`codex/plat-x8-exec-2`** (`branch_ownership: exclusive`) |
 
 Trần `sensitive` của ADR-0044: **≤3 tệp / ≤300 dòng thêm**. Bạn dùng 2 tệp; suất thứ ba chừa cố ý
 cho lượt vá sau verdict. Đừng tiêu nó.
@@ -127,8 +124,8 @@ làm nó ĐỎ** — đó không phải gợi ý, đó là phần bắt buộc c
 hai P1 của cross-review lượt 2; khai hoàn tất mà bỏ chúng là khai chưa chứng minh gì về đường
 reviewer lẫn về vế dương. Nhắc ba cái hay bị bỏ:
 
-- **A9**: `python3 ops/lease_publish_test.py` ⇒ `rc=0`, `N/N` **hai số BẰNG NHAU**, `N >= 42`.
-  Nền hiện tại là **42/42**. `rc=0` một mình là cổng có thể bị lừa — đòi bằng chứng DƯƠNG.
+- **A9**: `python3 ops/lease_publish_test.py` ⇒ `rc=0`, `N/N` **hai số BẰNG NHAU**, **`N >= 73`**.
+  Nền hiện tại là **73/73** trên `08bb4ecd`. Sàn 42 của bản cũ là sàn CHẾT — nó nằm 31 ca DƯỚI thực tế. `rc=0` một mình là cổng có thể bị lừa — đòi bằng chứng DƯƠNG.
 - **A13/A14**: `A13` đo HÀNH VI của *"không quét"* — thư mục lease chứa một tệp YAML **hỏng cú
   pháp** mà lease reviewer vẫn ra `sensitive`; thêm bất kỳ lượt đọc thư mục nào là ca ĐỎ vì tệp
   hỏng sẽ ném. `A14` giữ **vế dương** (executor `write_set: ['docs/x.md']` với bảng nới tạm ⇒
@@ -140,7 +137,7 @@ reviewer lẫn về vế dương. Nhắc ba cái hay bị bỏ:
 
 ## 5. Ranh giới
 
-**Commit vào nhánh `codex/plat-x8-exec-1`. ĐỪNG `git push`** — phiên điều phối đẩy sau khi kiểm.
+**Commit vào nhánh `codex/plat-x8-exec-2`. ĐỪNG `git push`** — phiên điều phối đẩy sau khi kiểm.
 Đừng đụng tệp ngoài write set. Đừng đụng `ops/NO_KY_THUAT.md` (thuộc `#209`) và đừng sửa 49 lease
 cũ (forward-only, §4.1 đặc tả).
 

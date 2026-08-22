@@ -50,10 +50,12 @@ BUOC_BAM = ("release-check", "release-verify", "release-bundle")
 # `tl selftest` co ca phu thuoc nen => tap doc tren windows-latest CHUA DO; khai thay vi ngam.
 NEN_DA_DO = "linux"
 
-# Di bang `usercustomize`, KHONG phai `sitecustomize`: Python chi nap MOT `sitecustomize`,
-# nen dung ten ay la CHE ban san co => tien trinh do khong con chay "y nhu that" va co the
-# cho tap doc NHO HON ma van rc=0 (codex bat, #247). `usercustomize` nap SAU nen khong che gi;
-# user-site bi tat thi hook khong cai duoc => roi vao nhanh KHONG DO DUOC san co, fail-close.
+# `sitecustomize`/`usercustomize` la co che MOT KHE MOT TEN, va ta chen tam_p len dau
+# PYTHONPATH nen LUON thang => KHONG ten nao an toan. Ba vong review deu vap dung day
+# (#247). Nen o day KHONG hua trong suot: dung khe `usercustomize` (de `sitecustomize` san
+# co van chay), roi TU PHAT HIEN minh dang che ai va tra KHONG DO DUOC. Do trong chinh tien
+# trinh DO vi chi no moi biet `sys.path` that. user-site bi tat => hook khong cai duoc =>
+# cung roi vao KHONG DO DUOC. Fail-close ca hai duong; khong co "trong suot mot phan".
 _NGUON_HOOK = """import os, sys
 _so = os.environ.get("CI_PHAMVI_SO")
 if _so:
@@ -67,6 +69,11 @@ if _so:
                 try: os.write(_fd, (p + "\\n").encode("utf-8", "replace"))
                 except Exception: pass
     sys.addaudithook(_h)
+    _ta = os.path.abspath(__file__)
+    for _d in sys.path:   # ta LUON thang (tam_p dau PYTHONPATH) => ban khac khong duoc nap
+        _p = os.path.abspath(os.path.join(_d, "usercustomize.py"))
+        if _p != _ta and os.path.exists(_p) and os.path.getsize(_p) > 0:
+            os.write(_fd, ("#CHE " + _p + "\\n").encode("utf-8", "replace")); break
 """
 
 
@@ -97,6 +104,8 @@ def do_tap_doc(buoc: str, goc: Path):
         dong = so.read_text(encoding="utf-8", errors="replace").splitlines()
     if "#HOOK-OK" not in dong:
         return "audit hook khong cai duoc"
+    if any(d.startswith("#CHE") for d in dong):
+        return "moi truong da co usercustomize rieng, hook se che no"
     if r.returncode != 0:
         # Hong sau khi hook nap => tap doc MOT PHAN, gia dang phep do sach (codex bat #247).
         return f"lenh dich thoat {r.returncode}"

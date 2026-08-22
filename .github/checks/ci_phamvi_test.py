@@ -150,6 +150,22 @@ def n7_khong_che_sitecustomize_san(ws):
     assert not list((ws / "scripts").rglob("__pycache__")), "da boc PYTHONDONTWRITEBYTECODE"
 
 
+@ca
+def n8_da_co_usercustomize_thi_khong_do_duoc(ws):
+    """Khe `usercustomize` cung MOT-KHE-MOT-TEN, va tam_p chen dau PYTHONPATH nen ta LUON
+    thang => doi ten khong cuu duoc, chi doi cho lo (vong 3, codex #247). Che ban san co thi
+    phai KHONG DO DUOC chu khong duoc do tiep roi cong bo `doc_lap`."""
+    (ws / "uc").mkdir(exist_ok=True)
+    (ws / "uc" / "usercustomize.py").write_text("x = 1\n", "utf-8")
+    for co in (["--kiem-doc"], ["--bang"]):
+        rc, out = chay(ws, *co, "--buoc", "workflow-audit", them_env={"PYTHONPATH": str(ws / "uc")})
+        assert rc != 0 and "KHONG DO DUOC" in out, f"che usercustomize san ma {co} xanh: {out}"
+    thay(ws, CHECK, 'if any(d.startswith("#CHE") for d in dong):', "if False:")
+    rc, out = chay(ws, "--kiem-doc", "--buoc", "workflow-audit",
+                   them_env={"PYTHONPATH": str(ws / "uc")})
+    assert rc == 0, f"go chot #CHE ma ca khong doi => ca do thu khac: {out}"
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory() as tam:
         ws = Path(tam) / "ws"

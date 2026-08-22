@@ -50,6 +50,10 @@ BUOC_BAM = ("release-check", "release-verify", "release-bundle")
 # `tl selftest` co ca phu thuoc nen => tap doc tren windows-latest CHUA DO; khai thay vi ngam.
 NEN_DA_DO = "linux"
 
+# Di bang `usercustomize`, KHONG phai `sitecustomize`: Python chi nap MOT `sitecustomize`,
+# nen dung ten ay la CHE ban san co => tien trinh do khong con chay "y nhu that" va co the
+# cho tap doc NHO HON ma van rc=0 (codex bat, #247). `usercustomize` nap SAU nen khong che gi;
+# user-site bi tat thi hook khong cai duoc => roi vao nhanh KHONG DO DUOC san co, fail-close.
 _NGUON_HOOK = """import os, sys
 _so = os.environ.get("CI_PHAMVI_SO")
 if _so:
@@ -60,10 +64,8 @@ if _so:
             p = args[0]
             p = p.decode("utf-8", "replace") if isinstance(p, bytes) else p
             if isinstance(p, str):
-                try:
-                    os.write(_fd, (p + "\\n").encode("utf-8", "replace"))
-                except Exception:
-                    pass
+                try: os.write(_fd, (p + "\\n").encode("utf-8", "replace"))
+                except Exception: pass
     sys.addaudithook(_h)
 """
 
@@ -85,20 +87,18 @@ def do_tap_doc(buoc: str, goc: Path):
     """Chay buoc THAT duoi audit hook. Tra TAP nhom doc duoc, hoac CHUOI ly do = KHONG DO DUOC."""
     with tempfile.TemporaryDirectory() as tam:
         tam_p = Path(tam)
-        (tam_p / "sitecustomize.py").write_text(_NGUON_HOOK, encoding="utf-8")
+        (tam_p / "usercustomize.py").write_text(_NGUON_HOOK, encoding="utf-8")
         (so := tam_p / "so.txt").touch()
         env = dict(os.environ)
         env["CI_PHAMVI_SO"] = str(so)
         env["PYTHONPATH"] = os.pathsep.join(x for x in (str(tam_p), env.get("PYTHONPATH")) if x)
-        env.pop("PYTHONDONTWRITEBYTECODE", None)
         r = subprocess.run([sys.executable] + BUOC[buoc]["lenh"], cwd=str(goc), env=env,
                            capture_output=True, text=True)
         dong = so.read_text(encoding="utf-8", errors="replace").splitlines()
     if "#HOOK-OK" not in dong:
         return "audit hook khong cai duoc"
     if r.returncode != 0:
-        # Lenh dich HONG sau khi hook nap => tap doc chi la MOT PHAN; voi buoc khai tap
-        # rong thi phan ay cung rong, nen no GIA DANG mot phep do sach (codex bat, #247).
+        # Hong sau khi hook nap => tap doc MOT PHAN, gia dang phep do sach (codex bat #247).
         return f"lenh dich thoat {r.returncode}"
     ra = set()
     for d in dong:
@@ -152,15 +152,12 @@ def kiem_doc(buoc: str, goc: Path) -> list:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="bang phu thuoc buoc CI <-> nhom duong dan")
-    ap.add_argument("--kiem-bam", action="store_true")
-    ap.add_argument("--kiem-doc", action="store_true")
-    ap.add_argument("--bang", action="store_true")
+    for c in ("--kiem-bam", "--kiem-doc", "--bang"):
+        ap.add_argument(c, action="store_true")
     ap.add_argument("--buoc", choices=sorted(BUOC))
-    ap.add_argument("--goc", default=str(GOC))
     a = ap.parse_args(argv)
-    if not (a.kiem_bam or a.kiem_doc or a.bang):
-        ap.error("chon it nhat mot trong --kiem-bam / --kiem-doc / --bang")
-    goc = Path(a.goc).resolve()
+    if not (a.kiem_bam or a.kiem_doc or a.bang): ap.error("chon mot: --kiem-bam/--kiem-doc/--bang")
+    goc = GOC
     chon = [a.buoc] if a.buoc else sorted(BUOC)
 
     loi = kiem_nhom_ton_tai(goc)

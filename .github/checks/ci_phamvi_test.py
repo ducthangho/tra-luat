@@ -12,6 +12,7 @@ Chay `python .github/checks/ci_phamvi_test.py` — ton ~4 phut vi N2 chay `tl se
 """
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import sys
@@ -29,9 +30,9 @@ def ca(f):
     return f
 
 
-def chay(ws: Path, *args):
+def chay(ws: Path, *args, them_env=None):
     r = subprocess.run([sys.executable, CHECK, *args], cwd=str(ws),
-                       capture_output=True, text=True)
+                       env={**os.environ, **(them_env or {})}, capture_output=True, text=True)
     return r.returncode, r.stdout + r.stderr
 
 
@@ -47,6 +48,8 @@ def thay(ws: Path, tep: str, cu: str, moi: str):
 def khoi_phuc(ws: Path):
     subprocess.run(["git", "checkout", "--", RELEASE], cwd=str(ws), capture_output=True)
     shutil.copy2(GOC / CHECK, ws / CHECK)
+    for d in (ws / "scripts").rglob("__pycache__"):  # .pyc cu => ca sau chay MA CU
+        shutil.rmtree(d, ignore_errors=True)
 
 
 @ca
@@ -130,6 +133,21 @@ def n6_lenh_dich_hong_thi_khong_do_duoc(ws):
     thay(ws, CHECK, "    if r.returncode != 0:", "    if False:")
     rc, out = chay(ws, "--kiem-doc", "--buoc", "workflow-audit")
     assert rc == 0, f"go chot rc ma ca khong doi => ca do thu khac: {out}"
+
+
+@ca
+def n7_khong_che_sitecustomize_san(ws):
+    """Python chi nap MOT `sitecustomize`; dung ten ay la CHE ban san co. Hook di bang
+    `usercustomize` => ban san VAN chay. Dau vet phai la TEP, khong phai env: env ke thua tu
+    cha nen ban dau viet bang env va dot bien SONG SOT — ca do khong do gi (codex, #247)."""
+    (ws / "sc").mkdir(exist_ok=True)
+    moc = ws / "sc" / "moc.txt"
+    (ws / "sc" / "sitecustomize.py").write_text(f"open({str(moc)!r},'a').write('x')\n", "utf-8")
+    rc, out = chay(ws, "--kiem-doc", "--buoc", "workflow-audit", them_env={
+        "PYTHONPATH": str(ws / "sc"), "PYTHONDONTWRITEBYTECODE": "1"})
+    n = len(moc.read_text()) if moc.exists() else 0
+    assert n >= 2, f"sitecustomize san chi chay {n} lan (cha) => bi che o tien trinh DO: {out}"
+    assert not list((ws / "scripts").rglob("__pycache__")), "da boc PYTHONDONTWRITEBYTECODE"
 
 
 def main() -> int:

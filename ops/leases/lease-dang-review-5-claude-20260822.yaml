@@ -1,0 +1,83 @@
+# Lease REVIEWER — `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 5 — REVIEW DELTA. Neo exact head ba82b06f.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 227
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+lease_id: lease-dang-review-5-claude-20260822
+revision: 5
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: codex
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+review_class: sensitive
+
+reviewed_sha_required: ba82b06f9df81fc2f13786fec590ec2110d046b7
+branch: codex/lease-dang-exec-1
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+nen_delta_sha: 6eaa3755abd96ef6d8f820daaa6b9d96e2bdd7b5
+target_branch_neu_land: master
+scope_files: 1
+scope_ghi_chu: 'REVIEW DELTA. Lượt 7 chỉ chạm `ops/lease_publish_test.py` (+30/−18) — tỉ lệ XOÁ cao nhất packet.'
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r7.md
+spec_sha256_required: 623b23555a6fa43dad2d9badeaac3a6f852c0be6b9927d4593992f6e10310cb4
+spec_ke_thua:
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r6.md, sha256: 4ee67d54b5504c0b303dad3bf8470c912ad754e6bcda42e8cb4a2866475ba181}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r5.md, sha256: 2c8fb5c68e45dbdcd3e21c316169623d4dcab33459934b575ae8c626b08cb796}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r4.md, sha256: abe7c292aba05aa772b77c246a570d72c9b8e97220247030ae15af8f750d0fce}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r3.md, sha256: c65d5dbd9d2b398978226f6863cf7cd4e4ddb219a7086be0005e65804a0f47da}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r2.md, sha256: 3f310582de59dce7c109717dbab13ef9467b80c67ffeafc0ac8e1484309e0093}
+
+verdict_luot_truoc:
+  path: ops/reviews/lease-dang-review-4-claude-verdict.md
+  sha256: 0655b9d0caea1d49450b4b8013f79cd49af61adc62b261bdce2085b76b17614f
+
+prompt_path: ops/prompts/lease-dang-review-5-claude-20260822.md
+prompt_sha256_required: 03d996a62e0930741dd9d645d7bc15565096a901ccc1d0ce83c47582ad62b597
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-22 ("Luot 7: dao sang danh sach CHO PHEP")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-22T08:00:00Z'
+lease_expires_at_utc: '2026-08-23T08:00:00Z'
+run_minutes: 120
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 7
+review_rounds_used_truoc_luot_nay: 4
+review_calls_limit: 8
+review_calls_used_truoc_luot_nay: 4
+
+ngan_sach_con_lai:
+  dong_them_da_dung: 645
+  dong_them_toi_da: 660
+  con_lai: 15
+  ghi_chu: 'Nếu verdict là `can_sua`, reviewer PHẢI nói bản vá đề xuất có lọt 15 dòng không.'
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: 'suite hai môi trường + actionlint + ngân sách + BỐN đột biến từng sống sót, ĐO LẠI ĐỘC LẬP'
+  bang_chung: >-
+    Trên `ba82b06f`: `numstat cfaccff9..HEAD` = 3 tệp, +645/−19 (trần 660); suite thường và suite
+    với ba biến GitHub đặt + `gh` VẮNG (đã kiểm `command -v gh` rỗng) đều `rc=0` `68/68`;
+    `actionlint` `rc=0` trên 5 workflow. Đếm `bao_chan` = **9**, khớp sổ 9 mục, KHÔNG còn `+1`.
+    Bốn đột biến TỪNG SỐNG SÓT nay đều chết: **D3** (`if ! cmd`) và **D4** (`cmd || rc=$?`) mỗi
+    cái `67/68` ĐỎ `t64` (trước: `67/67` LỌT); **A5** (gỡ nhánh chặn của khối POST) `64/68` ĐỎ
+    `t64 t66 t67 t68` (trước: `67/67` XANH TRỌN VẸN). **M4** vẫn giết: `65/68` ĐỎ `t51 t63 t67`.
+  no_khai: 'CHƯA có lượt GitHub Actions THẬT, chưa có Windows, chưa đo `gh` thật — sau BẢY lượt vá.'
+
+canh_bao_cho_reviewer: >-
+  `r7` đảo từ danh sách CẤM sang danh sách CHO PHÉP (đếm `bao_chan`). Nước đi ấy CHỈ ĐÚNG NẾU
+  `bao_chan` là dấu hiệu BẮT BUỘC của mọi nhánh chặn — đó là GIẢ ĐỊNH MỚI và CHƯA AI ĐO. Việc
+  chính của lượt này là tấn công đúng giả định ấy: dựng nhánh chặn KHÔNG đi qua `bao_chan`
+  (`BI_CHAN=1` viết thẳng · `exit 1` · `continue` im lặng · đổi tên hàm). Lọt cái nào là E lần 2,
+  và theo chốt r7 thì verdict phải là `dung_lai`.

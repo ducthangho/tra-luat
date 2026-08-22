@@ -371,6 +371,58 @@ jobs:
         run: python scripts/tl.py doc-claims-check --strict --json
       - name: determinism-audit strict
         run: python scripts/tl.py determinism-audit --strict --json
+      # r246 — NOI BANG PHU THUOC VAO DUONG CHAY TU DONG (M7, Issue #254).
+      # Hai tep `.github/checks/ci_phamvi*.py` land 22-08 (#251, master 26856f9) ma
+      # KHONG duong nao goi: `grep -n ci_phamvi .github/workflows/*.yml` tra ve 0 dong,
+      # nen chung chua tich duoc luot chay nao. Dung benh ma chu thich `r225` (ngay
+      # tren buoc `doc-claims-check strict`) tu ghi — neo theo TEN BUOC chu khong theo
+      # SO DONG, vi so dong troi ngay khi ai do chen o tren:
+      # "guard khong noi vao duong chay tu dong thi guard chi la tai lieu".
+      #
+      # DAT NGAY TRUOC `release-check`: bang khai dung ba buoc BAM (`release-check`,
+      # `release-verify`, `release-bundle`) doc lap voi nhom ngoai goi. Bang lech ma thi
+      # phai do TRUOC khi chay chinh ba buoc ay.
+      #
+      # HAI BUOC, HAI CAU HOI KHAC NHAU — dung gop:
+      #   `--kiem-bam` : bang CO KHOP MA khong. Do lai `_build_release_manifest()` roi doi
+      #                  chieu voi `NGOAI_GOI`. Day la buoc sinh ra cai do DOC DUOC khi ai
+      #                  do sua `_RELEASE_EXCLUDE_*` ma quen bang.
+      #   `_test.py`   : chinh cong tren CO RANG khong. 6 dot bien tren `git worktree`
+      #                  ban sao. Rang la LOGIC, khong phai he dieu hanh.
+      #
+      # VI SAO `_test.py` CHI CHAY LINUX — va day la loi KHAI NO, khong phai thiet ke dep.
+      # `--kiem-bam` goi `_build_release_manifest()`, DUNG ham ma `release-check` /
+      # `release-verify` / `release-bundle` ngay duoi da chay tren Windows moi luot master
+      # (khong buoc nao co dieu kien nen) => them no vao Windows KHONG ruoc them mat hong
+      # nao. Bo phan chung thi khac: no dung `os.symlink` (`n6`), `git worktree`, va thu
+      # muc tam — ca ba CHUA AI DO tren `windows-latest`, ma symlink o do thuong doi quyen
+      # dac biet. Thu bao ve master la CONG: Windows duyet cay khac Linux thi chinh
+      # `--kiem-bam` do tren Windows, vi no dan xuat tap loai tru tu manifest dung tren nen
+      # dang chay.
+      #
+      # NO CO TEN: `ci-phamvi-test-chua-chay-duoc-tren-windows`. `n5` (nhom tep thanh thu
+      # muc) va `n6` (symlink van doc lap) do NGU NGHIA DUYET CAY va se khong bao gio chay
+      # tren Windows theo cach nay. Cong van bat duoc neu Windows duyet khac, nhung ta se
+      # khong biet VI SAO. Cung kieu khai no voi `don-nhanh-test-chua-chay-duoc-tren-windows`
+      # o buoc `don-nhanh selftest` phia tren.
+      #
+      # VI SAO VO DIEU KIEN — va day la cho LECH mot dac ta DA DONG BANG, noi thang.
+      # `ops/specs/CI-FASTPATH-THEO-DIFF.md` (sha256 32ba1b32ec9436453f7f8fe3c6f8e4d9a4af6e2ceb4e40bfefd8ffb2917d7580)
+      # quyet dinh Q3 khai chay CO DIEU KIEN + mot luot dinh ky hang tuan, ly le nguyen van
+      # "Chay moi PR thi tu phan (cong 3-5 phut vao dung thu dang di cat)". Ly le ay DO TREN
+      # BAN CO VE DOC — ban da bi bo (#247 dong khong merge). Do lai tren thu that su duoc
+      # noi o day: 0,10s + 1,83s ~ 1,9s, so voi gate ~6,6 phut tuong => ~0,5%.
+      # Ly do THU HAI moi la ly do chinh: ban than logic dieu kien la mat hong kho nay da
+      # tra gia HAI lan — workflow co `paths:` khong chay o lan day tao nhanh moi, va ma
+      # tran theo nhan khong ban vi `pull_request:` thieu `types:`. Mua dung lop bug dang
+      # tra no de tiet kiem 1,9 giay la lo.
+      # Nguoi giu kho (@ducthangho) DA DUYET cho lech nay tai Issue #254, can cu la so do
+      # tren. `-r2` van BAT BUOC cho cong tac fast-path, khong phai cho buoc nay.
+      - name: ci-phamvi guard (bang phu thuoc khop ma)
+        run: python .github/checks/ci_phamvi.py --kiem-bam
+      - name: ci-phamvi selftest (phan chung — cong co rang)
+        if: runner.os != 'Windows'
+        run: python .github/checks/ci_phamvi_test.py
       - name: release-check full
         run: python scripts/tl.py release-check --full --json
       # --strict: file THỪA trong cây mà manifest không có ⇒ ĐỎ (bản cũ chỉ cảnh báo rồi trôi qua)

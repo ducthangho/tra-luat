@@ -28,7 +28,7 @@ verdict_sha256: f21069548bf0e0ff507822a246283fe47417bc334fa1e231b2e71dc88d52b4c0
 verdict_bytes: 21105
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/blob/PLACEHOLDER_COMMIT/ops/reviews/lease-dang-review-2-claude-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/6c294756057d3ca2e8d5aa93c1c09e56ab4a57ea/ops/reviews/lease-dang-review-2-claude-verdict.md
 evidence_url_ghi_chu: >-
   Điền SAU KHI ĐÃ PUSH THÀNH CÔNG, không phải sau khi commit — biên nhận lượt 1 đã chết một lần
   vì rebase viết lại commit sau khi điền (xem caveat `evidence_url-DA-CHET-MOT-LAN-vi-REBASE`).

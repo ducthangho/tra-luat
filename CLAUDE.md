@@ -158,6 +158,36 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   chưa chạy" nhìn giống hệt nhau** nếu hỏi sai chỗ. Chốt chung, rẻ và luôn dùng được: trước khi kết
   luận từ một chỗ RỖNG, hỏi "nếu thứ tôi đang tìm CÓ THẬT thì nó sẽ được ghi ở đâu?" — rồi đi hỏi
   đúng chỗ đó. Máy không canh được mục này; nó là kỷ luật đọc.
+- **SỔ LEASE KHÔNG NẰM MỘT CHỖ — đo `ops/leases/` trên `master` là mù đúng chỗ lease MỚI NHẤT nằm.**
+  Đo 21-08-2026, trả giá bằng một lease chồng lấn đã ký: đặc tả `PLAT-X8` khai *"không lease nào đang
+  giữ `ops/lease_publish*`"* sau khi quét `ops/leases/` trên master ⇒ **0**. Quét đủ **98 nhánh
+  `ops/**`** ⇒ **7** lease CHƯA HẾT HẠN chạm hai tệp ấy, trong đó **2** thật sự còn hiệu lực
+  (`#227`) — bản `lease-dang-exec-2` **đã đăng** và được cấp **15 phút trước**, giữ đúng cả hai tệp
+  ⇒ cửa sổ hai writer ~23,75h. **"Chưa hết hạn" KHÔNG phải "còn hiệu lực"** (cross-review bắt bản
+  đầu của bài học này đếm cả 7): năm lease kia thuộc packet ĐÃ LAND, và không trường nào trong tệp
+  lease nói ra điều đó — phải đi tìm HIỆN VẬT của packet trên master, còn Issue thì cả bốn vẫn
+  `open`. Đó là nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong` đo được thành số: **5** quyền ghi còn
+  sống sau khi việc đã xong. Nhưng **2 vẫn lớn hơn 0** — con số đúng không cứu được phép đo sai chỗ. Lý do cấu trúc:
+  lease sống trên nhánh `ops/**` và **chỉ về master sau khi merge**, nên master luôn thiếu đúng những
+  lease mới nhất — tức những lease khả nghi nhất, y hệt lý do `t23` không được ghi cứng một tên tệp.
+  Chưa có lệnh nào trả lời *"lease nào đang giữ đường dẫn X"* trên toàn kho (nợ
+  `SO-LEASE-KHONG-NAM-MOT-CHO`, biên bản `ops/RUT_LEASE_PLAT_X8_20260821.md`); tới lúc có, phải quét
+  `refs/remotes/origin/ops/*` bằng tay TRƯỚC KHI cấp bất kỳ lease nào, và **không fetch được ref nào
+  thì ĐỎ** — "không đo được" không phải "không có". Cùng họ *"hỏi chỗ tiện tay thay vì hỏi chỗ kết
+  luận được ghi"*, và lần này nạn nhân là chính packet sinh ra để dạy cổng ĐO thay vì NHẬN LỜI KHAI.
+- **Workflow có `paths:` ĐÃ KHÔNG CHẠY ở lần đẩy tạo nhánh mới — nguyên nhân CHƯA BIẾT, đừng chế ra.**
+  Đo 21-08-2026: đẩy nhánh `ops/**` MỚI kèm một tệp trong `ops/leases/` ⇒ `ops-publish-lease.yml`
+  chạy **0** lượt; đẩy tiếp lên nhánh ĐÃ TỒN TẠI, cùng bộ lọc, cùng thư mục ⇒ chạy ngay (lượt
+  `32492493219`). Đó là toàn bộ những gì đo được.
+  **Bản đầu của mục này khẳng định nguyên nhân — "vì không có commit *before* để so" — và
+  cross-review bác đúng chỗ đó** (P2 trên PR #228): tài liệu GitHub mô tả một phép so hai chấm với
+  tổ tiên của commit sâu nhất được đẩy, nên "bỏ qua bộ lọc" là ĐOÁN, không phải phép đo. Ghi một
+  nguyên nhân sai vào doctrine còn tệ hơn không ghi gì: lần sau workflow vắng mặt vì lý do KHÁC —
+  sai `paths`, sai nhánh, sai `on:` — người đọc sẽ nhận nhầm nó là "chuyện đã biết" rồi đi tiếp.
+  Thứ đáng nhớ là **triệu chứng**, không phải lời giải thích: một workflow bạn trông cậy có thể
+  **vắng mặt** ở đúng lần đẩy đầu tiên, và vắng mặt trông y hệt xanh. Nên sau MỌI lần đẩy mà bạn
+  cần một workflow chạy, hãy ĐO là nó đã chạy (`list_workflow_runs` lọc theo nhánh), đừng suy từ
+  việc `git push` thành công. Chưa có phản chứng cho ca này — dựng được nó thì mới nói tới nguyên nhân.
 - **Quét secrets: lọc theo PHẦN MỞ RỘNG là mù ĐÚNG CHỖ secrets nằm.** `Path('.env').suffix == ''` nên
   `.env` `.netrc` `credentials` (không mở rộng) bị bỏ qua SẠCH — bơm `GOCSPX-…` vào `.env` mà bộ quét
   trả rc=0. Cộng thêm `Get-ChildItem` thiếu `-Force` cũng bỏ y hệt: **hai lỗi ĐỘC LẬP mà CÙNG HƯỚNG** ⇒

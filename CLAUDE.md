@@ -556,19 +556,6 @@ không tra được.
   MỌI lệnh Bash chết trước khi chạy, và không còn đường `cd` về. Luôn dùng
   `$CLAUDE_PROJECT_DIR`.
 
-- **DANH SÁCH GIAO CHO REVIEWER LÀ TRẦN, KHÔNG PHẢI SÀN — và cái đắt nhất luôn nằm ngoài nó.**
-  Mọi prompt review đều kèm một danh sách "chỗ nên soi". Người nhận đọc nó thành phạm vi CẦN VÀ ĐỦ,
-  soi hết rồi kết luận sạch — nên danh sách ấy vừa hướng dẫn vừa **giới hạn tầm nhìn**, và nó giới
-  hạn theo đúng hình dạng hiểu biết của người VIẾT prompt, tức người đã bỏ sót thứ cần tìm.
-  Đo được ở `PLAT-X8`: prompt lượt 3 liệt kê năm hướng soi. P1 thật — bảng `_BANG_LOP` chứa mục
-  ngoài `§8:572` — **không nằm trong hướng nào**; nó lộ ra vì reviewer hỏi một câu không ai giao
-  (*"đặc tả có SAI không"*, thay vì *"mã có khớp đặc tả không"*). Hai lượt trước, cùng packet, đều
-  soi đúng danh sách được giao và đều sạch.
-  Chốt: prompt phải NÓI THẲNG rằng danh sách là TRẦN và yêu cầu tìm thứ không được giao; và người
-  đọc verdict phải hỏi *"lượt này có hỏi câu nào ngoài đề không"* — không có câu nào thì đó là dấu
-  hiệu về PHẠM VI, không phải bằng chứng về chất lượng. Cùng họ *"danh sách CẤM không bao giờ đủ"*:
-  ở đó ta liệt kê không xuể cách viết của kẻ gian; ở đây ta liệt kê không xuể cách hỏng của chính mình.
-
 ## Cấm
 - Không tự chạy lệnh có `--apply` / `source-delete` / `reg-delete` / `--clear-stale` khi user chưa duyệt (hook sẽ hỏi).
 - Không đọc/ghi secrets (`*.enc`, `tl_secrets*`, `*cookie*`, `*token*`, `credentials*`) ngoài đúng quy trình

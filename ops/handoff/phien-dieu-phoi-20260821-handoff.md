@@ -15,7 +15,9 @@ của packet nào, nên bản này **không** theo schema §7 (`ops/handoff/wp55
 # MỌI trường dưới đây đo CÙNG MỘT LÚC, trên CÙNG MỘT commit. Đừng vá lẻ từng trường.
 do_luc: '2026-08-22'
 nhanh: claude/opus-5-plan-steps-y5r6ci
-commit: 7c19850                    # commit CHỨA băm spec ghi bên dưới
+commit_gioi_thieu_bam_spec: 7c19850   # KHÔNG phải head của nhánh. Đây là commit ĐẦU TIÊN mà
+                                     # ops/specs/plat-x8.md mang băm ghi bên dưới. Head trôi
+                                     # theo mỗi commit; commit này thì không.
 base: a5bfe07                      # = origin/master lúc đo
 diff_so_master: xem PR 230           # con số này chết ở MỌI commit kế tiếp — đừng ghi cứng,
                                      # đo sống: git diff origin/master...HEAD --shortstat
@@ -52,7 +54,8 @@ pr: 230                            # https://github.com/ducthangho/tra-luat/pull
 > Nghĩa là **§3 dưới đây đã lệch một phần**: Q1 không còn là quyết định đang có hiệu lực. Hai thứ
 > còn lại (cấp lease, nới bảng phân loại) vẫn chờ. Đọc đặc tả bản 3 làm chuẩn, đừng đọc bản này.
 
-**Chưa mở PR** — người giữ kho chưa yêu cầu. Nhánh đã đẩy, spec tra được bằng
+**PR #230 đang mở** (mở 22-08-2026 theo yêu cầu người giữ kho) — xem trường `pr:` trong khối neo,
+và đọc lịch sử review của nó trước khi làm gì trên nhánh này. Nhánh đã đẩy, spec tra được bằng
 `git fetch origin claude/opus-5-plan-steps-y5r6ci`.
 
 ---

@@ -61,14 +61,14 @@ verdict_sha256: 16675de178478b8405dc835f3a67893c5c63fda850434d67d6e5dabb6b508270
 verdict_bytes: 16748
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/blob/claude/phien-tra-luat-5a-handoff-9o1cqp/ops/reviews/plat-x8-review-3-claude-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/247c6fb5d283cb78abfecbd50aeb1830c935dcc9/ops/reviews/plat-x8-review-3-claude-verdict.md
 evidence_url_ghi_chu: >-
-  TRẠNG THÁI TẠM: đang neo theo NHÁNH, sẽ ghim lại theo COMMIT ở commit kế tiếp. Lý do phải đi hai
-  bước: một commit không thể chứa băm của chính nó, mà `t26` lại đòi trường này có mặt dạng `https`
-  ngay trong cùng commit với biên nhận — nên không có đường một bước. Lượt 2 đi đúng hai bước này.
-  ĐỌC ĐÚNG GIỚI HẠN: `t26` kiểm HÌNH DẠNG (`https://`) cộng băm tệp phải khớp thật; URL NHÁNH qua
-  được cổng, nhưng nhánh là thứ TRÔI và bị xoá, nên chừng nào còn dòng này thì URL CHƯA phải mỏ neo.
-  Thứ định danh là `verdict_sha256` ở trên, không phải URL.
+  ĐÃ GHIM theo COMMIT `247c6fb5` — commit ĐẦU TIÊN chứa tệp verdict. Phải đi HAI bước vì một commit
+  không thể chứa băm của chính nó, mà `t26` đòi trường này có mặt dạng `https` ngay trong cùng commit
+  với biên nhận; bước 1 neo tạm theo nhánh, bước 2 (commit này) ghim lại theo commit. Lượt 2 đi đúng
+  đường ấy. `t26` chỉ kiểm HÌNH DẠNG cộng băm tệp khớp — nên URL nhánh CŨNG qua được cổng, và đó là
+  lý do bước 2 không được bỏ: cổng xanh không phân biệt mỏ neo bền với mỏ neo trôi.
+  Thứ định danh vẫn là `verdict_sha256` ở trên, không phải URL.
 projection_url: null
 truy_xuat_tag: null
 

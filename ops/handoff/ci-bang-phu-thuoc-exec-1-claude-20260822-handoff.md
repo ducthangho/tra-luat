@@ -16,6 +16,99 @@
 
 ---
 
+## 0. Handoff MÁY ĐỌC ĐƯỢC — `docs/PROTOCOL_DA_PHIEN.md` §7
+
+Bản đầu của tệp này chỉ có văn xuôi, nên dispatcher **không xác thực được** và không đóng/tiếp
+được packet bằng máy (codex bắt, P1 trên PR #253 — finding ĐÚNG; luật nằm ở protocol §7, không
+ở `AGENTS.md` như trích dẫn của nó). Phần văn xuôi phía dưới **giữ nguyên** làm bằng chứng bổ trợ.
+
+```yaml
+schema_version: 1
+packet_id: CI-BANG-PHU-THUOC        # Issue #245
+generation: 1
+spec_hash: 14bd1425e89f6b304ce60f8ebd0246a7bf8020f3732647494daecc9f07bc8b7c
+provider: claude
+role: executor
+session_id: session_01CX1JhRkNDDuNirBzms5zUr
+base_sha: 195a478d7f083b67900777c6f4e8ada0860b3707
+head_sha: a418e68e6a6be0777740da5db5871525caeb2d0e   # đã land qua #251 => 26856f9cc6
+status: needs_followup
+summary: >-
+  Vế BĂM land (M1/M2/M4/M5). Vế ĐỌC (M3) KHÔNG land: bốn vòng review chứng minh
+  audit-hook-qua-PYTHONPATH không thể trung thực — giới hạn KIẾN TRÚC, không vá được.
+  PR #247 đóng không merge. Packet giao MỘT NỬA có chủ đích.
+changed_paths:
+  - .github/checks/ci_phamvi.py
+  - .github/checks/ci_phamvi_test.py
+tests:
+  - name: ci_phamvi_test.py
+    status: passed        # 7/7 đạt; đã chạy=7, bỏ qua=0; rc=0
+    evidence: 'https://github.com/ducthangho/tra-luat/actions/runs/32591958672'
+  - name: gate (ubuntu-latest)
+    status: passed        # 28 passed / 0 failed / 3 skipped / 0 not_run
+    evidence: 'https://github.com/ducthangho/tra-luat/actions/runs/32591958672/job/97077070692'
+  - name: gate (windows-latest)
+    status: passed        # 27 passed / 0 failed / 4 skipped / 0 not_run
+    evidence: 'https://github.com/ducthangho/tra-luat/actions/runs/32591958672/job/97077070760'
+  - name: 'đột biến (6 phép thay, xem §3)'
+    status: passed        # không đột biến nào sống sót
+    evidence: 'ops/handoff/ci-bang-phu-thuoc-exec-1-claude-20260822-handoff.md#3'
+test_selection:
+  gate_tier: null         # lease/spec KHÔNG khai tier — để null thay vì bịa một giá trị
+  selector_policy_sha: null
+  tested_sha: 26856f9cc6a9fbf0cbd9ae31d620324b4a13a192
+  selected_groups: []     # chạy TOÀN BỘ gate, không chọn lọc
+  full_fallback_reason: 'chưa có công tắc chọn lọc — đó chính là việc packet này dọn đường'
+remaining_work:
+  - 'M3 (vế ĐỌC): còn ở Remediation Slice. Hai hướng chưa có phản chứng — tracer trước
+     `site` init, hoặc `tl selftest` TỰ KHAI tập đọc từng ca.'
+  - 'Nối `ci_phamvi_test.py` vào `ci.yml` (M7 của CI-FASTPATH-THEO-DIFF) — hiện KHÔNG
+     đường nào trong kho gọi hai tệp đã land.'
+  - 'CI-FASTPATH-THEO-DIFF cần bản sửa đổi -r2: lý lẽ Q1 đọc "cả tập đọc lẫn tập băm",
+     mà vế tập đọc không tồn tại.'
+  - 'Số B2 của đặc tả (440/243/67/107) đo bằng cơ chế ĐÃ BỊ BÁC — không phải hằng số.'
+next_role: human
+manual_next_action: >-
+  Người giữ kho quyết ba việc: (1) đóng Issue #245 với ghi nhận giao một nửa;
+  (2) mở Issue + cấp lease cho slice M7; (3) quyết CI-FASTPATH-THEO-DIFF-r2.
+  Biên bản bàn giao: ops/handoff/ci-noi-bang-vao-gate-BAN-GIAO.md
+  (sha256 d850fff2663ada851d7c893ab70c0a652b301ffad623239e4c93185492b82578)
+copyable_prompt: |
+  Bạn là phiên KẾ NHIỆM của packet CI-BANG-PHU-THUOC (#245), kho ducthangho/tra-luat.
+  Mission/packet: CI-BANG-PHU-THUOC · revision 1 · generation 1
+  spec_hash: 14bd1425e89f6b304ce60f8ebd0246a7bf8020f3732647494daecc9f07bc8b7c
+  exact SHA đã land: 26856f9cc6a9fbf0cbd9ae31d620324b4a13a192
+
+  Biên bản bàn giao của bạn là một TỆP, không phải prompt này:
+    ops/handoff/ci-noi-bang-vao-gate-BAN-GIAO.md
+    sha256 = d850fff2663ada851d7c893ab70c0a652b301ffad623239e4c93185492b82578
+  Tìm trên master TRƯỚC; chưa thấy thì
+  `git fetch origin claude/ci-bang-phu-thuoc-exec-3v3kco` (PR #253).
+  KIỂM BĂM trước khi đọc nội dung — băm định danh tệp, tên nhánh thì trôi.
+
+  Đọc theo thứ tự: CLAUDE.md · docs/PROTOCOL_DA_PHIEN.md ·
+  `sed -n '1,140p' .claude/dev/launcher.py` rồi `launcher.py doctor` · hai tệp handoff.
+
+  VAI TRÒ: executor cho slice M7 — nối `.github/checks/ci_phamvi_test.py` vào job `gate`
+  của `.github/workflows/ci.yml`. KHÔNG làm công tắc fast-path.
+  PHẠM VI: `.github/workflows/ci.yml` (+ `ci_phamvi_test.py` nếu cần chốt bỏ-qua Windows).
+  GATE: `python3 .github/checks/ci_phamvi_test.py` -> rc=0, N/N hai số BẰNG NHAU;
+  đo CI theo JOB; Windows gọi tay bằng workflow_dispatch (gắn nhãn KHÔNG sinh lượt chạy).
+
+  STOP CONDITIONS — dừng ngay khi:
+   · chưa có Issue + lease cho slice này (HIỆN CHƯA CÓ) — KHÔNG tự cấp cho mình;
+   · thấy mình định dựng lại vế ĐỌC bằng audit hook qua PYTHONPATH — kết luận phủ định
+     đã trả giá 4 vòng, đừng vá lần thứ năm;
+   · thấy mình định dựng hàm quyết định fast-path trên NỬA bảng (chỉ có vế BĂM);
+   · cần ghi ngoài phạm vi trên.
+failure:
+  fingerprint: null
+  category: null          # KHÔNG phải thất bại: vế ĐỌC là kết luận phủ định ĐÃ CHỨNG MINH
+successors: []            # phiên thi công KHÔNG tự mở packet kế nhiệm
+```
+
+---
+
 ## 1. Mỏ neo — commit và tree
 
 | vai trò | commit | tree |
@@ -97,20 +190,70 @@ Lượt `push` **`32591958672`** trên **`26856f9cc6a9fbf0cbd9ae31d620324b4a13a1
 
 | job | passed | failed | skipped | not_run |
 |---|---|---|---|---|
-| `gate (ubuntu-latest)` | 28 | **0** | 3 — `PR head contains required EOL base` · `gate lifecycle selftest (nen khong co cgroup)` · `tl selftest (luot PR)` | 0 |
-| `gate (windows-latest)` | 27 | **0** | 4 — ba mục trên, cộng `don-nhanh selftest` và `bo ca gate chay TRONG cgroup (Linux)` | 0 |
+| `gate (ubuntu-latest)` | 28 | **0** | **3** — `PR head contains required EOL base` · `gate lifecycle selftest (nen khong co cgroup)` · `tl selftest (luot PR)` | 0 |
+| `gate (windows-latest)` | 27 | **0** | **4** — `PR head contains required EOL base` · `don-nhanh selftest` · `bo ca gate chay TRONG cgroup (Linux)` · `tl selftest (luot PR)` | 0 |
 
-Cả hai job 31 bước. Bước `PR head contains required EOL base` `skipped` là **đúng luật** trên
-lượt `master` (`if: github.event_name == 'pull_request'`) — tiêu chí *"không bước nào skipped"*
-chỉ áp cho lượt PR.
+Cả hai job 31 bước; 28+3 = 27+4 = 31.
+
+**Hai bước cgroup BÙ NHAU, không cùng bị bỏ** — bản đầu của mục này gộp nhầm và codex bắt được
+(P2 trên PR #253). `bo ca gate chay TRONG cgroup (Linux)` chạy trên Ubuntu và bỏ trên Windows;
+`gate lifecycle selftest (nen khong co cgroup)` thì **ngược lại** — `ci.yml` neo nó bằng
+`runner.os != 'Linux'` nên nó **CHẠY THẬT trên Windows** (bước #13, `success`). Kể nó vào nhóm
+bỏ-qua của Windows làm câu văn nêu **năm** mục trong khi con số ghi **bốn**: bằng chứng dương tự
+mâu thuẫn với chính nó. Con số 4 đúng ngay từ đầu; **cái sai là DANH SÁCH**, và một bảng nêu tên
+sai thì đọc nguy hiểm hơn một bảng chỉ có số.
+
+Bước `PR head contains required EOL base` `skipped` là **đúng luật** trên lượt `master`
+(`if: github.event_name == 'pull_request'`) — tiêu chí *"không bước nào skipped"* chỉ áp cho lượt PR.
 
 Windows đã được đo **TRƯỚC** merge bằng `workflow_dispatch` — `ci.yml` khai `pull_request:` mà
 không khai `types:`, nên gắn nhãn `windows` **không** sinh lượt chạy nào.
 
 ## 5. Cross-review — 7 vòng, 8 finding của codex, cả 8 đều thật
 
-Canon ADR-0043 cho **2** vòng. Đã dùng **7**, mỗi lần nới đều do người giữ kho duyệt trong phiên,
-lý do: `assurance_target: cross_approved` chưa từng đạt cho tới vòng cuối.
+Canon `ADR-0043` cho **2** vòng. Đã dùng **7**. `ADR-0043:7` đòi mọi lần vượt trần phải có khối
+`nang_tran` khai `ai_nang` · `can_cu` · `tran_cu` · `tran_moi` — bản đầu của handoff này chỉ ghi
+*"người giữ kho duyệt trong phiên"*, tức **không có bản ghi bền nào kiểm toán được** (codex bắt,
+P1 trên PR #253; finding ĐÚNG, chỉ trích sai tệp — luật nằm ở `ADR-0043`, không ở `AGENTS.md`).
+Ghi lại đúng khuôn, **hồi tố**:
+
+```yaml
+nang_tran:
+  - ai_nang: ducthangho          # chủ kho — §2 authority_basis của lease
+    can_cu: >-
+      Hai vòng đầu trên #247 đều kết thúc COMMENTED kèm finding thật, nên
+      `assurance_target: cross_approved` của lease CHƯA TỪNG đạt. Trần 2 mà dừng
+      là land một bản có finding chưa đóng.
+    tran_cu: 2
+    tran_moi: 3
+    duong: 'trực tiếp trong phiên, 2026-08-22: "review vòng 2 đi" rồi "đồng ý"'
+    pr: 247
+  - ai_nang: ducthangho
+    can_cu: >-
+      Bản vá fail-close (a0a2805) sinh ra SAU vòng 3 nên chính nó chưa qua review.
+    tran_cu: 3
+    tran_moi: 4
+    duong: >-
+      trực tiếp trong phiên: "Cho phép thêm 1 vòng review, không cần chạy lại CI,
+      self-test, nếu cross review approved, merge luôn"
+    pr: 247
+  - ai_nang: ducthangho
+    can_cu: >-
+      PR #251 là Stable Slice MỚI theo §12, phải review lại trên exact head mới —
+      không kế thừa vòng của #247.
+    tran_cu: 2
+    tran_moi: 3
+    duong: >-
+      trực tiếp trong phiên: "cắt stable slice cho vế băm đi", rồi "chạy thêm vòng
+      review nữa...", rồi "chạy thêm vòng nữa"
+    pr: 251
+```
+
+**Khai thẳng giới hạn của khối này:** nó được ghi **sau khi việc đã xong**, nên nó là *biên bản*
+chứ không phải *giấy phép cấp trước*. `ADR-0043` muốn khối nằm trong **tệp lease** và cổng đăng
+lease từ chối khi thiếu — mà lease của packet này không có nó. Nợ đã đo ở
+`ops/HOAN_THIEN_KE_HOACH_20260822.md:187` (mục **D3**): `nang_tran` xuất hiện **1/49** lease, và
+**chưa cổng nào cưỡng chế**. Đây là ca thứ hai của cùng nợ ấy.
 
 ### PR #247 — 4 vòng, 6 finding, rồi ĐÓNG không merge
 

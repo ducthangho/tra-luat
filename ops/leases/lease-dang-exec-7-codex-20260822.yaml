@@ -117,3 +117,4 @@ dieu_kien_dung:
   - 'Ngân sách sẽ vượt 660 dòng thêm hoặc 3 tệp ⇒ DỪNG, xuất handoff'
   - 'Hình dạng A lần 7 · B lần 3 · C lần 2 · D lần 4 · E lần 2 ⇒ DỪNG, không vá'
   - 'E = "khoá theo thứ LIỆT KÊ ĐƯỢC thay vì theo thứ THẬT SỰ CHẶN", bộ đếm 1. E lần 2 = sau khi đảo sang bao_chan, LẠI tìm được một nhánh chặn KHÔNG gọi bao_chan. TRƯỚC KHI BÁO XONG: tự đi tìm một nhánh như vậy; không tìm được thì nói là không tìm được.'
+posted_comment_id: 5377741727   # workflow ghi, ĐỪNG sửa tay

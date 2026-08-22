@@ -39,3 +39,4 @@ dieu_kien_dung:
   - 'Dung `ci_phamvi_test.py` de CHUNG MINH bo buoc nao do la an toan (fast-path) — do la CI-FASTPATH-THEO-DIFF, can -r2, KHONG thuoc packet nay.'
   - 'Lam cong tac fast-path theo dif — VE TAP DOC KHONG TON TAI.'
   - 'Sua `.github/checks/ci_phamvi*.py` — ngoai write set cua lease nay.'
+posted_comment_id: 5382396231   # workflow ghi, ĐỪNG sửa tay

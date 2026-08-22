@@ -44,6 +44,12 @@ Mốc neo ấy cũng là lý do packet này **không gộp** nợ của packet k
 **Write set này ĐANG BỊ GIỮ lúc đóng băng đặc tả.** Đo 16:5xZ 22-08-2026 trên 164 ref
 (`yaml.safe_load`, fail-close): `plat-x8-exec-2`, `-2r2`, `-2r3` khai đúng hai đường dẫn này, hết hạn
 `2026-08-23T14:10:00Z`, và `PLAT-X8` đang chạy thật (PR `#248`, +265/−1 trên đúng hai tệp).
+
+**Đo lại 18:2xZ trên 165 ref: `CÒN_HẠN` lên 5, người giữ vẫn 1.** Chuỗi kéo dài thêm `-2r4` `-2r5`; hạn
+**không đổi**. Năm bản ghi, một thẩm quyền — xem `A2c`. Bài học đi kèm: lượt fetch trước đó **mù đúng một
+ref** (`claude/ci-bang-phu-thuoc-bam` có trên máy chủ, thiếu ở đệm cục bộ), và thứ bắt được là phép so hai
+nguồn ở `M2` chứ không phải mắt người — nên `164` ở trên là số ref **đo được lúc ấy**, không phải số ref
+tồn tại. Chính vì vậy `M2` phải chạy **trước** mỗi lượt quét, không phải chạy một lần rồi tin mãi.
 **Lease cho packet này chỉ được cấp SAU khi `PLAT-X8` nhả** — land hoặc rút. Đặc tả không phải lease
 (protocol §7), nên đóng băng trước là hợp lệ; bắt tay trước thì không.
 
@@ -64,7 +70,7 @@ Neo quyết định vào bất biến ấy; con số chỉ để đối chiếu,
 | Cổng `t33` đòi `shellcheck` | Packet riêng `T33-DOI-SHELLCHECK`. Chạm tệp khác (`ops/cai_actionlint.sh`), và **không dùng** năng lực "hỏi toàn kho" — gộp vào chỉ làm packet này vượt trần ADR-0044 |
 | Đường **thu hồi** lease đã tiêu | Nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong`. Packet này chỉ **ĐỌC ĐÚNG** trạng thái, không chế cơ chế huỷ. Cho một packet thu hồi lease của packet khác là dựng đường huỷ đơn phương |
 | Sửa dữ liệu 6 lượt đăng thừa đã có | Là **hiện vật lịch sử**. Sửa hậu kỳ làm mất bằng chứng của chính nợ này |
-| Đoán quan hệ `thay_the_lease` / `tiep_tuc_lease` | Hai trường ấy trỏ **NGƯỢC**; đọc xuôi không suy ra được. Sửa hướng con trỏ là đổi lược đồ lease — việc khác, packet khác |
+| Đoán quan hệ `thay_the_lease` / `tiep_tuc_lease` | Hai trường ấy trỏ **NGƯỢC** (mới → cũ): muốn biết lease `X` đã chết chưa thì phải quét **mọi** lease xem có cái nào trỏ về `X`. Sửa hướng con trỏ là đổi lược đồ lease — việc khác, packet khác. **`da_bi_thay_the` KHÔNG thuộc nhóm này** — xem `A2c` |
 
 ## `muc_tieu`
 
@@ -72,7 +78,7 @@ Mỗi mục chiếu vào **một** đường dẫn trong `write_set` (L2).
 
 | # | mục tiêu | đường dẫn |
 |---|---|---|
-| **M1** | Lệnh `ai-dang-giu <đường-dẫn>`: quét **mọi ref**, trả **ba** trạng thái `CÒN_HẠN` / `HẾT_HẠN` / `KHÔNG_XÁC_ĐỊNH`, dùng bộ phân tích cấu trúc (`yaml.safe_load`), **fail-close** | `ops/lease_publish.py` |
+| **M1** | Lệnh `ai-dang-giu <đường-dẫn>`: quét **mọi ref**, trả **ba** trạng thái `CÒN_HẠN` / `HẾT_HẠN` / `KHÔNG_XÁC_ĐỊNH`, dùng bộ phân tích cấu trúc (`yaml.safe_load`), **fail-close**; lease `CÒN_HẠN` mang `da_bi_thay_the` bị **loại khỏi tập người giữ** nhưng vẫn được **in ra** kèm nhãn | `ops/lease_publish.py` |
 | **M2** | Trước khi quét, `ai-dang-giu` **so hai nguồn** — `git ls-remote --heads` (máy chủ) với `git for-each-ref` (đệm) — **so bằng TẬP TÊN**, loại ref tượng trưng; thiếu ở phía cục bộ ⇒ `KHÔNG_XÁC_ĐỊNH` | `ops/lease_publish.py` |
 | **M3** | Chốt chống đăng trùng (`:236-241`) đọc dấu **TOÀN KHO** thay vì từ bản lease trong cây đang chạy | `ops/lease_publish.py` |
 | **M4** | Ca `rXX_` + đột biến cho M1–M3 | `ops/lease_publish_test.py` |
@@ -100,6 +106,31 @@ vào `KHÔNG_XÁC_ĐỊNH` — **hai** đột biến riêng, vì mỗi cái hỏ
 chỉ phủ đường không xác định. Thiếu `A2b` thì một cài đặt **dán nhãn mọi lease hết hạn thành `CÒN_HẠN` hoặc
 `KHÔNG_XÁC_ĐỊNH`** vẫn thoả trọn bộ fixture, và câu *"bỏ nhánh `HẾT_HẠN` làm `A1` đỏ"* ở bản đầu là **sai** —
 `A1` không đổi màu. `M1` hứa ba trạng thái thì nghiệm thu phải chạm đủ ba.
+
+`A2c` **LEASE CÒN HẠN MÀ ĐÃ CHẾT.** Bơm một chuỗi thay thế: lease `L1` còn hạn mang
+`da_bi_thay_the: L2`, và `L2` còn hạn **không** mang trường ấy — cả hai khai cùng đường dẫn được hỏi. ⇒
+tập **người giữ** chỉ có `L2`; `L1` vẫn **được in** kèm nhãn đã-bị-thay-thế (im lặng bỏ nó đi thì người
+đọc tưởng phép quét sót). ĐỎ khi: đột biến bỏ phép đọc `da_bi_thay_the` (⇒ `L1` lọt vào tập người giữ),
+**và** đột biến biến nó thành phép **loại bỏ khỏi đầu ra** (⇒ `L1` biến mất khỏi bản in) — **hai** đột
+biến riêng, vì "không phải người giữ" khác "không tồn tại".
+
+**Vì sao `A2c` phải có — đo được lúc 18:2xZ 22-08-2026, SAU khi đặc tả đã đóng băng.** `PLAT-X8` đi từ
+**3** lease `CÒN_HẠN` lên **5** trong khoảng một giờ, mà số **người giữ thật vẫn là 1**: `exec-2` → `-2r2`
+→ `-2r3` → `-2r4` → `-2r5`, mỗi cái trỏ tới cái sau bằng `da_bi_thay_the`, chỉ `-2r5` không có trường ấy.
+Hạn không đổi (`2026-08-23T14:10:00Z`). Bộ quét hand-roll dùng suốt phiên này **đếm cả 5** — nó chưa từng
+đọc trường đó. Một `ai-dang-giu` xây theo bản đặc tả **trước** bản vá này sẽ báo *"5 lease đang giữ"* khi
+có **1**, tức **chặn nhầm** một packet hợp lệ.
+
+Đây là ảnh gương của P1 lượt 2 (`write-set-khong-ranh`): lần ấy lời khai **rộng hơn** phép đo và cho
+qua nhầm; lần này phép đo **rộng hơn** sự thật và chặn nhầm. Cùng một gốc — *đếm bản ghi thay vì đếm
+thẩm quyền*.
+
+**Vì sao chuyện này lọt qua ba lượt review:** `ngoai_pham_vi` gạt `da_bi_thay_the` ra cùng rổ với
+`thay_the_lease`/`tiep_tuc_lease`, lấy lý do *"trỏ NGƯỢC, đọc xuôi không suy ra được"*. Đo thật thì **hai
+họ trỏ ngược chiều nhau**: `r5.thay_the_lease = r4` (mới → cũ, muốn biết `r4` chết chưa phải quét cả kho),
+còn `r3.da_bi_thay_the = r4` (**cũ → mới**, mở đúng một tệp là biết). Lý do loại trừ **đúng cho một
+trường và sai cho trường kia** — và vì hai tên nằm cùng một ô bảng, không ai tách ra kiểm. Toàn kho có
+**4/120** blob lease mang `da_bi_thay_the`, và cả 4 là chuỗi đang chặn chính write set này.
 
 **M2** — `A3` Giả một `ls-remote` trả **thừa một nhánh** so với `for-each-ref` ⇒ `KHÔNG_XÁC_ĐỊNH`.
 `A4` Giả chiều ngược lại (thừa ở **cục bộ**) và đặt một lease còn hạn trên một ref chung ⇒ **KHÔNG** báo
@@ -129,8 +160,8 @@ có ⇒ **`RC_DA_DANG` (9)** cho đúng `lease_id` được hỏi. ĐỎ khi: đ
 cục bộ, hoặc coi bất kỳ `posted_comment_id` nào trong kho là dấu của lease được hỏi. **Ca này là phản
 chứng của chính nợ mục 18**: không có nó thì không biết đang đo cổng hay đo thứ khác.
 
-**M4** — `A8` Mỗi ca trong `A1` `A2` `A2b` `A3` `A4` `A5` `A6` `A7` — liệt kê từng cái, vì `A2b` không
-nằm trong dãy số `A1`–`A7` và một dãy viết tắt là chỗ ca lẻ đi lạc — có **ít nhất một đột biến trong mã
+**M4** — `A8` Mỗi ca trong `A1` `A2` `A2b` `A2c` `A3` `A4` `A5` `A6` `A7` — liệt kê từng cái, vì `A2b`
+và `A2c` không nằm trong dãy số `A1`–`A7` và một dãy viết tắt là chỗ ca lẻ đi lạc — có **ít nhất một đột biến trong mã
 sản phẩm `ops/lease_publish.py`** khiến nó đổi màu. Bộ chạy ghi mỏ neo + thay thế của từng đột biến, xác
 nhận mỏ neo xuất hiện đúng một lần và xác nhận tệp sau thay thế khác bản gốc, rồi in **cả hai** số (số
 đột biến mã sản phẩm đã chạy · số đột biến bị giết) — hai số **bằng nhau**. ĐỎ khi: runner chỉ sửa assertion

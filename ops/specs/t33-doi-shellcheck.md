@@ -47,9 +47,16 @@ phiên thi hành gặp rồi tự xoay.
 
 Đo **17:38Z** 22-08-2026: **11** lease `CÒN_HẠN` chạm `ops/lease_publish_test.py` — 3 lease
 `plat-x8-exec-2`/`-2r2`/`-2r3` cộng 8 lease `LEASE-DANG-*`; **0** lease chạm `ops/cai_actionlint.sh`.
-Ba lease `PLAT-X8` **chưa tiêu**, nên write set **CHƯA RẢNH**: packet này chỉ được cấp lease sau khi
-`PLAT-X8` land hoặc rút. Tám lease `LEASE-DANG-*` thuộc packet đã land qua PR `#246`, nhưng bản thân tệp
-lease không tự khai trạng thái đã tiêu.
+`PLAT-X8` **chưa tiêu**, nên write set **CHƯA RẢNH**: packet này chỉ được cấp lease sau khi `PLAT-X8`
+land hoặc rút. Tám lease `LEASE-DANG-*` thuộc packet đã land qua PR `#246`, nhưng bản thân tệp lease
+không tự khai trạng thái đã tiêu.
+
+**Đo lại 18:2xZ: 13 lease, trong đó `PLAT-X8` chiếm 5 — nhưng chỉ MỘT là người giữ thật.** Bốn bản ghi
+kia mang `da_bi_thay_the` và đã chết; hạn của chuỗi **không đổi** (`2026-08-23T14:10:00Z`). Vì vậy câu
+trên cố ý **không** ghi số lease `PLAT-X8`: con số ấy phân rã theo giờ **và** phồng theo mỗi lượt review
+của packet kia, trong khi thứ quyết định — *`PLAT-X8` còn giữ hay đã nhả* — thì không. Chi tiết cơ chế và
+phép thử ở `A2c` của `ops/specs/lease-hoi-toan-kho.md`; nó là lý do hai packet này phải đi **tuần tự**
+chứ không chỉ là chuyện lịch.
 
 **Bản đầu khai "0 lease, write set RẢNH, cấp lease được ngay" — SAI, và cross-review lượt 2 bắt
 (`write-set-khong-ranh`, P1).** Tác giả đo write set của `PLAT-X8` rồi **suy** rằng write set của packet

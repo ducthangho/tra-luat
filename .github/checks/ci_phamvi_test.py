@@ -15,6 +15,7 @@ co the chay MA CU, co che CLAUDE.md ghi la tung tuoc rang moi mutant.
 """
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import sys
@@ -71,7 +72,11 @@ def n1_ma_bo_ops_thi_do(ws):
 
 @ca
 def n2_nhom_bia_thi_do(ws):
+    """Khai nhom chet NHAT QUAN o CA HAI hang: `kiem_bam` khong thay lech (khong muc manifest
+    nao => "ngoai goi", ma bang cung khai the), nen CHI `kiem_nhom_ton_tai` bat duoc. Ban dau
+    chi doi mot hang nen `kiem_bam` do ho, va dot bien tat `kiem_nhom_ton_tai` SONG SOT."""
     thay(ws, CHECK, '"ops": "ops",', '"ops": "ops", "khong-co-that": "khong-co-that",')
+    thay(ws, CHECK, 'NGOAI_GOI = {"ops",', 'NGOAI_GOI = {"khong-co-that", "ops",')
     rc, out = chay(ws, "--kiem-bam")
     assert rc != 0, f"nhom tro vao thu khong co tren dia ma van xanh: {out}"
     assert "khong-co-that" in out, f"thong diep khong neu ten nhom bia: {out}"
@@ -119,9 +124,27 @@ def n5_nhom_tep_thanh_thu_muc_thi_do(ws):
     rc, out = chay(ws, "--bang")
     assert '"CLAUDE.md": "phu_thuoc"' in out, f"bang van khai doc_lap cho cay do: {out}"
     # lop hai: go dung chot vua do => ca phai tro lai xanh, chung minh ca do CHOT DO.
-    thay(ws, CHECK, 'p.name in ten_tep and (goc / d).is_file()', "p.name in ten_tep")
+    thay(ws, CHECK, "if not any(x == d or x.startswith(d +", "if True or any(x == d or x.startswith(d +")
     rc, out = chay(ws, "--kiem-bam")
     assert rc == 0, f"go chot is_file ma ca khong doi => ca do thu khac: {out}"
+
+
+@ca
+def n6_symlink_van_doc_lap(ws):
+    """Chieu BAT OAN. `_release_should_include` tu choi MOI symlink VA `rglob` khong di xuyen
+    symlink, nen `CLAUDE.md` la symlink-toi-thu-muc VAN ngoai goi. Ban truoc dung `is_file()`
+    nen bat oan no (codex bat, #251). Ca chieu-tha chi chet boi dot bien SIET THEM."""
+    (ngoai := ws.parent / "ngoai_cay").mkdir(exist_ok=True)
+    (ngoai / "co-tep.txt").write_text("x", encoding="utf-8")
+    (p := ws / "CLAUDE.md").unlink()
+    os.symlink(ngoai, p)
+    rc, out = chay(ws, "--kiem-bam")
+    assert rc == 0, f"symlink bi BAT OAN: {out}"
+    rc, out = chay(ws, "--bang")
+    assert '"CLAUDE.md": "doc_lap"' in out, f"bang bat oan symlink: {out}"
+    thay(ws, CHECK, "for x in trong_goi)}", "for x in trong_goi) and not (goc / d).is_symlink()}")
+    rc, out = chay(ws, "--kiem-bam")
+    assert rc != 0, f"siet them ma ca khong doi => ca nay khong do gi: {out}"
 
 
 def main() -> int:

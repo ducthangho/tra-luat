@@ -39,7 +39,8 @@ BUOC_BAM = ("release-check", "release-verify", "release-bundle")
 
 
 def loai_tru_tu_ma(goc: Path):
-    """DAN XUAT tap nhom nam ngoai goi tu `_RELEASE_EXCLUDE_*`. Tra None = KHONG DO DUOC."""
+    """DAN XUAT tap nhom nam ngoai goi bang cach HOI CHINH `_build_release_manifest`.
+    Tra None = KHONG DO DUOC."""
     duong = str(goc / "scripts")
     if duong not in sys.path:
         sys.path.insert(0, duong)
@@ -47,24 +48,17 @@ def loai_tru_tu_ma(goc: Path):
         del sys.modules[ten]
     try:
         from tl_core import release as R
-        thu_muc = set(R._RELEASE_EXCLUDE_DIRS)
-        ten_tep = set(R._RELEASE_EXCLUDE_NAMES_ANYWHERE)
+        trong_goi = {f["path"] for f in R._build_release_manifest(goc)["files"]}
     except Exception:
-        return None          # nap hong => KHONG duoc im lang coi nhu "khong loai tru gi"
-    # Hai luat loai tru KHONG phu cung mot pham vi, nen khong duoc gop lam mot phep OR:
-    #   ten THU MUC (`_RELEASE_EXCLUDE_DIRS`)  -> phu ca cay con
-    #   BASENAME (`_RELEASE_EXCLUDE_NAMES_ANYWHERE`) -> chi phu DUNG tep do
-    # `_release_should_include` khop basename cua CHINH tep, nen mot THU MUC ten `CLAUDE.md`
-    # KHONG loai duoc hau due: `CLAUDE.md/x.txt` vao goi that (codex bat, #251). Vi vay nhom
-    # duoc loai theo basename chi tinh la ngoai goi khi tren dia no DUNG la mot tep.
-    ra = set()
-    for n, d in NHOM.items():
-        p = Path(d)
-        if p.parts[0] in thu_muc:
-            ra.add(n)
-        elif p.name in ten_tep and (goc / d).is_file():
-            ra.add(n)
-    return ra
+        return None          # nap/dung hong => KHONG duoc im lang coi nhu "khong loai tru gi"
+    # KHONG chep lai luat loai tru nua. Ba finding lien tiep tren tep nay deu cung mot hinh
+    # dang: ban chep cua ta troi lech khoi `_release_should_include` — bo qua cay con cua mot
+    # THU MUC ten `CLAUDE.md` (#251), roi BAT OAN mot symlink (cung #251). Va ke ca chep dung
+    # vi tu van chua du: symlink-toi-thu-muc bi loai la nho `rglob` KHONG di xuyen symlink,
+    # tuc do PHEP DUYET quyet dinh chu khong rieng vi tu. Nen hoi thang thu that: nhom nam
+    # ngoai goi khi KHONG duong dan nao tai/duoi no lot vao manifest.
+    return {n for n, d in NHOM.items()
+            if not any(x == d or x.startswith(d + "/") for x in trong_goi)}
 
 
 def phan_loai(nhom: str, ngoai_goi) -> str:

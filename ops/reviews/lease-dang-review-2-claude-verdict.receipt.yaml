@@ -1,0 +1,99 @@
+# BIÊN NHẬN — cross-review `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 2 (CUỐI), reviewer `claude`.
+#
+# Verdict `can_sua` với ĐÚNG MỘT P1 — và P1 ấy là một PHẢN CHỨNG CÒN THIẾU, không phải một hành
+# vi sai. Bản vá hiện tại chạy ĐÚNG; thứ nó không mang theo là sợi dây canh để lần refactor sau
+# không âm thầm gỡ mất cổng.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+packet_issue: 227
+lease_id: lease-dang-review-2-claude-20260821
+provider: claude
+role: reviewer
+executor_provider: codex
+verdict: changes_requested
+cross_provider: true
+review_class: sensitive
+reviewed_sha: 90015a53c7407400f87c9f5a018067849fa1e842
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+nen_delta_sha: fefa15b67a2691cf90ee8bfd0ab3880adc5f35d9
+target_pull_request: null
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r2.md
+spec_sha256: 3f310582de59dce7c109717dbab13ef9467b80c67ffeafc0ac8e1484309e0093
+
+verdict_path: ops/reviews/lease-dang-review-2-claude-verdict.md
+verdict_sha256: f21069548bf0e0ff507822a246283fe47417bc334fa1e231b2e71dc88d52b4c0
+verdict_bytes: 21105
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/6c294756057d3ca2e8d5aa93c1c09e56ab4a57ea/ops/reviews/lease-dang-review-2-claude-verdict.md
+evidence_url_ghi_chu: >-
+  Điền SAU KHI ĐÃ PUSH THÀNH CÔNG, không phải sau khi commit — biên nhận lượt 1 đã chết một lần
+  vì rebase viết lại commit sau khi điền (xem caveat `evidence_url-DA-CHET-MOT-LAN-vi-REBASE`).
+
+verdict_nguon: >-
+  stdout của `claude -p` do `launcher.py` giữ, run `3de90358`, `ma_thoat=0`,
+  `thoi_luong_giay=1030.2`, `stdout_byte=21105`, `stderr_byte=0`.
+  Chốt read-only sau lượt: `git status --porcelain` ở cây review RỖNG, HEAD vẫn `90015a53`.
+verdict_doi_chieu: >-
+  NGUYÊN VĂN, không đụng một byte — băm đo trực tiếp trên `stdout.log`. Bước rút gọn đường dẫn
+  phiên KHÔNG chạy (đo được: phép thay thế trả về chuỗi y hệt).
+
+so_finding: 4
+tom_tat_finding: >-
+  P1 không phép đo nào bắt được việc workflow BỎ gọi `kiem-github` (bất đối xứng với `check`,
+  thứ ĐƯỢC `t51` canh) · P3 `T53` khai "toàn suite" nhưng đo MỘT lệnh, và suite vẫn kế thừa môi
+  trường qua `GITHUB_ACTOR` · P3 `chua_do_duoc` của r2 khai HẸP hơn thực tế (thiếu chính mục P1)
+  · P3 `t55` gộp hai khiếm khuyết độc lập, và đột biến "bỏ lớp đo loại số hiệu" giết `t43`+`t44`
+  mà chưa ai khai.
+da_xu_ly: >-
+  CHƯA. Trần ngân sách đã cạn (+498/500) VÀ cả hai trần vòng đã cạn: executor `attempts` 2/2,
+  `review_rounds` 2/2. Theo protocol, packet trở về người giữ kho. Đang chờ quyết định.
+
+verdict_usage_caveats:
+- id: BAY-tren-BAY-finding-luot-1-DA-DONG-THAT
+  noi_dung: >-
+    Reviewer dựng lại ĐÚNG phản chứng của verdict lượt 1 trên head mới cho từng finding và cả
+    bảy đều đóng, mỗi cái kèm phép đo. Đáng chú ý: P2 đóng CẢ HAI CHIỀU (comment người ngoài
+    mang dấu ⇒ CHO QUA, tức lease chính đáng không còn bị bịt; `lease_id` chứa dấu nháy ngược
+    ⇒ `kiem()` CHẶN rc=8), và đột biến `[os.environ.get("GH_PATH") or "gh", …]` — thứ SỐNG SÓT
+    `52/52` ở lượt 1 — nay chết đúng `t49`. Đừng đọc `can_sua` của lượt này thành "lượt 2 hỏng".
+- id: P1-luot-2-la-PHAN-CHUNG-THIEU-khong-phai-HANH-VI-SAI
+  noi_dung: >-
+    Wiring hiện tại ĐÚNG — reviewer bọc `lease_publish.py` ghi nhật ký argv và đo được thứ tự
+    `kiem-github` -> `check` -> `body` -> `mark` cho mỗi lease, cùng việc `kiem-github` hỏng thì
+    `check` KHÔNG BAO GIỜ chạy. Thứ thiếu là ca khoá. Phiên điều phối đo lại độc lập, hai chiều,
+    trên bản sao tạm dựng từ `git archive` head, và khẳng định bất đối xứng: xoá khối gọi
+    `kiem-github` khỏi YAML (đếm còn 0 lần nhắc) ⇒ suite **58/58**, `actionlint` rc=0 — KHÔNG ca
+    nào đỏ; xoá khối gọi `check` ⇒ **57/58**, `t51` ĐỎ. Hai lớp GitHub nay treo vào một lời gọi
+    duy nhất trong YAML mà không phép đo nào canh.
+- id: bo-dem-hinh-dang-A-reviewer-TU-CHOI-tang-len-7
+  noi_dung: >-
+    Reviewer chủ động lập luận rằng P1 lượt này KHÔNG phải hình dạng A ("lời khai rộng hơn phép
+    đo") lần thứ 7: lần thứ 6 (Q5/`T52`) là một lời khai SAI mà phép đo không thể phát hiện, còn
+    ở đây lời khai của `muc_tieu` 5 là ĐÚNG và đo được — chỉ thiếu ca khoá. Vì vậy chốt DỪNG của
+    `hinh_dang_ke_thua` KHÔNG kích hoạt và verdict là `can_sua`, không phải `dung_lai`. Reviewer
+    nêu riêng rằng P3 về `T53` thì ĐÚNG là hình dạng A nhưng ở mức P3, và ĐỂ NGƯỜI GIỮ KHO quyết
+    có tính vào bộ đếm hay không. Bộ đếm hiện vẫn ghi **6**.
+- id: P3-T53-la-lo-CO-SAN-khong-phai-hoi-quy
+  noi_dung: >-
+    `GITHUB_ACTOR=nguoi-la python3 ops/lease_publish_test.py` ⇒ 36/58 trên head, và 26/42 trên
+    nền `cfaccff9`. Reviewer đo nền TRƯỚC khi kết luận, nên nói đúng: delta = 0, đây là cơ chế
+    có sẵn từ trước packet (`chay()` truyền `env=None`), KHÔNG phải hồi quy của bản vá. Cái mới
+    là **lời khai** `T53` ("toàn suite") rộng hơn thứ `t53` thật sự đo (một lệnh `check`).
+- id: B4-tien-de-cua-prompt-SAI-va-reviewer-noi-thang
+  noi_dung: >-
+    Prompt lượt 2 (do phiên điều phối viết) hỏi "thứ tự `kiem-github` TRƯỚC `check` ⇒ lease rác
+    gửi được lời gọi mạng?". Reviewer đo 9 loại lease rác và trả lời **tiền đề SAI**:
+    `kiem_github()` chạy `kiem()` THUẦN trước tiên, nên 0 lời gọi mạng cho mọi lease bị chặn.
+    Ghi ra vì đây là lần thứ hai trong packet này prompt của phiên điều phối chứa một giả định
+    chưa đo.
+- id: neo-github-actions-bot-la-TAI-LIEU-khong-phai-phep-do
+  noi_dung: >-
+    Q12 neo mỏ neo vào `user.login == "github-actions[bot]"`. Lý do nó không giả mạo được nằm ở
+    LUẬT KHÔNG GIAN TÊN của GitHub (tên người dùng không chứa `[`/`]`), tức TÀI LIỆU, không phải
+    hành vi của mã — và phép đo của kho chỉ chứng minh mã LỌC THEO trường ấy. Reviewer khai
+    thẳng là không tách được "không đặt được" khỏi "không ai thử" từ trong container. Có kiểm
+    được một nửa: `grep` trên 4 workflow còn lại ⇒ không workflow nào khác đăng comment.

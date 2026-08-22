@@ -1,0 +1,120 @@
+# Lease EXECUTOR — `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 7. Neo head xuất phát 6eaa3755.
+#
+# LẦN ĐẦU trong packet này KHÔNG phải nới trần: reviewer đo ba bản vá ~15 dòng, lọt trần còn 27.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 227
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+phase_key: LEASE-DANG-DUNG-MOT-LAN
+revision: 7
+generation: 1
+lease_id: lease-dang-exec-7-codex-20260822
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r7.md
+spec_sha256_required: 623b23555a6fa43dad2d9badeaac3a6f852c0be6b9927d4593992f6e10310cb4
+spec_ke_thua:
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r6.md, sha256: 4ee67d54b5504c0b303dad3bf8470c912ad754e6bcda42e8cb4a2866475ba181}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r5.md, sha256: 2c8fb5c68e45dbdcd3e21c316169623d4dcab33459934b575ae8c626b08cb796}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r4.md, sha256: abe7c292aba05aa772b77c246a570d72c9b8e97220247030ae15af8f750d0fce}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r3.md, sha256: c65d5dbd9d2b398978226f6863cf7cd4e4ddb219a7086be0005e65804a0f47da}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r2.md, sha256: 3f310582de59dce7c109717dbab13ef9467b80c67ffeafc0ac8e1484309e0093}
+
+verdict_phai_doc:
+  path: ops/reviews/lease-dang-review-4-claude-verdict.md
+  sha256: 0655b9d0caea1d49450b4b8013f79cd49af61adc62b261bdce2085b76b17614f
+  ket_luan: changes_requested
+  so_finding: 4
+  ghi_chu: 'Verdict NGUYÊN MẪU SẴN cả hai bản vá và ĐÃ ĐO. Executor tự dựng lại, đừng chép mù.'
+
+phan_xu_bo_dem:
+  cau_hoi: 'P2 lượt 4 có phải hình dạng D lần thứ 4 không?'
+  reviewer: >-
+    TÁCH làm hai trục và TỪ CHỐI tự quyết. Trục VẾ: KHÔNG phải D (t66 tính hai boolean độc lập nên
+    tập vế thực tế phân BA lớp; chiều ngược của M4 chứng minh trục thứ hai có răng). Trục ĐƠN VỊ
+    GUARD: đúng hình dạng D lần 1-2. Nêu thẳng rằng đọc theo HÌNH DẠNG thì đây là D=4 và chốt r6
+    biến verdict thành dung_lai.
+  quyet_dinh: 'KHÔNG tăng. Bộ đếm D giữ 3.'
+  can_cu: >-
+    Lựa chọn "guard = khối set +e" là của r5/Q25, đã qua HAI lượt review mà không ai bắt; nó không
+    phải nước đi mới của lượt 6. Cái mới chỉ là một nhánh sót chưa khai.
+  khai_thang: 'Ghi nguyên trạng CẢ HAI cách đọc, không làm tròn theo hướng nào (L1).'
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 660
+  don_vi: 'tệp trong write_set · dòng THÊM theo `git diff --numstat cfaccff9..HEAD`'
+  con_lai_uoc_tinh: 27
+  ghi_chu: >-
+    GIỮ NGUYÊN 660 — KHÔNG nới, lần đầu trong packet này. Head 6eaa3755 đang +633. Reviewer đo ba
+    bản vá ~15 dòng (9+2+4) ⇒ lọt. Vượt 660 ⇒ DỪNG + handoff (§2).
+
+branch: codex/lease-dang-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: 6eaa3755abd96ef6d8f820daaa6b9d96e2bdd7b5
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+start_from_sha: 6eaa3755abd96ef6d8f820daaa6b9d96e2bdd7b5
+
+prompt_path: ops/prompts/lease-dang-exec-7-codex-20260822.md
+prompt_sha256_required: 5ce25827a2045c4deb01827d409314ad36e9bea3d6d9c113f8bccce3b7dddff0
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-22 ("Luot 7: dao sang danh sach CHO PHEP")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-22T06:00:00Z'
+lease_expires_at_utc: '2026-08-23T06:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 6
+attempts_limit: 7
+executor_calls_limit: 14
+executor_calls_used_truoc_luot_nay: 6
+
+reviewer_provider: claude
+review_rounds_limit: 7
+review_rounds_used_truoc_luot_nay: 4
+review_calls_limit: 8
+review_calls_used_truoc_luot_nay: 4
+
+muc_tieu:
+  - "Q32/T64': ĐẢO danh sách CẤM -> CHO PHÉP. Đơn vị khoá là NHÁNH CHẶN, dấu hiệu bắt buộc là lời gọi `bao_chan` (thứ DUY NHẤT đặt BI_CHAN). Đếm bao_chan, đòi mọi lời gọi nằm trong sổ."
+  - 'Q33/T68: đăng ký nhánh `case "$ID"` TƯỜNG MINH; đặt lại tên mục #6 cho khớp thứ nó khoá; XOÁ dấu +1 — số bao_chan phải BẰNG số mục trong sổ'
+  - "Q34/T65': _ve_dan_xuat fail-close có ca RIÊNG, không sống nhờ except Exception của main()"
+  - 'Q35: ghe.exists() -> kiểm TỆP, tránh IsADirectoryError'
+
+gate_bat_buoc:
+  - 'python3 ops/lease_publish_test.py -> rc=0, N/N hai số BẰNG NHAU, >= 68 ca'
+  - 'CÙNG suite với ba biến GitHub đặt và `gh` VẮNG -> N/N y hệt'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'D2 (set +e một dòng), D3 (if ! cmd), D4 (cmd || rc=$?) — CẢ BA PHẢI ĐỎ (hiện sống sót 67/67)'
+  - 'A5 (gỡ nhánh chặn của khối POST) PHẢI ĐỎ — hiện sống sót 67/67'
+  - 'M1 M2 M3 M4 và tám đột biến gỡ guard VẪN phải ĐỎ — đừng làm hỏng thứ đang chạy'
+  - 'số bao_chan == số mục trong sổ, KHÔNG còn dấu +1'
+  - 'git diff --numstat cfaccff9..HEAD -> <= 3 tệp, <= 660 dòng thêm'
+
+dieu_kien_dung:
+  - 'Ngân sách sẽ vượt 660 dòng thêm hoặc 3 tệp ⇒ DỪNG, xuất handoff'
+  - 'Hình dạng A lần 7 · B lần 3 · C lần 2 · D lần 4 · E lần 2 ⇒ DỪNG, không vá'
+  - 'E = "khoá theo thứ LIỆT KÊ ĐƯỢC thay vì theo thứ THẬT SỰ CHẶN", bộ đếm 1. E lần 2 = sau khi đảo sang bao_chan, LẠI tìm được một nhánh chặn KHÔNG gọi bao_chan. TRƯỚC KHI BÁO XONG: tự đi tìm một nhánh như vậy; không tìm được thì nói là không tìm được.'
+posted_comment_id: 5377741727   # workflow ghi, ĐỪNG sửa tay

@@ -1,0 +1,129 @@
+# Lease EXECUTOR — `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 3 (CUỐI). Neo head xuất phát 90015a53.
+#
+# Người giữ kho cấp thêm MỘT lượt vá và nới trần 500 -> 550, sau khi verdict lượt 2 xác nhận
+# 7/7 finding của lượt 1 đã đóng thật và chỉ còn một P1 là PHẢN CHỨNG THIẾU.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 227
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+phase_key: LEASE-DANG-DUNG-MOT-LAN
+revision: 3
+generation: 1
+lease_id: lease-dang-exec-3-codex-20260821
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r3.md
+spec_sha256_required: c65d5dbd9d2b398978226f6863cf7cd4e4ddb219a7086be0005e65804a0f47da
+spec_ke_thua:
+  - path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r2.md
+    sha256: 3f310582de59dce7c109717dbab13ef9467b80c67ffeafc0ac8e1484309e0093
+    vai: 'vẫn nguyên hiệu lực cho MỌI thứ r3 không nêu — r3 CHỈ ghi delta'
+  - path: ops/specs/LEASE-DANG-DUNG-MOT-LAN.md
+    sha256: e1026adb569f5b4732197afac9c0f35cdd5a8945d46301b1d4cb062624e7c72c
+    vai: 'bản 1, hồ sơ — KHÔNG phải authority'
+spec_note: >-
+  r3 là bản DELTA. Nó nới trần (Q17), sửa lời khai `T53` (Q18), tách `t55` (Q19) và thêm ba ca
+  `T59`–`T61`. Trần trong lease này (550) khớp Q17 — cố ý soạn r3 thay vì để lease mâu thuẫn một
+  đặc tả đã đóng băng, vì lease lệch đặc tả thì LEASE sai.
+
+verdict_phai_doc:
+  path: ops/reviews/lease-dang-review-2-claude-verdict.md
+  sha256: f21069548bf0e0ff507822a246283fe47417bc334fa1e231b2e71dc88d52b4c0
+  ket_luan: changes_requested
+  so_finding: 4
+  ghi_chu: >-
+    Verdict này MÔ TẢ SẴN cách vá P1 và có lệnh chạy được cho từng finding. Nó cũng ghi rằng
+    BẢY TRÊN BẢY finding của lượt 1 đã đóng thật — executor KHÔNG được đụng lại chúng.
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 550
+  don_vi: 'tệp trong write_set · dòng THÊM theo `git diff --numstat cfaccff9..HEAD` (tính CẢ ba lượt)'
+  con_lai_uoc_tinh: 52
+  ghi_chu: >-
+    Head hiện tại +498. Người giữ kho nới 500 -> 550 trong phiên 2026-08-21, có chủ đích: trần cũ
+    đã cạn SẠCH, không còn chỗ cho một dòng nào — mà một trần đã cạn thì không còn là trần, nó là
+    một lệnh cấm. Vượt 550 ⇒ DỪNG + handoff (§2).
+
+branch: codex/lease-dang-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: 90015a53c7407400f87c9f5a018067849fa1e842
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+start_from_sha: 90015a53c7407400f87c9f5a018067849fa1e842
+
+prompt_path: ops/prompts/lease-dang-exec-3-codex-20260821.md
+prompt_sha256_required: c7be9200edf28f3167b9a2eee289da9378a06cdb88135eb226ef4dff21e246b4
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("Vá nốt P1 rồi land" — chọn sau khi đọc verdict lượt 2)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_note: >-
+  Phiên ghi lease đã soạn cả ba bản đặc tả. Bản 1 gây ra P1 lượt 1; prompt reviewer lượt 2 của
+  phiên này lại chứa một tiền đề CHƯA ĐO (câu hỏi B.4 — reviewer trả lời "tiền đề SAI", đo 9
+  loại lease rác đều 0 lời gọi mạng). Hai lần trong một packet. Khai ra để reviewer lượt sau soi
+  cả đặc tả và prompt, không chỉ bản vá.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-21T17:00:00Z'
+lease_expires_at_utc: '2026-08-22T17:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 2
+attempts_limit: 3
+attempts_ghi_chu: >-
+  Trần cũ là 2 và đã cạn ở lượt 2. Người giữ kho cấp thêm ĐÚNG MỘT lượt, không mở vô hạn.
+executor_calls_limit: 6
+executor_calls_used_truoc_luot_nay: 2
+
+reviewer_provider: claude
+review_rounds_limit: 3
+review_rounds_used_truoc_luot_nay: 2
+review_calls_limit: 4
+review_calls_used_truoc_luot_nay: 2
+
+muc_tieu:
+  - 'T59: nhật ký argv trong _chay_buoc_dang — mỗi lease phải có `kiem-github <tệp>` TRƯỚC `check <tệp>`'
+  - 'T60: `kiem-github` rc!=0 ⇒ lease KHÔNG được POST và bước thoát khác 0'
+  - 'Q18: T53 làm đúng chữ ("toàn suite") HOẶC hạ lời khai xuống đúng thứ nó đo — khai rõ chọn đường nào'
+  - 'Q19: tách t55 thành t55a (thiếu user.login ⇒ CHẶN) và t55b (dấu không ở đầu thân)'
+  - 'KHAI danh sách đột biến giết NHIỀU ca (ít nhất: bỏ lớp đo loại số hiệu -> t43+t44; kiem() gọi mạng lại -> 8 ca)'
+
+gate_bat_buoc:
+  - 'python3 ops/lease_publish_test.py -> rc=0, N/N hai số BẰNG NHAU, >= 61 ca'
+  - 'CÙNG suite với GITHUB_ACTIONS/GITHUB_REPOSITORY/GITHUB_ACTOR đặt và `gh` VẮNG -> N/N y hệt'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'D10 (xoá khối gọi kiem-github khỏi YAML) PHẢI ĐỎ — lượt 2 SỐNG SÓT 58/58'
+  - 'D11 (gọi kiem-github nhưng nuốt rc) PHẢI ĐỎ — lượt 2 SỐNG SÓT 58/58'
+  - 'D6 giết CHỈ t55b; D7 giết CHỈ t55a'
+  - 'git diff --numstat cfaccff9..HEAD -> <= 3 tệp, <= 550 dòng thêm'
+
+khong_duoc_dung:
+  - 'ops/specs/** — ngoài write_set; đặc tả có băm thì KHÔNG sửa đè. Đính chính `chua_do_duoc` của r2 thuộc BIÊN NHẬN, phiên điều phối làm.'
+  - 'Bảy finding của lượt 1 — đã đóng, có phản chứng. Đừng "cải thiện".'
+  - 'Khe race hai nhánh ops/** — ngoài phạm vi.'
+
+dieu_kien_dung:
+  - 'Ngân sách sẽ vượt 550 dòng thêm hoặc 3 tệp ⇒ DỪNG, xuất handoff'
+  - 'Chốt phải nằm NGOÀI write_set ⇒ DỪNG, xuất handoff'
+  - 'Hình dạng A lần thứ 7, B lần thứ 3, hoặc C ("phản chứng bắt buộc còn thiếu") lần thứ 2 ⇒ DỪNG, không vá'
+  - 'C là hình dạng vừa mắc ở lượt 2. Trước khi báo xong: với MỖI chốt an ninh trong bản vá, hỏi "phép đo nào ĐỎ nếu ai đó gỡ nó?" — không trả lời được thì đó là C lần thứ hai'
+posted_comment_id: 5376896739   # workflow ghi, ĐỪNG sửa tay

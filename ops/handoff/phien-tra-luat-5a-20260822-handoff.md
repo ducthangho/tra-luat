@@ -169,22 +169,48 @@ Cột `đã tiêu` **phải dựng BẰNG TAY** bằng cách đi tìm hiện v�
 trường nào trong tệp lease nói ra điều đó, và **trạng thái Issue cũng không** — đo 22-08: cả bốn Issue
 `#206 #215 #225 #227` đều `open` trong khi hai packet đầu đã land.
 
-```bash
-git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune || { echo "KHONG DO DUOC: fetch"; exit 1; }
-for r in $(git for-each-ref --format='%(refname)' refs/remotes/origin); do
-  for f in $(git ls-tree -r --name-only "$r" -- ops/leases/ 2>/dev/null | grep plat-x8); do
-    git show "$r:$f" | python3 -c '
-import sys,yaml,datetime
-try: d=yaml.safe_load(sys.stdin)
-except Exception as e: print("KHONG_XAC_DINH parse:",e); sys.exit(2)
-if not isinstance(d,dict): print("KHONG_XAC_DINH: khong phai anh xa"); sys.exit(2)
-h=d.get("lease_expires_at_utc")
-if not h: print("KHONG_XAC_DINH: thieu lease_expires_at_utc"); sys.exit(2)
-print("CON_HAN" if str(h)>datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") else "HET_HAN", h)
-' || echo "  ^ $r:$f"
-  done
-done
-```
+> ## ⛔ KHÔNG CÓ LỆNH NÀO Ở ĐÂY. Đó là kết luận, không phải thiếu sót.
+>
+> Chỗ này từng có một lệnh quét lease. Nó hỏng **BA lần liên tiếp**, mỗi lần theo một kiểu khác, và
+> **mỗi bản vá đẻ ra lỗi kế tiếp**:
+>
+> | lượt | bản đang có | hỏng thế nào |
+> |---|---|---|
+> | 1 | `grep -rl plat-x8 ops/leases/` | chỉ quét **cây đang checkout** ⇒ **âm tính giả** — mù đúng chỗ lease sống |
+> | 2 | quét mọi ref, khớp **tên tệp** | lease đã merge/hết hạn vẫn tính là sống ⇒ **dương tính giả VĨNH VIỄN**, chặn luôn việc của phiên sau |
+> | 3 | thêm phân loại `CON_HAN`/`HET_HAN`/`KHONG_XAC_DINH` | in **đúng chữ** `KHONG_XAC_DINH` nhưng `\|\| echo` nuốt mã thoát ⇒ **`rc=0`**. Fail-**OPEN** trong chính cái chốt viết ra để fail-**CLOSE** |
+>
+> Phản chứng cho lượt 3, chạy được: YAML hỏng ⇒ in `KHONG_XAC_DINH parse: …` mà **`rc` của cả khối
+> = 0**. Lượt ấy tôi còn khai *"đã chạy thật"* — nhưng tôi thử **đoạn python đơn lẻ** (`rc=2`), không
+> thử **khối đã ship**. Thử sai đơn vị rồi khai composite chạy được.
+>
+> **Ba lần cùng một chỗ ⇒ theo doctrine đếm hình dạng, câu hỏi đúng không còn là *"vá thế nào"* mà là
+> *"có nên làm việc này không"*.** Tiền lệ của kho: bộ tự ghi lại `~/.codex/config.toml` ăn **bảy**
+> phát hiện qua **bốn** lượt vá, và lời giải cuối cùng là **thôi làm việc đó** — *"cả lớp rủi ro chết
+> theo KIẾN TRÚC, không theo bản vá"*.
+>
+> **Nên đây là LUẬT, không phải script.** Trước khi đổi băm `ops/specs/plat-x8.md`, phải xác lập —
+> bằng tay, và **ngay trước lúc làm**, không phải từ một lượt quét cũ:
+>
+> 1. **Quét MỌI ref**, không chỉ `master`, không chỉ cây đang checkout. Số ref phải **đo**, đừng chép:
+>    98 → 99 → 158 trong một buổi.
+> 2. Với mỗi lease chạm `ops/lease_publish*`, phân **BA** trạng thái. Tên trường hạn là
+>    **`lease_expires_at_utc`** — đoán sai tên thì nhận `None` cho mọi tệp, và `None` đọc thành
+>    *"không có hạn"* cho ra đúng kết luận sai mà phép đo sinh ra để chặn.
+> 3. Cột **`đã tiêu`** phải dựng **BẰNG TAY** từ hiện vật của packet trên `master`. Không trường nào
+>    trong tệp lease nói ra điều đó, **và trạng thái Issue cũng không** — đo 22-08: cả bốn Issue
+>    `#206 #215 #225 #227` đều `open` trong khi hai packet đầu đã land.
+> 4. **`CÒN_HẠN` hoặc `KHÔNG_XÁC_ĐỊNH` ⇒ DỪNG và hỏi người giữ kho.** *"Không đo được"* không phải
+>    *"không có"*.
+>
+> **Đo hiện tại (06:5xZ) — đã có va chạm, nên bước này ĐANG ĐỎ:** hai lease `LEASE-DANG-WINDOWS` trên
+> `origin/ops/pkg-windows` (hết `23-08T10:00Z` và `11:00Z`) giữ **đúng cả hai** tệp `write_set` của
+> `PLAT-X8`. Xem §5c.
+>
+> **Nợ có tên:** `SO-LEASE-KHONG-NAM-MOT-CHO` (§7). Thứ cần là lệnh `ai-dang-giu <đường-dẫn>` **có bộ
+> test và có đột biến**, nằm trong `ops/lease_publish.py` — **không phải** một đoạn shell nữa dán vào
+> tài liệu. Ba lượt trên là bằng chứng đo được rằng đoạn shell là **hình dạng sai**, không phải bản vá
+> chưa đủ khéo.
 
 Lệnh này chỉ trả **`CÒN_HẠN` / `HẾT_HẠN` / `KHÔNG_XÁC_ĐỊNH`**. Nó **cố ý KHÔNG** tự quyết `đã tiêu` —
 đó là chỗ con người phải đo. `CÒN_HẠN` hoặc `KHÔNG_XÁC_ĐỊNH` ⇒ **DỪNG và hỏi**, đừng tự diễn giải.

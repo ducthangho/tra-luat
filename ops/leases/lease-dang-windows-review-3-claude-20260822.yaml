@@ -1,0 +1,111 @@
+# Lease REVIEWER — `LEASE-DANG-WINDOWS` (#238), lượt 3. Neo exact head 7f91ea1.
+
+schema_version: 1
+event: review_lease_granted
+packet_issue: 238
+packet_id: LEASE-DANG-WINDOWS
+lease_id: lease-dang-windows-review-3-claude-20260822
+revision: 4
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: codex
+assurance_target: cross_approved
+access: read-only-kho-ban-sao-ghi-duoc
+branch_ownership: none
+review_class: sensitive
+
+reviewed_sha_required: 7f91ea1cffe17af391362a91b83907c32b16f3b2
+branch: codex/lease-dang-windows-1
+base_sha: 2ab3560a8a406c1b436221fb3c6d23234aefdde0
+nen_so_write_set: ba82b06f9df81fc2f13786fec590ec2110d046b7
+target_branch_neu_land: master
+scope_files: 2
+
+spec_path: ops/specs/LEASE-DANG-WINDOWS-r4.md
+spec_sha256_required: 11972e8ce5d543304b35b7239128af5130d11feaef378465461c3b2b649cc613
+spec_ke_thua:
+  - {path: ops/specs/LEASE-DANG-WINDOWS.md, sha256: f555cbe1a368c12040726dd706ce25ed8dd4041bd8a2f840590810a3c3908a26}
+  - {path: ops/specs/LEASE-DANG-WINDOWS-r2.md, sha256: d9da7705617c95c8dc394d773de8456712d3cc2a2975e5903e8cb28c934c0d83}
+  - {path: ops/specs/LEASE-DANG-WINDOWS-r3.md, sha256: 130b6d29919db327ccc2d9ad8d53910e5dd74b2eef0f607d3e59a707647de40d}
+
+verdict_truoc:
+  path: ops/reviews/lease-dang-windows-review-2-claude-verdict.md
+  sha256: e5dd9584d2e01172f71a0308c1d90eb0918d5b971af56cbb664d91438cf3c4a7
+  phai_dong: ['P1-3']
+
+prompt_path: ops/prompts/lease-dang-windows-review-3-claude-20260822.md
+prompt_sha256_required: 6249ff20b49e4496cbf626934710294a0a3c610d6fdd4f1e70a04a5cd2953904
+
+CANH_BAO_THAM_QUYEN_PHAI_DOC_TRUOC:
+  gi: >-
+    Bản vá của lượt 4 KHÔNG do executor nghĩ ra. Nó do REVIEWER LƯỢT 2 (`claude`) viết và chạy;
+    r4/Q13 bắt executor (`codex`) CHÉP NGUYÊN VĂN, cấm sửa. Đo được: sha256 CẢ TỆP của bản
+    executor đẩy lên trùng bản reviewer đã chạy (`c378e6b0f934aa02…`).
+  he_qua: >-
+    Phần CROSS-PROVIDER của lượt này RẤT MỎNG — `codex` chỉ làm động tác chép. Nội dung bản vá là
+    của `claude`. Nên nhãn `cross_approved` cho lượt 4, nếu đạt, KHÔNG mang cùng sức nặng như các
+    lượt trước: nó chứng nhận rằng một bản vá do `claude` viết được một phiên `claude` khác duyệt.
+  phai_lam_gi: >-
+    Prompt yêu cầu reviewer TẤN CÔNG ca `t73` như tấn công mã của executor, và nếu kết `dat` thì
+    phải NÓI RÕ đã tấn công bằng những gì. Người giữ kho được báo điều này TRƯỚC khi land, không
+    phải sau.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-22 ("Noi 120->125, dong P1-3 bang dung ca va da do" — vòng review kế thừa, review_rounds_limit đã nới 2 -> 3)'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: false
+recorder_ghi_chu: >-
+  Phiên điều phối viết r1..r4 và đã ghi đè chốt dừng BỐN lần. r4 cố ý không đặc tả gì mới, nhưng
+  chính điều đó tạo ra tình huống thẩm quyền ở trên. Reviewer soi ĐẶC TẢ trước, bản vá sau.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-22T10:45:00Z'
+lease_expires_at_utc: '2026-08-23T10:45:00Z'
+run_minutes: 120
+
+attempts_used: 0
+attempts_limit: 0
+review_rounds_limit: 3
+review_rounds_used_truoc_luot_nay: 2
+review_calls_limit: 4
+review_calls_used_truoc_luot_nay: 2
+
+ngan_sach_con_lai:
+  dong_them_da_dung: 124
+  dong_them_toi_da: 125
+  con_lai: 1
+  don_vi: '`git diff --numstat` — KHÔNG phải dòng mã logic (r4/Q14)'
+  ghi_chu: '`can_sua` ⇒ reviewer PHẢI nói bản vá đề xuất cần bao nhiêu dòng, đo bằng numstat.'
+
+dieu_kien_ready_to_review_DA_THOA:
+  yeu_cau: "W3' — lượt Actions THẬT có job windows-latest XANH trên exact head 7f91ea1"
+  bang_chung: >-
+    `workflow_dispatch` run **32567293842** @ `7f91ea1c`, `run_attempt: 1`, `total_count: 2`,
+    không job nào ĐỎ. Log tải thẳng từ blob: ubuntu `lease_publish: 73/73 đạt; đã chạy=73,
+    bỏ qua=0` (0 dòng `BỎ QUA`) · windows `lease_publish: 65/65 đạt; đã chạy=65, bỏ qua=8`
+    (đúng 8 dòng `BỎ QUA`). 65+8=73 khớp.
+  thu_LAN_DAU_DO_DUOC: >-
+    Con số Windows đi **64 → 65** so với lượt trước ⇒ ca mới `t73` CHẠY THẬT trên chân
+    `windows-latest` và XANH. Verdict lượt 2 chỉ SUY được điều này và đã khai là chưa đo.
+  do_doc_lap_boi_phien_dieu_phoi: >-
+    bản vá khớp TỪNG BYTE với bản reviewer lượt 2 đã chạy (sha256 cả tệp `c378e6b0f934aa02…`) ·
+    write-set `ba82b06f..7f91ea1` = `+124/-20`, 2 tệp · `ops/lease_publish.py` KHÔNG đổi một byte
+    (vắng khỏi diff) · ba số của cổng khớp chính xác, mỗi số chạy lại trên worktree riêng.
+
+canh_bao_cho_reviewer: >-
+  Đừng nể bản vá vì "reviewer trước đã đo rồi". Bốn hướng tấn công cụ thể nằm trong prompt, mỗi
+  hướng đòi MỘT PHÉP CHẠY: t73 có xanh mà không đo gì được không · có đỏ SAI lý do không · chuỗi
+  "ĐỎ" khớp ở đâu (cùng họ `t64 đếm chuỗi` mà kho đã trả giá) · X1 có phải đột biến duy nhất khoá
+  được không.
+
+hinh_dang_ke_thua:
+  A_loi_khai_rong_hon_phep_do: 7
+  B_muon_tien_le_khong_do: 2
+  C_phan_chung_bat_buoc_con_thieu: 1
+  D_sai_do_phan_giai_hoac_pha: 3
+  E_khoa_theo_thu_liet_ke_duoc: 4
+  F_land_mot_nen_do_nen_khac: 2
+  ghi_chu: 'Chốt: A lần 8 · B lần 3 · C lần 2 · D lần 4 · E lần 5 · F lần 3 ⇒ DỪNG, không vá.'

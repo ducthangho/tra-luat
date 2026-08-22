@@ -76,6 +76,7 @@ pr: 230                            # https://github.com/ducthangho/tra-luat/pull
 > spec_sha256: 497c68360de79db129ef5158fa21c4f01decf48edb9c5f96637232907e2a6560   # BẢN 3f
 > packet_issue: 225
 > lease: CHUA CAP — VA CHAM lease song cua #238, xem duoi
+> pr: 240                              # PR mang ban 3f. #230 DA MERGE (khong con mo)
 > ```
 >
 > | bản | băm | kết cục |
@@ -97,6 +98,9 @@ pr: 230                            # https://github.com/ducthangho/tra-luat/pull
 > **Một phép đo tự bác chính nó trong 20 phút, ghi lại vì nó rẻ và hay tái phát:** quét đủ **99** ref
 > lúc 05:2xZ ra *"0 lease chồng lấn"*; 20 phút sau nhánh thứ 99 xuất hiện mang đúng một lease chồng
 > lấn. Quét đủ ref là **cần**, không **đủ** — phải quét **ngay trước khi cấp**.
+
+> ⛔ **CÂU DƯỚI ĐÂY ĐÃ LẠC HẬU:** `PR #230` **ĐÃ MERGE** 22-08 (master `3f64167`). Giữ nguyên văn
+> làm bằng chứng; mọi chỉ dẫn *"chờ #230 merge"* trong mục này là **lịch sử**, không phải việc.
 
 **PR #230 đang mở** (mở 22-08-2026 theo yêu cầu người giữ kho) — xem trường `pr:` trong khối neo,
 và đọc lịch sử review của nó trước khi làm gì trên nhánh này. Nhánh đã đẩy, spec tra được bằng

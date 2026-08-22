@@ -85,7 +85,7 @@ thêm) rồi trình người giữ kho.
 | thứ | trạng thái |
 |---|---|
 | ~~**PR #230**~~ | **ĐÃ MERGE** 22-08 (master `3f64167`). Dòng này giữ làm lịch sử |
-| **PLAT-X8** (#225) | chờ **`#238`** land (KHÔNG phải `#227` — nó land 05:16Z rồi bị revert qua PR #237); **mười hai** chỗ phải sửa, ghi trong hộp ⛔ đầu `ops/specs/plat-x8.md` bản **3d**. **Chưa cấp lease được**: lease của `#238` đang giữ đúng cả hai tệp `write_set` của `PLAT-X8` tới `2026-08-23T11:00:00Z` |
+| **PLAT-X8** (#225) | chờ **`#238`** land (KHÔNG phải `#227` — nó land 05:16Z rồi bị revert qua PR #237); **mười ba** chỗ phải sửa, ghi trong hộp ⛔ đầu `ops/specs/plat-x8.md` bản **`3f`** (`497c68360de7…`). **Chưa cấp lease được**: **BA** lease của `#238` giữ đúng cả hai tệp `write_set` của `PLAT-X8` tới `2026-08-23T15:00:00Z`. Khi cấp: packet là `sensitive` + executor `codex` ⇒ **ngoại lệ `ADR-0045`**, lease phải khai rõ — và **chưa cổng nào kiểm việc ấy** (`§20` xếp `ADR-0045` là `0 cổng`), nên phải tự kiểm bằng tay |
 | **#227** | **land rồi REVERT**: PR #234 merge 05:16:40Z ⇒ master ĐỎ Windows `59/68` ⇒ PR #237 hoàn nguyên ba tệp mã, giữ hồ sơ. Land lại là packet **`#238`** |
 
 Bắt đầu bằng **đo lại** bảng "Nền đã đo". Cái nào không tái lập được thì **nói ra**, đừng lặng lẽ dùng.

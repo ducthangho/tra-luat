@@ -130,10 +130,10 @@
 > băng **bản 4** → quét lease trên **mọi** ref rồi mới cấp lease neo băm bản 4. Prompt
 > `ops/prompts/plat-x8-exec-1-codex-20260821.md` giữ lại nhưng phải neo lại băm trước khi dùng.
 >
-> ## Chỗ thứ 13 — lease `codex` cho packet `sensitive` là NGOẠI LỆ CÓ ĐIỀU KIỆN, và điều kiện chưa được ghi ở đâu
+> ## Chỗ thứ 13 — lease `codex` cho packet `sensitive` là NGOẠI LỆ CÓ ĐIỀU KIỆN, và KHÔNG cổng nào canh
 >
 > Chuỗi trên nói *"giữ prompt executor `codex`, chỉ neo lại băm"*. Đúng — **nhưng chưa đủ**, và chỗ
-> thiếu là thứ làm cổng thoát khác 0.
+> thiếu là một điều kiện của `ADR-0045` mà **không cổng nào kiểm**, nên nó phải được kiểm bằng tay.
 >
 > `PLAT-X8` là **`sensitive`**. `ADR-0041:8` và `docs/PROTOCOL_DA_PHIEN.md:559` đều giới hạn Codex
 > Executor ở packet `routine`/`systemic` nhỏ. Đọc tới đó rồi dừng thì kết luận *"phải đổi executor
@@ -155,9 +155,21 @@
 > | **khai rằng đây là NGOẠI LỆ theo §2** | **KHÔNG** — `grep '0045\|ngoại lệ'` trong lease, đặc tả và prompt đều ra **0** |
 > | human readback trước land | chưa tới lúc; phải có trước land |
 >
-> `ADR-0045` cưỡng chế: *"`sensitive` cộng `executor: codex` mà không có khối ngoại lệ do chủ kho ký
-> ⇒ thoát khác 0"*. Nên lease lượt 2 **phải** mang khối ấy, nếu không nó chết ở chính cổng mà packet
-> này sinh ra để dựng.
+> **CHỐT ẤY CHƯA CÓ CỔNG — đây là preflight THỦ CÔNG, đừng đọc thành bằng chứng cổng.** `ADR-0045`
+> *mô tả* cách cưỡng chế (*"`review_class` vào danh sách trường bắt buộc; vắng ⇒ `sensitive`;
+> `sensitive` cộng `executor: codex` mà không có khối ngoại lệ do chủ kho ký ⇒ thoát khác 0"*), nhưng
+> đo trên `195a478d`: `ops/lease_publish.py` có **0** chỗ nhắc `review_class`, **0** nhắc `0045`,
+> **0** nhắc *"ngoại lệ"*; và `docs/PROTOCOL_DA_PHIEN.md:1090` xếp `ADR-0045` đúng ô **`0 cổng`**.
+>
+> Nên lease lượt 2 thiếu khối ngoại lệ **sẽ KHÔNG bị chặn** — nó chỉ sai luật mà không ai bắt. Đó là
+> lý do phải nêu ở đây: **người cấp lease phải tự kiểm bằng tay trước khi cấp.** Lời hứa fail-close
+> cùng ca phản chứng thuộc về packet nào thật sự cài chốt ấy, không phải packet này — `PLAT-X8` còn
+> chưa có lease thì không thể tự cài cổng chặn chính lease của mình.
+>
+> *Bản 3e viết câu này thành "⇒ thoát khác 0", tức khai một cổng CHƯA TỒN TẠI. Cross-review lượt 2
+> bắt được. Cùng hình dạng **A** — "lời khai rộng hơn phép đo" — mà `#238` đếm lên 7, và là lần thứ
+> hai trong phiên này. Gốc: tôi đọc chữ "Cưỡng chế:" trong ADR thành "đã cưỡng chế". **Một ADR mô tả
+> chốt cần có; chỉ mã mới nói chốt đã có.** Muốn biết thì `grep` mã, đừng đọc ADR.*
 >
 > Ghi ra đây vì cùng họ với mọi thứ trong hộp này: **`ADR-0041` là chỗ tiện tay, `ADR-0045` là chỗ
 > kết luận được ghi.** Một lượt cross-review đã dừng ở `ADR-0041` và đề xuất đổi executor — đề xuất
@@ -172,6 +184,21 @@
 >    là phép đo **sai đối tượng**. Chốt: đo `git rev-parse --is-shallow-repository` TRƯỚC mọi kết
 >    luận dạng *"không tồn tại"*; `true` ⇒ `git fetch --unshallow` rồi mới đo; in **cả** số ref
 >    **và** trạng thái shallow cạnh kết luận. Phiên `tra-luat-3a` chỉ ra bẫy này.
+>
+>    **Nhưng `--is-shallow-repository` MỘT MÌNH chưa đủ** — chính `tra-luat-3a` đính chính tiếp: một
+>    kho **đã gỡ nông, refspec rộng** vẫn thiếu ref được, vì `for-each-ref` **đọc bộ đệm cục bộ**
+>    chứ không hỏi máy chủ. Refspec là luật cho những lần fetch SAU, không phải lời hứa đã fetch.
+>    Phép canh đúng là so **HAI NGUỒN**:
+>
+>    ```bash
+>    git ls-remote --heads origin        | wc -l   # máy chủ CÓ những ref nào
+>    git for-each-ref refs/remotes/origin | wc -l   # tôi đang GIỮ bản sao nào
+>    ```
+>
+>    Lệch ⇒ **`KHÔNG_ĐO_ĐƯỢC`**, không phải *"không có"*. Thiếu mạng để chạy `ls-remote` cũng ra
+>    `KHÔNG_ĐO_ĐƯỢC`. Đo trên container này 08:5xZ: **159 / 159**, không lệch. Lệnh chữa không đổi —
+>    `git fetch --unshallow origin '+refs/heads/*:refs/remotes/origin/*'` bịt cả ba cơ chế (refspec
+>    hẹp do `--depth` kéo theo `--single-branch` · độ sâu bị cắt · bộ đệm chưa fetch).
 >
 > 1. **Tên trường hạn lease là `lease_expires_at_utc`.** Lượt quét đầu đoán `het_han`/`expires_at`/
 >    `deadline`, nhận `None` cho **cả 42** tệp, và `None` đọc thành *"không có hạn"* thì bảng ra
@@ -208,7 +235,8 @@ mà **nội dung yêu cầu vẫn không đổi một chữ** — thứ trôi l�
 | 3c | `182ea7621d02…` | sửa hộp ⛔: điều kiện chờ đổi `#227` → **`#238`**; sáu chỗ sai đo lại thành **mười một**; ghi va chạm lease SỐNG của `#238` |
 | 3d | `f7f8e6209e4f…` | thêm chỗ thứ 12 — **nhưng với con số SAI** (`29` trường / `21` lease; thật là `2`/`2`, xem `3f`) và một mệnh đề sai (*"chạm §9"*). Cả hai do clone NÔNG |
 | 3e | `ce14fb0b75e4…` | thêm chỗ thứ 13 (`ADR-0045`: lease `codex` cho packet `sensitive` là ngoại lệ CÓ ĐIỀU KIỆN) — hết hiệu lực khi chỗ 12 bị đo lại |
-| 3f | bản này | **SỬA chỗ 12: `29 trường / 21 tệp` → `2 / 2`.** Con số cũ là tạo tác của **clone NÔNG**, không phải SHA giả; mệnh đề *"chỗ 12 chạm §9"* cũng sai (`reviewed_sha_required` đo được **44/44** tồn tại). Cộng: nền đo → `195a478d`, va chạm → **3** lease `LEASE-DANG-WINDOWS` tới `23-08T15:00Z`, và bài học **0** về `--is-shallow-repository`. Nội dung yêu cầu KHÔNG đổi so với bản 3 |
+| 3f | `497c68360de7…` | SỬA chỗ 12: `29 trường / 21 tệp` → **`2/2`** — con số cũ là tạo tác của **clone NÔNG**, không phải SHA giả; mệnh đề *"chỗ 12 chạm §9"* cũng sai (`reviewed_sha_required` **44/44** tồn tại). Cộng: nền đo → `195a478d`, va chạm → **3** lease tới `23-08T15:00Z`, bài học **0**. Hết hiệu lực ở cross-review lượt 2 |
+| 3g | bản này | **Vá 3 finding của cross-review lượt 2.** Nặng nhất: bản 3e khai *"thiếu khối ngoại lệ ⇒ thoát khác 0"* — **cổng ấy KHÔNG TỒN TẠI** (`lease_publish.py` có 0 chỗ nhắc `review_class`/`0045`; §20 xếp `ADR-0045` là `0 cổng`), nên đổi thành **preflight THỦ CÔNG**. Cộng: bảng task prompt → `3f`/mười ba/`15:00Z`; handoff ghi `#230` đã merge; bài học 0 thêm phép so **hai nguồn** (`ls-remote` vs `for-each-ref`) vì `--is-shallow-repository` một mình chưa đủ |
 
 Bốn phát hiện trên **một** đường là dấu hiệu sai ở QUYẾT ĐỊNH GỐC chứ không ở các bản vá. Các bản
 trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm bản dùng được.

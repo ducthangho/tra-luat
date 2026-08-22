@@ -360,3 +360,80 @@ thứ ấy là job `gate` thì nó đụng **Q7** (đã trả lời *"KHÔNG B�
 ---
 
 **Đọc được bản này KHÔNG phải là được giao việc.** Handoff không phải lease (`docs/PROTOCOL_DA_PHIEN.md` §7).
+
+---
+
+## 8. CHỐT CUỐI PHIÊN — 08:0xZ. Đọc mục này TRƯỚC §5, §5b, §5c.
+
+Bốn mục trên là **lịch sử theo thứ tự viết**, và ba trong bốn đã bị chính phiên này bác một phần.
+Mục 8 là **ảnh chụp cuối cùng**. Vẫn phải đo lại — nó cũng chỉ là ảnh chụp.
+
+### 8.1 Việc của phiên — xong hết, không còn gì dở
+
+| # | việc | kết cục |
+|---|---|---|
+| 1 | Vá bốn con trỏ chết trong tài liệu có thẩm quyền | **PR #230 merged** |
+| 2 | Hộp ⛔ trên `ops/specs/plat-x8.md` | bản **3b** — nay đã lạc hậu, xem §8.3 |
+| 3 | Nợ **§12** `PLAT-X4-721-dong-chua-verdict-nao-phu` + đính chính append-only | trong #230 |
+| 4 | Bản giao việc hoàn thiện kế hoạch | `ops/prompts/phien-hoan-thien-ke-hoach-20260822.md` — **đã được thi hành**, xem §8.2 |
+| 5 | Bàn giao này | **PR #236 merged** |
+| 6 | Bộ quét hand-roll hỏng **NĂM** lần → thay bằng LUẬT | **PR #239 merged** |
+| 7 | Issue nối `adr-song` + `doctrine-scan` vào `ci.yml` | **Issue #241**, `proposed` |
+
+### 8.2 Việc người giữ kho giao từ đầu phiên — ĐÃ LAND, do phiên khác làm
+
+*"Hoàn thiện Kế hoạch triển khai + đồng bộ Protocol"* land qua **PR #233**, do
+`session_018YdsqSNdxorwxVYW2d2PkH` thi hành đúng bản giao việc ở mục 4 trên.
+
+- **`docs/PROTOCOL_DA_PHIEN.md` §20** — bảng định tuyến ADR **do MÁY canh**
+  (`packet_loop.py adr-song`), thay dòng phạm vi đã chết `ADR-0017 đến ADR-0035`.
+- **`ops/HOAN_THIEN_KE_HOACH_20260822.md`** — cắt mục D thành **bốn** packet đề xuất `D1`–`D4`,
+  thứ tự neo theo độ phủ đo được. Hàng đợi: `#227 → #225 → #209 → #220 → D1 → D2 → D3 → D4`.
+
+**Hai chỗ tệp ấy tự khai bất lợi, đáng đọc hơn phần còn lại:** (a) cột *"cổng đã ĐO"* của §20 có
+**ba** giá trị và **hai trong ba là lời khai yếu** — `có nhắc` chỉ là proxy, `chưa đo` là trạng thái
+thứ ba; (b) họ tự khai **vượt ngưỡng** `ADR-0044` (8 tệp, +2040) kèm lý lẽ đo được thay vì lờ đi.
+
+**Và con số của tôi sai lần nữa, lệch xa hơn tôi tưởng.** Tôi báo *"mục D là hai field"*, sửa thành
+*"230 tên trường"*; số đúng trên master mới là **247 tên trường · cổng đọc 8 · 239 không ai kiểm**,
+trên **61** lease. Bài học không phải con số mà là: **mỗi lần đo lại, con số lớn hơn** — vì tập lease
+tăng và phép liệt kê cũ luôn hụt. Đừng chép; chạy lệnh trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` §1.
+
+### 8.3 `PLAT-X8` bản 4 — HAI điều kiện, cả hai còn chặn
+
+| điều kiện | đo 08:00Z | đo thế nào |
+|---|---|---|
+| `#238` land | **CHƯA** — lịch sử `99eb1d2..master` = 0 commit; `RC_`=6; 39 ca; 0 hàm mới | LỊCH SỬ trước, HIỆN VẬT xác nhận. Hai phép đo phải KHỚP |
+| va chạm write set | **CÒN ĐỎ** — hai lease `LEASE-DANG-WINDOWS` `CON_HAN` tới `23-08T10:00Z` và `11:00Z`, giữ đúng cả hai tệp | `yaml.safe_load`, **KHÔNG** `sed` |
+
+**Xuất phát từ bản 3d**, KHÔNG phải 3b:
+`f7f8e6209e4fb624fc19f72a4759b48551e8312fdbd34c7badb6c14309d036ea`, trên nhánh
+`claude/phien-tra-luat-5a-handoff-9o1cqp` (chưa merge — vì thế master vẫn 3b). Hộp ⛔ của 3d ghi
+**MƯỜI HAI** chỗ sai, và chính nó cũng chỉ là ảnh chụp. **Đo lại từng chỗ.** Có **NĂM** chỗ trích băm,
+không phải bốn — chỗ thứ năm ở `ops/prompts/phien-hoan-thien-ke-hoach-20260822.md`.
+
+`ops/specs/plat-x8.md` do phiên `tra-luat-ae` (`session_014NW8Liw`) giữ. **Không đụng.**
+
+### 8.4 Bốn cam kết phạm vi — GIỮ ĐÚNG
+
+Không đụng: `ops/NO_KY_THUAT.md` · `docs/PROTOCOL_DA_PHIEN.md` · `docs/adr/**` (phiên #233) ·
+`ops/specs/plat-x8.md` (phiên `tra-luat-ae`).
+
+### 8.5 Thứ đáng mang sang nhất
+
+Phiên này đo sai **sáu** lần và bộ quét lease hỏng **năm** lần. Gộp lại thành đúng một câu:
+
+> **Đo cái mình sắp khẳng định, bằng công cụ hiểu CẤU TRÚC, ngay trước lúc khẳng định.**
+
+Ba hệ quả đã trả giá, mỗi cái một lần:
+
+1. **`grep`/`sed` trên YAML là hình dạng sai** — không phải bản vá chưa khéo. `sed 's/.*: *//'` tham
+   lam trên giá trị có dấu hai chấm cho **âm tính giả trên lease đang sống**. Dùng `yaml.safe_load`.
+2. **Thử THÀNH PHẦN không phải thử HỢP THỂ.** Mọi mảnh xanh mà hợp thể vẫn rỗng — đã xảy ra.
+3. **Một khung BÁC CHÍNH MÌNH vẫn phải đo.** Tôi nhận khung của phiên khác vì nó nghe khiêm tốn, rồi
+   *xác nhận* lại cho họ mà không thêm phép đo nào — biến lời khai thành bằng chứng bằng cách chuyền
+   tay. **Tự phê không phải bằng chứng.**
+
+Và một thứ khác loại ba cái trên: **triệu chứng của lỗi thứ năm ĐÃ HIỆN RA trong output của chính
+tôi** (`hết=00Z'`, bốn dòng liền, kèm dấu nháy thừa) và tôi đọc lướt qua. Không phải lỗi thiết kế —
+là **không nhìn thứ mình vừa in ra**.

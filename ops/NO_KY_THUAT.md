@@ -1065,3 +1065,61 @@ git ls-tree -r <ref> -- ops/leases/                          # gom (blob, duong 
 ```
 
 Máy chưa canh được mục này — chưa có cổng nào so biên nhận đăng giữa các nhánh.
+
+## 19. `LEASE-THAY-THE-CHUA-CHUAN-HOA` — 4/120 blob mang một trường không tài liệu nào biết
+
+**Đo 22-08-2026, 165 ref.** `ops/leases/**` có **120** cặp `(blob, đường dẫn)` duy nhất trên **110**
+đường dẫn. Trong đó **4** blob mang trường `da_bi_thay_the`, và **cả 4** thuộc đúng một chuỗi:
+
+```
+plat-x8-exec-2 -> -2r2 -> -2r3 -> -2r4 -> -2r5 -> -2r6
+```
+
+Mỗi bản trỏ tới bản sau; bản cuối không mang trường ấy. Hạn của cả chuỗi **không đổi**
+(`2026-08-23T14:10:00Z`). Nghĩa là **sáu bản ghi, một thẩm quyền**.
+
+**Quét `docs/` · `.claude/skills/` · `ops/lease_publish.py` ⇒ 0 lần nhắc.** Trường này ra đời ở
+`0d35e44` (22-08-2026), mang `schema_version: 2`, do executor `PLAT-X8` tự đặt.
+
+### Vì sao nó tồn tại — và vì sao đó là nợ chứ không phải giải pháp
+
+Lý do ghi nguyên văn trong tệp lease: chốt chống đăng trùng của `ops/lease_publish.py` trả `rc=9`
+cho một `lease_id` đã có `posted_comment_id`. Executor **không sửa được tệp lease cũ**, nên phải
+đúc `lease_id` mới rồi đánh dấu bản cũ đã chết.
+
+Tức là: khuyết tật đăng-trùng (mục 18) **đẻ ra vòng xoay id**, vòng xoay **thổi phồng số lease còn
+hạn**, và `da_bi_thay_the` là miếng vá thủ công cho hệ quả. Ba nợ trên một dây chuyền.
+
+### Hai hướng trỏ NGƯỢC NHAU, và gộp chúng làm một là chỗ đã trả giá
+
+```
+r5.thay_the_lease  = r4     moi -> cu    muon biet r4 chet chua: phai quet CA KHO
+r3.da_bi_thay_the  = r4     cu  -> moi   mo dung MOT tep la biet
+```
+
+Đặc tả `LEASE-HOI-TOAN-KHO` bản đầu gạt **cả ba** trường vào cùng một ô `ngoai_pham_vi` với lý do
+*"trỏ NGƯỢC, đọc xuôi không suy ra được"* — lý do ấy **đúng cho hai trường và sai cho trường thứ
+ba**. Ba lượt cross-review không ai tách ra kiểm, vì ba tên nằm chung một ô bảng. Hệ quả: một
+`ai-dang-giu` xây theo bản ấy sẽ báo *"6 lease đang giữ"* khi có **1** — **chặn nhầm** một packet
+hợp lệ.
+
+### Nợ cụ thể
+
+1. **Chưa có lược đồ.** `da_bi_thay_the` không nằm trong protocol, ADR, hay schema lease nào. Nó có
+   thể được thu nhận, hoặc chết cùng packet đã đặt ra nó — chưa ai quyết.
+2. **Vắng trường KHÔNG phải bằng chứng còn hiệu lực.** 116/120 blob vắng nó vì trường **chưa tồn
+   tại** lúc chúng được đúc, không phải vì chúng còn sống. Mọi bộ đọc phải dùng nó theo chiều
+   **THU HẸP** tập người giữ, không bao giờ **MỞ RỘNG** — sai chiều là fail-open.
+3. **Chưa có đường thu hồi** (nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong`). `da_bi_thay_the` chỉ
+   *đánh dấu*, không *thu hồi*.
+
+Tái lập:
+
+```
+git for-each-ref --format='%(refname)' refs/remotes/origin   # PHAI fetch du truoc, xem CLAUDE.md
+git ls-tree -r <ref> -- ops/leases/                          # gom (blob, duong dan) duy nhat
+# yaml.safe_load tung blob; dem blob co khoa `da_bi_thay_the`
+git log --all -S'da_bi_thay_the' --reverse -- ops/leases/    # commit dau tien dat ra truong nay
+```
+
+Máy chưa canh được mục này — chưa có cổng nào kiểm lease dùng trường ngoài lược đồ.

@@ -78,3 +78,4 @@ canh_bao_cho_reviewer: >-
   KHÔNG phải "chúng có xanh không" mà là "chúng đo CÁI GÌ": chúng đọc CHÍNH tệp YAML hay một bản
   chép trong test? Bản chép thì hai bản trôi lệch và ca chết âm thầm. Và delta có 12 dòng BỊ XOÁ
   trong một tệp phản chứng — soi xem có ca cũ nào bị nới lỏng để nhường chỗ không.
+posted_comment_id: 5377036019   # workflow ghi, ĐỪNG sửa tay

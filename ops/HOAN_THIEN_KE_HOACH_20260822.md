@@ -291,13 +291,13 @@ Việt lúc thành công nên nó thuộc kịch bản ấy thật.
 
 ## 5. Khai VƯỢT NGƯỠNG — theo đúng cửa thoát của `ADR-0044`
 
-Thay đổi của phiên này: **6 tệp · +815/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
+Thay đổi của phiên này: **6 tệp · +838/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
 là **≤ 3 tệp và ≤ 300 dòng thêm**. Khai thay vì lờ đi, và tách hai phần vì rủi ro của chúng khác họ:
 
 | phần | tệp | dòng thêm | rủi ro |
 |---|---|---|---|
 | **mã + phản chứng** | `.claude/dev/packet_loop.py` · `.claude/dev/packet_loop_test.py` | +307 | chạy sai |
-| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +508 | viết sai chữ |
+| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +531 | viết sai chữ |
 
 ```
 git diff --cached --numstat
@@ -309,7 +309,7 @@ chứng, tức đổi một con số lấy chính thứ làm cổng có răng �
 ca đi chết"*. Đây cũng không phải authority theo nghĩa hẹp của `ADR-0044`: `packet_loop.py` không cấp
 lease và không gác đường đăng; thứ ấy là `ops/lease_publish.py`, mà phiên này **không đụng**.
 
-**Phần văn bản: +508 trên 4 tệp.** Không dòng nào nằm trên đường chạy của `scripts/tl.py` hay của
+**Phần văn bản: +531 trên 4 tệp.** Không dòng nào nằm trên đường chạy của `scripts/tl.py` hay của
 cổng đăng lease. Ngưỡng của `ADR-0044` neo từ số đo về **chi phí review MÃ** (`PLAT-M4` 2 tệp/+351 →
 một vòng một finding; `PLAT-X4` 4 tệp/+721 → ba vòng tám finding); áp nguyên si sang một thay đổi tài
 liệu là áp sai đối tượng. Tiền lệ đã được chấp nhận: PR #210 khai đúng lý lẽ này cho 13 tệp/+861.
@@ -325,3 +325,26 @@ nhau — cổng đo §20, nên tách rời thì một trong hai nhánh có cổn
 | `ops/NO_KY_THUAT.md` | PR #230 thêm `## 12.` | phiên này bắt đầu từ `## 13.` và nói ra ngay trong §13. #230 không land ⇒ đánh số lại |
 | `CLAUDE.md` | PR #229 thêm 8 dòng quanh dòng 527 | phiên này sửa quanh dòng 517, cách 10 dòng — merge sạch nếu #229 land trước |
 | `ops/lease_publish*` | lease `#227` còn hiệu lực tới `23-08T01:00Z` | phiên này **KHÔNG đụng**; con trỏ chết `t42` ở §1.3 để lại cho phiên giữ lease ấy |
+| `ops/NO_KY_THUAT.md` | lease `slice-b-c-exec-1-claude-20260821` (#215), `access: read-write`, **chưa hết hạn** tới `22-08T06:40Z` | xem §5.1 |
+
+### 5.1 Một va chạm write set THẬT — và một phép đo hỏng suýt giấu nó
+
+`ops/NO_KY_THUAT.md` nằm trong `write_set` của một lease **chưa hết hạn** lúc phiên này ghi vào đó.
+Nhưng packet `#215` **đã land** — hiện vật có trên `master` (§2), nên quyền ghi ấy **đã tiêu**. Đây
+đúng là nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong`: *"chưa hết hạn"* không phải *"còn hiệu lực"*, và
+không trường nào trong tệp lease nói ra điều đó — phải đi tìm hiện vật mới biết.
+
+**Chỗ đáng ghi hơn là cách nó suýt bị giấu.** Phép quét va chạm chạy TRƯỚC khi ghi báo **0 va chạm**,
+và con số ấy SAI: script khớp `lease_expires_at_utc:` theo sau bởi nháy KÉP tuỳ chọn, trong khi YAML
+ghi nháy ĐƠN. Không lease nào đọc được hạn ⇒ tất cả rơi khỏi tập "chưa hết hạn" ⇒ báo sạch. **Cùng
+một regex hỏng cắn hai lần trong một phiên** — lần kia ở §2.1, biến 16 thành 0. Một phép đo an toàn
+trả về RỖNG trông y hệt một phép đo trả về SẠCH, đúng bài học *"vắng mặt vì sạch và vắng mặt vì chưa
+chạy nhìn giống hệt nhau"*.
+
+**Chốt rẻ, dùng được ngay — và nó là điều kiện tối thiểu cho mọi phép quét lease sau này:** in số
+lease **ĐỌC ĐƯỢC HẠN** bên cạnh số va chạm, rồi **thoát khác 0 khi hai số không bằng nhau**.
+`đọc được 93/93` cạnh `va chạm 0` là một kết luận; `đọc được 0/93` cạnh `va chạm 0` là một lỗi. Hai
+số bằng nhau chính là dạng bằng-chứng-dương mà `CLAUDE.md` đòi cho mọi cổng.
+
+Đây cũng là đầu vào cụ thể cho nợ `SO-LEASE-KHONG-NAM-MOT-CHO`: lệnh *"lease nào đang giữ đường dẫn
+X"* khi được viết phải mang sẵn chốt này, kẻo nó thành cổng câm ngay từ ngày đầu.

@@ -175,6 +175,37 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   `refs/remotes/origin/ops/*` bằng tay TRƯỚC KHI cấp bất kỳ lease nào, và **không fetch được ref nào
   thì ĐỎ** — "không đo được" không phải "không có". Cùng họ *"hỏi chỗ tiện tay thay vì hỏi chỗ kết
   luận được ghi"*, và lần này nạn nhân là chính packet sinh ra để dạy cổng ĐO thay vì NHẬN LỜI KHAI.
+- **`git for-each-ref` ĐỌC BỘ ĐỆM CỤC BỘ, KHÔNG HỎI MÁY CHỦ — "quét MỌI ref" có thể quét đúng 3 ref.**
+  Đo 22-08-2026, container remote mới mở: `for-each-ref refs/remotes/origin` ⇒ **3**; sau khi fetch đủ ⇒
+  **160**. Ba ref đầu là `master` + hai nhánh `claude/**`; `ops/pkg-windows` **không** nằm trong đó, mà
+  đúng nhánh ấy giữ **cả ba** lease `LEASE-DANG-WINDOWS` đang chặn write set `PLAT-X8`. Bộ quét vẫn in
+  *"đã quét mọi ref"* và vẫn `KHÔNG_XÁC_ĐỊNH = 0`. Đây là cách hỏng **thứ SÁU** của bộ quét lease và là
+  cái đầu tiên **KHÔNG nằm trong mã**: `yaml.safe_load` đúng từng dòng, ba trạng thái đủ, fail-close đủ —
+  sai vì ĐẦU VÀO thiếu. Bộ quét hỏi *"có ref nào"* và nhận câu trả lời **thành thật cho một câu hỏi khác**:
+  *"tôi đang giữ bản sao của những ref nào"*.
+  **BA cơ chế khác nhau, đo riêng từng cái — đừng gộp, vì cách chữa khác nhau:**
+  · **`--depth` kéo theo `--single-branch`, và thứ bị siết là REFSPEC.** Phản chứng chạy được, hai clone
+  cùng nguồn: `git clone --depth=1` ⇒ `shallow=true`, refspec `+refs/heads/<MỘT-NHÁNH>:...`; thêm
+  `--no-single-branch` ⇒ `shallow=true`, refspec `+refs/heads/*:...`. **Cùng nông, chỉ refspec khác** ⇒ độ
+  sâu tự nó không cắt ref, nhưng clone `--depth` TRẦN vẫn mất ref. Chữa: sửa refspec.
+  · **Cắt độ sâu làm hỏng phép hỏi LỊCH SỬ** — `merge-base --is-ancestor d5b7bcc origin/master` trả SAI
+  trong khi `d5b7bcc` (merge PR #116) ĐÚNG là tổ tiên; `git cat-file -e` báo "không có" cho SHA hợp lệ
+  (phiên `tra-luat-ae` mất 2,5h vì nó: khai "29 trường SHA không tra được", thật là **2**). Kèm `git fetch`
+  in `forced update` — đọc y hệt "master bị viết lại lịch sử". Chữa: `--unshallow`.
+  · **Refspec RỘNG mà vẫn thiếu ref** — ca thật của container này. **Refspec là luật cho những lần fetch
+  SAU, không phải bằng chứng đã fetch.** Chữa: fetch thật.
+  **PHÉP CANH ĐÚNG là so HAI NGUỒN, không phải hỏi `--is-shallow-repository`** (bản đầu của mục này ghi
+  thế và SAI — nó bỏ sót ca thứ ba, tức im lặng đúng lúc cần kêu):
+  `git ls-remote --heads origin | wc -l` (HỎI MÁY CHỦ) so với `git for-each-ref refs/remotes/origin | wc -l`
+  (ĐỌC ĐỆM). Lệch ⇒ **`KHÔNG_XÁC_ĐỊNH`, không phải "không có"**; không chạy được `ls-remote` cũng vậy.
+  **Phải xem lệch CHIỀU NÀO** (`comm -23` / `comm -13`): thiếu ở phía cục bộ mới là mù, THỪA chỉ là nhánh
+  chưa đẩy — kho này đo 160/159 và cái thừa là nhánh chỉ định chưa push, nên canh mà không xét chiều thì
+  tự báo động giả. Lệnh chữa cả ba: `git fetch --unshallow origin '+refs/heads/*:refs/remotes/origin/*'`.
+  **Ghi cả cái sai vì nguyên nhân sai trong doctrine tệ hơn không ghi:** bản đầu đổ cho `--depth` cắt nhánh,
+  trong khi ca thật là *chưa fetch* — đúng thói *"kết luận từ một đường hỏng"*. Cùng họ nợ
+  `SO-LEASE-KHONG-NAM-MOT-CHO` nhưng sâu hơn một tầng: nợ ấy nói *lease không nằm trên master*; mục này nói
+  **danh sách nhánh cũng chỉ là bản sao**. Khi viết `ai-dang-giu`, phép so này phải là chốt ĐẦU TIÊN, chạy
+  trước khi mở tệp lease nào.
 - **Workflow có `paths:` ĐÃ KHÔNG CHẠY ở lần đẩy tạo nhánh mới — nguyên nhân CHƯA BIẾT, đừng chế ra.**
   Đo 21-08-2026: đẩy nhánh `ops/**` MỚI kèm một tệp trong `ops/leases/` ⇒ `ops-publish-lease.yml`
   chạy **0** lượt; đẩy tiếp lên nhánh ĐÃ TỒN TẠI, cùng bộ lọc, cùng thư mục ⇒ chạy ngay (lượt

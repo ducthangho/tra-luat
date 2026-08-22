@@ -106,7 +106,10 @@ rồi nhận đúng một lời khai vì nó bất lợi cho tôi và nghe khiê
 
 - **"Mục D là hai field"** — hụt **hai bậc**. Đo lại: **49** lease dùng **230** tên trường mức gốc,
   `ops/lease_publish.py` nhắc **8**, còn **222** không ai kiểm. Phiên #233 đo ra 215/8/**207** —
-  cột giữa **khớp tuyệt đối**, tổng lệch **15**, chưa ai phân định. Kết luận chịu tải không đổi: mục D
+  cột giữa **khớp tuyệt đối**, tổng lệch **15**. **ĐÃ PHÂN ĐỊNH** (xem §3b, và sửa theo P2 lượt 2):
+  **230 đúng**; **215 là bản đếm HỤT** vì regex `^([a-z_][a-z0-9_]*):` đòi khoá toàn chữ thường, bỏ sót
+  đúng 15 tên có chữ HOA. Chiều ngược lại **rỗng** — 230 phủ 215. Giữ con số 215 ở đây làm **bối cảnh
+  lịch sử**, không phải như một lựa chọn còn treo. Kết luận chịu tải không đổi: mục D
   là một **quyết định phạm vi**, không phải bản vá hai dòng. Phiên #233 đã cắt thành D1–D4.
 - **"Protocol im lặng về trần review"** — sai (xem §3.1).
 - **VÀ CÁI THAY THẾ NÓ CŨNG SAI — lỗi đo thứ SÁU, xem §3c.** Tôi chép khung của phiên #233
@@ -140,16 +143,52 @@ lệnh ấy, và cross-review bắt (P1 trên PR #236): nó chỉ quét **cây �
 mà §7 của chính tệp này gọi tên là nợ `SO-LEASE-KHONG-NAM-MOT-CHO`. Một tệp vừa mô tả cái bẫy vừa
 bước vào nó. Lệnh đúng quét **mọi ref**, và **fail-close**:
 
+**Và bản vá ĐẦU TIÊN của lệnh ấy CŨNG hỏng — cross-review lượt 2 bắt (P1).** Nó quét mọi ref
+nhưng chỉ khớp **TÊN TỆP**. Một khi bản ghi lease `plat-x8` merge vào `master` hoặc nằm lại trên một
+nhánh đã hết hạn, vòng lặp trả "CÓ LEASE" **vĩnh viễn** — chặn luôn bước đổi băm kể cả sau khi
+executor xong hoặc lease đã bị rút. Đổi một phép đo **âm tính giả** lấy một phép đo **dương tính giả
+vĩnh viễn**.
+
+**Đây là lần THỨ HAI trong cùng tệp này tôi mô tả cái bẫy rồi bước vào nó.** §7 và mục 12 của sổ nợ
+đều ghi thành chữ: *"**chưa hết hạn** KHÔNG phải **còn hiệu lực**"*, và *"không có cách nào ĐỌC ĐƯỢC
+để biết một lease đã tiêu hay chưa"*. Tôi viết ra câu ấy rồi ship một bộ quét coi mọi tệp khớp tên là
+lease sống.
+
+**Nên lệnh đúng KHÔNG phải một bộ quét khôn hơn.** Thứ cần là **BA trạng thái**, đúng như
+`ops/RUT_LEASE_PLAT_X8_20260821.md` đã kê:
+
+| trạng thái | đọc từ đâu | xử |
+|---|---|---|
+| `còn hiệu lực` | `lease_expires_at_utc` > hiện tại **và** packet chưa có hiện vật trên master | **DỪNG**, hỏi người giữ kho |
+| `đã tiêu` | packet có hiện vật trên master ⇒ việc xong, quyền ghi thừa | bỏ qua |
+| **`không xác định được`** | parse hỏng · fetch hỏng · không đọc được ref · không dựng được cột "đã tiêu" | **DỪNG** — *"không đo được"* không phải *"không có"* |
+
+Cột `đã tiêu` **phải dựng BẰNG TAY** bằng cách đi tìm hiện vật của packet trên `master`; **không**
+trường nào trong tệp lease nói ra điều đó, và **trạng thái Issue cũng không** — đo 22-08: cả bốn Issue
+`#206 #215 #225 #227` đều `open` trong khi hai packet đầu đã land.
+
 ```bash
-git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune || { echo "KHONG DO DUOC"; exit 1; }
-n=0
+git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune || { echo "KHONG DO DUOC: fetch"; exit 1; }
 for r in $(git for-each-ref --format='%(refname)' refs/remotes/origin); do
-  git ls-tree -r --name-only "$r" -- ops/leases/ 2>/dev/null | grep -q plat-x8 && { echo "CO LEASE: $r"; n=1; }
+  for f in $(git ls-tree -r --name-only "$r" -- ops/leases/ 2>/dev/null | grep plat-x8); do
+    git show "$r:$f" | python3 -c '
+import sys,yaml,datetime
+try: d=yaml.safe_load(sys.stdin)
+except Exception as e: print("KHONG_XAC_DINH parse:",e); sys.exit(2)
+if not isinstance(d,dict): print("KHONG_XAC_DINH: khong phai anh xa"); sys.exit(2)
+h=d.get("lease_expires_at_utc")
+if not h: print("KHONG_XAC_DINH: thieu lease_expires_at_utc"); sys.exit(2)
+print("CON_HAN" if str(h)>datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") else "HET_HAN", h)
+' || echo "  ^ $r:$f"
+  done
 done
-[ "$n" = 0 ] || exit 1
 ```
 
-Không fetch được ref nào ⇒ **ĐỎ**. *"Không đo được"* không phải *"không có"*.
+Lệnh này chỉ trả **`CÒN_HẠN` / `HẾT_HẠN` / `KHÔNG_XÁC_ĐỊNH`**. Nó **cố ý KHÔNG** tự quyết `đã tiêu` —
+đó là chỗ con người phải đo. `CÒN_HẠN` hoặc `KHÔNG_XÁC_ĐỊNH` ⇒ **DỪNG và hỏi**, đừng tự diễn giải.
+
+Nợ có tên cho việc này: `SO-LEASE-KHONG-NAM-MOT-CHO` (§7) — cần lệnh `ai-dang-giu <đường-dẫn>` trả
+đủ ba trạng thái, chứ không phải một bộ quét nữa.
 
 ### 5b. CẬP NHẬT 05:4x Z — #227 ĐÃ LAND RỒI BỊ REVERT, và điều đó BÁC tiêu chí canh ở §5
 

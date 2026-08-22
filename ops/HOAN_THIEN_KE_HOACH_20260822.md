@@ -1,7 +1,8 @@
 # Hoàn thiện kế hoạch + đồng bộ protocol — phiên 22-08-2026
 
-**Giao việc:** `ops/prompts/phien-hoan-thien-ke-hoach-20260822.md` (PR #230, chưa land).
-**Nền đo:** `master` = `a5bfe07`, đo lúc `2026-08-22T03:05Z`.
+**Giao việc:** `ops/prompts/phien-hoan-thien-ke-hoach-20260822.md` (đã land ở PR #230).
+**Nền đo:** ban đầu `master` = `a5bfe07` lúc `03:05Z`; nhánh nay gộp tới `2ab3560a`.
+Mỗi con số dưới đây neo SHA của chính lần đo nó — xem `ops/NO_KY_THUAT.md` §14 để biết vì sao.
 
 > **Tệp này KHÔNG phải lease và không cấp việc cho ai.** `docs/PROTOCOL_DA_PHIEN.md` §7: prompt và
 > handoff không mang thẩm quyền. Thứ giao việc là Packet Issue kèm lease còn hiệu lực (§3.2 và §4).
@@ -39,12 +40,12 @@ git log --oneline --since=2026-08-20 origin/master -- ops/KE_HOACH_THI_CONG_CLAU
 Hai commit ấy là `f6e0037` (19-08 13:44) và `3cc7f09` (19-08 12:44). Ý định gần như chắc chắn là
 *"không đổi KỂ TỪ 19-08"*, tức số **0**, và tôi dùng số đó — nhưng nói ra thay vì lặng lẽ chọn.
 
-### 1.2 Dòng 5 — bệnh là 222/230, không phải hai field
+### 1.2 Dòng 5 — bệnh là 239/247, không phải hai field
 
 Hai con số của bản giao việc đúng (`review_class` 10/49 · `^spec_sha256` 11/49 = `spec_sha256` 5 +
 `spec_sha256_required` 6), và cổng đọc **0** dòng cả hai. Nhưng đo toàn bộ:
 
-**49 lease trên `master` dùng 230 tên trường khác nhau · `ops/lease_publish.py` đọc 8 · 222 trường
+**61 lease trên `master` (`2ab3560a`) dùng 247 tên trường · `ops/lease_publish.py` đọc 8 · 239 trường
 khai mà không cổng nào kiểm.** Trong đó **16 trường khai ở 100% lease** và vẫn không ai đọc.
 
 > **Con số này đã SAI một lần: bản đầu ghi 215/207.** Phép đo cũ dùng regex đòi khoá toàn chữ thường
@@ -54,10 +55,10 @@ khai mà không cổng nào kiểm.** Trong đó **16 trường khai ở 100% le
 > kê khoá. Chi tiết và lệnh đã sửa: `ops/NO_KY_THUAT.md` §14.
 
 Đã ghi thành nợ có tên `LEASE-KHAI-MA-CONG-KHONG-DOC` (`ops/NO_KY_THUAT.md` §14), kèm lệnh tái lập
-và kèm **cảnh báo đọc số**: 230 là số *tên trường*, không phải số *lỗ hổng* — nhiều trường cố ý là
+và kèm **cảnh báo đọc số**: 247 là số *tên trường*, không phải số *lỗ hổng* — nhiều trường cố ý là
 ghi chú cho người (`*_note`, `*_ghi_chu`, `canh_bao_*`) và không nên có cổng.
 
-Vì sao con số đúng lại đổi kết luận: **2** làm mục D trông như một bản vá hai dòng; **222** cho thấy
+Vì sao con số đúng lại đổi kết luận: **2** làm mục D trông như một bản vá hai dòng; **239** cho thấy
 nó là một **quyết định phạm vi** — phải chọn tập trường nào lên hợp đồng, tập nào rớt xuống ghi chú
 tự do. Đó là lý do §3 cắt nó thành bốn packet chứ không phải một.
 
@@ -349,13 +350,13 @@ bộ test **có** lưới: `thieu = [t for t, _ in cap if t not in goc]` in Đ�
 
 ## 5. Khai VƯỢT NGƯỠNG — theo đúng cửa thoát của `ADR-0044`
 
-Thay đổi của phiên này: **6 tệp · +1440/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
+Thay đổi của phiên này: **6 tệp · +1450/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
 là **≤ 3 tệp và ≤ 300 dòng thêm**. Khai thay vì lờ đi, và tách hai phần vì rủi ro của chúng khác họ:
 
 | phần | tệp | dòng thêm | rủi ro |
 |---|---|---|---|
 | **mã + phản chứng** | `.claude/dev/packet_loop.py` · `.claude/dev/packet_loop_test.py` | +797 | chạy sai |
-| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +643 | viết sai chữ |
+| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +653 | viết sai chữ |
 
 ```
 git diff --numstat $(git merge-base origin/master HEAD)
@@ -367,7 +368,7 @@ chứng, tức đổi một con số lấy chính thứ làm cổng có răng �
 ca đi chết"*. Đây cũng không phải authority theo nghĩa hẹp của `ADR-0044`: `packet_loop.py` không cấp
 lease và không gác đường đăng; thứ ấy là `ops/lease_publish.py`, mà phiên này **không đụng**.
 
-**Phần văn bản: +643 trên 4 tệp.** Không dòng nào nằm trên đường chạy của `scripts/tl.py` hay của
+**Phần văn bản: +653 trên 4 tệp.** Không dòng nào nằm trên đường chạy của `scripts/tl.py` hay của
 cổng đăng lease. Ngưỡng của `ADR-0044` neo từ số đo về **chi phí review MÃ** (`PLAT-M4` 2 tệp/+351 →
 một vòng một finding; `PLAT-X4` 4 tệp/+721 → ba vòng tám finding); áp nguyên si sang một thay đổi tài
 liệu là áp sai đối tượng. Tiền lệ đã được chấp nhận: PR #210 khai đúng lý lẽ này cho 13 tệp/+861.

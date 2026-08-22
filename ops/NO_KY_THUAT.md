@@ -722,17 +722,26 @@ for f in sorted(pathlib.Path("docs/adr").glob("*.md")):
 PY
 ```
 
-## 14. `LEASE-KHAI-MA-CONG-KHONG-DOC` — 222/230 trường, không phải hai
+## 14. `LEASE-KHAI-MA-CONG-KHONG-DOC` — 239/247 trường, không phải hai
 
 Bản bàn giao ngày 22-08 khai bệnh này bằng **hai** field (`review_class` 10/49 · `spec_sha256` 11/49).
-Đo lại trên `origin/master` = `3f641673`:
+Đo trên `origin/master` = `2ab3560a`:
 
-| | |
-|---|---|
-| lease `.yaml` | **49** (0 tệp không parse) |
-| tên trường **mức GỐC** | **230** |
-| `ops/lease_publish.py` có nhắc | **8** |
-| **không ai kiểm** | **222** |
+| | | (nền `3f641673`, ~2h trước) |
+|---|---|---|
+| lease `.yaml` | **61** (0 tệp không parse) | 49 |
+| tên trường **mức GỐC** | **247** | 230 |
+| `ops/lease_publish.py` có nhắc | **8** | 8 |
+| **không ai kiểm** | **239** | 222 |
+
+**Cột thứ ba không phải trang trí — nó là bằng chứng cho cách viết con số này.** Trong khoảng hai
+giờ, `#227` land rồi bị revert một phần (`#234` → `#237`), để lại 12 tệp lease mới: số trường nhảy
+`230 → 247`. Nếu mục này ghi `230` trơ trọi thì nay nó là một lời khai SAI. Ghi kèm **neo SHA** thì
+nó vẫn là một phép đo ĐÚNG — chỉ là của một thời điểm khác. Đó là lý do giữ số thay vì bỏ số, và là
+lý do neo SHA thay vì ghi ngày.
+
+Hai con số **KHÔNG** đổi qua cả hai lần đo: cổng đọc **8**, và **16** trường khai ở 100% lease. Thứ
+chịu tải của mục này nằm ở hai con số ấy, không ở tổng số trường.
 
 Tám tên cổng có nhắc: `granted_by` · `lease_expires_at_utc` · `lease_id` · `packet_issue` ·
 `posted_comment_id` · `prompt_path` · `prompt_sha256_required` · `reviewed_sha_required`.
@@ -760,12 +769,12 @@ liệt kê khoá chứ không ở phép dò cổng. **Bài học: đọc YAML b�
 bản thô là cùng họ với `_MARKER_NO` của `t43` và với bộ quét lease khớp nháy kép mà YAML ghi nháy đơn
 (§5.1 của `ops/HOAN_THIEN_KE_HOACH_20260822.md`) — **ba lần trong một ngày, cùng một hình dạng.**
 
-**Cảnh báo đọc số:** 230 là số **tên trường**, không phải số **lỗ hổng**. Nhiều trường cố ý là ghi chú
+**Cảnh báo đọc số:** 247 là số **tên trường**, không phải số **lỗ hổng**. Nhiều trường cố ý là ghi chú
 cho người đọc (`*_note`, `*_ghi_chu`, `canh_bao_*`) và không nên có cổng. Phép đo nói "không ai kiểm",
 nó **không** nói "phải kiểm hết" — đọc rộng ra là tự đặt cho mình một việc không ai duyệt.
 
 **Điều kiện coi là XONG:** một quyết định phạm vi — trường nào lên hợp đồng, trường nào rớt xuống ghi
-chú tự do — chứ không phải "cổng đọc đủ 230". `PLAT-X8` (#225) nhận `review_class`; `PLAT-X7` (#220)
+chú tự do — chứ không phải "cổng đọc đủ 247". `PLAT-X8` (#225) nhận `review_class`; `PLAT-X7` (#220)
 nhận danh tính model; phần còn lại cắt ở `ops/HOAN_THIEN_KE_HOACH_20260822.md` §3.
 
 **Lệnh tái lập — dùng bộ phân tích YAML, KHÔNG dùng regex, và đo trên `origin/master`:**

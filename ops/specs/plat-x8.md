@@ -3,7 +3,7 @@
 > # ⛔ ĐỪNG CẤP LEASE NEO VÀO BẢN NÀY
 >
 > **Điều kiện chờ ĐÃ ĐỔI: nay chờ `#238`, KHÔNG phải `#227`.** Và số chỗ sai không phải sáu — đo lại
-> toàn bảng 22-08-2026 trên `origin/master` `2ab3560` thì ra **mười ba**. Chỗ thứ 12 tìm được khi đi
+> toàn bảng 22-08-2026 trên `origin/master` (đo lại trên `195a478d`) thì ra **mười ba**. Chỗ thứ 12 tìm được khi đi
 > kiểm một việc KHÁC (`SLICE-B-C` đã land chưa); chỗ thứ 13 do **cross-review trên PR #240** chỉ ra —
 > nó chỉ sai chỗ hở đúng, còn kết luận thì sai, xem cuối hộp.
 >
@@ -19,68 +19,109 @@
 >
 > ## VA CHẠM WRITE SET ĐANG SỐNG — đây là lý do cứng nhất để chưa cấp lease
 >
-> `ops/leases/lease-dang-windows-exec-1-codex-20260822.yaml` (packet `#238`, `granted_by: ducthangho`,
-> hết **`2026-08-23T10:00:00Z`**) giữ `write_set`: `.github/workflows/ops-publish-lease.yml` ·
+> **BA** lease `LEASE-DANG-WINDOWS` (`exec-1` · `exec-2` · `exec-3`, packet `#238`,
+> `granted_by: ducthangho`) giữ `write_set`: `.github/workflows/ops-publish-lease.yml` ·
 > **`ops/lease_publish.py`** · **`ops/lease_publish_test.py`** — tức **ĐÚNG CẢ HAI** tệp `write_set`
-> của `PLAT-X8`. Lease ấy nằm trên nhánh `ops/pkg-windows`, **chưa về master**. Cấp lease `PLAT-X8`
-> bây giờ là dựng lại đúng cửa sổ hai writer đã làm lease lượt 1 bị RÚT.
+> của `PLAT-X8`. Hạn muộn nhất **`2026-08-23T15:00:00Z`** (`exec-3`, commit `3360f6da` lúc 07:56Z).
+> Cả ba nằm trên nhánh `ops/pkg-windows`, **chưa về master**. Cấp lease `PLAT-X8` bây giờ là dựng
+> lại đúng cửa sổ hai writer đã làm lease lượt 1 bị RÚT.
+>
+> Đo 08:39:57Z trên clone đầy đủ, 159 ref, 100 tệp lease phân biệt, `KHÔNG_ĐO_ĐƯỢC = 0`:
+> **10** lease còn hạn giữ `ops/lease_publish*` — 7 của `LEASE-DANG-DUNG-MOT-LAN`, 3 của
+> `LEASE-DANG-WINDOWS`. Bản 3d/3e ghi *"hai lease… tới 11:00Z"*: thiếu `exec-3`, vì lúc quét nó
+> chưa được đẩy. **Riêng ba lease `LEASE-DANG-WINDOWS` đã đủ đỏ** — không cần phân loại bảy cái kia.
 >
 > ## Mười một chỗ đã sai — không phải sáu
 >
-> | # | chỗ | đang ghi | sự thật đo được trên `2ab3560` |
+> | # | chỗ | đang ghi | sự thật đo được trên `195a478d`, clone ĐẦY ĐỦ |
 > |---|---|---|---|
 > | 1 | §0 bảng đo | bộ test `42/42` | **vẫn 42/42** trên master sau revert. `#227` từng nâng lên 68; `#238` sẽ nâng lại. **Đo, đừng đoán** — hộp bản 3b dự báo `58`, số thật lúc `#227` còn trên master là **68** |
-> | 2 | §6 `A9` | `N >= 42` | đúng cho `2ab3560`; phải nâng theo lượt `#238`, đo lại lúc ấy |
-> | 3 | §0 nền đo | `3db588c` | master nay **`2ab3560`** |
+> | 2 | §6 `A9` | `N >= 42` | đúng cho `195a478d`; phải nâng theo lượt `#238`, đo lại lúc ấy. **Đếm bằng `^def t[0-9]+` ra 42; bằng `^def t[0-9]+_` ra 39** — chênh ba ca hậu tố chữ (`t02b_` `t02c_` `t02d_`). Bộ test duyệt `for fn in CA` nên **42 là số ca thật chạy**; ghi kèm MẪU khi trích số, kẻo so chéo hai phiên ra `42 ≠ 39` rồi đọc thành *"#238 đã land"* |
+> | 3 | §0 nền đo | `3db588c` | master nay **`195a478d`** (đã qua `2ab3560` → `99eb1d2` → đây trong ba giờ) |
 > | 4 | §3 bảng va chạm | ba dòng: `#209`, `#220`, mục D | thiếu `#227` **và** `#238`; `#238` là dòng có lease SỐNG |
 > | 5 | §3 câu kết | *"không lease nào đang giữ hai tệp này"* | **bị bác hai lần.** Quét đủ ref lúc 05:2xZ: 8 lease còn hạn; quét lại 05:5xZ: **9** |
 > | 6 | §3 thứ tự | `PLAT-X8 → #209 → …` | thật: **`#238` → `PLAT-X8` → `#209` → `PLAT-X7` → mục D** |
 > | 7 | §5 mục 9 | `t23` *"42/42 → N/N"* | số nền đúng hôm nay, nhưng nó **đi kèm** sàn A9 nên phải đổi cùng lượt |
 > | 8 | §4 mục 1 · §6 `A8` | *"49 lease cũ"* | **61** tệp |
 > | 9 | §8 | *"15/15 đường dẫn"*, *"10 lease khai lớp"* | **14/14** đường · **22** lease khai lớp (1 `routine` / 5 `systemic` / 16 `sensitive`); executor **17**, reviewer **44** |
-> | 10 | §9 | *"0/49 tệp có `risk`"*, *"39/39 reviewer"* | **0/61** · **44/44** đo theo HÌNH DẠNG — nhưng xem mục **12**, đo theo TỒN TẠI ra **27/44** |
+> | 10 | §9 | *"0/49 tệp có `risk`"*, *"39/39 reviewer"* | **0/61** · **44/44** — và **44/44 theo CẢ HAI** cách đo (hình dạng lẫn tồn tại, trên clone đầy đủ). Bản 3d ghi *"27/44 theo tồn tại"*: **SAI**, xem mục 12 |
 > | 11 | §2 | *"lần **đầu tiên** `ops/lease_publish.py` vào một `write_set` (0/49)"* | **MỆNH ĐỀ SỰ KIỆN, đã sai.** `#227` mở tệp ấy trước; nay **7/61** lease mang nó. `PLAT-X8` là packet **thứ hai** chạm nó, không phải thứ nhất |
-> | 12 | §9 lập luận | *"exact head **CÓ THẬT** và neo ngay trong lease"* | **Chữ "có thật" do phép đo HÌNH DẠNG đỡ, không phải phép đo TỒN TẠI.** Đo tồn tại: **17/44** lease reviewer có `reviewed_sha_required` trỏ commit **không tra được**. Xem khối riêng bên dưới |
+> | 12 | cổng lease | `reviewed_sha_required` kiểm **40-hex**, tức kiểm CÁCH VIẾT | đúng về nguyên lý, quy mô nhỏ: **1** SHA giữ chỗ trong **2** `base_sha`. **KHÔNG chạm §9** — bản 3d nói nó chạm, và điều đó SAI. Xem khối riêng bên dưới |
 >
-> **Bốn quyết định ở §1 (Q1 thu hồi · Q2 · Q5 · Q6) và §5–§8, §10 KHÔNG bị ảnh hưởng** — mười một chỗ
-> đầu đều là con số nền, bảng va chạm, và một mệnh đề sự kiện. **Hai chỗ cuối thì khác:** chỗ **12**
-> chạm một LẬP LUẬN của §9; chỗ **13** chạm ĐIỀU KIỆN CẤP LEASE. Đọc cả hai trước khi dùng §9 làm
-> căn cứ hoặc cấp lease executor.
+> **Bốn quyết định ở §1 (Q1 thu hồi · Q2 · Q5 · Q6) và §5–§10 KHÔNG bị ảnh hưởng** — mười hai chỗ đầu
+> là con số nền, bảng va chạm, một mệnh đề sự kiện và một quan sát về cổng. **Chỉ chỗ 13 khác loại:**
+> nó chạm ĐIỀU KIỆN CẤP LEASE, nên đọc nó trước khi cấp lease executor.
 >
-> ## Chỗ thứ 12 — `reviewed_sha_required` được kiểm HÌNH DẠNG, không kiểm TỒN TẠI
+> **§9 KHÔNG bị chỗ 12 bác** — bản 3d nói có, và đó là hệ quả của cùng một phép đo hỏng: hai trường
+> tra không ra đều là `base_sha`, còn `reviewed_sha_required` — trường §9 thật sự dựa vào — đo được
+> **44/44 tồn tại** trên clone đầy đủ. Lập luận §9 đứng nguyên.
 >
-> Đo 22-08-2026 06:2xZ trên `origin/master` `2ab3560`, **61** lease:
+> ## Chỗ thứ 12 — `reviewed_sha_required` kiểm HÌNH DẠNG, không kiểm TỒN TẠI (SỐ ĐÃ SỬA)
+>
+> > ⚠ **BẢN 3d/3e GHI SAI CHỖ NÀY: "29 trường / 21 tệp / 20 SHA phân biệt".** Số đúng là
+> > **2 trường / 2 tệp / 1 SHA**. Hai mươi bảy trường kia tra không ra **vì clone NÔNG**, không
+> > vì SHA giả. Phát hiện nhờ phiên `tra-luat-3a` báo bẫy shallow clone; đo lại sau
+> > `git fetch --unshallow`. Giữ nguyên câu sai ở đây làm bằng chứng — xem "Vì sao sai" bên dưới,
+> > nó đắt hơn chính con số.
+>
+> `ops/lease_publish.py` đòi `reviewed_sha_required` là **40-hex** — tức kiểm **cách viết**. Một
+> chuỗi 40 ký tự hex bịa ra qua cổng y như SHA thật. Đo trên `195a478d`, clone **ĐẦY ĐỦ**
+> (`git rev-parse --is-shallow-repository` = `false`), 61 lease:
 >
 > | đo | số |
 > |---|---|
 > | trường SHA đã kiểm (`base_sha` · `reviewed_sha_required` · `start_from_sha`) | **141** |
-> | trường trỏ commit **không tra được** | **29** — trong **21** tệp lease, **20** SHA phân biệt |
-> | lease **reviewer** có `reviewed_sha_required` không tra được | **17/44** |
-> | lease **executor** có `reviewed_sha_required` không tra được | **2/17** |
+> | trỏ commit **không tra được** | **2** — trong **2** tệp lease, **1** SHA phân biệt |
+> | SHA ấy | `0333948669bb0fdbfef8f5cbcf14a95b1b0e8bd4`, ở `base_sha` của `slice-b-c-review-1-codex-20260821` và `tri-thuc-review-1-codex-20260821` |
 >
-> **Ba giả thuyết rẻ đã bị loại, theo thứ tự — đừng loại lại:**
+> Nó là **SHA giữ chỗ** thật: GitHub API trả `No commit found for SHA`, và trong kho có một commit
+> **thật** trùng đúng **8** ký tự đầu rồi khác hẳn — `03339486`**`bc44d533…`** (merge PR #212). Ai có
+> SHA viết tắt 8 ký tự rồi điền nốt cho đủ 40 sẽ ra đúng hình dạng này.
 >
-> 1. *"chưa fetch đủ"* — fetch **toàn bộ** `refs/heads/*`: **158** ref remote + **35** tag. Số **không đổi**.
-> 2. *"commit mất ref trong clone, vẫn còn trên GitHub"* — hỏi API: `No commit found for SHA`. Không phải GC.
-> 3. *"SHA thật bị chép thiếu/thừa ký tự"* — chỉ **1/20** trùng tiền tố với một commit thật, và trùng
->    đúng **8** ký tự rồi khác hẳn: lease khai `03339486`**`69bb0fdb…`**, commit thật là
->    `03339486`**`bc44d533…`**. Một cái khác lộ hẳn: `18da1da6a07a3e6e4e3e8f`**`0e0e0e0e0e0e0e0e0e`** —
->    mẫu lặp tới hết chuỗi. Đây là **SHA giữ chỗ**, không phải lỗi chép.
+> Finding vẫn đứng, chỉ nhỏ hơn **mười bốn lần** so với con số bản 3d: cổng kiểm hình dạng thì một
+> `base_sha` không tồn tại vẫn qua. Nhưng **2 ≠ 29**, và cách con số ấy phình lên mới là bài học.
 >
-> **Vì sao điều này thuộc về `PLAT-X8` chứ không phải một packet khác.** §9 dùng câu *"exact head có
-> thật và neo ngay trong lease"* làm lý do KHÔNG phân lớp diff trên đường reviewer. Lý do ấy đứng
-> được là nhờ `ops/lease_publish.py` **đã đòi và kiểm** trường `reviewed_sha_required` — nhưng nó
-> kiểm **40-hex**, tức kiểm **cách viết**. Một chuỗi 40 ký tự hex bịa ra qua cổng y như một SHA thật.
-> Cùng hình dạng với *"danh sách CẤM phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN"* (`v1.36.68`),
-> và với `gh auth status` xanh trong khi mọi thao tác kho trả 403: **một phép kiểm qua được mà không
-> chứng minh được thứ nó có tên**.
+> **Và nó KHÔNG chạm §9.** Cả hai trường hỏng là `base_sha`; `reviewed_sha_required` đo được **44/44
+> tồn tại**. Bản 3d khai chỗ này *"chạm một LẬP LUẬN của §9"* và ghi *"17/44 lease reviewer có
+> `reviewed_sha_required` không tra được"* — **cả hai là tạo tác của clone nông**. Câu *"exact head
+> có thật và neo ngay trong lease"* ở §9 đứng nguyên, đo cả hình dạng lẫn tồn tại.
 >
-> **Chưa quyết chỗ chữa, và CỐ Ý chưa quyết.** Thêm phép kiểm tồn tại vào cổng là mở rộng `write_set`
-> của `PLAT-X8` (`ops/lease_publish.py`) cho một mục Issue #225 không đặt ra, và **17/44** lease cũ sẽ
-> ĐỎ ngay — đúng thứ §4 mục 1 cấm (forward-only theo Q5). Nên đây là **nợ đã đo**, không phải yêu cầu
-> của packet này. Ai mở packet cho nó phải trả lời trước: cổng chặn **lease mới** hay chặn **mọi
-> lease**, và ba trạng thái (`có` · `không` · **`không đo được`**) ánh xạ ra `rc` nào — SHA của một
-> nhánh chưa fetch là `không đo được`, không phải `không có`.
+> ## Vì sao bản 3d sai — ba lỗi chồng nhau, cái sau che cái trước
+>
+> **1. `git cat-file -e` NÓI DỐI trên clone nông.** Container đo bản 3d có
+> `is-shallow-repository = true`. Nông cắt **LỊCH SỬ**, nên commit cũ không có trong clone và
+> `cat-file` trả "không có" cho SHA hoàn toàn hợp lệ.
+>
+> **2. Tôi tự loại giả thuyết ấy — và loại SAI.** Bản 3d ghi *"'chưa fetch đủ' — fetch **toàn bộ**
+> `refs/heads/*`: 158 ref + 35 tag. Số **không đổi**."* Câu ấy đúng về **ref** và vô nghĩa về **lịch
+> sử**: `--depth` cắt độ sâu, không cắt số ref, nên fetch thêm ref không kéo về commit cũ nào. **Đủ
+> REF không phải đủ LỊCH SỬ.** Phép đo duy nhất phân biệt được là `git rev-parse
+> --is-shallow-repository`, và bản 3d chưa từng chạy nó.
+>
+> **3. Bằng chứng thứ ba là BỊA, và tôi không biết.** Bản 3d viết: *"một cái lộ hẳn:
+> `18da1da6a07a3e6e4e3e8f0e0e0e0e0e0e0e0e0e` — mẫu lặp tới hết chuỗi"*. Script của tôi chỉ in **12
+> ký tự đầu**; **28 ký tự còn lại do chính tôi gõ** khi dựng lời gọi API, rồi tôi đọc kết quả 404
+> thành bằng chứng về dữ liệu. `base_sha` **thật** của `wp55-r4-exec-1-claude-20260816` là
+> `18da1da6a07a`**`b2c86d716cef1d74ff2cd0e3218a`** — **tra được**, merge PR #129. Cái "mẫu lặp" ấy
+> chưa bao giờ tồn tại trong kho.
+>
+> Chốt, và đây là phần đáng giữ hơn con số:
+>
+> - **Đo `--is-shallow-repository` TRƯỚC mọi kết luận dạng "không tồn tại".** Nông ⇒
+>   `git fetch --unshallow origin '+refs/heads/*:refs/remotes/origin/*'` rồi mới đo. In số ref **và**
+>   trạng thái shallow cạnh kết luận.
+> - **Loại một giả thuyết bằng phép đo TRẢ LỜI ĐÚNG NÓ.** Tôi loại *"chưa fetch đủ"* bằng số ref —
+>   một con số không liên quan tới điều đang hỏi. Một phép đo sai đối tượng nguy hiểm hơn không đo,
+>   vì nó để lại cảm giác đã kiểm.
+> - **Chỉ đưa vào lời gọi cái ĐỌC RA TỪ DỮ LIỆU.** Tự điền phần thiếu của một định danh rồi coi kết
+>   quả là bằng chứng thì đó là bằng chứng về thứ mình vừa gõ. Script in rút gọn ⇒ sửa script để in
+>   đủ, đừng lấp bằng tay.
+>
+> **Chưa quyết chỗ chữa, và CỐ Ý chưa quyết.** Thêm phép kiểm tồn tại vào cổng là mở `write_set` của
+> `PLAT-X8` cho một mục Issue #225 không đặt ra. Với con số thật (**2**), việc ấy càng không gấp.
+> Ai mở packet cho nó phải trả lời trước: cổng chặn **lease mới** hay **mọi lease**; ba trạng thái
+> (`có` · `không` · **`không đo được`**) ánh xạ ra `rc` nào; và **`không đo được` phải bao gồm ca
+> clone nông**, vì đó chính là ca đã lừa được lượt đo đầu tiên.
 >
 > ## Việc phải làm, đúng thứ tự
 >
@@ -122,7 +163,15 @@
 > kết luận được ghi.** Một lượt cross-review đã dừng ở `ADR-0041` và đề xuất đổi executor — đề xuất
 > ấy phá một quyết định chủ kho đã ký, chỉ vì hỏi thiếu một tệp.
 >
-> ## Ba thứ lượt đo 22-08 trả giá mới biết — đọc trước khi đo lại
+> ## Bốn thứ lượt đo 22-08 trả giá mới biết — đọc trước khi đo lại
+>
+> 0. **`git cat-file -e` NÓI DỐI trên clone NÔNG, và không có gì cảnh báo.** Container đo bản 3d có
+>    `is-shallow-repository = true`; nông cắt **lịch sử**, nên `cat-file` trả "không có" cho SHA hợp
+>    lệ. Nó đẻ ra con số **29** ở chỗ 12 (thật là **2**) và mệnh đề sai *"chỗ 12 chạm §9"*. Fetch
+>    thêm **ref** không cứu — `--depth` cắt độ sâu chứ không cắt số ref, nên *"đã fetch 158 ref"*
+>    là phép đo **sai đối tượng**. Chốt: đo `git rev-parse --is-shallow-repository` TRƯỚC mọi kết
+>    luận dạng *"không tồn tại"*; `true` ⇒ `git fetch --unshallow` rồi mới đo; in **cả** số ref
+>    **và** trạng thái shallow cạnh kết luận. Phiên `tra-luat-3a` chỉ ra bẫy này.
 >
 > 1. **Tên trường hạn lease là `lease_expires_at_utc`.** Lượt quét đầu đoán `het_han`/`expires_at`/
 >    `deadline`, nhận `None` cho **cả 42** tệp, và `None` đọc thành *"không có hạn"* thì bảng ra
@@ -147,8 +196,8 @@
 vào thứ không còn tồn tại, phải đi qua bản sửa đổi mới. Soạn bằng skill `soan-spec`, 21-08-2026.
 
 **BẢN ĐÓNG BĂNG THỨ BA (+ hộp cảnh báo, 22-08-2026).** Hai lượt cross-review (`codex`), **bốn P1**, và người giữ kho
-chọn SỬA đặc tả ở cả hai lượt. Hộp cảnh báo đã qua **hai** lượt sửa (`3b` → `3c`) mà **nội dung yêu
-cầu vẫn không đổi một chữ** — thứ trôi là nền đo, không phải đặc tả.
+chọn SỬA đặc tả ở cả hai lượt. Hộp cảnh báo đã qua **bốn** lượt sửa (`3b` → `3c` → `3d` → `3e` → `3f`)
+mà **nội dung yêu cầu vẫn không đổi một chữ** — thứ trôi là nền đo, không phải đặc tả.
 
 | bản | băm | kết cục |
 |---|---|---|
@@ -157,8 +206,9 @@ cầu vẫn không đổi một chữ** — thứ trôi là nền đo, không ph
 | 3 | `328a74facb84…` | Q1 **THU HỒI**: đường kế thừa bị gỡ, không vá tiếp — §10 |
 | 3b | `308d0cf44fc1…` | thêm hộp ⛔ cảnh báo, liệt kê **sáu** chỗ sai, điều kiện chờ = `#227` land — hết hiệu lực khi `#227` land **rồi bị revert** |
 | 3c | `182ea7621d02…` | sửa hộp ⛔: điều kiện chờ đổi `#227` → **`#238`**; sáu chỗ sai đo lại thành **mười một**; ghi va chạm lease SỐNG của `#238` |
-| 3d | `f7f8e6209e4f…` | thêm chỗ thứ 12: `reviewed_sha_required` kiểm HÌNH DẠNG chứ không kiểm TỒN TẠI — **29** trường SHA trong **21** lease trỏ commit không tra được |
-| 3e | bản này | **thêm chỗ thứ 13** (cross-review PR #240): lease `codex` cho packet `sensitive` là **ngoại lệ có điều kiện** theo `ADR-0045`, và điều kiện *"khai rằng đây là ngoại lệ theo §2"* chưa được ghi ở đâu. **KHÔNG đổi executor** — đề xuất đổi sang Claude dừng ở `ADR-0041` và bỏ qua `ADR-0045`. Nội dung yêu cầu KHÔNG đổi so với bản 3 |
+| 3d | `f7f8e6209e4f…` | thêm chỗ thứ 12 — **nhưng với con số SAI** (`29` trường / `21` lease; thật là `2`/`2`, xem `3f`) và một mệnh đề sai (*"chạm §9"*). Cả hai do clone NÔNG |
+| 3e | `ce14fb0b75e4…` | thêm chỗ thứ 13 (`ADR-0045`: lease `codex` cho packet `sensitive` là ngoại lệ CÓ ĐIỀU KIỆN) — hết hiệu lực khi chỗ 12 bị đo lại |
+| 3f | bản này | **SỬA chỗ 12: `29 trường / 21 tệp` → `2 / 2`.** Con số cũ là tạo tác của **clone NÔNG**, không phải SHA giả; mệnh đề *"chỗ 12 chạm §9"* cũng sai (`reviewed_sha_required` đo được **44/44** tồn tại). Cộng: nền đo → `195a478d`, va chạm → **3** lease `LEASE-DANG-WINDOWS` tới `23-08T15:00Z`, và bài học **0** về `--is-shallow-repository`. Nội dung yêu cầu KHÔNG đổi so với bản 3 |
 
 Bốn phát hiện trên **một** đường là dấu hiệu sai ở QUYẾT ĐỊNH GỐC chứ không ở các bản vá. Các bản
 trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm bản dùng được.

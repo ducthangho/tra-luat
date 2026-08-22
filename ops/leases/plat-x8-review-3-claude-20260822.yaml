@@ -1,0 +1,122 @@
+# Lease REVIEWER — `PLAT-X8` (#225 / PR #248), lượt 3, provider `claude`.
+#
+# VÌ SAO CÓ LEASE NÀY: hai lượt review claude trước chạy **KHÔNG có lease `role: reviewer`** — chúng
+# mượn lease executor, nên cả hai `la_canonical: false` và KHÔNG tăng `review_rounds_used`
+# (`PROTOCOL:758-760`). Người giữ kho quyết cấp lease thật thay vì backdate hai lượt kia; hai biên
+# nhận cũ GIỮ NGUYÊN nhãn non-canonical, không sửa lùi.
+#
+# LEASE NÀY KHÔNG CHỮA ĐƯỢC MỌI THỨ — nói trước kẻo ai đọc rộng hơn:
+#   · Nó cấp THẨM QUYỀN, không cấp DANH TÍNH. Receipt v2 còn đòi receipt ID + hai danh tính chứng
+#     thực ĐỘC LẬP; nếu lượt này vẫn đăng verdict bằng issue comment dưới tài khoản tác giả PR thì
+#     danh tính thứ hai vẫn thiếu, và biên nhận vẫn phải khai `la_canonical` cho đúng sự thật đo được.
+#   · Nó KHÔNG chữa chỗ mù "người review là người soạn đặc tả". Chốt cho chỗ ấy nằm ở
+#     `nguoi_review_phai_khac_phien` bên dưới, không nằm ở việc có lease.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên `#225` chỉ là bản chiếu.
+
+schema_version: 2
+event: review_lease_granted
+packet_issue: 225
+packet_id: PLAT-X8
+phase_key: PLAT-X8
+revision: 1
+generation: 1
+lease_id: plat-x8-review-3-claude-20260822
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: codex
+executor_provider: openai_codex
+executor_lease: plat-x8-exec-2r5-codex-20260822
+access: read-only
+branch_ownership: none
+review_class: sensitive
+effective_review_class: sensitive
+lop_ghi_chu: >-
+  `role: reviewer` ⇒ `sensitive` VÔ ĐIỀU KIỆN. Q1 đã THU HỒI: cổng KHÔNG tra lease executor, KHÔNG
+  mở `ops/leases/`, KHÔNG kế thừa lớp. `A3`/`A13` khoá đúng sự VẮNG MẶT ấy. Hai dòng trên khai
+  `sensitive` không phải để "cho chắc" mà vì đó là giá trị cổng TÍNH ra — chính cổng mà PR #248 dựng.
+
+assurance_target: cross_approved
+assurance_ghi_chu: >-
+  `codex` thi công · `claude` review ⇒ khác nền, khác họ model, tiêu chí N14 thoả. NHƯNG mục tiêu
+  không phải kết quả: biên nhận phải khai mức THỰC SỰ đạt sau khi đo, và nếu danh tính thứ hai vẫn
+  thiếu thì `cross_approved` KHÔNG đạt. Đừng khai mức theo mục tiêu.
+
+nguoi_review_phai_khac_phien: true
+nguoi_review_phai_khac_phien_ghi_chu: >-
+  ĐIỀU KIỆN CỦA LEASE NÀY, không phải lời khuyên. Lượt review PHẢI chạy trên một phiên `claude`
+  KHÁC với phiên đã soạn đặc tả/prompt/lease. Lý do đo được, không phải nghi lễ: hai lượt trước do
+  phiên soạn đặc tả tự review, và **hai P1 nặng nhất đều KHÔNG do phiên ấy tìm ra** — chúng đến từ
+  một bot review bên ngoài. Chỗ mù ấy là THẬT và đã có số. Phiên điều phối gọi phiên review bằng
+  `.claude/dev/launcher.py run` với sandbox riêng; phiên điều phối KHÔNG được tự viết verdict.
+
+yeu_cau_rieng_luot_nay: >-
+  Người giữ kho chỉ thị 22-08-2026: khi tìm ra vấn đề, reviewer phải THỬ VÁ và CHẠY TEST trên BẢN
+  SAO CẢ CÂY trong thư mục tạm, rồi gửi về dưới dạng GỢI Ý VÁ kèm patch chạy được, ca test khoá lỗi,
+  và đột biến chứng minh ca ấy ĐỎ khi gỡ vá. TUYỆT ĐỐI KHÔNG `git push`, KHÔNG sửa nhánh
+  `codex/plat-x8-exec-2`, KHÔNG sửa kho thật — `PROTOCOL §2` cấm Reviewer làm những việc ấy, và
+  `§441` nói thẳng *"gợi ý là gợi ý, không phải chỉ thị"*. Người vá là executor.
+
+spec_path: ops/specs/plat-x8.md
+spec_sha256_required: 3e49d0ebf14f6f82b13517a4cfd4fc965a41843320367e93628dbc987c53a4bf
+spec_status: da_duyet
+spec_duyet_boi: ducthangho
+spec_note: >-
+  Bản 5 SAU khi vá cross-review lượt 3 của PR #240, và nay **ĐÃ TRÊN MASTER** (merge `6675eca4`) —
+  tra ở `master` là thấy, không phải fetch nhánh nào. Băm này KHÁC băm mà lease executor `…-2r4`
+  từng neo (`d85a75d8…`): commit `cd81649c` sửa đặc tả khi lease ấy đã đăng, làm gãy mỏ neo, và đó
+  là lý do executor lease phải đi qua revision 5. Đọc `no_da_khai` của `…-2r5` trước khi ngạc nhiên.
+
+prompt_path: ops/prompts/plat-x8-review-3-claude-20260822.md
+prompt_sha256_required: 3c723c7ac45c63df53886227d7b180ad9bdaddb420d47f8576ed73eec504eebb
+prompt_note: >-
+  Prompt CỐ Ý không nêu tên lease, revision, `posted_comment_id`, hạn chót — đọc ở tệp này. Hai bản
+  prompt trước của packet đã chết vì chép danh tính lease.
+
+reviewed_sha_required: 86a556632f8464de06262efcc2aa7c0e88415f0e
+base_sha: 08bb4ecd6dbdb87267cb8179f52ac28c151eb4b9
+target_pull_request: 248
+branch: codex/plat-x8-exec-2
+base_ghi_chu: >-
+  `reviewed_sha_required` là EXACT HEAD của PR #248 lúc cấp — head đổi thì phải đọc lại, đừng review
+  bản đã cũ. `base_sha` giữ `08bb4ecd` (base của nhánh executor), KHÔNG phải master hiện tại
+  `6675eca4`: master đã tiến vì #240 merge, nhưng nhánh executor không mọc trên đó.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-22 ("cấp lease reviewer cho #248 đi, yêu cầu reviewer nếu phát hiện vấn đề thì thử vá và test, gửi thông tin về dưới dạng gợi ý vá")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: false
+recorder_ghi_chu: >-
+  Phiên soạn lease này là phiên ĐIỀU PHỐI, và nó CŨNG là phiên đã soạn đặc tả. Vì vậy nó KHÔNG được
+  làm người review — xem `nguoi_review_phai_khac_phien`. Nó chỉ được gọi phiên review và ghi sổ.
+
+leased_at_utc: '2026-08-22T18:10:00Z'
+lease_expires_at_utc: '2026-08-23T18:10:00Z'
+run_minutes: 120
+attempts_used: 0
+attempts_limit: 0
+tran_ghi_chu: 'Lease reviewer không có attempt vá — reviewer không vá, chỉ đề xuất.'
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+ngan_sach_ghi_chu: >-
+  **0, không phải 2.** Hai lượt review claude trước KHÔNG tính vào bộ đếm vì biên nhận không qua
+  validation (`PROTOCOL:758-760`). Mọi bản ghi cũ ghi "canon 1/2" là SAI, đã đính chính. Packet còn
+  NGUYÊN hai vòng canon, và lượt này là lượt thứ NHẤT nếu nó qua được validation.
+
+no_da_khai:
+  - id: PLAT-X8-hai-luot-review-truoc-KHONG-CANON
+    noi_dung: >-
+      `plat-x8-review-1` và `-2` đều `la_canonical: false`. Giữ nguyên nhãn, không sửa lùi. Giá trị
+      của chúng nằm ở hai P1 đã đóng, không ở tư cách canon.
+  - id: CONG-KHONG-KIEM-MO-NEO-DAC-TA
+    noi_dung: >-
+      `grep -c spec_sha256_required ops/lease_publish.py ops/lease_publish_test.py` = **0 và 0**.
+      Cổng kiểm mỏ neo PROMPT nhưng KHÔNG kiểm mỏ neo ĐẶC TẢ — nên một lần phá mỏ neo đặc tả sống
+      qua bốn commit và một lần merge vào master mà không cổng nào kêu. Nợ lớn hơn packet này.
+      **Đây là một hướng reviewer NÊN soi**, vì nó là ca thật của hình dạng "chốt được KHAI mà không
+      TỒN TẠI".
+  - id: PLAT-X8-ADR-0045-e-human-readback-CHUA-XONG
+    noi_dung: 'Thuộc lượt LAND, không phải lượt này.'

@@ -127,3 +127,4 @@ dieu_kien_dung:
   - 'Hình dạng A lần 7 · B lần 3 · C lần 2 · D lần 4 ⇒ DỪNG, không vá'
   - 'M4 KHÔNG giết được T67 ⇒ DỪNG — vị trí đang ghi cứng, tức chỉ DỜI chỗ ghi cứng chứ không bỏ nó, D lần 4 dưới lớp áo mới'
   - 'Một vế khẳng định BẤT KHẢ THI ở guard nào ⇒ KHAI ra và DỪNG ca đó, KHÔNG lách bằng đồ giả sai trạng thái (executor đã làm đúng điều này ở lượt 5)'
+posted_comment_id: 5377493515   # workflow ghi, ĐỪNG sửa tay

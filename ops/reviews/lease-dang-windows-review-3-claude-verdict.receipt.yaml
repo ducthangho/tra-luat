@@ -1,0 +1,135 @@
+# BIÊN NHẬN — cross-review `LEASE-DANG-WINDOWS` (#238), lượt 3, reviewer `claude`.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: LEASE-DANG-WINDOWS
+packet_issue: 238
+lease_id: lease-dang-windows-review-3-claude-20260822
+provider: claude
+role: reviewer
+executor_provider: codex
+verdict: approve
+cross_provider: true
+cross_provider_MONG_PHAI_DOC_CAVEAT: true
+review_class: sensitive
+reviewed_sha: 7f91ea1cffe17af391362a91b83907c32b16f3b2
+base_sha: 2ab3560a8a406c1b436221fb3c6d23234aefdde0
+nen_so_write_set: ba82b06f9df81fc2f13786fec590ec2110d046b7
+
+spec_path: ops/specs/LEASE-DANG-WINDOWS-r4.md
+spec_sha256: 11972e8ce5d543304b35b7239128af5130d11feaef378465461c3b2b649cc613
+
+verdict_path: ops/reviews/lease-dang-windows-review-3-claude-verdict.md
+verdict_sha256: c98d83b8bf1a00b009f0aaee0d7b5c580b4d2f28abc63dd809ba0326c7a6ed3c
+verdict_bytes: 9698
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: DIEN_SAU_KHI_PUSH
+evidence_url_ghi_chu: 'Điền SAU KHI ĐÃ PUSH và sau khi `git branch -r --contains` xác nhận.'
+
+verdict_nguon: >-
+  stdout của `claude -p`, run `1888fdc7`, `ma_thoat=0`, `thoi_luong_giay=1085.9`,
+  `stdout_byte=9698`. Cây review sạch, HEAD vẫn `7f91ea1c`; mọi đột biến trên bản sao tạm `/tmp`.
+verdict_doi_chieu: 'NGUYÊN VĂN, không đụng byte nào.'
+
+so_finding: 2
+tom_tat_finding: >-
+  Không P1, không P2. P3-1 trục phân biệt (theo NỀN hay theo TÊN TỆP) không được `t73` khoá — chỉ
+  chân Windows khoá, mà chân ấy không chạy cho PR thường · P3-2 đột biến X4 (`nen` thành tham số
+  chết) sống sót, thuộc `t70` chứ không thuộc lượt 4.
+da_xu_ly: 'P1-3 ĐÃ ĐÓNG. Hai P3 ngoài Q15, vào packet kế tiếp.'
+
+verdict_usage_caveats:
+- id: CROSS-PROVIDER-CUA-LUOT-4-RAT-MONG-doc-truoc-khi-tin-nhan
+  noi_dung: >-
+    Bản vá lượt 4 **không do executor nghĩ ra**: reviewer lượt 2 (`claude`) viết và chạy nó,
+    `r4/Q13` bắt `codex` chép nguyên văn. Đo được: sha256 CẢ TỆP của bản `codex` đẩy lên trùng
+    bản reviewer đã chạy (`c378e6b0f934aa02…`). Nên nhãn `approve` này chứng nhận rằng **một bản
+    vá do `claude` viết được một phiên `claude` khác duyệt** — phần cross-provider chỉ là động
+    tác chép. Phiên điều phối ghi điều này vào lease TRƯỚC khi land, và prompt buộc reviewer khai
+    đã tấn công `t73` bằng những gì. **Đừng đọc `cross_approved` ở đây với cùng sức nặng các lượt
+    trước.**
+- id: REVIEWER-DA-TAN-CONG-THAT-14-dot-bien
+  noi_dung: >-
+    Reviewer không nể mã của nhà cung cấp mình: **14 đột biến**, mọi bản qua `ast.parse` trước.
+    `t73` là ca **DUY NHẤT** giết **ba** đột biến độc lập — `X1` (bỏ mệnh đề nền) · `X3`
+    (`os.name` → hằng `"nt"`) · `X13` (`main()` luôn dẫn xuất với `nen="nt"`). Hai trong ba đúng
+    hình dạng "hằng số trá hình" mà `Q10` sinh ra để chặn ⇒ ca này **mạnh hơn mức đặc tả đòi**.
+- id: W10-THOA-Q8-PHEP-CHUA-AI-CHAY
+  noi_dung: >-
+    Reviewer chạy phép `Q8` cho chính `W10` — **chưa ai chạy phép này**: gỡ `@ca` của `t70` (ca
+    DUY NHẤT gọi thẳng `_ly_do_bo_qua_workflow`) rồi áp `X1` ⇒ `63/64`, `rc=1`, **`t73` vẫn đỏ**.
+    Tức `W10` có răng ở mức DÂY NỐI, không phải mức hàm.
+- id: HUONG-1-BA-MENH-DE-SUY-SAP-THANH-MOT-BIT-va-do-la-DUOC
+  noi_dung: >-
+    Nghi vấn của phiên điều phối (*"`t73` có xanh mà không đo gì không"*) được trả lời bằng phân
+    tích ĐO ĐƯỢC: vì `_chay_main_meta` đặt `CA[:] = [fn]`, ba mệnh đề `rc==1` · `"ĐỎ" in out` ·
+    `"bỏ qua=0"` suy sập thành ĐÚNG MỘT BIT (ca duy nhất rơi vào `hong`). Ba nguyên nhân cho bit
+    ấy, reviewer dựng cả ba: posix chặn (đúng ý) · `except Exception` nuốt lỗi (kéo theo **11 ca
+    ĐỎ**) · `main()` không bao giờ bỏ qua nữa (kéo `t72` ĐỎ). **Không có trạng thái nào `t73`
+    xanh giả mà suite còn xanh.**
+- id: KHONG-PHAI-HO-t64-DEM-CHUOI
+  noi_dung: >-
+    Nghi vấn *"chuỗi `ĐỎ` khớp ở đâu"* bị bác có lý lẽ đo được: `ĐỎ` chỉ được IN ở đúng một chỗ
+    (`main`, dòng 2676) và `CA` chỉ còn **một** phần tử ⇒ `"ĐỎ" in out` tương đương "ca ấy hỏng".
+    Khác `t64`: ở đó chuỗi đếm trên tập nhiều ca; ở đây tập có lực lượng 1 và ba mệnh đề khoá
+    chéo nhau (bỏ qua ⇒ `rc=0` **và** `bỏ qua=1`).
+- id: t73-KHONG-CO-CHE-DO-DO-GIA
+  noi_dung: >-
+    Hướng *"đỏ sai lý do"* **không dựng được**. Mọi cách làm `_chay_main_meta` hỏng qua tệp/đường
+    dẫn (`X7`/`X8`) đẩy `t73` về **XANH**, không về đỏ — và mọi chế độ xanh rỗng ấy đều bị ca khác
+    bắt ồn ào (`X7`/`X8` cho **11 ca ĐỎ**).
+- id: P3-1-TRUC-PHAN-BIET-KHONG-DUOC-t73-KHOA
+  noi_dung: >-
+    Phát hiện đáng giá nhất của lượt này. `X17` (`tep.name != "ops-publish-lease.yml"` thay cho
+    mệnh đề nền) và `X18` (giữ `nt` nhưng loại trừ chính tệp thật) ⇒ **73/73, rc=0** trên toàn
+    chân Ubuntu. `t73` chứng minh *"nền posix thì tuple (tệp thật, job dang) không được bỏ qua"* —
+    nó **KHÔNG** chứng minh quyết định ấy tra theo **NỀN**. Thứ tách hai điều đó là 8 dòng
+    `BỎ QUA` trên chân Windows, mà chân ấy **không chạy cho PR thường**. Ngoài `Q15`; vào packet
+    kế. Đóng ngay tốn **2 dòng numstat** ⇒ **vượt trần 125 đúng 1 dòng**, nên reviewer KHÔNG đề
+    xuất làm trong lượt này.
+- id: P3-2-X4-SONG-SOT-thuoc-t70-khong-thuoc-luot-4
+  noi_dung: >-
+    `X4` (bỏ tham số `nen`, chỉ dùng `os.name`) ⇒ `73/73` rc=0, không ai bắt. Nguyên nhân: `t70`
+    là ca duy nhất bơm `nen`, mà kỳ vọng của nó là chiều ÂM (`not ly_do`) nên nó xanh cả khi điểm
+    bơm bị vô hiệu. **Không đổi hành vi sản phẩm** (đường sản xuất không truyền `nen`). Ghi lại vì
+    lượt 4 **không** làm nặng thêm chỗ này.
+- id: HANDOFF-TRONG-COMMIT-chi-la-NEP-nhung-lo-ra-mot-hat-san-CO-SAN
+  noi_dung: >-
+    Sai khác nếp (lượt 3 để handoff ngoài reviewed commit, lượt 4 commit vào trong) **không có hệ
+    quả**: `ops/handoff/**` không thuộc `write_set` nên 9 dòng handoff không vào 124. Nhưng khi
+    kiểm điều đó reviewer lộ ra một hạt sạn CÓ SẴN (không do lượt 4): dòng `gate_bat_buoc` viết
+    `git diff --numstat ba82b06f..HEAD -> <= 3 tệp` mà **không nhắc write_set** — đọc nguyên văn
+    thì range ấy ra **58 tệp**, vì `ba82b06f` là tổ tiên xa và mọi việc master chen giữa đều nằm
+    trong. Chỉ trường `don_vi` cứu câu ấy. **Nên sửa CÂU, không phải sửa SỐ.**
+- id: MOT-CAU-TRONG-CLAUDE-MD-DA-TROI
+  noi_dung: >-
+    `CLAUDE.md` còn ghi *"actionlint trên cả 5 workflow của kho → rc=0"*; nay SAI — `actionlint`
+    toàn kho `rc=1` (SC1003 ở `ops-don-ref.yml`). Không gate nào đỏ vì `don_ref_chot_test.sh` gọi
+    với `-shellcheck=`. Delta so `origin/master` vẫn = 0 (tệp ấy khớp master từng byte).
+- id: SAU-PHEP-DO-CUA-PHIEN-DIEU-PHOI-DUOC-KIEM-6-tren-6
+  noi_dung: >-
+    write-set `+124/−20` 2 tệp · delta so `b0c8fb3` đúng **8** · `ops/lease_publish.py` vắng khỏi
+    diff · ba số của cổng (`73/73` · `64/65` ĐỎ `t73` · `64/64` XANH). 6/6 khớp. Thêm: reviewer
+    kiểm `Q13` **trên thứ ĐÃ ĐẾN** — băm khối ```python của r4 (`c96483ba7baf95ff…`) nằm trong tệp
+    đúng từng byte, xuất hiện đúng **1** lần, khoảng cách tới `def main()` đúng `'\n\n'`.
+- id: W3-PRIME-reviewer-DI-LAY-LOG-khong-nhan-loi-khai
+  noi_dung: >-
+    Reviewer không nhận `W3′` của phiên điều phối: tự gọi `actions_get` run `32567293842`
+    (`head_sha=7f91ea1c…`, `run_attempt=1`, `event=workflow_dispatch`, 2 job success), tải blob
+    log và grep. Windows: đúng **8** dòng `BỎ QUA`, đúng 8 ca `_chay_buoc_dang`, mỗi dòng in
+    `runs-on đã đọc được: 'ubuntu-latest'` ⇒ `65/65 đạt; đã chạy=65, bỏ qua=8`. Ubuntu `73/73`.
+    **`t73` không nằm trong 8 dòng bỏ qua ⇒ nó chạy thật và XANH trên chân Windows.**
+- id: reviewer-KHAI-mat-XICH-KHONG-DO-DUOC
+  noi_dung: >-
+    Reviewer khai thẳng một mắt xích chỉ **suy** được: *"codex chép đúng bản `claude` ĐÃ CHẠY"* —
+    sha256 tệp khớp con số phiên điều phối khai, nhưng **cây review lượt 2 không có trong kho**
+    nên *"bản ấy đã CHẠY ở đó"* không đo độc lập được. Không đổi kết luận vì reviewer đã chạy lại
+    cả ba số của `W10` từ đầu. Cùng nhóm: `shellcheck` trên runner Windows · `X17`/`X18` trên chân
+    Windows thật · nguyên nhân gốc vì sao 8 ca phải bỏ qua trên Windows (**vẫn né, chưa ai đo**).
+- id: BO-DEM-KHONG-DOI-khong-co-E-thu-nam
+  noi_dung: >-
+    **A**=7 · **B**=2 · **C**=1 · **D**=3 · **E**=4 · **F**=2 — không đổi. Lượt 4 không mô tả phép
+    dẫn xuất mới nào (r4 cố ý chỉ chép), nên không có biểu hiện **E** thứ năm. Không bộ đếm nào
+    chạm ngưỡng DỪNG. Đây là bằng chứng cho quyết định của người giữ kho ở ngã ba trước: nới trần
+    để **chép** một bản vá đã đo thì không tái tạo hình dạng đã đếm bốn lần.

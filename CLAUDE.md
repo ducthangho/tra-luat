@@ -195,12 +195,36 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   · **Refspec RỘNG mà vẫn thiếu ref** — ca thật của container này. **Refspec là luật cho những lần fetch
   SAU, không phải bằng chứng đã fetch.** Chữa: fetch thật.
   **PHÉP CANH ĐÚNG là so HAI NGUỒN, không phải hỏi `--is-shallow-repository`** (bản đầu của mục này ghi
-  thế và SAI — nó bỏ sót ca thứ ba, tức im lặng đúng lúc cần kêu):
-  `git ls-remote --heads origin | wc -l` (HỎI MÁY CHỦ) so với `git for-each-ref refs/remotes/origin | wc -l`
-  (ĐỌC ĐỆM). Lệch ⇒ **`KHÔNG_XÁC_ĐỊNH`, không phải "không có"**; không chạy được `ls-remote` cũng vậy.
-  **Phải xem lệch CHIỀU NÀO** (`comm -23` / `comm -13`): thiếu ở phía cục bộ mới là mù, THỪA chỉ là nhánh
-  chưa đẩy — kho này đo 160/159 và cái thừa là nhánh chỉ định chưa push, nên canh mà không xét chiều thì
-  tự báo động giả. Lệnh chữa cả ba: `git fetch --unshallow origin '+refs/heads/*:refs/remotes/origin/*'`.
+  thế và SAI — nó bỏ sót ca thứ ba, tức im lặng đúng lúc cần kêu): `git ls-remote --heads origin` (HỎI MÁY
+  CHỦ) so với `git for-each-ref refs/remotes/origin` (ĐỌC ĐỆM).
+  **So bằng TẬP TÊN, KHÔNG bằng `wc -l`** — bản đầu của mục này canh bằng số đếm và cross-review bác đúng
+  chỗ đó (P2 trên PR #243). Hai lý do, cả hai đo được: (a) **lực lượng bằng nhau vẫn có thể mù** — một ref
+  cục bộ đã cũ cộng một nhánh mới trên máy chủ chưa fetch cho ra `n == n` trong khi tập lệch; (b) clone
+  thường có `refs/remotes/origin/HEAD` **tượng trưng**, không có đối ứng trong `ls-remote --heads`, nên số
+  đếm lệch sẵn 1 mà chẳng ai mù (reviewer tái hiện 2 máy chủ / 3 cục bộ). Loại `HEAD`, cắt tiền tố cho
+  cùng dạng, rồi so tập:
+
+  ```
+  git ls-remote --heads origin | sed 's#.*refs/heads/##' | sort            > /tmp/mc
+  git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin \
+      | grep -v '^HEAD$' | sort                                           > /tmp/cb
+  comm -23 /tmp/mc /tmp/cb    # CO tren may chu, THIEU cuc bo  -> MU, fail-close
+  comm -13 /tmp/mc /tmp/cb    # THUA cuc bo -> nhanh chua day / da xoa, vo hai
+  ```
+
+  **Chiều lệch mới là kết luận, không phải con số.** Kho này đo `160/159` lúc 09:00Z (thừa một, là nhánh
+  chỉ định chưa push — vô hại) rồi `160/161` lúc 12:00Z (**thiếu** `ops/ci-bang-phu-thuoc` — mù thật).
+  Cùng một biên độ `1`, hai kết luận ngược nhau. Không chạy được `ls-remote` ⇒ `KHÔNG_XÁC_ĐỊNH`.
+  **Lệnh chữa KHÁC NHAU theo trạng thái — `--unshallow` KHÔNG phải thuốc chung** (P2 thứ hai, cùng lượt
+  review, tái hiện được): trên kho ĐẦY ĐỦ nó thoát **rc=128** `fatal: --unshallow on a complete repository
+  does not make sense` và **không fetch gì** — tức đúng ca thứ ba, ca của container này, thì lệnh "chữa cả
+  ba" của bản đầu chữa được **số không**.
+
+  ```
+  [ "$(git rev-parse --is-shallow-repository)" = true ] \
+      && git fetch --unshallow origin '+refs/heads/*:refs/remotes/origin/*' \
+      || git fetch            origin '+refs/heads/*:refs/remotes/origin/*'
+  ```
   **Ghi cả cái sai vì nguyên nhân sai trong doctrine tệ hơn không ghi:** bản đầu đổ cho `--depth` cắt nhánh,
   trong khi ca thật là *chưa fetch* — đúng thói *"kết luận từ một đường hỏng"*. Cùng họ nợ
   `SO-LEASE-KHONG-NAM-MOT-CHO` nhưng sâu hơn một tầng: nợ ấy nói *lease không nằm trên master*; mục này nói

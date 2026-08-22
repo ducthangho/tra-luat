@@ -82,6 +82,11 @@
 # `revision: 1 → 2`, hai băm đổi, lý do ghi ở đây, và bản chiếu trên `#225` sẽ có comment thứ hai.
 # `posted_comment_id` bên dưới trỏ bản chiếu của revision 1 — **băm trong comment ấy đã CŨ**.
 #
+da_bi_thay_the: plat-x8-exec-2r5-codex-20260822
+da_bi_thay_the_ly_do: >-
+  MỎ NEO ĐẶC TẢ GÃY. Commit `cd81649c` sửa `ops/specs/plat-x8.md` khi lease này ĐÃ ĐĂNG; băm
+  `d85a75d835566c90…` không còn tồn tại ở đâu ngoài lịch sử git. Không sửa ngược đặc tả vì nội
+  dung mới đúng; chữa bằng revision 5. GIỮ nguyên trạng làm hồ sơ.
 schema_version: 2
 event: executor_lease_granted
 packet_issue: 225

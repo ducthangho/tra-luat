@@ -688,3 +688,313 @@ với nợ `SO-LEASE-KHONG-NAM-MOT-CHO`. Nợ này là **anh em** của nợ ấ
 verdict. Lệnh cần có: `phu-boi-verdict-nao <sha-tu>..<sha-den>`, quét mọi ref, và
 **fail-close khi không fetch được ref nào** — *"không đo được"* phải ĐỎ, không được thành
 *"không có"*.
+## 13. `ADR-0016-THIEU-DONG-TRANG-THAI` — trạng thái thứ ba đang được tha bằng danh sách
+
+> Đánh số bắt đầu từ **13** vì `## 12.` thuộc PR #230 (`PLAT-X4-721-dong-chua-verdict-nao-phu`),
+> chưa land lúc viết. Nếu #230 không land thì đánh số lại — đây là chỗ DUY NHẤT của hai mục này
+> phụ thuộc vào PR ấy, và nói ra để nó không thành một khoảng trống không ai giải thích được.
+
+`docs/adr/0016-lop-dieu-phoi-rasoat-hoso-state-lai-single-writer-anchor.md` **không có dòng
+`Trạng thái` nào**. Đó là trạng thái thứ ba — `không đo được` — và theo doctrine `None ≠ False`
+nó phải làm cổng ĐỎ, không được đọc thành "chắc là còn hiệu lực".
+
+Cổng `packet_loop.py adr-song` hiện **tha** đúng số ấy bằng một danh sách liệt kê tường minh
+(`_ADR_THA_THIEU_TRANG_THAI`). Danh sách cho phép, không phải ngưỡng: một ADR MỚI thiếu dòng
+`Trạng thái` vẫn ĐỎ, và có phản chứng cho đúng điều đó
+(`adr_song_thieu_trang_thai_thi_do` ĐỎ với `0007`, `adr_song_ngoai_le_0016_van_xanh` XANH với
+`0016`), cộng một đột biến **nới danh sách cho phép để chứa số tấn công**
+(`adr_noi_ngoai_le_cho_moi_ADR`) làm ca đích chết — không có đột biến ấy thì không biết ca đang
+đo danh sách hay đo thứ khác.
+
+**Điều kiện coi là XONG:** người biết lịch sử quyết định ấy ghi đúng trạng thái vào tệp, rồi
+xoá `"0016"` khỏi danh sách. Danh sách này **chỉ được co lại, không được nới** — nới nó là quay
+về đúng cái bệnh nó đang che.
+
+**Lệnh tái lập:**
+
+```
+python3 .claude/dev/packet_loop.py adr-song --root .
+python3 - <<'PY'
+import pathlib,re
+for f in sorted(pathlib.Path("docs/adr").glob("*.md")):
+    if not re.search(r'^\s*[-*]\s*\*\*Tr[aạ]ng th[aá]i', f.read_text(encoding="utf-8"), re.M|re.I):
+        print("THIEU:", f.name)
+PY
+```
+
+## 14. `LEASE-KHAI-MA-CONG-KHONG-DOC` — 239/247 trường, không phải hai
+
+Bản bàn giao ngày 22-08 khai bệnh này bằng **hai** field (`review_class` 10/49 · `spec_sha256` 11/49).
+Đo trên `origin/master` = `2ab3560a`:
+
+| | | (nền `3f641673`, ~2h trước) |
+|---|---|---|
+| lease `.yaml` | **61** (0 tệp không parse) | 49 |
+| tên trường **mức GỐC** | **247** | 230 |
+| `ops/lease_publish.py` có nhắc | **8** | 8 |
+| **không ai kiểm** | **239** | 222 |
+
+**Cột thứ ba không phải trang trí — nó là bằng chứng cho cách viết con số này.** Trong khoảng hai
+giờ, `#227` land rồi bị revert một phần (`#234` → `#237`), để lại 12 tệp lease mới: số trường nhảy
+`230 → 247`. Nếu mục này ghi `230` trơ trọi thì nay nó là một lời khai SAI. Ghi kèm **neo SHA** thì
+nó vẫn là một phép đo ĐÚNG — chỉ là của một thời điểm khác. Đó là lý do giữ số thay vì bỏ số, và là
+lý do neo SHA thay vì ghi ngày.
+
+Hai con số **KHÔNG** đổi qua cả hai lần đo: cổng đọc **8**, và **16** trường khai ở 100% lease. Thứ
+chịu tải của mục này nằm ở hai con số ấy, không ở tổng số trường.
+
+Tám tên cổng có nhắc: `granted_by` · `lease_expires_at_utc` · `lease_id` · `packet_issue` ·
+`posted_comment_id` · `prompt_path` · `prompt_sha256_required` · `reviewed_sha_required`.
+
+Nặng nhất không phải các field hiếm mà là **16 trường khai ở 100% lease** và vẫn không ai đọc:
+`access` · `assurance_target` · `attempts_limit` · `attempts_used` · `base_sha` · `branch` ·
+`branch_ownership` · `event` · `granted_on_instruction` · `leased_at_utc` · `packet_id` ·
+`provider` · `recorded_by` · `role` · `run_minutes` · `schema_version`.
+
+### Con số này ĐÃ SAI MỘT LẦN, và cách nó sai đáng nhớ hơn con số
+
+Bản đầu của mục này ghi **215/207**. Sai vì phép đo dùng regex `^([a-z_][a-z0-9_]*):` — đòi khoá
+**toàn chữ thường**, nên bỏ sót đúng **15** khoá có chữ HOA (`pham_vi_NGOAI`, `write_set_KHONG_gom`,
+`la_luot_review_CUOI`, `assurance_KHONG_dat`…). Kho này dùng chữ hoa trong tên khoá để nhấn mạnh, nên
+đó không phải ca hiếm.
+
+**Tệ hơn con số sai: bản đầu còn ship kèm một LỆNH TÁI LẬP dùng chính cái regex hỏng ấy.** Lệnh chạy
+được, chạy nhanh, và tái lập **trung thành** một con số sai — nên nó trông y hệt bằng chứng. Một phép
+đo sai có lệnh tái lập thì khó phát hiện hơn một phép đo sai không có gì, vì cái lệnh mua cho nó sự
+tin cậy mà nội dung không xứng.
+
+Thứ bắt được: một phiên **khác** đo độc lập bằng `yaml.safe_load` và ra **230**, rồi nhắn sang. Cột
+giữa — cổng đọc **8** — hai bên khớp tuyệt đối, và chính chỗ khớp ấy khoanh vùng được lỗi nằm ở phép
+liệt kê khoá chứ không ở phép dò cổng. **Bài học: đọc YAML bằng bộ phân tích YAML.** Regex trên văn
+bản thô là cùng họ với `_MARKER_NO` của `t43` và với bộ quét lease khớp nháy kép mà YAML ghi nháy đơn
+(§5.1 của `ops/HOAN_THIEN_KE_HOACH_20260822.md`) — **ba lần trong một ngày, cùng một hình dạng.**
+
+**Cảnh báo đọc số:** 247 là số **tên trường**, không phải số **lỗ hổng**. Nhiều trường cố ý là ghi chú
+cho người đọc (`*_note`, `*_ghi_chu`, `canh_bao_*`) và không nên có cổng. Phép đo nói "không ai kiểm",
+nó **không** nói "phải kiểm hết" — đọc rộng ra là tự đặt cho mình một việc không ai duyệt.
+
+**Điều kiện coi là XONG:** một quyết định phạm vi — trường nào lên hợp đồng, trường nào rớt xuống ghi
+chú tự do — chứ không phải "cổng đọc đủ 247". `PLAT-X8` (#225) nhận `review_class`; `PLAT-X7` (#220)
+nhận danh tính model; phần còn lại cắt ở `ops/HOAN_THIEN_KE_HOACH_20260822.md` §3.
+
+**Lệnh tái lập — dùng bộ phân tích YAML, KHÔNG dùng regex, và đo trên `origin/master`:**
+
+```
+python3 - <<'PY'
+import subprocess, re, yaml, collections
+def sh(*a): return subprocess.run(a, capture_output=True, text=True).stdout
+tep = [p for p in sh("git","ls-tree","-r","--name-only","origin/master","ops/leases/").split()
+       if p.endswith((".yaml", ".yml"))]
+src = sh("git","show","origin/master:ops/lease_publish.py")
+dem, hong = collections.Counter(), 0
+for p in tep:
+    d = yaml.safe_load(sh("git","show",f"origin/master:{p}"))
+    if isinstance(d, dict): dem.update(d.keys())
+    else: hong += 1
+doc = [k for k in dem if re.search(r'["\']' + re.escape(str(k)) + r'["\']', src)]
+print(f"lease {len(tep)} · khong parse {hong} · truong {len(dem)} · cong doc {len(doc)} · khong doc {len(dem)-len(doc)}")
+print("khai 100% ma khong doc:", sorted(k for k,c in dem.items() if c==len(tep) and k not in doc))
+PY
+```
+
+**`khong parse` phải bằng 0.** Khác 0 mà vẫn in ra con số là đúng cái bẫy đã sập ở trên: một phép đo
+bỏ sót đầu vào trông y hệt một phép đo sạch.
+
+---
+
+## 15. `REVIEW-BUDGET-KHONG-CO-CONG` — trục LỜI GỌI vượt trần, và `ADR-0043` chưa được THI HÀNH
+
+**Bản đầu của mục này TRỘN HAI TRỤC, đúng cái bệnh `ADR-0043` sinh ra để chấm dứt.** Nó viết *"trần 2
+lượt, PR này dùng 4"* — trong đó `2` là trần trục **LỜI GỌI** còn `4` là số **head đã có finding**.
+Một phiên khác (`tra-luat-5a`) đính chính khung này, tôi đo lại và xác nhận. Chép cái sai ra đây vì
+nó là bằng chứng mạnh nhất cho chính mục: **tôi trộn trục ngay trong lúc viết về việc trộn trục.**
+
+`ADR-0043` nói thẳng ba trục là ĐỘC LẬP, trần nào chạm trước thì thắng:
+
+| trục | bộ đếm | trần | đo được trên PR #233 |
+|---|---|---|---|
+| **LỜI GỌI** (chi phí) | `codex_review_calls_used` | 2 | **≥ 4** — VƯỢT |
+| **VÒNG** (canon, kỷ luật) | `review_rounds_used` | 2 | **0** — không vượt |
+| **ATTEMPT** (số lần tuyên bố DONE) | — | — | ngoài phạm vi mục này |
+
+Hai con số ấy đo bằng ĐỊNH NGHĨA của protocol, không bằng cảm giác:
+
+- `:754` — `codex_review_calls_used` *"tăng khi có bằng chứng lời gọi review đã bắt đầu sinh
+  output/token, **kể cả** timeout hoặc output sai schema"*. Đo theo OUTPUT: **4 head** có finding
+  (`cbd14439bb` · `d17019628f` · `ef19e3b075` · `bc98b1f7`), **5 finding** trên 5 thread, và chỉ **3**
+  trong số đó có comment `@codex review` đi trước — lượt đầu sinh output mà không có lời gọi tường
+  minh nào của phiên này. Nên `≥ 4`, không phải `= 3`: đếm theo lời gọi tường minh là đếm THIẾU.
+- `:756` — `review_rounds_used` *"chỉ tăng khi verdict qua schema, exact-SHA và receipt validation"*.
+  Đo: `ops/reviews/` **không có** verdict hay receipt nào cho `#233`. Finding của connector codex
+  chưa từng đi qua đường ấy ⇒ **0**.
+
+Nên phát biểu đúng là: **trục LỜI GỌI vượt gấp đôi; trục VÒNG chưa chạm.** Và mỉa mai đúng chỗ —
+`0` trên trục VÒNG không phải tin tốt: nó nghĩa là bốn lượt review ấy **không để lại verdict nào**,
+tức chúng tốn chi phí mà không sinh ra thứ canon đếm được.
+
+### `ADR-0043` là `Accepted` mà chưa được thi hành — 3/4 đã làm trong PR #233
+
+`ADR-0043` liệt kê bốn việc. Đo lúc phát hiện (22-08-2026), **cả bốn chưa làm**; ba việc chữ nghĩa đã
+được sửa trong PR này sau khi người giữ kho duyệt, việc thứ tư là mã và cần packet riêng:
+
+| việc `ADR-0043` giao | lúc phát hiện | nay |
+|---|---|---|
+| sửa `docs/PROTOCOL_DA_PHIEN.md:751` để trỏ về ADR | *"ba vòng code/review tổng cộng"* | **đã sửa** — trỏ `ADR-0043`, dòng vẫn ở `751` |
+| sửa `docs/adr/0037` dòng 5 | *"ba vòng code/review tổng cộng"* | **đã sửa** — trỏ `ADR-0043` |
+| sửa mermaid `ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md:156` | *"Hết 2 Codex call hoặc 3 vòng"* | **đã sửa** — *"chạm trần vòng ADR-0043"* |
+| `doctrine-scan` mở rộng + chế độ `so-canon` | `so-canon` **0** lần trong `packet_loop.py`; `doctrine-scan` quét **7** tệp | **CHƯA** — là mã, cần lease riêng |
+
+Giữ nguyên `:751` đúng dòng số cũ là có chủ đích: `ADR-0043` **neo theo số dòng ấy**, nên đổi số dòng
+là làm chính con trỏ của ADR thành con trỏ chết — đúng bệnh mà `§20` sinh ra để chặn.
+
+**Hai chỗ CÒN chữ "ba vòng" là ĐÚNG, đừng sửa:** `ADR-0043` và
+`ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md:495-496` đang **trích dẫn** bản sai để giải thích. Một cổng
+`so-canon` viết bằng grep chuỗi sẽ báo động giả ở đúng hai chỗ này — nên nó phải phân biệt **phát biểu
+luật** với **trích dẫn**, và đó là lý do việc thứ tư không phải một dòng grep.
+
+Tái lập:
+
+```bash
+sed -n 751p docs/PROTOCOL_DA_PHIEN.md
+sed -n 5p docs/adr/0037-*.md
+sed -n 156p ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md
+grep -c "so-canon" .claude/dev/packet_loop.py          # 0
+python3 .claude/dev/packet_loop.py doctrine-scan --root . | tail -1
+```
+
+Lúc phát hiện: canon là **HAI** vòng theo `ADR-0043`, còn **ba** tài liệu vẫn nói **BA** — đúng tình
+trạng `ADR-0043` được viết ra để chấm dứt, và nó vẫn đang sống. Một phiên đọc protocol trước (đúng như
+dossier dạy) sẽ dùng ba vòng một cách **ngay tình**, y như ADR mô tả. Đó là lý do ba dòng ấy được sửa
+ngay thay vì xếp hàng: mỗi ngày để nguyên là một ngày cái bẫy còn lên cò.
+
+Đã quét toàn kho để chắc chỉ có ba chỗ, không phải ba chỗ ADR **nhớ ra**:
+`grep -rn "ba vòng\|3 vòng" docs/ ops/*.md CLAUDE.md .claude/`. Hai chỗ còn lại sau khi sửa đều là
+**trích dẫn bản sai**, giữ nguyên. Một chỗ nữa (`ops/DINH_CHINH_REVIEW_CLASS_PLAT_M4.md:97`) nhắc "ba
+vòng" trong lúc **kể một ca cụ thể**, không phát biểu luật — cũng giữ.
+
+### Bài học rộng hơn ô `0 cổng`: `Trạng thái: Accepted` KHÔNG có nghĩa ĐÃ THI HÀNH
+
+`§20` đo *"cổng nào ĐỌC luật ấy"*. Mục này lộ ra một khoảng mù **trước** cả câu hỏi đó: một ADR có
+thể `Accepted`, có mục **Thi hành** liệt kê bốn việc cụ thể, và **không việc nào** được làm — mà
+không dòng nào trong kho nói ra. `adr-song` hiện chỉ đòi mỗi ADR **có mặt** trong bảng và có dòng
+`Trạng thái` đọc được; nó không hỏi mục Thi hành đã xong chưa. Đây là biến thể của lỗi kho đã trả
+giá bốn lần: **đếm sự CÓ MẶT thay vì KHẢ NĂNG.**
+
+**Điều kiện coi là XONG (hai phần rời nhau, đừng gộp):**
+
+1. **Trần lời gọi có cổng** — một cổng đọc được `codex_review_calls_used` trên một PR và ĐỎ khi vượt,
+   kèm phản chứng `rXX_` hai chiều (vượt ⇒ đỏ · trong trần ⇒ xanh) và một đột biến **nới trần** để
+   chứng minh ca đích đang đo đúng thứ đó.
+2. **`ADR-0043` được thi hành** — bốn việc trong mục Thi hành của nó, mỗi việc có phép đo tái lập
+   được như bảng trên. Việc này thuộc packet khác và cần lease riêng; **không** làm kèm trong một PR
+   tài liệu.
+
+Chưa ai làm phần nào. Đừng đóng mục này bằng một câu trong tài liệu — đó đúng là cách `ADR-0043`
+thành `Accepted` mà không ai thi hành.
+
+
+## 16. `THE-HTML-TRONG-COMMENT-BI-NUOT` — dấu nháy ngược không phải hàng rào, lần thứ hai
+
+Đăng một reply dài lên PR #233: **gửi ~5000 ký tự, đến 466**. Comment dừng giữa một dòng bảng, và
+tôi chỉ biết vì đã đọc ngược về rồi đo — đúng chốt (a) của bài học *"tầng vận chuyển cũng chuẩn hoá
+chuỗi"* trong `CLAUDE.md`.
+
+Ranh giới cắt, đo bằng `repr()` trên bản ĐÃ ĐẾN:
+
+```
+GỬI : | `<pre>` `<div>` `<script>` `<textarea>` `<p>` | `rc=0` · ... |
+ĐẾN : | `<pre>` `` `
+```
+
+Đọc ra được hai việc riêng biệt: thẻ `div` **bị gỡ** (còn trơ hai dấu nháy ngược từng bao nó), rồi
+tại thẻ `script` **toàn bộ phần còn lại biến mất** — bộ phân tích HTML nuốt tới thẻ đóng, mà không
+có thẻ đóng. **Dấu nháy ngược không che được**: bộ lọc chạy trên thân THÔ, trước Markdown.
+
+**Không phải lần đầu, và lần đầu đã đi lọt.** Comment `5378121537` trên cùng PR dài **517** ký tự và
+kết thúc giữa câu — cùng bệnh, đăng lúc 05:11, không ai thấy suốt bốn giờ. Một comment bị cắt trông
+y hệt một comment ngắn.
+
+Cùng họ với dấu bỏ-qua-CI (`CLAUDE.md`): *"GitHub khớp CHUỖI trên toàn thông điệp, không đọc
+Markdown — dấu nháy ngược không phải hàng rào"*. Chỉ khác đối tượng: ở đó là chuỗi kích hoạt trong
+commit message, ở đây là thẻ HTML trong thân comment.
+
+**Cách viết an toàn:** nêu tên thẻ **không dùng ngoặc nhọn** (`pre` · `div` · `script`), hoặc đặt
+trong khối rào — đo được là thẻ nằm trong khối rào ba dấu nháy ngược **đã đi qua nguyên vẹn** ở các
+reply trước của cùng PR. **Chốt duy nhất tin được vẫn là đo thứ ĐÃ ĐẾN**: đăng xong đọc ngược về,
+so độ dài và kiểm vài mốc cuối bài; "lời gọi trả thành công" không nói gì về thứ người đọc nhìn thấy.
+
+Máy chưa canh được mục này — chưa có cổng nào đọc lại comment vừa đăng.
+
+---
+
+## 17. `CHECK-SUITE-BAO-XANH-CHO-LUOT-BI-HUY` — 3/3 lần, không phải chuyện hiếm
+
+Thông báo webhook `check_suite.completed` gửi về `conclusion: success`, kèm chú thích *"No check in
+this GitHub App's check suite failed"*. Đo theo **JOB** thì lượt `gate` **chưa chạy xong**:
+
+| head | check_suite gửi về | `gate (ubuntu)` | `gate (windows)` |
+|---|---|---|---|
+| `225d47d0090cbe86940f2ad581e86ff551cf45ad` | **success** | `success` 29/31 | **`cancelled`** 21/31 |
+| `fd78ead6b79d18bd08f3947545b07d04f05abdde` | **success** | **`cancelled`** 29/31 | **`cancelled`** 20/31 |
+| `2d4986b5d5b0bbebd81abeabbbd0505cfdb8c23b` | **success** | **`cancelled`** 19/31 | **`cancelled`** 18/31 |
+
+**Ba trên ba.** Trong một giờ có đúng ba lần đẩy bị lần sau đè lên, và **cả ba** sinh ra một thông báo
+khai xanh cho lượt `gate` bị huỷ. Đây không phải một ca biên hiếm gặp — nó là **hành vi mặc định** của
+kênh này với mọi lần đẩy chồng. Một agent đẩy nhiều lượt trong một phiên sẽ gặp nó ở **mọi** lượt trừ
+lượt cuối.
+
+### Ca 4 — biến thể KHÁC, và nó đánh vào đúng head ta cần
+
+Ba ca trên đều là lượt **bị huỷ**. Ca thứ tư không có gì bị huỷ: `355a55dd566a8e3cdc2806c04c8db10f51810630`
+là head **CUỐI**, không bị đè bởi lần đẩy nào.
+
+```
+07:17:xx  đẩy 355a55dd
+07:18:42  check_suite.completed  success  head_sha 355a55dd   check_suite_id 88255207197
+07:20:46  ĐO THEO JOB:  gate · in_progress
+                          gate (ubuntu-latest)   27/30 bước
+                          gate (windows-latest)  15/30 bước
+07:23:36  check_suite.completed  success  head_sha 355a55dd   check_suite_id 88255207202
+07:23:47  ĐO THEO JOB:  gate · completed · success
+                          gate (ubuntu-latest)   success  29/31 chạy · 2 bỏ qua · 0 hỏng
+                          gate (windows-latest)  success  28/31 chạy · 3 bỏ qua · 0 hỏng
+```
+
+**HAI `check_suite_id` KHÁC NHAU cho CÙNG một head** — `…197` và `…202`. Đó là bằng chứng đo được cho
+cơ chế, không phải suy đoán: `gate` và `launcher` sinh **hai check suite riêng**, và suite của
+`launcher` xong trước rồi khai `success` cho head ấy trong khi suite của `gate` còn chạy dở.
+
+Chú thích của harness — *"No check in this GitHub App's check suite failed"* — **đúng nguyên văn**:
+không check nào trong **suite ĐÓ** hỏng. Nó không nói gì về suite kia, và nó không tự nhận là nói.
+
+**Vì sao ca này xấu hơn ba ca trên:** ba ca kia chỉ đánh vào head **trung gian**, thứ không ai cần
+xanh. Ca này đánh vào head **CUỐI** — đúng thứ ta chờ để merge. Một agent nhận thông báo lúc `07:18:42`
+rồi báo *"CI xanh, merge được"* sẽ **sai**, kể cả khi nó chưa đẩy chồng lần nào trong cả phiên.
+
+**Kết luận đổi ĐƠN VỊ, không chỉ đổi độ cẩn thận:** đếm **suite** là sai đơn vị. Đơn vị đúng là **JOB**,
+và phải liệt kê ĐỦ tập job cần (`gate (ubuntu-latest)` **và** `gate (windows-latest)`), rồi đòi từng job
+`conclusion == "success"`. Một thông báo `check_suite` **không bao giờ** trả lời được câu *"CI trên head
+này xong chưa"*, vì nó không biết về các suite khác — nên đừng hỏi nó câu ấy.
+
+Nguyên nhân: lần đẩy kế tiếp **đè** lên lượt đang chạy (concurrency), GitHub **huỷ** nó. `cancelled`
+không phải `failure`, nên câu *"không check nào HỎNG"* vẫn đúng **về mặt chữ** — và sai hoàn toàn về
+mặt việc. Ba trạng thái, không phải hai: `xanh` · `đỏ` · **`chưa chạy xong`**; gộp trạng thái thứ ba
+vào "không hỏng" là đúng lỗi `None ≠ False` mà kho đã đặt tên.
+
+**Vì sao nguy hiểm hơn một cổng đỏ:** một agent đang lái PR về xanh sẽ nhận tín hiệu này làm *"CI đã
+qua"* rồi đi tiếp. Nó không phải cổng VẮNG MẶT (`[skip` + `ci]`, `t24`) và cũng không phải đồ giả nói
+dối — đây là **kênh thông báo khai xanh cho một lượt bị huỷ giữa chừng**. Biến thể thứ ba của cùng một
+họ, và là biến thể duy nhất đến dưới dạng một thông báo chủ động.
+
+Tái lập (MCP `x/actions`; tham số tên là `resource_id`, KHÔNG phải `run_id`, và payload lồng **hai**
+tầng `{"jobs": {"jobs": [...]}}`):
+
+```
+actions_list  method=list_workflow_runs  branch=<nhánh>       -> lấy run id theo head_sha
+actions_list  method=list_workflow_jobs  resource_id=<run id> -> đọc conclusion TỪNG job
+```
+
+**Chốt:** đòi `conclusion == "success"` trên **từng job cần**, và đếm bước — `cancelled` với 20/31 bước
+trông y hệt `success` với 31/31 nếu chỉ nhìn "0 hỏng". Đừng kết luận từ `check_suite`, và đừng kết luận
+từ số bước hỏng. Máy chưa canh được mục này; nó là kỷ luật đọc, cùng họ với *"hỏi chỗ tiện tay thay vì
+hỏi chỗ kết luận được ghi"*.

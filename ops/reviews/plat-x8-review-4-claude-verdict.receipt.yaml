@@ -74,11 +74,13 @@ verdict_sha256: f8096eba1b730aea8b6dbf7712dc09202c0a79d6a57952d676a90820d1eaa3df
 verdict_bytes: 24984
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/blob/claude/phien-tra-luat-5a-handoff-9o1cqp/ops/reviews/plat-x8-review-4-claude-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/c69eaf2f05cd9094db10ef8e220af3e0ededc487/ops/reviews/plat-x8-review-4-claude-verdict.md
 evidence_url_ghi_chu: >-
-  ĐIỀN Ở COMMIT SAU, ghim theo commit ĐẦU TIÊN chứa tệp verdict — một commit không chứa được băm
-  của chính nó, mà `t26` đòi trường này có mặt dạng `https` trong CÙNG commit với biên nhận. Không
-  có đường một bước; lượt 2 và lượt 3 đều đi hai bước này.
+  ĐÃ GHIM theo commit `c69eaf2f` — commit ĐẦU TIÊN chứa tệp verdict. Phải đi HAI bước vì một commit
+  không chứa được băm của chính nó, mà `t26` đòi trường này có mặt dạng `https` trong CÙNG commit
+  với biên nhận; lượt 2 và 3 đều đi đường này. Bước 2 KHÔNG được bỏ dù bước 1 đã làm cổng xanh:
+  `t26` chỉ kiểm HÌNH DẠNG (`https://`) cộng băm tệp khớp, nên URL NHÁNH cũng qua — cổng không phân
+  biệt mỏ neo BỀN với mỏ neo TRÔI, mà nhánh là thứ bị xoá. Xem thêm `anchor.cuong_do`.
 
 cross_provider: true
 assurance_dat: cross_approved

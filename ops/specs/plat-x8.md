@@ -198,13 +198,15 @@
 > | chờ `#238` land | merge `563e0eb8` **11:58:18Z 22-08** (PR #246). Nghiệm thu `W3` của `#238` đòi Windows xanh trên exact head — thuộc packet ấy, không phải packet này |
 > | đo lại toàn bảng §0, không vá lẻ | đã đo lại toàn bảng ở `3c`; các bản sau chỉ sửa chỗ ĐO SAI, có ghi nguyên nhân từng chỗ |
 > | sửa mười ba chỗ | **mười ở `3c`…`3i`; BA chỗ (1 · 2 · 7) chỉ xong ở BẢN 5.** Ba chỗ ấy cố ý HOÃN tới khi `#238` land vì chúng là con số phụ thuộc lượt ấy — nhưng **bản 4 quên làm chúng trong khi bảng này lại khai đã xong cả mười ba**. Bắt được lúc sắp giao prompt cho executor. Nguyên nhân: neo lại theo BĂM thì `grep` băm tìm được mọi chỗ trích băm, nhưng câu khẳng định trạng thái viết bằng CHỮ (`bản 3i`, `N >= 42`, `chưa cấp lease được`) thì `grep` băm KHÔNG BAO GIỜ thấy. **Quét theo băm không thay được quét theo TRẠNG THÁI** — giữ nguyên văn làm hồ sơ |
-> | đóng băng **bản 4** | bản này |
+> | đóng băng bản mới | **bản 5** (bản này). Bản 4 `46d9a029…` đã hết hiệu lực vì bỏ sót ba con số |
 > | quét lease trên **mọi** ref rồi mới cấp | quét **13:01Z**: 162 ref hai nguồn khớp, **0** lease còn hiệu lực. Xem mục *VA CHẠM WRITE SET* ở trên |
-> | prompt executor neo lại băm | `ops/prompts/plat-x8-exec-1-codex-20260821.md` giữ nguyên đường dẫn, neo lại băm bản 4 |
+> | prompt executor | **`ops/prompts/plat-x8-exec-3-codex-20260822.md`** (`ff019443…`). `exec-1` (`f74adeab…`) và `exec-2r2` (`4f58f2a9…`) BẤT BIẾN — mỗi bản bị một lease đã đăng neo, sửa đè là giết mỏ neo |
 >
-> Lease cấp theo chuỗi này: **`plat-x8-exec-2-codex-20260822`** — lượt **2**, vì lượt 1
-> (`plat-x8-exec-1-codex-20260821`, commit `3c21bcd8`) đã **RÚT**; biên bản
-> `ops/RUT_LEASE_PLAT_X8_20260821.md`.
+> **Lease đang hiệu lực: `plat-x8-exec-2r4-codex-20260822`** (revision 4). Chuỗi: lượt 1
+> (`plat-x8-exec-1-…`, `3c21bcd8`) **RÚT** — biên bản `ops/RUT_LEASE_PLAT_X8_20260821.md`; rồi
+> `…exec-2` → `…-2r2` → `…-2r3` → **`…-2r4`**, ba bản trước mang cờ `da_bi_thay_the`.
+> **ĐỪNG chép danh tính lease vào đây nữa** — dòng này đã sai một lần vì thế. Nguồn là tệp lease;
+> muốn biết bản nào sống thì đọc `da_bi_thay_the` trong `ops/leases/`, đừng đọc dòng này.
 >
 > ## Chỗ thứ 13 — lease `codex` cho packet `sensitive` là NGOẠI LỆ CÓ ĐIỀU KIỆN, và KHÔNG cổng nào canh
 >
@@ -395,7 +397,7 @@ hoá chính packet — `PLAT-M4` **có** khai, chỉ khai sai.
 `docs/adr/0044-nguong-kich-thuoc-packet-theo-do-luong.md` là ≤3 tệp / ≤300 dòng thêm; chừa một suất
 là cố ý, để lượt vá sau verdict không phải xin mở rộng write set.
 
-Đây là lần **đầu tiên** `ops/lease_publish.py` vào một `write_set` (đo: 0/49). Việc mở tệp ấy đã được
+Đây là lần **đầu tiên** `ops/lease_publish.py` vào một `write_set` (đo: 0/49). *(MỆNH ĐỀ NÀY ĐÃ SAI — `#227` mở tệp ấy trước; và mẫu số nay là **61**, không phải 49. Xem chỗ 11 và chỗ 8 ở hộp đầu tệp.)* Việc mở tệp ấy đã được
 người giữ kho duyệt cho gói cưỡng chế kế tiếp (ADR-0044, Q4). Nói thẳng vì cần nói:
 `ops/THAM_DINH_CHUNG_CLAUDE_CODEX_KE_HOACH.md:96` từng **cấm** mở tệp ấy cho `W0-R2` — đây là duyệt
 MỚI cho mục đích KHÁC, có ghi, không phải lờ đi lệnh cấm cũ.
@@ -417,7 +419,7 @@ land**. Nên không lease nào đang giữ hai tệp này ⇒ va chạm là **th
 
 ## 4. ngoai_pham_vi — CỐ Ý không làm
 
-1. **Không sửa 49 lease cũ.** Forward-only theo Q5. `t23` đòi **mọi** lease thật phải qua cổng; áp
+1. **Không sửa lease cũ.** *(số nền `3db588c`; **nay** đo trên `08bb4ecd`: **61** tệp — xem bảng đính chính chỗ 8 ở hộp đầu tệp. Bảng ấy là NGUỒN, dòng này là bản chiếu.)* Forward-only theo Q5. `t23` đòi **mọi** lease thật phải qua cổng; áp
    ngược lại là 49 tệp đỏ cùng lúc. Năm lease sai lớp của `PLAT-M4` **đã** có bản đính chính —
    `ops/DINH_CHINH_REVIEW_CLASS_PLAT_M4.md` — nên hồ sơ đã đúng, chỉ tệp lease giữ nguyên.
 2. **Không nới bảng phân loại quá thứ §8 nói NGUYÊN VĂN.** Xem §8 của đặc tả này; nới bảng phải có
@@ -509,9 +511,9 @@ suy ấy và thay bằng phép TÍNH từ `write_set`. Bộ đếm đang đượ
 `security/credential boundary` · `dispatcher/reconciler` · `review/land authority` ·
 `launcher hoặc gate lifecycle` · `migration dữ liệu và LIVE adapter`.
 
-**Hệ quả, đã đo và phải nói thẳng: 15/15 đường dẫn** từng xuất hiện trong `write_set` của mọi lease
+**Hệ quả, đã đo và phải nói thẳng: 15/15 đường dẫn** *(số nền `3db588c`; **nay** đo trên `08bb4ecd`: **14/14** đường — xem bảng đính chính chỗ 9 ở hộp đầu tệp. Bảng ấy là NGUỒN, dòng này là bản chiếu.)* từng xuất hiện trong `write_set` của mọi lease
 đều ra **`sensitive`** dưới bảng seed ấy — hoặc vì §8 gọi đích danh, hoặc vì rơi vào nhánh mặc định.
-Trong 10 lease khai lớp, **6 sẽ bị NÂNG** (1 `routine` + 5 `systemic`), 4 giữ nguyên.
+Trong 10 lease khai lớp, **6 sẽ bị NÂNG** (1 `routine` + 5 `systemic`), 4 giữ nguyên. *(số nền `3db588c`; **nay** đo trên `08bb4ecd`: **22** lease khai lớp — 1 `routine` / 5 `systemic` / 16 `sensitive` — xem bảng đính chính chỗ 9 ở hộp đầu tệp. Bảng ấy là NGUỒN, dòng này là bản chiếu.)*
 
 Đây **không** phải lỗi cài đặt; đó là điều Q2=(a) nghĩa là. Nhưng nó có giá vận hành thật: §8 mặc
 định *"Codex chỉ nhận Packet `routine`/`systemic` nhỏ"* và *"hết quota mà chưa có human thì pause"* —
@@ -538,11 +540,11 @@ riêng đối chiếu §8, và đó là quyết định của người giữ kho
 3. **Cổng này KHÔNG đọc `risk`, và KHÔNG phân lớp `diff thật` — hai trong ba đầu vào §8:567 đòi.**
    Bản viết trước của mục này **SAI**, và cross-review lượt 2 bác đúng chỗ; chép lại cái sai ở đây vì
    nó là bài học, không phải vì thủ tục. Bản ấy viết *"`diff thật` không tồn tại tại thời điểm cổng
-   chạy"* — một khẳng định PHỔ QUÁT dựng từ MỘT trong hai vai. Đo lại: **39/39** lease reviewer khai
+   chạy"* — một khẳng định PHỔ QUÁT dựng từ MỘT trong hai vai. Đo lại: **39/39** lease reviewer khai *(số nền `3db588c`; **nay** đo trên `08bb4ecd`: **44/44** — xem bảng đính chính chỗ 10 ở hộp đầu tệp. Bảng ấy là NGUỒN, dòng này là bản chiếu.)* 
    `reviewed_sha_required` là 40-hex **khác** `base_sha`, tức exact head **có thật và neo ngay trong
    lease**, còn `ops/lease_publish.py` thì vốn đã đòi và kiểm trường ấy. Nên trên đường reviewer,
    diff `base_sha...reviewed_sha_required` là thứ cổng **cầm trong tay**. Phần đúng còn lại: `risk`
-   **không tồn tại trong dữ liệu** (`grep '^risk:' ops/leases/` = **0/49 tệp**), và trên đường
+   **không tồn tại trong dữ liệu** (`grep '^risk:' ops/leases/` = **0/49 tệp** *(số nền `3db588c`; **nay** đo trên `08bb4ecd`: **0/61** — xem bảng đính chính chỗ 10 ở hộp đầu tệp. Bảng ấy là NGUỒN, dòng này là bản chiếu.)*), và trên đường
    **executor** thì head chưa tồn tại thật.
 
    **Vì sao KHÔNG phân lớp diff ấy, và vì sao lần này không phải fail-open:** sau khi Q1 bị thu hồi
@@ -574,7 +576,7 @@ từ lease executor"*) **hết hiệu lực**; đường kế thừa bị gỡ b
 |---|---|---|
 | 1 | tra bằng `packet_id` một mình ⇒ thừa kế lớp của tiền nhiệm đã chết | giả định "mỗi packet một lease executor" — đo bác: **3/5** packet có nhiều hơn một |
 | 2 | bộ định danh **toàn bộ** lấy từ chính tệp lease, không trường nào đối chiếu trạng thái bền ⇒ lease reviewer **dựng khéo** khai `generation` cũ + băm spec cũ sẽ khớp đúng một executor `routine` và thừa `routine`; nhánh fail-closed "thiếu trường" **không bao giờ chạy** vì mọi trường đều có mặt | chính bản vá của lượt 1 |
-| 2 | trên đường reviewer, exact head **có thật** (đo: **39/39** lease reviewer khai `reviewed_sha_required` 40-hex khác `base_sha`) nên lập luận *"chưa có diff để phân lớp"* sai ở đúng vai này | lập luận biện hộ của lượt 1 |
+| 2 | trên đường reviewer, exact head **có thật** (đo: **39/39**, nay **44/44** — chỗ 10 hộp đầu tệp — lease reviewer khai `reviewed_sha_required` 40-hex khác `base_sha`) nên lập luận *"chưa có diff để phân lớp"* sai ở đúng vai này | lập luận biện hộ của lượt 1 |
 | — | `generation` là trường **tự khai**, **0 dòng** cổng nào kiểm | tự nêu trước khi gọi lượt 2; lượt 2 xác nhận và làm sắc thêm |
 
 **Doctrine bắt phải hỏi từ lần thứ ba trở đi là *"có nên làm việc này không"*, không phải *"vá thế
@@ -588,7 +590,7 @@ Suy từ một tệp lease khác chỉ là dời lời khai sang tệp bên cạ
 đứng. Cấp thẳng trần là thứ duy nhất không suy.
 
 **Cái giá, nói bằng số chứ không bằng cảm giác.** Kế thừa lẽ ra mua được lớp THẤP cho reviewer của
-packet nhẹ. Đo dưới bảng seed: **15/15** đường dẫn từng xuất hiện trong `write_set` của mọi lease đều
+packet nhẹ. Đo dưới bảng seed: **15/15** (nay **14/14**, chỗ 9 hộp đầu tệp) đường dẫn từng xuất hiện trong `write_set` của mọi lease đều
 ra `sensitive`, nên hôm nay kế thừa mua được **0** trường hợp. Nó chỉ có giá sau khi bảng được nới —
 và nới bảng là packet KHÁC, chưa mở. Vậy giá phải trả bây giờ bằng không; giá phải trả trong tương
 lai là: mọi reviewer lease đều `sensitive` cho tới khi có một cơ chế trạng thái BỀN để neo, thay vì

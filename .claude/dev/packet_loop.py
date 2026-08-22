@@ -1140,7 +1140,24 @@ def cmd_doctrine_scan(a, state_dir: Path) -> int:
 #
 # RÀO HỎNG THÌ ĐỎ, không phải "che tới hết tệp rồi thôi": một rào không đóng sẽ
 # nuốt mọi metadata phía sau, tức biến lỗi định dạng thành cổng câm.
-_RAO_MO = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+# TÁCH MỞ và ĐÓNG — chúng KHÔNG cùng luật, và bản trước gộp chúng làm một.
+#
+# FINDING cross-review lượt 3 (codex, P2 trên head `ef19e3b075`): bản trước khớp
+# TIỀN TỐ, nên một dòng như "```not-a-close" bị tính là rào ĐÓNG. Codex dựng chuỗi
+# rào xen kẽ — mở · "```not-a-close" · dòng bảng GIẢ · hai rào nữa — làm `adr-song`
+# trả `rc=0` trong khi Markdown RENDER ra giữ dòng giả ấy nằm trong khối mã. Đã tái
+# hiện trước khi vá.
+#
+# Luật CommonMark, và mỗi vế dưới đây có một ca:
+#   · rào ĐÓNG: cùng loại ký tự, độ dài KHÔNG NGẮN HƠN rào mở, và sau đó CHỈ được
+#     có khoảng trắng. "```x" KHÔNG đóng được gì.
+#   · rào MỞ bằng BACKTICK: info string không được chứa backtick ("```js`x" không
+#     mở khối nào). Rào mở bằng NGÃ thì info string tuỳ ý — "~~~ a`b" là hợp lệ.
+#
+# Hai luật ngược chiều nhau: một cái làm cổng CHẶT hơn, một cái làm nó RỘNG hơn.
+# Gộp thành một regex là cách bản trước sai.
+_RAO_MO = re.compile(r"^ {0,3}(`{3,}|~{3,})([^\n]*)$")
+_RAO_DONG = re.compile(r"^ {0,3}(`{3,}|~{3,})[ \t]*$")
 
 
 def _che_khong_render(raw: str) -> tuple:
@@ -1151,17 +1168,19 @@ def _che_khong_render(raw: str) -> tuple:
     rao = None          # ký tự rào đang mở, hoặc None
     rao_dong = 0
     for i, d in enumerate(dong, 1):
-        m = _RAO_MO.match(d)
         if rao is None:
-            if m:
+            m = _RAO_MO.match(d)
+            # backtick mở: info string có backtick thì KHÔNG phải rào mở
+            if m and not (m.group(1)[0] == "`" and "`" in m.group(2)):
                 rao, rao_dong = m.group(1), i
                 ra.append(" " * len(d))
                 continue
             ra.append(d)
         else:
             ra.append(" " * len(d))
-            # đóng khi cùng loại ký tự và không ngắn hơn rào mở
-            if m and m.group(1)[0] == rao[0] and len(m.group(1)) >= len(rao):
+            # đóng: cùng loại, không ngắn hơn, và SAU ĐÓ CHỈ khoảng trắng
+            mc = _RAO_DONG.match(d)
+            if mc and mc.group(1)[0] == rao[0] and len(mc.group(1)) >= len(rao):
                 rao = None
     if rao is not None:
         van_de.append(f"rào khối mã mở ở dòng {rao_dong} không được đóng")

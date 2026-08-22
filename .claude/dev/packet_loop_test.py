@@ -2246,6 +2246,82 @@ def case_adr_song_thong_diep_loi_IN_RA_chinh_regex(c: Ctx):
     if "[0-9a-z]" not in s or "d{4}" not in s:
         raise AssertionError(f"thông điệp phải IN RA chính regex; được: {s[:300]!r}")
 
+# --- (d3) adr-song: rào MỞ và rào ĐÓNG không cùng luật ------------------------
+#
+# FINDING cross-review lượt 3 (codex, P2 trên head `ef19e3b075`). Bản trước khớp
+# rào bằng TIỀN TỐ cho cả hai chiều, nên `"```not-a-close"` bị tính là rào ĐÓNG.
+# Codex dựng chuỗi xen kẽ — mở · `"```not-a-close"` · dòng bảng GIẢ · hai rào nữa
+# — và `adr-song` trả `rc=0` trong khi Markdown RENDER giữ dòng giả trong khối mã.
+# Đã tái hiện TRƯỚC khi vá.
+#
+# Bốn ca dưới đây đo BỐN vế khác nhau, và hai trong bốn kéo cổng theo hai hướng
+# NGƯỢC nhau — đó là lý do không gộp được thành một regex:
+#   · đóng phải có đuôi khoảng trắng  ⇒ cổng CHẶT hơn
+#   · backtick mở có backtick trong info thì không mở ⇒ cổng RỘNG hơn
+
+_RAO_B = "`" * 3
+_RAO_T = "~" * 3
+_HANG_ADR = "| `ADR-0001` | luật | Accepted | 0 cổng |\n"
+
+
+def _repo_adr_than20(tmp: Path, than_20: str, ten: str):
+    """Kho giả một ADR, và §20 với THÂN do ca tự soạn (để dựng rào)."""
+    r = tmp / f"repo_than20_{ten}"
+    d = r / "docs" / "adr"
+    d.mkdir(parents=True, exist_ok=True)
+    (r / ".git").mkdir(exist_ok=True)
+    (d / "0001-ok.md").write_text(
+        "# ADR-0001 — ca thử\n\n- **Trạng thái:** Accepted (2026-08-22)\n",
+        encoding="utf-8", newline="\n")
+    (r / "docs" / "PROTOCOL_DA_PHIEN.md").write_text(
+        "# Protocol giả\n\n## 19. Mục trước\n\n"
+        "## 20. Quy tắc đang hiệu lực — bảng định tuyến ADR\n\n" + than_20,
+        encoding="utf-8", newline="\n")
+    return r
+
+
+def case_adr_song_rao_xen_ke_hang_gia_trong_khoi_ma(c: Ctx):
+    """CA CỦA CODEX, nguyên trạng: rào xen kẽ đẩy dòng bảng giả ra ngoài vùng che."""
+    than = (f"{_RAO_B}\n{_RAO_B}not-a-close\n{_HANG_ADR}{_RAO_B}\n{_RAO_B}\n")
+    r = _repo_adr_than20(c.tmp, than, "xenke")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(9, rc, e, "dòng bảng nằm TRONG khối mã không được tính là phủ")
+
+
+def case_adr_song_rao_dong_hop_le_van_che_dung(c: Ctx):
+    """Chiều BẮT OAN: rào đóng ĐÚNG luật (chỉ khoảng trắng sau) vẫn phải đóng.
+
+    Không có ca này thì "siết rào đóng" có thể siết thành KHÔNG BAO GIỜ đóng, và
+    mọi §20 có khối mã sẽ đỏ oan — kể cả §20 thật, vốn CÓ một khối mã.
+    """
+    than = f"{_RAO_B}\n{_HANG_ADR}{_RAO_B}   \n{_HANG_ADR}"
+    r = _repo_adr_than20(c.tmp, than, "donghople")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(0, rc, e, "rào đóng hợp lệ phải đóng; dòng bảng sau nó là dòng THẬT")
+
+
+def case_adr_song_backtick_mo_co_backtick_trong_info(c: Ctx):
+    """CommonMark: rào backtick mà info string chứa backtick thì KHÔNG mở khối nào.
+
+    Nên dòng bảng phía sau là dòng THẬT — che nó đi là bắt oan.
+    """
+    than = f"{_RAO_B}js`x\n{_HANG_ADR}"
+    r = _repo_adr_than20(c.tmp, than, "infobacktick")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(0, rc, e, "```js`x không mở khối mã ⇒ dòng bảng sau nó là THẬT")
+
+
+def case_adr_song_nga_mo_info_co_backtick_van_che(c: Ctx):
+    """Ngược lại: rào NGÃ thì info string tuỳ ý — `~~~ a`b` LÀ một rào mở hợp lệ.
+
+    Cặp với ca trên: cùng một ký tự backtick trong info, hai loại rào, hai kết quả.
+    Đo được cả hai mới chứng minh luật bó đúng theo LOẠI RÀO chứ không theo ký tự.
+    """
+    than = f"{_RAO_T} a`b\n{_HANG_ADR}{_RAO_T}\n"
+    r = _repo_adr_than20(c.tmp, than, "ngainfo")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(9, rc, e, "~~~ a`b LÀ rào mở ⇒ dòng bảng trong nó phải bị che")
+
 # --- (d) adr-song ---
 CASES += [
     ("adr_song_sach_xanh", case_adr_song_sach_xanh),
@@ -2271,6 +2347,10 @@ CASES += [
     ("adr_song_khoi_ma_HOP_LE_van_xanh", case_adr_song_khoi_ma_HOP_LE_van_xanh),
     ("adr_song_bien_dau_noi_cua_ten_tep", case_adr_song_bien_dau_noi_cua_ten_tep),
     ("adr_song_thong_diep_loi_IN_RA_chinh_regex", case_adr_song_thong_diep_loi_IN_RA_chinh_regex),
+    ("adr_song_rao_xen_ke_hang_gia_trong_khoi_ma", case_adr_song_rao_xen_ke_hang_gia_trong_khoi_ma),
+    ("adr_song_rao_dong_hop_le_van_che_dung", case_adr_song_rao_dong_hop_le_van_che_dung),
+    ("adr_song_backtick_mo_co_backtick_trong_info", case_adr_song_backtick_mo_co_backtick_trong_info),
+    ("adr_song_nga_mo_info_co_backtick_van_che", case_adr_song_nga_mo_info_co_backtick_van_che),
 ]
 
 # AC 18 — mỗi lớp trong danh sách đóng thành MỘT ca có tên riêng, để đột biến
@@ -2283,6 +2363,23 @@ CASES += [(f"ac19_{ten}", _ca_doctrine(nd, f"ac19_{ten}", 0)) for ten, nd in LOP
 # Đột biến nới ngưỡng: mỗi cái BẮT BUỘC giết đúng những ca dưới đây. Ca không
 # chết được nghĩa là nó không đo cái nó khai.
 MUTANTS = {
+    # --- rào MỞ / rào ĐÓNG: hai luật, hai đột biến ------------------------------
+    #
+    # (1) DỰNG LẠI ĐÚNG BUG lượt 3: khớp rào đóng bằng TIỀN TỐ. Không phải "gỡ một
+    # chốt" mà là khôi phục nguyên văn cơ chế cũ — ai vô tình viết lại như cũ thì ca
+    # của codex ĐỎ ngay.
+    "adr_dong_rao_khop_tien_to": (
+        "            mc = _RAO_DONG.match(d)\n",
+        "            mc = _RAO_MO.match(d)   # đột biến: khớp tiền tố như bản cũ\n",
+        ["adr_song_rao_xen_ke_hang_gia_trong_khoi_ma"],
+    ),
+    # (2) Chiều NGƯỢC: bỏ luật "backtick trong info thì không mở". Ca đích là ca
+    # BẮT OAN, nên đột biến này chứng minh luật ấy đang nới cổng đúng chỗ.
+    "adr_bo_luat_backtick_trong_info": (
+        '            if m and not (m.group(1)[0] == "`" and "`" in m.group(2)):\n',
+        "            if m:                   # đột biến: bỏ luật info string\n",
+        ["adr_song_backtick_mo_co_backtick_trong_info"],
+    ),
     # --- adr-song: đột biến cho lượt cross-review THỨ HAI ------------------------
     #
     # (1) BỎ che vùng không-render — dựng lại nguyên văn bệnh codex bắt được.

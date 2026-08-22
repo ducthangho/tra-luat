@@ -349,25 +349,25 @@ bộ test **có** lưới: `thieu = [t for t, _ in cap if t not in goc]` in Đ�
 
 ## 5. Khai VƯỢT NGƯỠNG — theo đúng cửa thoát của `ADR-0044`
 
-Thay đổi của phiên này: **6 tệp · +1312/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
+Thay đổi của phiên này: **6 tệp · +1440/−2**. Trần `ADR-0044` cho packet `sensitive` chạm authority
 là **≤ 3 tệp và ≤ 300 dòng thêm**. Khai thay vì lờ đi, và tách hai phần vì rủi ro của chúng khác họ:
 
 | phần | tệp | dòng thêm | rủi ro |
 |---|---|---|---|
-| **mã + phản chứng** | `.claude/dev/packet_loop.py` · `.claude/dev/packet_loop_test.py` | +681 | chạy sai |
-| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +631 | viết sai chữ |
+| **mã + phản chứng** | `.claude/dev/packet_loop.py` · `.claude/dev/packet_loop_test.py` | +797 | chạy sai |
+| **văn bản** | `CLAUDE.md` · `docs/PROTOCOL_DA_PHIEN.md` · `ops/NO_KY_THUAT.md` · `ops/HOAN_THIEN_KE_HOACH_20260822.md` | +643 | viết sai chữ |
 
 ```
-git diff --cached --numstat
+git diff --numstat $(git merge-base origin/master HEAD)
 ```
 
-**Phần mã: 2 tệp, +681.** Trong đó **phản chứng chiếm phần lớn**
-(`packet_loop_test.py` +464: 23 ca + 14 đột biến); cổng chỉ +217. Cắt cho vừa 300 nghĩa là cắt phản
+**Phần mã: 2 tệp, +797.** Trong đó **phản chứng chiếm phần lớn**
+(`packet_loop_test.py` +561: 27 ca + 16 đột biến); cổng chỉ +236. Cắt cho vừa 300 nghĩa là cắt phản
 chứng, tức đổi một con số lấy chính thứ làm cổng có răng — `CLAUDE.md` gọi đúng cái đó là *"chỗ các
 ca đi chết"*. Đây cũng không phải authority theo nghĩa hẹp của `ADR-0044`: `packet_loop.py` không cấp
 lease và không gác đường đăng; thứ ấy là `ops/lease_publish.py`, mà phiên này **không đụng**.
 
-**Phần văn bản: +631 trên 4 tệp.** Không dòng nào nằm trên đường chạy của `scripts/tl.py` hay của
+**Phần văn bản: +643 trên 4 tệp.** Không dòng nào nằm trên đường chạy của `scripts/tl.py` hay của
 cổng đăng lease. Ngưỡng của `ADR-0044` neo từ số đo về **chi phí review MÃ** (`PLAT-M4` 2 tệp/+351 →
 một vòng một finding; `PLAT-X4` 4 tệp/+721 → ba vòng tám finding); áp nguyên si sang một thay đổi tài
 liệu là áp sai đối tượng. Tiền lệ đã được chấp nhận: PR #210 khai đúng lý lẽ này cho 13 tệp/+861.

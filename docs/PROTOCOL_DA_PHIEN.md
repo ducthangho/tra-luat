@@ -1002,8 +1002,20 @@ python3 .claude/dev/packet_loop.py adr-song --root .
 
 Cổng ấy ĐỎ khi: một ADR không có dòng trong bảng · bảng trỏ một ADR không tồn tại · một ADR có
 hai dòng · một ADR không có dòng `Trạng thái` đọc được · **hai tệp cùng một số ADR** · **một
-tên tệp không đúng dạng và không nằm trong danh sách cho phép**. Thêm ADR mà quên bảng ⇒
-**gate đỏ**, không phải im lặng. Phản chứng cho từng luật ở `.claude/dev/packet_loop_test.py`.
+tên tệp không đúng dạng và không nằm trong danh sách cho phép** · **một rào khối mã hoặc một
+comment HTML không được đóng**. Thêm ADR mà quên bảng ⇒ **gate đỏ**, không phải im lặng.
+Phản chứng cho từng luật ở `.claude/dev/packet_loop_test.py`.
+
+**Chỉ metadata RENDER RA mới được tính.** Một dòng bảng `ADR-NNNN` hay một dòng `Trạng thái`
+nằm trong khối mã có rào hoặc trong comment HTML là VĂN BẢN, không phải khai báo — cổng che
+hai vùng ấy trước khi đếm. Rào không đóng thì ĐỎ chứ không che tới hết tệp: một rào hở sẽ
+nuốt mọi metadata phía sau, tức biến lỗi định dạng thành cổng câm.
+
+Rào MỞ và rào ĐÓNG **không cùng luật**, và gộp chúng là lỗi đã trả giá (cross-review lượt 3):
+rào đóng phải cùng loại ký tự, không ngắn hơn rào mở, và **sau nó chỉ được có khoảng trắng**:
+ba backtick rồi `not-a-close` **không** đóng được gì. Rào mở bằng **backtick** thì info string không được
+chứa backtick; rào mở bằng **ngã** thì info string tuỳ ý. Hai luật ấy kéo cổng ngược chiều
+nhau — một cái siết, một cái nới — nên mỗi cái có ca riêng và đột biến riêng.
 
 Dạng tên tệp ADR, ghi ĐÚNG NHƯ MÃ (`_ADR_TEN_TEP`): `^(\d{4})-[0-9a-z]([0-9a-z-]*[0-9a-z])?\.md$` —
 chặt hơn `^\d{4}-[0-9a-z-]+\.md$` ở đúng một chỗ: ký tự đầu và cuối của slug phải

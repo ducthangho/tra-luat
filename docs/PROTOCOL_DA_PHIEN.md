@@ -522,6 +522,28 @@ kèm theo. Chúng là DỮ LIỆU trong verdict, không phải commit và không
 cây thật (mỏ neo, tính duy nhất, tương tác với ca sẵn có), tự chạy gate, tự viết commit — bước chép-lại là một
 bước KIỂM, không được bỏ.
 
+**Reviewer phải ĐO ĐƯỢC, không chỉ ĐỌC.** Đây là luật review, không phải khuyến nghị về cú pháp
+verdict. Mọi khẳng định trong verdict phải neo vào một phép đo ĐÃ CHẠY: lệnh nguyên văn, kết quả
+thật, và `rc` đọc TRỰC TIẾP. Suy luận có căn cứ KHÔNG phải phép đo — suy thì phải nói là suy. Không
+đo được thì viết thẳng `KHÔNG ĐO ĐƯỢC` kèm lý do; đó là kết quả hợp lệ và là **trạng thái thứ ba**,
+không được lặng lẽ gộp vào "không có vấn đề". Một verdict chỉ gồm nhận xét đọc-mã là **chưa hoàn
+chỉnh** theo cùng nghĩa mà finding thiếu gợi ý vá là chưa hoàn chỉnh. Lý do có luật này: một lượt
+review không đo được chỉ chứng minh mã ĐỌC XUÔI, mà cách hỏng đắt nhất của kho này chưa lần nào đọc
+ngược tai — chúng đều là lời khai đúng cú pháp về một phép đo không ai chạy.
+
+**ĐỐI CHIẾU LƯỢT TRƯỚC là bắt buộc từ lượt 2 trở đi.** Reviewer phải đọc mọi verdict trước của cùng
+packet và trả lời tường minh ba câu, trong verdict của mình:
+(1) finding nào của lượt trước còn MỞ, và nó đã đóng THẬT chưa — phải ĐO, không nhận trạng thái
+`DA_DONG` trong biên nhận làm bằng chứng;
+(2) lượt trước có kết luận nào SAI không — một lượt trước sai được thì lượt kế cũng sai được, nên
+verdict cũ phải bị soi như soi mã, không phải như nền đã chốt;
+(3) bản vá đáp lại lượt trước có đẻ ra gì mới không — **một lượt review không bảo chứng được cho bản
+vá của chính nó**, nên delta ấy luôn cần một lượt khác nhìn.
+Thiếu phần đối chiếu ⇒ verdict **chưa hoàn chỉnh**. Lý do có luật này: đo được ở `PLAT-X8` — hai
+lượt đầu cùng nhận một bảng phân lớp làm nền và chỉ hỏi *"mã có khớp bảng không"*; không lượt nào
+hỏi *"bảng có khớp §8 không"*, nên cả hai bỏ sót một lỗ hạ lớp, và một trong hai còn dựng chỗ sai ấy
+thành ca ĐỐI CHỨNG — biến lỗi thành thứ được cổng bảo vệ.
+
 Reviewer muốn đi xa hơn được đính `goi-y-<finding>.patch` sinh từ cây riêng của mình — đính dạng ARTIFACT
 (comment/tệp), không push ref vào kho. Ba ràng buộc:
 
@@ -1088,6 +1110,7 @@ Lệnh tái lập cột ấy nằm trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` �
 | `ADR-0043` | Trần vòng review canon là HAI, và nó chỉ có một chỗ ở | Accepted | **0 cổng** — `so-canon` chưa tồn tại |
 | `ADR-0044` | Ngưỡng kích thước packet, neo từ số đo của chính kho | Accepted | **0 cổng** |
 | `ADR-0045` | Đảo vai executor/reviewer là NGOẠI LỆ CÓ VẾT, không phải mặc định mới | Accepted | **0 cổng** |
+| `ADR-0046` | Mô hình phiên: tác giả xuyên suốt, reviewer mới, cắt ở biên packet | Accepted | **0 cổng** — không cổng nào đọc "phiên nào soạn đặc tả" |
 
 ### B. ADR ngoài phạm vi protocol — thuộc `scripts/tl.py` và đường phát hành
 

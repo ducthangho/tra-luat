@@ -53,6 +53,25 @@ tiêu chí — ghi thẳng là chưa có cách đo, đừng làm tròn thành đ
 trong biên nhận của packet trước; packet mới bắt đầu từ 0 nếu không ai chép sang, và chốt "lặp
 ba lần thì hỏi có nên làm nữa không" mất tác dụng đúng lúc cần nhất.
 
+**L5 — Mọi con số phải kèm THỜI ĐIỂM ĐO, và phải ĐO LẠI trước khi công bố.** Cùng họ với L1:
+L1 hỏi *con số ĐẾM GÌ*, L5 hỏi *con số đo LÚC NÀO, trên head/ref nào*. Một con số không có mốc
+không sai lúc viết — nó **chết lặng** ở lần đẩy kế tiếp, và im lặng là toàn bộ vấn đề: không cổng
+nào đỏ, không ai cảnh báo, câu văn vẫn đọc trôi chảy.
+
+Đo được ở `PLAT-X8`, cùng một packet, **bốn lần**: `265 → 313 → 328` dòng thêm và `82/82 → 85/85 →
+87/87` ca test. Mỗi con số đúng ở commit sinh ra nó và sai ở commit kế. Lần tệ nhất, ô "trần
+`ADR-0044`" khai một cổng **ĐẠT** trong khi số thật đã vượt trần và cần ngoại lệ người giữ kho —
+tức một lời khai sai về THẨM QUYỀN, không chỉ sai một chữ số.
+
+Hai hệ quả bắt buộc:
+1. Mỗi con số trong đặc tả ghi kèm mốc (`đo trên <head/ref>, <ngày>`). Không có mốc thì không được
+   viết ra.
+2. Trước khi công bố bất kỳ bản nào, **đo lại** mọi con số, đừng chép từ bản trước hay từ thân PR.
+   Chép là cách con số sống lâu hơn sự thật của nó.
+
+Cách chữa cấu trúc, khi có thể: đừng ghi GIÁ TRỊ, hãy ghi **QUAN HỆ BẤT BIẾN + lệnh đo** (`N ≥ sàn`
+kèm lệnh sinh ra `N`). Quan hệ sống qua commit; giá trị thì không.
+
 ## 3. Đo trước khi hỏi
 
 Trước vòng 1, tự đo và ĐƯA SỐ vào câu hỏi, đừng bắt người dùng nhớ hộ:

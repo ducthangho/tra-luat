@@ -59,6 +59,33 @@ git diff --numstat <base_sha> <head_sha> > numstat.txt
 
 Verdict neo `reviewed_sha`; head đổi thì làm lại, đừng review bản đã cũ.
 
+## Dựng mirror trong sandbox — cú pháp nền, và ba chỗ đã gãy thật
+
+Mirror là **clone rời, detached đúng exact head**, không phải worktree của cây đang làm việc:
+worktree dùng chung `.git` nên reviewer chạm được nhánh executor, mà lease cấm đúng điều đó.
+
+```bash
+git clone -q <nguồn> "$RV"
+git -C "$RV" remote set-url origin https://github.com/<chủ>/<kho>   # BẮT BUỘC — xem (1)
+git -C "$RV" fetch -q origin <nhánh>
+git -C "$RV" checkout -q --detach <exact-sha>
+git -C "$RV" status --porcelain    # phải RỖNG trước khi phóng
+```
+
+1. **Clone từ ĐƯỜNG DẪN cục bộ để lại `origin` là đường dẫn, và `launcher.py` từ chối với `rc=11`**
+   (`kho lech: mong doi github.com/<chủ>/<kho>, thuc te (khong co remote)`). Đúng doctrine *neo theo
+   KHO, không theo đường dẫn*: từ một đường dẫn cục bộ không xác minh được danh tính kho. Clone cục
+   bộ vẫn nhanh và vẫn nên dùng — chỉ phải `remote set-url` về dạng URL ngay sau đó.
+2. **`git fetch origin <nhánh>` gãy nếu nhánh chỉ tồn tại dưới dạng remote-tracking ở nguồn cục bộ**
+   (`couldn't find remote ref`). Vô hại khi commit đã có sẵn trong clone, nhưng đừng đọc nó thành
+   "sandbox hỏng" — kiểm bằng `rev-parse HEAD`, không bằng mã thoát của `fetch`.
+3. **Phiên headless NGOÀI kho không kế thừa `.claude/settings.json`** — nó in
+   `Ignoring N permissions.allow entries: this workspace has not been trusted`. Đó là hành vi ĐÚNG
+   và nên giữ: quyền của reviewer phải đến từ `--allowedTools` tường minh, không từ cây bị review.
+
+Sau khi phóng, **kiểm reviewer đã tuân cấm**: `git -C "$RV" status --porcelain` rỗng VÀ
+`git -C "$RV" log --oneline <head>..HEAD` rỗng, cộng cùng hai phép ấy trên kho THẬT.
+
 ## Chạy nền kia trong sandbox
 
 ```bash

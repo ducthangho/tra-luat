@@ -18,7 +18,7 @@ base: 3db588c                      # = origin/master lúc phiên kết thúc
 diff_so_master: 1 tệp, +205 dòng   # chỉ ops/specs/plat-x8.md
 
 spec_path: ops/specs/plat-x8.md
-spec_sha256: 328a74facb8440c11326cd074796ec7a23d2c509d8e2b0a2b63325951c0e3e24   # BẢN 3
+spec_sha256: 308d0cf44fc1fcca75bc4d8edb014f560293622334ef25cc621c1e7afe3b2129   # BẢN 3b (bản 3 + hộp cảnh báo)
 spec_da_kiem_tren_ban_DA_DEN: true   # git cat-file -p origin/<nhánh>:… | sha256sum
 
 packet_issue: 225
@@ -35,7 +35,8 @@ pr: 230                            # https://github.com/ducthangho/tra-luat/pull
 > |---|---|---|
 > | 1 | `9cb54a2e4e7c…` | 2 P1 lượt 1 — hết hiệu lực |
 > | 2 | `b88c53dfd211…` | 2 P1 lượt 2 — hết hiệu lực |
-> | 3 | `328a74facb84…` | **bản dùng được** |
+> | 3 | `328a74facb84…` | hết hiệu lực khi dán hộp cảnh báo |
+> | 3b | `308d0cf44fc1…` | **bản dùng được** — bản 3 + hộp cảnh báo; nội dung yêu cầu không đổi |
 >
 > Nghĩa là **§3 dưới đây đã lệch một phần**: Q1 không còn là quyết định đang có hiệu lực. Hai thứ
 > còn lại (cấp lease, nới bảng phân loại) vẫn chờ. Đọc đặc tả bản 3 làm chuẩn, đừng đọc bản này.

@@ -1,16 +1,47 @@
 # ĐẶC TẢ — `PLAT-X8`: cổng TÍNH `effective_review_class`, thôi nhận lời khai
 
+> # ⛔ ĐỪNG CẤP LEASE NEO VÀO BẢN NÀY
+>
+> **Đặc tả này ĐANG CHỜ BẢN 4 và có SÁU chỗ đã sai.** Đo 22-08-2026 trên `origin/master` `a5bfe07`.
+>
+> Lease `plat-x8-exec-1-codex-20260821` đã bị **RÚT**, chưa từng đăng — biên bản
+> `ops/RUT_LEASE_PLAT_X8_20260821.md`. Lý do: va chạm write set với **`#227`** trên
+> `ops/lease_publish.py` + `ops/lease_publish_test.py`, **cả cửa sổ lẫn nội dung**.
+>
+> | # | chỗ | đang ghi | sai vì |
+> |---|---|---|---|
+> | 1 | §0 bảng đo | `bộ test tại 3db588c` = `42/42` | `#227` đưa bộ test **42 → 58** ca |
+> | 2 | §6 `A9` | `N >= 42` | sàn thật sẽ là **58** |
+> | 3 | §0 nền đo | `origin/master = 3db588c` | master nay **`a5bfe07`** |
+> | 4 | §3 bảng va chạm | ba dòng: `#209`, `#220`, mục D | **thiếu hẳn `#227`** — chính packet đã làm rút lease |
+> | 5 | §3 câu kết | *"không lease nào đang giữ hai tệp này"* | **câu này đã bị bác.** Nó đo `ops/leases/` trên `master`, mà lease sống nằm trên nhánh `ops/**`. Quét đủ 98 nhánh ra **2** lease còn hiệu lực giữ đúng hai tệp ấy, một cái cấp trước 15 phút |
+> | 6 | §3 thứ tự | `PLAT-X8 → #209 → PLAT-X7 → mục D` | thứ tự thật: **`#227` → `PLAT-X8` → `#209` → `PLAT-X7` → mục D** |
+>
+> **Bốn quyết định ở §1 (Q1 thu hồi · Q2 · Q5 · Q6) và mọi §5–§10 KHÔNG bị ảnh hưởng** — sáu chỗ trên
+> đều là con số nền và bảng va chạm, không phải yêu cầu kỹ thuật. Đó là lý do bản này giữ nguyên nội
+> dung yêu cầu thay vì viết lại.
+>
+> **Việc phải làm, đúng thứ tự:** chờ `#227` land → đo lại `origin/master` → sửa sáu chỗ trên →
+> đóng băng **bản 4** → cấp lease neo băm bản 4. Prompt `ops/prompts/plat-x8-exec-1-codex-20260821.md`
+> giữ lại nhưng phải neo lại băm trước khi dùng.
+>
+> *Hộp này tồn tại vì trước đó đặc tả — thứ DUY NHẤT có thẩm quyền, thứ lease neo vào — không mang
+> dấu hiệu nào cho biết các con số của nó sắp chết. Kế hoạch ra bản 4 chỉ được ghi ở biên bản rút
+> lease và ở prompt; ai đọc đúng chỗ có thẩm quyền thì không thấy gì.*
+
+
 Đặc tả này ĐÓNG BĂNG bằng băm. Lease neo vào `spec_sha256`. Sửa nội dung ⇒ băm đổi ⇒ lease trỏ
 vào thứ không còn tồn tại, phải đi qua bản sửa đổi mới. Soạn bằng skill `soan-spec`, 21-08-2026.
 
-**BẢN ĐÓNG BĂNG THỨ BA, 21-08-2026.** Hai lượt cross-review (`codex`), **bốn P1**, và người giữ kho
+**BẢN ĐÓNG BĂNG THỨ BA (+ hộp cảnh báo, 22-08-2026).** Hai lượt cross-review (`codex`), **bốn P1**, và người giữ kho
 chọn SỬA đặc tả ở cả hai lượt.
 
 | bản | băm | kết cục |
 |---|---|---|
 | 1 | `9cb54a2e4e7c…` | 2 P1 ở lượt 1 (neo `c9a1b4e90d`) — hết hiệu lực |
 | 2 | `b88c53dfd211…` | 2 P1 nữa ở lượt 2 (neo `3bafef75d6`), **cả hai** đánh vào đúng đường kế thừa — hết hiệu lực |
-| 3 | bản này | Q1 **THU HỒI**: đường kế thừa bị gỡ, không vá tiếp — §10 |
+| 3 | `328a74facb84…` | Q1 **THU HỒI**: đường kế thừa bị gỡ, không vá tiếp — §10 |
+| 3b | bản này | **chỉ thêm hộp cảnh báo ở đầu.** Nội dung yêu cầu KHÔNG đổi so với bản 3; băm đổi nên mọi chỗ trích băm phải cập nhật theo |
 
 Bốn phát hiện trên **một** đường là dấu hiệu sai ở QUYẾT ĐỊNH GỐC chứ không ở các bản vá. Các bản
 trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm bản dùng được.

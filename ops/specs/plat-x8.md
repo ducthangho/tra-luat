@@ -31,15 +31,40 @@
 > `LEASE-DANG-WINDOWS`. Bản 3d/3e ghi *"hai lease… tới 11:00Z"*: thiếu `exec-3`, vì lúc quét nó
 > chưa được đẩy. **Riêng ba lease `LEASE-DANG-WINDOWS` đã đủ đỏ** — không cần phân loại bảy cái kia.
 >
-> **Trích số thì trích kèm ĐƠN VỊ SINH RA NÓ** — ba cặp số dưới đây đều là hai phép đo ĐÚNG cạnh
-> nhau, và cặp nào cũng đọc thành mâu thuẫn nếu bỏ mẫu số:
+> **Trích số thì trích kèm ĐƠN VỊ SINH RA NÓ.** Bốn cặp dưới đây là những chỗ hai phiên đã đọc ra hai
+> con số khác nhau và suýt đi truy một bệnh không có. **Bảng này cố ý KHÔNG ghi giá trị** — giá trị
+> trôi, quan hệ thì không; muốn số thì chạy lệnh.
 >
-> | cặp | vì sao khác | cả hai đúng vì |
+> | hai cách đếm | khác nhau ở | quan hệ bất biến |
 > |---|---|---|
-> | **100** tệp lease / **110** blob | khử trùng theo **đường dẫn** vs theo **(blob, đường dẫn)** | 10 lease bị sửa nội dung trên nhánh khác ⇒ hai phiên bản đếm hai |
-> | **10** lease còn hạn / **25** lease còn hạn | lọc theo `write_set` chạm `ops/lease_publish*` vs **toàn kho** | lease `*-review-*` còn hạn nhưng `write_set` không chứa hai tệp ấy |
-> | **42** ca / **39** ca | `^def t[0-9]+` vs `^def t[0-9]+_` | ba ca hậu tố chữ (`t02b_` `t02c_` `t02d_`); **42** là số ca thật chạy |
-> | **159** ref / **160** ref | `ls-remote` (máy chủ) vs `for-each-ref` (bộ đệm cục bộ) | ref cục bộ do harness dựng, chưa đẩy — **lệch nghĩa là chưa đồng bộ, phải xem lệch CHIỀU NÀO trước khi kết luận thiếu** |
+> | tệp lease vs **blob** lease | khử trùng theo **đường dẫn** vs theo **(blob, đường dẫn)** | `blob ≥ tệp`. Chênh = **số phiên bản THỪA**, KHÔNG phải số tệp bị sửa — một tệp có 5 phiên bản đóng góp 4 vào chênh |
+> | lease còn hạn **chạm `write_set`** vs **toàn kho** | lọc theo `write_set` có `ops/lease_publish*` vs không lọc | tập con ⊂ tập cha. Lease `*-review-*` thường còn hạn mà `write_set` không chứa hai tệp ấy |
+> | ca test `^def t[0-9]+` vs `^def t[0-9]+_` | mẫu đòi `_` **ngay sau số** ⇒ loại ca hậu tố chữ (`t02b_` `t02c_` `t02d_`) | mẫu không `_` **≥** mẫu có `_`. Bộ test duyệt `for fn in CA`, nên **mẫu không `_` là số ca thật chạy** |
+> | ref `ls-remote` vs `for-each-ref` | hỏi **máy chủ** vs đọc **bộ đệm cục bộ** | không có quan hệ cố định — **lệch chiều nào cũng có nghĩa riêng**: máy chủ nhiều hơn ⇒ tôi thiếu, phải fetch; cục bộ nhiều hơn ⇒ có ref chưa đẩy. Lệch ⇒ `KHÔNG_ĐO_ĐƯỢC`, đừng kết luận |
+>
+> ```bash
+> # tệp vs blob, và ai là tệp nhiều phiên bản
+> for r in $(git for-each-ref --format='%(refname)' refs/remotes/origin/); do
+>   git ls-tree -r "$r" ops/leases/; done | awk '$4 ~ /\.ya?ml$/ {print $3, $4}' | sort -u \
+>   | awk '{print $2}' | sort | uniq -c | awk '$1>1'
+> #                     ^^^^ BẮT BUỘC: `uniq -c` chỉ đếm dòng LIỀN KỀ, mà `sort -u` ở trên sắp
+> #                     theo BLOB (cột 1) nên cùng đường dẫn không nằm cạnh nhau. Bỏ `sort` này
+> #                     thì lệnh vẫn `rc=0` và vẫn in ra thứ trông hợp lý — chỉ THIẾU phần lớn
+> #                     kết quả. Đã đo: bản thiếu `sort` ra 1 tệp, bản đủ ra 4.
+> ```
+>
+> *Hàng đầu bảng này từng ghi **"N lease bị sửa nội dung"** — **sai đơn vị**: chênh đếm **phiên bản
+> thừa**, và số tệp thật nhỏ hơn nhiều. Câu sai ấy nằm **ngay trong bảng cảnh báo về đơn vị đếm**;
+> phiên `session_0174Ls` bắt, `tra-luat-3a` xác nhận bằng phép đo độc lập. Chốt "trích kèm đơn vị"
+> khó giữ hơn là nó nghe.*
+>
+> **Một manh mối rơi ra từ phép đo ấy, chưa ai xử:** có tệp lease tồn tại ở **năm** phiên bản nội dung
+> khác nhau trên các nhánh (`plat-x5-review-2-claude-20260820.yaml`). Một lease bị viết lại nhiều lần
+> **sau khi đã mang số lượt** không khớp mô hình lease (cấp một lần · neo băm · hết hạn). Có thể lành
+> — rebase, cherry-pick, sửa trước khi đăng — nhưng **chưa cổng nào phân biệt "sửa TRƯỚC khi đăng"
+> với "sửa SAU khi đăng"**, trong khi `lease_publish.py` đã có `RC_DA_DANG` chặn đăng trùng: bài toán
+> mới được nghĩ tới một nửa. Nợ này do phiên `tra-luat-3a` ghi vào `ops/NO_KY_THUAT.md`, **không
+> thuộc packet này** — nêu ở đây vì nó chạm mô hình lease mà `PLAT-X8` đang dựng cổng cho.
 >
 > ## Mười ba chỗ đã sai — không phải sáu
 >
@@ -262,7 +287,8 @@ mà **nội dung yêu cầu vẫn không đổi một chữ** — thứ trôi l�
 | 3e | `ce14fb0b75e4…` | thêm chỗ thứ 13 (`ADR-0045`: lease `codex` cho packet `sensitive` là ngoại lệ CÓ ĐIỀU KIỆN) — hết hiệu lực khi chỗ 12 bị đo lại |
 | 3f | `497c68360de7…` | SỬA chỗ 12: `29 trường / 21 tệp` → **`2/2`** — con số cũ là tạo tác của **clone NÔNG**, không phải SHA giả; mệnh đề *"chỗ 12 chạm §9"* cũng sai (`reviewed_sha_required` **44/44** tồn tại). Cộng: nền đo → `195a478d`, va chạm → **3** lease tới `23-08T15:00Z`, bài học **0**. Hết hiệu lực ở cross-review lượt 2 |
 | 3g | `f3a2f5595120…` | vá 3 finding cross-review lượt 2 — nặng nhất: bản 3e khai một **cổng KHÔNG TỒN TẠI**, nay là preflight thủ công |
-| 3h | bản này | **Ba đính chính từ hai phiên khác.** (a) Tiêu đề bảng trong hộp ghi *"mười một chỗ"* trong khi bảng có 12 hàng + chỗ 13 — **tiêu đề là dòng đọc trước tiên**, ai đếm theo nó bỏ đúng hai chỗ mới nhất (`session_0174Ls` bắt). (b) Câu *"`--depth` không cắt số ref"* đúng cơ chế nhưng **sai kết cục** — `--depth` kéo theo `--single-branch`, nên clone `--depth` trần VẪN mất ref; tách thành hai hỏng, hai cách chữa (`tra-luat-3a` bắt, kèm phản chứng clone). (c) Thêm bảng **ĐƠN VỊ** cho bốn cặp số dễ đọc thành mâu thuẫn |
+| 3h | `3c9bff4f5410…` | ba đính chính từ hai phiên khác: tiêu đề bảng đếm sai, câu `--depth` sai kết cục, thêm bảng ĐƠN VỊ |
+| 3i | bản này | **Bảng ĐƠN VỊ tự phạm lỗi đơn vị, và lệnh đo trong nó CHẠY SAI.** (a) Hàng đầu ghi *"N lease bị sửa nội dung"* — chênh đếm **phiên bản thừa**, không phải số tệp; đo thật: **4** tệp / **14** phiên bản. (b) Bảng chép **giá trị**, mà giá trị trôi trong một giờ ⇒ bỏ hết giá trị, giữ **quan hệ bất biến** + lệnh đo. (c) Lệnh đo tôi viết **thiếu một `sort`** nên `uniq -c` chỉ đếm dòng liền kề — vẫn `rc=0`, vẫn in ra thứ trông hợp lý, mà **thiếu 3/4 kết quả**; chỉ lộ vì đã trích nguyên văn từ spec ra chạy. (d) Nêu manh mối `plat-x5-review-2` có **năm** phiên bản — nợ do `tra-luat-3a` ghi, ngoài packet này |
 
 Bốn phát hiện trên **một** đường là dấu hiệu sai ở QUYẾT ĐỊNH GỐC chứ không ở các bản vá. Các bản
 trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm bản dùng được.

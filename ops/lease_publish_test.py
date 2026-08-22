@@ -2303,6 +2303,7 @@ ge=pathlib.Path(os.environ['GITHUB_ENV']); snap=ge.read_text() if ge.is_file() e
 d['snapshots'].append([lease,snap]); p.write_text(json.dumps(d))
 if lease==os.environ.get('POST_HONG'): print('POST hong',file=sys.stderr); raise SystemExit(42)
 ds=d['comments']; ds.append({'id':9000+len(ds),'body':body,'lease':lease}); p.write_text(json.dumps(d))
+if lease=='giua' and os.environ.get('GUARD_HONG')=='post_rc': print(ds[-1]['id']); raise SystemExit(1)
 print('khong-phai-so' if lease=='giua' and os.environ.get('GUARD_HONG')=='case_id' else ds[-1]['id'])
 """, encoding="utf-8")
         for ten in ("dau", "giua", "cuoi"):
@@ -2334,7 +2335,7 @@ print('khong-phai-so' if lease=='giua' and os.environ.get('GUARD_HONG')=='case_i
                           (goc / "ops" / "leases" / f"{x}.yaml").read_text(encoding="utf-8")
                           for x in ("dau", "giua", "cuoi")},
                 "snapshots": dict(d["snapshots"]),
-                "env": ghe.read_text(encoding="utf-8") if ghe.exists() else "",
+                "env": ghe.read_text(encoding="utf-8") if ghe.is_file() else "",
                 "calls": [x.split()[:2] for x in log.read_text(encoding="utf-8").splitlines()],
                 "out": p.stdout + p.stderr}
 
@@ -2478,32 +2479,30 @@ def t63_check_rc9_bo_qua_lease_va_buoc_XANH():
 VE_TRUOC_POST = ("khong_POST", "khong_quan_sat_ghi_nguoc_sau_guard")
 VE_SAU_POST = ("co_POST", "khong_the_quan_sat_vang_POST")
 SO_GUARD_DANG = {
-    r'''python3 "$NEO/ops/lease_publish.py" kiem-github "$tep" --root .''': ("kiem-github", VE_TRUOC_POST),
-    r'''python3 "$NEO/ops/lease_publish.py" check "$tep" --root .''': ("check", VE_TRUOC_POST),
-    r'''ISSUE=$(python3 -c "import sys,yaml;print(yaml.safe_load(open(sys.argv[1],encoding='utf-8'))['packet_issue'])" "$tep")''': ("packet_issue", VE_TRUOC_POST),
-    r'''python3 "$NEO/ops/lease_publish.py" body "$tep" > than.md''': ("body", VE_TRUOC_POST),
-    r'''python3 -c "import json,sys;print(json.dumps({'body':open('than.md',encoding='utf-8').read()}))" > payload.json''': ("payload", VE_TRUOC_POST),
-    r'''ID=$(gh api "repos/$REPO/issues/$ISSUE/comments" --input payload.json --jq .id)''': ("case_id", VE_SAU_POST),
-    r'''python3 "$NEO/ops/lease_publish.py" mark "$tep" --comment-id "$ID"''': ("mark", VE_SAU_POST),
-    r'''echo "DA_DOI=1" >> "$GITHUB_ENV"''': ("github_env", VE_SAU_POST),
+    r'''bao_chan "hai lớp GitHub chặn (rc=$rc)"''': ("kiem-github", VE_TRUOC_POST),
+    r'''bao_chan "cổng chặn (rc=$rc)"''': ("check", VE_TRUOC_POST),
+    r'''bao_chan "không đọc được packet_issue (rc=$rc)"''': ("packet_issue", VE_TRUOC_POST),
+    r'''bao_chan "không dựng được thân comment (rc=$rc)"''': ("body", VE_TRUOC_POST),
+    r'''bao_chan "không dựng được payload (rc=$rc)"''': ("payload", VE_TRUOC_POST),
+    r'''bao_chan "đăng comment hỏng (rc=$rc)"''': ("post_rc", VE_SAU_POST),
+    r'''bao_chan "gh không trả về comment id: $ID"''': ("case_id", VE_SAU_POST),
+    r'''bao_chan "không ghi được comment id (rc=$rc)"''': ("mark", VE_SAU_POST),
+    r'''bao_chan "không ghi được GITHUB_ENV (rc=$rc)"''': ("github_env", VE_SAU_POST),
 }
 
 
 def _guard_dan_xuat(than=None) -> set[str]:
     than = _buoc_workflow("đăng")["run"] if than is None else than
-    bat = len(re.findall(r"(?m)^[ \t]*set \+e[ \t]*$", than))
-    khoi = re.findall(
-        r"(?ms)^[ \t]*set \+e[ \t]*\n(.*?)^[ \t]*rc=\$\?[ \t]*\n^[ \t]*set -e[ \t]*$", than)
-    bang(bat > 0 and len(khoi) == bat,
-         f"không phân tích kín guard: set+e={bat}, khối={len(khoi)}")
-    tap = {re.sub(r"[ \t\r\n]+", " ", x).strip() for x in khoi}
-    bang(len(tap) == bat, f"guard rỗng hoặc trùng: {tap}")
+    bao = re.findall(r"(?<![\w])bao_chan(?![\w(])", than)
+    goi = [x.rstrip() for x in re.findall(r"(?m)(?<![\w])bao_chan[ \t]+[^;\n]+", than)]
+    tap = set(goi)
+    bang(bao and len(bao) == len(goi) == len(tap), f"không phân tích kín bao_chan: {goi}")
     return tap
 
 
 def _ve_dan_xuat(than=None) -> dict:
     than = _buoc_workflow("đăng")["run"] if than is None else than
-    post = next(x for x in SO_GUARD_DANG if x.startswith("ID=$(gh api "))
+    post = next(x for x in than.splitlines() if x.strip().startswith("ID=$(gh api "))
     return {x: VE_TRUOC_POST if than.index(x) < than.index(post) else VE_SAU_POST
             for x in SO_GUARD_DANG}
 
@@ -2522,12 +2521,18 @@ def t65_bo_trich_rong_hoac_hong_phai_DO():
         except AssertionError:
             continue
         bang(False, f"bộ trích fail-open với {than!r}")
+    try:
+        _ve_dan_xuat(_buoc_workflow("đăng")["run"].replace("ID=$(gh api ", "ID=$( gh api ", 1))
+    except (StopIteration, ValueError):
+        pass
+    else:
+        bang(False, "bộ dẫn xuất vế fail-open khi không tìm được POST")
 
 
 @ca
 def t66_moi_guard_co_phan_chung_va_ve_theo_vi_tri():
     than, ve = _buoc_workflow("đăng")["run"], _ve_dan_xuat()
-    mark = next(x for x in SO_GUARD_DANG if " mark " in x)
+    mark = next(x for x, (loi, _) in SO_GUARD_DANG.items() if loi == "mark")
     for guard, (loi, _) in SO_GUARD_DANG.items():
         kq = _chay_buoc_dang(guard_hong=loi)
         co_post, da_mark = ve[guard] == VE_SAU_POST, than.index(guard) > than.index(mark)
@@ -2542,6 +2547,13 @@ def t67_ve_khang_dinh_phai_khop_vi_tri_dan_xuat_tu_YAML():
     bang(all(dan_xuat[x] == ve for x, (_, ve) in SO_GUARD_DANG.items()),
          f"vế đăng ký lệch vị trí YAML: "
          f"{[(loi, dan_xuat[x], ve) for x, (loi, ve) in SO_GUARD_DANG.items() if dan_xuat[x] != ve]}")
+
+
+@ca
+def t68_post_rc_hong_khong_duoc_mark():
+    kq = _chay_buoc_dang(guard_hong="post_rc")
+    bang(kq["rc"] == 1 and kq["posts"].count("giua") == 1
+         and not kq["marks"]["giua"], f"POST rc=1 bị mark: {kq}")
 
 
 def main() -> int:

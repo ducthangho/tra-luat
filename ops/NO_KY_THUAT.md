@@ -998,3 +998,70 @@ actions_list  method=list_workflow_jobs  resource_id=<run id> -> đọc conclusi
 trông y hệt `success` với 31/31 nếu chỉ nhìn "0 hỏng". Đừng kết luận từ `check_suite`, và đừng kết luận
 từ số bước hỏng. Máy chưa canh được mục này; nó là kỷ luật đọc, cùng họ với *"hỏi chỗ tiện tay thay vì
 hỏi chỗ kết luận được ghi"*.
+
+---
+
+## 18. `CHOT-CHONG-DANG-TRUNG-DOC-DAU-THEO-NHANH` — cùng một lease đã đăng BỐN lần
+
+Đo 22-08-2026 trên 160 ref, `yaml.safe_load`, fail-close. Trong **90** lease có `posted_comment_id`,
+có **3** lease mang **nhiều id KHÁC NHAU** — tức đã đăng nhiều lần:
+
+```
+4 lan  plat-x5-review-2-claude-20260820.yaml     5363965965 · 5364175428 · 5364489524 · 5364816383
+3 lan  plat-x5-exec-1r4-codex-20260821.yaml
+2 lan  plat-x5-review-3-claude-20260821.yaml
+```
+
+**9 lượt đăng cho 3 lease ⇒ 6 lượt thừa.** Bản trên `master` (`5fb8fb48`) là bản mang id của lượt
+**thứ tư**.
+
+**Điều khoản lease KHÔNG bị sửa** — đây là chỗ dễ kết luận vội, và bản đầu của mục này đã đặt sai tên
+(`LEASE-DOI-NOI-DUNG-SAU-KHI-CAP`) trước khi đo. `diff` giữa hai phiên bản bất kỳ chỉ ra **đúng một dòng**:
+
+```
+< posted_comment_id: 5363965965   # workflow ghi, ĐỪNG sửa tay
+> posted_comment_id: 5364816383   # workflow ghi, ĐỪNG sửa tay
+```
+
+Bản `a81ed083` (trên `ops/verdict-x5-review-2`) **không có** dòng ấy — đó là bản trước khi đăng. Nên
+hiện tượng không phải *"lease bị viết lại"* mà là *"biên nhận đăng bị ghi nhiều lần, mỗi lần vào một
+nhánh khác"*.
+
+**Cơ chế, đọc thẳng từ mã trên `master`** (`ops/lease_publish.py:236-241`):
+
+```python
+# Idempotent trước tiên: workflow bị chạy lại (retry, re-run tay, push lại
+# cùng commit) KHÔNG được đăng trùng một lease.
+if lease.get("posted_comment_id"):
+    raise Chan(RC_DA_DANG, ...)
+```
+
+Chốt đọc dấu **từ bản lease trong cây đang chạy**. Mà lease sống **theo nhánh**, và bước ghi ngược chỉ
+ghi vào **nhánh đã đăng** — nên một bản sao trên nhánh khác không có dấu, chốt cho qua, và nó đăng lại.
+**Chốt là per-branch, không phải toàn cục.** Chú thích ngay tại chỗ đã tự khai phạm vi hẹp ấy: nó chỉ kể
+`retry`, `re-run tay`, `push lại cùng commit` — cả ba đều là **cùng một nhánh**. Ca "bản sao trên nhánh
+khác" chưa từng nằm trong thiết kế, nên đây là **lỗ phạm vi**, không phải lỗi lập trình.
+
+Cùng gốc với `SO-LEASE-KHONG-NAM-MOT-CHO` (§ trong `CLAUDE.md`) nhưng khác trục: nợ kia nói *lease nằm
+đâu ta không thấy hết*; mục này nói **cái DẤU chống trùng cũng nằm rải theo nhánh y như vậy**. Một chốt
+idempotent mà trạng thái của nó bị nhân bản theo nhánh thì không idempotent.
+
+**CHƯA ĐO, đừng chế ra:** (a) sáu lượt thừa ấy có gây hại thật không — chưa đếm số comment thực tế trên
+PR đích, và chưa biết lượt sau có ghi đè lượt trước không; (b) phạm vi `#238` (`LEASE-DANG-WINDOWS`) có
+chạm cơ chế này không — `#227` đã land rồi bị revert bởi `#237`, nên không suy được từ đặc tả đã có;
+(c) ba lease dính đều là `plat-x5-*` cộng một `ag-t0-01b` chỉ có một id — chưa rõ vì `PLAT-X5` chạy
+nhiều lượt review hơn hay vì nhánh của nó bị fan-out rộng hơn.
+
+**Muốn chặn thì dấu phải rời khỏi tệp per-branch:** hoặc hỏi nơi chỉ có MỘT bản (chính comment trên
+GitHub, hoặc registry), hoặc quét mọi ref tìm `lease_id` trước khi đăng. Cách thứ hai lại đụng đúng
+`SO-LEASE-KHONG-NAM-MOT-CHO`, nên hai nợ này nên được giải cùng nhau chứ không lần lượt.
+
+Tái lập:
+
+```
+git for-each-ref --format='%(refname)' refs/remotes/origin   # PHAI fetch du truoc, xem CLAUDE.md
+git ls-tree -r <ref> -- ops/leases/                          # gom (blob, duong dan)
+# yaml.safe_load tung blob, gom posted_comment_id theo TEN TEP, dem id phan biet > 1
+```
+
+Máy chưa canh được mục này — chưa có cổng nào so biên nhận đăng giữa các nhánh.

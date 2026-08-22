@@ -46,10 +46,9 @@ def thay(ws: Path, tep: str, cu: str, moi: str):
 
 
 def khoi_phuc(ws: Path):
-    subprocess.run(["git", "checkout", "--", RELEASE], cwd=str(ws), capture_output=True)
-    shutil.copy2(GOC / CHECK, ws / CHECK)
-    for d in (ws / "scripts").rglob("__pycache__"):  # .pyc cu => ca sau chay MA CU
-        shutil.rmtree(d, ignore_errors=True)
+    subprocess.run(["git", "clean", "-fdq"], cwd=str(ws), capture_output=True)
+    subprocess.run(["git", "checkout", "-f", "--", "."], cwd=str(ws), capture_output=True)
+    shutil.copy2(GOC / CHECK, ws / CHECK)   # `clean` cung don `.pyc` cu: ca sau chay MA CU
 
 
 @ca
@@ -102,6 +101,25 @@ def n4_ops_van_doc_lap(ws):
     assert '"ops": "doc_lap"' not in out, f"bao_gio_cung_phu_thuoc ma n4 khong doi: {out}"
     rc, out = chay(ws, "--kiem-bam")
     assert rc == 0, f"dot bien n4 lam --kiem-bam do => no khong chi giet n4: {out}"
+
+
+@ca
+def n5_nhom_tep_thanh_thu_muc_thi_do(ws):
+    """Hai luat loai tru khac PHAM VI. `_release_should_include` khop basename cua CHINH tep,
+    nen THU MUC ten `CLAUDE.md` khong loai duoc hau due — `CLAUDE.md/x.txt` vao goi that,
+    trong khi bang van khai `doc_lap` (codex bat, #251)."""
+    (p := ws / "CLAUDE.md").unlink()
+    p.mkdir()
+    (p / "lot-vao-goi.txt").write_text("x", encoding="utf-8")
+    rc, out = chay(ws, "--kiem-bam")
+    assert rc != 0, f"nhom tep thanh thu muc ma cong van xanh: {out}"
+    assert "CLAUDE.md" in out, f"thong diep khong neu ten nhom: {out}"
+    rc, out = chay(ws, "--bang")
+    assert '"CLAUDE.md": "phu_thuoc"' in out, f"bang van khai doc_lap cho cay do: {out}"
+    # lop hai: go dung chot vua do => ca phai tro lai xanh, chung minh ca do CHOT DO.
+    thay(ws, CHECK, 'p.name in ten_tep and (goc / d).is_file()', "p.name in ten_tep")
+    rc, out = chay(ws, "--kiem-bam")
+    assert rc == 0, f"go chot is_file ma ca khong doi => ca do thu khac: {out}"
 
 
 def main() -> int:

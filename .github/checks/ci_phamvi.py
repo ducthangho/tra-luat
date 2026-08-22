@@ -51,8 +51,20 @@ def loai_tru_tu_ma(goc: Path):
         ten_tep = set(R._RELEASE_EXCLUDE_NAMES_ANYWHERE)
     except Exception:
         return None          # nap hong => KHONG duoc im lang coi nhu "khong loai tru gi"
-    return {n for n, d in NHOM.items()
-            if Path(d).parts[0] in thu_muc or Path(d).name in ten_tep}
+    # Hai luat loai tru KHONG phu cung mot pham vi, nen khong duoc gop lam mot phep OR:
+    #   ten THU MUC (`_RELEASE_EXCLUDE_DIRS`)  -> phu ca cay con
+    #   BASENAME (`_RELEASE_EXCLUDE_NAMES_ANYWHERE`) -> chi phu DUNG tep do
+    # `_release_should_include` khop basename cua CHINH tep, nen mot THU MUC ten `CLAUDE.md`
+    # KHONG loai duoc hau due: `CLAUDE.md/x.txt` vao goi that (codex bat, #251). Vi vay nhom
+    # duoc loai theo basename chi tinh la ngoai goi khi tren dia no DUNG la mot tep.
+    ra = set()
+    for n, d in NHOM.items():
+        p = Path(d)
+        if p.parts[0] in thu_muc:
+            ra.add(n)
+        elif p.name in ten_tep and (goc / d).is_file():
+            ra.add(n)
+    return ra
 
 
 def phan_loai(nhom: str, ngoai_goi) -> str:

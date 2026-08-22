@@ -1,0 +1,132 @@
+# Lease EXECUTOR — `LEASE-DANG-WINDOWS` (#238), lượt 2 — neo đặc tả r2.
+#
+# THAY lease lượt 1 (neo r1, CHƯA CHẠY lần nào). r1 cấm bỏ qua theo nền; r2 đảo lại, nên lease
+# lượt 1 nay trỏ vào một luật đã bị thay — không dùng nó.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 238
+packet_id: LEASE-DANG-WINDOWS
+phase_key: LEASE-DANG-WINDOWS
+revision: 2
+generation: 1
+lease_id: lease-dang-windows-exec-2-codex-20260822
+
+thay_the_lease:
+  lease_id: lease-dang-windows-exec-1-codex-20260822
+  vi_sao: >-
+    Lease lượt 1 neo `r1`, nơi Q3 CẤM bỏ qua theo nền. `r2` thay Q3 bằng Q3' (phạm vi nền DẪN
+    XUẤT từ `runs-on`). Lease lượt 1 CHƯA CHẠY lần nào, nên không có việc dở dang.
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+
+spec_path: ops/specs/LEASE-DANG-WINDOWS-r2.md
+spec_sha256_required: d9da7705617c95c8dc394d773de8456712d3cc2a2975e5903e8cb28c934c0d83
+spec_ke_thua:
+  - {path: ops/specs/LEASE-DANG-WINDOWS.md, sha256: f555cbe1a368c12040726dd706ce25ed8dd4041bd8a2f840590810a3c3908a26}
+spec_note: >-
+  r2 THAY Q3 của r1. Mọi thứ r2 không nêu thì r1 nguyên hiệu lực.
+
+khoi_phuc_tu: ba82b06f9df81fc2f13786fec590ec2110d046b7
+khoi_phuc_ghi_chu: >-
+  Ba tệp mã của #227 bị #237 hoàn nguyên khỏi master vì CI ĐỎ trên Windows. Khôi phục là thao tác
+  CƠ HỌC (chúng đã qua bốn lượt cross-review) nên KHÔNG tính vào ngân sách.
+
+nguon_quyet_dinh:
+  ai: 'người giữ kho ducthangho, in-session 22-08-2026'
+  duong: 'chuyển qua phiên session_018YdsqSNdxorwxVYW2d2PkH (PR #233): "(3) giao cho phiên #227"'
+  da_kiem: >-
+    Phiên điều phối kiểm lại BỐN phép đo của tin ấy. Cốt lõi ĐÚNG (ops-publish-lease.yml khai
+    runs-on: ubuntu-latest; bộ test chạy matrix). HAI phép đo SAI, đã ghi vào r2: "0 chốt theo
+    nền" (đo lại được 7) và "revert mất 5909 dòng" (revert đã THU HẸP; 46 tệp +5259 còn nguyên).
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 90
+  don_vi: 'dòng THÊM theo `git diff --numstat ba82b06f..HEAD` — phần MỚI, không tính phần khôi phục'
+  ghi_chu: 'r2/Q7 nới 60 -> 90 vì Q3'' đòi một phép DẪN XUẤT + ba ca meta, đắt hơn một danh sách.'
+
+branch: codex/lease-dang-windows-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: 2ab3560a8a406c1b436221fb3c6d23234aefdde0
+base_sha: 2ab3560a8a406c1b436221fb3c6d23234aefdde0
+start_from_sha: 2ab3560a8a406c1b436221fb3c6d23234aefdde0
+base_ghi_chu: >-
+  master = 2ab3560a, ĐÃ XÁC NHẬN XANH: run 32554713709, total_jobs 2 (ubuntu + windows),
+  failed_jobs 0.
+
+prompt_path: ops/prompts/lease-dang-windows-exec-2-codex-20260822.md
+prompt_sha256_required: 2bafcdc46aa95b4eb3a6ed5a1477b337b8662b7438aeb2b113e9b8b574f6448c
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-22 ("cap lease moi neo r2 roi phong codex luon")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_note: >-
+  Phiên điều phối là bên ĐÃ MERGE #227 mà không gọi workflow_dispatch — nguyên nhân trực tiếp của
+  sự cố packet này đi sửa. Và r1 do chính nó viết đã CẤM đúng cách chữa; r2 sửa lại. Reviewer soi
+  ĐẶC TẢ trước, bản vá sau.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-22T11:00:00Z'
+lease_expires_at_utc: '2026-08-23T11:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 3
+executor_calls_limit: 6
+
+reviewer_provider: claude
+review_rounds_limit: 3
+review_calls_limit: 4
+
+muc_tieu:
+  - 'Khôi phục ba tệp mã từ ba82b06f (CƠ HỌC)'
+  - "Q3': phạm vi nền DẪN XUẤT từ `runs-on` của workflow mà ca ấy đo — KHÔNG danh sách viết tay"
+  - 'Q6: t49 phải VÁ THẬT (nó đo mối nối GOI_GH, không phải artefact ubuntu-only) — CẤM bỏ qua'
+  - 'W1/W2: mọi chỗ đọc tệp do đồ giả sinh phải báo lỗi KÈM rc + stdout + stderr'
+
+gate_bat_buoc:
+  - 'python3 ops/lease_publish_test.py -> rc=0, N/N hai số BẰNG NHAU, >= 72 ca'
+  - 'CÙNG suite với ba biến GitHub đặt và `gh` VẮNG -> N/N y hệt'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'shellcheck PHẢI CÓ MẶT khi chạy actionlint; thiếu ⇒ in KHÔNG ĐO ĐƯỢC và ĐỎ'
+  - 'W6 (đổi runs-on thành matrix có windows ⇒ tám ca PHẢI chạy trở lại) giết 1/1'
+  - 'W7 (bỏ qua một ca mà workflow của nó KHÔNG ubuntu-only ⇒ ĐỎ) giết 1/1'
+  - 'W8 (ca bị bỏ qua phải IN RA lý do kèm runs-on) giết 1/1'
+  - 'đột biến bỏ đính kèm rc/stdout/stderr PHẢI ĐỎ'
+  - 'M1-M4, A5, D3/D4, tám đột biến gỡ guard của #227 VẪN phải giết'
+  - 'git diff --numstat ba82b06f..HEAD -> <= 3 tệp, <= 90 dòng thêm'
+
+nghiem_thu_THAT_nam_ngoai_sandbox:
+  gi: "W3' — lượt workflow_dispatch THẬT, job windows-latest XANH trên exact head"
+  ai_chay: 'phiên điều phối (executor KHÔNG gọi được workflow_dispatch từ sandbox)'
+  ghi_chu: >-
+    Suite xanh trong sandbox CHƯA PHẢI bằng chứng — #227 đã có bốn lượt xanh như thế rồi vẫn đỏ
+    ở CI. Bằng chứng phải nêu run_id, head_sha, kết luận TỪNG job.
+
+khong_duoc_dung:
+  - "bỏ qua theo nền NGOÀI điều kiện Q3' — đặc biệt t49"
+  - 'hai finding của verdict #227 lượt 5 — chúng ở #235'
+  - 'ops/specs/**'
+
+dieu_kien_dung:
+  - 'Ngân sách sẽ vượt 90 dòng thêm hoặc 3 tệp ⇒ DỪNG, xuất handoff'
+  - 'Hình dạng A lần 8 · B lần 3 · C lần 2 · D lần 4 · E lần 3 · F lần 3 ⇒ DỪNG, không vá'
+  - "Thấy mình sắp bỏ qua một ca mà KHÔNG dẫn xuất được lý do từ `runs-on` ⇒ DỪNG. Đó là cửa sau mà Q3' sinh ra để chặn."

@@ -71,6 +71,81 @@ prompt phải **cấm đọc ra ngoài thư mục đó**: một lượt chạy p
 transcript phiên, 40 phút không ra kết luận. `workspace-write` để nó tự đột biến bản sao mà không
 chạm kho thật.
 
+### Mirror trong sandbox — khi §8 đòi năng lực đo
+
+§8 quy định KHI NÀO phải cấp và VÌ SAO; đây chỉ là cú pháp dựng. Đặt mirror **BÊN TRONG** sandbox để
+ràng buộc "cấm đọc ra ngoài" ở trên vẫn giữ nguyên:
+
+```bash
+R=<sandbox>
+git clone --quiet --bare --no-local <kho> "$R/kho.git"
+git -C "$R/kho.git" fetch --quiet <kho> '+refs/remotes/origin/*:refs/heads/*'   # nap DU ref
+git clone --quiet "$R/kho.git" "$R/cay-kho"
+git -C "$R/cay-kho" fetch --quiet origin '+refs/heads/*:refs/remotes/origin/*'
+git -C "$R/cay-kho" config core.abbrev 7        # BAT BUOC — xem duoi
+git -C "$R/cay-kho" checkout --quiet <reviewed_sha>
+```
+
+**Ghim `core.abbrev 7` không phải tuỳ chọn.** Clone sạch có kích thước khác cây gốc nên git tự chọn
+độ viết tắt khác, và cổng của kho đọc giá trị ấy. Đo được ở lượt review đầu tiên dùng cơ chế này
+(PR #252): không ghim ⇒ `git rev-parse --short` trả **8** ⇒ `doc-claims-check --strict` biến năm SHA
+dài 8 ký tự từ *advisory* thành **cờ cứng** ⇒ `rc=2`, reviewer báo "cổng bắt buộc không xanh" trong
+khi cây gốc `rc=0`. Ghim rồi ⇒ `rc=0`.
+
+**Đối chiếu cổng TRƯỚC khi giao sandbox** — §8 đòi điều này, và nó rẻ:
+
+```bash
+cd "$R/cay-kho" && python3 scripts/tl.py doc-claims-check --strict; echo "sandbox rc=$?"
+cd <kho>        && python3 scripts/tl.py doc-claims-check --strict; echo "goc    rc=$?"
+```
+
+Hai mã thoát lệch ⇒ **lỗi sandbox** cho tới khi chứng minh ngược lại; đừng giao một mirror chưa đối
+chiếu, vì mọi finding về cổng từ nó đều đáng ngờ.
+
+Kiểm nhanh mirror có đủ ref không (cùng phép so hai nguồn của `CLAUDE.md`):
+
+```bash
+git -C "$R/cay-kho" rev-parse --is-shallow-repository        # phai la false
+git -C "$R/cay-kho" ls-remote --heads origin | wc -l         # so nhanh
+```
+
+`ls-remote` ở đây hỏi mirror cục bộ, không hỏi GitHub — nên nói thẳng trong `EVIDENCE.md` rằng trạng
+thái GitHub trực tiếp là `KHÔNG ĐO ĐƯỢC` từ sandbox, kẻo reviewer kết luận từ một ảnh chụp.
+
+## Khung `VERDICT.md` bắt reviewer sinh ra
+
+§8 quy định mục nào bắt buộc; đây là khung để dán vào `PROMPT.md`:
+
+```
+verdict: approved | changes_requested
+reviewed_sha: <sha>
+
+## ĐỐI CHIẾU LƯỢT TRƯỚC        <- BO QUA o luot 1; BAT BUOC tu luot 2
+- <slug luot truoc>: ĐÃ VÁ THẬT | VÁ HỜ | VÁ SINH LỖI MỚI | CHƯA VÁ — <bang chung TU DO>
+
+## BẢNG ĐO                      <- moi con so da do, KE CA cai khop
+| khẳng định | PR khai | đo được | khớp? |
+
+### <slug>  [P1|P2|P3]  <tieu de mot dong>
+TỆP/DÒNG:
+VẤN ĐỀ:
+ĐÃ THỬ VÁ: có/không — <mo ta>
+ĐÃ THỬ NGHIỆM: <lenh + ket qua, hoac KHÔNG ĐO ĐƯỢC + ly do>
+ĐỘ TIN: cao/vừa/thấp
+```
+
+Bảng đo **chỉ liệt kê cái lệch là bảng giấu công** — đòi cả cái khớp.
+
+**Gói vá: đòi CÂY ĐÃ SỬA, đừng đòi diff.** Đo trên bốn lượt của PR #250 và một lượt của #252: định
+dạng diff hỏng **2/5 lượt** (đường dẫn hai chiều bất đối xứng ⇒ `patch` từ chối cả gói; hoặc reviewer
+sửa thẳng vào cây nên diff đọc thành "đã áp"). Thứ dùng được cả năm lượt là **tệp trong `cay/`**. Nếu
+vẫn muốn diff thì bắt sinh đối xứng và tự kiểm:
+
+```bash
+diff -u --label a/cay/<tep> --label b/cay/<tep> <ban goc> cay/<tep>
+patch --dry-run -p1 -d <cay tam chua BAN GOC> < GOI_Y_VA.diff   # ghi ma thoat vao VERDICT.md
+```
+
 ## GHI VERDICT LÊN PR — bắt buộc, đây là nơi verdict sống
 
 ```bash

@@ -184,13 +184,32 @@ trường nào trong tệp lease nói ra điều đó, và **trạng thái Issue
 > | 1 | `grep -rl plat-x8 ops/leases/` | chỉ quét **cây đang checkout** ⇒ **âm tính giả** — mù đúng chỗ lease sống |
 > | 2 | quét mọi ref, khớp **tên tệp** | lease đã merge/hết hạn vẫn tính là sống ⇒ **dương tính giả VĨNH VIỄN**, chặn luôn việc của phiên sau |
 > | 3 | thêm phân loại `CON_HAN`/`HET_HAN`/`KHONG_XAC_DINH` | in **đúng chữ** `KHONG_XAC_DINH` nhưng `\|\| echo` nuốt mã thoát ⇒ **`rc=0`**. Fail-**OPEN** trong chính cái chốt viết ra để fail-**CLOSE** |
+> | 4 | vòng lặp qua **mọi ref**, hợp thể | trả **RỖNG** — trong khi **từng mảnh chạy đúng** khi tách rời (ref có · `git show` được · so ngày đúng). Hợp lại thì không ra gì |
+> | 5 | `sed 's/.*: *//'` để lấy giá trị | `.*` **tham lam**, mà giá trị **có dấu hai chấm**: `'2026-08-23T11:00:00Z'` bị cắt còn `00Z`. So chuỗi `"00Z" > "2026-08-22T…"` ra `het_han` ⇒ **ÂM TÍNH GIẢ TRÊN LEASE ĐANG SỐNG** |
 >
 > Phản chứng cho lượt 3, chạy được: YAML hỏng ⇒ in `KHONG_XAC_DINH parse: …` mà **`rc` của cả khối
 > = 0**. Lượt ấy tôi còn khai *"đã chạy thật"* — nhưng tôi thử **đoạn python đơn lẻ** (`rc=2`), không
 > thử **khối đã ship**. Thử sai đơn vị rồi khai composite chạy được.
 >
-> **Ba lần cùng một chỗ ⇒ theo doctrine đếm hình dạng, câu hỏi đúng không còn là *"vá thế nào"* mà là
-> *"có nên làm việc này không"*.** Tiền lệ của kho: bộ tự ghi lại `~/.codex/config.toml` ăn **bảy**
+> **Phản chứng cho lượt 5, chạy được:** dòng thật là `lease_expires_at_utc: '2026-08-23T11:00:00Z'`;
+> qua `sed` còn `00Z`. Hai lease `LEASE-DANG-WINDOWS` **đang sống** bị báo là hết hạn ⇒ bộ quét trả
+> *"cấp lease được"* cho câu hỏi mà đáp án đúng là *"không"*. Tin nó thì đã đổi băm đặc tả **dưới
+> chân một generation đang chạy** — đúng tai nạn mà nợ `SO-LEASE-KHONG-NAM-MOT-CHO` sinh ra để chặn.
+> Đo đúng bằng `yaml.safe_load` ⇒ cả hai `CON_HAN`.
+>
+> **Và triệu chứng của lượt 5 ĐÃ HIỆN RA TRONG OUTPUT CỦA CHÍNH TÔI** — một bảng trước đó in
+> `hết=00Z'`, kèm cả dấu nháy thừa, cho **bốn** dòng liền. Tôi đọc lướt qua. Đó là bài học khác
+> hẳn bốn cái kia: không phải lỗi thiết kế, mà là **không nhìn thứ mình vừa in ra**.
+>
+> **NĂM lần cùng một chỗ ⇒ theo doctrine đếm hình dạng, câu hỏi đúng không còn là *"vá thế nào"* mà
+> là *"có nên làm việc này không"*.** Bản đầu của mục này ghi **BA** — đó là số đúng lúc viết, và
+> hai lượt hỏng nữa xuất hiện **SAU khi tệp này đã merge**. Sửa con số vì nó là **lập luận chịu
+> tải**: ngưỡng doctrine là ba, nên *"ba"* dễ đọc thành *"vừa đủ chạm ngưỡng"*, trong khi sự thật
+> là **vá tới lần thứ ba vẫn chưa chạm đáy**.
+>
+> **Bốn và năm nặng hơn ba cái đầu, không nhẹ hơn.** Ba cái đầu hỏng **ồn ào** — chặn oan, in sai
+> chữ, sai mã thoát. Lượt 5 hỏng **im lặng và đúng chiều nguy hiểm**. Lượt 4 thì bác luôn cách tự
+> trấn an: **thử THÀNH PHẦN không phải thử HỢP THỂ** — mọi mảnh xanh mà hợp thể vẫn rỗng. Tiền lệ của kho: bộ tự ghi lại `~/.codex/config.toml` ăn **bảy**
 > phát hiện qua **bốn** lượt vá, và lời giải cuối cùng là **thôi làm việc đó** — *"cả lớp rủi ro chết
 > theo KIẾN TRÚC, không theo bản vá"*.
 >

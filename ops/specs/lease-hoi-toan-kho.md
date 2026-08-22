@@ -125,6 +125,22 @@ có **1**, tức **chặn nhầm** một packet hợp lệ.
 qua nhầm; lần này phép đo **rộng hơn** sự thật và chặn nhầm. Cùng một gốc — *đếm bản ghi thay vì đếm
 thẩm quyền*.
 
+**Trường này MỚI TINH, và chính nợ của packet này đẻ ra nó.** `da_bi_thay_the` xuất hiện lần đầu ở
+`0d35e44` (22-08-2026, lease `PLAT-X8` revision 2), mang `schema_version: 2`, và lý do nó tồn tại nằm
+nguyên văn trong tệp lease: chốt chống đăng trùng của `ops/lease_publish.py` trả `rc=9` cho một
+`lease_id` đã có `posted_comment_id`, **nên executor không sửa được tệp lease cũ — phải đúc `lease_id`
+mới** rồi đánh dấu cái cũ đã chết. Tức: khuyết tật `M3` sinh ra vòng xoay id, vòng xoay id thổi phồng
+số lease, và `da_bi_thay_the` là miếng vá thủ công cho hệ quả ấy. Packet này chạm **cả hai đầu** của
+cùng một dây chuyền — sửa `M3` sẽ làm vòng xoay thưa đi, nhưng **không** làm `A2c` thừa: lease đã đúc
+rồi thì vẫn nằm đó.
+
+**Hệ quả cho người thi hành, phải đọc trước khi cài `A2c`:** đây là **quy ước đang hình thành**, không
+phải lược đồ ổn định — **4/120** blob mang nó, tất cả đúc trong cùng một ngày, tất cả bởi **một** packet.
+Vậy nên `ai-dang-giu` **không được** coi *vắng `da_bi_thay_the`* là bằng chứng *"còn hiệu lực"*: tuyệt
+đại đa số lease trong kho vắng nó vì trường chưa tồn tại lúc chúng được đúc, chứ không phải vì chúng
+còn sống. Đọc trường ấy chỉ được phép **thu hẹp** tập người giữ, không bao giờ **mở rộng** — đúng chiều
+fail-close.
+
 **Vì sao chuyện này lọt qua ba lượt review:** `ngoai_pham_vi` gạt `da_bi_thay_the` ra cùng rổ với
 `thay_the_lease`/`tiep_tuc_lease`, lấy lý do *"trỏ NGƯỢC, đọc xuôi không suy ra được"*. Đo thật thì **hai
 họ trỏ ngược chiều nhau**: `r5.thay_the_lease = r4` (mới → cũ, muốn biết `r4` chết chưa phải quét cả kho),
@@ -210,3 +226,8 @@ khai" — đúng loại việc đẻ ra hình dạng A.
 4. **8 lease `LEASE-DANG-*` "đã tiêu" không tự khai điều đó.** Kết luận ấy dựng bằng tay từ hiện vật trên
    master (`kiem_github` = 1, bộ test 73 ca). Không trường nào trong tệp lease nói ra, và trạng thái Issue
    cũng không.
+5. **`da_bi_thay_the` chưa được chuẩn hoá ở đâu cả.** Quét `docs/` · `.claude/skills/` · `ops/lease_publish.py`
+   ⇒ **0** lần nhắc; nó chỉ tồn tại trong 4 tệp lease do `PLAT-X8` đúc, mang `schema_version: 2`. Nên chưa
+   đo được: quy ước này sẽ được protocol thu nhận, hay sẽ chết cùng packet ấy. `A2c` vì thế đọc trường theo
+   chiều **thu hẹp** tập người giữ (xem lý do ở `A2c`); nếu protocol sau này chuẩn hoá nó thì tiêu chí không
+   phải sửa, chỉ mạnh thêm.

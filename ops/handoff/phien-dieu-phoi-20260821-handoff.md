@@ -12,19 +12,30 @@ của packet nào, nên bản này **không** theo schema §7 (`ops/handoff/wp55
 ## 1. Neo — đọc bằng BĂM, không bằng tên nhánh
 
 ```yaml
+# MỌI trường dưới đây đo CÙNG MỘT LÚC, trên CÙNG MỘT commit. Đừng vá lẻ từng trường.
+do_luc: '2026-08-22'
 nhanh: claude/opus-5-plan-steps-y5r6ci
-commit: 38c2123
-base: 3db588c                      # = origin/master lúc phiên kết thúc
-diff_so_master: 1 tệp, +205 dòng   # chỉ ops/specs/plat-x8.md
+commit: 7c19850                    # commit CHỨA băm spec ghi bên dưới
+base: a5bfe07                      # = origin/master lúc đo
+diff_so_master: xem PR 230           # con số này chết ở MỌI commit kế tiếp — đừng ghi cứng,
+                                     # đo sống: git diff origin/master...HEAD --shortstat
 
 spec_path: ops/specs/plat-x8.md
 spec_sha256: 308d0cf44fc1fcca75bc4d8edb014f560293622334ef25cc621c1e7afe3b2129   # BẢN 3b (bản 3 + hộp cảnh báo)
-spec_da_kiem_tren_ban_DA_DEN: true   # git cat-file -p origin/<nhánh>:… | sha256sum
+spec_da_kiem_tren_ban_DA_DEN: true   # git cat-file -p origin/<nhánh>:ops/specs/plat-x8.md | sha256sum
 
 packet_issue: 225
 lease: CHUA CAP
 pr: 230                            # https://github.com/ducthangho/tra-luat/pull/230
 ```
+
+> **P1 cross-review bắt được (PR #230, `chatgpt-codex-connector`) — khối neo trên từng TỰ MÂU THUẪN.**
+> Nó khai `commit: 38c2123` cạnh `spec_sha256: 308d0cf4…`, nhưng băm của `ops/specs/plat-x8.md`
+> **tại** `38c2123` là `9cb54a2e…` (bản 1). Đo thêm thì **ba** trường chết chứ không phải một:
+> `commit`, `base`, `diff_so_master`. Nguyên nhân: mỗi lượt sửa chỉ vá **đúng trường vừa được
+> nhắc tới** thay vì đo lại cả khối — nên `spec_sha256` luôn mới còn các trường quanh nó ở lại
+> quá khứ. Mỉa mai đúng chỗ: trường khai `spec_da_kiem_tren_ban_DA_DEN: true` nằm trong chính
+> khối không được đo lại. **Khối neo là MỘT phép đo, không phải một danh sách trường.**
 
 > **CẬP NHẬT 22-08-2026 — đặc tả đã ĐÓNG BĂNG LẠI HAI LẦN sau khi bản bàn giao này viết xong.**
 > Hai lượt cross-review (`codex`) ra **bốn P1**, cả bốn đánh vào **một** đường: kế thừa lớp cho lease

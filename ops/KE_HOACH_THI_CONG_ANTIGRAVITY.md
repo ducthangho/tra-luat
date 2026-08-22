@@ -217,7 +217,7 @@ assurance: same_provider_approved
 
 ### Packet 3C (`AG-T0-01C` — Antigravity Plan & Lean AGENTS Pointer)
 - **Write-Set:** `AGENTS.md`, `ops/KE_HOACH_THI_CONG_ANTIGRAVITY.md`
-- **Tệp này ĐÃ BỊ CHẠM ngoài packet, 22-08-2026:** hai dòng (`:59`, `:216`) đổi `PLAT-X6` → `PLAT-X7` sau khi Issue `#220` đổi định danh. Chỉ sửa TÊN packet, số Issue giữ nguyên; không dòng nào khác đổi. Ghi ở đây vì `AG-T0-01C` khai tệp này trong Write-Set và chưa có lease — nên nó KHÔNG phải người đầu tiên chạm tệp.
+- **Sửa ngoài packet, 22-08-2026 — HỒ SƠ, không phải cảnh báo cho việc sắp tới.** Hai dòng (`:59`, `:216`) đổi `PLAT-X6` → `PLAT-X7` sau khi Issue `#220` đổi định danh; chỉ sửa TÊN packet, số Issue giữ nguyên, không dòng nào khác đổi. `AG-T0-01C` **đã land** (commit `4095a78`, merge `9fa9a05`) nên Write-Set trên là **lịch sử**, không phải quyền ghi đang chờ — xem §6 đầu mục. Bản đầu của dòng này viết *"chưa có lease"* và **sai tiền đề**: cross-review bắt (P2 trên PR #230), đo lại thì cả hai commit đều là tổ tiên của HEAD.
 - **Yêu cầu kỹ thuật:** Đồng bộ bản `AGENTS.md` tinh gọn (lean pointer) và kế hoạch thi công bán tĩnh vào repo, chạy `doc-claims-check` và `release-verify` sạch 100%.
 
 ### Packet 4 (`AG-T0-03` — Argparse Parser-Tree Coverage Report)

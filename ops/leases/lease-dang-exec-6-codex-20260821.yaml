@@ -1,0 +1,130 @@
+# Lease EXECUTOR — `LEASE-DANG-DUNG-MOT-LAN` (#227), lượt 6. Neo head xuất phát b32b4241.
+#
+# OVERRIDE THỨ BA đối với một chốt DỪNG đăng ký trước. Xem `phan_xu_chot_dung`.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 227
+packet_id: LEASE-DANG-DUNG-MOT-LAN
+phase_key: LEASE-DANG-DUNG-MOT-LAN
+revision: 6
+generation: 1
+lease_id: lease-dang-exec-6-codex-20260821
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+
+spec_path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r6.md
+spec_sha256_required: 4ee67d54b5504c0b303dad3bf8470c912ad754e6bcda42e8cb4a2866475ba181
+spec_ke_thua:
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r5.md, sha256: 2c8fb5c68e45dbdcd3e21c316169623d4dcab33459934b575ae8c626b08cb796}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r4.md, sha256: abe7c292aba05aa772b77c246a570d72c9b8e97220247030ae15af8f750d0fce}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r3.md, sha256: c65d5dbd9d2b398978226f6863cf7cd4e4ddb219a7086be0005e65804a0f47da}
+  - {path: ops/specs/LEASE-DANG-DUNG-MOT-LAN-r2.md, sha256: 3f310582de59dce7c109717dbab13ef9467b80c67ffeafc0ac8e1484309e0093}
+
+handoff_phai_doc:
+  path: ops/handoff/lease-dang-exec-4-codex-handoff.md
+  sha256: dfada28511f0b63e4922b98fa08b55cb03d57f28faccfb9709b227e316c291b7
+
+phan_xu_chot_dung:
+  chot_da_dang_ky: 'r5: hình dạng D lần thứ 3 ⇒ DỪNG, không vá'
+  su_kien: >-
+    T66 của r5 đòi MỌI guard khẳng định "lease đó không POST", nhưng ĐO ĐƯỢC trên b32b4241: ba
+    trong tám guard (case ID · mark · ghi $GITHUB_ENV) nằm SAU lời gọi POST ⇒ vế ấy BẤT KHẢ THI.
+    Executor DỪNG, từ chối lách bằng đồ giả sai trạng thái, từ chối tuyên đóng (sẽ là A lần 7),
+    và hoàn nguyên sạch (remote vẫn b32b4241, worktree 0 mục bẩn).
+  hinh_dang: 'D lần 3 — trục MỚI: sai PHA THỜI GIAN (tên do executor đặt), khác hai lần trước vốn sai ĐỘ PHÂN GIẢI'
+  quyet_dinh: 'cấp lượt 6 — mở rộng Q25 đến cùng: dẫn xuất luôn VẾ KHẲNG ĐỊNH, đặc tả thôi liệt kê'
+  can_cu: >-
+    Ba lần D đều là "đặc tả liệt kê từ bên ngoài", và CẢ BA đều do phiên điều phối. Lượt 5 đã
+    chứng minh đường thoát: cái gì máy dẫn xuất được từ YAML thì đừng để người liệt kê. r5 mới áp
+    nguyên tắc ấy cho DANH SÁCH GUARD; r6 áp nốt cho VẾ KHẲNG ĐỊNH.
+  khai_thang: >-
+    OVERRIDE THỨ BA. Ghi nguyên trạng, không làm tròn. Đây cũng là lần thứ HAI liên tiếp một chốt
+    đăng ký trước CHẠY THẬT và được executor tôn trọng — cơ chế hoạt động; thứ hỏng là đặc tả.
+  bang_chung_kien_truc_r5_CHAY: >-
+    Trên bản thử nghiệm của executor (đã hoàn nguyên): M1 (thêm guard vào YAML không đăng ký) ⇒
+    65/66 ĐỎ t64 — PHÉP THỬ QUYẾT ĐỊNH ĐẠT; M2, M3 cùng chết; cả sáu đột biến gỡ guard giết t66;
+    hai tập guard bằng nhau, 8 mục; không mutant đa sát. Ý tưởng Q25 ĐÚNG.
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 660
+  don_vi: 'tệp trong write_set · dòng THÊM theo `git diff --numstat cfaccff9..HEAD`'
+  con_lai_uoc_tinh: 119
+  ghi_chu: 'Head b32b4241 đang +541. Người giữ kho nới 620 -> 660 (Q31). Vượt ⇒ DỪNG + handoff (§2).'
+
+branch: codex/lease-dang-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: b32b424165c4a952661cf776bf953d91a7eaf814
+base_sha: cfaccff9bb373274552042e01edb4bfee81dc0ed
+start_from_sha: b32b424165c4a952661cf776bf953d91a7eaf814
+
+prompt_path: ops/prompts/lease-dang-exec-6-codex-20260821.md
+prompt_sha256_required: 12d3497d7d66deaad3e3e8a31085089f36d495856cde4ecb3fd6a96ac77bf9ce
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-21 ("Luot 6: dan xuat luon VE KHANG DINH")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_note: >-
+  Phiên điều phối soạn cả sáu bản đặc tả và là tác giả của CẢ BA lần hình dạng D. Reviewer lượt 6
+  phải soi ĐẶC TẢ trước — đặc biệt là chỗ r6 CỐ Ý KHÔNG liệt kê vế khẳng định: nếu việc không
+  liệt kê ấy lại sinh ra một lỗ khác thì đó là D lần 4 dưới lớp áo mới.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-22T01:00:00Z'
+lease_expires_at_utc: '2026-08-23T01:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 5
+attempts_limit: 6
+executor_calls_limit: 12
+executor_calls_used_truoc_luot_nay: 5
+
+reviewer_provider: claude
+review_rounds_limit: 6
+review_rounds_used_truoc_luot_nay: 3
+review_calls_limit: 7
+review_calls_used_truoc_luot_nay: 3
+
+muc_tieu:
+  - "T66': mỗi guard có ca THẬT; vế CHUNG (lease khác vẫn xử · BI_CHAN · mã thoát bước) + vế PHỤ THUỘC VỊ TRÍ do EXECUTOR dẫn xuất"
+  - 'T67: vị trí guard phải DẪN XUẤT TỪ YAML — M4 (dời guard qua bên kia POST, giữ nguyên vế) PHẢI ĐỎ'
+  - 'KHAI cửa sổ "POST xong, mark hỏng" vào chua_do_duoc — che bởi kiem-github rc=9, KHÔNG đóng'
+
+gate_bat_buoc:
+  - 'python3 ops/lease_publish_test.py -> rc=0, N/N hai số BẰNG NHAU, >= 67 ca'
+  - 'CÙNG suite với ba biến GitHub đặt và `gh` VẮNG -> N/N y hệt'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'M1 (thêm guard vào YAML không đăng ký) PHẢI ĐỎ'
+  - 'M2 (xoá mục khỏi sổ) và M3 (bộ trích trả []) PHẢI ĐỎ'
+  - 'M4 (dời guard qua bên kia POST, giữ nguyên vế) PHẢI ĐỎ — PHÉP THỬ QUYẾT ĐỊNH'
+  - 'gỡ TỪNG guard trong tám guard -> ca của guard đó PHẢI ĐỎ (mark/body/GITHUB_ENV hiện sống sót 63/63)'
+  - 'git diff --numstat cfaccff9..HEAD -> <= 3 tệp, <= 660 dòng thêm'
+
+khong_duoc_dung:
+  - 'KHÔNG đổi thứ tự lệnh trong thân bước `đăng`, KHÔNG thêm rollback, KHÔNG thêm preflight — cửa sổ "POST xong, mark hỏng" là THUỘC TÍNH của thiết kế hiện hành; vá nó là đổi sản phẩm giữa một packet đang đo sản phẩm ấy'
+  - 'ops/specs/** · _doc_gh / _kiem_loai_so_hieu / _kiem_comment_da_co (nhánh Q24 xếp "một phần") · finding đã đóng · khe race · nợ nền chay(env=None)'
+
+dieu_kien_dung:
+  - 'Ngân sách sẽ vượt 660 dòng thêm hoặc 3 tệp ⇒ DỪNG, xuất handoff'
+  - 'Hình dạng A lần 7 · B lần 3 · C lần 2 · D lần 4 ⇒ DỪNG, không vá'
+  - 'M4 KHÔNG giết được T67 ⇒ DỪNG — vị trí đang ghi cứng, tức chỉ DỜI chỗ ghi cứng chứ không bỏ nó, D lần 4 dưới lớp áo mới'
+  - 'Một vế khẳng định BẤT KHẢ THI ở guard nào ⇒ KHAI ra và DỪNG ca đó, KHÔNG lách bằng đồ giả sai trạng thái (executor đã làm đúng điều này ở lượt 5)'
+posted_comment_id: 5377493515   # workflow ghi, ĐỪNG sửa tay

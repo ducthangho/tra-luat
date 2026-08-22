@@ -31,7 +31,22 @@
 > `LEASE-DANG-WINDOWS`. Bản 3d/3e ghi *"hai lease… tới 11:00Z"*: thiếu `exec-3`, vì lúc quét nó
 > chưa được đẩy. **Riêng ba lease `LEASE-DANG-WINDOWS` đã đủ đỏ** — không cần phân loại bảy cái kia.
 >
-> ## Mười một chỗ đã sai — không phải sáu
+> **Trích số thì trích kèm ĐƠN VỊ SINH RA NÓ** — ba cặp số dưới đây đều là hai phép đo ĐÚNG cạnh
+> nhau, và cặp nào cũng đọc thành mâu thuẫn nếu bỏ mẫu số:
+>
+> | cặp | vì sao khác | cả hai đúng vì |
+> |---|---|---|
+> | **100** tệp lease / **110** blob | khử trùng theo **đường dẫn** vs theo **(blob, đường dẫn)** | 10 lease bị sửa nội dung trên nhánh khác ⇒ hai phiên bản đếm hai |
+> | **10** lease còn hạn / **25** lease còn hạn | lọc theo `write_set` chạm `ops/lease_publish*` vs **toàn kho** | lease `*-review-*` còn hạn nhưng `write_set` không chứa hai tệp ấy |
+> | **42** ca / **39** ca | `^def t[0-9]+` vs `^def t[0-9]+_` | ba ca hậu tố chữ (`t02b_` `t02c_` `t02d_`); **42** là số ca thật chạy |
+> | **159** ref / **160** ref | `ls-remote` (máy chủ) vs `for-each-ref` (bộ đệm cục bộ) | ref cục bộ do harness dựng, chưa đẩy — **lệch nghĩa là chưa đồng bộ, phải xem lệch CHIỀU NÀO trước khi kết luận thiếu** |
+>
+> ## Mười ba chỗ đã sai — không phải sáu
+>
+> *(Bảng dưới đánh số 1–12; chỗ **13** ở khối riêng cuối hộp vì nó chạm điều kiện cấp lease, không
+> phải một con số. Tiêu đề này từng ghi "mười một" — dấu vết của lượt trước chưa theo kịp lúc thêm
+> hàng 12, và **tiêu đề là dòng người ta đọc trước tiên**, nên ai đếm theo nó sẽ bỏ đúng hai chỗ mới
+> nhất. Phiên `session_0174Ls` bắt được.)*
 >
 > | # | chỗ | đang ghi | sự thật đo được trên `195a478d`, clone ĐẦY ĐỦ |
 > |---|---|---|---|
@@ -94,7 +109,7 @@
 >
 > **2. Tôi tự loại giả thuyết ấy — và loại SAI.** Bản 3d ghi *"'chưa fetch đủ' — fetch **toàn bộ**
 > `refs/heads/*`: 158 ref + 35 tag. Số **không đổi**."* Câu ấy đúng về **ref** và vô nghĩa về **lịch
-> sử**: `--depth` cắt độ sâu, không cắt số ref, nên fetch thêm ref không kéo về commit cũ nào. **Đủ
+> sử**: fetch thêm ref không kéo về commit cũ nào. **Đủ
 > REF không phải đủ LỊCH SỬ.** Phép đo duy nhất phân biệt được là `git rev-parse
 > --is-shallow-repository`, và bản 3d chưa từng chạy nó.
 >
@@ -180,8 +195,18 @@
 > 0. **`git cat-file -e` NÓI DỐI trên clone NÔNG, và không có gì cảnh báo.** Container đo bản 3d có
 >    `is-shallow-repository = true`; nông cắt **lịch sử**, nên `cat-file` trả "không có" cho SHA hợp
 >    lệ. Nó đẻ ra con số **29** ở chỗ 12 (thật là **2**) và mệnh đề sai *"chỗ 12 chạm §9"*. Fetch
->    thêm **ref** không cứu — `--depth` cắt độ sâu chứ không cắt số ref, nên *"đã fetch 158 ref"*
->    là phép đo **sai đối tượng**. Chốt: đo `git rev-parse --is-shallow-repository` TRƯỚC mọi kết
+>    thêm **ref** không cứu ca của tôi, vì ca của tôi là **thiếu LỊCH SỬ** chứ không thiếu ref, nên
+>    *"đã fetch 158 ref"* là phép đo **sai đối tượng**.
+>
+>    **Đừng rút câu ấy thành luật chung — `--depth` CŨNG cắt ref, chỉ là gián tiếp.** Phản chứng do
+>    `tra-luat-3a` chạy thật: `git clone --depth=1` cho refspec `+refs/heads/<MỘT-NHÁNH>` (2 ref),
+>    còn `--depth=1 --no-single-branch` cho `+refs/heads/*` (3 ref) — **cùng `shallow=true`, chỉ khác
+>    refspec**. Tức `--depth` **kéo theo `--single-branch`**, và chính cái đó cắt ref. Kho của tôi
+>    thoát chỉ vì tôi fetch `+refs/heads/*` tường minh; đó là ngoại lệ, không phải luật.
+>
+>    **Hai hỏng, hai cách chữa:** độ sâu bị cắt ⇒ hỏng `cat-file -e` và `merge-base`, chữa bằng
+>    `--unshallow`; refspec bị siết ⇒ hỏng `for-each-ref`, chữa bằng refspec rộng **và** một lượt
+>    fetch thật. Chốt: đo `git rev-parse --is-shallow-repository` TRƯỚC mọi kết
 >    luận dạng *"không tồn tại"*; `true` ⇒ `git fetch --unshallow` rồi mới đo; in **cả** số ref
 >    **và** trạng thái shallow cạnh kết luận. Phiên `tra-luat-3a` chỉ ra bẫy này.
 >
@@ -236,7 +261,8 @@ mà **nội dung yêu cầu vẫn không đổi một chữ** — thứ trôi l�
 | 3d | `f7f8e6209e4f…` | thêm chỗ thứ 12 — **nhưng với con số SAI** (`29` trường / `21` lease; thật là `2`/`2`, xem `3f`) và một mệnh đề sai (*"chạm §9"*). Cả hai do clone NÔNG |
 | 3e | `ce14fb0b75e4…` | thêm chỗ thứ 13 (`ADR-0045`: lease `codex` cho packet `sensitive` là ngoại lệ CÓ ĐIỀU KIỆN) — hết hiệu lực khi chỗ 12 bị đo lại |
 | 3f | `497c68360de7…` | SỬA chỗ 12: `29 trường / 21 tệp` → **`2/2`** — con số cũ là tạo tác của **clone NÔNG**, không phải SHA giả; mệnh đề *"chỗ 12 chạm §9"* cũng sai (`reviewed_sha_required` **44/44** tồn tại). Cộng: nền đo → `195a478d`, va chạm → **3** lease tới `23-08T15:00Z`, bài học **0**. Hết hiệu lực ở cross-review lượt 2 |
-| 3g | bản này | **Vá 3 finding của cross-review lượt 2.** Nặng nhất: bản 3e khai *"thiếu khối ngoại lệ ⇒ thoát khác 0"* — **cổng ấy KHÔNG TỒN TẠI** (`lease_publish.py` có 0 chỗ nhắc `review_class`/`0045`; §20 xếp `ADR-0045` là `0 cổng`), nên đổi thành **preflight THỦ CÔNG**. Cộng: bảng task prompt → `3f`/mười ba/`15:00Z`; handoff ghi `#230` đã merge; bài học 0 thêm phép so **hai nguồn** (`ls-remote` vs `for-each-ref`) vì `--is-shallow-repository` một mình chưa đủ |
+| 3g | `f3a2f5595120…` | vá 3 finding cross-review lượt 2 — nặng nhất: bản 3e khai một **cổng KHÔNG TỒN TẠI**, nay là preflight thủ công |
+| 3h | bản này | **Ba đính chính từ hai phiên khác.** (a) Tiêu đề bảng trong hộp ghi *"mười một chỗ"* trong khi bảng có 12 hàng + chỗ 13 — **tiêu đề là dòng đọc trước tiên**, ai đếm theo nó bỏ đúng hai chỗ mới nhất (`session_0174Ls` bắt). (b) Câu *"`--depth` không cắt số ref"* đúng cơ chế nhưng **sai kết cục** — `--depth` kéo theo `--single-branch`, nên clone `--depth` trần VẪN mất ref; tách thành hai hỏng, hai cách chữa (`tra-luat-3a` bắt, kèm phản chứng clone). (c) Thêm bảng **ĐƠN VỊ** cho bốn cặp số dễ đọc thành mâu thuẫn |
 
 Bốn phát hiện trên **một** đường là dấu hiệu sai ở QUYẾT ĐỊNH GỐC chứ không ở các bản vá. Các bản
 trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm bản dùng được.

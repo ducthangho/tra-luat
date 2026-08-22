@@ -86,3 +86,4 @@ canh_bao_cho_reviewer: >-
   đi ấy CÓ THẬT hay chỉ DỜI CHỖ GHI CỨNG — tấn công phép dẫn xuất vị trí (POST nhận diện bằng gì?
   hai lời gọi giống POST? chú thích chứa `gh api`? chiều ngược của M4?) và phép trích guard (hình
   dạng guard khác: `set +e` cùng dòng · `|| rc=$?` · `if ! cmd` · guard trong hàm shell).
+posted_comment_id: 5377612439   # workflow ghi, ĐỪNG sửa tay

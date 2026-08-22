@@ -2705,9 +2705,11 @@ def t76_A4_reviewer_khai_thap_phai_bi_CHAN():
 @ca
 def t77_A5_planned_duoc_cat_truoc_khi_tra_bang():
     mod = _nap_cong()
-    thuong = mod._tinh_lop_tu_write_set(["ops/chay_lease_publish_test.sh"])
-    planned = mod._tinh_lop_tu_write_set(["planned:ops/chay_lease_publish_test.sh"])
-    bang(thuong == planned == "systemic",
+    duong = "tam/doi-chung-planned.txt"
+    mod._BANG_LOP = ((duong, "routine"),) + mod._BANG_LOP
+    thuong = mod._tinh_lop_tu_write_set([duong])
+    planned = mod._tinh_lop_tu_write_set([f"planned:{duong}"])
+    bang(thuong == planned,
          f"planned phân khác bản thật: {thuong!r} / {planned!r}")
 
 
@@ -2870,6 +2872,23 @@ def t85_schema_version_hong_container_phai_bi_CHAN():
             bang(ex.ma == RC_LOP, f"schema {gia_tri!r} sai rc={ex.ma}")
         else:
             raise AssertionError(f"schema container {gia_tri!r} vẫn qua")
+
+
+@ca
+def t86_moi_muc_bang_seed_deu_phai_sensitive():
+    mod = _nap_cong()
+    sai = [(duong, lop) for duong, lop in mod._BANG_LOP if lop != "sensitive"]
+    bang(not sai, f"bảng seed có mục ngoài lớp sensitive: {sai!r}")
+
+
+@ca
+def t87_ba_duong_van_hanh_phai_sensitive():
+    mod = _nap_cong()
+    for duong in ("ops/lease_publish_test.py",
+                  "ops/chay_lease_publish_test.sh",
+                  "docs/PROTOCOL_DA_PHIEN.md"):
+        lop = mod._tinh_lop_tu_write_set([duong])
+        bang(lop == "sensitive", f"{duong} bị hạ xuống {lop!r}")
 
 
 def main() -> int:

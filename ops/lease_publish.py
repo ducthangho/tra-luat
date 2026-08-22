@@ -60,10 +60,6 @@ _BANG_LOP = (
     (".claude/dev/gate_lifecycle.py", "sensitive"),
     ("ops/lease_publish.py", "sensitive"),
     ("scripts/tl_gws.py", "sensitive"),
-    ("docs/PROTOCOL_DA_PHIEN.md", "systemic"),
-    ("docs/adr/", "systemic"),
-    ("ops/lease_publish_test.py", "systemic"),
-    ("ops/chay_lease_publish_test.sh", "systemic"),
 )
 
 def GOI_GH(*doi_so):

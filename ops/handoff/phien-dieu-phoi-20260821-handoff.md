@@ -11,8 +11,14 @@ của packet nào, nên bản này **không** theo schema §7 (`ops/handoff/wp55
 
 ## 1. Neo — đọc bằng BĂM, không bằng tên nhánh
 
+> ⚠ **`spec_sha256` TRONG KHỐI DƯỚI ĐÂY ĐÃ HẾT HIỆU LỰC.** Đặc tả ra **bản 4** ngày 22-08, băm
+> `46d9a0299a09…`, và **lease đã cấp**. Khối neo còn hiệu lực là khối CUỐI CÙNG ở **cuối §1**,
+> dưới nhãn *CẬP NHẬT 2*. Có HAI khối CẬP NHẬT — lấy khối SAU.
+> Khối cũ giữ nguyên làm bằng chứng — đừng vá lẻ nó, đừng lấy băm từ nó.
+
 ```yaml
 # MỌI trường dưới đây đo CÙNG MỘT LÚC, trên CÙNG MỘT commit. Đừng vá lẻ từng trường.
+# HẾT HIỆU LỰC 22-08 — xem khối CẬP NHẬT ở cuối §1.
 do_luc: '2026-08-22'
 nhanh: claude/opus-5-plan-steps-y5r6ci
 commit_gioi_thieu_bam_spec: 7c19850   # KHÔNG phải head của nhánh. Đây là commit ĐẦU TIÊN mà
@@ -49,19 +55,88 @@ pr: 230                            # https://github.com/ducthangho/tra-luat/pull
 > | 1 | `9cb54a2e4e7c…` | 2 P1 lượt 1 — hết hiệu lực |
 > | 2 | `b88c53dfd211…` | 2 P1 lượt 2 — hết hiệu lực |
 > | 3 | `328a74facb84…` | hết hiệu lực khi dán hộp cảnh báo |
-> | 3b | `308d0cf44fc1…` | **bản dùng được** — bản 3 + hộp cảnh báo; nội dung yêu cầu không đổi |
+> | 3b | `308d0cf44fc1…` | bản dùng được **khi ấy**; hết hiệu lực 22-08 khi `#227` land **rồi bị revert** |
 >
 > Nghĩa là **§3 dưới đây đã lệch một phần**: Q1 không còn là quyết định đang có hiệu lực. Hai thứ
-> còn lại (cấp lease, nới bảng phân loại) vẫn chờ. Đọc **bản 3b** làm chuẩn — băm
+> còn lại (cấp lease, nới bảng phân loại) vẫn chờ. *(Đoạn này viết 22-08 sáng; **bản 3b nay cũng hết
+> hiệu lực** — chuẩn hiện tại là **bản 4** `46d9a0299a09…`, xem khối *CẬP NHẬT 2* cuối §1.)*
+> Đọc **bản 3b** làm chuẩn — băm
 > `308d0cf44fc1fcca75bc4d8edb014f560293622334ef25cc621c1e7afe3b2129`, đúng giá trị ở hàng
 > `spec_sha256` của khối neo trên; hai chỗ ấy phải luôn khớp nhau. **Bản 3 (`328a74facb84…`) đã
 > HẾT HIỆU LỰC** — đọc nó là bỏ qua hộp ⛔ ĐỪNG CẤP LEASE ở đầu đặc tả. Đừng đọc bản bàn giao này.
+
+> **CẬP NHẬT 1 (22-08-2026 sáng) — HẾT HIỆU LỰC, giữ làm bằng chứng. Khối đang dùng là *CẬP
+> NHẬT 2* ngay dưới.** `#227` LAND RỒI BỊ REVERT; đặc tả khi ấy ra bản 3i, chưa ra bản 4.
+> Khối neo ở đầu bản bàn giao này là ảnh chụp 21/22-08; bài học P1 ngay phía trên — *"khối neo là MỘT
+> phép đo, không phải một danh sách trường"* — nên đây đo lại **cả khối** thay vì vá lẻ:
+>
+> ```yaml
+> # Đo cùng lúc, 22-08-2026.
+> commit_gioi_thieu_bam_spec: 282c5fd   # commit ĐẦU TIÊN mang băm bản 3i
+> base: 195a478d                        # = origin/master lúc đo (sau PR #242)
+> spec_path: ops/specs/plat-x8.md
+> spec_sha256: ca852d95ab598de9f2fbbfcfaf3a4e0b3383540a9937e415fb13441fece0712c   # BẢN 3i
+> packet_issue: 225
+> lease: CHUA CAP — VA CHAM lease song cua #238, xem duoi
+> pr: 240                              # PR mang ban 3f. #230 DA MERGE (khong con mo)
+> ```
+>
+> | bản | băm | kết cục |
+> |---|---|---|
+> | 3b | `308d0cf44fc1…` | hết hiệu lực khi `#227` land rồi bị revert |
+> | 3c | `182ea7621d02…` | hộp ⛔ đổi điều kiện chờ sang `#238` — hết hiệu lực khi thêm chỗ thứ 12 |
+> | 3d | `f7f8e6209e4f…` | thêm chỗ thứ 12 (`reviewed_sha_required` kiểm HÌNH DẠNG, không kiểm TỒN TẠI) — hết hiệu lực khi thêm chỗ 13 |
+> | 3e | `ce14fb0b75e4…` | thêm chỗ thứ 13 (`ADR-0045`) — hết hiệu lực khi chỗ 12 bị đo lại |
+> | 3f | `497c68360de7…` | SỬA chỗ 12 (`29/21` → `2/2`, tạo tác clone NÔNG) — hết hiệu lực ở cross-review lượt 2 |
+> | 3g | `f3a2f5595120…` | vá 3 finding lượt 2; nặng nhất: bản 3e khai một **cổng KHÔNG TỒN TẠI** (`ADR-0045` là `0 cổng`) |
+> | 3h | `3c9bff4f5410…` | ba đính chính: tiêu đề bảng đếm sai, câu `--depth` sai kết cục, thêm bảng ĐƠN VỊ |
+> | 3i | `ca852d95ab59…` | HẾT HIỆU LỰC khi ra bản 4 — bảng ĐƠN VỊ tự phạm lỗi đơn vị (chênh đếm **phiên bản thừa**, không phải số tệp) và lệnh đo trong nó **chạy sai** vì thiếu một `sort`; nay bỏ hết giá trị, giữ **quan hệ bất biến** + lệnh đã chạy thật |
+>
+> **Vì sao KHÔNG ra bản 4.** `#227` merge 05:16:40Z (PR #234) ⇒ CI master **ĐỎ trên Windows**
+> (`gate(windows-latest)` 59/68) ⇒ revert PR #237, master **`2ab3560`**, bộ test về **42** ca. Land
+> lại là packet **`#238`**. Đóng băng bản 4 trên một nền đang đổi là dựng lại đúng bệnh của bản 3.
+>
+> **Chưa cấp lease được:** `lease-dang-windows-exec-1-codex-20260822` (packet `#238`, hết
+> `2026-08-23T10:00:00Z`, trên nhánh `ops/pkg-windows` chưa về master) giữ **đúng cả hai** tệp
+> `write_set` của `PLAT-X8`.
+>
+> **Một phép đo tự bác chính nó trong 20 phút, ghi lại vì nó rẻ và hay tái phát:** quét đủ **99** ref
+> lúc 05:2xZ ra *"0 lease chồng lấn"*; 20 phút sau nhánh thứ 99 xuất hiện mang đúng một lease chồng
+> lấn. Quét đủ ref là **cần**, không **đủ** — phải quét **ngay trước khi cấp**.
+
+> ⛔ **CÂU DƯỚI ĐÂY ĐÃ LẠC HẬU:** `PR #230` **ĐÃ MERGE** 22-08 (master `3f64167`). Giữ nguyên văn
+> làm bằng chứng; mọi chỉ dẫn *"chờ #230 merge"* trong mục này là **lịch sử**, không phải việc.
 
 **PR #230 đang mở** (mở 22-08-2026 theo yêu cầu người giữ kho) — xem trường `pr:` trong khối neo,
 và đọc lịch sử review của nó trước khi làm gì trên nhánh này. Nhánh đã đẩy, spec tra được bằng
 `git fetch origin claude/opus-5-plan-steps-y5r6ci`.
 
 ---
+
+> **CẬP NHẬT 2 — 22-08-2026 13:0xZ. BẢN 4, VẬT CẢN HẾT, LEASE ĐÃ CẤP. ĐÂY LÀ KHỐI ĐANG DÙNG.**
+> Lại đo **cả khối** một lượt, không vá lẻ khối trên — cùng lý do P1 đã ghi: khối neo là MỘT phép đo.
+>
+> ```yaml
+> # Do cung luc, 22-08-2026 ~13:0xZ.
+> base: 08bb4ecd6dbdb87267cb8179f52ac28c151eb4b9   # = origin/master luc do
+> spec_path: ops/specs/plat-x8.md
+> spec_sha256: 46d9a0299a0906b53af3eb023628eacadf37ce87d0b96debb36c84dae9f0277d   # BAN 4
+> packet_issue: 225
+> lease: plat-x8-exec-2-codex-20260822        # luot 2 — luot 1 (3c21bcd8) DA RUT
+> lease_executor: codex ; lease_reviewer: claude ; review_class: sensitive
+> pr: 240                                      # PR mang ban 4; #230 va #246 DA MERGE
+> ```
+>
+> **Vật cản đã hết — đo, không suy:** `#238` land `563e0eb8` lúc **11:58:18Z** (PR #246); hiện vật
+> trên master là `ops/lease_publish_test.py` **73** ca (t43–t68 của `#227` + t69–t73 mới). Quét
+> **13:01Z**: 162 ref **hai nguồn khớp**, 114 blob / 104 tệp lease, 22 lease chạm `ops/lease_publish*`,
+> **10 chưa hết hạn nhưng cả 10 thuộc hai packet ĐÃ LAND** ⇒ **0 lease còn hiệu lực**.
+>
+> **Ba câu ở CẬP NHẬT 1 nay đọc SAI, nêu thẳng:** *"chưa cấp lease được"* · *"lease của `#238` giữ
+> đúng cả hai tệp"* · *"KHÔNG ra bản 4"*. Cả ba đúng lúc viết, sai từ 11:58Z.
+>
+> ⚠ **Đừng dùng lại con số 13:01Z để cấp lease tiếp.** Nó tự hết hạn hai lần trong ba giờ trước đó.
+> Quét đủ ref là CẦN, không ĐỦ — quét lại NGAY TRƯỚC lúc cấp.
 
 ## 2. Phiên này đã làm gì
 
@@ -120,6 +195,19 @@ TRƯỚC khi cấp lease.
 ---
 
 ## 5. Thứ tự packet đã chốt — bốn thứ cùng đòi `ops/lease_publish*`
+
+> ⛔ **MỤC NÀY ĐÃ LẠC HẬU — ĐỌC CẢNH BÁO TRƯỚC KHI CẤP BẤT KỲ LEASE NÀO.** Giữ nguyên văn làm bằng
+> chứng; **đừng dùng làm căn cứ vận hành**. Hai câu dưới đây đã bị bác bằng phép đo 22-08:
+>
+> | mục 5 ghi | đo được 22-08 |
+> |---|---|
+> | thứ tự bắt đầu từ `PLAT-X8` | `#238` chen lên trước: **`#238` → `PLAT-X8` → `#209` → `PLAT-X7` → mục D** |
+> | *"**không lease nào** đang giữ `ops/lease_publish.py` hay `ops/lease_publish_test.py`"* | **SAI.** `lease-dang-windows-exec-1` và `-exec-2` (packet `#238`, hết `2026-08-23T10:00:00Z` và `11:00:00Z`, trên nhánh `ops/pkg-windows` chưa về master) giữ **đúng cả hai** tệp |
+> | *"mười lease từng chạm tệp test đều thuộc `PLAT-X4`/`PLAT-X5`/`SLICE-B-C`, đã land"* | đúng **khi ấy**; nay có thêm lease của `#227` và `#238` |
+>
+> Câu *"không lease nào đang giữ"* sai vì nó quét `ops/leases/` trên **cây đang checkout**, mà lease
+> sống nằm trên nhánh `ops/**` và chỉ về master **sau khi merge**. Xem khối CẬP NHẬT ở cuối §1 và
+> hộp ⛔ đầu `ops/specs/plat-x8.md`.
 
 ```
 PLAT-X8 (#225)  →  PLAT-X6 (#209)  →  PLAT-X7 (#220)  →  gói spec-gate (mục D, chưa mở Issue)

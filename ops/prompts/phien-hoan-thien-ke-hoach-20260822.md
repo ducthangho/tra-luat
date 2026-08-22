@@ -61,8 +61,8 @@ master** · write set · thứ tự · chặn ai.
 **Kiểm PR #229 TRƯỚC** — nó đang dựng `ops/HANG_DOI_PACKET.md` cho THỨ TỰ packet; đừng dựng chỗ thứ
 hai nói cùng chuyện.
 
-**C — Mục D tách thành mấy packet?** Đã tách: `review_class` → `PLAT-X8` (#225, spec bản 3b
-`308d0cf4…`, chưa lease) · cross-provider theo họ model → `PLAT-X7` (#220, proposed) · phần còn lại
+**C — Mục D tách thành mấy packet?** Đã tách: `review_class` → `PLAT-X8` (#225, spec bản **3i**
+`46d9a0299a09…`, **đã cấp lease** `plat-x8-exec-2-codex-20260822`) · cross-provider theo họ model → `PLAT-X7` (#220, proposed) · phần còn lại
 → *"mục D"*, chưa mở Issue. Cắt phần còn lại cho vừa trần ADR-0044 (`sensitive` ≤3 tệp / ≤300 dòng
 thêm) rồi trình người giữ kho.
 
@@ -84,8 +84,8 @@ thêm) rồi trình người giữ kho.
 
 | thứ | trạng thái |
 |---|---|
-| **PR #230** (`claude/opus-5-plan-steps-y5r6ci`) — đo phạm vi SỐNG: `git diff --name-only origin/master...HEAD \| wc -l`, đừng tin con số ghi cứng | con trỏ chết + hộp cảnh báo đặc tả PLAT-X8 + nợ mục 12. Chờ người giữ kho merge |
-| **PLAT-X8** (#225) | chờ #227 land rồi ra đặc tả **bản 4**; sáu chỗ phải sửa ghi sẵn trong hộp cảnh báo đầu `ops/specs/plat-x8.md` |
-| **#227** (`codex/lease-dang-exec-1`) | chưa có PR, chưa land |
+| ~~**PR #230**~~ | **ĐÃ MERGE** 22-08 (master `3f64167`). Dòng này giữ làm lịch sử |
+| **PLAT-X8** (#225) | **ĐANG CHẠY** — `#238` đã land 11:58:18Z 22-08 (PR #246, `563e0eb8`), vật cản hết. Đặc tả **bản 4** `46d9a0299a09…`; lease **`plat-x8-exec-2-codex-20260822`** đã cấp (executor `codex`, reviewer `claude`, khai **ngoại lệ `ADR-0045` §2** mà lượt 1 thiếu). Mười ba chỗ sai giữ trong hộp đầu đặc tả làm hồ sơ. **`ADR-0045` vẫn `0 cổng`** ⇒ preflight thủ công, không phải bằng chứng cổng dương tính. |
+| **#227** | **land rồi REVERT**: PR #234 merge 05:16:40Z ⇒ master ĐỎ Windows `59/68` ⇒ PR #237 hoàn nguyên ba tệp mã, giữ hồ sơ. Land lại là packet **`#238`** |
 
 Bắt đầu bằng **đo lại** bảng "Nền đã đo". Cái nào không tái lập được thì **nói ra**, đừng lặng lẽ dùng.

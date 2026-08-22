@@ -2136,6 +2136,116 @@ def case_adr_song_readme_duoc_tha(c: Ctx):
     if "1 ADR trên đĩa" not in _txt(o):
         raise AssertionError(f"README không được tính là ADR; được: {_txt(o)!r}")
 
+# --- (d3) adr-song: vùng KHÔNG RENDER và BIÊN của dạng tên tệp -----------------
+#
+# Sinh từ lượt cross-review THỨ HAI (codex, hai P2 trên PR #233, head `d17019628f`).
+# Cả hai đã tái hiện TRƯỚC khi vá: ba ca vùng-không-render đều trả `rc=0` trong khi
+# bảng RENDER ra không có dòng nào.
+
+_ADR_OK = "# ADR-0001 — ca thử\n\n- **Trạng thái:** Accepted (2026-08-22)\n"
+_H20 = "## 20. Quy tắc đang hiệu lực — bảng định tuyến ADR\n\n"
+_HDR = "| ADR | luật | trạng thái | cổng đã ĐO |\n|---|---|---|---|\n"
+_ROW = "| `ADR-0001` | luật | Accepted | 0 cổng |\n"
+
+
+def _repo_adr_tho(tmp: Path, ten, than_adr, than_proto, co_git=True):
+    """Dựng kho giả với THÂN TỆP nguyên văn — để đặt metadata vào vùng không render."""
+    r = tmp / f"repo_adrtho_{ten}"
+    d = r / "docs" / "adr"
+    d.mkdir(parents=True, exist_ok=True)
+    if co_git:
+        (r / ".git").mkdir(exist_ok=True)
+    (d / "0001-ca-thu.md").write_text(than_adr, encoding="utf-8", newline="\n")
+    (r / "docs" / "PROTOCOL_DA_PHIEN.md").write_text(
+        "# Protocol giả\n\n## 19. Mục trước\n\n" + than_proto, encoding="utf-8", newline="\n")
+    return r
+
+
+def case_adr_song_dong_bang_trong_khoi_ma_khong_tinh(c: Ctx):
+    """Dòng bảng chỉ nằm giữa ``` ``` ⇒ bảng RENDER ra không có nó ⇒ phải ĐỎ."""
+    r = _repo_adr_tho(c.tmp, "fence", _ADR_OK, _H20 + _HDR + "```\n" + _ROW + "```\n")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(9, rc, e, "dòng bảng trong khối mã KHÔNG phải metadata sống")
+
+
+def case_adr_song_dong_bang_trong_comment_html_khong_tinh(c: Ctx):
+    r = _repo_adr_tho(c.tmp, "cmt", _ADR_OK, _H20 + _HDR + "<!--\n" + _ROW + "-->\n")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(9, rc, e, "dòng bảng trong comment HTML KHÔNG phải metadata sống")
+
+
+def case_adr_song_trang_thai_trong_khoi_ma_khong_tinh(c: Ctx):
+    """Chiều thứ hai: `Trạng thái` của chính tệp ADR nằm trong khối mã."""
+    r = _repo_adr_tho(c.tmp, "adrfence",
+                      "# ADR-0001 — ca thử\n\nVí dụ:\n\n```\n- **Trạng thái:** Accepted\n```\n",
+                      _H20 + _HDR + _ROW)
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(9, rc, e, "`Trạng thái` trong khối mã KHÔNG phải trường thật")
+
+
+def case_adr_song_rao_khong_dong_thi_do(c: Ctx):
+    """Rào hỏng phải FAIL-CLOSE: nó nuốt mọi metadata phía sau."""
+    r = _repo_adr_tho(c.tmp, "raohong", _ADR_OK, _H20 + _HDR + _ROW + "```\nchưa đóng\n")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(9, rc, e, "rào khối mã không đóng phải ĐỎ, không được che im lặng")
+
+
+def case_adr_song_comment_khong_dong_thi_do(c: Ctx):
+    r = _repo_adr_tho(c.tmp, "cmthong", _ADR_OK, _H20 + _HDR + _ROW + "<!-- chưa đóng\n")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(9, rc, e, "comment HTML không đóng phải ĐỎ")
+
+
+def case_adr_song_khoi_ma_HOP_LE_van_xanh(c: Ctx):
+    """Chiều BẮT OAN — và ca này KHÔNG thừa: §20 thật CÓ một khối mã.
+
+    Nếu che vùng không-render mà làm hỏng ca này thì bản vá đã giết chính §20 nó
+    sinh ra để canh.
+    """
+    r = _repo_adr_tho(c.tmp, "fenceok", _ADR_OK,
+                      _H20 + "```\npython3 .claude/dev/packet_loop.py adr-song --root .\n```\n\n"
+                      + _HDR + _ROW)
+    rc, o, e = run(c.script, ["adr-song", "--root", r])
+    _doi(0, rc, e, "khối mã hợp lệ không chứa metadata thì phải XANH")
+
+
+def case_adr_song_bien_dau_noi_cua_ten_tep(c: Ctx):
+    """Biên của `_ADR_TEN_TEP`, và văn bản phải khai ĐÚNG cái mã làm.
+
+    Codex (P2 lượt 2): dạng quảng cáo `^\\d{4}-[0-9a-z-]+\\.md$` nhận
+    `0046--draft.md` và `0046-draft-.md`, mã thì từ chối. Đã chọn GIỮ mã chặt và
+    sửa văn bản; ca này khoá cả BA biên để lần sau đổi bên nào cũng phải đổi có ý thức.
+    """
+    for ten_tep, doi in (("0046--draft.md", 9), ("0046-draft-.md", 9), ("0046-a--b.md", 0)):
+        r = c.tmp / f"repo_bien_{ten_tep.replace('.', '_')}"
+        d = r / "docs" / "adr"
+        d.mkdir(parents=True, exist_ok=True)
+        (r / ".git").mkdir(exist_ok=True)
+        (d / "0001-ca-thu.md").write_text(_ADR_OK, encoding="utf-8", newline="\n")
+        (d / ten_tep).write_text("# ADR-0046 — x\n\n- **Trạng thái:** Accepted\n",
+                                 encoding="utf-8", newline="\n")
+        (r / "docs" / "PROTOCOL_DA_PHIEN.md").write_text(
+            "# Protocol giả\n\n## 19. T\n\n" + _H20 + _HDR + _ROW
+            + "| `ADR-0046` | luật | Accepted | 0 cổng |\n", encoding="utf-8", newline="\n")
+        rc, _, e = run(c.script, ["adr-song", "--root", r])
+        if rc != doi:
+            raise AssertionError(f"{ten_tep}: đòi rc={doi}, được {rc}; {_txt(e)[:200]}")
+
+
+def case_adr_song_thong_diep_loi_IN_RA_chinh_regex(c: Ctx):
+    """Văn bản mô tả dạng tên phải SINH TỪ mã, không chép tay.
+
+    Đây là chốt chống trôi cho đúng finding trên: nếu ai đổi `_ADR_TEN_TEP` mà
+    quên sửa mọi chỗ mô tả nó, ít nhất thông điệp lỗi vẫn nói đúng sự thật.
+    """
+    r = _repo_adr_tho(c.tmp, "indregex", _ADR_OK, _H20 + _HDR + _ROW)
+    (r / "docs" / "adr" / "045-lech.md").write_text("# x\n", encoding="utf-8", newline="\n")
+    rc, _, e = run(c.script, ["adr-song", "--root", r])
+    _doi(9, rc, e, "tên lệch dạng phải ĐỎ")
+    s = _txt(e)
+    if "[0-9a-z]" not in s or "d{4}" not in s:
+        raise AssertionError(f"thông điệp phải IN RA chính regex; được: {s[:300]!r}")
+
 # --- (d) adr-song ---
 CASES += [
     ("adr_song_sach_xanh", case_adr_song_sach_xanh),
@@ -2153,6 +2263,14 @@ CASES += [
     ("adr_song_ten_tep_la_thi_do", case_adr_song_ten_tep_la_thi_do),
     ("adr_song_thu_muc_con_thi_do", case_adr_song_thu_muc_con_thi_do),
     ("adr_song_readme_duoc_tha", case_adr_song_readme_duoc_tha),
+    ("adr_song_dong_bang_trong_khoi_ma_khong_tinh", case_adr_song_dong_bang_trong_khoi_ma_khong_tinh),
+    ("adr_song_dong_bang_trong_comment_html_khong_tinh", case_adr_song_dong_bang_trong_comment_html_khong_tinh),
+    ("adr_song_trang_thai_trong_khoi_ma_khong_tinh", case_adr_song_trang_thai_trong_khoi_ma_khong_tinh),
+    ("adr_song_rao_khong_dong_thi_do", case_adr_song_rao_khong_dong_thi_do),
+    ("adr_song_comment_khong_dong_thi_do", case_adr_song_comment_khong_dong_thi_do),
+    ("adr_song_khoi_ma_HOP_LE_van_xanh", case_adr_song_khoi_ma_HOP_LE_van_xanh),
+    ("adr_song_bien_dau_noi_cua_ten_tep", case_adr_song_bien_dau_noi_cua_ten_tep),
+    ("adr_song_thong_diep_loi_IN_RA_chinh_regex", case_adr_song_thong_diep_loi_IN_RA_chinh_regex),
 ]
 
 # AC 18 — mỗi lớp trong danh sách đóng thành MỘT ca có tên riêng, để đột biến
@@ -2165,6 +2283,40 @@ CASES += [(f"ac19_{ten}", _ca_doctrine(nd, f"ac19_{ten}", 0)) for ten, nd in LOP
 # Đột biến nới ngưỡng: mỗi cái BẮT BUỘC giết đúng những ca dưới đây. Ca không
 # chết được nghĩa là nó không đo cái nó khai.
 MUTANTS = {
+    # --- adr-song: đột biến cho lượt cross-review THỨ HAI ------------------------
+    #
+    # (1) BỎ che vùng không-render — dựng lại nguyên văn bệnh codex bắt được.
+    "adr_bo_che_vung_khong_render": (
+        '    raw, van_de = _che_khong_render(proto.read_text(encoding="utf-8"))\n',
+        '    raw, van_de = proto.read_text(encoding="utf-8"), []   # đột biến\n',
+        ["adr_song_dong_bang_trong_khoi_ma_khong_tinh",
+         "adr_song_dong_bang_trong_comment_html_khong_tinh",
+         "adr_song_rao_khong_dong_thi_do", "adr_song_comment_khong_dong_thi_do"],
+    ),
+    # (2) Chỉ bỏ che ở phía TỆP ADR — tách khỏi (1) để biết đúng phía nào hở.
+    "adr_bo_che_o_phia_tep_adr": (
+        '        than_adr, vd = _che_khong_render(f.read_text(encoding="utf-8"))\n',
+        '        than_adr, vd = f.read_text(encoding="utf-8"), []   # đột biến\n',
+        ["adr_song_trang_thai_trong_khoi_ma_khong_tinh"],
+    ),
+    # (3) Rào hỏng thành "che êm tới hết tệp" thay vì ĐỎ — fail-open kinh điển.
+    "adr_rao_hong_khong_do": (
+        '        van_de.append(f"rào khối mã mở ở dòng {rao_dong} không được đóng")\n',
+        '        pass                              # đột biến: rào hỏng không ĐỎ\n',
+        ["adr_song_rao_khong_dong_thi_do"],
+    ),
+    # (4) Nới dạng tên tệp về đúng bản QUẢNG CÁO — ca biên phải ĐỎ.
+    "adr_noi_ten_tep_ve_ban_quang_cao": (
+        '_ADR_TEN_TEP = re.compile(r"^(\\d{4})-[0-9a-z]([0-9a-z-]*[0-9a-z])?\\.md$")',
+        '_ADR_TEN_TEP = re.compile(r"^(\\d{4})-[0-9a-z-]+\\.md$")   # đột biến',
+        ["adr_song_bien_dau_noi_cua_ten_tep"],
+    ),
+    # (5) Thông điệp lỗi quay về chuỗi CHÉP TAY — chốt chống trôi mất răng.
+    "adr_thong_diep_chep_tay": (
+        'f"{thu_muc}/{x}: không khớp {_ADR_TEN_TEP.pattern} và không thuộc "',
+        'f"{thu_muc}/{x}: sai dạng tên và không thuộc "',
+        ["adr_song_thong_diep_loi_IN_RA_chinh_regex"],
+    ),
     # --- adr-song: ba đột biến của finding cross-review PR #233 ------------------
     #
     # (1) DỰNG LẠI ĐÚNG BUG. Không phải "gỡ một chốt" mà là khôi phục nguyên văn cơ

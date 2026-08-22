@@ -1122,9 +1122,75 @@ def cmd_doctrine_scan(a, state_dir: Path) -> int:
 # cùng một nghĩa, và `ADR-0036` ghi "Superseded một phần bởi ADR-0041" — khớp
 # tiền tố `Superseded` sẽ loại một ADR VẪN CÒN HIỆU LỰC. Cổng chỉ đòi dòng ấy
 # ĐỌC ĐƯỢC; hiệu lực là việc của người đọc bảng.
+# --- che vùng KHÔNG RENDER trước khi coi bất cứ gì là metadata sống -------------
+#
+# FINDING cross-review (codex, P2 trên PR #233, head `d17019628f`): regex đa dòng
+# đọc thẳng tệp thô, nên một dòng bảng `ADR-NNNN` hay một dòng `Trạng thái` nằm
+# TRONG khối mã có rào hoặc TRONG comment HTML vẫn được tính là metadata sống.
+# Đã tái hiện đủ BA ca trước khi vá, tất cả trả `rc=0` trong khi bảng RENDER ra
+# không có dòng nào:
+#   A1 dòng bảng chỉ nằm giữa ``` ```      A2 dòng bảng chỉ nằm giữa <!-- -->
+#   A3 dòng `Trạng thái` của ADR chỉ nằm giữa ``` ```
+#
+# Cùng họ `_MARKER_NO` của `t43`: đọc CHUỖI thay vì đọc CẤU TRÚC. Khác chiều —
+# ở đây nhận nhầm làm cổng báo PHỦ ĐỦ trong khi bảng thật còn thiếu.
+#
+# CHE, KHÔNG XOÁ: mỗi dòng bị che thành khoảng trắng CÙNG ĐỘ DÀI, nên vị trí và
+# số dòng không xê dịch — `_dong_tai` và mọi phép cắt §20 vẫn đúng.
+#
+# RÀO HỎNG THÌ ĐỎ, không phải "che tới hết tệp rồi thôi": một rào không đóng sẽ
+# nuốt mọi metadata phía sau, tức biến lỗi định dạng thành cổng câm.
+_RAO_MO = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+
+
+def _che_khong_render(raw: str) -> tuple:
+    """Trả (văn bản đã che, danh sách vấn đề). Độ dài và số dòng giữ nguyên."""
+    van_de: list[str] = []
+    dong = raw.split("\n")
+    ra: list[str] = []
+    rao = None          # ký tự rào đang mở, hoặc None
+    rao_dong = 0
+    for i, d in enumerate(dong, 1):
+        m = _RAO_MO.match(d)
+        if rao is None:
+            if m:
+                rao, rao_dong = m.group(1), i
+                ra.append(" " * len(d))
+                continue
+            ra.append(d)
+        else:
+            ra.append(" " * len(d))
+            # đóng khi cùng loại ký tự và không ngắn hơn rào mở
+            if m and m.group(1)[0] == rao[0] and len(m.group(1)) >= len(rao):
+                rao = None
+    if rao is not None:
+        van_de.append(f"rào khối mã mở ở dòng {rao_dong} không được đóng")
+    t = "\n".join(ra)
+
+    # comment HTML — che SAU khi che rào, vì `<!--` trong khối mã chỉ là chữ.
+    ra2, i, n = [], 0, len(t)
+    while True:
+        j = t.find("<!--", i)
+        if j == -1:
+            ra2.append(t[i:])
+            break
+        k = t.find("-->", j + 4)
+        ra2.append(t[i:j])
+        if k == -1:
+            van_de.append(f"comment HTML mở ở vị trí {j} không được đóng")
+            ra2.append("".join(" " if c != "\n" else "\n" for c in t[j:]))
+            break
+        ra2.append("".join(" " if c != "\n" else "\n" for c in t[j:k + 3]))
+        i = k + 3
+    return "".join(ra2), van_de
+
+
 _ADR_HANG = re.compile(r"^\|\s*`ADR-(\d{4})`\s*\|", re.M)
+# Bó về CỘT 0: đo được 44/45 tệp ADR thật đặt dòng này ở cột 0 (tệp còn lại là
+# nợ `ADR-0016-THIEU-DONG-TRANG-THAI`, không có dòng nào). Cho thụt lề tuỳ ý thì
+# một khối mã thụt 4 dấu cách cũng lọt — mà khối mã thụt lề KHÔNG có rào để che.
 _ADR_TRANG_THAI = re.compile(
-    r"^\s*[-*]\s*\*\*Tr[aạ]ng th[aá]i:?\*\*:?\s*(\S.*)$", re.M | re.I
+    r"^[-*]\s*\*\*Tr[aạ]ng th[aá]i:?\*\*:?\s*(\S.*)$", re.M | re.I
 )
 _ADR_MUC = re.compile(r"^##\s*20\.\s", re.M)
 _ADR_MUC_KE = re.compile(r"^##\s", re.M)
@@ -1180,13 +1246,18 @@ def cmd_adr_song(a, state_dir: Path) -> int:
         cap.append((m2.group(1), f))
     if la:
         for x in sorted(la):
-            print(f"{thu_muc}/{x}: không đúng dạng tên ADR và không thuộc danh sách "
-                  f"cho phép — không đo được", file=sys.stderr)
+            print(f"{thu_muc}/{x}: không khớp {_ADR_TEN_TEP.pattern} và không thuộc "
+                  f"danh sách cho phép {sorted(_ADR_TEP_KHONG_PHAI_ADR)} — không đo được",
+                  file=sys.stderr)
         _die(RC_ADR, f"{len(la)} mục trong {thu_muc} không phân loại được")
     if not cap:
         _die(RC_ADR, f"{thu_muc} không có tệp ADR nào — không đo được")
 
-    raw = proto.read_text(encoding="utf-8")
+    raw, van_de = _che_khong_render(proto.read_text(encoding="utf-8"))
+    if van_de:
+        for x in van_de:
+            print(f"{proto}: {x}", file=sys.stderr)
+        _die(RC_ADR, f"{proto} có vùng không render hỏng — không đo được")
     m = _ADR_MUC.search(raw)
     if not m:
         _die(RC_ADR, f"{proto} không có §20 (bảng định tuyến ADR) — cổng này không có gì để đo")
@@ -1217,7 +1288,11 @@ def cmd_adr_song(a, state_dir: Path) -> int:
         loi.append(f"ADR-{s}: §20 có dòng mà KHÔNG có tệp trong docs/adr/ — con trỏ chết")
 
     for s, f in sorted(cap):
-        if _ADR_TRANG_THAI.search(f.read_text(encoding="utf-8")):
+        than_adr, vd = _che_khong_render(f.read_text(encoding="utf-8"))
+        if vd:
+            loi.append(f"ADR-{s}: `{f.name}` — {vd[0]}; không đo được")
+            continue
+        if _ADR_TRANG_THAI.search(than_adr):
             continue
         if s in _ADR_THA_THIEU_TRANG_THAI:
             continue

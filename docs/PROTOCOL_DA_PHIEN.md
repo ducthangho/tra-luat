@@ -1005,6 +1005,10 @@ hai dòng · một ADR không có dòng `Trạng thái` đọc được · **hai
 tên tệp không đúng dạng và không nằm trong danh sách cho phép**. Thêm ADR mà quên bảng ⇒
 **gate đỏ**, không phải im lặng. Phản chứng cho từng luật ở `.claude/dev/packet_loop_test.py`.
 
+Dạng tên tệp ADR, ghi ĐÚNG NHƯ MÃ (`_ADR_TEN_TEP`): `^(\d{4})-[0-9a-z]([0-9a-z-]*[0-9a-z])?\.md$` —
+chặt hơn `^\d{4}-[0-9a-z-]+\.md$` ở đúng một chỗ: ký tự đầu và cuối của slug phải
+là chữ-số. Thông điệp lỗi in ra chính `pattern` ấy, nên câu này không trôi khỏi mã được.
+
 Hai luật cuối sinh từ một finding cross-review (codex, P2 trên PR #233) và đáng đọc kỹ hơn
 phần còn lại, vì nó phá đúng thứ bảng này khoe là bằng chứng: bản đầu gom tệp bằng một map
 khoá theo bốn chữ số đầu, nên hai tệp cùng số thì cái sau ĐÈ cái trước — 2 tệp trên đĩa mà

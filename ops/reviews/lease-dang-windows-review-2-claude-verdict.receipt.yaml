@@ -23,7 +23,7 @@ verdict_sha256: e5dd9584d2e01172f71a0308c1d90eb0918d5b971af56cbb664d91438cf3c4a7
 verdict_bytes: 7892
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: DIEN_SAU_KHI_PUSH
+evidence_url: https://github.com/ducthangho/tra-luat/blob/9729f5f0720fa045e52785844e70cf511ca831a7/ops/reviews/lease-dang-windows-review-2-claude-verdict.md
 evidence_url_ghi_chu: 'Điền SAU KHI ĐÃ PUSH và sau khi `git branch -r --contains` xác nhận.'
 
 verdict_nguon: >-

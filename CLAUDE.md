@@ -280,6 +280,41 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   thái vẫn thủng vì `grep` quét MỌI dòng, mà thân phản hồi do máy chủ đầu kia quyết định. Chốt đúng:
   `gh api -i`, cắt **DÒNG ĐẦU**, khớp đúng dạng `HTTP/<phiên bản> 404`. Và ba trạng thái, không phải hai:
   `có` · `không` · **`không đo được`** — trạng thái thứ ba phải làm cổng ĐỎ, đúng doctrine `None ≠ False`.
+- **MỘT BẤT BIẾN CÒN ĐÚNG KHÔNG CHỨNG MINH CÁC SỐ HẠNG CÒN ĐÚNG — và chính nó làm lời khai TRÔNG NHƯ
+  ĐÃ KIỂM.** Đo 22-08-2026, đặc tả `LEASE-HOI-TOAN-KHO` khai *"117 cặp / 100 đường dẫn, **chênh 10** là
+  phiên bản thừa"*. Đo lại: **120 / 110** — cả hai số hạng đã trôi, mà **chênh vẫn đúng 10**. Ba lượt
+  cross-review đọc qua dòng ấy và không ai dừng lại, vì soi tính nhất quán nội tại thì nó **sạch hoàn
+  toàn**: quan hệ khớp, đơn vị có, câu tự giải thích. Chỉ phép đo mới thấy. Cùng họ *"cổng vắng mặt trông
+  giống cổng xanh"*, đổi đối tượng: **một quan hệ đúng trông giống các số hạng đúng.** Hệ quả thực hành:
+  khi một câu vừa nêu số hạng vừa nêu quan hệ giữa chúng, **kiểm số hạng**, đừng kiểm quan hệ — quan hệ
+  là thứ sống sót qua trôi số. Cùng lượt ấy còn hai ca y hệt: `37` biên nhận → **39**, và `3/90` → **3/100**
+  (tử đúng, **mẫu** trôi) — tức trong một đặc tả có **ba** con số đã cũ, không con nào lộ ra bằng đọc.
+- **REVIEWER KHÔNG ĐO ĐƯỢC THÌ REVIEW CHỈ LÀ SOÁT CHÍNH TẢ — đo được bằng số, 3 lượt/0 so 1 lượt/3.**
+  Bốn lượt cross-review trên cùng một PR (#250): ba lượt đầu reviewer chỉ nhận **hai tệp `.md`** cộng
+  tài liệu tham chiếu, tìm được `4 → 11 → 2` finding và **KHÔNG con số phân rã nào**. Lượt 4 cấp thêm
+  một **mirror git đầy đủ** trong sandbox (`git clone --bare` + bản làm việc; số nhánh là snapshot có thể
+  trôi, không phải bằng chứng bền) và
+  đổi nhiệm vụ chính thành *đo lại từng con số*: ra **ba** con số phân rã ngay lượt đầu tiên có năng lực
+  ấy. Không phải reviewer ba lượt đầu kém — họ **không có cách nào** kiểm một con số nào, nên cả một
+  LỚP lỗi nằm ngoài tầm với. Giá của bản vá: một `clone --bare` vào thư mục sandbox. **Bắt reviewer tự
+  vá + tự test cải thiện CHẤT LƯỢNG finding; chỉ năng lực ĐO mới cải thiện ĐỘ PHỦ** — hai đòn bẩy khác
+  nhau, đừng nhầm cái này mua được cái kia.
+  Các số theo lượt trong đoạn này hiện chỉ có ở comment PR #250, chưa có biên nhận trong kho và KHÔNG
+  TÁI LẬP ĐƯỢC từ một bundle offline; đừng dùng chúng như một gate đã kiểm.
+  · **Hệ luận: DANH SÁCH BẠN GIAO CHO REVIEWER TRỞ THÀNH TRẦN CỦA HỌ, trừ khi bạn tự khai nó thiên vị.**
+  Lượt 4 tôi giao bảng 21 con số kèm **chính script đã trích ra nó**, và nói thẳng rằng script lọc theo
+  **danh sách đơn vị đoán trước** (`lease` `ref` `blob` `tệp` `dòng`…) nên chắc chắn thiếu — mỗi số nó
+  bỏ sót mà reviewer tìm ra được tính là finding. Trả công ngay **hai** lần: một con số không có trong
+  bảng, và một finding nhắm thẳng vào **chính bộ lọc** (bốn số `rc`/finding lọt sạch vì **không mang
+  đơn vị nào**). Cùng gốc *"danh sách CẤM không bao giờ đủ"*, lần này ở dạng bộ lọc trích số.
+  · **Và bộ quét NHÁP của chính mình là thứ dễ tin nhất, nên nguy nhất.** Cùng phiên, script
+  `quet_lease.py` dùng suốt để trả lời *"đường dẫn X có bị giữ không"* in kết luận từ một **chuỗi ghi
+  cứng** nhắc tên một packet khác, bất kể `--duong-dan` truyền vào là gì. Hỏi nó về 6 tệp doctrine ⇒ nó
+  báo **14 lease đang chặn**; viết lại phép đo cho đúng ⇒ **0**. Nó **chặn nhầm** đúng một việc hợp lệ —
+  ảnh gương của ca *lời khai rộng hơn phép đo*, và đúng khuyết tật mà packet `LEASE-HOI-TOAN-KHO` sinh
+  ra để sửa. Công cụ nháp không có cổng, không có ca test, và **dòng kết luận của nó là thứ ta đọc chứ
+  không phải dữ liệu nó đo** — trước khi hành động theo một bộ quét tự viết, hãy hỏi nó một ca mà bạn
+  **biết trước đáp án**.
 
 ## Đẩy ref từ phiên Claude Code trên web (đo 16-08-2026)
 Phiên web **KHÔNG xoá được ref** và **KHÔNG đẩy được `refs/tags/*`**. Cùng một `POST /git-receive-pack`:

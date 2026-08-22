@@ -191,113 +191,46 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          BI_CHAN=0
-          bao_chan() {
-            echo "::error file=$tep::$1"
-            BI_CHAN=1
-            echo "::endgroup::"
-          }
+          DA_DOI=0
           while IFS= read -r tep; do
             [ -n "$tep" ] || continue
             [ -f "$tep" ] || continue
             echo "::group::$tep"
 
+            # `check` phân ba đường bằng MÃ THOÁT, không bằng chữ: 0 đăng được,
+            # 9 đã đăng rồi (bỏ qua, không phải lỗi), còn lại là CHẶN.
             # `--root .` là gốc kho ĐƯỢC ĐẨY: bộ kiểm đến từ nhánh mặc định, còn tệp
             # lease và `prompt_path` mà nó neo thì đọc từ head. Không nêu cờ này thì
             # `_goc_kho` đi ngược từ tệp lease tìm `.git` và cũng ra đúng chỗ đó, nhưng
             # nói rõ ràng vẫn hơn để tuỳ một hàm suy đoán.
             set +e
-            python3 "$NEO/ops/lease_publish.py" kiem-github "$tep" --root .
-            rc=$?
-            set -e
-            if [ "$rc" = "9" ]; then echo "đã đăng trước đó — bỏ qua"; echo "::endgroup::"; continue; fi
-            if [ "$rc" != "0" ]; then
-              bao_chan "hai lớp GitHub chặn (rc=$rc)"
-              continue
-            fi
-
-            # `check` phân ba đường bằng MÃ THOÁT, không bằng chữ: 0 đăng được,
-            # 9 đã đăng rồi (bỏ qua, không phải lỗi), còn lại là CHẶN.
-            set +e
             python3 "$NEO/ops/lease_publish.py" check "$tep" --root .
             rc=$?
             set -e
             if [ "$rc" = "9" ]; then echo "đã đăng trước đó — bỏ qua"; echo "::endgroup::"; continue; fi
-            if [ "$rc" != "0" ]; then
-              bao_chan "cổng chặn (rc=$rc)"
-              continue
-            fi
+            if [ "$rc" != "0" ]; then echo "::error file=$tep::cổng chặn (rc=$rc)"; exit "$rc"; fi
 
-            set +e
             ISSUE=$(python3 -c "import sys,yaml;print(yaml.safe_load(open(sys.argv[1],encoding='utf-8'))['packet_issue'])" "$tep")
-            rc=$?
-            set -e
-            if [ "$rc" != "0" ]; then
-              bao_chan "không đọc được packet_issue (rc=$rc)"
-              continue
-            fi
             # `body` cũng phải đi từ bản neo: nó dựng NỘI DUNG comment mang danh nghĩa
             # kho, nên một bản `body` bị sửa đăng được bất cứ thứ gì dù `check` xanh.
-            set +e
             python3 "$NEO/ops/lease_publish.py" body "$tep" > than.md
-            rc=$?
-            set -e
-            if [ "$rc" != "0" ]; then
-              bao_chan "không dựng được thân comment (rc=$rc)"
-              continue
-            fi
             # Dựng JSON bằng python: thân comment có tiếng Việt, dấu nháy và xuống
             # dòng — nhét thẳng vào đối số shell là hỏng ở chỗ khó đọc.
-            set +e
             python3 -c "import json,sys;print(json.dumps({'body':open('than.md',encoding='utf-8').read()}))" > payload.json
-            rc=$?
-            set -e
-            if [ "$rc" != "0" ]; then
-              bao_chan "không dựng được payload (rc=$rc)"
-              continue
-            fi
 
-            set +e
             ID=$(gh api "repos/$REPO/issues/$ISSUE/comments" --input payload.json --jq .id)
-            rc=$?
-            set -e
-            if [ "$rc" != "0" ]; then
-              bao_chan "đăng comment hỏng (rc=$rc)"
-              continue
-            fi
             # BẰNG CHỨNG DƯƠNG: đòi một ID số, đừng tin rc của `gh`.
-            case "$ID" in
-              ''|*[!0-9]*) bao_chan "gh không trả về comment id: $ID"; continue;;
-            esac
+            case "$ID" in ''|*[!0-9]*) echo "::error::gh không trả về comment id: $ID"; exit 1;; esac
             echo "đã đăng comment $ID lên #$ISSUE"
 
-            set +e
             python3 "$NEO/ops/lease_publish.py" mark "$tep" --comment-id "$ID"
-            rc=$?
-            set -e
-            if [ "$rc" != "0" ]; then
-              bao_chan "không ghi được comment id (rc=$rc)"
-              continue
-            fi
-            # SC2320: shellcheck ĐỎ nếu `rc=$?` đặt ngay sau `echo` — nó cho rằng ta lỡ tay
-            # lấy mã thoát của `echo` khi định lấy của lệnh TRƯỚC đó. Ở đây ta THẬT SỰ muốn mã
-            # thoát của chính `echo`, vì nó là thứ bắt lỗi CHUYỂN HƯỚNG `>>`. Viết bằng `if !`
-            # để nói ý ấy bằng CÚ PHÁP, thay vì tắt cảnh báo bằng `disable=`.
-            #
-            # ĐỪNG nhắc tên hàm chặn trong chú thích này: `t64` đếm nó bằng CHUỖI trên toàn thân
-            # bước, nên một lần nhắc trong comment cũng làm lệch sổ và suite ĐỎ. Đã đụng thật.
-            rc=0
-            if ! echo "DA_DOI=1" >> "$GITHUB_ENV"; then rc=1; fi
-            if [ "$rc" != "0" ]; then
-              bao_chan "không ghi được GITHUB_ENV (rc=$rc)"
-              continue
-            fi
+            DA_DOI=1
             echo "::endgroup::"
           done < ds.txt
-          if [ "$BI_CHAN" != "0" ]; then exit 1; fi
+          echo "DA_DOI=$DA_DOI" >> "$GITHUB_ENV"
 
       - name: ghi ngược comment id
-        if: always() && env.DA_DOI == '1'
+        if: env.DA_DOI == '1'
         run: |
           set -euo pipefail
           git config user.name  'github-actions[bot]'

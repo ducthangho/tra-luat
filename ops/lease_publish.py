@@ -12,8 +12,9 @@ chuyển cho thao tác GitHub, và phiên chạy chỉ cần quyền git — th�
 
 ĐỔI LẠI, RỦI RO PHẢI NÓI THẲNG: workflow chạy bằng `GITHUB_TOKEN` nghĩa là **push
 được thành đăng được**. Thứ duy nhất đứng giữa một tệp YAML trong kho và một comment
-mang danh nghĩa kho chính là bộ kiểm trong tệp này. `check` và `body` cùng đi qua
-`kiem()` thuần; riêng hai phép đo GitHub chỉ workflow gọi qua `kiem-github`.
+mang danh nghĩa kho chính là bộ kiểm trong tệp này. Nó xanh dễ dãi thì đường này
+thành đường đăng bừa. Vì thế mọi lệnh ở đây — kể cả `body` — đều đi qua cùng một
+hàm kiểm; hai đường mà chỉ một đường có chốt là chốt đi vòng được.
 
 MÃ THOÁT
   0  qua
@@ -21,21 +22,18 @@ MÃ THOÁT
   4  `granted_by` là tên một PROVIDER — agent tự cấp lease cho mình
   6  mỏ neo prompt hỏng (thiếu `prompt_path`, tệp không có, hoặc băm lệch)
   8  nội dung lease sai (thiếu trường, sai dạng, hết hạn, YAML hỏng)
-  9  lease ĐÃ đăng rồi (trong tệp hoặc comment Issue) — BỎ QUA, không đăng lại
+  9  lease ĐÃ đăng rồi (có `posted_comment_id`) — workflow phải BỎ QUA, không đăng lại
 """
 
 from __future__ import annotations
 
 import argparse
 import hashlib
-import json
 import os
 import re
-import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
-from urllib.parse import urlparse
 
 RC_OK = 0
 RC_THAM_SO = 2
@@ -43,10 +41,6 @@ RC_TU_CAP = 4
 RC_NEO = 6
 RC_NOI_DUNG = 8
 RC_DA_DANG = 9
-
-def GOI_GH(*doi_so):
-    return subprocess.run(["gh", "api", *doi_so], capture_output=True, text=True)
-
 
 # Cùng danh sách với `.claude/dev/packet_loop.py`. Hai chỗ cưỡng chế CÙNG một luật
 # ("không tự cấp lease") ở hai tầng khác nhau: một tầng cục bộ lúc chạy máy trạng
@@ -90,8 +84,6 @@ BAT_BUOC = (
 
 SHA40 = re.compile(r"^[0-9a-f]{40}$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
-REPO = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
-LEASE_ID = re.compile(r"^[A-Za-z0-9._-]+$")
 
 
 class Chan(Exception):
@@ -135,77 +127,6 @@ def _doc_han(chuoi) -> datetime:
         # lease lệch 26 giờ thì cái hạn chỉ còn là trang trí.
         raise Chan(RC_NOI_DUNG, f"lease_expires_at_utc phải kèm múi giờ (thêm 'Z'): {s!r}")
     return d.astimezone(timezone.utc)
-
-
-def _doc_gh(mo_ta: str, *doi_so):
-    """Gọi `gh api` và trả JSON; mọi trạng thái không đo được đều CHẶN."""
-    try:
-        p = GOI_GH(*doi_so)
-    except OSError as e:
-        raise Chan(RC_NOI_DUNG, f"KHÔNG ĐO ĐƯỢC {mo_ta}: không gọi được `gh api`: {e}") from None
-    if p.returncode != 0:
-        ly = (p.stderr or p.stdout or "không có chẩn đoán").strip().splitlines()[0][:200]
-        raise Chan(RC_NOI_DUNG,
-                   f"KHÔNG ĐO ĐƯỢC {mo_ta}: `gh api` rc={p.returncode}: {ly}")
-    try:
-        return json.loads(p.stdout)
-    except (TypeError, json.JSONDecodeError):
-        raise Chan(RC_NOI_DUNG, f"KHÔNG ĐO ĐƯỢC {mo_ta}: `gh api` không trả JSON hợp lệ") from None
-
-
-def _repo_github() -> str:
-    repo = (os.environ.get("GITHUB_REPOSITORY") or "").strip()
-    if not REPO.fullmatch(repo):
-        raise Chan(RC_NOI_DUNG, f"KHÔNG ĐO ĐƯỢC repository từ GITHUB_REPOSITORY={repo!r}")
-    return repo
-
-
-def _kiem_loai_so_hieu(repo: str, so: int) -> None:
-    try:
-        d = _doc_gh("loại số hiệu", f"repos/{repo}/issues/{so}")
-    except Chan as e:
-        raise Chan(e.ma, f"{e.thong_diep}; số hiệu trỏ vào PR là một nguyên nhân có thể — "
-                   "đây là phỏng đoán, không phải phép đo") from None
-    if not isinstance(d, dict) or not isinstance(d.get("html_url"), str):
-        raise Chan(RC_NOI_DUNG,
-                   "KHÔNG ĐO ĐƯỢC loại số hiệu: phản hồi thiếu `html_url`")
-    path = urlparse(d["html_url"]).path.rstrip("/")
-    if path.endswith(f"/pull/{so}"):
-        raise Chan(RC_NOI_DUNG,
-                   f"packet_issue #{so} là Pull Request — workflow cố ý không có "
-                   "`pull-requests: write`; quy ước bắt buộc trỏ tới Issue")
-    if not path.endswith(f"/issues/{so}"):
-        raise Chan(RC_NOI_DUNG,
-                   f"KHÔNG ĐO ĐƯỢC loại số hiệu từ html_url={d['html_url']!r}")
-
-
-def _kiem_comment_da_co(repo: str, lease: dict) -> None:
-    so, lease_id = lease["packet_issue"], str(lease["lease_id"])
-    cac_trang = _doc_gh("comment hiện có", "--paginate", "--slurp",
-                        f"repos/{repo}/issues/{so}/comments")
-    if not isinstance(cac_trang, list):
-        raise Chan(RC_NOI_DUNG,
-                   "KHÔNG ĐO ĐƯỢC comment hiện có: phản hồi không phải danh sách")
-    if not cac_trang:
-        raise Chan(RC_NOI_DUNG, "KHÔNG ĐO ĐƯỢC comment hiện có: `--slurp` không trả trang nào")
-    if all(isinstance(x, dict) for x in cac_trang):
-        comments = cac_trang
-    elif all(isinstance(x, list) for x in cac_trang):
-        comments = [x for trang in cac_trang for x in trang]
-    else:
-        raise Chan(RC_NOI_DUNG,
-                   "KHÔNG ĐO ĐƯỢC comment hiện có: cấu trúc phân trang lẫn kiểu")
-    dau = f"**Lease `{lease_id}`**"
-    for comment in comments:
-        if not isinstance(comment, dict) or not isinstance(comment.get("body"), str):
-            raise Chan(RC_NOI_DUNG, "KHÔNG ĐO ĐƯỢC comment hiện có: phần tử thiếu `body`")
-        user = comment.get("user")
-        if not isinstance(user, dict) or not isinstance(user.get("login"), str):
-            raise Chan(RC_NOI_DUNG, "KHÔNG ĐO ĐƯỢC comment hiện có: phần tử thiếu `user.login`")
-        if user["login"] == "github-actions[bot]" and comment["body"].startswith(dau):
-            raise Chan(RC_DA_DANG,
-                       f"lease {lease_id!r} đã có comment {comment.get('id', '<không id>')} "
-                       f"trên issue #{so} — bỏ qua")
 
 
 def _goc_kho(tep: Path, goc) -> Path:
@@ -305,7 +226,7 @@ def _kiem_neo_prompt(lease: dict, tep: Path, goc) -> str:
 
 
 def kiem(lease: dict, tep=None, goc=None) -> tuple:
-    """Kiểm thuần và trả `(lease, băm prompt)`; ném `Chan` nếu không hợp lệ.
+    """Trả `(lease, băm prompt ĐÃ XÁC MINH)` nếu ĐĂNG ĐƯỢC; ném `Chan` nếu không.
 
     Trả kèm cái băm chứ không trả mỗi lease, để dòng "prompt … khớp băm" mà `check`
     in ra là BẰNG CHỨNG chứ không phải lời khen. Bản trước in dòng đó chỉ vì lease
@@ -357,10 +278,6 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
     if isinstance(so, bool) or not isinstance(so, int) or so <= 0:
         raise Chan(RC_NOI_DUNG, f"packet_issue phải là số nguyên dương, được {so!r}")
 
-    lease_id = str(lease["lease_id"])
-    if not LEASE_ID.fullmatch(lease_id):
-        raise Chan(RC_NOI_DUNG, f"lease_id chỉ được chứa ASCII chữ/số/`.`/`_`/`-`; được {lease_id!r}")
-
     sha = str(lease["reviewed_sha_required"]).strip()
     if not SHA40.match(sha):
         # SHA ngắn hoặc lệch dạng là mỏ neo GIẢ: reviewer sẽ đọc một head khác với
@@ -385,14 +302,6 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
         raise Chan(RC_NOI_DUNG,
                    f"lease đã hết hạn lúc {han.isoformat()} — đăng một lease chết thì "
                    f"người nhận tưởng có quyền mà không có")
-    return lease, neo
-
-
-def kiem_github(lease: dict, tep=None, goc=None) -> tuple:
-    lease, neo = kiem(lease, tep, goc)
-    repo = _repo_github()
-    _kiem_loai_so_hieu(repo, lease["packet_issue"])
-    _kiem_comment_da_co(repo, lease)
     return lease, neo
 
 
@@ -425,7 +334,6 @@ def _ghi_comment_id(duong_dan: str, comment_id: int) -> None:
 
 def lenh_check(a) -> int:
     lease, neo = kiem(_doc_yaml(a.tep), a.tep, getattr(a, "goc", None))
-    print("LỆNH check KHÔNG CHẠY hai lớp GitHub: đo ISSUE/PR và dò comment; dùng `kiem-github`")
     print(f"lease {lease['lease_id']} ĐĂNG ĐƯỢC — issue #{lease['packet_issue']}, "
           f"neo {lease['reviewed_sha_required'][:12]}, hết hạn {lease['lease_expires_at_utc']}"
           + (f", prompt {lease['prompt_path']} khớp băm {neo[:12]}" if neo else ""))
@@ -433,15 +341,10 @@ def lenh_check(a) -> int:
 
 
 def lenh_body(a) -> int:
-    # Đi qua ĐÚNG bộ kiểm THUẦN của `check`; hai lớp GitHub do workflow gọi riêng.
+    # Đi qua ĐÚNG hàm kiểm của `check`. Nếu `body` có đường riêng, ai đó chỉ cần
+    # gọi thẳng `body` là vòng qua được toàn bộ chốt.
     lease, _ = kiem(_doc_yaml(a.tep), a.tep, getattr(a, "goc", None))
     sys.stdout.write(dung_than(lease, a.tep))
-    return RC_OK
-
-
-def lenh_kiem_github(a) -> int:
-    lease, _ = kiem_github(_doc_yaml(a.tep), a.tep, getattr(a, "goc", None))
-    print(f"hai lớp GitHub ĐÃ QUA cho lease {lease['lease_id']} trên issue #{lease['packet_issue']}")
     return RC_OK
 
 
@@ -463,7 +366,6 @@ def main(argv=None) -> int:
     for ten, fn, mo_ta in (
         ("check", lenh_check, "kiểm lease có đăng được không"),
         ("body", lenh_body, "in thân comment ra stdout"),
-        ("kiem-github", lenh_kiem_github, "đo loại số hiệu và comment đã đăng"),
     ):
         q = sub.add_parser(ten, help=mo_ta)
         q.add_argument("tep")

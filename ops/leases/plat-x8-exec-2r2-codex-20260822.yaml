@@ -167,13 +167,16 @@ base_ghi_chu: >-
   `reviewed_sha_required` bằng base vì nhánh packet chưa tồn tại; head thật sẽ neo lại ở lease
   reviewer. ĐỦ 40 ký tự hex thường — cổng từ chối bản rút gọn, và bản rút gọn là mỏ neo GIẢ.
 
-prompt_path: ops/prompts/plat-x8-exec-1-codex-20260821.md
-prompt_sha256_required: c59c1482095ed70f394aaee0444548fbf4830f5bd60cc214875387d74c75cd6c
+prompt_path: ops/prompts/plat-x8-exec-2r2-codex-20260822.md
+prompt_sha256_required: 4f58f2a956c56c629f3492c57b50a555255b63bf06b94cffd294cc32eda0d5ca
 prompt_note: >-
-  Tên tệp giữ hậu tố `-1-` của lượt 1 CÓ CHỦ Ý: nội dung prompt không đổi vai, chỉ neo lại băm sang
-  bản 4 và bổ sung khối *KHÔNG CỔNG NÀO CANH VIỆC NÀY*. Đổi tên tệp sẽ làm mọi con trỏ cũ chết mà
-  không mua được gì. Prompt hiện chỉ có trên nhánh PR #240 — cùng cách tra như `spec_note`.
-
+  TỆP MỚI, không phải bản sửa của prompt lượt 1. `plat-x8-exec-1-codex-20260821.md` GIỮ NGUYÊN
+  TRẠNG (`f74adeabae51…`) vì lease `plat-x8-exec-2-codex-20260822` đã ĐĂNG và neo vào đúng băm ấy.
+  Bản đầu của r2 sửa đè tệp kia và `t23` bắt ngay (*"LỆCH BĂM"*) — nó đúng: **một artefact đã bị
+  lease neo là BẤT BIẾN**. Lý lẽ *"giữ tên tệp để con trỏ cũ khỏi chết"* ở revision 1 SAI NGƯỢC:
+  con trỏ là BĂM, nên giữ tên mà đổi ruột chính là cách giết con trỏ; tên chỉ là chỗ dễ tìm.
+  Đáng ghi: `check` trên tệp lease cũ trả `rc=9` (đã đăng, bỏ qua) nên KHÔNG thấy lỗi này — chỉ
+  `t23` thấy, vì nó kiểm MỌI tệp trong `ops/leases/`, kể cả tệp đã đăng. Cổng nghiêm hơn cổng.
 granted_by: ducthangho
 granted_on_instruction: 'direct, in-session, 2026-08-22 ("B. đồng ý, tạo packet issue và lease đi"), kèm ba lựa chọn cùng phiên: GIỮ executor `codex` + khai ngoại lệ ADR-0045 · đóng băng BẢN 4 và neo lease vào nó · cho phép đẩy nhánh `ops/**` để cổng chạy'
 recorded_by: claude-session

@@ -1,0 +1,439 @@
+# Bàn giao — phiên `tra-luat-5a`, 22-08-2026
+
+**Vai:** điều phối + soạn tài liệu. **KHÔNG** phải executor của packet nào ⇒ bản này **không** theo
+schema §7 (`ops/handoff/wp55-r4g1-handoff.md` mới là bản §7 thật). Không có `generation`, không
+`attempts_used`, không head để review.
+
+**Tiếp nối:** `ops/handoff/phien-dieu-phoi-20260821-handoff.md` (đã trên master). Bản đó vẫn đúng cho
+phần lịch sử; bản này chép tiếp từ chỗ nó dừng.
+
+**Trạng thái:** không việc nào đang dở. Một hẹn tự động đang chạy (§5).
+
+---
+
+## 1. Neo
+
+```yaml
+# Đo cùng lúc, trên cùng một commit. Đừng vá lẻ từng trường.
+do_luc: '2026-08-22'
+base_khi_ban_giao: 3f641673205b068e598676f61a429b3bfc25e973   # OID ĐẦY ĐỦ, không tiền tố 7
+master_luc_cap_nhat: 2ab3560a8a406c1b436221fb3c6d23234aefdde0  # đã đi 50 commit — xem §5b
+nhanh_lam_viec: claude/opus-5-plan-steps-y5r6ci   # đã hết việc, reset về master
+pr_da_merge: 230
+pr_dang_mo_lien_quan: [233, 234, 229]
+hen_dang_chay: trig_01C6pjd3Xe1Px3tAuAVxwkVW     # 07:26Z — kiểm #238, xuất phát từ 3d.
+                                                # Hai hẹn TRƯỚC đã bị xoá vì tiêu chí sai;
+                                                # xem §5c. Đừng chép số hẹn từ tài liệu cũ.
+```
+
+## 2. Phiên này đã làm gì
+
+| # | việc | kết quả |
+|---|---|---|
+| 1 | Vá bốn con trỏ chết trong tài liệu có thẩm quyền | **PR #230 MERGE**, master `3f64167`, 8 tệp |
+| 2 | Dán hộp ⛔ lên đầu `ops/specs/plat-x8.md` | bản **3b**, băm `308d0cf4…` |
+| 3 | Ghi nợ mục **12** `PLAT-X4-721-dong-chua-verdict-nao-phu` | sổ nợ nay **12** mục |
+| 4 | Đính chính append-only câu *"vòng 3 đã lấp chỗ ấy"* | trong `ops/THAM_DINH_KE_HOACH_20260821.md` |
+| 5 | Viết bản giao việc hoàn thiện kế hoạch | `ops/prompts/phien-hoan-thien-ke-hoach-20260822.md` |
+| 6 | Điều phối với phiên `session_018YdsqSNdxorwxVYW2d2PkH` (PR #233) | đã hồi âm, đã cam kết phạm vi |
+
+Lượt master sau merge (`32552166181`) **xanh cả hai nền**, đo tới từng bước: `gate (windows-latest)`
+28 bước chạy thật ~8 phút; `gate (ubuntu-latest)` 5m47s. Bốn bước `skipped` đều có điều kiện, ba cặp
+skip **ngược nhau** giữa hai nền. **Việc Windows không còn treo.**
+
+## 3. BỐN LẦN PHIÊN NÀY ĐO SAI — chép ra vì cả bốn cùng một họ
+
+Cross-review (auto-review connector, 4 lượt trên #230) ra **chín** finding thật. Sáu cái là số trôi
+theo thời gian. **Bốn cái dưới đây là phép đo SAI của chính phiên**, và đều đã được báo cho người
+giữ kho **trước khi** bị bác — nên đính chính nằm trong chính các tệp đã land, không chỉ trong hội thoại.
+
+| # | tôi khai | sự thật đo được |
+|---|---|---|
+| 1 | *"protocol KHÔNG có canon 2 vòng"* | **SAI.** `docs/PROTOCOL_DA_PHIEN.md:543` và `:561` có sẵn trần 2 lượt Codex/PR |
+| 2 | *"`spec_sha256` 11/49 lease"* | **SAI.** Đếm chuỗi con, gộp hai lược đồ: `spec_sha256:` = **5**, `spec_sha256_required:` = **6** |
+| 3 | *"X4 cấp HAI lượt review, không verdict ở đâu"* | **SAI.** **BA** lượt; kết quả lượt 1+2 là `changes_requested`, ghi trong **thân lease của lượt kế tiếp** |
+| 4 | *"nhánh #227 đứng yên ⇒ executor có thể đã dừng"* | **SAI.** Họ đẩy sang nhánh **khác tên** (`land/227`) và đã mở **PR #234** |
+
+**Họ chung:** cả bốn đều là *hỏi chỗ tiện tay thay vì hỏi chỗ kết luận được ghi*. (1) và (2) là grep
+lỏng; (3) đọc `ops/reviews/` rồi kết luận về lịch sử review; (4) neo vào một **tên nhánh tự suy ra**.
+
+**Chốt rút ra, đã áp:** đo bằng **hiện vật** và **khoá chính xác**, không bằng tên/chuỗi con/tín hiệu
+gần nhất. Và trong tài liệu thì **bỏ số ghi cứng, thay bằng lệnh đo sống** — PR #230 ăn ba finding
+chỉ vì số ghi cứng chết ở commit kế tiếp, ba lần trong cùng một PR.
+
+### 3b. Bổ sung 05:23Z — bài học SẮC HƠN, do phiên #233 tìm ra
+
+Phiên `session_018YdsqSNdxorwxVYW2d2PkH` xác nhận con số **230** và tìm ra gốc lệch 15: regex của họ
+`^([a-z_][a-z0-9_]*):` đòi khoá **TOÀN CHỮ THƯỜNG**, mà kho dùng chữ HOA trong tên khoá để nhấn mạnh
+(`assurance_KHONG_dat`, `write_set_KHONG_gom`, `pham_vi_NGOAI`, `la_luot_review_CUOI`, …).
+
+Đã kiểm hai chiều, độc lập, trên `origin/master`: `yaml.safe_load` = **230** · regex = **215** ·
+`yaml \ regex` = **15** · `regex \ yaml` = **0**. Tập 230 **phủ** 215, không phải hai tập lệch nhau.
+
+> **Nguyên văn chỗ đáng nhớ nhất của họ:** bản đầu còn ship kèm một **lệnh tái lập dùng chính cái
+> regex hỏng ấy**. Lệnh chạy được, chạy nhanh, và tái lập **trung thành** một con số sai — nên nó
+> trông y hệt bằng chứng. **Một phép đo sai CÓ lệnh tái lập khó phát hiện hơn một phép đo sai không
+> có gì**, vì cái lệnh mua cho nó sự tin cậy mà nội dung không xứng.
+
+Điều này **sửa lại lời khuyên của chính bản bàn giao này**. §3 chốt *"thay số ghi cứng bằng lệnh đo
+sống"* — chưa đủ. Một lệnh đo sống dựng trên phép dò sai chỉ là lời khai sai chạy nhanh hơn. Chốt
+đúng có **hai** vế: (a) lệnh phải dùng **bộ phân tích CẤU TRÚC**, không phải regex trên văn bản thô;
+(b) lệnh phải **fail-close** — bản mới của họ đòi `khong parse == 0`, nên tệp hỏng làm phép đo ĐỎ chứ
+không lặng lẽ tụt số.
+
+**Thứ khoanh được vùng lỗi là IN CẢ BA CỘT.** Cột giữa (`cổng đọc 8`) khớp tuyệt đối giữa hai bên,
+nên lỗi bị dồn về cột đếm tên trường ngay lập tức. Nếu tôi chỉ nói *"215 sai"* thì họ phải truy cả
+phép dò cổng. **Báo một con số lệch thì báo luôn con số nào KHỚP** — chỗ khớp mới là thứ khoanh vùng.
+
+**Đếm hình dạng:** phiên #233 ghi nhận **ba lần trong MỘT ngày** cùng hình dạng *regex trên văn bản
+thô thay cho bộ phân tích cấu trúc* — bộ quét lease khớp nháy KÉP trong khi YAML ghi nháy ĐƠN (báo
+"0 va chạm" sai, giấu một va chạm thật) · `adr-song` đếm dòng bảng nằm trong khối mã có rào · và cái
+này. Ba lần ⇒ theo doctrine của kho, câu hỏi đúng không còn là *"vá regex thế nào"* mà là **"có nên
+dùng regex cho việc này không"**.
+
+### 3c. Lỗi đo thứ SÁU — và nó khác năm cái trước
+
+Năm lỗi ở §3 và §5b đều là **tôi đo sai**. Cái thứ sáu là **tôi KHÔNG đo**: tôi nhận khung của một
+phiên khác vì nó nghe sắc hơn khung của mình, rồi chuyển tiếp cho người giữ kho **và** cho chính
+phiên ấy như một xác nhận. Cross-review bắt (P2 trên PR #236).
+
+Nguy hơn năm cái trước ở hai chỗ. **Một:** một phép đo sai của tôi thì chỉ mình tôi mang; một khung
+sai được tôi *xác nhận* thì bên kia coi như đã có kiểm chứng độc lập — tôi biến lời khai của họ thành
+bằng chứng mà không thêm một phép đo nào. **Hai:** cả phiên này tôi đòi *"đo, đừng nhận lời khai"*,
+rồi nhận đúng một lời khai vì nó bất lợi cho tôi và nghe khiêm tốn.
+
+**Chốt:** một khung **bác chính mình** vẫn phải đo. Tự phê không phải bằng chứng.
+
+## 4. Hai con số tôi đã báo người giữ kho mà sau đó bị bác — đọc kỹ
+
+- **"Mục D là hai field"** — hụt **hai bậc**. Đo lại: **49** lease dùng **230** tên trường mức gốc,
+  `ops/lease_publish.py` nhắc **8**, còn **222** không ai kiểm. Phiên #233 đo ra 215/8/**207** —
+  cột giữa **khớp tuyệt đối**, tổng lệch **15**. **ĐÃ PHÂN ĐỊNH** (xem §3b, và sửa theo P2 lượt 2):
+  **230 đúng**; **215 là bản đếm HỤT** vì regex `^([a-z_][a-z0-9_]*):` đòi khoá toàn chữ thường, bỏ sót
+  đúng 15 tên có chữ HOA. Chiều ngược lại **rỗng** — 230 phủ 215. Giữ con số 215 ở đây làm **bối cảnh
+  lịch sử**, không phải như một lựa chọn còn treo. Kết luận chịu tải không đổi: mục D
+  là một **quyết định phạm vi**, không phải bản vá hai dòng. Phiên #233 đã cắt thành D1–D4.
+- **"Protocol im lặng về trần review"** — sai (xem §3.1).
+- **VÀ CÁI THAY THẾ NÓ CŨNG SAI — lỗi đo thứ SÁU, xem §3c.** Tôi chép khung của phiên #233
+  (*"protocol mang HAI con số mà không nói cái nào thắng"*) và chuyển tiếp cho cả người giữ kho lẫn
+  chính họ, **mà không đo**. Đo rồi thì `:750-751` nói rõ: *"Hai lượt Codex review… là một stop
+  condition **riêng**… được kích hoạt khi chạm trần này **HOẶC** khi PR đã qua ba vòng code/review
+  tổng cộng"*, và `:753` giữ **bộ đếm riêng** cho từng trục. Đó là **hai điều kiện dừng ĐỘC LẬP,
+  nối bằng HOẶC — cái nào chạm trước thì thắng**. Protocol có nói, và nói rõ.
+  **Chỗ lệch THẬT là LIÊN VĂN BẢN, không phải trong protocol:** `ADR-0043` chốt canon **HAI** vòng
+  review, còn protocol `:751` kích hoạt checkpoint ở **BA** vòng. Hai con số trên **cùng một trục**,
+  ở hai tài liệu, và protocol trỏ ADR-0043 **0 lần**. Ai đọc khung cũ sẽ đi *thay* một trần bằng
+  trần kia; việc đúng là **giữ cả hai trục** rồi phân xử con số trên trục VÒNG.
+  Cộng dòng 7 trỏ ADR bằng một **phạm vi đã chết** (`ADR-0017 đến ADR-0035`, trong khi có 45 ADR).
+
+## 5. Việc duy nhất còn treo — `PLAT-X8` bản 4
+
+> ⚠️ **MỤC NÀY ĐÃ LẠC HẬU BA CHỖ — ĐỌC §5c TRƯỚC.** Giữ nguyên vì append-only (vế cũ là bằng
+> chứng), nhưng **đừng hành động theo nó**: nó trỏ bản **3b** trong khi tệp đã lên **3d**, trỏ
+> **#227** trong khi điều kiện chờ nay là **#238**, và khai **BỐN** chỗ trích băm trong khi có
+> **NĂM**. Chi tiết + phép đo ở **§5c**.
+
+Chờ **#227** land. Đo 05:07Z: **chưa** (master `0` hàm mới · `RC_` = 6 · 39 ca). Đường land là
+**PR #234** (`land/227`, head `86788eb4`, mở 04:59Z) — `gate (ubuntu-latest)` **FAILURE**, chết ở
+**bước 10 `lease-publish selftest`**, 18 bước sau `skipped`.
+
+**Không vá hộ:** không có lease trên `ops/lease_publish*`, và lease `#227` còn hiệu lực tới
+**23-08T01:00Z**. Đó là việc của executor `#227`.
+
+Hẹn `trig_0171iMNPHfQSn58J4VmPm6h1` (06:00Z) mang **tiêu chí đã sửa**: đo hiện vật trên master +
+quét **tập PR đang mở** theo NỘI DUNG; **không canh tên nhánh**. Kèm ba đường thoát để không hẹn vô hạn.
+
+Khi #227 land: sáu chỗ phải sửa cho bản 4 nằm sẵn trong **hộp ⛔ ở đầu `ops/specs/plat-x8.md`**.
+Kèm gỡ hộp, thêm hàng `4` vào bảng phiên bản, và cập nhật **cả bốn** chỗ trích băm còn sống. **Hai
+bảng LỊCH SỬ giữ nguyên băm cũ.** **Trước khi đổi băm — KHÔNG dùng `grep -rl plat-x8 ops/leases/`.** Bản đầu của tệp này ship đúng
+lệnh ấy, và cross-review bắt (P1 trên PR #236): nó chỉ quét **cây đang checkout**, tức đúng phép đo mù
+mà §7 của chính tệp này gọi tên là nợ `SO-LEASE-KHONG-NAM-MOT-CHO`. Một tệp vừa mô tả cái bẫy vừa
+bước vào nó. Lệnh đúng quét **mọi ref**, và **fail-close**:
+
+**Và bản vá ĐẦU TIÊN của lệnh ấy CŨNG hỏng — cross-review lượt 2 bắt (P1).** Nó quét mọi ref
+nhưng chỉ khớp **TÊN TỆP**. Một khi bản ghi lease `plat-x8` merge vào `master` hoặc nằm lại trên một
+nhánh đã hết hạn, vòng lặp trả "CÓ LEASE" **vĩnh viễn** — chặn luôn bước đổi băm kể cả sau khi
+executor xong hoặc lease đã bị rút. Đổi một phép đo **âm tính giả** lấy một phép đo **dương tính giả
+vĩnh viễn**.
+
+**Đây là lần THỨ HAI trong cùng tệp này tôi mô tả cái bẫy rồi bước vào nó.** §7 và mục 12 của sổ nợ
+đều ghi thành chữ: *"**chưa hết hạn** KHÔNG phải **còn hiệu lực**"*, và *"không có cách nào ĐỌC ĐƯỢC
+để biết một lease đã tiêu hay chưa"*. Tôi viết ra câu ấy rồi ship một bộ quét coi mọi tệp khớp tên là
+lease sống.
+
+**Nên lệnh đúng KHÔNG phải một bộ quét khôn hơn.** Thứ cần là **BA trạng thái**, đúng như
+`ops/RUT_LEASE_PLAT_X8_20260821.md` đã kê:
+
+| trạng thái | đọc từ đâu | xử |
+|---|---|---|
+| `còn hiệu lực` | `lease_expires_at_utc` > hiện tại **và** packet chưa có hiện vật trên master | **DỪNG**, hỏi người giữ kho |
+| `đã tiêu` | packet có hiện vật trên master ⇒ việc xong, quyền ghi thừa | bỏ qua |
+| **`không xác định được`** | parse hỏng · fetch hỏng · không đọc được ref · không dựng được cột "đã tiêu" | **DỪNG** — *"không đo được"* không phải *"không có"* |
+
+Cột `đã tiêu` **phải dựng BẰNG TAY** bằng cách đi tìm hiện vật của packet trên `master`; **không**
+trường nào trong tệp lease nói ra điều đó, và **trạng thái Issue cũng không** — đo 22-08: cả bốn Issue
+`#206 #215 #225 #227` đều `open` trong khi hai packet đầu đã land.
+
+> ## ⛔ KHÔNG CÓ LỆNH NÀO Ở ĐÂY. Đó là kết luận, không phải thiếu sót.
+>
+> Chỗ này từng có một lệnh quét lease. Nó hỏng **BA lần liên tiếp**, mỗi lần theo một kiểu khác, và
+> **mỗi bản vá đẻ ra lỗi kế tiếp**:
+>
+> | lượt | bản đang có | hỏng thế nào |
+> |---|---|---|
+> | 1 | `grep -rl plat-x8 ops/leases/` | chỉ quét **cây đang checkout** ⇒ **âm tính giả** — mù đúng chỗ lease sống |
+> | 2 | quét mọi ref, khớp **tên tệp** | lease đã merge/hết hạn vẫn tính là sống ⇒ **dương tính giả VĨNH VIỄN**, chặn luôn việc của phiên sau |
+> | 3 | thêm phân loại `CON_HAN`/`HET_HAN`/`KHONG_XAC_DINH` | in **đúng chữ** `KHONG_XAC_DINH` nhưng `\|\| echo` nuốt mã thoát ⇒ **`rc=0`**. Fail-**OPEN** trong chính cái chốt viết ra để fail-**CLOSE** |
+> | 4 | vòng lặp qua **mọi ref**, hợp thể | trả **RỖNG** — trong khi **từng mảnh chạy đúng** khi tách rời (ref có · `git show` được · so ngày đúng). Hợp lại thì không ra gì |
+> | 5 | `sed 's/.*: *//'` để lấy giá trị | `.*` **tham lam**, mà giá trị **có dấu hai chấm**: `'2026-08-23T11:00:00Z'` bị cắt còn `00Z`. So chuỗi `"00Z" > "2026-08-22T…"` ra `het_han` ⇒ **ÂM TÍNH GIẢ TRÊN LEASE ĐANG SỐNG** |
+>
+> Phản chứng cho lượt 3, chạy được: YAML hỏng ⇒ in `KHONG_XAC_DINH parse: …` mà **`rc` của cả khối
+> = 0**. Lượt ấy tôi còn khai *"đã chạy thật"* — nhưng tôi thử **đoạn python đơn lẻ** (`rc=2`), không
+> thử **khối đã ship**. Thử sai đơn vị rồi khai composite chạy được.
+>
+> **Phản chứng cho lượt 5, chạy được:** dòng thật là `lease_expires_at_utc: '2026-08-23T11:00:00Z'`;
+> qua `sed` còn `00Z`. Hai lease `LEASE-DANG-WINDOWS` **đang sống** bị báo là hết hạn ⇒ bộ quét trả
+> *"cấp lease được"* cho câu hỏi mà đáp án đúng là *"không"*. Tin nó thì đã đổi băm đặc tả **dưới
+> chân một generation đang chạy** — đúng tai nạn mà nợ `SO-LEASE-KHONG-NAM-MOT-CHO` sinh ra để chặn.
+> Đo đúng bằng `yaml.safe_load` ⇒ cả hai `CON_HAN`.
+>
+> **Và triệu chứng của lượt 5 ĐÃ HIỆN RA TRONG OUTPUT CỦA CHÍNH TÔI** — một bảng trước đó in
+> `hết=00Z'`, kèm cả dấu nháy thừa, cho **bốn** dòng liền. Tôi đọc lướt qua. Đó là bài học khác
+> hẳn bốn cái kia: không phải lỗi thiết kế, mà là **không nhìn thứ mình vừa in ra**.
+>
+> **NĂM lần cùng một chỗ ⇒ theo doctrine đếm hình dạng, câu hỏi đúng không còn là *"vá thế nào"* mà
+> là *"có nên làm việc này không"*.** Bản đầu của mục này ghi **BA** — đó là số đúng lúc viết, và
+> hai lượt hỏng nữa xuất hiện **SAU khi tệp này đã merge**. Sửa con số vì nó là **lập luận chịu
+> tải**: ngưỡng doctrine là ba, nên *"ba"* dễ đọc thành *"vừa đủ chạm ngưỡng"*, trong khi sự thật
+> là **vá tới lần thứ ba vẫn chưa chạm đáy**.
+>
+> **Bốn và năm nặng hơn ba cái đầu, không nhẹ hơn.** Ba cái đầu hỏng **ồn ào** — chặn oan, in sai
+> chữ, sai mã thoát. Lượt 5 hỏng **im lặng và đúng chiều nguy hiểm**. Lượt 4 thì bác luôn cách tự
+> trấn an: **thử THÀNH PHẦN không phải thử HỢP THỂ** — mọi mảnh xanh mà hợp thể vẫn rỗng. Tiền lệ của kho: bộ tự ghi lại `~/.codex/config.toml` ăn **bảy**
+> phát hiện qua **bốn** lượt vá, và lời giải cuối cùng là **thôi làm việc đó** — *"cả lớp rủi ro chết
+> theo KIẾN TRÚC, không theo bản vá"*.
+>
+> **Nên đây là LUẬT, không phải script.** Trước khi đổi băm `ops/specs/plat-x8.md`, phải xác lập —
+> bằng tay, và **ngay trước lúc làm**, không phải từ một lượt quét cũ:
+>
+> 1. **Quét MỌI ref**, không chỉ `master`, không chỉ cây đang checkout. Số ref phải **đo**, đừng chép:
+>    98 → 99 → 158 trong một buổi.
+> 2. Với mỗi lease chạm `ops/lease_publish*`, phân **BA** trạng thái. Tên trường hạn là
+>    **`lease_expires_at_utc`** — đoán sai tên thì nhận `None` cho mọi tệp, và `None` đọc thành
+>    *"không có hạn"* cho ra đúng kết luận sai mà phép đo sinh ra để chặn.
+> 3. Cột **`đã tiêu`** phải dựng **BẰNG TAY** từ hiện vật của packet trên `master`. Không trường nào
+>    trong tệp lease nói ra điều đó, **và trạng thái Issue cũng không** — đo 22-08: cả bốn Issue
+>    `#206 #215 #225 #227` đều `open` trong khi hai packet đầu đã land.
+> 4. **`CÒN_HẠN` hoặc `KHÔNG_XÁC_ĐỊNH` ⇒ DỪNG và hỏi người giữ kho.** *"Không đo được"* không phải
+>    *"không có"*.
+>
+> **Đo hiện tại (06:5xZ) — đã có va chạm, nên bước này ĐANG ĐỎ:** hai lease `LEASE-DANG-WINDOWS` trên
+> `origin/ops/pkg-windows` (hết `23-08T10:00Z` và `11:00Z`) giữ **đúng cả hai** tệp `write_set` của
+> `PLAT-X8`. Xem §5c.
+>
+> **Nợ có tên:** `SO-LEASE-KHONG-NAM-MOT-CHO` (§7). Thứ cần là lệnh `ai-dang-giu <đường-dẫn>` **có bộ
+> test và có đột biến**, nằm trong `ops/lease_publish.py` — **không phải** một đoạn shell nữa dán vào
+> tài liệu. Ba lượt trên là bằng chứng đo được rằng đoạn shell là **hình dạng sai**, không phải bản vá
+> chưa đủ khéo.
+
+Lệnh này chỉ trả **`CÒN_HẠN` / `HẾT_HẠN` / `KHÔNG_XÁC_ĐỊNH`**. Nó **cố ý KHÔNG** tự quyết `đã tiêu` —
+đó là chỗ con người phải đo. `CÒN_HẠN` hoặc `KHÔNG_XÁC_ĐỊNH` ⇒ **DỪNG và hỏi**, đừng tự diễn giải.
+
+Nợ có tên cho việc này: `SO-LEASE-KHONG-NAM-MOT-CHO` (§7) — cần lệnh `ai-dang-giu <đường-dẫn>` trả
+đủ ba trạng thái, chứ không phải một bộ quét nữa.
+
+### 5b. CẬP NHẬT 05:4x Z — #227 ĐÃ LAND RỒI BỊ REVERT, và điều đó BÁC tiêu chí canh ở §5
+
+Master đi **50 commit** kể từ `3f64167`. Chuỗi thật:
+
+| commit | việc |
+|---|---|
+| `b88744e` | **merge PR #234** — `#227` LAND |
+| — | master `b88744ea` ⇒ `gate(windows-latest)` **ĐỎ 59/68** |
+| `7e75156` → `2ab3560` | **PR #237 revert BA TỆP MÃ** của `#227` |
+
+Chín ca đỏ (`t49 t51 t52 t59 t60 t62 t63 t66 t68`) đều là ca **MỚI** của `#227` và **chưa ca nào từng
+chạy trên Windows** — `ci.yml` chỉ chạy ubuntu cho PR thường. Cùng một gốc: đồ giả không chạy được
+trên Windows ⇒ không log nào được ghi ⇒ `FileNotFoundError` khi đọc `argv.log`.
+
+**Đó đúng là bài học `CLAUDE.md` mà chính `#227` đã chép vào `r6 §chua_do_duoc`** — *"PR xanh không
+hàm ý master xanh; lần merge chính là lần đo Windows đầu tiên"* — và vẫn trôi. Đường đúng là gọi tay
+`workflow_dispatch` trước khi merge; đã không làm.
+
+Revert **cố ý thu hẹp**: chỉ ba tệp mã (`ops-publish-lease.yml`, `lease_publish.py`,
+`lease_publish_test.py`), **giữ toàn bộ hồ sơ** — đo được: 10 verdict + 12 lease `lease-dang` còn trên
+master, và ba tệp ấy khớp **byte-identical** với `3f641673`.
+
+> **TIÊU CHÍ CANH Ở §5 ĐÃ HỎNG — đây là lần thứ NĂM cùng họ.** Nó đo *hiện vật hiện tại*
+> (`grep -c "^(GOI_GH|def kiem_github|…)"` ⇒ `0` ⇒ "chưa land"). Phép đo ấy **không phân biệt được**
+> *chưa từng land* với *land rồi bị revert*. Ngay lúc này nó trả "chưa land" và **tình cờ** dẫn tới
+> hành động đúng (chưa viết bản 4), nhưng vì **lý do sai** — và lần sau nó sẽ đọc nhầm mà không ai biết.
+>
+> **Tiêu chí đúng phải đo LỊCH SỬ, không đo trạng thái:** `git log --oneline <mốc>..origin/master`
+> tìm cả commit land LẪN commit revert. Trạng thái hiện tại là một hàm của lịch sử, và hàm ấy
+> **không khả nghịch**.
+
+**Hệ quả cho bản 4:** sáu chỗ trong hộp ⛔ giả định `#227` land và nâng bộ test **42 → 58**. Giả định
+ấy nay **đã bị hoàn nguyên**. Bộ test lại là **39 `def t` / 42 đạt**. **Đừng viết bản 4** cho tới khi
+`#227` land LẦN HAI — và biên bản revert nói rõ lần ấy sẽ được **đo thật trên Windows bằng
+`workflow_dispatch` trước khi land**.
+
+**Bệnh đăng trùng lease QUAY LẠI master** cho tới lúc land lại. Ai cấp lease trong khoảng này phải biết.
+
+### 5c. CẬP NHẬT 06:5xZ — §5 trên kia ĐÃ LẠC HẬU BA CHỖ. Đọc mục này thay cho §5.
+
+Phiên thứ ba, `tra-luat-ae` (`session_014NW8Liw`), đang giữ chính `ops/specs/plat-x8.md`. Tin họ gửi,
+**tôi đã đo lại ba khẳng định chịu tải và cả ba khớp**:
+
+| §5 nói | thật ra | phép đo |
+|---|---|---|
+| xuất phát từ **3b** `308d0cf4…` | tệp đã lên **3d** = `f7f8e6209e4fb624fc19f72a4759b48551e8312fdbd34c7badb6c14309d036ea`, trên nhánh `claude/phien-tra-luat-5a-handoff-9o1cqp` **chưa merge** | `git show origin/claude/phien-tra-luat-5a-handoff-9o1cqp:ops/specs/plat-x8.md \| sha256sum` ⇒ khớp |
+| chờ **#227** | `#227` land rồi bị revert; điều kiện chờ nay là **#238** (`LEASE-DANG-WINDOWS`) | §5b |
+| **BỐN** chỗ trích băm | **NĂM**. Chỗ thứ năm là `ops/prompts/phien-hoan-thien-ke-hoach-20260822.md:65` — **tệp do chính tôi tạo**, và tôi đã khai "bốn" nhiều lần | `grep -n 308d0cf4 ops/prompts/phien-hoan-thien-ke-hoach-20260822.md` ⇒ dòng 65 |
+
+**VA CHẠM WRITE SET ĐANG SỐNG — không cấp lease `PLAT-X8` được.** Đo trên `origin/ops/pkg-windows`
+(nhánh chưa về master):
+
+```
+lease-dang-windows-exec-1-codex-20260822.yaml   LEASE-DANG-WINDOWS   hết 2026-08-23T10:00:00Z
+lease-dang-windows-exec-2-codex-20260822.yaml   LEASE-DANG-WINDOWS   hết 2026-08-23T11:00:00Z
+  write_set: .github/workflows/ops-publish-lease.yml · ops/lease_publish.py · ops/lease_publish_test.py
+```
+
+Tức **đúng cả hai** tệp `write_set` của `PLAT-X8`, cộng một tệp nữa.
+
+**Hộp ⛔ của 3d ghi MƯỜI HAI chỗ sai, không phải sáu** — và họ nói thẳng rằng chính hộp 3d cũng chỉ là
+ảnh chụp lúc 06:2xZ. **Đo lại từng chỗ, đừng chép từ hộp.**
+
+> **Bài học họ trả giá, chép sang vì nó đổi CÁCH LÀM chứ không chỉ một con số:** một phép đo **đúng**
+> tự bác chính nó **trong 20 phút**. Họ quét đủ **99** ref lúc 05:2xZ ra *"0 lease chồng lấn, cấp lease
+> được"*; hai mươi phút sau nhánh `ops/pkg-windows` xuất hiện mang đúng một lease chồng lấn ⇒ kết luận
+> đảo chiều. **Quét đủ ref là CẦN, không ĐỦ — phải quét NGAY TRƯỚC KHI CẤP.** Và số ref cũng phải đo
+> chứ đừng chép: **98 → 99 → 158** trong một buổi.
+
+Kèm một bẫy tên trường: hạn lease là `lease_expires_at_utc`. Lượt quét đầu của họ đoán `het_han`/
+`expires_at`, nhận `None` cho cả 42 tệp, mà `None` đọc thành *"không có hạn"* thì bảng ra
+**`0 lease còn hạn`** — đúng cái kết luận sai mà phép đo ấy sinh ra để chặn.
+
+**Một điều đáng nhớ về `actionlint`:** container này **thiếu `shellcheck`**, nên `actionlint` ở đây là
+phép đo **YẾU HƠN** CI. Ai báo `actionlint rc=0` phải nói kèm **có `shellcheck` hay không**.
+
+**Chưa đo, họ khai:** 12 chỗ sai · **29** trường SHA trong **21** lease trỏ commit không tra được
+(17/44 lease reviewer) — chạm **lập luận** của §9 chứ không chỉ một con số, vì `reviewed_sha_required`
+được cổng kiểm **HÌNH DẠNG** (40-hex) chứ không kiểm **TỒN TẠI** · `SLICE-B-C` đã land (PR #216) ·
+master `2ab3560` xanh cả hai nền.
+
+**Cam kết phạm vi bổ sung:** từ 06:5xZ tôi **không đụng `ops/specs/plat-x8.md`** — `tra-luat-ae` đang
+giữ nó.
+
+## 6. Cam kết phạm vi với phiên #233 — GIỮ ĐÚNG
+
+Phiên `session_018YdsqSNdxorwxVYW2d2PkH` (PR #233) đang làm protocol §20 (bảng **định tuyến** ADR, do
+máy canh) và `ops/HOAN_THIEN_KE_HOACH_20260822.md`. Tôi đã hồi âm và cam kết **không đụng**:
+
+- `ops/NO_KY_THUAT.md` — họ dùng §13/§14, cố ý chừa §12 cho tôi (đã land ở #230, ráp sạch)
+- `docs/PROTOCOL_DA_PHIEN.md`
+- `docs/adr/**`
+
+**#233 CHƯA sắp merge:** codex ra 2 P2 chưa vá (`ADR-NNNN` trong khối mã có rào / comment HTML vẫn bị
+tính là metadata sống ⇒ `adr-song` trả `rc=0` sai; và regex tên tệp siết hơn văn bản mô tả).
+
+## 7. Còn mở, không ai đang làm
+
+| thứ | trạng thái |
+|---|---|
+| `PLAT-X8` (#225) | `state:proposed`, **0 lease**. Lease cũ đã cấp rồi **RÚT** (`c7bb945`), chưa từng đăng |
+| `PLAT-X6` (#209) | `state:ready`, **0 lease** — sổ nợ `required-status-check` + đảo `t34` |
+| `PLAT-X7` (#220) | `proposed`, chưa spec — đo danh tính model, `depends_on: [PLAT-X8]` |
+| PR #229 | `ops/HANG_DOI_PACKET.md` — một chỗ duy nhất cho THỨ TỰ packet, chưa merge |
+| nợ `SO-LEASE-KHONG-NAM-MOT-CHO` | chưa có lệnh `ai-dang-giu` |
+| nợ mục 12 | verdict lượt 3 của X4 **không có hiện vật ở đâu**; và lease lượt 3 khai sai rằng lượt 1+2 *"có verdict trong `ops/reviews/`"* (ở đó có **0** tệp X4) |
+
+**Một manh mối chưa phân định, đừng đọc thành kết luận:** `mergeable_state` của PR #230 đổi
+`clean` → `blocked` đúng lúc cổng chuyển `success` → `in_progress`, rồi về `clean` khi cổng xanh lại.
+GitHub trả `blocked` khi **branch protection** chặn, `unstable` khi check **không bắt buộc** đang chờ.
+Ta nhận `blocked`. Đó là bằng chứng gián tiếp rằng branch protection **có đòi một thứ gì đó** — nếu
+thứ ấy là job `gate` thì nó đụng **Q7** (đã trả lời *"KHÔNG BẬT"*) và nợ thường trực `§9`. **Chưa đo
+được** vì REST tới `/repos/<kho>` bị proxy chặn 403 từ container này. Cách phân định: so
+`mergeable_state` trên một PR **không có review nào** khi cổng đỏ.
+
+---
+
+**Đọc được bản này KHÔNG phải là được giao việc.** Handoff không phải lease (`docs/PROTOCOL_DA_PHIEN.md` §7).
+
+---
+
+## 8. CHỐT CUỐI PHIÊN — 08:0xZ. Đọc mục này TRƯỚC §5, §5b, §5c.
+
+Bốn mục trên là **lịch sử theo thứ tự viết**, và ba trong bốn đã bị chính phiên này bác một phần.
+Mục 8 là **ảnh chụp cuối cùng**. Vẫn phải đo lại — nó cũng chỉ là ảnh chụp.
+
+### 8.1 Việc của phiên — xong hết, không còn gì dở
+
+| # | việc | kết cục |
+|---|---|---|
+| 1 | Vá bốn con trỏ chết trong tài liệu có thẩm quyền | **PR #230 merged** |
+| 2 | Hộp ⛔ trên `ops/specs/plat-x8.md` | bản **3b** — nay đã lạc hậu, xem §8.3 |
+| 3 | Nợ **§12** `PLAT-X4-721-dong-chua-verdict-nao-phu` + đính chính append-only | trong #230 |
+| 4 | Bản giao việc hoàn thiện kế hoạch | `ops/prompts/phien-hoan-thien-ke-hoach-20260822.md` — **đã được thi hành**, xem §8.2 |
+| 5 | Bàn giao này | **PR #236 merged** |
+| 6 | Bộ quét hand-roll hỏng **NĂM** lần → thay bằng LUẬT | **PR #239 merged** |
+| 7 | Issue nối `adr-song` + `doctrine-scan` vào `ci.yml` | **Issue #241**, `proposed` |
+
+### 8.2 Việc người giữ kho giao từ đầu phiên — ĐÃ LAND, do phiên khác làm
+
+*"Hoàn thiện Kế hoạch triển khai + đồng bộ Protocol"* land qua **PR #233**, do
+`session_018YdsqSNdxorwxVYW2d2PkH` thi hành đúng bản giao việc ở mục 4 trên.
+
+- **`docs/PROTOCOL_DA_PHIEN.md` §20** — bảng định tuyến ADR **do MÁY canh**
+  (`packet_loop.py adr-song`), thay dòng phạm vi đã chết `ADR-0017 đến ADR-0035`.
+- **`ops/HOAN_THIEN_KE_HOACH_20260822.md`** — cắt mục D thành **bốn** packet đề xuất `D1`–`D4`,
+  thứ tự neo theo độ phủ đo được. Hàng đợi: `#227 → #225 → #209 → #220 → D1 → D2 → D3 → D4`.
+
+**Hai chỗ tệp ấy tự khai bất lợi, đáng đọc hơn phần còn lại:** (a) cột *"cổng đã ĐO"* của §20 có
+**ba** giá trị và **hai trong ba là lời khai yếu** — `có nhắc` chỉ là proxy, `chưa đo` là trạng thái
+thứ ba; (b) họ tự khai **vượt ngưỡng** `ADR-0044` (8 tệp, +2040) kèm lý lẽ đo được thay vì lờ đi.
+
+**Và con số của tôi sai lần nữa, lệch xa hơn tôi tưởng.** Tôi báo *"mục D là hai field"*, sửa thành
+*"230 tên trường"*; số đúng trên master mới là **247 tên trường · cổng đọc 8 · 239 không ai kiểm**,
+trên **61** lease. Bài học không phải con số mà là: **mỗi lần đo lại, con số lớn hơn** — vì tập lease
+tăng và phép liệt kê cũ luôn hụt. Đừng chép; chạy lệnh trong `ops/HOAN_THIEN_KE_HOACH_20260822.md` §1.
+
+### 8.3 `PLAT-X8` bản 4 — HAI điều kiện, cả hai còn chặn
+
+| điều kiện | đo 08:00Z | đo thế nào |
+|---|---|---|
+| `#238` land | **CHƯA** — lịch sử `99eb1d2..master` = 0 commit; `RC_`=6; 39 ca; 0 hàm mới | LỊCH SỬ trước, HIỆN VẬT xác nhận. Hai phép đo phải KHỚP |
+| va chạm write set | **CÒN ĐỎ** — hai lease `LEASE-DANG-WINDOWS` `CON_HAN` tới `23-08T10:00Z` và `11:00Z`, giữ đúng cả hai tệp | `yaml.safe_load`, **KHÔNG** `sed` |
+
+**Xuất phát từ bản 3d**, KHÔNG phải 3b:
+`f7f8e6209e4fb624fc19f72a4759b48551e8312fdbd34c7badb6c14309d036ea`, trên nhánh
+`claude/phien-tra-luat-5a-handoff-9o1cqp` (chưa merge — vì thế master vẫn 3b). Hộp ⛔ của 3d ghi
+**MƯỜI HAI** chỗ sai, và chính nó cũng chỉ là ảnh chụp. **Đo lại từng chỗ.** Có **NĂM** chỗ trích băm,
+không phải bốn — chỗ thứ năm ở `ops/prompts/phien-hoan-thien-ke-hoach-20260822.md`.
+
+`ops/specs/plat-x8.md` do phiên `tra-luat-ae` (`session_014NW8Liw`) giữ. **Không đụng.**
+
+### 8.4 Bốn cam kết phạm vi — GIỮ ĐÚNG
+
+Không đụng: `ops/NO_KY_THUAT.md` · `docs/PROTOCOL_DA_PHIEN.md` · `docs/adr/**` (phiên #233) ·
+`ops/specs/plat-x8.md` (phiên `tra-luat-ae`).
+
+### 8.5 Thứ đáng mang sang nhất
+
+Phiên này đo sai **sáu** lần và bộ quét lease hỏng **năm** lần. Gộp lại thành đúng một câu:
+
+> **Đo cái mình sắp khẳng định, bằng công cụ hiểu CẤU TRÚC, ngay trước lúc khẳng định.**
+
+Ba hệ quả đã trả giá, mỗi cái một lần:
+
+1. **`grep`/`sed` trên YAML là hình dạng sai** — không phải bản vá chưa khéo. `sed 's/.*: *//'` tham
+   lam trên giá trị có dấu hai chấm cho **âm tính giả trên lease đang sống**. Dùng `yaml.safe_load`.
+2. **Thử THÀNH PHẦN không phải thử HỢP THỂ.** Mọi mảnh xanh mà hợp thể vẫn rỗng — đã xảy ra.
+3. **Một khung BÁC CHÍNH MÌNH vẫn phải đo.** Tôi nhận khung của phiên khác vì nó nghe khiêm tốn, rồi
+   *xác nhận* lại cho họ mà không thêm phép đo nào — biến lời khai thành bằng chứng bằng cách chuyền
+   tay. **Tự phê không phải bằng chứng.**
+
+Và một thứ khác loại ba cái trên: **triệu chứng của lỗi thứ năm ĐÃ HIỆN RA trong output của chính
+tôi** (`hết=00Z'`, bốn dòng liền, kèm dấu nháy thừa) và tôi đọc lướt qua. Không phải lỗi thiết kế —
+là **không nhìn thứ mình vừa in ra**.

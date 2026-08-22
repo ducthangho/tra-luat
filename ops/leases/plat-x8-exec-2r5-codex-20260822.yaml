@@ -108,6 +108,16 @@
 # `revision: 1 → 2`, hai băm đổi, lý do ghi ở đây, và bản chiếu trên `#225` sẽ có comment thứ hai.
 # `posted_comment_id` bên dưới trỏ bản chiếu của revision 1 — **băm trong comment ấy đã CŨ**.
 #
+da_bi_thay_the: plat-x8-exec-2r6-codex-20260822
+da_bi_thay_the_ly_do: >-
+  HẾT HIỆU LỰC ~19:0xZ 22-08. Cross-review lượt 3 (lease reviewer `plat-x8-review-3-claude-20260822`,
+  phiên claude KHÁC phiên soạn đặc tả) tìm một P1 THẬT: `_BANG_LOP` chứa 4 mục `systemic` ngoài
+  §8:572 — nới bảng trái đặc tả, hạ lớp thật sự, và một mục chạm đúng write_set của chính packet này.
+  Bản vá (attempt 2/3, commit `28f32f7c`) đưa tổng lên **328 dòng thêm**, vượt mốc **313** mà
+  revision 5 cấp ⇒ theo đúng câu `KHONG_cong_nao_canh` của chính r5 ("lệch lên trên thì ngoại lệ
+  KHÔNG phủ, phải xin lại"), phải đi xin lại chứ không đẩy im lặng. Chủ kho duyệt nới lên 328.
+  GIỮ nguyên trạng làm hồ sơ; đã đăng (comment 5381826623).
+  Lease hiệu lực: `plat-x8-exec-2r6-codex-20260822`.
 schema_version: 2
 event: executor_lease_granted
 packet_issue: 225

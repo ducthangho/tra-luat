@@ -909,3 +909,38 @@ reply trước của cùng PR. **Chốt duy nhất tin được vẫn là đo th
 so độ dài và kiểm vài mốc cuối bài; "lời gọi trả thành công" không nói gì về thứ người đọc nhìn thấy.
 
 Máy chưa canh được mục này — chưa có cổng nào đọc lại comment vừa đăng.
+
+---
+
+## 17. `CHECK-SUITE-BAO-XANH-CHO-LUOT-BI-HUY` — hai ca đo được trong một giờ
+
+Thông báo webhook `check_suite.completed` gửi về `conclusion: success`, kèm chú thích *"No check in
+this GitHub App's check suite failed"*. Đo theo **JOB** thì lượt `gate` **chưa chạy xong**:
+
+| head | check_suite gửi về | `gate (ubuntu)` | `gate (windows)` |
+|---|---|---|---|
+| `225d47d0090cbe86940f2ad581e86ff551cf45ad` | **success** | `success` 29/31 | **`cancelled`** 21/31 |
+| `fd78ead6b79d18bd08f3947545b07d04f05abdde` | **success** | **`cancelled`** 29/31 | **`cancelled`** 20/31 |
+
+Nguyên nhân: lần đẩy kế tiếp **đè** lên lượt đang chạy (concurrency), GitHub **huỷ** nó. `cancelled`
+không phải `failure`, nên câu *"không check nào HỎNG"* vẫn đúng **về mặt chữ** — và sai hoàn toàn về
+mặt việc. Ba trạng thái, không phải hai: `xanh` · `đỏ` · **`chưa chạy xong`**; gộp trạng thái thứ ba
+vào "không hỏng" là đúng lỗi `None ≠ False` mà kho đã đặt tên.
+
+**Vì sao nguy hiểm hơn một cổng đỏ:** một agent đang lái PR về xanh sẽ nhận tín hiệu này làm *"CI đã
+qua"* rồi đi tiếp. Nó không phải cổng VẮNG MẶT (`[skip` + `ci]`, `t24`) và cũng không phải đồ giả nói
+dối — đây là **kênh thông báo khai xanh cho một lượt bị huỷ giữa chừng**. Biến thể thứ ba của cùng một
+họ, và là biến thể duy nhất đến dưới dạng một thông báo chủ động.
+
+Tái lập (MCP `x/actions`; tham số tên là `resource_id`, KHÔNG phải `run_id`, và payload lồng **hai**
+tầng `{"jobs": {"jobs": [...]}}`):
+
+```
+actions_list  method=list_workflow_runs  branch=<nhánh>       -> lấy run id theo head_sha
+actions_list  method=list_workflow_jobs  resource_id=<run id> -> đọc conclusion TỪNG job
+```
+
+**Chốt:** đòi `conclusion == "success"` trên **từng job cần**, và đếm bước — `cancelled` với 20/31 bước
+trông y hệt `success` với 31/31 nếu chỉ nhìn "0 hỏng". Đừng kết luận từ `check_suite`, và đừng kết luận
+từ số bước hỏng. Máy chưa canh được mục này; nó là kỷ luật đọc, cùng họ với *"hỏi chỗ tiện tay thay vì
+hỏi chỗ kết luận được ghi"*.

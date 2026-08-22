@@ -2265,9 +2265,13 @@ def t50_ngoai_Actions_phai_KHAI_hai_lop_vang():
 
 
 def _chay_buoc_dang(check_hong="", post_hong="", kiem_github_hong="",
-                    check_rc9="", kiem_github_rc9="") -> dict:
+                    check_rc9="", kiem_github_rc9="", guard_hong="") -> dict:
     import json
     import os
+    if guard_hong == "check":
+        check_hong = "giua"
+    if guard_hong == "kiem-github":
+        kiem_github_hong = "giua"
     than = _buoc_workflow("đăng")["run"]
     with tempfile.TemporaryDirectory() as t:
         goc, neo = Path(t), Path(t) / "neo"
@@ -2279,21 +2283,33 @@ p=pathlib.Path(sys.argv[2]); d=yaml.safe_load(p.read_text(encoding='utf-8')); cm
 with pathlib.Path(os.environ['LENH_GIA_LOG']).open('a',encoding='utf-8') as f: print(*sys.argv[1:],file=f)
 if cmd=='kiem-github': raise SystemExit(9 if d['lease_id']==os.environ.get('KIEM_GITHUB_RC9') else 8 if d['lease_id']==os.environ.get('KIEM_GITHUB_HONG') else 0)
 if cmd=='check': raise SystemExit(9 if d['lease_id']==os.environ.get('CHECK_RC9') else 8 if d['lease_id']==os.environ.get('CHECK_HONG') else 0)
+if cmd=='body' and d['lease_id']=='giua' and os.environ.get('GUARD_HONG')=='body': raise SystemExit(8)
+if cmd=='body' and d['lease_id']=='giua' and os.environ.get('GUARD_HONG')=='payload': sys.stdout.buffer.write(bytes([255])); raise SystemExit(0)
 if cmd=='body': print(f\"**Lease `{d['lease_id']}`**\")
-if cmd=='mark': p.write_text(p.read_text(encoding='utf-8')+'posted_comment_id: '+sys.argv[4]+'\\n',encoding='utf-8')
+if cmd=='mark' and d['lease_id']=='giua' and os.environ.get('GUARD_HONG')=='mark': raise SystemExit(8)
+if cmd=='mark':
+ p.write_text(p.read_text(encoding='utf-8')+'posted_comment_id: '+sys.argv[4]+'\\n',encoding='utf-8')
+ if os.environ.get('GUARD_HONG')=='github_env':
+  e=pathlib.Path(os.environ['GITHUB_ENV'])
+  if d['lease_id']=='giua': e.unlink(missing_ok=True); e.mkdir()
+  elif d['lease_id']=='cuoi': e.rmdir(); e.write_text('DA_DOI=1\\n')
 """.replace("import pathlib", "import os,pathlib"), encoding="utf-8")
         (neo / "ops" / "gh_gia.py").write_text(
             """import json,os,pathlib,re,sys
 a=sys.argv[1:]; p=pathlib.Path(os.environ['GH_GIA_STATE']); d=json.loads(p.read_text())
-body=json.loads(pathlib.Path(a[a.index('--input')+1]).read_text())['body']
-lease=re.search(r'\\*\\*Lease `([^`]+)`\\*\\*',body).group(1)
-ge=pathlib.Path(os.environ['GITHUB_ENV']); snap=ge.read_text() if ge.exists() else ''
+raw=pathlib.Path(a[a.index('--input')+1]).read_text(); body='**Lease `giua`**' if os.environ.get('GUARD_HONG')=='payload' and not raw else json.loads(raw)['body']
+m=re.search(r'\\*\\*Lease `([^`]+)`\\*\\*',body); lease='giua' if os.environ.get('GUARD_HONG')=='body' and m is None else m.group(1)
+ge=pathlib.Path(os.environ['GITHUB_ENV']); snap=ge.read_text() if ge.is_file() else ''
 d['snapshots'].append([lease,snap]); p.write_text(json.dumps(d))
 if lease==os.environ.get('POST_HONG'): print('POST hong',file=sys.stderr); raise SystemExit(42)
-ds=d['comments']; ds.append({'id':9000+len(ds),'body':body}); p.write_text(json.dumps(d)); print(ds[-1]['id'])
+ds=d['comments']; ds.append({'id':9000+len(ds),'body':body,'lease':lease}); p.write_text(json.dumps(d))
+print('khong-phai-so' if lease=='giua' and os.environ.get('GUARD_HONG')=='case_id' else ds[-1]['id'])
 """, encoding="utf-8")
         for ten in ("dau", "giua", "cuoi"):
-            viet(goc / "ops" / "leases", lease_mau(lease_id=ten), ten=f"{ten}.yaml")
+            lease = lease_mau(lease_id=ten)
+            if guard_hong == "packet_issue" and ten == "giua":
+                lease.pop("packet_issue")
+            viet(goc / "ops" / "leases", lease, ten=f"{ten}.yaml")
         (goc / "ds.txt").write_text(
             "".join(f"ops/leases/{x}.yaml\n" for x in ("dau", "giua", "cuoi")),
             encoding="utf-8")
@@ -2301,15 +2317,22 @@ ds=d['comments']; ds.append({'id':9000+len(ds),'body':body}); p.write_text(json.
         state.write_text('{"comments":[],"snapshots":[]}', encoding="utf-8")
         py = Path(sys.executable).resolve().as_posix()
         than = than.replace("python3 ", f"'{py}' ").replace(
-            "gh api ", f"'{py}' \"$NEO/ops/gh_gia.py\" api ")
+            "gh api ", f"'{py}' \"$NEO/ops/gh_gia.py\" api ").replace(
+            'if [ "$BI_CHAN" != "0" ]; then exit 1; fi',
+            'echo "BI_CHAN=$BI_CHAN"\nif [ "$BI_CHAN" != "0" ]; then exit 1; fi')
         mt = dict(os.environ, NEO=str(neo), REPO="o/r", GITHUB_ENV=str(ghe),
                   GH_GIA_STATE=str(state), CHECK_HONG=check_hong, POST_HONG=post_hong,
                   KIEM_GITHUB_HONG=kiem_github_hong, CHECK_RC9=check_rc9,
-                  KIEM_GITHUB_RC9=kiem_github_rc9, LENH_GIA_LOG=str(log))
+                  KIEM_GITHUB_RC9=kiem_github_rc9, GUARD_HONG=guard_hong,
+                  LENH_GIA_LOG=str(log))
         p = subprocess.run([_bash_posix(), "-c", than], cwd=goc, env=mt,
                            capture_output=True, text=True)
         d = json.loads(state.read_text(encoding="utf-8"))
         return {"rc": p.returncode, "bodies": "\n".join(x["body"] for x in d["comments"]),
+                "posts": [x["lease"] for x in d["comments"]],
+                "marks": {x: "posted_comment_id:" in
+                          (goc / "ops" / "leases" / f"{x}.yaml").read_text(encoding="utf-8")
+                          for x in ("dau", "giua", "cuoi")},
                 "snapshots": dict(d["snapshots"]),
                 "env": ghe.read_text(encoding="utf-8") if ghe.exists() else "",
                 "calls": [x.split()[:2] for x in log.read_text(encoding="utf-8").splitlines()],
@@ -2450,6 +2473,75 @@ def t63_check_rc9_bo_qua_lease_va_buoc_XANH():
     bang(kq["rc"] == 0 and kq["bodies"].count("`dau`") == 1
          and kq["bodies"].count("`cuoi`") == 1 and "`giua`" not in kq["bodies"],
          f"check rc=9 xử lý sai: {kq}")
+
+
+VE_TRUOC_POST = ("khong_POST", "khong_quan_sat_ghi_nguoc_sau_guard")
+VE_SAU_POST = ("co_POST", "khong_the_quan_sat_vang_POST")
+SO_GUARD_DANG = {
+    r'''python3 "$NEO/ops/lease_publish.py" kiem-github "$tep" --root .''': ("kiem-github", VE_TRUOC_POST),
+    r'''python3 "$NEO/ops/lease_publish.py" check "$tep" --root .''': ("check", VE_TRUOC_POST),
+    r'''ISSUE=$(python3 -c "import sys,yaml;print(yaml.safe_load(open(sys.argv[1],encoding='utf-8'))['packet_issue'])" "$tep")''': ("packet_issue", VE_TRUOC_POST),
+    r'''python3 "$NEO/ops/lease_publish.py" body "$tep" > than.md''': ("body", VE_TRUOC_POST),
+    r'''python3 -c "import json,sys;print(json.dumps({'body':open('than.md',encoding='utf-8').read()}))" > payload.json''': ("payload", VE_TRUOC_POST),
+    r'''ID=$(gh api "repos/$REPO/issues/$ISSUE/comments" --input payload.json --jq .id)''': ("case_id", VE_SAU_POST),
+    r'''python3 "$NEO/ops/lease_publish.py" mark "$tep" --comment-id "$ID"''': ("mark", VE_SAU_POST),
+    r'''echo "DA_DOI=1" >> "$GITHUB_ENV"''': ("github_env", VE_SAU_POST),
+}
+
+
+def _guard_dan_xuat(than=None) -> set[str]:
+    than = _buoc_workflow("đăng")["run"] if than is None else than
+    bat = len(re.findall(r"(?m)^[ \t]*set \+e[ \t]*$", than))
+    khoi = re.findall(
+        r"(?ms)^[ \t]*set \+e[ \t]*\n(.*?)^[ \t]*rc=\$\?[ \t]*\n^[ \t]*set -e[ \t]*$", than)
+    bang(bat > 0 and len(khoi) == bat,
+         f"không phân tích kín guard: set+e={bat}, khối={len(khoi)}")
+    tap = {re.sub(r"[ \t\r\n]+", " ", x).strip() for x in khoi}
+    bang(len(tap) == bat, f"guard rỗng hoặc trùng: {tap}")
+    return tap
+
+
+def _ve_dan_xuat(than=None) -> dict:
+    than = _buoc_workflow("đăng")["run"] if than is None else than
+    post = next(x for x in SO_GUARD_DANG if x.startswith("ID=$(gh api "))
+    return {x: VE_TRUOC_POST if than.index(x) < than.index(post) else VE_SAU_POST
+            for x in SO_GUARD_DANG}
+
+
+@ca
+def t64_guard_dan_xuat_tu_YAML_khop_so_dang_ky():
+    dan_xuat, dang_ky = _guard_dan_xuat(), set(SO_GUARD_DANG)
+    bang(dan_xuat == dang_ky, f"guard YAML != sổ: {dan_xuat ^ dang_ky}")
+
+
+@ca
+def t65_bo_trich_rong_hoac_hong_phai_DO():
+    for than in ("", "set +e\nfalse\nset -e\n"):
+        try:
+            _guard_dan_xuat(than)
+        except AssertionError:
+            continue
+        bang(False, f"bộ trích fail-open với {than!r}")
+
+
+@ca
+def t66_moi_guard_co_phan_chung_va_ve_theo_vi_tri():
+    than, ve = _buoc_workflow("đăng")["run"], _ve_dan_xuat()
+    mark = next(x for x in SO_GUARD_DANG if " mark " in x)
+    for guard, (loi, _) in SO_GUARD_DANG.items():
+        kq = _chay_buoc_dang(guard_hong=loi)
+        co_post, da_mark = ve[guard] == VE_SAU_POST, than.index(guard) > than.index(mark)
+        bang(kq["rc"] == 1 and kq["posts"].count("dau") == kq["posts"].count("cuoi") == 1
+             and kq["posts"].count("giua") == int(co_post) and kq["marks"]["giua"] == da_mark
+             and "BI_CHAN=1" in kq["out"], f"guard {loi}, vế {ve[guard]} sai: {kq}")
+
+
+@ca
+def t67_ve_khang_dinh_phai_khop_vi_tri_dan_xuat_tu_YAML():
+    dan_xuat = _ve_dan_xuat()
+    bang(all(dan_xuat[x] == ve for x, (_, ve) in SO_GUARD_DANG.items()),
+         f"vế đăng ký lệch vị trí YAML: "
+         f"{[(loi, dan_xuat[x], ve) for x, (loi, ve) in SO_GUARD_DANG.items() if dan_xuat[x] != ve]}")
 
 
 def main() -> int:

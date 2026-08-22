@@ -27,7 +27,7 @@ verdict_sha256: 79f8bb2a48e92f9081cd50ba0d6d24a8f4bd7246d92ab0cc2d500e26ecfe24a0
 verdict_bytes: 13554
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/blob/PLACEHOLDER_COMMIT/ops/reviews/lease-dang-review-3-claude-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/80bbd1c0ce52d9b4d0738c3b850cd53c972e9770/ops/reviews/lease-dang-review-3-claude-verdict.md
 evidence_url_ghi_chu: >-
   Điền SAU KHI ĐÃ PUSH THÀNH CÔNG và sau khi `git branch -r --contains` xác nhận — biên nhận
   lượt 1 đã chết một lần vì rebase viết lại commit sau khi điền.

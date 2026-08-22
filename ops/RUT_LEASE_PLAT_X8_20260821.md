@@ -119,6 +119,34 @@ với `gh auth status`: **một lớp mà ta không coi là lớp**.
 3. **Trước khi cấp BẤT KỲ lease nào**: quét lease còn sống trên **mọi nhánh `ops/**`**, không chỉ
    master. Chưa có công cụ cho việc này — đó là một nợ, ghi ở dưới.
 
+### ĐÍNH CHÍNH 22-08-2026 — mục 1 KHÔNG xảy ra như dự tính, và mục 2 có một con số SAI
+
+Nguyên văn phía trên giữ nguyên làm bằng chứng. Những gì đo được khi thực hiện:
+
+| mục | biên bản ghi | thực tế đo |
+|---|---|---|
+| 1 | *"chờ `#227` land, rồi đo lại"* | `#227` land 05:16:40Z (PR #234) **rồi bị REVERT** 40 phút sau (PR #237): CI master ĐỎ trên Windows, `gate(windows-latest)` **59/68**. Master nay **`2ab3560`**, bộ test về **42** ca. Land lại là packet **`#238`** |
+| 2 | *"sàn thật sẽ là **58**"* | **SAI.** Lúc `#227` còn trên master, sàn đo được là **68** — không phải 58. Nay đã revert nên sàn lại là 42; đo lại khi `#238` land |
+| 2 | *"ba con số chết theo `#227`"* | **mười một chỗ.** Hộp ⛔ bản 3b nâng lên sáu; đo lại toàn bảng ra mười một, trong đó một chỗ không phải con số mà là **mệnh đề sự kiện** (xem dưới) |
+| 2 | đặc tả *"phải ra bản 4"* | ra **bản `3i`**, không phải bản 4 — nền còn đang đổi, đóng băng bản 4 lúc này là dựng lại đúng bệnh của bản 3. Băm `ca852d95ab59…` (`3c`→…→`3i`; `3f` sửa chỗ 12 vì con số cũ là tạo tác của clone nông, `3g` sửa một khẳng định về cổng KHÔNG TỒN TẠI) |
+| 3 | *"chưa có công cụ"* | vẫn chưa. Nợ `SO-LEASE-KHONG-NAM-MOT-CHO` **còn nguyên**; lượt này quét bằng script rời |
+
+**Mục 3 đã cứu đúng một lần — và cách nó cứu mới là thứ đáng ghi.** Quét đủ **99** ref lúc 05:2xZ ra
+*"0 lease chồng lấn, cấp lease được"*. **Hai mươi phút sau**, nhánh `ops/pkg-windows` xuất hiện mang
+`lease-dang-windows-exec-1-codex-20260822` (packet `#238`, hết `2026-08-23T10:00:00Z`) giữ **đúng cả
+hai** tệp `write_set` của `PLAT-X8` ⇒ kết luận đảo chiều. Nên câu đúng không phải *"quét mọi ref"* mà
+là **"quét mọi ref NGAY TRƯỚC KHI CẤP"**: quét đủ là **cần**, không **đủ**. Số ref cũng phải đo chứ
+đừng chép — 98 → 99 trong một lượt làm việc.
+
+Hai thứ nữa suýt làm phép đo sai lần nữa:
+
+- **Tên trường hạn là `lease_expires_at_utc`.** Lượt quét đầu đoán `het_han`/`expires_at`/`deadline`,
+  nhận `None` cho **cả 42** tệp; `None` đọc thành *"không có hạn"* thì bảng ra `0 lease còn hạn` —
+  đúng cái kết luận sai mà biên bản này sinh ra để chặn. Họ *"đừng grep theo danh sách tên đoán trước"*.
+- **Chỗ thứ mười một không phải con số mà là mệnh đề sự kiện:** §2 khai *"lần **đầu tiên**
+  `ops/lease_publish.py` vào một `write_set`"* — sai, vì `#227` mở tệp ấy trước; nay **7/61** lease
+  mang nó. Đo lại một bảng số thì bắt được số sai; chỉ đọc lại câu chữ mới bắt được mệnh đề sai.
+
 ## Nợ sinh ra từ sự cố này
 
 - `SO-LEASE-KHONG-NAM-MOT-CHO` — chưa có lệnh nào trả lời *"lease nào đang giữ đường dẫn X"* trên
@@ -126,3 +154,19 @@ với `gh auth status`: **một lớp mà ta không coi là lớp**.
   `ops/lease_publish.py` (`ai-dang-giu <đường-dẫn>`) quét mọi ref `refs/remotes/origin/ops/*`, và
   phải fail-close khi không fetch được ref nào — "không đo được" phải ĐỎ, không được thành "không có".
 - `PATHS-TREN-NHANH-MOI-CHUA-CO-PHAN-CHUNG` — xem phần đầu.
+
+---
+
+## PHỤ LỤC 22-08-2026 ~13:0xZ — hàng 2 của bảng trên nay đọc SAI
+
+Hàng 2 ghi *"ra bản `3i`, không phải bản 4 — nền còn đang đổi"*. **Đúng lúc viết, sai từ 11:58:18Z**,
+khi `#238` land (PR #246, `563e0eb8`). Nguyên văn ở trên **giữ nguyên** — biên bản là BẰNG CHỨNG, không
+phải con trỏ; sửa nó là xoá dấu vết của một quyết định đã đúng trong bối cảnh của nó.
+
+Kết cục thật: **bản 4** = `46d9a0299a0906b53af3eb023628eacadf37ce87d0b96debb36c84dae9f0277d`, và lease lượt **2** `plat-x8-exec-2-codex-20260822`
+đã cấp. Lease lượt 1 (`3c21bcd8`) vẫn RÚT như biên bản này ghi — lượt 2 là lease MỚI, không phải khôi
+phục lượt 1.
+
+**Nợ `SO-LEASE-KHONG-NAM-MOT-CHO` vẫn MỞ**, và lượt cấp này lại phải quét tay 162 ref. Cộng thêm một số
+đo được: **10** lease chưa hết hạn giữ `ops/lease_publish*` mà cả 10 thuộc packet ĐÃ LAND — tức nợ
+`AG-T0-01B-thu-hoi-lease-chua-co-duong` nay là **10** quyền ghi còn sống sau khi việc xong (trước đo được 5).

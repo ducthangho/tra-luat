@@ -1,47 +1,334 @@
 # ĐẶC TẢ — `PLAT-X8`: cổng TÍNH `effective_review_class`, thôi nhận lời khai
 
-> # ⛔ ĐỪNG CẤP LEASE NEO VÀO BẢN NÀY
+> # ✅ BẢN 5 — VẬT CẢN ĐÃ HẾT; LEASE (revision 2) NEO VÀO ĐÚNG BẢN NÀY
 >
-> **Đặc tả này ĐANG CHỜ BẢN 4 và có SÁU chỗ đã sai.** Đo 22-08-2026 trên `origin/master` `a5bfe07`.
+> **Bản 4 BỎ SÓT ba con số (chỗ 1 · 2 · 7) — bản 5 sửa; xem bảng phiên bản cuối tệp.**
 >
-> Lease `plat-x8-exec-1-codex-20260821` đã bị **RÚT**, chưa từng đăng — biên bản
-> `ops/RUT_LEASE_PLAT_X8_20260821.md`. Lý do: va chạm write set với **`#227`** trên
-> `ops/lease_publish.py` + `ops/lease_publish_test.py`, **cả cửa sổ lẫn nội dung**.
+> **Năm bản trước (`3b`…`3i`) mở đầu bằng `⛔ ĐỪNG CẤP LEASE NEO VÀO BẢN NÀY`. Điều kiện chờ ấy nay
+> đã MÃN:** `#238` land **11:58:18Z 22-08-2026** (PR #246, `563e0eb8`), và quét lúc **13:01Z** ra
+> **0** lease còn hiệu lực giữ `write_set` của `PLAT-X8`. Người giữ kho duyệt cấp lease in-session
+> cùng ngày.
 >
-> | # | chỗ | đang ghi | sai vì |
+> **Hộp này KHÔNG bị xoá, và đó là chủ ý.** Mười ba chỗ sai bên dưới ở lại NGUYÊN VĂN làm hồ sơ —
+> chúng là thứ đắt nhất packet này sản xuất ra, và **ba trong số đó là lỗi của chính phiên soạn đặc
+> tả** (một cổng không tồn tại · một con số phình 14 lần vì clone nông · một bằng chứng bịa). Thứ đổi
+> ở bản 4 là **TRẠNG THÁI** (chặn → thông), không phải danh sách phát hiện. Xoá hồ sơ đi là bỏ đúng
+> phần có giá trị và giữ lại phần chỉ mô tả một lúc đã qua.
+>
+> Số chỗ sai vẫn là **mười ba**, đo lại toàn bảng 22-08-2026. Chỗ thứ 12 tìm được khi đi kiểm một
+> việc KHÁC (`SLICE-B-C` đã land chưa); chỗ thứ 13 do **cross-review trên PR #240** chỉ ra — nó chỉ
+> sai chỗ hở đúng, còn kết luận thì sai, xem cuối hộp.
+>
+> ## Vì sao điều kiện đổi
+>
+> `#227` **đã land rồi bị HOÀN NGUYÊN trong vòng 40 phút**: merge 05:16:40Z (PR #234, master
+> `b88744e`) ⇒ CI master **ĐỎ trên Windows**, `gate(windows-latest)` **59/68**, chín ca mới của
+> `#227` chưa ca nào từng chạy trên Windows ⇒ revert qua **PR #237**, master `2ab3560`. `#237` hoàn
+> nguyên **ba tệp mã**, **giữ nguyên hồ sơ**. Việc land lại là packet **`LEASE-DANG-WINDOWS` (#238)**.
+>
+> Nên mọi câu *"chờ `#227` land"* ở tài liệu khác nay đọc sai: `#227` **đã** land. Thứ chưa xảy ra là
+> ba tệp mã của nó **đứng được trên Windows**.
+>
+> ## VA CHẠM WRITE SET — ĐÃ GIẢI, đo 13:01Z 22-08-2026
+>
+> **Lý do chặn cũ, giữ nguyên để đối chiếu:** ba lease `LEASE-DANG-WINDOWS` (`exec-1` · `exec-2` ·
+> `exec-3`, packet `#238`, `granted_by: ducthangho`) giữ `.github/workflows/ops-publish-lease.yml` ·
+> **`ops/lease_publish.py`** · **`ops/lease_publish_test.py`** — tức ĐÚNG CẢ HAI tệp `write_set` của
+> `PLAT-X8`, hạn muộn nhất `2026-08-23T15:00:00Z`. Cấp lease lúc ấy là dựng lại đúng cửa sổ hai
+> writer đã làm lease lượt 1 bị RÚT.
+>
+> **Nay `#238` ĐÃ LAND** — merge `563e0eb8` lúc **11:58:18Z** qua PR #246. Bằng HIỆN VẬT trên master,
+> không bằng lời khai: `ops/lease_publish_test.py` có **73** ca, gồm cả `t43`–`t68` của `#227` lẫn
+> `t69`–`t73` mới của `#238`.
+>
+> Quét **13:01Z** (162 ref, **hai nguồn KHỚP**, 114 blob / 104 tệp lease, `KHÔNG_ĐO_ĐƯỢC = 0`):
+> **22** lease chạm `ops/lease_publish*`, **10 chưa hết hạn** — nhưng cả 10 thuộc
+> `LEASE-DANG-DUNG-MOT-LAN` (`#227`) và `LEASE-DANG-WINDOWS` (`#238`), **hai packet đã land**
+> ⇒ **0 lease CÒN HIỆU LỰC**.
+>
+> **"Chưa hết hạn" KHÔNG phải "còn hiệu lực" — và không trường nào trong tệp lease nói ra điều đó.**
+> Phải đi tìm HIỆN VẬT của packet trên master; Issue thì vẫn `open` cả sau khi land, nên hỏi Issue là
+> hỏi sai chỗ. Mười quyền ghi còn sống sau khi việc đã xong chính là nợ
+> `AG-T0-01B-thu-hoi-lease-chua-co-duong` đo được thành số.
+>
+> ⚠ **Con số 13:01Z này KHÔNG dùng lại được cho lần cấp sau.** Hai lần trước nó tự hết hạn trong
+> 20–30 phút (0 → 1 sau 20 phút; 2 → 3 sau nửa giờ). Quét đủ ref là **CẦN, không ĐỦ**: phải quét lại
+> NGAY TRƯỚC lúc cấp. Chưa có lệnh nào trong kho trả lời *"lease nào đang giữ đường dẫn X"* trên toàn
+> ref — nợ `SO-LEASE-KHONG-NAM-MOT-CHO`, xem `ops/RUT_LEASE_PLAT_X8_20260821.md`.
+>
+> **Trích số thì trích kèm ĐƠN VỊ SINH RA NÓ.** Bốn cặp dưới đây là những chỗ hai phiên đã đọc ra hai
+> con số khác nhau và suýt đi truy một bệnh không có. **Bảng này cố ý KHÔNG ghi giá trị** — giá trị
+> trôi, quan hệ thì không; muốn số thì chạy lệnh.
+>
+> | hai cách đếm | khác nhau ở | quan hệ bất biến |
+> |---|---|---|
+> | tệp lease vs **blob** lease | khử trùng theo **đường dẫn** vs theo **(blob, đường dẫn)** | `blob ≥ tệp`. Chênh = **số phiên bản THỪA**, KHÔNG phải số tệp bị sửa — một tệp có 5 phiên bản đóng góp 4 vào chênh |
+> | lease còn hạn **chạm `write_set`** vs **toàn kho** | lọc theo `write_set` có `ops/lease_publish*` vs không lọc | tập con ⊂ tập cha. Lease `*-review-*` thường còn hạn mà `write_set` không chứa hai tệp ấy |
+> | ca test `^def t[0-9]+` vs `^def t[0-9]+_` | mẫu đòi `_` **ngay sau số** ⇒ loại ca hậu tố chữ (`t02b_` `t02c_` `t02d_`) | mẫu không `_` **≥** mẫu có `_`. Bộ test duyệt `for fn in CA`, nên **mẫu không `_` là số ca thật chạy** |
+> | ref `ls-remote` vs `for-each-ref` | hỏi **máy chủ** vs đọc **bộ đệm cục bộ** | không có quan hệ cố định — **lệch chiều nào cũng có nghĩa riêng**: máy chủ nhiều hơn ⇒ tôi thiếu, phải fetch; cục bộ nhiều hơn ⇒ có ref chưa đẩy. Lệch ⇒ `KHÔNG_ĐO_ĐƯỢC`, đừng kết luận |
+>
+> ```bash
+> # tệp vs blob, và ai là tệp nhiều phiên bản
+> for r in $(git for-each-ref --format='%(refname)' refs/remotes/origin/); do
+>   git ls-tree -r "$r" ops/leases/; done | awk '$4 ~ /\.ya?ml$/ {print $3, $4}' | sort -u \
+>   | awk '{print $2}' | sort | uniq -c | awk '$1>1'
+> #                     ^^^^ BẮT BUỘC: `uniq -c` chỉ đếm dòng LIỀN KỀ, mà `sort -u` ở trên sắp
+> #                     theo BLOB (cột 1) nên cùng đường dẫn không nằm cạnh nhau. Bỏ `sort` này
+> #                     thì lệnh vẫn `rc=0` và vẫn in ra thứ trông hợp lý — chỉ THIẾU phần lớn
+> #                     kết quả. Đã đo: bản thiếu `sort` ra 1 tệp, bản đủ ra 4.
+> ```
+>
+> *Hàng đầu bảng này từng ghi **"N lease bị sửa nội dung"** — **sai đơn vị**: chênh đếm **phiên bản
+> thừa**, và số tệp thật nhỏ hơn nhiều. Câu sai ấy nằm **ngay trong bảng cảnh báo về đơn vị đếm**;
+> phiên `session_0174Ls` bắt, `tra-luat-3a` xác nhận bằng phép đo độc lập. Chốt "trích kèm đơn vị"
+> khó giữ hơn là nó nghe.*
+>
+> **Một manh mối rơi ra từ phép đo ấy, chưa ai xử:** có tệp lease tồn tại ở **năm** phiên bản nội dung
+> khác nhau trên các nhánh (`plat-x5-review-2-claude-20260820.yaml`). Một lease bị viết lại nhiều lần
+> **sau khi đã mang số lượt** không khớp mô hình lease (cấp một lần · neo băm · hết hạn). Có thể lành
+> — rebase, cherry-pick, sửa trước khi đăng — nhưng **chưa cổng nào phân biệt "sửa TRƯỚC khi đăng"
+> với "sửa SAU khi đăng"**, trong khi `lease_publish.py` đã có `RC_DA_DANG` chặn đăng trùng: bài toán
+> mới được nghĩ tới một nửa. Nợ này do phiên `tra-luat-3a` ghi vào `ops/NO_KY_THUAT.md`, **không
+> thuộc packet này** — nêu ở đây vì nó chạm mô hình lease mà `PLAT-X8` đang dựng cổng cho.
+>
+> ## Mười ba chỗ đã sai — không phải sáu
+>
+> *(Bảng dưới đánh số 1–12; chỗ **13** ở khối riêng cuối hộp vì nó chạm điều kiện cấp lease, không
+> phải một con số. Tiêu đề này từng ghi "mười một" — dấu vết của lượt trước chưa theo kịp lúc thêm
+> hàng 12, và **tiêu đề là dòng người ta đọc trước tiên**, nên ai đếm theo nó sẽ bỏ đúng hai chỗ mới
+> nhất. Phiên `session_0174Ls` bắt được.)*
+>
+> | # | chỗ | đang ghi | sự thật đo được trên `195a478d`, clone ĐẦY ĐỦ |
 > |---|---|---|---|
-> | 1 | §0 bảng đo | `bộ test tại 3db588c` = `42/42` | `#227` đưa bộ test **42 → 58** ca |
-> | 2 | §6 `A9` | `N >= 42` | sàn thật sẽ là **58** |
-> | 3 | §0 nền đo | `origin/master = 3db588c` | master nay **`a5bfe07`** |
-> | 4 | §3 bảng va chạm | ba dòng: `#209`, `#220`, mục D | **thiếu hẳn `#227`** — chính packet đã làm rút lease |
-> | 5 | §3 câu kết | *"không lease nào đang giữ hai tệp này"* | **câu này đã bị bác.** Nó đo `ops/leases/` trên `master`, mà lease sống nằm trên nhánh `ops/**`. Quét đủ 98 nhánh ra **2** lease còn hiệu lực giữ đúng hai tệp ấy, một cái cấp trước 15 phút |
-> | 6 | §3 thứ tự | `PLAT-X8 → #209 → PLAT-X7 → mục D` | thứ tự thật: **`#227` → `PLAT-X8` → `#209` → `PLAT-X7` → mục D** |
+> | 1 | §0 bảng đo | bộ test `42/42` | **vẫn 42/42** trên master sau revert. `#227` từng nâng lên 68; `#238` sẽ nâng lại. **Đo, đừng đoán** — hộp bản 3b dự báo `58`, số thật lúc `#227` còn trên master là **68** **ĐÃ SỬA Ở BẢN 5: 73/73 trên `08bb4ecd`.** Bản 4 BỎ SÓT chỗ này. |
+> | 2 | §6 `A9` | `N >= 42` | đúng cho `195a478d`; phải nâng theo lượt `#238`, đo lại lúc ấy. **Đếm bằng `^def t[0-9]+` ra 42; bằng `^def t[0-9]+_` ra 39** — chênh ba ca hậu tố chữ (`t02b_` `t02c_` `t02d_`). Bộ test duyệt `for fn in CA` nên **42 là số ca thật chạy**; ghi kèm MẪU khi trích số, kẻo so chéo hai phiên ra `42 ≠ 39` rồi đọc thành *"#238 đã land"* **ĐÃ SỬA Ở BẢN 5: `N >= 73`.** Bản 4 BỎ SÓT — và đây là chỗ sót ĐẮT NHẤT: sàn 42 nằm 31 ca dưới thực tế. |
+> | 3 | §0 nền đo | `3db588c` | master nay **`195a478d`** (đã qua `2ab3560` → `99eb1d2` → đây trong ba giờ) |
+> | 4 | §3 bảng va chạm | ba dòng: `#209`, `#220`, mục D | thiếu `#227` **và** `#238`; `#238` là dòng có lease SỐNG |
+> | 5 | §3 câu kết | *"không lease nào đang giữ hai tệp này"* | **bị bác hai lần.** Quét đủ ref lúc 05:2xZ: 8 lease còn hạn; quét lại 05:5xZ: **9** |
+> | 6 | §3 thứ tự | `PLAT-X8 → #209 → …` | thật: **`#238` → `PLAT-X8` → `#209` → `PLAT-X7` → mục D** |
+> | 7 | §5 mục 9 | `t23` *"42/42 → N/N"* | số nền đúng hôm nay, nhưng nó **đi kèm** sàn A9 nên phải đổi cùng lượt **ĐÃ SỬA Ở BẢN 5: `73/73 → N/N`.** Bản 4 BỎ SÓT. |
+> | 8 | §4 mục 1 · §6 `A8` | *"49 lease cũ"* | **61** tệp |
+> | 9 | §8 | *"15/15 đường dẫn"*, *"10 lease khai lớp"* | **14/14** đường · **22** lease khai lớp (1 `routine` / 5 `systemic` / 16 `sensitive`); executor **17**, reviewer **44** |
+> | 10 | §9 | *"0/49 tệp có `risk`"*, *"39/39 reviewer"* | **0/61** · **44/44** — và **44/44 theo CẢ HAI** cách đo (hình dạng lẫn tồn tại, trên clone đầy đủ). Bản 3d ghi *"27/44 theo tồn tại"*: **SAI**, xem mục 12 |
+> | 11 | §2 | *"lần **đầu tiên** `ops/lease_publish.py` vào một `write_set` (0/49)"* | **MỆNH ĐỀ SỰ KIỆN, đã sai.** `#227` mở tệp ấy trước; nay **7/61** lease mang nó. `PLAT-X8` là packet **thứ hai** chạm nó, không phải thứ nhất |
+> | 12 | cổng lease | `reviewed_sha_required` kiểm **40-hex**, tức kiểm CÁCH VIẾT | đúng về nguyên lý, quy mô nhỏ: **1** SHA giữ chỗ trong **2** `base_sha`. **KHÔNG chạm §9** — bản 3d nói nó chạm, và điều đó SAI. Xem khối riêng bên dưới |
 >
-> **Bốn quyết định ở §1 (Q1 thu hồi · Q2 · Q5 · Q6) và mọi §5–§10 KHÔNG bị ảnh hưởng** — sáu chỗ trên
-> đều là con số nền và bảng va chạm, không phải yêu cầu kỹ thuật. Đó là lý do bản này giữ nguyên nội
-> dung yêu cầu thay vì viết lại.
+> **Bốn quyết định ở §1 (Q1 thu hồi · Q2 · Q5 · Q6) và §5–§10 KHÔNG bị ảnh hưởng** — mười hai chỗ đầu
+> là con số nền, bảng va chạm, một mệnh đề sự kiện và một quan sát về cổng. **Chỉ chỗ 13 khác loại:**
+> nó chạm ĐIỀU KIỆN CẤP LEASE, nên đọc nó trước khi cấp lease executor.
 >
-> **Việc phải làm, đúng thứ tự:** chờ `#227` land → đo lại `origin/master` → sửa sáu chỗ trên →
-> đóng băng **bản 4** → cấp lease neo băm bản 4. Prompt `ops/prompts/plat-x8-exec-1-codex-20260821.md`
-> giữ lại nhưng phải neo lại băm trước khi dùng.
+> **§9 KHÔNG bị chỗ 12 bác** — bản 3d nói có, và đó là hệ quả của cùng một phép đo hỏng: hai trường
+> tra không ra đều là `base_sha`, còn `reviewed_sha_required` — trường §9 thật sự dựa vào — đo được
+> **44/44 tồn tại** trên clone đầy đủ. Lập luận §9 đứng nguyên.
+>
+> ## Chỗ thứ 12 — `reviewed_sha_required` kiểm HÌNH DẠNG, không kiểm TỒN TẠI (SỐ ĐÃ SỬA)
+>
+> > ⚠ **BẢN 3d/3e GHI SAI CHỖ NÀY: "29 trường / 21 tệp / 20 SHA phân biệt".** Số đúng là
+> > **2 trường / 2 tệp / 1 SHA**. Hai mươi bảy trường kia tra không ra **vì clone NÔNG**, không
+> > vì SHA giả. Phát hiện nhờ phiên `tra-luat-3a` báo bẫy shallow clone; đo lại sau
+> > `git fetch --unshallow`. Giữ nguyên câu sai ở đây làm bằng chứng — xem "Vì sao sai" bên dưới,
+> > nó đắt hơn chính con số.
+>
+> `ops/lease_publish.py` đòi `reviewed_sha_required` là **40-hex** — tức kiểm **cách viết**. Một
+> chuỗi 40 ký tự hex bịa ra qua cổng y như SHA thật. Đo trên `195a478d`, clone **ĐẦY ĐỦ**
+> (`git rev-parse --is-shallow-repository` = `false`), 61 lease:
+>
+> | đo | số |
+> |---|---|
+> | trường SHA đã kiểm (`base_sha` · `reviewed_sha_required` · `start_from_sha`) | **141** |
+> | trỏ commit **không tra được** | **2** — trong **2** tệp lease, **1** SHA phân biệt |
+> | SHA ấy | `0333948669bb0fdbfef8f5cbcf14a95b1b0e8bd4`, ở `base_sha` của `slice-b-c-review-1-codex-20260821` và `tri-thuc-review-1-codex-20260821` |
+>
+> Nó là **SHA giữ chỗ** thật: GitHub API trả `No commit found for SHA`, và trong kho có một commit
+> **thật** trùng đúng **8** ký tự đầu rồi khác hẳn — `03339486`**`bc44d533…`** (merge PR #212). Ai có
+> SHA viết tắt 8 ký tự rồi điền nốt cho đủ 40 sẽ ra đúng hình dạng này.
+>
+> Finding vẫn đứng, chỉ nhỏ hơn **mười bốn lần** so với con số bản 3d: cổng kiểm hình dạng thì một
+> `base_sha` không tồn tại vẫn qua. Nhưng **2 ≠ 29**, và cách con số ấy phình lên mới là bài học.
+>
+> **Và nó KHÔNG chạm §9.** Cả hai trường hỏng là `base_sha`; `reviewed_sha_required` đo được **44/44
+> tồn tại**. Bản 3d khai chỗ này *"chạm một LẬP LUẬN của §9"* và ghi *"17/44 lease reviewer có
+> `reviewed_sha_required` không tra được"* — **cả hai là tạo tác của clone nông**. Câu *"exact head
+> có thật và neo ngay trong lease"* ở §9 đứng nguyên, đo cả hình dạng lẫn tồn tại.
+>
+> ## Vì sao bản 3d sai — ba lỗi chồng nhau, cái sau che cái trước
+>
+> **1. `git cat-file -e` NÓI DỐI trên clone nông.** Container đo bản 3d có
+> `is-shallow-repository = true`. Nông cắt **LỊCH SỬ**, nên commit cũ không có trong clone và
+> `cat-file` trả "không có" cho SHA hoàn toàn hợp lệ.
+>
+> **2. Tôi tự loại giả thuyết ấy — và loại SAI.** Bản 3d ghi *"'chưa fetch đủ' — fetch **toàn bộ**
+> `refs/heads/*`: 158 ref + 35 tag. Số **không đổi**."* Câu ấy đúng về **ref** và vô nghĩa về **lịch
+> sử**: fetch thêm ref không kéo về commit cũ nào. **Đủ
+> REF không phải đủ LỊCH SỬ.** Phép đo duy nhất phân biệt được là `git rev-parse
+> --is-shallow-repository`, và bản 3d chưa từng chạy nó.
+>
+> **3. Bằng chứng thứ ba là BỊA, và tôi không biết.** Bản 3d viết: *"một cái lộ hẳn:
+> `18da1da6a07a3e6e4e3e8f0e0e0e0e0e0e0e0e0e` — mẫu lặp tới hết chuỗi"*. Script của tôi chỉ in **12
+> ký tự đầu**; **28 ký tự còn lại do chính tôi gõ** khi dựng lời gọi API, rồi tôi đọc kết quả 404
+> thành bằng chứng về dữ liệu. `base_sha` **thật** của `wp55-r4-exec-1-claude-20260816` là
+> `18da1da6a07a`**`b2c86d716cef1d74ff2cd0e3218a`** — **tra được**, merge PR #129. Cái "mẫu lặp" ấy
+> chưa bao giờ tồn tại trong kho.
+>
+> Chốt, và đây là phần đáng giữ hơn con số:
+>
+> - **Đo `--is-shallow-repository` TRƯỚC mọi kết luận dạng "không tồn tại".** Nông ⇒
+>   `git fetch --unshallow origin '+refs/heads/*:refs/remotes/origin/*'` rồi mới đo. In số ref **và**
+>   trạng thái shallow cạnh kết luận.
+> - **Loại một giả thuyết bằng phép đo TRẢ LỜI ĐÚNG NÓ.** Tôi loại *"chưa fetch đủ"* bằng số ref —
+>   một con số không liên quan tới điều đang hỏi. Một phép đo sai đối tượng nguy hiểm hơn không đo,
+>   vì nó để lại cảm giác đã kiểm.
+> - **Chỉ đưa vào lời gọi cái ĐỌC RA TỪ DỮ LIỆU.** Tự điền phần thiếu của một định danh rồi coi kết
+>   quả là bằng chứng thì đó là bằng chứng về thứ mình vừa gõ. Script in rút gọn ⇒ sửa script để in
+>   đủ, đừng lấp bằng tay.
+>
+> **Chưa quyết chỗ chữa, và CỐ Ý chưa quyết.** Thêm phép kiểm tồn tại vào cổng là mở `write_set` của
+> `PLAT-X8` cho một mục Issue #225 không đặt ra. Với con số thật (**2**), việc ấy càng không gấp.
+> Ai mở packet cho nó phải trả lời trước: cổng chặn **lease mới** hay **mọi lease**; ba trạng thái
+> (`có` · `không` · **`không đo được`**) ánh xạ ra `rc` nào; và **`không đo được` phải bao gồm ca
+> clone nông**, vì đó chính là ca đã lừa được lượt đo đầu tiên.
+>
+> ## Việc phải làm — ĐÃ LÀM XONG, từng bước kèm bằng chứng
+>
+> Bản 3i viết chuỗi này ở thì tương lai. Nó đã chạy hết; ghi lại kết cục ngay tại chỗ, vì một danh
+> sách việc còn đọc như đang treo là đúng thứ hộp này sinh ra để chống.
+>
+> | bước | bằng chứng |
+> |---|---|
+> | chờ `#238` land | merge `563e0eb8` **11:58:18Z 22-08** (PR #246). Nghiệm thu `W3` của `#238` đòi Windows xanh trên exact head — thuộc packet ấy, không phải packet này |
+> | đo lại toàn bảng §0, không vá lẻ | đã đo lại toàn bảng ở `3c`; các bản sau chỉ sửa chỗ ĐO SAI, có ghi nguyên nhân từng chỗ |
+> | sửa mười ba chỗ | **mười ở `3c`…`3i`; BA chỗ (1 · 2 · 7) chỉ xong ở BẢN 5.** Ba chỗ ấy cố ý HOÃN tới khi `#238` land vì chúng là con số phụ thuộc lượt ấy — nhưng **bản 4 quên làm chúng trong khi bảng này lại khai đã xong cả mười ba**. Bắt được lúc sắp giao prompt cho executor. Nguyên nhân: neo lại theo BĂM thì `grep` băm tìm được mọi chỗ trích băm, nhưng câu khẳng định trạng thái viết bằng CHỮ (`bản 3i`, `N >= 42`, `chưa cấp lease được`) thì `grep` băm KHÔNG BAO GIỜ thấy. **Quét theo băm không thay được quét theo TRẠNG THÁI** — giữ nguyên văn làm hồ sơ |
+> | đóng băng bản mới | **bản 5** (bản này). Bản 4 `46d9a029…` đã hết hiệu lực vì bỏ sót ba con số |
+> | quét lease trên **mọi** ref rồi mới cấp | quét **13:01Z**: 162 ref hai nguồn khớp, **0** lease còn hiệu lực. Xem mục *VA CHẠM WRITE SET* ở trên |
+> | prompt executor | **`ops/prompts/plat-x8-exec-3-codex-20260822.md`** (`ff019443…`). `exec-1` (`f74adeab…`) và `exec-2r2` (`4f58f2a9…`) BẤT BIẾN — mỗi bản bị một lease đã đăng neo, sửa đè là giết mỏ neo |
+>
+> **Lease đang hiệu lực: `plat-x8-exec-2r4-codex-20260822`** (revision 4). Chuỗi: lượt 1
+> (`plat-x8-exec-1-…`, `3c21bcd8`) **RÚT** — biên bản `ops/RUT_LEASE_PLAT_X8_20260821.md`; rồi
+> `…exec-2` → `…-2r2` → `…-2r3` → **`…-2r4`**, ba bản trước mang cờ `da_bi_thay_the`.
+> **ĐỪNG chép danh tính lease vào đây nữa** — dòng này đã sai một lần vì thế. Nguồn là tệp lease;
+> muốn biết bản nào sống thì đọc `da_bi_thay_the` trong `ops/leases/`, đừng đọc dòng này.
+>
+> ## Chỗ thứ 13 — lease `codex` cho packet `sensitive` là NGOẠI LỆ CÓ ĐIỀU KIỆN, và KHÔNG cổng nào canh
+>
+> Chuỗi trên nói *"giữ prompt executor `codex`, chỉ neo lại băm"*. Đúng — **nhưng chưa đủ**, và chỗ
+> thiếu là một điều kiện của `ADR-0045` mà **không cổng nào kiểm**, nên nó phải được kiểm bằng tay.
+>
+> `PLAT-X8` là **`sensitive`**. `ADR-0041:8` và `docs/PROTOCOL_DA_PHIEN.md:559` đều giới hạn Codex
+> Executor ở packet `routine`/`systemic` nhỏ. Đọc tới đó rồi dừng thì kết luận *"phải đổi executor
+> sang Claude"* — **và kết luận ấy SAI**, vì chỗ có thẩm quyền là **`ADR-0045`** (Accepted 21-08,
+> chủ kho phê duyệt Q8), sinh ra từ **đúng tình huống này** với `PLAT-X5`:
+>
+> > *Codex được làm Executor cho một packet `sensitive` **chỉ khi** chủ kho chỉ định tường minh trong
+> > lease, reviewer khác nền, và có human readback trước land. Mỗi lần dùng phải để lại vết đọc được
+> > bằng máy: lease khai `review_class` và khai rằng đây là ngoại lệ theo §2.*
+>
+> Nên đường đúng **không** phải đổi executor mà là **khai đủ vết**. Đo lease đã RÚT
+> (`plat-x8-exec-1-codex-20260821`, commit `3c21bcd8`) trên bốn điều kiện ấy:
+>
+> | điều kiện `ADR-0045` | lease đã rút |
+> |---|---|
+> | chủ kho chỉ định tường minh trong lease | **CÓ** — `granted_by: ducthangho`, `granted_on_instruction` ghi *"chọn nền `codex` + reviewer `claude`"* |
+> | reviewer khác nền | **CÓ** — `reviewer: claude`, `provider: openai_codex` |
+> | lease khai `review_class` | **CÓ** — `review_class` và `effective_review_class` đều `sensitive` |
+> | **khai rằng đây là NGOẠI LỆ theo §2** | **KHÔNG** — `grep '0045\|ngoại lệ'` trong lease, đặc tả và prompt đều ra **0** |
+> | human readback trước land | chưa tới lúc; phải có trước land |
+>
+> **CHỐT ẤY CHƯA CÓ CỔNG — đây là preflight THỦ CÔNG, đừng đọc thành bằng chứng cổng.** `ADR-0045`
+> *mô tả* cách cưỡng chế (*"`review_class` vào danh sách trường bắt buộc; vắng ⇒ `sensitive`;
+> `sensitive` cộng `executor: codex` mà không có khối ngoại lệ do chủ kho ký ⇒ thoát khác 0"*), nhưng
+> đo trên `195a478d`: `ops/lease_publish.py` có **0** chỗ nhắc `review_class`, **0** nhắc `0045`,
+> **0** nhắc *"ngoại lệ"*; và `docs/PROTOCOL_DA_PHIEN.md:1090` xếp `ADR-0045` đúng ô **`0 cổng`**.
+>
+> Nên lease lượt 2 thiếu khối ngoại lệ **sẽ KHÔNG bị chặn** — nó chỉ sai luật mà không ai bắt. Đó là
+> lý do phải nêu ở đây: **người cấp lease phải tự kiểm bằng tay trước khi cấp.** Lời hứa fail-close
+> cùng ca phản chứng thuộc về packet nào thật sự cài chốt ấy, không phải packet này — `PLAT-X8` còn
+> chưa có lease thì không thể tự cài cổng chặn chính lease của mình.
+>
+> *Bản 3e viết câu này thành "⇒ thoát khác 0", tức khai một cổng CHƯA TỒN TẠI. Cross-review lượt 2
+> bắt được. Cùng hình dạng **A** — "lời khai rộng hơn phép đo" — mà `#238` đếm lên 7, và là lần thứ
+> hai trong phiên này. Gốc: tôi đọc chữ "Cưỡng chế:" trong ADR thành "đã cưỡng chế". **Một ADR mô tả
+> chốt cần có; chỉ mã mới nói chốt đã có.** Muốn biết thì `grep` mã, đừng đọc ADR.*
+>
+> Ghi ra đây vì cùng họ với mọi thứ trong hộp này: **`ADR-0041` là chỗ tiện tay, `ADR-0045` là chỗ
+> kết luận được ghi.** Một lượt cross-review đã dừng ở `ADR-0041` và đề xuất đổi executor — đề xuất
+> ấy phá một quyết định chủ kho đã ký, chỉ vì hỏi thiếu một tệp.
+>
+> ## Bốn thứ lượt đo 22-08 trả giá mới biết — đọc trước khi đo lại
+>
+> 0. **`git cat-file -e` NÓI DỐI trên clone NÔNG, và không có gì cảnh báo.** Container đo bản 3d có
+>    `is-shallow-repository = true`; nông cắt **lịch sử**, nên `cat-file` trả "không có" cho SHA hợp
+>    lệ. Nó đẻ ra con số **29** ở chỗ 12 (thật là **2**) và mệnh đề sai *"chỗ 12 chạm §9"*. Fetch
+>    thêm **ref** không cứu ca của tôi, vì ca của tôi là **thiếu LỊCH SỬ** chứ không thiếu ref, nên
+>    *"đã fetch 158 ref"* là phép đo **sai đối tượng**.
+>
+>    **Đừng rút câu ấy thành luật chung — `--depth` CŨNG cắt ref, chỉ là gián tiếp.** Phản chứng do
+>    `tra-luat-3a` chạy thật: `git clone --depth=1` cho refspec `+refs/heads/<MỘT-NHÁNH>` (2 ref),
+>    còn `--depth=1 --no-single-branch` cho `+refs/heads/*` (3 ref) — **cùng `shallow=true`, chỉ khác
+>    refspec**. Tức `--depth` **kéo theo `--single-branch`**, và chính cái đó cắt ref. Kho của tôi
+>    thoát chỉ vì tôi fetch `+refs/heads/*` tường minh; đó là ngoại lệ, không phải luật.
+>
+>    **Hai hỏng, hai cách chữa:** độ sâu bị cắt ⇒ hỏng `cat-file -e` và `merge-base`, chữa bằng
+>    `--unshallow`; refspec bị siết ⇒ hỏng `for-each-ref`, chữa bằng refspec rộng **và** một lượt
+>    fetch thật. Chốt: đo `git rev-parse --is-shallow-repository` TRƯỚC mọi kết
+>    luận dạng *"không tồn tại"*; `true` ⇒ `git fetch --unshallow` rồi mới đo; in **cả** số ref
+>    **và** trạng thái shallow cạnh kết luận. Phiên `tra-luat-3a` chỉ ra bẫy này.
+>
+>    **Nhưng `--is-shallow-repository` MỘT MÌNH chưa đủ** — chính `tra-luat-3a` đính chính tiếp: một
+>    kho **đã gỡ nông, refspec rộng** vẫn thiếu ref được, vì `for-each-ref` **đọc bộ đệm cục bộ**
+>    chứ không hỏi máy chủ. Refspec là luật cho những lần fetch SAU, không phải lời hứa đã fetch.
+>    Phép canh đúng là so **HAI NGUỒN**:
+>
+>    ```bash
+>    git ls-remote --heads origin        | wc -l   # máy chủ CÓ những ref nào
+>    git for-each-ref refs/remotes/origin | wc -l   # tôi đang GIỮ bản sao nào
+>    ```
+>
+>    Lệch ⇒ **`KHÔNG_ĐO_ĐƯỢC`**, không phải *"không có"*. Thiếu mạng để chạy `ls-remote` cũng ra
+>    `KHÔNG_ĐO_ĐƯỢC`. Đo trên container này 08:5xZ: **159 / 159**, không lệch. Lệnh chữa không đổi —
+>    `git fetch --unshallow origin '+refs/heads/*:refs/remotes/origin/*'` bịt cả ba cơ chế (refspec
+>    hẹp do `--depth` kéo theo `--single-branch` · độ sâu bị cắt · bộ đệm chưa fetch).
+>
+> 1. **Tên trường hạn lease là `lease_expires_at_utc`.** Lượt quét đầu đoán `het_han`/`expires_at`/
+>    `deadline`, nhận `None` cho **cả 42** tệp, và `None` đọc thành *"không có hạn"* thì bảng ra
+>    **0 lease còn hạn** — đúng cái kết luận sai mà hộp này sinh ra để chặn.
+> 2. **Phép đo ĐÚNG vẫn chết theo thời gian.** Quét đủ **99** ref lúc 05:2xZ ra *"0 lease chồng lấn,
+>    cấp lease được"*. **Hai mươi phút sau** nhánh `ops/pkg-windows` xuất hiện với đúng một lease
+>    chồng lấn ⇒ kết luận đảo chiều. Quét đủ ref là **cần**, không **đủ**: phải quét **ngay trước khi
+>    cấp**, và số ref phải đo chứ đừng chép (98 → 99 trong một lượt làm việc).
+> 3. **`actionlint` không có `shellcheck` là phép đo YẾU HƠN CI.** Container này thiếu `shellcheck`,
+>    nên `actionlint` ở đây xanh trong khi CI đỏ — đúng hình dạng **A** *"lời khai rộng hơn phép đo"*
+>    mà `#238` đếm lên **7**. Ai báo *"actionlint rc=0"* phải nói kèm có `shellcheck` hay không.
 >
 > *Hộp này tồn tại vì trước đó đặc tả — thứ DUY NHẤT có thẩm quyền, thứ lease neo vào — không mang
-> dấu hiệu nào cho biết các con số của nó sắp chết. Kế hoạch ra bản 4 chỉ được ghi ở biên bản rút
-> lease và ở prompt; ai đọc đúng chỗ có thẩm quyền thì không thấy gì.*
+> dấu hiệu nào cho biết các con số của nó sắp chết. Bản 3b liệt kê sáu chỗ; đo lại ra mười một; đi
+> kiểm một việc khác ra chỗ thứ mười hai; một lượt cross-review ra chỗ thứ mười ba. **Bốn nguồn khác
+> nhau cho cùng một tệp** — không nguồn nào trong đó là "đọc lại danh sách".
+> **Một danh sách liệt kê không thay được một lượt đo lại toàn bảng** — cùng hình dạng với "danh sách
+> CẤM không bao giờ đủ".*
 
 
 Đặc tả này ĐÓNG BĂNG bằng băm. Lease neo vào `spec_sha256`. Sửa nội dung ⇒ băm đổi ⇒ lease trỏ
 vào thứ không còn tồn tại, phải đi qua bản sửa đổi mới. Soạn bằng skill `soan-spec`, 21-08-2026.
 
 **BẢN ĐÓNG BĂNG THỨ BA (+ hộp cảnh báo, 22-08-2026).** Hai lượt cross-review (`codex`), **bốn P1**, và người giữ kho
-chọn SỬA đặc tả ở cả hai lượt.
+chọn SỬA đặc tả ở cả hai lượt. Hộp cảnh báo đã qua **bốn** lượt sửa (`3b` → `3c` → `3d` → `3e` → `3f`)
+mà **nội dung yêu cầu vẫn không đổi một chữ** — thứ trôi là nền đo, không phải đặc tả.
 
 | bản | băm | kết cục |
 |---|---|---|
 | 1 | `9cb54a2e4e7c…` | 2 P1 ở lượt 1 (neo `c9a1b4e90d`) — hết hiệu lực |
 | 2 | `b88c53dfd211…` | 2 P1 nữa ở lượt 2 (neo `3bafef75d6`), **cả hai** đánh vào đúng đường kế thừa — hết hiệu lực |
 | 3 | `328a74facb84…` | Q1 **THU HỒI**: đường kế thừa bị gỡ, không vá tiếp — §10 |
-| 3b | bản này | **chỉ thêm hộp cảnh báo ở đầu.** Nội dung yêu cầu KHÔNG đổi so với bản 3; băm đổi nên mọi chỗ trích băm phải cập nhật theo |
+| 3b | `308d0cf44fc1…` | thêm hộp ⛔ cảnh báo, liệt kê **sáu** chỗ sai, điều kiện chờ = `#227` land — hết hiệu lực khi `#227` land **rồi bị revert** |
+| 3c | `182ea7621d02…` | sửa hộp ⛔: điều kiện chờ đổi `#227` → **`#238`**; sáu chỗ sai đo lại thành **mười một**; ghi va chạm lease SỐNG của `#238` |
+| 3d | `f7f8e6209e4f…` | thêm chỗ thứ 12 — **nhưng với con số SAI** (`29` trường / `21` lease; thật là `2`/`2`, xem `3f`) và một mệnh đề sai (*"chạm §9"*). Cả hai do clone NÔNG |
+| 3e | `ce14fb0b75e4…` | thêm chỗ thứ 13 (`ADR-0045`: lease `codex` cho packet `sensitive` là ngoại lệ CÓ ĐIỀU KIỆN) — hết hiệu lực khi chỗ 12 bị đo lại |
+| 3f | `497c68360de7…` | SỬA chỗ 12: `29 trường / 21 tệp` → **`2/2`** — con số cũ là tạo tác của **clone NÔNG**, không phải SHA giả; mệnh đề *"chỗ 12 chạm §9"* cũng sai (`reviewed_sha_required` **44/44** tồn tại). Cộng: nền đo → `195a478d`, va chạm → **3** lease tới `23-08T15:00Z`, bài học **0**. Hết hiệu lực ở cross-review lượt 2 |
+| 3g | `f3a2f5595120…` | vá 3 finding cross-review lượt 2 — nặng nhất: bản 3e khai một **cổng KHÔNG TỒN TẠI**, nay là preflight thủ công |
+| 3h | `3c9bff4f5410…` | ba đính chính từ hai phiên khác: tiêu đề bảng đếm sai, câu `--depth` sai kết cục, thêm bảng ĐƠN VỊ |
+| 3i | `ca852d95ab59…` | **Bảng ĐƠN VỊ tự phạm lỗi đơn vị, và lệnh đo trong nó CHẠY SAI.** (a) Hàng đầu ghi *"N lease bị sửa nội dung"* — chênh đếm **phiên bản thừa**, không phải số tệp; đo thật: **4** tệp / **14** phiên bản. (b) Bảng chép **giá trị**, mà giá trị trôi trong một giờ ⇒ bỏ hết giá trị, giữ **quan hệ bất biến** + lệnh đo. (c) Lệnh đo tôi viết **thiếu một `sort`** nên `uniq -c` chỉ đếm dòng liền kề — vẫn `rc=0`, vẫn in ra thứ trông hợp lý, mà **thiếu 3/4 kết quả**; chỉ lộ vì đã trích nguyên văn từ spec ra chạy. (d) Nêu manh mối `plat-x5-review-2` có **năm** phiên bản — nợ do `tra-luat-3a` ghi, ngoài packet này |
+| 4 | `46d9a0299a09…` | **VẬT CẢN HẾT.** `#238` land `563e0eb8` lúc 11:58:18Z (PR #246); quét 13:01Z ra **0** lease còn hiệu lực giữ `write_set`. Hộp ⛔ đổi từ *chặn* sang *đã giải* — **mười ba phát hiện GIỮ NGUYÊN làm hồ sơ**. Thêm khối khai ngoại lệ `ADR-0045` §2 mà lease lượt 1 thiếu. Đây là bản lease `plat-x8-exec-2-codex-20260822` neo vào
+| **5** | bản này | **Bản 4 khai *"sửa mười ba chỗ: xong"* mà BỎ SÓT ba chỗ** — `§0` bảng đo, `§6 A9`, `§5` mục 9. Cả ba là con số phụ thuộc `#238`, cố ý hoãn tới khi nó land, rồi bản 4 quên. Đắt nhất là **`A9` sàn `N >= 42` trong khi thực tế 73** — sàn nằm 31 ca DƯỚI thực tế, nên một lượt xoá 31 test vẫn qua nghiệm thu. Nguyên nhân: neo lại theo BĂM, mà `grep` băm không thấy câu khẳng định trạng thái viết bằng CHỮ. Bắt được lúc sắp giao prompt cho executor, trước khi codex chạy |
 
 Bốn phát hiện trên **một** đường là dấu hiệu sai ở QUYẾT ĐỊNH GỐC chứ không ở các bản vá. Các bản
 trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm bản dùng được.
@@ -72,7 +359,7 @@ trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm 
 | lease **reviewer** (không có `write_set`) | 39 | số tệp |
 | đường dẫn phân biệt trong `write_set` của mọi lease | 15 | số đường dẫn |
 | trong đó `ops/lease_publish.py` | 0 | số lần xuất hiện |
-| bộ test tại `3db588c` | 42/42 | số ca đạt / số ca chạy |
+| bộ test tại `08bb4ecd` (base của lease lượt 2) | **73/73** | số ca đạt / số ca chạy. Mốc cũ `3db588c` là `42/42`; `#227` nâng lên 68 rồi bị revert về 42; `#238` (PR #246) đưa lên **73** |
 | tám lần chạm gần nhất tới `ops/lease_publish*` | +50 … +187 | số dòng thêm mỗi commit |
 
 **Mâu thuẫn làm bằng chứng gốc** — hai lease executor, **cùng `write_set`**
@@ -110,7 +397,7 @@ hoá chính packet — `PLAT-M4` **có** khai, chỉ khai sai.
 `docs/adr/0044-nguong-kich-thuoc-packet-theo-do-luong.md` là ≤3 tệp / ≤300 dòng thêm; chừa một suất
 là cố ý, để lượt vá sau verdict không phải xin mở rộng write set.
 
-Đây là lần **đầu tiên** `ops/lease_publish.py` vào một `write_set` (đo: 0/49). Việc mở tệp ấy đã được
+Đây là lần **đầu tiên** `ops/lease_publish.py` vào một `write_set` (đo: 0/49). *(MỆNH ĐỀ NÀY ĐÃ SAI — `#227` mở tệp ấy trước; và mẫu số nay là **61**, không phải 49. Xem chỗ 11 và chỗ 8 ở hộp đầu tệp.)* Việc mở tệp ấy đã được
 người giữ kho duyệt cho gói cưỡng chế kế tiếp (ADR-0044, Q4). Nói thẳng vì cần nói:
 `ops/THAM_DINH_CHUNG_CLAUDE_CODEX_KE_HOACH.md:96` từng **cấm** mở tệp ấy cho `W0-R2` — đây là duyệt
 MỚI cho mục đích KHÁC, có ghi, không phải lờ đi lệnh cấm cũ.
@@ -132,7 +419,7 @@ land**. Nên không lease nào đang giữ hai tệp này ⇒ va chạm là **th
 
 ## 4. ngoai_pham_vi — CỐ Ý không làm
 
-1. **Không sửa 49 lease cũ.** Forward-only theo Q5. `t23` đòi **mọi** lease thật phải qua cổng; áp
+1. **Không sửa lease cũ.** *(số nền `3db588c`; **nay** đo trên `08bb4ecd`: **61** tệp — xem bảng đính chính chỗ 8 ở hộp đầu tệp. Bảng ấy là NGUỒN, dòng này là bản chiếu.)* Forward-only theo Q5. `t23` đòi **mọi** lease thật phải qua cổng; áp
    ngược lại là 49 tệp đỏ cùng lúc. Năm lease sai lớp của `PLAT-M4` **đã** có bản đính chính —
    `ops/DINH_CHINH_REVIEW_CLASS_PLAT_M4.md` — nên hồ sơ đã đúng, chỉ tệp lease giữ nguyên.
 2. **Không nới bảng phân loại quá thứ §8 nói NGUYÊN VĂN.** Xem §8 của đặc tả này; nới bảng phải có
@@ -171,7 +458,8 @@ land**. Nên không lease nào đang giữ hai tệp này ⇒ va chạm là **th
    `leased_at_utc` sau `2026-08-21T00:00:00Z` thì in **CẢNH BÁO** ra stderr, **không** đổi `rc`.
    → `ops/lease_publish.py`
 8. Ca `rXX_` khoá từng mục 2–7, và bảng đột biến khoá chúng. → `ops/lease_publish_test.py`
-9. `t23` (mọi lease thật phải qua) vẫn **42/42 → N/N**, không tụt số ca, sau khi thêm chốt.
+9. `t23` (mọi lease thật phải qua) vẫn **73/73 → N/N**, không tụt số ca, sau khi thêm chốt.
+   (Sàn 73 đo trên `08bb4ecd`, base của lease lượt 2 — KHÔNG phải 42; xem chỗ 1/2/7 trong hộp đầu tệp.)
    → `ops/lease_publish_test.py`
 
 ## 6. nghiem_thu — mỗi tiêu chí nêu phép đo làm nó ĐỎ (L3)
@@ -188,7 +476,7 @@ land**. Nên không lease nào đang giữ hai tệp này ⇒ va chạm là **th
 | A6 | `write_set: []` và lease thiếu hẳn `write_set` ⇒ cả hai ra `sensitive` | đột biến: coi rỗng là `routine` ⇒ ca ĐỎ |
 | A7 | **đột biến NỚI BẢNG**: thêm `.claude/dev/launcher.py → routine` vào `_BANG_LOP` ⇒ ca đích ĐỎ | không có đột biến này thì không biết ca đang đo **bảng** hay đo thứ khác (doctrine `v1.36.68`) |
 | A8 | lease `schema_version: 1` y hệt A2 ⇒ `rc == 0`, và stderr **có** chuỗi cảnh báo | đột biến: bỏ chốt `schema_version`, áp cho mọi lease ⇒ ca ĐỎ **và** `t23` ĐỎ (49 lease cũ) |
-| A9 | `python3 ops/lease_publish_test.py` ⇒ `rc=0`, `N/N` **hai số bằng nhau**, `N >= 42` | tụt số ca hoặc hai số lệch ⇒ ĐỎ |
+| A9 | `python3 ops/lease_publish_test.py` ⇒ `rc=0`, `N/N` **hai số bằng nhau**, **`N >= 73`** (đo trên `08bb4ecd`, base lease lượt 2; đếm bằng `^def t[0-9]+`) | tụt số ca hoặc hai số lệch ⇒ ĐỎ. **Sàn 42 của bản ≤4 là sàn CHẾT** — nó nằm 31 ca DƯỚI thực tế, nên một lượt xoá 31 test vẫn qua A9 |
 | A10 | mọi đột biến A1–A8 chạy trên **BẢN SAO CẢ CÂY** trong thư mục tạm, mỗi đột biến một tên tệp riêng | ghi vào tệp thật rồi khôi phục trong `finally` là bom hẹn giờ đã trả giá; bản sao một tệp làm `HERE` sai và số đo vô nghĩa |
 | A11 | `actionlint .github/workflows/*.yml` ⇒ `rc=0` cả 5, **fail-close khi thiếu công cụ** | thay bằng PyYAML ⇒ coi như KHÔNG ĐO ĐƯỢC, ĐỎ |
 | A12 | `ready to review` = CI xanh trên **exact head** qua `workflow_dispatch`, **cả hai** job `success` | *"PR xanh"* KHÔNG đủ: `ci.yml` chỉ chạy `ubuntu` cho PR thường |
@@ -223,9 +511,9 @@ suy ấy và thay bằng phép TÍNH từ `write_set`. Bộ đếm đang đượ
 `security/credential boundary` · `dispatcher/reconciler` · `review/land authority` ·
 `launcher hoặc gate lifecycle` · `migration dữ liệu và LIVE adapter`.
 
-**Hệ quả, đã đo và phải nói thẳng: 15/15 đường dẫn** từng xuất hiện trong `write_set` của mọi lease
+**Hệ quả, đã đo và phải nói thẳng: 15/15 đường dẫn** *(số nền `3db588c`; **nay** đo trên `08bb4ecd`: **14/14** đường — xem bảng đính chính chỗ 9 ở hộp đầu tệp. Bảng ấy là NGUỒN, dòng này là bản chiếu.)* từng xuất hiện trong `write_set` của mọi lease
 đều ra **`sensitive`** dưới bảng seed ấy — hoặc vì §8 gọi đích danh, hoặc vì rơi vào nhánh mặc định.
-Trong 10 lease khai lớp, **6 sẽ bị NÂNG** (1 `routine` + 5 `systemic`), 4 giữ nguyên.
+Trong 10 lease khai lớp, **6 sẽ bị NÂNG** (1 `routine` + 5 `systemic`), 4 giữ nguyên. *(số nền `3db588c`; **nay** đo trên `08bb4ecd`: **22** lease khai lớp — 1 `routine` / 5 `systemic` / 16 `sensitive` — xem bảng đính chính chỗ 9 ở hộp đầu tệp. Bảng ấy là NGUỒN, dòng này là bản chiếu.)*
 
 Đây **không** phải lỗi cài đặt; đó là điều Q2=(a) nghĩa là. Nhưng nó có giá vận hành thật: §8 mặc
 định *"Codex chỉ nhận Packet `routine`/`systemic` nhỏ"* và *"hết quota mà chưa có human thì pause"* —
@@ -252,11 +540,11 @@ riêng đối chiếu §8, và đó là quyết định của người giữ kho
 3. **Cổng này KHÔNG đọc `risk`, và KHÔNG phân lớp `diff thật` — hai trong ba đầu vào §8:567 đòi.**
    Bản viết trước của mục này **SAI**, và cross-review lượt 2 bác đúng chỗ; chép lại cái sai ở đây vì
    nó là bài học, không phải vì thủ tục. Bản ấy viết *"`diff thật` không tồn tại tại thời điểm cổng
-   chạy"* — một khẳng định PHỔ QUÁT dựng từ MỘT trong hai vai. Đo lại: **39/39** lease reviewer khai
+   chạy"* — một khẳng định PHỔ QUÁT dựng từ MỘT trong hai vai. Đo lại: **39/39** lease reviewer khai *(số nền `3db588c`; **nay** đo trên `08bb4ecd`: **44/44** — xem bảng đính chính chỗ 10 ở hộp đầu tệp. Bảng ấy là NGUỒN, dòng này là bản chiếu.)* 
    `reviewed_sha_required` là 40-hex **khác** `base_sha`, tức exact head **có thật và neo ngay trong
    lease**, còn `ops/lease_publish.py` thì vốn đã đòi và kiểm trường ấy. Nên trên đường reviewer,
    diff `base_sha...reviewed_sha_required` là thứ cổng **cầm trong tay**. Phần đúng còn lại: `risk`
-   **không tồn tại trong dữ liệu** (`grep '^risk:' ops/leases/` = **0/49 tệp**), và trên đường
+   **không tồn tại trong dữ liệu** (`grep '^risk:' ops/leases/` = **0/49 tệp** *(số nền `3db588c`; **nay** đo trên `08bb4ecd`: **0/61** — xem bảng đính chính chỗ 10 ở hộp đầu tệp. Bảng ấy là NGUỒN, dòng này là bản chiếu.)*), và trên đường
    **executor** thì head chưa tồn tại thật.
 
    **Vì sao KHÔNG phân lớp diff ấy, và vì sao lần này không phải fail-open:** sau khi Q1 bị thu hồi
@@ -288,7 +576,7 @@ từ lease executor"*) **hết hiệu lực**; đường kế thừa bị gỡ b
 |---|---|---|
 | 1 | tra bằng `packet_id` một mình ⇒ thừa kế lớp của tiền nhiệm đã chết | giả định "mỗi packet một lease executor" — đo bác: **3/5** packet có nhiều hơn một |
 | 2 | bộ định danh **toàn bộ** lấy từ chính tệp lease, không trường nào đối chiếu trạng thái bền ⇒ lease reviewer **dựng khéo** khai `generation` cũ + băm spec cũ sẽ khớp đúng một executor `routine` và thừa `routine`; nhánh fail-closed "thiếu trường" **không bao giờ chạy** vì mọi trường đều có mặt | chính bản vá của lượt 1 |
-| 2 | trên đường reviewer, exact head **có thật** (đo: **39/39** lease reviewer khai `reviewed_sha_required` 40-hex khác `base_sha`) nên lập luận *"chưa có diff để phân lớp"* sai ở đúng vai này | lập luận biện hộ của lượt 1 |
+| 2 | trên đường reviewer, exact head **có thật** (đo: **39/39**, nay **44/44** — chỗ 10 hộp đầu tệp — lease reviewer khai `reviewed_sha_required` 40-hex khác `base_sha`) nên lập luận *"chưa có diff để phân lớp"* sai ở đúng vai này | lập luận biện hộ của lượt 1 |
 | — | `generation` là trường **tự khai**, **0 dòng** cổng nào kiểm | tự nêu trước khi gọi lượt 2; lượt 2 xác nhận và làm sắc thêm |
 
 **Doctrine bắt phải hỏi từ lần thứ ba trở đi là *"có nên làm việc này không"*, không phải *"vá thế
@@ -302,7 +590,7 @@ Suy từ một tệp lease khác chỉ là dời lời khai sang tệp bên cạ
 đứng. Cấp thẳng trần là thứ duy nhất không suy.
 
 **Cái giá, nói bằng số chứ không bằng cảm giác.** Kế thừa lẽ ra mua được lớp THẤP cho reviewer của
-packet nhẹ. Đo dưới bảng seed: **15/15** đường dẫn từng xuất hiện trong `write_set` của mọi lease đều
+packet nhẹ. Đo dưới bảng seed: **15/15** (nay **14/14**, chỗ 9 hộp đầu tệp) đường dẫn từng xuất hiện trong `write_set` của mọi lease đều
 ra `sensitive`, nên hôm nay kế thừa mua được **0** trường hợp. Nó chỉ có giá sau khi bảng được nới —
 và nới bảng là packet KHÁC, chưa mở. Vậy giá phải trả bây giờ bằng không; giá phải trả trong tương
 lai là: mọi reviewer lease đều `sensitive` cho tới khi có một cơ chế trạng thái BỀN để neo, thay vì

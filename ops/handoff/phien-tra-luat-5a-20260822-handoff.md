@@ -128,6 +128,11 @@ rồi nhận đúng một lời khai vì nó bất lợi cho tôi và nghe khiê
 
 ## 5. Việc duy nhất còn treo — `PLAT-X8` bản 4
 
+> ⚠️ **MỤC NÀY ĐÃ LẠC HẬU BA CHỖ — ĐỌC §5c TRƯỚC.** Giữ nguyên vì append-only (vế cũ là bằng
+> chứng), nhưng **đừng hành động theo nó**: nó trỏ bản **3b** trong khi tệp đã lên **3d**, trỏ
+> **#227** trong khi điều kiện chờ nay là **#238**, và khai **BỐN** chỗ trích băm trong khi có
+> **NĂM**. Chi tiết + phép đo ở **§5c**.
+
 Chờ **#227** land. Đo 05:07Z: **chưa** (master `0` hàm mới · `RC_` = 6 · 39 ca). Đường land là
 **PR #234** (`land/227`, head `86788eb4`, mở 04:59Z) — `gate (ubuntu-latest)` **FAILURE**, chết ở
 **bước 10 `lease-publish selftest`**, 18 bước sau `skipped`.

@@ -128,7 +128,7 @@ Nguyên văn phía trên giữ nguyên làm bằng chứng. Những gì đo đư
 | 1 | *"chờ `#227` land, rồi đo lại"* | `#227` land 05:16:40Z (PR #234) **rồi bị REVERT** 40 phút sau (PR #237): CI master ĐỎ trên Windows, `gate(windows-latest)` **59/68**. Master nay **`2ab3560`**, bộ test về **42** ca. Land lại là packet **`#238`** |
 | 2 | *"sàn thật sẽ là **58**"* | **SAI.** Lúc `#227` còn trên master, sàn đo được là **68** — không phải 58. Nay đã revert nên sàn lại là 42; đo lại khi `#238` land |
 | 2 | *"ba con số chết theo `#227`"* | **mười một chỗ.** Hộp ⛔ bản 3b nâng lên sáu; đo lại toàn bảng ra mười một, trong đó một chỗ không phải con số mà là **mệnh đề sự kiện** (xem dưới) |
-| 2 | đặc tả *"phải ra bản 4"* | ra **bản `3c`**, không phải bản 4 — nền còn đang đổi, đóng băng bản 4 lúc này là dựng lại đúng bệnh của bản 3. Băm `182ea7621d02…` |
+| 2 | đặc tả *"phải ra bản 4"* | ra **bản `3d`**, không phải bản 4 — nền còn đang đổi, đóng băng bản 4 lúc này là dựng lại đúng bệnh của bản 3. Băm `f7f8e6209e4f…` (`3c` → `3d` khi thêm chỗ thứ 12) |
 | 3 | *"chưa có công cụ"* | vẫn chưa. Nợ `SO-LEASE-KHONG-NAM-MOT-CHO` **còn nguyên**; lượt này quét bằng script rời |
 
 **Mục 3 đã cứu đúng một lần — và cách nó cứu mới là thứ đáng ghi.** Quét đủ **99** ref lúc 05:2xZ ra

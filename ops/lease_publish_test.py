@@ -2645,6 +2645,14 @@ def t72_W8_bo_qua_phai_in_runs_on_va_tong_ket():
              f"main không in lý do tự dẫn xuất/tổng kết: rc={rc}, {out!r}")
 
 
+@ca
+def t73_nen_posix_khong_duoc_bo_qua_ca_nao():
+    def bo(): raise BoQuaNen(WORKFLOW_DANG, "dang")
+    rc, out = _chay_main_meta(bo, "posix")
+    bang(rc == 1 and "ĐỎ" in out and "bỏ qua=0" in out,
+         f"nền posix mà vẫn bỏ qua được: rc={rc}, {out!r}")
+
+
 def main() -> int:
     qua, hong, bo_qua = 0, [], []
     for fn in CA:

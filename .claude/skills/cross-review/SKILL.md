@@ -94,30 +94,58 @@ khi cây gốc `rc=0`. Ghim rồi ⇒ `rc=0`.
 
 **Đối chiếu cổng TRƯỚC khi giao sandbox** — §8 đòi điều này, và nó rẻ:
 
+Hai phép chạy phải ở **CÙNG MỘT COMMIT**, nếu không thì so hai thứ khác nhau: `<kho>` thường đang
+đứng ở nhánh khác, và khi ấy một khác biệt THẬT về mã bị dán nhãn nhầm thành "lỗi sandbox". Dựng nền
+bằng worktree read-only tại đúng `reviewed_sha`:
+
 ```bash
-cd "$R/cay-kho" && python3 scripts/tl.py doc-claims-check --strict; echo "sandbox rc=$?"
-cd <kho>        && python3 scripts/tl.py doc-claims-check --strict; echo "goc    rc=$?"
+git -C <kho> worktree add --detach /tmp/nen-<reviewed_sha> <reviewed_sha>
+cd /tmp/nen-<reviewed_sha> && python3 scripts/tl.py doc-claims-check --strict; echo "nen     rc=$?"
+cd "$R/cay-kho"            && python3 scripts/tl.py doc-claims-check --strict; echo "sandbox rc=$?"
+git -C <kho> worktree remove /tmp/nen-<reviewed_sha> --force
 ```
 
 Hai mã thoát lệch ⇒ **lỗi sandbox** cho tới khi chứng minh ngược lại; đừng giao một mirror chưa đối
 chiếu, vì mọi finding về cổng từ nó đều đáng ngờ.
 
-Kiểm nhanh mirror có đủ ref không (cùng phép so hai nguồn của `CLAUDE.md`):
+Chiều ngược lại KHÔNG đúng: **hai mã thoát bằng nhau chưa chứng minh môi trường tương đương** — nó chỉ
+nói cổng ấy không phân biệt được. Ghi trong `EVIDENCE.md` là đã đối chiếu cổng NÀO, đừng khái quát.
+
+**Phép so hai nguồn phải chạy TRÊN KHO NGUỒN, TRƯỚC khi clone** — chạy nó trong sandbox là vô nghĩa:
+ở đó `origin` trỏ vào chính mirror vừa tạo, nên `ls-remote` chỉ đếm head của chính nó và **không có
+nguồn có thẩm quyền nào để so**. Mirror kế thừa đúng cái mù của kho nguồn, nên chỗ duy nhất chặn được
+là trước bước clone (luật đầy đủ + lệnh `comm`: `CLAUDE.md`, mục `for-each-ref` đọc bộ đệm):
 
 ```bash
-git -C "$R/cay-kho" rev-parse --is-shallow-repository        # phai la false
-git -C "$R/cay-kho" ls-remote --heads origin | wc -l         # so nhanh
+cd <kho>
+git ls-remote --heads origin | sed 's#.*refs/heads/##' | sort            > /tmp/mc
+git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin \
+    | grep -v '^HEAD$' | sort                                           > /tmp/cb
+comm -23 /tmp/mc /tmp/cb        # CO tren may chu, THIEU cuc bo -> MU, fetch roi hay clone
 ```
 
-`ls-remote` ở đây hỏi mirror cục bộ, không hỏi GitHub — nên nói thẳng trong `EVIDENCE.md` rằng trạng
-thái GitHub trực tiếp là `KHÔNG ĐO ĐƯỢC` từ sandbox, kẻo reviewer kết luận từ một ảnh chụp.
+**So bằng TẬP TÊN, không bằng `wc -l`** — hai tập cùng lực lượng vẫn có thể lệch (một nhánh cục bộ đã
+bị xoá trên máy chủ cộng một nhánh mới chưa fetch), và `refs/remotes/origin/HEAD` tượng trưng làm số
+đếm lệch sẵn 1 mà chẳng ai mù. Bản đầu của chính mục này đếm bằng `wc -l` **ngay dưới một câu trỏ về
+doctrine cấm làm thế** — cross-review PR #261 bắt (P1).
+
+Sau khi clone, thứ kiểm được trong sandbox chỉ là *mirror có nhận đủ cái kho nguồn đang có không*:
+
+```bash
+diff <(git -C <kho> for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin | grep -v '^HEAD$' | sort) \
+     <(git -C "$R/cay-kho" for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin | grep -v '^HEAD$' | sort)
+git -C "$R/cay-kho" rev-parse --is-shallow-repository        # phai la false
+```
+
+Và nói thẳng trong `EVIDENCE.md` rằng trạng thái GitHub **trực tiếp** là `KHÔNG ĐO ĐƯỢC` từ sandbox —
+`origin` trong đó là mirror cục bộ, không phải máy chủ.
 
 ## Khung `VERDICT.md` bắt reviewer sinh ra
 
 §8 quy định mục nào bắt buộc; đây là khung để dán vào `PROMPT.md`:
 
 ```
-verdict: approved | changes_requested
+verdict: approve | changes_requested | blocked      <- BA gia tri canonical, xem §13
 reviewed_sha: <sha>
 
 ## ĐỐI CHIẾU LƯỢT TRƯỚC        <- BO QUA o luot 1; BAT BUOC tu luot 2

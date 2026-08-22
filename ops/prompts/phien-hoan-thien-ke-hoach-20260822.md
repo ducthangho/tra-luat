@@ -62,7 +62,7 @@ thêm) rồi trình người giữ kho.
 
 | thứ | trạng thái |
 |---|---|
-| **PR #230** (`claude/opus-5-plan-steps-y5r6ci`, 7 tệp) | con trỏ chết + hộp cảnh báo đặc tả PLAT-X8 + nợ mục 12. Chờ người giữ kho merge |
+| **PR #230** (`claude/opus-5-plan-steps-y5r6ci`) — đo phạm vi SỐNG: `git diff --name-only origin/master...HEAD \| wc -l`, đừng tin con số ghi cứng | con trỏ chết + hộp cảnh báo đặc tả PLAT-X8 + nợ mục 12. Chờ người giữ kho merge |
 | **PLAT-X8** (#225) | chờ #227 land rồi ra đặc tả **bản 4**; sáu chỗ phải sửa ghi sẵn trong hộp cảnh báo đầu `ops/specs/plat-x8.md` |
 | **#227** (`codex/lease-dang-exec-1`) | chưa có PR, chưa land |
 

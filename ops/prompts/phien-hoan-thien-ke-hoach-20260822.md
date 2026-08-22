@@ -84,8 +84,8 @@ thêm) rồi trình người giữ kho.
 
 | thứ | trạng thái |
 |---|---|
-| **PR #230** (`claude/opus-5-plan-steps-y5r6ci`) — đo phạm vi SỐNG: `git diff --name-only origin/master...HEAD \| wc -l`, đừng tin con số ghi cứng | con trỏ chết + hộp cảnh báo đặc tả PLAT-X8 + nợ mục 12. Chờ người giữ kho merge |
-| **PLAT-X8** (#225) | chờ #227 land rồi ra đặc tả **bản 4**; sáu chỗ phải sửa ghi sẵn trong hộp cảnh báo đầu `ops/specs/plat-x8.md` |
-| **#227** (`codex/lease-dang-exec-1`) | chưa có PR, chưa land |
+| ~~**PR #230**~~ | **ĐÃ MERGE** 22-08 (master `3f64167`). Dòng này giữ làm lịch sử |
+| **PLAT-X8** (#225) | chờ **`#238`** land (KHÔNG phải `#227` — nó land 05:16Z rồi bị revert qua PR #237); **mười hai** chỗ phải sửa, ghi trong hộp ⛔ đầu `ops/specs/plat-x8.md` bản **3d**. **Chưa cấp lease được**: lease của `#238` đang giữ đúng cả hai tệp `write_set` của `PLAT-X8` tới `2026-08-23T11:00:00Z` |
+| **#227** | **land rồi REVERT**: PR #234 merge 05:16:40Z ⇒ master ĐỎ Windows `59/68` ⇒ PR #237 hoàn nguyên ba tệp mã, giữ hồ sơ. Land lại là packet **`#238`** |
 
 Bắt đầu bằng **đo lại** bảng "Nền đã đo". Cái nào không tái lập được thì **nói ra**, đừng lặng lẽ dùng.

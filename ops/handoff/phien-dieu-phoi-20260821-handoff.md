@@ -160,6 +160,19 @@ TRƯỚC khi cấp lease.
 
 ## 5. Thứ tự packet đã chốt — bốn thứ cùng đòi `ops/lease_publish*`
 
+> ⛔ **MỤC NÀY ĐÃ LẠC HẬU — ĐỌC CẢNH BÁO TRƯỚC KHI CẤP BẤT KỲ LEASE NÀO.** Giữ nguyên văn làm bằng
+> chứng; **đừng dùng làm căn cứ vận hành**. Hai câu dưới đây đã bị bác bằng phép đo 22-08:
+>
+> | mục 5 ghi | đo được 22-08 |
+> |---|---|
+> | thứ tự bắt đầu từ `PLAT-X8` | `#238` chen lên trước: **`#238` → `PLAT-X8` → `#209` → `PLAT-X7` → mục D** |
+> | *"**không lease nào** đang giữ `ops/lease_publish.py` hay `ops/lease_publish_test.py`"* | **SAI.** `lease-dang-windows-exec-1` và `-exec-2` (packet `#238`, hết `2026-08-23T10:00:00Z` và `11:00:00Z`, trên nhánh `ops/pkg-windows` chưa về master) giữ **đúng cả hai** tệp |
+> | *"mười lease từng chạm tệp test đều thuộc `PLAT-X4`/`PLAT-X5`/`SLICE-B-C`, đã land"* | đúng **khi ấy**; nay có thêm lease của `#227` và `#238` |
+>
+> Câu *"không lease nào đang giữ"* sai vì nó quét `ops/leases/` trên **cây đang checkout**, mà lease
+> sống nằm trên nhánh `ops/**` và chỉ về master **sau khi merge**. Xem khối CẬP NHẬT ở cuối §1 và
+> hộp ⛔ đầu `ops/specs/plat-x8.md`.
+
 ```
 PLAT-X8 (#225)  →  PLAT-X6 (#209)  →  PLAT-X7 (#220)  →  gói spec-gate (mục D, chưa mở Issue)
 ```

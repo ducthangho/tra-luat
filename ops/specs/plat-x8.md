@@ -3,8 +3,9 @@
 > # ⛔ ĐỪNG CẤP LEASE NEO VÀO BẢN NÀY
 >
 > **Điều kiện chờ ĐÃ ĐỔI: nay chờ `#238`, KHÔNG phải `#227`.** Và số chỗ sai không phải sáu — đo lại
-> toàn bảng 22-08-2026 trên `origin/master` `2ab3560` thì ra **mười hai** — và chỗ thứ 12 tìm được
-> khi đi kiểm một việc KHÁC (`SLICE-B-C` đã land chưa), không phải khi rà danh sách này.
+> toàn bảng 22-08-2026 trên `origin/master` `2ab3560` thì ra **mười ba**. Chỗ thứ 12 tìm được khi đi
+> kiểm một việc KHÁC (`SLICE-B-C` đã land chưa); chỗ thứ 13 do **cross-review trên PR #240** chỉ ra —
+> nó chỉ sai chỗ hở đúng, còn kết luận thì sai, xem cuối hộp.
 >
 > ## Vì sao điều kiện đổi
 >
@@ -42,8 +43,9 @@
 > | 12 | §9 lập luận | *"exact head **CÓ THẬT** và neo ngay trong lease"* | **Chữ "có thật" do phép đo HÌNH DẠNG đỡ, không phải phép đo TỒN TẠI.** Đo tồn tại: **17/44** lease reviewer có `reviewed_sha_required` trỏ commit **không tra được**. Xem khối riêng bên dưới |
 >
 > **Bốn quyết định ở §1 (Q1 thu hồi · Q2 · Q5 · Q6) và §5–§8, §10 KHÔNG bị ảnh hưởng** — mười một chỗ
-> đầu đều là con số nền, bảng va chạm, và một mệnh đề sự kiện. **Chỗ thứ 12 thì khác: nó chạm một
-> LẬP LUẬN của §9**, không chỉ một con số — xem ngay dưới trước khi dùng §9 làm căn cứ.
+> đầu đều là con số nền, bảng va chạm, và một mệnh đề sự kiện. **Hai chỗ cuối thì khác:** chỗ **12**
+> chạm một LẬP LUẬN của §9; chỗ **13** chạm ĐIỀU KIỆN CẤP LEASE. Đọc cả hai trước khi dùng §9 làm
+> căn cứ hoặc cấp lease executor.
 >
 > ## Chỗ thứ 12 — `reviewed_sha_required` được kiểm HÌNH DẠNG, không kiểm TỒN TẠI
 >
@@ -83,9 +85,42 @@
 > ## Việc phải làm, đúng thứ tự
 >
 > Chờ **`#238`** land (ba tệp mã đứng được trên Windows, có `run_id` của lượt `workflow_dispatch`
-> xanh cả hai job trên exact head) → **đo lại toàn bảng §0**, không vá lẻ → sửa mười hai chỗ → đóng
+> xanh cả hai job trên exact head) → **đo lại toàn bảng §0**, không vá lẻ → sửa mười ba chỗ → đóng
 > băng **bản 4** → quét lease trên **mọi** ref rồi mới cấp lease neo băm bản 4. Prompt
 > `ops/prompts/plat-x8-exec-1-codex-20260821.md` giữ lại nhưng phải neo lại băm trước khi dùng.
+>
+> ## Chỗ thứ 13 — lease `codex` cho packet `sensitive` là NGOẠI LỆ CÓ ĐIỀU KIỆN, và điều kiện chưa được ghi ở đâu
+>
+> Chuỗi trên nói *"giữ prompt executor `codex`, chỉ neo lại băm"*. Đúng — **nhưng chưa đủ**, và chỗ
+> thiếu là thứ làm cổng thoát khác 0.
+>
+> `PLAT-X8` là **`sensitive`**. `ADR-0041:8` và `docs/PROTOCOL_DA_PHIEN.md:559` đều giới hạn Codex
+> Executor ở packet `routine`/`systemic` nhỏ. Đọc tới đó rồi dừng thì kết luận *"phải đổi executor
+> sang Claude"* — **và kết luận ấy SAI**, vì chỗ có thẩm quyền là **`ADR-0045`** (Accepted 21-08,
+> chủ kho phê duyệt Q8), sinh ra từ **đúng tình huống này** với `PLAT-X5`:
+>
+> > *Codex được làm Executor cho một packet `sensitive` **chỉ khi** chủ kho chỉ định tường minh trong
+> > lease, reviewer khác nền, và có human readback trước land. Mỗi lần dùng phải để lại vết đọc được
+> > bằng máy: lease khai `review_class` và khai rằng đây là ngoại lệ theo §2.*
+>
+> Nên đường đúng **không** phải đổi executor mà là **khai đủ vết**. Đo lease đã RÚT
+> (`plat-x8-exec-1-codex-20260821`, commit `3c21bcd8`) trên bốn điều kiện ấy:
+>
+> | điều kiện `ADR-0045` | lease đã rút |
+> |---|---|
+> | chủ kho chỉ định tường minh trong lease | **CÓ** — `granted_by: ducthangho`, `granted_on_instruction` ghi *"chọn nền `codex` + reviewer `claude`"* |
+> | reviewer khác nền | **CÓ** — `reviewer: claude`, `provider: openai_codex` |
+> | lease khai `review_class` | **CÓ** — `review_class` và `effective_review_class` đều `sensitive` |
+> | **khai rằng đây là NGOẠI LỆ theo §2** | **KHÔNG** — `grep '0045\|ngoại lệ'` trong lease, đặc tả và prompt đều ra **0** |
+> | human readback trước land | chưa tới lúc; phải có trước land |
+>
+> `ADR-0045` cưỡng chế: *"`sensitive` cộng `executor: codex` mà không có khối ngoại lệ do chủ kho ký
+> ⇒ thoát khác 0"*. Nên lease lượt 2 **phải** mang khối ấy, nếu không nó chết ở chính cổng mà packet
+> này sinh ra để dựng.
+>
+> Ghi ra đây vì cùng họ với mọi thứ trong hộp này: **`ADR-0041` là chỗ tiện tay, `ADR-0045` là chỗ
+> kết luận được ghi.** Một lượt cross-review đã dừng ở `ADR-0041` và đề xuất đổi executor — đề xuất
+> ấy phá một quyết định chủ kho đã ký, chỉ vì hỏi thiếu một tệp.
 >
 > ## Ba thứ lượt đo 22-08 trả giá mới biết — đọc trước khi đo lại
 >
@@ -102,7 +137,8 @@
 >
 > *Hộp này tồn tại vì trước đó đặc tả — thứ DUY NHẤT có thẩm quyền, thứ lease neo vào — không mang
 > dấu hiệu nào cho biết các con số của nó sắp chết. Bản 3b liệt kê sáu chỗ; đo lại ra mười một; đi
-> kiểm một việc khác thì ra chỗ thứ mười hai.
+> kiểm một việc khác ra chỗ thứ mười hai; một lượt cross-review ra chỗ thứ mười ba. **Bốn nguồn khác
+> nhau cho cùng một tệp** — không nguồn nào trong đó là "đọc lại danh sách".
 > **Một danh sách liệt kê không thay được một lượt đo lại toàn bảng** — cùng hình dạng với "danh sách
 > CẤM không bao giờ đủ".*
 
@@ -121,7 +157,8 @@ cầu vẫn không đổi một chữ** — thứ trôi là nền đo, không ph
 | 3 | `328a74facb84…` | Q1 **THU HỒI**: đường kế thừa bị gỡ, không vá tiếp — §10 |
 | 3b | `308d0cf44fc1…` | thêm hộp ⛔ cảnh báo, liệt kê **sáu** chỗ sai, điều kiện chờ = `#227` land — hết hiệu lực khi `#227` land **rồi bị revert** |
 | 3c | `182ea7621d02…` | sửa hộp ⛔: điều kiện chờ đổi `#227` → **`#238`**; sáu chỗ sai đo lại thành **mười một**; ghi va chạm lease SỐNG của `#238` |
-| 3d | bản này | **chỉ thêm chỗ thứ 12 vào hộp ⛔:** `reviewed_sha_required` được kiểm HÌNH DẠNG chứ không kiểm TỒN TẠI — **29** trường SHA trong **21** lease trỏ commit không tra được. Chạm một **lập luận** của §9, không chỉ một con số. Nội dung yêu cầu KHÔNG đổi so với bản 3 |
+| 3d | `f7f8e6209e4f…` | thêm chỗ thứ 12: `reviewed_sha_required` kiểm HÌNH DẠNG chứ không kiểm TỒN TẠI — **29** trường SHA trong **21** lease trỏ commit không tra được |
+| 3e | bản này | **thêm chỗ thứ 13** (cross-review PR #240): lease `codex` cho packet `sensitive` là **ngoại lệ có điều kiện** theo `ADR-0045`, và điều kiện *"khai rằng đây là ngoại lệ theo §2"* chưa được ghi ở đâu. **KHÔNG đổi executor** — đề xuất đổi sang Claude dừng ở `ADR-0041` và bỏ qua `ADR-0045`. Nội dung yêu cầu KHÔNG đổi so với bản 3 |
 
 Bốn phát hiện trên **một** đường là dấu hiệu sai ở QUYẾT ĐỊNH GỐC chứ không ở các bản vá. Các bản
 trước ở lại trong lịch sử `git` làm bằng chứng, **không** làm bản dùng được.

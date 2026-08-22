@@ -130,3 +130,4 @@ dieu_kien_dung:
   - 'Ngân sách sẽ vượt 90 dòng thêm hoặc 3 tệp ⇒ DỪNG, xuất handoff'
   - 'Hình dạng A lần 8 · B lần 3 · C lần 2 · D lần 4 · E lần 3 · F lần 3 ⇒ DỪNG, không vá'
   - "Thấy mình sắp bỏ qua một ca mà KHÔNG dẫn xuất được lý do từ `runs-on` ⇒ DỪNG. Đó là cửa sau mà Q3' sinh ra để chặn."
+posted_comment_id: 5378345150   # workflow ghi, ĐỪNG sửa tay

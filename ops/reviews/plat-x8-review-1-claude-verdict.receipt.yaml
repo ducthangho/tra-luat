@@ -9,7 +9,33 @@
 # 3. Người review là NGƯỜI SOẠN ĐẶC TẢ. Vai hợp lệ theo §2 (chỉ Executor bị cấm tự review), nhưng
 #    verdict KHÔNG bảo chứng tính đúng của đặc tả.
 
+# ══ P1 CROSS-REVIEW LƯỢT 3 (#240): `schema_version: 1` Ở ĐÂY KHÔNG TẠO MIỄN TRỪ ══
+#
+# `docs/PROTOCOL_DA_PHIEN.md:460-464` nguyên văn: *"`schema_version: 1` do tác giả tệp mới tự khai
+# KHÔNG tạo miễn trừ. Mọi receipt ngoài allowlist phải validate như v2."* Miễn trừ v1 chỉ neo vào
+# allowlist ĐÓNG BĂNG đúng 11 filename+hash tại cutover. Tệp này là tệp MỚI (`git diff --name-status
+# 08bb4ecd..d01a7839` chứng minh), nên nó KHÔNG thuộc allowlist và dòng `schema_version: 1` bên dưới
+# không mua được gì.
+#
+# HỆ QUẢ THẬT, rộng hơn `assurance_dat: null` mà bản đầu khai — và bản đầu khai THIẾU:
+# `docs/PROTOCOL_DA_PHIEN.md:758-760`: *"`review_rounds_used` chỉ tăng khi verdict qua schema,
+# exact-SHA và RECEIPT VALIDATION."* Receipt này không qua validation ⇒ **LƯỢT REVIEW ẤY KHÔNG ĐƯỢC
+# TÍNH VÀO BỘ ĐẾM VÒNG CANON của packet.** Nói cách khác: `PLAT-X8` vẫn còn NGUYÊN hai vòng canon.
+#
+# VÌ SAO KHÔNG NÂNG LÊN v2: v2 đòi receipt ID và **hai danh tính được chứng thực ĐỘC LẬP**. Phiên này
+# KHÔNG có chúng — lượt review chạy không có lease reviewer, và verdict đăng bằng issue comment nên
+# không mang danh tính review của GitHub. Bịa ra để tệp qua schema là **giả mạo danh tính hồi tố**,
+# đúng thứ cross-review lượt 3 cảnh báo: *"unavailable facts must stay unavailable"*.
+# Nên tệp này tự dán nhãn **NON-CANONICAL** và ở lại v1 một cách CÓ KHAI, thay vì mặc áo v2.
+#
+la_canonical: false
+la_canonical_ghi_chu: >-
+  BẰNG CHỨNG CHẨN ĐOÁN, KHÔNG phải vòng review canon. Không tính vào `review_rounds_used`. Hai P1 nó
+  ghi lại là THẬT và tái hiện được — giá trị của tệp này nằm ở đó, không ở tư cách canon.
 schema_version: 1
+schema_version_ghi_chu: >-
+  KHÔNG phải lời khai miễn trừ. Xem khối trên. Nâng lên v2 đòi danh tính mà phiên này không có, và
+  bịa ra là giả mạo hồi tố.
 kind: review_delivery_receipt
 packet_id: PLAT-X8
 packet_issue: 225
@@ -43,11 +69,11 @@ base_sha: 08bb4ecd6dbdb87267cb8179f52ac28c151eb4b9
 target_pull_request: 248
 
 verdict_path: ops/reviews/plat-x8-review-1-claude-verdict.md
-verdict_sha256: b5e9ea81f2d1669b15f29c1f2b73bcc86ba847adcb809e096a0180fb815e486d
-verdict_bytes: 6060
+verdict_sha256: be90451c4f09428aa1f4b36854558185918a874c3354e12a032ab28305d8aa2e
+verdict_bytes: 11364
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/blob/d7a1ea41405969473886cc2e0b565b7d64253cea/ops/reviews/plat-x8-review-1-claude-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/cd81649c267f753345f9daa4e024c6bace906dff/ops/reviews/plat-x8-review-1-claude-verdict.md
 evidence_url_ghi_chu: >-
   Trỏ commit ĐẦU TIÊN chứa tệp verdict (`d7a1ea41`) — một commit không thể chứa băm của chính nó,
   nên biên nhận ghi làm HAI commit. Bản đầu để `null` và `t26` ĐỎ ngay: cổng đòi trường này phải là
@@ -102,6 +128,21 @@ no_da_khai:
       Điều kiện (e) của `ADR-0045` — human readback trước land — chưa xong, thuộc lượt LAND. Khối
       `ngoai_le_ADR_0045` trong lease là preflight THỦ CÔNG; `PROTOCOL §20` xếp `ADR-0045` đúng ô
       `0 cổng`, không cổng nào canh nó.
+  - id: PLAT-X8-luot-review-1-KHONG-TINH-VAO-CANON
+    noi_dung: >-
+      Cross-review lượt 3 trên PR #240 (P1) chỉ ra: receipt này là tệp MỚI tự khai `schema_version: 1`,
+      ngoài allowlist đóng băng 11 tệp ⇒ không qua receipt validation ⇒ theo `PROTOCOL:758-760` lượt
+      review KHÔNG tăng `review_rounds_used`. Packet `PLAT-X8` vì vậy vẫn còn NGUYÊN hai vòng canon.
+      Bản đầu của biên nhận này khai `assurance_dat: null` — đúng nhưng CHƯA ĐỦ, nó bỏ sót hệ quả về
+      bộ đếm. Muốn có một vòng canon thật thì cần lease reviewer + danh tính chứng thực độc lập, tức
+      một lượt MỚI, không phải vá tệp này.
+  - id: PLAT-X8-CHUA-CO-BO-KIEM-RECEIPT
+    noi_dung: >-
+      Cross-review lượt 3 đề nghị thêm bộ kiểm làm ĐỎ mọi receipt MỚI tự khai v1 và mọi receipt v2
+      thiếu danh tính, kèm đột biến nới allowlist để chứa tệp tấn công; và một bộ kiểm conformance
+      làm đỏ finding thiếu bất kỳ phần nào trong bốn phần §441. **Cả hai là MÁY MÓC MỚI, ngoài
+      write_set của `PLAT-X8`** (`ops/lease_publish*`) và ngoài phạm vi lease đang cầm. Khai thành nợ
+      thay vì lặng lẽ dựng — dựng ở đây là mở rộng write set không xin phép.
   - id: PLAT-X8-so-packet-cuc-bo-CHUA-GHI
     noi_dung: >-
       `packet_loop.py record-review` chưa chạy được: chưa có state cho packet 225 và `init --mission`

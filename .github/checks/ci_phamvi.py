@@ -1,21 +1,15 @@
 # -*- coding: utf-8 -*-
 """ci_phamvi.py — BANG PHU THUOC giua buoc gate va nhom duong dan, cong tu dung lai bang.
 
-Kho chua co CHO NAO ghi buoc CI nao phu thuoc thu muc nao, nen moi cau "bo buoc nay co an
-toan khong" deu tra loi bang phong doan. Tep nay ghi bang ay va tu kiem no; no KHONG doi
-mot dong hanh vi CI nao. PHEP DO YEU DA CHO KET QUA SAI BA LAN — ly do ton tai cua tep
-nay: do bang "them mot dong chu thich roi xem dau ra co doi khong" CHI bat duoc buoc bam
-noi dung, con buoc chay HANH VI (`tl selftest`, `doc-claims-check`) deu cho "an toan de
-bo" trong khi that ra chung doc `docs/` 69 tep. Nen o day chi dung hai phep do MANH:
-  ve DOC  audit hook (`sys.addaudithook`) bat `open`/`os.open`/`io.open`, nap qua PYTHONPATH
-          nen tien trinh chay y nhu that va MOI tien trinh con ke thua.
-  ve BAM  DAN XUAT tu `_RELEASE_EXCLUDE_*` (`scripts/tl_core/release.py`): tep khong vao goi
-          thi khong doi bam goi => doc lap THEO KIEN TRUC, khong theo loi khai.
-
-BA TRANG THAI, KHONG PHAI HAI: mot phep do THAT BAI trong y het mot phep do SACH neu chi
-nhin rc, nen `khong_do_duoc` khong duoc gop vao `doc_lap` — no lam cong DO. Va BANG CHI LA
-LOI KHAI; su that nam o MA va o PHEP DO, lech thi BANG sai chu khong phai ma sai.
-
+Kho chua co cho nao ghi buoc CI nao phu thuoc thu muc nao, nen moi cau "bo buoc nay co an toan
+khong" deu tra loi bang phong doan. Tep nay ghi bang ay va tu kiem no; no KHONG doi mot dong
+hanh vi CI nao. Phep do YEU (them mot dong chu thich roi xem dau ra co doi khong) DA SAI BA
+LAN — no chi bat duoc buoc bam noi dung, con `tl selftest`/`doc-claims-check` deu bao "an toan
+de bo" trong khi doc `docs/` 69 tep. Nen chi dung hai phep do MANH: ve DOC = audit hook
+(`sys.addaudithook`) nap qua PYTHONPATH nen MOI tien trinh con ke thua; ve BAM = DAN XUAT tu
+`_RELEASE_EXCLUDE_*` — tep khong vao goi thi khong doi bam goi. BA TRANG THAI, khong phai hai:
+phep do THAT BAI trong y het phep do SACH neu chi nhin rc, nen `khong_do_duoc` khong gop vao
+`doc_lap`. Bang chi la LOI KHAI; su that o MA va o PHEP DO, lech thi BANG sai chu khong phai ma.
 Dung:  --kiem-bam | --kiem-doc [--buoc X] | --bang [--buoc X]
 """
 from __future__ import annotations
@@ -36,10 +30,9 @@ PHU_THUOC, DOC_LAP, KHONG_DO_DUOC = "phu_thuoc", "doc_lap", "khong_do_duoc"
 NHOM = {"ops": "ops", "docs": "docs", "CLAUDE.md": "CLAUDE.md",
         ".claude": ".claude", ".githooks": ".githooks", ".github": ".github"}
 
-# Ve DOC — KHAI tap nhom moi buoc doc; `kiem_doc` dung lai bang audit hook, lech => DO.
-# So do 2026-08-22 tren master 195a478d (tong tep · so tep tung nhom):
-#   tl-selftest 440 · docs 69 · CLAUDE.md 1 · .claude 1 (agents/) · .github 1 (ci.yml)
-#   doc-claims-check 243 · docs 69 · CLAUDE.md 1 · workflow-audit 67 · golden-test 107: khong nhom nao
+# Ve DOC — KHAI tap nhom moi buoc doc; `kiem_doc` dung lai bang audit hook, lech => DO. So do
+# 2026-08-22 tren master 195a478d: tl-selftest 440 tep (docs 69 · CLAUDE.md 1 · .claude 1 ·
+# .github 1) · doc-claims-check 243 (docs 69 · CLAUDE.md 1) · workflow-audit 67 · golden-test 107.
 BUOC = {
     "tl-selftest": {"lenh": ["scripts/tl.py", "--selftest"],
                     "doc": {"docs", "CLAUDE.md", ".claude", ".github"}},
@@ -54,8 +47,7 @@ BUOC = {
 NGOAI_GOI = {"ops", "docs", "CLAUDE.md", ".claude", ".githooks", ".github"}
 BUOC_BAM = ("release-check", "release-verify", "release-bundle")
 
-# `tl selftest` co ca phu thuoc nen => tap doc tren windows-latest CHUA DO; khai ra thay
-# vi ngam coi hai nen nhu mot.
+# `tl selftest` co ca phu thuoc nen => tap doc tren windows-latest CHUA DO; khai thay vi ngam.
 NEN_DA_DO = "linux"
 
 _NGUON_HOOK = """import os, sys
@@ -66,8 +58,7 @@ if _so:
     def _h(su, args):
         if su in ("open", "os.open", "io.open") and args:
             p = args[0]
-            if isinstance(p, bytes):
-                p = p.decode("utf-8", "replace")
+            p = p.decode("utf-8", "replace") if isinstance(p, bytes) else p
             if isinstance(p, str):
                 try:
                     os.write(_fd, (p + "\\n").encode("utf-8", "replace"))
@@ -91,22 +82,24 @@ def loai_tru_tu_ma(goc: Path) -> set:
 
 
 def do_tap_doc(buoc: str, goc: Path):
-    """Chay buoc THAT duoi audit hook. Tra tap nhom doc duoc, hoac None = KHONG DO DUOC."""
+    """Chay buoc THAT duoi audit hook. Tra TAP nhom doc duoc, hoac CHUOI ly do = KHONG DO DUOC."""
     with tempfile.TemporaryDirectory() as tam:
         tam_p = Path(tam)
         (tam_p / "sitecustomize.py").write_text(_NGUON_HOOK, encoding="utf-8")
-        so = tam_p / "so.txt"
-        so.touch()
+        (so := tam_p / "so.txt").touch()
         env = dict(os.environ)
         env["CI_PHAMVI_SO"] = str(so)
-        cu = env.get("PYTHONPATH")
-        env["PYTHONPATH"] = str(tam_p) + (os.pathsep + cu if cu else "")
+        env["PYTHONPATH"] = os.pathsep.join(x for x in (str(tam_p), env.get("PYTHONPATH")) if x)
         env.pop("PYTHONDONTWRITEBYTECODE", None)
-        subprocess.run([sys.executable] + BUOC[buoc]["lenh"], cwd=str(goc), env=env,
-                       capture_output=True, text=True)
+        r = subprocess.run([sys.executable] + BUOC[buoc]["lenh"], cwd=str(goc), env=env,
+                           capture_output=True, text=True)
         dong = so.read_text(encoding="utf-8", errors="replace").splitlines()
     if "#HOOK-OK" not in dong:
-        return None
+        return "audit hook khong cai duoc"
+    if r.returncode != 0:
+        # Lenh dich HONG sau khi hook nap => tap doc chi la MOT PHAN; voi buoc khai tap
+        # rong thi phan ay cung rong, nen no GIA DANG mot phep do sach (codex bat, #247).
+        return f"lenh dich thoat {r.returncode}"
     ra = set()
     for d in dong:
         if d.startswith("#"):
@@ -126,7 +119,7 @@ def phan_loai(nhom: str, buoc: str, doc_do_duoc, ngoai_goi) -> str:
     """Diem quyet dinh DUY NHAT cua bang. Ba trang thai, khong phai hai."""
     if buoc in BUOC_BAM:
         return DOC_LAP if nhom in ngoai_goi else PHU_THUOC
-    if doc_do_duoc is None:
+    if not isinstance(doc_do_duoc, set):
         return KHONG_DO_DUOC
     return PHU_THUOC if nhom in doc_do_duoc else DOC_LAP
 
@@ -149,8 +142,8 @@ def kiem_bam(goc: Path) -> list:
 def kiem_doc(buoc: str, goc: Path) -> list:
     """M3 — bang vs PHEP DO. Thong diep phai NEU TEN nhom, khong chi dem so."""
     do_duoc = do_tap_doc(buoc, goc)
-    if do_duoc is None:
-        return [f"KHONG DO DUOC: audit hook khong cai duoc cho buoc {buoc}"]
+    if not isinstance(do_duoc, set):
+        return [f"KHONG DO DUOC: buoc {buoc} — {do_duoc}"]
     khai = set(BUOC[buoc]["doc"])
     return ([f"buoc {buoc} DOC nhom chua khai: {n}" for n in sorted(do_duoc - khai)]
             + [f"buoc {buoc} khai DOC nhom nhung khong doc: {n}"
@@ -174,8 +167,7 @@ def main(argv=None) -> int:
     if a.kiem_bam:
         loi += kiem_bam(goc)
     if a.kiem_doc:
-        for b in chon:
-            loi += kiem_doc(b, goc)
+        loi += [d for b in chon for d in kiem_doc(b, goc)]
     if a.bang:
         ngoai = loai_tru_tu_ma(goc)
         bang = {"nen_da_do": NEN_DA_DO, "buoc": {}}

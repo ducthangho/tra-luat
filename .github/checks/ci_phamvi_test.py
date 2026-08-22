@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
-"""ci_phamvi_test.py — PHAN CHUNG chay duoc cho `ci_phamvi.py`. Moi luat mot ca, moi ca
-mot DOT BIEN giet dung no. Mot ca chi khang dinh `rc=0` la mot loi khai, khong phai phep do.
+"""ci_phamvi_test.py — PHAN CHUNG chay duoc cho `ci_phamvi.py`. Moi luat mot ca, moi ca mot
+DOT BIEN giet dung no; mot ca chi khang dinh `rc=0` la loi khai, khong phai phep do.
 
-DOT BIEN CHAY TREN BAN SAO (`git worktree add --detach`), KHONG tren cay that: mot luot bi
-cat giua chung de lai tep meo va luot sau doc ban meo lam ban goc. Da sap dung vay.
-
-DOI CHUNG TRUOC, HIEU SO SAU: moi ca dang "dot bien X phai lam DO" deu chay ban SACH truoc
-va doi no XANH — do sach khong doi chung thi khong tach duoc "do vi dot bien" voi "do san".
-N3 va N5 con mot lop nua: sau khi thay ca DO, chung ap THEM mot dot bien vao dung chot ma
-ca ay nham toi roi doi ca tro lai XANH, de biet ca do CHOT DO chu khong do thu khac.
-
+DOT BIEN CHAY TREN BAN SAO (`git worktree add --detach`), KHONG tren cay that: mot luot bi cat
+giua chung de lai tep meo va luot sau doc ban meo lam ban goc. Da sap dung vay. DOI CHUNG
+TRUOC, HIEU SO SAU: moi ca "dot bien X phai lam DO" deu chay ban SACH truoc va doi no XANH —
+do sach khong doi chung thi khong tach duoc "do vi dot bien" voi "do san". N3/N5/N6 con mot
+lop nua: sau khi thay ca DO, chung ap THEM dot bien vao dung chot ca ay nham toi roi doi ca tro
+lai XANH, de biet ca do CHOT DO chu khong do thu khac.
 Chay `python .github/checks/ci_phamvi_test.py` — ton ~4 phut vi N2 chay `tl selftest` 2 luot.
 """
 from __future__ import annotations
@@ -65,8 +63,7 @@ def t2_sach_kiem_doc_xanh(ws):
 
 @ca
 def n1_ma_bo_ops_thi_do(ws):
-    """Chi dot bien MA (`_RELEASE_EXCLUDE_DIRS`), KHONG dong vao bang. Cong van phai DO —
-    do la thu phan biet "doc ma" voi "doc lai chinh loi khai cua minh"."""
+    """Dot bien MA, KHONG dong vao bang: thu phan biet "doc ma" voi "doc lai loi khai cua minh"."""
     thay(ws, RELEASE, '"ops",', "")
     rc, out = chay(ws, "--kiem-bam")
     assert rc != 0, f"bo ops khoi _RELEASE_EXCLUDE_DIRS ma cong van xanh: {out}"
@@ -93,8 +90,7 @@ def n3_khong_do_duoc_thi_do(ws):
     assert rc != 0, f"hook hong ma cong van xanh: {out}"
     assert "KHONG DO DUOC" in out, f"thieu chu KHONG DO DUOC: {out}"
     # lop hai: go dung chot vua do => ca phai tro lai xanh, chung minh ca do CHOT DO.
-    thay(ws, CHECK, 'return [f"KHONG DO DUOC: audit hook khong cai duoc cho buoc {buoc}"]',
-         "return []")
+    thay(ws, CHECK, 'return [f"KHONG DO DUOC: buoc {buoc} — {do_duoc}"]', "return []")
     rc, out = chay(ws, "--kiem-doc", "--buoc", "workflow-audit")
     assert rc == 0, f"go chot KHONG DO DUOC ma ca khong doi => ca do thu khac: {out}"
 
@@ -109,9 +105,8 @@ def n4_nhom_bia_thi_do(ws):
 
 @ca
 def n5_ops_van_doc_lap(ws):
-    """`ops/**` phai DOC LAP voi ca 4 buoc. Ca chieu-tha khong chet bang dot bien go chot;
-    thu giet no la `bao_gio_cung_phu_thuoc`. Va dot bien ay phai KHONG lam N1/N4 do —
-    neu no lam moi ca cung do thi no khong chung minh duoc ca nay do dung thu no nham."""
+    """`ops/**` phai DOC LAP voi ca 4 buoc. Ca chieu-tha khong chet bang dot bien go chot; thu
+    giet no la `bao_gio_cung_phu_thuoc` — va dot bien ay phai KHONG lam N1/N4 do."""
     rc, out = chay(ws, "--bang", "--buoc", "workflow-audit")
     assert rc == 0 and '"ops": "doc_lap"' in out, f"ops phai doc_lap tren cay sach: {out}"
     assert '"ops": "phu_thuoc"' not in out, f"ops bi bat oan tren cay sach: {out}"
@@ -122,6 +117,19 @@ def n5_ops_van_doc_lap(ws):
     for co in (["--kiem-bam"], ["--kiem-doc", "--buoc", "doc-claims-check"]):
         rc, out = chay(ws, *co)
         assert rc == 0, f"dot bien N5 lam {co} do => no khong chi giet N5: {out}"
+
+
+@ca
+def n6_lenh_dich_hong_thi_khong_do_duoc(ws):
+    """Lenh dich thoat khac 0 sau khi hook nap => tap doc MOT PHAN, gia dang phep do sach (#247)."""
+    thay(ws, CHECK, '"workflow-audit", "--strict", "--json"', '"workflow-audit", "--co-nay-khong-co"')
+    for co in (["--kiem-doc"], ["--bang"]):
+        rc, out = chay(ws, *co, "--buoc", "workflow-audit")
+        assert rc != 0, f"lenh dich thoat khac 0 ma {co} van xanh: {out}"
+        assert "KHONG DO DUOC" in out, f"{co} thieu chu KHONG DO DUOC: {out}"
+    thay(ws, CHECK, "    if r.returncode != 0:", "    if False:")
+    rc, out = chay(ws, "--kiem-doc", "--buoc", "workflow-audit")
+    assert rc == 0, f"go chot rc ma ca khong doi => ca do thu khac: {out}"
 
 
 def main() -> int:

@@ -16,7 +16,8 @@ phần lịch sử; bản này chép tiếp từ chỗ nó dừng.
 ```yaml
 # Đo cùng lúc, trên cùng một commit. Đừng vá lẻ từng trường.
 do_luc: '2026-08-22'
-master: 3f64167                    # = origin/master lúc bàn giao
+base_khi_ban_giao: 3f641673205b068e598676f61a429b3bfc25e973   # OID ĐẦY ĐỦ, không tiền tố 7
+master_luc_cap_nhat: 2ab3560a8a406c1b436221fb3c6d23234aefdde0  # đã đi 50 commit — xem §5b
 nhanh_lam_viec: claude/opus-5-plan-steps-y5r6ci   # đã hết việc, reset về master
 pr_da_merge: 230
 pr_dang_mo_lien_quan: [233, 234, 229]
@@ -88,16 +89,37 @@ thô thay cho bộ phân tích cấu trúc* — bộ quét lease khớp nháy K�
 này. Ba lần ⇒ theo doctrine của kho, câu hỏi đúng không còn là *"vá regex thế nào"* mà là **"có nên
 dùng regex cho việc này không"**.
 
+### 3c. Lỗi đo thứ SÁU — và nó khác năm cái trước
+
+Năm lỗi ở §3 và §5b đều là **tôi đo sai**. Cái thứ sáu là **tôi KHÔNG đo**: tôi nhận khung của một
+phiên khác vì nó nghe sắc hơn khung của mình, rồi chuyển tiếp cho người giữ kho **và** cho chính
+phiên ấy như một xác nhận. Cross-review bắt (P2 trên PR #236).
+
+Nguy hơn năm cái trước ở hai chỗ. **Một:** một phép đo sai của tôi thì chỉ mình tôi mang; một khung
+sai được tôi *xác nhận* thì bên kia coi như đã có kiểm chứng độc lập — tôi biến lời khai của họ thành
+bằng chứng mà không thêm một phép đo nào. **Hai:** cả phiên này tôi đòi *"đo, đừng nhận lời khai"*,
+rồi nhận đúng một lời khai vì nó bất lợi cho tôi và nghe khiêm tốn.
+
+**Chốt:** một khung **bác chính mình** vẫn phải đo. Tự phê không phải bằng chứng.
+
 ## 4. Hai con số tôi đã báo người giữ kho mà sau đó bị bác — đọc kỹ
 
 - **"Mục D là hai field"** — hụt **hai bậc**. Đo lại: **49** lease dùng **230** tên trường mức gốc,
   `ops/lease_publish.py` nhắc **8**, còn **222** không ai kiểm. Phiên #233 đo ra 215/8/**207** —
   cột giữa **khớp tuyệt đối**, tổng lệch **15**, chưa ai phân định. Kết luận chịu tải không đổi: mục D
   là một **quyết định phạm vi**, không phải bản vá hai dòng. Phiên #233 đã cắt thành D1–D4.
-- **"Protocol im lặng về trần review"** — sai (xem §3.1). Chỗ hở thật, do phiên #233 tìm ra và
-  **mạnh hơn** cách tôi đóng khung: protocol mang **HAI** con số mà không nói cái nào thắng —
-  `:750` *"hai lượt Codex"* ↔ `:751` *"BA vòng code/review tổng cộng"*. Cộng dòng 7 trỏ ADR bằng một
-  **phạm vi đã chết** (`ADR-0017 đến ADR-0035`, trong khi có 45 ADR).
+- **"Protocol im lặng về trần review"** — sai (xem §3.1).
+- **VÀ CÁI THAY THẾ NÓ CŨNG SAI — lỗi đo thứ SÁU, xem §3c.** Tôi chép khung của phiên #233
+  (*"protocol mang HAI con số mà không nói cái nào thắng"*) và chuyển tiếp cho cả người giữ kho lẫn
+  chính họ, **mà không đo**. Đo rồi thì `:750-751` nói rõ: *"Hai lượt Codex review… là một stop
+  condition **riêng**… được kích hoạt khi chạm trần này **HOẶC** khi PR đã qua ba vòng code/review
+  tổng cộng"*, và `:753` giữ **bộ đếm riêng** cho từng trục. Đó là **hai điều kiện dừng ĐỘC LẬP,
+  nối bằng HOẶC — cái nào chạm trước thì thắng**. Protocol có nói, và nói rõ.
+  **Chỗ lệch THẬT là LIÊN VĂN BẢN, không phải trong protocol:** `ADR-0043` chốt canon **HAI** vòng
+  review, còn protocol `:751` kích hoạt checkpoint ở **BA** vòng. Hai con số trên **cùng một trục**,
+  ở hai tài liệu, và protocol trỏ ADR-0043 **0 lần**. Ai đọc khung cũ sẽ đi *thay* một trần bằng
+  trần kia; việc đúng là **giữ cả hai trục** rồi phân xử con số trên trục VÒNG.
+  Cộng dòng 7 trỏ ADR bằng một **phạm vi đã chết** (`ADR-0017 đến ADR-0035`, trong khi có 45 ADR).
 
 ## 5. Việc duy nhất còn treo — `PLAT-X8` bản 4
 
@@ -113,7 +135,21 @@ quét **tập PR đang mở** theo NỘI DUNG; **không canh tên nhánh**. Kèm
 
 Khi #227 land: sáu chỗ phải sửa cho bản 4 nằm sẵn trong **hộp ⛔ ở đầu `ops/specs/plat-x8.md`**.
 Kèm gỡ hộp, thêm hàng `4` vào bảng phiên bản, và cập nhật **cả bốn** chỗ trích băm còn sống. **Hai
-bảng LỊCH SỬ giữ nguyên băm cũ.** Trước khi đổi băm: `grep -rl plat-x8 ops/leases/` phải RỖNG.
+bảng LỊCH SỬ giữ nguyên băm cũ.** **Trước khi đổi băm — KHÔNG dùng `grep -rl plat-x8 ops/leases/`.** Bản đầu của tệp này ship đúng
+lệnh ấy, và cross-review bắt (P1 trên PR #236): nó chỉ quét **cây đang checkout**, tức đúng phép đo mù
+mà §7 của chính tệp này gọi tên là nợ `SO-LEASE-KHONG-NAM-MOT-CHO`. Một tệp vừa mô tả cái bẫy vừa
+bước vào nó. Lệnh đúng quét **mọi ref**, và **fail-close**:
+
+```bash
+git fetch origin '+refs/heads/*:refs/remotes/origin/*' --prune || { echo "KHONG DO DUOC"; exit 1; }
+n=0
+for r in $(git for-each-ref --format='%(refname)' refs/remotes/origin); do
+  git ls-tree -r --name-only "$r" -- ops/leases/ 2>/dev/null | grep -q plat-x8 && { echo "CO LEASE: $r"; n=1; }
+done
+[ "$n" = 0 ] || exit 1
+```
+
+Không fetch được ref nào ⇒ **ĐỎ**. *"Không đo được"* không phải *"không có"*.
 
 ### 5b. CẬP NHẬT 05:4x Z — #227 ĐÃ LAND RỒI BỊ REVERT, và điều đó BÁC tiêu chí canh ở §5
 

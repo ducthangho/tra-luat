@@ -27,7 +27,7 @@ verdict_sha256: d2b7eb935cde06034c7cce8975ab35bbf1f6fb06bf0284fb4faa2b4fbcf76ab3
 verdict_bytes: 10084
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/blob/PLACEHOLDER_COMMIT/ops/reviews/lease-dang-review-5-claude-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/d54ab0b7507cb2d2a7f43b3f041165e8535aa401/ops/reviews/lease-dang-review-5-claude-verdict.md
 evidence_url_ghi_chu: 'Điền SAU KHI ĐÃ PUSH và sau khi `git branch -r --contains` xác nhận.'
 
 verdict_nguon: >-

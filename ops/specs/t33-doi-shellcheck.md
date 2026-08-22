@@ -84,19 +84,35 @@ một cổng không nói lý do là cổng phải chẩn đoán lại từ đầ
 **M2** — `B4` Chạy bộ cài trong môi trường **không có sẵn** `shellcheck` ⇒ sau đó `shutil.which
 ("shellcheck")` khác `None` **và** `shellcheck --version` in đúng phiên bản đã ghim. ĐỎ khi: đột biến bỏ
 dòng cài `shellcheck`; hoặc bỏ phần ghim phiên bản (khi ấy `B4` phải đỏ vì phiên bản không khớp hằng).
-`B5` Lượt CI trên `master` sau bản vá: job `gate` **xanh trên cả hai nền**, `lease_publish` in `N/N` với
-**hai số bằng nhau**. ĐỎ khi: `shellcheck` chỉ được cài trên một nền.
+`B5` Một lượt Actions **THẬT** trên **exact head của packet** (gọi bằng `workflow_dispatch` trên đúng ref
+ấy — gắn nhãn `windows` KHÔNG đủ, `ci.yml` không khai `types: [labeled]`): job `gate` xanh trên **cả
+`ubuntu-latest` LẪN `windows-latest`**, `lease_publish` in `N/N` với **hai số bằng nhau**, và bằng chứng
+nêu `run_id` + `head_sha` + kết luận TỪNG job. ĐỎ khi: `shellcheck` chỉ được cài trên một nền; hoặc bằng
+chứng neo vào một SHA khác exact head.
+
+**Bản đầu đòi lượt CI trên `master` — vòng tròn, và cross-review lượt 1 (PR #250, P1) bắt đúng chỗ đó.**
+Packet phải qua nghiệm thu **trước** khi được land, nên lấy "CI trên master sau bản vá" làm tiêu chí nghiệm
+thu là đòi kết quả của một việc chỉ xảy ra **sau** khi tiêu chí đã đạt. Tệ hơn: nó cho phép **một commit
+master về sau** — không phải SHA đã review — trở thành bằng chứng. Lượt trên `master` là **cổng LAND sau
+merge**, không phải bằng chứng nghiệm thu.
 
 **Ràng buộc chéo, phải kiểm như một tiêu chí:** `B1` và `B4` **cùng phải xanh trong một lượt**. Vá `t33`
 mà quên bộ cài ⇒ `B1` xanh, `B4` đỏ, master đỏ. Đó là lý do hai mục tiêu không tách được.
 
 ## `hinh_dang_ke_thua`
 
-Chép từ thân Issue `#238` (**chưa** đối chiếu biên nhận): **A=7 · B=2 · C=1 · D=3 · E=2 · F=2**.
+**Nguồn là BIÊN NHẬN, không phải thân Issue** — bản đầu chép từ thân Issue `#238`, cross-review lượt 1
+(PR #250, P2) bác đúng chỗ đó. Đo trên `ops/reviews/lease-dang-review-5-claude-verdict.receipt.yaml`
+(`bo-dem-sau-luot-5`): **A = 6 · B = 2 · C = 1 · D = 3 · E = 2**.
 
-Kế thừa vì nợ này do lượt `#238` nêu. **F = 2 đáng đọc trước khi bắt tay**: *"land trên một nền, đo trên
-nền khác"* — và `M2` chính là một thay đổi **phụ thuộc nền**. `#238` đã chốt F lần 3 là **DỪNG**. Nghiệm
-thu `B5` đòi bằng chứng **cả hai nền** đúng để đóng cửa ấy.
+**Không có `F` trong biên nhận nào** — quét 37 biên nhận trên `master` ra **0**. Bản đầu ghi `F = 2` (lấy
+từ thân Issue) rồi dùng nó tuyên bố *"F lần 3 ⇒ DỪNG"*, tức lấy một số **không có hiện vật** làm **cổng
+dừng thi công**. Đã bỏ câu ấy.
+
+Yêu cầu bằng chứng **cả hai nền** vẫn giữ nguyên, nhưng nó đứng bằng **`B5`** — một tiêu chí nghiệm thu
+đo được — chứ không mượn một bộ đếm chưa ai ghi. `M2` là thay đổi phụ thuộc nền, nên bằng chứng phải đến
+từ cả `ubuntu-latest` lẫn `windows-latest` **trên exact head**; lý do đủ nằm trong bản chất của `M2`, không
+cần một con số để biện minh.
 
 ## `chua_do_duoc`
 

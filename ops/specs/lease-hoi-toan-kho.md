@@ -73,37 +73,71 @@ thoát **khác 0**. ĐỎ khi: đột biến bỏ một trạng thái khỏi b�
 `A2` Bơm một tệp lease **YAML hỏng** ⇒ `KHÔNG_XÁC_ĐỊNH` **và** mã thoát khác 0. ĐỎ khi: đột biến thay
 `raise`/`exit` bằng `|| echo` — đúng cách hỏng lượt 3 của bộ quét hand-roll (fail-**OPEN** trong chốt viết
 ra để fail-**CLOSE**).
+`A2b` Bơm một lease có `lease_expires_at_utc` **đã qua** ⇒ phân loại **`HẾT_HẠN`**, và lease ấy **không**
+xuất hiện trong danh sách chặn. ĐỎ khi: đột biến gộp nhánh `HẾT_HẠN` vào `CÒN_HẠN`, **và** đột biến gộp nó
+vào `KHÔNG_XÁC_ĐỊNH` — **hai** đột biến riêng, vì mỗi cái hỏng về một phía.
+**Vì sao `A2b` phải có (finding P2 cross-review lượt 1, PR #250):** `A1` chỉ cấp lease đang hoạt động, `A2`
+chỉ phủ đường không xác định. Thiếu `A2b` thì một cài đặt **dán nhãn mọi lease hết hạn thành `CÒN_HẠN` hoặc
+`KHÔNG_XÁC_ĐỊNH`** vẫn thoả trọn bộ fixture, và câu *"bỏ nhánh `HẾT_HẠN` làm `A1` đỏ"* ở bản đầu là **sai** —
+`A1` không đổi màu. `M1` hứa ba trạng thái thì nghiệm thu phải chạm đủ ba.
 
 **M2** — `A3` Giả một `ls-remote` trả **thừa một nhánh** so với `for-each-ref` ⇒ `KHÔNG_XÁC_ĐỊNH`.
-`A4` Giả chiều ngược lại (thừa ở **cục bộ**) ⇒ **KHÔNG** báo động. ĐỎ khi: đột biến đổi phép so tập thành
-so `wc -l` — cả A3 lẫn A4 phải đổi màu, vì đếm không phân biệt được hai chiều. `A5` Bơm một ref tượng
-trưng kiểu `origin/HEAD` ⇒ **không** báo động. ĐỎ khi: bỏ bước loại ref tượng trưng.
+`A4` Giả chiều ngược lại (thừa ở **cục bộ**) ⇒ **KHÔNG** báo động. `A5` Bơm một ref tượng trưng kiểu
+`origin/HEAD` ⇒ **không** báo động. ĐỎ khi: bỏ bước loại ref tượng trưng.
 
-**M3** — `A6` Dựng hai nhánh mang **cùng một** `lease_id`, một bản đã có `posted_comment_id`, bản kia
+`A6` **LỰC LƯỢNG BẰNG NHAU, TÊN KHÁC NHAU** — máy chủ và cục bộ cùng `n` ref, nhưng một nhánh cục bộ **cũ**
+đã bị xoá trên máy chủ và một nhánh **mới** trên máy chủ chưa fetch. ⇒ **`KHÔNG_XÁC_ĐỊNH`**. ĐỎ khi: đột
+biến đổi phép so **tập** thành so `wc -l`.
+
+**`A6` là fixture DUY NHẤT giết được đột biến ấy, và bản đầu của đặc tả này khai sai điều đó** (finding P1
+cross-review lượt 1, PR #250). `A3` và `A4` mỗi cái lệch lực lượng đúng **một**, nên một cài đặt **đếm** vẫn
+phân biệt được hai chiều (`n_máy_chủ > n_cục_bộ` ⇒ kêu; ngược lại ⇒ im) và thoả cả hai. Câu *"cả A3 lẫn A4
+phải đổi màu"* vì thế **sai**.
+
+Đắng ở chỗ: ca lực-lượng-bằng-nhau **chính là** lý do (a) mà cross-review PR #243 đã nêu và tôi đã chép vào
+`CLAUDE.md`. Tôi viết nó thành **văn xuôi doctrine** rồi **không** biến nó thành fixture — đúng bài học
+*"NGHĨ RA được phép thử mà KHÔNG CHẠY nó thì phép thử ấy KHÔNG TỒN TẠI"*, lần này ở dạng *"viết vào doctrine
+mà không viết vào nghiệm thu"*.
+
+**M3** — `A7` Dựng hai nhánh mang **cùng một** `lease_id`, một bản đã có `posted_comment_id`, bản kia
 chưa; chạy cổng trên bản chưa có ⇒ **`RC_DA_DANG` (9)**. ĐỎ khi: đột biến đưa phép đọc dấu về chỉ đọc
 tệp cục bộ — tức khôi phục đúng hành vi hiện tại. **Ca này là phản chứng của chính nợ mục 18**: không có
 nó thì không biết đang đo cổng hay đo thứ khác.
 
-**M4** — `A7` Mỗi ca trong `A1`–`A6` có **ít nhất một** đột biến khiến nó đổi màu, và bộ chạy đột biến in
+**M4** — `A8` Mỗi ca trong `A1` `A2` `A2b` `A3` `A4` `A5` `A6` `A7` — liệt kê từng cái, vì `A2b` không
+nằm trong dãy số `A1`–`A7` và một dãy viết tắt là chỗ ca lẻ đi lạc — có **ít nhất một** đột biến khiến nó đổi màu, và bộ chạy đột biến in
 ra **cả hai** số (số đột biến chạy · số đột biến bị giết) — hai số **bằng nhau**. ĐỎ khi: một đột biến
 sống sót, hoặc hai số lệch. Nhắc `t97`: đột biến có thể **chưa từng chạy** do va chạm `.pyc`; bộ chạy phải
 tắt ghi bytecode và dùng tên tệp riêng từng đột biến.
 
 ## `hinh_dang_ke_thua`
 
-Chép từ thân Issue `#238` (**chưa** đối chiếu biên nhận — xem `chua_do_duoc`):
+**Nguồn là BIÊN NHẬN, không phải thân Issue** — bản đầu của đặc tả này chép từ thân Issue `#238`
+và cross-review lượt 1 (PR #250, P2) bác đúng chỗ đó. Đo trên `ops/reviews/lease-dang-review-5-claude-verdict.receipt.yaml`,
+mục `bo-dem-sau-luot-5`:
 
 | | hình dạng | số |
 |---|---|---|
-| A | lời khai rộng hơn phép đo | **7** |
+| A | lời khai rộng hơn phép đo | **6** |
 | B | mượn tiền lệ mà không đo xem nó áp dụng được không | 2 |
 | C | phản chứng bắt buộc còn thiếu | 1 |
 | D | đặt câu hỏi kiểm chứng ở sai độ phân giải / sai pha | 3 |
 | E | khoá theo thứ liệt kê được thay vì theo thứ thật sự chặn | 2 |
-| F | land trên một nền, đo trên nền khác | 2 |
+| **F** | land trên một nền, đo trên nền khác | **KHÔNG CÓ TRONG BIÊN NHẬN NÀO** |
 
-Kế thừa vì packet này nhận một nợ đo được trong lượt `#238`. **A = 7 là cao nhất và đúng chỗ nguy hiểm
-của packet này**: cả ba mục tiêu đều là "đọc trạng thái rồi khai", tức đúng loại việc đẻ ra hình dạng A.
+Hai đính chính so với bản đầu, cả hai đo được:
+
+- **`A` là 6, không phải 7.** Thân Issue ghi 7; biên nhận ghi 6. Biên nhận là hiện vật bền, thân Issue sửa
+  được sau lưng — **biên nhận thắng**.
+- **`F` không tồn tại trong hồ sơ bền.** Quét **37** biên nhận trên `master`: **0** cái có bộ đếm `F`. Nó
+  chỉ có trong thân Issue `#238`.
+
+**Vì sao chỗ này nghiêm trọng hơn một con số lệch:** bản đầu dùng `F = 2` để tuyên bố *"F lần 3 ⇒ DỪNG"* —
+tức lấy một số **không có hiện vật** làm **cổng dừng thi công**. Đã bỏ câu ấy. Yêu cầu bằng chứng hai nền
+đứng bằng chính `B5`, không cần mượn một bộ đếm chưa ai ghi.
+
+**`A = 6` vẫn là cao nhất, và đúng chỗ nguy hiểm của packet này**: mọi mục tiêu đều là "đọc trạng thái rồi
+khai" — đúng loại việc đẻ ra hình dạng A.
 
 ## `chua_do_duoc`
 

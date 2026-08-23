@@ -57,3 +57,4 @@ dieu_kien_dung:
   - 'Go marker de cong het do — do la xoa mot khoan no THAT de mua cong xanh.'
   - 'Lam cong tac fast-path theo diff — VE TAP DOC KHONG TON TAI, can CI-FASTPATH-THEO-DIFF-r2.'
   - 'Sua `.github/checks/ci_phamvi*.py` — thuoc write set cua lease #245, khong phai lease nay.'
+posted_comment_id: 5383416335   # workflow ghi, ĐỪNG sửa tay

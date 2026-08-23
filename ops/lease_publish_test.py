@@ -3036,6 +3036,57 @@ def t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO():
     bang(chay_mut == giet == len(muts), f"đột biến {giet}/{chay_mut}")
 
 
+@ca
+def t95_git_that_bai_phai_fail_close_khong_duoc_nuot_loi():
+    """`_git()` không được coi `rc != 0` là "thành công, rỗng" — im lặng nuốt lỗi ở
+    tầng git là fail-OPEN, y hệt hình dạng mà `A2` khoá ở tầng YAML nhưng cho blob
+    hỏng, không cho LỆNH hỏng. Lan sang `_ten_nhanh_may_chu` vì đó là nơi hậu quả thật
+    xảy ra: tập rỗng do lỗi bị đọc thành "máy chủ không có nhánh nào", làm phép so hai
+    nguồn của M2 im lặng thay vì báo `KHÔNG_XÁC_ĐỊNH`."""
+    import subprocess as sp
+    mod = _nap_cong()
+
+    def gia_hong(*args, cwd=None):
+        return sp.CompletedProcess(args, 128, "", "fatal: giả lập git chết")
+
+    mod.GOI_GIT = gia_hong
+    try:
+        mod._git(Path("."), "ls-remote", "--heads", "origin")
+    except mod.Chan as ex:
+        bang(ex.ma == mod.RC_KHONG_XAC_DINH and "KHÔNG_XÁC_ĐỊNH" in ex.thong_diep,
+             f"t95 sai mã/thông điệp: {ex}")
+    else:
+        raise AssertionError("t95: `_git()` coi rc != 0 là thành công (trả chuỗi thay vì Chan)")
+
+    try:
+        mod._ten_nhanh_may_chu(Path("."))
+    except mod.Chan as ex:
+        bang(ex.ma == mod.RC_KHONG_XAC_DINH, f"t95 lan toả sai mã: {ex}")
+    else:
+        raise AssertionError(
+            "t95: ls-remote hỏng nhưng _ten_nhanh_may_chu trả tập (rỗng hoặc không) "
+            "thay vì chặn — M2 sẽ im lặng coi máy chủ không có nhánh nào")
+
+
+@ca
+def t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua():
+    """`_lease_cham_duong` nối một lease với đường dẫn bị hỏi — đây là chỗ M1 quyết
+    định TẬP NGƯỜI GIỮ được tính từ đâu, nên phải SO BẰNG tuyệt đối. Bơm overlap theo
+    CẢ HAI chiều: một mục `write_set` dài hơn nhận `duong` làm tiền tố, và một mục
+    ngắn hơn LÀ tiền tố của `duong` — cài `in` thay cho `==` sẽ khớp nhầm đúng một
+    trong hai chiều tuỳ hướng gõ, nên phải thử cả hai mới khoá được cả hai cách gõ sai."""
+    mod = _nap_cong()
+    duong = "ops/lease_publish.py"
+    bang(not mod._lease_cham_duong({"write_set": [duong + ".bak"]}, duong),
+         "t96: write_set dài hơn nhận `duong` làm tiền tố vẫn bị coi là khớp")
+    bang(not mod._lease_cham_duong({"write_set": ["ops/lease_publish"]}, duong),
+         "t96: write_set ngắn hơn, là tiền tố của `duong`, vẫn bị coi là khớp")
+    bang(mod._lease_cham_duong({"write_set": [duong]}, duong),
+         "t96: khớp đúng nghĩa (bằng nhau tuyệt đối) bị từ chối")
+    bang(mod._lease_cham_duong({"write_set": ["planned:" + duong]}, duong),
+         "t96: khớp đúng nghĩa kèm tiền tố `planned:` bị từ chối")
+
+
 def main() -> int:
     qua, hong, bo_qua = 0, [], []
     for fn in CA:

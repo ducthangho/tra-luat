@@ -224,3 +224,7 @@ ghi_de_ADR_0046:
     Phiên này tự viết và tự chạy ca `t98` cùng ma trận 8 ô của `r3`. Nên nó là bên KÉM
     ĐỘC LẬP NHẤT để nghiệm thu chính ca ấy. Reviewer `codex` phải TỰ DỰNG lại `X1`/`X2`
     và tự chạy `W11`–`W13`, không nhận bảng số trong `r3` làm bằng chứng.
+da_bi_thay_the: t33-doi-shellcheck-exec-1r3-claude-20260823
+da_bi_thay_the_ly_do: >-
+  Thu hẹp phạm vi theo quyết định chủ kho: M1/M2 trùng CHỨC NĂNG với packet #290 (PR #291
+  đang mở) nên để ngoài lượt này; write set giảm còn một đường dẫn. Xem `thu_hep_pham_vi`.

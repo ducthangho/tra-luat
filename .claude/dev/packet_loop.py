@@ -897,9 +897,8 @@ def cmd_void_attempt(a, state_dir: Path) -> int:
     if st["attempts_used"] <= 0:
         _die(RC_STATE, "chưa có lượt nào để hoàn")
     # KHÔNG có cổng bằng chứng ở đây, CÓ CHỦ Ý — `…-r4.md` §0. Ba bản trước đổi TRƯỜNG
-    # được tin mà không lập NGUỒN GỐC; cổng mang tên "bằng chứng máy" đọc một tệp bất kỳ
-    # ai viết thì TRÔNG như bảo vệ. `LY_DO_VOID` canh TỪ VỰNG, không canh SỰ THẬT — nói
-    # thẳng thay vì để nhãn nói hộ. `void_giu_dung_hanh_vi_master` canh việc BỎ đã sạch.
+    # được tin mà không lập NGUỒN GỐC; cổng đọc một tệp bất kỳ ai viết mà mang tên "bằng
+    # chứng máy" thì TRÔNG như bảo vệ. `void_giu_dung_hanh_vi_master` canh việc BỎ đã sạch.
     # Lượt ĐÃ được review thì không hoàn được — nếu không, mọi lượt hỏng đều
     # biến thành "quota" và trần trở thành trang trí.
     if st["reviews"] and st["reviews"][-1]["attempt"] == st["attempts_used"]:

@@ -732,12 +732,9 @@ def case_luong_canonical_chay_that(c: Ctx):
     r = subprocess.run(["pwsh", "-NoProfile", "-Command", ps], cwd=str(ROOT), capture_output=True)
     assert r.returncode == 0, f"khoi canonical KHONG chay duoc: {r.stderr!r}"
 def case_void_giu_dung_hanh_vi_master(c: Ctx):
-    """N11 — canh việc BỎ M3/M4 đã SẠCH, không sót mảnh nào.
-
-    Hai chiều: (a) HÀNH VI — mọi lý do trong allowlist hoàn được lượt, KHÔNG cờ bằng
-    chứng nào; (b) BỀ MẶT — bốn cờ M3/M4 phải biến khỏi parser. Thiếu (b) thì mảnh sót
-    vẫn qua (a) khi cờ có mặc định vô hại; thiếu (a) thì gỡ cờ mà để lại `_die` vẫn xanh.
-    """
+    """N11 — canh việc BỎ M3/M4 đã SẠCH. (a) HÀNH VI: mọi lý do trong allowlist hoàn được
+    lượt, KHÔNG cờ bằng chứng nào. (b) BỀ MẶT: bốn cờ phải biến khỏi PARSER. Thiếu (b) thì
+    mảnh sót vẫn qua (a) khi cờ có mặc định vô hại; thiếu (a) thì gỡ cờ mà `_die` vẫn xanh."""
     sd = c.sd()
     _doi(0, *c.init(sd)[0:1], b"", "init")
     for ly_do in ("quota", "rate_limit", "infrastructure", "permission"):
@@ -745,11 +742,13 @@ def case_void_giu_dung_hanh_vi_master(c: Ctx):
         _doi(0, rc, e, "begin-attempt")
         rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", ly_do], sd)
         _doi(0, rc, e, f"{ly_do} bị đòi bằng chứng — void-attempt phải giữ đúng hành vi master")
-    rc, o, e = run(c.script, ["void-attempt", "--help"], sd)
-    _doi(0, rc, e, "void-attempt --help")
-    sot = [f for f in ("--bang-chung", "--khong-co-bang-chung", "--ai-cho-phep", "--can-cu")
-           if f.encode() in o]
-    assert not sot, f"cờ M3/M4 còn sót trong parser: {sot}"
+    # Đo PARSER, KHÔNG đo `--help`: `help=argparse.SUPPRESS` giấu cờ khỏi help mà VẪN
+    # nhận đầu vào — bản trước xanh 231/231 với một cờ M3 còn sống (`n11-chi-kiem-help…`).
+    for co, dt in (("--bang-chung", ["x"]), ("--khong-co-bang-chung", []),
+                   ("--ai-cho-phep", ["x"]), ("--can-cu", ["x"])):
+        rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota", co] + dt, sd)
+        assert rc != 0 and f"unrecognized arguments: {co}".encode() in e, \
+            f"parser CÒN NHẬN {co}: rc={rc} · {e!r}"
 
 
 def case_void_attempt_allowlist(c: Ctx):
@@ -2603,17 +2602,13 @@ CASES += [(f"ac19_{ten}", _ca_doctrine(nd, f"ac19_{ten}", 0)) for ten, nd in LOP
 # chết được nghĩa là nó không đo cái nó khai.
 MUTANTS = {
     # --- M1/M2 · N11: mỗi luật MỘT đột biến -------------------------------------
-    # N2 là ca chiều BẮT OAN nên chỉ chết bởi đột biến SIẾT (ngưỡng tuổi về -1) — và
-    # đột biến ấy KHÔNG làm N1 đỏ, vì N1 vốn đòi rc=10. Hai chiều, hai loại đột biến.
+    # N2 (`mt_sach…`) CỐ Ý không đột biến — chính sách AC 18 cho ca chiều THA. ĐÃ THỬ
+    # siết ngưỡng tuổi về `-1`: ĐO ĐƯỢC nó giết **37/231** ca, không phải 1. Bộ tự-chứng-
+    # minh mù với BÁN KÍNH NỔ vì chỉ chạy ca đích + 3 đối chứng KHÁC HỌ. Đừng thêm lại.
     "mt_bo_chot_thieu_cong_cu": (
         '    thieu = d.get("thieu_bat_buoc") or []\n',
         '    thieu = []   # đột biến: bỏ chốt thiếu công cụ\n',
         ["mt_thieu_cong_cu_thi_khong_mo_duoc_luot"],
-    ),
-    "mt_siet_nguong_tuoi_ve_am_mot": (
-        "NGUONG_TUOI_BANG_CHUNG_GIAY = 3600\n",
-        "NGUONG_TUOI_BANG_CHUNG_GIAY = -1   # đột biến: siết, ảnh nào cũng 'cũ'\n",
-        ["mt_sach_thi_van_mo_duoc_luot"],
     ),
     "mt_bo_so_nen_chup_anh": (
         '    if d.get("he_dieu_hanh") != nen_thuc:\n',
@@ -2624,6 +2619,13 @@ MUTANTS = {
         '        return BC_KHONG_DOC_DUOC, None, f"ảnh môi trường không đọc được ({ex.__class__.__name__}): {duong}"\n',
         '        return BC_KHONG, None, f"hỏng: {ex}"   # đột biến: gộp trạng thái thứ ba\n',
         ["mt_anh_hong_la_KHONG_DOC_DUOC"],
+    ),
+    # Đúng đòn reviewer đã dùng để lách N11 — nay là CA, không còn là văn xuôi.
+    "mt_them_lai_co_M3_bi_SUPPRESS": (
+        '    q.add_argument("--reason", required=True, help=f"một trong {LY_DO_VOID}")\n',
+        '    q.add_argument("--reason", required=True, help=f"một trong {LY_DO_VOID}")\n'
+        '    q.add_argument("--bang-chung", default=None, help=argparse.SUPPRESS)\n',
+        ["void_giu_dung_hanh_vi_master"],
     ),
     "mt_them_lai_doi_bang_chung_o_void": (
         "    if a.reason not in LY_DO_VOID:\n",

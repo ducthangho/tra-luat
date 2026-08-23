@@ -28,8 +28,11 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
+import platform
 import re
 import sys
+import time
 import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
@@ -51,6 +54,7 @@ RC_DOCTRINE = 6
 RC_GUARD = 7
 RC_STATE = 8
 RC_ADR = 9
+RC_MOI_TRUONG = 10
 
 PROVIDERS = ("claude", "codex")
 
@@ -486,6 +490,112 @@ def _dong_tai(ban_do, offset: int) -> int:
     return so
 
 
+# --- Bằng chứng MÔI TRƯỜNG ----------------------------------------------------
+# `begin-attempt` trước đây kiểm state/lease/provider/trần và KHÔNG một dòng nào về
+# công cụ (đo được: 0 chỗ nhắc `cong_cu|doctor|shutil.which` trong thân hàm). Nên một
+# lượt mở ra bình thường trên máy thiếu `rg`/`codex`/`gh`, chạy, chết, rồi bị ĐẾM như
+# thất bại NỘI DUNG. Trần attempt sinh ra để phát tín hiệu "mã sai"; nuốt lỗi hạ tầng
+# vào đó là làm hỏng đúng tín hiệu ấy.
+#
+# Nới trần là SAI THUỐC: nó cho packet chịu nhiều lượt hỏng hơn mà VẪN không phân biệt
+# hai loại hỏng. Cơ chế đúng đã có sẵn — `void-attempt` — nhưng nó nhận lý do theo LỜI
+# KHAI (allowlist canh TỪ VỰNG, không canh SỰ THẬT), nên phải đòi bằng chứng máy.
+NGUONG_TUOI_BANG_CHUNG_GIAY = 3600
+BIEN_BANG_CHUNG = "TL_MOI_TRUONG_JSON"
+
+# BA trạng thái, không phải hai. `khong_doc_duoc` KHÔNG được gộp vào `khong`: một ảnh
+# hỏng cú pháp và một ảnh vắng mặt đòi hai cách xử khác nhau, và gộp lại thì thông điệp
+# nói sai chỗ cần sửa. Cả ba đều fail-close về phía TỪ CHỐI mở lượt.
+BC_CO, BC_KHONG, BC_KHONG_DOC_DUOC = "co", "khong", "khong_doc_duoc"
+
+
+def _doc_anh_moi_truong(duong):
+    """Đọc ảnh `launcher.py doctor --json`. Trả (trạng_thái, dữ_liệu, lý_do)."""
+    if not duong:
+        return BC_KHONG, None, f"chưa khai ảnh môi trường (--bang-chung-moi-truong hoặc ${BIEN_BANG_CHUNG})"
+    t = Path(duong)
+    if not t.is_file():
+        return BC_KHONG, None, f"không có tệp ảnh môi trường: {duong}"
+    try:
+        d = json.loads(t.read_text(encoding="utf-8"))
+    except Exception as ex:            # hỏng cú pháp KHÁC hẳn vắng mặt
+        return BC_KHONG_DOC_DUOC, None, f"ảnh môi trường không đọc được ({ex.__class__.__name__}): {duong}"
+    if not isinstance(d, dict) or "thieu_bat_buoc" not in d or "he_dieu_hanh" not in d:
+        return BC_KHONG_DOC_DUOC, None, f"ảnh môi trường thiếu trường của `doctor --json`: {duong}"
+    return BC_CO, d, ""
+
+
+def _kiem_anh_moi_truong(duong) -> dict:
+    """Fail-close: mọi đường không dẫn tới một ảnh SẠCH và TƯƠI đều `_die`."""
+    trang_thai, d, ly_do = _doc_anh_moi_truong(duong)
+    if trang_thai == BC_KHONG_DOC_DUOC:
+        _die(RC_MOI_TRUONG, f"KHÔNG ĐỌC ĐƯỢC: {ly_do} — không mở lượt trên một phép đo không đọc được")
+    if trang_thai == BC_KHONG:
+        _die(RC_MOI_TRUONG, f"THIẾU: {ly_do}")
+    thieu = d.get("thieu_bat_buoc") or []
+    if thieu:
+        _die(RC_MOI_TRUONG, f"môi trường thiếu công cụ bắt buộc: {thieu} — hoàn cảnh này KHÔNG được tiêu một attempt")
+    # Ảnh chụp trên MÁY KHÁC là lời khai về máy khác. `platform.system()` cho đúng
+    # chuỗi mà `doctor` ghi vào `he_dieu_hanh`.
+    nen_thuc = platform.system()
+    if d.get("he_dieu_hanh") != nen_thuc:
+        _die(RC_MOI_TRUONG,
+             f"ảnh môi trường chụp trên {d.get('he_dieu_hanh')!r} nhưng đang chạy trên {nen_thuc!r}")
+    # TƯƠI theo mtime của TỆP, vì `doctor --json` KHÔNG ghi mốc thời gian nào vào thân.
+    # Điểm yếu đã biết: mtime sửa được. Mô hình đe doạ ở đây là "cũ do vô ý", không phải
+    # kẻ gian — ai cố tình thì đã tự gõ được `--khong-co-bang-chung` có ghi sổ.
+    tuoi = time.time() - Path(duong).stat().st_mtime
+    if tuoi > NGUONG_TUOI_BANG_CHUNG_GIAY:
+        _die(RC_MOI_TRUONG,
+             f"ảnh môi trường cũ {int(tuoi)}s (> {NGUONG_TUOI_BANG_CHUNG_GIAY}s) — chụp lại `doctor --json`")
+    return d
+
+
+LY_DO_CAN_BANG_CHUNG = ("infrastructure", "permission")
+
+
+def _kiem_bang_chung_ha_tang(duong, ly_do) -> None:
+    """Bằng chứng MÁY cho `infrastructure`/`permission`. Fail-close, ba trạng thái."""
+    trang_thai, d, vi_sao = _doc_anh_moi_truong(duong)
+    if trang_thai == BC_KHONG_DOC_DUOC:
+        _die(RC_MOI_TRUONG, f"KHÔNG ĐỌC ĐƯỢC: {vi_sao} — không hoàn lượt trên phép đo không đọc được")
+    if trang_thai == BC_KHONG:
+        # Cùng hàm đọc, nhưng ở đây `run.json` của launcher cũng là bằng chứng hợp lệ,
+        # nên thử nhánh thứ hai trước khi từ chối.
+        d = _doc_so_lauch(duong)
+        if d is None:
+            _die(RC_MOI_TRUONG,
+                 f"--reason {ly_do} đòi BẰNG CHỨNG MÁY: ảnh `doctor --json` hoặc `run.json` của "
+                 f"launcher. Không có thì dùng --khong-co-bang-chung (có ghi sổ). ({vi_sao})")
+        return
+    thieu = d.get("thieu_bat_buoc") or []
+    chua_xt = d.get("chua_xac_thuc") or []
+    if ly_do == "infrastructure" and not thieu:
+        _die(RC_MOI_TRUONG, "ảnh môi trường KHÔNG thiếu công cụ bắt buộc — nó không chứng minh `infrastructure`")
+    if ly_do == "permission" and not chua_xt:
+        _die(RC_MOI_TRUONG, "ảnh môi trường KHÔNG có mục chưa xác thực — nó không chứng minh `permission`")
+
+
+def _doc_so_lauch(duong):
+    """`run.json` của launcher: mã 12/13, hoặc rc≠0 mà stdout RỖNG. None = không phải."""
+    try:
+        d = json.loads(Path(duong).read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    if not isinstance(d, dict) or "ma_thoat" not in d:
+        return None
+    ma = d.get("ma_thoat")
+    if ma in (12, 13):                       # thiếu công cụ / chưa xác thực
+        return d
+    if d.get("trang_thai") in ("qua_han", "hong"):
+        return d
+    # `rc=0 mà rỗng` là chốt của launcher; ở đây chiều ngược lại mới là bằng chứng:
+    # thoát khác 0 mà KHÔNG in gì = chết trước khi chạy tới phần việc.
+    if ma not in (None, 0) and d.get("stdout_byte") == 0:
+        return d
+    return None
+
+
 def _die(rc: int, msg: str) -> None:
     print(msg, file=sys.stderr)
     sys.exit(rc)
@@ -816,13 +926,19 @@ def cmd_begin_attempt(a, state_dir: Path) -> int:
             f"đã dùng hết {st['attempts_used']}/{st['attempts_limit']} lượt — packet về blocked. "
             f"Ghi failure evidence + handoff rồi dừng; reroute là việc của bên điều phối.",
         )
+    # M1/M2 — ĐO môi trường TRƯỚC khi tiêu một attempt. Đặt ở ĐÂY, sau mọi chốt state
+    # và ngay TRƯỚC dòng tăng `attempts_used`: đặt sớm hơn thì một máy thiếu công cụ che
+    # mất lỗi state thật, đặt muộn hơn thì attempt đã bị tiêu rồi mới từ chối.
+    anh = _kiem_anh_moi_truong(getattr(a, "bang_chung_moi_truong", None)
+                               or os.environ.get(BIEN_BANG_CHUNG))
     st["attempts_used"] += 1
     st["state"] = "running"
     st["attempt_open"] = True
     # Head cũ hết hiệu lực ngay khi mở lượt mới: có commit mới thì bản duyệt
     # trước không còn nói về cây đang có nữa.
     st["reviewing_head_sha"] = None
-    st["history"].append({"event": "begin_attempt", "attempt": st["attempts_used"]})
+    st["history"].append({"event": "begin_attempt", "attempt": st["attempts_used"],
+                          "nen": anh.get("he_dieu_hanh"), "moi_truong_ok": True})
     _save(state_dir, st)
     print(f"bắt đầu lượt {st['attempts_used']}/{st['attempts_limit']} — state {st['state']}")
     return RC_OK
@@ -834,6 +950,30 @@ def cmd_void_attempt(a, state_dir: Path) -> int:
         _die(RC_ARG, f"lý do {a.reason!r} không thuộc allowlist {LY_DO_VOID}")
     if st["attempts_used"] <= 0:
         _die(RC_STATE, "chưa có lượt nào để hoàn")
+    # M3 — `LY_DO_VOID` là danh sách CHO PHÉP, và nó đúng hình dạng: nó xác nhận
+    # `infrastructure` LÀ một lý do hợp lệ. Nhưng nó KHÔNG xác nhận lý do ấy CÓ THẬT.
+    # Allowlist canh TỪ VỰNG, không canh SỰ THẬT — gõ `--reason infrastructure` cho một
+    # lượt chết vì mã sai thì bản trước nhận, rc=0, và trần attempt thành trang trí đúng
+    # theo cách mà chú thích ngay dưới đây đã cảnh báo cho ca `đã có review`.
+    #
+    # Chỉ siết HAI lý do có dấu vết máy. `quota`/`rate_limit` nằm phía nhà cung cấp, không
+    # để lại gì trong kho — đòi bằng chứng cho chúng là đòi thứ không tồn tại, và cổng nào
+    # đòi thứ không tồn tại thì người ta sẽ học cách đi vòng qua nó.
+    if a.reason in LY_DO_CAN_BANG_CHUNG:
+        if a.khong_co_bang_chung:
+            # M4 — đường thoát PHẢI ĐƯỢC GHI. Ca môi trường chết TRƯỚC khi kịp ghi sổ là
+            # ca có thật, và ở đúng ca ấy bằng chứng máy vắng mặt. Không có cửa này thì M3
+            # biến một lỗi hạ tầng tạm thời thành ngõ cụt vĩnh viễn.
+            if a.ai_cho_phep not in NGUOI_CO_THAM_QUYEN:
+                _die(RC_MOI_TRUONG,
+                     f"--ai-cho-phep {a.ai_cho_phep!r} không thuộc {NGUOI_CO_THAM_QUYEN} — "
+                     f"người thi công KHÔNG tự cho phép mình bỏ bằng chứng")
+            if not (a.can_cu or "").strip():
+                _die(RC_MOI_TRUONG, "--khong-co-bang-chung đòi --can-cu, không nhận lý do trống")
+            st["history"].append({"event": "void_khong_co_bang_chung", "reason": a.reason,
+                                  "ai_cho_phep": a.ai_cho_phep, "can_cu": a.can_cu})
+        else:
+            _kiem_bang_chung_ha_tang(a.bang_chung, a.reason)
     # Lượt ĐÃ được review thì không hoàn được — nếu không, mọi lượt hỏng đều
     # biến thành "quota" và trần trở thành trang trí.
     if st["reviews"] and st["reviews"][-1]["attempt"] == st["attempts_used"]:
@@ -1434,11 +1574,23 @@ def build_parser() -> argparse.ArgumentParser:
     q = sub.add_parser("begin-attempt", help="mở một lượt executor")
     q.add_argument("--packet", type=int, required=True)
     q.add_argument("--provider", required=True)
+    q.add_argument("--bang-chung-moi-truong", dest="bang_chung_moi_truong",
+                   help=f"ảnh `launcher.py doctor --json`; thiếu thì đọc ${BIEN_BANG_CHUNG}. "
+                        f"Không có ảnh SẠCH và TƯƠI thì KHÔNG mở lượt (mã {RC_MOI_TRUONG})")
     q.set_defaults(fn=cmd_begin_attempt)
 
     q = sub.add_parser("void-attempt", help="hoàn lượt vì lỗi hạ tầng/quota")
     q.add_argument("--packet", type=int, required=True)
     q.add_argument("--reason", required=True, help=f"một trong {LY_DO_VOID}")
+    q.add_argument("--bang-chung", dest="bang_chung",
+                   help=f"bằng chứng MÁY, bắt buộc cho {LY_DO_CAN_BANG_CHUNG}: ảnh "
+                        f"`doctor --json` hoặc `run.json` của launcher")
+    q.add_argument("--khong-co-bang-chung", dest="khong_co_bang_chung", action="store_true",
+                   help="đường thoát CÓ GHI SỔ khi môi trường chết trước lúc kịp ghi; "
+                        "đòi --ai-cho-phep và --can-cu")
+    q.add_argument("--ai-cho-phep", dest="ai_cho_phep",
+                   help=f"bên CÓ THẨM QUYỀN cho phép bỏ bằng chứng; phải thuộc {NGUOI_CO_THAM_QUYEN}")
+    q.add_argument("--can-cu", dest="can_cu", help="vì sao không có bằng chứng máy")
     q.set_defaults(fn=cmd_void_attempt)
 
     q = sub.add_parser("record-review", help="ghi một lượt review")

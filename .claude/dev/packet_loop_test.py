@@ -19,7 +19,9 @@ Chạy: `python .claude/dev/packet_loop_test.py`
 
 from __future__ import annotations
 
+import json
 import os
+import platform
 import subprocess
 import sys
 import tempfile
@@ -36,6 +38,24 @@ REVIEWER = "codex"
 # --- hạ tầng ------------------------------------------------------------------
 
 
+BIEN_BC = "TL_MOI_TRUONG_JSON"
+_ANH_SACH = []
+
+
+def anh_moi_truong_sach(**doi) -> str:
+    """Ảnh `doctor --json` HỢP LỆ, dùng chung. `doi` để bẻ đúng một chiều làm ca đỏ."""
+    d = {"thieu_bat_buoc": [], "chua_xac_thuc": [], "he_dieu_hanh": platform.system(),
+         "ok": True, "ok_kha_dung": True}
+    d.update(doi)
+    if not doi and _ANH_SACH:
+        return _ANH_SACH[0]
+    f = Path(tempfile.mkdtemp(prefix="tl-mt-")) / "doctor.json"
+    f.write_text(json.dumps(d), encoding="utf-8")
+    if not doi:
+        _ANH_SACH.append(str(f))
+    return str(f)
+
+
 def run(script: Path, args, state_dir=None, env_extra=None):
     cmd = [sys.executable, str(script)]
     if state_dir is not None:
@@ -44,6 +64,10 @@ def run(script: Path, args, state_dir=None, env_extra=None):
     env = os.environ.copy()
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     env.pop("PYTHONIOENCODING", None)
+    # `begin-attempt` nay ĐÒI ảnh môi trường. 33 chỗ gọi nó ở dưới KHÔNG đo chốt ấy, nên
+    # tiêm một ảnh SẠCH mặc định thay vì sửa 33 dòng. `env_extra` ghi đè được, để ca nào
+    # ĐO chính chốt ấy vẫn nhìn thấy trạng thái thiếu/hỏng.
+    env[BIEN_BC] = anh_moi_truong_sach()
     if env_extra:
         env.update(env_extra)
     p = subprocess.run(cmd, capture_output=True, env=env)
@@ -644,6 +668,102 @@ def case_doctrine_scan_bat_qua_ngat_dong(c: Ctx):
 
 
 # --- §8 quota không tiêu thụ attempt -------------------------------------------
+
+
+def case_mt_thieu_cong_cu_thi_khong_mo_duoc_luot(c: Ctx):
+    """N1 — lượt chết vì thiếu công cụ KHÔNG được tiêu một attempt."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    anh = anh_moi_truong_sach(thieu_bat_buoc=["rg"])
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR],
+                   sd, env_extra={BIEN_BC: anh})
+    _doi(10, rc, e, "thiếu công cụ bắt buộc mà vẫn mở được lượt")
+    assert b"rg" in e, f"thông điệp không nêu công cụ thiếu: {e!r}"
+    st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    assert st["attempts_used"] == 0, f"attempt bị TIÊU dù từ chối: {st['attempts_used']}"
+
+
+def case_mt_sach_thi_van_mo_duoc_luot(c: Ctx):
+    """N2 — chiều BẮT OAN. Ca chiều-tha chỉ chết bởi đột biến SIẾT THÊM."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, o, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "ảnh môi trường SẠCH mà vẫn bị chặn")
+    assert b"1/3" in o, f"không mở đúng lượt 1: {o!r}"
+
+
+def case_mt_chup_tren_nen_khac_thi_tu_choi(c: Ctx):
+    """N3 — ảnh chụp trên MÁY KHÁC là lời khai về máy khác."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    anh = anh_moi_truong_sach(he_dieu_hanh="Plan9")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR],
+                   sd, env_extra={BIEN_BC: anh})
+    _doi(10, rc, e, "ảnh chụp nền khác mà vẫn mở được lượt")
+
+
+def case_mt_anh_hong_la_KHONG_DOC_DUOC_khong_phai_thieu(c: Ctx):
+    """N7 — trạng thái THỨ BA có tên riêng; gộp vào `khong` là nói sai chỗ cần sửa."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    f = Path(tempfile.mkdtemp(prefix="tl-mt-hong-")) / "doctor.json"
+    f.write_text("{ khong phai json", encoding="utf-8")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR],
+                   sd, env_extra={BIEN_BC: str(f)})
+    _doi(10, rc, e, "ảnh hỏng cú pháp mà vẫn mở được lượt")
+    assert "KHÔNG ĐỌC ĐƯỢC".encode() in e, f"gộp nhầm vào THIẾU: {e!r}"
+
+
+def case_void_ha_tang_khong_bang_chung_thi_tu_choi(c: Ctx):
+    """N4 — phản chứng cho ca `allowlist canh TỪ VỰNG, không canh SỰ THẬT`."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "begin-attempt")
+    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "infrastructure"], sd)
+    _doi(10, rc, e, "hoàn lượt vì `infrastructure` mà KHÔNG có bằng chứng máy")
+
+
+def case_void_ha_tang_co_bang_chung_thi_qua(c: Ctx):
+    """N4b — chiều BẮT OAN của N4: có bằng chứng thật thì phải hoàn được."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "begin-attempt")
+    anh = anh_moi_truong_sach(thieu_bat_buoc=["codex"])
+    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "infrastructure",
+                              "--bang-chung", anh], sd)
+    _doi(0, rc, e, "có bằng chứng thật mà vẫn bị chặn")
+
+
+def case_void_quota_khong_doi_bang_chung(c: Ctx):
+    """N6 — chiều BẮT OAN. `quota` ở phía nhà cung cấp, không để lại dấu vết máy."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    for ly_do in ("quota", "rate_limit"):
+        rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+        _doi(0, rc, e, "begin-attempt")
+        rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", ly_do], sd)
+        _doi(0, rc, e, f"{ly_do} bị đòi bằng chứng máy — đòi thứ không tồn tại")
+
+
+def case_void_duong_thoat_phai_co_tham_quyen_va_ghi_so(c: Ctx):
+    """N5 — cửa thoát KHÔNG ghi sổ là cửa hậu."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "begin-attempt")
+    thoat = ["void-attempt", "--packet", 55, "--reason", "infrastructure", "--khong-co-bang-chung"]
+    rc, _, e = run(c.script, thoat + ["--ai-cho-phep", EXECUTOR, "--can-cu", "x"], sd)
+    _doi(10, rc, e, "người thi công tự cho phép mình bỏ bằng chứng")
+    rc, _, e = run(c.script, thoat + ["--ai-cho-phep", "ducthangho"], sd)
+    _doi(10, rc, e, "bỏ bằng chứng mà không cần căn cứ")
+    rc, _, e = run(c.script, thoat + ["--ai-cho-phep", "ducthangho",
+                                      "--can-cu", "container chết trước khi kịp ghi run.json"], sd)
+    _doi(0, rc, e, "đủ thẩm quyền và căn cứ mà vẫn bị chặn")
+    st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    su = [h for h in st["history"] if h.get("event") == "void_khong_co_bang_chung"]
+    assert su and su[0]["ai_cho_phep"] == "ducthangho", f"cửa thoát KHÔNG ghi sổ: {st['history']}"
 
 
 def case_void_attempt_allowlist(c: Ctx):
@@ -2020,6 +2140,14 @@ CASES = [
     ("accepted_chi_dat_duoc_qua_record_review", case_accepted_chi_dat_duoc_qua_record_review),
     ("vao_reviewing_phai_co_luot_dang_mo", case_vao_reviewing_phai_co_luot_dang_mo),
     ("doctrine_scan_bat_qua_ngat_dong", case_doctrine_scan_bat_qua_ngat_dong),
+    ("mt_thieu_cong_cu_thi_khong_mo_duoc_luot", case_mt_thieu_cong_cu_thi_khong_mo_duoc_luot),
+    ("mt_sach_thi_van_mo_duoc_luot", case_mt_sach_thi_van_mo_duoc_luot),
+    ("mt_chup_tren_nen_khac_thi_tu_choi", case_mt_chup_tren_nen_khac_thi_tu_choi),
+    ("mt_anh_hong_la_KHONG_DOC_DUOC", case_mt_anh_hong_la_KHONG_DOC_DUOC_khong_phai_thieu),
+    ("void_ha_tang_khong_bang_chung_thi_tu_choi", case_void_ha_tang_khong_bang_chung_thi_tu_choi),
+    ("void_ha_tang_co_bang_chung_thi_qua", case_void_ha_tang_co_bang_chung_thi_qua),
+    ("void_quota_khong_doi_bang_chung", case_void_quota_khong_doi_bang_chung),
+    ("void_duong_thoat_phai_co_tham_quyen_va_ghi_so", case_void_duong_thoat_phai_co_tham_quyen_va_ghi_so),
     ("void_attempt_allowlist", case_void_attempt_allowlist),
     ("void_xong_van_mo_lai_duoc_luot", case_void_xong_van_mo_lai_duoc_luot),
     ("void_attempt_ly_do_tu_che_bi_tu_choi", case_void_attempt_ly_do_tu_che_bi_tu_choi),

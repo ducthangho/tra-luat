@@ -503,12 +503,10 @@ def _kiem_dau_toan_kho(lease: dict, tep=None, goc=None) -> None:
         Path(tep).resolve().relative_to(root)
     except ValueError:
         return  # fixture/bản sao rời, không phải tệp lease trong kho đang quét
-    try:
-        p = GOI_GIT("rev-parse", "--git-dir", cwd=root)
-    except OSError:
-        return
-    if p.returncode != 0:
-        return
+    # `.git` có mặt (đã kiểm ở trên) nên từ đây git lỗi là LỖI THẬT, không phải "không
+    # phải kho" — phải đi qua `_git()` để fail-close (`Chan(RC_KHONG_XAC_DINH)`) thay vì
+    # `return` lặng lẽ, kẻo cổng đăng lease bỏ qua đúng chốt "đã đăng" khi git tạm lỗi.
+    _git(root, "rev-parse", "--git-dir")
     lease_id = str(lease.get("lease_id") or "")
     for muc in _quet_lease_toan_kho(root, doi_chieu_ref=False):
         ban = muc["lease"]

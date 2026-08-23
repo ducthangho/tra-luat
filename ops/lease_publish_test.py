@@ -3087,6 +3087,39 @@ def t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua():
          "t96: khớp đúng nghĩa kèm tiền tố `planned:` bị từ chối")
 
 
+@ca
+def t97_kiem_dau_toan_kho_phai_fail_close_khi_git_that_bai():
+    """`_kiem_dau_toan_kho` gọi THẲNG `GOI_GIT("rev-parse", "--git-dir", …)` — KHÔNG đi
+    qua `_git()` — rồi `except OSError: return` / `if p.returncode != 0: return` lặng
+    lẽ. Đây là hình dạng y hệt lỗ mà `t95` vừa khoá cho `_git()`, nhưng ở một đường gọi
+    KHÁC không chạm `_git()` nên `t95` không bắt được nó — và đây KHÔNG phải một đột
+    biến giả định: đo trực tiếp trên `ops/lease_publish.py` hôm nay (chưa sửa gì) đã
+    fail-OPEN sẵn. `.git/` được xác nhận CÓ MẶT ngay phía trên (dòng `if not (root /
+    ".git").exists(): return`) nên từ điểm này git lỗi là LỖI THẬT, không phải "không
+    phải kho" — im lặng bỏ qua đúng là bỏ qua chốt "đã đăng" của `kiem()`, tức cổng
+    đăng lease thật (`lenh_check`/`lenh_body`/`lenh_kiem_github` đều gọi `kiem()` TRƯỚC
+    khi đăng) có thể đăng TRÙNG một lease đã đăng khi git tạm thời lỗi."""
+    import subprocess as sp
+    mod = _nap_cong()
+
+    def gia_hong(*args, cwd=None):
+        return sp.CompletedProcess(args, 128, "", "fatal: giả lập git chết")
+
+    mod.GOI_GIT = gia_hong
+    with San() as s:
+        (s / ".git").mkdir()
+        p = viet(s, _lease_quet("DUNG"))
+        try:
+            mod._kiem_dau_toan_kho({"lease_id": "DUNG"}, p, s)
+        except mod.Chan as ex:
+            bang(ex.ma == mod.RC_KHONG_XAC_DINH, f"t97 sai mã: {ex}")
+        else:
+            raise AssertionError(
+                "t97: `_kiem_dau_toan_kho` coi git lỗi thật (rev-parse --git-dir rc!=0) "
+                "là 'không phải kho' và bỏ qua lặng lẽ — cổng đăng lease sẽ KHÔNG bắt "
+                "được lease đã đăng trùng khi git tạm thời lỗi")
+
+
 def main() -> int:
     qua, hong, bo_qua = 0, [], []
     for fn in CA:

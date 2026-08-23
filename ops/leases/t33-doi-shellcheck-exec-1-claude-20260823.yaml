@@ -26,7 +26,7 @@ review_class: sensitive
 effective_review_class: sensitive
 
 spec_path: ops/specs/t33-doi-shellcheck-r3.md
-spec_sha256_required: 6df98f3967d8bc30ae72701613c53cb185c797582da90e639fc565b7816e3c89
+spec_sha256_required: 564dc8e18802ec1fbc86ba448092e2b45c0e6b91f53a412b9f6a21a56d5f62d2
 spec_ke_thua:
   - {path: ops/specs/t33-doi-shellcheck.md,    sha256: 1405d390ca9376725517d01ef5b8d1abffd6a09d78d2b7206c2f068e7711f4da}
   - {path: ops/specs/t33-doi-shellcheck-r2.md, sha256: b9620d17b86f503b12d93359fb6d3423d29c034c29ab372f40cc5d7089b40e71}
@@ -114,7 +114,14 @@ write_set_da_do_truoc_khi_cap: >-
     lease-hoi-toan-kho-exec-1r4-codex-20260823 -> #244 CLOSED completed 09:45:30Z · PR #275 MERGED
                                                   09:21:59Z · lenh_ai_dang_giu trên master + 9 biên nhận
   Đối chứng độc lập: quét 186 ref, 0 nhánh CHƯA MERGE nào còn chạm `ops/lease_publish_test.py`.
-  Người giữ kho chọn đường (a) — cấp ngay kèm khai — thay vì chờ tới 2026-08-24T08:25:00Z.
+  NÓI CHO CHẬT — cross-review lượt 1 của PR #288 (P1, codex) bác đúng chỗ này và bác đúng: mọi thứ
+  liệt kê trên chứng minh việc đã LAND, KHÔNG chứng minh thẩm quyền ghi đã CHẤM DỨT. Không trường
+  nào trong tệp lease mang trạng thái `đã tiêu`/`đã thu hồi`, và `ai-dang-giu` cố ý trả lời "ai đang
+  GIỮ" chứ không "ai đang DÙNG" — nợ AG-T0-01B chính là khoảng trống ấy. Bằng chứng chấm dứt DUY
+  NHẤT kho có là hết hạn (muộn nhất 2026-08-24T08:25:00Z).
+  Vì vậy việc cấp lease này là CHẤP NHẬN RỦI RO CÒN LẠI của người giữ kho theo §2, KHÔNG phải một
+  rủi ro đã đo bằng không. Ghi thẳng bằng chữ ấy vì bản đầu của r3 đã gọi nhầm nó là "đã đo bằng
+  không", và câu sai đó suýt trở thành căn cứ cho chính lease này.
 
 canh_bao_cho_nguoi_thi_hanh: >-
   (1) `t89` KHÔNG dùng được — #244 đã chiếm t89–t97. Ca là `t98`, chép NGUYÊN VĂN từ r3, KHÔNG

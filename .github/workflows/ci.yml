@@ -371,6 +371,91 @@ jobs:
         run: python scripts/tl.py doc-claims-check --strict --json
       - name: determinism-audit strict
         run: python scripts/tl.py determinism-audit --strict --json
+      # r246 — NOI BANG PHU THUOC VAO DUONG CHAY TU DONG (M7, Issue #254).
+      # Hai tep `.github/checks/ci_phamvi*.py` land 22-08 (#251, master 26856f9) ma
+      # KHONG duong nao goi: `grep -n ci_phamvi .github/workflows/*.yml` tra ve 0 dong,
+      # nen chung chua tich duoc luot chay nao. Dung benh ma chu thich `r225` (ngay
+      # tren buoc `doc-claims-check strict`) tu ghi — neo theo TEN BUOC chu khong theo
+      # SO DONG, vi so dong troi ngay khi ai do chen o tren:
+      # "guard khong noi vao duong chay tu dong thi guard chi la tai lieu".
+      #
+      # DAT NGAY TRUOC `release-check`: bang khai dung ba buoc BAM (`release-check`,
+      # `release-verify`, `release-bundle`) doc lap voi nhom ngoai goi. Bang lech ma thi
+      # phai do TRUOC khi chay chinh ba buoc ay.
+      #
+      # HAI BUOC, HAI CAU HOI KHAC NHAU — dung gop:
+      #   `--kiem-bam` : bang CO KHOP MA khong. Do lai `_build_release_manifest()` roi doi
+      #                  chieu voi `NGOAI_GOI`. Day la buoc sinh ra cai do DOC DUOC khi ai
+      #                  do sua `_RELEASE_EXCLUDE_*` ma quen bang.
+      #   `_test.py`   : chinh cong tren CO RANG khong. 6 dot bien tren `git worktree`
+      #                  ban sao. RANG CHIA HAI PHAN, dung gop lam mot:
+      #                    · `t1` `n1` `n2` `n3` `n4` do LOGIC thuan (dan xuat tu ma, ba
+      #                      trang thai, nhom bia, chieu bat oan) — doc lap nen. `n4` chi
+      #                      thay BIEU THUC TRA VE cua `phan_loai()`, KHONG dung unlink/
+      #                      mkdir/symlink, nen no khong phu thuoc nen;
+      #                    · `n5` `n6` do NGU NGHIA DUYET CAY (thu muc trung ten TEP,
+      #                      symlink-toi-thu-muc) — PHU THUOC nen.
+      #                  HAI TRUC NAY DOC LAP, dung suy truc no ra truc kia:
+      #                    LOAI NGU NGHIA : t1 n1 n2 n3 n4 = logic · n5 n6 = duyet cay
+      #                    DO PHU CI      : 7/7 tren Linux · 0/7 tren Windows
+      #                  `if:` ben duoi nam o muc BUOC, nen no bo qua CA BAY ca tren
+      #                  Windows — khong phai chi hai ca duyet cay. Ban truoc viet "dung
+      #                  hai ca ay la phan bi bo lai o Windows" va cross-review luot 3 bat:
+      #                  do la lan HAI phan loai nay sinh sai khi di vá phan loai. Goc cua
+      #                  ca hai lan la lan cung mot cho: "logic DOC LAP nen" khong co nghia
+      #                  la "da duoc DO tren nen do".
+      #                  Ban dau muc nay viet gon "rang la LOGIC, khong phai he dieu hanh"
+      #                  roi vai dong duoi tu thua nhan n5/n6 do duyet cay — HAI CAU AY
+      #                  MAU THUAN. Cross-review luot 1 (codex) bat, finding
+      #                  `rang-logic-tu-mau-thuan-nen`.
+      #
+      # VI SAO `_test.py` CHI CHAY LINUX — va day la loi KHAI NO, khong phai thiet ke dep.
+      # `--kiem-bam` goi `_build_release_manifest()`, DUNG ham ma `release-check` /
+      # `release-verify` / `release-bundle` ngay duoi da chay tren Windows moi luot master
+      # (khong buoc nao co dieu kien nen) => them no vao Windows KHONG ruoc them mat hong
+      # nao. Bo phan chung thi khac: no dung `os.symlink` (`n6`), `git worktree`, va thu
+      # muc tam — ca ba CHUA AI DO tren `windows-latest`, ma symlink o do thuong doi quyen
+      # dac biet. Thu bao ve master la CONG: Windows duyet cay khac Linux thi chinh
+      # `--kiem-bam` do tren Windows, vi no dan xuat tap loai tru tu manifest dung tren nen
+      # dang chay.
+      #
+      # NỢ CÓ TÊN: `ci-phamvi-test-chua-chay-duoc-tren-windows`. `if:` cua buoc `_test.py`
+      # nam o muc BUOC, nen tren Windows no bo qua CA BAY ca — 0/7, KHONG phai 2/7. Dung
+      # tron voi bang hai truc phia tren: loai NGU NGHIA chia 5/2, DO PHU CI chia 7/0.
+      # Cong `--kiem-bam` van bat duoc neu Windows duyet cay khac, nhung ta se khong biet
+      # VI SAO. Cung kieu khai no voi `don-nhanh-test-chua-chay-duoc-tren-windows` o buoc
+      # `don-nhanh selftest` phia tren.
+      #
+      # VI SAO VO DIEU KIEN — va day la cho LECH mot dac ta DA DONG BANG, noi thang.
+      # `ops/specs/CI-FASTPATH-THEO-DIFF.md` (sha256 32ba1b32ec9436453f7f8fe3c6f8e4d9a4af6e2ceb4e40bfefd8ffb2917d7580)
+      # quyet dinh Q3 khai chay CO DIEU KIEN + mot luot dinh ky hang tuan, ly le nguyen van
+      # "Chay moi PR thi tu phan (cong 3-5 phut vao dung thu dang di cat)". Ly le ay DO TREN
+      # BAN CO VE DOC — ban da bi bo (#247 dong khong merge).
+      #
+      # CHU THICH NAY KHONG SO SANH CHI PHI, va do la mot quyet dinh chu khong phai thieu
+      # sot. Ba luot cross-review lien tiep cung bat MOT hinh dang: con so tuyet doi -> ty
+      # le bang so -> ty le bang chu. Moi lan vá lai de lai dung cai cu o mot lop vo khac.
+      # Ly do goc: moi so sanh chi phi deu doi MAU SO la thoi luong job CI, ma thu ay
+      # KHONG NAM TRONG KHO — nguoi doc mot ban sao kho khong kiem duoc no, bao gio cung
+      # vay. Nen chua o TANG: bo han so sanh khoi day, thay vi vá cau chu lan thu tu.
+      # (`CLAUDE.md`: dem HINH DANG loi, dung chi dem loi — cung mot hinh dang lap ba lan
+      # thi cau hoi dung la "co nen lam viec nay khong", khong phai "vá the nao".)
+      # Muon biet chi phi that thi doc Issue #254 va comment PR #258: o do co so kem ten
+      # nen, so luot do va id run — tuc kem thu de kiem lai. Dung dung con so nao trong
+      # chu thich nay lam ly le, vi o day khong con con so nao ca.
+      #
+      # LY DO DE CHAY VO DIEU KIEN, KHONG DINH LUONG: ban than logic dieu kien la mat hong
+      # kho nay da tra gia HAI lan — workflow co `paths:` khong chay o lan day tao nhanh
+      # moi, va ma tran theo nhan khong ban vi `pull_request:` thieu `types:`. Them mot mat
+      # dieu kien nua vao dung cho da hong hai lan la mua rui ro da biet, va lap luan nay
+      # dung du chi phi la bao nhieu.
+      # Nguoi giu kho (@ducthangho) DA DUYET cho lech nay tai Issue #254.
+      # `-r2` van BAT BUOC cho cong tac fast-path, khong phai cho buoc nay.
+      - name: ci-phamvi guard (bang phu thuoc khop ma)
+        run: python .github/checks/ci_phamvi.py --kiem-bam
+      - name: ci-phamvi selftest (phan chung — cong co rang)
+        if: runner.os != 'Windows'
+        run: python .github/checks/ci_phamvi_test.py
       - name: release-check full
         run: python scripts/tl.py release-check --full --json
       # --strict: file THỪA trong cây mà manifest không có ⇒ ĐỎ (bản cũ chỉ cảnh báo rồi trôi qua)

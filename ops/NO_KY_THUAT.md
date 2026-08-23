@@ -1124,3 +1124,72 @@ git log --all -S'da_bi_thay_the' --reverse -- ops/leases/    # commit dau tien d
 ```
 
 Máy chưa canh được mục này — chưa có cổng nào kiểm lease dùng trường ngoài lược đồ.
+
+---
+
+## 20. `ci-phamvi-test-chua-chay-duoc-tren-windows` — bộ phản chứng chạy 0/7 ca trên Windows, không phải 2/7
+
+**marker:** `ci-phamvi-test-chua-chay-duoc-tren-windows` trong `.github/workflows/ci.yml`
+
+**Đo được, TÁI LẬP ĐƯỢC trong kho:** bước `ci-phamvi selftest (phan chung — cong co rang)`
+trong `.github/workflows/ci.yml` mang `if: runner.os != 'Windows'`, và điều kiện ấy nằm ở mức
+**BƯỚC** — nên nó bỏ qua **cả bảy** ca trên Windows. Bước gác cổng `ci-phamvi guard` **không**
+mang `if:` nào, nên nó chạy ở mọi nền. Hai câu này đọc thẳng từ tệp, không cần mạng.
+
+> **CỐ Ý KHÔNG ghim id run hay head vào mục này.** Trạng thái từng bước của một lượt CI sống
+> trên GitHub chứ không trong kho, nên ai đọc mục này từ một bản sao kho **không kiểm được nó**
+> (cross-review lượt 2, `run-windows-trong-so-no-khong-tai-lap`). Bản trước chữa bằng cách khai
+> "đây là lời khai ngoài kho" **rồi vẫn ghim một id run** — mà id ấy thuộc head TRƯỚC commit
+> ghi nó, nên nó cũ ngay khi được viết, và lượt kiểm sau lại chỉ người ta tới một mỏ neo chết.
+> Chữa ở TẦNG: mục này chỉ giữ thứ đọc được từ tệp; trạng thái CI tra ở PR #258, nơi luôn có
+> bảng bằng chứng neo head mới nhất.
+
+**Cái gì bị bỏ lại, nói cho đúng phạm vi:** bộ phản chứng có 7 ca, và chúng **không cùng
+loại**. `t1` `n1` `n2` `n3` đo LOGIC thuần (dẫn xuất từ mã, ba trạng thái, nhóm bịa) — độc
+lập nền — `n4` cũng thuộc nhóm này: nó chỉ thay **biểu thức trả về** của `phan_loai()`, không
+gọi `unlink`/`mkdir`/`os.symlink`. Chỉ `n5` và `n6` đo **ngữ nghĩa duyệt cây**: thư mục trùng
+tên TỆP, và symlink-tới-thư-mục.
+
+**Hai trục này ĐỘC LẬP — đừng suy trục nọ ra trục kia:**
+
+| trục | Linux | Windows |
+|---|---|---|
+| loại ngữ nghĩa | `t1 n1 n2 n3 n4` = logic · `n5 n6` = duyệt cây | *(không đổi theo nền)* |
+| **độ phủ CI** | **7/7 chạy** | **0/7 chạy** |
+
+`if: runner.os != 'Windows'` nằm ở mức **BƯỚC**, nên nó bỏ qua **cả bảy** ca trên Windows —
+không phải chỉ hai ca duyệt cây. Bản trước của mục này viết *"đúng hai ca ấy là phần không nền
+nào ngoài Linux đo lại"*: **sai**, và đó là lần **thứ hai** phân loại này sinh sai ngay trong
+lần đi vá phân loại (cross-review lượt 3 bắt). Gốc của cả hai lần là cùng một chỗ lẫn:
+*"logic ĐỘC LẬP nền"* không có nghĩa là *"đã được ĐO trên nền đó"* — đúng họ với bài học
+*"ca có MẶT khác ca có ĐO"* của kho.
+
+Bản đầu của mục này xếp `n4` vào nhóm duyệt cây. Sai, và sai **do chính lần vá** một finding
+về phân loại ở lượt review trước — cross-review lượt 2 xếp nó là `VÁ SINH LỖI MỚI`. Ghi lại vì
+đó là lý do mục `ĐỐI CHIẾU LƯỢT TRƯỚC` của §8 tồn tại: sửa một chỗ rồi sinh sai ở chỗ khác là
+thứ không lượt review nào khác nhìn tới.
+
+**Vì sao vẫn chấp nhận được, và vì sao vẫn là nợ:** thứ bảo vệ `master` là **cổng**
+(`ci_phamvi.py --kiem-bam`), không phải bộ phản chứng — và cổng chạy trên cả hai nền. Nó dẫn
+xuất tập loại trừ bằng cách gọi `_build_release_manifest()` **trên nền đang chạy**, nên nếu
+Windows duyệt cây khác Linux thì chính cổng đỏ ở đó. Cái mất là **chẩn đoán**: cổng sẽ nói
+"lệch", không nói "lệch VÌ SAO". Cùng hình dạng với mục 10 (`don-nhanh`), chỉ nhẹ hơn một bậc
+vì ở đây nền bị bỏ không phải nền mà mã sinh ra để chạy.
+
+**Vì sao không vá ngay:** cho `ci_phamvi_test.py` chạy trên `windows-latest` đòi xử lý ba mặt
+**chưa ai đo** ở đó — `os.symlink` (thường cần quyền đặc biệt), `git worktree`, và dọn thư mục
+tạm còn tệp read-only của git. Đưa cả ba lên Windows mà chưa đo là đẩy một cổng có thể ĐỎ vào
+`master`. Giữa *"cổng đỏ"* và *"cổng khai đúng phạm vi mình phủ"*, chọn cái thứ hai — nhưng
+**không được đọc nó thành "đã phủ Windows"**.
+
+**Điều kiện coi là XONG:** `ci_phamvi_test.py` chạy được trên `windows-latest` với bằng chứng
+DƯƠNG (`N/N`, hai số bằng nhau) — hoặc, nếu nền thật sự không cho tạo symlink, thì bộ test
+phải **dẫn xuất** lời tha từ một phép thử sống (không nhận lời khai theo tên nền), **đếm riêng**
+số ca bỏ qua và in từng ca kèm lý do, cộng một ca canh chống bỏ-qua-âm-thầm theo lối `t73` của
+`ops/lease_publish_test.py`. Bỏ qua im lặng thì mục này **chưa xong**.
+
+**Xuất xứ:** mở ra ở packet `CI-NOI-BANG-VAO-GATE` (#254). Bản đầu của bước ấy khai marker
+bằng chữ **không dấu** (`NO CO TEN`) nên né matcher `^\s*#\s*NỢ CÓ TÊN` và `t42` không đòi mục
+này — cổng **vắng mặt**, không phải xanh. Cross-review lượt 1 (codex) bắt được
+(`no-windows-ne-cong-so-no`), executor tái dẫn xuất: nền `87/87` `rc=0`, đổi marker sang dạng
+chuẩn ⇒ **`86/87` `rc=1`**. Mục này ra đời từ đúng phép đo đó.

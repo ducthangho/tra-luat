@@ -1,0 +1,118 @@
+# Lease EXECUTOR — `LEASE-DANG-WINDOWS` (#238), lượt 1 — GIAI ĐOẠN 1: LÀM PHÉP ĐO ĐỌC ĐƯỢC.
+#
+# Packet HAI GIAI ĐOẠN vì executor KHÔNG gọi được `workflow_dispatch` từ sandbox. Giai đoạn 1
+# chỉ làm cho log Windows đọc được; phiên điều phối chạy Windows thật rồi trả log về cho lượt 2.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 238
+packet_id: LEASE-DANG-WINDOWS
+phase_key: LEASE-DANG-WINDOWS
+revision: 1
+generation: 1
+lease_id: lease-dang-windows-exec-1-codex-20260822
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+review_class_ghi_chu: 'Chạm `.github/workflows/**` và `ops/lease_publish*.py` — đường authority theo §8.'
+
+spec_path: ops/specs/LEASE-DANG-WINDOWS.md
+spec_sha256_required: f555cbe1a368c12040726dd706ce25ed8dd4041bd8a2f840590810a3c3908a26
+
+khoi_phuc_tu: ba82b06f9df81fc2f13786fec590ec2110d046b7
+khoi_phuc_ghi_chu: >-
+  Ba tệp mã của #227 đã bị #237 hoàn nguyên khỏi master vì CI ĐỎ trên Windows. Khôi phục chúng
+  là thao tác CƠ HỌC — chúng đã qua bốn lượt cross-review — nên KHÔNG tính vào ngân sách.
+
+giai_doan:
+  so: 1
+  ten: 'làm phép đo ĐỌC ĐƯỢC'
+  vi_sao_tach: >-
+    Executor KHÔNG gọi được `workflow_dispatch` từ sandbox, và nguyên nhân Windows CHƯA ĐƯỢC ĐO.
+    Vá trước khi đo là đoán — đúng thứ #227 vừa trả giá năm lần. Giai đoạn 1 chỉ làm cho log
+    Windows đọc được; phiên điều phối chạy Windows thật rồi trả log về cho giai đoạn 2.
+  cam_o_giai_doan_nay: 'KHÔNG đoán nguyên nhân Windows, KHÔNG vá gì cho Windows'
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 60
+  don_vi: 'dòng THÊM theo `git diff --numstat ba82b06f..HEAD` — tức phần MỚI, không tính phần khôi phục'
+
+branch: codex/lease-dang-windows-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: 2ab3560a8a406c1b436221fb3c6d23234aefdde0
+base_sha: 2ab3560a8a406c1b436221fb3c6d23234aefdde0
+start_from_sha: 2ab3560a8a406c1b436221fb3c6d23234aefdde0
+base_ghi_chu: >-
+  `master` = `2ab3560a`, ĐÃ XÁC NHẬN XANH: run 32554713709, `total_jobs: 2` (ubuntu + windows),
+  `failed_jobs: 0`. Đó là nền sạch để đo delta.
+
+prompt_path: ops/prompts/lease-dang-windows-exec-1-codex-20260822.md
+prompt_sha256_required: 8467fd00ec34c732de8ce2f89c684f7dade12d0e17b74b80fc98707c73a8b367
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-22 ("mo packet cho viec sua Windows luon")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_note: >-
+  Phiên điều phối là bên ĐÃ MERGE #227 mà không gọi `workflow_dispatch`, tức nguyên nhân trực
+  tiếp của sự cố packet này đi sửa. Khai ra để reviewer soi cả đặc tả, không chỉ bản vá.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-22T10:00:00Z'
+lease_expires_at_utc: '2026-08-23T10:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 3
+executor_calls_limit: 6
+
+reviewer_provider: claude
+review_rounds_limit: 3
+review_calls_limit: 4
+
+muc_tieu:
+  - 'Khôi phục ba tệp mã từ ba82b06f (CƠ HỌC, không sửa gì thêm)'
+  - 'W1: `_chay_buoc_dang` thiếu tệp do đồ giả sinh ⇒ ném lỗi KÈM rc + stdout + stderr, nói rõ KHÔNG ĐO ĐƯỢC'
+  - 'W2: tương tự cho t49 và MỌI chỗ khác đọc tệp do đồ giả sinh'
+  - 'Ca khoá: bỏ phần đính kèm ⇒ ĐỎ'
+
+gate_bat_buoc:
+  - 'python3 ops/lease_publish_test.py -> rc=0, N/N hai số BẰNG NHAU, >= 69 ca'
+  - 'CÙNG suite với ba biến GitHub đặt và `gh` VẮNG -> N/N y hệt'
+  - 'actionlint .github/workflows/*.yml -> rc=0 cả 5'
+  - 'shellcheck PHẢI CÓ MẶT khi chạy actionlint; thiếu ⇒ in KHÔNG ĐO ĐƯỢC và ĐỎ'
+  - 'đột biến bỏ phần đính kèm rc/stdout/stderr PHẢI ĐỎ'
+  - 'git diff --numstat ba82b06f..HEAD -> <= 3 tệp, <= 60 dòng thêm'
+
+canh_bao_shellcheck: >-
+  Phiên điều phối khai "actionlint rc=0 trên 5 workflow" SUỐT BỐN LƯỢT của #227 trong khi
+  `actionlint` của container KHÔNG CÓ `shellcheck` — nó IM LẶNG bỏ qua toàn bộ luật nền
+  shellcheck, và CI ĐỎ ngay lần chạy đầu (SC2320). KIỂM `shellcheck` có mặt TRƯỚC KHI tin
+  `actionlint`, và KHAI RÕ đã đo bằng bản nào. Đây là hình dạng A lần 7, do phiên điều phối.
+
+khong_duoc_dung:
+  - 'skip / xfail / rẽ nhánh theo os.name để lấy xanh — một ca bỏ qua trên Windows là ca KHÔNG TỒN TẠI đúng nơi nó cần nhất'
+  - 'hai finding của verdict #227 lượt 5 (bao_chan khoá theo cách viết · bất biến set +e) — chúng ở #235'
+  - 'ops/specs/**'
+
+dieu_kien_dung:
+  - 'Ngân sách sẽ vượt 60 dòng thêm hoặc 3 tệp ⇒ DỪNG, xuất handoff'
+  - 'Thấy mình sắp ĐOÁN nguyên nhân Windows ⇒ DỪNG. Giai đoạn 1 KHÔNG vá Windows.'
+  - 'Hình dạng A lần 8 · B lần 3 · C lần 2 · D lần 4 · E lần 3 · F lần 3 ⇒ DỪNG, không vá'
+posted_comment_id: 5378293440   # workflow ghi, ĐỪNG sửa tay

@@ -1,0 +1,137 @@
+# LAND EVIDENCE — `PLAT-X8` (#225 / PR #248).
+#
+# TỆP LAND EVIDENCE ĐẦU TIÊN CỦA KHO. Đo 22-08-2026: `find ops -iname '*land*'` ⇒ 0 kết quả trước
+# tệp này. Lược đồ lấy từ `PROTOCOL_DA_PHIEN.md` §"Land evidence tách approval khỏi thao tác".
+# Nghĩa là chưa bộ kiểm nào từng chạy trên một tệp land evidence — đừng đọc "cổng xanh" thành
+# "land evidence đã được validate". Cùng cảnh báo như receipt v2 đầu tiên.
+#
+# VÌ SAO TỆP NÀY TỒN TẠI: `ADR-0045` đòi *"mỗi lần dùng phải để lại VẾT ĐỌC ĐƯỢC BẰNG MÁY"*. Một
+# dòng "chủ kho đã readback" trong thân PR hay trong chat KHÔNG phải vết đọc được bằng máy. Lease r6
+# khai `c_human_readback_truoc_land: true` — nhưng đó là khai ĐIỀU KIỆN BẮT BUỘC, không phải khai
+# ĐÃ LÀM. Tệp này là chỗ ghi việc đã làm.
+
+schema_version: 1
+mission_id: gh-225
+generation: 1
+provider: human
+role: land_operator
+session_id: 8a5ba8b2-2318-561b-92d3-fe1043cb1fc8
+input_packet_generations: [2]
+
+authorized_head_sha: 28f32f7cfb393c759e73e8afbb566a54866fc4b4
+approver: ducthangho
+authorization_url: null
+authorization_ghi_chu: >-
+  Uỷ quyền đưa ra TRỰC TIẾP trong phiên, không qua GitHub, nên không có URL bền. Khai `null` thay vì
+  bịa một URL — `PROTOCOL` cho phép trường rỗng, không cho phép trường sai. Nguyên văn chỉ thị:
+  "xác nhận đảo ngược docs/adr/, readback ADR-0045 (e), merge #248".
+  GIỚI HẠN PHẢI ĐỌC: vì không có URL bền, vết của uỷ quyền này là CHÍNH TỆP NÀY cộng commit chứa nó.
+  Ai muốn kiểm độc lập ngoài kho thì KHÔNG có đường — đó là điểm yếu thật của lần land này.
+
+# --- HAI XÁC NHẬN CỦA NGƯỜI GIỮ KHO, 22-08-2026 ---
+xac_nhan_nguoi_giu_kho:
+  - id: ADR-0045-e-human-readback
+    dieu_kien: 'ADR-0045 (e) — human readback trước land'
+    trang_thai: DA_XONG
+    boi: ducthangho
+    tren_head: 28f32f7cfb393c759e73e8afbb566a54866fc4b4
+    noi_dung_duoc_readback: >-
+      Packet `sensitive` thi công bởi executor `codex` — ngoại lệ có điều kiện theo `ADR-0045`.
+      Năm điều kiện (a)–(e) khai trong `ngoai_le_ADR_0045` của lease `plat-x8-exec-2r6-codex-20260822`.
+      (a) chủ kho chỉ định tường minh · (b) reviewer khác nền (`claude` review `codex`) ·
+      (d) lease khai `review_class`/`effective_review_class` = `sensitive` · (e) lease khai đây là
+      ngoại lệ. (c) là chính mục này, nay đóng.
+    KHONG_CONG_NAO_CUONG_CHE: >-
+      Nhắc lại cho đúng phạm vi: `PROTOCOL §20` xếp `ADR-0045` vào ô **0 cổng**; đo trên master
+      `grep -c review_class ops/lease_publish.py` = 0 và `grep -c 0045` = 0. Xác nhận này là
+      PREFLIGHT THỦ CÔNG, không phải bằng chứng cổng dương tính.
+  - id: dao-nguoc-chap-nhan-no-docs-adr
+    dieu_kien: 'Xác nhận việc xoá `docs/adr/` khỏi `_BANG_LOP` — đảo ngược thứ hai lượt review trước coi là đúng'
+    trang_thai: DA_XONG
+    boi: ducthangho
+    tren_head: 28f32f7cfb393c759e73e8afbb566a54866fc4b4
+    vi_sao_can_xac_nhan: >-
+      Lượt review 1 và 2 KHÔNG chỉ "chấp nhận nợ" cho `docs/adr/` — họ dựng nó thành ca ĐỐI CHỨNG
+      chống vá quá tay (lượt 1: *"`docs/adr/0045-x.md` vẫn phải ⇒ `systemic`"*). Bản vá lượt 3 đảo
+      ngược điều đó. Cả reviewer lượt canon lẫn lượt trước đều nêu: khác với ngoại lệ `ADR-0044` (có
+      vết rõ trong lease r6), việc đảo ngược này chưa có dòng xác nhận nào của chủ kho, và thông điệp
+      commit `28f32f7c` lẫn lộn *"quyết định điều phối xác nhận"* với *"chủ kho xác nhận"* — hai câu
+      khác nhau.
+    can_cu: >-
+      Đặc tả bản 5 (`3e49d0eb…`, đã trên master, chủ kho duyệt) settle câu hỏi này BA lần nguyên văn:
+      §8 *"`_BANG_LOP` chỉ được seed bằng thứ §8:572 nói NGUYÊN VĂN"* · §8 *"14/14 đường dẫn đều ra
+      `sensitive`"* · §4.2 *"không nới bảng phân loại quá thứ §8 nói NGUYÊN VĂN… đó là packet khác"*.
+      Ca đối chứng của lượt 1/2 dựng trên tiền đề "bảng seed đúng" — tiền đề mà đặc tả đã bác từ đầu.
+      Đo: sau vá, 23/23 đường dẫn phân biệt trong `write_set` của mọi lease đều ra `sensitive`, tức
+      bản vá KHÔI PHỤC bất biến đặc tả tuyên bố chứ không đặt chính sách mới.
+
+merge_method: merge
+merge_commit: 647cfead5381ab1e42797bdf10a0342a4e6619c7
+land_operator: ducthangho
+
+pre_merge_checks:
+  - ten: 'head khớp authorized_head_sha'
+    ket_qua: '28f32f7c… — không đổi kể từ lúc uỷ quyền'
+  - ten: 'A12 CI trên exact head, đo THEO JOB'
+    ket_qua: >-
+      run 32592693727 — `gate (ubuntu-latest)` success (31 bước, 0 hỏng) VÀ `gate (windows-latest)`
+      success (31 bước, 0 hỏng). Đo theo JOB chứ không theo check-suite: lượt `pull_request` cùng
+      head chỉ có 1 job (ubuntu), nên *"PR xanh"* không nói gì về Windows.
+  - ten: 'merge-tree vào master hiện tại'
+    ket_qua: 'rc=0 — sạch, kể cả sau khi master nhảy sang a22c5f83 (phiên song song merge #250/#251/…)'
+  - ten: 'trần ADR-0044'
+    ket_qua: '2 tệp, 328 dòng thêm — KHỚP CHÍNH XÁC ngoại lệ 328 trong lease r6 (chủ kho duyệt lần hai)'
+  - ten: 'suite lease_publish trên exact head'
+    ket_qua: '87/87, bỏ qua=0, rc=0 — điều phối chạy lại độc lập trên cây git archive'
+  - ten: 'vòng review canon'
+    ket_qua: >-
+      1 vòng đã tiêu (lượt 4, `la_canonical: true`, `cross_approved`, receipt v2). Còn 1 vòng theo
+      `ADR-0043`. Ba lượt trước `la_canonical: false`, mỗi lượt có lý do riêng đã ghi.
+
+post_merge_checks:
+  - ten: 'head đã vào master'
+    ket_qua: '`merge-base --is-ancestor 28f32f7c origin/master` ⇒ ĐÚNG; master = 647cfead'
+  - ten: 'mã đã land đúng thứ định merge'
+    ket_qua: >-
+      `_BANG_LOP` trên master: đúng 7 mục, **0** mục `systemic`/`routine`. Đo trên master chứ không
+      suy từ diff — thứ land được mới là thứ có hiệu lực.
+  - ten: 'CI master trên merge commit'
+    ket_qua: >-
+      **XANH CẢ HAI NỀN.** Run 32596660559 trên merge commit `647cfead`, đo THEO JOB:
+      `gate (ubuntu-latest)` = `success` · `gate (windows-latest)` = `success` · **0 bước hỏng**.
+      Đây là phép đo MỚI, KHÔNG phải A12: A12 neo `28f32f7c`, còn `647cfead` là SHA khác — merge
+      commit chưa từng được đo trước lúc merge, và với một PR thường thì lượt master CHÍNH LÀ lần
+      đo Windows đầu tiên của merge commit ấy.
+    canh_bao_doc_ket_qua: >-
+      Trên lượt master, bước `PR head contains required EOL base` LUÔN `skipped` vì nó có
+      `if: github.event_name == 'pull_request'`. Tiêu chí *"không bước nào skipped"* chỉ đúng cho
+      lượt PR; bê sang lượt master là tự báo động giả.
+
+bookkeeping:
+  - 'Packet follow-up cho `t88`: Issue #255, `depends_on: [PLAT-X8]`, chưa có lease.'
+  - 'Lease executor `plat-x8-exec-2r6-codex-20260822` và lease reviewer `plat-x8-review-4-claude-20260822` chưa thu hồi — nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong` (chưa có đường thu hồi).'
+  - >-
+    Verdict + biên nhận cả bốn lượt được SOẠN trên nhánh handoff trong lúc #248 land; chúng vào
+    master cùng lượt merge PR #264. Phép tra đúng ở CẢ HAI phía: tìm trên `master` trước, chưa
+    thấy thì fetch nhánh handoff của #264. Bản đầu của dòng này viết "CHƯA vào master" — câu ấy
+    đúng lúc #248 land nhưng tự phủ định chính nó ngay khi #264 merge, vì chính tệp này nằm trong
+    #264. Cross-review #264 bắt được (finding P3).
+
+no_mang_theo_khi_land:
+  - id: PLAT-X8-t88-CHUYEN-PACKET-SAU
+    noi_dung: >-
+      LAND VỚI MỘT NHÁNH BẢO VỆ KHÔNG CÓ PHÉP ĐO, biết trước và có vết. Xoá hẳn
+      `posixpath.normpath` khỏi `_tinh_lop_tu_write_set` ⇒ suite vẫn `87/87 rc=0`, 0 ca đỏ. Mã sản
+      phẩm ĐÚNG; thứ thiếu là phép đo. `t88` đã kiểm chứng đủ bốn trạng thái nhưng +15 dòng sẽ vượt
+      ngoại lệ 328 vừa duyệt và tiêu nốt attempt 3/3. Chuyển sang packet follow-up **#255**.
+      Rủi ro thật: nợ đóng khoảng mù mutation hay bị quên, mà chính khoảng mù này đã sống sót BỐN
+      lượt review trước khi có ai hỏi *"nếu tôi xoá hẳn cơ chế bảo vệ, còn ca nào bắt được không?"*.
+  - id: PLAT-X8-CHUA-CO-BO-KIEM-RECEIPT-V2
+    noi_dung: >-
+      `t26` không đọc `schema_version`, không đòi hai identity, không đọc `anchor`. Biên nhận lượt 4
+      qua cổng vì nó hợp lệ theo v1; cổng CHƯA xác nhận nó hợp lệ theo v2.
+  - id: PLAT-X8-LAND-EVIDENCE-KHONG-AI-KIEM
+    noi_dung: >-
+      Chính tệp này. Không cổng nào đọc `ops/land/**`, không ca test nào đòi nó tồn tại trước khi
+      merge, và không gì chặn một lần land thiếu nó. `ADR-0045` đòi vết đọc được bằng máy — tệp này
+      LÀ vết ấy, nhưng máy vẫn chưa đọc.

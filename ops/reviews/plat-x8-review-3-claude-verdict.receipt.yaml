@@ -1,0 +1,157 @@
+# BIÊN NHẬN — cross-review lượt 3 của `PLAT-X8` (#225 / PR #248), reviewer `claude`.
+#
+# ĐỌC BỐN DÒNG NÀY TRƯỚC:
+# 1. Đây là lượt review ĐẦU TIÊN của packet có LEASE REVIEWER THẬT và người review KHÁC phiên soạn
+#    đặc tả. Hai điều kiện ấy — (a) và (c) trong `la_canonical_ghi_chu` của lượt 1 và 2 — nay ĐÃ THOẢ.
+# 2. NHƯNG vẫn `la_canonical: false`, và nay chỉ vì MỘT lý do còn lại: (b) biên nhận không validate
+#    được như v2. Ghi rõ "một" thay vì chép lại "ba" của lượt trước — số ấy đã đổi, và chép nguyên
+#    câu cũ là đúng bệnh mà chính packet này sinh ra để chống.
+# 3. Verdict `changes_requested` với MỘT P1 THẬT mà hai lượt trước bỏ sót. Phiên điều phối đã TÁI
+#    HIỆN ĐỘC LẬP toàn bộ trước khi tin — xem `tai_hien_boi_dieu_phoi`.
+# 4. P1 ĐÃ ĐƯỢC VÁ ở commit `28f32f7c` (executor `codex`, attempt 2/3). Biên nhận này ghi lại lượt
+#    REVIEW trên `86a55663`; bản vá là sự kiện SAU nó, nêu ở đây để không ai đọc thành "còn mở".
+
+la_canonical: false
+la_canonical_ghi_chu: >-
+  MỘT lý do, không phải ba. Đối chiếu với lượt 1 và 2:
+  (a) "không có lease `role: reviewer`" — nay ĐÃ THOẢ: lease `plat-x8-review-3-claude-20260822`,
+      `role: reviewer`, `access: read-only`, `branch_ownership: none`, cấp trước khi review chạy.
+  (c) "người review là NGƯỜI SOẠN ĐẶC TẢ" — nay ĐÃ THOẢ: phiên claude RIÊNG, chạy trong sandbox rời
+      qua `launcher.py` với `--expected-head` neo exact head; nó tìm được đúng thứ hai lượt do tác
+      giả đặc tả tự làm đã bỏ sót, nên tính độc lập không chỉ là lời khai về quy trình.
+  (b) "biên nhận không qua validation" — VẪN CHƯA THOẢ, và đây là lý do duy nhất còn lại.
+      `PROTOCOL:460-464`: `schema_version: 1` do tác giả tệp MỚI tự khai KHÔNG tạo miễn trừ; miễn
+      trừ v1 neo vào allowlist ĐÓNG BĂNG đúng 11 filename+hash. Tệp này không nằm trong 11 tệp ấy
+      ⇒ phải validate như v2. **Biên nhận này được viết là v1, nên nó không validate. Đó là toàn bộ
+      lý do — và đó là THIẾU SÓT CỦA PHIÊN ĐIỀU PHỐI, không phải một rào cản cấu trúc.**
+
+      ĐÍNH CHÍNH (ghi 22-08 cùng ngày, sau khi đọc lại nguồn): bản đầu của trường này khai lý do là
+      *"v2 đòi receipt ID và HAI danh tính chứng thực ĐỘC LẬP, mà reviewer và điều phối đều là
+      `claude` cùng container nên không phải hai danh tính độc lập"*. **SAI, và sai theo hướng
+      nguy hiểm hơn: nó dựng một điều kiện bất khả rồi tự tha cho mình.** Hai identity của v2 KHÔNG
+      phải hai bên chứng thực độc lập — đọc `PROTOCOL:424-440` và `ADR-0040`, chúng là
+      `model_reviewer_identity` (provider/model/session đã TẠO verdict) và
+      `github_submitter_identity` (actor đã VẬN CHUYỂN nó lên GitHub). Cả hai đều biết được ở lượt
+      này. Chính `ADR-0040` tách chúng ra để tài khoản vận chuyển KHÔNG bị đọc thành bằng chứng
+      reviewer độc lập — tức mục đích của nó ngược hẳn với cách bản đầu diễn giải.
+      Hệ quả đúng: lượt 3 **lẽ ra đủ tư cách canon** nếu biên nhận được viết là v2. Nó không phải,
+      nên nó không canon — nhưng lý do là một việc CHƯA LÀM, không phải một việc KHÔNG LÀM ĐƯỢC.
+      Không sửa lùi nhãn `la_canonical`: nhãn đúng với hiện vật đang tồn tại; chỉ sửa LÝ DO.
+      Đo kèm, để không ai đọc "viết v2" thành đường mòn: 22-08-2026, **40/40** biên nhận trong
+      `ops/reviews/` đều `schema_version: 1` — kho CHƯA TỪNG có receipt v2 nào.
+
+      Theo `PROTOCOL:755-760` (`review_rounds_used` chỉ tăng khi qua schema + exact-SHA + receipt
+      validation) ⇒ lượt này KHÔNG vào bộ đếm.
+  HỆ QUẢ: `PLAT-X8` vẫn còn NGUYÊN hai vòng canon. Con số này không đổi kể từ lượt 1.
+schema_version: 1
+schema_version_ghi_chu: >-
+  KHÔNG phải lời khai miễn trừ — xem `la_canonical_ghi_chu` mục (b). Ở lại v1 CÓ KHAI, không mặc áo v2.
+kind: review_delivery_receipt
+packet_id: PLAT-X8
+packet_issue: 225
+lease_id: plat-x8-review-3-claude-20260822
+lease_ghi_chu: >-
+  Lease reviewer THẬT, khác lượt 1 và 2 (cả hai chạy dưới lease executor). Khai
+  `nguoi_review_phai_khac_phien: true` và `yeu_cau_rieng_luot_nay` đòi reviewer THỬ VÁ + CHẠY TEST
+  trên bản sao rồi gửi về dạng GỢI Ý VÁ — reviewer làm đúng như vậy.
+provider: claude
+role: reviewer
+executor_provider: openai_codex
+verdict: changes_requested
+cross_provider: true
+assurance_dat: null
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Mức thực sự đạt được: cross-provider review CÓ BẰNG CHỨNG CHẠY ĐƯỢC, người review khác phiên, có
+  lease. KHÔNG phải `cross_approved` đầy đủ theo receipt v2 — thiếu đúng danh tính chứng thực thứ
+  hai. Reviewer TỰ KHAI giới hạn này trong verdict (mục "Giới hạn", điểm 1) trước khi ai hỏi.
+
+reviewed_sha: 86a556632f8464de06262efcc2aa7c0e88415f0e
+base_sha: 08bb4ecd6dbdb87267cb8179f52ac28c151eb4b9
+target_pull_request: 248
+luot_truoc: ops/reviews/plat-x8-review-2-claude-verdict.receipt.yaml
+
+verdict_path: ops/reviews/plat-x8-review-3-claude-verdict.md
+verdict_sha256: 16675de178478b8405dc835f3a67893c5c63fda850434d67d6e5dabb6b508270
+verdict_bytes: 16748
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/247c6fb5d283cb78abfecbd50aeb1830c935dcc9/ops/reviews/plat-x8-review-3-claude-verdict.md
+evidence_url_ghi_chu: >-
+  ĐÃ GHIM theo COMMIT `247c6fb5` — commit ĐẦU TIÊN chứa tệp verdict. Phải đi HAI bước vì một commit
+  không thể chứa băm của chính nó, mà `t26` đòi trường này có mặt dạng `https` ngay trong cùng commit
+  với biên nhận; bước 1 neo tạm theo nhánh, bước 2 (commit này) ghim lại theo commit. Lượt 2 đi đúng
+  đường ấy. `t26` chỉ kiểm HÌNH DẠNG cộng băm tệp khớp — nên URL nhánh CŨNG qua được cổng, và đó là
+  lý do bước 2 không được bỏ: cổng xanh không phân biệt mỏ neo bền với mỏ neo trôi.
+  Thứ định danh vẫn là `verdict_sha256` ở trên, không phải URL.
+projection_url: null
+truy_xuat_tag: null
+
+findings:
+  - id: bang-lop-noi-ngoai-8-572
+    muc: P1
+    trang_thai: DA_DONG
+    tai_hien: true
+    dong_boi: 28f32f7cfb393c759e73e8afbb566a54866fc4b4
+    tom_tat: >-
+      `_BANG_LOP` chứa 4 mục `systemic` KHÔNG bắt nguồn từ §8:572 (`docs/PROTOCOL_DA_PHIEN.md`,
+      `docs/adr/`, `ops/lease_publish_test.py`, `ops/chay_lease_publish_test.sh`). Đặc tả cấm đúng
+      việc này ở ba chỗ nguyên văn (§8 "chỉ được seed bằng thứ §8:572 nói NGUYÊN VĂN"; §8 "14/14
+      đường dẫn đều ra sensitive"; §4.2 "không nới bảng… đó là packet khác"). Hậu quả thật: một lease
+      khai `write_set: ['ops/lease_publish_test.py']` một mình sẽ được cổng cho phép khai
+      `effective_review_class: systemic`, tức bỏ qua yêu cầu `cross_approved`/`human_audited` của
+      `sensitive` — và đường ấy nằm trong write_set của CHÍNH packet này.
+
+tai_hien_boi_dieu_phoi: >-
+  KHÔNG nhận lời khai. Phiên điều phối đo lại từ đầu, và kết quả RỘNG HƠN mô tả của reviewer:
+  quét 165 ref (đã so HAI NGUỒN `ls-remote` vs `for-each-ref` trước — 0 nhánh mù), 120 blob lease
+  phân biệt, 23 đường dẫn phân biệt trong `write_set` của mọi lease ⇒ trên head `86a55663` chỉ
+  **20/23** ra `sensitive`; BA đường rơi xuống `systemic`, trong đó `ops/lease_publish_test.py` xuất
+  hiện ở **27 lease**. Đặc tả khai 14/14. Sau vá: **23/23**.
+  Đọc §8:572 và §575/§578 trực tiếp trên master để kiểm phần CHUẨN TẮC, không chỉ phần hành vi —
+  và chỗ đó suýt làm phiên điều phối kết luận sai: §575 có chữ "protocol", §578 có chữ "test", nên
+  "cả bốn phải sensitive" KHÔNG hiển nhiên từ §8 một mình. Thứ quyết định là quy tắc SEED của đặc
+  tả (chỉ seed hạng mục sensitive, còn lại rơi vào mặc định fail-closed), không phải phép tự phân
+  loại từng đường. Ghi ra vì bước này là chỗ dễ bác nhầm một finding đúng.
+
+nghiem_thu:
+  suite_sau_va: 'rc=0, 87/87 hai số bằng nhau, bỏ qua=0 — điều phối tự chạy, khớp lời khai executor'
+  dot_bien: 'khôi phục 4 mục ⇒ rc=1, 85/87, ĐÚNG t86+t87 ĐỎ. t77 vẫn XANH dưới đột biến ⇒ bản sửa t77 thật sự tách khỏi bảng seed, không ghim vào một literal khác'
+  t77_khong_o_nhiem: '`_nap_cong()` dựng module MỚI mỗi lần gọi (không vào `sys.modules`) nên việc t77 bơm tạm vào `mod._BANG_LOP` không rò sang t86 — đã kiểm, không suy'
+  bam_tep: 'hai tệp khớp TỪNG BYTE giữa cây executor và cây điều phối kiểm ⇒ số đo áp đúng nội dung đã commit'
+  git_diff_check: 'rc=0'
+  tran_ADR_0044: '328 dòng thêm — VƯỢT mốc 313 của lease r5; chủ kho duyệt nới lên 328, ghi ở lease r6 (`plat-x8-exec-2r6-codex-20260822`)'
+  reviewer_tuan_thu: '0 thay đổi trong sandbox VÀ trong kho thật, 0 commit lạ — reviewer read-only đúng cấm của lease'
+
+verdict_usage_caveats:
+  - id: luot-3-KHONG-TINH-CANON-nhung-vi-MOT-ly-do
+    noi_dung: 'Xem `la_canonical_ghi_chu`. (a) và (c) đã thoả; chỉ còn (b). Vẫn nguyên hai vòng canon.'
+  - id: hai-luot-truoc-DUNG-docs-adr-lam-CA-DOI-CHUNG
+    noi_dung: >-
+      Lượt 1 và 2 không chỉ "chấp nhận nợ" cho `docs/adr/` — họ dựng nó thành ca ĐỐI CHỨNG chống vá
+      quá tay (lượt 1: "`docs/adr/0045-x.md` vẫn phải ⇒ `systemic`"). Bản vá lượt 3 ĐẢO NGƯỢC điều
+      đó. Đừng đọc thành đổi chính sách âm thầm — đọc là: hai lượt ấy soi "mã có khớp BẢNG không" và
+      chưa lượt nào soi "BẢNG có khớp §8 không", nên ca đối chứng của họ dựng trên một tiền đề chưa
+      ai kiểm.
+  - id: reviewer-KHONG-doc-duoc-comment-goc-tren-248
+    noi_dung: >-
+      Reviewer bị từ chối quyền GitHub MCP nên suy phạm vi nợ `docs/adr/` từ câu tóm tắt trong
+      PROMPT mục 4, không đọc comment gốc. Phiên điều phối ĐÃ đọc thay (verdict lượt 1 và 2 trên
+      master) và xác nhận suy luận ấy ĐÚNG — thậm chí còn nhẹ hơn thực tế.
+  - id: A12-cua-head-CU-KHONG-ap-cho-head-MOI
+    noi_dung: >-
+      Run `32587850266` (ubuntu + windows success) neo `86a55663`. Head nay là `28f32f7c` ⇒ bằng
+      chứng ấy KHÔNG áp; phải đo lượt `workflow_dispatch` mới, THEO JOB.
+
+no_da_khai:
+  - id: PLAT-X8-CHUA-CO-BO-KIEM-RECEIPT
+    noi_dung: 'Chưa có bộ kiểm làm đỏ receipt mới tự khai v1, và chưa có bộ kiểm đòi đủ bốn phần §441. Máy móc mới, ngoài write_set.'
+  - id: PLAT-X8-ADR-0045-e-human-readback-CHUA-XONG
+    noi_dung: 'Điều kiện (e) human readback trước land — thuộc lượt LAND.'
+  - id: KHONG-CONG-NAO-CHAN-NOI-LAI-BANG
+    noi_dung: >-
+      Reviewer nêu, và đúng: `t86` là bằng chứng HÀNH VI cho trạng thái hiện tại, không phải cổng
+      CẤU TRÚC chặn một PR tương lai thêm dòng `systemic`/`routine` vào bảng mà không có lập luận
+      §8 riêng. Nó chỉ đỏ khi có người chạy suite.
+  - id: PLAT-X8-con-so-328-va-23-HET-HAN
+    noi_dung: '328 hết hạn khi có commit mới; 20/23 và 23/23 hết hạn khi kho có lease mới. Thứ giữ chúng là phép đo lại, không phải hai con số này.'

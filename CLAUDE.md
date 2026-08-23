@@ -124,6 +124,25 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   vòng được đi đâu cả. Thứ nó tránh là **cho một dấu chéo NGUYÊN VĂN đi trên đường truyền**: dấu chéo
   được DỰNG SAU khi đã phân tích cú pháp, nên không còn gì để lớp nào giải mã. Đó là HOÃN việc dựng
   chuỗi, không phải né một tầng. Hễ nội dung NÓI VỀ chuỗi thoát thì phải đo nó sau khi ghi.
+- **…VÀ ĐƯỜNG ĐỌC CŨNG CHUẨN HOÁ — nên "đọc ngược về rồi diff" TỰ NÓ sinh phát hiện giả.**
+  Đo 22-08-2026. Chốt (a) ở gạch đầu dòng trên bảo: đăng xong thì đọc lại qua API và `diff`. Làm
+  đúng thế với comment lease `#238` ⇒ **lệch hệ thống**, không phải một hunk: `'`→`&#39;` ·
+  `"`→`&#34;` · `>`→`&gt;` · `<`→`&lt;`, rải khắp thân. Suýt nữa thành một finding về cổng đăng lease.
+  Ba phép đo tách được LỚP, và không phép nào bỏ được:
+  · **hai đường GHI độc lập cho kết quả Y HỆT** — comment do workflow đăng bằng `gh api` (Go, GitHub
+  CLI) và issue do phiên này đăng bằng MCP: cùng bị đổi như nhau ⇒ không phải đường ghi;
+  · **hai công cụ ĐỌC khác nhau** (`issue_read` · `list_issues`) cùng trả bản đã đổi;
+  · **tệp trong git đi qua CHÍNH máy chủ MCP ấy về BYTE-EXACT** — `get_file_contents` trên một tệp
+  có 5 dấu `>` cho **sha256 khớp bản trên đĩa**. Nên KHÔNG phải middleware chung; chỉ **trường thân
+  issue/comment** bị chuẩn hoá, đúng kiểu bộ lọc nội dung-người-dùng ở phía ĐỌC.
+  Dấu vết phụ: `&` trong phản hồi về dưới dạng `\u0026` — chữ ký `encoding/json` của Go bật HTMLEscape,
+  tức có **hai** lớp chồng nhau, và lớp JSON ấy KHÔNG phải thứ gây ra `&#39;`.
+  Chốt: `diff` bản-đã-đến qua MCP **chỉ dùng để tìm lệch VỀ KÝ TỰ THẬT** (kiểu `co` + `\u0308` + `dex`);
+  chênh lệch thực thể HTML ở đó là **tạo tác của công cụ đọc**, đừng ghi thành phát hiện. Muốn khẳng
+  định byte trên GitHub thì phải có client thứ hai — container này KHÔNG có (REST tới `repos/…` bị
+  proxy chặn 403), nên câu ấy đứng ở trạng thái thứ ba: **KHÔNG ĐO ĐƯỢC**, và nói thẳng như vậy.
+  Bài học gốc không đổi, chỉ chật hơn: **phải biết mình đang đứng ở LỚP NÀO** — kể cả khi cái lớp
+  đang lừa mình chính là cái chốt vừa dựng ra để chống bị lừa.
 - **HỎI CHỖ TIỆN TAY thay vì hỏi CHỖ KẾT LUẬN ĐƯỢC GHI — ba lần trong MỘT phiên (14-08-2026).**
   Cùng một gốc, ba mặt khác nhau, và KHÔNG lần nào tự phát hiện. Chép ra đây vì cái gốc ấy tái phát
   nhanh hơn mọi bài học khác trong tệp này: nó không đòi ta lười, chỉ đòi ta tin một tín hiệu ở gần.
@@ -260,7 +279,15 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   PyYAML, mà PyYAML không biết luật của GitHub. Cùng họ với "CÓ MẶT khác DÙNG ĐƯỢC", chỉ đổi đối tượng.
   Cách chữa đã cài: `ops/don_ref_chot_test.sh` gọi **`actionlint`** thật, và **fail-close khi thiếu công
   cụ** (in `KHÔNG ĐO ĐƯỢC`, trả mã khác 0) — một cổng tự tắt khi thiếu công cụ là cổng không tồn tại
-  đúng lúc nó cần nhất. Đo nền trước khi thêm: `actionlint` trên cả 5 workflow của kho → rc=0.
+  đúng lúc nó cần nhất. Đo nền khi thêm (16-08-2026): `actionlint` trên cả 5 workflow → rc=0.
+  **CÂU TRÊN ĐÃ TRÔI — đo lại 23-08-2026: `rc=1`**, một finding `ops-don-ref.yml:106 SC1003:info`.
+  Nền đổi vì `shellcheck` **có mặt** ở lần đo sau mà **vắng** ở lần đo trước, nên phép đo cũ yếu
+  hơn: thiếu `shellcheck` thì `actionlint` **im lặng bỏ toàn bộ luật nền ấy** và vẫn trả `rc=0`.
+  Delta so `origin/master` vẫn **= 0** — đỏ sẵn, không phải hồi quy. Nhắc kèm: `t33` trong
+  `ops/lease_publish_test.py` đòi `actionlint` có mặt nhưng **KHÔNG đòi `shellcheck`**, nên nó
+  không phân biệt được hai nền đo ấy (đo thẳng: có ⇒ `rc=1` 1 finding · vắng ⇒ `rc=0` 0 finding).
+  Bài học đứng nguyên; chỉ **con số minh hoạ** thì hết hạn — và một con số trong tài liệu không
+  ghi ĐIỀU KIỆN ĐO thì sẽ trôi mà không ai biết.
 - **Workflow chỉ chạy khi có người bấm là workflow KHÔNG có ai canh.** `workflow_dispatch` không chạy
   theo push/PR, nên mọi lỗi của nó — kể cả lỗi làm tệp vô hiệu hoàn toàn — nằm im cho tới **đúng lượt
   cần dùng**. Ở đây may: lỗi lộ ra vì GitHub kiểm tệp ngay khi đẩy. Đừng trông vào cái may đó: mọi

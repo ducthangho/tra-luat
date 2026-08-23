@@ -73,6 +73,14 @@ KHÔNG chứng minh các SỐ HẠNG còn đúng. Dòng `117 / 100` khai *"chên
 nội tại thì dòng ấy sạch hoàn toàn. **Câu nào vừa nêu số hạng vừa nêu quan hệ giữa chúng thì kiểm
 SỐ HẠNG** — quan hệ là thứ sống sót qua trôi số.
 
+Một ca nữa, hình dạng KHÁC và đắt hơn — trôi số thành lời khai sai về THẨM QUYỀN. `PLAT-X8` để
+cùng hai con số trôi **bốn** lần trong một packet: `265 → 313 → 328` dòng thêm và `82/82 → 85/85 →
+87/87` ca test. Ba lần đầu vô hại. Lần thứ tư không: ô *"trần `ADR-0044`"* trong thân PR khai một
+cổng **ĐẠT** trong khi số thật đã vượt trần và cần **ngoại lệ người giữ kho** — tức nó không sai
+một chữ số, nó khai sai rằng một thẩm quyền đã có. Phân biệt để biết đâu là trôi số phải chữa
+NGAY: hỏi *"con số này có đang chống đỡ một câu về THẨM QUYỀN không"* — nếu có thì nó không còn là
+số, nó là một lời khai.
+
 ## 3. Đo trước khi hỏi
 
 Trước vòng 1, tự đo và ĐƯA SỐ vào câu hỏi, đừng bắt người dùng nhớ hộ:

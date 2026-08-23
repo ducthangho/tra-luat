@@ -1,0 +1,146 @@
+# BIÊN NHẬN — cross-review `LEASE-DANG-WINDOWS` (#238), lượt 2, reviewer `claude`.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: LEASE-DANG-WINDOWS
+packet_issue: 238
+lease_id: lease-dang-windows-review-2-claude-20260822
+provider: claude
+role: reviewer
+executor_provider: codex
+verdict: changes_requested
+cross_provider: true
+review_class: sensitive
+reviewed_sha: b0c8fb368d70f17bce5eb7e3d1fe02d810db8e19
+base_sha: 2ab3560a8a406c1b436221fb3c6d23234aefdde0
+nen_so_write_set: ba82b06f9df81fc2f13786fec590ec2110d046b7
+
+spec_path: ops/specs/LEASE-DANG-WINDOWS-r3.md
+spec_sha256: 130b6d29919db327ccc2d9ad8d53910e5dd74b2eef0f607d3e59a707647de40d
+
+verdict_path: ops/reviews/lease-dang-windows-review-2-claude-verdict.md
+verdict_sha256: e5dd9584d2e01172f71a0308c1d90eb0918d5b971af56cbb664d91438cf3c4a7
+verdict_bytes: 7892
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/9729f5f0720fa045e52785844e70cf511ca831a7/ops/reviews/lease-dang-windows-review-2-claude-verdict.md
+evidence_url_ghi_chu: 'Điền SAU KHI ĐÃ PUSH và sau khi `git branch -r --contains` xác nhận.'
+
+verdict_nguon: >-
+  stdout của `claude -p`, run `a83035ad`, `ma_thoat=0`, `thoi_luong_giay=913.4`,
+  `stdout_byte=7892`. Cây review sạch, HEAD vẫn `b0c8fb36`; 27 bản sao đột biến nằm trong `/tmp/h`.
+verdict_doi_chieu: 'NGUYÊN VĂN, không đụng byte nào.'
+
+so_finding: 2
+tom_tat_finding: >-
+  P1-3 (MỚI, trong phạm vi) cổng NỀN trong `_ly_do_bo_qua_workflow` không có phản chứng nào — bỏ
+  mệnh đề `(nen or os.name) == "nt"` thì tám ca biến mất IM LẶNG trên chân Ubuntu mà suite vẫn
+  rc=0 · P2-5 (MỚI, ngoài phạm vi, làm NẶNG THÊM P2-3) `except Exception: ly_do = ""` gộp ba
+  nguyên nhân khác hẳn nhau vào cùng một câu chẩn đoán.
+da_xu_ly: 'CHƯA. Ngân sách 116/120, vá cần 125 (hoặc 128). Chốt E lần 4 KÊU. Trả về người giữ kho.'
+
+verdict_usage_caveats:
+- id: HAI-P1-CUA-LUOT-TRUOC-DA-DONG
+  noi_dung: >-
+    `P1-1` và `P1-2` của verdict lượt 1 **đã đóng**, đo lại độc lập bởi cả phiên điều phối lẫn
+    reviewer. `P1-2` (hằng số trá hình) ⇒ `70/72`, rc=1, đỏ `t71`+`t72`. `Q9` đóng cửa sau bằng
+    **kiến trúc**: `BoQuaNen.__init__(tep, ten_job)` bỏ hẳn tham số chuỗi nên ca không còn KHAI
+    được lý do; `main()` tự dẫn xuất lại từ mỏ neo.
+- id: PHIEN-DIEU-PHOI-DUOC-KIEM-LAI-5-tren-5-KHOP
+  noi_dung: >-
+    Reviewer kiểm lại năm phép đo của phiên điều phối: suite `72/72` · `P1-2` `70/72` · write-set
+    `+116/-20` 2 tệp (`lease_publish.py` vắng khỏi diff ⇒ khớp byte với `ba82b06f`) · `actionlint`
+    5 workflow DELTA=0 so `origin/master` · băm 5 tệp hồ sơ. **5/5 khớp.**
+- id: PHAN-CHUNG-P1-1-CUA-PHIEN-DIEU-PHOI-LA-BAN-YEU-HON
+  noi_dung: >-
+    Kết luận không đổi, nhưng VỊ TRÍ đột biến khác handoff. `_dong_tong_ket` lấy
+    `da_chay = len(CA) - len(bo_qua)` với `len(CA)=72`, nên `đã chạy=73` **chỉ có thể** xảy ra khi
+    đột biến THÊM một ca — tức bản của phiên điều phối chạm **1** ca (`72/73`, 1 ca đỏ), còn bản
+    handoff (thay guard trong `_chay_buoc_dang`) chạm **8** (`64/72`, 8 ca đỏ). Cả hai `bỏ qua=0`,
+    rc=1. Ghi ra vì "cùng kết luận" không có nghĩa "cùng phép đo".
+- id: Q8-KHONG-AI-CUONG-CHE-dung-nhu-tu-nghi
+  noi_dung: >-
+    Phiên điều phối tự nghi bản đặc tả của mình và giao thẳng câu hỏi cho reviewer; reviewer ĐO và
+    xác nhận. `grep -rn "co_names" ops/ .github/` ⇒ **một dòng duy nhất**, nằm trong thân `t70`,
+    không phải cổng. `grep -rln "W9" ops/*.py .github/workflows/*.yml` ⇒ **không tệp nào**. Thủ
+    tục `W9` sống trong `r3` và trong một bảng của handoff, **không sống trong lượt chạy nào** —
+    lần sau ai bỏ qua nó, không có gì đỏ. Đó là hình dạng **E ở tầng ĐẶC TẢ**.
+- id: NHUNG-BANG-W9-CUA-HANDOFF-LA-THAT
+  noi_dung: >-
+    Reviewer chạy lại đúng thủ tục `W9`: `W6′` `69/71` rc=1 · `W7′` `69/71` rc=1 · `W8` `71/72`
+    rc=1 — **trùng tuyệt đối** ba con số handoff khai. Nghi ngờ về `Q8` là về CƯỠNG CHẾ, không
+    phải về tính trung thực của executor.
+- id: W8-DAT-tap-go-RONG-la-ket-qua-DUNG
+  noi_dung: >-
+    Nghi vấn *"`W9` cho `W8` rỗng theo cấu tạo"* của phiên điều phối bị **bác bằng phép chạy**. Ba
+    đột biến riêng rẽ đều ĐỎ `t72`, `71/72` rc=1: (a) bỏ vòng in lý do · (b) hạ tổng kết về
+    `{qua}/{len(CA)}` · (c) bỏ riêng phần `bỏ qua=N`. Verdict lượt 1 đo (a) và (b) đều `rc=0`, nay
+    cả ba đỏ. `t72` chạm `W8` qua `main()` chứ không gọi `_dong_tong_ket`, nên tập gỡ rỗng là kết
+    quả ĐÚNG. Nghi vấn `W9`-cho-`W7′` cũng bị bác: nhãn của handoff lỏng nhưng vô hại.
+- id: P1-3-CONG-NEN-KHONG-CO-PHAN-CHUNG-NAO
+  noi_dung: >-
+    Phát hiện MỚI, trong phạm vi, và là thứ không ai trong chuỗi #227→#238 nghĩ tới. Một đột biến
+    MỘT MỆNH ĐỀ — bỏ `(nen or os.name) == "nt"` khỏi `_ly_do_bo_qua_workflow` — cho
+    `64/64 đạt; đã chạy=64, bỏ qua=8; rc=0` **XANH**: tám ca `_chay_buoc_dang` biến mất IM LẶNG
+    trên **chân Ubuntu, chân LUÔN chạy**. Cả ba ca mới (`t70` `t71` `t72`) đều ép `nen="nt"`, nên
+    **không ca nào đo nhánh `posix`** — nhánh quyết định "có được bỏ qua hay không". `Q9` khoá
+    phần LIỆT KÊ ĐƯỢC (chuỗi lý do) chứ không khoá phần THẬT SỰ CHẶN (nền) ⇒ **E lần 4**.
+- id: CA-VA-P1-3-DA-CHAY-khong-phai-de-xuat-tren-giay
+  noi_dung: >-
+    Reviewer không dừng ở mô tả: đã viết và CHẠY ca vá, **5 dòng**, đặt ở dây nối và tuân `Q8` (đi
+    qua `main()`, không gọi thẳng helper). Bản nguyên vẹn ⇒ `73/73` rc=0; dưới đột biến `X1` ⇒
+    `64/65` rc=1, đỏ `t73_nen_posix_khong_duoc_bo_qua_ca_nao`. Đây là con số người giữ kho cần.
+- id: P2-5-MOI-lam-NANG-THEM-P2-3
+  noi_dung: >-
+    `except Exception: ly_do = ""` trong `main()` là chỗ gộp MỚI — `edc1906` không có nó. Ba
+    nguyên nhân khác hẳn nhau (đường dẫn không tồn tại · YAML hỏng · matrix không phân giải) ra
+    **cùng một câu** *"bỏ qua không dẫn xuất được từ runs-on"*. Fail-close nên không mất an toàn,
+    nhưng chẩn đoán SAI: hai ca đầu là **KHÔNG ĐO ĐƯỢC**. Vá ≈ 3 dòng. Đúng luật "nếu bản vá làm
+    nặng thêm một mục ngoài phạm vi thì đó là phát hiện MỚI".
+- id: t33-PHEP-DO-CUA-PHIEN-DIEU-PHOI-DUOC-XAC-NHAN-va-DO-THANG
+  noi_dung: >-
+    Phiên điều phối đọc mã và kết luận `t33` không đòi `shellcheck`; reviewer ĐO thẳng:
+    `actionlint` 5 workflow CÓ shellcheck ⇒ `rc=1`, 1 finding `SC1003`; VẮNG shellcheck ⇒ `rc=0`,
+    **0 finding** — luật nền biến mất SẠCH. Thêm: `t33` chỉ lint **một** tệp trong khi docstring
+    của nó viết *"phải XANH trên MỌI workflow"*. Ngoài phạm vi (có từ `#227`), vào packet kế tiếp.
+- id: P2-2-KHONG-NANG-THEM-do-bang-ma-tran-runs-on
+  noi_dung: >-
+    Ma trận `runs-on` trên workflow THẬT, chạy trên Linux thật: `ubuntu-latest`/`[ubuntu-latest]`
+    ⇒ `72/72` rc=0 (nt có lý do, posix rỗng) · `windows-latest`/`matrix[ub,win]` ⇒ `72/72` rc=0,
+    tám ca VẪN chạy trên Linux (**= `P2-2`, ngoài phạm vi, KHÔNG nặng thêm**) · `matrix.os` thiếu
+    `strategy` / `${{ env.X }}` / rỗng ⇒ `rc=1` nhưng đỏ ở **`t33`** (actionlint), KHÔNG phải
+    `t71`/`t72` — tức trạng thái thứ ba vẫn bị gộp, đúng như `P2-3` đã nêu.
+- id: E-LAN-4-DIEU-KIEN-DUNG-DA-KICH-HOAT
+  noi_dung: >-
+    Bộ đếm sau lượt này: **A**=7 · **B**=2 · **C**=1 · **D**=3 · **E**=**4** · **F**=2. Lease đăng
+    ký *"E lần 4 ⇒ DỪNG, không vá"*. Reviewer tuân: kết `can_sua`, KHÔNG đề xuất chương trình vá
+    tiếp, chỉ giao lại con số đã chạy.
+- id: CON-SO-NGAN-SACH-cho-nguoi-giu-kho
+  noi_dung: >-
+    Đã dùng **116/120**, còn **4**. Đóng `P1-3` ở mức dây nối = **5 dòng đã đo** ⇒ **vượt trần
+    đúng 1 dòng** ⇒ cần nới **120 → 125**. Gộp thêm `P2-5` (≈3) ⇒ **120 → 128**. Reviewer nói
+    thẳng: không thu nhỏ phép đo cho vừa trần — đó đúng là cách `W6`/`W7` ra đời ở lượt 2.
+- id: reviewer-KHAI-pham-vi-KHONG-do
+  noi_dung: >-
+    Nhận `W3′` của phiên điều phối, KHÔNG dựng lại lượt Windows. Hành vi của `P1-3` trên chân
+    `windows-latest` THẬT chỉ **suy** được (`64/64 bỏ qua=8` y hệt bản đúng ⇒ không chân CI nào
+    đỏ), chưa chạy Windows thật. `shellcheck` có/vắng trên runner `windows-latest`: **KHÔNG ĐO
+    ĐƯỢC**; thứ đo được là dù thế nào `t33` cũng không cho biết.
+- id: evidence_url-NEO-COMMIT-KHONG-TRA-DUOC-TU-MASTER
+  noi_dung: >-
+    `evidence_url` của biên nhận này neo commit **9729f5f0720f** trên nhánh `ops/pkg-windows`. Commit ấy
+    **KHÔNG tra được từ `master`** (đo: `git merge-base --is-ancestor 9729f5f0720f origin/master` ⇒ sai)
+    — hồ sơ được **chép** sang master chứ không phải merge, nên nội dung sang được mà **commit công
+    bố thì không**. Xoá nhánh `ops/pkg-windows` là biến đường dẫn ấy thành SHA không tra được, đúng
+    thứ `CLAUDE.md` cảnh báo về `luu-tru/*`. **Mỏ neo BỀN của verdict là `verdict_sha256`
+    (`e5dd9584d2e01172f71a0308c1d90eb0918d5b971af56cbb664d91438cf3c4a7`) cộng chính tệp verdict nay đã nằm trên `master`** — nội dung kiểm lại được không cần
+    nhánh. **ĐÃ LÀM 23-08-2026.** Ba tag tồn tại, đo bằng `git rev-parse` chứ không tin log workflow:
+    `luu-tru/238-verdict-1` → `5a4fcc21…` · `-2` → `9729f5f0…` · `-3` → `a0ab3b88…`.
+    **Đính chính một câu của chính bản này:** *"phiên web KHÔNG tạo tag được"* là **quá rộng**.
+    Đúng là `git push refs/tags/*` trả 403 do proxy egress tự sinh — nhưng kho có sẵn đường khác
+    và phiên web dùng được: `workflow_dispatch` trên `.github/workflows/ops-don-ref.yml`, hành
+    động `tao-tag`, nơi `luu-tru/` được **miễn trừ có chủ đích** khỏi danh sách vùng bảo vệ đúng
+    để trình tự *"tạo tag TRƯỚC, rồi mới xoá"* chạy được. Thử khô trước rồi mới chạy thật:
+    run `32619494488` (khô) · `32619523955` (thật). **Còn cần máy người giữ kho:** xoá
+    `ops/pkg-windows` — `ops/*` bị chính workflow ấy **cấm tuyệt đối** (*"xoá phải do người,
+    không qua workflow"*), và đó là chốt đúng chứ không phải thiếu sót.

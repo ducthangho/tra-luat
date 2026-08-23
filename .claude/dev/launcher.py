@@ -92,6 +92,19 @@ from pathlib import Path
 
 VERSION = "1.4.2"
 
+
+def ky_ban_ghi_luot(ban_ghi: dict, khoa_hex: str) -> str:
+    """Chuẩn hoá và HMAC-SHA256 một bản ghi, bỏ chính trường ``chu_ky``.
+
+    Cơ chế này chống VÔ Ý và chống PHÁT LẠI. Nó KHÔNG chống giả mạo có chủ
+    đích, và không thể, chừng nào executor còn cùng principal với launcher.
+    Khoá nằm trong state chỉ mua integrity, không mua authenticity.
+    """
+    than = {k: v for k, v in ban_ghi.items() if k != "chu_ky"}
+    raw = json.dumps(than, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+                     allow_nan=False).encode("utf-8")
+    return hmac.new(bytes.fromhex(khoa_hex), raw, hashlib.sha256).hexdigest()
+
 # launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu probe-qua-han-ba-trang-thai mcp-endpoint
 #
 # CÙNG CƠ CHẾ với `# hook-nang-luc:` trong `.claude/hooks/session-start.sh`, áp cho
@@ -1257,13 +1270,15 @@ def _tom_tat_lenh(lenh: list) -> dict:
     }
 
 
-def _ghi_so(thu_muc: Path, ban_ghi: dict) -> None:
+def _ghi_so(thu_muc: Path, ban_ghi: dict, khoa_ky: str | None = None) -> None:
     """Ghi sổ NGUYÊN TỬ: ghi tệp tạm rồi đổi tên.
 
     Người đọc có thể là phiên khác / điện thoại đang poll; đọc trúng lúc ghi dở sẽ
     thấy JSON cụt. os.replace là nguyên tử trên cả POSIX lẫn Windows.
     """
     thu_muc.mkdir(parents=True, exist_ok=True)
+    if khoa_ky:
+        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)
     # Tên tệp tạm phải RIÊNG cho từng người ghi. Dùng chung "run.json.tmp" thì hai
     # tiến trình cùng ghi sẽ đụng nhau — trên Windows là PermissionError WinError 32
     # ngay vòng đầu (audit codex đo được khi stress hai writer).
@@ -1332,6 +1347,21 @@ def lenh_run(a) -> int:
     if not a.lenh:
         raise Chan(MA_THAM_SO, "thieu lenh de chay (dat sau dau --)")
     kq = chay_cac_chot(a)
+    if bool(a.attempt_state) != bool(a.void_reason):
+        raise Chan(MA_THAM_SO, "--attempt-state và --void-reason phải đi cùng nhau")
+    khoa_ky = None
+    neo = None
+    if a.attempt_state:
+        try:
+            st = json.loads(Path(a.attempt_state).read_text(encoding="utf-8"))
+            neo = st["attempt_anchor"]
+            if (not st.get("attempt_open") or neo.get("consumed")
+                    or not re.fullmatch(r"[0-9a-f]{32}", neo["nonce"])
+                    or not re.fullmatch(r"[0-9a-f]{64}", st["hmac_key"])):
+                raise ValueError("neo không thuộc lượt đang mở")
+            khoa_ky = st["hmac_key"]
+        except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as e:
+            raise Chan(MA_THAM_SO, f"không đọc được neo lượt từ --attempt-state: {e}") from None
     # resolve() BẮT BUỘC, không phải cho đẹp: con được sinh với cwd=gốc repo, còn
     # launcher có thể đang đứng ở THƯ MỤC CON (tim_workspace quảng cáo đúng điều
     # đó). Với --run-root TƯƠNG ĐỐI, đường dẫn bản chụp thay vào {PROMPT_FILE} là
@@ -1350,7 +1380,9 @@ def lenh_run(a) -> int:
         "ma_thoat": None, "ly_do_dung": None, "pid": None, "khoa_danh_tinh": None,
         **kq,
     }
-    _ghi_so(thu_muc, ban_ghi)
+    if neo:
+        ban_ghi.update(nonce=neo["nonce"], attempt=neo["attempt"], void_reason=a.void_reason)
+    _ghi_so(thu_muc, ban_ghi, khoa_ky)
 
     # --- TOCTOU của prompt. Audit codex đo được: hash xong rồi con vẫn MỞ LẠI
     # đường dẫn gốc, nên đổi nội dung tệp giữa hai thời điểm là qua mặt được neo.
@@ -1382,7 +1414,7 @@ def lenh_run(a) -> int:
             ban_ghi["prompt_kin_hoan_toan"] = True
         else:
             ban_ghi["prompt_kin_hoan_toan"] = False
-        _ghi_so(thu_muc, ban_ghi)
+        _ghi_so(thu_muc, ban_ghi, khoa_ky)
     elif any("{PROMPT_FILE}" in x for x in lenh_con):
         # Có chỗ thay mà không có gì để thay: con nhận CHUỖI NGUYÊN VĂN
         # "{PROMPT_FILE}" làm đường dẫn, rc=0, sổ ghi "xong" — người vận hành tin
@@ -1406,7 +1438,7 @@ def lenh_run(a) -> int:
     except (OSError, ValueError) as e:
         ban_ghi.update(trang_thai="hong", ly_do_dung=f"khong chay duoc lenh: {e}",
                        ket_thuc_utc=_bay_gio().isoformat())
-        _ghi_so(thu_muc, ban_ghi)
+        _ghi_so(thu_muc, ban_ghi, khoa_ky)
         f_out.close(); f_err.close()
         raise Chan(MA_THAM_SO, f"khong chay duoc lenh: {e}")
 
@@ -1423,7 +1455,7 @@ def lenh_run(a) -> int:
         ban_ghi["khoa_thieu_ly_do"] = ("con da thoat truoc khi lay duoc khoa"
                                        if p.poll() is not None
                                        else "khong doc duoc danh tinh du tien trinh con song")
-    _ghi_so(thu_muc, ban_ghi)
+    _ghi_so(thu_muc, ban_ghi, khoa_ky)
     if not a.json:
         print(f"short_id  : {sid}")
         print(f"run_id    : {rid}")
@@ -1521,7 +1553,7 @@ def lenh_run(a) -> int:
             ban_ghi[ten] = (thu_muc / tep).stat().st_size
         except OSError:
             ban_ghi[ten] = None
-    _ghi_so(thu_muc, ban_ghi)
+    _ghi_so(thu_muc, ban_ghi, khoa_ky)
     if a.json:
         print(json.dumps(ban_ghi, ensure_ascii=False))
     else:
@@ -3768,6 +3800,9 @@ def build_parser():
     _them_chot(r)
     r.add_argument("--run-root", required=True)
     r.add_argument("--name", default="")
+    r.add_argument("--attempt-state", help="state packet chứa neo của lượt đang mở")
+    r.add_argument("--void-reason", choices=("infrastructure", "permission"),
+                   help="lý do được buộc nguyên khối vào run.json của lượt")
     r.add_argument("--giu-ban-chup", action="store_true",
                    help="giu prompt.snapshot sau khi con thoat (mac dinh XOA: no chua noi dung prompt)")
     r.add_argument("lenh", nargs=argparse.REMAINDER)

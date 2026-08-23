@@ -730,13 +730,12 @@ không* — và mù với mọi mục nằm ngoài tệp ấy. Lease nào khai `
 danh sách tương đương thì mỗi mục phải có phép đo riêng trước khi packet rời hàng đợi; mục không đo được thì
 khai `KHÔNG ĐO ĐƯỢC` chứ không im lặng bỏ qua.
 
-**Quy tắc này hiện có `0` CỔNG THI HÀNH, và câu này ở lại cho tới khi có.** Đo 23-08-2026:
-`rg -l "viec_trong_revision|acceptance_criteria"` trên toàn cây cho **`0` tệp ngoài chính tệp này** — không
-tầng nào ĐỌC hai trường ấy bằng máy. (Đếm theo TỆP KHÁC chứ không theo số hit, vì mỗi lần ai đó sửa đoạn này
-là số hit đổi: bản đầu của chính câu này khai `5` rồi tự làm nó thành `6`.) Đây là quy tắc **normative** cho người vận hành, không phải bảo vệ
-tự động; đừng đọc động từ *"đòi"* / *"phải"* ở trên thành *"đã có máy canh"*. Cổng thi hành thuộc packet kế
-nhiệm, Issue + lease riêng. Khai thẳng vì im lặng ở đây sẽ tái tạo ĐÚNG lỗi mà quy tắc này sinh ra để chặn:
-một thứ trông như bảo vệ cả gói trong khi không đo gì.
+**Đoạn này đặt NGHĨA VỤ; nó KHÔNG khai có hay không có cổng thi hành.** Quy tắc trên là **normative** cho
+người vận hành — đừng đọc động từ *"đòi"* / *"phải"* thành *"đã có máy canh"*. Muốn biết hiện có cổng nào
+cưỡng chế nó hay không thì **ĐO trên một revision cụ thể**; doctrine không phải chỗ trả lời câu ấy, và một
+con số ghi ở đây sai ngay ở lần land kế tiếp. Cổng thi hành thuộc packet kế nhiệm (Issue #284), có lease
+riêng. Khai thẳng vì im lặng ở đây sẽ tái tạo ĐÚNG lỗi mà quy tắc này sinh ra để chặn: một thứ trông như
+bảo vệ cả gói trong khi không đo gì.
 
 Căn cứ, tách theo thứ TÁI LẬP ĐƯỢC từ kho và thứ KHÔNG — packet `CI-NOI-BANG-VAO-GATE` (#254):
 lease `-r2` khai **năm** mục `viec_trong_revision` (**đo được**: tệp lease trên `ops/ci-noi-bang-vao-gate`);

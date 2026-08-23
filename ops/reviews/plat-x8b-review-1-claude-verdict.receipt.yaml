@@ -1,0 +1,175 @@
+# BIÊN NHẬN v2 — cross-review lượt 1 (VÒNG CANON) của `PLAT-X8b` (#255 / PR #263), reviewer `claude`.
+#
+# Receipt v2 THỨ HAI của kho (cái đầu là `plat-x8-review-4`). Vẫn CHƯA có bộ kiểm nào cưỡng chế
+# lược đồ v2 — xem `no_da_khai`. Đừng đọc "cổng xanh" thành "v2 đã validate".
+
+schema_version: 2
+receipt_id: plat-x8b-review-1-claude-20260823-66d441a5
+kind: review_delivery_receipt
+packet_id: PLAT-X8b
+packet_issue: 255
+lease_id: plat-x8b-review-1-claude-20260823
+lease_ghi_chu: >-
+  Lượt review chạy dưới r1. Sau verdict, r1 được thay bằng `plat-x8b-review-1r2-claude-20260823` —
+  CHỈ để sửa hai trường ghi chú chép nhầm từ packet mẹ, đúng finding P2 của chính lượt này. Không mỏ
+  neo nào đổi, nên verdict vẫn neo vào r1 và vẫn có hiệu lực.
+role: reviewer
+provider: claude
+executor_provider: openai_codex
+executor_lease: plat-x8b-exec-1-codex-20260823
+
+model_reviewer_identity:
+  provider: anthropic
+  surface: claude_code_cli
+  cli_version: '2.1.240'
+  session_run_id: 66d441a5b64e4236b0fea79b5e5ecf0e
+  session_khoa_danh_tinh: 'linux:99124'
+  bat_dau_utc: '2026-08-23T01:14:37Z'
+  ket_thuc_utc: '2026-08-23T01:27:37Z'
+  ma_thoat: 0
+  neo_boi_launcher: >-
+    `launcher.py run` với `--expected-head 135adf78…`, `--require-clean`,
+    `--expected-prompt-sha256 c1a0200a…`. Launcher TỪ CHỐI chạy nếu lệch ⇒ ba thứ ấy đo được.
+  KHONG_do_duoc: >-
+    ID MODEL CỤ THỂ — `claude --version` trả phiên bản CLI, không trả model đang phục vụ. Khai
+    `anthropic/claude_code_cli` là mức chính xác nhất đo được; đừng đọc trường này thành bằng chứng
+    về model.
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: biên nhận do tài khoản tác giả đăng KHÔNG thành required check hay merge
+    authorization. Trường này ghi ai vận chuyển, không cấp thẩm quyền.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Neo bằng `verdict_sha256` + commit chứa nó. Không tag `luu-tru/*`, không protected ref, không
+    check object ⇒ mỏ neo chết nếu nhánh bị xoá trước khi land. Phiên web không đẩy được
+    `refs/tags/*` (đo 16-08: 403 do proxy egress).
+
+reviewed_sha: 135adf78c1f6175c977ae3439ce27619202dff08
+base_sha: 1ef928db2a409ea73de5a30f8bd14023c0aca3b1
+target_pull_request: 263
+
+verdict: approve
+verdict_path: ops/reviews/plat-x8b-review-1-claude-verdict.md
+verdict_sha256: f99aaf7764cb35acc5ec6b1b40780ef35ba6108c29e4a3b441edbf3426fada0e
+verdict_bytes: 15723
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/1d11f250821f95059ae1de097634197f7d256717/ops/reviews/plat-x8b-review-1-claude-verdict.md
+evidence_url_ghi_chu: >-
+  ĐÃ GHIM theo commit `1d11f250` — commit ĐẦU TIÊN chứa tệp verdict. Hai bước vì một commit không
+  chứa được băm của chính nó. Bước 2 không bỏ được dù cổng đã xanh ở bước 1: `t26` chỉ kiểm HÌNH
+  DẠNG (`https://`) cộng băm tệp khớp, nên URL nhánh cũng qua — cổng không phân biệt mỏ neo BỀN với
+  mỏ neo TRÔI, mà nhánh là thứ bị xoá.
+
+cross_provider: true
+assurance_dat: cross_approved
+assurance_ghi_chu: >-
+  `codex` thi công · `claude` review ⇒ đúng định nghĩa `PROTOCOL §8.1`. Lease `role: reviewer` cấp
+  TRƯỚC lượt chạy và reviewer TỰ kiểm nó tồn tại (bảng đo #1) thay vì nhận lời khai. Exact SHA neo
+  bởi launcher. Biên nhận này là v2.
+  KHÔNG khai `human_audited` — chưa có readback cho packet này.
+la_canonical: true
+la_canonical_ghi_chu: >-
+  Vòng canon ĐẦU TIÊN của `PLAT-X8b`. Packet này có ngân sách RIÊNG 2/2 theo `ADR-0043`; nó KHÔNG kế
+  thừa 1/2 đã tiêu của `PLAT-X8`. ⇒ `review_rounds_used` 0 → 1, còn **1** vòng.
+review_rounds_used_truoc_luot_nay: 0
+review_rounds_used_sau_luot_nay: 1
+
+findings:
+  - id: lease-ghi-chu-chep-tu-goi-packet-me-sai-du-lieu
+    muc: P2
+    trang_thai: DA_DONG
+    tai_hien: true
+    dong_boi: 'lease revision 2 — plat-x8b-review-1r2-claude-20260823'
+    thuoc_write_set: false
+    tom_tat: >-
+      `spec_note` và `base_ghi_chu` của lease r1 mang dữ liệu packet MẸ (PR #248/#240, base
+      `08bb4ecd`) do chép mẫu quên sửa. `spec_note` khai đặc tả "ĐÃ TRÊN MASTER — tra ở master là
+      thấy"; đo `git show origin/master:ops/specs/plat-x8b.md` ⇒ `rc=128`, KHÔNG tồn tại.
+      `base_ghi_chu` khai base `08bb4ecd` trong khi chính lease ấy có `base_sha: 1ef928db`.
+    tai_hien_boi_dieu_phoi: >-
+      Đo lại cả hai: `rc=128` cho master, và đặc tả CÓ trên `ops/cap-lease-plat-x8-2` +
+      nhánh handoff. Ghi chú tự mâu thuẫn với chính field nó giải thích — xác nhận.
+    vi_sao_dang_ke: >-
+      Không mỏ neo nào sai, nên nó không chặn land. Nhưng lease là thứ bị COPY-PASTE làm mẫu cho
+      lease sau, nên lỗi văn bản ở đây tự nhân bản. Và câu "tra ở master là thấy" đúng lớp lỗi
+      `CLAUDE.md` đã ghi là đã trả giá. Bản r2 viết lại cho đúng ở CẢ HAI trạng thái.
+
+reviewer_tim_NGOAI_tran: >-
+  Finding trên nằm NGOÀI cả năm hướng "trần" prompt liệt kê. Reviewer tự viết một checker
+  (`check_lease_pr_refs.py`), chạy hai chiều, rồi ĐỌC TAY loại một false positive (`lop_ghi_chu`
+  nhắc PR #248 là trích dẫn LỊCH SỬ hợp lệ — PR #248 thật sự dựng cơ chế ấy), và TỪ CHỐI đề xuất
+  biến checker thành gate khi chưa xử lý được điểm mù "trích dẫn lịch sử vs chép nhầm".
+  Đúng bài học `CLAUDE.md` *"công cụ nháp của chính mình dễ tin nhất, nên nguy nhất"* — và đúng
+  điều khoản §8 rằng danh sách giao cho reviewer là TRẦN chứ không phải SÀN.
+
+doi_chieu_finding_goc:
+  finding: 'chuan-hoa-traversal-mat-phep-do-sau-khi-vet-hazard-bi-xoa (PLAT-X8 lượt 4)'
+  phan_loai: DA_VA_THAT
+  can_cu: >-
+    Reviewer tự đo bốn trạng thái trên bản sao riêng (không dùng cache của điều phối lẫn của finding
+    gốc): base `87/87 rc=0` · xoá `normpath` không `t88` ⇒ `87/87 rc=0` 0 ca đỏ · có `t88` mã nguyên
+    vẹn ⇒ `88/88 rc=0` (đo HAI lần độc lập) · `t88` + xoá `normpath` ⇒ `87/88 rc=1` chỉ `t88` đỏ,
+    `t83` xanh.
+  them_ngoai_bang: >-
+    Đột biến TINH VI hơn bảng của điều phối, reviewer tự nghĩ tự chạy: thay `posixpath.normpath`
+    bằng chuẩn hoá SAI nhưng không rỗng (`duong.replace("/../","/",1)`, không đệ quy) ⇒ `t88` VẪN
+    bắt được, `87/88 rc=1`. Trả lời câu hỏi "đột biến tinh vi thì sao" bằng phép đo, không bằng suy luận.
+  khong_ro_giua_cac_ca: >-
+    `_nap_cong()` không đăng ký `sys.modules` ⇒ module độc lập mỗi lần. Bằng chứng THỰC NGHIỆM:
+    `t86` (đòi MỌI mục `_BANG_LOP` là `sensitive`) vẫn XANH trong cùng lượt `88/88`, dù `t88` đã bơm
+    một mục `routine` vào module của riêng nó — nếu rò thì `t86` phải đỏ.
+  khong_trung_duong_that: '`git ls-tree -r --name-only HEAD | grep "^tam/"` và `grep -i lop-thap` đều rỗng'
+
+nghiem_thu:
+  B1_B3: 'rc=0, 88/88, bỏ qua=0 — điều phối tự chạy trên cây git archive, khớp reviewer'
+  B2: 'đột biến xoá posixpath.normpath ⇒ rc=1, 87/88, CHỈ t88 đỏ'
+  B4: 't83 XANH dưới đột biến ⇒ t88 đo đúng phần t83 bỏ sót, không đo trùng'
+  B5: 'write set đúng một tệp ops/lease_publish_test.py'
+  B6: >-
+    run 32608695999 trên exact head 135adf78 — gate (ubuntu-latest) VÀ gate (windows-latest) đều
+    success, 0 bước hỏng, đo THEO JOB. ĐÂY LÀ PHÉP ĐO CỦA PHIÊN ĐIỀU PHỐI, KHÔNG phải của reviewer.
+  B7: '1 tệp, 10 dòng thêm — thừa sức dưới trần ADR-0044, không cần ngoại lệ'
+  reviewer_tuan_thu: '0 thay đổi ở sandbox VÀ kho thật, 0 commit lạ'
+  sandbox_tai_lap_moi_truong_cong: >-
+    MỚI ở lượt này, theo `PROTOCOL §8` do #252 land: sandbox ghim `core.abbrev=7` và đối chiếu cổng
+    với cây gốc trên cùng commit ⇒ cả hai `88/88 rc=0`. BA sandbox review trước của chuỗi này KHÔNG
+    làm bước ấy.
+
+verdict_usage_caveats:
+  - id: B6-la-loi-khai-cua-DIEU-PHOI-khong-phai-do-cua-reviewer
+    noi_dung: >-
+      Reviewer KHÔNG đo được B6: không có `gh`, và `get_check_runs` bị TỪ CHỐI QUYỀN hai lần. Khác
+      packet mẹ, điều phối KHÔNG cấp tệp `EVIDENCE.md` cho vòng này — nên với reviewer đó là khoảng
+      trống đo lường THẬT, và nó khai đúng như vậy thay vì nhận lời khai. Con số B6 trong biên nhận
+      này là của ĐIỀU PHỐI (run 32608695999). Đừng trích verdict lượt này làm bằng chứng CI.
+  - id: thieu-EVIDENCE-md-la-loi-cua-DIEU-PHOI
+    noi_dung: >-
+      Packet mẹ có `A12-EVIDENCE.md` trong bộ đầu vào; packet này KHÔNG — tôi quên. Reviewer vì thế
+      không có cách nào kiểm B6. Nếp đúng: mọi bộ đầu vào review phải kèm bằng chứng CI khi reviewer
+      không có công cụ Actions.
+  - id: danh-tinh-khac-phien-la-SUY-TU-VANG-MAT
+    noi_dung: >-
+      Reviewer tự khai: không xác minh được "khác phiên soạn đặc tả/prompt/lease" bằng cơ chế nào
+      ngoài lời khai của chính nó — không quyền ghi `ops/`, không thấy dấu vết soạn đặc tả trong ngữ
+      cảnh phiên. Đó là suy luận từ VẮNG MẶT, không phải phép đo dương tính. Áp cho cả các lượt trước.
+  - id: mo-neo-TRUNG-BINH-khong-phai-manh
+    noi_dung: 'canonical_ancestry, không tag `luu-tru/*` ⇒ chết nếu nhánh bị xoá trước khi land.'
+
+no_da_khai:
+  - id: PLAT-X8b-CHUA-CO-BO-KIEM-RECEIPT-V2
+    noi_dung: >-
+      Như packet mẹ: `t26` không đọc `schema_version`, không đòi hai identity, không đọc `anchor`.
+      Tệp này qua cổng vì hợp lệ theo v1. Cổng chưa từng validate một receipt v2.
+  - id: CHECKER-LEASE-PR-REFS-CHUA-THANH-GATE
+    noi_dung: >-
+      Reviewer viết `check_lease_pr_refs.py` và CỐ Ý không đề xuất làm gate: nó không phân biệt được
+      trích dẫn lịch sử hợp lệ với chép nhầm, đã có false positive xác nhận tay. Muốn thành gate thì
+      phải xử điểm mù ấy trước — máy móc mới, ngoài write set.
+  - id: KHONG-CONG-NAO-CHAN-NOI-LAI-BANG
+    noi_dung: 'Kế thừa từ packet mẹ, chưa đóng: `t86` là bằng chứng hành vi, không phải cổng cấu trúc.'

@@ -7,7 +7,6 @@ revision: 1
 generation: 1
 ke_nhiem_cua: TAT-DINH-VOID-HA-TANG   # Issue #262, generation 1 -> blocked
 review_class: sensitive
-reviewer: codex
 assurance_target: cross_approved
 ```
 
@@ -15,8 +14,10 @@ assurance_target: cross_approved
 > vô hiệu hoá mọi lease đang neo — im lặng, không cảnh báo. Cần đổi nội dung thì ra
 > **revision MỚI** (tệp mới, băm mới), như r1→r2→r3 của `#262` đã làm.
 >
-> **`executor` và `base_sha` CỐ Ý không có ở đây** — chúng thuộc **LEASE**, không thuộc
-> đặc tả. Bản nháp đầu để chúng là `null` kèm chú thích *"điền sau"*, tức mời đúng cái
+> **`executor`, `reviewer` và `base_sha` CỐ Ý không có ở đây** — cả ba thuộc **LEASE**,
+> không thuộc đặc tả. `reviewer` bị bỏ ở lần sửa thứ hai: bản trước ghi cứng `codex`, mà
+> ai review PHỤ THUỘC ai thi công (ADR-0045 đòi reviewer khác nền), nên ghi nó vào đặc tả
+> đóng băng là ghi sai một sự thật chỉ lease mới biết. Bản nháp đầu để chúng là `null` kèm chú thích *"điền sau"*, tức mời đúng cái
 > sửa vừa cấm ở trên. Cùng hình dạng lỗi với *"câu mô tả VỊ TRÍ phải đúng ở CẢ HAI phía"*:
 > một trường trông như chỗ trống thì sẽ có người điền.
 

@@ -1,0 +1,101 @@
+# BIÊN NHẬN — cross-review `LEASE-DANG-WINDOWS` (#238), lượt 1, reviewer `claude`.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: LEASE-DANG-WINDOWS
+packet_issue: 238
+lease_id: lease-dang-windows-review-1-claude-20260822
+provider: claude
+role: reviewer
+executor_provider: codex
+verdict: changes_requested
+cross_provider: true
+review_class: sensitive
+reviewed_sha: edc1906cf01fcceb15c646e1fdc4fcd8957644ed
+base_sha: 2ab3560a8a406c1b436221fb3c6d23234aefdde0
+nen_so_write_set: ba82b06f9df81fc2f13786fec590ec2110d046b7
+
+spec_path: ops/specs/LEASE-DANG-WINDOWS-r2.md
+spec_sha256: d9da7705617c95c8dc394d773de8456712d3cc2a2975e5903e8cb28c934c0d83
+
+verdict_path: ops/reviews/lease-dang-windows-review-1-claude-verdict.md
+verdict_sha256: 38b4986dac49c0207cd6c6ccf68e169491065552288169a790c0e7ba49589523
+verdict_bytes: 14201
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/5a4fcc21de8bd3f7978acb54dc25c462743a8b65/ops/reviews/lease-dang-windows-review-1-claude-verdict.md
+evidence_url_ghi_chu: 'Điền SAU KHI ĐÃ PUSH và sau khi `git branch -r --contains` xác nhận.'
+
+verdict_nguon: >-
+  stdout của `claude -p`, run `2c6dcaeb`, `ma_thoat=0`, `thoi_luong_giay=1516.2`,
+  `stdout_byte=14201`, `stderr_byte=0`. Cây review sạch, HEAD vẫn `edc1906c`.
+verdict_doi_chieu: 'NGUYÊN VĂN, không đụng byte nào.'
+
+so_finding: 9
+tom_tat_finding: >-
+  P1 `BoQuaNen` là CỬA SAU chưa khoá — bất kỳ ca nào bỏ qua vì bất kỳ lý do gì, suite vẫn rc=0
+  (`W7` KHÔNG ĐẠT) · P1 phép dẫn xuất KHÔNG được khoá — thay lời đọc YAML bằng HẰNG SỐ vẫn
+  `72/72` (`W6` KHÔNG ĐẠT) · P2 `W8` không răng (bỏ vòng in ⇒ 8 ca biến mất im lặng) · P2 dẫn
+  xuất MỘT CHIỀU (workflow windows-only vẫn chạy 8 ca trên Linux) · P2 không có trạng thái thứ ba
+  · P2 `_doc_do_gia` đo ở mức HÀM, tháo dây nối thì sống sót · P3 `_chay_than:1243` chưa bọc và
+  `t32` CHẠY trên Windows · P3 `t33` đòi `actionlint` mà KHÔNG đòi `shellcheck` · P3 nhật ký argv
+  lệch một token giữa hai nền.
+da_xu_ly: 'CHƯA. Ngân sách CẠN (+90/90) và chốt E lần 3 KÊU. Trả về người giữ kho.'
+
+verdict_usage_caveats:
+- id: W3-PRIME-DAT-co-bang-chung-SO-CAP
+  noi_dung: >-
+    Reviewer TẢI ZIP LOG ĐẦY ĐỦ của run `32558427472` (`head_sha=edc1906c`) và đọc thẳng bước
+    selftest của CẢ HAI job — không suy từ `conclusion`. `gate (windows-latest)` **success**:
+    bước `10_lease-publish selftest` in **8 dòng `BỎ QUA`** đủ tên ca kèm
+    *"runs-on đã đọc được: 'ubuntu-latest', phân giải thành ['ubuntu-latest']"*, rồi
+    `lease_publish: 64/64 đạt; đã chạy=64, bỏ qua=8`. `gate (ubuntu-latest)` **success**:
+    `72/72; đã chạy=72, bỏ qua=0`. **`t49` KHÔNG nằm trong 8 ca bỏ qua** ⇒ nó CHẠY THẬT trên
+    Windows (`Q6` đạt). Đây là lần đầu trong chuỗi #227→#238 có bằng chứng sơ cấp hai nền.
+- id: W5-DAT-do-CA-HAI-nen-14-tren-14
+  noi_dung: >-
+    Reviewer chạy 7 đột biến quyết định của `#227` × 2 nền (Linux + Windows mô phỏng) = **14/14
+    chết**. Trên nền Windows mô phỏng, `t64`/`t67` gánh hết ⇒ **phép bỏ qua KHÔNG tạo vùng mù đột
+    biến**. Handoff của executor chỉ đo một lượt Linux; đây là thứ họ chưa đo.
+- id: HAI-P1-DO-LAI-DOC-LAP-va-DUNG
+  noi_dung: >-
+    Phiên điều phối đo lại cả hai trên bản sao tạm. **P1-1**: thêm một ca
+    `raise BoQuaNen("hom nay troi mua — khong lien quan runs-on chut nao")` ⇒ suite in
+    `BỎ QUA …`, `72/72 đạt; bỏ qua=1`, **rc=0**. **P1-2**: thay
+    `job = job or yaml.safe_load(tep.read_text(...))["jobs"][ten_job]` bằng
+    `job = job or {"runs-on": "ubuntu-latest"}` ⇒ **72/72, KHÔNG ca nào đỏ**. Tức `Q3′` — quyết
+    định TRUNG TÂM của r2 — **không có cổng nào giữ**.
+- id: HINH-DANG-E-LAN-3-BON-BIEU-HIEN-trong-mot-diff-90-dong
+  noi_dung: >-
+    Reviewer đặt tên đúng cho mẫu chung của P1-1, P1-2, P2-1 và P2-4: *khoá phần LIỆT KÊ ĐƯỢC
+    (hàm thuần, gọi trực tiếp được) thay vì phần THẬT SỰ CHẶN (dây nối trong `main()` / call
+    site)* — **hình dạng E, lần 3**, bốn biểu hiện trong một diff 90 dòng. Lease đã đăng ký:
+    **E lần 3 ⇒ DỪNG, không vá**.
+- id: Q1-cua-r1-CHUA-TUNG-DUOC-THOA
+  noi_dung: >-
+    `r1/Q1` chốt *"ĐO TRƯỚC, VÁ SAU"*: `_doc_do_gia` (`W1`) dựng ra để BÁO NGUYÊN NHÂN, nhưng
+    phép bỏ qua chạy **TRƯỚC** nó, nên trên Windows nó **không bao giờ bắn**. **Nguyên nhân gốc
+    thật của tám ca vẫn CHƯA AI ĐO.** `r2` không thu hồi `Q1` tường minh, và `Q3′` lại nói tám ca
+    ấy *"không cần nguyên nhân"* — hai câu ấy mâu thuẫn. Reviewer nêu ra và TỪ CHỐI tự quyết.
+- id: HANDOFF-QUY-KET-SAI-W6
+  noi_dung: >-
+    Handoff §3 khai **"W6 | 1/1 | t70"**. Sai: `t70` **không đỏ ở bất kỳ đột biến `runs-on` nào**
+    (nó truyền `job=` dựng sẵn nên chưa từng chạm tệp). Ca duy nhất đỏ trong cả SÁU đột biến YAML
+    là `t72`. Ghi ra vì bảng đột biến của executor là thứ người sau sẽ tin.
+- id: P3-2-t33-doi-actionlint-ma-KHONG-doi-shellcheck
+  noi_dung: >-
+    Hunk YAML `−4/+2` của lượt này là BẮT BUỘC (hoàn nguyên về dạng `ba82b06f` ⇒ `SC2320` ⇒ `t33`
+    ĐỎ), và `t33` khoá nó — **chỉ khi `shellcheck` có mặt**. `t33` đòi `actionlint` nhưng không
+    đòi `shellcheck` ⇒ chốt giữ chính hunk ấy **tự tắt khi thiếu công cụ**. Đúng bệnh `A=7` mà r1
+    ghi cho phiên điều phối, nay tái xuất trong mã của packet.
+- id: CON-SO-NGAN-SACH-cho-nguoi-giu-kho
+  noi_dung: >-
+    Ngân sách CẠN (`+90/90`). Đóng đúng hai P1: **~29 dòng** ⇒ nới trần **90 → 120**. Đóng trọn
+    P1+P2: **~54 dòng** ⇒ **90 → 145**. P3 thêm ~6. Reviewer nói thẳng: nếu KHÔNG nới trần thì
+    hai P1 phải thành packet kế tiếp CÓ TÊN, vì bỏ chúng lại nghĩa là `Q3′` không có cổng nào
+    giữ, và đúng khoảnh khắc ai đó "dọn gọn" hàm dẫn xuất thành hằng số thì không phép đo nào kêu.
+- id: reviewer-KHAI-pham-vi-KHONG-do
+  noi_dung: >-
+    Review DELTA: KHÔNG rà nội dung `ops/lease_publish.py` (tin phép đo byte-for-byte) và không rà
+    YAML ngoài hunk mới. Chưa đo được `shellcheck` có trên runner `windows-latest` hay không.
+    Hành vi `t49` ở mức nội dung nhật ký chỉ suy từ ngữ nghĩa `sys.argv` + phản chứng Linux.

@@ -13,11 +13,37 @@ import yaml
 GOC = Path(__file__).resolve().parent.parent
 DAT, DO, KHONG_DO_DUOC = "DAT", "DO", "KHONG_DO_DUOC"
 RC = {DAT: 0, DO: 2, KHONG_DO_DUOC: 3}
+KY_TU_TOKEN_BAN = re.compile(r"[0-9A-Za-z._+-]")
 
 def doc_ban_ke(duong):
     d = yaml.safe_load(open(duong, encoding="utf-8")) or {}
     if not isinstance(d.get("cong_cu"), dict) or not d["cong_cu"]:
         raise SystemExit(f"ban ke '{duong}' rong hoac thieu khoa 'cong_cu'")
+    for ten, dn in d["cong_cu"].items():
+        if not isinstance(dn, dict) or not isinstance(dn.get("bat_buoc"), bool):
+            raise SystemExit(f"ban ke '{ten}': 'bat_buoc' phai la bool")
+        bg = dn.get("ban_ghim")
+        if bg is not None and (not isinstance(bg, str) or not bg.strip()):
+            raise SystemExit(f"ban ke '{ten}': 'ban_ghim' chi nhan chuoi khac rong hoac null")
+        if "canary_bat_buoc" in dn and not isinstance(dn["canary_bat_buoc"], bool):
+            raise SystemExit(f"ban ke '{ten}': 'canary_bat_buoc' phai la bool")
+        probe = dn.get("probe")
+        if not isinstance(probe, list) or not probe:
+            raise SystemExit(f"ban ke '{ten}': 'probe' phai la danh sach khac rong")
+        for pb in probe:
+            erc = pb.get("expected_rc", 0) if isinstance(pb, dict) else None
+            erc = [erc] if isinstance(erc, int) and not isinstance(erc, bool) else erc
+            if (not isinstance(pb, dict) or not isinstance(pb.get("lenh"), list)
+                    or not pb["lenh"] or not all(isinstance(x, str) and x for x in pb["lenh"])
+                    or not isinstance(pb.get("regex"), str)
+                    or not isinstance(erc, list) or not erc
+                    or not all(isinstance(x, int) and not isinstance(x, bool) for x in erc)):
+                raise SystemExit(f"ban ke '{ten}': probe/lenh/regex/expected_rc khong hop le")
+            try:
+                if re.compile(pb["regex"]).groups < 1:
+                    raise ValueError
+            except (re.error, ValueError):
+                raise SystemExit(f"ban ke '{ten}': regex probe phai hop le va co nhom bat")
     return d
 
 def nen_hien_tai():
@@ -28,62 +54,92 @@ def nen_hien_tai():
     return t or "unknown"
 
 def _chay(argv, timeout=20):
-    """rc=None: khong khoi chay duoc. Doc CA stdout+stderr (vd `shellcheck --version` in
-    ra stderr, khong phai stdout)."""
+    """Trả (rc, output, lỗi-khởi-chạy); timeout là ĐÃ chạy nhưng hỏng, khác không mở được."""
     try:
         p = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
-        return p.returncode, (p.stdout or "") + (p.stderr or "")
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        return None, ""
+        return p.returncode, (p.stdout or "") + (p.stderr or ""), None
+    except subprocess.TimeoutExpired as ex:
+        ra = (ex.stdout or "") + (ex.stderr or "")
+        return None, ra if isinstance(ra, str) else "", "qua_han"
+    except OSError as ex:
+        return None, "", f"khong_khoi_chay:{type(ex).__name__}"
+
+def _cat_tien_to_token(ra, m):
+    """Regex phải bắt trọn token; `1.7.7` trong `1.7.7-rc1` không phải một phiên bản."""
+    dau, cuoi = m.start(1), m.end(1)
+    return ((dau and KY_TU_TOKEN_BAN.fullmatch(ra[dau - 1]))
+            or (cuoi < len(ra) and KY_TU_TOKEN_BAN.fullmatch(ra[cuoi])))
 
 def kiem_tra_1(ten, dn):
-    bat_buoc, ban_ghim, ban_thay = bool(dn.get("bat_buoc")), dn.get("ban_ghim"), {}
+    bat_buoc, ban_ghim, ban_thay = dn["bat_buoc"], dn.get("ban_ghim"), {}
+    khong_mo, hong = [], []
     for pb in dn.get("probe") or []:
-        rc, ra = _chay(pb["lenh"])
-        if rc is None:
+        ten_pb = pb.get("ten", "mac_dinh")
+        rc, ra, loi = _chay(pb["lenh"])
+        ban_thay[ten_pb] = None
+        if loi and loi.startswith("khong_khoi_chay"):
+            khong_mo.append(ten_pb)
             continue
-        m = re.search(pb["regex"], ra) if pb.get("regex") else None
-        ban_thay[pb.get("ten", "mac_dinh")] = m.group(1) if m else None
+        if loi == "qua_han":
+            hong.append(f"probe '{ten_pb}' da chay nhung qua han")
+            continue
+        erc = pb.get("expected_rc", 0)
+        erc = [erc] if isinstance(erc, int) else erc
+        if rc not in erc:
+            hong.append(f"probe '{ten_pb}' da chay nhung rc={rc}, mong {erc}")
+            continue
+        m = re.search(pb["regex"], ra)
+        if not m or not m.group(1) or _cat_tien_to_token(ra, m):
+            hong.append(f"probe '{ten_pb}' da chay nhung khong parse tron token phien ban")
+            continue
+        ban_thay[ten_pb] = m.group(1)
     goc = {"ten": ten, "bat_buoc": bat_buoc, "ban_ghim": ban_ghim, "ban_thay": ban_thay}
-    if not ban_thay:
+    if hong:
+        return {**goc, "trang_thai": DO, "chi_tiet": "; ".join(hong)}
+    if khong_mo:
         return {**goc, "trang_thai": KHONG_DO_DUOC,
-                "chi_tiet": f"khong tim thay '{ten}' — moi probe deu khong khoi chay duoc"}
-    # T7: >=2 duong probe, cac ban THAY (bo None) khac nhau => DO, DOC LAP voi ban_ghim.
-    khac_nhau = {v for v in ban_thay.values() if v is not None}
-    if len(ban_thay) > 1 and len(khac_nhau) > 1:
+                "chi_tiet": f"khong khoi chay duoc probe {khong_mo} cua '{ten}'"}
+    khac_nhau = set(ban_thay.values())
+    if len(ban_thay) > 1 and len(khac_nhau) > 1:  # T7, độc lập ban_ghim
         return {**goc, "trang_thai": DO,
                 "chi_tiet": f"cac duong goi khac ban: {ban_thay} — co mat khong phai cung ban"}
-    if ban_ghim and not any(v == ban_ghim for v in ban_thay.values()):
+    if ban_ghim is not None and any(v != ban_ghim for v in ban_thay.values()):
         return {**goc, "trang_thai": DO, "chi_tiet": f"sai ban: mong '{ban_ghim}', thay {ban_thay}"}
     return {**goc, "trang_thai": DAT, "chi_tiet": "dat"}
 
-def kiem_tra_canary(ten_canary, theo_ten, thu_muc_goc):
-    al = theo_ten.get("actionlint")
-    if al is None or al["trang_thai"] == KHONG_DO_DUOC:
-        return {"ten": ten_canary, "trang_thai": KHONG_DO_DUOC, "chi_tiet": "khong co actionlint"}
+def kiem_tra_canary(ten_canary, ten_chu, dn, theo_ten, thu_muc_goc):
+    chu = theo_ten[ten_chu]
+    goc = {"ten": ten_canary, "chu_so_huu": ten_chu,
+           "bat_buoc": dn.get("canary_bat_buoc", chu["bat_buoc"])}
+    if chu["trang_thai"] != DAT:
+        return {**goc, "trang_thai": chu["trang_thai"],
+                "chi_tiet": f"tool chu so huu '{ten_chu}' chua DAT"}
     fixture = thu_muc_goc / "ops" / "canary" / f"{ten_canary}.yml"
     if not fixture.is_file():
-        return {"ten": ten_canary, "trang_thai": KHONG_DO_DUOC, "chi_tiet": f"thieu fixture '{fixture}'"}
-    rc, ra = _chay(["actionlint", str(fixture)], timeout=30)
-    if rc is None:
-        return {"ten": ten_canary, "trang_thai": KHONG_DO_DUOC, "chi_tiet": "khong goi duoc actionlint"}
+        return {**goc, "trang_thai": KHONG_DO_DUOC, "chi_tiet": f"thieu fixture '{fixture}'"}
+    lenh = [dn["probe"][0]["lenh"][0], str(fixture)]
+    rc, ra, loi = _chay(lenh, timeout=30)
+    if loi and loi.startswith("khong_khoi_chay"):
+        return {**goc, "trang_thai": KHONG_DO_DUOC, "chi_tiet": f"khong goi duoc '{ten_chu}'"}
+    if loi == "qua_han":
+        return {**goc, "trang_thai": DO, "chi_tiet": f"canary '{ten_canary}' qua han"}
     if "SC1003" in ra:
-        return {"ten": ten_canary, "trang_thai": DAT, "chi_tiet": "canary bat dung SC1003"}
+        return {**goc, "trang_thai": DAT, "chi_tiet": f"canary bat dung SC1003 (rc={rc})"}
     sc_thieu = (theo_ten.get("shellcheck") or {}).get("trang_thai") != DAT
     ly_do = ("SUY_GIAM: thieu shellcheck nen actionlint am tham bo lop luat SC*" if sc_thieu else
              "canary KHONG bat duoc SC1003 du shellcheck co mat — kiem fixture/ban actionlint")
-    return {"ten": ten_canary, "trang_thai": DO, "chi_tiet": ly_do}
+    return {**goc, "trang_thai": DO, "chi_tiet": f"{ly_do} (rc={rc})"}
 
 def tong_hop(ban_ke, thu_muc_goc=None, chi=None):
     cc = ban_ke["cong_cu"]
     theo_ten = {t: kiem_tra_1(t, cc[t]) for t in ([chi] if chi else cc.keys())}
     canary_kq, da_chay = [], set()
     if chi is None:
-        for dn in cc.values():
+        for ten, dn in cc.items():
             cn = dn.get("canary")
             if cn and cn not in da_chay:
                 da_chay.add(cn)
-                canary_kq.append(kiem_tra_canary(cn, theo_ten, thu_muc_goc or GOC))
+                canary_kq.append(kiem_tra_canary(cn, ten, dn, theo_ten, thu_muc_goc or GOC))
     tong = DAT
     for kq in list(theo_ten.values()) + canary_kq:
         if kq["trang_thai"] == KHONG_DO_DUOC and kq.get("bat_buoc"):

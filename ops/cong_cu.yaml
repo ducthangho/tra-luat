@@ -3,8 +3,9 @@
 # sách CHO PHÉP đang LỚN DẦN — công cụ chưa cổng nào gọi tới thì không có ở đây (xem
 # `chua_do_duoc`), không phải khiếm khuyết cần vá ngay.
 # SCHEMA `cong_cu.<ten>`: bat_buoc(vắng MỌI probe⇒KHÔNG_ĐO_ĐƯỢC,mã riêng,G4/T1) ·
-# ban_ghim("X.Y.Z"|null) · probe(≥1 {ten,lenh:[argv],regex}; >1 phần tử=T7: các đường PHẢI
-# khớp NHAU, độc lập ban_ghim) · cai({lenh,moi_truong} chung MỌI nền, hoặc
+# ban_ghim(chuỗi KHÁC RỖNG|null) · probe(≥1 {ten,lenh:[argv],regex,expected_rc?:int|[int]};
+# expected_rc vắng=0; regex phải bắt TRỌN token; >1 probe=T7: các đường PHẢI khớp NHAU) ·
+# canary_bat_buoc(bool, vắng⇒kế thừa bat_buoc; false=advisory) · cai({lenh,moi_truong} chung MỌI nền, hoặc
 # {linux|macos|windows:{...}} khi khác theo nền; vắng=chưa tự động hoá, từ chối RÕ) ·
 # canary(fixture ops/canary/<tên>.yml minh chứng CÓ HIỆU LỰC, không chỉ có mặt).
 schema_version: 1
@@ -12,7 +13,7 @@ cong_cu:
   actionlint:
     bat_buoc: true
     ban_ghim: "1.7.7"
-    probe: [{ten: mac_dinh, lenh: [actionlint, -version], regex: '^(\d+\.\d+\.\d+)'}]
+    probe: [{ten: mac_dinh, lenh: [actionlint, -version], regex: '(?m)^(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)$'}]
     cai: {lenh: "bash ops/cai_actionlint.sh", moi_truong: {AL_VER: "1.7.7"}}
     canary: actionlint_shellcheck
   shellcheck:
@@ -20,4 +21,4 @@ cong_cu:
     # vắng (rc=0) — canary trên bắt đúng sự âm thầm đó (T2).
     bat_buoc: false
     ban_ghim: null
-    probe: [{ten: mac_dinh, lenh: [shellcheck, --version], regex: 'version:\s*(\d+\.\d+\.\d+)'}]
+    probe: [{ten: mac_dinh, lenh: [shellcheck, --version], regex: 'version:\s*(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)'}]

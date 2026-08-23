@@ -70,6 +70,23 @@ jobs:
           # ĐÚNG bị hô sai (đo: `ad413e7`/`78d6bfe` — cả hai là commit thật 09-07 và 07-07 — bị gắn cờ
           # SHA_NOT_A_COMMIT trên clone `--depth 1`). Guard chỉ kết luận được khi có lịch sử để tra.
           fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # G5 cần PyYAML + actionlint nhưng phải đứng trước phép test/compile đầu tiên. Đây là
+      # hai bước SETUP thuần; T6 chỉ cho phép đúng allowlist setup nhỏ trước G5.
+      - name: cài PyYAML (bộ cổng đăng lease cần)
+        run: python -m pip install --quiet PyYAML==6.0.3
+      - name: cài actionlint cho G5
+        shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/cai_actionlint.sh
+      - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)
+        shell: bash
+        run: |
+          python ops/cong_cu.py kiem-tra --json
+          python ops/cong_cu_test.py
       # Kiểm CHÍNH head của PR, không dùng GITHUB_SHA vì trên pull_request đó là synthetic merge.
       # `cat-file` và `merge-base` đều không có nhánh bỏ qua: thiếu object/fetch/lỗi git phải đỏ.
       - name: PR head contains required EOL base
@@ -84,9 +101,6 @@ jobs:
           git cat-file -e "${PR_HEAD_SHA}^{commit}"
           git cat-file -e "${EOL_BASE_SHA}^{commit}"
           git merge-base --is-ancestor "$EOL_BASE_SHA" "$PR_HEAD_SHA"
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
       - name: py_compile
         run: python -m py_compile scripts/tl.py scripts/tl_boot.py scripts/gen_instructions.py scripts/tl_core/__init__.py scripts/tl_core/deterministic.py scripts/tl_core/jsonio.py scripts/tl_core/workflow.py scripts/tl_core/release.py scripts/tl_core/live.py scripts/tl_core/zip_ingest.py scripts/tl_core/ocr.py scripts/tl_core/chunking.py scripts/tl_core/command_registry.py
       # F2-A (ADR-0018): validator EOL dùng CHUNG với `.githooks/pre-commit`. Hook chỉ phủ máy
@@ -119,34 +133,24 @@ jobs:
       # Chạy trên CẢ hai nền: bộ này gọi lệnh qua `sys.executable` nên thuần Python;
       # `t19` (symlink) tự bỏ qua khi nền không cho tạo symlink. Đo 16-08: 3,4 giây,
       # không đáng kể so với trần 25 phút của job.
-      # GHIM EXACT, không để spec trần. Cross-review PR "#134" (codex) nêu
+      # PyYAML đã được cài ở vùng setup trước G5. GHIM EXACT, không để spec trần.
+      # Cross-review PR "#134" (codex) nêu
       # `unpinned-pyyaml-ci-dependency`: spec trần làm CÙNG MỘT SHA có thể xanh hôm nay
       # và đỏ sau này mà cây không đổi — cùng lớp với tiền lệ `pypdf>=4.0` không có trần.
       # Chọn exact chứ không phải `>=6.0,<7` vì job này đã ghim `python-version: "3.12"`
-      # ngay trên: ghim một nửa thì tính tất định cũng chỉ được một nửa.
-      # Nâng bản là việc CÓ CHỦ ĐÍCH — đổi số ở đây, đừng để PyPI đổi hộ.
-      - name: cài PyYAML (bộ cổng đăng lease cần)
-        run: python -m pip install --quiet PyYAML==6.0.3
-      # Cài + đối chiếu `actionlint` và chạy selftest trong MỘT lời gọi. Hai bước YAML
-      # riêng từng cho phép installer nằm ở job khác, sau selftest, hoặc bị `if: false`:
-      # có mặt trong YAML nhưng không cấp công cụ cho lần chạy. Wrapper gọi lại
-      # `cai_actionlint.sh`, không chép logic cài.
+      # ở vùng setup: ghim một nửa thì tính tất định cũng chỉ được một nửa.
+      # Nâng bản là việc CÓ CHỦ ĐÍCH — đổi số ở bước setup, đừng để PyPI đổi hộ.
+      # actionlint đã cài + đối chiếu trước G5. Wrapper dưới đây cố ý đo lại sau biên G5:
+      # t34 đang cấm workflow gọi thẳng file test, và wrapper giữ installer + selftest khép kín.
       #
       # NỢ CÓ TÊN `PLAT-X5-required-status-check`: selftest không thể tự chứng minh job
       # này thật sự được GitHub gọi. Branch protection phải require status của job `gate`;
       # t34 chỉ còn canh lời gọi thẳng tệp `.py`, không giả làm bộ phân tích shell.
-      - name: lease-publish selftest (cài công cụ + chạy cổng)
+      - name: lease-publish selftest (đo lại setup sau G5)
         shell: bash
         env:
           AL_VER: 1.7.7
         run: bash ops/chay_lease_publish_test.sh
-      # G5 (#290): NGAY SAU bước trên — actionlint vừa cài (GITHUB_PATH hiệu lực) nên canary
-      # G3 chạy thật. Trước mọi bước NẶNG còn lại — khoá bằng `t6` trong `cong_cu_test.py`.
-      - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)
-        shell: bash
-        run: |
-          python ops/cong_cu.py kiem-tra --json
-          python ops/cong_cu_test.py
       # `don-nhanh.ps1` XOÁ NHÁNH REMOTE — thao tác không hoàn tác được ở phía PR: xoá
       # nhầm một nhánh đang là BASE của PR đang mở thì GitHub ĐÓNG các PR ấy, và tạo lại
       # nhánh không mở lại chúng. Bộ này khoá đúng chỗ đó, cộng chốt fail-close khi không

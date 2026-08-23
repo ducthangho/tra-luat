@@ -48,8 +48,10 @@ def bin_gia(thu_muc, ten, than):
     p.write_text(than, encoding="utf-8"); p.chmod(0o755)
     return p
 
-def mot_probe(ten, regex=r"(\d+\.\d+\.\d+)"):
-    return [{"ten": "mac_dinh", "lenh": [ten, "--version"], "regex": regex}]
+def mot_probe(ten, regex=r"(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)", expected_rc=None):
+    pb = {"ten": "mac_dinh", "lenh": [ten, "--version"], "regex": regex}
+    if expected_rc is not None: pb["expected_rc"] = expected_rc
+    return [pb]
 
 def bk_don(tmp, ten, than, bat_buoc=True, ban_ghim=None):
     """1 tool giả + 1 bản kê tối giản -> (đường_bản_kê, env trỏ PATH tới nó)."""
@@ -64,11 +66,12 @@ def t1_thieu_bat_buoc_khac_ma_voi_do():
         tmp = Path(tmp)
         bk0 = ghi_ban_ke(tmp, {"vang-t1": {"bat_buoc": True, "ban_ghim": None,
                                             "probe": mot_probe("vang-t1-bin")}})
-        rc_vang, _, _ = chay("kiem-tra", "--ban-ke", str(bk0), env=moi_truong())
+        rc_vang, out_vang, _ = chay("kiem-tra", "--ban-ke", str(bk0), env=moi_truong())
         bk1, env1 = bk_don(tmp, "sai-ban-t1", "#!/bin/sh\necho 0.0.0\n", ban_ghim="9.9.9")
         rc_do, _, _ = chay("kiem-tra", "--ban-ke", str(bk1), env=env1)
         bang(rc_vang != 0 and rc_do != 0, f"cả hai phải khác 0: vắng={rc_vang} sai_bản={rc_do}")
         bang(rc_vang != rc_do, f"KHÔNG_ĐO_ĐƯỢC(rc={rc_vang}) và ĐỎ(rc={rc_do}) CHUNG mã")
+        bang("khong khoi chay" in out_vang, f"không phân biệt được lỗi khởi chạy: {out_vang}")
 
 @ca
 def t2_canary_thieu_shellcheck_phai_SUY_GIAM():
@@ -128,22 +131,28 @@ def t5_cai_cong_cu_khong_thoat_som_khi_da_co_tren_PATH():
 
 @ca
 def t6_ci_kiem_ban_ke_truoc_moi_test_nang():
-    """T6: bước kiểm bản kê đứng TRƯỚC mọi bước test NẶNG (neo TÊN bước, không số dòng)."""
+    """T6: trước G5 chỉ được có allowlist SETUP theo cấu trúc, không chọn trước tên test."""
     d = yaml.safe_load((GOC / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8"))
     buoc = (d.get("jobs", {}).get("gate", {}) or {}).get("steps", [])
     idx_kiem = [i for i, b in enumerate(buoc)
-                if "ops/cong_cu.py" in str(b.get("run", "")) and "kiem-tra" in str(b.get("run", ""))]
-    bang(idx_kiem, "không thấy bước gọi `ops/cong_cu.py kiem-tra` trong job `gate`")
-    # KHÔNG "selftest" trần: khớp cả bước NHẸ ("eol-policy/pre-push") LẪN "lease-publish
-    # selftest" (bước TỰ cài actionlint mà G5 đứng NGAY SAU để tái dùng).
-    NANG = ("tl selftest", "release-check", "release-verify", "release-bundle", "golden-test",
-            "doc-claims-check", "determinism-audit", "workflow-audit", "ci-phamvi",
-            "bundled-fragment", "gate lifecycle", "don-nhanh", "command-registry", "tl_boot")
-    idx_nang = [i for i, b in enumerate(buoc) if any(n in str(b.get("name", "")) for n in NANG)]
-    bang(idx_nang, "không thấy bước test NẶNG nào để đối chiếu (danh sách NANG trôi?)")
-    bang(min(idx_kiem) < min(idx_nang),
-         f"bước kiểm ở vị trí {min(idx_kiem)} không trước bước nặng sớm nhất "
-         f"{min(idx_nang)} ('{buoc[min(idx_nang)].get('name')}')")
+                if str(b.get("name", "")).startswith("G5 ")
+                and "ops/cong_cu.py kiem-tra" in str(b.get("run", ""))]
+    bang(len(idx_kiem) == 1, f"G5 phải có đúng một lần, thấy {idx_kiem}")
+    lenh_setup = {
+        "Force LF checkout (hash parity với manifest)": (
+            "git config --global core.autocrlf false", "git config --global core.eol lf",
+            "git config --global core.abbrev 7"),
+        "cài PyYAML (bộ cổng đăng lease cần)": (
+            "python -m pip install --quiet PyYAML==6.0.3",),
+        "cài actionlint cho G5": ("bash ops/cai_actionlint.sh",),
+    }
+    uses_setup = {"actions/checkout@v4", "actions/setup-python@v5"}
+    for i, b in enumerate(buoc[:idx_kiem[0]]):
+        if b.get("uses") in uses_setup and "run" not in b: continue
+        lenh = tuple(x.strip() for x in str(b.get("run", "")).splitlines()
+                     if x.strip() and not x.lstrip().startswith("#"))
+        bang(lenh_setup.get(b.get("name")) == lenh,
+             f"bước {i + 1} trước G5 không thuộc allowlist setup: '{b.get('name')}' / {lenh}")
 
 @ca
 def t7_hai_duong_goi_khac_ban_phai_bao_khong_im():
@@ -173,7 +182,88 @@ def t8_van_tay_cong_cu_co_trong_ho_so():
             bang("ban_thay" in kq, f"thiếu vân tay 'ban_thay': {kq}")
         bang(bc["cong_cu"][0]["ban_thay"].get("mac_dinh") == "1.2.3", f"'ban_thay' sai: {bc}")
 
-# ===== BỘ ĐỘT BIẾN T1..T8 (packet #290 lượt 2) — 1 đột biến/ca, bán kính đo
+@ca
+def t9_probe_rc_phai_hop_le_ke_ca_khong_ghim_va_mixed():
+    """V1: rc mặc định chỉ 0; nới phải khai từng probe; một probe tốt không che probe hỏng."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp); d = tmp / "bin"
+        bin_gia(d, "rc7-t9", "#!/bin/sh\necho 1.2.3\nexit 7\n")
+        bk = ghi_ban_ke(tmp, {"x": {"bat_buoc": True, "ban_ghim": None,
+                                     "probe": mot_probe("rc7-t9")}})
+        rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk), env=moi_truong(d))
+        bang(rc == 2 and "rc=7" in out, f"rc hỏng không ghim phải ĐỎ: rc={rc}\n{out}")
+        bk = ghi_ban_ke(tmp, {"x": {"bat_buoc": True, "ban_ghim": None,
+                                     "probe": mot_probe("rc7-t9", expected_rc=7)}})
+        bang(chay("kiem-tra", "--ban-ke", str(bk), env=moi_truong(d))[0] == 0,
+             "expected_rc riêng của probe hợp lệ bị chặn oan")
+        bin_gia(d, "ok-t9", "#!/bin/sh\necho 1.2.3\n")
+        pbs = mot_probe("ok-t9") + [{**mot_probe("rc7-t9")[0], "ten": "hong"}]
+        bk = ghi_ban_ke(tmp, {"x": {"bat_buoc": True, "ban_ghim": None, "probe": pbs}})
+        bang(chay("kiem-tra", "--ban-ke", str(bk), env=moi_truong(d))[0] == 2,
+             "probe tốt đã che probe rc hỏng trong cùng tool")
+
+@ca
+def t10_probe_phai_parse_va_bat_tron_token():
+    """V1: output không parse được và tiền tố 1.7.7 của 1.7.7-rc1 đều phải ĐỎ."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        bk, env = bk_don(tmp, "vo-nghia-t10", "#!/bin/sh\necho khong-phai-ban\n")
+        bang(chay("kiem-tra", "--ban-ke", str(bk), env=env)[0] == 2,
+             "probe chạy rc=0 nhưng không parse được đã thành ĐẠT")
+        bk, env = bk_don(tmp, "tien-to-t10", "#!/bin/sh\necho 1.7.7-rc1\n",
+                         ban_ghim="1.7.7")
+        # Cố ý dùng parser cũ để chứng minh bộ đo tự bắt việc cắt tiền tố.
+        d = yaml.safe_load(bk.read_text(encoding="utf-8")); d["cong_cu"]["tien-to-t10"]["probe"][0]["regex"] = r"^(\d+\.\d+\.\d+)"
+        bk.write_text(yaml.safe_dump(d), encoding="utf-8")
+        bang(chay("kiem-tra", "--ban-ke", str(bk), env=env)[0] == 2,
+             "1.7.7-rc1 đã bị cắt thành tiền tố ghim 1.7.7")
+
+@ca
+def t11_ban_ghim_rong_bi_tu_choi_nhung_null_hop_le():
+    """V3 + đối chứng: chuỗi rỗng là schema lỗi; chỉ null mới là không ghim."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp); bk, env = bk_don(tmp, "ghim-t11", "#!/bin/sh\necho 9.9.9\n")
+        d = yaml.safe_load(bk.read_text(encoding="utf-8")); d["cong_cu"]["ghim-t11"]["ban_ghim"] = ""
+        bk.write_text(yaml.safe_dump(d), encoding="utf-8")
+        rc, _, err = chay("kiem-tra", "--ban-ke", str(bk), env=env)
+        bang(rc == 1 and "ban_ghim" in err, f"ghim rỗng không bị validation từ chối: {rc}/{err}")
+        d["cong_cu"]["ghim-t11"]["ban_ghim"] = None; bk.write_text(yaml.safe_dump(d), encoding="utf-8")
+        bang(chay("kiem-tra", "--ban-ke", str(bk), env=env)[0] == 0,
+             "null (không ghim hợp lệ) bị chặn oan")
+
+@ca
+def t12_canary_bat_buoc_thieu_fixture_va_optional_khong_canary():
+    """V2 + đối chứng: canary kế thừa requiredness; optional không khai canary vẫn hợp lệ."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp); d = tmp / "bin"; bin_gia(d, "actionlint", "#!/bin/sh\necho 1.7.7\n")
+        bk = ghi_ban_ke(tmp, {"actionlint": {"bat_buoc": True, "ban_ghim": "1.7.7",
+            "probe": mot_probe("actionlint"), "canary": "fixture-khong-ton-tai-t12"}})
+        rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk), env=moi_truong(d))
+        bang(json.loads(out)["trang_thai_tong"] == "KHONG_DO_DUOC" and '"bat_buoc": true' in out,
+             f"canary bắt buộc thiếu fixture bị nuốt: {rc}\n{out}")
+        d_bk = yaml.safe_load(bk.read_text(encoding="utf-8"))
+        d_bk["cong_cu"]["actionlint"]["canary_bat_buoc"] = False
+        bk.write_text(yaml.safe_dump(d_bk), encoding="utf-8")
+        bang(chay("kiem-tra", "--ban-ke", str(bk), env=moi_truong(d))[0] == 0,
+             "canary khai advisory tường minh bị chặn oan")
+        bk = ghi_ban_ke(tmp, {"optional-t12": {"bat_buoc": False, "ban_ghim": None,
+                                                "probe": mot_probe("khong-co-t12")}})
+        bang(chay("kiem-tra", "--ban-ke", str(bk), env=moi_truong(d))[0] == 0,
+             "tool optional không khai canary bị chặn oan")
+
+@ca
+def t13_actionlint_bien_mat_giua_probe_va_canary():
+    """V2: tool DAT ở probe nhưng biến mất trước canary phải kéo tổng thành KHÔNG_ĐO_ĐƯỢC."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp); d = tmp / "bin"
+        bin_gia(d, "actionlint", "#!/bin/sh\ncase \"$1\" in -version|--version) echo 1.7.7; /bin/rm -- \"$0\"; exit 0;; esac\n")
+        bk = ghi_ban_ke(tmp, {"actionlint": {"bat_buoc": True, "ban_ghim": "1.7.7",
+            "probe": mot_probe("actionlint"), "canary": "actionlint_shellcheck"}})
+        rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk), env=dict(os.environ, PATH=str(d)))
+        bang(json.loads(out)["trang_thai_tong"] == "KHONG_DO_DUOC" and "khong goi duoc" in out,
+             f"canary mất executable bị nuốt: {rc}\n{out}")
+
+# ===== BỘ ĐỘT BIẾN — 1 đột biến/ca, bán kính đo
 # TOÀN suite. Rút gọn từ .claude/dev/packet_loop_test.py (MUTANTS). CÔ LẬP 3
 # HỌ: t1,t2,t3,t4,t7,t8 qua biến SCRIPT (hàm chay()); t5 qua CAI_SH RIÊNG; t6
 # qua GOC. Mỗi đột biến CHỈ patch ĐÚNG một biến — patch cả ba sẽ làm t5 "thấy"
@@ -209,12 +299,14 @@ DOT_BIEN = {
         "RC = {DAT: 0, DO: 2, KHONG_DO_DUOC: 0}  # đột biến: gộp\n",
         "SCRIPT", _PHU, "t1_thieu_bat_buoc_khac_ma_voi_do"),
     "t2_go_canary": ("ops/cong_cu.py",
-        "                canary_kq.append(kiem_tra_canary(cn, theo_ten, thu_muc_goc or GOC))\n",
-        "                pass  # đột biến: gỡ lời gọi kiem_tra_canary\n",
+        '    return {**goc, "trang_thai": DO, "chi_tiet": f"{ly_do} (rc={rc})"}\n',
+        '    return {**goc, "trang_thai": DAT, "chi_tiet": f"{ly_do} (rc={rc})"}  # đột biến\n',
         "SCRIPT", _PHU, "t2_canary_thieu_shellcheck_phai_SUY_GIAM"),
     "t3_bao_dong_gia": ("ops/cong_cu.py",
         '    return {**goc, "trang_thai": DAT, "chi_tiet": "dat"}\n',
-        '    return {**goc, "trang_thai": DO, "chi_tiet": "dat"}  # đột biến\n',
+        '    if ten == "on-dinh-t3":\n'
+        '        return {**goc, "trang_thai": DO, "chi_tiet": "bao dong gia"}  # đột biến\n'
+        '    return {**goc, "trang_thai": DAT, "chi_tiet": "dat"}\n',
         "SCRIPT", _PHU, "t3_du_cong_cu_dung_ban_khong_canh_bao_thua"),
     "t4_mat_ban_mong_doi": ("ops/cong_cu.py",
         '        return {**goc, "trang_thai": DO, "chi_tiet": f"sai ban: mong \'{ban_ghim}\', thay {ban_thay}"}\n',
@@ -226,18 +318,44 @@ DOT_BIEN = {
         '[ -n "$TEN" ] || { echo "cai_cong_cu: thieu ten cong cu (vi du: actionlint)" >&2; exit 2; }\n'
         'command -v "$TEN" >/dev/null 2>&1 && exit 0  # đột biến: thoát sớm\n',
         "CAI_SH", ("ops/cong_cu.py",) + _PHU, "t5_cai_cong_cu_khong_thoat_som_khi_da_co_tren_PATH"),
-    "t6_ten_buoc_trung_tu_khoa": (".github/workflows/ci.yml",
-        "      - name: eol-policy selftest\n",
-        "      - name: eol-policy selftest tl selftest\n",
+    "t6_day_g5_sau_py_compile": (".github/workflows/ci.yml",
+        "      - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)\n",
+        "      - name: py_compile dot bien TRUOC G5\n"
+        "        run: python -m py_compile ops/cong_cu.py\n"
+        "      - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)\n",
         "GOC", (), "t6_ci_kiem_ban_ke_truoc_moi_test_nang"),
     "t7_bo_luat_2_duong": ("ops/cong_cu.py",
-        "    if len(ban_thay) > 1 and len(khac_nhau) > 1:\n",
+        "    if len(ban_thay) > 1 and len(khac_nhau) > 1:  # T7, độc lập ban_ghim\n",
         "    if False:  # đột biến: bỏ luật hai đường khác bản\n",
         "SCRIPT", _PHU, "t7_hai_duong_goi_khac_ban_phai_bao_khong_im"),
     "t8_mat_field_ten": ("ops/cong_cu.py",
         '    goc = {"ten": ten, "bat_buoc": bat_buoc, "ban_ghim": ban_ghim, "ban_thay": ban_thay}\n',
         '    goc = {"bat_buoc": bat_buoc, "ban_ghim": ban_ghim, "ban_thay": ban_thay}  # đột biến\n',
         "SCRIPT", _PHU, "t8_van_tay_cong_cu_co_trong_ho_so"),
+    "t9_bo_kiem_rc": ("ops/cong_cu.py",
+        "        if rc not in erc:\n",
+        "        if False:  # đột biến: mọi rc đều hợp lệ\n",
+        "SCRIPT", _PHU, "t9_probe_rc_phai_hop_le_ke_ca_khong_ghim_va_mixed"),
+    "t10_cho_parse_rong_va_cat_tien_to": ("ops/cong_cu.py",
+        '        if not m or not m.group(1) or _cat_tien_to_token(ra, m):\n'
+        '            hong.append(f"probe \'{ten_pb}\' da chay nhung khong parse tron token phien ban")\n'
+        '            continue\n'
+        '        ban_thay[ten_pb] = m.group(1)\n',
+        '        if m:\n'
+        '            ban_thay[ten_pb] = m.group(1)  # đột biến: cho rỗng/cắt tiền tố\n',
+        "SCRIPT", _PHU, "t10_probe_phai_parse_va_bat_tron_token"),
+    "t11_cho_ban_ghim_rong": ("ops/cong_cu.py",
+        '        if bg is not None and (not isinstance(bg, str) or not bg.strip()):\n',
+        '        if bg is not None and not isinstance(bg, str):  # đột biến: cho chuỗi rỗng\n',
+        "SCRIPT", _PHU, "t11_ban_ghim_rong_bi_tu_choi_nhung_null_hop_le"),
+    "t12_mat_requiredness_khi_thieu_fixture": ("ops/cong_cu.py",
+        '        return {**goc, "trang_thai": KHONG_DO_DUOC, "chi_tiet": f"thieu fixture \'{fixture}\'"}\n',
+        '        return {"ten": ten_canary, "trang_thai": KHONG_DO_DUOC, "chi_tiet": f"thieu fixture \'{fixture}\'"}  # đột biến\n',
+        "SCRIPT", _PHU, "t12_canary_bat_buoc_thieu_fixture_va_optional_khong_canary"),
+    "t13_mat_requiredness_khi_tool_bien_mat": ("ops/cong_cu.py",
+        '        return {**goc, "trang_thai": KHONG_DO_DUOC, "chi_tiet": f"khong goi duoc \'{ten_chu}\'"}\n',
+        '        return {"ten": ten_canary, "trang_thai": KHONG_DO_DUOC, "chi_tiet": "mat tool"}  # đột biến\n',
+        "SCRIPT", _PHU, "t13_actionlint_bien_mat_giua_probe_va_canary"),
 }
 
 def _chay_1_ca(fn):
@@ -284,7 +402,7 @@ def main() -> int:
     print(f"\ncong_cu_test: {qua}/{len(CA) - len(bo_qua)} đạt; tổng={len(CA)}, bỏ qua={len(bo_qua)}")
 
     loi_db = 0
-    print(f"\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca t1..t8 đúng một):")
+    print(f"\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một):")
     for ten_db, cfg in DOT_BIEN.items():
         ca_dich = cfg[-1]
         try:

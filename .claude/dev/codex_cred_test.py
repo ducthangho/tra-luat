@@ -124,6 +124,7 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
     class A:
         codex_home, ra, han_giay = str(d), str(ra_tep), 5
         in_gia_tri, cai_de = False, False
+        tep_dan = None          # argparse thật LUÔN có trường này; đồ giả phải giống thật.
 
     import io
     from contextlib import redirect_stdout
@@ -156,7 +157,7 @@ def t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT(M):
     M._co_codex = lambda: None
 
     class A:
-        codex_home = ra = None
+        codex_home = ra = tep_dan = None
         han_giay, in_gia_tri, cai_de = 5, False, False
 
     import io
@@ -168,10 +169,60 @@ def t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT(M):
     assert rc != 0, "thiếu công cụ mà trả 0 — đúng lỗi 'cổng tự tắt'"
 
 
+def t9_cmd_lay_GHI_tep_huong_dan_dan(M):
+    """Tệp hướng dẫn dán phải do CHÍNH lệnh sinh ra, không phải việc làm tay sau đó.
+
+    Lần đầu tôi soạn tệp ấy bằng tay sau khi lệnh chạy xong. Làm tay thì lần sau người
+    khác quên — nên nó phải là một bước của mã, và ca này canh đúng chuyện đó.
+    """
+    bi_mat = b'{"tokens":{"access_token":"a.b.c","refresh_token":"R"}}'
+    d = Path(tempfile.mkdtemp())
+    (d / "auth.json").write_bytes(bi_mat)
+    M._co_codex = lambda: "/gia/codex"
+    M._chay_device_auth = lambda home, han: (True, "ok")
+    M._kiem_song = lambda home: (True, "rc=0")
+    tep_dan = d / "huong_dan.md"
+
+    class A:
+        codex_home, ra, han_giay = str(d), str(d / "b64.txt"), 5
+        in_gia_tri, cai_de = False, False
+    A.tep_dan = str(tep_dan)
+
+    import io
+    from contextlib import redirect_stdout
+    with redirect_stdout(io.StringIO()):
+        rc = M.cmd_lay(A())
+    assert rc == 0, f"rc={rc}"
+    assert tep_dan.is_file(), "KHÔNG sinh tệp hướng dẫn dán"
+    noi = tep_dan.read_text(encoding="utf-8")
+    b64 = __import__("base64").b64encode(bi_mat).decode()
+    assert b64 in noi, "tệp hướng dẫn thiếu chính chuỗi cần dán"
+    assert "CODEX_AUTH_JSON" in noi, "tệp không nói tên biến"
+    assert (tep_dan.stat().st_mode & 0o777) == 0o600, "tệp chứa bí mật không phải 0600"
+
+
+def t10_gio_con_lai_doc_exp_va_bu_padding(M):
+    """`exp` đọc từ JWT; payload base64url THIẾU padding là ca thật, không phải giả định."""
+    import base64 as _b, json as _j, time as _t
+    than = _j.dumps({"exp": int(_t.time()) + 7200}).encode()
+    # bỏ padding đúng như JWT thật làm
+    p64 = _b.urlsafe_b64encode(than).decode().rstrip("=")
+    assert len(p64) % 4 != 0, "fixture chưa chạm ca thiếu padding — sửa fixture"
+    d = Path(tempfile.mkdtemp())
+    (d / "a.json").write_text(_j.dumps({"tokens": {"access_token": f"h.{p64}.s"}}))
+    gio = M._gio_con_lai(d / "a.json")
+    assert gio is not None, "không đọc được exp (nhiều khả năng vỡ ở padding)"
+    assert 1.9 < gio < 2.1, f"exp sai: {gio}"
+    # hỏng thì phải trả None, KHÔNG được ném
+    (d / "b.json").write_text('{"tokens":{"access_token":"khong-phai-jwt"}}')
+    assert M._gio_con_lai(d / "b.json") is None, "token không phải JWT mà vẫn trả số"
+
+
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
       t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0, t4_kiem_song_bat_credential_bi_tu_choi,
       t5_kiem_song_dat_khi_co_dau_hieu, t6_khong_in_gia_tri_khi_khong_co_co,
-      t7_sao_luu_khong_de_ban_cu, t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT]
+      t7_sao_luu_khong_de_ban_cu, t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT,
+      t9_cmd_lay_GHI_tep_huong_dan_dan, t10_gio_con_lai_doc_exp_va_bu_padding]
 
 # ─────────────────────────── đột biến ───────────────────────────
 # (nhãn, chuỗi CŨ, chuỗi MỚI, ca ĐÍCH phải chết)
@@ -199,6 +250,18 @@ DOT_BIEN = [
     # Gỡ đúng vòng tìm tên trống ⇒ quay lại bệnh "hai lần trong cùng một giây thì đè nhau".
     ("t7_bo_vong_tim_ten_trong", "while bak.exists():", "while False:",
      "t7_sao_luu_khong_de_ban_cu"),
+    # Gỡ hẳn bước sinh tệp: đúng bệnh "làm tay rồi lần sau quên".
+    # Bỏ TRỌN khối sinh tệp (cả write_text lẫn chmod). Bản trước chỉ bỏ write_text nên
+    # `os.chmod` phía sau ném FileNotFoundError và giết luôn t6 — đó là đột biến làm hỏng
+    # HÀM cho mọi ca, không phải đột biến đo đúng tính chất t9 canh.
+    ("t9_khong_sinh_tep_dan",
+     '    tep_dan.write_text(soan_tep_dan(b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),\n'
+     '                                    gio_con), encoding="utf-8")\n'
+     "    os.chmod(tep_dan, 0o600)",
+     "    pass", "t9_cmd_lay_GHI_tep_huong_dan_dan"),
+    # Bỏ bù padding base64url — ca t10 phải ĐỎ, và đây là lỗi thật rất dễ lọt.
+    ("t10_khong_bu_padding", '\n    than += "=" * (-len(than) % 4)', "",
+     "t10_gio_con_lai_doc_exp_va_bu_padding"),
     ("t8_thieu_cong_cu_van_xanh", "return RC[KHONG_DO_DUOC]\n\n    tam =",
      "return RC[DAT]\n\n    tam =", "t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT"),
 ]
@@ -243,8 +306,16 @@ def main() -> int:
             print(f"  ĐỎ  {nhan}: không tìm thấy mỏ neo {cu!r}")
             xau.append(nhan)
             continue
-        Mm = nap(goc.replace(cu, moi, 1), nhan)
-        Mm.__nguon__, Mm.__nhan__ = goc.replace(cu, moi, 1), nhan
+        nguon_m = goc.replace(cu, moi, 1)
+        try:
+            Mm = nap(nguon_m, nhan)
+        except SyntaxError as e:
+            # Một đột biến không biên dịch được thì KHÔNG chạy, nên nó không đo gì —
+            # phải báo ĐỎ tại đây chứ không được làm sập cả lượt và che mọi đột biến sau.
+            print(f"  ĐỎ  {nhan:26} KHÔNG BIÊN DỊCH ĐƯỢC: {e}")
+            xau.append(f"{nhan}: đột biến không parse — không phải đột biến")
+            continue
+        Mm.__nguon__, Mm.__nhan__ = nguon_m, nhan
         chet = chay_suite(Mm)
         ok = dich in chet
         ngoai = sorted(chet - {dich})

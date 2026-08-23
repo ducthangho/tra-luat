@@ -190,6 +190,31 @@ def _kiem_song(codex_home: Path) -> tuple[bool, str]:
     return (True, f"rc={p.returncode}, có {DAU_HIEU_SONG}")
 
 
+def _gio_con_lai(auth: Path) -> float | None:
+    """Số giờ còn lại của access_token, đọc `exp` trong JWT. None khi không đọc được.
+
+    CHỈ rút trường thời gian; token KHÔNG bao giờ được trả ra hay in ra. `exp` lấy từ
+    payload mà KHÔNG kiểm chữ ký — đủ để CẢNH BÁO SỚM (hạ nhãn), không đủ để khẳng
+    định còn dùng được: khẳng định đó chỉ đến từ `_kiem_song`.
+    """
+    try:
+        d = json.loads(auth.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    tok = (d.get("tokens") or {}).get("access_token") or d.get("access_token")
+    if not isinstance(tok, str) or tok.count(".") != 2:
+        return None
+    than = tok.split(".")[1]
+    than += "=" * (-len(than) % 4)  # JWT bỏ padding base64url; thiếu nó là ném binascii.Error
+    try:
+        exp = json.loads(base64.urlsafe_b64decode(than)).get("exp")
+    except (ValueError, TypeError):
+        return None
+    if not isinstance(exp, (int, float)):
+        return None
+    return (exp - time.time()) / 3600.0
+
+
 def _sao_luu(dich: Path) -> Path | None:
     """Sao lưu ra tên CHƯA TỒN TẠI — không bao giờ đè một bản sao lưu trước.
 
@@ -211,6 +236,66 @@ def _sao_luu(dich: Path) -> Path | None:
     shutil.copy2(dich, bak)
     os.chmod(bak, 0o600)
     return bak
+
+
+def soan_tep_dan(b64: str, luc_utc: str, gio_con: float | None) -> str:
+    """Soạn tệp hướng dẫn dán — bản chiếu DUY NHẤT của chuỗi, để giao cho chủ kho.
+
+    Tách khỏi I/O để test được. Lần đầu việc này làm BẰNG TAY sau khi lệnh chạy xong;
+    làm tay thì lần sau người khác quên, nên nó thành một bước của chính lệnh.
+    """
+    han = f"{gio_con:.0f} giờ" if gio_con is not None else "không đọc được"
+    return f"""# CODEX_AUTH_JSON — credential codex
+
+Lấy lúc `{luc_utc}` bằng `python3 .claude/dev/codex_cred.py lay --cai-de`.
+Đã chứng minh dùng được bằng một lời gọi `codex exec` THẬT (`rc=0`, có `{DAU_HIEU_SONG}`) —
+KHÔNG phải bằng `codex login status` (lệnh đó nói dối), KHÔNG phải bằng `rc=0` suông.
+
+`access_token` còn: **{han}** kể từ lúc lấy.
+
+---
+
+## Cách 1 — Environment settings (dùng được cho MỌI phiên sau)
+
+* **Tên biến:** `CODEX_AUTH_JSON`
+* **Giá trị:** đúng chuỗi dưới đây — MỘT dòng, không xuống dòng, không khoảng trắng thừa
+
+```
+{b64}
+```
+
+## Cách 2 — export trong shell (chỉ có tác dụng trong phiên shell đó)
+
+```bash
+export CODEX_AUTH_JSON={b64}
+```
+
+---
+
+## Kiểm tra sau khi dán
+
+```bash
+python3 .claude/dev/launcher.py doctor --kiem-song    # phải thấy: DUNG_DUOC  codex
+python3 .claude/dev/codex_cred.py kiem --kiem-song    # rc=0 và "có {DAU_HIEU_SONG}"
+```
+
+Đừng tin `codex login status`: nó chỉ kiểm tệp đọc được, trả `rc=0 "Logged in"` trong khi
+mọi lời gọi thật trả 401. Kho này đã trả giá hai lần vì tin nó.
+
+## Chuỗi này chết theo hai cách
+
+1. **Refresh token XOAY VÒNG.** Chạy `codex login` ở máy khác bằng cùng tài khoản là chuỗi
+   này vô hiệu ngay, kể cả khi nó vẫn nằm nguyên trong biến môi trường.
+2. **Nó là ẢNH CHỤP**, không tự cập nhật.
+
+Cần bản mới: `python3 .claude/dev/codex_cred.py lay --cai-de` — ~30 giây, chỉ cần mở một URL
+và gõ một mã 10 ký tự.
+
+## Bảo mật
+
+Chuỗi này **tương đương mật khẩu tài khoản** cho mục đích codex. Đừng commit vào git, đừng
+dán vào issue/PR/chat. **Dán xong thì xoá tệp này.**
+"""
 
 
 def cmd_lay(a) -> int:
@@ -251,9 +336,21 @@ def cmd_lay(a) -> int:
         os.chmod(that, 0o600)
         _in(f"đã cài đè {that}" + (f" (sao lưu: {bak})" if bak else ""))
 
+    # Tệp hướng dẫn dán: bước CUỐI của lệnh, không phải việc làm tay sau đó. Phiên nào
+    # cũng phải giao được cùng một thứ cho chủ kho, nên nó thuộc về mã.
+    gio_con = _gio_con_lai(auth)
+    tep_dan = Path(a.tep_dan) if a.tep_dan else ra.with_name("CODEX_AUTH_JSON_setup.md")
+    tep_dan.write_text(soan_tep_dan(b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                                    gio_con), encoding="utf-8")
+    os.chmod(tep_dan, 0o600)
+
     _in("")
     _in("ĐẠT — credential mới, đã chứng minh bằng lời gọi thật.")
     _in(f"  base64 dài {len(b64)} ký tự, đã ghi (chmod 600): {ra}")
+    _in(f"  tệp hướng dẫn dán (chmod 600): {tep_dan}")
+    if gio_con is not None:
+        _in(f"  access_token còn ~{gio_con:.0f} giờ")
+    _in("  → GỬI TỆP TRÊN cho chủ kho (SendUserFile), đừng in chuỗi ra màn hình.")
     _in("")
     if a.in_gia_tri:
         _in("  ↓ GIÁ TRỊ để dán vào biến CODEX_AUTH_JSON ↓")
@@ -287,6 +384,10 @@ def cmd_kiem(a) -> int:
     lr = d.get("last_refresh")
     _in(f"tệp        : {auth}")
     _in(f"last_refresh: {lr}")
+    gio = _gio_con_lai(auth)
+    if gio is not None:
+        _in(f"access_token: còn ~{gio:.1f} giờ"
+            + ("   ⚠ SẮP HẾT — chạy `lay --cai-de` để lấy bản mới" if gio < 48 else ""))
     if not a.kiem_song:
         _in("CHƯA CHỨNG MINH khả dụng — thêm --kiem-song để gọi thật (tốn quota).")
         return RC[KHONG_DO_DUOC]
@@ -307,6 +408,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help=f"hạn chờ người dùng (mặc định {HAN_MAC_DINH_GIAY}s = hạn của mã)")
     q.add_argument("--in-gia-tri", action="store_true",
                    help="IN base64 ra màn hình — bí mật sẽ nằm lại trong nhật ký phiên")
+    q.add_argument("--tep-dan",
+                   help="tệp .md hướng dẫn dán (mặc định cạnh --ra); GỬI tệp này cho chủ kho")
     q.add_argument("--cai-de", action="store_true",
                    help="cài đè ~/.codex/auth.json (có sao lưu) để dùng ngay trong phiên này")
     q.set_defaults(fn=cmd_lay)

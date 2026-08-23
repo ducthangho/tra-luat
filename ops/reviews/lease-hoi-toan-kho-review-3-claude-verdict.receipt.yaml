@@ -1,0 +1,51 @@
+# Bản gốc là NGUYÊN VĂN của reviewer, neo bằng băm. Comment trên PR chỉ là BẢN CHIẾU.
+schema_version: 1
+packet_id: LEASE-HOI-TOAN-KHO
+packet_issue: 244
+pr: 275
+round: 3
+round_note: LƯỢT CUỐI — trần ADR-0043 canon 2, chủ kho nới lên 3 (lease r4). Không còn lượt 4.
+provider: claude
+role: reviewer
+executor: codex
+verdict: approve
+reviewed_sha: f12736dfbbb9760da4ce164988f3ee97784d0475
+lease_id: lease-hoi-toan-kho-exec-1r4-codex-20260823
+verdict_path: ops/reviews/lease-hoi-toan-kho-review-3-claude-verdict.md
+verdict_sha256: d4cad456de8230fcd5ef041644584753db262c0e08c4ed5fcf91a552abd9cc3a
+verdict_bytes: 15250
+evidence_url: https://github.com/ducthangho/tra-luat/pull/275#issuecomment-5385229908
+evidence_url_ghi_chu: Trỏ COMMENT trên PR — verdict chưa vào master lúc viết, URL blob sẽ là SHA không
+  tra được.
+delivered_by: 'claude-session   # KHÔNG phải reviewer'
+verdict_doi_chieu: NGUYÊN VĂN, không đụng byte nào.
+doi_chieu_luot_truoc:
+- id: kiem-dau-toan-kho-bo-qua-git-loi-that
+  phan: ĐÃ VÁ THẬT
+  bang_chung: 'gỡ vá → 95/97 với t97 đỏ đúng lỗ · giữ vá + actionlint thật → 97/97 rc=0 · ca `.git` là
+    TỆP dựng bằng git worktree thật → hành vi giống hệt trước/sau vá, không chặn oan · đọc main() và ops-publish-lease.yml:
+    Chan/rc=12 xử lý đúng, không traceback trần'
+- id: git-wrapper-nuot-loi-fail-open
+  phan: ĐÃ VÁ THẬT (xác nhận từ lượt 2)
+- id: lease-cham-duong-so-chua-thay-vi-so-bang
+  phan: ĐÃ VÁ THẬT (xác nhận từ lượt 2)
+- id: bien-het-han-khong-co-ca
+  phan: CHƯA VÁ — ngoài phạm vi, đã biết từ lượt 1
+findings:
+- id: t97-khong-ghim-nguon-loi
+  muc: P3
+  chan_land: false
+  tom_tat: '`t97` khoá đúng MÃ LỖI (RC_KHONG_XAC_DINH), không khoá ĐƯỜNG GỌI. Xoá hẳn dòng `_git(root,"rev-parse","--git-dir")`
+    vẫn 96/97, t97 XANH — vì `for-each-ref` bên dưới ném cùng mã. Không chặn: trên reviewed_sha dòng ấy
+    CÓ và làm đúng việc (đo: GOI_GIT gọi đúng một lần với đúng đối số). Nhưng là nợ thật — cùng họ nợ
+    21: khoá MÃ thay vì khoá ĐƯỜNG ĐI.'
+  nguoi_dieu_phoi_tai_hien: CÓ — xoá hẳn dòng kiểm ⇒ 96/97, t97 xanh. Xác nhận.
+khong_co_lo_thu_tu: Reviewer quét lại ops/lease_publish.py, không tìm thấy chỗ nào khác nuốt trạng thái
+  thứ ba.
+ngan_sach: 2 tệp (trần 3) · 368/380 dòng thêm · không tệp nào ngoài write_set
+chua_do_duoc:
+- CI kho HỎNG TOÀN CỤC từ ~08:37Z (runner_id=0, chết 2–4s, ≥4 nhánh/≥3 phiên; trước 08:07Z xanh 314–443s;
+  ci.yml không bị chạm). 97/97 là đo TRÊN CONTAINER LINUX NÀY, không phải trên runner.
+- Windows chưa đo lượt nào cho mã này.
+dieu_kien_land_con_thieu:
+- human readback của chủ kho (ADR-0045) — verdict KHÔNG thay bước này

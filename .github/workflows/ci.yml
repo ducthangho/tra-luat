@@ -388,7 +388,15 @@ jobs:
       #                  chieu voi `NGOAI_GOI`. Day la buoc sinh ra cai do DOC DUOC khi ai
       #                  do sua `_RELEASE_EXCLUDE_*` ma quen bang.
       #   `_test.py`   : chinh cong tren CO RANG khong. 6 dot bien tren `git worktree`
-      #                  ban sao. Rang la LOGIC, khong phai he dieu hanh.
+      #                  ban sao. RANG CHIA HAI PHAN, dung gop lam mot:
+      #                    · `t1` `n1` `n2` `n3` do LOGIC thuan (dan xuat tu ma, ba trang
+      #                      thai, nhom bia) — doc lap nen;
+      #                    · `n4` `n5` `n6` do NGU NGHIA DUYET CAY (thu muc trung ten tep,
+      #                      symlink) — PHU THUOC nen, va dung la phan bi bo lai o Windows.
+      #                  Ban dau muc nay viet gon "rang la LOGIC, khong phai he dieu hanh"
+      #                  roi vai dong duoi tu thua nhan n5/n6 do duyet cay — HAI CAU AY
+      #                  MAU THUAN. Cross-review luot 1 (codex) bat, finding
+      #                  `rang-logic-tu-mau-thuan-nen`.
       #
       # VI SAO `_test.py` CHI CHAY LINUX — va day la loi KHAI NO, khong phai thiet ke dep.
       # `--kiem-bam` goi `_build_release_manifest()`, DUNG ham ma `release-check` /
@@ -400,7 +408,7 @@ jobs:
       # `--kiem-bam` do tren Windows, vi no dan xuat tap loai tru tu manifest dung tren nen
       # dang chay.
       #
-      # NO CO TEN: `ci-phamvi-test-chua-chay-duoc-tren-windows`. `n5` (nhom tep thanh thu
+      # NỢ CÓ TÊN: `ci-phamvi-test-chua-chay-duoc-tren-windows`. `n5` (nhom tep thanh thu
       # muc) va `n6` (symlink van doc lap) do NGU NGHIA DUYET CAY va se khong bao gio chay
       # tren Windows theo cach nay. Cong van bat duoc neu Windows duyet khac, nhung ta se
       # khong biet VI SAO. Cung kieu khai no voi `don-nhanh-test-chua-chay-duoc-tren-windows`
@@ -411,11 +419,15 @@ jobs:
       # quyet dinh Q3 khai chay CO DIEU KIEN + mot luot dinh ky hang tuan, ly le nguyen van
       # "Chay moi PR thi tu phan (cong 3-5 phut vao dung thu dang di cat)". Ly le ay DO TREN
       # BAN CO VE DOC — ban da bi bo (#247 dong khong merge). Do lai tren thu that su duoc
-      # noi o day: 0,10s + 1,83s ~ 1,9s, so voi gate ~6,6 phut tuong => ~0,5%.
+      # noi o day: DUOI 1% thoi luong job, do THANG TREN CI theo tung nen.
+      # CO Y KHONG ghi so giay tuyet doi o day. So ay la anh chup MOT may MOT luot va
+      # khong tai lap duoc: cross-review luot 1 do lai tren may khac ra median lech han
+      # (finding `so-do-chi-phi-khong-tai-lap`). So that, kem ten nen va so luot do, neo
+      # o Issue #254 va comment PR #258 — can con so thi doc o do, dung doc o day.
       # Ly do THU HAI moi la ly do chinh: ban than logic dieu kien la mat hong kho nay da
       # tra gia HAI lan — workflow co `paths:` khong chay o lan day tao nhanh moi, va ma
       # tran theo nhan khong ban vi `pull_request:` thieu `types:`. Mua dung lop bug dang
-      # tra no de tiet kiem 1,9 giay la lo.
+      # tra no de tiet kiem duoi mot phan tram thoi luong job la lo.
       # Nguoi giu kho (@ducthangho) DA DUYET cho lech nay tai Issue #254, can cu la so do
       # tren. `-r2` van BAT BUOC cho cong tac fast-path, khong phai cho buoc nay.
       - name: ci-phamvi guard (bang phu thuoc khop ma)

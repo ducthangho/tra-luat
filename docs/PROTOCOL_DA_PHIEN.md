@@ -724,6 +724,18 @@ Các thuật ngữ trạng thái không dùng thay nhau:
 Vì vậy Packet merge vào integration mới là `integrated`, chưa `landed`. PR đi thẳng canonical trong giai đoạn
 bootstrap cũng chỉ thành `landed` sau post-merge evidence và bookkeeping.
 
+**`bookkeeping Packet xong` đòi DUYỆT TỪNG MỤC việc mà lease khai, không dừng ở hiện vật chính.** Một phép thử
+hiện vật (`grep` thấy thứ đã land trên canonical) trả lời đúng **một** câu hỏi — *deliverable chính có ở đó
+không* — và mù với mọi mục nằm ngoài tệp ấy. Lease nào khai `viec_trong_revision`, `acceptance_criteria` hay
+danh sách tương đương thì mỗi mục phải có phép đo riêng trước khi packet rời hàng đợi; mục không đo được thì
+khai `KHÔNG ĐO ĐƯỢC` chứ không im lặng bỏ qua.
+
+Đo được, không phải giả định: packet `CI-NOI-BANG-VAO-GATE` (#254) đóng bằng đúng một phép thử
+`grep -c ci_phamvi .github/workflows/ci.yml → 4`. Phép thử ấy **đúng**, nhưng lease `-r2` của nó khai **năm**
+mục `viec_trong_revision`, trong đó một mục nằm ngoài `ci.yml` hoàn toàn. Bốn mục tình cờ đã xong; mục thứ năm
+chưa, và không ai biết cho tới khi có người đọc lại tệp lease. Cùng họ *"cổng vắng mặt trông giống cổng xanh"*,
+đổi đối tượng: **một phép thử đo đúng MỘT thứ, bị đọc thành đo CẢ GÓI.**
+
 Land gate đóng băng mission, rebase/integrate lần cuối, gán version/changelog/manifest và chạy parity
 Windows–Linux. Land sinh bundled test module theo thứ tự tất định, kiểm cả chế độ dev có fragment lẫn topology
 bundle chỉ có module sinh. Bundle không chứa fragment và thiếu bundled module phải fail với lỗi đích danh;

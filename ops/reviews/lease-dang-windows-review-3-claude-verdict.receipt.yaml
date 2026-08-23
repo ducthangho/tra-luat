@@ -133,3 +133,24 @@ verdict_usage_caveats:
     dẫn xuất mới nào (r4 cố ý chỉ chép), nên không có biểu hiện **E** thứ năm. Không bộ đếm nào
     chạm ngưỡng DỪNG. Đây là bằng chứng cho quyết định của người giữ kho ở ngã ba trước: nới trần
     để **chép** một bản vá đã đo thì không tái tạo hình dạng đã đếm bốn lần.
+- id: evidence_url-NEO-COMMIT-KHONG-TRA-DUOC-TU-MASTER
+  noi_dung: >-
+    `evidence_url` của biên nhận này neo commit **a0ab3b88f08b** trên nhánh `ops/pkg-windows`. Commit ấy
+    **KHÔNG tra được từ `master`** (đo: `git merge-base --is-ancestor a0ab3b88f08b origin/master` ⇒ sai)
+    — hồ sơ được **chép** sang master chứ không phải merge, nên nội dung sang được mà **commit công
+    bố thì không**. Xoá nhánh `ops/pkg-windows` là biến đường dẫn ấy thành SHA không tra được, đúng
+    thứ `CLAUDE.md` cảnh báo về `luu-tru/*`. **Mỏ neo BỀN của verdict là `verdict_sha256`
+    (`c98d83b8bf1a00b009f0aaee0d7b5c580b4d2f28abc63dd809ba0326c7a6ed3c`) cộng chính tệp verdict nay đã nằm trên `master`** — nội dung kiểm lại được không cần
+    nhánh. Trước khi xoá `ops/pkg-windows`, tạo tag `luu-tru/*` cho ba commit công bố:
+    `5a4fcc21` · `9729f5f0` · `a0ab3b88`. **Phiên web KHÔNG tạo tag được** — đã đo: đẩy
+    `refs/tags/*` trả 403 do proxy egress tự sinh, không phải GitHub; việc này cần máy người giữ kho.
+- id: CAU-CHI-VI-TRI-MOT-CHIEU-trong-prompt-exec-4-DA-BI-THAY
+  noi_dung: >-
+    `ops/prompts/lease-dang-windows-exec-4-codex-20260822.md` viết *"Hồ sơ ở nhánh
+    `ops/pkg-windows` (chưa vào master)"*. Câu ấy đúng lúc viết và **SAI kể từ khi hồ sơ land lên
+    `master`** — đúng hình dạng `CLAUDE.md` đã ghi: *"Câu mô tả VỊ TRÍ của một artefact phải đúng ở
+    CẢ HAI phía của lần merge"*. Prompt **neo bằng băm** (`prompt_sha256_required` trong lease) nên
+    **KHÔNG được sửa**; mục này là bản thay thế có hiệu lực: **mọi đặc tả, verdict, biên nhận,
+    lease, prompt và handoff của `LEASE-DANG-WINDOWS` nay nằm trên `master`** — đọc thẳng ở đó,
+    không cần fetch nhánh nào. Đo được: hai prompt reviewer (`review-2`, `review-3`) đã viết đúng
+    dạng hai chiều (*"tìm ở `master` trước, chưa thấy thì fetch"*); chỉ `exec-4` còn dạng một chiều.

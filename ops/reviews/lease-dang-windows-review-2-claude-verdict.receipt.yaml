@@ -126,3 +126,14 @@ verdict_usage_caveats:
     `windows-latest` THẬT chỉ **suy** được (`64/64 bỏ qua=8` y hệt bản đúng ⇒ không chân CI nào
     đỏ), chưa chạy Windows thật. `shellcheck` có/vắng trên runner `windows-latest`: **KHÔNG ĐO
     ĐƯỢC**; thứ đo được là dù thế nào `t33` cũng không cho biết.
+- id: evidence_url-NEO-COMMIT-KHONG-TRA-DUOC-TU-MASTER
+  noi_dung: >-
+    `evidence_url` của biên nhận này neo commit **9729f5f0720f** trên nhánh `ops/pkg-windows`. Commit ấy
+    **KHÔNG tra được từ `master`** (đo: `git merge-base --is-ancestor 9729f5f0720f origin/master` ⇒ sai)
+    — hồ sơ được **chép** sang master chứ không phải merge, nên nội dung sang được mà **commit công
+    bố thì không**. Xoá nhánh `ops/pkg-windows` là biến đường dẫn ấy thành SHA không tra được, đúng
+    thứ `CLAUDE.md` cảnh báo về `luu-tru/*`. **Mỏ neo BỀN của verdict là `verdict_sha256`
+    (`e5dd9584d2e01172f71a0308c1d90eb0918d5b971af56cbb664d91438cf3c4a7`) cộng chính tệp verdict nay đã nằm trên `master`** — nội dung kiểm lại được không cần
+    nhánh. Trước khi xoá `ops/pkg-windows`, tạo tag `luu-tru/*` cho ba commit công bố:
+    `5a4fcc21` · `9729f5f0` · `a0ab3b88`. **Phiên web KHÔNG tạo tag được** — đã đo: đẩy
+    `refs/tags/*` trả 403 do proxy egress tự sinh, không phải GitHub; việc này cần máy người giữ kho.

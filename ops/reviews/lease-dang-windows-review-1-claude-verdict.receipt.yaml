@@ -99,3 +99,14 @@ verdict_usage_caveats:
     Review DELTA: KHÔNG rà nội dung `ops/lease_publish.py` (tin phép đo byte-for-byte) và không rà
     YAML ngoài hunk mới. Chưa đo được `shellcheck` có trên runner `windows-latest` hay không.
     Hành vi `t49` ở mức nội dung nhật ký chỉ suy từ ngữ nghĩa `sys.argv` + phản chứng Linux.
+- id: evidence_url-NEO-COMMIT-KHONG-TRA-DUOC-TU-MASTER
+  noi_dung: >-
+    `evidence_url` của biên nhận này neo commit **5a4fcc21de8b** trên nhánh `ops/pkg-windows`. Commit ấy
+    **KHÔNG tra được từ `master`** (đo: `git merge-base --is-ancestor 5a4fcc21de8b origin/master` ⇒ sai)
+    — hồ sơ được **chép** sang master chứ không phải merge, nên nội dung sang được mà **commit công
+    bố thì không**. Xoá nhánh `ops/pkg-windows` là biến đường dẫn ấy thành SHA không tra được, đúng
+    thứ `CLAUDE.md` cảnh báo về `luu-tru/*`. **Mỏ neo BỀN của verdict là `verdict_sha256`
+    (`38b4986dac49c0207cd6c6ccf68e169491065552288169a790c0e7ba49589523`) cộng chính tệp verdict nay đã nằm trên `master`** — nội dung kiểm lại được không cần
+    nhánh. Trước khi xoá `ops/pkg-windows`, tạo tag `luu-tru/*` cho ba commit công bố:
+    `5a4fcc21` · `9729f5f0` · `a0ab3b88`. **Phiên web KHÔNG tạo tag được** — đã đo: đẩy
+    `refs/tags/*` trả 403 do proxy egress tự sinh, không phải GitHub; việc này cần máy người giữ kho.

@@ -19,6 +19,7 @@ Chạy: `python .claude/dev/packet_loop_test.py`
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import platform
@@ -742,13 +743,18 @@ def case_void_giu_dung_hanh_vi_master(c: Ctx):
         _doi(0, rc, e, "begin-attempt")
         rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", ly_do], sd)
         _doi(0, rc, e, f"{ly_do} bị đòi bằng chứng — void-attempt phải giữ đúng hành vi master")
-    # Đo PARSER, KHÔNG đo `--help`: `help=argparse.SUPPRESS` giấu cờ khỏi help mà VẪN
-    # nhận đầu vào — bản trước xanh 231/231 với một cờ M3 còn sống (`n11-chi-kiem-help…`).
-    for co, dt in (("--bang-chung", ["x"]), ("--khong-co-bang-chung", []),
-                   ("--ai-cho-phep", ["x"]), ("--can-cu", ["x"])):
-        rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota", co] + dt, sd)
-        assert rc != 0 and f"unrecognized arguments: {co}".encode() in e, \
-            f"parser CÒN NHẬN {co}: rc={rc} · {e!r}"
+    # Danh sách CHO PHÉP, không phải danh sách CẤM. Vòng 1 khoá `--help`, vòng 2 khoá đúng
+    # BỐN CHÍNH TẢ — cả hai bị lách (`--bang-chung` với SUPPRESS; alias `--evidence-file`).
+    # "distinguishes spelling, not authority": danh sách cấm phải đoán trước mọi cách viết
+    # nên THUA TỪ TRONG THIẾT KẾ. Nạp module và đòi parser chứa ĐÚNG tập cờ hợp lệ —
+    # alias, SUPPRESS, tên chưa ai nghĩ ra đều ĐỎ.
+    import importlib.util as _iu
+    _s = _iu.spec_from_file_location("_n11", c.script); _m = _iu.module_from_spec(_s)
+    _s.loader.exec_module(_m)
+    _sub = next(a for a in _m.build_parser()._actions
+                if isinstance(a, argparse._SubParsersAction))
+    co = {t for a in _sub.choices["void-attempt"]._actions for t in a.option_strings}
+    assert co == {"-h", "--help", "--packet", "--reason"}, f"cờ LẠ trong parser: {co}"
 
 
 def case_void_attempt_allowlist(c: Ctx):
@@ -2626,6 +2632,25 @@ MUTANTS = {
         '    q.add_argument("--reason", required=True, help=f"một trong {LY_DO_VOID}")\n'
         '    q.add_argument("--bang-chung", default=None, help=argparse.SUPPRESS)\n',
         ["void_giu_dung_hanh_vi_master"],
+    ),
+    # Vòng 2 lách được bằng ALIAS, không bằng chính tả cũ — nên phải có mutant của chính
+    # đòn ấy, kẻo chốt allowlist lại thành thứ "nghĩ ra mà không chạy".
+    "mt_them_lai_alias_M3": (
+        '    q.add_argument("--reason", required=True, help=f"một trong {LY_DO_VOID}")\n',
+        '    q.add_argument("--reason", required=True, help=f"một trong {LY_DO_VOID}")\n'
+        '    q.add_argument("--evidence-file", default=None, help=argparse.SUPPRESS)\n',
+        ["void_giu_dung_hanh_vi_master"],
+    ),
+    # N2 là ca chiều BẮT OAN: nó khẳng định `rc=0`, nên CHỈ đột biến SIẾT giết nổi — và mọi
+    # đột biến siết cổng môi trường tất yếu giết cả các ca khác gọi `begin-attempt`.
+    # ĐO: 37/231, và N1 KHÔNG nằm trong đó (`thieu_bat_buoc` kiểm TRƯỚC tuổi). Bán kính 1 là
+    # BẤT KHẢ cho một ca chiều tha — không phải khuyết tật. Lỗi của vòng 1 KHÔNG phải con số
+    # mà là KHAI 1 TRONG KHI CHƯA ĐO; vòng 2 lại xoá nghĩa vụ thay vì thoả nó. `phai_chet`
+    # nói "phải chết", không nói "chỉ mình nó chết".
+    "mt_siet_nguong_tuoi_ve_am_mot": (
+        "NGUONG_TUOI_BANG_CHUNG_GIAY = 3600\n",
+        "NGUONG_TUOI_BANG_CHUNG_GIAY = -1   # đột biến SIẾT\n",
+        ["mt_sach_thi_van_mo_duoc_luot"],
     ),
     "mt_them_lai_doi_bang_chung_o_void": (
         "    if a.reason not in LY_DO_VOID:\n",

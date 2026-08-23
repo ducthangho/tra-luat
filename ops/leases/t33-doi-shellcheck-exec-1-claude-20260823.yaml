@@ -26,7 +26,7 @@ review_class: sensitive
 effective_review_class: sensitive
 
 spec_path: ops/specs/t33-doi-shellcheck-r3.md
-spec_sha256_required: 9d55174de5f54bbf6089c179bf54e3b7f0b0c8174a02ab558f99c3df8583667d
+spec_sha256_required: 78c3ecb40eb8dd7dcf628ef7ea9a372aae5cfbf7a4fcfd25bb4ec7f32fe6ea0d
 spec_ke_thua:
   - {path: ops/specs/t33-doi-shellcheck.md,    sha256: 1405d390ca9376725517d01ef5b8d1abffd6a09d78d2b7206c2f068e7711f4da}
   - {path: ops/specs/t33-doi-shellcheck-r2.md, sha256: b9620d17b86f503b12d93359fb6d3423d29c034c29ab372f40cc5d7089b40e71}

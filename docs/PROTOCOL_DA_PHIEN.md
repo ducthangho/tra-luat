@@ -730,11 +730,14 @@ không* — và mù với mọi mục nằm ngoài tệp ấy. Lease nào khai `
 danh sách tương đương thì mỗi mục phải có phép đo riêng trước khi packet rời hàng đợi; mục không đo được thì
 khai `KHÔNG ĐO ĐƯỢC` chứ không im lặng bỏ qua.
 
-**Quy tắc này hiện có `0` CỔNG THI HÀNH, và câu này ở lại cho tới khi có.** Đo 23-08-2026:
-`rg -l "viec_trong_revision|acceptance_criteria"` trên toàn cây cho **`0` tệp ngoài chính tệp này** — không
-tầng nào ĐỌC hai trường ấy bằng máy. (Đếm theo TỆP KHÁC chứ không theo số hit, vì mỗi lần ai đó sửa đoạn này
-là số hit đổi: bản đầu của chính câu này khai `5` rồi tự làm nó thành `6`.) Đây là quy tắc **normative** cho người vận hành, không phải bảo vệ
-tự động; đừng đọc động từ *"đòi"* / *"phải"* ở trên thành *"đã có máy canh"*. Cổng thi hành thuộc packet kế
+**Quy tắc này hiện có `0` CỔNG THI HÀNH, và câu này ở lại cho tới khi có.** Đo 23-08-2026: hai trường ấy
+**được KHAI BÁO** trong tệp lease (ví dụ `ops/leases/ci-noi-bang-vao-gate-exec-1r2-claude-20260823.yaml`)
+nhưng **không tệp MÃ nào ĐỌC chúng** — chúng là dữ liệu chưa ai cưỡng chế. Phép đo này là **TỪ VỰNG**: một
+reader truy cập trường qua biến sẽ không bị nó thấy, nên đây là *khớp trong phạm vi đo được*, không phải chứng
+minh hình thức. (Mệnh đề phân biệt KHAI BÁO với ĐỌC, **không** đếm "số tệp có nhắc" — cách đếm ấy đã sai HAI
+lần trong một ngày: bản đầu khai `5 hit` rồi tự làm nó thành `6`; bản sau khai `0 tệp khác` rồi một tệp lease
+land lên canonical làm nó thành `1`. Một phép đếm gộp dữ liệu với mã thì trôi theo mọi lần land.)
+Đây là quy tắc **normative** cho người vận hành, không phải bảo vệ tự động; đừng đọc động từ *"đòi"* / *"phải"* ở trên thành *"đã có máy canh"*. Cổng thi hành thuộc packet kế
 nhiệm, Issue + lease riêng. Khai thẳng vì im lặng ở đây sẽ tái tạo ĐÚNG lỗi mà quy tắc này sinh ra để chặn:
 một thứ trông như bảo vệ cả gói trong khi không đo gì.
 

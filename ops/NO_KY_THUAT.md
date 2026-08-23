@@ -1127,20 +1127,22 @@ Máy chưa canh được mục này — chưa có cổng nào kiểm lease dùng
 
 ---
 
-## 20. `ci-phamvi-test-chua-chay-duoc-tren-windows` — nửa đo NGỮ NGHĨA DUYỆT CÂY không được đo trên nền khác
+## 20. `ci-phamvi-test-chua-chay-duoc-tren-windows` — bộ phản chứng chạy 0/7 ca trên Windows, không phải 2/7
 
 **marker:** `ci-phamvi-test-chua-chay-duoc-tren-windows` trong `.github/workflows/ci.yml`
 
-**Đo được:** bước `ci-phamvi selftest (phan chung — cong co rang)` mang
-`if: runner.os != 'Windows'`. Lượt `workflow_dispatch` `32600129148` trên head `33e6f28`:
-bước ấy `success` trên `ubuntu-latest`, **`skipped`** trên `windows-latest`; bước gác cổng
-`ci-phamvi guard` thì `success` trên **cả hai**.
+**Đo được, TÁI LẬP ĐƯỢC trong kho:** bước `ci-phamvi selftest (phan chung — cong co rang)`
+trong `.github/workflows/ci.yml` mang `if: runner.os != 'Windows'`, và điều kiện ấy nằm ở mức
+**BƯỚC** — nên nó bỏ qua **cả bảy** ca trên Windows. Bước gác cổng `ci-phamvi guard` **không**
+mang `if:` nào, nên nó chạy ở mọi nền. Hai câu này đọc thẳng từ tệp, không cần mạng.
 
-> **Ba dòng ngay trên là LỜI KHAI NGOÀI KHO, không phải phép đo tái lập được.** Trạng thái
-> từng bước của một lượt CI sống trên GitHub, không có trong kho — ai đọc mục này từ một bản
-> sao kho (đúng cách §8 cấp cho reviewer) **không kiểm được nó**. Cross-review lượt 2 bắt đúng
-> chỗ này (`run-windows-trong-so-no-khong-tai-lap`). Thứ tái lập được là dòng `if:` trong
-> `.github/workflows/ci.yml`; phần còn lại phải tra thẳng GitHub theo id run ở trên.
+> **CỐ Ý KHÔNG ghim id run hay head vào mục này.** Trạng thái từng bước của một lượt CI sống
+> trên GitHub chứ không trong kho, nên ai đọc mục này từ một bản sao kho **không kiểm được nó**
+> (cross-review lượt 2, `run-windows-trong-so-no-khong-tai-lap`). Bản trước chữa bằng cách khai
+> "đây là lời khai ngoài kho" **rồi vẫn ghim một id run** — mà id ấy thuộc head TRƯỚC commit
+> ghi nó, nên nó cũ ngay khi được viết, và lượt kiểm sau lại chỉ người ta tới một mỏ neo chết.
+> Chữa ở TẦNG: mục này chỉ giữ thứ đọc được từ tệp; trạng thái CI tra ở PR #258, nơi luôn có
+> bảng bằng chứng neo head mới nhất.
 
 **Cái gì bị bỏ lại, nói cho đúng phạm vi:** bộ phản chứng có 7 ca, và chúng **không cùng
 loại**. `t1` `n1` `n2` `n3` đo LOGIC thuần (dẫn xuất từ mã, ba trạng thái, nhóm bịa) — độc

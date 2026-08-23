@@ -419,11 +419,12 @@ jobs:
       # `--kiem-bam` do tren Windows, vi no dan xuat tap loai tru tu manifest dung tren nen
       # dang chay.
       #
-      # NỢ CÓ TÊN: `ci-phamvi-test-chua-chay-duoc-tren-windows`. `n5` (nhom tep thanh thu
-      # muc) va `n6` (symlink van doc lap) do NGU NGHIA DUYET CAY va se khong bao gio chay
-      # tren Windows theo cach nay. Cong van bat duoc neu Windows duyet khac, nhung ta se
-      # khong biet VI SAO. Cung kieu khai no voi `don-nhanh-test-chua-chay-duoc-tren-windows`
-      # o buoc `don-nhanh selftest` phia tren.
+      # NỢ CÓ TÊN: `ci-phamvi-test-chua-chay-duoc-tren-windows`. `if:` cua buoc `_test.py`
+      # nam o muc BUOC, nen tren Windows no bo qua CA BAY ca — 0/7, KHONG phai 2/7. Dung
+      # tron voi bang hai truc phia tren: loai NGU NGHIA chia 5/2, DO PHU CI chia 7/0.
+      # Cong `--kiem-bam` van bat duoc neu Windows duyet cay khac, nhung ta se khong biet
+      # VI SAO. Cung kieu khai no voi `don-nhanh-test-chua-chay-duoc-tren-windows` o buoc
+      # `don-nhanh selftest` phia tren.
       #
       # VI SAO VO DIEU KIEN — va day la cho LECH mot dac ta DA DONG BANG, noi thang.
       # `ops/specs/CI-FASTPATH-THEO-DIFF.md` (sha256 32ba1b32ec9436453f7f8fe3c6f8e4d9a4af6e2ceb4e40bfefd8ffb2917d7580)

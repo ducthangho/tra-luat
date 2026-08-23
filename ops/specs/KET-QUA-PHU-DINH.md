@@ -113,7 +113,8 @@ chính nó"*, nhưng không đòi **mệnh đề biện minh** phải có phép 
 | **M2** | §7: thêm `status: disproven` vào enum, kèm khối bắt buộc khi dùng nó — `disproven: {menh_de, co_che, phan_chung, huong_con_lai[]}`. `phan_chung` phải là **lệnh chạy được**, không phải câu văn | `docs/PROTOCOL_DA_PHIEN.md` |
 | **M3** | §7: `disproven` **KHÔNG** đi kèm `failure.category` — kết quả phủ định không phải thất bại. Khai cả hai ⇒ sai hợp đồng | `docs/PROTOCOL_DA_PHIEN.md` |
 | **M4** | Đặc tả khai `phu_thuoc_ket_qua:` — liệt kê deliverable của packet khác mà **lý lẽ** của nó dựa vào, không chỉ hiện vật nó cần có mặt | `docs/PROTOCOL_DA_PHIEN.md` |
-| **M5** | Handoff mang `status: disproven` được quyền đánh dấu `vo_hieu_hoa: [<packet_id>…]`; đặc tả bị trỏ tới coi như **có cờ**, và cấp lease cho nó phải qua bản sửa đổi mới | `docs/PROTOCOL_DA_PHIEN.md` |
+| **M5** | Handoff mang `status: disproven` được khai `vo_hieu_hoa: [<packet_id>…]`. **Nó là KHUYẾN NGHỊ, không phải hiệu lực**: handoff của executor là **bằng chứng**, không phải nguồn thẩm quyền (`AGENTS.md` §5). Cờ chỉ có hiệu lực chặn lease sau khi **dispatcher xác nhận** — đã đối chiếu `phu_thuoc_ket_qua` khai đúng, đã đọc `phan_chung`, và có quyết định bền ghi lại | `docs/PROTOCOL_DA_PHIEN.md` |
+| **M5b** | `vo_hieu_hoa` trỏ packet **không liên quan** (không nằm trong `phu_thuoc_ket_qua` của bất kỳ bên nào) ⇒ **không chặn được gì**, và phải in ra là bị bỏ qua chứ không im lặng | `docs/PROTOCOL_DA_PHIEN.md` |
 | **M6** | §12: Stable Slice phải đưa **mệnh đề biện minh cho việc tách** vào `nghiem_thu` của chính nó (ca B3) | `docs/PROTOCOL_DA_PHIEN.md` |
 | **M7** | §20 có đúng một dòng cho ADR-0046, kèm cột *"cổng nào ĐỌC luật ấy"* — khai thẳng `0 cổng` nếu chưa có, đừng để trống | `docs/PROTOCOL_DA_PHIEN.md` |
 
@@ -124,6 +125,7 @@ chính nó"*, nhưng không đòi **mệnh đề biện minh** phải có phép 
 | **N1** | `packet_loop.py adr-song --root .` ⇒ rc=0 sau khi thêm ADR-0046 | **đo NỀN trước**: chạy trên `origin/master` sạch, phải rc=0 (đã đo 22-08: *"sạch — 45 ADR, 45 dòng §20"*). Thêm ADR mà quên dòng §20 ⇒ ĐỎ |
 | **N2** | Khối `disproven` của handoff #245 **parse được** và đủ trường | dựng lại khối ấy từ `ops/handoff/ci-bang-phu-thuoc-exec-1-*.md` rồi kiểm; thiếu `phan_chung` ⇒ ĐỎ |
 | **N3** | `disproven` + `failure.category` cùng lúc ⇒ **sai hợp đồng** | ca chiều **BẮT OAN**: `disproven` với `failure.category: null` phải ĐẠT. Giết ca ấy bằng đột biến **siết thêm** (cấm luôn khoá `failure`) |
+| **N3b** | **Một handoff `disproven` KHÔNG tự chặn được lease của packet khác** | ca: handoff khai `vo_hieu_hoa: [PACKET-KHONG-LIEN-QUAN]` ⇒ cấp lease cho packet ấy **vẫn được**, kèm dòng in ra rằng cờ bị bỏ qua. Đột biến cho cờ hiệu lực ngay ⇒ ĐỎ. Không có ca này thì một executor nhầm (hoặc bị chiếm) khoá được cả đồ thị packet |
 | **N4** | `doctrine-scan --root .` ⇒ rc=0 — ADR mới **không** được chép lại doctrine của protocol | đột biến chép nguyên một đoạn §7 vào ADR ⇒ ĐỎ |
 | **N5** | delta so master = 0 cho `packet_loop_test.py` và `lease_publish_test.py` | nền master đo **trong worktree của chính kho** (chép ra thư mục rỗng cho ĐỎ GIẢ) |
 | **N6** | `tl.py --selftest` giữ nguyên N/N | packet không chạm `scripts/`; số lệch ⇒ có thứ ngoài write set bị đụng |
@@ -142,6 +144,11 @@ Sau packet này, **hai** việc mọc ra và **cả hai đều cần quyết đ�
 - **Không đo được một mệnh đề `disproven` có ĐÚNG hay không.** Protocol chỉ đòi khai `phan_chung`
   là lệnh chạy được; nó không chạy hộ. Một kết luận phủ định SAI sẽ chặn oan một hướng đúng —
   và đó là rủi ro **thật** của packet này, phải nói ra chứ không giấu.
+- **M5 đổi `vo_hieu_hoa` thành KHUYẾN NGHỊ, và cái giá của việc ấy là ĐỘ TRỄ.** Một kết luận phủ
+  định **đúng** nay phải chờ dispatcher xác nhận mới chặn được lease — nghĩa là có một cửa sổ trong
+  đó phiên khác vẫn cấp được lease cho packet đã hỏng tiền đề. Đó là **đánh đổi có chủ đích**: cái
+  giá ngược lại (executor tự khoá cả đồ thị packet) nặng hơn, vì nó biến bằng chứng thành thẩm
+  quyền. Rút ngắn cửa sổ là việc của cổng đọc `phu_thuoc_ket_qua`, đã khai ở `hinh_dang_ke_thua`.
 - **Không đo được lý lẽ của một đặc tả có phụ thuộc gì.** `phu_thuoc_ket_qua` do người viết khai;
   quên khai thì cơ chế im lặng — cùng lớp với `nang_tran` (1/121 lease). Vì thế M7 đòi §20 ghi
   thẳng **`0 cổng`** nếu chưa cưỡng chế, để lần sau đếm được nợ thay vì tưởng đã có cổng.

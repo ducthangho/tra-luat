@@ -88,7 +88,9 @@ GitHub nào** (proxy tự sinh), trong khi `api.githubcopilot.com/mcp/` gọi đ
 |---|---|---|
 | **M1** | `review_verdict.py <pr> <sha>` trả **BA** trạng thái: `sach` · `co_finding` · **`chua_review`** | `ops/review_verdict.py` |
 | **M2** | Đọc **cả ba** nguồn: review object · review thread (inline) · **issue comment mang `Reviewed commit:`**. Thiếu nguồn thứ ba là lỗ đã trả giá (B3) | `ops/review_verdict.py` |
-| **M3** | **Neo EXACT SHA.** Verdict của commit khác **không tính**. `Reviewed commit:` viết dạng rút gọn (`a418e68e6a`) nên phép so phải là **tiền tố của SHA đầy đủ**, không phải bằng chuỗi | `ops/review_verdict.py` |
+| **M2b** | **XÁC THỰC TÁC GIẢ trước khi coi một comment là verdict.** Chỉ nhận comment từ **danh sách CHO PHÉP** danh tính reviewer (`chatgpt-codex-connector[bot]`…), đối chiếu **`user.login` + `author_association`**, không đối chiếu thân comment. Tác giả ngoài danh sách ⇒ comment **không phải verdict**, dù chép đúng từng chữ | `ops/review_verdict.py` |
+| **M3** | **Neo EXACT SHA.** Verdict của commit khác **không tính**. `Reviewed commit:` viết dạng rút gọn (`a418e68e6a`) nên phép so là **tiền tố**, không phải bằng chuỗi | `ops/review_verdict.py` |
+| **M3b** | **Tiền tố phải ĐỦ DÀI và PHÂN GIẢI DUY NHẤT.** Đòi độ dài tối thiểu, và `git rev-parse --verify <viết-tắt>^{commit}` phải phân giải về **đúng một** commit. Không phân giải được, hoặc mơ hồ ⇒ `chua_review` | `ops/review_verdict.py` |
 | **M4** | **FAIL-CLOSE**: gọi API hỏng, phân tích hỏng, hoặc có verdict mà **không** neo được SHA ⇒ `chua_review` + mã thoát khác 0. Không bao giờ im lặng trả `sach` | `ops/review_verdict.py` |
 | **M5** | Thread **chưa `is_resolved`** ⇒ `co_finding`, kể cả khi lượt review MỚI NHẤT là sạch. Sạch ở head mới không xoá thread mở ở head cũ | `ops/review_verdict.py` |
 | **M6** | Đồ giả **giữ TRẠNG THÁI**, không diễn kịch bản; mỗi thao tác đọc có phép đo đọc **nhật ký lời gọi**, không chỉ đọc mã thoát | `ops/review_verdict_test.py` |
@@ -104,6 +106,9 @@ GitHub nào** (proxy tự sinh), trong khi `api.githubcopilot.com/mcp/` gọi đ
 | **N4** | Verdict sạch nhưng của **SHA KHÁC** ⇒ `chua_review` | đột biến bỏ phép neo SHA ⇒ ĐỎ. Không có ca này thì công cụ tái tạo bệnh *"reviewed cái gì đó, không phải cái này"* |
 | **N5** | API ném lỗi ⇒ `chua_review` + rc≠0 | đột biến nuốt lỗi thành `sach` ⇒ ĐỎ |
 | **N6** | `Reviewed commit: a418e68e6a` khớp SHA đầy đủ `a418e68e6a6be0…` — chiều **BẮT OAN** | ca chiều-tha; giết bằng đột biến **SIẾT THÊM** (đòi bằng chuỗi tuyệt đối) ⇒ chỉ N6 ĐỎ, N4 vẫn xanh |
+| **N6b** | **Tác giả KHÔNG thuộc danh sách cho phép chép đúng từng chữ một verdict sạch ⇒ `chua_review`** | đột biến bỏ phép kiểm tác giả ⇒ ca ĐỎ. Kèm chiều BẮT OAN: comment THẬT của connector vẫn phải ra `sach`, nên đột biến **siết** danh sách xuống rỗng cũng phải làm N1 ĐỎ |
+| **N6c** | `Reviewed commit: a` (một ký tự) ⇒ `chua_review`, **không** khớp mọi head bắt đầu bằng `a` | đột biến bỏ ngưỡng độ dài ⇒ ĐỎ. Đo được: `'a418e68e…'.startswith('a')` là `True`, nên phép so tiền tố TRẦN nhận nó |
+| **N6d** | Viết tắt phân giải ra **nhiều hơn một** commit ⇒ `chua_review` | đột biến lấy commit đầu tiên thay vì từ chối ⇒ ĐỎ |
 | **N7** | Thread mở + review mới nhất sạch ⇒ vẫn `co_finding` | đột biến chỉ đọc lượt mới nhất ⇒ ĐỎ |
 | **N8** | delta so master = 0 cho `packet_loop_test.py` và `lease_publish_test.py` | nền master đo **trong worktree của chính kho** |
 
@@ -117,6 +122,7 @@ tự động chặn merge sai một chiều thì khoá cứng cả kho.
 
 - **Không đo được reviewer có ĐỌC KỸ hay không.** Công cụ đếm *đã có verdict cho đúng SHA chưa*,
   không đo chất lượng. `sach` nghĩa là *reviewer nói sạch*, không nghĩa là *mã đúng*.
+- **Danh tính reviewer có thể XOAY.** M2b dựng trên tên tài khoản/app, mà tên ấy đổi được: nhà cung cấp đổi slug bot, kho đổi connector. Siết quá thì **từ chối oan chính reviewer thật** — và ca ấy nhìn giống hệt "chưa review". Vì thế danh sách cho phép phải nằm **một chỗ, đặt tên rõ**, và khi không khớp thì thông điệp phải nói **"tác giả X không thuộc danh sách"**, đừng nói chung chung `chua_review`.
 - **Hình dạng verdict của connector là thứ NGOÀI TẦM KIỂM SOÁT.** Bốn dòng B1 đo ngày 22-08-2026;
   connector đổi định dạng thì `Reviewed commit:` có thể biến mất. Vì thế M4 fail-close: không
   nhận dạng được thì `chua_review`, chứ không đoán.

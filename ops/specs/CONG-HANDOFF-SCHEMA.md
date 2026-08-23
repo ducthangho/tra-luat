@@ -104,6 +104,7 @@ Không có nguyên văn `cu → moi` thì người sau không dựng lại đư�
 | **M3** | **Miễn trừ là DANH SÁCH CHO PHÉP ĐÓNG BĂNG**, không phải luật "tệp cũ thì tha": hằng `_MIEN_TRU` liệt kê đúng 10 tên tệp có sẵn lúc land. Không suy theo ngày, không suy theo git log | `ops/handoff_song.py` |
 | **M4** | **BÁNH CÓC**: một ca đòi `_MIEN_TRU` **không lớn hơn 10**. Thêm tên mới vào đó ⇒ ĐỎ. Miễn trừ chỉ được **co lại** | `ops/handoff_song_test.py` |
 | **M5** | `tested_sha` và `head_sha` phải là commit **tra được** (`git cat-file -e`); tra không được ⇒ `khong_doc_duoc`, không phải `dat` | `ops/handoff_song.py` |
+| **M5b** | **`tested_sha` phải BẰNG `head_sha`** sau khi phân giải cả hai về OID đầy đủ. Protocol §7:404 nói thẳng: *"`tested_sha` phải bằng head được đề nghị review"*. Hai commit **có thật nhưng KHÁC nhau** vẫn qua M5, và khi ấy bằng chứng cổng thuộc về một cây khác cây được soi | `ops/handoff_song.py` |
 | **M6** | Hai dòng doctrine: (a) bảng `passed/failed/skipped` phải liệt kê **TÊN** dẫn xuất từ dữ liệu job, và bước neo `runner.os` **bù nhau** chứ không cùng bị bỏ; (b) bảng đột biến phải kèm **nguyên văn** phép thay, neo khớp đúng một lần, trượt thì DỪNG | `CLAUDE.md` |
 | **M7** | Phản chứng cho từng luật + đột biến giết đúng ca của nó | `ops/handoff_song_test.py` |
 
@@ -119,6 +120,7 @@ Mỗi tiêu chí nêu **phép đo làm nó ĐỎ**.
 | **N4** | `hint_provenance` vắng **vẫn ĐẠT** — chiều **BẮT OAN** | ca chiều-tha; giết nó bằng đột biến **SIẾT THÊM** (đưa `hint_provenance` vào tập bắt buộc), và đột biến ấy phải **KHÔNG** làm N1 đỏ |
 | **N5** | Bánh cóc có răng | đột biến thêm một tên vào `_MIEN_TRU` ⇒ chỉ ca M4 ĐỎ |
 | **N6** | `tested_sha` bịa ⇒ ĐỎ | ca đặt `tested_sha` là 40 ký tự hex không phải commit |
+| **N6b** | **Hai commit CÓ THẬT nhưng KHÁC nhau ⇒ ĐỎ** | ca dùng hai commit thật của chính kho; đột biến bỏ phép so bằng ⇒ ĐỎ. **KHÔNG được nới `_MIEN_TRU` để tha ca này** — miễn trừ chỉ dành cho tệp có sẵn lúc land, không dành cho một luật mới thấy khó |
 | **N7** | delta so master = 0 cho `packet_loop_test.py` và `lease_publish_test.py` | nền master đo **trong worktree của chính kho** |
 
 ## `hinh_dang_ke_thua`
@@ -138,5 +140,11 @@ nối trong cùng packet**. Việc nối là slice kế tiếp, và nó gộp đ
   nó cưỡng chế được — bài học *"PHẠM VI TUYÊN BỐ phải bằng phạm vi ĐO ĐƯỢC"*.
 - **Không đo được "handoff có TRUNG THỰC không".** Khối đủ trường vẫn có thể khai số bịa. Cổng
   này chặn *thiếu* và *hỏng*, không chặn *sai*.
+- **M5b sẽ làm ĐỎ chính handoff của `CI-BANG-PHU-THUOC`, và đó là KẾT QUẢ ĐÚNG.** Đo được trên `master`:
+  `head_sha = a418e68e6a…` · `tested_sha = 26856f9cc6…` ⇒ **KHÁC nhau**. Tệp ấy nằm trong `_MIEN_TRU`
+  nên cổng không kêu, nhưng sai lệch là **thật**: head được codex soi là `a418e68`, còn số cổng thì
+  đo trên bản đã merge. Hai cây có `tree` **bằng nhau** (`38f6c02a…`) nên bằng chứng vẫn dùng được —
+  **nhưng cái đúng theo may mắn không phải cái đúng theo hợp đồng.** Sửa nó là việc của một packet
+  chỉnh sửa, KHÔNG phải của packet này, và tuyệt đối không phải bằng cách nới miễn trừ.
 - **Con số 10 của `_MIEN_TRU` đo lúc viết đặc tả** (`master` = `79de656`). Nếu có handoff mới land
   trước packet này thì executor phải ĐO LẠI và khai số thật, không bê con số ở đây.

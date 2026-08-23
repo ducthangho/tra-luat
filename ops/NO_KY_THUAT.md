@@ -1146,7 +1146,21 @@ bước ấy `success` trên `ubuntu-latest`, **`skipped`** trên `windows-lates
 loại**. `t1` `n1` `n2` `n3` đo LOGIC thuần (dẫn xuất từ mã, ba trạng thái, nhóm bịa) — độc
 lập nền — `n4` cũng thuộc nhóm này: nó chỉ thay **biểu thức trả về** của `phan_loai()`, không
 gọi `unlink`/`mkdir`/`os.symlink`. Chỉ `n5` và `n6` đo **ngữ nghĩa duyệt cây**: thư mục trùng
-tên TỆP, và symlink-tới-thư-mục. Đúng **hai** ca ấy là phần không nền nào ngoài Linux đo lại.
+tên TỆP, và symlink-tới-thư-mục.
+
+**Hai trục này ĐỘC LẬP — đừng suy trục nọ ra trục kia:**
+
+| trục | Linux | Windows |
+|---|---|---|
+| loại ngữ nghĩa | `t1 n1 n2 n3 n4` = logic · `n5 n6` = duyệt cây | *(không đổi theo nền)* |
+| **độ phủ CI** | **7/7 chạy** | **0/7 chạy** |
+
+`if: runner.os != 'Windows'` nằm ở mức **BƯỚC**, nên nó bỏ qua **cả bảy** ca trên Windows —
+không phải chỉ hai ca duyệt cây. Bản trước của mục này viết *"đúng hai ca ấy là phần không nền
+nào ngoài Linux đo lại"*: **sai**, và đó là lần **thứ hai** phân loại này sinh sai ngay trong
+lần đi vá phân loại (cross-review lượt 3 bắt). Gốc của cả hai lần là cùng một chỗ lẫn:
+*"logic ĐỘC LẬP nền"* không có nghĩa là *"đã được ĐO trên nền đó"* — đúng họ với bài học
+*"ca có MẶT khác ca có ĐO"* của kho.
 
 Bản đầu của mục này xếp `n4` vào nhóm duyệt cây. Sai, và sai **do chính lần vá** một finding
 về phân loại ở lượt review trước — cross-review lượt 2 xếp nó là `VÁ SINH LỖI MỚI`. Ghi lại vì

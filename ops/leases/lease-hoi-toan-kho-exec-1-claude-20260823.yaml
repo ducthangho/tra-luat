@@ -26,9 +26,27 @@ write_set:
   - ops/lease_publish.py
   - ops/lease_publish_test.py
 write_set_note: >-
-  ĐÚNG hai đường dẫn, không ký tự đại diện. Trần `sensitive` của ADR-0044 là
-  ≤3 tệp / ≤300 dòng thêm; chừa suất thứ ba là CỐ Ý, để lượt vá sau verdict
-  không phải xin mở rộng write set.
+  ĐÚNG hai đường dẫn, không ký tự đại diện. **HAI đường dẫn trên là TOÀN BỘ
+  quyền ghi của lease này** — đường thứ ba BẤT KỲ đều phải có lease sửa đổi,
+  không có ngoại lệ (AGENTS.md L42: "chỉ ghi trong effective write set"; L45:
+  "không tự cấp lease hoặc mở rộng Packet").
+  Trần `sensitive` của ADR-0044 (≤3 tệp / ≤300 dòng thêm) là NGƯỠNG KÍCH THƯỚC,
+  KHÔNG phải giấy phép đường dẫn: nó nói packet này được phép TO tới đâu, không
+  nói nó được ghi vào ĐÂU. Hai trục khác nhau; gộp lại là fail-open.
+  Bản đầu của dòng này viết "chừa suất thứ ba là CỐ Ý, để lượt vá sau verdict
+  không phải xin mở rộng write set" — SAI, và sai theo đúng chiều nguy: nó đọc
+  ra thành uỷ quyền. Cross-review codex bắt (P1, PR #272). Nếu lượt vá sau
+  verdict thật sự cần tệp thứ ba thì DỪNG và xin lease sửa đổi; dừng lại là
+  hành vi ĐÚNG ở đó, không phải trở ngại.
+write_set_khong_ai_cuong_che: >-
+  ĐO 04:52Z 23-08-2026, và đây là lý do dòng trên phải viết cho chặt: KHÔNG
+  tầng nào kiểm diff có nằm trong write set hay không. `grep -c write_set`:
+  `ops/lease_publish.py` = 5 nhưng CẢ NĂM chỉ để suy lớp review
+  (`_tinh_lop_tu_write_set`, dòng 127) — không chỗ nào so diff;
+  `.claude/dev/packet_loop.py` = 0; `.github/workflows/ci.yml` = 0.
+  Nên ranh giới write set hiện được giữ HOÀN TOÀN bằng việc người thi công đọc
+  đúng lease. Đó là nợ đã có tên: Issue #188 `PLAT-X1` (cổng cơ học kiểm giao
+  write set), và PR #187 §7.5 đã đo đúng con số này trước đây.
 
 branch: claude/lease-hoi-toan-kho-exec-1
 branch_ownership: exclusive
@@ -129,4 +147,21 @@ sua_sau_khi_dang:
       comment đính chính riêng trỏ về đây.
     dinh_chinh_comment_id: 5384065633
 
+  - luc_utc: '2026-08-23T04:55:00Z'
+    truong: write_set_note (+ them write_set_khong_ai_cuong_che)
+    sua_gi: >-
+      Bản đăng khai "chừa suất thứ ba là CỐ Ý, để lượt vá sau verdict không
+      phải xin mở rộng write set". Đọc ra thành UỶ QUYỀN một đường dẫn thứ ba,
+      trong khi `write_set` chỉ có HAI. Trần ≤3 tệp của ADR-0044 là ngưỡng
+      KÍCH THƯỚC, không phải giấy phép đường dẫn — hai trục khác nhau.
+    ai_bat: 'cross-review codex, P1 trên PR #272 (reviewed commit 914b7f4bb1)'
+    vi_sao_nghiem_trong: >-
+      Đo được cùng lúc: KHÔNG tầng nào cưỡng chế write set (lease_publish.py
+      chỉ dùng nó suy lớp review; packet_loop.py và ci.yml = 0). Nên câu chữ
+      ấy KHÔNG phải chú thích — nó là mặt kiểm soát DUY NHẤT, và nó chỉ sai
+      hướng. Nợ có tên: Issue #188 `PLAT-X1`.
+    vi_sao_ghi_thay_vi_dang_lai: >-
+      Như lần đính chính trước: `check` trả rc=9 sau `mark`, chốt đúng, không
+      phá. Tệp là nguồn sự thật; bản chiếu nay lệch hai trường, đã nói ở
+      comment đính chính trên PR #272.
 posted_comment_id: 5384038392   # workflow ghi, ĐỪNG sửa tay

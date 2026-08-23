@@ -31,6 +31,7 @@ spec_ke_thua:
   - {path: ops/specs/t33-doi-shellcheck.md,    sha256: 1405d390ca9376725517d01ef5b8d1abffd6a09d78d2b7206c2f068e7711f4da}
   - {path: ops/specs/t33-doi-shellcheck-r2.md, sha256: b9620d17b86f503b12d93359fb6d3423d29c034c29ab372f40cc5d7089b40e71}
 spec_status: dong_bang
+spec_da_len_master: 'PR #288 merged f33c12db — cả r1/r2/r3 tra được từ master, băm kiểm khớp'
 spec_duyet_boi: ducthangho
 spec_note: >-
   r3 KHÔNG đặc tả gì mới. Nó làm đúng việc r2 tự ra lệnh: đo lại trên base thật. Cả ba thứ r2 dặn
@@ -53,9 +54,9 @@ branch: claude/t33-doi-shellcheck-exec-1
 branch_ownership: exclusive
 target_branch_neu_land: master
 
-base_sha: 5561b6b497989447f9185b26abb1bba154564967
-start_from_sha: 5561b6b497989447f9185b26abb1bba154564967
-reviewed_sha_required: 5561b6b497989447f9185b26abb1bba154564967
+base_sha: f33c12db19e7bcc0b18b394635a142c9d45d671d
+start_from_sha: f33c12db19e7bcc0b18b394635a142c9d45d671d
+reviewed_sha_required: f33c12db19e7bcc0b18b394635a142c9d45d671d
 base_ghi_chu: >-
   master lúc cấp. Nếu master đã đi tiếp khi phiên thi công mở, PHẢI đo lại toàn bộ bảng
   `nghiem_thu` của r3 trên base mới — cả 8 ô đều neo vào 5561b6b4. master đã đi 27 commit trong
@@ -89,8 +90,8 @@ recorder_ghi_chu: >-
   thi công. `branch` ở trên dành cho một phiên `claude` MỚI. Ghi thẳng vì nhãn `cross_approved`
   trông y hệt nhau dù khâu thi công có độc lập hay không.
 
-leased_at_utc: '2026-08-23T10:30:00Z'
-lease_expires_at_utc: '2026-08-24T10:30:00Z'
+leased_at_utc: '2026-08-23T19:00:00Z'
+lease_expires_at_utc: '2026-08-24T19:00:00Z'
 run_minutes: 1440
 gia_han_da_cap_truoc: >-
   Người giữ kho cấp quyền gia hạn trước, cùng chỉ thị ở `granted_on_instruction` ("kể cả gia
@@ -171,3 +172,44 @@ viec_cua_luot_nay: >-
   KHÔNG mở rộng `t33` sang workflow khác — đó là Issue độ phủ riêng, và chữa nó cần đụng một mẫu
   `case` lọc tên ref (đường an ninh) ở tệp NGOÀI write set.
   KHÔNG làm N2/N6 của #269.
+
+nang_tran:
+  ai_nang: ducthangho
+  tham_quyen: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+  quyet_dinh_luc: 'direct, in-session, 2026-08-23 — sau khi được trình đủ ba đường'
+  tran_cu: 2
+  tran_moi: 4
+  adr: ADR-0043
+  can_cu: >-
+    4 finding CÒN HIỆU LỰC của cross-review đều nhắm vào MỘT artefact — bản bàn giao
+    `ops/handoff/…` — và artefact ấy ĐÃ ĐƯỢC GỠ khỏi PR #288 ở 589bc03c. Đo phân bố:
+    r2 = 0 finding còn hiệu lực · r3 = 0 · handoff = 4. Tức các vòng review thêm KHÔNG
+    do đặc tả không hội tụ, mà do một artefact PHỤ nay đã loại khỏi phạm vi.
+    Tổng 11 finding qua 4 lượt: 7 đã vá, 4 xử bằng cách gỡ thứ chúng nhắm vào.
+  do_duoc_boi: >-
+    `pull_request_read get_review_comments` trên PR #288, đếm theo `path` và
+    `is_outdated`; cộng `git diff --numstat origin/master...589bc03c` = đúng 2 tệp
+    `ops/specs/t33-doi-shellcheck-r{2,3}.md`.
+  canh_bao: >-
+    Khối này KHÔNG được cổng cưỡng chế. Đo 23-08: `ops/lease_publish.py` có 0 lần nhắc
+    `nang_tran` và 0 cơ chế đếm vòng review, nên lease vẫn `rc=0` dù vượt trần. Đây là
+    `Accepted` mà chưa THI HÀNH — cùng họ ghi nhận ADR-0045 trên PR #275. Sự có mặt của
+    khối này là hiện vật TỰ NGUYỆN, đừng đọc nó thành "cổng đã kiểm".
+
+ghi_de_ADR_0046:
+  dieu: '§3 — người thi hành KHÔNG nên là phiên đã viết đặc tả'
+  trang_thai_ADR: Proposed
+  ai_ghi_de: ducthangho
+  quyet_dinh_luc: 'direct, in-session, 2026-08-23 ("cấp lease và thực hiện luôn đi"), sau khi được trình rõ hệ quả'
+  he_qua_khai_thang: >-
+    Phiên soạn r2/r3 CŨNG là phiên ghi lease và CŨNG là phiên thi công — ba vai gộp làm
+    một. Đó đúng hình dạng đã làm `S2` kêu, và ngược với quyết định "cắt phiên trước khi
+    cấp lease" mà chính chủ kho chốt sáng cùng ngày. Chủ kho ghi đè có lý do nêu rõ.
+  he_qua_cho_nhan_cross_approved: >-
+    Nhãn `cross_approved` của lượt này đứng CHỈ bằng vòng review của `codex` SAU khi thi
+    công. Khâu soạn — cấp — thi công KHÔNG độc lập. Ghi thẳng vì nhãn ấy trông y hệt nhau
+    dù có độc lập hay không, và `#238` đã có tiền lệ nhãn mỏng.
+  phien_soan_da_tu_chay_gi: >-
+    Phiên này tự viết và tự chạy ca `t98` cùng ma trận 8 ô của `r3`. Nên nó là bên KÉM
+    ĐỘC LẬP NHẤT để nghiệm thu chính ca ấy. Reviewer `codex` phải TỰ DỰNG lại `X1`/`X2`
+    và tự chạy `W11`–`W13`, không nhận bảng số trong `r3` làm bằng chứng.

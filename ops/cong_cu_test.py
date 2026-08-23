@@ -173,6 +173,98 @@ def t8_van_tay_cong_cu_co_trong_ho_so():
             bang("ban_thay" in kq, f"thiếu vân tay 'ban_thay': {kq}")
         bang(bc["cong_cu"][0]["ban_thay"].get("mac_dinh") == "1.2.3", f"'ban_thay' sai: {bc}")
 
+# ===== BỘ ĐỘT BIẾN T1..T8 (packet #290 lượt 2) — 1 đột biến/ca, bán kính đo
+# TOÀN suite. Rút gọn từ .claude/dev/packet_loop_test.py (MUTANTS). CÔ LẬP 3
+# HỌ: t1,t2,t3,t4,t7,t8 qua biến SCRIPT (hàm chay()); t5 qua CAI_SH RIÊNG; t6
+# qua GOC. Mỗi đột biến CHỈ patch ĐÚNG một biến — patch cả ba sẽ làm t5 "thấy"
+# mutation của cong_cu.py qua đường gián tiếp (cai_cong_cu.sh tự suy GOC từ
+# BASH_SOURCE rồi gọi cong_cu.py TRONG CÙNG CÂY), trộn lẫn hai họ lẽ ra tách.
+
+_GOC_THAT = GOC  # snapshot bất biến, đọc nguồn LUÔN từ đây kể cả khi GOC bị patch
+
+def _dung_cay_dot_bien(ten, tep, tim, thay, phu_thuoc=()):
+    # Bản mutate + phụ thuộc vào THƯ MỤC TẠM RIÊNG (tên theo `ten` ⇒ .pyc không
+    # đụng độ, CLAUDE.md "bài học lớp chạy được ở đây"). Không đụng tệp thật.
+    than = (_GOC_THAT / tep).read_text(encoding="utf-8")
+    if tim not in than:
+        raise AssertionError(f"đột biến '{ten}': không thấy mỏ neo {tim!r} trong {tep}")
+    cay = Path(tempfile.mkdtemp(prefix=f"dotbien_{ten}_"))
+    dich = cay / tep
+    dich.parent.mkdir(parents=True, exist_ok=True)
+    dich.write_text(than.replace(tim, thay, 1), encoding="utf-8", newline="\n")
+    for p in phu_thuoc:
+        nguon, d2 = _GOC_THAT / p, cay / p
+        d2.parent.mkdir(parents=True, exist_ok=True)
+        (shutil.copytree if nguon.is_dir() else shutil.copy2)(nguon, d2)
+    if tep.endswith(".sh"):
+        dich.chmod(0o755)
+    return cay, dich
+
+_PHU = ("ops/cong_cu.yaml", "ops/canary/actionlint_shellcheck.yml")
+
+# ten_dot_bien -> (tep_muc_tieu, tim, thay, bien_toan_cuc_can_patch, phu_thuoc, ten_ca_dich)
+DOT_BIEN = {
+    "t1_rc_gop": ("ops/cong_cu.py",
+        "RC = {DAT: 0, DO: 2, KHONG_DO_DUOC: 3}\n",
+        "RC = {DAT: 0, DO: 2, KHONG_DO_DUOC: 0}  # đột biến: gộp\n",
+        "SCRIPT", _PHU, "t1_thieu_bat_buoc_khac_ma_voi_do"),
+    "t2_go_canary": ("ops/cong_cu.py",
+        "                canary_kq.append(kiem_tra_canary(cn, theo_ten, thu_muc_goc or GOC))\n",
+        "                pass  # đột biến: gỡ lời gọi kiem_tra_canary\n",
+        "SCRIPT", _PHU, "t2_canary_thieu_shellcheck_phai_SUY_GIAM"),
+    "t3_bao_dong_gia": ("ops/cong_cu.py",
+        '    return {**goc, "trang_thai": DAT, "chi_tiet": "dat"}\n',
+        '    return {**goc, "trang_thai": DO, "chi_tiet": "dat"}  # đột biến\n',
+        "SCRIPT", _PHU, "t3_du_cong_cu_dung_ban_khong_canh_bao_thua"),
+    "t4_mat_ban_mong_doi": ("ops/cong_cu.py",
+        '        return {**goc, "trang_thai": DO, "chi_tiet": f"sai ban: mong \'{ban_ghim}\', thay {ban_thay}"}\n',
+        '        return {"ten": ten, "bat_buoc": bat_buoc, "ban_thay": ban_thay,\n'
+        '                "trang_thai": DO, "chi_tiet": f"sai ban, thay {ban_thay}"}  # đột biến\n',
+        "SCRIPT", _PHU, "t4_sai_ban_phai_neu_ro_ban_mong_doi_va_ban_thay"),
+    "t5_thoat_som": ("ops/cai_cong_cu.sh",
+        '[ -n "$TEN" ] || { echo "cai_cong_cu: thieu ten cong cu (vi du: actionlint)" >&2; exit 2; }\n',
+        '[ -n "$TEN" ] || { echo "cai_cong_cu: thieu ten cong cu (vi du: actionlint)" >&2; exit 2; }\n'
+        'command -v "$TEN" >/dev/null 2>&1 && exit 0  # đột biến: thoát sớm\n',
+        "CAI_SH", ("ops/cong_cu.py",) + _PHU, "t5_cai_cong_cu_khong_thoat_som_khi_da_co_tren_PATH"),
+    "t6_ten_buoc_trung_tu_khoa": (".github/workflows/ci.yml",
+        "      - name: eol-policy selftest\n",
+        "      - name: eol-policy selftest tl selftest\n",
+        "GOC", (), "t6_ci_kiem_ban_ke_truoc_moi_test_nang"),
+    "t7_bo_luat_2_duong": ("ops/cong_cu.py",
+        "    if len(ban_thay) > 1 and len(khac_nhau) > 1:\n",
+        "    if False:  # đột biến: bỏ luật hai đường khác bản\n",
+        "SCRIPT", _PHU, "t7_hai_duong_goi_khac_ban_phai_bao_khong_im"),
+    "t8_mat_field_ten": ("ops/cong_cu.py",
+        '    goc = {"ten": ten, "bat_buoc": bat_buoc, "ban_ghim": ban_ghim, "ban_thay": ban_thay}\n',
+        '    goc = {"bat_buoc": bat_buoc, "ban_ghim": ban_ghim, "ban_thay": ban_thay}  # đột biến\n',
+        "SCRIPT", _PHU, "t8_van_tay_cong_cu_co_trong_ho_so"),
+}
+
+def _chay_1_ca(fn):
+    # Trả (trạng_thái, chi_tiết): qua | bo_qua (thiếu môi trường, KHÔNG tính
+    # là chết) | chet (ca đích PHẢI rơi vào đây).
+    try:
+        fn()
+        return "qua", None
+    except BoQuaMoiTruong as ex:
+        return "bo_qua", str(ex)
+    except AssertionError as ex:
+        return "chet", str(ex)
+    except Exception as ex:  # noqa: BLE001 — chết dưới đột biến là dữ liệu đo
+        return "chet", f"{type(ex).__name__}: {ex}"
+
+def _do_ban_kinh(ten_dot_bien):
+    tep, tim, thay, bp, phu_thuoc, ca_dich = DOT_BIEN[ten_dot_bien]
+    cay, dich = _dung_cay_dot_bien(ten_dot_bien, tep, tim, thay, phu_thuoc)
+    g, cu = globals(), globals()[bp]
+    g[bp] = cay if bp == "GOC" else dich
+    try:
+        return {fn.__name__: _chay_1_ca(fn) for fn in CA}, ca_dich
+    finally:
+        g[bp] = cu
+        shutil.rmtree(cay, ignore_errors=True)
+
+
 def main() -> int:
     qua, hong, bo_qua = 0, [], []
     for fn in CA:
@@ -190,7 +282,34 @@ def main() -> int:
     for ten, ly in hong:
         print(f"  ĐỎ  {ten}: {ly}")
     print(f"\ncong_cu_test: {qua}/{len(CA) - len(bo_qua)} đạt; tổng={len(CA)}, bỏ qua={len(bo_qua)}")
-    return 1 if hong else 0
+
+    loi_db = 0
+    print(f"\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca t1..t8 đúng một):")
+    for ten_db, cfg in DOT_BIEN.items():
+        ca_dich = cfg[-1]
+        try:
+            ket, _ = _do_ban_kinh(ten_db)
+        except AssertionError as ex:
+            print(f"  ĐỎ  {ten_db}: {ex}")
+            loi_db += 1
+            continue
+        tt_dich = ket[ca_dich][0]
+        chet = sorted(t for t, (tt, _) in ket.items() if tt == "chet")
+        oan = [t for t in chet if t != ca_dich]
+        bk = f"{len(chet)}/{len(CA)}"
+        if tt_dich == "bo_qua":
+            print(f"  KHÔNG_ĐO_ĐƯỢC {ten_db}: đích '{ca_dich}' bị BỎ QUA — {ket[ca_dich][1]}")
+            loi_db += 1
+        elif tt_dich != "chet":
+            print(f"  ĐỎ  {ten_db}: đích '{ca_dich}' vẫn XANH ⇒ đột biến không giết được gì")
+            loi_db += 1
+        elif oan:
+            print(f"  ĐỎ  {ten_db}: giết THÊM {oan} ngoài đích '{ca_dich}' (bán kính {bk}) ⇒ trói nhầm thứ")
+            loi_db += 1
+        else:
+            print(f"  ok  {ten_db} → giết đúng '{ca_dich}' · bán kính {bk}")
+    print(f"\nSỐ LIỆU: ca={len(CA)} · đột biến={len(DOT_BIEN)} · lỗi đột biến={loi_db}")
+    return 1 if (hong or loi_db) else 0
 
 if __name__ == "__main__":
     sys.exit(main())

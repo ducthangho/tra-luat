@@ -96,15 +96,41 @@ Cách nói đúng: `(a)` **hợp lệ** nếu người giữ kho **chấp nhận
 đó là thẩm quyền của chủ kho (`§2`). Cái không được phép là gọi việc chấp nhận ấy là *"đã đo bằng
 không"*. Chỉ `(b)` mới cho bằng chứng chấm dứt.
 
-### `bo_dem_A` — KHÔNG tự tăng, người giữ kho quyết
+### `bo_dem_A` — **A = 8. `S2` ĐÃ KÊU.**
 
-Biểu hiện vừa nêu là **hình dạng A**. Bộ đếm đang ở **7**; **8 là ngưỡng DỪNG đã đăng ký** (`S2`).
-`#269` chốt rõ: *"Phiên điều phối **không tự tăng** — người giữ kho quyết."* Nên tệp này **ghi biểu
-hiện, không ghi con số mới**, và `S2` giữ nguyên `A = 7` cho tới khi có quyết định.
+Biểu hiện vừa nêu là **hình dạng A**. `#269` chốt rõ: *"Phiên điều phối **không tự tăng** — người giữ
+kho quyết."* Đã trình, và người giữ kho quyết **in-session 23-08-2026: TĂNG lên 8**.
 
-Dữ kiện để quyết, cả hai đo được: lần này **reviewer ngoài** bắt (không phải tự phát hiện), và câu
-sai **đã được dùng làm căn cứ cho một quyết định cấp quyền ghi** — khác lần ở `#270`, nơi bản vá là
-một chữ và không chống đỡ thẩm quyền nào.
+```
+A = 7  ->  A = 8        B = 2   C = 1   D = 3   E = 4   F = 2
+```
+
+**`S2` là điều kiện DỪNG đã đăng ký, và nó vừa kêu lần đầu tiên.** Ghi thẳng ra đây thay vì để nó
+trôi, vì đây là lần đầu một chốt dừng của bộ đếm hình dạng thực sự kích hoạt trong kho.
+
+Hai dữ kiện làm nên quyết định, cả hai đo được, và cả hai khác lần ở `#270` (nơi người giữ kho chọn
+GIỮ 7):
+
+| | `#270` | lần này |
+|---|---|---|
+| ai bắt | phiên **tự** phát hiện | **reviewer ngoài** (codex, PR #288) |
+| câu sai chống đỡ gì | không chống đỡ thẩm quyền nào; bản vá là một chữ | **chống đỡ một quyết định CẤP QUYỀN GHI** |
+
+Ý nghĩa của `S2`, đọc từ `#269`: bộ đếm tồn tại *"để buộc hỏi «có nên làm việc này nữa không»"* —
+tức nó dừng để **XÉT LẠI KIẾN TRÚC**, không phải để hỏi *"vá thế nào"*. `CLAUDE.md` nói cùng điều:
+*"cùng một hình dạng lặp ba lần trở lên thì câu hỏi đúng là «có nên làm việc này không»"*.
+
+**Câu hỏi kiến trúc mà `S2` đang đặt ra, nêu thẳng cho phiên sau:** hình dạng lặp lại ở đây không
+phải *"một câu viết ẩu"* mà là **một phiên tự viết đặc tả rồi tự thẩm định lời khai của chính nó**.
+Ba biểu hiện gần nhất — `#270`, `P1` của PR #288, và cả `P2` — đều sinh ra trong artefact do **một
+phiên** vừa soạn vừa tự kiểm. `ADR-0046` §3 đã nêu đúng hướng chữa (*cắt phiên ở biên packet*) nhưng
+nó mới `Proposed`, và §3 chỉ cắt giữa **soạn spec** và **thi công** — **không** cắt giữa *soạn* và
+*tự thẩm định*. Đó là khoảng trống mà ba biểu hiện này rơi vào.
+
+**Trạng thái thi công dưới `S2`:** xem `dieu_kien_dung` bên dưới. Người giữ kho đã cho biết lập
+trường trên trục `(a)`/`(b)` (chấp nhận rủi ro còn lại — xem §trên), nhưng lập trường ấy trả lời
+*"nếu đi tiếp thì đi đường nào"*, **không** tự nó trả lời *"có đi tiếp không"*. Hai câu khác nhau, và
+`S2` hỏi câu thứ hai. Phiên soạn tệp này **không tự trả lời** câu ấy.
 
 ---
 
@@ -224,6 +250,34 @@ r3 làm rõ thêm một tầng:
 khác. Rủi ro cross-provider mỏng mà r2 khai **vẫn còn nguyên** và không được coi là đã xử.
 
 ---
+
+## `dieu_kien_dung` — thay bảng của r2 ở ĐÚNG một dòng
+
+Bảng `S1`–`S7` của r2 giữ nguyên, cộng `S8` mà r3 thêm. **Đổi trạng thái hai dòng:**
+
+| # | điều kiện | trạng thái, đo 23-08-2026 |
+|---|---|---|
+| **S1** | `#275` chưa merge ⇒ không cấp lease | **ĐÃ TẮT** — merged `09:21:59Z`, `#244` closed `completed` `09:45:30Z` |
+| **S2** | Bộ đếm hình dạng `A` chạm **8** | **ĐANG KÊU** — người giữ kho tăng 7 → 8 in-session 23-08. Xem §`bo_dem_A` |
+| S3 | `E` chạm 5 | `E = 4`, chưa kêu |
+| S4 | `numstat` vượt 120 | chưa đo trên head thi công |
+| S5 | số nào của `W11`–`W13` lệch bảng r3 | chưa chạy |
+| S6 | cần đường dẫn thứ ba | `write_set` đúng 2 |
+| S7 | lượt vá cần đụng `.github/workflows/**` | ⇒ Issue độ phủ, không phải packet này |
+| S8 | master đã đi tiếp so `base_sha` mà chưa đo lại `nghiem_thu` | `base_sha` = `5561b6b4` = master lúc đo |
+
+**`S2` đang kêu, và một chốt dừng đang kêu thì THI CÔNG KHÔNG ĐƯỢC BẮT ĐẦU** cho tới khi người giữ
+kho trả lời câu mà `S2` đặt ra (*"có nên làm việc này nữa không"* — xem §`bo_dem_A`).
+
+Ghi cho rõ vì ở đây có **hai trục dễ lẫn**, và lẫn chúng là cách một chốt dừng bị vô hiệu trong im
+lặng:
+
+- **Trục ĐƯỜNG ĐI** — `(a)` hay `(b)` cho năm lease đã tiêu. Người giữ kho đã chốt: **`(a)`, chấp
+  nhận rủi ro còn lại, có ghi**. Đã ghi vào lease bằng đúng chữ ấy.
+- **Trục CÓ ĐI KHÔNG** — `S2`. **Chưa có câu trả lời.**
+
+Lập trường trên trục thứ nhất **không** tự nó trả lời trục thứ hai. Lease đã soạn xong và qua cổng
+(`rc=0`), nhưng **chưa đẩy**, và không được đẩy tới khi trục thứ hai có câu trả lời.
 
 ## Neo — băm đo trên `master = 5561b6b4`, 10:0xZ 23-08-2026
 

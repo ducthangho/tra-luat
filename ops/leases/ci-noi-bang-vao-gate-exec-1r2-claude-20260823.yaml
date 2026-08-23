@@ -1,0 +1,60 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 254
+packet_id: CI-NOI-BANG-VAO-GATE
+phase_key: M7
+revision: 2
+generation: 1
+lease_id: ci-noi-bang-vao-gate-exec-1r2-claude-20260823
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+assurance_target: cross_approved
+access: read-write
+write_set:
+  - .github/workflows/ci.yml
+  - ops/NO_KY_THUAT.md
+branch: claude/ci-bang-phu-thuoc-handoff-vum08x
+branch_ownership: exclusive
+target_branch_neu_land: master
+reviewed_sha_required: 33e6f28ad8eb0894433b7f0d7f35fd2813664055
+base_sha: 647cfead5381ab1e42797bdf10a0342a4e6619c7
+start_from_sha: 33e6f28ad8eb0894433b7f0d7f35fd2813664055
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-23 ("Cap revision 2 cho packet CI-NOI-BANG-VAO-GATE (#254)") — sau khi cross-review luot 1 (codex) tra verdict blocked voi P1 no-windows-ne-cong-so-no'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuoc chu kho'
+leased_at_utc: '2026-08-23T00:38:36Z'
+lease_expires_at_utc: '2026-08-24T00:38:36Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 1
+attempts_limit: 3
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+thay_the_lease: ci-noi-bang-vao-gate-exec-1-claude-20260822
+ly_do_revision: >-
+  Cross-review luot 1 (codex, verdict blocked) tim P1 `no-windows-ne-cong-so-no`: marker
+  trong ci.yml viet ASCII khong dau (`NO CO TEN`) nen ne matcher chuan
+  `^\s*#\s*NỢ CÓ TÊN`, khien `t42` khong doi khoan no phai co muc trong so no.
+  Executor tai dan xuat tren ban sao: nen 87/87 rc=0; doi marker sang dang chuan => 86/87 rc=1.
+  Ban va dung DOI them `ops/NO_KY_THUAT.md`, tuc mo rong write set — dieu kien DUNG cua
+  lease r1. Revision nay cap dung quyen do.
+  Kem: sua review_class tu `systemic` (khai thap mot bac) sang `sensitive` va len schema_version 2
+  de cong `_kiem_lop_review` (#248) CUONG CHE thay vi chi canh bao.
+viec_trong_revision:
+  - 'Sua marker trong ci.yml ve dang chuan CO DAU.'
+  - 'Them muc so no `ci-phamvi-test-chua-chay-duoc-tren-windows` vao ops/NO_KY_THUAT.md kem backlink.'
+  - 'P3: tach loi khai "rang la logic" theo nen — 4 ca logic thuan vs 3 ca cham duyet cay.'
+  - 'P3: bo so thoi gian tuyet doi khoi chu thich workflow.'
+  - 'Sua cau dem lease thanh "0 lease CANH TRANH ngoai lease hien tai".'
+dieu_kien_dung:
+  - 'Mo rong write set qua ngoai HAI duong dan da khai — doi revision moi.'
+  - 'Go marker de cong het do — do la xoa mot khoan no THAT de mua cong xanh.'
+  - 'Lam cong tac fast-path theo diff — VE TAP DOC KHONG TON TAI, can CI-FASTPATH-THEO-DIFF-r2.'
+  - 'Sua `.github/checks/ci_phamvi*.py` — thuoc write set cua lease #245, khong phai lease nay.'
+posted_comment_id: 5383416335   # workflow ghi, ĐỪNG sửa tay

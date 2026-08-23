@@ -21249,10 +21249,22 @@ def run() -> int:
         # do người khác viết sau khi vấp cùng chỗ. Manifest trả lời "gói có đổi không"; ca NÀY mới trả
         # lời "số docs có đổi không". Cổng khác nhau trả lời câu hỏi khác nhau — và đọc một cổng rồi
         # suy sang cổng kia là lỗi, kể cả khi bài học ấy đã nằm sẵn ngay trong tệp mình đang sửa.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 69 == 249
+        # KÊ KHAI SLOT (PR #252 — mã hoá bài học đo lường thành luật): 69 → **70** Markdown dưới
+        # `docs/`. Thêm ĐÚNG MỘT tệp dev-side/ngoài gói:
+        #   + `docs/adr/0046-phien-tac-gia-xuyen-suot-reviewer-moi-moi-luot.md`
+        # Ba tệp còn lại của PR ấy KHÔNG ăn khe: `docs/PROTOCOL_DA_PHIEN.md` đã có sẵn (sửa, không
+        # thêm), còn `CLAUDE.md` và `ops/NO_KY_THUAT.md` nằm ngoài `docs/` nên ratchet này không đếm.
+        # Package giữ **180** (không tệp runtime nào được thêm) ⇒ trần 200 không nhúc nhích, còn 20 khe;
+        # cây thật = 180 + 70 = 250.
+        # LẠI TRẢ GIÁ ĐÚNG NẾP "ĐÃ TRẢ GIÁ" ghi ở trên, lần thứ BA trong cùng ca này: phiên #252 chạy
+        # `doctrine-scan` + `adr-song` + `doc-claims-check --strict` — cả ba XANH — rồi kết luận đủ cổng.
+        # Không cổng nào trong ba cái đó ghi CON SỐ docs; chỗ ghi là đúng đây, và nó chỉ đỏ ở
+        # `tl selftest`. Nếp đúng: THÊM TỆP dưới `docs/` ⇒ chạy `tl selftest` TRƯỚC khi đẩy, đừng suy
+        # từ ba cổng kia.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 70 == 250
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 69
+        ok4 = (len(tren_dia) == 70
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

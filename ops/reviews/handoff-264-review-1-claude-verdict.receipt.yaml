@@ -50,8 +50,8 @@ verdict_sha256: f87079e44388534547ffd7b4209d0727d3956390f8904e3cc174fdfdc6db2b7a
 verdict_bytes: 17648
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/blob/claude/ho-so-review-264/ops/reviews/handoff-264-review-1-claude-verdict.md
-evidence_url_ghi_chu: 'ĐIỀN Ở COMMIT SAU — một commit không chứa được băm của chính nó; `t26` đòi trường này trong CÙNG commit.'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/0fdd70b9d6e6b6b143ac54591c98178f2ddaf613/ops/reviews/handoff-264-review-1-claude-verdict.md
+evidence_url_ghi_chu: 'ĐÃ GHIM theo commit `0fdd70b9` — commit ĐẦU TIÊN chứa tệp verdict. Hai bước vì một commit không chứa được băm của chính nó; `t26` chỉ kiểm HÌNH DẠNG nên URL nhánh cũng qua, mà nhánh là thứ bị xoá.'
 
 cross_provider: false
 assurance_dat: null

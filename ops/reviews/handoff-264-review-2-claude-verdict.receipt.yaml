@@ -47,8 +47,8 @@ verdict_sha256: 92769c072fc19ecf69dbc13a5874d004d464864ccfa6d351139d42594381d064
 verdict_bytes: 14673
 evidence_channel: repo_file
 authoritative_source: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/blob/claude/ho-so-review-264/ops/reviews/handoff-264-review-2-claude-verdict.md
-evidence_url_ghi_chu: 'ĐIỀN Ở COMMIT SAU — hai bước, như mọi biên nhận trước.'
+evidence_url: https://github.com/ducthangho/tra-luat/blob/0fdd70b9d6e6b6b143ac54591c98178f2ddaf613/ops/reviews/handoff-264-review-2-claude-verdict.md
+evidence_url_ghi_chu: 'ĐÃ GHIM theo commit `0fdd70b9` — commit ĐẦU TIÊN chứa tệp verdict.'
 
 cross_provider: false
 assurance_dat: null

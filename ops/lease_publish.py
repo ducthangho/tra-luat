@@ -46,6 +46,8 @@ RC_NEO = 6
 RC_NOI_DUNG = 8
 RC_DA_DANG = 9
 RC_LOP = 10
+RC_DANG_GIU = 11
+RC_KHONG_XAC_DINH = 12
 
 _THU_TU_LOP = {"routine": 0, "systemic": 1, "sensitive": 2}
 
@@ -64,6 +66,10 @@ _BANG_LOP = (
 
 def GOI_GH(*doi_so):
     return subprocess.run(["gh", "api", *doi_so], capture_output=True, text=True)
+
+
+def GOI_GIT(*doi_so, cwd=None):
+    return subprocess.run(["git", *doi_so], cwd=cwd, capture_output=True, text=True)
 
 
 # Cùng danh sách với `.claude/dev/packet_loop.py`. Hai chỗ cưỡng chế CÙNG một luật
@@ -222,6 +228,102 @@ def _doc_han(chuoi) -> datetime:
         # lease lệch 26 giờ thì cái hạn chỉ còn là trang trí.
         raise Chan(RC_NOI_DUNG, f"lease_expires_at_utc phải kèm múi giờ (thêm 'Z'): {s!r}")
     return d.astimezone(timezone.utc)
+
+
+def _git(goc: Path, *doi_so) -> str:
+    try:
+        p = GOI_GIT(*doi_so, cwd=goc)
+    except OSError as e:
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: không gọi được git: {e}") from None
+    if p.returncode != 0:
+        ly = (p.stderr or p.stdout or "không có chẩn đoán").strip().splitlines()[0][:200]
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: git {' '.join(doi_so)} rc={p.returncode}: {ly}")
+    return p.stdout
+
+
+def _ten_nhanh_may_chu(goc: Path) -> set[str]:
+    out = _git(goc, "ls-remote", "--heads", "origin")
+    ket_qua = set()
+    for dong in out.splitlines():
+        cot = dong.split()
+        if len(cot) != 2 or not cot[1].startswith("refs/heads/"):
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: ls-remote có dòng hỏng: {dong!r}")
+        ket_qua.add(cot[1][len("refs/heads/"):])
+    return ket_qua
+
+
+def _cac_ref_cuc_bo(goc: Path) -> tuple[set[str], list[str]]:
+    out = _git(goc, "for-each-ref", "--format=%(refname)", "refs/heads", "refs/remotes")
+    ten_nhanh, refs = set(), []
+    for ref in out.splitlines():
+        ref = ref.strip()
+        if not ref or ref.endswith("/HEAD"):
+            continue
+        refs.append(ref)
+        if ref.startswith("refs/heads/"):
+            ten_nhanh.add(ref[len("refs/heads/"):])
+        elif ref.startswith("refs/remotes/origin/"):
+            ten_nhanh.add(ref[len("refs/remotes/origin/"):])
+    return ten_nhanh, refs
+
+
+def _quet_lease_toan_kho(goc: Path, *, doi_chieu_ref=True) -> list[dict]:
+    """Đọc mỗi cặp (blob, đường dẫn) lease đúng một lần trên mọi ref cục bộ."""
+    ten_cuc_bo, refs = _cac_ref_cuc_bo(goc)
+    if doi_chieu_ref:
+        thieu = _ten_nhanh_may_chu(goc) - ten_cuc_bo
+        if thieu:
+            raise Chan(RC_KHONG_XAC_DINH,
+                       "KHÔNG_XÁC_ĐỊNH: cache thiếu nhánh máy chủ: " + ", ".join(sorted(thieu)))
+    da_doc, ket_qua = set(), []
+    try:
+        import yaml
+    except ImportError:
+        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: thiếu PyYAML") from None
+    for ref in refs:
+        out = _git(goc, "ls-tree", "-r", ref, "--", "ops/leases")
+        for dong in out.splitlines():
+            try:
+                meta, duong = dong.split("\t", 1)
+                _, loai, blob = meta.split()
+            except ValueError:
+                raise Chan(RC_KHONG_XAC_DINH,
+                           f"KHÔNG_XÁC_ĐỊNH: ls-tree có dòng hỏng: {dong!r}") from None
+            if loai != "blob" or not duong.endswith((".yaml", ".yml")):
+                continue
+            khoa = (blob, duong)
+            if khoa in da_doc:
+                continue
+            da_doc.add(khoa)
+            try:
+                lease = yaml.safe_load(_git(goc, "cat-file", "-p", blob))
+            except Exception as e:
+                raise Chan(RC_KHONG_XAC_DINH,
+                           f"KHÔNG_XÁC_ĐỊNH: YAML hỏng tại {ref}:{duong}: {e}") from None
+            if not isinstance(lease, dict):
+                raise Chan(RC_KHONG_XAC_DINH,
+                           f"KHÔNG_XÁC_ĐỊNH: lease không phải ánh xạ tại {ref}:{duong}")
+            ket_qua.append({"lease": lease, "blob": blob, "path": duong, "ref": ref})
+    return ket_qua
+
+
+def _lease_cham_duong(lease: dict, duong: str) -> bool:
+    write_set = lease.get("write_set")
+    return isinstance(write_set, list) and any(
+        isinstance(x, str) and x.strip().removeprefix("planned:") == duong
+        for x in write_set)
+
+
+def _phan_loai_lease(lease: dict, bay_gio=None) -> str:
+    try:
+        han = _doc_han(lease.get("lease_expires_at_utc"))
+    except Chan as e:
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {e.thong_diep}") from None
+    bay_gio = bay_gio or datetime.now(timezone.utc)
+    return "HẾT_HẠN" if han <= bay_gio else "CÒN_HẠN"
 
 
 def _doc_gh(mo_ta: str, *doi_so):
@@ -391,6 +493,31 @@ def _kiem_neo_prompt(lease: dict, tep: Path, goc) -> str:
     return thuc
 
 
+def _kiem_dau_toan_kho(lease: dict, tep=None, goc=None) -> None:
+    if not tep:
+        return
+    root = _goc_kho(Path(tep), goc)
+    if not (root / ".git").exists():
+        return
+    try:
+        Path(tep).resolve().relative_to(root)
+    except ValueError:
+        return  # fixture/bản sao rời, không phải tệp lease trong kho đang quét
+    try:
+        p = GOI_GIT("rev-parse", "--git-dir", cwd=root)
+    except OSError:
+        return
+    if p.returncode != 0:
+        return
+    lease_id = str(lease.get("lease_id") or "")
+    for muc in _quet_lease_toan_kho(root, doi_chieu_ref=False):
+        ban = muc["lease"]
+        if str(ban.get("lease_id") or "") == lease_id and ban.get("posted_comment_id"):
+            raise Chan(RC_DA_DANG,
+                       f"lease {lease_id!r} đã đăng (comment {ban['posted_comment_id']}) "
+                       f"trên {muc['ref']}:{muc['path']} — bỏ qua")
+
+
 def kiem(lease: dict, tep=None, goc=None) -> tuple:
     """Kiểm thuần và trả `(lease, băm prompt)`; ném `Chan` nếu không hợp lệ.
 
@@ -405,6 +532,7 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
         raise Chan(RC_DA_DANG,
                    f"lease {lease.get('lease_id')!r} đã đăng "
                    f"(comment {lease['posted_comment_id']}) — bỏ qua")
+    _kiem_dau_toan_kho(lease, tep, goc)
     thieu = [k for k in BAT_BUOC if lease.get(k) in (None, "")]
     if thieu:
         raise Chan(RC_NOI_DUNG, f"thiếu trường bắt buộc: {', '.join(thieu)}")
@@ -541,6 +669,25 @@ def lenh_mark(a) -> int:
     return RC_OK
 
 
+def lenh_ai_dang_giu(a) -> int:
+    root = Path(a.goc or ".").resolve()
+    cac_lease = _quet_lease_toan_kho(root)
+    nguoi_giu = []
+    for muc in cac_lease:
+        lease = muc["lease"]
+        if not _lease_cham_duong(lease, a.duong_dan):
+            continue
+        trang_thai = _phan_loai_lease(lease)
+        da_chet = bool(lease.get("da_bi_thay_the")) and trang_thai == "CÒN_HẠN"
+        lease_id = str(lease.get("lease_id") or "<thiếu lease_id>")
+        nhan = " · ĐÃ_BỊ_THAY_THẾ" if da_chet else ""
+        print(f"{trang_thai}{nhan}\t{lease_id}\t{muc['ref']}:{muc['path']}")
+        if trang_thai == "CÒN_HẠN" and not da_chet:
+            nguoi_giu.append(lease_id)
+    print(f"NGƯỜI_GIỮ {len(nguoi_giu)}: " + (", ".join(sorted(nguoi_giu)) or "không có"))
+    return RC_DANG_GIU if nguoi_giu else RC_OK
+
+
 def main(argv=None) -> int:
     for luong in (sys.stdout, sys.stderr):
         try:
@@ -565,6 +712,10 @@ def main(argv=None) -> int:
     q.add_argument("tep")
     q.add_argument("--comment-id", type=int, required=True)
     q.set_defaults(fn=lenh_mark)
+    q = sub.add_parser("ai-dang-giu", help="quét toàn kho xem ai đang giữ một đường dẫn")
+    q.add_argument("duong_dan")
+    q.add_argument("--root", dest="goc", default=".")
+    q.set_defaults(fn=lenh_ai_dang_giu)
 
     a = ap.parse_args(argv)
     try:

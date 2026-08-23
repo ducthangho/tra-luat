@@ -543,52 +543,6 @@ def _kiem_anh_moi_truong(duong) -> dict:
     return d
 
 
-LY_DO_CAN_BANG_CHUNG = ("infrastructure", "permission")
-
-
-def _kiem_bang_chung_ha_tang(duong, ly_do) -> None:
-    """Bằng chứng MÁY cho `infrastructure`/`permission`. Fail-close, ba trạng thái."""
-    # `run.json` PHẢI thử TRƯỚC: nó là JSON hợp lệ mà thiếu trường của `doctor`, nên thử
-    # `doctor` trước làm nhánh sổ launcher KHÔNG BAO GIỜ tới được (lộ ra khi CHẠY, không
-    # khi đọc mã).
-    if _doc_so_lauch(duong) is not None:
-        return
-    trang_thai, d, vi_sao = _doc_anh_moi_truong(duong)
-    if trang_thai == BC_KHONG_DOC_DUOC:
-        _die(RC_MOI_TRUONG, f"KHÔNG ĐỌC ĐƯỢC: {vi_sao} — không hoàn lượt trên phép đo không đọc được")
-    if trang_thai == BC_KHONG:
-        _die(RC_MOI_TRUONG,
-             f"--reason {ly_do} đòi BẰNG CHỨNG MÁY: ảnh `doctor --json` hoặc `run.json` của "
-             f"launcher. Không có thì dùng --khong-co-bang-chung (có ghi sổ). ({vi_sao})")
-    thieu = d.get("thieu_bat_buoc") or []
-    chua_xt = d.get("chua_xac_thuc") or []
-    if ly_do == "infrastructure" and not thieu:
-        _die(RC_MOI_TRUONG, "ảnh môi trường KHÔNG thiếu công cụ bắt buộc — nó không chứng minh `infrastructure`")
-    if ly_do == "permission" and not chua_xt:
-        _die(RC_MOI_TRUONG, "ảnh môi trường KHÔNG có mục chưa xác thực — nó không chứng minh `permission`")
-
-
-# Chỉ hai giá trị này do LAUNCHER đặt: `qua_han` khi nó cưỡng chế hạn chót (launcher.py:1486),
-# `hong` khi nó không chạy nổi lệnh (:1407). `xong` nghĩa là con ĐÃ chạy và tự thoát.
-TRANG_THAI_HA_TANG = ("qua_han", "hong")
-
-
-def _doc_so_lauch(duong):
-    """`run.json`: CHỈ nhận trường do LAUNCHER đặt. None = không phải bằng chứng hạ tầng.
-
-    `ma_thoat`/`stdout_byte` ĐÃ BỎ — con quyết định chúng, nên chúng là lời khai của kẻ bị đo
-    (`launcher.py:50-51` cảnh báo sẵn). Hai bản trước sai cùng một cách; r3 đổi TIÊU CHÍ chứ
-    không thêm điều kiện — xem r3 §0. Ca thiếu công cụ đi bằng ảnh `doctor`, vốn là PHÉP ĐO.
-    """
-    try:
-        d = json.loads(Path(duong).read_text(encoding="utf-8"))
-    except Exception:
-        return None
-    if isinstance(d, dict) and d.get("trang_thai") in TRANG_THAI_HA_TANG:
-        return d
-    return None
-
-
 def _die(rc: int, msg: str) -> None:
     print(msg, file=sys.stderr)
     sys.exit(rc)
@@ -942,23 +896,10 @@ def cmd_void_attempt(a, state_dir: Path) -> int:
         _die(RC_ARG, f"lý do {a.reason!r} không thuộc allowlist {LY_DO_VOID}")
     if st["attempts_used"] <= 0:
         _die(RC_STATE, "chưa có lượt nào để hoàn")
-    # M3 — `LY_DO_VOID` canh TỪ VỰNG, không canh SỰ THẬT: nó xác nhận `infrastructure` là
-    # một lý do HỢP LỆ, không xác nhận nó CÓ THẬT. Chỉ siết hai lý do có dấu vết máy;
-    # `quota`/`rate_limit` nằm phía nhà cung cấp nên đòi bằng chứng là đòi thứ không tồn tại.
-    if a.reason in LY_DO_CAN_BANG_CHUNG:
-        if a.khong_co_bang_chung:
-            # M4 — cửa thoát PHẢI GHI SỔ: môi trường chết TRƯỚC khi kịp ghi là ca có thật,
-            # và thiếu cửa này thì M3 biến lỗi tạm thời thành ngõ cụt vĩnh viễn.
-            if a.ai_cho_phep not in NGUOI_CO_THAM_QUYEN:
-                _die(RC_MOI_TRUONG,
-                     f"--ai-cho-phep {a.ai_cho_phep!r} không thuộc {NGUOI_CO_THAM_QUYEN} — "
-                     f"người thi công KHÔNG tự cho phép mình bỏ bằng chứng")
-            if not (a.can_cu or "").strip():
-                _die(RC_MOI_TRUONG, "--khong-co-bang-chung đòi --can-cu, không nhận lý do trống")
-            st["history"].append({"event": "void_khong_co_bang_chung", "reason": a.reason,
-                                  "ai_cho_phep": a.ai_cho_phep, "can_cu": a.can_cu})
-        else:
-            _kiem_bang_chung_ha_tang(a.bang_chung, a.reason)
+    # KHÔNG có cổng bằng chứng ở đây, CÓ CHỦ Ý — `…-r4.md` §0. Ba bản trước đổi TRƯỜNG
+    # được tin mà không lập NGUỒN GỐC; cổng mang tên "bằng chứng máy" đọc một tệp bất kỳ
+    # ai viết thì TRÔNG như bảo vệ. `LY_DO_VOID` canh TỪ VỰNG, không canh SỰ THẬT — nói
+    # thẳng thay vì để nhãn nói hộ. `void_giu_dung_hanh_vi_master` canh việc BỎ đã sạch.
     # Lượt ĐÃ được review thì không hoàn được — nếu không, mọi lượt hỏng đều
     # biến thành "quota" và trần trở thành trang trí.
     if st["reviews"] and st["reviews"][-1]["attempt"] == st["attempts_used"]:
@@ -1567,15 +1508,6 @@ def build_parser() -> argparse.ArgumentParser:
     q = sub.add_parser("void-attempt", help="hoàn lượt vì lỗi hạ tầng/quota")
     q.add_argument("--packet", type=int, required=True)
     q.add_argument("--reason", required=True, help=f"một trong {LY_DO_VOID}")
-    q.add_argument("--bang-chung", dest="bang_chung",
-                   help=f"bằng chứng MÁY, bắt buộc cho {LY_DO_CAN_BANG_CHUNG}: ảnh "
-                        f"`doctor --json` hoặc `run.json` của launcher")
-    q.add_argument("--khong-co-bang-chung", dest="khong_co_bang_chung", action="store_true",
-                   help="đường thoát CÓ GHI SỔ khi môi trường chết trước lúc kịp ghi; "
-                        "đòi --ai-cho-phep và --can-cu")
-    q.add_argument("--ai-cho-phep", dest="ai_cho_phep",
-                   help=f"bên CÓ THẨM QUYỀN cho phép bỏ bằng chứng; phải thuộc {NGUOI_CO_THAM_QUYEN}")
-    q.add_argument("--can-cu", dest="can_cu", help="vì sao không có bằng chứng máy")
     q.set_defaults(fn=cmd_void_attempt)
 
     q = sub.add_parser("record-review", help="ghi một lượt review")

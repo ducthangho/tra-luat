@@ -712,54 +712,6 @@ def case_mt_anh_hong_la_KHONG_DOC_DUOC_khong_phai_thieu(c: Ctx):
                    sd, env_extra={BIEN_BC: str(f)})
     _doi(10, rc, e, "ảnh hỏng cú pháp mà vẫn mở được lượt")
     assert "KHÔNG ĐỌC ĐƯỢC".encode() in e, f"gộp nhầm vào THIẾU: {e!r}"
-
-
-def case_void_ha_tang_khong_bang_chung_thi_tu_choi(c: Ctx):
-    """N4 — phản chứng cho ca `allowlist canh TỪ VỰNG, không canh SỰ THẬT`."""
-    sd = c.sd()
-    _doi(0, *c.init(sd)[0:1], b"", "init")
-    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
-    _doi(0, rc, e, "begin-attempt")
-    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "infrastructure"], sd)
-    _doi(10, rc, e, "hoàn lượt vì `infrastructure` mà KHÔNG có bằng chứng máy")
-
-
-def case_void_ha_tang_co_bang_chung_thi_qua(c: Ctx):
-    """N4b — chiều BẮT OAN của N4: có bằng chứng thật thì phải hoàn được."""
-    sd = c.sd()
-    _doi(0, *c.init(sd)[0:1], b"", "init")
-    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
-    _doi(0, rc, e, "begin-attempt")
-    anh = anh_moi_truong_sach(thieu_bat_buoc=["codex"])
-    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "infrastructure",
-                              "--bang-chung", anh], sd)
-    _doi(0, rc, e, "có bằng chứng thật mà vẫn bị chặn")
-
-
-def case_void_ha_tang_nhan_so_launcher(c: Ctx):
-    """N4c — `run.json` của launcher LÀ bằng chứng. Bản đầu khai đường này mà mã không có:
-    run.json là JSON hợp lệ nhưng thiếu trường của `doctor`, nên rơi vào `khong_doc_duoc`
-    và chết trước khi tới nhánh đọc sổ. Chỉ lộ khi chạy thử, không lộ khi đọc mã."""
-    sd = c.sd()
-    _doi(0, *c.init(sd)[0:1], b"", "init")
-    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
-    _doi(0, rc, e, "begin-attempt")
-    f = Path(tempfile.mkdtemp(prefix="tl-run-")) / "run.json"
-    vo = ["void-attempt", "--packet", 55, "--reason", "infrastructure", "--bang-chung", str(f)]
-    # N4d — chiều SIẾT trước (rc=10 nên không tiêu lượt). `ma_thoat` do CON đặt; hình dạng
-    # dưới đây đo bằng launcher THẬT với con tự thoát 12, không phải bịa.
-    for ma in (1, 12, 13):
-        f.write_text(json.dumps({"trang_thai": "xong", "ma_thoat": ma, "stdout_byte": 0}), encoding="utf-8")
-        _doi(10, *run(c.script, vo, sd)[0:1], b"", f"con tu thoat {ma} duoc hoan nhu loi ha tang")
-    # N4e — chiều BẮT OAN: hai trạng thái do LAUNCHER đặt vẫn phải hoàn được.
-    for tt in ("qua_han", "hong"):
-        f.write_text(json.dumps({"trang_thai": tt, "ma_thoat": 0}), encoding="utf-8")
-        rc, _, e = run(c.script, vo, sd)
-        _doi(0, rc, e, f"trang_thai {tt} do launcher dat ma van bi chan")
-        rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
-        _doi(0, rc, e, "begin-attempt")
-
-
 def case_luong_canonical_chay_that(c: Ctx):
     """N10′ — CHẠY khối §7.4a chứ không khớp chuỗi (`doctor --json >` cắt cụt vẫn qua phép
     khớp). Khối là PowerShell dùng `$env:TEMP` nên chỉ đo thật trên Windows; nền khác BỎ QUA
@@ -779,36 +731,25 @@ def case_luong_canonical_chay_that(c: Ctx):
     ps = ps.replace("packet_loop.py ", f"packet_loop.py --state-dir {sd} ")
     r = subprocess.run(["pwsh", "-NoProfile", "-Command", ps], cwd=str(ROOT), capture_output=True)
     assert r.returncode == 0, f"khoi canonical KHONG chay duoc: {r.stderr!r}"
+def case_void_giu_dung_hanh_vi_master(c: Ctx):
+    """N11 — canh việc BỎ M3/M4 đã SẠCH, không sót mảnh nào.
 
-
-def case_void_quota_khong_doi_bang_chung(c: Ctx):
-    """N6 — chiều BẮT OAN. `quota` ở phía nhà cung cấp, không để lại dấu vết máy."""
+    Hai chiều: (a) HÀNH VI — mọi lý do trong allowlist hoàn được lượt, KHÔNG cờ bằng
+    chứng nào; (b) BỀ MẶT — bốn cờ M3/M4 phải biến khỏi parser. Thiếu (b) thì mảnh sót
+    vẫn qua (a) khi cờ có mặc định vô hại; thiếu (a) thì gỡ cờ mà để lại `_die` vẫn xanh.
+    """
     sd = c.sd()
     _doi(0, *c.init(sd)[0:1], b"", "init")
-    for ly_do in ("quota", "rate_limit"):
+    for ly_do in ("quota", "rate_limit", "infrastructure", "permission"):
         rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
         _doi(0, rc, e, "begin-attempt")
         rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", ly_do], sd)
-        _doi(0, rc, e, f"{ly_do} bị đòi bằng chứng máy — đòi thứ không tồn tại")
-
-
-def case_void_duong_thoat_phai_co_tham_quyen_va_ghi_so(c: Ctx):
-    """N5 — cửa thoát KHÔNG ghi sổ là cửa hậu."""
-    sd = c.sd()
-    _doi(0, *c.init(sd)[0:1], b"", "init")
-    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
-    _doi(0, rc, e, "begin-attempt")
-    thoat = ["void-attempt", "--packet", 55, "--reason", "infrastructure", "--khong-co-bang-chung"]
-    rc, _, e = run(c.script, thoat + ["--ai-cho-phep", EXECUTOR, "--can-cu", "x"], sd)
-    _doi(10, rc, e, "người thi công tự cho phép mình bỏ bằng chứng")
-    rc, _, e = run(c.script, thoat + ["--ai-cho-phep", "ducthangho"], sd)
-    _doi(10, rc, e, "bỏ bằng chứng mà không cần căn cứ")
-    rc, _, e = run(c.script, thoat + ["--ai-cho-phep", "ducthangho",
-                                      "--can-cu", "container chết trước khi kịp ghi run.json"], sd)
-    _doi(0, rc, e, "đủ thẩm quyền và căn cứ mà vẫn bị chặn")
-    st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
-    su = [h for h in st["history"] if h.get("event") == "void_khong_co_bang_chung"]
-    assert su and su[0]["ai_cho_phep"] == "ducthangho", f"cửa thoát KHÔNG ghi sổ: {st['history']}"
+        _doi(0, rc, e, f"{ly_do} bị đòi bằng chứng — void-attempt phải giữ đúng hành vi master")
+    rc, o, e = run(c.script, ["void-attempt", "--help"], sd)
+    _doi(0, rc, e, "void-attempt --help")
+    sot = [f for f in ("--bang-chung", "--khong-co-bang-chung", "--ai-cho-phep", "--can-cu")
+           if f.encode() in o]
+    assert not sot, f"cờ M3/M4 còn sót trong parser: {sot}"
 
 
 def case_void_attempt_allowlist(c: Ctx):
@@ -2189,12 +2130,8 @@ CASES = [
     ("mt_sach_thi_van_mo_duoc_luot", case_mt_sach_thi_van_mo_duoc_luot),
     ("mt_chup_tren_nen_khac_thi_tu_choi", case_mt_chup_tren_nen_khac_thi_tu_choi),
     ("mt_anh_hong_la_KHONG_DOC_DUOC", case_mt_anh_hong_la_KHONG_DOC_DUOC_khong_phai_thieu),
-    ("void_ha_tang_khong_bang_chung_thi_tu_choi", case_void_ha_tang_khong_bang_chung_thi_tu_choi),
-    ("void_ha_tang_co_bang_chung_thi_qua", case_void_ha_tang_co_bang_chung_thi_qua),
-    ("void_ha_tang_nhan_so_launcher", case_void_ha_tang_nhan_so_launcher),
     ("luong_canonical_chay_that", case_luong_canonical_chay_that),
-    ("void_quota_khong_doi_bang_chung", case_void_quota_khong_doi_bang_chung),
-    ("void_duong_thoat_phai_co_tham_quyen_va_ghi_so", case_void_duong_thoat_phai_co_tham_quyen_va_ghi_so),
+    ("void_giu_dung_hanh_vi_master", case_void_giu_dung_hanh_vi_master),
     ("void_attempt_allowlist", case_void_attempt_allowlist),
     ("void_xong_van_mo_lai_duoc_luot", case_void_xong_van_mo_lai_duoc_luot),
     ("void_attempt_ly_do_tu_che_bi_tu_choi", case_void_attempt_ly_do_tu_che_bi_tu_choi),
@@ -2665,6 +2602,36 @@ CASES += [(f"ac19_{ten}", _ca_doctrine(nd, f"ac19_{ten}", 0)) for ten, nd in LOP
 # Đột biến nới ngưỡng: mỗi cái BẮT BUỘC giết đúng những ca dưới đây. Ca không
 # chết được nghĩa là nó không đo cái nó khai.
 MUTANTS = {
+    # --- M1/M2 · N11: mỗi luật MỘT đột biến -------------------------------------
+    # N2 là ca chiều BẮT OAN nên chỉ chết bởi đột biến SIẾT (ngưỡng tuổi về -1) — và
+    # đột biến ấy KHÔNG làm N1 đỏ, vì N1 vốn đòi rc=10. Hai chiều, hai loại đột biến.
+    "mt_bo_chot_thieu_cong_cu": (
+        '    thieu = d.get("thieu_bat_buoc") or []\n',
+        '    thieu = []   # đột biến: bỏ chốt thiếu công cụ\n',
+        ["mt_thieu_cong_cu_thi_khong_mo_duoc_luot"],
+    ),
+    "mt_siet_nguong_tuoi_ve_am_mot": (
+        "NGUONG_TUOI_BANG_CHUNG_GIAY = 3600\n",
+        "NGUONG_TUOI_BANG_CHUNG_GIAY = -1   # đột biến: siết, ảnh nào cũng 'cũ'\n",
+        ["mt_sach_thi_van_mo_duoc_luot"],
+    ),
+    "mt_bo_so_nen_chup_anh": (
+        '    if d.get("he_dieu_hanh") != nen_thuc:\n',
+        '    if False:   # đột biến: bỏ so nền\n',
+        ["mt_chup_tren_nen_khac_thi_tu_choi"],
+    ),
+    "mt_gop_khong_doc_duoc_vao_thieu": (
+        '        return BC_KHONG_DOC_DUOC, None, f"ảnh môi trường không đọc được ({ex.__class__.__name__}): {duong}"\n',
+        '        return BC_KHONG, None, f"hỏng: {ex}"   # đột biến: gộp trạng thái thứ ba\n',
+        ["mt_anh_hong_la_KHONG_DOC_DUOC"],
+    ),
+    "mt_them_lai_doi_bang_chung_o_void": (
+        "    if a.reason not in LY_DO_VOID:\n",
+        '    if a.reason in ("infrastructure", "permission"):\n'
+        '        _die(RC_MOI_TRUONG, "đột biến: đòi lại bằng chứng")\n'
+        "    if a.reason not in LY_DO_VOID:\n",
+        ["void_giu_dung_hanh_vi_master"],
+    ),
     # --- dòng bảng phải THUỘC một bảng: đột biến dựng lại bản cũ -----------------
     #
     # Bản cũ đếm mọi dòng khớp `^| \`ADR-NNNN\` |` ở cột 0, bất kể nó có nằm trong

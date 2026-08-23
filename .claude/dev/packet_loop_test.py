@@ -792,7 +792,7 @@ def case_chup_anh_doctor_ky_noi_bo(c: Ctx):
     assert d["chu_ky"] == ky_ban_ghi_luot(d, st["hmac_key"])
 
 
-def case_anh_doctor_nen_tuoi_dung_chung_hai_duong(c: Ctx):
+def case_anh_doctor_nen_chung_tuoi_chi_begin(c: Ctx):
     for kieu in ("nen", "tuoi"):
         f = anh_doctor(he_dieu_hanh="Plan9") if kieu == "nen" else anh_doctor(ok=True)
         if kieu == "tuoi": os.utime(f, (time.time() - 7200,) * 2)
@@ -803,7 +803,7 @@ def case_anh_doctor_nen_tuoi_dung_chung_hai_duong(c: Ctx):
         f = anh_doctor_ky(sd, he_dieu_hanh="Plan9" if kieu == "nen" else platform.system(),
                           thieu_bat_buoc=["codex"])
         if kieu == "tuoi": os.utime(f, (time.time() - 7200,) * 2)
-        _doi(10, *_void_may(c, sd, f)[0:1], b"", f"void {kieu}")
+        _doi(10 if kieu == "nen" else 0, *_void_may(c, sd, f)[0:1], b"", f"void {kieu}")
 
 
 def case_ma_in_thang_gioi_han_cung_principal(c: Ctx):
@@ -2204,7 +2204,7 @@ CASES = [
     ("void_cung_anh_doctor_hai_luot_bi_chan", case_void_cung_anh_doctor_hai_luot_bi_chan),
     ("void_touch_anh_doctor_cu_van_bi_chan", case_void_touch_anh_doctor_cu_van_bi_chan),
     ("chup_anh_doctor_ky_noi_bo", case_chup_anh_doctor_ky_noi_bo),
-    ("anh_doctor_nen_tuoi_dung_chung_hai_duong", case_anh_doctor_nen_tuoi_dung_chung_hai_duong),
+    ("anh_doctor_nen_chung_tuoi_chi_begin", case_anh_doctor_nen_chung_tuoi_chi_begin),
     ("ma_in_thang_gioi_han_cung_principal", case_ma_in_thang_gioi_han_cung_principal),
     ("void_attempt_allowlist", case_void_attempt_allowlist),
     ("void_xong_van_mo_lai_duoc_luot", case_void_xong_van_mo_lai_duoc_luot),
@@ -3208,12 +3208,12 @@ MUTANTS = {
         '                               or os.environ.get(BIEN_BANG_CHUNG), can_sach=True)',
         '    anh = _doc_anh_moi_truong(getattr(a, "bang_chung_moi_truong", None)\n'
         '                              or os.environ.get(BIEN_BANG_CHUNG))[0]  # đột biến',
-        ["anh_doctor_nen_tuoi_dung_chung_hai_duong"],
+        ["anh_doctor_nen_chung_tuoi_chi_begin"],
     ),
-    "void_bo_kiem_nen_tuoi_dung_chung": (
-        '    d = _kiem_anh_moi_truong(duong, can_sach=False, d=d)',
-        '    d = _doc_anh_moi_truong(duong)[0]  # đột biến',
-        ["anh_doctor_nen_tuoi_dung_chung_hai_duong"],
+    "void_khoi_phuc_kiem_tuoi": (
+        '    d = _kiem_anh_moi_truong(duong, can_sach=False, d=d, kiem_tuoi=False)',
+        '    d = _kiem_anh_moi_truong(duong, can_sach=False, d=d, kiem_tuoi=True)',
+        ["anh_doctor_nen_chung_tuoi_chi_begin"],
     ),
     # Hai chốt của `void-reviewing-accepts-attempt-zero`, hai đột biến RỜI NHAU.
     "bo_void_roi_reviewing": (

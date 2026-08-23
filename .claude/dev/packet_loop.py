@@ -510,8 +510,8 @@ def _doc_anh_moi_truong(duong):
     return d, ""
 
 
-def _kiem_anh_moi_truong(duong, can_sach: bool, d=None) -> dict:
-    """Một phép kiểm nền + tuổi dùng chung cho begin và void (G6)."""
+def _kiem_anh_moi_truong(duong, can_sach: bool, d=None, *, kiem_tuoi=True) -> dict:
+    """Nền dùng chung; tuổi chỉ ở begin-attempt, nơi touch vẫn qua mặt được."""
     d, loi = _doc_anh_moi_truong(duong) if d is None else (d, "")
     if not isinstance(d, dict) or not {"thieu_bat_buoc", "chua_xac_thuc", "he_dieu_hanh"} <= d.keys():
         d, loi = None, "ảnh môi trường thiếu trường của `doctor --json`"
@@ -519,8 +519,7 @@ def _kiem_anh_moi_truong(duong, can_sach: bool, d=None) -> dict:
         _die(RC_MOI_TRUONG, f"KHÔNG ĐỌC ĐƯỢC: {loi}")
     if d["he_dieu_hanh"] != platform.system():
         _die(RC_MOI_TRUONG, f"ảnh thuộc nền khác: {d['he_dieu_hanh']!r}")
-    tuoi = time.time() - Path(duong).stat().st_mtime
-    if tuoi > NGUONG_TUOI_BANG_CHUNG_GIAY:
+    if kiem_tuoi and (tuoi := time.time() - Path(duong).stat().st_mtime) > NGUONG_TUOI_BANG_CHUNG_GIAY:
         _die(RC_MOI_TRUONG, f"ảnh môi trường cũ {int(tuoi)}s — chụp lại `doctor --json`")
     if can_sach and (d.get("thieu_bat_buoc") or []):
         _die(RC_MOI_TRUONG, f"môi trường thiếu công cụ: {d['thieu_bat_buoc']}")
@@ -555,7 +554,7 @@ def _kiem_bang_chung_may(duong, ly_do: str, anchor: dict, hmac_key: str) -> None
             if d.get("trang_thai") not in ("qua_han", "hong"):
                 _die(RC_MOI_TRUONG, "bản ghi không mang phán quyết lỗi hạ tầng")
             return
-    d = _kiem_anh_moi_truong(duong, can_sach=False, d=d)
+    d = _kiem_anh_moi_truong(duong, can_sach=False, d=d, kiem_tuoi=False)
     truong = "thieu_bat_buoc" if ly_do == "infrastructure" else "chua_xac_thuc"
     if not (d.get(truong) or []):
         _die(RC_MOI_TRUONG, f"ảnh doctor không chứng minh {ly_do!r}")

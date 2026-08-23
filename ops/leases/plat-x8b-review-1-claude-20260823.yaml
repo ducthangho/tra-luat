@@ -14,6 +14,14 @@
 #
 # NGUỒN SỰ THẬT LÀ TỆP NÀY. Comment trên `#255`/`#263` chỉ là bản chiếu.
 
+da_bi_thay_the: plat-x8b-review-1r2-claude-20260823
+da_bi_thay_the_ly_do: >-
+  HẾT HIỆU LỰC ~01:55Z 23-08, CHỈ vì vệ sinh văn bản — KHÔNG vì mỏ neo nào sai. Cross-review lượt 1
+  chạy DƯỚI lease này và verdict của nó (`approve`) vẫn có hiệu lực; mọi trường neo
+  (`spec_sha256_required`, `prompt_sha256_required`, `reviewed_sha_required`, `base_sha`) đều ĐÚNG và
+  reviewer đã tự đo khớp. Thứ sai là hai trường GHI CHÚ TỰ DO chép từ mẫu lease của packet MẸ và quên
+  sửa số — chính reviewer tìm ra, ngoài cả năm hướng "trần" mà prompt liệt kê.
+  GIỮ nguyên trạng làm hồ sơ; đã đăng (comment 5383532797). Lease hiệu lực: `…-1r2-…`.
 schema_version: 2
 event: review_lease_granted
 packet_issue: 255

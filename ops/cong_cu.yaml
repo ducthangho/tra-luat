@@ -1,0 +1,23 @@
+# ops/cong_cu.yaml — BẢN KÊ CÔNG CỤ TẤT ĐỊNH (G1, packet #290 HA-TANG-CONG-CU-TAT-DINH).
+# MỘT nguồn cho `ops/cong_cu.py` (probe+canary+cổng), `ops/cai_cong_cu.sh` (cài), CI. Danh
+# sách CHO PHÉP đang LỚN DẦN — công cụ chưa cổng nào gọi tới thì không có ở đây (xem
+# `chua_do_duoc`), không phải khiếm khuyết cần vá ngay.
+# SCHEMA `cong_cu.<ten>`: bat_buoc(vắng MỌI probe⇒KHÔNG_ĐO_ĐƯỢC,mã riêng,G4/T1) ·
+# ban_ghim("X.Y.Z"|null) · probe(≥1 {ten,lenh:[argv],regex}; >1 phần tử=T7: các đường PHẢI
+# khớp NHAU, độc lập ban_ghim) · cai({lenh,moi_truong} chung MỌI nền, hoặc
+# {linux|macos|windows:{...}} khi khác theo nền; vắng=chưa tự động hoá, từ chối RÕ) ·
+# canary(fixture ops/canary/<tên>.yml minh chứng CÓ HIỆU LỰC, không chỉ có mặt).
+schema_version: 1
+cong_cu:
+  actionlint:
+    bat_buoc: true
+    ban_ghim: "1.7.7"
+    probe: [{ten: mac_dinh, lenh: [actionlint, -version], regex: '^(\d+\.\d+\.\d+)'}]
+    cai: {lenh: "bash ops/cai_actionlint.sh", moi_truong: {AL_VER: "1.7.7"}}
+    canary: actionlint_shellcheck
+  shellcheck:
+    # KHÔNG bắt buộc: actionlint tự dò shellcheck trên PATH, ÂM THẦM bỏ lớp luật SC* khi
+    # vắng (rc=0) — canary trên bắt đúng sự âm thầm đó (T2).
+    bat_buoc: false
+    ban_ghim: null
+    probe: [{ten: mac_dinh, lenh: [shellcheck, --version], regex: 'version:\s*(\d+\.\d+\.\d+)'}]

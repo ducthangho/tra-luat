@@ -1,0 +1,19 @@
+# ops/canary/actionlint_shellcheck.yml — CANARY G3 (packet #290). KHONG phai workflow that
+# (ngoai .github/workflows/, `on:` chi de YAML hop le). `run:` tai dung pattern SC1003 DA DO
+# THAT trong kho (CLAUDE.md: finding `ops-don-ref.yml:106 SC1003:info`, case-pattern `*'\'*`
+# khop ky tu backslash). Vang shellcheck thi actionlint AM THAM bo qua ca lop luat SC*, van
+# rc=0 — hinh dang (b) "XANH GIA". `cong_cu.py` chay tren tep nay: thay SC1003 => DAT; khong
+# thay => SUY_GIAM (T2), khong duoc doc la "sach".
+name: canary-khong-tu-kich-hoat
+on: workflow_dispatch
+jobs:
+  vi_du:
+    runs-on: ubuntu-latest
+    steps:
+      - name: mo phong case-pattern khop ky tu backslash (nguon SC1003 that, xem tren)
+        run: |
+          r="a"
+          case "$r" in
+            *'\'*) echo "co backslash" ;;
+            *) echo "khong co" ;;
+          esac

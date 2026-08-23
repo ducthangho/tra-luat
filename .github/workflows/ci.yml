@@ -140,6 +140,13 @@ jobs:
         env:
           AL_VER: 1.7.7
         run: bash ops/chay_lease_publish_test.sh
+      # G5 (#290): NGAY SAU bước trên — actionlint vừa cài (GITHUB_PATH hiệu lực) nên canary
+      # G3 chạy thật. Trước mọi bước NẶNG còn lại — khoá bằng `t6` trong `cong_cu_test.py`.
+      - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)
+        shell: bash
+        run: |
+          python ops/cong_cu.py kiem-tra --json
+          python ops/cong_cu_test.py
       # `don-nhanh.ps1` XOÁ NHÁNH REMOTE — thao tác không hoàn tác được ở phía PR: xoá
       # nhầm một nhánh đang là BASE của PR đang mở thì GitHub ĐÓNG các PR ấy, và tạo lại
       # nhánh không mở lại chúng. Bộ này khoá đúng chỗ đó, cộng chốt fail-close khi không

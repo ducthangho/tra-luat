@@ -1,0 +1,137 @@
+# BIÊN NHẬN v2 — cross-review LƯỢT 1 của PR #264 (hồ sơ `PLAT-X8` + `PLAT-X8b`).
+#
+# ĐỌC TRƯỚC: PR #264 ĐÃ MERGE (`6541cade`) TRƯỚC KHI biên nhận này được ghi. Đó không phải sơ suất mà
+# là hệ quả cấu trúc — xem `de_quy_ho_so` bên dưới. Biên nhận này là hồ sơ HẬU KIỂM của một lượt
+# review đã hoàn tất và đã được hành động theo, không phải cổng chặn land.
+
+schema_version: 2
+receipt_id: handoff-264-review-1-claude-20260823-adf89321
+kind: review_delivery_receipt
+packet_id: HANDOFF-264
+packet_issue: 255
+lease_id: handoff-264-review-1-claude-20260823
+role: reviewer
+provider: claude
+executor_provider: claude
+executor_ghi_chu: >-
+  KHÔNG có executor `codex` cho PR #264 — đây là PR hồ sơ do chính phiên điều phối soạn. Vì thế lượt
+  này KHÔNG cross-provider, và reviewer đã tự khai không đạt `cross_approved` (xem `assurance_ghi_chu`).
+
+model_reviewer_identity:
+  provider: anthropic
+  surface: claude_code_cli
+  cli_version: '2.1.240'
+  session_run_id: adf89321c9c841929151f206942c528c
+  session_khoa_danh_tinh: 'linux:80021'
+  bat_dau_utc: '2026-08-23T02:02:44Z'
+  ket_thuc_utc: '2026-08-23T02:15:29Z'
+  ma_thoat: 0
+  neo_boi_launcher: '`--expected-head cc6657e8…`, `--require-clean`, `--expected-prompt-sha256 24144f05…`'
+  KHONG_do_duoc: 'ID model cụ thể — `claude --version` trả phiên bản CLI, không trả model đang phục vụ.'
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: biên nhận do tài khoản tác giả đăng KHÔNG thành required check hay merge authorization.'
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Neo bằng `verdict_sha256` + commit chứa nó. Không tag `luu-tru/*`. Mỏ neo chết nếu nhánh bị xoá
+    trước khi land.
+
+reviewed_sha: cc6657e826d90bebe61ea59983fa83c27db42c34
+base_sha: 05de1ab81c235235b971a6fb8d8ae1fb226295d5
+target_pull_request: 264
+
+verdict: changes_requested
+verdict_path: ops/reviews/handoff-264-review-1-claude-verdict.md
+verdict_sha256: f87079e44388534547ffd7b4209d0727d3956390f8904e3cc174fdfdc6db2b7a
+verdict_bytes: 17648
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/0fdd70b9d6e6b6b143ac54591c98178f2ddaf613/ops/reviews/handoff-264-review-1-claude-verdict.md
+evidence_url_ghi_chu: 'ĐÃ GHIM theo commit `0fdd70b9` — commit ĐẦU TIÊN chứa tệp verdict. Hai bước vì một commit không chứa được băm của chính nó; `t26` chỉ kiểm HÌNH DẠNG nên URL nhánh cũng qua, mà nhánh là thứ bị xoá.'
+
+cross_provider: false
+assurance_dat: null
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Reviewer TỰ TỪ CHỐI khai `cross_approved`, hai lý do nó tự nêu: (a) PR #264 là PR HỒ SƠ ghi lại các
+  lượt review của packet khác, không phải một packet thi công có executor/reviewer theo nghĩa §8, nên
+  khung `cross_approved`/`human_audited` áp cho các packet ĐƯỢC GHI chứ không cho việc duyệt PR này;
+  (b) không cross-provider — cả tác giả lẫn reviewer đều `claude`.
+la_canonical: false
+la_canonical_ghi_chu: >-
+  KHÔNG tính canon, và KHÔNG tiêu vòng nào của `PLAT-X8`/`PLAT-X8b`. `HANDOFF-264` không phải packet
+  trong bảng kế hoạch; `ADR-0043` đếm vòng canon theo PACKET, và PR hồ sơ không phải packet.
+
+findings:
+  - id: t27-mu-vi-sai-ten-truong
+    muc: P2
+    trang_thai: DA_DONG
+    dong_boi: '8cc52232 (đổi khoá ở 3 biên nhận) — xác nhận lại ở lượt 2, nhãn ĐÃ VÁ THẬT'
+    tai_hien: true
+    tom_tat: >-
+      Cả ba biên nhận v2 dùng khoá `canh_bao_da_nang_len_muc_luc`; `t27` đọc `verdict_usage_caveats`
+      (`lease_publish_test.py:1038`). 27/30 biên nhận cũ dùng đúng tên; không dòng mã nào trong kho
+      đọc tên bịa ra. ⇒ `t27` lặp trên danh sách RỖNG, 12 caveat CHƯA TỪNG được cổng kiểm.
+    tai_hien_boi_dieu_phoi: >-
+      Đột biến hai chiều tự chạy: TRƯỚC vá, xoá một hàng caveat khỏi README ⇒ `87/87 rc=0` (cổng MÙ);
+      SAU vá, cùng đột biến ⇒ `86/87 rc=1`, `t27` ĐỎ trỏ đúng tên caveat và đúng tệp; khôi phục ⇒
+      `87/87 rc=0`.
+    vi_sao_dang_ke: >-
+      Đúng doctrine "cổng xanh nhờ `rc=0` là cổng CÓ THỂ BỊ LỪA". Và mỉa mai đúng chỗ: các caveat ấy
+      CẢNH BÁO rằng `t26` không validate v2, trong khi chính chúng bị `t27` không đọc nổi.
+  - id: caveat-mo-neo-thieu-hang-README
+    muc: P2
+    trang_thai: DA_DONG
+    dong_boi: '8cc52232'
+    tai_hien: true
+    tom_tat: >-
+      Hệ quả bị finding trên che: caveat `mo-neo-TRUNG-BINH-khong-phai-manh` của `plat-x8b-review-1`
+      không có hàng README. 3/4 caveat được chép tay lên, cái thứ 4 rơi mất — và nó là cảnh báo về
+      mỏ neo YẾU của chính verdict đang cấp `cross_approved`.
+  - id: bookkeeping-land-evidence-tu-phu-dinh-sau-merge
+    muc: P3
+    trang_thai: DA_DONG
+    dong_boi: '8cc52232'
+    tai_hien: true
+    tom_tat: >-
+      Dòng `bookkeeping` khai "verdict… CHƯA vào master" — đúng lúc #248 land, tự phủ định ngay khi
+      #264 merge, vì chính tệp ấy nằm trong #264. Đúng lớp lỗi `CLAUDE.md` đã ghi giá về câu mô tả
+      VỊ TRÍ artefact. Viết lại cho đúng ở CẢ HAI phía.
+
+verdict_usage_caveats:
+  - id: HANDOFF-264-KHONG-TIEU-VONG-CANON-NAO
+    noi_dung: >-
+      Lượt này và lượt 2 đều KHÔNG tính canon và KHÔNG tiêu vòng của `PLAT-X8`/`PLAT-X8b`. Đừng cộng
+      chúng vào bộ đếm của hai packet ấy.
+  - id: KHONG-CROSS-PROVIDER-tac-gia-va-reviewer-deu-claude
+    noi_dung: >-
+      PR #264 do phiên điều phối `claude` soạn và phiên `claude` khác review ⇒ KHÔNG cross-provider.
+      Reviewer tự từ chối khai `cross_approved`. Đừng đọc verdict này thành một mức assurance.
+  - id: BANG-CHUNG-CI-CUA-LUOT-NAY-NEO-HEAD-TRUOC
+    noi_dung: >-
+      `B-CI-EVIDENCE.md` cấp cho lượt này neo head `21c823ca`, KHÔNG phải head được review
+      (`cc6657e8`). Reviewer khai đúng là KHÔNG ĐO ĐƯỢC CI trên exact head. Lỗi của điều phối.
+  - id: bien-nhan-nay-ghi-SAU-khi-PR-da-merge
+    noi_dung: >-
+      PR #264 merge `6541cade` TRƯỚC khi biên nhận này tồn tại. Đây là hồ sơ hậu kiểm, KHÔNG phải
+      cổng chặn land — xem `de_quy_ho_so`.
+
+de_quy_ho_so: >-
+  MỘT PR HỒ SƠ KHÔNG THỂ CHỨA HỒ SƠ REVIEW CỦA CHÍNH NÓ. Thêm verdict của #264 vào #264 sẽ đổi head,
+  làm verdict vừa ghi không còn phủ nội dung, và đòi một lượt review nữa — lặp vô hạn. Đó là lý do
+  hai biên nhận này nằm ở PR RIÊNG, ghi SAU khi #264 đã merge.
+  Đệ quy KHÔNG tự dừng bằng cơ chế; nó dừng bằng QUYẾT ĐỊNH. Chuỗi này dừng ở đây theo chỉ thị chủ
+  kho ("ghi verdict #264 vào PR follow-up"): PR hồ sơ NÀY không cần một PR hồ sơ nữa cho review của
+  nó. Nếu ai muốn luật chung thay vì quyết định từng lần, đó là ADR chưa viết — nêu làm nợ dưới đây.
+
+no_da_khai:
+  - id: DE-QUY-HO-SO-REVIEW-CHUA-CO-LUAT
+    noi_dung: >-
+      Chưa có ADR/§ nào nói hồ sơ review của một PR hồ sơ dừng ở đâu. Hiện dừng bằng quyết định từng
+      lần. Máy móc mới, ngoài write set của lượt này.
+  - id: CHUA-CO-BO-KIEM-RECEIPT-V2
+    noi_dung: '`t26` không đọc `schema_version`, không đòi hai identity, không đọc `anchor`. Cổng chưa từng validate một receipt v2.'

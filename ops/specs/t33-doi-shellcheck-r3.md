@@ -61,8 +61,13 @@ NGƯỜI_GIỮ 5: lease-dang-windows-exec-2-codex-20260822    het 2026-08-23T11:
 ```
 
 **Cả năm thuộc packet ĐÃ LAND** — `#238` (`LEASE-DANG-WINDOWS`), `PLAT-X8`/`PLAT-X8b`, và `#244`
-(đóng `completed`). Không lease nào có writer đang sống; đo được bằng hai đường độc lập: (a) `#244`
-đóng và PR merged, (b) **0** nhánh chưa merge chạm tệp.
+(đóng `completed`). Hai đường đo độc lập cho **trạng thái packet**, không hơn: (a) `#244` đóng và PR
+merged, (b) **0** nhánh chưa merge chạm tệp.
+
+**Đó là TẤT CẢ những gì hai phép đo ấy nói.** Chúng **không** nói *"không lease nào có writer đang
+sống"* — bản đầu của r3 viết đúng câu ấy ở đây, và cross-review lượt 2 của PR #288 bắt được rằng nó
+**vẫn còn** sau khi tôi đã vá phần kết luận ở §dưới. Tức tôi sửa chỗ mình nhớ và bỏ sót chỗ mình
+không nhớ — một lý do nữa để phép đo, chứ không phải trí nhớ, là thứ quyết định.
 
 Đây **đúng** là nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong` hiện thành số: quyền ghi còn sống sau khi
 việc đã xong, và **không trường nào trong tệp lease nói ra điều đó** — nên công cụ báo 5 là công cụ
@@ -156,7 +161,7 @@ base_sha := 5561b6b497989447f9185b26abb1bba154564967
 | `t33` ở dòng | 1312 | 1312 | không |
 | `t73` ở dòng | 2649 | 2649 | không |
 | `t70` ở dòng | 2604 | 2604 | không |
-| `main()` ở dòng | 2905 | **3123** | CÓ |
+| `main()` ở dòng | **2904** | **3123** | CÓ |
 | mệnh đề nền ở dòng | 189 | **196** | CÓ |
 | `numstat` bản vá | 16 | **16** | không |
 | **tên ca đề xuất** | `t89` | **`t98`** | **CÓ — xem dưới** |

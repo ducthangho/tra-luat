@@ -17,16 +17,29 @@ Tên nhánh trôi và bị xoá; băm thì không. Tìm ở `master` trước; c
 |---|---|
 | `ops/specs/t33-doi-shellcheck.md` (r1) | `1405d390ca9376725517d01ef5b8d1abffd6a09d78d2b7206c2f068e7711f4da` |
 | `ops/specs/t33-doi-shellcheck-r2.md` | `b9620d17b86f503b12d93359fb6d3423d29c034c29ab372f40cc5d7089b40e71` |
-| `ops/specs/t33-doi-shellcheck-r3.md` | `9d55174de5f54bbf6089c179bf54e3b7f0b0c8174a02ab558f99c3df8583667d` |
+| `ops/specs/t33-doi-shellcheck-r3.md` | **ĐO, đừng chép** — `sha256sum ops/specs/t33-doi-shellcheck-r3.md`. Băm đã đổi BỐN lần trong review; bất kỳ giá trị ghi cứng ở đây cũng sẽ cũ |
 | lease đã soạn, **CHƯA ĐẨY** | `ops/leases/t33-doi-shellcheck-exec-1-claude-20260823.yaml`, nhánh `ops/cap-lease-t33-doi-shellcheck`, 3 commit trên `origin/master` |
 | `base_sha` lease neo | `5561b6b497989447f9185b26abb1bba154564967` |
-| PR đặc tả | **#288**, head `f9dae732d8f1c822e33942aa734c0e6798449175` |
+| PR đặc tả | **#288**. **KHÔNG ghi head ở đây** — xem ghi chú ngay dưới bảng |
+
+**Vì sao bảng trên KHÔNG ghi head của #288.** Bản đầu ghi cứng một SHA, và **chính commit thêm tệp
+này đã làm SHA ấy sai** — cross-review lượt 2 bắt (`P1`, codex). Một câu neo vào head mà nằm *trong*
+head thì tự vô hiệu ở mọi lần đẩy tiếp theo. Nên đo, đừng chép:
+
+```
+git rev-parse origin/claude/spec-freeze-n3-n1-269-gw47hw     # hoac HEAD cua PR #288 neu da doi ten
+```
+
+Và **mọi bằng chứng CI/review neo vào một SHA khác head bạn vừa đo đều là STALE** — `AGENTS.md` §6
+không miễn trừ cho ai. Tính tới lúc viết, chuỗi head đã là `0a270a03` → `bd3ae2bc` → `f9dae732` →
+`6f97910f` → (commit vá lượt 2 này), và mỗi lần đẩy đều làm lượt review liền trước hết hiệu lực.
 
 **Cả ba bản đặc tả còn hiệu lực.** `r2` và `r3` là **delta**; thứ chúng không nêu thì bản trước
 nguyên hiệu lực. `r1` không bị sửa một chữ.
 
-**Băm `r3` đã đổi HAI lần trong lúc review** — `6df98f39…` → `564dc8e1…` → `9d55174d…`. Hai bản đầu đã
-khai tử. Nếu bạn đọc một tài liệu nào nhắc băm cũ, tài liệu ấy cũ.
+**Băm `r3` đã đổi BỐN lần trong lúc review** — `6df98f39…` → `564dc8e1…` → `9d55174d…` → (bản hiện tại).
+Mọi bản trước đã khai tử. Nếu một tài liệu nhắc băm cũ thì tài liệu ấy cũ; **lease neo băm nào thì đo
+băm ấy**, đừng tin bảng.
 
 ---
 
@@ -37,8 +50,8 @@ khai tử. Nếu bạn đọc một tài liệu nào nhắc băm cũ, tài liệ
 ### 1 · Thẩm định ĐỘC LẬP `r2`/`r3` — đừng nhận lời khai của phiên soạn
 
 Đây là điều người giữ kho mua bằng một lượt phiên. Phiên soạn (`claude`, phiên này) đã **tự viết và
-tự chạy** ca `t98`, rồi **tự thẩm định** bảng số của chính nó — và đúng lớp lỗi ấy đã lọt **hai lần**
-trong một ngày (xem §`Vì sao có bước này`).
+tự chạy** ca `t98`, rồi **tự thẩm định** bảng số của chính nó — và đúng lớp lỗi ấy đã lọt **NĂM lần**
+trong một ngày, qua **hai** lượt cross-review (xem §`Vì sao có bước này`).
 
 Tối thiểu phải tự **CHẠY**, không đọc:
 
@@ -113,7 +126,7 @@ Hai finding cụ thể, cả hai **tái hiện được trên chính tệp**, kh
 | `r2` | gộp `N1` của `#269` vào packet `#249`; `N1` chiếu vào `ops/lease_publish_test.py` vốn ĐÃ trong write set ⇒ **không nới quyền ghi** |
 | `r3` | đo lại toàn bộ trên `5561b6b4` sau khi `#275` merge; ma trận 8 ô; ghi `A = 8` + `S2` |
 | lease | soạn đủ trường, `schema_version: 2`, cổng `rc=0`, **chưa đẩy** |
-| PR #288 | mở, CI `gate (ubuntu-latest)` xanh trên `bd3ae2bc`; đã xin review lượt 2 trên `f9dae732` |
+| PR #288 | mở; CI và review đã chạy nhiều lượt, **mỗi lần đẩy làm lượt liền trước stale** — đo head hiện tại rồi đối chiếu, đừng chép SHA từ đây |
 | 5 lease đã tiêu | đo **riêng từng cái** — `#238`/`#225`/`#255`/`#244` đều CLOSED, hiện vật trên master |
 
 ---

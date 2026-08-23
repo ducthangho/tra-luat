@@ -27,8 +27,18 @@ này đã làm SHA ấy sai** — cross-review lượt 2 bắt (`P1`, codex). M�
 head thì tự vô hiệu ở mọi lần đẩy tiếp theo. Nên đo, đừng chép:
 
 ```
-git rev-parse origin/claude/spec-freeze-n3-n1-269-gw47hw     # hoac HEAD cua PR #288 neu da doi ten
+# HOI MAY CHU, dung doc bo dem. `rev-parse`/`for-each-ref` chi doc ban sao CUC BO:
+git ls-remote origin refs/heads/claude/spec-freeze-n3-n1-269-gw47hw | cut -f1
+# hoac fetch TRUOC roi moi giai:
+git fetch origin claude/spec-freeze-n3-n1-269-gw47hw && git rev-parse FETCH_HEAD
 ```
+
+**Bản đầu ghi `git rev-parse origin/…` KHÔNG kèm fetch** — cross-review lượt 3 bắt (`P1`). Lệnh ấy
+đọc **ref theo dõi cục bộ**, nên khi PR nhận thêm một lần đẩy mà checkout của bạn chưa fetch, nó
+**vẫn trả SHA cũ** và làm bằng chứng CI/review cũ trông như còn hiệu lực. Trớ trêu đúng chỗ: chính
+tệp này trích bài học *"`for-each-ref` đọc bộ đệm cục bộ, không hỏi máy chủ"* ở §cuối, rồi vi phạm
+nó ở §này. **Không có lệch tại một thời điểm KHÔNG chứng minh lệnh an toàn** — cơ chế mới là thứ
+quyết định.
 
 Và **mọi bằng chứng CI/review neo vào một SHA khác head bạn vừa đo đều là STALE** — `AGENTS.md` §6
 không miễn trừ cho ai. Tính tới lúc viết, chuỗi head đã là `0a270a03` → `bd3ae2bc` → `f9dae732` →
@@ -45,7 +55,19 @@ băm ấy**, đừng tin bảng.
 
 ## Việc của phiên nhận bàn giao
 
-**Đúng ba việc, theo thứ tự. Việc 1 là lý do phiên bạn tồn tại.**
+**BỐN vai, và chúng phải là BỐN PHIÊN KHÁC NHAU.** Việc 1 là lý do phiên bạn tồn tại; việc 2 là
+chỗ phiên bạn DỪNG.
+
+| vai | ai | làm gì |
+|---|---|---|
+| soạn đặc tả | phiên đã xong (không phải bạn) | r1/r2/r3 + lease nháp, **không cấp, không thi công** |
+| **thẩm định** | **phiên bạn** | tự chạy ma trận, ra verdict neo exact-SHA, **DỪNG** |
+| cấp lease | phiên thứ ba | tiêu thụ verdict, đo lại `base_sha`/write set, đẩy lease |
+| thi công | phiên thứ tư | chép ca `t98`, làm `M1`/`M2`/`M4` |
+
+Vì sao bốn chứ không hai: mỗi lần gộp hai vai vào một phiên, phép kiểm của phiên ấy trở thành
+uỷ quyền cho chính việc nó sắp làm. Đó là hình dạng đã làm `S2` kêu, và bản đầu của tệp này **tái
+tạo nó** ở tầng thẩm định — cross-review lượt 3 bắt được.
 
 ### 1 · Thẩm định ĐỘC LẬP `r2`/`r3` — đừng nhận lời khai của phiên soạn
 
@@ -70,7 +92,27 @@ Tám ô phải khớp **chính xác** bảng `nghiem_thu` của `r3`. Lệch b�
 Cần `actionlint 1.7.7` (`AL_VER=1.7.7 bash ops/cai_actionlint.sh`) **và** `shellcheck` — thiếu
 `actionlint` thì `t33` ĐỎ sẵn trên nền, không phải hồi quy.
 
-### 2 · Nếu thẩm định sạch: cấp lease
+### 2 · Nếu thẩm định sạch: ra VERDICT neo exact-SHA — **và DỪNG Ở ĐÂY**
+
+**Phiên bạn KHÔNG cấp lease.** Cross-review lượt 3 bắt (`P1`) rằng bản đầu của tệp này giao cho
+**cùng một phiên** vừa thẩm định vừa cấp — tức để chính phép kiểm của nó uỷ quyền cho writer kế
+tiếp. Đó **đúng hình dạng** đã làm `S2` kêu, chỉ lùi lên một tầng: bản bàn giao viết ra để chặn
+"một phiên tự thẩm định lời khai của mình" lại dựng "một phiên tự thẩm định rồi tự uỷ quyền".
+
+Việc của bạn kết thúc bằng một **verdict neo exact-SHA**, ghi vào `ops/reviews/`, nêu rõ:
+
+- SHA bạn đã thẩm định (đo bằng cách hỏi máy chủ, xem §Neo);
+- tám ô ma trận **bạn tự chạy** (không chép);
+- danh tính phiên bạn, tách bạch với phiên soạn và phiên cấp.
+
+### 3 · Phiên CẤP LEASE — phiên KHÁC nữa, tiêu thụ verdict ở §2
+
+**Điều kiện VÀO, kiểm trước khi làm gì khác:** verdict của §2 phải **tồn tại trong `ops/reviews/`**
+và **neo đúng SHA** mà bạn sắp cấp lease trên đó. Không có verdict, hoặc verdict neo SHA khác ⇒
+**DỪNG**. *Không có verdict* và *verdict sạch* nhìn giống hệt nhau nếu bạn không đi tìm — đây là lỗi
+kho đã trả giá (*"rỗng ≠ sạch"*), nên hãy tìm cho ra tệp, đừng suy từ việc không ai phản đối.
+
+Từ đây "bạn" = **phiên cấp lease**, không phải phiên thẩm định ở §1–§2.
 
 Lease đã soạn xong và **qua cổng** (`python3 ops/lease_publish.py check <lease>` ⇒ `rc=0` ĐĂNG ĐƯỢC).
 Trước khi đẩy, làm **ba** việc, không bỏ việc nào:
@@ -88,7 +130,7 @@ Trước khi đẩy, làm **ba** việc, không bỏ việc nào:
 **Đẩy xong phải ĐO là workflow đã chạy** (`list_workflow_runs` lọc theo nhánh) — đừng suy từ việc
 `git push` thành công; đã đo được là workflow có `paths:` **không chạy** ở lần đẩy tạo nhánh mới.
 
-### 3 · Thi công: phiên `claude` MỚI, KHÁC cả phiên soạn LẪN phiên bạn
+### 4 · Thi công: phiên `claude` MỚI, KHÁC cả ba phiên trên
 
 `ADR-0046` §3. Reviewer `codex`, sandbox riêng, **mirror git đầy đủ** — `#250` đo được: ba lượt chỉ có
 tệp `.md` cho `4 → 11 → 2` finding và **không con số phân rã nào**; lượt thứ tư có năng lực đo ra

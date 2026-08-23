@@ -141,9 +141,16 @@ verdict_usage_caveats:
     bố thì không**. Xoá nhánh `ops/pkg-windows` là biến đường dẫn ấy thành SHA không tra được, đúng
     thứ `CLAUDE.md` cảnh báo về `luu-tru/*`. **Mỏ neo BỀN của verdict là `verdict_sha256`
     (`c98d83b8bf1a00b009f0aaee0d7b5c580b4d2f28abc63dd809ba0326c7a6ed3c`) cộng chính tệp verdict nay đã nằm trên `master`** — nội dung kiểm lại được không cần
-    nhánh. Trước khi xoá `ops/pkg-windows`, tạo tag `luu-tru/*` cho ba commit công bố:
-    `5a4fcc21` · `9729f5f0` · `a0ab3b88`. **Phiên web KHÔNG tạo tag được** — đã đo: đẩy
-    `refs/tags/*` trả 403 do proxy egress tự sinh, không phải GitHub; việc này cần máy người giữ kho.
+    nhánh. **ĐÃ LÀM 23-08-2026.** Ba tag tồn tại, đo bằng `git rev-parse` chứ không tin log workflow:
+    `luu-tru/238-verdict-1` → `5a4fcc21…` · `-2` → `9729f5f0…` · `-3` → `a0ab3b88…`.
+    **Đính chính một câu của chính bản này:** *"phiên web KHÔNG tạo tag được"* là **quá rộng**.
+    Đúng là `git push refs/tags/*` trả 403 do proxy egress tự sinh — nhưng kho có sẵn đường khác
+    và phiên web dùng được: `workflow_dispatch` trên `.github/workflows/ops-don-ref.yml`, hành
+    động `tao-tag`, nơi `luu-tru/` được **miễn trừ có chủ đích** khỏi danh sách vùng bảo vệ đúng
+    để trình tự *"tạo tag TRƯỚC, rồi mới xoá"* chạy được. Thử khô trước rồi mới chạy thật:
+    run `32619494488` (khô) · `32619523955` (thật). **Còn cần máy người giữ kho:** xoá
+    `ops/pkg-windows` — `ops/*` bị chính workflow ấy **cấm tuyệt đối** (*"xoá phải do người,
+    không qua workflow"*), và đó là chốt đúng chứ không phải thiếu sót.
 - id: CAU-CHI-VI-TRI-MOT-CHIEU-trong-prompt-exec-4-DA-BI-THAY
   noi_dung: >-
     `ops/prompts/lease-dang-windows-exec-4-codex-20260822.md` viết *"Hồ sơ ở nhánh

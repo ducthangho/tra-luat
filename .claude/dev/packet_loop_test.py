@@ -19,11 +19,16 @@ Chạy: `python .claude/dev/packet_loop_test.py`
 
 from __future__ import annotations
 
+import json
 import os
+import platform
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
+
+from launcher import ky_ban_ghi_luot
 
 HERE = Path(__file__).resolve().parent
 CANONICAL = HERE / "packet_loop.py"
@@ -31,9 +36,35 @@ ROOT = HERE.parents[1]
 
 EXECUTOR = "claude"
 REVIEWER = "codex"
+BIEN_BC = "TL_MOI_TRUONG_JSON"
+VOID_DUYET = ["--khong-co-bang-chung", "--ai-cho-phep", "ducthangho",
+              "--can-cu", "ca test có người duyệt"]
+_ANH_SACH = []
 
 
 # --- hạ tầng ------------------------------------------------------------------
+
+
+def anh_doctor(**doi) -> str:
+    d = {"thieu_bat_buoc": [], "chua_xac_thuc": [],
+         "he_dieu_hanh": platform.system()}
+    d.update(doi)
+    if not doi and _ANH_SACH:
+        return _ANH_SACH[0]
+    f = Path(tempfile.mkdtemp(prefix="tl-doctor-")) / "doctor.json"
+    f.write_text(json.dumps(d), encoding="utf-8")
+    if not doi:
+        _ANH_SACH.append(str(f))
+    return str(f)
+
+
+def anh_doctor_ky(sd, **doi) -> str:
+    f = Path(anh_doctor(**doi)); d = json.loads(f.read_text(encoding="utf-8"))
+    st = json.loads((sd / "wp55.json").read_text(encoding="utf-8")); neo = st["attempt_anchor"]
+    d.update(nonce=neo["nonce"], attempt=neo["attempt"])
+    d["chu_ky"] = ky_ban_ghi_luot(d, st["hmac_key"])
+    f.write_text(json.dumps(d), encoding="utf-8")
+    return str(f)
 
 
 def run(script: Path, args, state_dir=None, env_extra=None):
@@ -44,10 +75,24 @@ def run(script: Path, args, state_dir=None, env_extra=None):
     env = os.environ.copy()
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     env.pop("PYTHONIOENCODING", None)
+    env[BIEN_BC] = anh_doctor()
     if env_extra:
         env.update(env_extra)
     p = subprocess.run(cmd, capture_output=True, env=env)
     return p.returncode, p.stdout, p.stderr
+
+
+def run_json_that(c, sd, reason="infrastructure", xong=False) -> Path:
+    launcher = c.script.with_name("launcher.py")
+    if not launcher.is_file():
+        launcher.write_text((HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
+    rr = c.tmp / f"runs{c._n}-{reason}-{int(xong)}-{time.time_ns()}"
+    cmd = [sys.executable, str(launcher), "run", "--workspace", str(ROOT),
+           "--run-root", str(rr), "--attempt-state", str(sd / "wp55.json"),
+           "--void-reason", reason, "--"]
+    cmd += [sys.executable, "-c", "pass"] if xong else [str(c.tmp / "khong-ton-tai")]
+    subprocess.run(cmd, capture_output=True, env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+    return next(rr.iterdir()) / "run.json"
 
 
 def _txt(b: bytes) -> str:
@@ -646,12 +691,132 @@ def case_doctrine_scan_bat_qua_ngat_dong(c: Ctx):
 # --- §8 quota không tiêu thụ attempt -------------------------------------------
 
 
+def _mo_luot(c: Ctx):
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    _doi(0, *run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)[0:1],
+         b"", "begin-attempt")
+    return sd
+
+
+def _void_may(c, sd, f, reason="infrastructure"):
+    return run(c.script, ["void-attempt", "--packet", 55, "--reason", reason,
+                          "--bang-chung", f], sd)
+
+
+def case_void_khong_bang_chung_phai_ghi_so(c: Ctx):
+    sd = _mo_luot(c)
+    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota"], sd)
+    _doi(10, rc, e, "quota trần không được hoàn ngoài hai cửa")
+    _doi(0, *run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota", *VOID_DUYET], sd)[0:1],
+         b"", "cửa có người duyệt")
+    st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    assert any(x.get("event") == "void_khong_co_bang_chung" for x in st["history"])
+
+
+def case_void_cung_run_hai_lan_bi_chan(c: Ctx):
+    sd = _mo_luot(c); f = run_json_that(c, sd)
+    lan_dau = _void_may(c, sd, f)
+    # Ca âm này không đo đường chấp nhận: nếu một bản khác siết từ chối mọi run,
+    # P6 phải đỏ còn P2 vẫn xanh. Bản chuẩn và đột biến bỏ-đốt đều đi tiếp ở đây.
+    if lan_dau[0] != 0:
+        _doi(10, lan_dau[0], lan_dau[2], "lần đầu bị từ chối")
+        return
+    rc, _, e = _void_may(c, sd, f)
+    _doi(10, rc, e, "phát lại"); assert "đã dùng".encode() in e
+
+
+def case_void_lat_phan_quyet_bi_hmac_chan(c: Ctx):
+    for kieu in ("run", "doctor"):
+        sd = _mo_luot(c); f = run_json_that(c, sd, xong=True) if kieu == "run" else Path(anh_doctor_ky(sd, thieu_bat_buoc=["rg"]))
+        d = json.loads(f.read_text(encoding="utf-8")); d["trang_thai" if kieu == "run" else "he_dieu_hanh"] = "hong"
+        f.write_text(json.dumps(d), encoding="utf-8")
+        rc, _, e = _void_may(c, sd, f)
+        _doi(10, rc, e, f"sửa {kieu}"); assert "bị sửa".encode() in e
+
+
+def case_void_run_cheo_luot_bi_chan(c: Ctx):
+    sd = _mo_luot(c); f = run_json_that(c, sd)
+    _doi(0, *run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota",
+                            *VOID_DUYET], sd)[0:1], b"", "đóng lượt 1 có ghi sổ")
+    _doi(0, *run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)[0:1],
+         b"", "mở lượt 2")
+    rc, _, e = _void_may(c, sd, f)
+    _doi(10, rc, e, "chéo lượt")
+
+
+def case_void_run_cu_khong_neo_co_thong_diep_rieng(c: Ctx):
+    sd = _mo_luot(c); cu = c.tmp / "run-cu.json"; cu.write_text('{"trang_thai":"hong"}', encoding="utf-8")
+    for f in (cu, anh_doctor()):
+        rc, _, e = _void_may(c, sd, f); _doi(10, rc, e, "bằng chứng cũ")
+        assert _txt(e) == "bằng chứng máy không có neo lượt — dùng `--khong-co-bang-chung` (có ghi sổ)"
+
+
+def case_void_run_that_dung_luot_duoc_tha(c: Ctx):
+    sd = _mo_luot(c); f = run_json_that(c, sd)
+    _doi(0, *_void_may(c, sd, f)[0:1], b"", "run thật đúng lượt")
+
+
+def case_void_hai_ly_do_khong_dung_chung_run(c: Ctx):
+    sd = _mo_luot(c); f = run_json_that(c, sd, reason="permission")
+    _doi(10, *_void_may(c, sd, f, "infrastructure")[0:1], b"", "một run chứng minh hai lý do")
+    _doi(0, *_void_may(c, sd, f, "permission")[0:1], b"", "permission có run riêng")
+
+
+def _anh_doctor_luot_truoc(c: Ctx, cham=False):
+    sd = _mo_luot(c); f = anh_doctor_ky(sd, thieu_bat_buoc=["rg"])
+    _doi(0, *_void_may(c, sd, f)[0:1], b"", "ảnh chụp trong lượt 1")
+    _doi(0, *run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)[0:1],
+         b"", "mở lượt 2")
+    if cham: Path(f).touch()
+    return sd, f
+
+
+def case_void_cung_anh_doctor_hai_luot_bi_chan(c: Ctx):
+    sd, f = _anh_doctor_luot_truoc(c)
+    rc, _, e = _void_may(c, sd, f)
+    _doi(10, rc, e, "phát lại ảnh lượt 1"); assert "neo thuộc lượt khác".encode() in e
+
+
+def case_void_touch_anh_doctor_cu_van_bi_chan(c: Ctx):
+    sd, f = _anh_doctor_luot_truoc(c, cham=True)
+    rc, _, e = _void_may(c, sd, f)
+    _doi(10, rc, e, "touch ảnh cũ"); assert "neo thuộc lượt khác".encode() in e
+
+
+def case_chup_anh_doctor_ky_noi_bo(c: Ctx):
+    sd = _mo_luot(c); f = c.tmp / "doctor-signed.json"
+    _doi(0, *run(c.script, ["chup-anh-doctor", "--packet", 55, "--out", f], sd)[0:1], b"", "chụp")
+    d = json.loads(f.read_text(encoding="utf-8")); st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    assert d["nonce"] == st["attempt_anchor"]["nonce"]
+    assert d["chu_ky"] == ky_ban_ghi_luot(d, st["hmac_key"])
+
+
+def case_anh_doctor_nen_chung_tuoi_chi_begin(c: Ctx):
+    for kieu in ("nen", "tuoi"):
+        f = anh_doctor(he_dieu_hanh="Plan9") if kieu == "nen" else anh_doctor(ok=True)
+        if kieu == "tuoi": os.utime(f, (time.time() - 7200,) * 2)
+        sd = c.sd(); _doi(0, *c.init(sd)[0:1], b"", "init")
+        _doi(10, *run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR,
+                                "--bang-chung-moi-truong", f], sd)[0:1], b"", f"begin {kieu}")
+        sd = _mo_luot(c)
+        f = anh_doctor_ky(sd, he_dieu_hanh="Plan9" if kieu == "nen" else platform.system(),
+                          thieu_bat_buoc=["codex"])
+        if kieu == "tuoi": os.utime(f, (time.time() - 7200,) * 2)
+        _doi(10 if kieu == "nen" else 0, *_void_may(c, sd, f)[0:1], b"", f"void {kieu}")
+
+
+def case_ma_in_thang_gioi_han_cung_principal(c: Ctx):
+    s = (HERE / "launcher.py").read_text(encoding="utf-8")
+    assert "chống VÔ Ý" in s and "chống PHÁT LẠI" in s and "cùng principal" in s
+
+
 def case_void_attempt_allowlist(c: Ctx):
     sd = c.sd()
     _doi(0, *c.init(sd)[0:1], b"", "init")
     rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
     _doi(0, rc, e, "begin-attempt")
-    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota"], sd)
+    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota", *VOID_DUYET], sd)
     _doi(0, rc, e, "quota phải hoàn được lượt")
 
 
@@ -665,7 +830,7 @@ def case_void_xong_van_mo_lai_duoc_luot(c: Ctx):
     _doi(0, *c.init(sd)[0:1], b"", "init")
     rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
     _doi(0, rc, e, "begin-attempt lần 1")
-    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota"], sd)
+    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota", *VOID_DUYET], sd)
     _doi(0, rc, e, "void vì quota")
     rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
     _doi(0, rc, e, "sau khi hoàn lượt phải mở lại được lượt")
@@ -808,7 +973,11 @@ def _lenh_con_tu_parser(script: Path) -> list:
     import importlib.util
     spec = importlib.util.spec_from_file_location("pl_parser", script)
     m = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(m)
+    sys.path.insert(0, str(script.parent))
+    try:
+        spec.loader.exec_module(m)
+    finally:
+        sys.path.pop(0)
     p = m.build_parser()
     for a in p._actions:
         ch = getattr(a, "choices", None)
@@ -838,6 +1007,7 @@ def _kich_ban_in(c: Ctx, codepage: str):
           "--evidence", "https://github.com/o/r/issues/55#issuecomment-1",
           "--expires-utc", _han_tuong_lai()], sd),
         (["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd),
+        (["chup-anh-doctor", "--packet", 55, "--out", c.tmp / f"doctor-{codepage}.json"], sd),
         (["next-comment", "--packet", 55], sd),
         (["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "7770000009"], sd),
         (["transition", "--packet", 55, "--to", "reviewing", "--comment-id", "7770000009",
@@ -845,7 +1015,7 @@ def _kich_ban_in(c: Ctx, codepage: str):
         # `void-attempt` in tiếng Việt lúc THÀNH CÔNG — lệnh generation 4 bỏ sót.
         # Đặt TRƯỚC `record-review`: một lượt đã có review thì không hoàn được nữa
         # (chốt `void_sau_review_bi_chan`), nên đặt sau sẽ đo nhầm đường thất bại.
-        (["void-attempt", "--packet", 55, "--reason", "quota"], sd),
+        (["void-attempt", "--packet", 55, "--reason", "quota", *VOID_DUYET], sd),
         # Mở lại lượt: đồng thời là phép đo chiều bắt-oan của
         # `void-reviewing-accepts-attempt-zero` — void xong phải chạy tiếp được.
         (["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd),
@@ -1098,6 +1268,10 @@ def case_legacy_state_khong_co_lease_bi_chan(c: Ctx):
     tt = c.state(sd, 55)
     if tt != "leased":
         raise AssertionError(f"fixture không đúng dạng bug gốc: state={tt!r}, phải là 'leased'")
+    p_state = Path(sd) / "wp55.json"
+    du_lieu = json.loads(p_state.read_text(encoding="utf-8"))
+    du_lieu["hmac_key"] = "0" * 64  # cô lập ca này: chỉ thiếu lease, không thiếu khoá mới
+    p_state.write_text(json.dumps(du_lieu), encoding="utf-8")
     rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
     _doi(8, rc, e, "begin-attempt (bản MỚI) nhận state cũ KHÔNG có 'lease' mà không chặn")
 
@@ -1618,7 +1792,7 @@ def case_g5_void_o_reviewing_khong_ket_thuc_bang_approve(c: Ctx):
     sd = c.sd()
     _doi(0, *c.init(sd)[0:1], b"", "init")
     c.den_reviewing(sd, 55, 1)
-    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota"], sd)
+    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "quota", *VOID_DUYET], sd)
     _doi(0, rc, e, "void-attempt vì quota")
     tt = c.state(sd, 55)
     if tt == "reviewing":
@@ -2020,6 +2194,18 @@ CASES = [
     ("accepted_chi_dat_duoc_qua_record_review", case_accepted_chi_dat_duoc_qua_record_review),
     ("vao_reviewing_phai_co_luot_dang_mo", case_vao_reviewing_phai_co_luot_dang_mo),
     ("doctrine_scan_bat_qua_ngat_dong", case_doctrine_scan_bat_qua_ngat_dong),
+    ("void_khong_bang_chung_phai_ghi_so", case_void_khong_bang_chung_phai_ghi_so),
+    ("void_cung_run_hai_lan_bi_chan", case_void_cung_run_hai_lan_bi_chan),
+    ("void_lat_phan_quyet_bi_hmac_chan", case_void_lat_phan_quyet_bi_hmac_chan),
+    ("void_run_cheo_luot_bi_chan", case_void_run_cheo_luot_bi_chan),
+    ("void_run_cu_khong_neo_co_thong_diep_rieng", case_void_run_cu_khong_neo_co_thong_diep_rieng),
+    ("void_run_that_dung_luot_duoc_tha", case_void_run_that_dung_luot_duoc_tha),
+    ("void_hai_ly_do_khong_dung_chung_run", case_void_hai_ly_do_khong_dung_chung_run),
+    ("void_cung_anh_doctor_hai_luot_bi_chan", case_void_cung_anh_doctor_hai_luot_bi_chan),
+    ("void_touch_anh_doctor_cu_van_bi_chan", case_void_touch_anh_doctor_cu_van_bi_chan),
+    ("chup_anh_doctor_ky_noi_bo", case_chup_anh_doctor_ky_noi_bo),
+    ("anh_doctor_nen_chung_tuoi_chi_begin", case_anh_doctor_nen_chung_tuoi_chi_begin),
+    ("ma_in_thang_gioi_han_cung_principal", case_ma_in_thang_gioi_han_cung_principal),
     ("void_attempt_allowlist", case_void_attempt_allowlist),
     ("void_xong_van_mo_lai_duoc_luot", case_void_xong_van_mo_lai_duoc_luot),
     ("void_attempt_ly_do_tu_che_bi_tu_choi", case_void_attempt_ly_do_tu_che_bi_tu_choi),
@@ -2981,6 +3167,54 @@ MUTANTS = {
         ('unicodedata.normalize("NFC", text)', "text.translate(_DONG_TU)"),
         ["ac18_nfkc_ligature_ff"],
     ),
+    "void_bo_ghi_so_nguoi_duyet": (
+        '        st["history"].append({"event": "void_khong_co_bang_chung", "reason": a.reason,\n'
+        '                              "ai_cho_phep": a.ai_cho_phep, "can_cu": a.can_cu})',
+        '        pass  # đột biến: cửa thoát không ghi sổ',
+        ["void_khong_bang_chung_phai_ghi_so"],
+    ),
+    "void_bo_dot_nonce": (
+        '    anchor["consumed"] = True', '    anchor["consumed"] = False  # đột biến',
+        ["void_cung_run_hai_lan_bi_chan"],
+    ),
+    "void_bo_kiem_hmac": (
+        '        if not hmac.compare_digest(d["chu_ky"], mong):', '        if False:',
+        ["void_lat_phan_quyet_bi_hmac_chan"],
+    ),
+    "void_bo_khop_nonce": (
+        '        if d["nonce"] != anchor["nonce"]:', '        if False:',
+        ["void_run_cheo_luot_bi_chan", "void_cung_anh_doctor_hai_luot_bi_chan",
+         "void_touch_anh_doctor_cu_van_bi_chan"],
+    ),
+    "void_gop_thong_diep_run_cu": (
+        '"bằng chứng máy không có neo lượt — dùng "', '"ảnh môi trường thiếu trường của `doctor --json` — "',
+        ["void_run_cu_khong_neo_co_thong_diep_rieng"],
+    ),
+    "void_siet_tu_choi_moi_run": (
+        '        if d.get("trang_thai") not in ("qua_han", "hong"):', '        if True:',
+        ["void_run_that_dung_luot_duoc_tha"],
+    ),
+    "void_bo_phan_biet_ly_do": (
+        '        if d.get("void_reason") != ly_do:', '        if False:',
+        ["void_hai_ly_do_khong_dung_chung_run"],
+    ),
+    "doctor_bo_ky_anh": (
+        '    d["chu_ky"] = ky_ban_ghi_luot(d, st["hmac_key"])',
+        '    d.pop("chu_ky", None)  # đột biến: ảnh writer không ký',
+        ["chup_anh_doctor_ky_noi_bo"],
+    ),
+    "begin_bo_kiem_nen_tuoi_dung_chung": (
+        '    anh = _kiem_anh_moi_truong(getattr(a, "bang_chung_moi_truong", None)\n'
+        '                               or os.environ.get(BIEN_BANG_CHUNG), can_sach=True)',
+        '    anh = _doc_anh_moi_truong(getattr(a, "bang_chung_moi_truong", None)\n'
+        '                              or os.environ.get(BIEN_BANG_CHUNG))[0]  # đột biến',
+        ["anh_doctor_nen_chung_tuoi_chi_begin"],
+    ),
+    "void_khoi_phuc_kiem_tuoi": (
+        '    d = _kiem_anh_moi_truong(duong, can_sach=False, d=d, kiem_tuoi=False)',
+        '    d = _kiem_anh_moi_truong(duong, can_sach=False, d=d, kiem_tuoi=True)',
+        ["anh_doctor_nen_chung_tuoi_chi_begin"],
+    ),
     # Hai chốt của `void-reviewing-accepts-attempt-zero`, hai đột biến RỜI NHAU.
     "bo_void_roi_reviewing": (
         '    if st["state"] == "reviewing":\n        st["state"] = "running"',
@@ -3167,6 +3401,8 @@ def main() -> int:
             for t, th in cap:
                 than = than.replace(t, th, 1)
             mut.write_text(than, encoding="utf-8", newline="\n")
+            (mut_dir / "launcher.py").write_text(
+                (HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
             doi_chung = _doi_chung_khac_ho(phai_chet)
             ket_mut = chay_suite(mut, mut_dir, chi_chay=set(phai_chet) | set(doi_chung))
             song = [t for t in phai_chet if ket_mut.get(t) is None]

@@ -16,6 +16,7 @@ import argparse
 import ast
 import contextlib
 import hashlib
+import hmac
 import importlib.util
 import io
 import json
@@ -5611,9 +5612,34 @@ def t143_mcp_endpoint_do_DAU_KIA_cua_day_va_KHONG_duoc_tinh_la_lam_duoc_viec():
         m._git, m.shutil.which = goc_git, goc_which
 
 
+@ca
+def t144_run_ghi_nonce_va_hmac_khong_lo_khoa():
+    with San() as s:
+        repo = tao_repo(s); rr = s / "runs"; state = s / "wp55.json"
+        nonce, khoa = "1" * 32, "2" * 64
+        state.write_text(json.dumps({"attempt_open": True, "hmac_key": khoa,
+                                     "attempt_anchor": {"attempt": 1, "nonce": nonce,
+                                                        "consumed": False}}), encoding="utf-8")
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                 "--attempt-state", str(state), "--void-reason", "infrastructure",
+                 "--", PY, "-c", "pass")
+        bang(r.returncode == 0, f"run có neo hỏng: {r.returncode} {r.stderr}")
+        raw = (next(rr.iterdir()) / "run.json").read_text(encoding="utf-8")
+        d = json.loads(raw); chu_ky = d.pop("chu_ky", None)
+        than = json.dumps(d, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+                          allow_nan=False).encode("utf-8")
+        mong = hmac.new(bytes.fromhex(khoa), than, hashlib.sha256).hexdigest()
+        bang(d.get("nonce") == nonce and chu_ky == mong, "nonce/HMAC không khớp bản ghi")
+        bang(khoa not in raw, "khoá HMAC bị ghi vào run.json")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
+    ("bo_ky_ban_ghi_luot",
+     ('    if khoa_ky:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)',
+      '    if False:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)'),
+     ["t144_run_ghi_nonce_va_hmac_khong_lo_khoa"]),
     # Ca "rc=0 ma stdout RONG" duoc chan o BON cho doc lap: guard trong
     # _git_mot_dong, kiem SHA_RE trong chot_head, kiem `not top` trong chot_workspace,
     # va kiem `not ref` trong chot_ref. DA DO: bo RIENG bat ky cho nao cung KHONG ca nao chet -

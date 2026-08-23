@@ -33,6 +33,7 @@ import os
 import platform
 import re
 import secrets
+import subprocess
 import sys
 import time
 import unicodedata
@@ -509,9 +510,11 @@ def _doc_anh_moi_truong(duong):
     return d, ""
 
 
-def _kiem_anh_moi_truong(duong, can_sach: bool) -> dict:
+def _kiem_anh_moi_truong(duong, can_sach: bool, d=None) -> dict:
     """Một phép kiểm nền + tuổi dùng chung cho begin và void (G6)."""
-    d, loi = _doc_anh_moi_truong(duong)
+    d, loi = _doc_anh_moi_truong(duong) if d is None else (d, "")
+    if not isinstance(d, dict) or not {"thieu_bat_buoc", "chua_xac_thuc", "he_dieu_hanh"} <= d.keys():
+        d, loi = None, "ảnh môi trường thiếu trường của `doctor --json`"
     if d is None:
         _die(RC_MOI_TRUONG, f"KHÔNG ĐỌC ĐƯỢC: {loi}")
     if d["he_dieu_hanh"] != platform.system():
@@ -532,10 +535,10 @@ def _kiem_bang_chung_may(duong, ly_do: str, anchor: dict, hmac_key: str) -> None
         d = json.loads(Path(duong).read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as e:
         _die(RC_MOI_TRUONG, f"KHÔNG ĐỌC ĐƯỢC bằng chứng máy: {type(e).__name__}")
-    if isinstance(d, dict) and ("trang_thai" in d or "run_id" in d):
-        if not d.get("nonce") or not d.get("chu_ky"):
-            _die(RC_MOI_TRUONG, "bản ghi launcher không có neo lượt — dùng "
-                 "`--khong-co-bang-chung` (có ghi sổ)")
+    if not isinstance(d, dict) or not d.get("nonce") or not d.get("chu_ky"):
+        _die(RC_MOI_TRUONG, "bằng chứng máy không có neo lượt — dùng "
+             "`--khong-co-bang-chung` (có ghi sổ)")
+    if isinstance(d, dict):
         if d["nonce"] != anchor["nonce"]:
             _die(RC_MOI_TRUONG, "neo thuộc lượt khác")
         if not isinstance(d["chu_ky"], str) or not re.fullmatch(r"[0-9a-f]{64}", d["chu_ky"]):
@@ -546,15 +549,13 @@ def _kiem_bang_chung_may(duong, ly_do: str, anchor: dict, hmac_key: str) -> None
             _die(RC_MOI_TRUONG, "bản ghi đã bị sửa sau khi launcher ghi")
         if not hmac.compare_digest(d["chu_ky"], mong):
             _die(RC_MOI_TRUONG, "bản ghi đã bị sửa sau khi launcher ghi")
-        if d.get("void_reason") != ly_do:
-            _die(RC_MOI_TRUONG, f"bản ghi buộc cho {d.get('void_reason')!r}, không phải {ly_do!r}")
-        if d.get("trang_thai") not in ("qua_han", "hong"):
-            _die(RC_MOI_TRUONG, "bản ghi không mang phán quyết lỗi hạ tầng")
-        return
-    d = _kiem_anh_moi_truong(duong, can_sach=False)
-    if not isinstance(anchor.get("opened_at"), (int, float)) or \
-            Path(duong).stat().st_mtime < anchor["opened_at"]:
-        _die(RC_MOI_TRUONG, "ảnh doctor có trước khi lượt hiện tại mở — chụp lại")
+        if "trang_thai" in d or "run_id" in d:
+            if d.get("void_reason") != ly_do:
+                _die(RC_MOI_TRUONG, f"bản ghi buộc cho {d.get('void_reason')!r}, không phải {ly_do!r}")
+            if d.get("trang_thai") not in ("qua_han", "hong"):
+                _die(RC_MOI_TRUONG, "bản ghi không mang phán quyết lỗi hạ tầng")
+            return
+    d = _kiem_anh_moi_truong(duong, can_sach=False, d=d)
     truong = "thieu_bat_buoc" if ly_do == "infrastructure" else "chua_xac_thuc"
     if not (d.get(truong) or []):
         _die(RC_MOI_TRUONG, f"ảnh doctor không chứng minh {ly_do!r}")
@@ -965,6 +966,32 @@ def cmd_void_attempt(a, state_dir: Path) -> int:
     st["history"].append({"event": "void_attempt", "reason": a.reason})
     _save(state_dir, st)
     print(f"đã hoàn một lượt vì {a.reason} — còn dùng {st['attempts_used']}/{st['attempts_limit']}")
+    return RC_OK
+
+
+def cmd_chup_anh_doctor(a, state_dir: Path) -> int:
+    """Chụp doctor rồi ký trong tiến trình này; khoá HMAC không đi qua argv."""
+    st = _load(state_dir, a.packet); anchor = st.get("attempt_anchor")
+    if not st.get("attempt_open") or not isinstance(anchor, dict) or anchor.get("consumed"):
+        _die(RC_STATE, "không có lượt đang mở để neo ảnh doctor")
+    try:
+        kq = subprocess.run([sys.executable, str(Path(__file__).with_name("launcher.py")),
+                             "doctor", "--json"], capture_output=True)
+        d = json.loads(kq.stdout)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as e:
+        _die(RC_MOI_TRUONG, f"không chụp được `doctor --json`: {type(e).__name__}")
+    if not isinstance(d, dict) or not {"thieu_bat_buoc", "chua_xac_thuc", "he_dieu_hanh"} <= d.keys():
+        _die(RC_MOI_TRUONG, "ảnh môi trường thiếu trường của `doctor --json`")
+    d.update(nonce=anchor["nonce"], attempt=anchor["attempt"])
+    d["chu_ky"] = ky_ban_ghi_luot(d, st["hmac_key"])
+    out = Path(a.out)
+    if out.exists():
+        _die(RC_ARG, f"không ghi đè ảnh đã có: {out}")
+    try:
+        out.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    except OSError as e:
+        _die(RC_MOI_TRUONG, f"không ghi được ảnh doctor: {e}")
+    print(f"đã chụp ảnh doctor có neo lượt tại {a.out}")
     return RC_OK
 
 
@@ -1546,6 +1573,11 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--ai-cho-phep", help=f"phải thuộc {NGUOI_CO_THAM_QUYEN}")
     q.add_argument("--can-cu", help="căn cứ người duyệt cho phép hoàn lượt")
     q.set_defaults(fn=cmd_void_attempt)
+
+    q = sub.add_parser("chup-anh-doctor", help="chụp và ký doctor cho lượt đang mở")
+    q.add_argument("--packet", type=int, required=True)
+    q.add_argument("--out", required=True)
+    q.set_defaults(fn=cmd_chup_anh_doctor)
 
     q = sub.add_parser("record-review", help="ghi một lượt review")
     q.add_argument("--packet", type=int, required=True)

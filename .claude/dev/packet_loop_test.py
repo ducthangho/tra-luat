@@ -28,6 +28,8 @@ import tempfile
 import time
 from pathlib import Path
 
+from launcher import ky_ban_ghi_luot
+
 HERE = Path(__file__).resolve().parent
 CANONICAL = HERE / "packet_loop.py"
 ROOT = HERE.parents[1]
@@ -53,6 +55,15 @@ def anh_doctor(**doi) -> str:
     f.write_text(json.dumps(d), encoding="utf-8")
     if not doi:
         _ANH_SACH.append(str(f))
+    return str(f)
+
+
+def anh_doctor_ky(sd, **doi) -> str:
+    f = Path(anh_doctor(**doi)); d = json.loads(f.read_text(encoding="utf-8"))
+    st = json.loads((sd / "wp55.json").read_text(encoding="utf-8")); neo = st["attempt_anchor"]
+    d.update(nonce=neo["nonce"], attempt=neo["attempt"])
+    d["chu_ky"] = ky_ban_ghi_luot(d, st["hmac_key"])
+    f.write_text(json.dumps(d), encoding="utf-8")
     return str(f)
 
 
@@ -716,11 +727,12 @@ def case_void_cung_run_hai_lan_bi_chan(c: Ctx):
 
 
 def case_void_lat_phan_quyet_bi_hmac_chan(c: Ctx):
-    sd = _mo_luot(c); f = run_json_that(c, sd, xong=True)
-    d = json.loads(f.read_text(encoding="utf-8")); d["trang_thai"] = "hong"
-    f.write_text(json.dumps(d), encoding="utf-8")
-    rc, _, e = _void_may(c, sd, f)
-    _doi(10, rc, e, "lật phán quyết"); assert "bị sửa".encode() in e
+    for kieu in ("run", "doctor"):
+        sd = _mo_luot(c); f = run_json_that(c, sd, xong=True) if kieu == "run" else Path(anh_doctor_ky(sd, thieu_bat_buoc=["rg"]))
+        d = json.loads(f.read_text(encoding="utf-8")); d["trang_thai" if kieu == "run" else "he_dieu_hanh"] = "hong"
+        f.write_text(json.dumps(d), encoding="utf-8")
+        rc, _, e = _void_may(c, sd, f)
+        _doi(10, rc, e, f"sửa {kieu}"); assert "bị sửa".encode() in e
 
 
 def case_void_run_cheo_luot_bi_chan(c: Ctx):
@@ -734,11 +746,10 @@ def case_void_run_cheo_luot_bi_chan(c: Ctx):
 
 
 def case_void_run_cu_khong_neo_co_thong_diep_rieng(c: Ctx):
-    sd = _mo_luot(c); f = c.tmp / "run-cu.json"
-    f.write_text('{"trang_thai":"hong"}', encoding="utf-8")
-    rc, _, e = _void_may(c, sd, f)
-    _doi(10, rc, e, "run cũ")
-    assert _txt(e) == "bản ghi launcher không có neo lượt — dùng `--khong-co-bang-chung` (có ghi sổ)"
+    sd = _mo_luot(c); cu = c.tmp / "run-cu.json"; cu.write_text('{"trang_thai":"hong"}', encoding="utf-8")
+    for f in (cu, anh_doctor()):
+        rc, _, e = _void_may(c, sd, f); _doi(10, rc, e, "bằng chứng cũ")
+        assert _txt(e) == "bằng chứng máy không có neo lượt — dùng `--khong-co-bang-chung` (có ghi sổ)"
 
 
 def case_void_run_that_dung_luot_duoc_tha(c: Ctx):
@@ -752,15 +763,33 @@ def case_void_hai_ly_do_khong_dung_chung_run(c: Ctx):
     _doi(0, *_void_may(c, sd, f, "permission")[0:1], b"", "permission có run riêng")
 
 
-def case_void_cung_anh_doctor_hai_luot_bi_chan(c: Ctx):
-    sd = _mo_luot(c); f = anh_doctor(thieu_bat_buoc=["rg"])
+def _anh_doctor_luot_truoc(c: Ctx, cham=False):
+    sd = _mo_luot(c); f = anh_doctor_ky(sd, thieu_bat_buoc=["rg"])
     _doi(0, *_void_may(c, sd, f)[0:1], b"", "ảnh chụp trong lượt 1")
     _doi(0, *run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)[0:1],
          b"", "mở lượt 2")
+    if cham: Path(f).touch()
+    return sd, f
+
+
+def case_void_cung_anh_doctor_hai_luot_bi_chan(c: Ctx):
+    sd, f = _anh_doctor_luot_truoc(c)
     rc, _, e = _void_may(c, sd, f)
-    _doi(10, rc, e, "phát lại cùng ảnh ở lượt 2")
-    assert "trước khi lượt hiện tại mở".encode() in e
-    assert json.loads((sd / "wp55.json").read_text(encoding="utf-8"))["attempts_used"] == 1
+    _doi(10, rc, e, "phát lại ảnh lượt 1"); assert "neo thuộc lượt khác".encode() in e
+
+
+def case_void_touch_anh_doctor_cu_van_bi_chan(c: Ctx):
+    sd, f = _anh_doctor_luot_truoc(c, cham=True)
+    rc, _, e = _void_may(c, sd, f)
+    _doi(10, rc, e, "touch ảnh cũ"); assert "neo thuộc lượt khác".encode() in e
+
+
+def case_chup_anh_doctor_ky_noi_bo(c: Ctx):
+    sd = _mo_luot(c); f = c.tmp / "doctor-signed.json"
+    _doi(0, *run(c.script, ["chup-anh-doctor", "--packet", 55, "--out", f], sd)[0:1], b"", "chụp")
+    d = json.loads(f.read_text(encoding="utf-8")); st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    assert d["nonce"] == st["attempt_anchor"]["nonce"]
+    assert d["chu_ky"] == ky_ban_ghi_luot(d, st["hmac_key"])
 
 
 def case_anh_doctor_nen_tuoi_dung_chung_hai_duong(c: Ctx):
@@ -771,8 +800,8 @@ def case_anh_doctor_nen_tuoi_dung_chung_hai_duong(c: Ctx):
         _doi(10, *run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR,
                                 "--bang-chung-moi-truong", f], sd)[0:1], b"", f"begin {kieu}")
         sd = _mo_luot(c)
-        d = json.loads(Path(f).read_text(encoding="utf-8")); d["thieu_bat_buoc"] = ["codex"]
-        Path(f).write_text(json.dumps(d), encoding="utf-8")
+        f = anh_doctor_ky(sd, he_dieu_hanh="Plan9" if kieu == "nen" else platform.system(),
+                          thieu_bat_buoc=["codex"])
         if kieu == "tuoi": os.utime(f, (time.time() - 7200,) * 2)
         _doi(10, *_void_may(c, sd, f)[0:1], b"", f"void {kieu}")
 
@@ -978,6 +1007,7 @@ def _kich_ban_in(c: Ctx, codepage: str):
           "--evidence", "https://github.com/o/r/issues/55#issuecomment-1",
           "--expires-utc", _han_tuong_lai()], sd),
         (["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd),
+        (["chup-anh-doctor", "--packet", 55, "--out", c.tmp / f"doctor-{codepage}.json"], sd),
         (["next-comment", "--packet", 55], sd),
         (["record-post", "--packet", 55, "--for", "reviewing", "--comment-id", "7770000009"], sd),
         (["transition", "--packet", 55, "--to", "reviewing", "--comment-id", "7770000009",
@@ -2172,6 +2202,8 @@ CASES = [
     ("void_run_that_dung_luot_duoc_tha", case_void_run_that_dung_luot_duoc_tha),
     ("void_hai_ly_do_khong_dung_chung_run", case_void_hai_ly_do_khong_dung_chung_run),
     ("void_cung_anh_doctor_hai_luot_bi_chan", case_void_cung_anh_doctor_hai_luot_bi_chan),
+    ("void_touch_anh_doctor_cu_van_bi_chan", case_void_touch_anh_doctor_cu_van_bi_chan),
+    ("chup_anh_doctor_ky_noi_bo", case_chup_anh_doctor_ky_noi_bo),
     ("anh_doctor_nen_tuoi_dung_chung_hai_duong", case_anh_doctor_nen_tuoi_dung_chung_hai_duong),
     ("ma_in_thang_gioi_han_cung_principal", case_ma_in_thang_gioi_han_cung_principal),
     ("void_attempt_allowlist", case_void_attempt_allowlist),
@@ -3151,10 +3183,11 @@ MUTANTS = {
     ),
     "void_bo_khop_nonce": (
         '        if d["nonce"] != anchor["nonce"]:', '        if False:',
-        ["void_run_cheo_luot_bi_chan"],
+        ["void_run_cheo_luot_bi_chan", "void_cung_anh_doctor_hai_luot_bi_chan",
+         "void_touch_anh_doctor_cu_van_bi_chan"],
     ),
     "void_gop_thong_diep_run_cu": (
-        '"bản ghi launcher không có neo lượt — dùng "', '"ảnh môi trường thiếu trường của `doctor --json` — "',
+        '"bằng chứng máy không có neo lượt — dùng "', '"ảnh môi trường thiếu trường của `doctor --json` — "',
         ["void_run_cu_khong_neo_co_thong_diep_rieng"],
     ),
     "void_siet_tu_choi_moi_run": (
@@ -3165,11 +3198,10 @@ MUTANTS = {
         '        if d.get("void_reason") != ly_do:', '        if False:',
         ["void_hai_ly_do_khong_dung_chung_run"],
     ),
-    "void_bo_buoc_anh_vao_luot": (
-        '    if not isinstance(anchor.get("opened_at"), (int, float)) or \\\n'
-        '            Path(duong).stat().st_mtime < anchor["opened_at"]:',
-        '    if False:  # đột biến: ảnh cũ được phát lại ở lượt mới',
-        ["void_cung_anh_doctor_hai_luot_bi_chan"],
+    "doctor_bo_ky_anh": (
+        '    d["chu_ky"] = ky_ban_ghi_luot(d, st["hmac_key"])',
+        '    d.pop("chu_ky", None)  # đột biến: ảnh writer không ký',
+        ["chup_anh_doctor_ky_noi_bo"],
     ),
     "begin_bo_kiem_nen_tuoi_dung_chung": (
         '    anh = _kiem_anh_moi_truong(getattr(a, "bang_chung_moi_truong", None)\n'
@@ -3179,7 +3211,7 @@ MUTANTS = {
         ["anh_doctor_nen_tuoi_dung_chung_hai_duong"],
     ),
     "void_bo_kiem_nen_tuoi_dung_chung": (
-        '    d = _kiem_anh_moi_truong(duong, can_sach=False)',
+        '    d = _kiem_anh_moi_truong(duong, can_sach=False, d=d)',
         '    d = _doc_anh_moi_truong(duong)[0]  # đột biến',
         ["anh_doctor_nen_tuoi_dung_chung_hai_duong"],
     ),

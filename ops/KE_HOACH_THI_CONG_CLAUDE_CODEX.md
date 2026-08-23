@@ -419,6 +419,8 @@ $Begin = python .claude/dev/packet_loop.py begin-attempt --packet <issue> --prov
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if ($Begin -notmatch 'nonce=([0-9a-f]{32})') { throw 'begin-attempt không in nonce hợp lệ' }
 $AttemptNonce = $Matches[1]
+# Ảnh doctor dùng để void phải được chụp + ký trong packet-loop; không tự ký bằng argv.
+python .claude/dev/packet_loop.py chup-anh-doctor --packet <issue> --out <doctor-signed.json>
 # Lượt launcher kế tiếp phải nhận --attempt-state <state/wpN.json> và
 # --void-reason <infrastructure|permission>; nonce không được tự gõ lại.
 # Executor làm việc, chạy gate, đăng handoff; lấy GitHub comment ID thật.

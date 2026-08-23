@@ -51,3 +51,30 @@ verdict_usage_caveats:
 - id: head-da-doi-sau-verdict
   noi_dung: >-
     Verdict neo `825558a5`; head được merge là `5a96c1a`. Theo §9 bằng chứng cũ HẾT HIỆU LỰC, nên bản vá 5 finding CHƯA AI REVIEW. Class `routine` nên §8 không đòi cross-provider; cross-review ở đây là nâng lớp tự nguyện.
+- id: DELTA-SAU-VERDICT-DA-DO-khong-tieu-them-mot-vong-review
+  noi_dung: >-
+    Bổ sung 23-08-2026 bởi phiên điều phối, đóng đúng caveat `head-da-doi-sau-verdict` ở trên.
+    **KHÔNG phải một lượt review** — là một phép ĐO, và khai đúng phạm vi của nó.
+    Delta chưa ai review (`825558a5..5a96c1a`) đo được là **MỘT tệp, `+40/−5`, thuần tài liệu**:
+    `ops/THAM_DINH_VONG_LAP_TRI_THUC_20260821.md`. Nội dung của nó là **bản chép kết luận của
+    chính reviewer**, mỗi đoạn ghi rõ đóng finding nào (`codex P1`, `codex P2`). Hai khẳng định
+    MÁY ĐO ĐƯỢC trong bản vá ấy đã kiểm, cả hai ĐÚNG: (1) băm đề bài vòng 2 sửa thành
+    `3602eaf14ec068fb2f2c597c451280311eb95cb0d4ae9faf30422a796971ac77` — hash lại
+    `ops/tham-dinh/tri-thuc-20260821/de-bai-vong2.md` trên `master` cho đúng chuỗi ấy, và
+    `BAM.txt` cũng khớp; bản cũ `3602eafe…` sai đúng **nibble thứ 8**. (2) Câu *"0 occurrence
+    toàn kho **tại neo `0333948`**"* — đo: **0** lần xuất hiện tại neo ấy, và **22** tại
+    `5a96c1a`, khớp TUYỆT ĐỐI con số reviewer nêu.
+    **Phần KHÔNG kiểm được, nói thẳng:** các đoạn văn xuôi còn lại là bản chép kết luận của
+    reviewer — không có nguồn độc lập nào để đối chiếu, nên chúng KHÔNG được nâng lên mức
+    "đã xác nhận". Chúng chỉ ở mức "chép đúng thứ reviewer đã viết".
+    **Vì sao không tiêu một vòng review:** `review_class` của gói này là `routine`, và §8 KHÔNG
+    đòi cross-provider — lượt đã chạy là NÂNG LỚP tự nguyện. Một vòng nữa sẽ bắt reviewer soi một
+    văn bản mà nội dung là *"reviewer đã nói X"*, với chính họ là người nói X. Người giữ kho quyết
+    phương án này in-session 23-08-2026.
+- id: BAY-DEM-git-grep-c-dem-DONG-khong-dem-LAN-XUAT-HIEN
+  noi_dung: >-
+    Ghi ra vì phiên sau sẽ đếm lại đúng con số này. `git grep -c <mẫu> <ref>` đếm **số DÒNG có
+    khớp trên mỗi tệp**, KHÔNG đếm **số lần xuất hiện**. Trên `5a96c1a` nó cho **20**, còn
+    `git grep -o … | wc -l` cho **22** — và 22 mới là con số reviewer nêu. Dừng ở `-c` thì đã báo
+    một chênh lệch KHÔNG CÓ THẬT và nghi oan bản vá. Cùng họ với *"cổng xanh nhờ `rc=0`"*: một
+    lệnh trả số không có nghĩa nó trả **số mình đang hỏi**.

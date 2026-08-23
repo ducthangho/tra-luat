@@ -1310,7 +1310,12 @@ def t32_buoc_chon_lease_KHONG_duoc_quet_CA_THU_MUC():
 
 @ca
 def t33_workflow_dang_lease_phai_qua_actionlint():
-    """`actionlint` phải XANH trên mọi workflow — và THIẾU công cụ là ĐỎ, không phải bỏ qua.
+    """`actionlint` phải XANH trên `ops-publish-lease.yml` — và THIẾU công cụ là ĐỎ.
+
+    PHẠM VI, nói đúng bằng phép đo: ca này lint ĐÚNG MỘT tệp — `ops-publish-lease.yml`,
+    workflow mà bộ test này là cổng của nó. Nó KHÔNG lint bốn workflow còn lại của kho.
+    Bản trước viết "phải XANH trên mọi workflow" — lời khai rộng hơn thân ca, tức hình dạng
+    A trong chính ca sinh ra để chống một cổng nói dối (#269 mục N3).
 
     "YAML parse được" KHÁC "GitHub NHẬN". Đo 16-08-2026: `ops-don-ref.yml` bị GitHub từ
     chối, dấu hiệu là một run mang tên ĐƯỜNG DẪN TỆP, 0 job, `conclusion: failure` — lỗi
@@ -3118,6 +3123,22 @@ def t97_kiem_dau_toan_kho_phai_fail_close_khi_git_that_bai():
                 "t97: `_kiem_dau_toan_kho` coi git lỗi thật (rev-parse --git-dir rc!=0) "
                 "là 'không phải kho' và bỏ qua lặng lẽ — cổng đăng lease sẽ KHÔNG bắt "
                 "được lease đã đăng trùng khi git tạm thời lỗi")
+
+
+@ca
+def t98_truc_phan_biet_la_NEN_chu_khong_phai_TEN_TEP():
+    """Cặp với `t73`: CÙNG tuple, ĐỔI mỗi nền, phải ra kết quả NGƯỢC nhau.
+
+    `t73` một mình chỉ chứng minh "posix thì không bỏ qua". Nó KHÔNG chứng minh quyết
+    định ấy tra theo NỀN: thay mệnh đề nền bằng phân biệt theo TÊN TỆP vẫn cho 97/97,
+    rc=0 trên toàn chân Ubuntu (đo 23-08-2026). Ca này khoá đúng cái trục ấy.
+
+    Đi qua `main()`, KHÔNG gọi thẳng `_ly_do_bo_qua_workflow` — tuân `r4/Q8`.
+    """
+    def bo(): raise BoQuaNen(WORKFLOW_DANG, "dang")
+    rc, out = _chay_main_meta(bo, "nt")
+    bang(rc == 0 and "bỏ qua=1" in out,
+         f"cùng tuple mà nền nt KHÔNG bỏ qua: rc={rc}, {out!r}")
 
 
 def main() -> int:

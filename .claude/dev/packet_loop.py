@@ -556,18 +556,19 @@ LY_DO_CAN_BANG_CHUNG = ("infrastructure", "permission")
 
 def _kiem_bang_chung_ha_tang(duong, ly_do) -> None:
     """Bằng chứng MÁY cho `infrastructure`/`permission`. Fail-close, ba trạng thái."""
+    # `run.json` PHẢI thử TRƯỚC. Bản đầu thử `doctor` trước rồi mới tới đây, nhưng một
+    # `run.json` là JSON hợp lệ mà THIẾU trường của `doctor`, nên nó rơi vào
+    # `khong_doc_duoc` và chết ngay — đường sổ launcher KHÔNG BAO GIỜ tới được, dù M3
+    # khai là có. Tự bắt bằng cách chạy thử đúng ca ấy, không phải bằng cách đọc lại mã.
+    if _doc_so_lauch(duong) is not None:
+        return
     trang_thai, d, vi_sao = _doc_anh_moi_truong(duong)
     if trang_thai == BC_KHONG_DOC_DUOC:
         _die(RC_MOI_TRUONG, f"KHÔNG ĐỌC ĐƯỢC: {vi_sao} — không hoàn lượt trên phép đo không đọc được")
     if trang_thai == BC_KHONG:
-        # Cùng hàm đọc, nhưng ở đây `run.json` của launcher cũng là bằng chứng hợp lệ,
-        # nên thử nhánh thứ hai trước khi từ chối.
-        d = _doc_so_lauch(duong)
-        if d is None:
-            _die(RC_MOI_TRUONG,
-                 f"--reason {ly_do} đòi BẰNG CHỨNG MÁY: ảnh `doctor --json` hoặc `run.json` của "
-                 f"launcher. Không có thì dùng --khong-co-bang-chung (có ghi sổ). ({vi_sao})")
-        return
+        _die(RC_MOI_TRUONG,
+             f"--reason {ly_do} đòi BẰNG CHỨNG MÁY: ảnh `doctor --json` hoặc `run.json` của "
+             f"launcher. Không có thì dùng --khong-co-bang-chung (có ghi sổ). ({vi_sao})")
     thieu = d.get("thieu_bat_buoc") or []
     chua_xt = d.get("chua_xac_thuc") or []
     if ly_do == "infrastructure" and not thieu:

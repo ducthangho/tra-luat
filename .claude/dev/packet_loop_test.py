@@ -736,6 +736,21 @@ def case_void_ha_tang_co_bang_chung_thi_qua(c: Ctx):
     _doi(0, rc, e, "có bằng chứng thật mà vẫn bị chặn")
 
 
+def case_void_ha_tang_nhan_so_launcher(c: Ctx):
+    """N4c — `run.json` của launcher LÀ bằng chứng. Bản đầu khai đường này mà mã không có:
+    run.json là JSON hợp lệ nhưng thiếu trường của `doctor`, nên rơi vào `khong_doc_duoc`
+    và chết trước khi tới nhánh đọc sổ. Chỉ lộ khi chạy thử, không lộ khi đọc mã."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+    _doi(0, rc, e, "begin-attempt")
+    f = Path(tempfile.mkdtemp(prefix="tl-run-")) / "run.json"
+    f.write_text(json.dumps({"trang_thai": "xong", "ma_thoat": 12, "stdout_byte": 0}), encoding="utf-8")
+    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "infrastructure",
+                              "--bang-chung", str(f)], sd)
+    _doi(0, rc, e, "sổ launcher mã 12 (thiếu công cụ) mà vẫn bị chặn")
+
+
 def case_void_quota_khong_doi_bang_chung(c: Ctx):
     """N6 — chiều BẮT OAN. `quota` ở phía nhà cung cấp, không để lại dấu vết máy."""
     sd = c.sd()
@@ -2146,6 +2161,7 @@ CASES = [
     ("mt_anh_hong_la_KHONG_DOC_DUOC", case_mt_anh_hong_la_KHONG_DOC_DUOC_khong_phai_thieu),
     ("void_ha_tang_khong_bang_chung_thi_tu_choi", case_void_ha_tang_khong_bang_chung_thi_tu_choi),
     ("void_ha_tang_co_bang_chung_thi_qua", case_void_ha_tang_co_bang_chung_thi_qua),
+    ("void_ha_tang_nhan_so_launcher", case_void_ha_tang_nhan_so_launcher),
     ("void_quota_khong_doi_bang_chung", case_void_quota_khong_doi_bang_chung),
     ("void_duong_thoat_phai_co_tham_quyen_va_ghi_so", case_void_duong_thoat_phai_co_tham_quyen_va_ghi_so),
     ("void_attempt_allowlist", case_void_attempt_allowlist),

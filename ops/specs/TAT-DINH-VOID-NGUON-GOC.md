@@ -2,16 +2,23 @@
 
 ```yaml
 packet_id: TAT-DINH-VOID-NGUON-GOC
-packet_issue: null            # điền sau khi mở Issue; đặc tả không tự gán số
+packet_issue: 276
 revision: 1
 generation: 1
 ke_nhiem_cua: TAT-DINH-VOID-HA-TANG   # Issue #262, generation 1 -> blocked
 review_class: sensitive
-executor: null                # người giữ kho chọn khi cấp lease
 reviewer: codex
 assurance_target: cross_approved
-base_sha: null                # điền bằng head của master lúc cấp lease
 ```
+
+> **TỆP NÀY ĐÃ ĐÓNG BĂNG. ĐỪNG SỬA.** Lease neo vào `sha256` của nó, nên mỗi lần sửa là
+> vô hiệu hoá mọi lease đang neo — im lặng, không cảnh báo. Cần đổi nội dung thì ra
+> **revision MỚI** (tệp mới, băm mới), như r1→r2→r3 của `#262` đã làm.
+>
+> **`executor` và `base_sha` CỐ Ý không có ở đây** — chúng thuộc **LEASE**, không thuộc
+> đặc tả. Bản nháp đầu để chúng là `null` kèm chú thích *"điền sau"*, tức mời đúng cái
+> sửa vừa cấm ở trên. Cùng hình dạng lỗi với *"câu mô tả VỊ TRÍ phải đúng ở CẢ HAI phía"*:
+> một trường trông như chỗ trống thì sẽ có người điền.
 
 ## 0. Packet này KHÔNG phải generation 3 của #262
 

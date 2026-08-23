@@ -245,3 +245,4 @@ thu_hep_pham_vi:
     Phép quét trùng lặp của `soan-spec` §3 được chạy theo ĐƯỜNG DẪN và bỏ qua CHỨC NĂNG. Hai
     packet không giao một đường dẫn nào mà vẫn xây cùng một thứ. Phát hiện SAU khi cấp lease,
     do người giữ kho chỉ ra — không phải phiên tự thấy.
+posted_comment_id: 5387949993   # workflow ghi, ĐỪNG sửa tay

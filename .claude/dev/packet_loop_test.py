@@ -746,25 +746,39 @@ def case_void_ha_tang_nhan_so_launcher(c: Ctx):
     _doi(0, rc, e, "begin-attempt")
     f = Path(tempfile.mkdtemp(prefix="tl-run-")) / "run.json"
     vo = ["void-attempt", "--packet", 55, "--reason", "infrastructure", "--bang-chung", str(f)]
-    # Chiều SIẾT trước (không tiêu lượt): lỗi NỘI DUNG im lặng KHÔNG phải bằng chứng hạ tầng.
-    f.write_text(json.dumps({"trang_thai": "xong", "ma_thoat": 1, "stdout_byte": 0}), encoding="utf-8")
-    _doi(10, *run(c.script, vo, sd)[0:1], b"", "lỗi nội dung im lặng được hoàn như hạ tầng")
-    f.write_text(json.dumps({"trang_thai": "xong", "ma_thoat": 12, "stdout_byte": 0}), encoding="utf-8")
-    rc, _, e = run(c.script, vo, sd)
-    _doi(0, rc, e, "sổ launcher mã 12 (thiếu công cụ) mà vẫn bị chặn")
+    # N4d — chiều SIẾT trước (rc=10 nên không tiêu lượt). `ma_thoat` do CON đặt; hình dạng
+    # dưới đây đo bằng launcher THẬT với con tự thoát 12, không phải bịa.
+    for ma in (1, 12, 13):
+        f.write_text(json.dumps({"trang_thai": "xong", "ma_thoat": ma, "stdout_byte": 0}), encoding="utf-8")
+        _doi(10, *run(c.script, vo, sd)[0:1], b"", f"con tu thoat {ma} duoc hoan nhu loi ha tang")
+    # N4e — chiều BẮT OAN: hai trạng thái do LAUNCHER đặt vẫn phải hoàn được.
+    for tt in ("qua_han", "hong"):
+        f.write_text(json.dumps({"trang_thai": tt, "ma_thoat": 0}), encoding="utf-8")
+        rc, _, e = run(c.script, vo, sd)
+        _doi(0, rc, e, f"trang_thai {tt} do launcher dat ma van bi chan")
+        rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
+        _doi(0, rc, e, "begin-attempt")
 
 
-def case_luong_canonical_co_chup_anh_moi_truong(c: Ctx):
-    """N10 — TRÍCH thân lệnh TỪ CHÍNH tài liệu: chép lại là hai bản trôi lệch. Chuỗi canonical
-    thiếu bước chụp thì ai làm đúng tài liệu ăn rc=10 MỌI lượt — guard chặn người dùng hợp lệ."""
+def case_luong_canonical_chay_that(c: Ctx):
+    """N10′ — CHẠY khối §7.4a chứ không khớp chuỗi (`doctor --json >` cắt cụt vẫn qua phép
+    khớp). Khối là PowerShell dùng `$env:TEMP` nên chỉ đo thật trên Windows; nền khác BỎ QUA
+    CÓ IN LÝ DO."""
     ke = ROOT / "ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md"
     if not ke.is_file():                       # chỉ tha bản sao rời (không có `.git`)
         assert not (ROOT / ".git").exists(), f"trong kho thật mà thiếu {ke}"
         return
-    i = (s := ke.read_text(encoding="utf-8")).find("#### 7.4a")
-    assert i != -1, "không thấy §7.4a — tài liệu đổi cấu trúc, ca này mù"
-    for can in ("doctor --json", "--bang-chung-moi-truong"):
-        assert can in s[i:i + 2000], f"chuỗi canonical thiếu {can!r}"
+    i = (s := ke.read_text(encoding="utf-8")).find("```powershell", s.find("#### 7.4a"))
+    assert i != -1, "không thấy khối lệnh §7.4a — tài liệu đổi cấu trúc, ca này mù"
+    dau = (k := s[i + 13:s.find("```", i + 13)])[:k.find("record-post")].rsplit("python", 1)[0]
+    if os.name != "nt":
+        print(f"  BO QUA n10 (nen {os.name}): khoi la PowerShell dung $env:TEMP", flush=True)
+        return
+    _doi(0, *c.init(sd := c.sd())[0:1], b"", "init")
+    ps = dau.replace("<issue>", "55").replace("<executor-provider>", EXECUTOR)
+    ps = ps.replace("packet_loop.py ", f"packet_loop.py --state-dir {sd} ")
+    r = subprocess.run(["pwsh", "-NoProfile", "-Command", ps], cwd=str(ROOT), capture_output=True)
+    assert r.returncode == 0, f"khoi canonical KHONG chay duoc: {r.stderr!r}"
 
 
 def case_void_quota_khong_doi_bang_chung(c: Ctx):
@@ -2178,7 +2192,7 @@ CASES = [
     ("void_ha_tang_khong_bang_chung_thi_tu_choi", case_void_ha_tang_khong_bang_chung_thi_tu_choi),
     ("void_ha_tang_co_bang_chung_thi_qua", case_void_ha_tang_co_bang_chung_thi_qua),
     ("void_ha_tang_nhan_so_launcher", case_void_ha_tang_nhan_so_launcher),
-    ("luong_canonical_co_chup_anh_moi_truong", case_luong_canonical_co_chup_anh_moi_truong),
+    ("luong_canonical_chay_that", case_luong_canonical_chay_that),
     ("void_quota_khong_doi_bang_chung", case_void_quota_khong_doi_bang_chung),
     ("void_duong_thoat_phai_co_tham_quyen_va_ghi_so", case_void_duong_thoat_phai_co_tham_quyen_va_ghi_so),
     ("void_attempt_allowlist", case_void_attempt_allowlist),

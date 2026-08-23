@@ -491,21 +491,14 @@ def _dong_tai(ban_do, offset: int) -> int:
 
 
 # --- Bằng chứng MÔI TRƯỜNG ----------------------------------------------------
-# `begin-attempt` trước đây kiểm state/lease/provider/trần và KHÔNG một dòng nào về
-# công cụ (đo được: 0 chỗ nhắc `cong_cu|doctor|shutil.which` trong thân hàm). Nên một
-# lượt mở ra bình thường trên máy thiếu `rg`/`codex`/`gh`, chạy, chết, rồi bị ĐẾM như
-# thất bại NỘI DUNG. Trần attempt sinh ra để phát tín hiệu "mã sai"; nuốt lỗi hạ tầng
-# vào đó là làm hỏng đúng tín hiệu ấy.
-#
-# Nới trần là SAI THUỐC: nó cho packet chịu nhiều lượt hỏng hơn mà VẪN không phân biệt
-# hai loại hỏng. Cơ chế đúng đã có sẵn — `void-attempt` — nhưng nó nhận lý do theo LỜI
-# KHAI (allowlist canh TỪ VỰNG, không canh SỰ THẬT), nên phải đòi bằng chứng máy.
+# `begin-attempt` trước không đo công cụ, nên lượt chết vì máy thiếu `rg`/`codex` bị ĐẾM
+# như thất bại NỘI DUNG — hỏng đúng tín hiệu mà trần attempt sinh ra để phát. Nới trần là
+# sai thuốc; `void-attempt` là cơ chế đúng nhưng nhận lý do theo LỜI KHAI. Xem đặc tả §B.
 NGUONG_TUOI_BANG_CHUNG_GIAY = 3600
 BIEN_BANG_CHUNG = "TL_MOI_TRUONG_JSON"
 
-# BA trạng thái, không phải hai. `khong_doc_duoc` KHÔNG được gộp vào `khong`: một ảnh
-# hỏng cú pháp và một ảnh vắng mặt đòi hai cách xử khác nhau, và gộp lại thì thông điệp
-# nói sai chỗ cần sửa. Cả ba đều fail-close về phía TỪ CHỐI mở lượt.
+# BA trạng thái: ảnh hỏng cú pháp và ảnh vắng mặt đòi hai cách xử khác nhau, gộp lại thì
+# thông điệp nói sai chỗ cần sửa. Cả ba fail-close về phía TỪ CHỐI mở lượt.
 BC_CO, BC_KHONG, BC_KHONG_DOC_DUOC = "co", "khong", "khong_doc_duoc"
 
 
@@ -541,9 +534,8 @@ def _kiem_anh_moi_truong(duong) -> dict:
     if d.get("he_dieu_hanh") != nen_thuc:
         _die(RC_MOI_TRUONG,
              f"ảnh môi trường chụp trên {d.get('he_dieu_hanh')!r} nhưng đang chạy trên {nen_thuc!r}")
-    # TƯƠI theo mtime của TỆP, vì `doctor --json` KHÔNG ghi mốc thời gian nào vào thân.
-    # Điểm yếu đã biết: mtime sửa được. Mô hình đe doạ ở đây là "cũ do vô ý", không phải
-    # kẻ gian — ai cố tình thì đã tự gõ được `--khong-co-bang-chung` có ghi sổ.
+    # TƯƠI theo mtime TỆP, vì `doctor --json` không ghi mốc thời gian vào thân. Điểm yếu đã
+    # biết: mtime sửa được — mô hình đe doạ là "cũ do vô ý", không phải kẻ gian.
     tuoi = time.time() - Path(duong).stat().st_mtime
     if tuoi > NGUONG_TUOI_BANG_CHUNG_GIAY:
         _die(RC_MOI_TRUONG,
@@ -556,10 +548,9 @@ LY_DO_CAN_BANG_CHUNG = ("infrastructure", "permission")
 
 def _kiem_bang_chung_ha_tang(duong, ly_do) -> None:
     """Bằng chứng MÁY cho `infrastructure`/`permission`. Fail-close, ba trạng thái."""
-    # `run.json` PHẢI thử TRƯỚC. Bản đầu thử `doctor` trước rồi mới tới đây, nhưng một
-    # `run.json` là JSON hợp lệ mà THIẾU trường của `doctor`, nên nó rơi vào
-    # `khong_doc_duoc` và chết ngay — đường sổ launcher KHÔNG BAO GIỜ tới được, dù M3
-    # khai là có. Tự bắt bằng cách chạy thử đúng ca ấy, không phải bằng cách đọc lại mã.
+    # `run.json` PHẢI thử TRƯỚC: nó là JSON hợp lệ mà thiếu trường của `doctor`, nên thử
+    # `doctor` trước làm nhánh sổ launcher KHÔNG BAO GIỜ tới được (lộ ra khi CHẠY, không
+    # khi đọc mã).
     if _doc_so_lauch(duong) is not None:
         return
     trang_thai, d, vi_sao = _doc_anh_moi_truong(duong)
@@ -577,21 +568,24 @@ def _kiem_bang_chung_ha_tang(duong, ly_do) -> None:
         _die(RC_MOI_TRUONG, "ảnh môi trường KHÔNG có mục chưa xác thực — nó không chứng minh `permission`")
 
 
+# Chỉ hai giá trị này do LAUNCHER đặt: `qua_han` khi nó cưỡng chế hạn chót (launcher.py:1486),
+# `hong` khi nó không chạy nổi lệnh (:1407). `xong` nghĩa là con ĐÃ chạy và tự thoát.
+TRANG_THAI_HA_TANG = ("qua_han", "hong")
+
+
 def _doc_so_lauch(duong):
-    """`run.json` của launcher: mã 12/13 hoặc trạng thái hạ tầng. None = không phải."""
+    """`run.json`: CHỈ nhận trường do LAUNCHER đặt. None = không phải bằng chứng hạ tầng.
+
+    `ma_thoat`/`stdout_byte` ĐÃ BỎ — con quyết định chúng, nên chúng là lời khai của kẻ bị đo
+    (`launcher.py:50-51` cảnh báo sẵn). Hai bản trước sai cùng một cách; r3 đổi TIÊU CHÍ chứ
+    không thêm điều kiện — xem r3 §0. Ca thiếu công cụ đi bằng ảnh `doctor`, vốn là PHÉP ĐO.
+    """
     try:
         d = json.loads(Path(duong).read_text(encoding="utf-8"))
     except Exception:
         return None
-    if not isinstance(d, dict) or "ma_thoat" not in d:
-        return None
-    ma = d.get("ma_thoat")
-    if ma in (12, 13):                       # thiếu công cụ / chưa xác thực
+    if isinstance(d, dict) and d.get("trang_thai") in TRANG_THAI_HA_TANG:
         return d
-    if d.get("trang_thai") in ("qua_han", "hong"):
-        return d
-    # ĐÃ BỎ nhánh `rc≠0 mà stdout RỖNG`: lỗi NỘI DUNG cũng khớp (`exit 1` im lặng ⇒ hoàn lượt,
-    # rc=0) nên nó mở lại cửa lách M3 định đóng — xem r2 §0. `qua_han`/`hong` đã phủ ca kia.
     return None
 
 
@@ -925,9 +919,8 @@ def cmd_begin_attempt(a, state_dir: Path) -> int:
             f"đã dùng hết {st['attempts_used']}/{st['attempts_limit']} lượt — packet về blocked. "
             f"Ghi failure evidence + handoff rồi dừng; reroute là việc của bên điều phối.",
         )
-    # M1/M2 — ĐO môi trường TRƯỚC khi tiêu một attempt. Đặt ở ĐÂY, sau mọi chốt state
-    # và ngay TRƯỚC dòng tăng `attempts_used`: đặt sớm hơn thì một máy thiếu công cụ che
-    # mất lỗi state thật, đặt muộn hơn thì attempt đã bị tiêu rồi mới từ chối.
+    # M1/M2 — ĐO môi trường ngay TRƯỚC dòng tăng `attempts_used`: sớm hơn thì máy thiếu
+    # công cụ che mất lỗi state thật, muộn hơn thì attempt đã bị tiêu rồi mới từ chối.
     anh = _kiem_anh_moi_truong(getattr(a, "bang_chung_moi_truong", None)
                                or os.environ.get(BIEN_BANG_CHUNG))
     st["attempts_used"] += 1
@@ -949,20 +942,13 @@ def cmd_void_attempt(a, state_dir: Path) -> int:
         _die(RC_ARG, f"lý do {a.reason!r} không thuộc allowlist {LY_DO_VOID}")
     if st["attempts_used"] <= 0:
         _die(RC_STATE, "chưa có lượt nào để hoàn")
-    # M3 — `LY_DO_VOID` là danh sách CHO PHÉP, và nó đúng hình dạng: nó xác nhận
-    # `infrastructure` LÀ một lý do hợp lệ. Nhưng nó KHÔNG xác nhận lý do ấy CÓ THẬT.
-    # Allowlist canh TỪ VỰNG, không canh SỰ THẬT — gõ `--reason infrastructure` cho một
-    # lượt chết vì mã sai thì bản trước nhận, rc=0, và trần attempt thành trang trí đúng
-    # theo cách mà chú thích ngay dưới đây đã cảnh báo cho ca `đã có review`.
-    #
-    # Chỉ siết HAI lý do có dấu vết máy. `quota`/`rate_limit` nằm phía nhà cung cấp, không
-    # để lại gì trong kho — đòi bằng chứng cho chúng là đòi thứ không tồn tại, và cổng nào
-    # đòi thứ không tồn tại thì người ta sẽ học cách đi vòng qua nó.
+    # M3 — `LY_DO_VOID` canh TỪ VỰNG, không canh SỰ THẬT: nó xác nhận `infrastructure` là
+    # một lý do HỢP LỆ, không xác nhận nó CÓ THẬT. Chỉ siết hai lý do có dấu vết máy;
+    # `quota`/`rate_limit` nằm phía nhà cung cấp nên đòi bằng chứng là đòi thứ không tồn tại.
     if a.reason in LY_DO_CAN_BANG_CHUNG:
         if a.khong_co_bang_chung:
-            # M4 — đường thoát PHẢI ĐƯỢC GHI. Ca môi trường chết TRƯỚC khi kịp ghi sổ là
-            # ca có thật, và ở đúng ca ấy bằng chứng máy vắng mặt. Không có cửa này thì M3
-            # biến một lỗi hạ tầng tạm thời thành ngõ cụt vĩnh viễn.
+            # M4 — cửa thoát PHẢI GHI SỔ: môi trường chết TRƯỚC khi kịp ghi là ca có thật,
+            # và thiếu cửa này thì M3 biến lỗi tạm thời thành ngõ cụt vĩnh viễn.
             if a.ai_cho_phep not in NGUOI_CO_THAM_QUYEN:
                 _die(RC_MOI_TRUONG,
                      f"--ai-cho-phep {a.ai_cho_phep!r} không thuộc {NGUOI_CO_THAM_QUYEN} — "

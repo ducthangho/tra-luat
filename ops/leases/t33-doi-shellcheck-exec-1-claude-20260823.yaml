@@ -214,3 +214,8 @@ ghi_de_ADR_0046:
     ĐỘC LẬP NHẤT để nghiệm thu chính ca ấy. Reviewer `codex` phải TỰ DỰNG lại `X1`/`X2`
     và tự chạy `W11`–`W13`, không nhận bảng số trong `r3` làm bằng chứng.
 posted_comment_id: 5387891190   # workflow ghi, ĐỪNG sửa tay
+da_bi_thay_the: t33-doi-shellcheck-exec-1r2-claude-20260823
+da_bi_thay_the_ly_do: >-
+  Mâu thuẫn nội tại: `recorder_cung_la_nguoi_thi_cong: false` + `recorder_ghi_chu` khai "phiên
+  này KHÔNG thi công", trong khi `ghi_de_ADR_0046` trong CÙNG tệp khai chính phiên ấy thi công.
+  r2 sửa hai trường ấy cho khớp khối ghi đè. Không điều khoản nào khác đổi.

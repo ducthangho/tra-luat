@@ -124,6 +124,25 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   vòng được đi đâu cả. Thứ nó tránh là **cho một dấu chéo NGUYÊN VĂN đi trên đường truyền**: dấu chéo
   được DỰNG SAU khi đã phân tích cú pháp, nên không còn gì để lớp nào giải mã. Đó là HOÃN việc dựng
   chuỗi, không phải né một tầng. Hễ nội dung NÓI VỀ chuỗi thoát thì phải đo nó sau khi ghi.
+- **…VÀ ĐƯỜNG ĐỌC CŨNG CHUẨN HOÁ — nên "đọc ngược về rồi diff" TỰ NÓ sinh phát hiện giả.**
+  Đo 22-08-2026. Chốt (a) ở gạch đầu dòng trên bảo: đăng xong thì đọc lại qua API và `diff`. Làm
+  đúng thế với comment lease `#238` ⇒ **lệch hệ thống**, không phải một hunk: `'`→`&#39;` ·
+  `"`→`&#34;` · `>`→`&gt;` · `<`→`&lt;`, rải khắp thân. Suýt nữa thành một finding về cổng đăng lease.
+  Ba phép đo tách được LỚP, và không phép nào bỏ được:
+  · **hai đường GHI độc lập cho kết quả Y HỆT** — comment do workflow đăng bằng `gh api` (Go, GitHub
+  CLI) và issue do phiên này đăng bằng MCP: cùng bị đổi như nhau ⇒ không phải đường ghi;
+  · **hai công cụ ĐỌC khác nhau** (`issue_read` · `list_issues`) cùng trả bản đã đổi;
+  · **tệp trong git đi qua CHÍNH máy chủ MCP ấy về BYTE-EXACT** — `get_file_contents` trên một tệp
+  có 5 dấu `>` cho **sha256 khớp bản trên đĩa**. Nên KHÔNG phải middleware chung; chỉ **trường thân
+  issue/comment** bị chuẩn hoá, đúng kiểu bộ lọc nội dung-người-dùng ở phía ĐỌC.
+  Dấu vết phụ: `&` trong phản hồi về dưới dạng `\u0026` — chữ ký `encoding/json` của Go bật HTMLEscape,
+  tức có **hai** lớp chồng nhau, và lớp JSON ấy KHÔNG phải thứ gây ra `&#39;`.
+  Chốt: `diff` bản-đã-đến qua MCP **chỉ dùng để tìm lệch VỀ KÝ TỰ THẬT** (kiểu `co` + `\u0308` + `dex`);
+  chênh lệch thực thể HTML ở đó là **tạo tác của công cụ đọc**, đừng ghi thành phát hiện. Muốn khẳng
+  định byte trên GitHub thì phải có client thứ hai — container này KHÔNG có (REST tới `repos/…` bị
+  proxy chặn 403), nên câu ấy đứng ở trạng thái thứ ba: **KHÔNG ĐO ĐƯỢC**, và nói thẳng như vậy.
+  Bài học gốc không đổi, chỉ chật hơn: **phải biết mình đang đứng ở LỚP NÀO** — kể cả khi cái lớp
+  đang lừa mình chính là cái chốt vừa dựng ra để chống bị lừa.
 - **HỎI CHỖ TIỆN TAY thay vì hỏi CHỖ KẾT LUẬN ĐƯỢC GHI — ba lần trong MỘT phiên (14-08-2026).**
   Cùng một gốc, ba mặt khác nhau, và KHÔNG lần nào tự phát hiện. Chép ra đây vì cái gốc ấy tái phát
   nhanh hơn mọi bài học khác trong tệp này: nó không đòi ta lười, chỉ đòi ta tin một tín hiệu ở gần.

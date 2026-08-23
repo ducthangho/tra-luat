@@ -1,0 +1,146 @@
+# Lease EXECUTOR — `LEASE-DANG-WINDOWS` (#238), lượt 4 — neo đặc tả r4.
+#
+# TIẾP TỤC lượt 3. Lượt này CHÉP một bản vá ĐÃ CHẠY (reviewer viết và đo trong cây review lượt 2),
+# KHÔNG đặc tả phép dẫn xuất nào mới — đó là điều kiện người giữ kho đặt ra khi cho đi tiếp sau
+# khi chốt `E lần 4` đã kêu.
+
+schema_version: 1
+event: executor_lease_granted
+packet_issue: 238
+packet_id: LEASE-DANG-WINDOWS
+phase_key: LEASE-DANG-WINDOWS
+revision: 4
+generation: 1
+lease_id: lease-dang-windows-exec-4-codex-20260822
+
+tiep_tuc_lease:
+  lease_id: lease-dang-windows-exec-3-codex-20260822
+  vi_sao: >-
+    Lượt 3 ĐÃ CHẠY và ĐÃ ĐƯỢC REVIEW (verdict `can_sua`,
+    e5dd9584d2e01172f71a0308c1d90eb0918d5b971af56cbb664d91438cf3c4a7, đo trên b0c8fb36).
+    P1-1 và P1-2 của lượt 1 ĐÃ ĐÓNG. Còn đúng một việc: P1-3.
+
+role: executor
+provider: codex
+executor: codex
+model: gpt-5.6-sol
+effort: max
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+
+spec_path: ops/specs/LEASE-DANG-WINDOWS-r4.md
+spec_sha256_required: 11972e8ce5d543304b35b7239128af5130d11feaef378465461c3b2b649cc613
+spec_ke_thua:
+  - {path: ops/specs/LEASE-DANG-WINDOWS.md, sha256: f555cbe1a368c12040726dd706ce25ed8dd4041bd8a2f840590810a3c3908a26}
+  - {path: ops/specs/LEASE-DANG-WINDOWS-r2.md, sha256: d9da7705617c95c8dc394d773de8456712d3cc2a2975e5903e8cb28c934c0d83}
+  - {path: ops/specs/LEASE-DANG-WINDOWS-r3.md, sha256: 130b6d29919db327ccc2d9ad8d53910e5dd74b2eef0f607d3e59a707647de40d}
+spec_note: >-
+  r4 CỐ Ý không đặc tả gì mới: nó chép lại một bản vá đã chạy và đăng ký phản chứng của chính bản
+  vá ấy. Mọi thứ r4 không nêu thì r3 (rồi r2, r1) nguyên hiệu lực.
+
+verdict_can_dong:
+  path: ops/reviews/lease-dang-windows-review-2-claude-verdict.md
+  sha256: e5dd9584d2e01172f71a0308c1d90eb0918d5b971af56cbb664d91438cf3c4a7
+  phai_dong: ['P1-3']
+  co_y_de_ngoai: ['P2-5']
+  de_ngoai_vi_sao: >-
+    P2-5 (`except Exception: ly_do = ""` gộp ba nguyên nhân khác hẳn nhau vào một câu) là lỗi
+    THẬT, đã đo, fail-close nên không mất an toàn — chỉ sai chẩn đoán. Trần 125 chỉ đủ cho P1-3.
+    Nó vào packet kế tiếp cùng P2-3 mà nó làm nặng thêm.
+
+write_set:
+  - .github/workflows/ops-publish-lease.yml
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 125
+  don_vi: '`git diff --numstat ba82b06f..HEAD` trên write_set — dòng THÊM'
+  da_dung: 116
+  du_kien_sau_luot_nay: 124
+  ghi_chu: >-
+    r4/Q14: verdict khai "5 dòng" là dòng MÃ LOGIC. Đo bằng `git diff --numstat`: 8 (kể 2 dòng
+    trống ngăn cách và dòng `f"..."` bị ngắt). 116 + 8 = 124, dư 1. Đừng lấy số 5 làm chuẩn.
+
+branch: codex/lease-dang-windows-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+reviewed_sha_required: b0c8fb368d70f17bce5eb7e3d1fe02d810db8e19
+start_from_sha: b0c8fb368d70f17bce5eb7e3d1fe02d810db8e19
+base_sha: 2ab3560a8a406c1b436221fb3c6d23234aefdde0
+base_ghi_chu: >-
+  b0c8fb3 ĐÃ có bằng chứng Windows xanh (run 32563904221: ubuntu 72/72 bỏ qua=0 · windows 64/64
+  bỏ qua=8, mỗi dòng bỏ qua in runs-on đọc được từ YAML). Head sẽ đổi ⇒ phải chạy lại W3'.
+
+prompt_path: ops/prompts/lease-dang-windows-exec-4-codex-20260822.md
+prompt_sha256_required: d9ba16d400edbe0e37e2c5335c5eda4b1f989183249809bbd5a6283601c63df9
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-22 ("Noi 120->125, dong P1-3 bang dung ca va da do")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_note: >-
+  Chốt `E lần 4` ĐÃ KÊU và reviewer đã tuân (kết can_sua, không đề xuất chương trình vá tiếp).
+  Người giữ kho ghi đè có lý do nêu rõ: lượt này KHÔNG đặc tả phép dẫn xuất nào mới, chỉ chép một
+  bản vá đã chạy — nên nó không tái tạo hình dạng E. Đây là lần ghi đè thứ tư của chuỗi; ghi
+  thẳng ra thay vì để nó trôi.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-22T10:00:00Z'
+lease_expires_at_utc: '2026-08-23T10:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+
+attempts_used: 0
+attempts_limit: 2
+executor_calls_limit: 2
+
+reviewer_provider: claude
+review_rounds_limit: 3
+review_rounds_used_truoc_luot_nay: 2
+review_calls_limit: 4
+review_ghi_chu: >-
+  Người giữ kho nới review_rounds_limit 2 -> 3 cùng lúc với trần dòng: đóng P1-3 mà không có vòng
+  review nào cho chính bản vá ấy thì lại rơi vào đúng bệnh "land rồi mới biết".
+
+muc_tieu:
+  - 'Q13: CHÉP NGUYÊN VĂN ca t73_nen_posix_khong_duoc_bo_qua_ca_nao vào trước `def main()`. KHÔNG cải tiến, KHÔNG đổi tên, KHÔNG gộp.'
+  - 'Thấy ca ấy SAI hoặc thiếu ⇒ DỪNG và NÓI. Đó là phát hiện, không phải việc.'
+
+gate_bat_buoc:
+  - 'bản vá nguyên vẹn -> 73/73 đạt; đã chạy=73, bỏ qua=0 ; rc=0'
+  - 'bản vá + X1 -> 64/65 đạt; đã chạy=65, bỏ qua=8 ; rc=1 ; ĐỎ t73_nen_posix_khong_duoc_bo_qua_ca_nao'
+  - 'đối chứng X1 KHÔNG kèm bản vá -> 64/64 ; rc=0 (XANH — đây là lỗ, phải tái hiện được)'
+  - 'lệch bất kỳ số nào trong ba số ⇒ DỪNG, báo số đo được. KHÔNG sửa ca cho vừa số.'
+  - 'actionlint trên ops-publish-lease.yml rc=0, với shellcheck CÓ MẶT (kiểm trước khi tin actionlint)'
+  - 'cùng suite với ba biến GitHub đặt và `gh` VẮNG -> N/N y hệt'
+  - 'M1-M4, A5, D3/D4, tám đột biến gỡ guard của #227 VẪN phải giết'
+  - 'ba phản chứng P1-1 / P1-2 / P1-2(b) của lượt 3 VẪN phải đỏ'
+  - 'git diff --numstat ba82b06f..HEAD -> <= 3 tệp, <= 125 dòng thêm'
+
+nghiem_thu_THAT_nam_ngoai_sandbox:
+  gi: "W3' — lượt workflow_dispatch THẬT trên head MỚI, job windows-latest XANH"
+  ai_chay: 'phiên điều phối'
+  ghi_chu: >-
+    Cộng thêm một thứ CHƯA AI ĐO: hành vi của P1-3 trên chân windows-latest THẬT. Reviewer chỉ
+    SUY được (64/64 bỏ qua=8 y hệt bản đúng ⇒ không chân CI nào đỏ). Lượt W3' này đo nó.
+
+khong_duoc_dung:
+  - 'P2-5 và bảy mục P2/P3 của verdict lượt 1 — chúng thuộc packet kế tiếp'
+  - 'ops/specs/**'
+  - 'ops/reviews/**'
+
+dieu_kien_dung:
+  - 'Ngân sách sẽ vượt 125 dòng thêm hoặc 3 tệp ⇒ DỪNG, báo SỐ DÒNG ĐO ĐƯỢC'
+  - 'Ba số của cổng lệch bất kỳ số nào ⇒ DỪNG. CẤM sửa ca cho vừa số.'
+  - 'Thấy cần sửa ca vá đã chép ⇒ DỪNG và NÓI, không tự sửa'
+  - 'Hình dạng A lần 8 · B lần 3 · C lần 2 · D lần 4 · E lần 5 · F lần 3 ⇒ DỪNG, không vá'
+
+handoff_bat_buoc:
+  path: ops/handoff/lease-dang-windows-exec-4-codex-handoff.md
+  vi_sao: 'Ngắn: ba số của cổng, số git diff --numstat, chua_do_duoc. TÊN CA đã đỏ THẬT.'
+posted_comment_id: 5379627095   # workflow ghi, ĐỪNG sửa tay

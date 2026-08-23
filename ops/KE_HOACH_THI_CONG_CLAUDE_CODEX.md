@@ -414,8 +414,14 @@ call review đã reserve để thử executor.
 hoàn tất exact head, đăng handoff bền, ghi ID GitHub trả về và chuyển state sang `reviewing` **trước**
 khi gọi model reviewer:
 
+`begin-attempt` **đòi ảnh môi trường SẠCH và TƯƠI** cho đúng nền; thiếu nó thì lượt KHÔNG mở được
+(mã `10`) — chốt ấy để một lượt chết vì máy thiếu công cụ không bị đếm như thất bại nội dung:
+
 ```powershell
-python .claude/dev/packet_loop.py begin-attempt --packet <issue> --provider <executor-provider>
+python .claude/dev/launcher.py doctor --json > $env:TEMP\tl-doctor.json
+python .claude/dev/packet_loop.py begin-attempt --packet <issue> --provider <executor-provider> `
+  --bang-chung-moi-truong $env:TEMP\tl-doctor.json
+# Ảnh cũ hơn 3600s, hoặc chụp trên `he_dieu_hanh` khác, bị từ chối — chụp lại, đừng dùng lại.
 # Executor làm việc, chạy gate, đăng handoff; lấy GitHub comment ID thật.
 python .claude/dev/packet_loop.py record-post --packet <issue> --for reviewing `
   --comment-id <recorded-github-comment-id>

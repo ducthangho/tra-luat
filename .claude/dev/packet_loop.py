@@ -590,9 +590,8 @@ def _doc_so_lauch(duong):
         return d
     if d.get("trang_thai") in ("qua_han", "hong"):
         return d
-    # ĐÃ BỎ nhánh `rc≠0 mà stdout RỖNG`: một lỗi NỘI DUNG cũng khớp (`exit 1` im lặng ⇒
-    # bản trước hoàn lượt, rc=0, `attempts_used` 1→0), tức nó mở lại đúng cửa lách mà M3
-    # sinh ra để đóng (codex, P1 #266). `qua_han`/`hong` đã phủ ca chết-trước-khi-chạy.
+    # ĐÃ BỎ nhánh `rc≠0 mà stdout RỖNG`: lỗi NỘI DUNG cũng khớp (`exit 1` im lặng ⇒ hoàn lượt,
+    # rc=0) nên nó mở lại cửa lách M3 định đóng — xem r2 §0. `qua_han`/`hong` đã phủ ca kia.
     return None
 
 

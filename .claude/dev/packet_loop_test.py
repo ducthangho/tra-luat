@@ -754,6 +754,19 @@ def case_void_ha_tang_nhan_so_launcher(c: Ctx):
     _doi(0, rc, e, "sổ launcher mã 12 (thiếu công cụ) mà vẫn bị chặn")
 
 
+def case_luong_canonical_co_chup_anh_moi_truong(c: Ctx):
+    """N10 — TRÍCH thân lệnh TỪ CHÍNH tài liệu: chép lại là hai bản trôi lệch. Chuỗi canonical
+    thiếu bước chụp thì ai làm đúng tài liệu ăn rc=10 MỌI lượt — guard chặn người dùng hợp lệ."""
+    ke = ROOT / "ops/KE_HOACH_THI_CONG_CLAUDE_CODEX.md"
+    if not ke.is_file():                       # chỉ tha bản sao rời (không có `.git`)
+        assert not (ROOT / ".git").exists(), f"trong kho thật mà thiếu {ke}"
+        return
+    i = (s := ke.read_text(encoding="utf-8")).find("#### 7.4a")
+    assert i != -1, "không thấy §7.4a — tài liệu đổi cấu trúc, ca này mù"
+    for can in ("doctor --json", "--bang-chung-moi-truong"):
+        assert can in s[i:i + 2000], f"chuỗi canonical thiếu {can!r}"
+
+
 def case_void_quota_khong_doi_bang_chung(c: Ctx):
     """N6 — chiều BẮT OAN. `quota` ở phía nhà cung cấp, không để lại dấu vết máy."""
     sd = c.sd()
@@ -2165,6 +2178,7 @@ CASES = [
     ("void_ha_tang_khong_bang_chung_thi_tu_choi", case_void_ha_tang_khong_bang_chung_thi_tu_choi),
     ("void_ha_tang_co_bang_chung_thi_qua", case_void_ha_tang_co_bang_chung_thi_qua),
     ("void_ha_tang_nhan_so_launcher", case_void_ha_tang_nhan_so_launcher),
+    ("luong_canonical_co_chup_anh_moi_truong", case_luong_canonical_co_chup_anh_moi_truong),
     ("void_quota_khong_doi_bang_chung", case_void_quota_khong_doi_bang_chung),
     ("void_duong_thoat_phai_co_tham_quyen_va_ghi_so", case_void_duong_thoat_phai_co_tham_quyen_va_ghi_so),
     ("void_attempt_allowlist", case_void_attempt_allowlist),

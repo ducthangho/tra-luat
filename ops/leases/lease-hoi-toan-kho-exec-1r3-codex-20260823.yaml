@@ -135,4 +135,10 @@ viec_cua_luot_nay: 'CHỈ áp gói vá của cross-review lượt 1: thêm `t95`
   git rc≠0) và `t96` (P2 — `_lease_cham_duong` phải so BẰNG, không so CHỨA). Gói vá nằm ở `ops/reviews/goi-va-lease-hoi-toan-kho-1/lease_publish_test.py`
   trên nhánh `ops/verdict-lease-hoi-toan-kho-1`. KHÔNG sửa mã sản phẩm — hai finding là THIẾU CA TEST,
   mã hiện tại ĐÚNG. Sửa mã sản phẩm sẽ làm verdict lượt 1 hết hiệu lực với head mới.'
+da_bi_thay_the: lease-hoi-toan-kho-exec-1r4-codex-20260823
+da_bi_thay_the_ly_do: >-
+  Cross-review lượt 2 xác nhận P1/P2 lượt 1 ĐÃ VÁ THẬT, nhưng tìm ra một P1 MỚI là LỖI
+  ĐANG SỐNG (`_kiem_dau_toan_kho` fail-open khi git lỗi thật). Vá nó cần lượt review 3,
+  vượt trần ADR-0043 (canon = 2). Chủ kho chọn phương án (a): nới trần review thêm MỘT
+  lượt. r4 mang ngoại lệ ấy.
 posted_comment_id: 5384906700   # workflow ghi, ĐỪNG sửa tay

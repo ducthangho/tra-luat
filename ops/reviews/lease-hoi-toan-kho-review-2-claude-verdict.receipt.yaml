@@ -1,0 +1,56 @@
+# Bản gốc là NGUYÊN VĂN của reviewer, neo bằng băm. Comment trên PR chỉ là BẢN CHIẾU.
+schema_version: 1
+packet_id: LEASE-HOI-TOAN-KHO
+packet_issue: 244
+pr: 275
+round: 2
+provider: claude
+role: reviewer
+executor: codex
+verdict: changes_requested
+reviewed_sha: babceec2399169f968664b82c096b41b8b8db78b
+lease_id: lease-hoi-toan-kho-exec-1r3-codex-20260823
+verdict_path: ops/reviews/lease-hoi-toan-kho-review-2-claude-verdict.md
+verdict_sha256: b6b6a3a2787d30182b960fa81c42fc779036e108fa4be01ed7cb0bd762c42c6d
+verdict_bytes: 16359
+goi_va_path: ops/reviews/goi-va-lease-hoi-toan-kho-2/
+evidence_url: https://github.com/ducthangho/tra-luat/pull/275#issuecomment-5385048723
+evidence_url_ghi_chu: Trỏ COMMENT trên PR, không phải blob master — verdict chưa vào master lúc viết,
+  nên URL blob sẽ là SHA không tra được.
+delivered_by: 'claude-session   # KHÔNG phải reviewer'
+verdict_doi_chieu: NGUYÊN VĂN, không đụng byte nào.
+doi_chieu_luot_1:
+- id: git-wrapper-nuot-loi-fail-open
+  phan: ĐÃ VÁ THẬT
+  bang_chung: đột biến → 94/96, đỏ ĐÚNG MỘT ca t95, thông điệp nói đúng lỗ; đổi tên _git→_git2 ⇒ t95 đứt
+    AttributeError, tức đi qua _git() thật
+- id: lease-cham-duong-so-chua-thay-vi-so-bang
+  phan: ĐÃ VÁ THẬT
+  bang_chung: đột biến → 94/96, đỏ đúng t96; _lease_cham_duong chỉ có MỘT điểm gọi nên không có đường
+    vòng
+- id: bien-het-han-khong-co-ca
+  phan: CHƯA VÁ
+  bang_chung: đúng như lượt 1 tự khai
+findings:
+- id: kiem-dau-toan-kho-bo-qua-git-loi-that
+  muc: P1
+  ca_de_xuat: t97
+  loai: LỖI ĐANG SỐNG — không phải thiếu ca test
+  tom_tat: '`_kiem_dau_toan_kho` gọi thẳng `GOI_GIT`, bỏ qua `_git()`, rồi `return` lặng lẽ khi git lỗi
+    — dù `.git` đã xác nhận có ở nhánh trên, tức git hỏng ở đó là LỖI THẬT. Hàm chạy ở ĐẦU `kiem()`, cổng
+    mà check/body/kiem-github đều qua; git tạm lỗi ⇒ chốt "đã đăng rồi" bị bỏ qua im lặng ⇒ mở đường đăng
+    TRÙNG, chính sự cố #244 tồn tại để sửa.'
+  bac_bo_loi_khai_luot_1: 'Verdict lượt 1 viết "toàn bộ M1/M2/M3 đi qua đúng MỘT điểm gọi git: _git()".
+    SAI — đây là điểm gọi thứ hai.'
+nguoi_dieu_phoi_tai_hien_doc_lap:
+  da_lam: true
+  cach: git worktree rời tại babceec, KHÔNG đột biến mã nguồn, chỉ thay GOI_GIT bằng hàm trả rc=128
+  ket_qua: .git tồn tại True · _kiem_dau_toan_kho TRẢ VỀ None, KHÔNG ném Chan
+  ket_luan: FAIL-OPEN XÁC NHẬN — lỗi đang sống.
+tran_cham_phai_hoi_chu_kho:
+  luot_review: 2/2 — ADR-0043 canon là 2; chủ kho chọn phương án (a), nới lên 3 (xem lease r4)
+  dong_them: 337/380 · gói vá +37 ⇒ 374/380, vừa nhưng sát
+chua_do_duoc:
+- '`actionlint` vắng ⇒ t33 fail-close mọi lượt'
+- '`record-review` không ghi được (state `awaiting_lease`); bộ đếm review_rounds_used KHÔNG hoạt động
+  ở container này — số 2/3 do người đếm'

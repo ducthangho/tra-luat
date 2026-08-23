@@ -745,9 +745,12 @@ def case_void_ha_tang_nhan_so_launcher(c: Ctx):
     rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
     _doi(0, rc, e, "begin-attempt")
     f = Path(tempfile.mkdtemp(prefix="tl-run-")) / "run.json"
+    vo = ["void-attempt", "--packet", 55, "--reason", "infrastructure", "--bang-chung", str(f)]
+    # Chiều SIẾT trước (không tiêu lượt): lỗi NỘI DUNG im lặng KHÔNG phải bằng chứng hạ tầng.
+    f.write_text(json.dumps({"trang_thai": "xong", "ma_thoat": 1, "stdout_byte": 0}), encoding="utf-8")
+    _doi(10, *run(c.script, vo, sd)[0:1], b"", "lỗi nội dung im lặng được hoàn như hạ tầng")
     f.write_text(json.dumps({"trang_thai": "xong", "ma_thoat": 12, "stdout_byte": 0}), encoding="utf-8")
-    rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", "infrastructure",
-                              "--bang-chung", str(f)], sd)
+    rc, _, e = run(c.script, vo, sd)
     _doi(0, rc, e, "sổ launcher mã 12 (thiếu công cụ) mà vẫn bị chặn")
 
 

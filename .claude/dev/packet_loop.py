@@ -578,7 +578,7 @@ def _kiem_bang_chung_ha_tang(duong, ly_do) -> None:
 
 
 def _doc_so_lauch(duong):
-    """`run.json` của launcher: mã 12/13, hoặc rc≠0 mà stdout RỖNG. None = không phải."""
+    """`run.json` của launcher: mã 12/13 hoặc trạng thái hạ tầng. None = không phải."""
     try:
         d = json.loads(Path(duong).read_text(encoding="utf-8"))
     except Exception:
@@ -590,10 +590,9 @@ def _doc_so_lauch(duong):
         return d
     if d.get("trang_thai") in ("qua_han", "hong"):
         return d
-    # `rc=0 mà rỗng` là chốt của launcher; ở đây chiều ngược lại mới là bằng chứng:
-    # thoát khác 0 mà KHÔNG in gì = chết trước khi chạy tới phần việc.
-    if ma not in (None, 0) and d.get("stdout_byte") == 0:
-        return d
+    # ĐÃ BỎ nhánh `rc≠0 mà stdout RỖNG`: một lỗi NỘI DUNG cũng khớp (`exit 1` im lặng ⇒
+    # bản trước hoàn lượt, rc=0, `attempts_used` 1→0), tức nó mở lại đúng cửa lách mà M3
+    # sinh ra để đóng (codex, P1 #266). `qua_han`/`hong` đã phủ ca chết-trước-khi-chạy.
     return None
 
 

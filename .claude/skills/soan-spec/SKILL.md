@@ -33,7 +33,7 @@ luôn là của người dùng.
 Xong khi biên giới RỖNG: mọi nhánh đã đi qua, không còn gì được giả định trong im lặng.
 **Không hành động cho tới khi người dùng xác nhận đã hiểu giống nhau.**
 
-## 2. Bốn luật riêng của kho — chúng sinh ra từ những lần đã trả giá
+## 2. Năm luật riêng của kho — chúng sinh ra từ những lần đã trả giá
 
 **L1 — Mọi con số "N thứ phải xử" phải khai N ĐẾM GÌ.** Một đặc tả từng viết một con số mà
 người viết đếm phản chứng còn người đọc đếm finding; lượt thi hành đốt hơn 170 nghìn token và
@@ -52,6 +52,26 @@ tiêu chí — ghi thẳng là chưa có cách đo, đừng làm tròn thành đ
 **L4 — Packet khắc phục phải chép số đếm HÌNH DẠNG LỖI từ hồ sơ tiền nhiệm.** Bộ đếm ấy sống
 trong biên nhận của packet trước; packet mới bắt đầu từ 0 nếu không ai chép sang, và chốt "lặp
 ba lần thì hỏi có nên làm nữa không" mất tác dụng đúng lúc cần nhất.
+
+**L5 — Mọi con số phải kèm THỜI ĐIỂM ĐO, và phải ĐO LẠI trước mỗi bước công bố.** Con số đúng
+lúc viết vẫn sai lúc người khác đọc. Đo trên đợt #250: **bốn** con số trong hai đặc tả đã trôi
+giữa lúc viết và lúc review — `117 cặp / 100 đường dẫn` → `120 / 110`, `37` biên nhận → `39`,
+`3/90` → `3/100`, `4/120` blob → `5/121`. Không con nào là đoán bừa; tất cả **từng được đo đúng**.
+
+Ba hệ quả bắt buộc:
+
+- **Ghi thời điểm ngay cạnh con số** (`đo 17:38Z 22-08`), không ghi trống. Thiếu nó thì người đọc
+  không biết con số ấy bao nhiêu tuổi.
+- **Neo quyết định vào BẤT BIẾN, không vào con số.** *"`PLAT-X8` đang giữ hai đường dẫn"* không
+  trôi; *"13 lease"* trôi từng giờ. Con số chỉ để đối chiếu.
+- **Đo lại trước MỖI bước công bố** — đăng băm, cấp lease, merge. Rẻ, và nó là thứ duy nhất bắt
+  được trôi số.
+
+Cạm bẫy đắt nhất của luật này, vì nó làm lời khai **trông như đã kiểm**: một BẤT BIẾN còn đúng
+KHÔNG chứng minh các SỐ HẠNG còn đúng. Dòng `117 / 100` khai *"chênh 10"*; đo lại ra `120 / 110`
+— **chênh vẫn đúng 10**. Ba lượt cross-review đọc qua và không ai dừng lại, vì soi tính nhất quán
+nội tại thì dòng ấy sạch hoàn toàn. **Câu nào vừa nêu số hạng vừa nêu quan hệ giữa chúng thì kiểm
+SỐ HẠNG** — quan hệ là thứ sống sót qua trôi số.
 
 ## 3. Đo trước khi hỏi
 

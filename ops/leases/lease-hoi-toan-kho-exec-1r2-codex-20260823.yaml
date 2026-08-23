@@ -112,4 +112,9 @@ ngoai_le_ADR_0045:
     + KHÔNG khối ngoại lệ rồi chạy `lease_publish.py check` ⇒ **rc=0 ĐĂNG ĐƯỢC**. ADR-0045 khai phải thoát
     khác 0. Tức khối này là hiện vật TỰ NGUYỆN, không phải thứ cổng đòi — đúng bệnh `Accepted` mà CHƯA
     THI HÀNH của nợ 15. Đừng đọc sự có mặt của nó thành ''cổng đã kiểm''.'
+da_bi_thay_the: lease-hoi-toan-kho-exec-1r3-codex-20260823
+da_bi_thay_the_ly_do: >-
+  Cross-review lượt 1 trả `changes_requested` với hai finding P1/P2 (đã tái hiện độc lập).
+  Áp gói vá làm vượt trần ADR-0044, mà `dieu_kien_dung` của chính lease này ghi "vượt trần
+  ⇒ DỪNG, xin ngoại lệ có vết". Chủ kho đã cấp ngoại lệ in-session 23-08; r3 mang ngoại lệ ấy.
 posted_comment_id: 5384452787   # workflow ghi, ĐỪNG sửa tay

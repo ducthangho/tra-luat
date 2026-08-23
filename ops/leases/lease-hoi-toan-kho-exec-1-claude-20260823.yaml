@@ -91,8 +91,13 @@ canh_bao_cho_nguoi_thi_hanh: >-
   nhánh "đổi tên hàm" bị bắt, và bắt vì phá phép ĐẾM CHUỖI chứ không vì cổng
   hiểu thế nào là "chặn". Nguyên văn hai lượt verdict liên tiếp:
   "distinguishes spelling, not authority".
-  Lỗ ấy nằm ở WORKFLOW gọi cổng, không ở cổng — nên nó NGOÀI write set của bạn
-  và bạn KHÔNG được sửa nó ở đây. Nhưng nó chưa được ghi vào `ops/NO_KY_THUAT.md`
+  ĐỪNG ĐỌC CÂU TRÊN THÀNH "NGOÀI TẦM TAY BẠN" — bản đầu của lease này viết đúng
+  như thế và nó SAI. Tệp `.github/workflows/ops-publish-lease.yml` thì đúng là ngoài
+  write set; nhưng thứ ĐÁNG LẼ bắt được ba đột biến kia là BỘ TEST của nó, mà bộ test
+  ấy là `ops/lease_publish_test.py` — nằm THẲNG trong write set của bạn (`WORKFLOW_DANG`
+  dòng 27 trỏ chính tệp workflow, `t51` dòng 2375). Nên ranh giới đúng là PHẠM VI ĐẶC TẢ,
+  không phải write set: packet này là `ai-dang-giu`, vá E3 là packet KHÁC. Bạn CÓ tay ở
+  đó; bạn không dùng tay ấy vì đặc tả không giao, chứ không phải vì lease chặn. Nhưng nó chưa được ghi vào `ops/NO_KY_THUAT.md`
   (đo 03:3xZ: 0 lần nhắc) vì tệp ấy đang bị `#254` giữ tới `2026-08-24T00:38Z`.
   Ghi vào lease này để nó có hiện vật bền ngay bây giờ thay vì chỉ sống trong
   một tệp verdict.
@@ -109,4 +114,19 @@ dieu_kien_dung:
   - Verdict cross-review khác nền là `dung_lai` ⇒ DỪNG, không tự vá tiếp.
   - Vượt trần ADR-0044 (3 tệp / 300 dòng thêm) ⇒ DỪNG, xin ngoại lệ có vết.
   - Hình dạng lỗi lặp lần thứ 3 ⇒ hỏi "có nên làm nữa không", đừng vá tiếp.
+sua_sau_khi_dang:
+  - luc_utc: '2026-08-23T04:05:00Z'
+    truong: canh_bao_cho_nguoi_thi_hanh
+    sua_gi: >-
+      Bản đăng lúc 03:40Z khai lỗ E3 "NGOÀI write set của bạn". SAI, và sai theo
+      chiều nguy: `ops/lease_publish_test.py` — tệp giữ `WORKFLOW_DANG` (dòng 27)
+      và `t51` (dòng 2375), tức đúng thứ đáng lẽ bắt ba đột biến workflow — nằm
+      TRONG write set. Ranh giới thật là PHẠM VI ĐẶC TẢ, không phải write set.
+    vi_sao_ghi_thay_vi_dang_lai: >-
+      Cổng idempotent trả `rc=9` sau `mark`, và đó là chốt ĐÚNG — không phá nó để
+      sửa một câu chữ. Tệp là NGUỒN SỰ THẬT, comment chỉ là BẢN CHIẾU (chính thân
+      comment khai như vậy). Bản chiếu nay LỆCH ở đúng một trường; đã đăng một
+      comment đính chính riêng trỏ về đây.
+    dinh_chinh_comment_id: 5384065633
+
 posted_comment_id: 5384038392   # workflow ghi, ĐỪNG sửa tay

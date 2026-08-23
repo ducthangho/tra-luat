@@ -19,9 +19,17 @@ tự ra lệnh phải làm:
 > *r2/§base_sha:* "Trước khi cấp lease phải đo lại **ba** thứ trên base ấy, vì cả ba đã trôi khi
 > `#275` land: `t33`/`t73` ở dòng nào · số ca của suite (nay 88) · `numstat` của bản vá `M3`."
 
-Đã đo lại. **Cả ba đều trôi, cộng một thứ thứ tư r2 không lường trước: tên ca `t89` đã bị chiếm.**
+Đã đo lại. **Trong ba thứ r2 nêu, ĐÚNG MỘT trôi** — số ca suite (88 → 97). `t33`/`t73` **giữ nguyên**
+dòng 1312/2649, và `numstat` của `M3` **giữ nguyên** 16. Cộng một thứ **thứ tư r2 không lường trước và
+không nằm trong ba thứ ấy: tên ca `t89` đã bị chiếm.**
 Nếu cấp lease theo r2 nguyên trạng thì executor sẽ ĐỎ ở **mọi** tiêu chí `W11`–`W13` — không phải vì
-bản vá sai, mà vì số trong đặc tả cũ.
+bản vá sai, mà vì **số ca suite** nằm trong cả ba tiêu chí ấy.
+
+> **Câu trên đã được SỬA sau cross-review lượt 1 của PR #288 (`P2`, codex).** Bản đầu viết *"Cả ba đều
+> trôi"* trong khi bảng ở §"Ba thứ r2 dặn đo lại" — cách đó 40 dòng, **trong cùng tệp này** — nói rõ
+> `t33`/`t73`/`numstat` KHÔNG đổi. Một đặc tả tự mâu thuẫn với bằng chứng của chính nó là đặc tả mà
+> lượt kiểm điều kiện DỪNG về sau sẽ đọc sai. Ghi lại thay vì lặng lẽ sửa, vì đây đúng lớp lỗi mà cả
+> phiên này đi săn.
 
 Mọi con số dưới đây đo trên `master = 5561b6b497989447f9185b26abb1bba154564967`, **10:0xZ 23-08-2026**,
 `actionlint 1.7.7` + `shellcheck 0.9.0`. Theo **L5**: đo lại trước bước công bố kế tiếp.
@@ -65,12 +73,38 @@ dùng"*; hai câu hỏi khác nhau và kho mới chỉ có lệnh cho câu thứ
 
 | | đường | giá |
 |---|---|---|
-| **(a)** | **Cấp ngay, khai thẳng trong lease** rằng 5 lease kia đã tiêu, kèm hiện vật cho từng cái | Rẻ nhất, có vết. Rủi ro: nếu một trong năm thật sự chưa tiêu thì thành hai writer |
-| **(b)** | Chờ hết hạn tự nhiên | Muộn nhất `2026-08-24T08:25:00Z` — **~22 giờ**. An toàn tuyệt đối, đắt về thời gian |
-| **(c)** | Thu hồi 5 lease trước | Chưa có đường thu hồi (đó chính là nợ `AG-T0-01B`) ⇒ phải làm tay |
+| **(a)** | **Cấp ngay**, lease khai từng hiện vật land, và khai thẳng rằng đây là **CHẤP NHẬN RỦI RO CÒN LẠI**, không phải rủi ro đã đo bằng không | Rẻ nhất, có vết. Rủi ro **KHÔNG đo được**: không bằng chứng nào nói thẩm quyền ghi đã chấm dứt |
+| **(b)** | Chờ hết hạn tự nhiên | Muộn nhất `2026-08-24T08:25:00Z`. Đây là bằng chứng chấm dứt **DUY NHẤT** kho có |
+| **(c)** | Thu hồi 5 lease trước | Chưa có đường thu hồi (chính là nợ `AG-T0-01B`) ⇒ phải làm tay |
 
-Đề xuất: **(a)**, vì bằng chứng "đã tiêu" là hiện vật trên master chứ không phải lời khai, và (b)
-trả 22 giờ cho một rủi ro đã đo được là bằng không.
+**Đặc tả KHÔNG đề xuất đường nào — và câu này thay một câu SAI của bản đầu.**
+
+Bản đầu đề xuất `(a)` với lý lẽ *"(b) trả 22 giờ cho một rủi ro **đã đo được là bằng không**"*.
+Cross-review lượt 1 của PR #288 (`P1`, codex) bác đúng chỗ đó, và bác đúng:
+
+- Thứ đã đo là **"việc đã LAND"** — Issue đóng, hiện vật trên master, 0 nhánh chưa-merge chạm tệp.
+- Thứ được KHAI là **"rủi ro bằng không"**, tức *thẩm quyền ghi đã chấm dứt*.
+- **Hai mệnh đề khác nhau.** Land chứng minh việc xong; nó không chứng minh không phiên nào còn hành
+  động được dưới `lease_id` ấy. Và **không có bằng chứng chấm dứt bền nào tồn tại** — đó chính là nợ
+  `AG-T0-01B`, mà chính tệp này nêu ở hai chỗ khác (§trên: *"quyền ghi còn sống sau khi việc đã
+  xong"*; `chua_do_duoc#10`: *"chưa mở từng packet"*).
+
+Nên bản đầu là **hình dạng A — lời khai rộng hơn phép đo — nằm trong chính artefact viết ra để chống
+nó**, và nó là căn cứ mà một quyết định cấp lease đã dựa vào. Xem §`bo_dem_A` ngay dưới.
+
+Cách nói đúng: `(a)` **hợp lệ** nếu người giữ kho **chấp nhận rủi ro còn lại** và ghi thẳng như vậy —
+đó là thẩm quyền của chủ kho (`§2`). Cái không được phép là gọi việc chấp nhận ấy là *"đã đo bằng
+không"*. Chỉ `(b)` mới cho bằng chứng chấm dứt.
+
+### `bo_dem_A` — KHÔNG tự tăng, người giữ kho quyết
+
+Biểu hiện vừa nêu là **hình dạng A**. Bộ đếm đang ở **7**; **8 là ngưỡng DỪNG đã đăng ký** (`S2`).
+`#269` chốt rõ: *"Phiên điều phối **không tự tăng** — người giữ kho quyết."* Nên tệp này **ghi biểu
+hiện, không ghi con số mới**, và `S2` giữ nguyên `A = 7` cho tới khi có quyết định.
+
+Dữ kiện để quyết, cả hai đo được: lần này **reviewer ngoài** bắt (không phải tự phát hiện), và câu
+sai **đã được dùng làm căn cứ cho một quyết định cấp quyền ghi** — khác lần ở `#270`, nơi bản vá là
+một chữ và không chống đỡ thẩm quyền nào.
 
 ---
 
@@ -215,10 +249,15 @@ khác. Rủi ro cross-provider mỏng mà r2 khai **vẫn còn nguyên** và kh�
 
 Giữ trọn 9 mục của r2 (mục 6 nay **đã đo**: `numstat` = 16 trên base thật). Thêm:
 
-10. **Năm lease "đã tiêu" chưa được kiểm từng cái bằng hiện vật riêng.** Tôi đo hai đường gộp — `#244`
-    đóng `completed`, và 0 nhánh chưa-merge chạm tệp — chứ **không** mở từng packet của `#238`,
-    `PLAT-X8`, `PLAT-X8b` để xác nhận hiện vật của chúng nằm trọn trên master. Nếu chọn đường (a) thì
-    lease phải khai từng cái, và **việc khai ấy phải do người cấp đo**, không chép từ đây.
+10. **KHÔNG CÓ CÁCH NÀO ĐO ĐƯỢC RẰNG MỘT LEASE ĐÃ CHẤM DỨT — trừ hết hạn.** Đây là mục quan trọng
+    nhất của danh sách này, và bản đầu của r3 khai nó quá nhẹ (chỉ nói *"chưa kiểm từng cái"*), rồi
+    ở §trên lại rút ra kết luận *"rủi ro đã đo được là bằng không"*. Cross-review `P1` bác đúng chỗ ấy.
+    Nói cho chật: thứ đo được là **việc đã LAND** — Issue đóng, hiện vật trên master, 0 nhánh
+    chưa-merge chạm tệp. Thứ **KHÔNG** đo được là **thẩm quyền ghi đã chấm dứt**: không trường nào
+    trong tệp lease mang trạng thái `đã tiêu`/`đã thu hồi`, không sổ nào ghi, và `ai-dang-giu` cố ý
+    trả lời *"ai đang GIỮ"* chứ không *"ai đang DÙNG"*. Nợ `AG-T0-01B` **chính là** khoảng trống này.
+    Hệ quả cho người cấp: đường (a) là **chấp nhận rủi ro còn lại**, phải ghi đúng bằng chữ ấy trong
+    lease; và phần khai hiện vật từng lease **phải do người cấp tự đo**, không chép từ đây.
 11. **Hành vi trên `windows-latest` thật vẫn CHƯA ĐO** — cả 8 ô của r3 vẫn chỉ chạy trên Linux, y hệt
     r2. `B5` của r1 là chỗ đo, và đường chắc chắn là `workflow_dispatch` trên đúng ref (gắn nhãn
     `windows` KHÔNG đủ).

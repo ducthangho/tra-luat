@@ -213,3 +213,4 @@ ghi_de_ADR_0046:
     Phiên này tự viết và tự chạy ca `t98` cùng ma trận 8 ô của `r3`. Nên nó là bên KÉM
     ĐỘC LẬP NHẤT để nghiệm thu chính ca ấy. Reviewer `codex` phải TỰ DỰNG lại `X1`/`X2`
     và tự chạy `W11`–`W13`, không nhận bảng số trong `r3` làm bằng chứng.
+posted_comment_id: 5387891190   # workflow ghi, ĐỪNG sửa tay

@@ -1,0 +1,120 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 244
+packet_id: LEASE-HOI-TOAN-KHO
+phase_key: LEASE-HOI-TOAN-KHO
+revision: 2
+generation: 1
+lease_id: lease-hoi-toan-kho-exec-1r2-codex-20260823
+role: executor
+provider: codex
+executor: codex
+model: gpt-5-codex
+effort: xhigh
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+write_set:
+- ops/lease_publish.py
+- ops/lease_publish_test.py
+write_set_note: 'ĐÚNG hai đường dẫn, không ký tự đại diện. **HAI đường dẫn trên là TOÀN BỘ quyền ghi của
+  lease này** — đường thứ ba BẤT KỲ đều phải có lease sửa đổi, không có ngoại lệ (AGENTS.md L42: "chỉ
+  ghi trong effective write set"; L45: "không tự cấp lease hoặc mở rộng Packet"). Trần `sensitive` của
+  ADR-0044 (≤3 tệp / ≤300 dòng thêm) là NGƯỠNG KÍCH THƯỚC, KHÔNG phải giấy phép đường dẫn: nó nói packet
+  này được phép TO tới đâu, không nói nó được ghi vào ĐÂU. Hai trục khác nhau; gộp lại là fail-open. Bản
+  đầu của dòng này viết "chừa suất thứ ba là CỐ Ý, để lượt vá sau verdict không phải xin mở rộng write
+  set" — SAI, và sai theo đúng chiều nguy: nó đọc ra thành uỷ quyền. Cross-review codex bắt (P1, PR #272).
+  Nếu lượt vá sau verdict thật sự cần tệp thứ ba thì DỪNG và xin lease sửa đổi; dừng lại là hành vi ĐÚNG
+  ở đó, không phải trở ngại.'
+write_set_khong_ai_cuong_che: 'ĐO 04:52Z 23-08-2026, và đây là lý do dòng trên phải viết cho chặt: KHÔNG
+  tầng nào kiểm diff có nằm trong write set hay không. `grep -c write_set`: `ops/lease_publish.py` = 5
+  nhưng CẢ NĂM chỉ để suy lớp review (`_tinh_lop_tu_write_set`, dòng 127) — không chỗ nào so diff; `.claude/dev/packet_loop.py`
+  = 0; `.github/workflows/ci.yml` = 0. Nên ranh giới write set hiện được giữ HOÀN TOÀN bằng việc người
+  thi công đọc đúng lease. Đó là nợ đã có tên: Issue #188 `PLAT-X1` (cổng cơ học kiểm giao write set),
+  và PR #187 §7.5 đã đo đúng con số này trước đây.'
+branch: codex/lease-hoi-toan-kho-exec-1r2
+branch_ownership: exclusive
+target_branch_neu_land: master
+reviewed_sha_required: 8222c101542030f67bf66d4fbfd2e685fcfe4e58
+base_sha: 8222c101542030f67bf66d4fbfd2e685fcfe4e58
+start_from_sha: 8222c101542030f67bf66d4fbfd2e685fcfe4e58
+spec_path: ops/specs/lease-hoi-toan-kho.md
+spec_sha256_required: ffca019ecb519dffdbe4bc46a57306c36c357fa0c005262a1a3a1c21fb15da87
+spec_status: da_duyet
+spec_duyet_boi: ducthangho
+spec_duyet_luc: 'direct, in-session, 2026-08-23 ("Tôi duyệt, ký lease #244,#249")'
+spec_note: 'Đặc tả ĐÃ TRÊN MASTER (merge PR #250, `a22c5f83`) — tra ở `master` là thấy. Băm trên là bản
+  SAU bốn lượt cross-review; ba thế hệ băm trước đã khai tử trên Issue #244, đừng dùng lại chúng.'
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-23 — "phóng phiên codex chạy #244 đi". Chủ kho dùng
+  quyền reroute của §2 để ĐẢO VAI executor/reviewer so với r1.'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: false
+recorder_ghi_chu: Phiên claude này CHÉP LẠI chỉ đạo và cấp lease; người thi công là phiên `codex` khác.
+  Khác r1 ở chỗ đó — r1 có người ghi trùng người vá, r2 thì không.
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc chủ kho
+leased_at_utc: '2026-08-23T05:35:00Z'
+lease_expires_at_utc: '2026-08-24T05:35:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+write_set_da_do_truoc_khi_cap: 'Đo 03:34Z 23-08-2026 trên 171 ref / 130 blob lease duy nhất, `yaml.safe_load`,
+  fail-close: KHÔNG_XÁC_ĐỊNH = 0. Bảy lease còn hạn chạm write set này, và CẢ BẢY là quyền ghi ĐÃ TIÊU
+  — mỗi cái kiểm bằng HIỆN VẬT trên master, không bằng nhãn Issue: `#225` PLAT-X8 land qua PR #248 · `#227`
+  LEASE-DANG (`ba82b06f` là tổ tiên của master) · `#238` LEASE-DANG-WINDOWS land qua PR #246 · `#255`
+  PLAT-X8b land qua PR #263 (`t88` có trên master). Không lease nào còn hiệu lực thật. Phép so hai nguồn
+  (`ls-remote` vs `for-each-ref`) sạch: 171/171, không mù ref nào.'
+canh_bao_cho_nguoi_thi_hanh: 'LỖ E3 CỦA #227 VẪN MỞ, VÀ NÓ Ở NGAY CẠNH VIỆC CỦA BẠN — ĐỪNG TƯỞNG SỬA `M3`
+  LÀ ĐƯỜNG ĐĂNG LEASE ĐÃ KÍN. Cross-review lượt 5 của `#227` trả verdict `dung_lai` (biên nhận `ops/reviews/lease-dang-review-5-claude-verdict.md`,
+  sha256 `d2b7eb93…6ab3`, `reviewed_sha ba82b06f`). Reviewer dựng BỐN nhánh chặn thật trong thân bước
+  `đăng` của `.github/workflows/ops-publish-lease.yml`; BA cái lọt sạch với `68/68` XANH — `BI_CHAN=1
+  + continue` không gọi `bao_chan` · `exit 1` thẳng (phá luôn bất biến cô lập lease của `t51`) · và nguy
+  nhất, bỏ qua `rc=6` (`RC_NEO`, lệch băm neo prompt) IM LẶNG, tức FAIL-OPEN THẬT. Chỉ nhánh "đổi tên
+  hàm" bị bắt, và bắt vì phá phép ĐẾM CHUỖI chứ không vì cổng hiểu thế nào là "chặn". Cụm "distinguishes
+  spelling, not authority" hay được nhắc cho hình dạng này, nhưng nguồn NGUYÊN VĂN là `ops/reviews/wp55-r2-review-4-codex-verdict.md`
+  (packet `wp55`, reviewer codex) — `lease-dang-review-5` chỉ TRÍCH LẠI, và bốn lượt trước của `LEASE-DANG`
+  có 0 lần nhắc. ĐỪNG chép lại lời quy nguồn "hai lượt verdict liên tiếp": nó SAI, cross-review codex
+  bắt (P2, PR #271). ĐỪNG ĐỌC CÂU TRÊN THÀNH "NGOÀI TẦM TAY BẠN" — bản đầu của lease này viết đúng như
+  thế và nó SAI. Tệp `.github/workflows/ops-publish-lease.yml` thì đúng là ngoài write set; nhưng thứ
+  ĐÁNG LẼ bắt được ba đột biến kia là BỘ TEST của nó, mà bộ test ấy là `ops/lease_publish_test.py` — nằm
+  THẲNG trong write set của bạn (`WORKFLOW_DANG` dòng 27 trỏ chính tệp workflow, `t51` dòng 2375). Nên
+  ranh giới đúng là PHẠM VI ĐẶC TẢ, không phải write set: packet này là `ai-dang-giu`, vá E3 là packet
+  KHÁC. Bạn CÓ tay ở đó; bạn không dùng tay ấy vì đặc tả không giao, chứ không phải vì lease chặn. Nhưng
+  nó chưa được ghi vào `ops/NO_KY_THUAT.md` (đo 03:3xZ: 0 lần nhắc) vì tệp ấy đang bị `#254` giữ tới `2026-08-24T00:38Z`.
+  Ghi vào lease này để nó có hiện vật bền ngay bây giờ thay vì chỉ sống trong một tệp verdict.'
+chua_do_duoc_luc_cap: (1) `#227` vẫn mang nhãn `state:running` trên GitHub trong khi việc đã land — nhãn
+  cũ, không phải trạng thái thật; chủ kho sẽ sửa. (2) Bảy lease "đã tiêu" ở trên KHÔNG tự khai điều đó
+  — kết luận dựng bằng tay từ hiện vật. Đó chính là nợ 19 `LEASE-THAY-THE-CHUA-CHUAN-HOA` và `AG-T0-01B-thu-hoi-lease-chua-co-duong`,
+  và cũng chính là năng lực `ai-dang-giu` mà packet NÀY sinh ra để xây. Packet tự chứng minh lý do tồn
+  tại của nó.
+dieu_kien_dung:
+- Verdict cross-review khác nền là `dung_lai` ⇒ DỪNG, không tự vá tiếp.
+- Vượt trần ADR-0044 (3 tệp / 300 dòng thêm) ⇒ DỪNG, xin ngoại lệ có vết.
+- Hình dạng lỗi lặp lần thứ 3 ⇒ hỏi "có nên làm nữa không", đừng vá tiếp.
+- Ngoài `write_set` hai đường dẫn ⇒ DỪNG, xin lease sửa đổi. Không tầng nào cưỡng chế, nên đây là kỷ luật.
+- Chưa có human readback của chủ kho ⇒ KHÔNG land (điều kiện ADR-0045).
+thay_the_cho: lease-hoi-toan-kho-exec-1-claude-20260823
+ngoai_le_ADR_0045:
+  ap_dung: true
+  vi_sao_can: '`review_class: sensitive` (tính từ write set — `ops/lease_publish.py` nằm trong bảng tiền
+    tố `sensitive` của chính cổng). ADR-0041 và gate §4.2 giới hạn Codex-Executor ở `routine`/`systemic`,
+    nên đây là NGOẠI LỆ, không phải mặc định mới.'
+  ba_dieu_kien_ADR_0045:
+    chu_kho_chi_dinh_tuong_minh_trong_lease: CÓ — xem `granted_on_instruction`, nguyên văn chỉ đạo.
+    reviewer_khac_nen: 'CÓ — `reviewer_provider: claude`, đảo so với r1.'
+    human_readback_truoc_land: BẮT BUỘC — chủ kho phải đọc lại diff trước khi merge. CHƯA làm.
+  ceiling_tu_dieu_phoi_30_phan_tram: không đổi
+  canh_bao_cong_KHONG_cuong_che: 'ĐO 05:2xZ 23-08-2026: dựng một lease `executor: codex` + `sensitive`
+    + KHÔNG khối ngoại lệ rồi chạy `lease_publish.py check` ⇒ **rc=0 ĐĂNG ĐƯỢC**. ADR-0045 khai phải thoát
+    khác 0. Tức khối này là hiện vật TỰ NGUYỆN, không phải thứ cổng đòi — đúng bệnh `Accepted` mà CHƯA
+    THI HÀNH của nợ 15. Đừng đọc sự có mặt của nó thành ''cổng đã kiểm''.'
+da_bi_thay_the: lease-hoi-toan-kho-exec-1r3-codex-20260823
+da_bi_thay_the_ly_do: >-
+  Cross-review lượt 1 trả `changes_requested` với hai finding P1/P2 (đã tái hiện độc lập).
+  Áp gói vá làm vượt trần ADR-0044, mà `dieu_kien_dung` của chính lease này ghi "vượt trần
+  ⇒ DỪNG, xin ngoại lệ có vết". Chủ kho đã cấp ngoại lệ in-session 23-08; r3 mang ngoại lệ ấy.
+posted_comment_id: 5384452787   # workflow ghi, ĐỪNG sửa tay

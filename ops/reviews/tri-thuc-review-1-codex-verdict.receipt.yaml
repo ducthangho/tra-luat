@@ -53,8 +53,11 @@ verdict_usage_caveats:
     Verdict neo `825558a5`; head được merge là `5a96c1a`. Theo §9 bằng chứng cũ HẾT HIỆU LỰC, nên bản vá 5 finding CHƯA AI REVIEW. Class `routine` nên §8 không đòi cross-provider; cross-review ở đây là nâng lớp tự nguyện.
 - id: DELTA-SAU-VERDICT-DA-DO-khong-tieu-them-mot-vong-review
   noi_dung: >-
-    Bổ sung 23-08-2026 bởi phiên điều phối, đóng đúng caveat `head-da-doi-sau-verdict` ở trên.
-    **KHÔNG phải một lượt review** — là một phép ĐO, và khai đúng phạm vi của nó.
+    Bổ sung 23-08-2026 bởi phiên điều phối. **THU HẸP phạm vi** của caveat
+    `head-da-doi-sau-verdict` ở trên — **KHÔNG đóng nó**. Caveat ấy **VẪN MỞ** cho tới khi có một
+    verdict neo `5a96c1a`: `AGENTS.md` §6 nói *"head SHA đổi sau review hoặc sau CI; review, gate
+    và authorization cũ đều stale"* — **không miễn trừ cho `routine`**. Mục này **KHÔNG phải một
+    lượt review**; nó là một phép ĐO, và khai đúng phạm vi của nó.
     Delta chưa ai review (`825558a5..5a96c1a`) đo được là **MỘT tệp, `+40/−5`, thuần tài liệu**:
     `ops/THAM_DINH_VONG_LAP_TRI_THUC_20260821.md`. Nội dung của nó là **bản chép kết luận của
     chính reviewer**, mỗi đoạn ghi rõ đóng finding nào (`codex P1`, `codex P2`). Hai khẳng định
@@ -78,3 +81,16 @@ verdict_usage_caveats:
     `git grep -o … | wc -l` cho **22** — và 22 mới là con số reviewer nêu. Dừng ở `-c` thì đã báo
     một chênh lệch KHÔNG CÓ THẬT và nghi oan bản vá. Cùng họ với *"cổng xanh nhờ `rc=0`"*: một
     lệnh trả số không có nghĩa nó trả **số mình đang hỏi**.
+- id: CHU-DONG-CUA-TOI-RONG-HON-PHEP-DO-hinh-dang-A
+  noi_dung: >-
+    Ghi ra vì nó xảy ra trong chính artefact viết để chống nó. Bản đầu của mục
+    `DELTA-SAU-VERDICT-DA-DO-…` mở đầu bằng *"**đóng** đúng caveat `head-da-doi-sau-verdict`"*,
+    rồi hai dòng sau lại viết *"KHÔNG phải một lượt review"* và để nguyên phần văn xuôi chưa xác
+    nhận. Hai câu ấy **mâu thuẫn trong cùng một mục**, và câu đầu **rộng hơn phép đo** — đúng
+    **hình dạng A**. Bắt được bởi `chatgpt-codex-connector` trên PR `#270`, neo `AGENTS.md:124-127`.
+    Đã sửa: nay khai **THU HẸP PHẠM VI**, và nói thẳng caveat kia **vẫn MỞ**.
+    Phiên điều phối **KHÔNG tự tăng bộ đếm A** (đang là 7, và 8 là ngưỡng DỪNG đã đăng ký) — nêu
+    ra để người giữ kho quyết, đúng tiền lệ bộ đếm D ở lượt 6 của `#227`.
+    Đề xuất của reviewer về **một ca kiểm chặn việc đánh dấu caveat là đã đóng khi chưa có biên
+    nhận `reviewed_sha` khớp head** là một thay đổi MÃ ⇒ ngoài phạm vi PR thuần tài liệu này;
+    đã chuyển sang Issue `#269`.

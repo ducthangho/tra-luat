@@ -2851,6 +2851,16 @@ def t83_traversal_duoc_chuan_hoa_truoc_khi_tra_bang():
 
 
 @ca
+def t88_traversal_khong_duoc_nhan_lop_thap_truoc_khi_chuan_hoa():
+    mod = _nap_cong()
+    mod._BANG_LOP = (("tam/lop-thap/", "routine"),) + mod._BANG_LOP
+    for tien_to in ("", "planned:"):
+        duong = tien_to + "tam/lop-thap/../../ops/lease_publish.py"
+        bang(mod._tinh_lop_tu_write_set([duong]) == "sensitive",
+             f"traversal có tiền tố {tien_to!r} đã nhận lớp thấp trước chuẩn hoá")
+
+
+@ca
 def t84_schema_version_hong_vo_huong_phai_bi_CHAN():
     mod = _nap_cong()
     for gia_tri in ("v2", "2.0", 2.0, "abc", None):

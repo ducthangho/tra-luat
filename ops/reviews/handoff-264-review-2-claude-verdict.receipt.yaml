@@ -1,0 +1,114 @@
+# BIÊN NHẬN v2 — cross-review LƯỢT 2 của PR #264. Lượt này trả `approve` và là lượt PR #264 land theo.
+#
+# ĐỌC TRƯỚC: cùng `de_quy_ho_so` như lượt 1 — PR #264 merge (`6541cade`) TRƯỚC khi biên nhận này tồn
+# tại. Hồ sơ hậu kiểm, không phải cổng chặn land.
+
+schema_version: 2
+receipt_id: handoff-264-review-2-claude-20260823-3d912c93
+kind: review_delivery_receipt
+packet_id: HANDOFF-264
+packet_issue: 255
+lease_id: handoff-264-review-2-claude-20260823
+luot_truoc: ops/reviews/handoff-264-review-1-claude-verdict.receipt.yaml
+role: reviewer
+provider: claude
+executor_provider: claude
+executor_ghi_chu: 'KHÔNG cross-provider — PR hồ sơ do phiên điều phối `claude` soạn, phiên `claude` khác review.'
+
+model_reviewer_identity:
+  provider: anthropic
+  surface: claude_code_cli
+  cli_version: '2.1.241'
+  session_run_id: 3d912c93
+  session_khoa_danh_tinh: 'linux:216760'
+  bat_dau_utc: '2026-08-23T02:25:31Z'
+  ket_thuc_utc: '2026-08-23T02:33:20Z'
+  ma_thoat: 0
+  neo_boi_launcher: '`--expected-head 1badac86…`, `--require-clean`, `--expected-prompt-sha256 cbd651c8…`'
+  KHONG_do_duoc: 'ID model cụ thể.'
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: '`ADR-0040`: tài khoản vận chuyển không cấp thẩm quyền.'
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: 'Neo bằng `verdict_sha256` + commit chứa nó. Không tag `luu-tru/*`.'
+
+reviewed_sha: 1badac86d8b2982d59d6130d77f74ed97607671a
+base_sha: 05de1ab81c235235b971a6fb8d8ae1fb226295d5
+target_pull_request: 264
+merge_commit_cua_PR: 6541cadefda11e3c81b634d777d0e5cb411e343e
+
+verdict: approve
+verdict_path: ops/reviews/handoff-264-review-2-claude-verdict.md
+verdict_sha256: 92769c072fc19ecf69dbc13a5874d004d464864ccfa6d351139d42594381d064
+verdict_bytes: 14673
+evidence_channel: repo_file
+authoritative_source: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/claude/ho-so-review-264/ops/reviews/handoff-264-review-2-claude-verdict.md
+evidence_url_ghi_chu: 'ĐIỀN Ở COMMIT SAU — hai bước, như mọi biên nhận trước.'
+
+cross_provider: false
+assurance_dat: null
+assurance_KHONG_dat: cross_approved
+assurance_ghi_chu: >-
+  Reviewer TỰ TỪ CHỐI khai `cross_approved`, cùng hai lý do lượt 1. Mức thật đạt được: đã tự đo lại
+  ĐỘC LẬP toàn bộ ba finding lượt 1 và toàn bộ `delta-ban-va.patch` (6 tệp CHƯA AI SOI), trên bản sao
+  riêng ngoài kho, không chạm cây review lẫn kho thật.
+la_canonical: false
+la_canonical_ghi_chu: 'Như lượt 1: `HANDOFF-264` không phải packet; không tiêu vòng canon của packet nào.'
+
+doi_chieu_luot_truoc:
+  bat_buoc_theo: 'PROTOCOL §8 — từ lượt 2 trở đi'
+  ket_qua:
+    - finding: t27-mu-vi-sai-ten-truong
+      nhan: DA_VA_THAT
+      can_cu: >-
+        Tự dựng lại mutation hai chiều trên bản sao riêng (KHÔNG dùng số của lượt 1): nền `87/87 rc=0`;
+        xoá một hàng caveat README ⇒ `86/87`, `t27` ĐỎ trỏ đúng tên; khôi phục ⇒ `87/87 rc=0`.
+        Cộng `grep` toàn kho tên khoá cũ: chỉ còn 1 chỗ, và đó là prompt lượt 2 MÔ TẢ finding, không
+        phải chỗ dùng thật.
+    - finding: caveat-mo-neo-thieu-hang-README
+      nhan: DA_VA_THAT
+      can_cu: >-
+        Tự viết script đọc `verdict_usage_caveats` qua `yaml.safe_load` và đối chiếu từng cặp
+        (`id`, `tệp verdict`) với TỪNG dòng bảng README — đếm ra **12/12, 0 MISSING**. Không đọc con
+        số "12" của lượt 1 rồi xác nhận bằng mắt.
+    - finding: bookkeeping-land-evidence-tu-phu-dinh-sau-merge
+      nhan: DA_VA_THAT
+      can_cu: >-
+        Parse lại YAML sau vá (khối `>-` ra đúng 1 chuỗi, `bookkeeping` vẫn list 3 phần tử `str` —
+        không hồi quy kiểu), rồi đối chiếu câu mới với `diff.patch`: cả 4 cặp verdict/receipt cộng
+        chính `land-evidence.yaml` đều nằm trong danh sách tệp của #264 ⇒ câu mới ĐÚNG SỰ THẬT, không
+        chỉ đúng cú pháp. Còn quét tìm chỗ khác cùng bệnh: một ứng viên, đọc kỹ thì KHÔNG cùng bệnh
+        (mốc đã khoá bằng SHA, không phải claim còn hiệu lực tới lúc land).
+
+findings: []
+findings_ghi_chu: 'Không finding mới. Đã soát toàn bộ 6 tệp của `delta-ban-va.patch` — phần chưa lượt nào phủ.'
+
+verdict_usage_caveats:
+  - id: HANDOFF-264-KHONG-TIEU-VONG-CANON-NAO
+    noi_dung: 'Như lượt 1. Đừng cộng vào bộ đếm canon của `PLAT-X8`/`PLAT-X8b`.'
+  - id: KHONG-CROSS-PROVIDER-tac-gia-va-reviewer-deu-claude
+    noi_dung: 'Reviewer tự từ chối khai `cross_approved`. `approve` ở đây nói về NỘI DUNG, không cấp assurance.'
+  - id: CI-tren-exact-head-KHONG-do-duoc-boi-reviewer
+    noi_dung: >-
+      Điều phối cấp `B-CI-EVIDENCE.md` chứa ảnh chụp một run CHƯA HOÀN TẤT (`in_progress`,
+      conclusion `None`), và tệp ấy KHÔNG in trường `head=` nên chỉ dẫn tự kiểm của chính nó không
+      thực hiện được. Reviewer khai đúng cả hai chỗ và KHÔNG nhận đó là "CI xanh". CI thật trên
+      `1badac86` (ubuntu + windows `success`, 0 bước hỏng) do ĐIỀU PHỐI đo sau đó — không phải phép
+      đo của reviewer. Đừng trích verdict này làm bằng chứng CI.
+  - id: danh-tinh-khac-phien-la-SUY-TU-VANG-MAT
+    noi_dung: >-
+      Reviewer tự khai không xác minh được "khác phiên soạn lease/prompt" bằng cơ chế nào ngoài suy
+      luận từ VẮNG MẶT. Áp cho mọi lượt review của chuỗi này.
+  - id: bien-nhan-nay-ghi-SAU-khi-PR-da-merge
+    noi_dung: 'PR #264 merge `6541cade` trước khi biên nhận này tồn tại — hồ sơ hậu kiểm, xem `de_quy_ho_so` ở lượt 1.'
+
+no_da_khai:
+  - id: DE-QUY-HO-SO-REVIEW-CHUA-CO-LUAT
+    noi_dung: 'Xem lượt 1. Đệ quy dừng bằng QUYẾT ĐỊNH, không bằng cơ chế; chưa có ADR.'
+  - id: CHUA-CO-BO-KIEM-RECEIPT-V2
+    noi_dung: 'Bốn receipt v2 nay trên master, chưa cổng nào validate lược đồ v2.'

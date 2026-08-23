@@ -41,6 +41,8 @@ MÃ THOÁT — mỗi chốt một mã, để phía gọi xử lý được mà k
   11  kho không đúng (remote/commit gốc lệch)
   12  thiếu công cụ bắt buộc (xem `doctor`)
   13  công cụ CÓ MẶT nhưng CHƯA DÙNG ĐƯỢC — thiếu xác thực (xem `doctor`, `chuan-bi`)
+  14  workspace là git worktree — phải dùng clone độc lập
+  15  probe năng lực ĐỎ hoặc KHÔNG ĐO ĐƯỢC
   124 quá hạn trong lúc chạy (giống `timeout(1)`) — VÀ đã giết được
   125 quá hạn NHƯNG KHÔNG giết được: tiến trình còn sống, cần người can thiệp
   130 bị ngắt (Ctrl-C) — đã giết con
@@ -134,6 +136,8 @@ MA_QUA_HAN = 124
 MA_GIET_HUT = 125
 MA_THIEU_CONG_CU = 12
 MA_CHUA_XAC_THUC = 13
+MA_WORKTREE = 14
+MA_PROBE = 15
 
 # Bộ đột biến dùng cùng mốc này để không thể trượt từ ~70% phép đo được xuống
 # gần 0 mà vẫn xanh. Đặt ở mã được đột biến (không đặt trong chính runner test).
@@ -978,6 +982,88 @@ def chot_workspace(ws: str) -> str:
     return str(Path(top).resolve())
 
 
+def _probe_workspace(ws: str) -> dict:
+    git_meta = Path(ws) / ".git"
+    try:
+        if git_meta.is_file():
+            return {"trang_thai": "DO", "chi_tiet": "git worktree", "ma": "git_worktree"}
+        if git_meta.is_dir():
+            return {"trang_thai": "DAT", "chi_tiet": ".git la thu muc"}
+    except OSError as e:
+        return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": type(e).__name__}
+    return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": ".git khong phai tep/thu muc"}
+
+
+def _probe_ghi(ws: str) -> dict:
+    tep = None
+    try:
+        with tempfile.NamedTemporaryFile(prefix=".launcher-probe-", dir=ws, delete=False) as f:
+            tep = Path(f.name)
+            f.write(b"LAUNCHER_WRITE_PROBE\n")
+            f.flush()
+        if tep.read_bytes() != b"LAUNCHER_WRITE_PROBE\n":
+            return {"trang_thai": "DO", "chi_tiet": "ghi/readback lech"}
+        tep.unlink()
+        tep = None
+        return {"trang_thai": "DAT", "chi_tiet": "ghi-readback-xoa thanh cong"}
+    except OSError as e:
+        return {"trang_thai": "DO", "chi_tiet": f"ghi workspace: {type(e).__name__}"}
+    finally:
+        if tep is not None:
+            try:
+                tep.unlink()
+            except OSError:
+                pass
+
+
+def _probe_spawn(chuong_trinh: str, ws: str) -> dict:
+    try:
+        p = _chay_van_ban_an_toan([chuong_trinh, "--version"], cwd=ws, timeout=30)
+    except (OSError, subprocess.SubprocessError) as e:
+        return {"trang_thai": "DO", "chi_tiet": f"spawn --version: {type(e).__name__}"}
+    ra = (p.stdout or "") + (p.stderr or "")
+    if p.returncode == 0 and bool(ra.strip()):
+        return {"trang_thai": "DAT", "chi_tiet": f"rc=0; output={len(ra.encode('utf-8'))}B"}
+    return {"trang_thai": "DO", "chi_tiet": f"rc={p.returncode}; output={len(ra)} ky tu"}
+
+
+def _probe_trust_claude(ws: str, home: Path | None = None) -> dict:
+    try:
+        data = json.loads(((home or Path.home()) / ".claude.json").read_text(encoding="utf-8"))
+        muc = data.get("projects", {}).get(str(Path(ws).resolve()))
+    except (OSError, TypeError, AttributeError, json.JSONDecodeError):
+        return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "khong doc duoc trust Claude"}
+    if not isinstance(muc, dict) or "hasTrustDialogAccepted" not in muc:
+        return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "thieu khoa trust Claude"}
+    if muc["hasTrustDialogAccepted"] is True:
+        return {"trang_thai": "DAT", "chi_tiet": "Claude trust=true"}
+    if muc["hasTrustDialogAccepted"] is False:
+        return {"trang_thai": "DO", "chi_tiet": "Claude trust=false"}
+    return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "trust Claude khong phai boolean"}
+
+
+def _probe_cho_so(ds: dict) -> dict:
+    return {ten: {"trang_thai": kq["trang_thai"], "chi_tiet": kq["chi_tiet"]}
+            for ten, kq in ds.items()}
+
+
+def chay_cac_probe(ws: str, lenh: list[str], bo_qua: str | None) -> tuple[dict, str | None]:
+    ds = {"workspace": _probe_workspace(ws), "ghi": _probe_ghi(ws),
+          "spawn": _probe_spawn(str(lenh[0]), ws)}
+    if Path(str(lenh[0])).name.casefold() in ("claude", "claude.exe"):
+        ds["claude_trust"] = _probe_trust_claude(ws)
+    ly_do = bo_qua.strip() if bo_qua is not None else None
+    if bo_qua is not None and not ly_do:
+        raise Chan(MA_THAM_SO, "--bo-qua-probe bat buoc co ly do khac rong")
+    hong = {ten: kq for ten, kq in ds.items() if kq["trang_thai"] != "DAT"}
+    if hong and ly_do is None:
+        if ds["workspace"].get("ma") == "git_worktree":
+            raise Chan(MA_WORKTREE, "workspace la git worktree; dung ban clone doc lap")
+        mo_ta = ", ".join(f"{ten}={kq['trang_thai']}" for ten, kq in hong.items())
+        raise Chan(MA_PROBE, f"probe nang luc khong dat: {mo_ta}")
+    return ds, ly_do
+
+
 # ------------------------------------------------- nhận diện kho, KHÔNG theo đường dẫn
 
 def _danh_tinh_remote(url: str) -> str | None:
@@ -1347,6 +1433,8 @@ def lenh_run(a) -> int:
     if not a.lenh:
         raise Chan(MA_THAM_SO, "thieu lenh de chay (dat sau dau --)")
     kq = chay_cac_chot(a)
+    probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe)
+    kq.update(probe=_probe_cho_so(probe), bo_qua_probe_ly_do=ly_do_bo_qua)
     if bool(a.attempt_state) != bool(a.void_reason):
         raise Chan(MA_THAM_SO, "--attempt-state và --void-reason phải đi cùng nhau")
     khoa_ky = None
@@ -3805,6 +3893,8 @@ def build_parser():
                    help="lý do được buộc nguyên khối vào run.json của lượt")
     r.add_argument("--giu-ban-chup", action="store_true",
                    help="giu prompt.snapshot sau khi con thoat (mac dinh XOA: no chua noi dung prompt)")
+    r.add_argument("--bo-qua-probe", metavar="LY_DO",
+                   help="cho run tiep khi probe hong; bat buoc ghi ly do vao run.json")
     r.add_argument("lenh", nargs=argparse.REMAINDER)
     r.set_defaults(fn=lenh_run)
 

@@ -724,6 +724,27 @@ Các thuật ngữ trạng thái không dùng thay nhau:
 Vì vậy Packet merge vào integration mới là `integrated`, chưa `landed`. PR đi thẳng canonical trong giai đoạn
 bootstrap cũng chỉ thành `landed` sau post-merge evidence và bookkeeping.
 
+**`bookkeeping Packet xong` đòi DUYỆT TỪNG MỤC việc mà lease khai, không dừng ở hiện vật chính.** Một phép thử
+hiện vật (`grep` thấy thứ đã land trên canonical) trả lời đúng **một** câu hỏi — *deliverable chính có ở đó
+không* — và mù với mọi mục nằm ngoài tệp ấy. Lease nào khai `viec_trong_revision`, `acceptance_criteria` hay
+danh sách tương đương thì mỗi mục phải có phép đo riêng trước khi packet rời hàng đợi; mục không đo được thì
+khai `KHÔNG ĐO ĐƯỢC` chứ không im lặng bỏ qua.
+
+**Quy tắc này hiện có `0` CỔNG THI HÀNH, và câu này ở lại cho tới khi có.** Đo 23-08-2026:
+`rg -l "viec_trong_revision|acceptance_criteria"` trên toàn cây cho **`0` tệp ngoài chính tệp này** — không
+tầng nào ĐỌC hai trường ấy bằng máy. (Đếm theo TỆP KHÁC chứ không theo số hit, vì mỗi lần ai đó sửa đoạn này
+là số hit đổi: bản đầu của chính câu này khai `5` rồi tự làm nó thành `6`.) Đây là quy tắc **normative** cho người vận hành, không phải bảo vệ
+tự động; đừng đọc động từ *"đòi"* / *"phải"* ở trên thành *"đã có máy canh"*. Cổng thi hành thuộc packet kế
+nhiệm, Issue + lease riêng. Khai thẳng vì im lặng ở đây sẽ tái tạo ĐÚNG lỗi mà quy tắc này sinh ra để chặn:
+một thứ trông như bảo vệ cả gói trong khi không đo gì.
+
+Căn cứ, tách theo thứ TÁI LẬP ĐƯỢC từ kho và thứ KHÔNG — packet `CI-NOI-BANG-VAO-GATE` (#254):
+lease `-r2` khai **năm** mục `viec_trong_revision` (**đo được**: tệp lease trên `ops/ci-noi-bang-vao-gate`);
+bốn mục đầu có hiện vật trên canonical (**đo được**); mục thứ năm nhắm vào **thân Issue**, nên trạng thái của
+nó **KHÔNG ĐO ĐƯỢC** từ kho — và chính điều đó là ví dụ sống cho quy tắc. Câu *"packet đóng bằng đúng một
+phép thử"* cũng **KHÔNG ĐO ĐƯỢC**: kho không giữ receipt của lần đóng. Cùng họ *"cổng vắng mặt trông giống
+cổng xanh"*, đổi đối tượng: **một phép thử đo đúng MỘT thứ, bị đọc thành đo CẢ GÓI.**
+
 Land gate đóng băng mission, rebase/integrate lần cuối, gán version/changelog/manifest và chạy parity
 Windows–Linux. Land sinh bundled test module theo thứ tự tất định, kiểm cả chế độ dev có fragment lẫn topology
 bundle chỉ có module sinh. Bundle không chứa fragment và thiếu bundled module phải fail với lỗi đích danh;

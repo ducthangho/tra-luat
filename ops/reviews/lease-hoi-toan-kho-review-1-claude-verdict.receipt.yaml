@@ -1,0 +1,64 @@
+# Bản gốc là NGUYÊN VĂN của reviewer, neo bằng băm. Comment trên PR chỉ là BẢN CHIẾU.
+schema_version: 1
+packet_id: LEASE-HOI-TOAN-KHO
+packet_issue: 244
+pr: 275
+round: 1
+provider: claude
+role: reviewer
+executor: codex
+verdict: changes_requested
+reviewed_sha: 13e3a9cfdac763a317252e68fa91571fee942bd0
+base_sha: 8222c101542030f67bf66d4fbfd2e685fcfe4e58
+lease_id: lease-hoi-toan-kho-exec-1r2-codex-20260823
+verdict_path: ops/reviews/lease-hoi-toan-kho-review-1-claude-verdict.md
+verdict_sha256: fe6eea93c0742cc7a87b5e4535f088559ae0486208683a7b01241354704b9848
+verdict_bytes: 17871
+goi_va_path: ops/reviews/goi-va-lease-hoi-toan-kho-1/lease_publish_test.py
+goi_va_sha256: 60ff6dda220098aa1dc7291f4ba5d17470cd38b46a3b0422d9044b7a0c2b9025
+published_comment: https://github.com/ducthangho/tra-luat/pull/275#issuecomment-5384865602
+delivered_by: 'claude-session   # KHÔNG phải reviewer — người chuyển thư'
+verdict_nguon: 'Phiên reviewer chạy headless trong sandbox cô lập NGOÀI kho, mirror git đầy đủ (core.abbrev=7,
+  không nông), cấm đọc ra ngoài sandbox và cấm sửa cây review. Kiểm sau khi chạy: mirror 0 mục bẩn, HEAD
+  vẫn 13e3a9c; kho thật 0 mục bẩn.'
+verdict_doi_chieu: NGUYÊN VĂN, không đụng byte nào.
+findings:
+- id: git-wrapper-nuot-loi-fail-open
+  muc: P1
+  ca_de_xuat: t95
+  tom_tat: '`_git()` — đường gọi git DUY NHẤT cho M1/M2/M3 — không có ca nào kiểm nhánh fail-close khi
+    git rc khác 0. Đổi thành trả chuỗi RỖNG thay vì ném Chan(RC_KHONG_XAC_DINH) thì bộ test KHÔNG đổi
+    (93/94). Gộp trạng thái thứ ba vào "coi như sạch" — đúng hình dạng mà packet này sinh ra để chặn,
+    chỉ khác là ở tầng git-wrapper.'
+- id: lease-cham-duong-so-chua-thay-vi-so-bang
+  muc: P2
+  ca_de_xuat: t96
+  tom_tat: '`_lease_cham_duong` không có ca nào ép phép so phải là so BẰNG. Đổi sang so CHỨA thì lọt sạch
+    (93/94) — một lease khai `ops/` sẽ bị nhận là đang giữ `ops/lease_publish.py`.'
+- id: bien-het-han-khong-co-ca
+  muc: P3
+  tom_tat: Biên đúng lúc hết hạn (nhỏ-hơn-hoặc-bằng so với nhỏ-hơn) không có ca kiểm; rủi ro thực tế gần
+    bằng không.
+nguoi_dieu_phoi_tai_hien_doc_lap:
+  da_lam: true
+  cach: Chạy lại từng đột biến trên một BẢN SAO THỨ HAI của mirror, không dùng số của reviewer.
+  ket_qua:
+    nen: 93/94
+    P1_sau_dot_bien: 93/94 — SỐNG SÓT
+    P2_sau_dot_bien: 93/94 — SỐNG SÓT
+  ket_luan: Cả hai finding là THẬT.
+t94_bo_dot_bien_san_co: 10/10 đúng — hai lỗ trên nằm NGOÀI tập ấy
+chua_do_duoc:
+- 'KHÔNG ghi được vào sổ cục bộ `.claude/.packet_state/wp244.json`: `record-review` đòi state `reviewing`,
+  mà state trong container này là `awaiting_lease` (chưa phiên nào chạy vòng đời packet ở đây). Diễn lại
+  vòng đời để lệnh chịu ghi là CHẾ RA một sổ chưa từng xảy ra, nên KHÔNG làm. Biên nhận này là bản ghi
+  bền thay thế.'
+- '`actionlint` vắng trong container ⇒ `t33` fail-close ở mọi lượt đo. Không kết luận gì về đường đó.'
+dieu_kien_land_con_thieu:
+- vá P1/P2 rồi review lại
+- human readback của chủ kho (điều kiện cứng ADR-0045) — CHƯA làm
+evidence_url: https://github.com/ducthangho/tra-luat/pull/275#issuecomment-5384865602
+evidence_url_ghi_chu: Trỏ vào COMMENT trên PR, không phải blob trên master — cố ý. Verdict chưa vào master
+  lúc viết biên nhận này, nên một URL blob sẽ là SHA không tra được; đó đúng là bệnh mà bài học `luu-tru/*`
+  đã ghi. Comment là nơi verdict đã thật sự được công bố và đọc lại được ngay. Khi nhánh này land, tệp
+  verdict có băm `verdict_sha256` ở trên là bản có thẩm quyền.

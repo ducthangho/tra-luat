@@ -2901,6 +2901,225 @@ def t87_ba_duong_van_hanh_phai_sensitive():
         bang(lop == "sensitive", f"{duong} bị hạ xuống {lop!r}")
 
 
+class _GitKhoGia:
+    def __init__(self, remote, local, leases):
+        import yaml
+        self.remote, self.local, self.refs, self.blobs = set(remote), set(local), {}, {}
+        for i, (ref, path, lease) in enumerate(leases):
+            blob = f"{i + 1:040x}"
+            self.refs.setdefault(ref, []).append((blob, path))
+            self.blobs[blob] = lease if isinstance(lease, str) else yaml.safe_dump(lease)
+
+    def __call__(self, *args, cwd=None):
+        if args[:2] == ("ls-remote", "--heads"):
+            out = "".join(f"{'a' * 40}\trefs/heads/{x}\n" for x in sorted(self.remote))
+        elif args and args[0] == "for-each-ref":
+            out = "".join(f"refs/remotes/origin/{x}\n" for x in sorted(self.local))
+            out += "refs/remotes/origin/HEAD\n"
+        elif args and args[0] == "ls-tree":
+            out = "".join(f"100644 blob {b}\t{p}\n" for b, p in self.refs.get(args[2], []))
+        elif args[:2] == ("cat-file", "-p"):
+            out = self.blobs[args[2]]
+        elif args[:2] == ("rev-parse", "--git-dir"):
+            out = ".git\n"
+        else:
+            return subprocess.CompletedProcess(args, 1, "", "không giả lệnh này")
+        return subprocess.CompletedProcess(args, 0, out, "")
+
+
+def _lease_quet(lease_id, path="ops/lease_publish.py", han="2099-01-01T00:00:00Z", **them):
+    d = {"lease_id": lease_id, "lease_expires_at_utc": han, "write_set": [path]}
+    d.update(them)
+    return d
+
+
+def _quet_gia(git, duong="ops/lease_publish.py"):
+    import contextlib, io
+    mod, out = _nap_cong(), io.StringIO()
+    mod.GOI_GIT = git
+    with contextlib.redirect_stdout(out):
+        rc = mod.lenh_ai_dang_giu(type("A", (), {"goc": ".", "duong_dan": duong})())
+    return rc, out.getvalue(), mod
+
+
+@ca
+def t89_A1_A2b_quet_du_hai_nguoi_giu_va_ba_trang_thai():
+    ls = [("refs/remotes/origin/a", "ops/leases/a.yaml", _lease_quet("L1")),
+          ("refs/remotes/origin/b", "ops/leases/b.yaml", _lease_quet("L2")),
+          ("refs/remotes/origin/b", "ops/leases/c.yaml", _lease_quet("CU", han="2000-01-01T00:00:00Z")),
+          ("refs/remotes/origin/b", "ops/leases/d.yaml", _lease_quet("KHAC", "x.py"))]
+    rc, out, mod = _quet_gia(_GitKhoGia({"a", "b"}, {"a", "b"}, ls))
+    bang(rc == mod.RC_DANG_GIU and all(x in out for x in ("L1", "L2", "HẾT_HẠN\tCU"))
+         and "KHAC" not in out and "NGƯỜI_GIỮ 2" in out, f"A1/A2b sai: {rc} {out}")
+
+
+@ca
+def t90_A2_yaml_hong_fail_close():
+    git = _GitKhoGia({"a"}, {"a"}, [("refs/remotes/origin/a", "ops/leases/a.yaml", "[:")])
+    try: _quet_gia(git)
+    except Exception as ex: bang("KHÔNG_XÁC_ĐỊNH" in str(ex), f"A2 sai: {ex}")
+    else: raise AssertionError("A2 YAML hỏng vẫn qua")
+
+
+@ca
+def t91_A2c_da_bi_thay_the_van_in_nhung_khong_giu():
+    ls = [("refs/remotes/origin/a", "ops/leases/a.yaml", _lease_quet("L1", da_bi_thay_the="L2")),
+          ("refs/remotes/origin/a", "ops/leases/b.yaml", _lease_quet("L2"))]
+    rc, out, mod = _quet_gia(_GitKhoGia({"a"}, {"a"}, ls))
+    bang(rc == mod.RC_DANG_GIU and "CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ\tL1" in out
+         and "NGƯỜI_GIỮ 1: L2" in out, f"A2c sai: {out}")
+
+
+@ca
+def t92_A3_A4_A5_A6_so_tap_ten_ref():
+    chung = [("refs/remotes/origin/a", "ops/leases/a.yaml", _lease_quet("L"))]
+    for remote, local in [({"a", "moi"}, {"a"}), ({"a", "moi"}, {"a", "cu"})]:
+        try: _quet_gia(_GitKhoGia(remote, local, chung))
+        except Exception as ex: bang("KHÔNG_XÁC_ĐỊNH" in str(ex), f"A3/A6 sai: {ex}")
+        else: raise AssertionError("ref máy chủ thiếu cục bộ vẫn qua")
+    rc, out, mod = _quet_gia(_GitKhoGia({"a"}, {"a", "cu"}, chung))
+    bang(rc == mod.RC_DANG_GIU and "L" in out, f"A4/A5 mất lượt quét: {rc} {out}")
+    mod.GOI_GIT = _GitKhoGia({"a"}, {"a"}, chung)
+    _, refs = mod._cac_ref_cuc_bo(Path("."))
+    bang(all(not x.endswith("/HEAD") for x in refs), f"A5 giữ ref tượng trưng: {refs}")
+
+
+@ca
+def t93_A7_dau_dang_duoc_doc_toan_kho_theo_dung_lease_id():
+    mod = _nap_cong()
+    git = _GitKhoGia({"a"}, {"a"}, [
+        ("refs/remotes/origin/a", "ops/leases/a.yaml", _lease_quet("DUNG", posted_comment_id=7)),
+        ("refs/remotes/origin/a", "ops/leases/b.yaml", _lease_quet("KHAC", posted_comment_id=8))])
+    mod.GOI_GIT = git
+    with San() as s:
+        (s / ".git").mkdir(); p = viet(s, _lease_quet("DUNG"))
+        try: mod._kiem_dau_toan_kho({"lease_id": "DUNG"}, p, s)
+        except mod.Chan as ex: bang(ex.ma == RC_DA_DANG and "comment 7" in ex.thong_diep, str(ex))
+        else: raise AssertionError("A7 không thấy dấu cùng lease_id trên ref khác")
+
+
+@ca
+def t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO():
+    """Chạy mutant trên tệp riêng, tắt bytecode; in đủ số chạy/bị giết."""
+    import importlib, importlib.util, contextlib, io
+    nguon, chay_mut, giet = SCRIPT.read_text(encoding="utf-8"), 0, 0
+    muts = [
+        ("A1", "for ref in refs:", "for ref in refs[:1]:"),
+        ("A2", "lease = yaml.safe_load(_git(goc, \"cat-file\", \"-p\", blob))", "lease = {}"),
+        ("A2b-co", 'return "HẾT_HẠN" if han <= bay_gio else "CÒN_HẠN"', 'return "CÒN_HẠN"'),
+        ("A2b-khong", 'return "HẾT_HẠN" if han <= bay_gio else "CÒN_HẠN"', 'return "KHÔNG_XÁC_ĐỊNH"'),
+        ("A2c-giu", 'da_chet = bool(lease.get("da_bi_thay_the"))', 'da_chet = False'),
+        ("A2c-in", 'print(f"{trang_thai}{nhan}\\t{lease_id}\\t{muc[\'ref\']}:{muc[\'path\']}")', 'print("")'),
+        ("A3-A6", "thieu = _ten_nhanh_may_chu(goc) - ten_cuc_bo", "thieu = set()"),
+        ("A4", "if doi_chieu_ref:", "if ten_cuc_bo - _ten_nhanh_may_chu(goc): return []\n    if doi_chieu_ref:"),
+        ("A5", 'if not ref or ref.endswith("/HEAD"):', 'if not ref:'),
+        ("A7", 'for muc in _quet_lease_toan_kho(root, doi_chieu_ref=False):', 'for muc in []:'),
+    ]
+    with San() as s:
+        sys.dont_write_bytecode = True
+        for i, (ten, cu, moi) in enumerate(muts):
+            bang(nguon.count(cu) == 1, f"neo mutant {ten} không duy nhất")
+            p = s / f"lease_publish_mut_{i}_{ten}.py"; p.write_text(nguon.replace(cu, moi), encoding="utf-8")
+            bang(p.read_text(encoding="utf-8") != nguon, f"mutant {ten} không đổi tệp")
+            importlib.invalidate_caches(); spec = importlib.util.spec_from_file_location(f"lp_m{i}", p)
+            mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod); chay_mut += 1
+            dich = (t89_A1_A2b_quet_du_hai_nguoi_giu_va_ba_trang_thai if ten == "A1" or ten.startswith("A2b")
+                    else t90_A2_yaml_hong_fail_close if ten == "A2"
+                    else t91_A2c_da_bi_thay_the_van_in_nhung_khong_giu if ten.startswith("A2c")
+                    else t93_A7_dau_dang_duoc_doc_toan_kho_theo_dung_lease_id if ten == "A7"
+                    else t92_A3_A4_A5_A6_so_tap_ten_ref)
+            cu_nap = globals()["_nap_cong"]; globals()["_nap_cong"] = lambda: mod
+            try: dich()
+            except AssertionError: giet += 1
+            finally: globals()["_nap_cong"] = cu_nap
+    print(f"đột biến mã sản phẩm: đã chạy={chay_mut}, bị giết={giet}")
+    bang(chay_mut == giet == len(muts), f"đột biến {giet}/{chay_mut}")
+
+
+@ca
+def t95_git_that_bai_phai_fail_close_khong_duoc_nuot_loi():
+    """`_git()` không được coi `rc != 0` là "thành công, rỗng" — im lặng nuốt lỗi ở
+    tầng git là fail-OPEN, y hệt hình dạng mà `A2` khoá ở tầng YAML nhưng cho blob
+    hỏng, không cho LỆNH hỏng. Lan sang `_ten_nhanh_may_chu` vì đó là nơi hậu quả thật
+    xảy ra: tập rỗng do lỗi bị đọc thành "máy chủ không có nhánh nào", làm phép so hai
+    nguồn của M2 im lặng thay vì báo `KHÔNG_XÁC_ĐỊNH`."""
+    import subprocess as sp
+    mod = _nap_cong()
+
+    def gia_hong(*args, cwd=None):
+        return sp.CompletedProcess(args, 128, "", "fatal: giả lập git chết")
+
+    mod.GOI_GIT = gia_hong
+    try:
+        mod._git(Path("."), "ls-remote", "--heads", "origin")
+    except mod.Chan as ex:
+        bang(ex.ma == mod.RC_KHONG_XAC_DINH and "KHÔNG_XÁC_ĐỊNH" in ex.thong_diep,
+             f"t95 sai mã/thông điệp: {ex}")
+    else:
+        raise AssertionError("t95: `_git()` coi rc != 0 là thành công (trả chuỗi thay vì Chan)")
+
+    try:
+        mod._ten_nhanh_may_chu(Path("."))
+    except mod.Chan as ex:
+        bang(ex.ma == mod.RC_KHONG_XAC_DINH, f"t95 lan toả sai mã: {ex}")
+    else:
+        raise AssertionError(
+            "t95: ls-remote hỏng nhưng _ten_nhanh_may_chu trả tập (rỗng hoặc không) "
+            "thay vì chặn — M2 sẽ im lặng coi máy chủ không có nhánh nào")
+
+
+@ca
+def t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua():
+    """`_lease_cham_duong` nối một lease với đường dẫn bị hỏi — đây là chỗ M1 quyết
+    định TẬP NGƯỜI GIỮ được tính từ đâu, nên phải SO BẰNG tuyệt đối. Bơm overlap theo
+    CẢ HAI chiều: một mục `write_set` dài hơn nhận `duong` làm tiền tố, và một mục
+    ngắn hơn LÀ tiền tố của `duong` — cài `in` thay cho `==` sẽ khớp nhầm đúng một
+    trong hai chiều tuỳ hướng gõ, nên phải thử cả hai mới khoá được cả hai cách gõ sai."""
+    mod = _nap_cong()
+    duong = "ops/lease_publish.py"
+    bang(not mod._lease_cham_duong({"write_set": [duong + ".bak"]}, duong),
+         "t96: write_set dài hơn nhận `duong` làm tiền tố vẫn bị coi là khớp")
+    bang(not mod._lease_cham_duong({"write_set": ["ops/lease_publish"]}, duong),
+         "t96: write_set ngắn hơn, là tiền tố của `duong`, vẫn bị coi là khớp")
+    bang(mod._lease_cham_duong({"write_set": [duong]}, duong),
+         "t96: khớp đúng nghĩa (bằng nhau tuyệt đối) bị từ chối")
+    bang(mod._lease_cham_duong({"write_set": ["planned:" + duong]}, duong),
+         "t96: khớp đúng nghĩa kèm tiền tố `planned:` bị từ chối")
+
+
+@ca
+def t97_kiem_dau_toan_kho_phai_fail_close_khi_git_that_bai():
+    """`_kiem_dau_toan_kho` gọi THẲNG `GOI_GIT("rev-parse", "--git-dir", …)` — KHÔNG đi
+    qua `_git()` — rồi `except OSError: return` / `if p.returncode != 0: return` lặng
+    lẽ. Đây là hình dạng y hệt lỗ mà `t95` vừa khoá cho `_git()`, nhưng ở một đường gọi
+    KHÁC không chạm `_git()` nên `t95` không bắt được nó — và đây KHÔNG phải một đột
+    biến giả định: đo trực tiếp trên `ops/lease_publish.py` hôm nay (chưa sửa gì) đã
+    fail-OPEN sẵn. `.git/` được xác nhận CÓ MẶT ngay phía trên (dòng `if not (root /
+    ".git").exists(): return`) nên từ điểm này git lỗi là LỖI THẬT, không phải "không
+    phải kho" — im lặng bỏ qua đúng là bỏ qua chốt "đã đăng" của `kiem()`, tức cổng
+    đăng lease thật (`lenh_check`/`lenh_body`/`lenh_kiem_github` đều gọi `kiem()` TRƯỚC
+    khi đăng) có thể đăng TRÙNG một lease đã đăng khi git tạm thời lỗi."""
+    import subprocess as sp
+    mod = _nap_cong()
+
+    def gia_hong(*args, cwd=None):
+        return sp.CompletedProcess(args, 128, "", "fatal: giả lập git chết")
+
+    mod.GOI_GIT = gia_hong
+    with San() as s:
+        (s / ".git").mkdir()
+        p = viet(s, _lease_quet("DUNG"))
+        try:
+            mod._kiem_dau_toan_kho({"lease_id": "DUNG"}, p, s)
+        except mod.Chan as ex:
+            bang(ex.ma == mod.RC_KHONG_XAC_DINH, f"t97 sai mã: {ex}")
+        else:
+            raise AssertionError(
+                "t97: `_kiem_dau_toan_kho` coi git lỗi thật (rev-parse --git-dir rc!=0) "
+                "là 'không phải kho' và bỏ qua lặng lẽ — cổng đăng lease sẽ KHÔNG bắt "
+                "được lease đã đăng trùng khi git tạm thời lỗi")
+
+
 def main() -> int:
     qua, hong, bo_qua = 0, [], []
     for fn in CA:

@@ -26,7 +26,7 @@ review_class: sensitive
 effective_review_class: sensitive
 
 spec_path: ops/specs/t33-doi-shellcheck-r3.md
-spec_sha256_required: 564dc8e18802ec1fbc86ba448092e2b45c0e6b91f53a412b9f6a21a56d5f62d2
+spec_sha256_required: 9d55174de5f54bbf6089c179bf54e3b7f0b0c8174a02ab558f99c3df8583667d
 spec_ke_thua:
   - {path: ops/specs/t33-doi-shellcheck.md,    sha256: 1405d390ca9376725517d01ef5b8d1abffd6a09d78d2b7206c2f068e7711f4da}
   - {path: ops/specs/t33-doi-shellcheck-r2.md, sha256: b9620d17b86f503b12d93359fb6d3423d29c034c29ab372f40cc5d7089b40e71}
@@ -150,7 +150,11 @@ chua_do_duoc_luc_cap: >-
   Phiên bản ghim phải chọn lúc thi hành và đo trên runner thật.
 
 dieu_kien_dung: >-
-  S2 bộ đếm hình dạng A chạm 8 (đang 7, người giữ kho chốt GIỮ 7) ·
+  S2 ĐANG KÊU — người giữ kho TĂNG bộ đếm hình dạng A từ 7 lên 8 in-session 23-08-2026, sau khi
+  cross-review PR #288 (P1, codex) bắt một lời khai rộng hơn phép đo NẰM TRONG chính đặc tả. Một
+  chốt dừng đang kêu thì THI CÔNG KHÔNG ĐƯỢC BẮT ĐẦU cho tới khi người giữ kho trả lời câu S2 đặt
+  ra: "có nên làm việc này nữa không". Lập trường (a) của người giữ kho trả lời "nếu đi tiếp thì
+  đi đường nào", KHÔNG tự nó trả lời "có đi tiếp không" — hai trục khác nhau. Chi tiết ở r3 §bo_dem_A ·
   S3 bộ đếm E chạm 5 (đang 4; đặc tả THÊM một phép dẫn xuất mới cho M3 là chạm S3 — M3 phải
   chép bản vá đã chạy, không mô tả cách dẫn ra nó) ·
   S4 numstat trên write set vượt 120 dòng thêm ·

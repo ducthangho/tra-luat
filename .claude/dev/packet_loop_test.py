@@ -23,6 +23,7 @@ import argparse
 import json
 import os
 import platform
+import runpy
 import subprocess
 import sys
 import tempfile
@@ -734,8 +735,8 @@ def case_luong_canonical_chay_that(c: Ctx):
     assert r.returncode == 0, f"khoi canonical KHONG chay duoc: {r.stderr!r}"
 def case_void_giu_dung_hanh_vi_master(c: Ctx):
     """N11 — canh việc BỎ M3/M4 đã SẠCH. (a) HÀNH VI: mọi lý do trong allowlist hoàn được
-    lượt, KHÔNG cờ bằng chứng nào. (b) BỀ MẶT: bốn cờ phải biến khỏi PARSER. Thiếu (b) thì
-    mảnh sót vẫn qua (a) khi cờ có mặc định vô hại; thiếu (a) thì gỡ cờ mà `_die` vẫn xanh."""
+    lượt, KHÔNG cờ bằng chứng nào. (b) BỀ MẶT: parser mà `main()` THẬT dùng phải chứa ĐÚNG
+    tập cờ hợp lệ. Thiếu (b) thì mảnh sót vẫn qua (a); thiếu (a) thì gỡ cờ mà `_die` vẫn xanh."""
     sd = c.sd()
     _doi(0, *c.init(sd)[0:1], b"", "init")
     for ly_do in ("quota", "rate_limit", "infrastructure", "permission"):
@@ -743,16 +744,20 @@ def case_void_giu_dung_hanh_vi_master(c: Ctx):
         _doi(0, rc, e, "begin-attempt")
         rc, _, e = run(c.script, ["void-attempt", "--packet", 55, "--reason", ly_do], sd)
         _doi(0, rc, e, f"{ly_do} bị đòi bằng chứng — void-attempt phải giữ đúng hành vi master")
-    # Danh sách CHO PHÉP, không phải danh sách CẤM. Vòng 1 khoá `--help`, vòng 2 khoá đúng
-    # BỐN CHÍNH TẢ — cả hai bị lách (`--bang-chung` với SUPPRESS; alias `--evidence-file`).
-    # "distinguishes spelling, not authority": danh sách cấm phải đoán trước mọi cách viết
-    # nên THUA TỪ TRONG THIẾT KẾ. Nạp module và đòi parser chứa ĐÚNG tập cờ hợp lệ —
-    # alias, SUPPRESS, tên chưa ai nghĩ ra đều ĐỎ.
-    import importlib.util as _iu
-    _s = _iu.spec_from_file_location("_n11", c.script); _m = _iu.module_from_spec(_s)
-    _s.loader.exec_module(_m)
-    _sub = next(a for a in _m.build_parser()._actions
-                if isinstance(a, argparse._SubParsersAction))
+    # Phải đo ĐÚNG parser `main()` dùng: nạp dưới tên KHÁC thì cờ đặt dưới
+    # `if __name__ == "__main__"` sống trong CLI thật mà ca này vẫn xanh (P1 vòng 1 gen 3).
+    # Ba lần trước mở rộng thứ QUAN SÁT trên parser SONG SONG; đây đo CHÍNH cửa CLI đi qua.
+    _thu, _goc = {}, argparse.ArgumentParser.parse_args
+    def _bat(self, *a, **k): _thu["p"] = self; raise SystemExit(99)
+    argparse.ArgumentParser.parse_args = _bat
+    try:
+        runpy.run_path(str(c.script), run_name="__main__")
+    except SystemExit:
+        pass
+    finally:
+        argparse.ArgumentParser.parse_args = _goc
+    assert "p" in _thu, "main() KHÔNG gọi parse_args — chốt này không còn đo cửa CLI"
+    _sub = next(a for a in _thu["p"]._actions if isinstance(a, argparse._SubParsersAction))
     co = {t for a in _sub.choices["void-attempt"]._actions for t in a.option_strings}
     assert co == {"-h", "--help", "--packet", "--reason"}, f"cờ LẠ trong parser: {co}"
 

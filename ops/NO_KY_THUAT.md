@@ -1136,10 +1136,22 @@ Máy chưa canh được mục này — chưa có cổng nào kiểm lease dùng
 bước ấy `success` trên `ubuntu-latest`, **`skipped`** trên `windows-latest`; bước gác cổng
 `ci-phamvi guard` thì `success` trên **cả hai**.
 
+> **Ba dòng ngay trên là LỜI KHAI NGOÀI KHO, không phải phép đo tái lập được.** Trạng thái
+> từng bước của một lượt CI sống trên GitHub, không có trong kho — ai đọc mục này từ một bản
+> sao kho (đúng cách §8 cấp cho reviewer) **không kiểm được nó**. Cross-review lượt 2 bắt đúng
+> chỗ này (`run-windows-trong-so-no-khong-tai-lap`). Thứ tái lập được là dòng `if:` trong
+> `.github/workflows/ci.yml`; phần còn lại phải tra thẳng GitHub theo id run ở trên.
+
 **Cái gì bị bỏ lại, nói cho đúng phạm vi:** bộ phản chứng có 7 ca, và chúng **không cùng
 loại**. `t1` `n1` `n2` `n3` đo LOGIC thuần (dẫn xuất từ mã, ba trạng thái, nhóm bịa) — độc
-lập nền, nên chạy ở Linux là đủ. `n4` `n5` `n6` đo **ngữ nghĩa duyệt cây**: thư mục trùng tên
-tệp, và symlink-tới-thư-mục. Đúng ba ca ấy là phần không nền nào ngoài Linux đo lại.
+lập nền — `n4` cũng thuộc nhóm này: nó chỉ thay **biểu thức trả về** của `phan_loai()`, không
+gọi `unlink`/`mkdir`/`os.symlink`. Chỉ `n5` và `n6` đo **ngữ nghĩa duyệt cây**: thư mục trùng
+tên TỆP, và symlink-tới-thư-mục. Đúng **hai** ca ấy là phần không nền nào ngoài Linux đo lại.
+
+Bản đầu của mục này xếp `n4` vào nhóm duyệt cây. Sai, và sai **do chính lần vá** một finding
+về phân loại ở lượt review trước — cross-review lượt 2 xếp nó là `VÁ SINH LỖI MỚI`. Ghi lại vì
+đó là lý do mục `ĐỐI CHIẾU LƯỢT TRƯỚC` của §8 tồn tại: sửa một chỗ rồi sinh sai ở chỗ khác là
+thứ không lượt review nào khác nhìn tới.
 
 **Vì sao vẫn chấp nhận được, và vì sao vẫn là nợ:** thứ bảo vệ `master` là **cổng**
 (`ci_phamvi.py --kiem-bam`), không phải bộ phản chứng — và cổng chạy trên cả hai nền. Nó dẫn

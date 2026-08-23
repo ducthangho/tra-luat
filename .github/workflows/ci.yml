@@ -389,10 +389,13 @@ jobs:
       #                  do sua `_RELEASE_EXCLUDE_*` ma quen bang.
       #   `_test.py`   : chinh cong tren CO RANG khong. 6 dot bien tren `git worktree`
       #                  ban sao. RANG CHIA HAI PHAN, dung gop lam mot:
-      #                    · `t1` `n1` `n2` `n3` do LOGIC thuan (dan xuat tu ma, ba trang
-      #                      thai, nhom bia) — doc lap nen;
-      #                    · `n4` `n5` `n6` do NGU NGHIA DUYET CAY (thu muc trung ten tep,
-      #                      symlink) — PHU THUOC nen, va dung la phan bi bo lai o Windows.
+      #                    · `t1` `n1` `n2` `n3` `n4` do LOGIC thuan (dan xuat tu ma, ba
+      #                      trang thai, nhom bia, chieu bat oan) — doc lap nen. `n4` chi
+      #                      thay BIEU THUC TRA VE cua `phan_loai()`, KHONG dung unlink/
+      #                      mkdir/symlink, nen no khong phu thuoc nen;
+      #                    · `n5` `n6` do NGU NGHIA DUYET CAY (thu muc trung ten TEP,
+      #                      symlink-toi-thu-muc) — PHU THUOC nen, va dung HAI ca ay la
+      #                      phan bi bo lai o Windows.
       #                  Ban dau muc nay viet gon "rang la LOGIC, khong phai he dieu hanh"
       #                  roi vai dong duoi tu thua nhan n5/n6 do duyet cay — HAI CAU AY
       #                  MAU THUAN. Cross-review luot 1 (codex) bat, finding
@@ -419,11 +422,17 @@ jobs:
       # quyet dinh Q3 khai chay CO DIEU KIEN + mot luot dinh ky hang tuan, ly le nguyen van
       # "Chay moi PR thi tu phan (cong 3-5 phut vao dung thu dang di cat)". Ly le ay DO TREN
       # BAN CO VE DOC — ban da bi bo (#247 dong khong merge). Do lai tren thu that su duoc
-      # noi o day: DUOI 1% thoi luong job, do THANG TREN CI theo tung nen.
-      # CO Y KHONG ghi so giay tuyet doi o day. So ay la anh chup MOT may MOT luot va
-      # khong tai lap duoc: cross-review luot 1 do lai tren may khac ra median lech han
-      # (finding `so-do-chi-phi-khong-tai-lap`). So that, kem ten nen va so luot do, neo
-      # o Issue #254 va comment PR #258 — can con so thi doc o do, dung doc o day.
+      # noi o day: KHONG DANG KE so voi thoi luong job — nhung chu thich nay CO Y KHONG
+      # ghi ra con so nao, ke ca mot ty le.
+      # VI SAO KHONG GHI TY LE: mot ty le doi MAU SO la thoi luong job CI, ma thu ay khong
+      # nam trong kho — reviewer doc mot ban sao kho KHONG the kiem no. Ban truoc ghi
+      # "duoi 1%" va cross-review luot 2 bat dung cho do (`so-do-chi-phi-khong-tai-lap`,
+      # trang thai VA HO): bo so giay tuyet doi nhung van de lai mot con so khong tai lap
+      # duoc thi chua vá xong. Con so tuyet doi cung the: cross-review do lai tren may
+      # khac ra median lech han.
+      # So THAT — kem ten nen, so luot va id run — neo o Issue #254 va comment PR #258.
+      # Can con so thi doc o do; dung doc o day, va dung dung con so trong chu thich nay
+      # lam ly le cho bat cu quyet dinh nao.
       # Ly do THU HAI moi la ly do chinh: ban than logic dieu kien la mat hong kho nay da
       # tra gia HAI lan — workflow co `paths:` khong chay o lan day tao nhanh moi, va ma
       # tran theo nhan khong ban vi `pull_request:` thieu `types:`. Mua dung lop bug dang

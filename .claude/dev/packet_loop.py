@@ -552,6 +552,9 @@ def _kiem_bang_chung_may(duong, ly_do: str, anchor: dict, hmac_key: str) -> None
             _die(RC_MOI_TRUONG, "bản ghi không mang phán quyết lỗi hạ tầng")
         return
     d = _kiem_anh_moi_truong(duong, can_sach=False)
+    if not isinstance(anchor.get("opened_at"), (int, float)) or \
+            Path(duong).stat().st_mtime < anchor["opened_at"]:
+        _die(RC_MOI_TRUONG, "ảnh doctor có trước khi lượt hiện tại mở — chụp lại")
     truong = "thieu_bat_buoc" if ly_do == "infrastructure" else "chua_xac_thuc"
     if not (d.get(truong) or []):
         _die(RC_MOI_TRUONG, f"ảnh doctor không chứng minh {ly_do!r}")
@@ -900,7 +903,7 @@ def cmd_begin_attempt(a, state_dir: Path) -> int:
     # trước không còn nói về cây đang có nữa.
     st["reviewing_head_sha"] = None
     st["attempt_anchor"] = {"attempt": st["attempts_used"], "nonce": secrets.token_hex(16),
-                            "consumed": False}
+                            "consumed": False, "opened_at": time.time()}
     st["history"].append({"event": "begin_attempt", "attempt": st["attempts_used"],
                           "nen": anh["he_dieu_hanh"]})
     _save(state_dir, st)

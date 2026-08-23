@@ -752,6 +752,17 @@ def case_void_hai_ly_do_khong_dung_chung_run(c: Ctx):
     _doi(0, *_void_may(c, sd, f, "permission")[0:1], b"", "permission có run riêng")
 
 
+def case_void_cung_anh_doctor_hai_luot_bi_chan(c: Ctx):
+    sd = _mo_luot(c); f = anh_doctor(thieu_bat_buoc=["rg"])
+    _doi(0, *_void_may(c, sd, f)[0:1], b"", "ảnh chụp trong lượt 1")
+    _doi(0, *run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)[0:1],
+         b"", "mở lượt 2")
+    rc, _, e = _void_may(c, sd, f)
+    _doi(10, rc, e, "phát lại cùng ảnh ở lượt 2")
+    assert "trước khi lượt hiện tại mở".encode() in e
+    assert json.loads((sd / "wp55.json").read_text(encoding="utf-8"))["attempts_used"] == 1
+
+
 def case_anh_doctor_nen_tuoi_dung_chung_hai_duong(c: Ctx):
     for kieu in ("nen", "tuoi"):
         f = anh_doctor(he_dieu_hanh="Plan9") if kieu == "nen" else anh_doctor(ok=True)
@@ -2160,6 +2171,7 @@ CASES = [
     ("void_run_cu_khong_neo_co_thong_diep_rieng", case_void_run_cu_khong_neo_co_thong_diep_rieng),
     ("void_run_that_dung_luot_duoc_tha", case_void_run_that_dung_luot_duoc_tha),
     ("void_hai_ly_do_khong_dung_chung_run", case_void_hai_ly_do_khong_dung_chung_run),
+    ("void_cung_anh_doctor_hai_luot_bi_chan", case_void_cung_anh_doctor_hai_luot_bi_chan),
     ("anh_doctor_nen_tuoi_dung_chung_hai_duong", case_anh_doctor_nen_tuoi_dung_chung_hai_duong),
     ("ma_in_thang_gioi_han_cung_principal", case_ma_in_thang_gioi_han_cung_principal),
     ("void_attempt_allowlist", case_void_attempt_allowlist),
@@ -3152,6 +3164,12 @@ MUTANTS = {
     "void_bo_phan_biet_ly_do": (
         '        if d.get("void_reason") != ly_do:', '        if False:',
         ["void_hai_ly_do_khong_dung_chung_run"],
+    ),
+    "void_bo_buoc_anh_vao_luot": (
+        '    if not isinstance(anchor.get("opened_at"), (int, float)) or \\\n'
+        '            Path(duong).stat().st_mtime < anchor["opened_at"]:',
+        '    if False:  # đột biến: ảnh cũ được phát lại ở lượt mới',
+        ["void_cung_anh_doctor_hai_luot_bi_chan"],
     ),
     "begin_bo_kiem_nen_tuoi_dung_chung": (
         '    anh = _kiem_anh_moi_truong(getattr(a, "bang_chung_moi_truong", None)\n'

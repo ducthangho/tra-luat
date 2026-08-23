@@ -1193,3 +1193,134 @@ bằng chữ **không dấu** (`NO CO TEN`) nên né matcher `^\s*#\s*NỢ CÓ T
 này — cổng **vắng mặt**, không phải xanh. Cross-review lượt 1 (codex) bắt được
 (`no-windows-ne-cong-so-no`), executor tái dẫn xuất: nền `87/87` `rc=0`, đổi marker sang dạng
 chuẩn ⇒ **`86/87` `rc=1`**. Mục này ra đời từ đúng phép đo đó.
+
+---
+
+## 21. `SO-GUARD-DANG-DEM-LOI-GOI-KHONG-DO-DIEU-KIEN` — đột biến fail-open sống sót `87/88`
+
+**Nơi nợ nằm:** hằng `SO_GUARD_DANG` trong `ops/lease_publish_test.py`.
+
+> **CỐ Ý KHÔNG dùng dạng `**marker:** … trong …`** — dạng ấy là một LỜI HỨA rằng `t42` canh hai
+> chiều, và với mục này lời hứa ấy SAI theo cả hai đường. `t42` khai thẳng phạm vi trong chính
+> docstring của nó: *"ca này chỉ đo `.github/workflows/ci.yml` ↔ `ops/NO_KY_THUAT.md`"*. Nó bắt
+> `group(2)` của `_BACKLINK_NO` (đường dẫn được khai) rồi **không so nó bao giờ** — dòng kiểm là
+> `k not in trong_ma`, chỉ dùng KHOÁ. Nên một nợ có marker nằm ngoài `ci.yml` mà khai đúng dạng
+> sẽ bị báo ĐỎ GIẢ: đo được khi soạn mục này, nền `87/88` → `86/88`, thông điệp *"marker ấy KHÔNG
+> CÒN trong `ci.yml`"* trong khi nó chưa từng ở đó. Đây là mặt **đỏ giả** của khuyết tật mà `#265`
+> đã liệt kê ba mặt **xanh giả**; đã báo bổ sung ở `#265`. Tới khi `#265` land, nợ ngoài `ci.yml`
+> **không có cổng nào canh** — nói thẳng ra đây thay vì mượn một dạng trông như có canh.
+
+**Đo được, TÁI LẬP ĐƯỢC trong kho** (hai đột biến dưới đây chạy trong `git worktree` rời, không
+đụng tệp thật — xem bài học *"đột biến ghi vào tệp THẬT rồi khôi phục trong `finally` là bom hẹn
+giờ"*):
+
+| đột biến vào `.github/workflows/ops-publish-lease.yml` | 9 chuỗi `bao_chan` | kết quả |
+|---|---|---|
+| *(nền, không đột biến)* | giữ nguyên | **87/88** |
+| chèn `if [ "$rc" = "6" ]; then continue; fi` trước cổng `check` — bỏ qua `rc=6` **im lặng** | **giữ nguyên** | **87/88** — LỌT |
+| `sed 's/\bbao_chan\b/bao_chan_x/g'` — đổi tên hàm | **đổi hết** | **84/88** — bắt |
+
+*(`t33` đỏ ở cả ba lượt vì thiếu `actionlint` — fail-close có chủ đích, không liên quan. Nền và
+đột biến 1 lệch **0** ca.)*
+
+### Cơ chế, đọc thẳng từ mã
+
+`SO_GUARD_DANG` (`ops/lease_publish_test.py`) là **sổ chín LỜI GỌI** `bao_chan`, mỗi dòng ghim
+nguyên văn thông điệp và vế trước/sau `POST`. `_guard_dan_xuat()` trích tập ấy khỏi thân bước
+`đăng` bằng `re.findall(r"(?<![\w])bao_chan(?![\w(])", than)`, rồi `t64` đòi **tập dẫn xuất ==
+tập đăng ký**.
+
+Nó đo **các lời gọi CÓ MẶT**. Nó không đo **điều kiện nào DẪN TỚI** lời gọi. Chín chuỗi nằm im
+trong khi `if [ "$rc" != "0" ]` phía trên bị siết lại thì tập dẫn xuất **không đổi một byte** ⇒
+`t64` xanh, và `rc=6` (`RC_NEO` — lệch băm neo prompt) đi thẳng qua cổng không một dòng nhật ký.
+
+Cùng hình dạng với bài học **"danh sách CẤM không bao giờ đủ"**, đổi trục: ở đây là **danh sách
+CÓ MẶT không chứng minh được HIỆU LỰC**. Và cùng hình dạng với chính `t42` ở mục 20 — một cổng
+khớp **hình dạng văn bản** thay vì **hành vi**.
+
+### Vì sao là nợ, không phải bug
+
+Mã trên `master` hiện **ĐÚNG**: `if [ "$rc" != "0" ]` bắt cả `rc=6`, và `bao_chan` có 9 chỗ gọi
+thật. Không có gì đang chảy. Thiếu là **cái canh** cho chín nhánh ấy. Đây là lỗ **PHÁT HIỆN**,
+không phải lỗ đang mở — nói cho đúng kẻo người sau đi vá nhầm chỗ, đúng lỗi mà lease `#244` đã
+mắc một lần trong ngày (xem đính chính, `#244` comment `5384065633`).
+
+### Xuất xứ — verdict `dung_lai` của `#227` mà việc vẫn land
+
+| | |
+|---|---|
+| biên nhận | `ops/reviews/lease-dang-review-5-claude-verdict.md` |
+| `sha256` | `d2b7eb935cde06034c7cce8975ab35bbf1f6fb06bf0284fb4faa2b4fbcf76ab3` |
+| `reviewed_sha` | `ba82b06f9df81fc2f13786fec590ec2110d046b7` |
+| vào `master` tại | `d54ab0b7507cb2d2a7f43b3f041165e8535aa401` |
+
+Reviewer dựng **bốn** nhánh chặn, **ba** lọt với `68/68` xanh; chỉ nhánh đổi tên bị bắt, *"và bắt
+vì phá phép ĐẾM CHUỖI chứ không vì cổng hiểu thế nào là chặn"*.
+
+Cụm **"distinguishes spelling, not authority"** hay được nhắc cho hình dạng lỗi này. **Xuất xứ chính
+xác, đo bằng tìm nguyên văn toàn kho** (đừng chép lại lời khai của bản trước):
+
+| tệp | packet | provider | có cụm |
+|---|---|---|---|
+| `ops/reviews/wp55-r2-review-4-codex-verdict.md` | `wp55` | codex | **có** — đây là NGUỒN |
+| `ops/reviews/lease-dang-review-5-claude-verdict.md` | `LEASE-DANG` | claude | có, nhưng là **trích lại** |
+| `ops/reviews/lease-dang-review-{1,2,3,4}-claude-verdict.md` | `LEASE-DANG` | claude | **0 / 0 / 0 / 0** |
+
+> **Bản đầu của mục này ghi *"Nguyên văn hai lượt verdict liên tiếp"* — SAI, và sai theo kiểu tệ nhất
+> cho một sổ audit: nó bịa ra một xuất xứ.** Hai lượt verdict *liên tiếp* của `LEASE-DANG` không hề
+> chứa cụm ấy; lượt 4 có **0** lần nhắc. Nguồn thật là một packet **KHÁC** (`wp55`), reviewer **khác
+> nền** (codex). Cross-review codex bắt (P2, PR #271) bằng đúng phép tìm nguyên văn ở neo được xét.
+>
+> Đáng ghi hơn cả con số: **lỗi này có HAI tầng, và tôi chỉ thêm tầng thứ hai.** Chính
+> `lease-dang-review-5` viết *"Nguyên văn verdict lượt trước"* — một lời quy nguồn đã lỏng sẵn. Tôi
+> đọc nó rồi làm cho **chặt hơn bằng chứng**: "lượt trước" → "hai lượt liên tiếp". Trích một bản
+> chiếu mà không đi tới nguồn thì cái lỏng không đứng yên, nó **siết lại quanh một điều sai**. Đúng
+> họ với bài học *"nguồn có thẩm quyền là TỆP CÓ BĂM, comment chỉ là bản chiếu"* — ở đây bản chiếu
+> là một verdict khác, và nó cũng có băm, nên nó *trông* như nguồn.
+
+Verdict là `dung_lai` và **việc vẫn land** — `#227` nay mang `state:landed` vì hiện vật có trên
+`master`, nhưng nhãn không có chỗ nói điều đó, nên nó ở đây và ở `#227` comment `5384069956`.
+
+### Nợ cụ thể
+
+Đơn vị phủ là **cặp `(thao tác, kết cục)` TỚI ĐƯỢC**, **KHÔNG** phải "chín nhánh, chín ca".
+
+> **Bản đầu của mục này viết *"Chín nhánh, chín ca"* và *"mỗi mã thoát khác 0 và khác 9 phải tới
+> được một `bao_chan`"* — cả hai đều HẸP HƠN không gian kết cục thật, tức một điều kiện "xong" mà
+> đạt được vẫn còn hở.** Cross-review codex bắt (P2, PR #271). Hai chỗ hẹp, đo được:
+>
+> · **Một guard KHÔNG phải một kết cục.** `ops/lease_publish.py` khai **sáu** mã chặn —
+> `RC_THAM_SO=2` `RC_TU_CAP=4` `RC_NEO=6` `RC_NOI_DUNG=8` `RC_DA_DANG=9` `RC_LOP=10` — ném ở **40**
+> chỗ (`22` NOI_DUNG · `8` NEO · `3` TU_CAP · `3` LOP · `2` THAM_SO · `2` DA_DANG). `check` và
+> `kiem-github` mỗi cái trả **nhiều** mã trong số đó. Test một mã cho mỗi guard rồi tuyên bố phủ
+> ⇒ một fail-open **chọn lọc theo mã khác** vẫn lọt — đúng hình dạng đột biến `rc=6` ở bảng trên,
+> chỉ đổi con số.
+>
+> · **Guard `case_id` KHÔNG kích hoạt bằng mã thoát.** Đọc thân workflow:
+> `case "$ID" in ''|*[!0-9]*) bao_chan "gh không trả về comment id: $ID"; continue;; esac` — nó bắt
+> **`gh` THÀNH CÔNG (rc=0) trả về ID rỗng hoặc không phải số**. Luật *"rc ≠ 0 và rc ≠ 9"* của bản
+> đầu **không bao giờ chạm tới nó**: thay `_guard_dan_xuat` bằng đúng luật ấy là **xoá** phép canh
+> của guard này mà bảng vẫn khai đủ chín. Đây chính là *"BẰNG CHỨNG DƯƠNG: đòi một ID số, đừng tin
+> rc của `gh`"* — chú thích ngay tại chỗ đã nói, mà điều kiện xong của tôi vẫn bỏ qua.
+>
+> Cùng gốc với chính khuyết tật mục này mô tả: tôi **đếm chỗ có guard** thay vì **liệt kê kết cục
+> tới được**. Viết một tiêu chí "xong" theo lối đếm là dựng sẵn một cổng xanh-mà-hở.
+
+1. **Liệt kê kết cục trước, rồi mới viết ca.** Với mỗi thao tác trong thân bước `đăng`
+   (`kiem-github` · `check` · đọc `packet_issue` · `body` · `payload` · `POST` · `mark` ·
+   `GITHUB_ENV`), dẫn xuất tập kết cục **tới được** — mọi mã chặn mà thao tác ấy thật sự ném,
+   **cộng** kết cục *"lệnh thành công nhưng đầu ra không hợp lệ"* ở đâu có (ít nhất `POST`→`case_id`).
+   Tập ấy phải **dẫn xuất từ mã**, không gõ tay, kẻo nó trôi y như bảng chín dòng đã trôi.
+2. **Mỗi cặp `(thao tác, kết cục)` một ca đo HÀNH VI:** bơm đúng kết cục ấy, đòi lượt chạy ĐỎ **và**
+   đòi đúng thông điệp `bao_chan` của nhánh ấy có trong nhật ký. Đòi thông điệp chứ không chỉ đòi
+   đỏ — `BI_CHAN=1 + continue` im lặng cũng đỏ.
+3. **Đồ giả phải sinh đủ tập kết cục.** Verdict lượt 5 ghi rõ vì sao ba đột biến lọt: *"Đồ giả chỉ
+   sinh rc ∈ {0, 8, 9} nên không ca nào chạm rc=6"*. Bộ ca có đủ mà đồ giả không dựng nổi kết cục
+   thì vẫn là không đo.
+4. **Mỗi ca mới kèm đột biến làm nó ĐỎ.** Ca không có đột biến riêng là ca sẽ âm thầm hở lại.
+5. **Một ca canh chống trôi:** tập kết cục dẫn xuất phải khớp tập ca đã đăng ký; thêm một mã chặn
+   mới vào `lease_publish.py` mà không thêm ca thì ĐỎ. Không có chốt này thì mục 21 tái phát dưới
+   một con số khác.
+
+**Chưa có packet nhận.** Ngoài `write_set` của `#244` theo **phạm vi đặc tả** (packet ấy là
+`ai-dang-giu`), dù `ops/lease_publish_test.py` nằm trong write set của nó.

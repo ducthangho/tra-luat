@@ -1,0 +1,114 @@
+# Lease REVIEWER — PR #267 (hồ sơ hai lượt review của PR #264), lượt 1, provider `claude`.
+#
+# MẮT XÍCH CUỐI CỦA CHUỖI ĐỆ QUY. PR #264 đã merge; hồ sơ review của nó nằm ở #267; hồ sơ review của
+# #267 sẽ KHÔNG được ghi ở đâu nữa. Đệ quy dừng bằng **QUYẾT ĐỊNH của chủ kho**, không bằng cơ chế —
+# nợ `DE-QUY-HO-SO-REVIEW-CHUA-CO-LUAT` đã khai điều đó trong chính hai biên nhận bị review.
+# Reviewer được nói thẳng điều này trong prompt: không có lượt sau đọc lại verdict của nó.
+#
+# LỚP `sensitive` là phép ĐO: `ops/reviews/**` không nằm trong `_BANG_LOP` nên rơi nhánh mặc định
+# fail-closed — chính cổng mà `PLAT-X8` dựng.
+#
+# KHÔNG cross-provider (tác giả và reviewer đều `claude`) ⇒ đừng mong `cross_approved`.
+# KHÔNG tiêu vòng canon của packet nào — `HANDOFF-267` không phải packet.
+#
+# THIÊN VỊ: người soạn lease/prompt này viết cả bốn tệp bị review.
+#
+# NGUỒN SỰ THẬT LÀ TỆP NÀY.
+
+schema_version: 2
+event: review_lease_granted
+packet_issue: 255
+packet_id: HANDOFF-267
+phase_key: HANDOFF-267
+revision: 1
+generation: 1
+lease_id: handoff-267-review-1-claude-20260823
+
+role: reviewer
+provider: claude
+reviewer: claude
+executor: codex
+executor_provider: openai_codex
+access: read-only
+branch_ownership: none
+review_class: sensitive
+effective_review_class: sensitive
+lop_ghi_chu: >-
+  `role: reviewer` ⇒ `sensitive` VÔ ĐIỀU KIỆN. Q1 đã THU HỒI: cổng KHÔNG tra lease executor, KHÔNG
+  mở `ops/leases/`, KHÔNG kế thừa lớp. `A3`/`A13` khoá đúng sự VẮNG MẶT ấy. Hai dòng trên khai
+  `sensitive` không phải để "cho chắc" mà vì đó là giá trị cổng TÍNH ra — chính cổng mà PR #248 dựng.
+
+assurance_target: cross_approved
+assurance_ghi_chu: >-
+  `codex` thi công · `claude` review ⇒ khác nền, khác họ model, tiêu chí N14 thoả. NHƯNG mục tiêu
+  không phải kết quả: biên nhận phải khai mức THỰC SỰ đạt sau khi đo, và nếu danh tính thứ hai vẫn
+  thiếu thì `cross_approved` KHÔNG đạt. Đừng khai mức theo mục tiêu.
+
+nguoi_review_phai_khac_phien: true
+nguoi_review_phai_khac_phien_ghi_chu: >-
+  ĐIỀU KIỆN CỦA LEASE NÀY, không phải lời khuyên. Lượt review PHẢI chạy trên một phiên `claude`
+  KHÁC với phiên đã soạn đặc tả/prompt/lease. Lý do đo được, không phải nghi lễ: hai lượt trước do
+  phiên soạn đặc tả tự review, và **hai P1 nặng nhất đều KHÔNG do phiên ấy tìm ra** — chúng đến từ
+  một bot review bên ngoài. Chỗ mù ấy là THẬT và đã có số. Phiên điều phối gọi phiên review bằng
+  `.claude/dev/launcher.py run` với sandbox riêng; phiên điều phối KHÔNG được tự viết verdict.
+
+yeu_cau_rieng_luot_nay: >-
+  Người giữ kho chỉ thị 22-08-2026: khi tìm ra vấn đề, reviewer phải THỬ VÁ và CHẠY TEST trên BẢN
+  SAO CẢ CÂY trong thư mục tạm, rồi gửi về dưới dạng GỢI Ý VÁ kèm patch chạy được, ca test khoá lỗi,
+  và đột biến chứng minh ca ấy ĐỎ khi gỡ vá. TUYỆT ĐỐI KHÔNG `git push`, KHÔNG sửa nhánh
+  `codex/plat-x8-exec-2`, KHÔNG sửa kho thật — `PROTOCOL §2` cấm Reviewer làm những việc ấy, và
+  `§441` nói thẳng *"gợi ý là gợi ý, không phải chỉ thị"*. Người vá là executor.
+
+
+prompt_path: ops/prompts/handoff-267-review-1-claude-20260823.md
+prompt_sha256_required: 454cd8b8dd131c3e594fb5443d05fd4eee81fbe0ca2a9c04b394a3adb036effb
+prompt_note: >-
+  Prompt CỐ Ý không nêu tên lease, revision, `posted_comment_id`, hạn chót — đọc ở tệp này. Hai bản
+  prompt trước của packet đã chết vì chép danh tính lease.
+
+reviewed_sha_required: 558164148a3ffaaf05f401d62694b6b91f467e13
+base_sha: 2b58ea1c761d86db100103b97b1b1ee571568cd2
+target_pull_request: 267
+branch: claude/ho-so-review-264
+base_ghi_chu: >-
+  `reviewed_sha_required` = `55816414…` là head SAU khi thêm prompt của chính lượt này. Head trước đó
+  (`f6285f56…`) là lúc mở PR — bằng chứng CI neo head ấy KHÔNG áp.
+  NẾP ĐÃ SỬA Ở LƯỢT NÀY: đẩy HẾT mọi commit lên nhánh TRƯỚC, gọi `workflow_dispatch` SAU CÙNG. Bốn
+  lượt trước làm ngược (gọi CI rồi còn đẩy tiếp) nên bằng chứng CI neo head cũ ba lần liên tiếp.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-23 ("cross review #267 rồi merge")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_va: false
+recorder_ghi_chu: >-
+  Phiên soạn lease này là phiên ĐIỀU PHỐI, và nó CŨNG là phiên đã soạn đặc tả. Vì vậy nó KHÔNG được
+  làm người review — xem `nguoi_review_phai_khac_phien`. Nó chỉ được gọi phiên review và ghi sổ.
+
+leased_at_utc: '2026-08-23T03:05:00Z'
+lease_expires_at_utc: '2026-08-24T03:05:00Z'
+run_minutes: 120
+attempts_used: 0
+attempts_limit: 0
+tran_ghi_chu: 'Lease reviewer không có attempt vá — reviewer không vá, chỉ đề xuất.'
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+ngan_sach_ghi_chu: >-
+  **0, không phải 2.** Hai lượt review claude trước KHÔNG tính vào bộ đếm vì biên nhận không qua
+  validation (`PROTOCOL:758-760`). Mọi bản ghi cũ ghi "canon 1/2" là SAI, đã đính chính. Packet còn
+  NGUYÊN hai vòng canon, và lượt này là lượt thứ NHẤT nếu nó qua được validation.
+
+no_da_khai:
+  - id: PLAT-X8-hai-luot-review-truoc-KHONG-CANON
+    noi_dung: >-
+      `plat-x8-review-1` và `-2` đều `la_canonical: false`. Giữ nguyên nhãn, không sửa lùi. Giá trị
+      của chúng nằm ở hai P1 đã đóng, không ở tư cách canon.
+  - id: CONG-KHONG-KIEM-MO-NEO-DAC-TA
+    noi_dung: >-
+      `grep -c spec_sha256_required ops/lease_publish.py ops/lease_publish_test.py` = **0 và 0**.
+      Cổng kiểm mỏ neo PROMPT nhưng KHÔNG kiểm mỏ neo ĐẶC TẢ — nên một lần phá mỏ neo đặc tả sống
+      qua bốn commit và một lần merge vào master mà không cổng nào kêu. Nợ lớn hơn packet này.
+      **Đây là một hướng reviewer NÊN soi**, vì nó là ca thật của hình dạng "chốt được KHAI mà không
+      TỒN TẠI".
+  - id: PLAT-X8-ADR-0045-e-human-readback-CHUA-XONG
+    noi_dung: 'Thuộc lượt LAND, không phải lượt này.'

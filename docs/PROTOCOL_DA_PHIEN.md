@@ -731,8 +731,9 @@ danh sách tương đương thì mỗi mục phải có phép đo riêng trướ
 khai `KHÔNG ĐO ĐƯỢC` chứ không im lặng bỏ qua.
 
 **Quy tắc này hiện có `0` CỔNG THI HÀNH, và câu này ở lại cho tới khi có.** Đo 23-08-2026:
-`rg "viec_trong_revision|acceptance_criteria"` trên toàn cây cho **5 hit, tất cả nằm trong chính tệp này** —
-không tầng nào ĐỌC hai trường ấy bằng máy. Đây là quy tắc **normative** cho người vận hành, không phải bảo vệ
+`rg -l "viec_trong_revision|acceptance_criteria"` trên toàn cây cho **`0` tệp ngoài chính tệp này** — không
+tầng nào ĐỌC hai trường ấy bằng máy. (Đếm theo TỆP KHÁC chứ không theo số hit, vì mỗi lần ai đó sửa đoạn này
+là số hit đổi: bản đầu của chính câu này khai `5` rồi tự làm nó thành `6`.) Đây là quy tắc **normative** cho người vận hành, không phải bảo vệ
 tự động; đừng đọc động từ *"đòi"* / *"phải"* ở trên thành *"đã có máy canh"*. Cổng thi hành thuộc packet kế
 nhiệm, Issue + lease riêng. Khai thẳng vì im lặng ở đây sẽ tái tạo ĐÚNG lỗi mà quy tắc này sinh ra để chặn:
 một thứ trông như bảo vệ cả gói trong khi không đo gì.

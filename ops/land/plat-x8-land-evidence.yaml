@@ -110,7 +110,12 @@ post_merge_checks:
 bookkeeping:
   - 'Packet follow-up cho `t88`: Issue #255, `depends_on: [PLAT-X8]`, chưa có lease.'
   - 'Lease executor `plat-x8-exec-2r6-codex-20260822` và lease reviewer `plat-x8-review-4-claude-20260822` chưa thu hồi — nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong` (chưa có đường thu hồi).'
-  - 'Verdict + biên nhận cả bốn lượt nằm trên nhánh handoff, CHƯA vào master. Chúng chỉ về master khi nhánh này land.'
+  - >-
+    Verdict + biên nhận cả bốn lượt được SOẠN trên nhánh handoff trong lúc #248 land; chúng vào
+    master cùng lượt merge PR #264. Phép tra đúng ở CẢ HAI phía: tìm trên `master` trước, chưa
+    thấy thì fetch nhánh handoff của #264. Bản đầu của dòng này viết "CHƯA vào master" — câu ấy
+    đúng lúc #248 land nhưng tự phủ định chính nó ngay khi #264 merge, vì chính tệp này nằm trong
+    #264. Cross-review #264 bắt được (finding P3).
 
 no_mang_theo_khi_land:
   - id: PLAT-X8-t88-CHUYEN-PACKET-SAU

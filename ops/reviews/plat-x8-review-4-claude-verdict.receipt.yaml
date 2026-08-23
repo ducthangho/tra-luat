@@ -145,7 +145,7 @@ nghiem_thu:
   reviewer_tuan_thu: '0 thay đổi ở sandbox VÀ kho thật, 0 commit lạ'
   lease_tu_kiem: 'reviewer TỰ kiểm lease của chính nó tồn tại trước khi review, thay vì nhận lời khai'
 
-canh_bao_da_nang_len_muc_luc:
+verdict_usage_caveats:
   - id: luot-4-la-CANON-DAU-TIEN-va-la-receipt-v2-DAU-TIEN-cua-kho
     noi_dung: >-
       Hai cái "đầu tiên" trong một tệp. `review_rounds_used` 0 → 1; còn 1 vòng canon. Và đây là

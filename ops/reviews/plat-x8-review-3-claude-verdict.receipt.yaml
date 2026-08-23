@@ -123,7 +123,7 @@ nghiem_thu:
   tran_ADR_0044: '328 dòng thêm — VƯỢT mốc 313 của lease r5; chủ kho duyệt nới lên 328, ghi ở lease r6 (`plat-x8-exec-2r6-codex-20260822`)'
   reviewer_tuan_thu: '0 thay đổi trong sandbox VÀ trong kho thật, 0 commit lạ — reviewer read-only đúng cấm của lease'
 
-canh_bao_da_nang_len_muc_luc:
+verdict_usage_caveats:
   - id: luot-3-KHONG-TINH-CANON-nhung-vi-MOT-ly-do
     noi_dung: 'Xem `la_canonical_ghi_chu`. (a) và (c) đã thoả; chỉ còn (b). Vẫn nguyên hai vòng canon.'
   - id: hai-luot-truoc-DUNG-docs-adr-lam-CA-DOI-CHUNG

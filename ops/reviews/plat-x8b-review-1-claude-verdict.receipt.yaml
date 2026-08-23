@@ -141,7 +141,7 @@ nghiem_thu:
     với cây gốc trên cùng commit ⇒ cả hai `88/88 rc=0`. BA sandbox review trước của chuỗi này KHÔNG
     làm bước ấy.
 
-canh_bao_da_nang_len_muc_luc:
+verdict_usage_caveats:
   - id: B6-la-loi-khai-cua-DIEU-PHOI-khong-phai-do-cua-reviewer
     noi_dung: >-
       Reviewer KHÔNG đo được B6: không có `gh`, và `get_check_runs` bị TỪ CHỐI QUYỀN hai lần. Khác

@@ -534,6 +534,77 @@ Lưu ý: phiên headless chạy Ở NGOÀI kho (sandbox review) không thừa k�
 `settings.json` của kho — allowlist per-run là đường duy nhất. Và **đừng kèm
 `--bare`**: nó bỏ qua cả cấu hình xác thực, phiên chết `Not logged in` (đo 20-08).
 
+#### `Bash(x:*)` KHỚP TIỀN TỐ CHUỖI LỆNH — nên nó chặn OAN gần hết phép đo thật (đo 24-08-2026)
+
+Câu "cấp allowlist HẸP theo lượt" ở trên **đúng về ý định và sai về hậu quả**, và nó đã
+làm hỏng **ba lượt cross-review liên tiếp** trong một phiên. Luật `Bash(git:*)` không
+khớp *"lệnh nào có chạy `git`"*; nó khớp *"chuỗi lệnh BẮT ĐẦU bằng `git`"*, và mọi thứ
+có **ống, `;`, `>`, `$( )`, heredoc, hay gán biến đứng trước** đều **không khớp gì cả**.
+Đo được, cùng một lượt, allowlist đã có đủ `Bash(git:*)` `Bash(python3:*)` `Bash(cd:*)`
+`Bash(echo:*)`:
+
+```text
+git ls-remote --heads origin 2>/dev/null | sed 's#...#' | sort > /tmp/mc   TU CHOI
+echo "may chu: $(git ls-remote --heads origin | wc -l)"                    TU CHOI
+python3 - <<'PY' ... PY                                                    TU CHOI
+M=8ba8acaa; echo ...; git merge-base --is-ancestor $M HEAD                 TU CHOI
+cd "$(git rev-parse --show-toplevel)"; python3 - <<'PY' ...                TU CHOI
+bash /tmp/refscan.sh                                                       TU CHOI
+```
+
+Chốt của Claude Code làm **đúng**: một luật tiền tố không bao được phần còn lại của một
+lệnh ghép, nên nó từ chối thay vì đoán. Cái sai nằm ở phía ta — **allowlist theo tên
+chương trình phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN**. Đúng hình dạng kho đã
+đếm nhiều lần; lần này nó quay ngược lại cắn chính bộ đo của mình.
+
+**Hậu quả không dừng ở "thiếu vài phép đo".** Mỗi lần bị từ chối, reviewer viết lại lệnh
+rồi thử tiếp, và vòng lặp ấy làm context phình lên. Đo ba lượt trên **cùng một prompt,
+cùng một exact head**:
+
+| allowlist | lượt hội thoại | bị từ chối | cache đọc | kết cục |
+|---|---:|---:|---:|---|
+| liệt kê theo tên lệnh | 78 | 5 | 10,8 M | `api_error` — mất trắng |
+| nới thêm `cd`/`bash`/`sh` | 85 | 10 | 12,8 M | `api_error` — mất trắng |
+| **`Bash` trần** | **45** | **1** | **3,7 M** | **`completed`, verdict đầy đủ** |
+
+Hai lỗi API ấy **không ngẫu nhiên**: chúng là hệ quả của chính vòng lặp bị-từ-chối. Giá
+phải trả trước khi tìm ra: ~$39 và ba lượt chạy.
+
+**Nên làm.** Với phiên **reviewer read-only** trong clone rời, cấp `Bash` **trần** cộng
+đúng những công cụ MCP chỉ đọc mà lượt ấy cần:
+
+```bash
+claude -p --model opus --effort max --permission-mode acceptEdits \
+  --allowedTools Read Glob Grep Bash \
+      mcp__github__pull_request_read mcp__github__issue_read mcp__github__get_file_contents \
+  --output-format json '<prompt>'
+```
+
+Và **đừng gọi đó là siết an ninh** — nó chưa từng là. Ranh giới thật của lượt review là
+**clone rời + `--require-clean` + phép kiểm cây sạch SAU khi chạy**; allowlist chỉ quyết
+định reviewer *đo được bao nhiêu*. Giữ danh sách hẹp ở đây không mua được an toàn, chỉ
+mua được một verdict mỏng hơn — hoặc không có verdict nào.
+
+Với phiên **executor có quyền ghi**, danh sách hẹp vẫn hợp lý: ở đó ta muốn giới hạn
+*hình dạng việc*, và executor có `settings.json` của kho làm nền.
+
+#### Bản in cuối cùng của phiên headless LÀ sản phẩm — không có lượt sau
+
+Cùng đợt đo, một lượt review khác thoát `rc=0`, `subtype: success`, `stop_reason:
+end_turn`, cây làm việc sạch — **188 lượt hội thoại, 105 911 token đầu ra, 31 phút** — rồi
+in đúng một câu: *"I'll pick this up when the probe lands."* Không có probe nào; `claude -p`
+không có cơ chế chạy nền. Toàn bộ công việc mất sạch.
+
+Hỏng kiểu này **trông y hệt thành công** ở mọi tín hiệu ta quen nhìn (`rc`, `is_error`,
+`subtype`, cây sạch); chỉ đọc **nội dung** bản in mới thấy rỗng. Nên: `rc=0` của một lượt
+agent **không phải bằng chứng có sản phẩm** — phải đo chính sản phẩm.
+
+Chốt rẻ, đã dùng lại và hiệu nghiệm: nói thẳng trong prompt rằng bản in cuối LÀ sản phẩm
+bàn giao, không có lượt sau; còn ~20% ngân sách thì **dừng đo và viết kết luận** với những
+gì đã có; ô nào chưa xong thì ghi `KHÔNG_ĐO_ĐƯỢC` kèm lý do — **đó là câu trả lời hợp lệ,
+im lặng thì không**; và lệnh nào bị từ chối quyền thì ghi vào mục *"chỗ không đo được"*
+rồi **đi tiếp**, đừng bỏ cả hướng đo.
+
 **Antigravity (AG).** Chế độ duyệt của AG nằm trong CÀI ĐẶT APP (Agent auto-run),
 kho không cấu hình hộ được. Khuyến nghị khi mở phiên AG cho packet của kho: bật
 auto-run cho lệnh ĐỌC + chạy test; giữ hỏi cho terminal ghi ngoài worktree, mọi thao

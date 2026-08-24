@@ -1,0 +1,145 @@
+# Lease EXECUTOR — `LAUNCHER-R3-VA-P1P2` (#308), lượt 1.
+#
+# Packet tách ra từ #299 sau cross-review độc lập của `codex` (verdict tổng hợp
+# `changes_requested` trên exact SHA 51745d9d…). Vá ĐÚNG hai finding: P1 (N10 đo CỜ chứ
+# không đo HÀNH VI) và P2 (allow-rule `Bash(git push:*)` quá rộng). Không hơn.
+#
+# CẢNH BÁO CHO NGƯỜI THI HÀNH: đặc tả họ `LAUNCHER-DUNG-WORKSPACE` có BA bản và cả ba còn
+# hiệu lực. `r3` chỉ ghi phần THAY ĐỔI; mọi thứ `r3` không nêu thì `r2`, rồi `r1`, nguyên
+# hiệu lực. Lease này CHỈ cho sửa `r3`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 308
+packet_id: LAUNCHER-R3-VA-P1P2
+phase_key: LAUNCHER-R3-VA-P1P2
+revision: 1
+generation: 1
+lease_id: launcher-r3-va-p1p2-exec-1-codex-20260824
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` ở đây là MẶC ĐỊNH FAIL-CLOSE của `_BANG_LOP` (7 tiền tố, mọi thứ khác rơi về
+  `sensitive` tại `ops/lease_publish.py:151-152`), KHÔNG phải tín hiệu rằng packet chạm thẩm
+  quyền. Đừng đọc nhãn này thành "đã có ai xét thấy nguy". Nợ doctrine đã ghi nhận, chưa hoà giải
+  với trần ADR-0044.
+
+spec_path: ops/specs/LAUNCHER-DUNG-WORKSPACE-r3.md
+spec_sha256_required: c5f6c905315e9700140bde2f162d024174f1581b06126bc3aec39684b9f9d0a4
+spec_ke_thua:
+  - {path: ops/specs/LAUNCHER-DUNG-WORKSPACE.md,    sha256: 94351fd0e6e0d788ddf4a13ac03b0c9a7cd82e65a44905df77a9106dff171957}
+  - {path: ops/specs/LAUNCHER-DUNG-WORKSPACE-r2.md, sha256: 0f66976a96f327e00e76c8ef53213559d4f323b06b1609fff1cf41fc784d0afc}
+spec_status: dang_va
+spec_da_len_master: 'CHƯA — r3 chỉ có trên nhánh claude/launcher-r3-rescue-exec-1 (a2ad098b). r1/r2 đang ở PR #299, cũng chưa land.'
+spec_duyet_boi: ducthangho
+spec_note: >-
+  `spec_path` ở đây VỪA là đặc tả VỪA là write set — packet này sửa chính tài liệu nó neo vào.
+  `spec_sha256_required` vì vậy là băm ĐẦU VÀO (thứ codex đã đọc khi ra verdict), KHÔNG phải băm
+  đầu ra. Sau khi vá, băm ĐỔI là ĐÚNG; tiêu chí N4 đòi ghi băm cũ vào chính tệp để verdict còn
+  tra được. Đây là chỗ dễ đọc nhầm nhất của lease này.
+
+write_set:
+  - ops/specs/LAUNCHER-DUNG-WORKSPACE-r3.md
+write_set_note: >-
+  ĐÚNG MỘT đường dẫn, không ký tự đại diện. Trần ADR-0044 (`sensitive`: ≤3 tệp) còn dư hai suất
+  tệp — suất ấy KHÔNG phải giấy phép: trần là NGƯỠNG KÍCH THƯỚC, không phải giấy phép đường dẫn.
+  Hai trục khác nhau; gộp lại là fail-open.
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+  Ngoài write set ⇒ DỪNG và xin lease sửa đổi.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 24-08-2026 bằng `ops/lease_publish.py ai-dang-giu` bản trên `origin/master`.
+  Phép so hai nguồn TRƯỚC khi quét: `ls-remote --heads` 198 = `for-each-ref` 198, `comm -23`
+  RỖNG ⇒ không mù ref nào. Lần quét đầu đã fail-close đúng (`KHÔNG_XÁC_ĐỊNH: cache thiếu nhánh
+  máy chủ claude/cong-ci-packet-loop-exec-2`) vì tôi vừa đẩy nhánh ấy từ một clone khác — chốt
+  chạy đúng, đã fetch đủ rồi quét lại.
+    ops/specs/LAUNCHER-DUNG-WORKSPACE-r3.md  ->  NGƯỜI_GIỮ 0
+  Đo thêm ba đường dẫn KHÔNG nằm trong write set, để biết vùng lân cận (không cấp quyền):
+    .claude/dev/launcher.py       ->  NGƯỜI_GIỮ 0  (5 lease HẾT_HẠN)
+    .claude/dev/launcher_test.py  ->  NGƯỜI_GIỮ 0  (5 lease HẾT_HẠN)
+    .claude/settings.json         ->  NGƯỜI_GIỮ 0
+
+branch: claude/launcher-r3-rescue-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 207c7d6d3fc7b4dc8522539551f0126d81d9507c
+start_from_sha: a2ad098b553e0969c5cb9e04468da26989fb7a8e
+reviewed_sha_required: a2ad098b553e0969c5cb9e04468da26989fb7a8e
+base_ghi_chu: >-
+  `start_from_sha` KHÁC `base_sha` có chủ đích: nhánh đã mang sẵn r3 (`a2ad098b`), và `a2ad098b`
+  là con trực tiếp của một base cũ hơn. Ngân sách đo từ `git merge-base origin/master HEAD`,
+  KHÔNG đo bằng `origin/master..HEAD` — bài học đã trả giá (41 tệp thay vì 6).
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 1
+  dong_them_toi_da: 150
+  don_vi: '`git diff --numstat $(git merge-base origin/master HEAD)..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  da_dung: 0
+  ghi_chu: >-
+    150 là ƯỚC LƯỢNG CÓ NEO, không phải số đo: P2 gỡ 3 dòng + đoạn giải thích (~12 dòng), P1 nâng
+    hai hàng bảng + đoạn ràng buộc hành vi (~25 dòng), khối ghi chú revision + băm cũ (~10 dòng).
+    Dư ra là chỗ cho câu chữ chặt. Vượt ⇒ DỪNG trước review, khai lý do theo ADR-0044, xin bản sửa
+    đổi. KHÔNG tự nới.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-24 — người giữ kho trình verdict độc lập của codex cho #299 kèm
+  chỉ thị "Hãy nghiên cứu, kết hợp cho tôi phương án tối ưu nhất", rồi chốt ba quyết định
+  "1. vẫn giữ / 2. nhánh riêng / 3. packet riêng". Executor codex max effort đã được giao trước
+  đó cùng phiên cho họ packet này.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên ghi lease này là phiên ĐIỀU PHỐI. Nó KHÔNG soạn `r3` (một phiên khác soạn) và KHÔNG thi
+  công lượt này (executor là `codex`). Nó SẼ là reviewer — khác nền với executor, đúng
+  PROTOCOL:580 cho `sensitive`.
+
+leased_at_utc: '2026-08-24T12:00:00Z'
+lease_expires_at_utc: '2026-08-25T12:00:00Z'
+run_minutes: 1440
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) SANDBOX MOUNT `.git` CHỈ ĐỌC — đo được 7 lượt executor. Bạn KHÔNG commit và KHÔNG push
+  được; đừng phí lượt thử. Sinh bản vá trên cây làm việc, phiên điều phối commit và push. Trớ
+  trêu đúng chỗ: chính phép đo ấy là căn cứ của P2.
+  (2) VÁ TẠI CHỖ trên `r3`, KHÔNG viết `r4`. Lý do ở #308 §write_set — P2 là finding AN NINH, và
+  một đính chính an ninh chỉ sống trong tài liệu kế nhiệm là đính chính có thể bị bỏ sót.
+  (3) `N5` cấm mọi hunk ngoài §4, §5 và khối ghi chú revision. Đọc `git diff` của chính mình
+  trước khi báo xong.
+  (4) `KHÔNG_ĐO_ĐƯỢC` là một trạng thái HỢP LỆ và phải làm cổng CHẶN (S4). Hạ `N10c` xuống đo argv
+  rồi gọi là đạt chính là tái phạm đúng cái P1 tố cáo.
+  (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu, kể cả khi trích dẫn để giải thích.
+
+chua_do_duoc_luc_cap: >-
+  (1) CHƯA đo được `codex` CLI có thật sự thi hành `-s workspace-write` / `-s read-only` như tài
+  liệu nói hay không — đó chính là thứ P1 đòi đo, và nó là việc của lượt này, không phải tiền đề.
+  (2) CHƯA biết nền của executor có cho dựng phép đo hành vi ghi hay không (sandbox lồng nhau).
+  Nếu không ⇒ S4, ghi `KHÔNG_ĐO_ĐƯỢC` vào đặc tả, KHÔNG hạ tiêu chí.
+  (3) Verdict `changes_requested` của codex được người giữ kho chuyển tiếp vào phiên; phiên này
+  CHƯA đọc trực tiếp đối tượng review trên GitHub. Nội dung P1/P2 ghi trong #308 là bản chiếu, và
+  #308 nói thẳng điều đó.
+
+dieu_kien_dung: >-
+  S1 cần một đường dẫn THỨ HAI ⇒ xin lease sửa đổi, KHÔNG tự nới ·
+  S2 vượt 150 dòng thêm trên write set ·
+  S3 kết luận rằng một dạng `git push` nào đó CẦN giữ ⇒ DỪNG, trình phép đo, xin quyết định ·
+  S4 không dựng được phép đo hành vi cho N10c/N10d ⇒ ghi `KHÔNG_ĐO_ĐƯỢC`, KHÔNG hạ tiêu chí ·
+  S5 `origin/master` đã đi tiếp so với `base_sha` mà chưa đo lại.
+
+viec_cua_luot_nay: >-
+  HAI mục tiêu, không hơn. P1: nâng `N10c`/`N10d` của §5 thành cặp sinh đôi HÀNH VI (đo kết quả
+  một lần ghi, không chỉ đo argv), kèm đột biến "hạ xuống chỉ đo argv" phải giết ca. P2: gỡ
+  `Bash(git add:*)` `Bash(git commit:*)` `Bash(git push:*)` khỏi allowlist §4 và ghi hệ quả vận
+  hành. Cộng `N4`: ghi băm `c5f6c905…` vào tệp để verdict của codex còn tra được.
+  KHÔNG triển khai launcher. KHÔNG sửa `r1`/`r2`. KHÔNG đụng `.claude/dev/**`.

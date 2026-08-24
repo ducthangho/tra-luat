@@ -995,6 +995,14 @@ def _kich_ban_in(c: Ctx, codepage: str):
     # thuộc kịch bản này. Chốt PHỦ ở cuối hàm đã bắt đúng chỗ này khi lệnh vừa
     # được thêm — ma trận lấy danh sách từ `build_parser()` chứ không kê tay.
     r_adr = _repo_adr_gia(c.tmp, [("0001", True)], ["0001"], f"cp{codepage}")
+    # `bien-nhan` in tiếng Việt lúc THÀNH CÔNG ("N biên nhận `role: reviewer` trên …"),
+    # nên nó THUỘC kịch bản này. Cần một kho giả CÓ biên nhận reviewer, vì đường thất bại
+    # chỉ in stderr — đo đường ấy là đo nhầm chỗ.
+    r_bn = c.tmp / f"cp{codepage}-bien-nhan"
+    (r_bn / ".git").mkdir(parents=True, exist_ok=True)
+    (r_bn / "ops" / "reviews").mkdir(parents=True, exist_ok=True)
+    (r_bn / "ops" / "reviews" / "a-verdict.receipt.yaml").write_text(
+        _BN_REVIEWER, encoding="utf-8")
 
     buoc = [
         (["where"], None),
@@ -1028,6 +1036,7 @@ def _kich_ban_in(c: Ctx, codepage: str):
         (["status", "--packet", 55], sd),
         (["doctrine-scan", "--root", r], None),
         (["adr-song", "--root", r_adr], None),
+        (["bien-nhan", "--root", r_bn, "--packet", "249"], None),
     ]
     da_phu = set()
     for args, state_dir in buoc:
@@ -3311,6 +3320,110 @@ def _doi_chung_khac_ho(phai_chet) -> tuple:
     # Đột biến bắc qua hai họ: không có "họ kia" để đối chứng — nói thẳng thay vì
     # chọn bừa một tập rồi coi như đã đo.
     return ()
+
+
+# --- #298 B3 — cổng `bien-nhan` ------------------------------------------------------
+#
+# VÌ SAO CÓ: kho ĐÃ có bộ đếm bền (`ops/reviews/*.receipt.yaml`, trong git nên sống sót
+# container) và ĐÃ có hai cổng `t26`/`t27` gác nó. Nhưng `t27` duyệt `glob("*-verdict.md")`
+# — nó gác thứ ĐÃ ghi ra đĩa, mù hoàn toàn với verdict chưa ai viết. Packet #249 chạy BỐN
+# vòng cross-review, để lại 0 biên nhận, suite vẫn 98/98 xanh. Chuỗi `doctor-github-mcp`
+# mất năm lượt y hệt trước đó.
+
+def _kho_gia(c: Ctx, ten: str, bien_nhan=()) -> Path:
+    """Dựng một "kho" giả có `.git` và `ops/reviews/` chứa các biên nhận cho trước."""
+    goc = c.tmp / ten
+    (goc / ".git").mkdir(parents=True, exist_ok=True)
+    tm = goc / "ops" / "reviews"
+    tm.mkdir(parents=True, exist_ok=True)
+    for ten_tep, noi_dung in bien_nhan:
+        (tm / ten_tep).write_text(noi_dung, encoding="utf-8")
+    return goc
+
+
+_BN_REVIEWER = """schema_version: 1
+kind: review_delivery_receipt
+packet_id: '249'
+role: reviewer
+provider: codex
+verdict: approve
+reviewed_sha: efcf5757403bd989c0ebbd388fa7a7180171b49f
+"""
+
+# Hình dạng THẬT, không phải bịa: `plat-m4-human-audit-ducthangho-verdict.receipt.yaml` và
+# `slice-b-c-human-audit-...` trong kho đều mang `role: auditor`. Một packet có audit của
+# người mà KHÔNG có vòng review nào là trạng thái tồn tại được — và đếm TỆP sẽ gọi nó là
+# "đã review".
+_BN_AUDITOR = """schema_version: 1
+kind: review_delivery_receipt
+packet_id: '249'
+role: auditor
+provider: ducthangho
+verdict: approve
+reviewed_sha: efcf5757403bd989c0ebbd388fa7a7180171b49f
+"""
+
+
+def case_bien_nhan_0_thi_DO(c: Ctx):
+    goc = _kho_gia(c, "bn0")
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(11, rc, e, "packet 0 biên nhận reviewer phải ĐỎ")
+
+
+def case_bien_nhan_co_reviewer_thi_QUA(c: Ctx):
+    goc = _kho_gia(c, "bn1", [("a-verdict.receipt.yaml", _BN_REVIEWER)])
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(0, rc, e, "có biên nhận reviewer thì phải QUA")
+
+
+def case_bien_nhan_chi_dem_VAI_khong_dem_TEP(c: Ctx):
+    """Trục phân biệt: `role`, KHÔNG phải số tệp trong thư mục.
+
+    Bỏ mệnh đề `role == "reviewer"` thì ca này XANH oan — đó là phép thử cho chính nó.
+    """
+    goc = _kho_gia(c, "bn_audit", [("h-verdict.receipt.yaml", _BN_AUDITOR)])
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(11, rc, e, "chỉ có biên nhận `role: auditor` mà vẫn QUA ⇒ cổng đang đếm TỆP")
+
+
+def case_bien_nhan_yaml_hong_la_KHONG_DO_DUOC(c: Ctx):
+    """YAML hỏng phải ĐỎ kèm `KHÔNG ĐO ĐƯỢC` — KHÔNG được lặng lẽ thành "0 biên nhận".
+
+    Ba trạng thái, không phải hai: hai câu ấy đòi hai hành động ngược nhau (ghi biên nhận ·
+    sửa môi trường) mà con số thì giống hệt.
+    """
+    goc = _kho_gia(c, "bn_hong", [("x-verdict.receipt.yaml", "[: khong phai yaml\n")])
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(11, rc, e, "YAML hỏng phải ĐỎ")
+    if "KHÔNG ĐO ĐƯỢC" not in _txt(e):
+        raise AssertionError(f"đỏ mà không nói KHÔNG ĐO ĐƯỢC: {_txt(e)!r}")
+
+
+def case_bien_nhan_kho_that_thieu_thu_muc_la_DO(c: Ctx):
+    goc = c.tmp / "bn_thieu"
+    (goc / ".git").mkdir(parents=True, exist_ok=True)
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc)])
+    _doi(11, rc, e, "kho thật mà thiếu ops/reviews phải ĐỎ")
+    if "KHÔNG ĐO ĐƯỢC" not in _txt(e):
+        raise AssertionError(f"đỏ mà không nói KHÔNG ĐO ĐƯỢC: {_txt(e)!r}")
+
+
+def case_bien_nhan_ban_sao_roi_thi_bo_qua(c: Ctx):
+    """Bản sao rời (không `.git`) được tha — nhưng CHỈ bản sao rời. Bài học `t24`."""
+    goc = c.tmp / "bn_roi"
+    goc.mkdir(parents=True, exist_ok=True)
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc)])
+    _doi(0, rc, e, "bản sao rời không có .git thì bỏ qua")
+
+
+CASES += [
+    ("bien_nhan_0_thi_DO", case_bien_nhan_0_thi_DO),
+    ("bien_nhan_co_reviewer_thi_QUA", case_bien_nhan_co_reviewer_thi_QUA),
+    ("bien_nhan_chi_dem_VAI_khong_dem_TEP", case_bien_nhan_chi_dem_VAI_khong_dem_TEP),
+    ("bien_nhan_yaml_hong_la_KHONG_DO_DUOC", case_bien_nhan_yaml_hong_la_KHONG_DO_DUOC),
+    ("bien_nhan_kho_that_thieu_thu_muc_la_DO", case_bien_nhan_kho_that_thieu_thu_muc_la_DO),
+    ("bien_nhan_ban_sao_roi_thi_bo_qua", case_bien_nhan_ban_sao_roi_thi_bo_qua),
+]
 
 
 def chay_suite(script: Path, tmp: Path, chi_chay=None):

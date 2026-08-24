@@ -60,6 +60,7 @@ RC_GUARD = 7
 RC_STATE = 8
 RC_ADR = 9
 RC_MOI_TRUONG = 10
+RC_BIEN_NHAN = 11
 
 PROVIDERS = ("claude", "codex")
 
@@ -1506,6 +1507,89 @@ def cmd_adr_song(a, state_dir: Path) -> int:
     return RC_OK
 
 
+def _doc_bien_nhan(thu_muc: Path) -> list:
+    """Đọc mọi `*.receipt.yaml`. YAML hỏng ⇒ KHÔNG ĐO ĐƯỢC, KHÔNG phải "không có".
+
+    Ba trạng thái, không phải hai. Một bộ đếm trả `0` cho cả "chưa ai ghi biên nhận" lẫn
+    "không đọc được thư mục" là bộ đếm nói dối đúng lúc nó cần nói thật: hai câu ấy đòi hai
+    hành động ngược nhau (ghi biên nhận · sửa môi trường), mà con số thì giống hệt.
+    """
+    try:
+        import yaml
+    except ModuleNotFoundError:
+        _die(RC_BIEN_NHAN,
+             "KHÔNG ĐO ĐƯỢC: thiếu PyYAML nên không đọc được biên nhận nào. Đây KHÔNG "
+             "phải 'packet có 0 biên nhận'. Cài: pip install PyYAML")
+    ds = []
+    for f in sorted(thu_muc.glob("*.receipt.yaml")):
+        try:
+            d = yaml.safe_load(f.read_text(encoding="utf-8"))
+        except Exception as ex:  # noqa: BLE001 — mọi lỗi đọc đều là KHÔNG ĐO ĐƯỢC
+            _die(RC_BIEN_NHAN, f"KHÔNG ĐO ĐƯỢC: {f.name} không đọc được như YAML: {ex}")
+        if not isinstance(d, dict):
+            _die(RC_BIEN_NHAN, f"KHÔNG ĐO ĐƯỢC: {f.name} không phải một ánh xạ YAML")
+        d["_tep"] = f.name
+        ds.append(d)
+    return ds
+
+
+def cmd_bien_nhan(a, state_dir: Path) -> int:
+    """B2 — đếm biên nhận review; B3 — ĐỎ khi packet có 0 biên nhận `role: reviewer`.
+
+    VÌ SAO CÓ (đo được, không phải lo xa): kho ĐÃ có bộ đếm bền — `ops/reviews/*.receipt.yaml`
+    nằm trong git nên sống sót container — và ĐÃ có hai cổng `t26`/`t27` gác nó. Nhưng `t27`
+    duyệt `glob("*-verdict.md")`, tức nó gác thứ ĐÃ được ghi ra đĩa và mù hoàn toàn với
+    verdict chưa ai viết. Packet #249 chạy BỐN vòng cross-review, để lại **0** biên nhận, và
+    suite vẫn 98/98 xanh. Chuỗi `doctor-github-mcp` trước đó mất **năm** lượt y hệt — biên
+    nhận đầu tiên của kho tự khai điều ấy ở dòng đầu.
+
+    PHẠM VI, nói đúng bằng thứ nó cưỡng chế: lệnh này bắt ca **0 biên nhận**. Nó KHÔNG bắt ca
+    "ghi 1 biên nhận cho 4 vòng" — muốn thế phải biết số vòng THẬT, mà `packet_loop.py` có 0
+    đường ra GitHub và sẽ không mở một đường như vậy chỉ để đếm. Khai thẳng phạm vi thay vì
+    đặt cho cổng một cái tên to hơn thứ nó làm.
+    """
+    root = Path(a.root)
+    thu_muc = root / "ops" / "reviews"
+
+    # "Không thấy thì bỏ qua" là cách một ca ĐẠT mà không ĐO gì (bài học `t24`).
+    # Chỉ tha khi cây rõ ràng là bản sao rời; trong kho thật mà thiếu thì ĐỎ.
+    if not thu_muc.is_dir():
+        if (root / ".git").exists():
+            _die(RC_BIEN_NHAN,
+                 f"KHÔNG ĐO ĐƯỢC: kho thật mà không có {thu_muc} — không phải 'sạch'")
+        print(f"bien-nhan: bỏ qua — {thu_muc} không có và cây không phải kho git")
+        return RC_OK
+
+    ds = _doc_bien_nhan(thu_muc)
+    muon = None if a.packet is None else str(a.packet).strip()
+
+    def khop(d) -> bool:
+        if muon is None:
+            return True
+        return muon in {str(d.get("packet_id") or "").strip(),
+                        str(d.get("packet_slug") or "").strip()}
+
+    hop = [d for d in ds if khop(d)]
+    # Đếm theo VAI, không theo TỆP. Một biên nhận `role: executor` nằm cùng thư mục KHÔNG
+    # chứng minh có ai review — đó là trục phân biệt, và `bien_nhan_chi_dem_role_reviewer`
+    # là ca khoá nó.
+    rv = [d for d in hop if str(d.get("role") or "").strip() == "reviewer"]
+
+    nhan = "mọi packet" if muon is None else f"packet {muon!r}"
+    print(f"bien-nhan: {nhan} — {len(rv)} biên nhận `role: reviewer` "
+          f"trên {len(hop)} biên nhận khớp / {len(ds)} biên nhận toàn thư mục")
+    for d in rv:
+        print(f"  {d.get('verdict', '?')!s:20s} luot={d.get('luot', '?')!s:3s} "
+              f"{str(d.get('reviewed_sha') or '?')[:12]}  {d['_tep']}")
+
+    if len(rv) < a.toi_thieu:
+        _die(RC_BIEN_NHAN,
+             f"{nhan}: {len(rv)} biên nhận `role: reviewer`, đòi tối thiểu {a.toi_thieu}. "
+             f"Một vòng review không để lại biên nhận là một vòng không ai tra được sau khi "
+             f"container chết — và không cổng nào khác thấy điều đó.")
+    return RC_OK
+
+
 def cmd_status(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     print(json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True))
@@ -1625,6 +1709,14 @@ def build_parser() -> argparse.ArgumentParser:
                        help="bảng §20 của protocol phải phủ hết docs/adr/")
     q.add_argument("--root", default=".")
     q.set_defaults(fn=cmd_adr_song)
+
+    q = sub.add_parser("bien-nhan",
+                       help="đếm biên nhận review; ĐỎ khi packet có 0 biên nhận reviewer")
+    q.add_argument("--root", default=".")
+    q.add_argument("--packet", help="số hiệu hoặc slug; bỏ trống = mọi packet")
+    q.add_argument("--toi-thieu", type=int, default=1,
+                   dest="toi_thieu", help="số biên nhận reviewer tối thiểu (mặc định 1)")
+    q.set_defaults(fn=cmd_bien_nhan)
 
     q = sub.add_parser("status", help="in state đầy đủ")
     q.add_argument("--packet", type=int, required=True)

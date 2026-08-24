@@ -1513,14 +1513,37 @@ def _la_dang_commit(s: str) -> bool:
     KHÔNG hỏi "commit ấy có tồn tại không" — `packet_loop.py` chạy được ở cây không có
     lịch sử ấy, và hỏi git là mở một phụ thuộc mới cho một phép đếm. Chỉ hỏi HÌNH DẠNG:
     hex, dài từ 7 (độ viết tắt ngắn nhất git chấp) tới 64 (sha256).
-
-    CHỖ HỞ CÒN LẠI, cross-review lượt 4 đo được (`bn-sha-viet-tat-nhan-doi-vong`): một
-    commit ghi bằng ID ĐẦY ĐỦ và bằng BẢN RÚT GỌN CỦA CHÍNH NÓ là hai chuỗi khác nhau,
-    nên thành hai khoá. Đóng nó đòi hỏi `git rev-parse` — tức chính phụ thuộc đoạn trên
-    cố ý không mở. Chủ kho chốt 24-08: KHÔNG siết thêm ở đây, hạ lời khai xuống đúng thứ
-    cưỡng chế được (xem `cmd_bien_nhan`), và để việc hỏi git thành packet riêng.
     """
     return 7 <= len(s) <= 64 and all(c in "0123456789abcdef" for c in s)
+
+
+def _khoa_neo_cac_sha(ds: list[dict]) -> list[str]:
+    """Chuẩn hoá cách viết SHA mà không hỏi git; mơ hồ thì KHÔNG ĐO ĐƯỢC.
+
+    Chuỗi bằng nhau cùng khoá. Một viết tắt chỉ nhập với OID đầy đủ (SHA-1 40 hoặc
+    SHA-256 64 ký tự) khi đúng MỘT OID trong tập bắt đầu bằng nó. Không có OID đầy đủ
+    mà hai cách viết lồng tiền tố, hoặc một viết tắt khớp nhiều OID, thì không đủ dữ
+    liệu để phán chúng cùng hay khác commit — không được tự chọn một xô.
+    """
+    shas = [str(d.get("reviewed_sha") or "").strip().lower() for d in ds]
+    hop_le = sorted({s for s in shas if _la_dang_commit(s)})
+    day_du = [s for s in hop_le if len(s) in (40, 64)]
+    khoa_theo_sha = {}
+    for sha in hop_le:
+        ung_vien_day_du = [s for s in day_du if s.startswith(sha)]
+        if len(ung_vien_day_du) > 1:
+            _die(RC_BIEN_NHAN, "KHÔNG ĐO ĐƯỢC: `reviewed_sha` viết tắt "
+                 f"{sha!r} khớp nhiều OID đầy đủ: {ung_vien_day_du}")
+        if ung_vien_day_du:
+            khoa_theo_sha[sha] = ung_vien_day_du[0]
+            continue
+        long_nhau = [s for s in hop_le if s != sha
+                     and (s.startswith(sha) or sha.startswith(s))]
+        if long_nhau:
+            _die(RC_BIEN_NHAN, "KHÔNG ĐO ĐƯỢC: các `reviewed_sha` viết tắt lồng "
+                 f"tiền tố nhưng không có OID đầy đủ phân giải: {[sha, *long_nhau]}")
+        khoa_theo_sha[sha] = sha
+    return [khoa_theo_sha.get(sha, "__khong_neo_duoc__") for sha in shas]
 
 
 def _verdict_trong_kho(thu_muc: Path, gia_tri) -> bool:
@@ -1572,7 +1595,9 @@ def _doc_bien_nhan(thu_muc: Path) -> list:
     ds = []
     for f in sorted(thu_muc.glob("*.receipt.yaml")):
         try:
-            d = yaml.safe_load(f.read_text(encoding="utf-8"))
+            # Bộ đếm chỉ so scalar theo TỪ VỰNG. SafeLoader áp luật kiểu YAML 1.1,
+            # biến `0123456` thành số bát phân 42798 và phá chính khoá SHA.
+            d = yaml.load(f.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
         except Exception as ex:  # noqa: BLE001 — mọi lỗi đọc đều là KHÔNG ĐO ĐƯỢC
             _die(RC_BIEN_NHAN, f"KHÔNG ĐO ĐƯỢC: {f.name} không đọc được như YAML: {ex}")
         if not isinstance(d, dict):
@@ -1602,14 +1627,14 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
     trỏ một tệp CÓ THẬT NẰM TRONG `ops/reviews` (không phải đường dẫn tuyệt đối, không qua symlink
     ra ngoài). Biên nhận trùng khoá neo đếm là MỘT.
 
-    ĐƠN VỊ ĐẾM KHÔNG PHẢI "VÒNG REVIEW" mà là **số biên nhận PHÂN BIỆT ĐƯỢC** — gom theo
-    `reviewed_sha` khi chuỗi ấy có hình dạng commit, thiếu/rỗng/sai dạng gom hết về MỘT xô.
-    Hai chỗ lệch, cả hai đo được: một commit ghi bằng ID đầy đủ VÀ bản rút gọn của chính nó
-    đếm thành HAI (lượt 4, `bn-sha-viet-tat-nhan-doi-vong`); "3 vòng đã chạy, 1 biên nhận"
-    vẫn đếm 1. Đóng cả hai đều đòi git hoặc GitHub, mà lệnh này cố ý không phụ thuộc git và
-    có 0 đường ra mạng. Chủ kho chốt 24-08: KHAI ĐÚNG TÊN thay vì siết thêm — cổng sinh ra
-    để bắt ca 0 biên nhận và ca ấy nó bắt đúng; mọi dạng lách trên chỉ có nghĩa khi ai đó cố
-    vượt `--toi-thieu` cao, mà ngưỡng mặc định là 1.
+    ĐƠN VỊ ĐẾM KHÔNG PHẢI "VÒNG REVIEW" mà là **số biên nhận PHÂN BIỆT ĐƯỢC**. Khoá neo
+    giữ nguyên scalar YAML rồi chuẩn hoá viết tắt vào đúng một OID đầy đủ cùng tiền tố;
+    thiếu/rỗng/sai dạng gom hết về MỘT xô, còn tiền tố mơ hồ làm cổng ĐỎ.
+
+    MỘT chỗ hở còn lại: hiện vật cục bộ chỉ chứng minh có biên nhận + verdict tự khai,
+    không chứng minh commit tồn tại hoặc có bao nhiêu vòng review đã thật sự chạy. Đóng
+    khoảng ấy đòi hỏi authority ngoài hai tệp (git/GitHub); lệnh này cố ý không mở phụ
+    thuộc git và có 0 đường ra mạng, nên không được gọi số đếm này là số vòng review.
     """
     # NGƯỠNG 0 HOẶC ÂM BIẾN CỔNG THÀNH CỔNG TỰ TẮT — `--toi-thieu 0` cho `rc=0` trên một
     # packet có 0 biên nhận, tức đúng ca B3 sinh ra để bắt. Một cổng tắt được bằng chính cờ
@@ -1655,23 +1680,21 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
     # TRÙNG VÒNG: hai biên nhận cùng `reviewed_sha` là cùng MỘT vòng ghi hai lần. Đếm chúng là 2
     # thì `--toi-thieu` lấp được bằng cách chép tệp — cổng đo SỐ TỆP chứ không đo SỐ VÒNG.
     thay, vong = set(), []
-    for d in that:
+    khoa_theo_bien_nhan = _khoa_neo_cac_sha(that)
+    for d, khoa in zip(that, khoa_theo_bien_nhan):
         # KHOÁ VÒNG PHẢI LÀ THỨ NEO ĐƯỢC VÀO MỘT COMMIT — không phải một chuỗi tự khai.
         #
-        # Bệnh này đã có BA dạng, và tôi vá trượt hai lần vì mỗi lần chỉ bịt đúng dạng
-        # vừa bị chỉ ra:
+        # Bệnh này đã có NĂM dạng. Chốt ở BIÊN CHUẨN HOÁ thay vì nối thêm một nhánh:
         #   (1) lượt 1 — đếm theo TỆP: hai biên nhận cùng `reviewed_sha` tính là 2.
         #   (2) lượt 2 — vẫn theo TỆP ở nhánh THIẾU sha: khoá rơi về
         #       `f"__khong_sha__{tệp}"`, nên chép tệp là nhân số vòng.
         #   (3) lượt 3 — theo GIÁ TRỊ TỰ KHAI: `reviewed_sha` CÓ mặt nhưng là rác
         #       (`rac-1`, `rac-2`, …). Ba chuỗi rác khác nhau ⇒ 3 vòng, `rc=0`.
         #
-        # Nên chốt không đóng thêm một DẠNG mà đóng HÌNH DẠNG: chỉ chuỗi trông như một
-        # commit mới được làm khoá vòng. Mọi thứ khác — thiếu, rỗng, sai dạng — dồn về
-        # CÙNG MỘT xô, tức góp nhiều nhất MỘT vòng. Không từ chối biên nhận, chỉ từ chối
-        # cho nó quyền tự nhân bản thành nhiều vòng.
-        sha = str(d.get("reviewed_sha") or "").strip().lower()
-        khoa = sha if _la_dang_commit(sha) else "__khong_neo_duoc__"
+        #   (4) cùng OID đầy đủ + viết tắt từng là hai khoá;
+        #   (5) YAML từng đổi scalar toàn số thành int trước khi khoá nhìn thấy nó.
+        # `_doc_bien_nhan` giữ từ vựng; `_khoa_neo_cac_sha` lập lớp tương đương tiền tố
+        # có đúng một OID đầy đủ. Dữ liệu mơ hồ là KHÔNG ĐO ĐƯỢC, không phải một con số.
         if khoa in thay:
             continue
         thay.add(khoa)

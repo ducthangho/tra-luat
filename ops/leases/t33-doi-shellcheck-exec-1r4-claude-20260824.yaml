@@ -325,4 +325,10 @@ noi_da_duoc_cho_phep_ma_KHONG_dung:
     câu `write_set_note` của r3 đã nói thế về suất tệp còn dư của ADR-0044. Sửa một đặc tả đóng
     băng đang được lease này NGHIM BĂM, ngay trong lượt thi công mà lease ấy cấp phép, là để mã
     và đặc tả cùng trôi trong một commit — không bên nào còn làm mốc cho bên nào.
+da_bi_thay_the: t33-doi-shellcheck-exec-1r5-claude-20260824
+da_bi_thay_the_ly_do: >-
+  Chủ kho chỉ thị "Vá nốt đi" in-session 2026-08-24 ⇒ nới write set sang `ops/specs/` để đóng
+  NGUỒN của finding P2. Quyền ghi chuyển sang r5; lease này KHÔNG còn hiệu lực. Giữ tệp làm
+  hiện vật, không xoá.
+
 posted_comment_id: 5389601157   # workflow ghi, ĐỪNG sửa tay

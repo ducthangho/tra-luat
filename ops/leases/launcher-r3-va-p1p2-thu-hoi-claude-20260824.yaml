@@ -60,3 +60,4 @@ viec_cua_luot_nay: >-
 canh_bao_cho_nguoi_thi_hanh: >-
   ĐỪNG đọc tệp này thành "được cấp quyền". `access: none`, `write_set: []`.
   Cần ghi `ops/specs/LAUNCHER-DUNG-WORKSPACE-r3.md` thì phải xin lease MỚI của chủ kho.
+posted_comment_id: 5402973891   # workflow ghi, ĐỪNG sửa tay

@@ -68,3 +68,4 @@ viec_cua_luot_nay: >-
 canh_bao_cho_nguoi_thi_hanh: >-
   ĐỪNG đọc tệp này thành "được cấp quyền". `access: none`, `write_set: []`.
   Cần ghi `ops/lease_publish_test.py` thì phải xin lease MỚI của chủ kho.
+posted_comment_id: 5402767232   # workflow ghi, ĐỪNG sửa tay

@@ -1,0 +1,139 @@
+# Lease EXECUTOR — packet #305 `BIEN-NHAN-KHOA-NEO-THAT`.
+#
+# EXECUTOR LÀ **CODEX**, không phải claude. Chủ kho chỉ định in-session 2026-08-24
+# ("executor codex, xhigh effort"). Đây là NGOẠI LỆ ĐẢO VAI của `ADR-0045`: bình thường
+# claude thi công / codex review; lượt này ngược lại.
+#
+# VÌ SAO ĐẢO VAI LÀ ĐÚNG Ở ĐÂY, không phải tiện tay:
+# cả hai finding của packet này đều do CODEX tìm ra (dạng 4 ở cross-review lượt 3 của
+# #304, dạng 5 ở lượt 1 của #309 — hoặc chính xác hơn: dạng 5 lộ ra khi phiên claude
+# dựng phép đo để giải thích dạng 4). Và claude đã VÁ TRƯỢT **hai lần liên tiếp** cùng
+# một bệnh — mỗi lần bịt đúng dạng vừa bị chỉ ra rồi coi là xong. Giao cho bên đã nhìn
+# ra hình dạng chung là giảm đúng rủi ro đã đo được, không phải luân phiên cho công bằng.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 305
+packet_id: BIEN-NHAN-KHOA-NEO-THAT
+phase_key: KHOA-NEO-THAT
+revision: 1
+generation: 1
+lease_id: khoa-neo-that-exec-1-codex-20260824
+role: executor
+provider: codex
+executor: codex
+executor_effort: xhigh
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+ngoai_le_dao_vai_ADR_0045: >-
+  Có. `ADR-0045` cho phép đảo vai executor/reviewer khi có căn cứ. Căn cứ ở đây ĐO ĐƯỢC:
+  claude vá trượt hai lần cùng một bệnh (dạng 2 rồi dạng 3), và cả bốn dạng đều do codex
+  tìm ra. Reviewer lượt này là **claude**, tức bên vừa vá trượt — nên lượt review phải
+  đặc biệt soi chỗ "vá đúng dạng vừa bị chỉ, để hở dạng kế tiếp".
+
+lop_review_do_the_nao: >-
+  `.claude/dev/packet_loop.py` nằm THẲNG trong `_BANG_LOP` với giá trị `sensitive` — một
+  trong bảy tiền tố khai tường minh. Packet này sửa CỔNG, nên đúng là chạm authority.
+
+write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+write_set_note: >-
+  ĐÚNG HAI đường dẫn. Không đụng `ops/reviews/` (hiện vật review) và không đụng
+  `docs/`/`CLAUDE.md` — nếu bản vá đòi sửa tài liệu thì DỪNG, đó là write set khác.
+write_set_da_do_truoc_khi_cap: >-
+  `ai-dang-giu` trên cả hai đường dẫn -> NGƯỜI_GIỮ 0. Đo 2026-08-24 SAU khi thu hồi lease
+  `bien-nhan-review-s2-exec-1r3` (packet của nó đã land nhưng lease còn giữ đường dẫn —
+  nợ `AG-T0-01B`). Trước khi thu: NGƯỜI_GIỮ 1.
+
+branch: codex/khoa-neo-that-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 59f4202e1a78a97acf3065801856f83f99fc88b9
+start_from_sha: 59f4202e1a78a97acf3065801856f83f99fc88b9
+reviewed_sha_required: 59f4202e1a78a97acf3065801856f83f99fc88b9
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 200
+  don_vi: '`git diff --numstat <base>..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  trong_nguong_ADR_0044: true
+  vi_sao_200: >-
+    ADR-0044 cho `sensitive` chạm authority là ≤3 tệp / ≤300 dòng. Đặt 200 chứ không 300:
+    packet này sửa MỘT hàm khoá và thêm ca phản chứng, không thiết kế gì mới. Chạm 200 là
+    tín hiệu bản vá đang phình ra khỏi phạm vi — DỪNG và báo, đừng nới.
+
+viec_cua_luot_nay: >-
+  Đóng HAI dạng còn lại của bệnh "khoá neo lấy từ dữ liệu tự khai", CÙNG MỘT LƯỢT, bằng
+  MỘT chốt — không phải hai bản vá nối nhau.
+
+  DẠNG 4 — cùng commit, hai cách viết. `_la_dang_commit` chấp mọi hex 7..64 và khoá là
+  NGUYÊN CHUỖI, nên ID đầy đủ và bản rút gọn CỦA CHÍNH NÓ thành hai khoá. Tái hiện:
+  `8b627e843a3be87f2ceac97f2f147bbadcaa3cdc` + `8b627e8`, `--toi-thieu 2` ⇒ rc=0.
+
+  DẠNG 5 — YAML đổi KIỂU. `reviewed_sha` không nháy mà toàn chữ số bị đọc thành int, mất
+  số 0 dẫn đầu (`0123456` ⇒ 42798 theo luật bát phân YAML 1.1). `str()` ngắn đi ⇒ trượt
+  `_la_dang_commit` ⇒ dồn về xô `__khong_neo_duoc__` ⇒ hai biên nhận HỢP LỆ, hai commit
+  KHÁC NHAU, gộp thành MỘT. Đây là ĐẾM THIẾU (fail-closed), ngược trục với dạng 1–4, và
+  là HỒI QUY do F4 gây ra.
+
+nghiem_thu:
+  N1: >-
+    Cùng một commit ghi bằng ID đầy đủ và bản rút gọn của chính nó ⇒ đếm MỘT.
+    Đột biến gỡ chốt ấy phải làm ca đích ĐỎ.
+  N2: >-
+    BẮT OAN: hai commit KHÁC NHAU vẫn đếm HAI. Thiếu ca này thì chốt có thể "an toàn"
+    bằng cách gom sạch mọi thứ về một xô, và cổng thành mù mà không ai biết.
+  N3: >-
+    `reviewed_sha` toàn chữ số có 0 dẫn đầu KHÔNG được rơi vào xô không-neo-được.
+    Đột biến gỡ chốt kiểu phải làm ca đích ĐỎ.
+  N4: >-
+    Mọi fixture sha trong bộ test phải phủ CẢ BA hình dạng: toàn chữ số CÓ 0 dẫn đầu ·
+    toàn chữ số KHÔNG 0 dẫn đầu · có chữ cái. Ca `bien_nhan_sha_that_van_dem_RIENG` hiện
+    dùng `'%040x' % 11` = `...00b` — có chữ `b` nên YAML giữ chuỗi, và nó NÉ TRÚNG dạng 5
+    một cách tình cờ. Đổi fixture sang dạng toàn chữ số là ca ĐỎ ngay.
+  N5: >-
+    Docstring `cmd_bien_nhan` hiện khai HAI chỗ hở. Sau lượt này phải khai đúng số chỗ hở
+    CÒN LẠI — không được để lời khai cũ đứng nguyên khi mã đã đổi.
+  N6: 'Suite `packet_loop_test.py`: N/N hai số BẰNG NHAU, `TỔNG: ĐẠT`, rc=0.'
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) ĐÓNG HÌNH DẠNG, ĐỪNG ĐÓNG THÊM MỘT DẠNG. Bệnh này đã có bốn dạng trong bốn lượt và
+  người thi công trước vá trượt HAI lần vì mỗi lần chỉ bịt dạng vừa bị chỉ. Câu hỏi đúng:
+  *thứ này chứng minh có một VÒNG REVIEW, hay chỉ chứng minh có ai ghi một chuỗi?*
+
+  (2) `_la_dang_commit` CỐ Ý không hỏi git — lệnh chạy được ở cây không có lịch sử ấy, và
+  hỏi git là mở một phụ thuộc mới cho một phép đếm. Nếu bản vá của bạn ĐÒI `git rev-parse`
+  thì đó là đổi kiến trúc: xem `dieu_kien_dung` S3, DỪNG và báo, đừng tự quyết.
+
+  (3) BA TRẠNG THÁI: `có` · `không` · `KHÔNG ĐO ĐƯỢC`. Trạng thái thứ ba làm cổng ĐỎ.
+
+  (4) Bộ test này KHÔNG đo được trong `git worktree` — `chay_cac_probe()` ở
+  `launcher.py:1051` (đường PHÓNG, dòng 1061) ném `Chan(MA_WORKTREE)` khi `.git` là TỆP.
+  Dùng CLONE RỜI. `doctor --json` KHÔNG gọi hàm ấy nên kiểm bằng `doctor` cho kết luận
+  NGƯỢC.
+
+  (5) Đo cổng phải dựng CẢ HAI VẾ trong MỘT lệnh, cùng các bước, chạy liền nhau. Phiên
+  trước có NĂM lần rig tự sinh hồi quy không tồn tại.
+
+dieu_kien_dung: >-
+  S1 nếu cần đường dẫn thứ ba. S2 nếu vượt 200 dòng thêm. S3 nếu bản vá đòi `packet_loop.py`
+  gọi `git` hoặc gọi mạng — đó là đổi kiến trúc, DỪNG và xin quyết định của chủ kho.
+
+chua_do_duoc_luc_cap: >-
+  Chưa biết còn dạng THỨ SÁU nào không. Bốn dạng trước đều lộ ra ở lượt review KẾ TIẾP,
+  không phải lúc thiết kế. Đừng khai "đã đóng cả lớp" trừ khi có phép đo cho câu ấy.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-24: "cấp lease, executor codex, xhigh effort"'
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc chủ kho
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+
+leased_at_utc: '2026-08-24T12:40:00Z'
+lease_expires_at_utc: '2026-08-25T12:40:00Z'
+run_minutes: 1440

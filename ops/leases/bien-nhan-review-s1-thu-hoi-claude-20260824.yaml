@@ -1,0 +1,63 @@
+# THU HỒI — packet ĐÃ LAND, lease không còn việc gì để bảo vệ.
+#
+# Kho KHÔNG có cơ chế thu hồi lease (nợ `AG-T0-01B`). `ai-dang-giu` chỉ đọc HAI thứ để
+# coi một lease là hết hiệu lực: `da_bi_thay_the`, và hạn dùng — `lease_publish.py:679`.
+# Nên đây là BIA MỘ dùng đúng cơ chế đang có: nó kế vị lease cũ để lease cũ rơi khỏi phép
+# đếm NGƯỜI_GIỮ, và tự khai rằng nó không cấp quyền ghi cho ai.
+#
+# VÌ SAO CẦN NGAY: lease này vẫn giữ `ops/reviews/`, tức chặn mọi lượt ghi biên nhận review kế tiếp
+# của MỌI packet — thư mục dùng chung.
+#
+# ĐÂY LÀ CÁCH CHỮA TẠM. Đường đúng là một trường thu hồi tường minh mà cổng ĐỌC — #188.
+
+schema_version: 2
+event: executor_lease_revoked
+packet_issue: 298
+packet_id: BIEN-NHAN-REVIEW-DEM-DUOC
+phase_key: BIEN-NHAN-REVIEW-S1
+revision: 3
+generation: 1
+lease_id: bien-nhan-review-s1-thu-hoi-claude-20260824
+thay_the_cho: bien-nhan-review-s1-exec-1r2-claude-20260824
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: none
+review_class: sensitive
+effective_review_class: sensitive
+
+write_set: []
+write_set_note: >-
+  RỖNG CÓ CHỦ ĐÍCH. Bia mộ không giữ đường dẫn nào. Nghiệm thu: sau khi tệp này vào nhánh
+  lease, `ai-dang-giu` trên các đường dẫn cũ phải trả NGƯỜI_GIỮ 0.
+
+branch: claude/bien-nhan-review-s1-exec-1
+branch_ownership: none
+target_branch_neu_land: null
+base_sha: b0af6b4d886c9c3e1cc87ef6bb96e67fabed61c5
+start_from_sha: b0af6b4d886c9c3e1cc87ef6bb96e67fabed61c5
+reviewed_sha_required: b0af6b4d886c9c3e1cc87ef6bb96e67fabed61c5
+
+ly_do_thu_hoi: >-
+  Slice 1 ĐÃ LAND (PR #309, merge `59f4202e`). Lease xong việc nhưng vẫn giữ tiền tố
+  `ops/reviews/` — thư mục DÙNG CHUNG cho biên nhận review của mọi packet. Giữ nó lại là
+  chặn oan mọi lượt review sau.
+
+granted_by: ducthangho          # BAT_BUOC của cổng; ở đây nghĩa là AI RA LỆNH THU HỒI.
+thu_hoi_boi: ducthangho
+thu_hoi_theo_lenh: 'direct, in-session, 2026-08-24: "xử lý luôn các vấn đề còn mở"'
+authority_basis: §2 — cấp/thu lease thuộc chủ kho
+recorded_by: claude-session
+
+leased_at_utc: '2026-08-24T12:30:00Z'
+lease_expires_at_utc: '2026-08-25T12:30:00Z'
+run_minutes: 0
+
+viec_cua_luot_nay: >-
+  KHÔNG có việc. Tệp này chỉ ghi nhận lease tiền nhiệm hết hiệu lực.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  ĐỪNG đọc tệp này thành "được cấp quyền". `access: none`, `write_set: []`. Cần ghi các
+  đường dẫn cũ thì phải xin lease MỚI của chủ kho.

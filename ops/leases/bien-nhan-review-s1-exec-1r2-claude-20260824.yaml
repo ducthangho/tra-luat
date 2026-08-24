@@ -133,3 +133,6 @@ dieu_kien_dung: >-
   write set, phải xin lease sửa đổi. S2 nếu cần chạm bất kỳ đường dẫn nào ngoài
   `ops/reviews/`. S3 nếu phát hiện verdict nguyên văn có chỗ sai và bị cám dỗ sửa nó.
 posted_comment_id: 5394743803   # workflow ghi, ĐỪNG sửa tay
+
+# THU HỒI 2026-08-24 — packet đã land. Xem bia mộ kế vị.
+da_bi_thay_the: bien-nhan-review-s1-thu-hoi-claude-20260824

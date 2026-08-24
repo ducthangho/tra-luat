@@ -3489,6 +3489,75 @@ def case_bien_nhan_mo_coi_khong_duoc_dem(c: Ctx):
     _doi(11, rc, e, "biên nhận mồ côi vẫn được đếm ⇒ cổng đo TỆP chứ không đo VÒNG")
 
 
+def case_bien_nhan_verdict_path_TUYET_DOI_khong_duoc_dem(c: Ctx):
+    """`verdict_path` tuyệt đối trỏ RA NGOÀI kho ⇒ không được tính.
+
+    `pathlib` định nghĩa `a / "/x"` == `Path("/x")` — vế trái bị VỨT. Nên bộ lọc mồ côi
+    bản đầu (`(root / verdict_path).is_file()`) hoá ra hỏi về chính tệp ngoài kho, thấy nó
+    có thật, rồi tính biên nhận là một vòng hợp lệ. Cross-review lượt 2 của #298 tái hiện
+    được: `rc=0` ở nơi phải `rc=11`.
+    """
+    ngoai = c.tmp / "ngoai-kho-tuyet-doi.md"
+    ngoai.write_text("khong phai verdict\n", encoding="utf-8")
+    goc = _kho_gia(c, "bnabs", [("a-verdict.receipt.yaml",
+                                 _bn_that("%040x" % 3, str(ngoai.resolve())))])
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(11, rc, e, "đường dẫn TUYỆT ĐỐI ra ngoài kho vẫn được đếm ⇒ bộ lọc đo "
+                    "'có tệp nào đó tồn tại', không đo 'verdict nằm trong kho này'")
+
+
+def case_bien_nhan_verdict_path_SYMLINK_ra_ngoai_khong_duoc_dem(c: Ctx):
+    """Symlink trong `ops/reviews/` trỏ ra ngoài kho ⇒ không được tính.
+
+    Đường thứ hai của cùng lỗ: `is_file()` ĐI THEO liên kết, nên đích ngoài kho vẫn đạt.
+    Chốt phải `resolve()` rồi đòi ĐÍCH CUỐI nằm trong `ops/reviews`.
+    """
+    ngoai = c.tmp / "ngoai-kho-symlink.md"
+    ngoai.write_text("khong phai verdict\n", encoding="utf-8")
+    goc = _kho_gia(c, "bnsym", [("a-verdict.receipt.yaml",
+                                 _bn_that("%040x" % 4, "ops/reviews/link.md"))])
+    try:
+        (goc / "ops" / "reviews" / "link.md").symlink_to(ngoai.resolve())
+    except (OSError, NotImplementedError) as ex:
+        # KHÔNG ĐO ĐƯỢC ⇒ ĐỎ, không lặng lẽ ĐẠT. Windows chỉ cho tạo symlink khi bật
+        # Developer Mode hoặc chạy quyền cao. Một ca tự tha khi thiếu năng lực là ca
+        # "có MẶT mà không ĐO" — đúng bệnh `t24`, và cùng nếp với `t33` (thiếu
+        # `actionlint` ⇒ ĐỎ chứ không bỏ qua).
+        raise AssertionError(
+            f"KHÔNG ĐO ĐƯỢC: nền không tạo được symlink ({type(ex).__name__}: {ex}). "
+            f"Ca này gác đường symlink nên không đo được thì phải ĐỎ.") from ex
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(11, rc, e, "symlink trỏ ra ngoài kho vẫn được đếm ⇒ chốt chưa đi hết liên kết")
+
+
+def case_bien_nhan_thieu_sha_nhieu_ban_van_dem_MOT(c: Ctx):
+    """Nhiều biên nhận cùng THIẾU `reviewed_sha` góp nhiều nhất MỘT vòng.
+
+    Bản đầu rơi về khoá `f"__khong_sha__{tên tệp}"`, tức lại đếm theo TỆP — đúng khuyết tật
+    lượt 1 đã nêu, chỉ dời sang nhánh không ai nghĩ tới. Một biên nhận không neo commit thì
+    không nói được nó là vòng NÀO.
+    """
+    khong_sha = ("schema_version: 1\nkind: review_delivery_receipt\npacket_id: '249'\n"
+                 "role: reviewer\nprovider: codex\nverdict: approve\n"
+                 "verdict_path: ops/reviews/v.md\n")
+    goc = _kho_gia_co_verdict(c, "bnnosha", [("a-verdict.receipt.yaml", khong_sha),
+                                             ("b-verdict.receipt.yaml", khong_sha)])
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249",
+                              "--toi-thieu", "2"])
+    _doi(11, rc, e, "hai biên nhận cùng THIẾU sha được đếm thành 2 ⇒ lấp trần bằng chép tệp")
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(0, rc, e, "chặn oan: thiếu sha vẫn phải tính là MỘT vòng hợp lệ")
+
+
+def case_bien_nhan_nguong_0_hoac_am_bi_CHAN(c: Ctx):
+    """`--toi-thieu 0` / âm ⇒ CHẶN. Cổng tắt được bằng chính cờ của nó thì không phải cổng."""
+    goc = _kho_gia(c, "bnnguong")
+    for n in ("0", "-1"):
+        rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249",
+                                  "--toi-thieu", n])
+        _doi(2, rc, e, f"--toi-thieu {n} được chấp nhận ⇒ cổng TỰ TẮT được")
+
+
 def case_bien_nhan_hai_ban_trung_vong_dem_MOT(c: Ctx):
     """Hai biên nhận cùng `reviewed_sha` là MỘT vòng ghi hai lần.
 
@@ -3509,6 +3578,14 @@ CASES += [
     ("bien_nhan_khop_duoc_bang_packet_slug", case_bien_nhan_khop_duoc_bang_packet_slug),
     ("bien_nhan_mo_coi_khong_duoc_dem", case_bien_nhan_mo_coi_khong_duoc_dem),
     ("bien_nhan_hai_ban_trung_vong_dem_MOT", case_bien_nhan_hai_ban_trung_vong_dem_MOT),
+    ("bien_nhan_verdict_path_TUYET_DOI_khong_duoc_dem",
+     case_bien_nhan_verdict_path_TUYET_DOI_khong_duoc_dem),
+    ("bien_nhan_verdict_path_SYMLINK_ra_ngoai_khong_duoc_dem",
+     case_bien_nhan_verdict_path_SYMLINK_ra_ngoai_khong_duoc_dem),
+    ("bien_nhan_thieu_sha_nhieu_ban_van_dem_MOT",
+     case_bien_nhan_thieu_sha_nhieu_ban_van_dem_MOT),
+    ("bien_nhan_nguong_0_hoac_am_bi_CHAN",
+     case_bien_nhan_nguong_0_hoac_am_bi_CHAN),
 ]
 
 

@@ -1507,6 +1507,39 @@ def cmd_adr_song(a, state_dir: Path) -> int:
     return RC_OK
 
 
+def _verdict_trong_kho(thu_muc: Path, gia_tri) -> bool:
+    """`verdict_path` có trỏ một tệp THẬT nằm TRONG `ops/reviews` của chính kho này không?
+
+    Bản đầu chỉ hỏi `(root / verdict_path).is_file()`, và cross-review lượt 2 của #298 phá
+    được bằng HAI đường — cả hai đã tái hiện, `rc=0` ở nơi phải `rc=11`:
+
+      · ĐƯỜNG DẪN TUYỆT ĐỐI. `pathlib` định nghĩa `a / "/x"` == `Path("/x")` — vế trái bị
+        VỨT. Nên một biên nhận trỏ `/tmp/bất-kỳ.md` khiến phép kiểm hoá ra hỏi về chính tệp
+        ngoài kho ấy, và nó có thật, nên biên nhận được tính là một vòng review hợp lệ.
+      · SYMLINK. `is_file()` đi THEO liên kết, nên `ops/reviews/link.md -> /ngoài/kho.md`
+        cũng đạt.
+
+    Cả hai biến bộ lọc mồ côi thành phép đo "có một tệp nào đó tồn tại ở đâu đó" thay vì
+    "verdict nằm trong kho này". Chốt đúng phải neo vào CÂY, không vào sự tồn tại:
+    từ chối đường dẫn tuyệt đối, `resolve()` để đi hết symlink, rồi đòi đích cuối nằm
+    trong `ops/reviews`. Ba trạng thái: trong · ngoài · không phân giải được — hai cái sau
+    đều KHÔNG được tính.
+    """
+    s = str(gia_tri or "").strip()
+    if not s or Path(s).is_absolute():
+        return False
+    try:
+        dich = (thu_muc.parent.parent / s).resolve(strict=True)
+        goc = thu_muc.resolve(strict=True)
+    except (OSError, RuntimeError):
+        return False
+    try:
+        dich.relative_to(goc)
+    except ValueError:
+        return False
+    return dich.is_file()
+
+
 def _doc_bien_nhan(thu_muc: Path) -> list:
     """Đọc mọi `*.receipt.yaml`. YAML hỏng ⇒ KHÔNG ĐO ĐƯỢC, KHÔNG phải "không có".
 
@@ -1556,6 +1589,12 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
     ra mạng và sẽ không mở một đường như vậy chỉ để đếm. Nên "3 vòng đã chạy, 1 biên nhận" vẫn lọt.
     Khai thẳng chỗ hở thay vì đặt cho cổng một cái tên to hơn thứ nó làm.
     """
+    # NGƯỠNG 0 HOẶC ÂM BIẾN CỔNG THÀNH CỔNG TỰ TẮT — `--toi-thieu 0` cho `rc=0` trên một
+    # packet có 0 biên nhận, tức đúng ca B3 sinh ra để bắt. Một cổng tắt được bằng chính cờ
+    # của nó thì không phải cổng.
+    if a.toi_thieu < 1:
+        _die(RC_ARG, f"--toi-thieu phải >= 1 (nhận {a.toi_thieu}): ngưỡng 0 hoặc âm làm cổng "
+                     f"luôn xanh, kể cả khi packet có 0 biên nhận nào")
     root = Path(a.root)
     thu_muc = root / "ops" / "reviews"
 
@@ -1588,14 +1627,19 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
     # cho các biên nhận ĐANG có mặt, nhưng lệnh này chạy được ở cây không có bộ test ấy, nên nó
     # phải tự đo chứ không mượn.
     mo_coi = [d for d in rv
-              if not (root / str(d.get("verdict_path") or "")).is_file()]
+              if not _verdict_trong_kho(thu_muc, d.get("verdict_path"))]
     that = [d for d in rv if d not in mo_coi]
 
     # TRÙNG VÒNG: hai biên nhận cùng `reviewed_sha` là cùng MỘT vòng ghi hai lần. Đếm chúng là 2
     # thì `--toi-thieu` lấp được bằng cách chép tệp — cổng đo SỐ TỆP chứ không đo SỐ VÒNG.
     thay, vong = set(), []
     for d in that:
-        khoa = str(d.get("reviewed_sha") or f"__khong_sha__{d['_tep']}").strip()
+        # THIẾU `reviewed_sha` ⇒ MỘT xô chung, KHÔNG theo tên tệp. Bản đầu rơi về
+        # `f"__khong_sha__{tệp}"`, tức lại đếm theo TỆP — đúng khuyết tật lượt 1 đã nêu,
+        # chỉ dời sang nhánh tôi không nghĩ tới. Đo được: hai biên nhận cùng thiếu sha,
+        # `--toi-thieu 2` ⇒ `rc=0`. Một biên nhận không neo commit thì không nói được nó
+        # là vòng NÀO, nên nhiều bản như thế góp nhiều nhất MỘT vòng.
+        khoa = str(d.get("reviewed_sha") or "").strip() or "__khong_sha__"
         if khoa in thay:
             continue
         thay.add(khoa)

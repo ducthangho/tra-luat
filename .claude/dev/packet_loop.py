@@ -1507,6 +1507,17 @@ def cmd_adr_song(a, state_dir: Path) -> int:
     return RC_OK
 
 
+def _la_dang_commit(s: str) -> bool:
+    """Chuỗi này có THỂ là một commit sha không?
+
+    KHÔNG hỏi "commit ấy có tồn tại không" — `packet_loop.py` chạy được ở cây không có
+    lịch sử ấy, và hỏi git là mở một phụ thuộc mới cho một phép đếm. Chỉ hỏi HÌNH DẠNG:
+    hex, dài từ 7 (độ viết tắt ngắn nhất git chấp) tới 64 (sha256). Đủ để một chuỗi rác
+    tự khai không giả làm hai vòng khác nhau, và không đòi hỏi gì thêm.
+    """
+    return 7 <= len(s) <= 64 and all(c in "0123456789abcdef" for c in s)
+
+
 def _verdict_trong_kho(thu_muc: Path, gia_tri) -> bool:
     """`verdict_path` có trỏ một tệp THẬT nằm TRONG `ops/reviews` của chính kho này không?
 
@@ -1634,12 +1645,22 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
     # thì `--toi-thieu` lấp được bằng cách chép tệp — cổng đo SỐ TỆP chứ không đo SỐ VÒNG.
     thay, vong = set(), []
     for d in that:
-        # THIẾU `reviewed_sha` ⇒ MỘT xô chung, KHÔNG theo tên tệp. Bản đầu rơi về
-        # `f"__khong_sha__{tệp}"`, tức lại đếm theo TỆP — đúng khuyết tật lượt 1 đã nêu,
-        # chỉ dời sang nhánh tôi không nghĩ tới. Đo được: hai biên nhận cùng thiếu sha,
-        # `--toi-thieu 2` ⇒ `rc=0`. Một biên nhận không neo commit thì không nói được nó
-        # là vòng NÀO, nên nhiều bản như thế góp nhiều nhất MỘT vòng.
-        khoa = str(d.get("reviewed_sha") or "").strip() or "__khong_sha__"
+        # KHOÁ VÒNG PHẢI LÀ THỨ NEO ĐƯỢC VÀO MỘT COMMIT — không phải một chuỗi tự khai.
+        #
+        # Bệnh này đã có BA dạng, và tôi vá trượt hai lần vì mỗi lần chỉ bịt đúng dạng
+        # vừa bị chỉ ra:
+        #   (1) lượt 1 — đếm theo TỆP: hai biên nhận cùng `reviewed_sha` tính là 2.
+        #   (2) lượt 2 — vẫn theo TỆP ở nhánh THIẾU sha: khoá rơi về
+        #       `f"__khong_sha__{tệp}"`, nên chép tệp là nhân số vòng.
+        #   (3) lượt 3 — theo GIÁ TRỊ TỰ KHAI: `reviewed_sha` CÓ mặt nhưng là rác
+        #       (`rac-1`, `rac-2`, …). Ba chuỗi rác khác nhau ⇒ 3 vòng, `rc=0`.
+        #
+        # Nên chốt không đóng thêm một DẠNG mà đóng HÌNH DẠNG: chỉ chuỗi trông như một
+        # commit mới được làm khoá vòng. Mọi thứ khác — thiếu, rỗng, sai dạng — dồn về
+        # CÙNG MỘT xô, tức góp nhiều nhất MỘT vòng. Không từ chối biên nhận, chỉ từ chối
+        # cho nó quyền tự nhân bản thành nhiều vòng.
+        sha = str(d.get("reviewed_sha") or "").strip().lower()
+        khoa = sha if _la_dang_commit(sha) else "__khong_neo_duoc__"
         if khoa in thay:
             continue
         thay.add(khoa)

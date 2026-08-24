@@ -3549,6 +3549,45 @@ def case_bien_nhan_thieu_sha_nhieu_ban_van_dem_MOT(c: Ctx):
     _doi(0, rc, e, "chặn oan: thiếu sha vẫn phải tính là MỘT vòng hợp lệ")
 
 
+def case_bien_nhan_sha_RAC_khong_duoc_lam_khoa_vong(c: Ctx):
+    """`reviewed_sha` CÓ mặt nhưng là RÁC ⇒ không được làm khoá vòng.
+
+    Dạng THỨ BA của cùng một bệnh, cross-review lượt 3 của #298 tìm ra. Hai dạng trước
+    đếm theo TỆP; dạng này đếm theo GIÁ TRỊ TỰ KHAI — ba chuỗi rác khác nhau thành ba
+    "vòng", `rc=0` ở nơi phải `rc=11`. Chốt đóng HÌNH DẠNG, không đóng thêm một dạng:
+    chỉ chuỗi trông như commit mới được làm khoá; mọi thứ khác dồn về CÙNG một xô.
+    """
+    def bn(sha):
+        return ("schema_version: 1\nkind: review_delivery_receipt\npacket_id: '249'\n"
+                "role: reviewer\nprovider: codex\nverdict: approve\n"
+                f"reviewed_sha: {sha}\nverdict_path: ops/reviews/v.md\n")
+    goc = _kho_gia_co_verdict(c, "bnracsha", [("a-verdict.receipt.yaml", bn("rac-1")),
+                                              ("b-verdict.receipt.yaml", bn("rac-2")),
+                                              ("c-verdict.receipt.yaml", bn("khong-phai-sha"))])
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249",
+                              "--toi-thieu", "3"])
+    _doi(11, rc, e, "ba chuỗi RÁC khác nhau thành 3 vòng ⇒ cổng đếm GIÁ TRỊ TỰ KHAI")
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(0, rc, e, "chặn oan: sha rác vẫn phải tính là MỘT vòng hợp lệ")
+
+
+def case_bien_nhan_sha_that_van_dem_RIENG(c: Ctx):
+    """Chặn oan phía kia: hai `reviewed_sha` HỢP LỆ và khác nhau vẫn phải là HAI vòng.
+
+    Thiếu ca này thì chốt F4 có thể gom sạch mọi thứ về một xô mà không ai biết —
+    cổng sẽ "an toàn" bằng cách không đếm được gì.
+    """
+    def bn(sha):
+        return ("schema_version: 1\nkind: review_delivery_receipt\npacket_id: '249'\n"
+                "role: reviewer\nprovider: codex\nverdict: approve\n"
+                f"reviewed_sha: {sha}\nverdict_path: ops/reviews/v.md\n")
+    goc = _kho_gia_co_verdict(c, "bnshathat", [("a-verdict.receipt.yaml", bn("%040x" % 11)),
+                                               ("b-verdict.receipt.yaml", bn("%040x" % 22))])
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249",
+                              "--toi-thieu", "2"])
+    _doi(0, rc, e, "hai sha HỢP LỆ khác nhau bị gom thành một ⇒ cổng thành mù")
+
+
 def case_bien_nhan_nguong_0_hoac_am_bi_CHAN(c: Ctx):
     """`--toi-thieu 0` / âm ⇒ CHẶN. Cổng tắt được bằng chính cờ của nó thì không phải cổng."""
     goc = _kho_gia(c, "bnnguong")
@@ -3586,6 +3625,10 @@ CASES += [
      case_bien_nhan_thieu_sha_nhieu_ban_van_dem_MOT),
     ("bien_nhan_nguong_0_hoac_am_bi_CHAN",
      case_bien_nhan_nguong_0_hoac_am_bi_CHAN),
+    ("bien_nhan_sha_RAC_khong_duoc_lam_khoa_vong",
+     case_bien_nhan_sha_RAC_khong_duoc_lam_khoa_vong),
+    ("bien_nhan_sha_that_van_dem_RIENG",
+     case_bien_nhan_sha_that_van_dem_RIENG),
 ]
 
 

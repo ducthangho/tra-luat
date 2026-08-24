@@ -2,8 +2,9 @@
 #
 # ĐỌC TRƯỚC: biên nhận này được ghi **SAU** khi cả bốn lượt đã chạy xong, bởi CHÍNH phiên
 # thi công — tức bên kém độc lập nhất để khai chúng đã diễn ra thế nào. Phần KIỂM ĐƯỢC
-# không phụ thuộc lời tôi: `verdict_path` + `verdict_sha256` neo tệp nguyên văn, và
-# `evidence_url` trỏ comment đã đăng công khai. Phần TÓM TẮT thì là lời tôi — đọc verdict.
+# không phụ thuộc lời tôi: `verdict_sha256` khoá BYTE của bản trong kho, nên bất kỳ ai
+# sửa nó về sau đều lộ; `evidence_url` trỏ comment đã đăng công khai. Phần TÓM TẮT thì là
+# lời tôi — đọc verdict. ĐỪNG đọc băm ấy thành bằng chứng "nguyên văn": xem `verdict_doi_chieu`.
 #
 # KHÔNG CÓ LEASE REVIEW cho bốn lượt này. Chúng chạy dưới chỉ thị trực tiếp của chủ kho
 # trong phiên, không qua `record-lease`. Ghi thẳng thay vì mượn `lease_id` của executor.
@@ -34,8 +35,24 @@ verdict_sha256: c9a9558003de85c24feaaa1b3af3bc6ea56b7759d2780a1f213ebdbe1609faef
 verdict_bytes: 7046
 verdict_nguon: >-
   `codex exec -s workspace-write --skip-git-repo-check --cd <sandbox>` trong container
-  phiên; tệp gốc `<sandbox>/VERDICT2.md`. Chép nguyên văn, KHÔNG sửa.
-verdict_doi_chieu: 'sha256 đo trên tệp ĐÃ CHÉP trong kho — chính con số ở `verdict_sha256`'
+  phiên; tệp gốc `<sandbox>/VERDICT2.md`. Người thi công chép và KHÔNG sửa — nhưng đó là LỜI KHAI của tôi, không phải phép đo; xem `verdict_doi_chieu`.
+verdict_doi_chieu: >-
+  BĂM NÀY CHỨNG MINH GÌ, VÀ KHÔNG CHỨNG MINH GÌ — cross-review lượt 1 của #298 bắt đúng chỗ
+  này (`s1-nguyen-van-khong-co-doi-chung`, P1), và chủ kho chốt hướng (a) in-session
+  2026-08-24 ("Chọn a").
+  CHỨNG MINH: bản trong kho không đổi kể từ lúc ghi. `verdict_sha256` đo trên chính tệp
+  `verdict_path`, nên ai sửa nó về sau đều lộ. Đó là CHỐNG SỬA VỀ SAU, và nó thật.
+  KHÔNG CHỨNG MINH: rằng bản chép khớp thứ reviewer đã sinh ra. Băm đo trên BẢN SAO, nên
+  nó chỉ nói bản sao khớp CHÍNH NÓ — một vòng tròn. Muốn cắt vòng phải có một client thứ
+  hai lấy bản gốc rồi băm độc lập.
+  VÌ SAO KHÔNG LÀM ĐƯỢC ĐIỀU ĐÓ Ở ĐÂY: container phiên KHÔNG có đường ấy. REST tới
+  `repos/…` bị proxy chặn 403 bất kể token (đo 15-08 và 17-08, cả có lẫn không token, kết
+  quả y hệt ⇒ chặn theo ĐƯỜNG DẪN, không theo danh tính). Còn đường đọc MCP thì CHUẨN HOÁ
+  thân comment (`'`→`&#39;` · `"`→`&#34;` · `>`→`&gt;` · `<`→`&lt;`), nên `diff` với nó
+  sinh lệch hệ thống — tạo tác của công cụ đọc, không phải bằng chứng.
+  NÊN TRẠNG THÁI ĐÚNG LÀ TRẠNG THÁI THỨ BA: **KHÔNG ĐO ĐƯỢC**, không phải "đã kiểm".
+  NGUỒN CÓ THẨM QUYỀN: tệp trong kho (`authoritative_source: repo_file`). Comment trên PR
+  là BẢN CHIẾU, không phải bản gốc để đối chiếu ngược.
 
 evidence_channel: github_pr_comment
 evidence_url: https://github.com/ducthangho/tra-luat/pull/293#issuecomment-5389433877

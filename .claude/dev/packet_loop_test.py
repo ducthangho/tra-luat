@@ -3008,6 +3008,25 @@ MUTANTS = {
         "MAC_DINH_TRAN_SAME_FAILURE = 99",
         ["same_failure_cung_id_qua_2_review"],
     ),
+    "bien_nhan_bo_gom_full_va_viet_tat": (
+        "    khoa_theo_bien_nhan = _khoa_neo_cac_sha(that)\n",
+        ('    khoa_theo_bien_nhan = []\n'
+         '    for d in that:\n'
+         '        s = str(d.get("reviewed_sha") or "").strip().lower()\n'
+         '        khoa_theo_bien_nhan.append(s if _la_dang_commit(s) '
+         'else "__khong_neo_duoc__")\n'),
+        ["bien_nhan_cung_sha_full_va_viet_tat_dem_MOT"],
+    ),
+    "bien_nhan_tra_lai_safe_loader_doi_kieu": (
+        '            d = yaml.load(f.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)\n',
+        '            d = yaml.safe_load(f.read_text(encoding="utf-8"))  # đột biến\n',
+        ["bien_nhan_sha_so_co_0_dau_van_dem_RIENG"],
+    ),
+    "bien_nhan_bo_chan_tien_to_mo_ho": (
+        "        if len(ung_vien_day_du) > 1:\n",
+        "        if False:  # đột biến: tự chọn OID đầu tiên\n",
+        ["bien_nhan_viet_tat_khop_hai_oid_la_KHONG_DO_DUOC"],
+    ),
     "bo_cung_hoa_stdout": (
         "\n    _cung_hoa_stdout()\n",
         "\n    pass  # đột biến: bỏ cứng hoá stdout\n",
@@ -3496,6 +3515,15 @@ def _bn_that(sha: str, duong: str = "ops/reviews/v.md") -> str:
             f"reviewed_sha: {sha}\nverdict_path: {duong}\n")
 
 
+# Ba hình dạng fixture SHA mà #305 bắt buộc phủ: có chữ · toàn số không 0 đầu ·
+# toàn số có 0 đầu. Hai hằng cuối cố ý KHÔNG đặt nháy khi đi qua `_bn_that`.
+_SHA_CO_CHU = "8b627e843a3be87f2ceac97f2f147bbadcaa3cdc"
+_SHA_SO_KHONG_0_A = "1234567012345670123456701234567012345670"
+_SHA_SO_KHONG_0_B = "2234567022345670223456702234567022345670"
+_SHA_SO_CO_0_DAU_A = "0123456"
+_SHA_SO_CO_0_DAU_B = "0765432"
+
+
 def case_bien_nhan_packet_24_khong_an_bien_nhan_249(c: Ctx):
     """So BẰNG, không phải chuỗi con. `24` là chuỗi con của `249`.
 
@@ -3604,18 +3632,56 @@ def case_bien_nhan_sha_RAC_khong_duoc_lam_khoa_vong(c: Ctx):
     _doi(0, rc, e, "chặn oan: sha rác vẫn phải tính là MỘT vòng hợp lệ")
 
 
+def case_bien_nhan_cung_sha_full_va_viet_tat_dem_MOT(c: Ctx):
+    """N1: full OID + viết tắt của chính nó là MỘT khoá neo, không phải hai."""
+    goc = _kho_gia_co_verdict(c, "bnfulltat", [
+        ("a-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU)),
+        ("b-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU[:7])),
+    ])
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249",
+                              "--toi-thieu", "2"])
+    _doi(11, rc, e, "full SHA + viết tắt của nó được đếm thành HAI")
+    if "1 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
+
+
+def case_bien_nhan_sha_so_co_0_dau_van_dem_RIENG(c: Ctx):
+    """N3: YAML không nháy không được đổi hai SHA toàn số có 0 đầu thành một xô."""
+    goc = _kho_gia_co_verdict(c, "bnso0dau", [
+        ("a-verdict.receipt.yaml", _bn_that(_SHA_SO_CO_0_DAU_A)),
+        ("b-verdict.receipt.yaml", _bn_that(_SHA_SO_CO_0_DAU_B)),
+    ])
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249",
+                              "--toi-thieu", "2"])
+    _doi(0, rc, e, "hai SHA toàn số có 0 đầu bị YAML đổi kiểu rồi gom một xô")
+    if "2 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm HAI: {_txt(o)!r}")
+
+
+def case_bien_nhan_viet_tat_khop_hai_oid_la_KHONG_DO_DUOC(c: Ctx):
+    """Dạng 6: một viết tắt khớp hai full OID ⇒ không được tự chọn một phía."""
+    sha_b = _SHA_CO_CHU[:7] + "f" * 33
+    goc = _kho_gia_co_verdict(c, "bnmoho", [
+        ("a-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU)),
+        ("b-verdict.receipt.yaml", _bn_that(sha_b)),
+        ("c-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU[:7])),
+    ])
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(11, rc, e, "viết tắt khớp hai OID mà cổng vẫn tự gom")
+    if "KHÔNG ĐO ĐƯỢC" not in _txt(e):
+        raise AssertionError(f"đỏ mà không khai trạng thái thứ ba: {_txt(e)!r}")
+
+
 def case_bien_nhan_sha_that_van_dem_RIENG(c: Ctx):
     """Chặn oan phía kia: hai `reviewed_sha` HỢP LỆ và khác nhau vẫn phải là HAI vòng.
 
     Thiếu ca này thì chốt F4 có thể gom sạch mọi thứ về một xô mà không ai biết —
     cổng sẽ "an toàn" bằng cách không đếm được gì.
     """
-    def bn(sha):
-        return ("schema_version: 1\nkind: review_delivery_receipt\npacket_id: '249'\n"
-                "role: reviewer\nprovider: codex\nverdict: approve\n"
-                f"reviewed_sha: {sha}\nverdict_path: ops/reviews/v.md\n")
-    goc = _kho_gia_co_verdict(c, "bnshathat", [("a-verdict.receipt.yaml", bn("%040x" % 11)),
-                                               ("b-verdict.receipt.yaml", bn("%040x" % 22))])
+    goc = _kho_gia_co_verdict(c, "bnshathat", [
+        ("a-verdict.receipt.yaml", _bn_that(_SHA_SO_KHONG_0_A)),
+        ("b-verdict.receipt.yaml", _bn_that(_SHA_SO_KHONG_0_B)),
+    ])
     rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249",
                               "--toi-thieu", "2"])
     _doi(0, rc, e, "hai sha HỢP LỆ khác nhau bị gom thành một ⇒ cổng thành mù")
@@ -3660,6 +3726,12 @@ CASES += [
      case_bien_nhan_nguong_0_hoac_am_bi_CHAN),
     ("bien_nhan_sha_RAC_khong_duoc_lam_khoa_vong",
      case_bien_nhan_sha_RAC_khong_duoc_lam_khoa_vong),
+    ("bien_nhan_cung_sha_full_va_viet_tat_dem_MOT",
+     case_bien_nhan_cung_sha_full_va_viet_tat_dem_MOT),
+    ("bien_nhan_sha_so_co_0_dau_van_dem_RIENG",
+     case_bien_nhan_sha_so_co_0_dau_van_dem_RIENG),
+    ("bien_nhan_viet_tat_khop_hai_oid_la_KHONG_DO_DUOC",
+     case_bien_nhan_viet_tat_khop_hai_oid_la_KHONG_DO_DUOC),
     ("bien_nhan_sha_that_van_dem_RIENG",
      case_bien_nhan_sha_that_van_dem_RIENG),
 ]

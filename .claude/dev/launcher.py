@@ -966,10 +966,11 @@ def _giet_cay(pid: int, khoa: str | None, job=None) -> KetGiet:
 class Chan(Exception):
     """Một chốt chặn. Mang theo mã thoát để phía gọi phân biệt được."""
 
-    def __init__(self, ma: int, thong_diep: str):
+    def __init__(self, ma: int, thong_diep: str, probe: dict | None = None):
         super().__init__(thong_diep)
         self.ma = ma
         self.thong_diep = thong_diep
+        self.probe = probe
 
 
 def chot_workspace(ws: str) -> str:
@@ -1054,13 +1055,13 @@ def chay_cac_probe(ws: str, lenh: list[str], bo_qua: str | None) -> tuple[dict, 
         ds["claude_trust"] = _probe_trust_claude(ws)
     ly_do = bo_qua.strip() if bo_qua is not None else None
     if bo_qua is not None and not ly_do:
-        raise Chan(MA_THAM_SO, "--bo-qua-probe bat buoc co ly do khac rong")
+        raise Chan(MA_THAM_SO, "--bo-qua-probe bat buoc co ly do khac rong", ds)
     hong = {ten: kq for ten, kq in ds.items() if kq["trang_thai"] != "DAT"}
     if hong and ly_do is None:
         if ds["workspace"].get("ma") == "git_worktree":
-            raise Chan(MA_WORKTREE, "workspace la git worktree; dung ban clone doc lap")
+            raise Chan(MA_WORKTREE, "workspace la git worktree; dung ban clone doc lap", ds)
         mo_ta = ", ".join(f"{ten}={kq['trang_thai']}" for ten, kq in hong.items())
-        raise Chan(MA_PROBE, f"probe nang luc khong dat: {mo_ta}")
+        raise Chan(MA_PROBE, f"probe nang luc khong dat: {mo_ta}", ds)
     return ds, ly_do
 
 
@@ -1433,7 +1434,22 @@ def lenh_run(a) -> int:
     if not a.lenh:
         raise Chan(MA_THAM_SO, "thieu lenh de chay (dat sau dau --)")
     kq = chay_cac_chot(a)
-    probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe)
+    try:
+        probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe)
+    except Chan as e:
+        if e.probe is None:
+            raise
+        run_root = Path(a.run_root).expanduser().resolve()
+        rid, sid = _cap_id(run_root)
+        luc = _bay_gio().isoformat()
+        _ghi_so(run_root / sid, {
+            "version": VERSION, "run_id": rid, "short_id": sid, "ten": a.name,
+            "lenh": _tom_tat_lenh(a.lenh), "trang_thai": "hong", "giai_doan": "probe",
+            "bat_dau_utc": luc, "ket_thuc_utc": luc, "ma_thoat": e.ma,
+            "ly_do_dung": e.thong_diep, "pid": None, "khoa_danh_tinh": None,
+            **kq, "probe": _probe_cho_so(e.probe), "bo_qua_probe_ly_do": None,
+        })
+        raise
     kq.update(probe=_probe_cho_so(probe), bo_qua_probe_ly_do=ly_do_bo_qua)
     if bool(a.attempt_state) != bool(a.void_reason):
         raise Chan(MA_THAM_SO, "--attempt-state và --void-reason phải đi cùng nhau")

@@ -5657,21 +5657,26 @@ def t144_run_ghi_nonce_va_hmac_khong_lo_khoa():
 @ca
 def r01_worktree_that_bi_chan():
     with San() as s:
-        wt = tao_worktree(s); dau = s / "da-chay"
-        r = chay("run", "--workspace", str(wt), "--run-root", str(s / "runs"), "--",
+        wt = tao_worktree(s); dau = s / "da-chay"; rr = s / "runs"
+        r = chay("run", "--workspace", str(wt), "--run-root", str(rr), "--",
                  PY, "-c", f"open({str(dau)!r},'w').write('x')")
         bang(r.returncode == MA_WORKTREE and "clone doc lap" in r.stderr,
              f"worktree khong bi chan dung cach: {r.returncode} {r.stderr}")
         bang(not dau.exists(), "lenh con da chay trong worktree")
+        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(d["trang_thai"] == "hong" and d.get("giai_doan") == "probe"
+             and d["ma_thoat"] == MA_WORKTREE and d["probe"]["workspace"]["trang_thai"] == "DO"
+             and "worktree" in d["ly_do_dung"], f"chan probe khong vao so: {d}")
 
 
 @ca
 def r02_clone_that_di_tiep():
     with San() as s:
-        repo = tao_repo(s); dau = s / "da-chay"
-        r = chay("run", "--workspace", str(repo), "--run-root", str(s / "runs"), "--",
+        repo = tao_repo(s); dau = s / "da-chay"; rr = s / "runs"
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--",
                  PY, "-c", f"open({str(dau)!r},'w').write('x')")
-        bang(r.returncode == 0 and dau.is_file(), f"clone that bi bat oan: {r.returncode} {r.stderr}")
+        bang(r.returncode == 0 and dau.is_file() and (next(rr.iterdir()) / "run.json").is_file(),
+             f"clone that bi bat oan: {r.returncode} {r.stderr}")
 
 
 @ca
@@ -5757,6 +5762,21 @@ def r09_run_json_giu_ba_trang_thai_probe():
              f"run.json khong giu ba trang thai: {trang_thai}")
 
 
+@ca
+def r10_trust_json_hong_bi_chan_sach():
+    with San() as s:
+        repo = tao_repo(s); claude = tao_claude_gia(s); home = s / "home"; home.mkdir()
+        dau = s / "da-chay"; rr = s / "runs"
+        (home / ".claude.json").write_text("{", encoding="utf-8")
+        env = dict(os.environ, HOME=str(home), USERPROFILE=str(home))
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--",
+                 str(claude), "-c", f"open({str(dau)!r},'w').write('x')", env=env)
+        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(r.returncode == MA_PROBE and not dau.exists() and "Traceback" not in r.stderr
+             and d["probe"]["claude_trust"]["trang_thai"] == "KHONG_DO_DUOC",
+             f"JSON hong khong bi chan sach: {r.returncode} {r.stderr} {d}")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -5767,6 +5787,9 @@ DOT_BIEN = [
     ("m1_coi_worktree_la_hop_le",
      ('            return {"trang_thai": "DO", "chi_tiet": "git worktree", "ma": "git_worktree"}',
       '            return {"trang_thai": "DAT", "chi_tiet": "git worktree", "ma": "git_worktree"}'),
+     ["r01_worktree_that_bi_chan"]),
+    ("m6c_khong_ghi_khi_probe_chan",
+     ('        _ghi_so(run_root / sid, {', '        if False: _ghi_so(run_root / sid, {'),
      ["r01_worktree_that_bi_chan"]),
     ("m1_chan_ca_clone_that",
      ('            return {"trang_thai": "DAT", "chi_tiet": ".git la thu muc"}',
@@ -5783,6 +5806,10 @@ DOT_BIEN = [
      ('        return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "thieu khoa trust Claude"}',
       '        return {"trang_thai": "DAT", "chi_tiet": "thieu khoa trust Claude"}'),
      ["r05_trust_thieu_khoa_la_khong_do_duoc"]),
+    ("m4_bo_bat_JSON_hong",
+     ('    except (OSError, TypeError, AttributeError, json.JSONDecodeError):',
+      '    except (OSError, TypeError, AttributeError):'),
+     ["r10_trust_json_hong_bi_chan_sach"]),
     ("m5_canh_bao_thay_vi_chan",
      ('    if hong and ly_do is None:', '    if False and hong and ly_do is None:'),
      ["r06_probe_hong_khong_override_phai_chan"]),

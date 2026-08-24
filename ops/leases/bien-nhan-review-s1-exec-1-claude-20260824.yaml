@@ -103,3 +103,6 @@ dieu_kien_dung: >-
   write set, phải xin lease sửa đổi. S2 nếu cần chạm bất kỳ đường dẫn nào ngoài
   `ops/reviews/`. S3 nếu phát hiện verdict nguyên văn có chỗ sai và bị cám dỗ sửa nó.
 posted_comment_id: 5389863081   # workflow ghi, ĐỪNG sửa tay
+
+# BẢN SỬA ĐỔI 2 thay thế bản này (nới trần TỆP 9 -> 11 cho verdict + biên nhận lượt 4 của #298).
+da_bi_thay_the: bien-nhan-review-s1-exec-1r2-claude-20260824

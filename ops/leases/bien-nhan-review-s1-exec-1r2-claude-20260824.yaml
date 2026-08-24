@@ -1,0 +1,134 @@
+# BẢN SỬA ĐỔI 2: nới trần TỆP 9 -> 11 (thêm verdict + biên nhận cross-review lượt 4
+# của packet #298). Trần DÒNG giữ nguyên 900; đang dùng 700.
+#
+# Lease EXECUTOR — packet `BIEN-NHAN-REVIEW-DEM-DUOC` (#298), SLICE 1 = B1.
+#
+# Ghi 4 biên nhận + 4 tệp verdict còn thiếu của #249 vào `ops/reviews/`. Đây là nợ của
+# CHÍNH phiên thi công #293: bốn vòng cross-review đã chạy và để lại 0 biên nhận.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 298
+packet_id: BIEN-NHAN-REVIEW-DEM-DUOC
+phase_key: BIEN-NHAN-REVIEW-S1
+revision: 2
+generation: 1
+lease_id: bien-nhan-review-s1-exec-1r2-claude-20260824
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+lop_review_do_the_nao: >-
+  ĐO, không đoán — và bản đầu của lease này ĐOÁN SAI. Tôi khai `routine` với lý lẽ "biên nhận
+  là bằng chứng, không phải mã authority"; cổng `check` BÁC: rc=10, "effective_review_class
+  ='routine' không bằng lớp cổng tính được 'sensitive'". Đo tiếp mới hiểu vì sao: `_BANG_LOP`
+  của `ops/lease_publish.py` chỉ có BẢY tiền tố, và mọi đường dẫn không khớp đều rơi về
+  `sensitive` theo fail-close (`next(..., "sensitive")`). Nên `docs/`, `scripts/`,
+  `references/`, `ops/reviews/` đều `sensitive`.
+  HỆ QUẢ ĐÁNG GHI, ngoài phạm vi lease này: `sensitive` ở kho này là MẶC ĐỊNH chứ không phải
+  tín hiệu "chạm authority". Mà `ADR-0044` đặt trần ≤3 tệp cho "packet `sensitive` chạm
+  authority" — nếu đọc theo lớp cổng tính ra thì trần ấy siết gần như MỌI packet, kể cả một
+  packet chỉ thêm tài liệu. Hai câu ấy chưa ai đối chiếu. Ghi vào #298 làm nợ, không tự sửa.
+
+write_set:
+  - ops/reviews/
+write_set_note: >-
+  ĐÚNG MỘT tiền tố. Trong đó lượt này chạm: 4 tệp `*-verdict.md`, 4 tệp `*.receipt.yaml`,
+  và `README.md` (bảng Mục lục + bảng Cảnh báo). Đường dẫn ngoài tiền tố này BẤT KỲ phải
+  có lease sửa đổi.
+write_set_da_do_truoc_khi_cap: >-
+  `ops/lease_publish.py ai-dang-giu ops/reviews` -> NGƯỜI_GIỮ 0: không có. Đo 2026-08-24.
+  Phép so hai nguồn trước đó: ls-remote 191 = for-each-ref 191, `comm -23` rỗng.
+write_set_khong_ai_cuong_che: >-
+  ĐO 23-08-2026: KHÔNG tầng nào kiểm diff có nằm trong write set hay không. Lời dặn, không
+  phải cổng.
+
+branch: claude/bien-nhan-review-s1-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 59fe955dde4e718dcd12e1617e57862165dae812
+start_from_sha: 59fe955dde4e718dcd12e1617e57862165dae812
+reviewed_sha_required: 59fe955dde4e718dcd12e1617e57862165dae812
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 11
+  dong_them_toi_da: 900
+  don_vi: '`git diff --numstat <base>..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  trong_nguong_ADR_0044: false
+  nang_tran_ADR_0044:
+    ai_nang: ducthangho
+    tham_quyen: §2
+    quyet_dinh_luc: 'direct, in-session, 2026-08-24: "cấp lease triển khai luôn"'
+    tran_cu: 9
+    tran_moi: 11
+    da_dung_luc_nang: 11
+    chieu_nao_noi: >-
+      NỚI SỐ TỆP, KHÔNG nới số dòng. Dòng vẫn 700/900 — chưa chạm. Khác hẳn hai lần nới của
+      slice 2 (300→400→520), vốn nới DÒNG để chứa bản vá cho finding.
+    can_cu: >-
+      Trần 9 đặt từ phép ĐẾM gói lúc cấp — "4 verdict + 4 biên nhận + README của #249" — chứ
+      không phải một giới hạn thiết kế. Hai tệp thêm vào là verdict và biên nhận của cross-review
+      LƯỢT 4 (packet #298), tức CÙNG LOẠI, CÙNG thư mục, CÙNG mục đích với 9 tệp kia: hiện vật
+      nguyên trạng của một vòng review đã hoàn tất. `ADR-0044` sinh ra để chặn một THIẾT KẾ quá
+      lớn; ở đây thiết kế không đổi, chỉ có thêm đúng hai hiện vật cùng họ.
+    vi_sao_khong_cat_slice: >-
+      Cắt thành S1a (9 tệp #249) + S1b (2 tệp #298) là đường sạch về giấy tờ và đã được trình
+      chủ kho. Không giảm rủi ro nào: hai nhóm tệp không tương tác, không có mã chạy được, và
+      bảng Mục lục trong README phải sửa ở CẢ HAI lượt nếu tách — tức tách làm TĂNG số lần chạm
+      một tệp dùng chung. Chủ kho chọn giữ nguyên gói.
+    tro_treu_dang_ghi: >-
+      Nguyên nhân vượt trần là việc ghi biên nhận cho #298 vào đây — tức chính thao tác gỡ
+      `bien-nhan --packet 298` khỏi `rc=11` lại làm S1 vỡ trần của nó. Ghi ra vì đây là cái giá
+      thật của việc đặt bộ đếm và hiện vật của nó trong cùng một kho.
+  vuot_nguong_ADR_0044: true
+  ly_do_vuot_khai_theo_ADR_0044: >-
+    ADR-0044 cho packet thường ≤6 tệp; slice này chạm 9. ADR cho phép vượt nếu KHAI LÝ DO.
+    Lý do: bốn cặp (verdict + biên nhận) là HIỆN VẬT NGUYÊN VĂN của các vòng review ĐÃ hoàn
+    tất, không phải thiết kế mới — thứ ADR-0044 muốn chặn là một THIẾT KẾ quá lớn, neo từ
+    dữ liệu PLAT-X4/PLAT-X5. Chia nhỏ chúng không giảm rủi ro nào mà chỉ bắt sửa bảng mục
+    lục nhiều lần. Dòng thêm lớn vì verdict là nguyên văn của reviewer, KHÔNG được rút gọn.
+
+granted_by: ducthangho
+thay_the_cho: bien-nhan-review-s1-exec-1-claude-20260824
+granted_on_instruction: 'direct, in-session, 2026-08-24: "Đồng ý làm ngay B1, B2, B3"'
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc chủ kho
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_ghi_chu: >-
+  Phiên ghi lease này CŨNG là phiên thi công, VÀ là phiên đã tạo ra chính cái nợ mà slice
+  này trả. Ghi thẳng: bên ghi biên nhận cho bốn vòng review là bên kém độc lập nhất để
+  khai chúng đã diễn ra thế nào. Nội dung verdict được chép NGUYÊN VĂN từ tệp reviewer
+  sinh ra, và biên nhận neo băm — nên phần kiểm được không phụ thuộc lời tôi.
+
+leased_at_utc: '2026-08-24T02:00:00Z'
+lease_expires_at_utc: '2026-08-25T02:00:00Z'
+run_minutes: 1440
+
+viec_cua_luot_nay: >-
+  MỘT mục tiêu: ghi 4 tệp verdict (nguyên văn) + 4 biên nhận + cập nhật hai bảng trong
+  ops/reviews/README.md, sao cho `t26` và `t27` của ops/lease_publish_test.py XANH.
+  KHÔNG làm B2/B3 — chúng là slice 2, write set khác, lease khác.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) `t26` đòi `verdict_sha256` khớp TỆP THẬT và `evidence_url` dạng https — băm sau khi
+  chép, đừng băm bản nháp. (2) `t27` đòi `verdict_path` bằng ĐƯỜNG DẪN ĐẦY ĐỦ, không phải
+  basename; đòi tên verdict ở CỘT 'tệp verdict' và tên biên nhận ở CỘT 'biên nhận' của bảng
+  Mục lục; đòi MỌI `verdict_usage_caveats[].id` nằm ở CỘT 'id' TRÊN CÙNG HÀNG với tên
+  verdict trong bảng Cảnh báo. (3) Verdict là NGUYÊN VĂN của reviewer — KHÔNG sửa để cho
+  đẹp; đính chính phải sống ở biên nhận.
+
+chua_do_duoc_luc_cap: >-
+  (1) Có đúng hai lần kho bỏ ghi biên nhận không — đo được hai (chuỗi doctor-github-mcp và
+  #249), CHƯA quét toàn bộ packet lịch sử. (2) Bốn verdict này do phiên thi công vận chuyển
+  từ sandbox ephemeral; `evidence_url` trỏ comment PR là bền, nhưng bản sandbox thì không —
+  nếu container chết trước khi land thì không còn nguồn thứ hai để đối chiếu băm.
+
+dieu_kien_dung: >-
+  S1 nếu `t26`/`t27` không xanh được mà phải sửa CHÍNH hai ca ấy — đó là đổi cổng, ngoài
+  write set, phải xin lease sửa đổi. S2 nếu cần chạm bất kỳ đường dẫn nào ngoài
+  `ops/reviews/`. S3 nếu phát hiện verdict nguyên văn có chỗ sai và bị cám dỗ sửa nó.

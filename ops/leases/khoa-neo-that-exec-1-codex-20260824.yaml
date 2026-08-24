@@ -137,3 +137,6 @@ recorder_cung_la_nguoi_thi_cong: false
 leased_at_utc: '2026-08-24T12:40:00Z'
 lease_expires_at_utc: '2026-08-25T12:40:00Z'
 run_minutes: 1440
+da_bi_thay_the: khoa-neo-that-thu-hoi-claude-20260824   # THEM DUNG MOT DONG — day la co che duy nhat lam mot lease
+                        # roi khoi phep dem NGUOI_GIU (lease_publish.py:679).
+                        # Viec cua lease nay DA LAND; xem bia mo de biet phep do.

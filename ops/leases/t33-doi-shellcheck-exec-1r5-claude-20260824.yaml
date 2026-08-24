@@ -322,3 +322,6 @@ noi_da_dung_o_r5:
     diff. Bắt buộc thêm một vòng trên diff HAI tệp — chủ kho đã yêu cầu ("review lại"). Vòng ấy không
     chạy thì phần đặc tả vào master mà chưa ai review: fail-open.
 posted_comment_id: 5389738368   # workflow ghi, ĐỪNG sửa tay
+da_bi_thay_the: t33-doi-shellcheck-thu-hoi-claude-20260824   # THEM DUNG MOT DONG — day la co che duy nhat lam mot lease
+                        # roi khoi phep dem NGUOI_GIU (lease_publish.py:679).
+                        # Viec cua lease nay DA LAND; xem bia mo de biet phep do.

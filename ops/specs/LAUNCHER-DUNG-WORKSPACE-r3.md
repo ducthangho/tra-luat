@@ -5,17 +5,22 @@ packet_id: LAUNCHER-DUNG-WORKSPACE
 revision: 3
 review_class: sensitive
 successor_assurance_target: cross_approved
-remediation_pr299_assurance: cross_approved
-kind: append_only_design_addendum
+kind: selective_replacement_design_delta
+remediation_source:
+  verdict: changes_requested
+  reviewed_sha: 51745d9d64c2205dfc336b13995c891746c4354e
+  reviewed_tree: 28f657d968763ab490b1b517613bfa0907a8b72c
+  pre_patch_sha256: c5f6c905315e9700140bde2f162d024174f1581b06126bc3aec39684b9f9d0a4
+  evidence: https://github.com/ducthangho/tra-luat/pull/299#issuecomment-5393428338
 ```
 
 > `r3` không phải lease và không triển khai launcher. Nó chỉ thay phần thiết kế `M7`
 > của revision 2 để một successor Packet có thể được đóng băng, cấp lease và đo đúng
 > ranh giới vai trò. `M1`–`M6` đã land giữ nguyên.
-> Reviewer của PR #299 đã được chủ kho đổi sang một phiên Claude Opus 5 độc lập sau
-> khi dịch vụ hồi phục; assurance hiện hành là `cross_approved`. Ngoại lệ
-> `same_provider_approved` trước đó đã bị thu hồi cho verdict mới. Successor
-> `sensitive` vẫn giữ target `cross_approved`; fallback khác cần authority mới.
+> Verdict nguồn của PR #299 ghi `cross_provider_review_performed: true`, nhưng kết quả là
+> `changes_requested` và `assurance_result: not_approved`; spec này không khai achieved
+> assurance. Successor `sensitive` vẫn giữ target `cross_approved`; assurance đạt được chỉ
+> sống ở verdict/receipt của exact head sau này, và fallback khác cần authority mới.
 >
 > Hai đầu vào bất biến không được sửa đè:
 >
@@ -29,6 +34,13 @@ kind: append_only_design_addendum
 `r3` thay toàn bộ bảng cho phép và `N10`–`N13` của `r2`. Các câu trong `r2`
 gọi `acceptEdits` là allowlist, chọn sandbox chỉ theo provider, để ngân sách M7
 chưa xác định hoặc neo protocol bằng số dòng đều không còn được dùng để cấp lease.
+Tên `selective_replacement_design_delta` khai đúng phạm vi ấy: thay có chọn lọc các
+khối nêu trên, không phải một addendum chỉ nối thêm và cũng không thay phần còn lại của `r2`.
+
+Đối với successor M7, target `cross_approved` cố ý chỉ có **một orientation**:
+Executor `anthropic_claude` → Reviewer `openai_codex`. Chiều Executor `openai_codex` →
+Reviewer `anthropic_claude` không được thiết kế này hứa hỗ trợ, vì tuple Reviewer Claude
+vẫn fail-close ở §3; đây là giới hạn chủ ý, không phải lời khai cross-review đối xứng.
 
 Successor vẫn chỉ được sửa:
 
@@ -106,16 +118,25 @@ Bash(git log:*)
 Bash(git show:*)
 Bash(git rev-parse:*)
 Bash(git merge-base:*)
-Bash(git add:*)
-Bash(git commit:*)
-Bash(git push:*)
 Bash(python:*)
 Bash(python3:*)
 Bash(py:*)
 Bash(rg:*)
 ```
 
-Đây là danh sách cho phép thực được đưa sau `--allowedTools`, không phải mô tả prose.
+Đây là **15 phần tử argv riêng biệt** đứng sau đúng một `--allowedTools`, không phải một
+token nối bằng dấu cách/phẩy và không phải mô tả prose. Mỗi dòng, kể cả
+`Bash(git status:*)` có khoảng trắng bên trong, là đúng một phần tử argv; lớp spawn truyền
+list đối số trực tiếp, không ghép thành chuỗi để shell tách lại.
+
+Revision này chọn hướng **(b)** cho `STD-299-02`: gỡ hẳn ba verb `git add`, `git commit`
+và `git push`, thay vì dựng prefix rule theo tên generation branch. Phép đo nền là bảy
+lượt Codex Executor có mount `.git` chỉ-đọc nhưng packet vẫn được land qua phiên điều
+phối; giữ quyền Git mutation riêng cho Claude sẽ biến một tình cờ sandbox thành bất đối
+xứng thiết kế. Hệ quả vận hành: Executor do launcher spawn chỉ sinh working-tree diff;
+phiên điều phối áp dụng/commit/push sau readback. Nhu cầu để Executor tự stage, commit hoặc
+push phải đi qua Packet revision mới, không được nới allowlist của lượt chạy.
+
 Nhu cầu thêm công cụ/câu lệnh phải nằm trong Packet revision mới; successor không được
 sao toàn bộ allowlist rộng của `.claude/settings.json` để “cho chắc”. Hook và write set
 vẫn là các lớp độc lập; allowlist không tự biến thành security boundary.
@@ -125,7 +146,7 @@ Thứ tự argv canonical:
 ```text
 claude -p --model <model> --effort <effort>
   --permission-mode acceptEdits
-  --allowedTools <danh-sach-tren>
+  --allowedTools <15-argv-rieng-cua-danh-sach-tren>
   --output-format json
   <prompt-argument-chua-{PROMPT_FILE}>
 ```
@@ -145,23 +166,37 @@ tên+giá trị của tuple §3; không dùng blacklist substring. Cờ quyền 
 
 ## 5. Nghiệm thu successor — đo argv cuối và process thật
 
-Mỗi ca phải chạy qua `launcher run` với child giả ghi lại argv/đầu vào và số lần spawn;
-không kiểm một biến trung gian hay chỉ grep mã. Mỗi tính chất có đột biến riêng chạy
-trên bản sao tạm, không dùng `.pyc` cũ.
+`N10a`, `N10b` và `N11`–`N13` chạy qua `launcher run` với child ghi argv/đầu vào và
+số lần spawn; không kiểm một biến trung gian hay chỉ grep mã. Riêng `N10c`/`N10d`
+**cấm child giả**: phải gọi executable `codex` thật đã ghi version, qua chính
+`launcher run`, và đo kết quả của một lần ghi thật trong workspace fixture.
+
+Fixture là một clone tạm độc lập, có fingerprint trước-run và sentinel vắng. Hai lượt
+dùng cùng binary/provider `openai_codex`, cùng workspace đã khôi phục về đúng fingerprint,
+cùng prompt yêu cầu thực hiện đúng một write probe tạo sentinel với byte đã chốt; chỉ hai
+trường `role` và `capability_profile` được đổi. Output process phải có positive evidence
+write probe đã được thử. Thiếu evidence đã thử, thiếu credential/process thật, hoặc nền
+không cho chạy sandbox lồng nhau là `KHONG_DO_DUOC` và **chặn**, không được tính là pass.
+
+Mỗi tính chất có đột biến riêng chạy trên bản sao tạm, không dùng `.pyc` cũ. Với
+`N10c`/`N10d`, đột biến hạ phép đo xuống argv hoặc thay `codex` bằng child giả phải làm
+ca đích đỏ vì mất marker process thật và kết quả write probe.
 
 | ID | phép đo dương/âm bắt buộc | đột biến phải chết |
 |---|---|---|
-| `N10a` | Claude Executor nhận `acceptEdits`, đúng toàn bộ allowlist §4 và prompt đúng một lần ở vị trí cuối | bỏ `--allowedTools`, hoặc dời cờ kết thúc để prompt bị nuốt |
+| `N10a` | Claude Executor nhận `acceptEdits`, đúng 15 argv riêng của allowlist §4 và prompt đúng một lần ở vị trí cuối | nối allowlist thành một token, bỏ `--allowedTools`, thêm lại một Git mutation verb, hoặc dời cờ kết thúc để prompt bị nuốt |
 | `N10b` | `acceptEdits` có nhưng allowlist vắng/rỗng ⇒ chặn, child spawn `0` lần | coi mode là đủ quyền |
-| `N10c` | Codex Executor nhận đúng `-s workspace-write` | chọn sandbox chỉ theo provider hoặc để mặc định CLI |
-| `N10d` | Codex Reviewer nhận đúng `-s read-only`; checkout sau run vẫn sạch | dùng bảng Codex Executor cho Reviewer |
+| `N10c` | Process Codex Executor thật nhận đúng `-s workspace-write`, thử write probe và sentinel xuất hiện với đúng byte; không xuất hiện/sai byte ⇒ ĐỎ | hạ xuống chỉ đo argv/dùng child giả, hoặc cấp `read-only` |
+| `N10d` | Process Codex Reviewer thật nhận đúng `-s read-only`, thử cùng write probe nhưng bị từ chối; sentinel vẫn vắng và fixture giữ nguyên fingerprint; ghi thành công ⇒ ĐỎ | hạ xuống chỉ đo argv/dùng child giả, hoặc cấp `workspace-write` |
 | `N11` | role/provider/capability thiếu, sai chính tả, không hỗ trợ hoặc tuple chéo ⇒ chặn trước spawn | unknown đi qua hoặc fallback theo provider |
 | `N12` | mọi bypass ở §3–§4 và cờ quyền xung đột ⇒ chặn trước spawn | chỉ chặn một cách viết hoặc âm thầm sửa argv |
 | `N13` | caller đã truyền đúng mode/sandbox/allowlist ⇒ không thêm lần hai, prompt vẫn nguyên | duplicate cờ hoặc bắt oan đường hợp lệ |
 
-Ca `N10c` và `N10d` phải dùng **cùng provider, cùng workspace fixture**, chỉ đổi role và
-capability, rồi chứng minh hai argv khác nhau. Nếu chỉ chạy riêng từng ca thì chưa chứng
-minh bảng không còn chọn theo provider.
+Ca `N10c` và `N10d` là một cặp A/B duy nhất: **cùng provider, cùng binary/version, cùng
+workspace fixture/fingerprint và cùng write probe**, chỉ đổi role + capability. Bằng chứng
+phải có cả argv exact và hai kết quả ghi ngược nhau; hai argv khác nhau tự chúng chưa đủ.
+Nếu chỉ chạy riêng từng ca, không chứng minh write probe đã được thử, hoặc không đối chiếu
+fingerprint thì chưa chứng minh launcher cưỡng chế capability theo role.
 
 ## 6. Dependency hồi quy packet-loop — đã land, có khai va chạm
 
@@ -169,7 +204,6 @@ Fact phiên bản hiện hành sau quyết định land của chủ kho:
 
 ```yaml
 issue: 302
-issue_state: closed
 pull_request: 303
 pr_head_sha: 77f3c4361c8a9a12f514dd3b7440109da706ad62
 merge_commit: 8ba8acaa4d4e0f8e7a38228ab5b5f16f64cb960c
@@ -178,6 +212,10 @@ status: landed_with_declared_owner_override_and_lease_collision
 cross_review: https://github.com/ducthangho/tra-luat/pull/303#issuecomment-5392476465
 declared_lease_collision: https://github.com/ducthangho/tra-luat/issues/298#issuecomment-5392499800
 ```
+
+`issue_state` cố ý không được đóng băng trong spec. Preflight của successor phải đọc lại
+Issue #302 trực tiếp từ GitHub, ghi URL + thời điểm đọc + state nhận được vào evidence;
+không đọc được hoặc state không phù hợp với dependency đã khai ⇒ `KHONG_DO_DUOC` và chặn.
 
 PR #303 bắt đầu là hiện vật **pre-lease**, nên lịch sử cũ từ chối dùng nó làm authority
 cho một implementation Codex generation 2 là đúng tại thời điểm đó. Owner sau này đã

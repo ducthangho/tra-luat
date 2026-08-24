@@ -143,3 +143,4 @@ viec_cua_luot_nay: >-
   `Bash(git add:*)` `Bash(git commit:*)` `Bash(git push:*)` khỏi allowlist §4 và ghi hệ quả vận
   hành. Cộng `N4`: ghi băm `c5f6c905…` vào tệp để verdict của codex còn tra được.
   KHÔNG triển khai launcher. KHÔNG sửa `r1`/`r2`. KHÔNG đụng `.claude/dev/**`.
+posted_comment_id: 5394543680   # workflow ghi, ĐỪNG sửa tay

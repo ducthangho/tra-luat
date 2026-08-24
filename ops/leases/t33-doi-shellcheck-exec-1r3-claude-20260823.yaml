@@ -245,4 +245,8 @@ thu_hep_pham_vi:
     Phép quét trùng lặp của `soan-spec` §3 được chạy theo ĐƯỜNG DẪN và bỏ qua CHỨC NĂNG. Hai
     packet không giao một đường dẫn nào mà vẫn xây cùng một thứ. Phát hiện SAU khi cấp lease,
     do người giữ kho chỉ ra — không phải phiên tự thấy.
+da_bi_thay_the: t33-doi-shellcheck-exec-1r4-claude-20260824
+da_bi_thay_the_ly_do: >-
+  r4 ghi đè byte-identity với đặc tả r3 + nới trần vòng review PR #293. Quyền ghi chuyển sang r4.
+
 posted_comment_id: 5387949993   # workflow ghi, ĐỪNG sửa tay

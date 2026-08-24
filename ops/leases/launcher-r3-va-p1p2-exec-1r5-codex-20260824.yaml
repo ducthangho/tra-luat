@@ -1,0 +1,188 @@
+# Lease EXECUTOR — `LAUNCHER-R3-VA-P1P2` (#308), LƯỢT 3.
+#
+# Lượt 3 đóng ĐÚNG MỘT finding, và nó KHÔNG đến từ một vòng cross-review canon: nó là finding
+# của connector `chatgpt-codex-connector` trên PR #310 (bot tự động, chạy khi PR mở). Vì vậy
+# trần ADR-0043 (hai vòng review hợp lệ) KHÔNG bị chạm — packet mới dùng MỘT vòng canon
+# (đóng ở `d1b2011`). Không cần khối `nang_tran`, và lease này cố ý KHÔNG có khối ấy.
+#
+# CẢNH BÁO CHO NGƯỜI THI HÀNH: đặc tả họ `LAUNCHER-DUNG-WORKSPACE` có BA bản và cả ba còn
+# hiệu lực. `r3` chỉ ghi phần THAY ĐỔI; mọi thứ `r3` không nêu thì `r2`, rồi `r1`, nguyên
+# hiệu lực. Lease này CHỈ cho sửa `r3`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 308
+packet_id: LAUNCHER-R3-VA-P1P2
+phase_key: LAUNCHER-R3-VA-P1P2
+revision: 5
+generation: 1
+lease_id: launcher-r3-va-p1p2-exec-1r5-codex-20260824
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` ở đây là MẶC ĐỊNH FAIL-CLOSE của `_BANG_LOP` (7 tiền tố, mọi thứ khác rơi về
+  `sensitive` tại `ops/lease_publish.py:151-152`), KHÔNG phải tín hiệu rằng packet chạm thẩm
+  quyền. Đừng đọc nhãn này thành "đã có ai xét thấy nguy". Nợ doctrine đã ghi nhận, chưa hoà giải
+  với trần ADR-0044.
+
+spec_path: ops/specs/LAUNCHER-DUNG-WORKSPACE-r3.md
+spec_sha256_required: 1749854246062982fd2f998207edbca17649c96a785eed3b44111bbcb51de248
+spec_sha256_ghi_chu: >-
+  ĐỔI so với revision 4 (`c5f6c905…`) và điều đó ĐÚNG: lượt 1 và lượt 2 đã vá chính tệp này.
+  Đây là băm ĐẦU VÀO của lượt 3 — thứ executor phải đọc thấy trước khi gõ dòng nào. Đo trên
+  `origin/claude/launcher-r3-rescue-exec-1` = `3143c624`. Không khớp ⇒ DỪNG, nhánh đã trôi.
+spec_ke_thua:
+  - {path: ops/specs/LAUNCHER-DUNG-WORKSPACE.md,    sha256: 94351fd0e6e0d788ddf4a13ac03b0c9a7cd82e65a44905df77a9106dff171957}
+  - {path: ops/specs/LAUNCHER-DUNG-WORKSPACE-r2.md, sha256: 0f66976a96f327e00e76c8ef53213559d4f323b06b1609fff1cf41fc784d0afc}
+spec_ke_thua_da_do: >-
+  ĐO 24-08-2026 vì connector khai HAI tệp này KHÔNG TỒN TẠI trong cây. Lời khai ấy SAI:
+  `git ls-tree -r origin/claude/launcher-r3-rescue-exec-1` trả CẢ BA bản (r1, r2, r3), và r1/r2
+  cũng có trên `master` (`59f4202e`) — chúng land qua PR #299 tại `683048d6`.
+spec_status: dang_va
+spec_da_len_master: 'CHƯA — r3 chỉ có trên nhánh claude/launcher-r3-rescue-exec-1. r1/r2 ĐÃ len master qua PR #299 (683048d6).'
+spec_duyet_boi: ducthangho
+spec_note: >-
+  `spec_path` ở đây VỪA là đặc tả VỪA là write set — packet này sửa chính tài liệu nó neo vào.
+  `spec_sha256_required` vì vậy là băm ĐẦU VÀO, KHÔNG phải băm đầu ra. Sau khi vá, băm ĐỔI là
+  ĐÚNG. Đây là chỗ dễ đọc nhầm nhất của lease này.
+
+write_set:
+  - ops/specs/LAUNCHER-DUNG-WORKSPACE-r3.md
+write_set_note: >-
+  ĐÚNG MỘT đường dẫn, không ký tự đại diện. KHÔNG đổi so với revision 4.
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+  Ngoài write set ⇒ DỪNG và xin lease sửa đổi.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 24-08-2026 14:36Z bằng `ops/lease_publish.py ai-dang-giu` trên `origin/master`.
+  Phép so HAI NGUỒN chạy TRƯỚC khi quét, và so bằng TẬP TÊN chứ không bằng số đếm:
+    `ls-remote --heads` 201  ·  `for-each-ref` 201  ·  `comm -23` RỖNG  ·  `comm -13` RỖNG
+    `git rev-parse --is-shallow-repository` -> false
+  ⇒ không mù ref nào theo cả hai chiều. Rồi mới quét:
+    ops/specs/LAUNCHER-DUNG-WORKSPACE-r3.md  ->  rc=11, NGƯỜI_GIỮ 1
+  Người giữ duy nhất là `…exec-1r4-codex-20260824`, tức CHÍNH lease mà bản này thay thế —
+  không phải xung đột với phiên khác. Ba revision trước hiện `CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ`.
+
+branch: claude/launcher-r3-rescue-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 59f4202e1a78a97acf3065801856f83f99fc88b9
+start_from_sha: 3143c624affb51847b590c78285fb9ea7f8896f9
+reviewed_sha_required: 2a40326bfe9b07118baef6c2ee502a4e41c41428
+base_ghi_chu: >-
+  `base_sha` NÂNG từ `207c7d6d` lên `59f4202e`: nhánh đã merge master vào tại `3143c624`, nên
+  base cũ không còn mô tả đúng quan hệ. `reviewed_sha_required` là `2a40326b` — exact head mà
+  connector đã ra finding, GitHub ghi ở `commit_id` của review. KHÔNG phải `b41792df…`: SHA ấy
+  connector tự nêu trong thân finding và nó KHÔNG TỒN TẠI trong kho
+  (`git cat-file -t` → `could not get object info`, trên một kho đã đo là KHÔNG NÔNG và không
+  mù ref nào). Ghi ra đây vì đó là căn cứ bác một trong ba finding.
+  Ngân sách vẫn đo từ `a2ad098b` như revision 2 đã chốt — `a2ad098b` vẫn là tổ tiên của HEAD
+  (`git merge-base --is-ancestor` rc=0), nên `S5` KHÔNG kêu.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 1
+  dong_them_toi_da: 150
+  do_tu_sha: a2ad098b553e0969c5cb9e04468da26989fb7a8e
+  don_vi: '`git diff --numstat a2ad098b..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  da_dung: 90
+  con_lai: 60
+  da_dung_do_the_nao: >-
+    ĐO CỘNG DỒN MỘT LẦN, không cộng tay từng lượt — và hai cách cho HAI SỐ KHÁC NHAU:
+      `git diff --numstat a2ad098b..3143c624`   ->  90  30     <-- SỐ ĐÚNG
+      cộng tay lượt 1 (59) + lượt 2 (44)        ->  103        <-- SAI, thừa 13
+    Lệch vì dòng lượt 1 THÊM rồi lượt 2 XOÁ không còn là "dòng thêm" của packet. Trần đo trạng
+    thái CUỐI so mốc, không đo tổng công sức. Cộng tay ở đây sẽ khai vống 13 dòng và có thể làm
+    `S2` kêu oan. Ghi ra vì revision 4 đã suýt đi theo đường cộng tay.
+  ghi_chu: >-
+    60 dòng còn lại là RỘNG cho lượt 3: chỉ một finding, và bản vá của nó chủ yếu là ĐỔI phân
+    loại của hai ô (`N10c`/`N10d`) cộng một đoạn khai tầng chứng cứ. Ước lượng có neo: ~25 dòng.
+    Vượt ⇒ `S2`, DỪNG và xin bản sửa đổi. KHÔNG tự nới.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-24 — "đồng ý đề nghị, kiểm trạng thái, xử lý luôn các vấn đề còn
+  mở, tạo PR, cấp lease, executor codex, xhigh effort theo đúng hướng dẫn launcher, nới trần nếu
+  cần". Trần KHÔNG cần nới cho lease này (xem khối chú thích đầu tệp); quyền nới vẫn còn nguyên
+  và chưa dùng.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên ghi lease này là phiên ĐIỀU PHỐI. Nó KHÔNG soạn `r3` và KHÔNG thi công lượt này
+  (executor là `codex`). Nó SẼ là reviewer — khác nền với executor, đúng PROTOCOL:580 cho
+  `sensitive`.
+
+leased_at_utc: '2026-08-24T14:45:00Z'
+lease_expires_at_utc: '2026-08-25T14:45:00Z'
+run_minutes: 1440
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) SANDBOX MOUNT `.git` CHỈ ĐỌC. Bạn KHÔNG commit và KHÔNG push được; đừng phí lượt thử.
+  Sinh bản vá trên cây làm việc, phiên điều phối commit và push.
+  (2) VÁ TẠI CHỖ trên `r3`, KHÔNG viết `r4`.
+  (3) `N6` giới hạn hunk trong ĐÚNG các vùng ghi ở `vung_duoc_phep_cham` của `r3`. ĐỌC TRƯỜNG
+  ẤY, đừng đọc câu này thay nó. Đọc `git diff` của chính mình trước khi báo xong.
+  (4) `KHÔNG_ĐO_ĐƯỢC` là trạng thái HỢP LỆ và phải làm cổng CHẶN. Nhưng xem `viec_cua_luot_nay`:
+  lượt này chính là ca mà "chặn" bị đặt SAI CHỖ. Đọc kỹ trước khi cho rằng nó mâu thuẫn.
+  (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu, kể cả khi trích dẫn để giải thích.
+
+viec_cua_luot_nay: >-
+  LƯỢT 3 — đóng ĐÚNG MỘT finding P1 của connector trên PR #310, `commit_id` `2a40326b`:
+  *"Keep required launcher tests independent of provider credentials"*.
+
+  VẤN ĐỀ, và nó ĐÃ ĐƯỢC ĐO chứ không phải nhận lời khai:
+    · `r3` §5 buộc `N10c`/`N10d` gọi executable `codex` THẬT, và §7 khai thiếu credential/
+      process thật ⇒ `KHONG_DO_DUOC` và **chặn**, "không được tính là pass".
+    · `r3` §5 đặt TẦNG THI HÀNH vào `.claude/dev/launcher_test.py` + mutation suite.
+    · ĐO: `.github/workflows/launcher-windows.yml` chạy `python .claude/dev/launcher_test.py`
+      và `--dot-bien`, với `on.push.branches: [master]` + `paths: ['.claude/dev/**']` —
+      tức MỌI lần đẩy master chạm `.claude/dev/**` đều chạy, KHÔNG điều kiện nhãn.
+    · Runner GitHub KHÔNG có `CODEX_AUTH_JSON`.
+  ⇒ Một successor thi hành ĐÚNG `r3` sẽ làm required gate ĐỎ VĨNH VIỄN trên master. Và một cổng
+  đỏ thường trực là cổng người ta tắt hoặc học cách bỏ qua — tức `r3` tự tay dựng lại đúng bệnh
+  "cổng vắng mặt" mà nó sinh ra để chữa.
+
+  HƯỚNG VÁ (connector đề, phiên điều phối đồng ý): TÁCH HAI TẦNG, đừng hạ tiêu chí.
+    · Required gate giữ OFFLINE và TẤT ĐỊNH: `N10a`/`N10b`/`N11`–`N13` cùng phần `N10c`/`N10d`
+      đo được không cần credential (hình dạng argv, schema đóng, mutation) ở lại `launcher_test.py`.
+    · Phần đòi process Codex THẬT + event `--json` chuyển thành BẰNG CHỨNG NĂNG LỰC RIÊNG: một
+      lượt `workflow_dispatch` hoặc phép đo tay có biên nhận neo SHA, KHÔNG phải một ca test do
+      feature cung cấp trong required suite.
+    · Trên required gate, vắng credential ⇒ ca ấy KHÔNG CÓ MẶT ở đó (không phải "skip" trá hình);
+      còn ở tầng năng lực thì vắng credential vẫn `KHONG_DO_DUOC` và CHẶN như cũ.
+  Khai thẳng trong `r3` rằng đây là HAI CÂU HỎI KHÁC NHAU: "CLI có cưỡng chế sandbox không"
+  (năng lực, cần credential) và "launcher có sinh đúng argv/schema không" (hồi quy, không cần).
+  Gộp chúng vào một required suite là thứ tạo ra mâu thuẫn.
+
+  KHÔNG mở lại 7 finding của cross-review vòng 1 (đã đóng ở `d1b2011`, reviewer xác nhận).
+  KHÔNG đụng finding connector đã bị BÁC (xem `spec_ke_thua_da_do`) — nó đã được trả lời và
+  thread đã đóng.
+  KHÔNG triển khai launcher. KHÔNG sửa r1/r2. KHÔNG đụng `.claude/dev/**`.
+
+dieu_kien_dung: >-
+  S1 cần một đường dẫn THỨ HAI ⇒ xin lease sửa đổi, KHÔNG tự nới ·
+  S2 vượt 150 dòng thêm CỘNG DỒN trên write set (đã dùng 90, còn 60) ·
+  S3 kết luận rằng KHÔNG tách được hai tầng — tức phép đo process thật BUỘC phải nằm trong
+  required suite — ⇒ DỪNG, trình phép đo, xin quyết định. ĐỪNG tự hạ `N10c`/`N10d` xuống
+  argv-only để thoát: đó là tái phạm đúng cái P1 vòng 1 tố cáo ·
+  S4 không đọc được `launcher-windows.yml` để tự xác nhận phép đo trên ⇒ ghi `KHÔNG_ĐO_ĐƯỢC`,
+  KHÔNG nhận lời khai của lease này làm tiền đề ·
+  S5 `origin/master` đã đi tiếp so với `base_sha` mà chưa đo lại.
+
+thay_the_cho: launcher-r3-va-p1p2-exec-1r4-codex-20260824
+thay_the_ly_do: >-
+  Lượt 2 đã xong và đã land lên nhánh (`d1b2011`), nên `viec_cua_luot_nay` của r4 đã hết hiệu
+  lực — giữ nguyên nó thì executor lượt 3 sẽ đi làm lại việc đã làm. Bản này ghi phạm vi lượt 3,
+  cập nhật `spec_sha256_required` theo tệp SAU hai lượt vá, nâng `base_sha` theo lần merge master,
+  và ghi phép đo ngân sách CỘNG DỒN (90/150) thay cho phép cộng tay từng lượt vốn khai vống 13
+  dòng. Write set, trần dòng, provider, reviewer KHÔNG đổi.

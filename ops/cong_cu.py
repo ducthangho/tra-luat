@@ -5,7 +5,7 @@ KHÔNG_ĐO_ĐƯỢC, mã riêng) cho `ops/cong_cu.yaml`. `cai-lenh` chỉ TRA C�
 (dòng 1) + biến môi trường (dòng sau) — thực thi thuộc `ops/cai_cong_cu.sh`."""
 from __future__ import annotations
 
-import argparse, json, os, platform, re, subprocess, sys
+import argparse, json, os, platform, re, shutil, subprocess, sys
 from pathlib import Path
 
 import yaml
@@ -13,6 +13,7 @@ import yaml
 GOC = Path(__file__).resolve().parent.parent
 DAT, DO, KHONG_DO_DUOC = "DAT", "DO", "KHONG_DO_DUOC"
 RC = {DAT: 0, DO: 2, KHONG_DO_DUOC: 3}
+CHINH_SACH_CANARY = {"blocking", "advisory"}
 KY_TU_TOKEN_BAN = re.compile(r"[0-9A-Za-z._+-]")
 
 def doc_ban_ke(duong):
@@ -25,8 +26,12 @@ def doc_ban_ke(duong):
         bg = dn.get("ban_ghim")
         if bg is not None and (not isinstance(bg, str) or not bg.strip()):
             raise SystemExit(f"ban ke '{ten}': 'ban_ghim' chi nhan chuoi khac rong hoac null")
-        if "canary_bat_buoc" in dn and not isinstance(dn["canary_bat_buoc"], bool):
-            raise SystemExit(f"ban ke '{ten}': 'canary_bat_buoc' phai la bool")
+        cn = dn.get("canary")
+        if cn is not None and (not isinstance(cn, str) or not cn.strip()):
+            raise SystemExit(f"ban ke '{ten}': 'canary' phai la chuoi khac rong")
+        if "chinh_sach" in dn and (cn is None or not isinstance(dn["chinh_sach"], str)
+                                    or dn["chinh_sach"] not in CHINH_SACH_CANARY):
+            raise SystemExit(f"ban ke '{ten}': 'chinh_sach' chi nhan blocking|advisory va doi hoi canary")
         probe = dn.get("probe")
         if not isinstance(probe, list) or not probe:
             raise SystemExit(f"ban ke '{ten}': 'probe' phai la danh sach khac rong")
@@ -62,6 +67,22 @@ def _chay(argv, timeout=20):
         ra = (ex.stdout or "") + (ex.stderr or "")
         return None, ra if isinstance(ra, str) else "", "qua_han"
     except OSError as ex:
+        # Python native tren Windows khong chay truc tiep script shebang khong co `.exe`;
+        # duong lui nay giu probe script dung duoc trong Git Bash, binary that van di duong tren.
+        bash = os.environ.get("CONG_CU_BASH") or shutil.which("bash")
+        if os.name == "nt" and bash:
+            for d in os.environ.get("PATH", "").split(os.pathsep):
+                ung = Path(d) / argv[0]
+                if ung.is_file():
+                    try:
+                        p = subprocess.run([bash, str(ung), *argv[1:]], capture_output=True,
+                                           text=True, timeout=timeout)
+                        return p.returncode, (p.stdout or "") + (p.stderr or ""), None
+                    except subprocess.TimeoutExpired as ex2:
+                        ra = (ex2.stdout or "") + (ex2.stderr or "")
+                        return None, ra if isinstance(ra, str) else "", "qua_han"
+                    except OSError:
+                        break
         return None, "", f"khong_khoi_chay:{type(ex).__name__}"
 
 def _cat_tien_to_token(ra, m):
@@ -110,7 +131,7 @@ def kiem_tra_1(ten, dn):
 def kiem_tra_canary(ten_canary, ten_chu, dn, theo_ten, thu_muc_goc):
     chu = theo_ten[ten_chu]
     goc = {"ten": ten_canary, "chu_so_huu": ten_chu,
-           "bat_buoc": dn.get("canary_bat_buoc", chu["bat_buoc"])}
+           "chinh_sach": dn.get("chinh_sach", "blocking")}
     if chu["trang_thai"] != DAT:
         return {**goc, "trang_thai": chu["trang_thai"],
                 "chi_tiet": f"tool chu so huu '{ten_chu}' chua DAT"}
@@ -141,8 +162,15 @@ def tong_hop(ban_ke, thu_muc_goc=None, chi=None):
                 da_chay.add(cn)
                 canary_kq.append(kiem_tra_canary(cn, ten, dn, theo_ten, thu_muc_goc or GOC))
     tong = DAT
-    for kq in list(theo_ten.values()) + canary_kq:
+    for kq in theo_ten.values():
         if kq["trang_thai"] == KHONG_DO_DUOC and kq.get("bat_buoc"):
+            tong = KHONG_DO_DUOC
+        elif kq["trang_thai"] == DO and tong != KHONG_DO_DUOC:
+            tong = DO
+    for kq in canary_kq:
+        if kq["chinh_sach"] == "advisory":
+            continue
+        if kq["trang_thai"] == KHONG_DO_DUOC:
             tong = KHONG_DO_DUOC
         elif kq["trang_thai"] == DO and tong != KHONG_DO_DUOC:
             tong = DO

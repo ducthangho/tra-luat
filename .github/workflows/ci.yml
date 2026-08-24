@@ -73,8 +73,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      # G5 cần PyYAML + actionlint nhưng phải đứng trước phép test/compile đầu tiên. Đây là
-      # hai bước SETUP thuần; T6 chỉ cho phép đúng allowlist setup nhỏ trước G5.
+      # G5 cần PyYAML + actionlint + shellcheck nhưng phải đứng trước phép test/compile
+      # đầu tiên. T6 chỉ cho phép đúng allowlist setup nhỏ trước G5.
       - name: cài PyYAML (bộ cổng đăng lease cần)
         run: python -m pip install --quiet PyYAML==6.0.3
       - name: cài actionlint cho G5
@@ -82,6 +82,9 @@ jobs:
         env:
           AL_VER: 1.7.7
         run: bash ops/cai_actionlint.sh
+      - name: cài shellcheck cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
       - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)
         shell: bash
         run: |

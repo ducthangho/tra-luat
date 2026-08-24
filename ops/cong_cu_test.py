@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""T1..T8 (đặc tả đóng băng #290, sha256 b1b7e3b0…) cho cong_cu.py+cai_cong_cu.sh. Gọi
+"""T1..T8 + chính sách canary (#290, sha256 b1b7e3b0…) cho cong_cu.py+cai_cong_cu.sh. Gọi
 CHÍNH lệnh qua subprocess (không import) — doctrine `lease_publish_test.py`."""
 from __future__ import annotations
 
@@ -145,6 +145,7 @@ def t6_ci_kiem_ban_ke_truoc_moi_test_nang():
         "cài PyYAML (bộ cổng đăng lease cần)": (
             "python -m pip install --quiet PyYAML==6.0.3",),
         "cài actionlint cho G5": ("bash ops/cai_actionlint.sh",),
+        "cài shellcheck cho G5 (cài xong đo lại)": ("bash ops/cai_cong_cu.sh shellcheck",),
     }
     uses_setup = {"actions/checkout@v4", "actions/setup-python@v5"}
     for i, b in enumerate(buoc[:idx_kiem[0]]):
@@ -153,6 +154,10 @@ def t6_ci_kiem_ban_ke_truoc_moi_test_nang():
                      if x.strip() and not x.lstrip().startswith("#"))
         bang(lenh_setup.get(b.get("name")) == lenh,
              f"bước {i + 1} trước G5 không thuộc allowlist setup: '{b.get('name')}' / {lenh}")
+    sc_buoc = [b for b in buoc[:idx_kiem[0]] if str(b.get("name", "")).startswith("cài shellcheck")]
+    bang(len(sc_buoc) == 1 and "if" not in sc_buoc[0], "CI phải cài shellcheck vô điều kiện trên cả hai nền")
+    cai_sc = yaml.safe_load((GOC / "ops/cong_cu.yaml").read_text(encoding="utf-8"))["cong_cu"]["shellcheck"]["cai"]
+    bang(all((cai_sc.get(n) or {}).get("lenh") for n in ("linux", "windows")), "thiếu công thức cài shellcheck Linux/Windows")
 
 @ca
 def t7_hai_duong_goi_khac_ban_phai_bao_khong_im():
@@ -232,20 +237,18 @@ def t11_ban_ghim_rong_bi_tu_choi_nhung_null_hop_le():
              "null (không ghim hợp lệ) bị chặn oan")
 
 @ca
-def t12_canary_bat_buoc_thieu_fixture_va_optional_khong_canary():
-    """V2 + đối chứng: canary kế thừa requiredness; optional không khai canary vẫn hợp lệ."""
+def t12_vang_chinh_sach_canary_mac_dinh_blocking():
+    """Y2: canary vắng chính sách phải fail-close thành blocking."""
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp); d = tmp / "bin"; bin_gia(d, "actionlint", "#!/bin/sh\necho 1.7.7\n")
         bk = ghi_ban_ke(tmp, {"actionlint": {"bat_buoc": True, "ban_ghim": "1.7.7",
             "probe": mot_probe("actionlint"), "canary": "fixture-khong-ton-tai-t12"}})
         rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk), env=moi_truong(d))
-        bang(json.loads(out)["trang_thai_tong"] == "KHONG_DO_DUOC" and '"bat_buoc": true' in out,
+        bang(json.loads(out)["trang_thai_tong"] == "KHONG_DO_DUOC" and '"chinh_sach": "blocking"' in out,
              f"canary bắt buộc thiếu fixture bị nuốt: {rc}\n{out}")
-        d_bk = yaml.safe_load(bk.read_text(encoding="utf-8"))
-        d_bk["cong_cu"]["actionlint"]["canary_bat_buoc"] = False
-        bk.write_text(yaml.safe_dump(d_bk), encoding="utf-8")
-        bang(chay("kiem-tra", "--ban-ke", str(bk), env=moi_truong(d))[0] == 0,
-             "canary khai advisory tường minh bị chặn oan")
+        sai = yaml.safe_load(bk.read_text(encoding="utf-8")); sai["cong_cu"]["actionlint"]["chinh_sach"] = "khac"
+        bk.write_text(yaml.safe_dump(sai), encoding="utf-8"); rc, _, err = chay("kiem-tra", "--ban-ke", str(bk), env=moi_truong(d))
+        bang(rc == 1 and "blocking|advisory" in err, f"schema nhận chính sách lạ: {rc}/{err}")
         bk = ghi_ban_ke(tmp, {"optional-t12": {"bat_buoc": False, "ban_ghim": None,
                                                 "probe": mot_probe("khong-co-t12")}})
         bang(chay("kiem-tra", "--ban-ke", str(bk), env=moi_truong(d))[0] == 0,
@@ -258,10 +261,29 @@ def t13_actionlint_bien_mat_giua_probe_va_canary():
         tmp = Path(tmp); d = tmp / "bin"
         bin_gia(d, "actionlint", "#!/bin/sh\ncase \"$1\" in -version|--version) echo 1.7.7; /bin/rm -- \"$0\"; exit 0;; esac\n")
         bk = ghi_ban_ke(tmp, {"actionlint": {"bat_buoc": True, "ban_ghim": "1.7.7",
-            "probe": mot_probe("actionlint"), "canary": "actionlint_shellcheck"}})
-        rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk), env=dict(os.environ, PATH=str(d)))
+            "probe": mot_probe("actionlint"), "canary": "actionlint_shellcheck", "chinh_sach": "blocking"}})
+        rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk),
+                          env=dict(os.environ, PATH=str(d), CONG_CU_BASH=shutil.which("bash") or ""))
         bang(json.loads(out)["trang_thai_tong"] == "KHONG_DO_DUOC" and "khong goi duoc" in out,
              f"canary mất executable bị nuốt: {rc}\n{out}")
+
+@ca
+def t14_advisory_giu_trang_thai_that_nhung_khong_keo_tong():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp); d = tmp / "bin"; bin_gia(d, "actionlint", "#!/bin/sh\necho 1.7.7\n")
+        bk = ghi_ban_ke(tmp, {"actionlint": {"bat_buoc": True, "ban_ghim": "1.7.7", "probe": mot_probe("actionlint"), "canary": "vang-t14", "chinh_sach": "advisory"}})
+        rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk), env=moi_truong(d)); bc = json.loads(out); cn = bc["canary"][0]
+        bang(rc == 0 and bc["trang_thai_tong"] == "DAT", f"advisory đã kéo tổng: {out}")
+        bang(cn["trang_thai"] == "KHONG_DO_DUOC" and cn["chinh_sach"] == "advisory", f"JSON che trạng thái thật: {out}")
+
+@ca
+def t15_blocking_du_cong_cu_phai_DAT_khong_bat_oan():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp); d = tmp / "bin"
+        bin_gia(d, "actionlint", '#!/bin/sh\n[ "$1" = --version ] && { echo 1.7.7; exit; }; echo SC1003; exit 1\n'); bin_gia(d, "shellcheck", "#!/bin/sh\necho 'version: 0.11.0'\n")
+        cc = {"actionlint": {"bat_buoc": True, "ban_ghim": "1.7.7", "probe": mot_probe("actionlint"), "canary": "actionlint_shellcheck", "chinh_sach": "blocking"}, "shellcheck": {"bat_buoc": False, "ban_ghim": None, "probe": mot_probe("shellcheck", r"version:\s*(\d+\.\d+\.\d+)")}}
+        rc, out, _ = chay("kiem-tra", "--ban-ke", str(ghi_ban_ke(tmp, cc)), env=moi_truong(d)); bc = json.loads(out)
+        bang(rc == 0 and bc["trang_thai_tong"] == "DAT" and bc["canary"][0]["trang_thai"] == "DAT", f"blocking bắt oan: {out}")
 
 # ===== BỘ ĐỘT BIẾN — 1 đột biến/ca, bán kính đo
 # TOÀN suite. Rút gọn từ .claude/dev/packet_loop_test.py (MUTANTS). CÔ LẬP 3
@@ -348,14 +370,20 @@ DOT_BIEN = {
         '        if bg is not None and (not isinstance(bg, str) or not bg.strip()):\n',
         '        if bg is not None and not isinstance(bg, str):  # đột biến: cho chuỗi rỗng\n',
         "SCRIPT", _PHU, "t11_ban_ghim_rong_bi_tu_choi_nhung_null_hop_le"),
-    "t12_mat_requiredness_khi_thieu_fixture": ("ops/cong_cu.py",
-        '        return {**goc, "trang_thai": KHONG_DO_DUOC, "chi_tiet": f"thieu fixture \'{fixture}\'"}\n',
-        '        return {"ten": ten_canary, "trang_thai": KHONG_DO_DUOC, "chi_tiet": f"thieu fixture \'{fixture}\'"}  # đột biến\n',
-        "SCRIPT", _PHU, "t12_canary_bat_buoc_thieu_fixture_va_optional_khong_canary"),
+    "t12_mac_dinh_advisory": ("ops/cong_cu.py",
+        '           "chinh_sach": dn.get("chinh_sach", "blocking")}\n',
+        '           "chinh_sach": dn.get("chinh_sach", "advisory")}  # đột biến\n',
+        "SCRIPT", _PHU, "t12_vang_chinh_sach_canary_mac_dinh_blocking"),
     "t13_mat_requiredness_khi_tool_bien_mat": ("ops/cong_cu.py",
         '        return {**goc, "trang_thai": KHONG_DO_DUOC, "chi_tiet": f"khong goi duoc \'{ten_chu}\'"}\n',
         '        return {"ten": ten_canary, "trang_thai": KHONG_DO_DUOC, "chi_tiet": "mat tool"}  # đột biến\n',
         "SCRIPT", _PHU, "t13_actionlint_bien_mat_giua_probe_va_canary"),
+    "t14_advisory_keo_tong": ("ops/cong_cu.py",
+        '        if kq["chinh_sach"] == "advisory":\n', '        if False:  # đột biến\n',
+        "SCRIPT", _PHU, "t14_advisory_giu_trang_thai_that_nhung_khong_keo_tong"),
+    "t15_blocking_bat_oan": ("ops/cong_cu.py",
+        '    if "SC1003" in ra:\n', '    if False:  # đột biến\n',
+        "SCRIPT", _PHU, "t15_blocking_du_cong_cu_phai_DAT_khong_bat_oan"),
 }
 
 def _chay_1_ca(fn):

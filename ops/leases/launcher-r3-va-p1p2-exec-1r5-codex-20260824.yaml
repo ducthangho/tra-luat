@@ -186,3 +186,4 @@ thay_the_ly_do: >-
   cập nhật `spec_sha256_required` theo tệp SAU hai lượt vá, nâng `base_sha` theo lần merge master,
   và ghi phép đo ngân sách CỘNG DỒN (90/150) thay cho phép cộng tay từng lượt vốn khai vống 13
   dòng. Write set, trần dòng, provider, reviewer KHÔNG đổi.
+posted_comment_id: 5396842406   # workflow ghi, ĐỪNG sửa tay

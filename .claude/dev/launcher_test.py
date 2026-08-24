@@ -39,6 +39,7 @@ LA_WINDOWS = platform.system() == "Windows"
 
 MA_OK, MA_THAM_SO, MA_GIT, MA_HEAD, MA_REF = 0, 2, 3, 4, 5
 MA_BAN, MA_PROMPT, MA_HAN, MA_VA_CHAM, MA_DANH_TINH, MA_QUA_HAN = 6, 7, 8, 9, 10, 124
+MA_WORKTREE, MA_PROBE = 14, 15
 
 CA: list = []
 
@@ -93,6 +94,26 @@ def tao_repo(goc: Path, ten="repo", ban=False) -> Path:
     if ban:
         (d / "ban.txt").write_text("chua theo doi", encoding="utf-8")
     return d
+
+
+def tao_worktree(goc: Path) -> Path:
+    repo = tao_repo(goc, "clone-goc")
+    wt = goc / "worktree"
+    p = subprocess.run(["git", "-C", str(repo), "worktree", "add", "-b", "fixture-wt", str(wt)],
+                       capture_output=True, text=True)
+    bang(p.returncode == 0 and (wt / ".git").is_file(), f"khong tao duoc worktree: {p.stderr}")
+    return wt
+
+
+def tao_claude_gia(goc: Path) -> Path:
+    dich = goc / ("claude.exe" if LA_WINDOWS else "claude")
+    try:
+        os.link(Path(PY).resolve(), dich)
+    except OSError:
+        shutil.copy2(Path(PY).resolve(), dich)
+    if not LA_WINDOWS:
+        dich.chmod(0o755)
+    return dich
 
 
 def head_cua(d: Path) -> str:
@@ -3815,7 +3836,7 @@ def t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho():
 
 @ca
 def t116_moi_ham_ca_phai_duoc_DANG_KY_bang_decorator():
-    """Mọi `def tNN_...` phải có `@ca` ngay trên nó — nếu không, ca ấy KHÔNG CHẠY.
+    """Mọi `def tNN_...`/`rNN_...` phải có `@ca` ngay trên — nếu không, ca KHÔNG CHẠY.
 
     VÌ SAO CÓ CA NÀY: tôi vừa tự gây ra đúng lỗi ấy khi chèn `t115`. Điểm chèn rơi vào
     GIỮA `@ca` và `def t101_...`, nên decorator của `t101` quay sang trang trí `t115`:
@@ -3838,14 +3859,14 @@ def t116_moi_ham_ca_phai_duoc_DANG_KY_bang_decorator():
     """
     import re as _re
     dong = Path(__file__).read_text(encoding="utf-8").splitlines()
-    ham = [(i, l) for i, l in enumerate(dong) if _re.match(r"^def t\d+_", l)]
+    ham = [(i, l) for i, l in enumerate(dong) if _re.match(r"^def [tr]\d+_", l)]
     thieu = [l.split("(")[0][4:] for i, l in ham if i == 0 or dong[i - 1].strip() != "@ca"]
     bang(not thieu, f"ca co mat trong TEP ma KHONG duoc dang ky (thieu `@ca`): {thieu}")
     # ...va so ca DA DANG KY phai khop so ham. Hai phep dem doc lap: mot doc TEP, mot
     # doc bang `CA` da nap. Lech nhau nghia la co ca bi trang tri hai lan, hoac co
     # `@ca` gan cho thu khong phai ca.
     bang(len(ham) == len(CA),
-         f"{len(ham)} ham `tNN_` nhung `CA` co {len(CA)} muc — co cho dang ky lech")
+         f"{len(ham)} ham `tNN_/rNN_` nhung `CA` co {len(CA)} muc — co cho dang ky lech")
 
 
 @ca
@@ -5633,6 +5654,142 @@ def t144_run_ghi_nonce_va_hmac_khong_lo_khoa():
         bang(khoa not in raw, "khoá HMAC bị ghi vào run.json")
 
 
+@ca
+def r01_worktree_that_bi_chan():
+    with San() as s:
+        wt = tao_worktree(s); dau = s / "da-chay"; rr = s / "runs"
+        r = chay("run", "--workspace", str(wt), "--run-root", str(rr), "--",
+                 PY, "-c", f"open({str(dau)!r},'w').write('x')")
+        bang(r.returncode == MA_WORKTREE and "clone doc lap" in r.stderr,
+             f"worktree khong bi chan dung cach: {r.returncode} {r.stderr}")
+        bang(not dau.exists(), "lenh con da chay trong worktree")
+        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(d["trang_thai"] == "hong" and d.get("giai_doan") == "probe"
+             and d["ma_thoat"] == MA_WORKTREE and d["probe"]["workspace"]["trang_thai"] == "DO"
+             and "worktree" in d["ly_do_dung"], f"chan probe khong vao so: {d}")
+
+
+@ca
+def r02_clone_that_di_tiep():
+    with San() as s:
+        repo = tao_repo(s); dau = s / "da-chay"; rr = s / "runs"
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--",
+                 PY, "-c", f"open({str(dau)!r},'w').write('x')")
+        bang(r.returncode == 0 and dau.is_file() and (next(rr.iterdir()) / "run.json").is_file(),
+             f"clone that bi bat oan: {r.returncode} {r.stderr}")
+
+
+@ca
+def r03_probe_ghi_bi_tu_choi_thi_do():
+    m = _tai_launcher_thu(); goc = m.tempfile.NamedTemporaryFile
+    m.tempfile.NamedTemporaryFile = lambda *a, **k: (_ for _ in ()).throw(PermissionError("RO"))
+    try:
+        kq = m._probe_ghi(".")
+    finally:
+        m.tempfile.NamedTemporaryFile = goc
+    bang(kq["trang_thai"] == "DO", f"backend chi-doc khong lam probe DO: {kq}")
+
+
+@ca
+def r04_spawn_rc0_dau_ra_rong_bi_chan():
+    m = _tai_launcher_thu(); goc = m._chay_van_ban_an_toan
+    m._chay_van_ban_an_toan = lambda *a, **k: subprocess.CompletedProcess(a[0], 0, "", "")
+    try:
+        kq = m._probe_spawn("gia", ".")
+    finally:
+        m._chay_van_ban_an_toan = goc
+    bang(kq["trang_thai"] == "DO", f"rc=0 rong bi coi la DAT: {kq}")
+
+
+@ca
+def r05_trust_thieu_khoa_la_khong_do_duoc():
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = s / "repo"; repo.mkdir(); home = s / "home"; home.mkdir()
+        (home / ".claude.json").write_text("[]", encoding="utf-8")
+        kq = m._probe_trust_claude(str(repo), home)
+        bang(kq["trang_thai"] == "KHONG_DO_DUOC", f"JSON sai dang lam probe thoat: {kq}")
+        (home / ".claude.json").write_text(json.dumps({"projects": {str(repo.resolve()): {}}}),
+                                            encoding="utf-8")
+        kq = m._probe_trust_claude(str(repo), home)
+        bang(kq["trang_thai"] == "KHONG_DO_DUOC", f"thieu khoa trust bi coi la DAT: {kq}")
+
+
+@ca
+def r06_probe_hong_khong_override_phai_chan():
+    with San() as s:
+        repo = tao_repo(s); claude = tao_claude_gia(s); home = s / "home"; home.mkdir()
+        dau = s / "da-chay"; env = dict(os.environ, HOME=str(home), USERPROFILE=str(home))
+        r = chay("run", "--workspace", str(repo), "--run-root", str(s / "runs"), "--",
+                 str(claude), "-c", f"open({str(dau)!r},'w').write('x')", env=env)
+        bang(r.returncode == MA_PROBE and not dau.exists(),
+             f"probe hong van cho lenh chay: {r.returncode} {r.stderr}")
+
+
+@ca
+def r07_override_ly_do_rong_bi_tu_choi():
+    with San() as s:
+        repo = tao_repo(s)
+        r = chay("run", "--workspace", str(repo), "--run-root", str(s / "runs"),
+                 "--bo-qua-probe", "", "--", PY, "-c", "pass")
+        bang(r.returncode == MA_THAM_SO, f"ly do rong van duoc nhan: {r.returncode}")
+
+
+@ca
+def r08_override_co_ly_do_duoc_ghi_so():
+    with San() as s:
+        wt = tao_worktree(s); rr = s / "runs"; ly_do = "human cho phep do lai sau"
+        r = chay("run", "--workspace", str(wt), "--run-root", str(rr),
+                 "--bo-qua-probe", ly_do, "--", PY, "-c", "pass")
+        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(r.returncode == 0 and d.get("bo_qua_probe_ly_do") == ly_do,
+             f"override khong vao so: {r.returncode} {d}")
+
+
+@ca
+def r09_run_json_giu_ba_trang_thai_probe():
+    with San() as s:
+        wt = tao_worktree(s); rr = s / "runs"; claude = tao_claude_gia(s)
+        home = s / "home"; home.mkdir()
+        (home / ".claude.json").write_text(json.dumps({"projects": {str(wt.resolve()): {}}}),
+                                            encoding="utf-8")
+        env = dict(os.environ, HOME=str(home), USERPROFILE=str(home))
+        r = chay("run", "--workspace", str(wt), "--run-root", str(rr),
+                 "--bo-qua-probe", "fixture", "--", str(claude), "-c", "pass", env=env)
+        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        trang_thai = {x["trang_thai"] for x in d["probe"].values()}
+        bang(r.returncode == 0 and trang_thai == {"DAT", "DO", "KHONG_DO_DUOC"},
+             f"run.json khong giu ba trang thai: {trang_thai}")
+
+
+@ca
+def r10_trust_json_hong_bi_chan_sach():
+    with San() as s:
+        repo = tao_repo(s); claude = tao_claude_gia(s); home = s / "home"; home.mkdir()
+        dau = s / "da-chay"; rr = s / "runs"
+        (home / ".claude.json").write_text("{", encoding="utf-8")
+        env = dict(os.environ, HOME=str(home), USERPROFILE=str(home))
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--",
+                 str(claude), "-c", f"open({str(dau)!r},'w').write('x')", env=env)
+        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(r.returncode == MA_PROBE and not dau.exists() and "Traceback" not in r.stderr
+             and d["probe"]["claude_trust"]["trang_thai"] == "KHONG_DO_DUOC",
+             f"JSON hong khong bi chan sach: {r.returncode} {r.stderr} {d}")
+
+
+@ca
+def r11_trust_gia_tri_that_ba_chieu():
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = s / "repo"; repo.mkdir(); home = s / "home"; home.mkdir()
+        tep = home / ".claude.json"
+        for gia_tri, mong in ((True, "DAT"), (False, "DO"), (1, "KHONG_DO_DUOC")):
+            tep.write_text(json.dumps({"projects": {str(repo.resolve()):
+                           {"hasTrustDialogAccepted": gia_tri}}}), encoding="utf-8")
+            kq = m._probe_trust_claude(str(repo), home)
+            bang(kq["trang_thai"] == mong, f"trust={gia_tri!r}: {kq}")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -5640,6 +5797,54 @@ DOT_BIEN = [
      ('    if khoa_ky:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)',
       '    if False:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)'),
      ["t144_run_ghi_nonce_va_hmac_khong_lo_khoa"]),
+    ("m1_coi_worktree_la_hop_le",
+     ('            return {"trang_thai": "DO", "chi_tiet": "git worktree", "ma": "git_worktree"}',
+      '            return {"trang_thai": "DAT", "chi_tiet": "git worktree", "ma": "git_worktree"}'),
+     ["r01_worktree_that_bi_chan"]),
+    ("m6c_khong_ghi_khi_probe_chan",
+     ('        _ghi_so(run_root / sid, {', '        if False: _ghi_so(run_root / sid, {'),
+     ["r01_worktree_that_bi_chan"]),
+    ("m1_chan_ca_clone_that",
+     ('            return {"trang_thai": "DAT", "chi_tiet": ".git la thu muc"}',
+      '            return {"trang_thai": "DO", "chi_tiet": ".git la thu muc"}'),
+     ["r02_clone_that_di_tiep"]),
+    ("m2_bo_probe_ghi",
+     ('        return {"trang_thai": "DO", "chi_tiet": f"ghi workspace: {type(e).__name__}"}',
+      '        return {"trang_thai": "DAT", "chi_tiet": f"ghi workspace: {type(e).__name__}"}'),
+     ["r03_probe_ghi_bi_tu_choi_thi_do"]),
+    ("m3_chi_kiem_rc",
+     ('    if p.returncode == 0 and bool(ra.strip()):', '    if p.returncode == 0:'),
+     ["r04_spawn_rc0_dau_ra_rong_bi_chan"]),
+    ("m4_thieu_khoa_coi_la_tin_cay",
+     ('        return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "thieu khoa trust Claude"}',
+      '        return {"trang_thai": "DAT", "chi_tiet": "thieu khoa trust Claude"}'),
+     ["r05_trust_thieu_khoa_la_khong_do_duoc"]),
+    ("m4_bo_bat_JSON_hong",
+     ('    except (OSError, TypeError, AttributeError, json.JSONDecodeError):',
+      '    except (OSError, TypeError, AttributeError):'),
+     ["r10_trust_json_hong_bi_chan_sach"]),
+    ("m4_bool_nghiem_ngat_thanh_truthy_else",
+     [('    if muc["hasTrustDialogAccepted"] is True:', '    if muc["hasTrustDialogAccepted"]:'),
+      ('    if muc["hasTrustDialogAccepted"] is False:', '    else:')],
+     ["r11_trust_gia_tri_that_ba_chieu"]),
+    ("m4_non_bool_bi_coi_la_DAT",
+     ('    return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "trust Claude khong phai boolean"}',
+      '    return {"trang_thai": "DAT", "chi_tiet": "trust Claude khong phai boolean"}'),
+     ["r11_trust_gia_tri_that_ba_chieu"]),
+    ("m5_canh_bao_thay_vi_chan",
+     ('    if hong and ly_do is None:', '    if False and hong and ly_do is None:'),
+     ["r06_probe_hong_khong_override_phai_chan"]),
+    ("m5b_cho_bo_qua_khong-can-ly-do",
+     ('    if bo_qua is not None and not ly_do:', '    if False and bo_qua is not None and not ly_do:'),
+     ["r07_override_ly_do_rong_bi_tu_choi"]),
+    ("m6_khong_ghi_so",
+     ('    kq.update(probe=_probe_cho_so(probe), bo_qua_probe_ly_do=ly_do_bo_qua)',
+      '    kq.update(probe=_probe_cho_so(probe), bo_qua_probe_ly_do=None)'),
+     ["r08_override_co_ly_do_duoc_ghi_so"]),
+    ("m6b_gop_khong_do_duoc_vao_dat",
+     ('    return {ten: {"trang_thai": kq["trang_thai"], "chi_tiet": kq["chi_tiet"]}',
+      '    return {ten: {"trang_thai": ("DAT" if kq["trang_thai"] == "KHONG_DO_DUOC" else kq["trang_thai"]), "chi_tiet": kq["chi_tiet"]}'),
+     ["r09_run_json_giu_ba_trang_thai_probe"]),
     # Ca "rc=0 ma stdout RONG" duoc chan o BON cho doc lap: guard trong
     # _git_mot_dong, kiem SHA_RE trong chot_head, kiem `not top` trong chot_workspace,
     # va kiem `not ref` trong chot_ref. DA DO: bo RIENG bat ky cho nao cung KHONG ca nao chet -
@@ -6473,6 +6678,12 @@ def chay_dot_bien() -> int:
             # Đường dẫn khác nhau ⇒ đường `.pyc` khác nhau ⇒ va chạm là bất khả.
             ban_sao = tam / f"launcher_db_{DOT_BIEN.index(muc):02d}.py"
             ban_sao.write_text(moi_ma, encoding="utf-8")
+            try:
+                compile(moi_ma, str(ban_sao), "exec")
+            except SyntaxError as e:
+                print(f"  {ten:<28} SAI - dot bien khong bien dich: {e.msg}")
+                hong += 1
+                continue
             LAUNCHER_DANG_DUNG = ban_sao
             chet, bo_qua = [], []
             for fn in CA:

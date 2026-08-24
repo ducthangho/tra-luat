@@ -60,6 +60,7 @@ RC_GUARD = 7
 RC_STATE = 8
 RC_ADR = 9
 RC_MOI_TRUONG = 10
+RC_BIEN_NHAN = 11
 
 PROVIDERS = ("claude", "codex")
 
@@ -1506,6 +1507,198 @@ def cmd_adr_song(a, state_dir: Path) -> int:
     return RC_OK
 
 
+def _la_dang_commit(s: str) -> bool:
+    """Chuỗi này có THỂ là một commit sha không?
+
+    KHÔNG hỏi "commit ấy có tồn tại không" — `packet_loop.py` chạy được ở cây không có
+    lịch sử ấy, và hỏi git là mở một phụ thuộc mới cho một phép đếm. Chỉ hỏi HÌNH DẠNG:
+    hex, dài từ 7 (độ viết tắt ngắn nhất git chấp) tới 64 (sha256).
+
+    CHỖ HỞ CÒN LẠI, cross-review lượt 4 đo được (`bn-sha-viet-tat-nhan-doi-vong`): một
+    commit ghi bằng ID ĐẦY ĐỦ và bằng BẢN RÚT GỌN CỦA CHÍNH NÓ là hai chuỗi khác nhau,
+    nên thành hai khoá. Đóng nó đòi hỏi `git rev-parse` — tức chính phụ thuộc đoạn trên
+    cố ý không mở. Chủ kho chốt 24-08: KHÔNG siết thêm ở đây, hạ lời khai xuống đúng thứ
+    cưỡng chế được (xem `cmd_bien_nhan`), và để việc hỏi git thành packet riêng.
+    """
+    return 7 <= len(s) <= 64 and all(c in "0123456789abcdef" for c in s)
+
+
+def _verdict_trong_kho(thu_muc: Path, gia_tri) -> bool:
+    """`verdict_path` có trỏ một tệp THẬT nằm TRONG `ops/reviews` của chính kho này không?
+
+    Bản đầu chỉ hỏi `(root / verdict_path).is_file()`, và cross-review lượt 2 của #298 phá
+    được bằng HAI đường — cả hai đã tái hiện, `rc=0` ở nơi phải `rc=11`:
+
+      · ĐƯỜNG DẪN TUYỆT ĐỐI. `pathlib` định nghĩa `a / "/x"` == `Path("/x")` — vế trái bị
+        VỨT. Nên một biên nhận trỏ `/tmp/bất-kỳ.md` khiến phép kiểm hoá ra hỏi về chính tệp
+        ngoài kho ấy, và nó có thật, nên biên nhận được tính là một vòng review hợp lệ.
+      · SYMLINK. `is_file()` đi THEO liên kết, nên `ops/reviews/link.md -> /ngoài/kho.md`
+        cũng đạt.
+
+    Cả hai biến bộ lọc mồ côi thành phép đo "có một tệp nào đó tồn tại ở đâu đó" thay vì
+    "verdict nằm trong kho này". Chốt đúng phải neo vào CÂY, không vào sự tồn tại:
+    từ chối đường dẫn tuyệt đối, `resolve()` để đi hết symlink, rồi đòi đích cuối nằm
+    trong `ops/reviews`. Ba trạng thái: trong · ngoài · không phân giải được — hai cái sau
+    đều KHÔNG được tính.
+    """
+    s = str(gia_tri or "").strip()
+    if not s or Path(s).is_absolute():
+        return False
+    try:
+        dich = (thu_muc.parent.parent / s).resolve(strict=True)
+        goc = thu_muc.resolve(strict=True)
+    except (OSError, RuntimeError):
+        return False
+    try:
+        dich.relative_to(goc)
+    except ValueError:
+        return False
+    return dich.is_file()
+
+
+def _doc_bien_nhan(thu_muc: Path) -> list:
+    """Đọc mọi `*.receipt.yaml`. YAML hỏng ⇒ KHÔNG ĐO ĐƯỢC, KHÔNG phải "không có".
+
+    Ba trạng thái, không phải hai. Một bộ đếm trả `0` cho cả "chưa ai ghi biên nhận" lẫn
+    "không đọc được thư mục" là bộ đếm nói dối đúng lúc nó cần nói thật: hai câu ấy đòi hai
+    hành động ngược nhau (ghi biên nhận · sửa môi trường), mà con số thì giống hệt.
+    """
+    try:
+        import yaml
+    except ModuleNotFoundError:
+        _die(RC_BIEN_NHAN,
+             "KHÔNG ĐO ĐƯỢC: thiếu PyYAML nên không đọc được biên nhận nào. Đây KHÔNG "
+             "phải 'packet có 0 biên nhận'. Cài: pip install PyYAML")
+    ds = []
+    for f in sorted(thu_muc.glob("*.receipt.yaml")):
+        try:
+            d = yaml.safe_load(f.read_text(encoding="utf-8"))
+        except Exception as ex:  # noqa: BLE001 — mọi lỗi đọc đều là KHÔNG ĐO ĐƯỢC
+            _die(RC_BIEN_NHAN, f"KHÔNG ĐO ĐƯỢC: {f.name} không đọc được như YAML: {ex}")
+        if not isinstance(d, dict):
+            _die(RC_BIEN_NHAN, f"KHÔNG ĐO ĐƯỢC: {f.name} không phải một ánh xạ YAML")
+        d["_tep"] = f.name
+        ds.append(d)
+    return ds
+
+
+def cmd_bien_nhan(a, state_dir: Path) -> int:
+    """B2 — đếm biên nhận review; B3 — ĐỎ khi packet có 0 biên nhận `role: reviewer`.
+
+    VÌ SAO CÓ (đo được, không phải lo xa): kho ĐÃ có bộ đếm bền — `ops/reviews/*.receipt.yaml`
+    nằm trong git nên sống sót container — và ĐÃ có hai cổng `t26`/`t27` gác nó. Nhưng `t27`
+    duyệt `glob("*-verdict.md")`, tức nó gác thứ ĐÃ được ghi ra đĩa và mù hoàn toàn với
+    verdict chưa ai viết. Packet #249 chạy BỐN vòng cross-review, để lại **0** biên nhận, và
+    suite vẫn 98/98 xanh. Chuỗi `doctor-github-mcp` trước đó mất **năm** lượt y hệt — biên
+    nhận đầu tiên của kho tự khai điều ấy ở dòng đầu.
+
+    PHẠM VI — bản đầu của docstring này khai RỘNG HƠN thứ lệnh cưỡng chế, và cross-review lượt 1
+    của #298 bắt đúng chỗ đó (`s2-dem-tep-tu-nhan-reviewer`, P2): nó khai "nói đúng bằng thứ nó
+    cưỡng chế" trong khi chỉ lọc dict YAML theo `packet_id` + `role`, nên HAI biên nhận trùng
+    một vòng, cùng trỏ vào một `verdict_path` KHÔNG TỒN TẠI, vẫn được đếm là 2 và qua cổng.
+
+    Nay phạm vi là: một biên nhận chỉ được TÍNH khi (a) `role: reviewer`, (b) khớp packet bằng
+    SO BẰNG chuỗi trên `packet_id` hoặc `packet_slug` — không phải chuỗi con, và (c) `verdict_path`
+    trỏ một tệp CÓ THẬT NẰM TRONG `ops/reviews` (không phải đường dẫn tuyệt đối, không qua symlink
+    ra ngoài). Biên nhận trùng khoá neo đếm là MỘT.
+
+    ĐƠN VỊ ĐẾM KHÔNG PHẢI "VÒNG REVIEW" mà là **số biên nhận PHÂN BIỆT ĐƯỢC** — gom theo
+    `reviewed_sha` khi chuỗi ấy có hình dạng commit, thiếu/rỗng/sai dạng gom hết về MỘT xô.
+    Hai chỗ lệch, cả hai đo được: một commit ghi bằng ID đầy đủ VÀ bản rút gọn của chính nó
+    đếm thành HAI (lượt 4, `bn-sha-viet-tat-nhan-doi-vong`); "3 vòng đã chạy, 1 biên nhận"
+    vẫn đếm 1. Đóng cả hai đều đòi git hoặc GitHub, mà lệnh này cố ý không phụ thuộc git và
+    có 0 đường ra mạng. Chủ kho chốt 24-08: KHAI ĐÚNG TÊN thay vì siết thêm — cổng sinh ra
+    để bắt ca 0 biên nhận và ca ấy nó bắt đúng; mọi dạng lách trên chỉ có nghĩa khi ai đó cố
+    vượt `--toi-thieu` cao, mà ngưỡng mặc định là 1.
+    """
+    # NGƯỠNG 0 HOẶC ÂM BIẾN CỔNG THÀNH CỔNG TỰ TẮT — `--toi-thieu 0` cho `rc=0` trên một
+    # packet có 0 biên nhận, tức đúng ca B3 sinh ra để bắt. Một cổng tắt được bằng chính cờ
+    # của nó thì không phải cổng.
+    if a.toi_thieu < 1:
+        _die(RC_ARG, f"--toi-thieu phải >= 1 (nhận {a.toi_thieu}): ngưỡng 0 hoặc âm làm cổng "
+                     f"luôn xanh, kể cả khi packet có 0 biên nhận nào")
+    root = Path(a.root)
+    thu_muc = root / "ops" / "reviews"
+
+    # "Không thấy thì bỏ qua" là cách một ca ĐẠT mà không ĐO gì (bài học `t24`).
+    # Chỉ tha khi cây rõ ràng là bản sao rời; trong kho thật mà thiếu thì ĐỎ.
+    if not thu_muc.is_dir():
+        if (root / ".git").exists():
+            _die(RC_BIEN_NHAN,
+                 f"KHÔNG ĐO ĐƯỢC: kho thật mà không có {thu_muc} — không phải 'sạch'")
+        print(f"bien-nhan: bỏ qua — {thu_muc} không có và cây không phải kho git")
+        return RC_OK
+
+    ds = _doc_bien_nhan(thu_muc)
+    muon = None if a.packet is None else str(a.packet).strip()
+
+    def khop(d) -> bool:
+        if muon is None:
+            return True
+        return muon in {str(d.get("packet_id") or "").strip(),
+                        str(d.get("packet_slug") or "").strip()}
+
+    hop = [d for d in ds if khop(d)]
+    # Đếm theo VAI, không theo TỆP. Một biên nhận `role: executor` nằm cùng thư mục KHÔNG
+    # chứng minh có ai review — đó là trục phân biệt, và `bien_nhan_chi_dem_role_reviewer`
+    # là ca khoá nó.
+    rv = [d for d in hop if str(d.get("role") or "").strip() == "reviewer"]
+
+    # MỒ CÔI: biên nhận trỏ vào một verdict KHÔNG TỒN TẠI không chứng minh có ai review — nó
+    # chứng minh có ai ghi một tệp YAML. `t26` của `ops/lease_publish_test.py` đã gác chuyện này
+    # cho các biên nhận ĐANG có mặt, nhưng lệnh này chạy được ở cây không có bộ test ấy, nên nó
+    # phải tự đo chứ không mượn.
+    mo_coi = [d for d in rv
+              if not _verdict_trong_kho(thu_muc, d.get("verdict_path"))]
+    that = [d for d in rv if d not in mo_coi]
+
+    # TRÙNG VÒNG: hai biên nhận cùng `reviewed_sha` là cùng MỘT vòng ghi hai lần. Đếm chúng là 2
+    # thì `--toi-thieu` lấp được bằng cách chép tệp — cổng đo SỐ TỆP chứ không đo SỐ VÒNG.
+    thay, vong = set(), []
+    for d in that:
+        # KHOÁ VÒNG PHẢI LÀ THỨ NEO ĐƯỢC VÀO MỘT COMMIT — không phải một chuỗi tự khai.
+        #
+        # Bệnh này đã có BA dạng, và tôi vá trượt hai lần vì mỗi lần chỉ bịt đúng dạng
+        # vừa bị chỉ ra:
+        #   (1) lượt 1 — đếm theo TỆP: hai biên nhận cùng `reviewed_sha` tính là 2.
+        #   (2) lượt 2 — vẫn theo TỆP ở nhánh THIẾU sha: khoá rơi về
+        #       `f"__khong_sha__{tệp}"`, nên chép tệp là nhân số vòng.
+        #   (3) lượt 3 — theo GIÁ TRỊ TỰ KHAI: `reviewed_sha` CÓ mặt nhưng là rác
+        #       (`rac-1`, `rac-2`, …). Ba chuỗi rác khác nhau ⇒ 3 vòng, `rc=0`.
+        #
+        # Nên chốt không đóng thêm một DẠNG mà đóng HÌNH DẠNG: chỉ chuỗi trông như một
+        # commit mới được làm khoá vòng. Mọi thứ khác — thiếu, rỗng, sai dạng — dồn về
+        # CÙNG MỘT xô, tức góp nhiều nhất MỘT vòng. Không từ chối biên nhận, chỉ từ chối
+        # cho nó quyền tự nhân bản thành nhiều vòng.
+        sha = str(d.get("reviewed_sha") or "").strip().lower()
+        khoa = sha if _la_dang_commit(sha) else "__khong_neo_duoc__"
+        if khoa in thay:
+            continue
+        thay.add(khoa)
+        vong.append(d)
+
+    nhan = "mọi packet" if muon is None else f"packet {muon!r}"
+    print(f"bien-nhan: {nhan} — {len(vong)} biên nhận PHÂN BIỆT ĐƯỢC "
+          f"(từ {len(that)} biên nhận `role: reviewer` hợp lệ / {len(hop)} khớp packet "
+          f"/ {len(ds)} toàn thư mục)")
+    for d in vong:
+        print(f"  {d.get('verdict', '?')!s:20s} luot={d.get('luot', '?')!s:3s} "
+              f"{str(d.get('reviewed_sha') or '?')[:12]}  {d['_tep']}")
+    for d in mo_coi:
+        print(f"  BỎ (mồ côi) verdict_path không có thật: "
+              f"{str(d.get('verdict_path') or '?')!r}  {d['_tep']}")
+    if len(that) > len(vong):
+        print(f"  GỘP {len(that) - len(vong)} biên nhận trùng KHOÁ NEO — cùng "
+              f"một khoá ghi nhiều lần, đếm MỘT")
+
+    if len(vong) < a.toi_thieu:
+        _die(RC_BIEN_NHAN,
+             f"{nhan}: {len(vong)} biên nhận PHÂN BIỆT ĐƯỢC, đòi tối thiểu {a.toi_thieu}. "
+             f"Một vòng review không để lại biên nhận là một vòng không ai tra được sau khi "
+             f"container chết — và không cổng nào khác thấy điều đó.")
+    return RC_OK
+
+
 def cmd_status(a, state_dir: Path) -> int:
     st = _load(state_dir, a.packet)
     print(json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True))
@@ -1625,6 +1818,14 @@ def build_parser() -> argparse.ArgumentParser:
                        help="bảng §20 của protocol phải phủ hết docs/adr/")
     q.add_argument("--root", default=".")
     q.set_defaults(fn=cmd_adr_song)
+
+    q = sub.add_parser("bien-nhan",
+                       help="đếm biên nhận review; ĐỎ khi packet có 0 biên nhận reviewer")
+    q.add_argument("--root", default=".")
+    q.add_argument("--packet", help="số hiệu hoặc slug; bỏ trống = mọi packet")
+    q.add_argument("--toi-thieu", type=int, default=1,
+                   dest="toi_thieu", help="số biên nhận reviewer tối thiểu (mặc định 1)")
+    q.set_defaults(fn=cmd_bien_nhan)
 
     q = sub.add_parser("status", help="in state đầy đủ")
     q.add_argument("--packet", type=int, required=True)

@@ -1003,6 +1003,10 @@ def _kich_ban_in(c: Ctx, codepage: str):
     (r_bn / "ops" / "reviews").mkdir(parents=True, exist_ok=True)
     (r_bn / "ops" / "reviews" / "a-verdict.receipt.yaml").write_text(
         _BN_REVIEWER, encoding="utf-8")
+    # `_BN_REVIEWER` trỏ `verdict_path: ops/reviews/v.md` — thiếu tệp ấy thì biên nhận thành
+    # MỒ CÔI và lệnh trả rc=11, tức kịch bản codepage sẽ đo nhầm ĐƯỜNG THẤT BẠI (chỉ in stderr)
+    # thay vì đường thành công. Chốt PHỦ ở cuối hàm bắt đúng chuyện này khi phép mồ côi vừa thêm.
+    (r_bn / "ops" / "reviews" / "v.md").write_text("verdict\n", encoding="utf-8")
 
     buoc = [
         (["where"], None),
@@ -3341,6 +3345,13 @@ def _kho_gia(c: Ctx, ten: str, bien_nhan=()) -> Path:
     return goc
 
 
+def _kho_gia_co_verdict(c: Ctx, ten: str, bien_nhan=()) -> Path:
+    """Như `_kho_gia` nhưng tạo luôn `ops/reviews/v.md` để biên nhận không thành mồ côi."""
+    goc = _kho_gia(c, ten, bien_nhan)
+    (goc / "ops" / "reviews" / "v.md").write_text("verdict\n", encoding="utf-8")
+    return goc
+
+
 _BN_REVIEWER = """schema_version: 1
 kind: review_delivery_receipt
 packet_id: '249'
@@ -3348,6 +3359,7 @@ role: reviewer
 provider: codex
 verdict: approve
 reviewed_sha: efcf5757403bd989c0ebbd388fa7a7180171b49f
+verdict_path: ops/reviews/v.md
 """
 
 # Hình dạng THẬT, không phải bịa: `plat-m4-human-audit-ducthangho-verdict.receipt.yaml` và
@@ -3371,7 +3383,7 @@ def case_bien_nhan_0_thi_DO(c: Ctx):
 
 
 def case_bien_nhan_co_reviewer_thi_QUA(c: Ctx):
-    goc = _kho_gia(c, "bn1", [("a-verdict.receipt.yaml", _BN_REVIEWER)])
+    goc = _kho_gia_co_verdict(c, "bn1", [("a-verdict.receipt.yaml", _BN_REVIEWER)])
     rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
     _doi(0, rc, e, "có biên nhận reviewer thì phải QUA")
 
@@ -3423,6 +3435,80 @@ CASES += [
     ("bien_nhan_yaml_hong_la_KHONG_DO_DUOC", case_bien_nhan_yaml_hong_la_KHONG_DO_DUOC),
     ("bien_nhan_kho_that_thieu_thu_muc_la_DO", case_bien_nhan_kho_that_thieu_thu_muc_la_DO),
     ("bien_nhan_ban_sao_roi_thi_bo_qua", case_bien_nhan_ban_sao_roi_thi_bo_qua),
+]
+
+
+# --- #298 lượt 1 cross-review: ba finding, bốn ca khoá lại -----------------------------
+#
+# Hai đột biến SỐNG SÓT qua cả 6 ca đầu (`s2-sau-ca-khong-khoa-truc-khop`, P2): đổi so BẰNG
+# thành chuỗi con, và bỏ `packet_slug`. Mã vốn ĐÚNG cả hai — nhưng không ca nào ĐO, nên
+# "đúng" là may chứ không phải được khoá. Cộng `s2-dem-tep-tu-nhan-reviewer` (P2): hai biên
+# nhận trùng vòng, trỏ verdict không tồn tại, vẫn qua cổng.
+
+_BN_SLUG = """schema_version: 1
+kind: review_delivery_receipt
+packet_slug: T33-DOI-SHELLCHECK
+role: reviewer
+provider: codex
+verdict: approve
+reviewed_sha: efcf5757403bd989c0ebbd388fa7a7180171b49f
+verdict_path: ops/reviews/v.md
+"""
+
+
+def _bn_that(sha: str, duong: str = "ops/reviews/v.md") -> str:
+    """Biên nhận HỢP LỆ: có `verdict_path` trỏ tệp thật (ca tự tạo tệp ấy)."""
+    return (f"schema_version: 1\nkind: review_delivery_receipt\npacket_id: '249'\n"
+            f"role: reviewer\nprovider: codex\nverdict: approve\n"
+            f"reviewed_sha: {sha}\nverdict_path: {duong}\n")
+
+
+def case_bien_nhan_packet_24_khong_an_bien_nhan_249(c: Ctx):
+    """So BẰNG, không phải chuỗi con. `24` là chuỗi con của `249`.
+
+    Đột biến `M1_KHOP_SUBSTRING` sống sót qua 6 ca đầu; ca này giết nó.
+    """
+    goc = _kho_gia_co_verdict(c, "bn24", [("a-verdict.receipt.yaml", _bn_that("%040x" % 1))])
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "24"])
+    _doi(11, rc, e, "packet '24' ăn biên nhận của '249' ⇒ đang khớp CHUỖI CON")
+
+
+def case_bien_nhan_khop_duoc_bang_packet_slug(c: Ctx):
+    """`packet_slug` phải khớp được — lease khai vậy, và đột biến bỏ nó từng sống sót."""
+    goc = _kho_gia_co_verdict(c, "bnslug", [("a-verdict.receipt.yaml", _BN_SLUG)])
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc),
+                              "--packet", "T33-DOI-SHELLCHECK"])
+    _doi(0, rc, e, "biên nhận chỉ mang `packet_slug` phải khớp được bằng slug")
+
+
+def case_bien_nhan_mo_coi_khong_duoc_dem(c: Ctx):
+    """`verdict_path` trỏ tệp KHÔNG CÓ ⇒ không chứng minh ai review, chỉ chứng minh ai ghi YAML."""
+    goc = _kho_gia(c, "bnmocoi", [("a-verdict.receipt.yaml",
+                                   _bn_that("%040x" % 1, "ops/reviews/KHONG-CO.md"))])
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(11, rc, e, "biên nhận mồ côi vẫn được đếm ⇒ cổng đo TỆP chứ không đo VÒNG")
+
+
+def case_bien_nhan_hai_ban_trung_vong_dem_MOT(c: Ctx):
+    """Hai biên nhận cùng `reviewed_sha` là MỘT vòng ghi hai lần.
+
+    Đếm là 2 thì `--toi-thieu 2` lấp được bằng cách CHÉP TỆP — cổng đo số tệp, không đo số vòng.
+    """
+    sha = "%040x" % 7
+    goc = _kho_gia_co_verdict(c, "bntrung", [("a-verdict.receipt.yaml", _bn_that(sha)),
+                                         ("b-verdict.receipt.yaml", _bn_that(sha))])
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249",
+                              "--toi-thieu", "2"])
+    _doi(11, rc, e, "hai biên nhận TRÙNG vòng được đếm thành 2 ⇒ lấp được trần bằng chép tệp")
+    rc, _, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(0, rc, e, "chặn oan: trùng vòng vẫn phải tính là MỘT vòng hợp lệ")
+
+
+CASES += [
+    ("bien_nhan_packet_24_khong_an_bien_nhan_249", case_bien_nhan_packet_24_khong_an_bien_nhan_249),
+    ("bien_nhan_khop_duoc_bang_packet_slug", case_bien_nhan_khop_duoc_bang_packet_slug),
+    ("bien_nhan_mo_coi_khong_duoc_dem", case_bien_nhan_mo_coi_khong_duoc_dem),
+    ("bien_nhan_hai_ban_trung_vong_dem_MOT", case_bien_nhan_hai_ban_trung_vong_dem_MOT),
 ]
 
 

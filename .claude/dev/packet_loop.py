@@ -1543,10 +1543,18 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
     suite vẫn 98/98 xanh. Chuỗi `doctor-github-mcp` trước đó mất **năm** lượt y hệt — biên
     nhận đầu tiên của kho tự khai điều ấy ở dòng đầu.
 
-    PHẠM VI, nói đúng bằng thứ nó cưỡng chế: lệnh này bắt ca **0 biên nhận**. Nó KHÔNG bắt ca
-    "ghi 1 biên nhận cho 4 vòng" — muốn thế phải biết số vòng THẬT, mà `packet_loop.py` có 0
-    đường ra GitHub và sẽ không mở một đường như vậy chỉ để đếm. Khai thẳng phạm vi thay vì
-    đặt cho cổng một cái tên to hơn thứ nó làm.
+    PHẠM VI — bản đầu của docstring này khai RỘNG HƠN thứ lệnh cưỡng chế, và cross-review lượt 1
+    của #298 bắt đúng chỗ đó (`s2-dem-tep-tu-nhan-reviewer`, P2): nó khai "nói đúng bằng thứ nó
+    cưỡng chế" trong khi chỉ lọc dict YAML theo `packet_id` + `role`, nên HAI biên nhận trùng
+    một vòng, cùng trỏ vào một `verdict_path` KHÔNG TỒN TẠI, vẫn được đếm là 2 và qua cổng.
+
+    Nay phạm vi là: một biên nhận chỉ được TÍNH khi (a) `role: reviewer`, (b) khớp packet bằng
+    SO BẰNG chuỗi trên `packet_id` hoặc `packet_slug` — không phải chuỗi con, và (c) `verdict_path`
+    trỏ tới một tệp CÓ THẬT. Hai biên nhận cùng `reviewed_sha` đếm là MỘT vòng.
+
+    Vẫn KHÔNG cưỡng chế: số vòng THẬT. Biết nó đòi hỏi hỏi GitHub, mà `packet_loop.py` có 0 đường
+    ra mạng và sẽ không mở một đường như vậy chỉ để đếm. Nên "3 vòng đã chạy, 1 biên nhận" vẫn lọt.
+    Khai thẳng chỗ hở thay vì đặt cho cổng một cái tên to hơn thứ nó làm.
     """
     root = Path(a.root)
     thu_muc = root / "ops" / "reviews"
@@ -1575,16 +1583,41 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
     # là ca khoá nó.
     rv = [d for d in hop if str(d.get("role") or "").strip() == "reviewer"]
 
+    # MỒ CÔI: biên nhận trỏ vào một verdict KHÔNG TỒN TẠI không chứng minh có ai review — nó
+    # chứng minh có ai ghi một tệp YAML. `t26` của `ops/lease_publish_test.py` đã gác chuyện này
+    # cho các biên nhận ĐANG có mặt, nhưng lệnh này chạy được ở cây không có bộ test ấy, nên nó
+    # phải tự đo chứ không mượn.
+    mo_coi = [d for d in rv
+              if not (root / str(d.get("verdict_path") or "")).is_file()]
+    that = [d for d in rv if d not in mo_coi]
+
+    # TRÙNG VÒNG: hai biên nhận cùng `reviewed_sha` là cùng MỘT vòng ghi hai lần. Đếm chúng là 2
+    # thì `--toi-thieu` lấp được bằng cách chép tệp — cổng đo SỐ TỆP chứ không đo SỐ VÒNG.
+    thay, vong = set(), []
+    for d in that:
+        khoa = str(d.get("reviewed_sha") or f"__khong_sha__{d['_tep']}").strip()
+        if khoa in thay:
+            continue
+        thay.add(khoa)
+        vong.append(d)
+
     nhan = "mọi packet" if muon is None else f"packet {muon!r}"
-    print(f"bien-nhan: {nhan} — {len(rv)} biên nhận `role: reviewer` "
-          f"trên {len(hop)} biên nhận khớp / {len(ds)} biên nhận toàn thư mục")
-    for d in rv:
+    print(f"bien-nhan: {nhan} — {len(vong)} VÒNG đếm được "
+          f"(từ {len(that)} biên nhận `role: reviewer` hợp lệ / {len(hop)} khớp packet "
+          f"/ {len(ds)} toàn thư mục)")
+    for d in vong:
         print(f"  {d.get('verdict', '?')!s:20s} luot={d.get('luot', '?')!s:3s} "
               f"{str(d.get('reviewed_sha') or '?')[:12]}  {d['_tep']}")
+    for d in mo_coi:
+        print(f"  BỎ (mồ côi) verdict_path không có thật: "
+              f"{str(d.get('verdict_path') or '?')!r}  {d['_tep']}")
+    if len(that) > len(vong):
+        print(f"  GỘP {len(that) - len(vong)} biên nhận trùng `reviewed_sha` — "
+              f"cùng một vòng ghi nhiều lần, đếm MỘT")
 
-    if len(rv) < a.toi_thieu:
+    if len(vong) < a.toi_thieu:
         _die(RC_BIEN_NHAN,
-             f"{nhan}: {len(rv)} biên nhận `role: reviewer`, đòi tối thiểu {a.toi_thieu}. "
+             f"{nhan}: {len(vong)} VÒNG đếm được, đòi tối thiểu {a.toi_thieu}. "
              f"Một vòng review không để lại biên nhận là một vòng không ai tra được sau khi "
              f"container chết — và không cổng nào khác thấy điều đó.")
     return RC_OK

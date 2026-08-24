@@ -144,3 +144,9 @@ viec_cua_luot_nay: >-
   hành. Cộng `N4`: ghi băm `c5f6c905…` vào tệp để verdict của codex còn tra được.
   KHÔNG triển khai launcher. KHÔNG sửa `r1`/`r2`. KHÔNG đụng `.claude/dev/**`.
 posted_comment_id: 5394543680   # workflow ghi, ĐỪNG sửa tay
+da_bi_thay_the: launcher-r3-va-p1p2-exec-1r2-codex-20260824
+da_bi_thay_the_ly_do: >-
+  `ngan_sach_kich_thuoc.don_vi` bảo đo từ `merge-base(origin/master, HEAD)`. Đo thật:
+  `git diff --numstat 207c7d6d..a2ad098b -- ops/specs/LAUNCHER-DUNG-WORKSPACE-r3.md` = `206  0`.
+  Tức trần 150 bị vượt khi executor CHƯA gõ dòng nào — lease này không cấp được việc, nó chỉ cấp
+  một điều kiện dừng. r2 đổi mốc sang `start_from_sha` (`a2ad098b`). Không điều khoản nào khác đổi.

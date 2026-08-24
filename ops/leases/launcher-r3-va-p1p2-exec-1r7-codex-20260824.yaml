@@ -212,3 +212,5 @@ thay_the_ly_do: >-
   KHÔNG đổi. TRẦN ADR-0043 KHÔNG bị chạm: packet đã dùng đúng HAI vòng review canon (vòng 1 và
   vòng 2); lượt 4 là lượt VÁ đóng finding của vòng 2, không phải một vòng review mới.
 posted_comment_id: 5398653293   # workflow ghi, ĐỪNG sửa tay
+da_bi_thay_the: launcher-r3-va-p1p2-thu-hoi-claude-20260824   # viec da land (PR #310 -> c35ae1c);
+                        # xem bia mo cung ten de biet phep do.

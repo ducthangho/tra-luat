@@ -1,0 +1,62 @@
+# BIA MỘ — họ lease `launcher-r3-va-p1p2` (#308) ĐÃ XONG VIỆC.
+#
+# PR #310 merge tại `c35ae1c`, cổng master `success`. Đặc tả `r3` nay trên master.
+# Giữ quyền ghi sau khi việc xong là để một writer thứ hai đứng sẵn mà không ai biết —
+# đúng cửa sổ mà write-set exclusion sinh ra để đóng.
+#
+# Kèm ba dòng `da_bi_thay_the` cho r4→r5→r6 trong cùng commit: chuỗi thay thế ấy khai
+# `thay_the_cho` đủ cả nhưng CHƯA AI đánh dấu chiều ngược lại, nên `ai-dang-giu` đếm
+# NĂM người giữ trên một đường dẫn đã land. Đó chính là ca 3 của #313, lặp bốn lần.
+
+schema_version: 2
+event: executor_lease_revoked
+packet_issue: 308
+packet_id: LAUNCHER-R3-VA-P1P2
+phase_key: LAUNCHER-R3-VA-P1P2
+revision: 99
+generation: 1
+lease_id: launcher-r3-va-p1p2-thu-hoi-claude-20260824
+thay_the_cho: launcher-r3-va-p1p2-exec-1r7-codex-20260824
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: none
+review_class: sensitive
+effective_review_class: sensitive
+
+write_set: []
+write_set_note: >-
+  RỖNG CÓ CHỦ ĐÍCH. Bia mộ không giữ đường dẫn nào. Nghiệm thu của chính tệp này:
+  `ai-dang-giu ops/specs/LAUNCHER-DUNG-WORKSPACE-r3.md` phải về `NGƯỜI_GIỮ 0`.
+
+branch: claude/launcher-r3-rescue-exec-1
+branch_ownership: none
+target_branch_neu_land: null
+base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+reviewed_sha_required: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+
+ly_do_thu_hoi: >-
+  Việc ĐÃ LAND — đo chứ không suy: PR #310 merge tại `c35ae1c0a110`, cổng master `success`,
+  và `ops/specs/LAUNCHER-DUNG-WORKSPACE-r3.md` nay tra được trên master.
+  Packet đi hết 2 vòng review canon (đúng trần ADR-0043) và 4 lượt vá.
+
+granted_by: ducthangho          # BẮT BUỘC của cổng; ở đây nghĩa là AI RA LỆNH THU HỒI,
+                                # KHÔNG phải ai được cấp quyền — `access: none`, `write_set: []`.
+thu_hoi_boi: ducthangho
+thu_hoi_theo_lenh: 'direct, in-session, 2026-08-24: "đồng ý với các khuyến nghị, triển khai tiếp luôn"'
+authority_basis: §2 — cấp/thu lease thuộc chủ kho
+recorded_by: claude-session
+
+leased_at_utc: '2026-08-24T23:45:00Z'
+lease_expires_at_utc: '2026-08-25T23:45:00Z'
+run_minutes: 0
+
+viec_cua_luot_nay: >-
+  KHÔNG có việc. Tệp này chỉ ghi nhận họ lease tiền nhiệm hết hiệu lực vì đã xong việc.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  ĐỪNG đọc tệp này thành "được cấp quyền". `access: none`, `write_set: []`.
+  Cần ghi `ops/specs/LAUNCHER-DUNG-WORKSPACE-r3.md` thì phải xin lease MỚI của chủ kho.

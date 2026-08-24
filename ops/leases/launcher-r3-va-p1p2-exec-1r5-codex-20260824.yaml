@@ -187,3 +187,5 @@ thay_the_ly_do: >-
   và ghi phép đo ngân sách CỘNG DỒN (90/150) thay cho phép cộng tay từng lượt vốn khai vống 13
   dòng. Write set, trần dòng, provider, reviewer KHÔNG đổi.
 posted_comment_id: 5396842406   # workflow ghi, ĐỪNG sửa tay
+da_bi_thay_the: launcher-r3-va-p1p2-exec-1r6-codex-20260824   # buoc thu HAI cua chuoi thay the — thieu no thi lease cu
+                        # VAN duoc dem la NGUOI_GIU (lease_publish.py:679).

@@ -198,3 +198,5 @@ thay_the_ly_do: >-
   phải ghi ra thay vì để executor suy.
   Ngân sách và write set KHÔNG đổi; thêm trường ghi phần đã tiêu của lượt 1.
 posted_comment_id: 5395400839   # workflow ghi, ĐỪNG sửa tay
+da_bi_thay_the: launcher-r3-va-p1p2-exec-1r5-codex-20260824   # buoc thu HAI cua chuoi thay the — thieu no thi lease cu
+                        # VAN duoc dem la NGUOI_GIU (lease_publish.py:679).

@@ -96,3 +96,6 @@ dieu_kien_dung: >-
   S1 nếu cần đường dẫn thứ hai. S2 nếu vượt 200 dòng thêm. S3 nếu phát hiện chỗ thứ TƯ mang
   cùng lời khai — khi ấy "ba chỗ" là số sai và phạm vi packet phải khai lại trước khi viết tiếp.
 posted_comment_id: 5390422667   # workflow ghi, ĐỪNG sửa tay
+
+# THU HỒI 2026-08-24 — chủ kho bỏ hướng r5. Xem bia mộ kế vị để biết lý do.
+da_bi_thay_the: spec-r5-overclaim-thu-hoi-claude-20260824

@@ -1,0 +1,78 @@
+# THU HỒI lease `spec-r5-overclaim-exec-1-claude-20260824` — hướng r5 ĐÃ BỊ BỎ.
+#
+# VÌ SAO TỆP NÀY TRÔNG NHƯ MỘT LEASE MÀ KHÔNG CẤP QUYỀN CHO AI:
+# kho KHÔNG có cơ chế thu hồi lease (nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong`).
+# `ai-dang-giu` chỉ đọc HAI thứ để coi một lease là hết hiệu lực: `da_bi_thay_the`,
+# và hạn dùng. Không có trường `thu_hoi`. Đo được: `grep -nE "thu_hoi|revoked|huy"
+# ops/lease_publish.py` -> 0 dòng; chỗ duy nhất là `lease_publish.py:679`
+# `da_chet = bool(lease.get("da_bi_thay_the")) and trang_thai == "CÒN_HẠN"`.
+#
+# Nên đây là BIA MỘ dùng đúng cơ chế đang có, KHÔNG phải một cơ chế mới tự chế:
+# nó kế vị lease cũ để lease cũ rơi khỏi phép đếm NGƯỜI_GIỮ, và tự khai rằng nó
+# không cấp quyền ghi cho ai. Không sửa đè lease cũ ngoài đúng một dòng
+# `da_bi_thay_the` — đúng nếp "sửa đè làm hồ sơ mất dấu".
+#
+# ĐÂY LÀ CÁCH CHỮA TẠM. Đường đúng là một trường thu hồi tường minh mà cổng ĐỌC;
+# đã nêu ở #305.
+
+schema_version: 2
+event: executor_lease_revoked
+packet_issue: 297
+packet_id: SPEC-R3-OVERCLAIM
+phase_key: SPEC-R5
+revision: 2
+generation: 1
+lease_id: spec-r5-overclaim-thu-hoi-claude-20260824
+thay_the_cho: spec-r5-overclaim-exec-1-claude-20260824
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: none
+review_class: sensitive
+effective_review_class: sensitive
+
+write_set: []
+write_set_note: >-
+  RỖNG CÓ CHỦ ĐÍCH. Bia mộ không giữ đường dẫn nào. Sau khi tệp này vào nhánh lease,
+  `ai-dang-giu ops/specs/t33-doi-shellcheck-r5.md` phải trả NGƯỜI_GIỮ 0 — đó là phép
+  đo nghiệm thu của chính tệp này, và tôi đã chạy nó (kết quả ghi ở `da_do_sau_khi_ghi`).
+
+branch: claude/spec-r5-overclaim-exec-1
+branch_ownership: none
+target_branch_neu_land: null
+base_sha: a84b6d15c69cd7161eaca780a1d877b8a79c2b1e
+start_from_sha: a84b6d15c69cd7161eaca780a1d877b8a79c2b1e
+reviewed_sha_required: a84b6d15c69cd7161eaca780a1d877b8a79c2b1e
+
+ly_do_thu_hoi: >-
+  Chủ kho bỏ hướng r5 in-session 2026-08-24 ("theo hướng (2)"): thay vì sửa lời khai
+  trong đặc tả bằng VĂN XUÔI, dựng một cơ chế trạng thái ĐỌC ĐƯỢC BẰNG MÁY. Nhánh
+  `claude/spec-r5-overclaim-exec-1` đã đẩy (`322e841`) nhưng KHÔNG có PR và sẽ không mở.
+  Bản thân r5 lặp lại đúng khuyết tật nó sinh ra để vá — ba lần: suy "không ai còn thi
+  hành theo r2" từ một phép grep văn bản; khai `194` tham chiếu khi đo được `195`; và
+  viết tắt một tên lease thành dạng mơ hồ giữa bốn tệp.
+
+granted_by: ducthangho          # BAT_BUOC của cổng; ở đây nghĩa là AI RA LỆNH THU HỒI,
+                                # không phải ai được cấp quyền — `access: none`, `write_set: []`.
+thu_hoi_boi: ducthangho
+thu_hoi_theo_lenh: 'direct, in-session, 2026-08-24: "Thu lease"'
+authority_basis: §2 — cấp/thu lease thuộc chủ kho
+recorded_by: claude-session
+
+# Cửa sổ CÒN LẠI của chính lease bị thu hồi — bia mộ phủ đúng khoảng ấy rồi tự tắt.
+# KHÔNG đặt hạn bằng lúc sinh: cổng từ chối đúng như thế ("đăng một lease chết thì
+# người nhận tưởng có quyền mà không có" — rc=8, đo 2026-08-24). Cổng đúng, và thứ
+# làm tệp này vô hại KHÔNG phải hạn dùng mà là `access: none` + `write_set: []`.
+leased_at_utc: '2026-08-24T09:00:00Z'
+lease_expires_at_utc: '2026-08-25T09:00:00Z'
+run_minutes: 0
+
+viec_cua_luot_nay: >-
+  KHÔNG có việc. Tệp này chỉ ghi nhận lease tiền nhiệm hết hiệu lực.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  ĐỪNG đọc tệp này thành "được cấp quyền". `access: none`, `write_set: []`,
+  `lease_expires_at_utc` == `leased_at_utc` (hết hạn ngay lúc sinh). Nếu bạn cần ghi
+  `ops/specs/t33-doi-shellcheck-r5.md` thì phải xin lease MỚI của chủ kho.

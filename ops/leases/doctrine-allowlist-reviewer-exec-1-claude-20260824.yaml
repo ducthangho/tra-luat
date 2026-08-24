@@ -123,3 +123,4 @@ dieu_kien_dung: >-
   S1 cần đường dẫn thứ hai (nhất là `CLAUDE.md`) ⇒ DỪNG, xin lease sửa đổi — đường ấy đang có
   người giữ · S2 vượt 90 dòng thêm · S3 phát hiện một trong ba con số của bảng không tái lập được
   từ `stdout.log` ⇒ DỪNG, đo lại, KHÔNG giữ số cũ · S4 `origin/master` đã đi tiếp mà chưa đo lại.
+posted_comment_id: 5402763178   # workflow ghi, ĐỪNG sửa tay

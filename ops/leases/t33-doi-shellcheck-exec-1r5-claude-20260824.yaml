@@ -321,3 +321,4 @@ noi_da_dung_o_r5:
     Đưa đặc tả vào cùng PR với mã khiến BA vòng review đã duyệt (trên diff MỘT tệp) KHÔNG còn phủ hết
     diff. Bắt buộc thêm một vòng trên diff HAI tệp — chủ kho đã yêu cầu ("review lại"). Vòng ấy không
     chạy thì phần đặc tả vào master mà chưa ai review: fail-open.
+posted_comment_id: 5389738368   # workflow ghi, ĐỪNG sửa tay

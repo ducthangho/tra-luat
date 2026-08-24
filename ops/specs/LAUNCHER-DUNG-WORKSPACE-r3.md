@@ -130,12 +130,19 @@ token nối bằng dấu cách/phẩy và không phải mô tả prose. Mỗi d�
 list đối số trực tiếp, không ghép thành chuỗi để shell tách lại.
 
 Revision này chọn hướng **(b)** cho `STD-299-02`: gỡ hẳn ba verb `git add`, `git commit`
-và `git push`, thay vì dựng prefix rule theo tên generation branch. Phép đo nền là bảy
-lượt Codex Executor có mount `.git` chỉ-đọc nhưng packet vẫn được land qua phiên điều
-phối; giữ quyền Git mutation riêng cho Claude sẽ biến một tình cờ sandbox thành bất đối
-xứng thiết kế. Hệ quả vận hành: Executor do launcher spawn chỉ sinh working-tree diff;
-phiên điều phối áp dụng/commit/push sau readback. Nhu cầu để Executor tự stage, commit hoặc
-push phải đi qua Packet revision mới, không được nới allowlist của lượt chạy.
+và `git push`, thay vì dựng prefix rule theo tên generation branch. Đây là quyết định
+**thu hẹp affordance**: bỏ ba cách viết tiện tay, không phải cổng tước thẩm quyền Git.
+Nguồn bền tra được chỉ là `C6` tại `ops/TONG_HOP_PHAT_HIEN_20260820.md:142`, ghi **2 lượt**
+Codex Executor gặp `.git` chỉ-đọc ngày 20-08-2026; nó là tiền lệ vận hành, không phải ràng
+buộc vĩnh viễn. `docs/GOI_AGENT_DA_NEN.md:335` còn chứng minh mặc định ấy có thể được nới.
+
+Chính bốn rule `Bash(python:*)`, `Bash(python3:*)`, `Bash(py:*)`, `Bash(rg:*)` bao trùm
+khả năng gọi script thực hiện ba verb đã gỡ; `rg --pre` cũng chạy được chương trình ngoài.
+Vì vậy ý định vận hành là Executor bàn giao working-tree diff để phiên điều phối readback
+rồi commit/push, nhưng đó **không phải hệ quả an ninh** của allowlist. Hook, kiểm effective
+write set và branch protection mới là các tầng phải cưỡng chế quyền thật, độc lập với
+affordance này. Nhu cầu chính thức cho Executor tự stage/commit/push phải đi qua Packet
+revision mới; không được nới allowlist của lượt chạy.
 
 Nhu cầu thêm công cụ/câu lệnh phải nằm trong Packet revision mới; successor không được
 sao toàn bộ allowlist rộng của `.claude/settings.json` để “cho chắc”. Hook và write set
@@ -160,9 +167,13 @@ Các dạng `bypassPermissions`, `--dangerously-skip-permissions` hoặc alias g
 chế độ bỏ qua quyền đều bị chặn trước spawn. `acceptEdits` có mặt mà `--allowedTools`
 vắng/rỗng cũng bị chặn.
 
-Chốt này phải parse nhóm cờ quyền/sandbox theo grammar từng CLI rồi chỉ nhận đúng
-tên+giá trị của tuple §3; không dùng blacklist substring. Cờ quyền mới/không biết là
-`KHONG_DO_DUOC` và chặn. Như vậy một alias mới không lọt chỉ vì chưa có trong danh sách cấm.
+Chốt phải parse **toàn bộ argv** theo grammar từng CLI và chỉ nhận schema đóng về vị trí,
+tên, arity và giá trị mà launcher sinh/nhận cho tuple §3; không có passthrough
+`argparse.REMAINDER` tổng quát. Token/cờ ngoài schema, dù chưa được phân loại là cờ quyền,
+đều là `KHONG_DO_DUOC` và bị chặn trước spawn. Riêng Codex, `-c`/`--config`, `-p`/`--profile`,
+`--enable` và `--disable` đều bị chặn cho tới khi một Packet revision allowlist đúng
+tên+giá trị cần thiết. Như vậy cấu hình sandbox không lọt qua một cờ chưa được người viết
+blacklist nghĩ tới.
 
 ## 5. Nghiệm thu successor — đo argv cuối và process thật
 
@@ -174,9 +185,13 @@ số lần spawn; không kiểm một biến trung gian hay chỉ grep mã. Riê
 Fixture là một clone tạm độc lập, có fingerprint trước-run và sentinel vắng. Hai lượt
 dùng cùng binary/provider `openai_codex`, cùng workspace đã khôi phục về đúng fingerprint,
 cùng prompt yêu cầu thực hiện đúng một write probe tạo sentinel với byte đã chốt; chỉ hai
-trường `role` và `capability_profile` được đổi. Output process phải có positive evidence
-write probe đã được thử. Thiếu evidence đã thử, thiếu credential/process thật, hoặc nền
-không cho chạy sandbox lồng nhau là `KHONG_DO_DUOC` và **chặn**, không được tính là pass.
+trường `role` và `capability_profile` được đổi. Event stream `codex exec --json` phải có
+tool-call máy đọc được (`apply_patch` hoặc write tool tương đương) với target+payload đúng
+sentinel, kèm tool-result tương ứng; lời tự thuật văn xuôi rằng đã thử không phải evidence.
+Thiếu cặp event ấy, credential/process thật, hoặc nền không cho chạy sandbox lồng nhau là
+`KHONG_DO_DUOC` và **chặn**, không được tính là pass.
+Tầng thi hành là assertion trong `.claude/dev/launcher_test.py` cùng mutation suite của
+successor; không có assertion máy đọc được thì required gate không được xanh bằng prose.
 
 Mỗi tính chất có đột biến riêng chạy trên bản sao tạm, không dùng `.pyc` cũ. Với
 `N10c`/`N10d`, đột biến hạ phép đo xuống argv hoặc thay `codex` bằng child giả phải làm
@@ -184,12 +199,12 @@ ca đích đỏ vì mất marker process thật và kết quả write probe.
 
 | ID | phép đo dương/âm bắt buộc | đột biến phải chết |
 |---|---|---|
-| `N10a` | Claude Executor nhận `acceptEdits`, đúng 15 argv riêng của allowlist §4 và prompt đúng một lần ở vị trí cuối | nối allowlist thành một token, bỏ `--allowedTools`, thêm lại một Git mutation verb, hoặc dời cờ kết thúc để prompt bị nuốt |
+| `N10a` | Claude Executor nhận `acceptEdits`, đúng 15 argv riêng của allowlist §4 và prompt đúng một lần ở vị trí cuối | nối allowlist thành một token, bỏ `--allowedTools`, thêm lại một Git mutation verb, hoặc dời cờ kết thúc để prompt bị nuốt; mutant verb chỉ đo chuỗi allowlist, không đo thẩm quyền tương đương |
 | `N10b` | `acceptEdits` có nhưng allowlist vắng/rỗng ⇒ chặn, child spawn `0` lần | coi mode là đủ quyền |
 | `N10c` | Process Codex Executor thật nhận đúng `-s workspace-write`, thử write probe và sentinel xuất hiện với đúng byte; không xuất hiện/sai byte ⇒ ĐỎ | hạ xuống chỉ đo argv/dùng child giả, hoặc cấp `read-only` |
 | `N10d` | Process Codex Reviewer thật nhận đúng `-s read-only`, thử cùng write probe nhưng bị từ chối; sentinel vẫn vắng và fixture giữ nguyên fingerprint; ghi thành công ⇒ ĐỎ | hạ xuống chỉ đo argv/dùng child giả, hoặc cấp `workspace-write` |
 | `N11` | role/provider/capability thiếu, sai chính tả, không hỗ trợ hoặc tuple chéo ⇒ chặn trước spawn | unknown đi qua hoặc fallback theo provider |
-| `N12` | mọi bypass ở §3–§4 và cờ quyền xung đột ⇒ chặn trước spawn | chỉ chặn một cách viết hoặc âm thầm sửa argv |
+| `N12` | toàn argv ngoài schema đóng ⇒ chặn trước spawn `0` lần; tối thiểu thử `-c 'sandbox_workspace_write.writable_roots=[...]'`, `--config`, `-p`/`--profile` và `--enable`/`--disable` | chỉ lọc `-s`, chỉ chặn một cách viết, cho `REMAINDER` đi qua hoặc âm thầm sửa argv |
 | `N13` | caller đã truyền đúng mode/sandbox/allowlist ⇒ không thêm lần hai, prompt vẫn nguyên | duplicate cờ hoặc bắt oan đường hợp lệ |
 
 Ca `N10c` và `N10d` là một cặp A/B duy nhất: **cùng provider, cùng binary/version, cùng
@@ -213,9 +228,11 @@ cross_review: https://github.com/ducthangho/tra-luat/pull/303#issuecomment-53924
 declared_lease_collision: https://github.com/ducthangho/tra-luat/issues/298#issuecomment-5392499800
 ```
 
-`issue_state` cố ý không được đóng băng trong spec. Preflight của successor phải đọc lại
-Issue #302 trực tiếp từ GitHub, ghi URL + thời điểm đọc + state nhận được vào evidence;
-không đọc được hoặc state không phù hợp với dependency đã khai ⇒ `KHONG_DO_DUOC` và chặn.
+`issue_state` cố ý không được đóng băng trong spec. Preflight của successor đọc lại Issue
+#302 trực tiếp từ GitHub và ghi URL + thời điểm + state vào evidence **chỉ để audit**;
+state ấy không phải vị ngữ dependency. Cổng có thể ĐỎ là phép ancestry exact-SHA bên dưới
+cộng phép quét effective write-set trên toàn bộ lease/ref; thiếu một trong hai phép đo là
+`KHONG_DO_DUOC` và chặn.
 
 PR #303 bắt đầu là hiện vật **pre-lease**, nên lịch sử cũ từ chối dùng nó làm authority
 cho một implementation Codex generation 2 là đúng tại thời điểm đó. Owner sau này đã
@@ -229,9 +246,10 @@ land exact head ấy; merge commit và tree trên là **version authority** ch�
 - cross-review exact head của PR #303 chứng minh review của byte đã land, không chứng minh
   một lineage Codex generation 2 chưa từng tạo commit.
 
-Successor M7 chỉ được cấp lease khi base của nó chứa
-`8ba8acaa4d4e0f8e7a38228ab5b5f16f64cb960c` (đo bằng ancestry, không so tiền tố) và
-đã quét lại effective write-set exclusion trên toàn bộ lease/ref. Va chạm với lease #298
+Successor M7 chỉ được cấp lease khi lệnh `git merge-base --is-ancestor
+8ba8acaa4d4e0f8e7a38228ab5b5f16f64cb960c <successor-base>` trả `rc=0` và đã quét lại
+effective write-set exclusion trên toàn bộ lease/ref; `rc` khác `0` hoặc không chạy được
+đều chặn. Va chạm với lease #298
 được khai ở URL trên là một owner override đã xảy ra, **không** là tiền lệ cho lần cấp
 lease kế tiếp và không được đọc thành write set hiện đã tự do.
 
@@ -239,6 +257,10 @@ lease kế tiếp và không được đọc thành write set hiện đã tự d
 
 - Cần sửa ngoài `launcher.py` + `launcher_test.py`, hoặc vượt 2 tệp / `+300`.
 - Cần thêm một tuple provider/role/capability chưa có bằng chứng trong §3.
-- Ca chỉ đọc mã, child không ghi argv/prompt thật, mutant không chạy hoặc không có răng.
-- Base successor không chứa merge commit #302, hoặc chưa quét lại lease mà M7 đã được khai `ready`.
+- Với `N10a`/`N10b`/`N11`–`N13`, child không ghi argv+prompt cuối thật, mutant không chạy
+  hoặc không có răng.
+- Với `N10c`/`N10d`, không gọi được process Codex thật hoặc event `--json` không chứng minh
+  bằng máy write probe đã được thử ⇒ `KHONG_DO_DUOC` và chặn; cấm hạ xuống child/argv-only.
+- Phép ancestry exact SHA #302 không trả `rc=0`, hoặc chưa quét lại toàn bộ lease/ref mà
+  M7 đã được khai `ready`.
 - Windows hoặc required gate vắng/skipped trên exact head, hoặc review không neo đúng SHA.

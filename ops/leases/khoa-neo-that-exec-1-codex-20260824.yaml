@@ -140,3 +140,4 @@ run_minutes: 1440
 da_bi_thay_the: khoa-neo-that-thu-hoi-claude-20260824   # THEM DUNG MOT DONG — day la co che duy nhat lam mot lease
                         # roi khoi phep dem NGUOI_GIU (lease_publish.py:679).
                         # Viec cua lease nay DA LAND; xem bia mo de biet phep do.
+posted_comment_id: 5402785384   # workflow ghi, ĐỪNG sửa tay

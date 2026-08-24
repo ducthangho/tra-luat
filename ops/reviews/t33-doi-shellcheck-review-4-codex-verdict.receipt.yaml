@@ -1,0 +1,92 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 4 của PR #293 (packet #249 `T33-DOI-SHELLCHECK`).
+#
+# ĐỌC TRƯỚC: biên nhận này được ghi **SAU** khi cả bốn lượt đã chạy xong, bởi CHÍNH phiên
+# thi công — tức bên kém độc lập nhất để khai chúng đã diễn ra thế nào. Phần KIỂM ĐƯỢC
+# không phụ thuộc lời tôi: `verdict_sha256` khoá BYTE của bản trong kho, nên bất kỳ ai
+# sửa nó về sau đều lộ; `evidence_url` trỏ comment đã đăng công khai. Phần TÓM TẮT thì là
+# lời tôi — đọc verdict. ĐỪNG đọc băm ấy thành bằng chứng "nguyên văn": xem `verdict_doi_chieu`.
+#
+# KHÔNG CÓ LEASE REVIEW cho bốn lượt này. Chúng chạy dưới chỉ thị trực tiếp của chủ kho
+# trong phiên, không qua `record-lease`. Ghi thẳng thay vì mượn `lease_id` của executor.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '249'
+packet_slug: T33-DOI-SHELLCHECK
+lease_id: null
+lease_review_KHONG_DUOC_CAP: >-
+  Bốn lượt cross-review của #293 KHÔNG có lease review riêng. Lease đang sống là lease
+  EXECUTOR (`t33-doi-shellcheck-exec-1r5-claude-20260824`). Mượn nó vào ô `lease_id` sẽ
+  khai một quyền chưa ai cấp, nên để `null` và nói ra.
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: ee545cf5afaa0b3286b3cf7fe13dd12ee1ec94f3
+luot: 4
+cross_provider: true
+assurance: cross_approved
+assurance_ghi_chu: >-
+  Executor `claude`, reviewer `codex` — khác nền. NHƯNG verdict do TÀI KHOẢN TÁC GIẢ PR
+  vận chuyển lên GitHub, và `ADR-0040` nói thẳng thứ đó KHÔNG thành merge authorization.
+  Packet `sensitive` vẫn cần human Land Approver readback exact-head.
+
+verdict_path: ops/reviews/t33-doi-shellcheck-review-4-codex-verdict.md
+verdict_sha256: 66962b02de689aeec79bcf266bc229a4e7cd05108a8754500a8ef3ffb0f66152
+verdict_bytes: 6767
+verdict_nguon: >-
+  `codex exec -s workspace-write --skip-git-repo-check --cd <sandbox>` trong container
+  phiên; tệp gốc `<sandbox>/VERDICT4.md`. Người thi công chép và KHÔNG sửa — nhưng đó là LỜI KHAI của tôi, không phải phép đo; xem `verdict_doi_chieu`.
+verdict_doi_chieu: >-
+  BĂM NÀY CHỨNG MINH GÌ, VÀ KHÔNG CHỨNG MINH GÌ — cross-review lượt 1 của #298 bắt đúng chỗ
+  này (`s1-nguyen-van-khong-co-doi-chung`, P1), và chủ kho chốt hướng (a) in-session
+  2026-08-24 ("Chọn a").
+  CHỨNG MINH: bản trong kho không đổi kể từ lúc ghi. `verdict_sha256` đo trên chính tệp
+  `verdict_path`, nên ai sửa nó về sau đều lộ. Đó là CHỐNG SỬA VỀ SAU, và nó thật.
+  KHÔNG CHỨNG MINH: rằng bản chép khớp thứ reviewer đã sinh ra. Băm đo trên BẢN SAO, nên
+  nó chỉ nói bản sao khớp CHÍNH NÓ — một vòng tròn. Muốn cắt vòng phải có một client thứ
+  hai lấy bản gốc rồi băm độc lập.
+  VÌ SAO KHÔNG LÀM ĐƯỢC ĐIỀU ĐÓ Ở ĐÂY: container phiên KHÔNG có đường ấy. REST tới
+  `repos/…` bị proxy chặn 403 bất kể token (đo 15-08 và 17-08, cả có lẫn không token, kết
+  quả y hệt ⇒ chặn theo ĐƯỜNG DẪN, không theo danh tính). Còn đường đọc MCP thì CHUẨN HOÁ
+  thân comment (`'`→`&#39;` · `"`→`&#34;` · `>`→`&gt;` · `<`→`&lt;`), nên `diff` với nó
+  sinh lệch hệ thống — tạo tác của công cụ đọc, không phải bằng chứng.
+  NÊN TRẠNG THÁI ĐÚNG LÀ TRẠNG THÁI THỨ BA: **KHÔNG ĐO ĐƯỢC**, không phải "đã kiểm".
+  NGUỒN CÓ THẨM QUYỀN: tệp trong kho (`authoritative_source: repo_file`). Comment trên PR
+  là BẢN CHIẾU, không phải bản gốc để đối chiếu ngược.
+
+evidence_channel: github_pr_comment
+evidence_url: https://github.com/ducthangho/tra-luat/pull/293#issuecomment-5389795797
+evidence_ghi_chu: >-
+  Comment do tài khoản tác giả PR đăng. Nội dung ở đó là bản CHIẾU có tóm tắt; nguồn có
+  thẩm quyền là tệp `verdict_path` trong kho, neo băm ở trên.
+
+chot_read_only_DO_chu_khong_tin_co:
+  cay_sandbox_sau_luot: 'git status --porcelain rỗng ở cả cay-kho/ và nen-f33c12d/'
+  kho_that_sau_luot: 'git status --porcelain rỗng; HEAD không đổi bởi reviewer'
+
+verdict_usage_caveats:
+- id: P1-luot-4-CON-MO-khi-ghi-bien-nhan-nay
+  noi_dung: >-
+    `r2:215-216` khai `X2` làm *"toàn bộ chân Ubuntu im lặng"* trong khi phép đo ngay trên nó là một
+    **worktree rời** tại `00d4b3d7` cho `88/88, rc=0`. **CHƯA VÁ** lúc biên nhận này được ghi. Đừng
+    đọc PR #293 thành "đã hết finding".
+- id: r4-TU-MAU-THUAN-va-day-la-lan-thu-tu
+  noi_dung: >-
+    Đặc tả `r4` mở đầu *"Bản này sửa **ĐÚNG MỘT** lời khai"* (dòng 16) trong khi chính nó ghi ở dòng
+    109 *"CHƯA AI QUÉT"*. Hai câu ngược nhau, cách 93 dòng — cùng lớp lỗi mà lease `r1`→`r2` đã phải
+    sửa. Đây là **lần thứ tư** trong cùng packet, và cả bốn đều do phiên thi công viết.
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-24T02:10:00Z'
+receipt_ghi_muon: >-
+  Ghi MUỘN, sau khi cả bốn lượt đã xong. Đó chính là khuyết tật mà packet #298 sinh ra để
+  chặn: bộ đếm vòng review đã có sẵn trong kho (`ops/reviews/*.receipt.yaml`) và không ai
+  ghi vào nó — bốn vòng của #249 để lại 0 biên nhận trong khi suite vẫn 98/98 xanh.
+
+receipt_khong_khai:
+- 'Không khai bốn lượt này đã đủ cho land — `ADR-0040` đòi human readback exact-head.'
+- 'Không khai số suite trong verdict là pristine — cả bốn lượt đều phải áp bản vá #296 trước khi đo.'
+- 'Không khai đã quét hết lời khai rộng hơn phép đo trong đặc tả — lượt 4 tìm ra cái thứ hai, và chưa ai chứng minh chỉ có hai.'

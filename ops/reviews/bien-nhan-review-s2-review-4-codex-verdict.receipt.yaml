@@ -1,0 +1,127 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review LƯỢT 4 của PR #304 (packet #298 slice 2).
+#
+# ĐÂY LÀ BIÊN NHẬN ĐẦU TIÊN CỦA PACKET #298, và việc nó tới muộn là CHÍNH KHUYẾT TẬT
+# packet này sinh ra để chặn. Cho tới trước tệp này, `bien-nhan --packet 298` trả
+# rc=11 / 0 biên nhận — tức packet TRƯỢT chính cổng nó xây. Ghi ra đây là để câu ấy
+# thôi đúng, chứ không phải để làm đẹp hồ sơ.
+#
+# BA LƯỢT TRƯỚC KHÔNG CÓ BIÊN NHẬN, và lý do khác nhau — đừng gộp:
+#   luot 1  co verdict that (changes_requested, 3 finding) nhung KHONG ai ghi ra tep
+#   luot 2  BI CAT giua chung boi bo loc noi dung cua nen -> khong co verdict
+#   luot 3  BI CAT y nhu vay -> khong co verdict
+# Hai lượt bị cắt vẫn ĐO ĐƯỢC thật (F1–F4 đến từ đó), nhưng đo được KHÔNG PHẢI verdict.
+
+schema_version: 2
+kind: review_delivery_receipt
+packet_id: '298'
+packet_slug: BIEN-NHAN-REVIEW-DEM-DUOC
+phase_key: BIEN-NHAN-REVIEW-S2
+luot: 4
+role: reviewer
+provider: codex
+executor_provider: claude
+verdict: changes_requested
+reviewed_sha: 8b627e843a3be87f2ceac97f2f147bbadcaa3cdc
+
+verdict_path: ops/reviews/bien-nhan-review-s2-review-4-codex-verdict.md
+verdict_sha256: 031c79915ea5084e995eb4aa117bc6fe065b95a53251d1070e73655b881504e2
+verdict_bytes: 4151
+verdict_nguon: >-
+  `launcher.py run` bọc `codex exec -s workspace-write` trong sandbox
+  `scratchpad/rv298-r4`; mirror là CLONE RỜI detached đúng `reviewed_sha`.
+  run_id `d7be84f4aa834fe3a7fb6990194b35d2`, `trang_thai: xong`, `ma_thoat: 0`, 922.4s,
+  `prompt_kin_hoan_toan: true` (prompt neo bằng sha256, con đọc BẢN CHỤP bất biến).
+  Tệp gốc `<sandbox>/VERDICT.md`, chép không sửa.
+  CÁC TRƯỜNG ẤY NAY CHÉP THẲNG XUỐNG `run_neo` DƯỚI ĐÂY. Bản đầu chỉ nhắc `run_id` trong
+  văn xuôi rồi khai là "kiểm được" — mà `run.json` sống trong sandbox ephemeral, không vào
+  kho, nên người đọc KHÔNG tra được gì. Cross-review S1 bắt đúng chỗ đó (P1
+  `run-anchor-va-evidence-url-khong-truy-xuat`).
+
+verdict_doi_chieu: >-
+  BĂM NÀY CHỨNG MINH GÌ, VÀ KHÔNG CHỨNG MINH GÌ — theo hướng (a) chủ kho chốt 24-08.
+  CHỨNG MINH: bản trong kho không đổi kể từ lúc ghi; ai sửa về sau đều lộ.
+  KHÔNG CHỨNG MINH: bản chép khớp thứ reviewer sinh ra — băm đo trên BẢN SAO nên chỉ
+  nói bản sao khớp CHÍNH NÓ. Cắt vòng tròn ấy cần một client thứ hai lấy bản gốc rồi
+  băm độc lập, mà container này không có đường ấy (REST tới `repos/…` bị proxy chặn
+  403 bất kể token; đường đọc MCP chuẩn hoá thực thể HTML). Trạng thái đúng là
+  KHÔNG ĐO ĐƯỢC, không phải "đã kiểm".
+  Ở lượt này có MỘT lớp neo thêm mà ba lượt trước không có: `run.json` của launcher
+  ghi `prompt_sha256`, `head`, `worktree_sach`, `thoi_luong_giay` — nên "prompt nào
+  đã chạy trên head nào" thì kiểm được, kể cả khi nội dung verdict thì không.
+
+run_neo:
+  # Chép từ `run.json` của `launcher.py run`. `run.json` KHÔNG vào kho (nó nằm trong
+  # sandbox ephemeral), nên nếu không chép xuống đây thì lớp neo này không tồn tại với
+  # người đọc. Đây là dữ liệu, không phải lời khai.
+  run_id: d7be84f4aa834fe3a7fb6990194b35d2
+  prompt_sha256: f5aa7c2c05a7bd4534911b230f419bec393b8968e6478863f5d6688727d5b588
+  head_luc_chay: 8b627e843a3be87f2ceac97f2f147bbadcaa3cdc
+  worktree_sach: true
+  thoi_luong_giay: 922.422
+  prompt_kin_hoan_toan: true
+  con_kiem_duoc_gi: >-
+    Kiểm được: prompt NÀO đã chạy trên head NÀO, và cây lúc chạy sạch. KHÔNG kiểm được:
+    nội dung verdict có đúng là thứ reviewer sinh ra hay không — xem `verdict_doi_chieu`.
+
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/pull/309
+evidence_url_ghi_chu: >-
+  TRỎ #309, KHÔNG PHẢI #304. Bản đầu trỏ #304 và đó là SAI: tệp verdict KHÔNG tồn tại ở
+  merge commit của #304 (`b0af6b4d`) — đo bằng `git cat-file -e` — mà lần đầu xuất hiện ở
+  `21fd979`, tức PR #309. Một `evidence_url` trỏ nơi không có hiện vật thì không phải bằng
+  chứng. Cross-review S1 bắt (P1).
+authoritative_source: repo_file
+
+ket_luan_tom_tat: >-
+  Bốn finding của ba lượt trước: TẤT CẢ `ĐÃ VÁ THẬT`, mỗi cái xác nhận bằng cách đột
+  biến BẢN VÁ rồi thấy ca đích ĐỎ — không phải bằng "có thêm ca test". Bốn chiều
+  BẮT OAN đều khớp. Trong BẢY lời khai của EVIDENCE: **SÁU** đo lại khớp, **MỘT**
+  ("trạng thái GitHub trực tiếp") là **KHÔNG ĐO ĐƯỢC**. Bản đầu viết "bảy … đều khớp;
+  riêng … KHÔNG ĐO ĐƯỢC" — một câu tự mâu thuẫn, và nó XOÁ trạng thái thứ ba đúng kiểu
+  packet này sinh ra để chặn. Cross-review S1 bắt (P2 `tom-tat-298-bien-khong-do-duoc-thanh-khop`).
+  MỘT P1 MỚI: `bn-sha-viet-tat-nhan-doi-vong` — một commit ghi bằng ID đầy đủ và bằng
+  bản rút gọn CỦA CHÍNH NÓ đếm thành HAI. Phiên điều phối đã tái hiện độc lập.
+
+verdict_usage_caveats:
+  - id: luot-4-la-luot-DAU-TIEN-hoan-tat
+    noi_dung: >-
+      Đừng đọc "lượt 4" thành "đã có bốn verdict". Đây là verdict thứ HAI tồn tại thành
+      tệp của packet này (lượt 1 có verdict nhưng không ai ghi ra), và là lượt đầu tiên
+      chạy trọn từ đầu đến cuối.
+  - id: reviewer-KHONG-tu-soan-phan-chung
+    noi_dung: >-
+      Lượt này CẤM reviewer tự soạn chuỗi tấn công — đó là ràng buộc do phiên điều phối
+      đặt, sau khi hai lượt trước chết vì đúng việc ấy. Hệ quả: P1 `bn-sha-viet-tat`
+      được reviewer mô tả BẰNG LỜI, phần đo động là do phiên điều phối chạy. Nên độ độc
+      lập của finding ấy THẤP HƠN ba finding kia, và reviewer tự ghi `ĐỘ TIN: cao về
+      lỗi logic, trung bình về tái hiện động`.
+  - id: head-DA-DOI-sau-khi-review
+    noi_dung: >-
+      `reviewed_sha` là `8b627e84`. Head PR sau đó chuyển `8b627e84 -> afbf69b3 ->
+      772dfdb1` để áp hướng (c). Đo bằng so AST đã bỏ docstring, ĐO THẲNG hai đầu:
+      `8b627e84 → 772dfdb1` lệch **6 node** (chặng một 4, chặng hai 2), TOÀN BỘ là hằng
+      chuỗi in ra, **0 nhánh điều khiển**. Bản đầu ghi "4 node … cộng một lần sửa tiếp 2
+      dòng" — tức chỉ đếm chặng ĐẦU rồi mô tả chặng sau bằng lời, nên con số đứng một mình
+      thì THIẾU. Cross-review S1 bắt (P2 `caveat-head-dem-thieu-hai-node`).
+      Tức phần LOGIC mà lượt 4 đã review thì KHÔNG đổi. Nhưng `reviewed_sha` vẫn KHÔNG
+      khớp head, và điều đó phải do chủ kho quyết, không phải do biên nhận này khẳng định.
+  - id: tai-hien-cua-DIEU-PHOI-khong-co-hien-vat
+    noi_dung: >-
+      Biên nhận này (và thân PR #304) khai "phiên điều phối đã tái hiện độc lập" P1
+      `bn-sha-viet-tat-nhan-doi-vong`. Phép chạy ấy CÓ THẬT nhưng chạy trong phiên, và
+      KHÔNG để lại hiện vật nào trong kho — không lệnh, không output, không run id. Nên
+      với người đọc, nó ở trạng thái **KHÔNG ĐO ĐƯỢC**, không phải "đã kiểm". Cross-review
+      S1 bắt (P2). Giữ câu ấy nhưng hạ đúng trạng thái, thay vì xoá cho gọn.
+  - id: P1-moi-CHUA-va-o-day
+    noi_dung: >-
+      `bn-sha-viet-tat-nhan-doi-vong` CỐ Ý không vá ở #304. Chủ kho chốt hướng (c) —
+      hạ lời khai đơn vị đếm xuống "số biên nhận PHÂN BIỆT ĐƯỢC" và khai thẳng chỗ hở —
+      còn việc hỏi `git rev-parse` tách thành packet #305. Lý do: đây là dạng THỨ TƯ
+      của cùng một bệnh trong bốn lượt, và bốn lần là tín hiệu về quyết định gốc chứ
+      không phải về bản vá.
+
+delivered: true
+delivered_by: claude-session
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-24T11:20:48Z'
+recorder_cung_la_nguoi_thi_cong: true

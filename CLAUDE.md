@@ -262,8 +262,8 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   **vắng mặt** ở đúng lần đẩy đầu tiên, và vắng mặt trông y hệt xanh. Nên sau MỌI lần đẩy mà bạn
   cần một workflow chạy, hãy ĐO là nó đã chạy (`list_workflow_runs` lọc theo nhánh), đừng suy từ
   việc `git push` thành công. Chưa có phản chứng cho ca này — dựng được nó thì mới nói tới nguyên nhân.
-- **PHÉP ĐO SO HAI VẾ PHẢI DỰNG CẢ HAI TRONG **MỘT** LỆNH — năm lần trong một phiên, rig tự đẻ ra hồi quy
-  không tồn tại.** Đo 24-08-2026. Không lần nào lộ ra bằng đọc kết quả; mỗi lần đều trông y hệt một hồi quy
+- **PHÉP ĐO DELTA SO HAI VẾ PHẢI DỰNG CẢ HAI TRONG **MỘT** LỆNH — BỐN lần trong một phiên, rig tự đẻ ra
+  hồi quy không tồn tại.** Đo 24-08-2026. Không lần nào lộ ra bằng đọc kết quả; mỗi lần đều trông y hệt một hồi quy
   thật, và mỗi lần suýt thành một báo cáo sai gửi chủ kho.
   · `git worktree` **hai lần** — `chay_cac_probe()` trong `.claude/dev/launcher.py` — hàm của đường PHÓNG, KHÔNG phải của `doctor` — ném
   `Chan(MA_WORKTREE)` khi `.git` là **TỆP**, nên `packet_loop_test` cho `234/237` (3 đỏ) trong worktree và
@@ -272,13 +272,30 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   · **kho-thật-vs-clone** — chạy nhánh trong kho chính còn nền trong clone ⇒ 3 ca đỏ giả, tất cả là
   `not a git repository`.
   · **`clone` + `cp` + `checkout` đá nhau** ⇒ `78/97`; dựng lại tử tế ⇒ `96/97`. Delta thật = **0**.
-  · Và lần thứ năm cùng ngày, cùng bệnh, sau khi tôi đã tự nhắc mình về bốn lần trước.
-  **Thuốc duy nhất luôn đúng:** một lệnh, hai vòng lặp, cùng các bước, chạy liền nhau —
+  · Lúc viết, tôi đếm **năm**. Cross-review đòi phép đo cho từng ca và chỉ **bốn** ca trên có SHA/lệnh/output
+  để tái hiện; ca thứ năm không có dấu hiệu nào tách nó khỏi ca `clone`+`cp`+`checkout` (chúng dùng chung
+  cặp số `78/97` · `96/97`). Nên con số là **BỐN ĐO ĐƯỢC**, và ca thứ năm là `KHÔNG ĐO ĐƯỢC` — không phải
+  bị bác, chỉ là không tách được. Ghi vậy vì một con số tròn hơn dữ liệu chính là thứ mục dưới đây tố cáo.
+  **Thuốc — và PHẠM VI của nó, vì bản đầu viết quá rộng và cross-review bác đúng chỗ đó:** một lệnh, hai
+  vòng lặp, cùng các bước, chạy liền nhau —
   `for pair in "nen:$SHA_A" "sau:$SHA_B"; do clone; checkout; config core.abbrev 7; done` rồi mới chạy đo.
   Dựng hai vế ở hai thời điểm là mở cửa cho môi trường trôi giữa chừng.
+  **Luật này CHỈ áp cho phép đo DELTA MÃ/NỘI DUNG** — câu hỏi *"hai commit này khác nhau những gì"*, nơi
+  rig là NHIỄU và phải bị triệt. Nó **KHÔNG** áp cho phép đo MÔI TRƯỜNG — câu hỏi *"hai rig này khác nhau
+  những gì"*, nơi rig chính là BIẾN ĐANG ĐO. Bản đầu phát biểu cho MỌI phép đo hai vế và gọi đây là
+  "thuốc duy nhất luôn đúng"; như thế nó **cấm chính phép A/B mà `.claude/skills/cross-review/SKILL.md`
+  bắt chạy** (đối chiếu cổng: nền bằng worktree, sandbox bằng clone, CÙNG một commit) — và phép ấy có giá
+  trị chẩn đoán thật, chính nó cho `234/237` so `235/237` ở gạch đầu dòng trên. Hai vế của phép đo môi
+  trường phải khác **đúng một biến**; clone cả hai thì không còn gì để đo.
+  Trớ trêu đúng chỗ đáng nhớ: một luật viết ra để chống "rig đẻ hồi quy giả" mà phát biểu quá rộng thì
+  chính nó **xoá mất phép đo bắt được rig**.
   **Kèm một hệ quả ít ai ngờ:** `doctor --json` KHÔNG gọi `chay_cac_probe`, nên ai đi kiểm giả thuyết
-  "worktree có phải nguyên nhân không" bằng `doctor` sẽ thấy `workspace = {}` ở CẢ HAI rig và kết luận
-  **NGƯỢC**. Tôi đã đi đúng đường ấy, đọc sự IM LẶNG thành BẰNG CHỨNG PHỦ ĐỊNH, rồi tự bác nhầm kết luận
+  "worktree có phải nguyên nhân không" bằng `doctor` sẽ thấy **KHÔNG CÓ KHOÁ `workspace` NÀO** trong JSON
+  ở CẢ HAI rig — và kết luận **NGƯỢC**. Nói cho đúng vì bản đầu viết `workspace = {}` và cross-review bác:
+  `{}` đọc thành *"doctor đã đo workspace và thấy rỗng"*, trong khi sự thật là **doctor chưa từng đo** —
+  khoá ấy vắng mặt hoàn toàn (`doctor --json` trả 13 khoá top-level, không có `workspace`, không có
+  `probe`). Viết sai một ký tự ở đây là tái phạm ĐÚNG bệnh "có MẶT khác có ĐO" ngay bên trong bài học
+  về nó. Tôi đã đi đúng đường ấy, đọc sự IM LẶNG thành BẰNG CHỨNG PHỦ ĐỊNH, rồi tự bác nhầm kết luận
   đúng của chính mình — mất một lượt. Kiểm ở đường PHÓNG, đừng kiểm ở `doctor`.
 - **REVIEWER BỊ CHẶN: hỏi VÌ SAO trước khi kết luận ĐƯỜNG TẮC.** Đo 24-08-2026. Hai lượt cross-review
   liên tiếp chết giữa chừng vì bộ lọc nội dung của nền (`flagged for possible cybersecurity risk`), không
@@ -289,7 +306,20 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   nhiệm vụ của tôi** ép nó sinh nội dung bị chặn.
   Chữa bằng **đổi phân công, không đổi provider**: mọi phản chứng đã nằm sẵn trong cây, nên reviewer chỉ
   **CHẠY** chúng và **ĐỘT BIẾN BẢN VÁ** để đo răng; hướng thử nào cần soạn nội dung dạng ấy thì **mô tả
-  bằng lời** cho phiên điều phối viết. Lượt kế tiếp chạy trọn 1146s, `ma_thoat=0`, **0** lần chạm bộ lọc.
+  bằng lời** cho phiên điều phối viết. Lượt kế tiếp chạy trọn **922,4s**, `ma_thoat=0`
+  (biên nhận `ops/reviews/bien-nhan-review-s2-review-4-codex-verdict.receipt.yaml`, `thoi_luong_giay:
+  922.422`).
+  **Con số ấy sửa một lời khai SAI của bản đầu, và cái sai đáng ghi hơn con số:** bản đầu viết `1146s`.
+  1146s có thật — nhưng nó là lượt cross-review **S1 của PR #309**, một lượt KHÁC và MUỘN HƠN. Tôi lấy
+  thời lượng của lượt này gán cho lượt kia để chứng minh rằng "đổi phân công đã chữa xong". Đó đúng là
+  bệnh **ghép sai lượt** mà tệp này đã tố cáo ở mục *"hỏi chỗ TIỆN TAY thay vì hỏi chỗ KẾT LUẬN ĐƯỢC
+  GHI"* — và lần này nạn nhân là chính đoạn viết ra để tổng kết một sự cố.
+  Kèm theo: vì transcript của HAI lượt chết đã mất, mệnh đề *"bộ lọc CHỈ bắn khi reviewer tự soạn"* là
+  `KHÔNG ĐO ĐƯỢC`, không phải đã chứng minh. Thứ đo được chỉ là **thứ tự**: đổi phân công rồi có một lượt
+  chạy trọn. Tương quan, không phải nhân quả — đừng đọc mạnh hơn thế.
+  **KHÔNG CỔNG NÀO CANH HAI BÀI HỌC NÀY.** Không có gì ép phép A/B phải dựng cùng một lệnh, và không có gì
+  ép reviewer đừng tự soạn nội dung nhạy cảm. `doctrine-scan` và `doc-claims-check` chỉ canh HÌNH THỨC.
+  Cả hai mục là kỷ luật đọc và kỷ luật giao việc — nói thẳng ra đây kẻo người đọc tưởng đã có cơ chế.
   Kèm `launcher.py run` để một lượt chết vẫn **được ghi nhận** (`run.json`) thay vì bốc hơi — hai lượt
   trước mất sạch vì gọi `codex exec` trần.
   **Vì sao đáng ghi dù đã có bài học họ hàng:** `.claude/dev/launcher.py` chép sẵn NGUYÊN câu chuyện (khối chú thích dài ngay trên `_RE_BIEN_NHAY_CAM`) một phiên

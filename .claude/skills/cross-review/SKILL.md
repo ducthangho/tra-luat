@@ -138,9 +138,14 @@ chiếu, vì mọi finding về cổng từ nó đều đáng ngờ.
 Chiều ngược lại KHÔNG đúng: **hai mã thoát bằng nhau chưa chứng minh môi trường tương đương** — nó chỉ
 nói cổng ấy không phân biệt được. Ghi trong `EVIDENCE.md` là đã đối chiếu cổng NÀO, đừng khái quát.
 
-**Phép so hai nguồn phải chạy TRÊN KHO NGUỒN, TRƯỚC khi clone** — chạy nó trong sandbox là vô nghĩa:
-ở đó `origin` trỏ vào chính mirror vừa tạo, nên `ls-remote` chỉ đếm head của chính nó và **không có
-nguồn có thẩm quyền nào để so**. Mirror kế thừa đúng cái mù của kho nguồn, nên chỗ duy nhất chặn được
+**Phép so hai nguồn phải chạy TRÊN KHO NGUỒN, TRƯỚC khi clone** — chạy nó trong sandbox là vô nghĩa ở
+**cả hai** trạng thái của `origin`, nhưng vì hai lý do KHÁC NHAU, và reviewer phải ghi đúng lý do của
+trạng thái mình đang đứng:
+· **trước `set-url`** — `origin` trỏ vào chính mirror vừa tạo, nên `ls-remote` `rc=0` và **đếm head của
+chính mirror** (đo được: 201 head), tức không có nguồn có thẩm quyền nào để so;
+· **sau `set-url`** — `origin` là URL HTTPS thật nhưng sandbox không ra được mạng, nên `ls-remote`
+`rc=128`, **0 dòng**. Nó KHÔNG "đếm mirror": nó không đếm gì cả.
+Đừng chép câu của trạng thái kia — đó là chỗ bản trước đã tự mâu thuẫn. Mirror kế thừa đúng cái mù của kho nguồn, nên chỗ duy nhất chặn được
 là trước bước clone (luật đầy đủ + lệnh `comm`: `CLAUDE.md`, mục `for-each-ref` đọc bộ đệm):
 
 ```bash
@@ -179,8 +184,10 @@ mirror cục bộ; sau `set-url` nó là URL HTTPS **không gọi tới được
 mình đang đứng, chứ đừng chép câu có sẵn.
 
 Hệ quả thực hành: phép so hai nguồn (`ls-remote` ↔ `for-each-ref`) chạy **TRONG** sandbox là vô nghĩa
-dù `origin` trông như URL thật — nó vẫn chỉ đếm được thứ mirror đã nhận. Chỗ duy nhất chặn được vẫn là
-**trước bước clone**, trên kho nguồn.
+dù `origin` trông như URL thật. Nói cho chật, vì bản trước viết "nó vẫn chỉ đếm được thứ mirror đã
+nhận" và câu ấy SAI sau `set-url`: lúc đó `ls-remote` gọi HTTPS và **thất bại** (`rc=128`, 0 dòng) —
+không đếm mirror, không đếm gì. Kết luận đúng cho cả hai trạng thái là **không đo được GitHub từ
+sandbox**; chỗ duy nhất chặn được vẫn là **trước bước clone**, trên kho nguồn.
 
 ## Khung `VERDICT.md` bắt reviewer sinh ra
 

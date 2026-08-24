@@ -175,12 +175,28 @@ tên, arity và giá trị mà launcher sinh/nhận cho tuple §3; không có pa
 tên+giá trị cần thiết. Như vậy cấu hình sandbox không lọt qua một cờ chưa được người viết
 blacklist nghĩ tới.
 
-## 5. Nghiệm thu successor — đo argv cuối và process thật
+## 5. Nghiệm thu successor — tách gate hồi quy và bằng chứng năng lực
 
-`N10a`, `N10b` và `N11`–`N13` chạy qua `launcher run` với child ghi argv/đầu vào và
-số lần spawn; không kiểm một biến trung gian hay chỉ grep mã. Riêng `N10c`/`N10d`
-**cấm child giả**: phải gọi executable `codex` thật đã ghi version, qua chính
-`launcher run`, và đo kết quả của một lần ghi thật trong workspace fixture.
+Hai câu hỏi sau thuộc hai tầng khác nhau; gộp chúng vào một required suite sẽ làm cổng
+phụ thuộc credential thay vì đo hồi quy launcher:
+
+| câu hỏi | tầng | cần credential? |
+|---|---|---|
+| CLI có thật sự cưỡng chế sandbox không? | năng lực | **có** |
+| launcher có sinh đúng argv/schema không? | hồi quy, required gate | **không** |
+
+Required gate trong `.claude/dev/launcher_test.py` cùng mutation suite phải **offline và
+tất định**. `N10a`, `N10b`, `N11`–`N13` và phần hồi quy của `N10c`/`N10d` chạy qua
+`launcher run` với child ghi argv/đầu vào và số lần spawn: chúng đo argv cuối, schema đóng
+trên toàn bộ argv, xung đột và mutation mà không cần credential. Child ghi argv chỉ hợp lệ
+ở tầng này và không bao giờ là bằng chứng hoàn tất phần năng lực của `N10c`/`N10d`.
+Ca process thật không thuộc required gate ngay từ đầu; vắng credential ở gate này vì vậy
+không phải một ca bị bỏ qua trá hình, và suite không được rẽ nhánh hay báo pass cho ca ấy.
+
+Phần năng lực của `N10c`/`N10d` là một phép đo riêng qua `workflow_dispatch` hoặc đo tay,
+không phải ca test do feature cung cấp trong required suite. Nó phải sinh biên nhận neo
+exact SHA của successor, version executable và fingerprint fixture. Phép đo ấy **cấm child
+giả**: phải gọi executable `codex` thật qua chính `launcher run` và đo một lần ghi thật.
 
 Fixture là một clone tạm độc lập, có fingerprint trước-run và sentinel vắng. Hai lượt
 dùng cùng binary/provider `openai_codex`, cùng workspace đã khôi phục về đúng fingerprint,
@@ -189,20 +205,21 @@ trường `role` và `capability_profile` được đổi. Event stream `codex e
 tool-call máy đọc được (`apply_patch` hoặc write tool tương đương) với target+payload đúng
 sentinel, kèm tool-result tương ứng; lời tự thuật văn xuôi rằng đã thử không phải evidence.
 Thiếu cặp event ấy, credential/process thật, hoặc nền không cho chạy sandbox lồng nhau là
-`KHONG_DO_DUOC` và **chặn**, không được tính là pass.
-Tầng thi hành là assertion trong `.claude/dev/launcher_test.py` cùng mutation suite của
-successor; không có assertion máy đọc được thì required gate không được xanh bằng prose.
+`KHONG_DO_DUOC` và **chặn nghiệm thu năng lực**, không được tính là pass; required gate
+xanh không thay được biên nhận này. Biên nhận hạ xuống argv-only hoặc child giả không hợp
+lệ vì thiếu marker process thật và cặp event/result. Ở tầng hồi quy, thiếu assertion máy
+đọc được về argv/schema hoặc mutation tương ứng thì required gate không được xanh bằng prose.
 
-Mỗi tính chất có đột biến riêng chạy trên bản sao tạm, không dùng `.pyc` cũ. Với
-`N10c`/`N10d`, đột biến hạ phép đo xuống argv hoặc thay `codex` bằng child giả phải làm
-ca đích đỏ vì mất marker process thật và kết quả write probe.
+Mỗi tính chất hồi quy có đột biến riêng chạy trên bản sao tạm, không dùng `.pyc` cũ.
+Với biên nhận năng lực `N10c`/`N10d`, evidence bị hạ xuống argv hoặc thay `codex` bằng
+child giả phải bị bộ kiểm bác vì mất marker process thật và kết quả write probe.
 
 | ID | phép đo dương/âm bắt buộc | đột biến phải chết |
 |---|---|---|
 | `N10a` | Claude Executor nhận `acceptEdits`, đúng 15 argv riêng của allowlist §4 và prompt đúng một lần ở vị trí cuối | nối allowlist thành một token, bỏ `--allowedTools`, thêm lại một Git mutation verb, hoặc dời cờ kết thúc để prompt bị nuốt; mutant verb chỉ đo chuỗi allowlist, không đo thẩm quyền tương đương |
 | `N10b` | `acceptEdits` có nhưng allowlist vắng/rỗng ⇒ chặn, child spawn `0` lần | coi mode là đủ quyền |
-| `N10c` | Process Codex Executor thật nhận đúng `-s workspace-write`, thử write probe và sentinel xuất hiện với đúng byte; không xuất hiện/sai byte ⇒ ĐỎ | hạ xuống chỉ đo argv/dùng child giả, hoặc cấp `read-only` |
-| `N10d` | Process Codex Reviewer thật nhận đúng `-s read-only`, thử cùng write probe nhưng bị từ chối; sentinel vẫn vắng và fixture giữ nguyên fingerprint; ghi thành công ⇒ ĐỎ | hạ xuống chỉ đo argv/dùng child giả, hoặc cấp `workspace-write` |
+| `N10c` | Hồi quy: argv cuối có đúng `-s workspace-write` và toàn schema đóng. Năng lực: process Codex Executor thật thử write probe, sentinel xuất hiện đúng byte; vắng/sai ⇒ ĐỎ | đổi sandbox/schema phải làm required gate đỏ; hạ biên nhận xuống argv/child giả hoặc cấp `read-only` không được công nhận |
+| `N10d` | Hồi quy: argv cuối có đúng `-s read-only` và toàn schema đóng. Năng lực: process Codex Reviewer thật thử cùng write probe nhưng bị từ chối; sentinel vắng, fixture nguyên fingerprint; ghi được ⇒ ĐỎ | đổi sandbox/schema phải làm required gate đỏ; hạ biên nhận xuống argv/child giả hoặc cấp `workspace-write` không được công nhận |
 | `N11` | role/provider/capability thiếu, sai chính tả, không hỗ trợ hoặc tuple chéo ⇒ chặn trước spawn | unknown đi qua hoặc fallback theo provider |
 | `N12` | toàn argv ngoài schema đóng ⇒ chặn trước spawn `0` lần; tối thiểu thử `-c 'sandbox_workspace_write.writable_roots=[...]'`, `--config`, `-p`/`--profile` và `--enable`/`--disable` | chỉ lọc `-s`, chỉ chặn một cách viết, cho `REMAINDER` đi qua hoặc âm thầm sửa argv |
 | `N13` | caller đã truyền đúng mode/sandbox/allowlist ⇒ không thêm lần hai, prompt vẫn nguyên | duplicate cờ hoặc bắt oan đường hợp lệ |
@@ -259,8 +276,11 @@ lease kế tiếp và không được đọc thành write set hiện đã tự d
 - Cần thêm một tuple provider/role/capability chưa có bằng chứng trong §3.
 - Với `N10a`/`N10b`/`N11`–`N13`, child không ghi argv+prompt cuối thật, mutant không chạy
   hoặc không có răng.
-- Với `N10c`/`N10d`, không gọi được process Codex thật hoặc event `--json` không chứng minh
-  bằng máy write probe đã được thử ⇒ `KHONG_DO_DUOC` và chặn; cấm hạ xuống child/argv-only.
+- Với phần hồi quy `N10c`/`N10d`, argv/schema hoặc mutation offline không có assertion
+  máy đọc được ⇒ required gate đỏ; credential không phải đầu vào của tầng này.
+- Với phần năng lực `N10c`/`N10d`, không gọi được process Codex thật hoặc event `--json`
+  không chứng minh bằng máy write probe đã được thử ⇒ `KHONG_DO_DUOC` và chặn nghiệm thu;
+  cấm dùng required gate xanh hoặc hạ xuống child/argv-only để thay biên nhận.
 - Phép ancestry exact SHA #302 không trả `rc=0`, hoặc chưa quét lại toàn bộ lease/ref mà
   M7 đã được khai `ready`.
 - Windows hoặc required gate vắng/skipped trên exact head, hoặc review không neo đúng SHA.

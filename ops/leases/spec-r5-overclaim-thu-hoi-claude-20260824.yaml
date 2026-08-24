@@ -76,3 +76,4 @@ canh_bao_cho_nguoi_thi_hanh: >-
   ĐỪNG đọc tệp này thành "được cấp quyền". `access: none`, `write_set: []`,
   `lease_expires_at_utc` == `leased_at_utc` (hết hạn ngay lúc sinh). Nếu bạn cần ghi
   `ops/specs/t33-doi-shellcheck-r5.md` thì phải xin lease MỚI của chủ kho.
+posted_comment_id: 5393283126   # workflow ghi, ĐỪNG sửa tay

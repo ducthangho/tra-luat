@@ -202,3 +202,8 @@ thay_the_ly_do: >-
   neo cho 7 finding là ~99 dòng, 150 còn dư.
   Ghi thành bản MỚI thay vì sửa đè, theo nếp đã chốt.
 posted_comment_id: 5394673301   # workflow ghi, ĐỪNG sửa tay
+da_bi_thay_the: launcher-r3-va-p1p2-exec-1r4-codex-20260824
+da_bi_thay_the_ly_do: >-
+  `spec-310-06` (cross-review vòng 1, PR #310): `canh_bao_cho_nguoi_thi_hanh (3)` mâu thuẫn với
+  `vung_duoc_phep_cham` trong cùng tệp — câu cảnh báo giữ nguyên phạm vi HẸP của revision 2, đúng
+  cái lỗi revision 3 sinh ra để sửa. Cộng `viec_cua_luot_nay` chỉ mô tả lượt 1.

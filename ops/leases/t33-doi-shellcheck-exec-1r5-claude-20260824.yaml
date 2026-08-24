@@ -1,0 +1,323 @@
+# Lease EXECUTOR — `T33-DOI-SHELLCHECK` (#249), lượt 1 — neo đặc tả r3.
+# BẢN SỬA ĐỔI 5: NỚI write set sang `ops/specs/` để đóng NGUỒN của P2 (đặc tả r4).
+#
+# Packet gộp N1 của #269 theo quyết định người giữ kho (#269 comment 5384370472: "N3 đi trước,
+# N1 gộp cùng"). N1 chiếu vào `ops/lease_publish_test.py` vốn ĐÃ có trong write set của r1,
+# nên gộp KHÔNG nới quyền ghi.
+#
+# CẢNH BÁO CHO NGƯỜI THI HÀNH — đọc trước khi gõ dòng đầu tiên: đặc tả có BA bản và cả ba còn
+# hiệu lực. r3 chỉ ghi phần THAY ĐỔI; mọi thứ r3 không nêu thì r2, rồi r1, nguyên hiệu lực.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 249
+packet_id: T33-DOI-SHELLCHECK
+phase_key: T33-DOI-SHELLCHECK
+revision: 5
+generation: 1
+lease_id: t33-doi-shellcheck-exec-1r5-claude-20260824
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+spec_path: ops/specs/t33-doi-shellcheck-r3.md
+spec_sha256_required: 78c3ecb40eb8dd7dcf628ef7ea9a372aae5cfbf7a4fcfd25bb4ec7f32fe6ea0d
+spec_ke_thua:
+  - {path: ops/specs/t33-doi-shellcheck.md,    sha256: 1405d390ca9376725517d01ef5b8d1abffd6a09d78d2b7206c2f068e7711f4da}
+  - {path: ops/specs/t33-doi-shellcheck-r2.md, sha256: b9620d17b86f503b12d93359fb6d3423d29c034c29ab372f40cc5d7089b40e71}
+spec_status: dong_bang
+spec_da_len_master: 'PR #288 merged f33c12db — cả r1/r2/r3 tra được từ master, băm kiểm khớp'
+spec_duyet_boi: ducthangho
+spec_note: >-
+  r3 KHÔNG đặc tả gì mới. Nó làm đúng việc r2 tự ra lệnh: đo lại trên base thật. Cả ba thứ r2 dặn
+  đo đều trôi, cộng một thứ r2 không lường (tên ca `t89` đã bị #244 chiếm). Cấp lease theo r2
+  nguyên trạng thì executor ĐỎ ở MỌI tiêu chí W11–W13 — không phải vì bản vá sai mà vì số cũ.
+
+write_set:
+  - ops/lease_publish_test.py
+  - ops/specs/t33-doi-shellcheck-r4.md
+write_set_note: >-
+  ĐÚNG MỘT đường dẫn, không ký tự đại diện. Đường ấy là TOÀN BỘ quyền ghi của lease này;
+  đường thứ ba BẤT KỲ phải có lease sửa đổi, không ngoại lệ. Trần ADR-0044 (`sensitive`: ≤3 tệp)
+  còn dư một suất tệp — suất ấy KHÔNG phải giấy phép: trần là NGƯỠNG KÍCH THƯỚC, không phải
+  giấy phép đường dẫn. Hai trục khác nhau; gộp lại là fail-open.
+write_set_khong_ai_cuong_che: >-
+  ĐO 23-08-2026: KHÔNG tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không
+  phải cổng. Ngoài write set ⇒ DỪNG và xin lease sửa đổi.
+
+branch: claude/t33-doi-shellcheck-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: f33c12db19e7bcc0b18b394635a142c9d45d671d
+start_from_sha: f33c12db19e7bcc0b18b394635a142c9d45d671d
+reviewed_sha_required: f33c12db19e7bcc0b18b394635a142c9d45d671d
+base_ghi_chu: >-
+  master lúc cấp. Nếu master đã đi tiếp khi phiên thi công mở, PHẢI đo lại toàn bộ bảng
+  `nghiem_thu` của r3 trên base mới — cả 8 ô đều neo vào 5561b6b4. master đã đi 27 commit trong
+  1,5 giờ ngày 23-08, tức số trong r3 có thể hết hạn nhanh.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 120
+  don_vi: '`git diff --numstat <base_sha>..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  da_dung: 0
+  ghi_chu: >-
+    Đơn vị viết đủ CÓ CHỦ ĐÍCH — đây đúng câu mà N4 của #269 tồn tại để sửa. Lease #238 viết
+    `git diff --numstat ba82b06f..HEAD -> <= 3 tệp` mà KHÔNG nhắc write set; đọc đúng chữ thì
+    range ấy ra 58 tệp. Ở đây phạm vi được nêu thẳng trong `don_vi`.
+    Số đo được: M3 = 16 (ca `t98` kèm docstring, đã chạy trên 5561b6b4). M4 ~2–4, chưa chốt câu
+    chữ. M1+M2 CHƯA CÓ SỐ NÀO — 120 là ước lượng có neo, không phải số đo. Vượt ⇒ DỪNG trước
+    review, khai lý do theo ADR-0044, xin bản sửa đổi. KHÔNG tự nới.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-23 — sau khi được trình ba đường (a)/(b)/(c) cho năm lease đã tiêu,
+  và được trình rằng r2 đã hỏng số: "Tôi đồng ý theo đề xuất, triển khai, tôi cấp quyền đầy đủ,
+  kể cả gia hạn."
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+thay_the_cho: t33-doi-shellcheck-exec-1r4-claude-20260824
+thay_the_ly_do: >-
+  Chủ kho chỉ thị in-session 2026-08-24: "Vá nốt đi và review lại". Phần "nốt" là NGUỒN của finding
+  P2 `ubuntu-leg-overclaim`: `ops/specs/t33-doi-shellcheck-r3.md:192` TRÊN MASTER vẫn mang nguyên câu
+  "rc=0 trên toàn chân Ubuntu". r4 đã vá phía MÃ bằng ghi đè có vết, nhưng cố ý KHÔNG chạm đặc tả vì
+  `ops/specs/**` ngoài write set. Nay chủ kho cho nới. r5 nới ĐÚNG MỘT đường dẫn mới:
+  `ops/specs/t33-doi-shellcheck-r4.md` — một bản delta MỚI, KHÔNG sửa đè r3 (sửa đè đặc tả đóng băng
+  làm hồ sơ mất dấu; nếp r1->r2->r3 đã theo).
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_ghi_chu: >-
+  MỘT phiên giữ CẢ BA vai: soạn r2/r3 · ghi lease · thi công. Nó cũng là phiên tự tay viết và
+  chạy ca `t98` cùng ma trận 8 ô của r3. Chủ kho ghi đè ADR-0046 §3 có vết — xem khối
+  `ghi_de_ADR_0046`. Ghi thẳng vì nhãn `cross_approved` trông y hệt nhau dù khâu thi công có
+  độc lập hay không, và vì sự độc lập DUY NHẤT còn lại của lượt này nằm ở vòng review `codex`
+  SAU thi công.
+
+leased_at_utc: '2026-08-23T19:00:00Z'
+lease_expires_at_utc: '2026-08-25T19:00:00Z'
+run_minutes: 1440
+gia_han_da_cap_truoc: >-
+  Người giữ kho cấp quyền gia hạn trước, cùng chỉ thị ở `granted_on_instruction` ("kể cả gia
+  hạn"). Gia hạn phải ghi thành lease sửa đổi mới (`revision` tăng, `thay_the_cho` trỏ lease này),
+  KHÔNG sửa đè trường `lease_expires_at_utc` của bản ghi này — sửa đè làm hồ sơ mất dấu.
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 10:0x–10:2xZ 23-08-2026, quét toàn kho bằng chính lệnh `ai-dang-giu` mà #244 vừa land.
+  Phép so hai nguồn: `ls-remote` 186 = `for-each-ref` 186, `comm -23` RỖNG ⇒ không mù.
+  `ops/cai_actionlint.sh`: 0 lease CÒN HẠN.
+  `ops/lease_publish_test.py`: `ai-dang-giu` trả NGƯỜI_GIỮ 5 — và CẢ NĂM thuộc packet ĐÃ LAND.
+  Công cụ báo 5 là công cụ ĐÚNG: nó trả lời "ai đang GIỮ", không trả lời "ai đang DÙNG", và
+  không trường nào trong tệp lease nói "đã tiêu". Đây là nợ AG-T0-01B hiện thành số.
+  Từng cái đo riêng, KHÔNG suy gộp:
+    lease-dang-windows-exec-2-codex-20260822   -> #238 CLOSED · spec r4 + ca t73 trên master
+                                                  + 3 tag luu-tru/238-verdict-{1,2,3} + 6 biên nhận
+    lease-dang-windows-exec-3-codex-20260822   -> #238 CLOSED · như trên
+    plat-x8-exec-2r6-codex-20260822            -> #225 CLOSED · ops/specs/plat-x8.md + 10 biên nhận
+    plat-x8b-exec-1-codex-20260823             -> #255 CLOSED · ops/specs/plat-x8b.md + ca t88
+                                                  trên master + 2 biên nhận
+    lease-hoi-toan-kho-exec-1r4-codex-20260823 -> #244 CLOSED completed 09:45:30Z · PR #275 MERGED
+                                                  09:21:59Z · lenh_ai_dang_giu trên master + 9 biên nhận
+  Đối chứng độc lập: quét 186 ref, 0 nhánh CHƯA MERGE nào còn chạm `ops/lease_publish_test.py`.
+  NÓI CHO CHẬT — cross-review lượt 1 của PR #288 (P1, codex) bác đúng chỗ này và bác đúng: mọi thứ
+  liệt kê trên chứng minh việc đã LAND, KHÔNG chứng minh thẩm quyền ghi đã CHẤM DỨT. Không trường
+  nào trong tệp lease mang trạng thái `đã tiêu`/`đã thu hồi`, và `ai-dang-giu` cố ý trả lời "ai đang
+  GIỮ" chứ không "ai đang DÙNG" — nợ AG-T0-01B chính là khoảng trống ấy. Bằng chứng chấm dứt DUY
+  NHẤT kho có là hết hạn (muộn nhất 2026-08-24T08:25:00Z).
+  Vì vậy việc cấp lease này là CHẤP NHẬN RỦI RO CÒN LẠI của người giữ kho theo §2, KHÔNG phải một
+  rủi ro đã đo bằng không. Ghi thẳng bằng chữ ấy vì bản đầu của r3 đã gọi nhầm nó là "đã đo bằng
+  không", và câu sai đó suýt trở thành căn cứ cho chính lease này.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) `t89` KHÔNG dùng được — #244 đã chiếm t89–t97. Ca là `t98`, chép NGUYÊN VĂN từ r3, KHÔNG
+  tự nghĩ lại (r4/Q13: cho executor tự nghĩ lại chính là đường mở ra hình dạng E lần sau).
+  (2) Ba số của W11–W13 phải khớp CHÍNH XÁC. Lệch bất kỳ số nào ⇒ DỪNG, báo số đo được, KHÔNG
+  sửa ca cho vừa số.
+  (3) Ca `t33` ĐỎ SẴN trên nền khi thiếu `actionlint` — fail-close có chủ đích, không phải hồi
+  quy. Cài bằng `ops/cai_actionlint.sh` với `AL_VER=1.7.7`. Thiếu `shellcheck` thì `actionlint`
+  IM LẶNG bỏ toàn bộ luật nền và vẫn trả rc=0 — đó chính là M1.
+  (4) M1 và M2 KHOÁ LẪN NHAU: vá `t33` đòi `shellcheck` mà quên bộ cài ⇒ B1 xanh, B4 đỏ, master
+  đỏ. Hai mục tiêu không tách được, phải cùng xanh trong MỘT lượt.
+  (5) `/tmp/actionlint` có thể TỒN TẠI mà không phải thư mục (tệp sót) ⇒ bộ cài chết ở `mkdir`.
+  Dọn rồi cài lại.
+
+chua_do_duoc_luc_cap: >-
+  (1) M4 KHÔNG CÓ CỔNG và kho không có cơ chế canh docstring nào — `t42` khớp marker nợ với sổ,
+  không đọc văn xuôi. W14 là tiêu chí của REVIEWER, không phải của máy. Khai theo L3 thay vì làm
+  tròn thành đã có.
+  (2) Hành vi trên `windows-latest` THẬT: cả 8 ô của r3 chạy trên Linux. B5 của r1 là chỗ đo, và
+  đường CHẮC CHẮN là `workflow_dispatch` trên đúng ref — gắn nhãn `windows` KHÔNG đủ vì `ci.yml`
+  khai `pull_request:` mà không khai `types:`.
+  (3) M1/M2 chưa có số kích thước nào ⇒ trần 120 là ước lượng.
+  (4) Năm lease "đã tiêu" đo bằng Issue đóng + hiện vật trên master; CHƯA mở từng packet để xác
+  nhận hiện vật nằm TRỌN trên master.
+  (5) Bản `shellcheck` mà CI sẽ nhận: container đo bằng 0.9.0 qua apt; runner GitHub có thể khác.
+  Phiên bản ghim phải chọn lúc thi hành và đo trên runner thật.
+
+dieu_kien_dung: >-
+  S2 ĐANG KÊU — người giữ kho TĂNG bộ đếm hình dạng A từ 7 lên 8 in-session 23-08-2026, sau khi
+  cross-review PR #288 (P1, codex) bắt một lời khai rộng hơn phép đo NẰM TRONG chính đặc tả. Một
+  chốt dừng đang kêu thì THI CÔNG KHÔNG ĐƯỢC BẮT ĐẦU cho tới khi người giữ kho trả lời câu S2 đặt
+  ra: "có nên làm việc này nữa không". Lập trường (a) của người giữ kho trả lời "nếu đi tiếp thì
+  đi đường nào", KHÔNG tự nó trả lời "có đi tiếp không" — hai trục khác nhau. Chi tiết ở r3 §bo_dem_A ·
+  S3 bộ đếm E chạm 5 (đang 4; đặc tả THÊM một phép dẫn xuất mới cho M3 là chạm S3 — M3 phải
+  chép bản vá đã chạy, không mô tả cách dẫn ra nó) ·
+  S4 numstat trên write set vượt 120 dòng thêm ·
+  S5 bất kỳ số nào của W11–W13 lệch bảng r3 ·
+  S6 cần một đường dẫn THỨ BA ⇒ xin lease sửa đổi, KHÔNG tự nới ·
+  S7 lượt vá sau verdict cần đụng `.github/workflows/**` ⇒ đó là Issue độ phủ, không phải packet
+  này ·
+  S8 master đã đi tiếp so với base_sha mà chưa đo lại bảng nghiem_thu.
+
+viec_cua_luot_nay: >-
+  HAI mục tiêu, không hơn: M3 (chép ca `t98` từ r3 — trục phân biệt là NỀN, không phải TÊN
+  TỆP) · M4 (hạ câu docstring của `t33` xuống đúng bằng phép đo).
+  M1 và M2 CỐ Ý ĐỂ NGOÀI LƯỢT NÀY — xem `thu_hep_pham_vi`. Đặc tả r1/r2/r3 KHÔNG bị sửa và
+  KHÔNG bị huỷ; chỉ LƯỢT NÀY không thi hành M1/M2, nên `nghiem_thu` B1–B5 của r1 KHÔNG áp cho
+  lượt này. Tiền lệ: #238/r4/Q15 khoanh một lượt vào tập con của đặc tả đúng cách này.
+  KHÔNG mở rộng `t33` sang workflow khác. KHÔNG làm N2/N6 của #269.
+
+nang_tran:
+  ai_nang: ducthangho
+  tham_quyen: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+  quyet_dinh_luc: 'direct, in-session, 2026-08-23 — sau khi được trình đủ ba đường'
+  tran_cu: 2
+  tran_moi: 4
+  adr: ADR-0043
+  can_cu: >-
+    4 finding CÒN HIỆU LỰC của cross-review đều nhắm vào MỘT artefact — bản bàn giao
+    `ops/handoff/…` — và artefact ấy ĐÃ ĐƯỢC GỠ khỏi PR #288 ở 589bc03c. Đo phân bố:
+    r2 = 0 finding còn hiệu lực · r3 = 0 · handoff = 4. Tức các vòng review thêm KHÔNG
+    do đặc tả không hội tụ, mà do một artefact PHỤ nay đã loại khỏi phạm vi.
+    Tổng 11 finding qua 4 lượt: 7 đã vá, 4 xử bằng cách gỡ thứ chúng nhắm vào.
+  do_duoc_boi: >-
+    `pull_request_read get_review_comments` trên PR #288, đếm theo `path` và
+    `is_outdated`; cộng `git diff --numstat origin/master...589bc03c` = đúng 2 tệp
+    `ops/specs/t33-doi-shellcheck-r{2,3}.md`.
+  canh_bao: >-
+    Khối này KHÔNG được cổng cưỡng chế. Đo 23-08: `ops/lease_publish.py` có 0 lần nhắc
+    `nang_tran` và 0 cơ chế đếm vòng review, nên lease vẫn `rc=0` dù vượt trần. Đây là
+    `Accepted` mà chưa THI HÀNH — cùng họ ghi nhận ADR-0045 trên PR #275. Sự có mặt của
+    khối này là hiện vật TỰ NGUYỆN, đừng đọc nó thành "cổng đã kiểm".
+
+ghi_de_ADR_0046:
+  dieu: '§3 — người thi hành KHÔNG nên là phiên đã viết đặc tả'
+  trang_thai_ADR: Proposed
+  ai_ghi_de: ducthangho
+  quyet_dinh_luc: 'direct, in-session, 2026-08-23 ("cấp lease và thực hiện luôn đi"), sau khi được trình rõ hệ quả'
+  he_qua_khai_thang: >-
+    Phiên soạn r2/r3 CŨNG là phiên ghi lease và CŨNG là phiên thi công — ba vai gộp làm
+    một. Đó đúng hình dạng đã làm `S2` kêu, và ngược với quyết định "cắt phiên trước khi
+    cấp lease" mà chính chủ kho chốt sáng cùng ngày. Chủ kho ghi đè có lý do nêu rõ.
+  he_qua_cho_nhan_cross_approved: >-
+    Nhãn `cross_approved` của lượt này đứng CHỈ bằng vòng review của `codex` SAU khi thi
+    công. Khâu soạn — cấp — thi công KHÔNG độc lập. Ghi thẳng vì nhãn ấy trông y hệt nhau
+    dù có độc lập hay không, và `#238` đã có tiền lệ nhãn mỏng.
+  phien_soan_da_tu_chay_gi: >-
+    Phiên này tự viết và tự chạy ca `t98` cùng ma trận 8 ô của `r3`. Nên nó là bên KÉM
+    ĐỘC LẬP NHẤT để nghiệm thu chính ca ấy. Reviewer `codex` phải TỰ DỰNG lại `X1`/`X2`
+    và tự chạy `W11`–`W13`, không nhận bảng số trong `r3` làm bằng chứng.
+thu_hep_pham_vi:
+  quyet_dinh: 'chủ kho, direct in-session 2026-08-23 ("Đồng ý (2)")'
+  bo_khoi_luot_nay: [M1, M2]
+  bo_khoi_write_set: [ops/cai_actionlint.sh]
+  vi_sao: >-
+    Packet #290 `HA-TANG-CONG-CU-TAT-DINH` (PR #291, ĐANG MỞ, exact head 134b5a04) xây ĐÚNG
+    thứ M1/M2 nhắm tới, và rộng hơn: `ops/cong_cu.yaml` là bản kê MỘT NƠI cho
+    `bat_buoc`/`ban_ghim`/`probe`/`cai`/`canary`; `ops/cai_cong_cu.sh` cài rồi ĐO LẠI;
+    `ops/canary/actionlint_shellcheck.yml` là fixture `SC1003` chứng minh tầng luật shell CÓ
+    HIỆU LỰC chứ không chỉ có mặt. Thân PR #291 nêu đúng câu mở đầu của #249:
+    "actionlint thiếu shellcheck thì ÂM THẦM bỏ cả lớp luật SC* và vẫn trả rc=0".
+    Làm M2 ở đây sẽ tạo NƠI GHIM PHIÊN BẢN THỨ HAI cho `shellcheck` — đúng bài học
+    `pkg_secret_scan.py`: "hai bản sẽ trôi lệch, và bên quên cập nhật chính là bên đẩy lọt".
+  mau_thuan_doctrine_phai_giai_o_noi_khac: >-
+    #290 khai `shellcheck: bat_buoc: false` (bắt suy giảm bằng canary thay vì đòi công cụ);
+    #249 đòi `t33` ĐỎ khi thiếu `shellcheck`. Hai luật khác nhau cho cùng một lỗ. Lượt này
+    KHÔNG giải mâu thuẫn ấy — nó nhường phần công cụ cho #290 và chỉ làm phần #290 không chạm.
+  giao_duong_dan_voi_290: 'KHÔNG — đo 23-08: comm giữa hai write set = RỖNG. Trùng CHỨC NĂNG, không trùng đường dẫn.'
+  loi_quy_trinh_da_pham: >-
+    Phép quét trùng lặp của `soan-spec` §3 được chạy theo ĐƯỜNG DẪN và bỏ qua CHỨC NĂNG. Hai
+    packet không giao một đường dẫn nào mà vẫn xây cùng một thứ. Phát hiện SAU khi cấp lease,
+    do người giữ kho chỉ ra — không phải phiên tự thấy.
+
+# ── BẢN SỬA ĐỔI 4 THÊM TỪ ĐÂY ────────────────────────────────────────────────
+# Khoá MỚI, KHÔNG trùng tên khoá nào ở trên. `nang_tran` của r3 nói về vòng review
+# PR #288 (đặc tả) và GIỮ NGUYÊN; trần của PR #293 (thi công) là chuyện khác, nên
+# nó mang tên riêng `nang_tran_pr293`. Đặt hai bảng cùng tên là mất dữ liệu im lặng
+# — bài học "bảng TOML trùng tên" đã trả giá bốn lượt review.
+
+ghi_de_byte_identity_voi_dac_ta:
+  dieu_bi_ghi_de: >-
+    `canh_bao_cho_nguoi_thi_hanh` (1) của r1/r2/r3 — "ca là t98, chép NGUYÊN VĂN từ r3, KHÔNG tự
+    nghĩ lại (r4/Q13)". Cả hai lượt cross-review đã ĐO và xác nhận byte-identity: khối 14 dòng
+    băm 4c9b223d3e5edd4a ở CẢ HAI phía, 670 byte, `cmp` rỗng.
+  ai_ghi_de: ducthangho
+  tham_quyen: §2 — start/pause/resume/reroute/override/authorize thuộc chủ kho
+  quyet_dinh_luc: >-
+    direct, in-session, 2026-08-24 — sau khi được trình verdict lượt 2, finding P2, và BA đường
+    (a) đặc tả r4 rồi chép lại · (b) ghi đè có vết · (c) land nguyên trạng, kèm khuyến nghị (a):
+    "vá đi và review lại nếu cần nới thì tôi cho phép".
+  do_duoc_sau_khi_va:
+    khoi_14_dong_trong_ma: 1ed3eb53770076d6
+    khoi_14_dong_trong_r3: 4c9b223d3e5edd4a
+    con_khop: false
+    pham_vi_lech: >-
+      ĐÚNG MỘT dòng docstring (dòng 3134). Thân ca — `def bo()`, lời gọi `_chay_main_meta(bo, "nt")`,
+      phép `bang(...)` — KHÔNG đổi một byte. `git diff efcf5757..3239279b` = 1 tệp, +1/−1.
+  he_qua_khai_thang: >-
+    Mã nay KHÁC đặc tả đóng băng r3 ở một dòng. Ai đối chiếu t98 với r3 về sau sẽ thấy lệch và
+    PHẢI đọc bản ghi này để biết đó là cố ý, không phải executor tự nghĩ lại. Đó chính là lý do
+    khối này tồn tại: r4/Q13 sinh ra để chặn hình dạng E, và bỏ nó mà không ghi vết thì lần sau
+    không ai phân biệt được "ghi đè có phép" với "tự ý chế lại".
+  dac_ta_tren_master_VAN_SAI: >-
+    `ops/specs/t33-doi-shellcheck-r3.md:192` trên master vẫn mang nguyên câu "trên toàn chân
+    Ubuntu". Lượt này CỐ Ý không sửa: lease cho ĐÚNG MỘT đường dẫn, và sửa đè một đặc tả đóng
+    băng làm hồ sơ mất dấu. Đường đúng là một bản đặc tả r4 (delta) — đã tách Issue riêng.
+    Nói thẳng hệ quả: chừng nào r3:192 còn nguyên thì AI CHÉP LẠI r3 SẼ CHÉP LẠI ĐÚNG CÂU ẤY.
+
+nang_tran_pr293:
+  ai_nang: ducthangho
+  tham_quyen: §2
+  quyet_dinh_luc: direct, in-session, 2026-08-24 — "nếu cần nới thì tôi cho phép"
+  adr: ADR-0043
+  tran_cu: 2
+  tran_moi: 4
+  pham_vi: >-
+    Vòng review của PR #293 (THI CÔNG). KHÔNG dính tới `nang_tran` ở trên, vốn nói về vòng review
+    của PR #288 (ĐẶC TẢ) và giữ nguyên tran_cu 2 → tran_moi 4 với căn cứ riêng của nó.
+  can_cu: >-
+    ĐO được, không phải ước lượng. Lượt 1 = approve, 0 finding. Lượt 2 = changes_requested, ĐÚNG
+    MỘT finding P2, và nó nằm trong write set. Lượt 3 tồn tại vì bản vá của lượt 2 CHƯA TỪNG được
+    một bên độc lập kiểm — chính bản vá ấy có thể tái tạo khuyết tật nó sửa (lời khai mới
+    "rc=0 khi chạy cục bộ trên Linux" cũng là một lời khai, và nó vừa được một vòng review chấp
+    nhận nên là chỗ khó thấy nhất). Tức các vòng thêm KHÔNG do đặc tả không hội tụ mà do MỖI vòng
+    tìm ra một lớp lỗi lớp trước không với tới được — đúng lý do ADR-0043 cho phép nới có căn cứ.
+  canh_bao: >-
+    Khối này KHÔNG được cổng cưỡng chế. Đo 23-08: `ops/lease_publish.py` có 0 lần nhắc `nang_tran`
+    và 0 cơ chế đếm vòng review. ĐO THÊM 24-08: `packet_loop.py record-review` TỪ CHỐI ghi lượt 2
+    vì state đã là `accepted` sau lượt 1 — máy KHÔNG có đường lùi từ `accepted` khi có bằng chứng
+    mới, nên sổ cục bộ đang nói "approve, 0 finding" trong khi bằng chứng mới nhất là
+    changes_requested + 1 P2. Bộ đếm vòng lại sống trong `.claude/.packet_state/` vốn gitignore và
+    KHÔNG sống sót qua container. Ba khuyết tật độc lập, cùng một hệ quả: trần ADR-0043 hiện
+    KHÔNG cưỡng chế được xuyên phiên. Sự có mặt của khối này là hiện vật TỰ NGUYỆN.
+
+noi_da_dung_o_r5:
+  ghi_chu_bat_buoc_doc: >-
+    Khối `noi_da_duoc_cho_phep_ma_KHONG_dung` của r4 khai "KHÔNG nới write set ... cụ thể KHÔNG thêm
+    ops/specs/** để sửa r3:192". r5 LÀM ĐÚNG ĐIỀU ĐÓ. Nên khối ấy BỊ THAY, không để lại song song —
+    hai câu ngược nhau trong một văn bản cấp quyền ghi đang sống chính là lỗi mà r1->r2 phải sửa, và
+    phiên ghi đã tái phạm ba lần. Ghi ra thay vì lặng lẽ xoá.
+  vi_sao_r4_khong_lam_ma_r5_lam: >-
+    r4 từ chối vì lúc ấy chỉ có lời cho phép CHUNG ("nếu cần nới thì tôi cho phép"), và được phép nới
+    không phải lý do để nới. r5 có chỉ thị ĐÍCH DANH ("vá nốt đi"), tức chủ kho đã cân nhắc đúng việc
+    này. Khác biệt là THẨM QUYỀN CHO MỘT VIỆC CỤ THỂ, không phải đổi ý.
+  rui_ro_con_lai_khai_thang: >-
+    Đưa đặc tả vào cùng PR với mã khiến BA vòng review đã duyệt (trên diff MỘT tệp) KHÔNG còn phủ hết
+    diff. Bắt buộc thêm một vòng trên diff HAI tệp — chủ kho đã yêu cầu ("review lại"). Vòng ấy không
+    chạy thì phần đặc tả vào master mà chưa ai review: fail-open.

@@ -137,3 +137,7 @@ thay_the_ly_do: >-
   phạm vi của nó phải phủ cả chú thích chứ không chỉ trường.
   Không điều khoản nào khác đổi.
 posted_comment_id: 5402776067   # workflow ghi, ĐỪNG sửa tay
+da_bi_thay_the: doctrine-allowlist-reviewer-exec-1r3-claude-20260824
+da_bi_thay_the_ly_do: >-
+  Người giữ kho nới write set (in-session, "nới đi, tôi cho phép") để `mcp_gh.py` +
+  `mcp_gh_test.py` vào `.claude/dev/` thay vì chết theo container. Kèm nâng trần theo §2.

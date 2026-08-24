@@ -46,12 +46,14 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import math
 import os
 import re
 import select
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -180,13 +182,17 @@ def _kiem_song(codex_home: Path) -> tuple[bool, str]:
         return (False, f"quá hạn {HAN_KIEM_SONG_GIAY}s")
     except (OSError, subprocess.SubprocessError) as e:
         return (False, f"không chạy được: {type(e).__name__}")
-    ra = (p.stdout or "") + (p.stderr or "")
+    stdout, stderr = p.stdout or "", p.stderr or ""
+    ra = stdout + stderr
     for dau in ("token_revoked", "refresh_token_invalidated", "401 unauthorized",
                 "please log in again", "could not be refreshed"):
         if dau in ra.lower():
             return (False, f"credential BỊ TỪ CHỐI ({dau})")
-    if DAU_HIEU_SONG not in ra:
-        return (False, f"rc={p.returncode} nhưng KHÔNG thấy dấu hiệu sống trong đầu ra")
+    if p.returncode != 0:
+        return (False, f"codex exec thoát rc={p.returncode}")
+    # Chỉ stdout là câu trả lời. Stderr có thể echo chính prompt, vốn đã chứa dấu hiệu.
+    if DAU_HIEU_SONG not in stdout:
+        return (False, "rc=0 nhưng KHÔNG thấy dấu hiệu sống trong stdout")
     return (True, f"rc={p.returncode}, có {DAU_HIEU_SONG}")
 
 
@@ -201,18 +207,50 @@ def _gio_con_lai(auth: Path) -> float | None:
         d = json.loads(auth.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return None
-    tok = (d.get("tokens") or {}).get("access_token") or d.get("access_token")
+    if not isinstance(d, dict):
+        return None
+    tokens = d.get("tokens") or {}
+    if not isinstance(tokens, dict):
+        return None
+    tok = tokens.get("access_token") or d.get("access_token")
     if not isinstance(tok, str) or tok.count(".") != 2:
         return None
     than = tok.split(".")[1]
     than += "=" * (-len(than) % 4)  # JWT bỏ padding base64url; thiếu nó là ném binascii.Error
     try:
-        exp = json.loads(base64.urlsafe_b64decode(than)).get("exp")
+        payload = json.loads(base64.urlsafe_b64decode(than))
     except (ValueError, TypeError):
         return None
-    if not isinstance(exp, (int, float)):
+    if not isinstance(payload, dict):
+        return None
+    exp = payload.get("exp")
+    if isinstance(exp, bool) or not isinstance(exp, (int, float)):
+        return None
+    try:
+        exp = float(exp)
+    except (OverflowError, ValueError):
+        return None
+    if not math.isfinite(exp):
         return None
     return (exp - time.time()) / 3600.0
+
+
+def _ghi_bi_mat(dich: Path, noi_dung: bytes) -> None:
+    """Ghi 0600 bằng tệp độc quyền rồi replace; không đi theo symlink/hardlink đích."""
+    fd, ten = tempfile.mkstemp(prefix=f".{dich.name}.tmp-", dir=dich.parent)
+    tam = Path(ten)
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(noi_dung)
+            f.flush()
+            os.fsync(f.fileno())
+        os.chmod(tam, 0o600)
+        os.replace(tam, dich)
+    finally:
+        try:
+            tam.unlink()
+        except FileNotFoundError:
+            pass
 
 
 def _sao_luu(dich: Path) -> Path | None:
@@ -225,17 +263,29 @@ def _sao_luu(dich: Path) -> Path | None:
     Không chữa bằng đồng hồ mịn hơn (`time_ns` vẫn có thể trùng khi hệ thống lùi giờ);
     chữa bằng cách HỎI hệ tệp cho tới khi có tên trống.
     """
+    if dich.is_symlink():
+        raise OSError(f"từ chối sao lưu qua symlink: {dich}")
     if not dich.is_file():
         return None
     goc = f"{dich.name}.bak-{int(time.time())}"
-    bak = dich.with_name(goc)
     i = 0
-    while bak.exists():
-        i += 1
-        bak = dich.with_name(f"{goc}.{i}")
-    shutil.copy2(dich, bak)
-    os.chmod(bak, 0o600)
-    return bak
+    while True:
+        bak = dich.with_name(goc if i == 0 else f"{goc}.{i}")
+        try:
+            fd = os.open(bak, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_TRUNC, 0o600)
+            break
+        except FileExistsError:
+            i += 1
+    try:
+        with os.fdopen(fd, "wb") as ra, dich.open("rb") as nguon:
+            shutil.copyfileobj(nguon, ra)
+            ra.flush()
+            os.fsync(ra.fileno())
+        os.chmod(bak, 0o600)
+        return bak
+    except Exception:
+        bak.unlink(missing_ok=True)
+        raise
 
 
 def soan_tep_dan(b64: str, luc_utc: str, gio_con: float | None) -> str:
@@ -303,7 +353,8 @@ def cmd_lay(a) -> int:
         _in("KHÔNG_ĐO_ĐƯỢC: không có `codex` trên PATH — cài rồi chạy lại.")
         return RC[KHONG_DO_DUOC]
 
-    tam = Path(a.codex_home) if a.codex_home else Path(f"/tmp/codex-cred-{os.getpid()}")
+    tam_ctx = None if a.codex_home else tempfile.TemporaryDirectory(prefix="codex-cred-")
+    tam = Path(a.codex_home) if a.codex_home else Path(tam_ctx.name)
     _in(f"CODEX_HOME tạm: {tam}   (bản đang dùng ở ~/.codex KHÔNG bị đụng)")
     ok, dau_ra = _chay_device_auth(tam, a.han_giay)
     if not ok:
@@ -323,26 +374,24 @@ def cmd_lay(a) -> int:
         return RC[DO]
     _in(f"kiểm sống: {vi_sao}")
 
-    b64 = base64.b64encode(auth.read_bytes()).decode("ascii")
+    auth_bytes = auth.read_bytes()
+    b64 = base64.b64encode(auth_bytes).decode("ascii")
     ra = Path(a.ra) if a.ra else Path("/tmp/CODEX_AUTH_JSON.b64")
-    ra.write_text(b64 + "\n", encoding="ascii")
-    os.chmod(ra, 0o600)
+    _ghi_bi_mat(ra, (b64 + "\n").encode("ascii"))
 
     if a.cai_de:
         that = Path(os.path.expanduser("~/.codex/auth.json"))
         that.parent.mkdir(parents=True, exist_ok=True)
         bak = _sao_luu(that)
-        shutil.copy2(auth, that)
-        os.chmod(that, 0o600)
+        _ghi_bi_mat(that, auth_bytes)
         _in(f"đã cài đè {that}" + (f" (sao lưu: {bak})" if bak else ""))
 
     # Tệp hướng dẫn dán: bước CUỐI của lệnh, không phải việc làm tay sau đó. Phiên nào
     # cũng phải giao được cùng một thứ cho chủ kho, nên nó thuộc về mã.
     gio_con = _gio_con_lai(auth)
     tep_dan = Path(a.tep_dan) if a.tep_dan else ra.with_name("CODEX_AUTH_JSON_setup.md")
-    tep_dan.write_text(soan_tep_dan(b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                                    gio_con), encoding="utf-8")
-    os.chmod(tep_dan, 0o600)
+    _ghi_bi_mat(tep_dan, soan_tep_dan(
+        b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))
 
     _in("")
     _in("ĐẠT — credential mới, đã chứng minh bằng lời gọi thật.")
@@ -380,6 +429,9 @@ def cmd_kiem(a) -> int:
     except (OSError, json.JSONDecodeError) as e:
         _in(f"ĐỎ: {auth} không đọc được ({type(e).__name__})")
         return RC[DO]
+    if not isinstance(d, dict):
+        _in(f"ĐỎ: {auth} không chứa JSON object")
+        return RC[DO]
     # CHỈ đọc trường thời gian. Không in token, không trả token ra ngoài hàm.
     lr = d.get("last_refresh")
     _in(f"tệp        : {auth}")
@@ -402,7 +454,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="lenh", required=True)
 
     q = sub.add_parser("lay", help="chạy device-auth rồi xuất base64 cho CODEX_AUTH_JSON")
-    q.add_argument("--codex-home", help="thư mục tạm (mặc định /tmp/codex-cred-<pid>)")
+    q.add_argument("--codex-home", help="thư mục tạm (mặc định tên ngẫu nhiên an toàn trong temp)")
     q.add_argument("--ra", help="tệp ghi base64 (mặc định /tmp/CODEX_AUTH_JSON.b64)")
     q.add_argument("--han-giay", type=int, default=HAN_MAC_DINH_GIAY,
                    help=f"hạn chờ người dùng (mặc định {HAN_MAC_DINH_GIAY}s = hạn của mã)")

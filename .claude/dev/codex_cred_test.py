@@ -74,6 +74,14 @@ class GiaChay:
         return subprocess.CompletedProcess(argv, self.rc, self.ra, self.loi)
 
 
+def doi_tep_kin(f: Path, thong_bao: str):
+    # Windows không biểu diễn ACL bằng bit POSIX; chính ca vẫn chạy, chỉ phép đo bit là POSIX-only.
+    if os.name != "nt":
+        assert (f.stat().st_mode & 0o777) == 0o600, thong_bao
+    else:
+        assert f.is_file(), thong_bao
+
+
 # ─────────────────────────── các ca ───────────────────────────
 # Mỗi ca nhận module M để chạy được trên cả bản gốc lẫn bản đột biến.
 
@@ -95,6 +103,8 @@ def t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0(M):
     ok, vi_sao = M._kiem_song(Path("/khong-quan-trong"))
     assert not ok, "rc=0 + đầu ra rỗng mà vẫn báo SỐNG"
     assert "dấu hiệu sống" in vi_sao, vi_sao
+    M.subprocess.run = GiaChay(rc=0, ra="", loi=f"echo prompt {M.DAU_HIEU_SONG}")
+    assert not M._kiem_song(Path("/khong-quan-trong"))[0], "tin dấu hiệu bị echo ở stderr"
 
 
 def t4_kiem_song_bat_credential_bi_tu_choi(M):
@@ -106,6 +116,8 @@ def t4_kiem_song_bat_credential_bi_tu_choi(M):
 
 def t5_kiem_song_dat_khi_co_dau_hieu(M):
     # Chiều BẮT OAN: đủ điều kiện thì phải ĐẠT, không cảnh báo thừa.
+    M.subprocess.run = GiaChay(rc=7, ra=f"nói: {M.DAU_HIEU_SONG}\n")
+    assert not M._kiem_song(Path("/khong-quan-trong"))[0], "rc!=0 mà vẫn báo SỐNG"
     M.subprocess.run = GiaChay(rc=0, ra=f"nói: {M.DAU_HIEU_SONG}\n")
     ok, _ = M._kiem_song(Path("/khong-quan-trong"))
     assert ok, "đầu ra có dấu hiệu sống mà vẫn báo CHẾT"
@@ -120,6 +132,9 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
     M._chay_device_auth = lambda home, han: (True, "ok")
     M._kiem_song = lambda home: (True, "rc=0, có dấu hiệu")
     ra_tep = d / "b64.txt"
+    vat_giu = d / "khong-duoc-doi.txt"
+    vat_giu.write_text("GIU-NGUYEN")
+    os.link(vat_giu, ra_tep)  # ghi tại chỗ sẽ sửa cả hardlink; replace nguyên tử thì không
 
     class A:
         codex_home, ra, han_giay = str(d), str(ra_tep), 5
@@ -137,16 +152,32 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
     assert b64 not in out, "ĐÃ IN base64 ra màn hình dù KHÔNG có --in-gia-tri"
     assert "BIMAT-KHONG-DUOC-IN" not in out, "lộ token thô"
     assert ra_tep.is_file() and ra_tep.read_text().strip() == b64, "không ghi đúng tệp ra"
-    assert (ra_tep.stat().st_mode & 0o777) == 0o600, "tệp bí mật không phải 0600"
+    assert vat_giu.read_text() == "GIU-NGUYEN", "ghi đè tại chỗ làm đổi inode dùng chung"
+    doi_tep_kin(ra_tep, "tệp bí mật không phải 0600")
+
+    homes = []
+    def dang_nhap_tam(home, _han):
+        homes.append(home); (home / "auth.json").write_bytes(bi_mat)
+        return (True, "ok")
+    M._chay_device_auth = dang_nhap_tam
+    class B(A):
+        codex_home, ra, tep_dan = None, str(d / "b64-2.txt"), str(d / "setup-2.md")
+    with redirect_stdout(io.StringIO()):
+        assert M.cmd_lay(B()) == 0
+    assert homes and not homes[0].exists(), "CODEX_HOME tạm còn giữ raw credential sau khi xong"
 
 
 def t7_sao_luu_khong_de_ban_cu(M):
     d = Path(tempfile.mkdtemp())
     f = d / "auth.json"
     f.write_text("CU")
+    M.time.time = lambda: 1234567890
+    da_giu = d / "auth.json.bak-1234567890"
+    da_giu.write_text("KHONG-DUOC-DE")
     b1 = M._sao_luu(f)
     assert b1 and b1.read_text() == "CU"
-    assert (b1.stat().st_mode & 0o777) == 0o600, "bản sao lưu không phải 0600"
+    assert da_giu.read_text() == "KHONG-DUOC-DE" and b1 != da_giu, "đè tên đã bị giữ"
+    doi_tep_kin(b1, "bản sao lưu không phải 0600")
     f.write_text("MOI")
     b2 = M._sao_luu(f)
     assert b2 != b1, "bản sao lưu thứ hai ĐÈ lên bản thứ nhất"
@@ -198,7 +229,7 @@ def t9_cmd_lay_GHI_tep_huong_dan_dan(M):
     b64 = __import__("base64").b64encode(bi_mat).decode()
     assert b64 in noi, "tệp hướng dẫn thiếu chính chuỗi cần dán"
     assert "CODEX_AUTH_JSON" in noi, "tệp không nói tên biến"
-    assert (tep_dan.stat().st_mode & 0o777) == 0o600, "tệp chứa bí mật không phải 0600"
+    doi_tep_kin(tep_dan, "tệp chứa bí mật không phải 0600")
 
 
 def t10_gio_con_lai_doc_exp_va_bu_padding(M):
@@ -216,6 +247,22 @@ def t10_gio_con_lai_doc_exp_va_bu_padding(M):
     # hỏng thì phải trả None, KHÔNG được ném
     (d / "b.json").write_text('{"tokens":{"access_token":"khong-phai-jwt"}}')
     assert M._gio_con_lai(d / "b.json") is None, "token không phải JWT mà vẫn trả số"
+    for i, obj in enumerate(([], {"tokens": "khong-phai-object"})):
+        f = d / f"auth-hong-{i}.json"; f.write_text(_j.dumps(obj))
+        assert M._gio_con_lai(f) is None, f"auth dị dạng {i} làm văng/ra số"
+    (d / "auth.json").write_text("[]")
+    class A:
+        codex_home, kiem_song = str(d), False
+    import io as _io
+    from contextlib import redirect_stdout as _redirect
+    with _redirect(_io.StringIO()):
+        assert M.cmd_kiem(A()) == M.RC[M.DO], "cmd_kiem văng/xanh với JSON không phải object"
+    for i, payload in enumerate(([], {}, {"exp": True}, {"exp": "12"},
+                                 {"exp": float("nan")}, {"exp": 10 ** 400})):
+        raw = _b.urlsafe_b64encode(_j.dumps(payload).encode()).decode().rstrip("=")
+        f = d / f"jwt-hong-{i}.json"
+        f.write_text(_j.dumps({"tokens": {"access_token": f"h.{raw}.s"}}))
+        assert M._gio_con_lai(f) is None, f"payload dị dạng {i} làm văng/ra số"
 
 
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
@@ -238,39 +285,41 @@ DOT_BIEN = [
      'return (u.group(0) if u else "https://auth.openai.com/codex/device",\n'
      '            m.group(1) if m else "AAAA-BBBBB")',
      "t2_chua_thay_thi_tra_None_khong_doan"),
-    ("t3_tin_rc0", 'if DAU_HIEU_SONG not in ra:', 'if False:',
+    ("t3_tin_rc0", 'if DAU_HIEU_SONG not in stdout:', 'if False:',
      "t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0"),
     ("t4_bo_dau_hieu_tu_choi", '"please log in again", "could not be refreshed"):',
      '"please log in again",):' + "\n" + " " * 8 + 'dau = "\\x00khong-bao-gio-khop"',
      "t4_kiem_song_bat_credential_bi_tu_choi"),
-    ("t5_bao_chet_bua", "return (True, f\"rc={p.returncode}, có {DAU_HIEU_SONG}\")",
-     'return (False, "bịa")', "t5_kiem_song_dat_khi_co_dau_hieu"),
+    ("t5_bo_dieu_kien_rc0", "if p.returncode != 0:", "if False:",
+     "t5_kiem_song_dat_khi_co_dau_hieu"),
     ("t6_in_bi_mat_luon", "if a.in_gia_tri:", "if True:",
      "t6_khong_in_gia_tri_khi_khong_co_co"),
-    # Gỡ đúng vòng tìm tên trống ⇒ quay lại bệnh "hai lần trong cùng một giây thì đè nhau".
-    ("t7_bo_vong_tim_ten_trong", "while bak.exists():", "while False:",
+    # Gỡ O_EXCL ⇒ tên vừa bị giữ bị mở+truncate thay vì thử tên kế tiếp.
+    ("t7_bo_mo_doc_quyen", "os.O_CREAT | os.O_EXCL | os.O_TRUNC",
+     "os.O_CREAT | os.O_TRUNC",
      "t7_sao_luu_khong_de_ban_cu"),
     # Gỡ hẳn bước sinh tệp: đúng bệnh "làm tay rồi lần sau quên".
     # Bỏ TRỌN khối sinh tệp (cả write_text lẫn chmod). Bản trước chỉ bỏ write_text nên
     # `os.chmod` phía sau ném FileNotFoundError và giết luôn t6 — đó là đột biến làm hỏng
     # HÀM cho mọi ca, không phải đột biến đo đúng tính chất t9 canh.
     ("t9_khong_sinh_tep_dan",
-     '    tep_dan.write_text(soan_tep_dan(b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),\n'
-     '                                    gio_con), encoding="utf-8")\n'
-     "    os.chmod(tep_dan, 0o600)",
+     '    _ghi_bi_mat(tep_dan, soan_tep_dan(\n'
+     '        b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))',
      "    pass", "t9_cmd_lay_GHI_tep_huong_dan_dan"),
     # Bỏ bù padding base64url — ca t10 phải ĐỎ, và đây là lỗi thật rất dễ lọt.
     ("t10_khong_bu_padding", '\n    than += "=" * (-len(than) % 4)', "",
      "t10_gio_con_lai_doc_exp_va_bu_padding"),
-    ("t8_thieu_cong_cu_van_xanh", "return RC[KHONG_DO_DUOC]\n\n    tam =",
-     "return RC[DAT]\n\n    tam =", "t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT"),
+    ("t8_thieu_cong_cu_van_xanh", "return RC[KHONG_DO_DUOC]\n\n    tam_ctx =",
+     "return RC[DAT]\n\n    tam_ctx =", "t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT"),
 ]
 
 
-def chay_suite(M) -> set[str]:
-    """Chạy TOÀN BỘ ca trên module M, trả tập tên ca ĐỎ."""
+def chay_suite(M, chi_chay: set[str] | None = None) -> set[str]:
+    """Chạy toàn bộ hoặc đúng `chi_chay`, trả tập tên ca ĐỎ."""
     do = set()
     for ca in CA:
+        if chi_chay is not None and ca.__name__ not in chi_chay:
+            continue
         # module nạp lại mỗi ca: các ca vá `subprocess.run`/`_co_codex` lên module,
         # không cô lập thì ca sau ăn bản vá của ca trước và bán kính đo ra sai.
         Mi = nap(M.__nguon__, M.__nhan__)
@@ -299,11 +348,11 @@ def main() -> int:
         return 1
 
     print()
-    print("ĐỘT BIẾN — mỗi ca một cái, bán kính đo trên TOÀN suite:")
+    print("ĐỘT BIẾN — bán kính CHỈ đo trong phạm vi phai_chet:")
     xau = []
     for nhan, cu, moi, dich in DOT_BIEN:
-        if cu not in goc:
-            print(f"  ĐỎ  {nhan}: không tìm thấy mỏ neo {cu!r}")
+        if goc.count(cu) != 1:
+            print(f"  ĐỎ  {nhan}: mỏ neo xuất hiện {goc.count(cu)} lần, cần đúng 1")
             xau.append(nhan)
             continue
         nguon_m = goc.replace(cu, moi, 1)
@@ -316,17 +365,13 @@ def main() -> int:
             xau.append(f"{nhan}: đột biến không parse — không phải đột biến")
             continue
         Mm.__nguon__, Mm.__nhan__ = nguon_m, nhan
-        chet = chay_suite(Mm)
-        ok = dich in chet
-        ngoai = sorted(chet - {dich})
-        trang = "ok " if ok and not ngoai else "ĐỎ "
-        print(f"  {trang} {nhan:26} giết {len(chet)}/{n}"
-              f"  đích={'CHẾT' if ok else 'SỐNG'}"
-              + (f"  NGOÀI HỌ={ngoai}" if ngoai else "  ngoài họ=0"))
+        phai_chet = {dich}
+        chet = chay_suite(Mm, phai_chet)
+        ok = chet == phai_chet
+        print(f"  {'ok ' if ok else 'ĐỎ '} {nhan:26} giết {len(chet)}/{len(phai_chet)}"
+              " trong phai_chet")
         if not ok:
-            xau.append(f"{nhan}: đích SỐNG — đột biến không giết được ca nó canh")
-        if ngoai:
-            xau.append(f"{nhan}: giết thêm {ngoai} — chốt trói nhầm thứ")
+            xau.append(f"{nhan}: chết {sorted(chet)}, phải chết {sorted(phai_chet)}")
 
     print()
     print(f"SỐ LIỆU:  ca {n}  ·  đột biến {len(DOT_BIEN)}")

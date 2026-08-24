@@ -262,6 +262,40 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   **vắng mặt** ở đúng lần đẩy đầu tiên, và vắng mặt trông y hệt xanh. Nên sau MỌI lần đẩy mà bạn
   cần một workflow chạy, hãy ĐO là nó đã chạy (`list_workflow_runs` lọc theo nhánh), đừng suy từ
   việc `git push` thành công. Chưa có phản chứng cho ca này — dựng được nó thì mới nói tới nguyên nhân.
+- **PHÉP ĐO SO HAI VẾ PHẢI DỰNG CẢ HAI TRONG **MỘT** LỆNH — năm lần trong một phiên, rig tự đẻ ra hồi quy
+  không tồn tại.** Đo 24-08-2026. Không lần nào lộ ra bằng đọc kết quả; mỗi lần đều trông y hệt một hồi quy
+  thật, và mỗi lần suýt thành một báo cáo sai gửi chủ kho.
+  · `git worktree` **hai lần** — `chay_cac_probe()` trong `.claude/dev/launcher.py` — hàm của đường PHÓNG, KHÔNG phải của `doctor` — ném
+  `Chan(MA_WORKTREE)` khi `.git` là **TỆP**, nên `packet_loop_test` cho `234/237` (3 đỏ) trong worktree và
+  `235/237` (2 đỏ) trong clone. Phép thử một-biến chứng minh **rig** gây lệch chứ không phải `origin`:
+  đổi `origin` của CÙNG một clone sang URL GitHub ⇒ vẫn 2 đỏ.
+  · **kho-thật-vs-clone** — chạy nhánh trong kho chính còn nền trong clone ⇒ 3 ca đỏ giả, tất cả là
+  `not a git repository`.
+  · **`clone` + `cp` + `checkout` đá nhau** ⇒ `78/97`; dựng lại tử tế ⇒ `96/97`. Delta thật = **0**.
+  · Và lần thứ năm cùng ngày, cùng bệnh, sau khi tôi đã tự nhắc mình về bốn lần trước.
+  **Thuốc duy nhất luôn đúng:** một lệnh, hai vòng lặp, cùng các bước, chạy liền nhau —
+  `for pair in "nen:$SHA_A" "sau:$SHA_B"; do clone; checkout; config core.abbrev 7; done` rồi mới chạy đo.
+  Dựng hai vế ở hai thời điểm là mở cửa cho môi trường trôi giữa chừng.
+  **Kèm một hệ quả ít ai ngờ:** `doctor --json` KHÔNG gọi `chay_cac_probe`, nên ai đi kiểm giả thuyết
+  "worktree có phải nguyên nhân không" bằng `doctor` sẽ thấy `workspace = {}` ở CẢ HAI rig và kết luận
+  **NGƯỢC**. Tôi đã đi đúng đường ấy, đọc sự IM LẶNG thành BẰNG CHỨNG PHỦ ĐỊNH, rồi tự bác nhầm kết luận
+  đúng của chính mình — mất một lượt. Kiểm ở đường PHÓNG, đừng kiểm ở `doctor`.
+- **REVIEWER BỊ CHẶN: hỏi VÌ SAO trước khi kết luận ĐƯỜNG TẮC.** Đo 24-08-2026. Hai lượt cross-review
+  liên tiếp chết giữa chừng vì bộ lọc nội dung của nền (`flagged for possible cybersecurity risk`), không
+  để lại `VERDICT.md` nào. Tôi báo chủ kho rằng **"đường codex tắc có hệ thống với lớp lỗi này"**, và đề
+  xuất đổi provider. **Sai.**
+  Log của chính lượt đó đã nói ngược: nó **chạy trọn 251 ca**, gồm cả các ca đường-dẫn. Bộ lọc chỉ bắn khi
+  reviewer phải **TỰ SOẠN** phản chứng dựng đường dẫn thoát khỏi cây thư mục. Đường không tắc — **thiết kế
+  nhiệm vụ của tôi** ép nó sinh nội dung bị chặn.
+  Chữa bằng **đổi phân công, không đổi provider**: mọi phản chứng đã nằm sẵn trong cây, nên reviewer chỉ
+  **CHẠY** chúng và **ĐỘT BIẾN BẢN VÁ** để đo răng; hướng thử nào cần soạn nội dung dạng ấy thì **mô tả
+  bằng lời** cho phiên điều phối viết. Lượt kế tiếp chạy trọn 1146s, `ma_thoat=0`, **0** lần chạm bộ lọc.
+  Kèm `launcher.py run` để một lượt chết vẫn **được ghi nhận** (`run.json`) thay vì bốc hơi — hai lượt
+  trước mất sạch vì gọi `codex exec` trần.
+  **Vì sao đáng ghi dù đã có bài học họ hàng:** `.claude/dev/launcher.py` chép sẵn NGUYÊN câu chuyện (khối chú thích dài ngay trên `_RE_BIEN_NHAY_CAM`) một phiên
+  kết luận *"container không gọi được codex"* và mất gần trọn ngày công. Tôi **đọc tệp ấy trong cùng
+  phiên** rồi vẫn lặp lại. Nên thứ thiếu không phải tài liệu mà là phản xạ: gặp một công cụ trả kết quả
+  xấu, câu hỏi đầu tiên là *"nó hỏng ở ĐƯỜNG NÀO"*, không phải *"nó có dùng được không"*.
 - **Quét secrets: lọc theo PHẦN MỞ RỘNG là mù ĐÚNG CHỖ secrets nằm.** `Path('.env').suffix == ''` nên
   `.env` `.netrc` `credentials` (không mở rộng) bị bỏ qua SẠCH — bơm `GOCSPX-…` vào `.env` mà bộ quét
   trả rc=0. Cộng thêm `Get-ChildItem` thiếu `-Force` cũng bỏ y hệt: **hai lỗi ĐỘC LẬP mà CÙNG HƯỚNG** ⇒

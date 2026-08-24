@@ -164,8 +164,23 @@ diff <(git -C <kho> for-each-ref --format='%(refname:lstrip=3)' refs/remotes/ori
 git -C "$R/cay-kho" rev-parse --is-shallow-repository        # phai la false
 ```
 
-Và nói thẳng trong `EVIDENCE.md` rằng trạng thái GitHub **trực tiếp** là `KHÔNG ĐO ĐƯỢC` từ sandbox —
-`origin` trong đó là mirror cục bộ, không phải máy chủ.
+Và nói thẳng trong `EVIDENCE.md` rằng trạng thái GitHub **trực tiếp** là `KHÔNG ĐO ĐƯỢC` từ sandbox.
+
+**LÝ DO phải viết cho đúng — bản trước của chính mục này viết SAI, và cross-review bắt** (P3
+`evidence-origin-khong-phai-mirror-cuc-bo`, #309). Nó ghi *"`origin` trong đó là mirror cục bộ, không
+phải máy chủ"* — nhưng bước dựng mirror ở trên **BẮT BUỘC** chạy `remote set-url origin
+https://github.com/<chủ>/<kho>`. Làm đúng bước ấy thì `origin` là **URL HTTPS thật**, không phải mirror.
+Hai mục trong CÙNG một tệp dặn hai điều loại trừ nhau, và **bốn verdict trong kho đã chép lại câu sai**.
+
+Câu đúng, và nó đúng ở **cả hai trạng thái** — trước và sau khi `remote set-url` chạy: sandbox
+**không có đường ra mạng**, nên `origin` trỏ đâu cũng không đọc được máy chủ. Trước `set-url` nó là
+mirror cục bộ; sau `set-url` nó là URL HTTPS **không gọi tới được**. Cả hai đường đều dẫn tới
+`KHÔNG ĐO ĐƯỢC`, nhưng vì **hai lý do khác nhau** — và reviewer phải ghi lý do ĐÚNG với trạng thái
+mình đang đứng, chứ đừng chép câu có sẵn.
+
+Hệ quả thực hành: phép so hai nguồn (`ls-remote` ↔ `for-each-ref`) chạy **TRONG** sandbox là vô nghĩa
+dù `origin` trông như URL thật — nó vẫn chỉ đếm được thứ mirror đã nhận. Chỗ duy nhất chặn được vẫn là
+**trước bước clone**, trên kho nguồn.
 
 ## Khung `VERDICT.md` bắt reviewer sinh ra
 

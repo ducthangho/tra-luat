@@ -132,3 +132,4 @@ dieu_kien_dung: >-
   S1 nếu `t26`/`t27` không xanh được mà phải sửa CHÍNH hai ca ấy — đó là đổi cổng, ngoài
   write set, phải xin lease sửa đổi. S2 nếu cần chạm bất kỳ đường dẫn nào ngoài
   `ops/reviews/`. S3 nếu phát hiện verdict nguyên văn có chỗ sai và bị cám dỗ sửa nó.
+posted_comment_id: 5394743803   # workflow ghi, ĐỪNG sửa tay

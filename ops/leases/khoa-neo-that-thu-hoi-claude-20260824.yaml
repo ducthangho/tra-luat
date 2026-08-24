@@ -1,0 +1,70 @@
+# BIA MỘ — lease `khoa-neo-that-exec-1-codex-20260824` đã XONG VIỆC.
+#
+# VÌ SAO TỆP NÀY TRÔNG NHƯ LEASE MÀ KHÔNG CẤP QUYỀN CHO AI: kho KHÔNG có cơ chế thu hồi
+# lease (nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong`). `ai-dang-giu` chỉ đọc HAI thứ để coi
+# một lease hết hiệu lực — `da_bi_thay_the` và hạn dùng; KHÔNG có trường `thu_hoi`.
+# Chỗ duy nhất: `ops/lease_publish.py:679`
+#   `da_chet = bool(lease.get("da_bi_thay_the")) and trang_thai == "CÒN_HẠN"`
+# Nên đây là bia mộ dùng ĐÚNG cơ chế đang có, không phải cơ chế tự chế.
+#
+# ĐÂY LÀ "CHƯA HẾT HẠN" ≠ "CÒN HIỆU LỰC" — ĐO CHỨ KHÔNG SUY:
+#   PR #311 đã merge tại `e80f43b8`
+#   hiện vật CÓ trên master: `_khoa_neo_cac_sha` xuất hiện 3 lần trong `.claude/dev/packet_loop.py`
+# Việc xong mà quyền ghi còn sống chính là nợ `AG-T0-01B` đo được thành số.
+
+schema_version: 2
+event: executor_lease_revoked
+packet_issue: 305
+packet_id: KHOA-NEO-THAT
+phase_key: KHOA-NEO-THAT
+revision: 99
+generation: 1
+lease_id: khoa-neo-that-thu-hoi-claude-20260824
+thay_the_cho: khoa-neo-that-exec-1-codex-20260824
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: none
+review_class: sensitive
+effective_review_class: sensitive
+
+write_set: []
+write_set_note: >-
+  RỖNG CÓ CHỦ ĐÍCH. Bia mộ không giữ đường dẫn nào. Sau khi tệp này vào nhánh lease,
+  `ai-dang-giu .claude/dev/packet_loop.py` phải bớt đúng một người giữ — đó là phép đo nghiệm thu
+  của chính tệp này.
+
+branch: codex/khoa-neo-that-exec-1
+branch_ownership: none
+target_branch_neu_land: null
+base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+reviewed_sha_required: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+
+ly_do_thu_hoi: >-
+  Việc của lease này ĐÃ LAND. Giữ quyền ghi sau khi việc xong là để một writer thứ hai
+  đứng sẵn trên đường dẫn mà không ai biết — đúng cửa sổ hai-writer mà write-set
+  exclusion sinh ra để đóng. Thu hồi để `ai-dang-giu` nói đúng sự thật.
+
+granted_by: ducthangho          # BẮT BUỘC của cổng; ở đây nghĩa là AI RA LỆNH THU HỒI,
+                                # KHÔNG phải ai được cấp quyền — `access: none`, `write_set: []`.
+thu_hoi_boi: ducthangho
+thu_hoi_theo_lenh: 'direct, in-session, 2026-08-24: "#313 dong y de xuat"'
+authority_basis: §2 — cấp/thu lease thuộc chủ kho
+recorded_by: claude-session
+
+# Cửa sổ còn lại của lease bị thu hồi; bia mộ phủ đúng khoảng ấy rồi tự tắt.
+# KHÔNG đặt hạn bằng lúc sinh — cổng từ chối đúng như thế (rc=8, đã đo). Thứ làm tệp này
+# vô hại KHÔNG phải hạn dùng mà là `access: none` + `write_set: []`.
+leased_at_utc: '2026-08-24T23:30:00Z'
+lease_expires_at_utc: '2026-08-25T23:30:00Z'
+run_minutes: 0
+
+viec_cua_luot_nay: >-
+  KHÔNG có việc. Tệp này chỉ ghi nhận lease tiền nhiệm hết hiệu lực vì đã xong việc.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  ĐỪNG đọc tệp này thành "được cấp quyền". `access: none`, `write_set: []`.
+  Cần ghi `.claude/dev/packet_loop.py` thì phải xin lease MỚI của chủ kho.

@@ -1,0 +1,137 @@
+# Lease EXECUTOR — `KHOA-NEO-BE-RONG` (#313 ca 2), lượt 1.
+#
+# TÁCH khỏi packet `CON-TRO-TREO` vì WRITE SET KHÁC HẲN — chạy song song được, và đang
+# chạy song song thật (`con-tro-treo-exec-1-codex-20260824` giữ `ops/lease_publish*.py`).
+# Hai packet KHÔNG giao đường dẫn nào; đó là điều kiện để cả hai cùng mở.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 313
+packet_id: KHOA-NEO-BE-RONG
+phase_key: KHOA-NEO-BE-RONG
+revision: 1
+generation: 1
+lease_id: khoa-neo-be-rong-exec-1-codex-20260825
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` là MẶC ĐỊNH FAIL-CLOSE của `_BANG_LOP`, KHÔNG phải tín hiệu packet chạm thẩm
+  quyền. Đừng đọc nhãn này thành "đã có ai xét thấy nguy".
+
+spec_path: null
+spec_note: >-
+  Không có đặc tả đóng băng. Nguồn yêu cầu: Issue #313 mục (2), và thread P2 của connector
+  trên PR #311 https://github.com/ducthangho/tra-luat/pull/311#discussion_r3844331956
+  (thread để MỞ có chủ đích vì chưa vá). Phản chứng đã chạy được ghi trong cả hai chỗ;
+  executor PHẢI tự đo lại, không nhận lời khai.
+
+write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 24-08-2026 23:5xZ. Phép so HAI NGUỒN chạy TRƯỚC, so bằng TẬP TÊN:
+    is-shallow false · ls-remote 203 · for-each-ref 203 · comm RỖNG cả hai chiều
+  Rồi quét:
+    .claude/dev/packet_loop.py       -> rc=0 NGƯỜI_GIỮ 0
+    .claude/dev/packet_loop_test.py  -> rc=0 NGƯỜI_GIỮ 0
+  Vừa được giải phóng bằng bia mộ `khoa-neo-that-thu-hoi-claude-20260824` (#305 → PR #311
+  land `e80f43b`). Đo lại mà thấy có người giữ ⇒ DỪNG.
+
+branch: codex/khoa-neo-be-rong-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+reviewed_sha_required: cb6f566ec38be196cc1e36930d66c7567a88ac46
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 120
+  do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+  don_vi: >-
+    `git diff --numstat c35ae1c0a1104dbd6e65a321cda3b9f9441a408b -- .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py`
+    — cột dòng THÊM. Pathspec TRONG lệnh, và KHÔNG `..HEAD` (sandbox không cho commit nên
+    `..HEAD` không thấy bản vá trên working tree).
+  da_dung: 0
+  ghi_chu: >-
+    120 là ƯỚC LƯỢNG CÓ NEO, không phải trần ADR-0044: bản vá là một phép suy bề rộng OID
+    (~15 dòng) cộng 2–3 ca hồi quy (~60) cộng đột biến (~25). Vượt ⇒ `S2`, DỪNG.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-24: "đồng ý với các khuyến nghị, triển khai tiếp luôn" —
+  duyệt mục (2) trong danh sách ba việc chờ chốt, vốn ghi "ca 2 (SHA-256) — packet riêng,
+  write set khác, chạy song song được. Anh cho đi thì tôi cấp lease + phóng".
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên điều phối KHÔNG thi công lượt này (executor `codex`) và SẼ là reviewer — khác nền,
+  đúng PROTOCOL:580. Cùng phiên ấy đã review PR #311 và cố ý KHÔNG vá lỗi này lúc đó;
+  lý do ghi trong thread, và nay việc vá là của packet này.
+
+leased_at_utc: '2026-08-25T00:00:00Z'
+lease_expires_at_utc: '2026-08-26T00:00:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  `.claude/dev/packet_loop.py`: hàm `_khoa_neo_cac_sha` và hàm mới do packet này thêm.
+  `.claude/dev/packet_loop_test.py`: ca mới và bảng đăng ký ca.
+  Hunk ngoài các vùng ấy ⇒ ĐỎ. TRƯỜNG NÀY SỐNG TRONG LEASE — đừng tìm ở tệp khác.
+
+viec_cua_luot_nay: >-
+  Đóng finding P2 của connector trên PR #311: `_khoa_neo_cac_sha` xếp CẢ hai bề rộng vào
+  "OID đầy đủ" mà KHÔNG hỏi object format của kho.
+
+    day_du = [s for s in hop_le if len(s) in (40, 64)]
+
+  Trong kho SHA-256, một tiền tố 40 ký tự vừa tự khớp mình vừa khớp bản 64 ⇒
+  `len(ung_vien_day_du) == 2` ⇒ chặn oan.
+
+  PHẢI TỰ ĐO LẠI — phản chứng đã chạy trên head `cb6f566e` bằng fixture của chính bộ test
+  (`_kho_gia_co_verdict` + `_bn_that`):
+    OID 64 + tiền tố 40 CỦA CHÍNH NÓ  -> rc=11 (`KHÔNG ĐO ĐƯỢC: … khớp nhiều OID đầy đủ`)
+    đối chứng 40 + tiền tố 7 của nó   -> rc=0, đếm 1
+    đối chứng một mình 64             -> rc=0, đếm 1
+
+  VÁ: suy bề rộng OID từ **object format của kho** trước khi phân loại `day_du`.
+
+  BA RÀNG BUỘC, ràng buộc thứ hai là chỗ dễ hỏng nhất:
+  (1) Ca `bien_nhan_viet_tat_khop_hai_oid_la_KHONG_DO_DUOC` hiện có PHẢI VẪN ĐỎ sau khi vá.
+      Nó xanh nghĩa là bản vá đã nới quá tay và giết luôn phần chặn ca mơ hồ THẬT.
+  (2) `packet_loop.py` CỐ Ý không phụ thuộc git cho phép đếm này — `_la_dang_commit` khai
+      thẳng lý do (lệnh phải chạy được ở cây không có lịch sử ấy). Hỏi object format là mở
+      MỘT phụ thuộc git mới. Vì vậy: hỏi được thì dùng; KHÔNG hỏi được (không `.git`, bản sao
+      rời) thì phải giữ nguyên hành vi hiện tại, KHÔNG được chặn. Ca
+      `bien_nhan_ban_sao_roi_thi_bo_qua` đang bảo vệ đúng đường ấy — nó phải vẫn xanh.
+  (3) Thêm ca hồi quy full-64 + tiền tố-40, và ca đối chứng hai commit KHÁC NHAU vẫn đếm HAI
+      (chiều bắt-oan). Thiếu chiều này thì bản vá có thể "an toàn" bằng cách gom sạch.
+
+  Mỗi tính chất một đột biến riêng. Ca không có răng thì thà không có.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ⇒ DỪNG, xin lease sửa đổi ·
+  S2 vượt 120 dòng thêm ⇒ DỪNG, khai phần chưa làm ·
+  S3 kết luận KHÔNG hỏi được object format mà vẫn giữ được hành vi cũ ⇒ DỪNG, trình phép đo,
+  xin quyết định. Đừng tự chọn fail-close rồi báo sau — nó chặn mọi bản sao rời ·
+  S4 không tái hiện được phản chứng bằng phép đo của chính mình ⇒ ghi `KHÔNG_ĐO_ĐƯỢC`, DỪNG ·
+  S5 `origin/master` đã đi tiếp so với `base_sha` mà chưa đo lại.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) SANDBOX MOUNT `.git` CHỈ ĐỌC — không commit, không push.
+  (2) Kho NÀY là `sha1` (`git rev-parse --show-object-format`), nên ca lỗi KHÔNG tái hiện
+  được bằng dữ liệu thật ở đây; phải dựng fixture. Đừng kết luận "không tái hiện được" rồi
+  bỏ — nó tái hiện bằng fixture, đã có người làm.
+  (3) Hỏng này fail-CLOSE (chặn phép đếm hợp lệ), nên bản vá SAI HƯỚNG sẽ biến nó thành
+  fail-OPEN. Ràng buộc (1) và (3) ở trên là chốt chống đúng điều đó.
+  (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.

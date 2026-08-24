@@ -212,3 +212,4 @@ thay_the_ly_do: >-
   `canh_bao (3)` để nói rõ trường sống trong LEASE chứ không trong đặc tả.
   Ngân sách, write set, provider, reviewer KHÔNG đổi. Lượt 3 chưa tiêu dòng nào: `git diff` của
   cây executor RỖNG, `numstat` vẫn `90  30`.
+posted_comment_id: 5397026683   # workflow ghi, ĐỪNG sửa tay

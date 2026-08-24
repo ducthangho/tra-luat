@@ -1,0 +1,97 @@
+# Lease EXECUTOR — packet `SPEC-R3-OVERCLAIM` (#297).
+#
+# Đóng NGUỒN của lời khai "toàn chân Ubuntu" bằng MỘT bản delta `r5` trên master, thay vì
+# vá từng chỗ rồi mỗi lượt lại phát hiện chỗ tiếp theo.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 297
+packet_id: SPEC-R3-OVERCLAIM
+phase_key: SPEC-R5
+revision: 1
+generation: 1
+lease_id: spec-r5-overclaim-exec-1-claude-20260824
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+write_set:
+  - ops/specs/t33-doi-shellcheck-r5.md
+write_set_note: >-
+  ĐÚNG MỘT đường dẫn, một tệp MỚI. KHÔNG sửa đè r1/r2/r3 — sửa đè một đặc tả đóng băng làm
+  băm trong lease trỏ vào thứ không còn tồn tại. Nếp r1->r2->r3 đã theo.
+write_set_da_do_truoc_khi_cap: >-
+  `ai-dang-giu ops/specs` -> NGƯỜI_GIỮ 0. Đo 2026-08-24 sau khi nạp đủ ref: phép so hai
+  nguồn ls-remote 194 = for-each-ref 194, `comm -23` RỖNG.
+  ĐÁNG GHI: lần chạy TRƯỚC đó công cụ trả `CHAN [12] KHÔNG_XÁC_ĐỊNH: cache thiếu nhánh máy
+  chủ claude/cong-cho-codex-cred-exec-1` — nó TỪ CHỐI trả lời từ cache mù thay vì trả lời
+  sai. Đó là chốt fail-close làm đúng việc, không phải lỗi.
+
+branch: claude/spec-r5-overclaim-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: a84b6d15c69cd7161eaca780a1d877b8a79c2b1e
+start_from_sha: a84b6d15c69cd7161eaca780a1d877b8a79c2b1e
+reviewed_sha_required: a84b6d15c69cd7161eaca780a1d877b8a79c2b1e
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 1
+  dong_them_toi_da: 200
+  don_vi: '`git diff --numstat <base>..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  trong_nguong_ADR_0044: true
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-24: "Tôi duyệt (a). Xử lý các bước cần thiết"'
+authority_basis: §2
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+
+leased_at_utc: '2026-08-24T09:00:00Z'
+lease_expires_at_utc: '2026-08-25T09:00:00Z'
+run_minutes: 1440
+
+viec_cua_luot_nay: >-
+  MỘT mục tiêu: `ops/specs/t33-doi-shellcheck-r5.md` — bản delta thay BA chỗ mang lời khai
+  "toàn chân Ubuntu" (r2:215-216 văn xuôi · r2:232 trong khối CHÉP NGUYÊN VĂN · r3:192 trong
+  khối CHÉP NGUYÊN VĂN), và đánh dấu các mục của r1/r2/r3 đã TIÊU kèm thứ đã thay chúng.
+  KHÔNG đo lại số của r2 cho khớp master — xem `khong_lam_gi`.
+
+khong_lam_gi: >-
+  KHÔNG đo lại toàn bộ số của r2. r2 neo `00d4b3d7`, master đã đi 51 commit; `180 ref` nay
+  194, `88/88` nay 97/98. Nhưng `grep` toàn kho trả 0 tham chiếu tới r2 ngoài chính chuỗi
+  đặc tả, và mọi phần của r2 đều đã bị thay: M3/M4 đã thi công · M1/M2 nhường #290 · nghiem_thu
+  bị r3 thay · write_set bị lease thay. Đo lại một đặc tả không ai còn thi hành theo là làm
+  việc không có người tiêu thụ, và nó lại hết hạn sau 51 commit nữa. Thứ cần sửa là TRẠNG THÁI,
+  không phải CON SỐ.
+  KHÔNG mở rộng r4 (đang nằm trong PR #293 với một P1 mở) — chồng scope lên một PR đang chờ
+  quyết định.
+
+vi_tri_r4_noi_dung_dung_o_CA_HAI_trang_thai: >-
+  ĐO: `r4` KHÔNG có trên master, chỉ trên nhánh `claude/t33-doi-shellcheck-exec-1` (PR #293).
+  `r2` và `r3` ĐỀU có trên master. Vì vậy `r5` phải thay BA chỗ trên MASTER và KHÔNG được
+  phụ thuộc vào r4 — câu nào của r5 nói về vị trí r4 phải đúng dù #293 land hay bị gỡ r4.
+  Đây đúng bài học "câu mô tả VỊ TRÍ của một artefact phải đúng ở CẢ HAI phía của lần merge".
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) r5 tự nó là một văn bản đầy lời khai — nó phải chịu CHÍNH phép thử nó đang áp cho r2/r3.
+  Một bản đặc tả sửa lỗi "khai rộng hơn đo" mà tự khai rộng hơn đo thì tệ hơn không sửa. r4 đã
+  mắc đúng thế: khai "sửa ĐÚNG MỘT lời khai" trong khi cùng tệp ghi "CHƯA AI QUÉT".
+  (2) Đừng khai "đã quét hết" trừ khi có phép quét chạy được. Số đo được là BA chỗ trên ba dòng
+  cụ thể; "chỉ ba" là kết luận của MỘT phép quét theo cụm từ, không phải chứng minh.
+
+chua_do_duoc_luc_cap: >-
+  (1) Còn lời khai nào cùng hình dạng mà KHÔNG chứa cụm "chân Ubuntu" hay không — phép quét đã
+  chạy dùng lượng từ tuyệt đối + cụm từ, tức một DANH SÁCH ĐOÁN TRƯỚC, và kho đã trả giá nhiều
+  lần vì danh sách đoán trước. (2) Đặc tả không có trường trạng thái nào (`spec_status` chỉ
+  sống trong LEASE) — nên r5 đánh dấu "đã tiêu" bằng VĂN XUÔI, không có cổng nào đọc được.
+  Đó là nợ riêng, đã trình chủ kho như mục (b), CHƯA duyệt.
+
+dieu_kien_dung: >-
+  S1 nếu cần đường dẫn thứ hai. S2 nếu vượt 200 dòng thêm. S3 nếu phát hiện chỗ thứ TƯ mang
+  cùng lời khai — khi ấy "ba chỗ" là số sai và phạm vi packet phải khai lại trước khi viết tiếp.

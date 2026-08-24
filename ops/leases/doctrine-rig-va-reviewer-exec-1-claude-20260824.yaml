@@ -97,3 +97,4 @@ recorder_cung_la_nguoi_thi_cong: true
 leased_at_utc: '2026-08-24T12:45:00Z'
 lease_expires_at_utc: '2026-08-25T12:45:00Z'
 run_minutes: 1440
+posted_comment_id: 5396259254   # workflow ghi, ĐỪNG sửa tay

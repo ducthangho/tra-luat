@@ -3010,7 +3010,7 @@ def t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO():
     nguon, chay_mut, giet = SCRIPT.read_text(encoding="utf-8"), 0, 0
     muts = [
         ("A1", "for ref in refs:", "for ref in refs[:1]:"),
-        ("A2", "lease = yaml.safe_load(_git(goc, \"cat-file\", \"-p\", blob))", "lease = {}"),
+        ("A2", "lease = yaml.safe_load(noi_dung)", "lease = {}"),
         ("A2b-co", 'return "HẾT_HẠN" if han <= bay_gio else "CÒN_HẠN"', 'return "CÒN_HẠN"'),
         ("A2b-khong", 'return "HẾT_HẠN" if han <= bay_gio else "CÒN_HẠN"', 'return "KHÔNG_XÁC_ĐỊNH"'),
         ("A2c-giu", 'da_chet = bool(lease.get("da_bi_thay_the"))', 'da_chet = False'),
@@ -3139,6 +3139,111 @@ def t98_truc_phan_biet_la_NEN_chu_khong_phai_TEN_TEP():
     rc, out = _chay_main_meta(bo, "nt")
     bang(rc == 0 and "bỏ qua=1" in out,
          f"cùng tuple mà nền nt KHÔNG bỏ qua: rc={rc}, {out!r}")
+
+
+@ca
+def t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc():
+    import contextlib
+    import io
+    mod = _nap_cong()
+    bang(mod._cac_con_tro_treo("ghi `vung_duoc_phep_cham` nhưng thiếu") ==
+         ["vung_duoc_phep_cham"], "không thấy con trỏ treo")
+    bang(not mod._cac_con_tro_treo("đang bàn `spec_path` của một spec"),
+         "chặn oan tên trường của tài liệu spec")
+    bang(not mod._cac_con_tro_treo(
+        "vung_duoc_phep_cham: x\nnhắc `vung_duoc_phep_cham`"),
+        "chặn oan trường được định nghĩa trong chính lease")
+
+    with San() as s:
+        (s / ".git").mkdir()
+        mod.GOI_GIT = _GitKhoGia({"a"}, {"a"}, [])
+        for code_span, phai_qua in (("vung_duoc_phep_cham", False),
+                                    ("spec_path", True)):
+            lease = lease_mau(lease_id="KIEM-" + code_span.replace("_", "-"))
+            p = viet(s, lease, ten=code_span + ".yaml")
+            p.write_text(p.read_text(encoding="utf-8") +
+                         f"ghi_chu: đang bàn `{code_span}` của một tài liệu khác\n",
+                         encoding="utf-8")
+            try:
+                mod.kiem(lease, p, s)
+            except mod.Chan as ex:
+                bang(not phai_qua and ex.ma == RC_NOI_DUNG and "con trỏ treo" in ex.thong_diep,
+                     f"check chặn sai {code_span}: {ex.ma} {ex.thong_diep}")
+            else:
+                bang(phai_qua, "check không chặn con trỏ lease thật sự treo")
+
+    raw_xau = "lease_id: TREO\nlease_expires_at_utc: '2099-01-01T00:00:00Z'\n" \
+              "write_set: [x.py]\nghi_chu: nhắc `vung_duoc_phep_cham`\n"
+    raw_cu = raw_xau.replace("TREO", "CU").replace("2099", "2000")
+    raw_tot = raw_xau.replace("TREO", "TOT").replace(
+        "ghi_chu:", "vung_duoc_phep_cham: x\nghi_chu:")
+    raw_chet = raw_xau.replace("TREO", "DA_CHET") + "da_bi_thay_the: MOI\n"
+    git = _GitKhoGia({"a"}, {"a"}, [
+        ("refs/remotes/origin/a", "ops/leases/xau.yaml", raw_xau),
+        ("refs/remotes/origin/a", "ops/leases/cu.yaml", raw_cu),
+        ("refs/remotes/origin/a", "ops/leases/tot.yaml", raw_tot),
+        ("refs/remotes/origin/a", "ops/leases/chet.yaml", raw_chet)])
+    mod.GOI_GIT, out = git, io.StringIO()
+    with contextlib.redirect_stdout(out):
+        rc = mod.lenh_con_tro_treo(type("A", (), {"goc": "."})())
+    s = out.getvalue()
+    bang(rc == 0 and "TREO" in s and all(x not in s for x in ("CU", "TOT", "DA_CHET")),
+         f"quét ngược không lọc đúng lease hiệu lực: {rc} {s!r}")
+
+
+@ca
+def t100_bia_mo_doi_dau_cu_thieu_danh_dau_nhung_cho_ca_dung():
+    mod = _nap_cong()
+    moi = lease_mau(lease_id="MOI", thay_the_cho="CU")
+    with San() as s:
+        (s / ".git").mkdir()
+        p = viet(s, moi)
+        for marker, phai_qua in ((None, False), ("MOI", True)):
+            cu = _lease_quet("CU", da_bi_thay_the=marker)
+            mod.GOI_GIT = _GitKhoGia({"a"}, {"a"}, [
+                ("refs/remotes/origin/a", "ops/leases/cu.yaml", cu)])
+            try:
+                mod.kiem(moi, p, s)
+            except mod.Chan as ex:
+                bang(not phai_qua and ex.ma == RC_NOI_DUNG and
+                     "da_bi_thay_the: MOI" in ex.thong_diep and "CU" in ex.thong_diep,
+                     f"bia mộ bị chặn sai: {ex.ma} {ex.thong_diep}")
+            else:
+                bang(phai_qua, "lease cũ chưa đánh dấu mà bia mộ mới vẫn qua")
+
+
+@ca
+def t101_dot_bien_con_tro_treo_va_bia_mo_deu_bi_giet():
+    import importlib
+    import importlib.util
+    nguon, giet = SCRIPT.read_text(encoding="utf-8"), 0
+    muts = [
+        ("con-tro", '_TRUONG_SCHEMA_LEASE = frozenset({"vung_duoc_phep_cham"})',
+         "_TRUONG_SCHEMA_LEASE = frozenset()",
+         t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc),
+        ("bia-mo", "if not thay_the_cho:\n        return", "if True:\n        return",
+         t100_bia_mo_doi_dau_cu_thieu_danh_dau_nhung_cho_ca_dung),
+    ]
+    with San() as s:
+        sys.dont_write_bytecode = True
+        for i, (ten, cu, moi, dich) in enumerate(muts):
+            bang(nguon.count(cu) == 1, f"neo mutant {ten} không duy nhất")
+            p = s / f"mut_{i}.py"
+            p.write_text(nguon.replace(cu, moi), encoding="utf-8")
+            importlib.invalidate_caches()
+            spec = importlib.util.spec_from_file_location(f"lp_new_m{i}", p)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            cu_nap = globals()["_nap_cong"]
+            globals()["_nap_cong"] = lambda: mod
+            try:
+                dich()
+            except AssertionError:
+                giet += 1
+            finally:
+                globals()["_nap_cong"] = cu_nap
+    print(f"đột biến packet #313: đã chạy={len(muts)}, bị giết={giet}")
+    bang(giet == len(muts), f"đột biến packet #313 chỉ bị giết {giet}/{len(muts)}")
 
 
 def main() -> int:

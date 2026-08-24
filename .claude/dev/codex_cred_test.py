@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import importlib.util
 import os
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -59,19 +58,23 @@ DAU_RA_THAT = (
 )
 
 
-class GiaChay:
-    """`subprocess.run` giả GIỮ TRẠNG THÁI, không diễn kịch bản.
-
-    Kho này đã có 40/40 xanh trong khi một đột biến xoá hẳn lệnh phá vẫn qua, vì đồ giả
-    diễn kịch bản. Nên đồ giả ở đây ghi NHẬT KÝ lời gọi để ca test đọc được.
-    """
-
-    def __init__(self, rc=0, ra="", loi=""):
-        self.rc, self.ra, self.loi, self.nhat_ky = rc, ra, loi, []
-
-    def __call__(self, argv, **kw):
-        self.nhat_ky.append(list(argv))
-        return subprocess.CompletedProcess(argv, self.rc, self.ra, self.loi)
+def kiem_song_bang_codex_gia(M, rc=0, ra="", loi=""):
+    """Dựng script `codex` giả portable: `sys.executable exec ...` trên mọi nền."""
+    with tempfile.TemporaryDirectory(prefix="codex-gia-") as td:
+        d = Path(td)
+        (d / "exec").write_text(
+            "import sys\n"
+            f"sys.stdout.write({ra!r})\n"
+            f"sys.stderr.write({loi!r})\n"
+            f"raise SystemExit({rc})\n",
+            encoding="utf-8")
+        cwd = os.getcwd()
+        try:
+            os.chdir(d)
+            M._co_codex = lambda: sys.executable
+            return M._kiem_song(d)
+        finally:
+            os.chdir(cwd)
 
 
 def doi_tep_kin(f: Path, thong_bao: str):
@@ -99,27 +102,25 @@ def t2_chua_thay_thi_tra_None_khong_doan(M):
 
 def t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0(M):
     # rc=0 + đầu ra RỖNG là ca ĐÃ XẢY RA THẬT (r244). Cổng tin rc là cổng bị lừa.
-    M.subprocess.run = GiaChay(rc=0, ra="", loi="")
-    ok, vi_sao = M._kiem_song(Path("/khong-quan-trong"))
+    ok, vi_sao = kiem_song_bang_codex_gia(M)
     assert not ok, "rc=0 + đầu ra rỗng mà vẫn báo SỐNG"
     assert "dấu hiệu sống" in vi_sao, vi_sao
-    M.subprocess.run = GiaChay(rc=0, ra="", loi=f"echo prompt {M.DAU_HIEU_SONG}")
-    assert not M._kiem_song(Path("/khong-quan-trong"))[0], "tin dấu hiệu bị echo ở stderr"
+    assert not kiem_song_bang_codex_gia(
+        M, loi=f"echo prompt {M.DAU_HIEU_SONG}")[0], "tin dấu hiệu bị echo ở stderr"
 
 
 def t4_kiem_song_bat_credential_bi_tu_choi(M):
-    M.subprocess.run = GiaChay(rc=0, ra=f"{M.DAU_HIEU_SONG}", loi="error: refresh_token_invalidated")
-    ok, vi_sao = M._kiem_song(Path("/khong-quan-trong"))
+    ok, vi_sao = kiem_song_bang_codex_gia(
+        M, ra=M.DAU_HIEU_SONG, loi="error: refresh_token_invalidated")
     assert not ok, "có dấu hiệu bị từ chối mà vẫn báo SỐNG"
     assert "TỪ CHỐI" in vi_sao, vi_sao
 
 
 def t5_kiem_song_dat_khi_co_dau_hieu(M):
     # Chiều BẮT OAN: đủ điều kiện thì phải ĐẠT, không cảnh báo thừa.
-    M.subprocess.run = GiaChay(rc=7, ra=f"nói: {M.DAU_HIEU_SONG}\n")
-    assert not M._kiem_song(Path("/khong-quan-trong"))[0], "rc!=0 mà vẫn báo SỐNG"
-    M.subprocess.run = GiaChay(rc=0, ra=f"nói: {M.DAU_HIEU_SONG}\n")
-    ok, _ = M._kiem_song(Path("/khong-quan-trong"))
+    assert not kiem_song_bang_codex_gia(
+        M, rc=7, ra=f"{M.DAU_HIEU_SONG}\n")[0], "rc!=0 mà vẫn báo SỐNG"
+    ok, _ = kiem_song_bang_codex_gia(M, ra=f"{M.DAU_HIEU_SONG}\n")
     assert ok, "đầu ra có dấu hiệu sống mà vẫn báo CHẾT"
 
 
@@ -265,11 +266,80 @@ def t10_gio_con_lai_doc_exp_va_bu_padding(M):
         assert M._gio_con_lai(f) is None, f"payload dị dạng {i} làm văng/ra số"
 
 
+def t11_sao_luu_tu_choi_symlink(M):
+    d = Path(tempfile.mkdtemp())
+    nguon, dich = d / "bi-mat.json", d / "auth.json"
+    nguon.write_text("BI-MAT")
+    try:
+        dich.symlink_to(nguon)
+    except (OSError, NotImplementedError):
+        print("  BỎ QUA symlink thật; nền không cho tạo — đo guard bằng symlink giả")
+        class SymlinkGia:
+            def is_symlink(self): return True
+            def is_file(self): return False
+            def __str__(self): return str(dich)
+        dich = SymlinkGia()
+    try:
+        M._sao_luu(dich)
+    except OSError as e:
+        assert "từ chối sao lưu qua symlink" in str(e), f"từ chối sai tầng: {e}"
+    else:
+        raise AssertionError("_sao_luu không từ chối đích là symlink")
+    assert nguon.read_text() == "BI-MAT", "đã sửa nguồn mà symlink trỏ tới"
+
+
+def t12_sao_luu_O_NOFOLLOW_tai_diem_doc(M):
+    d = Path(tempfile.mkdtemp())
+    dich, bi_mat = d / "auth.json", d / "ngoai-pham-vi"
+    dich.write_text("AN-TOAN")
+    bi_mat.write_text("BI-MAT-KHAC")
+    mo_that = os.open
+    nofollow = getattr(os, "O_NOFOLLOW", 0)
+
+    if nofollow:
+        class OsDoiNguon:
+            da_doi = False
+            def __getattr__(self, ten): return getattr(os, ten)
+            def open(self, path, flags, mode=0o777):
+                if Path(path) == dich:
+                    self.da_doi = True
+                    dich.unlink(); dich.symlink_to(bi_mat)
+                return mo_that(path, flags, mode)
+    else:
+        # Đường fallback phải vẫn sao lưu tệp thường; chỉ phản chứng kernel bị bỏ qua.
+        assert M._sao_luu(dich).read_text() == "AN-TOAN"
+        print("  BỎ QUA phản chứng kernel O_NOFOLLOW; nền thiếu cờ — đo wiring bằng os giả")
+        dich = d / "auth-race.json"; dich.write_text("AN-TOAN")
+        class OsDoiNguon:
+            O_NOFOLLOW = 1 << 29
+            da_doi = False
+            def __getattr__(self, ten): return getattr(os, ten)
+            def open(self, path, flags, mode=0o777):
+                if Path(path) == dich:
+                    self.da_doi = True
+                    if flags & self.O_NOFOLLOW:
+                        raise OSError("os giả từ chối symlink tại điểm dùng")
+                    return mo_that(bi_mat, flags, mode)
+                return mo_that(path, flags, mode)
+
+    os_doi = OsDoiNguon()
+    M.os = os_doi
+    try:
+        M._sao_luu(dich)
+    except OSError:
+        pass
+    else:
+        raise AssertionError("đổi nguồn thành symlink giữa check/use mà vẫn sao lưu")
+    assert os_doi.da_doi, "ca chưa chạm lần os.open nguồn"
+    assert bi_mat.read_text() == "BI-MAT-KHAC", "đã sửa nguồn ngoài phạm vi"
+
+
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
       t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0, t4_kiem_song_bat_credential_bi_tu_choi,
       t5_kiem_song_dat_khi_co_dau_hieu, t6_khong_in_gia_tri_khi_khong_co_co,
       t7_sao_luu_khong_de_ban_cu, t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT,
-      t9_cmd_lay_GHI_tep_huong_dan_dan, t10_gio_con_lai_doc_exp_va_bu_padding]
+      t9_cmd_lay_GHI_tep_huong_dan_dan, t10_gio_con_lai_doc_exp_va_bu_padding,
+      t11_sao_luu_tu_choi_symlink, t12_sao_luu_O_NOFOLLOW_tai_diem_doc]
 
 # ─────────────────────────── đột biến ───────────────────────────
 # (nhãn, chuỗi CŨ, chuỗi MỚI, ca ĐÍCH phải chết)
@@ -311,6 +381,12 @@ DOT_BIEN = [
      "t10_gio_con_lai_doc_exp_va_bu_padding"),
     ("t8_thieu_cong_cu_van_xanh", "return RC[KHONG_DO_DUOC]\n\n    tam_ctx =",
      "return RC[DAT]\n\n    tam_ctx =", "t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT"),
+    ("t11_bo_tu_choi_symlink",
+     '    if dich.is_symlink():\n'
+     '        raise OSError(f"từ chối sao lưu qua symlink: {dich}")\n', "",
+     "t11_sao_luu_tu_choi_symlink"),
+    ("t12_bo_O_NOFOLLOW", 'os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)', "os.O_RDONLY",
+     "t12_sao_luu_O_NOFOLLOW_tai_diem_doc"),
 ]
 
 
@@ -320,7 +396,7 @@ def chay_suite(M, chi_chay: set[str] | None = None) -> set[str]:
     for ca in CA:
         if chi_chay is not None and ca.__name__ not in chi_chay:
             continue
-        # module nạp lại mỗi ca: các ca vá `subprocess.run`/`_co_codex` lên module,
+        # module nạp lại mỗi ca: các ca vá I/O/`_co_codex` lên module,
         # không cô lập thì ca sau ăn bản vá của ca trước và bán kính đo ra sai.
         Mi = nap(M.__nguon__, M.__nhan__)
         Mi.__nguon__, Mi.__nhan__ = M.__nguon__, M.__nhan__

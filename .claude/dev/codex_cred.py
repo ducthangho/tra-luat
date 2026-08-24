@@ -277,8 +277,17 @@ def _sao_luu(dich: Path) -> Path | None:
         except FileExistsError:
             i += 1
     try:
-        with os.fdopen(fd, "wb") as ra, dich.open("rb") as nguon:
-            shutil.copyfileobj(nguon, ra)
+        with os.fdopen(fd, "wb") as ra:
+            # Chính lần MỞ nguồn mới là chốt use-time. Nền thiếu O_NOFOLLOW (Windows)
+            # vẫn đi đường hợp lệ, với phép kiểm symlink tường minh ở đầu hàm.
+            nguon_fd = os.open(dich, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+            try:
+                nguon = os.fdopen(nguon_fd, "rb")
+            except Exception:
+                os.close(nguon_fd)
+                raise
+            with nguon:
+                shutil.copyfileobj(nguon, ra)
             ra.flush()
             os.fsync(ra.fileno())
         os.chmod(bak, 0o600)

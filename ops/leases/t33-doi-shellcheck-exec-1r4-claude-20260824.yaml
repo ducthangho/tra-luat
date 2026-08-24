@@ -325,3 +325,4 @@ noi_da_duoc_cho_phep_ma_KHONG_dung:
     câu `write_set_note` của r3 đã nói thế về suất tệp còn dư của ADR-0044. Sửa một đặc tả đóng
     băng đang được lease này NGHIM BĂM, ngay trong lượt thi công mà lease ấy cấp phép, là để mã
     và đặc tả cùng trôi trong một commit — không bên nào còn làm mốc cho bên nào.
+posted_comment_id: 5389601157   # workflow ghi, ĐỪNG sửa tay

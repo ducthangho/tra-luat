@@ -1688,8 +1688,8 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
         print(f"  BỎ (mồ côi) verdict_path không có thật: "
               f"{str(d.get('verdict_path') or '?')!r}  {d['_tep']}")
     if len(that) > len(vong):
-        print(f"  GỘP {len(that) - len(vong)} biên nhận trùng `reviewed_sha` — "
-              f"cùng một vòng ghi nhiều lần, đếm MỘT")
+        print(f"  GỘP {len(that) - len(vong)} biên nhận trùng KHOÁ NEO — cùng "
+              f"một khoá ghi nhiều lần, đếm MỘT")
 
     if len(vong) < a.toi_thieu:
         _die(RC_BIEN_NHAN,

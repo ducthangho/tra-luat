@@ -82,7 +82,7 @@ def run(script: Path, args, state_dir=None, env_extra=None):
     return p.returncode, p.stdout, p.stderr
 
 
-def run_json_that(c, sd, reason="infrastructure", xong=False) -> Path:
+def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False) -> Path:
     launcher = c.script.with_name("launcher.py")
     if not launcher.is_file():
         launcher.write_text((HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
@@ -90,9 +90,29 @@ def run_json_that(c, sd, reason="infrastructure", xong=False) -> Path:
     cmd = [sys.executable, str(launcher), "run", "--workspace", str(ROOT),
            "--run-root", str(rr), "--attempt-state", str(sd / "wp55.json"),
            "--void-reason", reason, "--"]
-    cmd += [sys.executable, "-c", "pass"] if xong else [str(c.tmp / "khong-ton-tai")]
-    subprocess.run(cmd, capture_output=True, env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
-    return next(rr.iterdir()) / "run.json"
+    if loi_probe:
+        cmd += [str(c.tmp / f"khong-ton-tai-{time.time_ns()}")]
+    else:
+        cmd += [sys.executable, "-c", "pass" if xong else "import sys; sys.exit(23)"]
+    p = subprocess.run(cmd, capture_output=True,
+                       env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+    f = next(rr.iterdir()) / "run.json"
+    if loi_probe or xong:
+        return f
+
+    d = json.loads(f.read_text(encoding="utf-8"))
+    if p.returncode != 23 or d.get("ma_thoat") != 23:
+        raise AssertionError(f"child sau-spawn không thất bại đúng cách: rc={p.returncode}, sổ={d}")
+    if d.get("probe", {}).get("spawn", {}).get("trang_thai") != "DAT":
+        raise AssertionError(f"child chưa qua probe spawn: {d.get('probe')}")
+    # Launcher gọi một child đã spawn rồi là `xong` kể cả khi rc != 0. Đây là
+    # fixture của packet_loop: giữ bằng chứng sau-spawn thật, đổi sang phán quyết
+    # hạ tầng `hong`, rồi ký lại đúng neo lượt như fixture doctor ở trên.
+    st = json.loads((sd / "wp55.json").read_text(encoding="utf-8"))
+    d["trang_thai"] = "hong"
+    d["chu_ky"] = ky_ban_ghi_luot(d, st["hmac_key"])
+    f.write_text(json.dumps(d), encoding="utf-8")
+    return f
 
 
 def _txt(b: bytes) -> str:
@@ -761,6 +781,18 @@ def case_void_hai_ly_do_khong_dung_chung_run(c: Ctx):
     sd = _mo_luot(c); f = run_json_that(c, sd, reason="permission")
     _doi(10, *_void_may(c, sd, f, "infrastructure")[0:1], b"", "một run chứng minh hai lý do")
     _doi(0, *_void_may(c, sd, f, "permission")[0:1], b"", "permission có run riêng")
+
+
+def case_void_phan_biet_loi_probe_va_sau_spawn(c: Ctx):
+    sd = _mo_luot(c)
+    probe = json.loads(run_json_that(c, sd, loi_probe=True).read_text(encoding="utf-8"))
+    sau = json.loads(run_json_that(c, sd).read_text(encoding="utf-8"))
+    assert probe.get("giai_doan") == "probe" and sau.get("giai_doan") is None
+    assert probe["probe"]["spawn"]["trang_thai"] == "DO"
+    assert sau["probe"]["spawn"]["trang_thai"] == "DAT"
+    assert not {"nonce", "chu_ky"} & probe.keys()
+    assert {"nonce", "chu_ky"} <= sau.keys()
+    assert probe["ma_thoat"] != sau["ma_thoat"]
 
 
 def _anh_doctor_luot_truoc(c: Ctx, cham=False):
@@ -2201,6 +2233,7 @@ CASES = [
     ("void_run_cu_khong_neo_co_thong_diep_rieng", case_void_run_cu_khong_neo_co_thong_diep_rieng),
     ("void_run_that_dung_luot_duoc_tha", case_void_run_that_dung_luot_duoc_tha),
     ("void_hai_ly_do_khong_dung_chung_run", case_void_hai_ly_do_khong_dung_chung_run),
+    ("void_phan_biet_loi_probe_va_sau_spawn", case_void_phan_biet_loi_probe_va_sau_spawn),
     ("void_cung_anh_doctor_hai_luot_bi_chan", case_void_cung_anh_doctor_hai_luot_bi_chan),
     ("void_touch_anh_doctor_cu_van_bi_chan", case_void_touch_anh_doctor_cu_van_bi_chan),
     ("chup_anh_doctor_ky_noi_bo", case_chup_anh_doctor_ky_noi_bo),

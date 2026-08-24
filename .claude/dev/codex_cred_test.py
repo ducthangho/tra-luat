@@ -85,6 +85,15 @@ def doi_tep_kin(f: Path, thong_bao: str):
         assert f.is_file(), thong_bao
 
 
+def gan_O_NOFOLLOW_gia_cho_ca_khong_do_kernel(M):
+    """Giữ ca phi-kernel chạy được trên Windows; t12 mới đo ngữ nghĩa cờ thật."""
+    if not hasattr(M.os, "O_NOFOLLOW"):
+        class OsCoNoFollow:
+            O_NOFOLLOW = 0
+            def __getattr__(self, ten): return getattr(os, ten)
+        M.os = OsCoNoFollow()
+
+
 # ─────────────────────────── các ca ───────────────────────────
 # Mỗi ca nhận module M để chạy được trên cả bản gốc lẫn bản đột biến.
 
@@ -169,6 +178,7 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
 
 
 def t7_sao_luu_khong_de_ban_cu(M):
+    gan_O_NOFOLLOW_gia_cho_ca_khong_do_kernel(M)
     d = Path(tempfile.mkdtemp())
     f = d / "auth.json"
     f.write_text("CU")
@@ -267,6 +277,7 @@ def t10_gio_con_lai_doc_exp_va_bu_padding(M):
 
 
 def t11_sao_luu_tu_choi_symlink(M):
+    gan_O_NOFOLLOW_gia_cho_ca_khong_do_kernel(M)
     d = Path(tempfile.mkdtemp())
     nguon, dich = d / "bi-mat.json", d / "auth.json"
     nguon.write_text("BI-MAT")
@@ -306,9 +317,7 @@ def t12_sao_luu_O_NOFOLLOW_tai_diem_doc(M):
                     dich.unlink(); dich.symlink_to(bi_mat)
                 return mo_that(path, flags, mode)
     else:
-        # Đường fallback phải vẫn sao lưu tệp thường; chỉ phản chứng kernel bị bỏ qua.
-        assert M._sao_luu(dich).read_text() == "AN-TOAN"
-        print("  BỎ QUA phản chứng kernel O_NOFOLLOW; nền thiếu cờ — đo wiring bằng os giả")
+        print("  BỎ QUA phản chứng kernel O_NOFOLLOW; đo wiring bằng os giả có cờ")
         dich = d / "auth-race.json"; dich.write_text("AN-TOAN")
         class OsDoiNguon:
             O_NOFOLLOW = 1 << 29
@@ -334,12 +343,42 @@ def t12_sao_luu_O_NOFOLLOW_tai_diem_doc(M):
     assert bi_mat.read_text() == "BI-MAT-KHAC", "đã sửa nguồn ngoài phạm vi"
 
 
+def t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW(M):
+    d = Path(tempfile.mkdtemp())
+    dich = d / "auth.json"
+    dich.write_text("AN-TOAN")
+    mo_that = os.open
+    co_nofollow = hasattr(os, "O_NOFOLLOW")
+    nofollow = getattr(os, "O_NOFOLLOW", None)
+    def cam_mo(*_a, **_kw):
+        raise AssertionError("đã gọi os.open trên nền thiếu O_NOFOLLOW")
+    try:
+        if co_nofollow:
+            delattr(os, "O_NOFOLLOW")
+        os.open = cam_mo
+        try:
+            M._sao_luu(dich)
+        except OSError as e:
+            assert "O_NOFOLLOW" in str(e), f"lỗi không nêu giới hạn nền: {e}"
+        else:
+            raise AssertionError("nền thiếu O_NOFOLLOW mà _sao_luu vẫn chạy")
+        assert not list(d.glob("*.bak-*")), "đã tạo .bak trước khi fail-closed"
+    finally:
+        os.open = mo_that
+        if co_nofollow:
+            os.O_NOFOLLOW = nofollow
+    gan_O_NOFOLLOW_gia_cho_ca_khong_do_kernel(M)
+    bak = M._sao_luu(dich)
+    assert bak and bak.read_text() == "AN-TOAN", "chặn oan nền có O_NOFOLLOW"
+
+
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
       t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0, t4_kiem_song_bat_credential_bi_tu_choi,
       t5_kiem_song_dat_khi_co_dau_hieu, t6_khong_in_gia_tri_khi_khong_co_co,
       t7_sao_luu_khong_de_ban_cu, t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT,
       t9_cmd_lay_GHI_tep_huong_dan_dan, t10_gio_con_lai_doc_exp_va_bu_padding,
-      t11_sao_luu_tu_choi_symlink, t12_sao_luu_O_NOFOLLOW_tai_diem_doc]
+      t11_sao_luu_tu_choi_symlink, t12_sao_luu_O_NOFOLLOW_tai_diem_doc,
+      t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW]
 
 # ─────────────────────────── đột biến ───────────────────────────
 # (nhãn, chuỗi CŨ, chuỗi MỚI, ca ĐÍCH phải chết)
@@ -387,6 +426,10 @@ DOT_BIEN = [
      "t11_sao_luu_tu_choi_symlink"),
     ("t12_bo_O_NOFOLLOW", 'os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)', "os.O_RDONLY",
      "t12_sao_luu_O_NOFOLLOW_tai_diem_doc"),
+    ("t13_bo_fail_closed",
+     '    if not hasattr(os, "O_NOFOLLOW"):\n'
+     '        raise OSError("từ chối sao lưu: nền thiếu os.O_NOFOLLOW")\n', "",
+     "t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW"),
 ]
 
 

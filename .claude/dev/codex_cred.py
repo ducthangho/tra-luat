@@ -34,6 +34,8 @@ CHỐT AN TOÀN
   màn hình là bí mật nằm lại trong nhật ký phiên, mà nhật ký sống lâu hơn phiên.
 * Thành công CHỈ được công bố sau một **lời gọi codex THẬT** (`_kiem_song`). `codex login
   status` NÓI DỐI — nó chỉ kiểm tệp đọc được, rc=0 trong khi mọi lời gọi trả 401.
+* **Giới hạn Windows:** stdlib thiếu `os.O_NOFOLLOW`, nên `_sao_luu` fail-closed: không
+  đọc nguồn, không tạo `.bak`; không dựa vào check-then-use `is_symlink()`.
 
 MÃ THOÁT (cùng quy ước `ops/cong_cu.py`)
     0  ĐẠT            việc xong VÀ đã chứng minh bằng lời gọi thật
@@ -263,6 +265,8 @@ def _sao_luu(dich: Path) -> Path | None:
     Không chữa bằng đồng hồ mịn hơn (`time_ns` vẫn có thể trùng khi hệ thống lùi giờ);
     chữa bằng cách HỎI hệ tệp cho tới khi có tên trống.
     """
+    if not hasattr(os, "O_NOFOLLOW"):
+        raise OSError("từ chối sao lưu: nền thiếu os.O_NOFOLLOW")
     if dich.is_symlink():
         raise OSError(f"từ chối sao lưu qua symlink: {dich}")
     if not dich.is_file():
@@ -278,8 +282,8 @@ def _sao_luu(dich: Path) -> Path | None:
             i += 1
     try:
         with os.fdopen(fd, "wb") as ra:
-            # Chính lần MỞ nguồn mới là chốt use-time. Nền thiếu O_NOFOLLOW (Windows)
-            # vẫn đi đường hợp lệ, với phép kiểm symlink tường minh ở đầu hàm.
+            # Chính lần MỞ nguồn mới là chốt use-time; guard đầu hàm bảo đảm cờ có thật,
+            # nên getattr không bao giờ được phép suy biến thành mở trần.
             nguon_fd = os.open(dich, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
             try:
                 nguon = os.fdopen(nguon_fd, "rb")

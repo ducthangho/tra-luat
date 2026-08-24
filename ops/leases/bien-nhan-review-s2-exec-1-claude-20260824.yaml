@@ -1,0 +1,89 @@
+# Lease EXECUTOR — packet `BIEN-NHAN-REVIEW-DEM-DUOC` (#298), SLICE 2 = B2 + B3.
+#
+# B2: cho bộ đếm vòng review MỘT lối gọi và MỘT định nghĩa, thay vì mỗi người tự grep.
+# B3: cổng từ chối khi một packet có 0 biên nhận `role: reviewer`.
+#
+# ĐỘC LẬP với slice 1: S2 không đọc tệp nào S1 tạo ra, nên KHÔNG cần
+# `mission/<issue>/integration` theo đoạn cuối ADR-0044. Hai nhánh cùng mọc từ master.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 298
+packet_id: BIEN-NHAN-REVIEW-DEM-DUOC
+phase_key: BIEN-NHAN-REVIEW-S2
+revision: 1
+generation: 1
+lease_id: bien-nhan-review-s2-exec-1-claude-20260824
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+lop_review_do_the_nao: >-
+  `.claude/dev/packet_loop.py` nằm THẲNG trong `_BANG_LOP` với giá trị `sensitive` — đây là
+  một trong bảy tiền tố được khai tường minh, không phải rơi về mặc định. Slice này thật sự
+  chạm authority: nó thêm một cổng.
+
+write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+write_set_note: >-
+  ĐÚNG HAI đường dẫn. Trần ADR-0044 cho `sensitive` chạm authority là ≤3 tệp và ≤300 dòng
+  thêm — slice này ở trong cả hai, và suất tệp còn dư KHÔNG phải giấy phép cho đường thứ ba.
+write_set_da_do_truoc_khi_cap: >-
+  `ai-dang-giu .claude/dev/packet_loop.py` -> NGƯỜI_GIỮ 0. Đo 2026-08-24.
+  CỐ Ý KHÔNG đặt cổng ở `ops/lease_publish_test.py` dù hai cổng anh em `t26`/`t27` sống ở
+  đó: `ai-dang-giu` trả NGƯỜI_GIỮ 4 cho tệp ấy, trong đó lease `t33-doi-shellcheck-exec-1r5`
+  của PR #293 CÒN HIỆU LỰC. Hai packet cùng ghi một tệp là đúng thứ write-set exclusion sinh
+  ra để chặn.
+
+branch: claude/bien-nhan-review-s2-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 59fe955dde4e718dcd12e1617e57862165dae812
+start_from_sha: 59fe955dde4e718dcd12e1617e57862165dae812
+reviewed_sha_required: 59fe955dde4e718dcd12e1617e57862165dae812
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 300
+  don_vi: '`git diff --numstat <base>..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  trong_nguong_ADR_0044: true
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-24: "Đồng ý làm ngay B1, B2, B3"'
+authority_basis: §2 — start/pause/resume/reroute/override/authorize thuộc chủ kho
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+
+leased_at_utc: '2026-08-24T02:30:00Z'
+lease_expires_at_utc: '2026-08-25T02:30:00Z'
+run_minutes: 1440
+
+viec_cua_luot_nay: >-
+  B2 — lệnh con `bien-nhan`: đếm biên nhận `role: reviewer` theo packet, một định nghĩa
+  duy nhất. B3 — chính lệnh ấy THOÁT KHÁC 0 khi số đếm dưới ngưỡng (mặc định 1), và
+  fail-close khi KHÔNG ĐO ĐƯỢC (thiếu thư mục trong kho thật, YAML hỏng). Kèm ca phản chứng
+  cho từng nhánh. KHÔNG làm B1 — đã xong ở slice 1, write set khác.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) BA trạng thái, không phải hai: có · không · KHÔNG ĐO ĐƯỢC. Trạng thái thứ ba phải làm
+  cổng ĐỎ, không được trả 0 lặng lẽ — "0 biên nhận" và "không đọc được thư mục" nhìn giống
+  hệt nhau nếu trả cùng một số. (2) Phải có ca chứng minh cổng đếm ĐÚNG TRỤC: một biên nhận
+  `role: executor` KHÔNG được tính. Thiếu ca ấy thì cổng đang đếm TỆP chứ không đếm VAI, và
+  không ai biết. (3) `packet_id` trong kho có hai dạng đang sống — slug (`wp55`) và số
+  (`'249'`); so bằng chuỗi và chấp cả `packet_slug`.
+
+chua_do_duoc_luc_cap: >-
+  (1) B3 bắt được ca "0 biên nhận". Ca "ghi 1 biên nhận cho 4 vòng" nó KHÔNG bắt, và chưa có
+  cách đo số vòng THẬT mà không cần mạng — `packet_loop.py` có 0 đường ra GitHub. Khai
+  thẳng phạm vi thay vì đặt tên cổng to hơn thứ nó cưỡng chế. (2) Chưa quét toàn bộ packet
+  lịch sử xem còn bao nhiêu packet có 0 biên nhận — đo được hai, không suy ra chỉ hai.
+
+dieu_kien_dung: >-
+  S1 nếu cần đường dẫn thứ ba. S2 nếu vượt 300 dòng thêm. S3 nếu để cưỡng chế được "đủ số
+  vòng" mà phải cho `packet_loop.py` gọi mạng — đó là đổi kiến trúc, dừng và xin quyết định.

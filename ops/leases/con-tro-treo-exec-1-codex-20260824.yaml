@@ -1,0 +1,167 @@
+# Lease EXECUTOR — `CON-TRO-TREO` (#313), lượt 1. Packet GỘP ba ca.
+#
+# Ba ca ở ba tầng khác nhau nhưng CÙNG MỘT CÂU: một chỗ trỏ/đọc tới thứ không còn đúng,
+# và không tầng nào biết. Cả ba sống trong CÙNG hai tệp nên làm một lượt là rẻ nhất.
+# Chủ kho chốt "gộp" in-session 2026-08-24.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 313
+packet_id: CON-TRO-TREO
+phase_key: CON-TRO-TREO
+revision: 1
+generation: 1
+lease_id: con-tro-treo-exec-1-codex-20260824
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` ở đây KHÔNG phải mặc định fail-close như phần lớn packet khác — packet này sửa
+  CHÍNH `ops/lease_publish.py`, tức tầng cưỡng chế thẩm quyền ghi. Nhãn đúng nghĩa đen.
+  Vì vậy trần ADR-0044 (≤3 tệp / ≤300 dòng thêm) áp THẬT, không phải hình thức.
+
+spec_path: null
+spec_note: >-
+  KHÔNG có đặc tả đóng băng. Nguồn yêu cầu là Issue #313 cùng comment
+  https://github.com/ducthangho/tra-luat/issues/313#issuecomment-5402804233 (ca 3 và ca 4).
+  Cả hai ca ấy có phép đo chạy được ghi trong comment; executor PHẢI tự đo lại, không nhận lời khai.
+
+write_set:
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+write_set_note: >-
+  ĐÚNG HAI đường dẫn. Trần ADR-0044 cho `sensitive` là ≤3 tệp — còn dư một suất, và suất ấy
+  KHÔNG phải giấy phép: trần là NGƯỠNG KÍCH THƯỚC, không phải giấy phép đường dẫn.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 24-08-2026 23:2xZ. Phép so HAI NGUỒN chạy TRƯỚC, so bằng TẬP TÊN không bằng số đếm:
+    is-shallow-repository false · ls-remote 203 · for-each-ref 203 · comm RỖNG cả hai chiều
+  Rồi mới quét:
+    ops/lease_publish.py       -> rc=0  NGƯỜI_GIỮ 0
+    ops/lease_publish_test.py  -> rc=0  NGƯỜI_GIỮ 0
+  CẢ HAI vừa được giải phóng trong chính phiên này bằng bia mộ + đánh dấu `da_bi_thay_the`
+  (#305→PR #311 land `e80f43b`, #249→PR #293 land `e3fba03`). Nếu bạn đo lại mà thấy có người
+  giữ ⇒ DỪNG, có phiên khác vừa cấp.
+
+branch: codex/con-tro-treo-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+reviewed_sha_required: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 300
+  do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+  don_vi: >-
+    `git diff --numstat c35ae1c0a1104dbd6e65a321cda3b9f9441a408b -- ops/lease_publish.py ops/lease_publish_test.py`
+    — cột dòng THÊM. PATHSPEC NẰM TRONG LỆNH, và KHÔNG có `..HEAD`: sandbox executor mount
+    `.git` chỉ đọc nên bạn không commit được, mà `..HEAD` thì KHÔNG NHÌN THẤY bản vá trên
+    working tree. Cả hai chỗ này đều đã trả giá ở packet #308 (lease r7 và báo cáo lượt 4).
+  da_dung: 0
+  ghi_chu: >-
+    300 là TRẦN CỨNG của ADR-0044 cho `sensitive` chạm thẩm quyền, KHÔNG phải ước lượng.
+    Ba ca cộng phản chứng cộng đột biến rất có thể KHÔNG vừa. Vì vậy có THỨ TỰ ƯU TIÊN bắt
+    buộc ở `viec_cua_luot_nay`: làm hết ca 1 rồi mới sang ca 3, hết ca 3 mới sang ca 4.
+    Hết ngân sách ⇒ DỪNG, khai ca nào chưa làm. TUYỆT ĐỐI KHÔNG tự nới trần, và KHÔNG cắt
+    phản chứng để nhét thêm ca — một ca không có răng thì thà không có.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-24. Hai lệnh nối nhau: "#313 đồng ý đề xuất" (duyệt hướng
+  "chặn lúc ĐĂNG + một lượt quét ngược" cho ca 1), rồi "Tôi chọn gộp" (duyệt gộp ca 3 và
+  ca 4 vào cùng packet sau khi được trình hai lựa chọn gộp/tách).
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên ghi lease là phiên ĐIỀU PHỐI, và nó CHÍNH LÀ phiên đã vấp ca 3 và ca 4. Nó KHÔNG thi
+  công lượt này (executor `codex`) và SẼ là reviewer — khác nền, đúng PROTOCOL:580.
+
+leased_at_utc: '2026-08-24T23:30:00Z'
+lease_expires_at_utc: '2026-08-25T23:30:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  `ops/lease_publish.py`: hàm `lenh_check` và các hàm nó gọi · `lenh_ai_dang_giu` ·
+  `_quet_lease_toan_kho` · hằng mã thoát ở đầu tệp · hàm mới do packet này thêm.
+  `ops/lease_publish_test.py`: ca mới và bảng đăng ký ca.
+  Hunk ngoài các vùng ấy ⇒ ĐỎ. TRƯỜNG NÀY SỐNG TRONG LEASE, KHÔNG trong tài liệu nào khác —
+  đó chính là ca 1 của packet, đừng đi tìm nó ở chỗ khác.
+
+quyet_dinh_mac_dinh_nguoi_giu_co_the_doi: >-
+  BỐN quyết định thiết kế do phiên điều phối CHỌN MẶC ĐỊNH, đã trình người giữ kho. Executor
+  thi hành theo mặc định; nếu người giữ đổi thì sẽ có lease sửa đổi, ĐỪNG tự chọn khác.
+  D1 quét ngược = CHỈ BÁO CÁO, không tự sửa lease đã đăng. Lý do: lease đã đăng là hồ sơ
+     đóng băng; tự ghi vào đó là đúng thứ kho đã cấm ("sửa đè làm hồ sơ mất dấu").
+  D2 biên hợp lệ của ca 1 = chỉ soi tên trường THUỘC SCHEMA LEASE. Lease nhắc tên trường của
+     tài liệu KHÁC (ví dụ bàn về `spec_path` của một spec) là HỢP LỆ và không được chặn.
+     Phải có ca phản chứng cho ĐÚNG tình huống này, nếu không cổng sẽ chặn oan.
+  D3 ca 3 = TỪ CHỐI lúc đăng, KHÔNG tự ghi `da_bi_thay_the` vào lease cũ. Cùng lý do D1.
+  D4 ca 4 = FAIL-CLOSE (chặn), kèm thông điệp nêu ĐÍCH DANH nhánh cục bộ tụt sau và lệnh chữa.
+     Lý do: một người-giữ-ma chặn oan việc hợp lệ, còn im lặng thì mở cửa cho writer thứ hai —
+     sai cả hai chiều, nên phải kêu.
+
+viec_cua_luot_nay: >-
+  BA CA, THEO ĐÚNG THỨ TỰ NÀY. Hết ngân sách thì dừng và khai ca còn lại.
+
+  === CA 1 (BẮT BUỘC) — con trỏ treo trong lease ===
+  Tên trường xuất hiện trong văn bản một lease (dạng `` `ten_truong` ``) mà KHÔNG có định
+  nghĩa `^ten_truong:` trong CHÍNH tệp ấy ⇒ ĐỎ ở `check`.
+  Ca thật đã xảy ra: `vung_duoc_phep_cham` định nghĩa ở `launcher-r3-va-p1p2-exec-1r3`, bị XOÁ
+  ở `r4`, mà `r4` vẫn nhắc nó HAI lần. Con trỏ nằm im hai revision rồi CHẶN THẬT một lượt
+  executor ở `r5`. Đo lại được: `grep -c '^vung_duoc_phep_cham:'` so `grep -c 'vung_duoc_phep_cham'`
+  trên từng revision cho 0/0 · 0/0 · 1/2 · 0/2 · 0/2.
+  Kèm D2 (biên hợp lệ) — và ca phản chứng cho biên ấy là BẮT BUỘC, không phải tuỳ chọn.
+  Kèm quét ngược MỘT LẦN theo D1: một chế độ chỉ-đọc liệt kê mọi lease CÒN HIỆU LỰC đang mang
+  con trỏ treo. Chỉ báo cáo.
+
+  === CA 3 (NÊN) — bia mộ hai bước, bước hai không có cổng ===
+  Lease mới khai `thay_the_cho: X` mà `X` chưa mang `da_bi_thay_the` ⇒ `check` TỪ CHỐI (D3),
+  thông điệp nói rõ phải thêm dòng ấy vào `X`.
+  Vì sao có ca này: phiên điều phối đăng hai bia mộ đúng mẫu, `check` rc=0, workflow `success`,
+  và THA ĐƯỢC SỐ KHÔNG — vì workflow chỉ ghi `posted_comment_id`, không ghi `da_bi_thay_the`.
+  Bước thứ hai chỉ sống trong một dòng CHÚ THÍCH của mẫu bia mộ. Đo được: sau khi đẩy `8a10f85`,
+  cả hai lease cũ vẫn 0 lần nhắc trường ấy, và `ai-dang-giu` vẫn `rc=11`.
+
+  === CA 4 (NÊN) — `ai-dang-giu` đếm cả ref CỤC BỘ, nên nhánh cũ đẻ người-giữ-ma ===
+  `_quet_lease_toan_kho` quét cả `refs/heads/*`. Một nhánh cục bộ sót lại từ worktree cũ, tụt
+  sau đối ứng remote, làm `ai-dang-giu` báo NGƯỜI_GIỮ cho một lease ĐÃ bị thay thế.
+  Đo được: `refs/heads/ops/cap-lease-t33-doi-shellcheck` ở `1bb5fc8` trong khi remote ở
+  `d4facdb` ⇒ `rc=11`; `git branch -f` cho khớp ⇒ `rc=0` ngay, không đổi gì khác.
+  Theo D4: khai rõ trong output rằng nó quét `refs/heads/*`, và CHẶN khi một nhánh cục bộ tụt
+  sau `origin/<cùng tên>`, nêu đích danh nhánh + lệnh chữa.
+  ĐỪNG chữa bằng cách bỏ `refs/heads/*` khỏi phạm vi quét — nhánh cục bộ CHƯA ĐẨY là chỗ lease
+  mới nhất nằm; bỏ nó đi là mở đúng lỗ mà `SO-LEASE-KHONG-NAM-MOT-CHO` đã tố cáo.
+
+  MỌI CA phải có phản chứng chạy được trong `ops/lease_publish_test.py` VÀ một đột biến giết
+  được ca đích. Ca không có răng thì thà không có.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ⇒ DỪNG, xin lease sửa đổi ·
+  S2 vượt 300 dòng thêm ⇒ DỪNG, khai ca chưa làm, KHÔNG tự nới ·
+  S3 kết luận một trong bốn quyết định mặc định (D1–D4) là SAI ⇒ DỪNG, trình phép đo, xin
+  quyết định. Đừng tự chọn hướng khác rồi báo sau ·
+  S4 không tái hiện được ca 3 hoặc ca 4 bằng phép đo của chính mình ⇒ ghi `KHÔNG_ĐO_ĐƯỢC`
+  cho ca ấy và BỎ QUA nó, đừng vá theo lời khai của lease ·
+  S5 `origin/master` đã đi tiếp so với `base_sha` mà chưa đo lại.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) SANDBOX MOUNT `.git` CHỈ ĐỌC. Không commit, không push. Để bản vá trên cây làm việc.
+  (2) Bạn đang sửa CHÍNH cổng thẩm quyền ghi. Một cổng chặn oan còn tệ hơn không có cổng, vì
+  nó dạy người ta đi vòng. Mỗi ca phải có phản chứng cho CẢ hai chiều: chặn đúng ca xấu, và
+  KHÔNG chặn ca tốt.
+  (3) `vung_duoc_phep_cham` nằm trong LEASE này (có ở trên). Đừng đi tìm ở tệp khác — trớ trêu
+  là đi tìm nhầm chỗ chính là ca 1.
+  (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu, kể cả khi trích để giải thích.
+  (5) `ops/lease_publish_test.py` có 3170 dòng và `ops/lease_publish.py` có 727 — đọc quanh
+  chỗ bạn sửa trước khi thêm, kho này có sẵn nhiều tiện ích dựng fixture.

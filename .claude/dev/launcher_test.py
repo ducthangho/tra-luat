@@ -5777,6 +5777,19 @@ def r10_trust_json_hong_bi_chan_sach():
              f"JSON hong khong bi chan sach: {r.returncode} {r.stderr} {d}")
 
 
+@ca
+def r11_trust_gia_tri_that_ba_chieu():
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = s / "repo"; repo.mkdir(); home = s / "home"; home.mkdir()
+        tep = home / ".claude.json"
+        for gia_tri, mong in ((True, "DAT"), (False, "DO"), (1, "KHONG_DO_DUOC")):
+            tep.write_text(json.dumps({"projects": {str(repo.resolve()):
+                           {"hasTrustDialogAccepted": gia_tri}}}), encoding="utf-8")
+            kq = m._probe_trust_claude(str(repo), home)
+            bang(kq["trang_thai"] == mong, f"trust={gia_tri!r}: {kq}")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -5810,6 +5823,14 @@ DOT_BIEN = [
      ('    except (OSError, TypeError, AttributeError, json.JSONDecodeError):',
       '    except (OSError, TypeError, AttributeError):'),
      ["r10_trust_json_hong_bi_chan_sach"]),
+    ("m4_bool_nghiem_ngat_thanh_truthy_else",
+     [('    if muc["hasTrustDialogAccepted"] is True:', '    if muc["hasTrustDialogAccepted"]:'),
+      ('    if muc["hasTrustDialogAccepted"] is False:', '    else:')],
+     ["r11_trust_gia_tri_that_ba_chieu"]),
+    ("m4_non_bool_bi_coi_la_DAT",
+     ('    return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "trust Claude khong phai boolean"}',
+      '    return {"trang_thai": "DAT", "chi_tiet": "trust Claude khong phai boolean"}'),
+     ["r11_trust_gia_tri_that_ba_chieu"]),
     ("m5_canh_bao_thay_vi_chan",
      ('    if hong and ly_do is None:', '    if False and hong and ly_do is None:'),
      ["r06_probe_hong_khong_override_phai_chan"]),

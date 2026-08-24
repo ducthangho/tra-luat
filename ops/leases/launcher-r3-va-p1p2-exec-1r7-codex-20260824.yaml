@@ -211,3 +211,4 @@ thay_the_ly_do: >-
   Cập nhật `da_dung` 90 → 111 theo phép đo trên write set. Write set, trần, provider, reviewer
   KHÔNG đổi. TRẦN ADR-0043 KHÔNG bị chạm: packet đã dùng đúng HAI vòng review canon (vòng 1 và
   vòng 2); lượt 4 là lượt VÁ đóng finding của vòng 2, không phải một vòng review mới.
+posted_comment_id: 5398653293   # workflow ghi, ĐỪNG sửa tay

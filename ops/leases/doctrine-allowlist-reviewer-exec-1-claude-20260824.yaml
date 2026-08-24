@@ -124,3 +124,7 @@ dieu_kien_dung: >-
   người giữ · S2 vượt 90 dòng thêm · S3 phát hiện một trong ba con số của bảng không tái lập được
   từ `stdout.log` ⇒ DỪNG, đo lại, KHÔNG giữ số cũ · S4 `origin/master` đã đi tiếp mà chưa đo lại.
 posted_comment_id: 5402763178   # workflow ghi, ĐỪNG sửa tay
+da_bi_thay_the: doctrine-allowlist-reviewer-exec-1r2-claude-20260824
+da_bi_thay_the_ly_do: >-
+  Dòng chú thích đầu tệp ghi `(#313)` trong khi packet là #314; #313 là packet có thật của
+  phiên khác. Con trỏ treo — đúng lớp lỗi mà #313 đang mở để đóng.

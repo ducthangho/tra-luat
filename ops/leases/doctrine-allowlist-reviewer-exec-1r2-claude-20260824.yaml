@@ -1,0 +1,138 @@
+# Lease EXECUTOR — `DOCTRINE-ALLOWLIST-REVIEWER` (#314), lượt 1.
+#
+# Ghi vào doctrine một phép đo đã trả giá thật trong phiên 24-08-2026: luật `Bash(x:*)` của
+# `--allowedTools` khớp TIỀN TỐ CHUỖI LỆNH, nên nó chặn oan gần hết phép đo mà reviewer cần —
+# và chính vòng lặp bị-từ-chối làm context phình tới mức hai lượt review chết vì `api_error`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 314
+packet_id: DOCTRINE-ALLOWLIST-REVIEWER
+phase_key: DOCTRINE-ALLOWLIST-REVIEWER
+revision: 2
+generation: 1
+lease_id: doctrine-allowlist-reviewer-exec-1r2-claude-20260824
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` là MẶC ĐỊNH FAIL-CLOSE của `_BANG_LOP`, không phải tín hiệu chạm thẩm quyền.
+  Packet này thuần tài liệu dev-side.
+
+spec_path: 'KHÔNG CÓ — nội dung packet là chính phép đo, ghi trong Issue #314'
+spec_status: khong_co_dac_ta_rieng
+spec_duyet_boi: ducthangho
+spec_note: >-
+  Không soạn đặc tả riêng: toàn bộ nội dung là BA phép đo đã chạy trong phiên, và chúng được
+  chép nguyên số vào Issue #314 cùng bản vá. Soạn thêm một tệp spec để neo băm chỉ tạo thêm một
+  bản chiếu nữa cho cùng dữ liệu.
+
+write_set:
+  - docs/GOI_AGENT_DA_NEN.md
+write_set_note: >-
+  ĐÚNG MỘT đường dẫn. `CLAUDE.md` và `.claude/skills/cross-review/SKILL.md` KHÔNG nằm trong
+  write set và KHÔNG được chạm — chúng đang bị lease `doctrine-rig-va-reviewer-exec-1-claude-20260824`
+  (packet #305) giữ tới 2026-08-25T12:45:00Z. Con trỏ từ `CLAUDE.md` sang mục mới sẽ do người giữ
+  lease ấy thêm; đã báo ở Issue #305.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 24-08-2026 ~23:0xZ bằng `ops/lease_publish.py ai-dang-giu` bản trên `origin/master` (3e6001a).
+  Phép so hai nguồn TRƯỚC khi quét: `ls-remote --heads` 201 = `for-each-ref` 201, `comm -23` RỖNG.
+    docs/GOI_AGENT_DA_NEN.md              ->  NGƯỜI_GIỮ 0
+    CLAUDE.md                             ->  NGƯỜI_GIỮ 1  (doctrine-rig-va-reviewer…, CÒN_HẠN 13h37m)
+    .claude/skills/cross-review/SKILL.md  ->  NGƯỜI_GIỮ 1  (cùng lease)
+  Hai đường dẫn sau là lý do packet này KHÔNG viết vào `CLAUDE.md`.
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+
+branch: claude/doctrine-allowlist-reviewer-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+reviewed_sha_required: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+base_ghi_chu: >-
+  `3e6001a` = master lúc cấp, chính là merge của PR #306. Ngân sách đo từ đây; nhánh chưa mang
+  sẵn việc nào nên merge-base và start_from trùng nhau, không có bẫy như packet #308.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 1
+  dong_them_toi_da: 90
+  do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+  don_vi: '`git diff --numstat 3e6001a..HEAD -- docs/GOI_AGENT_DA_NEN.md` — cột dòng THÊM'
+  da_dung: 71
+  ghi_chu: >-
+    71 là số ĐÃ ĐO trên bản vá thật, không phải ước lượng — bản vá viết xong trước khi cấp lease
+    vì nội dung của nó CHÍNH LÀ nhật ký đo của phiên. 90 để chừa chỗ cho vòng review.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-24 — sau khi được trình ba việc còn hở, người giữ kho trả lời
+  "xử lý ngay".
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_ghi_chu: >-
+  KHAI THẲNG: phiên ghi lease này CŨNG là phiên thi công, VÀ là phiên đã tạo ra sự cố được ghi
+  vào doctrine. Ba vai gộp làm một. Lý do chấp nhận: nội dung là NHẬT KÝ ĐO của chính phiên —
+  ba lượt chạy thật với số đo kèm theo — nên tách phiên thi công sẽ chỉ tạo một bản chép lại.
+  Hệ quả cho nhãn: `cross_approved` của lượt này đứng CHỈ bằng vòng review `codex` SAU khi thi
+  công; khâu soạn — cấp — thi công KHÔNG độc lập. Ghi ra vì nhãn ấy trông y hệt nhau dù có độc
+  lập hay không.
+
+leased_at_utc: '2026-08-24T23:05:00Z'
+lease_expires_at_utc: '2026-08-25T23:05:00Z'
+run_minutes: 1440
+
+viec_cua_luot_nay: >-
+  MỘT mục tiêu: thêm hai tiểu mục vào §"Chế độ hỏi/duyệt của phiên agent" của
+  `docs/GOI_AGENT_DA_NEN.md`, ngay sau đoạn "Claude Code headless".
+  (1) `Bash(x:*)` khớp TIỀN TỐ chuỗi lệnh ⇒ chặn oan mọi lệnh có ống/`;`/`>`/`$( )`/heredoc/gán
+      biến đứng trước. Kèm bảng ba lượt đo trên CÙNG prompt + CÙNG exact head, và khuyến nghị
+      cấp `Bash` TRẦN cho phiên reviewer read-only.
+  (2) Bản in cuối của phiên headless LÀ sản phẩm — không có lượt sau, không có probe chạy nền.
+  KHÔNG chạm `CLAUDE.md`, KHÔNG chạm `.claude/skills/**`, KHÔNG sửa mã.
+
+vi_sao_muc_nay_thuoc_TEP_NAY: >-
+  §"Claude Code headless" của chính tệp này đang dặn "Cấp allowlist HẸP theo lượt" kèm ví dụ
+  `--allowedTools "Read" "Glob" ... "Bash(python:*)"`. Đó ĐÚNG là lời khuyên đã làm hỏng ba lượt
+  review. Người đọc làm theo sẽ vấp lại y hệt. Nên bản vá phải nằm CẠNH câu ấy, không nằm ở một
+  tệp khác — bài học "một đính chính chỉ sống trong tài liệu kế nhiệm là đính chính có thể bị bỏ sót".
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) Ba con số của bảng so sánh (78/5/10,8M · 85/10/12,8M · 45/1/3,7M) đọc từ trường `usage` và
+  `permission_denials` trong `stdout.log` của ba lượt chạy — KHÔNG gõ tay, và nếu sửa thì phải đo lại.
+  (2) Câu "hai lỗi API là hệ quả của vòng lặp bị-từ-chối" là SUY LUẬN có neo, không phải phép đo
+  trực tiếp — tương quan ba điểm, không phải phản chứng. Đừng nâng nó thành nhân quả đã chứng minh.
+  (3) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+
+chua_do_duoc_luc_cap: >-
+  (1) CHƯA có phản chứng cô lập cho quan hệ nhân quả denial → context phình → `api_error`. Ba lượt
+  khác nhau ở allowlist VÀ ở thời điểm chạy; không loại được yếu tố phía dịch vụ.
+  (2) CHƯA đo luật `Bash(x:*)` trên bản Claude Code nào khác ngoài `2.1.241`.
+  (3) CHƯA đo hành vi tương đương của `codex` — mục này chỉ nói về `claude -p`.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ hai (nhất là `CLAUDE.md`) ⇒ DỪNG, xin lease sửa đổi — đường ấy đang có
+  người giữ · S2 vượt 90 dòng thêm · S3 phát hiện một trong ba con số của bảng không tái lập được
+  từ `stdout.log` ⇒ DỪNG, đo lại, KHÔNG giữ số cũ · S4 `origin/master` đã đi tiếp mà chưa đo lại.
+
+thay_the_cho: doctrine-allowlist-reviewer-exec-1-claude-20260824
+thay_the_ly_do: >-
+  CON TRỎ TREO trong dòng chú thích đầu tệp: r1 ghi `(#313)` trong khi packet là **#314**.
+  Và #313 KHÔNG phải số trống — nó là packet CÓ THẬT của một phiên khác (`CON-TRO-TREO`,
+  mở 2026-08-24T16:45Z), nên con trỏ không chỉ sai, nó chỉ sang việc của người khác.
+  Trớ trêu đúng chỗ phải ghi lại: đây là lease của một packet về DOCTRINE, và lỗi của nó
+  thuộc đúng lớp mà #313 sinh ra để đóng — *"một chỗ TRỎ tới một thứ, thứ ấy không đúng
+  như con trỏ mô tả, và không tầng nào phát hiện"*. `check` không bắt vì nó đọc trường
+  `packet_issue` (đã đúng: 314), còn con trỏ sai nằm trong CHÚ THÍCH — vùng không có cổng.
+  Đó chính là bằng chứng thứ hai cho việc chốt mà #313 đề xuất là cần thiết, và cho thấy
+  phạm vi của nó phải phủ cả chú thích chứ không chỉ trường.
+  Không điều khoản nào khác đổi.

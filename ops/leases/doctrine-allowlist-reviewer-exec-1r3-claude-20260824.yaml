@@ -175,3 +175,4 @@ thay_the_ly_do: >-
   `.claude/dev/mcp_gh_test.py` và `.claude/dev/` đều trả NGƯỜI_GIỮ 0; phép so hai nguồn
   `ls-remote` 203 = `for-each-ref` 203, `comm -23` RỖNG.
   `CLAUDE.md` và `.claude/skills/**` VẪN KHÔNG được chạm — packet #305 còn giữ.
+posted_comment_id: 5402861836   # workflow ghi, ĐỪNG sửa tay

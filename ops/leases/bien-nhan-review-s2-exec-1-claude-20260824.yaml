@@ -87,3 +87,4 @@ chua_do_duoc_luc_cap: >-
 dieu_kien_dung: >-
   S1 nếu cần đường dẫn thứ ba. S2 nếu vượt 300 dòng thêm. S3 nếu để cưỡng chế được "đủ số
   vòng" mà phải cho `packet_loop.py` gọi mạng — đó là đổi kiến trúc, dừng và xin quyết định.
+posted_comment_id: 5389936227   # workflow ghi, ĐỪNG sửa tay

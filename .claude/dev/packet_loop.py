@@ -1512,8 +1512,13 @@ def _la_dang_commit(s: str) -> bool:
 
     KHÔNG hỏi "commit ấy có tồn tại không" — `packet_loop.py` chạy được ở cây không có
     lịch sử ấy, và hỏi git là mở một phụ thuộc mới cho một phép đếm. Chỉ hỏi HÌNH DẠNG:
-    hex, dài từ 7 (độ viết tắt ngắn nhất git chấp) tới 64 (sha256). Đủ để một chuỗi rác
-    tự khai không giả làm hai vòng khác nhau, và không đòi hỏi gì thêm.
+    hex, dài từ 7 (độ viết tắt ngắn nhất git chấp) tới 64 (sha256).
+
+    CHỖ HỞ CÒN LẠI, cross-review lượt 4 đo được (`bn-sha-viet-tat-nhan-doi-vong`): một
+    commit ghi bằng ID ĐẦY ĐỦ và bằng BẢN RÚT GỌN CỦA CHÍNH NÓ là hai chuỗi khác nhau,
+    nên thành hai khoá. Đóng nó đòi hỏi `git rev-parse` — tức chính phụ thuộc đoạn trên
+    cố ý không mở. Chủ kho chốt 24-08: KHÔNG siết thêm ở đây, hạ lời khai xuống đúng thứ
+    cưỡng chế được (xem `cmd_bien_nhan`), và để việc hỏi git thành packet riêng.
     """
     return 7 <= len(s) <= 64 and all(c in "0123456789abcdef" for c in s)
 
@@ -1594,11 +1599,17 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
 
     Nay phạm vi là: một biên nhận chỉ được TÍNH khi (a) `role: reviewer`, (b) khớp packet bằng
     SO BẰNG chuỗi trên `packet_id` hoặc `packet_slug` — không phải chuỗi con, và (c) `verdict_path`
-    trỏ tới một tệp CÓ THẬT. Hai biên nhận cùng `reviewed_sha` đếm là MỘT vòng.
+    trỏ một tệp CÓ THẬT NẰM TRONG `ops/reviews` (không phải đường dẫn tuyệt đối, không qua symlink
+    ra ngoài). Biên nhận trùng khoá neo đếm là MỘT.
 
-    Vẫn KHÔNG cưỡng chế: số vòng THẬT. Biết nó đòi hỏi hỏi GitHub, mà `packet_loop.py` có 0 đường
-    ra mạng và sẽ không mở một đường như vậy chỉ để đếm. Nên "3 vòng đã chạy, 1 biên nhận" vẫn lọt.
-    Khai thẳng chỗ hở thay vì đặt cho cổng một cái tên to hơn thứ nó làm.
+    ĐƠN VỊ ĐẾM KHÔNG PHẢI "VÒNG REVIEW" mà là **số biên nhận PHÂN BIỆT ĐƯỢC** — gom theo
+    `reviewed_sha` khi chuỗi ấy có hình dạng commit, thiếu/rỗng/sai dạng gom hết về MỘT xô.
+    Hai chỗ lệch, cả hai đo được: một commit ghi bằng ID đầy đủ VÀ bản rút gọn của chính nó
+    đếm thành HAI (lượt 4, `bn-sha-viet-tat-nhan-doi-vong`); "3 vòng đã chạy, 1 biên nhận"
+    vẫn đếm 1. Đóng cả hai đều đòi git hoặc GitHub, mà lệnh này cố ý không phụ thuộc git và
+    có 0 đường ra mạng. Chủ kho chốt 24-08: KHAI ĐÚNG TÊN thay vì siết thêm — cổng sinh ra
+    để bắt ca 0 biên nhận và ca ấy nó bắt đúng; mọi dạng lách trên chỉ có nghĩa khi ai đó cố
+    vượt `--toi-thieu` cao, mà ngưỡng mặc định là 1.
     """
     # NGƯỠNG 0 HOẶC ÂM BIẾN CỔNG THÀNH CỔNG TỰ TẮT — `--toi-thieu 0` cho `rc=0` trên một
     # packet có 0 biên nhận, tức đúng ca B3 sinh ra để bắt. Một cổng tắt được bằng chính cờ
@@ -1667,7 +1678,7 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
         vong.append(d)
 
     nhan = "mọi packet" if muon is None else f"packet {muon!r}"
-    print(f"bien-nhan: {nhan} — {len(vong)} VÒNG đếm được "
+    print(f"bien-nhan: {nhan} — {len(vong)} biên nhận PHÂN BIỆT ĐƯỢC "
           f"(từ {len(that)} biên nhận `role: reviewer` hợp lệ / {len(hop)} khớp packet "
           f"/ {len(ds)} toàn thư mục)")
     for d in vong:
@@ -1682,7 +1693,7 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
 
     if len(vong) < a.toi_thieu:
         _die(RC_BIEN_NHAN,
-             f"{nhan}: {len(vong)} VÒNG đếm được, đòi tối thiểu {a.toi_thieu}. "
+             f"{nhan}: {len(vong)} biên nhận PHÂN BIỆT ĐƯỢC, đòi tối thiểu {a.toi_thieu}. "
              f"Một vòng review không để lại biên nhận là một vòng không ai tra được sau khi "
              f"container chết — và không cổng nào khác thấy điều đó.")
     return RC_OK

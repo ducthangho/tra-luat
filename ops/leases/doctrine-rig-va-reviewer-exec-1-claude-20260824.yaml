@@ -1,0 +1,99 @@
+# Lease EXECUTOR — packet `DOCTRINE-RIG-VA-REVIEWER`.
+#
+# HAI bài học của phiên 24-08, chủ kho DUYỆT in-session ("đồng ý đề nghị"), cộng MỘT lỗi
+# tài liệu mà cross-review S1 (#309) tìm ra và không ai sửa được vì nó ngoài mọi write set
+# đang mở.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 305
+packet_id: DOCTRINE-RIG-VA-REVIEWER
+phase_key: DOCTRINE-24-08
+revision: 1
+generation: 1
+lease_id: doctrine-rig-va-reviewer-exec-1-claude-20260824
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+lop_review_do_the_nao: >-
+  `CLAUDE.md` là lõi doctrine của kho và `.claude/skills/**` là adapter mà mọi phiên đọc.
+  Sai ở đây KHÔNG làm cổng nào đỏ — nó làm mọi phiên sau đi sai. Đó đúng là `sensitive`
+  theo nghĩa nặng nhất: không có phép đo nào bắt được, chỉ có người đọc.
+
+write_set:
+  - CLAUDE.md
+  - .claude/skills/cross-review/SKILL.md
+write_set_note: >-
+  ĐÚNG HAI tệp. KHÔNG đụng `docs/PROTOCOL_DA_PHIEN.md` — protocol là nguồn quy tắc, hai
+  tệp này là doctrine kho và adapter nền. Sửa protocol là packet khác.
+write_set_da_do_truoc_khi_cap: >-
+  `ai-dang-giu CLAUDE.md` -> NGƯỜI_GIỮ 0; `ai-dang-giu .claude/skills/cross-review/SKILL.md`
+  -> NGƯỜI_GIỮ 0. Đo 2026-08-24.
+
+branch: claude/doctrine-rig-va-reviewer-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 59f4202e1a78a97acf3065801856f83f99fc88b9
+start_from_sha: 59f4202e1a78a97acf3065801856f83f99fc88b9
+reviewed_sha_required: 59f4202e1a78a97acf3065801856f83f99fc88b9
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 120
+  don_vi: '`git diff --numstat <base>..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  trong_nguong_ADR_0044: true
+  vi_sao_120: >-
+    Thuần văn bản, không mã. `CLAUDE.md` vốn dài và mỗi bài học ở đó chiếm 10–25 dòng vì
+    nó phải mang PHÉP ĐO chứ không chỉ lời khuyên. Hai bài học cộng một sửa câu ⇒ 120 là
+    rộng rãi. Chạm 120 nghĩa là tôi đang viết dài chứ không phải việc lớn — DỪNG và cắt.
+
+viec_cua_luot_nay: >-
+  (1) `CLAUDE.md` — bài học RIG: mọi phép đo so hai vế phải dựng CẢ HAI trong MỘT lệnh,
+  cùng các bước, chạy liền nhau. Phiên 24-08 có NĂM lần rig tự sinh hồi quy không tồn tại:
+  `git worktree` (x2), kho-thật-vs-clone, `clone`+`cp`+`checkout`, và một lần cho `78/97`
+  giả trong khi thật là `96/97`. Mỗi lần suýt thành một báo cáo sai.
+
+  (2) `CLAUDE.md` — bài học REVIEWER BỊ CHẶN: hỏi VÌ SAO trước khi kết luận đường tắc.
+  Phiên báo "codex tắc có hệ thống" sau hai lượt bị bộ lọc cắt; sai. Log cho thấy nó chạy
+  trọn 251 ca — bộ lọc chỉ bắn khi reviewer phải TỰ SOẠN nội dung dạng tấn công. Đổi phân
+  công (reviewer CHẠY và ĐỘT BIẾN, không SOẠN) là xong ngay lượt sau.
+
+  (3) `SKILL.md` — sửa MÂU THUẪN NỘI TẠI: bước "Dựng mirror" bảo
+  `git -C "$RV" remote set-url origin https://github.com/<chủ>/<kho>` (BẮT BUỘC), rồi mục
+  EVIDENCE bảo khai "origin trong đó là mirror cục bộ". Làm đúng bước một thì câu ở bước
+  hai thành SAI. Cross-review S1 của #309 bắt (P3 `evidence-origin-khong-phai-mirror-cuc-bo`).
+
+nghiem_thu:
+  N1: 'Mỗi bài học mới ở `CLAUDE.md` phải mang PHÉP ĐO cụ thể — số, lệnh, hoặc ngày đo — không phải lời khuyên trần.'
+  N2: '`packet_loop.py doctrine-scan --root .` ⇒ rc=0 (adapter không được chép doctrine).'
+  N3: '`scripts/tl.py doc-claims-check --strict` ⇒ delta 0 so nền.'
+  N4: 'Câu sửa ở `SKILL.md` phải ĐÚNG Ở CẢ HAI trạng thái — trước và sau khi `remote set-url` chạy.'
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) `CLAUDE.md` KHÔNG vào gói phát hành (`_RELEASE_EXCLUDE_NAMES_ANYWHERE`), nên sửa nó
+  không kéo theo tái sinh manifest. Nhưng `doctrine-scan` ĐỌC nó — chạy cổng ấy.
+
+  (2) ĐỪNG viết dấu bỏ-qua-CI nguyên văn trong thông điệp commit, kể cả khi trích dẫn để
+  giải thích. `CLAUDE.md` đã ghi bài học ấy và nó từng tắt gate của master một lần.
+
+  (3) Bài học phải nêu PHÉP ĐO. Một dòng "hãy cẩn thận" trong `CLAUDE.md` là dòng chết —
+  chính tệp ấy dạy rằng tài liệu không chạy, chỉ ca test chạy. Nên nếu bài học nào canh
+  được bằng máy thì phải nói ra là CHƯA có cổng nào canh, đừng để người đọc tưởng có.
+
+dieu_kien_dung: >-
+  S1 nếu cần đường dẫn thứ ba (vd `docs/PROTOCOL_DA_PHIEN.md`). S2 nếu vượt 120 dòng thêm.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-24: "đồng ý đề nghị" + "xử lý luôn các vấn đề còn mở, cấp lease"'
+authority_basis: §2
+recorded_by: claude-session
+recorder_cung_la_nguoi_thi_cong: true
+
+leased_at_utc: '2026-08-24T12:45:00Z'
+lease_expires_at_utc: '2026-08-25T12:45:00Z'
+run_minutes: 1440

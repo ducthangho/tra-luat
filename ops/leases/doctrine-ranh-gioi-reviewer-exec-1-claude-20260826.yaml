@@ -59,28 +59,35 @@ target_branch_neu_land: master
 
 base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
 start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
-reviewed_sha_required: f16b6bf9d6085bd1923db9800090faaed1ffdd1b
+reviewed_sha_required: 88bd4f2fe6e02803a97f2da9df86c8b43d53076f
 base_ghi_chu: >-
   `c35ae1c` = `origin/master` lúc cấp, ĐO trong phiên (không chép từ hồ sơ bàn giao), và cũng là
   merge của PR #310. Nhánh rẽ SẠCH từ đây, KHÔNG kế thừa `6c4140b` của PR #315 (đã đóng, không
   merge). `reviewed_sha_required` đã được CẬP NHẬT sang exact head của vòng review đang mở
-  (`f16b6bf`, vòng 2). Vòng 1 neo `48cf331` — xem `lich_su_reviewed_sha`. Bản đầu để nguyên base
+  (`88bd4f2`, vòng 3). Vòng 1 neo `48cf331`, vòng 2 neo `f16b6bf` — xem `lich_su_reviewed_sha`. Bản đầu để nguyên base
   `c35ae1c` trong khi review đã neo head khác, trái chính câu này: cross-review vòng 1 bắt được
   (`lease-trang-thai-hien-tai-khong-nhat-quan`, P1).
 lich_su_reviewed_sha:
 - {vong: 1, sha: 48cf331e36cc2bde9fbdd485d51b85c81a5b25af, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-1-codex-verdict.receipt.yaml'}
-- {vong: 2, sha: f16b6bf9d6085bd1923db9800090faaed1ffdd1b, verdict: 'CHƯA CÓ'}
+- {vong: 2, sha: f16b6bf9d6085bd1923db9800090faaed1ffdd1b, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-2-codex-verdict.receipt.yaml'}
+- {vong: 3, sha: 88bd4f2fe6e02803a97f2da9df86c8b43d53076f, verdict: 'CHƯA CÓ'}
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 1
   dong_them_toi_da: 200
   do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
   don_vi: '`git diff --numstat c35ae1c..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
-  da_dung: 187
+  da_dung: 194
   ghi_chu: >-
-    200 là trần sau khi NÂNG LẦN HAI; xem `nang_tran_lan_hai`. 187 là số ĐÃ ĐO sau vòng vá 2
+    200 là trần sau khi NÂNG LẦN HAI; xem `nang_tran_lan_hai`. 194 là số ĐÃ ĐO sau vòng vá 3
     (`git diff --numstat c35ae1c -- docs/GOI_AGENT_DA_NEN.md`), không phải ước lượng.
-    Lịch sử trần: 120 (ước lượng ban đầu, SAI — vòng 1 cần 155) → 165 → 200 (vòng 2 cần 187).
+    Lịch sử trần: 120 (ước lượng ban đầu, SAI — vòng 1 cần 155) → 165 → 200 (vòng 2 cần 187;
+    vòng 3 cần 194). Vòng vá 3 KHÔNG chạm trần: `S2` KHÔNG bắn lần thứ ba, nên điều khoản
+    `neu_lai_cham_tran` ("lần thứ ba thì TÁCH") KHÔNG được kích hoạt. Còn biên 6 dòng.
+    Vì sao vòng 3 rẻ hơn dự tính: năm finding phần lớn đóng được bằng SỬA TẠI CHỖ, mà bản vá
+    này thuần THÊM (`194  0` — cột XOÁ bằng 0), nên viết lại một dòng đã có tốn 0 dòng mới.
+    Ước lượng trước khi đo là ~18 dòng và nó lại SAI — lần thứ ba ước lượng sai trong packet
+    này, cùng một hướng: đoán cao vì quên rằng ngân sách đếm dòng THÊM chứ không đếm SỬA.
     CẢ HAI lần nâng đều vì trần là ƯỚC LƯỢNG của phiên, không phải ngưỡng doctrine; xem `nang_tran`
     và `nang_tran_lan_hai`. Căn cứ kích thước: trên `master` tệp có 544 dòng và chưa mang mục nào
     trong bốn mục đang xét; bản trên nhánh cũ thêm 146 dòng cho CẢ mục allowlist LẪN mục ranh giới,
@@ -274,6 +281,14 @@ base_da_do_lai:
     không phải làm lại và không bắn `S4` lần nữa cho cùng một lần trôi.
   do_luc_utc: '2026-08-26T10:14:00Z'
   master_luc_do: b662fe1d07c675a222ae26e734377e305775e4f3
+  do_lai_lan_hai:
+    vi_sao: '`S4` BẮN LẠI trước vòng vá 3 — `origin/master` trôi tiếp `b662fe1` → `9044a5d`'
+    master_luc_do: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+    to_tien: '`c35ae1c` VẪN là tổ tiên của `9044a5d` — `git merge-base --is-ancestor` rc=0'
+    drift: 'ops/lease_publish.py · ops/lease_publish_test.py · ops/specs/CONG-CI-PACKET-LOOP.md · ops/specs/CONG-SAME-FAILURE-DEM-Y-DINH.md'
+    giao_write_set: 'RỖNG — không chạm `docs/GOI_AGENT_DA_NEN.md`'
+    blob_write_set: '16bad9e13255 tại `c35ae1c` = 16bad9e13255 tại `9044a5d` — Y HỆT TỪNG BYTE'
+    ket_luan: '`base_sha` GIỮ NGUYÊN `c35ae1c`, cùng căn cứ §3.2 như lần trôi trước'
   ket_qua:
     to_tien: '`c35ae1c` VẪN là tổ tiên của `b662fe1` — master đi TỚI, không viết lại lịch sử'
     drift: 'ops/lease_publish.py · ops/lease_publish_test.py'

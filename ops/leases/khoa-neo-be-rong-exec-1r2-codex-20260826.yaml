@@ -152,3 +152,4 @@ canh_bao_cho_nguoi_thi_hanh: >-
   (3) Hỏng này fail-CLOSE (chặn phép đếm hợp lệ), nên bản vá SAI HƯỚNG sẽ biến nó thành
   fail-OPEN. Ràng buộc (1) và (3) ở trên là chốt chống đúng điều đó.
   (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+posted_comment_id: 5422797401   # workflow ghi, ĐỪNG sửa tay

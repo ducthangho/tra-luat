@@ -1,0 +1,106 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 3 của PR #322 (packet #318).
+# Ghi NGAY SAU LƯỢT, trước khi vá gì.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '318'
+packet_slug: DOCTRINE-RANH-GIOI-REVIEWER
+lease_id: null
+lease_review_KHONG_DUOC_CAP: >-
+  Không có lease review riêng; lease đang sống là lease EXECUTOR
+  `doctrine-ranh-gioi-reviewer-exec-1r2-claude-20260826`. Để `null` và nói ra.
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 88bd4f2fe6e02803a97f2da9df86c8b43d53076f
+reviewed_tree: 57e734c69468100687ca643d45a763f22736f613
+luot: 3
+cross_provider: true
+assurance: cross_approved
+assurance_ghi_chu: >-
+  Khác nền (executor claude / reviewer codex). Vận chuyển bằng `add_issue_comment` của TÀI KHOẢN
+  TÁC GIẢ PR, KHÔNG phải `REQUEST_CHANGES` — nên KHÔNG mang trạng thái review chính thức của
+  GitHub, và `ADR-0040` nói thẳng thứ đó không thành merge authorization.
+
+tieu_chi_dung_de_cham: >-
+  BẢN SỬA ĐỔI 2 của lease — N1..N6 giữ nguyên, N7 cũ được thay bằng N7a/N7b. Đây là lượt review
+  ĐẦU TIÊN chấm theo bộ tiêu chí mới; vòng 1 và vòng 2 chấm theo N7 cũ (bộ đã hỏng).
+
+verdict_path: ops/reviews/doctrine-ranh-gioi-reviewer-review-3-codex-verdict.md
+verdict_sha256: 3bbdb67afa26edb4f4a2231a7aeda385783632e23aefe0171ab11f7269d0a879
+verdict_bytes: 11084
+verdict_nguon: >-
+  `codex exec -s workspace-write -c model_reasoning_effort=xhigh`, bọc trong `launcher.py run`
+  với `--expected-head 88bd4f2…`, `--expected-ref claude/doctrine-ranh-gioi-reviewer-exec-1`,
+  `--require-clean`, prompt neo băm `b2e5e8ee58a4f396f092c7fdfce40e615d6d6baf93f6f7c3bc896b24ced12fde`
+  (prompt kín hoàn toàn). `run_id` `8c7e20fe`, 590.4s, `ma_thoat=0`, `trang_thai=xong`.
+  `worktree_sach: true` lúc phóng.
+
+ma_thoat_KHONG_PHAI_BANG_CHUNG: >-
+  `ma_thoat=0` được ghi ở trên chỉ để tra, KHÔNG phải căn cứ nghiệm thu — chính tệp đang được
+  review nói thẳng một lượt agent `rc=0` có thể in ra một câu rỗng. Căn cứ là TỆP verdict có
+  thật, 11084 byte, neo băm ở trên, và đã đọc hết.
+
+doi_chieu_luot_truoc:
+  da_va_that: 3
+  va_ho: 2
+  va_sinh_loi_moi: 0
+  chua_va: 0
+  don_vi_dem: 'năm slug của VERDICT lượt 2, mỗi slug một phán quyết'
+  da_va_that_gom:
+  - phan-hang-mang-tu-mau-thuan
+  - n7-doc-claims-khong-phai-phep-n7
+  - ba-neo-cua-48cf331-dem-sai
+  va_ho_gom:
+  - nam-hang-khong-tao-phan-hoach
+  - probe-mang-moi-khong-tai-lap-duoc
+
+ket_qua_dem_duoc:
+  P1: 1
+  P2: 1
+  slug_hien_hanh:
+  - {slug: nam-hang-khong-tao-phan-hoach, hang: P1}
+  - {slug: probe-mang-moi-khong-tai-lap-duoc, hang: P2}
+  cham_tieu_chi:
+    N1: DAT
+    N2: KHONG_DAT
+    N3: DAT
+    N4: DAT
+    N5: DAT
+    N6: DAT
+    N7a: DAT
+    N7b: DAT
+  dem_bang_lenh: >-
+    Đếm trên TIÊU ĐỀ finding, không đếm trên toàn tệp:
+    `grep '^### ' VERDICT | grep -c '\[P1\]'` -> 1 và `… -c '\[P2\]'` -> 1.
+    Ghi rõ vì phép đếm ĐẦU TIÊN tôi chạy (`grep -o 'P1\]' | wc -l`) trả 4 và 3 — nó đếm cả
+    bảng đối chiếu lẫn phần thân, tức trả lời một câu hỏi KHÁC. Khớp với con số reviewer tự khai
+    ở dòng cuối verdict. Không đếm bằng mắt: lỗi ấy đã xảy ra một lần trong packet này
+    (khai "6 P1" khi thật ra 7).
+
+REVIEWER_TU_XAC_NHAN_MOT_PHAN_PHEP_DO_CUA_EXECUTOR:
+  chuyen_gi: >-
+    Reviewer chạy probe mạng THẲNG trong vỏ của nó và thu `1/1/128` — TRÙNG cột "mặc định" mà
+    executor khai. Đó là một xác nhận trên harness KHÁC (vỏ codex của reviewer, không phải
+    `codex sandbox` lồng của executor).
+  vi_sao_van_chua_du: >-
+    Reviewer KHÔNG chạy được `codex sandbox` lồng nhau: cả hai cấu hình đều `rc=101`, chết ở
+    khoá `/tmp/codex-bwrap-synthetic-mount-targets-0/lock` vì mount chỉ-đọc — nên CẶP A/B
+    (`1/1/128` so `0/0/0`) vẫn CHƯA được tái lập độc lập. Reviewer nói thẳng kết quả trực tiếp
+    của nó "không đủ để bác cột đối chứng Claude" vì khác execution surface.
+  ket_luan_dung: >-
+    Cột MẶC ĐỊNH nay có hai phép đo khác harness. Cột `network_access=true` vẫn đứng bằng MỘT
+    phép đo của MỘT phiên. Đừng đọc thành "bảng đã được kiểm chéo".
+
+CHO_KHONG_DO_DUOC_REVIEWER_TU_KHAI:
+- 'codex sandbox lồng nhau rc=101 (khoá bubblewrap, mount chỉ-đọc) ⇒ không xác nhận được cặp A/B'
+- 'không mạng ⇒ không đo được trạng thái động của Issue #318, PR #322, CI'
+- 'ba `stdout.log` của bảng 78/85/45 không có trong kho ⇒ chỉ xác nhận được là chúng GIỮ NGUYÊN'
+- '`spec_hash` của lease r2 KHÔNG_ĐO_ĐƯỢC từ hiện vật cục bộ (packet này không có spec riêng)'
+
+DIEU_KIEN_DUNG_SAP_BAN:
+  S2: >-
+    Ngân sách đang 194/200 — còn 6 dòng. Hai finding còn lại đều phải vá TRONG tệp write set, và
+    finding P2 đòi đưa THÂN probe vào tệp. Nhiều khả năng vượt 200 ⇒ `S2` bắn LẦN THỨ BA.
+    Lease đã tự ghi `neu_lai_cham_tran`: "Lần thứ ba thì TÁCH, không nâng tiếp". Quyết định thuộc
+    người giữ kho, KHÔNG phải phiên thi công.

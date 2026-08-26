@@ -1,0 +1,138 @@
+# Lease EXECUTOR — `SKILL-GOI-PYTHON3` (#325), lượt 1, BẢN r2 — ĐỔI HƯỚNG.
+#
+# r1 làm B-HẸP (`python3` -> `python`). Cross-review bắt đúng: đó là ĐỔI MỘT GIẢ ĐỊNH
+# MỘT-TÊN LẤY MỘT GIẢ ĐỊNH MỘT-TÊN KHÁC. `S1` bắn. r2 chuyển sang idiom BA TÊN.
+#
+# Đổi 3 dòng `python3` -> `python` trong `.claude/skills/**` cho khớp quy ước ĐANG CÓ của kho.
+# KHÔNG đụng câu hỏi lớn "làm sao một dòng lệnh mẫu nhận cả ba tên" — đó là B-RỘNG, packet khác.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 325
+packet_id: SKILL-GOI-PYTHON3
+phase_key: SKILL-GOI-PYTHON3-IDIOM-BA-TEN
+revision: 2
+generation: 1
+lease_id: skill-goi-python3-exec-1r2-claude-20260826
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  Issue #325 ĐỀ XUẤT `routine`. KHÔNG dùng — lớp do CỔNG tính, phiên thi công không tự hạ lớp
+  cho chính mình. Giữ mặc định fail-close `sensitive`. Ở packet 3 dòng thì hạ lớp cũng chẳng
+  mua được gì, nên cái giá duy nhất của việc tự hạ là một tiền lệ xấu.
+
+spec_path: 'KHÔNG CÓ — phép đo và hai phương án ghi trong Issue #325'
+spec_status: khong_co_dac_ta_rieng
+spec_duyet_boi: ducthangho
+
+write_set:
+  - .claude/skills/work-packet/SKILL.md
+  - .claude/skills/cross-review/SKILL.md
+write_set_note: >-
+  ĐÚNG HAI đường dẫn. KHÔNG chạm `docs/**` — còn 7 dòng `python3` ở đó, cố ý để ngoài (B-RỘNG).
+  KHÔNG chạm `.claude/agents/**` (đang có PR #330) và `.claude/hooks/**` (đang có PR #328).
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 ~13:5xZ bằng `ops/lease_publish.py ai-dang-giu`. Phép so hai nguồn TRƯỚC khi
+  quét, so bằng TẬP TÊN: `ls-remote --heads` 215 = `for-each-ref` 215, `comm -23` RỖNG.
+    .claude/skills/work-packet/SKILL.md   ->  NGƯỜI_GIỮ 0
+    .claude/skills/cross-review/SKILL.md  ->  NGƯỜI_GIỮ 0
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+
+branch: claude/skill-goi-python3-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+branch_ghi_chu: >-
+  Nhánh MỚI, base là `master` — packet này ĐỘC LẬP với #324 (write set rời hẳn), nên KHÔNG xếp
+  chồng lên A1/A2 như PR #330. Land theo thứ tự nào cũng được.
+
+base_sha: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+start_from_sha: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+reviewed_sha_required: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+base_ghi_chu: '`9044a5d8` = `origin/master` lúc cấp, đo lại tại chỗ chứ không lấy số lượt trước.'
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 30
+  do_tu_sha: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+  don_vi: '`git diff --numstat 9044a5d8..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  da_dung: 0
+  la_uoc_luong: true
+  ghi_chu: >-
+    r1 đặt 20 cho một bản vá thay-tại-chỗ 3 dòng. r2 thêm 3 dòng ĐỊNH NGHĨA `PY` (một dòng cho
+    mỗi khối lệnh có thể chép rời), nên nâng lên 30. Vẫn là ƯỚC LƯỢNG, khai thẳng.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-26: được trình hai phương án kèm phép đo (`python` 52 so `python3`
+  10 toàn kho; 8 so 0 trong chính `CLAUDE.md`), người giữ kho trả lời "#325 B hẹp".
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_ghi_chu: >-
+  KHAI THẲNG: phiên ghi lease này CŨNG là phiên thi công VÀ là phiên phát hiện. Ba vai gộp một.
+
+leased_at_utc: '2026-08-26T14:00:00Z'
+lease_expires_at_utc: '2026-08-27T14:00:00Z'
+run_minutes: 1440
+
+viec_cua_luot_nay: >-
+  ĐỔI HƯỚNG so r1. Ba chỗ trong phạm vi packet dùng idiom BA TÊN thay vì ghi cứng một tên:
+    PY="$(command -v python3 || command -v python || command -v py)"
+    "$PY" ...
+  Ba chỗ: `work-packet/SKILL.md:52` · `cross-review/SKILL.md:130,131`.
+  ĐÚNG BA CHỖ ẤY. Hai tệp còn 15 chỗ khác gọi `python` trần — NỢ CÓ SẴN, không do packet này
+  tạo ra, và KHÔNG được tiện tay dọn: người giữ kho đã hai lần chọn phạm vi hẹp. Ghi vào báo
+  cáo, mở Issue nối tiếp.
+
+dieu_kien_dung: >-
+  S1 ĐÃ BẮN Ở r1 và đó là lý do có r2 — xem `thay_the_ly_do`. Dạng mới của S1: phát hiện idiom
+  ba tên KHÔNG chạy trên một nền kho thật sự dùng (vd `command -v` vắng trong shell tối giản)
+  ⇒ DỪNG · S2 cần đường dẫn thứ ba, hoặc cần sửa quá BA chỗ trong hai tệp ⇒ DỪNG, đó là B-RỘNG
+  · S3 vượt 30 dòng thêm · S4 `origin/master` đã đi tiếp mà chưa đo lại.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) PHẠM VI VẪN HẸP dù hướng đã đổi: ĐÚNG BA chỗ. Cám dỗ mới là "đã làm idiom thì làm nốt 15
+  chỗ kia cho nhất quán" — ĐỪNG. Người giữ kho duyệt r2 với nguyên văn "cùng 2 tệp, thêm ~3
+  dòng". Hai tệp sẽ TẠM thời không nhất quán; đó là cái giá đã biết, không phải sơ suất.
+  (2) 7 dòng `python3` trong `docs/` vẫn NGOÀI phạm vi.
+  (3) Idiom phải giữ được ngữ nghĩa dòng gốc: `cross-review:130,131` có `cd … &&` đứng trước và
+  `; echo "… rc=$?"` đứng sau — `rc` phải vẫn là mã của lệnh python, đừng để phép gán `PY=` xen
+  vào giữa làm hỏng `$?`.
+  (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+
+chua_do_duoc_luc_cap: >-
+  (1) CHƯA chạy thật trên Windows để thấy `python3` gãy — dựa vào `CLAUDE.md:558` và chú thích
+  trong `launcher.py:1762-1764`, không phải phép đo của phiên này. Kho CÓ lane Windows nên đo
+  được; chỉ là chưa đo.
+  (2) CHƯA đo `python` vắng mặt trên Debian tối giản — kiến thức đóng gói, không phải phép đo.
+posted_comment_id: 5426327767   # workflow ghi, ĐỪNG sửa tay
+
+thay_the_cho: skill-goi-python3-exec-1-claude-20260826
+thay_the_ly_do: >-
+  `S1` BẮN. Cross-review codex trên PR #332 (`dfbaf11`) chỉ ra bản vá r1 chỉ ĐỔI MỘT GIẢ ĐỊNH
+  MỘT-TÊN LẤY MỘT GIẢ ĐỊNH MỘT-TÊN KHÁC, và neo vào một dòng TRONG CHÍNH KHO mà r1 không dùng:
+    .claude/dev/launcher.py:1768   "Linux": "sudo apt-get install -y python3"
+  Tức đường cài Linux do kho khai cho ra `python3`, và trên Debian/Ubuntu gói ấy không tạo
+  `python` trần. Cộng `CLAUDE.md:559` đòi "nhận CẢ BA TÊN", r1 chỉ thoả "nhất quán với đa số"
+  chứ không thoả luật.
+  r1 CÓ nêu rủi ro này, nhưng ở dạng kiến thức đóng gói ("Debian tối giản"); neo vào dòng trong
+  kho là bằng chứng mạnh hơn hẳn, và nó đổi quyết định. Người giữ kho được trình lại và chọn
+  "Đổi sang idiom ba tên".
+  Đáng ghi: `gate` CI trên `dfbaf11` XANH, và không thể không xanh — `ci.yml:73-75` dùng
+  `actions/setup-python@v5` nên `python` LUÔN có trên runner. Cổng chạy ở đúng môi trường mà
+  bản vá không sai, nên nó mù với lỗi này theo CẤU TẠO. Người hồi quy là người/agent chạy tay.
+  Kéo theo: `phase_key` · trần 20 -> 30 · viết lại `viec_cua_luot_nay`, `dieu_kien_dung` (S1 đổi
+  dạng, S2 thêm vế "quá BA chỗ", S3 nêu 30), và `canh_bao` (1) đổi hẳn nội dung vì cám dỗ nay
+  là cám dỗ NGƯỢC LẠI so r1. Tự soi bằng grep sau khi soạn.
+
+da_bi_thay_the_ghi_chu: r1 mang `da_bi_thay_the` trỏ về bản này.

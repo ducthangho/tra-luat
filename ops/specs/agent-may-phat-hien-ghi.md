@@ -53,8 +53,14 @@ bằng `session_id`, thời gian, `cwd` hoặc thứ tự sự kiện.
 Ảnh chụp tối thiểu dùng chính `cwd` đã kiểm tra là worktree Git rồi chạy:
 
 ```sh
-git -C <cwd> status --porcelain=v1 -uall
+git --no-optional-locks -C <cwd> status --porcelain=v1 -uall
 ```
+
+Cả lần chụp Start lẫn Stop phải dùng `--no-optional-locks`: `git status` trần có thể
+refresh stat data và ghi `.git/index` mà porcelain không lộ. Phép đo A/B trên cùng ca stat
+data cũ cho thấy index đổi `74df19cdeb851d66` → `ff75a73f79a04eea` khi dùng lệnh trần,
+nhưng giữ nguyên `ff75a73f79a04eea` với `--no-optional-locks`; cả hai đều cho 0 dòng
+porcelain. Vì vậy chốt này ngăn chính detector ghi trạng thái mà không đổi kết quả đo.
 
 Phải giữ nguyên từng bản ghi của đầu ra (sau chuẩn hóa thứ tự nếu phép đo chứng minh cần),
 không chỉ giữ số dòng. Snapshot phải gắn ít nhất `agent_id`, `agent_type`, `cwd` đã chuẩn hóa,
@@ -153,6 +159,9 @@ trúc và trạng thái Git cuối theo D1; “hook đã chạy” không thay c
   allowlist của cổng #324 nhưng vẫn ghi tệp — ca cụ thể là `tl nlm-reconcile SO --json` không
   `--apply` tạo `.tl_state/reconcile_plan_SO.json`. Ca đỏ nếu detector báo `clean`; tiêu chí
   này không được thay bằng cơ chế ngoài allowlist như `install`.
+- **A12 — ảnh chụp không refresh index:** trong repo tạm, làm cũ stat data của một tệp được
+  theo dõi, rồi so byte `.git/index` trước Start, giữa Start/Stop và sau Stop. Byte phải giữ
+  nguyên qua cả hai lần chụp; ca phải đỏ khi bỏ `--no-optional-locks` khỏi một trong hai lần.
 
 Lệnh kiểm tối thiểu của pha 2 phải được Packet revision ghi chính xác sau khi biết tên tệp
 triển khai/test. Không bịa trước một CLI chưa tồn tại. Handoff phải ghi command, mã thoát thật,
@@ -160,8 +169,10 @@ bằng chứng dương, `passed`/`failed`/`skipped`/`not_run`, exact HEAD và tr
 
 ## 6. Chưa đo được
 
-- Chi phí thời gian/I/O của hai lần `git status --porcelain=v1 -uall` cho mỗi lượt trên cây
-  thật; chưa có phân bố kích thước worktree hay thời gian chạy để đặt ngân sách.
+- Chi phí thời gian/I/O của hai lần `git --no-optional-locks status --porcelain=v1 -uall`
+  cho mỗi lượt trên cây thật; chưa có phân bố kích thước worktree hay thời gian chạy để đặt ngân sách.
+- Chi phí refresh stat data lặp lại trên kho lớn khi detector dùng `--no-optional-locks` và
+  index không còn được làm mới qua hai lần chụp; đánh đổi này chưa được đo.
 - `SubagentStop` exit `2` có thực sự chặn được trên execution surface đang dùng hay chỉ báo lỗi;
   tài liệu không thay phép đo subagent thật.
 - Hành vi và quy trách nhiệm khi nhiều subagent chạy chồng: một thay đổi ngoại sinh giữa hai

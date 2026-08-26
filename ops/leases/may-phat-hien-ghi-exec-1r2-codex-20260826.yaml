@@ -75,6 +75,10 @@ recorder_ghi_chu: >-
   codex không làm được (xem `n1_da_do`). Nên đặc tả sẽ dựa trên số liệu của bên sẽ đi review nó.
   Đó là mất độc lập CÓ THẬT, chỉ nhỏ hơn r1 chứ không phải không có.
 
+leased_at_utc: '2026-08-26T14:55:00Z'
+lease_expires_at_utc: '2026-08-27T14:55:00Z'
+run_minutes: 1440
+
 n1_da_do: >-
   `N1` KHÔNG CÒN LÀ VIỆC CỦA LƯỢT NÀY — đã đo 2026-08-26 ~14:5xZ, kết quả DƯƠNG.
   Cách đo: đăng ký hook `SubagentStart`/`SubagentStop` trong `.claude/settings.local.json`

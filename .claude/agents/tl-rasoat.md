@@ -67,8 +67,8 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
 
 ### Vốn từ lệnh của bạn
 
-- ĐỌC: `tl reg-query …`, `tl locate/source-map`, `tl status/relation-check/vbhn-check`,
-  `tl nlm-query`/`nlm-cross`/`nlm-content` (scoped), `git status/log`.
+- ĐỌC: `tl locate`, `tl status/relation-check/vbhn-check`, `tl nlm-query`/`nlm-cross`/`nlm-content`
+  (scoped), `git status/log`; `tl reg-query`/`tl source-map` **KHÔNG `--out`** (cả hai nhận cờ ấy).
 - `tl extract` KHÔNG nằm trong vốn từ của bạn, và đừng thêm vào: `extract_cache.py` tạo thư mục
   cache rồi `disk.write_text(...)` **vô điều kiện** — không có chế độ nào không ghi, và cache ấy
   chính là nguồn sau này chảy vào corpus. Cần toàn văn thì XIN phiên chính trích rồi đưa bạn đọc.

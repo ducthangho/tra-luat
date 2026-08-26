@@ -63,8 +63,8 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
 ### Vốn từ lệnh của bạn
 
 - ĐỌC: `tl sweep [--json]`, `tl counts`, `tl cat-audit --json`, `tl review-queue --json`,
-  `tl reg-query …`, `tl source-map …`, `tl vbhn-check …`, `tl header-verify …` (không áp `--fix`),
-  `tl nlm-get <nb>` (KHÔNG `--out`), `git log/diff/status`, `ruff check`, selftest.
+  `tl vbhn-check …`, `tl header-verify …` (không áp `--fix`), `git log/diff/status`, `ruff check`,
+  selftest. **KHÔNG `--out`** với `tl reg-query`/`tl source-map`/`tl nlm-get <nb>` — cả BA nhận cờ ấy.
 - `tl corpus-audit --json` CHỈ ở dạng KHÔNG `--sohieu-file` và KHÔNG `--all`. Hai dạng ấy bật
   checkpoint resumable — `hygiene.py` ghi `corpus_audit_ckpt_*.json` sau mỗi target và CỐ Ý để
   lại tệp khi dừng giữa chừng. Audit nối lại được là việc của phiên chính, không phải của bạn.

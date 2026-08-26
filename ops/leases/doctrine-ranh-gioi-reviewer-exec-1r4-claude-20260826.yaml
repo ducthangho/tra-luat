@@ -95,12 +95,12 @@ target_branch_neu_land: master
 
 base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
 start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
-reviewed_sha_required: 770b3af3399b6794874008dd907f1dfaad6c5dba
+reviewed_sha_required: 70311ee3f073d3a905ba59d0851dd2ce9355cd8e
 base_ghi_chu: >-
   `c35ae1c` = `origin/master` lúc cấp, ĐO trong phiên (không chép từ hồ sơ bàn giao), và cũng là
   merge của PR #310. Nhánh rẽ SẠCH từ đây, KHÔNG kế thừa `6c4140b` của PR #315 (đã đóng, không
   merge). `reviewed_sha_required` đã được CẬP NHẬT sang exact head của vòng review đang mở
-  (`770b3af`, vòng 5). Vòng 1 `48cf331`, 2 `f16b6bf`, 3 `88bd4f2`, 4 `6d0a183` — xem `lich_su_reviewed_sha`. Bản đầu để nguyên base
+  (`70311ee`, vòng 6). Vòng 1 `48cf331`, 2 `f16b6bf`, 3 `88bd4f2`, 4 `6d0a183`, 5 `770b3af` — xem `lich_su_reviewed_sha`. Bản đầu để nguyên base
   `c35ae1c` trong khi review đã neo head khác, trái chính câu này: cross-review vòng 1 bắt được
   (`lease-trang-thai-hien-tai-khong-nhat-quan`, P1).
 lich_su_reviewed_sha:
@@ -108,7 +108,8 @@ lich_su_reviewed_sha:
 - {vong: 2, sha: f16b6bf9d6085bd1923db9800090faaed1ffdd1b, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-2-codex-verdict.receipt.yaml'}
 - {vong: 3, sha: 88bd4f2fe6e02803a97f2da9df86c8b43d53076f, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-3-codex-verdict.receipt.yaml', tieu_chi: 'BẢN SỬA ĐỔI 2 — lượt ĐẦU TIÊN chấm theo N7a/N7b', ket_qua: 'P1=1 P2=1; N2 KHÔNG ĐẠT, bảy tiêu chí còn lại ĐẠT'}
 - {vong: 4, sha: 6d0a183e4af6422d85af1d6d3373fcbab2c7e83e, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-4-codex-verdict.receipt.yaml', tieu_chi: 'BẢN SỬA ĐỔI 2 — acceptance KHÔNG đổi ở r3, chỉ write_set đổi', ket_qua: 'P1=1 P2=2; N2 KHÔNG ĐẠT (lần thứ hai liên tiếp), bảy tiêu chí còn lại ĐẠT'}
-- {vong: 5, sha: 770b3af3399b6794874008dd907f1dfaad6c5dba, verdict: 'CHƯA CÓ', tieu_chi: 'BẢN SỬA ĐỔI 2 — acceptance vẫn KHÔNG đổi; r4 chỉ đổi write_set và objective'}
+- {vong: 5, sha: 770b3af3399b6794874008dd907f1dfaad6c5dba, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-5-codex-verdict.receipt.yaml', tieu_chi: 'BẢN SỬA ĐỔI 2 — acceptance vẫn KHÔNG đổi; r4 chỉ đổi write_set và objective', ket_qua: 'P1=1 P2=1; N2 KHÔNG ĐẠT, bảy tiêu chí còn lại ĐẠT. Reviewer BÁC đề xuất thu bảng về ba hạng — giữ đủ năm là đúng.'}
+- {vong: 6, sha: 70311ee3f073d3a905ba59d0851dd2ce9355cd8e, verdict: 'CHƯA CÓ'}
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 2
@@ -120,12 +121,12 @@ ngan_sach_kich_thuoc:
   dong_them_toi_da: 200
   do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
   don_vi: '`git diff --numstat c35ae1c..HEAD -- docs/GOI_AGENT_DA_NEN.md` — cột dòng THÊM, CHỈ tệp này'
-  da_dung: 144
+  da_dung: 145
   ghi_chu: >-
     200 là trần sau khi NÂNG LẦN HAI; xem `nang_tran_lan_hai`. 198 là số ĐÃ ĐO sau vòng vá 4
     (`git diff --numstat c35ae1c -- docs/GOI_AGENT_DA_NEN.md`), không phải ước lượng.
     Lịch sử trần: 120 (ước lượng ban đầu, SAI — vòng 1 cần 155) → 165 → 200 (vòng 2 cần 187;
-    vòng 3 cần 194; vòng 4 cần 198; sau khi TÁCH ở r4 còn 144). `S2` CHƯA HỀ bắn lần thứ ba — vòng 4 vốn sẽ tốn 211/200
+    vòng 3 cần 194; vòng 4 cần 198; sau khi TÁCH ở r4 còn 144; vòng vá 5 lên 145). `S2` CHƯA HỀ bắn lần thứ ba — vòng 4 vốn sẽ tốn 211/200
     nếu dán thân probe vào tệp này, nhưng r3 đưa probe ra thành hiện vật riêng nên tệp doctrine
     chỉ tốn 198. Tức `neu_lai_cham_tran` ("lần thứ ba thì TÁCH") KHÔNG được kích hoạt, và trần
     200 CHƯA từng bị nâng lần thứ ba. Còn biên 2 dòng — chật, và nói ra để lượt sau biết.
@@ -492,4 +493,8 @@ comment_trung_lap:
     bản sau khi workflow ghi `posted_comment_id`) bị đếm thành HAI người giữ. Lần này phiên còn
     tạo thêm một blob thứ ba. Ai đo `ai-dang-giu` trên `docs/GOI_AGENT_DA_NEN.md` sau mốc này
     phải trừ bằng tay, hoặc đợi #313 vá xong.
-# posted_comment_id: CHƯA ĐĂNG — workflow `dang-lease` tự ghi khi nhánh được đẩy. CHỜ nó, ĐỪNG đăng tay.
+# ĐÃ ĐĂNG — `posted_comment_id` nằm ở CUỐI TỆP. Workflow ĐÃ đăng comment `5427971996` nhưng KHÔNG
+# ghi ngược vào tệp (chạy đua với hai lần đẩy sau đó). Phiên điều phối ghi hộ bằng
+# `lease_publish.py mark` với ĐÚNG id của workflow — KHÔNG đăng comment mới. Không ghi thì lần đẩy
+# sau cổng sẽ tưởng lease chưa đăng và đăng TRÙNG, đúng lỗi đã mắc ở r2.
+posted_comment_id: 5427971996   # workflow ghi, ĐỪNG sửa tay

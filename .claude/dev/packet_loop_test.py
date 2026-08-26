@@ -19,6 +19,7 @@ Chạy: `python .claude/dev/packet_loop_test.py`
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
 import platform
@@ -43,6 +44,9 @@ _ANH_SACH = []
 
 
 # --- hạ tầng ------------------------------------------------------------------
+
+class BoQua(Exception):
+    pass
 
 
 def anh_doctor(**doi) -> str:
@@ -3009,13 +3013,54 @@ MUTANTS = {
         ["same_failure_cung_id_qua_2_review"],
     ),
     "bien_nhan_bo_gom_full_va_viet_tat": (
-        "    khoa_theo_bien_nhan = _khoa_neo_cac_sha(that)\n",
+        "    khoa_theo_bien_nhan = _khoa_neo_cac_sha(that, root)\n",
         ('    khoa_theo_bien_nhan = []\n'
          '    for d in that:\n'
          '        s = str(d.get("reviewed_sha") or "").strip().lower()\n'
          '        khoa_theo_bien_nhan.append(s if _la_dang_commit(s) '
-         'else "__khong_neo_duoc__")\n'),
+        'else "__khong_neo_duoc__")\n'),
         ["bien_nhan_cung_sha_full_va_viet_tat_dem_MOT"],
+    ),
+    "bien_nhan_khong_doc_object_format_thi_giu_hanh_vi_cu": (
+        "        if p.returncode != 0:\n            return (40, 64)\n",
+        ('        if p.returncode != 0:\n'
+         '            _die(RC_BIEN_NHAN, "đột biến: hỏi object format lỗi thành chặn")\n'),
+        ["bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc"],
+    ),
+    "bien_nhan_khong_leo_len_kho_cha": (
+        "            cung_goc = Path(dong_dau).resolve() == root.resolve()\n",
+        "            cung_goc = True  # đột biến: bỏ phép so toplevel\n",
+        ["bien_nhan_ban_sao_roi_duoi_sha256_cha_dem_MOT"],
+    ),
+    "bien_nhan_root_xuong_dong_tach_tu_trai": (
+        '        ket_qua = p.stdout.removesuffix("\\n").rsplit("\\n", 1)\n',
+        "        ket_qua = p.stdout.splitlines()\n", ["bien_nhan_sha256_root_xuong_dong_dem_MOT"]),
+    "bien_nhan_root_xuong_dong_tha_vo_dieu_kien": (
+        "        goc.mkdir()\n", '        raise BoQua("đột biến: tha vô điều kiện")\n',
+        ["bien_nhan_sha256_root_xuong_dong_dem_MOT"]),
+    "bien_nhan_shim_tha_vo_dieu_kien": (
+        "        p = subprocess.run([str(git)], capture_output=True, check=True)\n",
+        '        raise BoQua("đột biến: tha vô điều kiện")\n',
+        ["bien_nhan_git_gia_duong_dan_nul_giu_fallback"]),
+    "phan_loai_lai_dot_bien_test_bang_suy_luan": (
+        "    dot_bien_test = ten_mut in MUTANTS_NHAM_TEST\n",
+        "    dot_bien_test = all(t in goc_test for t, _ in cap)  # đột biến: suy từ văn bản\n",
+        ["phan_loai_dot_bien_san_pham_neo_trung_test_van_DO"]),
+    "bien_nhan_bo_nhanh_valueerror": (
+        "        except ValueError:\n", "        except RuntimeError:\n",
+        ["bien_nhan_git_gia_duong_dan_nul_giu_fallback"]),
+    "bien_nhan_valueerror_tai_indexing_phai_noi": (
+        "        dong_dau = ket_qua[0]\n", '        raise ValueError("injected-indexing")\n',
+        ["bien_nhan_git_gia_duong_dan_nul_giu_fallback"]),
+    "bien_nhan_sha256_khong_nhan_40_la_oid_day_du": (
+        '    return {"sha1": (40,), "sha256": (64,)}.get(ket_qua[1].strip(), (40, 64))\n',
+        '    return (40, 64)  # đột biến: không phân biệt object format\n',
+        ["bien_nhan_sha256_full64_va_tien_to40_dem_MOT"],
+    ),
+    "bien_nhan_gom_moi_oid_day_du": (
+        "            khoa_theo_sha[sha] = ung_vien_day_du[0]\n",
+        '            khoa_theo_sha[sha] = "__gom_moi_oid__"  # đột biến\n',
+        ["bien_nhan_sha256_hai_oid_khac_nhau_dem_HAI"],
     ),
     "bien_nhan_tra_lai_safe_loader_doi_kieu": (
         '            d = yaml.load(f.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)\n',
@@ -3314,6 +3359,14 @@ MUTANTS = {
     ),
 }
 
+# Phân loại là KHAI BÁO: tên chỉ có mặt ở đây mới được sửa test harness.
+# Mỏ neo của mọi mục vẫn phải sống trong đúng tệp được khai.
+MUTANTS_NHAM_TEST = frozenset({
+    "bien_nhan_root_xuong_dong_tha_vo_dieu_kien",
+    "bien_nhan_shim_tha_vo_dieu_kien",
+    "phan_loai_lai_dot_bien_test_bang_suy_luan",
+})
+
 
 # Ca được PHỦ BỞI NHIỀU LỚP nên không đột biến ĐƠN LẺ nào giết được. Khai tường
 # minh kèm lý do ĐO ĐƯỢC — nói thẳng chỗ phủ chồng còn hơn gán bừa cho một lớp rồi
@@ -3361,6 +3414,14 @@ def _cap_thay_the(tim, thay):
     if len(tim) != len(thay):
         raise AssertionError(f"đột biến phối hợp lệch số vế: {len(tim)} ≠ {len(thay)}")
     return list(zip(tim, thay))
+
+
+def _phan_loai_dot_bien(ten_mut, cap, goc, goc_test):
+    """Chọn nguồn bằng khai báo, rồi canh mỏ neo trong chính nguồn ấy."""
+    dot_bien_test = ten_mut in MUTANTS_NHAM_TEST
+    than = goc_test if dot_bien_test else goc
+    thieu = [t for t, _ in cap if t not in than]
+    return than, dot_bien_test, thieu
 
 
 def _la_ho_doctrine(ten: str) -> bool:
@@ -3515,6 +3576,14 @@ def _bn_that(sha: str, duong: str = "ops/reviews/v.md") -> str:
             f"reviewed_sha: {sha}\nverdict_path: {duong}\n")
 
 
+def _dat_object_format(goc: Path, dinh_dang: str) -> None:
+    p = subprocess.run(["git", "-C", str(goc), "init", "--quiet",
+                        f"--object-format={dinh_dang}"], capture_output=True)
+    if p.returncode != 0:
+        raise AssertionError(f"KHÔNG ĐO ĐƯỢC: git init {dinh_dang} rc={p.returncode}: "
+                             f"{_txt(p.stderr)!r}")
+
+
 # Ba hình dạng fixture SHA mà #305 bắt buộc phủ: có chữ · toàn số không 0 đầu ·
 # toàn số có 0 đầu. Hai hằng cuối cố ý KHÔNG đặt nháy khi đi qua `_bn_that`.
 _SHA_CO_CHU = "8b627e843a3be87f2ceac97f2f147bbadcaa3cdc"
@@ -3645,6 +3714,97 @@ def case_bien_nhan_cung_sha_full_va_viet_tat_dem_MOT(c: Ctx):
         raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
 
 
+def case_bien_nhan_sha256_full64_va_tien_to40_dem_MOT(c: Ctx):
+    """SHA-256: 40 ký tự chỉ là tiền tố, không phải một OID SHA-1 thứ hai."""
+    sha = _SHA_CO_CHU + "fedcba987654321001234567"
+    goc = _kho_gia_co_verdict(c, "bnsha256tat", [
+        ("a-verdict.receipt.yaml", _bn_that(sha)),
+        ("b-verdict.receipt.yaml", _bn_that(sha[:40])),
+    ])
+    _dat_object_format(goc, "sha256")
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(0, rc, e, "SHA-256 full-64 + tiền tố-40 của nó bị chặn oan")
+    if "1 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
+
+
+def case_bien_nhan_sha256_root_xuong_dong_dem_MOT(c: Ctx):
+    sha = _SHA_CO_CHU + "f" * 24
+    goc = c.tmp / "bnsha256\nroot"
+    try:
+        goc.mkdir()
+    except OSError as ex:
+        raise BoQua(f"nền từ chối tên thư mục có xuống dòng: {ex}") from ex
+    goc = _kho_gia_co_verdict(c, "bnsha256\nroot", [
+        ("a-verdict.receipt.yaml", _bn_that(sha)),
+        ("b-verdict.receipt.yaml", _bn_that(sha[:40]))])
+    _dat_object_format(goc, "sha256")
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(0, rc, e, "root có xuống dòng làm mất object format")
+    if "1 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
+
+
+def case_bien_nhan_git_gia_duong_dan_nul_giu_fallback(c: Ctx):
+    git = c.tmp / "git"
+    git.write_text("#!/usr/bin/env python3\nimport sys\nsys.stdout.buffer.write(b'/tmp/a\\x00b\\nsha256\\n')\n", encoding="utf-8")
+    git.chmod(0o755)
+    try:
+        p = subprocess.run([str(git)], capture_output=True, check=True)
+    except OSError as ex:
+        raise BoQua(f"nền từ chối thi hành git giả: {ex}") from ex
+    if b"\x00" not in p.stdout:
+        raise AssertionError("git giả được gọi nhưng không trả fixture NUL")
+    goc = _kho_gia_co_verdict(c, "bnnul", [
+        ("a-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU)),
+        ("b-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU[:7]))])
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"],
+                   env_extra={"PATH": str(c.tmp) + os.pathsep + os.environ["PATH"]})
+    _doi(0, rc, e, "ValueError từ top-level không hợp lệ thoát traceback")
+    if "1 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
+
+
+def case_bien_nhan_sha256_hai_oid_khac_nhau_dem_HAI(c: Ctx):
+    """Chiều bắt-oan: hai OID SHA-256 khác nhau không được gom sạch."""
+    goc = _kho_gia_co_verdict(c, "bnsha256hai", [
+        ("a-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU + "a" * 24)),
+        ("b-verdict.receipt.yaml", _bn_that("9" * 64)),
+    ])
+    _dat_object_format(goc, "sha256")
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249",
+                              "--toi-thieu", "2"])
+    _doi(0, rc, e, "hai OID SHA-256 khác nhau bị gom thành một")
+    if "2 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm HAI: {_txt(o)!r}")
+
+
+def case_bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc(c: Ctx):
+    """Không hỏi được object format thì giữ phép phân loại cũ, không chặn."""
+    goc = _kho_gia_co_verdict(c, "bnroidudulieu", [
+        ("a-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU)),
+        ("b-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU[:7])),
+    ])
+    (goc / ".git").rmdir()
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(0, rc, e, "bản sao rời có dữ liệu bị chặn vì không hỏi được format")
+    if "1 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
+
+
+def case_bien_nhan_ban_sao_roi_duoi_sha256_cha_dem_MOT(c: Ctx):
+    goc = _kho_gia_co_verdict(c, "bnroichasha256", [
+        ("a-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU)),
+        ("b-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU[:7])),
+    ])
+    (goc / ".git").rmdir()
+    _dat_object_format(goc.parent, "sha256")
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(0, rc, e, "bản sao rời dưới kho cha SHA-256 bị chặn oan")
+    if "1 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
+
+
 def case_bien_nhan_sha_so_co_0_dau_van_dem_RIENG(c: Ctx):
     """N3: YAML không nháy không được đổi hai SHA toàn số có 0 đầu thành một xô."""
     goc = _kho_gia_co_verdict(c, "bnso0dau", [
@@ -3728,12 +3888,87 @@ CASES += [
      case_bien_nhan_sha_RAC_khong_duoc_lam_khoa_vong),
     ("bien_nhan_cung_sha_full_va_viet_tat_dem_MOT",
      case_bien_nhan_cung_sha_full_va_viet_tat_dem_MOT),
+    ("bien_nhan_sha256_full64_va_tien_to40_dem_MOT",
+     case_bien_nhan_sha256_full64_va_tien_to40_dem_MOT),
+    ("bien_nhan_sha256_root_xuong_dong_dem_MOT", case_bien_nhan_sha256_root_xuong_dong_dem_MOT),
+    ("bien_nhan_git_gia_duong_dan_nul_giu_fallback", case_bien_nhan_git_gia_duong_dan_nul_giu_fallback),
+    ("bien_nhan_sha256_hai_oid_khac_nhau_dem_HAI",
+     case_bien_nhan_sha256_hai_oid_khac_nhau_dem_HAI),
+    ("bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc",
+     case_bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc),
+    ("bien_nhan_ban_sao_roi_duoi_sha256_cha_dem_MOT",
+     case_bien_nhan_ban_sao_roi_duoi_sha256_cha_dem_MOT),
     ("bien_nhan_sha_so_co_0_dau_van_dem_RIENG",
      case_bien_nhan_sha_so_co_0_dau_van_dem_RIENG),
     ("bien_nhan_viet_tat_khop_hai_oid_la_KHONG_DO_DUOC",
      case_bien_nhan_viet_tat_khop_hai_oid_la_KHONG_DO_DUOC),
     ("bien_nhan_sha_that_van_dem_RIENG",
      case_bien_nhan_sha_that_van_dem_RIENG),
+]
+
+
+def case_phan_loai_dot_bien_san_pham_neo_trung_test_van_DO(c: Ctx):
+    """Neo sản phẩm chết phải lộ, dù nguyên văn neo vẫn nằm trong bảng MUTANTS."""
+    ten = "tran_attempt_3_thanh_99"
+    cap = _cap_thay_the(*MUTANTS[ten][:2])
+    goc = c.script.read_text(encoding="utf-8")
+    goc_test = Path(__file__).read_text(encoding="utf-8")
+    for neo, _ in cap:
+        if neo not in goc_test:
+            raise AssertionError("fixture phải có neo trùng trong tệp test")
+        goc = goc.replace(neo, "", 1)
+    _, dot_bien_test, thieu = _phan_loai_dot_bien(ten, cap, goc, goc_test)
+    if dot_bien_test or not thieu:
+        raise AssertionError("không tìm thấy mỏ neo: neo sản phẩm chết đã bị nuốt")
+
+
+def case_dot_bien_test_khai_bao_chay_va_giet_dung_ca(c: Ctx):
+    """Mutant test-harness khai báo vẫn được nạp và giết đúng ca đích của nó."""
+    ten = "bien_nhan_root_xuong_dong_tha_vo_dieu_kien"
+    tim, thay, phai_chet = MUTANTS[ten]
+    cap = _cap_thay_the(tim, thay)
+    goc = c.script.read_text(encoding="utf-8")
+    goc_test = Path(__file__).read_text(encoding="utf-8")
+    than, dot_bien_test, thieu = _phan_loai_dot_bien(ten, cap, goc, goc_test)
+    if not dot_bien_test or thieu:
+        raise AssertionError(f"khai báo mutant test-harness không dùng được: {thieu!r}")
+    for neo, thay_the in cap:
+        than = than.replace(neo, thay_the, 1)
+    mut_dir = c.tmp / "test_harness_mutant"
+    mut_dir.mkdir(parents=True, exist_ok=True)
+    script = mut_dir / "packet_loop.py"
+    script.write_text(goc, encoding="utf-8", newline="\n")
+    (mut_dir / "launcher.py").write_text(
+        (HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
+    test_mut = mut_dir / "packet_loop_test.py"
+    test_mut.write_text(than, encoding="utf-8", newline="\n")
+    spec = importlib.util.spec_from_file_location("packet_loop_test_khoa_neo", test_mut)
+    suite = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(suite)
+    ket = suite.chay_suite(script, mut_dir / "run", chi_chay=set(phai_chet))
+    if set(ket) != set(phai_chet) or any(ket[t] is None for t in phai_chet):
+        raise AssertionError(f"mutant test-harness không giết đúng ca đích: {ket!r}")
+
+
+def case_dot_bien_test_neo_chet_van_DO(c: Ctx):
+    """Khai nhắm test chỉ đổi tệp tra neo; nó không được làm chốt biến mất."""
+    ten = "bien_nhan_root_xuong_dong_tha_vo_dieu_kien"
+    cap = _cap_thay_the(*MUTANTS[ten][:2])
+    goc = c.script.read_text(encoding="utf-8")
+    goc_test = Path(__file__).read_text(encoding="utf-8")
+    for neo, _ in cap:
+        goc_test = goc_test.replace(neo, "", 1)
+    _, dot_bien_test, thieu = _phan_loai_dot_bien(ten, cap, goc, goc_test)
+    if not dot_bien_test or not thieu:
+        raise AssertionError("không tìm thấy mỏ neo: neo test-harness chết đã bị nuốt")
+
+
+CASES += [
+    ("phan_loai_dot_bien_san_pham_neo_trung_test_van_DO",
+     case_phan_loai_dot_bien_san_pham_neo_trung_test_van_DO),
+    ("dot_bien_test_khai_bao_chay_va_giet_dung_ca",
+     case_dot_bien_test_khai_bao_chay_va_giet_dung_ca),
+    ("dot_bien_test_neo_chet_van_DO", case_dot_bien_test_neo_chet_van_DO),
 ]
 
 
@@ -3747,6 +3982,8 @@ def chay_suite(script: Path, tmp: Path, chi_chay=None):
         try:
             fn(Ctx(script, d))
             ket[ten] = None
+        except BoQua as ex:
+            ket[ten] = ex if isinstance(ex.__cause__, OSError) else f"BỎ QUA không có OSError đo được: {ex}"
         except Exception as ex:  # noqa: BLE001 — ca đỏ là dữ liệu, không phải sự cố
             ket[ten] = f"{type(ex).__name__}: {ex}"
     return ket
@@ -3756,6 +3993,7 @@ def main() -> int:
     _ = [s.reconfigure(encoding="utf-8", errors="backslashreplace")
          for s in (sys.stdout, sys.stderr) if hasattr(s, "reconfigure")]
     goc = CANONICAL.read_text(encoding="utf-8")
+    goc_test = Path(__file__).read_text(encoding="utf-8")
     that_bai_tong = 0
 
     with tempfile.TemporaryDirectory(prefix="packet_loop_test_") as td:
@@ -3763,12 +4001,15 @@ def main() -> int:
 
         # --- 1. nền: mọi ca phải XANH -----------------------------------------
         ket = chay_suite(CANONICAL, tmp / "baseline")
+        bo_qua = {ten: ex for ten, ex in ket.items() if isinstance(ex, BoQua)}
         dat = sum(1 for v in ket.values() if v is None)
-        tong = len(ket)
+        tong = len(ket) - len(bo_qua)
         for ten, loi in ket.items():
-            if loi:
+            if isinstance(loi, BoQua):
+                print(f"  BỎ QUA  {ten}: {loi}")
+            elif loi:
                 print(f"  ĐỎ  {ten}: {loi}")
-        print(f"nền: {dat}/{tong} đạt")
+        print(f"nền: {dat}/{tong} đạt · BỎ QUA: {len(bo_qua)}")
         that_bai_tong += tong - dat
 
         # --- 2. AC 19: MỖI lớp lách phải có một ca bắt-oan ---------------------
@@ -3813,7 +4054,8 @@ def main() -> int:
         print("\ntự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH):")
         for ten_mut, (tim, thay, phai_chet) in MUTANTS.items():
             cap = _cap_thay_the(tim, thay)
-            thieu = [t for t, _ in cap if t not in goc]
+            than, dot_bien_test, thieu = _phan_loai_dot_bien(
+                ten_mut, cap, goc, goc_test)
             if thieu:
                 print(f"  ĐỎ  đột biến {ten_mut}: không tìm thấy mỏ neo {thieu!r}")
                 that_bai_tong += len(thieu)
@@ -3821,14 +4063,23 @@ def main() -> int:
             mut_dir = tmp / f"mut_{ten_mut}"
             mut_dir.mkdir(parents=True, exist_ok=True)
             mut = mut_dir / "packet_loop.py"
-            than = goc
             for t, th in cap:
                 than = than.replace(t, th, 1)
-            mut.write_text(than, encoding="utf-8", newline="\n")
+            mut.write_text(goc if dot_bien_test else than, encoding="utf-8", newline="\n")
             (mut_dir / "launcher.py").write_text(
                 (HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
-            doi_chung = _doi_chung_khac_ho(phai_chet)
-            ket_mut = chay_suite(mut, mut_dir, chi_chay=set(phai_chet) | set(doi_chung))
+            suite = sys.modules[__name__]
+            if dot_bien_test:
+                test_mut = mut_dir / "packet_loop_test.py"
+                test_mut.write_text(than, encoding="utf-8", newline="\n")
+                spec = importlib.util.spec_from_file_location(f"packet_loop_test_{ten_mut}", test_mut)
+                suite = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(suite)
+            doi_chung = suite._doi_chung_khac_ho(phai_chet)
+            ket_mut = suite.chay_suite(mut, mut_dir,
+                                       chi_chay=set(phai_chet) | set(doi_chung))
+            bo_qua_mut = [t for t in phai_chet
+                           if isinstance(ket_mut.get(t), suite.BoQua)]
             song = [t for t in phai_chet if ket_mut.get(t) is None]
             oan = [t for t in doi_chung if ket_mut.get(t) is not None]
             if song:
@@ -3838,7 +4089,9 @@ def main() -> int:
                 print(f"  ĐỎ  đột biến {ten_mut}: giết cả ĐỐI CHỨNG KHÁC HỌ {oan} ⇒ "
                       f"đột biến không nhắm đúng tầng nó khai")
                 that_bai_tong += len(oan)
-            if not song and not oan:
+            if bo_qua_mut:
+                print(f"  BỎ QUA  đột biến {ten_mut}: ca {bo_qua_mut} không được tính là đã giết")
+            if not song and not oan and not bo_qua_mut:
                 print(f"  ok  {ten_mut} → giết {len(phai_chet)} ca đích · "
                       f"{len(doi_chung)} đối chứng khác họ còn sống")
 

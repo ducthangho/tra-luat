@@ -30,8 +30,11 @@ rg -n '_AGENT_CHI_DOC|_CHUONG_TRINH_CHO_PHEP|_KIEM_RIENG' \
   .claude/hooks/pretooluse_guard.py
 ```
 
-Lệnh thứ hai cho thấy allowlist chương trình vẫn kèm bộ phân loại riêng cho chế độ của từng
-chương trình. Nó không chứng minh tập cơ chế ghi đã kín.
+Lệnh thứ hai cho thấy allowlist có 36 chương trình nhưng `_KIEM_RIENG` chỉ có 9:
+`git`, `python`, `python3`, `py`, `find`, `sort`, `uniq`, `diff`, `ruff`. Với D2, điều này
+có nghĩa 27 chương trình còn lại chỉ được lọc ở tầng tên chương trình cộng các chốt chung
+(chuyển hướng, thay thế lệnh, tách dòng), **không** có bộ phân loại cờ/chế độ riêng nào.
+Nó không chứng minh tập cơ chế ghi đã kín.
 
 ## 2. Payload đã đo và hệ quả thiết kế
 
@@ -92,7 +95,7 @@ allowlist đầy đủ.
 
 | phương án | điều đo được hoặc suy trực tiếp từ phép đo |
 |---|---|
-| **CHẤP NHẬN MÙ** | Giữ detector nhỏ và cục bộ; nhưng `git status --porcelain=v1 -uall` không hiện tệp bị ignore, ghi ngoài Git top-level hay tác dụng phụ mạng. Báo cáo phải gọi đúng ba vùng đó là không quan sát được. |
+| **CHẤP NHẬN MÙ** | Giữ detector nhỏ và cục bộ, nhưng chấp nhận mù cả đường ghi thật sau: (1) `.gitignore:22 -> .tl_state/` — BỊ IGNORE; (2) `git status --porcelain=v1 -uall -> 0 dòng (tệp bị ignore)`, còn cùng lệnh + `--ignored -> 1 dòng` (đối chứng dương: cùng một lệnh, chỉ khác một cờ); (3) cổng #324, `agent_type=tl-auditor`: `python scripts/tl.py nlm-reconcile x --json -> ALLOW`, `install -m 644 /tmp/a /tmp/b -> deny`; (4) `scripts/tl_core/nlm_admin_ops.py`, nhánh `if not getattr(a, "apply", False)`: `_pa, _pae = _reconcile_write_artifact(_plan_out, _artd)`, chú thích ngay trên: “TRƯỚC ĐÂY chỉ ghi khi có --plan-out ... nay LUÔN ghi”. Ghép lại, `tl nlm-reconcile SO --json` không `--apply` vẫn tạo `.tl_state/reconcile_plan_SO.json`: lớp 1 cho qua vì `python` thuộc allowlist, lớp 2 báo `clean` vì `.tl_state/` bị ignore; hai lớp trùng vùng mù. `A3` dùng `install`, là cơ chế lớp 1 chặn nên không đo đường có thể xảy ra từ subagent thật. Khuyết tật gốc thuộc master và có từ trước; PR #330 đã gỡ lệnh ấy khỏi vốn từ tại `6af77a2`, nhưng việc gỡ khỏi vốn từ không làm mất đường ghi hay vùng mù. Ghi ngoài Git top-level và tác dụng phụ mạng cũng không quan sát được; báo cáo phải gọi đúng các giới hạn này. |
 | **MỞ RỘNG** | Có thể tăng vùng quan sát, nhưng phải chỉ rõ từng nguồn sự thật, baseline, chi phí và quyền truy cập; đo toàn filesystem hoặc mạng không thể được suy ra chỉ từ payload hook hiện có. Mỗi cảm biến mới cần ca dương, ca đối chứng và trạng thái lỗi fail-closed riêng. |
 
 Không được viết “phát hiện mọi ghi” ở cả hai phương án.
@@ -136,14 +139,20 @@ trúc và trạng thái Git cuối theo D1; “hook đã chạy” không thay c
   lệch đều cho `unknown` và hành động đúng quyết định D1.
 - **A7 — chạy chồng:** hai `agent_id` có snapshot riêng, không ghi đè/tái sử dụng lẫn nhau.
   Fixture phải bao gồm thứ tự Start(A), Start(B), Stop(B), Stop(A) và chiều Stop ngược lại.
-- **A8 — vùng mù D3:** nếu chấp nhận mù, ca ghi tệp ignored, ghi ngoài repo và mô phỏng tác
-  dụng phụ mạng phải chứng minh kết quả không quan sát được và báo giới hạn đúng; nếu mở rộng,
-  mỗi vùng được chọn phải có ca dương và ca cảm biến lỗi.
+- **A8 — vùng mù D3:** giữa Start/Stop, chạy `tl nlm-reconcile SO --json` không `--apply`
+  để tạo `.tl_state/reconcile_plan_SO.json`. Nếu chấp nhận mù, kết quả phải là `unknown` hoặc
+  báo rõ giới hạn; **cấm** `clean`. Ca ghi ngoài repo và mô phỏng tác dụng phụ mạng cũng phải
+  chứng minh kết quả không quan sát được và báo giới hạn đúng; nếu mở rộng, mỗi vùng được chọn
+  phải có ca dương và ca cảm biến lỗi.
 - **A9 — tương thích D2:** nếu giữ guard #324, toàn bộ suite hiện hành vẫn xanh cùng suite
   detector; nếu bỏ, Packet phải chỉ rõ và đo việc gỡ hook/test thay vì để mã chết.
 - **A10 — hiệu lực D1:** đo trên subagent Claude Code thật, không chỉ gọi script hook trực
   tiếp. Riêng phương án CHẶN phải chứng minh `SubagentStop` exit `2` thực sự ngăn bước tiếp
   theo nào và không được mô tả nó như hoàn tác thay đổi đã có.
+- **A11 — tác dụng phụ của lệnh được cổng cho phép:** tách khỏi A3, chạy một lệnh nằm trong
+  allowlist của cổng #324 nhưng vẫn ghi tệp — ca cụ thể là `tl nlm-reconcile SO --json` không
+  `--apply` tạo `.tl_state/reconcile_plan_SO.json`. Ca đỏ nếu detector báo `clean`; tiêu chí
+  này không được thay bằng cơ chế ngoài allowlist như `install`.
 
 Lệnh kiểm tối thiểu của pha 2 phải được Packet revision ghi chính xác sau khi biết tên tệp
 triển khai/test. Không bịa trước một CLI chưa tồn tại. Handoff phải ghi command, mã thoát thật,

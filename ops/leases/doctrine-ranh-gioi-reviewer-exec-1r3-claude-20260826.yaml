@@ -446,3 +446,4 @@ comment_trung_lap:
     bản sau khi workflow ghi `posted_comment_id`) bị đếm thành HAI người giữ. Lần này phiên còn
     tạo thêm một blob thứ ba. Ai đo `ai-dang-giu` trên `docs/GOI_AGENT_DA_NEN.md` sau mốc này
     phải trừ bằng tay, hoặc đợi #313 vá xong.
+posted_comment_id: 5427050254   # workflow ghi, ĐỪNG sửa tay

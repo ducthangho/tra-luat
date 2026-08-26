@@ -2907,9 +2907,10 @@ def t87_ba_duong_van_hanh_phai_sensitive():
 
 
 class _GitKhoGia:
-    def __init__(self, remote, local, leases):
+    def __init__(self, remote, local, leases, heads=(), lech=None):
         import yaml
-        self.remote, self.local, self.refs, self.blobs = set(remote), set(local), {}, {}
+        self.remote, self.local, self.heads = set(remote), set(local), set(heads)
+        self.lech, self.refs, self.blobs = lech or {}, {}, {}
         for i, (ref, path, lease) in enumerate(leases):
             blob = f"{i + 1:040x}"
             self.refs.setdefault(ref, []).append((blob, path))
@@ -2919,8 +2920,13 @@ class _GitKhoGia:
         if args[:2] == ("ls-remote", "--heads"):
             out = "".join(f"{'a' * 40}\trefs/heads/{x}\n" for x in sorted(self.remote))
         elif args and args[0] == "for-each-ref":
-            out = "".join(f"refs/remotes/origin/{x}\n" for x in sorted(self.local))
+            out = "".join(f"refs/heads/{x}\n" for x in sorted(self.heads))
+            out += "".join(f"refs/remotes/origin/{x}\n" for x in sorted(self.local))
             out += "refs/remotes/origin/HEAD\n"
+        elif args and args[0] == "rev-list":
+            ten = args[-1].split("refs/heads/", 1)[1].split("...", 1)[0]
+            trai, phai = self.lech.get(ten, (0, 0))
+            out = f"{trai}\t{phai}\n"
         elif args and args[0] == "ls-tree":
             out = "".join(f"100644 blob {b}\t{p}\n" for b, p in self.refs.get(args[2], []))
         elif args[:2] == ("cat-file", "-p"):
@@ -3263,6 +3269,102 @@ def t101_dot_bien_con_tro_treo_va_bia_mo_deu_bi_giet():
                 globals()["_nap_cong"] = cu_nap
     print(f"đột biến packet #313: đã chạy={len(muts)}, bị giết={giet}")
     bang(giet == len(muts), f"đột biến packet #313 chỉ bị giết {giet}/{len(muts)}")
+
+
+def _chay_nhanh_gia(trai=0, phai=0, co_origin=True, leases=()):
+    import contextlib, io
+    mod, out = _nap_cong(), io.StringIO()
+    co = {"a"} if co_origin else set()
+    mod.GOI_GIT = _GitKhoGia(co, co, leases, heads={"a"}, lech={"a": (trai, phai)})
+    with contextlib.redirect_stdout(out):
+        try:
+            rc = mod.lenh_ai_dang_giu(type("A", (), {"goc": ".", "duong_dan":
+                                                       "ops/lease_publish.py"})())
+        except mod.Chan as ex:
+            return ex.ma, out.getvalue() + ex.thong_diep, mod
+    return rc, out.getvalue(), mod
+
+
+@ca
+def t102_nhanh_cuc_bo_tut_sau_phai_CHAN_truoc_khu_trung_lease_id():
+    ls = [("refs/heads/a", "ops/leases/x.yaml", _lease_quet("L")),
+          ("refs/remotes/origin/a", "ops/leases/x.yaml",
+           _lease_quet("L", da_bi_thay_the="M"))]
+    rc, out, mod = _chay_nhanh_gia(0, 1, leases=ls)
+    bang(rc == mod.RC_KHONG_XAC_DINH and "NHÁNH_CỤC_BỘ_TỤT_SAU: a" in out
+         and "git branch -f a refs/remotes/origin/a" in out
+         and "NGƯỜI_GIỮ" not in out, f"không chặn nhánh tụt sau trước dedup: {rc} {out}")
+
+
+@ca
+def t103_nhanh_cuc_bo_bang_origin_phai_QUA():
+    rc, out, _ = _chay_nhanh_gia(0, 0)
+    bang(rc == RC_OK and "quét refs/heads/*" in out and "NGƯỜI_GIỮ 0" in out,
+         f"chặn oan nhánh bằng origin: {rc} {out}")
+
+
+@ca
+def t104_nhanh_cuc_bo_di_truoc_origin_phai_QUA():
+    rc, out, _ = _chay_nhanh_gia(3, 0)
+    bang(rc == RC_OK and "NGƯỜI_GIỮ 0" in out, f"chặn oan nhánh đi trước: {rc} {out}")
+
+
+@ca
+def t105_nhanh_cuc_bo_khong_co_origin_phai_QUA():
+    rc, out, _ = _chay_nhanh_gia(co_origin=False)
+    bang(rc == RC_OK and "NGƯỜI_GIỮ 0" in out, f"chặn oan nhánh thuần cục bộ: {rc} {out}")
+
+
+@ca
+def t106_cung_lease_id_khac_noi_dung_chi_dem_MOT():
+    ls = [("refs/remotes/origin/a", "ops/leases/x.yaml", _lease_quet("L")),
+          ("refs/remotes/origin/b", "ops/leases/x.yaml",
+           _lease_quet("L", posted_comment_id=7))]
+    rc, out, mod = _quet_gia(_GitKhoGia({"a", "b"}, {"a", "b"}, ls))
+    bang(rc == mod.RC_DANG_GIU and out.count("\tL\t") == 2
+         and "NGƯỜI_GIỮ 1: L" in out, f"không dedup theo lease_id: {rc} {out}")
+
+
+@ca
+def t107_hai_lease_id_khac_nhau_phai_dem_HAI():
+    ls = [("refs/remotes/origin/a", "ops/leases/a.yaml", _lease_quet("L1")),
+          ("refs/remotes/origin/b", "ops/leases/b.yaml", _lease_quet("L2"))]
+    rc, out, mod = _quet_gia(_GitKhoGia({"a", "b"}, {"a", "b"}, ls))
+    bang(rc == mod.RC_DANG_GIU and "NGƯỜI_GIỮ 2: L1, L2" in out,
+         f"nuốt hai lease khác nhau: {rc} {out}")
+
+
+@ca
+def t108_moi_chot_ref_cuc_bo_co_dot_bien_rieng():
+    import importlib, importlib.util
+    nguon, giet = SCRIPT.read_text(encoding="utf-8"), 0
+    dieu_kien = "if trai == 0 and phai > 0:"
+    muts = [
+        ("tut-sau", dieu_kien, "if False:", t102_nhanh_cuc_bo_tut_sau_phai_CHAN_truoc_khu_trung_lease_id),
+        ("bang", dieu_kien, "if trai == 0:", t103_nhanh_cuc_bo_bang_origin_phai_QUA),
+        ("di-truoc", dieu_kien, "if trai > 0 and phai == 0:", t104_nhanh_cuc_bo_di_truoc_origin_phai_QUA),
+        ("khong-origin", "if doi_ung not in tap_ref:\n            continue",
+         "if doi_ung not in tap_ref:\n            tut_sau.append(ten)\n            continue",
+         t105_nhanh_cuc_bo_khong_co_origin_phai_QUA),
+        ("dedup", "nguoi_giu[lease_id] = None", 'nguoi_giu[lease_id + muc["ref"]] = None',
+         t106_cung_lease_id_khac_noi_dung_chi_dem_MOT),
+        ("hai-lease", "nguoi_giu[lease_id] = None", 'nguoi_giu["MỘT"] = None',
+         t107_hai_lease_id_khac_nhau_phai_dem_HAI),
+    ]
+    with San() as s:
+        sys.dont_write_bytecode = True
+        for i, (ten, cu, moi, dich) in enumerate(muts):
+            bang(nguon.count(cu) == 1, f"neo mutant {ten} không duy nhất")
+            p = s / f"mut_ref_{i}.py"; p.write_text(nguon.replace(cu, moi), encoding="utf-8")
+            importlib.invalidate_caches()
+            spec = importlib.util.spec_from_file_location(f"lp_ref_m{i}", p)
+            mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+            cu_nap = globals()["_nap_cong"]; globals()["_nap_cong"] = lambda: mod
+            try: dich()
+            except AssertionError: giet += 1
+            finally: globals()["_nap_cong"] = cu_nap
+    print(f"đột biến ref cục bộ: đã chạy={len(muts)}, bị giết={giet}")
+    bang(giet == len(muts), f"đột biến ref cục bộ chỉ bị giết {giet}/{len(muts)}")
 
 
 def main() -> int:

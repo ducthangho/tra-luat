@@ -33,6 +33,7 @@ import json
 import os
 import posixpath
 import re
+import shlex
 import subprocess
 import sys
 import unicodedata
@@ -318,9 +319,38 @@ def _cac_ref_cuc_bo(goc: Path) -> tuple[set[str], list[str]]:
     return ten_nhanh, refs
 
 
-def _quet_lease_toan_kho(goc: Path, *, doi_chieu_ref=True) -> list[dict]:
+def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[str]:
+    """Chỉ nhận nhánh là tụt sau khi nó là tổ tiên thật sự của origin cùng tên."""
+    tap_ref, tut_sau = set(refs), []
+    for ref in sorted(x for x in tap_ref if x.startswith("refs/heads/")):
+        ten = ref.removeprefix("refs/heads/")
+        doi_ung = "refs/remotes/origin/" + ten
+        if doi_ung not in tap_ref:
+            continue
+        out = _git(goc, "rev-list", "--left-right", "--count", f"{ref}...{doi_ung}")
+        try:
+            trai, phai = (int(x) for x in out.split())
+        except ValueError:
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: rev-list trả kết quả hỏng cho {ten}: {out!r}") from None
+        if trai == 0 and phai > 0:
+            tut_sau.append(ten)
+    return tut_sau
+
+
+def _quet_lease_toan_kho(goc: Path, *, doi_chieu_ref=True,
+                         chan_nhanh_tut_sau=False) -> list[dict]:
     """Đọc mỗi cặp (blob, đường dẫn) lease đúng một lần trên mọi ref cục bộ."""
     ten_cuc_bo, refs = _cac_ref_cuc_bo(goc)
+    if chan_nhanh_tut_sau:
+        tut_sau = _nhanh_cuc_bo_tut_sau(goc, refs)
+        if tut_sau:
+            lenh_chua = "; ".join(
+                f"git branch -f {shlex.quote(x)} "
+                f"{shlex.quote('refs/remotes/origin/' + x)}" for x in tut_sau)
+            raise Chan(RC_KHONG_XAC_DINH,
+                       "NHÁNH_CỤC_BỘ_TỤT_SAU: " + ", ".join(tut_sau) +
+                       ". ai-dang-giu quét refs/heads/*; chữa: " + lenh_chua)
     if doi_chieu_ref:
         thieu = _ten_nhanh_may_chu(goc) - ten_cuc_bo
         if thieu:
@@ -741,8 +771,9 @@ def lenh_mark(a) -> int:
 
 def lenh_ai_dang_giu(a) -> int:
     root = Path(a.goc or ".").resolve()
-    cac_lease = _quet_lease_toan_kho(root)
-    nguoi_giu = []
+    print("PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN")
+    cac_lease = _quet_lease_toan_kho(root, chan_nhanh_tut_sau=True)
+    nguoi_giu = {}
     for muc in cac_lease:
         lease = muc["lease"]
         if not _lease_cham_duong(lease, a.duong_dan):
@@ -753,7 +784,7 @@ def lenh_ai_dang_giu(a) -> int:
         nhan = " · ĐÃ_BỊ_THAY_THẾ" if da_chet else ""
         print(f"{trang_thai}{nhan}\t{lease_id}\t{muc['ref']}:{muc['path']}")
         if trang_thai == "CÒN_HẠN" and not da_chet:
-            nguoi_giu.append(lease_id)
+            nguoi_giu[lease_id] = None
     print(f"NGƯỜI_GIỮ {len(nguoi_giu)}: " + (", ".join(sorted(nguoi_giu)) or "không có"))
     return RC_DANG_GIU if nguoi_giu else RC_OK
 

@@ -23,10 +23,8 @@ ghi_chu_hinh_dang: >-
 **DELTA, không phải bản viết lại.** Thay **đúng hai dòng**; mọi phần khác của `r2`/`r3` **giữ
 nguyên hiệu lực**, và **hai tệp ấy không đổi một byte nào** — ai đang neo băm `r2`/`r3` vẫn neo đúng.
 
-> **Tệp này CHỈ ghi ĐIỀU GÌ đổi. Nó KHÔNG lập luận.**
-> Lý lẽ, phép đo, bảng chân trị, thước phân xử và toàn bộ lịch sử quyết định nằm ở **#297**
-> (`ho_so_lap_luan` trong khối đầu tệp). Đó là chỗ chúng chịu được tranh luận và sửa lại;
-> một đặc tả **đóng băng** thì không. Xem §4 để biết vì sao ranh giới ấy được đặt ở đây.
+Lý lẽ, phép đo, lịch sử quyết định và hồ sơ cross-review của chính bản delta này nằm ở **#297**
+(`ho_so_lap_luan` ở khối đầu tệp).
 
 ---
 
@@ -51,12 +49,11 @@ nguyên hiệu lực**, và **hai tệp ấy không đổi một byte nào** —
 
 (ở `r3`: `88/88` → `97/97`, phần còn lại y hệt.)
 
-**Câu thay thế KHÔNG phải lời khai mới của `r4`.** Nó là bản vá **đã qua review và đã land** ở
-`3239279b`, hôm nay vẫn đứng nguyên trong mã — `ops/lease_publish_test.py:3134`. `r4` **chép**
-nó, đúng luật `#238/r4/Q13` (*"chép bản vá đã chạy, KHÔNG tự nghĩ lại"*).
+Câu thay thế là bản vá **đã qua review và đã land** ở `3239279b`, hôm nay vẫn đứng nguyên trong mã
+tại `ops/lease_publish_test.py:3134`. `r4` **chép** nó, theo `#238/r4/Q13`.
 
-**Sai ở đâu:** `"toàn chân Ubuntu"` chỉ một **job/leg của CI**; bằng chứng trong hồ sơ là một lượt
-chạy **cục bộ**. Chi tiết ở #297.
+Chỗ sai của câu cũ: `"toàn chân Ubuntu"` chỉ một **job/leg của CI**; bằng chứng trong hồ sơ là một
+lượt chạy **cục bộ**.
 
 ---
 
@@ -64,15 +61,9 @@ chạy **cục bộ**. Chi tiết ở #297.
 
 Câu ở `r2:215` (`toàn bộ chân Ubuntu im lặng`) **không** thuộc phạm vi `r4` và **không** được sửa.
 
-Quyết định của chủ kho, in-session `2026-08-26`: **`r2:215` không phải hình dạng `A`.** Nó là suy
-luận từ tiền đề nêu tại chỗ, không phải lời khai kết quả một lượt chạy.
+Quyết định của chủ kho, in-session `2026-08-26`: `r2:215` **không** phải hình dạng `A`.
 
-**Đây là kết luận của một LẬP LUẬN, không phải của một phép đo** — không cổng nào phân xử được nó.
-Lập luận đầy đủ, ba lượt cross-review đã bác và đã sửa nó, nằm ở **#297**. Ai muốn xét lại thì xét
-ở đó, không phải ở đây.
-
-Ghi nhận một điều đo được: `r2:215` dùng **cùng cách lượng hoá** với câu sai ở gần đó nhưng
-**không cùng byte** — `:215` viết `toàn bộ chân Ubuntu`, `:232` viết `toàn chân Ubuntu`.
+Đo được: `r2:215` viết `toàn bộ chân Ubuntu`; `r2:232` viết `toàn chân Ubuntu` — **khác byte**.
 
 ---
 
@@ -83,39 +74,17 @@ Ghi nhận một điều đo được: `r2:215` dùng **cùng cách lượng ho�
 
 ---
 
-## 4. Vì sao tệp này không lập luận — và nó phải tự khai điều này
-
-Ba lượt cross-review trên chính `r4` ra **sáu** finding, **tất cả là của người viết**, và **tất cả
-cùng MỘT hình dạng**: một câu nói rộng hơn thứ phép đo thật sự chứng minh.
-
-| lượt | câu bị bác |
-|---|---|
-| 1 | *"`r4` chưa từng tồn tại"* — phép quét chỉ hỏi **tip**, không hỏi lịch sử |
-| 1 | thước *"bằng chứng hay giải thích"* — không tách được hai câu |
-| 2 | *"bị rút không vì nội dung"* — hồ sơ ghi **hai** lý do |
-| 2 | *"gỡ mệnh đề nền là no-op"* — mệnh đề đúng ở **ngữ cảnh khác** |
-| 3 | *"chưa bao giờ lên master"* — lẫn **tệp trong cây** với **commit trong lịch sử** |
-| 3 | một truth table cho **một tuple** → kết luận cho **cả một leg** |
-
-`CLAUDE.md`: *"cùng một hình dạng lỗi lặp ba lần trở lên thì câu hỏi đúng là **có nên làm việc này
-không**, không phải **vá thế nào**."*
-
-Việc không nên làm là: **để một đặc tả ĐÓNG BĂNG mang lập luận.** Mỗi câu lý lẽ là một bề mặt mới
-để khai rộng hơn đo, và một tệp đóng băng thì **không sửa được** — nó chỉ được thay bằng một delta
-nữa. Nên `r4` giữ đúng phần **không thể sai theo cách đó**: hai câu đổi, băm, phạm vi. Lý lẽ chuyển
-sang #297, nơi nó **được phép sai và được sửa**.
-
----
-
-## 5. Những gì `r4` tự khai là CHƯA ĐO ĐƯỢC
+## 4. Những gì `r4` tự khai là CHƯA ĐO ĐƯỢC
 
 - **KHÔNG khai "đã quét hết".** Số đo được là **hai** chỗ hình dạng `A` cộng **một** chỗ đã được
   chủ kho xếp ngoài phạm vi. `"chỉ ba"` là kết luận của **một** phép quét theo cụm từ — một **danh
   sách đoán trước**. Còn lời khai nào cùng hình dạng mà **không** chứa cụm `"chân Ubuntu"` hay
   không: **CHƯA ĐO ĐƯỢC**.
 - **Số `r4` là TÁI DÙNG.** Đo được: path **vắng ở base `9044a5d`** và vắng ở mọi **cây kết quả**
-  của `master` đã quét; nhưng hai commit `ee545cf5` (thêm) và `e87eae9d` (rút) **reachable từ
+  của `master` đã quét; **và** hai commit `ee545cf5` (thêm) `e87eae9d` (rút) **reachable từ
   `master`** qua PR #293. Hai sự kiện khác nhau — đừng gộp. Bản cũ cùng mục đích; tra `ee545cf5`.
   **Định danh là BĂM, không phải tên bản.**
 - **Băm hai tệp bị thay đo tại chỗ**, ghi ở khối đầu. Băm không khớp ⇒ `r2`/`r3` đã bị động ⇒ `r4`
   phải được xét lại, không được dùng.
+- **Cổng không đọc tệp này.** `doc-claims-check --strict` quét sáu root và **không** gồm
+  `ops/specs`. Ba cổng xanh không xác nhận một câu nào ở đây.

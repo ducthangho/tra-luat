@@ -583,7 +583,7 @@ cụ MCP chỉ đọc mà lượt ấy cần:
 claude -p --model opus --effort max --permission-mode acceptEdits \
   --allowedTools Read Glob Grep Bash \
       mcp__github__pull_request_read mcp__github__issue_read mcp__github__get_file_contents \
-  --output-format json "$PROMPT"
+  --output-format json < PROMPT.md
 ```
 
 Và **đừng gọi đó là siết an ninh** — nó chưa từng là. Giữ danh sách hẹp ở đây không mua được an
@@ -691,10 +691,11 @@ cách là hỏi **hạng cho ĐỐI TƯỢNG NÀO**. Với đối tượng của
 bộ ba ấy là **CHƯA XẾP ĐƯỢC**: đo được nó không tố cáo, nhưng chưa ai đo vì sao, nên cũng không
 gọi được là chiều MỞ.
 
-`--require-clean` CÓ bó một thứ khác — việc chạy một lượt trên cây bẩn — và bó thật, đo được. Nhưng
-đối tượng ấy **ngoài phạm vi mục này**, nên nó không vào bảng và không vào phép đếm ở trên; đưa nó
-vào là lẫn hai đối tượng, đúng lỗi cả mục sinh ra để chữa. Ai cần hạng cho đối tượng ấy thì xếp nó
-ở nơi nói về vòng đời lượt chạy, kèm phép đo riêng.
+Còn `--require-clean` với một đối tượng KHÁC — việc chạy một lượt trên cây bẩn — thì **hạng của
+nó không được xếp ở đây**, kể cả khi có vẻ hiển nhiên. Mục này chỉ đo **quyền ghi vào kho**, nên
+mọi kết luận về đối tượng khác phải nằm ở mục nói về vòng đời lượt chạy, mang phép đo riêng của
+nó. Câu này cố ý KHÔNG khẳng định control ấy bó hay không bó: khẳng định ở đây là lại thêm một
+mệnh đề vào một phạm vi đã tuyên bố không chứa nó — đúng lỗi cả mục sinh ra để chữa.
 
 Với phiên **executor có quyền ghi**, danh sách hẹp vẫn hợp lý: ở đó ta muốn giới hạn *hình dạng
 việc*, và executor có `settings.json` của kho làm nền.

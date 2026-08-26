@@ -1,0 +1,70 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 8 của PR #322 (packet #318).
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '318'
+packet_slug: DOCTRINE-RANH-GIOI-REVIEWER
+lease_id: null
+lease_review_KHONG_DUOC_CAP: 'lease đang sống là lease EXECUTOR r4; không có lease review riêng'
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: d14ba2f3afd317b903224d1b06b4ddffb238dc5b
+reviewed_tree: 70bea4939b8ccb0c013f900841e29e0651f497b0
+luot: 8
+cross_provider: true
+assurance: cross_approved
+verdict_path: ops/reviews/doctrine-ranh-gioi-reviewer-review-8-codex-verdict.md
+verdict_sha256: e01e6b6504e99c5b2048dd43e03808767d7097ceb6a12624b234646ef1923195
+verdict_bytes: 20240
+verdict_nguon: >-
+  `codex exec -s workspace-write -c model_reasoning_effort=xhigh` trong `launcher.py run`,
+  `--expected-head d14ba2f…`, `--require-clean`, prompt neo băm `04ca07fb…`.
+  933.9s, `ma_thoat=0`, `trang_thai=xong`, `worktree_sach: true`.
+
+ket_qua_dem_duoc:
+  P1: 1
+  P2: 4
+  dem_bang_lenh: 'awk giới hạn mục FINDING MỚI rồi grep tiêu đề; khớp lời khai reviewer "1/4"'
+  cham_tieu_chi: {N1: KHONG_DAT, N2: KHONG_DAT, N3: DAT, N4: KHONG_DAT, N5: DAT, N6: DAT, N7a: DAT, N7b: DAT}
+  slug_hien_hanh:
+  - {slug: require-clean-vuot-pham-vi-quyen-ghi, hang: P1}
+  - {slug: require-clean-command-thieu-run-root, hang: P2}
+  - {slug: phep-dem-bo-sot-menh-de-proxy, hang: P2}
+  - {slug: ba-control-chi-dung-cho-bang, hang: P2}
+  - {slug: hai-menh-de-chua-chot-nhung-goi-duy-nhat, hang: P2}
+
+NAM_TREN_SAU_FINDING_VONG_7_DA_VA_THAT:
+  da_va_that: 5
+  va_sinh_loi_moi: 1
+  gom: >-
+    ĐÃ VÁ THẬT: nam-hang-khong-tao-phan-hoach (mở liên tục từ vòng 2, NAY ĐÓNG) ·
+    allowedtools-hep-bi-xep-sai-hang · bon-control-thuc-ra-ba · ba-cau-nhung-liet-ke-bon ·
+    packet-rieng-khong-co-neo. VÁ SINH LỖI MỚI: may-phat-hien-khong-phat-hien-push.
+  dang_ke: >-
+    `nam-hang-khong-tao-phan-hoach` mở LIÊN TỤC từ vòng 2 qua sáu vòng, nay ĐÓNG THẬT. Đây là
+    lần đầu nó được phán quyết ĐÃ VÁ THẬT.
+
+TAT_CA_NAM_FINDING_CON_LAI_TRUY_VE_MOT_THU_TOI_THEM:
+  no_la_gi: 'phép đo `--require-clean` cây sạch/cây bẩn mà tôi tự thêm vào doctrine ở vòng vá 8'
+  loi_1_PHAM_VI_P1: >-
+    Mục TỰ KHAI đối tượng đo là QUYỀN GHI VÀO KHO. Việc `--require-clean` chặn một lượt chạy trên
+    cây bẩn là ĐỐI TƯỢNG KHÁC. Reviewer nói rõ: nhãn `chiều ĐÓNG` tự nó ĐÚNG NGHĨA cho đối tượng
+    cây bẩn — lỗi là đối tượng ấy KHÔNG thuộc phạm vi mục. Tôi giải đúng bài toán sai đề.
+  loi_2_LENH_KHONG_CHAY_DUOC: >-
+    Lệnh tôi IN vào doctrine thiếu `--run-root`, nên chạy nguyên văn cho `rc=2`, không phải
+    `0`/`6`. Tôi CÓ chạy thật (có `--run-root`) nhưng in ra bản KHÔNG chạy được. Đúng tội
+    "probe không tái lập được" mà chính packet này đã bị bắt hai lần và đã tách một mục vì nó.
+  loi_3_4_5_LAN_SANG_PHEP_DEM: >-
+    Đoạn phép đếm tôi tự viết BỎ SÓT mệnh đề proxy ambient có nhãn đầy đủ (tổng đúng là 8 và
+    `MỞ ×4`, không phải 7 và `MỞ ×3`) · lượng từ "BA control" rộng hơn phần thực đếm (chỉ đúng
+    cho BẢNG) · và câu "mệnh đề chưa chốt DUY NHẤT" chỏi với chính câu trên nó nói có HAI.
+  bai_hoc: >-
+    Một bổ sung ngoài phạm vi không chỉ sai chỗ nó nằm — nó kéo theo mọi phép đếm chạm tới nó.
+    Và luật đếm do CHÍNH NGƯỜI BỊ CHẤM viết ra thì vừa khít với kết quả mong muốn: tôi khai
+    "phép đếm đầy đủ" rồi bỏ sót đúng một mệnh đề.
+
+REVIEWER_BAT_LOI_SO_SACH_CUA_PHIEN_DIEU_PHOI:
+  no_la_gi: >-
+    Lease r4 còn `reviewed_sha_required: ed50b734…` (head vòng 7) trong khi vòng 8 chấm
+    `d14ba2f`. Tôi đẩy bản vá mà QUÊN cập nhật lease trước khi phóng review.
+  vi_sao_dang_ke: 'reviewer phải dùng chỉ thị trực tiếp thay cho hồ sơ durable — hồ sơ đã lệch thật'

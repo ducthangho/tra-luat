@@ -591,9 +591,9 @@ toàn, chỉ mua được một verdict mỏng hơn, hoặc không có verdict n
 
 #### NĂM HẠNG bằng chứng — đọc mục dưới bằng từ vựng này, kẻo lại viết ra ba câu chỏi nhau
 
-**Phạm vi của từ vựng này:** nó áp cho các **control của mục này** — tức BỐN TẦNG đo ở vỏ phiên
-điều phối. Mục mạng/sandbox codex và mục hai pha reviewer ĐÃ ĐƯỢC TÁCH sang packet riêng (xem cuối
-mục dưới); từ vựng này áp cho chúng ở đó, không phải ở đây. Chỗ khác trong tệp dùng chữ *ranh giới* / *cưỡng chế* theo nghĩa thường (phân công giữa
+**Phạm vi của từ vựng này:** nó áp cho các **control của mục này** — BỐN control đo ở vỏ phiên
+điều phối, thành NĂM mệnh đề (`--allowedTools` được đo ở hai cấu hình). Mục mạng/sandbox codex và mục hai pha reviewer ĐÃ ĐƯỢC TÁCH sang packet riêng (đoạn khai chỗ
+tách nằm ngay TRƯỚC bảng của mục dưới); từ vựng này áp cho chúng ở đó, không phải ở đây. Chỗ khác trong tệp dùng chữ *ranh giới* / *cưỡng chế* theo nghĩa thường (phân công giữa
 launcher và CLI ở đầu tệp; hạn chót của launcher; và *"ranh giới cắt"* là thuật ngữ Git của clone
 nông) — những chỗ ấy **không** mang hạng, và nói ra ở đây để không ai đi gắn nhãn nhầm.
 
@@ -616,7 +616,9 @@ KHÁC NHAU ở hai cấu hình. Mục dưới có ví dụ: hàng `--allowedTool
 **Mục này dùng BA trên năm hạng, và đó là KẾT LUẬN chứ không phải thiếu sót.** Đếm được sau vùng
 định nghĩa: `chiều MỞ` ×4, `chưa xếp được` ×2, `máy phát hiện` ×1 — còn **`chiều ĐÓNG` bằng KHÔNG**.
 Đúng như thế mới phải: luận điểm của mục là **không tầng nào bó được quyền ghi vào kho**, nên một
-hạng "đã đo được nó CHẶN" mà rỗng chính là bằng chứng cho luận điểm ấy, không phải ô bỏ quên. Hạng
+hạng "đã đo được nó CHẶN" mà rỗng là bằng chứng cho luận điểm ấy, không phải ô bỏ quên — nhưng
+là bằng chứng **có giới hạn**: hai ô `chưa xếp được` nghĩa là hai mệnh đề chưa chốt được, nên câu
+đúng là "chưa đo được control nào CHẶN", không phải "đã chứng minh không control nào chặn". Hạng
 `quan sát chưa rõ cơ chế` cũng rỗng, nhưng vì một lý do KHÁC và đáng nói: hàng
 `codex -s workspace-write` **không** truy được cơ chế — vậy sao không xếp nó vào đó? Vì hạng ấy đòi
 **lặp lại được**, mà hàng ấy không mang phiên bản lẫn số lần lặp của chính phép đo sinh ra nó. Thiếu
@@ -634,13 +636,16 @@ là thứ đã xác minh theo chiều MỞ, không thoả định nghĩa "đo đ
 **Một bảng phân loại tự xưng phủ hết mà không có ô dư thì không thể phủ hết**; ô dư là chỗ để cái
 chưa xếp được LỘ RA thay vì bị nhét bừa vào hàng gần nhất.
 
-#### Bốn tầng thường bị coi là hàng rào — đo Ở VỎ PHIÊN ĐIỀU PHỐI: không tầng nào bó được QUYỀN GHI VÀO KHO (24-08-2026)
+#### Bốn CONTROL thường bị coi là hàng rào, NĂM mệnh đề — đo Ở VỎ PHIÊN ĐIỀU PHỐI: không control nào bó được QUYỀN GHI VÀO KHO (24-08-2026)
 
 Phạm vi của mục này là **vỏ phiên điều phối** (`claude`, `Bash` trần), và thứ bị đo là **quyền ghi
 vào kho** — không phải "bó" nói chung. Phân biệt ấy quan trọng: HAI hàng `--allowedTools` dưới đây CÓ
 chặn, nhưng nó chặn theo **hình dạng lệnh**, không theo **thẩm quyền**, nên nó chặn oan phép đo mà
-không chặn được đường ghi. Hàng `codex` trong bảng là **phép đo đối chứng ở vỏ phiên** — chỉ
-còn MỘT, vì hàng đối chứng thứ hai đã theo mục mạng sang packet kia.
+không chặn được đường ghi. Hàng `codex` trong bảng là **phép đo đối chứng ở vỏ phiên**, và chỉ
+có MỘT — bảng này chưa bao giờ có hai. Bản trước viết *"Hai hàng `codex`"*: sai từ đầu, không phải
+sai do lát cắt. Sửa lần đầu còn tệ hơn, vì nó giải thích rằng hàng thứ hai "đã theo mục mạng sang
+packet kia" — **bịa một nguyên nhân cho một con số sai**, đúng lỗi mà chính tệp này lên án. Đối
+chiếu được: bảng có ĐÚNG một hàng `codex` ở `48cf331`, `f16b6bf`, `88bd4f2` và `6d0a183`.
 
 Kết quả **bên trong sandbox codex khác hẳn**, và mục ấy — cùng mục hai pha reviewer — ĐÃ TÁCH sang
 packet riêng. Lý do tách là một phép đếm, không phải cảm tính: bốn vòng cross-review liên tiếp đều
@@ -650,7 +655,8 @@ CẤU HÌNH, không phải bất biến — biết cơ chế KHÔNG làm nó th�
 hai pha thuộc packet kia; đừng chép lại chúng vào đây.
 
 Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": `rc=0`, ref được tạo, và
-`--require-clean` **vẫn báo sạch**. Đo tiếp bốn tầng:
+`--require-clean` **vẫn báo sạch**. Đo tiếp bốn control ấy — năm hàng, vì `--allowedTools` vào
+bảng hai lần ở hai cấu hình, đúng theo luật đơn vị ở trên:
 
 | tầng | phép đo | kết quả |
 |---|---|---|

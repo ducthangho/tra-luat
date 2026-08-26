@@ -614,7 +614,7 @@ KHÁC NHAU ở hai cấu hình. Mục dưới có ví dụ: hàng `--allowedTool
 | **chưa xếp được** | không rơi gọn vào bốn hàng trên | phải GỌI TÊN là chưa xếp được, không im lặng bỏ qua |
 
 **Mục này dùng BA trên năm hạng, và đó là KẾT LUẬN chứ không phải thiếu sót.** Đếm được sau vùng
-định nghĩa: `chiều MỞ` ×2, `máy phát hiện` ×1, `chưa xếp được` ×1 — còn **`chiều ĐÓNG` bằng KHÔNG**.
+định nghĩa: `chiều MỞ` ×5, `máy phát hiện` ×1, `chưa xếp được` ×1 — còn **`chiều ĐÓNG` bằng KHÔNG**.
 Đúng như thế mới phải: luận điểm của mục là **không tầng nào bó được quyền ghi vào kho**, nên một
 hạng "đã đo được nó CHẶN" mà rỗng chính là bằng chứng cho luận điểm ấy, không phải ô bỏ quên. Hạng
 `quan sát chưa rõ cơ chế` cũng rỗng ở đây vì mọi mệnh đề còn lại đều đã truy được cơ chế. Hai hạng
@@ -635,7 +635,8 @@ chưa xếp được LỘ RA thay vì bị nhét bừa vào hàng gần nhất.
 Phạm vi của mục này là **vỏ phiên điều phối** (`claude`, `Bash` trần), và thứ bị đo là **quyền ghi
 vào kho** — không phải "bó" nói chung. Phân biệt ấy quan trọng: HAI hàng `--allowedTools` dưới đây CÓ
 chặn, nhưng nó chặn theo **hình dạng lệnh**, không theo **thẩm quyền**, nên nó chặn oan phép đo mà
-không chặn được đường ghi. Hai hàng `codex` trong bảng là **phép đo đối chứng ở vỏ phiên**.
+không chặn được đường ghi. Hàng `codex` trong bảng là **phép đo đối chứng ở vỏ phiên** — chỉ
+còn MỘT, vì hàng đối chứng thứ hai đã theo mục mạng sang packet kia.
 
 Kết quả **bên trong sandbox codex khác hẳn**, và mục ấy — cùng mục hai pha reviewer — ĐÃ TÁCH sang
 packet riêng. Lý do tách là một phép đếm, không phải cảm tính: bốn vòng cross-review liên tiếp đều
@@ -651,11 +652,11 @@ Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": 
 |---|---|---|
 | `--allowedTools`, luật hẹp `Bash(x:*)` | gặp lệnh ghép | không khớp gì ⇒ **CHƯA XẾP ĐƯỢC**: chưa đo được là chặn oan hay không chặn |
 | `--allowedTools`, `Bash` trần | cùng lệnh ghép | khớp mọi thứ ⇒ **cơ chế đã xác minh — chiều MỞ** |
-| `codex -s workspace-write` | ghi tệp **ngoài** cây | **`rc=0`** — tệp ngoài cây bị ghi đè thật |
-| xoá `GITHUB_PAT` `GH_TOKEN` `GITHUB_TOKEN` `GIT_CONFIG_*` khỏi env | `git push --dry-run` lên GitHub | **`rc=0`** — vẫn đẩy được |
-| nhét **token RÁC** vào URL đẩy | cùng lệnh | **`rc=0`** |
+| `codex -s workspace-write` | ghi tệp **ngoài** cây | **`rc=0`** — tệp ngoài cây bị ghi đè thật ⇒ **cơ chế đã xác minh — chiều MỞ** |
+| xoá `GITHUB_PAT` `GH_TOKEN` `GITHUB_TOKEN` `GIT_CONFIG_*` khỏi env | `git push --dry-run` lên GitHub | **`rc=0`** — vẫn đẩy được ⇒ **cơ chế đã xác minh — chiều MỞ** |
+| nhét **token RÁC** vào URL đẩy | cùng lệnh | **`rc=0`** ⇒ **cơ chế đã xác minh — chiều MỞ** |
 
-Dòng cuối là dòng quyết định: **proxy egress bỏ qua credential client gửi và tự chèn credential
+HAI dòng cuối cùng một cơ chế, và dòng chót là dòng quyết định: **proxy egress bỏ qua credential client gửi và tự chèn credential
 của nó** — nên "cấp token đọc riêng cho reviewer" cũng vô dụng, credential là **ambient ở mức
 container**. Đây là **cơ chế đã xác minh — chiều MỞ**: ta biết vì sao nó không chặn.
 Bản đầu còn viết *"ranh giới thật là clone rời + `--require-clean` + kiểm cây sạch"*. Câu ấy **SAI

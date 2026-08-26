@@ -127,7 +127,9 @@
           {
             "type": "command",
             "command": "python",
-            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/session_start.py"],
+            "args": [
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/session_start.py"
+            ],
             "timeout": 630
           }
         ]
@@ -141,6 +143,26 @@
             "type": "command",
             "command": "python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/pretooluse_guard.py\"",
             "shell": "bash"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'PY=\"$(command -v python3 || command -v python || command -v py)\"; \"$PY\" \"${CLAUDE_PROJECT_DIR}/.claude/hooks/subagent_ghi_detect.py\"'"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'PY=\"$(command -v python3 || command -v python || command -v py)\"; \"$PY\" \"${CLAUDE_PROJECT_DIR}/.claude/hooks/subagent_ghi_detect.py\"'"
           }
         ]
       }

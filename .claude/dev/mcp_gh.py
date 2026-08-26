@@ -60,11 +60,15 @@ def _mo_mac_dinh(req, timeout):
     return _OPENER.open(req, timeout=timeout)
 
 
+def _bo_tien_to_data(dong: str) -> str:
+    return dong[5:].strip()
+
+
 def tach_than(raw: str) -> str:
     """Lấy dòng data cuối của SSE, hoặc giữ nguyên JSON thuần; không cắt tải trọng."""
     for dong in reversed(raw.splitlines()):
         if dong.startswith("data:"):
-            return dong[5:].strip()
+            return _bo_tien_to_data(dong)
     return raw
 
 

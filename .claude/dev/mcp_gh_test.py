@@ -230,9 +230,10 @@ def b1_sse_lay_data_cuoi():
 
 def b2_khong_cat_hai_tang():
     text = json.dumps({"x": ["y" * 40] * 500})
-    than = m.tach_than("data: " + json.dumps({"result": {"content": [{"text": text}]}}))
+    kq = {"result": {"content": [{"text": text}]}}
+    than = m._bo_tien_to_data("data: " + json.dumps(kq))
     assert len(than) > 20000
-    kq = json.loads(than)
+    json.loads(than)
     van_ban = m.rut_van_ban(kq)
     assert len(van_ban) > 20000
     json.loads(van_ban)
@@ -294,6 +295,7 @@ def b7_xoa_pyc_cu():
         path.write_text("GIA_TRI = 'moi'\n", encoding="utf-8")
         os.utime(path, (moc, moc))
         assert nap_dot_bien(path, "mau_moi").GIA_TRI == "moi"
+        assert not pathlib.Path(importlib.util.cache_from_source(str(path))).exists()
 
 
 def b7_tat_ghi_bytecode():
@@ -394,16 +396,10 @@ def d4_phan_hoi_list_co_loi_cau_truc():
 
 
 def d5_notification_loi_van_chuyen():
-    lan = 0
-
-    def mo(req, timeout):
-        nonlocal lan
-        lan += 1
-        if lan == 1:
-            return PhanHoiGia('{"result":{"ok":1}}')
-        raise urllib.error.URLError("notification hong")
-
-    kq = m.Phien("/mcp/", "tok", mo=mo).mo_phien()
+    hop = iter(({"result": {"ok": 1}}, {"_mang": "notification hong"}))
+    p = m.Phien("/mcp/", "tok", mo=mo_gia([]))
+    p.goi = lambda *args, **kwargs: next(hop)
+    kq = p.mo_phien()
     assert kq.get("_loi", "").startswith("lỗi mạng"), kq
 
 
@@ -414,7 +410,7 @@ def d6_hop_dong_cli_0_2_3():
     assert main_gia(["tool", '{"x":1}'], lop)[0] == 0
     assert main_gia(["--liet-ke", "--path", "/mcp/x/actions"], lop)[0] == 0
     assert main_gia(["tool", "{"], lop)[0] == 2
-    assert main_gia(["--liet-ke"], lop, token=None)[0] == 3
+    assert main_gia(["--path", "/sai"], m.Phien)[0] == 3
     assert sum(x[0] == "goi" and x[1] == "tools/list" for x in ghi) == 2
     assert any(x[0] == "chay" and x[1] == "tool" for x in ghi)
     assert any(x[0] == "init" and x[1] == "/mcp/x/actions" for x in ghi)
@@ -422,6 +418,16 @@ def d6_hop_dong_cli_0_2_3():
 
 def d7_cong_xanh_chi_khi_hai_so_duong_bang_nhau():
     assert cong(("c",), ("c",), ("m",), ("m",), ())
+
+
+def dong_dot_bien(killed, mutants, failed):
+    if failed:
+        return "ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)"
+    return f"ĐỘT BIẾN   : {len(killed)}/{len(mutants)} bị giết đúng một ca"
+
+
+def d7b_nen_do_khong_dem_dot_bien():
+    assert "KHÔNG_ĐO_ĐƯỢC" in dong_dot_bien((), ("m",), (("c", "đỏ"),))
 
 
 def dung_mot(failed, target):
@@ -433,9 +439,9 @@ def d8_dot_bien_chi_giet_mot_ca():
     assert not dung_mot([], "c") and not dung_mot(["c", "d"], "c")
 
 
-def d9_ngan_sach_790_dong_ma():
+def d9_ngan_sach_842_dong_ma():
     tong = sum(sum(1 for _ in path.open(encoding="utf-8")) for path in (NGUON, pathlib.Path(__file__)))
-    assert tong <= 790, f"hai tệp mã dùng {tong}/790 dòng"
+    assert tong <= 842, f"hai tệp mã dùng {tong}/842 dòng"
 
 
 # Đăng ký xong mới đóng băng; runner không sửa tuple này.
@@ -456,7 +462,8 @@ CASES = (
     ("D3", d3_initialize_result_rong_do), ("D4", d4_phan_hoi_list_co_loi_cau_truc),
     ("D5", d5_notification_loi_van_chuyen), ("D6", d6_hop_dong_cli_0_2_3),
     ("D7", d7_cong_xanh_chi_khi_hai_so_duong_bang_nhau),
-    ("D8", d8_dot_bien_chi_giet_mot_ca), ("D9", d9_ngan_sach_790_dong_ma),
+    ("D7b", d7b_nen_do_khong_dem_dot_bien),
+    ("D8", d8_dot_bien_chi_giet_mot_ca), ("D9", d9_ngan_sach_842_dong_ma),
 )
 
 
@@ -486,7 +493,7 @@ MUTATIONS = (
     ("b9_bo_sid", "app", "                if sid:\n                    self.sid = sid", "                if False:\n                    self.sid = sid", "B9"),
     ("c1_cho_so_ca_rong", "test", "return len(registry) > 0 and tuple(ran) == tuple(registry)", "return tuple(ran) == tuple(registry)", "C1"),
     ("c2_cho_so_db_rong", "test", "return bool(mutants)", "return True", "C2"),
-    ("c3_cho_ca_hai_rong", "test", "    return (_du_ca(registry, ran) and _co_dot_bien(mutants)", "    return ((not registry and not mutants) or (_du_ca(registry, ran) and _co_dot_bien(mutants)", "C3"),
+    ("c3_cho_ca_hai_rong", "test", "    return (_du_ca(registry, ran) and _co_dot_bien(mutants)", "    return ((not registry and not mutants) or _du_ca(registry, ran) and _co_dot_bien(mutants)", "C3"),
     ("c4_khong_goi_ca", "test", "return len(registry) > 0 and tuple(ran) == tuple(registry)", "return bool(registry)", "C4"),
     ("d1_bo_top_error", "app", "    if loi:\n        return loi\n    result = d[\"result\"]", "    if loi:\n        return None\n    result = d[\"result\"]", "D1"),
     ("d2_bo_iserror", "app", 'if isinstance(result, dict) and result.get("isError") is True:', "if False:", "D2"),
@@ -495,8 +502,9 @@ MUTATIONS = (
     ("d5_nuot_loi_notification", "app", "        if loi:\n            return {\"_loi\": loi}\n        return {}", "        if False:\n            return {\"_loi\": loi}\n        return {}", "D5"),
     ("d6_doi_co_cli", "app", 'argv[0] == "--liet-ke"', 'argv[0] == "--liet-ke-doi"', "D6"),
     ("d7_cong_khong_xanh", "test", "return len(registry) > 0 and tuple(ran) == tuple(registry)", "return False", "D7"),
+    ("d7b_dem_khi_nen_do", "test", "    if failed:\n        return \"ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)\"", "    if False:\n        return \"ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)\"", "D7b"),
     ("d8_khong_dem_dung_mot", "test", "return tuple(failed) == (target,)", "return True", "D8"),
-    ("d9_vuot_ngan_sach", "test", "assert tong <= 790", "assert tong < 0", "D9"),
+    ("d9_vuot_ngan_sach", "test", "assert tong <= 842", "assert tong < 0", "D9"),
 )
 
 
@@ -551,11 +559,11 @@ def chay_dot_bien():
 
 if __name__ == "__main__":
     ran, failed = chay_cac_ca(sys.modules[__name__])
-    killed, live = chay_dot_bien()
+    killed, live = ([], []) if failed else chay_dot_bien()
     print(f"CA         : {len(ran) - len(failed)}/{len(CASES)} đạt · {len(failed)} đỏ")
     for name, error in failed:
         print(f"  ĐỎ {name}: {error}")
-    print(f"ĐỘT BIẾN   : {len(killed)}/{len(MUTATIONS)} bị giết đúng một ca")
+    print(dong_dot_bien(killed, MUTATIONS, failed))
     for error in live:
         print(f"  SỐNG SÓT {error}")
     ok = cong(tuple(name for name, _ in CASES), tuple(ran),

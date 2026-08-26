@@ -106,3 +106,4 @@ chua_do_duoc_luc_cap: >-
   trong `launcher.py:1762-1764`, không phải phép đo của phiên này. Kho CÓ lane Windows nên đo
   được; chỉ là chưa đo.
   (2) CHƯA đo `python` vắng mặt trên Debian tối giản — kiến thức đóng gói, không phải phép đo.
+posted_comment_id: 5426327767   # workflow ghi, ĐỪNG sửa tay

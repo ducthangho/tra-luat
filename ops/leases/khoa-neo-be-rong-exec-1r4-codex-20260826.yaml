@@ -195,3 +195,7 @@ canh_bao_cho_nguoi_thi_hanh: >-
   (3) Hỏng này fail-CLOSE (chặn phép đếm hợp lệ), nên bản vá SAI HƯỚNG sẽ biến nó thành
   fail-OPEN. Ràng buộc (1) và (3) ở trên là chốt chống đúng điều đó.
   (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+
+da_bi_thay_the: khoa-neo-be-rong-exec-1r5-codex-20260826   # BUOC HAI cua chuoi thay the —
+                        # thieu dong nay thi r4 VAN duoc dem la NGUOI_GIU (lease_publish.py:679),
+                        # va hai lease cung giu mot write set. Viec cua r4 da xong: c61394a.

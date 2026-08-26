@@ -127,8 +127,8 @@ bằng worktree read-only tại đúng `reviewed_sha`:
 
 ```bash
 git -C <kho> worktree add --detach /tmp/nen-<reviewed_sha> <reviewed_sha>
-cd /tmp/nen-<reviewed_sha> && python3 scripts/tl.py doc-claims-check --strict; echo "nen     rc=$?"
-cd "$R/cay-kho"            && python3 scripts/tl.py doc-claims-check --strict; echo "sandbox rc=$?"
+cd /tmp/nen-<reviewed_sha> && python scripts/tl.py doc-claims-check --strict; echo "nen     rc=$?"
+cd "$R/cay-kho"            && python scripts/tl.py doc-claims-check --strict; echo "sandbox rc=$?"
 git -C <kho> worktree remove /tmp/nen-<reviewed_sha> --force
 ```
 

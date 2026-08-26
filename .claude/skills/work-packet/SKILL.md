@@ -49,7 +49,7 @@ cài phụ thuộc Python và đã đo được một lần làm hỏng môi tr�
 ```bash
 D="$(mktemp -d)"
 git show origin/master:.claude/dev/launcher.py > "$D/launcher.py"
-python3 "$D/launcher.py" doctor              # bằng chứng DƯƠNG, chạy được từ mọi nhánh
+python "$D/launcher.py" doctor              # bằng chứng DƯƠNG, chạy được từ mọi nhánh
 ```
 
 **Vắng mặt là một QUAN SÁT; "môi trường không có" là một KẾT LUẬN.** Trước khi báo với

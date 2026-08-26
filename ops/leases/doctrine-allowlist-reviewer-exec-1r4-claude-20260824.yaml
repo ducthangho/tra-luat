@@ -1,0 +1,182 @@
+# Lease EXECUTOR — `DOCTRINE-ALLOWLIST-REVIEWER` (#314), lượt 1.
+#
+# Ghi vào doctrine một phép đo đã trả giá thật trong phiên 24-08-2026: luật `Bash(x:*)` của
+# `--allowedTools` khớp TIỀN TỐ CHUỖI LỆNH, nên nó chặn oan gần hết phép đo mà reviewer cần —
+# và chính vòng lặp bị-từ-chối làm context phình tới mức hai lượt review chết vì `api_error`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 314
+packet_id: DOCTRINE-ALLOWLIST-REVIEWER
+phase_key: DOCTRINE-ALLOWLIST-REVIEWER
+revision: 4
+generation: 1
+lease_id: doctrine-allowlist-reviewer-exec-1r4-claude-20260824
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` là MẶC ĐỊNH FAIL-CLOSE của `_BANG_LOP`, không phải tín hiệu chạm thẩm quyền.
+  Packet này chạm tài liệu VÀ mã dev-side (`.claude/dev/**`) — không tệp nào vào gói phát hành.
+
+spec_path: 'KHÔNG CÓ — nội dung packet là chính phép đo, ghi trong Issue #314'
+spec_status: khong_co_dac_ta_rieng
+spec_duyet_boi: ducthangho
+spec_note: >-
+  Không soạn đặc tả riêng: toàn bộ nội dung là BA phép đo đã chạy trong phiên, và chúng được
+  chép nguyên số vào Issue #314 cùng bản vá. Soạn thêm một tệp spec để neo băm chỉ tạo thêm một
+  bản chiếu nữa cho cùng dữ liệu.
+
+write_set:
+  - docs/GOI_AGENT_DA_NEN.md
+  - .claude/dev/mcp_gh.py
+  - .claude/dev/mcp_gh_test.py
+write_set_note: >-
+  ĐÚNG BA đường dẫn ghi ở `write_set`. `CLAUDE.md` và `.claude/skills/cross-review/SKILL.md` KHÔNG nằm trong
+  write set và KHÔNG được chạm — chúng đang bị lease `doctrine-rig-va-reviewer-exec-1-claude-20260824`
+  (packet #305) giữ tới 2026-08-25T12:45:00Z. Con trỏ từ `CLAUDE.md` sang mục mới sẽ do người giữ
+  lease ấy thêm; đã báo ở Issue #305.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 24-08-2026 ~23:0xZ bằng `ops/lease_publish.py ai-dang-giu` bản trên `origin/master` (3e6001a).
+  Phép so hai nguồn TRƯỚC khi quét: `ls-remote --heads` 201 = `for-each-ref` 201, `comm -23` RỖNG.
+    docs/GOI_AGENT_DA_NEN.md              ->  NGƯỜI_GIỮ 0
+    CLAUDE.md                             ->  NGƯỜI_GIỮ 1  (doctrine-rig-va-reviewer…, CÒN_HẠN 13h37m)
+    .claude/skills/cross-review/SKILL.md  ->  NGƯỜI_GIỮ 1  (cùng lease)
+  Hai đường dẫn sau là lý do packet này KHÔNG viết vào `CLAUDE.md`.
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+
+branch: claude/doctrine-allowlist-reviewer-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+reviewed_sha_required: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+base_ghi_chu: >-
+  `3e6001a` = master lúc cấp, chính là merge của PR #306. Ngân sách đo từ đây; nhánh chưa mang
+  sẵn việc nào nên merge-base và start_from trùng nhau, không có bẫy như packet #308.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 760
+  do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+  don_vi: '`git diff --numstat c35ae1c0..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  da_dung: 687
+  phan_ra:
+    docs/GOI_AGENT_DA_NEN.md: 146
+    .claude/dev/mcp_gh.py: 207
+    .claude/dev/mcp_gh_test.py: 334
+  ghi_chu: >-
+    478 là số ĐÃ ĐO trên bản vá thật, không phải ước lượng — cả ba tệp viết xong và chạy xong
+    trước khi cấp lease này, vì nội dung của chúng CHÍNH LÀ nhật ký đo của phiên. 520 để chừa
+    chỗ cho vòng review. Tệp test chiếm hơn nửa: 256/478 — đúng tỷ lệ mã:test ~1:1,7 mà `r1`
+    của packet #292 đo được (107:214), nên không có dấu hiệu test bị viết mỏng cho vừa trần.
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-24 — sau khi được trình ba việc còn hở, người giữ kho trả lời
+  "xử lý ngay".
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_ghi_chu: >-
+  KHAI THẲNG: phiên ghi lease này CŨNG là phiên thi công, VÀ là phiên đã tạo ra sự cố được ghi
+  vào doctrine. Ba vai gộp làm một. Lý do chấp nhận: nội dung là NHẬT KÝ ĐO của chính phiên —
+  ba lượt chạy thật với số đo kèm theo — nên tách phiên thi công sẽ chỉ tạo một bản chép lại.
+  Hệ quả cho nhãn: `cross_approved` của lượt này đứng CHỈ bằng vòng review `codex` SAU khi thi
+  công; khâu soạn — cấp — thi công KHÔNG độc lập. Ghi ra vì nhãn ấy trông y hệt nhau dù có độc
+  lập hay không.
+
+leased_at_utc: '2026-08-24T23:05:00Z'
+lease_expires_at_utc: '2026-08-26T23:59:59Z'
+run_minutes: 1440
+gia_han:
+  het_han_cu: '2026-08-25T23:05:00Z'
+  het_han_moi: '2026-08-26T23:59:59Z'
+  ai_gia_han: ducthangho
+  tham_quyen: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+  quyet_dinh_luc: 'direct, in-session, 2026-08-26: "Cho gia hạn tới hết hôm nay, tiếp tục"'
+  vi_sao: >-
+    Phiên treo qua đêm; lease chết lúc 23:05Z 25-08 trong khi bản vá lượt 3 đã viết xong và cổng
+    đã xanh. `lease_publish.py check` chặn r4 với rc=8 — "đăng một lease chết thì người nhận
+    tưởng có quyền mà không có". Chốt làm ĐÚNG.
+  khong_tu_gia_han: >-
+    Phiên KHÔNG tự kéo dài. Quyền người giữ kho cấp ngày 24-08 là NỚI WRITE SET ("nới đi, tôi
+    cho phép"), không phải gia hạn — khác tiền lệ lease `t33-doi-shellcheck` vốn ghi sẵn "kể cả
+    gia hạn" trong `granted_on_instruction`. Đã dừng và hỏi; đây là câu trả lời.
+
+viec_cua_luot_nay: >-
+  LƯỢT 3 — đóng verdict `blocked` của cross-review vòng 1 (PR #315, reviewed_sha 96845938):
+  bốn P1 và ba P2.
+  P1 `reviewer-shell-is-not-read-only` — bản vá cũ khai "ranh giới thật là clone rời +
+    --require-clean + kiểm cây sạch". Reviewer bác bằng phép chạy. Thay bằng BẢNG ĐO bốn tầng
+    và thiết kế HAI PHA; gọi đúng tên máy phát hiện, không gọi là hàng rào.
+  P1 `credential-destination-mutant-survives` — khoá NƠI NHẬN credential trong mã
+    (`kiem_dich_den`, `HOST_CHO_PHEP`, `DUONG_CHO_PHEP`); thêm ca + đột biến `m7_doi_diem_cuoi`
+    tái đúng đột biến reviewer dựng ra.
+  P1 `mcp-initialize-failure-reported-success` — thêm `loi_cua()` phân biệt bốn đường hỏng;
+    `notifications/initialized` chỉ gửi sau khi mở THẬT; bắt `URLError`/`TimeoutError`/`OSError`
+    (KHÔNG bắt `Exception` trần).
+  P1 `packet-spec-revision-incoherent` — CHÍNH bản này: r3 nới write_set + trần nhưng để nguyên
+    "đúng một đường dẫn", "thuần tài liệu", "không sửa mã", stop condition 90 dòng, và có HAI
+    khoá `thay_the_cho` trùng nhau (YAML lặng lẽ giữ cái sau). r4 sửa cả tám chỗ, đo bằng grep.
+  P2 — hạ nhân quả xuống "tương quan có neo"; khai `stdout.log` KHÔNG tái lập được từ kho; tách
+    ví dụ thứ sáu `bash /tmp/refscan.sh` ra vì nó KHÁC nguyên nhân (thiếu `Bash(bash:*)`).
+  KHÔNG chạm `CLAUDE.md`, KHÔNG chạm `.claude/skills/**`.
+
+phep_do_moi_cua_luot_nay: >-
+  Bốn tầng thường bị coi là hàng rào, đo ở VỎ PHIÊN: `--allowedTools` không khớp lệnh ghép ·
+  `codex -s workspace-write` ghi ra ngoài cây `rc=0` · xoá `GITHUB_PAT`/`GH_TOKEN`/`GITHUB_TOKEN`/
+  `GIT_CONFIG_*` vẫn `git push --dry-run` `rc=0` · nhét TOKEN RÁC vào URL vẫn `rc=0` ⇒ proxy egress
+  bỏ qua credential client gửi.
+  Rồi đo TRONG sandbox codex, và kết quả KHÁC HẲN — đây là chỗ suýt khái quát sai:
+    codex -s workspace-write   FS trong 0 · FS ngoài 0 · ls-remote 128 · push 128
+    codex -s read-only         FS trong 1 · FS ngoài 1 · ls-remote 128 · push 128
+  Tức codex bị chặn MẠNG ở CẢ HAI chế độ. Reviewer chạy bằng `codex exec` KHÔNG đẩy được lên
+  GitHub kể cả `workspace-write`. Chọn NỀN quan trọng hơn chọn chế độ.
+  CHƯA ĐO: vì sao codex chặn mạng (sandbox tự chặn, hay biến proxy không kế thừa) ⇒ chưa được
+  dựa vào nó như bảo đảm an ninh.
+vi_sao_muc_nay_thuoc_TEP_NAY: >-
+  §"Claude Code headless" của chính tệp này đang dặn "Cấp allowlist HẸP theo lượt" kèm ví dụ
+  `--allowedTools "Read" "Glob" ... "Bash(python:*)"`. Đó ĐÚNG là lời khuyên đã làm hỏng ba lượt
+  review. Người đọc làm theo sẽ vấp lại y hệt. Nên bản vá phải nằm CẠNH câu ấy, không nằm ở một
+  tệp khác — bài học "một đính chính chỉ sống trong tài liệu kế nhiệm là đính chính có thể bị bỏ sót".
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) Ba con số của bảng so sánh (78/5/10,8M · 85/10/12,8M · 45/1/3,7M) đọc từ trường `usage` và
+  `permission_denials` trong `stdout.log` của ba lượt chạy — KHÔNG gõ tay, và nếu sửa thì phải đo lại.
+  (2) Câu "hai lỗi API là hệ quả của vòng lặp bị-từ-chối" là SUY LUẬN có neo, không phải phép đo
+  trực tiếp — tương quan ba điểm, không phải phản chứng. Đừng nâng nó thành nhân quả đã chứng minh.
+  (3) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+
+chua_do_duoc_luc_cap: >-
+  (1) CHƯA có phản chứng cô lập cho quan hệ nhân quả denial → context phình → `api_error`. Ba lượt
+  khác nhau ở allowlist VÀ ở thời điểm chạy; không loại được yếu tố phía dịch vụ.
+  (2) CHƯA đo luật `Bash(x:*)` trên bản Claude Code nào khác ngoài `2.1.241`.
+  (3) CHƯA đo hành vi tương đương của `codex` — mục này chỉ nói về `claude -p`.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ hai (nhất là `CLAUDE.md`) ⇒ DỪNG, xin lease sửa đổi — đường ấy đang có
+  người giữ · S2 vượt 760 dòng thêm · S3 phát hiện một trong ba con số của bảng không tái lập được
+  từ `stdout.log` ⇒ DỪNG, đo lại, KHÔNG giữ số cũ · S4 `origin/master` đã đi tiếp mà chưa đo lại.
+
+thay_the_cho: doctrine-allowlist-reviewer-exec-1r3-claude-20260824
+thay_the_ly_do: >-
+  Finding P1 `packet-spec-revision-incoherent` của cross-review vòng 1 (PR #315). r3 nới
+  `write_set` 1→3 và trần 90→520 nhưng ĐỂ NGUYÊN mọi mệnh đề mô tả phạm vi cũ. Đo bằng grep,
+  TÁM chỗ: "thuần tài liệu dev-side" · "ĐÚNG MỘT đường dẫn" · `viec_cua_luot_nay` mô tả lượt 1 ·
+  "KHÔNG sửa mã" · `S2` còn ghi 90 dòng · và HAI khoá `thay_the_cho` trùng nhau (dòng 134 và 167)
+  mà `yaml.safe_load` lặng lẽ giữ cái sau.
+  Đây là lần THỨ BA trong một ngày một lease của phiên này tự mâu thuẫn sau khi nới (trước đó:
+  `spec-310-06` và `rev2-03` của packet #308). Cùng một cách hỏng: sửa TRƯỜNG được nới, quên VĂN
+  BẢN mô tả nó. Nên r4 không sửa mò — liệt kê bằng `grep` TRƯỚC, rồi kiểm lại bằng `grep` SAU.
+  Cộng nâng trần 520→760: bản vá lượt 3 đưa tổng lên 687 dòng (docs 146 · mcp_gh 207 ·
+  mcp_gh_test 334). Phần tăng nằm phần lớn ở TEST — 334/687 — vì đóng hai P1 đòi thêm ba ca và
+  bốn đột biến, trong đó có đúng đột biến `DIEM_CUOI → example.invalid` mà bộ cũ không giết được.

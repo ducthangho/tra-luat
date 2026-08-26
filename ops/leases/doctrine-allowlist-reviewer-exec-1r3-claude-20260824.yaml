@@ -176,3 +176,7 @@ thay_the_ly_do: >-
   `ls-remote` 203 = `for-each-ref` 203, `comm -23` RỖNG.
   `CLAUDE.md` và `.claude/skills/**` VẪN KHÔNG được chạm — packet #305 còn giữ.
 posted_comment_id: 5402861836   # workflow ghi, ĐỪNG sửa tay
+da_bi_thay_the: doctrine-allowlist-reviewer-exec-1r4-claude-20260824
+da_bi_thay_the_ly_do: >-
+  P1 `packet-spec-revision-incoherent` (PR #315): nới write_set + trần nhưng để nguyên 8 mệnh đề
+  mô tả phạm vi cũ, gồm hai khoá `thay_the_cho` trùng nhau.

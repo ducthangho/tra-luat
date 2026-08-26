@@ -549,8 +549,12 @@ echo "may chu: $(git ls-remote --heads origin | wc -l)"                    TU CH
 python3 - <<'PY' ... PY                                                    TU CHOI
 M=8ba8acaa; echo ...; git merge-base --is-ancestor $M HEAD                 TU CHOI
 cd "$(git rev-parse --show-toplevel)"; python3 - <<'PY' ...                TU CHOI
-bash /tmp/refscan.sh                                                       TU CHOI
 ```
+
+*(Lượt đo ấy còn một lệnh thứ sáu bị từ chối — `bash /tmp/refscan.sh` — nhưng nó **khác nguyên
+nhân**: allowlist lượt đó không có `Bash(bash:*)`, tức bị chặn vì thiếu tên chương trình chứ
+không vì lệnh ghép. Ghi tách ra vì gộp nó vào năm ca trên là **lời khai rộng hơn phép đo** —
+cross-review bắt đúng chỗ này.)*
 
 Chốt của Claude Code làm **đúng**: một luật tiền tố không bao được phần còn lại của một
 lệnh ghép, nên nó từ chối thay vì đoán. Cái sai nằm ở phía ta — **allowlist theo tên
@@ -567,8 +571,16 @@ cùng một exact head**:
 | nới thêm `cd`/`bash`/`sh` | 85 | 10 | 12,8 M | `api_error` — mất trắng |
 | **`Bash` trần** | **45** | **1** | **3,7 M** | **`completed`, verdict đầy đủ** |
 
-Hai lỗi API ấy **không ngẫu nhiên**: chúng là hệ quả của chính vòng lặp bị-từ-chối. Giá
-phải trả trước khi tìm ra: ~$39 và ba lượt chạy.
+**Ba con số ấy KHÔNG tái lập được từ kho.** Chúng đọc từ trường `usage` và `permission_denials`
+trong `stdout.log` của ba lượt chạy, và các tệp ấy nằm trong scratchpad của phiên, **không được
+git theo dõi** — nên bảng trên là *chứng cứ đã đo*, không phải *phép đo bạn chạy lại được*. Ai
+cần kiểm phải chạy lại ba lượt.
+
+**Quan hệ nhân quả thì CHƯA chứng minh.** Ba lượt khác nhau ở **cả** allowlist **lẫn** thời điểm
+chạy, nên không loại được yếu tố phía dịch vụ: đây là **tương quan có neo**, không phải nhân quả.
+Điều nói chắc được chỉ là — allowlist rộng cho ít lượt hơn, ít bị từ chối hơn, ít context hơn, và
+là cấu hình duy nhất trong ba cấu hình cho ra verdict. Giá phải trả trước khi tìm ra: ~$39 và ba
+lượt chạy.
 
 **Nên làm.** Với phiên **reviewer read-only** trong clone rời, cấp `Bash` **trần** cộng
 đúng những công cụ MCP chỉ đọc mà lượt ấy cần:
@@ -580,10 +592,73 @@ claude -p --model opus --effort max --permission-mode acceptEdits \
   --output-format json '<prompt>'
 ```
 
-Và **đừng gọi đó là siết an ninh** — nó chưa từng là. Ranh giới thật của lượt review là
-**clone rời + `--require-clean` + phép kiểm cây sạch SAU khi chạy**; allowlist chỉ quyết
-định reviewer *đo được bao nhiêu*. Giữ danh sách hẹp ở đây không mua được an toàn, chỉ
-mua được một verdict mỏng hơn — hoặc không có verdict nào.
+Và **đừng gọi đó là siết an ninh** — nó chưa từng là. Giữ danh sách hẹp ở đây không mua được
+an toàn, chỉ mua được một verdict mỏng hơn — hoặc không có verdict nào.
+
+**Bản đầu của mục này viết tiếp rằng *"ranh giới thật là clone rời + `--require-clean` + kiểm
+cây sạch"*. Câu ấy SAI, và cross-review bác bằng phép chạy** — xem mục dưới.
+
+#### Phiên review KHÔNG có ranh giới kỹ thuật — đo bốn tầng, không tầng nào bó được (24-08-2026)
+
+Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": `rc=0`, ref được tạo, và
+`--require-clean` **vẫn báo sạch**. Đo tiếp bốn tầng thường được coi là hàng rào:
+
+| tầng | phép đo | kết quả |
+|---|---|---|
+| `--allowedTools` | luật `Bash(x:*)` gặp lệnh ghép | không khớp gì ⇒ hoặc chặn oan, hoặc `Bash` trần = mọi thứ |
+| `codex -s workspace-write` | ghi tệp **ngoài** cây | **`rc=0`** — tệp ngoài cây bị ghi đè thật |
+| xoá `GITHUB_PAT` `GH_TOKEN` `GITHUB_TOKEN` `GIT_CONFIG_*` khỏi env | `git push --dry-run` lên GitHub | **`rc=0`** — vẫn đẩy được |
+| nhét **token RÁC** vào URL đẩy | cùng lệnh | **`rc=0`** |
+
+Dòng cuối là dòng quyết định: **proxy egress bỏ qua credential client gửi và tự chèn credential
+của nó.** Nên "cấp token đọc riêng cho reviewer" cũng vô dụng — credential là **ambient ở mức
+container**, không nằm ở chỗ phiên với tới.
+
+**NHƯNG bốn dòng trên đo ở VỎ PHIÊN ĐIỀU PHỐI, không phải trong sandbox codex — và đo trong
+sandbox thì kết quả KHÁC HẲN:**
+
+```text
+                          ghi trong cay   ghi NGOAI cay   git ls-remote   git push
+codex -s workspace-write       rc=0            rc=0            rc=128        rc=128
+codex -s read-only             rc=1            rc=1            rc=128        rc=128
+vo phien (claude, Bash tran)   rc=0            rc=0             rc=0          rc=0
+```
+
+Hai trục **tách rời**, và tách theo NỀN chứ không theo chế độ:
+
+- **Mạng: codex bị chặn ở CẢ HAI chế độ** (`rc=128`). Một reviewer chạy bằng `codex exec`
+  **không đẩy được lên GitHub**, kể cả `workspace-write`. Đây là hàng rào thật, và nó có sẵn.
+- **Hệ tệp: chỉ `read-only` bó.** `workspace-write` ghi được ra ngoài cây — rò rỉ thật, nhưng
+  hậu quả thấp hơn nhiều so với ghi vào kho, và **phát hiện được**.
+- **Claude `-p` không có hàng rào nào** — cả hai trục đều mở.
+
+Nên câu đúng KHÔNG phải *"reviewer không thể bị bó"* mà là: **chọn NỀN quan trọng hơn chọn chế
+độ.** Phản chứng push mà cross-review dựng ra chạy trong phiên `claude` và đẩy vào một **bare
+remote cục bộ**, không phải GitHub — nó chứng minh `git push` hoạt động về cơ chế, không chứng
+minh kho thật bị với tới từ trong sandbox codex.
+
+#### Hệ quả: reviewer ghi được mà vẫn không chạm được kho — nếu chạy bằng codex
+
+| pha | chế độ | được gì | cưỡng chế bằng |
+|---|---|---|---|
+| **A — soát** | `codex -s read-only` | tìm finding, đọc mã, phép đo chỉ-đọc | **sandbox thật**: FS đóng, mạng đóng |
+| **B — dựng vá** | `codex -s workspace-write` | sửa thử, chạy test/đột biến, **chứng minh bản vá** | **mạng vẫn đóng**; FS ngoài cây mở ⇒ máy phát hiện |
+
+Pha B là thứ phải có nếu muốn reviewer *đề xuất bản vá* chứ không chỉ chỉ trích — phần lớn finding
+tốt của kho đến từ reviewer **chạy được thứ gì đó**. Và với codex, pha B **không** mở đường vào kho.
+
+Với reviewer chạy bằng **`claude -p`** thì không có hàng rào nào: ở đó `--require-clean` cộng chụp
+`git ls-remote` **trước và sau** lượt là **máy PHÁT HIỆN** — nó không ngăn, nó tố cáo. Nhầm hai
+thứ ấy chính là lỗi mục này vừa phải sửa.
+
+Ràng buộc mà **cả hai** pha của codex phải chịu: mạng đóng ⇒ reviewer **không đọc được
+PR/verdict/Issue**. Cách rẻ là phiên điều phối **ghi sẵn ngữ cảnh ấy thành tệp trong cây** trước
+khi spawn, để reviewer đọc offline. Đây cũng là lý do vài lượt review của kho phải chạy bằng
+`claude -p` — nó đọc được GitHub qua MCP; cái giá là mất luôn hàng rào mạng.
+
+**Chưa đo:** vì sao codex chặn mạng (sandbox tự chặn, hay chỉ là biến proxy không được kế thừa)
+— và do đó chưa biết hàng rào ấy có bền không. Đừng dựa vào nó như một bảo đảm an ninh cho tới
+khi có phép đo về CƠ CHẾ; hôm nay nó chỉ là một quan sát lặp lại được ở hai chế độ.
 
 Với phiên **executor có quyền ghi**, danh sách hẹp vẫn hợp lý: ở đó ta muốn giới hạn
 *hình dạng việc*, và executor có `settings.json` của kho làm nền.

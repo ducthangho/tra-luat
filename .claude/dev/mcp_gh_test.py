@@ -85,9 +85,13 @@ def _t1():
     # CÔ LẬP: bịt mọi đường ra mạng để rc=3 CHỈ có thể đến từ chốt token. Bản đầu không bịt,
     # nên `main` đi tiếp, lời gọi mạng hỏng, và rc=3 xuất hiện vì LÝ DO KHÁC — đột biến
     # "gỡ chốt token" sống sót. Ca xanh mà không đo cái nó tưởng đang đo.
-    goc_mo, goc_cc = m.Phien.mo_phien, m.Phien.cong_cu
+    # Bịt MỌI đường ra mạng — kể cả `goi`, vì `main` gọi thẳng nó chứ không qua `cong_cu`.
+    # Lần đầu ca này mất răng vì chỉ bịt `cong_cu`; bản vá cho `main` làm nó mất răng LẦN HAI.
+    # Bài học: chốt cô lập phải neo vào ĐƯỜNG `main` THẬT ĐI, không neo vào tên hàm ta nhớ.
+    goc_mo, goc_cc, goc_goi = m.Phien.mo_phien, m.Phien.cong_cu, m.Phien.goi
     m.Phien.mo_phien = lambda self: {}
     m.Phien.cong_cu = lambda self: ["gia"]
+    m.Phien.goi = lambda self, *a, **k: {"result": {"tools": [{"name": "gia"}]}}
     try:
         loi, ra = io.StringIO(), io.StringIO()
         that_e, sys.stderr = sys.stderr, loi
@@ -99,7 +103,7 @@ def _t1():
         assert rc == 3, f"mong rc=3, được {rc} (chốt token bị gỡ?)"
         assert "KHÔNG ĐO ĐƯỢC" in loi.getvalue(), "phải nói KHÔNG ĐO ĐƯỢC"
     finally:
-        m.Phien.mo_phien, m.Phien.cong_cu = goc_mo, goc_cc
+        m.Phien.mo_phien, m.Phien.cong_cu, m.Phien.goi = goc_mo, goc_cc, goc_goi
         if cu is not None:
             os.environ["GITHUB_PAT"] = cu
 
@@ -194,6 +198,65 @@ def _t10():
     assert json.loads(m.rut_van_ban({"result": {"khac": 1}}))["result"] == {"khac": 1}
 
 
+
+# ── t11 · NƠI NHẬN credential bị khoá — cross-review bắt được lỗ này ────────────────────────
+@ca("t11_dich_den_bi_khoa")
+def _t11():
+    # đường hợp lệ phải đi qua
+    m.Phien("/mcp/", "tok", mo=mo_gia(["{}"]))
+    m.Phien("/mcp/x/actions", "tok", mo=mo_gia(["{}"]))
+    # và DIEM_CUOI mặc định phải trỏ đúng host cho phép — đột biến đổi endpoint chết ở đây
+    assert m.DIEM_CUOI.startswith("https://" + m.HOST_CHO_PHEP), \
+        f"DIEM_CUOI trỏ sai host: {m.DIEM_CUOI}"
+    for xau, vi_sao in [("http://api.githubcopilot.com/mcp/", "http trần"),
+                        ("https://example.invalid/mcp/", "host lạ"),
+                        ("https://api.githubcopilot.com/lung-tung", "đường dẫn lạ")]:
+        try:
+            m.kiem_dich_den(xau)
+        except ValueError:
+            continue
+        raise AssertionError(f"KHÔNG chặn {vi_sao}: {xau}")
+    # và `Phien.__init__` phải THẬT SỰ gọi chốt — gỡ lời gọi ấy thì ca này phải đỏ
+    try:
+        m.Phien("/lung-tung-khong-cho-phep", "tok", mo=mo_gia(["{}"]))
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("Phien.__init__ KHÔNG gọi kiem_dich_den")
+
+
+# ── t12 · initialize trả JSON-RPC error ⇒ KHÔNG được báo thành công ─────────────────────────
+@ca("t12_initialize_loi_khong_bao_xanh")
+def _t12():
+    than = '{"jsonrpc":"2.0","id":1,"error":{"code":-32000,"message":"khong duoc phep"}}'
+    d = m.Phien("/mcp/", "tok", mo=mo_gia([than])).mo_phien()
+    assert d.get("_loi"), f"initialize hỏng mà không báo lỗi: {d}"
+    # phải nhận ra ĐÚNG là JSON-RPC error, không phải rơi xuống nhánh "thiếu result" —
+    # nhánh ấy cũng in cả khối JSON nên chuỗi "-32000" lọt vào và che mất đột biến.
+    assert d["_loi"].startswith("JSON-RPC error -32000"), d["_loi"]
+    # và phải ra tới rc=3 ở lớp lệnh
+    os.environ.setdefault("GITHUB_PAT", "tok-gia")
+    goc = m.Phien.mo_phien
+    m.Phien.mo_phien = lambda self: {"_loi": "gia lap"}
+    e, o = sys.stderr, sys.stdout
+    sys.stderr, sys.stdout = io.StringIO(), io.StringIO()
+    try:
+        rc = m.main(["--liet-ke"])
+    finally:
+        sys.stderr, sys.stdout = e, o
+        m.Phien.mo_phien = goc
+    assert rc == 3, f"mong rc=3, được {rc}"
+
+
+# ── t13 · lỗi TẦNG VẬN CHUYỂN ⇒ khối `_mang`, không traceback ───────────────────────────────
+@ca("t13_urlerror_khong_nem_traceback")
+def _t13():
+    def _mo(req, timeout):
+        raise urllib.error.URLError("Operation not permitted")
+    d = m.Phien("/mcp/", "tok", mo=_mo).goi("tools/list", {})
+    assert "_mang" in d, f"URLError không được gói lại: {d}"
+    assert m.loi_cua(d), "loi_cua phải nhận ra lỗi mạng"
+
 # ── ĐỘT BIẾN — mỗi cái phải giết ĐÚNG ca của nó ─────────────────────────────────────────────
 DOT_BIEN = [
     ("m1_sse_bo_qua_data", 'if dong.startswith("data:"):', 'if False:', "t2_sse_lay_dong_data_cuoi"),
@@ -202,10 +265,25 @@ DOT_BIEN = [
     ("m4_bao_tin_van_co_id", "if not bao_tin:", "if True:", "t6_bao_tin_khong_co_id"),
     ("m5_thieu_token_khong_chan", 'if not tok:', 'if False:', "t1_thieu_token_fail_close"),
     ("m6_rut_van_ban_cat", 'return nd[0]["text"]', 'return nd[0]["text"][:6000]', "t4_khong_cat_chuoi_dai"),
+    # ĐÚNG đột biến mà cross-review dựng ra và bộ test cũ KHÔNG giết được:
+    ("m7_doi_diem_cuoi", 'DIEM_CUOI = "https://api.githubcopilot.com"',
+     'DIEM_CUOI = "https://example.invalid"', "t11_dich_den_bi_khoa"),
+    ("m8_bo_kiem_dich_den", "        kiem_dich_den(self.url)", "        pass", "t11_dich_den_bi_khoa"),
+    ("m9_bo_kiem_error_jsonrpc", 'if isinstance(d.get("error"), dict):', "if False:",
+     "t12_initialize_loi_khong_bao_xanh"),
+    ("m10_bo_bat_urlerror", "except (urllib.error.URLError, TimeoutError, OSError) as e:",
+     "except (_KhongBaoGio,) as e:", "t13_urlerror_khong_nem_traceback"),
 ]
 
 
+class _KhongBaoGio(Exception):
+    """Chỉ dùng cho đột biến m10 — không nhánh nào ném nó."""
+
+
 CA_THEO_TEN = {
+    "t11_dich_den_bi_khoa": _t11,
+    "t12_initialize_loi_khong_bao_xanh": _t12,
+    "t13_urlerror_khong_nem_traceback": _t13,
     "t1_thieu_token_fail_close": _t1,
     "t2_sse_lay_dong_data_cuoi": _t2,
     "t4_khong_cat_chuoi_dai": _t4,

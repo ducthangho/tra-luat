@@ -28,6 +28,24 @@ import urllib.request
 DIEM_CUOI = "https://api.githubcopilot.com"
 PHIEN_BAN_GIAO_THUC = "2025-06-18"
 
+# Credential `GITHUB_PAT` đi kèm MỌI lời gọi, nên NƠI NHẬN là thứ phải khoá, không phải thứ
+# để mặc định. Cross-review bắt được lỗ này: đột biến đổi `DIEM_CUOI` thành `https://example.invalid`
+# vẫn cho `10 đạt · 6/6 · TỔNG ĐẠT` — bộ test không hề canh credential đi đâu.
+HOST_CHO_PHEP = "api.githubcopilot.com"
+DUONG_CHO_PHEP = ("/mcp/", "/mcp/x/actions")
+
+
+def kiem_dich_den(url: str) -> None:
+    """Chặn TRƯỚC khi gắn `Authorization` vào một đích không thuộc danh sách cho phép."""
+    from urllib.parse import urlparse
+    u = urlparse(url)
+    if u.scheme != "https":
+        raise ValueError(f"từ chối gửi credential qua {u.scheme!r}: chỉ https")
+    if u.hostname != HOST_CHO_PHEP:
+        raise ValueError(f"từ chối gửi credential tới host {u.hostname!r}: chỉ {HOST_CHO_PHEP}")
+    if u.path not in DUONG_CHO_PHEP:
+        raise ValueError(f"từ chối đường dẫn {u.path!r}: chỉ {DUONG_CHO_PHEP}")
+
 
 def _mo_mac_dinh(req, timeout):
     return urllib.request.urlopen(req, timeout=timeout)
@@ -49,6 +67,7 @@ def tach_than(raw: str) -> str:
 class Phien:
     def __init__(self, path: str = "/mcp/", token: str | None = None, mo=None, timeout: int = 90):
         self.url = DIEM_CUOI + path
+        kiem_dich_den(self.url)
         self.token = token
         self.sid: str | None = None
         self.n = 0
@@ -80,6 +99,9 @@ class Phien:
                 raw = r.read().decode("utf-8", "replace")
         except urllib.error.HTTPError as e:
             return {"_http": e.code, "_than": e.read().decode("utf-8", "replace")}
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
+            # KHÔNG bắt `Exception` trần — sẽ che lỗi lập trình. Chỉ bắt lỗi TẦNG VẬN CHUYỂN.
+            return {"_mang": f"{type(e).__name__}: {e}"}
         if bao_tin or not raw.strip():
             return {}
         than = tach_than(raw)
@@ -89,10 +111,15 @@ class Phien:
             return {"_tho": than}
 
     def mo_phien(self):
+        """Trả `{}` khi mở được; ngược lại trả chính khối lỗi. `notifications/initialized` CHỈ
+        gửi sau khi mở THẬT — bản đầu gửi vô điều kiện và báo rc=0 cho một phiên chưa mở được."""
         d = self.goi("initialize", {"protocolVersion": PHIEN_BAN_GIAO_THUC, "capabilities": {},
                                     "clientInfo": {"name": "tra-luat-cuu-ho", "version": "1"}})
+        loi = loi_cua(d)
+        if loi:
+            return {"_loi": loi}
         self.goi("notifications/initialized", {}, bao_tin=True)
-        return d
+        return {}
 
     def cong_cu(self) -> list:
         d = self.goi("tools/list", {})
@@ -100,6 +127,26 @@ class Phien:
 
     def chay(self, ten: str, doi_so: dict):
         return self.goi("tools/call", {"name": ten, "arguments": doi_so})
+
+
+def loi_cua(d: dict):
+    """Ba đường hỏng, PHẢI phân biệt — `rc=0` cho bất kỳ đường nào là báo xanh cho phiên chưa mở.
+
+    Bản đầu chỉ kiểm `_http`, nên `{"error": …}` của JSON-RPC lọt qua và in `0 công cụ`;
+    còn `URLError` thì thoát bằng traceback `rc=1`, sai hợp đồng `rc=3`.
+    """
+    if "_http" in d:
+        return f"HTTP {d['_http']} — {str(d.get('_than'))[:200]}"
+    if "_mang" in d:
+        return f"lỗi mạng — {d['_mang']}"
+    if "_tho" in d:
+        return f"phản hồi không phải JSON — {str(d['_tho'])[:200]}"
+    if isinstance(d.get("error"), dict):
+        e = d["error"]
+        return f"JSON-RPC error {e.get('code')} — {str(e.get('message'))[:200]}"
+    if "result" not in d:
+        return f"phản hồi thiếu `result` — {json.dumps(d, ensure_ascii=False)[:200]}"
+    return None
 
 
 def rut_van_ban(kq: dict):
@@ -125,14 +172,23 @@ def main(argv: list) -> int:
         print("KHÔNG ĐO ĐƯỢC: thiếu GITHUB_PAT", file=sys.stderr)
         return 3
 
-    p = Phien(path, tok)
+    try:
+        p = Phien(path, tok)
+    except ValueError as e:
+        print(f"KHÔNG ĐO ĐƯỢC: đích không hợp lệ — {e}", file=sys.stderr)
+        return 3
     mo = p.mo_phien()
-    if "_http" in mo:
-        print(f"KHÔNG ĐO ĐƯỢC: initialize HTTP {mo['_http']} — {mo['_than'][:200]}", file=sys.stderr)
+    if mo.get("_loi"):
+        print(f"KHÔNG ĐO ĐƯỢC: initialize — {mo['_loi']}", file=sys.stderr)
         return 3
 
     if not argv or argv[0] == "--liet-ke":
-        ds = p.cong_cu()
+        d = p.goi("tools/list", {})
+        loi = loi_cua(d)
+        if loi:
+            print(f"KHÔNG ĐO ĐƯỢC: tools/list — {loi}", file=sys.stderr)
+            return 3
+        ds = [t["name"] for t in d.get("result", {}).get("tools", [])]
         print(f"{path}  ·  {len(ds)} công cụ")
         for t in ds:
             print("  " + t)

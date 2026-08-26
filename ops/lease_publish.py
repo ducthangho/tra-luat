@@ -35,6 +35,7 @@ import posixpath
 import re
 import subprocess
 import sys
+import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from urllib.parse import urlparse
@@ -116,6 +117,11 @@ SHA40 = re.compile(r"^[0-9a-f]{40}$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 REPO = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 LEASE_ID = re.compile(r"^[A-Za-z0-9._-]+$")
+
+# Chỉ cấu trúc YAML này tạo tham chiếu có quyền chặn. Văn xuôi không mang ngữ nghĩa
+# ấy; lệnh quét ngược chỉ báo nó như gợi ý sau khi parser đã loại comment.
+_TRUONG_SCHEMA_LEASE = frozenset({"vung_duoc_phep_cham"})
+_KHOA_THAM_CHIEU = "tham_chieu_truong_lease"
 
 
 class Chan(Exception):
@@ -230,6 +236,48 @@ def _doc_han(chuoi) -> datetime:
     return d.astimezone(timezone.utc)
 
 
+def _cac_con_tro_treo(lease: dict) -> list[str]:
+    """Tham chiếu khai máy-đọc-được nhưng thiếu định nghĩa top-level."""
+    tham_chieu = lease.get(_KHOA_THAM_CHIEU, [])
+    if not isinstance(tham_chieu, list) or any(
+            not isinstance(x, str) or not x for x in tham_chieu):
+        raise Chan(RC_NOI_DUNG, f"{_KHOA_THAM_CHIEU} phải là danh sách tên trường")
+    la = set(tham_chieu)
+    khong_biet = la - _TRUONG_SCHEMA_LEASE
+    if khong_biet:
+        raise Chan(RC_NOI_DUNG, "tham chiếu trường lease không thuộc schema: " +
+                   ", ".join(sorted(khong_biet)))
+    return sorted(la - lease.keys())
+
+
+def _kiem_con_tro_treo(lease: dict) -> None:
+    treo = _cac_con_tro_treo(lease)
+    if treo:
+        raise Chan(RC_NOI_DUNG,
+                   "con trỏ treo: tham chiếu khai trong cấu trúc nhưng thiếu định nghĩa: " +
+                   ", ".join(treo))
+
+
+def _cac_nhac_mo_ho(lease: dict) -> list[str]:
+    """Tên trường trong scalar YAML; chỉ advisory, không tham gia cổng đăng."""
+    def scalar(x):
+        if isinstance(x, dict):
+            for k, v in x.items():
+                if k != _KHOA_THAM_CHIEU:
+                    yield from scalar(v)
+        elif isinstance(x, list):
+            for v in x:
+                yield from scalar(v)
+        elif isinstance(x, str):
+            yield x
+
+    van = "\n".join(scalar(lease))
+    van = "".join(c for c in unicodedata.normalize("NFD", van).casefold()
+                  if unicodedata.category(c) != "Mn").replace("đ", "d")
+    return sorted(ten for ten in _TRUONG_SCHEMA_LEASE if ten not in lease and
+                  re.search(rf"(?<![a-z0-9_]){re.escape(ten)}(?![a-z0-9_])", van))
+
+
 def _git(goc: Path, *doi_so) -> str:
     try:
         p = GOI_GIT(*doi_so, cwd=goc)
@@ -299,7 +347,8 @@ def _quet_lease_toan_kho(goc: Path, *, doi_chieu_ref=True) -> list[dict]:
                 continue
             da_doc.add(khoa)
             try:
-                lease = yaml.safe_load(_git(goc, "cat-file", "-p", blob))
+                noi_dung = _git(goc, "cat-file", "-p", blob)
+                lease = yaml.safe_load(noi_dung)
             except Exception as e:
                 raise Chan(RC_KHONG_XAC_DINH,
                            f"KHÔNG_XÁC_ĐỊNH: YAML hỏng tại {ref}:{duong}: {e}") from None
@@ -324,6 +373,25 @@ def _phan_loai_lease(lease: dict, bay_gio=None) -> str:
         raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: {e.thong_diep}") from None
     bay_gio = bay_gio or datetime.now(timezone.utc)
     return "HẾT_HẠN" if han <= bay_gio else "CÒN_HẠN"
+
+
+def _kiem_bia_mo(lease: dict, tep, goc=None) -> None:
+    """Lease mới chỉ được thay X sau khi X trỏ ngược lại đúng lease mới."""
+    thay_the_cho = str(lease.get("thay_the_cho") or "").strip()
+    if not thay_the_cho:
+        return
+    root = _goc_kho(Path(tep), goc)
+    lease_moi = str(lease.get("lease_id") or "").strip()
+    da_danh_dau = any(
+        str(muc["lease"].get("lease_id") or "").strip() == thay_the_cho
+        and str(muc["lease"].get("da_bi_thay_the") or "").strip() == lease_moi
+        for muc in _quet_lease_toan_kho(root, doi_chieu_ref=False)
+    )
+    if not da_danh_dau:
+        raise Chan(RC_NOI_DUNG,
+                   f"lease mới thay_the_cho={thay_the_cho!r}, nhưng lease cũ chưa "
+                   f"mang dòng `da_bi_thay_the: {lease_moi}`; hãy thêm dòng ấy vào "
+                   f"{thay_the_cho} trước khi đăng lease mới (cổng không tự sửa hồ sơ cũ)")
 
 
 def _doc_gh(mo_ta: str, *doi_so):
@@ -574,6 +642,10 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
     if not LEASE_ID.fullmatch(lease_id):
         raise Chan(RC_NOI_DUNG, f"lease_id chỉ được chứa ASCII chữ/số/`.`/`_`/`-`; được {lease_id!r}")
 
+    if tep is not None:
+        _kiem_con_tro_treo(lease)
+        _kiem_bia_mo(lease, tep, goc)
+
     sha = str(lease["reviewed_sha_required"]).strip()
     if not SHA40.match(sha):
         # SHA ngắn hoặc lệch dạng là mỏ neo GIẢ: reviewer sẽ đọc một head khác với
@@ -686,6 +758,28 @@ def lenh_ai_dang_giu(a) -> int:
     return RC_DANG_GIU if nguoi_giu else RC_OK
 
 
+def lenh_con_tro_treo(a) -> int:
+    """Quét ngược read-only; hồ sơ đã đăng không bao giờ bị sửa tại đây."""
+    root = Path(a.goc or ".").resolve()
+    tim_thay = goi_y = 0
+    for muc in _quet_lease_toan_kho(root):
+        lease = muc["lease"]
+        if (_phan_loai_lease(lease) != "CÒN_HẠN"
+                or bool(lease.get("da_bi_thay_the"))):
+            continue
+        for ten in _cac_con_tro_treo(lease):
+            tim_thay += 1
+            lease_id = str(lease.get("lease_id") or "<thiếu lease_id>")
+            print(f"CON_TRỎ_TREO\t{lease_id}\t{ten}\t{muc['ref']}:{muc['path']}")
+        for ten in _cac_nhac_mo_ho(lease):
+            goi_y += 1
+            lease_id = str(lease.get("lease_id") or "<thiếu lease_id>")
+            print(f"CON_TRỎ_GỢI_Ý\t{lease_id}\t{ten}\t{muc['ref']}:{muc['path']}")
+    print(f"CON_TRỎ_TREO {tim_thay}; chỉ báo cáo, không sửa lease đã đăng")
+    print(f"CON_TRỎ_GỢI_Ý {goi_y}; văn xuôi chỉ là advisory")
+    return RC_OK
+
+
 def main(argv=None) -> int:
     for luong in (sys.stdout, sys.stderr):
         try:
@@ -714,6 +808,10 @@ def main(argv=None) -> int:
     q.add_argument("duong_dan")
     q.add_argument("--root", dest="goc", default=".")
     q.set_defaults(fn=lenh_ai_dang_giu)
+    q = sub.add_parser("con-tro-treo",
+                       help="liệt kê read-only lease còn hiệu lực có con trỏ treo")
+    q.add_argument("--root", dest="goc", default=".")
+    q.set_defaults(fn=lenh_con_tro_treo)
 
     a = ap.parse_args(argv)
     try:

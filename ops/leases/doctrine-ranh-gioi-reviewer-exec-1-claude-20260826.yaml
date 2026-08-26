@@ -68,16 +68,44 @@ base_ghi_chu: >-
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 1
-  dong_them_toi_da: 120
+  dong_them_toi_da: 165
   do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
   don_vi: '`git diff --numstat c35ae1c..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
-  da_dung: 0
+  da_dung: 155
   ghi_chu: >-
-    120 là TRẦN ƯỚC LƯỢNG, KHÔNG phải số đã đo trên một bản vá có sẵn — khác hẳn r4 của #314, nơi
+    165 là trần SAU KHI NÂNG; xem khối `nang_tran`. Trần ban đầu 120 là ƯỚC LƯỢNG đặt TRƯỚC khi
+    đọc hết nội dung phải mang sang, và nó SAI — bản vá thật cần 155. `da_dung: 155` là số ĐÃ ĐO
+    (`git diff --numstat c35ae1c -- docs/GOI_AGENT_DA_NEN.md`), không phải ước lượng — khác r4 của #314, nơi
     687 là số đo được vì bản vá viết xong trước khi cấp lease. Ở đây chưa có dòng nào. Căn cứ:
     trên `master` tệp có 544 dòng và chưa mang mục nào trong bốn mục đang xét; bản trên nhánh cũ
     thêm 146 dòng cho CẢ mục allowlist LẪN mục ranh giới, và packet này chỉ nhận phần ranh giới
-    rồi viết lại. Vượt 120 ⇒ điều kiện dừng S2, xin sửa lease, KHÔNG nới trong im lặng.
+    rồi viết lại. Vượt 165 ⇒ điều kiện dừng S2, xin sửa lease, KHÔNG nới trong im lặng.
+
+nang_tran:
+  tran_cu: 120
+  tran_moi: 165
+  da_do_thuc_te: 155
+  ai_nang: ducthangho
+  tham_quyen: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+  quyet_dinh_luc: >-
+    direct, in-session, 2026-08-26 — phiên thi công DỪNG theo S2 khi đo được 155/120, trình ba
+    phương án (nâng trần · tách hai packet · cắt nội dung) kèm số đo cho từng phương án; người
+    giữ kho chọn nâng trần và land một packet.
+  vi_sao: >-
+    Trần 120 là ƯỚC LƯỢNG của phiên soạn lease, đặt TRƯỚC khi đọc hết 146 dòng phải mang từ nhánh
+    bị bác sang, và nó chặt hơn doctrine ở CẢ HAI cách đọc ADR-0044: ngưỡng nghiêm nhất
+    (`sensitive` chạm authority) là 3 tệp / 300 dòng thêm, còn bản vá này là 1 tệp / 155 dòng —
+    còn biên 145. Nên nâng lên 165 KHÔNG phải nới doctrine, chỉ là sửa một ước lượng sai.
+    Đã nén thật một lượt trước khi xin: 166 → 155. Cắt tiếp là cắt vào phép đo (bảng ba lượt,
+    bảng bốn tầng, bảng sandbox) hoặc vào ba P2 mà chính `giu_nguyen_khong_lam_lai` cấm làm lại.
+  vi_sao_khong_tach_lam_hai: >-
+    Phương án tách đo được: phần ranh giới 100 dòng (vừa trần cũ), mục `Bash(x:*)` 55 dòng đi
+    packet thứ ba. Không chọn, vì hai nửa là MỘT MẠCH: mục `Bash(x:*)` kết bằng câu "bản đầu viết
+    … câu ấy SAI — xem mục dưới", nên tách ra là để một con trỏ chết đúng lúc merge — đúng bài học
+    `CLAUDE.md` về câu mô tả VỊ TRÍ phải đúng ở CẢ HAI phía của lần merge. Cộng thêm: ba P2 đã được
+    duyệt ở vòng 2 sẽ phải chờ thêm một vòng review nữa cho nội dung đã chấp nhận.
+  15_dong_bien: >-
+    165 chứ không phải 155: chừa 10 dòng cho vòng review. Đây là biên, KHÔNG phải hạn mức để tiêu.
 
 granted_by: ducthangho
 granted_on_instruction: >-
@@ -142,7 +170,8 @@ chua_do_duoc_luc_cap: >-
 dieu_kien_dung: >-
   S1 cần đường dẫn thứ hai (kể cả `CLAUDE.md`, dù nay NGƯỜI_GIỮ 0) ⇒ DỪNG, xin sửa lease — nới
   write set trong im lặng là ĐÚNG cách packet tiền nhiệm hỏng ba lần ·
-  S2 vượt 120 dòng thêm ⇒ DỪNG, xin nâng trần bằng khối `nang_tran` có `ai_nang`/`vi_sao`,
+  S2 vượt 165 dòng thêm ⇒ DỪNG, xin nâng trần bằng khối `nang_tran` có `ai_nang`/`vi_sao`,
+  KHÔNG sửa `dong_them_toi_da` trần trụi. ĐÃ BẮN MỘT LẦN, ở đúng 155/120 — xem `nang_tran` ·
   KHÔNG sửa `dong_them_toi_da` trần trụi ·
   S3 phát hiện một trong ba P2 của vòng 2 bị hồi quy ⇒ DỪNG, báo trước khi đi tiếp ·
   S4 `origin/master` đã đi tiếp mà chưa đo lại ⇒ DỪNG, đo lại base.

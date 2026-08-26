@@ -74,7 +74,7 @@ base_ghi_chu: >-
 lich_su_reviewed_sha:
 - {vong: 1, sha: 48cf331e36cc2bde9fbdd485d51b85c81a5b25af, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-1-codex-verdict.receipt.yaml'}
 - {vong: 2, sha: f16b6bf9d6085bd1923db9800090faaed1ffdd1b, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-2-codex-verdict.receipt.yaml'}
-- {vong: 3, sha: 88bd4f2fe6e02803a97f2da9df86c8b43d53076f, verdict: 'CHƯA CÓ'}
+- {vong: 3, sha: 88bd4f2fe6e02803a97f2da9df86c8b43d53076f, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-3-codex-verdict.receipt.yaml', tieu_chi: 'BẢN SỬA ĐỔI 2 — lượt ĐẦU TIÊN chấm theo N7a/N7b', ket_qua: 'P1=1 P2=1; N2 KHÔNG ĐẠT, bảy tiêu chí còn lại ĐẠT'}
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 1

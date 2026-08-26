@@ -2,7 +2,8 @@
 #
 # Mở vì §3.2: cross-review vòng 2 cho thấy CHÍNH SPEC thiếu (tiêu chí N7 hỏng), không phải
 # bản vá thiếu. Câu §3.2: "finding cho thấy chính spec thiếu thì verdict là `blocked` và đi
-# qua revision mới". Nội dung THI CÔNG không đổi — nhánh vẫn `88bd4f2`, bản vá không làm lại.
+# qua revision mới". LÚC MỞ r3 nhánh đứng ở `88bd4f2` và bản vá cũ không phải làm lại; vòng vá 4
+# sau đó đẩy tiếp lên `6d0a183` — xem `reviewed_sha_required`, đừng đọc `88bd4f2` là head hiện tại.
 #
 # Nửa DOCTRINE của packet #314 sau khi tách. Việc duy nhất: hoà ba câu tự mâu thuẫn về ranh
 # giới kỹ thuật của phiên review trong `docs/GOI_AGENT_DA_NEN.md`, trên trục
@@ -92,18 +93,19 @@ target_branch_neu_land: master
 
 base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
 start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
-reviewed_sha_required: 88bd4f2fe6e02803a97f2da9df86c8b43d53076f
+reviewed_sha_required: 6d0a183e4af6422d85af1d6d3373fcbab2c7e83e
 base_ghi_chu: >-
   `c35ae1c` = `origin/master` lúc cấp, ĐO trong phiên (không chép từ hồ sơ bàn giao), và cũng là
   merge của PR #310. Nhánh rẽ SẠCH từ đây, KHÔNG kế thừa `6c4140b` của PR #315 (đã đóng, không
   merge). `reviewed_sha_required` đã được CẬP NHẬT sang exact head của vòng review đang mở
-  (`88bd4f2`, vòng 3). Vòng 1 neo `48cf331`, vòng 2 neo `f16b6bf` — xem `lich_su_reviewed_sha`. Bản đầu để nguyên base
+  (`6d0a183`, vòng 4). Vòng 1 `48cf331`, vòng 2 `f16b6bf`, vòng 3 `88bd4f2` — xem `lich_su_reviewed_sha`. Bản đầu để nguyên base
   `c35ae1c` trong khi review đã neo head khác, trái chính câu này: cross-review vòng 1 bắt được
   (`lease-trang-thai-hien-tai-khong-nhat-quan`, P1).
 lich_su_reviewed_sha:
 - {vong: 1, sha: 48cf331e36cc2bde9fbdd485d51b85c81a5b25af, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-1-codex-verdict.receipt.yaml'}
 - {vong: 2, sha: f16b6bf9d6085bd1923db9800090faaed1ffdd1b, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-2-codex-verdict.receipt.yaml'}
 - {vong: 3, sha: 88bd4f2fe6e02803a97f2da9df86c8b43d53076f, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-3-codex-verdict.receipt.yaml', tieu_chi: 'BẢN SỬA ĐỔI 2 — lượt ĐẦU TIÊN chấm theo N7a/N7b', ket_qua: 'P1=1 P2=1; N2 KHÔNG ĐẠT, bảy tiêu chí còn lại ĐẠT'}
+- {vong: 4, sha: 6d0a183e4af6422d85af1d6d3373fcbab2c7e83e, verdict: 'CHƯA CÓ', tieu_chi: 'BẢN SỬA ĐỔI 2 — acceptance KHÔNG đổi ở r3, chỉ write_set đổi'}
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 2
@@ -115,15 +117,17 @@ ngan_sach_kich_thuoc:
   dong_them_toi_da: 200
   do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
   don_vi: '`git diff --numstat c35ae1c..HEAD -- docs/GOI_AGENT_DA_NEN.md` — cột dòng THÊM, CHỈ tệp này'
-  da_dung: 194
+  da_dung: 198
   ghi_chu: >-
-    200 là trần sau khi NÂNG LẦN HAI; xem `nang_tran_lan_hai`. 194 là số ĐÃ ĐO sau vòng vá 3
+    200 là trần sau khi NÂNG LẦN HAI; xem `nang_tran_lan_hai`. 198 là số ĐÃ ĐO sau vòng vá 4
     (`git diff --numstat c35ae1c -- docs/GOI_AGENT_DA_NEN.md`), không phải ước lượng.
     Lịch sử trần: 120 (ước lượng ban đầu, SAI — vòng 1 cần 155) → 165 → 200 (vòng 2 cần 187;
-    vòng 3 cần 194). Vòng vá 3 KHÔNG chạm trần: `S2` KHÔNG bắn lần thứ ba, nên điều khoản
-    `neu_lai_cham_tran` ("lần thứ ba thì TÁCH") KHÔNG được kích hoạt. Còn biên 6 dòng.
+    vòng 3 cần 194; vòng 4 cần 198). `S2` CHƯA HỀ bắn lần thứ ba — vòng 4 vốn sẽ tốn 211/200
+    nếu dán thân probe vào tệp này, nhưng r3 đưa probe ra thành hiện vật riêng nên tệp doctrine
+    chỉ tốn 198. Tức `neu_lai_cham_tran` ("lần thứ ba thì TÁCH") KHÔNG được kích hoạt, và trần
+    200 CHƯA từng bị nâng lần thứ ba. Còn biên 2 dòng — chật, và nói ra để lượt sau biết.
     Vì sao vòng 3 rẻ hơn dự tính: năm finding phần lớn đóng được bằng SỬA TẠI CHỖ, mà bản vá
-    này thuần THÊM (`194  0` — cột XOÁ bằng 0), nên viết lại một dòng đã có tốn 0 dòng mới.
+    này thuần THÊM (`198  0` — cột XOÁ bằng 0), nên viết lại một dòng đã có tốn 0 dòng mới.
     Ước lượng trước khi đo là ~18 dòng và nó lại SAI — lần thứ ba ước lượng sai trong packet
     này, cùng một hướng: đoán cao vì quên rằng ngân sách đếm dòng THÊM chứ không đếm SỬA.
     CẢ HAI lần nâng đều vì trần là ƯỚC LƯỢNG của phiên, không phải ngưỡng doctrine; xem `nang_tran`
@@ -135,9 +139,15 @@ ngan_sach_probe:
   duong_dan: .claude/dev/probe_mang.py
   dong_them_toi_da: 30
   don_vi: '`git diff --numstat c35ae1c..HEAD -- .claude/dev/probe_mang.py` — cột dòng THÊM'
+  da_dung: 30
   vi_sao_30: >-
     Bản nháp đo được ~14 dòng. 30 là biên cho chú thích và một lần sửa của vòng review, KHÔNG
     phải hạn mức để tiêu. Vượt 30 ⇒ dừng và hỏi, y như `S2`.
+  tran_nay_DA_BAN: >-
+    Bản probe ĐẦU tôi viết là 53 dòng — VƯỢT 30, tức trần do chính tôi đặt hai mươi phút trước
+    đã bắn ngay lượt đầu tiên. Chọn NÉN xuống đúng 30, KHÔNG nâng trần: nâng một trần mình vừa
+    tự đặt là đúng hình dạng lỗi packet này ghi lại nhiều lần. Docstring bị cắt còn phần cần
+    thiết vì tệp doctrine đã mang lời giải thích. 30/30 — hết biên, lượt sau muốn thêm phải hỏi.
   KHONG_co_tep_test: >-
     KHAI THẲNG: không kèm `.claude/dev/probe_mang_test.py`, nên write set là HAI chứ không phải
     BA. Căn cứ ĐO ĐƯỢC, không phải suy đoán: `ci.yml` LIỆT KÊ từng tệp `_test.py` phải chạy
@@ -185,14 +195,15 @@ chu_ky_commit_KHAI_HO:
   neo_cua_48cf331:
     dem_sai_ra_sao: >-
       Bản đầu khai "BA hồ sơ neo `48cf331`", kể cả "head của PR #322". Sai một phần ba: PR #322 đã
-      đi tiếp, head nay là `88bd4f2`. Cross-review vòng 2 bắt đúng chỗ này (`ba-neo-cua-48cf331-dem-sai`, P2).
+      đi tiếp — head lúc phát hiện là `88bd4f2`, nay là `6d0a183`; điều KHÔNG đổi là `48cf331`
+      chưa bao giờ còn là head. Cross-review vòng 2 bắt đúng chỗ này (`ba-neo-cua-48cf331-dem-sai`, P2).
     dung_ra_la: 'HAI mỏ neo CHÍNH XÁC + MỘT quan hệ TỔ TIÊN — ba thứ khác hạng, đừng cộng chung'
     neo_chinh_xac:
     - 'reviewed_sha của verdict vòng 1 — trỏ ĐÚNG 48cf331'
     - 'reviewed_sha của biên nhận vòng 1 — trỏ ĐÚNG 48cf331'
     quan_he_to_tien:
       la_gi: '`48cf331` là TỔ TIÊN của head PR #322, không phải head'
-      do_bang: 'git merge-base --is-ancestor 48cf331 88bd4f2  # rc=0'
+      do_bang: 'git merge-base --is-ancestor 48cf331 HEAD_HIEN_TAI  # rc=0; đo lúc head=88bd4f2, vẫn đúng với 6d0a183 vì lịch sử chỉ đi tới'
     vi_sao_van_khong_viet_lai: >-
       Quan hệ tổ tiên YẾU hơn mỏ neo chính xác, nhưng `rebase` phá CẢ BA: nó đổi SHA của
       `48cf331`, nên hai mỏ neo chính xác trỏ vào hư không. Kết luận không đổi; chỉ lý do được
@@ -206,7 +217,7 @@ chu_ky_commit_KHAI_HO:
       for c in $(git rev-list origin/master..origin/NHANH); do
       git cat-file commit $c | grep -q "^gpgsig" || echo CHUA_KY; done | wc -l
     ket_qua_tung_nhanh:
-      'claude/doctrine-ranh-gioi-reviewer-exec-1': 'tổng 3 · CHƯA KÝ 1 (chỉ 48cf331; f16b6bf và 88bd4f2 ĐÃ ký)'
+      'claude/doctrine-ranh-gioi-reviewer-exec-1': 'ĐO LÚC head=88bd4f2: tổng 3 · CHƯA KÝ 1 (chỉ 48cf331). Vòng vá 4 thêm 6d0a183 (ĐÃ ký) ⇒ nay tổng 4 · CHƯA KÝ 1'
       'claude/mcp-gh-cuu-ho-exec-1': 'tổng 6 · CHƯA KÝ 6'
       'ops/cap-lease-tach-314': 'tổng 18 · CHƯA KÝ 16'
     hop_ba_nhanh_khong_dem_trung: 'tổng 27 · CHƯA KÝ 23'
@@ -348,7 +359,7 @@ doi_gi_so_voi_r2: >-
 doi_gi_so_voi_r1: >-
   (của r2, giữ lại để tra) ĐÚNG MỘT thứ: `acceptance` — tiêu chí N7. Mọi thứ khác BƯNG NGUYÊN: write set, base, trần 200,
   nhánh, executor, reviewer, environment, review_class. Nói riêng: trần GIỮ 200 — bản sửa đổi này
-  KHÔNG phải cớ để nâng lần ba; đo được 194/200, còn biên 6.
+  KHÔNG phải cớ để nâng lần ba; sau vòng vá 4 đo được 198/200, còn biên 2.
 n7_cu_va_moi:
   n7_cu: '`packet_loop.py doctrine-scan --root .` rc=0; delta gate so `origin/master` = 0'
   hong_cho_nao:
@@ -425,8 +436,8 @@ base_da_do_lai:
   phai_do_lai_khi_nao: >-
     Phép đo này chỉ đúng cho lần trôi tới `b662fe1`. Master trôi tiếp ⇒ `S4` bắn lại và phải
     chạy LẠI đủ bốn phép đo trên; đừng đọc khối này thành "base đã được miễn kiểm vĩnh viễn".
-# posted_comment_id: CHƯA ĐĂNG. Workflow `dang-lease` tự ghi khi nhánh được đẩy — ĐỪNG đăng tay,
-# và ĐỪNG điền số này. r2 đã dính đúng lỗi ấy: phiên không chờ workflow, đăng thừa một comment.
+# ĐÃ ĐĂNG — workflow `dang-lease` tự ghi `posted_comment_id` ở CUỐI TỆP. Lần này phiên CÓ CHỜ,
+# nên chỉ có ĐÚNG MỘT comment lease r3 (`5427050254`); không lặp lỗi đăng thừa của r2.
 comment_trung_lap:
   id_bo_di: '5426284747'
   ai_dang: 'phiên điều phối (claude), ĐĂNG THỪA'

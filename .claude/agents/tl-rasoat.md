@@ -43,8 +43,10 @@ Cổng trên chặn theo **cơ chế**, không theo **đường dẫn** — nên
 Ba chỗ nó **thật sự không phủ**, cũng đo cùng lượt:
 
 1. **Tác dụng phụ của lệnh `tl` ĐƯỢC PHÉP.** Cổng chỉ đọc CHUỖI LỆNH, không biết bên trong một
-   lệnh làm gì: `python scripts/tl.py nlm-get abc` và `… drive-pull x` đều `allow` và đều chạm
-   mạng/Drive. Chỉ nhóm MUTATE liệt kê dưới mới bị chặn theo tên.
+   lệnh làm gì. `python scripts/tl.py nlm-get abc` và `… nlm-reconcile abc --json` đều `allow`,
+   và cả hai là lệnh CÓ THẬT trong bảng lệnh (`--help` rc=0) mà việc của chúng là đi tới
+   NotebookLM. Cổng không mô hình hoá điều đó — nó chỉ thấy một chuỗi hợp lệ. Chỉ nhóm MUTATE
+   liệt kê dưới mới bị chặn theo tên.
 2. **`agent_type` khác ⇒ KHÔNG có cổng nào** — đo: cùng lệnh `cp` ấy với `agent_type` là
    `tl-auditor-v2` thì `allow`. Đổi tên agent là mất sạch chốt.
 3. **Cơ chế ghi chưa ai liệt kê.** Đây là khuyết tật CẤU TRÚC, không phải sót một dòng: cùng một

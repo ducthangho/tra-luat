@@ -589,7 +589,7 @@ claude -p --model opus --effort max --permission-mode acceptEdits \
 Và **đừng gọi đó là siết an ninh** — nó chưa từng là. Giữ danh sách hẹp ở đây không mua được an
 toàn, chỉ mua được một verdict mỏng hơn, hoặc không có verdict nào.
 
-#### Ba HẠNG bằng chứng — đọc mục dưới bằng từ vựng này, kẻo lại viết ra ba câu chỏi nhau
+#### NĂM HẠNG bằng chứng — đọc mục dưới bằng từ vựng này, kẻo lại viết ra ba câu chỏi nhau
 
 **Phạm vi của từ vựng này:** nó áp cho các **control của mục này** — bốn tầng, sandbox, và hai pha
 reviewer. Chỗ khác trong tệp dùng chữ *ranh giới* / *cưỡng chế* theo nghĩa thường (phân công giữa
@@ -599,7 +599,9 @@ nông) — những chỗ ấy **không** mang hạng, và nói ra ở đây đ�
 Bản đầu của mục dưới tự mâu thuẫn trong sáu chục dòng: khai *"không tầng nào bó được"*, rồi gọi
 mạng đóng là *"hàng rào thật, có sẵn"*, rồi dùng nó làm cột **cưỡng chế**, rồi bảo *đừng dựa vào nó
 như một bảo đảm an ninh*. Cả bốn câu đều dựa trên phép đo có thật; thứ trôi không phải số liệu mà
-là **HẠNG của bằng chứng**. Ba hạng, và mọi câu dưới đây mang đúng một nhãn:
+là **HẠNG của bằng chứng**. NĂM hạng — và **đơn vị được xếp hạng là một MỆNH ĐỀ KÈM ĐIỀU KIỆN
+ĐO**, không phải một control trần: cùng một control mang hạng KHÁC NHAU ở hai cấu hình, và mục
+dưới có đúng một ví dụ như thế. Mọi mệnh đề sau đây mang đúng một nhãn:
 
 | hạng | nghĩa | được gọi là |
 |---|---|---|
@@ -631,7 +633,7 @@ Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": 
 
 | tầng | phép đo | kết quả |
 |---|---|---|
-| `--allowedTools` | luật `Bash(x:*)` gặp lệnh ghép | không khớp gì ⇒ hoặc chặn oan, hoặc `Bash` trần = mọi thứ |
+| `--allowedTools` | luật `Bash(x:*)` gặp lệnh ghép | không khớp gì ⇒ hoặc chặn oan, hoặc `Bash` trần = mọi thứ — **CHƯA XẾP ĐƯỢC**: chưa đo được là đằng nào |
 | `codex -s workspace-write` | ghi tệp **ngoài** cây | **`rc=0`** — tệp ngoài cây bị ghi đè thật |
 | xoá `GITHUB_PAT` `GH_TOKEN` `GITHUB_TOKEN` `GIT_CONFIG_*` khỏi env | `git push --dry-run` lên GitHub | **`rc=0`** — vẫn đẩy được |
 | nhét **token RÁC** vào URL đẩy | cùng lệnh | **`rc=0`** |
@@ -642,7 +644,7 @@ container**. Đây là **cơ chế đã xác minh** theo chiều MỞ: ta biết
 Bản đầu còn viết *"ranh giới thật là clone rời + `--require-clean` + kiểm cây sạch"*. Câu ấy **SAI
 về hạng** — ba thứ đó là **máy phát hiện**: chúng tố cáo sau khi push đã xảy ra.
 
-#### Trong sandbox codex thì khác hẳn — nhưng đó là QUAN SÁT, chưa phải hàng rào
+#### Trong sandbox codex thì khác hẳn — CƠ CHẾ ĐÃ XÁC MINH, nhưng nó là MẶC ĐỊNH CẤU HÌNH, không phải bất biến
 
 ```text
                           ghi trong cay   ghi NGOAI cay   git ls-remote   git push
@@ -655,13 +657,17 @@ Hai trục **tách rời**, và tách theo NỀN chứ không theo chế độ:
 
 - **Mạng của sandbox codex — CƠ CHẾ NAY ĐÃ BIẾT, và nó là một CỜ CẤU HÌNH.**
   **HẠNG: cơ chế đã xác minh — chiều ĐÓNG**, nhưng đọc kỹ hệ quả bên dưới trước khi mừng.
-  Đo 26-08-2026, `codex-cli 0.149.1`, `-s workspace-write`, cùng một probe chạy hai lần:
+  Đo lại 26-08-2026, `codex-cli 0.149.1`, bằng probe TÁI LẬP ĐƯỢC — `codex sandbox -c
+  sandbox_mode=workspace-write [-c sandbox_workspace_write.network_access=true] -- python3 P`,
+  với `P` in ba `rc`: `socket.bind(('127.0.0.1',0))` · `urllib` GET · `git ls-remote`. KHÔNG có
+  lượt model nào ở giữa nên tất định — ba lần chạy cho cùng số; cột đối chứng là chính `P` chạy
+  thẳng, không qua codex.
 
-  | phép đo | mặc định | `-c sandbox_workspace_write.network_access=true` |
-  |---|---|---|
-  | `bind` loopback `127.0.0.1` | `rc=1` | **`rc=0`** |
-  | HTTP `urllib` tới `api.github.com` | `rc=1` | **`rc=0`** |
-  | `git ls-remote` một URL HTTPS | `rc=0` | `rc=0` |
+  | phép đo | mặc định | `…network_access=true` | đối chứng: vỏ phiên |
+  |---|---|---|---|
+  | `bind` loopback `127.0.0.1` | `rc=1` | **`rc=0`** | `rc=0` |
+  | HTTP `urllib` tới `api.github.com` | `rc=1` | **`rc=0`** | `rc=0` |
+  | `git ls-remote` một URL HTTPS | **`rc=128`** | **`rc=0`** | `rc=0` |
 
   Tức mạng đóng **KHÔNG phải bất biến** — nó là mặc định của
   `sandbox_workspace_write.network_access`, và **chính tệp này đã ghi cái cờ ấy** ở mục sandbox phía
@@ -670,12 +676,13 @@ Hai trục **tách rời**, và tách theo NỀN chứ không theo chế độ:
   **Hệ quả cho an ninh, và nó ngược với trực giác:** biết cơ chế KHÔNG làm nó thành ranh giới. Một
   reviewer truyền được `-c` thì tự mở, nên với **kẻ có quyền đặt cờ**, đây không bó gì cả. Nó chỉ bó
   một reviewer **chạy đúng cấu hình mặc định** — và đó là điều kiện vận hành, không phải bất biến.
-  **CHƯA ĐO ĐƯỢC:** vì sao `git ls-remote` cho `rc=0` ở CẢ HAI cấu hình, ngược bảng cũ vốn khai
-  `rc=128`. Nhiều khả năng git đi đường credential/proxy khác đường `urllib`, nhưng đó là GIẢ THUYẾT
-  — chưa dựng phản chứng. Đừng chép dòng `rc=128` của bảng cũ như thể nó còn đứng.
-- **Hệ tệp: chỉ `read-only` bó.** `workspace-write` ghi được ra ngoài cây — rò rỉ thật, nhưng hậu
+  **MỘT SỐ SAI ĐÃ ĐƯỢC SỬA TẠI CHỖ:** bản vá vòng 2 khai `git ls-remote` cho `rc=0` ở CẢ HAI cấu
+  hình rồi gọi đó là chỗ chưa đo được — số ấy đến từ một probe KHÔNG tái lập được, đúng hình dạng
+  mà chính mục này lên án. Đo lại bằng lệnh trên: `rc=128` ở mặc định. Nên bảng `codex -s …` phía
+  trên KHÔNG bị thu hồi — nó ĐỨNG, và nay có hai phép đo khác harness chống lưng thay vì một.
+- **Hệ tệp: chỉ `read-only` bó** — **cơ chế đã xác minh**, đo cả hai chiều. `workspace-write` ghi được ra ngoài cây — rò rỉ thật, nhưng hậu
   quả thấp hơn nhiều so với ghi vào kho, và **phát hiện được**.
-- **Claude `-p` không có gì cả** — cả hai trục đều mở.
+- **Claude `-p` không có gì cả** — cả hai trục đều mở; **cơ chế đã xác minh — chiều MỞ**.
 
 Nên câu đúng KHÔNG phải *"reviewer không thể bị bó"* mà là **chọn NỀN quan trọng hơn chọn chế độ.**
 Phản chứng push của cross-review chạy trong phiên `claude` và đẩy vào **bare remote cục bộ**, không
@@ -686,12 +693,12 @@ trong sandbox codex.
 
 | pha | chế độ | được gì | DỰA VÀO (kèm hạng) |
 |---|---|---|---|
-| **A — soát** | `codex -s read-only` | tìm finding, đọc mã, phép đo chỉ-đọc | FS đóng = **cơ chế đã xác minh**; mạng đóng = **quan sát** |
-| **B — dựng vá** | `codex -s workspace-write` | sửa thử, chạy test/đột biến, **chứng minh bản vá** | mạng đóng = **quan sát**; FS ngoài cây MỞ ⇒ chỉ có **máy phát hiện** |
+| **A — soát** | `codex -s read-only` | tìm finding, đọc mã, phép đo chỉ-đọc | FS đóng = **cơ chế đã xác minh**; mạng đóng = **cơ chế đã xác minh — CHỈ ở cấu hình mặc định** |
+| **B — dựng vá** | `codex -s workspace-write` | sửa thử, chạy test/đột biến, **chứng minh bản vá** | mạng đóng = **cơ chế đã xác minh — CHỈ ở cấu hình mặc định**; FS ngoài cây MỞ ⇒ chỉ có **máy phát hiện** |
 
 Cột phải cố ý KHÔNG mang tên *"cưỡng chế bằng"*: bảng mô tả thứ ta **dựa vào**, và một trong hai
-thứ ấy là quan sát chưa rõ cơ chế. Gọi nó là "cưỡng chế" thì bảng tự nâng hạng cho nó — đúng lỗi
-mục này sinh ra để sửa. Pha B phải có nếu muốn reviewer *đề xuất bản vá* chứ không chỉ chỉ trích:
+thứ ấy là một MẶC ĐỊNH mà chính người chạy lật được. Gọi nó là "cưỡng chế" thì bảng tự nâng hạng
+cho nó — đúng lỗi mục này sinh ra để sửa. Pha B phải có nếu muốn reviewer *đề xuất bản vá* chứ không chỉ chỉ trích:
 phần lớn finding tốt của kho đến từ reviewer **chạy được thứ gì đó**. Còn reviewer chạy bằng
 **`claude -p`** thì không có hàng rào nào — `--require-clean` cộng chụp `git ls-remote` trước và sau
 lượt là **máy phát hiện**, nó không ngăn, nó tố cáo.
@@ -701,8 +708,8 @@ một cờ: **chạy ở cấu hình mặc định** thì reviewer không đọc
 điều phối **ghi sẵn ngữ cảnh thành tệp trong cây** trước khi spawn — và cách ấy đúng bất kể cờ, nên
 cứ làm. Đừng viết ngược lại thành "mạng luôn đóng nên bắt buộc phải làm thế": đó là nâng một mặc
 định thành bất biến, đúng lỗi mục này sinh ra để sửa. Đây cũng là lý
-do vài lượt review của kho phải chạy bằng `claude -p` — nó đọc được GitHub qua MCP; giá phải trả là
-mất luôn quan sát về mạng.
+do vài lượt review của kho phải chạy bằng `claude -p` — nó đọc được GitHub qua MCP; giá phải trả
+là mất luôn cái mặc định mạng ấy, chứ không phải mất một hàng rào.
 
 Với phiên **executor có quyền ghi**, danh sách hẹp vẫn hợp lý: ở đó ta muốn giới hạn *hình dạng
 việc*, và executor có `settings.json` của kho làm nền.

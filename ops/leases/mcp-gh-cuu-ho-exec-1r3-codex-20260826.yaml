@@ -91,17 +91,45 @@ base_ghi_chu: >-
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 3
-  dong_them_toi_da: 750
+  dong_them_toi_da: 1000
   do_tu_sha: b662fe1d07c675a222ae26e734377e305775e4f3
   don_vi: '`git diff --numstat b662fe1..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
-  da_dung: 0
+  da_dung: 210
   ghi_chu: >-
-    750 là TRẦN ƯỚC LƯỢNG, KHÔNG phải số đã đo — `da_dung` vẫn là 0. HẠ từ 900 của r1; xem khối
+    1000 là trần SAU KHI NÂNG lần hai; xem khối `nang_tran`. `da_dung: 210` là số ĐÃ ĐO
+    (`git diff --numstat b662fe1 origin/claude/mcp-gh-cuu-ho-exec-1`) — đặc tả đã tiêu 210 dòng vì
+    `ops/specs/mcp-gh-cuu-ho.md` NẰM TRONG write set. Trần cũ 750; xem khối
     `ha_tran`. Căn cứ: bản bị bác trên `6c4140b` là 541 dòng cho hai tệp mã (mcp_gh.py 207 ·
     mcp_gh_test.py 334) và đã chạy xanh; NĂM hạng mục của đặc tả thêm ước chừng 6 ca + 5 đột biến,
     cộng tệp đặc tả. Tỷ lệ mã:test đo được của kho ~1:1,6. TRẦN, KHÔNG PHẢI MỤC TIÊU. Vượt ⇒ S2.
-    ADR-0044: packet xếp `thường` (≤ 6 tệp, ≤ 1.000 thêm+xoá) vì không chạm authority; 750 dưới
-    trần ấy. Phần vượt trần 300 của cách đọc kia đã KHAI trong đặc tả — đúng đường ADR cho phép.
+    ADR-0044: packet xếp `thường` (≤ 6 tệp, ≤ 1.000 thêm+xoá) vì không chạm authority; 1000 là
+    ĐÚNG BẰNG trần ấy, không còn biên nào. Phần vượt trần 300 của cách đọc kia đã KHAI trong đặc tả — đúng đường ADR cho phép.
+
+nang_tran:
+  tran_cu: 750
+  tran_moi: 1000
+  da_dung_luc_nang: 210
+  ai_nang: claude-session
+  tham_quyen: >-
+    KHÔNG phải quyền chủ kho. Đây là phiên điều phối sửa MỘT ƯỚC LƯỢNG SAI CỦA CHÍNH NÓ, trong
+    phạm vi mà ADR-0044 còn cho phép (lớp `thường`: ≤ 6 tệp và ≤ 1.000 dòng thêm+xoá). 1000 là
+    ĐÚNG BẰNG trần ấy, không vượt. Muốn đi quá 1000 thì phải có quyết định của chủ kho.
+  vi_sao: >-
+    Trần 750 của r2 TỰ MÂU THUẪN, đo được: đặc tả tiêu 210 dòng (nó nằm trong write set), còn lại
+    540 cho hai tệp mã — trong khi bản BỊ BÁC đã dùng 541 cho đúng hai tệp ấy, và đặc tả còn đòi
+    thêm ~12 ca và ~8 đột biến. Tức trần cũ âm 1 dòng so với NỀN, trước khi viết dòng nào.
+    Lỗi ước lượng của r2: cộng "541 + 6 ca + 5 đột biến + tệp đặc tả" rồi viết ra một TỔNG nhỏ hơn
+    các SỐ HẠNG. Đúng bẫy `CLAUDE.md` đã ghi — một quan hệ trông hợp lý không chứng minh các số
+    hạng hợp lý.
+  canh_bao_that: >-
+    Ước lượng lại cho tử tế: mã ≈ 541 nền + ~115 (bốn hạng mục thiết kế) + ~212 (ca và đột biến
+    mới) ≈ 870; cộng đặc tả 210 ≈ 1.080. Tức **có thể VẪN vượt 1000**. Nâng lên 1000 KHÔNG phải
+    lời hứa rằng packet vừa — nó là mức cao nhất phiên điều phối được phép đặt mà không xin chủ kho.
+    Nếu executor chạm 1000 mà đặc tả chưa xong: **DỪNG theo S2, báo CHÍNH XÁC hạng mục nào còn
+    chưa viết và cần bao nhiêu dòng nữa**. Một con số ĐO ĐƯỢC từ lượt thi công thật đáng giá hơn
+    một ước lượng nữa của tôi — ước lượng của tôi đã sai hai lần liên tiếp ở packet này.
+    Khi ấy quyết định thuộc chủ kho, và phương án nhiều khả năng đúng là TÁCH, không phải nâng tiếp:
+    ADR-0044 nói thẳng "vượt ngưỡng thì dừng TRƯỚC review để revision thiết kế".
 
 ha_tran:
   tran_cu: 900
@@ -184,7 +212,7 @@ dieu_kien_dung: >-
   S1 chặn việc viết mã KHI CHƯA có đặc tả; đặc tả nay đã có băm nên S1 ĐỔI NGHĨA: nó chặn việc đi
   CHỆCH đặc tả. Đặc tả sai thì sửa qua bản mới, KHÔNG sửa đè — sửa đè làm băm trong lease trỏ vào
   thứ không còn tồn tại ·
-  S2 vượt 750 dòng thêm ⇒ DỪNG, xin nâng trần bằng khối `nang_tran` có `ai_nang`/`vi_sao`, KHÔNG
+  S2 vượt 1000 dòng thêm ⇒ DỪNG, xin nâng trần bằng khối `nang_tran` có `ai_nang`/`vi_sao`, KHÔNG
   sửa `dong_them_toi_da` trần trụi — r4 của #314 đã mất đúng khối ấy, và r2 này thêm `ha_tran`
   chính vì thế ·
   S3 cần đường dẫn thứ tư ⇒ DỪNG, xin sửa lease ·
@@ -199,8 +227,9 @@ thay_the_ly_do_r3: >-
   ĐỔI EXECUTOR theo chỉ thị trực tiếp của người giữ kho ngày 2026-08-26: "xử lý #319 pha 2 luôn đi,
   codex xhigh là executor". §3.2 liệt kê `executor` là thứ tạo revision mới, nên đây là r3 chứ
   không phải sửa r2 tại chỗ; và reviewer lật sang `claude` để giữ `cross_approved`.
-  KHÔNG đổi: đặc tả và băm của nó · write set ba đường dẫn · trần 750 · base `b662fe1` · mọi tiêu
-  chí nghiệm thu. Đo lại lúc 10:49Z trước khi soạn r3: `origin/master` vẫn `b662fe1`; băm đặc tả
+  KHÔNG đổi: đặc tả và băm của nó · write set ba đường dẫn · base `b662fe1` · mọi tiêu chí
+  nghiệm thu. CÓ đổi thêm một thứ ngoài vai: trần 750 → 1000, vì trần cũ đo lại thì TỰ MÂU THUẪN
+  (đặc tả tiêu 210, còn 540 cho hai tệp mã mà nền đã là 541). Xem khối `nang_tran`. Đo lại lúc 10:49Z trước khi soạn r3: `origin/master` vẫn `b662fe1`; băm đặc tả
   trên nhánh packet vẫn khớp giá trị r2 neo; phép so hai nguồn 210 = 210, `comm` hai chiều rỗng.
 
 thay_the_ly_do: >-

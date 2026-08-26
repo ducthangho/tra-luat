@@ -358,6 +358,13 @@ base_da_do_lai:
     Phép đo này chỉ đúng cho lần trôi tới `b662fe1`. Master trôi tiếp ⇒ `S4` bắn lại và phải
     chạy LẠI đủ bốn phép đo trên; đừng đọc khối này thành "base đã được miễn kiểm vĩnh viễn".
 posted_comment_id: 5426283891   # workflow ghi, ĐỪNG sửa tay
+
+# Bản sửa đổi 3 THAY lease này. `_kiem_bia_mo` khớp CHUỖI VÔ HƯỚNG; thiếu dòng này thì cổng CHẶN r3.
+da_bi_thay_the: doctrine-ranh-gioi-reviewer-exec-1r3-claude-20260826
+da_bi_thay_the_vi_sao: >-
+  `S1` bắn sau cross-review vòng 3: finding P2 đòi probe thành HIỆN VẬT chạy được, tức cần đường
+  dẫn thứ hai `.claude/dev/probe_mang.py`. Chỉ `write_set` đổi; `acceptance` của r2 GIỮ NGUYÊN.
+  Bản vá trên `88bd4f2` không làm lại.
 comment_trung_lap:
   id_bo_di: '5426284747'
   ai_dang: 'phiên điều phối (claude), ĐĂNG THỪA'

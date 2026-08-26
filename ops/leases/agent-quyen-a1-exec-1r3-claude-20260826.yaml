@@ -224,3 +224,4 @@ thay_the_ly_do: >-
   Đây là lần thứ hai lease này phải sửa văn bản theo trường; cả hai lần đều tự soi bằng `grep`
   SAU khi soạn, đúng bài học P1 `packet-spec-revision-incoherent` của #314.
 posted_comment_id: 5425417630   # workflow ghi, ĐỪNG sửa tay
+da_bi_thay_the: agent-quyen-a1-exec-1r4-claude-20260826

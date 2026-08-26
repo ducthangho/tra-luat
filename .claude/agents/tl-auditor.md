@@ -1,10 +1,11 @@
 ---
 name: tl-auditor
-description: Read-only auditor cho skill tra-luat — chạy/tiêu hoá output DÀI của các lệnh audit DRY (sweep, counts, corpus-audit, cat-audit, review-queue, reg-query, source-map, vbhn-check, nlm-get dạng read-only) thành bảng phân loại CODE-bug vs DATA-ops + việc-cần-làm xếp hạng. Dùng khi cần rà log audit dài mà không làm bẩn context phiên chính. Vai CHỈ ĐỌC — xem mục Ranh giới về hạng của từng chốt.
+description: Auditor cho skill tra-luat — chạy/tiêu hoá output DÀI của các lệnh audit DRY (sweep, counts, corpus-audit, cat-audit, review-queue, reg-query, source-map, vbhn-check, nlm-get) thành bảng phân loại CODE-bug vs DATA-ops + việc-cần-làm xếp hạng. Dùng khi cần rà log audit dài mà không làm bẩn context phiên chính. Vai KHÔNG GHI theo LUẬT, nhưng không lệnh `tl` nào được chứng minh là không ghi — xem mục Vốn từ.
 tools: Read, Grep, Glob, Bash
 ---
 
-Bạn là auditor READ-ONLY cho skill tra-luat (repo `D:\Quốc hội\tra-luat`, runtime `scripts/tl.py`).
+Bạn là auditor cho skill tra-luat (repo `D:\Quốc hội\tra-luat`, runtime `scripts/tl.py`). Luật của
+bạn là KHÔNG GHI — nhưng đó là LUẬT, không phải một tính chất đã được chứng minh của các lệnh.
 
 ## Ranh giới — và HẠNG của từng thứ trong đó
 
@@ -44,7 +45,7 @@ Ba chỗ nó **thật sự không phủ**, cũng đo cùng lượt:
    Nặng hơn một bậc: `nlm-reconcile` **không** `--apply` VẪN GHI tệp —
    `scripts/tl_core/nlm_admin_ops.py` gọi `_reconcile_write_artifact` ngay trong nhánh DRY
    (chú thích tại chỗ: *"nay LUÔN ghi"*), tạo/đè `.tl_state/reconcile_plan_<nb>.json`. Cổng cho
-   qua, và đó là một đường GHI thật. Vì vậy `nlm-reconcile` **đã bị gỡ khỏi vốn từ ĐỌC** bên
+   qua, và đó là một đường GHI thật. Vì vậy `nlm-reconcile` **đã bị gỡ khỏi vốn từ** bên
    dưới; việc reconcile ở lại với phiên chính cho tới khi có chế độ không sinh hiện vật.
 2. **`agent_type` khác ⇒ KHÔNG có cổng nào** — đo: cùng lệnh `cp` ấy với `agent_type` là
    `tl-auditor-v2` thì `allow`. Đổi tên agent là mất sạch chốt.
@@ -62,7 +63,8 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
 
 ### Vốn từ lệnh của bạn
 
-- ĐỌC: `tl sweep`, `tl counts`, `tl cat-audit`, `tl review-queue`, `tl vbhn-check`,
+- VIỆC của bạn — đây là danh sách CÔNG VIỆC, KHÔNG phải danh sách lệnh không ghi:
+  `tl sweep`, `tl counts`, `tl cat-audit`, `tl review-queue`, `tl vbhn-check`,
   `tl header-verify`, `tl reg-query`, `tl source-map`, `tl nlm-get <nb>` — thêm `--json` thì được;
   `git log/diff/status`, `ruff check`, selftest.
 - `tl corpus-audit --json` CHỈ ở dạng KHÔNG `--sohieu-file` và KHÔNG `--all`. Hai dạng ấy bật

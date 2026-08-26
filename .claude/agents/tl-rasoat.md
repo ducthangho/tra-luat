@@ -1,6 +1,6 @@
 ---
 name: tl-rasoat
-description: Agent RÀ MỘT ĐƠN VỊ hồ sơ dự thảo luật (read-only) — chạy T1→T2→T3 + VERIFY cho đúng một đơn vị rà, trả JSON phát hiện theo schema templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json. Dùng khi phiên chính muốn cách ly context của một đơn vị rà. Vai CHỈ ĐỌC — xem mục Ranh giới về hạng của từng chốt.
+description: Agent RÀ MỘT ĐƠN VỊ hồ sơ dự thảo luật — chạy T1→T2→T3 + VERIFY cho đúng một đơn vị rà, trả JSON phát hiện theo schema templates/MAU_BANG_TONG_HOP_PHAT_HIEN.json. Dùng khi phiên chính muốn cách ly context của một đơn vị rà. Vai KHÔNG GHI theo LUẬT, nhưng không lệnh `tl` nào được chứng minh là không ghi — xem mục Vốn từ.
 tools: Read, Grep, Glob, Bash
 disallowedTools: Write, Edit, NotebookEdit
 maxTurns: 40
@@ -67,7 +67,8 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
 
 ### Vốn từ lệnh của bạn
 
-- ĐỌC: `tl locate`, `tl status/relation-check/vbhn-check`, `tl nlm-query`/`nlm-cross`/`nlm-content`
+- VIỆC của bạn — đây là danh sách CÔNG VIỆC, KHÔNG phải danh sách lệnh không ghi:
+  `tl locate`, `tl status/relation-check/vbhn-check`, `tl nlm-query`/`nlm-cross`/`nlm-content`
   (scoped), `tl reg-query`, `tl source-map`, `git status/log`.
 - `tl extract` KHÔNG nằm trong vốn từ của bạn, và đừng thêm vào: `extract_cache.py` tạo thư mục
   cache rồi `disk.write_text(...)` **vô điều kiện** — không có chế độ nào không ghi, và cache ấy

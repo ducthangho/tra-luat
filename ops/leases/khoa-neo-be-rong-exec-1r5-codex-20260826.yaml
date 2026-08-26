@@ -196,3 +196,7 @@ canh_bao_cho_nguoi_thi_hanh: >-
   xanh bằng cách bịt mắt nó.
   (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
 posted_comment_id: 5424492758   # workflow ghi, ĐỪNG sửa tay
+
+da_bi_thay_the: khoa-neo-be-rong-exec-1r6-codex-20260826   # BUOC HAI cua chuoi thay the.
+                        # r5 chet giua chung vi MAT MANG (websocket refused, 11:25Z), khong vi
+                        # mot quyet dinh nao. Ban va do dang van con tren cay lam viec.

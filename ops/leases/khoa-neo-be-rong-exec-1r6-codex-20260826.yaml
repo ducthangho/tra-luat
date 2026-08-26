@@ -1,0 +1,249 @@
+# Lease EXECUTOR — `KHOA-NEO-BE-RONG` (#313 ca 2), lượt 6 — NỐI TIẾP lượt 5 ĐÃ CHẾT.
+#
+# Lượt 5 KHÔNG dừng vì một quyết định nào: `codex exec` mất mạng lúc 11:25Z
+# (`failed to connect to websocket ... Connection refused`) sau ~9 phút, và tiến trình
+# launcher cũng chết theo nên `run.json` không được chốt. Bản vá dở dang CÒN NGUYÊN trên
+# cây làm việc — 192 dòng thêm, tức ĐÃ VƯỢT trần 190 của r5.
+#
+# LƯỢT NÀY SINH RA TỪ MỘT CỔNG ĐỎ, KHÔNG TỪ MỘT GÓP Ý. `gate (windows-latest)` trên
+# `c61394a` trả `TỔNG: 2 lỗi`, và cả hai lỗi là của CHÍNH packet này. Đây là lần đầu
+# mã của packet được đo trên Windows — đúng bài học `CLAUDE.md`: "một job CI mặc định
+# SKIP là một cổng KHÔNG TỒN TẠI", và "PR xanh KHÔNG hàm ý master xanh".
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 313
+packet_id: KHOA-NEO-BE-RONG
+phase_key: KHOA-NEO-BE-RONG
+revision: 6
+generation: 1
+lease_id: khoa-neo-be-rong-exec-1r6-codex-20260826
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` là MẶC ĐỊNH FAIL-CLOSE của `_BANG_LOP`, KHÔNG phải tín hiệu packet chạm thẩm
+  quyền. Đừng đọc nhãn này thành "đã có ai xét thấy nguy".
+
+spec_path: null
+spec_note: >-
+  Không có đặc tả đóng băng. Nguồn yêu cầu lượt này là NHẬT KÝ CỔNG, không phải văn bản:
+  https://github.com/ducthangho/tra-luat/actions/runs/32961068930/job/98153316046
+  Executor PHẢI tự đo lại cả hai lỗi, không nhận lời khai của lease.
+
+write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 11:1xZ. Phép so HAI NGUỒN chạy TRƯỚC, so bằng TẬP TÊN:
+    is-shallow false · ls-remote 210 · for-each-ref 210 · comm RỖNG cả hai chiều
+  Rồi quét: cả hai đường dẫn -> rc=0 NGƯỜI_GIỮ 0.
+
+branch: codex/khoa-neo-be-rong-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+start_from_sha: c61394acccaf8f878548ad34bf325aa7bed05b18
+reviewed_sha_required: c61394acccaf8f878548ad34bf325aa7bed05b18
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 300
+  do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+  don_vi: >-
+    `git diff --numstat c35ae1c0a1104dbd6e65a321cda3b9f9441a408b -- .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py`
+    — cột dòng THÊM. Pathspec TRONG lệnh, và KHÔNG `..HEAD` (sandbox không cho commit nên
+    `..HEAD` không thấy bản vá trên working tree).
+  da_dung: 192
+  ghi_chu: >-
+    TRẦN NÀY KHÔNG CÒN LÀ MỘT ƯỚC LƯỢNG — nó là trần ADR-0044 cho `sensitive` (≤3 tệp /
+    ≤300 dòng thêm). Xem `nang_tran.can_cu` để biết vì sao đổi cách đặt trần thay vì đoán
+    lại lần thứ tư. Phạm vi vẫn bị kẹp bằng `write_set` (ĐÚNG 2 tệp) và
+    `vung_duoc_phep_cham`, là hai thứ thật sự chặn scope creep; số dòng chỉ là proxy.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-26: "lam tat ca cac buoc con lai"'
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên điều phối KHÔNG thi công lượt này và SẼ là reviewer — khác nền, đúng PROTOCOL:580.
+
+leased_at_utc: '2026-08-26T11:20:00Z'
+lease_expires_at_utc: '2026-08-27T11:20:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  `.claude/dev/packet_loop.py`: hàm `_be_rong_oid_cua_kho`. `.claude/dev/packet_loop_test.py`:
+  hai ca `bien_nhan_sha256_root_xuong_dong_dem_MOT` · `bien_nhan_git_gia_duong_dan_nul_giu_fallback`,
+  và bảng đăng ký ca/đột biến. Hunk ngoài các vùng ấy ⇒ ĐỎ.
+
+viec_cua_luot_nay: >-
+  BA việc. Hai việc đầu là CỔNG ĐỎ (chặn land); việc thứ ba là finding P2 của cross-review
+  vòng 3, gộp vào đây vì nó nằm ĐÚNG trong vùng hai việc kia đang sửa.
+
+  === (W1) ca KHÔNG DỰNG NỔI FIXTURE trên Windows, và nó ném traceback thay vì khai ===
+
+      ĐỎ  bien_nhan_sha256_root_xuong_dong_dem_MOT: OSError: [WinError 123] The filename,
+          directory name, or volume label syntax is incorrect:
+          '...\baseline\bien_nhan_sha256_root_xuong_dong_dem_MOT\bnsha256\nroot\.git'
+
+  Win32 KHÔNG cho ký tự xuống dòng trong tên tệp/thư mục. Ca này CỐ Ý dựng một thư mục có
+  `\n` trong tên, nên trên Windows nó không thể tồn tại. Hôm nay ca chết bằng traceback —
+  tức nó khai KHÔNG ĐO ĐƯỢC bằng cách sập, chứ không bằng lời.
+
+  === (W2) ĐỘT BIẾN MẤT RĂNG trên Windows ===
+
+      ĐỎ  đột biến bien_nhan_bo_nhanh_valueerror:
+          ca ['bien_nhan_git_gia_duong_dan_nul_giu_fallback'] VẪN XANH ⇒ ca đó không đo gì
+
+  GIẢ THUYẾT của phiên điều phối, **PHẢI ĐO, ĐỪNG NHẬN**: ca ấy cài một `git` GIẢ bằng tệp
+  có shebang `#!/usr/bin/env python3` cộng `chmod +x`, đặt đầu `PATH`. Windows KHÔNG có cơ
+  chế shebang, nên `subprocess.run(["git", ...])` không chạy tệp ấy — ca đi một đường khác,
+  trả fallback vì lý do KHÁC, và trả fallback ấy dù có hay không có nhánh `except ValueError`.
+  Nếu đo ra nguyên nhân KHÁC thì ghi nguyên nhân đo được, đừng chép giả thuyết này.
+
+  === (W3) P2 vòng 3: `try` còn ôm phép LẤY PHẦN TỬ ===
+
+  `.claude/dev/packet_loop.py:1532-1535`. `ket_qua[0]` được đánh giá BÊN TRONG
+  `try ... except ValueError`, nên một `ValueError` do lỗi lập trình tại chính phép lấy phần
+  tử bị nuốt thành fallback im lặng. Reviewer đo được:
+
+      valueerror_in_removesuffix: propagated=ValueError:injected-removesuffix
+      valueerror_in_rsplit:       propagated=ValueError:injected-rsplit
+      valueerror_in_indexing:     returned=(40, 64)      <- nuốt
+
+  Vá: đưa `ket_qua[0]` ra TRƯỚC `try`; chỉ `Path(...).resolve()` và phép so ở trong. Đừng
+  đưa `Path(...)` ra theo — dựng `Path` từ chuỗi có NUL là chỗ ValueError HỢP LỆ phát sinh.
+
+  === CHUẨN CHO CẢ W1 VÀ W2: "BỎ QUA" PHẢI LÀ MỘT LỜI KHAI, KHÔNG PHẢI MỘT LỖ ===
+
+  Kho này đã trả giá vì ca "có MẶT mà không có ĐO". Nên mỗi chốt bỏ qua phải thoả BỐN điều:
+    1. BỎ QUA theo NĂNG LỰC ĐO ĐƯỢC, không theo tên nền. Thử dựng thứ cần dựng; chỉ khi hệ
+       điều hành TỪ CHỐI mới bỏ qua. `os.name == "nt"` là danh sách đoán trước — nó cũng tha
+       oan cho một Windows tương lai làm được, và không tha cho một hệ tệp Linux không làm được.
+    2. IN RA lý do, đúng nếp `BỎ QUA …` đã có trong kho, và ca bị bỏ qua KHÔNG được đếm vào
+       số ca ĐẠT.
+    3. Bộ chạy đột biến KHÔNG được đòi một ca ĐÃ BỎ QUA phải chết — nhưng cũng KHÔNG được vì
+       thế mà coi đột biến ấy là "đã giết".
+    4. TRÊN NỀN DỰNG ĐƯỢC (Linux ở đây), ca vẫn CHẠY THẬT và đột biến vẫn GIẾT ĐÚNG nó. Đây
+       là chiều bắt-oan: thiếu nó thì bản vá có thể "xanh" bằng cách bỏ qua ở mọi nơi.
+
+  ĐỘT BIẾN BẮT BUỘC — làm cho chốt tha thành VÔ ĐIỀU KIỆN (luôn bỏ qua) thì phải có thứ ĐỎ.
+  Không có đột biến ấy thì không ai biết chốt đang đo năng lực hay đang đo một hằng số.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ⇒ DỪNG ·
+  S2 vượt 190 dòng thêm ⇒ DỪNG, khai phần chưa làm, KHÔNG cắt phản chứng ·
+  S3 bạn kết luận W1 hoặc W2 KHÔNG sửa được mà không bỏ hẳn ca ⇒ DỪNG, trình phép đo, xin
+  quyết định. XOÁ ca là mất chốt của P1 vòng 2/3 — không được tự chọn ·
+  S4 không tái hiện được W1 hoặc W2 bằng phép đo của chính mình ⇒ `KHÔNG_ĐO_ĐƯỢC`, DỪNG ·
+  S5 `origin/master` đã đi tiếp so `base_sha` mà chưa đo lại.
+
+thay_the_cho: khoa-neo-be-rong-exec-1r5-codex-20260826
+thay_the_ly_do_r4: >-
+  Lượt 4 đã xong việc của nó (mỏ neo mutant sống lại, suite `263/263`, `TỔNG: ĐẠT` TRÊN LINUX)
+  và đã lên nhánh (`c61394a`); `viec_cua_luot_nay` của r4 hết hiệu lực. Lượt 5 mở cửa sổ cho
+  một việc mà KHÔNG lượt nào trước có thể thấy: mã của packet lần đầu được đo trên Windows,
+  và nó ĐỎ. Cập nhật neo sang head đã được review, `da_dung` 155, NỚI TRẦN 160 → 190
+  (xem `nang_tran`). Write set, provider, reviewer KHÔNG đổi.
+
+nang_tran:
+  ai_nang: ducthangho
+  tham_quyen: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+  quyet_dinh_luc: >-
+    direct, in-session, 2026-08-26: "lam tat ca cac buoc con lai". ĐÂY LÀ MỘT CHỈ THỊ THƯỜNG
+    TRỰC, KHÔNG phải một lần duyệt riêng cho con số 190 — và phải đọc đúng như vậy. Chủ kho
+    đã nới HAI lần trước đó (120 → 150 → 160), mỗi lần sau khi được trình phép đo; lần này
+    phiên điều phối áp chỉ thị thường trực cho một CỔNG ĐỎ phát hiện SAU lần duyệt gần nhất,
+    nên chủ kho CHƯA THẤY lỗi Windows lúc ra chỉ thị. Đã báo lại ngay trong lượt.
+  adr: ADR-0043 và ADR-0044
+  tran_cu_dong: 190
+  tran_moi_dong: 300
+  tran_cu_vong_review: 4
+  tran_moi_vong_review: 4
+  can_cu_r5: >-
+    (1) TRẦN DÒNG. Đã dùng 155/160, còn 5. Ba việc của lượt này ước ~35 dòng, phần lớn là
+    phản chứng + đột biến. Cắt cho vừa 5 dòng nghĩa là land một chốt bỏ qua KHÔNG CÓ RĂNG,
+    đúng thứ kho đã trả giá. 190 vẫn còn xa 300 của ADR-0044 cho `sensitive`.
+    (2) TRẦN VÒNG REVIEW. Vòng 4 KHÔNG mở vì một góp ý mà vì một CỔNG ĐỎ: `gate
+    (windows-latest)` `TỔNG: 2 lỗi` trên `c61394a`. Cả hai lỗi thuộc packet này, đo được:
+    `git show c35ae1c:.claude/dev/packet_loop_test.py | grep -c <tên ca>` trả **0** cho cả
+    ba tên (`bien_nhan_sha256_root_xuong_dong_dem_MOT`,
+    `bien_nhan_git_gia_duong_dan_nul_giu_fallback`, `bien_nhan_bo_nhanh_valueerror`) trong
+    khi head trả 3/3/1. Nên KHÔNG được gọi là "đỏ sẵn"; delta ≠ 0.
+  can_cu: >-
+    ĐÂY LÀ LẦN NỚI THỨ TƯ (120 → 150 → 160 → 190 → 300), và chính khối `nang_tran` của r5
+    đã viết: "câu hỏi cho lần SAU không còn là *nới bao nhiêu* mà là *ước lượng trần cho
+    packet có phản chứng nặng đang sai ở đâu*". Nên lần này tôi trả lời câu hỏi đó thay vì
+    đoán lại.
+    CHẨN ĐOÁN: cả bốn lần đều ước lượng từ KÍCH THƯỚC BẢN VÁ MÃ SẢN PHẨM rồi cộng một phần
+    trăm cho phản chứng. Với packet này mã sản phẩm là ~30 dòng còn ca + đột biến là ~160 —
+    tỷ lệ hơn 5:1, tức phần bị ước lượng kém CHÍNH LÀ phần chiếm gần hết ngân sách. Một ước
+    lượng sai theo cùng một hướng bốn lần không phải xui; nó là phương pháp sai.
+    QUYẾT ĐỊNH: bỏ hẳn con số đoán, lấy TRẦN DOCTRINE làm trần — ADR-0044 cho `sensitive`
+    là ≤3 tệp / ≤300 dòng thêm. 300 KHÔNG phải một ước lượng tốt hơn; nó là con số duy nhất
+    ở đây KHÔNG phải ước lượng. Phạm vi vẫn được kẹp bằng `write_set` (ĐÚNG 2 tệp) và
+    `vung_duoc_phep_cham`; đó mới là thứ chặn scope creep, số dòng chỉ là proxy cho nó.
+    ĐÁNH ĐỔI, nói thẳng: mất một tín hiệu sớm "packet đang phình". Bù lại bằng nghĩa vụ báo
+    cáo — mọi lượt phải in numstat, và vượt 300 là chạm trần ADR thật, không nới được nữa.
+    (2) TRẦN VÒNG REVIEW: KHÔNG đổi (vẫn 4). Lượt 6 không phải một vòng mới — nó là lượt 5
+    chạy lại sau khi chết vì mất mạng.
+
+  canh_bao: >-
+    Lần nới trước đã cảnh báo về hình dạng lặp (120 → 150 → 160 → 190). `CLAUDE.md` dạy đếm
+    HÌNH DẠNG lỗi: ba lần nới trước đều vì cùng một thứ — phản chứng đắt hơn ước lượng ban
+    đầu. Hình dạng ấy đã lặp đủ ba lần, nên câu hỏi cho lần SAU không còn là "nới bao nhiêu"
+    mà là "ước lượng trần cho packet có phản chứng nặng đang sai ở đâu". Ghi ra đây để lần
+    thứ tư không đi qua im lặng.
+  cong_khong_doc_khoi_nay: >-
+    ĐO 2026-08-26: `grep -rn nang_tran --include=*.py --include=*.yml --include=*.yaml
+    --include=*.sh .` (trừ `ops/leases/`) trả RỖNG — KHÔNG tầng nào đọc khối này, dù ADR-0043
+    nói cổng phải từ chối khi thiếu nó. Nay có nhà: Issue #323. Đừng đọc sự hiện diện của
+    khối này thành bằng chứng đã qua kiểm.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) SANDBOX MOUNT `.git` CHỈ ĐỌC — không commit, không push.
+  (2) BẠN ĐANG CHẠY TRÊN LINUX, và cả hai lỗi chỉ hiện trên Windows. Bạn KHÔNG tái hiện được
+  chúng trực tiếp. Cách đo hợp lệ: dựng phản chứng cho CƠ CHẾ (hệ điều hành từ chối tên tệp ·
+  shebang không được thi hành), ví dụ bằng cách bơm lỗi/giả lập lời từ chối, rồi đòi chốt mới
+  khai BỎ QUA thay vì sập. Ghi thẳng phần nào là `KHÔNG_ĐO_ĐƯỢC` trên nền này.
+  (3) ĐỪNG "sửa" bằng cách xoá ca hay nới `except` cho nuốt luôn `OSError` — đó là làm cổng
+  xanh bằng cách bịt mắt nó.
+  (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+
+
+thay_the_ly_do: >-
+  Lượt 5 CHẾT GIỮA CHỪNG vì mất mạng (websocket refused, 11:25Z), không vì `S1`-`S5` nào.
+  Bản vá dở dang còn nguyên trên cây và đã ĐO ĐƯỢC: 29 + 163 = 192 dòng thêm, tức vượt trần
+  190 của r5. r6 mở lại cửa sổ cho ĐÚNG phần còn thiếu (chạy hậu kiểm + đóng gói), và đặt
+  lại trần theo ADR-0044 thay vì đoán thêm một lần nữa. Write set, provider, reviewer, và
+  ba việc W1/W2/W3 KHÔNG đổi.
+
+tiep_noi_cong_viec_do_dang: >-
+  CÂY LÀM VIỆC KHÔNG SẠCH, và đó là CHỦ Ý — nó giữ bản vá của lượt 5. Đã đọc và ghi lại ở
+  đây để lượt 6 không viết lại từ đầu:
+    · W3 ĐÃ VÁ: `dong_dau = ket_qua[0]` được nâng ra TRƯỚC `try`, `Path(dong_dau)` ở lại
+      trong `try` — đúng như yêu cầu.
+    · W1 ĐÃ CÓ CHỐT: thử `goc.mkdir()` trên tên có xuống dòng, `OSError` ⇒ `raise BoQua`.
+      Tức hỏi NĂNG LỰC, không hỏi `os.name`. ĐÚNG HƯỚNG.
+    · W2 ĐÃ CÓ CHỐT: THI HÀNH thật `git` giả rồi đòi stdout có NUL; `OSError` ⇒ `BoQua`,
+      chạy được mà sai fixture ⇒ `AssertionError`. ĐÚNG HƯỚNG.
+    · Hạ tầng BỎ QUA: lớp `BoQua`, `chay_suite` chỉ nhận `BoQua` khi `__cause__` là
+      `OSError` (chốt chống tha bừa), `main` trừ ca bỏ qua khỏi mẫu số và in `BỎ QUA`.
+    · Đã khai 3 đột biến mới: hai cái "tha vô điều kiện" (W1, W2) và một cái bơm
+      `ValueError` tại indexing (W3).
+  CHƯA LÀM (và là toàn bộ việc của r6): chạy suite sau vá · chạy từng đột biến mới và đo
+  nó giết ĐÚNG ca nào · kiểm ca bỏ qua = 0 trên Linux · numstat cuối · viết BÁO CÁO.
+  MỘT NGHI VẤN PHẢI ĐO, KHÔNG ĐƯỢC BỎ QUA: ca `bien_nhan_sha256_root_xuong_dong_dem_MOT`
+  nay `goc.mkdir()` RỒI mới gọi `_kho_gia_co_verdict(c, "bnsha256\nroot", ...)` — nếu hàm
+  ấy cũng tạo thư mục thì lần hai có thể ném `FileExistsError`. Chạy ca đó riêng và xem.

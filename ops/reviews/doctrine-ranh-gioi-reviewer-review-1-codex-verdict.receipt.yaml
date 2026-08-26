@@ -1,0 +1,118 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 1 của PR #322 (packet #318 `DOCTRINE-RANH-GIOI-REVIEWER`).
+#
+# GHI NGAY SAU LƯỢT, không ghi muộn. Tiền lệ gần nhất (`t33-doi-shellcheck-review-4`) tự khai là
+# ghi muộn sau khi cả bốn lượt đã xong, và gọi đó là "khuyết tật mà packet #298 sinh ra để chặn".
+# Ở đây lượt kết thúc lúc 1171.803s và biên nhận được ghi trong cùng phiên, trước khi vá gì.
+#
+# NHƯNG người ghi vẫn là PHIÊN THI CÔNG — tức bên kém độc lập nhất để khai lượt review đã diễn ra
+# thế nào. Phần KIỂM ĐƯỢC không phụ thuộc lời tôi; phần TÓM TẮT thì có. Đọc verdict.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '318'
+packet_slug: DOCTRINE-RANH-GIOI-REVIEWER
+lease_id: null
+lease_review_KHONG_DUOC_CAP: >-
+  Lượt này KHÔNG có lease review riêng. Lease đang sống là lease EXECUTOR
+  (`doctrine-ranh-gioi-reviewer-exec-1-claude-20260826`). Mượn nó vào ô `lease_id` sẽ khai một
+  quyền chưa ai cấp, nên để `null` và nói ra.
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 48cf331e36cc2bde9fbdd485d51b85c81a5b25af
+luot: 1
+cross_provider: true
+assurance: cross_approved
+assurance_ghi_chu: >-
+  Executor `claude`, reviewer `codex` — khác nền. NHƯNG verdict do TÀI KHOẢN TÁC GIẢ PR vận
+  chuyển lên GitHub bằng `add_issue_comment`, KHÔNG phải `REQUEST_CHANGES`: GitHub từ chối
+  request-changes trên PR của chính mình. Verdict do đó **không mang trạng thái review chính thức
+  của GitHub**, và `ADR-0040` nói thẳng thứ đó KHÔNG thành merge authorization.
+
+verdict_path: ops/reviews/doctrine-ranh-gioi-reviewer-review-1-codex-verdict.md
+verdict_sha256: c96dd003966ad350ffbdd47b0ff233f4546979486e07ae12762d566e582cdb4d
+verdict_bytes: 21423
+verdict_nguon: >-
+  `codex exec -s workspace-write --skip-git-repo-check -c model_reasoning_effort=xhigh`, bọc
+  trong `launcher.py run` với `--expected-head`, `--require-clean` và prompt neo băm
+  (`prompt_kin_hoan_toan: true`). Tệp gốc `/tmp/rv-318/VERDICT.md`. Người thi công chép và
+  KHÔNG sửa — nhưng đó là LỜI KHAI của tôi, không phải phép đo; xem `verdict_doi_chieu`.
+verdict_doi_chieu: >-
+  CHỨNG MINH: bản trong kho không đổi kể từ lúc ghi — `verdict_sha256` đo trên chính
+  `verdict_path`, nên ai sửa nó về sau đều lộ. Đó là chống-sửa-về-sau, và nó thật.
+  KHÔNG CHỨNG MINH: rằng bản chép khớp thứ reviewer đã sinh ra. Băm đo trên BẢN SAO nên chỉ nói
+  bản sao khớp chính nó — một vòng tròn. Cắt vòng cần một client thứ hai lấy bản gốc rồi băm độc
+  lập, và container này KHÔNG có đường ấy (REST tới `repos/…` bị proxy chặn 403; đường đọc MCP
+  chuẩn hoá thực thể HTML nên `diff` với nó sinh lệch hệ thống).
+  TRẠNG THÁI ĐÚNG: **KHÔNG ĐO ĐƯỢC**, không phải "đã kiểm".
+  Thứ MỚI so với tiền lệ, và nó thu hẹp vòng tròn một chút chứ không cắt được: lượt chạy có
+  `run.json` do `launcher.py` ghi, mang `ma_thoat`, `thoi_luong_giay`, băm prompt và mốc
+  thời gian — nên "đã có một lượt chạy thật, dài 1171.803s, thoát 0" là ĐO ĐƯỢC, khác với "nội
+  dung verdict là nguyên văn của nó" vốn vẫn không đo được.
+
+evidence_channel: github_pr_comment
+evidence_url: https://github.com/ducthangho/tra-luat/pull/322#issuecomment-5424468475
+evidence_ghi_chu: >-
+  Comment do tài khoản tác giả PR đăng. Đã đọc ngược về và `diff`: KHỚP TỪNG BYTE sau khi gỡ
+  thực thể HTML của đường đọc. Nguồn có thẩm quyền vẫn là tệp `verdict_path` trong kho.
+
+chot_read_only_DO_chu_khong_tin_co:
+  cay_sandbox_sau_luot: 'git status --porcelain RỖNG ở /tmp/rv-318/cay-kho; git log 48cf331..HEAD RỖNG'
+  kho_that_sau_luot: 'git status --porcelain RỖNG; HEAD không bị reviewer đổi'
+  launcher_chot: '--require-clean bật; --expected-head khớp 48cf331e36cc…; prompt neo băm cf3521c1… KHÔNG, xem dưới'
+  ghi_chu_bam_prompt: >-
+    Băm prompt của lượt REVIEW là `c2123262ac227e46a2416ed5cce6c0f377d2558a0aaa46f55d73f447ce808b95`
+    (`cf3521c1…` là băm prompt của lượt EXECUTOR packet #319 — hai lượt khác nhau, đừng ghép).
+
+ket_qua_dem_duoc:
+  P1: 6
+  P2: 3
+  P3: 0
+  don_vi_dem: 'finding có slug riêng trong VERDICT.md; KHÔNG đếm dòng bảng đo'
+  bang_do_dong: 44
+  o_KHONG_DO_DUOC_trong_bang: 17
+
+phep_do_reviewer_lat_lai_loi_khai_cua_executor:
+- id: n5-grep-khong-giu-duoc-nghia
+  noi_dung: >-
+    Executor chứng minh N5 bằng "cả ba grep thấy". Reviewer đảo RIÊNG nghĩa của từng P2 trong khi
+    giữ nguyên các chuỗi neo: cả ba lần bộ grep vẫn `rc=0`. Bản hiện tại KHÔNG sai, nhưng phép
+    chứng minh của executor KHÔNG có răng ngữ nghĩa.
+- id: n7-khong-co-duong-do-trong-write-set
+  noi_dung: >-
+    `doctrine-scan --root .` chỉ quét `.claude/skills/*.md` và `CLAUDE.md`, KHÔNG quét
+    `docs/GOI_AGENT_DA_NEN.md` — tệp DUY NHẤT của write set. Nên N7 là tiêu chí RỖNG với packet
+    này: không đột biến hợp lệ nào trên tệp packet làm nó đỏ. Đây là L3 của skill `soan-spec`
+    bị vi phạm ngay trong đặc tả do phiên điều phối viết.
+- id: mirror-ref-count-khong-khop
+  noi_dung: >-
+    EVIDENCE khai "210 = 210, tập ref y hệt". Bundle reviewer nhận: `kho.git` có 211 head (thừa
+    `refs/heads/HEAD`), clone có 210 ref không-symref. Cả con số lẫn lời "y hệt" đều không đúng
+    cho bundle ấy.
+- id: lease-trang-thai-hien-tai-khong-nhat-quan
+  noi_dung: >-
+    `reviewed_sha_required` của lease vẫn là base `c35ae1c` trong khi review neo `48cf331`,
+    trái chính ghi chú ngay dưới nó; và ghi chú ngân sách còn nói "Ở đây chưa có dòng nào" sau khi
+    `da_dung` đã là 155. ĐÚNG hình dạng "sửa TRƯỜNG, quên VĂN BẢN" — và đây là lần thứ NĂM của
+    hình dạng ấy trong chuỗi packet #314 → #318 → #319.
+
+phep_do_reviewer_XAC_NHAN_lai:
+- id: phep-E-mang-trong-sandbox
+  noi_dung: >-
+    Phiên điều phối giao thêm một phép đo: chạy `git ls-remote --heads origin` NGAY TRONG sandbox
+    reviewer. Kết quả lượt này: **`rc=128`, 0 dòng ref**. Tức mệnh đề của adapter
+    `cross-review` ("sandbox codex không ra được mạng") ĐÚNG cho lượt này. Đáng ghi vì phiên
+    điều phối chạy cùng lệnh ở VỎ PHIÊN và được `rc=0` với ref thật — hai lớp, hai kết quả, và
+    chỉ reviewer đo được lớp của họ.
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-26T11:15:33Z'
+receipt_khong_khai:
+- 'KHÔNG khai lượt này đủ cho land — verdict là `changes_requested`, còn 6 P1 chưa vá.'
+- 'KHÔNG khai bản vá đúng — reviewer chỉ nói nó chưa đủ, không nói nó sai toàn bộ.'
+- 'KHÔNG khai đã chạy state machine `packet_loop`: `.claude/.packet_state/` bị gitignore và
+   trống trong container này, nên `record-review` sẽ ghi vào thứ chết theo container. Biên nhận
+   này LÀ đường bền, và `bien-nhan --packet 318` trả rc=11 trước khi có nó.'

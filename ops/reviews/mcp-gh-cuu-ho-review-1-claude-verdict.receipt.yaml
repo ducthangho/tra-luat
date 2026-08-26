@@ -1,0 +1,74 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 1 của PR #339 (packet #319).
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '319'
+packet_slug: MCP-GH-CUU-HO
+lease_id: null
+lease_review_KHONG_DUOC_CAP: 'lease đang sống là lease EXECUTOR r5; không có lease review riêng'
+provider: claude
+role: reviewer
+verdict: blocked
+reviewed_sha: 4aa936e0a3be676ed2492f89b25f9742a249a965
+luot: 1
+cross_provider: true
+cross_provider_ghi_chu: 'executor là codex, reviewer là claude — khác nền theo đúng lease r5'
+assurance: cross_approved
+verdict_path: ops/reviews/mcp-gh-cuu-ho-review-1-claude-verdict.md
+verdict_sha256: 7882517a1a01aa6623d5daceeebd3af8c05bdeec8b56e37b5cb94e749a7faeef
+verdict_bytes: 38227
+verdict_nguon: >-
+  `claude -p --model opus --permission-mode acceptEdits` trong `launcher.py run`, trên một CLONE
+  ĐỘC LẬP tại exact SHA, `--require-clean`, prompt neo băm `622bb61c…`. 1088.6s, `ma_thoat=0`.
+phien_reviewer_DOC_LAP: >-
+  Chạy bằng một phiên `claude` RIÊNG, không mang ngữ cảnh của phiên đã soạn đặc tả. Cần thiết vì
+  phiên điều phối tự viết spec và cả ba mươi tiêu chí — nó review chính nó thì chỉ là đọc lại.
+
+ket_qua_dem_duoc:
+  P1: 3
+  P2: 8
+  dem_bang_lenh: "grep -cE '^### P1' và '^### P2' trên tệp verdict; khớp lời khai cuối verdict."
+  P1_slug: [cong-that-khong-noi-vao-du-lieu-that, bo-test-khong-co-cong-nao-chay, review-vong-1-khong-do-duoc]
+
+VONG_NAY_KHONG_DO_DUOC_GI_VA_DO_LA_LOI_CAU_HINH_CUA_PHIEN_DIEU_PHOI:
+  hien_tuong: >-
+    Vỏ shell của reviewer KHÔNG chạy được mã. `python3 file.py`, `python3 -c`, `bash -c` đều trả
+    "This command requires approval". Chỉ nhóm lệnh chỉ-đọc chạy được (`git` đọc, `grep`, `sed`,
+    `wc`, `sha256sum`, và `python3 --version`).
+  nguyen_nhan: >-
+    Tôi phóng bằng `--permission-mode acceptEdits` mà KHÔNG truyền `--allowedTools`. Chế độ ấy cho
+    sửa tệp, không cho chạy Bash.
+  cay_dang_o_cho: >-
+    CHÍNH TỆP packet #318 đang sửa đã ghi sẵn câu trả lời: dòng 530 nêu thành ngữ
+    `--allowedTools "Read" "Glob" "Grep" "Edit" "Write" "Bash(python:*)" … < PROMPT.md`, và mục
+    bốn-control kết luận rằng `Bash` TRẦN mới khớp mọi thứ còn luật hẹp thì chặn oan. Tôi vừa
+    review chín vòng về đúng đoạn ấy rồi phóng sai đúng chỗ nó cảnh báo.
+  he_qua_dung_dan: >-
+    Verdict `blocked` là ĐÚNG, không phải thất bại của reviewer: nó tuyên bố ngay câu đầu rằng
+    vòng này không đo được gì, liệt kê từng lệnh bị từ chối, và KHÔNG suy kết luận từ việc không
+    chạy được. Đó chính là hành vi `KHÔNG_ĐO_ĐƯỢC` mà doctrine đòi.
+
+DU_KHONG_CHAY_DUOC_VAN_TIM_RA_11_FINDING_BANG_DOC:
+  P1_cong_that_khong_noi_vao_du_lieu_that: 'cổng của bộ test nằm ngoài tầm đo của chính nó'
+  P1_bo_test_khong_co_cong_nao_chay: >-
+    KHÔNG cổng nào trong kho chạy `mcp_gh_test.py`. `ci.yml` liệt kê từng `_test.py` phải chạy và
+    tệp này không có trong danh sách. "Cổng vắng runner ≡ cổng vắng mặt" — cùng câu doctrine mà
+    #331 đang nói về `doctrine-scan`.
+  P1_review_vong_1_khong_do_duoc: 'chính vòng review này, tự ghi thành finding'
+  P2_dang_chu_y:
+  - don-vi-ngan-sach-doi-sau-khi-truot-va-tien-de-sai
+  - d9-ghi-cung-900-trai-chinh-D9
+  - loi-khai-38-38-bi-giet-rong-hon-phep-do
+  - b7-xoa-ca-khong-the-do
+  ghi_chu: >-
+    `don-vi-ngan-sach-doi…` là ĐÚNG chỗ tôi cắm vào prompt để nó soi hoài nghi. Nó không chỉ xác
+    nhận đơn vị đổi giữa chừng mà còn nói TIỀN ĐỀ của lần đổi ấy sai.
+
+REVIEWER_GHI_RO_PHAN_LAM_TOT: >-
+  `kiem_dich_den` chặt và không phản chiếu URL · chốt kiểm lại lúc gửi đúng chỗ · `loi_cua` xếp
+  thứ tự nhánh chuẩn · `D6` đo bằng SỔ LỜI GỌI chứ không bằng `rc` · ba mutant c1/c4/d7 đột biến
+  cùng một dòng theo ba hướng để tách đích · ba bản sửa đổi spec đều tự khai chỗ đáng nghi.
+  Ghi lại để `blocked` không bị đọc thành "bản vá kém": vấn đề là CHỖ NỐI và NĂNG LỰC ĐO.
+
+viec_phai_lam_tiep:
+- 'phóng LẠI vòng review với `--allowedTools` có Bash, để lấy phần đo được'
+- 'ba P1 hiện tại đều là chỗ NỐI, không phải nội dung bản vá — sửa được mà không đụng mã'

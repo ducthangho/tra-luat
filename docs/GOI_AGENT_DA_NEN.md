@@ -583,7 +583,7 @@ cụ MCP chỉ đọc mà lượt ấy cần:
 claude -p --model opus --effort max --permission-mode acceptEdits \
   --allowedTools Read Glob Grep Bash \
       mcp__github__pull_request_read mcp__github__issue_read mcp__github__get_file_contents \
-  --output-format json '<prompt>'
+  --output-format json "$PROMPT"
 ```
 
 Và **đừng gọi đó là siết an ninh** — nó chưa từng là. Giữ danh sách hẹp ở đây không mua được an
@@ -591,7 +591,7 @@ toàn, chỉ mua được một verdict mỏng hơn, hoặc không có verdict n
 
 #### NĂM HẠNG bằng chứng — đọc mục dưới bằng từ vựng này, kẻo lại viết ra những câu chỏi nhau
 
-**Phạm vi của từ vựng này:** nó áp cho các **control của mục này** — BA control đo ở vỏ phiên
+**Phạm vi của từ vựng này:** nó áp cho các **control của mục này** — BA control TRONG BẢNG, đo ở vỏ phiên
 điều phối, thành NĂM mệnh đề TRONG BẢNG (`--allowedTools` và cặp credential mỗi cái được đo ở
 hai cấu hình); văn xuôi dưới bảng mang thêm hai mệnh đề nữa; phép đếm đầy đủ nằm ngay sau bảng năm hạng.
 Mục mạng/sandbox codex và mục hai pha reviewer ĐÃ ĐƯỢC TÁCH sang **packet `MANG-SANDBOX-CODEX`,
@@ -617,26 +617,28 @@ KHÁC NHAU ở hai cấu hình. Mục dưới có ví dụ: hàng `--allowedTool
 | **chưa xếp được** | không rơi gọn vào bốn hàng trên | phải GỌI TÊN là chưa xếp được, không im lặng bỏ qua |
 
 **Mục này dùng BA trên năm hạng — nhưng KHÔNG phải ba hạng mà bản trước tưởng.** Đơn vị đếm là
-**lần GẮN NHÃN cho một mệnh đề**, không phải số lần xuất hiện của cụm chữ: năm hàng bảng cộng hai
-mệnh đề trong văn xuôi dưới bảng, tổng BẢY. Đếm ra: `chiều ĐÓNG` ×2 · `chiều MỞ` ×3 ·
-`chưa xếp được` ×2 · `máy phát hiện` ×0 · `quan sát chưa rõ cơ chế` ×0.
+**lần GẮN NHÃN cho một mệnh đề**, không phải số lần xuất hiện của cụm chữ. Bảy mệnh đề mang nhãn:
+năm hàng bảng, cộng mệnh đề cơ chế proxy ambient và mệnh đề bộ-ba-với-quyền-ghi, cả hai nằm trong
+văn xuôi dưới bảng. Đếm ra: `chiều ĐÓNG` ×1 · `chiều MỞ` ×4 · `chưa xếp được` ×2 ·
+`máy phát hiện` ×0 · `quan sát chưa rõ cơ chế` ×0.
 
 Bản trước của chính đoạn này khai `chiều ĐÓNG` **bằng KHÔNG** rồi dựng cả một lập luận trên đó —
-rằng ô rỗng ấy chứng minh "không control nào bó được". Cross-review bác: hai mệnh đề THẬT SỰ đóng.
+rằng ô rỗng ấy chứng minh "không control nào bó được". Cross-review bác: có mệnh đề THẬT SỰ đóng.
 Ghi lại vì bài học đắt hơn con số: **quan hệ tổng còn đúng không chứng minh các số hạng còn đúng**.
 Số hạng-được-dùng vẫn là ba trước và sau khi sửa, nên mọi phép kiểm đếm-theo-quan-hệ đều xanh
 trong khi danh tính từng hạng đã đổi hết.
 
-Điều đáng nói nay KHÁC hẳn, và mạnh hơn: **có thứ đóng thật — nhưng không thứ nào đóng ĐÚNG THỨ
-đang bàn.** Luật hẹp `Bash(x:*)` đóng HÌNH DẠNG lệnh; `--require-clean` đóng việc chạy trên cây
-bẩn. Cả hai đều đo được, đều fail-closed, và **cả hai đều không chạm quyền ghi vào kho**. Nên
+Điều đáng nói nay KHÁC hẳn, và mạnh hơn: **có thứ đóng thật — nhưng nó không đóng ĐÚNG THỨ đang
+bàn.** Luật hẹp `Bash(x:*)` đóng HÌNH DẠNG lệnh: đo được, fail-closed, và **không chạm quyền ghi
+vào kho**. Nên
 luận điểm đúng của mục là *chưa đo được control nào bó được quyền ghi*, với lượng từ cố ý yếu vì
 hai ô `chưa xếp được` là hai mệnh đề chưa chốt.
 
 `máy phát hiện` rỗng cũng là kết luận, không phải sót: bộ ba từng bị gọi là máy phát hiện hoá ra
-KHÔNG tố cáo sự kiện đang bàn. `quan sát chưa rõ cơ chế` rỗng vì mệnh đề chưa chốt duy nhất không
-mang phiên bản lẫn số lần lặp, mà hạng ấy đòi lặp lại được — thiếu cả hai điều kiện thì chỗ của nó
-là ô dư, không phải hạng gần nhất. Bảng giữ đủ năm hàng vì nó là **từ vựng dùng chung**; đừng đọc
+KHÔNG tố cáo sự kiện đang bàn. `quan sát chưa rõ cơ chế` rỗng vì lý do riêng của TỪNG mệnh đề chưa chốt, không
+phải một lý do chung: hàng `workspace-write` không mang phiên bản lẫn số lần lặp, mà hạng ấy đòi
+lặp lại được; còn mệnh đề bộ-ba-với-quyền-ghi thì chưa ai đo CƠ CHẾ. Thiếu điều kiện thì chỗ của
+chúng là ô dư, không phải hạng gần nhất. Bảng giữ đủ năm hàng vì nó là **từ vựng dùng chung**; đừng đọc
 số hàng thành số hạng đã dùng.
 
 Luật đọc: **quan sát theo phiên bản KHÁC bất biến an ninh.** Chỉ được gọi một thứ là *ranh giới*
@@ -685,16 +687,14 @@ container**. Đây là **cơ chế đã xác minh — chiều MỞ**: ta biết 
 Bản đầu còn viết *"ranh giới thật là clone rời + `--require-clean` + kiểm cây sạch"*. Câu ấy SAI
 về hạng, nhưng bản sửa đầu tiên cũng sai: nó gọi cả ba là **máy phát hiện**, trong khi phản chứng
 nằm ngay trên — push ĐÃ tạo ref mà `--require-clean` **vẫn báo sạch**, tức nó KHÔNG tố cáo. Đúng
-cách là tách **hai đối tượng**, vì cùng một control mang hạng khác nhau cho hai thứ bị đo:
+cách là hỏi **hạng cho ĐỐI TƯỢNG NÀO**. Với đối tượng của mục này — **quyền ghi/push vào kho** —
+bộ ba ấy là **CHƯA XẾP ĐƯỢC**: đo được nó không tố cáo, nhưng chưa ai đo vì sao, nên cũng không
+gọi được là chiều MỞ.
 
-- **Với quyền ghi/push vào kho:** bộ ba ấy là **CHƯA XẾP ĐƯỢC** — đo được nó không tố cáo, nhưng
-  chưa ai đo vì sao, nên không gọi được là chiều MỞ.
-- **Với việc chạy một lượt trên cây bẩn:** `--require-clean` là **cơ chế đã xác minh — chiều
-  ĐÓNG**, đo hai chiều 26-08-2026 bằng `launcher.py run --require-clean -- true`: cây sạch cho
-  `rc=0`, cây bẩn cho **`rc=6`** kèm `worktree KHONG sach (1 muc) - tu choi chay mo ho`. Nó chặn
-  TRƯỚC khi chạy, nên với đối tượng ấy nó còn mạnh hơn một máy phát hiện.
-
-Đừng gom hai điều ấy lại: gom chính là lỗi mà cả mục này sinh ra để chữa.
+`--require-clean` CÓ bó một thứ khác — việc chạy một lượt trên cây bẩn — và bó thật, đo được. Nhưng
+đối tượng ấy **ngoài phạm vi mục này**, nên nó không vào bảng và không vào phép đếm ở trên; đưa nó
+vào là lẫn hai đối tượng, đúng lỗi cả mục sinh ra để chữa. Ai cần hạng cho đối tượng ấy thì xếp nó
+ở nơi nói về vòng đời lượt chạy, kèm phép đo riêng.
 
 Với phiên **executor có quyền ghi**, danh sách hẹp vẫn hợp lý: ở đó ta muốn giới hạn *hình dạng
 việc*, và executor có `settings.json` của kho làm nền.

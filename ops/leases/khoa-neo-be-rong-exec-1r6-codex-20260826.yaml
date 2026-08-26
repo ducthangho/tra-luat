@@ -248,3 +248,7 @@ tiep_noi_cong_viec_do_dang: >-
   nay `goc.mkdir()` RỒI mới gọi `_kho_gia_co_verdict(c, "bnsha256\nroot", ...)` — nếu hàm
   ấy cũng tạo thư mục thì lần hai có thể ném `FileExistsError`. Chạy ca đó riêng và xem.
 posted_comment_id: 5424908382   # workflow ghi, ĐỪNG sửa tay
+
+da_bi_thay_the: khoa-neo-be-rong-exec-1r7-codex-20260826   # BUOC HAI cua chuoi thay the.
+                        # r6 lam XONG viec cua no (suite 263/263 · BO QUA 0 · TONG DAT · 75
+                        # dot bien), nhung co che no them vao lam YEU mot chot khac — xem r7.

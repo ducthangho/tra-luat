@@ -355,7 +355,8 @@ ly_do_mo_ban_sua_doi_4: >-
   vòng 3. Không nâng trần lần nữa; cắt.
   Mệnh đề doctrine còn đứng mà KHÔNG cần bảng số nào và đã viết lại vào chỗ cắt: mạng đóng của
   sandbox là một MẶC ĐỊNH CẤU HÌNH, không phải bất biến — biết cơ chế không làm nó thành ranh giới.
-  Số đo, probe và bảng hai pha đi sang packet mới.
+  Số đo, probe và bảng hai pha đi sang packet mới: **Issue #334** (`MANG-SANDBOX-CODEX`), đã mở,
+  mang theo toàn văn 70 dòng bị cắt và hai khuyết tật đã biết. #334 CHƯA có lease.
   ĐO ĐƯỢC: cắt 70 dòng ⇒ ngân sách tệp doctrine từ 198/200 xuống 144/200, còn biên 56.
 doi_gi_so_voi_r3: >-
   HAI thứ: `write_set` (về một đường dẫn) và `objective` (mục mạng/sandbox + hai pha rời khỏi

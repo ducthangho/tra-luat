@@ -171,3 +171,8 @@ thay_the_ly_do: >-
   TRƯỜNG được nới, quên VĂN BẢN mô tả nó. Nên lease này đã được grep lại toàn văn sau khi soạn,
   và S2 nói thẳng cách nâng trần đúng.
 posted_comment_id: 5423419681   # workflow ghi, ĐỪNG sửa tay
+
+# Cổng `_kiem_bia_mo` (PR #316) đòi chuỗi thay thế HAI CHIỀU: lease mới khai `thay_the_cho`,
+# lease cũ phải khai ngược lại. Dòng dưới do người vận hành thêm tay — cổng cố ý không tự sửa
+# hồ sơ cũ. ĐO: thiếu dòng này thì r2 bị chặn rc=8.
+da_bi_thay_the: mcp-gh-cuu-ho-exec-1r2-claude-20260826

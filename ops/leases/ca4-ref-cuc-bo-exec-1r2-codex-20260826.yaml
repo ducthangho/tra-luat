@@ -188,3 +188,7 @@ canh_bao_cho_nguoi_thi_hanh: >-
   bắt-oan của (A) — nhánh cục bộ ĐI TRƯỚC remote phải QUA — là bắt buộc, không phải tuỳ chọn.
   (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
 posted_comment_id: 5426192946   # workflow ghi, ĐỪNG sửa tay
+
+da_bi_thay_the: ca4-ref-cuc-bo-exec-1r3-codex-20260826   # BUOC HAI cua chuoi thay the.
+                        # r2 vá dung P2 cua connector, nhung cross-review luot 2 do duoc BA
+                        # trang thai worktree NUA cung hong theo cung mot hinh dang — xem r3.

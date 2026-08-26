@@ -1,0 +1,89 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 2 của PR #322 (packet #318).
+# Ghi NGAY SAU LƯỢT, trước khi vá gì.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '318'
+packet_slug: DOCTRINE-RANH-GIOI-REVIEWER
+lease_id: null
+lease_review_KHONG_DUOC_CAP: >-
+  Không có lease review riêng; lease đang sống là lease EXECUTOR. Để `null` và nói ra.
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: f16b6bf9d6085bd1923db9800090faaed1ffdd1b
+luot: 2
+cross_provider: true
+assurance: cross_approved
+assurance_ghi_chu: >-
+  Khác nền (executor claude / reviewer codex). Vận chuyển bằng `add_issue_comment` của TÀI KHOẢN
+  TÁC GIẢ PR, KHÔNG phải `REQUEST_CHANGES` — nên KHÔNG mang trạng thái review chính thức của
+  GitHub, và `ADR-0040` nói thẳng thứ đó không thành merge authorization.
+
+verdict_path: ops/reviews/doctrine-ranh-gioi-reviewer-review-2-codex-verdict.md
+verdict_sha256: 42c0bd585983d73f892b54e3ffcf10f8dc7297517fcaab5545b291244e12150a
+verdict_bytes: 21440
+verdict_nguon: >-
+  `codex exec -s workspace-write -c model_reasoning_effort=xhigh`, bọc trong `launcher.py run`
+  với `--expected-head f16b6bf…`, `--require-clean`, prompt neo băm
+  (`prompt_kin_hoan_toan: true`), 1127.702s, `ma_thoat=0`.
+
+BAN_CHIEU_TREN_GITHUB_MAT_CHU:
+  comment_id: 5425672762
+  hien_tuong: >-
+    Đọc ngược comment đã đăng rồi `diff` với tệp nguồn: lệch ĐÚNG MỘT chỗ — chuỗi `bản-sao`
+    đặt trong cặp ngoặc nhọn (9 ký tự) **biến mất sạch** khỏi thân đã đến, ở dòng đối chiếu
+    `n7-khong-co-duong-do-trong-write-set`. Nguồn 571 ký tự, bản đã đến 562.
+  vi_sao_dang_ghi: >-
+    Đây là lần THỨ HAI trong cùng phiên, và lần này nó ăn vào CHÍNH VĂN CỦA REVIEWER, không phải
+    văn của người đăng. Lần đầu đã báo ở PR #315 (comment 5423287261). Cùng họ với bài học tầng
+    vận chuyển trong `CLAUDE.md`, nhưng KHÁC hành vi: không phải chuẩn hoá thực thể HTML
+    (`'`→`&#39;`) mà là CẮT BỎ đoạn có hình dạng thẻ — mất ký tự thật.
+  he_qua: >-
+    Bản chiếu trên GitHub KHÔNG đọc đủ ở đúng dòng ấy. Nguồn có thẩm quyền là tệp
+    `verdict_path` trong kho, neo băm ở trên. Đã đăng một comment đính chính.
+  chua_do_duoc: >-
+    Không tách được \"GitHub lưu thiếu\" với \"công cụ đọc cắt\" — cần một client thứ hai, và
+    container này không có (REST tới `repos/…` bị proxy chặn 403).
+
+doi_chieu_luot_truoc:
+  da_va_that: 6
+  va_ho: 2
+  va_sinh_loi_moi: 2
+  chua_va: 0
+  don_vi_dem: 'mười slug của VERDICT lượt 1, mỗi slug một phán quyết'
+  reviewer_TU_THU_HEP_finding_cua_ho: >-
+    `n7-khong-co-duong-do-trong-write-set`: từ *"không gate nào có răng"* xuống *"hai phép N7
+    nêu không có răng"*, sau khi executor bác một phần kèm phép đo. Đáng ghi vì nó cho thấy vòng
+    review này ĐỌC được phản bác chứ không giữ nguyên lời cũ.
+
+ket_qua_dem_duoc:
+  P1: 3
+  P2: 2
+  P3: 0
+  cach_dem: "grep -oE '^### [a-z0-9-]+  \\[(P[123])\\]' VERDICT.md | grep -oE 'P[123]' | sort | uniq -c"
+  ba_p1: 'phan-hang-mang-tu-mau-thuan · nam-hang-khong-tao-phan-hoach · n7-doc-claims-khong-phai-phep-n7'
+  hai_p2: 'probe-mang-moi-khong-tai-lap-duoc · ba-neo-cua-48cf331-dem-sai'
+
+hai_P2_danh_thang_vao_LOI_KHAI_CUA_EXECUTOR:
+- id: ba-neo-cua-48cf331-dem-sai
+  noi_dung: >-
+    Executor khai `48cf331` bị neo bởi BA thứ: verdict, biên nhận, và "head PR #322". Sai một
+    phần ba: head PR nay là `f16b6bf`, còn `48cf331` chỉ là CHA. Đúng là HAI neo exact cộng
+    MỘT quan hệ tổ tiên. Và con số "23 commit của phiên" không tái lập được vì tập "của phiên"
+    chưa bao giờ được định nghĩa.
+- id: probe-mang-moi-khong-tai-lap-duoc
+  noi_dung: >-
+    Bảng ba dòng về `network_access` là nền của thay đổi phân hạng LỚN NHẤT vòng 2, nhưng
+    bundle chỉ ghi "cùng một probe" — không có lệnh, fixture hay raw output, nên reviewer KHÔNG
+    tái lập được. Đúng hình dạng "ba `stdout.log` không tái lập được" mà chính packet này tố
+    cáo ở #314 — nay do executor phạm.
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-26T13:02:02Z'
+receipt_khong_khai:
+- 'KHÔNG khai đủ cho land — verdict `changes_requested`, còn 3 P1.'
+- 'KHÔNG khai bản vá vòng 2 sai toàn bộ — 6/10 finding vòng 1 đã vá THẬT.'

@@ -16,6 +16,7 @@ Chạy: python3 ops/lease_publish_test.py
 from __future__ import annotations
 
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -2927,6 +2928,8 @@ class _GitKhoGia:
             ten = args[-1].split("refs/heads/", 1)[1].split("...", 1)[0]
             trai, phai = self.lech.get(ten, (0, 0))
             out = f"{trai}\t{phai}\n"
+        elif args[:3] == ("worktree", "list", "--porcelain"):
+            out = ""
         elif args and args[0] == "ls-tree":
             out = "".join(f"100644 blob {b}\t{p}\n" for b, p in self.refs.get(args[2], []))
         elif args[:2] == ("cat-file", "-p"):
@@ -3365,6 +3368,88 @@ def t108_moi_chot_ref_cuc_bo_co_dot_bien_rieng():
             finally: globals()["_nap_cong"] = cu_nap
     print(f"đột biến ref cục bộ: đã chạy={len(muts)}, bị giết={giet}")
     bang(giet == len(muts), f"đột biến ref cục bộ chỉ bị giết {giet}/{len(muts)}")
+
+
+def _git_fixture(goc: Path, *args) -> str:
+    p = subprocess.run(["git", *args], cwd=goc, capture_output=True, text=True)
+    bang(p.returncode == 0, f"fixture git {' '.join(args)} rc={p.returncode}: {p.stderr}")
+    return p.stdout.strip()
+
+
+def _kho_tut_sau(s: Path, *, bi_giu: bool) -> tuple[Path, Path | None]:
+    kho = s / "kho"; kho.mkdir()
+    _git_fixture(kho, "init", "-q", "-b", "main")
+    _git_fixture(kho, "config", "user.name", "Test")
+    _git_fixture(kho, "config", "user.email", "test@example.invalid")
+    _git_fixture(kho, "config", "commit.gpgsign", "false")
+    (kho / "x").write_text("cu\n", encoding="utf-8")
+    _git_fixture(kho, "add", "x")
+    _git_fixture(kho, "commit", "-qm", "cu")
+    _git_fixture(kho, "branch", "a")
+    (kho / "x").write_text("moi\n", encoding="utf-8")
+    _git_fixture(kho, "commit", "-qam", "moi")
+    _git_fixture(kho, "update-ref", "refs/remotes/origin/a", "HEAD")
+    wt = s / "wt giu" if bi_giu else None
+    if wt is not None:
+        _git_fixture(kho, "worktree", "add", "-q", str(wt), "a")
+    return kho, wt
+
+
+def _thi_hanh_lenh_chua(kho: Path) -> tuple[str, int, str]:
+    rc, _, err = chay("ai-dang-giu", "ops/lease_publish.py", "--root", kho, cwd=kho)
+    bang(rc == 12 and "chữa: " in err, f"cổng không in lệnh chữa: rc={rc}, {err!r}")
+    lenh = err.split("chữa: ", 1)[1].strip()
+    p = subprocess.run(shlex.split(lenh), cwd=kho, capture_output=True, text=True)
+    hai_ref = _git_fixture(kho, "rev-parse", "refs/heads/a",
+                          "refs/remotes/origin/a").splitlines()
+    bang(p.returncode == 0 and len(hai_ref) == 2 and hai_ref[0] == hai_ref[1],
+         f"lệnh chữa không chạy/không khớp ref: {lenh!r}, rc={p.returncode}, "
+         f"refs={hai_ref}, err={p.stderr!r}")
+    return lenh, p.returncode, hai_ref[0]
+
+
+@ca
+def t109_lenh_chua_nhanh_ranh_phai_chay_duoc_va_khop_origin():
+    with San() as s:
+        kho, _ = _kho_tut_sau(s, bi_giu=False)
+        lenh, rc, _ = _thi_hanh_lenh_chua(kho)
+        bang(rc == 0 and lenh == "git branch -f a refs/remotes/origin/a",
+             f"nhánh rảnh không giữ lệnh branch -f: {lenh!r}")
+
+
+@ca
+def t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin():
+    with San() as s:
+        kho, wt = _kho_tut_sau(s, bi_giu=True)
+        lenh, rc, _ = _thi_hanh_lenh_chua(kho)
+        doi_so = shlex.split(lenh)
+        bang(rc == 0 and doi_so[:2] == ["git", "-C"] and Path(doi_so[2]).resolve() == wt.resolve()
+             and doi_so[3:] == ["merge", "--ff-only", "refs/remotes/origin/a"],
+             f"lệnh không nêu đúng worktree bị giữ: {lenh!r}")
+
+
+@ca
+def t111_dot_bien_branch_f_vo_dieu_kien_chi_giet_ca_worktree_giu():
+    global SCRIPT
+    nguon = SCRIPT.read_text(encoding="utf-8")
+    cu, moi = "if ten in dang_giu:", "if False:"
+    bang(nguon.count(cu) == 1, "neo mutant branch-f vô điều kiện không duy nhất")
+    with San() as s:
+        ban_goc, p = SCRIPT, s / "mut_branch_f.py"
+        p.write_text(nguon.replace(cu, moi), encoding="utf-8")
+        SCRIPT = p
+        try:
+            song, do = 0, []
+            for dich in (t109_lenh_chua_nhanh_ranh_phai_chay_duoc_va_khop_origin,
+                         t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin):
+                try: dich()
+                except AssertionError: do.append(dich.__name__)
+                else: song += 1
+        finally:
+            SCRIPT = ban_goc
+    print(f"đột biến lệnh chữa: ĐỎ={do}, đối chứng sống={song}")
+    bang(do == [t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin.__name__]
+         and song == 1, f"mutant giết sai ca: ĐỎ={do}, sống={song}")
 
 
 def main() -> int:

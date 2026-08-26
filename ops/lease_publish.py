@@ -338,6 +338,28 @@ def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[str]:
     return tut_sau
 
 
+def _lenh_chua_nhanh_tut_sau(goc: Path, tut_sau: list[str]) -> str:
+    """Fast-forward trong worktree đang giữ nhánh; nhánh rảnh vẫn cập nhật ref trực tiếp."""
+    out = _git(goc, "worktree", "list", "--porcelain", "-z")
+    dang_giu, worktree = {}, None
+    for truong in out.split("\0"):
+        if truong.startswith("worktree "):
+            worktree = truong.removeprefix("worktree ")
+        elif truong.startswith("branch refs/heads/") and worktree is not None:
+            dang_giu[truong.removeprefix("branch refs/heads/")] = worktree
+        elif not truong:
+            worktree = None
+    ket_qua = []
+    for ten in tut_sau:
+        doi_ung = "refs/remotes/origin/" + ten
+        if ten in dang_giu:
+            ket_qua.append(f"git -C {shlex.quote(dang_giu[ten])} merge --ff-only "
+                           f"{shlex.quote(doi_ung)}")
+        else:
+            ket_qua.append(f"git branch -f {shlex.quote(ten)} {shlex.quote(doi_ung)}")
+    return "; ".join(ket_qua)
+
+
 def _quet_lease_toan_kho(goc: Path, *, doi_chieu_ref=True,
                          chan_nhanh_tut_sau=False) -> list[dict]:
     """Đọc mỗi cặp (blob, đường dẫn) lease đúng một lần trên mọi ref cục bộ."""
@@ -345,9 +367,7 @@ def _quet_lease_toan_kho(goc: Path, *, doi_chieu_ref=True,
     if chan_nhanh_tut_sau:
         tut_sau = _nhanh_cuc_bo_tut_sau(goc, refs)
         if tut_sau:
-            lenh_chua = "; ".join(
-                f"git branch -f {shlex.quote(x)} "
-                f"{shlex.quote('refs/remotes/origin/' + x)}" for x in tut_sau)
+            lenh_chua = _lenh_chua_nhanh_tut_sau(goc, tut_sau)
             raise Chan(RC_KHONG_XAC_DINH,
                        "NHÁNH_CỤC_BỘ_TỤT_SAU: " + ", ".join(tut_sau) +
                        ". ai-dang-giu quét refs/heads/*; chữa: " + lenh_chua)

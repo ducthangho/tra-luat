@@ -76,7 +76,7 @@ target_branch_neu_land: master
 
 base_sha: b662fe1d07c675a222ae26e734377e305775e4f3
 start_from_sha: b662fe1d07c675a222ae26e734377e305775e4f3
-reviewed_sha_required: 4aa936e0a3be676ed2492f89b25f9742a249a965
+reviewed_sha_required: 97617d3a5372fcce39b0e53064958c24d15775ce
 base_ghi_chu: >-
   `b662fe1` = `origin/master` đo 10:03Z 26-08. ĐỔI so với r1, vốn neo `c35ae1c`: master trôi
   GIỮA LÚC SOẠN ĐẶC TẢ (PR #316 land packet #313 ca 1+3, chạm `ops/lease_publish.py` +99/−1 và
@@ -98,7 +98,7 @@ ngan_sach_kich_thuoc:
     `.claude/dev/mcp_gh_test.py` — cột dòng THÊM. ĐỔI ĐƠN VỊ ở r5; xem `doi_don_vi_ngan_sach`.
   dac_ta_theo_doi_rieng: 315
   don_vi_cu_de_doi_chieu: '1117 nếu tính CẢ write set như r1–r4 — báo cả hai, đừng chỉ báo cái có lợi'
-  da_dung: 840
+  da_dung: 876
   ghi_chu: >-
     1000 là trần SAU KHI NÂNG lần hai; xem khối `nang_tran`. `da_dung: 210` là số ĐÃ ĐO
     (`git diff --numstat b662fe1 origin/claude/mcp-gh-cuu-ho-exec-1`) — đặc tả đã tiêu 210 dòng vì
@@ -308,6 +308,24 @@ thay_the_ly_do: >-
   và so khớp `da_bi_thay_the` bằng CHUỖI VÔ HƯỚNG, nên quan hệ "một lease bị HAI lease thay" KHÔNG
   biểu diễn được — r4 chỉ mang được một tên. Hai lease của #318/#319 đã đăng TRƯỚC khi cổng ấy land
   nên lọt; lease nào sau này khai cùng quan hệ sẽ bị chặn. Đã báo #313.
+NO_CO_TEN_mo_truoc_khi_land:
+  slug: khong-cong-nao-chay-bo-test
+  hang: P1
+  no_la_gi: >-
+    KHÔNG cổng nào trong kho chạy `.claude/dev/mcp_gh_test.py`. `ci.yml` LIỆT KÊ từng `_test.py`
+    bằng tay và tệp này không có trong danh sách; tìm `glob`/`rglob`/`**/*_test` trong
+    `.github/workflows/*.yml` cho 0 kết quả. Nên mọi con số 39/39 và 42/42 chỉ tồn tại KHI CÓ
+    NGƯỜI GÕ TAY.
+  vi_sao_KHONG_va_trong_packet_nay: >-
+    Sửa đòi chạm `.github/workflows/`, NGOÀI write set ba đường dẫn đã đóng băng. Đây là lỗ do
+    CHÍNH write set sinh ra: đăng ký runner không nằm trong `muc_tieu`, không nằm trong
+    `ngoai_pham_vi`, và ba đường dẫn không cho làm.
+  phai_lam_gi: >-
+    Mở packet riêng thêm `python .claude/dev/mcp_gh_test.py` vào `ci.yml`. `CLAUDE.md` đã chốt
+    "Workflow chỉ chạy khi có người bấm là workflow KHÔNG có ai canh"; ở đây còn nhẹ hơn — không
+    có cả cái nút.
+  KHONG_duoc_de_luot_land_tu_nho: 'ghi thành nợ CÓ TÊN chính vì thế'
+
 da_dung_ĐÃ_SỬA:
   truoc: 802
   sau: 840

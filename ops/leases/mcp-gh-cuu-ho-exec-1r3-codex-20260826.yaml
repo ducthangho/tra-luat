@@ -1,0 +1,220 @@
+# Lease EXECUTOR — `MCP-GH-CUU-HO` (#319), lượt 1, BẢN SỬA ĐỔI 3.
+#
+# Nửa CÔNG CỤ của packet #314 sau khi tách: client MCP cứu hộ cầm `GITHUB_PAT`, cộng harness
+# đo nó. Hai lỗ nặng nhất là lỗi THIẾT KẾ, đã vá một lần và thất bại đúng chỗ vừa vá — nên
+# lượt này SOẠN ĐẶC TẢ TRƯỚC, không vá tiếp.
+#
+# r2 đóng PHA 1: đặc tả đã soạn và ĐÓNG BĂNG, băm neo ở `spec_sha256`. r2 cũng dời base vì
+# `origin/master` trôi GIỮA LÚC SOẠN, và HẠ trần 900 → 750 theo ADR-0044.
+#
+# r3 mở PHA 2 và ĐỔI EXECUTOR sang `codex xhigh` theo chỉ thị người giữ kho; reviewer lật
+# sang `claude` để giữ cross-provider. Đặc tả, write set, trần, base: KHÔNG đổi.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 319
+packet_id: MCP-GH-CUU-HO
+phase_key: MCP-GH-CUU-HO
+revision: 3
+generation: 1
+lease_id: mcp-gh-cuu-ho-exec-1r3-codex-20260826
+
+role: executor
+provider: codex
+executor: codex
+executor_effort: xhigh
+reviewer_provider: claude
+doi_vai_ghi_chu: >-
+  r3 ĐỔI EXECUTOR: `claude` → `codex` (`xhigh`), và LẬT reviewer `codex` → `claude` theo. Lật cả
+  hai là BẮT BUỘC, không phải tuỳ chọn: `assurance_target: cross_approved` đòi hai NỀN khác nhau,
+  nên đổi một vế mà giữ vế kia thì cùng nền tự duyệt bài của mình.
+  §3.2 liệt kê `executor` là thứ TẠO REVISION MỚI và làm lease cũ mất hiệu lực — nên đây là r3,
+  không phải sửa r2 tại chỗ.
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` do CỔNG tính (`_BANG_LOP` mặc định fail-close cho `.claude/dev/mcp_gh*.py` và
+  `ops/specs/**`), và ở packet này nó CÒN là hạng đúng theo nội dung: mã cầm credential thật
+  (`GITHUB_PAT`) và tự quyết định gửi nó đi đâu. Không tự hạ lớp.
+
+spec_path: ops/specs/mcp-gh-cuu-ho.md
+spec_sha256: '51105214fe121a07aa8412466485877c1b98d4dcca0fc97ad4e61e318765f073'
+spec_status: dong_bang
+spec_duyet_boi: ducthangho
+spec_note: >-
+  KHÁC #314 và khác lease A: packet này BẮT BUỘC có đặc tả riêng, vì hai lỗ là lỗi THIẾT KẾ.
+  Bằng chứng đắt: reviewer vòng 2 khai đã vá lỗ sổ rỗng ở vòng 2 — tách sổ nền khỏi sổ đột biến —
+  mà vị ngữ cuối vẫn là `not DO`, và sổ rỗng thoả `not DO`. "Tách sổ mà không đòi sổ nền khác
+  rỗng thì chưa vá gì; nó chỉ đổi chỗ cái lỗ."
+  Vì `spec_hash` chưa tồn tại lúc cấp, lease này CỐ Ý ở revision 1 và điều kiện dừng S1 chặn mọi
+  dòng mã trước khi có băm. Ghi ra vì protocol §3.2 đóng băng spec khi vào `ready`, và lease này
+  KHÔNG giả vờ đã đóng băng.
+
+write_set:
+  - ops/specs/mcp-gh-cuu-ho.md
+  - .claude/dev/mcp_gh.py
+  - .claude/dev/mcp_gh_test.py
+write_set_note: >-
+  BA đường dẫn: một cho đặc tả, hai cho mã. Thứ tự BẮT BUỘC — đặc tả trước, xem S1. Cả ba đều
+  dev-side, không tệp nào vào gói phát hành. `docs/GOI_AGENT_DA_NEN.md` KHÔNG nằm trong write set
+  này: nó thuộc lease `doctrine-ranh-gioi-reviewer-exec-1-claude-20260826` (#318).
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 ~09:19Z bằng `ops/lease_publish.py ai-dang-giu` bản trên `origin/master` (c35ae1c).
+  Phép so hai nguồn TRƯỚC khi quét, so bằng TẬP TÊN: `ls-remote --heads` 205 = `for-each-ref` 205,
+  `comm -23` RỖNG và `comm -13` RỖNG.
+    .claude/dev/mcp_gh.py       ->  NGƯỜI_GIỮ 1  (r4 của #314 — lease bị thay, xem `thay_the_cho`)
+    .claude/dev/mcp_gh_test.py  ->  NGƯỜI_GIỮ 1  (cùng lease)
+    ops/specs/mcp-gh-cuu-ho.md  ->  chưa tồn tại; không lease nào nhắc tới
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+
+branch: claude/mcp-gh-cuu-ho-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: b662fe1d07c675a222ae26e734377e305775e4f3
+start_from_sha: b662fe1d07c675a222ae26e734377e305775e4f3
+reviewed_sha_required: b662fe1d07c675a222ae26e734377e305775e4f3
+base_ghi_chu: >-
+  `b662fe1` = `origin/master` đo 10:03Z 26-08. ĐỔI so với r1, vốn neo `c35ae1c`: master trôi
+  GIỮA LÚC SOẠN ĐẶC TẢ (PR #316 land packet #313 ca 1+3, chạm `ops/lease_publish.py` +99/−1 và
+  `ops/lease_publish_test.py` +125/−1). Điều kiện dừng `S4` của r1 bắn đúng chỗ nó sinh ra để bắn.
+  Đo trước khi dời: `c35ae1c` VẪN là tổ tiên của `b662fe1` (không viết lại lịch sử), và PR #316
+  KHÔNG giao write set của #319. Xử theo §5.1 — master drift thì merge thẳng; nhánh packet đã
+  rebase lên `b662fe1`. Nhánh rẽ SẠCH; mã trên `6c4140b`
+  (PR #315, đã đóng, không merge) đọc được để tham khảo nhưng KHÔNG cherry-pick — nó là thứ
+  verdict vòng 2 bác. Hai tệp `.claude/dev/mcp_gh*.py` CHƯA có trên `master`, nên lượt này viết
+  MỚI chứ không sửa tệp có sẵn.
+  `reviewed_sha_required` bằng base lúc cấp và phải cập nhật sang exact head khi vào review.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 750
+  do_tu_sha: b662fe1d07c675a222ae26e734377e305775e4f3
+  don_vi: '`git diff --numstat b662fe1..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  da_dung: 0
+  ghi_chu: >-
+    750 là TRẦN ƯỚC LƯỢNG, KHÔNG phải số đã đo — `da_dung` vẫn là 0. HẠ từ 900 của r1; xem khối
+    `ha_tran`. Căn cứ: bản bị bác trên `6c4140b` là 541 dòng cho hai tệp mã (mcp_gh.py 207 ·
+    mcp_gh_test.py 334) và đã chạy xanh; NĂM hạng mục của đặc tả thêm ước chừng 6 ca + 5 đột biến,
+    cộng tệp đặc tả. Tỷ lệ mã:test đo được của kho ~1:1,6. TRẦN, KHÔNG PHẢI MỤC TIÊU. Vượt ⇒ S2.
+    ADR-0044: packet xếp `thường` (≤ 6 tệp, ≤ 1.000 thêm+xoá) vì không chạm authority; 750 dưới
+    trần ấy. Phần vượt trần 300 của cách đọc kia đã KHAI trong đặc tả — đúng đường ADR cho phép.
+
+ha_tran:
+  tran_cu: 900
+  tran_moi: 750
+  ai_ha: ducthangho
+  tham_quyen: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+  quyet_dinh_luc: 'direct, in-session, 2026-08-26 — chốt Q1 của vòng chất vấn `soan-spec`'
+  vi_sao: >-
+    ADR-0044 đặt hai trần cho hai lớp và KHÔNG định nghĩa "chạm authority". 900 nằm sát mép trần
+    1.000 của lớp `thường`; hạ xuống 750 để còn biên, và `da_dung` đang là 0 nên hạ không mất gì.
+    Khối này tồn tại vì lease `r4` của #314 NÂNG trần 520 → 760 mà MẤT HẲN khối tương ứng, khiến
+    trần ấy không có thẩm quyền ghi nhận — finding P1 `packet-spec-revision-incoherent`. Hạ trần
+    cũng là ĐỔI trần; không có khối này thì không ai biết ai hạ và vì sao.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-26 — cùng một lượt duyệt với lease #318: phiên tiếp quản trình kế
+  hoạch tách kèm bảng đo và nêu "trước khi tôi mở Issue và cấp lease, cần ba quyết định"; người
+  giữ kho trả lời cả ba (đóng PR #315 giữ nhánh · Packet A một tệp · cài `codex` trước khi cấp).
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  ĐỔI so với r2, và đổi theo hướng TỐT HƠN: phiên ghi lease (`claude`) nay KHÔNG còn là phiên thi
+  công — thi công là `codex`. Một vai đã tách ra thật.
+  Nhưng khai thẳng phần CHƯA tách: phiên `claude` này đã SOẠN ĐẶC TẢ và viết cả bảy nhóm tiêu chí
+  nghiệm thu, nên nếu nó cũng làm reviewer thì đó là **chấm bài theo thang điểm do chính mình đặt**
+  — yếu hơn cross-review thật, dù đúng là khác nền với executor.
+  ⇒ Lượt review PHẢI chạy ở một PHIÊN `claude` RIÊNG (headless, clone rời, detached exact head),
+  không phải trong phiên điều phối này. Nhãn `cross_approved` chỉ đứng được với điều kiện ấy.
+  Thứ vẫn KHÔNG tách được ở container này: phiên điều phối là chỗ duy nhất đọc/ghi được GitHub.
+
+leased_at_utc: '2026-08-26T09:35:00Z'
+lease_expires_at_utc: '2026-08-27T10:00:00Z'
+run_minutes: 1440
+
+viec_cua_luot_nay: >-
+  PHA 2 — viết MỚI `.claude/dev/mcp_gh.py` và `.claude/dev/mcp_gh_test.py` theo ĐÚNG đặc tả đã
+  đóng băng `ops/specs/mcp-gh-cuu-ho.md`
+  (sha256 `51105214fe121a07aa8412466485877c1b98d4dcca0fc97ad4e61e318765f073`, commit `bdbdf05`).
+  PHA 1 đã xong ở r2; đặc tả KHÔNG đổi ở r3.
+  Đặc tả có NĂM hạng mục, TÁM mục tiêu, BA MƯƠI tiêu chí nghiệm thu (A1–A8 · B1–B9 · C1–C4 ·
+  D1–D9). Đọc ở đặc tả, KHÔNG chép lại vào đây — chép là tạo bản chiếu thứ hai rồi để hai bản
+  trôi lệch, đúng bệnh đã làm packet tiền nhiệm bị `blocked`.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  RIÊNG CHO EXECUTOR `codex` — bốn điều khác hẳn khi executor là `claude`:
+  (1) Sandbox codex KHÔNG có đường ra mạng (quan sát 24-08-2026, chưa ai đo CƠ CHẾ — xem
+  `docs/GOI_AGENT_DA_NEN.md`). Executor do đó KHÔNG đọc được Issue #319, đặc tả trên GitHub, hay
+  verdict nào. Phiên điều phối PHẢI ghi sẵn đặc tả + đề bài thành TỆP TRONG THƯ MỤC LÀM VIỆC
+  trước khi phóng. Thiếu bước ấy thì executor viết mò và không ai biết.
+  (2) `.git` mount CHỈ ĐỌC ⇒ executor SINH DIFF/tệp, phiên điều phối commit và push. Executor
+  đừng thử `git commit`.
+  (3) ĐỪNG TỰ SOẠN nội dung dựng đường dẫn thoát khỏi cây, và đừng soạn payload tấn công — bộ lọc
+  nội dung của nền bắn đúng lớp ấy và đã GIẾT HAI LƯỢT của kho này. Hướng thử nào cần nội dung như
+  vậy thì MÔ TẢ BẰNG LỜI cho phiên điều phối viết.
+  (4) Bản in cuối LÀ sản phẩm, không có lượt sau. Còn ~20% ngân sách thì DỪNG và viết kết luận;
+  ô nào chưa xong ghi `KHÔNG_ĐO_ĐƯỢC` kèm lý do — im lặng KHÔNG phải câu trả lời hợp lệ.
+  Cộng ba điều giữ nguyên từ r2:
+  (5) ĐỪNG cherry-pick từ `6c4140b`: bản ấy XANH (`13 đạt · 0 đỏ` · `10/10` · rc=0) và VẪN có cả
+  ba lỗ. Cổng xanh không phải bằng chứng — đó chính là bài học của packet.
+  (6) Mỗi ca mới phải có ĐỘT BIẾN RIÊNG giết đúng ca của nó; đột biến chạy trên BẢN SAO TẠM, tên
+  tệp riêng từng đột biến, không để lại `.pyc`.
+  (7) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu; đừng viết chuỗi giữ chỗ trong cặp ngoặc
+  nhọn ở thân issue/comment.
+
+chua_do_duoc_luc_cap: >-
+  (1) CHƯA tách được "GitHub lưu thiếu" với "công cụ đọc cắt" cho hiện tượng ở cảnh báo (7) —
+  cần một client thứ hai; REST tới `repos/…` bị proxy chặn 403 trong container này.
+  (2) CHƯA đo hành vi chuyển hướng của điểm cuối THẬT (`api.githubcopilot.com`) — bảng 301..308
+  đo trên hai `http.server` cục bộ, tức đo HÀNH VI CỦA `urllib`, không phải của máy chủ kia.
+  Đó vẫn đủ để đòi opener không-theo-chuyển-hướng, vì chốt phải đứng vững bất kể máy chủ trả gì.
+  (3) CHƯA có phản chứng cho `result.isError` từ một công cụ THẬT — mới đọc mã, chưa dựng được ca
+  làm máy chủ trả `isError: true`.
+  (4) Bảng đo sandbox của #314 CHƯA được kiểm chéo; reviewer vòng 2 không tái lập được.
+
+dieu_kien_dung: >-
+  S1 GHI MỘT DÒNG NÀO vào hai tệp mã mà LỆCH đặc tả đã đóng băng ⇒ DỪNG, xin bản sửa đổi 3. Ở r1
+  S1 chặn việc viết mã KHI CHƯA có đặc tả; đặc tả nay đã có băm nên S1 ĐỔI NGHĨA: nó chặn việc đi
+  CHỆCH đặc tả. Đặc tả sai thì sửa qua bản mới, KHÔNG sửa đè — sửa đè làm băm trong lease trỏ vào
+  thứ không còn tồn tại ·
+  S2 vượt 750 dòng thêm ⇒ DỪNG, xin nâng trần bằng khối `nang_tran` có `ai_nang`/`vi_sao`, KHÔNG
+  sửa `dong_them_toi_da` trần trụi — r4 của #314 đã mất đúng khối ấy, và r2 này thêm `ha_tran`
+  chính vì thế ·
+  S3 cần đường dẫn thứ tư ⇒ DỪNG, xin sửa lease ·
+  S4 `origin/master` đi tiếp mà chưa đo lại ⇒ DỪNG, đo lại base. ĐÃ BẮN MỘT LẦN ở r1
+  (`c35ae1c` → `b662fe1`); bắn lần nữa thì xử y hệt, đừng coi là chuyện đã xong ·
+  S5 một trong NĂM hạng mục của đặc tả không có ca đo được ⇒ DỪNG: hạng mục không đo được là hạng
+  mục sẽ được khai là đã làm ·
+  S6 `spec_sha256` đo lại không khớp tệp trên nhánh ⇒ DỪNG: lease đang trỏ vào thứ đã đổi.
+
+thay_the_cho: mcp-gh-cuu-ho-exec-1r2-claude-20260826
+thay_the_ly_do_r3: >-
+  ĐỔI EXECUTOR theo chỉ thị trực tiếp của người giữ kho ngày 2026-08-26: "xử lý #319 pha 2 luôn đi,
+  codex xhigh là executor". §3.2 liệt kê `executor` là thứ tạo revision mới, nên đây là r3 chứ
+  không phải sửa r2 tại chỗ; và reviewer lật sang `claude` để giữ `cross_approved`.
+  KHÔNG đổi: đặc tả và băm của nó · write set ba đường dẫn · trần 750 · base `b662fe1` · mọi tiêu
+  chí nghiệm thu. Đo lại lúc 10:49Z trước khi soạn r3: `origin/master` vẫn `b662fe1`; băm đặc tả
+  trên nhánh packet vẫn khớp giá trị r2 neo; phép so hai nguồn 210 = 210, `comm` hai chiều rỗng.
+
+thay_the_ly_do: >-
+  Chuỗi bản sửa đổi bình thường của CHÍNH packet này: r2 thay r1. BA thứ đổi, và cả ba đều là
+  trường CÓ VĂN BẢN mô tả nó, nên cả ba chỗ văn bản đã sửa theo và grep lại sau khi soạn:
+  (1) `spec_sha256` từ "chưa có" thành băm thật, `spec_status` thành `dong_bang`;
+  (2) base `c35ae1c` → `b662fe1` vì master trôi giữa lúc soạn (S4 của r1 bắn), xử theo §5.1;
+  (3) trần 900 → 750, kèm khối `ha_tran` — thứ mà r4 của #314 đã MẤT khi nâng 520 → 760.
+  r1 KHÔNG bị bác về nội dung: nó đúng cho PHA 1, và PHA 1 đã xong. Đây là bàn giao pha, không
+  phải sửa lỗi.
+  Nhắc quan hệ với r4 vì r1 mang nó còn r2 thì không: r1 khai `thay_the_cho` trỏ
+  `doctrine-allowlist-reviewer-exec-1r4-claude-20260824`, cùng với lease của #318 — HAI lease phân
+  hoạch BA đường dẫn của r4. Quan hệ ấy đã ghi ở r1 và giữ nguyên ở đó.
+  ĐO 10:0xZ 26-08, đáng báo: cổng `_kiem_bia_mo` vừa land ở PR #316 đòi chuỗi thay thế HAI CHIỀU
+  và so khớp `da_bi_thay_the` bằng CHUỖI VÔ HƯỚNG, nên quan hệ "một lease bị HAI lease thay" KHÔNG
+  biểu diễn được — r4 chỉ mang được một tên. Hai lease của #318/#319 đã đăng TRƯỚC khi cổng ấy land
+  nên lọt; lease nào sau này khai cùng quan hệ sẽ bị chặn. Đã báo #313.

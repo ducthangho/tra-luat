@@ -75,11 +75,18 @@ _CHUONG_TRINH_CHO_PHEP = frozenset({
     "echo", "printf", "basename", "dirname", "pwd", "date", "true", "false",
     "diff", "sha256sum", "md5sum", "stat", "file", "test", "[",
     "rg", "grep", "egrep", "fgrep", "jq", "ruff",
-    "git", "python", "python3", "py", "sed", "awk", "find",
+    "git", "python", "python3", "py", "find",
 })
 # CO Y VANG MAT (dung xem la thieu sot): tee cp mv rm mkdir touch chmod ln dd truncate patch
 # install xargs sh bash env command which eval source. `env`/`command`/`xargs` bi loai vi chung
 # CHAY DUOC chuong trinh khac — cho phep chung la vo hieu hoa ca danh sach nay.
+# `sed` va `awk` BI LOAI sau cross-review codex tren PR #328 (2 finding P1, da tai hien):
+#   sed -n 'w scripts/tl.py' CLAUDE.md              ALLOW  — lenh `w` cua sed GHI tep
+#   awk 'BEGIN { system ("touch x") }'                ALLOW  — bo kiem chi do chuoi `system(`,
+#                                                            mot khoang trang la thoat
+# Ca hai la NGON NGU co lenh ghi rieng, khong phan tich tin cay duoc bang chuoi — va awk con
+# dung duoc bieu thuc de DUNG ten ham luc chay. Va tai cho la lai danh sach CAM. `rg` `grep`
+# `cut` `head` `tail` du cho viec doc cua hai agent nay.
 
 _GIT_LENH_DOC = frozenset({
     "log", "diff", "status", "show", "rev-parse", "rev-list", "ls-files", "ls-tree",
@@ -91,7 +98,8 @@ _GIT_REMOTE_GHI = frozenset({"add", "remove", "rm", "rename", "set-url", "set-he
                              "set-branches", "prune", "update"})
 _GIT_DOC_CO_CO = frozenset({"--get", "--get-all", "--get-regexp", "--list", "-l"})
 _GIT_CO_GHI = frozenset({"-d", "-D", "--delete", "-m", "-M", "--move", "-f", "--force",
-                         "--set-upstream", "-u", "--edit-description"})
+                         "--set-upstream", "-u", "--edit-description", "-c", "-C", "--copy"})
+_GIT_CO_LIET_KE = frozenset({"--list", "-l"})
 _GIT_CO_MANG_GIA_TRI = frozenset({"-C", "-c", "--git-dir", "--work-tree", "--namespace"})
 
 _RE_GAN_BIEN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
@@ -161,8 +169,14 @@ def _kiem_git(doi):
         return "git remote sua cau hinh"
     if lenh == "config" and not any(a in _GIT_DOC_CO_CO for a in con):
         return "git config khong o che do doc"
-    if lenh in ("branch", "tag") and any(a in _GIT_CO_GHI for a in con):
-        return "git %s o che do GHI/XOA" % lenh
+    if lenh in ("branch", "tag"):
+        if any(a in _GIT_CO_GHI for a in con):
+            return "git %s o che do GHI/XOA" % lenh
+        # `git branch TEN` / `git tag TEN` TAO ref ma khong co co nao — doi so VI TRI la dang
+        # tao. Doi dang LIET KE tuong minh thay vi chi tu choi vai co (cross-review PR #328).
+        if [a for a in con if not a.startswith("-")] and not any(
+                a in _GIT_CO_LIET_KE for a in con):
+            return "git %s co doi so VI TRI => dang TAO ref" % lenh
     return None
 
 
@@ -178,14 +192,6 @@ def _kiem_python(doi):
     return None
 
 
-def _kiem_sed(doi):
-    for a in doi:
-        if a == "--in-place" or a.startswith("--in-place=") or (
-                a.startswith("-") and not a.startswith("--") and "i" in a[1:]):
-            return "sed ghi de tai cho (-i)"
-    return None
-
-
 def _kiem_find(doi):
     cam = {"-delete", "-exec", "-execdir", "-ok", "-okdir",
            "-fprint", "-fprint0", "-fprintf", "-fls"}
@@ -195,15 +201,40 @@ def _kiem_find(doi):
     return None
 
 
-def _kiem_awk(doi):
+def _cam_co(doi, co):
+    """Tu choi co lam TEP RA, ke ca dang `--x=gia-tri`. Doi thu hai cua cross-review PR #328:
+    `sort -o`, `diff --output=`, `ruff --fix` deu GHI, va deu nam trong danh sach cho phep."""
     for a in doi:
-        if ">" in a or "system(" in a or "print |" in a:
-            return "chuong trinh awk co chuyen huong/system()"
+        if a in co or any(a.startswith(c + "=") for c in co):
+            return "co GHI ra tep: %s" % a
     return None
 
 
+def _kiem_sort(doi):
+    return _cam_co(doi, ("-o", "--output"))
+
+
+def _kiem_diff(doi):
+    return _cam_co(doi, ("--output",))
+
+
+def _kiem_uniq(doi):
+    # `uniq IN OUT` — doi so VI TRI thu hai la TEP RA, khong co co nao bao hieu.
+    if len([a for a in doi if not a.startswith("-")]) > 1:
+        return "uniq: doi so vi tri thu hai la TEP RA"
+    return None
+
+
+def _kiem_ruff(doi):
+    vt = [a for a in doi if not a.startswith("-")]
+    if not vt or vt[0] != "check":
+        return "ruff chi duoc chay `check` (`format` GHI de tep)"
+    return _cam_co(doi, ("--fix", "--fix-only", "--unsafe-fixes"))
+
+
 _KIEM_RIENG = {"git": _kiem_git, "python": _kiem_python, "python3": _kiem_python,
-               "py": _kiem_python, "sed": _kiem_sed, "find": _kiem_find, "awk": _kiem_awk}
+               "py": _kiem_python, "find": _kiem_find, "sort": _kiem_sort,
+               "uniq": _kiem_uniq, "diff": _kiem_diff, "ruff": _kiem_ruff}
 
 
 def _kiem_doan(toks):
@@ -256,7 +287,13 @@ def _kiem_lenh_agent(cmd, sau=0):
     doan, hien, i = [], [], 0
     while i < len(toks):
         t = toks[i]
-        if t in (">", ">>", ">|"):
+        # `shlex` phat `&>` `&>>` `<>` `>&` thanh MOT token — chot cu chi khop dung ba dang
+        # `>` `>>` `>|` nen ca bon dang ghep di lot (cross-review PR #328, da tai hien).
+        # Nay khop theo TINH CHAT chu khong theo danh sach dang: token nao CHUA `>` deu la
+        # chuyen huong. Do roi moi bo: mot chot RIENG cho `<>`/`>&` la THUA — ca hai đeu chua
+        # `>` nen nhanh nay da bat; dot bien go chot rieng ay khong lam ca nao do, tuc no
+        # khong co rang. Giu mot chot khong co rang la tu doi.
+        if ">" in t:
             if i + 1 >= len(toks) or toks[i + 1] != "/dev/null":
                 return "chuyen huong GHI ra tep"
             i += 2

@@ -56,6 +56,33 @@ GHI_LONG = [
     # Ca nay chi LOT khi bo CA HAI chot (heredoc + tach xuong dong) — xem m10.
     ("ghi trong than heredoc", "python scripts/tl.py <<'E'\ncp /tmp/x scripts/tl.py\nE"),
 ]
+# 11 ca do CROSS-REVIEW CODEX (PR #328) tim ra — 5 finding P1, ca 11 DA TAI HIEN la ALLOW
+# tren ban da day. Chung o day vi bo test truoc do xanh 8/8 ma khong thay cai nao.
+GHI_CHE_DO = [
+    ("chuyen huong &>", "echo x &> scripts/tl.py"),
+    ("chuyen huong &>>", "echo x &>> scripts/tl.py"),
+    ("chuyen huong doc-ghi <>", "cat <> scripts/tl.py"),
+    ("sort -o", "sort -o scripts/tl.py CLAUDE.md"),
+    ("uniq doi so ra", "uniq CLAUDE.md scripts/tl.py"),
+    ("diff --output=", "diff --output=scripts/tl.py CLAUDE.md CONTEXT.md"),
+    ("ruff format", "ruff format .claude/hooks/pretooluse_guard.py"),
+    ("sed lenh w", "sed -n 'w scripts/tl.py' CLAUDE.md"),
+    ("git branch tao ref", "git branch readonly-agent-wrote-this"),
+    ("git tag tao ref", "git tag readonly-agent-wrote-this"),
+    ("awk system co khoang trang", 'awk \'BEGIN { system ("touch scripts/written") }\''),
+]
+# Ca DUONG di kem — cross-review doi giu lai che do DOC cua dung nhung chuong trinh tren, kẻo
+# ban va bien thanh chan oan. Khong co danh sach nay thi "deny 11/11" khong noi len dieu gi.
+DOC_CHE_DO = [
+    "sort CLAUDE.md | head -3",
+    "uniq CLAUDE.md | wc -l",
+    "diff CLAUDE.md CONTEXT.md | head -5",
+    "ruff check .claude/hooks/pretooluse_guard.py",
+    "git branch --list",
+    "git tag --list",
+    "git branch",
+    "git log --oneline -1 2>/dev/null",
+]
 DOI_CHUNG = [("rm -rf /x", "ask"), ("git push origin master --force", "ask")]
 AGENT = ("tl-auditor", "tl-rasoat")
 
@@ -125,6 +152,19 @@ def t8_ghi_giau_qua_tach_lenh_va_thay_the(g):
                      + (f"; LOT: {xau}" if xau else ""))
 
 
+def t9_che_do_ghi_cua_chuong_trinh_cho_phep(g):
+    xau = [t for t, c in GHI_CHE_DO if hoi(g, c, "tl-auditor")[0] != "deny"]
+    return (not xau, f"che do GHI (11 ca cross-review) -> deny "
+                     f"{len(GHI_CHE_DO) - len(xau)}/{len(GHI_CHE_DO)}"
+                     + (f"; LOT: {xau}" if xau else ""))
+
+
+def t10_che_do_doc_cua_cung_chuong_trinh_khong_bi_chan(g):
+    xau = [c for c in DOC_CHE_DO if hoi(g, c, "tl-auditor")[0] != "allow"]
+    return (not xau, f"che do DOC -> allow {len(DOC_CHE_DO) - len(xau)}/{len(DOC_CHE_DO)}"
+                     + (f"; CHAN OAN: {xau}" if xau else ""))
+
+
 def t7_nhom_mutate_tra_luat_bi_chan(g):
     ca = ["python scripts/tl.py corpus-audit --apply",
           "python scripts/tl.py reg-delete 123",
@@ -136,12 +176,15 @@ def t7_nhom_mutate_tra_luat_bi_chan(g):
 CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
       t3_khong_chan_oan_lenh_doc, t4_phien_chinh_y_het_ban_master,
       t5_doi_chung_van_ask, t6_agent_la_khong_bi_ap_luat,
-      t7_nhom_mutate_tra_luat_bi_chan, t8_ghi_giau_qua_tach_lenh_va_thay_the]
+      t7_nhom_mutate_tra_luat_bi_chan, t8_ghi_giau_qua_tach_lenh_va_thay_the,
+      t9_che_do_ghi_cua_chuong_trinh_cho_phep,
+      t10_che_do_doc_cua_cung_chuong_trinh_khong_bi_chan]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
-    ("m1_bo_kiem_sed", '"sed": _kiem_sed, ', ""),
-    ("m2_bo_chot_chuyen_huong", 'if t in (">", ">>", ">|"):', 'if False:'),
+    ("m1_cho_sed_awk_vao_danh_sach", '"git", "python", "python3", "py", "find",',
+     '"sed", "awk", "git", "python", "python3", "py", "find",'),
+    ("m2_bo_chot_chuyen_huong", 'if ">" in t:', 'if False:'),
     ("m3_bo_de_quy_thay_the", "ly = _kiem_lenh_agent(t, sau + 1)", "ly = None"),
     ("m4_bo_kiem_python", '"python": _kiem_python, ', ""),
     ("m5_cho_tee_vao_danh_sach", '"rg", "grep",', '"tee", "cp", "mv", "rg", "grep",'),
@@ -152,6 +195,10 @@ DOT_BIEN = [
     ("m9_bo_thay_the_tien_trinh", 'if cmd[i:i + 2] in ("$(", "<("):', 'if cmd[i:i + 2] == "$(":'),
     # GHEP hai chot: rieng le thi cai nay che cai kia nen dot bien don le SONG — khong phai vi
     # test yeu ma vi hai lop doc lap cung chan mot ca. Doctrine: "phai dot bien ghep ca bon".
+    ("m12_bo_kiem_sort", '"sort": _kiem_sort,', ""),
+    ("m13_bo_kiem_uniq", '"uniq": _kiem_uniq,', ""),
+    ("m14_bo_chot_vi_tri_git_ref",
+     'if [a for a in con if not a.startswith("-")] and not any(', "if False and any("),
     ("m10_ghep_bo_heredoc_va_tach_dong",
      ('if "<<" in cmd:', 'if "\\n" in cmd:'), ("if False:", "if False:")),
 ]

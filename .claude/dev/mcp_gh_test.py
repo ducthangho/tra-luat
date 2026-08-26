@@ -9,6 +9,7 @@ import io
 import json
 import os
 import pathlib
+import socket
 import sys
 import tempfile
 import threading
@@ -222,6 +223,18 @@ def a8_hai_duong_thuan():
     m.Phien("/mcp/x/actions", "tok", mo=mo_gia([]))
 
 
+def a9_host_hau_to_bi_chan():
+    bi_chan("https://api.githubcopilot.com.example/mcp/")
+
+
+def a10_http_bi_chan():
+    bi_chan("http://api.githubcopilot.com/mcp/")
+
+
+def a11_duong_ngoai_tap_bi_chan():
+    bi_chan("https://api.githubcopilot.com/x")
+
+
 # B — chín bất biến đã trả giá
 def b1_sse_lay_data_cuoi():
     raw = 'data: {"result":{"sai":1}}\n\ndata: {"result":{"dung":1}}\n'
@@ -240,13 +253,16 @@ def b2_khong_cat_hai_tang():
 
 
 def b3_thieu_token_fail_close():
-    cu_mo = m._mo_mac_dinh
-    m._mo_mac_dinh = lambda *args: (_ for _ in ()).throw(AssertionError("đã ra mạng"))
+    cu_ket_noi, so_ket_noi = socket.create_connection, []
+    def chan_ket_noi(*args, **kwargs):
+        so_ket_noi.append(1)
+        raise AssertionError("đã ra mạng")
+    socket.create_connection = chan_ket_noi
     try:
         rc, _, err = main_gia(["--liet-ke"], m.Phien, token=None)
     finally:
-        m._mo_mac_dinh = cu_mo
-    assert rc == 3 and "KHÔNG ĐO ĐƯỢC" in err
+        socket.create_connection = cu_ket_noi
+    assert rc == 3 and "KHÔNG ĐO ĐƯỢC" in err and not so_ket_noi
 
 
 def b4_initialize_jsonrpc_error():
@@ -355,6 +371,14 @@ def _co_dot_bien(mutants):
 def cong(registry, ran, mutants, killed, errors):
     return (_du_ca(registry, ran) and _co_dot_bien(mutants)
             and tuple(killed) == tuple(mutants) and not errors)
+
+
+def ma_thoat(cases, ran, mutants, failed, mutation_errors, d8_errors):
+    names = tuple(name for name, *_ in mutants)
+    d8_ok = not failed and not any(d8_errors)
+    ok = cong(tuple(name for name, _ in cases), tuple(ran), names,
+              names if d8_ok else (), tuple(failed) + tuple(mutation_errors))
+    return 0 if ok else 1
 
 
 def c1_so_ca_rong_do():
@@ -475,12 +499,19 @@ def d9_ngan_sach_900_dong_ma():
     assert tong <= 900, f"hai tệp mã dùng {tong}/900 dòng"
 
 
+def d10_main_khong_chay_ca_phai_do():
+    mutants = (("m", "test", "old", "new", "c"),)
+    assert ma_thoat((("c", None),), (), mutants, (), (), ((), (), ())) == 1
+
+
 # Đăng ký xong mới đóng băng; runner không sửa tuple này.
 CASES = (
     ("A1", a1_cong_444_bi_chan), ("A2", a2_origin_va_cu_phap_url),
     ("A3", a3_khong_lo_bi_mat_trong_loi), ("A4", a4_kiem_lai_luc_gui),
     ("A5", a5_khong_theo_301), ("A6-302", a6_khong_theo_302),
     ("A6-303", a6_khong_theo_303), ("A7", a7_khong_theo_307_308), ("A8", a8_hai_duong_thuan),
+    ("A9-host", a9_host_hau_to_bi_chan), ("A10-scheme", a10_http_bi_chan),
+    ("A11-path", a11_duong_ngoai_tap_bi_chan),
     ("B1", b1_sse_lay_data_cuoi), ("B2", b2_khong_cat_hai_tang),
     ("B3", b3_thieu_token_fail_close), ("B4", b4_initialize_jsonrpc_error),
     ("B5", b5_loi_van_chuyen_co_khoi_rieng), ("B6", b6_init_thuc_su_goi_chot),
@@ -495,6 +526,7 @@ CASES = (
     ("D7", d7_cong_xanh_chi_khi_hai_so_duong_bang_nhau),
     ("D7b", d7b_nen_do_khong_dem_dot_bien),
     ("D8", d8_quy_trach_nhiem_ba_dieu_kien), ("D9", d9_ngan_sach_900_dong_ma),
+    ("D10-main", d10_main_khong_chay_ca_phai_do),
 )
 
 
@@ -509,6 +541,9 @@ MUTATIONS = (
     ("a6_theo_303", "app", "if code == 303:", "if code == -303:", "A6-303"),
     ("a7_theo_307_308", "app", "if code in (307, 308):", "if False:", "A7"),
     ("a8_bo_actions", "app", 'DUONG_CHO_PHEP = ("/mcp/", "/mcp/x/actions")', 'DUONG_CHO_PHEP = ("/mcp/",)', "A8"),
+    ("a9_bo_host", "app", 'if u.hostname != HOST_CHO_PHEP:', "if False:", "A9-host"),
+    ("a10_bo_scheme", "app", 'if u.scheme != "https":', "if False:", "A10-scheme"),
+    ("a11_bo_path", "app", "if u.path not in DUONG_CHO_PHEP:", "if False:", "A11-path"),
     ("b1_bo_data", "app", 'if dong.startswith("data:"):', "if False:", "B1"),
     ("b2_cat_than", "app", "return dong[5:].strip()", "return dong[5:].strip()[:6000]", "B2"),
     ("b2_cat_text", "app", 'return nd[0]["text"]', 'return nd[0]["text"][:6000]', "B2"),
@@ -538,6 +573,7 @@ MUTATIONS = (
     ("d8_bo_dieu_kien_b", "test", "if not kill_sets.get(name, ())", "if False", "D8"),
     ("d8_bo_dieu_kien_c", "test", "if case not in targets.values()", "if False", "D8"),
     ("d9_vuot_ngan_sach", "test", "assert tong <= 900", "assert tong < 0", "D9"),
+    ("d10_main_luon_xanh", "test", "return 0 if ok else 1", "return 0", "D10-main"),
 )
 
 
@@ -586,7 +622,7 @@ def chay_dot_bien():
     return kill_sets, errors
 
 
-if __name__ == "__main__":
+def chay_cli():
     ran, failed = chay_cac_ca(sys.modules[__name__])
     kill_sets, mutation_errors = ({}, []) if failed else chay_dot_bien()
     d8_errors = ((), (), ()) if failed else loi_d8(
@@ -601,10 +637,10 @@ if __name__ == "__main__":
         print(line)
     for error in mutation_errors:
         print(f"  LỖI RUNNER {error}")
-    mutant_names = tuple(name for name, *_ in MUTATIONS)
-    d8_ok = not failed and not any(d8_errors)
-    ok = cong(tuple(name for name, _ in CASES), tuple(ran),
-              mutant_names, mutant_names if d8_ok else (),
-              tuple(failed) + tuple(mutation_errors))
-    print("TỔNG: " + ("ĐẠT" if ok else "ĐỎ"))
-    sys.exit(0 if ok else 1)
+    rc = ma_thoat(CASES, ran, MUTATIONS, failed, mutation_errors, d8_errors)
+    print("TỔNG: " + ("ĐẠT" if rc == 0 else "ĐỎ"))
+    return rc
+
+
+if __name__ == "__main__":
+    sys.exit(chay_cli())

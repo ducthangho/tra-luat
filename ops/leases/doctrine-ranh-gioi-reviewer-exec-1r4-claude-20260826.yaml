@@ -95,7 +95,7 @@ target_branch_neu_land: master
 
 base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
 start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
-reviewed_sha_required: 7d7354e14c540c3c2afd3f3a594ff2e432f6fd44
+reviewed_sha_required: 12e0315a439b1e73bde57b09152bc077e04d7ee5
 base_ghi_chu: >-
   `c35ae1c` = `origin/master` lúc cấp, ĐO trong phiên (không chép từ hồ sơ bàn giao), và cũng là
   merge của PR #310. Nhánh rẽ SẠCH từ đây, KHÔNG kế thừa `6c4140b` của PR #315 (đã đóng, không
@@ -113,6 +113,8 @@ lich_su_reviewed_sha:
 - {vong: 6, sha: 70311ee3f073d3a905ba59d0851dd2ce9355cd8e, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-6-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0 — GẦN LAND NHẤT. Chỉ N2 rớt; nhãn đúng cú pháp mà sai nghĩa ở một hàng.'}
 - {vong: 7, sha: ed50b734611fe9f5a1b8c332458b52fdcaabe43a, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-7-codex-verdict.receipt.yaml', ket_qua: 'P1=3 P2=3; N2 VÀ N3 đều KHÔNG ĐẠT. Hai nhãn SAI NGHĨA; lượt tự soát tìm 4 bỏ sót 6.'}
 - {vong: 8, sha: d14ba2f3afd317b903224d1b06b4ddffb238dc5b, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-8-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=4. NĂM trên sáu finding vòng 7 ĐÃ VÁ THẬT, kể cả nam-hang-khong-tao-phan-hoach vốn mở liên tục từ vòng 2. Cả năm finding còn lại truy về MỘT bổ sung ngoài phạm vi.'}
+- {vong: 9, sha: 7d7354e14c540c3c2afd3f3a594ff2e432f6fd44, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-9-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=1. Vòng ĐẦU chấm dưới luat_dung_LAND; reviewer nói thẳng CHẶN LAND vì còn P1.'}
+- {vong: 10, sha: 12e0315a439b1e73bde57b09152bc077e04d7ee5, verdict: 'CHƯA CÓ'}
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 2
@@ -124,7 +126,7 @@ ngan_sach_kich_thuoc:
   dong_them_toi_da: 200
   do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
   don_vi: '`git diff --numstat c35ae1c..HEAD -- docs/GOI_AGENT_DA_NEN.md` — cột dòng THÊM, CHỈ tệp này'
-  da_dung: 179
+  da_dung: 180
   ghi_chu: >-
     200 là trần sau khi NÂNG LẦN HAI; xem `nang_tran_lan_hai`. 198 là số ĐÃ ĐO sau vòng vá 4
     (`git diff --numstat c35ae1c -- docs/GOI_AGENT_DA_NEN.md`), không phải ước lượng.

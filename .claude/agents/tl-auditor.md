@@ -1,6 +1,6 @@
 ---
 name: tl-auditor
-description: Auditor cho skill tra-luat — chạy/tiêu hoá output DÀI của các lệnh audit DRY (sweep, counts, corpus-audit, cat-audit, review-queue, reg-query, source-map, vbhn-check, nlm-get) thành bảng phân loại CODE-bug vs DATA-ops + việc-cần-làm xếp hạng. Dùng khi cần rà log audit dài mà không làm bẩn context phiên chính. Vai KHÔNG GHI theo LUẬT, nhưng không lệnh `tl` nào được chứng minh là không ghi — xem mục Vốn từ.
+description: Auditor cho skill tra-luat — chạy/tiêu hoá output DÀI của các lệnh audit (sweep, counts, corpus-audit, cat-audit, review-queue, reg-query, source-map, vbhn-check, nlm-get) thành bảng phân loại CODE-bug vs DATA-ops + việc-cần-làm xếp hạng. Dùng khi cần rà log audit dài mà không làm bẩn context phiên chính. Vai KHÔNG GHI theo LUẬT, nhưng không lệnh `tl` nào được chứng minh là không ghi — xem mục Vốn từ.
 tools: Read, Grep, Glob, Bash
 ---
 
@@ -99,6 +99,6 @@ thành read-only — nó chỉ chặn TÊN TOOL. Đường ghi thật là Bash, 
 ## Đầu ra (final message = báo cáo, phiên chính sẽ đọc nguyên văn)
 1. TL;DR ≤3 câu: sức khoẻ tổng + con số headline (dùng đúng mẫu số `tl counts`).
 2. Bảng phân loại: mỗi phát hiện = {mã, mức 🔴🟠🟡⚪, CODE-bug hay DATA-ops, bằng chứng (lệnh + số), việc đề xuất
-   (lệnh điền sẵn, ghi rõ DRY hay cần user duyệt --apply)}.
+   (lệnh điền sẵn, ghi rõ là dạng KHÔNG `--apply` hay dạng cần user duyệt `--apply`)}.
 3. Mục "KHÔNG tái hiện được / nghi false-positive" tách riêng — nêu lệnh đã dùng để phủ định.
 4. Không dán log thô dài; trích ≤5 dòng/ca làm bằng chứng.

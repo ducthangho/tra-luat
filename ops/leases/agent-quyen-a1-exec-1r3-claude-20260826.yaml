@@ -223,3 +223,4 @@ thay_the_ly_do: >-
   `dieu_kien_dung` S3 "vượt 430" -> "vượt 470" · thêm mục (4) vào `phep_do_moi_cua_luot_nay`.
   Đây là lần thứ hai lease này phải sửa văn bản theo trường; cả hai lần đều tự soi bằng `grep`
   SAU khi soạn, đúng bài học P1 `packet-spec-revision-incoherent` của #314.
+posted_comment_id: 5425417630   # workflow ghi, ĐỪNG sửa tay

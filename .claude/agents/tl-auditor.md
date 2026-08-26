@@ -68,10 +68,14 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
 - `tl corpus-audit --json` CHỈ ở dạng KHÔNG `--sohieu-file` và KHÔNG `--all`. Hai dạng ấy bật
   checkpoint resumable — `hygiene.py` ghi `corpus_audit_ckpt_*.json` sau mỗi target và CỐ Ý để
   lại tệp khi dừng giữa chừng. Audit nối lại được là việc của phiên chính, không phải của bạn.
-- **CẤM MỌI CỜ SINH TỆP** — `--out`, và bất kỳ cờ nào ghi ra đĩa — trên MỌI lệnh trên.
-  Đo 26-08: 7/10 lệnh vốn từ này nhận `--out`, kể cả `sweep` `counts` `review-queue` mà
-  `COMMAND_META` xếp `write_scope='none'`; CHẠY THẬT cả ba đều tạo tệp. Nên registry tả hành vi
-  MẶC ĐỊNH, không tả BỀ MẶT CỜ — thêm lệnh thì tra bảng (`read_only=False` là cấm) VÀ đọc `--help`.
+- **KHÔNG lệnh `tl` nào được chứng minh là không ghi.** Danh sách trên là VIỆC của bạn, không
+  phải bảo đảm. Năm vòng review 26-08 ra NĂM cơ chế ghi khác nhau: ghi mặc định · `read_only=False`
+  trong `COMMAND_META` · cờ `--out` trên lệnh `read_only=True` · `--out` cả trên lệnh
+  `write_scope='none'` (chạy thật: `sweep` `counts` `review-queue` ĐỀU tạo tệp) · và ghi NGẦM
+  KHÔNG cờ nào — `_load_manifest_full` ghi `manifest.json`+`manifest_index.json` khi cache
+  thiếu/cũ, `locate` tự refresh sau 900s. `--trust-cache` CHỈ có ở `locate`: 12/13 lệnh không
+  có đường tắt nào. Nên đừng dùng `--out`/`--refresh`, và coi MỌI lệnh là có thể ghi vào profile
+  cache — nơi `extract_*.txt` chảy vào corpus. Cần bảo đảm KHÔNG ghi thì giao phiên chính.
 - Nhóm MUTATE — `--apply` `--clear-stale` `register` `source-rename` `source-delete` `reg-delete`
   `recat --apply` `drive-push` `clasp` `ingest*` — nay bị cổng **chặn thật**, không còn chỉ là
   dòng chữ này.

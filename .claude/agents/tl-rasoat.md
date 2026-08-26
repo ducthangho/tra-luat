@@ -72,10 +72,13 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
 - `tl extract` KHÔNG nằm trong vốn từ của bạn, và đừng thêm vào: `extract_cache.py` tạo thư mục
   cache rồi `disk.write_text(...)` **vô điều kiện** — không có chế độ nào không ghi, và cache ấy
   chính là nguồn sau này chảy vào corpus. Cần toàn văn thì XIN phiên chính trích rồi đưa bạn đọc.
-- **CẤM MỌI CỜ SINH TỆP** — `--out`, và bất kỳ cờ nào ghi ra đĩa — trên MỌI lệnh trên.
-  Đo 26-08: 5/9 lệnh vốn từ này nhận `--out` (`nlm-query` `nlm-cross` `nlm-content` `reg-query`
-  `source-map`) — mới đọc `--help`, CHƯA chạy thật. Bên `tl-auditor` đã chạy thật và `--out` tạo
-  tệp cả trên lệnh `COMMAND_META` xếp `write_scope='none'`: registry tả MẶC ĐỊNH, không tả CỜ.
+- **KHÔNG lệnh `tl` nào được chứng minh là không ghi.** Danh sách trên là VIỆC của bạn, không
+  phải bảo đảm. Năm vòng review 26-08 ra NĂM cơ chế ghi khác nhau, và cái sắc nhất chạm thẳng
+  vai của bạn: khi NotebookLM chết, `nlm-query`/`nlm-cross`/`nlm-content` rơi vào fallback corpus,
+  gọi `_doc_text_any` và ghi `extract_<id>.txt` + sidecar vào ĐÚNG cache mà `extract` bị cấm vì
+  nó — không cần cờ nào. Dùng `--no-fallback` cho cả ba. Cộng ghi ngầm của manifest khi cache
+  thiếu/cũ, mà chỉ `locate` có `--trust-cache`. Nên đừng dùng `--out`/`--refresh`, coi MỌI lệnh
+  là có thể ghi vào profile cache, và cần bảo đảm KHÔNG ghi thì giao phiên chính.
 - Nhóm MUTATE — `--apply` `--confirm` `register` `recat` `source-rename` `source-delete`
   `reg-delete` `--clear-stale` `ingest*` `drive-push` `clasp` `nlm-add` — nay bị cổng **chặn
   thật**, không còn chỉ là dòng chữ này.

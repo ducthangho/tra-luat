@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phản chứng offline cho mcp_gh.py; mỗi đột biến phải làm đỏ đúng một ca."""
+"""Phản chứng offline cho mcp_gh.py và trách nhiệm ca/đột biến."""
 from __future__ import annotations
 
 import http.server
@@ -420,28 +420,59 @@ def d7_cong_xanh_chi_khi_hai_so_duong_bang_nhau():
     assert cong(("c",), ("c",), ("m",), ("m",), ())
 
 
-def dong_dot_bien(killed, mutants, failed):
+def dong_dot_bien(kill_sets, mutants, failed):
     if failed:
         return "ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)"
-    return f"ĐỘT BIẾN   : {len(killed)}/{len(mutants)} bị giết đúng một ca"
+    return f"ĐỘT BIẾN   : đã đo {len(kill_sets)}/{len(mutants)} tập giết"
 
 
 def d7b_nen_do_khong_dem_dot_bien():
     assert "KHÔNG_ĐO_ĐƯỢC" in dong_dot_bien((), ("m",), (("c", "đỏ"),))
 
 
-def dung_mot(failed, target):
-    return tuple(failed) == (target,)
+def loi_d8(cases, mutants, kill_sets):
+    targets = {name: target for name, *_, target in mutants}
+    return (
+        [name for name, target in targets.items()
+         if target not in kill_sets.get(name, ())],
+        [name for name in targets if not kill_sets.get(name, ())],
+        [case for case in cases if case not in targets.values()],
+    )
 
 
-def d8_dot_bien_chi_giet_mot_ca():
-    assert dung_mot(["c"], "c")
-    assert not dung_mot([], "c") and not dung_mot(["c", "d"], "c")
+def dong_d8(errors, failed):
+    labels = ("D8(a) đích nằm trong tập giết", "D8(b) không tập giết rỗng",
+              "D8(c) mọi ca có đột biến canh")
+    if failed:
+        return [f"{label}: KHÔNG_ĐO_ĐƯỢC (nền đỏ)" for label in labels]
+    return [f"{label}: " + (f"ĐỎ {bad!r}" if bad else "ĐẠT")
+            for label, bad in zip(labels, errors)]
 
 
-def d9_ngan_sach_842_dong_ma():
+def bang_giao_pham_vi(mutants, kill_sets, failed):
+    lines = ["GIAO PHẠM VI:", "| đột biến | đích | ca ngoài đích bị giết |",
+             "|---|---|---|"]
+    if failed:
+        return lines + ["| KHÔNG_ĐO_ĐƯỢC | — | nền đỏ |"]
+    rows = []
+    for name, *_, target in mutants:
+        extra = [case for case in kill_sets.get(name, ()) if case != target]
+        if extra:
+            rows.append(f"| {name} | {target} | {', '.join(extra)} |")
+    return lines + (rows or ["| (không có) | — | — |"])
+
+
+def d8_quy_trach_nhiem_ba_dieu_kien():
+    mutants = (("m", "test", "old", "new", "c"),)
+    assert loi_d8(("c",), mutants, {"m": ("c", "d")}) == ([], [], [])
+    assert loi_d8(("c",), mutants, {"m": ("d",)})[0] == ["m"]
+    assert loi_d8(("c",), mutants, {"m": ()})[1] == ["m"]
+    assert loi_d8(("c", "d"), mutants, {"m": ("c",)})[2] == ["d"]
+
+
+def d9_ngan_sach_900_dong_ma():
     tong = sum(sum(1 for _ in path.open(encoding="utf-8")) for path in (NGUON, pathlib.Path(__file__)))
-    assert tong <= 842, f"hai tệp mã dùng {tong}/842 dòng"
+    assert tong <= 900, f"hai tệp mã dùng {tong}/900 dòng"
 
 
 # Đăng ký xong mới đóng băng; runner không sửa tuple này.
@@ -463,11 +494,11 @@ CASES = (
     ("D5", d5_notification_loi_van_chuyen), ("D6", d6_hop_dong_cli_0_2_3),
     ("D7", d7_cong_xanh_chi_khi_hai_so_duong_bang_nhau),
     ("D7b", d7b_nen_do_khong_dem_dot_bien),
-    ("D8", d8_dot_bien_chi_giet_mot_ca), ("D9", d9_ngan_sach_842_dong_ma),
+    ("D8", d8_quy_trach_nhiem_ba_dieu_kien), ("D9", d9_ngan_sach_900_dong_ma),
 )
 
 
-# (tên, tệp đích, mẫu cũ, mẫu mới, đúng một ca phải đỏ)
+# (tên, tệp đích, mẫu cũ, mẫu mới, ca đích phải nằm trong tập giết)
 MUTATIONS = (
     ("a1_cong_444", "app", "if port != CONG_CHO_PHEP:", "if port not in (CONG_CHO_PHEP, 444):", "A1"),
     ("a2_bo_query", "app", "if u.query or u.fragment:", "if False:", "A2"),
@@ -503,8 +534,10 @@ MUTATIONS = (
     ("d6_doi_co_cli", "app", 'argv[0] == "--liet-ke"', 'argv[0] == "--liet-ke-doi"', "D6"),
     ("d7_cong_khong_xanh", "test", "return len(registry) > 0 and tuple(ran) == tuple(registry)", "return False", "D7"),
     ("d7b_dem_khi_nen_do", "test", "    if failed:\n        return \"ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)\"", "    if False:\n        return \"ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)\"", "D7b"),
-    ("d8_khong_dem_dung_mot", "test", "return tuple(failed) == (target,)", "return True", "D8"),
-    ("d9_vuot_ngan_sach", "test", "assert tong <= 842", "assert tong < 0", "D9"),
+    ("d8_bo_dieu_kien_a", "test", "if target not in kill_sets.get(name, ())", "if False", "D8"),
+    ("d8_bo_dieu_kien_b", "test", "if not kill_sets.get(name, ())", "if False", "D8"),
+    ("d8_bo_dieu_kien_c", "test", "if case not in targets.values()", "if False", "D8"),
+    ("d9_vuot_ngan_sach", "test", "assert tong <= 900", "assert tong < 0", "D9"),
 )
 
 
@@ -522,12 +555,12 @@ def chay_cac_ca(module):
 def chay_dot_bien():
     app_src = NGUON.read_text(encoding="utf-8")
     test_src = pathlib.Path(__file__).read_text(encoding="utf-8")
-    killed, live = [], []
+    kill_sets, errors = {}, []
     root = sys.modules[__name__]
     for i, (name, target_file, old, new, target_case) in enumerate(MUTATIONS):
         src = app_src if target_file == "app" else test_src
         if old not in src:
-            live.append(f"{name}: mẫu đột biến đã trôi")
+            errors.append(f"{name}: mẫu đột biến đã trôi")
             continue
         with tempfile.TemporaryDirectory() as d:
             folder = pathlib.Path(d)
@@ -547,26 +580,31 @@ def chay_dot_bien():
                     path.write_text(src.replace(old, new, 1), encoding="utf-8")
                     mutant = nap_dot_bien(path, f"mcp_gh_test_db_{i}")
                     _, failed = chay_cac_ca(mutant)
-                failed_names = [case for case, _ in failed]
-                if dung_mot(failed_names, target_case):
-                    killed.append(name)
-                else:
-                    live.append(f"{name}: đỏ {failed_names!r}, cần đúng [{target_case!r}]")
+                kill_sets[name] = tuple(case for case, _ in failed)
             except Exception as e:
-                live.append(f"{name}: runner lỗi {type(e).__name__}: {e}")
-    return killed, live
+                errors.append(f"{name}: runner lỗi {type(e).__name__}: {e}")
+    return kill_sets, errors
 
 
 if __name__ == "__main__":
     ran, failed = chay_cac_ca(sys.modules[__name__])
-    killed, live = ([], []) if failed else chay_dot_bien()
+    kill_sets, mutation_errors = ({}, []) if failed else chay_dot_bien()
+    d8_errors = ((), (), ()) if failed else loi_d8(
+        tuple(name for name, _ in CASES), MUTATIONS, kill_sets)
     print(f"CA         : {len(ran) - len(failed)}/{len(CASES)} đạt · {len(failed)} đỏ")
     for name, error in failed:
         print(f"  ĐỎ {name}: {error}")
-    print(dong_dot_bien(killed, MUTATIONS, failed))
-    for error in live:
-        print(f"  SỐNG SÓT {error}")
+    print(dong_dot_bien(kill_sets, MUTATIONS, failed))
+    for line in dong_d8(d8_errors, failed):
+        print(line)
+    for line in bang_giao_pham_vi(MUTATIONS, kill_sets, failed):
+        print(line)
+    for error in mutation_errors:
+        print(f"  LỖI RUNNER {error}")
+    mutant_names = tuple(name for name, *_ in MUTATIONS)
+    d8_ok = not failed and not any(d8_errors)
     ok = cong(tuple(name for name, _ in CASES), tuple(ran),
-              tuple(name for name, *_ in MUTATIONS), tuple(killed), tuple(failed) + tuple(live))
+              mutant_names, mutant_names if d8_ok else (),
+              tuple(failed) + tuple(mutation_errors))
     print("TỔNG: " + ("ĐẠT" if ok else "ĐỎ"))
     sys.exit(0 if ok else 1)

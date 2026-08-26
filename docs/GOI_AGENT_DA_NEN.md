@@ -534,6 +534,161 @@ Lưu ý: phiên headless chạy Ở NGOÀI kho (sandbox review) không thừa k�
 `settings.json` của kho — allowlist per-run là đường duy nhất. Và **đừng kèm
 `--bare`**: nó bỏ qua cả cấu hình xác thực, phiên chết `Not logged in` (đo 20-08).
 
+#### `Bash(x:*)` KHỚP TIỀN TỐ CHUỖI LỆNH — nên nó chặn OAN gần hết phép đo thật (đo 24-08-2026)
+
+Câu "cấp allowlist HẸP theo lượt" ở trên **đúng về ý định và sai về hậu quả**, và nó đã làm hỏng
+**ba lượt cross-review liên tiếp** trong một phiên. Luật `Bash(git:*)` không khớp *"lệnh nào có
+chạy `git`"*; nó khớp *"chuỗi lệnh BẮT ĐẦU bằng `git`"*, nên mọi thứ có **ống, `;`, `>`, `$( )`,
+heredoc, hay gán biến đứng trước** đều **không khớp gì cả**. Đo được trong một lượt mà allowlist
+đã có đủ `Bash(git:*)` `Bash(python3:*)` `Bash(cd:*)` `Bash(echo:*)`:
+
+```text
+git ls-remote --heads origin 2>/dev/null | sed 's#...#' | sort > /tmp/mc   TU CHOI
+echo "may chu: $(git ls-remote --heads origin | wc -l)"                    TU CHOI
+python3 - <<'PY' ... PY                                                    TU CHOI
+M=8ba8acaa; echo ...; git merge-base --is-ancestor $M HEAD                 TU CHOI
+cd "$(git rev-parse --show-toplevel)"; python3 - <<'PY' ...                TU CHOI
+```
+
+*(Lượt ấy còn một lệnh thứ sáu bị từ chối — `bash /tmp/refscan.sh` — nhưng nó **khác nguyên nhân**:
+allowlist lượt đó không có `Bash(bash:*)`, tức bị chặn vì thiếu tên chương trình chứ không vì lệnh
+ghép. Ghi tách vì gộp nó vào năm ca trên là **lời khai rộng hơn phép đo** — cross-review bắt đúng
+chỗ này.)*
+
+Chốt của Claude Code làm **đúng** — luật tiền tố không bao được phần còn lại của lệnh ghép nên nó
+từ chối thay vì đoán. Cái sai ở phía ta: **allowlist theo tên chương trình phân biệt CÁCH VIẾT,
+không phân biệt THẨM QUYỀN**, đúng hình dạng kho đã đếm nhiều lần — lần này nó cắn chính bộ đo của
+mình. Và hậu quả không dừng ở "thiếu vài phép đo": mỗi lần bị từ chối, reviewer viết lại lệnh rồi
+thử tiếp, vòng lặp ấy làm context phình. Ba lượt, **cùng prompt, cùng exact head**:
+
+| allowlist | lượt hội thoại | bị từ chối | cache đọc | kết cục |
+|---|---:|---:|---:|---|
+| liệt kê theo tên lệnh | 78 | 5 | 10,8 M | `api_error` — mất trắng |
+| nới thêm `cd`/`bash`/`sh` | 85 | 10 | 12,8 M | `api_error` — mất trắng |
+| **`Bash` trần** | **45** | **1** | **3,7 M** | **`completed`, verdict đầy đủ** |
+
+**Ba con số ấy KHÔNG tái lập được từ kho** — đọc từ `usage` và `permission_denials` trong
+`stdout.log` của ba lượt, mà các tệp ấy nằm trong scratchpad của phiên, **không được git theo dõi**.
+Bảng trên là *chứng cứ đã đo*, không phải *phép đo bạn chạy lại được*.
+
+**Nhân quả thì CHƯA chứng minh:** ba lượt khác nhau ở **cả** allowlist **lẫn** thời điểm chạy, nên
+không loại được yếu tố phía dịch vụ — đây là **tương quan có neo**. Nói chắc được chỉ là: allowlist
+rộng cho ít lượt hơn, ít bị từ chối hơn, ít context hơn, và là cấu hình duy nhất trong ba cho ra
+verdict. Giá trước khi tìm ra: ~$39 và ba lượt chạy.
+
+**Nên làm.** Phiên **reviewer read-only** trong clone rời: cấp `Bash` **trần** cộng đúng những công
+cụ MCP chỉ đọc mà lượt ấy cần:
+
+```bash
+claude -p --model opus --effort max --permission-mode acceptEdits \
+  --allowedTools Read Glob Grep Bash \
+      mcp__github__pull_request_read mcp__github__issue_read mcp__github__get_file_contents \
+  --output-format json '<prompt>'
+```
+
+Và **đừng gọi đó là siết an ninh** — nó chưa từng là. Giữ danh sách hẹp ở đây không mua được an
+toàn, chỉ mua được một verdict mỏng hơn, hoặc không có verdict nào.
+
+#### Ba HẠNG bằng chứng — đọc mục dưới bằng từ vựng này, kẻo lại viết ra ba câu chỏi nhau
+
+Bản đầu của mục dưới tự mâu thuẫn trong sáu chục dòng: khai *"không tầng nào bó được"*, rồi gọi
+mạng đóng là *"hàng rào thật, có sẵn"*, rồi dùng nó làm cột **cưỡng chế**, rồi bảo *đừng dựa vào nó
+như một bảo đảm an ninh*. Cả bốn câu đều dựa trên phép đo có thật; thứ trôi không phải số liệu mà
+là **HẠNG của bằng chứng**. Ba hạng, và mọi câu dưới đây mang đúng một nhãn:
+
+| hạng | nghĩa | được gọi là |
+|---|---|---|
+| **cơ chế đã xác minh** | biết nó chặn BẰNG GÌ, và đã đo được nó fail-close | *ranh giới*, *hàng rào* |
+| **quan sát chưa rõ cơ chế** | lặp lại được, nhưng chưa ai đo CƠ CHẾ ⇒ chưa biết có bền không | *quan sát* — kèm phiên bản và điều kiện đo |
+| **máy phát hiện** | không ngăn được gì; nó TỐ CÁO sau khi việc đã xảy ra | *máy phát hiện* |
+
+Luật đọc: **quan sát theo phiên bản KHÁC bất biến an ninh.** Chỉ được gọi một thứ là *ranh giới*
+sau khi xác minh cơ chế fail-closed; trước đó nó là *quan sát*, và quan sát thì có hạn dùng. Nhầm
+hạng chính là lỗi mà mục dưới đã phải sửa — và nhầm theo hướng nguy hiểm: nâng một quan sát lên
+thành bảo đảm rồi thiết kế quy trình dựa trên nó.
+
+#### Bốn tầng thường bị coi là hàng rào — đo Ở VỎ PHIÊN ĐIỀU PHỐI, không tầng nào bó được (24-08-2026)
+
+Phạm vi của mục này là **vỏ phiên điều phối** (`claude`, `Bash` trần). Nó KHÔNG nói gì về bên trong
+sandbox codex — chỗ đó đo riêng ở mục kế, và kết quả khác hẳn.
+
+Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": `rc=0`, ref được tạo, và
+`--require-clean` **vẫn báo sạch**. Đo tiếp bốn tầng:
+
+| tầng | phép đo | kết quả |
+|---|---|---|
+| `--allowedTools` | luật `Bash(x:*)` gặp lệnh ghép | không khớp gì ⇒ hoặc chặn oan, hoặc `Bash` trần = mọi thứ |
+| `codex -s workspace-write` | ghi tệp **ngoài** cây | **`rc=0`** — tệp ngoài cây bị ghi đè thật |
+| xoá `GITHUB_PAT` `GH_TOKEN` `GITHUB_TOKEN` `GIT_CONFIG_*` khỏi env | `git push --dry-run` lên GitHub | **`rc=0`** — vẫn đẩy được |
+| nhét **token RÁC** vào URL đẩy | cùng lệnh | **`rc=0`** |
+
+Dòng cuối là dòng quyết định: **proxy egress bỏ qua credential client gửi và tự chèn credential
+của nó** — nên "cấp token đọc riêng cho reviewer" cũng vô dụng, credential là **ambient ở mức
+container**. Đây là **cơ chế đã xác minh** theo chiều MỞ: ta biết vì sao nó không chặn.
+Bản đầu còn viết *"ranh giới thật là clone rời + `--require-clean` + kiểm cây sạch"*. Câu ấy **SAI
+về hạng** — ba thứ đó là **máy phát hiện**: chúng tố cáo sau khi push đã xảy ra.
+
+#### Trong sandbox codex thì khác hẳn — nhưng đó là QUAN SÁT, chưa phải hàng rào
+
+```text
+                          ghi trong cay   ghi NGOAI cay   git ls-remote   git push
+codex -s workspace-write       rc=0            rc=0            rc=128        rc=128
+codex -s read-only             rc=1            rc=1            rc=128        rc=128
+vo phien (claude, Bash tran)   rc=0            rc=0             rc=0          rc=0
+```
+
+Hai trục **tách rời**, và tách theo NỀN chứ không theo chế độ:
+
+- **Mạng: codex trả `rc=128` ở CẢ HAI chế độ.** Một reviewer chạy bằng `codex exec` không đẩy được
+  lên GitHub, kể cả `workspace-write`. **HẠNG: quan sát chưa rõ cơ chế** — đo 24-08-2026, `codex`
+  bản lúc đó, hai chế độ; **chưa ai đo VÌ SAO** (sandbox tự chặn, hay biến proxy không được kế
+  thừa). Chưa có phép đo về cơ chế thì **đừng dựa vào nó như một bảo đảm an ninh**, và đừng cho
+  rằng nó còn đúng ở bản codex kế tiếp.
+- **Hệ tệp: chỉ `read-only` bó.** `workspace-write` ghi được ra ngoài cây — rò rỉ thật, nhưng hậu
+  quả thấp hơn nhiều so với ghi vào kho, và **phát hiện được**.
+- **Claude `-p` không có gì cả** — cả hai trục đều mở.
+
+Nên câu đúng KHÔNG phải *"reviewer không thể bị bó"* mà là **chọn NỀN quan trọng hơn chọn chế độ.**
+Phản chứng push của cross-review chạy trong phiên `claude` và đẩy vào **bare remote cục bộ**, không
+phải GitHub — nó chứng minh `git push` hoạt động về cơ chế, không chứng minh kho thật bị với tới từ
+trong sandbox codex.
+
+#### Hệ quả vận hành: hai pha cho reviewer chạy bằng codex
+
+| pha | chế độ | được gì | DỰA VÀO (kèm hạng) |
+|---|---|---|---|
+| **A — soát** | `codex -s read-only` | tìm finding, đọc mã, phép đo chỉ-đọc | FS đóng = **cơ chế đã xác minh**; mạng đóng = **quan sát** |
+| **B — dựng vá** | `codex -s workspace-write` | sửa thử, chạy test/đột biến, **chứng minh bản vá** | mạng đóng = **quan sát**; FS ngoài cây MỞ ⇒ chỉ có **máy phát hiện** |
+
+Cột phải cố ý KHÔNG mang tên *"cưỡng chế bằng"*: bảng mô tả thứ ta **dựa vào**, và một trong hai
+thứ ấy là quan sát chưa rõ cơ chế. Gọi nó là "cưỡng chế" thì bảng tự nâng hạng cho nó — đúng lỗi
+mục này sinh ra để sửa. Pha B phải có nếu muốn reviewer *đề xuất bản vá* chứ không chỉ chỉ trích:
+phần lớn finding tốt của kho đến từ reviewer **chạy được thứ gì đó**. Còn reviewer chạy bằng
+**`claude -p`** thì không có hàng rào nào — `--require-clean` cộng chụp `git ls-remote` trước và sau
+lượt là **máy phát hiện**, nó không ngăn, nó tố cáo.
+
+Ràng buộc cho **cả hai** pha của codex: mạng đóng ⇒ reviewer **không đọc được PR/verdict/Issue**.
+Cách rẻ là phiên điều phối **ghi sẵn ngữ cảnh thành tệp trong cây** trước khi spawn. Đây cũng là lý
+do vài lượt review của kho phải chạy bằng `claude -p` — nó đọc được GitHub qua MCP; giá phải trả là
+mất luôn quan sát về mạng.
+
+Với phiên **executor có quyền ghi**, danh sách hẹp vẫn hợp lý: ở đó ta muốn giới hạn *hình dạng
+việc*, và executor có `settings.json` của kho làm nền.
+
+#### Bản in cuối cùng của phiên headless LÀ sản phẩm — không có lượt sau
+
+Cùng đợt đo, một lượt review khác thoát `rc=0`, `subtype: success`, `stop_reason: end_turn`, cây
+làm việc sạch — **188 lượt hội thoại, 105 911 token đầu ra, 31 phút** — rồi in đúng một câu:
+*"I'll pick this up when the probe lands."* Không có probe nào; `claude -p` không có cơ chế chạy
+nền. Toàn bộ công việc mất sạch.
+
+Hỏng kiểu này **trông y hệt thành công** ở mọi tín hiệu ta quen nhìn (`rc`, `is_error`, `subtype`,
+cây sạch); chỉ đọc **nội dung** bản in mới thấy rỗng. `rc=0` của một lượt agent **không phải bằng
+chứng có sản phẩm** — phải đo chính sản phẩm. Chốt rẻ, đã dùng lại và hiệu nghiệm: nói thẳng trong prompt rằng bản in cuối LÀ sản phẩm bàn giao,
+không có lượt sau; còn ~20% ngân sách thì **dừng đo và viết kết luận** với những gì đã có; ô nào
+chưa xong thì ghi `KHÔNG_ĐO_ĐƯỢC` kèm lý do — **đó là câu trả lời hợp lệ, im lặng thì không**; và
+lệnh nào bị từ chối quyền thì ghi vào mục *"chỗ không đo được"* rồi **đi tiếp**, đừng bỏ cả hướng đo.
+
 **Antigravity (AG).** Chế độ duyệt của AG nằm trong CÀI ĐẶT APP (Agent auto-run),
 kho không cấu hình hộ được. Khuyến nghị khi mở phiên AG cho packet của kho: bật
 auto-run cho lệnh ĐỌC + chạy test; giữ hỏi cho terminal ghi ngoài worktree, mọi thao

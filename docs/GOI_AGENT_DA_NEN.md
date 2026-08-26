@@ -591,6 +591,11 @@ toàn, chỉ mua được một verdict mỏng hơn, hoặc không có verdict n
 
 #### Ba HẠNG bằng chứng — đọc mục dưới bằng từ vựng này, kẻo lại viết ra ba câu chỏi nhau
 
+**Phạm vi của từ vựng này:** nó áp cho các **control của mục này** — bốn tầng, sandbox, và hai pha
+reviewer. Chỗ khác trong tệp dùng chữ *ranh giới* / *cưỡng chế* theo nghĩa thường (phân công giữa
+launcher và CLI ở đầu tệp; hạn chót của launcher; và *"ranh giới cắt"* là thuật ngữ Git của clone
+nông) — những chỗ ấy **không** mang hạng, và nói ra ở đây để không ai đi gắn nhãn nhầm.
+
 Bản đầu của mục dưới tự mâu thuẫn trong sáu chục dòng: khai *"không tầng nào bó được"*, rồi gọi
 mạng đóng là *"hàng rào thật, có sẵn"*, rồi dùng nó làm cột **cưỡng chế**, rồi bảo *đừng dựa vào nó
 như một bảo đảm an ninh*. Cả bốn câu đều dựa trên phép đo có thật; thứ trôi không phải số liệu mà
@@ -598,19 +603,28 @@ là **HẠNG của bằng chứng**. Ba hạng, và mọi câu dưới đây man
 
 | hạng | nghĩa | được gọi là |
 |---|---|---|
-| **cơ chế đã xác minh** | biết nó chặn BẰNG GÌ, và đã đo được nó fail-close | *ranh giới*, *hàng rào* |
+| **cơ chế đã xác minh — chiều ĐÓNG** | biết nó chặn BẰNG GÌ, và đã đo được nó chặn | *ranh giới*, *hàng rào* |
+| **cơ chế đã xác minh — chiều MỞ** | biết vì sao nó KHÔNG chặn, và đã đo | KHÔNG được gọi là ranh giới; nó giải thích một chỗ HỞ |
 | **quan sát chưa rõ cơ chế** | lặp lại được, nhưng chưa ai đo CƠ CHẾ ⇒ chưa biết có bền không | *quan sát* — kèm phiên bản và điều kiện đo |
 | **máy phát hiện** | không ngăn được gì; nó TỐ CÁO sau khi việc đã xảy ra | *máy phát hiện* |
+| **chưa xếp được** | không rơi gọn vào bốn hàng trên | phải GỌI TÊN là chưa xếp được, không im lặng bỏ qua |
 
 Luật đọc: **quan sát theo phiên bản KHÁC bất biến an ninh.** Chỉ được gọi một thứ là *ranh giới*
-sau khi xác minh cơ chế fail-closed; trước đó nó là *quan sát*, và quan sát thì có hạn dùng. Nhầm
-hạng chính là lỗi mà mục dưới đã phải sửa — và nhầm theo hướng nguy hiểm: nâng một quan sát lên
-thành bảo đảm rồi thiết kế quy trình dựa trên nó.
+sau khi xác minh cơ chế **và đo được nó chặn**; trước đó nó là *quan sát*, và quan sát thì có hạn dùng.
 
-#### Bốn tầng thường bị coi là hàng rào — đo Ở VỎ PHIÊN ĐIỀU PHỐI, không tầng nào bó được (24-08-2026)
+Hàng cuối tồn tại vì cross-review bắt được: bản đầu của bảng này chỉ có ba hàng, tự xưng *"mọi câu
+dưới đây mang đúng một nhãn"*, rồi **sai ngay ở ví dụ của chính nó** — cơ chế proxy chèn credential
+là thứ đã xác minh theo chiều MỞ, không thoả định nghĩa "đo được fail-close" của hàng đầu.
+**Một bảng phân loại tự xưng phủ hết mà không có ô dư thì không thể phủ hết**; ô dư là chỗ để cái
+chưa xếp được LỘ RA thay vì bị nhét bừa vào hàng gần nhất.
 
-Phạm vi của mục này là **vỏ phiên điều phối** (`claude`, `Bash` trần). Nó KHÔNG nói gì về bên trong
-sandbox codex — chỗ đó đo riêng ở mục kế, và kết quả khác hẳn.
+#### Bốn tầng thường bị coi là hàng rào — đo Ở VỎ PHIÊN ĐIỀU PHỐI: không tầng nào bó được QUYỀN GHI VÀO KHO (24-08-2026)
+
+Phạm vi của mục này là **vỏ phiên điều phối** (`claude`, `Bash` trần), và thứ bị đo là **quyền ghi
+vào kho** — không phải "bó" nói chung. Phân biệt ấy quan trọng: hàng `--allowedTools` dưới đây CÓ
+chặn, nhưng nó chặn theo **hình dạng lệnh**, không theo **thẩm quyền**, nên nó chặn oan phép đo mà
+không chặn được đường ghi. Hai hàng `codex` trong bảng là **phép đo đối chứng ở vỏ phiên**; kết quả
+BÊN TRONG sandbox codex khác hẳn và nằm ở mục kế.
 
 Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": `rc=0`, ref được tạo, và
 `--require-clean` **vẫn báo sạch**. Đo tiếp bốn tầng:
@@ -639,11 +653,26 @@ vo phien (claude, Bash tran)   rc=0            rc=0             rc=0          rc
 
 Hai trục **tách rời**, và tách theo NỀN chứ không theo chế độ:
 
-- **Mạng: codex trả `rc=128` ở CẢ HAI chế độ.** Một reviewer chạy bằng `codex exec` không đẩy được
-  lên GitHub, kể cả `workspace-write`. **HẠNG: quan sát chưa rõ cơ chế** — đo 24-08-2026, `codex`
-  bản lúc đó, hai chế độ; **chưa ai đo VÌ SAO** (sandbox tự chặn, hay biến proxy không được kế
-  thừa). Chưa có phép đo về cơ chế thì **đừng dựa vào nó như một bảo đảm an ninh**, và đừng cho
-  rằng nó còn đúng ở bản codex kế tiếp.
+- **Mạng của sandbox codex — CƠ CHẾ NAY ĐÃ BIẾT, và nó là một CỜ CẤU HÌNH.**
+  **HẠNG: cơ chế đã xác minh — chiều ĐÓNG**, nhưng đọc kỹ hệ quả bên dưới trước khi mừng.
+  Đo 26-08-2026, `codex-cli 0.149.1`, `-s workspace-write`, cùng một probe chạy hai lần:
+
+  | phép đo | mặc định | `-c sandbox_workspace_write.network_access=true` |
+  |---|---|---|
+  | `bind` loopback `127.0.0.1` | `rc=1` | **`rc=0`** |
+  | HTTP `urllib` tới `api.github.com` | `rc=1` | **`rc=0`** |
+  | `git ls-remote` một URL HTTPS | `rc=0` | `rc=0` |
+
+  Tức mạng đóng **KHÔNG phải bất biến** — nó là mặc định của
+  `sandbox_workspace_write.network_access`, và **chính tệp này đã ghi cái cờ ấy** ở mục sandbox phía
+  trên. Bản đầu của mục này viết *"chưa ai đo VÌ SAO"* trong khi câu trả lời nằm cách đó ba trăm
+  dòng, trong cùng một tệp — cross-review bắt đúng chỗ ấy.
+  **Hệ quả cho an ninh, và nó ngược với trực giác:** biết cơ chế KHÔNG làm nó thành ranh giới. Một
+  reviewer truyền được `-c` thì tự mở, nên với **kẻ có quyền đặt cờ**, đây không bó gì cả. Nó chỉ bó
+  một reviewer **chạy đúng cấu hình mặc định** — và đó là điều kiện vận hành, không phải bất biến.
+  **CHƯA ĐO ĐƯỢC:** vì sao `git ls-remote` cho `rc=0` ở CẢ HAI cấu hình, ngược bảng cũ vốn khai
+  `rc=128`. Nhiều khả năng git đi đường credential/proxy khác đường `urllib`, nhưng đó là GIẢ THUYẾT
+  — chưa dựng phản chứng. Đừng chép dòng `rc=128` của bảng cũ như thể nó còn đứng.
 - **Hệ tệp: chỉ `read-only` bó.** `workspace-write` ghi được ra ngoài cây — rò rỉ thật, nhưng hậu
   quả thấp hơn nhiều so với ghi vào kho, và **phát hiện được**.
 - **Claude `-p` không có gì cả** — cả hai trục đều mở.
@@ -667,8 +696,11 @@ phần lớn finding tốt của kho đến từ reviewer **chạy được th�
 **`claude -p`** thì không có hàng rào nào — `--require-clean` cộng chụp `git ls-remote` trước và sau
 lượt là **máy phát hiện**, nó không ngăn, nó tố cáo.
 
-Ràng buộc cho **cả hai** pha của codex: mạng đóng ⇒ reviewer **không đọc được PR/verdict/Issue**.
-Cách rẻ là phiên điều phối **ghi sẵn ngữ cảnh thành tệp trong cây** trước khi spawn. Đây cũng là lý
+Điều kiện vận hành cho **cả hai** pha của codex — KHÔNG phải ràng buộc, vì đo được là nó mở bằng
+một cờ: **chạy ở cấu hình mặc định** thì reviewer không đọc được PR/verdict/Issue. Cách rẻ là phiên
+điều phối **ghi sẵn ngữ cảnh thành tệp trong cây** trước khi spawn — và cách ấy đúng bất kể cờ, nên
+cứ làm. Đừng viết ngược lại thành "mạng luôn đóng nên bắt buộc phải làm thế": đó là nâng một mặc
+định thành bất biến, đúng lỗi mục này sinh ra để sửa. Đây cũng là lý
 do vài lượt review của kho phải chạy bằng `claude -p` — nó đọc được GitHub qua MCP; giá phải trả là
 mất luôn quan sát về mạng.
 

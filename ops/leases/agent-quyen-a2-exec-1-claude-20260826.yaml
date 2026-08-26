@@ -1,0 +1,138 @@
+# Lease EXECUTOR — `AGENT-QUYEN-KHAI-KHONG` (#324), PHA A2 "hạ lời khai", lượt 1.
+#
+# Nửa VĂN BẢN của #324. A1 dựng CỔNG (PR #328, xanh, mergeable); A2 sửa hai tệp agent để lời
+# khai của chúng khớp đúng thứ cổng ấy thật sự cấp — không hơn.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 324
+packet_id: AGENT-QUYEN-KHAI-KHONG
+phase_key: AGENT-QUYEN-A2-HA-LOI-KHAI
+revision: 1
+generation: 1
+lease_id: agent-quyen-a2-exec-1-claude-20260826
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` giữ nguyên như A1 dù A2 thuần văn bản: hai tệp này MÔ TẢ thẩm quyền của agent, và
+  một mô tả sai thẩm quyền chính là lỗi mà #324 mở ra để đóng. Lớp do CỔNG tính, không tự hạ.
+
+spec_path: 'KHÔNG CÓ — nội dung là ba hạng bằng chứng của #318 áp lên phép đo của #324'
+spec_status: khong_co_dac_ta_rieng
+spec_duyet_boi: ducthangho
+spec_note: >-
+  Không soạn đặc tả riêng. Đầu vào đã đóng băng: từ vựng ba hạng (#318, đã land ở PR #322) cộng
+  phép đo của #324 và kết quả A1 (PR #328). Một tệp spec ở đây chỉ tạo thêm một bản chiếu.
+
+write_set:
+  - .claude/agents/tl-auditor.md
+  - .claude/agents/tl-rasoat.md
+write_set_note: >-
+  ĐÚNG HAI đường dẫn, khớp `ngan_sach_kich_thuoc.tep_toi_da: 2`. KHÔNG chạm
+  `.claude/hooks/**` (thuộc A1, PR #328 đang mở) và KHÔNG chạm `.claude/settings.json`.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 ~13:2xZ bằng `ops/lease_publish.py ai-dang-giu`. Phép so hai nguồn TRƯỚC khi
+  quét, so bằng TẬP TÊN: `ls-remote --heads` 213 = `for-each-ref` 213, `comm -23` RỖNG.
+    .claude/agents/tl-auditor.md  ->  NGƯỜI_GIỮ 0
+    .claude/agents/tl-rasoat.md   ->  NGƯỜI_GIỮ 0
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+
+branch: claude/agent-quyen-a2-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+branch_ghi_chu: >-
+  Nhánh MỚI, KHÔNG dùng lại nhánh chỉ định của phiên (nhánh ấy đang mang A1 và PR #328 đã xanh).
+  Hai lý do bắt buộc tách: lease A1 khai thẳng KHÔNG được chạm `.claude/agents/**`, và nhét
+  packet thứ hai vào một PR đã review xong là trộn hai lượt review làm một.
+  Người giữ kho ra lệnh "Cấp lease A2, làm luôn" — mà A2 KHÔNG thực hiện được nếu không có
+  nhánh thứ hai, nên câu ấy chính là cho phép tường minh cho nhánh này.
+
+thu_tu_land:
+  phai_land_sau: agent-quyen-a1-exec-1r4-claude-20260826
+  pr_cua_a1: 328
+  co_che_cuong_che: >-
+    PR của A2 đặt BASE = nhánh của A1, không phải `master`. Nên A2 KHÔNG THỂ vào master trước
+    A1 — GitHub tự chuyển base sang `master` sau khi A1 merge. Đây là CƯỠNG CHẾ bằng cấu tạo,
+    không phải lời dặn; #324 mở ra chính vì lời dặn không chặn được gì.
+  vi_sao: >-
+    Văn bản A2 TRỎ tới cổng do A1 dựng. Land ngược thứ tự là để một con trỏ chết trên master —
+    đúng lớp lỗi của #313 CON-TRO-TREO.
+
+base_sha: d60cc58f72410e499fdb6154d9bb5143c613fc05
+start_from_sha: d60cc58f72410e499fdb6154d9bb5143c613fc05
+reviewed_sha_required: d60cc58f72410e499fdb6154d9bb5143c613fc05
+base_ghi_chu: >-
+  `d60cc58f` = HEAD nhánh A1 lúc cấp, KHÔNG phải `origin/master` (`9044a5d8`). Cố ý: A2 xếp
+  chồng lên A1 nên ngân sách phải đo từ A1, kẻo diff của A2 gộp cả 534 dòng của A1 vào.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 150
+  do_tu_sha: d60cc58f72410e499fdb6154d9bb5143c613fc05
+  don_vi: '`git diff --numstat d60cc58f..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  da_dung: 0
+  la_uoc_luong: true
+  ghi_chu: >-
+    150 là ƯỚC LƯỢNG, chưa viết dòng nào lúc cấp. Ghi rõ vì packet này đã trả giá đúng chỗ đó
+    ba lần ở pha A1 (trần 300 -> 430 -> 470 -> 560, cả ba lần vượt đều là ước lượng sai).
+    Hai tệp hiện 34 và 35 dòng; phần phải viết lại là mục "Ranh giới cứng" của mỗi tệp.
+    Trong trần ADR-0044 cho `sensitive` (<=3 tệp / <=300 dòng) nên KHÔNG cần `nang_tran`.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-26: sau khi A1 xanh và mergeable, người giữ kho trả lời
+  "Cấp lease A2, làm luôn".
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_ghi_chu: >-
+  KHAI THẲNG: phiên ghi lease này CŨNG là phiên thi công A1 VÀ là phiên đo ra phát hiện gốc.
+  Ba vai gộp làm một, y như A1. `cross_approved` đứng CHỈ bằng vòng review `codex` sau thi công.
+
+leased_at_utc: '2026-08-26T13:30:00Z'
+lease_expires_at_utc: '2026-08-27T13:30:00Z'
+run_minutes: 1440
+
+viec_cua_luot_nay: >-
+  MỘT mục tiêu: sửa mục "Ranh giới cứng" của `.claude/agents/tl-auditor.md` và
+  `.claude/agents/tl-rasoat.md` cho khớp thứ CỔNG A1 thật sự cấp. Ba việc cụ thể:
+  (1) gọi đúng HẠNG theo từ vựng #318 — đường Bash nay có CƠ CHẾ ĐÃ XÁC MINH (guard, đo được
+  fail-close, 13 đột biến); mọi đường khác vẫn chỉ là LỜI DẶN, và phải nói ra;
+  (2) TRỎ tới `.claude/hooks/pretooluse_guard.py` bằng tên, để người đọc kiểm được;
+  (3) nói thẳng `disallowedTools` chặn TÊN TOOL chứ không chặn ĐƯỜNG GHI — câu ấy là chỗ
+  `tl-rasoat` trông chặt hơn `tl-auditor` trong khi đường ghi y hệt.
+  KHÔNG chạm `.claude/hooks/**`, KHÔNG chạm `.claude/settings.json`, KHÔNG sửa mã.
+
+dieu_kien_dung: >-
+  S1 A1 (PR #328) bị đóng mà KHÔNG merge, hoặc bị sửa đổi phạm vi ⇒ DỪNG, văn bản A2 mất chỗ
+  trỏ · S2 cần đường dẫn thứ ba ⇒ DỪNG, xin lease sửa đổi · S3 vượt 150 dòng thêm trên write
+  set · S4 phát hiện một câu trong bản vá khai MẠNH HƠN thứ đo được ở A1 ⇒ DỪNG, hạ câu ấy
+  xuống đúng hạng chứ KHÔNG nâng lời khai · S5 nhánh A1 đi tiếp mà chưa đo lại `base_sha`.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) Đây là packet về LỜI KHAI. Cám dỗ lớn nhất là viết mạnh hơn thực tế cho gọn câu — mà
+  đó đúng là lỗi gốc. Mỗi lần định dùng chữ "không thể", "tuyệt đối", "ranh giới", hãy hỏi
+  phép đo nào đỡ cho chữ ấy.
+  (2) Cổng A1 KHÔNG phủ: ghi ra ngoài cây kho, tệp bị `.gitignore`, gọi mạng, và cơ chế ghi
+  chưa ai liệt kê (xem #329). Không khai ra là lặp lại đúng lỗi đang sửa.
+  (3) Cổng chỉ áp khi `agent_type` khớp {tl-auditor, tl-rasoat}. Gọi hai agent này dưới tên
+  khác thì KHÔNG có cổng nào.
+  (4) `đường dẫn tuyệt đối kiểu Windows` trong hai tệp trái doctrine "neo theo KHO" — NGOÀI
+  phạm vi lượt này, ghi vào báo cáo, ĐỪNG tiện tay sửa.
+  (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+
+chua_do_duoc_luc_cap: >-
+  (1) CHƯA phóng subagent thật sau khi có cổng A1 để chứng minh đầu-cuối rằng lệnh ghi bị chặn
+  ở lượt chạy THẬT — mới đo cổng bằng payload dựng tay. Nếu lượt này đo được thì là bằng chứng
+  mạnh hơn hẳn cho văn bản A2, và nên đo.
+  (2) CHƯA biết A1 có được merge không; toàn bộ văn bản A2 giả định nó merge (xem S1).

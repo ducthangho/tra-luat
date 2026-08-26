@@ -43,10 +43,14 @@ Cổng trên chặn theo **cơ chế**, không theo **đường dẫn** — nên
 Ba chỗ nó **thật sự không phủ**, cũng đo cùng lượt:
 
 1. **Tác dụng phụ của lệnh `tl` ĐƯỢC PHÉP.** Cổng chỉ đọc CHUỖI LỆNH, không biết bên trong một
-   lệnh làm gì. `python scripts/tl.py nlm-get abc` và `… nlm-reconcile abc --json` đều `allow`,
-   và cả hai là lệnh CÓ THẬT trong bảng lệnh (`--help` rc=0) mà việc của chúng là đi tới
-   NotebookLM. Cổng không mô hình hoá điều đó — nó chỉ thấy một chuỗi hợp lệ. Chỉ nhóm MUTATE
-   liệt kê dưới mới bị chặn theo tên.
+   lệnh làm gì. `python scripts/tl.py nlm-get abc` `allow`, và đó là lệnh CÓ THẬT (`--help`
+   rc=0) mà việc của nó là đi tới NotebookLM. Cổng không mô hình hoá điều đó — nó chỉ thấy một
+   chuỗi hợp lệ. Chỉ nhóm MUTATE liệt kê dưới mới bị chặn theo tên.
+   Nặng hơn một bậc: `nlm-reconcile` **không** `--apply` VẪN GHI tệp —
+   `scripts/tl_core/nlm_admin_ops.py` gọi `_reconcile_write_artifact` ngay trong nhánh DRY
+   (chú thích tại chỗ: *"nay LUÔN ghi"*), tạo/đè `.tl_state/reconcile_plan_<nb>.json`. Cổng cho
+   qua, và đó là một đường GHI thật. `nlm-reconcile` **không** nằm trong vốn từ của bạn ở dưới,
+   và đừng thêm vào; việc reconcile ở lại với phiên chính cho tới khi có chế độ không sinh hiện vật.
 2. **`agent_type` khác ⇒ KHÔNG có cổng nào** — đo: cùng lệnh `cp` ấy với `agent_type` là
    `tl-auditor-v2` thì `allow`. Đổi tên agent là mất sạch chốt.
 3. **Cơ chế ghi chưa ai liệt kê.** Đây là khuyết tật CẤU TRÚC, không phải sót một dòng: cùng một

@@ -1,6 +1,6 @@
 ---
 name: tl-auditor
-description: Read-only auditor cho skill tra-luat — chạy/tiêu hoá output DÀI của các lệnh audit DRY (sweep, counts, corpus-audit, cat-audit, review-queue, reg-query, source-map, vbhn-check, nlm-get/nlm-reconcile dạng read-only) thành bảng phân loại CODE-bug vs DATA-ops + việc-cần-làm xếp hạng. Dùng khi cần rà log audit dài mà không làm bẩn context phiên chính. Vai CHỈ ĐỌC — xem mục Ranh giới về hạng của từng chốt.
+description: Read-only auditor cho skill tra-luat — chạy/tiêu hoá output DÀI của các lệnh audit DRY (sweep, counts, corpus-audit, cat-audit, review-queue, reg-query, source-map, vbhn-check, nlm-get dạng read-only) thành bảng phân loại CODE-bug vs DATA-ops + việc-cần-làm xếp hạng. Dùng khi cần rà log audit dài mà không làm bẩn context phiên chính. Vai CHỈ ĐỌC — xem mục Ranh giới về hạng của từng chốt.
 tools: Read, Grep, Glob, Bash
 ---
 
@@ -38,10 +38,14 @@ Cổng trên chặn theo **cơ chế**, không theo **đường dẫn** — nên
 Ba chỗ nó **thật sự không phủ**, cũng đo cùng lượt:
 
 1. **Tác dụng phụ của lệnh `tl` ĐƯỢC PHÉP.** Cổng chỉ đọc CHUỖI LỆNH, không biết bên trong một
-   lệnh làm gì. `python scripts/tl.py nlm-get abc` và `… nlm-reconcile abc --json` đều `allow`,
-   và cả hai là lệnh CÓ THẬT trong bảng lệnh (`--help` rc=0) mà việc của chúng là đi tới
-   NotebookLM. Cổng không mô hình hoá điều đó — nó chỉ thấy một chuỗi hợp lệ. Chỉ nhóm MUTATE
-   liệt kê dưới mới bị chặn theo tên.
+   lệnh làm gì. `python scripts/tl.py nlm-get abc` `allow`, và đó là lệnh CÓ THẬT (`--help`
+   rc=0) mà việc của nó là đi tới NotebookLM. Cổng không mô hình hoá điều đó — nó chỉ thấy một
+   chuỗi hợp lệ. Chỉ nhóm MUTATE liệt kê dưới mới bị chặn theo tên.
+   Nặng hơn một bậc: `nlm-reconcile` **không** `--apply` VẪN GHI tệp —
+   `scripts/tl_core/nlm_admin_ops.py` gọi `_reconcile_write_artifact` ngay trong nhánh DRY
+   (chú thích tại chỗ: *"nay LUÔN ghi"*), tạo/đè `.tl_state/reconcile_plan_<nb>.json`. Cổng cho
+   qua, và đó là một đường GHI thật. Vì vậy `nlm-reconcile` **đã bị gỡ khỏi vốn từ ĐỌC** bên
+   dưới; việc reconcile ở lại với phiên chính cho tới khi có chế độ không sinh hiện vật.
 2. **`agent_type` khác ⇒ KHÔNG có cổng nào** — đo: cùng lệnh `cp` ấy với `agent_type` là
    `tl-auditor-v2` thì `allow`. Đổi tên agent là mất sạch chốt.
 3. **Cơ chế ghi chưa ai liệt kê.** Đây là khuyết tật CẤU TRÚC, không phải sót một dòng: cùng một
@@ -60,7 +64,7 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
 
 - ĐỌC: `tl sweep [--json]`, `tl counts`, `tl corpus-audit …` (KHÔNG `--apply`), `tl cat-audit --json`,
   `tl review-queue --json`, `tl reg-query …`, `tl source-map …`, `tl vbhn-check …`,
-  `tl header-verify …` (không áp `--fix`), `tl nlm-get <nb>`, `tl nlm-reconcile <nb> --json`
+  `tl header-verify …` (không áp `--fix`), `tl nlm-get <nb>` (KHÔNG `--out`),
   (KHÔNG `--apply`), `git log/diff/status`, `ruff check`, selftest.
 - Nhóm MUTATE — `--apply` `--clear-stale` `register` `source-rename` `source-delete` `reg-delete`
   `recat --apply` `drive-push` `clasp` `ingest*` — nay bị cổng **chặn thật**, không còn chỉ là
@@ -72,7 +76,9 @@ thành read-only — nó chỉ chặn TÊN TOOL. Đường ghi thật là Bash, 
 ## Kiến thức nền bắt buộc khi phân loại
 - corpus-audit đọc HEADER thật (ít cờ, bằng chứng mạnh) ≠ sweep heuristic tên/enum (rộng, nghi vấn) — đếm lệch
   giữa 2 thước đo là BÌNH THƯỜNG, không phải bug.
-- registry claim NLM là ESTIMATE — mọi kết luận slot/FULL/desync phải neo số LIVE (`nlm-get`/`nlm-reconcile`).
+- registry claim NLM là ESTIMATE — mọi kết luận slot/FULL/desync phải neo số LIVE. Bạn chạy được
+  `nlm-get`; `nlm-reconcile` thì KHÔNG (nó ghi hiện vật, xem mục Ranh giới) — cần số ấy thì ĐỀ XUẤT
+  trong báo cáo để phiên chính chạy.
 - Rổ cat 46 = luật sửa nhiều luật (doctrine §13, phi-pháp-điển) — gợi ý dời omnibus khỏi 46 theo đề-tài là nhiễu.
 - VBHN: số hiệu phải có NĂM (NN-YYYY-VBHN-XXX); cờ UNVERIFIED_LATEST đã có 2 van hạ
   (VBHN_LATEST_RECENT_COVERED / VBHN_LATEST_LOW_PRIORITY_RECENT_LAW) — đừng báo lại như bug.

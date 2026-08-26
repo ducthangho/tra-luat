@@ -1,0 +1,227 @@
+# Lease EXECUTOR — `DU-LUONG-CA4` (#326), lượt 1.
+#
+# Packet này sinh ra từ DƯ LƯỢNG đo được của #313 ca 4 (PR #327, land `ac82ddc`).
+# Ca 4 đóng được MỘT topology (tụt sau THUẦN, đối ứng CÙNG TÊN). Ba mặt còn lại vẫn hở,
+# và cả ba có CHUNG một gốc: chốt dùng TÊN làm đại diện cho quan hệ upstream, và chỉ
+# phân loại được HAI trạng thái.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 326
+packet_id: DU-LUONG-CA4
+phase_key: DU-LUONG-CA4
+revision: 2
+generation: 1
+lease_id: du-luong-ca4-exec-1r2-codex-20260826
+thay_the_cho: du-luong-ca4-exec-1-codex-20260826
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` ĐÚNG NGHĨA ĐEN: packet sửa `ops/lease_publish.py`, tầng cưỡng chế write-set
+  exclusion. Trần ADR-0044 (≤3 tệp / ≤300 dòng thêm) áp thật.
+
+spec_path: null
+spec_note: >-
+  Nguồn yêu cầu: Issue #326 (thân bài + ba comment), cụ thể
+  https://github.com/ducthangho/tra-luat/issues/326#issuecomment-5428798541 (phân kỳ — đo được
+  rằng nới ngây thơ thì MẤT DỮ LIỆU) và
+  https://github.com/ducthangho/tra-luat/issues/326#issuecomment-5429445975 (mặt thứ ba —
+  upstream KHÁC TÊN). Executor PHẢI tự đo lại, không nhận lời khai.
+
+write_set:
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 18:5xZ, SAU khi bia mộ `ca4-ref-cuc-bo-thu-hoi-claude-20260826` đã đăng
+  (posted_comment_id 5429429181). Phép so HAI NGUỒN chạy TRƯỚC, so bằng TẬP TÊN:
+  ls-remote 217 · for-each-ref 217 · comm RỖNG cả hai chiều · không shallow.
+  Rồi quét cả hai đường dẫn bằng CHÍNH mã vừa land: `NGƯỜI_GIỮ 0`, `rc=0`.
+
+branch: codex/du-luong-ca4-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+start_from_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+reviewed_sha_required: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 300
+  do_tu_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+  don_vi: >-
+    `git diff --numstat ac82ddc583f688d54bdc60e06922ec09bdab9f16 -- ops/lease_publish.py ops/lease_publish_test.py`
+    — cột dòng THÊM. Pathspec TRONG lệnh, và KHÔNG `..HEAD` (sandbox không cho commit nên
+    `..HEAD` không thấy bản vá trên working tree).
+  da_dung: 163
+  ghi_chu: >-
+    `300` là trần ADR-0044 cho `sensitive`, KHÔNG phải ước lượng từ kích thước bản vá —
+    bài học ca 4: đặt trần bằng cách ước lượng mã sản phẩm rồi cộng phần trăm cho phản chứng
+    là sai, vì phần bị ước lượng kém chính là phần chiếm gần hết ngân sách.
+    Phạm vi thật vẫn được kẹp bằng `write_set` (ĐÚNG 2 tệp) và `vung_duoc_phep_cham`.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-26: "toi duyet theo de xuat, lam di"'
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên điều phối KHÔNG thi công lượt này và SẼ là reviewer — khác nền, đúng PROTOCOL:580.
+  Chính phiên này đã VẤP mặt thứ ba trong lúc chôn lease ca 4, nên nó có phép đo thật.
+
+leased_at_utc: '2026-08-26T19:40:00Z'
+lease_expires_at_utc: '2026-08-27T19:40:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  `ops/lease_publish.py`: hàm `_nhanh_cuc_bo_tut_sau`, `_lenh_chua_nhanh_tut_sau`,
+  `_quet_lease_toan_kho`, cộng hàm mới do packet này thêm.
+  `ops/lease_publish_test.py`: ca mới và bảng đăng ký ca/mutant.
+  Hunk ngoài các vùng ấy ⇒ ĐỎ. TRƯỜNG NÀY SỐNG TRONG LEASE, không ở tài liệu nào khác.
+
+viec_cua_luot_nay: >-
+  MỘT gốc, BA mặt. Đừng vá ba lần.
+
+  === GỐC ===
+
+  `_nhanh_cuc_bo_tut_sau` hiện làm HAI việc sai cùng lúc:
+
+    (i)  dựng đối ứng bằng TÊN — `doi_ung = "refs/remotes/origin/" + ten` — rồi
+         `if doi_ung not in tap_ref: continue`. Tên là ĐẠI DIỆN cho quan hệ upstream,
+         và đại diện ấy sai khi nhánh theo dõi một upstream KHÁC TÊN. Git đã ghi sẵn
+         quan hệ THẬT ở `branch.<ten>.merge` / `<ten>@{upstream}`.
+    (ii) chỉ phân loại HAI trạng thái: `trai == 0 && phai > 0` ⇒ CHẶN, còn lại ⇒ QUA.
+         Phân kỳ (`trai > 0 && phai > 0`) rơi vào "còn lại" nên QUA — trong khi nó
+         thiếu commit của upstream y hệt ca tụt sau, tức RỦI RO LEASE-MA LÀ NHƯ NHAU.
+
+  === PHẢI LÀM ===
+
+  1. ĐỌC UPSTREAM THẬT, không đoán theo tên.
+     Không có upstream ⇒ nhánh cục bộ thuần ⇒ **QUA**. Chiều bắt-oan này BẮT BUỘC giữ
+     (`t105` đang khoá nó) — một cổng chặn oan còn tệ hơn không có cổng.
+
+  2. PHÂN LOẠI BỐN trạng thái, không phải hai:
+
+       bằng      (0/0)            -> QUA
+       đi trước  (M>0, 0)         -> QUA
+       tụt sau   (0, N>0)         -> CHẶN, và danh sách CHO PHÉP quyết định có phát lệnh
+       PHÂN KỲ   (M>0, N>0)       -> CHẶN, và **KHÔNG BAO GIỜ PHÁT LỆNH**
+
+  3. PHÂN KỲ KHÔNG BAO GIỜ NHẬN MỘT LỆNH NÀO. Không `git branch -f` (vứt mất commit cục
+     bộ), không `merge --ff-only` (không fast-forward được theo định nghĩa). Chỉ CHẨN ĐOÁN:
+     nêu đích danh nhánh, upstream thật của nó, quan hệ M/N, và bảo người dùng tự quyết
+     (merge, rebase, hoặc bỏ nhánh). Đây KHÔNG phải tuỳ chọn — đã ĐO: nới điều kiện thành
+     `phai > 0` mà giữ nguyên tầng phát lệnh khiến cổng in `git branch -f` cho nhánh phân
+     kỳ, chạy `rc=0`, và MẤT commit cục bộ, unreachable từ mọi ref. Nặng hơn cả năm finding
+     của ca 4 cộng lại — chúng chỉ là ngõ cụt, cái này PHÁ DỮ LIỆU.
+
+  4. Danh sách CHO PHÉP của ca 4 GIỮ NGUYÊN cho ca tụt sau. Phép kiểm an toàn worktree là
+     CẦN nhưng KHÔNG ĐỦ: nó hỏi "worktree có sạch không", chưa bao giờ hỏi "fast-forward có
+     hợp lệ về NGỮ NGHĨA không". Chốt quan hệ ref phải chạy TRƯỚC nó.
+
+  === CA KHOÁ — bảy trạng thái, rig đã dựng sẵn và ĐÃ KIỂM ===
+
+  Rig ở `rig/kho` có đúng bảy nhánh, mỗi nhánh mang một lease riêng:
+
+    tutsau      origin/tutsau CÓ    0/1   -> CHẶN + lệnh (hành vi CŨ, không được đổi)
+    phanky      origin/phanky CÓ    1/1   -> CHẶN, KHÔNG lệnh          [MỚI]
+    bang        origin/bang   CÓ    0/0   -> QUA
+    ditruoc     origin/ditruoc CÓ   1/0   -> QUA
+    thuancucbo  KHÔNG origin, KHÔNG upstream -> QUA (bắt-oan, bắt buộc)
+    khacten     upstream=origin/main  1/1 -> CHẶN, KHÔNG lệnh          [MỚI]
+    khactensau  upstream=origin/main  0/1 -> CHẶN + lệnh               [MỚI]
+
+  ĐÃ KIỂM TRƯỚC KHI GIAO bằng chính mã vừa land: nó CHẶN `main` + `tutsau`, và BỎ SÓT
+  `phanky`, `khacten`, `khactensau`. Nên "KHÔNG_ĐO_ĐƯỢC" là câu trả lời ĐÁNG NGỜ ở đây.
+
+  Ca từ chối phải khẳng định output KHÔNG chứa dạng lệnh chạy được (`git branch -f`,
+  `git -C`, `merge --ff-only`) — y như `t111` của ca 4 làm.
+
+  === ĐỘT BIẾN BẮT BUỘC — mỗi cái phải làm ĐÚNG ca của nó ĐỎ ===
+
+    · gỡ phát hiện phân kỳ                    -> ca phanky ĐỎ
+    · biến phân kỳ thành tụt sau (tức CHO nó nhận lệnh) -> ca phanky ĐỎ   [QUAN TRỌNG NHẤT:
+      đây đúng đường phá dữ liệu; không có đột biến này thì không biết ca đang đo điều gì]
+    · quay về dựng đối ứng bằng TÊN           -> khacten + khactensau ĐỎ
+    · chặn cả nhánh KHÔNG có upstream         -> thuancucbo ĐỎ (bắt-oan)
+    · gỡ chốt quan hệ ref, chỉ còn danh sách cho phép -> phanky ĐỎ
+
+  Mỗi đột biến phải chạy trong THƯ MỤC RIÊNG (bẫy `.pyc` trùng `(mtime giây, kích thước)`).
+
+  === ĐỪNG ===
+
+  ĐỪNG đụng `t102`–`t111`; chúng phải XANH nguyên vẹn sau bản vá (nếu một ca cũ buộc phải
+  đổi thì DỪNG và khai, đừng tự sửa). ĐỪNG mở lại thiết kế danh sách CHO PHÉP của ca 4.
+  ĐỪNG tự stash/reset/abort/prune bất cứ thứ gì.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ngoài write set ⇒ DỪNG ·
+  S2 vượt 300 dòng thêm ⇒ DỪNG, khai phần chưa làm, KHÔNG cắt phản chứng ·
+  S3 chốt quan hệ ref và danh sách CHO PHÉP xung đột (một cái đòi phát lệnh, cái kia cấm)
+  ⇒ DỪNG, trình phép đo, xin quyết định ·
+  S4 không tái hiện được một trong ba mặt bằng phép đo của chính mình ⇒ `KHÔNG_ĐO_ĐƯỢC`,
+  DỪNG (rig ĐÃ được kiểm là chứa cả ba) ·
+  S5 một ca trong `t102`–`t111` buộc phải đổi ⇒ DỪNG, khai, không tự sửa ·
+  S6 `origin/master` đã đi tiếp so `base_sha` mà chưa đo lại.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) SANDBOX MOUNT `.git` CHỈ ĐỌC — không commit, không push. Đo ngân sách bằng
+  `git diff --numstat <base_sha> -- <hai đường dẫn>`, KHÔNG dùng `..HEAD`.
+  (2) RIG ĐÃ DỰNG SẴN và ĐÃ KIỂM: `rig/kho` có bảy nhánh, và mã hiện tại BỎ SÓT đúng ba
+  nhánh mà packet này phải bắt. Script dựng lại rig ở `rig/dung_rig.sh` nếu cần rig sạch.
+  (3) Bạn đang sửa CỔNG THẨM QUYỀN GHI. Cổng CHẶN OAN còn tệ hơn không có cổng — ba trạng
+  thái hợp lệ (bằng · đi trước · không có upstream) phải QUA, mỗi cái một ca riêng.
+  (4) `git ls-remote` sẽ HỎNG trong sandbox (không mạng). Đó là `KHÔNG_ĐO_ĐƯỢC`, khai thẳng,
+  đừng dựng phản chứng giả để lấp.
+  (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+posted_comment_id: 5429722577   # workflow ghi, ĐỪNG sửa tay
+
+thay_the_ly_do: >-
+  Lượt 1 đúng về THIẾT KẾ (bốn trạng thái, chốt quan hệ ref chạy trước danh sách CHO PHÉP,
+  fail-close khi upstream khai mà ref không có) và ngân sách chỉ dùng 163/300. Nhưng
+  cross-review lượt 1 đo được MỘT finding P1 CHẶN LAND: mã mới đọc upstream CHỈ từ tracking
+  config, nên nhánh KHÔNG khai config mà vẫn có `origin/<cùng tên>` bị BỎ QUA hoàn toàn —
+  trong khi mã cũ phủ nó. Hướng hỏng là fail-OPEN.
+  Đo trên rig ĐÚNG NHƯ LÚC BÀN GIAO: mã cũ chặn `main` + `tutsau`; mã mới chặn cả hai
+  KHÔNG. `phanky` (phân kỳ, không config) cũng lọt — tức chính khuyết tật packet này sinh ra
+  để sửa vẫn hở cho population ấy.
+  Trần, write set, provider, reviewer KHÔNG đổi. KHÔNG nới trần (163/300, còn 137 dòng).
+  Đây là vòng review thứ 2 — ĐÚNG trần ADR-0043, không cần `nang_tran`.
+
+viec_cua_luot_2: >-
+  MỘT việc, cộng một việc về PHÉP ĐO.
+
+  (1) BẢN VÁ — ưu tiên config, LÙI VỀ TÊN khi không có. Cộng dồn, không đánh đổi:
+
+        if not doi_ung:
+            ung_vien = "refs/remotes/origin/" + ten
+            if ung_vien in tap_ref:
+                doi_ung = ung_vien
+
+     Reviewer ĐÃ CHẠY bản vá này trên rig sạch: đủ cả bảy trạng thái
+     (TỤT_SAU: khactensau · main · tutsau | PHÂN_KỲ: khacten · phanky | QUA: bang · ditruoc ·
+     thuancucbo), và suite KHÔNG đổi (94/113). Bạn vẫn phải TỰ ĐO LẠI, đừng nhận lời khai.
+
+  (2) PHÉP ĐO — ca khoá hiện KHÔNG THỂ ĐỎ vì lỗi này.
+     `t112`/`t113` chạy trên git GIẢ, dựng quan hệ bằng map `upstreams={ten: upstream} if
+     upstream else {}`, nên trạng thái "KHÔNG có config NHƯNG CÓ origin/<cùng tên>" không
+     biểu diễn được. Phải làm nó biểu diễn được — hoặc thêm ca chạy trên GIT THẬT cho đúng
+     population ấy. Kèm một ĐỘT BIẾN: gỡ nhánh lùi-về-tên ⇒ ca ấy phải ĐỎ. Không có đột biến
+     đó thì không biết ca đang đo gì.
+
+  (3) KHAI, đừng im: dòng `PHẠM_VI:` nằm trong `lenh_ai_dang_giu`, NGOÀI `vung_duoc_phep_cham`.
+     Giữ nguyên là ĐÚNG LUẬT. Nhưng phải nói ra trong báo cáo rằng câu ấy chỉ đúng khi có
+     bản vá lùi-về-tên.
+
+  ĐỪNG sửa rig cho khớp mã. Lượt 1 đã làm thế (thêm 4 tracking config) và chính việc đó che
+  mất finding. Rig là ĐỀ BÀI; mã phải khớp rig, không phải ngược lại. Cần rig sạch thì chạy
+  `rig/dung_rig.sh <thư-mục-mới>`.

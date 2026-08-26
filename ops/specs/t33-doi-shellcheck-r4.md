@@ -103,15 +103,45 @@ ra kết quả khác.
 | bằng chứng thật có gì | một lượt chạy trong **worktree cục bộ**; không chỗ nào dẫn ra lượt CI | **tiền đề được chỉ ra tại chỗ** (xem dưới) |
 | kiểm lại được không | phải **chạy** trên một runner Ubuntu — chưa ai làm | **suy ra được từ mã**, không cần chạy |
 
-Tiền đề của `r2:215`, nêu ngay tại chỗ nên người đọc kiểm được: `t73` truyền `nen="posix"`, **trùng
-`os.name` thật** của một runner Linux, nên gỡ mệnh đề nền là **no-op** với nó; thứ phân biệt hai trục
-là **8 dòng `BỎ QUA`** trên chân `windows-latest`.
+Tiền đề của `r2:215` — và nó phải **KÉO THEO** kết luận, không chỉ được nêu tên. Tính thẳng mệnh đề
+ở `ops/lease_publish_test.py:189-200` cho `ops-publish-lease.yml:dang` (`runs-on: ubuntu-latest`,
+nên `toàn-ubuntu = True`):
+
+```text
+bản    posix      nt     đọc `nen`?
+BASE   False    True     có
+X1     True     True     không
+X2     False    False    không
+```
+
+`BỎ QUA` xảy ra khi mệnh đề `True`. Đọc bảng:
+
+- **`X2` không đọc `nen`**, và trên `posix` nó cho **cùng kết quả với `BASE`** (`False`) ⇒ chân Ubuntu
+  sinh **đúng cùng output** cho hai bản ⇒ **im lặng**. Chỉ chân `nt` tách được (`BASE=True` so
+  `X2=False`) — đó chính là **8 dòng `BỎ QUA`** trên `windows-latest`.
+
+**Đó là toàn bộ suy dẫn, và nó chỉ dùng `X2`.**
+
+**Bản trước của `r4` dùng một tiền đề NGƯỢC, và cross-review chéo nền bác được bằng chính bảng trên.**
+Nó viết: *"`t73` truyền `nen="posix"` … nên gỡ mệnh đề nền là **no-op** với nó"*. **SAI** — gỡ mệnh đề
+nền là `X1`, và `X1` trên `posix` cho `True` (không phải `False`), tức nó **làm `t73` ĐỎ**; bảng đo ở
+`r2:212` ghi đúng thế (`X1` `rc=1`, ĐỎ `t73`).
+Câu *"no-op"* ấy có thật, nhưng nó nói về một **đột biến KHÁC**: gỡ mock `os.name` ở mối nối
+`_chay_main_meta` — ở đó `t73` sống vì `nen="posix"` trùng `os.name` thật của runner. Tôi bê một mệnh
+đề đúng từ ngữ cảnh này sang ngữ cảnh kia, nơi nó **không phải** mệnh đề đang vận hành.
+
+**Và đó là bài học của chính lần sửa này:** *"tiền đề được CHỈ RA"* chưa đủ — nó phải **KÉO THEO** kết
+luận. Một tiền đề nêu rõ ràng mà **không** dẫn tới kết luận thì thước mới **vẫn tha** một overclaim.
+Nên thước phải đọc là: **tiền đề nêu tại chỗ VÀ kéo theo kết luận**, kiểm được mà không phải chạy gì.
 
 ### Luật rút ra — dùng lại được, không cần hỏi lại
 
 **Hình dạng `A` là về LỜI KHAI KẾT QUẢ CHẠY.** Hỏi: *câu này khai một lượt chạy đã xảy ra, hay suy ra
-từ tiền đề nó chỉ ra?* Khai lượt chạy thì phải có lượt chạy ấy — đúng nền, đúng phạm vi. Suy luận thì
-phải **chỉ ra tiền đề tại chỗ** để người đọc kiểm được mà không phải chạy gì.
+từ tiền đề nó chỉ ra?* Khai lượt chạy thì phải có lượt chạy ấy — **đúng nền, đúng phạm vi**. Suy luận
+thì tiền đề phải **nêu tại chỗ VÀ KÉO THEO** kết luận, kiểm được mà không phải chạy gì.
+
+Vế **"kéo theo"** không phải chữ thừa: bản trước của `r4` nêu tiền đề rất rõ ràng — và tiền đề ấy nói
+về một đột biến khác, nên nó **không kéo theo** kết luận. Thước thiếu vế đó sẽ tha đúng loại lỗi ấy.
 
 **Bản đầu của `r4` dùng một thước KHÁC và nó SAI** — *"bằng chứng hay giải thích"*. Cross-review chéo
 nền bác đúng hai chỗ, và cả hai đều đo được: (a) `r2:232` **nằm trong docstring** của ca, tức bản thân
@@ -172,10 +202,24 @@ Một bản đặc tả sửa lỗi *"khai rộng hơn đo"* mà **tự** khai r
   *"tip nào đang có tệp này"* — và bản đầu đọc nó thành *"tệp này chưa từng tồn tại"*. **Lời khai
   rộng hơn phép đo — hình dạng `A`, ngay trong tệp sinh ra để sửa hình dạng `A`.**
 
-  Điều đo được và giữ nguyên: `ops/specs/t33-doi-shellcheck-r4.md` **vắng ở base `9044a5d`** và vắng
-  ở mọi tip đã quét. Tái dùng số `r4` là **có chủ đích**: bản `ee545cf5` có **cùng mục đích** với
-  bản này (hạ đúng lời khai `"toàn chân Ubuntu"`) và đã bị rút vì lý do phạm vi, không vì nội dung.
-  Ai muốn đọc bản cũ thì tra `ee545cf5`. **Định danh là BĂM, không phải tên bản.**
+  Điều đo được: `ops/specs/t33-doi-shellcheck-r4.md` **vắng ở base `9044a5d`** và vắng ở mọi tip đã
+  quét. Tái dùng số `r4` là **có chủ đích**: bản `ee545cf5` có **cùng mục đích** (hạ đúng lời khai
+  `"toàn chân Ubuntu"`). Ai muốn đọc bản cũ thì tra `ee545cf5`.
+  **Định danh là BĂM, không phải tên bản.**
+
+  **VÌ SAO BẢN CŨ BỊ RÚT — chép từ hồ sơ, không suy.** `git show -s --format='%B' e87eae9d` ghi **HAI**
+  lý do, không phải một:
+
+  > Đó là việc ĐÚNG nhưng SAI CHỖ: nó biến một PR về mã thành một PR vừa mã vừa đặc tả, **và chính
+  > r4 lại tự mâu thuẫn** (dòng 16 khai "sửa ĐÚNG MỘT lời khai", dòng 109 khai "CHƯA AI QUÉT") —
+  > lượt 4 cross-review bắt được.
+
+  Tức **phạm vi VÀ nội dung**. Bản trước của `r4` viết *"bị rút vì lý do phạm vi, **không vì nội
+  dung**"* — vế phủ định ấy **SAI**, và cross-review chéo nền bác được bằng chính commit object.
+  Lại là một lời khai rộng hơn hồ sơ, trong tệp về lời khai rộng hơn hồ sơ.
+
+  Và mâu thuẫn đã hạ bản cũ **chính là** cái bẫy `r4` này né ở §4: khai *"sửa ĐÚNG MỘT lời khai"*
+  trong khi cùng tệp ghi *"CHƯA AI QUÉT"*. Đó là lý do §4 **không khai "đã quét hết"**.
 - **Băm của hai tệp bị thay đã đo tại chỗ**, ghi trong khối đầu tệp. Ai đọc `r4` mà thấy băm không
   khớp thì `r2`/`r3` đã bị động — và khi ấy `r4` phải được xét lại, không được dùng.
 

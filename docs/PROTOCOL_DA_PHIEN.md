@@ -1053,7 +1053,8 @@ lần thêm ADR; kho này vừa trả giá cho **năm** con trỏ chết cùng h
 docstring `t34` trỏ `t42` đã bị gỡ). Nên bảng dưới đây **do máy canh**, không do kỷ luật:
 
 ```
-python3 .claude/dev/packet_loop.py adr-song --root .
+PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
+"$PY"  .claude/dev/packet_loop.py adr-song --root .
 ```
 
 Cổng ấy ĐỎ khi: một ADR không có dòng trong bảng · bảng trỏ một ADR không tồn tại · một ADR có

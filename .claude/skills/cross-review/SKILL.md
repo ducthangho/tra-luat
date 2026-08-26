@@ -13,7 +13,8 @@ Tệp này **không tóm tắt** những mục trên — đợt đầu của ch�
 đăng verdict. Chốt cơ học:
 
 ```bash
-python .claude/dev/packet_loop.py doctrine-scan --root .
+PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
+"$PY"  .claude/dev/packet_loop.py doctrine-scan --root .
 ```
 
 Dưới đây chỉ có cú pháp của nền.
@@ -25,9 +26,10 @@ mà container phiên **không có sẵn** (đo 17-08-2026: `codex` vắng, `gh` 
 không chạy vì `CLAUDE_PROJECT_DIR` không được đặt khi kho gắn giữa phiên).
 
 ```bash
-python .claude/dev/launcher.py doctor            # kiểm tra toàn bộ công cụ (CONG_CU)
+PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
+"$PY"  .claude/dev/launcher.py doctor            # kiểm tra toàn bộ công cụ (CONG_CU)
 npm install -g @openai/codex                     # nếu doctor báo `khong codex`
-python .claude/dev/launcher.py chuan-bi          # CODEX_AUTH_JSON -> ~/.codex/auth.json
+"$PY"  .claude/dev/launcher.py chuan-bi          # CODEX_AUTH_JSON -> ~/.codex/auth.json
 codex --version                                  # bằng chứng THẬT về phiên bản codex CLI
 ```
 
@@ -240,7 +242,8 @@ là MCP GitHub (`pull_request_review_write` với `method: create` rồi `submit
 ## Ghi lại lượt review
 
 ```bash
-python .claude/dev/packet_loop.py record-review --packet 55 --provider codex \
+PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
+"$PY"  .claude/dev/packet_loop.py record-review --packet 55 --provider codex \
     --verdict changes_requested \
     --reviewed-sha $(gh pr view 56 --json headRefOid -q .headRefOid) \
     --finding-id url-alias      --finding-desc "mô tả tự do, KHÔNG tham gia phép đếm" \

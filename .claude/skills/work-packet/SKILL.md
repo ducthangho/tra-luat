@@ -14,7 +14,8 @@ Tệp này **không tóm tắt** những mục trên. Tóm tắt là bản sao, 
 review liên tiếp đã bắt được đúng lỗi đó ở chính adapter này. Nay có chốt cơ học:
 
 ```bash
-python .claude/dev/packet_loop.py doctrine-scan --root .
+PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
+"$PY"  .claude/dev/packet_loop.py doctrine-scan --root .
 ```
 
 Dưới đây chỉ có cú pháp của nền.
@@ -79,23 +80,24 @@ if [ -n "${TEN_BIEN:-}" ]; then echo "có, ${#TEN_BIEN} ký tự"; else echo "ch
 ## Máy trạng thái — mọi chuyển động đi qua đây
 
 ```bash
-python .claude/dev/packet_loop.py init          --packet 55 --mission 54 \
+PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
+"$PY"  .claude/dev/packet_loop.py init          --packet 55 --mission 54 \
                                                 --executor claude --reviewer codex
 # `init` CHỈ tới `awaiting_lease`. Uỷ quyền là bước RIÊNG, và người cấp KHÔNG được
 # là tên một provider — agent không tự cấp lease cho chính mình.
-python .claude/dev/packet_loop.py record-lease  --packet 55 \
+"$PY"  .claude/dev/packet_loop.py record-lease  --packet 55 \
                                 --lease-id wp55-r2-review-2-codex-20260813 \
                                 --granted-by ducthangho \
                                 --evidence https://github.com/o/r/issues/55#issuecomment-5281636040 \
                                 --expires-utc 2026-08-13T18:30:00Z
-python .claude/dev/packet_loop.py begin-attempt --packet 55 --provider claude
-python .claude/dev/packet_loop.py next-comment  --packet 55        # in văn bản → ĐĂNG lên Issue
-python .claude/dev/packet_loop.py record-post   --packet 55 --for reviewing --comment-id 5258163128
-python .claude/dev/packet_loop.py transition    --packet 55 --to reviewing --comment-id 5258163128 \
+"$PY"  .claude/dev/packet_loop.py begin-attempt --packet 55 --provider claude
+"$PY"  .claude/dev/packet_loop.py next-comment  --packet 55        # in văn bản → ĐĂNG lên Issue
+"$PY"  .claude/dev/packet_loop.py record-post   --packet 55 --for reviewing --comment-id 5258163128
+"$PY"  .claude/dev/packet_loop.py transition    --packet 55 --to reviewing --comment-id 5258163128 \
                                                 --head-sha $(git rev-parse HEAD)
-python .claude/dev/packet_loop.py void-attempt  --packet 55 --reason quota
-python .claude/dev/packet_loop.py status        --packet 55
-python .claude/dev/packet_loop.py where
+"$PY"  .claude/dev/packet_loop.py void-attempt  --packet 55 --reason quota
+"$PY"  .claude/dev/packet_loop.py status        --packet 55
+"$PY"  .claude/dev/packet_loop.py where
 ```
 
 **Lease không tự có.** `init` chỉ khai *hình dạng* của packet và dừng ở `awaiting_lease`; `leased`
@@ -118,7 +120,8 @@ tự nói lý do trên stderr.
 ## Chặn cứng
 
 ```bash
-python .claude/dev/packet_loop.py guard --action merge
+PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
+"$PY"  .claude/dev/packet_loop.py guard --action merge
 # merge | deploy | live | secrets | force-push | delete-branch | delete-worktree | edit-other-spec
 ```
 

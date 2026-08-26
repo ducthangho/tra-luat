@@ -17,7 +17,8 @@ nhau) · §12 (khi nào mission được đóng). Quy ước deploy của kho: `
 Tệp này **không tóm tắt** những mục trên. Chốt cơ học:
 
 ```bash
-python .claude/dev/packet_loop.py doctrine-scan --root .
+PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
+"$PY"  .claude/dev/packet_loop.py doctrine-scan --root .
 ```
 
 Dưới đây chỉ có cú pháp của nền.
@@ -40,7 +41,8 @@ bundle cùng SHA-256. Ngưỡng cụ thể của từng gate nằm ở `CLAUDE.m
 Trước mọi thao tác trong nhóm này:
 
 ```bash
-python .claude/dev/packet_loop.py guard --action merge     # hoặc deploy | live
+PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
+"$PY"  .claude/dev/packet_loop.py guard --action merge     # hoặc deploy | live
 ```
 
 Lệnh này không có cờ nới, và không được thêm. Uỷ quyền cho một exact head SHA sống trên GitHub, không

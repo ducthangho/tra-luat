@@ -62,16 +62,16 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
 
 ### Vốn từ lệnh của bạn
 
-- ĐỌC: `tl sweep [--json]`, `tl counts`, `tl cat-audit --json`, `tl review-queue --json`,
-  `tl vbhn-check …`, `tl header-verify …` (không áp `--fix`), `git log/diff/status`, `ruff check`,
-  selftest. **KHÔNG `--out`** với `tl reg-query`/`tl source-map`/`tl nlm-get <nb>` — cả BA nhận cờ ấy.
+- ĐỌC: `tl sweep`, `tl counts`, `tl cat-audit`, `tl review-queue`, `tl vbhn-check`,
+  `tl header-verify`, `tl reg-query`, `tl source-map`, `tl nlm-get <nb>` — thêm `--json` thì được;
+  `git log/diff/status`, `ruff check`, selftest.
 - `tl corpus-audit --json` CHỈ ở dạng KHÔNG `--sohieu-file` và KHÔNG `--all`. Hai dạng ấy bật
   checkpoint resumable — `hygiene.py` ghi `corpus_audit_ckpt_*.json` sau mỗi target và CỐ Ý để
   lại tệp khi dừng giữa chừng. Audit nối lại được là việc của phiên chính, không phải của bạn.
-- **Bảng có thẩm quyền về lệnh nào GHI: `scripts/tl_core/command_registry.py` → `COMMAND_META`**
-  (187 lệnh, mỗi lệnh có `read_only` + `write_scope`). Thêm lệnh vào vốn từ trên thì tra bảng ấy
-  TRƯỚC: `read_only=False` là KHÔNG được thêm. Ba lệnh đợt 26-08 gỡ/siết đều `read_only=False`,
-  và cả ba đã lọt qua vòng đọc bằng mắt trước đó.
+- **CẤM MỌI CỜ SINH TỆP** — `--out` `--fix` `--plan-out` `--save` `--export` — trên MỌI lệnh trên.
+  Đo 26-08: 8/10 lệnh vốn từ này nhận `--out`, kể cả `sweep` `counts` `review-queue` mà `COMMAND_META`
+  xếp `write_scope='none'`; chạy thật cả ba ĐỀU tạo tệp. Nên registry tả hành vi MẶC ĐỊNH,
+  không tả BỀ MẶT CỜ — thêm lệnh thì tra bảng (`read_only=False` là cấm) VÀ đọc `--help`.
 - Nhóm MUTATE — `--apply` `--clear-stale` `register` `source-rename` `source-delete` `reg-delete`
   `recat --apply` `drive-push` `clasp` `ingest*` — nay bị cổng **chặn thật**, không còn chỉ là
   dòng chữ này.

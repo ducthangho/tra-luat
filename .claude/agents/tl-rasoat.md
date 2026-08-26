@@ -68,14 +68,14 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
 ### Vốn từ lệnh của bạn
 
 - ĐỌC: `tl locate`, `tl status/relation-check/vbhn-check`, `tl nlm-query`/`nlm-cross`/`nlm-content`
-  (scoped), `git status/log`; `tl reg-query`/`tl source-map` **KHÔNG `--out`** (cả hai nhận cờ ấy).
+  (scoped), `tl reg-query`, `tl source-map`, `git status/log`.
 - `tl extract` KHÔNG nằm trong vốn từ của bạn, và đừng thêm vào: `extract_cache.py` tạo thư mục
   cache rồi `disk.write_text(...)` **vô điều kiện** — không có chế độ nào không ghi, và cache ấy
   chính là nguồn sau này chảy vào corpus. Cần toàn văn thì XIN phiên chính trích rồi đưa bạn đọc.
-- **Bảng có thẩm quyền về lệnh nào GHI: `scripts/tl_core/command_registry.py` → `COMMAND_META`**
-  (187 lệnh, mỗi lệnh có `read_only` + `write_scope`). Thêm lệnh vào vốn từ trên thì tra bảng ấy
-  TRƯỚC: `read_only=False` là KHÔNG được thêm. Ba lệnh đợt 26-08 gỡ/siết đều `read_only=False`,
-  và cả ba đã lọt qua vòng đọc bằng mắt trước đó.
+- **CẤM MỌI CỜ SINH TỆP** — `--out` `--fix` `--plan-out` `--save` `--export` — trên MỌI lệnh trên.
+  Đo 26-08: 5/9 lệnh vốn từ này nhận `--out`, kể cả `nlm-query` `nlm-cross` `nlm-content` mà `COMMAND_META`
+  xếp `write_scope='none'`; chạy thật cả ba ĐỀU tạo tệp. Nên registry tả hành vi MẶC ĐỊNH,
+  không tả BỀ MẶT CỜ — thêm lệnh thì tra bảng (`read_only=False` là cấm) VÀ đọc `--help`.
 - Nhóm MUTATE — `--apply` `--confirm` `register` `recat` `source-rename` `source-delete`
   `reg-delete` `--clear-stale` `ingest*` `drive-push` `clasp` `nlm-add` — nay bị cổng **chặn
   thật**, không còn chỉ là dòng chữ này.

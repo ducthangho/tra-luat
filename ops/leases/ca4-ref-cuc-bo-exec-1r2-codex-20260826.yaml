@@ -1,0 +1,189 @@
+# Lease EXECUTOR — `CA4-REF-CUC-BO` (#313 ca 4), lượt 1.
+#
+# Ca 4 đã THẤT BẠI MỘT LẦN, và lỗi là của phiên điều phối chứ không của executor: workspace
+# giao cho nó là một `git clone` — chỉ có ĐÚNG MỘT nhánh cục bộ — nên HIỆN TƯỢNG CẦN ĐO KHÔNG
+# TỒN TẠI trong rig. Executor đo `git rev-parse refs/heads/...` -> `fatal: unknown revision`
+# rồi ghi `KHÔNG_ĐO_ĐƯỢC` và từ chối dựng phản chứng giả. Đó là hành vi ĐÚNG.
+# Lần này rig ĐÃ ĐƯỢC DỰNG SẴN hiện tượng, và đã kiểm trước khi giao.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 313
+packet_id: CA4-REF-CUC-BO
+phase_key: CA4-REF-CUC-BO
+revision: 2
+generation: 1
+lease_id: ca4-ref-cuc-bo-exec-1r2-codex-20260826
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` ĐÚNG NGHĨA ĐEN ở đây: packet sửa `ops/lease_publish.py`, tầng cưỡng chế write-set
+  exclusion. Trần ADR-0044 (≤3 tệp / ≤300 dòng thêm) áp thật.
+
+spec_path: null
+spec_note: >-
+  Nguồn yêu cầu: Issue #313 mục ca 4, và comment
+  https://github.com/ducthangho/tra-luat/issues/313#issuecomment-5402804233
+  Cả hai phép đo trong đó executor PHẢI tự đo lại, không nhận lời khai.
+
+write_set:
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 10:4xZ. Phép so HAI NGUỒN chạy TRƯỚC, so bằng TẬP TÊN:
+    ls-remote 210 · for-each-ref 210 · comm RỖNG cả hai chiều
+  Rồi quét: cả hai đường dẫn -> rc=0 NGƯỜI_GIỮ 0.
+  Vừa được giải phóng bằng bia mộ `con-tro-treo-thu-hoi-claude-20260826` (#316 land `b662fe1`).
+
+branch: codex/ca4-ref-cuc-bo-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: b662fe1d07c675a222ae26e734377e305775e4f3
+start_from_sha: d3897beea7edb7399d752802bcafc178e63d01f4
+reviewed_sha_required: d3897beea7edb7399d752802bcafc178e63d01f4
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 300
+  do_tu_sha: b662fe1d07c675a222ae26e734377e305775e4f3
+  don_vi: >-
+    `git diff --numstat b662fe1d07c675a222ae26e734377e305775e4f3 -- ops/lease_publish.py ops/lease_publish_test.py`
+    — cột dòng THÊM. Pathspec TRONG lệnh, và KHÔNG `..HEAD` (sandbox không cho commit nên
+    `..HEAD` không thấy bản vá trên working tree).
+  da_dung: 140
+  ghi_chu: >-
+    TRẦN NÀY KHÔNG CÒN LÀ ƯỚC LƯỢNG — nó là trần ADR-0044 cho `sensitive` (≤3 tệp / ≤300 dòng
+    thêm). Xem `nang_tran.can_cu`. Phạm vi vẫn bị kẹp bằng `write_set` (ĐÚNG 2 tệp) và
+    `vung_duoc_phep_cham`; số dòng chỉ là proxy cho hai thứ ấy.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-26: "lam tat ca cac buoc con lai"'
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên điều phối KHÔNG thi công lượt này và SẼ là reviewer — khác nền, đúng PROTOCOL:580.
+  Chính phiên này đã VẤP cả hai hiện tượng dưới đây trong lúc vận hành, nên chúng có phép đo
+  thật chứ không phải giả thuyết.
+
+leased_at_utc: '2026-08-26T10:45:00Z'
+lease_expires_at_utc: '2026-08-27T10:45:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  `ops/lease_publish.py`: hàm `lenh_ai_dang_giu` và `_quet_lease_toan_kho`, cộng hàm mới do
+  packet này thêm. `ops/lease_publish_test.py`: ca mới và bảng đăng ký ca/mutant.
+  Hunk ngoài các vùng ấy ⇒ ĐỎ. TRƯỜNG NÀY SỐNG TRONG LEASE, không ở tài liệu nào khác.
+
+viec_cua_luot_nay: >-
+  MỘT việc. Không phải góp ý — có phản chứng chạy được, và nó đã xảy ra THẬT trong ngày.
+
+  === LỆNH CHỮA MÀ CỔNG IN RA KHÔNG CHẠY ĐƯỢC KHI NHÁNH BỊ MỘT WORKTREE GIỮ ===
+
+  Lượt 1 dạy `ai-dang-giu` CHẶN khi nhánh cục bộ tụt sau, và in đích danh lệnh chữa:
+
+      git branch -f <ten> refs/remotes/origin/<ten>
+
+  Lệnh ấy **thất bại** khi nhánh đang được một linked worktree checkout — kể cả có `-f`:
+
+      $ git worktree add /tmp/ca4wt ops/cap-lease-t33-doi-shellcheck
+      $ python3 ops/lease_publish.py ai-dang-giu ops/lease_publish.py
+      CHAN [12]: NHÁNH_CỤC_BỘ_TỤT_SAU: ops/cap-lease-t33-doi-shellcheck. … chữa: git branch -f …
+      rc=12
+      $ git branch -f ops/cap-lease-t33-doi-shellcheck refs/remotes/origin/ops/cap-lease-t33-doi-shellcheck
+      fatal: cannot force update the branch '...' used by worktree at '/tmp/ca4wt'
+      rc=128
+
+  VÌ SAO NẶNG HƠN "CHẶN OAN": một cổng chặn oan còn để người dùng một lối ra. Cổng này chặn,
+  cho ĐÚNG MỘT lối ra, và lối ấy trả `rc=128`. Người dùng làm đúng y lời nó dặn và VẪN KẸT.
+  Đó là NGÕ CỤT, không phải phiền phức.
+
+  VÀ NÓ KHÔNG HIẾM: phiên điều phối chạy thường trực nhiều linked worktree, và đã vấp đúng lỗi
+  này SÁNG NAY trên hai nhánh (`wt313`, `wt313b`) TRƯỚC khi review tồn tại. Trạng thái "origin
+  vừa đi tiếp trong lúc một worktree đang giữ nhánh" là trạng thái BÌNH THƯỜNG của một phiên
+  đang làm việc.
+
+  PHẢI LÀM:
+    · Đọc `git worktree list --porcelain` để biết nhánh nào đang bị worktree nào giữ.
+    · Khi nhánh tụt sau ĐANG BỊ GIỮ: in lệnh chữa KHÁC — fast-forward ngay trong worktree ấy
+      (`git -C <đường-dẫn-worktree> merge --ff-only <origin ref>`), hoặc bảo detach worktree
+      trước rồi mới `git branch -f`. NÊU ĐÍCH DANH đường dẫn worktree.
+    · Khi nhánh KHÔNG bị giữ: giữ nguyên lệnh `git branch -f` hiện tại — nó đúng và đã được
+      reviewer chạy thật.
+
+  CA KHOÁ — hai chiều, và cả hai đều phải CHẠY ĐƯỢC LỆNH ĐƯỢC IN RA:
+    · nhánh tụt sau, KHÔNG bị worktree giữ ⇒ in `git branch -f`, và ca phải CHẠY nó rồi đòi
+      `rc=0` + ref khớp origin;
+    · nhánh tụt sau, ĐANG bị worktree giữ ⇒ in lệnh khác, và ca phải CHẠY nó rồi đòi `rc=0`
+      + ref khớp origin. **Đây là điểm cốt lõi: ca phải THI HÀNH lệnh, không chỉ so chuỗi.**
+      So chuỗi thì bản vá "in một câu khác" cũng xanh, mà câu ấy vẫn có thể không chạy được.
+
+  ĐỘT BIẾN BẮT BUỘC: đưa lệnh chữa trở lại `git branch -f` VÔ ĐIỀU KIỆN phải làm ca thứ hai
+  ĐỎ. Không có đột biến ấy thì không biết ca đang đo lệnh chữa hay đo một hằng số.
+
+  ĐỪNG mở lại (A)/(B) của lượt 1 — cả hai đã đúng, đã có răng, đã qua cross-review và đã xanh
+  cả hai nền CI. Đừng đụng bảy ca `t102`–`t108` ngoài việc thêm ca mới.
+  DƯ LƯỢNG PHÂN KỲ (#326) KHÔNG thuộc lượt này — đừng vá kèm.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ⇒ DỪNG ·
+  S2 vượt 140 dòng thêm ⇒ DỪNG, khai phần chưa làm, KHÔNG cắt phản chứng ·
+  S3 kết luận (A) và (B) xung đột — khử trùng làm mất khả năng phát hiện nhánh tụt sau — ⇒
+  DỪNG, trình phép đo, xin quyết định ·
+  S4 không tái hiện được (A) hoặc (B) bằng phép đo của chính mình ⇒ `KHÔNG_ĐO_ĐƯỢC`, DỪNG ·
+  S5 `origin/master` đã đi tiếp so `base_sha` mà chưa đo lại.
+
+thay_the_cho: ca4-ref-cuc-bo-exec-1-codex-20260826
+thay_the_ly_do: >-
+  Lượt 1 đã xong, đã qua cross-review `approve` (0 finding), đã xanh CẢ HAI nền CI, và readback
+  của chủ kho ĐÃ DUYỆT. Nhưng trước khi merge, phiên điều phối mở phần REVIEW (không chỉ nhìn
+  cổng) và thấy connector `codex` để lại một P2 THẬT trên đúng head ấy — thread `r3862508136`,
+  đăng `12:03:47Z` trên `d3897beea7`. Phiên điều phối tái hiện được, và mạnh hơn một lần chạy:
+  chính nó đã vấp đúng lỗi ấy sáng nay. r2 mở cửa sổ cho ĐÚNG việc vá chỗ đó.
+  Write set, provider, reviewer KHÔNG đổi.
+
+nang_tran:
+  ai_nang: ducthangho
+  tham_quyen: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+  quyet_dinh_luc: >-
+    direct, in-session, 2026-08-26: "theo khuyến nghị, làm tiếp đi" — sau khi được trình đầy đủ
+    finding, phép tái hiện, và lý do phiên điều phối KHÔNG tự nới ở lượt trước.
+  adr: ADR-0044
+  tran_cu_dong: 140
+  tran_moi_dong: 300
+  tran_cu_vong_review: 2
+  tran_moi_vong_review: 2
+  can_cu: >-
+    ĐỔI CÁCH ĐẶT TRẦN, KHÔNG ĐỔI CON SỐ — cùng lý lẽ đã dùng cho `#313 ca 2` r6 và được chủ kho
+    duyệt. `140` là ước lượng từ kích thước bản vá MÃ SẢN PHẨM (~35 dòng) cộng một phần trăm cho
+    phản chứng (~105); tỷ lệ 3:1, tức phần bị ước lượng kém chính là phần chiếm gần hết ngân
+    sách — và lượt 1 dùng đúng 140/140, không còn một dòng nào. `300` là trần ADR-0044 cho
+    `sensitive`, con số duy nhất ở đây KHÔNG phải ước lượng. Phạm vi vẫn kẹp bằng `write_set`
+    (ĐÚNG 2 tệp) và `vung_duoc_phep_cham`.
+    TRẦN VÒNG REVIEW KHÔNG ĐỔI (vẫn 2): lượt 2 là vòng canon thứ hai, chưa chạm trần ADR-0043.
+  canh_bao: >-
+    Nới trần KHÔNG phải giấy phép nới phạm vi. Việc của lượt này là MỘT finding. Dư lượng phân
+    kỳ (#326) và mặt `refs/remotes/origin/*` chưa được soi đều NGOÀI phạm vi — chúng có nhà
+    riêng và cần quyết định riêng về CHIỀU HỎNG.
+  cong_khong_doc_khoi_nay: >-
+    ĐO 2026-08-26: không tầng nào đọc `nang_tran` (Issue #323). Khối này là hồ sơ có thẩm quyền,
+    KHÔNG phải thứ được cưỡng chế.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) SANDBOX MOUNT `.git` CHỈ ĐỌC — không commit, không push.
+  (2) RIG ĐÃ ĐƯỢC DỰNG SẴN hiện tượng: trong `cay/` có một nhánh cục bộ CỐ Ý tụt sau đối ứng
+  remote, VÀ một linked worktree CỐ Ý đang giữ đúng nhánh ấy. Đã kiểm trước khi giao — cổng
+  chặn `rc=12` và lệnh nó in ra trả `rc=128`. Nên `KHÔNG_ĐO_ĐƯỢC` là câu trả lời ĐÁNG NGỜ.
+  (3) Bạn đang sửa cổng thẩm quyền ghi. Một cổng CHẶN OAN còn tệ hơn không có cổng. Chiều
+  bắt-oan của (A) — nhánh cục bộ ĐI TRƯỚC remote phải QUA — là bắt buộc, không phải tuỳ chọn.
+  (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.

@@ -1,0 +1,359 @@
+# Lease EXECUTOR — `DOCTRINE-RANH-GIOI-REVIEWER` (#318), lượt 1, BẢN SỬA ĐỔI 2.
+#
+# Mở vì §3.2: cross-review vòng 2 cho thấy CHÍNH SPEC thiếu (tiêu chí N7 hỏng), không phải
+# bản vá thiếu. Câu §3.2: "finding cho thấy chính spec thiếu thì verdict là `blocked` và đi
+# qua revision mới". Nội dung THI CÔNG không đổi — nhánh vẫn `88bd4f2`, bản vá không làm lại.
+#
+# Nửa DOCTRINE của packet #314 sau khi tách. Việc duy nhất: hoà ba câu tự mâu thuẫn về ranh
+# giới kỹ thuật của phiên review trong `docs/GOI_AGENT_DA_NEN.md`, trên trục
+# "quan sát theo phiên bản ≠ bất biến an ninh".
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 318
+packet_id: DOCTRINE-RANH-GIOI-REVIEWER
+phase_key: DOCTRINE-RANH-GIOI-REVIEWER
+revision: 2
+generation: 1
+lease_id: doctrine-ranh-gioi-reviewer-exec-1r2-claude-20260826
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` là MẶC ĐỊNH FAIL-CLOSE của `_BANG_LOP` (`docs/**` không có trong bảng), KHÔNG phải
+  tín hiệu chạm thẩm quyền. Lớp do CỔNG tính, không tự hạ. Packet này thuần tài liệu dev-side:
+  `docs/**` không vào gói phát hành.
+
+spec_path: 'KHÔNG CÓ — nội dung packet là ba trích dẫn trong Issue #318'
+spec_status: khong_co_dac_ta_rieng
+spec_duyet_boi: ducthangho
+spec_note: >-
+  Không soạn đặc tả riêng. Đầu vào là BA đoạn văn có SẴN trong kho, trích nguyên văn kèm số dòng
+  vào Issue #318, và bảy tiêu chí nghiệm thu N1–N7 đọc thẳng được từ đó. Một tệp spec ở đây chỉ
+  tạo thêm một bản chiếu cho cùng dữ liệu — đúng lý do #314 cũng không soạn.
+
+write_set:
+  - docs/GOI_AGENT_DA_NEN.md
+write_set_note: >-
+  ĐÚNG MỘT đường dẫn, và lần này là QUYẾT ĐỊNH chứ không phải ràng buộc: đo lúc cấp cho thấy
+  `CLAUDE.md` và `.claude/skills/cross-review/SKILL.md` đều NGƯỜI_GIỮ 0 (lease packet #305 đã hết
+  hạn), tức lấy thêm được. Không lấy, vì packet tiền nhiệm hỏng BA LẦN đúng vì nới phạm vi rồi
+  quên sửa văn bản mô tả nó. Con trỏ từ `CLAUDE.md` sang mục mới để lượt sau.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 ~09:19Z bằng `ops/lease_publish.py ai-dang-giu` bản trên `origin/master` (c35ae1c).
+  Phép so hai nguồn TRƯỚC khi quét, so bằng TẬP TÊN: `ls-remote --heads` 205 = `for-each-ref` 205,
+  `comm -23` RỖNG và `comm -13` RỖNG.
+  (Trước khi fetch đủ: 205 so 1 — clone `--depth 1` cho refspec single-branch, mù 204 ref. Không
+  chạy phép so này thì bộ quét đã trả lời một câu hỏi khác.)
+    docs/GOI_AGENT_DA_NEN.md              ->  NGƯỜI_GIỮ 1  (r4 của #314 — lease bị thay, xem `thay_the_cho`)
+    CLAUDE.md                             ->  NGƯỜI_GIỮ 0
+    .claude/skills/cross-review/SKILL.md  ->  NGƯỜI_GIỮ 0
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+
+branch: claude/doctrine-ranh-gioi-reviewer-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+reviewed_sha_required: 88bd4f2fe6e02803a97f2da9df86c8b43d53076f
+base_ghi_chu: >-
+  `c35ae1c` = `origin/master` lúc cấp, ĐO trong phiên (không chép từ hồ sơ bàn giao), và cũng là
+  merge của PR #310. Nhánh rẽ SẠCH từ đây, KHÔNG kế thừa `6c4140b` của PR #315 (đã đóng, không
+  merge). `reviewed_sha_required` đã được CẬP NHẬT sang exact head của vòng review đang mở
+  (`88bd4f2`, vòng 3). Vòng 1 neo `48cf331`, vòng 2 neo `f16b6bf` — xem `lich_su_reviewed_sha`. Bản đầu để nguyên base
+  `c35ae1c` trong khi review đã neo head khác, trái chính câu này: cross-review vòng 1 bắt được
+  (`lease-trang-thai-hien-tai-khong-nhat-quan`, P1).
+lich_su_reviewed_sha:
+- {vong: 1, sha: 48cf331e36cc2bde9fbdd485d51b85c81a5b25af, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-1-codex-verdict.receipt.yaml'}
+- {vong: 2, sha: f16b6bf9d6085bd1923db9800090faaed1ffdd1b, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-2-codex-verdict.receipt.yaml'}
+- {vong: 3, sha: 88bd4f2fe6e02803a97f2da9df86c8b43d53076f, verdict: 'CHƯA CÓ'}
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 1
+  dong_them_toi_da: 200
+  do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+  don_vi: '`git diff --numstat c35ae1c..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  da_dung: 194
+  ghi_chu: >-
+    200 là trần sau khi NÂNG LẦN HAI; xem `nang_tran_lan_hai`. 194 là số ĐÃ ĐO sau vòng vá 3
+    (`git diff --numstat c35ae1c -- docs/GOI_AGENT_DA_NEN.md`), không phải ước lượng.
+    Lịch sử trần: 120 (ước lượng ban đầu, SAI — vòng 1 cần 155) → 165 → 200 (vòng 2 cần 187;
+    vòng 3 cần 194). Vòng vá 3 KHÔNG chạm trần: `S2` KHÔNG bắn lần thứ ba, nên điều khoản
+    `neu_lai_cham_tran` ("lần thứ ba thì TÁCH") KHÔNG được kích hoạt. Còn biên 6 dòng.
+    Vì sao vòng 3 rẻ hơn dự tính: năm finding phần lớn đóng được bằng SỬA TẠI CHỖ, mà bản vá
+    này thuần THÊM (`194  0` — cột XOÁ bằng 0), nên viết lại một dòng đã có tốn 0 dòng mới.
+    Ước lượng trước khi đo là ~18 dòng và nó lại SAI — lần thứ ba ước lượng sai trong packet
+    này, cùng một hướng: đoán cao vì quên rằng ngân sách đếm dòng THÊM chứ không đếm SỬA.
+    CẢ HAI lần nâng đều vì trần là ƯỚC LƯỢNG của phiên, không phải ngưỡng doctrine; xem `nang_tran`
+    và `nang_tran_lan_hai`. Căn cứ kích thước: trên `master` tệp có 544 dòng và chưa mang mục nào
+    trong bốn mục đang xét; bản trên nhánh cũ thêm 146 dòng cho CẢ mục allowlist LẪN mục ranh giới,
+    và packet này nhận cả hai rồi viết lại phần ranh giới. Vượt 200 ⇒ điều kiện dừng S2, xin sửa lease, KHÔNG nới trong im lặng.
+
+nang_tran_lan_hai:
+  tran_cu: 165
+  tran_moi: 200
+  da_do_thuc_te: 187
+  ai_nang: ducthangho
+  tham_quyen: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+  quyet_dinh_luc: >-
+    direct, in-session, 2026-08-26 — phiên DỪNG theo S2 khi đo 187/165 sau vòng vá thứ hai,
+    trình số đo và đối chiếu ADR-0044; người giữ kho chốt nâng.
+  vi_sao: >-
+    Cùng nguyên nhân lần nâng thứ nhất: 165 là ƯỚC LƯỢNG của phiên, không phải ngưỡng doctrine.
+    Vòng vá 2 đóng BẢY P1 của cross-review, trong đó ba cái đòi viết thêm thật sự — bảng hạng
+    thêm hai hàng (chiều MỞ và ô dư), mục mạng sandbox thay bằng một BẢNG ĐO ba dòng có số phiên
+    bản, và một đoạn khai phạm vi từ vựng. So ADR-0044 ngưỡng NGHIÊM NHẤT (3 tệp / 300 dòng thêm):
+    bản vá là 1 tệp / 187, còn biên 113.
+  khac_gi_319: >-
+    #318 KHÔNG có tệp đặc tả trong write set, nên 187 dòng này là doctrine thật, không phải hợp
+    đồng ăn vào ngân sách mã như ca #319. Đừng đọc hai lần nâng ấy thành cùng một chuyện.
+  neu_lai_cham_tran: >-
+    Lần thứ ba thì TÁCH, không nâng tiếp — mục doctrine này đã đủ dài để tách được theo tiểu mục.
+
+chu_ky_commit_KHAI_HO:
+  trang_thai: 'ĐÃ ĐO LẠI — xem `dem_lai_chua_ky`. Lời khai cũ "48cf331 và 22 commit khác của phiên" KHÔNG tái lập được vì "phiên" chưa từng được định nghĩa.'
+  vi_sao: >-
+    Phiên dùng `-c commit.gpgsign=false` từ đầu — một phản xạ phòng thủ CHƯA TỪNG ĐƯỢC ĐO. Đo lại
+    26-08-2026: ký chạy `rc=0` bình thường. Đúng bệnh doctrine đã ghi (kết luận một công cụ không
+    dùng được mà không hỏi nó hỏng ở đường nào), chỉ tệ hơn ở chỗ chưa hề thử.
+  da_sua: 'từ `f16b6bf` trở đi ký mặc định; `f16b6bf` có cha là `48cf331` nên đẩy tiến thẳng'
+  vi_sao_KHONG_ky_lai_ho_so_cu: >-
+    Ký lại các commit đã đẩy đòi `rebase` + ép lùi. Doctrine nói thẳng ép lùi làm commit thành
+    không tra được y như xoá, và `luu-tru/*` tồn tại chính vì thế. Người giữ kho chốt: giữ
+    nguyên, ký từ nay. Số mỏ neo xem `neo_cua_48cf331` — bản đầu của khối này đếm SAI.
+  neo_cua_48cf331:
+    dem_sai_ra_sao: >-
+      Bản đầu khai "BA hồ sơ neo `48cf331`", kể cả "head của PR #322". Sai một phần ba: PR #322 đã
+      đi tiếp, head nay là `88bd4f2`. Cross-review vòng 2 bắt đúng chỗ này (`ba-neo-cua-48cf331-dem-sai`, P2).
+    dung_ra_la: 'HAI mỏ neo CHÍNH XÁC + MỘT quan hệ TỔ TIÊN — ba thứ khác hạng, đừng cộng chung'
+    neo_chinh_xac:
+    - 'reviewed_sha của verdict vòng 1 — trỏ ĐÚNG 48cf331'
+    - 'reviewed_sha của biên nhận vòng 1 — trỏ ĐÚNG 48cf331'
+    quan_he_to_tien:
+      la_gi: '`48cf331` là TỔ TIÊN của head PR #322, không phải head'
+      do_bang: 'git merge-base --is-ancestor 48cf331 88bd4f2  # rc=0'
+    vi_sao_van_khong_viet_lai: >-
+      Quan hệ tổ tiên YẾU hơn mỏ neo chính xác, nhưng `rebase` phá CẢ BA: nó đổi SHA của
+      `48cf331`, nên hai mỏ neo chính xác trỏ vào hư không. Kết luận không đổi; chỉ lý do được
+      đếm cho đúng.
+  dem_lai_chua_ky:
+    vi_sao_dem_lai: >-
+      Con số 23 cũ dựa trên chữ "phiên", thứ KHÔNG có định nghĩa tra được — nên không ai kiểm lại
+      được. Nay thay bằng một phép đếm có LỆNH, chạy lại được từ kho.
+    do_luc_utc: '2026-08-26'
+    lenh: >-
+      for c in $(git rev-list origin/master..origin/NHANH); do
+      git cat-file commit $c | grep -q "^gpgsig" || echo CHUA_KY; done | wc -l
+    ket_qua_tung_nhanh:
+      'claude/doctrine-ranh-gioi-reviewer-exec-1': 'tổng 3 · CHƯA KÝ 1 (chỉ 48cf331; f16b6bf và 88bd4f2 ĐÃ ký)'
+      'claude/mcp-gh-cuu-ho-exec-1': 'tổng 6 · CHƯA KÝ 6'
+      'ops/cap-lease-tach-314': 'tổng 18 · CHƯA KÝ 16'
+    hop_ba_nhanh_khong_dem_trung: 'tổng 27 · CHƯA KÝ 23'
+    ghi_chu: >-
+      Con số 23 SỐNG SÓT, nhưng nay nó có ĐỊNH NGHĨA (hợp của ba nhánh so với `origin/master`,
+      không đếm trùng) và có lệnh. Trước đó nó chỉ đúng do tình cờ. Đáng chú ý cho người đọc
+      lease này: trên CHÍNH nhánh packet #318 chỉ có ĐÚNG MỘT commit chưa ký.
+
+nang_tran:
+  tran_cu: 120
+  tran_moi: 165
+  da_do_thuc_te: 155
+  ai_nang: ducthangho
+  tham_quyen: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+  quyet_dinh_luc: >-
+    direct, in-session, 2026-08-26 — phiên thi công DỪNG theo S2 khi đo được 155/120, trình ba
+    phương án (nâng trần · tách hai packet · cắt nội dung) kèm số đo cho từng phương án; người
+    giữ kho chọn nâng trần và land một packet.
+  vi_sao: >-
+    Trần 120 là ƯỚC LƯỢNG của phiên soạn lease, đặt TRƯỚC khi đọc hết 146 dòng phải mang từ nhánh
+    bị bác sang, và nó chặt hơn doctrine ở CẢ HAI cách đọc ADR-0044: ngưỡng nghiêm nhất
+    (`sensitive` chạm authority) là 3 tệp / 300 dòng thêm, còn bản vá này là 1 tệp / 155 dòng —
+    còn biên 145. Nên nâng lên 165 KHÔNG phải nới doctrine, chỉ là sửa một ước lượng sai.
+    Đã nén thật một lượt trước khi xin: 166 → 155. Cắt tiếp là cắt vào phép đo (bảng ba lượt,
+    bảng bốn tầng, bảng sandbox) hoặc vào ba P2 mà chính `giu_nguyen_khong_lam_lai` cấm làm lại.
+  vi_sao_khong_tach_lam_hai: >-
+    Phương án tách đo được: phần ranh giới 100 dòng (vừa trần cũ), mục `Bash(x:*)` 55 dòng đi
+    packet thứ ba. Không chọn, vì hai nửa là MỘT MẠCH: mục `Bash(x:*)` kết bằng câu "bản đầu viết
+    … câu ấy SAI — xem mục dưới", nên tách ra là để một con trỏ chết đúng lúc merge — đúng bài học
+    `CLAUDE.md` về câu mô tả VỊ TRÍ phải đúng ở CẢ HAI phía của lần merge. Cộng thêm: ba P2 đã được
+    duyệt ở vòng 2 sẽ phải chờ thêm một vòng review nữa cho nội dung đã chấp nhận.
+  15_dong_bien: >-
+    165 chứ không phải 155: chừa 10 dòng cho vòng review. Đây là biên, KHÔNG phải hạn mức để tiêu.
+
+granted_by: ducthangho
+granted_on_instruction_r2: >-
+  direct, in-session, 2026-08-26 — phiên trình phép đo cho thấy N7 hỏng cả hai vế, trích §3.2
+  ĐỦ CẢ CÂU (kể cả vế "finding cho thấy chính spec thiếu thì … đi qua revision mới"), nêu rõ
+  đây là thời điểm RẺ NHẤT để mở vì vòng 1 và 2 đều `changes_requested` và vòng 3 chưa chạy —
+  nên không có verdict `approved` nào bị huỷ. Người giữ kho trả lời: "theo khuyến nghị, làm đi".
+granted_on_instruction: >-
+  direct, in-session, 2026-08-26 — phiên tiếp quản trình kế hoạch tách kèm bảng đo, nêu rõ
+  "trước khi tôi mở Issue và cấp lease, cần ba quyết định", và người giữ kho trả lời cả ba:
+  đóng PR #315 giữ nhánh làm hiện vật · Packet A chỉ `docs/GOI_AGENT_DA_NEN.md` ·
+  cài `codex` ngay trước khi cấp lease.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_ghi_chu: >-
+  KHAI THẲNG: phiên ghi lease này cũng là phiên sẽ điều phối thi công. Hai vai gộp. Khác r4 của
+  #314 ở một điểm có thật: phiên này KHÔNG phải phiên gây ra sự cố được ghi vào doctrine, và
+  KHÔNG viết sẵn bản vá trước khi cấp lease — nên `cross_approved` của lượt này đứng bằng vòng
+  review `codex` trên một bản vá chưa tồn tại lúc cấp.
+
+leased_at_utc: '2026-08-26T09:35:00Z'
+ban_sua_doi_2_luc_utc: '2026-08-26'
+lease_expires_at_utc: '2026-08-27T10:00:00Z'
+run_minutes: 1440
+
+viec_cua_luot_nay: >-
+  Hoà BA câu tự mâu thuẫn trong `docs/GOI_AGENT_DA_NEN.md` (đọc trên `6c4140b`, đối chiếu số dòng
+  lại sau khi rẽ nhánh vì tệp trên `master` ngắn hơn):
+  `:601` tiêu đề khai "phiên review KHÔNG có ranh giới kỹ thuật — không tầng nào bó được" ·
+  `:629-630` khai mạng chặn codex là "hàng rào thật, và nó có sẵn" ·
+  `:642-645` bảng hai pha dùng "mạng đóng" làm cột CƯỠNG CHẾ ·
+  `:659-661` lại khai chưa đo được CƠ CHẾ và "đừng dựa vào nó như một bảo đảm an ninh".
+  Trục hoà: quan sát theo phiên bản ≠ bất biến an ninh; chỉ gọi là boundary SAU khi xác minh cơ
+  chế fail-closed, trước đó là quan sát và phải mang điều kiện đo.
+  `:617-618` đã hoà một phần cặp thứ nhất (bốn dòng bảng đo ở VỎ PHIÊN, không trong sandbox) —
+  giữ ý ấy, nhưng thu tiêu đề `:601` về đúng phạm vi thân nó.
+  KHÔNG chạm `CLAUDE.md`, KHÔNG chạm `.claude/**`, KHÔNG sửa mã.
+
+giu_nguyen_khong_lam_lai: >-
+  BA finding P2 đã vá THẬT ở cross-review vòng 2 của #314 giữ nguyên: hạ nhân quả xuống "tương
+  quan có neo" · khai `stdout.log` KHÔNG tái lập được từ kho · tách ví dụ thứ sáu
+  `bash /tmp/refscan.sh` vì nó khác nguyên nhân (thiếu `Bash(bash:*)`). Sửa lại một trong ba ⇒ ĐỎ
+  (tiêu chí N5 của Issue #318).
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) Bảng đo sandbox `codex -s …` CHƯA được kiểm chéo — reviewer vòng 2 không tái lập được
+  (`codex exec` lồng nhau `rc=1`, `Read-only file system`). Đừng viết như thể nó đã được xác nhận
+  độc lập; đó chính là mệnh đề mà N2 đòi gắn nhãn hạng.
+  (2) Ba con số của bảng ba lượt (78/5/10,8M · 85/10/12,8M · 45/1/3,7M) đọc từ `stdout.log` KHÔNG
+  có trong kho ⇒ không tái lập được ở đây. Giữ nguyên số và giữ nguyên lời khai "không tái lập
+  được"; sửa số mà không đo lại ⇒ ĐỎ.
+  (3) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu, kể cả khi trích dẫn để giải thích.
+  (4) Sandbox executor mount `.git` chỉ đọc ⇒ executor SINH DIFF, phiên điều phối commit/push.
+  (5) ĐỪNG giao reviewer việc TỰ SOẠN phản chứng dựng đường dẫn thoát khỏi cây — bộ lọc nội dung
+  của nền bắn đúng lớp ấy và đã giết hai lượt review. Phản chứng nằm sẵn trong cây; reviewer CHẠY
+  chúng và ĐỘT BIẾN BẢN VÁ.
+
+chua_do_duoc_luc_cap: >-
+  (1) CHƯA biết CƠ CHẾ codex chặn mạng (sandbox tự chặn, hay biến proxy không kế thừa) — đây
+  chính là lý do `:659-661` tồn tại và là lý do N2 đòi nhãn hạng.
+  (2) CHƯA có phép đo độc lập cho bảng sandbox; nó đứng bằng một phép đo của một phiên.
+  (3) Lượt Windows của #315 `skipped`, KHÔNG tính là pass.
+  (4) Số dòng `:601` / `:629-645` / `:659-661` đọc trên `6c4140b`; trên `master` tệp có 544 dòng
+  nên các số ấy KHÔNG áp thẳng — phải định vị lại bằng nội dung, không bằng số dòng.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ hai (kể cả `CLAUDE.md`, dù nay NGƯỜI_GIỮ 0) ⇒ DỪNG, xin sửa lease — nới
+  write set trong im lặng là ĐÚNG cách packet tiền nhiệm hỏng ba lần ·
+  S2 vượt 200 dòng thêm ⇒ DỪNG, xin nâng trần bằng khối `nang_tran` có `ai_nang`/`vi_sao`,
+  KHÔNG sửa `dong_them_toi_da` trần trụi. ĐÃ BẮN HAI LẦN — 155/120 (`nang_tran`) và 187/165
+  (`nang_tran_lan_hai`). Lần thứ ba thì TÁCH, đừng nâng tiếp ·
+  KHÔNG sửa `dong_them_toi_da` trần trụi ·
+  S3 phát hiện một trong ba P2 của vòng 2 bị hồi quy ⇒ DỪNG, báo trước khi đi tiếp ·
+  S4 `origin/master` đã đi tiếp mà chưa đo lại ⇒ DỪNG, đo lại base.
+
+thay_the_cho: doctrine-ranh-gioi-reviewer-exec-1-claude-20260826
+thay_the_chuoi_day_du: >-
+  `doctrine-allowlist-reviewer-exec-1r4-claude-20260824` (r4 của #314) -> `…-ranh-gioi-reviewer-exec-1`
+  (r1, bản này thay) -> `…-ranh-gioi-reviewer-exec-1r2`. r1 đã hoàn tất việc thay r4; r2 KHÔNG thay
+  r4 lần nữa. `_kiem_bia_mo` khớp `da_bi_thay_the` bằng CHUỖI VÔ HƯỚNG nên mỗi lease cũ chỉ trỏ
+  được tới MỘT lease mới — chuỗi phải đi thẳng, không rẽ nhánh.
+ly_do_mo_ban_sua_doi_2: >-
+  §3.2: "Findings của Reviewer được sửa trong cùng Packet KHI SPEC VẪN ĐỦ; finding cho thấy CHÍNH
+  SPEC THIẾU thì verdict là `blocked` và đi qua revision mới." P1 `n7-doc-claims-khong-phai-phep-n7`
+  của cross-review vòng 2 thuộc vế sau: tiêu chí N7 gọi tên một cổng KHÔNG TỒN TẠI ("delta gate"),
+  và đo bằng một lệnh KHÔNG ĐỌC tệp của packet. Đó là spec thiếu, không phải bản vá thiếu.
+  Phiên điều phối ban đầu nghiêng hướng "vá tiêu chí hỏng, không mở revision" — SAI, vì lúc ấy mới
+  đọc VẾ ĐẦU của câu §3.2. Đọc hết câu thì protocol đã trả lời sẵn, và trả lời ngược lại.
+doi_gi_so_voi_r1: >-
+  ĐÚNG MỘT thứ: `acceptance` — tiêu chí N7. Mọi thứ khác BƯNG NGUYÊN: write set, base, trần 200,
+  nhánh, executor, reviewer, environment, review_class. Nói riêng: trần GIỮ 200 — bản sửa đổi này
+  KHÔNG phải cớ để nâng lần ba; đo được 194/200, còn biên 6.
+n7_cu_va_moi:
+  n7_cu: '`packet_loop.py doctrine-scan --root .` rc=0; delta gate so `origin/master` = 0'
+  hong_cho_nao:
+    ve_mot: >-
+      `cmd_doctrine_scan` (`.claude/dev/packet_loop.py:1189`) gom mục tiêu từ ĐÚNG BA nguồn:
+      `.claude/skills/**/*.md`, `CLAUDE.md`, và tệp truyền qua `--path`. Không `--path` thì quét
+      7 tệp, KHÔNG có `docs/GOI_AGENT_DA_NEN.md` — đường dẫn DUY NHẤT của write set. `rc=0` ấy là
+      XANH RỖNG: cổng chưa từng mở tệp đang bị sửa. Ba vòng review đều nhìn thấy `rc=0` đó.
+    ve_hai: >-
+      "delta gate" KHÔNG TỒN TẠI. `packet_loop.py --help` liệt kê 15 lệnh con, không có `delta`;
+      `grep -n "delta" .claude/dev/packet_loop.py` RỖNG. Tiêu chí ấy không xanh được cũng không
+      đỏ được — nó KHÔNG CÓ TRẠNG THÁI.
+  n7a_moi: >-
+    `python3 .claude/dev/packet_loop.py doctrine-scan --root . --path docs/GOI_AGENT_DA_NEN.md`
+    cho `rc=0` VÀ in số tệp quét là **8**. Số 8 nằm trong tiêu chí CÓ CHỦ Ý: nó chặn đúng kiểu
+    xanh rỗng vừa mô tả — 7 nghĩa là tệp chưa vào tầm quét, 8 nghĩa là đã vào.
+  n7b_moi: >-
+    `git diff --numstat c35ae1c -- docs/GOI_AGENT_DA_NEN.md` cho cột dòng THÊM <= `dong_them_toi_da`
+    của lease này. Thay hẳn cụm "delta gate" bằng phép đo đã dùng suốt packet. Vế "đúng một đường
+    dẫn" KHÔNG nhắc lại ở đây vì N6 đã giữ — nhắc hai lần là tạo hai nguồn sự thật.
+  chat_hon_hay_long_hon: >-
+    CHẶT HƠN ở cả hai vế: một vế từ xanh-rỗng thành có-đọc-tệp, một vế từ không-có-lệnh thành
+    có-lệnh. Bản sửa đổi này KHÔNG nới cho ai cái gì. Ghi rõ để vòng review 3 khỏi phải tự suy.
+thay_the_cho_r1_ly_do: >-
+  Packet #314 đã được TÁCH theo khuyến nghị của chính verdict cross-review vòng 2 (PR #315,
+  comment 5423010218: `blocked` · `DO_NOT_LAND`) và quyết định của người giữ kho 2026-08-26.
+  PR #315 đã đóng, KHÔNG merge; nhánh `claude/doctrine-allowlist-reviewer-exec-1` (`6c4140b`)
+  giữ lại làm hiện vật để verdict còn tra được SHA.
+  Lease r4 giữ BA đường dẫn. Hai lease thay thế PHÂN HOẠCH đúng ba đường dẫn ấy, không chồng lấn
+  và không bỏ sót: lease này lấy `docs/GOI_AGENT_DA_NEN.md`; lease
+  `mcp-gh-cuu-ho-exec-1-claude-20260826` (#319) lấy `.claude/dev/mcp_gh.py` và
+  `.claude/dev/mcp_gh_test.py`.
+  Ghi thẳng khuyết tật của r4 để lease này không lặp: r4 có `base_sha: c35ae1c` trong khi
+  `base_ghi_chu` ngay dưới còn nhắc `3e6001a`; `ngan_sach…ghi_chu` còn nói 478/520 trong khi
+  trường là `da_dung: 687` / `dong_them_toi_da: 760`; và MẤT HẲN khối `nang_tran` nên trần 760
+  không có thẩm quyền ghi nhận. Đó là lần THỨ TƯ cùng một hình dạng: sửa TRƯỜNG được nới, quên
+  VĂN BẢN mô tả nó — nên lease này đã được grep lại toàn văn sau khi soạn.
+# posted_comment_id: CHƯA ĐĂNG — workflow sẽ ghi. ĐỪNG điền tay.
+
+# Thêm TAY sau khi lease đã đăng — `posted_comment_id` ở trên giữ nguyên, cổng trả rc=9 và
+# KHÔNG đăng lại. Ghi ở đây chứ không ở comment vì lease là thứ có thẩm quyền; comment là bản chiếu.
+base_da_do_lai:
+  vi_sao: >-
+    Điều kiện dừng `S4` của chính lease này đã BẮN lúc 09:57Z 26-08: `origin/master` trôi
+    `c35ae1c` → `b662fe1` (PR #316 land packet #313 ca 1+3). `S4` đòi "DỪNG, ĐO LẠI base" —
+    tức đòi một PHÉP ĐO, không đòi một bản sửa đổi. Đây là phép đo đó, ghi lại để phiên sau
+    không phải làm lại và không bắn `S4` lần nữa cho cùng một lần trôi.
+  do_luc_utc: '2026-08-26T10:14:00Z'
+  master_luc_do: b662fe1d07c675a222ae26e734377e305775e4f3
+  do_lai_lan_hai:
+    vi_sao: '`S4` BẮN LẠI trước vòng vá 3 — `origin/master` trôi tiếp `b662fe1` → `9044a5d`'
+    master_luc_do: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+    to_tien: '`c35ae1c` VẪN là tổ tiên của `9044a5d` — `git merge-base --is-ancestor` rc=0'
+    drift: 'ops/lease_publish.py · ops/lease_publish_test.py · ops/specs/CONG-CI-PACKET-LOOP.md · ops/specs/CONG-SAME-FAILURE-DEM-Y-DINH.md'
+    giao_write_set: 'RỖNG — không chạm `docs/GOI_AGENT_DA_NEN.md`'
+    blob_write_set: '16bad9e13255 tại `c35ae1c` = 16bad9e13255 tại `9044a5d` — Y HỆT TỪNG BYTE'
+    ket_luan: '`base_sha` GIỮ NGUYÊN `c35ae1c`, cùng căn cứ §3.2 như lần trôi trước'
+  ket_qua:
+    to_tien: '`c35ae1c` VẪN là tổ tiên của `b662fe1` — master đi TỚI, không viết lại lịch sử'
+    drift: 'ops/lease_publish.py · ops/lease_publish_test.py'
+    giao_write_set: 'RỖNG — DRIFT không chạm `docs/GOI_AGENT_DA_NEN.md`'
+    blob_write_set: >-
+      16bad9e13255 tại `c35ae1c` = 16bad9e13255 tại `b662fe1` — Y HỆT TỪNG BYTE. Nên ngân sách
+      đo từ base nào cũng cho cùng kết quả, vì nó giới hạn TRÊN WRITE SET.
+  ket_luan: >-
+    `base_sha` GIỮ NGUYÊN `c35ae1c`. KHÔNG mở bản sửa đổi 2. Căn cứ: §3.2 liệt kê thứ tạo
+    revision mới là objective · acceptance · write set · dependency · executor · environment —
+    `base_sha` KHÔNG nằm trong đó. Mở r2 ở đây sẽ làm r1 mất hiệu lực không vì lý do gì và lập
+    tiền lệ "master trôi ⇒ revision", thứ sẽ bắn ở mọi packet mỗi lần master nhúc nhích.
+  khac_gi_lease_cua_319: >-
+    Lease `mcp-gh-cuu-ho-exec-1r2` CÓ đổi base trong cùng lần trôi này. Không mâu thuẫn: r2 ấy
+    cần thiết vì phải neo `spec_sha256` và hạ trần 900 → 750; đổi base chỉ ĐI KÈM. Đó không
+    phải revision-vì-base, và đừng đọc nó thành tiền lệ ngược với kết luận trên.
+  phai_do_lai_khi_nao: >-
+    Phép đo này chỉ đúng cho lần trôi tới `b662fe1`. Master trôi tiếp ⇒ `S4` bắn lại và phải
+    chạy LẠI đủ bốn phép đo trên; đừng đọc khối này thành "base đã được miễn kiểm vĩnh viễn".

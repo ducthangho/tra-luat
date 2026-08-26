@@ -271,6 +271,14 @@ thay_the_ly_do: >-
   VĂN BẢN mô tả nó — nên lease này đã được grep lại toàn văn sau khi soạn.
 posted_comment_id: 5423418459   # workflow ghi, ĐỪNG sửa tay
 
+# Bản sửa đổi 2 THAY lease này. `_kiem_bia_mo` đòi lease CŨ trỏ ngược lại lease MỚI bằng đúng
+# một chuỗi vô hướng, nếu không cổng CHẶN lease mới. Đây là dòng đó.
+da_bi_thay_the: doctrine-ranh-gioi-reviewer-exec-1r2-claude-20260826
+da_bi_thay_the_vi_sao: >-
+  Không phải vì thi công sai. Bản vá trên `88bd4f2` GIỮ NGUYÊN, không làm lại. Revision mở vì
+  §3.2 nói finding cho thấy CHÍNH SPEC thiếu thì phải đi qua revision mới, và P1
+  `n7-doc-claims-khong-phai-phep-n7` đúng là loại đó. Chỉ `acceptance` (tiêu chí N7) đổi.
+
 # Thêm TAY sau khi lease đã đăng — `posted_comment_id` ở trên giữ nguyên, cổng trả rc=9 và
 # KHÔNG đăng lại. Ghi ở đây chứ không ở comment vì lease là thứ có thẩm quyền; comment là bản chiếu.
 base_da_do_lai:

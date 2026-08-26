@@ -1,0 +1,77 @@
+# BIA MỘ — lease `ca4-ref-cuc-bo-exec-1r3-codex-20260826` ĐÃ XONG VIỆC.
+#
+# PR #327 merge tại `ac82ddc`. Giữ quyền ghi sau khi việc xong là để một writer thứ hai đứng
+# sẵn trên đường dẫn mà không ai biết — đúng cửa sổ mà write-set exclusion sinh ra để đóng.
+#
+# Cơ chế: kho KHÔNG có trường `thu_hoi`; `ai-dang-giu` chỉ đọc `da_bi_thay_the` và hạn dùng.
+# Bia mộ này dùng ĐÚNG cơ chế ấy. Kèm dòng `da_bi_thay_the` thêm vào lease cũ — BƯỚC HAI,
+# thiếu nó thì bia mộ không chôn ai.
+#
+# `r1` và `r2` đã có bia mộ từ trước (đo: cả hai đã mang `da_bi_thay_the`); tệp này chôn `r3`,
+# lease CUỐI CÙNG còn sống của chuỗi ca 4.
+
+schema_version: 2
+event: executor_lease_revoked
+packet_issue: 313
+packet_id: CA4-REF-CUC-BO
+phase_key: CA4-REF-CUC-BO
+revision: 99
+generation: 1
+lease_id: ca4-ref-cuc-bo-thu-hoi-claude-20260826
+thay_the_cho: ca4-ref-cuc-bo-exec-1r3-codex-20260826
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: none
+review_class: sensitive
+effective_review_class: sensitive
+
+write_set: []
+write_set_note: >-
+  RỖNG CÓ CHỦ ĐÍCH. Nghiệm thu của chính tệp này: `ai-dang-giu ops/lease_publish.py` và
+  `ops/lease_publish_test.py` phải về `NGƯỜI_GIỮ 0`.
+
+branch: codex/ca4-ref-cuc-bo-exec-1
+branch_ownership: none
+target_branch_neu_land: null
+base_sha: b662fe1d07c675a222ae26e734377e305775e4f3
+start_from_sha: b662fe1d07c675a222ae26e734377e305775e4f3
+reviewed_sha_required: d63e8b2e414efa8b8faf7eb395bd3dbc49f7174e
+
+ly_do_thu_hoi: >-
+  Việc ĐÃ LAND — đo chứ không suy: PR #327 merge tại `ac82ddc583f688d5`, và hai tệp write set
+  trên `master` băm KHỚP `d63e8b2` (`lease_publish.py` `1579d3c3b964aa1e`,
+  `lease_publish_test.py` `8308ce79ea69aa63`). Suite trên master vừa land: `92/111`, đúng
+  19 đỏ nền, delta `0`. Cổng `gate` xanh CẢ HAI nền trên `d63e8b2` — Windows đo TRƯỚC merge
+  (`17:50:48Z → 18:10:31Z`), sau khi đã ĐỎ hai lần và được vá.
+  Ngân sách dùng hết đúng trần: `83 + 217 = 300/300`, đúng 2 tệp.
+
+khai_no_khi_thu_hoi: >-
+  (1) TRẦN VÒNG REVIEW BỊ VƯỢT: packet đi 3 vòng cross-review, `ADR-0043` cho 2, và khối
+  `nang_tran` của `r3` chỉ nới trục KÍCH THƯỚC (140 → 300), để nguyên `tran_moi_vong_review: 2`.
+  Chủ kho chốt (b): coi trần là trần, dừng, land — KHÔNG khai `nang_tran` bổ khuyết.
+  Nợ nền: không tầng nào đọc `nang_tran` — Issue #323, đã xếp lịch `D3`.
+  (2) DƯ LƯỢNG #326: nhánh cục bộ PHÂN KỲ vẫn lọt, và `refs/remotes/origin/*` chưa bao giờ
+  được soi. Đo được sau khi land: nới ngây thơ điều kiện thành `phải > 0` khiến cổng phát
+  `git branch -f` trên nhánh phân kỳ, `rc=0`, MẤT commit cục bộ, unreachable từ mọi ref.
+  Nặng hơn cả năm finding của packet này — chúng chỉ là ngõ cụt, cái đó PHÁ DỮ LIỆU.
+  Cần detection riêng VÀ phán quyết riêng; chưa có lease.
+
+granted_by: ducthangho          # BẮT BUỘC của cổng; ở đây nghĩa là AI RA LỆNH THU HỒI,
+                                # KHÔNG phải ai được cấp quyền — `access: none`, `write_set: []`.
+thu_hoi_boi: ducthangho
+thu_hoi_theo_lenh: 'direct, in-session, 2026-08-26: "duyet readback d63e8b2, merge di"'
+authority_basis: §2 — cấp/thu lease thuộc chủ kho
+recorded_by: claude-session
+
+leased_at_utc: '2026-08-26T18:20:00Z'
+lease_expires_at_utc: '2026-08-27T18:20:00Z'
+run_minutes: 0
+
+viec_cua_luot_nay: >-
+  KHÔNG có việc. Tệp này chỉ ghi nhận lease tiền nhiệm hết hiệu lực vì đã xong việc.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  ĐỪNG đọc tệp này thành "được cấp quyền". `access: none`, `write_set: []`.

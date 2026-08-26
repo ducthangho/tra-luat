@@ -158,6 +158,7 @@ dieu_kien_dung: >-
   S5 `origin/master` đã đi tiếp so `base_sha` mà chưa đo lại.
 
 thay_the_cho: ca4-ref-cuc-bo-exec-1r2-codex-20260826
+da_bi_thay_the: ca4-ref-cuc-bo-thu-hoi-claude-20260826
 thay_the_ly_do_r1: >-
   Lượt 1 đã xong, đã qua cross-review `approve` (0 finding), đã xanh CẢ HAI nền CI, và readback
   của chủ kho ĐÃ DUYỆT. Nhưng trước khi merge, phiên điều phối mở phần REVIEW (không chỉ nhìn

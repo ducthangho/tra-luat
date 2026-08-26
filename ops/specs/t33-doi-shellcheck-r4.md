@@ -80,28 +80,46 @@ Câu ở `r2:215`:
 im lặng**. Thứ duy nhất tách hai trục là 8 dòng `BỎ QUA` trên chân `windows-latest` — …
 ```
 
-Nó dùng **đúng cụm từ** của câu sai nằm cách đó mười mấy dòng. Câu hỏi *"đây có phải finding không"*
-đã được đặt **hai lần**. Ghi đáp án ra đây để lần thứ ba không ra kết quả khác.
+Nó dùng **cùng một cách lượng hoá** với câu sai nằm cách đó mười mấy dòng — nhưng **KHÔNG cùng byte**:
+`r2:215` viết `toàn bộ chân Ubuntu`, `r2:232` viết `toàn chân Ubuntu`. Đo bằng phép so chuỗi chính xác:
 
-### Phép thử phân xử: câu ấy được đưa ra làm **BẰNG CHỨNG** hay làm **GIẢI THÍCH**?
+```text
+r2:215   'toàn bộ chân Ubuntu' in=True    'toàn chân Ubuntu' in=False
+r2:232   'toàn bộ chân Ubuntu' in=False   'toàn chân Ubuntu' in=True
+```
+
+(Bản đầu của `r4` viết *"đúng cụm từ"* — **SAI byte**, và cross-review chéo nền bắt được. Trong một
+tệp mà nghề của nó là hạ lời khai cho khớp phép đo, một mô tả văn bản sai byte là lỗi cùng họ.)
+
+Câu hỏi *"đây có phải finding không"* đã được đặt **hai lần**. Ghi đáp án ra đây để lần thứ ba không
+ra kết quả khác.
+
+### Phép thử phân xử: câu ấy khai **KẾT QUẢ MỘT LƯỢT CHẠY**, hay **SUY LUẬN TỪ TIỀN ĐỀ ĐƯỢC CHỈ RA**?
 
 | | `r2:232` · `r3:192` | `r2:215` |
 |---|---|---|
-| vai trò | **bằng chứng** — nó *là* chứng cứ rằng cổng có lỗ | **giải thích** — vì sao bảng đo ngay trên nó ra như vậy |
-| người đọc tin điều gì | *"đã có người chạy đột biến trên chân Ubuntu của CI và được rc=0"* | *"chân Ubuntu không phân biệt được trục này"* |
-| điều đó đúng không | **KHÔNG** | **CÓ**, và **suy ra được** |
-| bỏ câu đi thì mất gì | mất **chứng cứ** — không còn gì chứng minh có lỗ | mất **lời giải thích** — con số vẫn đứng nguyên |
-| cơ chế phân biệt có nêu tại chỗ không | không | **có** — *"8 dòng `BỎ QUA` trên chân `windows-latest`"* |
+| khai gì | **kết quả một lượt chạy** — `"vẫn cho 88/88, rc=0 … (đo 23-08-2026)"`, có cả **ngày đo** | **một tính chất** — chân Ubuntu không phân biệt được trục này |
+| gán cho đâu | **`"toàn chân Ubuntu"`** — một job/leg của CI | cùng cách lượng hoá, nhưng không kèm lượt chạy nào |
+| bằng chứng thật có gì | một lượt chạy trong **worktree cục bộ**; không chỗ nào dẫn ra lượt CI | **tiền đề được chỉ ra tại chỗ** (xem dưới) |
+| kiểm lại được không | phải **chạy** trên một runner Ubuntu — chưa ai làm | **suy ra được từ mã**, không cần chạy |
 
-Suy dẫn nằm sau `r2:215`, viết ra để người đọc kiểm được: `t73` truyền `nen="posix"`, **trùng
-`os.name` thật** của một runner Linux, nên gỡ mệnh đề nền là **no-op** với nó; 8 dòng `BỎ QUA` phân
-biệt hai trục đến từ chân `windows-latest`.
+Tiền đề của `r2:215`, nêu ngay tại chỗ nên người đọc kiểm được: `t73` truyền `nen="posix"`, **trùng
+`os.name` thật** của một runner Linux, nên gỡ mệnh đề nền là **no-op** với nó; thứ phân biệt hai trục
+là **8 dòng `BỎ QUA`** trên chân `windows-latest`.
 
 ### Luật rút ra — dùng lại được, không cần hỏi lại
 
-**Hình dạng `A` là về BẰNG CHỨNG.** Một câu nhắc phạm vi trong lúc **giải thích** một con số đã nêu
-ở chỗ khác thì soi bằng thước khác: hỏi *"có suy ra được không"* và *"cơ chế có được nêu tại chỗ
-không"*, chứ **không** hỏi *"đã chạy chưa"*.
+**Hình dạng `A` là về LỜI KHAI KẾT QUẢ CHẠY.** Hỏi: *câu này khai một lượt chạy đã xảy ra, hay suy ra
+từ tiền đề nó chỉ ra?* Khai lượt chạy thì phải có lượt chạy ấy — đúng nền, đúng phạm vi. Suy luận thì
+phải **chỉ ra tiền đề tại chỗ** để người đọc kiểm được mà không phải chạy gì.
+
+**Bản đầu của `r4` dùng một thước KHÁC và nó SAI** — *"bằng chứng hay giải thích"*. Cross-review chéo
+nền bác đúng hai chỗ, và cả hai đều đo được: (a) `r2:232` **nằm trong docstring** của ca, tức bản thân
+nó cũng là văn giải thích — nên phân đôi ấy không tách được hai câu; (b) `r4` khi ấy viết *"bỏ câu
+`232` đi thì không còn gì chứng minh có lỗ"*, **trái ngay bảng đo ở `r2:209-213`** đã ghi
+`X2 = 88/88, rc=0, KHÔNG CA NÀO` — **bảng mới là bằng chứng**, không phải câu `232`.
+Thước cũ còn nguy hơn là chỉ sai: nó **tha** một lời khai quá phép đo chỉ vì câu ấy nằm trong đoạn
+văn giải thích. Thước mới không có cửa đó.
 
 ### Khai thẳng: đây là kết luận của một LẬP LUẬN
 
@@ -135,10 +153,29 @@ Một bản đặc tả sửa lỗi *"khai rộng hơn đo"* mà **tự** khai r
   quyết. `"chỉ ba"` là kết luận của **một** phép quét theo cụm từ — tức một **danh sách đoán trước**
   — không phải một chứng minh. Còn lời khai nào cùng hình dạng mà **không** chứa cụm `"chân Ubuntu"`
   hay không: **CHƯA ĐO ĐƯỢC**.
-- **Số `r4` còn trống — đã đo, không đoán.** Quét **227 ref** (`refs/heads` + `refs/remotes/origin`):
-  `ops/specs/t33-doi-shellcheck-r4.md` **chưa từng tồn tại** trên ref nào. Hồ sơ cũ khai ngược (lease
-  `spec-r5-overclaim-exec-1` đã thu hồi, trường `vi_tri_r4_noi_dung_dung_o_CA_HAI_trang_thai`) là do
-  nhầm **lease** `r4` với **đặc tả** `r4` — hai thứ khác nhau mang cùng chữ `r4`.
+- **Số `r4` là TÁI DÙNG CÓ CHỦ ĐÍCH, không phải số trống — và bản đầu của `r4` khai SAI chỗ này.**
+  Bản đầu viết *"`r4` chưa từng tồn tại trên ref nào"*, và còn bác một câu trong lease đã thu hồi.
+  **Cả hai đều sai**, cross-review chéo nền bác được bằng object trong chính cây:
+
+  ```text
+  $ git log --all --format='%H %s' -- ops/specs/t33-doi-shellcheck-r4.md
+  e87eae9d…  #249 RÚT đặc tả r4 khỏi PR #293 — land phần mã, tách việc đặc tả sang packet riêng
+  ee545cf5…  #249 đặc tả r4 (delta): đóng NGUỒN của P2 — hạ lời khai "toàn chân Ubuntu" ở r3:192
+  ```
+
+  Tức **đã có một `r4`**, thêm ở `ee545cf5`, **rút** ở `e87eae9d`, chưa bao giờ lên master. Lease
+  `spec-r5-overclaim-exec-1` (đã thu hồi) khai *"r4 … chỉ trên nhánh `claude/t33-doi-shellcheck-exec-1`
+  (PR #293)"* — **ĐÚNG**. Câu bác nó là câu sai, và nó đã bị rút.
+
+  **Vì sao phép quét của bản đầu trượt:** nó chạy `git cat-file -e "<ref>:<đường-dẫn>"` trên **TIP**
+  của từng ref. Tệp được thêm rồi **xoá**, nên không tip nào còn nó. Phép đo trả lời đúng câu
+  *"tip nào đang có tệp này"* — và bản đầu đọc nó thành *"tệp này chưa từng tồn tại"*. **Lời khai
+  rộng hơn phép đo — hình dạng `A`, ngay trong tệp sinh ra để sửa hình dạng `A`.**
+
+  Điều đo được và giữ nguyên: `ops/specs/t33-doi-shellcheck-r4.md` **vắng ở base `9044a5d`** và vắng
+  ở mọi tip đã quét. Tái dùng số `r4` là **có chủ đích**: bản `ee545cf5` có **cùng mục đích** với
+  bản này (hạ đúng lời khai `"toàn chân Ubuntu"`) và đã bị rút vì lý do phạm vi, không vì nội dung.
+  Ai muốn đọc bản cũ thì tra `ee545cf5`. **Định danh là BĂM, không phải tên bản.**
 - **Băm của hai tệp bị thay đã đo tại chỗ**, ghi trong khối đầu tệp. Ai đọc `r4` mà thấy băm không
   khớp thì `r2`/`r3` đã bị động — và khi ấy `r4` phải được xét lại, không được dùng.
 

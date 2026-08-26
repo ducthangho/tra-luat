@@ -1,0 +1,159 @@
+# Lease EXECUTOR — `SPEC-R4-DELTA` (#297), lượt 1.
+#
+# Hướng r5 ĐÃ BỊ THU HỒI (lease `spec-r5-overclaim-thu-hoi-claude-20260824`): chủ kho bỏ đường
+# "sửa lời khai bằng VĂN XUÔI" và chuyển sang "cơ chế trạng thái ĐỌC ĐƯỢC BẰNG MÁY".
+# Lease này KHÔNG dựng lại r5. Nó thi hành quyết định mới của chủ kho ngày 26-08:
+# hai câu hỏi mở của Issue #297 đã được trả lời, và đường đi là (i) DELTA TRƯỚC, CƠ CHẾ SAU,
+# với phần đánh dấu ghi bằng khối MÁY ĐỌC ĐƯỢC nhưng KHAI THẲNG là TẠM.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 297
+packet_id: SPEC-R3-OVERCLAIM
+phase_key: SPEC-R4-DELTA
+revision: 1
+generation: 2
+lease_id: spec-r4-delta-exec-1-claude-20260826
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` là MẶC ĐỊNH FAIL-CLOSE của `_BANG_LOP`, KHÔNG phải tín hiệu packet chạm thẩm quyền.
+  Đặc tả không phải tầng cưỡng chế; nhưng băm của nó ĐƯỢC LEASE NEO VÀO, nên sai một câu ở đây
+  là sai ở chỗ người khác chép lại.
+
+spec_path: null
+spec_note: >-
+  Không có đặc tả đóng băng cho chính packet này — nó LÀ một bản đặc tả. Nguồn yêu cầu: Issue #297
+  và comment trả lời hai câu hỏi mở
+  https://github.com/ducthangho/tra-luat/issues/297#issuecomment-5425739399
+
+write_set:
+  - ops/specs/t33-doi-shellcheck-r4.md
+write_set_note: >-
+  ĐÚNG MỘT đường dẫn, một tệp MỚI. KHÔNG sửa đè `r1`/`r2`/`r3` — sửa đè một đặc tả đóng băng
+  làm băm trong lease trỏ vào thứ không còn tồn tại. Nếp `r1`→`r2`→`r3` đã theo.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 13:4xZ. Phép so HAI NGUỒN chạy TRƯỚC, so bằng TẬP TÊN:
+    is-shallow false · ls-remote 214 · for-each-ref 214 · comm RỖNG cả hai chiều
+  Rồi quét: `ai-dang-giu ops/specs/t33-doi-shellcheck-r4.md` -> rc=0 NGƯỜI_GIỮ 0.
+  VÀ ĐO RIÊNG SỐ HIỆU: quét 227 ref, `ops/specs/t33-doi-shellcheck-r4.md` CHƯA TỪNG TỒN TẠI trên
+  ref nào. Số `r4` còn trống — hồ sơ cũ khai ngược là do nhầm LEASE `r4` với ĐẶC TẢ `r4`.
+
+branch: claude/spec-r4-delta-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+start_from_sha: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+reviewed_sha_required: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 1
+  dong_them_toi_da: 300
+  do_tu_sha: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+  don_vi: '`git diff --numstat 9044a5d -- ops/specs/t33-doi-shellcheck-r4.md` — cột dòng THÊM'
+  da_dung: 0
+  ghi_chu: >-
+    300 là trần ADR-0044, KHÔNG phải một ước lượng — cùng cách đặt trần đã dùng cho `#313` r6/ca4
+    r2 và đã được chủ kho duyệt. Với một packet VĂN BẢN thì số dòng lại càng không phải thứ chặn
+    scope creep; thứ chặn là `write_set` ĐÚNG MỘT tệp và `vung_duoc_phep_cham`.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-26: "theo khuyến nghị, làm tiếp đi" — duyệt cả hai khuyến nghị cho
+  hai câu hỏi mở của #297: Q1 = (a) `r2:215` KHÔNG phải finding, phạm vi HAI câu; Q2 = (i) delta
+  TRƯỚC, cơ chế SAU, với phần đánh dấu ghi bằng khối máy đọc được nhưng khai thẳng là TẠM.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_ghi_chu: >-
+  KHAI THẲNG: phiên ghi lease CŨNG là phiên thi công lượt này. Độc lập vì thế MỎNG, đúng như
+  lease `r5` đã khai trước đây. Bù lại bằng cross-review CHÉO NỀN (`codex`) trên head chính xác —
+  đó là lớp độc lập duy nhất của lượt này, nên nó KHÔNG được bỏ.
+  Vì sao vẫn để `claude` thi công: bản delta phải PHÁT BIỂU LẠI một suy dẫn (`t73` truyền
+  `nen="posix"` trùng `os.name` runner ⇒ gỡ mệnh đề nền là no-op) mà chính phiên này đã dựng ra
+  khi trả lời Q1. Giao cho một nền khác viết lại suy dẫn ấy là mở đúng hình dạng `E` mà `r4/Q13`
+  sinh ra để chặn.
+
+leased_at_utc: '2026-08-26T13:50:00Z'
+lease_expires_at_utc: '2026-08-27T13:50:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  CHỈ tệp mới `ops/specs/t33-doi-shellcheck-r4.md`. KHÔNG chạm `r1`/`r2`/`r3`, KHÔNG chạm
+  `ops/lease_publish*.py`, KHÔNG chạm `.claude/**`. Hunk ngoài vùng ấy ⇒ ĐỎ.
+
+viec_cua_luot_nay: >-
+  Dựng `ops/specs/t33-doi-shellcheck-r4.md` — bản DELTA, không phải bản viết lại.
+
+  === NỘI DUNG BẮT BUỘC ===
+
+  (1) HẠ HAI CÂU hình dạng `A` xuống đúng phép đo. Cả hai là CÙNG MỘT CÂU, nguyên văn, chỉ khác
+  con số đi kèm:
+      `ops/specs/t33-doi-shellcheck-r2.md:232`   (đi với `88/88`)
+      `ops/specs/t33-doi-shellcheck-r3.md:192`   (đi với `97/97`)
+      > "…thay mệnh đề nền bằng phân biệt theo TÊN TỆP vẫn cho 88/88,
+      >  rc=0 trên toàn chân Ubuntu (đo 23-08-2026). Ca này khoá đúng cái trục ấy."
+  Sai ở chỗ: đột biến ấy CHƯA TỪNG được đẩy lên CI, nên nó chưa chạy trên một runner Ubuntu nào —
+  nó chạy trong một worktree CỤC BỘ. `"toàn chân Ubuntu"` chỉ cả job/leg CI.
+  Bản hạ phải nói ĐÚNG thứ đã đo: một lượt chạy cục bộ, ngày nào, và KHÔNG khai chân CI nào.
+
+  (2) GHI NHẬN `r2:215` VÀ NÓI RÕ NÓ NGOÀI PHẠM VI — không sửa, không im lặng.
+  Câu: "…nó làm cổng nền tra theo một trục hoàn toàn khác mà **toàn bộ chân Ubuntu im lặng**".
+  Lý do ngoài phạm vi, phải viết ra chứ không chỉ khẳng định: nó là GIẢI THÍCH cho bảng đo ngay
+  trên nó, không phải BẰNG CHỨNG; nội dung của nó SUY RA ĐƯỢC (`t73` truyền `nen="posix"` trùng
+  `os.name` thật của runner Linux nên gỡ mệnh đề nền là NO-OP với nó); và cơ chế phân biệt được
+  NÊU NGAY TẠI CHỖ (8 dòng `BỎ QUA` trên chân `windows-latest`) nên người đọc kiểm được.
+  KÈM luật rút ra để lần sau không phải hỏi lại: hình dạng `A` là về BẰNG CHỨNG; một câu nhắc
+  phạm vi trong lúc GIẢI THÍCH một con số đã nêu ở chỗ khác thì soi bằng thước khác.
+  VÀ KHAI THẲNG: đây là kết luận của một LẬP LUẬN, không phải của một phép đo; không cổng nào
+  phân xử được nó. Câu này đã được hỏi HAI lần — ghi ra để lần thứ ba không ra đáp án khác.
+
+  (3) KHỐI ĐÁNH DẤU MÁY ĐỌC ĐƯỢC ở đầu tệp, dạng YAML front-matter, kèm MỘT trường khai thẳng
+  rằng hình dạng này là TẠM và packet "cơ chế trạng thái đặc tả" được phép đổi hoàn toàn. Thiếu
+  trường ấy là lén đặt trước giao diện cho một packet chưa được thiết kế.
+
+  (4) NÓI RÕ `r4` LÀ DELTA: nó KHÔNG thay thế `r2`/`r3` toàn phần, chỉ thay hai chỗ đã nêu; mọi
+  phần khác của `r2`/`r3` GIỮ NGUYÊN hiệu lực. Ai neo băm `r2`/`r3` vẫn neo đúng — hai tệp ấy
+  KHÔNG đổi một byte nào.
+
+  === TỰ CHỊU CHÍNH PHÉP THỬ MÌNH ĐANG ÁP ===
+  `r4` là một văn bản đầy lời khai. Một bản đặc tả sửa lỗi "khai rộng hơn đo" mà TỰ khai rộng hơn
+  đo thì tệ hơn không sửa — `r4` của #314 đã mắc đúng thế (khai "sửa ĐÚNG MỘT lời khai" trong khi
+  cùng tệp ghi "CHƯA AI QUÉT"), và `r5` bị thu hồi một phần cũng vì lặp lại nó BA lần.
+  Cụ thể: đừng khai "đã quét hết". Số đo được là HAI chỗ hình dạng `A` cộng MỘT chỗ cần người
+  quyết; "chỉ ba" là kết luận của MỘT phép quét theo cụm từ — tức một DANH SÁCH ĐOÁN TRƯỚC —
+  không phải một chứng minh.
+
+khong_lam_gi: >-
+  KHÔNG đo lại toàn bộ số của `r2`/`r3` cho khớp master. KHÔNG dựng cơ chế trạng thái (đó là
+  packet riêng, chưa có đặc tả, và có một câu hỏi thiết kế chưa ai trả lời: cổng LÀM GÌ khi một
+  đặc tả bị đánh dấu đã thay thế — từ chối cho lease neo vào, hay chỉ cảnh báo).
+  KHÔNG sửa `r2:215`. KHÔNG đụng `r1`.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ hai ⇒ DỪNG ·
+  S2 vượt 300 dòng thêm ⇒ DỪNG ·
+  S3 phát hiện chỗ thứ TƯ mang cùng hình dạng `A` ⇒ DỪNG: khi ấy "hai câu" là số SAI và phạm vi
+  packet phải khai lại TRƯỚC khi viết tiếp ·
+  S4 không tái hiện được hai câu ở `r2:232`/`r3:192` trên master bằng phép đo của chính mình ⇒
+  `KHÔNG_ĐO_ĐƯỢC`, DỪNG ·
+  S5 `origin/master` đã đi tiếp so `base_sha` mà chưa đo lại.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) Đặc tả đóng băng KHÔNG sửa đè. `r2`/`r3` phải giữ byte-identical trên master — kiểm bằng
+  `git diff --name-only` chỉ ra ĐÚNG MỘT tệp mới.
+  (2) Đánh số `r4`, KHÔNG phải `r5`/`r6`. Đã đo trên 227 ref: `r4` chưa từng tồn tại. Hồ sơ cũ
+  (`vi_tri_r4_noi_dung_dung_o_CA_HAI_trang_thai` trong lease `spec-r5` đã thu hồi) khai SAI vị
+  trí của `r4` vì nhầm LEASE `r4` với ĐẶC TẢ `r4` — đừng chép lại lời khai ấy.
+  (3) `ops/specs/**` là dev-side, KHÔNG vào gói phát hành.
+  (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.

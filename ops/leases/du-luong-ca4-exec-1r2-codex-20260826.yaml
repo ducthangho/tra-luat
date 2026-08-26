@@ -224,3 +224,4 @@ viec_cua_luot_2: >-
   ĐỪNG sửa rig cho khớp mã. Lượt 1 đã làm thế (thêm 4 tracking config) và chính việc đó che
   mất finding. Rig là ĐỀ BÀI; mã phải khớp rig, không phải ngược lại. Cần rig sạch thì chạy
   `rig/dung_rig.sh <thư-mục-mới>`.
+posted_comment_id: 5430106984   # workflow ghi, ĐỪNG sửa tay

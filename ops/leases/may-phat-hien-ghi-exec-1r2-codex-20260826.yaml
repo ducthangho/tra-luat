@@ -1,0 +1,158 @@
+# Lease EXECUTOR — `AGENT-MAY-PHAT-HIEN-GHI` (#329), PHA 1, BẢN r2 — SỬA PHÂN CÔNG.
+#
+# r1 giao CẢ phép đo N1 lẫn việc soạn đặc tả cho codex. SAI PHÂN CÔNG: `SubagentStart`/
+# `SubagentStop` là cơ chế Claude Code, `codex exec` KHÔNG sinh ra được. Bắt được TRƯỚC khi
+# phóng. r2: N1 đã do claude đo xong và chép vào đây; codex chỉ soạn đặc tả.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 329
+packet_id: AGENT-MAY-PHAT-HIEN-GHI
+phase_key: AGENT-MAY-PHAT-HIEN-GHI-PHA1-DAC-TA
+revision: 2
+generation: 1
+lease_id: may-phat-hien-ghi-exec-1r2-codex-20260826
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` đúng thực chất: đặc tả này quyết định cơ chế chặn/phát hiện ghi của agent. Lớp do
+  CỔNG tính, executor không tự hạ.
+
+spec_path: ops/specs/agent-may-phat-hien-ghi.md
+spec_status: PHAI_SOAN_O_LUOT_NAY
+spec_duyet_boi: 'CHƯA — người giữ kho duyệt SAU khi codex nộp'
+spec_note: >-
+  Packet này đổi KIẾN TRÚC và Issue #329 để ngỏ năm câu, nên soạn đặc tả CHÍNH LÀ việc.
+
+write_set:
+  - ops/specs/agent-may-phat-hien-ghi.md
+write_set_note: >-
+  ĐÚNG MỘT đường dẫn, tệp MỚI. KHÔNG chạm `.claude/**` dưới bất kỳ dạng nào. Pha 1 không viết
+  mã; chạm đường dẫn khác là `S2`. Khác r1: r1 còn mở ngoại lệ `.claude/settings.local.json`
+  cho phép đo — nay KHÔNG cần nữa vì phép đo đã xong.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 ~14:4xZ: `ls-remote --heads` 216 = `for-each-ref` 216, `comm -23` RỖNG.
+    ops/specs/agent-may-phat-hien-ghi.md  ->  NGƯỜI_GIỮ 0
+
+branch: codex/may-phat-hien-ghi-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 6cc64d399f6477c8ba256e761bde0e9c5187b180
+start_from_sha: 6cc64d399f6477c8ba256e761bde0e9c5187b180
+reviewed_sha_required: 6cc64d399f6477c8ba256e761bde0e9c5187b180
+base_ghi_chu: >-
+  `6cc64d39` = `origin/master` SAU khi PR #328 merge. BẮT BUỘC: đặc tả phải đọc được cổng A1
+  (`.claude/hooks/pretooluse_guard.py` + `..._test.py`) để trả lời câu "giữ hay bỏ bộ phân tích".
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 1
+  dong_them_toi_da: 260
+  do_tu_sha: 6cc64d399f6477c8ba256e761bde0e9c5187b180
+  don_vi: '`git diff --numstat 6cc64d39..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  da_dung: 0
+  la_uoc_luong: true
+  ghi_chu: '260 là ƯỚC LƯỢNG cho một tệp đặc tả. Trong trần ADR-0044 nên không cần `nang_tran`.'
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-26: "cấp lease, quyền cho #329, codex executor", rồi "làm tất đi".
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Người ghi (claude) KHÔNG thi công đặc tả; executor là codex, khác nền; reviewer là claude.
+  NHƯNG khai thẳng một phần KHÔNG độc lập: phép đo N1 dưới đây do CHÍNH claude thực hiện, vì
+  codex không làm được (xem `n1_da_do`). Nên đặc tả sẽ dựa trên số liệu của bên sẽ đi review nó.
+  Đó là mất độc lập CÓ THẬT, chỉ nhỏ hơn r1 chứ không phải không có.
+
+n1_da_do: >-
+  `N1` KHÔNG CÒN LÀ VIỆC CỦA LƯỢT NÀY — đã đo 2026-08-26 ~14:5xZ, kết quả DƯƠNG.
+  Cách đo: đăng ký hook `SubagentStart`/`SubagentStop` trong `.claude/settings.local.json`
+  (tệp ĐÃ bị `.gitignore`), phóng subagent `tl-auditor` thật, đọc log, rồi xoá tệp và KIỂM
+  `git status --porcelain` RỖNG. Cây kho không bị chạm.
+  Cả hai sự kiện ĐỀU BẮN. Khoá trong payload:
+    SubagentStart : agent_id · agent_type · cwd · hook_event_name · prompt_id · session_id
+                    · transcript_path
+    SubagentStop  : (như trên) + agent_transcript_path · background_tasks · effort
+                    · last_assistant_message · permission_mode · session_crons
+                    · stop_hook_active
+    ca hai mang agent_type = "tl-auditor"
+  HỆ QUẢ CHO THIẾT KẾ, đọc kỹ: KHÔNG sự kiện nào mang ảnh chụp hệ tệp. Nên máy phát hiện phải
+  TỰ chụp trạng thái ở `SubagentStart` và so ở `SubagentStop`, và phải tự lo chỗ lưu ảnh chụp
+  giữa hai lần bắn (`agent_id` là khoá nối hai đầu — nó có mặt ở CẢ HAI).
+
+sua_mot_khang_dinh_sai: >-
+  Cùng lượt đo trên bác một câu mà chính phiên này đã khẳng định nhiều lần, gồm trong lease A1
+  và thân PR #328: "hook config chỉ nạp lúc mở phiên, nên điểm bơm duy nhất có hiệu lực NGAY là
+  chính script hook". SAI — hook đăng ký GIỮA phiên trong `.claude/settings.local.json` có hiệu
+  lực NGAY, đo được ở trên. Đó là giả định chưa từng thử, đem trình bày như sự kiện.
+  Hệ quả thực hành cho executor: muốn đo một hook event CHƯA được đăng ký thì cứ đăng ký nó vào
+  `settings.local.json` — không phải đi bơm vào script của một hook khác.
+
+vi_sao_claude_do_N1_chu_khong_phai_codex: >-
+  `SubagentStart`/`SubagentStop` là sự kiện của Claude Code, sinh ra khi một phiên Claude Code
+  phóng subagent. `codex exec` không phóng subagent Claude nên không thể làm chúng bắn. Giao
+  phép đo ấy cho codex là giao một việc bất khả thi, và lượt chạy sẽ chết mà không ai biết vì
+  sao. Đúng luật `CLAUDE.md`: "chọn NỀN theo thứ packet ĐO, đừng chọn theo nền nào đang rảnh".
+  r1 mắc lỗi này; bắt được TRƯỚC khi phóng, không phải sau khi codex thất bại.
+
+viec_cua_luot_nay: >-
+  MỘT mục tiêu: soạn `ops/specs/agent-may-phat-hien-ghi.md`. KHÔNG viết mã, KHÔNG đo lại N1.
+  Đặc tả phải có, tối thiểu:
+  (a) chép nguyên bảng khoá payload ở `n1_da_do`, và rút ra hệ quả thiết kế từ việc KHÔNG sự
+      kiện nào mang ảnh chụp hệ tệp;
+  (b) TRÌNH ba quyết định của người giữ kho, mỗi cái kèm đánh đổi ĐO ĐƯỢC chứ không phải ý
+      kiến — (1) phát hiện rồi thì CHẶN (`SubagentStop` exit 2) / HOÀN TÁC / chỉ TỐ CÁO;
+      (2) GIỮ hay BỎ bộ phân tích chuỗi lệnh của A1 đã land ở `6cc64d39`; (3) tệp bị
+      `.gitignore`, ghi ngoài cây kho, gọi mạng — chấp nhận mù hay mở rộng phép đo;
+  (c) tiêu chí nghiệm thu cho pha 2, BẮT BUỘC có một ca bắt được cơ chế ghi KHÔNG nằm trong
+      danh sách nào (vd `install -m 644`) — thiếu ca ấy thì packet này chỉ là một danh sách
+      cấm khác, tức đúng thứ nó sinh ra để thay;
+  (d) khai thẳng những gì đặc tả CHƯA đo được.
+  Rồi DỪNG. Người giữ kho duyệt trước khi có lease pha 2.
+
+dieu_kien_dung: >-
+  S1 phát hiện `n1_da_do` mâu thuẫn với thực tế khi đọc mã ⇒ DỪNG, báo, KHÔNG tự đo lại bằng
+  cách khác · S2 chạm BẤT KỲ đường dẫn nào ngoài `ops/specs/agent-may-phat-hien-ghi.md` ⇒ DỪNG
+  · S3 vượt 260 dòng thêm · S4 tự trả lời một trong BA câu quyết định thay vì TRÌNH lên ⇒ DỪNG,
+  đó là việc của người giữ kho · S5 `origin/master` đã đi tiếp mà chưa đo lại.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) ĐỪNG viết mã sản phẩm. Bản phác thảo ~20 dòng trông dễ hơn một đặc tả 260 dòng, nhưng ba
+  câu quyết định chưa chốt và viết mã trước là tự chốt hộ người giữ kho.
+  (2) `git status --porcelain` MÙ với tệp bị `.gitignore`, ghi ngoài cây kho, và gọi mạng. Đặc
+  tả phải KHAI phạm vi ấy — packet trước đã trả giá đúng chỗ này HAI lần.
+  (3) Máy phát hiện bắt SAU khi đã ghi. Từ vựng ba hạng của #318: nó là MÁY PHÁT HIỆN, KHÔNG
+  phải RANH GIỚI. Đừng gọi tên to hơn thứ đo được.
+  (4) Hoàn tác tự động là một ĐƯỜNG GHI MỚI do chính chốt tạo ra; đề xuất nó thì phải nói rõ
+  hậu quả khi nó chạy nhầm.
+  (5) Mọi con số trong đặc tả phải neo vào một lệnh chạy được. Bài học vừa trả giá ở PR #330:
+  một ví dụ `tl drive-pull` được viết ra làm bằng chứng, nhưng lệnh ấy KHÔNG TỒN TẠI (`rc=2`)
+  — "cổng cho qua chuỗi" không chứng minh "lệnh có thật", càng không chứng minh "có tác dụng phụ".
+  (6) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+
+chua_do_duoc_luc_cap: >-
+  (1) CHƯA đo chi phí: chụp `git status` hai lần mỗi lượt agent trên cây kho này tốn bao lâu.
+  (2) CHƯA đo `SubagentStop` có thật sự CHẶN được bằng exit 2 hay không — tài liệu nói có,
+  nhưng tài liệu KHÔNG phải phép đo. Đặc tả phải liệt việc này vào pha 2.
+  (3) CHƯA đo hành vi khi agent chạy nền hoặc khi có nhiều subagent song song — `agent_id` nối
+  được hai đầu, nhưng chưa ai thử chồng lượt.
+
+thay_the_cho: may-phat-hien-ghi-exec-1-codex-20260826
+thay_the_ly_do: >-
+  SỬA PHÂN CÔNG. r1 giao N1 cho codex — bất khả thi, vì `SubagentStart`/`SubagentStop` là sự
+  kiện Claude Code. Kéo theo: thêm `n1_da_do` (kết quả đo thật), `vi_sao_claude_do_N1...`,
+  `sua_mot_khang_dinh_sai`; `viec_cua_luot_nay` bỏ mục đo, chỉ còn soạn đặc tả; `write_set_note`
+  bỏ ngoại lệ `settings.local.json` vì không cần nữa; `S1` đổi nghĩa; `chua_do_duoc_luc_cap`
+  đánh số lại và thêm hai mục mới lộ ra từ phép đo. `recorder_ghi_chu` khai phần mất độc lập
+  còn lại. Tự soi bằng grep sau khi soạn.

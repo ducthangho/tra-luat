@@ -152,3 +152,4 @@ cach_phong_executor: >-
   lượt chết vẫn để lại `run.json` thay vì bốc hơi. Đo lúc cấp: `launcher.py doctor --kiem-song`
   cho codex `rc=0 (VAN dung duoc)` — bằng chứng gọi THẬT, không tin `codex login status`.
 posted_comment_id: 5426917948   # workflow ghi, ĐỪNG sửa tay
+da_bi_thay_the: may-phat-hien-ghi-exec-1r2-codex-20260826

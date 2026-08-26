@@ -3442,11 +3442,11 @@ def _tu_choi_worktree(trang, dau):
     with San() as s:
         kho, wt = _kho_tut_sau(s, trang)
         rc, _, err = chay("ai-dang-giu", "ops/lease_publish.py", "--root", kho, cwd=kho)
-        bang(rc == 12 and "KHÔNG_PHÁT_LỆNH_CHỮA" in err and wt.as_posix() in err and dau in err
+        bang(rc == 12 and "KHÔNG_PHÁT_LỆNH_CHỮA" in err and f"{s.name}/{wt.name}" in err and dau in err
              and "Người dùng tự" in err and "chạy lại cổng" in err
              and not any(x in err for x in ("git branch -f", "git -C", "merge --ff-only")),
-             f"không từ chối {trang}: rc={rc} {err}")
-        if trang == "hai": bang((s / "wt 2").as_posix() in err, f"thiếu worktree thứ hai: {err}")
+             f"không từ chối {trang}: rc={rc} neo={s.name}/{wt.name!r} wt={wt.as_posix()!r} err={err}")
+        if trang == "hai": bang(f"{s.name}/wt 2" in err, f"thiếu worktree thứ hai: {err}")
         if trang == "rebase":
             por = _git_fixture(kho, "worktree", "list", "--porcelain")
             bang("detached" in por and "branch refs/heads/a" not in por, f"chưa đo detached rebase: {por} {err}")

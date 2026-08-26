@@ -200,3 +200,4 @@ canh_bao_cho_nguoi_thi_hanh: >-
   (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu, kể cả khi trích để giải thích.
   (5) `ops/lease_publish_test.py` có 3170 dòng và `ops/lease_publish.py` có 727 — đọc quanh
   chỗ bạn sửa trước khi thêm, kho này có sẵn nhiều tiện ích dựng fixture.
+posted_comment_id: 5422858857   # workflow ghi, ĐỪNG sửa tay

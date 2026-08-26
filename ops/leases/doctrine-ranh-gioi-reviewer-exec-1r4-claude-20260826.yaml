@@ -95,7 +95,7 @@ target_branch_neu_land: master
 
 base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
 start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
-reviewed_sha_required: d14ba2f3afd317b903224d1b06b4ddffb238dc5b
+reviewed_sha_required: 7d7354e14c540c3c2afd3f3a594ff2e432f6fd44
 base_ghi_chu: >-
   `c35ae1c` = `origin/master` lúc cấp, ĐO trong phiên (không chép từ hồ sơ bàn giao), và cũng là
   merge của PR #310. Nhánh rẽ SẠCH từ đây, KHÔNG kế thừa `6c4140b` của PR #315 (đã đóng, không
@@ -141,6 +141,17 @@ ngan_sach_kich_thuoc:
     và `nang_tran_lan_hai`. Căn cứ kích thước: trên `master` tệp có 544 dòng và chưa mang mục nào
     trong bốn mục đang xét; bản trên nhánh cũ thêm 146 dòng cho CẢ mục allowlist LẪN mục ranh giới,
     và packet này nhận cả hai rồi viết lại phần ranh giới. Vượt 200 ⇒ điều kiện dừng S2, xin sửa lease, KHÔNG nới trong im lặng.
+
+SO_SACH_SUYT_LECH_LAN_HAI:
+  chuyen_gi: >-
+    Cập nhật `reviewed_sha_required` cho vòng 9, phiên BỊA phần đuôi của SHA đầy đủ từ bản rút gọn
+    `7d7354e` thay vì đọc `git rev-parse`. Ghi ra `7d7354e0ff9a…` trong khi head thật là
+    `7d7354e14c54…` — trùng bảy ký tự đầu nên nhìn bằng mắt KHÔNG thấy.
+  bat_duoc_bang: >-
+    So chuỗi đã ghi với `git rev-parse` NGAY SAU khi ghi, thay vì tin tay mình. Đây là lần THỨ HAI
+    trong phiên phiên bịa một SHA đầy đủ; lần đầu bị `launcher.py --expected-head` chặn (rc=4).
+  da_sua: 'ghi lại bằng giá trị đo được, và kiểm lại lần nữa sau khi ghi'
+  luat: 'KHÔNG BAO GIỜ gõ tay SHA đầy đủ — luôn nội suy từ lệnh, rồi đối chiếu lại'
 
 SO_SACH_DA_LECH_MOT_LAN:
   chuyen_gi: >-

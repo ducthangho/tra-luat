@@ -197,3 +197,7 @@ thay_the_ly_do: >-
   biểu diễn được — r4 chỉ mang được một tên. Hai lease của #318/#319 đã đăng TRƯỚC khi cổng ấy land
   nên lọt; lease nào sau này khai cùng quan hệ sẽ bị chặn. Đã báo #313.
 posted_comment_id: 5423801572   # workflow ghi, ĐỪNG sửa tay
+
+# Cổng `_kiem_bia_mo` (PR #316) đòi chuỗi thay thế HAI CHIỀU; thêm tay vì cổng cố ý không sửa
+# hồ sơ cũ. `posted_comment_id` ở trên giữ nguyên ⇒ cổng trả rc=9 và KHÔNG đăng lại.
+da_bi_thay_the: mcp-gh-cuu-ho-exec-1r3-codex-20260826

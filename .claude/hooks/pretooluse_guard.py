@@ -2,7 +2,9 @@
 -> tra permissionDecision=ask de user duyet tay (KHONG deny cung — runbook van co ngay phai chay --apply).
 Exit 0 + khong output = cho qua binh thuong."""
 import json
+import pathlib
 import re
+import subprocess
 import shlex
 import sys
 
@@ -102,6 +104,248 @@ _GIT_CO_GHI = frozenset({"-d", "-D", "--delete", "-m", "-M", "--move", "-f", "--
 _GIT_CO_LIET_KE = frozenset({"--list", "-l"})
 _GIT_CO_MANG_GIA_TRI = frozenset({"-C", "-c", "--git-dir", "--work-tree", "--namespace"})
 
+# ── TANG 1: TEN LENH `tl` ─────────────────────────────────────────────────────────────────
+# Lo do duoc o #336 muc 1: `recat` tran LOT `_TL_CAM`, vi `_TL_CAM` do CO ma `recat` khong
+# can co nao de ghi. Chan theo TEN LENH moi la dung tang: `read_only` la thuoc tinh cua
+# LENH, khong phai cua co. 90 ten duoi sinh tu `COMMAND_META` (read_only=False) va duoc
+# cong CI doi chieu lai — xem `--kiem-bang`. Bang nay SE TROI khi `tl` them lenh; cong CI
+# la thu duy nhat giu no khong troi, nen dung bo cong ay di.
+_TL_LENH_GHI = frozenset({
+    "backfill-hieuluc", "backfill-loai", "backfill-nlm-status", "backfill-notebook",
+    "backfill-title-vn", "bench", "boot", "bootstrap", "bundle-export", "cache-build",
+    "cache-snapshot", "chunk-apply", "config-pin-registry", "confirm", "consolidation-cleanup",
+    "corpus-audit", "corpus-fix", "dedup-corpus", "dedup-plan", "doc-patch", "download",
+    "edit-skill", "external-ingest", "extract", "fetch-batch", "golden-test", "gws-auth-load",
+    "gws-bootstrap-cowork", "ingest", "ingest-inbox", "ingest-local", "ingest-missing",
+    "ingest-ocr", "ingest-zip", "init-config", "instructions", "journal", "loop", "manifest",
+    "missing-sohieu", "nlm-auth-load", "nlm-auth-pull", "nlm-install", "nlm-migrate",
+    "nlm-reconcile", "nlm-source-remove", "ocr-run", "profile-adopt",
+    "profile-backfill-markers", "profile-create", "profile-delete", "profile-doctor",
+    "profile-file-add", "profile-file-remove", "profile-from-nlm", "profile-index",
+    "profile-ingest", "profile-ingest-chunks", "profile-ingest-ocr", "profile-ingest-zip",
+    "profile-materialize-sources", "profile-promote", "profile-rebuild-registry",
+    "profile-rename", "profile-set-meta", "profile-sync", "profile-use", "push-overflow",
+    "quarantine-fix", "rasoat-loop", "rasoat-merge", "recat", "reconcile", "reg-delete",
+    "register", "relation-backfill", "release-bundle", "release-check", "release-manifest",
+    "resume", "shared-source-fix", "source-delete", "source-rename", "source-update-corpus",
+    "the-thuc-build", "the-thuc-normalize", "undo", "up", "vbhn-year-fix", "verify-staged",
+})
+
+# ── TANG 2: CO, theo DANH SACH CHO PHEP tung chuong trinh ─────────────────────────────────
+# Doctrine kho: "danh sach CAM khong bao gio du — phai dao thanh danh sach CHO PHEP".
+# Lo #336 muc 2 va 3 deu la co GHI cua chuong trinh DUOC PHEP: `git diff --output=F` tao tep
+# 1559 B, `ruff check --output-file=F` tao tep 9840 B. Ca hai LOT vi cong chi soi TEN chuong
+# trinh, roi (voi git) BO QUA MOI CO.
+#
+# Vi sao KHONG liet ke ~600 co dai ma 30 chuong trinh phoi ra qua `--help`: liet ke het roi
+# danh dau an/khong-an chinh la doan xem cai nao an — tuc mot danh sach CAM doi vai. Bang
+# duoi chi chua co ma hai agent doc THAT SU can; moi co khac, ke ca co MOI cua ban coreutils
+# tuong lai, TU DONG bi tu choi. Do la chieu fail-close dung.
+#
+# `--kiem-bang` doi chieu bang nay voi `--help` cua chuong trinh DA CAI: moi co o day phai
+# TON TAI that. Do la phep do bat duoc lo #336 muc 4+5 — `_kiem_diff` canh `--output`, mot
+# co ma `diff` KHONG HE CO (`diff: unrecognized option '--output'`).
+_CO_CHO_PHEP = {
+    "git":   frozenset({"-C", "-c", "-n", "-p", "-U", "-M", "-l", "-q", "-v", "-z",
+                        "--oneline", "--stat", "--numstat", "--shortstat", "--name-only",
+                        "--name-status", "--format", "--pretty", "--date", "--graph",
+                        "--all", "--merges", "--no-merges", "--follow", "--reverse",
+                        "--porcelain", "--short", "--long", "--branch", "--untracked-files",
+                        "--cached", "--staged", "--word-diff", "--color", "--no-color",
+                        "--abbrev", "--no-patch", "--quiet", "--verify", "--max-count",
+                        "--since", "--until", "--author", "--grep", "--first-parent",
+                        "--is-ancestor", "--count", "--heads", "--tags", "--max-parents",
+                        "--contains", "--merged", "--no-merged", "--list", "--get",
+                        "--get-all", "--get-regexp", "--show-toplevel", "--show-object-format",
+                        "--is-shallow-repository", "--is-inside-work-tree", "--abbrev-ref",
+                        "--symbolic-full-name", "--no-optional-locks", "--no-pager",
+                        "--unified", "--find-renames", "--text", "--decorate",
+                        "-uall", "-uno"}),
+    "ruff":  frozenset({"--select", "--ignore", "--output-format", "--statistics", "--no-cache",
+                        "--quiet", "-q", "--config", "--isolated", "--preview", "--exclude",
+                        "--extend-select", "--line-length", "--target-version", "--no-fix"}),
+    "rg":    frozenset({"-n", "-i", "-l", "-c", "-o", "-w", "-F", "-e", "-A", "-B", "-C", "-U",
+                        "-g", "-t", "-m", "-v", "-H", "-h", "-r", "-S", "-s", "-u", "-P",
+                        "--line-number", "--ignore-case", "--files-with-matches", "--count",
+                        "--count-matches", "--only-matching", "--word-regexp",
+                        "--fixed-strings", "--regexp", "--after-context", "--before-context",
+                        "--context", "--multiline", "--multiline-dotall", "--glob", "--type",
+                        "--max-count", "--invert-match", "--with-filename", "--no-filename",
+                        "--no-heading", "--heading", "--color", "--files", "--hidden",
+                        "--no-ignore", "--smart-case", "--case-sensitive", "--sort",
+                        "--null-data", "--max-columns", "--max-depth", "--pcre2"}),
+    "grep":  frozenset({"-n", "-i", "-l", "-c", "-o", "-w", "-F", "-E", "-e", "-A", "-B", "-C",
+                        "-r", "-R", "-v", "-h", "-H", "-q", "-a", "-x", "-s", "-z", "-m",
+                        "--line-number", "--ignore-case", "--files-with-matches", "--count",
+                        "--only-matching", "--word-regexp", "--fixed-strings", "--regexp",
+                        "--extended-regexp", "--after-context", "--before-context",
+                        "--context", "--recursive", "--invert-match", "--no-filename",
+                        "--with-filename", "--quiet", "--color", "--include", "--exclude",
+                        "--max-count", "--text", "--binary-files", "--null-data",
+                        "--line-regexp"}),
+    "sort":  frozenset({"-n", "-r", "-u", "-k", "-t", "-f", "-b", "-h", "-V", "-g", "-s", "-z",
+                        "--numeric-sort", "--reverse", "--unique", "--key",
+                        "--field-separator", "--ignore-case", "--version-sort", "--stable",
+                        "--zero-terminated", "--human-numeric-sort",
+                        "--general-numeric-sort"}),
+    "uniq":  frozenset({"-c", "-d", "-u", "-i", "-f", "-s", "-w", "-z",
+                        "--count", "--repeated", "--unique", "--ignore-case",
+                        "--skip-fields", "--skip-chars", "--check-chars",
+                        "--zero-terminated"}),
+    "cut":   frozenset({"-d", "-f", "-c", "-b", "-s", "-z", "--delimiter", "--fields",
+                        "--characters", "--bytes", "--only-delimited", "--complement"}),
+    "head":  frozenset({"-n", "-c", "-q", "-v", "-z", "--lines", "--bytes", "--quiet",
+                        "--silent", "--verbose", "--zero-terminated"}),
+    "tail":  frozenset({"-n", "-c", "-q", "-v", "-z", "--lines", "--bytes", "--quiet",
+                        "--silent", "--verbose", "--zero-terminated"}),
+    "wc":    frozenset({"-l", "-w", "-c", "-m", "-L", "--lines", "--words", "--bytes",
+                        "--chars", "--max-line-length"}),
+    "tr":    frozenset({"-d", "-s", "-c", "-t", "--delete", "--squeeze-repeats",
+                        "--complement", "--truncate-set1"}),
+    "nl":    frozenset({"-b", "-n", "-w", "-s", "-v", "--body-numbering", "--number-format",
+                        "--number-width", "--number-separator"}),
+    "ls":    frozenset({"-l", "-a", "-A", "-h", "-t", "-r", "-S", "-1", "-d", "-R", "-i", "-n",
+                        "--all", "--almost-all", "--human-readable", "--reverse",
+                        "--directory", "--recursive", "--time", "--sort", "--color",
+                        "--format", "--time-style", "--full-time", "--inode"}),
+    "cat":   frozenset({"-n", "-b", "-A", "-e", "-t", "-s", "-v", "-E", "-T",
+                        "--number", "--show-all", "--squeeze-blank", "--show-ends",
+                        "--show-tabs", "--show-nonprinting", "--number-nonblank"}),
+    "jq":    frozenset({"-r", "-c", "-e", "-n", "-s", "-S", "-j", "-a", "-R", "--raw-output",
+                        "--compact-output", "--exit-status", "--null-input", "--slurp",
+                        "--sort-keys", "--join-output", "--arg", "--argjson", "--tab",
+                        "--indent", "--ascii-output", "--raw-input",
+                        "--monochrome-output"}),
+    "diff":  frozenset({"-u", "-U", "-r", "-q", "-i", "-w", "-b", "-B", "-N", "-a", "-y",
+                        "--unified", "--recursive", "--brief", "--ignore-case",
+                        "--ignore-all-space", "--ignore-space-change",
+                        "--ignore-blank-lines", "--new-file", "--text", "--side-by-side",
+                        "--color", "--label"}),
+    "find":  frozenset({"-name", "-iname", "-type", "-path", "-ipath", "-maxdepth",
+                        "-mindepth", "-print", "-print0", "-size", "-newer", "-mtime",
+                        "-not", "-o", "-a", "-empty", "-regex", "-iregex", "-prune",
+                        "-follow", "-xdev", "-links"}),
+    "stat":  frozenset({"-c", "-f", "-t", "-L", "--format", "--printf", "--terse",
+                        "--dereference", "--file-system"}),
+    "file":  frozenset({"-b", "-i", "-L", "-z", "--brief", "--mime", "--mime-type",
+                        "--mime-encoding", "--dereference"}),
+    "date":  frozenset({"-u", "-d", "-R", "-I", "--utc", "--date", "--rfc-3339",
+                        "--iso-8601", "--rfc-email", "--universal"}),
+    "sha256sum": frozenset({"-b", "-t", "-c", "-z", "--binary", "--text", "--check",
+                            "--zero", "--quiet", "--status"}),
+    "md5sum":    frozenset({"-b", "-t", "-c", "-z", "--binary", "--text", "--check",
+                            "--zero", "--quiet", "--status"}),
+    "basename":  frozenset({"-a", "-s", "-z", "--multiple", "--suffix", "--zero"}),
+    "dirname":   frozenset({"-z", "--zero"}),
+    "echo":      frozenset({"-n", "-e", "-E"}),
+    "printf":    frozenset(),
+    "pwd":       frozenset({"-L", "-P"}),
+    "test":      frozenset(),
+    "[":         frozenset(),
+    "true":      frozenset(),
+    "false":     frozenset(),
+    "egrep":     frozenset(),
+    "fgrep":     frozenset(),
+}
+# MIEN TANG 2 — CO LY DO, khong phai cho tien. `tl.py` co ~180 lenh, moi lenh mot bo co
+# rieng; liet ke chung o day la dung mot bang KHAC de canh mot be mat da co bo canh CHAT
+# HON. Ba lop dang phu `python*`:
+#   1. `_kiem_python` — cam `-c`/`-m`/`-` (chay ma tuy y) va bat kich ban phai nam trong
+#      `_RE_KICH_BAN_CHO_PHEP` (scripts/ · .claude/dev/ · ops/, duoi .py);
+#   2. TANG 1 `_TL_LENH_GHI` — 90 lenh `read_only=False` bi tu choi theo TEN;
+#   3. `_TL_CAM` — nhom MUTATE theo co (`--apply` `--write` ...).
+# DE `frozenset()` RONG thi TANG 2 tu choi MOI co, ke ca `--json`: DO DUOC — ca
+# `python scripts/tl.py cat-audit --json | head -40` bi CHAN OAN, va `t3` bat duoc.
+_MIEN_TANG2 = frozenset({"python", "python3", "py"})
+
+# HO CO SINH TEP cua `tl` — do trong Issue #336: 187 subcommand co `--help` rc=0, 45 nhan
+# DUNG `--out`, 47 nhan mot trong bon ten duoi. Day KHONG phai mot danh sach cam doan ra:
+# `--kiem-bang` doi chieu no voi `write_scope` trong COMMAND_META va DO se khi co lenh
+# `read_only=True` ma `write_scope != "none"` lai khong bi ho co nay phu.
+# Vi sao can: TANG 1 chi chan `read_only=False`. Nhung `read_only=True` + `write_scope`
+# khac "none" nghia la "CHI ghi khi nguoi goi tu khai `--out`" (chinh chu thich trong
+# command_registry.py noi vay). Do duoc: `tl sweep --out /tmp/x` -> ALLOW truoc khi co ho
+# co nay, va `sweep` KHONG nam trong 90 ten cua TANG 1.
+_TL_CO_SINH_TEP = frozenset({"--out", "--output", "--out-dir", "--output-file"})
+# `egrep`/`fgrep` de RONG CO CHU DINH: chung la wrapper bi khai tu, va cho co qua day la
+# nhan doi be mat phai canh. Ai can thi dung `grep -E` / `grep -F` — deu nam trong bang.
+# `python*` de RONG vi `_kiem_python` da soi rieng va CHAT HON (chi cho kich ban trong vung
+# cho phep, cam -c/-m/-); bang co o day chi lam yeu di.
+
+# Co MANG GIA TRI o token KE TIEP (`-n 5`), khac voi `--x=5` gop mot token. Khong biet dieu
+# nay thi gia tri cua co bi doc nham thanh doi so VI TRI — dung lo `uniq IN OUT`.
+_CO_AN_GIA_TRI = {
+    "git":  frozenset({"-C", "-c", "-n", "-U", "-M", "--format", "--pretty", "--date",
+                       "--abbrev", "--max-count", "--since", "--until", "--author", "--grep",
+                       "--untracked-files", "--unified", "--max-parents", "--contains",
+                       "--merged", "--no-merged", "--find-renames"}),
+    "ruff": frozenset({"--select", "--ignore", "--output-format", "--config", "--exclude",
+                       "--extend-select", "--line-length", "--target-version"}),
+    "rg":   frozenset({"-e", "-A", "-B", "-C", "-g", "-t", "-m", "-r", "--regexp", "--glob",
+                       "--type", "--max-count", "--after-context", "--before-context",
+                       "--context", "--color", "--sort", "--max-columns", "--max-depth"}),
+    "grep": frozenset({"-e", "-A", "-B", "-C", "-m", "--regexp", "--after-context",
+                       "--before-context", "--context", "--max-count", "--include",
+                       "--exclude", "--color", "--binary-files"}),
+    "sort": frozenset({"-k", "-t", "--key", "--field-separator"}),
+    "uniq": frozenset({"-f", "-s", "-w", "--skip-fields", "--skip-chars", "--check-chars"}),
+    "cut":  frozenset({"-d", "-f", "-c", "-b", "--delimiter", "--fields", "--characters",
+                       "--bytes"}),
+    "head": frozenset({"-n", "-c", "--lines", "--bytes"}),
+    "tail": frozenset({"-n", "-c", "--lines", "--bytes"}),
+    "nl":   frozenset({"-b", "-n", "-w", "-s"}),
+    "jq":   frozenset({"--arg", "--argjson", "--indent"}),
+    "diff": frozenset({"-U", "--unified", "--label", "--color"}),
+    "stat": frozenset({"-c", "--format", "--printf"}),
+    "date": frozenset({"-d", "--date"}),
+    "basename": frozenset({"-s", "--suffix"}),
+    "ls":   frozenset({"--color", "--format", "--sort", "--time", "--time-style"}),
+}
+
+_RE_CO_NGAN_GOP = re.compile(r"^-[A-Za-z0-9]{2,}$")
+_RE_SO_TRAN = re.compile(r"^-[0-9]+$")
+# `head -3` la viet tat cua `-n 3`. KHONG suy rong: DO 2026-08-26 tren chinh container nay,
+# `-3` duoc NHAN boi head · tail · uniq · git-log, va bi TU CHOI boi grep · diff · sort · cat ·
+# nl · ls · rg. Nen day la mot tap DO DUOC, khong phai mot tap doan ra. Cho `-3` qua o chuong
+# trinh khong nhan no la noi be mat ma khong mua duoc gi.
+_CHO_SO_TRAN = frozenset({"head", "tail", "uniq", "git"})
+
+
+def _kiem_co(ten, doi):
+    """Danh sach CHO PHEP theo co. Co nao KHONG co trong bang => TU CHOI."""
+    if ten in _MIEN_TANG2:
+        return None
+    cho_phep = _CO_CHO_PHEP.get(ten)
+    if cho_phep is None:
+        return "chuong trinh chua co bang co: " + ten          # fail-close
+    an = _CO_AN_GIA_TRI.get(ten, frozenset())
+    i = 0
+    while i < len(doi):
+        a = doi[i]
+        if a == "--":
+            break
+        if not a.startswith("-") or a == "-":
+            i += 1
+            continue
+        goc, gop = (a.split("=", 1)[0], True) if "=" in a else (a, False)
+        if _RE_SO_TRAN.match(goc) and ten in _CHO_SO_TRAN:
+            i += 1
+            continue
+        if goc in cho_phep:
+            i += 2 if (goc in an and not gop and i + 1 < len(doi)) else 1
+            continue
+        # co NGAN GOP: `-la` = `-l -a`. No ra roi kiem tung cai; mot chu xau la ca cum xau.
+        if _RE_CO_NGAN_GOP.match(goc):
+            xau = [c for c in ("-" + ch for ch in goc[1:]) if c not in cho_phep]
+            if xau:
+                return "co ngoai danh sach cho phep cua `" + ten + "`: " + " ".join(xau) \
+                       + " (trong `" + goc + "`)"
+            i += 1
+            continue
+        return "co ngoai danh sach cho phep cua `" + ten + "`: " + goc
+    return None
+
+
 _RE_GAN_BIEN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 _RE_KICH_BAN_CHO_PHEP = re.compile(
     r"^(?:\./)?(?:scripts/[\w.-]+\.py|\.claude/dev/[\w.-]+\.py|ops/[\w.-]+\.py)$")
@@ -189,6 +433,16 @@ def _kiem_python(doi):
         return "python khong co kich ban (doc stdin)"
     if not _RE_KICH_BAN_CHO_PHEP.match(kich):
         return "kich ban ngoai vung cho phep: %s" % kich
+    # TANG 1 — lo #336 muc 1. `recat` khong can CO nao de ghi, nen chan theo CO khong bao gio
+    # bat duoc no; `read_only` la thuoc tinh cua LENH. Lay doi so VI TRI ke sau kich ban.
+    if kich.rsplit("/", 1)[-1] == "tl.py":
+        vt = [a for a in doi if not a.startswith("-")]
+        if len(vt) > 1 and vt[1] in _TL_LENH_GHI:
+            return "lenh tl `%s` co read_only=False trong COMMAND_META" % vt[1]
+        for a in doi:
+            if a.split("=", 1)[0] in _TL_CO_SINH_TEP:
+                return "co sinh tep cua tl: %s (lenh read_only=True van GHI khi co co nay)" \
+                       % a.split("=", 1)[0]
     return None
 
 
@@ -210,14 +464,6 @@ def _cam_co(doi, co):
     return None
 
 
-def _kiem_sort(doi):
-    return _cam_co(doi, ("-o", "--output"))
-
-
-def _kiem_diff(doi):
-    return _cam_co(doi, ("--output",))
-
-
 def _kiem_uniq(doi):
     # `uniq IN OUT` — doi so VI TRI thu hai la TEP RA, khong co co nao bao hieu.
     if len([a for a in doi if not a.startswith("-")]) > 1:
@@ -233,8 +479,19 @@ def _kiem_ruff(doi):
 
 
 _KIEM_RIENG = {"git": _kiem_git, "python": _kiem_python, "python3": _kiem_python,
-               "py": _kiem_python, "find": _kiem_find, "sort": _kiem_sort,
-               "uniq": _kiem_uniq, "diff": _kiem_diff, "ruff": _kiem_ruff}
+               "py": _kiem_python, "find": _kiem_find,
+               "uniq": _kiem_uniq, "ruff": _kiem_ruff}
+# `sort` BO bo soi rieng cung ly do `diff`: TANG 2 da phu. DO tren ban sao tam TRUOC khi
+# bo — khong _kiem_sort thi `sort -o F A` va `sort --output=F A` VAN deny (vi `-o` va
+# `--output` khong nam trong `_CO_CHO_PHEP["sort"]`), con `sort A | head -3` van ALLOW.
+# Dot bien `m12_bo_kiem_sort` SONG chinh vi vay: chot ay khong con rang. Kho da co tien
+# le — chu thich cua chot `<>`/`>&` ghi "giu mot chot khong co rang la tu doi".
+# `diff` CO Y khong co bo soi rieng: no KHONG CO co sinh tep nao. Do 2026-08-26 tren
+# diffutils cua container: `diff --output=F a b` -> `unrecognized option`, rc khac 0, khong
+# tao tep. `_kiem_diff` cu canh dung cai cua ay, va ca test cua no chung minh mot dieu RONG
+# (lo #336 muc 4+5). Nay `diff` di qua TANG 2 nhu moi chuong trinh khac: co nao khong co
+# trong `_CO_CHO_PHEP["diff"]` deu bi tu choi, ke ca `-o`/`--output` cua mot ban `diff` KHAC
+# (BSD/busybox) neu ban ay co that — chan theo DANH SACH CHO PHEP thi khong can biet truoc.
 
 
 def _kiem_doan(toks):
@@ -246,8 +503,14 @@ def _kiem_doan(toks):
     ten = toks[k].rsplit("/", 1)[-1]
     if ten not in _CHUONG_TRINH_CHO_PHEP:
         return "chuong trinh ngoai danh sach cho phep: %s" % ten
+    doi = toks[k + 1:]
+    # TANG 2 chay cho MOI chuong trinh duoc phep, khong chi 9 chuong trinh co `_KIEM_RIENG`.
+    # Truoc #336, 27/36 chuong trinh KHONG co bo soi co nao — do la lo, khong phai thiet ke.
+    ly = _kiem_co(ten, doi)
+    if ly:
+        return ly
     kiem = _KIEM_RIENG.get(ten)
-    return kiem(toks[k + 1:]) if kiem else None
+    return kiem(doi) if kiem else None
 
 
 def _kiem_lenh_agent(cmd, sau=0):
@@ -318,7 +581,122 @@ def _kiem_lenh_agent(cmd, sau=0):
     return None
 
 
+# ── CONG CI: doi chieu HAI BANG TINH voi NGUON THAT ───────────────────────────────────────
+# Hai bang tren la BANG TINH, va bang tinh thi TROI. Cong nay la thu duy nhat giu chung
+# khong troi. Chay o CI, KHONG chay trong hook — hook phai nhe vi no chan truoc MOI lenh
+# Bash, va chi phi import `tl` chua ai do (#336 muc "Chua do duoc").
+#
+# Doc `COMMAND_META` bang PHAN TICH VAN BAN chu khong import: import keo theo 1646 ham
+# tl_core re-home `__globals__`, va do la chi phi chua do. Nguon su that van la mot.
+_RE_META = re.compile(r'^\s*"([a-z0-9][\w-]*)":\s*_m\(\s*"[^"]*"\s*,\s*(True|False)\s*,', re.M)
+_RE_META_WS = re.compile(
+    r'^\s*"([a-z0-9][\w-]*)":\s*_m\(\s*"[^"]*"\s*,\s*(True|False)\s*,\s*"([^"]*)"', re.M)
+
+
+def _co_tu_help(lenh):
+    """Tra tap co DAI+NGAN ma chuong trinh DA CAI phoi ra. None = khong do duoc (fail-close)."""
+    try:
+        r = subprocess.run(lenh, capture_output=True, text=True, timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    van = (r.stdout or "") + (r.returncode is not None and (r.stderr or "") or "")
+    if not van.strip():
+        return None
+    return set(re.findall(r"(?<![\w-])(--?[A-Za-z0-9][\w-]*)", van))
+
+
+def _kiem_bang(goc):
+    """rc=0 hai bang con khop nguon that; rc khac 0 kem ly do tren stderr."""
+    loi = []
+
+    # (a) TANG 1 vs COMMAND_META
+    meta = pathlib.Path(goc, "scripts/tl_core/command_registry.py")
+    if not meta.is_file():
+        loi.append("KHONG DO DUOC: thieu %s" % meta)
+    else:
+        rows = _RE_META.findall(meta.read_text(encoding="utf-8"))
+        if not rows:
+            loi.append("KHONG DO DUOC: khong doc duoc entry nao tu COMMAND_META")
+        else:
+            that = {n for n, ro in rows if ro == "False"}
+            thieu, thua = sorted(that - _TL_LENH_GHI), sorted(_TL_LENH_GHI - that)
+            if thieu:
+                loi.append("_TL_LENH_GHI THIEU %d lenh read_only=False: %s"
+                           % (len(thieu), " ".join(thieu)))
+            if thua:
+                loi.append("_TL_LENH_GHI THUA %d ten khong con read_only=False: %s"
+                           % (len(thua), " ".join(thua)))
+            print("TANG 1: %d lenh read_only=False, bang khop" % len(that))
+            # (a2) lenh read_only=True MA write_scope != "none" — nhom "chi ghi khi co --out".
+            # Ho co `_TL_CO_SINH_TEP` la thu duy nhat chan nhom nay; rong = fail-close.
+            ws = _RE_META_WS.findall(meta.read_text(encoding="utf-8"))
+            co_dieu_kien = sorted(n for n, ro, w in ws if ro == "True" and w != "none")
+            if co_dieu_kien and not _TL_CO_SINH_TEP:
+                loi.append("_TL_CO_SINH_TEP RONG trong khi co %d lenh read_only=True co "
+                           "write_scope != none" % len(co_dieu_kien))
+            print("TANG 1b: %d lenh read_only=True nhung write_scope != none "
+                  "(chi ghi khi co %s)" % (len(co_dieu_kien),
+                                           "/".join(sorted(_TL_CO_SINH_TEP))))
+
+    # (b) TANG 2 vs `--help` cua chuong trinh DA CAI
+    #     git khai co theo TUNG subcommand (`git --help` chi phoi 4 co dai), nen hop cac
+    #     `git <sub> -h` cua nhom doc. Do la ly do phai co nhanh rieng, khong phai ngoai le.
+    do_duoc = khop = chua_xn = 0
+    chua_theo_ct = []
+    for ten, cho_phep in sorted(_CO_CHO_PHEP.items()):
+        if not cho_phep:
+            continue
+        if ten == "ruff":
+            co = _co_tu_help(["ruff", "check", "--help"])
+        elif ten == "git":
+            co = set()
+            for sub in sorted(_GIT_LENH_DOC):
+                mot = _co_tu_help(["git", sub, "-h"])
+                if mot:
+                    co |= mot
+            co |= (_co_tu_help(["git", "-h"]) or set())
+        else:
+            co = _co_tu_help([ten, "--help"])
+        if co is None:
+            loi.append("KHONG DO DUOC `%s --help` — fail-close (mot cong tu tat khi thieu "
+                       "cong cu la cong khong ton tai dung luc no can nhat)" % ten)
+            continue
+        do_duoc += 1
+        xn = cho_phep & co
+        chua = sorted(cho_phep - co)
+        khop += len(xn)
+        chua_xn += len(chua)
+        if chua:
+            chua_theo_ct.append("%s(%d): %s" % (ten, len(chua), " ".join(chua)))
+    print("TANG 2: do duoc --help cua %d/%d chuong trinh co bang co khong rong"
+          % (do_duoc, sum(1 for v in _CO_CHO_PHEP.values() if v)))
+    print("TANG 2: %d co XAC NHAN co that · %d co KHONG DO DUOC" % (khop, chua_xn))
+    for d in chua_theo_ct:
+        print("  KHONG DO DUOC  " + d)
+    # VI SAO "khong do duoc" o TANG 2 KHONG lam cong DO, trong khi o TANG 1 thi CO:
+    # hai tang co CHIEU RUI RO NGUOC NHAU.
+    #  · TANG 1 la bang CAM (lenh read_only=False). Thieu mot ten = lenh ghi ay duoc PHEP
+    #    => lo an ninh. Phai chan.
+    #  · TANG 2 la bang CHO PHEP. Mot ten co KHONG TON TAI nam trong bang thi chang mo ra
+    #    gi ca — no chi cho phep mot thu khong the xay ra. Vo hai.
+    # Va `--help` KHONG phai ban liet ke day du: do 2026-08-26, `git` khai co theo TUNG
+    # subcommand nen 31 co that (`--oneline` `--porcelain` `--since`...) khong hien o
+    # `git <sub> -h`; `find --help` terse nen thieu `-ipath` du GNU find CO. Bien mot phep
+    # do KHONG DAY DU thanh cong DO la tu bao dong gia — nhung GIAU no di thi con te hon,
+    # nen in ra tung ten.
+    # Chi mot thu o TANG 2 lam cong DO: KHONG CHAY DUOC `--help`. Do la thieu PHEP DO, khac
+    # han voi phep do khong day du.
+
+    for x in loi:
+        print("CHAN: " + x, file=sys.stderr)
+    return 0 if not loi else 4
+
+
 def main() -> int:
+    if "--kiem-bang" in sys.argv[1:]:
+        i = sys.argv.index("--kiem-bang")
+        goc = sys.argv[i + 1] if len(sys.argv) > i + 1 else "."
+        return _kiem_bang(goc)
     try:
         data = json.load(sys.stdin)
     except Exception:

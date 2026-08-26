@@ -623,7 +623,7 @@ chưa xếp được LỘ RA thay vì bị nhét bừa vào hàng gần nhất.
 #### Bốn tầng thường bị coi là hàng rào — đo Ở VỎ PHIÊN ĐIỀU PHỐI: không tầng nào bó được QUYỀN GHI VÀO KHO (24-08-2026)
 
 Phạm vi của mục này là **vỏ phiên điều phối** (`claude`, `Bash` trần), và thứ bị đo là **quyền ghi
-vào kho** — không phải "bó" nói chung. Phân biệt ấy quan trọng: hàng `--allowedTools` dưới đây CÓ
+vào kho** — không phải "bó" nói chung. Phân biệt ấy quan trọng: HAI hàng `--allowedTools` dưới đây CÓ
 chặn, nhưng nó chặn theo **hình dạng lệnh**, không theo **thẩm quyền**, nên nó chặn oan phép đo mà
 không chặn được đường ghi. Hai hàng `codex` trong bảng là **phép đo đối chứng ở vỏ phiên**; kết quả
 BÊN TRONG sandbox codex khác hẳn và nằm ở mục kế.
@@ -633,14 +633,15 @@ Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": 
 
 | tầng | phép đo | kết quả |
 |---|---|---|
-| `--allowedTools` | luật `Bash(x:*)` gặp lệnh ghép | không khớp gì ⇒ hoặc chặn oan, hoặc `Bash` trần = mọi thứ — **CHƯA XẾP ĐƯỢC**: chưa đo được là đằng nào |
+| `--allowedTools`, luật hẹp `Bash(x:*)` | gặp lệnh ghép | không khớp gì ⇒ **CHƯA XẾP ĐƯỢC**: chưa đo được là chặn oan hay không chặn |
+| `--allowedTools`, `Bash` trần | cùng lệnh ghép | khớp mọi thứ ⇒ **cơ chế đã xác minh — chiều MỞ** |
 | `codex -s workspace-write` | ghi tệp **ngoài** cây | **`rc=0`** — tệp ngoài cây bị ghi đè thật |
 | xoá `GITHUB_PAT` `GH_TOKEN` `GITHUB_TOKEN` `GIT_CONFIG_*` khỏi env | `git push --dry-run` lên GitHub | **`rc=0`** — vẫn đẩy được |
 | nhét **token RÁC** vào URL đẩy | cùng lệnh | **`rc=0`** |
 
 Dòng cuối là dòng quyết định: **proxy egress bỏ qua credential client gửi và tự chèn credential
 của nó** — nên "cấp token đọc riêng cho reviewer" cũng vô dụng, credential là **ambient ở mức
-container**. Đây là **cơ chế đã xác minh** theo chiều MỞ: ta biết vì sao nó không chặn.
+container**. Đây là **cơ chế đã xác minh — chiều MỞ**: ta biết vì sao nó không chặn.
 Bản đầu còn viết *"ranh giới thật là clone rời + `--require-clean` + kiểm cây sạch"*. Câu ấy **SAI
 về hạng** — ba thứ đó là **máy phát hiện**: chúng tố cáo sau khi push đã xảy ra.
 
@@ -659,9 +660,10 @@ Hai trục **tách rời**, và tách theo NỀN chứ không theo chế độ:
   **HẠNG: cơ chế đã xác minh — chiều ĐÓNG**, nhưng đọc kỹ hệ quả bên dưới trước khi mừng.
   Đo lại 26-08-2026, `codex-cli 0.149.1`, bằng probe TÁI LẬP ĐƯỢC — `codex sandbox -c
   sandbox_mode=workspace-write [-c sandbox_workspace_write.network_access=true] -- python3 P`,
-  với `P` in ba `rc`: `socket.bind(('127.0.0.1',0))` · `urllib` GET · `git ls-remote`. KHÔNG có
-  lượt model nào ở giữa nên tất định — ba lần chạy cho cùng số; cột đối chứng là chính `P` chạy
-  thẳng, không qua codex.
+  với `P` = **`.claude/dev/probe_mang.py`**, HIỆN VẬT CÓ THẬT trong kho — không phải
+  metavariable: nó in ba `rc` cho `socket.bind(('127.0.0.1',0))` · `urllib` GET · `git ls-remote`.
+  KHÔNG có lượt model nào ở giữa nên tất định — ba lần chạy cho cùng số; cột đối chứng là chính
+  `P` chạy thẳng, không qua codex.
 
   | phép đo | mặc định | `…network_access=true` | đối chứng: vỏ phiên |
   |---|---|---|---|
@@ -669,7 +671,8 @@ Hai trục **tách rời**, và tách theo NỀN chứ không theo chế độ:
   | HTTP `urllib` tới `api.github.com` | `rc=1` | **`rc=0`** | `rc=0` |
   | `git ls-remote` một URL HTTPS | **`rc=128`** | **`rc=0`** | `rc=0` |
 
-  Tức mạng đóng **KHÔNG phải bất biến** — nó là mặc định của
+  Cấu hình `network_access=true` là một claim RIÊNG, và nó mang **cơ chế đã xác minh — chiều
+  MỞ**: ta biết vì sao nó không chặn. Tức mạng đóng **KHÔNG phải bất biến** — nó là mặc định của
   `sandbox_workspace_write.network_access`, và **chính tệp này đã ghi cái cờ ấy** ở mục sandbox phía
   trên. Bản đầu của mục này viết *"chưa ai đo VÌ SAO"* trong khi câu trả lời nằm cách đó ba trăm
   dòng, trong cùng một tệp — cross-review bắt đúng chỗ ấy.
@@ -680,7 +683,8 @@ Hai trục **tách rời**, và tách theo NỀN chứ không theo chế độ:
   hình rồi gọi đó là chỗ chưa đo được — số ấy đến từ một probe KHÔNG tái lập được, đúng hình dạng
   mà chính mục này lên án. Đo lại bằng lệnh trên: `rc=128` ở mặc định. Nên bảng `codex -s …` phía
   trên KHÔNG bị thu hồi — nó ĐỨNG, và nay có hai phép đo khác harness chống lưng thay vì một.
-- **Hệ tệp: chỉ `read-only` bó** — **cơ chế đã xác minh**, đo cả hai chiều. `workspace-write` ghi được ra ngoài cây — rò rỉ thật, nhưng hậu
+- **Hệ tệp: chỉ `read-only` bó** — `read-only` là **cơ chế đã xác minh — chiều ĐÓNG**, còn
+  `workspace-write` là **cơ chế đã xác minh — chiều MỞ**; hai claim, hai điều kiện, hai nhãn. `workspace-write` ghi được ra ngoài cây — rò rỉ thật, nhưng hậu
   quả thấp hơn nhiều so với ghi vào kho, và **phát hiện được**.
 - **Claude `-p` không có gì cả** — cả hai trục đều mở; **cơ chế đã xác minh — chiều MỞ**.
 
@@ -693,8 +697,8 @@ trong sandbox codex.
 
 | pha | chế độ | được gì | DỰA VÀO (kèm hạng) |
 |---|---|---|---|
-| **A — soát** | `codex -s read-only` | tìm finding, đọc mã, phép đo chỉ-đọc | FS đóng = **cơ chế đã xác minh**; mạng đóng = **cơ chế đã xác minh — CHỈ ở cấu hình mặc định** |
-| **B — dựng vá** | `codex -s workspace-write` | sửa thử, chạy test/đột biến, **chứng minh bản vá** | mạng đóng = **cơ chế đã xác minh — CHỈ ở cấu hình mặc định**; FS ngoài cây MỞ ⇒ chỉ có **máy phát hiện** |
+| **A — soát** | `codex -s read-only` | tìm finding, đọc mã, phép đo chỉ-đọc | FS đóng = **cơ chế đã xác minh — chiều ĐÓNG**; mạng ở cấu hình MẶC ĐỊNH = **cơ chế đã xác minh — chiều ĐÓNG** |
+| **B — dựng vá** | `codex -s workspace-write` | sửa thử, chạy test/đột biến, **chứng minh bản vá** | mạng ở cấu hình MẶC ĐỊNH = **cơ chế đã xác minh — chiều ĐÓNG**; FS ngoài cây = **cơ chế đã xác minh — chiều MỞ** ⇒ chỉ còn **máy phát hiện** |
 
 Cột phải cố ý KHÔNG mang tên *"cưỡng chế bằng"*: bảng mô tả thứ ta **dựa vào**, và một trong hai
 thứ ấy là một MẶC ĐỊNH mà chính người chạy lật được. Gọi nó là "cưỡng chế" thì bảng tự nâng hạng

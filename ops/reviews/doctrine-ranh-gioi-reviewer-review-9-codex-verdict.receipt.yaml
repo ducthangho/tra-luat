@@ -1,0 +1,75 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 9 của PR #322 (packet #318).
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '318'
+packet_slug: DOCTRINE-RANH-GIOI-REVIEWER
+lease_id: null
+lease_review_KHONG_DUOC_CAP: 'lease đang sống là lease EXECUTOR r4; không có lease review riêng'
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 7d7354e14c540c3c2afd3f3a594ff2e432f6fd44
+reviewed_tree: eee35b0782fde46fc5492f26b89b7e7aa2c3477c
+luot: 9
+cross_provider: true
+assurance: cross_approved
+verdict_path: ops/reviews/doctrine-ranh-gioi-reviewer-review-9-codex-verdict.md
+verdict_sha256: 40fe4b27eb6344e17ba3e3a6a139c337db58afac58d9cb29efaca337cd005dd7
+verdict_bytes: 12990
+verdict_nguon: >-
+  `codex exec -s workspace-write -c model_reasoning_effort=xhigh` trong `launcher.py run`,
+  `--expected-head 7d7354e1…`, `--require-clean`, prompt neo băm `a8166cef…`. 1086.7s, `ma_thoat=0`.
+
+LUOT_DAU_TIEN_CHAM_DUOI_LUAT_DUNG: >-
+  Vòng đầu tiên chạy sau khi `luat_dung_LAND` được chốt. Prompt nêu luật theo CẢ HAI CHIỀU (đừng
+  nâng P2 lên P1 để giữ mở, đừng hạ P1 xuống P2 để được land). Reviewer viết thẳng trong kết luận:
+  "Vì vẫn còn P1, packet CHẶN LAND theo `luat_dung_LAND`. P2 không được nâng hạng để giữ packet mở."
+
+ket_qua_dem_duoc:
+  P1: 1
+  P2: 1
+  dem_bang_lenh: >-
+    grep -cE '^### .*— P1' và '— P2' trên tệp verdict. GHI RÕ VÌ PHÉP ĐẾM ĐẦU TIÊN SAI: tôi dùng
+    mẫu '\[P1\]' như tám vòng trước và được 0/0, vì verdict vòng này viết hạng bằng dấu gạch dài
+    chứ không phải ngoặc vuông. Lại đúng bệnh: phép đo trả lời một câu hỏi KHÁC câu mình định hỏi.
+  cham_tieu_chi: {N1: KHONG_DAT, N2: KHONG_DAT, N3: DAT, N4: KHONG_DAT, N5: DAT, N6: DAT, N7a: DAT, N7b: DAT}
+  slug_hien_hanh:
+  - {slug: require-clean-vuot-pham-vi-quyen-ghi, hang: P1, trang_thai: 'còn mở từ vòng 8'}
+  - {slug: prompt-shell-bien-chua-khoi-tao, hang: P2, trang_thai: MOI}
+
+P1_CON_MO_VI_CON_TRO_VAN_LA_MOT_MENH_DE:
+  no_la_gi: >-
+    Vòng 8 bảo gỡ mệnh đề `--require-clean` ngoài phạm vi. Tôi gỡ phép đo nhưng GIỮ một "con trỏ"
+    viết rằng control ấy "CÓ bó một thứ khác — và bó thật, đo được". Reviewer chỉ ra: câu ấy VẪN
+    LÀ một khẳng định thực chứng, tức mệnh đề thứ TÁM mang nhãn `chiều ĐÓNG` ngầm — trong khi
+    phép đếm ngay trên khai BẢY. Vừa sai số vừa giữ kết luận ngoài phạm vi đã tuyên bố.
+  tôi_đã_tự_hỏi_đúng_câu_này: >-
+    Prompt vòng 9 do chính tôi viết có câu: "Kiểm: con trỏ ấy có vô tình vẫn là một mệnh đề mang
+    hạng không?" Tôi NGỜ đúng chỗ mà vẫn không tự sửa trước khi giao — biết chỗ yếu không thay
+    được việc đi sửa nó.
+  huong_va: >-
+    Reviewer cho hai đường: biến con trỏ thành CHỈ DẪN TRUNG TÍNH (chỉ nói hạng ấy không xếp ở đây
+    và phải xử ở mục vòng đời kèm phép đo riêng, KHÔNG khẳng định "bó thật"/"đã đo"), hoặc chuyển
+    trọn mệnh đề + điều kiện + bằng chứng sang mục đúng phạm vi rồi đếm ở đó.
+
+P2_LA_LOI_DO_CHINH_BAN_VA_TRUOC_SINH_RA:
+  no_la_gi: >-
+    Vòng trước tôi thay chỗ-giữ-chỗ trong ngoặc nhọn bằng `"$PROMPT"` để tránh bẫy transport.
+    Nhưng `PROMPT` KHÔNG được gán ở đâu trong tệp; các lần xuất hiện khác là TÊN TỆP `PROMPT.md`.
+    Shell truyền đối số RỖNG, còn với `set -u` thì dừng hẳn.
+  bai_hoc: >-
+    Sửa một lỗi tái-lập bằng một cấu trúc cũng không tái lập được thì không phải sửa. Reviewer đề
+    nghị đường tốt hơn: cho CLI đọc thẳng stdin từ `PROMPT.md`, tránh cả biến môi trường ngầm lẫn
+    giới hạn argv.
+
+LOI_VAN_HANH_CUA_PHIEN_DIEU_PHOI:
+  chuyen_gi: >-
+    Reviewer ghi trong Preflight: checkout dùng chung ban đầu đúng exact SHA "nhưng đã bị một tiến
+    trình khác chuyển sang nhánh `ops/cap-lease-tach-314` TRONG LÚC REVIEW".
+  ai_lam: 'phiên điều phối — tôi `git checkout` sang nhánh ops để đo người-giữ cho #331/#334'
+  vi_sao_nghiem: >-
+    Tôi đã làm nhiễu chính workspace đang được review. Lượt này thoát vì reviewer tự dựng clone
+    detached tại exact SHA và nói ra; nhưng đó là NÓ tự cứu, không phải tôi làm đúng.
+  luat: >-
+    Trong lúc một vòng review đang chạy trên workspace nào thì KHÔNG đổi nhánh trên workspace ấy.
+    Việc đo song song phải làm trên clone/worktree riêng.

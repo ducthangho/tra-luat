@@ -59,27 +59,66 @@ target_branch_neu_land: master
 
 base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
 start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
-reviewed_sha_required: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+reviewed_sha_required: f16b6bf9d6085bd1923db9800090faaed1ffdd1b
 base_ghi_chu: >-
   `c35ae1c` = `origin/master` lúc cấp, ĐO trong phiên (không chép từ hồ sơ bàn giao), và cũng là
   merge của PR #310. Nhánh rẽ SẠCH từ đây, KHÔNG kế thừa `6c4140b` của PR #315 (đã đóng, không
-  merge). `reviewed_sha_required` bằng base lúc cấp và phải được cập nhật sang exact head khi
-  vào review — nó là mỏ neo, không phải lời tiên tri.
+  merge). `reviewed_sha_required` đã được CẬP NHẬT sang exact head của vòng review đang mở
+  (`f16b6bf`, vòng 2). Vòng 1 neo `48cf331` — xem `lich_su_reviewed_sha`. Bản đầu để nguyên base
+  `c35ae1c` trong khi review đã neo head khác, trái chính câu này: cross-review vòng 1 bắt được
+  (`lease-trang-thai-hien-tai-khong-nhat-quan`, P1).
+lich_su_reviewed_sha:
+- {vong: 1, sha: 48cf331e36cc2bde9fbdd485d51b85c81a5b25af, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-1-codex-verdict.receipt.yaml'}
+- {vong: 2, sha: f16b6bf9d6085bd1923db9800090faaed1ffdd1b, verdict: 'CHƯA CÓ'}
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 1
-  dong_them_toi_da: 165
+  dong_them_toi_da: 200
   do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
   don_vi: '`git diff --numstat c35ae1c..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
-  da_dung: 155
+  da_dung: 187
   ghi_chu: >-
-    165 là trần SAU KHI NÂNG; xem khối `nang_tran`. Trần ban đầu 120 là ƯỚC LƯỢNG đặt TRƯỚC khi
-    đọc hết nội dung phải mang sang, và nó SAI — bản vá thật cần 155. `da_dung: 155` là số ĐÃ ĐO
-    (`git diff --numstat c35ae1c -- docs/GOI_AGENT_DA_NEN.md`), không phải ước lượng — khác r4 của #314, nơi
-    687 là số đo được vì bản vá viết xong trước khi cấp lease. Ở đây chưa có dòng nào. Căn cứ:
-    trên `master` tệp có 544 dòng và chưa mang mục nào trong bốn mục đang xét; bản trên nhánh cũ
-    thêm 146 dòng cho CẢ mục allowlist LẪN mục ranh giới, và packet này chỉ nhận phần ranh giới
-    rồi viết lại. Vượt 165 ⇒ điều kiện dừng S2, xin sửa lease, KHÔNG nới trong im lặng.
+    200 là trần sau khi NÂNG LẦN HAI; xem `nang_tran_lan_hai`. 187 là số ĐÃ ĐO sau vòng vá 2
+    (`git diff --numstat c35ae1c -- docs/GOI_AGENT_DA_NEN.md`), không phải ước lượng.
+    Lịch sử trần: 120 (ước lượng ban đầu, SAI — vòng 1 cần 155) → 165 → 200 (vòng 2 cần 187).
+    CẢ HAI lần nâng đều vì trần là ƯỚC LƯỢNG của phiên, không phải ngưỡng doctrine; xem `nang_tran`
+    và `nang_tran_lan_hai`. Căn cứ kích thước: trên `master` tệp có 544 dòng và chưa mang mục nào
+    trong bốn mục đang xét; bản trên nhánh cũ thêm 146 dòng cho CẢ mục allowlist LẪN mục ranh giới,
+    và packet này nhận cả hai rồi viết lại phần ranh giới. Vượt 200 ⇒ điều kiện dừng S2, xin sửa lease, KHÔNG nới trong im lặng.
+
+nang_tran_lan_hai:
+  tran_cu: 165
+  tran_moi: 200
+  da_do_thuc_te: 187
+  ai_nang: ducthangho
+  tham_quyen: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+  quyet_dinh_luc: >-
+    direct, in-session, 2026-08-26 — phiên DỪNG theo S2 khi đo 187/165 sau vòng vá thứ hai,
+    trình số đo và đối chiếu ADR-0044; người giữ kho chốt nâng.
+  vi_sao: >-
+    Cùng nguyên nhân lần nâng thứ nhất: 165 là ƯỚC LƯỢNG của phiên, không phải ngưỡng doctrine.
+    Vòng vá 2 đóng BẢY P1 của cross-review, trong đó ba cái đòi viết thêm thật sự — bảng hạng
+    thêm hai hàng (chiều MỞ và ô dư), mục mạng sandbox thay bằng một BẢNG ĐO ba dòng có số phiên
+    bản, và một đoạn khai phạm vi từ vựng. So ADR-0044 ngưỡng NGHIÊM NHẤT (3 tệp / 300 dòng thêm):
+    bản vá là 1 tệp / 187, còn biên 113.
+  khac_gi_319: >-
+    #318 KHÔNG có tệp đặc tả trong write set, nên 187 dòng này là doctrine thật, không phải hợp
+    đồng ăn vào ngân sách mã như ca #319. Đừng đọc hai lần nâng ấy thành cùng một chuyện.
+  neu_lai_cham_tran: >-
+    Lần thứ ba thì TÁCH, không nâng tiếp — mục doctrine này đã đủ dài để tách được theo tiểu mục.
+
+chu_ky_commit_KHAI_HO:
+  trang_thai: 'commit của vòng 1 (48cf331) và 22 commit khác của phiên CHƯA KÝ'
+  vi_sao: >-
+    Phiên dùng `-c commit.gpgsign=false` từ đầu — một phản xạ phòng thủ CHƯA TỪNG ĐƯỢC ĐO. Đo lại
+    26-08-2026: ký chạy `rc=0` bình thường. Đúng bệnh doctrine đã ghi (kết luận một công cụ không
+    dùng được mà không hỏi nó hỏng ở đường nào), chỉ tệ hơn ở chỗ chưa hề thử.
+  da_sua: 'từ `f16b6bf` trở đi ký mặc định; `f16b6bf` có cha là `48cf331` nên đẩy tiến thẳng'
+  vi_sao_KHONG_ky_lai_ho_so_cu: >-
+    Ký lại 23 commit đã đẩy đòi `rebase` + ép lùi. `48cf331` đang bị NEO bởi ba hồ sơ —
+    `reviewed_sha` của verdict, `reviewed_sha` của biên nhận, và head của PR #322. Doctrine nói
+    thẳng ép lùi làm commit thành không tra được y như xoá, và `luu-tru/*` tồn tại chính vì thế.
+    Viết lại là giết ba mỏ neo để đổi lấy một nhãn. Người giữ kho chốt: giữ nguyên, ký từ nay.
 
 nang_tran:
   tran_cu: 120
@@ -170,8 +209,9 @@ chua_do_duoc_luc_cap: >-
 dieu_kien_dung: >-
   S1 cần đường dẫn thứ hai (kể cả `CLAUDE.md`, dù nay NGƯỜI_GIỮ 0) ⇒ DỪNG, xin sửa lease — nới
   write set trong im lặng là ĐÚNG cách packet tiền nhiệm hỏng ba lần ·
-  S2 vượt 165 dòng thêm ⇒ DỪNG, xin nâng trần bằng khối `nang_tran` có `ai_nang`/`vi_sao`,
-  KHÔNG sửa `dong_them_toi_da` trần trụi. ĐÃ BẮN MỘT LẦN, ở đúng 155/120 — xem `nang_tran` ·
+  S2 vượt 200 dòng thêm ⇒ DỪNG, xin nâng trần bằng khối `nang_tran` có `ai_nang`/`vi_sao`,
+  KHÔNG sửa `dong_them_toi_da` trần trụi. ĐÃ BẮN HAI LẦN — 155/120 (`nang_tran`) và 187/165
+  (`nang_tran_lan_hai`). Lần thứ ba thì TÁCH, đừng nâng tiếp ·
   KHÔNG sửa `dong_them_toi_da` trần trụi ·
   S3 phát hiện một trong ba P2 của vòng 2 bị hồi quy ⇒ DỪNG, báo trước khi đi tiếp ·
   S4 `origin/master` đã đi tiếp mà chưa đo lại ⇒ DỪNG, đo lại base.

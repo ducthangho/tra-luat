@@ -3146,49 +3146,63 @@ def t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc():
     import contextlib
     import io
     mod = _nap_cong()
-    bang(mod._cac_con_tro_treo("ghi `vung_duoc_phep_cham` nhưng thiếu") ==
-         ["vung_duoc_phep_cham"], "không thấy con trỏ treo")
-    bang(not mod._cac_con_tro_treo("đang bàn `spec_path` của một spec"),
-         "chặn oan tên trường của tài liệu spec")
-    bang(not mod._cac_con_tro_treo(
-        "vung_duoc_phep_cham: x\nnhắc `vung_duoc_phep_cham`"),
-        "chặn oan trường được định nghĩa trong chính lease")
+    truong, khoa = "vung_duoc_phep_cham", "tham_chieu_truong_lease"
+    bang(mod._cac_con_tro_treo({khoa: [truong]}) == [truong],
+         "không thấy tham chiếu cấu trúc đang treo")
+    bang(not mod._cac_con_tro_treo({khoa: [truong], truong: "x"}),
+         "chặn oan trường đã được định nghĩa")
+    for van in ("`Vung_Duoc_Phep_Cham`", "vùng_được_phép_chạm", truong):
+        bang(mod._cac_nhac_mo_ho({"ghi_chu": "minh hoạ " + van}) == [truong],
+             f"văn xuôi không thành advisory: {van!r}")
 
     with San() as s:
         (s / ".git").mkdir()
         mod.GOI_GIT = _GitKhoGia({"a"}, {"a"}, [])
-        for code_span, phai_qua in (("vung_duoc_phep_cham", False),
-                                    ("spec_path", True)):
-            lease = lease_mau(lease_id="KIEM-" + code_span.replace("_", "-"))
-            p = viet(s, lease, ten=code_span + ".yaml")
-            p.write_text(p.read_text(encoding="utf-8") +
-                         f"ghi_chu: đang bàn `{code_span}` của một tài liệu khác\n",
-                         encoding="utf-8")
+        cases = [
+            ("comment", {}, f"# comment YAML nhắc `{truong}`\n", True),
+            ("minh-hoa", {"ghi_chu": f"tên biến minh hoạ là `{truong}`"}, "", True),
+            ("treo", {khoa: [truong]}, "", False),
+            ("da-co", {khoa: [truong], truong: "x"}, "", True),
+        ]
+        for ten, them, duoi, phai_qua in cases:
+            lease = lease_mau(lease_id="KIEM-" + ten, **them)
+            p = viet(s, lease, ten=ten + ".yaml")
+            if duoi:
+                p.write_text(p.read_text(encoding="utf-8") + duoi, encoding="utf-8")
             try:
                 mod.kiem(lease, p, s)
             except mod.Chan as ex:
                 bang(not phai_qua and ex.ma == RC_NOI_DUNG and "con trỏ treo" in ex.thong_diep,
-                     f"check chặn sai {code_span}: {ex.ma} {ex.thong_diep}")
+                     f"check chặn sai {ten}: {ex.ma} {ex.thong_diep}")
             else:
-                bang(phai_qua, "check không chặn con trỏ lease thật sự treo")
+                bang(phai_qua, f"check không chặn tham chiếu thật sự treo: {ten}")
 
     raw_xau = "lease_id: TREO\nlease_expires_at_utc: '2099-01-01T00:00:00Z'\n" \
-              "write_set: [x.py]\nghi_chu: nhắc `vung_duoc_phep_cham`\n"
+              f"write_set: [x.py]\n{khoa}: [{truong}, {truong}]\n"
     raw_cu = raw_xau.replace("TREO", "CU").replace("2099", "2000")
-    raw_tot = raw_xau.replace("TREO", "TOT").replace(
-        "ghi_chu:", "vung_duoc_phep_cham: x\nghi_chu:")
+    raw_tot = raw_xau.replace("TREO", "TOT").replace("write_set:", f"{truong}: x\nwrite_set:")
     raw_chet = raw_xau.replace("TREO", "DA_CHET") + "da_bi_thay_the: MOI\n"
+    raw_goi_y = raw_xau.replace("TREO", "GOI-Y").replace(
+        f"{khoa}: [{truong}, {truong}]", f"ghi_chu: vùng_được_phép_chạm")
     git = _GitKhoGia({"a"}, {"a"}, [
         ("refs/remotes/origin/a", "ops/leases/xau.yaml", raw_xau),
         ("refs/remotes/origin/a", "ops/leases/cu.yaml", raw_cu),
         ("refs/remotes/origin/a", "ops/leases/tot.yaml", raw_tot),
-        ("refs/remotes/origin/a", "ops/leases/chet.yaml", raw_chet)])
+        ("refs/remotes/origin/a", "ops/leases/chet.yaml", raw_chet),
+        ("refs/remotes/origin/a", "ops/leases/goi-y.yaml", raw_goi_y)])
     mod.GOI_GIT, out = git, io.StringIO()
     with contextlib.redirect_stdout(out):
         rc = mod.lenh_con_tro_treo(type("A", (), {"goc": "."})())
     s = out.getvalue()
-    bang(rc == 0 and "TREO" in s and all(x not in s for x in ("CU", "TOT", "DA_CHET")),
-         f"quét ngược không lọc đúng lease hiệu lực: {rc} {s!r}")
+    hang = [x.split("\t") for x in s.splitlines() if x.startswith("CON_TRỎ_TREO\t")]
+    tong = [x for x in s.splitlines() if x.startswith("CON_TRỎ_TREO ")]
+    goi_y = [x.split("\t") for x in s.splitlines() if x.startswith("CON_TRỎ_GỢI_Ý\t")]
+    bang(rc == 0 and len(hang) == 1 and len(hang[0]) == 4 and
+         hang[0][1:3] == ["TREO", truong], f"hàng dữ liệu sai schema/dedup: {s!r}")
+    bang(len(tong) == 1 and tong[0].split()[1].rstrip(";") == "1",
+         f"tổng kết không bằng 1: {tong!r}")
+    bang(len(goi_y) == 1 and len(goi_y[0]) == 4 and goi_y[0][1] == "GOI-Y",
+         f"văn xuôi không đi ra advisory có schema: {goi_y!r}")
 
 
 @ca
@@ -3218,8 +3232,13 @@ def t101_dot_bien_con_tro_treo_va_bia_mo_deu_bi_giet():
     import importlib.util
     nguon, giet = SCRIPT.read_text(encoding="utf-8"), 0
     muts = [
-        ("con-tro", '_TRUONG_SCHEMA_LEASE = frozenset({"vung_duoc_phep_cham"})',
-         "_TRUONG_SCHEMA_LEASE = frozenset()",
+        ("quet-raw", "_kiem_con_tro_treo(lease)",
+         '_kiem_con_tro_treo({"tham_chieu_truong_lease": re.findall('
+         'r"`([a-z_][a-z0-9_]*)`", Path(tep).read_text(encoding="utf-8"))})',
+         t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc),
+        ("bo-tham-chieu", "treo = _cac_con_tro_treo(lease)", "treo = []",
+         t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc),
+        ("bo-vong-lenh", "for muc in _quet_lease_toan_kho(root):", "for muc in []:",
          t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc),
         ("bia-mo", "if not thay_the_cho:\n        return", "if True:\n        return",
          t100_bia_mo_doi_dau_cu_thieu_danh_dau_nhung_cho_ca_dung),

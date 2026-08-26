@@ -68,10 +68,10 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
 - `tl corpus-audit --json` CHỈ ở dạng KHÔNG `--sohieu-file` và KHÔNG `--all`. Hai dạng ấy bật
   checkpoint resumable — `hygiene.py` ghi `corpus_audit_ckpt_*.json` sau mỗi target và CỐ Ý để
   lại tệp khi dừng giữa chừng. Audit nối lại được là việc của phiên chính, không phải của bạn.
-- **CẤM MỌI CỜ SINH TỆP** — `--out` `--fix` `--plan-out` `--save` `--export` — trên MỌI lệnh trên.
-  Đo 26-08: 8/10 lệnh vốn từ này nhận `--out`, kể cả `sweep` `counts` `review-queue` mà `COMMAND_META`
-  xếp `write_scope='none'`; chạy thật cả ba ĐỀU tạo tệp. Nên registry tả hành vi MẶC ĐỊNH,
-  không tả BỀ MẶT CỜ — thêm lệnh thì tra bảng (`read_only=False` là cấm) VÀ đọc `--help`.
+- **CẤM MỌI CỜ SINH TỆP** — `--out`, và bất kỳ cờ nào ghi ra đĩa — trên MỌI lệnh trên.
+  Đo 26-08: 7/10 lệnh vốn từ này nhận `--out`, kể cả `sweep` `counts` `review-queue` mà
+  `COMMAND_META` xếp `write_scope='none'`; CHẠY THẬT cả ba đều tạo tệp. Nên registry tả hành vi
+  MẶC ĐỊNH, không tả BỀ MẶT CỜ — thêm lệnh thì tra bảng (`read_only=False` là cấm) VÀ đọc `--help`.
 - Nhóm MUTATE — `--apply` `--clear-stale` `register` `source-rename` `source-delete` `reg-delete`
   `recat --apply` `drive-push` `clasp` `ingest*` — nay bị cổng **chặn thật**, không còn chỉ là
   dòng chữ này.

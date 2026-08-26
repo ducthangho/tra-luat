@@ -1529,8 +1529,9 @@ def _be_rong_oid_cua_kho(root: Path) -> tuple[int, ...]:
             return (40, 64)
         if len(ket_qua) != 2:
             return (40, 64)
+        dong_dau = ket_qua[0]
         try:
-            cung_goc = Path(ket_qua[0]).resolve() == root.resolve()
+            cung_goc = Path(dong_dau).resolve() == root.resolve()
         except ValueError:
             return (40, 64)
         if not cung_goc:

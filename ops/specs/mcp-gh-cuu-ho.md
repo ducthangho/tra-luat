@@ -1,4 +1,4 @@
-# ĐẶC TẢ — `MCP-GH-CUU-HO` (Issue #319) — **BẢN SỬA ĐỔI 2**
+# ĐẶC TẢ — `MCP-GH-CUU-HO` (Issue #319) — **BẢN SỬA ĐỔI 3**
 
 > **r2 sửa gì, và vì sao.** Bản r1 (`51105214fe121a…`) đã được thi công một lượt bởi `codex xhigh`
 > và lượt ấy **lộ ra hai khuyết tật của chính đặc tả**, không phải của bản vá: (a) `D7`/`D8` giả
@@ -8,6 +8,12 @@
 > r1 không nêu: **ca của một tiêu chí không được đi qua đúng đoạn mã mà đột biến của tiêu chí khác
 > nhắm vào** — ba đột biến `b1`/`b3`/`b5` sống sót vì đúng chuyện đó.
 > r1 KHÔNG bị bác về nội dung; ba mươi tiêu chí giữ nguyên trừ những chỗ ghi rõ dưới đây.
+>
+> **r3 đổi ĐÚNG MỘT tiêu chí: `D8`.** Lượt 2 vá xong ba giao phạm vi thì **đẻ ra hai cái mới**
+> (`b6` giết cả `B6` lẫn `D6` vì `D6` nay cấp token hợp lệ nên đi qua đường `init`; `b7_bo_cam_ghi`
+> giết cả hai ca `B7`). Đó là lần thứ NĂM của cùng một hình dạng, và `CLAUDE.md` chốt: lặp ba lần
+> thì câu hỏi đúng là *"có nên làm việc này không"*. Câu trả lời ở đây không phải "bỏ đo đột biến"
+> mà là: **"đúng một ca" là BIẾN SAI của thứ ta thật sự cần đo.**
 
 Đặc tả này ĐÓNG BĂNG bằng băm. Lease neo vào `spec_sha256`. Sửa nội dung ⇒ băm đổi ⇒ lease trỏ
 vào thứ không còn tồn tại, phải đi qua bản sửa đổi mới. Soạn bằng skill `soan-spec`.
@@ -184,7 +190,7 @@ cờ; `D5` bơm lỗi vận chuyển qua một điểm khác điểm `B5` dùng.
 | D6 | Bốn lời gọi CLI cũ chạy y nguyên trên bản mới: `--liet-ke` · `<tên> '<json>'` · `--path` · mã thoát `0/2/3` | ca chạy `main()` cho từng dạng; đổi tên cờ hoặc đổi mã thoát ⇒ ĐỎ |
 | D7 | Suite đầy đủ: hai số **BẰNG NHAU** và **> 0**, mọi đột biến bị giết, `rc=0` | `rc` trần KHÔNG đủ — phải đọc dòng tổng kết. Đây chính là bài học của packet |
 | D7b | **Sổ nền phải XANH thì phép đếm đột biến mới có nghĩa.** Nền đỏ ⇒ cổng ĐỎ vì lý do NỀN, và ô đột biến in **`KHÔNG_ĐO_ĐƯỢC`**, KHÔNG in `0/N` | r2 thêm sau phép đo lượt 1: bốn ca nền đỏ làm MỌI đột biến "giết" thêm đúng bốn ca ấy, nên "đúng một ca" không bao giờ thoả và cổng in `0/35`. Con số ấy ĐÚNG mà đọc thành "không đột biến nào có răng" — sai hẳn. **Cấm trừ ca đỏ nền để lấy một con số đẹp**: trừ đi là giấu nền hỏng. Đường đúng là fail-close: nói thẳng chưa đo được |
-| D8 | Mỗi đột biến giết **đúng một** ca, so với tập đỏ nền phải RỖNG | giết 0 ca ⇒ ca không có răng; giết nhiều ca ⇒ ca trùng phạm vi. Nền không rỗng ⇒ xem `D7b`, không kết luận |
+| D8 | **QUY ĐƯỢC TRÁCH NHIỆM** — ba điều kiện, kiểm riêng từng cái: (a) ca ĐÍCH của mỗi đột biến **nằm trong** tập giết; (b) **không** đột biến nào có tập giết RỖNG; (c) **mọi** ca là đích của ít nhất một đột biến | (a) hỏng ⇒ đột biến không đo thứ nó khai · (b) hỏng ⇒ đột biến không có răng · (c) hỏng ⇒ ca không ai canh. Nền không rỗng ⇒ xem `D7b`, không kết luận. Giao phạm vi (tập giết có ca ngoài đích) **được IN RA** cho reviewer đọc, KHÔNG làm cổng đỏ |
 | D9 | Ngân sách: `git diff --numstat` trên write set, cột dòng THÊM, **≤ trần của lease đang hiệu lực** | vượt ⇒ điều kiện dừng `S2`, DỪNG và xin nâng trần bằng khối có `ai_nang`/`vi_sao`. **r2 CỐ Ý không ghi cứng con số ở đây**: r1 ghi `≤ 750` rồi lease nâng lên 1000, và hai mệnh đề không cùng đúng được — đó chính là hình dạng "sửa TRƯỜNG, quên VĂN BẢN" mà packet này sinh ra để chặn. Đặc tả trỏ sang trường có thẩm quyền thay vì chép lại nó |
 
 Đột biến chạy trên **bản sao tạm**, tên tệp riêng, không ghi vào tệp thật — kho đã trả giá cho một
@@ -212,6 +218,57 @@ phần lớn ngân sách là phản chứng chứ không phải bề mặt mới
 số `300`/`1.000` nào, và `numstat` chỉ xuất hiện ở `ops/chatgpt_review/build_bundle.py` — bộ **dựng
 bundle review**, không phải cổng. Ngưỡng ADR-0044 hiện là **kỷ luật đọc**, không phải cổng. Ghi ra
 vì một cổng vắng mặt trông y hệt một cổng xanh, và vì nợ này không thuộc packet nào đang mở.
+
+### Vì sao `D8` đổi — và cái giá của việc đổi nó
+
+**Nói cái giá trước, vì nó thật:** nới một tiêu chí ngay sau khi trượt nó **trông y hệt dịch cột
+đích**. Ai đọc hồ sơ này về sau có quyền nghi đúng chỗ ấy. Nên lý lẽ phải đứng được độc lập với
+việc bản vá hiện tại có qua hay không.
+
+**"Đúng một ca" là BIẾN, không phải thứ cần đo.** Thứ cần đo là: *ca này có thật sự canh tính chất
+nó khai không*. Biến ấy đúng khi các ca độc lập về đường mã, và **sai khi chúng dùng chung đường
+mã một cách CHÍNH ĐÁNG** — một ca CLI bắt buộc đi qua `Phien.__init__`; hai ca `B7` cùng đo một họ
+chốt chống `.pyc`. Ép chúng tách ra không làm phép đo mạnh hơn; nó làm ca **méo đi** để chiều một
+con số, và lượt 2 đã cho thấy mỗi lần ép lại đẻ ra một cặp giao mới.
+
+**Bằng chứng rằng biến sai chứ không phải bản vá sai:** hai đột biến sống sót ở lượt 2 đều có ca
+ĐÍCH nằm trong tập giết, và **không** đột biến nào có tập giết rỗng. Tức chúng ĐẠT cả ba điều kiện
+mới, và chỉ trượt đúng cái biến bị bỏ. Không có tính chất nào mất đi khi đổi tiêu chí — thứ mất đi
+là một đòi hỏi về **hình dạng của tập giết**, vốn chưa bao giờ là mục tiêu.
+
+**Cái mới KHÔNG lỏng hơn ở chỗ quan trọng:** `(b)` và `(c)` là hai điều kiện `D8` cũ **không có**.
+`(c)` đặc biệt — nó bắt mọi ca phải là đích của ít nhất một đột biến, tức chặn thẳng lớp "ca không
+ai canh" mà `D8` cũ để lọt. Đo được: `b7_bo_xoa_pyc` ở lượt 1 có tập giết **RỖNG** và `D8` cũ báo
+nó "sống sót" chung một rọ với các ca giao phạm vi — hai bệnh khác hẳn nhau, cùng một thông điệp.
+
+**Giao phạm vi vẫn phải IN RA.** Nó là dữ liệu chẩn đoán thật: một đột biến giết năm ca là dấu hiệu
+mã bị nối quá chặt. Chỉ khác là nó thành thứ reviewer ĐỌC, không thành thứ cổng ĐỎ.
+
+## Ngân sách — ĐỔI ĐƠN VỊ ĐO ở r3, và khai vì sao trước khi ai phải hỏi
+
+**Đơn vị cũ (r1/r2):** `git diff --numstat` trên **cả write set**, tức gồm cả tệp đặc tả này.
+**Đơn vị mới (r3):** trần áp cho **hai tệp MÃ** — `.claude/dev/mcp_gh.py` và
+`.claude/dev/mcp_gh_test.py`. Đặc tả theo dõi **riêng** và vẫn phải báo cáo, chỉ không trừ vào trần.
+
+**Vì sao đổi — ba lần đo, cùng một nguyên nhân.** Trần bị chạm ba lần trong packet này
+(750 → 1000 → 1100), và **cả ba lần đều do ĐẶC TẢ nở, không do mã**. Đo 11:4xZ 26-08:
+mã đứng ở **802** (`mcp_gh.py` 230 · `mcp_gh_test.py` 572) suốt từ lượt 2, trong khi đặc tả đi
+210 → 258 → 289. Đơn vị cũ tính **hợp đồng** vào ngân sách của **thứ nó điều khiển**, nên mỗi lần
+sửa đặc tả cho ĐÚNG lại bị phạt — một động cơ ngược, và nó đã bày ra ba lần chứ không phải một.
+
+**Vì sao đây không phải nới trần trá hình.** ADR-0044 tồn tại để bó **gánh nặng review của bản
+vá**: `PLAT-M4` 2 tệp/+351 ⇒ một vòng một finding; `PLAT-X4` 4 tệp/+721 ⇒ ba vòng tám finding.
+Cả hai đều đo **mã**. Đặc tả ở đây là **đầu vào đã qua hai vòng chất vấn của người giữ kho**, không
+mang rủi ro hồi quy, và reviewer đọc nó như hợp đồng chứ không soát nó như diff. Theo đơn vị mới,
+**802 nằm dưới ngưỡng 1.000 của lớp `thường` với biên gần 200** — packet chưa từng thật sự lớn.
+
+**Cái giá, nói thẳng:** đổi ĐƠN VỊ trông tệ hơn đổi con số, vì nó đổi luôn thứ đang được đo. Đây là
+lần thứ BA động vào ngân sách của cùng một packet. Ai đọc hồ sơ về sau có quyền nghi đúng chỗ này,
+nên: con số theo **cả hai** đơn vị phải được báo ở mọi lượt, và người land phải **thấy** rằng đơn
+vị đã đổi chứ không để nó trôi qua như chi tiết nội bộ.
+
+**Chốt chống lặp:** nếu **MÃ** chạm 900 thì câu trả lời là **TÁCH**, không phải nâng lần bốn và
+cũng không phải đổi đơn vị lần hai.
 
 ## Vượt ngưỡng ADR-0044 — KHAI LÝ DO, đúng đường ADR cho phép
 

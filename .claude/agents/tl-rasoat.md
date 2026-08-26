@@ -67,9 +67,15 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
 
 ### Vốn từ lệnh của bạn
 
-- ĐỌC: `tl extract … --dieu N`, `tl tra_cuu --cite --exact`, `tl reg-query …`, `tl locate/source-map`,
-  `tl status/relation-check/vbhn-check`, `tl nlm-query`/`nlm-cross`/`nlm-content` (scoped),
-  `git status/log`.
+- ĐỌC: `tl reg-query …`, `tl locate/source-map`, `tl status/relation-check/vbhn-check`,
+  `tl nlm-query`/`nlm-cross`/`nlm-content` (scoped), `git status/log`.
+- `tl extract` KHÔNG nằm trong vốn từ của bạn, và đừng thêm vào: `extract_cache.py` tạo thư mục
+  cache rồi `disk.write_text(...)` **vô điều kiện** — không có chế độ nào không ghi, và cache ấy
+  chính là nguồn sau này chảy vào corpus. Cần toàn văn thì XIN phiên chính trích rồi đưa bạn đọc.
+- **Bảng có thẩm quyền về lệnh nào GHI: `scripts/tl_core/command_registry.py` → `COMMAND_META`**
+  (187 lệnh, mỗi lệnh có `read_only` + `write_scope`). Thêm lệnh vào vốn từ trên thì tra bảng ấy
+  TRƯỚC: `read_only=False` là KHÔNG được thêm. Ba lệnh đợt 26-08 gỡ/siết đều `read_only=False`,
+  và cả ba đã lọt qua vòng đọc bằng mắt trước đó.
 - Nhóm MUTATE — `--apply` `--confirm` `register` `recat` `source-rename` `source-delete`
   `reg-delete` `--clear-stale` `ingest*` `drive-push` `clasp` `nlm-add` — nay bị cổng **chặn
   thật**, không còn chỉ là dòng chữ này.

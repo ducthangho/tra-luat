@@ -1,0 +1,153 @@
+# Lease EXECUTOR — `AGENT-MAY-PHAT-HIEN-GHI` (#329), PHA 1 "đo N1 + soạn đặc tả", lượt 1.
+#
+# EXECUTOR LÀ CODEX. Đây là lease ĐẦU TIÊN của đợt này có TÁCH VAI THẬT: người ghi lease
+# (claude) KHÔNG phải người thi công (codex), và reviewer (claude) khác nền với executor.
+# PHA 1 KHÔNG VIẾT MÃ. Lý do ở `vi_sao_pha_1_khong_viet_ma`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 329
+packet_id: AGENT-MAY-PHAT-HIEN-GHI
+phase_key: AGENT-MAY-PHAT-HIEN-GHI-PHA1-DAC-TA
+revision: 1
+generation: 1
+lease_id: may-phat-hien-ghi-exec-1-codex-20260826
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` đúng thực chất: đặc tả này quyết định cơ chế chặn/phát hiện ghi của agent. Một
+  đặc tả sai ở đây sinh ra một cổng sai ở pha 2. Lớp do CỔNG tính, executor không tự hạ.
+
+spec_path: ops/specs/agent-may-phat-hien-ghi.md
+spec_status: PHAI_SOAN_O_LUOT_NAY
+spec_duyet_boi: 'CHƯA — người giữ kho duyệt SAU khi codex nộp'
+spec_note: >-
+  Khác mọi lease trước của đợt: các lease kia khai `khong_co_dac_ta_rieng` vì đầu vào của
+  chúng là phép đo đã chạy. Packet này thì NGƯỢC LẠI — nó đổi KIẾN TRÚC, và Issue #329 để ngỏ
+  năm câu. Soạn đặc tả CHÍNH LÀ việc của lượt này.
+
+write_set:
+  - ops/specs/agent-may-phat-hien-ghi.md
+write_set_note: >-
+  ĐÚNG MỘT đường dẫn, và nó là tệp MỚI. KHÔNG chạm `.claude/hooks/**`, KHÔNG chạm
+  `.claude/settings.json`, KHÔNG chạm `.claude/agents/**`. Pha 1 không viết mã — chạm bất kỳ
+  đường dẫn nào khác là điều kiện dừng `S2`.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 ~14:4xZ bằng `ops/lease_publish.py ai-dang-giu`. Phép so hai nguồn TRƯỚC khi
+  quét, so bằng TẬP TÊN: `ls-remote --heads` 216 = `for-each-ref` 216, `comm -23` RỖNG.
+    ops/specs/agent-may-phat-hien-ghi.md   ->  NGƯỜI_GIỮ 0
+    .claude/hooks/subagent_ghi_guard.py    ->  NGƯỜI_GIỮ 0   (pha 2, đo trước cho biết)
+    .claude/settings.json                  ->  NGƯỜI_GIỮ 0   (pha 2, đo trước cho biết)
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+
+branch: codex/may-phat-hien-ghi-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 6cc64d399f6477c8ba256e761bde0e9c5187b180
+start_from_sha: 6cc64d399f6477c8ba256e761bde0e9c5187b180
+reviewed_sha_required: 6cc64d399f6477c8ba256e761bde0e9c5187b180
+base_ghi_chu: >-
+  `6cc64d39` = `origin/master` SAU khi PR #328 (pha A1 của #324) merge. Neo vào đây là BẮT
+  BUỘC, không phải tiện: đặc tả này phải đọc được cổng A1 (`.claude/hooks/pretooluse_guard.py`
+  + `..._test.py`) để trả lời câu hỏi "giữ hay bỏ bộ phân tích". Neo vào một base cũ hơn thì
+  executor soạn đặc tả cho một cây không có thứ nó đang bàn.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 1
+  dong_them_toi_da: 260
+  do_tu_sha: 6cc64d399f6477c8ba256e761bde0e9c5187b180
+  don_vi: '`git diff --numstat 6cc64d39..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  da_dung: 0
+  la_uoc_luong: true
+  ghi_chu: >-
+    260 là ƯỚC LƯỢNG cho một tệp đặc tả trả lời 5 câu, kèm bảng đo N1 và tiêu chí nghiệm thu
+    cho pha 2. Khai thẳng là ước lượng — packet #324 đã trả giá ba lần vì trộn số đo với số
+    ước lượng trong cùng một trường. Trong trần ADR-0044 cho `sensitive` nên KHÔNG cần
+    `nang_tran`.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-26: "cấp lease, quyền cho #329, codex executor".
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  KHÁC HẲN các lease trước của đợt: ở đó người ghi CŨNG là người thi công và đã phải khai mất
+  độc lập. Ở đây người ghi (claude) KHÔNG thi công; executor là codex, khác nền. Nên nhãn
+  `cross_approved` của packet này đứng bằng độc lập THẬT, không phải bằng một vòng review sau
+  thi công của cùng một phiên. Ghi ra vì hai tình huống ấy trông y hệt nhau trên nhãn.
+
+leased_at_utc: '2026-08-26T14:45:00Z'
+lease_expires_at_utc: '2026-08-27T14:45:00Z'
+run_minutes: 1440
+
+vi_sao_pha_1_khong_viet_ma: >-
+  Issue #329 để ngỏ NĂM câu, và chúng chia làm hai loại khác hẳn nhau:
+    QUYET DINH (nguoi giu kho)  1. phat hien roi thi CHAN (exit 2) / HOAN TAC / chi TO CAO?
+                                3. giu hay bo bo phan tich cua A1?
+                                4. tep ngoai cay va tep bi ignore: chap nhan mu hay mo rong?
+    PHEP DO (executor)          2. `SubagentStart` co chay chac chan khong, vang thi lay
+                                   trang thai "truoc" o dau?
+                                5. `SubagentStart`/`SubagentStop` co BAN THAT trong kho nay
+                                   khong — moi doc tai lieu, CHUA do.
+  Giao cả năm cho executor thì ba quyết định của người giữ kho sẽ do executor tự quyết trong
+  lúc viết mã — đúng cách #314 phình rồi vỡ. Pha 1 tách ra: executor ĐO hai câu, rồi TRÌNH ba
+  câu kèm số đo; người giữ kho chốt; pha 2 mới viết mã theo đặc tả đã đóng băng.
+
+viec_cua_luot_nay: >-
+  HAI mục tiêu, theo thứ tự, KHÔNG viết mã sản phẩm:
+  (1) ĐO `N1`: `SubagentStart` và `SubagentStop` có BẮN THẬT trong kho này không, và payload
+      mang gì. Cách đã dùng cho packet trước và có bằng chứng chạy: bơm TẠM một dòng ghi
+      payload vào một hook ĐANG ĐƯỢC ĐĂNG KÝ (điểm bơm duy nhất có hiệu lực NGAY — hook config
+      chỉ nạp lúc mở phiên), phóng một subagent thật, rồi khôi phục bằng `git checkout --` và
+      KIỂM băm blob khớp `origin/master` từng byte. Nếu phải sửa `settings.json` để đăng ký
+      hook mới thì dùng `.claude/settings.local.json` — tệp ấy ĐÃ bị `.gitignore`, nên không
+      chạm cây kho. Không đo được ⇒ `S1`.
+  (2) SOẠN `ops/specs/agent-may-phat-hien-ghi.md`: chép nguyên kết quả đo N1; trình BA quyết
+      định ở trên kèm đánh đổi đo được cho từng phương án; và viết tiêu chí nghiệm thu cho
+      pha 2, trong đó BẮT BUỘC có một ca bắt được cơ chế ghi KHÔNG nằm trong danh sách nào
+      (vd `install -m 644`) — thiếu ca ấy thì packet này chỉ là một danh sách cấm khác.
+  Rồi DỪNG. Người giữ kho duyệt đặc tả trước khi có lease pha 2.
+
+dieu_kien_dung: >-
+  S1 `SubagentStart`/`SubagentStop` KHÔNG bắn trong kho này ⇒ DỪNG NGAY, hướng phát hiện mất
+  chân đứng; báo người giữ kho, KHÔNG chế ra đường thay thế trong cùng lượt ·
+  S2 chạm BẤT KỲ đường dẫn nào ngoài `ops/specs/agent-may-phat-hien-ghi.md` ⇒ DỪNG (ngoại lệ
+  DUY NHẤT: `.claude/settings.local.json`, đã bị gitignore, dùng cho phép đo rồi xoá) ·
+  S3 vượt 260 dòng thêm · S4 tự trả lời một trong BA câu quyết định thay vì trình lên ⇒ DỪNG,
+  đó là việc của người giữ kho · S5 `origin/master` đã đi tiếp mà chưa đo lại.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) ĐỪNG viết mã sản phẩm ở lượt này. Cám dỗ lớn vì bản phác thảo ~20 dòng trông dễ hơn một
+  tệp đặc tả 260 dòng. Nhưng ba câu quyết định chưa chốt, và viết mã trước là tự chốt hộ.
+  (2) `git status --porcelain` MÙ với: tệp bị `.gitignore`, ghi ra ngoài cây kho, và gọi mạng.
+  Đặc tả phải KHAI phạm vi ấy chứ không được im — packet trước đã trả giá đúng chỗ này.
+  (3) Máy phát hiện bắt SAU khi đã ghi. Dùng đúng từ vựng ba hạng của #318: nó là MÁY PHÁT
+  HIỆN, không phải RANH GIỚI. Đừng gọi tên to hơn thứ đo được.
+  (4) Hoàn tác tự động (`git checkout --`) là một ĐƯỜNG GHI MỚI do chính chốt tạo ra. Nếu đề
+  xuất nó thì phải nói rõ hậu quả khi nó chạy nhầm.
+  (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+
+chua_do_duoc_luc_cap: >-
+  (1) CHƯA đo `SubagentStart`/`SubagentStop` bắn thật — mới đọc tài liệu chính thức. Đây LÀ
+  việc của lượt này, không phải nợ.
+  (2) CHƯA đo chi phí: chụp `git status` hai lần mỗi lượt agent trên cây kho này tốn bao lâu.
+  (3) `agent_type` thì ĐÃ đo (packet #324, đã land ở `6cc64d39`): subagent mang
+  `agent_type`/`agent_id`, phiên chính THIẾU HẲN khoá ấy. Đặc tả được phép dựa vào điều này.
+
+cach_phong_executor: >-
+  Người giữ kho hoặc phiên điều phối phóng codex; KHÔNG viết script spawn riêng
+  (`docs/GOI_AGENT_DA_NEN.md`). Dùng CLI chính thức qua `.claude/dev/launcher.py run` để một
+  lượt chết vẫn để lại `run.json` thay vì bốc hơi. Đo lúc cấp: `launcher.py doctor --kiem-song`
+  cho codex `rc=0 (VAN dung duoc)` — bằng chứng gọi THẬT, không tin `codex login status`.

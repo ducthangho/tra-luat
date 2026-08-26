@@ -1517,8 +1517,22 @@ def _la_dang_commit(s: str) -> bool:
     return 7 <= len(s) <= 64 and all(c in "0123456789abcdef" for c in s)
 
 
-def _khoa_neo_cac_sha(ds: list[dict]) -> list[str]:
-    """Chuẩn hoá cách viết SHA mà không hỏi git; mơ hồ thì KHÔNG ĐO ĐƯỢC.
+def _be_rong_oid_cua_kho(root: Path) -> tuple[int, ...]:
+    """Hỏi object format; không hỏi được thì giữ phép phân loại cũ."""
+    try:
+        p = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--show-object-format"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return (40, 64)
+    if p.returncode != 0:
+        return (40, 64)
+    return {"sha1": (40,), "sha256": (64,)}.get(p.stdout.strip(), (40, 64))
+
+
+def _khoa_neo_cac_sha(ds: list[dict], root: Path) -> list[str]:
+    """Chuẩn hoá cách viết SHA theo object format; mơ hồ thì KHÔNG ĐO ĐƯỢC.
 
     Chuỗi bằng nhau cùng khoá. Một viết tắt chỉ nhập với OID đầy đủ (SHA-1 40 hoặc
     SHA-256 64 ký tự) khi đúng MỘT OID trong tập bắt đầu bằng nó. Không có OID đầy đủ
@@ -1527,7 +1541,8 @@ def _khoa_neo_cac_sha(ds: list[dict]) -> list[str]:
     """
     shas = [str(d.get("reviewed_sha") or "").strip().lower() for d in ds]
     hop_le = sorted({s for s in shas if _la_dang_commit(s)})
-    day_du = [s for s in hop_le if len(s) in (40, 64)]
+    be_rong_oid = _be_rong_oid_cua_kho(root)
+    day_du = [s for s in hop_le if len(s) in be_rong_oid]
     khoa_theo_sha = {}
     for sha in hop_le:
         ung_vien_day_du = [s for s in day_du if s.startswith(sha)]
@@ -1680,7 +1695,7 @@ def cmd_bien_nhan(a, state_dir: Path) -> int:
     # TRÙNG VÒNG: hai biên nhận cùng `reviewed_sha` là cùng MỘT vòng ghi hai lần. Đếm chúng là 2
     # thì `--toi-thieu` lấp được bằng cách chép tệp — cổng đo SỐ TỆP chứ không đo SỐ VÒNG.
     thay, vong = set(), []
-    khoa_theo_bien_nhan = _khoa_neo_cac_sha(that)
+    khoa_theo_bien_nhan = _khoa_neo_cac_sha(that, root)
     for d, khoa in zip(that, khoa_theo_bien_nhan):
         # KHOÁ VÒNG PHẢI LÀ THỨ NEO ĐƯỢC VÀO MỘT COMMIT — không phải một chuỗi tự khai.
         #

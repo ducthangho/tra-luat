@@ -3009,13 +3009,29 @@ MUTANTS = {
         ["same_failure_cung_id_qua_2_review"],
     ),
     "bien_nhan_bo_gom_full_va_viet_tat": (
-        "    khoa_theo_bien_nhan = _khoa_neo_cac_sha(that)\n",
+        "    khoa_theo_bien_nhan = _khoa_neo_cac_sha(that, root)\n",
         ('    khoa_theo_bien_nhan = []\n'
          '    for d in that:\n'
          '        s = str(d.get("reviewed_sha") or "").strip().lower()\n'
          '        khoa_theo_bien_nhan.append(s if _la_dang_commit(s) '
-         'else "__khong_neo_duoc__")\n'),
+        'else "__khong_neo_duoc__")\n'),
         ["bien_nhan_cung_sha_full_va_viet_tat_dem_MOT"],
+    ),
+    "bien_nhan_khong_doc_object_format_thi_giu_hanh_vi_cu": (
+        "    if p.returncode != 0:\n        return (40, 64)\n",
+        ('    if p.returncode != 0:\n'
+         '        _die(RC_BIEN_NHAN, "đột biến: hỏi object format lỗi thành chặn")\n'),
+        ["bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc"],
+    ),
+    "bien_nhan_sha256_khong_nhan_40_la_oid_day_du": (
+        '    return {"sha1": (40,), "sha256": (64,)}.get(p.stdout.strip(), (40, 64))\n',
+        '    return (40, 64)  # đột biến: không phân biệt object format\n',
+        ["bien_nhan_sha256_full64_va_tien_to40_dem_MOT"],
+    ),
+    "bien_nhan_gom_moi_oid_day_du": (
+        "            khoa_theo_sha[sha] = ung_vien_day_du[0]\n",
+        '            khoa_theo_sha[sha] = "__gom_moi_oid__"  # đột biến\n',
+        ["bien_nhan_sha256_hai_oid_khac_nhau_dem_HAI"],
     ),
     "bien_nhan_tra_lai_safe_loader_doi_kieu": (
         '            d = yaml.load(f.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)\n',
@@ -3515,6 +3531,14 @@ def _bn_that(sha: str, duong: str = "ops/reviews/v.md") -> str:
             f"reviewed_sha: {sha}\nverdict_path: {duong}\n")
 
 
+def _dat_object_format(goc: Path, dinh_dang: str) -> None:
+    p = subprocess.run(["git", "-C", str(goc), "init", "--quiet",
+                        f"--object-format={dinh_dang}"], capture_output=True)
+    if p.returncode != 0:
+        raise AssertionError(f"KHÔNG ĐO ĐƯỢC: git init {dinh_dang} rc={p.returncode}: "
+                             f"{_txt(p.stderr)!r}")
+
+
 # Ba hình dạng fixture SHA mà #305 bắt buộc phủ: có chữ · toàn số không 0 đầu ·
 # toàn số có 0 đầu. Hai hằng cuối cố ý KHÔNG đặt nháy khi đi qua `_bn_that`.
 _SHA_CO_CHU = "8b627e843a3be87f2ceac97f2f147bbadcaa3cdc"
@@ -3645,6 +3669,47 @@ def case_bien_nhan_cung_sha_full_va_viet_tat_dem_MOT(c: Ctx):
         raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
 
 
+def case_bien_nhan_sha256_full64_va_tien_to40_dem_MOT(c: Ctx):
+    """SHA-256: 40 ký tự chỉ là tiền tố, không phải một OID SHA-1 thứ hai."""
+    sha = _SHA_CO_CHU + "fedcba987654321001234567"
+    goc = _kho_gia_co_verdict(c, "bnsha256tat", [
+        ("a-verdict.receipt.yaml", _bn_that(sha)),
+        ("b-verdict.receipt.yaml", _bn_that(sha[:40])),
+    ])
+    _dat_object_format(goc, "sha256")
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(0, rc, e, "SHA-256 full-64 + tiền tố-40 của nó bị chặn oan")
+    if "1 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
+
+
+def case_bien_nhan_sha256_hai_oid_khac_nhau_dem_HAI(c: Ctx):
+    """Chiều bắt-oan: hai OID SHA-256 khác nhau không được gom sạch."""
+    goc = _kho_gia_co_verdict(c, "bnsha256hai", [
+        ("a-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU + "a" * 24)),
+        ("b-verdict.receipt.yaml", _bn_that("9" * 64)),
+    ])
+    _dat_object_format(goc, "sha256")
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249",
+                              "--toi-thieu", "2"])
+    _doi(0, rc, e, "hai OID SHA-256 khác nhau bị gom thành một")
+    if "2 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm HAI: {_txt(o)!r}")
+
+
+def case_bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc(c: Ctx):
+    """Không hỏi được object format thì giữ phép phân loại cũ, không chặn."""
+    goc = _kho_gia_co_verdict(c, "bnroidudulieu", [
+        ("a-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU)),
+        ("b-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU[:7])),
+    ])
+    (goc / ".git").rmdir()
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(0, rc, e, "bản sao rời có dữ liệu bị chặn vì không hỏi được format")
+    if "1 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
+
+
 def case_bien_nhan_sha_so_co_0_dau_van_dem_RIENG(c: Ctx):
     """N3: YAML không nháy không được đổi hai SHA toàn số có 0 đầu thành một xô."""
     goc = _kho_gia_co_verdict(c, "bnso0dau", [
@@ -3728,6 +3793,12 @@ CASES += [
      case_bien_nhan_sha_RAC_khong_duoc_lam_khoa_vong),
     ("bien_nhan_cung_sha_full_va_viet_tat_dem_MOT",
      case_bien_nhan_cung_sha_full_va_viet_tat_dem_MOT),
+    ("bien_nhan_sha256_full64_va_tien_to40_dem_MOT",
+     case_bien_nhan_sha256_full64_va_tien_to40_dem_MOT),
+    ("bien_nhan_sha256_hai_oid_khac_nhau_dem_HAI",
+     case_bien_nhan_sha256_hai_oid_khac_nhau_dem_HAI),
+    ("bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc",
+     case_bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc),
     ("bien_nhan_sha_so_co_0_dau_van_dem_RIENG",
      case_bien_nhan_sha_so_co_0_dau_van_dem_RIENG),
     ("bien_nhan_viet_tat_khop_hai_oid_la_KHONG_DO_DUOC",

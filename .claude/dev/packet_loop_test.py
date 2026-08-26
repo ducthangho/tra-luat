@@ -3024,10 +3024,16 @@ MUTANTS = {
         ["bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc"],
     ),
     "bien_nhan_khong_leo_len_kho_cha": (
-        "        if Path(ket_qua[0]).resolve() != root.resolve():\n",
-        "        if False:  # đột biến: bỏ phép so toplevel\n",
+        "            cung_goc = Path(ket_qua[0]).resolve() == root.resolve()\n",
+        "            cung_goc = True  # đột biến: bỏ phép so toplevel\n",
         ["bien_nhan_ban_sao_roi_duoi_sha256_cha_dem_MOT"],
     ),
+    "bien_nhan_root_xuong_dong_tach_tu_trai": (
+        '        ket_qua = p.stdout.removesuffix("\\n").rsplit("\\n", 1)\n',
+        "        ket_qua = p.stdout.splitlines()\n", ["bien_nhan_sha256_root_xuong_dong_dem_MOT"]),
+    "bien_nhan_bo_nhanh_valueerror": (
+        "        except ValueError:\n", "        except RuntimeError:\n",
+        ["bien_nhan_git_gia_duong_dan_nul_giu_fallback"]),
     "bien_nhan_sha256_khong_nhan_40_la_oid_day_du": (
         '    return {"sha1": (40,), "sha256": (64,)}.get(ket_qua[1].strip(), (40, 64))\n',
         '    return (40, 64)  # đột biến: không phân biệt object format\n',
@@ -3688,6 +3694,32 @@ def case_bien_nhan_sha256_full64_va_tien_to40_dem_MOT(c: Ctx):
         raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
 
 
+def case_bien_nhan_sha256_root_xuong_dong_dem_MOT(c: Ctx):
+    sha = _SHA_CO_CHU + "f" * 24
+    goc = _kho_gia_co_verdict(c, "bnsha256\nroot", [
+        ("a-verdict.receipt.yaml", _bn_that(sha)),
+        ("b-verdict.receipt.yaml", _bn_that(sha[:40]))])
+    _dat_object_format(goc, "sha256")
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(0, rc, e, "root có xuống dòng làm mất object format")
+    if "1 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
+
+
+def case_bien_nhan_git_gia_duong_dan_nul_giu_fallback(c: Ctx):
+    git = c.tmp / "git"
+    git.write_text("#!/usr/bin/env python3\nimport sys\nsys.stdout.buffer.write(b'/tmp/a\\x00b\\nsha256\\n')\n", encoding="utf-8")
+    git.chmod(0o755)
+    goc = _kho_gia_co_verdict(c, "bnnul", [
+        ("a-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU)),
+        ("b-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU[:7]))])
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"],
+                   env_extra={"PATH": str(c.tmp) + os.pathsep + os.environ["PATH"]})
+    _doi(0, rc, e, "ValueError từ top-level không hợp lệ thoát traceback")
+    if "1 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
+
+
 def case_bien_nhan_sha256_hai_oid_khac_nhau_dem_HAI(c: Ctx):
     """Chiều bắt-oan: hai OID SHA-256 khác nhau không được gom sạch."""
     goc = _kho_gia_co_verdict(c, "bnsha256hai", [
@@ -3813,6 +3845,8 @@ CASES += [
      case_bien_nhan_cung_sha_full_va_viet_tat_dem_MOT),
     ("bien_nhan_sha256_full64_va_tien_to40_dem_MOT",
      case_bien_nhan_sha256_full64_va_tien_to40_dem_MOT),
+    ("bien_nhan_sha256_root_xuong_dong_dem_MOT", case_bien_nhan_sha256_root_xuong_dong_dem_MOT),
+    ("bien_nhan_git_gia_duong_dan_nul_giu_fallback", case_bien_nhan_git_gia_duong_dan_nul_giu_fallback),
     ("bien_nhan_sha256_hai_oid_khac_nhau_dem_HAI",
      case_bien_nhan_sha256_hai_oid_khac_nhau_dem_HAI),
     ("bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc",

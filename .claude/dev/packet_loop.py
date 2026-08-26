@@ -1524,12 +1524,16 @@ def _be_rong_oid_cua_kho(root: Path) -> tuple[int, ...]:
             ["git", "-C", str(root), "rev-parse", "--show-toplevel", "--show-object-format"],
             capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5,
         )
-        ket_qua = p.stdout.splitlines()
+        ket_qua = p.stdout.removesuffix("\n").rsplit("\n", 1)
         if p.returncode != 0:
             return (40, 64)
         if len(ket_qua) != 2:
             return (40, 64)
-        if Path(ket_qua[0]).resolve() != root.resolve():
+        try:
+            cung_goc = Path(ket_qua[0]).resolve() == root.resolve()
+        except ValueError:
+            return (40, 64)
+        if not cung_goc:
             return (40, 64)
     except (OSError, RuntimeError, subprocess.SubprocessError):
         return (40, 64)

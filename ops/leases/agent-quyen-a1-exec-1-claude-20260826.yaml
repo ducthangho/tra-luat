@@ -1,0 +1,145 @@
+# Lease EXECUTOR — `AGENT-QUYEN-KHAI-KHONG` (#324), PHA A1 "cổng thật", lượt 1.
+#
+# Nửa CỔNG của #324. Việc duy nhất: đảo chốt Bash cho hai agent read-only từ danh sách CẤM
+# (không có) sang danh sách CHO PHÉP fail-close, đọc `agent_type` mà `PreToolUse` đã mang sẵn
+# vào subagent. Pha A2 (hạ lời khai trong `.claude/agents/**`) là LEASE KHÁC, land SAU A1.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 324
+packet_id: AGENT-QUYEN-KHAI-KHONG
+phase_key: AGENT-QUYEN-A1-CONG-THAT
+revision: 1
+generation: 1
+lease_id: agent-quyen-a1-exec-1-claude-20260826
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` ở đây KHÔNG phải mặc định fail-close mà là NHÃN ĐÚNG THỰC CHẤT: packet sửa chính
+  chốt quyết định quyền của mọi lệnh Bash trong kho. Vá sai thì hoặc mở toang cho subagent,
+  hoặc chặn oan phiên chính. Lớp do CỔNG tính, không tự hạ.
+
+spec_path: 'KHÔNG CÓ — ba phương án và bảy tiêu chí nghiệm thu ghi trong Issue #324'
+spec_status: khong_co_dac_ta_rieng
+spec_duyet_boi: ducthangho
+spec_note: >-
+  Không soạn đặc tả riêng. Đầu vào là MỘT phép đo đã chạy (10 ca, 8 hình dạng ghi + 2 đối chứng)
+  chép nguyên bảng vào Issue #324, cộng một phép đo tài liệu xác nhận `PreToolUse` chạy trong
+  subagent và mang `agent_type`. N1–N7 đọc thẳng được từ đó. Một tệp spec ở đây chỉ tạo thêm
+  một bản chiếu cho cùng dữ liệu.
+
+write_set:
+  - .claude/hooks/pretooluse_guard.py
+  - .claude/hooks/pretooluse_guard_test.py
+write_set_note: >-
+  ĐÚNG HAI đường dẫn, khớp `ngan_sach_kich_thuoc.tep_toi_da: 2`. `.claude/agents/tl-auditor.md`
+  và `.claude/agents/tl-rasoat.md` KHÔNG nằm trong write set và KHÔNG được chạm ở lượt này —
+  chúng là pha A2, và A2 phải land SAU A1 kẻo văn bản lại mô tả một cổng chưa tồn tại (đúng bệnh
+  #324 tố cáo). `.claude/settings.json` cũng KHÔNG chạm: guard đã đăng ký sẵn cho `Bash`, không
+  cần hook event mới — đây là kết quả của phép đo tài liệu, không phải giả định.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 ~11:56Z bằng `ops/lease_publish.py ai-dang-giu` bản trên `origin/master` (9044a5d8).
+  Phép so hai nguồn TRƯỚC khi quét, so bằng TẬP TÊN: `ls-remote --heads` 211 so `for-each-ref` 212,
+  `comm -23` RỖNG (không mù). `comm -13` trả đúng 1 tên là nhánh chỉ định của phiên này, chưa push
+  — thừa cục bộ, vô hại. Chiều lệch mới là kết luận, không phải con số.
+  (Trước khi fetch đủ: 211 so 2 — clone nông cho refspec single-branch, mù 209 ref.)
+    .claude/hooks/pretooluse_guard.py       ->  NGƯỜI_GIỮ 0
+    .claude/hooks/pretooluse_guard_test.py  ->  NGƯỜI_GIỮ 0
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+
+branch: claude/launcher-skill-agents-permissions-lttd8h
+branch_ownership: exclusive
+branch_ghi_chu: >-
+  KHÔNG theo nếp `claude/<packet>-exec-1` của các lease trước. Phiên này là phiên remote và vỏ
+  harness ràng ĐÚNG MỘT nhánh chỉ định cho mã; đẩy nhánh khác là vi phạm ràng buộc ấy. Ghi tên
+  thật ra đây thay vì ghi tên đẹp rồi đẩy chỗ khác — tên nhánh trong lease là DỮ LIỆU phải khớp
+  hiện vật, không phải nhãn trang trí. Nhánh `ops/**` mang chính tệp lease này là đường đăng
+  lease của kho, không phải nhánh mã.
+target_branch_neu_land: master
+
+base_sha: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+start_from_sha: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+reviewed_sha_required: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+base_ghi_chu: >-
+  `9044a5d8` = `origin/master` lúc cấp, chính là merge của PR #321. Đo lại ngay trước khi cấp
+  (11:56Z) chứ không lấy số của bản bàn giao #314 (`c35ae1c`) — master ĐÃ đi tiếp kể từ đó.
+  Nhánh chỉ định chưa mang việc nào nên merge-base và `start_from_sha` trùng nhau.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 300
+  do_tu_sha: 9044a5d8b9ab483929d7a7ad3a4d5aac6db80be5
+  don_vi: '`git diff --numstat 9044a5d8..HEAD` giới hạn TRÊN WRITE SET — cột dòng THÊM'
+  da_dung: 0
+  la_uoc_luong: true
+  ghi_chu: >-
+    300 là ƯỚC LƯỢNG, KHÔNG phải số đã đo — chưa viết dòng nào lúc cấp. Ghi rõ vì packet tiền
+    nhiệm #314 đã trả giá đúng chỗ này: trộn số ĐÃ ĐO với số ƯỚC LƯỢNG trong cùng một trường
+    rồi để nguyên khi nới. `da_dung: 0` là trạng thái thật lúc cấp; lượt thi công phải cập nhật
+    nó bằng số ĐO ĐƯỢC, không phải bằng ước lượng mới.
+    Vẫn nằm trong trần ADR-0044 cho `sensitive` (≤3 tệp / ≤300 dòng thêm) nên KHÔNG cần
+    `nang_tran`. Đó chính là lý do #324 đề nghị tách A1/A2 thay vì làm một lượt 4 tệp.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-26: sau khi được trình hai phát hiện kèm phép đo và ba phương án,
+  người giữ kho trả lời "Cấp lease A1 trước, làm luôn".
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: true
+recorder_ghi_chu: >-
+  KHAI THẲNG: phiên ghi lease này CŨNG là phiên thi công VÀ là phiên đã đo ra phát hiện. Ba vai
+  gộp làm một. Hệ quả cho nhãn: `cross_approved` của lượt này đứng CHỈ bằng vòng review `codex`
+  SAU khi thi công; khâu phát hiện — cấp — thi công KHÔNG độc lập. Ghi ra vì nhãn ấy trông y hệt
+  nhau dù có độc lập hay không.
+
+leased_at_utc: '2026-08-26T12:00:00Z'
+lease_expires_at_utc: '2026-08-27T12:00:00Z'
+run_minutes: 1440
+
+viec_cua_luot_nay: >-
+  MỘT mục tiêu: `.claude/hooks/pretooluse_guard.py` đọc `agent_type` từ payload; nếu thuộc
+  {tl-auditor, tl-rasoat} thì đối chiếu DANH SÁCH CHO PHÉP (regex trên CẢ CHUỖI lệnh) và
+  `deny` khi không khớp — `deny` chứ không `ask`, vì agent không có người ngồi duyệt.
+  `agent_type` VẮNG MẶT ⇒ coi như phiên chính, giữ nguyên hành vi hôm nay: một trường thiếu
+  KHÔNG được biến thành nới quyền. Cộng `.claude/hooks/pretooluse_guard_test.py` mang phản
+  chứng chạy được cho N2–N6 kèm đột biến. KHÔNG chạm `.claude/agents/**`, KHÔNG chạm
+  `.claude/settings.json`, KHÔNG chạm `docs/**`.
+
+dieu_kien_dung: >-
+  S1 (N1 của #324) — `agent_type` KHÔNG có thật trong payload `PreToolUse` của subagent kho này
+  ⇒ DỪNG NGAY, phương án P3 mất chân đứng; báo người giữ kho và chọn lại, KHÔNG vá mò ·
+  S2 cần đường dẫn thứ ba (nhất là `.claude/settings.json` hay `.claude/agents/**`) ⇒ DỪNG,
+  xin lease sửa đổi · S3 vượt 300 dòng thêm trên write set · S4 đột biến "nới allow-list để
+  chứa `sed -i`" KHÔNG làm ca đích ĐỎ ⇒ ca đang đo thứ khác, DỪNG và viết lại ca ·
+  S5 `origin/master` đã đi tiếp mà chưa đo lại.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) Danh sách CHO PHÉP phải viết bằng regex trên CẢ CHUỖI lệnh, đúng nếp guard đang có
+  ("Hook quet CA CHUOI lenh"). Viết theo kiểu tiền tố là tái tạo đúng bẫy #314 —
+  `Bash(x:*)` khớp TIỀN TỐ nên mọi lệnh có ống/`;`/`>`/`$( )`/heredoc/gán biến đứng trước đều
+  trượt, và ba lượt cross-review đã chết vì nó.
+  (2) Hai agent CẦN Bash để chạy `tl …`, `ruff`, selftest — danh sách cho phép hẹp quá thì
+  chặn oan chính chức năng của chúng. N4 là ca canh chuyện đó, đừng bỏ.
+  (3) `pretooluse_guard.py` chạy cho MỌI lệnh Bash của MỌI phiên. Một lỗi ở đây chặn oan cả
+  phiên chính. N3 là ca canh, phải đo trên đủ 10 ca của bảng #324.
+  (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu, kể cả khi đang trích dẫn để giải thích.
+
+chua_do_duoc_luc_cap: >-
+  (1) CHƯA phóng subagent thật để chứng minh đầu-cuối rằng `tl-auditor` ghi được tệp trên bản
+  master hiện tại. Thứ đã đo là CỔNG HOOK (10 ca, 8/8 cho qua, 2/2 đối chứng `ask`), không phải
+  tầng permission ngoài nó. Đây chính là lý do N1 tồn tại và là điều kiện dừng S1.
+  (2) CHƯA đo `agent_type` có mặt trong payload thực tế của Claude Code `2.1.246` — mới chỉ đọc
+  tài liệu chính thức. Tài liệu KHÔNG phải phép đo.
+  (3) CHƯA đo hành vi khi phiên chạy ở `permission_mode` khác (`auto` · `acceptEdits` ·
+  `bypassPermissions`). Có thể đổi kết luận về tầng NGOÀI hook, không đổi kết luận về hook.

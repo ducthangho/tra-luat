@@ -4,7 +4,7 @@
 #   "cấp lease cho tất cả và chạy luôn, cross review bằng codex, xhigh"
 # Người ghi lease là phiên claude — GHI HỘ, không phải người cấp (§2).
 
-schema_version: 1
+schema_version: 2
 event: lease_granted
 packet_issue: 329
 packet_id: MAY-PHAT-HIEN-GHI-PHA2
@@ -16,6 +16,8 @@ provider: claude
 executor: claude
 reviewer: codex
 assurance_target: cross_approved
+review_class: sensitive
+effective_review_class: sensitive
 access: read-write-nhanh-rieng
 branch_ownership: exclusive
 

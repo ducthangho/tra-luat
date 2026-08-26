@@ -65,10 +65,22 @@ chot_read_only_DO_chu_khong_tin_co:
     (`cf3521c1…` là băm prompt của lượt EXECUTOR packet #319 — hai lượt khác nhau, đừng ghép).
 
 ket_qua_dem_duoc:
-  P1: 6
+  P1: 7
   P2: 3
   P3: 0
   don_vi_dem: 'finding có slug riêng trong VERDICT.md; KHÔNG đếm dòng bảng đo'
+  cach_dem: >-
+    `grep -oE '^### [a-z0-9-]+  \[(P[123])\]' VERDICT.md` rồi đếm theo hạng. Ghi lệnh ra vì
+    con số này đã SAI một lần: bản đầu của biên nhận ghi `P1: 6`, do người viết đếm bằng mắt
+    trong lúc đọc verdict thay vì chạy lệnh. Cùng phiên, cùng ngày, trong chính tệp viết ra để
+    ghi lại một lượt review tố cáo hình dạng "số hạng trôi". Đếm bằng lệnh, đừng đếm bằng mắt.
+  bay_p1: >-
+    quan-sat-mang-van-thanh-rang-buoc · mo-ta-sandbox-cu-choi-phan-hang-moi ·
+    dieu-kien-do-thieu-phien-ban-codex · tieu-de-bon-tang-van-rong-hon-than ·
+    ba-hang-khong-phu-het · n7-khong-co-duong-do-trong-write-set ·
+    lease-trang-thai-hien-tai-khong-nhat-quan
+  ba_p2: >-
+    nhan-hang-cu-ngoai-diff-bi-thieu · n5-grep-khong-giu-duoc-nghia · mirror-ref-count-khong-khop
   bang_do_dong: 44
   o_KHONG_DO_DUOC_trong_bang: 17
 

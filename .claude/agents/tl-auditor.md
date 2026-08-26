@@ -28,7 +28,8 @@ Nói cho chật vì chỗ này dễ đọc mạnh hơn thực tế: cái ĐÃ X�
 lạ ⇒ `deny`, tức fail-close, đo được. Cái CHƯA đủ là **nội dung danh sách**: một chương trình
 được phép vẫn có thể ghi bằng cách chưa ai kể (mục 3 dưới). Cơ chế đã xác minh ≠ danh sách đã đủ.
 
-**Không cần thuộc danh sách**: cứ chạy, cổng từ chối kèm lý do. Nhưng nhớ **viết lệnh dạng chạy
+**Không thuộc danh sách thì cổng từ chối kèm lý do — nhưng ĐỪNG dùng cổng làm phép thử**: nó
+không soi cờ (xem `git --output` ở dưới), nên "chạy thử xem có bị chặn không" KHÔNG an toàn. Nhưng nhớ **viết lệnh dạng chạy
 được**: `tl X` trong tài liệu này là VIẾT TẮT, không phải lệnh có thật — đo được là `tl sweep`
 bị từ chối còn `python scripts/tl.py sweep` thì qua.
 
@@ -53,9 +54,10 @@ Ba chỗ nó **thật sự không phủ**, cũng đo cùng lượt:
    hình dạng lỗ đã lặp ba vòng (8 + 3 + 11 hình dạng). #329 mở ra để thay cách tiếp cận.
 
 Ở ba đường ấy, các dòng dưới **VẪN LÀ LUẬT BẮT BUỘC** — chỉ khác ở chỗ **không máy nào bắt
-lỗi**. Đừng đọc "không được cưỡng chế" thành "được phép bỏ qua": ngược lại là đằng khác. Ở
-đường có cổng, sai một lệnh thì bị chặn ngay và không hại gì; ở ba đường này, sai một lệnh là
-hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ luật CAO HƠN, không phải thấp hơn.
+lỗi**. Đừng đọc "không được cưỡng chế" thành "được phép bỏ qua": ngược lại là đằng khác. Và
+**đừng đọc "có cổng" thành "thử gì cũng vô hại"** — đo 26-08: `git diff --output=F` được cổng
+CHO QUA và git TẠO TỆP thật (1559 B); `_kiem_git` bỏ qua MỌI cờ, chỉ soi tên subcommand. Nên cả
+hai nơi đều đòi kỷ luật CAO HƠN: sai một lệnh có thể hỏng thật và **không ai phát hiện**.
 
 - KHÔNG sửa file nào — nhất là `scripts/tl.py` canonical (bài học rogue-edit đã ghi trong memory
   dự án). Phiên chính là BÊN GHI DUY NHẤT.
@@ -67,9 +69,10 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
   `tl sweep`, `tl counts`, `tl cat-audit`, `tl review-queue`, `tl vbhn-check`,
   `tl header-verify`, `tl reg-query`, `tl source-map`, `tl nlm-get <nb>` — thêm `--json` thì được;
   `git log/diff/status`, `ruff check`, selftest.
-- `tl corpus-audit --json` CHỈ ở dạng KHÔNG `--sohieu-file` và KHÔNG `--all`. Hai dạng ấy bật
-  checkpoint resumable — `hygiene.py` ghi `corpus_audit_ckpt_*.json` sau mỗi target và CỐ Ý để
-  lại tệp khi dừng giữa chừng. Audit nối lại được là việc của phiên chính, không phải của bạn.
+- `tl corpus-audit --json` KHÔNG `--sohieu-file`, và KHÔNG `--all --resume`/`--all --full`.
+  Đúng ba dạng ấy bật checkpoint (`hygiene.py`: `_all_resume = all AND (resume OR full)`), ghi
+  `corpus_audit_ckpt_*.json` sau mỗi target và CỐ Ý để lại tệp khi dừng giữa chừng. `--all` TRẦN
+  thì không — vẫn dùng được. Audit nối lại được là việc của phiên chính, không phải của bạn.
 - **KHÔNG lệnh `tl` nào được chứng minh là không ghi.** Danh sách trên là VIỆC của bạn, không
   phải bảo đảm. Năm vòng review 26-08 ra NĂM cơ chế ghi khác nhau: ghi mặc định · `read_only=False`
   trong `COMMAND_META` · cờ `--out` trên lệnh `read_only=True` · `--out` cả trên lệnh

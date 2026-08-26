@@ -1,0 +1,73 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 2 của PR #339 (packet #319).
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '319'
+packet_slug: MCP-GH-CUU-HO
+lease_id: null
+lease_review_KHONG_DUOC_CAP: 'lease đang sống là lease EXECUTOR r5; không có lease review riêng'
+provider: claude
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 4aa936e0a3be676ed2492f89b25f9742a249a965
+luot: 2
+cross_provider: true
+cross_provider_ghi_chu: 'executor codex / reviewer claude — khác nền theo lease r5'
+assurance: cross_approved
+verdict_path: ops/reviews/mcp-gh-cuu-ho-review-2-claude-verdict.md
+verdict_sha256: 06cb8433d8b5785c6bf307368da4008c517a1d13dd91565755a750c3b2d1b655
+verdict_bytes: 34400
+verdict_nguon: >-
+  `claude -p --model opus --permission-mode acceptEdits --allowedTools Read Glob Grep Edit Write Bash`
+  trong `launcher.py run`, trên CLONE ĐỘC LẬP detached tại exact SHA, `--require-clean`,
+  prompt neo băm `8a1cc66b…`. 940.7s, `ma_thoat=0`.
+DO_DUOC_MA: 'CÓ — `python3 -c print(PROBE_OK)` chạy; 0 lệnh bị từ chối, so với vòng 1 bị từ chối liên tục'
+
+ket_qua_dem_duoc:
+  P1: 4
+  P2: 5
+  dem_bang_lenh: "grep -cE '^### P1' và '^### P2'; khớp lời khai cuối verdict."
+  P1_slug: [chot-dich-credential-khong-co-phan-chung, cong-that-nam-trong-main-khong-ai-canh, khong-cong-nao-chay-bo-test, b3-chot-cach-ly-mang-neo-theo-TEN]
+
+VI_SAO_VONG_1_KHONG_DO_DUOC_GI_NGUYEN_NHAN_THAT:
+  chan_doan_dau_cua_toi_CHUA_DU: >-
+    Tôi quy lỗi cho `--permission-mode acceptEdits` mà không truyền `--allowedTools`. Đúng một
+    phần, nhưng chưa phải gốc.
+  nguyen_nhan_sau_hon: >-
+    stderr lượt 2 in: "Ignoring 101 permissions.allow entries from .claude/settings.json: this
+    workspace has not been trusted." Một CLONE MỚI là workspace CHƯA ĐƯỢC TIN, nên toàn bộ 101 mục
+    allow của kho BỊ BỎ QUA — và việc "tin" đòi một lượt chạy TƯƠNG TÁC, thứ phiên headless không
+    bao giờ có.
+  vi_sao_dang_ghi_vao_doctrine: >-
+    Một allowlist 101 mục có thể bị vô hiệu HOÀN TOÀN mà không cổng nào báo đỏ — nó chỉ in một
+    dòng vào stderr rồi chạy tiếp. Đúng hình dạng "cổng vắng mặt trông y hệt cổng xanh", lần này ở
+    tầng CẤU HÌNH. Cách đi vòng đã đo được: `--allowedTools` là CỜ DÒNG LỆNH nên không bị trust chặn.
+  nghi_van_chua_do_duoc: >-
+    Bảng ba lượt review trong `docs/GOI_AGENT_DA_NEN.md` kết luận `Bash` trần tốt hơn luật hẹp.
+    Nếu các lượt ấy cũng chạy trên workspace chưa được tin thì luật hẹp trong `settings.json` VỐN
+    ĐÃ không tồn tại, nên phép so có thể đang so hai thứ khác điều nó tưởng. CHƯA ĐO ĐƯỢC; nêu như
+    nghi vấn có căn cứ, không sửa số nào.
+
+LOI_TU_KHAI_CUA_EXECUTOR_TAI_LAP_DUOC_TUNG_CON_SO: >-
+  `rc=0` · 35/35 ca · 38/38 tập giết · D8(a)(b)(c) ĐẠT — reviewer chạy lại và khớp hết, còn in
+  thêm tập giết thật của cả 38 đột biến (mọi tập KHÔNG rỗng, mọi ca đích nằm trong tập của nó).
+  NHƯNG: lời tự khai đúng KHÔNG làm cổng đúng.
+
+BON_DOT_BIEN_SONG_SOT_LA_KET_QUA_NANG_NHAT:
+  M1: '`if u.hostname != HOST_CHO_PHEP:` -> `if False:` ⇒ suite VẪN `rc=0` 35/35 ĐẠT'
+  M2: '`if u.scheme != "https":` -> `if False:` ⇒ suite VẪN `rc=0` 35/35 ĐẠT'
+  N1_N2: 'tắt chính cổng D8 trong bộ test ⇒ sống sót'
+  vi_sao_NGHIEM: >-
+    M1 và M2 tắt ĐÚNG HAI CHỐT AN NINH mà packet sinh ra để thêm — và bộ test không hề đỏ. Đây là
+    dạng sâu nhất của "cổng không có răng": không phải cổng thiếu, mà cổng CÓ MẶT và vẫn xanh khi
+    thứ nó gác bị gỡ.
+  con_M4_va_C4: >-
+    Hai ca cho `rc=1` NHƯNG dòng tổng vẫn in `CA 35/35 đạt · 0 đỏ` — tức tầng CA mù, chỉ tầng D8
+    bắt. Người đọc dòng tổng sẽ kết luận sai.
+
+REVIEWER_GHI_RO_PHAN_DUNG_VUNG: >-
+  Bộ test chạy trọn ở nền độc lập; ba tính chất chuyển hướng mà lượt thi công 1 không chạy nổi nay
+  có một nền độc lập xác nhận, kèm hai đột biến M6/M7 cho thấy chúng CÓ răng. Đó là việc thật.
+
+viec_phai_lam_tiep:
+- 'ba trong bốn P1 nằm TRONG write set đã đóng băng — thêm ca + thêm đột biến + một lần tách hàm'
+- 'P1 `khong-cong-nao-chay-bo-test` phải mở NỢ CÓ TÊN: write set ba đường dẫn không cho chạm .github/workflows/'

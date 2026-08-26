@@ -353,6 +353,26 @@ chua_do_duoc_luc_cap: >-
   (4) Số dòng `:601` / `:629-645` / `:659-661` đọc trên `6c4140b`; trên `master` tệp có 544 dòng
   nên các số ấy KHÔNG áp thẳng — phải định vị lại bằng nội dung, không bằng số dòng.
 
+luat_dung_LAND:
+  chot_boi: ducthangho
+  tham_quyen: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+  chot_luc: >-
+    direct, in-session, 2026-08-26 — sau vòng 8, phiên trình xu hướng tám vòng và nêu rằng không
+    có luật dừng thì "còn một P2" luôn là lý do chạy thêm một vòng, mà mỗi vòng lại có cơ hội đẻ
+    lỗi mới. Người giữ kho duyệt khuyến nghị.
+  luat: >-
+    CHỈ P1 mới chặn land. Verdict `changes_requested` mà mọi finding còn lại đều là P2 thì
+    ĐƯỢC LAND, với điều kiện mọi P2 còn lại được ghi thành NỢ CÓ TÊN — mỗi cái một slug, có nơi
+    xử, không tan vào lời hứa chung chung.
+  KHONG_duoc_doc_thanh: >-
+    KHÔNG phải "P2 không quan trọng". Nó nghĩa là P2 không đáng đổi lấy thêm một vòng vá, vì tám
+    vòng đã đo được rằng mỗi lượt vá của phiên này đóng lỗi cũ VÀ đẻ lỗi mới ở cùng vùng. Luật
+    này mua tính hội tụ, không mua sự dễ dãi.
+  ai_ap_dung: >-
+    Phiên thi công KHÔNG tự tuyên bố đạt luật này. Nó trình số đếm P1/P2 ĐẾM BẰNG LỆNH trên tệp
+    verdict, và người giữ kho quyết định land.
+  het_hieu_luc: 'chỉ áp cho packet #318; packet khác muốn dùng phải được chốt riêng'
+
 dieu_kien_dung: >-
   S1 ĐÃ BẮN ở vòng 3 và đã được xử đúng đường: DỪNG, trình phương án kèm số đo, người giữ kho
   chốt, rồi mở r3 này. Cần đường dẫn THỨ BA ⇒ DỪNG LẠI LẦN NỮA, đừng tự lấy ·

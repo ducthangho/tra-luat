@@ -151,3 +151,4 @@ cach_phong_executor: >-
   (`docs/GOI_AGENT_DA_NEN.md`). Dùng CLI chính thức qua `.claude/dev/launcher.py run` để một
   lượt chết vẫn để lại `run.json` thay vì bốc hơi. Đo lúc cấp: `launcher.py doctor --kiem-song`
   cho codex `rc=0 (VAN dung duoc)` — bằng chứng gọi THẬT, không tin `codex login status`.
+posted_comment_id: 5426917948   # workflow ghi, ĐỪNG sửa tay

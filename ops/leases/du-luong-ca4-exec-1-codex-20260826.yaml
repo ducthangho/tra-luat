@@ -182,3 +182,4 @@ canh_bao_cho_nguoi_thi_hanh: >-
   (4) `git ls-remote` sẽ HỎNG trong sandbox (không mạng). Đó là `KHÔNG_ĐO_ĐƯỢC`, khai thẳng,
   đừng dựng phản chứng giả để lấp.
   (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+posted_comment_id: 5429722577   # workflow ghi, ĐỪNG sửa tay

@@ -1,0 +1,197 @@
+# Lease EXECUTOR — `KHOA-NEO-BE-RONG` (#313 ca 2), lượt 1.
+#
+# TÁCH khỏi packet `CON-TRO-TREO` vì WRITE SET KHÁC HẲN — chạy song song được, và đang
+# chạy song song thật (`con-tro-treo-exec-1-codex-20260824` giữ `ops/lease_publish*.py`).
+# Hai packet KHÔNG giao đường dẫn nào; đó là điều kiện để cả hai cùng mở.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 313
+packet_id: KHOA-NEO-BE-RONG
+phase_key: KHOA-NEO-BE-RONG
+revision: 4
+generation: 1
+lease_id: khoa-neo-be-rong-exec-1r4-codex-20260826
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` là MẶC ĐỊNH FAIL-CLOSE của `_BANG_LOP`, KHÔNG phải tín hiệu packet chạm thẩm
+  quyền. Đừng đọc nhãn này thành "đã có ai xét thấy nguy".
+
+spec_path: null
+spec_note: >-
+  Không có đặc tả đóng băng. Nguồn yêu cầu: Issue #313 mục (2), và thread P2 của connector
+  trên PR #311 https://github.com/ducthangho/tra-luat/pull/311#discussion_r3844331956
+  (thread để MỞ có chủ đích vì chưa vá). Phản chứng đã chạy được ghi trong cả hai chỗ;
+  executor PHẢI tự đo lại, không nhận lời khai.
+
+write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 24-08-2026 23:5xZ. Phép so HAI NGUỒN chạy TRƯỚC, so bằng TẬP TÊN:
+    is-shallow false · ls-remote 203 · for-each-ref 203 · comm RỖNG cả hai chiều
+  Rồi quét:
+    .claude/dev/packet_loop.py       -> rc=0 NGƯỜI_GIỮ 0
+    .claude/dev/packet_loop_test.py  -> rc=0 NGƯỜI_GIỮ 0
+  Vừa được giải phóng bằng bia mộ `khoa-neo-that-thu-hoi-claude-20260824` (#305 → PR #311
+  land `e80f43b`). Đo lại mà thấy có người giữ ⇒ DỪNG.
+
+branch: codex/khoa-neo-be-rong-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+start_from_sha: b811049d2259ce0780f9320a14a5235d460e0360
+reviewed_sha_required: b811049d2259ce0780f9320a14a5235d460e0360
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 160
+  do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+  don_vi: >-
+    `git diff --numstat c35ae1c0a1104dbd6e65a321cda3b9f9441a408b -- .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py`
+    — cột dòng THÊM. Pathspec TRONG lệnh, và KHÔNG `..HEAD` (sandbox không cho commit nên
+    `..HEAD` không thấy bản vá trên working tree).
+  da_dung: 155
+  ghi_chu: >-
+    120 là ƯỚC LƯỢNG CÓ NEO, không phải trần ADR-0044: bản vá là một phép suy bề rộng OID
+    (~15 dòng) cộng 2–3 ca hồi quy (~60) cộng đột biến (~25). Vượt ⇒ `S2`, DỪNG.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-24: "đồng ý với các khuyến nghị, triển khai tiếp luôn" —
+  duyệt mục (2) trong danh sách ba việc chờ chốt, vốn ghi "ca 2 (SHA-256) — packet riêng,
+  write set khác, chạy song song được. Anh cho đi thì tôi cấp lease + phóng".
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên điều phối KHÔNG thi công lượt này (executor `codex`) và SẼ là reviewer — khác nền,
+  đúng PROTOCOL:580. Cùng phiên ấy đã review PR #311 và cố ý KHÔNG vá lỗi này lúc đó;
+  lý do ghi trong thread, và nay việc vá là của packet này.
+
+leased_at_utc: '2026-08-26T10:20:00Z'
+lease_expires_at_utc: '2026-08-27T10:20:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  `.claude/dev/packet_loop.py`: hàm `_khoa_neo_cac_sha` và hàm mới do packet này thêm.
+  `.claude/dev/packet_loop_test.py`: ca mới và bảng đăng ký ca.
+  Hunk ngoài các vùng ấy ⇒ ĐỎ. TRƯỜNG NÀY SỐNG TRONG LEASE — đừng tìm ở tệp khác.
+
+viec_cua_luot_nay: >-
+  LƯỢT 4 — HẬU KIỂM. Lượt 3 đã VÁ ĐÚNG cả hai P1 nhưng DỪNG ở `S2` (155 > 150) trước khi chạy
+  hậu kiểm, và KHÔNG cắt phản chứng để lọt trần. Chủ kho nới trần 150 → 160.
+
+  BẢN VÁ CỦA LƯỢT 3 GIỮ NGUYÊN, ĐỪNG VIẾT LẠI. Phiên điều phối đã đo nó và nó ĐÚNG:
+    P1-A  `_be_rong_oid_cua_kho` trên root có xuống dòng -> `(64,)`, `bien-nhan` rc=0, đếm MỘT
+    P1-B  git giả trả NUL -> KHÔNG còn traceback; fallback `(40, 64)` giữ đúng hành vi cũ
+          (fixture `40 + tiền tố 7` -> rc=0 đếm MỘT; fixture `64 + tiền tố 40` -> rc=11, và
+           rc=11 ấy CHÍNH LÀ hành vi cũ của `(40,64)` trên đầu vào đó, không phải lỗi)
+
+  === VIỆC DUY NHẤT CỦA LƯỢT NÀY: MỎ NEO MUTANT LƯỢT 2 ĐÃ CHẾT ===
+
+  Suite sau vá: `nền: 263/263 đạt` nhưng `TỔNG: 1 lỗi`:
+
+      ĐỎ  đột biến bien_nhan_khong_leo_len_kho_cha: không tìm thấy mỏ neo
+          ['        if Path(ket_qua[0]).resolve() != root.resolve():\n']
+
+  Bản vá P1-B VIẾT LẠI chính dòng mà mutant lượt 2 neo vào. Mutant ấy nay không áp được ⇒
+  MẤT RĂNG. Đây đúng rủi ro đã ghi trong `canh_bao` của r3 và đã được trình chủ kho.
+
+  PHẢI LÀM:
+    · Cập nhật mỏ neo của `bien_nhan_khong_leo_len_kho_cha` sang một dòng CÒN TỒN TẠI sao cho
+      đột biến vẫn VÔ HIỆU HOÁ phép so toplevel, và vẫn giết ĐÚNG
+      `bien_nhan_ban_sao_roi_duoi_sha256_cha_dem_MOT`.
+    · Chạy lại suite: phải `TỔNG: ĐẠT`, không mutant nào sống, không mỏ neo nào chết.
+
+  CẨN THẬN — đây là chỗ dễ làm sai theo hai kiểu, cả hai đều là mất răng trá hình:
+    (a) neo vào một dòng KHÔNG thuộc phép so toplevel (ví dụ dòng `return`) ⇒ mutant vẫn "chạy"
+        nhưng không còn đo tính chất nó sinh ra để đo;
+    (b) XOÁ mutant cho suite xanh ⇒ mất hẳn chốt của P1 vòng 1.
+  Cả hai làm suite xanh mà bảo đảm biến mất. Phải giữ ĐÚNG tính chất: bỏ phép so toplevel thì
+  ca bản-sao-rời-dưới-kho-cha-sha256 phải ĐỎ.
+
+  ĐỪNG mở lại hai P1, đừng thêm ca mới, đừng đụng tệp ngoài write set.
+  Ngân sách còn **5 dòng** (155/160) — việc này là cập nhật CHUỖI mỏ neo, gần như không thêm dòng.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ⇒ DỪNG, xin lease sửa đổi ·
+  S2 vượt 120 dòng thêm ⇒ DỪNG, khai phần chưa làm ·
+  S3 kết luận KHÔNG hỏi được object format mà vẫn giữ được hành vi cũ ⇒ DỪNG, trình phép đo,
+  xin quyết định. Đừng tự chọn fail-close rồi báo sau — nó chặn mọi bản sao rời ·
+  S4 không tái hiện được phản chứng bằng phép đo của chính mình ⇒ ghi `KHÔNG_ĐO_ĐƯỢC`, DỪNG ·
+  S5 `origin/master` đã đi tiếp so với `base_sha` mà chưa đo lại.
+
+thay_the_cho: khoa-neo-be-rong-exec-1-codex-20260825
+thay_the_ly_do: >-
+  Lượt 1 đã xong và đã lên nhánh (`34de004a`), nên `viec_cua_luot_nay` của r1 hết hiệu lực.
+  Lượt 2 có phạm vi khác: đóng P1 `oid-format-leo-len-kho-cha`. Cập nhật `start_from_sha` và
+  `reviewed_sha_required` sang head đã được review, và `da_dung` 0 → 92 theo phép đo trên
+  write set. Trần, write set, provider, reviewer KHÔNG đổi.
+
+thay_the_cho: khoa-neo-be-rong-exec-1r2-codex-20260826
+thay_the_ly_do: >-
+  Lượt 2 đã xong và đã lên nhánh (`b811049d`); `viec_cua_luot_nay` của r2 hết hiệu lực. Lượt 3
+  đóng hai P1 của cross-review vòng 2. Cập nhật neo sang head đã được review, `da_dung` 92 → 117,
+  và NỚI TRẦN DÒNG 120 → 150 (xem khối `nang_tran`). Write set, provider, reviewer KHÔNG đổi.
+
+thay_the_cho: khoa-neo-be-rong-exec-1r3-codex-20260826
+thay_the_ly_do: >-
+  Lượt 3 dừng ĐÚNG ở `S2` với bản vá đã hoàn chỉnh về mã nhưng chưa hậu kiểm. Chủ kho nới trần
+  150 → 160 sau khi được trình rằng 5 dòng vượt nằm TRỌN ở phần phản chứng, và rằng cắt cho vừa
+  nghĩa là land một bản vá không có răng. r4 mở lại cửa sổ cho ĐÚNG phần hậu kiểm còn thiếu,
+  cộng một việc mới mà chính hậu kiểm phát hiện: mỏ neo mutant lượt 2 đã chết.
+  Write set, provider, reviewer KHÔNG đổi.
+
+nang_tran:
+  ai_nang: ducthangho
+  tham_quyen: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+  quyet_dinh_luc: >-
+    direct, in-session, 2026-08-26 — sau khi được trình rằng vòng 2 ra HAI P1 đều CHẶN LAND,
+    rằng ngân sách chỉ còn 3 dòng, và rằng reviewer đã nói thẳng "không nên land chỉ với dòng
+    catch chưa có răng", người giữ kho trả lời "#317 nới trần 150".
+  adr: ADR-0043 và ADR-0044
+  tran_cu_dong: 150
+  tran_moi_dong: 160
+  tran_cu_vong_review: 2
+  tran_moi_vong_review: 3
+  can_cu: >-
+    HAI trần bị chạm, và chúng độc lập.
+    (1) TRẦN DÒNG. `120` là ƯỚC LƯỢNG CÓ NEO của phiên điều phối, KHÔNG phải trần ADR-0044
+    (trần ấy là ≤300 cho `sensitive`). Đã dùng 117, còn 3. Reviewer ước lượng hai bản vá cần
+    ~11–15 dòng, phần lớn là ca khoá + đột biến. Cắt cho vừa 3 dòng nghĩa là land một dòng
+    `except` KHÔNG CÓ RĂNG — đúng thứ kho đã trả giá nhiều lần. 150 vẫn còn xa 300 của ADR-0044.
+    (2) TRẦN VÒNG REVIEW. ADR-0043 chốt HAI vòng canon; packet đã dùng đủ hai. Vòng 3 cần thiết
+    vì hai P1 của vòng 2 là hỏng THẬT trên mã sản phẩm, không phải góp ý văn phong, và cả hai
+    đã được phiên điều phối TÁI HIỆN ĐỘC LẬP.
+  canh_bao: >-
+    Nới trần KHÔNG phải giấy phép nới phạm vi. Write set vẫn ĐÚNG HAI tệp, và lượt 3 chỉ được
+    đóng hai P1 đã nêu. Nếu vòng 3 lại ra P1 mới trên mã sản phẩm thì câu hỏi đúng KHÔNG còn là
+    "nới tiếp bao nhiêu" mà là "hàm này có nên hỏi git hay không" — tức quay lại câu hỏi thiết
+    kế của #305. Đếm HÌNH DẠNG lỗi, đừng chỉ đếm lỗi.
+  cong_khong_doc_khoi_nay: >-
+    ĐO 2026-08-26: `grep -rl nang_tran --include=*.py --include=*.yml --include=*.sh .` trả
+    RỖNG. ADR-0043:7-8 viết "không có khối ấy thì cổng đăng lease TỪ CHỐI", nhưng KHÔNG tầng nào
+    đọc `nang_tran`. Khối này vì vậy là hồ sơ có thẩm quyền, KHÔNG phải thứ được cưỡng chế.
+    Đây là một nợ "luật không có cổng" khác, ghi ra để không ai đọc sự hiện diện của khối này
+    thành bằng chứng đã qua kiểm.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) SANDBOX MOUNT `.git` CHỈ ĐỌC — không commit, không push.
+  (2) Kho NÀY là `sha1` (`git rev-parse --show-object-format`), nên ca lỗi KHÔNG tái hiện
+  được bằng dữ liệu thật ở đây; phải dựng fixture. Đừng kết luận "không tái hiện được" rồi
+  bỏ — nó tái hiện bằng fixture, đã có người làm.
+  (3) Hỏng này fail-CLOSE (chặn phép đếm hợp lệ), nên bản vá SAI HƯỚNG sẽ biến nó thành
+  fail-OPEN. Ràng buộc (1) và (3) ở trên là chốt chống đúng điều đó.
+  (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.

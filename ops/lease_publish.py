@@ -338,26 +338,54 @@ def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[str]:
     return tut_sau
 
 
-def _lenh_chua_nhanh_tut_sau(goc: Path, tut_sau: list[str]) -> str:
-    """Fast-forward trong worktree đang giữ nhánh; nhánh rảnh vẫn cập nhật ref trực tiếp."""
+def _cac_worktree(goc: Path) -> list[dict]:
     out = _git(goc, "worktree", "list", "--porcelain", "-z")
-    dang_giu, worktree = {}, None
-    for truong in out.split("\0"):
-        if truong.startswith("worktree "):
-            worktree = truong.removeprefix("worktree ")
-        elif truong.startswith("branch refs/heads/") and worktree is not None:
-            dang_giu[truong.removeprefix("branch refs/heads/")] = worktree
-        elif not truong:
-            worktree = None
-    ket_qua = []
+    ds = [dict(x.partition(" ")[::2] for x in khoi.split("\0") if x) for khoi in out.rstrip("\0").split("\0\0") if khoi]
+    for muc in ds:
+        p = Path(muc["worktree"])
+        if not p.exists() or "bare" in muc: continue
+        gd = Path(_git(p, "rev-parse", "--git-dir").strip())
+        muc["_gitdir"] = gd if gd.is_absolute() else p / gd
+        if "branch" not in muc:
+            for ten in ("rebase-merge/head-name", "rebase-apply/head-name", "BISECT_START"):
+                q = muc["_gitdir"] / ten
+                if q.is_file():
+                    ref = q.read_text(encoding="utf-8").strip()
+                    muc["branch"] = ref if ref.startswith("refs/") else "refs/heads/" + ref
+                    break
+    return ds
+def _trang_thai_worktree(muc: dict) -> list[str]:
+    p, trang = Path(muc["worktree"]), []
+    if "prunable" in muc: return ["PRUNABLE"]
+    if not p.exists(): return ["ĐƯỜNG_DẪN_KHÔNG_TỒN_TẠI"]
+    if "bare" in muc: return ["BARE"]
+    try:
+        meta = {x.name for x in muc["_gitdir"].iterdir()}
+    except OSError:
+        return ["METADATA_KHÔNG_ĐỌC_ĐƯỢC"]
+    trang = [nhan for nhan, ten in (("MERGE", "MERGE_HEAD"), ("REBASE", "rebase-merge"),
+             ("REBASE", "rebase-apply"), ("CHERRY-PICK", "CHERRY_PICK_HEAD"),
+             ("BISECT", "BISECT_START")) if ten in meta]
+    if _git(p, "status", "--porcelain").strip(): trang.append("BẨN")
+    return sorted(set(trang))
+def _lenh_chua_nhanh_tut_sau(goc: Path, tut_sau: list[str]) -> str:
+    worktrees, lenh, chi_tiet, an_toan = _cac_worktree(goc), [], [], True
     for ten in tut_sau:
-        doi_ung = "refs/remotes/origin/" + ten
-        if ten in dang_giu:
-            ket_qua.append(f"git -C {shlex.quote(dang_giu[ten])} merge --ff-only "
-                           f"{shlex.quote(doi_ung)}")
+        ref, doi_ung = "refs/heads/" + ten, "refs/remotes/origin/" + ten
+        giu = [wt for wt in worktrees if wt.get("branch") == ref]
+        if not giu:
+            lenh.append(f"git branch -f {shlex.quote(ten)} {shlex.quote(doi_ung)}")
+            chi_tiet.append(f"{ten}: KHÔNG_BỊ_WORKTREE_NÀO_GIỮ")
         else:
-            ket_qua.append(f"git branch -f {shlex.quote(ten)} {shlex.quote(doi_ung)}")
-    return "; ".join(ket_qua)
+            lenh.append(f"git -C {shlex.quote(giu[0]['worktree'])} merge --ff-only {shlex.quote(doi_ung)}")
+            trang = [(wt, _trang_thai_worktree(wt)) for wt in giu]
+            mo_ta = "; ".join(f"{wt['worktree']} [{'+'.join(tt or ['SẠCH', 'RẢNH'])}]" for wt, tt in trang)
+            chi_tiet.append(f"{ten}: GIỮ_BỞI_{len(giu)}_WORKTREE; {mo_ta}")
+            if len(giu) != 1 or trang[0][1]: an_toan = False
+    if not an_toan:
+        return ("KHÔNG_PHÁT_LỆNH_CHỮA. " + " | ".join(chi_tiet) + ". Người dùng tự "
+                "commit/stash, hoàn tất hoặc huỷ thao tác dở, dọn entry stale, detach bớt worktree, rồi chạy lại cổng.")
+    return "chữa: " + "; ".join(lenh)
 
 
 def _quet_lease_toan_kho(goc: Path, *, doi_chieu_ref=True,
@@ -367,10 +395,10 @@ def _quet_lease_toan_kho(goc: Path, *, doi_chieu_ref=True,
     if chan_nhanh_tut_sau:
         tut_sau = _nhanh_cuc_bo_tut_sau(goc, refs)
         if tut_sau:
-            lenh_chua = _lenh_chua_nhanh_tut_sau(goc, tut_sau)
+            huong_xu_ly = _lenh_chua_nhanh_tut_sau(goc, tut_sau)
             raise Chan(RC_KHONG_XAC_DINH,
                        "NHÁNH_CỤC_BỘ_TỤT_SAU: " + ", ".join(tut_sau) +
-                       ". ai-dang-giu quét refs/heads/*; chữa: " + lenh_chua)
+                       ". ai-dang-giu quét refs/heads/*; " + huong_xu_ly)
     if doi_chieu_ref:
         thieu = _ten_nhanh_may_chu(goc) - ten_cuc_bo
         if thieu:

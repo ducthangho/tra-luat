@@ -3376,7 +3376,7 @@ def _git_fixture(goc: Path, *args) -> str:
     return p.stdout.strip()
 
 
-def _kho_tut_sau(s: Path, *, bi_giu: bool) -> tuple[Path, Path | None]:
+def _kho_tut_sau(s: Path, trang="ranh") -> tuple[Path, Path | None]:
     kho = s / "kho"; kho.mkdir()
     _git_fixture(kho, "init", "-q", "-b", "main")
     _git_fixture(kho, "config", "user.name", "Test")
@@ -3386,12 +3386,22 @@ def _kho_tut_sau(s: Path, *, bi_giu: bool) -> tuple[Path, Path | None]:
     _git_fixture(kho, "add", "x")
     _git_fixture(kho, "commit", "-qm", "cu")
     _git_fixture(kho, "branch", "a")
-    (kho / "x").write_text("moi\n", encoding="utf-8")
-    _git_fixture(kho, "commit", "-qam", "moi")
+    _git_fixture(kho, "commit", "--allow-empty", "-qm", "moi")
     _git_fixture(kho, "update-ref", "refs/remotes/origin/a", "HEAD")
-    wt = s / "wt giu" if bi_giu else None
+    wt = s / "wt giu" if trang != "ranh" else None
     if wt is not None:
         _git_fixture(kho, "worktree", "add", "-q", str(wt), "a")
+        if trang == "prunable":
+            import shutil; shutil.rmtree(wt)
+        elif trang == "hai":
+            _git_fixture(kho, "worktree", "add", "--force", "-q", str(s / "wt 2"), "a")
+        elif trang == "ban":
+            (wt / "x").write_text("ban\n", encoding="utf-8")
+        elif trang == "merge":
+            _git_fixture(wt, "merge", "--no-commit", "--no-ff", "refs/remotes/origin/a")
+        elif trang == "rebase":
+            p = subprocess.run(["git", "rebase", "--root", "--exec", "false"], cwd=wt, capture_output=True, text=True)
+            bang(p.returncode == 1, f"không dựng được rebase dở: {p.returncode} {p.stderr}")
     return kho, wt
 
 
@@ -3411,7 +3421,7 @@ def _thi_hanh_lenh_chua(kho: Path) -> tuple[str, int, str]:
 @ca
 def t109_lenh_chua_nhanh_ranh_phai_chay_duoc_va_khop_origin():
     with San() as s:
-        kho, _ = _kho_tut_sau(s, bi_giu=False)
+        kho, _ = _kho_tut_sau(s)
         lenh, rc, _ = _thi_hanh_lenh_chua(kho)
         bang(rc == 0 and lenh == "git branch -f a refs/remotes/origin/a",
              f"nhánh rảnh không giữ lệnh branch -f: {lenh!r}")
@@ -3420,7 +3430,7 @@ def t109_lenh_chua_nhanh_ranh_phai_chay_duoc_va_khop_origin():
 @ca
 def t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin():
     with San() as s:
-        kho, wt = _kho_tut_sau(s, bi_giu=True)
+        kho, wt = _kho_tut_sau(s, "sach")
         lenh, rc, _ = _thi_hanh_lenh_chua(kho)
         doi_so = shlex.split(lenh)
         bang(rc == 0 and doi_so[:2] == ["git", "-C"] and Path(doi_so[2]).resolve() == wt.resolve()
@@ -3428,28 +3438,45 @@ def t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin():
              f"lệnh không nêu đúng worktree bị giữ: {lenh!r}")
 
 
-@ca
-def t111_dot_bien_branch_f_vo_dieu_kien_chi_giet_ca_worktree_giu():
-    global SCRIPT
-    nguon = SCRIPT.read_text(encoding="utf-8")
-    cu, moi = "if ten in dang_giu:", "if False:"
-    bang(nguon.count(cu) == 1, "neo mutant branch-f vô điều kiện không duy nhất")
+def _tu_choi_worktree(trang, dau):
     with San() as s:
-        ban_goc, p = SCRIPT, s / "mut_branch_f.py"
-        p.write_text(nguon.replace(cu, moi), encoding="utf-8")
-        SCRIPT = p
-        try:
-            song, do = 0, []
-            for dich in (t109_lenh_chua_nhanh_ranh_phai_chay_duoc_va_khop_origin,
-                         t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin):
-                try: dich()
-                except AssertionError: do.append(dich.__name__)
-                else: song += 1
-        finally:
-            SCRIPT = ban_goc
-    print(f"đột biến lệnh chữa: ĐỎ={do}, đối chứng sống={song}")
-    bang(do == [t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin.__name__]
-         and song == 1, f"mutant giết sai ca: ĐỎ={do}, sống={song}")
+        kho, wt = _kho_tut_sau(s, trang)
+        rc, _, err = chay("ai-dang-giu", "ops/lease_publish.py", "--root", kho, cwd=kho)
+        bang(rc == 12 and "KHÔNG_PHÁT_LỆNH_CHỮA" in err and str(wt) in err and dau in err
+             and "Người dùng tự" in err and "chạy lại cổng" in err
+             and not any(x in err for x in ("git branch -f", "git -C", "merge --ff-only")),
+             f"không từ chối {trang}: rc={rc} {err}")
+        if trang == "hai": bang(str(s / "wt 2") in err, f"thiếu worktree thứ hai: {err}")
+        if trang == "rebase":
+            por = _git_fixture(kho, "worktree", "list", "--porcelain")
+            bang("detached" in por and "branch refs/heads/a" not in por, f"chưa đo detached rebase: {por} {err}")
+
+
+@ca
+def t111_allowlist_worktree_nam_trang_thai_va_dot_bien():
+    global SCRIPT
+    ca_tu_choi = {"prunable": "PRUNABLE", "hai": "GIỮ_BỞI_2_WORKTREE", "ban": "BẨN",
+                  "merge": "MERGE", "rebase": "REBASE"}
+    for trang, dau in ca_tu_choi.items(): _tu_choi_worktree(trang, dau)
+    nguon, ban_goc = SCRIPT.read_text(encoding="utf-8"), SCRIPT
+    muts = [("prunable", 'if "prunable" in muc:', "if False:", {"prunable"}),
+            ("last-wins", 'giu = [wt for wt in worktrees if wt.get("branch") == ref]',
+             'giu = list({wt.get("branch"): wt for wt in worktrees if wt.get("branch") == ref}.values())', {"hai"}),
+            ("sạch", 'if _git(p, "status", "--porcelain").strip():', "if False:", {"ban"}),
+            ("thao-tác-dở", "if ten in meta]", "if False]", {"merge", "rebase"}),
+            ("vô-điều-kiện", "if not an_toan:", "if False:", set(ca_tu_choi))]
+    with San() as s:
+        for i, (ten, cu, moi, dich) in enumerate(muts):
+            bang(nguon.count(cu) == 1, f"neo mutant {ten} không duy nhất")
+            p = s / f"mut_wt_{i}.py"; p.write_text(nguon.replace(cu, moi), encoding="utf-8")
+            SCRIPT, do = p, set()
+            for trang, dau in ca_tu_choi.items():
+                try: _tu_choi_worktree(trang, dau)
+                except AssertionError: do.add(trang)
+            t109_lenh_chua_nhanh_ranh_phai_chay_duoc_va_khop_origin(); t110_lenh_chua_nhanh_bi_worktree_giu_phai_chay_duoc_va_khop_origin(); song = 2
+            print(f"đột biến {ten}: ĐỎ={sorted(do)}, đối chứng cho phép sống={song}")
+            bang(do == dich and song == 2, f"mutant {ten}: ĐỎ={do}, cho phép sống={song}")
+    SCRIPT = ban_goc
 
 
 def main() -> int:

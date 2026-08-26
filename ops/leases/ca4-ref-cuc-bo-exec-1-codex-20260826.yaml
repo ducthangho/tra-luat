@@ -1,0 +1,133 @@
+# Lease EXECUTOR — `CA4-REF-CUC-BO` (#313 ca 4), lượt 1.
+#
+# Ca 4 đã THẤT BẠI MỘT LẦN, và lỗi là của phiên điều phối chứ không của executor: workspace
+# giao cho nó là một `git clone` — chỉ có ĐÚNG MỘT nhánh cục bộ — nên HIỆN TƯỢNG CẦN ĐO KHÔNG
+# TỒN TẠI trong rig. Executor đo `git rev-parse refs/heads/...` -> `fatal: unknown revision`
+# rồi ghi `KHÔNG_ĐO_ĐƯỢC` và từ chối dựng phản chứng giả. Đó là hành vi ĐÚNG.
+# Lần này rig ĐÃ ĐƯỢC DỰNG SẴN hiện tượng, và đã kiểm trước khi giao.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 313
+packet_id: CA4-REF-CUC-BO
+phase_key: CA4-REF-CUC-BO
+revision: 1
+generation: 1
+lease_id: ca4-ref-cuc-bo-exec-1-codex-20260826
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` ĐÚNG NGHĨA ĐEN ở đây: packet sửa `ops/lease_publish.py`, tầng cưỡng chế write-set
+  exclusion. Trần ADR-0044 (≤3 tệp / ≤300 dòng thêm) áp thật.
+
+spec_path: null
+spec_note: >-
+  Nguồn yêu cầu: Issue #313 mục ca 4, và comment
+  https://github.com/ducthangho/tra-luat/issues/313#issuecomment-5402804233
+  Cả hai phép đo trong đó executor PHẢI tự đo lại, không nhận lời khai.
+
+write_set:
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 10:4xZ. Phép so HAI NGUỒN chạy TRƯỚC, so bằng TẬP TÊN:
+    ls-remote 210 · for-each-ref 210 · comm RỖNG cả hai chiều
+  Rồi quét: cả hai đường dẫn -> rc=0 NGƯỜI_GIỮ 0.
+  Vừa được giải phóng bằng bia mộ `con-tro-treo-thu-hoi-claude-20260826` (#316 land `b662fe1`).
+
+branch: codex/ca4-ref-cuc-bo-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: b662fe1d07c675a222ae26e734377e305775e4f3
+start_from_sha: b662fe1d07c675a222ae26e734377e305775e4f3
+reviewed_sha_required: b662fe1d07c675a222ae26e734377e305775e4f3
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 140
+  do_tu_sha: b662fe1d07c675a222ae26e734377e305775e4f3
+  don_vi: >-
+    `git diff --numstat b662fe1d07c675a222ae26e734377e305775e4f3 -- ops/lease_publish.py ops/lease_publish_test.py`
+    — cột dòng THÊM. Pathspec TRONG lệnh, và KHÔNG `..HEAD` (sandbox không cho commit nên
+    `..HEAD` không thấy bản vá trên working tree).
+  da_dung: 0
+  ghi_chu: >-
+    140 là ƯỚC LƯỢNG CÓ NEO: hai chốt nhỏ trong `lenh_ai_dang_giu` (~20 dòng) cộng ca phản chứng
+    hai chiều và đột biến (~110). Vượt ⇒ `S2`, DỪNG, KHÔNG cắt phản chứng để lọt trần.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-26: "lam tat ca cac buoc con lai"'
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên điều phối KHÔNG thi công lượt này và SẼ là reviewer — khác nền, đúng PROTOCOL:580.
+  Chính phiên này đã VẤP cả hai hiện tượng dưới đây trong lúc vận hành, nên chúng có phép đo
+  thật chứ không phải giả thuyết.
+
+leased_at_utc: '2026-08-26T10:45:00Z'
+lease_expires_at_utc: '2026-08-27T10:45:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  `ops/lease_publish.py`: hàm `lenh_ai_dang_giu` và `_quet_lease_toan_kho`, cộng hàm mới do
+  packet này thêm. `ops/lease_publish_test.py`: ca mới và bảng đăng ký ca/mutant.
+  Hunk ngoài các vùng ấy ⇒ ĐỎ. TRƯỜNG NÀY SỐNG TRONG LEASE, không ở tài liệu nào khác.
+
+viec_cua_luot_nay: >-
+  HAI khuyết tật của `ai-dang-giu`, cả hai đã xảy ra THẬT với phiên điều phối.
+
+  === (A) NGƯỜI-GIỮ-MA từ nhánh CỤC BỘ tụt sau ===
+  `_quet_lease_toan_kho` quét cả `refs/heads/*`. Một nhánh cục bộ sót lại từ worktree cũ, tụt
+  sau đối ứng remote, làm `ai-dang-giu` báo NGƯỜI_GIỮ cho một lease ĐÃ bị thay thế.
+  Đo được: `refs/heads/ops/cap-lease-t33-doi-shellcheck` ở `1bb5fc8` trong khi
+  `refs/remotes/origin/…` ở `d4facdb` ⇒ `rc=11`; `git branch -f` cho khớp ⇒ `rc=0` NGAY, không
+  đổi gì khác. Đây là lỗi RIG làm cổng fail-close CHẶN NHẦM việc hợp lệ.
+  THEO D4 ĐÃ CHỐT: khai rõ trong output rằng nó quét `refs/heads/*`, và **CHẶN** khi một nhánh
+  cục bộ tụt sau `origin/<cùng tên>`, nêu ĐÍCH DANH nhánh + lệnh chữa.
+  ĐỪNG chữa bằng cách bỏ `refs/heads/*` khỏi phạm vi quét — nhánh cục bộ CHƯA ĐẨY là chỗ lease
+  mới nhất nằm; bỏ nó là mở đúng lỗ mà nợ `SO-LEASE-KHONG-NAM-MOT-CHO` đã tố cáo.
+
+  === (B) ĐẾM TRÙNG: `NGƯỜI_GIỮ` là số (lease × ref), không phải số LEASE ===
+  `lenh_ai_dang_giu` làm `nguoi_giu.append(lease_id)` KHÔNG khử trùng. Cùng một lease nằm trên
+  hai ref được đếm thành HAI người giữ.
+  Đo được: `ai-dang-giu ops/specs/LAUNCHER-DUNG-WORKSPACE-r3.md` trả `NGƯỜI_GIỮ 5`, trong đó
+  `launcher-r3-va-p1p2-exec-1r7-codex-20260824` xuất hiện HAI LẦN — một từ
+  `refs/heads/ops/cap-lease-launcher-r3-va-r5`, một từ `refs/remotes/origin/…`.
+  VÁ: khử trùng theo `lease_id`. Con số phải là số LEASE.
+  CẨN THẬN: khử trùng KHÔNG được che mất ca (A) — hai ref có cùng `lease_id` nhưng NỘI DUNG
+  khác nhau (một bản tụt sau) vẫn phải làm cổng kêu theo (A).
+
+  MỖI ca phải có phản chứng HAI CHIỀU và đột biến RIÊNG:
+    · (A) chặn đúng khi nhánh cục bộ tụt sau; KHÔNG chặn khi nhánh cục bộ khớp hoặc ĐI TRƯỚC
+      remote (nhánh chưa đẩy là hợp lệ — đây là chiều bắt-oan, thiếu nó thì cổng chặn oan mọi
+      phiên đang làm việc).
+    · (B) cùng lease trên hai ref đếm MỘT; hai lease KHÁC NHAU vẫn đếm HAI.
+  Đột biến gỡ từng chốt phải làm ca đích ĐỎ.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ⇒ DỪNG ·
+  S2 vượt 140 dòng thêm ⇒ DỪNG, khai phần chưa làm, KHÔNG cắt phản chứng ·
+  S3 kết luận (A) và (B) xung đột — khử trùng làm mất khả năng phát hiện nhánh tụt sau — ⇒
+  DỪNG, trình phép đo, xin quyết định ·
+  S4 không tái hiện được (A) hoặc (B) bằng phép đo của chính mình ⇒ `KHÔNG_ĐO_ĐƯỢC`, DỪNG ·
+  S5 `origin/master` đã đi tiếp so `base_sha` mà chưa đo lại.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) SANDBOX MOUNT `.git` CHỈ ĐỌC — không commit, không push.
+  (2) RIG ĐÃ ĐƯỢC DỰNG SẴN hiện tượng (A): trong `cay/` có một nhánh cục bộ CỐ Ý tụt sau đối
+  ứng remote của nó. Đã kiểm trước khi giao. Nên `KHÔNG_ĐO_ĐƯỢC` cho (A) là câu trả lời ĐÁNG
+  NGỜ — nếu định ghi, hãy nêu lệnh và output thật.
+  (3) Bạn đang sửa cổng thẩm quyền ghi. Một cổng CHẶN OAN còn tệ hơn không có cổng. Chiều
+  bắt-oan của (A) — nhánh cục bộ ĐI TRƯỚC remote phải QUA — là bắt buộc, không phải tuỳ chọn.
+  (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.

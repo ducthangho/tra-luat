@@ -1054,7 +1054,7 @@ docstring `t34` trỏ `t42` đã bị gỡ). Nên bảng dưới đây **do máy
 
 ```
 PY="$(command -v python3 || command -v python || command -v py)"   # CLAUDE.md: nhận CẢ BA tên
-"$PY"  .claude/dev/packet_loop.py adr-song --root .
+"$PY"   .claude/dev/packet_loop.py adr-song --root .
 ```
 
 Cổng ấy ĐỎ khi: một ADR không có dòng trong bảng · bảng trỏ một ADR không tồn tại · một ADR có

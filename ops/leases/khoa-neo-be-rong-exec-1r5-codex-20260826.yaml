@@ -195,3 +195,4 @@ canh_bao_cho_nguoi_thi_hanh: >-
   (3) ĐỪNG "sửa" bằng cách xoá ca hay nới `except` cho nuốt luôn `OSError` — đó là làm cổng
   xanh bằng cách bịt mắt nó.
   (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+posted_comment_id: 5424492758   # workflow ghi, ĐỪNG sửa tay

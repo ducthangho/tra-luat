@@ -1,4 +1,13 @@
-# ĐẶC TẢ — `MCP-GH-CUU-HO` (Issue #319)
+# ĐẶC TẢ — `MCP-GH-CUU-HO` (Issue #319) — **BẢN SỬA ĐỔI 2**
+
+> **r2 sửa gì, và vì sao.** Bản r1 (`51105214fe121a…`) đã được thi công một lượt bởi `codex xhigh`
+> và lượt ấy **lộ ra hai khuyết tật của chính đặc tả**, không phải của bản vá: (a) `D7`/`D8` giả
+> định ngầm rằng sổ nền XANH, nên khi bốn ca nền đỏ thì **mọi** đột biến đều "giết" thêm bốn ca ấy
+> và phép "đúng một ca" cho `0/35` — một con số đúng mà đọc thành sai; (b) `D9` khai trần 750
+> trong khi lease đã nâng 1000, hai mệnh đề không cùng đúng được. Cộng một ràng buộc thiết kế mà
+> r1 không nêu: **ca của một tiêu chí không được đi qua đúng đoạn mã mà đột biến của tiêu chí khác
+> nhắm vào** — ba đột biến `b1`/`b3`/`b5` sống sót vì đúng chuyện đó.
+> r1 KHÔNG bị bác về nội dung; ba mươi tiêu chí giữ nguyên trừ những chỗ ghi rõ dưới đây.
 
 Đặc tả này ĐÓNG BĂNG bằng băm. Lease neo vào `spec_sha256`. Sửa nội dung ⇒ băm đổi ⇒ lease trỏ
 vào thứ không còn tồn tại, phải đi qua bản sửa đổi mới. Soạn bằng skill `soan-spec`.
@@ -117,6 +126,14 @@ hai P1 không thuộc packet này (`reviewer-shell-is-not-read-only` → #318;
 | A7 | **307**/**308** cũng không rò | ca riêng; hiện `urllib` đã ném `HTTPError` nên ca này XANH sẵn — giữ để đột biến "tự viết handler đi theo mọi mã" bị giết |
 | A8 | Đường thuận không hỏng: `/mcp/` và `/mcp/x/actions` vẫn dựng phiên được | chặn nhầm đích hợp lệ ⇒ ĐỎ |
 
+**Yêu cầu MÔI TRƯỜNG cho `A5`–`A7` (r2 thêm):** ba ca ấy cần dựng **hai máy chủ loopback**, tức cần
+quyền `bind` trên `127.0.0.1`. Đo được ở lượt 1: sandbox `codex` **từ chối** (`PermissionError:
+[Errno 1] Operation not permitted`), còn vỏ phiên điều phối và runner CI `ubuntu-latest` thì cho.
+Môi trường cấm `bind` ⇒ ba ca ấy **ĐỎ**, KHÔNG được "bỏ qua" và tuyệt đối KHÔNG được thay bằng
+kiểm tra giả để lấy `rc=0` — executor lượt 1 đã từ chối làm thế, và đó là hành xử đúng. Kéo theo
+`D7b`: nền đỏ thì ô đột biến in `KHÔNG_ĐO_ĐƯỢC`. **Chọn NỀN chạy suite là một quyết định vận hành,
+không phải chi tiết**; nghiệm thu cuối phải chạy ở nền cho `bind`.
+
 ### B. Chín bất biến phải sống sót (mục tiêu 7)
 
 | # | bất biến | phép đo làm nó ĐỎ |
@@ -149,6 +166,14 @@ lỗi vòng 2 — "tách sổ mà không đòi sổ nền khác rỗng thì chư
 
 ### D. Hợp đồng và cổng (mục tiêu 4–5, 8)
 
+**Ràng buộc thiết kế cho MỌI ca (r2 thêm, sau khi ba đột biến sống sót vì thiếu nó):** ca của một
+tiêu chí **không được đi qua** đúng đoạn mã mà đột biến của tiêu chí KHÁC nhắm vào. Ba ca sống sót
+ở lượt 1 vì vi phạm: `b1_bo_data` giết cả `B1` lẫn `B2` (ca `B2` đi qua đường tách thân SSE);
+`b3_bo_token` giết cả `B3` lẫn `D6` (ca CLI khẳng định `rc=3` sinh từ chốt token);
+`b5_bo_urlerror` giết cả `B5` lẫn `D5`. Cách chữa là **đổi ĐƯỜNG VÀO của ca bị vạ lây**, không
+phải nới phép đếm: `B2` gọi thẳng hàm rút văn bản; `D6` cấp token hợp lệ rồi mới đo mã thoát của
+cờ; `D5` bơm lỗi vận chuyển qua một điểm khác điểm `B5` dùng.
+
 | # | tiêu chí | phép đo làm nó ĐỎ |
 |---|---|---|
 | D1 | `tools/call` trả top-level `error` ⇒ `main` trả mã khác 0 | ca bơm phản hồi lỗi; hiện `main` trả `0` ⇒ ĐỎ |
@@ -158,8 +183,9 @@ lỗi vòng 2 — "tách sổ mà không đòi sổ nền khác rỗng thì chư
 | D5 | Lỗi vận chuyển khi gửi `notifications/initialized` ⇒ phiên KHÔNG được coi là mở | ca bơm lỗi ở lời gọi thứ hai; hiện giá trị trả bị bỏ ⇒ ĐỎ |
 | D6 | Bốn lời gọi CLI cũ chạy y nguyên trên bản mới: `--liet-ke` · `<tên> '<json>'` · `--path` · mã thoát `0/2/3` | ca chạy `main()` cho từng dạng; đổi tên cờ hoặc đổi mã thoát ⇒ ĐỎ |
 | D7 | Suite đầy đủ: hai số **BẰNG NHAU** và **> 0**, mọi đột biến bị giết, `rc=0` | `rc` trần KHÔNG đủ — phải đọc dòng tổng kết. Đây chính là bài học của packet |
-| D8 | Mỗi đột biến giết **đúng một** ca | giết 0 ca ⇒ ca không có răng; giết nhiều ca ⇒ ca trùng phạm vi |
-| D9 | Ngân sách: `git diff --numstat` trên write set, cột dòng THÊM, **≤ 750** | vượt ⇒ điều kiện dừng `S2` của lease, DỪNG và xin nâng trần bằng khối có `ai_nang`/`vi_sao` |
+| D7b | **Sổ nền phải XANH thì phép đếm đột biến mới có nghĩa.** Nền đỏ ⇒ cổng ĐỎ vì lý do NỀN, và ô đột biến in **`KHÔNG_ĐO_ĐƯỢC`**, KHÔNG in `0/N` | r2 thêm sau phép đo lượt 1: bốn ca nền đỏ làm MỌI đột biến "giết" thêm đúng bốn ca ấy, nên "đúng một ca" không bao giờ thoả và cổng in `0/35`. Con số ấy ĐÚNG mà đọc thành "không đột biến nào có răng" — sai hẳn. **Cấm trừ ca đỏ nền để lấy một con số đẹp**: trừ đi là giấu nền hỏng. Đường đúng là fail-close: nói thẳng chưa đo được |
+| D8 | Mỗi đột biến giết **đúng một** ca, so với tập đỏ nền phải RỖNG | giết 0 ca ⇒ ca không có răng; giết nhiều ca ⇒ ca trùng phạm vi. Nền không rỗng ⇒ xem `D7b`, không kết luận |
+| D9 | Ngân sách: `git diff --numstat` trên write set, cột dòng THÊM, **≤ trần của lease đang hiệu lực** | vượt ⇒ điều kiện dừng `S2`, DỪNG và xin nâng trần bằng khối có `ai_nang`/`vi_sao`. **r2 CỐ Ý không ghi cứng con số ở đây**: r1 ghi `≤ 750` rồi lease nâng lên 1000, và hai mệnh đề không cùng đúng được — đó chính là hình dạng "sửa TRƯỜNG, quên VĂN BẢN" mà packet này sinh ra để chặn. Đặc tả trỏ sang trường có thẩm quyền thay vì chép lại nó |
 
 Đột biến chạy trên **bản sao tạm**, tên tệp riêng, không ghi vào tệp thật — kho đã trả giá cho một
 bản vá NGƯỢC đi thẳng vào commit vì `finally` không chạy khi lượt bị `SIGTERM` cắt.
@@ -187,6 +213,24 @@ số `300`/`1.000` nào, và `numstat` chỉ xuất hiện ở `ops/chatgpt_revi
 bundle review**, không phải cổng. Ngưỡng ADR-0044 hiện là **kỷ luật đọc**, không phải cổng. Ghi ra
 vì một cổng vắng mặt trông y hệt một cổng xanh, và vì nợ này không thuộc packet nào đang mở.
 
+## Vượt ngưỡng ADR-0044 — KHAI LÝ DO, đúng đường ADR cho phép
+
+Đo 11:22Z 26-08, sau lượt thi công 1: write set đã dùng **1000 dòng thêm** (`mcp_gh.py` 226 ·
+`mcp_gh_test.py` 564 · đặc tả r1 210). Bản sửa đổi này cộng thêm ~55 dòng, và năm bản vá đột biến
+cộng thêm ít nữa ⇒ tổng **vượt 1.000**, tức vượt ngưỡng lớp `thường` của ADR-0044.
+
+ADR-0044 cho đúng hai đường: *"dừng TRƯỚC review để revision thiết kế, **hoặc khai lý do trong
+spec**"*. Đây là lời khai ấy.
+
+**Lý do:** trần bị tiêu bởi chính **đặc tả** — nó nằm trong write set, nên hợp đồng bị tính vào
+ngân sách của thứ nó điều khiển. 210 dòng đặc tả và ~55 dòng bản sửa đổi này **không phải bề mặt
+mã**, không mang rủi ro hồi quy, và đã qua hai vòng chất vấn của người giữ kho. Phần MÃ thật là
+790 — dưới 1.000, và chỉ nhỉnh hơn 541 của bản bị bác đúng phần ca và đột biến mà đặc tả đòi thêm.
+
+**Điều này KHÔNG được đọc thành "ngưỡng không áp dụng".** Nó chỉ nói: với packet có đặc tả nằm
+trong write set, con số `numstat` trộn hai thứ khác loại. Nếu lượt sau lại chạm trần, câu trả lời
+đúng là **TÁCH** — ADR nói thẳng thế — chứ không phải khai lý do lần nữa.
+
 ## chua_do_duoc
 
 1. **Chuyển hướng của điểm cuối THẬT.** Bảng 301..308 đo trên hai `http.server` cục bộ, tức đo
@@ -203,7 +247,11 @@ vì một cổng vắng mặt trông y hệt một cổng xanh, và vì nợ nà
    vô hướng, nên một lease bị **hai** lease thay thế — đúng ca `r4` của #314 bị #318 và #319 phân
    hoạch — **không biểu diễn được**. Hai lease ấy đã đăng TRƯỚC khi cổng land nên lọt; lease nào
    sau này muốn khai cùng quan hệ sẽ bị chặn. Chưa đo hết hệ quả; đã báo #313.
-6. **`lease_publish.py check` chạy từ HEAD TÁCH RỜI không thấy lease vừa commit.**
+6. **Lượt thi công 1 KHÔNG chạy được `A5`–`A7`** trong sandbox của nó (thiếu quyền `bind`), nên
+   ba tính chất chuyển hướng — thứ chỉ có phiên tiếp quản đo được, và là lỗ P1 thứ ba của packet —
+   **chưa từng được xác nhận bởi một nền độc lập với nền đã phát hiện ra chúng**. Vỏ phiên điều
+   phối chạy được, nhưng nó cũng chính là nơi phát hiện. Cần một lượt chạy ở CI hoặc nền thứ ba.
+7. **`lease_publish.py check` chạy từ HEAD TÁCH RỜI không thấy lease vừa commit.**
    `_cac_ref_cuc_bo` chỉ đọc `refs/heads` + `refs/remotes`, nên commit ở HEAD tách rời là vô hình.
    Đo được: cùng một commit, HEAD tách rời ⇒ `rc=8`; trỏ một nhánh vào đúng commit ấy ⇒ `rc=0`.
    Đáng chú ý vì kho cho reviewer chạy ở **detached exact head**. Chưa đo hệ quả cho đường review;

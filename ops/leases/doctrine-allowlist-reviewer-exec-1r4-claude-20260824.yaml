@@ -180,3 +180,4 @@ thay_the_ly_do: >-
   Cộng nâng trần 520→760: bản vá lượt 3 đưa tổng lên 687 dòng (docs 146 · mcp_gh 207 ·
   mcp_gh_test 334). Phần tăng nằm phần lớn ở TEST — 334/687 — vì đóng hai P1 đòi thêm ba ca và
   bốn đột biến, trong đó có đúng đột biến `DIEM_CUOI → example.invalid` mà bộ cũ không giết được.
+posted_comment_id: 5422760600   # workflow ghi, ĐỪNG sửa tay

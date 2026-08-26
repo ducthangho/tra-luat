@@ -318,10 +318,10 @@ thay_the_cho_r1_ly_do: >-
   trường là `da_dung: 687` / `dong_them_toi_da: 760`; và MẤT HẲN khối `nang_tran` nên trần 760
   không có thẩm quyền ghi nhận. Đó là lần THỨ TƯ cùng một hình dạng: sửa TRƯỜNG được nới, quên
   VĂN BẢN mô tả nó — nên lease này đã được grep lại toàn văn sau khi soạn.
-# posted_comment_id: CHƯA ĐĂNG — workflow sẽ ghi. ĐỪNG điền tay.
 
-# Thêm TAY sau khi lease đã đăng — `posted_comment_id` ở trên giữ nguyên, cổng trả rc=9 và
-# KHÔNG đăng lại. Ghi ở đây chứ không ở comment vì lease là thứ có thẩm quyền; comment là bản chiếu.
+# Khối dưới được thêm TAY sau khi lease đã đăng. `posted_comment_id` (khoá ấy nằm ở CUỐI TỆP,
+# do workflow ghi) giữ nguyên, nên cổng trả rc=9 và KHÔNG đăng lại. Ghi ở tệp chứ không ở comment
+# vì lease là thứ có thẩm quyền; comment chỉ là bản chiếu.
 base_da_do_lai:
   vi_sao: >-
     Điều kiện dừng `S4` của chính lease này đã BẮN lúc 09:57Z 26-08: `origin/master` trôi
@@ -358,3 +358,22 @@ base_da_do_lai:
     Phép đo này chỉ đúng cho lần trôi tới `b662fe1`. Master trôi tiếp ⇒ `S4` bắn lại và phải
     chạy LẠI đủ bốn phép đo trên; đừng đọc khối này thành "base đã được miễn kiểm vĩnh viễn".
 posted_comment_id: 5426283891   # workflow ghi, ĐỪNG sửa tay
+comment_trung_lap:
+  id_bo_di: '5426284747'
+  ai_dang: 'phiên điều phối (claude), ĐĂNG THỪA'
+  chuyen_gi_xay_ra: >-
+    Phiên đẩy lease lúc `6802aa8`; workflow `dang-lease` bắt được và ĐĂNG NGAY, ghi
+    `posted_comment_id: 5426283891` rồi commit ngược lại (`7492122`). Phiên KHÔNG chờ workflow,
+    tự chạy `lease_publish.py body` rồi đăng tay comment thứ hai `5426284747` — nội dung Y HỆT
+    (cùng 22535 ký tự). Lỗi của phiên điều phối, không phải của cổng.
+  cai_nao_co_tham_quyen: '`5426283891` — của workflow, và có id NHỎ HƠN nên đăng TRƯỚC'
+  vi_sao_khong_xoa: >-
+    `mcp_gh.py` không có công cụ xoá/sửa comment (44 công cụ, chỉ có `add_issue_comment`), và
+    `gh` CLI không có trên nền này. Nên đánh dấu tại chỗ thay vì xoá — comment thừa vẫn nằm đó,
+    đọc lease này mới biết cái nào có thẩm quyền.
+  vi_sao_DANG_KE: >-
+    Đây là ĐÚNG điều kiện gây lỗi đếm `NGƯỜI_GIỮ` đã báo #313: `_quet_lease_toan_kho` khử trùng
+    bằng `(blob, đường dẫn)` chứ không bằng `lease_id`, nên MỘT lease có HAI blob (bản trước và
+    bản sau khi workflow ghi `posted_comment_id`) bị đếm thành HAI người giữ. Lần này phiên còn
+    tạo thêm một blob thứ ba. Ai đo `ai-dang-giu` trên `docs/GOI_AGENT_DA_NEN.md` sau mốc này
+    phải trừ bằng tay, hoặc đợi #313 vá xong.

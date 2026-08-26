@@ -95,7 +95,7 @@ target_branch_neu_land: master
 
 base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
 start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
-reviewed_sha_required: 9adfd57e84daf93a931e6781809c61d046dca374
+reviewed_sha_required: ed50b734611fe9f5a1b8c332458b52fdcaabe43a
 base_ghi_chu: >-
   `c35ae1c` = `origin/master` lúc cấp, ĐO trong phiên (không chép từ hồ sơ bàn giao), và cũng là
   merge của PR #310. Nhánh rẽ SẠCH từ đây, KHÔNG kế thừa `6c4140b` của PR #315 (đã đóng, không
@@ -111,7 +111,7 @@ lich_su_reviewed_sha:
 - {vong: 4, sha: 6d0a183e4af6422d85af1d6d3373fcbab2c7e83e, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-4-codex-verdict.receipt.yaml', tieu_chi: 'BẢN SỬA ĐỔI 2 — acceptance KHÔNG đổi ở r3, chỉ write_set đổi', ket_qua: 'P1=1 P2=2; N2 KHÔNG ĐẠT (lần thứ hai liên tiếp), bảy tiêu chí còn lại ĐẠT'}
 - {vong: 5, sha: 770b3af3399b6794874008dd907f1dfaad6c5dba, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-5-codex-verdict.receipt.yaml', tieu_chi: 'BẢN SỬA ĐỔI 2 — acceptance vẫn KHÔNG đổi; r4 chỉ đổi write_set và objective', ket_qua: 'P1=1 P2=1; N2 KHÔNG ĐẠT, bảy tiêu chí còn lại ĐẠT. Reviewer BÁC đề xuất thu bảng về ba hạng — giữ đủ năm là đúng.'}
 - {vong: 6, sha: 70311ee3f073d3a905ba59d0851dd2ce9355cd8e, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-6-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0 — GẦN LAND NHẤT. Chỉ N2 rớt; nhãn đúng cú pháp mà sai nghĩa ở một hàng.'}
-- {vong: 7, sha: 9adfd57e84daf93a931e6781809c61d046dca374, verdict: 'CHƯA CÓ'}
+- {vong: 7, sha: ed50b734611fe9f5a1b8c332458b52fdcaabe43a, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-7-codex-verdict.receipt.yaml', ket_qua: 'P1=3 P2=3; N2 VÀ N3 đều KHÔNG ĐẠT. Hai nhãn SAI NGHĨA; lượt tự soát tìm 4 bỏ sót 6.', ghi_chu: 'neo là ed50b73 chứ không phải 9adfd57 — vòng 7 chấm bản SAU lượt tự soát'}
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 2
@@ -123,7 +123,7 @@ ngan_sach_kich_thuoc:
   dong_them_toi_da: 200
   do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
   don_vi: '`git diff --numstat c35ae1c..HEAD -- docs/GOI_AGENT_DA_NEN.md` — cột dòng THÊM, CHỈ tệp này'
-  da_dung: 149
+  da_dung: 155
   ghi_chu: >-
     200 là trần sau khi NÂNG LẦN HAI; xem `nang_tran_lan_hai`. 198 là số ĐÃ ĐO sau vòng vá 4
     (`git diff --numstat c35ae1c -- docs/GOI_AGENT_DA_NEN.md`), không phải ước lượng.

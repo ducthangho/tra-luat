@@ -1,0 +1,87 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 7 của PR #322 (packet #318).
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '318'
+packet_slug: DOCTRINE-RANH-GIOI-REVIEWER
+lease_id: null
+lease_review_KHONG_DUOC_CAP: 'lease đang sống là lease EXECUTOR r4; không có lease review riêng'
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: ed50b734611fe9f5a1b8c332458b52fdcaabe43a
+reviewed_tree: 9e9786cea4524088147a4ecce123bfb3695b125d
+luot: 7
+cross_provider: true
+assurance: cross_approved
+verdict_path: ops/reviews/doctrine-ranh-gioi-reviewer-review-7-codex-verdict.md
+verdict_sha256: b7d7859d908bd537759094f8f7f0b6e84064225a919ce68444c9bbe63a2cf089
+verdict_bytes: 21544
+verdict_nguon: >-
+  `codex exec -s workspace-write -c model_reasoning_effort=xhigh` trong `launcher.py run`,
+  `--expected-head ed50b73…`, `--require-clean`, prompt neo băm `edf23175…`.
+  881.9s, `ma_thoat=0`, `trang_thai=xong`, `worktree_sach: true`.
+
+ket_qua_dem_duoc:
+  P1: 3
+  P2: 3
+  dem_bang_lenh: >-
+    Đếm CHỈ trong mục "FINDING CÒN MỞ / FINDING MỚI" bằng awk giới hạn vùng rồi grep tiêu đề.
+    Khớp lời khai của reviewer ("Finding P1/P2: 3/3").
+  slug_hien_hanh:
+  - {slug: nam-hang-khong-tao-phan-hoach, hang: P1, mo_tu: 'vòng 2', chua_dong_lan_nao: true}
+  - {slug: allowedtools-hep-bi-xep-sai-hang, hang: P1, trang_thai: MOI}
+  - {slug: may-phat-hien-khong-phat-hien-push, hang: P1, trang_thai: MOI}
+  - {slug: bon-control-thuc-ra-ba, hang: P2, trang_thai: MOI}
+  - {slug: ba-cau-nhung-liet-ke-bon, hang: P2, trang_thai: MOI}
+  - {slug: packet-rieng-khong-co-neo, hang: P2, trang_thai: MOI}
+  cham_tieu_chi: {N1: DAT, N2: KHONG_DAT, N3: KHONG_DAT, N4: DAT, N5: DAT, N6: DAT, N7a: DAT, N7b: DAT}
+
+DI_LUI_SO_VOI_VONG_6:
+  vong_6: 'P1=1 P2=0 — vòng gần land nhất'
+  vong_7: 'P1=3 P2=3, và N3 rớt THÊM sau bốn vòng liền ĐẠT'
+  vi_sao_KHONG_phai_ban_va_lam_te_di: >-
+    Vòng 6 chỉ soi ĐÚNG hàng nó đã nêu. Vòng 7 được prompt yêu cầu soi TOÀN BỘ vùng VÀ kiểm lại
+    lượt tự soát, nên đào sâu hơn hẳn. Con số tăng nghĩa là vùng này chưa từng được soi tới mức
+    ấy, không phải bản vá làm tệp xấu đi. Đừng đọc 1->3 thành hồi quy.
+
+LUOT_TU_SOAT_TIM_4_BO_SOT_6:
+  tim_duoc: 4
+  bo_sot: 6
+  hai_cai_DA_KIEM_VA_CHO_QUA_SAI:
+    ba-cau-nhung-liet-ke-bon: >-
+      Tôi ĐÃ kiểm cụm "ba câu" và cho qua, vì đối chiếu với Issue #318 vốn nêu ba câu mâu thuẫn.
+      SAI HƯỚNG: phải đối chiếu với THÂN NGAY DƯỚI, nơi liệt kê BỐN vế (khai/gọi/dùng/bảo) và tự
+      gọi là "Cả bốn câu". Hai phép đếm chỏi nhau trong tám dòng. Lại đúng bệnh cũ: đo một câu
+      hỏi DỄ HƠN câu hỏi thật.
+    packet-rieng-khong-co-neo: >-
+      Tôi QUYẾT ĐỊNH không ghi số hiệu packet đã tách, lý do "tệp chưa hề chứa số hiệu nào nên
+      thêm vào là phá quy ước". Reviewer bác: VẮNG MẶT không phải QUY ƯỚC CẤM, và protocol xem
+      Issue number là ID BỀN của packet; đo được lease blob cục bộ ghi đích là #334 trong khi tệp
+      có bốn câu "packet riêng / packet kia" không neo vào đâu.
+      Đây là ĐỌC VẮNG MẶT THÀNH LUẬT — đúng lớp lỗi tôi đã mắc một lần trong phiên này và đã tự
+      ghi vào doctrine.
+
+HAI_NHAN_SAI_NGHIA_PHEP_QUET_CU_PHAP_KHONG_THAY:
+  allowedtools_hep: >-
+    Tôi xếp `chưa xếp được`. Reviewer: cơ chế khớp-tiền-tố ĐÃ BIẾT và năm lệnh bị từ chối ĐÃ ĐO,
+    nên với mệnh đề "luật hẹp gặp lệnh ghép" nó là `cơ chế đã xác minh — chiều ĐÓNG`.
+  may_phat_hien: >-
+    Tôi gọi clone rời + `--require-clean` + kiểm cây sạch là `máy phát hiện`. Reviewer: BẰNG
+    CHỨNG NGAY TRƯỚC ĐÓ trong chính tệp nói `--require-clean` VẪN BÁO SẠCH sau khi push đã xảy
+    ra — tức nó KHÔNG tố cáo. Nhãn bị bác bởi câu đứng cách nó vài dòng.
+  he_qua_so_dem: >-
+    Số đúng sau khi sửa hai nhãn: `chiều ĐÓNG` x1 · `chiều MỞ` x4 · `chưa xếp được` x2 ·
+    `máy phát hiện` x0. Vẫn "ba hạng được dùng" và vẫn "hai ô chưa xếp được" — QUAN HỆ TỔNG giữ
+    nguyên nhưng DANH TÍNH các số hạng đổi hết. Reviewer gọi đúng tên lớp lỗi: "quan hệ còn đúng
+    không chứng minh các số hạng còn đúng".
+  vi_sao_NGHIEM: >-
+    `chiều ĐÓNG` x1 nghĩa là ô ấy KHÔNG rỗng — mà toàn bộ lập luận tôi viết ở vùng định nghĩa
+    dựng trên tiền đề nó RỖNG. Reviewer vòng 6 đã DUYỆT lập luận ấy; nay nó đổ vì một phép đo
+    khác. Một lập luận được duyệt không có nghĩa là nó đúng.
+
+N3_ROT_LAN_DAU_SAU_BON_VONG:
+  vi_sao: >-
+    Câu văn xuôi và TIÊU ĐỀ mục vẫn là khẳng định TUYỆT ĐỐI ("không control nào bó được QUYỀN GHI
+    VÀO KHO") trong khi đoạn ngay dưới vừa hạ kết luận mạnh nhất xuống "chưa đo được control nào
+    CHẶN". Lượt tự soát hạ VĂN XUÔI mà quên TIÊU ĐỀ — dù chính lượt ấy CÓ sửa tiêu đề (đổi "tầng"
+    thành "control") và vẫn để nguyên lượng từ tuyệt đối. Sửa nửa câu là chưa sửa.

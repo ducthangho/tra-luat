@@ -160,3 +160,4 @@ thay_the_ly_do: >-
   bỏ ngoại lệ `settings.local.json` vì không cần nữa; `S1` đổi nghĩa; `chua_do_duoc_luc_cap`
   đánh số lại và thêm hai mục mới lộ ra từ phép đo. `recorder_ghi_chu` khai phần mất độc lập
   còn lại. Tự soi bằng grep sau khi soạn.
+posted_comment_id: 5427079794   # workflow ghi, ĐỪNG sửa tay

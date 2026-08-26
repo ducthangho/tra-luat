@@ -262,3 +262,4 @@ phat_hien_boi: >-
   Phiên điều phối, trong lúc đọc `git diff` của lượt 6 để nghiệm thu. KHÔNG phải reviewer
   chéo nền — lượt review của r6 chưa chạy. Ghi ra đây để không ai đọc nhầm rằng cổng review
   đã bắt được nó.
+posted_comment_id: 5425109620   # workflow ghi, ĐỪNG sửa tay

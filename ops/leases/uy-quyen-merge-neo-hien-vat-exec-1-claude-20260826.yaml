@@ -69,3 +69,4 @@ chong_lan_write_set_phan_xu: >-
   Căn cứ cho phép chồng: phép đo ở `chong_lan_write_set_da_khai` chứng minh KHÔNG có writer
   thứ hai (packet kia đã land, nhánh là tổ tiên của master). Nếu phép đo ấy sai thì lease
   này sai — nó đứng trên phép đo, không đứng trên lời khai.
+posted_comment_id: 5429763594   # workflow ghi, ĐỪNG sửa tay

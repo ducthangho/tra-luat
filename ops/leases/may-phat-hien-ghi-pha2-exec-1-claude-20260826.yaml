@@ -60,3 +60,4 @@ chong_lan_write_set_da_khai: >-
   Hai tệp hook là TỆP MỚI (chưa tồn tại); `.claude/settings.json` có sẵn, NGƯỜI_GIỮ 0.
   Đặc tả pha 1 (`ops/specs/agent-may-phat-hien-ghi.md`, land ở 6031222) KHÔNG nằm trong
   write set này — pha 2 đọc nó, không sửa nó.
+posted_comment_id: 5429760706   # workflow ghi, ĐỪNG sửa tay

@@ -1,0 +1,107 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 4 của PR #322 (packet #318).
+# Ghi NGAY SAU LƯỢT, trước khi vá gì.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '318'
+packet_slug: DOCTRINE-RANH-GIOI-REVIEWER
+lease_id: null
+lease_review_KHONG_DUOC_CAP: >-
+  Không có lease review riêng; lease đang sống là lease EXECUTOR
+  `doctrine-ranh-gioi-reviewer-exec-1r3-claude-20260826`. Để `null` và nói ra.
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 6d0a183e4af6422d85af1d6d3373fcbab2c7e83e
+reviewed_tree: 5557a399cc959a8cbc10f666f120da83cd3f60e0
+luot: 4
+cross_provider: true
+assurance: cross_approved
+assurance_ghi_chu: >-
+  Khác nền (executor claude / reviewer codex). Vận chuyển bằng `add_issue_comment` của TÀI KHOẢN
+  TÁC GIẢ PR, KHÔNG phải `REQUEST_CHANGES`; `ADR-0040` nói thẳng thứ đó không thành merge
+  authorization.
+
+verdict_path: ops/reviews/doctrine-ranh-gioi-reviewer-review-4-codex-verdict.md
+verdict_sha256: 6c1b24798fe97e1a60bd2f22746e404b4b7eaa24bca7e39a3b2e0dce3a157a4d
+verdict_bytes: 14616
+verdict_nguon: >-
+  `codex exec -s workspace-write -c model_reasoning_effort=xhigh` trong `launcher.py run`,
+  `--expected-head 6d0a183…`, `--expected-ref claude/doctrine-ranh-gioi-reviewer-exec-1`,
+  `--require-clean`, prompt neo băm
+  `a769c133d43f7ccb71df9c5b207a7427ac5db42ac3ef8012fa53b96d47c1aeee`.
+  `run_id` `4e0d5e99`, 1027.8s, `ma_thoat=0`, `trang_thai=xong`, `worktree_sach: true`.
+
+ma_thoat_KHONG_PHAI_BANG_CHUNG: >-
+  `ma_thoat=0` ghi để tra, KHÔNG phải căn cứ nghiệm thu. Căn cứ là TỆP verdict 14616 byte, neo
+  băm ở trên, đã đọc hết và đã đối chiếu lại bằng hashlib.
+
+doi_chieu_luot_truoc:
+  da_va_that: 0
+  va_ho: 1
+  va_sinh_loi_moi: 1
+  chua_va: 0
+  don_vi_dem: 'hai slug của VERDICT lượt 3, mỗi slug một phán quyết'
+  va_ho_chi_tiet: {slug: nam-hang-khong-tao-phan-hoach, con_mo_tu: 'vòng 3'}
+  va_sinh_loi_moi_chi_tiet: {slug: probe-mang-moi-khong-tai-lap-duoc, sinh_ra: ['probe-nuot-loi-thanh-chan-mang', 'doi-chung-vo-phien-phu-thuoc-be-mat']}
+  KHOA_TRUNG_DA_TUNG_NUOT_SO: >-
+    Bản đầu của khối này đặt `va_ho` và `va_sinh_loi_moi` HAI LẦN — một lần là số đếm, một lần là
+    khối chi tiết. YAML lấy cái SAU và NUỐT hai con số, không báo lỗi. Bắt được vì đọc lại bằng
+    `yaml.safe_load` thay vì tin mắt. Đã đổi tên hai khoá chi tiết; hai số đếm nay đứng một mình.
+
+ket_qua_dem_duoc:
+  P1: 1
+  P2: 2
+  dem_bang_lenh: >-
+    Đếm trên TIÊU ĐỀ finding: `grep '^### ' VERDICT | grep -c '\[P1\]'` -> 1, `… '\[P2\]'` -> 2.
+    Khớp con số reviewer tự khai ở mục "Đếm finding".
+  slug_hien_hanh:
+  - {slug: nam-hang-khong-tao-phan-hoach, hang: P1, trang_thai: 'còn mở từ vòng 3'}
+  - {slug: probe-nuot-loi-thanh-chan-mang, hang: P2, trang_thai: MỚI}
+  - {slug: doi-chung-vo-phien-phu-thuoc-be-mat, hang: P2, trang_thai: MỚI}
+  cham_tieu_chi: {N1: DAT, N2: KHONG_DAT, N3: DAT, N4: DAT, N5: DAT, N6: DAT, N7a: DAT, N7b: DAT}
+
+FINDING_DANG_KE_NHAT_LA_LOI_CUA_EXECUTOR:
+  slug: probe-nuot-loi-thanh-chan-mang
+  no_la_gi: >-
+    `ma_thoat` trong `.claude/dev/probe_mang.py` bắt `Exception` TRẦN rồi định nghĩa MỌI lỗi là
+    "bị chặn"; hàng git chỉ giữ số `128` và bỏ stderr. Nên DNS, TLS, timeout, URL sai, repo không
+    tồn tại, thiếu quyền, hay lỗi chương trình đều bị đọc thành "mạng đóng".
+  reviewer_chung_minh_bang_DOT_BIEN_chu_khong_bang_lap_luan: >-
+    Trên clone riêng: mutant KHÔNG gọi mạng (URL dữ liệu hợp lệ + repo-relative `khong-ton-tai`)
+    vẫn cho probe `rc=0`, in `urllib 0 / ls-remote 128`; chạy `git ls-remote khong-ton-tai` riêng
+    thì `rc=128` với lỗi "does not appear to be a git repository" — KHÔNG hề là lỗi mạng.
+    Mutant URL thiếu scheme ném `ValueError` (`rc=1` khi chạy riêng) mà probe vẫn in `urllib 1`.
+  vi_sao_NGHIEM: >-
+    Probe này LÀ bằng chứng cho một mệnh đề doctrine. Một phép đo không phân biệt được thứ nó đo
+    với thứ khác là ĐÚNG cái bệnh packet này sinh ra để chữa — và lần này executor tự mắc, ngay
+    trong hiện vật dựng lên để chữa nó. Ghi thẳng, không giảm nhẹ.
+
+DOI_CHUNG_CUA_REVIEWER_LECH_VOI_BANG:
+  do_duoc: >-
+    Reviewer chạy probe TRỰC TIẾP (không lồng) và thu `1/1/128`, trong khi tệp doctrine khai cột
+    "đối chứng: vỏ phiên" là `0/0/0`.
+  KHONG_phai_bang_chung_bang_bi_bia: >-
+    Reviewer nói thẳng điều này: vỏ ngoài cùng của phiên reviewer CHÍNH LÀ một sandbox codex, nên
+    phép chạy "trực tiếp" của nó đo một execution surface KHÁC. Nó ghi rõ "không phải bằng chứng
+    rằng phép đo cũ trên vỏ Claude bị bịa".
+  finding_that_su: >-
+    Nhãn cột SAI, không phải số sai: "ngoài codex" được in như một điều kiện phổ quát, trong khi
+    thứ quyết định kết quả là execution surface và sandbox ngoài cùng.
+
+CHO_KHONG_DO_DUOC_REVIEWER_TU_KHAI:
+- 'codex sandbox lồng nhau rc=101 (khoá bubblewrap, mount chỉ-đọc) — hai cột A/B VẪN chưa tái lập; sang vòng thứ HAI liên tiếp'
+- 'cột 0/0/0 trên chính vỏ Claude của executor: KHÔNG_ĐO_ĐƯỢC từ surface codex'
+- 'không mạng ⇒ không đo được PR/CI/lease trên GitHub; "vắng evidence KHÔNG phải pass"'
+- 'ba stdout.log của bảng 78/85/45 vẫn không có trong kho'
+
+NGAN_SACH_DA_CAN_CA_HAI_DUONG_DAN:
+  doctrine: '198/200 — còn 2 dòng'
+  probe: '30/30 — HẾT'
+  he_qua: >-
+    Vá `probe-nuot-loi-thanh-chan-mang` cho tử tế đòi phân biệt ba trạng thái và giữ raw evidence;
+    KHÔNG làm được trong 0 dòng còn lại. Chính reviewer viết: "Nếu 30 dòng không đủ để làm trung
+    thực, xin revision ngân sách thay vì nén mất bằng chứng."
+  quyet_dinh_thuoc_nguoi_giu_kho: >-
+    Phiên thi công KHÔNG tự nâng. Trần probe 30 do chính phiên này đặt ở r3 và đã bị nén cho vừa
+    một lần rồi; nén lần nữa là nén mất bằng chứng, đúng thứ reviewer vừa cấm.

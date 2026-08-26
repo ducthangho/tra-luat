@@ -75,9 +75,10 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
   trong `COMMAND_META` · cờ `--out` trên lệnh `read_only=True` · `--out` cả trên lệnh
   `write_scope='none'` (chạy thật: `sweep` `counts` `review-queue` ĐỀU tạo tệp) · và ghi NGẦM
   KHÔNG cờ nào — `_load_manifest_full` ghi `manifest.json`+`manifest_index.json` khi cache
-  thiếu/cũ, `locate` tự refresh sau 900s. `--trust-cache` CHỈ có ở `locate`: 12/13 lệnh không
-  có đường tắt nào. Nên đừng dùng `--out`/`--refresh`, và coi MỌI lệnh là có thể ghi vào profile
-  cache — nơi `extract_*.txt` chảy vào corpus. Cần bảo đảm KHÔNG ghi thì giao phiên chính.
+  thiếu/cũ, `locate` tự refresh sau 900s. `--trust-cache` CHỈ có ở `locate` — mà `locate` KHÔNG
+  nằm trong danh sách trên, nên **không lệnh nào ở trên có đường tắt**. Nên đừng dùng
+  `--out`/`--refresh`, và coi MỌI lệnh là có thể ghi vào profile cache — nơi `extract_*.txt`
+  chảy vào corpus. Cần bảo đảm KHÔNG ghi thì giao phiên chính.
 - Nhóm MUTATE — `--apply` `--clear-stale` `register` `source-rename` `source-delete` `reg-delete`
   `recat --apply` `drive-push` `clasp` `ingest*` — nay bị cổng **chặn thật**, không còn chỉ là
   dòng chữ này.

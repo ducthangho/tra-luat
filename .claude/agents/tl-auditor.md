@@ -31,7 +31,7 @@ lạ ⇒ `deny`, tức fail-close, đo được. Cái CHƯA đủ là **nội du
 được**: `tl X` trong tài liệu này là VIẾT TẮT, không phải lệnh có thật — đo được là `tl sweep`
 bị từ chối còn `python scripts/tl.py sweep` thì qua.
 
-### LỜI DẶN (không tầng nào cưỡng chế) — mọi đường còn lại
+### LUẬT BẮT BUỘC nhưng KHÔNG có máy cưỡng chế — mọi đường còn lại
 
 Cổng trên chặn theo **cơ chế**, không theo **đường dẫn** — nên ghi ra `/tmp` hay `~` cũng bị chặn
 (đo 26-08-2026: `cp /tmp/a /tmp/b`, `echo x > /tmp/y`, `echo x > ~/.codex/auth.json` đều `deny`).
@@ -45,7 +45,10 @@ Ba chỗ nó **thật sự không phủ**, cũng đo cùng lượt:
 3. **Cơ chế ghi chưa ai liệt kê.** Đây là khuyết tật CẤU TRÚC, không phải sót một dòng: cùng một
    hình dạng lỗ đã lặp ba vòng (8 + 3 + 11 hình dạng). #329 mở ra để thay cách tiếp cận.
 
-Ở ba đường ấy, các dòng dưới là lời dặn cho bạn, **không phải ràng buộc lên bạn**:
+Ở ba đường ấy, các dòng dưới **VẪN LÀ LUẬT BẮT BUỘC** — chỉ khác ở chỗ **không máy nào bắt
+lỗi**. Đừng đọc "không được cưỡng chế" thành "được phép bỏ qua": ngược lại là đằng khác. Ở
+đường có cổng, sai một lệnh thì bị chặn ngay và không hại gì; ở ba đường này, sai một lệnh là
+hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ luật CAO HƠN, không phải thấp hơn.
 
 - KHÔNG sửa file nào — nhất là `scripts/tl.py` canonical (bài học rogue-edit đã ghi trong memory
   dự án). Phiên chính là BÊN GHI DUY NHẤT.

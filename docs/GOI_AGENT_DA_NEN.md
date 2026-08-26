@@ -614,10 +614,14 @@ KHÁC NHAU ở hai cấu hình. Mục dưới có ví dụ: hàng `--allowedTool
 | **chưa xếp được** | không rơi gọn vào bốn hàng trên | phải GỌI TÊN là chưa xếp được, không im lặng bỏ qua |
 
 **Mục này dùng BA trên năm hạng, và đó là KẾT LUẬN chứ không phải thiếu sót.** Đếm được sau vùng
-định nghĩa: `chiều MỞ` ×5, `máy phát hiện` ×1, `chưa xếp được` ×1 — còn **`chiều ĐÓNG` bằng KHÔNG**.
+định nghĩa: `chiều MỞ` ×4, `chưa xếp được` ×2, `máy phát hiện` ×1 — còn **`chiều ĐÓNG` bằng KHÔNG**.
 Đúng như thế mới phải: luận điểm của mục là **không tầng nào bó được quyền ghi vào kho**, nên một
 hạng "đã đo được nó CHẶN" mà rỗng chính là bằng chứng cho luận điểm ấy, không phải ô bỏ quên. Hạng
-`quan sát chưa rõ cơ chế` cũng rỗng ở đây vì mọi mệnh đề còn lại đều đã truy được cơ chế. Hai hạng
+`quan sát chưa rõ cơ chế` cũng rỗng, nhưng vì một lý do KHÁC và đáng nói: hàng
+`codex -s workspace-write` **không** truy được cơ chế — vậy sao không xếp nó vào đó? Vì hạng ấy đòi
+**lặp lại được**, mà hàng ấy không mang phiên bản lẫn số lần lặp của chính phép đo sinh ra nó. Thiếu
+CẢ HAI điều kiện thì đúng chỗ của nó là ô dư, không phải hạng gần nhất — và đó chính là việc ô dư
+sinh ra để làm. Hai hạng
 rỗng ấy có chỗ dùng trong packet mạng/sandbox đã tách. Bảng giữ đủ năm hàng vì nó là **từ vựng
 dùng chung**, không phải bảng kiểm của riêng mục này — nhưng đừng đọc số hàng thành số hạng đã dùng.
 
@@ -652,7 +656,7 @@ Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": 
 |---|---|---|
 | `--allowedTools`, luật hẹp `Bash(x:*)` | gặp lệnh ghép | không khớp gì ⇒ **CHƯA XẾP ĐƯỢC**: chưa đo được là chặn oan hay không chặn |
 | `--allowedTools`, `Bash` trần | cùng lệnh ghép | khớp mọi thứ ⇒ **cơ chế đã xác minh — chiều MỞ** |
-| `codex -s workspace-write` | ghi tệp **ngoài** cây | **`rc=0`** — tệp ngoài cây bị ghi đè thật ⇒ **cơ chế đã xác minh — chiều MỞ** |
+| `codex -s workspace-write` | ghi tệp **ngoài** cây | **`rc=0`** — tệp ngoài cây bị ghi đè thật ⇒ **CHƯA XẾP ĐƯỢC**: đo được nó KHÔNG chặn, nhưng cơ chế đã theo mục sandbox sang packet kia |
 | xoá `GITHUB_PAT` `GH_TOKEN` `GITHUB_TOKEN` `GIT_CONFIG_*` khỏi env | `git push --dry-run` lên GitHub | **`rc=0`** — vẫn đẩy được ⇒ **cơ chế đã xác minh — chiều MỞ** |
 | nhét **token RÁC** vào URL đẩy | cùng lệnh | **`rc=0`** ⇒ **cơ chế đã xác minh — chiều MỞ** |
 

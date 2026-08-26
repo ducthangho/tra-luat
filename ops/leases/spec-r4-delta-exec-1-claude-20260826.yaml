@@ -157,3 +157,4 @@ canh_bao_cho_nguoi_thi_hanh: >-
   trí của `r4` vì nhầm LEASE `r4` với ĐẶC TẢ `r4` — đừng chép lại lời khai ấy.
   (3) `ops/specs/**` là dev-side, KHÔNG vào gói phát hành.
   (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+posted_comment_id: 5426261377   # workflow ghi, ĐỪNG sửa tay

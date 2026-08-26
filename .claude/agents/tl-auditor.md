@@ -74,11 +74,11 @@ hai nơi đều đòi kỷ luật CAO HƠN: sai một lệnh có thể hỏng th
   `corpus_audit_ckpt_*.json` sau mỗi target và CỐ Ý để lại tệp khi dừng giữa chừng. `--all` TRẦN
   thì không — vẫn dùng được. Audit nối lại được là việc của phiên chính, không phải của bạn.
 - **KHÔNG lệnh `tl` nào được chứng minh là không ghi.** Danh sách trên là VIỆC của bạn, không
-  phải bảo đảm. Năm vòng review 26-08 ra NĂM cơ chế ghi khác nhau: ghi mặc định · `read_only=False`
-  trong `COMMAND_META` · cờ `--out` trên lệnh `read_only=True` · `--out` cả trên lệnh
-  `write_scope='none'` (chạy thật: `sweep` `counts` `review-queue` ĐỀU tạo tệp) · và ghi NGẦM
-  KHÔNG cờ nào — `_load_manifest_full` ghi `manifest.json`+`manifest_index.json` khi cache
-  thiếu/cũ, `locate` tự refresh sau 900s. `--trust-cache` CHỈ có ở `locate` — mà `locate` KHÔNG
+  phải bảo đảm. Đo 26-08 ra **BA** cơ chế, phân biệt bằng ĐƯỜNG MÃ chứ không bằng siêu dữ liệu:
+  **(1) ghi mặc định** — `extract` (`disk.write_text` vô điều kiện), `nlm-reconcile` không
+  `--apply`; **(2) cờ sinh tệp** — `--out` trên `sweep` `counts` `review-queue` (chạy thật: ĐỀU
+  tạo tệp), `ruff --output-file`, `git diff --output`; **(3) ghi NGẦM không cờ** —
+  `_load_manifest_full` ghi `manifest.json` khi cache thiếu/cũ, `locate` tự refresh sau 900s. `--trust-cache` CHỈ có ở `locate` — mà `locate` KHÔNG
   nằm trong danh sách trên, nên **không lệnh nào ở trên có đường tắt**. Nên đừng dùng
   `--out`/`--refresh`, và coi MỌI lệnh là có thể ghi vào profile cache — nơi `extract_*.txt`
   chảy vào corpus. Cần bảo đảm KHÔNG ghi thì giao phiên chính.

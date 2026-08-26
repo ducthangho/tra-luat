@@ -76,8 +76,8 @@ hai nơi đều đòi kỷ luật CAO HƠN: sai một lệnh có thể hỏng th
   cache rồi `disk.write_text(...)` **vô điều kiện** — không có chế độ nào không ghi, và cache ấy
   chính là nguồn sau này chảy vào corpus. Cần toàn văn thì XIN phiên chính trích rồi đưa bạn đọc.
 - **KHÔNG lệnh `tl` nào được chứng minh là không ghi.** Danh sách trên là VIỆC của bạn, không
-  phải bảo đảm. Năm vòng review 26-08 ra NĂM cơ chế ghi khác nhau, và cái sắc nhất chạm thẳng
-  vai của bạn: khi NotebookLM chết, `nlm-query`/`nlm-cross`/`nlm-content` rơi vào fallback corpus,
+  phải bảo đảm. Đo 26-08 ra **BA** cơ chế (ghi mặc định · cờ sinh tệp · ghi NGẦM không cờ), và
+  cái sắc nhất chạm thẳng vai của bạn: khi NotebookLM chết, `nlm-query`/`nlm-cross`/`nlm-content` rơi vào fallback corpus,
   gọi `_doc_text_any` và ghi `extract_<id>.txt` + sidecar vào ĐÚNG cache mà `extract` bị cấm vì
   nó — không cần cờ nào. Dùng `--no-fallback` cho cả ba. Cộng ghi ngầm của manifest khi cache
   thiếu/cũ, mà chỉ `locate` có `--trust-cache`. Nên đừng dùng `--out`/`--refresh`, coi MỌI lệnh

@@ -82,8 +82,9 @@ hỏng thật và **có thể không ai phát hiện**. Nên chúng đòi kỷ l
   là có thể ghi vào profile cache, và cần bảo đảm KHÔNG ghi thì giao phiên chính.
 - Nhóm MUTATE — `--apply` `--confirm` `register` `recat --apply` `source-rename` `source-delete`
   `reg-delete` `--clear-stale` `ingest*` `drive-push` `clasp` `nlm-add` — nay bị cổng **chặn
-  thật**, không còn chỉ là dòng chữ này. Đo 26-08: 11/12 mục trên đều `deny`.
-- **NGOẠI LỆ đã đo — `recat` TRẦN thì cổng CHO QUA.** `_TL_CAM` khớp `--apply`, không có token
+  thật**, không còn chỉ là dòng chữ này. Đo 26-08: **12/12** dạng ghi ở trên đều `deny`.
+- **NGOẠI LỆ đã đo — `recat` TRẦN thì cổng CHO QUA.** Nó KHÔNG nằm trong danh sách trên (đã thu
+  hẹp về `recat --apply`), nên `12/12` ở trên vẫn đúng. `_TL_CAM` khớp `--apply`, không có token
   `recat`, nên `tl recat <id> --cat NN` (dạng khô) **lọt**. Nó KHÔNG vô hại: nhánh khô vẫn gọi
   `_manifest_entries()` → có thể ghi `manifest.json` khi cache thiếu. Vẫn CẤM với bạn, nhưng đây
   là luật KHÔNG có máy cưỡng chế — đừng đọc "nhóm MUTATE bị chặn" thành "mọi dạng đều bị chặn".

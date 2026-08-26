@@ -1,0 +1,154 @@
+# Lease EXECUTOR — `KHOA-NEO-BE-RONG` (#313 ca 2), lượt 1.
+#
+# TÁCH khỏi packet `CON-TRO-TREO` vì WRITE SET KHÁC HẲN — chạy song song được, và đang
+# chạy song song thật (`con-tro-treo-exec-1-codex-20260824` giữ `ops/lease_publish*.py`).
+# Hai packet KHÔNG giao đường dẫn nào; đó là điều kiện để cả hai cùng mở.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 313
+packet_id: KHOA-NEO-BE-RONG
+phase_key: KHOA-NEO-BE-RONG
+revision: 2
+generation: 1
+lease_id: khoa-neo-be-rong-exec-1r2-codex-20260826
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` là MẶC ĐỊNH FAIL-CLOSE của `_BANG_LOP`, KHÔNG phải tín hiệu packet chạm thẩm
+  quyền. Đừng đọc nhãn này thành "đã có ai xét thấy nguy".
+
+spec_path: null
+spec_note: >-
+  Không có đặc tả đóng băng. Nguồn yêu cầu: Issue #313 mục (2), và thread P2 của connector
+  trên PR #311 https://github.com/ducthangho/tra-luat/pull/311#discussion_r3844331956
+  (thread để MỞ có chủ đích vì chưa vá). Phản chứng đã chạy được ghi trong cả hai chỗ;
+  executor PHẢI tự đo lại, không nhận lời khai.
+
+write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 24-08-2026 23:5xZ. Phép so HAI NGUỒN chạy TRƯỚC, so bằng TẬP TÊN:
+    is-shallow false · ls-remote 203 · for-each-ref 203 · comm RỖNG cả hai chiều
+  Rồi quét:
+    .claude/dev/packet_loop.py       -> rc=0 NGƯỜI_GIỮ 0
+    .claude/dev/packet_loop_test.py  -> rc=0 NGƯỜI_GIỮ 0
+  Vừa được giải phóng bằng bia mộ `khoa-neo-that-thu-hoi-claude-20260824` (#305 → PR #311
+  land `e80f43b`). Đo lại mà thấy có người giữ ⇒ DỪNG.
+
+branch: codex/khoa-neo-be-rong-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+start_from_sha: 34de004a2c6e329d8632d6b1e64f56668d4360ba
+reviewed_sha_required: 34de004a2c6e329d8632d6b1e64f56668d4360ba
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 120
+  do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
+  don_vi: >-
+    `git diff --numstat c35ae1c0a1104dbd6e65a321cda3b9f9441a408b -- .claude/dev/packet_loop.py .claude/dev/packet_loop_test.py`
+    — cột dòng THÊM. Pathspec TRONG lệnh, và KHÔNG `..HEAD` (sandbox không cho commit nên
+    `..HEAD` không thấy bản vá trên working tree).
+  da_dung: 92
+  ghi_chu: >-
+    120 là ƯỚC LƯỢNG CÓ NEO, không phải trần ADR-0044: bản vá là một phép suy bề rộng OID
+    (~15 dòng) cộng 2–3 ca hồi quy (~60) cộng đột biến (~25). Vượt ⇒ `S2`, DỪNG.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-24: "đồng ý với các khuyến nghị, triển khai tiếp luôn" —
+  duyệt mục (2) trong danh sách ba việc chờ chốt, vốn ghi "ca 2 (SHA-256) — packet riêng,
+  write set khác, chạy song song được. Anh cho đi thì tôi cấp lease + phóng".
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên điều phối KHÔNG thi công lượt này (executor `codex`) và SẼ là reviewer — khác nền,
+  đúng PROTOCOL:580. Cùng phiên ấy đã review PR #311 và cố ý KHÔNG vá lỗi này lúc đó;
+  lý do ghi trong thread, và nay việc vá là của packet này.
+
+leased_at_utc: '2026-08-26T08:45:00Z'
+lease_expires_at_utc: '2026-08-27T08:45:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  `.claude/dev/packet_loop.py`: hàm `_khoa_neo_cac_sha` và hàm mới do packet này thêm.
+  `.claude/dev/packet_loop_test.py`: ca mới và bảng đăng ký ca.
+  Hunk ngoài các vùng ấy ⇒ ĐỎ. TRƯỜNG NÀY SỐNG TRONG LEASE — đừng tìm ở tệp khác.
+
+viec_cua_luot_nay: >-
+  LƯỢT 2 — đóng ĐÚNG MỘT finding P1 của cross-review vòng 1 trên PR #317
+  (`verdict: changes_requested`, reviewed_sha `34de004a2c6e329d8632d6b1e64f56668d4360ba`).
+
+  Lượt 1 vá ĐÚNG HƯỚNG và reviewer xác nhận: mục 2 (không tạo fail-OPEN), mục 3
+  (`_dat_object_format` dựng kho Git THẬT chứ không diễn kịch bản), mục 4 (3 ca mới đều có
+  răng, 66→69 mutant, không mutant nào sống), mục 5 (92/120, 2 tệp) đều ĐẠT.
+  KHÔNG mở lại những phần ấy.
+
+  FINDING P1 `oid-format-leo-len-kho-cha` — `git -C <root>` LEO LÊN KHO CHA:
+    `_be_rong_oid_cua_kho()` gọi `git -C <root> rev-parse --show-object-format` mà KHÔNG chặn
+    discovery đi ngược lên thư mục cha. Nên một bản sao rời KHÔNG có `.git`, nếu tình cờ nằm
+    trong một kho cha SHA-256, bị phân loại là SHA-256 thay vì rơi về `(40, 64)`.
+    ⇒ FAIL-CLOSE MỚI trên đúng đường "không có `.git`" — tức ràng buộc quan trọng nhất của
+    packet bị thủng.
+
+  PHÉP ĐO A/B của reviewer (cùng fixture, cùng bố cục, chỉ đổi script base/HEAD):
+    no_dot_git_under_sha256_parent   HEAD -> rc=11, count_one=False   (CHẶN OAN)
+    no_dot_git_under_sha256_parent   base -> rc=0,  count_one=True    (đúng)
+  Sáu đường hỏng khác (không `.git`, `.git` là tệp, không có `git` trên PATH, rc≠0, stdout lạ,
+  timeout 5.13s) đều GIỮ ĐÚNG `rc=0` và đếm MỘT — chỉ ca lồng kho là thủng.
+
+  PHIÊN ĐIỀU PHỐI ĐÃ TÁI HIỆN ĐỘC LẬP, không nhận lời khai:
+    git init --object-format=sha256 chame ; mkdir chame/con     (con KHÔNG có .git)
+    git -C chame/con rev-parse --show-object-format  ->  sha256
+    git -C chame/con rev-parse --show-toplevel       ->  .../chame     <- KHÁC `con`
+
+  HƯỚNG VÁ (reviewer đề, phiên điều phối đồng ý): trước khi tin câu trả lời, xác nhận kho mà
+  git PHÁT HIỆN chính là `root`. Phép so `--show-toplevel` với `root` là chốt phân biệt đã đo
+  được ở trên. Không khớp (hoặc không hỏi được) ⇒ trả `(40, 64)` như cũ.
+  Cẩn thận biên: `root` có thể là đường dẫn tương đối, có symlink, hoặc chính là một worktree
+  (`.git` là TỆP) — ca `.git` là tệp hiện đang ĐẠT, đừng làm nó đỏ.
+
+  CA MỚI BẮT BUỘC: đặt nguyên fixture full-SHA + viết tắt sẵn có của suite vào một thư mục con
+  KHÔNG có `.git` của một kho SHA-256 thật, rồi đòi `rc=0` và bằng chứng dương đếm MỘT.
+  Kèm đột biến: gỡ phép so toplevel phải làm ca ấy ĐỎ.
+  Nền không dựng được kho `--object-format=sha256` ⇒ ghi `KHÔNG_ĐO_ĐƯỢC` và DỪNG, đừng giả lập.
+
+  KHÔNG mở lại 3 ca của lượt 1. KHÔNG đụng tệp ngoài write set.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ⇒ DỪNG, xin lease sửa đổi ·
+  S2 vượt 120 dòng thêm ⇒ DỪNG, khai phần chưa làm ·
+  S3 kết luận KHÔNG hỏi được object format mà vẫn giữ được hành vi cũ ⇒ DỪNG, trình phép đo,
+  xin quyết định. Đừng tự chọn fail-close rồi báo sau — nó chặn mọi bản sao rời ·
+  S4 không tái hiện được phản chứng bằng phép đo của chính mình ⇒ ghi `KHÔNG_ĐO_ĐƯỢC`, DỪNG ·
+  S5 `origin/master` đã đi tiếp so với `base_sha` mà chưa đo lại.
+
+thay_the_cho: khoa-neo-be-rong-exec-1-codex-20260825
+thay_the_ly_do: >-
+  Lượt 1 đã xong và đã lên nhánh (`34de004a`), nên `viec_cua_luot_nay` của r1 hết hiệu lực.
+  Lượt 2 có phạm vi khác: đóng P1 `oid-format-leo-len-kho-cha`. Cập nhật `start_from_sha` và
+  `reviewed_sha_required` sang head đã được review, và `da_dung` 0 → 92 theo phép đo trên
+  write set. Trần, write set, provider, reviewer KHÔNG đổi.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) SANDBOX MOUNT `.git` CHỈ ĐỌC — không commit, không push.
+  (2) Kho NÀY là `sha1` (`git rev-parse --show-object-format`), nên ca lỗi KHÔNG tái hiện
+  được bằng dữ liệu thật ở đây; phải dựng fixture. Đừng kết luận "không tái hiện được" rồi
+  bỏ — nó tái hiện bằng fixture, đã có người làm.
+  (3) Hỏng này fail-CLOSE (chặn phép đếm hợp lệ), nên bản vá SAI HƯỚNG sẽ biến nó thành
+  fail-OPEN. Ràng buộc (1) và (3) ở trên là chốt chống đúng điều đó.
+  (4) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.

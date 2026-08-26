@@ -143,3 +143,4 @@ chua_do_duoc_luc_cap: >-
   tài liệu chính thức. Tài liệu KHÔNG phải phép đo.
   (3) CHƯA đo hành vi khi phiên chạy ở `permission_mode` khác (`auto` · `acceptEdits` ·
   `bypassPermissions`). Có thể đổi kết luận về tầng NGOÀI hook, không đổi kết luận về hook.
+posted_comment_id: 5424968502   # workflow ghi, ĐỪNG sửa tay

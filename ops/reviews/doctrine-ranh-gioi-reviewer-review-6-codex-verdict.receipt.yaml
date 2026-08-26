@@ -1,0 +1,80 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 6 của PR #322 (packet #318).
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '318'
+packet_slug: DOCTRINE-RANH-GIOI-REVIEWER
+lease_id: null
+lease_review_KHONG_DUOC_CAP: >-
+  Không có lease review riêng; lease đang sống là lease EXECUTOR
+  `doctrine-ranh-gioi-reviewer-exec-1r4-claude-20260826`. Để `null` và nói ra.
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 70311ee3f073d3a905ba59d0851dd2ce9355cd8e
+reviewed_tree: 2cef49f4f5d676c5c19ef027e9cdd0a8ec890a80
+luot: 6
+cross_provider: true
+assurance: cross_approved
+verdict_path: ops/reviews/doctrine-ranh-gioi-reviewer-review-6-codex-verdict.md
+verdict_sha256: e0f1e67bba37cffa55f8717c9033ea6b6400d74bc4738e1c9af6eba5231f6ed0
+verdict_bytes: 13743
+verdict_nguon: >-
+  `codex exec -s workspace-write -c model_reasoning_effort=xhigh` trong `launcher.py run`,
+  `--expected-head 70311ee…`, `--require-clean`, prompt neo băm `5503318a…`.
+  1052.1s, `ma_thoat=0`, `trang_thai=xong`, `worktree_sach: true`.
+ma_thoat_KHONG_PHAI_BANG_CHUNG: >-
+  Căn cứ là TỆP verdict 13743 byte, neo băm ở trên, đã đọc hết và đối chiếu lại bằng hashlib.
+
+doi_chieu_luot_truoc:
+  da_va_that: 1
+  va_ho: 0
+  va_sinh_loi_moi: 1
+  chua_va: 0
+  don_vi_dem: 'hai slug của VERDICT lượt 5, mỗi slug một phán quyết'
+  da_va_that_gom: [hai-hang-codex-chi-con-mot]
+  va_sinh_loi_moi_gom: [nam-hang-khong-tao-phan-hoach]
+
+ket_qua_dem_duoc:
+  P1: 1
+  P2: 0
+  dem_bang_lenh: >-
+    Đếm CHỈ trong mục "## FINDING CÒN MỞ", không đếm toàn tệp:
+    awk '/^## FINDING/,/^## CHỖ KHÔNG|^## Đếm/' VERDICT | grep -E '^### ' | grep -c '\[P1\]'
+    -> 1; P2 -> 0. Khớp con số reviewer tự khai.
+    GHI RÕ VÌ PHÉP ĐẾM ĐẦU TIÊN SAI: grep toàn tệp trả P1=2 P2=1 vì mục ĐỐI CHIẾU cũng mang thẻ
+    [P1]/[P2] cho các finding của vòng TRƯỚC. Cùng họ với lỗi đếm đã mắc ở vòng 3.
+  slug_hien_hanh:
+  - {slug: nam-hang-khong-tao-phan-hoach, hang: P1, mo_tu: 'vòng 2', chua_dong_lan_nao: true}
+  cham_tieu_chi: {N1: DAT, N2: KHONG_DAT, N3: DAT, N4: DAT, N5: DAT, N6: DAT, N7a: DAT, N7b: DAT}
+
+PHIEN_MOI_REVIEWER_BAC_VA_REVIEWER_BAC_THAT:
+  chuyen_gi: >-
+    Prompt vòng 6 hỏi thẳng: gắn nhãn `chiều MỞ` cho ba hàng có ĐÚNG không, hay là "dán nhãn máy
+    móc cho vừa phép đếm"? Reviewer trả lời: HAI hàng credential đúng, MỘT hàng SAI.
+  finding: >-
+    Hàng `codex -s workspace-write` (:655) chỉ có `rc=0` và hiệu ứng ghi đè. Đoạn từng giải
+    thích CƠ CHẾ hệ tệp đã theo lát cắt sang #334, nên trong cây KHÔNG còn mệnh đề nào nói VÌ SAO
+    phép ghi ngoài cây lọt. Định nghĩa hạng ở :611 đòi ĐỒNG THỜI "biết vì sao nó không chặn" VÀ
+    "đã đo"; hàng 655 chỉ có vế thứ hai.
+  vi_sao_KHONG_ha_xuong_quan_sat: >-
+    Reviewer nói rõ: cũng chưa đủ để xếp `quan sát chưa rõ cơ chế`, vì hạng ấy đòi TÍNH LẶP LẠI
+    được, mà artefact không ghi phiên bản Codex hay số lần lặp của đúng phép đo ấy. Đúng hạng là
+    `chưa xếp được`.
+  so_dung_theo_taxonomy: 'chiều MỞ ×4 và chưa xếp được ×2 — KHÔNG phải chiều MỞ ×5'
+  bai_hoc: >-
+    Phép đo phía phủ định của executor đo NHÃN CÓ MẶT, không đo NHÃN CÓ ĐÚNG NGHĨA. Nó là cải
+    thiện thật (reviewer xác nhận 10/10 hàng có nhãn) nhưng vẫn là phép đếm cú pháp. Lần thứ hai
+    liên tiếp executor sửa được HÌNH THỨC của phân hoạch mà chưa sửa được NGHĨA.
+  reviewer_KHONG_doi_slug: >-
+    Reviewer ghi rõ đây vẫn là CÙNG stable finding `nam-hang-khong-tao-phan-hoach`, không phải
+    finding mới cần slug khác. Đừng đếm nó thành hai.
+
+TRANG_THAI_GAN_LAND_NHAT_TU_TRUOC_DEN_NAY:
+  P1: 1
+  P2: 0
+  tieu_chi_rot: 'CHỈ N2; bảy tiêu chí còn lại ĐẠT bốn vòng liền'
+  ban_va_con_lai: 'một dòng đổi nhãn ở :655 cộng đồng bộ con số đếm'
+  luat_dung_CHUA_DUOC_CHOT: >-
+    Người giữ kho được hỏi về luật dừng ("chỉ P1 mới chặn land") nhưng CHƯA trả lời. Phiên thi
+    công KHÔNG tự đặt luật ấy, và KHÔNG coi packet là landable. Vòng này vẫn còn ĐÚNG MỘT P1 nên
+    câu hỏi ấy chưa tới lúc quyết định.

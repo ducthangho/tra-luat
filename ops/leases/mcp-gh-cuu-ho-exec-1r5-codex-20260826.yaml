@@ -98,7 +98,7 @@ ngan_sach_kich_thuoc:
     `.claude/dev/mcp_gh_test.py` — cột dòng THÊM. ĐỔI ĐƠN VỊ ở r5; xem `doi_don_vi_ngan_sach`.
   dac_ta_theo_doi_rieng: 315
   don_vi_cu_de_doi_chieu: '1117 nếu tính CẢ write set như r1–r4 — báo cả hai, đừng chỉ báo cái có lợi'
-  da_dung: 802
+  da_dung: 840
   ghi_chu: >-
     1000 là trần SAU KHI NÂNG lần hai; xem khối `nang_tran`. `da_dung: 210` là số ĐÃ ĐO
     (`git diff --numstat b662fe1 origin/claude/mcp-gh-cuu-ho-exec-1`) — đặc tả đã tiêu 210 dòng vì
@@ -308,6 +308,18 @@ thay_the_ly_do: >-
   và so khớp `da_bi_thay_the` bằng CHUỖI VÔ HƯỚNG, nên quan hệ "một lease bị HAI lease thay" KHÔNG
   biểu diễn được — r4 chỉ mang được một tên. Hai lease của #318/#319 đã đăng TRƯỚC khi cổng ấy land
   nên lọt; lease nào sau này khai cùng quan hệ sẽ bị chặn. Đã báo #313.
+da_dung_ĐÃ_SỬA:
+  truoc: 802
+  sau: 840
+  do_bang: 'git diff --numstat b662fe1 origin/claude/mcp-gh-cuu-ho-exec-1 -- .claude/dev/mcp_gh.py .claude/dev/mcp_gh_test.py'
+  vi_sao_lech: >-
+    Trường `da_dung` chưa được cập nhật sau lượt thi công cuối. Cùng hình dạng với `reviewed_sha`
+    trỏ vào base: SỔ SÁCH không theo kịp CÔNG VIỆC. Đây là lần thứ ba trong phiên bắt được hình
+    dạng ấy (#318 vòng 8, #319 reviewed_sha, và đây).
+  he_qua: >-
+    Biên còn lại THẬT là 900-840 = 60 dòng, không phải 98 như trường cũ gợi ý. Ai lập kế hoạch vá
+    bốn P1 theo con số 802 sẽ tính dư 38 dòng không tồn tại.
+
 reviewed_sha_ĐÃ_SỬA:
   truoc: 'b662fe1d07c675a222ae26e734377e305775e4f3 — BẰNG ĐÚNG `base_sha`, tức chưa bao giờ được cập nhật'
   sau: '4aa936e0a3be676ed2492f89b25f9742a249a965 — đầu nhánh THẬT, đo bằng `git rev-parse`, không gõ tay'

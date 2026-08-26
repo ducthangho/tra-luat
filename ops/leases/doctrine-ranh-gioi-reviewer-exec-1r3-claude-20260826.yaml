@@ -105,7 +105,7 @@ lich_su_reviewed_sha:
 - {vong: 1, sha: 48cf331e36cc2bde9fbdd485d51b85c81a5b25af, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-1-codex-verdict.receipt.yaml'}
 - {vong: 2, sha: f16b6bf9d6085bd1923db9800090faaed1ffdd1b, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-2-codex-verdict.receipt.yaml'}
 - {vong: 3, sha: 88bd4f2fe6e02803a97f2da9df86c8b43d53076f, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-3-codex-verdict.receipt.yaml', tieu_chi: 'BẢN SỬA ĐỔI 2 — lượt ĐẦU TIÊN chấm theo N7a/N7b', ket_qua: 'P1=1 P2=1; N2 KHÔNG ĐẠT, bảy tiêu chí còn lại ĐẠT'}
-- {vong: 4, sha: 6d0a183e4af6422d85af1d6d3373fcbab2c7e83e, verdict: 'CHƯA CÓ', tieu_chi: 'BẢN SỬA ĐỔI 2 — acceptance KHÔNG đổi ở r3, chỉ write_set đổi'}
+- {vong: 4, sha: 6d0a183e4af6422d85af1d6d3373fcbab2c7e83e, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-4-codex-verdict.receipt.yaml', tieu_chi: 'BẢN SỬA ĐỔI 2 — acceptance KHÔNG đổi ở r3, chỉ write_set đổi', ket_qua: 'P1=1 P2=2; N2 KHÔNG ĐẠT (lần thứ hai liên tiếp), bảy tiêu chí còn lại ĐẠT'}
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 2
@@ -143,6 +143,14 @@ ngan_sach_probe:
   vi_sao_30: >-
     Bản nháp đo được ~14 dòng. 30 là biên cho chú thích và một lần sửa của vòng review, KHÔNG
     phải hạn mức để tiêu. Vượt 30 ⇒ dừng và hỏi, y như `S2`.
+  DA_CAN_TRAN_SAU_VONG_4: >-
+    30/30 — HẾT BIÊN. Cross-review vòng 4 mở `probe-nuot-loi-thanh-chan-mang` [P2]: `ma_thoat`
+    bắt `Exception` trần nên mọi lỗi (DNS, TLS, timeout, URL sai, repo không tồn tại) đều bị đọc
+    thành "mạng đóng". Vá cho tử tế đòi ba trạng thái `lọt / bị chặn đúng cơ chế / lỗi-khác` và
+    giữ raw evidence — KHÔNG làm được trong 0 dòng còn lại. Reviewer viết thẳng: "Nếu 30 dòng
+    không đủ để làm trung thực, xin revision ngân sách thay vì nén mất bằng chứng."
+    Phiên thi công KHÔNG tự nâng. Trần này đã bị nén cho vừa MỘT LẦN rồi (53 -> 30); nén lần nữa
+    là nén mất bằng chứng, đúng thứ reviewer vừa cấm. Chờ quyết định người giữ kho.
   tran_nay_DA_BAN: >-
     Bản probe ĐẦU tôi viết là 53 dòng — VƯỢT 30, tức trần do chính tôi đặt hai mươi phút trước
     đã bắn ngay lượt đầu tiên. Chọn NÉN xuống đúng 30, KHÔNG nâng trần: nâng một trần mình vừa

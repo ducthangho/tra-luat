@@ -1,0 +1,62 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 5 của PR #322 (packet #318).
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '318'
+packet_slug: DOCTRINE-RANH-GIOI-REVIEWER
+lease_id: null
+lease_review_KHONG_DUOC_CAP: >-
+  Không có lease review riêng; lease đang sống là lease EXECUTOR
+  `doctrine-ranh-gioi-reviewer-exec-1r4-claude-20260826`. Để `null` và nói ra.
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 770b3af3399b6794874008dd907f1dfaad6c5dba
+reviewed_tree: 021b89a36a751e83eb22680f6e6024c73a2917ed
+luot: 5
+cross_provider: true
+assurance: cross_approved
+verdict_path: ops/reviews/doctrine-ranh-gioi-reviewer-review-5-codex-verdict.md
+verdict_sha256: fc78a11989b6822e58ffd906ee6b91a20074ec32d85acd6a9e85424e77482012
+verdict_bytes: 12845
+verdict_nguon: >-
+  `codex exec -s workspace-write -c model_reasoning_effort=xhigh` trong `launcher.py run`,
+  `--expected-head 770b3af…`, `--require-clean`, prompt neo băm `37ee7aed…`.
+  `run_id` từ `run_r5`, 907.7s, `ma_thoat=0`, `trang_thai=xong`, `worktree_sach: true`.
+ma_thoat_KHONG_PHAI_BANG_CHUNG: >-
+  Căn cứ là TỆP verdict 12845 byte, neo băm ở trên, đã đọc hết và đối chiếu lại bằng hashlib.
+
+LUOT_DAU_TIEN_SAU_KHI_TACH: >-
+  Đây là vòng đầu tiên chấm bản ĐÃ TÁCH (mục mạng/sandbox và mục hai pha sang #334).
+
+ket_qua_dem_duoc:
+  P1: 1
+  P2: 1
+  dem_bang_lenh: "grep -E '^#{2,4} ' VERDICT | grep -c '\\[P1\\]' -> 1; tương tự P2 -> 1. Khớp con số reviewer tự khai."
+  slug_hien_hanh:
+  - {slug: nam-hang-khong-tao-phan-hoach, hang: P1, phan_quyet: 'VÁ SINH LỖI MỚI'}
+  - {slug: hai-hang-codex-chi-con-mot, hang: P2, trang_thai: MỚI}
+  cham_tieu_chi: {N1: DAT, N2: KHONG_DAT, N3: DAT, N4: DAT, N5: DAT, N6: DAT, N7a: DAT, N7b: DAT}
+
+REVIEWER_BAC_BO_MOT_DE_XUAT_CUA_CHINH_PROMPT:
+  chuyen_gi: >-
+    Prompt vòng 5 hỏi thẳng: bảng năm hàng mà chỉ dùng ba hạng thì có nên THU về ba hạng không, hay
+    lập luận "ô rỗng là kết luận" chỉ là hợp lý hoá. Reviewer trả lời: GIỮ đủ năm hạng là ĐÚNG.
+  ly_le_cua_reviewer: >-
+    "Đây là taxonomy của BẰNG CHỨNG, không phải checklist buộc mỗi mục phải sinh ít nhất một
+    instance ở từng hạng." Và thu bảng về ba chỉ vì hai hạng chưa dùng sẽ "lẫn TẬP LOẠI CÓ THỂ CÓ
+    với CÁC INSTANCE ĐANG CÓ". `chiều ĐÓNG = 0` do đó là một kết luận có nghĩa.
+  vi_sao_dang_ghi: >-
+    Phiên thi công đã tự khai điểm yếu này và MỜI reviewer bác. Reviewer không bác, mà còn cho một
+    lý do sắc hơn lý do executor tự viết. Ghi lại vì nó là một mệnh đề doctrine dùng lại được.
+
+KHUYET_TAT_DO_CHINH_LAT_CAT_SINH_RA:
+  slug: nam-hang-khong-tao-phan-hoach
+  no_la_gi: >-
+    Lát cắt xoá đoạn gắn nhãn `cơ chế đã xác minh — chiều MỞ` cho claim hệ tệp
+    `codex -s workspace-write`, NHƯNG giữ lại chính HÀNG QUAN SÁT ấy ở `:654`. Dòng `:606`
+    vẫn cam kết "Mọi mệnh đề sau đây mang đúng một nhãn" ⇒ `:654` là phản ví dụ cho chính nó.
+  vi_sao_executor_KHONG_bat_duoc: >-
+    Phép đếm của executor đếm NHÃN CÓ MẶT (`chiều MỞ` x2, `máy phát hiện` x1, …) chứ không hỏi
+    MỆNH ĐỀ NÀO THIẾU NHÃN. Hai câu hỏi khác nhau; phép đo trả lời câu dễ hơn. Đây đúng hình dạng
+    lỗi mà chính tệp đang được review lên án.
+  bai_hoc: 'đếm cái CÓ không thay được đếm cái THIẾU — muốn phủ hết thì phải đo phía phủ định'

@@ -3018,13 +3018,18 @@ MUTANTS = {
         ["bien_nhan_cung_sha_full_va_viet_tat_dem_MOT"],
     ),
     "bien_nhan_khong_doc_object_format_thi_giu_hanh_vi_cu": (
-        "    if p.returncode != 0:\n        return (40, 64)\n",
-        ('    if p.returncode != 0:\n'
-         '        _die(RC_BIEN_NHAN, "đột biến: hỏi object format lỗi thành chặn")\n'),
+        "        if p.returncode != 0:\n            return (40, 64)\n",
+        ('        if p.returncode != 0:\n'
+         '            _die(RC_BIEN_NHAN, "đột biến: hỏi object format lỗi thành chặn")\n'),
         ["bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc"],
     ),
+    "bien_nhan_khong_leo_len_kho_cha": (
+        "        if Path(ket_qua[0]).resolve() != root.resolve():\n",
+        "        if False:  # đột biến: bỏ phép so toplevel\n",
+        ["bien_nhan_ban_sao_roi_duoi_sha256_cha_dem_MOT"],
+    ),
     "bien_nhan_sha256_khong_nhan_40_la_oid_day_du": (
-        '    return {"sha1": (40,), "sha256": (64,)}.get(p.stdout.strip(), (40, 64))\n',
+        '    return {"sha1": (40,), "sha256": (64,)}.get(ket_qua[1].strip(), (40, 64))\n',
         '    return (40, 64)  # đột biến: không phân biệt object format\n',
         ["bien_nhan_sha256_full64_va_tien_to40_dem_MOT"],
     ),
@@ -3710,6 +3715,19 @@ def case_bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc(c: Ctx):
         raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
 
 
+def case_bien_nhan_ban_sao_roi_duoi_sha256_cha_dem_MOT(c: Ctx):
+    goc = _kho_gia_co_verdict(c, "bnroichasha256", [
+        ("a-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU)),
+        ("b-verdict.receipt.yaml", _bn_that(_SHA_CO_CHU[:7])),
+    ])
+    (goc / ".git").rmdir()
+    _dat_object_format(goc.parent, "sha256")
+    rc, o, e = run(c.script, ["bien-nhan", "--root", str(goc), "--packet", "249"])
+    _doi(0, rc, e, "bản sao rời dưới kho cha SHA-256 bị chặn oan")
+    if "1 biên nhận PHÂN BIỆT ĐƯỢC" not in _txt(o):
+        raise AssertionError(f"không có bằng chứng dương đếm MỘT: {_txt(o)!r}")
+
+
 def case_bien_nhan_sha_so_co_0_dau_van_dem_RIENG(c: Ctx):
     """N3: YAML không nháy không được đổi hai SHA toàn số có 0 đầu thành một xô."""
     goc = _kho_gia_co_verdict(c, "bnso0dau", [
@@ -3799,6 +3817,8 @@ CASES += [
      case_bien_nhan_sha256_hai_oid_khac_nhau_dem_HAI),
     ("bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc",
      case_bien_nhan_ban_sao_roi_co_du_lieu_van_dem_duoc),
+    ("bien_nhan_ban_sao_roi_duoi_sha256_cha_dem_MOT",
+     case_bien_nhan_ban_sao_roi_duoi_sha256_cha_dem_MOT),
     ("bien_nhan_sha_so_co_0_dau_van_dem_RIENG",
      case_bien_nhan_sha_so_co_0_dau_van_dem_RIENG),
     ("bien_nhan_viet_tat_khop_hai_oid_la_KHONG_DO_DUOC",

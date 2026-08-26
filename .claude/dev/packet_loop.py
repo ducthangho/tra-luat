@@ -1521,14 +1521,19 @@ def _be_rong_oid_cua_kho(root: Path) -> tuple[int, ...]:
     """Hỏi object format; không hỏi được thì giữ phép phân loại cũ."""
     try:
         p = subprocess.run(
-            ["git", "-C", str(root), "rev-parse", "--show-object-format"],
+            ["git", "-C", str(root), "rev-parse", "--show-toplevel", "--show-object-format"],
             capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=5,
         )
-    except (OSError, subprocess.SubprocessError):
+        ket_qua = p.stdout.splitlines()
+        if p.returncode != 0:
+            return (40, 64)
+        if len(ket_qua) != 2:
+            return (40, 64)
+        if Path(ket_qua[0]).resolve() != root.resolve():
+            return (40, 64)
+    except (OSError, RuntimeError, subprocess.SubprocessError):
         return (40, 64)
-    if p.returncode != 0:
-        return (40, 64)
-    return {"sha1": (40,), "sha256": (64,)}.get(p.stdout.strip(), (40, 64))
+    return {"sha1": (40,), "sha256": (64,)}.get(ket_qua[1].strip(), (40, 64))
 
 
 def _khoa_neo_cac_sha(ds: list[dict], root: Path) -> list[str]:

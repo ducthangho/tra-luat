@@ -163,3 +163,33 @@ thay_the_ly_do: >-
   không có thẩm quyền ghi nhận. Đó là lần THỨ TƯ cùng một hình dạng: sửa TRƯỜNG được nới, quên
   VĂN BẢN mô tả nó — nên lease này đã được grep lại toàn văn sau khi soạn.
 posted_comment_id: 5423418459   # workflow ghi, ĐỪNG sửa tay
+
+# Thêm TAY sau khi lease đã đăng — `posted_comment_id` ở trên giữ nguyên, cổng trả rc=9 và
+# KHÔNG đăng lại. Ghi ở đây chứ không ở comment vì lease là thứ có thẩm quyền; comment là bản chiếu.
+base_da_do_lai:
+  vi_sao: >-
+    Điều kiện dừng `S4` của chính lease này đã BẮN lúc 09:57Z 26-08: `origin/master` trôi
+    `c35ae1c` → `b662fe1` (PR #316 land packet #313 ca 1+3). `S4` đòi "DỪNG, ĐO LẠI base" —
+    tức đòi một PHÉP ĐO, không đòi một bản sửa đổi. Đây là phép đo đó, ghi lại để phiên sau
+    không phải làm lại và không bắn `S4` lần nữa cho cùng một lần trôi.
+  do_luc_utc: '2026-08-26T10:14:00Z'
+  master_luc_do: b662fe1d07c675a222ae26e734377e305775e4f3
+  ket_qua:
+    to_tien: '`c35ae1c` VẪN là tổ tiên của `b662fe1` — master đi TỚI, không viết lại lịch sử'
+    drift: 'ops/lease_publish.py · ops/lease_publish_test.py'
+    giao_write_set: 'RỖNG — DRIFT không chạm `docs/GOI_AGENT_DA_NEN.md`'
+    blob_write_set: >-
+      16bad9e13255 tại `c35ae1c` = 16bad9e13255 tại `b662fe1` — Y HỆT TỪNG BYTE. Nên ngân sách
+      đo từ base nào cũng cho cùng kết quả, vì nó giới hạn TRÊN WRITE SET.
+  ket_luan: >-
+    `base_sha` GIỮ NGUYÊN `c35ae1c`. KHÔNG mở bản sửa đổi 2. Căn cứ: §3.2 liệt kê thứ tạo
+    revision mới là objective · acceptance · write set · dependency · executor · environment —
+    `base_sha` KHÔNG nằm trong đó. Mở r2 ở đây sẽ làm r1 mất hiệu lực không vì lý do gì và lập
+    tiền lệ "master trôi ⇒ revision", thứ sẽ bắn ở mọi packet mỗi lần master nhúc nhích.
+  khac_gi_lease_cua_319: >-
+    Lease `mcp-gh-cuu-ho-exec-1r2` CÓ đổi base trong cùng lần trôi này. Không mâu thuẫn: r2 ấy
+    cần thiết vì phải neo `spec_sha256` và hạ trần 900 → 750; đổi base chỉ ĐI KÈM. Đó không
+    phải revision-vì-base, và đừng đọc nó thành tiền lệ ngược với kết luận trên.
+  phai_do_lai_khi_nao: >-
+    Phép đo này chỉ đúng cho lần trôi tới `b662fe1`. Master trôi tiếp ⇒ `S4` bắn lại và phải
+    chạy LẠI đủ bốn phép đo trên; đừng đọc khối này thành "base đã được miễn kiểm vĩnh viễn".

@@ -1,0 +1,60 @@
+# Lease EXECUTOR — packet #329 (MAY-PHAT-HIEN-GHI-PHA2).
+#
+# UỶ QUYỀN: chủ kho ra lệnh trực tiếp trong phiên 26-08-2026:
+#   "cấp lease cho tất cả và chạy luôn, cross review bằng codex, xhigh"
+# Người ghi lease là phiên claude — GHI HỘ, không phải người cấp (§2).
+
+schema_version: 1
+event: lease_granted
+packet_issue: 329
+packet_id: MAY-PHAT-HIEN-GHI-PHA2
+lease_id: may-phat-hien-ghi-pha2-exec-1-claude-20260826
+revision: 1
+
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+assurance_target: cross_approved
+access: read-write-nhanh-rieng
+branch_ownership: exclusive
+
+reviewed_sha_required: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+base_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+branch: claude/may-phat-hien-ghi-pha2-exec-1
+
+write_set:
+  - .claude/hooks/subagent_ghi_detect.py
+  - .claude/hooks/subagent_ghi_detect_test.py
+  - .claude/settings.json
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 ~19:00Z bằng `ops/lease_publish.py ai-dang-giu` trên HEAD ac82ddc.
+  Phép so hai nguồn TRƯỚC khi quét, so bằng TẬP TÊN: `ls-remote --heads` 217 =
+  `for-each-ref` 217, `comm -23` RỖNG và `comm -13` RỖNG.
+  Chi tiết NGƯỜI_GIỮ của từng đường dẫn ghi ở `chong_lan_write_set_da_khai`.
+
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-26 ("cấp lease cho tất cả và chạy luôn, cross review bằng codex, xhigh")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-26T19:00:00Z'
+lease_expires_at_utc: '2026-08-27T19:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 60
+
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+
+chong_lan_write_set_da_khai: >-
+  KHÔNG thay thế lease nào. NGƯỜI_GIỮ đo được lúc cấp: cả ba đường dẫn -> 0.
+  Hai tệp hook là TỆP MỚI (chưa tồn tại); `.claude/settings.json` có sẵn, NGƯỜI_GIỮ 0.
+  Đặc tả pha 1 (`ops/specs/agent-may-phat-hien-ghi.md`, land ở 6031222) KHÔNG nằm trong
+  write set này — pha 2 đọc nó, không sửa nó.

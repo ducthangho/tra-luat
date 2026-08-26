@@ -1,0 +1,69 @@
+# Lease EXECUTOR — packet #338 (UY-QUYEN-MERGE-NEO-HIEN-VAT).
+#
+# UỶ QUYỀN: chủ kho ra lệnh trực tiếp trong phiên 26-08-2026:
+#   "cấp lease cho tất cả và chạy luôn, cross review bằng codex, xhigh"
+# Người ghi lease là phiên claude — GHI HỘ, không phải người cấp (§2).
+
+schema_version: 1
+event: lease_granted
+packet_issue: 338
+packet_id: UY-QUYEN-MERGE-NEO-HIEN-VAT
+lease_id: uy-quyen-merge-neo-hien-vat-exec-1-claude-20260826
+revision: 1
+
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+assurance_target: cross_approved
+access: read-write-nhanh-rieng
+branch_ownership: exclusive
+
+reviewed_sha_required: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+base_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+branch: claude/uy-quyen-merge-neo-hien-vat-exec-1
+
+write_set:
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-26 ~19:00Z bằng `ops/lease_publish.py ai-dang-giu` trên HEAD ac82ddc.
+  Phép so hai nguồn TRƯỚC khi quét, so bằng TẬP TÊN: `ls-remote --heads` 217 =
+  `for-each-ref` 217, `comm -23` RỖNG và `comm -13` RỖNG.
+  Chi tiết NGƯỜI_GIỮ của từng đường dẫn ghi ở `chong_lan_write_set_da_khai`.
+
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-26 ("cấp lease cho tất cả và chạy luôn, cross review bằng codex, xhigh")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-26T19:00:00Z'
+lease_expires_at_utc: '2026-08-27T19:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 60
+
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+
+chong_lan_write_set_da_khai: >-
+  NGƯỜI_GIỮ đo được lúc cấp: `.claude/dev/packet_loop.py` và `_test.py` -> 3
+  (khoa-neo-be-rong-exec-1 r2/r3/r7, packet #313). ĐO trước khi thay, không suy từ tên merge:
+  `git rev-list --count origin/master..origin/codex/khoa-neo-be-rong-exec-1` = 0 (nhánh là tổ
+  tiên của master), và `git diff origin/master..<nhánh> -- .claude/dev/packet_loop.py` RỖNG
+  ⇒ không có việc chưa land trên hai tệp ấy. Việc thật của #313 đi vào `ops/lease_publish.py`
+  chứ không vào `packet_loop.py`, nên phần write set này của lease cũ đã cũ. Cùng nợ `AG-T0-01B`.
+chong_lan_write_set_phan_xu: >-
+  CHỒNG LẤN CÓ CHỦ ĐÍCH, khai ra chứ không đi vòng. `thay_the_cho` KHÔNG dùng được ở đây:
+  cổng đòi thay thế HAI CHIỀU (lease cũ phải tự mang `da_bi_thay_the`), mà lease cũ thuộc
+  packet KHÁC — sửa hồ sơ của họ là sai thẩm quyền. Đó chính là nợ
+  `AG-T0-01B-thu-hoi-lease-chua-co-duong`: chưa có đường thu hồi lease của packet ĐÃ LAND.
+  Căn cứ cho phép chồng: phép đo ở `chong_lan_write_set_da_khai` chứng minh KHÔNG có writer
+  thứ hai (packet kia đã land, nhánh là tổ tiên của master). Nếu phép đo ấy sai thì lease
+  này sai — nó đứng trên phép đo, không đứng trên lời khai.

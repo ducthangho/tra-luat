@@ -255,3 +255,4 @@ thay_the_ly_do: >-
   "vượt 560" · `nang_tran_lich_su` thêm mục thứ ba · thêm mục (5) vào
   `phep_do_moi_cua_luot_nay`. Đây là lần thứ ba lease này phải sửa văn bản theo trường; cả ba
   lần đều tự soi bằng `grep` SAU khi soạn, đúng bài học P1 `packet-spec-revision-incoherent`.
+posted_comment_id: 5425713465   # workflow ghi, ĐỪNG sửa tay

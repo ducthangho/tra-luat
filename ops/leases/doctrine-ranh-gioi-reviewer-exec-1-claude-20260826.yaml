@@ -108,17 +108,48 @@ nang_tran_lan_hai:
     Lần thứ ba thì TÁCH, không nâng tiếp — mục doctrine này đã đủ dài để tách được theo tiểu mục.
 
 chu_ky_commit_KHAI_HO:
-  trang_thai: 'commit của vòng 1 (48cf331) và 22 commit khác của phiên CHƯA KÝ'
+  trang_thai: 'ĐÃ ĐO LẠI — xem `dem_lai_chua_ky`. Lời khai cũ "48cf331 và 22 commit khác của phiên" KHÔNG tái lập được vì "phiên" chưa từng được định nghĩa.'
   vi_sao: >-
     Phiên dùng `-c commit.gpgsign=false` từ đầu — một phản xạ phòng thủ CHƯA TỪNG ĐƯỢC ĐO. Đo lại
     26-08-2026: ký chạy `rc=0` bình thường. Đúng bệnh doctrine đã ghi (kết luận một công cụ không
     dùng được mà không hỏi nó hỏng ở đường nào), chỉ tệ hơn ở chỗ chưa hề thử.
   da_sua: 'từ `f16b6bf` trở đi ký mặc định; `f16b6bf` có cha là `48cf331` nên đẩy tiến thẳng'
   vi_sao_KHONG_ky_lai_ho_so_cu: >-
-    Ký lại 23 commit đã đẩy đòi `rebase` + ép lùi. `48cf331` đang bị NEO bởi ba hồ sơ —
-    `reviewed_sha` của verdict, `reviewed_sha` của biên nhận, và head của PR #322. Doctrine nói
-    thẳng ép lùi làm commit thành không tra được y như xoá, và `luu-tru/*` tồn tại chính vì thế.
-    Viết lại là giết ba mỏ neo để đổi lấy một nhãn. Người giữ kho chốt: giữ nguyên, ký từ nay.
+    Ký lại các commit đã đẩy đòi `rebase` + ép lùi. Doctrine nói thẳng ép lùi làm commit thành
+    không tra được y như xoá, và `luu-tru/*` tồn tại chính vì thế. Người giữ kho chốt: giữ
+    nguyên, ký từ nay. Số mỏ neo xem `neo_cua_48cf331` — bản đầu của khối này đếm SAI.
+  neo_cua_48cf331:
+    dem_sai_ra_sao: >-
+      Bản đầu khai "BA hồ sơ neo `48cf331`", kể cả "head của PR #322". Sai một phần ba: PR #322 đã
+      đi tiếp, head nay là `88bd4f2`. Cross-review vòng 2 bắt đúng chỗ này (`ba-neo-cua-48cf331-dem-sai`, P2).
+    dung_ra_la: 'HAI mỏ neo CHÍNH XÁC + MỘT quan hệ TỔ TIÊN — ba thứ khác hạng, đừng cộng chung'
+    neo_chinh_xac:
+    - 'reviewed_sha của verdict vòng 1 — trỏ ĐÚNG 48cf331'
+    - 'reviewed_sha của biên nhận vòng 1 — trỏ ĐÚNG 48cf331'
+    quan_he_to_tien:
+      la_gi: '`48cf331` là TỔ TIÊN của head PR #322, không phải head'
+      do_bang: 'git merge-base --is-ancestor 48cf331 88bd4f2  # rc=0'
+    vi_sao_van_khong_viet_lai: >-
+      Quan hệ tổ tiên YẾU hơn mỏ neo chính xác, nhưng `rebase` phá CẢ BA: nó đổi SHA của
+      `48cf331`, nên hai mỏ neo chính xác trỏ vào hư không. Kết luận không đổi; chỉ lý do được
+      đếm cho đúng.
+  dem_lai_chua_ky:
+    vi_sao_dem_lai: >-
+      Con số 23 cũ dựa trên chữ "phiên", thứ KHÔNG có định nghĩa tra được — nên không ai kiểm lại
+      được. Nay thay bằng một phép đếm có LỆNH, chạy lại được từ kho.
+    do_luc_utc: '2026-08-26'
+    lenh: >-
+      for c in $(git rev-list origin/master..origin/NHANH); do
+      git cat-file commit $c | grep -q "^gpgsig" || echo CHUA_KY; done | wc -l
+    ket_qua_tung_nhanh:
+      'claude/doctrine-ranh-gioi-reviewer-exec-1': 'tổng 3 · CHƯA KÝ 1 (chỉ 48cf331; f16b6bf và 88bd4f2 ĐÃ ký)'
+      'claude/mcp-gh-cuu-ho-exec-1': 'tổng 6 · CHƯA KÝ 6'
+      'ops/cap-lease-tach-314': 'tổng 18 · CHƯA KÝ 16'
+    hop_ba_nhanh_khong_dem_trung: 'tổng 27 · CHƯA KÝ 23'
+    ghi_chu: >-
+      Con số 23 SỐNG SÓT, nhưng nay nó có ĐỊNH NGHĨA (hợp của ba nhánh so với `origin/master`,
+      không đếm trùng) và có lệnh. Trước đó nó chỉ đúng do tình cờ. Đáng chú ý cho người đọc
+      lease này: trên CHÍNH nhánh packet #318 chỉ có ĐÚNG MỘT commit chưa ký.
 
 nang_tran:
   tran_cu: 120

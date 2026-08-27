@@ -62,7 +62,7 @@ branch_ghi_chu: >-
 
 base_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
 start_from_sha: 511a58d2392a60dc94b40918da4d39c4aeda07a3
-reviewed_sha_required: b5bb3952b99f991e84f458f70dcd38c0bf9b90e2
+reviewed_sha_required: 2ab5c76c36562738d2a059887e4846c954739a0a
 base_ghi_chu: >-
   `base_sha` GIỮ NGUYÊN. `S4` đo lại lúc cấp r2: `origin/master` nay `f715fc28`, `ac82ddc` VẪN là
   tổ tiên, và `git diff --numstat ac82ddc..f715fc28` trên ĐÚNG ba đường dẫn write set ⇒ RỖNG.
@@ -74,8 +74,8 @@ ngan_sach_kich_thuoc:
   dong_them_toi_da: 320
   do_tu_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
   don_vi: '`git diff --numstat ac82ddc..HEAD` trên ĐÚNG ba đường dẫn write set, cột dòng THÊM.'
-  da_dung: 309   # ĐO trên `b5bb3952`
-  bien_con_lai: 11
+  da_dung: 317   # ĐO trên `2ab5c76c` (lượt 4)
+  bien_con_lai: 3
   KHONG_NANG_TRAN_O_r2: >-
     r2 KHÔNG nâng trần, cố ý. Lượt 2 chưa hề chạm trần — nó dừng vì chốt công cụ, không vì ngân
     sách — nên chưa có PHÉP ĐO nào biện minh cho việc nâng. Nâng trần TRƯỚC khi có số đo là đúng
@@ -294,3 +294,34 @@ CON_LAI_CUA_334_SAU_KHI_TACH:
   P1_con: bang-chinh-gom-unknown-vao-1-nhu-chan
   vi_sao_o_lai: 'nó thuộc `docs/MANG_SANDBOX_CODEX.md` — TRONG write set, và rẻ: thêm cột `class` hoặc chú thích cho hai bảng. Biên 11 dòng đủ.'
   land_duoc_khi_nao: 'sau khi P1 ấy đóng — `luat_dung_LAND` chỉ cho P2 thành nợ, và P1 `meta-test` nay ĐI THEO packet mới chứ không thành nợ.'
+
+LUOT_4:
+  sha: 2ab5c76c36562738d2a059887e4846c954739a0a
+  nguoi_va: 'phiên điều phối (sửa tài liệu, ba chỗ, không chạm mã)'
+  vi_sao_khong_giao_executor: >-
+    Bản vá là ba sửa trong `docs/` theo đơn thuốc reviewer viết sẵn — mechanical, không có quyết
+    định thiết kế nào. Phóng một lượt executor 20 phút cho việc ấy là lãng phí. KHAI THẲNG cái giá:
+    phiên điều phối nay lại vừa vá vừa đo. Vòng review 3 phải chấm lại phần này như mọi phần khác.
+  ngan_sach: '317/320, biên 3'
+  ba_cho_sua:
+    - 'bảng ba cột: thêm cột LỚP đo được'
+    - 'bảng bốn tổ hợp: thêm cột LỚP'
+    - 'mục `KHÔNG_ĐO_ĐƯỢC`: THAY dòng đã lỗi thời bằng nguyên nhân gốc reviewer vòng 2 tìm ra'
+  dong_da_loi_thoi_da_thay: >-
+    Dòng cũ viết "Số cũ `1` không có lớp, stage, rc con hay raw; không thể phân loại hồi tố."
+    Từ lượt 3 probe ĐÃ phân lớp và lượt này ĐÃ đo, nên câu ấy thành SAI. Để lại là một câu chỏi
+    mới — đúng bệnh sáu lần của #318. Đã thay.
+  DIEU_PHOI_TU_DO_TUNG_O:
+    ngoai_codex: 'LOT · LOT · LOT'
+    sandbox_mac_dinh: 'POLICY_DENIED(create) · POLICY_DENIED(urlopen) · UNKNOWN(rc=128)'
+    network_access_true: 'LOT · LOT · LOT'
+    c_chi_writable_roots: 'POLICY_DENIED · POLICY_DENIED · UNKNOWN'
+    ghi_chu: 'đo trên ĐÚNG bản này, không chép từ lượt trước'
+  bo_do: '11/11 ca · 5 đột biến · 0 sống · TỔNG ĐẠT'
+  N6: 'ĐẠT — chỉ ba đường dẫn write set'
+  P1_meta_test_KHONG_dong_o_day: >-
+    Đã TÁCH sang packet `CONG-NGOAI-WRITE-SET`. Đường vá đúng đòi chạm `.github/workflows/**` hoặc
+    `.claude/dev/packet_loop.py`, cả hai NGOÀI write set ⇒ `S3`.
+  trang_thai_packet: >-
+    Mọi P1 TRONG write set đã đóng. Chờ cross-review vòng 3 trên `2ab5c76c`. Biên 3 dòng — vòng 3
+    mà đòi thêm dòng thì gần như chắc chạm trần, và khi ấy câu trả lời KHÔNG phải nâng trần.

@@ -11,6 +11,7 @@ phase_key: MCP-GITHUB-DOC
 revision: 1
 generation: 1
 lease_id: mcp-github-doc-exec-1-codex-20260827
+da_bi_thay_the: mcp-github-doc-exec-1r2-codex-20260827
 
 role: executor
 provider: codex

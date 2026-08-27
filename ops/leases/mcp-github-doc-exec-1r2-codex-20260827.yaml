@@ -1,0 +1,145 @@
+# Lease EXECUTOR — `MCP-GITHUB-DOC` (#355), lượt 1.
+#
+# Sinh ra từ nợ khai lúc land #347: client MCP github dùng để làm TRỌN phần GitHub của
+# packet ấy nằm ngoài kho, nên phiên sau gặp cảnh mất uỷ quyền connector phải viết lại.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 355
+packet_id: MCP-GITHUB-DOC
+phase_key: MCP-GITHUB-DOC
+revision: 2
+generation: 1
+lease_id: mcp-github-doc-exec-1r2-codex-20260827
+thay_the_cho: mcp-github-doc-exec-1-codex-20260827
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  Hai trường KHÁC NHAU có chủ đích, và nói thẳng kẻo bị đọc là lách trần.
+  `review_class: sensitive` vì tệp chuyển `${GITHUB_PAT}` tới một endpoint ngoài —
+  đòi độ soi của lớp nhạy cảm.
+  `risk: normal` vì trần ADR-0044 `≤3 tệp / ≤300 dòng` gắn với packet **CHẠM AUTHORITY**
+  (`ops/lease_publish.py`, tầng cưỡng chế write-set). Packet này KHÔNG chạm authority:
+  `.claude/dev/**` là dev-side, NGOÀI gói phát hành (đo: `RELEASE_MANIFEST.json` 180 mục,
+  0 mục chứa `.claude`), và không cổng nào đọc nó.
+  Nên trần áp là trần packet thường: `≤6 tệp / ≤1000 dòng thêm+xoá`.
+
+spec_path: null
+spec_note: >-
+  Nguồn yêu cầu: Issue #355. Executor PHẢI tự đo lại mọi con số trong đó, không nhận lời khai —
+  kể cả phép đo `.port` và phép đếm `RELEASE_MANIFEST.json`.
+
+write_set:
+  - .claude/dev/mcp_github_doc.py
+  - .claude/dev/mcp_github_doc_test.py
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-27T11:2xZ trên `b702428`. Phép so HAI NGUỒN (TẬP TÊN): ls-remote 231 ·
+  for-each-ref 231 · `comm` RỖNG hai chiều · không shallow. Rồi quét bằng chính mã vừa
+  land ở #347: `ai-dang-giu .claude/dev/mcp_github_doc.py` ⇒ `NGƯỜI_GIỮ 0`, `rc=0`.
+
+branch: codex/mcp-github-doc-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: b702428702ab770a46ecaa9800074022138e5b78
+start_from_sha: b702428702ab770a46ecaa9800074022138e5b78
+reviewed_sha_required: b702428702ab770a46ecaa9800074022138e5b78
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 6
+  dong_them_toi_da: 1000
+  do_tu_sha: b702428702ab770a46ecaa9800074022138e5b78
+  don_vi: >-
+    `git diff --numstat b702428702ab770a46ecaa9800074022138e5b78 -- .claude/dev/mcp_github_doc.py
+    .claude/dev/mcp_github_doc_test.py` — THÊM cộng XOÁ (trần packet thường tính cả hai).
+    Pathspec TRONG lệnh, KHÔNG `..HEAD`.
+  da_dung: 0
+  ghi_chu: >-
+    Ước lượng từ số đo của chính kho, KHÔNG từ cảm tính: tệp cùng loại `gh_readback.py`
+    = 206 src + 216 test = 422 dòng. Bản nháp client hiện có 192 dòng. Nên ~400 là kích
+    thước THẬT của việc này, và nó nằm gọn trong trần thường.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-27: "mở packet riêng cho nó"'
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+
+recorder_xung_dot_loi_ich: >-
+  KHAI THẲNG: phiên ghi lease NÀY chính là phiên đã viết BẢN NHÁP `mcp_github_doc.py`.
+  Nên khi nó làm reviewer, phần LÕI của bản vá không được review độc lập với tác giả.
+  Giảm thiểu: (a) mọi lỗ đã biết được khai sẵn trong #355 kèm phép đo, thay vì để reviewer
+  tự tìm lại; (b) đòi cross-review của connector trên PR — đó là lượt độc lập thật;
+  (c) nếu connector im lặng thì đọc là CHƯA CHẠY, không phải sạch.
+
+leased_at_utc: '2026-08-27T11:30:00Z'
+lease_expires_at_utc: '2026-08-28T11:30:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  Đúng hai tệp trong `write_set`. KHÔNG đụng `launcher.py`, KHÔNG đụng `.mcp.json`,
+  KHÔNG đụng `gh_readback.py`. Hunk ngoài hai tệp ấy ⇒ ĐỎ.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ngoài write set ⇒ DỪNG ·
+  S2 vượt 1000 dòng thêm+xoá ⇒ DỪNG, khai ·
+  S3 phải sửa `launcher.py` mới làm được ⇒ DỪNG (đó là mở phạm vi sang tệp nóng) ·
+  S4 thêm tệp này làm một mutant của `launcher_test.py` mất răng ⇒ DỪNG, trình phép đo ·
+  S5 `origin/master` đã đi tiếp so `base_sha` mà chưa đo lại.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) KHÔNG commit, KHÔNG push, KHÔNG tạo/xoá/đổi ref. Phiên điều phối commit.
+  (2) Test KHÔNG được gọi mạng thật. Đồ giả phải mô phỏng TRẠNG THÁI, không diễn kịch bản.
+  (3) Mỗi chốt từ chối phải có ĐỘT BIẾN RIÊNG làm ca đích ĐỎ; chốt không có mutant là chốt
+      sẽ âm thầm hở lại.
+  (4) KHÔNG nhánh từ chối nào được mang dữ liệu lấy từ `url` ra mô tả — kể cả `scheme`.
+  (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+
+nang_tran:
+  tran_cu: 2
+  tran_moi: 3
+  ai_nang: ducthangho
+  khi_nao: 'chủ kho chốt in-session 2026-08-27, sau khi vòng 2 trả P2 lệch bộ phân tích'
+  can_cu: >-
+    ADR-0043 đặt trần canon là HAI vòng review hợp lệ. Packet #355 đã dùng đủ hai:
+    vòng 1 → P1 `isError` (cổng báo thành công đúng lúc thao tác thất bại, ĐÃ VÁ),
+    vòng 2 → P2 lệch bộ phân tích `.mcp.json` so `launcher.py` (CHƯA VÁ).
+    Phiên điều phối đã trình ba đường (vá-rồi-land · land-kèm-khai-nợ · nới trần) và
+    chủ kho chọn nới trần để bản vá P2 được soi bằng một lượt cross-review THẬT,
+    thay vì land một thay đổi chưa ai xem.
+  trang_thai_cuong_che_cua_tran: >-
+    NÓI CHO ĐÚNG, kẻo đọc thành thứ nó không phải: trần vòng là KỶ LUẬT VẬN HÀNH,
+    CHƯA CÓ CƯỠNG CHẾ MÁY. Nợ `#323` đã khai và đo được: KHÔNG tầng nào đọc `nang_tran`.
+    Nên khối này là một quyết định GHI LẠI ĐƯỢC của chủ kho, không phải mở một cổng máy.
+    Đừng dẫn nó như bằng chứng "cổng đã cho phép".
+  khong_lach_budget: >-
+    Nới trần VÒNG, KHÔNG nới trần KÍCH THƯỚC. Ngân sách giữ nguyên `≤6 tệp / ≤1000 dòng`;
+    hiện dùng 586. Vá P2 là sửa vài dòng cộng ca test, không phải cớ để mở phạm vi.
+
+viec_cua_vong_3: >-
+  MỘT việc: `_doc_cau_hinh` chọn khoá theo CÓ MẶT rồi mới kiểm kiểu, khớp bộ phân tích
+  chuẩn `launcher.py::_doc_mcp_json`.
+
+  Hiện tại hai công cụ BẤT ĐỒNG về cùng một tệp — đo được, không phải suy luận:
+    .mcp.json = {"mcpServers": null, "servers": {"github": {...hợp lệ...}}}
+      client này        -> `MO`, 44 công cụ, rc=0   (lặng lẽ rơi sang khoá dự phòng)
+      launcher.py       -> False, "khoa `mcpServers` khong phai object (la NoneType)"
+
+  `launcher.py` lấy khoá CÓ MẶT đầu tiên (`if khoa in d`) rồi kiểm kiểu; client này tìm
+  khoá đầu tiên ĐÃ LÀ dict (`isinstance(d.get(khoa), dict)`) nên bỏ qua khoá hỏng.
+  Sửa cho khớp: chọn theo CÓ MẶT, rồi kiểm kiểu, hỏng ⇒ fail-CLOSE.
+
+  Ca test bắt buộc: `mcpServers` là `null` VÀ là `list`, cùng `servers.github` hợp lệ ⇒
+  phải TỪ CHỐI, không được rơi sang khoá dự phòng.
+  Đột biến bắt buộc: quay lại `isinstance(...)` ⇒ ca ấy phải ĐỎ.

@@ -672,8 +672,8 @@ Kết quả **bên trong sandbox codex khác hẳn**, và mục ấy — cùng m
 packet riêng. Lý do tách là một phép đếm, không phải cảm tính: bốn vòng cross-review liên tiếp đều
 sinh finding về mục mạng/sandbox (tám finding), trong khi mọi tiêu chí khác của packet này đã đạt
 từ vòng ba. Mệnh đề còn đứng mà không cần bảng số nào — và nó MANG NHÃN như mọi mệnh đề khác:
-**mạng đóng của sandbox là một MẶC ĐỊNH CẤU HÌNH, không phải bất biến — biết cơ chế KHÔNG làm nó
-thành ranh giới** ⇒ **chưa xếp được**, cho câu hỏi *"nó có phải ranh giới không"*.
+**mạng đóng của sandbox là một MẶC ĐỊNH CẤU HÌNH, không phải bất biến — DÙ có biết cơ chế thì cũng
+KHÔNG làm nó thành ranh giới** ⇒ **chưa xếp được**, cho câu hỏi *"nó có phải ranh giới không"*.
 ĐIỀU KIỆN ĐO nằm NGAY ĐÂY, không ở packet kia — mục `sandbox workspace-write` phía trên đo A/B
 trên CÙNG một lệnh: mặc định `git ls-remote` lỗi kết nối; sau khi bật **HAI** cờ cùng lúc
 (`network_access` và `writable_roots`) thì `lsremote_rc=0`. Điều kiện: codex CLI trong container

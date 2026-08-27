@@ -143,3 +143,4 @@ viec_cua_vong_3: >-
   Ca test bắt buộc: `mcpServers` là `null` VÀ là `list`, cùng `servers.github` hợp lệ ⇒
   phải TỪ CHỐI, không được rơi sang khoá dự phòng.
   Đột biến bắt buộc: quay lại `isinstance(...)` ⇒ ca ấy phải ĐỎ.
+posted_comment_id: 5441809444   # workflow ghi, ĐỪNG sửa tay

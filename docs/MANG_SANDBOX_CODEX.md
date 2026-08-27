@@ -1,36 +1,30 @@
-# Mạng ra ngoài của sandbox `codex sandbox` — quan sát → phép đo tái lập được
+# Sandbox mạng của Codex — quan sát có điều kiện
 
-Packet `MANG-SANDBOX-CODEX`. Nguồn: quan sát 24-08-2026 "sandbox `codex` không có đường ra
-mạng" — **chưa ai đo CƠ CHẾ** trước gói này. Doctrine giữ nguyên, không bị nâng cấp bởi tài
-liệu này: **mạng đóng là một MẶC ĐỊNH CẤU HÌNH, không phải bất biến an ninh** — biết cơ chế
-KHÔNG làm nó thành ranh giới, vì cờ lật được (xem bảng dưới).
+Packet `MANG-SANDBOX-CODEX` giữ nguyên doctrine: **mạng đóng là MẶC ĐỊNH CẤU HÌNH,
+không phải bất biến an ninh**. Bảng dưới là số đã chốt ngày 27-08-2026, không phải lời
+hứa cho phiên bản hay cấu hình khác.
 
-Công cụ: `.claude/dev/probe_mang.py` — ba kênh độc lập, mỗi kênh in `TEN=MA` (`0`=lọt,
-`1`=bị chặn): `bind_loopback` (đối chứng nội bộ, không ra mạng), `urlopen`, `git_ls_remote`.
-Phản chứng: `.claude/dev/probe_mang_test.py` — chạy `python3 .claude/dev/probe_mang_test.py`.
+Probe nay in `TEN=MA_CU class=LOP stage=GIAI_DOAN rc=RC raw=DU_LIEU_DA_KHU_NHAY_CAM`.
+`MA_CU=0` ánh xạ `LOT`; `MA_CU=1` chỉ có nghĩa *không lọt*. Chỉ `class` mới phân biệt
+`POLICY_DENIED`, `ENDPOINT_ERROR`, `DNS_ERROR`, `TIMEOUT`, `TOOL_ERROR`,
+`REPOSITORY_ERROR`, `AUTH_ERROR`, `UNKNOWN`; `UNKNOWN` là `KHÔNG_ĐO_ĐƯỢC` và làm probe rc=1.
+Hai bảng cũ giữ nguyên số 0/1; vì lượt đo cũ không lưu lớp/raw, không hồi tố số 1 thành policy-denied.
 
-## Việc 3 — bảng ba cột
+## Bảng ba cột đã chốt
 
-Điều kiện đo (27-08-2026): OS `Linux 6.18.44-fc-v21 x86_64` · `python3 3.11.15` ·
-`codex-cli 0.150.0` · `sandbox_mode=workspace-write` khi qua codex.
+Điều kiện: `Linux 6.18.44-fc-v21 x86_64` · Python 3.11.15 · `codex-cli 0.150.0` ·
+`sandbox_mode=workspace-write` khi qua Codex.
 
-| lệnh (chạy tại gốc kho) | bind | url | git | mệnh đề |
-|---|---|---|---|---|
-| `python3 .claude/dev/probe_mang.py` | 0 | 0 | 0 | đối chứng NGOÀI codex — container này có mạng |
-| `codex sandbox -c sandbox_mode=workspace-write -- python3 .claude/dev/probe_mang.py` | 1 | 1 | 1 | sandbox mặc định, KHÔNG cờ mạng — cả ba bị chặn |
-| `codex sandbox -c sandbox_mode=workspace-write -c sandbox_workspace_write.network_access=true -- python3 .claude/dev/probe_mang.py` | 0 | 0 | 0 | bật `network_access=true` — cả ba lọt: cấu hình lật được, KHÔNG phải ranh giới |
+| lệnh (tại gốc kho) | socket (cũ: bind) | url | git |
+|---|---:|---:|---:|
+| `python3 .claude/dev/probe_mang.py` | 0 | 0 | 0 |
+| `codex sandbox -c sandbox_mode=workspace-write -- python3 .claude/dev/probe_mang.py` | 1 | 1 | 1 |
+| `codex sandbox -c sandbox_mode=workspace-write -c sandbox_workspace_write.network_access=true -- python3 .claude/dev/probe_mang.py` | 0 | 0 | 0 |
 
-Ba lệnh trên là nguyên văn để tái lập; không đối số nào bị lược.
+## Bốn lệnh tách hai cờ
 
-## Việc 4 — tách hai cờ (mạng đóng do cờ nào)
-
-Bản ghi cũ trong kho mở **đúng hai** chốt cùng lúc (`network_access=true` VÀ
-`writable_roots=[...]`) rồi khai `fetch_rc=0`/`lsremote_rc=0` — hai biến bật cùng lúc thì
-KHÔNG cô lập được cờ nào là nguyên nhân (cross-review packet #318 đã bác một bản vá đúng vì lý
-do này). Đo lại BỐN tổ hợp, mỗi cờ riêng, cùng một lệnh nền
-`codex sandbox -c sandbox_mode=workspace-write [CỜ] -- python3 .claude/dev/probe_mang.py`,
-`[CỜ]` thay bằng đúng cột dưới (`DUONG_DAN_GOC` = `$(git rev-parse --show-toplevel)`). Bốn lệnh
-nguyên văn, chép-chạy được (đã tự chạy lại 27-08-2026, khớp bảng dưới byte-với-byte):
+Khối Bash/Linux dưới đây là bốn lệnh nguyên văn đã được phiên điều phối rút từ chính tài liệu
+và chạy lại; không dùng nó để tuyên bố đã tái lập trong sandbox Codex của executor lượt này.
 
 ```bash
 DUONG_DAN_GOC=$(git rev-parse --show-toplevel)
@@ -40,22 +34,19 @@ codex sandbox -c sandbox_mode=workspace-write -c 'sandbox_workspace_write.writab
 codex sandbox -c sandbox_mode=workspace-write -c sandbox_workspace_write.network_access=true -c 'sandbox_workspace_write.writable_roots=["'"$DUONG_DAN_GOC"'/.git","/tmp"]' -- python3 .claude/dev/probe_mang.py
 ```
 
-| tổ hợp | `network_access=true` | `writable_roots=["DUONG_DAN_GOC/.git","/tmp"]` | bind | url | git |
-|---|---|---|---|---|---|
+| tổ hợp | `network_access=true` | `writable_roots` | socket | url | git |
+|---|---|---|---:|---:|---:|
 | (a) | không | không | 1 | 1 | 1 |
 | (b) | CÓ | không | 0 | 0 | 0 |
 | (c) | không | CÓ | 1 | 1 | 1 |
 | (d) | CÓ | CÓ | 0 | 0 | 0 |
 
-**Trả lời thẳng:** `network_access=true` MỘT MÌNH đủ đảo cả ba kênh — (b) khớp byte-với-byte
-(d), và (a) khớp (c). `writable_roots` không đảo kênh nào. Cơ chế mạng **ĐÃ XÁC MINH**: cờ gây
-mở mạng là `sandbox_workspace_write.network_access`, không phải `writable_roots`. Bản ghi cũ
-đúng VỀ KẾT QUẢ nhưng sai VỀ HẠNG BẰNG CHỨNG (đo tổ hợp, không đo từng cờ); nay đã tách.
+`network_access=true` một mình đã đảo cả ba quan sát; `writable_roots` không đảo ô nào.
+Loopback không phải egress: cờ này gate capability socket rộng hơn hai phép HTTPS ra ngoài,
+nên kết quả chỉ xác minh phạm vi cờ cấu hình đã đo, không xác minh một ranh giới mạng.
 
 ## KHÔNG_ĐO_ĐƯỢC
 
-- Cơ chế HỆ ĐIỀU HÀNH đứng sau `network_access` (netns/seccomp/…) — bảng trên đo ở mức
-  cờ cấu hình, không đo bằng cách nào kernel thực thi nó.
-- Hành vi trên phiên bản `codex-cli` khác 0.150.0, hay trên Windows — chưa chạy được ở đây.
-- `sandbox_mode` khác `workspace-write` (vd `read-only`, `danger-full-access`) — ngoài phạm
-  vi packet này.
+- Executor lượt này không chạy lại ba cột/bốn tổ hợp: `codex sandbox` lồng dừng `rc=101` trước probe.
+- Số cũ `1` không có lớp, stage, rc con hay raw; không thể phân loại hồi tố.
+- Chưa đo cơ chế kernel, OS/Codex/sandbox mode khác, và egress ngoài hai endpoint HTTPS đã chọn.

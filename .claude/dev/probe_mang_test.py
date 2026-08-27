@@ -1,186 +1,156 @@
 #!/usr/bin/env python3
-"""Phản chứng cho `probe_mang.py` — CHẠY ĐƯỢC, không cần mạng, mỗi ca một đột biến.
-
-Mọi thao tác mạng thật bị thay bằng giả lập (`unittest.mock`): bộ này đo LOGIC
-quy đổi kết quả sang mã thoát, KHÔNG đo môi trường đang chạy có mạng hay
-không (đo môi trường thật thì chạy chính probe_mang.py — xem
-docs/MANG_SANDBOX_CODEX.md). Mỗi kênh có MỘT ca gộp ba mệnh đề: (a) thành
-công → MA_LOT, (b) bị chặn → MA_CHAN, (c) một lỗi KHÁC chính sách mạng (bug
-trong chính probe) VẪN bị nuốt thành MA_CHAN chứ không được lọt ra làm sập
-tiến trình — sập thì các kênh SAU không còn cơ hội chạy (xem ca main).
-Nạp module động, mỗi đột biến ra module TÊN RIÊNG (không ghi tệp thật, không
-đụng .pyc dùng chung) — xem giải thích đầy đủ ở đầu codex_cred_test.py.
-"""
+"""Phản chứng offline cho phân loại probe và cho chính cổng đột biến."""
 from __future__ import annotations
-
 import contextlib
+import errno
 import importlib.util
 import io
 import os
+import socket
 import sys
 import tempfile
 import urllib.error
 from pathlib import Path
 from unittest import mock
-
 sys.dont_write_bytecode = True
-
 GOC = Path(__file__).with_name("probe_mang.py")
-_dem = 0
-
-
+SO_DOT_BIEN_MONG_DOI = 5
 def nap(nguon: str, nhan: str):
-    global _dem
-    _dem += 1
-    d = Path(tempfile.mkdtemp(prefix="pm-test-"))
-    t = d / f"pm_{nhan}_{_dem}.py"
-    t.write_text(nguon, encoding="utf-8")
-    importlib.invalidate_caches()
-    spec = importlib.util.spec_from_file_location(t.stem, t)
-    m = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(m)
-    assert not list(d.glob("__pycache__/*")), "đã ghi .pyc — chốt chống va chạm hỏng"
-    return m
-
-
-def t1_bind_hanh_vi_dung(M):
-    with mock.patch.object(M.socket, "socket", return_value=mock.MagicMock()):
-        assert M.kenh_bind_loopback() == 0
-    with mock.patch.object(M.socket, "socket", side_effect=OSError("bi chan")):
-        assert M.kenh_bind_loopback() == 1
-    with mock.patch.object(M.socket, "socket", side_effect=ValueError("bug")):
-        assert M.kenh_bind_loopback() == 1
-
-
-def t2_urlopen_hanh_vi_dung(M):
+    with tempfile.TemporaryDirectory(prefix="pm-test-") as d:
+        p = Path(d) / f"pm_{nhan}.py"
+        p.write_text(nguon, encoding="utf-8")
+        importlib.invalidate_caches()
+        spec = importlib.util.spec_from_file_location(p.stem, p)
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        assert not list(Path(d).glob("__pycache__/*")), "đã ghi .pyc"
+        return m
+def url_loi(M, exc):
+    with mock.patch.object(M.urllib.request, "urlopen", side_effect=exc):
+        return M.kenh_urlopen()
+def git_loi(M, stderr):
+    p = mock.MagicMock(returncode=128, stderr=stderr, stdout=b"")
+    with mock.patch.object(M.subprocess, "run", return_value=p):
+        return M.kenh_git_ls_remote()
+def t1_url_sai_cu_phap(M):
+    assert M.kenh_urlopen("khong-phai-url")["lop"] == M.ENDPOINT_ERROR
+def t2_dns_loi(M):
+    e = urllib.error.URLError(socket.gaierror(-2, "name or service not known"))
+    assert url_loi(M, e)["lop"] == M.DNS_ERROR
+def t3_timeout(M):
+    assert url_loi(M, TimeoutError("timeout"))["lop"] == M.TIMEOUT
+def t4_path_rong(M):
+    with mock.patch.dict(os.environ, {"PATH": ""}):
+        assert M.kenh_git_ls_remote()["lop"] == M.TOOL_ERROR
+def t5_kho_khong_ton_tai(M):
+    x = git_loi(M, b"fatal: repository not found"); assert (x["lop"], x["rc"]) == (M.REPOSITORY_ERROR, 128)
+def t6_auth_loi(M):
+    x = git_loi(M, b"fatal: Authentication failed for 'https://user:secret@example.invalid/repo'")
+    assert x["lop"] == M.AUTH_ERROR and "secret" not in x["raw"]
+def t7_policy_denied(M):
+    e = PermissionError(errno.EPERM, "Operation not permitted")
+    with mock.patch.object(M.socket, "socket", side_effect=e):
+        x = M.kenh_socket_loopback()
+    assert (x["lop"], x["stage"]) == (M.POLICY_DENIED, "create")
+def t8_giai_doan_socket(M):
+    for stage in ("bind", "listen"):
+        s = mock.MagicMock()
+        getattr(s, stage).side_effect = PermissionError(errno.EPERM, "denied")
+        with mock.patch.object(M.socket, "socket", return_value=s):
+            assert M.kenh_socket_loopback()["stage"] == stage
+def t9_lot_unknown(M):
     cm = mock.MagicMock()
     cm.__enter__.return_value = cm
     with mock.patch.object(M.urllib.request, "urlopen", return_value=cm):
-        assert M.kenh_urlopen() == 0
-    with mock.patch.object(M.urllib.request, "urlopen",
-                            side_effect=urllib.error.URLError("bi chan")):
-        assert M.kenh_urlopen() == 1
-    with mock.patch.object(M.urllib.request, "urlopen", side_effect=TypeError("bug")):
-        assert M.kenh_urlopen() == 1
-
-
-def t3_lsremote_hanh_vi_dung(M):
-    with mock.patch.object(M.subprocess, "run", return_value=mock.MagicMock(returncode=0)):
-        assert M.kenh_git_ls_remote() == 0
-    with mock.patch.object(M.subprocess, "run", return_value=mock.MagicMock(returncode=128)):
-        assert M.kenh_git_ls_remote() == 1
-    with mock.patch.object(M.subprocess, "run", side_effect=TypeError("bug")):
-        assert M.kenh_git_ls_remote() == 1
-
-
-def t4_main_goi_du_ba_kenh_dung_mot_lan(M):
-    """`main()` phải GỌI cả ba kênh, đúng một lần — không bỏ sót im lặng."""
-    dem = {"bind_loopback": 0, "urlopen": 0, "git_ls_remote": 0}
-
-    def dem_goi(ten):
-        def f(*_a, **_k):
-            dem[ten] += 1
-            return 0
-        return f
-
-    M.kenh_bind_loopback = dem_goi("bind_loopback")
-    M.kenh_urlopen = dem_goi("urlopen")
-    M.kenh_git_ls_remote = dem_goi("git_ls_remote")
-
-    buf = io.StringIO()
-    with contextlib.redirect_stdout(buf):
-        rc = M.main()
-    dong = [d for d in buf.getvalue().splitlines() if d]
-    assert rc == 0
-    assert dem == {"bind_loopback": 1, "urlopen": 1, "git_ls_remote": 1}, dem
-    assert len(dong) == 3, dong
-    assert {d.split("=")[0] for d in dong} == set(dem), dong
-
-
-def t5_hang_so_MA_LOT_MA_CHAN_dung_gia_tri(M):
-    assert M.MA_LOT == 0 and M.MA_CHAN == 1 and M.MA_LOT != M.MA_CHAN
-
-
-CA = [t1_bind_hanh_vi_dung, t2_urlopen_hanh_vi_dung, t3_lsremote_hanh_vi_dung,
-      t4_main_goi_du_ba_kenh_dung_mot_lan, t5_hang_so_MA_LOT_MA_CHAN_dung_gia_tri]
-
-# (nhãn, mỏ neo — PHẢI xuất hiện đúng 1 lần trong nguồn gốc, chuỗi thay, ca phải chết)
+        assert M.kenh_urlopen()["lop"] == M.LOT
+    x = url_loi(M, TypeError("bug")); assert x["lop"] == M.UNKNOWN and x["raw"]
+def t10_main_schema_va_fail_close(M):
+    a, b, c = M.kq(M.LOT, "done"), M.kq(M.POLICY_DENIED, "create"), M.kq(M.DNS_ERROR, "urlopen")
+    with mock.patch.object(M, "kenh_socket_loopback", return_value=a), \
+         mock.patch.object(M, "kenh_urlopen", return_value=b), \
+         mock.patch.object(M, "kenh_git_ls_remote", return_value=c):
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            assert M.main() == 0
+    dong = out.getvalue().splitlines()
+    assert len(dong) == 3 and all(" class=" in d and " stage=" in d for d in dong)
+    with mock.patch.object(M, "kenh_urlopen", return_value=M.kq(M.UNKNOWN, "urlopen")):
+        with contextlib.redirect_stdout(io.StringIO()):
+            assert M.main() == 1
+def t11_ma_phan_loai_doc_nhat(M):
+    lop = [M.LOT, M.POLICY_DENIED, M.ENDPOINT_ERROR, M.TIMEOUT, M.TOOL_ERROR,
+           M.UNKNOWN, M.DNS_ERROR, M.REPOSITORY_ERROR, M.AUTH_ERROR]
+    assert len(lop) == len(set(lop)) == 9
+CA_SAN_PHAM = [t1_url_sai_cu_phap, t2_dns_loi, t3_timeout, t4_path_rong,
+               t5_kho_khong_ton_tai, t6_auth_loi, t7_policy_denied, t8_giai_doan_socket,
+               t9_lot_unknown, t10_main_schema_va_fail_close, t11_ma_phan_loai_doc_nhat]
+# (ID, mỏ neo duy nhất, thay thế, các ca tối thiểu phải giết)
 DOT_BIEN = [
-    ("m1_bind_thu_hep_except", "except Exception:  # bind", "except OSError:  # bind",
-     "t1_bind_hanh_vi_dung"),
-    ("m2_urlopen_thu_hep_except", "except Exception:  # urlopen", "except OSError:  # urlopen",
-     "t2_urlopen_hanh_vi_dung"),
-    ("m3_lsremote_thu_hep_except", "except Exception:  # ls_remote",
-     "except OSError:  # ls_remote", "t3_lsremote_hanh_vi_dung"),
-    ("m4_main_bo_sot_mot_kenh", '        "git_ls_remote": kenh_git_ls_remote(),\n', "",
-     "t4_main_goi_du_ba_kenh_dung_mot_lan"),
-    ("m5_dao_hang_so_MA_LOT", "MA_LOT = 0", "MA_LOT = 1",
-     "t5_hang_so_MA_LOT_MA_CHAN_dung_gia_tri"),
+    ("m1_sai_stage_bind", 'stage = "bind"', 'stage = "create"', {"t8_giai_doan_socket"}),
+    ("m2_gom_dns_endpoint", "return kq(DNS_ERROR, stage, raw)", "return kq(ENDPOINT_ERROR, stage, raw)", {"t2_dns_loi"}),
+    ("m3_gom_auth_repo", "(AUTH_ERROR, (", "(REPOSITORY_ERROR, (", {"t6_auth_loi"}),
+    ("m4_main_bo_kenh_git", '                "git_ls_remote": kenh_git_ls_remote()}', '}', {"t10_main_schema_va_fail_close"}),
+    ("m5_gom_hai_ma", 'AUTH_ERROR = "AUTH_ERROR"', "AUTH_ERROR = REPOSITORY_ERROR", {"t11_ma_phan_loai_doc_nhat"}),
 ]
-
-
-def chay_suite(M, chi_chay: set[str] | None = None) -> set[str]:
+def chay_suite(nguon: str, cases=CA_SAN_PHAM) -> set[str]:
     do = set()
-    for ca in CA:
-        if chi_chay is not None and ca.__name__ not in chi_chay:
-            continue
-        Mi = nap(M.__nguon__, M.__nhan__)
-        Mi.__nguon__, Mi.__nhan__ = M.__nguon__, M.__nhan__
+    for ca in cases:
         try:
-            ca(Mi)
+            ca(nap(nguon, ca.__name__))
         except Exception as e:
             do.add(ca.__name__)
             if os.environ.get("PM_CHI_TIET"):
                 print(f"    ĐỎ {ca.__name__}: {type(e).__name__}: {e}")
     return do
-
-
-def main() -> int:
-    goc = GOC.read_text(encoding="utf-8")
-    M = nap(goc, "goc")
-    M.__nguon__, M.__nhan__ = goc, "goc"
-
-    do = chay_suite(M)
-    n = len(CA)
-    print(f"nền: {n - len(do)}/{n} đạt")
-    for t in sorted(do):
-        print(f"  ĐỎ  {t}")
-    if do:
-        print("TỔNG: ĐỎ (nền chưa xanh — không đo đột biến khi nền đã đỏ)")
-        return 1
-
-    print("\nĐỘT BIẾN — bán kính CHỈ đo trong phạm vi phai_chet:")
+def bao(s: str) -> int:
+    print(s)
+    return 1
+def gate(goc: str, cases=CA_SAN_PHAM, mutants=DOT_BIEN,
+         expected=SO_DOT_BIEN_MONG_DOI) -> int:
+    if len(mutants) != expected: return bao(f"ĐỎ số đột biến {len(mutants)} != {expected}")  # canh-so-luong
+    do = chay_suite(goc, cases)
+    print(f"nền: {len(cases) - len(do)}/{len(cases)} đạt")
+    if do: return bao(f"TỔNG: ĐỎ (nền đỏ: {sorted(do)})")  # canh-nen-do
     xau = []
-    for nhan, cu, moi, dich in DOT_BIEN:
-        if goc.count(cu) != 1:
-            print(f"  ĐỎ  {nhan}: mỏ neo xuất hiện {goc.count(cu)} lần, cần đúng 1")
-            xau.append(nhan)
-            continue
-        nguon_m = goc.replace(cu, moi, 1)
-        try:
-            Mm = nap(nguon_m, nhan)
-        except SyntaxError as e:
-            print(f"  ĐỎ  {nhan:26} KHÔNG BIÊN DỊCH ĐƯỢC: {e}")
-            xau.append(f"{nhan}: đột biến không parse")
-            continue
-        Mm.__nguon__, Mm.__nhan__ = nguon_m, nhan
-        phai_chet = {dich}
-        chet = chay_suite(Mm, phai_chet)
-        ok = chet == phai_chet
-        print(f"  {'ok ' if ok else 'ĐỎ '} {nhan:26} giết {len(chet)}/{len(phai_chet)}"
-              " trong phai_chet")
-        if not ok:
-            xau.append(f"{nhan}: chết {sorted(chet)}, phải chết {sorted(phai_chet)}")
-
-    print(f"\nSỐ LIỆU:  ca {n}  ·  đột biến {len(DOT_BIEN)}")
-    if xau:
-        print("TỔNG: ĐỎ")
-        for x in xau:
-            print(f"  - {x}")
-        return 1
+    for nhan, cu, moi, phai_chet in mutants:
+        if goc.count(cu) != 1: xau.append(f"{nhan}: mỏ neo không duy nhất"); continue  # canh-duy-nhat
+        chet = chay_suite(goc.replace(cu, moi, 1), CA_SAN_PHAM)
+        ok = phai_chet <= chet
+        print(f"  {'ok ' if ok else 'ĐỎ '} {nhan}: kill-set={sorted(chet)}")
+        if not ok: xau.append(f"{nhan}: thiếu {sorted(phai_chet - chet)}")  # canh-ghi-song
+    print(f"SỐ LIỆU: ca {len(cases)} · đột biến {len(mutants)} · sống {len(xau)}")
+    if xau: return bao(f"TỔNG: ĐỎ ({xau})")  # canh-ket-luan
     print("TỔNG: ĐẠT")
     return 0
-
-
+def bo_dong(nguon: str, dau: str) -> str:
+    dong = nguon.splitlines(keepends=True)
+    assert sum(dau in d for d in dong) <= 1
+    return "".join(d for d in dong if dau not in d)
+def go(f, *args, **kwargs):
+    with contextlib.redirect_stdout(io.StringIO()):
+        return f(*args, **kwargs)
+def t12_cong_dot_bien_tu_canh(_M):
+    ts, goc = Path(__file__).read_text(encoding="utf-8"), GOC.read_text(encoding="utf-8")
+    for i in range(1, 6):
+        m = nap(bo_dong(ts, f'("m{i}_'), f"self_m{i}")
+        assert (go(gate, goc), go(m.gate, goc)) == (0, 1)
+    goc_trung = goc + "\n# " + DOT_BIEN[-1][1] + "\n"
+    m = nap(bo_dong(ts, "# canh-" + "duy-nhat"), "self_duy_nhat")
+    assert (go(gate, goc_trung), go(m.gate, goc_trung)) == (1, 0)
+    def ca_do(_): raise AssertionError("fixture nền đỏ")
+    kw = {"cases": [ca_do], "mutants": [], "expected": 0}
+    m = nap(bo_dong(ts, "# canh-" + "nen-do"), "self_nen_do")
+    assert (go(gate, goc, **kw), go(m.gate, goc, **kw)) == (1, 0)
+    song = [("song", 'LOT = "LOT"', 'LOT = "LOT"', {"t11_ma_phan_loai_doc_nhat"})]
+    kw = {"mutants": song, "expected": 1}
+    for key in ("ghi-song", "ket-luan"):
+        m = nap(bo_dong(ts, "# canh-" + key), "self_" + key)
+        assert (go(gate, goc, **kw), go(m.gate, goc, **kw)) == (1, 0)
+    print("tự đột biến cổng: 9/9 chết (m1..m5 + 4 dòng cơ chế)")
+def main() -> int:
+    try:
+        t12_cong_dot_bien_tu_canh(None)
+    except Exception as e:
+        return bao(f"TỔNG: ĐỎ (t12_cong_dot_bien_tu_canh: {type(e).__name__}: {e})")
+    return gate(GOC.read_text(encoding="utf-8"))
 if __name__ == "__main__":
     sys.exit(main())

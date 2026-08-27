@@ -333,6 +333,35 @@ def _doc_cau_hinh_git(goc: Path) -> dict[str, list[str]]:
     return ket_qua
 
 
+def _ref_ton_tai(goc: Path, ref: str) -> bool:
+    """Hỏi Git về tồn tại; không dùng tập ref thuộc phạm vi quét lease."""
+    try:
+        # check-ref-format không hỗ trợ option terminator: cả `--` lẫn
+        # `--end-of-options` đều rc=129, kể cả với ref hợp lệ. Chặn
+        # dấu `-` từ Python để Git không thể hiểu ref thành option.
+        if ref.startswith("-"):
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: ref có hình dạng không an toàn "
+                       f"(bắt đầu bằng '-'): {ref}")
+        hinh_dang = GOI_GIT("check-ref-format", ref, cwd=goc)
+        if hinh_dang.returncode != 0:
+            ly = (hinh_dang.stderr or hinh_dang.stdout or "refname không hợp lệ").strip()
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: git check-ref-format {ref} "
+                       f"rc={hinh_dang.returncode}: {ly.splitlines()[0][:200]}")
+        p = GOI_GIT("show-ref", "--verify", "--quiet", "--", ref, cwd=goc)
+    except OSError as e:
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: không gọi được git: {e}") from None
+    if p.returncode == 0:
+        return True
+    if p.returncode == 1:
+        return False
+    ly = (p.stderr or p.stdout or "không có chẩn đoán").strip().splitlines()[0][:200]
+    raise Chan(RC_KHONG_XAC_DINH,
+               f"KHÔNG_XÁC_ĐỊNH: git show-ref --verify {ref} rc={p.returncode}: {ly}")
+
+
 def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[tuple[str, str, int, int, str]]:
     """Phân loại nhánh theo upstream thật; chỉ trả các quan hệ phải chặn."""
     out = _git(goc, "for-each-ref", "--format=%(refname)%09%(upstream)", "refs/heads")
@@ -360,10 +389,10 @@ def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[tuple[str, str, in
             ung_vien = "refs/remotes/origin/" + ten
             if ung_vien in tap_ref:
                 doi_ung = ung_vien
-        if doi_ung and doi_ung not in tap_ref:
+        if doi_ung and not _ref_ton_tai(goc, doi_ung):
             raise Chan(RC_KHONG_XAC_DINH,
                        f"KHÔNG_XÁC_ĐỊNH: {ten} khai upstream không có ref: {doi_ung}")
-        if doi_ung not in tap_ref:
+        if not doi_ung:
             continue
         out = _git(goc, "rev-list", "--left-right", "--count", f"{ref}...{doi_ung}")
         try:

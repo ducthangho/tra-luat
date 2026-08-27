@@ -129,11 +129,37 @@ def t01_doc_dung_server_chinh_xac_va_giai_header(m=M):
         _hong(lambda: m._doc_cau_hinh(d), m)
     with _cau_hinh({"sai-khoa": {"github": {"url": "https://x"}}}) as d:
         _hong(lambda: m._doc_cau_hinh(d), m)
+    with _cau_hinh([]) as d:
+        _hong(lambda: m._doc_cau_hinh(d), m)
     with _cau_hinh({"mcpServers": {"github": {}}}) as d:
         mo_ta = _hong(lambda: m._doc_cau_hinh(d), m)
         bang("khong khai `url`" in mo_ta, f"url rong bi phan loai sai: {mo_ta}")
     with _cau_hinh(_cfg(headers=["khong", "phai", "object"])) as d:
         _hong(lambda: m._doc_cau_hinh(d), m)
+
+
+@ca
+def t10_khoa_co_mat_hong_khong_roi_sang_du_phong(m=M):
+    du_phong = {"github": {"url": "https://du-phong.example/mcp"}}
+    for gia_tri, ten_kieu in ((None, "NoneType"), (["github"], "list")):
+        with _cau_hinh({"mcpServers": gia_tri, "servers": du_phong}) as d:
+            mo_ta = _hong(lambda: m._doc_cau_hinh(d), m)
+            bang("`mcpServers`" in mo_ta and ten_kieu in mo_ta,
+                 f"khong neu dung khoa/kieu hong: {mo_ta}")
+            bang("du-phong" not in mo_ta, f"da roi sang khoa du phong: {mo_ta}")
+
+
+@ca
+def t11_ten_server_casefold_phai_duy_nhat(m=M):
+    with _cau_hinh(_cfg(ten="GitHub")) as d:
+        url, _ = m._doc_cau_hinh(d)
+        bang(url == "https://api.example/mcp", f"khong nhan ten casefold duy nhat: {url}")
+    with _cau_hinh({"mcpServers": {
+            "github": {"url": "https://mot.example/mcp"},
+            "GitHub": {"url": "https://hai.example/mcp"},
+    }}) as d:
+        mo_ta = _hong(lambda: m._doc_cau_hinh(d), m)
+        bang("2 server" in mo_ta and "chuan hoa" in mo_ta, f"khong chan ten mo ho: {mo_ta}")
 
 
 @ca
@@ -283,7 +309,10 @@ def t09_rpc_loi_va_ket_qua_tool_duoc_xu_ly(m=M):
 # Mỗi mẫu chỉ thay đúng một chốt; ca đích phải đỏ trên bản mutant tương ứng.
 DOT_BIEN = [
     ("bo_kiem_tep_config", '    if not tep.is_file():', '    if False:', "t01_doc_dung_server_chinh_xac_va_giai_header"),
-    ("bo_kiem_khoa_config", '    if srv is None:', '    if False:', "t01_doc_dung_server_chinh_xac_va_giai_header"),
+    ("chon_khoa_theo_kieu_dict",
+     '    for khoa in ("mcpServers", "servers"):\n        if khoa in d:\n            srv = d[khoa]\n            break',
+     '    for khoa in ("mcpServers", "servers"):\n        if isinstance(d.get(khoa), dict):\n            srv = d[khoa]\n            break',
+     "t10_khoa_co_mat_hong_khong_roi_sang_du_phong"),
     ("bo_kiem_muc_object", '    if not isinstance(muc, dict):', '    if False:', "t01_doc_dung_server_chinh_xac_va_giai_header"),
     ("bo_kiem_url_rong", '    if not url:', '    if False:', "t01_doc_dung_server_chinh_xac_va_giai_header"),
     ("bo_kiem_headers_object", '    if not isinstance(headers, dict):', '    if False:', "t01_doc_dung_server_chinh_xac_va_giai_header"),
@@ -292,7 +321,8 @@ DOT_BIEN = [
     ("bo_scheme", '    if p.scheme.lower() not in ("http", "https"):', '    if False:', "t02_moi_url_tu_choi_khong_probe_khong_ro_bi_mat"),
     ("bo_hostname", '    if not p.hostname:', '    if False:', "t02_moi_url_tu_choi_khong_probe_khong_ro_bi_mat"),
     ("lo_url_o_nhanh_port", 'raise Hong(f"`url` khong phan tich duoc ({type(e).__name__})")', 'raise Hong(f"`url` khong phan tich duoc: {url}")', "t02_moi_url_tu_choi_khong_probe_khong_ro_bi_mat"),
-    ("ten_server_khop_con", '    if "github" not in srv:', '    if not any("github" in k for k in srv):', "t01_doc_dung_server_chinh_xac_va_giai_header"),
+    ("ten_server_chi_khop_literal", '    ten = [k for k in srv if k.casefold() == "github"]',
+     '    ten = [k for k in srv if k == "github"]', "t11_ten_server_casefold_phai_duy_nhat"),
     ("env_thieu_thanh_rong", '            if not v:', '            if False:', "t01_doc_dung_server_chinh_xac_va_giai_header"),
     ("bo_loc_toolset", '        if len(hau_to) > 64 or not _RE_HAU_TO.fullmatch(hau_to):', '        if False:', "t03_toolset_chi_la_hau_to_path_an_toan"),
     ("ghep_toolset_bang_chuoi", '        p = p._replace(path=p.path.rstrip("/") + "/" + hau_to)', '        p = urllib.parse.urlsplit(str(url).rstrip("/") + "/" + hau_to)', "t03_toolset_chi_la_hau_to_path_an_toan"),

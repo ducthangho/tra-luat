@@ -53,16 +53,22 @@ def _doc_cau_hinh(goc: Path) -> tuple[str, dict[str, str]]:
     if not tep.is_file():
         raise Hong(f"khong thay .mcp.json o {goc}")
     d = json.loads(tep.read_text(encoding="utf-8"))
-    srv = None
+    if not isinstance(d, dict):
+        raise Hong(f".mcp.json khong phai object o goc (la {type(d).__name__})")
     for khoa in ("mcpServers", "servers"):
-        if isinstance(d.get(khoa), dict):
+        if khoa in d:
             srv = d[khoa]
             break
-    if srv is None:
+    else:
         raise Hong(".mcp.json khong co khoa `mcpServers` lan `servers`")
-    if "github" not in srv:
+    if not isinstance(srv, dict):
+        raise Hong(f".mcp.json khoa `{khoa}` khong phai object (la {type(srv).__name__})")
+    ten = [k for k in srv if k.casefold() == "github"]
+    if not ten:
         raise Hong(".mcp.json KHONG khai server ten dung bang `github`")
-    muc = srv["github"]
+    if len(ten) > 1:
+        raise Hong(f".mcp.json khai {len(ten)} server cung khop `github` sau chuan hoa hoa/thuong")
+    muc = srv[ten[0]]
     if not isinstance(muc, dict):
         raise Hong("server `github` khong phai object cau hinh")
     url = muc.get("url")

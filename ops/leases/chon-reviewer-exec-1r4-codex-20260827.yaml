@@ -131,3 +131,4 @@ reviewer_model_luot_1: >-
   của chính packet này. Phiên điều phối chọn bằng TAY khi phóng, và phải khai trong verdict là
   đã chọn tay, chọn bậc nào, theo lý lẽ gì. Khoảng cho phép chủ kho đã nêu: từ `claude-opus-5`
   ở `high` tới `claude-fable-5` ở `max`.
+posted_comment_id: 5437118914   # workflow ghi, ĐỪNG sửa tay

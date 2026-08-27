@@ -52,15 +52,36 @@ Mô hình phục vụ THẬT là `claude-opus-4-8`. Chạy 1964 giây, tốn ~$1
 `subtype`, `is_error` đều báo thành công.** Chỉ phép kiểm *"mô hình đã yêu cầu phải có mặt làm
 KHOÁ trong `modelUsage`"* bắt được.
 
-Ba lớp kiểm, dùng cả ba:
+### PROBE TRƯỚC KHI PHÓNG KHÔNG CHỨNG MINH ĐƯỢC GÌ — đo được, và nó bác chốt vừa viết
 
-1. **Probe TRƯỚC khi phóng** (rẻ): gọi `claude --model <id> --output-format json -p 'OK'` vài
-   lần, đòi `<id>` có trong `modelUsage`. Bắt cú tụt trong vài giây thay vì sau 30 phút.
-2. **Kiểm SAU khi xong**: `<id>` phải có trong `modelUsage`.
-3. **Kiểm mô hình LẠ** (chặt hơn (2), và (2) không thay được): một lượt DÀI có thể tụt GIỮA
-   CHỪNG, khi ấy `modelUsage` mang **cả hai** — đủ qua (2) nhưng không đủ gọi là review của
-   `<id>`. Loại `claude-haiku-*` (mô hình phụ của harness, có ở mọi lượt), rồi đòi **không còn
-   mô hình nào khác**.
+Bản đầu của chính mục này khai ba lớp, lớp 1 là *"probe trước khi phóng, bắt cú tụt trong vài
+giây thay vì sau 30 phút"*. **Phép đo bác lớp ấy.**
+
+Lượt review thứ hai (chạy lại) có probe xanh **3/3** ngay trước khi phóng, rồi vẫn tụt **hoàn
+toàn** sang `claude-opus-4-8` — `claude-fable-5` KHÔNG có mặt trong `modelUsage`. Phép đo tách
+nguyên nhân, chạy trong **cùng sandbox, cùng bộ cờ**:
+
+| lượt | độ dài | `modelUsage` | fable-5? |
+|---|---|---|---|
+| probe trước khi phóng ×3 | ngắn | `[claude-fable-5, claude-haiku-4-5]` | **có** |
+| review thật | 1626s | `[claude-haiku-4-5, claude-opus-4-8]` | **không** |
+| probe sau, cùng sandbox + cờ | ngắn | `[claude-fable-5, claude-haiku-4-5]` | **có** |
+
+Khác biệt **không** ở cờ, **không** ở thư mục, **không** ở xác thực. Nguyên nhân: **KHÔNG ĐO
+ĐƯỢC** — đừng chế ra. Thứ đo được là **triệu chứng**: hai lượt dài liên tiếp yêu cầu fable-5
+đều bị phục vụ bằng opus-4-8, trong khi mọi lượt ngắn đều đúng.
+
+Nên chỉ còn **HAI** lớp, và lớp SAU mới là lớp có giá trị:
+
+1. **Kiểm SAU khi xong** — `<id>` phải có mặt làm KHOÁ trong `modelUsage`. Đây là lớp duy nhất
+   chứng minh được điều gì.
+2. **Kiểm mô hình LẠ** (chặt hơn (1), và (1) không thay được): một lượt dài có thể tụt GIỮA
+   CHỪNG, khi ấy `modelUsage` mang **cả hai** — đủ qua (1) nhưng không đủ gọi là review của
+   `<id>`. Loại `claude-haiku-*` (mô hình phụ, có ở MỌI lượt), rồi đòi không còn mô hình nào khác.
+
+Probe trước khi phóng vẫn dùng được cho **đúng một việc**: loại ca *"mô hình hoàn toàn không
+gọi được"* (sai tên, mất xác thực). Nó **không** cấp chứng nhận cho lượt dài, và đừng ghi nó
+vào báo cáo như thể có.
 
 Verdict của lượt tụt được ghi nhận **VÔ HIỆU VỀ DANH TÍNH NGƯỜI REVIEW**, nhưng **nội dung vẫn
 đứng**: 3 finding của nó có bằng chứng chạy được và phiên gốc đã tái hiện độc lập.
@@ -70,7 +91,29 @@ Verdict của lượt tụt được ghi nhận **VÔ HIỆU VỀ DANH TÍNH NG�
 - **Lượt 1** (codex xhigh): `changes_requested`, 7 finding (5 P1). **Đã đóng cả 7**, xác nhận
   bởi lượt 2.
 - **Lượt 2** (claude, danh tính vô hiệu): `changes_requested`, 3 finding F1/F2/F3. **Đã đóng cả 3.**
-- **Lượt 2 chạy lại** (fable-5 max): đang chạy khi bàn giao.
+- **Lượt 2 chạy lại** (yêu cầu fable-5 max, **phục vụ bằng `claude-opus-4-8`** — vô hiệu về
+  danh tính, nội dung vẫn đứng): `changes_requested`, 1626s. **Verdict đã lưu nguyên vẹn lên
+  PR #349** (`issuecomment-5437386545`) vì scratchpad mất theo container.
+  Nó xác nhận **7 finding lượt 1 và 3 finding lượt 2 đều ĐÓNG THẬT**, tái hiện độc lập, và ra
+  **5 finding mới: 1×P2 + 4×P3**.
+
+### Finding P2 mới cho câu trả lời TỐT HƠN mọi bản vá đã làm — đọc trước khi vá tiếp
+
+`cho-phep-muc-workflow-khong-day-du`: allow-list khoá TẬP JOB và khoá bên trong `cong`, nhưng
+để hở **mức workflow**. Ba biến thể qua sạch cả 31 ca — `env:` mức workflow (kế thừa xuống bước
+tin cậy ⇒ tiêm biến môi trường vào **chính tiến trình chạy `duyet_danh_tinh.py`**),
+`defaults.run.shell` (đổi shell chạy thân `run` đã khớp nguyên văn), và **giá trị** `runs-on`.
+Hai chỗ đầu **vô hiệu hoá đúng phép khớp-nguyên-văn** mà topology dựa vào. Đây là chỗ **thứ 6/7**
+của cùng một hình dạng.
+
+**ĐỪNG vá chỗ thứ sáu rồi đợi chỗ thứ tám.** Reviewer trả lời đúng câu đã đặt (*đóng cả HỌ được
+không?*) và có bằng chứng: **ĐƯỢC, và RẺ** — thay **năm** allow-list rời (tập sự kiện · `if` ·
+topology bước · khoá `with` · tập job) bằng **MỘT** phép so BẰNG NHAU SÂU giữa cây workflow đã
+`yaml.safe_load` và một **golden dict** canonical. Thêm-thắt ở bất kỳ mức nào đều lệch golden.
+Chi phí không cao hơn khớp-nguyên-văn đang có. Đúng idiom *"so NGUYÊN KHỐI với bản canonical"*
+kho đã dùng cho golden-test.
+
+**Đó là việc đầu tiên nên làm cho #348**, chứ không phải vá bốn P3 trước.
 
 ### Năm chỗ cùng MỘT hình dạng — đếm hình dạng, đừng chỉ đếm lỗi
 
@@ -91,7 +134,7 @@ lượt chết vẫn ra finding thật.
 ### Số đo cuối (head `4573b0b`, có `actionlint` 1.7.7 + `shellcheck` 0.10.0 trên PATH)
 
 ```
-bo phan chung : 31 ca · 35 dot bien · giet DUNG va CHI DUNG tap khai · TONG: DAT
+bo phan chung : 31 ca · 35 dot bien   (than PR #349 con ghi 29/31 — SO CU, can sua) · giet DUNG va CHI DUNG tap khai · TONG: DAT
 doctrine-scan rc=0 · adr-song rc=0 · doc-claims rc=0 · workflow-audit rc=0
 release-verify rc=0 (180/180) · lease_publish 114/114 · idiom_py_test DAT
 actionlint rc=1 — DUNG 1 finding `ops-don-ref.yml:106 SC1003:info`, DO SAN tren master, DELTA=0

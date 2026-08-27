@@ -2,7 +2,7 @@
 
 ```yaml
 packet_id: CHON-REVIEWER-THEO-DO-PHUC-TAP
-revision: 1
+revision: 2
 generation: 1
 review_class: sensitive          # sua chinh duong REVIEW - thu quyet dinh ai kiem cai gi
 executor: codex
@@ -44,16 +44,51 @@ DƯƠNG"*. Một harness chỉ đọc `rc` sẽ ghi nhận "review đã chạy" 
 
 **(c) `--output-format json` là chỗ DUY NHẤT nói thật, và nó nói ngược `rc`.**
 
-| yêu cầu | `rc` | `subtype` | `is_error` | `modelUsage` |
-|---|---|---|---|---|
-| `claude-opus-5` | 0 | `success` | `false` | `{"claude-opus-5": {..., "canonicalModel": "claude-opus-5"}}` |
-| `claude-fable-5` | 0 | `success` | `false` | `{"claude-fable-5": {..., "canonicalModel": "claude-fable-5"}}` |
-| `claude-khong-ton-tai-9` | 0 | **`success`** | **`true`** | **`{}`** |
+Đo lần đầu ở một thư mục TRỐNG ngoài kho:
 
-`rc` và `subtype` **cùng nói dối**; `is_error` + `modelUsage` nói thật. Đây là bằng chứng dương
-duy nhất đo được, và nó là của HARNESS — khác hẳn *lời tự khai của mô hình*. Lời tự khai
-(`{"model_id_ban_dang_chay": ...}`) cũng trả đúng ở hai ca hợp lệ, nhưng **một mô hình có thể
-sai về chính nó**, nên nó KHÔNG được dùng làm chốt. Đo cả hai để nói rõ vì sao chọn cái nào.
+| yêu cầu | `rc` | `subtype` | `is_error` | khoá của `modelUsage` |
+|---|---|---|---|---|
+| `claude-opus-5` | 0 | `success` | `false` | `["claude-opus-5"]` |
+| `claude-fable-5` | 0 | `success` | `false` | `["claude-fable-5"]` |
+| `claude-khong-ton-tai-9` | 0 | **`success`** | **`true`** | `[]` |
+
+`rc` và `subtype` **cùng nói dối**; `is_error` nói thật.
+
+**(c′) NHƯNG BẢNG TRÊN LÀ CỦA MỘT NGỮ CẢNH, VÀ NÓ KHÔNG TỔNG QUÁT.** Đo lại trong một sandbox
+CÓ kho (có `CLAUDE.md`, có `.claude/`), sáu lượt:
+
+| yêu cầu | dùng công cụ? | `is_error` | khoá của `modelUsage` |
+|---|---|---|---|
+| `claude-opus-5` | không | `false` | `["claude-haiku-4-5-20251001", "claude-opus-5"]` |
+| `claude-opus-5` | có | `false` | `["claude-haiku-4-5-20251001", "claude-opus-5"]` |
+| `claude-fable-5` | không | `false` | `["claude-fable-5", "claude-haiku-4-5-20251001"]` |
+| `claude-fable-5` | có | `false` | `["claude-fable-5", "claude-haiku-4-5-20251001"]` |
+| `claude-sonnet-5` | không | `false` | `["claude-haiku-4-5-20251001", "claude-sonnet-5"]` |
+| `claude-khong-ton-tai-9` | không | **`true`** | **`["claude-haiku-4-5-20251001"]`** |
+
+Một **mô hình phụ** (`claude-haiku-4-5-20251001`) có mặt ở **cả sáu** lượt — kể cả lượt không
+gọi công cụ nào. Hai hệ quả, và cả hai đều bác một luật của REVISION 1:
+
+1. **"đúng một khoá" là luật SAI** — nó làm `kiem_ket_qua` từ chối **mọi lượt chạy thật** trong
+   ngữ cảnh có kho. Đó không phải một lỗ, nó là một cổng TỰ KHOÁ: công cụ vô dụng ngay từ lượt
+   đầu. (Revision 1 đã viết đúng luật ấy, và bản nháp executor đã cài đúng nó:
+   `raise KhongDoDuoc("modelUsage phải có đúng một khoá")`.)
+2. **"`modelUsage` rỗng ⇒ ĐỎ" KHÔNG bắt được model rác** trong ngữ cảnh có kho: ở đó model rác
+   cho `modelUsage` **KHÔNG rỗng** — nó chứa đúng mô hình phụ. Một phép kiểm chỉ nhìn RỖNG sẽ
+   cho lượt ấy đi qua.
+
+Và `canonicalModel` **khác** khoá khi id có ngày: khoá `claude-haiku-4-5-20251001` →
+`canonicalModel: "claude-haiku-4-5"`. Nên so `canonicalModel` một mình cũng không đủ chặt.
+
+**BẰNG CHỨNG DƯƠNG ĐÚNG, và nó là MỘT câu:** *mô hình ĐÃ YÊU CẦU phải CÓ MẶT làm KHOÁ trong
+`modelUsage`.* Câu ấy bắt được model rác ở **cả hai** ngữ cảnh (khoá `[]` và khoá chỉ-có-phụ đều
+thiếu mô hình yêu cầu), và **không** từ chối lượt hợp lệ nào. Khoá thừa là mô hình phụ của
+harness — ghi ra để người đọc biết, KHÔNG coi là lỗi.
+
+Bài học đứng sau, và nó đắt hơn con số: **một bảng đo đúng vẫn có thể sinh ra một luật sai nếu
+bảng ấy chỉ có MỘT ngữ cảnh.** Revision 1 đo ở thư mục trống, thấy đúng một khoá, rồi viết luật
+"đúng một khoá" — luật ấy mô tả CÁI RIG chứ không mô tả CÔNG CỤ. Cùng họ với bài học
+*"phép đo delta phải dựng cả hai vế trong MỘT lệnh"*: rig lặng lẽ trở thành một phần của kết luận.
 
 **(d) Và chưa có chỗ nào trong kho ghi chọn mô hình theo cái gì.**
 
@@ -157,17 +192,23 @@ nhất", tức một mục tiêu DI ĐỘNG, và cả kho này neo mọi thứ b
 VỊ TỪ THUẦN — nhận **dict đã phân tích**, KHÔNG tự gọi CLI. Một ca test phải chạy được offline,
 không mạng, không xác thực; hàm nào tự gọi CLI thì ca của nó không tồn tại ở CI.
 
+**BẰNG CHỨNG DƯƠNG DUY NHẤT:** `yeu_cau_model` phải CÓ MẶT làm **khoá** trong `modelUsage`.
+
 ĐỎ khi bất kỳ điều nào:
 
 - `ket_qua_json` là `None`/không phải dict ⇒ KHÔNG ĐO ĐƯỢC;
 - `is_error` là `True` **hoặc thiếu** (thiếu = không đo được, `None != False`);
-- `modelUsage` rỗng/thiếu;
-- `modelUsage` có **nhiều hơn một** khoá (không xác định được model nào đã chạy);
-- `canonicalModel` khác `yeu_cau_model`, **hoặc thiếu** — và nếu thiếu thì lùi về so KHOÁ của
-  `modelUsage`, chứ không tha.
+- `modelUsage` thiếu/không phải dict/rỗng;
+- **`yeu_cau_model` không nằm trong khoá của `modelUsage`** — thử theo thứ tự: (a) khớp KHOÁ;
+  (b) nếu không, khớp `canonicalModel` của một mục bất kỳ. Cả hai trượt ⇒ ĐỎ.
 
-**KHÔNG được đọc `rc` hay `subtype` làm bằng chứng ĐẠT.** Bảng ở §0(c) là lý do; ghi lý do ấy
-vào chú thích ngay tại hàm, không phải chỉ ở đây.
+**KHÔNG được coi khoá THỪA là lỗi.** `modelUsage` gần như luôn mang thêm mô hình phụ của
+harness (`claude-haiku-4-5-20251001` ở cả 6 lượt đo). Luật "đúng một khoá" của revision 1 là
+luật SAI và đã bị bác bằng phép đo — xem §0(c′). Hàm phải **kể ra** khoá thừa trong thông báo,
+không phải từ chối vì chúng.
+
+**KHÔNG được đọc `rc` hay `subtype` làm bằng chứng ĐẠT.** §0(c) là lý do; ghi lý do ấy vào chú
+thích ngay tại hàm, không phải chỉ ở đây.
 
 ### 3.4 CLI
 
@@ -185,9 +226,16 @@ Chạy `python3 .claude/dev/chon_reviewer_test.py`, thoát 0 khi ĐẠT.
 2. Ca cho `khong-biet`: một đường dẫn lạ (`vi-du/la.txt`) phải đẩy lên bậc cao nhất.
 3. Ca BÁNH CÓC hai chiều: `bac_truoc` cao hơn ⇒ giữ bậc cao; `bac_truoc` thấp hơn ⇒ KHÔNG bị kéo xuống.
 4. Ca `kiem_dinh_danh`: bí danh `opus`/`fable` bị TỪ CHỐI; `claude-opus-5` được nhận; effort sai bị TỪ CHỐI.
-5. Ca `kiem_ket_qua`, dùng ĐÚNG ba bản ghi JSON đo được ở §0(c) làm fixture: hai ca hợp lệ ĐẠT,
-   ca `claude-khong-ton-tai-9` (`is_error: true`, `modelUsage: {}`) ĐỎ.
-6. Ca `modelUsage` **hai khoá** ⇒ ĐỎ. Ca thiếu `is_error` ⇒ ĐỎ.
+5. Ca `kiem_ket_qua`, fixture lấy từ **CẢ HAI** bảng §0(c) và §0(c′) — chín bản ghi:
+   · thư mục trống: `claude-opus-5` ĐẠT · `claude-fable-5` ĐẠT · `claude-khong-ton-tai-9`
+     (`modelUsage: {}`) ĐỎ;
+   · sandbox có kho: bốn lượt hai-khoá (`opus`/`fable`, có và không dùng công cụ) **ĐỀU ĐẠT** —
+     đây là ca chặn luật "đúng một khoá" quay lại;
+   · sandbox có kho, model rác: `is_error: true`, `modelUsage` **CHỈ CÓ mô hình phụ** ⇒ ĐỎ.
+     Ca này là ca quan trọng nhất của cả mục: nó ĐỎ vì **thiếu mô hình yêu cầu**, KHÔNG phải vì
+     `modelUsage` rỗng — một bản vá chỉ kiểm rỗng sẽ để nó đi qua.
+6. Ca thiếu `is_error` ⇒ ĐỎ. Ca `modelUsage` chỉ có `canonicalModel` khớp (không khớp khoá)
+   ⇒ ĐẠT, và ca `canonicalModel` khớp một mô hình KHÁC ⇒ ĐỎ.
 7. Ca ĐƠN ĐIỆU: thêm một khoản điểm không bao giờ làm bậc TỤT (chạy qua mọi tổ hợp
    `review_class` × vùng × ngưỡng, so bằng chỉ số bậc).
 
@@ -200,7 +248,8 @@ Chạy `python3 .claude/dev/chon_reviewer_test.py`, thoát 0 khi ĐẠT.
 | bỏ bánh cóc | ca 3 |
 | nhận bí danh vào allow-list | ca 4 |
 | `kiem_ket_qua` đọc `subtype == "success"` thay vì `is_error` | ca 5 |
-| `kiem_ket_qua` tha khi `modelUsage` nhiều khoá | ca 6 |
+| `kiem_ket_qua` đòi `modelUsage` có ĐÚNG MỘT khoá (luật sai của revision 1) | ca 5 |
+| `kiem_ket_qua` chỉ kiểm `modelUsage` RỖNG, không kiểm có mô hình yêu cầu | ca 5 |
 | `is_error` thiếu ⇒ đọc thành `False` | ca 6 |
 
 Nền có ca ĐỎ ⇒ **TỪ CHỐI công bố điểm đột biến** (bài học P1 của PR #342).

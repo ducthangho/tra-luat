@@ -1,0 +1,106 @@
+# Lease EXECUTOR — packet #351 (CHON-REVIEWER-THEO-DO-PHUC-TAP).
+#
+# ĐÂY LÀ LEASE ĐẦU TIÊN CỦA KHO CẤP CHO `codex` LÀM EXECUTOR VỚI REVIEWER LÀ `claude`.
+# Mọi lease trước đảo chiều (claude thi công, codex review). Chủ kho đổi phân vai trực tiếp
+# trong phiên 27-08-2026: "executor thì dùng codex, xhigh. reviewer thì chọn từ opus 5 high
+# cho tới fable 5 max tùy độ phức tạp." Ghi ra đây vì một lần đảo vai là chỗ dễ nhất để một
+# giả định cũ đi lọt: §8 đòi reviewer KHÁC NỀN, và chiều mới vẫn thoả — chỉ là thoả theo
+# hướng ngược lại.
+#
+# TỰ THAM CHIẾU, nói thẳng kẻo ai đó tưởng là lỗi: packet này VIẾT RA bảng chọn bậc reviewer,
+# nên lượt review CỦA CHÍNH NÓ chưa có bảng ấy trên master mà dùng. Bậc của lượt 1 do phiên
+# điều phối chọn bằng tay và phải KHAI RÕ trong verdict — chọn tay thì phải nói là chọn tay.
+
+schema_version: 2
+event: lease_granted
+packet_issue: 351
+packet_id: CHON-REVIEWER-THEO-DO-PHUC-TAP
+lease_id: chon-reviewer-exec-1r2-codex-20260827
+revision: 2
+thay_the_cho: chon-reviewer-exec-1-codex-20260827
+
+spec_path: ops/specs/CHON-REVIEWER-THEO-DO-PHUC-TAP.md
+spec_sha256: 2078562e7af660bb40a3daabe43b500070dfdb2c6eae84d52547cdf8647acfed
+
+role: executor
+provider: codex
+executor: codex
+reviewer: claude
+assurance_target: cross_approved
+review_class: sensitive
+effective_review_class: sensitive
+access: read-write-nhanh-rieng
+branch_ownership: exclusive
+
+reviewed_sha_required: f715fc28139427f2c845f258f15a6d032011b716
+base_sha: f715fc28139427f2c845f258f15a6d032011b716
+branch: codex/chon-reviewer-exec-1
+
+write_set:
+  - .claude/dev/chon_reviewer.py
+  - .claude/dev/chon_reviewer_test.py
+  - .claude/skills/cross-review/SKILL.md
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-27 ~08:00Z bằng `ops/lease_publish.py ai-dang-giu`. Phép so hai nguồn chạy TRƯỚC,
+  so bằng TẬP TÊN: `ls-remote --heads` 229 = `for-each-ref` 229, `comm -23` RỖNG và `comm -13`
+  RỖNG. Kết quả: hai đường MỚI -> rc=0, NGƯỜI_GIỮ 0. Đường thứ ba
+  (`.claude/skills/cross-review/SKILL.md`) -> rc=11, NGƯỜI_GIỮ 2 — xem `chong_lan_write_set_phan_xu`.
+  LẦN QUÉT ĐẦU BỊ CHẶN `rc=12` (NHÁNH_CỤC_BỘ_TỤT_SAU: ops/cap-lease-tach-danh-tinh-20260827)
+  — đã chữa nhánh rồi mới quét lại; KHÔNG quét trên bộ đệm cũ, và KHÔNG đọc `rc=12` thành
+  "không ai giữ".
+
+chong_lan_write_set_phan_xu: >-
+  `.claude/skills/cross-review/SKILL.md` bị HAI lease giữ:
+  `skill-goi-python-ba-ten-exec-1-claude-20260826` (#337) và
+  `skill-goi-python3-exec-1r2-claude-20260826` (#325).
+  "Chưa hết hạn" KHÔNG phải "còn hiệu lực" — đã đi tìm HIỆN VẬT thay vì đọc trường trong tệp
+  lease: `git merge-base --is-ancestor` cho thấy `2d1c074` (nhánh #337) và `210ff79` (nhánh
+  #325) ĐỀU là tổ tiên của `origin/master`, tức cả hai packet ĐÃ LAND. Đây là quyền ghi còn
+  sống sau khi việc đã xong — nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong` — chứ không phải hai
+  writer đang tranh chỗ. KHÔNG có cách nào thu hồi hai lease ấy bằng lệnh: `lease_publish.py`
+  chỉ có check · body · kiem-github · mark · ai-dang-giu · con-tro-treo.
+  Đây là lần thứ HAI trong hai ngày nợ ấy đo được là chặn việc thật (lần trước: `ci.yml` ở
+  lease #348). Hai lần liên tiếp cùng một hình dạng thì câu hỏi đúng không còn là "lách thế
+  nào" — ghi thành nợ có tên và báo chủ kho.
+
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-27 ("executor thì dùng codex, xhigh...
+  nếu chưa implement trong skill thì lưu ý đưa vào để implement việc chọn mô hình theo độ phức tạp")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-27T08:00:00Z'
+lease_expires_at_utc: '2026-08-28T08:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 60
+
+attempts_used: 1
+attempts_limit: 3
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+
+vi_sao_revision_2: >-
+  ĐẶC TẢ REVISION 1 CÓ MỘT LUẬT SAI, và nó sai theo hướng TỰ KHOÁ chứ không phải hở.
+  §3.3 đòi `modelUsage` có ĐÚNG MỘT khoá. Đo lại trong sandbox CÓ kho (6 lượt): một mô hình
+  phụ `claude-haiku-4-5-20251001` có mặt ở CẢ SÁU lượt, kể cả lượt không gọi công cụ nào —
+  nên luật ấy làm `kiem_ket_qua` từ chối MỌI lượt chạy thật. Executor đã cài đúng luật ấy
+  (`raise KhongDoDuoc("modelUsage phải có đúng một khoá")`) trước khi lượt bị dừng.
+  Lỗi thứ hai cùng gốc: "modelUsage RỖNG ⇒ ĐỎ" KHÔNG bắt được model rác trong ngữ cảnh có
+  kho, vì ở đó model rác cho `modelUsage` chứa đúng mô hình phụ — không rỗng.
+  Bằng chứng dương ĐÚNG là MỘT câu: mô hình ĐÃ YÊU CẦU phải có mặt làm KHOÁ.
+  Gốc của cái sai: revision 1 đo ở một thư mục TRỐNG ngoài kho, thấy đúng một khoá, rồi viết
+  luật mô tả CÁI RIG chứ không mô tả CÔNG CỤ — cùng họ bài học "phép đo delta phải dựng cả
+  hai vế trong MỘT lệnh". Lượt executor r1 bị DỪNG CÓ CHỦ Ý ở phút ~12; bản nháp của nó giữ
+  lại làm đối chiếu, không dùng làm nền.
+
+executor_model: codex xhigh
+reviewer_model_luot_1: >-
+  CHƯA CHỐT tại thời điểm cấp lease, và cố ý để trống thay vì đoán: bảng chọn bậc là SẢN PHẨM
+  của chính packet này. Phiên điều phối chọn bằng TAY khi phóng, và phải khai trong verdict là
+  đã chọn tay, chọn bậc nào, theo lý lẽ gì. Khoảng cho phép chủ kho đã nêu: từ `claude-opus-5`
+  ở `high` tới `claude-fable-5` ở `max`.

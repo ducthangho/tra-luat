@@ -373,12 +373,12 @@ def cong(registry, ran, mutants, killed, errors):
             and tuple(killed) == tuple(mutants) and not errors)
 
 
-def ma_thoat(cases, ran, mutants, failed, mutation_errors, d8_errors):
-    names = tuple(name for name, *_ in mutants)
-    d8_ok = not failed and not any(d8_errors)
-    ok = cong(tuple(name for name, _ in cases), tuple(ran), names,
-              names if d8_ok else (), tuple(failed) + tuple(mutation_errors))
-    return 0 if ok else 1
+def phan_dinh(lines):
+    return not any("ĐỎ" in line or "KHÔNG_ĐO_ĐƯỢC" in line for line in lines)
+
+
+def ma_thoat(xanh):
+    return 0 if xanh else 1
 
 
 def c1_so_ca_rong_do():
@@ -444,10 +444,11 @@ def d7_cong_xanh_chi_khi_hai_so_duong_bang_nhau():
     assert cong(("c",), ("c",), ("m",), ("m",), ())
 
 
-def dong_dot_bien(kill_sets, mutants, failed):
+def dong_dot_bien(kill_sets, mutants, failed, errors=()):
     if failed:
         return "ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)"
-    return f"ĐỘT BIẾN   : đã đo {len(kill_sets)}/{len(mutants)} tập giết"
+    ok = _co_dot_bien(mutants) and len(kill_sets) == len(mutants) and not errors
+    return f"ĐỘT BIẾN   : đã đo {len(kill_sets)}/{len(mutants)} tập giết · " + ("ĐẠT" if ok else "ĐỎ")
 
 
 def d7b_nen_do_khong_dem_dot_bien():
@@ -500,8 +501,25 @@ def d9_ngan_sach_900_dong_ma():
 
 
 def d10_main_khong_chay_ca_phai_do():
-    mutants = (("m", "test", "old", "new", "c"),)
-    assert ma_thoat((("c", None),), (), mutants, (), (), ((), (), ())) == 1
+    assert ma_thoat(False) == 1
+
+
+def d11_chay_cli_khong_duoc_xanh_khi_d8_do():
+    da_chay = []
+    class Canh:
+        CASES = (("c", lambda: da_chay.append(True)),)
+    mutants = (("m", "test", "", "", "c"),)
+    cu_out = sys.stdout
+    try:
+        for lan, (kill_sets, do) in enumerate((({"m": ("c",)}, False), ({"m": ()}, True)), 1):
+            out = sys.stdout = io.StringIO()
+            rc = chay_cli(Canh, mutants, lambda: (kill_sets, []))
+            report = out.getvalue()
+            assert len(da_chay) == lan and ("ĐỎ" in report) == do == (rc != 0)
+            assert f"TỔNG: {'ĐỎ' if do else 'ĐẠT'}" in report
+            assert all(x in report for x in ("CA ", "ĐỘT BIẾN", "D8(a)", "D8(b)", "D8(c)", "GIAO PHẠM VI"))
+    finally:
+        sys.stdout = cu_out
 
 
 # Đăng ký xong mới đóng băng; runner không sửa tuple này.
@@ -526,7 +544,7 @@ CASES = (
     ("D7", d7_cong_xanh_chi_khi_hai_so_duong_bang_nhau),
     ("D7b", d7b_nen_do_khong_dem_dot_bien),
     ("D8", d8_quy_trach_nhiem_ba_dieu_kien), ("D9", d9_ngan_sach_900_dong_ma),
-    ("D10-main", d10_main_khong_chay_ca_phai_do),
+    ("D10-main", d10_main_khong_chay_ca_phai_do), ("D11-gate", d11_chay_cli_khong_duoc_xanh_khi_d8_do),
 )
 
 
@@ -573,7 +591,13 @@ MUTATIONS = (
     ("d8_bo_dieu_kien_b", "test", "if not kill_sets.get(name, ())", "if False", "D8"),
     ("d8_bo_dieu_kien_c", "test", "if case not in targets.values()", "if False", "D8"),
     ("d9_vuot_ngan_sach", "test", "assert tong <= 900", "assert tong < 0", "D9"),
-    ("d10_main_luon_xanh", "test", "return 0 if ok else 1", "return 0", "D10-main"),
+    ("d10_main_luon_xanh", "test", "return 0 if xanh else 1", "return 0", "D10-main"),
+    ("d11_ep_rc_xanh", "test", "return 0 if xanh else 1", "return 0", "D11-gate"),
+    ("d11_phan_dinh_xanh", "test", "return not any(\"ĐỎ\" in line or \"KHÔNG_ĐO_ĐƯỢC\" in line for line in lines)", "return True", "D11-gate"),
+    ("d11_xoa_d8", "test", "    lines += dong_d8(d8_errors, failed)\n    lines += bang_giao_pham_vi", "    lines += bang_giao_pham_vi", "D11-gate"),
+    ("d11_xoa_tong", "test", "    lines.append(\"TỔNG: \" + (\"ĐẠT\" if xanh else \"ĐỎ\"))", "    pass", "D11-gate"),
+    ("d11_xoa_ban_in", "test", "    print(\"\\n\".join(lines))", "    pass", "D11-gate"),
+    ("d11_bo_than_ca", "test", "    for name, fn in module.CASES:\n        ran.append(name)\n        try:\n            fn()\n        except Exception as e:  # runner phải biến mọi lỗi ca thành ĐỎ, nhưng không che nội dung\n            failed.append((name, f\"{type(e).__name__}: {e}\"))", "    for name, fn in module.CASES:\n        pass", "D11-gate"),
 )
 
 
@@ -622,24 +646,24 @@ def chay_dot_bien():
     return kill_sets, errors
 
 
-def chay_cli():
-    ran, failed = chay_cac_ca(sys.modules[__name__])
-    kill_sets, mutation_errors = ({}, []) if failed else chay_dot_bien()
+def chay_cli(module=None, mutants=MUTATIONS, run_mutants=chay_dot_bien):
+    module = sys.modules[__name__] if module is None else module
+    cases = module.CASES
+    ran, failed = chay_cac_ca(module)
+    kill_sets, mutation_errors = ({}, []) if failed else run_mutants()
     d8_errors = ((), (), ()) if failed else loi_d8(
-        tuple(name for name, _ in CASES), MUTATIONS, kill_sets)
-    print(f"CA         : {len(ran) - len(failed)}/{len(CASES)} đạt · {len(failed)} đỏ")
-    for name, error in failed:
-        print(f"  ĐỎ {name}: {error}")
-    print(dong_dot_bien(kill_sets, MUTATIONS, failed))
-    for line in dong_d8(d8_errors, failed):
-        print(line)
-    for line in bang_giao_pham_vi(MUTATIONS, kill_sets, failed):
-        print(line)
-    for error in mutation_errors:
-        print(f"  LỖI RUNNER {error}")
-    rc = ma_thoat(CASES, ran, MUTATIONS, failed, mutation_errors, d8_errors)
-    print("TỔNG: " + ("ĐẠT" if rc == 0 else "ĐỎ"))
-    return rc
+        tuple(name for name, _ in cases), mutants, kill_sets)
+    lines = [f"CA         : {len(ran) - len(failed)}/{len(cases)} đạt · {len(failed)} đỏ · "
+             + ("ĐẠT" if _du_ca(tuple(name for name, _ in cases), ran) and not failed else "ĐỎ")]
+    lines += [f"  ĐỎ {name}: {error}" for name, error in failed]
+    lines.append(dong_dot_bien(kill_sets, mutants, failed, mutation_errors))
+    lines += dong_d8(d8_errors, failed)
+    lines += bang_giao_pham_vi(mutants, kill_sets, failed)
+    lines += [f"  LỖI RUNNER {error}" for error in mutation_errors]
+    xanh = phan_dinh(lines)
+    lines.append("TỔNG: " + ("ĐẠT" if xanh else "ĐỎ"))
+    print("\n".join(lines))
+    return ma_thoat(xanh)
 
 
 if __name__ == "__main__":

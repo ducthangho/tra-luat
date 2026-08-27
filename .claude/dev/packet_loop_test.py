@@ -71,10 +71,39 @@ _GIT_BIEN_CO_LAP = {
 }
 
 
+# NGUỒN THỨ BA, và bản lượt 3 của chính tệp này KHÔNG BIẾT tới nó — cross-review codex
+# lượt 2 trên PR #342 bắt trên packet anh em, tái hiện tại đây:
+#   env COUNT=1 KEY_0=commit.gpgsign VALUE_0=true + GIT_CONFIG_GLOBAL=/dev/null
+#     -> commit rc=128 "gpg failed to sign the data" · `config --get commit.gpgsign` = true
+#   gỡ đúng ba biến ấy ra -> rc=0
+# Tức cấu hình PHẠM VI LỆNH (`GIT_CONFIG_COUNT` + `GIT_CONFIG_KEY_<n>`/`VALUE_<n>`) có độ
+# ưu tiên CAO HƠN cả repo-local, và `GIT_CONFIG_GLOBAL` không đụng tới nó. Câu "đã cắt
+# nguồn ngoài" của lượt 3 vì thế SAI — nó cắt HAI TRONG BA.
+#
+# KHÔNG hiển nhiên và KHÔNG hiếm: container này ĐANG đặt `GIT_CONFIG_COUNT=3` (url rewrite
+# + `credential.interactive=false`), nên kênh ấy sống trong MỌI lệnh git bộ test gọi. Hiện
+# vô hại, nhưng "vô hại hôm nay" không phải "không tồn tại".
+#
+# VÌ SAO ĐÂY KHÔNG PHẢI DANH SÁCH CẤM: git đọc cấu hình từ một tập ĐÓNG gồm ba NGUỒN
+# (system · global · phạm vi lệnh) — ta chặn cả ba. Tập KHOÁ thù địch mới là thứ vô hạn,
+# và đó là chỗ danh sách cấm thua.
+def _la_cau_hinh_pham_vi_lenh(k: str) -> bool:
+    if k == "GIT_CONFIG_COUNT":
+        return True
+    for tien_to in ("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_"):
+        # Xoá MỌI cặp đánh số, không chỉ những cặp dưới `COUNT` hiện tại: bỏ sót một cặp
+        # rồi để `COUNT` mới trỏ tới nó còn tệ hơn không xoá gì.
+        if k.startswith(tien_to) and k[len(tien_to):].isdigit():
+            return True
+    return False
+
+
 def _ep_git_co_lap(env):
     """Ép một môi trường về trạng thái KHÔNG đọc cấu hình git ngoài. Nhận `env` làm ĐỐI SỐ
     để ca `fixture_git_KHONG_an_config_toan_cuc` gọi được với một nền THÙ ĐỊCH dựng sẵn —
     một hàm chỉ sửa `os.environ` thì không có cách nào cho nó ca biết trước đáp án."""
+    for k in [k for k in env if _la_cau_hinh_pham_vi_lenh(k)]:
+        del env[k]
     env.update(_GIT_BIEN_CO_LAP)
     return env
 
@@ -683,6 +712,24 @@ def case_fixture_git_KHONG_an_config_toan_cuc(c: Ctx):
     if ra.stdout.strip():
         raise AssertionError(f"khoá NGOÀI danh sách #342 vẫn lọt: core.hooksPath="
                              f"{ra.stdout.strip()!r} ⇒ đang ghim khoá chứ chưa cắt nguồn")
+
+    # (4) NGUỒN THỨ BA — cấu hình PHẠM VI LỆNH. Bản lượt 3 KHÔNG chặn nó, và nó thắng cả
+    # repo-local. Hai chiều, vì chiều đối chứng là thứ chứng minh nền thù địch có thật.
+    thu_lenh = {"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "commit.gpgsign",
+                "GIT_CONFIG_VALUE_0": "true"}
+    ban3 = dict(os.environ, **thu_lenh)
+    for k in ("GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM"):
+        ban3[k] = os.devnull                      # hai nguồn KIA đã bị chặn sẵn…
+    rc, e = _thu_commit(c.tmp / f"kho-thu-lenh-doi-chung-{time.time_ns()}", ban3)
+    if rc == 0:
+        raise BoQua("KHÔNG ĐO ĐƯỢC: nền `GIT_CONFIG_COUNT` vẫn commit được (máy này thiếu "
+                    "gpg?) ⇒ chiều đối chứng vô nghĩa, không kết luận gì")
+
+    sach3 = _ep_git_co_lap(dict(os.environ, **thu_lenh))
+    rc, e = _thu_commit(c.tmp / f"kho-thu-lenh-co-lap-{time.time_ns()}", sach3)
+    if rc != 0:
+        raise AssertionError(f"cấu hình PHẠM VI LỆNH vẫn lọt qua `_ep_git_co_lap`: "
+                             f"rc={rc} {e[:200]!r}")
 
 
 # --- #338: hạ lời khai của guard + sổ khai báo ĐẾM ĐƯỢC -------------------------
@@ -3523,6 +3570,12 @@ MUTANTS = {
     # Lùi về hình dạng GHIM KHOÁ của PR #342: vẫn ĐỌC config toàn cục, chỉ đè đúng khoá đã
     # nghĩ tới. Chiều (2) của ca vẫn xanh — đúng như vậy — nên chỉ chiều (3) giết nó, tức
     # chiều (3) đo được RIÊNG cái khác biệt "cắt nguồn" vs "ghim khoá".
+    # Bỏ đúng bước xoá kênh PHẠM VI LỆNH — tức lùi về chính bản lượt 3, bản "cắt hai
+    # trong ba nguồn". Nếu ca không chết thì chiều (4) chưa đo gì.
+    "git_co_lap_bo_sot_pham_vi_lenh": (
+        "    for k in [k for k in env if _la_cau_hinh_pham_vi_lenh(k)]:\n        del env[k]\n",
+        "    pass  # đột biến: bỏ sót kênh cấu hình phạm vi lệnh\n",
+        ["fixture_git_KHONG_an_config_toan_cuc"]),
     "git_co_lap_lui_ve_ghim_khoa": (
         '    "GIT_CONFIG_GLOBAL": os.devnull,\n    "GIT_CONFIG_SYSTEM": os.devnull,\n',
         '    "GIT_CONFIG_COUNT": "1",  # đột biến: ghim khoá thay vì cắt nguồn\n'
@@ -3858,6 +3911,7 @@ MUTANTS = {
 MUTANTS_NHAM_TEST = frozenset({
     "bien_nhan_root_xuong_dong_tha_vo_dieu_kien",
     "bien_nhan_shim_tha_vo_dieu_kien",
+    "git_co_lap_bo_sot_pham_vi_lenh",
     "git_co_lap_lui_ve_ghim_khoa",
     "git_co_lap_tha_vo_dieu_kien",
     "moc_kiem_noi_vo_dieu_kien",

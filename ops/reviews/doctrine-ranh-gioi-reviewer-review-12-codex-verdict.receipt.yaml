@@ -1,0 +1,98 @@
+# BIÊN NHẬN — cross-review lượt 12 của PR #322 (packet #318).
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '318'
+packet_slug: DOCTRINE-RANH-GIOI-REVIEWER
+lease_id: doctrine-ranh-gioi-reviewer-exec-1r4-claude-20260826
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: fa9a505d0926a56603cabfb998bd4832084ed68f
+reviewed_tree: 38eb08ad09d43bca0e57ac098dba19e486c8c61f
+luot: 12
+cross_provider: true
+assurance: cross_approved
+verdict_path: ops/reviews/doctrine-ranh-gioi-reviewer-review-12-codex-verdict.md
+verdict_sha256: '9760672fb367580296999d9c0895e90a8f0a9cd8e9ad5859039815fd062a1c9e'
+verdict_bytes: 9475
+verdict_nguon: >-
+  `codex exec -s workspace-write -c approval_policy=never -c model_reasoning_effort=xhigh` trong
+  `launcher.py run`, CLONE ĐỘC LẬP detached tại exact SHA, `--require-clean`, prompt neo băm
+  `f317140a3c3e17f8`. 503.8s, `ma_thoat=0`. run `8a37b882`.
+ket_qua_dem_duoc:
+  P1: 1
+  P2: 0
+  slug_hien_hanh: [{slug: menh-de-sandbox-mo-coi-khong-nhan, hang: P1}]
+  finding_moi: 0
+doi_chieu_finding_vong_11:
+  phan_quyet: VA_SINH_LOI_MOI
+  phan_DA_VA_THAT: >-
+    Nhãn đã được gắn thật: dòng 669-673 mang `cơ chế đã xác minh — chiều MỞ`, và dòng 619-625 đưa
+    mệnh đề vào phép đếm. Reviewer XÁC NHẬN nhãn ĐÚNG NGHĨA, và xác nhận bằng một thứ phiên điều
+    phối KHÔNG viện tới: phép A/B đã có sẵn TRONG CHÍNH TỆP ở dòng 328-339 — mặc định `ls-remote`
+    lỗi kết nối, bật cấu hình mạng của sandbox thì `lsremote_rc=0`. Nên `chiều MỞ` KHÔNG phải
+    suy luận từ tài liệu cấu hình; nó có neo thực chứng.
+  phan_SINH_LOI_MOI: >-
+    Hồi quy PHẠM VI (N1). Dòng 594-596 vẫn giới hạn mục vào năm mệnh đề bảng cộng HAI mệnh đề văn
+    xuôi, và dòng 597-601 còn nói từ vựng mạng/sandbox áp dụng ở #334 "không phải ở đây" — trong khi
+    dòng 619-625 và 669-673 gắn nhãn và đếm mệnh đề mạng/sandbox NGAY Ở ĐÂY. Câu đầu mục sai phạm
+    vi thân nó.
+  phan_CHUA_DONG: >-
+    N4. Ngay cạnh mệnh đề chỉ có "cờ lật được" và một con trỏ chung sang packet khác; không có điều
+    kiện đo cụ thể, không phiên bản, không lệnh/kết quả A/B, và KHÔNG trỏ tới phép đo local ở dòng
+    328-339 vốn nằm cách hơn 300 dòng.
+  reviewer_TU_CHOI_bang_chung_o_packet_khac: >-
+    Nguyên văn: "không nhận lời 'bằng chứng ở packet kia' làm evidence độc lập" — clone không chứa
+    artifact nào mang tên `MANG-SANDBOX-CODEX` hoặc `334`, và điều kiện vận hành cấm mạng.
+  KHONG_tach_slug_moi: >-
+    Reviewer CỐ Ý giữ stable ID cũ: "tách slug mới sẽ đếm đôi cùng một gốc lỗi". Đây là lần đầu
+    trong packet có người từ chối tách slug để tránh thổi phồng số finding.
+phep_dem_reviewer_TU_LIET_KE:
+  tong: 8
+  phan_bo: 'chiều ĐÓNG ×1 · chiều MỞ ×5 · chưa xếp được ×2 · máy phát hiện ×0 · quan sát chưa rõ cơ chế ×0'
+  khop_voi_executor: true
+  cach_dem: >-
+    KHÔNG grep cụm nhãn — liệt kê từng đơn vị "mệnh đề + điều kiện đo" thành bảng tám hàng, rồi
+    kiểm không đơn vị nào tính hai lần. Reviewer nói rõ vì sao hai hàng credential là HAI mệnh đề
+    (hai điều kiện đo khác nhau) và vì sao mệnh đề proxy ambient là KẾT LUẬN chứ không phải một
+    trong hai quan sát đầu vào.
+bang_cham:
+  N1: KHONG_DAT
+  N2: DAT
+  N3: DAT
+  N4: KHONG_DAT
+  N5: DAT
+  N6: DAT
+  N7a: 'DAT — doctrine-scan rc=0, sạch, quét 8 tệp, 0 chỗ chép doctrine'
+  N7b: 'DAT — numstat 184/200, còn biên 16 dòng thêm'
+  ghi_chu: 'N1 và N4 là HAI BIỂU HIỆN của cùng một finding, KHÔNG đếm thành hai.'
+huong_va_reviewer_de_xuat:
+  o_dau: 'cùng một cụm: dòng 594-625 và 669-673 — nơi định nghĩa phạm vi, đơn vị đếm, nhãn và neo đo của đúng mệnh đề ấy'
+  hai_duong_loai_tru_nhau:
+    - 'GIỮ nhãn `chiều MỞ`: sửa câu phạm vi để thừa nhận mệnh đề mạng/sandbox CÒN LẠI trong tệp, VÀ đặt ngay cạnh nó điều kiện đo tối thiểu cộng kết quả A/B đã có ở dòng 328-339'
+    - 'HẠ nhãn về `chưa xếp được` và TÍNH LẠI phân bố'
+  cam: >-
+    "Không được vừa gọi là `cơ chế đã xác minh` vừa chỉ sang bằng chứng reviewer không có."
+  ban_va_co_the_de_ra_gi: >-
+    Reviewer tự nêu ba cái bẫy: (1) chép cả bảng động của #334 về sẽ làm hỏng lát cắt và tạo số
+    liệu dễ trôi; (2) đổi nhãn mà quên phân bố sẽ làm tổng 8 vẫn đúng nhưng các số hạng sai;
+    (3) thêm một con trỏ mới mà không sửa câu "neo duy nhất" sẽ tạo hai neo cạnh tranh.
+KHONG_DO_DUOC_reviewer_khai: 3
+
+LOI_CUA_PHIEN_DIEU_PHOI_KHI_GHI_BIEN_NHAN_NAY:
+  loi_gi: >-
+    Heredoc KHÔNG trích dẫn (`<<EOF` thay vì `<<'EOF'`) nên vỏ shell THỰC THI ba cụm trong dấu
+    huyền chưa được thoát và thay chúng bằng CHUỖI RỖNG. Ba nhãn `chiều MỞ`, `chưa xếp được`,
+    `cơ chế đã xác minh` biến mất khỏi mục `huong_va_reviewer_de_xuat` — đúng ba nhãn là NỘI DUNG
+    của hướng vá.
+  vi_sao_suyt_lot: >-
+    `yaml.safe_load` vẫn ĐỌC ĐƯỢC tệp và in ra "YAML OK". Cổng cú pháp xanh trong khi nội dung đã
+    hỏng — đúng hình dạng "cổng xanh không phải bằng chứng" mà cả hai packet trong phiên này sinh
+    ra để chặn. Thứ bắt được là ba dòng `command not found` trên stderr, không phải bộ kiểm.
+  lan_thu_hai: >-
+    Đây là LẦN THỨ HAI trong phiên heredoc không trích dẫn làm hỏng một biên nhận YAML. Lần trước
+    `yaml.safe_load` ném lỗi nên bắt được ngay; lần này nó KHÔNG ném, và nếu tôi chỉ nhìn dòng
+    "YAML OK" thì bản ghi đã đi vào kho với ba chỗ trống.
+  luat_rut_ra: >-
+    Ghi YAML nhiều dấu huyền thì dùng `<<'EOF'` hoặc viết bằng Python. Và ĐỌC LẠI nội dung sau khi
+    ghi, đừng chỉ kiểm cú pháp.

@@ -97,6 +97,21 @@ _ENV_CONG = {
 #   · `token: <bí mật khác>` — checkout bằng một credential khác, có thể có quyền ghi.
 # Cái thứ ba (`fetch-depth: 0`) vô hại, và chính vì vô hại nên nó là ca đo TÍNH CHÍNH XÁC của
 # allow-list chứ không đo mức nguy hiểm: một allow-list đúng thì từ chối cả khoá vô hại.
+# ALLOW-LIST MỨC JOB, và đây là CHỖ THỨ NĂM của cùng một hình dạng trong packet này.
+# Cross-review lượt 2 đo được: `loi_topology` chỉ nhận `jobs["cong"]["steps"]` và `loi_quyen`
+# chỉ soi job tên `cong` (ghi cứng), nên KHÔNG hàm nào khẳng định workflow tin cậy có ĐÚNG một
+# job. Thêm một job thứ hai `evil` (`permissions: contents: write` + checkout `head.sha` + chạy
+# script của PR) ⇒ **29/29 ca xanh, job `evil` VÔ HÌNH** — đúng bẫy B2 mà `ca_topology_job_cong`
+# khai là "đóng cả một HỌ đường tấn công". Nó đóng cho MỘT JOB, không cho WORKFLOW.
+# Cùng chỗ ấy: `continue-on-error: true` ở MỨC JOB lọt (mức STEP thì bị bắt).
+# Reviewer nói đúng phạm vi và tôi chép lại kẻo ai đọc mạnh hơn phép đo: `evil` chỉ chạy khi đã
+# ở nhánh CƠ SỞ, nên phải qua một lần merge (vốn đòi `cong`) hoặc một lần đẩy thẳng (bị branch
+# protection chặn sau Bước 2). Đây là "khoá cơ học bị thủng", KHÔNG phải bypass tức thì. Nhưng
+# luận đề của packet là khoá CƠ HỌC để người khỏi phải soi ngữ nghĩa YAML — nên một hình dạng
+# B2 qua được bộ là finding thật.
+_JOB_TIN_CAY = "cong"
+_KHOA_MUC_JOB_CHO_PHEP = ("if", "permissions", "runs-on", "steps")
+
 _TOPOLOGY_CONG = (
     {"khoa": ("name", "uses", "with"), "uses": _CHECKOUT,
      "with_khoa": ("ref", "persist-credentials"),
@@ -181,6 +196,17 @@ def loi_quyen(d, ten_job):
     return xau
 
 
+def _khac_o_dau(mong, thuc):
+    """Mẩu đầu tiên lệch giữa hai chuỗi đã chuẩn hoá — đủ để người sửa biết đi đâu."""
+    for i, (a, b) in enumerate(zip(mong, thuc)):
+        if a != b:
+            return "lệch từ ký tự %d: đòi %r, đang là %r" % (i, mong[i:i + 40], thuc[i:i + 40])
+    if len(mong) != len(thuc):
+        dai, ngan = (thuc, mong) if len(thuc) > len(mong) else (mong, thuc)
+        return "một bên dài hơn %d ký tự: phần thừa %r" % (len(dai) - len(ngan), dai[len(ngan):len(ngan) + 40])
+    return "không định vị được chỗ lệch"
+
+
 def loi_topology(cac_buoc):
     """Danh sách lỗi topology của job `cong` — ALLOW-LIST, không phải danh sách cấm.
 
@@ -203,10 +229,21 @@ def loi_topology(cac_buoc):
         if "uses" in mau and str(b.get("uses") or "") != mau["uses"]:
             xau.append("bước %d: `uses`=%r, allow-list đòi %r"
                        % (i, b.get("uses"), mau["uses"]))
-        if "run" in mau and chuan_hoa_lenh(b.get("run")) != mau["run"]:
-            xau.append("bước %d: thân `run` KHÁC bản trong allow-list" % i)
-        if "env" in mau and dict(b.get("env") or {}) != mau["env"]:
-            xau.append("bước %d: bảng `env` KHÁC bản trong allow-list" % i)
+        # F2 cross-review lượt 2: hai nhánh exact-match này từng chỉ nói "KHÁC" mà không nói
+        # KHÁC Ở ĐÂU, buộc người sửa mở tệp test tìm hằng rồi tự diff — trong khi nhánh khoá-thừa
+        # ngay dưới đã chỉ đúng tên khoá. Một chốt exact-match mà thông báo mơ hồ thì mỗi lần đổi
+        # workflow chính đáng là một lần mò; chi phí ấy dồn lên đúng người đang làm việc đúng.
+        if "run" in mau:
+            thuc = chuan_hoa_lenh(b.get("run"))
+            if thuc != mau["run"]:
+                xau.append("bước %d: thân `run` KHÁC allow-list — %s" % (i, _khac_o_dau(mau["run"], thuc)))
+        if "env" in mau:
+            e = dict(b.get("env") or {})
+            if e != mau["env"]:
+                lech = sorted(set(e) ^ set(mau["env"]))
+                doi = sorted(k for k in set(e) & set(mau["env"]) if e[k] != mau["env"][k])
+                xau.append("bước %d: bảng `env` KHÁC allow-list — khoá lệch=%s, giá trị đổi=%s"
+                           % (i, lech or "không", doi or "không"))
         w = b.get("with") or {}
         mong = set(mau.get("with_khoa") or ())
         thieu = sorted(mong - set(w))
@@ -407,6 +444,29 @@ def ca_trung_moc_thoi_gian_TAT_DINH(m):
             raise AssertionError("mâu thuẫn KHÔNG tách được mà không ĐỎ: " + ly)
 
 
+def ca_MOC_THOI_GIAN_so_theo_THOI_DIEM_khong_theo_CHUOI(m):
+    """F3 của cross-review lượt 2: bản đầu so `submitted_at` bằng CHUỖI.
+
+    Hai chiều. Chiều một là chính ca reviewer dựng: `APPROVED` lúc `12:00:00+07:00` (=05:00Z)
+    so với `CHANGES_REQUESTED` lúc `06:00:00Z` — bản CHẶN muộn hơn THẬT, nhưng theo thứ tự
+    chuỗi thì `"12:00…+07" > "06:00…Z"` nên bản duyệt thắng và cổng trả XANH.
+    Chiều hai chặn bản vá thành fail-close mù: mốc HỎNG phải là KHÔNG ĐO ĐƯỢC, và mốc HỢP LỆ
+    ở nhiều dạng viết (có phần giây lẻ, offset không có dấu hai chấm) vẫn phải đọc được."""
+    lech_mui = [_rv("code2nguyen", "APPROVED", "2026-05-05T12:00:00+07:00", ma=1),
+                _rv("code2nguyen", "CHANGES_REQUESTED", "2026-05-05T06:00:00Z", ma=2)]
+    dat, ly = m.phan_quyet("ducthangho", lech_mui)
+    if dat:
+        raise AssertionError("bản CHẶN muộn hơn THẬT bị thua vì so chuỗi: " + ly)
+    hong = [_rv("code2nguyen", "APPROVED", "hom qua")]
+    dat, ly = m.phan_quyet("ducthangho", hong)
+    if dat or "KHÔNG ĐO ĐƯỢC" not in ly:
+        raise AssertionError("mốc thời gian HỎNG phải là KHÔNG ĐO ĐƯỢC và ĐỎ: " + ly)
+    for dang in ("2026-05-05T06:00:00.123Z", "2026-05-05T06:00:00+0000",
+                 "2026-05-05T06:00:00+00:00"):
+        if not m.phan_quyet("ducthangho", [_rv("code2nguyen", "APPROVED", dang)])[0]:
+            raise AssertionError("mốc HỢP LỆ dạng %r bị từ chối oan" % dang)
+
+
 def ca_login_BOT_trung_ten_khong_tinh(m):
     """Bản ghi mang `user.type` khác `User` không được tính là bản duyệt của người ấy.
 
@@ -507,6 +567,23 @@ def ca_topology_job_cong(m):
         raise AssertionError("; ".join(xau))
 
 
+def ca_workflow_tin_cay_CHI_MOT_JOB(m):
+    """F1 của cross-review lượt 2. Khoá TẬP JOB và khoá MỨC JOB, không chỉ khoá bên trong `cong`.
+
+    Bộ cũ soi rất kỹ bên trong job `cong` rồi bỏ ngỏ câu hỏi trước đó một bậc: *workflow này có
+    những job nào?* Một job thứ hai mang quyền ghi và kéo head PR đi qua sạch."""
+    d = _yaml()
+    co = set(d.get("jobs") or {})
+    if co != {_JOB_TIN_CAY}:
+        raise AssertionError("workflow tin cậy phải có ĐÚNG job %r, đang có %s"
+                             % (_JOB_TIN_CAY, sorted(co)))
+    job = (d["jobs"] or {})[_JOB_TIN_CAY] or {}
+    thua = sorted(set(job) - set(_KHOA_MUC_JOB_CHO_PHEP))
+    if thua:
+        raise AssertionError("job %r có khoá MỨC JOB ngoài allow-list: %s"
+                             % (_JOB_TIN_CAY, thua))
+
+
 def ca_quyen_HIEU_LUC_CHI_DOC(m):
     """P1 `b2-job-permissions-va-buoc-keo-head-deu-mu`: job ghi đè được `permissions`."""
     xau = loi_quyen(_yaml(), "cong")
@@ -571,6 +648,8 @@ CA = [
     ("COMMENTED_khong_GO_YEU_CAU_SUA", ca_COMMENTED_khong_GO_YEU_CAU_SUA),
     ("DISMISSED_go_quyet_dinh", ca_DISMISSED_go_quyet_dinh),
     ("trung_moc_thoi_gian_TAT_DINH", ca_trung_moc_thoi_gian_TAT_DINH),
+    ("MOC_THOI_GIAN_so_theo_THOI_DIEM_khong_theo_CHUOI",
+     ca_MOC_THOI_GIAN_so_theo_THOI_DIEM_khong_theo_CHUOI),
     ("login_BOT_trung_ten_khong_tinh", ca_login_BOT_trung_ten_khong_tinh),
     ("doc_HET_moi_trang", ca_doc_HET_moi_trang),
     ("quyet_dinh_o_TRANG_SAU_van_chan", ca_quyet_dinh_o_TRANG_SAU_van_chan),
@@ -581,6 +660,7 @@ CA = [
     ("cong_KHONG_chay_tren_pull_request", ca_cong_KHONG_chay_tren_pull_request),
     ("cong_KHONG_checkout_head_PR", ca_cong_KHONG_checkout_head_PR),
     ("topology_job_cong", ca_topology_job_cong),
+    ("workflow_tin_cay_CHI_MOT_JOB", ca_workflow_tin_cay_CHI_MOT_JOB),
     ("quyen_HIEU_LUC_CHI_DOC", ca_quyen_HIEU_LUC_CHI_DOC),
     ("khong_co_cu_phap_bieu_thuc_trong_run", ca_khong_co_cu_phap_bieu_thuc_trong_run),
     ("workflow_TRUYEN_head_sha", ca_workflow_TRUYEN_head_sha),
@@ -604,6 +684,7 @@ DOT_BIEN_MA = {
         "    luc_max = max(x[0] for x in ban_ghi)",
         "    luc_max = min(x[0] for x in ban_ghi)",
         ["CHI_tinh_review_MOI_NHAT", "DISMISSED_go_quyet_dinh",
+         "MOC_THOI_GIAN_so_theo_THOI_DIEM_khong_theo_CHUOI",
          "quyet_dinh_o_TRANG_SAU_van_chan"]),
     "bo_kiem_YEU_CAU_SUA": (
         "    if chan:\n",
@@ -638,6 +719,17 @@ DOT_BIEN_MA = {
         '    raise KhongDoDuoc(\n        "%d b',
         '    return dong[0][2], dong[0][3]\n    raise KhongDoDuoc(\n        "%d b',
         ["trung_moc_thoi_gian_TAT_DINH"]),
+    "so_MOC_bang_CHUOI_nhu_ban_dau": (
+        "            luc = _moc((r or {}).get(\"submitted_at\"))",
+        "            luc = str((r or {}).get(\"submitted_at\") or \"\")",
+        ["MOC_THOI_GIAN_so_theo_THOI_DIEM_khong_theo_CHUOI"]),
+    "moc_HONG_thi_bo_qua_ban_ghi": (
+        '        except KhongDoDuoc as e:\n'
+        '            # Mốc hỏng là KHÔNG ĐO ĐƯỢC cho CẢ phán quyết, không phải "bỏ qua bản ghi này":\n'
+        '            # bỏ qua nghĩa là một bản CHANGES_REQUESTED có mốc lạ biến mất khỏi phép tính.\n'
+        '            return False, "KHÔNG ĐO ĐƯỢC: %s — %s" % (ai, e)',
+        "        except KhongDoDuoc:\n            continue",
+        ["MOC_THOI_GIAN_so_theo_THOI_DIEM_khong_theo_CHUOI"]),
     "bo_kiem_type_bot": (
         '        if str(u.get("type") or "User") != "User":\n            continue\n',
         "",
@@ -659,6 +751,18 @@ DOT_BIEN_MA = {
 }
 
 DOT_BIEN_YML = {
+    # F1 cross-review lượt 2 — hai đường lách reviewer đo được, cả hai từng cho `29/29 xanh`.
+    "them_job_thu_hai_EVIL": (
+        "jobs:\n  cong:\n",
+        "jobs:\n  evil:\n    runs-on: ubuntu-latest\n    permissions:\n"
+        "      contents: write\n    steps:\n      - uses: actions/checkout@v4\n"
+        "        with:\n          ref: " + _MO_BIEU_THUC + " github.event.pull_request.head.sha }}\n"
+        "      - run: bash ./tu-nhanh-PR.sh\n  cong:\n",
+        ["workflow_tin_cay_CHI_MOT_JOB"]),
+    "them_khoa_MUC_JOB_continue_on_error": (
+        "    runs-on: ubuntu-latest\n    permissions:\n",
+        "    runs-on: ubuntu-latest\n    continue-on-error: true\n    permissions:\n",
+        ["workflow_tin_cay_CHI_MOT_JOB"]),
     # B1 — đúng đường lách reviewer đo được: điều kiện còn nguyên hai mẩu chuỗi cũ mà vẫn
     # luôn đúng. Bản cũ cho `18/18, dead=NONE`.
     "noi_them_ve_LUON_DUNG": (

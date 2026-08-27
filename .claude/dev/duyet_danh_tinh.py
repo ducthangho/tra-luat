@@ -22,8 +22,10 @@ hai bản ghi mâu thuẫn không phân biệt được thứ tự ⇒ ĐỎ, kh
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -87,6 +89,36 @@ def _ma_so(r):
         return int(ma)
     except (TypeError, ValueError):
         return None
+
+
+_RE_MOC = re.compile(
+    r"^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2}):(\d{2})(\.\d+)?"
+    r"(Z|[+-]\d{2}:?\d{2})$")
+
+
+def _moc(luc):
+    """`submitted_at` → `datetime` có múi giờ. Không đọc được ⇒ `KhongDoDuoc`.
+
+    BẢN ĐẦU SO BẰNG CHUỖI, và cross-review lượt 2 đo được nó FAIL-OPEN (F3): một bản
+    `APPROVED` lúc `12:00:00+07:00` (= 05:00Z) so với `CHANGES_REQUESTED` lúc `06:00:00Z`
+    — bản chặn MUỘN HƠN THẬT — cho `"12:00…+07" > "06:00…Z"` theo thứ tự chuỗi, nên cổng
+    chọn bản duyệt làm "mới nhất" và trả XANH. Tie-break bằng `id` không cứu được: nó chỉ
+    chạy khi hai chuỗi BẰNG NHAU.
+
+    NÓI ĐÚNG PHẠM VI, vì reviewer đã nói đúng và không nên đọc mạnh hơn: REST của GitHub trả
+    `submitted_at` với độ chính xác GIÂY và hậu tố `Z`, cố định độ rộng — nên với dữ liệu
+    THẬT hiện nay, so chuỗi bằng so thời gian, và lỗ này **chưa với tới được**. Thứ được vá
+    ở đây là một **GIẢ ĐỊNH ĐỊNH DẠNG KHÔNG AI KHAI**, đúng loại giả định mà kho này đắt giá
+    nhất khi để im. Parse rồi so thì luật không còn phụ thuộc vào việc GitHub giữ nguyên
+    định dạng."""
+    t = str(luc or "").strip()
+    m = _RE_MOC.match(t)
+    if not m:
+        raise KhongDoDuoc("mốc thời gian không đọc được: %r" % (luc,))
+    try:
+        return datetime.datetime.fromisoformat(t.replace("Z", "+00:00"))
+    except ValueError as e:
+        raise KhongDoDuoc("mốc thời gian không đọc được: %r (%s)" % (luc, e)) from None
 
 
 def _quyet_dinh_cuoi(ban_ghi):
@@ -158,9 +190,14 @@ def phan_quyet(tac_gia, reviews, cho_phep=NGUOI_DUOC_DUYET, head_sha=None):
         st = str((r or {}).get("state") or "").upper()
         if st not in _QUYET_DINH:
             continue
+        try:
+            luc = _moc((r or {}).get("submitted_at"))
+        except KhongDoDuoc as e:
+            # Mốc hỏng là KHÔNG ĐO ĐƯỢC cho CẢ phán quyết, không phải "bỏ qua bản ghi này":
+            # bỏ qua nghĩa là một bản CHANGES_REQUESTED có mốc lạ biến mất khỏi phép tính.
+            return False, "KHÔNG ĐO ĐƯỢC: %s — %s" % (ai, e)
         theo_nguoi.setdefault(ai, []).append(
-            (str((r or {}).get("submitted_at") or ""), _ma_so(r), st,
-             str((r or {}).get("commit_id") or "")))
+            (luc, _ma_so(r), st, str((r or {}).get("commit_id") or "")))
 
     moi_nhat = {}
     for ai, bg in theo_nguoi.items():

@@ -95,7 +95,7 @@ target_branch_neu_land: master
 
 base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
 start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
-reviewed_sha_required: d9c24ddaecb8b94dd234d77819745e96ea4226d1
+reviewed_sha_required: 1c000495c8e64e2582c37ee92ae5be8d14557218
 base_ghi_chu: >-
   `c35ae1c` = `origin/master` lúc cấp, ĐO trong phiên (không chép từ hồ sơ bàn giao), và cũng là
   merge của PR #310. Nhánh rẽ SẠCH từ đây, KHÔNG kế thừa `6c4140b` của PR #315 (đã đóng, không
@@ -117,7 +117,8 @@ lich_su_reviewed_sha:
 - {vong: 11, sha: 12e0315a439b1e73bde57b09152bc077e04d7ee5, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-11-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0 — finding duy nhất `menh-de-sandbox-mo-coi-khong-nhan`: mệnh đề sandbox đứng ngoài hợp đồng nhãn và ngoài phép đếm.'}
 - {vong: 12, sha: fa9a505d0926a56603cabfb998bd4832084ed68f, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-12-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0, KHÔNG finding mới. Cùng slug `menh-de-sandbox-mo-coi-khong-nhan` — phán quyết VÁ SINH LỖI MỚI: nhãn ĐÚNG NGHĨA (reviewer tìm được neo A/B ngay trong tệp, dòng 328-339) nhưng câu phạm vi dòng 594-601 nay TỰ MÂU THUẪN với phép đếm dòng 619-625, và N4 chưa đóng. N2/N3/N5/N6/N7a/N7b ĐẠT. Biên 16 dòng.'}
 - {vong: 13, sha: e68e9fac23690399121b76d6ea3c35a6c5e9a067, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-13-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0, KHÔNG finding mới, cùng slug. N1 và N4 ĐÃ VÁ THẬT; N2+N3 FAIL vì bản vá khai một phép ĐO KHÔNG XẢY RA (dòng 678 nói một cờ, dòng 682 nói hai cờ — cách nhau BỐN dòng). Nhãn phải là `chưa xếp được`, phân bố đúng 1/4/3/0/0. Lỗi là của PHIÊN ĐIỀU PHỐI.'}
-- {vong: 14, sha: d9c24ddaecb8b94dd234d77819745e96ea4226d1, verdict: 'CHƯA CÓ — bản vá vòng 13 đã đẩy'}
+- {vong: 14, sha: d9c24ddaecb8b94dd234d77819745e96ea4226d1, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-14-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0, cùng slug. N1/N4/N5/N6/N7a/N7b ĐẠT. N2+N3 rớt vì MỘT chỗ bản vá 13 BỎ SÓT: nhãn đã hạ ở dòng 676 nhưng NỘI DUNG mệnh đề ở 675 vẫn khai `biết cơ chế`.'}
+- {vong: 15, sha: 1c000495c8e64e2582c37ee92ae5be8d14557218, verdict: 'CHƯA CÓ — bản vá vòng 14 đã đẩy'}
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 2
@@ -691,3 +692,24 @@ VONG_VA_13:
     phân bố quay về 1/5/2/0/0 — tức MỘT lượt vá nữa, trên biên chỉ còn 2 dòng. Phiên điều phối đã
     nêu rủi ro ấy trước khi vá và người giữ kho vẫn chọn vá ngay; ghi ra để lượt sau không phải
     đoán vì sao có hai lượt vá liên tiếp trên cùng một mệnh đề.
+
+VONG_VA_14:
+  sha: 1c000495c8e64e2582c37ee92ae5be8d14557218
+  sua: >-
+    MỘT dòng, net 0: "biết cơ chế KHÔNG làm nó thành ranh giới" → "DÙ có biết cơ chế thì cũng KHÔNG
+    làm nó thành ranh giới". Giữ NGUYÊN ý doctrine, nhưng phát biểu nó dạng GIẢ ĐỊNH thay vì KHẲNG
+    ĐỊNH rằng cơ chế đã biết. Bản trước trộn chung hai thứ.
+  vi_sao_ban_va_13_bo_sot: >-
+    Lượt 13 hạ NHÃN và sửa ba con số phụ thuộc, nhưng không soi NỘI DUNG của chính mệnh đề. Nguyên
+    văn reviewer: "Một mệnh đề không thể vừa khai biết cơ chế vừa lấy việc chưa xác minh cơ chế làm
+    lý do cho hạng dư."
+  CAU_TRA_LOI_CHO_CAU_HOI_KHO:
+    cau_hoi: 'với riêng tệp này ở exact SHA này, `chưa xếp được` là hạng ĐÚNG hay THẤP HƠN sự thật?'
+    tra_loi: 'ĐÚNG'
+    nguyen_van: >-
+      "Hạng ở đây đo trạng thái bằng chứng mà người đọc exact tree có thể kiểm... Nó không phải nhãn
+      chân trị của thế giới bên ngoài. Một kết quả đúng nằm trên nhánh packet khác, chưa land và
+      không có trong clone, không phải evidence độc lập của tệp này. Việc lời khai tình cờ đúng
+      không đổi tiêu chuẩn đã áp ở vòng 12 và 13."
+    duong_quay_lai: 'reviewer xác nhận tệp ĐÃ có ở dòng 685-686 ⇒ KHÔNG mở finding riêng.'
+  ngan_sach: '198/200, biên 2 — KHÔNG đổi vì sửa net 0'

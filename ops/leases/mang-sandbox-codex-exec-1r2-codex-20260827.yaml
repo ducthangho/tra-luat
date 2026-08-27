@@ -62,7 +62,7 @@ branch_ghi_chu: >-
 
 base_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
 start_from_sha: 511a58d2392a60dc94b40918da4d39c4aeda07a3
-reviewed_sha_required: 2ab5c76c36562738d2a059887e4846c954739a0a
+reviewed_sha_required: 944742869b53946b56531c1da3f831a47707ecac
 base_ghi_chu: >-
   `base_sha` GIỮ NGUYÊN. `S4` đo lại lúc cấp r2: `origin/master` nay `f715fc28`, `ac82ddc` VẪN là
   tổ tiên, và `git diff --numstat ac82ddc..f715fc28` trên ĐÚNG ba đường dẫn write set ⇒ RỖNG.
@@ -74,8 +74,8 @@ ngan_sach_kich_thuoc:
   dong_them_toi_da: 320
   do_tu_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
   don_vi: '`git diff --numstat ac82ddc..HEAD` trên ĐÚNG ba đường dẫn write set, cột dòng THÊM.'
-  da_dung: 317   # ĐO trên `2ab5c76c` (lượt 4)
-  bien_con_lai: 3
+  da_dung: 318   # ĐO trên `94474286` (lượt 5)
+  bien_con_lai: 2
   KHONG_NANG_TRAN_O_r2: >-
     r2 KHÔNG nâng trần, cố ý. Lượt 2 chưa hề chạm trần — nó dừng vì chốt công cụ, không vì ngân
     sách — nên chưa có PHÉP ĐO nào biện minh cho việc nâng. Nâng trần TRƯỚC khi có số đo là đúng
@@ -325,3 +325,31 @@ LUOT_4:
   trang_thai_packet: >-
     Mọi P1 TRONG write set đã đóng. Chờ cross-review vòng 3 trên `2ab5c76c`. Biên 3 dòng — vòng 3
     mà đòi thêm dòng thì gần như chắc chạm trần, và khi ấy câu trả lời KHÔNG phải nâng trần.
+
+VERDICT_VONG_3_va_LUOT_VA_5:
+  verdict_vong_3:
+    hang: changes_requested
+    P1: 0
+    P2: 1
+    reviewed_sha: 2ab5c76c36562738d2a059887e4846c954739a0a
+    P1_da_va_that: 'bang-chinh-gom-unknown-vao-1-nhu-chan — reviewer xác nhận ĐỘC LẬP bằng BẢY ô tự đo'
+    vi_sao_van_changes_requested: >-
+      Reviewer nói thẳng: "tôi để `changes_requested` vì bản thân tôi không có quyền quyết định
+      'ghi nợ là đủ' thay người giữ kho, KHÔNG phải vì tôi coi đây là P1." Nó nêu rõ có thể land
+      ngay nếu P2 thành nợ có tên, hoặc vá một dòng.
+    reviewer_da_cham_phan_TOI_va: >-
+      Đề bài CẢNH BÁO trước rằng lượt 4 do phiên điều phối (cùng nền `claude` với reviewer) vá, nên
+      `cross_approved` không đứng cho riêng phần ấy và phải chấm nghi ngờ hơn. Reviewer chấm và cho
+      ĐÃ VÁ THẬT, có phép đo kèm.
+  luot_va_5:
+    sha: 944742869b53946b56531c1da3f831a47707ecac
+    sua: 'dòng 11 — nói rõ cột `LỚP` là số ĐO LẠI ĐỘC LẬP, không phải suy diễn từ 0/1 cũ. +1 dòng.'
+    vi_sao: >-
+      Lượt 4 sửa CÂU SONG SINH ở mục `KHÔNG_ĐO_ĐƯỢC` nhưng BỎ SÓT dòng 11 ở phần mở đầu mang cùng
+      nội dung. Reviewer nói rõ đây KHÔNG phải mâu thuẫn logic (cột `LỚP` là đo lại, không phải hồi
+      tố) nhưng nó ĐỌC NHƯ mâu thuẫn — và đó đúng lớp lỗi đã lặp hai lần trong chính packet này.
+    ngan_sach: '318/320, biên 2'
+    bo_do: '11/11 ca · 5 đột biến · 0 sống · TỔNG ĐẠT'
+  trang_thai: >-
+    Sau lượt 5: KHÔNG còn P1 nào trong write set, và KHÔNG còn P2 nào. Chờ cross-review vòng 4 trên
+    `94474286`.

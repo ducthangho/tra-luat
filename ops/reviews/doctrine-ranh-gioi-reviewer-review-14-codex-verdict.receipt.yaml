@@ -1,0 +1,13 @@
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '318'
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: d9c24ddaecb8b94dd234d77819745e96ea4226d1
+luot: 14
+cross_provider: true
+verdict_path: ops/reviews/doctrine-ranh-gioi-reviewer-review-14-codex-verdict.md
+verdict_sha256: '9fe085fbbf6cd3eb8089972daabe4839108219aa33be6545d64ab30e50b30d05'
+verdict_bytes: 12925
+ket_qua_dem_duoc: {P1: 1, P2: 0}

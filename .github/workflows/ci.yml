@@ -110,6 +110,19 @@ jobs:
         run: python .claude/dev/codex_cred_test.py
       - name: packet-loop selftest
         run: python .claude/dev/packet_loop_test.py
+      # HOP DONG IDIOM BA TEN (packet #345, ke nhiem #337). Cung doctrine voi hai buoc
+      # duoi: guard khong noi vao duong TU DONG thi guard chi la tai lieu (bai hoc r225).
+      # Bo phan chung cua #337 song o thu muc tam, ngoai kho, khong cong => se chet theo
+      # container; day la thu GIU muc 0 loi goi `python` tran trong `.claude/skills/**` +
+      # `docs/PROTOCOL_DA_PHIEN.md`.
+      #
+      # CHAY TREN CA UBUNTU LAN WINDOWS co chu dinh: hai ca DONG (`ba_nen_path`,
+      # `doi_chung_dong`) can POSIX nen tu bao BO QUA CO TEN tren Windows, con nam ca TINH
+      # van do that. Ca lop hong nay VON la lop hong theo NEN TANG — `python3` khong co
+      # tren Windows la ly do packet #337 ton tai — nen bo qua Windows la bo qua dung nen
+      # dang duoc bao ve.
+      - name: idiom-ba-ten selftest
+        run: python .claude/dev/idiom_py_test.py
       # F2-A (ADR-0018): validator EOL dùng CHUNG với `.githooks/pre-commit`. Hook chỉ phủ máy
       # dev đã bật `core.hooksPath`; CI là đường TỰ ĐỘNG, và guard không nối vào đường tự động
       # thì guard chỉ là tài liệu (bài học r225). Chạy trên CẢ ubuntu lẫn windows vì cả lớp hỏng

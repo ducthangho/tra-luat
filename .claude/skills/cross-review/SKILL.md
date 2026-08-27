@@ -50,7 +50,7 @@ Antigravity Reviewer lane trong `AGENTS.md` theo cơ chế `same_provider_approv
 | `3–4` | `claude-fable-5` | `xhigh` |
 | `>= 5` | `claude-fable-5` | `max` |
 
-Giữa các lượt của cùng packet, truyền bậc lượt trước làm `bac_truoc`: bánh cóc chỉ cho giữ hoặc tăng bậc, không bao giờ cho tụt khi diff còn lại nhỏ đi.
+Giữa các lượt của cùng packet, truyền bậc lượt trước bằng `--bac-truoc model,effort` (lượt 1 bỏ cờ): bánh cóc chỉ cho giữ hoặc tăng bậc, không bao giờ cho tụt khi diff còn lại nhỏ đi.
 
 Ba bẫy CLI đã đo 27-08-2026, không phải giả định:
 
@@ -66,7 +66,8 @@ Chọn bậc **trước khi phóng**:
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"
 "$PY" .claude/dev/chon_reviewer.py --review-class sensitive \
-  --duong-dan a.py,b.md --so-dong 120 --luot 1 --json
+  --duong-dan a.py,b.md --so-dong 120 --luot 2 \
+  --bac-truoc claude-fable-5,max --json
 ```
 
 Phóng Claude reviewer headless, cấp đúng công cụ cần để review, và giữ JSON nguyên vẹn:

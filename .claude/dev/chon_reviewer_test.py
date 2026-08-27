@@ -4,16 +4,10 @@ Mỗi đột biến chạy trên TOÀN BỘ bảng ca và phải giết ĐÚNG, 
 Nền đỏ thì từ chối công bố điểm: ca đỏ sẵn không phải một mutant bị giết.
 """
 from __future__ import annotations
-import importlib
-import importlib.util
-import itertools
-import sys
-import tempfile
+import contextlib, importlib, importlib.util, io, itertools, json, sys, tempfile
 from pathlib import Path
-if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8")
-if hasattr(sys.stderr, "reconfigure"):
-    sys.stderr.reconfigure(encoding="utf-8")
+if hasattr(sys.stdout, "reconfigure"): sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"): sys.stderr.reconfigure(encoding="utf-8")
 HERE = Path(__file__).resolve().parent
 MA = HERE / "chon_reviewer.py"
 BAC = (("claude-opus-5", "high"), ("claude-opus-5", "xhigh"),
@@ -32,6 +26,11 @@ def _doi_loi(m, ham, *args):
     raise AssertionError("đầu vào không đo được nhưng không bị từ chối: %r" % (args,))
 def _bac(m, review_class, paths, so_dong=0, luot=1, bac_truoc=None):
     return m.chon(review_class, paths, so_dong, luot, bac_truoc)[:2]
+def _cli(m, *args):
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        rc = m.main(list(args))
+    return rc, out.getvalue(), err.getvalue()
 def r01_bon_bac_biet_truoc(m):
     for path in ("scripts/tl.py", ".claude/dev/x.py", "ops/x.py",
                  "references/x.txt", "README.md"):
@@ -170,86 +169,86 @@ def r11_systemic_cong_mot_diem(m):
     kq = m.chon("systemic", ["scripts/x.py"], 0, 1)
     if kq[:2] != BAC[1] or "+1 review_class=systemic" not in kq[2]:
         raise AssertionError("systemic không cộng đúng +1: %r" % (kq,))
-def r12_uu_tien_effective_review_class(m):
+def r12_effective_khong_duoc_ha_lop(m):
     lease = {"review_class": "sensitive", "effective_review_class": "routine"}
-    if _bac(m, lease, ["scripts/x.py"]) != BAC[0]:
-        raise AssertionError("không ưu tiên lớp sau escalation")
+    if _bac(m, lease, ["scripts/x.py"]) != BAC[1]:
+        raise AssertionError("effective thấp hơn đã hạ lớp khai báo")
+def r15_backslash_khong_phai_md_o_goc(m):
+    path = "la\\la.md"
+    if m._vung(path) != "khong-biet" or _bac(m, "sensitive", [path]) != BAC[3]:
+        raise AssertionError("đường Windows đuôi .md bị coi là tài liệu ở gốc")
+def r16_bang_vung_r6_va_nhan_planned(m):
+    bang = {".github/checks/x.py": "cong", ".claude/settings.json": "cong",
+            "RELEASE_MANIFEST.json": "cong", ".claude/agents/x.md": "giao-thuc",
+            "docs/PROTOCOL_DA_PHIEN.md": "giao-thuc", "docs/adr/x.md": "giao-thuc",
+            ".gitignore": "dev", "docs/x.md": "tai-lieu"}
+    sai = {x: m._vung(x) for x, v in bang.items() if m._vung(x) != v}
+    if sai: raise AssertionError("bảng vùng r6 sai: %r" % sai)
+    if m._cac_duong_dan(["planned:ops/x.sh", "ops/x.sh"]) != ("ops/x.sh",): raise AssertionError("nhãn planned: chưa được bóc trước phân loại/dedup")
+    if "khong-biet" in m.chon("routine", ["planned:ops/x.sh"], 0, 1)[2]: raise AssertionError("planned:ops/x.sh bị tính như đường lạ")
+def r17_cli_khong_hoan_vi_so_dong_luot(m):
+    rc, out, _ = _cli(m, "--review-class", "routine", "--duong-dan", "scripts/x.py", "--so-dong", "398", "--luot", "1", "--json")
+    if rc or (json.loads(out)["model"], json.loads(out)["effort"]) != BAC[0]: raise AssertionError("CLI hoán vị so_dong/luot hoặc không trả JSON đúng")
+def r18_cli_bac_truoc_fail_close(m):
+    co_so = ("--review-class", "routine", "--duong-dan", "scripts/x.py", "--so-dong", "1", "--luot", "1", "--json")
+    rc, out, _ = _cli(m, *co_so, "--bac-truoc", "claude-fable-5,max")
+    if rc or (json.loads(out)["model"], json.loads(out)["effort"]) != BAC[3]: raise AssertionError("CLI bỏ qua bánh cóc")
+    for x in ("claude-fable-5", "la,max", "claude-fable-5,la"):
+        rc, _, err = _cli(m, *co_so, "--bac-truoc", x)
+        if rc != 2 or "KHÔNG ĐO ĐƯỢC" not in err: raise AssertionError("--bac-truoc sai không fail-close: %r" % x)
+def r19_dinh_danh_phai_khop_bang_nhau(m):
+    for usage in ({"claude-opus-5x": {}}, {"id": {"canonicalModel": "claude-opus-5x"}}):
+        _doi_loi(m, m.kiem_ket_qua, "claude-opus-5", {"is_error": False, "modelUsage": usage})
+def r20_dict_chi_review_class_van_chay(m):
+    if _bac(m, {"review_class": "sensitive"}, ["scripts/x.py"]) != BAC[1]:
+        raise AssertionError("dict chỉ có review_class mất nhánh fallback")
+def r21_ghim_bien_duoi_tuyet_doi(m):
+    ca = [_bac(m, "routine", ["scripts/x.py"], 399, 1),
+          _bac(m, "routine", ["scripts/%d.py" % i for i in range(4)], 0, 1),
+          _bac(m, "routine", ["scripts/x.py"], 0, 2),
+          _bac(m, "sensitive", [".github/workflows/ci.yml"], 0, 1)]
+    if ca != [BAC[0], BAC[0], BAC[0], BAC[2]]: raise AssertionError("biên dưới ngưỡng không được ghim tuyệt đối: %r" % ca)
 CA = [(ham.__name__, ham) for ham in (
     r01_bon_bac_biet_truoc, r02_khong_biet_day_len_cao_nhat, r03_banh_coc_hai_chieu,
     r04_dinh_danh_allow_list, r05_chin_fixture_hai_rig, r06_json_mo_ho_phai_do,
     r07_don_dieu_moi_to_hop, r08_review_class_allow_list, r09_write_set_rong_khong_do_duoc,
     r10_so_am_khong_phai_pham_vi_nho, r11_systemic_cong_mot_diem,
-    r12_uu_tien_effective_review_class, r13_tut_giua_chung_bi_chan,
-    r14_khong_co_model_phu_van_dat)]
+    r12_effective_khong_duoc_ha_lop, r13_tut_giua_chung_bi_chan,
+    r14_khong_co_model_phu_van_dat, r15_backslash_khong_phai_md_o_goc,
+    r16_bang_vung_r6_va_nhan_planned, r17_cli_khong_hoan_vi_so_dong_luot,
+    r18_cli_bac_truoc_fail_close, r19_dinh_danh_phai_khop_bang_nhau,
+    r20_dict_chi_review_class_van_chay, r21_ghim_bien_duoi_tuyet_doi)]
+def _db(tim, thay, *dich): return tim, thay, list(dich)
 DOT_BIEN = {
-    "bo_nhanh_khong_biet": (
-        '    if "khong-biet" in cac_vung: cong(3, "chạm vùng khong-biet")',
-        '    if "khong-biet" in cac_vung: pass', ["r02_khong_biet_day_len_cao_nhat"]),
-    "bo_banh_coc": ("        if truoc > chi_so:",
-                      "        if False and truoc > chi_so:", ["r03_banh_coc_hai_chieu"]),
-    "nhan_bi_danh": ('MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5")',
-        'MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5", "opus", "fable", "sonnet")',
-        ["r04_dinh_danh_allow_list"]),
-    "tin_subtype_success": (
-        '    model_usage = ket_qua_json.get("modelUsage")',
-        '    if ket_qua_json.get("subtype") == "success":\n'
-        '        return "modelUsage: ĐẠT (đột biến tin subtype)"\n'
-        '    model_usage = ket_qua_json.get("modelUsage")',
-        ["r05_chin_fixture_hai_rig", "r13_tut_giua_chung_bi_chan",
-         "r14_khong_co_model_phu_van_dat"]),
-    "doi_modelUsage_thanh_dung_mot_khoa": (
-        '    def danh_tinh(ten, thong_tin):',
-        '    if len(model_usage) != 1:\n'
-        '        raise KhongDoDuoc("đột biến đòi đúng một khoá")\n'
-        '    def danh_tinh(ten, thong_tin):',
-        ["r05_chin_fixture_hai_rig", "r13_tut_giua_chung_bi_chan"]),
-    "chi_kiem_modelUsage_khong_rong": (
-        '    if chinh != {yeu_cau_model}:',
-        '    if False and chinh != {yeu_cau_model}:',
-        ["r05_chin_fixture_hai_rig", "r06_json_mo_ho_phai_do",
-         "r13_tut_giua_chung_bi_chan"]),
-    "tap_bang_nhau_noi_thanh_membership": (
-        '    if chinh != {yeu_cau_model}:',
-        '    if yeu_cau_model not in chinh:',
-        ["r13_tut_giua_chung_bi_chan"]),
-    "tap_bang_nhau_noi_thanh_issubset": (
-        '    if chinh != {yeu_cau_model}:',
-        '    if not {yeu_cau_model}.issubset(chinh):',
-        ["r13_tut_giua_chung_bi_chan"]),
-    "doi_model_phu_phai_co": (
-        '    chinh = {dinh_danh for ten, dinh_danh in muc if ten not in phu}',
-        '    chinh = {dinh_danh for ten, dinh_danh in muc if ten not in phu}\n'
-        '    if not phu:\n        raise KhongDoDuoc("đột biến đòi model phụ")',
-        ["r05_chin_fixture_hai_rig", "r06_json_mo_ho_phai_do",
-         "r13_tut_giua_chung_bi_chan", "r14_khong_co_model_phu_van_dat"]),
-    "bo_canonicalModel_chi_so_ten_khoa": (
-        '        if isinstance(thong_tin, dict) and "canonicalModel" in thong_tin:',
-        '        if False and isinstance(thong_tin, dict) and "canonicalModel" in thong_tin:',
-        ["r06_json_mo_ho_phai_do"]),
-    "kiem_is_error_truoc_so_tap": (
-        '    def danh_tinh(ten, thong_tin):',
-        '    if ket_qua_json.get("is_error") is not False:\n'
-        '        raise KhongDoDuoc("đột biến kiểm is_error trước")\n'
-        '    def danh_tinh(ten, thong_tin):',
-        ["r05_chin_fixture_hai_rig"]),
-    "thieu_is_error_doc_false": ('    if ket_qua_json.get("is_error") is not False:',
-        '    if ket_qua_json.get("is_error", False) is not False:', ["r06_json_mo_ho_phai_do"]),
-    "review_class_la_doc_nhu_routine": (
-        '    if review_class not in ("routine", "systemic", "sensitive"):',
-        '    if False and review_class not in ("routine", "systemic", "sensitive"):',
-        ["r08_review_class_allow_list"]),
-    "write_set_rong_van_chon": ("    if not ket_qua:",
-        "    if False and not ket_qua:", ["r09_write_set_rong_khong_do_duoc"]),
-    "so_am_doc_nhu_pham_vi_nho": (
-        "    if type(so_dong) is not int or so_dong < 0 or type(luot) is not int or luot < 1:",
-        "    if type(so_dong) is not int or type(luot) is not int:",
-        ["r10_so_am_khong_phai_pham_vi_nho"]),
-    "systemic_khong_cong_diem": ('    if review_class == "systemic":',
-        '    if False and review_class == "systemic":', ["r11_systemic_cong_mot_diem"]),
-    "bo_uu_tien_effective_review_class": (
-        '        review_class = review_class.get("effective_review_class", review_class.get("review_class"))',
-        '        review_class = review_class.get("review_class")',
-        ["r12_uu_tien_effective_review_class"]),
+    "bo_nhanh_khong_biet": _db('    if "khong-biet" in cac_vung: cong(3, "chạm vùng khong-biet")', '    if "khong-biet" in cac_vung: pass', "r02_khong_biet_day_len_cao_nhat", "r15_backslash_khong_phai_md_o_goc"),
+    "bo_banh_coc": _db("        if truoc > chi_so:", "        if False and truoc > chi_so:", "r03_banh_coc_hai_chieu", "r18_cli_bac_truoc_fail_close"),
+    "nhan_bi_danh": _db('MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5")', 'MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5", "opus", "fable", "sonnet")', "r04_dinh_danh_allow_list"),
+    "tin_subtype_success": _db('    model_usage = ket_qua_json.get("modelUsage")', '    if ket_qua_json.get("subtype") == "success":\n        return "modelUsage: ĐẠT (đột biến tin subtype)"\n    model_usage = ket_qua_json.get("modelUsage")', "r05_chin_fixture_hai_rig", "r13_tut_giua_chung_bi_chan", "r14_khong_co_model_phu_van_dat"),
+    "doi_modelUsage_thanh_dung_mot_khoa": _db('    def danh_tinh(ten, thong_tin):', '    if len(model_usage) != 1:\n        raise KhongDoDuoc("đột biến đòi đúng một khoá")\n    def danh_tinh(ten, thong_tin):', "r05_chin_fixture_hai_rig", "r13_tut_giua_chung_bi_chan"),
+    "chi_kiem_modelUsage_khong_rong": _db('    if chinh != {yeu_cau_model}:', '    if False and chinh != {yeu_cau_model}:', "r05_chin_fixture_hai_rig", "r06_json_mo_ho_phai_do", "r13_tut_giua_chung_bi_chan", "r19_dinh_danh_phai_khop_bang_nhau"),
+    "tap_bang_nhau_noi_thanh_membership": _db('    if chinh != {yeu_cau_model}:', '    if yeu_cau_model not in chinh:', "r13_tut_giua_chung_bi_chan"),
+    "tap_bang_nhau_noi_thanh_issubset": _db('    if chinh != {yeu_cau_model}:', '    if not {yeu_cau_model}.issubset(chinh):', "r13_tut_giua_chung_bi_chan"),
+    "doi_model_phu_phai_co": _db('    chinh = {dinh_danh for ten, dinh_danh in muc if ten not in phu}', '    chinh = {dinh_danh for ten, dinh_danh in muc if ten not in phu}\n    if not phu:\n        raise KhongDoDuoc("đột biến đòi model phụ")', "r05_chin_fixture_hai_rig", "r06_json_mo_ho_phai_do", "r13_tut_giua_chung_bi_chan", "r14_khong_co_model_phu_van_dat"),
+    "bo_canonicalModel_chi_so_ten_khoa": _db('        if isinstance(thong_tin, dict) and "canonicalModel" in thong_tin:', '        if False and isinstance(thong_tin, dict) and "canonicalModel" in thong_tin:', "r06_json_mo_ho_phai_do"),
+    "kiem_is_error_truoc_so_tap": _db('    def danh_tinh(ten, thong_tin):', '    if ket_qua_json.get("is_error") is not False:\n        raise KhongDoDuoc("đột biến kiểm is_error trước")\n    def danh_tinh(ten, thong_tin):', "r05_chin_fixture_hai_rig"),
+    "thieu_is_error_doc_false": _db('    if ket_qua_json.get("is_error") is not False:', '    if ket_qua_json.get("is_error", False) is not False:', "r06_json_mo_ho_phai_do"),
+    "review_class_la_doc_nhu_routine": _db('    if gia_tri not in _HANG_REVIEW:', '    if False and gia_tri not in _HANG_REVIEW:', "r08_review_class_allow_list"),
+    "write_set_rong_van_chon": _db("    if not ket_qua:", "    if False and not ket_qua:", "r09_write_set_rong_khong_do_duoc"),
+    "so_am_doc_nhu_pham_vi_nho": _db("    if type(so_dong) is not int or so_dong < 0 or type(luot) is not int or luot < 1:", "    if type(so_dong) is not int or type(luot) is not int:", "r10_so_am_khong_phai_pham_vi_nho"),
+    "systemic_khong_cong_diem": _db('    if review_class == "systemic":', '    if False and review_class == "systemic":', "r11_systemic_cong_mot_diem"),
+    "ha_lop_theo_effective": _db('            review_class = max((khai, hieu_luc), key=_HANG_REVIEW.get)', '            review_class = hieu_luc', "r12_effective_khong_duoc_ha_lop"),
+    "backslash_la_ky_tu_thuong": _db('            "/" not in path and "\\\\" not in path and path.endswith(".md")):', '            "/" not in path and path.endswith(".md")):', "r15_backslash_khong_phai_md_o_goc"),
+    "bo_bang_vung_mo_rong": _db('".github/workflows/", ".github/checks/", ".claude/hooks/",', '".github/workflows/", ".claude/hooks/",', "r16_bang_vung_r6_va_nhan_planned"),
+    "bo_boc_nhan_planned": _db('        if duong.startswith("planned:"):', '        if False and duong.startswith("planned:"):', "r16_bang_vung_r6_va_nhan_planned"),
+    "cli_hoan_vi_so_dong_luot": _db('            a.review_class, a.duong_dan, a.so_dong, a.luot, bac_truoc)', '            a.review_class, a.duong_dan, a.luot, a.so_dong, bac_truoc)', "r17_cli_khong_hoan_vi_so_dong_luot"),
+    "cli_bo_qua_bac_truoc": _db('            a.review_class, a.duong_dan, a.so_dong, a.luot, bac_truoc)', '            a.review_class, a.duong_dan, a.so_dong, a.luot, None)', "r18_cli_bac_truoc_fail_close"),
+    "khoa_noi_long_substring": _db('        return ten', '        return yeu_cau_model if yeu_cau_model in ten else ten', "r19_dinh_danh_phai_khop_bang_nhau"),
+    "canonical_noi_long_startswith": _db('            return can', '            return yeu_cau_model if can.startswith(yeu_cau_model) else can', "r19_dinh_danh_phai_khop_bang_nhau"),
+    "dict_bo_fallback_review_class": _db('        else: review_class = khai', '        else: review_class = review_class.get("effective_review_class")', "r20_dict_chi_review_class_van_chay"),
+    "luot_ha_bien_duoi": _db('    if luot >= 3: cong(1, "lượt=%d >= 3" % luot)', '    if luot >= 2: cong(1, "lượt=%d >= 3" % luot)', "r21_ghim_bien_duoi_tuyet_doi"),
+    "so_tep_ha_bien_duoi": _db('    if len(ds) >= 5: cong(1, "số tệp=%d >= 5" % len(ds))', '    if len(ds) >= 4: cong(1, "số tệp=%d >= 5" % len(ds))', "r21_ghim_bien_duoi_tuyet_doi"),
+    "so_dong_ha_bien_duoi": _db('    if so_dong >= 400: cong(1, "số dòng=%d >= 400" % so_dong)', '    if so_dong >= 399: cong(1, "số dòng=%d >= 400" % so_dong)', "r21_ghim_bien_duoi_tuyet_doi"),
+    "diem_ha_bien_duoi": _db('    return 0 if diem <= 0 else 1 if diem <= 2 else 2 if diem <= 4 else 3', '    return 0 if diem <= 0 else 1 if diem <= 2 else 2 if diem < 4 else 3', "r21_ghim_bien_duoi_tuyet_doi"),
 }
 def _chay(m):
     dat, ly = {}, {}

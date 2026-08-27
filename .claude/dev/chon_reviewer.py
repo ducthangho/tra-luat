@@ -1,75 +1,70 @@
 #!/usr/bin/env python3
 """Chọn reviewer theo độ phức tạp và kiểm bằng chứng model đã chạy."""
 from __future__ import annotations
-import argparse
-import json
-import sys
-if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8")
-if hasattr(sys.stderr, "reconfigure"):
-    sys.stderr.reconfigure(encoding="utf-8")
+import argparse, json, sys
+if hasattr(sys.stdout, "reconfigure"): sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"): sys.stderr.reconfigure(encoding="utf-8")
 MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5")
 NO_LUC_CHO_PHEP = ("low", "medium", "high", "xhigh", "max")
-_BAC = (
-    ("claude-opus-5", "high"),
-    ("claude-opus-5", "xhigh"),
-    ("claude-fable-5", "xhigh"),
-    ("claude-fable-5", "max"),
-)
+_BAC = (("claude-opus-5", "high"), ("claude-opus-5", "xhigh"),
+        ("claude-fable-5", "xhigh"), ("claude-fable-5", "max"))
 class KhongDoDuoc(Exception):
     """Bằng chứng thiếu hoặc không thuộc tập hữu hạn mà kho đo được."""
-
 def _cac_duong_dan(duong_dan):
-    if isinstance(duong_dan, str):
-        ds = duong_dan.split(",")
+    if isinstance(duong_dan, str): ds = duong_dan.split(",")
     else:
         try:
             ds = list(duong_dan)
-        except TypeError as exc:
-            raise KhongDoDuoc("đường dẫn không phải chuỗi/danh sách") from exc
+        except TypeError as exc: raise KhongDoDuoc("đường dẫn không phải chuỗi/danh sách") from exc
+    # `planned:` la nhan cua protocol, khong phai mot thanh phan duong dan.
+    sach = []
+    for x in ds:
+        duong = str(x).strip()
+        if not duong: continue
+        if duong.startswith("planned:"): duong = duong[len("planned:"):].strip()
+        if not duong: raise KhongDoDuoc("đường dẫn sau nhãn planned: bị rỗng")
+        sach.append(duong)
     # Trung lap khong duoc tu nang diem; rong la phep do hong, khong phai diff nho.
-    ket_qua = tuple(dict.fromkeys(str(x).strip() for x in ds if str(x).strip()))
-    if not ket_qua:
-        raise KhongDoDuoc("write set rỗng")
+    ket_qua = tuple(dict.fromkeys(sach))
+    if not ket_qua: raise KhongDoDuoc("write set rỗng")
     return ket_qua
-
 def _vung(path):
     """Phân loại bằng allow-list; mọi thứ ngoài bảng đi vào `khong-biet`."""
-    if path.startswith((".github/workflows/", ".claude/hooks/",
-                        ".claude/dev/packet_loop", "ops/lease_publish")):
-        return "cong"
+    if path == ".claude/settings.json" or path == "RELEASE_MANIFEST.json" or path.startswith(
+            (".github/workflows/", ".github/checks/", ".claude/hooks/",
+                        ".claude/dev/packet_loop", "ops/lease_publish")): return "cong"
     if path == "docs/PROTOCOL_DA_PHIEN.md" or path.startswith(
-            ("docs/adr/", ".claude/skills/")):
-        return "giao-thuc"
-    if path.startswith("scripts/"):
-        return "runtime"
-    if path.startswith((".claude/dev/", "ops/")):
-        return "dev"
-    if path.startswith("references/") or ("/" not in path and path.endswith(".md")):
-        return "tai-lieu"
+            ("docs/adr/", ".claude/skills/", ".claude/agents/")): return "giao-thuc"
+    if path.startswith("scripts/"): return "runtime"
+    if path == ".gitignore" or path.startswith((".claude/dev/", "ops/")): return "dev"
+    if path.startswith(("references/", "docs/")) or (
+            "/" not in path and "\\" not in path and path.endswith(".md")): return "tai-lieu"
     return "khong-biet"
-
 def _bac_theo_diem(diem):
     return 0 if diem <= 0 else 1 if diem <= 2 else 2 if diem <= 4 else 3
-
 def kiem_dinh_danh(model, effort):
     """Từ chối bí danh/mức lạ bằng phép so bằng nhau với allow-list."""
     if model not in MO_HINH_CHO_PHEP:
         raise KhongDoDuoc("model ngoài allow-list: %r" % (model,))
     if effort not in NO_LUC_CHO_PHEP:
         raise KhongDoDuoc("effort ngoài allow-list: %r" % (effort,))
-
+_HANG_REVIEW = {"routine": 0, "systemic": 1, "sensitive": 2}
+def _lop_review(gia_tri):
+    if not isinstance(gia_tri, str): raise KhongDoDuoc("review_class không phải chuỗi")
+    gia_tri = gia_tri.strip()
+    # Da dem: routine=22, systemic=167, sensitive=570, `thuong`=0.
+    if gia_tri not in _HANG_REVIEW: raise KhongDoDuoc("review_class ngoài allow-list: %r" % gia_tri)
+    return gia_tri
 def chon(review_class, duong_dan, so_dong, luot, bac_truoc=None):
     """Trả ``(model, effort, giải thích)`` từ đúng các đối số đã cho."""
     if isinstance(review_class, dict):
-        # 147 lease co lop effective sau escalation; lop nay moi co hieu luc.
-        review_class = review_class.get("effective_review_class", review_class.get("review_class"))
-    if not isinstance(review_class, str):
-        raise KhongDoDuoc("review_class không phải chuỗi")
-    review_class = review_class.strip()
-    # Da dem: routine=22, systemic=167, sensitive=570, `thuong`=0.
-    if review_class not in ("routine", "systemic", "sensitive"):
-        raise KhongDoDuoc("review_class ngoài allow-list: %r" % review_class)
+        khai = _lop_review(review_class.get("review_class"))
+        if "effective_review_class" in review_class:
+            hieu_luc = _lop_review(review_class.get("effective_review_class"))
+            # Protocol chi cho effective nang lop; lease ha lop phai giu muc khai bao.
+            review_class = max((khai, hieu_luc), key=_HANG_REVIEW.get)
+        else: review_class = khai
+    else: review_class = _lop_review(review_class)
     # So am la phep do hong, khong phai diff nho.
     if type(so_dong) is not int or so_dong < 0 or type(luot) is not int or luot < 1:
         raise KhongDoDuoc("so_dong phải là số nguyên >= 0 và luot phải là số nguyên >= 1")
@@ -77,12 +72,10 @@ def chon(review_class, duong_dan, so_dong, luot, bac_truoc=None):
     cac_vung = {_vung(p) for p in ds}
     khoan = []
     diem = 0
-
     def cong(so, ly_do):
         nonlocal diem
         diem += so
         khoan.append("+%d %s" % (so, ly_do))
-
     if review_class == "sensitive": cong(2, "review_class=sensitive")
     if review_class == "systemic": cong(1, "review_class=systemic")
     if "cong" in cac_vung: cong(2, "chạm vùng cong")
@@ -101,7 +94,6 @@ def chon(review_class, duong_dan, so_dong, luot, bac_truoc=None):
         if truoc > chi_so:
             chi_so = truoc
             banh_coc = "; bánh cóc giữ bậc trước=%s/%s" % bac_truoc
-
     model, effort = _BAC[chi_so]
     kiem_dinh_danh(model, effort)
     chi_tiet = ", ".join(khoan) if khoan else "không có khoản điểm cộng"
@@ -154,11 +146,19 @@ def main(argv=None):
     p.add_argument("--duong-dan", required=True)
     p.add_argument("--so-dong", required=True, type=int)
     p.add_argument("--luot", required=True, type=int)
+    p.add_argument("--bac-truoc")
     p.add_argument("--json", action="store_true")
     a = p.parse_args(argv)
     try:
+        bac_truoc = None
+        if a.bac_truoc is not None:
+            phan = tuple(x.strip() for x in a.bac_truoc.split(","))
+            if len(phan) != 2 or not all(phan):
+                raise KhongDoDuoc("--bac-truoc phải có dạng model,effort")
+            kiem_dinh_danh(*phan)
+            bac_truoc = phan
         model, effort, giai_thich = chon(
-            a.review_class, a.duong_dan, a.so_dong, a.luot)
+            a.review_class, a.duong_dan, a.so_dong, a.luot, bac_truoc)
         kiem_dinh_danh(model, effort)
     except KhongDoDuoc as exc:
         print("KHÔNG ĐO ĐƯỢC: %s" % exc, file=sys.stderr)
@@ -169,6 +169,5 @@ def main(argv=None):
     else:
         print("model: %s\neffort: %s\ngiai_thich: %s" % (model, effort, giai_thich))
     return 0
-
 if __name__ == "__main__":
     sys.exit(main())

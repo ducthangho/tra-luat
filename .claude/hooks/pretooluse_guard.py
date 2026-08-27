@@ -1,10 +1,12 @@
 """PreToolUse guard (dev-side, KHONG vao zip deploy): lenh Bash cham nhom MUTATE cua tra-luat
 -> tra permissionDecision=ask de user duyet tay (KHONG deny cung — runbook van co ngay phai chay --apply).
 Exit 0 + khong output = cho qua binh thuong."""
+import hashlib
 import json
 import pathlib
 import re
 import subprocess
+import tempfile
 import shlex
 import sys
 
@@ -115,20 +117,27 @@ _TL_LENH_GHI = frozenset({
     "backfill-title-vn", "bench", "boot", "bootstrap", "bundle-export", "cache-build",
     "cache-snapshot", "chunk-apply", "config-pin-registry", "confirm", "consolidation-cleanup",
     "corpus-audit", "corpus-fix", "dedup-corpus", "dedup-plan", "doc-patch", "download",
-    "edit-skill", "external-ingest", "extract", "fetch-batch", "golden-test", "gws-auth-load",
-    "gws-bootstrap-cowork", "ingest", "ingest-inbox", "ingest-local", "ingest-missing",
-    "ingest-ocr", "ingest-zip", "init-config", "instructions", "journal", "loop", "manifest",
-    "missing-sohieu", "nlm-auth-load", "nlm-auth-pull", "nlm-install", "nlm-migrate",
-    "nlm-reconcile", "nlm-source-remove", "ocr-run", "profile-adopt",
-    "profile-backfill-markers", "profile-create", "profile-delete", "profile-doctor",
-    "profile-file-add", "profile-file-remove", "profile-from-nlm", "profile-index",
-    "profile-ingest", "profile-ingest-chunks", "profile-ingest-ocr", "profile-ingest-zip",
+    "drive-push", "edit-skill", "external-ingest", "extract", "fetch-batch", "golden-test",
+    "gws-auth-load", "gws-auth-stage", "gws-bootstrap-cowork", "ingest", "ingest-inbox",
+    "ingest-local", "ingest-missing", "ingest-ocr", "ingest-zip", "init-config", "instructions",
+    "journal", "loop", "manifest", "missing-sohieu", "nlm-add", "nlm-auth-load",
+    "nlm-auth-pull", "nlm-auth-stage", "nlm-install", "nlm-migrate", "nlm-reconcile",
+    "nlm-source-remove", "ocr-run", "profile-adopt", "profile-backfill-markers",
+    "profile-create", "profile-delete", "profile-doctor", "profile-file-add",
+    "profile-file-remove", "profile-from-nlm", "profile-index", "profile-ingest",
+    "profile-ingest-chunks", "profile-ingest-ocr", "profile-ingest-zip",
     "profile-materialize-sources", "profile-promote", "profile-rebuild-registry",
     "profile-rename", "profile-set-meta", "profile-sync", "profile-use", "push-overflow",
     "quarantine-fix", "rasoat-loop", "rasoat-merge", "recat", "reconcile", "reg-delete",
     "register", "relation-backfill", "release-bundle", "release-check", "release-manifest",
-    "resume", "shared-source-fix", "source-delete", "source-rename", "source-update-corpus",
-    "the-thuc-build", "the-thuc-normalize", "undo", "up", "vbhn-year-fix", "verify-staged",
+    "resume", "secrets-set", "secrets-stage", "shared-source-fix", "source-delete",
+    "source-rename", "source-update-corpus", "state-put", "the-thuc-build",
+    "the-thuc-normalize", "undo", "up", "vbhn-year-fix", "verify-staged",
+})
+# Lenh LONG (`tl <nhom> <lenh>`) — phai so HAI token, khong phai mot.
+_TL_LENH_GHI_LONG = frozenset({
+    "hygiene plan", "hygiene reconcile", "rasoat keywords", "rasoat orchestrate",
+    "rasoat phuluc", "rasoat titles", "rasoat worksheet",
 })
 
 # ── TANG 2: CO, theo DANH SACH CHO PHEP tung chuong trinh ─────────────────────────────────
@@ -308,7 +317,10 @@ _RE_SO_TRAN = re.compile(r"^-[0-9]+$")
 # `-3` duoc NHAN boi head · tail · uniq · git-log, va bi TU CHOI boi grep · diff · sort · cat ·
 # nl · ls · rg. Nen day la mot tap DO DUOC, khong phai mot tap doan ra. Cho `-3` qua o chuong
 # trinh khong nhan no la noi be mat ma khong mua duoc gi.
-_CHO_SO_TRAN = frozenset({"head", "tail", "uniq", "git"})
+# DO tung chuong trinh, khong doan: `-3` -> rc=0 tren head · tail · uniq · git · grep · diff;
+# rc khac 0 tren sort · ls · rg · cat · nl. Ban truoc chi co BON ten nen `grep -3` va
+# `diff -3` bi CHAN OAN (cross-review bat duoc).
+_CHO_SO_TRAN = frozenset({"head", "tail", "uniq", "git", "grep", "diff"})
 
 
 def _kiem_co(ten, doi):
@@ -334,6 +346,16 @@ def _kiem_co(ten, doi):
         if goc in cho_phep:
             i += 2 if (goc in an and not gop and i + 1 < len(doi)) else 1
             continue
+        # CO NGAN AN GIA TRI GAN LIEN: `-n3` = `-n 3`, `-U3` = `-U 3`, `-m1`, `-k1`, `-f1`,
+        # `-w3`. Phai xet TRUOC nhanh no bo co, kẻo `-n3` bi hieu la bo `-n` + `-3` roi tu
+        # choi. Cross-review do duoc MUOI ca chan oan kieu nay, gom ca `git log -n1` va
+        # `git diff -U3` — hai lenh doc thuong nhat cua kho. Chi nhan khi phan CHU dau tien
+        # la mot co CO TRONG bang VA co ay AN GIA TRI; phan con lai phai la SO.
+        if (len(goc) > 2 and not goc.startswith("--")
+                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep
+                and goc[2:].isdigit()):
+            i += 1
+            continue
         # co NGAN GOP: `-la` = `-l -a`. No ra roi kiem tung cai; mot chu xau la ca cum xau.
         if _RE_CO_NGAN_GOP.match(goc):
             xau = [c for c in ("-" + ch for ch in goc[1:]) if c not in cho_phep]
@@ -347,8 +369,18 @@ def _kiem_co(ten, doi):
 
 
 _RE_GAN_BIEN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
-_RE_KICH_BAN_CHO_PHEP = re.compile(
-    r"^(?:\./)?(?:scripts/[\w.-]+\.py|\.claude/dev/[\w.-]+\.py|ops/[\w.-]+\.py)$")
+# P1 `python-mien-tang2-cho-phep-script-ghi-bat-ky`: ban truoc cho MOI tep `.py` duoi
+# `scripts/` `.claude/dev/` `ops/`. Do duoc: `python scripts/build_cache.py --cache-dir X`
+# -> ALLOW, ma script ay `mkdir` + ghi hai tep JSON; `python .claude/dev/packet_loop.py init`
+# -> ALLOW, va no ghi state. Vung theo THU MUC la mot danh sach CAM doi vai: no gia dinh moi
+# tep trong ba thu muc ay khong ghi, va gia dinh do SAI ngay trong chinh cay nay.
+#
+# Dao thanh DANH SACH CHO PHEP TUNG TEP. Chi `scripts/tl.py` — vi no la thu duy nhat co bo
+# canh rieng (TANG 1 `_TL_LENH_GHI` 104 lenh · TANG 1b `_TL_CO_SINH_TEP` · `_TL_CAM`). Moi
+# tep khac bi tu choi cho toi khi co nguoi ĐO no va them vao day CO CHU DICH.
+_KICH_BAN_CHO_PHEP = frozenset({"scripts/tl.py"})
+_RE_KICH_BAN_CHO_PHEP = None      # giu ten cu = None de moi cho doc no deu hong TO, khong
+                                  # am tham roi ve hanh vi cu
 _TOAN_TU_TACH = frozenset({"|", "||", "&&", ";", "&", "|&", "\n"})
 
 # Nhom MUTATE cua chinh skill tra-luat — hai agent tu cam trong van xuoi, nay thanh CONG.
@@ -424,6 +456,42 @@ def _kiem_git(doi):
     return None
 
 
+# Co GLOBAL cua `tl` — khai TRUOC subcommand trong `build_parser` (scripts/tl_core/cli.py).
+# Hai co dau AN GIA TRI o token ke tiep, va do la lo P1 `tl-global-option-lam-lech-ten-lenh`:
+# ban truoc lay "token dau tien khong bat dau bang `-`" lam ten kich ban va token thu hai lam
+# ten lenh, nen `tl --profile vbqppl recat ...` day `vbqppl` vao vi tri ten lenh va `recat`
+# tut xuong => TANG 1 mu. DO DUOC: `recat` tran -> deny, them `--profile vbqppl` -> ALLOW.
+_TL_CO_GLOBAL_AN_GIA_TRI = frozenset({"--config", "--profile"})
+_TL_CO_GLOBAL_CO_DON = frozenset({"--version", "--timings", "--deterministic", "--selftest"})
+
+
+def _tach_lenh_tl(doi, kich):
+    """Tra danh sach token LENH sau `tl.py`, da tieu het co global va gia tri cua chung.
+
+    Fail-close theo huong CHAT: co global la ma KHONG biet an gia tri hay khong thi coi nhu
+    CO an — bo qua mot token thua chi lam ta doc nham ten lenh thanh rong (=> khong chan),
+    nen chieu an toan la nguoc lai: co la => tieu ca token sau no."""
+    try:
+        k = doi.index(kich) + 1
+    except ValueError:
+        return []
+    ra = []
+    while k < len(doi):
+        a = doi[k]
+        if a == "--":
+            k += 1
+            continue
+        if a.startswith("-"):
+            if "=" in a or a in _TL_CO_GLOBAL_CO_DON:
+                k += 1
+            else:
+                k += 2 if not ra else 1     # co global an gia tri; sau khi da co ten lenh
+            continue                         # thi co la cua chinh lenh do, khong tieu bua
+        ra.append(a)
+        k += 1
+    return ra
+
+
 def _kiem_python(doi):
     for a in doi:
         if a in ("-c", "-m", "-"):
@@ -431,14 +499,15 @@ def _kiem_python(doi):
     kich = next((a for a in doi if not a.startswith("-")), None)
     if kich is None:
         return "python khong co kich ban (doc stdin)"
-    if not _RE_KICH_BAN_CHO_PHEP.match(kich):
-        return "kich ban ngoai vung cho phep: %s" % kich
+    if kich.lstrip("./") not in _KICH_BAN_CHO_PHEP:
+        return "kich ban ngoai danh sach cho phep: %s" % kich
     # TANG 1 — lo #336 muc 1. `recat` khong can CO nao de ghi, nen chan theo CO khong bao gio
     # bat duoc no; `read_only` la thuoc tinh cua LENH. Lay doi so VI TRI ke sau kich ban.
     if kich.rsplit("/", 1)[-1] == "tl.py":
-        vt = [a for a in doi if not a.startswith("-")]
-        if len(vt) > 1 and vt[1] in _TL_LENH_GHI:
-            return "lenh tl `%s` co read_only=False trong COMMAND_META" % vt[1]
+        lenh = _tach_lenh_tl(doi, kich)
+        if lenh and (lenh[0] in _TL_LENH_GHI
+                     or " ".join(lenh[:2]) in _TL_LENH_GHI_LONG):
+            return "lenh tl `%s` co read_only=False trong COMMAND_META" % " ".join(lenh[:2])
         for a in doi:
             if a.split("=", 1)[0] in _TL_CO_SINH_TEP:
                 return "co sinh tep cua tl: %s (lenh read_only=True van GHI khi co co nay)" \
@@ -586,11 +655,56 @@ def _kiem_lenh_agent(cmd, sau=0):
 # khong troi. Chay o CI, KHONG chay trong hook — hook phai nhe vi no chan truoc MOI lenh
 # Bash, va chi phi import `tl` chua ai do (#336 muc "Chua do duoc").
 #
-# Doc `COMMAND_META` bang PHAN TICH VAN BAN chu khong import: import keo theo 1646 ham
-# tl_core re-home `__globals__`, va do la chi phi chua do. Nguon su that van la mot.
-_RE_META = re.compile(r'^\s*"([a-z0-9][\w-]*)":\s*_m\(\s*"[^"]*"\s*,\s*(True|False)\s*,', re.M)
-_RE_META_WS = re.compile(
-    r'^\s*"([a-z0-9][\w-]*)":\s*_m\(\s*"[^"]*"\s*,\s*(True|False)\s*,\s*"([^"]*)"', re.M)
+# HOI RUNTIME, KHONG PARSE VAN BAN — day la ban va cua P1 `command-meta-regex-bo-sot-writer`.
+# Ban truoc doc `COMMAND_META` bang regex voi ly do "tranh chi phi import". Ly do ay dung cho
+# HOOK (chan truoc moi lenh Bash) nhung SAI cho CONG: cong chay o CI, mot lan, va no phai noi
+# SU THAT. Regex chi nhan entry viet thang `_m(...)`, bo qua `dict(_m(...))` va lenh LONG:
+#     regex    ->  90 writer
+#     runtime  -> 104 writer  (97 top-level + 7 long)
+# va cong VAN IN "bang khop". Do la CONG XANH GIA — te hon khong co cong, vi no bao da kiem.
+# Nam ten lot: gws-auth-stage · nlm-auth-stage · secrets-stage · secrets-set · state-put —
+# deu la duong STAGE/SET CREDENTIAL, va deu ALLOW truoc ban va nay (do bang chinh guard).
+#
+# Phan cong dung: HOOK doc BANG TINH (nhe), CONG hoi RUNTIME (that). Bang tinh troi khoi
+# runtime => cong DO.
+def _writer_tu_runtime(goc):
+    """Tra (top_level, long, write_scope_khac_none) tu `tl tool-inventory --json`.
+    None = KHONG DO DUOC.
+
+    CO BO DEM, va khoa la BAM NOI DUNG cua `command_registry.py` — doi registry mot byte la
+    dem mat hieu luc. Khong dem thi bo test goi cong 2 ca x 30 dot bien = 60 lan x ~40s.
+    Dem theo THOI GIAN hay theo su TON TAI cua tep dem thi che duoc troi; dem theo BAM thi
+    khong."""
+    tl = pathlib.Path(goc, "scripts/tl.py")
+    reg = pathlib.Path(goc, "scripts/tl_core/command_registry.py")
+    if not tl.is_file() or not reg.is_file():
+        return None
+    khoa = hashlib.sha256(reg.read_bytes()).hexdigest()[:32]
+    dem = pathlib.Path(tempfile.gettempdir(), "tl-writer-%s.json" % khoa)
+    if dem.is_file():
+        try:
+            d = json.loads(dem.read_text(encoding="utf-8"))
+            return set(d["top"]), set(d["long"]), set(d["ws"])
+        except Exception:
+            pass
+    try:
+        r = subprocess.run([sys.executable, "-B", str(tl), "tool-inventory", "--json"],
+                           capture_output=True, text=True, timeout=300, cwd=str(goc))
+        d = json.loads(r.stdout)
+        cmds = d["registry"]["commands"]
+    except Exception:
+        return None
+    w = {k for k, v in cmds.items() if v.get("read_only") is False}
+    ws = {k for k, v in cmds.items()
+          if v.get("read_only") is True and v.get("write_scope") not in (None, "none")}
+    top = {x for x in w if " " not in x}
+    lng = {x for x in w if " " in x}
+    try:
+        dem.write_text(json.dumps({"top": sorted(top), "long": sorted(lng),
+                                   "ws": sorted(ws)}), encoding="utf-8")
+    except OSError:
+        pass                                   # dem hong KHONG duoc lam hong phep do
+    return (top, lng, ws)
 
 
 def _co_tu_help(lenh):
@@ -609,34 +723,68 @@ def _kiem_bang(goc):
     """rc=0 hai bang con khop nguon that; rc khac 0 kem ly do tren stderr."""
     loi = []
 
-    # (a) TANG 1 vs COMMAND_META
-    meta = pathlib.Path(goc, "scripts/tl_core/command_registry.py")
-    if not meta.is_file():
-        loi.append("KHONG DO DUOC: thieu %s" % meta)
+    # (a) TANG 1 + 1b vs RUNTIME (khong phai regex — xem chu thich `_writer_tu_runtime`)
+    rt = _writer_tu_runtime(goc)
+    if rt is None:
+        # FAIL-CLOSE. Mot cong tu tat khi thieu phep do la cong khong ton tai dung luc no
+        # can nhat — va lan truoc chinh cho nay in "bang khop" tu mot phep do SAI TAP.
+        loi.append("KHONG DO DUOC: khong hoi duoc `tl tool-inventory --json` — fail-close")
     else:
-        rows = _RE_META.findall(meta.read_text(encoding="utf-8"))
-        if not rows:
-            loi.append("KHONG DO DUOC: khong doc duoc entry nao tu COMMAND_META")
-        else:
-            that = {n for n, ro in rows if ro == "False"}
-            thieu, thua = sorted(that - _TL_LENH_GHI), sorted(_TL_LENH_GHI - that)
+        top, lng, ws = rt
+        for nhan, that, bang in (("_TL_LENH_GHI", top, _TL_LENH_GHI),
+                                 ("_TL_LENH_GHI_LONG", lng, _TL_LENH_GHI_LONG)):
+            thieu, thua = sorted(that - bang), sorted(bang - that)
             if thieu:
-                loi.append("_TL_LENH_GHI THIEU %d lenh read_only=False: %s"
-                           % (len(thieu), " ".join(thieu)))
+                loi.append("%s THIEU %d lenh read_only=False: %s"
+                           % (nhan, len(thieu), " ".join(thieu)))
             if thua:
-                loi.append("_TL_LENH_GHI THUA %d ten khong con read_only=False: %s"
-                           % (len(thua), " ".join(thua)))
-            print("TANG 1: %d lenh read_only=False, bang khop" % len(that))
-            # (a2) lenh read_only=True MA write_scope != "none" — nhom "chi ghi khi co --out".
-            # Ho co `_TL_CO_SINH_TEP` la thu duy nhat chan nhom nay; rong = fail-close.
-            ws = _RE_META_WS.findall(meta.read_text(encoding="utf-8"))
-            co_dieu_kien = sorted(n for n, ro, w in ws if ro == "True" and w != "none")
-            if co_dieu_kien and not _TL_CO_SINH_TEP:
-                loi.append("_TL_CO_SINH_TEP RONG trong khi co %d lenh read_only=True co "
-                           "write_scope != none" % len(co_dieu_kien))
-            print("TANG 1b: %d lenh read_only=True nhung write_scope != none "
-                  "(chi ghi khi co %s)" % (len(co_dieu_kien),
-                                           "/".join(sorted(_TL_CO_SINH_TEP))))
+                loi.append("%s THUA %d ten khong con read_only=False: %s"
+                           % (nhan, len(thua), " ".join(thua)))
+        print("TANG 1 : %d writer top-level + %d writer LONG = %d (nguon: runtime)"
+              % (len(top), len(lng), len(top) + len(lng)))
+        if ws and not _TL_CO_SINH_TEP:
+            loi.append("_TL_CO_SINH_TEP RONG trong khi co %d lenh read_only=True co "
+                       "write_scope != none" % len(ws))
+        # Ban truoc CHI kiem ho co co RONG hay khong. Cross-review do duoc: doi ca ho co
+        # thanh mot ten GIA van khong lam `t15` do — tuc cong khong he doi chieu NOI DUNG.
+        # Nay doi chieu voi HELP THAT cua dung 8 lenh ma TANG 1b tuyen bo canh: moi ten
+        # trong ho phai xuat hien o it nhat mot trong 8 lenh ay, va moi co sinh tep 8 lenh
+        # ay phoi ra phai nam trong ho. Tam kiem = tam tuyen bo, khong rong hon.
+        elif ws:
+            phoi = set()
+            for lenh in sorted(ws):
+                h = _co_tu_help([sys.executable, "-B", str(pathlib.Path(goc, "scripts/tl.py")),
+                                 *lenh.split(), "--help"])
+                if h is None:
+                    loi.append("KHONG DO DUOC `tl %s --help` — fail-close" % lenh)
+                    continue
+                phoi |= {c for c in h if c.startswith("--")
+                         and ("out" in c or "output" in c)}
+            mo_coi = sorted(_TL_CO_SINH_TEP - phoi)
+            lot = sorted(phoi - _TL_CO_SINH_TEP)
+            # CHIEU RUI RO — day la bang CAM, nguoc voi bang CHO PHEP o TANG 2, nen phan
+            # quyet cung nguoc:
+            #  · ten trong ho ma 8 lenh ay KHONG phoi ra  -> PHONG NGUA. Vo hai: no chan mot
+            #    thu khong the xay ra o day (va co the CO that o 40 lenh khac — reviewer do
+            #    duoc 45 lenh phoi `--out`). BAO, khong DO. Nhung phai goi dung ten no la
+            #    PHONG NGUA chu khong phai phep do, kẻo lai thanh `_kiem_diff` lan hai.
+            #  · co sinh tep 8 lenh ay PHOI RA ma KHONG nam trong ho -> LO THAT -> DO.
+            if lot:
+                loi.append("%d co sinh tep cua %d lenh TANG 1b KHONG nam trong ho bi chan: %s"
+                           % (len(lot), len(ws), " ".join(lot)))
+            print("TANG 1b: help THAT cua %d lenh phoi %d spelling; ho co %d ten, trong do "
+                  "%d la PHONG NGUA (khong lenh nao trong %d lenh ay phoi ra): %s"
+                  % (len(ws), len(phoi), len(_TL_CO_SINH_TEP), len(mo_coi), len(ws),
+                     " ".join(mo_coi) or "-"))
+        print("TANG 1b: %d lenh read_only=True nhung write_scope != none (chi ghi khi co %s)"
+              % (len(ws), "/".join(sorted(_TL_CO_SINH_TEP))))
+
+    # (a3) DANH SACH KICH BAN — moi tep o day phai TON TAI, kẻo lai canh mot cua khong co
+    for k in sorted(_KICH_BAN_CHO_PHEP):
+        if not pathlib.Path(goc, k).is_file():
+            loi.append("_KICH_BAN_CHO_PHEP tro toi tep KHONG TON TAI: %s" % k)
+    print("KICH BAN: %d tep trong danh sach cho phep (%s)"
+          % (len(_KICH_BAN_CHO_PHEP), " ".join(sorted(_KICH_BAN_CHO_PHEP))))
 
     # (b) TANG 2 vs `--help` cua chuong trinh DA CAI
     #     git khai co theo TUNG subcommand (`git --help` chi phoi 4 co dai), nen hop cac

@@ -11,6 +11,7 @@ trong finally la bom hen gio"), moi ban sao mot TEN RIENG + chay bang `-B`, de t
 """
 import json
 import pathlib
+import re
 import subprocess
 import sys
 import tempfile
@@ -155,7 +156,7 @@ def t8_ghi_giau_qua_tach_lenh_va_thay_the(g):
 
 def t9_che_do_ghi_cua_chuong_trinh_cho_phep(g):
     xau = [t for t, c in GHI_CHE_DO if hoi(g, c, "tl-auditor")[0] != "deny"]
-    return (not xau, f"che do GHI (11 ca cross-review) -> deny "
+    return (not xau, f"che do GHI (10 ca cross-review) -> deny "
                      f"{len(GHI_CHE_DO) - len(xau)}/{len(GHI_CHE_DO)}"
                      + (f"; LOT: {xau}" if xau else ""))
 
@@ -261,18 +262,11 @@ def t14_co_khong_ton_tai_phan_biet_duoc_voi_bi_chan(g):
                 f"tao-tep={tao_tep} (mong doi deny/True/True/False)")
 
 
-def t16_so_tran_chi_cho_chuong_trinh_do_duoc_la_nhan(g):
-    """Doi chung cho `_CHO_SO_TRAN`. Khong co ca nay thi khong biet luat `-<so>` dang do
-    PHEP DO hay dang mo toang. DO 2026-08-26: head/tail/uniq/git NHAN `-3`; sort/grep/diff/
-    ls/rg/cat/nl TU CHOI no."""
-    phai_qua = ["head -3 CLAUDE.md", "tail -3 CLAUDE.md", "uniq -3 CLAUDE.md",
-                "git log --oneline -3"]
-    phai_chan = ["sort -3 CLAUDE.md", "grep -3 x CLAUDE.md", "ls -3 .claude",
-                 "diff -3 CLAUDE.md CONTEXT.md"]
-    xau = [c for c in phai_qua if hoi(g, c, "tl-auditor")[0] != "allow"]
-    xau += ["(khong chan) " + c for c in phai_chan if hoi(g, c, "tl-auditor")[0] != "deny"]
-    return (not xau, f"so tran: qua {len(phai_qua)}/{len(phai_qua)} · chan "
-                     f"{len(phai_chan)}/{len(phai_chan)}" + (f"; XAU: {xau}" if xau else ""))
+# t16_so_tran_chi_cho_chuong_trinh_do_duoc_la_nhan DA XOA: no KHOA dung LOI KHAI
+# "-<so> chi head/tail/uniq/git nhan", ma cross-review DO DUOC rang GNU grep va GNU
+# diff cung nhan `-3` (rc=0). Ca ay khong sai ky thuat — no dung, va no dung mot
+# dieu SAI. `t26` la ban do LAI, hai chieu (6 nhan / 5 tu choi). Giu ca hai la giu
+# mot ca doi CHAN OAN vinh vien.
 
 
 def t17_co_sinh_tep_cua_tl_bi_chan_nhung_che_do_doc_thi_khong(g):
@@ -330,9 +324,152 @@ def t15_cong_kiem_bang_khop_nguon_that(g):
     """A4 cua #336: bang TINH thi TROI; cong CI la thu duy nhat giu no khong troi."""
     r = subprocess.run([sys.executable, "-B", str(g), "--kiem-bang", str(HERE.parent.parent)],
                        capture_output=True, text=True, timeout=300)
-    ok = r.returncode == 0 and "TANG 1:" in r.stdout and "TANG 2:" in r.stdout
+    ok = r.returncode == 0 and "TANG 1 :" in r.stdout and "TANG 2:" in r.stdout
     dong = [x for x in r.stdout.splitlines() if x.startswith("TANG")]
     return (ok, f"--kiem-bang rc={r.returncode} · " + " · ".join(dong[:3]))
+
+
+# ── Luot 2: BA P1 cua cross-review codex tren PR #341 ────────────────────────────────────
+# Ca ba deu DA TAI HIEN bang chinh guard truoc khi va (reviewer co y KHONG chay duong ghi
+# — do la gioi han phan cong toi dat ra sau khi luot 1 chet vi bo loc noi dung).
+
+# P1-a: `_RE_META` chi nhan entry viet thang `_m(...)`, bo qua `dict(_m(...))` va lenh LONG.
+# Regex -> 90 writer; runtime -> 104. Nam ten duoi day deu ALLOW truoc ban va, va deu la
+# duong STAGE/SET CREDENTIAL. Cong VAN in "bang khop" => CONG XANH GIA.
+GHI_336B_CRED = [
+    "python scripts/tl.py gws-auth-stage",
+    "python scripts/tl.py nlm-auth-stage",
+    "python scripts/tl.py secrets-stage khoa gia-tri",
+    "python scripts/tl.py secrets-set khoa gia-tri",
+    "python scripts/tl.py state-put khoa gia-tri",
+]
+# 7 lenh LONG (`tl <nhom> <lenh>`) — phai so HAI token, khong phai mot.
+GHI_336B_LONG = [
+    "python scripts/tl.py hygiene plan", "python scripts/tl.py hygiene reconcile",
+    "python scripts/tl.py rasoat keywords", "python scripts/tl.py rasoat orchestrate",
+    "python scripts/tl.py rasoat phuluc", "python scripts/tl.py rasoat titles",
+    "python scripts/tl.py rasoat worksheet",
+]
+# P1-b: co GLOBAL an gia tri day ten lenh lui mot o => TANG 1 mu.
+GHI_336B_GLOBAL = [
+    "python scripts/tl.py --profile vbqppl recat x --cat 01",
+    "python scripts/tl.py --config c.json recat x --cat 01",
+    "python scripts/tl.py --profile=vbqppl recat x --cat 01",
+    "python scripts/tl.py --deterministic recat x --cat 01",
+    "python3 scripts/tl.py --profile vbqppl secrets-set k v",
+]
+# P1-c: vung kich ban theo THU MUC la danh sach CAM doi vai — no gia dinh moi tep `.py`
+# duoi scripts/ .claude/dev/ ops/ khong ghi, va gia dinh ay SAI ngay trong cay nay.
+GHI_336B_KICHBAN = [
+    "python scripts/build_cache.py --input a --cache-dir /tmp/x --number-symbol s",
+    "python .claude/dev/packet_loop.py init --packet 9 --mission 9",
+    "python ops/lease_publish.py mark x --comment-id 1",
+]
+# Doi chung DUONG: lenh DOC cua CUNG nhung be mat tren phai van ALLOW.
+DOC_336B = [
+    "python scripts/tl.py cat-audit --json",
+    "python scripts/tl.py --profile vbqppl cat-audit --json",
+    "python scripts/tl.py --deterministic sweep --json",
+    "grep -3 def /etc/hostname",
+    "diff -3 /etc/hostname /etc/hostname",
+]
+
+
+def t28_writer_credential_bi_chan(g):
+    xau = [c for c in GHI_336B_CRED if hoi(g, c, "tl-auditor")[0] != "deny"]
+    return (not xau, f"stage/set credential -> deny {len(GHI_336B_CRED)-len(xau)}"
+                     f"/{len(GHI_336B_CRED)}" + (f"; LOT: {xau}" if xau else ""))
+
+
+def t29_lenh_LONG_bi_chan(g):
+    xau = [c for c in GHI_336B_LONG if hoi(g, c, "tl-auditor")[0] != "deny"]
+    return (not xau, f"lenh LONG -> deny {len(GHI_336B_LONG)-len(xau)}/{len(GHI_336B_LONG)}"
+                     + (f"; LOT: {xau}" if xau else ""))
+
+
+def t30_co_global_khong_lam_lech_ten_lenh(g):
+    xau = [c for c in GHI_336B_GLOBAL if hoi(g, c, "tl-auditor")[0] != "deny"]
+    return (not xau, f"co global + writer -> deny {len(GHI_336B_GLOBAL)-len(xau)}"
+                     f"/{len(GHI_336B_GLOBAL)}" + (f"; LOT: {xau}" if xau else ""))
+
+
+def t31_kich_ban_ngoai_danh_sach_bi_chan(g):
+    xau = [c for c in GHI_336B_KICHBAN if hoi(g, c, "tl-auditor")[0] != "deny"]
+    return (not xau, f"kich ban ngoai danh sach -> deny {len(GHI_336B_KICHBAN)-len(xau)}"
+                     f"/{len(GHI_336B_KICHBAN)}" + (f"; LOT: {xau}" if xau else ""))
+
+
+def t32_khong_chan_oan_be_mat_vua_siet(g):
+    xau = [c for c in DOC_336B if hoi(g, c, "tl-auditor")[0] != "allow"]
+    return (not xau, f"doc hop le -> allow {len(DOC_336B)-len(xau)}/{len(DOC_336B)}"
+                     + (f"; CHAN OAN: {xau}" if xau else ""))
+
+
+def t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban(g):
+    """P1-a o goc: cong cu doc `COMMAND_META` bang regex nen do SAI TAP roi in "bang khop".
+    Ca nay doi cong noi ro no dem duoc BAO NHIEU va tu dau — 104, tu runtime."""
+    r = subprocess.run([sys.executable, "-B", str(g or GUARD), "--kiem-bang",
+                        str(HERE.parent.parent)], capture_output=True, text=True, timeout=400)
+    dong = next((x for x in r.stdout.splitlines() if x.startswith("TANG 1 :")), "")
+    ok = (r.returncode == 0 and "nguon: runtime" in dong and "= 104" in dong)
+    return (ok, f"rc={r.returncode} · {dong or '(khong co dong TANG 1)'}")
+
+
+def t34_so_tran_chi_cho_chuong_trinh_DO_DUOC_la_nhan(g):
+    """DO tung chuong trinh, khong doan. Ban truoc co BON ten nen `grep -3`/`diff -3` bi
+    CHAN OAN — cross-review bat duoc. Ca nay do CA HAI chieu."""
+    nhan = ["head -3 /etc/hostname", "tail -3 /etc/hostname", "uniq -3 /etc/hostname",
+            "git log -3 --oneline", "grep -3 x /etc/hostname",
+            "diff -3 /etc/hostname /etc/hostname"]
+    tu_choi = ["sort -3 /etc/hostname", "ls -3", "rg -3 x", "cat -3 /etc/hostname",
+               "nl -3 /etc/hostname"]
+    xau = [c for c in nhan if hoi(g, c, "tl-auditor")[0] != "allow"]
+    xau += [c for c in tu_choi if hoi(g, c, "tl-auditor")[0] != "deny"]
+    return (not xau, f"-<so>: 6 nhan / 5 tu choi -> dung {11-len(xau)}/11"
+                     + (f"; SAI: {xau}" if xau else ""))
+
+
+# P2 `so-tran-va-co-ngan-gan-gia-tri-chan-oan`: `_RE_CO_NGAN_GOP` hieu MOI token chu-so
+# ngan la BO co, nen `-n3` bi doc thanh bo `-n`+`-3` roi tu choi. Cross-review do duoc
+# MUOI ca chan oan, gom `git log -n1` va `git diff -U3` — hai lenh doc thuong nhat cua kho.
+# Moi dong duoi day DA DO: chuong trinh that tra rc=0.
+DOC_CO_NGAN_GAN = [
+    "head -n3 CLAUDE.md", "tail -n3 CLAUDE.md", "uniq -w3 CLAUDE.md",
+    "git log -n1 --oneline", "grep -m1 x CLAUDE.md", "rg -m1 x CLAUDE.md",
+    "sort -k1 CLAUDE.md", "cut -f1 CLAUDE.md", "nl -w3 CLAUDE.md",
+    "git diff -U3 HEAD~1 HEAD",
+]
+
+
+def t35_co_ngan_an_gia_tri_gan_lien_khong_bi_chan_oan(h):
+    xau = [c for c in DOC_CO_NGAN_GAN if hoi(h, c, "tl-auditor")[0] != "allow"]
+    # Doi chung NGUOC: bo co that va co la van phai deny, keo ban va thanh noi bua.
+    cam = ["sort -o F A", "ruff check --output-file=F .", "cat -xyz F", "uniq A B"]
+    xau += [c for c in cam if hoi(h, c, "tl-auditor")[0] != "deny"]
+    return (not xau, f"co ngan gan gia tri: 10 allow / 4 deny -> dung {14-len(xau)}/14"
+                     + (f"; SAI: {xau}" if xau else ""))
+
+
+def t36_moi_ca_DINH_NGHIA_deu_phai_DANG_KY(h):
+    """Ca CO MAT khac ca CO DO. Da tra gia trong chinh packet nay: bay ca cua luot 2 duoc
+    viet xong nhung moc `replace` tro sai dong nen KHONG cai nao vao `CA`. Bo test bao
+    "DAT" trong khi khong do gi phan moi, va no chi lo ra vi mot dot bien SONG.
+
+    Phep kiem nay doc CHINH tep nguon, khong doc `CA` da nap — mot ca bi bo quen thi no
+    van nam trong van ban."""
+    van = pathlib.Path(__file__).read_text(encoding="utf-8")
+    dinh = set(re.findall(r"^def (t\w+)\(", van, re.M))
+    # Neo theo DAU DONG: chuoi "CA = [" cung xuat hien trong chinh docstring nay, va ban
+    # dau `index` khop vao do => dang_ky = 0 => ca bao DO voi ca 28 ten. Mot phep do bat
+    # duoc loi that cua nguoi khac van co the sai o chinh no.
+    i = re.search(r"^CA = \[", van, re.M).start()
+    dang_ky = set(re.findall(r"\b(t\w+)\b", van[i:van.index("]", i)]))
+    bo_quen = sorted(dinh - dang_ky)
+    ma = sorted(x for x in dang_ky - dinh if x.startswith("t") and "_" in x)
+    return (not bo_quen and not ma,
+            f"dinh nghia {len(dinh)} · dang ky {len(dinh) - len(bo_quen)}"
+            + (f"; BO QUEN: {bo_quen}" if bo_quen else "")
+            + (f"; DANG KY MA KHONG CO: {ma}" if ma else ""))
 
 
 CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
@@ -345,11 +482,19 @@ CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
       t13_khong_chan_oan_che_do_doc,
       t14_co_khong_ton_tai_phan_biet_duoc_voi_bi_chan,
       t15_cong_kiem_bang_khop_nguon_that,
-      t16_so_tran_chi_cho_chuong_trinh_do_duoc_la_nhan,
       t17_co_sinh_tep_cua_tl_bi_chan_nhung_che_do_doc_thi_khong,
       t18_co_ngan_GOP_mot_chu_xau_la_ca_cum_xau,
       t19_kiem_bang_FAIL_CLOSE_khi_thieu_nguon,
-      t20_TL_CAM_bat_cai_ma_hai_tang_kia_KHONG_bat]
+      t20_TL_CAM_bat_cai_ma_hai_tang_kia_KHONG_bat,
+      # --- luot 2: BA P1 + HAI P2 cua cross-review codex tren PR #341 ---
+      t28_writer_credential_bi_chan, t29_lenh_LONG_bi_chan,
+      t30_co_global_khong_lam_lech_ten_lenh,
+      t31_kich_ban_ngoai_danh_sach_bi_chan,
+      t32_khong_chan_oan_be_mat_vua_siet,
+      t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban,
+      t34_so_tran_chi_cho_chuong_trinh_DO_DUOC_la_nhan,
+      t35_co_ngan_an_gia_tri_gan_lien_khong_bi_chan_oan,
+      t36_moi_ca_DINH_NGHIA_deu_phai_DANG_KY]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
@@ -382,8 +527,10 @@ DOT_BIEN = [
      'if [a for a in con if not a.startswith("-")] and not any(', "if False and any("),
     # --- #336: moi chot moi mot dot bien RIENG; chot khong co dot bien la chot se ho lai ---
     ("m15_bo_tang2_kiem_co", "    ly = _kiem_co(ten, doi)", "    ly = None"),
-    ("m16_bo_tang1_lenh_tl_ghi", 'if len(vt) > 1 and vt[1] in _TL_LENH_GHI:',
-     "if False:"),
+    # Moc cu (`if len(vt) > 1 and vt[1] in _TL_LENH_GHI:`) da bien mat khi va P1-b — luot
+    # chay bao "MOC KHONG CON TRONG MA -> dot bien chua tung chay", dung nhu no phai bao.
+    ("m16_bo_tang1_lenh_tl_ghi",
+     'if lenh and (lenh[0] in _TL_LENH_GHI', 'if False and (lenh[0] in _TL_LENH_GHI'),
     # m17 BAN DAU la dot bien RONG: `frozenset({} or {...})` -> `{} or {...}` cho ra chinh
     # tap cu, nen no khong doi gi va "SONG" ma khong noi len dieu gi. Nay lam RONG that su
     # bang cach gan ten khac cho phan than.
@@ -403,8 +550,31 @@ DOT_BIEN = [
     ("m19_no_cum_cho_qua_tat_ca",
      '            xau = [c for c in ("-" + ch for ch in goc[1:]) if c not in cho_phep]',
      "            xau = []"),
-    ("m20_tang1_fail_open_khi_thieu_meta", 'loi.append("KHONG DO DUOC: thieu %s" % meta)',
+    # m20_tang1_fail_open_khi_thieu_meta DA GO: no dot bien duong `loi.append("KHONG DO
+    # DUOC: thieu <meta>")` cua ban PARSE VAN BAN, ma duong ay khong con — cong nay hoi
+    # RUNTIME. `m26_cong_fail_OPEN_khi_khong_hoi_duoc_runtime` la ban KE NHIEM, dot bien
+    # dung tinh chat ay tren duong moi. Giu m20 chi de no bao "MOC KHONG CON" moi luot.
+    # --- luot 2: dot bien cho BA chot vua them ---
+    ("m23_rong_bang_lenh_LONG", "_TL_LENH_GHI_LONG = frozenset({",
+     "_TL_LENH_GHI_LONG = frozenset()\n_TL_LENH_GHI_LONG_CU = frozenset({"),
+    ("m24_bo_tieu_gia_tri_co_global", "                k += 2 if not ra else 1",
+     "                k += 1"),
+    ("m25_noi_kich_ban_ve_theo_THU_MUC",
+     '_KICH_BAN_CHO_PHEP = frozenset({"scripts/tl.py"})',
+     '_KICH_BAN_CHO_PHEP = frozenset({"scripts/tl.py", "scripts/build_cache.py",\n'
+     '                                ".claude/dev/packet_loop.py"})'),
+    ("m26_cong_fail_OPEN_khi_khong_hoi_duoc_runtime",
+     'loi.append("KHONG DO DUOC: khong hoi duoc `tl tool-inventory --json` — fail-close")',
      "pass"),
+    ("m27_bo_grep_diff_khoi_so_tran",
+     '_CHO_SO_TRAN = frozenset({"head", "tail", "uniq", "git", "grep", "diff"})',
+     '_CHO_SO_TRAN = frozenset({"head", "tail", "uniq", "git"})'),
+    ("m28_bo_nhanh_co_ngan_gan_gia_tri",
+     '        if (len(goc) > 2 and not goc.startswith("--")',
+     '        if (False and len(goc) > 2 and not goc.startswith("--")'),
+    ("m29_bo_mot_spelling_THAT_khoi_ho_sinh_tep",
+     '_TL_CO_SINH_TEP = frozenset({"--out", "--output", "--out-dir", "--output-file"})',
+     '_TL_CO_SINH_TEP = frozenset({"--output", "--out-dir", "--output-file"})'),
     ("m10_ghep_bo_heredoc_va_tach_dong",
      ('if "<<" in cmd:', 'if "\\n" in cmd:'), ("if False:", "if False:")),
 ]

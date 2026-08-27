@@ -157,3 +157,4 @@ canh_bao_cho_nguoi_thi_hanh: >-
   bệnh packet này chữa. Đừng chữa nó bằng cách mở toang phạm vi quét.
   (4) `git ls-remote` sẽ HỎNG (sandbox không mạng) — `KHÔNG_ĐO_ĐƯỢC`, khai thẳng.
   (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+posted_comment_id: 5435023566   # workflow ghi, ĐỪNG sửa tay

@@ -72,3 +72,5 @@ chong_lan_write_set_da_khai: >-
 chong_lan_write_set_phan_xu: >-
   KHÔNG chồng lấn. Không cần `thay_the_cho`.
 posted_comment_id: 5434047373   # workflow ghi, ĐỪNG sửa tay
+
+da_bi_thay_the: ci-cong-idiom-ba-ten-exec-1r2-claude-20260827

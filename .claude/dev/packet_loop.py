@@ -1184,7 +1184,11 @@ def cmd_next_comment(a, state_dir: Path) -> int:
 #     có tự khai `rc=7` trong thông điệp merge, 5 lần không;
 #   · và cổng này KHÔNG phân biệt được thẩm quyền. Đo 2026-08-26:
 #       get_me                     -> {"login":"ducthangho","id":12748935}
-#       master.protected           -> true  (nhánh DUY NHẤT trong 222)
+#       master.protected           -> true  (nhánh DUY NHẤT được bảo vệ)
+#     CỐ Ý KHÔNG ghi mẫu số. Bản đầu ghi "trong 222" và con số ấy trôi trong vòng
+#     một giờ (đo cùng ngày: 223 rồi 225) vì nhánh `ops/**` sinh và bị xoá liên
+#     tục. Một mẫu số hết hạn nhanh hơn câu chứa nó thì nó chỉ làm câu ấy sai.
+#     Thứ có ý nghĩa là "đúng một nhánh được bảo vệ", không phải tỷ lệ.
 #     Phiên chạy bằng credential CỦA CHỦ KHO. Nên "cổng của người có quyền" mô tả một phép
 #     kiểm không tồn tại: nó chặn một NHÃN VAI, không chặn một THẨM QUYỀN.
 #
@@ -1291,8 +1295,9 @@ def cmd_doi_chieu_uy_quyen(a, state_dir: Path) -> int:
     # muon dem toan DAG thi phai la mot che do co TEN KHAC, khong duoc am tham doi nghia.
     if not a.since:
         _die(RC_ARG,
-             "--since la BAT BUOC: khong co bien, lenh dem TOAN BO lich su (do tren kho "
-             "nay: 321 merge) va con so ay khong tai lap duoc giua hai luot.")
+             "--since la BAT BUOC: khong co bien, lenh dem TOAN BO lich su theo "
+             "duong cha thu nhat (do tren kho nay 27-08-2026: 193 merge) va con so "
+             "ay khong tai lap duoc giua hai luot.")
     r = subprocess.run(["git", "-C", a.root, "rev-parse", "--verify", a.since + "^{commit}"],
                        capture_output=True, text=True)
     if r.returncode != 0:

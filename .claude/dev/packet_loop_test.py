@@ -793,8 +793,14 @@ def case_doi_chieu_dem_duoc_merge_co_khai_va_khong(c: Ctx):
 
 
 def case_doi_chieu_neo_dung_HEAD_da_merge_khong_phai_commit_merge(c: Ctx):
-    """Khai vào SHA của chính commit merge cũng được tính — nhưng khai vào một SHA
-    KHÔNG liên quan thì KHÔNG. Không có chốt này thì đếm gì cũng ra 'có khai'."""
+    """CHỈ cha thứ hai (HEAD đã merge) mới được tính. Khai vào SHA của chính commit
+    merge KHÔNG được tính, và khai vào một SHA vô can cũng KHÔNG. Không có chốt này thì
+    đếm gì cũng ra 'có khai'.
+
+    Docstring này từng nói NGƯỢC hành vi (`"SHA của chính commit merge cũng được tính"`)
+    — đúng cái lỗi mà chính finding `doi-chieu-nhan-sai-schema-va-sai-neo` tố cáo ở mã,
+    chỉ là ở lời khai. Lúc KHAI thì commit merge CHƯA TỒN TẠI, nên neo vào nó là neo vào
+    thứ chưa có."""
     sd = c.sd()
     goc = c.tmp / f"kho-338b-{time.time_ns()}"
     goc.mkdir(parents=True)

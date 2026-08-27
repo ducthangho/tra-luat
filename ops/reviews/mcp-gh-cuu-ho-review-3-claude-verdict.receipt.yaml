@@ -1,0 +1,45 @@
+# BIÊN NHẬN — cross-review lượt 3 của PR #339 (packet #319).
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '319'
+packet_slug: MCP-GH-CUU-HO
+lease_id: null
+provider: claude
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 97617d3a5372fcce39b0e53064958c24d15775ce
+luot: 3
+cross_provider: true
+assurance: cross_approved
+verdict_path: ops/reviews/mcp-gh-cuu-ho-review-3-claude-verdict.md
+verdict_sha256: 7be660afd464c8264f5b56e090696a86ca2cd1b4a4eb8075f893b2a45aa89134
+verdict_bytes: 22072
+verdict_nguon: >-
+  `claude -p --allowedTools ... Bash` trong `launcher.py run`, CLONE ĐỘC LẬP detached tại exact
+  SHA, prompt neo băm `bc359f31…`. 870.4s, `ma_thoat=0`.
+NEN_DO_KHAC_HAN_EXECUTOR: >-
+  Vỏ reviewer `bind` loopback ĐƯỢC (`BIND_OK ('127.0.0.1', 35105)`), trong khi sandbox codex của
+  executor bị `PermissionError`. Nên bốn ca `A5`/`A6-302`/`A6-303`/`A7` lượt này CHẠY THẬT, chứ
+  không phải `KHÔNG_ĐO_ĐƯỢC` như lượt executor.
+ket_qua_dem_duoc:
+  P1: 1
+  P2: 2
+  dem_bang_lenh: >-
+    Đếm CHỈ trong mục "## 6. Finding mới" bằng awk giới hạn vùng. GHI RÕ VÌ PHÉP ĐẾM ĐẦU SAI:
+    grep toàn tệp trả P1=4 vì mục ĐỐI CHIẾU cũng mang thẻ hạng cho finding vòng TRƯỚC. Lỗi này
+    tôi đã mắc ở vòng 6 và vòng 9 của #318; lần thứ ba.
+  slug_hien_hanh:
+  - {slug: cong-tu-mo-cua-bang-hai-dong-trong-duong-quyet-dinh, hang: P1}
+  - {slug: b3-chi-canh-mot-choke-point, hang: P2}
+  - {slug: c4-va-d10-dung-chung-vi-ngu-cong, hang: P2}
+doi_chieu_bon_P1_vong_2:
+  da_va_that: 2
+  va_ho: 1
+  chua_va: 1
+  chi_tiet: >-
+    ĐÃ VÁ THẬT: `chot-dich-credential-khong-co-phan-chung` · `b3-chot-cach-ly-mang-neo-theo-TEN`.
+    VÁ HỜ: `cong-that-nam-trong-main-khong-ai-canh` — P1 duy nhất đang chặn là NỬA CÒN LẠI của nó.
+    CHƯA VÁ: `khong-cong-nao-chay-bo-test`, và reviewer xác nhận lời khai của phiên điều phối ĐÚNG.
+REVIEWER_TU_KHAI_MOT_LAN_TU_SAP_RIG: >-
+  Verdict có mục "Cảnh báo về rig — tôi đã tự sập một lần, ghi ra để không ai đọc nhầm". Đáng ghi:
+  reviewer tự khai hỏng phép đo của mình thay vì giấu.

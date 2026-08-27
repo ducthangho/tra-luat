@@ -1,0 +1,40 @@
+# BIÊN NHẬN — cross-review lượt 11 của PR #322 (packet #318).
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '318'
+packet_slug: DOCTRINE-RANH-GIOI-REVIEWER
+lease_id: null
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 12e0315a439b1e73bde57b09152bc077e04d7ee5
+reviewed_tree: f13e9dc33ef4873b639000f0c4573a928b8c4cd7
+luot: 11
+cross_provider: true
+assurance: cross_approved
+verdict_path: ops/reviews/doctrine-ranh-gioi-reviewer-review-11-codex-verdict.md
+verdict_sha256: 6c39cfc0f1c175154eef3cc2240743f37e124ea510a6fb6ea406d9575d64dcdd
+verdict_bytes: 10794
+verdict_nguon: >-
+  `codex exec -s workspace-write -c model_reasoning_effort=xhigh` trong `launcher.py run`, CLONE
+  ĐỘC LẬP detached tại exact SHA, prompt neo băm. 809.5s, `ma_thoat=0`.
+ket_qua_dem_duoc:
+  P1: 1
+  P2: 0
+  slug_hien_hanh: [{slug: menh-de-sandbox-mo-coi-khong-nhan, hang: P1}]
+doi_chieu_hai_finding_vong_9:
+  da_va_that: 2
+  chi_tiet: 'CẢ HAI ĐÃ VÁ THẬT — `require-clean-vuot-pham-vi-quyen-ghi` (mở liên tục từ vòng 8) và `prompt-shell-bien-chua-khoi-tao`.'
+P1_MOI_LA_CUNG_MOT_HINH_DANG_LAN_THU_BA:
+  no_la_gi: >-
+    Câu doctrine mà phiên CỐ Ý GIỮ LẠI khi cắt mục mạng — "mạng đóng của sandbox là một MẶC ĐỊNH
+    CẤU HÌNH, không phải bất biến" — tự nó là một mệnh đề về một control, nhưng KHÔNG mang nhãn
+    hạng nào. Trong khi tệp cam kết "mọi mệnh đề sau đây mang đúng một nhãn" và đếm BẢY.
+  vi_sao_dang_ghi: >-
+    Đây là lần THỨ BA cùng một hình dạng trong packet: mỗi lượt vá đóng mệnh đề ngoài-danh-sách cũ
+    rồi để lại một mệnh đề ngoài-danh-sách mới. Vòng 8 là hàng `workspace-write`; vòng 9-10 là con
+    trỏ `--require-clean`; nay là chính câu doctrine được giữ làm KẾT LUẬN của lát cắt.
+  reviewer_bac_truoc_kha_nang_do_la_loi_grep: >-
+    Verdict viết thẳng: "Đây không phải lỗi grep: liệt kê theo từng đơn vị cho ra bảy mệnh đề có
+    nhãn cộng một mệnh đề không nhãn."
+  chua_de_xuat_huong_va: 'bằng chứng của câu ấy đã sang packet #334, nên nó không thể mang `cơ chế đã xác minh` ở đây'

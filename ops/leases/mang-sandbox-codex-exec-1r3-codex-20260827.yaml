@@ -1,0 +1,194 @@
+# Lease EXECUTOR — `MANG-SANDBOX-CODEX` (#334), lượt 1, BẢN SỬA ĐỔI 3.
+#
+# MỞ VÌ §3.2: "finding cho thấy CHÍNH SPEC thiếu thì verdict là `blocked` và đi qua revision
+# mới". Đây đúng trường hợp ấy — không phải bản vá thiếu, mà là WRITE SET khai thiếu.
+#
+# Packet đã `approved` vòng 4 (P1=0 P2=0) mà vẫn mang một lỗi làm ĐỎ gate. Lý do không ai bắt
+# được: `gate (ubuntu-latest)` CHƯA HỀ CHẠY trên PR #352. `ci.yml` chỉ có hai cò —
+# `push: branches: [master]` (nhánh `claude/**` không khớp) và `pull_request` — mà #352 do
+# `ops-open-pr.yml` mở bằng `GH_TOKEN: ${{ github.token }}`, và GitHub KHÔNG sinh lượt chạy cho
+# sự kiện do GITHUB_TOKEN tạo ra. Bốn vòng review chấm một packet mà cổng chưa từng đo.
+# Cùng họ bài học của kho: **cổng VẮNG MẶT trông giống hệt cổng XANH.**
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 334
+packet_id: MANG-SANDBOX-CODEX
+phase_key: MANG-SANDBOX-CODEX
+revision: 3
+generation: 1
+lease_id: mang-sandbox-codex-exec-1r3-codex-20260827
+
+role: executor
+provider: codex
+executor: codex
+executor_effort: xhigh
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` do CỔNG tính (mặc định fail-close của `_BANG_LOP`), KHÔNG tự hạ. Giữ nguyên như r2.
+
+executor_ghi_chu: >-
+  GIỮ `codex`, không đổi. Write set chạm `.claude/**`, và nền từ chối vô điều kiện khi executor
+  `claude` gọi `Edit`/`Write` vào đó ("which is a sensitive file"). Đã đo trong phiên: `codex`
+  cài xong (`codex-cli 0.150.1`), `launcher.py chuan-bi` bung `$CODEX_AUTH_JSON` ra
+  `/root/.codex/auth.json`, `doctor --kiem-song` cho rc=0 "Logged in using ChatGPT",
+  access_token còn ~148h. ĐỪNG dạy executor `claude` đi vòng qua chốt của nền bằng `Bash`.
+
+spec_path: null
+spec_ghi_chu: >-
+  Không có tệp đặc tả riêng; đặc tả việc nằm trong r1 và trong Issue #334. Bản sửa đổi này CHỈ
+  mở rộng write set và thêm đúng một mục việc — mọi acceptance của r1/r2 giữ nguyên.
+
+write_set:
+  - .claude/dev/probe_mang.py
+  - .claude/dev/probe_mang_test.py
+  - docs/MANG_SANDBOX_CODEX.md
+  - scripts/tl_selftest.py
+write_set_note: >-
+  NỚI THÊM ĐÚNG MỘT đường dẫn so với r2: `scripts/tl_selftest.py`. Câu này được viết LẠI cùng
+  lúc với trường `write_set` ở trên — packet tiền nhiệm hỏng BỐN LẦN đúng một hình dạng: sửa
+  TRƯỜNG được nới, quên VĂN BẢN mô tả nó.
+  VÌ SAO PHẢI NỚI: `docs/MANG_SANDBOX_CODEX.md` mà packet thêm đẩy số Markdown dưới `docs/` từ
+  70 lên 71, làm ĐỎ ca ratchet `r291_docs_ngoai_goi` nằm trong `scripts/tl_selftest.py`. Ca ấy
+  đòi một khối `KÊ KHAI SLOT` mỗi lần số đổi, và lịch sử của chính nó cho thấy MỌI packet thêm
+  tệp docs đều phải khai — kể cả lượt thêm `docs/GOI_AGENT_DA_NEN.md` (r246: 52 → 55).
+  Tức write set của r1/r2 khai THIẾU ngay từ đầu; đây là khuyết tật SPEC, không phải vá.
+  VÌ SAO KHÔNG SỬA LÉN Ở r2: kho KHÔNG có `.github/coordination/change-impact.v1.json` nên
+  không `write_closure` nào cấp tệp đó cho packet, và §5 nói thẳng `scripts/tl_selftest.py` là
+  "legacy harness dùng chung và mặc định không thuộc packet thường". Sửa nó dưới lease r2 là
+  nới write set trong im lặng.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-27 ~13:50Z bằng `ops/lease_publish.py ai-dang-giu` trên nhánh mặc định.
+  Phép so HAI NGUỒN trước khi quét, so bằng TẬP TÊN (không bằng `wc -l`):
+  `ls-remote --heads` 235 · `for-each-ref` 236; `comm -23` RỖNG; `comm -13` chỉ có `HEAD`
+  (hiện vật cục bộ của `refs/remotes/origin`, không phải nhánh) ⇒ KHÔNG mù ref nào.
+  Lượt đo ĐẦU bị công cụ CHẶN rc=12 `NHÁNH_CỤC_BỘ_TỤT_SAU: master (0/3)` — đúng khuyết tật §7
+  mà nó sinh ra để bắt; đã `git branch -f` đồng bộ rồi mới đo lại. Kết quả:
+    scripts/tl_selftest.py          ->  NGƯỜI_GIỮ 0: không có   (LẤY ĐƯỢC)
+    .claude/dev/probe_mang.py       ->  NGƯỜI_GIỮ 1: mang-sandbox-codex-exec-1r2-codex-20260827
+    .claude/dev/probe_mang_test.py  ->  NGƯỜI_GIỮ 1: mang-sandbox-codex-exec-1r2-codex-20260827
+    docs/MANG_SANDBOX_CODEX.md      ->  NGƯỜI_GIỮ 1: mang-sandbox-codex-exec-1r2-codex-20260827
+  Ba đường dẫn cuối do CHÍNH lease bị thay giữ ⇒ không va chạm với packet khác.
+
+branch: claude/mang-sandbox-codex-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+base_ghi_chu: >-
+  `base_sha` GIỮ NGUYÊN — §3.2 không liệt `base_sha` là thứ tạo revision, và §5 chỉ đòi đổi khi
+  DRIFT chạm write set. ĐÃ ĐO trên base MỚI của master (`b7024287`): blob
+  `scripts/tl_selftest.py` GIỐNG HỆT nhau ở cả ba chỗ — master `b7024287`, base `ac82ddc5`, và
+  head nhánh `cd3ceb36` (đều `a14dc96c`). Nên đường dẫn vừa nới KHÔNG có drift, và sửa trên
+  nhánh sẽ merge sạch.
+start_from_sha: cd3ceb36160c948c1f9b3e73a61491b7105fe660
+start_from_ghi_chu: >-
+  Head hiện tại của nhánh. Hai commit cuối (`667c7ed8`, `cd3ceb36`) đều RỖNG — một mang
+  `[open-pr]`, một để kích hoạt `pull_request: synchronize`. Tree bất biến suốt chuỗi:
+  tree(94474286) == tree(667c7ed8) == tree(cd3ceb36) == 2bd7ec70da37adcebc418d68a7b871c71750b31e.
+reviewed_sha_required: cd3ceb36160c948c1f9b3e73a61491b7105fe660
+reviewed_sha_ghi_chu: >-
+  ĐẶT LẠI về head hiện tại. Bản duyệt vòng 4 (`94474286`, P1=0 P2=0) KHÔNG bị vứt — nội dung nó
+  duyệt vẫn nguyên vẹn ở tree `2bd7ec70`. Nhưng revision mới ⇒ lease cũ mất hiệu lực (§3.2), nên
+  vòng review kế tiếp neo vào head MỚI sau khi executor vá xong, chứ không tái dùng `94474286`.
+
+viec_cua_luot_nay: >-
+  ĐÚNG MỘT việc. Trong `scripts/tl_selftest.py`, ca `_c291_docs_ngoai_goi`:
+  (a) dòng 21264 `ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 70 == 250`
+      -> `len(paths) + 71 == 251`;
+  (b) dòng 21267 `ok4 = (len(tren_dia) == 70` -> `== 71`;
+  (c) thêm một khối `KÊ KHAI SLOT` theo ĐÚNG nếp của các khối có sẵn ngay trên đó, nêu:
+      70 -> 71 Markdown dưới `docs/`, thêm đúng `docs/MANG_SANDBOX_CODEX.md`, dev-side/NGOÀI gói,
+      `RELEASE_MANIFEST.json` KHÔNG đổi nên gói giữ 180 và trần Package 200 không nhúc nhích,
+      cây thật = 180 + 71 = 251.
+  KHÔNG chạm gì khác. KHÔNG sửa ba tệp kia — chúng đã `approved` vòng 4.
+canh_bao_dot_bien: >-
+  ĐỘT BIẾN THEO SỐ DÒNG, KHÔNG THEO CHUỖI. Số `70` xuất hiện HAI chỗ trong chính ca này, và số
+  `250`/`71` còn xuất hiện ở nơi khác trong tệp 20k+ dòng. `sed s/70/71/` là hỏng. Dùng số dòng
+  21264 và 21267, và ĐỌC LẠI vùng quanh đó sau khi sửa để xác nhận đánh đúng chỗ.
+phan_chung_bat_buoc: >-
+  Sau khi vá, chạy `python3 scripts/tl.py --selftest` trên CLONE ĐỘC LẬP (không phải git
+  worktree — worktree cho `rc=14 workspace là git worktree`) với
+  `git config core.autocrlf false && core.eol lf && core.abbrev 7` — THIẾU `core.abbrev` làm
+  `doc-claims-check`/`golden-test`/`determinism-audit` ĐỎ GIẢ, phiên điều phối đã mắc một lượt.
+  Tiêu chí: `1698/1698` và KHÔNG dòng `[FAIL]` nào. Trước đó phải TÁI LẬP được lỗi gốc
+  (`1697/1698`, `[FAIL] r291_docs_ngoai_goi`) rồi mới cho thấy nó xanh — đừng chỉ khai "đã sửa".
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 4
+  dong_them_toi_da: 30
+  do_tu_sha: cd3ceb36160c948c1f9b3e73a61491b7105fe660
+  ghi_chu: >-
+    Trần NHỎ có chủ đích. Việc của lượt này là hai con số cộng một khối kê khai; vượt 30 dòng
+    nghĩa là đang làm thứ khác. Chạm trần ⇒ CẮT hoặc VIẾT NGẮN LẠI, KHÔNG nâng trần (§12, và
+    #319 đã nâng bốn lần rồi mất hết ý nghĩa con số).
+
+dieu_kien_dung: >-
+  Giữ NGUYÊN `S1`..`S6` của r1/r2 — đọc ở đó, không chép lại. Thêm `S7`: nếu bản vá làm ĐỎ bất
+  kỳ ca nào KHÁC trong `tl selftest`, DỪNG và báo — đó là dấu hiệu ratchet còn ràng buộc thứ
+  chưa ai đo, không phải chỗ để vá lần thứ hai.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  Uỷ quyền trực tiếp trong phiên, 2026-08-27: "Tôi uỷ quyền cho phép bạn cấp lease, gia hạn,
+  khi có vấn đề cần xin ý kiến hãy chọn phương án bạn cho là tốt nhất." Phiên điều phối chọn
+  TÁCH #318 ra land riêng (PR #358) và đưa #334 qua revision này, thay vì vá lén dưới lease r2.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên ghi lease là `claude`; executor là `codex`; reviewer là `claude` PHIÊN MỚI, read-only.
+  Phiên này KHÔNG viết bản vá — nó chỉ ĐO ra lỗi và cấp lease. `cross_approved` của lượt tới
+  đứng bằng vòng review trên một bản vá chưa tồn tại lúc cấp.
+
+leased_at_utc: '2026-08-27T13:55:00Z'
+lease_expires_at_utc: '2026-08-28T13:55:00Z'
+run_minutes: 1440
+
+thay_the_cho: mang-sandbox-codex-exec-1r2-codex-20260827
+thay_the_ly_do: >-
+  ĐÚNG MỘT thứ đổi, và §3.2 liệt kê nó: `write_set` (ba đường → bốn đường). Mọi trường khác
+  giữ nguyên ngữ nghĩa của r2. Bia mộ `da_bi_thay_the` đã được ghi vào tệp r2 TRONG CÙNG commit
+  với tệp này — `_kiem_bia_mo` của `lease_publish.py` chặn nếu thiếu, và cổng không tự sửa hồ sơ cũ.
+
+BANG_CHUNG_LOI_DA_DO:
+  do_luc_utc: '2026-08-27T13:35Z'
+  cach_do: >-
+    Chạy 32 bước `run` của `.github/workflows/ci.yml` trên clone ĐỘC LẬP, đặt
+    `core.autocrlf=false core.eol=lf core.abbrev=7` đúng như bước "Force LF checkout" của CI.
+  bang:
+    - {cay: 'master b7024287',      docs_md: 70, tl_selftest: '1698/1698', ket: XANH}
+    - {cay: 'master + #318',        docs_md: 70, tl_selftest: '1698/1698', ket: XANH}
+    - {cay: 'master + #334',        docs_md: 71, tl_selftest: '1697/1698', ket: 'ĐỎ — [FAIL] r291_docs_ngoai_goi'}
+    - {cay: 'PR #356 (cả hai)',     docs_md: 71, tl_selftest: '1697/1698', ket: 'ĐỎ'}
+  ket_luan: >-
+    #318 xanh MỘT MÌNH; #334 là thứ làm đỏ. 20 cổng còn lại rc=0. `ops/lease_publish_test.py`
+    rc=1 nhưng 115/116 và ca duy nhất hỏng là `t33_..._phai_qua_actionlint: KHÔNG ĐO ĐƯỢC:
+    thiếu actionlint` — CI cài actionlint ở bước [4], và ĐỎ Y HỆT trên master (DELTA=0).
+  da_lam_gi_voi_318: >-
+    TÁCH theo §12 Stable Slice, đối chiếu đủ năm vế: hữu ích độc lập · đạt acceptance riêng
+    (approved vòng 15, P1=0 P2=0) · không phụ thuộc phần đang có finding (write set rời nhau
+    hoàn toàn) · không làm yếu security/gate · có evidence dương của chính nó (1698/1698).
+    PR #358 trên nhánh `claude/land-318`, chỉ đổi `docs/GOI_AGENT_DA_NEN.md`.
+
+NO_CO_TEN_LO_RA_TU_LUOT_NAY:
+  - id: AG-CI-01-co-pull-request-khong-ban-cho-PR-do-bot-mo
+    mo_ta: >-
+      PR do `ops-open-pr.yml` mở bằng GITHUB_TOKEN không bao giờ có `gate (ubuntu-latest)`.
+      Hệ quả đã đo: #322 và #352 kẹt hai ngày, và #334 qua BỐN vòng review với một lỗi gate.
+      Đường vòng hiện dùng: đẩy một commit RỖNG bằng xác thực NGƯỜI DÙNG để `synchronize` bắn.
+      Đó là VÁ, không phải sửa. Sửa thật thuộc packet riêng.
+  - id: AG-POLICY-01-thieu-change-impact-v1-json
+    mo_ta: >-
+      §5 mô tả `write_closure` qua `.github/coordination/change-impact.v1.json`, nhưng tệp ấy
+      KHÔNG TỒN TẠI trong kho. Nên mọi coupling kiểu "thêm tệp `docs/` ⇒ phải sửa ratchet trong
+      `scripts/tl_selftest.py`" hiện chỉ sống trong đầu người, và đúng lượt này nó đã lọt.
+  - id: AG-DOCTRINE-02-hai-trong-ba-client-land-apply-khong-ton-tai
+    mo_ta: >-
+      §10.2 khai ba client tương đương gọi `land apply`. Quét `.github/workflows/` chỉ có
+      `ci.yml`, `launcher-windows.yml`, `ops-don-ref.yml`, `ops-open-pr.yml`,
+      `ops-publish-lease.yml` — không có workflow land-apply, không có listener `issue_comment`.

@@ -168,6 +168,15 @@ lease_expires_at_utc: '2026-08-28T06:20:00Z'
 run_minutes: 1440
 
 thay_the_cho: mang-sandbox-codex-exec-1-claude-20260827
+da_bi_thay_the: mang-sandbox-codex-exec-1r3-codex-20260827
+da_bi_thay_the_ly_do: >-
+  BIA MỘ, ghi CÙNG COMMIT với lease r3 vì `_kiem_bia_mo` của `ops/lease_publish.py` chặn lease
+  mới nếu lease cũ chưa trỏ ngược lại đúng nó ("cổng không tự sửa hồ sơ cũ").
+  r3 mở vì §3.2 — chính SPEC thiếu, không phải bản vá thiếu: `write_set` của r1/r2 khai thiếu
+  `scripts/tl_selftest.py`, nên `docs/MANG_SANDBOX_CODEX.md` đẩy ratchet `r291_docs_ngoai_goi`
+  từ 70 lên 71 mà không lease nào cho phép sửa con số ấy. ĐÃ ĐO 2026-08-27T13:35Z:
+  master + #334 => `tl selftest 1697/1698`, `[FAIL] r291_docs_ngoai_goi`;
+  master + #318 => `1698/1698`; master trơn => `1698/1698`.
 thay_the_ly_do: >-
   ĐÚNG MỘT thứ đổi, và §3.2 liệt kê nó: `executor` (`claude` → `codex`), kéo theo
   `reviewer_provider` lật ngược để giữ `cross_approved`.

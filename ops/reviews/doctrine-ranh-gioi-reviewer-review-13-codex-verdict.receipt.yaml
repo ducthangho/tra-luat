@@ -1,0 +1,87 @@
+# BIÊN NHẬN — cross-review lượt 13 của PR #322 (packet #318).
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '318'
+packet_slug: DOCTRINE-RANH-GIOI-REVIEWER
+lease_id: doctrine-ranh-gioi-reviewer-exec-1r4-claude-20260826
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: e68e9fac23690399121b76d6ea3c35a6c5e9a067
+reviewed_tree: 0cfa60aed6ac8d4b4291ea494c07272da9d4695a
+luot: 13
+cross_provider: true
+assurance: cross_approved
+verdict_path: doctrine-ranh-gioi-reviewer-review-13-codex-verdict.md
+verdict_sha256: '7a0ecbd25148e7eb430a251beaf39839ff671a56cfc7fd44a569b3e5e110119a'
+verdict_bytes: 11742
+verdict_nguon: >-
+  `codex exec -s workspace-write -c approval_policy=never -c model_reasoning_effort=xhigh` trong
+  `launcher.py run`, CLONE ĐỘC LẬP detached tại exact SHA, `--require-clean`, prompt neo băm
+  `1c890d75cffbb003`. run `5eb55166`.
+ket_qua_dem_duoc:
+  P1: 1
+  P2: 0
+  finding_moi: 0
+  slug_hien_hanh: [{slug: menh-de-sandbox-mo-coi-khong-nhan, hang: P1}]
+
+phan_quyet: VA_SINH_LOI_MOI
+LOI_LA_CUA_PHIEN_DIEU_PHOI: >-
+  Nói thẳng vì nó quan trọng: bản vá vòng 12 do PHIÊN ĐIỀU PHỐI viết, và nó vừa đóng một câu chỏi
+  vừa đẻ ra một câu chỏi MỚI trong chính hành động ấy. Dòng 678 khai "thêm cờ `network_access` thì
+  `lsremote_rc=0`"; dòng 682 — cách bốn dòng — khai "nó bật HAI cờ cùng lúc". Cùng một tệp, cách
+  nhau bốn dòng, nói ngược nhau. Đây là lần thứ SÁU hình dạng ấy ở packet này, và lần đầu do phiên
+  điều phối tự gây ra sau khi đã viết hẳn một cảnh báo về nó vào đề bài của reviewer.
+
+hai_cho_DA_VA_THAT:
+  N1: 'PASS — câu phạm vi nay bao đúng 5 mệnh đề bảng + 3 văn xuôi = 8; reviewer tự liệt kê đủ tám.'
+  N4: >-
+    PASS về VỊ TRÍ — điều kiện đo nay nằm ngay dòng 676-686 cạnh mệnh đề, không còn là con trỏ trần.
+    Reviewer nói rõ: "PASS này chỉ chấm vị trí; nó không hợp thức hoá lời khai sai về số biến."
+  neo: 'không sinh neo thứ hai — vùng 592-699 chỉ có ĐÚNG một `Issue #334`; câu NEO DUY NHẤT còn nguyên.'
+hai_cho_FAIL:
+  N2: >-
+    Gắn `cơ chế đã xác minh — chiều MỞ` cho một cơ chế mà phép A/B chưa tách riêng. Đối chiếu định
+    nghĩa ở bảng hạng cho ra `chưa xếp được`.
+  N3: >-
+    Dòng 678 dùng một điều CHƯA ĐO làm căn cứ. Phép đo gốc và chính dòng 682 đều nói hai cờ bật
+    cùng lúc, và nói chưa ai chạy riêng từng cờ.
+
+lap_luan_TU_BAO_CHUA_da_bi_BAC:
+  toi_khai: '"mệnh đề chỉ nói cấu hình đổi được kết quả, nên A/B hai cờ vẫn đủ"'
+  reviewer_bac: >-
+    "Mệnh đề thực tế ở dòng 674-675 nói riêng rằng MẠNG ĐÓNG là mặc định cấu hình, 'biết cơ chế',
+    rồi nhận nhãn `cơ chế đã xác minh — chiều MỞ`. A/B hai-biến chỉ chứng minh TỔ HỢP cấu hình đổi
+    kết quả; nó không đo cờ nào là nguyên nhân. `git ls-remote` không ghi `.git` làm suy luận về
+    `network_access` hợp lý, nhưng bảng hạng đòi cơ chế ĐÃ XÁC MINH, không phải cơ chế SUY LUẬN."
+  danh_gia: >-
+    Bác ĐÚNG. Mệnh đề tự nó nói "biết cơ chế", nên không được rút gọn về một khẳng định yếu hơn để
+    lời khai vừa với bằng chứng.
+vi_sao_KHONG_phai_quan_sat_chua_ro_co_che: >-
+  Hạng ấy đòi ghi số lần lặp và phiên bản NGAY TẠI quan sát; mục không có. Nên hạng còn lại là
+  `chưa xếp được`.
+
+phan_bo_dung_theo_du_lieu_hien_co: 'chiều ĐÓNG ×1 · chiều MỞ ×4 · chưa xếp được ×3 · máy phát hiện ×0 · quan sát chưa rõ cơ chế ×0'
+phan_bo_tep_dang_khai: 'chiều ĐÓNG ×1 · chiều MỞ ×5 · chưa xếp được ×2 · máy phát hiện ×0 · quan sát chưa rõ cơ chế ×0'
+
+quet_toan_muc:
+  ket_qua: SACH
+  da_doc: 'tuyến tính từ dòng 592 tới 719'
+  khong_con: >-
+    câu nào hàm ý bằng chứng mệnh đề thứ tám ở packet khác · câu nào loại nó khỏi phạm vi ·
+    neo thứ hai · con số chỏi nào khác ngoài phân bố thuộc cùng gốc lỗi.
+  mot_diem_reviewer_lam_ro: >-
+    Câu ở dòng 697 về cơ chế "theo mục sandbox sang packet kia" thuộc mệnh đề THỨ BA (hành vi ghi
+    ngoài cây), KHÔNG phải mệnh đề mạng thứ tám. Phiên điều phối chưa phân biệt được điều này.
+
+bang_cham: {N1: PASS, N2: FAIL_P1, N3: FAIL_P1, N4: PASS, N5: PASS, N6: PASS, N7a: PASS, N7b: PASS}
+ngan_sach: '197/200, biên 3'
+
+QUYET_DINH_CUA_NGUOI_GIU_KHO: >-
+  CHỜ #334 rồi vá MỘT LẦN. Căn cứ: packet #334 (`MANG-SANDBOX-CODEX`) đang chạy lượt thi công đầu
+  tiên, và việc 4 của đề bài là ĐÚNG phép tách hai cờ mà finding này đòi — chạy bốn tổ hợp
+  (không cờ · chỉ `network_access` · chỉ `writable_roots` · cả hai) trên cùng một lệnh.
+  Nếu `network_access` một mình đảo được `ls-remote` thì cơ chế ĐÃ XÁC MINH và nhãn `chiều MỞ`
+  đứng được — chỉ cần sửa dòng 678 cho khớp phép đo thật. Nếu không, hạ nhãn về `chưa xếp được` và
+  tính lại phân bố sang 1/4/3/0/0.
+  Vá hai lần trên biên 3 dòng là cách chắc chắn nhất để đẻ thêm một câu chỏi nữa.

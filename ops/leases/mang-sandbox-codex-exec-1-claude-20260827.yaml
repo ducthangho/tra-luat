@@ -212,3 +212,29 @@ khuyet_tat_da_bao:
       Ở lần này con số sai theo chiều AN TOÀN (thừa người giữ). Chiều nguy hiểm — nhánh tụt sau
       LÀM MẤT một lease đang sống, cho phép cấp lease chồng — CHƯA AI ĐO.
 posted_comment_id: 5434083615   # workflow ghi, ĐỪNG sửa tay
+
+S4_DA_BAN_TRUOC_KHI_PHONG:
+  do_luc: '2026-08-27T05:0xZ, ngay trước lượt thi công đầu tiên'
+  master_luc_cap_lease: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+  master_luc_do_lai: d636cf669b4f297d85104a128c38f83dc58b28a6
+  so_commit_moi: 19
+  to_tien_con_giu: true
+  do_bang_to_tien: '`git merge-base --is-ancestor ac82ddc d636cf6` ⇒ rc=0'
+  cham_write_set: false
+  do_bang_cham: >-
+    `git diff --numstat ac82ddc..d636cf6 --` trên ĐÚNG ba đường dẫn của write set ⇒ KẾT QUẢ RỖNG.
+    Ba tệp ấy vẫn chưa tồn tại trên master.
+  QUYET_DINH: 'GIỮ NGUYÊN `base_sha: ac82ddc`'
+  can_cu: >-
+    Cùng căn cứ §3.2 mà lease #318 đã dùng ba lần: `base_sha` KHÔNG nằm trong danh sách thứ tạo
+    revision mới (objective · acceptance · write set · dependency · executor · environment). Đổi
+    base ở đây còn có cái giá riêng: lease NÀY đã đăng (`posted_comment_id: 5434083615`), nên sửa
+    base là làm bản chiếu trên #334 lệch bản có thẩm quyền — đúng cái giá vừa phải trả khi đóng
+    sớm lease r6 của #319. Chưa có việc nào được viết, nên giữ base không mất gì.
+  DANG_BAO_CHO_EXECUTOR_va_reviewer: >-
+    19 commit mới KHÔNG chạm write set, nhưng CÓ chạm thứ có thể liên quan: `#336` thêm HAI TẦNG
+    cho chế độ ghi của chương trình được phép, `#329 pha 2` thêm MÁY PHÁT HIỆN GHI cho subagent
+    read-only, và `#337` đổi idiom gọi `python` ở 18 dòng. Lượt này chạy trên base CŨ HƠN các thay
+    đổi ấy, nên tệp mới sinh ra ở đây CHƯA đi qua chúng. Khi packet land sẽ có merge, và lúc ấy mới
+    biết. ĐỪNG khai rằng tệp đã qua các cổng đó.
+  S4_da_ban_may_lan_trong_kho: 'BỐN — #319 r1, #319 r6, #318 (ba lần đo trên cùng một lease), và đây.'

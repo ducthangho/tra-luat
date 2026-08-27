@@ -116,7 +116,7 @@ lich_su_reviewed_sha:
 - {vong: 9, sha: 7d7354e14c540c3c2afd3f3a594ff2e432f6fd44, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-9-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=1. Vòng ĐẦU chấm dưới luat_dung_LAND; reviewer nói thẳng CHẶN LAND vì còn P1.'}
 - {vong: 11, sha: 12e0315a439b1e73bde57b09152bc077e04d7ee5, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-11-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0 — finding duy nhất `menh-de-sandbox-mo-coi-khong-nhan`: mệnh đề sandbox đứng ngoài hợp đồng nhãn và ngoài phép đếm.'}
 - {vong: 12, sha: fa9a505d0926a56603cabfb998bd4832084ed68f, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-12-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0, KHÔNG finding mới. Cùng slug `menh-de-sandbox-mo-coi-khong-nhan` — phán quyết VÁ SINH LỖI MỚI: nhãn ĐÚNG NGHĨA (reviewer tìm được neo A/B ngay trong tệp, dòng 328-339) nhưng câu phạm vi dòng 594-601 nay TỰ MÂU THUẪN với phép đếm dòng 619-625, và N4 chưa đóng. N2/N3/N5/N6/N7a/N7b ĐẠT. Biên 16 dòng.'}
-- {vong: 13, sha: e68e9fac23690399121b76d6ea3c35a6c5e9a067, verdict: 'CHƯA CÓ — bản vá vòng 12 đã đẩy, chờ phóng'}
+- {vong: 13, sha: e68e9fac23690399121b76d6ea3c35a6c5e9a067, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-13-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0, KHÔNG finding mới, cùng slug. N1 và N4 ĐÃ VÁ THẬT; N2+N3 FAIL vì bản vá khai một phép ĐO KHÔNG XẢY RA (dòng 678 nói một cờ, dòng 682 nói hai cờ — cách nhau BỐN dòng). Nhãn phải là `chưa xếp được`, phân bố đúng 1/4/3/0/0. Lỗi là của PHIÊN ĐIỀU PHỐI.'}
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 2

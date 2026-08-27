@@ -1,4 +1,4 @@
-# ĐẶC TẢ — `MCP-GH-CUU-HO` (Issue #319) — **BẢN SỬA ĐỔI 3**
+# ĐẶC TẢ — `MCP-GH-CUU-HO` (Issue #319) — **BẢN SỬA ĐỔI 4**
 
 > **r2 sửa gì, và vì sao.** Bản r1 (`51105214fe121a…`) đã được thi công một lượt bởi `codex xhigh`
 > và lượt ấy **lộ ra hai khuyết tật của chính đặc tả**, không phải của bản vá: (a) `D7`/`D8` giả
@@ -14,6 +14,13 @@
 > giết cả hai ca `B7`). Đó là lần thứ NĂM của cùng một hình dạng, và `CLAUDE.md` chốt: lặp ba lần
 > thì câu hỏi đúng là *"có nên làm việc này không"*. Câu trả lời ở đây không phải "bỏ đo đột biến"
 > mà là: **"đúng một ca" là BIẾN SAI của thứ ta thật sự cần đo.**
+>
+> **r4 THÊM hai tiêu chí, không đổi tiêu chí nào cũ: `D10` và `D11`.** Hai lý do độc lập.
+> (a) Sổ ca đã có `D10-main` mà bảng `D` KHÔNG có tiêu chí tương ứng — mã đi trước đặc tả, và
+> đặc tả là thứ có thẩm quyền, nên đặc tả phải bắt kịp chứ không phải ngược lại.
+> (b) Cross-review vòng 3 nêu một P1 — cổng in một bản báo cáo có dòng ĐỎ mà vẫn thoát 0, vì
+> `TỔNG` suy từ `rc` chứ không suy từ báo cáo — và bản vá đầu cho nó đã bị phiên điều phối ĐO LẠI
+> và BÁC. Xem mục `D10`/`D11` ở cuối phần `D`. Ba mươi tiêu chí cũ giữ NGUYÊN VĂN.
 
 Đặc tả này ĐÓNG BĂNG bằng băm. Lease neo vào `spec_sha256`. Sửa nội dung ⇒ băm đổi ⇒ lease trỏ
 vào thứ không còn tồn tại, phải đi qua bản sửa đổi mới. Soạn bằng skill `soan-spec`.
@@ -25,6 +32,7 @@ vào thứ không còn tồn tại, phải đi qua bản sửa đổi mới. So�
 | `nguon_cap_viec` | Packet cha **#314**, verdict cross-review vòng 2 trên PR #315 — `blocked` · `DO_NOT_LAND`, comment `5423010218`, `reviewed_sha 6c4140ba507162ca1c6ee8d2bf510445574bad24`. **Verdict ấy KHÔNG có biên nhận trong kho**: quét cả 206 ref lúc 09:45Z 26-08 ⇒ **0** tệp `ops/reviews/*` nào cho #314/#315. Nguồn cấp việc của packet này do đó là một **comment**, không phải tệp có băm — nói thẳng vì `CLAUDE.md` chốt rằng nguồn có thẩm quyền là tệp có băm, và ở đây điều kiện ấy KHÔNG thoả |
 | `review_class` | `sensitive` — cổng `_BANG_LOP` tự tính, mặc định fail-close. Ở packet này còn là hạng đúng theo nội dung: mã cầm `GITHUB_PAT` và tự quyết định gửi nó đi đâu. **KHÔNG** "chạm authority" theo nghĩa ADR-0044: không cấp lease, không gác cổng, không vào gói phát hành (chốt Q1) |
 | `base_sha` | `b662fe1d07c675a222ae26e734377e305775e4f3` — `origin/master` đo 09:57Z 26-08 |
+| `base_sha` (r4) | `ac82ddc583f688d54bdc60e06922ec09bdab9f16` — `origin/master` đo 02:43Z 27-08. `S4` bắn LẦN HAI. `b662fe1` VẪN là tổ tiên (không viết lại lịch sử) và 46 commit mới KHÔNG chạm đường dẫn nào trong `write_set` — đo bằng `git diff --numstat` trên đúng ba đường dẫn, kết quả RỖNG. Xử theo §5.1: merge thẳng vào nhánh packet (`043d2709`) |
 
 ## Trôi base — ghi vì L5 bắt được nó giữa lúc soạn
 
@@ -192,6 +200,42 @@ cờ; `D5` bơm lỗi vận chuyển qua một điểm khác điểm `B5` dùng.
 | D7b | **Sổ nền phải XANH thì phép đếm đột biến mới có nghĩa.** Nền đỏ ⇒ cổng ĐỎ vì lý do NỀN, và ô đột biến in **`KHÔNG_ĐO_ĐƯỢC`**, KHÔNG in `0/N` | r2 thêm sau phép đo lượt 1: bốn ca nền đỏ làm MỌI đột biến "giết" thêm đúng bốn ca ấy, nên "đúng một ca" không bao giờ thoả và cổng in `0/35`. Con số ấy ĐÚNG mà đọc thành "không đột biến nào có răng" — sai hẳn. **Cấm trừ ca đỏ nền để lấy một con số đẹp**: trừ đi là giấu nền hỏng. Đường đúng là fail-close: nói thẳng chưa đo được |
 | D8 | **QUY ĐƯỢC TRÁCH NHIỆM** — ba điều kiện, kiểm riêng từng cái: (a) ca ĐÍCH của mỗi đột biến **nằm trong** tập giết; (b) **không** đột biến nào có tập giết RỖNG; (c) **mọi** ca là đích của ít nhất một đột biến | (a) hỏng ⇒ đột biến không đo thứ nó khai · (b) hỏng ⇒ đột biến không có răng · (c) hỏng ⇒ ca không ai canh. Nền không rỗng ⇒ xem `D7b`, không kết luận. Giao phạm vi (tập giết có ca ngoài đích) **được IN RA** cho reviewer đọc, KHÔNG làm cổng đỏ |
 | D9 | Ngân sách: `git diff --numstat` trên write set, cột dòng THÊM, **≤ trần của lease đang hiệu lực** | vượt ⇒ điều kiện dừng `S2`, DỪNG và xin nâng trần bằng khối có `ai_nang`/`vi_sao`. **r2 CỐ Ý không ghi cứng con số ở đây**: r1 ghi `≤ 750` rồi lease nâng lên 1000, và hai mệnh đề không cùng đúng được — đó chính là hình dạng "sửa TRƯỜNG, quên VĂN BẢN" mà packet này sinh ra để chặn. Đặc tả trỏ sang trường có thẩm quyền thay vì chép lại nó |
+
+### Bản sửa đổi 4 thêm `D10` và `D11` — phán định phải SUY TỪ bản báo cáo
+
+**Vì sao r4 tồn tại.** Mã đã đi trước đặc tả: ca `D10-main` có trong sổ ca mà KHÔNG có tiêu chí
+nào ở bảng trên, và cross-review vòng 3 nêu một P1 mà bảng trên không có chỗ để trả lời. Bản vá
+đầu cho P1 ấy bị phiên điều phối đo lại và bác — nên r4 sửa ĐẶC TẢ trước, đúng thứ tự `S1`.
+
+**Phép đo đã bác bản vá đầu** (biên nhận `ops/reviews/mcp-gh-cuu-ho-kiem-doc-lap-va-P1-vong3.*`):
+bản vá thêm vào `chay_cli` một chốt hai dòng thay TOÀN BỘ `d8_errors` bằng một bộ dựng sẵn khi
+một cờ không được ca `D11-gate` đặt. Ba phép đo đột biến theo SỐ DÒNG cho thấy:
+
+- Xoá chốt là **vô hình** với toàn bộ bộ đo — cổng vẫn `40/40`, `D8 ĐẠT`, `rc=0`. Chốt không có
+  phản chứng nào, tức là mã KHÔNG ĐO ĐƯỢC thêm vào chính cái cổng đang đo mọi thứ khác.
+- Chốt cũng **không cần thiết**: bỏ nó đi thì kịch bản thân-ca-rỗng VẪN chết, qua khẳng định
+  "ca đã thực sự chạy" nằm trong THÂN CA. Cái giết nó là ca, không phải chốt.
+- Và chốt **làm hỏng bản báo cáo**: vì nó THAY `d8_errors` chứ không THÊM lỗi, trong đúng kịch
+  bản nó sinh ra để bắt, dòng `D8(b)` in ra `ĐẠT` trong khi sự thật đo được là `ĐỎ` cho cả 46
+  đột biến. Một khẳng định xanh không đúng sự thật, ở đúng chỗ nó phải mô tả.
+
+| # | tiêu chí | phép đo làm nó ĐỎ |
+|---|---|---|
+| D10 | Điểm vào `__main__` phải THỰC SỰ chạy sổ ca. Một `main` trả `0` mà không gọi ca nào ⇒ **ĐỎ** | ca dựng cảnh sổ ca một phần tử có cờ ghi nhận, gọi điểm vào, và đòi CẢ HAI: mã thoát khác 0 VÀ cờ đã được đặt. Chỉ đòi mã thoát thì một `return 0` cứng vẫn lọt |
+| D11 | **Phán định SUY TỪ bản báo cáo, không tính song song với nó.** `chay_cli` sinh TOÀN BỘ dòng báo cáo trước; `TỔNG` và mã thoát cùng suy từ MỘT phán định tính TỪ các dòng ấy. Không được có hai đường tính độc lập cho `TỔNG` và cho `rc` | ca chạy `chay_cli` trong ÍT NHẤT HAI cảnh — một xanh, một đỏ — bắt `stdout`, và đòi quan hệ **hai chiều**: bản in có dấu đỏ ⟺ mã trả về khác 0. Ép `rc` thành hằng số ⇒ quan hệ gãy ở cảnh đỏ ⇒ ĐỎ. Đây là chỗ P1 vòng 3 nằm: `TỔNG` suy từ `rc` chứ không suy từ báo cáo, nên hai nửa cùng một bản in mâu thuẫn nhau được |
+
+**Cấm CHỐT TỰ CHIẾU (r4 thêm, và đây là ràng buộc THIẾT KẾ, không phải lời khuyên).** Mã sản phẩm
+KHÔNG được thay kết quả đo bằng một giá trị dựng sẵn để chứng minh rằng một ca đã chạy. Lý do đo
+được, không phải thẩm mỹ: một chốt như thế (a) tự nó không đo gì nên không có phản chứng, và
+(b) khi bắn thì nó GHI ĐÈ phép đo thật, biến một dòng đỏ đúng thành một dòng xanh sai. Muốn biết
+một ca đã chạy thì đòi điều đó **trong thân ca**, nơi phép khẳng định là bằng chứng chứ không phải
+là giả định. Phản chứng cho chính điều cấm này: xoá bất kỳ dòng nào của cơ chế `D11` phải làm ĐỎ
+một ca CÓ TÊN — không được có dòng nào trong cơ chế mà xoá đi vẫn xanh.
+
+**`D11` KHÔNG hứa điều không hứa được.** Dòng ngoài cùng nhất — `sys.exit(chay_cli())` — vẫn có
+thể sửa thành `sys.exit(0)`, và không phép đo nào chạy TRONG tiến trình bắt được nó. `D11` thu
+hẹp bề mặt ấy xuống một dòng duy nhất và đặt một đột biến canh nó; nó không xoá bề mặt. Khai
+thẳng ở đây để không ai đọc `D11` thành "cổng nay không thể bị làm giả".
 
 Đột biến chạy trên **bản sao tạm**, tên tệp riêng, không ghi vào tệp thật — kho đã trả giá cho một
 bản vá NGƯỢC đi thẳng vào commit vì `finally` không chạy khi lượt bị `SIGTERM` cắt.

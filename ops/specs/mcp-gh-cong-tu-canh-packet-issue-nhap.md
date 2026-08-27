@@ -28,7 +28,11 @@ lại đánh đúng chỗ **chỉ nhờ thứ tự tình cờ** — mã đích c
 Việc: `src.count(old) != 1` ⇒ `KHÔNG_ĐO_ĐƯỢC` kèm tên mẫu, đừng đoán. Cộng phản chứng cho chính
 chốt ấy.
 
-### 2. Dòng 657 không có đột biến canh
+### 2. HAI dòng hậu tố không có đột biến canh — không phải một
+
+**Cập nhật sau cross-review vòng 4 (2026-08-27, `changes_requested`).** Phiên điều phối tìm ra MỘT
+dòng; reviewer tìm ra **HAI**. Cái thứ hai là dòng phiên điều phối BỎ SÓT.
+
 
 Hậu tố `ĐẠT`/`ĐỎ` của dòng `CA` là dòng cơ chế do bản vá r6 thêm. Ép nó thành `"ĐẠT"` cho một bản
 chạy **xanh hoàn toàn**, `rc=0`, không ca nào đỏ. Không đột biến nào trong 48 nhắm vào nó.
@@ -38,6 +42,19 @@ chạy **xanh hoàn toàn**, `rc=0`, không ca nào đỏ. Không đột biến 
 
 Nói cho công bằng: nó KHÔNG phải chốt duy nhất — bỏ một ca khỏi vòng lặp vẫn chết qua đường khác.
 Nhưng *"có đường khác bắt hộ"* không phải là *"có phản chứng"*.
+
+**Dòng thứ hai — reviewer vòng 4 tìm ra, phiên điều phối BỎ SÓT.** Hậu tố `ĐẠT`/`ĐỎ` của dòng
+`ĐỘT BIẾN` trong `dong_dot_bien` (khoảng dòng 450–451). Khoá cứng nó thành `"ĐẠT"` cũng cho
+`CA 40/40 · ĐẠT`, `ĐỘT BIẾN 48/48 · ĐẠT`, `D8(a)(b)(c) ĐẠT`, `TỔNG: ĐẠT`, `rc=0` — sống sót
+tuyệt đối qua cả 48 đột biến. Reviewer tái lập hai lần độc lập.
+
+Reviewer xếp cả hai chung một finding **P1** `hau-to-dat-do-moi-cua-ca-va-dot-bien-khong-co-dot-bien-canh`
+và gọi đây là **cảnh nguy hiểm nhất**: nó không cần một lỗi nền nào cả — chỉ cần đúng hai dòng bị
+âm thầm khoá cứng là cổng mù vĩnh viễn với MỌI lỗi tương lai chỉ lộ qua hậu tố ấy.
+
+**Bài học cho chính phiên điều phối:** tôi đột biến dòng 657 vì tôi ĐỌC diff và thấy nó là dòng
+mới. Dòng `dong_dot_bien` cũng đổi trong cùng diff ấy và tôi không đột biến nó. Quét theo DIFF thì
+bỏ sót; quét theo "mọi dòng sinh ra hậu tố ĐẠT/ĐỎ" thì không.
 
 ### 3. Ca `D10-main` bị hạ thành mệnh đề luôn đúng
 
@@ -55,6 +72,7 @@ lease r6 đã bắn ở đúng chỗ này.
 
 Đặc tả r4 viết *"`D11` thu hẹp bề mặt ấy xuống một dòng duy nhất"*. **Đo được là sai.** Có ít nhất
 BA dòng mà đột biến làm tiến trình thoát 0: 381 (`ma_thoat`), 377 (`phan_dinh`), 670 (`sys.exit`).
+Reviewer vòng 4 đếm được **ít nhất NĂM** khi cộng cả hai dòng hậu tố — con số của tôi cũng thấp.
 Khác biệt thật — và đây mới là điều đáng khai — là hai dòng đầu **để lại vết đỏ trong bản in**, còn
 dòng 670 thì **không in gì cả**.
 

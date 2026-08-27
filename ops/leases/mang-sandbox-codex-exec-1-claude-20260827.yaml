@@ -1,0 +1,213 @@
+# Lease EXECUTOR — `MANG-SANDBOX-CODEX` (#334), lượt 1, bản đầu.
+#
+# Packet này SINH RA TỪ MỘT LÁT CẮT, không phải từ một ý tưởng mới. Lease
+# `doctrine-ranh-gioi-reviewer-exec-1r4` (#318) cắt mục mạng/sandbox ra khỏi tệp doctrine sau khi
+# ĐẾM ĐƯỢC trên tiêu đề finding của từng vòng: vòng 1 có 3 finding về mạng/sandbox · vòng 2 có 2 ·
+# vòng 3 có 1 · vòng 4 có 2. BỐN vòng liên tiếp, TÁM finding, cùng một chủ đề — trong khi bảy tiêu
+# chí khác đã ĐẠT từ vòng 3. `CLAUDE.md` chốt: lặp ba lần thì câu hỏi đúng là "có nên làm việc này
+# không". Câu trả lời là CẮT, và đây là chỗ phần bị cắt về.
+#
+# Issue #334 đã mở từ 2026-08-26 và ĐẾN HÔM NAY CHƯA CÓ LEASE — quét cạn 223 ref lúc 03:3xZ
+# 27-08 cho 0 tệp `ops/leases/**` nào mang `packet_issue: 334`. Đây là lease đầu tiên của nó.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 334
+packet_id: MANG-SANDBOX-CODEX
+phase_key: MANG-SANDBOX-CODEX
+revision: 1
+generation: 1
+lease_id: mang-sandbox-codex-exec-1-claude-20260827
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` do CỔNG tính. Bảng `_BANG_LOP` mặc định **fail-close**: đường dẫn nào không khớp tiền
+  tố nào đều ra `sensitive`, và cả ba đường dẫn ở đây đều thuộc diện ấy. KHÔNG tự hạ lớp.
+
+vi_sao_executor_LA_CLAUDE_chu_khong_phai_codex: >-
+  Đây KHÔNG phải sở thích, nó là điều kiện để phép đo tồn tại. Packet này đo SANDBOX CỦA CODEX, và
+  bảng đo cần BA cột: đối chứng NGOÀI sandbox · trong sandbox mặc định · trong sandbox bật mạng.
+  Một executor `codex` đang NẰM TRONG sandbox ấy thì không sinh được cột đối chứng — nó không có
+  chỗ đứng ở ngoài.
+  Đã có bằng chứng đắt cho đúng chuyện này, đo hôm nay: executor `codex` của packet #319 (run
+  `ae038f02`) KHÔNG `bind(127.0.0.1)` được, nên nền bộ đo của nó ĐỎ và mọi ô in `KHÔNG_ĐO_ĐƯỢC`.
+  Nó khai thẳng và đúng `D7b` — nhưng hệ quả là nó **chưa từng đo được cổng của chính mình
+  đầu-cuối**, và bản in cuối của nó khai sáu đột biến "BỊ GIẾT" dựa trên một phép đo thu nhỏ.
+  Phiên điều phối chạy lại trên vỏ `bind` được thì bản vá ấy cho `rc=1`.
+  Bài học: **đừng giao phép đo về một cái hộp cho một tiến trình sống trong cái hộp đó.**
+  Reviewer lật sang `codex` để giữ `cross_approved` — hai NỀN khác nhau là bắt buộc, đổi một vế mà
+  giữ vế kia thì cùng nền tự duyệt bài của mình.
+
+write_set:
+  - .claude/dev/probe_mang.py
+  - .claude/dev/probe_mang_test.py
+  - docs/MANG_SANDBOX_CODEX.md
+write_set_note: >-
+  BA đường dẫn, cả ba VIẾT MỚI — `git ls-tree -r origin/master` không có tệp nào trong ba, và quét
+  mọi ref cũng không. Không tệp nào vào gói phát hành.
+  `docs/GOI_AGENT_DA_NEN.md` **KHÔNG** nằm trong write set này và KHÔNG được chạm: nó đang có
+  `NGƯỜI_GIỮ 1` là lease `doctrine-ranh-gioi-reviewer-exec-1r4` của #318, còn hạn tới
+  2026-08-27T10:00:00Z. Kết quả của packet này về sau CÓ THỂ được viết ngược vào tệp doctrine, nhưng
+  đó là việc của một packet khác, sau khi lease #318 kết thúc. Muốn đường dẫn thứ tư ⇒ `S3`.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-27T03:4xZ bằng `ops/lease_publish.py ai-dang-giu`. So hai nguồn ref TRƯỚC khi quét,
+  so bằng TẬP TÊN: `ls-remote --heads` 223 = `for-each-ref` 223, `comm -23` RỖNG và `comm -13` RỖNG.
+    .claude/dev/probe_mang.py       ->  NGƯỜI_GIỮ 0
+    .claude/dev/probe_mang_test.py  ->  NGƯỜI_GIỮ 0
+    docs/MANG_SANDBOX_CODEX.md      ->  NGƯỜI_GIỮ 0
+  Lease `doctrine-ranh-gioi-reviewer-exec-1r3` từng nhắc `probe_mang.py` nhưng đã `ĐÃ_BỊ_THAY_THẾ`,
+  nên không tính là người giữ.
+hai_lan_phai_do_lai_truoc_khi_ra_so_nay: >-
+  Phép đo này KHÔNG chạy trơn lần đầu, và ghi ra vì cả hai lần hỏng đều là bài học vận hành:
+  (1) Lần đầu cổng trả `CHAN [12] KHÔNG_XÁC_ĐỊNH: cache thiếu nhánh máy chủ
+  ops/cap-lease-ci-idiom-20260827` — một nhánh lease MỚI xuất hiện trên máy chủ giữa hai lần đo.
+  Chốt fail-close vừa land ở #313 ca 4 bắn ĐÚNG chỗ nó sinh ra để bắn. Phải `git fetch --prune`
+  rồi đo lại.
+  (2) `.claude/dev/mcp_gh_test.py` trả `NGƯỜI_GIỮ 2` với **cùng một lease_id in HAI LẦN**, vì nhánh
+  CỤC BỘ `ops/cap-lease-tach-314` tụt sau bản đã đẩy nên hai ref mang HAI PHIÊN BẢN NỘI DUNG của
+  cùng một lease (băm `e72b1de5…` và `e56bccf8…`). Đồng bộ nhánh cục bộ xong mới ra `NGƯỜI_GIỮ 1`.
+  Đã báo #313 — xem `khuyet_tat_da_bao`.
+
+branch: claude/mang-sandbox-codex-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+start_from_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+reviewed_sha_required: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+base_ghi_chu: >-
+  `origin/master` đo lúc 03:4xZ 27-08. Nhánh packet CHƯA TỒN TẠI — `git ls-remote --heads` không có
+  ref nào khớp `mang-sandbox`; executor tạo nhánh từ base này.
+  `reviewed_sha_required` đang BẰNG `base_sha` vì chưa có việc nào. **Cập nhật NGAY SAU khi đẩy bản
+  vá, TRƯỚC khi phóng review** — trường này đã trỏ sai một lần ở #319 r5 và đó là lần thứ ba trong
+  phiên bắt được hình dạng "sổ sách không theo kịp công việc". Đo bằng `git rev-parse`, không gõ tay.
+
+muc_tieu: >-
+  Biến MỘT QUAN SÁT thành một PHÉP ĐO TÁI LẬP ĐƯỢC, và không hứa quá thế.
+  Quan sát đang có: "sandbox `codex` không có đường ra mạng" — ghi 24-08-2026, **chưa ai đo CƠ CHẾ**.
+  Packet này KHÔNG được nâng nó thành bất biến an ninh. Mệnh đề doctrine đã chốt và packet này phải
+  giữ nguyên: **mạng đóng của sandbox là một MẶC ĐỊNH CẤU HÌNH, không phải bất biến — biết cơ chế
+  KHÔNG làm nó thành ranh giới**, vì cờ lật được (`sandbox_workspace_write.network_access=true`).
+  Ba việc:
+  (1) `.claude/dev/probe_mang.py` — in mã thoát cho BA kênh: `socket.bind` loopback ·
+  `urllib.request.urlopen` ra ngoài · `git ls-remote` ra ngoài. Không sửa gì, không cần đối số.
+  (2) `.claude/dev/probe_mang_test.py` — phản chứng cho chính probe. Mỗi mệnh đề probe khai phải có
+  một ca làm nó ĐỎ; probe nuốt lỗi CÓ CHỦ Ý (đo chặn hay không, không đo lỗi gì) nên phải có ca
+  chứng minh nó KHÔNG nuốt nhầm một lỗi khác thành "bị chặn".
+  (3) `docs/MANG_SANDBOX_CODEX.md` — bảng BA CỘT kèm ĐIỀU KIỆN ĐO của từng ô, cộng lệnh tái lập
+  nguyên văn. Mỗi ô là **một mệnh đề kèm điều kiện đo**, không phải một con số trần.
+
+cach_chay_ba_cot: >-
+  `codex sandbox -c sandbox_mode=workspace-write -- <lệnh>` chạy thẳng một lệnh TRONG sandbox,
+  KHÔNG có lượt model ở giữa, nên tất định. Ba cột:
+    python3 .claude/dev/probe_mang.py                                      # đối chứng, NGOÀI codex
+    codex sandbox -c sandbox_mode=workspace-write -- python3 .claude/dev/probe_mang.py
+    codex sandbox -c sandbox_mode=workspace-write \
+      -c sandbox_workspace_write.network_access=true -- python3 .claude/dev/probe_mang.py
+  Cột thứ ba TỒN TẠI CHÍNH LÀ luận điểm: nếu bật cờ mà mạng mở, thì "mạng đóng" là cấu hình, không
+  phải ranh giới. Thiếu cột ấy thì bảng nói ngược lại điều doctrine đã chốt.
+
+bang_chung_moi_de_dua_vao: >-
+  Một quan sát ĐỘC LẬP đo hôm nay, khác nguồn với quan sát 24-08: executor `codex` của #319
+  (run `ae038f02`, `codex exec -s workspace-write -c approval_policy=never`) KHÔNG
+  `bind(127.0.0.1)` được — bốn ca `A5`, `A6-302`, `A6-303`, `A7` của bộ test đỏ với `PermissionError`.
+  ĐIỀU KIỆN ĐO phải đi kèm khi trích: `codex-cli 0.150.0`, Linux, Python 3.11, `sandbox_mode`
+  workspace-write, KHÔNG bật `network_access`. Đây là quan sát về `bind` LOOPBACK — nó KHÁC câu hỏi
+  "có ra Internet được không", và đừng gộp hai thứ vào một ô.
+
+ngoai_pham_vi:
+  - 'KHÔNG chạm `docs/GOI_AGENT_DA_NEN.md` — đang có người giữ (#318).'
+  - 'KHÔNG kết luận về sandbox của nền KHÁC (`claude`); packet này chỉ đo `codex`.'
+  - 'KHÔNG nâng quan sát thành bất biến an ninh, và KHÔNG hạ mệnh đề doctrine đã chốt.'
+  - 'KHÔNG đo "hai pha" của launcher — phần ấy cắt cùng lượt nhưng là câu hỏi khác; muốn làm thì mở packet riêng.'
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 320
+  do_tu_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+  don_vi: '`git diff --numstat ac82ddc..HEAD` trên ĐÚNG ba đường dẫn của `write_set`, cột dòng THÊM.'
+  da_dung: 0
+  uoc_luong_de_doi_chieu: 'probe ~40 · test ~110 · tài liệu ~150 ≈ 300'
+  canh_bao_that: >-
+    320 là TRẦN, KHÔNG PHẢI MỤC TIÊU, và ước lượng ở trên là DỰ BÁO chứ không phải hạn mức được
+    phép tiêu. Nói thẳng vì ước lượng của phiên điều phối đã SAI HAI LẦN liên tiếp ở packet #319
+    (750 tự mâu thuẫn ngay khi đo lại; 1000 rồi 1100 vẫn chạm). ADR-0044 xếp packet này lớp `thường`
+    (≤ 6 tệp, ≤ 1.000 dòng thêm+xoá): 320 nằm sâu dưới ngưỡng, nên nếu chạm thì câu hỏi đúng là
+    "tài liệu có đang nở thay cho phép đo không", chứ không phải "nâng trần".
+  neu_cham_tran: >-
+    DỪNG theo `S2` và báo CHÍNH XÁC ô nào của bảng ba cột còn trống và cần bao nhiêu dòng nữa. Một
+    con số ĐO ĐƯỢC từ lượt thi công thật đáng giá hơn một ước lượng nữa.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) ĐỪNG TỰ SOẠN payload tấn công, và ĐỪNG tự dựng chuỗi đường dẫn thoát khỏi cây — bộ lọc nội
+  dung của nền bắn đúng lớp ấy và đã GIẾT HAI LƯỢT của kho này. Packet này KHÔNG cần loại nội dung
+  đó: ba kênh probe đều là lời gọi thư viện chuẩn, hợp pháp, không có gì để né.
+  (2) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu; đừng đặt chỗ-giữ-chỗ trong cặp ngoặc nhọn
+  ở thân issue/comment — GitHub XOÁ văn bản hình thẻ trong ngoặc nhọn ở đường ĐỌC, và dấu huyền
+  không phải hàng rào. Dùng CHỮ_HOA_GẠCH_DƯỚI.
+  (3) Số probe in ra KHÔNG phải bất biến an ninh — chúng phụ thuộc phiên bản và cấu hình. Ghi phiên
+  bản `codex --version` và hệ điều hành vào từng ô, và đọc như QUAN SÁT CÓ ĐIỀU KIỆN ĐO.
+  (4) `codex login status` KHÔNG phải bằng chứng dùng được. Muốn khai `codex` chạy được thì phải có
+  một lượt gọi THẬT.
+  (5) Ô nào không đo được thì ghi `KHÔNG_ĐO_ĐƯỢC` kèm lý do. Im lặng KHÔNG phải câu trả lời hợp lệ,
+  và một ô trống trông y hệt một ô đã đo và đạt.
+
+dieu_kien_dung: >-
+  S1 viết một dòng nào NÂNG quan sát thành bất biến an ninh, hoặc mâu thuẫn mệnh đề doctrine đã
+  chốt ("mạng đóng là MẶC ĐỊNH CẤU HÌNH, không phải bất biến") ⇒ DỪNG, xin bản sửa đổi ·
+  S2 vượt 320 dòng thêm trên ba đường dẫn ⇒ DỪNG, xin nâng trần bằng khối có `ai_nang`/`vi_sao`,
+  KHÔNG sửa `dong_them_toi_da` trần trụi ·
+  S3 cần đường dẫn thứ tư ⇒ DỪNG, xin sửa lease. RIÊNG `docs/GOI_AGENT_DA_NEN.md` thì câu trả lời
+  gần như chắc là KHÔNG, chừng nào lease #318 còn sống ·
+  S4 `origin/master` đi tiếp mà chưa đo lại ⇒ DỪNG, đo lại base. Ở kho này `S4` đã bắn BA LẦN trong
+  hai ngày; đừng coi là chuyện hiếm ·
+  S5 một trong BA cột của bảng không có lệnh tái lập nguyên văn ⇒ DỪNG: cột không tái lập được là
+  cột sẽ được khai là đã đo ·
+  S6 probe khai một mệnh đề mà không có ca phản chứng làm nó ĐỎ ⇒ DỪNG.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-27 — phiên điều phối quét cạn 223 ref, báo "#334 CHƯA có lease" kèm
+  bảng người giữ, và hỏi "anh muốn tôi soạn lease #334 (thu hẹp) luôn không?"; người giữ kho trả
+  lời "soạn lease #334 đi".
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên `claude` này ghi lease VÀ là cùng NỀN với executor (`claude`). Khai thẳng phần chưa tách:
+  nếu lượt thi công chạy trong CHÍNH phiên này thì `recorder_cung_la_nguoi_thi_cong` thành đúng và
+  trường trên thành lời khai sai. ⇒ Lượt thi công PHẢI chạy ở một phiên `claude` RIÊNG, headless,
+  clone rời, detached exact head. Reviewer là `codex`, khác nền, nên `cross_approved` đứng được.
+
+leased_at_utc: '2026-08-27T04:00:00Z'
+lease_expires_at_utc: '2026-08-28T04:00:00Z'
+run_minutes: 1440
+
+nguon_cap_viec: >-
+  Lát cắt của lease `doctrine-ranh-gioi-reviewer-exec-1r4-claude-20260826` (#318), khối
+  `he_qua_cua_lat_cat_da_khai_trong_tep` và dòng khai "#334 đã mở… CHƯA có lease".
+  ĐO ĐƯỢC lúc cắt: bỏ 70 dòng ⇒ ngân sách tệp doctrine từ 198/200 xuống 144/200.
+  Toàn văn 70 dòng bị cắt nằm trong thân Issue #334, KHÔNG chép lại vào đây — chép là tạo bản chiếu
+  thứ hai rồi để hai bản trôi lệch, đúng bệnh đã làm packet tiền nhiệm bị `blocked`.
+
+khuyet_tat_da_bao:
+  - ten: ai-dang-giu-dem-TRUNG-mot-lease-khi-hai-ref-mang-hai-phien-ban
+    bao_cho: 313
+    hien_tuong: '`NGƯỜI_GIỮ 2: mcp-gh-cuu-ho-exec-1r6-codex-20260827, mcp-gh-cuu-ho-exec-1r6-codex-20260827` — CÙNG một lease_id in hai lần'
+    nguyen_nhan_do_duoc: >-
+      Nhánh cục bộ `ops/cap-lease-tach-314` tụt sau bản đã đẩy, nên hai ref mang HAI PHIÊN BẢN NỘI
+      DUNG của cùng một lease (băm `e72b1de5…` cục bộ, `e56bccf8…` từ xa). Phép đếm dedup không
+      gộp được hai bản ấy về một lease.
+    vi_sao_dang_ke: >-
+      #313 ca 4 vừa land với lời khai "đếm NGƯỜI_GIỮ theo LEASE chứ không theo (lease × ref)".
+      Lời khai ấy CHƯA đúng hết: nó đúng khi hai ref mang CÙNG nội dung, và hỏng khi nội dung lệch.
+      Ở lần này con số sai theo chiều AN TOÀN (thừa người giữ). Chiều nguy hiểm — nhánh tụt sau
+      LÀM MẤT một lease đang sống, cho phép cấp lease chồng — CHƯA AI ĐO.

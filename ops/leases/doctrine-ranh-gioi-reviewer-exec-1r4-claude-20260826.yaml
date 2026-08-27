@@ -96,6 +96,39 @@ target_branch_neu_land: master
 base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
 start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
 reviewed_sha_required: 1c000495c8e64e2582c37ee92ae5be8d14557218
+head_da_doi_sau_review:
+# Khoi nay do phien dieu phoi ghi 2026-08-27T10:44Z. Head cua nhanh DA DOI sau
+# vong review, va day la khai bao THANG ve viec do — khong giau trong lich su git.
+  head_luc_review: '1c000495c8e64e2582c37ee92ae5be8d14557218'
+  head_hien_tai: 'ad55f6dc56a60a7ab5655b49e87f18d73317e1a5'
+  vi_sao_doi: >-
+    Required status check `gate (ubuntu-latest)` tren PR #322 CHUA HE CHAY va khong
+    bao gio tu chay duoc: `ci.yml` chi co co `push: branches: [master]` (nhanh
+    `claude/**` khong khop) va co `pull_request` — ma PR do `ops-open-pr.yml` mo bang
+    `GH_TOKEN: ${{ github.token }}`, va GitHub KHONG sinh luot chay moi cho su kien
+    do GITHUB_TOKEN tao ra. Chinh kho nay ghi dung cau ay trong `ops-publish-lease.yml`
+    va DUA VAO no lam chong-de-quy. Mot tien ich o cho nay la mot khoa chet o cho kia.
+    Da DO: `git push origin HEAD:refs/heads/master` bi tu choi —
+    "GH013 ... - Changes must be made through a pull request.
+     - Required status check \"gate (ubuntu-latest)\" is expected."
+    ("is expected" = check CHUA TUNG BAO CAO, khong phai check do.)
+    Day mot commit RONG bang thong tin xac thuc NGUOI DUNG (khong phai GITHUB_TOKEN)
+    lam `pull_request: synchronize` ban ⇒ gate chay ⇒ required check bao cao duoc.
+  bang_chung_KHONG_stale: >-
+    Commit them vao la commit RONG. TREE GIU NGUYEN, da do:
+    tree(1c000495) == tree(ad55f6dc) == cabf02e3f9a54919f50f00a6062b00dd2a4f01cc
+    `git diff --stat 1c000495 ad55f6dc` RONG — khong doi mot byte nao.
+    `git merge-base --is-ancestor 1c000495 ad55f6dc` => rc=0.
+    Nen `reviewed_sha_required` KHONG doi: no neo dung NOI DUNG reviewer da duyet,
+    va noi dung do van la noi dung tai head hien tai.
+  reviewed_sha_required_co_doi_khong: 'KHONG — giu nguyen 1c000495c8e64e2582c37ee92ae5be8d14557218'
+  khong_tao_revision: >-
+    §3.2 liet ke dung nam thu tao revision: objective, acceptance, write set,
+    dependency, executor/environment. Head cua nhanh khong nam trong do.
+  ban_chieu_KHONG_theo: >-
+    DA DO lai lan hai: `lease_publish.py check` van tra rc=9 (RC_DA_DANG) vi lease
+    da co `posted_comment_id`, nen `ops-publish-lease.yml` bo qua va comment tren
+    Issue KHONG duoc cap nhat. Tep YAML nay la ban CO THAM QUYEN.
 base_ghi_chu: >-
   `c35ae1c` = `origin/master` lúc cấp, ĐO trong phiên (không chép từ hồ sơ bàn giao), và cũng là
   merge của PR #310. Nhánh rẽ SẠCH từ đây, KHÔNG kế thừa `6c4140b` của PR #315 (đã đóng, không

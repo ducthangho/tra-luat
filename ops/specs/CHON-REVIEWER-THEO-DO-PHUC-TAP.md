@@ -2,7 +2,7 @@
 
 ```yaml
 packet_id: CHON-REVIEWER-THEO-DO-PHUC-TAP
-revision: 4
+revision: 5
 generation: 1
 review_class: sensitive          # sua chinh duong REVIEW - thu quyet dinh ai kiem cai gi
 executor: codex
@@ -97,8 +97,9 @@ bảng ấy chỉ có MỘT ngữ cảnh.** Revision 1 đo ở thư mục trốn
 | 1 | `modelUsage` phải có ĐÚNG MỘT khoá | đo ở **một** ngữ cảnh (thư mục trống) rồi viết luật mô tả CÁI RIG |
 | 2 | không ai validate `review_class` | thiếu sót |
 | 3 | allow-list `("sensitive", "thuong")` | **bịa** từ vựng thay vì **đếm** từ vựng đang dùng |
+| 4 | §3.3 *"KHÔNG được coi khoá THỪA là lỗi"* | luật viết **rộng hơn miền đã đo**: chỉ đo được MỘT loại khoá thừa (mô hình phụ) là vô hại, rồi cấm từ chối khoá thừa NÓI CHUNG |
 
-Revision 1 và 3 cùng một gốc: **viết luật TRƯỚC khi đo miền giá trị**. Cả hai đều hỏng theo
+Revision 1, 3 và 4 cùng một gốc: **viết luật TRƯỚC khi đo miền giá trị**. Cả hai đều hỏng theo
 hướng **fail-CLOSED** — công cụ từ chối đầu vào hợp lệ — nên chúng không lộ ra như một lỗ mà
 lộ ra như một cổng không dùng được. Cả hai lần executor cài **đúng** thứ được giao, và cả hai
 lần thứ bắt được là **một phép đo trên dữ liệu thật**, không phải một lượt đọc lại mã.
@@ -106,6 +107,40 @@ lần thứ bắt được là **một phép đo trên dữ liệu thật**, kh�
 Hệ quả thực hành cho bất kỳ ai viết đặc tả cho packet này về sau: mỗi khi đặc tả nêu một TẬP
 GIÁ TRỊ HỮU HẠN (tên mô hình, tên lớp review, tên vùng, tên khoá JSON), **đếm nó trong kho
 trước**, và dán số đếm vào đặc tả. Một allow-list không kèm số đếm là một allow-list chưa đo.
+
+**(c‴) VÀ REVISION 4 CŨNG SAI — bắt được bằng một cú tụt THẬT, hai lần trong một ngày.**
+
+§3.3 r4 viết *"**KHÔNG được coi khoá THỪA là lỗi**"*, lý do kèm theo là mô hình phụ có ở cả sáu
+lượt đo. Luật ấy **rộng hơn miền đã đo**: bảng (c′) chứng minh được rằng MỘT loại khoá thừa
+(mô hình phụ của harness) là vô hại, còn luật thì cấm từ chối khoá thừa **nói chung**.
+
+Hậu quả đo được 27-08-2026, trên chính kho này, **hai lượt cross-review dài liên tiếp**:
+
+| lượt | `modelUsage` | mô hình phục vụ thật | §3.3 r4 |
+|---|---|---|---|
+| `rv349` (2081s) | `[claude-fable-5, claude-haiku-4-5, claude-opus-4-8]` | `claude-opus-4-8` **84.1%** | **ĐẠT** |
+| `rv349b` (1549s) | `[claude-fable-5, claude-opus-4-8]` | `claude-opus-4-8` **87.8%** | **ĐẠT** |
+
+Cả hai `rc=0`, `subtype=success`, `is_error=false`, và `claude-fable-5` **có mặt làm khoá** —
+nên bằng chứng dương của (c′) được thoả, và §3.3 r4 cho cả hai đi qua. Tụt **TOÀN PHẦN** thì
+(c′) bắt được; tụt **GIỮA CHỪNG** thì lọt. Và tụt giữa chừng là ca ĐÃ XẢY RA.
+
+**Con số của (c′) cũng phải sửa.** Đếm lại trên **9 lượt** (3 dài + 6 probe ngắn, 27-08-2026):
+
+```
+claude-haiku-4-5-20251001   8/9    <- KHONG phai 6/6; mot luot dai KHONG co haiku nao
+claude-fable-5              6/9
+claude-opus-5               3/9
+claude-opus-4-8             2/9    <- ca hai deu la luot TUT
+```
+
+Nên allow-list mô hình phụ phải **CHO PHÉP** nó, tuyệt đối không được **ĐÒI** nó có mặt — đòi
+thì lặp lại đúng lỗi fail-CLOSED của revision 1, chỉ đổi hình dạng.
+
+Bài học riêng của lần này, khác với (c″): revision 1 và 3 hỏng vì **chưa đếm**. Revision 4 hỏng
+vì **đếm rồi nhưng khái quát quá phép đếm** — từ *"loại khoá thừa NÀY vô hại"* nhảy sang
+*"khoá thừa nói chung không phải lỗi"*. Một allow-list có số đếm vẫn sai nếu kết luận rộng hơn
+thứ số đếm chống đỡ được.
 
 **(d) Và chưa có chỗ nào trong kho ghi chọn mô hình theo cái gì.**
 
@@ -263,23 +298,53 @@ nhất", tức một mục tiêu DI ĐỘNG, và cả kho này neo mọi thứ b
 VỊ TỪ THUẦN — nhận **dict đã phân tích**, KHÔNG tự gọi CLI. Một ca test phải chạy được offline,
 không mạng, không xác thực; hàm nào tự gọi CLI thì ca của nó không tồn tại ở CI.
 
-**BẰNG CHỨNG DƯƠNG DUY NHẤT:** `yeu_cau_model` phải CÓ MẶT làm **khoá** trong `modelUsage`.
+**REVISION 5 THAY HẲN LUẬT CỦA r4.** Xem §0(c‴): r4 cấm coi khoá thừa là lỗi *nói chung*, và
+hai lượt tụt GIỮA CHỪNG có thật đã đi qua nó. Luật mới là **MỘT phép so TẬP HỢP**.
 
-ĐỎ khi bất kỳ điều nào:
+**ĐỊNH NGHĨA.** Với mỗi mục của `modelUsage`, *danh tính* của nó là `canonicalModel` nếu có,
+ngược lại là tên khoá. Gọi:
 
-- `ket_qua_json` là `None`/không phải dict ⇒ KHÔNG ĐO ĐƯỢC;
-- `is_error` là `True` **hoặc thiếu** (thiếu = không đo được, `None != False`);
-- `modelUsage` thiếu/không phải dict/rỗng;
-- **`yeu_cau_model` không nằm trong khoá của `modelUsage`** — thử theo thứ tự: (a) khớp KHOÁ;
-  (b) nếu không, khớp `canonicalModel` của một mục bất kỳ. Cả hai trượt ⇒ ĐỎ.
+- `phu` = các mục có danh tính mang tiền tố thuộc allow-list mô hình phụ — **`("claude-haiku-",)`**;
+- `chinh` = tập danh tính của mọi mục **còn lại**.
 
-**KHÔNG được coi khoá THỪA là lỗi.** `modelUsage` gần như luôn mang thêm mô hình phụ của
-harness (`claude-haiku-4-5-20251001` ở cả 6 lượt đo). Luật "đúng một khoá" của revision 1 là
-luật SAI và đã bị bác bằng phép đo — xem §0(c′). Hàm phải **kể ra** khoá thừa trong thông báo,
-không phải từ chối vì chúng.
+**MIỀN GIÁ TRỊ ĐÃ ĐẾM (9 lượt, 27-08-2026)** — dán số vào đặc tả theo đúng luật của §0(c″):
+
+```
+claude-haiku-4-5-20251001   8/9      <- CHO PHEP, KHONG DOI phai co
+claude-fable-5              6/9
+claude-opus-5               3/9
+claude-opus-4-8             2/9      <- ca hai deu la luot TUT
+```
+
+ĐỎ khi bất kỳ điều nào, **theo đúng thứ tự này** — thứ tự là một phần của hợp đồng, không phải
+chi tiết cài đặt:
+
+1. `ket_qua_json` không phải dict; hoặc `modelUsage` thiếu/rỗng/không phải dict ⇒ KHÔNG ĐO ĐƯỢC;
+2. `yeu_cau_model` **không** thuộc `chinh` ⇒ ĐỎ, và thông báo **phải chứa chuỗi `"model yêu cầu"`**;
+3. `chinh` còn phần tử **khác** `yeu_cau_model` ⇒ **mô hình LẠ** ⇒ ĐỎ. Thông báo phải nêu đích
+   danh mô hình lạ. **Đây là điều r4 cấm, và là chỗ P1 lọt.**
+4. `is_error` không bằng `False` (thiếu = không đo được, `None != False`).
+
+**VÌ SAO (4) ĐỨNG SAU (2) VÀ (3), không phải trước.** Ca *model-rác* (`--model` sai) trả
+`is_error: true` **và** `modelUsage` chỉ có mô hình phụ. Kiểm `is_error` trước thì nó bị chặn ở
+nhánh `is_error`, và người đọc thông báo sẽ đi tìm lỗi harness thay vì thấy *"model yêu cầu
+không có mặt"* — tức chẩn sai chỗ. Bộ phản chứng khoá đúng thứ tự này (§4).
+
+**KHÔNG ĐƯỢC ĐÒI mô hình phụ phải CÓ MẶT.** Đo được `8/9`, không phải `9/9` — một lượt dài không
+có haiku nào. Đòi nó có mặt là lặp lại lỗi fail-CLOSED của revision 1 dưới hình dạng khác.
 
 **KHÔNG được đọc `rc` hay `subtype` làm bằng chứng ĐẠT.** §0(c) là lý do; ghi lý do ấy vào chú
-thích ngay tại hàm, không phải chỉ ở đây.
+thích ngay tại hàm, không phải chỉ ở đây. Nhắc lại vì (c‴) làm nó nặng hơn: cả hai lượt tụt đều
+`rc=0` **và** `subtype=success`.
+
+Thông báo ĐẠT vẫn phải **kể ra** mô hình phụ đã bỏ qua.
+
+**HƯỚNG HỎNG KHI HARNESS ĐỔI MÔ HÌNH PHỤ:** fail-CLOSED, kèm thông báo nêu đích danh mô hình lạ.
+Với một cổng danh tính đó là hướng chấp nhận được — và khi ấy allow-list được cập nhật bằng một
+phép ĐẾM mới, không bằng phỏng đoán.
+
+**BẰNG CHỨNG LUẬT NÀY ĐÚNG** — chạy trên cả 9 lượt đã đếm ở trên: **7 ĐẠT / 2 ĐỎ**, và đúng 2 ĐỎ
+là hai lượt tụt thật. **0 dương tính giả**, kể cả lượt không có mô hình phụ.
 
 ### 3.4 CLI
 
@@ -305,6 +370,12 @@ Chạy `python3 .claude/dev/chon_reviewer_test.py`, thoát 0 khi ĐẠT.
    · sandbox có kho, model rác: `is_error: true`, `modelUsage` **CHỈ CÓ mô hình phụ** ⇒ ĐỎ.
      Ca này là ca quan trọng nhất của cả mục: nó ĐỎ vì **thiếu mô hình yêu cầu**, KHÔNG phải vì
      `modelUsage` rỗng — một bản vá chỉ kiểm rỗng sẽ để nó đi qua.
+6b. **Ca TỤT GIỮA CHỪNG (revision 5, §0(c‴)) — bắt buộc.** `modelUsage` mang **CẢ HAI** mô hình
+   chính, ví dụ `{claude-fable-5: …, claude-opus-4-8: …}` với `is_error: false`, yêu cầu
+   `claude-fable-5` ⇒ **ĐỎ**. Đây là dữ liệu THẬT của hai lượt `rv349`/`rv349b`, không phải
+   fixture bịa. Ca này là thứ duy nhất phân biệt r5 với r4.
+6c. **Ca KHÔNG có mô hình phụ — bắt buộc.** `modelUsage` chỉ có đúng mô hình yêu cầu (đo được
+   `8/9`, không phải `9/9`) ⇒ **ĐẠT**. Ca này chặn hướng hỏng fail-CLOSED "đòi haiku phải có".
 6. Ca thiếu `is_error` ⇒ ĐỎ. Ca `modelUsage` chỉ có `canonicalModel` khớp (không khớp khoá)
    ⇒ ĐẠT, và ca `canonicalModel` khớp một mô hình KHÁC ⇒ ĐỎ.
 7. Ca ĐƠN ĐIỆU: thêm một khoản điểm không bao giờ làm bậc TỤT (chạy qua mọi tổ hợp
@@ -323,6 +394,11 @@ Chạy `python3 .claude/dev/chon_reviewer_test.py`, thoát 0 khi ĐẠT.
 | `kiem_ket_qua` đọc `subtype == "success"` thay vì `is_error` | ca 5 |
 | `kiem_ket_qua` đòi `modelUsage` có ĐÚNG MỘT khoá (luật sai của revision 1) | ca 5 |
 | `kiem_ket_qua` chỉ kiểm `modelUsage` RỖNG, không kiểm có mô hình yêu cầu | ca 5 |
+| `kiem_ket_qua` nới `chinh == {yeu_cau}` thành `yeu_cau in chinh` (bỏ nhánh mô hình LẠ) | ca tụt-giữa-chừng |
+| `kiem_ket_qua` nới thành `issubset` / so tiền tố / so chuỗi con | ca tụt-giữa-chừng |
+| `kiem_ket_qua` ĐÒI mô hình phụ phải CÓ MẶT (thay vì cho phép) | ca `modelUsage` không có mô hình phụ |
+| `kiem_ket_qua` bỏ `canonicalModel`, chỉ so tên khoá | ca khoá-theo-ngày |
+| `kiem_ket_qua` kiểm `is_error` TRƯỚC phép so tập hợp | ca model-rác (phải chặn ở nhánh MODEL) |
 | `is_error` thiếu ⇒ đọc thành `False` | ca 6 |
 
 Nền có ca ĐỎ ⇒ **TỪ CHỐI công bố điểm đột biến** (bài học P1 của PR #342).

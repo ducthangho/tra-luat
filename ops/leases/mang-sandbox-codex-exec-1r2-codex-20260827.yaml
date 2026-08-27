@@ -256,3 +256,41 @@ VERDICT_VONG_2:
       `.github/workflows/**` hoặc `.claude/dev/packet_loop.py`, cả hai NGOÀI write set ⇒ `S3`.
       Cùng hình dạng với nợ `khong-cong-nao-chay-bo-test` của #319.
     QUYET_DINH_THUOC_NGUOI_GIU_KHO: true
+
+TACH_P1_META_TEST:
+  ai_quyet: ducthangho
+  quyet_dinh_luc: 'direct, in-session, 2026-08-27 — phiên trình ba đường, khuyến nghị đường thứ ba; người giữ kho trả lời "theo đường thứ ba, tách đi"'
+  tham_quyen: '§2'
+  packet_moi:
+    ten_de_xuat: CONG-NGOAI-WRITE-SET
+    ho_so_nhap: ops/specs/cong-ngoai-write-set-packet-issue-nhap.md
+    gop_hai_no_cua_hai_packet:
+      - '#319 — nợ có tên `khong-cong-nao-chay-bo-test`'
+      - '#334 — P1 `meta-test-tu-canh-khong-ai-canh`'
+    vi_sao_gop: >-
+      Đo ra thì là CÙNG MỘT việc: cả hai đòi một cổng chạy các bộ test này từ NGOÀI write set của
+      packet sở hữu chúng. Một packet vá cả hai; hai packet thì vá hai lần cùng một cổng.
+  KHONG_phai_them_hai_dong_vao_ci:
+    - 'đòi bằng chứng DƯƠNG, không chỉ `rc=0` — #319 vòng 3 đã cho thấy `rc` và bản in tách rời nhau được'
+    - 'chống danh sách gõ tay — `ci.yml` liệt kê từng tệp; thêm hai dòng là tái tạo đúng lỗ đã sinh ra nợ'
+    - 'phản chứng cho CHÍNH cổng mới — nếu không thì chỉ dời lỗ lên tầng năm'
+  CHUA_CAP_LEASE_DUOC:
+    ly_do: '`.github/workflows/ci.yml` có NGƯỜI_GIỮ 1: `ci-cong-idiom-ba-ten-exec-1r2-claude-20260827`, tới 2026-08-28T03:40:00Z'
+    do_luc: '2026-08-27T07:0xZ, sau khi so hai nguồn ref bằng TẬP TÊN: 229 = 229, `comm -3` RỖNG'
+    thu_tu_dung: >-
+      (1) #334 vá nốt P1 rẻ `bang-chinh-gom-unknown-vao-1-nhu-chan` và land ·
+      (2) lease `ci-cong-idiom-ba-ten-exec-1r2` kết thúc, nhả `ci.yml` · (3) mới cấp lease.
+  CHUA_CO_ISSUE:
+    ly_do: 'phiên điều phối KHÔNG mở được Issue — proxy trả 403 cho mọi lời gọi API GitHub, kể cả GET'
+    he_qua: 'người giữ kho mở Issue; thân bài đã soạn sẵn ở `ho_so_nhap`'
+  quan_sat_cho_313: >-
+    `.claude/dev/packet_loop.py` cho `NGƯỜI_GIỮ 4`, trong đó BA là revision của cùng một chuỗi
+    lease (`khoa-neo-be-rong` r2, r3, r7). Nếu phép đếm coi mỗi revision còn hạn là một người giữ
+    riêng thì con số ấy CAO HƠN số writer thật. Cùng họ với khuyết tật đã báo ở
+    `khuyet_tat_da_bao` — nhưng KHÁC nguyên nhân: lần trước là nhánh cục bộ tụt sau, lần này là
+    chuỗi revision. Chưa đo kỹ; ghi ra để #313 nhìn.
+
+CON_LAI_CUA_334_SAU_KHI_TACH:
+  P1_con: bang-chinh-gom-unknown-vao-1-nhu-chan
+  vi_sao_o_lai: 'nó thuộc `docs/MANG_SANDBOX_CODEX.md` — TRONG write set, và rẻ: thêm cột `class` hoặc chú thích cho hai bảng. Biên 11 dòng đủ.'
+  land_duoc_khi_nao: 'sau khi P1 ấy đóng — `luat_dung_LAND` chỉ cho P2 thành nợ, và P1 `meta-test` nay ĐI THEO packet mới chứ không thành nợ.'

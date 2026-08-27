@@ -107,10 +107,10 @@ def _moc(luc):
 
     NÓI ĐÚNG PHẠM VI, vì reviewer đã nói đúng và không nên đọc mạnh hơn: REST của GitHub trả
     `submitted_at` với độ chính xác GIÂY và hậu tố `Z`, cố định độ rộng — nên với dữ liệu
-    THẬT hiện nay, so chuỗi bằng so thời gian, và lỗ này **chưa với tới được**. Thứ được vá
-    ở đây là một **GIẢ ĐỊNH ĐỊNH DẠNG KHÔNG AI KHAI**, đúng loại giả định mà kho này đắt giá
-    nhất khi để im. Parse rồi so thì luật không còn phụ thuộc vào việc GitHub giữ nguyên
-    định dạng."""
+    THẬT hiện nay, so chuỗi bằng so thời gian, và lỗ này **chưa với tới được**. `_RE_MOC` cố
+    ý chỉ nhận tập định dạng ISO-8601 hữu hạn mà các ca dưới đã đo (`T`/dấu cách, phần giây
+    lẻ, `Z`, offset có/không dấu hai chấm); dạng khác fail-close. Parse rồi so chỉ bỏ phụ
+    thuộc vào MỘT cách viết `Z` hiện tại của GitHub, không phải bỏ mọi giả định định dạng."""
     t = str(luc or "").strip()
     m = _RE_MOC.match(t)
     if not m:

@@ -19,9 +19,10 @@ HAI TẦNG, vì cổng này có hai mặt hỏng khác hẳn nhau:
      được chứa `pip install`/`npm `) và reviewer đo được ba đường lách vẫn cho `18/18,
      dead=NONE`: một vế `|| always()` nối thêm · `permissions: write` ghi đè ở MỨC JOB ·
      một bước kéo head PR chèn vào giữa. "Danh sách cấm không bao giờ đủ — phải đảo thành
-     danh sách CHO PHÉP" (`lease-authority-spoof`, v1.36.68). Nay tầng (B) là ba allow-list:
-     TẬP SỰ KIỆN · BIỂU THỨC `if` sau chuẩn hoá · TOPOLOGY các bước của job `cong` (đúng 2
-     bước, thân `run` và bảng `env` khớp nguyên văn).
+     danh sách CHO PHÉP" (`lease-authority-spoof`, v1.36.68). Cross-review lượt 2 tiếp tục
+     tìm được mức WORKFLOW còn hở (`env`, `defaults.run.shell`, giá trị `runs-on`). Vì vậy
+     tầng (B) nay chỉ có MỘT allow-list: so BẰNG NHAU SÂU toàn bộ cây `safe_load` với một
+     golden dict canonical. Thêm hoặc đổi ở bất kỳ mức nào đều làm lệch cả cây.
 
      NÓI RÕ GIỚI HẠN, đừng để ai đọc mạnh hơn: tầng (B) đo HÌNH DẠNG TỆP, KHÔNG đo hành vi
      của GitHub. Nó không chứng minh `pull_request_target` thật sự lấy workflow từ nhánh cơ
@@ -60,64 +61,57 @@ YML2 = ROOT / ".github" / "workflows" / "duyet-phan-chung.yml"       # lane PH�
 _MO_BIEU_THUC = "$" + "{" + "{"
 
 
-def _bt(x):
-    return "%s %s }}" % (_MO_BIEU_THUC, x)
-
-
-# ── BA ALLOW-LIST CỦA TẦNG (B) ─────────────────────────────────────────────────────────
-_SU_KIEN_CHO_PHEP = {"pull_request_target", "pull_request_review"}
+# ── GOLDEN TOÀN CÂY CỦA LANE TIN CẬY ──────────────────────────────────────────────────
 _SU_KIEN_PHAN_CHUNG = {"pull_request"}
-_DIEU_KIEN_CHO_PHEP = ("github.event_name != 'pull_request'",)
-_QUYEN_CHO_PHEP = {"read", "none"}
-_CHECKOUT = "actions/checkout@v4"
 
-_RUN_CONG = ('set -eu '
-             'PY="$(command -v python3 || command -v python || command -v py)" '
-             '"$PY" .claude/dev/duyet_danh_tinh.py --kho "$TL_KHO" --pr "$TL_PR" '
-             '--tac-gia "$TL_TAC_GIA" --head-sha "$TL_HEAD"')
-
-# `env` PHẢI KHỚP NGUYÊN VĂN, không chỉ khớp TÊN BIẾN. Thân `run` cố định rồi thì đường
-# tấn công còn lại là ĐỔI GIÁ TRỊ: `TL_KHO: <biểu thức trỏ head.repo.full_name>` làm cổng
-# đi hỏi kho FORK của người mở PR — cổng vẫn chạy đúng script, vẫn xanh, và đo nhầm kho.
-_ENV_CONG = {
-    "GH_TOKEN": _bt("secrets.GITHUB_TOKEN"),
-    "TL_KHO": _bt("github.repository"),
-    "TL_PR": _bt("github.event.pull_request.number"),
-    "TL_TAC_GIA": _bt("github.event.pull_request.user.login"),
-    "TL_HEAD": _bt("github.event.pull_request.head.sha"),
+# ĐO TRỰC TIẾP bằng `list(yaml.safe_load(YML).keys())`: PyYAML dùng YAML 1.1 nên `on:`
+# thành khoá bool `True`, không phải chuỗi "on". Golden giữ cây THÔ: biểu thức, thứ tự
+# `steps`, khoảng trắng và `\n` cuối thân `run` đều nguyên vẹn. Không chuẩn hoá nửa cây rồi
+# so với nửa còn lại — đổi workflow chính đáng thì cập nhật đúng một bản canonical này.
+_GOLDEN_WORKFLOW_TIN_CAY = {
+    "name": "duyet khac danh tinh",
+    True: {
+        "pull_request_target": {
+            "types": ["opened", "reopened", "synchronize", "ready_for_review"],
+        },
+        "pull_request_review": {"types": ["submitted", "dismissed"]},
+    },
+    "permissions": {"contents": "read", "pull-requests": "read"},
+    "jobs": {
+        "cong": {
+            "if": "github.event_name != 'pull_request'",
+            "runs-on": "ubuntu-latest",
+            "permissions": {"contents": "read", "pull-requests": "read"},
+            "steps": [
+                {
+                    "name": "lay ma tu NHANH CO SO (khong bao gio head PR)",
+                    "uses": "actions/checkout@v4",
+                    "with": {
+                        "ref": "${{ github.event.pull_request.base.ref }}",
+                        "persist-credentials": False,
+                    },
+                },
+                {
+                    "name": "do nguoi duyet khac nguoi tao PR",
+                    "env": {
+                        "GH_TOKEN": "${{ secrets.GITHUB_TOKEN }}",
+                        "TL_KHO": "${{ github.repository }}",
+                        "TL_PR": "${{ github.event.pull_request.number }}",
+                        "TL_TAC_GIA": "${{ github.event.pull_request.user.login }}",
+                        "TL_HEAD": "${{ github.event.pull_request.head.sha }}",
+                    },
+                    "run": (
+                        "set -eu\n"
+                        'PY="$(command -v python3 || command -v python || command -v py)"\n'
+                        '"$PY"  .claude/dev/duyet_danh_tinh.py --kho "$TL_KHO" '
+                        '--pr "$TL_PR" \\\n'
+                        '       --tac-gia "$TL_TAC_GIA" --head-sha "$TL_HEAD"\n'
+                    ),
+                },
+            ],
+        },
+    },
 }
-
-# `with_khoa` là ALLOW-LIST CHÍNH XÁC, không phải "những khoá bắt buộc phải có".
-# Bản đầu của allow-list này chỉ đòi hai khoá CÓ MẶT và bỏ qua khoá THỪA — cross-review lượt 2
-# (codex) đo được ba đường lách trước khi lượt ấy bị bộ lọc nội dung của nền giết giữa chừng.
-# Hai trong ba là lỗ THẬT, và cả hai là đúng bẫy B2 mà `_TOPOLOGY_CONG` sinh ra để đóng:
-#   · `repository: <kho lạ>`  — `actions/checkout` nhận khoá này, nên job cầm token của kho đi
-#     lấy mã từ KHO KHÁC rồi chạy `.claude/dev/duyet_danh_tinh.py` CỦA KHO ẤY. `ref` vẫn là
-#     `base.ref` nên `ca_cong_KHONG_checkout_head_PR` cũng không thấy gì.
-#   · `token: <bí mật khác>` — checkout bằng một credential khác, có thể có quyền ghi.
-# Cái thứ ba (`fetch-depth: 0`) vô hại, và chính vì vô hại nên nó là ca đo TÍNH CHÍNH XÁC của
-# allow-list chứ không đo mức nguy hiểm: một allow-list đúng thì từ chối cả khoá vô hại.
-# ALLOW-LIST MỨC JOB, và đây là CHỖ THỨ NĂM của cùng một hình dạng trong packet này.
-# Cross-review lượt 2 đo được: `loi_topology` chỉ nhận `jobs["cong"]["steps"]` và `loi_quyen`
-# chỉ soi job tên `cong` (ghi cứng), nên KHÔNG hàm nào khẳng định workflow tin cậy có ĐÚNG một
-# job. Thêm một job thứ hai `evil` (`permissions: contents: write` + checkout `head.sha` + chạy
-# script của PR) ⇒ **29/29 ca xanh, job `evil` VÔ HÌNH** — đúng bẫy B2 mà `ca_topology_job_cong`
-# khai là "đóng cả một HỌ đường tấn công". Nó đóng cho MỘT JOB, không cho WORKFLOW.
-# Cùng chỗ ấy: `continue-on-error: true` ở MỨC JOB lọt (mức STEP thì bị bắt).
-# Reviewer nói đúng phạm vi và tôi chép lại kẻo ai đọc mạnh hơn phép đo: `evil` chỉ chạy khi đã
-# ở nhánh CƠ SỞ, nên phải qua một lần merge (vốn đòi `cong`) hoặc một lần đẩy thẳng (bị branch
-# protection chặn sau Bước 2). Đây là "khoá cơ học bị thủng", KHÔNG phải bypass tức thì. Nhưng
-# luận đề của packet là khoá CƠ HỌC để người khỏi phải soi ngữ nghĩa YAML — nên một hình dạng
-# B2 qua được bộ là finding thật.
-_JOB_TIN_CAY = "cong"
-_KHOA_MUC_JOB_CHO_PHEP = ("if", "permissions", "runs-on", "steps")
-
-_TOPOLOGY_CONG = (
-    {"khoa": ("name", "uses", "with"), "uses": _CHECKOUT,
-     "with_khoa": ("ref", "persist-credentials"),
-     "with_gia_tri": {"persist-credentials": False}},
-    {"khoa": ("name", "env", "run"), "run": _RUN_CONG, "env": _ENV_CONG},
-)
 
 
 def _nap():
@@ -149,113 +143,27 @@ def _su_kien(d):
     return set(kh or ())
 
 
-def chuan_hoa_bieu_thuc(s):
-    """Chuẩn hoá TỐI THIỂU trước khi so với allow-list: bỏ cặp ngoặc biểu thức bao ngoài,
-    thống nhất kiểu nháy, gộp khoảng trắng.
-
-    KHÔNG cố hiểu biểu thức. Hiểu nửa vời chính là lỗ vừa bị đo: bản cũ "hiểu" điều kiện
-    bằng cách tìm hai mẩu chuỗi trong đó, và một vế `|| always()` nối thêm vẫn mang đủ hai
-    mẩu ấy. So BẰNG NHAU với một tập hữu hạn thì không có chỗ cho vế nối thêm."""
-    t = str(s or "").strip()
-    if t.startswith(_MO_BIEU_THUC) and t.endswith("}}"):
-        t = t[len(_MO_BIEU_THUC):-2].strip()
-    return " ".join(t.replace('"', "'").split())
-
-
-def chuan_hoa_lenh(s):
-    """Gộp nối dòng `\\` và mọi khoảng trắng thành một dấu cách, đủ để so BẰNG NHAU mà
-    không đỏ giả chỉ vì xuống dòng khác đi."""
-    return " ".join(str(s or "").replace("\\\n", " ").split())
-
-
-def loi_quyen(d, ten_job):
-    """Danh sách lỗi quyền HIỆU LỰC (mức workflow HỢP mức job).
-
-    Bản cũ chỉ đọc `permissions` mức workflow. GitHub cho job GHI ĐÈ trọn vẹn khai báo ấy,
-    nên đọc một mình mức workflow là đo nửa sự thật — reviewer thêm `permissions: write` vào
-    ĐÚNG job cầm token và cả 18 ca cũ vẫn đạt. Đòi CẢ HAI mức: mức workflow vì nó là mặc
-    định cho mọi job thêm sau, mức job vì nó là thứ thật sự hiệu lực cho job này."""
-    xau = []
-    for nhan, o, bat_buoc in (("workflow", d, True),
-                              ("job `%s`" % ten_job, (d.get("jobs") or {}).get(ten_job) or {},
-                               True)):
-        if "permissions" not in o:
-            if bat_buoc:
-                xau.append("%s KHÔNG khai `permissions` — nhận mặc định của kho" % nhan)
-            continue
-        q = o["permissions"]
-        if isinstance(q, str):
-            if q != "read-all":
-                xau.append("%s khai `permissions: %s`" % (nhan, q))
-            continue
-        if not isinstance(q, dict) or not q:
-            xau.append("%s khai `permissions` RỖNG/không đọc được: %r" % (nhan, q))
-            continue
-        xau += ["%s: %s=%s" % (nhan, k, v) for k, v in sorted(q.items())
-                if str(v) not in _QUYEN_CHO_PHEP]
-    return xau
-
-
-def _khac_o_dau(mong, thuc):
-    """Mẩu đầu tiên lệch giữa hai chuỗi đã chuẩn hoá — đủ để người sửa biết đi đâu."""
-    for i, (a, b) in enumerate(zip(mong, thuc)):
-        if a != b:
-            return "lệch từ ký tự %d: đòi %r, đang là %r" % (i, mong[i:i + 40], thuc[i:i + 40])
-    if len(mong) != len(thuc):
-        dai, ngan = (thuc, mong) if len(thuc) > len(mong) else (mong, thuc)
-        return "một bên dài hơn %d ký tự: phần thừa %r" % (len(dai) - len(ngan), dai[len(ngan):len(ngan) + 40])
-    return "không định vị được chỗ lệch"
-
-
-def loi_topology(cac_buoc):
-    """Danh sách lỗi topology của job `cong` — ALLOW-LIST, không phải danh sách cấm.
-
-    Bản cũ cấm đúng hai chuỗi (`pip install`, `npm `). Reviewer chèn một bước kéo head PR
-    bằng `git` và không chạm hai chuỗi ấy: `18/18 dead=NONE`. Danh sách cấm phải đoán trước
-    mọi cách chạy mã lạ (`curl|sh`, `gh pr checkout`, `actions/download-artifact`, một
-    action bất kỳ ở phiên bản bất kỳ) nên thua từ trong thiết kế. Tập bước HỢP LỆ thì hữu
-    hạn và biết trước: đúng hai bước, và cả hai khớp nguyên văn.
-
-    GIÁ PHẢI TRẢ, nói thẳng: đổi workflow một cách CHÍNH ĐÁNG cũng làm ca này đỏ, và người
-    đổi phải cập nhật bảng trên. Đó là chi phí đúng với một job cầm token của kho."""
-    xau = []
-    if len(cac_buoc) != len(_TOPOLOGY_CONG):
-        return ["job `cong` có %d bước, allow-list đòi ĐÚNG %d"
-                % (len(cac_buoc), len(_TOPOLOGY_CONG))]
-    for i, (b, mau) in enumerate(zip(cac_buoc, _TOPOLOGY_CONG), 1):
-        thua = sorted(set(b) - set(mau["khoa"]))
-        if thua:
-            xau.append("bước %d có khoá NGOÀI allow-list: %s" % (i, thua))
-        if "uses" in mau and str(b.get("uses") or "") != mau["uses"]:
-            xau.append("bước %d: `uses`=%r, allow-list đòi %r"
-                       % (i, b.get("uses"), mau["uses"]))
-        # F2 cross-review lượt 2: hai nhánh exact-match này từng chỉ nói "KHÁC" mà không nói
-        # KHÁC Ở ĐÂU, buộc người sửa mở tệp test tìm hằng rồi tự diff — trong khi nhánh khoá-thừa
-        # ngay dưới đã chỉ đúng tên khoá. Một chốt exact-match mà thông báo mơ hồ thì mỗi lần đổi
-        # workflow chính đáng là một lần mò; chi phí ấy dồn lên đúng người đang làm việc đúng.
-        if "run" in mau:
-            thuc = chuan_hoa_lenh(b.get("run"))
-            if thuc != mau["run"]:
-                xau.append("bước %d: thân `run` KHÁC allow-list — %s" % (i, _khac_o_dau(mau["run"], thuc)))
-        if "env" in mau:
-            e = dict(b.get("env") or {})
-            if e != mau["env"]:
-                lech = sorted(set(e) ^ set(mau["env"]))
-                doi = sorted(k for k in set(e) & set(mau["env"]) if e[k] != mau["env"][k])
-                xau.append("bước %d: bảng `env` KHÁC allow-list — khoá lệch=%s, giá trị đổi=%s"
-                           % (i, lech or "không", doi or "không"))
-        w = b.get("with") or {}
-        mong = set(mau.get("with_khoa") or ())
-        thieu = sorted(mong - set(w))
-        if thieu:
-            xau.append("bước %d: `with` thiếu %s" % (i, thieu))
-        thua_w = sorted(set(w) - mong)
-        if thua_w:
-            xau.append("bước %d: `with` có khoá NGOÀI allow-list: %s" % (i, thua_w))
-        for k, v in sorted((mau.get("with_gia_tri") or {}).items()):
-            if w.get(k) != v:
-                xau.append("bước %d: `with.%s`=%r, allow-list đòi %r" % (i, k, w.get(k), v))
-    return xau
+def _lech_sau(mong, thuc, duong="$"):
+    """Định vị chỗ lệch đầu tiên để phép so toàn cây không trả thông báo mơ hồ."""
+    if type(mong) is not type(thuc):
+        return "%s: kiểu đòi %s, đang là %s" % (duong, type(mong).__name__, type(thuc).__name__)
+    if isinstance(mong, dict):
+        thieu = sorted(set(mong) - set(thuc), key=repr)
+        thua = sorted(set(thuc) - set(mong), key=repr)
+        if thieu or thua:
+            return "%s: khoá thiếu=%r, thừa=%r" % (duong, thieu, thua)
+        for k in mong:
+            if mong[k] != thuc[k]:
+                return _lech_sau(mong[k], thuc[k], "%s[%r]" % (duong, k))
+    elif isinstance(mong, list):
+        if len(mong) != len(thuc):
+            return "%s: độ dài đòi %d, đang là %d" % (duong, len(mong), len(thuc))
+        for i, (a, b) in enumerate(zip(mong, thuc)):
+            if a != b:
+                return _lech_sau(a, b, "%s[%d]" % (duong, i))
+    elif mong != thuc:
+        return "%s: đòi %r, đang là %r" % (duong, mong, thuc)
+    return "%s: lệch nhưng không định vị được" % duong
 
 
 def _rv(ai, tt="APPROVED", luc="2026-01-01T00:00:00Z", commit="HEAD1", ma=None, kieu="User"):
@@ -528,67 +436,17 @@ def ca_phan_hoi_KHONG_phai_danh_sach_la_KHONG_DO_DUOC(m):
 
 
 # ── TẦNG B — hình dạng workflow ────────────────────────────────────────────────────────
-def ca_su_kien_DUNG_allow_list(m):
-    """B1, lớp THỨ NHẤT và là lớp mạnh nhất: nếu `on:` không chứa `pull_request` thì không
-    có cách nào chạy workflow này từ nhánh PR. ALLOW-LIST, so BẰNG NHAU — thêm bất cứ sự
-    kiện nào (kể cả `workflow_run`, `issue_comment`) cũng phải làm ca này đỏ."""
-    co = _su_kien(_yaml())
-    if co != _SU_KIEN_CHO_PHEP:
-        raise AssertionError("tập sự kiện %s KHÁC allow-list %s"
-                             % (sorted(co), sorted(_SU_KIEN_CHO_PHEP)))
+def ca_workflow_tin_cay_KHOP_GOLDEN(m):
+    """So NGUYÊN CÂY, không ghép các allow-list rời rồi bỏ hở một mức khác.
 
-
-def ca_cong_KHONG_chay_tren_pull_request(m):
-    """B1, lớp THỨ HAI. Bản cũ chỉ đòi chuỗi điều kiện CHỨA `pull_request'` và `!=`, nên một
-    vế `|| always()` nối thêm vẫn qua trong khi job chạy ở `pull_request` (P1
-    `b1-if-kiem-bang-chuoi-co-the-luon-dung`). Nay so BẰNG NHAU với allow-list."""
-    dk = chuan_hoa_bieu_thuc((_yaml()["jobs"]["cong"] or {}).get("if"))
-    if dk not in _DIEU_KIEN_CHO_PHEP:
-        raise AssertionError("điều kiện của job `cong` NGOÀI allow-list: %r" % dk)
-
-
-def ca_cong_KHONG_checkout_head_PR(m):
-    """B2. `pull_request_target` cầm token của kho; checkout head PR là mở cửa chạy mã lạ."""
-    xau = []
-    for b in _yaml()["jobs"]["cong"]["steps"]:
-        ref = str((b.get("with") or {}).get("ref") or "")
-        if "head" in ref.lower():
-            xau.append("bước %r neo vào HEAD: %s" % (b.get("name") or b.get("uses"), ref))
-        if str(b.get("uses") or "").startswith("actions/checkout") and "base" not in ref:
-            xau.append("checkout KHÔNG neo vào nhánh cơ sở: ref=%r" % ref)
-    if xau:
-        raise AssertionError("; ".join(xau))
-
-
-def ca_topology_job_cong(m):
-    """B2, lớp đóng cả một HỌ đường tấn công thay vì từng đường. Xem `loi_topology`."""
-    xau = loi_topology(_yaml()["jobs"]["cong"]["steps"])
-    if xau:
-        raise AssertionError("; ".join(xau))
-
-
-def ca_workflow_tin_cay_CHI_MOT_JOB(m):
-    """F1 của cross-review lượt 2. Khoá TẬP JOB và khoá MỨC JOB, không chỉ khoá bên trong `cong`.
-
-    Bộ cũ soi rất kỹ bên trong job `cong` rồi bỏ ngỏ câu hỏi trước đó một bậc: *workflow này có
-    những job nào?* Một job thứ hai mang quyền ghi và kéo head PR đi qua sạch."""
-    d = _yaml()
-    co = set(d.get("jobs") or {})
-    if co != {_JOB_TIN_CAY}:
-        raise AssertionError("workflow tin cậy phải có ĐÚNG job %r, đang có %s"
-                             % (_JOB_TIN_CAY, sorted(co)))
-    job = (d["jobs"] or {})[_JOB_TIN_CAY] or {}
-    thua = sorted(set(job) - set(_KHOA_MUC_JOB_CHO_PHEP))
-    if thua:
-        raise AssertionError("job %r có khoá MỨC JOB ngoài allow-list: %s"
-                             % (_JOB_TIN_CAY, thua))
-
-
-def ca_quyen_HIEU_LUC_CHI_DOC(m):
-    """P1 `b2-job-permissions-va-buoc-keo-head-deu-mu`: job ghi đè được `permissions`."""
-    xau = loi_quyen(_yaml(), "cong")
-    if xau:
-        raise AssertionError("quyền KHÔNG chỉ-đọc: %s" % ", ".join(xau))
+    `loi_quyen` cũ bị gỡ cùng các phép so từng mảnh. Nó đòi khai quyền ở cả workflow lẫn
+    job rồi gọi cấu hình chỉ-job là "không chỉ-đọc", dù GitHub cho cấu hình ấy có thể chỉ
+    đọc thật. Golden ở đây cố ý chặt hơn vì nó đóng băng TOÀN workflow; thông báo chỉ nói
+    cây lệch canonical, không gán sai ngữ nghĩa quyền cho một cấu hình khác."""
+    thuc = _yaml()
+    if thuc != _GOLDEN_WORKFLOW_TIN_CAY:
+        raise AssertionError("workflow tin cậy KHÁC golden — "
+                             + _lech_sau(_GOLDEN_WORKFLOW_TIN_CAY, thuc))
 
 
 def ca_khong_co_cu_phap_bieu_thuc_trong_run(m):
@@ -600,15 +458,6 @@ def ca_khong_co_cu_phap_bieu_thuc_trong_run(m):
            if _MO_BIEU_THUC in str(b.get("run") or "")]
     if xau:
         raise AssertionError("có cú pháp biểu thức trong thân `run`: %s" % xau)
-
-
-def ca_workflow_TRUYEN_head_sha(m):
-    """Vị từ neo được vào head KHÔNG có nghĩa gì nếu workflow quên truyền head vào.
-    Ca `ban_duyet_CU_khong_tinh` gọi vị từ TRỰC TIẾP, nên nó vẫn xanh trong khi cổng thật
-    mù — đúng khoảng cách giữa "hàm đúng" và "cổng đúng"."""
-    r = "".join(str(b.get("run") or "") for b in _yaml()["jobs"]["cong"]["steps"])
-    if "--head-sha" not in r:
-        raise AssertionError("job `cong` KHÔNG truyền `--head-sha` — vị từ neo mà cổng không neo")
 
 
 def ca_hai_lane_KHAC_context(m):
@@ -656,14 +505,8 @@ CA = [
     ("cham_TRAN_TRANG_la_KHONG_DO_DUOC", ca_cham_TRAN_TRANG_la_KHONG_DO_DUOC),
     ("phan_hoi_KHONG_phai_danh_sach_la_KHONG_DO_DUOC",
      ca_phan_hoi_KHONG_phai_danh_sach_la_KHONG_DO_DUOC),
-    ("su_kien_DUNG_allow_list", ca_su_kien_DUNG_allow_list),
-    ("cong_KHONG_chay_tren_pull_request", ca_cong_KHONG_chay_tren_pull_request),
-    ("cong_KHONG_checkout_head_PR", ca_cong_KHONG_checkout_head_PR),
-    ("topology_job_cong", ca_topology_job_cong),
-    ("workflow_tin_cay_CHI_MOT_JOB", ca_workflow_tin_cay_CHI_MOT_JOB),
-    ("quyen_HIEU_LUC_CHI_DOC", ca_quyen_HIEU_LUC_CHI_DOC),
+    ("workflow_tin_cay_KHOP_GOLDEN", ca_workflow_tin_cay_KHOP_GOLDEN),
     ("khong_co_cu_phap_bieu_thuc_trong_run", ca_khong_co_cu_phap_bieu_thuc_trong_run),
-    ("workflow_TRUYEN_head_sha", ca_workflow_TRUYEN_head_sha),
     ("hai_lane_KHAC_context", ca_hai_lane_KHAC_context),
 ]
 
@@ -750,7 +593,23 @@ DOT_BIEN_MA = {
         ["phan_hoi_KHONG_phai_danh_sach_la_KHONG_DO_DUOC"]),
 }
 
+_DICH_GOLDEN = ["workflow_tin_cay_KHOP_GOLDEN"]
+
 DOT_BIEN_YML = {
+    # P2 `cho-phep-muc-workflow-khong-day-du`: ba mức/giá trị này cùng đi vòng qua các
+    # allow-list rời cũ. Cả ba phải chết ở đúng MỘT phép so toàn cây.
+    "them_env_MUC_WORKFLOW": (
+        "name: duyet khac danh tinh\n\non:\n",
+        "name: duyet khac danh tinh\n\nenv:\n  PYTHONPATH: /tmp/ma-la\n\non:\n",
+        _DICH_GOLDEN),
+    "them_defaults_shell_MUC_WORKFLOW": (
+        "name: duyet khac danh tinh\n\non:\n",
+        "name: duyet khac danh tinh\n\ndefaults:\n  run:\n    shell: bash -x {0}\n\non:\n",
+        _DICH_GOLDEN),
+    "doi_runs_on_sang_SELF_HOSTED": (
+        "    runs-on: ubuntu-latest\n",
+        "    runs-on: [self-hosted, linux]\n",
+        _DICH_GOLDEN),
     # F1 cross-review lượt 2 — hai đường lách reviewer đo được, cả hai từng cho `29/29 xanh`.
     "them_job_thu_hai_EVIL": (
         "jobs:\n  cong:\n",
@@ -758,71 +617,71 @@ DOT_BIEN_YML = {
         "      contents: write\n    steps:\n      - uses: actions/checkout@v4\n"
         "        with:\n          ref: " + _MO_BIEU_THUC + " github.event.pull_request.head.sha }}\n"
         "      - run: bash ./tu-nhanh-PR.sh\n  cong:\n",
-        ["workflow_tin_cay_CHI_MOT_JOB"]),
+        _DICH_GOLDEN),
     "them_khoa_MUC_JOB_continue_on_error": (
         "    runs-on: ubuntu-latest\n    permissions:\n",
         "    runs-on: ubuntu-latest\n    continue-on-error: true\n    permissions:\n",
-        ["workflow_tin_cay_CHI_MOT_JOB"]),
+        _DICH_GOLDEN),
     # B1 — đúng đường lách reviewer đo được: điều kiện còn nguyên hai mẩu chuỗi cũ mà vẫn
     # luôn đúng. Bản cũ cho `18/18, dead=NONE`.
     "noi_them_ve_LUON_DUNG": (
         "    if: github.event_name != 'pull_request'\n",
         "    if: github.event_name != 'pull_request' || always()\n",
-        ["cong_KHONG_chay_tren_pull_request"]),
+        _DICH_GOLDEN),
     "dung_pull_request_thay_vi_target": (
         "    if: github.event_name != 'pull_request'\n",
         "    if: always()\n",
-        ["cong_KHONG_chay_tren_pull_request"]),
+        _DICH_GOLDEN),
     "them_su_kien_pull_request": (
         "  pull_request_review:\n",
         "  pull_request:\n    types: [opened]\n  pull_request_review:\n",
-        ["su_kien_DUNG_allow_list"]),
+        _DICH_GOLDEN),
     # B2 — checkout head PR trong job cầm token.
     "checkout_head_PR": (
         "          ref: ${{ github.event.pull_request.base.ref }}\n",
         "          ref: ${{ github.event.pull_request.head.sha }}\n",
-        ["cong_KHONG_checkout_head_PR"]),
+        _DICH_GOLDEN),
     "workflow_quen_truyen_head_sha": (
         ' \\\n                 --tac-gia "$TL_TAC_GIA" --head-sha "$TL_HEAD"\n',
         ' --tac-gia "$TL_TAC_GIA"\n',
-        ["workflow_TRUYEN_head_sha", "topology_job_cong"]),
+        _DICH_GOLDEN),
     "quyen_ghi": (
         "permissions:\n  contents: read\n  pull-requests: read\n\njobs:\n",
         "permissions:\n  contents: write\n  pull-requests: read\n\njobs:\n",
-        ["quyen_HIEU_LUC_CHI_DOC"]),
+        _DICH_GOLDEN),
     "bo_khai_quyen": (
         "permissions:\n  contents: read\n  pull-requests: read\n\njobs:\n",
         "jobs:\n",
-        ["quyen_HIEU_LUC_CHI_DOC"]),
+        _DICH_GOLDEN),
     # B2 — hai đường lách reviewer đo được, cả hai từng cho `18/18 dead=NONE`.
     "job_GHI_DE_quyen_write": (
         "    permissions:\n      contents: read\n      pull-requests: read\n",
         "    permissions:\n      contents: write\n      pull-requests: read\n",
-        ["quyen_HIEU_LUC_CHI_DOC"]),
+        _DICH_GOLDEN),
     "them_buoc_KEO_HEAD_PR": (
         "      - name: do nguoi duyet khac nguoi tao PR\n",
         "      - name: lay them ma cua PR\n        run: |\n"
         "          set -eu\n          git fetch origin \"$GITHUB_SHA\"\n"
         "          git checkout FETCH_HEAD\n"
         "      - name: do nguoi duyet khac nguoi tao PR\n",
-        ["topology_job_cong"]),
+        _DICH_GOLDEN),
     # ba đường lách reviewer lượt 2 đo được trên bản `with` chỉ-đòi-có-mặt.
     "them_with_repository_kho_LA": (
         "          persist-credentials: false\n",
         "          persist-credentials: false\n          repository: nguoi-la/kho-doc-hai\n",
-        ["topology_job_cong"]),
+        _DICH_GOLDEN),
     "them_with_token_bi_mat_KHAC": (
         "          persist-credentials: false\n",
         "          persist-credentials: false\n          token: " + _MO_BIEU_THUC + " secrets.PAT_GHI }}\n",
-        ["topology_job_cong"]),
+        _DICH_GOLDEN),
     "them_with_khoa_VO_HAI": (
         "          persist-credentials: false\n",
         "          persist-credentials: false\n          fetch-depth: 0\n",
-        ["topology_job_cong"]),
+        _DICH_GOLDEN),
     "doi_env_TL_KHO_sang_kho_FORK": (
         "          TL_KHO: ${{ github.repository }}\n",
         "          TL_KHO: ${{ github.event.pull_request.head.repo.full_name }}\n",
-        ["topology_job_cong"]),
+        _DICH_GOLDEN),
 }
 
 DOT_BIEN_YML2 = {
@@ -890,6 +749,7 @@ def _khai(ten, chet, dich, hong):
 
 def main() -> int:
     dat, ly = _chay()
+    so_dot_bien = len(DOT_BIEN_MA) + len(DOT_BIEN_YML) + len(DOT_BIEN_YML2)
     do_san = sorted(k for k, v in dat.items() if v is False)
     print(f"nền: {sum(1 for v in dat.values() if v)}/{len(dat)} đạt")
     for k in do_san:
@@ -898,6 +758,8 @@ def main() -> int:
         # Nền đỏ thì mọi đột biến "giết" tầm thường bằng chính ca đỏ sẵn — tỷ lệ ấy KHÔNG
         # CÓ NGHĨA. Bài học P1 của PR #342, và nay là nếp chung của kho.
         print(f"\nTỪ CHỐI công bố điểm đột biến: nền có {len(do_san)} ca ĐỎ")
+        print(f"SO LIEU: ca={len(dat)}; dot bien={so_dot_bien}")
+        print("TONG: HONG")
         return 1
 
     print("\ntự chứng minh KHÔNG RỖNG (giết ĐÚNG và CHỈ ĐÚNG tập ca đã khai):")
@@ -918,17 +780,17 @@ def main() -> int:
             d2, _ = _chay(**{khoa: (tim, thay)})
             _khai(ten, [k for k, v in d2.items() if v is False], dich, hong)
 
-    print(f"\nSỐ LIỆU (đếm bằng máy):\n  ca        : {len(dat)}\n"
-          f"  đột biến  : {len(DOT_BIEN_MA) + len(DOT_BIEN_YML) + len(DOT_BIEN_YML2)}")
     print("NỢ  : `ngu-nghia-trigger-chua-do-bang-PR-doi-khang` — tầng (B) đo HÌNH DẠNG tệp,")
     print("      KHÔNG đo hành vi trigger của GitHub. Muốn đo thật phải mở PR đối kháng;")
     print("      bước nghiệm thu của `ops/RUNBOOK_TACH_DANH_TINH_GITHUB.md` là chỗ làm việc đó.")
+    print(f"SO LIEU: ca={len(dat)}; dot bien={so_dot_bien}")
     if hong:
-        print("TỔNG: %d lỗi" % len(hong))
+        print("CHI TIET HONG: %d lỗi" % len(hong))
         for x in hong:
             print("   " + x)
+        print("TONG: HONG")
         return 1
-    print("TỔNG: ĐẠT")
+    print("TONG: DAT")
     return 0
 
 

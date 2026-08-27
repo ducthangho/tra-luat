@@ -166,6 +166,8 @@ required status check. Trên chính PR ấy (vẫn chưa ai duyệt):
 
 **N4 — CÔ LẬP luật neo head, tức thứ cổng mới mua thêm.** Điều kiện: ô *"Dismiss stale
 approvals"* đang TRỐNG (bước 2 đã dặn).
+**Trong toàn bộ cửa sổ từ trước lúc duyệt `H1` đến sau khi đẩy `H2`, dismiss-stale đang
+TẮT.** Nếu ô ấy được bật giữa chừng thì phép N4 mất đối chứng và phải làm lại từ đầu.
 1. Người khác duyệt PR ở head `H1` → cả hai luật xanh, nút merge sáng.
 2. Đẩy thêm một commit vô hại → head thành `H2`.
 3. `Require approvals: 1` **vẫn thoả** (bản duyệt không bị gỡ), nhưng `cong` **ĐỎ** với lý do
@@ -175,14 +177,20 @@ Sau khi ghi kết quả, **bật** ô "Dismiss stale approvals" (phòng thủ nh
 **N5 — người duyệt THOẢ branch protection nhưng NGOÀI danh sách của cổng.** Đây là ca
 reviewer đòi, và nó đo đúng thứ `NGUOI_DUOC_DUYET` sinh ra để đo. Hôm nay kho có **đúng
 hai** cộng tác viên và **cả hai đều nằm trong danh sách**, nên ca này không chạy được bằng
-người thứ ba. Chạy được bằng cách thu hẹp danh sách:
-1. Một PR nhỏ bỏ `code2nguyen` khỏi `NGUOI_DUOC_DUYET`; merge nó (lúc này `code2nguyen` vẫn
-   còn trong danh sách **trên nhánh cơ sở**, nên nó duyệt được chính PR ấy).
-2. Mở PR canary do danh tính chạy-việc tạo; `code2nguyen` duyệt.
+người thứ ba. **Với trạng thái hai người hiện tại, phép này chỉ chạy được nếu bước 1 chọn
+đường (a), GitHub App.** Chọn đường (b) thì `code2nguyen` vừa là tác giả chạy-việc vừa là
+người cần đứng ngoài allow-list; GitHub không tính tự duyệt, nên N5 là **KHÔNG ĐO ĐƯỢC**
+cho tới khi có danh tính thứ ba — đừng đổi vai giữa chừng để làm bảng trông đủ.
+
+Với đường (a), thu hẹp danh sách theo đúng tác giả đã ghim:
+1. `ducthangho` tạo một PR nhỏ bỏ `code2nguyen` khỏi `NGUOI_DUOC_DUYET`; `code2nguyen`
+   duyệt và merge nó (ở nhánh cơ sở lúc duyệt, `code2nguyen` vẫn còn trong danh sách và
+   khác tác giả PR).
+2. Mở PR canary do **GitHub App của bước 1(a)** tạo; `code2nguyen` duyệt.
 3. `Require approvals: 1` **thoả**; `cong` **ĐỎ** (*"chưa có bản duyệt nào từ danh tính
    khác"*); merge **bị chặn**.
-4. Hoàn nguyên bước 1. PR hoàn nguyên phải do danh tính chạy-việc tạo và do `ducthangho`
-   duyệt — vì lúc này `code2nguyen` đang ở ngoài danh sách.
+4. Hoàn nguyên bước 1. PR hoàn nguyên phải do **GitHub App** tạo và do `ducthangho` duyệt —
+   vì lúc này `code2nguyen` đang ở ngoài danh sách.
 
 **N6 — chiều XANH, kẻo cả bộ trên chỉ chứng minh ta chặn được mọi thứ.** Một danh tính khác,
 trong danh sách, duyệt đúng head hiện tại → `cong` **XANH** → merge được.

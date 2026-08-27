@@ -95,7 +95,7 @@ target_branch_neu_land: master
 
 base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
 start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
-reviewed_sha_required: 12e0315a439b1e73bde57b09152bc077e04d7ee5
+reviewed_sha_required: fa9a505d0926a56603cabfb998bd4832084ed68f
 base_ghi_chu: >-
   `c35ae1c` = `origin/master` lúc cấp, ĐO trong phiên (không chép từ hồ sơ bàn giao), và cũng là
   merge của PR #310. Nhánh rẽ SẠCH từ đây, KHÔNG kế thừa `6c4140b` của PR #315 (đã đóng, không
@@ -114,7 +114,8 @@ lich_su_reviewed_sha:
 - {vong: 7, sha: ed50b734611fe9f5a1b8c332458b52fdcaabe43a, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-7-codex-verdict.receipt.yaml', ket_qua: 'P1=3 P2=3; N2 VÀ N3 đều KHÔNG ĐẠT. Hai nhãn SAI NGHĨA; lượt tự soát tìm 4 bỏ sót 6.'}
 - {vong: 8, sha: d14ba2f3afd317b903224d1b06b4ddffb238dc5b, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-8-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=4. NĂM trên sáu finding vòng 7 ĐÃ VÁ THẬT, kể cả nam-hang-khong-tao-phan-hoach vốn mở liên tục từ vòng 2. Cả năm finding còn lại truy về MỘT bổ sung ngoài phạm vi.'}
 - {vong: 9, sha: 7d7354e14c540c3c2afd3f3a594ff2e432f6fd44, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-9-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=1. Vòng ĐẦU chấm dưới luat_dung_LAND; reviewer nói thẳng CHẶN LAND vì còn P1.'}
-- {vong: 10, sha: 12e0315a439b1e73bde57b09152bc077e04d7ee5, verdict: 'CHƯA CÓ'}
+- {vong: 11, sha: 12e0315a439b1e73bde57b09152bc077e04d7ee5, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-11-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0 — finding duy nhất `menh-de-sandbox-mo-coi-khong-nhan`: mệnh đề sandbox đứng ngoài hợp đồng nhãn và ngoài phép đếm.'}
+- {vong: 12, sha: fa9a505d0926a56603cabfb998bd4832084ed68f, verdict: 'CHƯA CÓ — đang chạy 2026-08-27'}
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 2
@@ -562,3 +563,38 @@ comment_trung_lap:
 # `lease_publish.py mark` với ĐÚNG id của workflow — KHÔNG đăng comment mới. Không ghi thì lần đẩy
 # sau cổng sẽ tưởng lease chưa đăng và đăng TRÙNG, đúng lỗi đã mắc ở r2.
 posted_comment_id: 5427971996   # workflow ghi, ĐỪNG sửa tay
+
+SO_SACH_DA_LECH_LAN_BA:
+  phat_hien_luc: '2026-08-27T04:2xZ, NGAY TRƯỚC khi phóng vòng 12'
+  lech_gi:
+    reviewed_sha_required: >-
+      Trỏ `12e0315a` trong khi đầu nhánh là `fa9a505` — tức mọi vòng review sẽ neo vào bản TRƯỚC
+      lượt vá 11. `12e0315a` VẪN là tổ tiên của `fa9a505`, chỉ có ĐÚNG MỘT commit ở giữa
+      (`fa9a505 doctrine(#318): vòng vá 11`), nên không mất việc — nhưng vòng 12 sẽ chấm lại đúng
+      bản mà vòng 11 đã bác.
+    lich_su_reviewed_sha: >-
+      Mục cuối ghi `{vong: 10, sha: 12e0315a, verdict: 'CHƯA CÓ'}`. SAI hai chỗ: số vòng (biên nhận
+      trong kho là `review-11`, không có `review-10` nào) và verdict (vòng 11 ĐÃ trả
+      `changes_requested`, P1=1 P2=0, biên nhận có băm). Đã sửa cả hai và thêm mục vòng 12.
+  vi_sao_dang_ke: >-
+    Đây là LẦN THỨ TƯ hình dạng "sổ sách không theo kịp công việc" bị bắt trong cùng phiên
+    (#318 vòng 8 · #319 `reviewed_sha` bằng base · #319 `da_dung` 802 trong khi đo được 840 · và
+    đây). Ba lần trước đều bắt được bằng cách ĐO trước khi phóng, không bằng cách đọc lại lease.
+    Luật đã ghi trong chính lease này — "cập nhật NGAY SAU khi đẩy bản vá, TRƯỚC khi phóng review"
+    — và lần này chính nó bị vi phạm. Luật không tự cưỡng chế; chỉ phép đo mới cưỡng chế.
+
+DINH_CHINH_GHI_CHU_SKILL_CUA_VONG_12:
+  ghi_chu_sai: >-
+    Khối `base_da_do_lai.do_lai_lan_ba.dang_bao_cho_vong_12` viết: "vòng 12 chạy trên một BẢN SKILL
+    KHÁC hai vòng trước". ĐO LẠI thì SAI.
+  do_duoc: >-
+    `.claude/skills/cross-review/SKILL.md` trên nhánh packet = blob `dc563d95d277`; trên
+    `origin/master` = blob `804c18a317d7`. Lượt review chạy trong bản clone của NHÁNH PACKET,
+    và nhánh packet CHƯA merge master — nên vòng 12 dùng ĐÚNG bản `dc563d9`, y hệt vòng 11.
+  cai_dung_phai_noi: >-
+    Master đã đổi SKILL, nhưng thay đổi ấy KHÔNG với tới lượt review này. Nó chỉ với tới khi ai đó
+    merge master vào nhánh packet — và ở #318 chưa ai merge, cố ý, vì `base_sha` giữ `c35ae1c`.
+  vi_sao_ghi_ra_thay_vi_sua_de: >-
+    Ghi chú sai ấy do CHÍNH phiên này viết cách đây một giờ, và nó thuộc loại nguy hiểm nhất: một
+    cảnh báo NGHE HỢP LÝ về một thứ không xảy ra. Nếu vòng 12 ra kết quả lạ, ghi chú ấy sẵn sàng
+    làm lời giải thích sai. Sửa đè thì mất dấu; ghi đính chính thì không.

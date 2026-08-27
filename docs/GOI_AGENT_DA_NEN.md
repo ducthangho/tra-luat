@@ -617,10 +617,12 @@ KHÁC NHAU ở hai cấu hình. Mục dưới có ví dụ: hàng `--allowedTool
 | **chưa xếp được** | không rơi gọn vào bốn hàng trên | phải GỌI TÊN là chưa xếp được, không im lặng bỏ qua |
 
 **Mục này dùng BA trên năm hạng — nhưng KHÔNG phải ba hạng mà bản trước tưởng.** Đơn vị đếm là
-**lần GẮN NHÃN cho một mệnh đề**, không phải số lần xuất hiện của cụm chữ. Bảy mệnh đề mang nhãn:
-năm hàng bảng, cộng mệnh đề cơ chế proxy ambient và mệnh đề bộ-ba-với-quyền-ghi, cả hai nằm trong
-văn xuôi dưới bảng. Đếm ra: `chiều ĐÓNG` ×1 · `chiều MỞ` ×4 · `chưa xếp được` ×2 ·
+**lần GẮN NHÃN cho một mệnh đề**, không phải số lần xuất hiện của cụm chữ. TÁM mệnh đề mang nhãn:
+năm hàng bảng, cộng mệnh đề cơ chế proxy ambient, mệnh đề bộ-ba-với-quyền-ghi, và mệnh đề mạng
+sandbox ở đoạn khai chỗ tách. Đếm ra: `chiều ĐÓNG` ×1 · `chiều MỞ` ×5 · `chưa xếp được` ×2 ·
 `máy phát hiện` ×0 · `quan sát chưa rõ cơ chế` ×0.
+Mệnh đề thứ tám ấy là mệnh đề DUY NHẤT có phép đo nằm ở packet khác. Nó vẫn phải mang nhãn: bỏ nó
+ra khỏi phép đếm vì "bằng chứng ở chỗ khác" là mở đúng cái ngoại lệ mà cam kết trên cấm.
 
 Bản trước của chính đoạn này khai `chiều ĐÓNG` **bằng KHÔNG** rồi dựng cả một lập luận trên đó —
 rằng ô rỗng ấy chứng minh "không control nào bó được". Cross-review bác: có mệnh đề THẬT SỰ đóng.
@@ -664,9 +666,11 @@ chiếu được: bảng có ĐÚNG một hàng `codex` ở `48cf331`, `f16b6bf`
 Kết quả **bên trong sandbox codex khác hẳn**, và mục ấy — cùng mục hai pha reviewer — ĐÃ TÁCH sang
 packet riêng. Lý do tách là một phép đếm, không phải cảm tính: bốn vòng cross-review liên tiếp đều
 sinh finding về mục mạng/sandbox (tám finding), trong khi mọi tiêu chí khác của packet này đã đạt
-từ vòng ba. Mệnh đề còn đứng mà không cần bảng số nào: **mạng đóng của sandbox là một MẶC ĐỊNH
-CẤU HÌNH, không phải bất biến — biết cơ chế KHÔNG làm nó thành ranh giới.** Số đo, probe và bảng
-hai pha thuộc packet kia; đừng chép lại chúng vào đây.
+từ vòng ba. Mệnh đề còn đứng mà không cần bảng số nào — và nó MANG NHÃN như mọi mệnh đề khác:
+**mạng đóng của sandbox là một MẶC ĐỊNH CẤU HÌNH, không phải bất biến — biết cơ chế KHÔNG làm nó
+thành ranh giới** ⇒ **cơ chế đã xác minh — chiều MỞ**, cho câu hỏi *"nó có phải ranh giới không"*:
+ta biết VÌ SAO nó không bó, vì cờ lật được. Phép đo chống lưng cho nhãn ấy nay nằm ở packet kia
+cùng số đo, probe và bảng hai pha — **đừng chép chúng về đây**, chỉ giữ nhãn và con trỏ.
 
 Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": `rc=0`, ref được tạo, và
 `--require-clean` **vẫn báo sạch**. Đo tiếp BA control ấy — năm hàng, vì `--allowedTools` vào bảng

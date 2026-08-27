@@ -1,0 +1,108 @@
+schema_version: 2
+event: kiem_doc_lap
+loai: khong_phai_verdict_review
+ghi_chu_loai: >-
+  Biên nhận này là phép đo của PHIÊN ĐIỀU PHỐI, không phải verdict của reviewer. Nó tồn tại vì
+  phiên điều phối đã cam kết không chuyển tiếp báo cáo của executor mà không tự đo lại.
+packet_issue: 319
+packet_id: MCP-GH-CUU-HO
+lease_id: mcp-gh-cuu-ho-exec-1r5-codex-20260826
+nguoi_do: claude
+vai: dieu_phoi
+
+neo:
+  base_sha: '97617d3a5372fcce39b0e53064958c24d15775ce'
+  base_trang_thai: da_commit_va_da_xac_minh_lanh
+  ban_va_dang_xet: chua_commit
+  ban_va_diff_sha256: '3e564de0e26efede9e9b0d5f4668f42460640398862992d8d4aca626d515ff75'
+  ban_va_so_dong_diff: 56
+
+ngan_sach:
+  mcp_gh_py: 230
+  mcp_gh_test_py: 670
+  tong: 900
+  tran: 900
+  bien_con_lai: 0
+  tu_bao_ve_boi: 'ca D9 (assert tong <= 900)'
+
+phuong_phap:
+  ky_thuat: dot_bien_theo_so_dong
+  ly_do_khong_theo_chuoi: >-
+    Hai chuỗi đích nay xuất hiện HAI lần trong tệp — một lần là mã thật, một lần là dữ liệu trong
+    bảng MUTATIONS. Bộ đo theo chuỗi có chốt một-lần-xuất-hiện nên trả KHÔNG_ĐO_ĐƯỢC thay vì đoán.
+  cach_chay: >-
+    Sao mcp_gh.py và mcp_gh_test.py sang thư mục tạm, sửa MỘT dòng theo chỉ số, chạy
+    python3 mcp_gh_test.py, ghi mã thoát cùng dòng CA và dòng TỔNG.
+
+phep_do:
+  - ten: NEN
+    sua: khong
+    ma_thoat: 0
+    ca: '40/40 đạt · 0 đỏ'
+    dot_bien: '46/46 tập giết'
+    d8: 'ĐẠT (a)(b)(c)'
+    phan_dinh: nen_xanh
+  - ten: M1_than_ca_rong
+    sua: 'dòng 607: fn() -> pass'
+    ma_thoat: 1
+    ca: '40/40 đạt · 0 đỏ'
+    d8_a: "ĐỎ ('D11-gate',)"
+    d8_b: 'ĐẠT'
+    phan_dinh: bi_giet
+    ghi_chu: 'Dòng D8(b) ĐẠT là SAI — xem M4 cho sự thật.'
+  - ten: M3_bo_chot_D11
+    sua: 'dòng 652: if not getattr(chay_cli, "d11_da_chay", False): -> if False:'
+    ma_thoat: 0
+    ca: '40/40 đạt · 0 đỏ'
+    d8: 'ĐẠT (a)(b)(c)'
+    phan_dinh: song_sot
+    ghi_chu: 'Xoá chốt là VÔ HÌNH với toàn bộ bộ đo. Chốt không có phản chứng.'
+  - ten: M4_than_ca_rong_va_bo_chot
+    sua: 'dòng 607 + dòng 652'
+    ma_thoat: 1
+    d8_a: 'ĐỎ — 46 đột biến'
+    d8_b: 'ĐỎ — 46 đột biến'
+    phan_dinh: bi_giet
+    ghi_chu: >-
+      Chứng minh HAI điều: (1) sự thật trong kịch bản thân-ca-rỗng là D8(b) đỏ toàn bộ, nên dòng
+      ĐẠT của M1 là sai; (2) D8(b) MỘT MÌNH đã giết được thân-ca-rỗng, nên chốt không cần thiết.
+  - ten: M5_ep_rc_0
+    sua: 'dòng 664: rc = ma_thoat(...) -> rc = 0'
+    ma_thoat: 0
+    ca: '39/40 đạt · 1 đỏ'
+    tong_in_ra: 'ĐẠT'
+    phan_dinh: song_sot
+    ghi_chu: >-
+      Tiến trình thoát 0 trong khi in một ca ĐỎ. TỔNG suy từ rc chứ không suy từ báo cáo, nên hai
+      nửa cùng một bản in mâu thuẫn nhau. Đột biến d11_ep_rc_xanh CÓ chết trong SỔ đột biến, nhưng
+      tính chất ĐẦU-CUỐI (mã thoát phản ánh báo cáo) thì không được đo.
+
+xac_minh_phan_da_commit:
+  cay: '97617d3a'
+  ca: '39/39 đạt · 0 đỏ'
+  dot_bien: '42/42 tập giết'
+  d8: 'ĐẠT (a)(b)(c)'
+  ma_thoat: 0
+  ket_luan: ba_P1_vong_2_LANH
+
+ket_luan:
+  P1_vong_3: chua_dong
+  so_cho_con_ho: 3
+  cho_ho:
+    - 'Chốt GHI ĐÈ d8_errors nên biến một sự thật ĐỎ thành dòng in ĐẠT sai.'
+    - 'Chốt không có phản chứng (M3 sống sót) và không cần thiết (M4 vẫn giết).'
+    - 'rc = 0 vẫn sống: mã thoát tách rời báo cáo — đúng P1 đã nêu.'
+  da_commit_ban_va: false
+  ly_do_khong_commit: >-
+    Không được ghi "P1 đã đóng" khi ba phép đo trên nói ngược lại. Diff giữ trong bản clone làm
+    việc, băm ghi ở trên.
+
+de_xuat:
+  A_khuyen_nghi: >-
+    verdict blocked + lease r6: bỏ hai dòng chốt, đổi chay_cli để rc SUY RA TỪ bản báo cáo đã in
+    thay vì tính song song, thêm một ca đo tính chất đầu-cuối. Net dòng nhiều khả năng ÂM nên
+    không cần nâng trần. Căn cứ protocol §3.2 — finding cho thấy đặc tả thiếu thì đi qua revision.
+  B_khong_khuyen_nghi: >-
+    Land 97617d3a và tách P1 vòng 3 sang packet riêng. luat_dung_LAND KHÔNG cho phép: nó chỉ cho
+    P2 thành nợ có tên, P1 vẫn chặn land. B chỉ hợp lệ nếu NGƯỜI GIỮ KHO hạ hạng finding — phiên
+    điều phối không tự hạ.

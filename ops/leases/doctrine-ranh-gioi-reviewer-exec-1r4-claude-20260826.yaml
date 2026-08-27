@@ -357,8 +357,8 @@ recorder_ghi_chu: >-
 
 leased_at_utc: '2026-08-26T09:35:00Z'
 ban_sua_doi_2_luc_utc: '2026-08-26'
-lease_expires_at_utc: '2026-08-27T22:00:00Z'
-run_minutes: 2160
+lease_expires_at_utc: '2026-08-28T22:00:00Z'
+run_minutes: 3600
 gia_han:
 - tu: '2026-08-27T10:00:00Z'
   den: '2026-08-27T22:00:00Z'
@@ -396,6 +396,47 @@ gia_han:
     #319 vừa dính đúng chỗ này lúc đóng lease sớm. Tệp YAML này là bản CÓ THẨM QUYỀN;
     comment là bản chiếu và nó ĐANG LỆCH.
 
+- tu: '2026-08-27T22:00:00Z'
+  den: '2026-08-28T22:00:00Z'
+  cong_them: '24 giờ'
+  luc_ghi_utc: '2026-08-27T20:18:00Z'
+  boi: ducthangho
+  can_cu: >-
+    Uỷ quyền trực tiếp trong phiên, 2026-08-27: "Tôi uỷ quyền cho phép bạn cấp lease, gia hạn,
+    khi có vấn đề cần xin ý kiến hãy chọn phương án bạn cho là tốt nhất." §2 — authorize thuộc
+    chủ kho. Lượt gia hạn này do phiên điều phối tự quyết trong một lượt kiểm định kỳ.
+  vi_sao: >-
+    ĐO 2026-08-27T20:16:56Z: `master` vẫn `b7024287`; `refs/pull/358/merge` = `870c042e` còn tồn
+    tại ⇒ PR #358 còn MỞ; `merge-base --is-ancestor b78a0213 b7024287` rc=1; blob
+    `docs/GOI_AGENT_DA_NEN.md` trên master vẫn `16bad9e1` = y hệt base `c35ae1c`. Tức #318 CHƯA
+    land, và hạn cũ chỉ còn 1 giờ 43 phút. Để lease hết hạn sẽ nhả `docs/GOI_AGENT_DA_NEN.md`
+    thành KHÔNG NGƯỜI GIỮ trong khi PR #358 vẫn mở trên đúng tệp ấy.
+  vi_sao_24h_chu_khong_ngan_hon: >-
+    Thứ đang chặn KHÔNG phải nội dung mà là một thao tác chỉ chủ kho làm được (bấm Merge trên
+    GitHub). Phiên không dự đoán được lúc nào việc đó xảy ra, nên chọn mốc phủ qua đêm thay vì
+    gia hạn nhiều lượt ngắn — mỗi lượt ngắn là một lần sửa hồ sơ, và hồ sơ sửa nhiều lần là chỗ
+    bản ghi bắt đầu trôi khỏi phép đo. Mốc này cũng phủ được hạn của lease r3 của #334
+    (2026-08-28T13:55:00Z), nên hai packet không lệch pha nhau.
+  trang_thai_318_luc_gia_han: >-
+    `approved` vòng 15 (`codex`, P1=0 P2=0), CI XANH trên head `b78a0213` của PR #358
+    (sự kiện `check_suite.completed` 2026-08-27T13:53:28Z: không suite bên thứ ba nào còn chạy
+    hoặc thất bại), merge sạch vào `b7024287`. Chỉ còn CHỜ MERGE.
+  khong_tao_revision: >-
+    §3.2 liệt kê đúng năm thứ tạo revision: objective, acceptance, write set, dependency,
+    executor/environment. `lease_expires_at_utc` KHÔNG nằm trong đó. `reviewed_sha_required`
+    giữ nguyên `1c000495c8e64e2582c37ee92ae5be8d14557218`.
+  run_minutes_ghi_chu: >-
+    2160 → 3600, DỜI ĐỀU +1440' đúng bằng lượng gia hạn. KHÔNG suy lại từ `leased_at_utc` —
+    chiều dư này đã lệch 25 phút từ trước lượt gia hạn ĐẦU (`leased_at` + 1440' = 09:35Z chứ
+    không phải 10:00Z đã ghi), và suy lại sẽ lặng lẽ sửa một sai số có sẵn rồi giấu nó trong
+    lượt gia hạn. Nợ CÓ TÊN, gốc ghi ở `ops/BAO_313_...md` §8: schema lưu một sự thật hai
+    chiều và chiều dư trôi. Không vá ở đây.
+  ban_chieu_KHONG_theo: >-
+    Lần thứ BA khai cùng một chỗ lệch, vì nó vẫn đúng: `lease_publish.py` kiểm
+    `posted_comment_id` ngay đầu `kiem()` và ném `RC_DA_DANG`=9; `ops-publish-lease.yml` bắt
+    rc=9 rồi `continue`. Nên comment 5427971996 trên Issue #318 VẪN HIỂN THỊ hạn 10:00Z — sai
+    so với bản có thẩm quyền tới hai lượt gia hạn. Kho KHÔNG có đường cập nhật comment lease
+    (cùng họ nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong`). Tệp YAML này là bản CÓ THẨM QUYỀN.
 viec_cua_luot_nay: >-
   Hoà BA câu tự mâu thuẫn trong `docs/GOI_AGENT_DA_NEN.md` (đọc trên `6c4140b`, đối chiếu số dòng
   lại sau khi rẽ nhánh vì tệp trên `master` ngắn hơn):

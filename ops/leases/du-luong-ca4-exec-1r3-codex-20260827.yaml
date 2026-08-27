@@ -13,6 +13,7 @@ phase_key: DU-LUONG-CA4
 revision: 3
 generation: 1
 lease_id: du-luong-ca4-exec-1r3-codex-20260827
+da_bi_thay_the: du-luong-ca4-thu-hoi-claude-20260827
 thay_the_cho: du-luong-ca4-exec-1r2-codex-20260826
 
 role: executor

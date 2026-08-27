@@ -497,6 +497,26 @@ base_da_do_lai:
     giao_write_set: 'RỖNG — không chạm `docs/GOI_AGENT_DA_NEN.md`'
     blob_write_set: '16bad9e13255 tại `c35ae1c` = 16bad9e13255 tại `9044a5d` — Y HỆT TỪNG BYTE'
     ket_luan: '`base_sha` GIỮ NGUYÊN `c35ae1c`, cùng căn cứ §3.2 như lần trôi trước'
+  do_lai_lan_ba:
+    vi_sao: '`S4` BẮN LẠI lúc 02:43Z 27-08 — `origin/master` trôi tiếp `9044a5d` → `ac82ddc`'
+    master_luc_do: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+    to_tien: '`c35ae1c` VẪN là tổ tiên của `ac82ddc` — `git merge-base --is-ancestor` rc=0'
+    so_commit_moi_tu_c35ae1c: 50
+    drift: >-
+      12 đường dẫn: `.claude/agents/tl-auditor.md` · `.claude/agents/tl-rasoat.md` ·
+      `.claude/dev/packet_loop.py` · `.claude/dev/packet_loop_test.py` ·
+      `.claude/hooks/pretooluse_guard.py` · `.claude/hooks/pretooluse_guard_test.py` ·
+      `.claude/skills/cross-review/SKILL.md` · `.claude/skills/work-packet/SKILL.md` ·
+      `ops/lease_publish.py` · `ops/lease_publish_test.py` ·
+      `ops/specs/agent-may-phat-hien-ghi.md` · `ops/specs/t33-doi-shellcheck-r4.md`
+    giao_write_set: 'RỖNG — không chạm `docs/GOI_AGENT_DA_NEN.md`'
+    blob_write_set: '16bad9e13255 tại `c35ae1c` = 16bad9e13255 tại `ac82ddc` — Y HỆT TỪNG BYTE'
+    ket_luan: '`base_sha` GIỮ NGUYÊN `c35ae1c`, cùng căn cứ §3.2 như hai lần trôi trước'
+    dang_bao_cho_vong_12: >-
+      Drift lần này CHẠM `.claude/skills/cross-review/SKILL.md` — tệp điều khiển chính lượt review
+      sắp chạy. Không giao write set, nên `S4` không đổi base; nhưng vòng 12 chạy trên một BẢN
+      SKILL KHÁC hai vòng trước. Ghi ra để verdict vòng 12 không bị đọc là cùng thang đo với
+      vòng 10-11.
   ket_qua:
     to_tien: '`c35ae1c` VẪN là tổ tiên của `b662fe1` — master đi TỚI, không viết lại lịch sử'
     drift: 'ops/lease_publish.py · ops/lease_publish_test.py'

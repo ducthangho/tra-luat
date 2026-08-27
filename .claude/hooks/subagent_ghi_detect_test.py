@@ -23,9 +23,25 @@ HOOK = HERE / "subagent_ghi_detect.py"
 def _cay():
     """Dung mot worktree git TAM co mot commit. Tra duong dan."""
     d = tempfile.mkdtemp(prefix="tl329-cay-")
-    sh = lambda *a: subprocess.run(a, cwd=d, capture_output=True, text=True)
+
+    def sh(*a):
+        # KIEM MA THOAT. Ban truoc dung `lambda` VUT ma thoat, nen mot buoc fixture hong
+        # di qua im lang va ca do vi ly do KHONG lien quan gi toi detector.
+        r = subprocess.run(a, cwd=d, capture_output=True, text=True)
+        if r.returncode != 0:
+            raise AssertionError(f"fixture hong o {' '.join(a)!r}: rc={r.returncode} "
+                                 f"stderr={(r.stderr or '').strip()[:200]}")
+        return r
+
     sh("git", "init", "-q")
     sh("git", "config", "user.email", "t@t"); sh("git", "config", "user.name", "t")
+    # HERMETIC: ghim moi thu co the den tu cau hinh GLOBAL cua may chay. Cross-review do
+    # duoc: tren nen `commit.gpgsign=true`, hai commit fixture that bai => baseline thanh
+    # kho KHONG CO HEAD => 9/19 ca do. (Toi KHONG tai hien duoc that bai ay tren container
+    # nay — `gpgsign=true` khong signingkey van rc=0 — nhung ghim dung o CA HAI nen.)
+    for k, v in (("commit.gpgsign", "false"), ("tag.gpgsign", "false"),
+                 ("core.autocrlf", "false"), ("core.eol", "lf"), ("gc.auto", "0")):
+        sh("git", "config", k, v)
     (pathlib.Path(d) / "a.txt").write_text("x\n", encoding="utf-8")
     sh("git", "add", "a.txt"); sh("git", "commit", "-qm", "khoi tao")
     (pathlib.Path(d) / ".gitignore").write_text(".tl_state/\n", encoding="utf-8")
@@ -277,6 +293,116 @@ def t18_HEAD_doi_giua_Start_va_Stop_la_UNKNOWN(h):
     return (kq == "unknown", f"HEAD doi -> {kq} (mong doi unknown — khong the so hai anh khac nen)")
 
 
+def t19_de_len_tep_DA_CO_TRUOC_Start_van_changed(h):
+    """P1 `status-on-dinh-che-giau-lan-ghi` (cross-review PR #342, DA TAI HIEN).
+
+    Mot tep ignored DA co mat truoc Start bi GHI DE: dong porcelain KHONG doi, `.git/index`
+    KHONG doi => ban truoc bao `clean` trong khi byte da khac. Do duoc: `TRUOC` ->
+    `SAU-DA-BI-DE`, ket qua `clean`. Vung mu nam DUNG o `.tl_state/` — noi D3 vua mo ra."""
+    c, sn = _cay(), _snap()
+    d = pathlib.Path(c) / ".tl_state"; d.mkdir()
+    (d / "plan.json").write_text("TRUOC\n", encoding="utf-8")      # TON TAI truoc Start
+    goi("SubagentStart", "tl-auditor", "a19", c, sn, h)
+    (d / "plan.json").write_text("SAU-DA-BI-DE\n", encoding="utf-8")  # GHI DE, cung trang thai
+    rc, kq, _ = goi("SubagentStop", "tl-auditor", "a19", c, sn, h)
+    shutil.rmtree(c, ignore_errors=True)
+    return (kq == "changed", f"de len tep ignored da co -> {kq} (mong doi changed)")
+
+
+def t19b_de_len_tep_UNTRACKED_da_co_van_changed(h):
+    """Cung lop voi t19 nhung o trang thai `??` thay vi `!!` — de chot khong chi dung cho
+    mot trang thai."""
+    c, sn = _cay(), _snap()
+    f = pathlib.Path(c) / "rac.txt"
+    f.write_text("TRUOC\n", encoding="utf-8")
+    goi("SubagentStart", "tl-auditor", "a19b", c, sn, h)
+    f.write_text("SAU\n", encoding="utf-8")
+    rc, kq, _ = goi("SubagentStop", "tl-auditor", "a19b", c, sn, h)
+    shutil.rmtree(c, ignore_errors=True)
+    return (kq == "changed", f"de len tep untracked da co -> {kq} (mong doi changed)")
+
+
+def t20_duong_KHONG_bam_duoc_thi_UNKNOWN_khong_phai_clean(h):
+    """`None != False`. Mot duong quan sat duoc ma KHONG noi-dung-hoa duoc thi khong duoc
+    khang dinh `clean` — va bao cao phai GOI TEN no, khong dem.
+
+    Dung tep VUOT TRAN, khong dung symlink va khong dung FIFO — ca hai deu KHONG toi duoc
+    cho bam:
+      · symlink VAN bam duoc (bam theo link target), nen khong sinh duong MU nao;
+      · FIFO thi `git status --porcelain -uall --ignored` KHONG HE liet ke (do truc tiep:
+        chi `?? to.bin` hien ra, `ong` bien mat) — nen no khong bao gio toi duoc ma bam.
+    Tep vuot tran thi git CO liet ke va ma CO chay qua nhanh `qua tran`. Do la khac biet
+    giua mot ca do DUONG DI va mot ca chi do y dinh."""
+    c, sn = _cay(), _snap()
+    (pathlib.Path(c) / "to.bin").write_bytes(b"\0" * (9 * 1024 * 1024))
+    goi("SubagentStart", "tl-auditor", "a20", c, sn, h)
+    p2 = subprocess.run([sys.executable, "-B", str(h or HOOK)],
+                        input=json.dumps({"hook_event_name": "SubagentStop",
+                                          "agent_type": "tl-auditor", "agent_id": "a20",
+                                          "cwd": c}),
+                        capture_output=True, text=True,
+                        env={**os.environ, "TL_SUBAGENT_SNAP_DIR": sn})
+    shutil.rmtree(c, ignore_errors=True)
+    try:
+        d = json.loads((p2.stderr or "").strip().splitlines()[-1])
+    except Exception:
+        return (False, "khong doc duoc JSON bao cao")
+    mu = (d.get("chi_tiet") or {}).get("khong_bam_duoc") or []
+    ok = d.get("ket_qua") == "unknown" and any("to.bin" in x for x in mu)
+    return (ok, f"tep vuot tran -> {d.get('ket_qua')} · khong_bam_duoc={mu} "
+                f"(mong doi unknown + co ten duong)")
+
+
+def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h):
+    """P1 `hook-khong-co-fallback-project-dir` (cross-review PR #342, DA TAI HIEN).
+
+    `CLAUDE_PROJECT_DIR` KHONG duoc dat trong phien remote — chinh `CLAUDE.md:541` ghi lai
+    phep do ay, va toi do lai trong phien nay: bien CHUA DAT. Lenh cu no thanh
+    `/.claude/hooks/...` va thoat 2 TRUOC khi detector doc duoc payload.
+
+    Ca nay doc lenh TU `.claude/settings.json` chu khong chep lai — chep lai la hai ban se
+    troi lech, va ca se do mot dieu khong con dung."""
+    goc = HERE.parent.parent
+    d = json.loads((goc / ".claude" / "settings.json").read_text(encoding="utf-8"))
+    xau = []
+    for su_kien in ("SubagentStart", "SubagentStop"):
+        nhom = (d.get("hooks") or {}).get(su_kien) or []
+        if not nhom:
+            xau.append(f"{su_kien}: CHUA DANG KY")
+            continue
+        lenh = nhom[0]["hooks"][0]["command"]
+        for nhan, moi_truong in (("khong dat", {}),
+                                 ("co dat", {"CLAUDE_PROJECT_DIR": str(goc)})):
+            env = {k: v for k, v in os.environ.items() if k != "CLAUDE_PROJECT_DIR"}
+            env.update(moi_truong)
+            env["TL_SUBAGENT_SNAP_DIR"] = _snap()
+            r = subprocess.run(["bash", "-c", lenh], cwd=str(goc / ".claude" / "dev"),
+                               input=json.dumps({"hook_event_name": "SubagentStart",
+                                                 "agent_type": "tl-auditor",
+                                                 "agent_id": f"t21{nhan}{su_kien}",
+                                                 "cwd": str(goc)}),
+                               capture_output=True, text=True, env=env)
+            if r.returncode != 0:
+                xau.append(f"{su_kien}/{nhan}: rc={r.returncode} {(r.stderr or '')[:80]}")
+    return (not xau, f"lenh hook chay duoc o 2 su kien x 2 nen -> dung {4 - len(xau)}/4"
+                     + (f"; SAI: {xau}" if xau else ""))
+
+
+def t22_runner_TU_CHOI_cham_diem_dot_bien_khi_NEN_DO(h):
+    """Chot cua chinh bo test nay — doc TEP NGUON, khong doc trang thai da nap.
+
+    Cross-review do duoc: `CA 10/19 dat · DOT BIEN 13/13 bi giet`. Khi nen do, moi dot bien
+    "giet" tam thuong bang cac ca DA DO SAN, va ty le ay KHONG CO NGHIA. Ca nay doi hai
+    tinh chat co mat trong ma: `giet` phai loai `do_san`, va nen do thi tu choi cong bo."""
+    van = pathlib.Path(__file__).read_text(encoding="utf-8")
+    thieu = []
+    if "if f.__name__ not in do_san and not f(tep)[0]" not in van:
+        thieu.append("`giet` khong loai `do_san`")
+    if "DIEM DOT BIEN BI TU CHOI" not in van:
+        thieu.append("khong tu choi cong bo diem khi nen do")
+    return (not thieu, "runner co ca hai chot nen-do" if not thieu else f"THIEU: {thieu}")
+
+
 CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t3_ghi_tep_BI_IGNORE_van_changed, t4_sua_tep_da_theo_doi_thi_changed,
       t5_thieu_anh_chup_la_UNKNOWN_khong_phai_clean, t6_cwd_khong_phai_git_la_UNKNOWN,
@@ -286,7 +412,13 @@ CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t12_anh_chup_KHONG_nam_trong_cay_dang_do,
       t13_index_byte_khong_doi_khi_chi_DOC, t14_D1_chi_TO_CAO_khong_chan,
       t15_bao_cao_KHAI_TEN_vung_MU, t16_delta_neu_ten_tep_NGUYEN_VAN_khong_phai_so_dem,
-      t17_anh_chup_bi_don_sau_khi_dung, t18_HEAD_doi_giua_Start_va_Stop_la_UNKNOWN]
+      t17_anh_chup_bi_don_sau_khi_dung, t18_HEAD_doi_giua_Start_va_Stop_la_UNKNOWN,
+      # --- luot 2: BA P1 cua cross-review codex tren PR #342 ---
+      t19_de_len_tep_DA_CO_TRUOC_Start_van_changed,
+      t19b_de_len_tep_UNTRACKED_da_co_van_changed,
+      t20_duong_KHONG_bam_duoc_thi_UNKNOWN_khong_phai_clean,
+      t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT,
+      t22_runner_TU_CHOI_cham_diem_dot_bien_khi_NEN_DO]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
@@ -306,9 +438,11 @@ DOT_BIEN = [
      'if truoc.get("agent_type") != agent or truoc.get("cwd") != cwd:', "if False:"),
     # Dot bien nay ban dau nham nhanh `changed`, ma `t15` chay nhanh `clean` => no khong
     # bao gio duoc cham toi va SONG. Nay nham dung nhanh `clean`.
+    # Moc cu bien mat khi nhanh `clean` them `so_duong_da_bam_noi_dung` (luot 2). Neo lai
+    # vao chinh khoa `MU` — ngan hon va it troi hon.
     ("m8_bo_khai_vung_MU",
-     '_bao("clean", "khong thay doi nao trong cay quan sat duoc", {\n        "MU": ["ghi ngoai git top-level", "tac dung phu MANG",\n               "ghi roi hoan tac trong cung mot luot"]})',
-     '_bao("clean", "khong thay doi nao trong cay quan sat duoc")'),
+     '        "MU": ["ghi ngoai git top-level", "tac dung phu MANG",\n               "ghi roi hoan tac trong cung mot luot"]})',
+     '        })'),
     ("m9_anh_chup_vao_TRONG_cay",
      'd = pathlib.Path(os.environ.get("TL_SUBAGENT_SNAP_DIR")',
      'd = pathlib.Path(os.environ.get("TL_SUBAGENT_SNAP_DIR_KHONG_TON_TAI")'),
@@ -319,22 +453,42 @@ DOT_BIEN = [
      '_AGENT = frozenset({"tl-auditor", "tl-rasoat", "general-purpose"})'),
     ("m12_bo_don_anh_chup", 'dich.unlink(missing_ok=True)\n    return _MA_CLEAN',
      "return _MA_CLEAN"),
+    # --- luot 2: dot bien cho ba chot moi ---
+    ("m14_bo_bam_noi_dung", "    noi_dung, mu = _van_tay_noi_dung(top, st)",
+     "    noi_dung, mu = {}, []"),
+    ("m15_bo_so_sanh_noi_dung",
+     "    doi_noi_dung = sorted(k for k in set(nd_t) & set(nd_s) if nd_t[k] != nd_s[k])",
+     "    doi_noi_dung = []"),
+    ("m16_duong_MU_doc_thanh_clean", "    if mu_nd:", "    if False:"),
     ("m13_delta_rut_ve_so_dem", '"them": them, "mat": mat,',
      '"them": len(them), "mat": len(mat),'),
 ]
 
 
 def chay():
+    do_san = set()          # ca DA DO o NEN — doc chu thich duoi truoc khi sua
     do = 0
     for f in CA:
         ok, msg = f(None)
         if not ok:
             do += 1
+            do_san.add(f.__name__)
             print(f"  DO   {f.__name__:52} {msg}")
         else:
             print(f"  ok   {f.__name__:52} {msg}")
     goc = HOOK.read_text(encoding="utf-8")
     song = []
+    # ── DOT BIEN CHI CO NGHIA KHI NEN XANH ───────────────────────────────────────────────
+    # Ban truoc dem `giet = [f for f in CA if not f(tep)[0]]` — KHONG he tham chieu `do_san`.
+    # Nen khi nen do, MOI dot bien "giet" tam thuong bang chinh cac ca da do san, va runner
+    # in `13/13 bi giet` NGAY CANH `CA 10/19 dat`. Cross-review codex tren PR #342 do duoc
+    # dung cap so ay.
+    # Hai chot, can CA HAI:
+    #   1. "giet" chi tinh ca PASS o nen ma FAIL o mutant — HIEU SO, khong phai tap tho;
+    #   2. nen do thi TU CHOI cong bo diem dot bien. Mot ty le tinh tren nen do khong phai
+    #      "so nho hon su that" — no KHONG CO NGHIA, va in no ra la moi nguoi doc nham.
+    # Dung bai hoc "dot bien bi giet boi mot ca DA DO thi phep do ay vo nghia" ma packet
+    # #336 phai ap BANG TAY tung luot; nay may cuong che.
     print("--- DOT BIEN ---")
     with tempfile.TemporaryDirectory() as d:
         for ten, cu, moi in DOT_BIEN:
@@ -348,14 +502,22 @@ def chay():
                 ma = ma.replace(c, m, 1)
             tep = pathlib.Path(d) / f"hook_{ten}.py"
             tep.write_text(ma, encoding="utf-8")
-            giet = [f.__name__ for f in CA if not f(tep)[0]]
+            giet = [f.__name__ for f in CA
+                    if f.__name__ not in do_san and not f(tep)[0]]
             if giet:
                 print(f"  GIET {ten:34} lam DO: {', '.join(giet[:3])}")
             else:
                 print(f"  SONG {ten:34} KHONG ca nao do -> chot nay KHONG CO RANG")
                 song.append(ten)
     tap_giet = len(DOT_BIEN) - len(song)
-    print(f"TONG: CA {len(CA) - do}/{len(CA)} dat · DOT BIEN {tap_giet}/{len(DOT_BIEN)} bi giet")
+    if do_san:
+        print(f"TONG: CA {len(CA) - do}/{len(CA)} dat")
+        print(f"TONG: DIEM DOT BIEN BI TU CHOI — nen co {len(do_san)} ca DO SAN "
+              f"({', '.join(sorted(do_san)[:3])}{'...' if len(do_san) > 3 else ''}). "
+              f"Sua nen xanh truoc, roi moi doc duoc so dot bien.")
+    else:
+        print(f"TONG: CA {len(CA) - do}/{len(CA)} dat · "
+              f"DOT BIEN {tap_giet}/{len(DOT_BIEN)} bi giet")
     dat = (len(CA) > 0 and do == 0 and len(DOT_BIEN) > 0 and not song)
     print("TONG:", "DAT" if dat else "DO")
     # ── A10 — RANH GIOI CUA CHINH BO TEST NAY, khai o day chu khong giau trong PR ──

@@ -80,13 +80,81 @@ def _chup(cwd):
     van_tay_idx = ""
     if idx.is_file():
         van_tay_idx = hashlib.sha256(idx.read_bytes()).hexdigest()[:16]
+    noi_dung, mu = _van_tay_noi_dung(top, st)
     return {
         "top": top,
         "head": head.strip(),
         "status": st,
+        "noi_dung": noi_dung,               # path -> van tay NOI DUNG
+        "mu_noi_dung": mu,                  # path KHONG noi-dung-hoa duoc
         "index_sha256_16": van_tay_idx,     # A12: byte cua index KHONG duoc doi
         "luc": time.time(),
     }, None
+
+
+# Tran kich thuoc khi bam noi dung. Tep lon hon thi KHONG bam — va duoc khai la MU chu
+# khong lang le bo qua.
+_TRAN_BAM_BYTE = 8 * 1024 * 1024
+
+
+def _duong_tu_porcelain(dong):
+    """Tra duong dan tu mot ban ghi porcelain v1. `R  cu -> moi` tra ban MOI."""
+    if len(dong) < 4:
+        return None
+    p = dong[3:]
+    if " -> " in p:                       # rename/copy
+        p = p.split(" -> ", 1)[1]
+    if p.startswith('"') and p.endswith('"'):
+        # git trich dan khi ten co ky tu la; giai bang chinh luat cua no
+        try:
+            p = p[1:-1].encode("latin-1", "backslashreplace").decode("unicode_escape")
+        except Exception:
+            return None
+    return p
+
+
+def _van_tay_noi_dung(top, st):
+    """Bam NOI DUNG tung duong dan trong porcelain. Tra (anh_xa, danh_sach_MU).
+
+    VI SAO CAN — lo P1 `status-on-dinh-che-giau-lan-ghi` (cross-review PR #342, DA TAI HIEN):
+    ban truoc chi so TAP DONG porcelain cong bam `.git/index`. Mot tep DA co mat truoc Start
+    o cung trang thai (`!! .tl_state/plan.json`) bi GHI DE thi dong porcelain KHONG doi va
+    index KHONG doi => may bao `clean` trong khi byte da khac. Do duoc: `TRUOC` -> `SAU-DA-
+    BI-DE`, ket qua `clean`. Vung mu nam DUNG o `.tl_state/` — noi D3 vua mo ra, va noi
+    duong ghi that da do duoc rot xuong.
+
+    VI SAO BAM DUOC, khong phai vi re: voi `-uall --ignored` git tra TUNG TEP chu khong tra
+    thu muc — do tren kho nay: 61 ban ghi, 0 ban ghi ket thuc bang `/`. Nen tap can bam la
+    huu han va biet truoc, khong phai "duyet ca cay".
+
+    Duong nao KHONG bam duoc (thu muc, symlink, qua tran, doc khong duoc) thi vao danh sach
+    MU va duoc GOI TEN o bao cao — khong lang le bo qua."""
+    anh_xa, mu = {}, []
+    for dong in st.splitlines():
+        if not dong.strip():
+            continue
+        duong = _duong_tu_porcelain(dong)
+        if duong is None:
+            mu.append(dong[:80])
+            continue
+        f = pathlib.Path(top) / duong
+        try:
+            if f.is_symlink():
+                anh_xa[duong] = "symlink:" + os.readlink(f)   # KHONG di theo
+                continue
+            if f.is_dir():
+                mu.append(duong + " (thu muc)")
+                continue
+            if not f.is_file():
+                mu.append(duong + " (khong phai tep thuong)")
+                continue
+            if f.stat().st_size > _TRAN_BAM_BYTE:
+                mu.append(duong + " (qua tran %d byte)" % _TRAN_BAM_BYTE)
+                continue
+            anh_xa[duong] = hashlib.sha256(f.read_bytes()).hexdigest()[:16]
+        except OSError as e:
+            mu.append("%s (khong doc duoc: %s)" % (duong, e.__class__.__name__))
+    return anh_xa, sorted(mu)
 
 
 def _ghi_nguyen_tu(dich, du_lieu):
@@ -206,10 +274,14 @@ def main() -> int:
 
     them, mat = _so(truoc["status"], sau["status"])
     idx_doi = (truoc.get("index_sha256_16") != sau.get("index_sha256_16"))
+    nd_t, nd_s = truoc.get("noi_dung") or {}, sau.get("noi_dung") or {}
+    doi_noi_dung = sorted(k for k in set(nd_t) & set(nd_s) if nd_t[k] != nd_s[k])
+    mu_nd = sorted(set(truoc.get("mu_noi_dung") or []) | set(sau.get("mu_noi_dung") or []))
     # KHONG xoa bang chung TRUOC khi ket qua da duoc tao chac chan (dac ta §4.2).
-    if them or mat or idx_doi:
+    if them or mat or idx_doi or doi_noi_dung:
         _bao("changed", "phat hien thay doi trong cay quan sat duoc", {
             "them": them, "mat": mat,
+            "noi_dung_doi": doi_noi_dung,       # P1 `status-on-dinh-che-giau-lan-ghi`
             "index_byte_doi": idx_doi,          # A12
             "agent_type": agent, "cwd": cwd,
             "MU": ["ghi ngoai git top-level", "tac dung phu MANG",
@@ -217,7 +289,17 @@ def main() -> int:
         })
         dich.unlink(missing_ok=True)
         return _MA_CHANGED
+    if mu_nd:
+        # FAIL-CLOSE: co duong quan sat duoc ma KHONG noi-dung-hoa duoc thi khong duoc noi
+        # `clean` — day dung la `None != False`. Goi TEN tung duong, dung dem.
+        _bao("unknown", "co duong khong noi-dung-hoa duoc nen khong khang dinh duoc `clean`",
+             {"khong_bam_duoc": mu_nd,
+              "MU": ["ghi ngoai git top-level", "tac dung phu MANG",
+                     "ghi roi hoan tac trong cung mot luot"]})
+        dich.unlink(missing_ok=True)
+        return _MA_UNKNOWN
     _bao("clean", "khong thay doi nao trong cay quan sat duoc", {
+        "so_duong_da_bam_noi_dung": len(nd_s),
         "MU": ["ghi ngoai git top-level", "tac dung phu MANG",
                "ghi roi hoan tac trong cung mot luot"]})
     dich.unlink(missing_ok=True)

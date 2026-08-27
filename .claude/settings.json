@@ -152,7 +152,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'PY=\"$(command -v python3 || command -v python || command -v py)\"; \"$PY\" \"${CLAUDE_PROJECT_DIR}/.claude/hooks/subagent_ghi_detect.py\"'"
+            "command": "bash -c 'D=\"${CLAUDE_PROJECT_DIR:-}\"; [ -n \"$D\" ] || D=\"$(git rev-parse --show-toplevel 2>/dev/null)\"; [ -n \"$D\" ] || D=\"$PWD\"; PY=\"$(command -v python3 || command -v python || command -v py)\"; \"$PY\" \"$D/.claude/hooks/subagent_ghi_detect.py\"'"
           }
         ]
       }
@@ -162,7 +162,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'PY=\"$(command -v python3 || command -v python || command -v py)\"; \"$PY\" \"${CLAUDE_PROJECT_DIR}/.claude/hooks/subagent_ghi_detect.py\"'"
+            "command": "bash -c 'D=\"${CLAUDE_PROJECT_DIR:-}\"; [ -n \"$D\" ] || D=\"$(git rev-parse --show-toplevel 2>/dev/null)\"; [ -n \"$D\" ] || D=\"$PWD\"; PY=\"$(command -v python3 || command -v python || command -v py)\"; \"$PY\" \"$D/.claude/hooks/subagent_ghi_detect.py\"'"
           }
         ]
       }

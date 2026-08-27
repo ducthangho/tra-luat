@@ -41,6 +41,53 @@ Làm bước này ở ĐẦU phiên, không phải lúc sắp review: phát hi�
 chính mình — thứ §8 không cho. (Khi cả Claude lẫn Codex hết quota, xem hướng dẫn
 Antigravity Reviewer lane trong `AGENTS.md` theo cơ chế `same_provider_approved`.)
 
+## Chọn model/effort theo độ phức tạp
+
+| điểm | model | effort |
+|---:|---|---|
+| `<= 0` | `claude-opus-5` | `high` |
+| `1–2` | `claude-opus-5` | `xhigh` |
+| `3–4` | `claude-fable-5` | `xhigh` |
+| `>= 5` | `claude-fable-5` | `max` |
+
+Giữa các lượt của cùng packet, truyền bậc lượt trước làm `bac_truoc`: bánh cóc chỉ cho
+giữ hoặc tăng bậc, không bao giờ cho tụt khi diff còn lại nhỏ đi.
+
+Ba bẫy CLI đã đo 27-08-2026, không phải giả định:
+
+- `--effort khong-ton-tai` chỉ cảnh báo rồi lùi im lặng về mặc định; kết quả không ghi đã lùi.
+- `--model claude-khong-ton-tai-9` không chạy review nào nhưng vẫn trả `rc=0`.
+- Trong thư mục trống, 2 model hợp lệ cho `is_error=false` và mỗi lượt 1 khoá `modelUsage`;
+  model rác cho `is_error=true`, `modelUsage={}` dù vẫn `subtype=success`. Trong sandbox có
+  kho, cả 6/6 lượt đều thêm khoá phụ `claude-haiku-4-5-20251001`; model rác vẫn có 1 khoá
+  phụ nhưng thiếu model yêu cầu. **`rc` và `subtype` cùng nói dối** — bằng chứng dương là
+  `is_error is false` và model yêu cầu có mặt làm khoá hoặc `canonicalModel`; khoá thừa
+  phải được báo ra, không được dùng để từ chối.
+
+Chọn bậc **trước khi phóng**:
+
+```bash
+PY="$(command -v python3 || command -v python || command -v py)"
+"$PY" .claude/dev/chon_reviewer.py --review-class sensitive \
+  --duong-dan a.py,b.md --so-dong 120 --luot 1 --json
+```
+
+Phóng Claude reviewer headless và giữ JSON nguyên vẹn:
+
+```bash
+claude --model <id> --effort <bac> --output-format json -p ... < PROMPT.md > reviewer.json
+```
+
+Kiểm `modelUsage` **sau khi phóng**; lệnh gọi đúng vị từ fail-close dùng chung với CI:
+
+```bash
+PY="$(command -v python3 || command -v python || command -v py)"
+"$PY" -c 'import json,runpy,sys; m=runpy.run_path(".claude/dev/chon_reviewer.py"); print(m["kiem_ket_qua"](sys.argv[1],json.load(open(sys.argv[2],encoding="utf-8"))))' <id> reviewer.json
+```
+
+Mục này **KHÔNG thay** `docs/PROTOCOL_DA_PHIEN.md` §8; nó chỉ nói chọn bậc nào và cú pháp
+đo model thực sự đã chạy.
+
 ## Khi PAT là chính tài khoản tác giả PR
 
 `pull_request_review_write` với `event=REQUEST_CHANGES` sẽ bị GitHub từ chối:

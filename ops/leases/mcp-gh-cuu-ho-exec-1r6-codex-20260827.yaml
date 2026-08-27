@@ -1,0 +1,211 @@
+# Lease EXECUTOR — `MCP-GH-CUU-HO` (#319), lượt 1, BẢN SỬA ĐỔI 6.
+#
+# r6 tồn tại vì HAI thứ đổi cùng lúc, và §3.2 liệt kê cả hai là thứ TẠO REVISION MỚI:
+#   (1) ĐẶC TẢ đổi — bản sửa đổi 4 thêm `D10` và `D11`, nên `spec_sha256` đổi;
+#   (2) MỤC TIÊU LƯỢT đổi — lượt này KHÔNG vá tiếp bản vá cũ mà THAY nó.
+# Cộng một thứ thứ ba đã tự bắn: `S4` — `origin/master` trôi từ `b662fe1` sang `ac82ddc`.
+#
+# r6 KHÔNG nâng trần. r5 đã chốt trước: "MÃ chạm 900 ⇒ TÁCH. Không nâng lần bốn, và không đổi
+# đơn vị lần hai." Lời hứa ấy giữ nguyên ở đây, và biên thật chỉ còn 24 dòng.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 319
+packet_id: MCP-GH-CUU-HO
+phase_key: MCP-GH-CUU-HO
+revision: 6
+generation: 1
+lease_id: mcp-gh-cuu-ho-exec-1r6-codex-20260827
+
+role: executor
+provider: codex
+executor: codex
+executor_effort: xhigh
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` do CỔNG tính, KHÔNG tự hạ. Giữ nguyên từ r5.
+
+spec_path: ops/specs/mcp-gh-cuu-ho.md
+spec_sha256: 'c893fb46de3b83291ded2efb89d1c1415b62612f417369ac6e7383c3b6672ebc'
+spec_commit: da522be5baf4ed490662e298a16765216af065b6
+spec_status: dong_bang
+spec_duyet_boi: ducthangho
+spec_ghi_chu: >-
+  BẢN SỬA ĐỔI 4. Băm ĐO bằng `sha256sum` trên bản đã commit, KHÔNG gõ tay — kho đã có một lần
+  bịa đuôi băm trong phiên này và bắt được bằng đúng thói quen ấy.
+  r4 THÊM `D10` và `D11`; BA MƯƠI tiêu chí cũ giữ NGUYÊN VĂN, không tiêu chí nào bị đổi hay gỡ.
+
+write_set:
+  - ops/specs/mcp-gh-cuu-ho.md
+  - .claude/dev/mcp_gh.py
+  - .claude/dev/mcp_gh_test.py
+write_set_note: >-
+  BA đường dẫn, KHÔNG đổi so với r5. Đặc tả đã sửa xong TRƯỚC khi cấp lease này (commit
+  `da522be5`), nên lượt r6 thực tế chỉ còn chạm HAI tệp mã. Đường dẫn đặc tả giữ trong write set
+  để executor sửa được nếu chính đặc tả lộ khuyết tật — nhưng sửa nó ⇒ băm đổi ⇒ `S6` bắn ⇒ dừng.
+  `.github/workflows/**` KHÔNG nằm trong write set — xem `NO_CO_TEN_mo_truoc_khi_land`.
+
+branch: claude/mcp-gh-cuu-ho-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+start_from_sha: da522be5baf4ed490662e298a16765216af065b6
+reviewed_sha_required: da522be5baf4ed490662e298a16765216af065b6
+reviewed_sha_luat: >-
+  Cập nhật NGAY SAU khi đẩy bản vá, TRƯỚC khi phóng review. Trường này đã trỏ sai MỘT LẦN ở r5
+  (bằng đúng `base_sha`, tức mọi vòng review sẽ neo vào bản chưa có việc gì) và đó là lần thứ ba
+  trong phiên bắt được hình dạng "sổ sách không theo kịp công việc". Đo bằng `git rev-parse`,
+  không gõ tay.
+
+drift_base_S4_lan_hai:
+  base_cu: b662fe1d07c675a222ae26e734377e305775e4f3
+  base_moi: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+  do_luc: '2026-08-27T02:43:20Z'
+  to_tien_con_giu: true
+  do_bang_to_tien: 'git merge-base --is-ancestor b662fe1 ac82ddc ⇒ 0 (KHÔNG viết lại lịch sử)'
+  so_commit_moi: 46
+  cham_write_set: false
+  do_bang_cham: >-
+    `git diff --numstat b662fe1..ac82ddc -- ops/specs/mcp-gh-cuu-ho.md .claude/dev/mcp_gh.py
+    .claude/dev/mcp_gh_test.py` ⇒ KẾT QUẢ RỖNG. Và `git ls-tree ac82ddc .claude/dev/` không có
+    `mcp_gh*` — hai tệp mã VẪN chưa có trên master, nên lượt này vẫn là viết mới, không phải sửa đè.
+  xu_ly: '§5.1 — merge thẳng. Nhánh packet đã merge `ac82ddc` ở commit `043d2709`, đẩy lúc 02:5xZ.'
+  bo_do_sau_merge: 'CA 39/39 đạt · 0 đỏ · ĐỘT BIẾN 42/42 · D8(a)(b)(c) ĐẠT · rc=0 — merge KHÔNG làm hỏng gì.'
+  ghi_chu: >-
+    S4 đã bắn HAI LẦN ở packet này (r1 và r6). Đừng coi là chuyện đã xong; bắn lần ba thì xử y hệt.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 900
+  do_tu_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+  don_vi: >-
+    `git diff --numstat ac82ddc..HEAD` giới hạn trên HAI TỆP MÃ — `.claude/dev/mcp_gh.py` và
+    `.claude/dev/mcp_gh_test.py` — cột dòng THÊM. Đơn vị KHÔNG đổi so với r5.
+  da_dung: 876
+  da_dung_do_luc: '2026-08-27T02:5xZ trên `043d2709`, sau merge master'
+  da_dung_chi_tiet: 'mcp_gh.py 230 · mcp_gh_test.py 646'
+  bien_con_lai: 24
+  dac_ta_theo_doi_rieng: 360
+  don_vi_cu_de_doi_chieu: '1236 nếu tính CẢ write set như r1–r4 — báo cả hai, đừng chỉ báo cái có lợi'
+  KHONG_NANG_TRAN: >-
+    r5 chốt trước: "MÃ chạm 900 ⇒ TÁCH. Không nâng lần bốn, và không đổi đơn vị lần hai." Lời hứa
+    ấy có hiệu lực ở đây. Trần bị động vào BA lần rồi (750 → 1000 → 1100, rồi đổi đơn vị về 900);
+    lần thứ tư thì con số mất hết ý nghĩa. 24 dòng là 24 dòng.
+  vi_sao_24_dong_ĐỦ: >-
+    Bản vá đúng theo r4 phần lớn là ĐỔI CHỖ, không THÊM: bỏ hai dòng chốt (âm 2), gom các dòng báo
+    cáo vào một danh sách rồi in (xấp xỉ trung tính), thêm một hàm suy phán định (~3), sửa ca
+    `D11-gate` sang đo quan hệ hai chiều (~5), thêm/sửa đột biến canh (~4). Đây là ƯỚC LƯỢNG, và
+    ước lượng của phiên điều phối đã sai HAI LẦN ở đúng packet này — nên nó là dự báo, KHÔNG phải
+    hạn mức được phép tiêu. Chạm 24 mà chưa xong ⇒ `S2` ⇒ DỪNG và báo CHÍNH XÁC còn thiếu gì.
+
+viec_cua_luot_nay: >-
+  THAY bản vá P1 vòng 3, không vá tiếp nó. Ba việc, đúng ba, theo `D10` và `D11` của đặc tả r4:
+  (1) XOÁ hai dòng chốt tự chiếu trong `chay_cli` — cái đọc cờ `d11_da_chay` và thay TOÀN BỘ
+  `d8_errors` bằng một bộ dựng sẵn. Nó vô hình với bộ đo, không cần thiết, và khi bắn thì ghi đè
+  một dòng đỏ đúng thành một dòng xanh sai. Ba phép đo trong biên nhận
+  `ops/reviews/mcp-gh-cuu-ho-kiem-doc-lap-va-P1-vong3.md` chứng minh cả ba điều đó.
+  (2) ĐỔI `chay_cli` để phán định SUY TỪ bản báo cáo: sinh TOÀN BỘ dòng trước, rồi `TỔNG` và mã
+  thoát cùng suy từ MỘT phán định tính TỪ các dòng ấy. Cấm hai đường tính độc lập.
+  (3) SỬA ca `D11-gate` sang đo quan hệ HAI CHIỀU trên ÍT NHẤT HAI cảnh (một xanh, một đỏ):
+  bản in có dấu đỏ ⟺ mã trả về khác 0. Và đòi "ca đã thực sự chạy" TRONG THÂN CA, không bằng chốt
+  trong mã sản phẩm.
+  ĐỪNG đụng hai tệp ở chỗ khác. ĐỪNG sửa đặc tả. ĐỪNG thêm ca cho tiêu chí khác.
+
+viec_KHONG_lam_lai: >-
+  Ba P1 của cross-review vòng 2 ĐÃ ĐÓNG và đã được phiên điều phối đo lại độc lập trên cây đã
+  commit `97617d3a`: ba mệnh đề an ninh (scheme · hostname · path) nay đều có phản chứng riêng,
+  ba đột biến tương ứng đều chết, và bộ đo cho `39/39 · 42/42 · D8 ĐẠT · rc=0`. KHÔNG mở lại.
+  Đặc tả đã sửa xong ở `da522be5`; PHA soạn đặc tả của lượt này ĐÃ HẾT.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  RIÊNG CHO EXECUTOR `codex` — giữ nguyên bảy điều của r5, nhắc lại bốn điều dễ chết nhất:
+  (1) Sandbox codex KHÔNG có đường ra mạng ⇒ executor KHÔNG đọc được Issue, verdict, hay đặc tả
+  trên GitHub. Phiên điều phối PHẢI ghi đề bài + đường dẫn đặc tả thành TỆP TRONG THƯ MỤC LÀM VIỆC
+  trước khi phóng.
+  (2) `.git` mount CHỈ ĐỌC ⇒ executor SINH DIFF/tệp; phiên điều phối commit và push.
+  (3) ĐỪNG TỰ SOẠN payload tấn công hay nội dung dựng đường dẫn thoát khỏi cây — bộ lọc nội dung
+  của nền bắn đúng lớp ấy và đã GIẾT HAI LƯỢT của kho này. Lượt này KHÔNG cần loại nội dung đó.
+  (4) Bản in cuối LÀ sản phẩm. Còn ~20% ngân sách thì DỪNG và viết kết luận; ô nào chưa xong ghi
+  `KHÔNG_ĐO_ĐƯỢC` kèm lý do. Im lặng KHÔNG phải câu trả lời hợp lệ.
+  (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+  THÊM cho r6: (6) Bản vá bị bác lần trước thất bại vì nó THÊM MỘT CHỐT thay vì SỬA CẤU TRÚC.
+  Nếu bản vá của lượt này cũng có hình dạng "thêm một điều kiện đặc biệt để một ca đi qua", thì nó
+  sai y hệt — dừng lại và mô tả bằng lời cho phiên điều phối.
+
+dieu_kien_dung: >-
+  S1 GHI MỘT DÒNG NÀO vào hai tệp mã mà LỆCH đặc tả r4 ⇒ DỪNG, xin bản sửa đổi 7 ·
+  S2 vượt 900 dòng thêm TRÊN HAI TỆP MÃ (tức thêm ròng quá 24 dòng so với `043d2709`) ⇒ DỪNG.
+  KHÔNG nâng trần — r5 đã chốt "chạm 900 ⇒ TÁCH". Đường đúng khi chạm là TÁCH, và quyết định
+  tách thuộc chủ kho ·
+  S3 cần đường dẫn thứ tư ⇒ DỪNG, xin sửa lease ·
+  S4 `origin/master` đi tiếp mà chưa đo lại ⇒ DỪNG, đo lại base. ĐÃ BẮN HAI LẦN (`c35ae1c`→
+  `b662fe1` ở r1, `b662fe1`→`ac82ddc` ở r6). Bắn lần ba thì xử y hệt ·
+  S5 `D10` hoặc `D11` không có ca đo được ⇒ DỪNG: tiêu chí không đo được là tiêu chí sẽ được khai
+  là đã làm ·
+  S6 `spec_sha256` đo lại không khớp tệp trên nhánh ⇒ DỪNG: lease đang trỏ vào thứ đã đổi ·
+  S7 (r6 THÊM) bản vá có hình dạng "thêm một chốt trong mã sản phẩm để một ca đi qua" ⇒ DỪNG.
+  Đó ĐÚNG hình dạng bản vá vừa bị bác, và đặc tả r4 CẤM nó bằng tên: chốt tự chiếu.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-27 — phiên điều phối trình kết quả kiểm độc lập bản vá P1 vòng 3
+  (P1 CHƯA ĐÓNG, ba chỗ hở, năm phép đo) kèm hai phương án A/B và khuyến nghị A; người giữ kho
+  trả lời "theo A, làm đi". A = verdict `blocked` + lease r6 với đúng nội dung ở `viec_cua_luot_nay`.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Giữ nguyên khai báo của r5, và khai thêm phần XẤU ĐI: phiên `claude` này nay đã (a) soạn đặc tả,
+  (b) soạn tiêu chí nghiệm thu `D10`/`D11`, VÀ (c) tự chạy phép đo bác bản vá trước. Ba vai chồng
+  lên nhau. Hệ quả bắt buộc: lượt review r6 PHẢI chạy ở một phiên `claude` RIÊNG, headless, clone
+  rời, detached exact head — và reviewer ấy phải được nói rõ rằng thang điểm nó chấm do phiên điều
+  phối đặt, để nó chất vấn chính thang điểm chứ không chỉ chấm theo.
+
+leased_at_utc: '2026-08-27T03:00:00Z'
+lease_expires_at_utc: '2026-08-28T03:00:00Z'
+run_minutes: 1440
+
+thay_the_cho: mcp-gh-cuu-ho-exec-1r5-codex-20260826
+thay_the_ly_do: >-
+  BA thứ đổi, và §3.2 liệt kê cả ba là thứ tạo revision mới hoặc buộc đo lại:
+  (1) ĐẶC TẢ: bản sửa đổi 3 → 4, `spec_sha256`
+  `7294d24e8acb1c38…` → `c893fb46de3b8329…`. Sửa qua bản MỚI, không sửa đè — sửa đè làm băm trong
+  lease trỏ vào thứ không còn tồn tại, đúng điều `S6` sinh ra để chặn.
+  (2) MỤC TIÊU LƯỢT: r5 giao "hiện thực D8 mới"; r6 giao "THAY bản vá P1 vòng 3". Khác việc.
+  (3) BASE: `b662fe1` → `ac82ddc`, `S4` bắn lần hai. Đo đầy đủ ở khối `drift_base_S4_lan_hai`.
+  KHÔNG đổi: write set ba đường dẫn · trần 900 · đơn vị đo · executor `codex` · reviewer `claude` ·
+  ba mươi tiêu chí nghiệm thu cũ.
+
+verdict_vong_3_ghi_nhan:
+  hang: blocked
+  ai_quyet: ducthangho
+  can_cu_protocol: >-
+    §3.2 — "Findings của Reviewer được sửa trong cùng Packet khi spec vẫn đủ; finding cho thấy
+    chính spec thiếu thì verdict là `blocked` và đi qua revision mới." Ở đây spec THIẾU thật: bảng
+    `D` của r3 không có tiêu chí nào nói phán định phải suy từ báo cáo, nên bản vá không có gì để
+    chiếu vào và đã đi sai hướng.
+  bang_chung: ops/reviews/mcp-gh-cuu-ho-kiem-doc-lap-va-P1-vong3.md
+  bang_chung_commit: ddaebcaa742f70322199934e96ffc27649417426
+  KHONG_ha_hang: >-
+    Phương án B (land `97617d3a` rồi tách P1 vòng 3 thành nợ có tên) đã trình và KHÔNG được chọn.
+    `luat_dung_LAND` chỉ cho P2 thành nợ; P1 vẫn chặn land. Phiên điều phối không tự hạ hạng.
+
+NO_CO_TEN_mo_truoc_khi_land:
+  slug: khong-cong-nao-chay-bo-test
+  hang: P1
+  no_la_gi: >-
+    KHÔNG cổng nào trong kho chạy `.claude/dev/mcp_gh_test.py`. Mọi con số `39/39` và `42/42` chỉ
+    tồn tại KHI CÓ NGƯỜI GÕ TAY. Giữ nguyên từ r5, chưa đóng.
+  vi_sao_KHONG_va_trong_packet_nay: >-
+    Sửa đòi chạm `.github/workflows/`, NGOÀI write set ba đường dẫn.
+  phai_lam_gi: 'Mở packet riêng thêm `python .claude/dev/mcp_gh_test.py` vào `ci.yml`.'
+  lien_quan_den_D11: >-
+    Đáng nói thẳng: `D11` làm mã thoát phản ánh báo cáo, nhưng KHÔNG ai đọc mã thoát ấy vì không
+    cổng nào chạy tệp này. Hai lỗ độc lập; đóng lỗ này KHÔNG đóng lỗ kia. Đừng để lượt land đọc
+    `D11 ĐẠT` thành "cổng đã có người canh".

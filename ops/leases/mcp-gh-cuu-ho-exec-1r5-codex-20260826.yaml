@@ -351,3 +351,12 @@ reviewed_sha_ĐÃ_SỬA:
     Diff so base: mcp_gh.py 230 · mcp_gh_test.py 610 · spec 315 — khớp write set ba đường dẫn.
 
 posted_comment_id: 5424841382   # workflow ghi, ĐỪNG sửa tay
+
+# Thêm TAY sau khi lease đã đăng — `posted_comment_id` ở trên giữ nguyên, KHÔNG đăng lại.
+da_bi_thay_the: mcp-gh-cuu-ho-exec-1r6-codex-20260827
+da_bi_thay_the_vi_sao: >-
+  BA thứ đổi cùng lúc: đặc tả sang bản sửa đổi 4 (băm đổi), mục tiêu lượt đổi từ "hiện thực D8
+  mới" sang "THAY bản vá P1 vòng 3", và base đổi `b662fe1` → `ac82ddc` khi `S4` bắn lần hai.
+  KHÔNG phải vì thi công sai: ba P1 vòng 2 vá ở `97617d3a` GIỮ NGUYÊN và đã được đo lại độc lập
+  là lành. Thứ bị bác là bản vá P1 VÒNG BA, chưa từng commit.
+  §3.2 — finding cho thấy CHÍNH SPEC thiếu thì verdict là `blocked` và đi qua revision mới.

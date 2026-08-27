@@ -33,6 +33,7 @@ import json
 import os
 import posixpath
 import re
+import shlex
 import subprocess
 import sys
 import unicodedata
@@ -318,9 +319,86 @@ def _cac_ref_cuc_bo(goc: Path) -> tuple[set[str], list[str]]:
     return ten_nhanh, refs
 
 
-def _quet_lease_toan_kho(goc: Path, *, doi_chieu_ref=True) -> list[dict]:
+def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[str]:
+    """Chỉ nhận nhánh là tụt sau khi nó là tổ tiên thật sự của origin cùng tên."""
+    tap_ref, tut_sau = set(refs), []
+    for ref in sorted(x for x in tap_ref if x.startswith("refs/heads/")):
+        ten = ref.removeprefix("refs/heads/")
+        doi_ung = "refs/remotes/origin/" + ten
+        if doi_ung not in tap_ref:
+            continue
+        out = _git(goc, "rev-list", "--left-right", "--count", f"{ref}...{doi_ung}")
+        try:
+            trai, phai = (int(x) for x in out.split())
+        except ValueError:
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: rev-list trả kết quả hỏng cho {ten}: {out!r}") from None
+        if trai == 0 and phai > 0:
+            tut_sau.append(ten)
+    return tut_sau
+
+
+def _cac_worktree(goc: Path) -> list[dict]:
+    out = _git(goc, "worktree", "list", "--porcelain", "-z")
+    ds = [dict(x.partition(" ")[::2] for x in khoi.split("\0") if x) for khoi in out.rstrip("\0").split("\0\0") if khoi]
+    for muc in ds:
+        p = Path(muc["worktree"])
+        if not p.exists() or "bare" in muc: continue
+        gd = Path(_git(p, "rev-parse", "--git-dir").strip())
+        muc["_gitdir"] = gd if gd.is_absolute() else p / gd
+        if "branch" not in muc:
+            for ten in ("rebase-merge/head-name", "rebase-apply/head-name", "BISECT_START"):
+                q = muc["_gitdir"] / ten
+                if q.is_file():
+                    ref = q.read_text(encoding="utf-8").strip()
+                    muc["branch"] = ref if ref.startswith("refs/") else "refs/heads/" + ref
+                    break
+    return ds
+def _trang_thai_worktree(muc: dict) -> list[str]:
+    p, trang = Path(muc["worktree"]), []
+    if "prunable" in muc: return ["PRUNABLE"]
+    if not p.exists(): return ["ĐƯỜNG_DẪN_KHÔNG_TỒN_TẠI"]
+    if "bare" in muc: return ["BARE"]
+    try:
+        meta = {x.name for x in muc["_gitdir"].iterdir()}
+    except OSError:
+        return ["METADATA_KHÔNG_ĐỌC_ĐƯỢC"]
+    trang = [nhan for nhan, ten in (("MERGE", "MERGE_HEAD"), ("REBASE", "rebase-merge"),
+             ("REBASE", "rebase-apply"), ("CHERRY-PICK", "CHERRY_PICK_HEAD"),
+             ("BISECT", "BISECT_START")) if ten in meta]
+    if _git(p, "status", "--porcelain").strip(): trang.append("BẨN")
+    return sorted(set(trang))
+def _lenh_chua_nhanh_tut_sau(goc: Path, tut_sau: list[str]) -> str:
+    worktrees, lenh, chi_tiet, an_toan = _cac_worktree(goc), [], [], True
+    for ten in tut_sau:
+        ref, doi_ung = "refs/heads/" + ten, "refs/remotes/origin/" + ten
+        giu = [wt for wt in worktrees if wt.get("branch") == ref]
+        if not giu:
+            lenh.append(f"git branch -f {shlex.quote(ten)} {shlex.quote(doi_ung)}")
+            chi_tiet.append(f"{ten}: KHÔNG_BỊ_WORKTREE_NÀO_GIỮ")
+        else:
+            lenh.append(f"git -C {shlex.quote(giu[0]['worktree'])} merge --ff-only {shlex.quote(doi_ung)}")
+            trang = [(wt, _trang_thai_worktree(wt)) for wt in giu]
+            mo_ta = "; ".join(f"{wt['worktree']} [{'+'.join(tt or ['SẠCH', 'RẢNH'])}]" for wt, tt in trang)
+            chi_tiet.append(f"{ten}: GIỮ_BỞI_{len(giu)}_WORKTREE; {mo_ta}")
+            if len(giu) != 1 or trang[0][1]: an_toan = False
+    if not an_toan:
+        return ("KHÔNG_PHÁT_LỆNH_CHỮA. " + " | ".join(chi_tiet) + ". Người dùng tự "
+                "commit/stash, hoàn tất hoặc huỷ thao tác dở, dọn entry stale, detach bớt worktree, rồi chạy lại cổng.")
+    return "chữa: " + "; ".join(lenh)
+
+
+def _quet_lease_toan_kho(goc: Path, *, doi_chieu_ref=True,
+                         chan_nhanh_tut_sau=False) -> list[dict]:
     """Đọc mỗi cặp (blob, đường dẫn) lease đúng một lần trên mọi ref cục bộ."""
     ten_cuc_bo, refs = _cac_ref_cuc_bo(goc)
+    if chan_nhanh_tut_sau:
+        tut_sau = _nhanh_cuc_bo_tut_sau(goc, refs)
+        if tut_sau:
+            huong_xu_ly = _lenh_chua_nhanh_tut_sau(goc, tut_sau)
+            raise Chan(RC_KHONG_XAC_DINH,
+                       "NHÁNH_CỤC_BỘ_TỤT_SAU: " + ", ".join(tut_sau) +
+                       ". ai-dang-giu quét refs/heads/*; " + huong_xu_ly)
     if doi_chieu_ref:
         thieu = _ten_nhanh_may_chu(goc) - ten_cuc_bo
         if thieu:
@@ -741,8 +819,9 @@ def lenh_mark(a) -> int:
 
 def lenh_ai_dang_giu(a) -> int:
     root = Path(a.goc or ".").resolve()
-    cac_lease = _quet_lease_toan_kho(root)
-    nguoi_giu = []
+    print("PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN")
+    cac_lease = _quet_lease_toan_kho(root, chan_nhanh_tut_sau=True)
+    nguoi_giu = {}
     for muc in cac_lease:
         lease = muc["lease"]
         if not _lease_cham_duong(lease, a.duong_dan):
@@ -753,7 +832,7 @@ def lenh_ai_dang_giu(a) -> int:
         nhan = " · ĐÃ_BỊ_THAY_THẾ" if da_chet else ""
         print(f"{trang_thai}{nhan}\t{lease_id}\t{muc['ref']}:{muc['path']}")
         if trang_thai == "CÒN_HẠN" and not da_chet:
-            nguoi_giu.append(lease_id)
+            nguoi_giu[lease_id] = None
     print(f"NGƯỜI_GIỮ {len(nguoi_giu)}: " + (", ".join(sorted(nguoi_giu)) or "không có"))
     return RC_DANG_GIU if nguoi_giu else RC_OK
 

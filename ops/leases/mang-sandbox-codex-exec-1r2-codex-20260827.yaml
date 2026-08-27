@@ -62,7 +62,7 @@ branch_ghi_chu: >-
 
 base_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
 start_from_sha: 511a58d2392a60dc94b40918da4d39c4aeda07a3
-reviewed_sha_required: 511a58d2392a60dc94b40918da4d39c4aeda07a3
+reviewed_sha_required: b5bb3952b99f991e84f458f70dcd38c0bf9b90e2
 base_ghi_chu: >-
   `base_sha` GIỮ NGUYÊN. `S4` đo lại lúc cấp r2: `origin/master` nay `f715fc28`, `ac82ddc` VẪN là
   tổ tiên, và `git diff --numstat ac82ddc..f715fc28` trên ĐÚNG ba đường dẫn write set ⇒ RỖNG.
@@ -74,8 +74,8 @@ ngan_sach_kich_thuoc:
   dong_them_toi_da: 320
   do_tu_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
   don_vi: '`git diff --numstat ac82ddc..HEAD` trên ĐÚNG ba đường dẫn write set, cột dòng THÊM.'
-  da_dung: 316
-  bien_con_lai: 4
+  da_dung: 309   # ĐO trên `b5bb3952`
+  bien_con_lai: 11
   KHONG_NANG_TRAN_O_r2: >-
     r2 KHÔNG nâng trần, cố ý. Lượt 2 chưa hề chạm trần — nó dừng vì chốt công cụ, không vì ngân
     sách — nên chưa có PHÉP ĐO nào biện minh cho việc nâng. Nâng trần TRƯỚC khi có số đo là đúng
@@ -162,3 +162,58 @@ CHOT_CUA_NEN_DA_LO_RA:
     Một cổng lúc CẤP LEASE: nếu `write_set` chạm `.claude/**` mà `executor` là `claude` ⇒ chặn kèm
     lý do. Ngoài mọi write set đang mở, nên chỉ ghi thành đề xuất.
 posted_comment_id: 5435103145   # workflow ghi, ĐỪNG sửa tay
+
+LUOT_3:
+  sha: b5bb3952b99f991e84f458f70dcd38c0bf9b90e2
+  run: a9557dc92b664ff0b095eea7b7dc4cc6
+  giay: 1213
+  ngan_sach: '309/320, biên 11 — GIẢM so với 316 vì executor viết lại ngắn hơn: test 186→156, docs 61→52'
+  cach_lay_bien: 'gọt văn xuôi và trùng lặp, KHÔNG gọt phản chứng — số ca TĂNG 5→11'
+  nam_finding_executor_khai_da_dong:
+    - cong-dot-bien-tu-giam-van-xanh (P1)
+    - ma-chan-gom-moi-loi-khong-phan-loai (P1)
+    - bon-to-hop-chua-co-lenh-nguyen-van (P1, đóng từ lượt 2)
+    - network-access-gate-rong-hon-egress (P2)
+    - ban-kinh-phai-chet-che-tac-dong-cheo (P2)
+
+  PHIEN_DIEU_PHOI_TU_DO:
+    bo_do: '11/11 ca đạt · 5/5 mutant chết · 0 sống · rc=0'
+    bon_lenh: >-
+      Rút khối bash TỪ CHÍNH TÀI LIỆU bằng parser rồi chạy: vẫn chạy được với probe MỚI. Và khối
+      bash GIỐNG NGUYÊN VĂN bản trước — phiên điều phối đã CẤM sửa nó, và nó không bị sửa.
+    bon_phep_xoa_cua_reviewer: 'chạy lại cả bốn — 4/4 BỊ GIẾT, đều đỏ ở ca có tên `t12_cong_dot_bien_tu_canh`'
+
+  DIEU_EXECUTOR_KHONG_KHAI_va_dieu_phoi_tu_do:
+    ten: meta-test-t12-canh-cong-nhung-khong-ai-canh-t12
+    do_duoc: >-
+      Cả bốn phép xoá đều chết Ở CÙNG MỘT CHỖ: ca `t12_cong_dot_bien_tu_canh`. Nên câu hỏi kế tiếp
+      là ai canh `t12`. Phiên điều phối tự chạy ba đường vô hiệu hoá nó — CẢ BA SỐNG SÓT:
+      `t12` thành no-op ⇒ rc=0, TỔNG ĐẠT · `main` không gọi `t12` ⇒ rc=0, TỔNG ĐẠT ·
+      nuốt lỗi `t12` (`return 0` thay vì `bao(...)`) ⇒ rc=0, TỔNG ĐẠT.
+    danh_gia_cong_bang: >-
+      Đây VẪN là tiến bộ lớn và thật: trước lượt 3, MỌI phép xoá đều sống sót; nay chỉ còn tầng
+      meta-test hở. Nhưng lời khai "9/9 chết, không còn mutant sống" ĐÚNG trong phạm vi của nó mà
+      HẸP hơn cái nó gợi ý — nó không nói rằng chính lớp canh ấy không có ai canh.
+    hinh_dang_lap_lan_thu_TU: >-
+      #319 bộ chạy đột biến thiếu chốt duy-nhất · #319 hai dòng hậu tố không có đột biến canh ·
+      #334 chốt duy-nhất không có phản chứng · và nay #334 lớp canh chốt ấy không có phản chứng.
+      Mỗi lần vá lại đẩy bề mặt hở LÊN MỘT TẦNG chứ không xoá nó.
+    huong_de_xuat_KHONG_tu_lam: >-
+      Đừng thêm meta-meta-test — nó chỉ đẩy tiếp lên tầng năm. Đường đúng nhiều khả năng là KHAI
+      THẲNG giới hạn trong chính tệp, đúng cách đặc tả r4 của #318 khai bề mặt còn lại của
+      `sys.exit`. Biên 11 dòng đủ cho một lời khai như thế.
+      Phiên điều phối KHÔNG tự vá: nó vừa đo, và vá tiếp là tự chấm bài mình. Để reviewer vòng 2
+      đo độc lập trước.
+
+  MOT_NGHI_NGO_NUA_de_reviewer_do:
+    la_gi: >-
+      Probe nay phân lớp, và trong sandbox `git_ls_remote` ra `class=UNKNOWN` (raw: "Failed to
+      connect"), KHÔNG phải `POLICY_DENIED`. Nhưng hai bảng trong tài liệu vẫn in `1` trần cho cột
+      `git`, và văn xuôi đọc là "cả ba bị chặn".
+    vi_sao_dang_ke: >-
+      `1` nay gộp `POLICY_DENIED` với `UNKNOWN`. Nói "bị chặn" cho một ô mà chính bộ phân loại TỪ
+      CHỐI quy cho chính sách là đúng lớp lỗi mà packet này sinh ra để chặn — chỉ dời lên một tầng,
+      từ mã trả về sang bảng.
+    phien_dieu_phoi_KHONG_va: >-
+      Cố ý. Ghi thành câu hỏi cho reviewer vòng 2, không thành kết luận — vá bây giờ là tự chấm bài
+      mình lần thứ hai trong cùng một lượt.

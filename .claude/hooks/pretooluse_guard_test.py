@@ -394,6 +394,48 @@ def t29_lenh_LONG_bi_chan(g):
                      + (f"; LOT: {xau}" if xau else ""))
 
 
+def t41_co_GLOBAL_DON_khong_lam_lech_ten_lenh(h):
+    """`co-global-don-timings-khong-co-rang` — `_TL_CO_GLOBAL_CO_DON` co bon ten ma chi ba
+    co ca giu. Co don KHONG an gia tri, nen tieu nham mot token la day ten lenh di mot o —
+    dung co che da lam TANG 1 mu o P1 `tl-global-option-lam-lech-ten-lenh`."""
+    xau = []
+    for co in ("--timings", "--deterministic", "--version", "--selftest"):
+        if hoi(h, f"python scripts/tl.py {co} recat", "tl-auditor")[0] != "deny":
+            xau.append(f"{co}: lenh GHI `recat` lot")
+        if hoi(h, f"python scripts/tl.py {co} sweep", "tl-auditor")[0] != "allow":
+            xau.append(f"{co}: lenh DOC `sweep` bi chan oan")
+    return (not xau, f"co global don: {8 - len(xau)}/8" + (f"; SAI: {xau}" if xau else ""))
+
+
+def t42_bo_dem_khoa_theo_BAM_khong_theo_THOI_GIAN(h):
+    """`cache-hash-khong-co-mutant` — thuoc tinh nay tung chi duoc KHAI trong docstring.
+
+    Ba chieu, va chieu thu hai moi la chieu dat: doi NOI DUNG phai doi khoa; doi rieng MTIME
+    (dung `touch`) phai KHONG doi khoa — vi neu no doi thi dem gan nhu vo dung, con neu khoa
+    dan tu mtime thi mot `touch` du de giu lai ban CU cua mot registry da troi.
+    """
+    import importlib.util, os, tempfile as _tf, time as _t
+    sp = importlib.util.spec_from_file_location("g42", str(h))
+    m = importlib.util.module_from_spec(sp)
+    sp.loader.exec_module(m)
+    if not hasattr(m, "_duong_bo_dem"):
+        return (False, "guard khong con `_duong_bo_dem` — moc phep do da chet")
+    d = pathlib.Path(_tf.mkdtemp(prefix="tl336-dem-"))
+    p = d / "command_registry.py"
+    p.write_text("COMMAND_META = {}\n", encoding="utf-8")
+    k1 = m._duong_bo_dem(p)
+    os.utime(p, (0, 0))                      # doi RIENG mtime
+    k2 = m._duong_bo_dem(p)
+    p.write_text("COMMAND_META = {'x': 1}\n", encoding="utf-8")
+    k3 = m._duong_bo_dem(p)
+    xau = []
+    if k1 != k2:
+        xau.append("doi rieng mtime ma khoa doi -> dem gan nhu vo dung")
+    if k1 == k3:
+        xau.append("doi NOI DUNG ma khoa KHONG doi -> dem che duoc registry da troi")
+    return (not xau, f"khoa bo dem: {2 - len(xau)}/2" + (f"; SAI: {xau}" if xau else ""))
+
+
 def t30_co_global_khong_lam_lech_ten_lenh(g):
     xau = [c for c in GHI_336B_GLOBAL if hoi(g, c, "tl-auditor")[0] != "deny"]
     return (not xau, f"co global + writer -> deny {len(GHI_336B_GLOBAL)-len(xau)}"
@@ -578,6 +620,8 @@ CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
       t37_duong_dan_kich_ban_KHONG_CO_LOI_THOAT, t38_git_c_chi_nhan_khoa_DA_DO,
       t39_gan_bien_TIEN_TO_bi_chan_gan_bien_THUAN_thi_KHONG,
       t40_co_ngan_gia_tri_PHI_SO_khong_bi_chan_oan,
+      t41_co_GLOBAL_DON_khong_lam_lech_ten_lenh,
+      t42_bo_dem_khoa_theo_BAM_khong_theo_THOI_GIAN,
       t36_moi_ca_DINH_NGHIA_deu_phai_DANG_KY]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
@@ -675,6 +719,13 @@ DOT_BIEN = [
      "    for t in toks[:k]:\n        ten = t.split(\"=\", 1)[0]",
      "    for t in []:\n        ten = t.split(\"=\", 1)[0]"),
     # Siet lai `isdigit` — tra ve dung chan oan ma luot 2 gay ra.
+    # Dan khoa tu MTIME thay vi tu BAM — dung hinh dang ma docstring khai la KHONG lam.
+    ("m35_bo_dem_khoa_theo_mtime",
+     "    khoa = hashlib.sha256(pathlib.Path(reg).read_bytes()).hexdigest()[:32]",
+     '    khoa = "%d" % int(pathlib.Path(reg).stat().st_mtime)'),
+    ("m34_bo_timings_khoi_co_global_don",
+     '_TL_CO_GLOBAL_CO_DON = frozenset({"--version", "--timings", "--deterministic", "--selftest"})',
+     '_TL_CO_GLOBAL_CO_DON = frozenset({"--version", "--deterministic", "--selftest"})'),
     ("m33_siet_lai_isdigit_cho_co_ngan",
      '                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep):',
      '                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep\n'
@@ -682,13 +733,32 @@ DOT_BIEN = [
 ]
 
 
+# ── PHEP CHAM DIEM, tach thanh HAM THUAN de co the DO duoc ─────────────────────────────
+# Chinh bo test nay tung in `CA 27/28 dat · DOT BIEN 28/28 bi giet` — HAI CON SO CANH NHAU
+# trong mot dong, va con so thu hai KHONG CO NGHIA: khi nen da co ca DO, moi dot bien "giet"
+# tam thuong bang chinh ca do san. Do la P1 `suite-do-do-tren-nen-gpgsign` ma PR #342 phai va
+# tren packet anh em; o day no chua bao gio duoc va, va no lo ra vi lan chay dau cua luot 3
+# lam do `t3` (chan oan do chinh toi gay ra).
+# Hai chot, can CA HAI: "giet" tinh bang HIEU SO, va nen do thi TU CHOI cong bo diem.
+def giet_duoc(do_san, ket_qua):
+    """Ca bi dot bien GIET = PASS o NEN ma FAIL o MUTANT."""
+    return sorted(t for t, ok in ket_qua.items() if t not in do_san and not ok)
+
+
+def duoc_cong_bo_diem(do_san):
+    """Nen do thi KHONG duoc cong bo ty le dot bien — no khong phai 'so nho hon su that'."""
+    return not do_san
+
+
 def chay():
     goc = GUARD.read_text(encoding="utf-8")
     print("CA:")
-    do = 0
+    do, do_san = 0, set()
     for f in CA:
         ok, mo_ta = f(GUARD)
         do += not ok
+        if not ok:
+            do_san.add(f.__name__)
         print(f"  {'DAT ' if ok else 'DO  '} {f.__name__:38} {mo_ta}")
 
     print("DOT BIEN (moi cai PHAI lam it nhat mot ca DO):")
@@ -705,7 +775,7 @@ def chay():
                 ma = ma.replace(c, m, 1)
             tep = pathlib.Path(d) / f"guard_{ten}.py"      # TEN RIENG tung dot bien
             tep.write_text(ma, encoding="utf-8")
-            giet = [f.__name__ for f in CA if not f(tep)[0]]
+            giet = giet_duoc(do_san, {f.__name__: f(tep)[0] for f in CA})
             if giet:
                 print(f"  GIET {ten:30} lam DO: {', '.join(giet)}")
             else:
@@ -713,7 +783,13 @@ def chay():
                 song.append(ten)
 
     tap_giet = len(DOT_BIEN) - len(song)
-    print(f"TONG: CA {len(CA) - do}/{len(CA)} dat · DOT BIEN {tap_giet}/{len(DOT_BIEN)} bi giet")
+    if not duoc_cong_bo_diem(do_san):
+        print(f"TONG: CA {len(CA) - do}/{len(CA)} dat")
+        print(f"TONG: DIEM DOT BIEN BI TU CHOI — nen co {len(do_san)} ca DO SAN "
+              f"({', '.join(sorted(do_san)[:3])}). Sua nen xanh truoc, roi moi doc duoc so.")
+    else:
+        print(f"TONG: CA {len(CA) - do}/{len(CA)} dat · "
+              f"DOT BIEN {tap_giet}/{len(DOT_BIEN)} bi giet")
     # Vi ngu phai doi SO DUONG hai ve, khong duoc thoa man boi so rong (bai hoc "so rong thoa
     # `not DO`" cua #319): so ca da chay phai BANG so ca dang ky VA > 0.
     dat = (len(CA) > 0 and do == 0 and len(DOT_BIEN) > 0 and not song)

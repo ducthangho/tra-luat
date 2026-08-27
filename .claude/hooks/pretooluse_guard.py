@@ -313,13 +313,15 @@ _CO_AN_GIA_TRI = {
 
 _RE_CO_NGAN_GOP = re.compile(r"^-[A-Za-z0-9]{2,}$")
 _RE_SO_TRAN = re.compile(r"^-[0-9]+$")
-# `head -3` la viet tat cua `-n 3`. KHONG suy rong: DO 2026-08-26 tren chinh container nay,
-# `-3` duoc NHAN boi head · tail · uniq · git-log, va bi TU CHOI boi grep · diff · sort · cat ·
-# nl · ls · rg. Nen day la mot tap DO DUOC, khong phai mot tap doan ra. Cho `-3` qua o chuong
-# trinh khong nhan no la noi be mat ma khong mua duoc gi.
-# DO tung chuong trinh, khong doan: `-3` -> rc=0 tren head · tail · uniq · git · grep · diff;
-# rc khac 0 tren sort · ls · rg · cat · nl. Ban truoc chi co BON ten nen `grep -3` va
-# `diff -3` bi CHAN OAN (cross-review bat duoc).
+# `head -3` la viet tat cua `-n 3`. KHONG suy rong — DO tung chuong trinh:
+#   `-3` -> rc=0     tren head · tail · uniq · git · grep · diff
+#   `-3` -> rc!=0    tren sort · ls · rg · cat · nl
+# Cho `-3` qua o chuong trinh khong nhan no la noi be mat ma khong mua duoc gi.
+#
+# CHO NAY TUNG CO HAI KHOI CHU THICH NOI NGUOC NHAU: khoi cu (viet luc bang con BON ten) khai
+# `-3` bi "TU CHOI boi grep · diff", va no O LAI ngay tren phep do moi noi nguoc lai. Ca
+# `t16` khoa dung loi khai cu ay, nen luot 2 phai BO `t16` — nhung chu thich thi khong ai bo,
+# va cross-review luot 2 bat dung no. Bo test sai thi xoa duoc; lo khai sai thi phai xoa TAY.
 _CHO_SO_TRAN = frozenset({"head", "tail", "uniq", "git", "grep", "diff"})
 
 
@@ -751,6 +753,16 @@ def _kiem_lenh_agent(cmd, sau=0):
 #
 # Phan cong dung: HOOK doc BANG TINH (nhe), CONG hoi RUNTIME (that). Bang tinh troi khoi
 # runtime => cong DO.
+# TACH RIENG phep dan KHOA de no DO DUOC. `cache-hash-khong-co-mutant` (cross-review luot 2):
+# thuoc tinh "dem theo BAM, khong theo thoi gian" chi duoc KHAI trong docstring, khong ca nao
+# giu. Ma thuoc tinh ay la thu duy nhat ngan bo dem che mot registry DA TROI: dem theo mtime
+# thi `touch` la du de giu ban cu; dem theo SU TON TAI cua tep dem thi con te hon.
+# Ham thuan, nhan DUONG DAN lam doi so, nen ca `t42` goi duoc voi du lieu dung san.
+def _duong_bo_dem(reg):
+    khoa = hashlib.sha256(pathlib.Path(reg).read_bytes()).hexdigest()[:32]
+    return pathlib.Path(tempfile.gettempdir(), "tl-writer-%s.json" % khoa)
+
+
 def _writer_tu_runtime(goc):
     """Tra (top_level, long, write_scope_khac_none) tu `tl tool-inventory --json`.
     None = KHONG DO DUOC.
@@ -763,8 +775,7 @@ def _writer_tu_runtime(goc):
     reg = pathlib.Path(goc, "scripts/tl_core/command_registry.py")
     if not tl.is_file() or not reg.is_file():
         return None
-    khoa = hashlib.sha256(reg.read_bytes()).hexdigest()[:32]
-    dem = pathlib.Path(tempfile.gettempdir(), "tl-writer-%s.json" % khoa)
+    dem = _duong_bo_dem(reg)
     if dem.is_file():
         try:
             d = json.loads(dem.read_text(encoding="utf-8"))

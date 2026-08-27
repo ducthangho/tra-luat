@@ -324,8 +324,44 @@ recorder_ghi_chu: >-
 
 leased_at_utc: '2026-08-26T09:35:00Z'
 ban_sua_doi_2_luc_utc: '2026-08-26'
-lease_expires_at_utc: '2026-08-27T10:00:00Z'
-run_minutes: 1440
+lease_expires_at_utc: '2026-08-27T22:00:00Z'
+run_minutes: 2160
+gia_han:
+- tu: '2026-08-27T10:00:00Z'
+  den: '2026-08-27T22:00:00Z'
+  cong_them: '12 giờ'
+  luc_ghi_utc: '2026-08-27T09:44:00Z'
+  boi: ducthangho
+  can_cu: >-
+    Lệnh trực tiếp trong phiên, 2026-08-27: "gia hạn lease #318 thêm 12 tiếng". §2 —
+    start/pause/resume/reroute/override/authorize thuộc chủ kho.
+  vi_sao: >-
+    #318 đã `approved` vòng 15 (P1=0 P2=0) và chỉ còn CHỜ MERGE. PR #322 đo lúc
+    2026-08-27T09:38:38Z vẫn MỞ: `master` đứng ở `f715fc28`, `merge-base --is-ancestor
+    1c000495 f715fc28` rc=1, `refs/pull/322/merge` còn tồn tại, và blob
+    `docs/GOI_AGENT_DA_NEN.md` trên `master` (`16bad9e1`) y hệt base `c35ae1c`.
+    Để lease hết hạn lúc 10:00Z sẽ nhả `docs/GOI_AGENT_DA_NEN.md` thành KHÔNG NGƯỜI GIỮ
+    trong khi PR #322 vẫn mở trên đúng tệp ấy — lease cấp sau sẽ đè lên một PR đang chờ.
+  khong_tao_revision: >-
+    §3.2 liệt kê đúng năm thứ tạo revision mới: objective, acceptance, write set,
+    dependency, executor/environment. `lease_expires_at_utc` KHÔNG nằm trong đó.
+    Không trường nào khác của lease này đổi; `reviewed_sha_required` giữ nguyên
+    `1c000495c8e64e2582c37ee92ae5be8d14557218`.
+  run_minutes_ghi_chu: >-
+    `run_minutes` là CHIỀU DƯ của cùng một sự thật, nên nó đã trôi lệch từ trước khi
+    gia hạn: `leased_at_utc` + 1440' = 2026-08-27T09:35Z, KHÔNG phải 10:00Z đã ghi.
+    Cố ý DỜI ĐỀU +720' (1440 → 2160) để giữ nguyên độ lệch 25' cũ, KHÔNG suy lại từ
+    `leased_at_utc` — suy lại sẽ lặng lẽ sửa một sai số có sẵn và giấu nó trong lượt
+    gia hạn. Đây đúng hình dạng gốc mà `ops/BAO_313_...md` §8 chỉ ra: schema lưu một
+    sự thật hai chiều và chiều dư trôi. Nợ CÓ TÊN, không vá ở đây.
+  ban_chieu_KHONG_theo: >-
+    ĐÃ ĐO, không phải suy đoán: comment #5427971996 trên Issue #318 VẪN HIỂN THỊ HẠN CŨ
+    10:00Z sau lượt đẩy này. `ops/lease_publish.py` kiểm `posted_comment_id` NGAY ĐẦU
+    `kiem()` (dòng 746-749) và ném `RC_DA_DANG`=9; `ops-publish-lease.yml` bắt rc=9 rồi
+    `continue` kèm "đã đăng trước đó — bỏ qua". Kho KHÔNG có đường CẬP NHẬT comment lease,
+    y như KHÔNG có đường thu hồi lease (nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong`) —
+    #319 vừa dính đúng chỗ này lúc đóng lease sớm. Tệp YAML này là bản CÓ THẨM QUYỀN;
+    comment là bản chiếu và nó ĐANG LỆCH.
 
 viec_cua_luot_nay: >-
   Hoà BA câu tự mâu thuẫn trong `docs/GOI_AGENT_DA_NEN.md` (đọc trên `6c4140b`, đối chiếu số dòng

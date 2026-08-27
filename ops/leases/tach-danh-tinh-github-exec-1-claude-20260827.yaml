@@ -77,3 +77,4 @@ chong_lan_write_set_phan_xu: >-
   `ci.yml`). CHỌN ĐƯỜNG KHÁC: đổi thiết kế để workflow mới tự mang cả cổng lẫn phản chứng
   trong MỘT tệp, nên không cần `ci.yml`. Write set sạch, không chồng, và tiền lệ "khai chồng
   rồi đi tiếp" không bị mượn thêm một lần nữa.
+posted_comment_id: 5435033666   # workflow ghi, ĐỪNG sửa tay

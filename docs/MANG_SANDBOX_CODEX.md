@@ -8,7 +8,8 @@ Probe nay in `TEN=MA_CU class=LOP stage=GIAI_DOAN rc=RC raw=DU_LIEU_DA_KHU_NHAY_
 `MA_CU=0` ánh xạ `LOT`; `MA_CU=1` chỉ có nghĩa *không lọt*. Chỉ `class` mới phân biệt
 `POLICY_DENIED`, `ENDPOINT_ERROR`, `DNS_ERROR`, `TIMEOUT`, `TOOL_ERROR`,
 `REPOSITORY_ERROR`, `AUTH_ERROR`, `UNKNOWN`; `UNKNOWN` là `KHÔNG_ĐO_ĐƯỢC` và làm probe rc=1.
-Hai bảng cũ giữ nguyên số 0/1; vì lượt đo cũ không lưu lớp/raw, không hồi tố số 1 thành policy-denied.
+Hai bảng giữ nguyên cột số 0/1 cũ; vì lượt đo cũ không lưu lớp/raw, KHÔNG suy diễn lớp cho
+những số ấy. Cột `LỚP` ở hai bảng dưới là số **ĐO LẠI ĐỘC LẬP**, không phải suy diễn từ 0/1.
 
 ## Bảng ba cột đã chốt
 

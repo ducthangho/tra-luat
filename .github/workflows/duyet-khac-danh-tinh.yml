@@ -1,0 +1,75 @@
+# Cong: NGUOI DUYET phai khac NGUOI TAO PR — packet #348 (TACH-DANH-TINH-GITHUB).
+#
+# MOT TEP MANG CA HAI, co chu dinh:
+#   job `cong`       — chay tren `pull_request_target` / `pull_request_review`
+#   job `phan-chung` — chay tren `pull_request`, chay bo test cua chinh cong nay
+# KHONG dung `.github/workflows/ci.yml` vi duong ay dang bi lease cua packet #345 (DA LAND)
+# giu ma khong co duong thu hoi — no `AG-T0-01B`. Xem than lease cua #348.
+#
+# ── BAY B1: PR SUA DUOC CHINH CONG CUA NO ────────────────────────────────────────────────
+# Voi `on: pull_request`, GitHub chay workflow LAY TU NHANH PR. Nen mot PR chi can sua tep
+# nay la tu noi cong cho minh — cong tu vo hieu, va tren giao dien no van "xanh".
+# CHUA: `pull_request_target` chay workflow LAY TU NHANH CO SO. Do la ly do DUY NHAT dung
+# trigger ay o day; no khong phai tuy chon phong cach.
+#
+# ── BAY B2: `pull_request_target` CAM TOKEN va thay nhanh CO SO ──────────────────────────
+# Chinh vi no chay tu nhanh co so, no duoc cap token cua kho. Neu vo y checkout HEAD cua PR
+# roi chay bat cu thu gi tu do, MOT PR BAT KY chay duoc ma tuy y voi quyen cua token.
+# CHUA, ba lop: `permissions` chi doc · checkout NEO VAO `base.ref` (khong bao gio `head`) ·
+# job `cong` KHONG chay mot dong ma nao den tu PR.
+#
+# ── BAY THU BA, da tra gia trong kho nay (16-08-2026) ────────────────────────────────────
+# GitHub noi suy bieu thuc tren TOAN BO than `run` TRUOC khi shell thay no. Mot cap ngoac
+# bieu thuc RONG nam trong mot dong CHU THICH cua `run` da lam ca tep khong hop le va
+# `ops-don-ref.yml` bi TU CHOI (run mang ten DUONG DAN TEP, 0 job). Nen o day KHONG dong
+# `run` nao chua cu phap bieu thuc — moi gia tri di qua `env:`. Bo test khoa dieu do.
+name: duyet khac danh tinh
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed]
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  cong:
+    # KHONG chay o `pull_request`: o su kien do workflow den tu nhanh PR, tuc bay B1.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: lay ma tu NHANH CO SO (khong bao gio head PR)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          persist-credentials: false
+      - name: do nguoi duyet khac nguoi tao PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TL_KHO: ${{ github.repository }}
+          TL_PR: ${{ github.event.pull_request.number }}
+          TL_TAC_GIA: ${{ github.event.pull_request.user.login }}
+        run: |
+          set -eu
+          PY="$(command -v python3 || command -v python || command -v py)"
+          "$PY"  .claude/dev/duyet_danh_tinh.py --kho "$TL_KHO" --pr "$TL_PR" --tac-gia "$TL_TAC_GIA"
+
+  phan-chung:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: cai PyYAML (bo test doc chinh tep workflow nay)
+        run: python -m pip install --quiet PyYAML
+      - name: phan chung cua cong duyet-khac-danh-tinh
+        run: |
+          set -eu
+          PY="$(command -v python3 || command -v python || command -v py)"
+          "$PY"  .claude/dev/duyet_danh_tinh_test.py

@@ -1,0 +1,119 @@
+schema_version: 2
+event: kiem_doc_lap
+loai: khong_phai_verdict_review
+packet_issue: 319
+packet_id: MCP-GH-CUU-HO
+lease_id: mcp-gh-cuu-ho-exec-1r6-codex-20260827
+nguoi_do: claude
+vai: dieu_phoi
+
+neo:
+  sha: 'f461413a03b3a28ebdacde1fa17f49c894223682'
+  base: 'ac82ddc583f688d54bdc60e06922ec09bdab9f16'
+  executor: codex
+  run_id: ae038f02d971424d82c8c44990d18be3
+  run_ma_thoat: 0
+  run_giay: 1058
+
+ngan_sach:
+  mcp_gh_py: 230
+  mcp_gh_test_py: 670
+  tong: 900
+  tran: 900
+  them_rong_luot_nay: 24
+  tran_cua_luot: 24
+  bien_con_lai: 0
+
+ban_giao_do:
+  su_that: >-
+    Bản vá như executor bàn giao cho rc=1 trên vỏ bind được: D8(a) và D8(b) ĐỎ vì tập giết của
+    d11_xoa_d8 RỖNG.
+  nguyen_nhan: >-
+    Mẫu đột biến của d11_xoa_d8 xuất hiện HAI lần — một lần là mã thật (dòng 660), một lần là dữ
+    liệu trong chính bảng MUTATIONS (dòng 597). Bộ chạy dùng src.replace(old, new, 1) nên đánh vào
+    lần đầu, tức vào BẢNG chứ không vào mã.
+  vi_sao_executor_khong_thay: >-
+    Sandbox của nó không bind(127.0.0.1) được nên nền ĐỎ và mọi ô đột biến in KHÔNG_ĐO_ĐƯỢC —
+    ĐÚNG D7b và nó khai thẳng. Hệ quả: nó chưa bao giờ đo bộ đo của chính mình đầu-cuối, và sáu ô
+    "BỊ GIẾT" trong bản in cuối của nó dựa trên một phép đo thu nhỏ (CA 0/1), không phải cổng thật.
+  da_sua_boi: dieu_phoi
+  sua_the_nao: 'neo mẫu vào HAI dòng để nó duy nhất — thay MỘT dòng bằng MỘT dòng, net 0'
+  do_lai_sau_sua: 'CA 40/40 đạt · 0 đỏ · ĐẠT | ĐỘT BIẾN 48/48 · ĐẠT | D8(a)(b)(c) ĐẠT | TỔNG ĐẠT | rc=0'
+
+khuyet_tat_nen_lo_ra:
+  ten: bo-chay-dot-bien-khong-co-chot-duy-nhat
+  no_la_gi: >-
+    Bộ chạy chỉ kiểm `if old not in src`, KHÔNG kiểm `src.count(old) == 1`. Mẫu trùng thì
+    replace(...,1) im lặng đánh vào lần xuất hiện đầu.
+  pham_vi_do_duoc: '14 trong 48 mẫu KHÔNG duy nhất'
+  hien_dung_cho_nho_dau: >-
+    13 cái còn lại đánh đúng chỗ CHỈ nhờ thứ tự tình cờ — mã đích của chúng nằm TRƯỚC bảng
+    MUTATIONS (dòng 552-601). Chuyển một hàm xuống dưới bảng là 13 đột biến ấy lặng lẽ vô nghĩa.
+  chot_dung: 'fail-close: src.count(old) != 1 ⇒ KHÔNG_ĐO_ĐƯỢC, đừng đoán. Tốn ~2 dòng.'
+
+dot_bien_doc_lap:
+  phuong_phap: 'theo SỐ DÒNG, trên một bản nền đã xanh'
+  bang:
+    - {ten: N1, dong: 381, sua: 'return 0 if xanh else 1 -> return 0', phan_dinh: song_sot, ban_in: 'CA 38/40 · 2 đỏ · ĐỎ | TỔNG: ĐỎ', ma_thoat: 0}
+    - {ten: N2, dong: 377, sua: 'phan_dinh -> return True', phan_dinh: song_sot, ban_in: 'CA 39/40 · 1 đỏ · ĐỎ | TỔNG: ĐẠT', ma_thoat: 0}
+    - {ten: N3, dong: 609, sua: 'fn() -> pass', phan_dinh: bi_giet, ban_in: 'CA 40/40 · ĐẠT | TỔNG: ĐỎ', ma_thoat: 1}
+    - {ten: N4, dong: 660, sua: 'bỏ các dòng D8', phan_dinh: bi_giet, ban_in: 'TỔNG: ĐỎ', ma_thoat: 1}
+    - {ten: N5, dong: 664, sua: 'bỏ dòng TỔNG', phan_dinh: bi_giet, ban_in: 'không có dòng TỔNG', ma_thoat: 1}
+    - {ten: N6, dong: 670, sua: 'sys.exit(chay_cli()) -> sys.exit(0)', phan_dinh: song_sot, ban_in: 'KHÔNG IN GÌ CẢ', ma_thoat: 0}
+    - {ten: N7, dong: 657, sua: 'hậu tố dòng CA -> luôn "ĐẠT"', phan_dinh: song_sot, ban_in: 'CA 40/40 · 0 đỏ · ĐẠT | TỔNG: ĐẠT', ma_thoat: 0}
+    - {ten: N8, dong: 606, sua: 'bỏ một ca khỏi vòng lặp', phan_dinh: bi_giet, ban_in: 'CA 39/40 · 0 đỏ · ĐỎ', ma_thoat: 1}
+    - {ten: N9, dong: '606+657', sua: 'N8 cộng N7', phan_dinh: bi_giet, ban_in: 'CA 39/40 · 0 đỏ · ĐẠT | TỔNG: ĐỎ', ma_thoat: 1}
+  da_tien_that: >-
+    N1 và N2 vẫn cho tiến trình thoát 0, nhưng bản in nay NÓI RA rằng có ca đỏ. Trước bản vá, cùng
+    loại đột biến cho một bản in TRÔNG SẠCH. Người đọc báo cáo nay thấy đỏ; chỉ mã thoát nói dối.
+  dung_doc_qua_loi: >-
+    Với N2 hai dòng của CÙNG một bản in vẫn mâu thuẫn: dòng CA nói ĐỎ, dòng TỔNG nói ĐẠT. Bất biến
+    "mã thoát phản ánh báo cáo" CHƯA thành bất biến; nó mới thành "mọi đường làm gãy nó đều để lại
+    vết đỏ trong báo cáo".
+
+con_ho:
+  - ten: dong-657-khong-co-dot-bien-canh
+    vi_pham: 'đặc tả r4 — không được có dòng nào trong cơ chế mà xoá đi vẫn xanh'
+    bang_chung: 'N7 — ép hậu tố thành "ĐẠT" cho một bản chạy XANH HOÀN TOÀN, rc=0'
+    luu_y_cong_bang: >-
+      N9 cho thấy nó không phải chốt DUY NHẤT — bỏ một ca vẫn chết qua đường khác. Nhưng
+      "có đường khác bắt hộ" không phải là CÓ PHẢN CHỨNG.
+  - ten: d10-main-bi-ha-thanh-menh-de-luon-dung
+    vi_pham: 'S1 — thân ca nay là `assert ma_thoat(False) == 1`, lệch đặc tả r4'
+    dac_ta_doi_gi: 'dựng cảnh sổ ca một phần tử có cờ ghi nhận, gọi điểm vào, đòi CẢ HAI: mã thoát khác 0 VÀ cờ đã đặt'
+    la_hoi_quy: >-
+      Bản CŨ mạnh hơn: nó khẳng định "có ca đăng ký mà không chạy ca nào ⇒ 1". Khả năng ấy chưa mất
+      hẳn (chuyển sang ca D11-gate và sang _du_ca trong dòng CA) nhưng D10 nay không còn tự đo tiêu
+      chí mang tên nó.
+
+khuyet_tat_cua_dac_ta_r4:
+  ai_viet: 'phiên điều phối này'
+  loi_khai_sai: '"D11 thu hẹp bề mặt ấy xuống một dòng duy nhất"'
+  do_duoc: >-
+    SAI. Có ít nhất BA dòng mà đột biến làm tiến trình thoát 0: 381 (ma_thoat), 377 (phan_dinh),
+    670 (sys.exit). Khác biệt thật là hai dòng đầu ĐỂ LẠI VẾT ĐỎ trong bản in, còn dòng 670 KHÔNG
+    IN GÌ CẢ.
+  cau_dung_phai_la: >-
+    D11 không xoá được bề mặt, nhưng nó làm mọi đường làm giả TRỪ dòng ngoài cùng nhất đều phải để
+    lại vết trong báo cáo.
+  vi_sao_ghi_ra: >-
+    Phiên điều phối vừa soạn đặc tả, vừa soạn tiêu chí, vừa chấm. Một lời khai quá mạnh của chính
+    nó là thứ dễ trôi qua nhất.
+
+dieu_kien_dung_da_ban:
+  S1: 'D10-main lệch đặc tả r4'
+  S2: '900/900, biên 0. Ba việc còn lại cần ~7 dòng: chốt duy-nhất (~2), đột biến canh dòng 657 (~1), khôi phục D10 (~4)'
+  lease_cam_nang_tran: true
+  r5_da_chot_truoc: 'MÃ chạm 900 ⇒ TÁCH. Không nâng lần bốn, và không đổi đơn vị lần hai.'
+
+de_xuat:
+  A_khuyen_nghi: >-
+    TÁCH, đúng như r5 đã hứa trước khi biết sẽ chạm. Packet mới nhận ba việc: chốt duy-nhất
+    fail-close cho bộ chạy đột biến · đột biến canh dòng 657 · khôi phục D10. #319 chạy review
+    vòng 4 trên f461413a như hiện trạng, với BA finding trên đã khai sẵn để reviewer xác nhận hoặc
+    bác chứ không phải tự tìm lại.
+  B_khong_khuyen_nghi: >-
+    Nâng trần lần thứ TƯ. r5 đã ghi thẳng rằng khi ấy con số mất hết ý nghĩa.
+  C: >-
+    Land f461413a với ba finding thành nợ có tên. CHỈ hợp lệ nếu người giữ kho xếp cả ba là P2;
+    luat_dung_LAND cấm nợ hoá P1, và phiên điều phối KHÔNG tự xếp hạng cho chúng.

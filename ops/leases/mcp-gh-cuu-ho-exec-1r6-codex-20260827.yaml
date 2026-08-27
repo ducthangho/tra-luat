@@ -55,7 +55,7 @@ target_branch_neu_land: master
 
 base_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
 start_from_sha: da522be5baf4ed490662e298a16765216af065b6
-reviewed_sha_required: da522be5baf4ed490662e298a16765216af065b6
+reviewed_sha_required: f461413a03b3a28ebdacde1fa17f49c894223682
 reviewed_sha_luat: >-
   Cập nhật NGAY SAU khi đẩy bản vá, TRƯỚC khi phóng review. Trường này đã trỏ sai MỘT LẦN ở r5
   (bằng đúng `base_sha`, tức mọi vòng review sẽ neo vào bản chưa có việc gì) và đó là lần thứ ba
@@ -86,10 +86,10 @@ ngan_sach_kich_thuoc:
   don_vi: >-
     `git diff --numstat ac82ddc..HEAD` giới hạn trên HAI TỆP MÃ — `.claude/dev/mcp_gh.py` và
     `.claude/dev/mcp_gh_test.py` — cột dòng THÊM. Đơn vị KHÔNG đổi so với r5.
-  da_dung: 876
-  da_dung_do_luc: '2026-08-27T02:5xZ trên `043d2709`, sau merge master'
-  da_dung_chi_tiet: 'mcp_gh.py 230 · mcp_gh_test.py 646'
-  bien_con_lai: 24
+  da_dung: 900
+  da_dung_do_luc: '2026-08-27T03:3xZ trên `f461413a`, SAU bản vá r6 — trước đó 876 trên `043d2709`'
+  da_dung_chi_tiet: 'mcp_gh.py 230 · mcp_gh_test.py 670'
+  bien_con_lai: 0
   dac_ta_theo_doi_rieng: 360
   don_vi_cu_de_doi_chieu: '1236 nếu tính CẢ write set như r1–r4 — báo cả hai, đừng chỉ báo cái có lợi'
   KHONG_NANG_TRAN: >-
@@ -210,3 +210,27 @@ NO_CO_TEN_mo_truoc_khi_land:
     cổng nào chạy tệp này. Hai lỗ độc lập; đóng lỗ này KHÔNG đóng lỗ kia. Đừng để lượt land đọc
     `D11 ĐẠT` thành "cổng đã có người canh".
 posted_comment_id: 5433738994   # workflow ghi, ĐỪNG sửa tay
+
+# Thêm TAY sau khi lease đã đăng — `posted_comment_id` ở trên giữ nguyên, KHÔNG đăng lại.
+ket_qua_thi_cong_r6:
+  sha: 'f461413a03b3a28ebdacde1fa17f49c894223682'
+  executor_run: ae038f02d971424d82c8c44990d18be3
+  bo_do: 'CA 40/40 đạt · 0 đỏ · ĐẠT | ĐỘT BIẾN 48/48 · ĐẠT | D8(a)(b)(c) ĐẠT | TỔNG ĐẠT | rc=0'
+  ngan_sach: '900/900, thêm ròng 24/24, biên 0'
+  bien_nhan: ops/reviews/mcp-gh-cuu-ho-kiem-doc-lap-r6.md
+  ban_giao_DO_va_da_sua: >-
+    Bản vá như executor bàn giao cho `rc=1`: mẫu đột biến `d11_xoa_d8` KHÔNG duy nhất nên
+    `replace(...,1)` đánh vào chính bảng `MUTATIONS` thay vì vào mã. Phiên điều phối sửa net 0 dòng
+    (neo mẫu vào hai dòng). Executor không thấy vì sandbox không `bind` được ⇒ nền đỏ ⇒ mọi ô
+    `KHÔNG_ĐO_ĐƯỢC` — đúng `D7b`, nhưng nghĩa là nó chưa từng đo cổng của chính mình đầu-cuối.
+  S1_DA_BAN:
+    cho_nao: 'ca `D10-main` bị hạ thành `assert ma_thoat(False) == 1` — mệnh đề luôn đúng'
+    dac_ta_doi_gi: 'dựng cảnh sổ ca một phần tử có cờ, gọi điểm vào, đòi CẢ HAI: mã thoát khác 0 VÀ cờ đã đặt'
+    trang_thai: 'CHƯA sửa — sửa cần ~4 dòng và biên là 0'
+  S2_DA_BAN:
+    cho_nao: '900/900, biên 0'
+    con_thieu: 'chốt duy-nhất fail-close cho bộ chạy đột biến (~2) · đột biến canh dòng 657 (~1) · khôi phục D10 (~4)'
+    lease_cam_nang_tran: true
+  quyet_dinh_thuoc_nguoi_giu_kho: >-
+    r5 chốt trước "MÃ chạm 900 ⇒ TÁCH". Phiên điều phối KHÔNG tự tách, KHÔNG tự nâng trần, và
+    KHÔNG tự xếp hạng ba finding còn mở. Ba phương án đã trình trong biên nhận.

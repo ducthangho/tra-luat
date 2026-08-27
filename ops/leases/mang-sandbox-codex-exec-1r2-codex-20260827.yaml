@@ -161,3 +161,4 @@ CHOT_CUA_NEN_DA_LO_RA:
   de_xuat_ngoai_packet: >-
     Một cổng lúc CẤP LEASE: nếu `write_set` chạm `.claude/**` mà `executor` là `claude` ⇒ chặn kèm
     lý do. Ngoài mọi write set đang mở, nên chỉ ghi thành đề xuất.
+posted_comment_id: 5435103145   # workflow ghi, ĐỪNG sửa tay

@@ -168,7 +168,7 @@ recorder_ghi_chu: >-
   phối đặt, để nó chất vấn chính thang điểm chứ không chỉ chấm theo.
 
 leased_at_utc: '2026-08-27T03:00:00Z'
-lease_expires_at_utc: '2026-08-28T03:00:00Z'
+lease_expires_at_utc: '2026-08-27T04:20:00Z'   # ĐÓNG SỚM — xem khối DONG_LEASE ở cuối
 run_minutes: 1440
 
 thay_the_cho: mcp-gh-cuu-ho-exec-1r5-codex-20260826
@@ -280,3 +280,61 @@ TACH_DA_QUYET:
       "người giữ ma" đã báo ở #313. Ở đây nó chỉ làm con số sai theo chiều AN TOÀN (thừa người
       giữ); chiều ngược lại — nhánh tụt sau LÀM MẤT một lease đang sống — mới là chiều nguy hiểm,
       và chưa ai đo chiều ấy.
+
+DONG_LEASE:
+  dong_luc_utc: '2026-08-27T04:20:00Z'
+  han_goc_neu_khong_dong: '2026-08-28T03:00:00Z'
+  rut_ngan_bao_nhieu: '22 giờ 40 phút'
+  ai_quyet: ducthangho
+  quyet_dinh_luc: >-
+    direct, in-session, 2026-08-27 — phiên điều phối trình verdict vòng 4 (`changes_requested`,
+    HAI P1) và nêu rằng #319 không land được nữa nên giữ lease chỉ chặn việc; người giữ kho trả lời
+    "đóng lease #319 đi, tôi mở issue packet tách".
+  tham_quyen: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+  vi_sao: >-
+    Cross-review vòng 4 trả `changes_requested` với HAI P1, cả hai nằm TRONG write set của chính
+    packet, trong khi biên ngân sách là 0 và lease r6 CẤM nâng trần. Nên #319 không land được và
+    không vá tiếp được trong cùng lease. Giữ lease sống thêm 22 giờ chỉ khoá
+    `.claude/dev/mcp_gh_test.py` khỏi packet tách — thứ sinh ra để làm đúng phần việc ấy.
+  KHONG_phai_vi_thi_cong_hong: >-
+    Việc của r6 GIỮ NGUYÊN trên `f461413a`, đã đẩy, cổng xanh (`CA 40/40 · ĐỘT BIẾN 48/48 ·
+    D8(a)(b)(c) ĐẠT · rc=0`). Đóng lease KHÔNG xoá việc, KHÔNG revert, KHÔNG đóng PR #339.
+    Nhánh `claude/mcp-gh-cuu-ho-exec-1` giữ nguyên tại `f461413a`.
+
+  CACH_DONG_va_phan_KHONG_duoc_doc_rong_hon:
+    da_lam_gi: 'hạ `lease_expires_at_utc` xuống 04:20Z, giữ nguyên hạn gốc trong khối này để không ai phải đoán'
+    tai_sao_lam_the: >-
+      Vì đó là cơ chế DUY NHẤT kho có. `ops/RUT_LEASE_PLAT_X8_20260821.md` đã ghi thẳng:
+      "kho vốn không có đường ấy (nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong`: cơ chế duy nhất được
+      cài đặt là CHỜ HẾT HẠN)". Tiền lệ ấy dễ hơn ca này — lease PLAT-X8 CHƯA TỪNG được đăng.
+      Lease r6 thì ĐÃ ĐĂNG (`posted_comment_id: 5433738994`).
+    KHONG_duoc_doc_thanh: >-
+      "kho có đường thu hồi lease". KHÔNG có. Đây là sửa MỘT TRƯỜNG cho tới khi `ai-dang-giu` đọc
+      ra `HẾT_HẠN`; không tầng nào cưỡng chế rằng executor phải ngừng ghi, và comment đã đăng trên
+      #319 vẫn hiển thị hạn CŨ. Bản chiếu và bản có thẩm quyền nay LỆCH NHAU, và cách duy nhất
+      người đọc issue biết là đọc lease.
+    no_ky_thuat_bi_lan_thu_hai: AG-T0-01B-thu-hoi-lease-chua-co-duong
+    de_xuat_cho_no_ay: >-
+      Một khối `DONG_LEASE` có schema, cộng một lượt `lease_publish.py` ĐĂNG comment đính chính lên
+      issue khi phát hiện lease bị đóng sớm — để bản chiếu không đứng yên khi bản có thẩm quyền đổi.
+      Chưa làm ở đây vì `.github/workflows/**` và `ops/lease_publish.py` đều NGOÀI mọi write set
+      đang mở, và vì phiên này KHÔNG đăng được comment (proxy chặn API GitHub).
+
+  trang_thai_packet_khi_dong:
+    reviewed_sha: f461413a03b3a28ebdacde1fa17f49c894223682
+    verdict_vong_4: changes_requested
+    P1_con_mo: 2
+    P2_con_mo: '1 (vòng 4) + 5 (vòng 2) + 2 (vòng 3) — bảy cái sau chưa đối chiếu lại ở vòng 4'
+    land_duoc_khong: >-
+      KHÔNG. `luat_dung_LAND` chỉ cho P2 thành nợ có tên; P1 vẫn chặn land. Hai P1 đang mở.
+    ngan_sach: '900/900, biên 0'
+    no_co_ten_van_mo: khong-cong-nao-chay-bo-test
+
+  duong_dan_duoc_nha:
+    - .claude/dev/mcp_gh.py
+    - .claude/dev/mcp_gh_test.py
+    - ops/specs/mcp-gh-cuu-ho.md
+  ai_nhan_tiep: >-
+    Packet tách `MCP-GH-CONG-TU-CANH` — người giữ kho đang mở Issue. Hồ sơ nhập:
+    `ops/specs/mcp-gh-cong-tu-canh-packet-issue-nhap.md`. Nó nhận HAI P1 của vòng 4 cộng hai việc
+    phiên điều phối đã đo. **Đọc được hồ sơ ≠ được giao việc: phải có Issue + lease mới.**

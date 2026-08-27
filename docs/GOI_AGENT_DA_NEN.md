@@ -593,10 +593,13 @@ toàn, chỉ mua được một verdict mỏng hơn, hoặc không có verdict n
 
 **Phạm vi của từ vựng này:** nó áp cho các **control của mục này** — BA control TRONG BẢNG, đo ở vỏ phiên
 điều phối, thành NĂM mệnh đề TRONG BẢNG (`--allowedTools` và cặp credential mỗi cái được đo ở
-hai cấu hình); văn xuôi dưới bảng mang thêm hai mệnh đề nữa; phép đếm đầy đủ nằm ngay sau bảng năm hạng.
+hai cấu hình); văn xuôi dưới bảng mang thêm BA mệnh đề nữa; phép đếm đầy đủ nằm ngay sau bảng năm hạng.
 Mục mạng/sandbox codex và mục hai pha reviewer ĐÃ ĐƯỢC TÁCH sang **packet `MANG-SANDBOX-CODEX`,
 Issue #334** — đó là NEO DUY NHẤT cho chỗ tách; mọi câu "packet kia" phía dưới đều trỏ về đây, và
-đừng chép trạng thái động của nó vào tệp này. Từ vựng này áp cho chúng ở đó, không phải ở đây. Chỗ khác trong tệp dùng chữ *ranh giới* / *cưỡng chế* theo nghĩa thường (phân công giữa
+đừng chép trạng thái động của nó vào tệp này. Cái ĐI theo lát cắt là SỐ ĐO đầy đủ, probe và bảng
+hai pha. Cái Ở LẠI là ĐÚNG MỘT mệnh đề về mạng sandbox: nó nằm TRONG phạm vi từ vựng này, mang
+nhãn, và được đếm Ở ĐÂY — nên điều kiện đo của nó cũng phải nằm ngay cạnh nó như mọi mệnh đề khác.
+Chỗ khác trong tệp dùng chữ *ranh giới* / *cưỡng chế* theo nghĩa thường (phân công giữa
 launcher và CLI ở đầu tệp; hạn chót của launcher; và *"ranh giới cắt"* là thuật ngữ Git của clone
 nông) — những chỗ ấy **không** mang hạng, và nói ra ở đây để không ai đi gắn nhãn nhầm.
 
@@ -621,8 +624,9 @@ KHÁC NHAU ở hai cấu hình. Mục dưới có ví dụ: hàng `--allowedTool
 năm hàng bảng, cộng mệnh đề cơ chế proxy ambient, mệnh đề bộ-ba-với-quyền-ghi, và mệnh đề mạng
 sandbox ở đoạn khai chỗ tách. Đếm ra: `chiều ĐÓNG` ×1 · `chiều MỞ` ×5 · `chưa xếp được` ×2 ·
 `máy phát hiện` ×0 · `quan sát chưa rõ cơ chế` ×0.
-Mệnh đề thứ tám ấy là mệnh đề DUY NHẤT có phép đo nằm ở packet khác. Nó vẫn phải mang nhãn: bỏ nó
-ra khỏi phép đếm vì "bằng chứng ở chỗ khác" là mở đúng cái ngoại lệ mà cam kết trên cấm.
+Mệnh đề thứ tám ấy TỪNG bị bỏ khỏi phép đếm vì "bằng chứng ở chỗ khác" — đó là mở đúng cái ngoại lệ
+mà cam kết trên cấm. Nay nó mang nhãn VÀ có điều kiện đo ngay cạnh nó, lấy từ phép A/B đã có sẵn
+trong chính tệp này; thứ ở packet kia chỉ là số đo ĐẦY ĐỦ, không phải chỗ dựa của nhãn.
 
 Bản trước của chính đoạn này khai `chiều ĐÓNG` **bằng KHÔNG** rồi dựng cả một lập luận trên đó —
 rằng ô rỗng ấy chứng minh "không control nào bó được". Cross-review bác: có mệnh đề THẬT SỰ đóng.
@@ -668,9 +672,18 @@ packet riêng. Lý do tách là một phép đếm, không phải cảm tính: b
 sinh finding về mục mạng/sandbox (tám finding), trong khi mọi tiêu chí khác của packet này đã đạt
 từ vòng ba. Mệnh đề còn đứng mà không cần bảng số nào — và nó MANG NHÃN như mọi mệnh đề khác:
 **mạng đóng của sandbox là một MẶC ĐỊNH CẤU HÌNH, không phải bất biến — biết cơ chế KHÔNG làm nó
-thành ranh giới** ⇒ **cơ chế đã xác minh — chiều MỞ**, cho câu hỏi *"nó có phải ranh giới không"*:
-ta biết VÌ SAO nó không bó, vì cờ lật được. Phép đo chống lưng cho nhãn ấy nay nằm ở packet kia
-cùng số đo, probe và bảng hai pha — **đừng chép chúng về đây**, chỉ giữ nhãn và con trỏ.
+thành ranh giới** ⇒ **cơ chế đã xác minh — chiều MỞ**, cho câu hỏi *"nó có phải ranh giới không"*.
+ĐIỀU KIỆN ĐO nằm NGAY ĐÂY, không ở packet kia — và nó đã có sẵn trong chính tệp này: mục
+`sandbox workspace-write` phía trên đo A/B trên CÙNG một lệnh, mặc định `git ls-remote` lỗi kết
+nối, thêm `-c 'sandbox_workspace_write.network_access=true'` thì `lsremote_rc=0`. Một cờ cấu hình
+lật được đảo hẳn kết quả ⇒ cơ chế đã biết, và nó KHÔNG bó. Điều kiện của phép đo ấy: codex CLI
+trong container này, sandbox `workspace-write`, chạy ở vỏ phiên điều phối; số phụ thuộc phiên bản
+và cấu hình, đọc như QUAN SÁT CÓ ĐIỀU KIỆN ĐO. Chỗ phép đo ấy CHƯA tách được, nói thẳng: nó bật
+HAI cờ cùng lúc (`network_access` và `writable_roots`), nên "cờ mạng là thứ đảo `lsremote_rc`" là
+SUY LUẬN — hợp lý vì `ls-remote` không ghi `.git`, nhưng chưa ai chạy riêng từng cờ. Điều chưa tách
+ấy KHÔNG đụng tới mệnh đề: mệnh đề khai *"cấu hình đổi được kết quả"*, và A/B cho thấy đúng thế bất
+kể cờ nào là thủ phạm. Thứ ở packet kia là số đo đầy đủ, probe và bảng hai pha — **đừng chép chúng
+về đây**. Nhãn này KHÔNG dựa vào chúng.
 
 Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": `rc=0`, ref được tạo, và
 `--require-clean` **vẫn báo sạch**. Đo tiếp BA control ấy — năm hàng, vì `--allowedTools` vào bảng

@@ -56,8 +56,10 @@ Ba bẫy CLI đã đo 27-08-2026, không phải giả định:
 
 - `--effort khong-ton-tai` chỉ cảnh báo rồi lùi im lặng về mặc định; kết quả không ghi đã lùi.
 - `--model claude-khong-ton-tai-9` không chạy review nào nhưng vẫn trả `rc=0`.
-- Trong thư mục trống, 2 model hợp lệ cho `is_error=false` và mỗi lượt 1 khoá `modelUsage`; model rác cho `is_error=true`, `modelUsage={}` dù vẫn `subtype=success`. Trong sandbox có kho, cả 6/6 lượt đều thêm khoá phụ `claude-haiku-4-5-20251001`; model rác vẫn có 1 khoá phụ nhưng thiếu model yêu cầu.
-  **`rc` và `subtype` cùng nói dối** — bằng chứng dương là `is_error is false` và model yêu cầu có mặt làm khoá hoặc `canonicalModel`; khoá thừa phải được báo ra, không được dùng để từ chối.
+- Trong 9 lượt, `haiku-4-5` có 8/9, `fable-5` 6/9, `opus-5` 3/9 và `opus-4-8` 2/9; cả hai lượt `opus-4-8` là lượt tụt giữa chừng thật.
+  **`rc` và `subtype` cùng nói dối**. Danh tính mỗi mục là `canonicalModel` nếu có, ngược lại là tên khoá; bỏ qua danh tính mang tiền tố phụ `claude-haiku-`, rồi đòi tập danh tính chính bằng đúng `{model yêu cầu}`. Model yêu cầu vắng và model lạ có mặt là hai nhánh lỗi riêng. Không được đòi model phụ có mặt.
+
+Probe ngắn chỉ loại được ca *model hoàn toàn không gọi được*; nó không chứng nhận lượt dài sẽ giữ model. Đo 27-08: probe xanh 3/3 rồi lượt dài vẫn tụt hoàn toàn, nên luôn kiểm `modelUsage` **sau** lượt thật.
 
 Chọn bậc **trước khi phóng**:
 

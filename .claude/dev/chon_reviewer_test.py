@@ -1,29 +1,23 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Phản chứng offline cho bộ chọn reviewer — packet #351.
 Mỗi đột biến chạy trên TOÀN BỘ bảng ca và phải giết ĐÚNG, CHỈ ĐÚNG tập đã khai.
 Nền đỏ thì từ chối công bố điểm: ca đỏ sẵn không phải một mutant bị giết.
 """
-
 from __future__ import annotations
-
 import importlib
 import importlib.util
 import itertools
 import sys
 import tempfile
 from pathlib import Path
-
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
-
 HERE = Path(__file__).resolve().parent
 MA = HERE / "chon_reviewer.py"
 BAC = (("claude-opus-5", "high"), ("claude-opus-5", "xhigh"),
        ("claude-fable-5", "xhigh"), ("claude-fable-5", "max"))
-
 def _nap(path=MA, nhan="nen"):
     importlib.invalidate_caches()
     sp = importlib.util.spec_from_file_location("tl351_" + nhan, str(path))
@@ -39,12 +33,10 @@ def _doi_loi(m, ham, *args):
 def _bac(m, review_class, paths, so_dong=0, luot=1, bac_truoc=None):
     return m.chon(review_class, paths, so_dong, luot, bac_truoc)[:2]
 def r01_bon_bac_biet_truoc(m):
-    # Năm vùng đã biết không tự sinh điểm; nếu một tiền tố trượt allow-list, ca 0 sẽ lộ.
     for path in ("scripts/tl.py", ".claude/dev/x.py", "ops/x.py",
                  "references/x.txt", "README.md"):
         if _bac(m, "routine", [path]) != BAC[0]:
             raise AssertionError("điểm 0 sai cho vùng đã biết: %s" % path)
-
     mot_diem = [
         _bac(m, "routine", ["docs/adr/0001-x.md"]),
         _bac(m, "routine", ["scripts/x.py"], so_dong=400),
@@ -78,11 +70,8 @@ def r04_dinh_danh_allow_list(m):
         _doi_loi(m, m.kiem_dinh_danh, alias, "high")
     m.kiem_dinh_danh("claude-opus-5", "high")
     _doi_loi(m, m.kiem_dinh_danh, "claude-opus-5", "khong-ton-tai")
-# Đúng 9 bản ghi ở cả hai rig của đặc tả §0(c)/(c′). Bốn cặp opus/fable trong
-# sandbox có kho khác nhau ở việc dùng công cụ, dù các trường liên quan của JSON giống
-# nhau. Giữ cả 9 nhãn để một rig không âm thầm bị rút khỏi phép đo lần nữa.
+# Giu du 9 nhan cua hai rig de mot rig khong bi rut khoi phep do.
 PHU = "claude-haiku-4-5-20251001"
-
 def _ket_qua(loi, *models):
     return {"subtype": "success", "is_error": loi,
             "modelUsage": {x: {"canonicalModel": x.rsplit("-", 1)[0]
@@ -123,19 +112,29 @@ def r06_json_mo_ho_phai_do(m):
               {"is_error": False, "modelUsage": {"claude-fable-5": {
                   "canonicalModel": "claude-fable-5"}}}):
         _doi_loi(m, m.kiem_ket_qua, "claude-opus-5", x)
-    # Khoá không khớp nhưng canonical khớp thì vẫn là bằng chứng dương hợp lệ.
     m.kiem_ket_qua("claude-opus-5", {"is_error": False, "modelUsage": {
         "claude-opus-5-20260827": {"canonicalModel": "claude-opus-5"}}})
     _doi_loi(m, m.kiem_ket_qua, "claude-opus-5", {"is_error": False, "modelUsage": {
         "id-theo-ngay": {"canonicalModel": "claude-fable-5"}}})
+def r13_tut_giua_chung_bi_chan(m):
+    du_lieu = _ket_qua(False, "claude-fable-5", "claude-opus-4-8")
+    try:
+        m.kiem_ket_qua("claude-fable-5", du_lieu)
+    except m.KhongDoDuoc as exc:
+        if "mô hình LẠ" not in str(exc):
+            raise AssertionError("tụt giữa chừng bị chặn sai nhánh: %s" % exc)
+        return
+    raise AssertionError("tụt giữa chừng mang hai model chính vẫn ĐẠT")
+def r14_khong_co_model_phu_van_dat(m):
+    thong_bao = m.kiem_ket_qua(
+        "claude-fable-5", _ket_qua(False, "claude-fable-5"))
+    if "mô hình phụ bỏ qua=[]" not in thong_bao:
+        raise AssertionError("lượt không có model phụ không được báo đúng: %r" % thong_bao)
 def r07_don_dieu_moi_to_hop(m):
-    """144 tổ hợp gốc; với mỗi tổ hợp, thêm từng khoản điểm và so chỉ số bậc."""
     vung = (".github/workflows/ci.yml", "docs/adr/x.md", "scripts/x.py",
             ".claude/dev/x.py", "references/x.txt", "vi-du/la.txt")
-
     def ds(path, nhieu):
         return [path] + (["scripts/phu-%d.py" % i for i in range(4)] if nhieu else [])
-
     for review_class, path, nhieu, dai, muon in itertools.product(
             ("routine", "systemic", "sensitive"), vung,
             (False, True), (False, True), (False, True)):
@@ -154,7 +153,6 @@ def r07_don_dieu_moi_to_hop(m):
         if hien_tai < co_so:
             raise AssertionError("đổi từ vùng 0 điểm sang %s làm tụt bậc" % path)
 def r08_review_class_allow_list(m):
-    # Đo lượt 2: `sensitve`/`SENSITIVE`/None từng âm thầm bớt 2 điểm; strip thì hợp lệ.
     for x in ("sensitve", "SENSITIVE", None):
         _doi_loi(m, m.chon, x, ["scripts/x.py"], 0, 1)
     for x in ("routine", "systemic", "sensitive"):
@@ -181,18 +179,15 @@ CA = [(ham.__name__, ham) for ham in (
     r04_dinh_danh_allow_list, r05_chin_fixture_hai_rig, r06_json_mo_ho_phai_do,
     r07_don_dieu_moi_to_hop, r08_review_class_allow_list, r09_write_set_rong_khong_do_duoc,
     r10_so_am_khong_phai_pham_vi_nho, r11_systemic_cong_mot_diem,
-    r12_uu_tien_effective_review_class)]
-
+    r12_uu_tien_effective_review_class, r13_tut_giua_chung_bi_chan,
+    r14_khong_co_model_phu_van_dat)]
 DOT_BIEN = {
     "bo_nhanh_khong_biet": (
-        '        cong(3, "chạm vùng khong-biet")',
-        '        pass  # đột biến: bỏ điểm vùng ngoài allow-list',
-        ["r02_khong_biet_day_len_cao_nhat"]),
-    "bo_banh_coc": (
-        "        if truoc > chi_so:", "        if False and truoc > chi_so:",
-        ["r03_banh_coc_hai_chieu"]),
-    "nhan_bi_danh": (
-        'MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5")',
+        '    if "khong-biet" in cac_vung: cong(3, "chạm vùng khong-biet")',
+        '    if "khong-biet" in cac_vung: pass', ["r02_khong_biet_day_len_cao_nhat"]),
+    "bo_banh_coc": ("        if truoc > chi_so:",
+                      "        if False and truoc > chi_so:", ["r03_banh_coc_hai_chieu"]),
+    "nhan_bi_danh": ('MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5")',
         'MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5", "opus", "fable", "sonnet")',
         ["r04_dinh_danh_allow_list"]),
     "tin_subtype_success": (
@@ -200,42 +195,62 @@ DOT_BIEN = {
         '    if ket_qua_json.get("subtype") == "success":\n'
         '        return "modelUsage: ĐẠT (đột biến tin subtype)"\n'
         '    model_usage = ket_qua_json.get("modelUsage")',
-        ["r05_chin_fixture_hai_rig"]),
+        ["r05_chin_fixture_hai_rig", "r13_tut_giua_chung_bi_chan",
+         "r14_khong_co_model_phu_van_dat"]),
     "doi_modelUsage_thanh_dung_mot_khoa": (
-        '    khoa_khop = yeu_cau_model if yeu_cau_model in model_usage else None',
+        '    def danh_tinh(ten, thong_tin):',
         '    if len(model_usage) != 1:\n'
         '        raise KhongDoDuoc("đột biến đòi đúng một khoá")\n'
-        '    khoa_khop = yeu_cau_model if yeu_cau_model in model_usage else None',
-        ["r05_chin_fixture_hai_rig"]),
+        '    def danh_tinh(ten, thong_tin):',
+        ["r05_chin_fixture_hai_rig", "r13_tut_giua_chung_bi_chan"]),
     "chi_kiem_modelUsage_khong_rong": (
-        '    khoa_khop = yeu_cau_model if yeu_cau_model in model_usage else None',
-        '    khoa_khop = next(iter(model_usage))  # đột biến không tìm model yêu cầu',
-        ["r05_chin_fixture_hai_rig", "r06_json_mo_ho_phai_do"]),
-    "thieu_is_error_doc_false": (
-        '    if ket_qua_json.get("is_error") is not False:',
-        '    if ket_qua_json.get("is_error", False) is not False:',
+        '    if chinh != {yeu_cau_model}:',
+        '    if False and chinh != {yeu_cau_model}:',
+        ["r05_chin_fixture_hai_rig", "r06_json_mo_ho_phai_do",
+         "r13_tut_giua_chung_bi_chan"]),
+    "tap_bang_nhau_noi_thanh_membership": (
+        '    if chinh != {yeu_cau_model}:',
+        '    if yeu_cau_model not in chinh:',
+        ["r13_tut_giua_chung_bi_chan"]),
+    "tap_bang_nhau_noi_thanh_issubset": (
+        '    if chinh != {yeu_cau_model}:',
+        '    if not {yeu_cau_model}.issubset(chinh):',
+        ["r13_tut_giua_chung_bi_chan"]),
+    "doi_model_phu_phai_co": (
+        '    chinh = {dinh_danh for ten, dinh_danh in muc if ten not in phu}',
+        '    chinh = {dinh_danh for ten, dinh_danh in muc if ten not in phu}\n'
+        '    if not phu:\n        raise KhongDoDuoc("đột biến đòi model phụ")',
+        ["r05_chin_fixture_hai_rig", "r06_json_mo_ho_phai_do",
+         "r13_tut_giua_chung_bi_chan", "r14_khong_co_model_phu_van_dat"]),
+    "bo_canonicalModel_chi_so_ten_khoa": (
+        '        if isinstance(thong_tin, dict) and "canonicalModel" in thong_tin:',
+        '        if False and isinstance(thong_tin, dict) and "canonicalModel" in thong_tin:',
         ["r06_json_mo_ho_phai_do"]),
+    "kiem_is_error_truoc_so_tap": (
+        '    def danh_tinh(ten, thong_tin):',
+        '    if ket_qua_json.get("is_error") is not False:\n'
+        '        raise KhongDoDuoc("đột biến kiểm is_error trước")\n'
+        '    def danh_tinh(ten, thong_tin):',
+        ["r05_chin_fixture_hai_rig"]),
+    "thieu_is_error_doc_false": ('    if ket_qua_json.get("is_error") is not False:',
+        '    if ket_qua_json.get("is_error", False) is not False:', ["r06_json_mo_ho_phai_do"]),
     "review_class_la_doc_nhu_routine": (
         '    if review_class not in ("routine", "systemic", "sensitive"):',
         '    if False and review_class not in ("routine", "systemic", "sensitive"):',
         ["r08_review_class_allow_list"]),
-    "write_set_rong_van_chon": (
-        "    if not ket_qua:", "    if False and not ket_qua:",
-        ["r09_write_set_rong_khong_do_duoc"]),
+    "write_set_rong_van_chon": ("    if not ket_qua:",
+        "    if False and not ket_qua:", ["r09_write_set_rong_khong_do_duoc"]),
     "so_am_doc_nhu_pham_vi_nho": (
         "    if type(so_dong) is not int or so_dong < 0 or type(luot) is not int or luot < 1:",
         "    if type(so_dong) is not int or type(luot) is not int:",
         ["r10_so_am_khong_phai_pham_vi_nho"]),
-    "systemic_khong_cong_diem": (
-        '    if review_class == "systemic":',
-        '    if False and review_class == "systemic":',
-        ["r11_systemic_cong_mot_diem"]),
+    "systemic_khong_cong_diem": ('    if review_class == "systemic":',
+        '    if False and review_class == "systemic":', ["r11_systemic_cong_mot_diem"]),
     "bo_uu_tien_effective_review_class": (
         '        review_class = review_class.get("effective_review_class", review_class.get("review_class"))',
         '        review_class = review_class.get("review_class")',
         ["r12_uu_tien_effective_review_class"]),
 }
-
 def _chay(m):
     dat, ly = {}, {}
     for ten, ham in CA:
@@ -246,12 +261,10 @@ def _chay(m):
             dat[ten] = False
             ly[ten] = "%s: %s" % (type(exc).__name__, exc)
     return dat, ly
-
 def _ap(van, tim, thay):
     if van.count(tim) != 1:
         raise AssertionError("mốc đột biến khớp %d chỗ: %r" % (van.count(tim), tim))
     return van.replace(tim, thay, 1)
-
 def main():
     nen, ly = _chay(_nap())
     do_san = sorted(k for k, v in nen.items() if not v)
@@ -261,7 +274,6 @@ def main():
     if do_san:
         print("TỪ CHỐI công bố điểm đột biến: nền có %d ca ĐỎ" % len(do_san))
         return 1
-
     hong = []
     goc = MA.read_text(encoding="utf-8")
     sys.dont_write_bytecode = True  # mutant cùng kích thước/mtime từng làm CPython nạp nhầm .pyc.
@@ -283,6 +295,5 @@ def main():
         return 1
     print("TỔNG: ĐẠT")
     return 0
-
 if __name__ == "__main__":
     sys.exit(main())

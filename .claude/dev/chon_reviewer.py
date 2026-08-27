@@ -1,28 +1,21 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """Chọn reviewer theo độ phức tạp và kiểm bằng chứng model đã chạy."""
-
 from __future__ import annotations
-
 import argparse
 import json
 import sys
-
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
-
 MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5")
 NO_LUC_CHO_PHEP = ("low", "medium", "high", "xhigh", "max")
-
 _BAC = (
     ("claude-opus-5", "high"),
     ("claude-opus-5", "xhigh"),
     ("claude-fable-5", "xhigh"),
     ("claude-fable-5", "max"),
 )
-
 class KhongDoDuoc(Exception):
     """Bằng chứng thiếu hoặc không thuộc tập hữu hạn mà kho đo được."""
 
@@ -34,8 +27,7 @@ def _cac_duong_dan(duong_dan):
             ds = list(duong_dan)
         except TypeError as exc:
             raise KhongDoDuoc("đường dẫn không phải chuỗi/danh sách") from exc
-    # Một tệp lặp lại không được biến thành nhiều tệp để tự nâng điểm. Rỗng là phép
-    # đo phạm vi hỏng, không phải write set nhỏ để được nhận bậc thấp.
+    # Trung lap khong duoc tu nang diem; rong la phep do hong, khong phai diff nho.
     ket_qua = tuple(dict.fromkeys(str(x).strip() for x in ds if str(x).strip()))
     if not ket_qua:
         raise KhongDoDuoc("write set rỗng")
@@ -58,13 +50,7 @@ def _vung(path):
     return "khong-biet"
 
 def _bac_theo_diem(diem):
-    if diem <= 0:
-        return 0
-    if diem <= 2:
-        return 1
-    if diem <= 4:
-        return 2
-    return 3
+    return 0 if diem <= 0 else 1 if diem <= 2 else 2 if diem <= 4 else 3
 
 def kiem_dinh_danh(model, effort):
     """Từ chối bí danh/mức lạ bằng phép so bằng nhau với allow-list."""
@@ -76,18 +62,15 @@ def kiem_dinh_danh(model, effort):
 def chon(review_class, duong_dan, so_dong, luot, bac_truoc=None):
     """Trả ``(model, effort, giải thích)`` từ đúng các đối số đã cho."""
     if isinstance(review_class, dict):
-        # Đo mọi nhánh ops/**: 147 lease có lớp effective SAU escalation. Vì vậy khi
-        # có cả hai trường phải lấy lớp có hiệu lực, không được chấm lớp khai ban đầu.
+        # 147 lease co lop effective sau escalation; lop nay moi co hieu luc.
         review_class = review_class.get("effective_review_class", review_class.get("review_class"))
     if not isinstance(review_class, str):
         raise KhongDoDuoc("review_class không phải chuỗi")
     review_class = review_class.strip()
-    # Đếm trước khi viết allow-list: routine=22, systemic=167, sensitive=570, còn
-    # `thuong`=0. Revision 3 từng bịa `thuong` và sẽ tự khoá 167 lease thật. Lease ghi
-    # đúng một dạng; casefold sẽ tái mở lỗi phân biệt cách viết/thẩm quyền đã đo.
+    # Da dem: routine=22, systemic=167, sensitive=570, `thuong`=0.
     if review_class not in ("routine", "systemic", "sensitive"):
         raise KhongDoDuoc("review_class ngoài allow-list: %r" % review_class)
-    # Số âm không mô tả một diff nhỏ: nó chứng minh phép đo đầu vào đã hỏng.
+    # So am la phep do hong, khong phai diff nho.
     if type(so_dong) is not int or so_dong < 0 or type(luot) is not int or luot < 1:
         raise KhongDoDuoc("so_dong phải là số nguyên >= 0 và luot phải là số nguyên >= 1")
     ds = _cac_duong_dan(duong_dan)
@@ -100,23 +83,14 @@ def chon(review_class, duong_dan, so_dong, luot, bac_truoc=None):
         diem += so
         khoan.append("+%d %s" % (so, ly_do))
 
-    if review_class == "sensitive":
-        cong(2, "review_class=sensitive")
-    if review_class == "systemic":
-        cong(1, "review_class=systemic")
-    if "cong" in cac_vung:
-        cong(2, "chạm vùng cong")
-    if "giao-thuc" in cac_vung:
-        cong(1, "chạm vùng giao-thuc")
-    if len(ds) >= 5:
-        cong(1, "số tệp=%d >= 5" % len(ds))
-    if so_dong >= 400:
-        cong(1, "số dòng=%d >= 400" % so_dong)
-    if luot >= 3:
-        cong(1, "lượt=%d >= 3" % luot)
-    if "khong-biet" in cac_vung:
-        cong(3, "chạm vùng khong-biet")
-
+    if review_class == "sensitive": cong(2, "review_class=sensitive")
+    if review_class == "systemic": cong(1, "review_class=systemic")
+    if "cong" in cac_vung: cong(2, "chạm vùng cong")
+    if "giao-thuc" in cac_vung: cong(1, "chạm vùng giao-thuc")
+    if len(ds) >= 5: cong(1, "số tệp=%d >= 5" % len(ds))
+    if so_dong >= 400: cong(1, "số dòng=%d >= 400" % so_dong)
+    if luot >= 3: cong(1, "lượt=%d >= 3" % luot)
+    if "khong-biet" in cac_vung: cong(3, "chạm vùng khong-biet")
     chi_so = _bac_theo_diem(diem)
     banh_coc = ""
     if bac_truoc is not None:
@@ -134,33 +108,46 @@ def chon(review_class, duong_dan, so_dong, luot, bac_truoc=None):
     giai_thich = "%s; tổng=%d%s; bậc cuối=%s/%s" % (
         chi_tiet, diem, banh_coc, model, effort)
     return model, effort, giai_thich
-
+_MO_HINH_PHU = ("claude-haiku-",)
 def kiem_ket_qua(yeu_cau_model, ket_qua_json):
-    """Đòi bằng chứng dương từ JSON của harness, không tin lời tự khai của model.
+    """Doi hoi tap model chinh bang dung tap chi co model yeu cau.
 
-    Đo 27-08-2026: model không tồn tại vẫn ``rc=0`` và ``subtype=success``. Vì vậy hai
-    trường ấy tuyệt đối không tham gia nhánh ĐẠT. Trong sandbox có kho, cả 6 lượt đều có
-    thêm model phụ; bằng chứng đúng là model yêu cầu xuất hiện trong khoá hoặc danh tính
-    canonical, không phải ``modelUsage`` có đúng một khoá.
+    Hai luot dai ngay 27-08-2026 mang ca fable-5 va opus-4-8, nhung ``rc=0``
+    va ``subtype=success``. Vi vay hai truong do khong tham gia nhanh DAT.
+    Haiku co mat 8/9 luot: chi duoc cho phep, khong duoc doi phai co.
     """
     if not isinstance(ket_qua_json, dict):
         raise KhongDoDuoc("kết quả JSON thiếu hoặc không phải object")
     model_usage = ket_qua_json.get("modelUsage")
     if not isinstance(model_usage, dict) or not model_usage:
         raise KhongDoDuoc("modelUsage thiếu/rỗng/không phải object")
-    khoa_khop = yeu_cau_model if yeu_cau_model in model_usage else None
-    if khoa_khop is None:
-        for ten, thong_tin in model_usage.items():
-            if isinstance(thong_tin, dict) and thong_tin.get("canonicalModel") == yeu_cau_model:
-                khoa_khop = ten
-                break
-    if khoa_khop is None:
-        raise KhongDoDuoc("model yêu cầu %r không có trong modelUsage" % yeu_cau_model)
+    def danh_tinh(ten, thong_tin):
+        if isinstance(thong_tin, dict) and "canonicalModel" in thong_tin:
+            can = thong_tin["canonicalModel"]
+            if not isinstance(can, str) or not can:
+                raise KhongDoDuoc("canonicalModel không phải chuỗi có nội dung: %r" % can)
+            return can
+        return ten
+    muc = [(ten, danh_tinh(ten, thong_tin))
+           for ten, thong_tin in model_usage.items()]
+    phu = sorted(ten for ten, dinh_danh in muc
+                 if dinh_danh.startswith(_MO_HINH_PHU))
+    chinh = {dinh_danh for ten, dinh_danh in muc if ten not in phu}
+    # Hai nhanh hong khac nhau: model yeu cau VANG va model LA cung co mat.
+    if chinh != {yeu_cau_model}:
+        if yeu_cau_model not in chinh:
+            raise KhongDoDuoc(
+                "model yêu cầu %r không có trong tập model chính %r; mô hình phụ=%r"
+                % (yeu_cau_model, sorted(chinh), phu))
+        la = sorted(chinh - {yeu_cau_model})
+        raise KhongDoDuoc(
+            "model yêu cầu %r có mặt nhưng còn mô hình LẠ %r; mô hình phụ=%r"
+            % (yeu_cau_model, la, phu))
+    # Kiem sau phep so tap de model rac bi chan o nhanh model yeu cau VANG.
     if ket_qua_json.get("is_error") is not False:
         raise KhongDoDuoc("is_error thiếu hoặc không bằng false")
-    khoa_thua = [ten for ten in model_usage if ten != khoa_khop]
-    return "modelUsage: ĐẠT; khoá chứng minh=%r; khoá thừa=%r" % (khoa_khop, khoa_thua)
-
+    return "modelUsage: ĐẠT; tập model chính=%r; mô hình phụ bỏ qua=%r" % (
+        sorted(chinh), phu)
 def main(argv=None):
     p = argparse.ArgumentParser(description="Chọn reviewer theo độ phức tạp")
     p.add_argument("--review-class", required=True)

@@ -29,7 +29,16 @@ Bản ghi cũ trong kho mở **đúng hai** chốt cùng lúc (`network_access=t
 KHÔNG cô lập được cờ nào là nguyên nhân (cross-review packet #318 đã bác một bản vá đúng vì lý
 do này). Đo lại BỐN tổ hợp, mỗi cờ riêng, cùng một lệnh nền
 `codex sandbox -c sandbox_mode=workspace-write [CỜ] -- python3 .claude/dev/probe_mang.py`,
-`[CỜ]` thay bằng đúng cột dưới (`DUONG_DAN_GOC` = `$(git rev-parse --show-toplevel)`):
+`[CỜ]` thay bằng đúng cột dưới (`DUONG_DAN_GOC` = `$(git rev-parse --show-toplevel)`). Bốn lệnh
+nguyên văn, chép-chạy được (đã tự chạy lại 27-08-2026, khớp bảng dưới byte-với-byte):
+
+```bash
+DUONG_DAN_GOC=$(git rev-parse --show-toplevel)
+codex sandbox -c sandbox_mode=workspace-write -- python3 .claude/dev/probe_mang.py
+codex sandbox -c sandbox_mode=workspace-write -c sandbox_workspace_write.network_access=true -- python3 .claude/dev/probe_mang.py
+codex sandbox -c sandbox_mode=workspace-write -c 'sandbox_workspace_write.writable_roots=["'"$DUONG_DAN_GOC"'/.git","/tmp"]' -- python3 .claude/dev/probe_mang.py
+codex sandbox -c sandbox_mode=workspace-write -c sandbox_workspace_write.network_access=true -c 'sandbox_workspace_write.writable_roots=["'"$DUONG_DAN_GOC"'/.git","/tmp"]' -- python3 .claude/dev/probe_mang.py
+```
 
 | tổ hợp | `network_access=true` | `writable_roots=["DUONG_DAN_GOC/.git","/tmp"]` | bind | url | git |
 |---|---|---|---|---|---|

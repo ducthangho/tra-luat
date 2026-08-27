@@ -35,6 +35,81 @@ HERE = Path(__file__).resolve().parent
 CANONICAL = HERE / "packet_loop.py"
 ROOT = HERE.parents[1]
 
+# --- CÔ LẬP GIT KHỎI CẤU HÌNH NGOÀI (cross-review codex, PR #343, cùng lớp với P1-a của
+# PR #342) --------------------------------------------------------------------------
+#
+# TRIỆU CHỨNG: fixture nào `git commit` mà không ghim `commit.gpgsign=false` sẽ ăn cấu hình
+# TOÀN CỤC của máy chạy. Container này ĐANG có đúng nền ấy — đo được:
+#     git config --global --list | grep -E 'gpgsign|signingkey'
+#       commit.gpgsign=true · user.signingkey=… · gpg.format=ssh
+# Tái hiện được cú chết bằng một global config dựng sẵn có `signingkey` trỏ tệp KHÔNG tồn
+# tại: `error: cannot run ssh-keygen` → `fatal: failed to write commit object`, rc=128.
+# Reviewer đo `271/273` trên một nền bật ký; ở đây nền bật ký vẫn `rc=0` vì máy có sẵn
+# `gpg.ssh.program`. Hai nền, hai kết quả — tức con số phụ thuộc MÁY, đúng thứ hermeticity
+# sinh ra để giết.
+#
+# VÌ SAO KHÔNG GHIM TỪNG KHOÁ: bản của PR #342 liệt `commit.gpgsign` `tag.gpgsign`
+# `core.autocrlf` `core.eol` `gc.auto` — đó là DANH SÁCH CẤM, và kho này đã trả giá cho
+# hình dạng ấy (`lease-authority-spoof`: "danh sách cấm không bao giờ đủ"). `core.hooksPath`,
+# `include.path`, `core.fsmonitor`, `merge.*`, `diff.*`… đều có thể phá fixture, và không ai
+# liệt hết được. ĐẢO thành: KHÔNG đọc nguồn cấu hình ngoài NÀO — `GIT_CONFIG_GLOBAL` và
+# `GIT_CONFIG_SYSTEM` trỏ `os.devnull` (git ≥ 2.32; đo tại chỗ: 2.43.0). Cấu hình
+# REPO-LOCAL (`.git/config`, ví dụ `core.abbrev=7` mà CLAUDE.md đòi) KHÔNG bị đụng.
+#
+# Danh tính commit phải cấp bằng biến vì global đã tắt — fixture nào quên `git config
+# user.email` sẽ không còn mượn được của máy chạy.
+#
+# ĐẶT NGAY KHI NẠP MODULE, TRƯỚC mọi lần spawn: `run()` và các fixture đều `os.environ.copy()`
+# hoặc kế thừa thẳng, nên một chỗ này phủ CẢ tiến trình con lẫn `git` gọi trực tiếp.
+_GIT_BIEN_CO_LAP = {
+    "GIT_CONFIG_GLOBAL": os.devnull,
+    "GIT_CONFIG_SYSTEM": os.devnull,
+    "GIT_AUTHOR_NAME": "tl-test",
+    "GIT_AUTHOR_EMAIL": "tl-test@invalid",
+    "GIT_COMMITTER_NAME": "tl-test",
+    "GIT_COMMITTER_EMAIL": "tl-test@invalid",
+}
+
+
+# NGUỒN THỨ BA, và bản lượt 3 của chính tệp này KHÔNG BIẾT tới nó — cross-review codex
+# lượt 2 trên PR #342 bắt trên packet anh em, tái hiện tại đây:
+#   env COUNT=1 KEY_0=commit.gpgsign VALUE_0=true + GIT_CONFIG_GLOBAL=/dev/null
+#     -> commit rc=128 "gpg failed to sign the data" · `config --get commit.gpgsign` = true
+#   gỡ đúng ba biến ấy ra -> rc=0
+# Tức cấu hình PHẠM VI LỆNH (`GIT_CONFIG_COUNT` + `GIT_CONFIG_KEY_<n>`/`VALUE_<n>`) có độ
+# ưu tiên CAO HƠN cả repo-local, và `GIT_CONFIG_GLOBAL` không đụng tới nó. Câu "đã cắt
+# nguồn ngoài" của lượt 3 vì thế SAI — nó cắt HAI TRONG BA.
+#
+# KHÔNG hiển nhiên và KHÔNG hiếm: container này ĐANG đặt `GIT_CONFIG_COUNT=3` (url rewrite
+# + `credential.interactive=false`), nên kênh ấy sống trong MỌI lệnh git bộ test gọi. Hiện
+# vô hại, nhưng "vô hại hôm nay" không phải "không tồn tại".
+#
+# VÌ SAO ĐÂY KHÔNG PHẢI DANH SÁCH CẤM: git đọc cấu hình từ một tập ĐÓNG gồm ba NGUỒN
+# (system · global · phạm vi lệnh) — ta chặn cả ba. Tập KHOÁ thù địch mới là thứ vô hạn,
+# và đó là chỗ danh sách cấm thua.
+def _la_cau_hinh_pham_vi_lenh(k: str) -> bool:
+    if k == "GIT_CONFIG_COUNT":
+        return True
+    for tien_to in ("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_"):
+        # Xoá MỌI cặp đánh số, không chỉ những cặp dưới `COUNT` hiện tại: bỏ sót một cặp
+        # rồi để `COUNT` mới trỏ tới nó còn tệ hơn không xoá gì.
+        if k.startswith(tien_to) and k[len(tien_to):].isdigit():
+            return True
+    return False
+
+
+def _ep_git_co_lap(env):
+    """Ép một môi trường về trạng thái KHÔNG đọc cấu hình git ngoài. Nhận `env` làm ĐỐI SỐ
+    để ca `fixture_git_KHONG_an_config_toan_cuc` gọi được với một nền THÙ ĐỊCH dựng sẵn —
+    một hàm chỉ sửa `os.environ` thì không có cách nào cho nó ca biết trước đáp án."""
+    for k in [k for k in env if _la_cau_hinh_pham_vi_lenh(k)]:
+        del env[k]
+    env.update(_GIT_BIEN_CO_LAP)
+    return env
+
+
+_ep_git_co_lap(os.environ)
+
 EXECUTOR = "claude"
 REVIEWER = "codex"
 BIEN_BC = "TL_MOI_TRUONG_JSON"
@@ -493,6 +568,416 @@ def case_guard_khong_co_co_noi(c: Ctx):
     for co in ("--force", "--allow", "--override", "--yes", "--bypass", "--no-guard", "--i-know"):
         if co in txt:
             raise AssertionError(f"guard KHÔNG được có cờ nới, nhưng thấy {co!r}")
+
+
+# --- #338: mốc đột biến phải khớp ĐÚNG MỘT CHỖ -------------------------------------
+#
+# VÌ SAO CÓ: bảng `MUTANTS` áp bằng `str.replace(moc, thay, 1)` — phép CHUỖI CON, không
+# neo dòng. Nên một dòng thụt SÂU HƠN chứa trọn mốc thụt NÔNG hơn:
+#     "            except ValueError:\n"   CHỨA   "        except ValueError:\n"
+# Nếu dòng sâu ấy nằm TRƯỚC mục tiêu trong tệp, `replace(..., 1)` sửa NHẦM nó và đột biến
+# thành vô hiệu — ca đích vẫn XANH, và runner báo "ca đó không đo gì", tức đổ lỗi cho CA
+# trong khi lỗi nằm ở MỐC.
+#
+# ĐÃ XẢY RA THẬT trong chính packet này: thêm một `except ValueError:` 12 dấu cách vào
+# `cmd_doi_chieu_uy_quyen` làm `bien_nhan_bo_nhanh_valueerror` mất răng. Đo được: mốc khớp
+# 1 chỗ trên `origin/master`, 2 chỗ sau khi thêm dòng ấy. Nền master `TỔNG: ĐẠT`, nhánh
+# `TỔNG: 1 lỗi` — delta THẬT, dù `git diff | grep bien_nhan` = 0. Suy "diff không chạm tên
+# ấy nên không phải của mình" là SAI: tương tác đi qua CHUỖI CON, không qua tên.
+#
+# Chốt này nói đúng chỗ đau ngay lần đầu, thay vì để người sau truy như tôi vừa truy.
+#
+# LƯỢT 3 — cross-review codex bắt đúng hai lỗ của bản lượt 2, và cả hai đều thuộc lớp
+# "phép kiểm tự bảo vệ mình bằng chính thứ cần được bảo vệ":
+#
+#  (1) BẢNG NGOẠI LỆ LÀ CỬA. Bản trước khai `MOC_MO_HO_CO_SAN = {"adr_…": 2}` để tha một
+#      mốc khớp 2 chỗ. Nhưng bảng ngoại lệ chính là thứ mà mọi mốc mơ hồ SAU này sẽ được
+#      thêm vào — đúng hình dạng "danh sách CẤM/THA không bao giờ đủ" mà kho đã trả giá.
+#      Đường ra: làm MỐC ĐỦ HẸP (kéo thêm một dòng ngữ cảnh vào mốc `adr_tha_khi_thieu_thu_muc`,
+#      đo còn 1 chỗ) rồi BỎ HẲN bảng, đòi `== 1` vô điều kiện. Cửa chết theo KIẾN TRÚC.
+#
+#  (2) PHÉP KIỂM XANH-THEO-CẤU-TẠO KHÔNG THỂ TỰ CHỨNG MINH CÓ RĂNG. Đo được: nới vị từ
+#      thành `if n == n:` thì KHÔNG ca nào chết — vì trên dữ liệu THẬT mọi mốc đều khớp,
+#      nên nhánh "báo xấu" chưa từng chạy. Một vị từ không bao giờ sai thì đột biến làm nó
+#      luôn đúng chẳng đổi gì. Đường ra là tách VỊ TỪ khỏi DỮ LIỆU: `_moc_khop_sai(...)`
+#      nhận bảng làm ĐỐI SỐ, rồi cho nó một ca BIẾT TRƯỚC ĐÁP ÁN (một mốc dựng sẵn khớp 2
+#      chỗ PHẢI bị tố; một mốc khớp 1 chỗ PHẢI được tha). Nay đột biến `if True:` giết
+#      `moc_kiem_TU_NO_co_rang` — tức phép kiểm có răng ĐO ĐƯỢC, không phải suy ra.
+def _moc_khop_sai(bang, nham_test, goc, goc_test) -> list[str]:
+    """Trả danh sách mốc KHÔNG khớp đúng một chỗ. Bảng là ĐỐI SỐ nên gọi được với dữ liệu
+    dựng sẵn — đó là cách duy nhất cho vị từ này một ca biết trước đáp án."""
+    xau = []
+    for ten, bo in bang.items():
+        than = goc_test if ten in nham_test else goc
+        for t, _ in _cap_thay_the(bo[0], bo[1]):
+            n = than.count(t)
+            if n == 1:
+                continue
+            xau.append(f"{ten}: mốc khớp {n} chỗ (đòi 1) — {t[:50]!r}")
+    return xau
+
+
+def case_moc_dot_bien_phai_khop_DUNG_MOT_CHO(c: Ctx):
+    xau = _moc_khop_sai(MUTANTS, MUTANTS_NHAM_TEST,
+                        c.script.read_text(encoding="utf-8"),
+                        Path(__file__).read_text(encoding="utf-8"))
+    if xau:
+        raise AssertionError(
+            "mốc đột biến KHÔNG khớp đúng một chỗ ⇒ `replace(...,1)` có thể sửa NHẦM chỗ và "
+            "đột biến mất răng trong im lặng: " + "; ".join(xau))
+
+
+def case_moc_kiem_TU_NO_co_rang(c: Ctx):
+    """Ca BIẾT TRƯỚC ĐÁP ÁN cho `_moc_khop_sai` — hai chiều, vì một vị từ luôn-tố cũng vô
+    dụng y như một vị từ luôn-tha."""
+    goc = "alpha\nbeta\nalpha\n"
+    hai_cho = {"mut_khop_2": ("alpha\n", "GAMMA\n", ["ca_nao_do"])}
+    mot_cho = {"mut_khop_1": ("beta\n", "GAMMA\n", ["ca_nao_do"])}
+    khong_cho = {"mut_khop_0": ("delta\n", "GAMMA\n", ["ca_nao_do"])}
+
+    ra = _moc_khop_sai(hai_cho, frozenset(), goc, "")
+    if len(ra) != 1 or "khớp 2 chỗ" not in ra[0]:
+        raise AssertionError(f"mốc khớp 2 chỗ PHẢI bị tố, nhận: {ra!r}")
+
+    ra = _moc_khop_sai(khong_cho, frozenset(), goc, "")
+    if len(ra) != 1 or "khớp 0 chỗ" not in ra[0]:
+        raise AssertionError(f"mốc khớp 0 chỗ (mỏ neo chết) PHẢI bị tố, nhận: {ra!r}")
+
+    ra = _moc_khop_sai(mot_cho, frozenset(), goc, "")
+    if ra:
+        raise AssertionError(f"mốc khớp ĐÚNG 1 chỗ phải được tha, nhưng bị tố: {ra!r}")
+
+    # Chiều thứ ba: bảng `nham_test` phải đổi NGUỒN đọc, chứ không chỉ là trang trí.
+    ra = _moc_khop_sai(mot_cho, frozenset({"mut_khop_1"}), goc, "")
+    if len(ra) != 1 or "khớp 0 chỗ" not in ra[0]:
+        raise AssertionError(f"MUTANTS_NHAM_TEST phải chuyển sang thân test, nhận: {ra!r}")
+
+
+_CAU_HINH_THU_DICH = (
+    "[user]\n\tname = Ke Thu\n\temail = kethu@example.invalid\n"
+    "\tsigningkey = /khong/co/khoa/nao.pub\n"
+    "[gpg]\n\tformat = ssh\n[commit]\n\tgpgsign = true\n[core]\n\tautocrlf = true\n"
+)
+
+
+def _thu_commit(goc: Path, env) -> tuple[int, str]:
+    """Dựng một kho tí hon rồi commit — trả `(rc, stderr)` của riêng bước commit."""
+    goc.mkdir(parents=True, exist_ok=True)
+    for a in (["init", "--quiet", "-b", "main"], ["add", "a.txt"]):
+        if a[0] == "add":
+            (goc / "a.txt").write_text("1\n", encoding="utf-8")
+        subprocess.run(["git", "-C", str(goc), *a], capture_output=True, env=env)
+    p = subprocess.run(["git", "-C", str(goc), "commit", "-qm", "goc"],
+                       capture_output=True, env=env)
+    return p.returncode, _txt(p.stderr)
+
+
+def case_fixture_git_KHONG_an_config_toan_cuc(c: Ctx):
+    """Ca BIẾT TRƯỚC ĐÁP ÁN cho `_ep_git_co_lap`, hai chiều.
+
+    Không có chiều ĐỐI CHỨNG thì ca này xanh cả khi hàm cô lập là một `pass` — vì nền
+    của máy đang chạy có thể vốn đã lành. Chiều đối chứng chứng minh nền thù địch THẬT SỰ
+    giết được commit; chỉ khi ấy chiều còn lại mới nói lên điều gì."""
+    thu = c.tmp / f"gitcfg-thu-{time.time_ns()}"
+    thu.write_text(_CAU_HINH_THU_DICH, encoding="utf-8")
+
+    # (1) ĐỐI CHỨNG: gỡ đúng các biến cô lập ra ⇒ nền thù địch phải giết được commit.
+    ban = os.environ.copy()
+    for k in _GIT_BIEN_CO_LAP:
+        ban.pop(k, None)
+    ban["GIT_CONFIG_GLOBAL"] = str(thu)
+    ban["GIT_CONFIG_SYSTEM"] = os.devnull
+    rc, e = _thu_commit(c.tmp / f"kho-thu-doi-chung-{time.time_ns()}", ban)
+    if rc == 0:
+        raise BoQua("KHÔNG ĐO ĐƯỢC: nền thù địch dựng sẵn vẫn commit được (máy này có "
+                    "ssh-keygen + khoá?) ⇒ chiều đối chứng vô nghĩa, không kết luận gì")
+
+    # (2) CHIỀU THẬT: cùng nền thù địch, nhưng đi qua hàm cô lập ⇒ commit phải SỐNG.
+    sach = _ep_git_co_lap(dict(ban))
+    rc, e = _thu_commit(c.tmp / f"kho-thu-co-lap-{time.time_ns()}", sach)
+    if rc != 0:
+        raise AssertionError(f"_ep_git_co_lap KHÔNG chặn được cấu hình toàn cục: rc={rc} {e[:200]!r}")
+
+    # (3) Cô lập phải là KHÔNG ĐỌC NGUỒN NGOÀI, không phải "ghim vài khoá đã nghĩ tới":
+    # một khoá ngoài danh sách của PR #342 (`core.hooksPath`) cũng phải biến mất.
+    thu2 = c.tmp / f"gitcfg-thu2-{time.time_ns()}"
+    thu2.write_text("[core]\n\thooksPath = /khong/co/hooks\n", encoding="utf-8")
+    moi = _ep_git_co_lap(dict(os.environ, GIT_CONFIG_GLOBAL=str(thu2)))
+    goc = c.tmp / f"kho-thu-hooks-{time.time_ns()}"
+    goc.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["git", "-C", str(goc), "init", "--quiet", "-b", "main"],
+                   capture_output=True, env=moi)
+    ra = subprocess.run(["git", "-C", str(goc), "config", "--get", "core.hooksPath"],
+                        capture_output=True, text=True, env=moi)
+    if ra.stdout.strip():
+        raise AssertionError(f"khoá NGOÀI danh sách #342 vẫn lọt: core.hooksPath="
+                             f"{ra.stdout.strip()!r} ⇒ đang ghim khoá chứ chưa cắt nguồn")
+
+    # (4) NGUỒN THỨ BA — cấu hình PHẠM VI LỆNH. Bản lượt 3 KHÔNG chặn nó, và nó thắng cả
+    # repo-local. Hai chiều, vì chiều đối chứng là thứ chứng minh nền thù địch có thật.
+    thu_lenh = {"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "commit.gpgsign",
+                "GIT_CONFIG_VALUE_0": "true"}
+    ban3 = dict(os.environ, **thu_lenh)
+    for k in ("GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM"):
+        ban3[k] = os.devnull                      # hai nguồn KIA đã bị chặn sẵn…
+    rc, e = _thu_commit(c.tmp / f"kho-thu-lenh-doi-chung-{time.time_ns()}", ban3)
+    if rc == 0:
+        raise BoQua("KHÔNG ĐO ĐƯỢC: nền `GIT_CONFIG_COUNT` vẫn commit được (máy này thiếu "
+                    "gpg?) ⇒ chiều đối chứng vô nghĩa, không kết luận gì")
+
+    sach3 = _ep_git_co_lap(dict(os.environ, **thu_lenh))
+    rc, e = _thu_commit(c.tmp / f"kho-thu-lenh-co-lap-{time.time_ns()}", sach3)
+    if rc != 0:
+        raise AssertionError(f"cấu hình PHẠM VI LỆNH vẫn lọt qua `_ep_git_co_lap`: "
+                             f"rc={rc} {e[:200]!r}")
+
+
+# --- #338: hạ lời khai của guard + sổ khai báo ĐẾM ĐƯỢC -------------------------
+
+
+def case_guard_KHONG_khai_minh_kiem_tham_quyen(c: Ctx):
+    """Bản trước nói "Đây là cổng của người có quyền" — một phép kiểm KHÔNG TỒN TẠI.
+    Cổng chặn một NHÃN VAI; phiên chạy bằng credential của chủ kho (đo: `get_me` ->
+    ducthangho), nên nó không phân biệt được uỷ quyền thật với tự cấp.
+
+    Ca này KHÔNG đo văn phong. Nó đo hai thứ cụ thể: (1) câu khẳng định cũ đã biến mất,
+    (2) cơ chế CÒN THIẾU được gọi tên. Thiếu (2) thì hạ lời khai chỉ là xoá chữ."""
+    sd = c.sd()
+    rc, _, e = run(c.script, ["guard", "--action", "merge"], sd)
+    _doi(7, rc, e, "guard merge")
+    txt = _txt(e)
+    if "cổng của người có quyền" in txt:
+        raise AssertionError("guard vẫn khẳng định một phép kiểm thẩm quyền không tồn tại")
+    for phai_co in ("LỜI NHẮC", "KHÔNG PHẢI PHÉP KIỂM THẨM QUYỀN", "TÁCH DANH TÍNH", "338"):
+        if phai_co not in txt:
+            raise AssertionError(f"thông điệp guard thiếu {phai_co!r}: {txt[:300]!r}")
+
+
+def case_ghi_uy_quyen_doi_danh_sach_CHO_PHEP(c: Ctx):
+    """Danh sách CẤM thua từ trong thiết kế — kho đã trả giá đúng một lần
+    (`lease-authority-spoof` P1: `codex-dispatcher`/`ai-codex-bot`/`cödex` đều lọt).
+    Ca này dùng LẠI đúng ba tên tấn công ấy."""
+    sd = c.sd()
+    sha = "a" * 40
+    for xau in ("codex-dispatcher", "ai-codex-bot", "cödex", "claude", "codex", ""):
+        rc, _, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", xau,
+                                  "--bang-chung", "https://x", "--head-sha", sha], sd)
+        if rc == 0:
+            raise AssertionError(f"--nguoi-cap {xau!r} phải bị chặn, nhưng rc=0")
+    rc, o, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
+                              "--bang-chung", "https://x", "--head-sha", sha], sd)
+    _doi(0, rc, e, "ghi-uy-quyen người cấp hợp lệ")
+    if "LỜI KHAI" not in _txt(o):
+        raise AssertionError("bản ghi phải tự khai nó là LỜI KHAI, không phải bằng chứng")
+
+
+def case_ghi_uy_quyen_doi_sha40_that(c: Ctx):
+    """Neo vào ĐÚNG head. Neo sai chỗ thì con số đối chiếu vô nghĩa."""
+    sd = c.sd()
+    for xau in ("deadbeef", "", "z" * 40, "a" * 39, "a" * 41):
+        rc, _, _ = run(c.script, ["ghi-uy-quyen", "--action", "merge",
+                                  "--nguoi-cap", "ducthangho", "--bang-chung", "https://x",
+                                  "--head-sha", xau], sd)
+        if rc == 0:
+            raise AssertionError(f"--head-sha {xau!r} phải bị từ chối, nhưng rc=0")
+
+
+def case_khai_uy_quyen_KHONG_mo_khoa_guard(c: Ctx):
+    """Chốt trung tâm của #338: ghi khai báo KHÔNG được biến `rc=7` thành `rc=0`.
+    Nếu nó mở khoá được thì nó là D1 — và D1 đã bị bác, vì phiên tự gõ được lệnh ấy."""
+    sd = c.sd()
+    sha = "b" * 40
+    rc, _, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
+                              "--bang-chung", "https://x", "--head-sha", sha], sd)
+    _doi(0, rc, e, "ghi-uy-quyen")
+    rc, _, e = run(c.script, ["guard", "--action", "merge"], sd)
+    _doi(7, rc, e, "guard SAU khi đã khai — vẫn phải 7")
+
+
+def case_doi_chieu_dem_duoc_merge_co_khai_va_khong(c: Ctx):
+    """Biến KHÔNG ĐO ĐƯỢC thành SỐ. Dựng một kho tạm có merge thật rồi đếm hai chiều."""
+    sd = c.sd()
+    goc = c.tmp / f"kho-338-{time.time_ns()}"
+    goc.mkdir(parents=True)
+    g = lambda *a: subprocess.run(["git", "-C", str(goc), *a], capture_output=True)
+    g("init", "--quiet", "-b", "main")
+    g("config", "user.email", "t@t"); g("config", "user.name", "t")
+    (goc / "a.txt").write_text("1\n", encoding="utf-8")
+    g("add", "a.txt"); g("commit", "-qm", "goc")
+    g("checkout", "-q", "-b", "nhanh")
+    (goc / "b.txt").write_text("2\n", encoding="utf-8")
+    g("add", "b.txt"); g("commit", "-qm", "viec")
+    head_nhanh = subprocess.run(["git", "-C", str(goc), "rev-parse", "HEAD"],
+                                capture_output=True, text=True).stdout.strip()
+    g("checkout", "-q", "main")
+    g("merge", "--no-ff", "-q", "nhanh", "-m", "Merge nhanh")
+    # chua khai gi -> 1 merge, 0 co khai
+    goc_sha = subprocess.run(["git", "-C", str(goc), "rev-list", "--max-parents=0", "HEAD"],
+                             capture_output=True, text=True).stdout.split()[0]
+    # SO RONG khac SO VANG, va do dung la phan biet packet nay vua dung: so vang =>
+    # KHONG DO DUOC (rc=8, co ca rieng `doi_chieu_THIEU_SO_la_KHONG_DO_DUOC`); so rong =>
+    # that su "0 khai bao". Tao so rong de do dung chieu thu hai.
+    (sd / "uy_quyen_merge.jsonl").parent.mkdir(parents=True, exist_ok=True)
+    (sd / "uy_quyen_merge.jsonl").write_text("", encoding="utf-8")
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main",
+                              "--since", goc_sha], sd)
+    _doi(0, rc, e, "doi-chieu lan 1 (so RONG)")
+    t = _txt(o)
+    if "CÓ khai báo    : 0" not in t or "KHÔNG khai báo : 1" not in t:
+        raise AssertionError(f"trước khi khai phải là 0/1, được: {t!r}")
+    # khai dung head DA MERGE (cha thu hai) -> 1 co khai
+    rc, _, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
+                              "--bang-chung", "https://x", "--head-sha", head_nhanh], sd)
+    _doi(0, rc, e, "ghi-uy-quyen head nhánh")
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main",
+                              "--since", goc_sha], sd)
+    _doi(0, rc, e, "doi-chieu lan 2")
+    t = _txt(o)
+    if "CÓ khai báo    : 1" not in t or "KHÔNG khai báo : 0" not in t:
+        raise AssertionError(f"sau khi khai phải là 1/0, được: {t!r}")
+    if "không nghĩa là đã được duyệt" not in t:
+        raise AssertionError("đối chiếu phải tự khai nó đo TẦN SUẤT, không đo THẨM QUYỀN")
+
+
+def case_doi_chieu_neo_dung_HEAD_da_merge_khong_phai_commit_merge(c: Ctx):
+    """CHỈ cha thứ hai (HEAD đã merge) mới được tính. Khai vào SHA của chính commit
+    merge KHÔNG được tính, và khai vào một SHA vô can cũng KHÔNG. Không có chốt này thì
+    đếm gì cũng ra 'có khai'.
+
+    Docstring này từng nói NGƯỢC hành vi (`"SHA của chính commit merge cũng được tính"`)
+    — đúng cái lỗi mà chính finding `doi-chieu-nhan-sai-schema-va-sai-neo` tố cáo ở mã,
+    chỉ là ở lời khai. Lúc KHAI thì commit merge CHƯA TỒN TẠI, nên neo vào nó là neo vào
+    thứ chưa có."""
+    sd = c.sd()
+    goc = c.tmp / f"kho-338b-{time.time_ns()}"
+    goc.mkdir(parents=True)
+    g = lambda *a: subprocess.run(["git", "-C", str(goc), *a], capture_output=True)
+    g("init", "--quiet", "-b", "main")
+    g("config", "user.email", "t@t"); g("config", "user.name", "t")
+    (goc / "a.txt").write_text("1\n", encoding="utf-8")
+    g("add", "a.txt"); g("commit", "-qm", "goc")
+    g("checkout", "-q", "-b", "nhanh")
+    (goc / "b.txt").write_text("2\n", encoding="utf-8")
+    g("add", "b.txt"); g("commit", "-qm", "viec")
+    g("checkout", "-q", "main")
+    g("merge", "--no-ff", "-q", "nhanh", "-m", "Merge nhanh")
+    (sd / "uy_quyen_merge.jsonl").parent.mkdir(parents=True, exist_ok=True)
+    (sd / "uy_quyen_merge.jsonl").write_text("", encoding="utf-8")
+    rc, _, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
+                              "--bang-chung", "https://x", "--head-sha", "c" * 40], sd)
+    _doi(0, rc, e, "ghi-uy-quyen sha vô can")
+    goc_sha = subprocess.run(["git", "-C", str(goc), "rev-list", "--max-parents=0", "HEAD"],
+                             capture_output=True, text=True).stdout.split()[0]
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main",
+                              "--since", goc_sha], sd)
+    _doi(0, rc, e, "doi-chieu")
+    if "KHÔNG khai báo : 1" not in _txt(o):
+        raise AssertionError("khai vào SHA vô can KHÔNG được tính là có khai")
+    # Chieu thu hai, do duoc chu khong chi tuyen bo: khai vao chinh COMMIT MERGE cung
+    # KHONG duoc tinh. Ban truoc chu thich noi vay ma MA nhan ca hai, va ca test mang ten
+    # "khong phai commit merge" chua bao gio dung mot ban ghi nhu the.
+    merge_sha = subprocess.run(["git", "-C", str(goc), "rev-parse", "main"],
+                               capture_output=True, text=True).stdout.strip()
+    rc, _, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
+                              "--bang-chung", "https://x", "--head-sha", merge_sha], sd)
+    _doi(0, rc, e, "ghi-uy-quyen vao COMMIT MERGE")
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main",
+                              "--since", goc_sha], sd)
+    _doi(0, rc, e, "doi-chieu sau khi khai vao commit merge")
+    if "KHÔNG khai báo : 1" not in _txt(o):
+        raise AssertionError("khai vào chính COMMIT MERGE KHÔNG được tính — lúc khai nó "
+                             "chưa tồn tại")
+
+
+def case_doi_chieu_chi_dem_FIRST_PARENT(c: Ctx):
+    """P2 `doi-chieu-dem-ca-merge-ben-nhanh` (cross-review PR #343, DA TAI HIEN).
+
+    Thieu `--first-parent`, lenh dem ca merge nam BEN TRONG nhanh phu nhu mot merge "tren
+    master". Do tren kho that, dung cua so cua Issue #338: `--merges` -> 10,
+    `--merges --first-parent` -> 9. Con so `9` executor khai o luot 1 do bang mot lenh
+    KHAC voi lenh da giao.
+
+    Fixture dung dung hinh dang ay: nhanh phu MERGE master vao no truoc, roi moi merge
+    nhanh phu vao master."""
+    sd = c.sd()
+    goc = c.tmp / f"kho-fp-{time.time_ns()}"
+    goc.mkdir(parents=True)
+    def g(*a):
+        return subprocess.run(["git", "-C", str(goc), *a], capture_output=True, text=True)
+    g("init", "--quiet", "-b", "main")
+    for k, v in (("user.email", "t@t"), ("user.name", "t"), ("commit.gpgsign", "false")):
+        g("config", k, v)
+    (goc / "a.txt").write_text("1\n", encoding="utf-8")
+    g("add", "a.txt"); g("commit", "-qm", "goc")
+    goc_sha = g("rev-parse", "HEAD").stdout.strip()
+    g("checkout", "-q", "-b", "phu")
+    (goc / "b.txt").write_text("2\n", encoding="utf-8")
+    g("add", "b.txt"); g("commit", "-qm", "viec phu")
+    g("checkout", "-q", "main")
+    (goc / "c.txt").write_text("3\n", encoding="utf-8")
+    g("add", "c.txt"); g("commit", "-qm", "viec main")
+    g("checkout", "-q", "phu")
+    g("merge", "--no-ff", "-q", "main", "-m", "Merge main VAO nhanh phu")   # merge BEN TRONG
+    g("checkout", "-q", "main")
+    g("merge", "--no-ff", "-q", "phu", "-m", "Merge phu vao main")          # merge first-parent
+    so = c.tmp / f"so-fp-{time.time_ns()}.jsonl"
+    so.write_text("", encoding="utf-8")
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main",
+                              "--since", goc_sha, "--so", str(so)], sd)
+    _doi(0, rc, e, "doi-chieu first-parent")
+    t = _txt(o)
+    if "merge trên main: 1" not in t:
+        raise AssertionError(f"phai dem DUNG 1 merge first-parent, duoc: {t!r}")
+    if "(first-parent)" not in t:
+        raise AssertionError("phai in ro cua so la first-parent")
+    # doi chung: khong first-parent thi git thay HAI merge — chung minh fixture co that
+    tho = g("rev-list", "--count", "--merges", goc_sha + "..main").stdout.strip()
+    fp = g("rev-list", "--count", "--merges", "--first-parent", goc_sha + "..main").stdout.strip()
+    if (tho, fp) != ("2", "1"):
+        raise AssertionError(f"fixture khong dung hinh dang: tho={tho} fp={fp} (can 2/1)")
+
+
+def case_doi_chieu_THIEU_SO_la_KHONG_DO_DUOC(c: Ctx):
+    """P2 `so-khai-cuc-bo-bien-mat-thanh-khong-khai`. So mac dinh nam trong thu muc bi
+    `.gitignore` loai, nen mot clone moi khong phan biet duoc "khong co khai bao" voi "so
+    khong duoc chuyen sang". Tra 0 la doc cai IM LANG thanh mot phep do."""
+    sd = c.sd()
+    rc, _, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(ROOT), "--nhanh", "HEAD",
+                              "--since", "HEAD~1",
+                              "--so", str(c.tmp / f"khong-ton-tai-{time.time_ns()}.jsonl")], sd)
+    if rc == 0:
+        raise AssertionError("thieu so PHAI la KHONG DO DUOC, khong duoc tra 0 va rc=0")
+    if "KHONG DO DUOC" not in _txt(e):
+        raise AssertionError(f"phai noi ro KHONG DO DUOC, stderr={_txt(e)[:200]!r}")
+
+
+def case_doi_chieu_TU_CHOI_ban_ghi_sai_luoc_do(c: Ctx):
+    """P2 `doi-chieu-nhan-sai-schema-va-sai-neo`. Ban truoc chi doi co truong `head_sha`,
+    nen mot ban ghi cua action KHAC hoac mot dong JSON viet tay cung duoc tinh."""
+    sd = c.sd()
+    sha_that = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"],
+                              capture_output=True, text=True).stdout.strip()
+    so = c.tmp / f"so-xau-{time.time_ns()}.jsonl"
+    xau = [
+        {"head_sha": sha_that},                                              # thieu het
+        {"event": "linh_tinh", "action": "merge", "nguoi_cap": "ducthangho",
+         "bang_chung": "x", "head_sha": sha_that},                           # sai event
+        {"event": "uy_quyen_merge_KHAI_BAO", "action": "deploy", "nguoi_cap": "ducthangho",
+         "bang_chung": "x", "head_sha": sha_that},                           # sai action
+        {"event": "uy_quyen_merge_KHAI_BAO", "action": "merge", "nguoi_cap": "codex-dispatcher",
+         "bang_chung": "x", "head_sha": sha_that},                           # nguoi cap gia mao
+        {"event": "uy_quyen_merge_KHAI_BAO", "action": "merge", "nguoi_cap": "ducthangho",
+         "bang_chung": "x", "head_sha": "deadbeef"},                         # sha khong hop le
+    ]
+    so.write_text("\n".join(json.dumps(x) for x in xau) + "\n", encoding="utf-8")
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(ROOT), "--nhanh", "HEAD",
+                              "--since", "HEAD~1", "--so", str(so)], sd)
+    _doi(0, rc, e, "doi-chieu so xau")
+    t = _txt(o)
+    if "BO QUA 5 ban ghi" not in t:
+        raise AssertionError(f"phai BO QUA ca 5 ban ghi sai luoc do, duoc: {t[:300]!r}")
+    if "CÓ khai báo    : 0" not in t:
+        raise AssertionError("khong ban ghi sai nao duoc tinh la co khai")
 
 
 # --- (b) dấu vết comment -------------------------------------------------------
@@ -1077,6 +1562,17 @@ def _kich_ban_in(c: Ctx, codepage: str):
         (["doctrine-scan", "--root", r], None),
         (["adr-song", "--root", r_adr], None),
         (["bien-nhan", "--root", r_bn, "--packet", "249"], None),
+        # #338: cả hai lệnh in tiếng Việt CÓ DẤU lúc thành công. `ghi-uy-quyen` in "đã ghi
+        # KHAI BÁO…", `doi-chieu-uy-quyen` in "CÓ khai báo"/"KHÔNG khai báo". Console máy
+        # Việt là cp1258, nên thiếu phủ ở đây là để nguyên đúng cái bẫy mà chốt này sinh ra
+        # để chặn — và chính chốt ấy đã bắt tôi ở lượt đầu (270/272).
+        (["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
+          "--bang-chung", "https://x", "--head-sha", "%040x" % 3], sd),
+        # `--root ROOT`: kho THAT, vi lenh nay doc lich su git that su. `_repo_gia` chi
+        # co `.git` GIA nen `git log` se hong va ca se do vi ly do sai. Lenh chi DOC.
+        (["doi-chieu-uy-quyen", "--root", str(ROOT), "--nhanh", "HEAD",
+          "--since", "%040x" % 0 if False else "HEAD~1",
+          "--so", str(sd / "uy_quyen_merge.jsonl")], sd),
     ]
     da_phu = set()
     for args, state_dir in buoc:
@@ -2231,6 +2727,21 @@ CASES = [
     ("thieu_finding_id_thoat_khac_0", case_thieu_finding_id_thoat_khac_0),
     ("slug_sai_dang_thoat_khac_0", case_slug_sai_dang_thoat_khac_0),
     ("guard_moi_hanh_vi_thoat_7", case_guard_moi_hanh_vi_thoat_7),
+    # --- #338: ha loi khai + so khai bao DEM DUOC ---
+    ("moc_dot_bien_phai_khop_DUNG_MOT_CHO", case_moc_dot_bien_phai_khop_DUNG_MOT_CHO),
+    ("moc_kiem_TU_NO_co_rang", case_moc_kiem_TU_NO_co_rang),
+    ("fixture_git_KHONG_an_config_toan_cuc", case_fixture_git_KHONG_an_config_toan_cuc),
+    ("guard_KHONG_khai_minh_kiem_tham_quyen", case_guard_KHONG_khai_minh_kiem_tham_quyen),
+    ("ghi_uy_quyen_doi_danh_sach_CHO_PHEP", case_ghi_uy_quyen_doi_danh_sach_CHO_PHEP),
+    ("ghi_uy_quyen_doi_sha40_that", case_ghi_uy_quyen_doi_sha40_that),
+    ("khai_uy_quyen_KHONG_mo_khoa_guard", case_khai_uy_quyen_KHONG_mo_khoa_guard),
+    ("doi_chieu_dem_duoc_merge_co_khai_va_khong",
+     case_doi_chieu_dem_duoc_merge_co_khai_va_khong),
+    ("doi_chieu_neo_dung_HEAD_da_merge",
+     case_doi_chieu_neo_dung_HEAD_da_merge_khong_phai_commit_merge),
+    ("doi_chieu_chi_dem_FIRST_PARENT", case_doi_chieu_chi_dem_FIRST_PARENT),
+    ("doi_chieu_THIEU_SO_la_KHONG_DO_DUOC", case_doi_chieu_THIEU_SO_la_KHONG_DO_DUOC),
+    ("doi_chieu_TU_CHOI_ban_ghi_sai_luoc_do", case_doi_chieu_TU_CHOI_ban_ghi_sai_luoc_do),
     ("guard_khong_co_co_noi", case_guard_khong_co_co_noi),
     ("transition_hop_le_rc0", case_transition_hop_le_rc0),
     ("comment_id_chua_dang_ky_bi_tu_choi", case_comment_id_chua_dang_ky_bi_tu_choi),
@@ -2887,9 +3398,15 @@ MUTANTS = {
         ["adr_song_thieu_trang_thai_thi_do"],
     ),
     # Nhánh "không thấy thì bỏ qua" biến thành tha vô điều kiện — bệnh `t24`.
+    # MỐC HAI DÒNG, không phải một: `if (root / ".git").exists():` khớp ĐÚNG HAI chỗ
+    # (`cmd_adr_song` và `cmd_bien_nhan` dùng cùng một idiom "chỉ tha khi cây rời"), nên
+    # mốc một dòng buộc phải khai ngoại lệ `count == 2` — và ngoại lệ ấy là CỬA cho mọi
+    # mốc mơ hồ khác lọt qua. Kéo thêm đầu dòng `_die(RC_ADR, ` vào mốc là đủ phân biệt
+    # (đo: 1 chỗ) ⇒ bảng ngoại lệ BỎ HẲN, phép kiểm đòi `== 1` vô điều kiện.
     "adr_tha_khi_thieu_thu_muc": (
-        '        if (root / ".git").exists():\n',
-        "        if False:                     # đột biến: kho thật cũng bỏ qua êm\n",
+        '        if (root / ".git").exists():\n            _die(RC_ADR, ',
+        "        if False:                     # đột biến: kho thật cũng bỏ qua êm\n"
+        "            _die(RC_ADR, ",
         ["adr_song_kho_that_thieu_thu_muc_thi_do"],
     ),
     # Nới phép nhận dòng bảng thành khớp cả VĂN XUÔI: cổng sẽ báo phủ đủ trong khi
@@ -3042,6 +3559,36 @@ MUTANTS = {
         "        p = subprocess.run([str(git)], capture_output=True, check=True)\n",
         '        raise BoQua("đột biến: tha vô điều kiện")\n',
         ["bien_nhan_git_gia_duong_dan_nul_giu_fallback"]),
+    # Hai chiều của CÙNG một vị từ, vì bản lượt 2 không có chiều nào: nới thành luôn-tha
+    # (`if True:`) và siết thành luôn-tố (`if False:`). Cả hai PHẢI giết
+    # `moc_kiem_TU_NO_co_rang`; nếu chỉ một chiều giết được thì ca ấy mới đo được nửa vị từ.
+    # Cô lập git thành no-op ⇒ fixture ăn lại cấu hình toàn cục của máy chạy.
+    "git_co_lap_tha_vo_dieu_kien": (
+        "    env.update(_GIT_BIEN_CO_LAP)\n",
+        "    pass  # đột biến: không cô lập gì\n",
+        ["fixture_git_KHONG_an_config_toan_cuc"]),
+    # Lùi về hình dạng GHIM KHOÁ của PR #342: vẫn ĐỌC config toàn cục, chỉ đè đúng khoá đã
+    # nghĩ tới. Chiều (2) của ca vẫn xanh — đúng như vậy — nên chỉ chiều (3) giết nó, tức
+    # chiều (3) đo được RIÊNG cái khác biệt "cắt nguồn" vs "ghim khoá".
+    # Bỏ đúng bước xoá kênh PHẠM VI LỆNH — tức lùi về chính bản lượt 3, bản "cắt hai
+    # trong ba nguồn". Nếu ca không chết thì chiều (4) chưa đo gì.
+    "git_co_lap_bo_sot_pham_vi_lenh": (
+        "    for k in [k for k in env if _la_cau_hinh_pham_vi_lenh(k)]:\n        del env[k]\n",
+        "    pass  # đột biến: bỏ sót kênh cấu hình phạm vi lệnh\n",
+        ["fixture_git_KHONG_an_config_toan_cuc"]),
+    "git_co_lap_lui_ve_ghim_khoa": (
+        '    "GIT_CONFIG_GLOBAL": os.devnull,\n    "GIT_CONFIG_SYSTEM": os.devnull,\n',
+        '    "GIT_CONFIG_COUNT": "1",  # đột biến: ghim khoá thay vì cắt nguồn\n'
+        '    "GIT_CONFIG_KEY_0": "commit.gpgsign",\n    "GIT_CONFIG_VALUE_0": "false",\n',
+        ["fixture_git_KHONG_an_config_toan_cuc"]),
+    "moc_kiem_noi_vo_dieu_kien": (
+        "            if n == 1:\n",
+        "            if True:   # đột biến: luôn tha, phép kiểm thành vô nghĩa\n",
+        ["moc_kiem_TU_NO_co_rang"]),
+    "moc_kiem_to_vo_dieu_kien": (
+        "            if n == 1:\n",
+        "            if False:  # đột biến: luôn tố, kể cả mốc khớp đúng 1 chỗ\n",
+        ["moc_kiem_TU_NO_co_rang"]),
     "phan_loai_lai_dot_bien_test_bang_suy_luan": (
         "    dot_bien_test = ten_mut in MUTANTS_NHAM_TEST\n",
         "    dot_bien_test = all(t in goc_test for t, _ in cap)  # đột biến: suy từ văn bản\n",
@@ -3364,6 +3911,11 @@ MUTANTS = {
 MUTANTS_NHAM_TEST = frozenset({
     "bien_nhan_root_xuong_dong_tha_vo_dieu_kien",
     "bien_nhan_shim_tha_vo_dieu_kien",
+    "git_co_lap_bo_sot_pham_vi_lenh",
+    "git_co_lap_lui_ve_ghim_khoa",
+    "git_co_lap_tha_vo_dieu_kien",
+    "moc_kiem_noi_vo_dieu_kien",
+    "moc_kiem_to_vo_dieu_kien",
     "phan_loai_lai_dot_bien_test_bang_suy_luan",
 })
 

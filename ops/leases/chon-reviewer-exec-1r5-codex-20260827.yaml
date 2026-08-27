@@ -18,6 +18,7 @@ packet_id: CHON-REVIEWER-THEO-DO-PHUC-TAP
 lease_id: chon-reviewer-exec-1r5-codex-20260827
 revision: 5
 thay_the_cho: chon-reviewer-exec-1r4-codex-20260827
+da_bi_thay_the: chon-reviewer-exec-1r6-codex-20260827
 
 spec_path: ops/specs/CHON-REVIEWER-THEO-DO-PHUC-TAP.md
 spec_sha256: 43e9797ea980b82adfd34447c0ceab9b392a00f7d78698b1a3a51e25457bd2ef

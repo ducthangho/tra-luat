@@ -2,7 +2,7 @@
 
 ```yaml
 packet_id: CHON-REVIEWER-THEO-DO-PHUC-TAP
-revision: 3
+revision: 4
 generation: 1
 review_class: sensitive          # sua chinh duong REVIEW - thu quyet dinh ai kiem cai gi
 executor: codex
@@ -90,6 +90,23 @@ bảng ấy chỉ có MỘT ngữ cảnh.** Revision 1 đo ở thư mục trốn
 "đúng một khoá" — luật ấy mô tả CÁI RIG chứ không mô tả CÔNG CỤ. Cùng họ với bài học
 *"phép đo delta phải dựng cả hai vế trong MỘT lệnh"*: rig lặng lẽ trở thành một phần của kết luận.
 
+**(c″) BA LẦN ĐẶC TẢ NÀY SAI, VÀ HAI LẦN CÙNG MỘT GỐC — ghi ở đây vì nó là bài học của packet.**
+
+| revision | luật sai | gốc |
+|---|---|---|
+| 1 | `modelUsage` phải có ĐÚNG MỘT khoá | đo ở **một** ngữ cảnh (thư mục trống) rồi viết luật mô tả CÁI RIG |
+| 2 | không ai validate `review_class` | thiếu sót |
+| 3 | allow-list `("sensitive", "thuong")` | **bịa** từ vựng thay vì **đếm** từ vựng đang dùng |
+
+Revision 1 và 3 cùng một gốc: **viết luật TRƯỚC khi đo miền giá trị**. Cả hai đều hỏng theo
+hướng **fail-CLOSED** — công cụ từ chối đầu vào hợp lệ — nên chúng không lộ ra như một lỗ mà
+lộ ra như một cổng không dùng được. Cả hai lần executor cài **đúng** thứ được giao, và cả hai
+lần thứ bắt được là **một phép đo trên dữ liệu thật**, không phải một lượt đọc lại mã.
+
+Hệ quả thực hành cho bất kỳ ai viết đặc tả cho packet này về sau: mỗi khi đặc tả nêu một TẬP
+GIÁ TRỊ HỮU HẠN (tên mô hình, tên lớp review, tên vùng, tên khoá JSON), **đếm nó trong kho
+trước**, và dán số đếm vào đặc tả. Một allow-list không kèm số đếm là một allow-list chưa đo.
+
 **(d) Và chưa có chỗ nào trong kho ghi chọn mô hình theo cái gì.**
 
 ```
@@ -149,6 +166,7 @@ phải ĐẨY LÊN, không phải tha.
 
 ```
 +2  review_class == "sensitive"
++1  review_class == "systemic"
 +2  cham vung `cong`
 +1  cham vung `giao-thuc`
 +1  so_tep >= 5
@@ -194,11 +212,31 @@ fail-open thì tệ hơn không có: nó phát ra một con số trông như đ�
 
 Bắt buộc:
 
-- `review_class` so với ALLOW-LIST `("sensitive", "thuong")` sau khi `strip()`. **KHÔNG
-  casefold**, và nói rõ vì sao: giá trị này đọc từ tệp lease, nơi nó được ghi ở đúng một dạng;
-  chấp nhận `SENSITIVE` là chấp nhận hai chính tả cho một khái niệm, và kho đã trả giá cho
-  chuyện ấy (`lease-authority-spoof`: *"phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN"*).
-  Ngoài allow-list ⇒ **`KhongDoDuoc`**, KHÔNG phải "coi như thường".
+- `review_class` so với ALLOW-LIST **`("routine", "systemic", "sensitive")`** sau khi `strip()`.
+  **KHÔNG casefold**, và nói rõ vì sao: giá trị này đọc từ tệp lease, nơi nó được ghi ở đúng một
+  dạng; chấp nhận `SENSITIVE` là chấp nhận hai chính tả cho một khái niệm, và kho đã trả giá
+  (`lease-authority-spoof`: *"phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN"*).
+  Ngoài allow-list ⇒ **`KhongDoDuoc`**.
+
+  **REVISION 3 GHI ALLOW-LIST NÀY SAI, và cái sai đáng ghi hơn bản vá.** Nó ghi
+  `("sensitive", "thuong")` — một từ vựng tôi **nghĩ ra**, không phải từ vựng kho **đang
+  dùng**. Đếm trên toàn bộ tệp lease của mọi nhánh `ops/**`:
+
+  ```
+  review_class: sensitive   570
+  review_class: systemic    167
+  review_class: routine      22
+  review_class: thuong        0     <- tu toi bia ra
+  ```
+
+  Hệ quả nếu land: allow-list ấy **từ chối 167 lease thật** (`systemic`) bằng `KhongDoDuoc` —
+  lại một cổng TỰ KHOÁ, đúng hình dạng của lỗi revision 1. Và nó chấp nhận một giá trị **không
+  tồn tại**. `docs/PROTOCOL_DA_PHIEN.md:144` khai đúng ba giá trị ấy từ đầu; tôi không đọc.
+  Executor phát hiện và ghi vào mục *"chỗ tôi không chắc"* thay vì im lặng làm theo — đó đúng
+  là việc của mục ấy.
+
+- Ưu tiên `effective_review_class` khi lease có cả hai trường (đo được: 147 lần xuất hiện).
+  Nó là lớp SAU escalation, tức lớp thật sự có hiệu lực.
 - `duong_dan` sau khi chuẩn hoá mà **RỖNG** ⇒ `KhongDoDuoc`. Write set rỗng nghĩa là không đo
   được phạm vi, và không đo được thì không được cho ra bậc THẤP. Cùng lý lẽ với `khong-biet`.
 - `so_dong` và `luot` phải là số nguyên `>= 0` (và `luot >= 1`). Ngoài khoảng ⇒ `KhongDoDuoc`.
@@ -278,6 +316,8 @@ Chạy `python3 .claude/dev/chon_reviewer_test.py`, thoát 0 khi ĐẠT.
 | đột biến | phải giết |
 |---|---|
 | bỏ nhánh `khong-biet` (coi như không cộng điểm) | ca 2 |
+| `systemic` không cộng điểm (coi như `routine`) | ca `review_class` |
+| bỏ ưu tiên `effective_review_class` | ca `review_class` |
 | bỏ bánh cóc | ca 3 |
 | nhận bí danh vào allow-list | ca 4 |
 | `kiem_ket_qua` đọc `subtype == "success"` thay vì `is_error` | ca 5 |

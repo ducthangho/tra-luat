@@ -1175,15 +1175,146 @@ def cmd_next_comment(a, state_dir: Path) -> int:
     return RC_OK
 
 
+# ── #338: HẠ LỜI KHAI xuống đúng hạng bằng chứng ─────────────────────────────────────────
+# Bản trước nói: "Đây là cổng của người có quyền, không phải của phiên worker", và chú thích
+# nói "Chốt có đường vòng là chốt không tồn tại."
+#
+# CẢ HAI CÂU ĐỀU SAI VỀ HIỆU LỰC, và câu thứ hai tự nêu tiêu chí mà chính nó trượt:
+#   · đường vòng CÓ THẬT — merge qua MCP. Đã đi 9 lần trên `master` trong một phiên, 4 lần
+#     có tự khai `rc=7` trong thông điệp merge, 5 lần không;
+#   · và cổng này KHÔNG phân biệt được thẩm quyền. Đo 2026-08-26:
+#       get_me                     -> {"login":"ducthangho","id":12748935}
+#       master.protected           -> true  (nhánh DUY NHẤT trong 222)
+#     Phiên chạy bằng credential CỦA CHỦ KHO. Nên "cổng của người có quyền" mô tả một phép
+#     kiểm không tồn tại: nó chặn một NHÃN VAI, không chặn một THẨM QUYỀN.
+#
+# Kho này đã làm đúng động tác ấy một lần và nó đúng — packet #324 pha A2: không chứng minh
+# được "read-only" thì BỎ CHỮ "read-only", chứ không vá lần thứ năm. Ở đây cũng vậy.
+#
+# CƠ CHẾ CÒN THIẾU, viết thẳng vào đây để ai đọc `rc=7` cũng đọc luôn cái chưa có:
+#   TÁCH DANH TÍNH — cấp phiên một token KHÔNG có quyền merge, giữ quyền merge ở một danh
+#   tính người. Đó là thay đổi HẠ TẦNG, không phải thay đổi mã; không write set nào chứa
+#   được nó, và phiên này ĐO ĐƯỢC là mình không kiểm chứng nổi (`/repos/…/protection` trả
+#   403 với 0 header GitHub — proxy chặn theo ĐƯỜNG DẪN).
+# Chừng nào chưa có nó, MỌI chốt dựng trong kho đều là chốt chủ kho tự dựng cho chính mình,
+# và phiên kế thừa đúng thẩm quyền ấy. Đừng vá tiếp ở tầng này.
+#
+# CÂU TRÊN CHỈ ĐÚNG VỚI GITHUB — đo 2026-08-27, và phép đo này nói CHỖ NÀO cần sửa:
+#     ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN          CHƯA ĐẶT
+#     /root/.claude/.credentials.json                   KHÔNG có credential Anthropic nào
+#     CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR = '4'     credential đi bằng FILE DESCRIPTOR
+#     CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST    = '1'     host giữ, không phải phiên
+#     `ls /proc/<shell con>/fd/` -> chỉ 0,1,2           fd 4 KHÔNG xuống tiến trình con
+#     GITHUB_PAT                                        biến THƯỜNG, 93 ký tự, đọc thẳng được
+# Tức mô hình "credential mà phiên KHÔNG phát lại được" ĐÃ CHẠY SẴN trong container này cho
+# đường Anthropic; nó chỉ chưa được áp cho đường GitHub. "Tách danh tính" vì thế KHÔNG phải
+# một giả thuyết kiến trúc — nó là ÁP CÙNG CÁCH ĐỐI XỬ cho GitHub.
+#
+# VÀ MỘT CÁM DỖ PHẢI TỪ CHỐI: có `CLAUDE_CODE_USER_EMAIL` / `..._ACCOUNT_UUID` /
+# `..._ORGANIZATION_UUID` trong môi trường. ĐỪNG đọc chúng để quyết định uỷ quyền. Chúng là
+# biến MÔI TRƯỜNG THƯỜNG — phiên đọc được thì phiên cũng ĐẶT được cho tiến trình con. Đó là
+# lời khai của host cho khách, không phải bằng chứng cho một chốt chạy BÊN TRONG khách; dùng
+# chúng ở đây thì yếu hệt một cờ `--uy-quyen`, tức đúng D1 đã bị bác.
+#
+# CHƯA ĐO, và cố ý không đo: container chạy `root`, nên rất có thể `root` đọc được
+# `/proc/<pid cha>/fd/4`. Thử điều đó nghĩa là ĐỌC MỘT CREDENTIAL, mà `CLAUDE.md` cấm. Nên
+# ranh giới fd ấy đứng ở trạng thái KHÔNG ĐO ĐƯỢC — nếu vượt được thì nó là QUY ƯỚC, không
+# phải tường. Đừng đọc câu trên mạnh hơn thế.
+_KHAI_UY_QUYEN = "uy_quyen_merge.jsonl"
+
+
 def cmd_guard(a, state_dir: Path) -> int:
-    # Không có cờ nới, không có biến môi trường mở khoá, không có ngoại lệ theo
-    # actor. Chốt có đường vòng là chốt không tồn tại.
     _die(
         RC_GUARD,
-        f"hành vi {a.action!r} bị chặn cứng ở vai executor. "
-        f"Đây là cổng của người có quyền, không phải của phiên worker.",
+        f"hành vi {a.action!r} KHÔNG được phép ở vai executor.\n"
+        f"\n"
+        f"ĐÂY LÀ LỜI NHẮC, KHÔNG PHẢI PHÉP KIỂM THẨM QUYỀN. Cổng này chặn một NHÃN VAI; nó\n"
+        f"KHÔNG phân biệt được uỷ quyền thật với một phiên tự cho phép mình, vì phiên chạy\n"
+        f"bằng credential của chủ kho (đo 2026-08-26: `get_me` -> ducthangho). Cơ chế còn\n"
+        f"thiếu là TÁCH DANH TÍNH — xem #338, và xem chú thích ngay trên hàm này.\n"
+        f"\n"
+        f"Được chủ kho uỷ quyền thật thì ghi lại cho ĐẾM ĐƯỢC:\n"
+        f"  packet_loop.py ghi-uy-quyen --action {a.action} --nguoi-cap <ai> \\\n"
+        f"      --bang-chung <url> --head-sha <sha40>\n"
+        f"Ghi xong cổng này VẪN trả {RC_GUARD} — nó không mở khoá được thứ nó không kiểm được.",
     )
     return RC_GUARD  # pragma: no cover
+
+
+def cmd_ghi_uy_quyen(a, state_dir: Path) -> int:
+    """Ghi một KHAI BÁO uỷ quyền vào sổ máy đọc được.
+
+    ĐÂY LÀ LỜI KHAI, KHÔNG PHẢI BẰNG CHỨNG — phiên tự gõ được lệnh này, y hệt nó tự gõ
+    được câu văn xuôi trong thông điệp merge hôm nay. Cái nó mua KHÔNG phải sự thật, mà là
+    KHẢ NĂNG ĐẾM: đo 2026-08-26 cho 9 merge / 4 tự khai / *ai làm* KHÔNG ĐO ĐƯỢC, và chính
+    cái không-đo-được ấy là lý do việc này xảy ra 9 lần mà không ai thấy con số.
+    Một tần suất KHÔNG BIẾT thành một tần suất BIẾT. Chỉ vậy, và nói đúng chỉ vậy."""
+    if not SHA_RE.match(a.head_sha or ""):
+        _die(RC_ARG, f"--head-sha phải là sha40, nhận {a.head_sha!r}")
+    # DÙNG LẠI danh sách CHO PHÉP đã có, không dựng danh sách cấm mới. Kho này đã trả giá
+    # đúng một lần cho việc ấy (`lease-authority-spoof` P1: `codex-dispatcher`, `ai-codex-bot`,
+    # `cödex` đều lọt vì chốt cũ từ chối đúng hai chuỗi) — xem chú thích ở `NGUOI_CO_THAM_QUYEN`.
+    if (a.nguoi_cap or "").strip() not in NGUOI_CO_THAM_QUYEN:
+        _die(RC_GUARD,
+             f"--nguoi-cap {a.nguoi_cap!r} không nằm trong danh sách CHO PHÉP "
+             f"({', '.join(NGUOI_CO_THAM_QUYEN)}). Và nhắc lại giới hạn đã ghi ở đó: danh "
+             f"sách này chứng minh cái TÊN được phép cấp, KHÔNG chứng minh đúng người đó "
+             f"đã gõ — tệp này chạy CỤC BỘ, không có `GITHUB_ACTOR` để neo danh tính.")
+    state_dir.mkdir(parents=True, exist_ok=True)
+    ban_ghi = {
+        "event": "uy_quyen_merge_KHAI_BAO",
+        "action": a.action,
+        "nguoi_cap": a.nguoi_cap,
+        "bang_chung": a.bang_chung,
+        "head_sha": a.head_sha,
+        "ghi_boi": "packet_loop",
+        "la_loi_khai_khong_phai_bang_chung": True,
+    }
+    with (state_dir / _KHAI_UY_QUYEN).open("a", encoding="utf-8", newline="\n") as f:
+        f.write(json.dumps(ban_ghi, ensure_ascii=False, sort_keys=True) + "\n")
+    print(f"đã ghi KHAI BÁO uỷ quyền {a.action!r} cho head {a.head_sha[:12]} "
+          f"(cấp bởi {a.nguoi_cap}) — đây là LỜI KHAI, không phải bằng chứng")
+    return RC_OK
+
+
+def cmd_doi_chieu_uy_quyen(a, state_dir: Path) -> int:
+    """Đếm merge trên một nhánh so với khai báo đã ghi. Biến KHÔNG ĐO ĐƯỢC thành SỐ.
+
+    Lệnh này KHÔNG ngăn được gì và không giả vờ ngăn. Nó trả lời đúng một câu hỏi mà hôm
+    nay không ai trả lời được: *bao nhiêu lần merge có khai, bao nhiêu lần không*."""
+    r = subprocess.run(["git", "-C", a.root, "log", "--merges", "--format=%H%x09%s",
+                        a.since + ".." + a.nhanh if a.since else a.nhanh],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        _die(RC_ARG, f"không đọc được lịch sử git: {(r.stderr or '').strip()[:200]}")
+    merges = [x.split("\t", 1) for x in r.stdout.splitlines() if x.strip()]
+    so = state_dir / _KHAI_UY_QUYEN
+    khai: dict[str, dict] = {}
+    if so.is_file():
+        for dong in so.read_text(encoding="utf-8").splitlines():
+            if not dong.strip():
+                continue
+            try:
+                d = json.loads(dong)
+            except ValueError:
+                continue
+            if d.get("head_sha"):
+                khai[d["head_sha"]] = d
+    # Một merge được coi là CÓ KHAI khi khai báo neo vào ĐÚNG head đã merge (cha thứ hai),
+    # không phải vào commit merge. Neo sai chỗ thì con số vô nghĩa.
+    co_khai, khong = [], []
+    for sha, tieu_de in merges:
+        p2 = subprocess.run(["git", "-C", a.root, "rev-parse", sha + "^2"],
+                            capture_output=True, text=True).stdout.strip()
+        (co_khai if (p2 in khai or sha in khai) else khong).append((sha, tieu_de))
+    print(f"merge trên {a.nhanh}: {len(merges)}")
+    print(f"  CÓ khai báo    : {len(co_khai)}")
+    print(f"  KHÔNG khai báo : {len(khong)}")
+    for sha, td in khong[:20]:
+        print(f"      {sha[:12]}  {td[:80]}")
+    print("LƯU Ý: 'có khai báo' nghĩa là CÓ NGƯỜI GÕ LỆNH GHI, không nghĩa là đã được duyệt.")
+    print("Phiên tự gõ được lệnh ấy. Con số này đo TẦN SUẤT, không đo THẨM QUYỀN.")
+    return RC_OK
 
 
 def cmd_doctrine_scan(a, state_dir: Path) -> int:
@@ -1856,6 +1987,22 @@ def build_parser() -> argparse.ArgumentParser:
     q = sub.add_parser("guard", help="chặn cứng hành vi ngoài vai executor")
     q.add_argument("--action", required=True, choices=HANH_VI_CHAN)
     q.set_defaults(fn=cmd_guard)
+
+    q = sub.add_parser("ghi-uy-quyen",
+                       help="ghi KHAI BÁO uỷ quyền (lời khai, KHÔNG phải bằng chứng)")
+    q.add_argument("--action", required=True, choices=HANH_VI_CHAN)
+    q.add_argument("--nguoi-cap", required=True,
+                   help="bên CÓ THẨM QUYỀN đã cấp; không được là tên provider")
+    q.add_argument("--bang-chung", required=True, help="URL/ID dấu vết bền")
+    q.add_argument("--head-sha", required=True, help="sha40 CHÍNH XÁC được uỷ quyền")
+    q.set_defaults(fn=cmd_ghi_uy_quyen)
+
+    q = sub.add_parser("doi-chieu-uy-quyen",
+                       help="đếm merge so với khai báo — biến KHÔNG ĐO ĐƯỢC thành SỐ")
+    q.add_argument("--root", default=".")
+    q.add_argument("--nhanh", default="origin/master")
+    q.add_argument("--since", help="chỉ đếm từ commit này trở đi")
+    q.set_defaults(fn=cmd_doi_chieu_uy_quyen)
 
     q = sub.add_parser("doctrine-scan", help="bắt adapter chép doctrine")
     q.add_argument("--root", default=".")

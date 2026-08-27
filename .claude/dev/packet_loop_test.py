@@ -495,6 +495,129 @@ def case_guard_khong_co_co_noi(c: Ctx):
             raise AssertionError(f"guard KHÔNG được có cờ nới, nhưng thấy {co!r}")
 
 
+# --- #338: hạ lời khai của guard + sổ khai báo ĐẾM ĐƯỢC -------------------------
+
+
+def case_guard_KHONG_khai_minh_kiem_tham_quyen(c: Ctx):
+    """Bản trước nói "Đây là cổng của người có quyền" — một phép kiểm KHÔNG TỒN TẠI.
+    Cổng chặn một NHÃN VAI; phiên chạy bằng credential của chủ kho (đo: `get_me` ->
+    ducthangho), nên nó không phân biệt được uỷ quyền thật với tự cấp.
+
+    Ca này KHÔNG đo văn phong. Nó đo hai thứ cụ thể: (1) câu khẳng định cũ đã biến mất,
+    (2) cơ chế CÒN THIẾU được gọi tên. Thiếu (2) thì hạ lời khai chỉ là xoá chữ."""
+    sd = c.sd()
+    rc, _, e = run(c.script, ["guard", "--action", "merge"], sd)
+    _doi(7, rc, e, "guard merge")
+    txt = _txt(e)
+    if "cổng của người có quyền" in txt:
+        raise AssertionError("guard vẫn khẳng định một phép kiểm thẩm quyền không tồn tại")
+    for phai_co in ("LỜI NHẮC", "KHÔNG PHẢI PHÉP KIỂM THẨM QUYỀN", "TÁCH DANH TÍNH", "338"):
+        if phai_co not in txt:
+            raise AssertionError(f"thông điệp guard thiếu {phai_co!r}: {txt[:300]!r}")
+
+
+def case_ghi_uy_quyen_doi_danh_sach_CHO_PHEP(c: Ctx):
+    """Danh sách CẤM thua từ trong thiết kế — kho đã trả giá đúng một lần
+    (`lease-authority-spoof` P1: `codex-dispatcher`/`ai-codex-bot`/`cödex` đều lọt).
+    Ca này dùng LẠI đúng ba tên tấn công ấy."""
+    sd = c.sd()
+    sha = "a" * 40
+    for xau in ("codex-dispatcher", "ai-codex-bot", "cödex", "claude", "codex", ""):
+        rc, _, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", xau,
+                                  "--bang-chung", "https://x", "--head-sha", sha], sd)
+        if rc == 0:
+            raise AssertionError(f"--nguoi-cap {xau!r} phải bị chặn, nhưng rc=0")
+    rc, o, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
+                              "--bang-chung", "https://x", "--head-sha", sha], sd)
+    _doi(0, rc, e, "ghi-uy-quyen người cấp hợp lệ")
+    if "LỜI KHAI" not in _txt(o):
+        raise AssertionError("bản ghi phải tự khai nó là LỜI KHAI, không phải bằng chứng")
+
+
+def case_ghi_uy_quyen_doi_sha40_that(c: Ctx):
+    """Neo vào ĐÚNG head. Neo sai chỗ thì con số đối chiếu vô nghĩa."""
+    sd = c.sd()
+    for xau in ("deadbeef", "", "z" * 40, "a" * 39, "a" * 41):
+        rc, _, _ = run(c.script, ["ghi-uy-quyen", "--action", "merge",
+                                  "--nguoi-cap", "ducthangho", "--bang-chung", "https://x",
+                                  "--head-sha", xau], sd)
+        if rc == 0:
+            raise AssertionError(f"--head-sha {xau!r} phải bị từ chối, nhưng rc=0")
+
+
+def case_khai_uy_quyen_KHONG_mo_khoa_guard(c: Ctx):
+    """Chốt trung tâm của #338: ghi khai báo KHÔNG được biến `rc=7` thành `rc=0`.
+    Nếu nó mở khoá được thì nó là D1 — và D1 đã bị bác, vì phiên tự gõ được lệnh ấy."""
+    sd = c.sd()
+    sha = "b" * 40
+    rc, _, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
+                              "--bang-chung", "https://x", "--head-sha", sha], sd)
+    _doi(0, rc, e, "ghi-uy-quyen")
+    rc, _, e = run(c.script, ["guard", "--action", "merge"], sd)
+    _doi(7, rc, e, "guard SAU khi đã khai — vẫn phải 7")
+
+
+def case_doi_chieu_dem_duoc_merge_co_khai_va_khong(c: Ctx):
+    """Biến KHÔNG ĐO ĐƯỢC thành SỐ. Dựng một kho tạm có merge thật rồi đếm hai chiều."""
+    sd = c.sd()
+    goc = c.tmp / f"kho-338-{time.time_ns()}"
+    goc.mkdir(parents=True)
+    g = lambda *a: subprocess.run(["git", "-C", str(goc), *a], capture_output=True)
+    g("init", "--quiet", "-b", "main")
+    g("config", "user.email", "t@t"); g("config", "user.name", "t")
+    (goc / "a.txt").write_text("1\n", encoding="utf-8")
+    g("add", "a.txt"); g("commit", "-qm", "goc")
+    g("checkout", "-q", "-b", "nhanh")
+    (goc / "b.txt").write_text("2\n", encoding="utf-8")
+    g("add", "b.txt"); g("commit", "-qm", "viec")
+    head_nhanh = subprocess.run(["git", "-C", str(goc), "rev-parse", "HEAD"],
+                                capture_output=True, text=True).stdout.strip()
+    g("checkout", "-q", "main")
+    g("merge", "--no-ff", "-q", "nhanh", "-m", "Merge nhanh")
+    # chua khai gi -> 1 merge, 0 co khai
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main"], sd)
+    _doi(0, rc, e, "doi-chieu lan 1")
+    t = _txt(o)
+    if "CÓ khai báo    : 0" not in t or "KHÔNG khai báo : 1" not in t:
+        raise AssertionError(f"trước khi khai phải là 0/1, được: {t!r}")
+    # khai dung head DA MERGE (cha thu hai) -> 1 co khai
+    rc, _, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
+                              "--bang-chung", "https://x", "--head-sha", head_nhanh], sd)
+    _doi(0, rc, e, "ghi-uy-quyen head nhánh")
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main"], sd)
+    _doi(0, rc, e, "doi-chieu lan 2")
+    t = _txt(o)
+    if "CÓ khai báo    : 1" not in t or "KHÔNG khai báo : 0" not in t:
+        raise AssertionError(f"sau khi khai phải là 1/0, được: {t!r}")
+    if "không nghĩa là đã được duyệt" not in t:
+        raise AssertionError("đối chiếu phải tự khai nó đo TẦN SUẤT, không đo THẨM QUYỀN")
+
+
+def case_doi_chieu_neo_dung_HEAD_da_merge_khong_phai_commit_merge(c: Ctx):
+    """Khai vào SHA của chính commit merge cũng được tính — nhưng khai vào một SHA
+    KHÔNG liên quan thì KHÔNG. Không có chốt này thì đếm gì cũng ra 'có khai'."""
+    sd = c.sd()
+    goc = c.tmp / f"kho-338b-{time.time_ns()}"
+    goc.mkdir(parents=True)
+    g = lambda *a: subprocess.run(["git", "-C", str(goc), *a], capture_output=True)
+    g("init", "--quiet", "-b", "main")
+    g("config", "user.email", "t@t"); g("config", "user.name", "t")
+    (goc / "a.txt").write_text("1\n", encoding="utf-8")
+    g("add", "a.txt"); g("commit", "-qm", "goc")
+    g("checkout", "-q", "-b", "nhanh")
+    (goc / "b.txt").write_text("2\n", encoding="utf-8")
+    g("add", "b.txt"); g("commit", "-qm", "viec")
+    g("checkout", "-q", "main")
+    g("merge", "--no-ff", "-q", "nhanh", "-m", "Merge nhanh")
+    rc, _, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
+                              "--bang-chung", "https://x", "--head-sha", "c" * 40], sd)
+    _doi(0, rc, e, "ghi-uy-quyen sha vô can")
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main"], sd)
+    _doi(0, rc, e, "doi-chieu")
+    if "KHÔNG khai báo : 1" not in _txt(o):
+        raise AssertionError("khai vào SHA vô can KHÔNG được tính là có khai")
+
+
 # --- (b) dấu vết comment -------------------------------------------------------
 
 
@@ -1077,6 +1200,15 @@ def _kich_ban_in(c: Ctx, codepage: str):
         (["doctrine-scan", "--root", r], None),
         (["adr-song", "--root", r_adr], None),
         (["bien-nhan", "--root", r_bn, "--packet", "249"], None),
+        # #338: cả hai lệnh in tiếng Việt CÓ DẤU lúc thành công. `ghi-uy-quyen` in "đã ghi
+        # KHAI BÁO…", `doi-chieu-uy-quyen` in "CÓ khai báo"/"KHÔNG khai báo". Console máy
+        # Việt là cp1258, nên thiếu phủ ở đây là để nguyên đúng cái bẫy mà chốt này sinh ra
+        # để chặn — và chính chốt ấy đã bắt tôi ở lượt đầu (270/272).
+        (["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
+          "--bang-chung", "https://x", "--head-sha", "%040x" % 3], sd),
+        # `--root ROOT`: kho THAT, vi lenh nay doc lich su git that su. `_repo_gia` chi
+        # co `.git` GIA nen `git log` se hong va ca se do vi ly do sai. Lenh chi DOC.
+        (["doi-chieu-uy-quyen", "--root", str(ROOT), "--nhanh", "HEAD"], sd),
     ]
     da_phu = set()
     for args, state_dir in buoc:
@@ -2231,6 +2363,15 @@ CASES = [
     ("thieu_finding_id_thoat_khac_0", case_thieu_finding_id_thoat_khac_0),
     ("slug_sai_dang_thoat_khac_0", case_slug_sai_dang_thoat_khac_0),
     ("guard_moi_hanh_vi_thoat_7", case_guard_moi_hanh_vi_thoat_7),
+    # --- #338: ha loi khai + so khai bao DEM DUOC ---
+    ("guard_KHONG_khai_minh_kiem_tham_quyen", case_guard_KHONG_khai_minh_kiem_tham_quyen),
+    ("ghi_uy_quyen_doi_danh_sach_CHO_PHEP", case_ghi_uy_quyen_doi_danh_sach_CHO_PHEP),
+    ("ghi_uy_quyen_doi_sha40_that", case_ghi_uy_quyen_doi_sha40_that),
+    ("khai_uy_quyen_KHONG_mo_khoa_guard", case_khai_uy_quyen_KHONG_mo_khoa_guard),
+    ("doi_chieu_dem_duoc_merge_co_khai_va_khong",
+     case_doi_chieu_dem_duoc_merge_co_khai_va_khong),
+    ("doi_chieu_neo_dung_HEAD_da_merge",
+     case_doi_chieu_neo_dung_HEAD_da_merge_khong_phai_commit_merge),
     ("guard_khong_co_co_noi", case_guard_khong_co_co_noi),
     ("transition_hop_le_rc0", case_transition_hop_le_rc0),
     ("comment_id_chua_dang_ky_bi_tu_choi", case_comment_id_chua_dang_ky_bi_tu_choi),

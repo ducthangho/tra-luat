@@ -217,3 +217,42 @@ LUOT_3:
     phien_dieu_phoi_KHONG_va: >-
       Cố ý. Ghi thành câu hỏi cho reviewer vòng 2, không thành kết luận — vá bây giờ là tự chấm bài
       mình lần thứ hai trong cùng một lượt.
+
+VERDICT_VONG_2:
+  hang: changes_requested
+  P1: 2
+  P2: 0
+  reviewed_sha: b5bb3952b99f991e84f458f70dcd38c0bf9b90e2
+  bien_nhan: ops/reviews/mang-sandbox-codex-review-2-claude-verdict.receipt.yaml
+  land_duoc_khong: 'KHÔNG — hai P1 mới đang mở.'
+  bon_tren_nam_finding_vong_1_DA_VA_THAT: true
+  hai_P1_moi_deu_la_TAI_PHAT:
+    meta-test-tu-canh-khong-ai-canh: 'tái phát của `cong-dot-bien-tu-giam-van-xanh` ở tầng meta-test'
+    bang-chinh-gom-unknown-vao-1-nhu-chan: 'tái phát của `ma-chan-gom-moi-loi-khong-phan-loai` ở tầng bảng tóm tắt'
+  r2_DA_TRA_CO_TUC: >-
+    Lý do thứ hai của r2 — reviewer `claude` chạy được `codex sandbox` lồng — đã thành hiện thực:
+    vòng 2 tự chạy ĐỦ bảng ba cột VÀ bốn tổ hợp, khớp byte-với-byte. Vòng 1 (`codex` chấm) phải ghi
+    `KHÔNG_ĐO_ĐƯỢC` cho hai trong ba cột. Đây là lần ĐẦU một reviewer tái lập được toàn bộ bảng số.
+  REVIEWER_SAC_HON_NGUOI_SOAN_DE:
+    o_dau: >-
+      Phiên điều phối đo được "git ra UNKNOWN" rồi DỪNG ở đó. Reviewer đi tiếp và tìm ra NGUYÊN
+      NHÂN GỐC: hạ tầng phiên bơm `https_proxy=http://127.0.0.1:37215`, nên trong sandbox lồng
+      không mở `network_access`, git hỏng vì không nối được tới CHÍNH proxy loopback — lỗi
+      "couldn't connect", không phải "operation not permitted". Probe fail-close ĐÚNG; lỗi ở TÀI LIỆU.
+    va_o_dau_nua: >-
+      Phiên điều phối đề xuất "khai thẳng giới hạn trong tệp". Reviewer chỉ ra khai KHÔNG ĐỦ khi
+      việc phá tốn đúng một dòng, và nêu một đường THỰC SỰ khác họ: xác minh bộ đo từ một cổng NẰM
+      NGOÀI write set của packet (CI hoặc `packet_loop.py`), vì kẻ sửa ba tệp trong write set không
+      đồng thời sửa được cấu hình CI.
+  CACH_DAT_DE_DA_DUNG: >-
+    Phiên điều phối đã tự đo cả hai chỗ trước khi phóng, CỐ Ý không vá và CỐ Ý không nói đáp án —
+    chỉ chĩa câu hỏi. Reviewer tìm ra ĐỘC LẬP cả hai và đi xa hơn ở cả hai. Nói đáp án thì đã mất
+    một phép đo độc lập.
+  HE_QUA_NGAN_SACH:
+    hien_tai: '309/320, biên 11'
+    P1_bang_UNKNOWN: 'rẻ — sửa cách trình bày hai bảng, thêm cột `class` hoặc chú thích. Vừa biên.'
+    P1_meta_test: >-
+      Đường reviewer đề xuất (cổng NGOÀI write set) KHÔNG vá được trong packet này: nó đòi chạm
+      `.github/workflows/**` hoặc `.claude/dev/packet_loop.py`, cả hai NGOÀI write set ⇒ `S3`.
+      Cùng hình dạng với nợ `khong-cong-nao-chay-bo-test` của #319.
+    QUYET_DINH_THUOC_NGUOI_GIU_KHO: true

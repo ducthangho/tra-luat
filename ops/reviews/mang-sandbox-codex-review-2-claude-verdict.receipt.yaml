@@ -1,0 +1,93 @@
+# BIÊN NHẬN — cross-review lượt 2, packet MANG-SANDBOX-CODEX (#334).
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '334'
+packet_slug: MANG-SANDBOX-CODEX
+lease_id: mang-sandbox-codex-exec-1r2-codex-20260827
+provider: claude
+role: reviewer
+executor: codex
+verdict: changes_requested
+reviewed_sha: b5bb3952b99f991e84f458f70dcd38c0bf9b90e2
+luot: 2
+cross_provider: true
+assurance: cross_approved
+verdict_path: ops/reviews/mang-sandbox-codex-review-2-claude-verdict.md
+verdict_sha256: 'f335467dbb4631168f0b13c33c444b8bb617d5b4864a0b00b42d8faf9f899ea7'
+verdict_bytes: 25054
+verdict_nguon: >-
+  `claude -p --allowedTools "Bash,Read,Write,Edit,Glob,Grep"` trong `launcher.py run`, clone rời
+  detached tại exact SHA, `--require-clean`, prompt neo băm `b625487d2de50713`. run `85c690ab`.
+
+ket_qua_dem_duoc:
+  P1: 2
+  P2: 0
+  P2_ton_dong_tu_vong_1: 0
+  slug:
+    - {slug: meta-test-tu-canh-khong-ai-canh, hang: P1, loai: tai_phat}
+    - {slug: bang-chinh-gom-unknown-vao-1-nhu-chan, hang: P1, loai: tai_phat}
+
+LAN_DAU_MOT_REVIEWER_TAI_LAP_DUOC_TOAN_BO_BANG_SO: >-
+  Vòng 1 do `codex` chấm và `codex` CHÍNH LÀ cái hộp packet đo, nên `codex sandbox` lồng trả
+  `rc=101` và HAI trong ba cột chưa từng được kiểm chéo. Lease r2 lật reviewer sang `claude` —
+  nền chạy được sandbox lồng — và vòng 2 tự chạy đủ bảng ba cột VÀ bốn tổ hợp. Cả hai KHỚP
+  BYTE-VỚI-BYTE với tài liệu ở cột `MA_CU`. Đây là lý do thứ hai của r2, và nó đã trả cổ tức.
+
+phan_quyet_nam_finding_vong_1:
+  da_va_that: 4
+  va_ho: 1
+  chi_tiet:
+    ma-chan-gom-moi-loi-khong-phan-loai: DA_VA_THAT
+    bon-to-hop-chua-co-lenh-nguyen-van: DA_VA_THAT
+    network-access-gate-rong-hon-egress: DA_VA_THAT
+    ban-kinh-phai-chet-che-tac-dong-cheo: DA_VA_THAT
+    cong-dot-bien-tu-giam-van-xanh: >-
+      VÁ HỜ — năm phép xoá cụ thể của vòng 1 CHẾT THẬT, nhưng lớp bảo vệ mới (`t12`) mở lại ĐÚNG
+      BỐN trong năm đường đó bằng MỘT dòng sửa duy nhất.
+
+hai_P1_moi:
+  meta-test-tu-canh-khong-ai-canh: >-
+    Vô hiệu hoá `t12` bằng một dòng (bỏ lời gọi trong `main`, hoặc để thân rỗng) rồi giữ nguyên mỗi
+    phép xoá guard: `canh-nen-do` · `canh-duy-nhat` · `canh-ghi-song` · `canh-ket-luan` đều quay lại
+    SỐNG, `TỔNG: ĐẠT`, rc=0. Chỉ `canh-so-luong` sống sót độc lập vì `gate()` chạy nó vô điều kiện
+    trên dữ liệu THẬT, không qua `t12`.
+  bang-chinh-gom-unknown-vao-1-nhu-chan: >-
+    Hai bảng flagship trình bày một ô `UNKNOWN` ngang hàng hai ô `POLICY_DENIED` thật. Tái phát của
+    `ma-chan-gom-moi-loi-khong-phan-loai` ở TẦNG BẢNG TÓM TẮT: probe nay phân lớp đúng, nhưng bảng
+    gộp lại thành `1` trần rồi văn xuôi đọc là "cả ba bị chặn".
+
+REVIEWER_TIM_RA_NGUYEN_NHAN_GOC_ma_dieu_phoi_KHONG_tim_ra:
+  phien_dieu_phoi_do_duoc: 'git ra `class=UNKNOWN` chứ không phải `POLICY_DENIED` — và dừng ở đó.'
+  reviewer_di_tiep: >-
+    Hạ tầng phiên bơm `https_proxy=http://127.0.0.1:37215`. HTTPS ra ngoài đi qua proxy LOOPBACK,
+    không liên quan chính sách sandbox. Trong sandbox lồng không mở `network_access`, kết nối tới
+    CHÍNH proxy loopback ấy bị từ chối kiểu "couldn't connect", KHÔNG phải "operation not
+    permitted" — nên `phan_loai_git()` (khớp mẫu chuỗi) không nhận diện được và rơi vào `UNKNOWN`
+    theo đúng thiết kế fail-close.
+  ket_luan_cua_reviewer: >-
+    "Đây KHÔNG phải bug của `probe_mang.py` — nó làm đúng việc phải làm: không đoán, trả `UNKNOWN`.
+    Vấn đề nằm ở TÀI LIỆU coi ô này ngang hàng 1 = bị chặn chính sách như hai cột kia."
+
+TRA_LOI_CAU_HOI_KHO_NHAT_cua_de_bai:
+  cau_hoi: 'tầng không ai canh là FINDING hay GIỚI HẠN KHÔNG THỂ XOÁ?'
+  tra_loi: FINDING
+  lap_luan_cua_reviewer: >-
+    Đúng về tuyệt đối rằng không tệp nào tự bảo vệ 100% khỏi chính người sửa nó. Nhưng KHÔNG đúng
+    theo nghĩa thực hành ở đây: vô hiệu hoá tầng bảo vệ tốn ĐÚNG MỘT dòng và KHÔNG ca nào phát hiện.
+    Thêm một tầng canh sẽ đóng ĐÚNG BA trong bốn đường — không vô ích, chỉ không phải lời giải cuối.
+  duong_KHAC_HO_khong_dich_tang: >-
+    Xác minh `probe_mang_test.py` (rc VÀ chuỗi "tự đột biến cổng: 9/9 chết" trong stdout) từ một
+    cổng NẰM NGOÀI write set của packet — ví dụ một bước CI hoặc `packet_loop.py` — vì kẻ sửa ba
+    tệp trong write set KHÔNG đồng thời sửa được cấu hình CI ấy.
+  danh_gia_cua_dieu_phoi: >-
+    Đây là câu trả lời SẮC HƠN của phiên điều phối. Phiên điều phối đề xuất "khai thẳng giới hạn
+    trong tệp"; reviewer chỉ ra rằng khai không đủ khi việc phá tốn một dòng, và nêu một đường
+    THỰC SỰ khác họ. Ghi ra vì đây là lần reviewer đúng hơn người soạn đề bài.
+
+hai_dieu_phien_dieu_phoi_da_NGHI_va_KHONG_va:
+  ghi_chu: >-
+    Phiên điều phối đã tự đo CẢ HAI trước khi phóng review, và CỐ Ý không vá, cũng cố ý KHÔNG nói
+    đáp án trong đề bài — chỉ chĩa câu hỏi. Reviewer tìm ra ĐỘC LẬP cả hai, và đi xa hơn ở cả hai.
+    Đây là bằng chứng rằng cách đặt đề ấy đúng: nói đáp án thì mất một phép đo độc lập.
+
+ngan_sach_reviewer_kiem: '309/320 — probe 101 · test 156 · docs 52. Biên 11. Khớp lời khai executor.'

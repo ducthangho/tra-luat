@@ -1,4 +1,4 @@
-# `MCP-GH-CONG-TU-CANH` — ba dòng của cổng đo mà KHÔNG ai đo
+# `MCP-GH-CONG-TU-CANH` — bốn chỗ của cổng đo mà KHÔNG ai đo
 
 Tách khỏi **#319** theo quyết định của người giữ kho ngày 2026-08-27, đúng lời hứa đã ghi trước
 trong lease `mcp-gh-cuu-ho-exec-1r5`: *"MÃ chạm 900 ⇒ TÁCH. Không nâng lần bốn, và không đổi đơn
@@ -7,7 +7,7 @@ vị lần hai."* Ngân sách của #319 chạm **900/900, biên 0**, và ba vi�
 Đây KHÔNG phải việc mới nghĩ ra. Cả ba đã ĐO ĐƯỢC trên `f461413a`, biên nhận
 `ops/reviews/mcp-gh-cuu-ho-kiem-doc-lap-r6.md` trên nhánh `ops/cap-lease-tach-314`.
 
-## Ba việc
+## Bốn việc
 
 ### 1. Bộ chạy đột biến KHÔNG có chốt duy-nhất — fail-close
 
@@ -68,7 +68,7 @@ Khả năng ấy chưa mất hẳn — nó chuyển sang ca `D11-gate` và sang 
 `D10` nay không còn tự đo tiêu chí mang tên nó. Đây là **hồi quy**, và điều kiện dừng `S1` của
 lease r6 đã bắn ở đúng chỗ này.
 
-## Một việc thứ tư, nhỏ hơn: sửa một lời khai QUÁ MẠNH của đặc tả r4
+### 4. Sửa một lời khai QUÁ MẠNH của đặc tả r4
 
 Đặc tả r4 viết *"`D11` thu hẹp bề mặt ấy xuống một dòng duy nhất"*. **Đo được là sai.** Có ít nhất
 BA dòng mà đột biến làm tiến trình thoát 0: 381 (`ma_thoat`), 377 (`phan_dinh`), 670 (`sys.exit`).

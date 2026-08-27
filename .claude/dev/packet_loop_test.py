@@ -495,6 +495,47 @@ def case_guard_khong_co_co_noi(c: Ctx):
             raise AssertionError(f"guard KHÔNG được có cờ nới, nhưng thấy {co!r}")
 
 
+# --- #338: mốc đột biến phải khớp ĐÚNG MỘT CHỖ -------------------------------------
+#
+# VÌ SAO CÓ: bảng `MUTANTS` áp bằng `str.replace(moc, thay, 1)` — phép CHUỖI CON, không
+# neo dòng. Nên một dòng thụt SÂU HƠN chứa trọn mốc thụt NÔNG hơn:
+#     "            except ValueError:\n"   CHỨA   "        except ValueError:\n"
+# Nếu dòng sâu ấy nằm TRƯỚC mục tiêu trong tệp, `replace(..., 1)` sửa NHẦM nó và đột biến
+# thành vô hiệu — ca đích vẫn XANH, và runner báo "ca đó không đo gì", tức đổ lỗi cho CA
+# trong khi lỗi nằm ở MỐC.
+#
+# ĐÃ XẢY RA THẬT trong chính packet này: thêm một `except ValueError:` 12 dấu cách vào
+# `cmd_doi_chieu_uy_quyen` làm `bien_nhan_bo_nhanh_valueerror` mất răng. Đo được: mốc khớp
+# 1 chỗ trên `origin/master`, 2 chỗ sau khi thêm dòng ấy. Nền master `TỔNG: ĐẠT`, nhánh
+# `TỔNG: 1 lỗi` — delta THẬT, dù `git diff | grep bien_nhan` = 0. Suy "diff không chạm tên
+# ấy nên không phải của mình" là SAI: tương tác đi qua CHUỖI CON, không qua tên.
+#
+# Chốt này nói đúng chỗ đau ngay lần đầu, thay vì để người sau truy như tôi vừa truy.
+MOC_MO_HO_CO_SAN = {
+    # Có sẵn trên `origin/master` (đo: mốc khớp 2 chỗ ở CẢ master lẫn nhánh này, và diff
+    # không chạm dòng ấy). KHÔNG phải nợ của packet #338, nhưng nay có TÊN thay vì nằm mù.
+    "adr_tha_khi_thieu_thu_muc": 2,
+}
+
+
+def case_moc_dot_bien_phai_khop_DUNG_MOT_CHO(c: Ctx):
+    goc = c.script.read_text(encoding="utf-8")
+    goc_test = Path(__file__).read_text(encoding="utf-8")
+    xau = []
+    for ten, bo in MUTANTS.items():
+        than = goc_test if ten in MUTANTS_NHAM_TEST else goc
+        for t, _ in _cap_thay_the(bo[0], bo[1]):
+            n = than.count(t)
+            if n == MOC_MO_HO_CO_SAN.get(ten, 1):
+                continue
+            xau.append(f"{ten}: mốc khớp {n} chỗ (đòi "
+                       f"{MOC_MO_HO_CO_SAN.get(ten, 1)}) — {t[:50]!r}")
+    if xau:
+        raise AssertionError(
+            "mốc đột biến KHÔNG khớp đúng một chỗ ⇒ `replace(...,1)` có thể sửa NHẦM chỗ và "
+            "đột biến mất răng trong im lặng: " + "; ".join(xau))
+
+
 # --- #338: hạ lời khai của guard + sổ khai báo ĐẾM ĐƯỢC -------------------------
 
 
@@ -2364,6 +2405,7 @@ CASES = [
     ("slug_sai_dang_thoat_khac_0", case_slug_sai_dang_thoat_khac_0),
     ("guard_moi_hanh_vi_thoat_7", case_guard_moi_hanh_vi_thoat_7),
     # --- #338: ha loi khai + so khai bao DEM DUOC ---
+    ("moc_dot_bien_phai_khop_DUNG_MOT_CHO", case_moc_dot_bien_phai_khop_DUNG_MOT_CHO),
     ("guard_KHONG_khai_minh_kiem_tham_quyen", case_guard_KHONG_khai_minh_kiem_tham_quyen),
     ("ghi_uy_quyen_doi_danh_sach_CHO_PHEP", case_ghi_uy_quyen_doi_danh_sach_CHO_PHEP),
     ("ghi_uy_quyen_doi_sha40_that", case_ghi_uy_quyen_doi_sha40_that),

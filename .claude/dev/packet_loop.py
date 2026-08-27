@@ -1296,7 +1296,14 @@ def cmd_doi_chieu_uy_quyen(a, state_dir: Path) -> int:
                 continue
             try:
                 d = json.loads(dong)
-            except ValueError:
+            except json.JSONDecodeError:
+                # CỐ Ý không viết `except ValueError:` ở đây, dù JSONDecodeError là con của
+                # nó. Lý do KHÔNG phải phong cách: bảng đột biến của bộ test khớp CHUỖI CON
+                # (`str.replace(moc, ..., 1)`), nên một dòng 12 dấu cách `except ValueError:`
+                # CHỨA mốc 8 dấu cách của đột biến `bien_nhan_bo_nhanh_valueerror`. Code này
+                # nằm TRƯỚC `bien-nhan` trong tệp ⇒ đột biến sẽ sửa NHẦM dòng này và trở
+                # thành vô hiệu, còn ca đích thì XANH mà không đo gì.
+                # ĐO ĐƯỢC: mốc khớp 1 chỗ trên master, 2 chỗ khi có dòng ấy.
                 continue
             if d.get("head_sha"):
                 khai[d["head_sha"]] = d

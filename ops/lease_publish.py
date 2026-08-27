@@ -319,6 +319,20 @@ def _cac_ref_cuc_bo(goc: Path) -> tuple[set[str], list[str]]:
     return ten_nhanh, refs
 
 
+def _doc_cau_hinh_git(goc: Path) -> dict[str, list[str]]:
+    """Đọc config cùng giá trị mà không nhập nhằng khoảng trắng hay dòng mới."""
+    out, ket_qua = _git(goc, "config", "--includes", "--null", "--list"), {}
+    for muc in out.split("\0"):
+        if not muc:
+            continue
+        khoa, co_ngan, gia_tri = muc.partition("\n")
+        if not co_ngan or not khoa:
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: git config trả mục hỏng: {muc!r}")
+        ket_qua.setdefault(khoa, []).append(gia_tri)
+    return ket_qua
+
+
 def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[tuple[str, str, int, int, str]]:
     """Phân loại nhánh theo upstream thật; chỉ trả các quan hệ phải chặn."""
     out = _git(goc, "for-each-ref", "--format=%(refname)%09%(upstream)", "refs/heads")
@@ -329,10 +343,19 @@ def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[tuple[str, str, in
             raise Chan(RC_KHONG_XAC_DINH,
                        f"KHÔNG_XÁC_ĐỊNH: upstream có dòng hỏng: {dong!r}")
         upstream[cot[0]] = cot[1]
-    tap_ref, tut_sau = set(refs), []
+    tap_ref, tut_sau, cau_hinh = set(refs), [], _doc_cau_hinh_git(goc)
     for ref in sorted(x for x in tap_ref if x.startswith("refs/heads/")):
         ten = ref.removeprefix("refs/heads/")
         doi_ung = upstream.get(ref, "")
+        ds_remote = cau_hinh.get(f"branch.{ten}.remote")
+        ds_merge = cau_hinh.get(f"branch.{ten}.merge")
+        remote = ds_remote[-1] if ds_remote else None
+        merge = ds_merge[-1] if ds_merge else None
+        co_cau_hinh = ds_remote is not None or ds_merge is not None
+        if co_cau_hinh and not doi_ung:
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: {ten} có config upstream nhưng không giải được: "
+                       f"branch.{ten}.remote={remote!r}, branch.{ten}.merge={merge!r}")
         if not doi_ung:
             ung_vien = "refs/remotes/origin/" + ten
             if ung_vien in tap_ref:

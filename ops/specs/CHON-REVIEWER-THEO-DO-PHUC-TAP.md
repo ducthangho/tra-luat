@@ -2,7 +2,7 @@
 
 ```yaml
 packet_id: CHON-REVIEWER-THEO-DO-PHUC-TAP
-revision: 5
+revision: 6
 generation: 1
 review_class: sensitive          # sua chinh duong REVIEW - thu quyet dinh ai kiem cai gi
 executor: codex
@@ -189,8 +189,37 @@ VỊ TỪ THUẦN. Nhận dữ liệu làm đối số — điều kiện để 
 | `giao-thuc` | `docs/PROTOCOL_DA_PHIEN.md`, `docs/adr/`, `.claude/skills/` |
 | `runtime` | `scripts/` |
 | `dev` | `.claude/dev/` (phần còn lại), `ops/` (phần còn lại) |
-| `tai-lieu` | `references/`, `*.md` ở gốc |
+| `tai-lieu` | `references/`, `*.md` ở gốc, `docs/` (phần còn lại) |
 | **`khong-biet`** | **mọi đường dẫn KHÔNG khớp bảng trên** |
+
+**REVISION 6 — bảng trên lần đầu được ĐẾM trên `write_set` THẬT.** Cho tới r5, bảng vùng là
+bảng DUY NHẤT trong đặc tả này chưa qua phép đếm mà chính §0(c″) bắt buộc — một sự bỏ sót đáng
+ghi, vì packet này tồn tại để dạy đúng luật ấy. Đếm 51 đường `write_set` duy nhất trên mọi
+nhánh (27-08-2026):
+
+```
+dev 23 · cong 12 · khong-biet 11 · giao-thuc 4 · tai-lieu 1
+```
+
+**11/51 (~22%) rơi `khong-biet`**, mỗi đường +3 điểm. Chiều hỏng là LEO bậc — an toàn, nhưng
+mọi packet chạm các đường quen thuộc ấy đều trả phí review đắt nhất. Bổ sung, có lý do:
+
+| đường | vùng | vì sao |
+|---|---|---|
+| `.github/checks/` | `cong` | mã cổng CI — cùng loại với `.github/workflows/` |
+| `.claude/settings.json` | `cong` | quyền + hook: mặt điều khiển, không phải cấu hình phong cách |
+| `RELEASE_MANIFEST.json` | `cong` | `release-verify` đọc nó làm nguồn chân lý |
+| `.claude/agents/` | `giao-thuc` | frontmatter ÉP quyền agent (`disallowedTools`) — một hợp đồng, không phải tài liệu |
+| `docs/` (phần còn lại) | `tai-lieu` | tài liệu; `docs/PROTOCOL_DA_PHIEN.md` và `docs/adr/` vẫn là `giao-thuc` và đứng TRƯỚC trong thứ tự khớp |
+| `.gitignore` | `dev` | |
+
+**Tiền tố `planned:`** (protocol §8 định nghĩa) phải được **bóc ra trước khi phân loại**, rồi
+phân loại phần còn lại. `planned:ops/x.sh` là `dev`, không phải `khong-biet`. Đây là một NHÃN,
+không phải một phần của đường dẫn — coi nó là đường dẫn thì mọi lease dùng nhãn hợp lệ của
+protocol đều bị tính +3 oan.
+
+Sau bổ sung, đếm lại trên đúng 51 đường ấy: **`khong-biet` = 0**. Con số này phải được đo lại
+mỗi khi bảng đổi; một bảng vùng không kèm số đếm là một bảng chưa đo.
 
 `khong-biet` KHÔNG được bỏ qua. Đường dẫn không phân loại được là đường ta chưa nghĩ tới, và
 bài học `lease-authority-spoof` nói thẳng: danh sách CẤM thua từ trong thiết kế, phải đảo thành
@@ -270,7 +299,13 @@ Bắt buộc:
   Executor phát hiện và ghi vào mục *"chỗ tôi không chắc"* thay vì im lặng làm theo — đó đúng
   là việc của mục ấy.
 
-- Ưu tiên `effective_review_class` khi lease có cả hai trường (đo được: 147 lần xuất hiện).
+- Ưu tiên `effective_review_class` khi lease có cả hai trường (đo được: 147 lần xuất hiện) —
+  **NHƯNG CHỈ THEO CHIỀU LÊN.** Protocol §8: *dispatcher ghi `effective_review_class` bằng mức
+  CAO HƠN giữa khai báo và classifier; executor không được hạ lớp.* Nên `effective` THẤP hơn
+  `review_class` chỉ có thể là lease hỏng hoặc bị sửa tay, và tin nó là tự mở một cửa mà
+  protocol đã đóng. Luật: xếp hạng `routine < systemic < sensitive`, lấy **hạng CAO HƠN** giữa
+  hai trường. Đếm trên toàn kho: **0/8203** (ref,tệp) có `effective` thấp hơn khai báo — lỗ
+  chưa bị dẫm, nhưng một công cụ sinh ra để chặn fail-open thì không được tự mở.
   Nó là lớp SAU escalation, tức lớp thật sự có hiệu lực.
 - `duong_dan` sau khi chuẩn hoá mà **RỖNG** ⇒ `KhongDoDuoc`. Write set rỗng nghĩa là không đo
   được phạm vi, và không đo được thì không được cho ra bậc THẤP. Cùng lý lẽ với `khong-biet`.
@@ -352,6 +387,17 @@ là hai lượt tụt thật. **0 dương tính giả**, kể cả lượt khôn
 → in `model`, `effort`, `giai_thich`; `--json` cho dạng máy đọc. Thoát 0 khi chọn được, khác 0
 khi `kiem_dinh_danh` từ chối.
 
+**REVISION 6 THÊM `--bac-truoc model,effort`** (tuỳ chọn). Không có nó, **bánh cóc của §3.1 —
+một luật BẮT BUỘC — không thể hiện thực được qua lối vào DUY NHẤT mà tài liệu dạy.** Người làm
+đúng theo `SKILL.md` ở lượt 2 (diff nhỏ lại) sẽ nhận bậc TỤT, đúng kịch bản §3.1 nêu là lý do
+bánh cóc tồn tại. Đặc tả r5 tự mâu thuẫn giữa §3.1 (bắt buộc) và §3.4 (không có đường).
+
+Đây không phải lo ngại lý thuyết: **phiên điều phối đã vấp đúng nó ngày 27-08** khi chọn bậc
+cho cross-review lượt 3 của PR #349 — phải áp bánh cóc BẰNG TAY vì CLI không nhận `bac_truoc`.
+
+Giá trị sai dạng (thiếu dấu phẩy, model/effort không thuộc bảng) ⇒ `KhongDoDuoc`, KHÔNG im lặng
+bỏ qua — im lặng bỏ qua là fail-OPEN đúng loại §0(a) đã trả giá.
+
 ## 4. `.claude/dev/chon_reviewer_test.py` — phản chứng
 
 Chạy `python3 .claude/dev/chon_reviewer_test.py`, thoát 0 khi ĐẠT.
@@ -370,6 +416,19 @@ Chạy `python3 .claude/dev/chon_reviewer_test.py`, thoát 0 khi ĐẠT.
    · sandbox có kho, model rác: `is_error: true`, `modelUsage` **CHỈ CÓ mô hình phụ** ⇒ ĐỎ.
      Ca này là ca quan trọng nhất của cả mục: nó ĐỎ vì **thiếu mô hình yêu cầu**, KHÔNG phải vì
      `modelUsage` rỗng — một bản vá chỉ kiểm rỗng sẽ để nó đi qua.
+6d. **Ca BACKSLASH (revision 6) — bắt buộc.** `la\\la.md` KHÔNG ở gốc, nên nó KHÔNG phải
+   `tai-lieu`. Cài đặt r4/r5 đo *"ở gốc"* bằng *"không chứa `/`"*, nên mọi đường Windows-separator
+   đuôi `.md` rơi xuống bậc ĐÁY. Đường lạ phải đẩy LÊN theo luật `khong-biet`, không được tụt.
+   Chiều ngược (`.github\\workflows\\ci.yml` → `khong-biet`, leo lên) đã an toàn sẵn.
+6e. **Ca EFFECTIVE THẤP HƠN KHAI BÁO (revision 6) — bắt buộc.** Lease
+   `{review_class: sensitive, effective_review_class: routine}` phải chấm theo **sensitive**.
+   Ca `r12` của r4 đóng đinh đúng hành vi SAI (đáp án là bậc THẤP) — phải sửa ca ấy, không phải
+   thêm ca mới bên cạnh nó.
+6f. **Ca NHÃN `planned:` (revision 6) — bắt buộc.** `planned:ops/x.sh` phải phân loại là `dev`,
+   không phải `khong-biet`.
+6g. **Ca BÁNH CÓC QUA CLI (revision 6) — bắt buộc.** Lượt 2 với diff nhỏ hơn, truyền
+   `--bac-truoc` bậc lượt 1 ⇒ bậc KHÔNG được tụt. Thiếu ca này thì §3.1 vẫn không có đường
+   hiện thực qua lối vào được tài liệu hoá.
 6b. **Ca TỤT GIỮA CHỪNG (revision 5, §0(c‴)) — bắt buộc.** `modelUsage` mang **CẢ HAI** mô hình
    chính, ví dụ `{claude-fable-5: …, claude-opus-4-8: …}` với `is_error: false`, yêu cầu
    `claude-fable-5` ⇒ **ĐỎ**. Đây là dữ liệu THẬT của hai lượt `rv349`/`rv349b`, không phải
@@ -399,6 +458,13 @@ Chạy `python3 .claude/dev/chon_reviewer_test.py`, thoát 0 khi ĐẠT.
 | `kiem_ket_qua` ĐÒI mô hình phụ phải CÓ MẶT (thay vì cho phép) | ca `modelUsage` không có mô hình phụ |
 | `kiem_ket_qua` bỏ `canonicalModel`, chỉ so tên khoá | ca khoá-theo-ngày |
 | `kiem_ket_qua` kiểm `is_error` TRƯỚC phép so tập hợp | ca model-rác (phải chặn ở nhánh MODEL) |
+| `_cac_duong_dan` coi `\` như ký tự thường (đường Windows đuôi `.md` → `tai-lieu`) | ca backslash |
+| `chon` lấy thẳng `effective_review_class` thay vì hạng CAO HƠN | ca effective-thấp-hơn |
+| bỏ bóc tiền tố `planned:` trước khi phân loại vùng | ca nhãn `planned:` |
+| `main` HOÁN VỊ `a.so_dong` và `a.luot` | ca CLI |
+| `--bac-truoc` bị bỏ qua im lặng thay vì áp bánh cóc | ca bánh cóc qua CLI |
+| khớp danh tính nới từ so-BẰNG sang chuỗi con / tiền tố | ca `claude-opus-5x` phải ĐỎ |
+| hạ ngưỡng biên DƯỚI (`luot>=3→>=2`, `len>=5→>=4`, `so_dong>=400→>=399`, `diem<=4→<4`) | ca ghim biên tuyệt đối |
 | `is_error` thiếu ⇒ đọc thành `False` | ca 6 |
 
 Nền có ca ĐỎ ⇒ **TỪ CHỐI công bố điểm đột biến** (bài học P1 của PR #342).

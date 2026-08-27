@@ -1,0 +1,96 @@
+# Lease EXECUTOR — packet #348 (TACH-DANH-TINH-GITHUB), REVISION 2.
+#
+# VÌ SAO REVISION 2 — và đây là một BẢN VÁ REVIEW, không phải tiện tay nới:
+# cross-review codex lượt 1 (PR #349) ra `changes_requested` với 7 finding, 5 P1. Một trong
+# số đó (`runbook-chua-tach-rieng-bang-chung-cua-check-cong`, P1) chỉ ra rằng job cổng và
+# job phản chứng NẰM CHUNG một tệp làm tên check `cong` xuất hiện được từ CẢ lane
+# `pull_request` (dưới dạng `skipped`) — nên một required check mang tên ấy có ngữ cảnh MƠ
+# HỒ, và người làm theo runbook có thể tưởng đã bind đúng nguồn tin cậy.
+# Đường chữa mà reviewer nêu, và tôi chọn: TÁCH lane phản chứng sang tệp workflow RIÊNG, để
+# tên check của cổng KHÔNG THỂ sinh ra từ lane PR. Việc ấy cần thêm đúng một đường vào
+# write set, nên phải là một revision có thay thế HAI CHIỀU chứ không phải sửa lén tệp cũ.
+#
+# UỶ QUYỀN: chủ kho ra lệnh trực tiếp trong phiên 27-08-2026: "tách danh tính GitHub đi".
+# Người ghi lease là phiên claude — GHI HỘ, không phải người cấp (§2).
+#
+# PHẠM VI CỦA PACKET NÀY HẸP HƠN TÊN CỦA NÓ, và điều đó được khai ngay ở đây thay vì để
+# người đọc tự vỡ ra: "tách danh tính" gồm HAI nửa, và nửa quyết định (tạo danh tính chạy-việc
+# không phải admin + siết `master`) nằm NGOÀI kho và NGOÀI tầm phiên — đo được: REST tới
+# `branches/master/protection` và `rulesets` đều 403 KHÔNG kèm header `X-GitHub-*`, tức proxy
+# tự sinh. Packet giao nửa TRONG kho (cổng đo người duyệt khác người tạo PR) cộng RUNBOOK cho
+# nửa ngoài. Nó KHÔNG tự nhận đã tách xong danh tính.
+
+schema_version: 2
+event: lease_granted
+packet_issue: 348
+packet_id: TACH-DANH-TINH-GITHUB
+lease_id: tach-danh-tinh-github-exec-1r2-claude-20260827
+revision: 2
+thay_the_cho: tach-danh-tinh-github-exec-1-claude-20260827
+
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+assurance_target: cross_approved
+review_class: sensitive
+effective_review_class: sensitive
+access: read-write-nhanh-rieng
+branch_ownership: exclusive
+
+reviewed_sha_required: f715fc28139427f2c845f258f15a6d032011b716
+base_sha: f715fc28139427f2c845f258f15a6d032011b716
+branch: claude/tach-danh-tinh-github-exec-1
+
+write_set:
+  - .claude/dev/duyet_danh_tinh.py
+  - .claude/dev/duyet_danh_tinh_test.py
+  - .github/workflows/duyet-khac-danh-tinh.yml
+  - .github/workflows/duyet-phan-chung.yml
+  - ops/RUNBOOK_TACH_DANH_TINH_GITHUB.md
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-27 ~06:00Z bằng `ops/lease_publish.py ai-dang-giu`: cả BỐN đường -> NGƯỜI_GIỮ 0.
+  Phép so hai nguồn TRƯỚC khi quét, so bằng TẬP TÊN: `ls-remote --heads` 226 = `for-each-ref`
+  226, `comm -23` RỖNG và `comm -13` RỖNG.
+  LẦN QUÉT ĐẦU BỊ CHẶN `rc=12` (NHÁNH_CỤC_BỘ_TỤT_SAU: master, ops/cap-lease-ci-idiom-20260827)
+  — cổng của packet #313 ca 4 làm đúng việc của nó. Đã chữa hai nhánh rồi mới quét lại; KHÔNG
+  quét trên bộ đệm cũ, và KHÔNG đọc `rc=12` thành "không ai giữ".
+
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-27 ("tách danh tính GitHub đi")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-27T07:00:00Z'
+lease_expires_at_utc: '2026-08-28T07:00:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 60
+
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+
+chong_lan_write_set_da_khai: >-
+  KHÔNG chồng lấn: cả bốn đường đo được NGƯỜI_GIỮ 0, và cả bốn là tệp MỚI.
+  CỐ Ý KHÔNG LẤY `.github/workflows/ci.yml` dù việc nối phản chứng vào CI là tự nhiên nhất:
+  đo được `ai-dang-giu` trả `rc=11`, đường ấy đang bị `ci-cong-idiom-ba-ten-exec-1r2-claude-
+  20260827` giữ — lease của packet #345 ĐÃ LAND mà không có đường thu hồi (`lease_publish.py`
+  chỉ có check · body · kiem-github · mark · ai-dang-giu · con-tro-treo). Đó là nợ
+  `AG-T0-01B-thu-hoi-lease-chua-co-duong`, và đây là lần nó ĐO ĐƯỢC là chặn việc thật.
+duong_them_o_revision_2: >-
+  `.github/workflows/duyet-phan-chung.yml` — ĐO 2026-08-27 ~07:00Z: NGƯỜI_GIỮ 0, tệp MỚI.
+  Lần quét đầu bị chặn `rc=12` (NHÁNH_CỤC_BỘ_TỤT_SAU + worktree BẨN) — cổng làm đúng việc;
+  đã chữa rồi mới quét lại, KHÔNG đọc `rc=12` thành "không ai giữ".
+chong_lan_write_set_phan_xu: >-
+  Có thể khai chồng lấn như lease #337 đã làm, và phép đo cũng sẽ chứng minh không có writer
+  thứ hai (packet #345 đã land, hiện vật trên master: bước `idiom-ba-ten selftest` trong
+  `ci.yml`). CHỌN ĐƯỜNG KHÁC: đổi thiết kế để workflow mới tự mang cả cổng lẫn phản chứng
+  trong MỘT tệp, nên không cần `ci.yml`. Write set sạch, không chồng, và tiền lệ "khai chồng
+  rồi đi tiếp" không bị mượn thêm một lần nữa.
+

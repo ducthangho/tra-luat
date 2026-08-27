@@ -78,3 +78,4 @@ chong_lan_write_set_da_khai: >-
   thay thế HAI CHIỀU trong cùng một packet, không đụng hồ sơ của packet khác.
 chong_lan_write_set_phan_xu: >-
   KHÔNG chồng lấn với packet nào khác. Chồng duy nhất là với revision 1 của chính nó.
+posted_comment_id: 5434067345   # workflow ghi, ĐỪNG sửa tay

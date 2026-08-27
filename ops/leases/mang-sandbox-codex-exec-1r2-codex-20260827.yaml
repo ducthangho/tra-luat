@@ -353,3 +353,21 @@ VERDICT_VONG_3_va_LUOT_VA_5:
   trang_thai: >-
     Sau lượt 5: KHÔNG còn P1 nào trong write set, và KHÔNG còn P2 nào. Chờ cross-review vòng 4 trên
     `94474286`.
+
+APPROVED_VONG_4:
+  sha: 944742869b53946b56531c1da3f831a47707ecac
+  P1: 0
+  P2: 0
+  finding_moi: 0
+  P2_vong_3_da_VA_THAT: 'không phải chỉ ghi nợ — reviewer kiểm bằng diff trực tiếp và đọc lại toàn văn'
+  BAY_O_SO_LIEU_COT_LOI_da_duoc_BON_PHIEN_DOC_LAP_tai_lap: >-
+    executor lượt 3 · reviewer vòng 2 · vòng 3 · vòng 4 — giống hệt nhau, bằng lệnh NGUYÊN VĂN chép
+    từ tài liệu. Đây là mức xác nhận cao nhất packet nào trong phiên đạt được.
+  hai_tep_ma_khong_doi: 'từ `b5bb3952`; bộ đo vẫn 11/11 · 5 đột biến · 0 sống'
+  ngan_sach_khi_approved: '318/320, biên 2 — đúng ba đường dẫn write set, tệp ngoài write set không bị chạm'
+  meta_test_giu_nguyen_trang_thai: >-
+    Cố ý KHÔNG vá, đã tách sang `CONG-NGOAI-WRITE-SET`. Reviewer KHÔNG chấm là "chưa vá" để chặn
+    land — đúng chỉ dẫn đề bài, và đúng vì đường vá đòi chạm đường dẫn ngoài write set.
+  reviewer_khai_thang_cho_KHONG_do_lai: >-
+    Nó ghi vào `KHÔNG_ĐO_ĐƯỢC` rằng KHÔNG tự chạy lại phép đo `meta-test` của vòng 3, kèm lý do
+    (ngân sách, và đó không phải finding đang mở của lượt này). Khai chỗ không đo thay vì im lặng.

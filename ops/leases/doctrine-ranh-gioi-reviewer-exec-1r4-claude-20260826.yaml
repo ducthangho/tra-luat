@@ -118,7 +118,7 @@ lich_su_reviewed_sha:
 - {vong: 12, sha: fa9a505d0926a56603cabfb998bd4832084ed68f, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-12-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0, KHÔNG finding mới. Cùng slug `menh-de-sandbox-mo-coi-khong-nhan` — phán quyết VÁ SINH LỖI MỚI: nhãn ĐÚNG NGHĨA (reviewer tìm được neo A/B ngay trong tệp, dòng 328-339) nhưng câu phạm vi dòng 594-601 nay TỰ MÂU THUẪN với phép đếm dòng 619-625, và N4 chưa đóng. N2/N3/N5/N6/N7a/N7b ĐẠT. Biên 16 dòng.'}
 - {vong: 13, sha: e68e9fac23690399121b76d6ea3c35a6c5e9a067, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-13-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0, KHÔNG finding mới, cùng slug. N1 và N4 ĐÃ VÁ THẬT; N2+N3 FAIL vì bản vá khai một phép ĐO KHÔNG XẢY RA (dòng 678 nói một cờ, dòng 682 nói hai cờ — cách nhau BỐN dòng). Nhãn phải là `chưa xếp được`, phân bố đúng 1/4/3/0/0. Lỗi là của PHIÊN ĐIỀU PHỐI.'}
 - {vong: 14, sha: d9c24ddaecb8b94dd234d77819745e96ea4226d1, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-14-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0, cùng slug. N1/N4/N5/N6/N7a/N7b ĐẠT. N2+N3 rớt vì MỘT chỗ bản vá 13 BỎ SÓT: nhãn đã hạ ở dòng 676 nhưng NỘI DUNG mệnh đề ở 675 vẫn khai `biết cơ chế`.'}
-- {vong: 15, sha: 1c000495c8e64e2582c37ee92ae5be8d14557218, verdict: 'CHƯA CÓ — bản vá vòng 14 đã đẩy'}
+- {vong: 15, sha: 1c000495c8e64e2582c37ee92ae5be8d14557218, verdict: approved, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-15-codex-verdict.receipt.yaml', ket_qua: 'P1=0 P2=0, KHÔNG finding mới. N1-N6, N7a, N7b ĐỀU ĐẠT. Finding vòng 14 ĐÃ VÁ THẬT.'}
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 2
@@ -713,3 +713,21 @@ VONG_VA_14:
       không đổi tiêu chuẩn đã áp ở vòng 12 và 13."
     duong_quay_lai: 'reviewer xác nhận tệp ĐÃ có ở dòng 685-686 ⇒ KHÔNG mở finding riêng.'
   ngan_sach: '198/200, biên 2 — KHÔNG đổi vì sửa net 0'
+
+APPROVED_VONG_15:
+  sha: 1c000495c8e64e2582c37ee92ae5be8d14557218
+  P1: 0
+  P2: 0
+  sau_bao_nhieu_vong: 15
+  reviewer_kiem_dung_hai_dieu_de_bai_lo:
+    ban_va_co_that_su_la_GIA_DINH_khong: >-
+      "Cấu trúc `DÙ có ... thì cũng ...` là một giả định nhượng bộ, không khai cơ chế hiện đã biết;
+      các câu ngay sau còn nói tường minh phép A/B hai-biến chưa tách được nguyên nhân."
+    co_lam_MAT_luan_diem_doctrine_khong: >-
+      "Luận điểm doctrine không mất: mệnh đề vẫn nói nguyên văn rằng mạng đóng của sandbox là một
+      MẶC ĐỊNH CẤU HÌNH, không phải bất biến. Vế mới chỉ nói biết cơ chế, NẾU CÓ, chưa tự nó đủ
+      biến mặc định ấy thành ranh giới."
+  reviewer_tu_TU_CHOI_hai_cai_bay:
+    khong_tao_slug_gia: '"Không tạo slug giả để làm tăng số finding."'
+    khong_giu_mo_vi_so_vong: '"không giữ packet mở chỉ vì số vòng đã cao."'
+  ngan_sach_khi_approved: '198/200, biên 2'

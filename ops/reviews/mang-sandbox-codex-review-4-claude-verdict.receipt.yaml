@@ -1,0 +1,14 @@
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '334'
+provider: claude
+role: reviewer
+verdict: approved
+reviewed_sha: 944742869b53946b56531c1da3f831a47707ecac
+luot: 4
+cross_provider: true
+assurance: cross_approved
+verdict_path: ops/reviews/mang-sandbox-codex-review-4-claude-verdict.md
+verdict_sha256: '7d3a05567ad4ce71a09a26b99534dd05035ee7e7f415c41ca7205098c72f0311'
+verdict_bytes: 11053
+ket_qua_dem_duoc: {P1: 0, P2: 0, finding_moi: 0}

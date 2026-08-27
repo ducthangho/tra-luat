@@ -423,10 +423,23 @@ def main() -> int:
         if sua == 0:
             hong.append(f"{ten}: MỐC KHÔNG CÒN TRONG PHẠM VI")
             continue
-        d2, _, _ = _chay_bo_ca(cay, chi=set(dich))
+        d2, bo2, _ = _chay_bo_ca(cay, chi=set(dich))
         chet = sorted(k for k, v in d2.items() if v is False)
-        thieu = [x for x in dich if x not in chet]
-        print(f"  {'ok ' if not thieu else 'LỖI'} {ten} → giết {chet or 'KHÔNG CA NÀO'}")
+        # CA ĐÍCH BỊ BỎ QUA TRÊN NỀN NÀY KHÔNG PHẢI "CÒN SỐNG". `drop-name` nhắm cả
+        # `hop_dong_khoi` (tĩnh) lẫn `ba_nen_path` (ĐỘNG, cần POSIX). Trên Windows ca động
+        # tự báo BỎ QUA, và bản đầu tính nó vào `thiếu` ⇒ suite ĐỎ trên nền mà chính packet
+        # #337 sinh ra để bảo vệ. Đó là "ca có MẶT khác ca có ĐO" ở chiều ngược: một ca
+        # KHÔNG ĐO ĐƯỢC bị đọc thành một chốt hỏng.
+        # Gọi TÊN cái bị bỏ, đừng nuốt: nếu MỌI ca đích đều bị bỏ thì đột biến ấy không đo
+        # gì trên nền này, và đó vẫn phải là LỖI.
+        thieu = [x for x in dich if x not in chet and x not in bo2]
+        bo_ten = [x for x in dich if x in bo2]
+        if bo_ten and not chet:
+            hong.append(f"{ten}: MỌI ca đích bị BỎ QUA trên nền này ({bo_ten}) — "
+                        f"đột biến không đo gì")
+        nhan = "ok " if not thieu and (chet or not bo_ten) else "LỖI"
+        print(f"  {nhan} {ten} → giết {chet or 'KHÔNG CA NÀO'}"
+              + (f" · BỎ QUA {bo_ten}" if bo_ten else ""))
         if thieu:
             hong.append(f"{ten}: ca đích còn sống: {thieu}")
 

@@ -57,8 +57,11 @@ GHI_LONG = [
     # Ca nay chi LOT khi bo CA HAI chot (heredoc + tach xuong dong) — xem m10.
     ("ghi trong than heredoc", "python scripts/tl.py <<'E'\ncp /tmp/x scripts/tl.py\nE"),
 ]
-# 11 ca do CROSS-REVIEW CODEX (PR #328) tim ra — 5 finding P1, ca 11 DA TAI HIEN la ALLOW
-# tren ban da day. Chung o day vi bo test truoc do xanh 8/8 ma khong thay cai nao.
+# Ca do CROSS-REVIEW CODEX (PR #328) tim ra, DA TAI HIEN la ALLOW tren ban da day. Chung o
+# day vi bo test truoc do xanh ma khong thay cai nao.
+# KHONG GHI SO O DAY. Ban truoc viet "11 ca" roi mot ca bi BO (`diff --output=`, xem `t14`)
+# ma cau ay o lai; cross-review luot 2 dem duoc 10. So dem la thu doi theo bang ngay ben
+# duoi, nen no phai doc TU bang (`len(GHI_CHE_DO)`), khong phai chep vao chu thich.
 GHI_CHE_DO = [
     ("chuyen huong &>", "echo x &> scripts/tl.py"),
     ("chuyen huong &>>", "echo x &>> scripts/tl.py"),
@@ -74,7 +77,7 @@ GHI_CHE_DO = [
     ("awk system co khoang trang", 'awk \'BEGIN { system ("touch scripts/written") }\''),
 ]
 # Ca DUONG di kem — cross-review doi giu lai che do DOC cua dung nhung chuong trinh tren, kẻo
-# ban va bien thanh chan oan. Khong co danh sach nay thi "deny 11/11" khong noi len dieu gi.
+# ban va bien thanh chan oan. Khong co danh sach nay thi "deny N/N" khong noi len dieu gi.
 DOC_CHE_DO = [
     "sort CLAUDE.md | head -3",
     "uniq CLAUDE.md | wc -l",
@@ -175,7 +178,11 @@ def t7_nhom_mutate_tra_luat_bi_chan(g):
     return (not xau, f"nhom mutate tra-luat -> deny {len(ca) - len(xau)}/{len(ca)}")
 
 
-# ── #336: NAM lo DO DUOC cua che do GHI, va phep do doi CA HAI dieu ──────────────────────
+# ── #336: lo DO DUOC cua che do GHI, va phep do doi CA HAI dieu ─────────────────────────
+# LOI KHAI DA THU HEP HAI LAN, ghi lai vi ca hai lan deu la toi noi RONG hon phep do:
+#   luot 1: "NAM lo deu tai hien duoc" -> sai, chi 2 mode co CA HAI ve;
+#   luot 2: van de lai chu "NAM lo" trong tieu de muc nay du bang chi con 2 phan tu.
+# Bang la nguon; tieu de khong duoc mang so.
 # Bai hoc sinh ra muc nay: ca `diff --output=` cu o `GHI_CHE_DO` XANH suot, ma no xanh VI LY
 # DO SAI — `diff` KHONG CO co `--output` nao, nen lenh ay that bai voi `unrecognized option`
 # va chang bao gio ghi gi. Cong "canh" mot cua khong ton tai, va bo test "chung minh" duoc
@@ -450,6 +457,80 @@ def t35_co_ngan_an_gia_tri_gan_lien_khong_bi_chan_oan(h):
                      + (f"; SAI: {xau}" if xau else ""))
 
 
+def t37_duong_dan_kich_ban_KHONG_CO_LOI_THOAT(h):
+    """P1 `python-allowlist-lstrip-khong-phai-exact-path` (cross-review luot 2).
+
+    `str.lstrip` bo MOI ky tu trong tap chu khong phai mot TIEN TO, nen `../../scripts/tl.py`
+    co ve dung `scripts/tl.py`. Danh sach cho phep dung; PHEP SO thi sai — va mot phep chuan
+    hoa long hon phep so lam danh sach cho phep vo hieu.
+    DO DUOC (A/B tren `9583293` va head): 4 dang thoat cay tu ALLOW -> deny, duong hop le
+    giu nguyen ALLOW.
+    """
+    thoat = ["python ../../scripts/tl.py sweep",
+             "python ../scripts/tl.py sweep",
+             "python .././scripts/tl.py sweep",
+             "python ../../scripts/tl.py --profile x sweep"]
+    hop_le = ["python scripts/tl.py sweep", "python ./scripts/tl.py sweep"]
+    xau = [c for c in thoat if hoi(h, c, "tl-auditor")[0] != "deny"]
+    xau += [c for c in hop_le if hoi(h, c, "tl-auditor")[0] != "allow"]
+    n = len(thoat) + len(hop_le)
+    return (not xau, f"duong dan kich ban: {n - len(xau)}/{n}"
+                     + (f"; SAI: {xau}" if xau else ""))
+
+
+def t38_git_c_chi_nhan_khoa_DA_DO(h):
+    """P1 `git-read-subcommand-van-goi-duoc-helper-ngoai`, mat thu nhat.
+
+    `-c` nam trong bang co cho phep, ma TANG 2 chi soi TEN CO chu khong soi GIA TRI, nen
+    `git -c core.pager=<lenh> log` la mot subcommand DOC goi chuong trinh NGOAI. Tap khoa
+    nguy hiem khong liet het duoc (`core.editor` `diff.external` `core.hooksPath`
+    `credential.helper` `alias.*` `core.sshCommand` …), nen DAO sang danh sach CHO PHEP.
+    """
+    cam = ["git -c core.pager=touch log --oneline",
+           "git -c core.hooksPath=/x status",
+           "git -c credential.helper=touch log",
+           "git -c diff.external=touch diff HEAD~1 HEAD"]
+    tha = ["git -c core.abbrev=7 log --oneline", "git log --oneline"]
+    xau = [c for c in cam if hoi(h, c, "tl-auditor")[0] != "deny"]
+    xau += [c for c in tha if hoi(h, c, "tl-auditor")[0] != "allow"]
+    n = len(cam) + len(tha)
+    return (not xau, f"git -c theo khoa: {n - len(xau)}/{n}" + (f"; SAI: {xau}" if xau else ""))
+
+
+def t39_gan_bien_TIEN_TO_bi_chan_gan_bien_THUAN_thi_KHONG(h):
+    """P1 tren, mat thu hai — VA chieu tha, vi ban dau toi lam do chinh `t3`.
+
+    `GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.pager ... git log` dat dung thu ma `-c` vua bi
+    chan, chi bang duong khac. Nhung ap danh sach cho phep cho MOI phep gan la CHAN OAN:
+    `M=$(git rev-parse HEAD)` chi doi bien CUA SHELL. Phan biet o TIEN TO: gan lam tien to
+    cho mot lenh thi no vao moi truong cua tien trinh se chay.
+    """
+    cam = ["GIT_PAGER=touch git log", "GIT_CONFIG_COUNT=1 git log",
+           "LD_PRELOAD=/x.so git log", "GIT_EXTERNAL_DIFF=touch git diff"]
+    tha = ['M=$(git rev-parse HEAD); echo "$M"', "LC_ALL=C git log --oneline",
+           "PYTHONDONTWRITEBYTECODE=1 python scripts/tl.py sweep"]
+    xau = [c for c in cam if hoi(h, c, "tl-auditor")[0] != "deny"]
+    xau += [c for c in tha if hoi(h, c, "tl-auditor")[0] != "allow"]
+    n = len(cam) + len(tha)
+    return (not xau, f"gan bien tien to: {n - len(xau)}/{n}" + (f"; SAI: {xau}" if xau else ""))
+
+
+def t40_co_ngan_gia_tri_PHI_SO_khong_bi_chan_oan(h):
+    """P2 `co-ngan-gia-tri-phi-so-van-bi-chan-oan` — luot 2 SIET QUA TAY.
+
+    Ban luot 2 doi `goc[2:].isdigit()`, nen gia tri khong phai so cung roi xuong nhanh bo co
+    va bi DENY oan. Dieu kien an toan khong nam o HINH DANG gia tri ma o CHU DAU: no phai la
+    co CO TRONG bang VA la co AN GIA TRI.
+    """
+    tha = ["cut -d, -f1 a.csv", "grep -ePAT a.txt", "rg -epat a.txt", "sort -k1,1 a.txt"]
+    cam = ["cat -xyz F", "sort -o F A"]           # chu dau KHONG an gia tri / la co GHI
+    xau = [c for c in tha if hoi(h, c, "tl-auditor")[0] != "allow"]
+    xau += [c for c in cam if hoi(h, c, "tl-auditor")[0] != "deny"]
+    n = len(tha) + len(cam)
+    return (not xau, f"co ngan gia tri phi so: {n - len(xau)}/{n}"
+                     + (f"; SAI: {xau}" if xau else ""))
+
+
 def t36_moi_ca_DINH_NGHIA_deu_phai_DANG_KY(h):
     """Ca CO MAT khac ca CO DO. Da tra gia trong chinh packet nay: bay ca cua luot 2 duoc
     viet xong nhung moc `replace` tro sai dong nen KHONG cai nao vao `CA`. Bo test bao
@@ -494,6 +575,9 @@ CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
       t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban,
       t34_so_tran_chi_cho_chuong_trinh_DO_DUOC_la_nhan,
       t35_co_ngan_an_gia_tri_gan_lien_khong_bi_chan_oan,
+      t37_duong_dan_kich_ban_KHONG_CO_LOI_THOAT, t38_git_c_chi_nhan_khoa_DA_DO,
+      t39_gan_bien_TIEN_TO_bi_chan_gan_bien_THUAN_thi_KHONG,
+      t40_co_ngan_gia_tri_PHI_SO_khong_bi_chan_oan,
       t36_moi_ca_DINH_NGHIA_deu_phai_DANG_KY]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
@@ -577,6 +661,24 @@ DOT_BIEN = [
      '_TL_CO_SINH_TEP = frozenset({"--output", "--out-dir", "--output-file"})'),
     ("m10_ghep_bo_heredoc_va_tach_dong",
      ('if "<<" in cmd:', 'if "\\n" in cmd:'), ("if False:", "if False:")),
+    # ── luot 3: dot bien cho ba ban va P1/P2 cua cross-review luot 2 ────────────────────
+    # Tra lai `lstrip` — phep so long hon phep chuan hoa, tuc danh sach cho phep vo hieu.
+    ("m30_tra_lai_lstrip_cho_kich_ban",
+     "    chuan = _chuan_hoa_kich_ban(kich)\n    if chuan is None or chuan not in _KICH_BAN_CHO_PHEP:",
+     '    chuan = kich.lstrip("./")\n    if chuan not in _KICH_BAN_CHO_PHEP:'),
+    # Tha moi khoa `git -c` — quay ve trang thai chi soi TEN CO.
+    ("m31_git_c_tha_moi_khoa",
+     '    khoa = str(v).split("=", 1)[0].strip().lower()',
+     '    khoa = "core.abbrev"  # dot bien: khoa nao cung coi la hop le'),
+    # Bo kiem gan bien lam TIEN TO cho lenh.
+    ("m32_gan_bien_tien_to_tha_vo_dieu_kien",
+     "    for t in toks[:k]:\n        ten = t.split(\"=\", 1)[0]",
+     "    for t in []:\n        ten = t.split(\"=\", 1)[0]"),
+    # Siet lai `isdigit` — tra ve dung chan oan ma luot 2 gay ra.
+    ("m33_siet_lai_isdigit_cho_co_ngan",
+     '                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep):',
+     '                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep\n'
+     '                and goc[2:].isdigit()):'),
 ]
 
 

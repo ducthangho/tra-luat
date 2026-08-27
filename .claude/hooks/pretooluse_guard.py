@@ -348,12 +348,20 @@ def _kiem_co(ten, doi):
             continue
         # CO NGAN AN GIA TRI GAN LIEN: `-n3` = `-n 3`, `-U3` = `-U 3`, `-m1`, `-k1`, `-f1`,
         # `-w3`. Phai xet TRUOC nhanh no bo co, kẻo `-n3` bi hieu la bo `-n` + `-3` roi tu
-        # choi. Cross-review do duoc MUOI ca chan oan kieu nay, gom ca `git log -n1` va
-        # `git diff -U3` — hai lenh doc thuong nhat cua kho. Chi nhan khi phan CHU dau tien
-        # la mot co CO TRONG bang VA co ay AN GIA TRI; phan con lai phai la SO.
+        # choi. Cross-review luot 1 do duoc MUOI ca chan oan kieu nay, gom `git log -n1` va
+        # `git diff -U3` — hai lenh doc thuong nhat cua kho.
+        #
+        # LUOT 2 SIET QUA TAY, va cross-review luot 2 do duoc: doi `goc[2:].isdigit()` nen
+        # MUOI dang gia tri KHONG PHAI SO cung bi chan oan (`-d,` cua `cut`, `-e<mau>` cua
+        # `grep`, `--date`-style dinh lien, hau to don vi…). Chuong trinh THAT tra rc=0 ca
+        # muoi; guard DENY ca muoi.
+        # Dieu kien AN TOAN khong nam o HINH DANG gia tri ma o CHU DAU: no phai la mot co
+        # CO TRONG bang cho phep VA la co AN GIA TRI. Da qua hai chot ay thi phan con lai la
+        # GIA TRI cua co do — noi dung cua no khong the mo them che do nao. Neu mot binary cu
+        # the khong nhan cach viet ay thi chinh binary tu choi, va do la loi cua NGUOI GOI,
+        # khong phai mot che do ghi bi mo.
         if (len(goc) > 2 and not goc.startswith("--")
-                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep
-                and goc[2:].isdigit()):
+                and ("-" + goc[1]) in an and ("-" + goc[1]) in cho_phep):
             i += 1
             continue
         # co NGAN GOP: `-la` = `-l -a`. No ra roi kiem tung cai; mot chu xau la ca cum xau.
@@ -425,11 +433,35 @@ def _boc_thay_the(cmd):
     return trong, "".join(ra)
 
 
+# P1 `git-read-subcommand-van-goi-duoc-helper-ngoai` (cross-review luot 2, PR #341).
+# `-c` nam trong `_CO_CHO_PHEP["git"]`, va TANG 2 chi soi TEN CO chu khong soi GIA TRI. Nen
+# `git -c core.pager=<lenh> log` la mot subcommand DOC goi mot chuong trinh NGOAI. Cung ho
+# ay con `core.editor` `diff.external` `core.hooksPath` `credential.helper` `alias.*`
+# `core.sshCommand` `filter.*.clean` `diff.*.textconv` … — mot tap KHONG liet het duoc, tuc
+# dung hinh dang danh sach CAM. DAO: chi CHO PHEP mot tap khoa DA DO.
+#
+# `core.abbrev` la khoa DUY NHAT kho nay that su can o duong doc: `CLAUDE.md` §Quy uoc deploy
+# muc 6 doi ghim `core.abbrev=7` khi chay cong, va `cross-review/SKILL.md` ghim no cho mirror.
+# Them khoa nao thi phai co ly do DO DUOC, khong them "cho tien".
+_GIT_KHOA_CAU_HINH_CHO_PHEP = frozenset({"core.abbrev"})
+
+
+def _kiem_gia_tri_c(v):
+    khoa = str(v).split("=", 1)[0].strip().lower()
+    if khoa not in _GIT_KHOA_CAU_HINH_CHO_PHEP:
+        return "git -c dat khoa cau hinh ngoai danh sach cho phep: %s" % khoa
+    return None
+
+
 def _kiem_git(doi):
     i = 0
     while i < len(doi):
         a = doi[i]
         if a in _GIT_CO_MANG_GIA_TRI:
+            if a == "-c":
+                ly = _kiem_gia_tri_c(doi[i + 1] if i + 1 < len(doi) else "")
+                if ly:
+                    return ly
             i += 2
             continue
         if a.startswith("-"):
@@ -492,6 +524,33 @@ def _tach_lenh_tl(doi, kich):
     return ra
 
 
+# P1 `python-allowlist-lstrip-khong-phai-exact-path` (cross-review luot 2, PR #341).
+# Ban luot 2 so bang `kich.lstrip("./")`. `str.lstrip` bo MOI ky tu trong tap, khong phai
+# mot TIEN TO — nen `../../scripts/tl.py` co ve dung `scripts/tl.py` va lot vao danh sach
+# CHO PHEP, roi duoc huong mien TANG 2 danh cho mot tep KHAC. Danh sach cho phep dung, phep
+# SO thi sai: mot phep chuan hoa long hon phep so lam danh sach cho phep vo hieu.
+#
+# Chuan hoa CHINH XAC, fail-close: tuyet doi -> tu choi · o dia Windows -> tu choi ·
+# thanh phan `..` -> tu choi · thanh phan `.` -> bo (vo hai) · chap ca hai dau phan cach
+# de khong chan oan `scripts\tl.py` tren Windows.
+#
+# GIOI HAN, KHAI THANG: day la phep so CHUOI. Mot symlink ten `scripts/tl.py` tro di cho
+# khac van qua duoc. Giai symlink doi cham he tep ngay trong hook (cham, va co dieu kien
+# tranh chap), nen no KHONG duoc lam o day — no la no co ten
+# `kich-ban-cho-phep-khong-giai-symlink`, va co ca test khai dung dieu do.
+def _chuan_hoa_kich_ban(kich):
+    """Tra duong dan repo-relative CHUAN, hoac None neu khong an toan."""
+    if not kich or kich.startswith("-"):
+        return None
+    if kich.startswith(("/", "\\")) or (len(kich) > 1 and kich[1] == ":"):
+        return None
+    phan = [x for x in re.split(r"[/\\]+", kich) if x]
+    if any(x == ".." for x in phan):
+        return None
+    phan = [x for x in phan if x != "."]
+    return "/".join(phan) if phan else None
+
+
 def _kiem_python(doi):
     for a in doi:
         if a in ("-c", "-m", "-"):
@@ -499,7 +558,8 @@ def _kiem_python(doi):
     kich = next((a for a in doi if not a.startswith("-")), None)
     if kich is None:
         return "python khong co kich ban (doc stdin)"
-    if kich.lstrip("./") not in _KICH_BAN_CHO_PHEP:
+    chuan = _chuan_hoa_kich_ban(kich)
+    if chuan is None or chuan not in _KICH_BAN_CHO_PHEP:
         return "kich ban ngoai danh sach cho phep: %s" % kich
     # TANG 1 — lo #336 muc 1. `recat` khong can CO nao de ghi, nen chan theo CO khong bao gio
     # bat duoc no; `read_only` la thuoc tinh cua LENH. Lay doi so VI TRI ke sau kich ban.
@@ -563,12 +623,36 @@ _KIEM_RIENG = {"git": _kiem_git, "python": _kiem_python, "python3": _kiem_python
 # (BSD/busybox) neu ban ay co that — chan theo DANH SACH CHO PHEP thi khong can biet truoc.
 
 
+# Cung P1 tren, mat thu hai: `_kiem_doan` BO QUA moi phep gan bien dat truoc lenh, nen
+# `GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.pager GIT_CONFIG_VALUE_0=<lenh> git log` dat
+# dung thu ma `-c` vua bi chan — chi bang mot duong khac. `GIT_EXTERNAL_DIFF`, `GIT_PAGER`,
+# `GIT_SSH_COMMAND`, `PAGER`, `LD_PRELOAD` cung the.
+# DAO sang danh sach CHO PHEP, va giu no NHO: chi nhung bien doi NGON NGU/MAU/DEM, khong
+# bien nao doi duoc chuong trinh se chay.
+_BIEN_MOI_TRUONG_CHO_PHEP = frozenset({
+    "LANG", "LC_ALL", "LC_CTYPE", "LC_COLLATE", "LC_NUMERIC", "LC_TIME", "TZ",
+    "NO_COLOR", "CLICOLOR", "CLICOLOR_FORCE", "TERM", "COLUMNS",
+    "PYTHONDONTWRITEBYTECODE", "PYTHONIOENCODING", "PYTHONUTF8", "PYTHONHASHSEED",
+})
+
+
 def _kiem_doan(toks):
     k = 0
     while k < len(toks) and _RE_GAN_BIEN.match(toks[k]):
         k += 1
     if k >= len(toks):
-        return None                          # chi gan bien, khong chay gi
+        # CHI GAN BIEN, khong chay gi => KHONG ap danh sach cho phep. Ban dau toi ap no cho
+        # MOI phep gan va lam do `t3_khong_chan_oan_lenh_doc`: `M=$(git rev-parse HEAD)` bi
+        # tu choi vi ten `M` khong co trong bang. Do la CHAN OAN, va no lo ra vi bo test co
+        # san mot ca chieu-tha — dung thu ma cross-review PR #328 bat phai co.
+        # Phan biet dung tang: gan bien THUAN chi doi bien CUA SHELL, con thu nguy hiem la
+        # gan lam TIEN TO cho mot lenh (`GIT_PAGER=x git log`) — luc ay no vao moi truong
+        # cua tien trinh se chay. Noi dung trong `$( )` da duoc kiem rieng o duong long nhau.
+        return None
+    for t in toks[:k]:
+        ten = t.split("=", 1)[0]
+        if ten not in _BIEN_MOI_TRUONG_CHO_PHEP:
+            return "dat bien moi truong lam TIEN TO cho lenh, ngoai danh sach cho phep: %s" % ten
     ten = toks[k].rsplit("/", 1)[-1]
     if ten not in _CHUONG_TRINH_CHO_PHEP:
         return "chuong trinh ngoai danh sach cho phep: %s" % ten

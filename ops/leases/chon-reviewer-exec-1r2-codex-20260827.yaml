@@ -105,3 +105,5 @@ reviewer_model_luot_1: >-
   đã chọn tay, chọn bậc nào, theo lý lẽ gì. Khoảng cho phép chủ kho đã nêu: từ `claude-opus-5`
   ở `high` tới `claude-fable-5` ở `max`.
 posted_comment_id: 5436607673   # workflow ghi, ĐỪNG sửa tay
+
+da_bi_thay_the: chon-reviewer-exec-1r3-codex-20260827   # HAI CHIEU — xem than lease r3

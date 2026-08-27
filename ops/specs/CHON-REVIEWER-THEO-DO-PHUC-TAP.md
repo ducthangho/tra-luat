@@ -2,7 +2,7 @@
 
 ```yaml
 packet_id: CHON-REVIEWER-THEO-DO-PHUC-TAP
-revision: 2
+revision: 3
 generation: 1
 review_class: sensitive          # sua chinh duong REVIEW - thu quyet dinh ai kiem cai gi
 executor: codex
@@ -174,6 +174,39 @@ là lượt trước chưa đủ. `bac_truoc=None` ở lượt 1.
 `giai_thich` phải liệt kê từng khoản điểm đã cộng và bậc cuối — để người đọc verdict biết vì sao,
 không phải tin một con số.
 
+### 3.1b VALIDATE ĐẦU VÀO — và đây là chỗ REVISION 2 tự dẫm lên chính mình
+
+Đo trên bản thi công theo revision 2 (gọi thẳng `chon()`):
+
+```
+review_class='sensitive'  -> claude-fable-5/xhigh     <- dung
+review_class='sensitve'   -> claude-opus-5/xhigh      <- GO NHAM MOT CHU, TUT MOT BAC
+review_class='SENSITIVE'  -> claude-opus-5/xhigh      <- HOA THUONG, TUT MOT BAC
+review_class=None         -> claude-opus-5/xhigh
+duong_dan=[]              -> claude-opus-5/xhigh      <- WRITE SET RONG, KHONG day len
+so_dong=-999, luot=-5     -> claude-opus-5/high
+```
+
+**Đó ĐÚNG là con bọ mà packet này sinh ra để diệt.** §0(a): `--effort` gõ sai thì CLI cảnh báo
+rồi im lặng lùi về mặc định. Ở đây `review_class` gõ sai thì hàm im lặng **bớt 2 điểm** và hạ
+cấp reviewer — không cảnh báo, không dấu vết. Một công cụ chống fail-open mà bản thân nó
+fail-open thì tệ hơn không có: nó phát ra một con số trông như đã được kiểm.
+
+Bắt buộc:
+
+- `review_class` so với ALLOW-LIST `("sensitive", "thuong")` sau khi `strip()`. **KHÔNG
+  casefold**, và nói rõ vì sao: giá trị này đọc từ tệp lease, nơi nó được ghi ở đúng một dạng;
+  chấp nhận `SENSITIVE` là chấp nhận hai chính tả cho một khái niệm, và kho đã trả giá cho
+  chuyện ấy (`lease-authority-spoof`: *"phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN"*).
+  Ngoài allow-list ⇒ **`KhongDoDuoc`**, KHÔNG phải "coi như thường".
+- `duong_dan` sau khi chuẩn hoá mà **RỖNG** ⇒ `KhongDoDuoc`. Write set rỗng nghĩa là không đo
+  được phạm vi, và không đo được thì không được cho ra bậc THẤP. Cùng lý lẽ với `khong-biet`.
+- `so_dong` và `luot` phải là số nguyên `>= 0` (và `luot >= 1`). Ngoài khoảng ⇒ `KhongDoDuoc`.
+  Số âm không phải một phạm vi nhỏ; nó là một phép đo hỏng.
+
+Mỗi chốt một ca `rXX_` và một đột biến riêng. Đột biến "coi review_class lạ như thường" phải
+giết ca đích — không có nó thì không biết ca đang đo allow-list hay đo thứ khác.
+
 ### 3.2 `kiem_dinh_danh(model, effort)` → ném `KhongDoDuoc` nếu sai
 
 ALLOW-LIST, so BẰNG NHAU:
@@ -261,8 +294,15 @@ Thêm **một** mục, đặt ngay sau `## Bước 0 — CÔNG CỤ`. Nội dung
 - bảng bậc ở §3.1 (điểm → model/effort) và câu bánh cóc;
 - **ba cái bẫy đo được ở §0**, kèm đúng số đo, kèm câu *"`rc` và `subtype` cùng nói dối"*;
 - hai lệnh: chọn bậc TRƯỚC khi phóng, và kiểm `modelUsage` SAU khi phóng;
-- cú pháp phóng reviewer claude headless:
-  `claude --model <id> --effort <bac> --output-format json -p ... < PROMPT.md`
+- cú pháp phóng reviewer claude headless, **kèm cờ quyền** — thiếu chúng thì reviewer chạy
+  được nhưng **không gọi nổi công cụ nào**, tức một lượt review không đo được gì:
+  `claude --model <id> --effort <bac> --output-format json --allowedTools Bash Read Write Edit Glob Grep --permission-mode acceptEdits --add-dir <sandbox> -p "$(cat PROMPT.md)"`
+  (đo 27-08: cả `-p "$(cat TEP)"` lẫn `-p < TEP` đều chạy — hai dạng tương đương, đừng khai
+  một dạng là sai);
+- **`--dangerously-skip-permissions` BỊ TỪ CHỐI khi chạy dưới root** (đo 27-08: *"cannot be
+  used with root/sudo privileges for security reasons"*, tiến trình thoát ngay `rc=1`,
+  `1.151s`). Container phiên chạy dưới root, nên đường ấy KHÔNG dùng được — phải đi bằng
+  `--allowedTools` + `--permission-mode`. Ghi ra để người sau không mất một lượt phóng;
 - câu giới hạn: mục này KHÔNG thay §8 của protocol, nó chỉ nói **chọn bậc nào**.
 
 **KHÔNG chép doctrine** — `packet_loop.py doctrine-scan --root .` phải `rc=0`.

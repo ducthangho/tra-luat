@@ -76,11 +76,26 @@ def _chup(cwd):
     rc, st = _git(cwd, "status", "--porcelain=v1", "-uall", "--ignored")
     if rc != 0:
         return None, "git status that bai (rc=%d)" % rc
-    idx = pathlib.Path(top) / ".git" / "index"
-    van_tay_idx = ""
-    if idx.is_file():
-        van_tay_idx = hashlib.sha256(idx.read_bytes()).hexdigest()[:16]
+    # `<top>/.git/index` SAI trong LINKED WORKTREE: o do `.git` la mot TEP tro sang
+    # `.git/worktrees/<ten>/`, va index THAT nam duoi ay. Cross-review luot 2 do duoc:
+    # doi byte index rieng cua worktree trong khi porcelain rong => van bao `clean`.
+    # Te hon "sai duong": `is_file()` tra False nen van tay THANH RONG trong IM LANG, tuc
+    # mat mot chot ma khong ai biet. Hoi CHINH GIT thay vi ghep chuoi, va khong hoi duoc
+    # thi GOI TEN chu khong tra chuoi rong.
+    rc_idx, duong_idx = _git(cwd, "rev-parse", "--git-path", "index")
+    van_tay_idx, mu_idx = "", None
+    if rc_idx != 0 or not duong_idx.strip():
+        mu_idx = "khong hoi duoc duong index (rev-parse --git-path)"
+    else:
+        idx = pathlib.Path(top) / duong_idx.strip() if not pathlib.Path(
+            duong_idx.strip()).is_absolute() else pathlib.Path(duong_idx.strip())
+        if idx.is_file():
+            van_tay_idx = hashlib.sha256(idx.read_bytes()).hexdigest()[:16]
+        else:
+            mu_idx = "khong thay tep index tai %s" % idx
     noi_dung, mu = _van_tay_noi_dung(top, st)
+    if mu_idx:
+        mu = list(mu) + ["<index> " + mu_idx]
     return {
         "top": top,
         "head": head.strip(),
@@ -124,11 +139,18 @@ def _van_tay_noi_dung(top, st):
     duong ghi that da do duoc rot xuong.
 
     VI SAO BAM DUOC, khong phai vi re: voi `-uall --ignored` git tra TUNG TEP chu khong tra
-    thu muc — do tren kho nay: 61 ban ghi, 0 ban ghi ket thuc bang `/`. Nen tap can bam la
-    huu han va biet truoc, khong phai "duyet ca cay".
+    THU MUC, nen tap can bam huu han va biet truoc — khong phai "duyet ca cay".
 
-    Duong nao KHONG bam duoc (thu muc, symlink, qua tran, doc khong duoc) thi vao danh sach
-    MU va duoc GOI TEN o bao cao — khong lang le bo qua."""
+    KHONG GHI SO O DAY. Ban truoc viet "do tren kho nay: 61 ban ghi"; cross-review luot 2
+    do tren checkout cua ho ra `0` (khong `--ignored`) va `31` (co `--ignored`), tuc con so
+    ay phu thuoc TRANG THAI MAY chu khong phai thuoc tinh cua ma. Mot con so nhu the trong
+    docstring san pham se sai voi moi nguoi doc thu hai. Bat bien KIEM DUOC va khong troi
+    la: `0` ban ghi ket thuc bang `/`.
+
+    Duong nao KHONG bam duoc (thu muc, qua tran, doc khong duoc, khong dinh vi duoc index)
+    thi vao danh sach MU va duoc GOI TEN o bao cao — khong lang le bo qua. Symlink KHONG
+    nam trong danh sach ay: no BAM DUOC, bam theo LINK TARGET (`symlink:<target>`), co y
+    khong di theo link."""
     anh_xa, mu = {}, []
     for dong in st.splitlines():
         if not dong.strip():
@@ -235,6 +257,13 @@ def main() -> int:
             _ghi_nguyen_tu(dich, {"hong": ly, "agent_type": agent, "cwd": cwd})
             _bao("unknown", "chup baseline that bai: %s" % ly)
             return _MA_UNKNOWN
+        # `agent_id` phai nam TRONG anh chup, khong chi trong TEN TEP. Cross-review luot
+        # 2 do duoc: Start `A`, doi ten `A.json` -> `B.json`, Stop `B` => `clean`. Ten tep
+        # la thu ke khac doi duoc; noi dung thi it nhat phai KHAI ra de con doi chieu.
+        # KHONG phai bien toan ven (ke doi ten cung sua duoc noi dung) — no dong dung mot
+        # ca: doi ten thuan tuy. Bien toan ven that can mot khoa ma subagent khong doc
+        # duoc, va D1 chua co thu ay: xem `snapshot-ngoai-cay-cung-nam-trong-vung-mu`.
+        anh["agent_id"] = aid
         anh["agent_type"] = agent
         anh["cwd"] = cwd
         _ghi_nguyen_tu(dich, anh)
@@ -255,9 +284,11 @@ def main() -> int:
         _bao("unknown", "baseline da hong tu luc Start: %s" % truoc["hong"])
         _don_rac(thu_muc); dich.unlink(missing_ok=True)
         return _MA_UNKNOWN
-    if truoc.get("agent_type") != agent or truoc.get("cwd") != cwd:
+    if (truoc.get("agent_type") != agent or truoc.get("cwd") != cwd
+            or truoc.get("agent_id") != aid):
         _bao("unknown", "sieu du lieu lech giua Start va Stop",
-             {"agent_type": [truoc.get("agent_type"), agent], "cwd": [truoc.get("cwd"), cwd]})
+             {"agent_type": [truoc.get("agent_type"), agent], "cwd": [truoc.get("cwd"), cwd],
+              "agent_id": [truoc.get("agent_id"), aid]})
         return _MA_UNKNOWN
 
     sau, ly = _chup(cwd)

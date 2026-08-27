@@ -75,12 +75,17 @@ def kiem_dinh_danh(model, effort):
 
 def chon(review_class, duong_dan, so_dong, luot, bac_truoc=None):
     """Trả ``(model, effort, giải thích)`` từ đúng các đối số đã cho."""
+    if isinstance(review_class, dict):
+        # Đo mọi nhánh ops/**: 147 lease có lớp effective SAU escalation. Vì vậy khi
+        # có cả hai trường phải lấy lớp có hiệu lực, không được chấm lớp khai ban đầu.
+        review_class = review_class.get("effective_review_class", review_class.get("review_class"))
     if not isinstance(review_class, str):
         raise KhongDoDuoc("review_class không phải chuỗi")
     review_class = review_class.strip()
-    # Lease ghi đúng một dạng; casefold sẽ tái mở lỗi "phân biệt cách viết, không phân
-    # biệt thẩm quyền" đã đo ở lease-authority-spoof.
-    if review_class not in ("sensitive", "thuong"):
+    # Đếm trước khi viết allow-list: routine=22, systemic=167, sensitive=570, còn
+    # `thuong`=0. Revision 3 từng bịa `thuong` và sẽ tự khoá 167 lease thật. Lease ghi
+    # đúng một dạng; casefold sẽ tái mở lỗi phân biệt cách viết/thẩm quyền đã đo.
+    if review_class not in ("routine", "systemic", "sensitive"):
         raise KhongDoDuoc("review_class ngoài allow-list: %r" % review_class)
     # Số âm không mô tả một diff nhỏ: nó chứng minh phép đo đầu vào đã hỏng.
     if type(so_dong) is not int or so_dong < 0 or type(luot) is not int or luot < 1:
@@ -97,6 +102,8 @@ def chon(review_class, duong_dan, so_dong, luot, bac_truoc=None):
 
     if review_class == "sensitive":
         cong(2, "review_class=sensitive")
+    if review_class == "systemic":
+        cong(1, "review_class=systemic")
     if "cong" in cac_vung:
         cong(2, "chạm vùng cong")
     if "giao-thuc" in cac_vung:

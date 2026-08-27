@@ -192,3 +192,4 @@ NO_CO_TEN_LO_RA_TU_LUOT_NAY:
       §10.2 khai ba client tương đương gọi `land apply`. Quét `.github/workflows/` chỉ có
       `ci.yml`, `launcher-windows.yml`, `ops-don-ref.yml`, `ops-open-pr.yml`,
       `ops-publish-lease.yml` — không có workflow land-apply, không có listener `issue_comment`.
+posted_comment_id: 5440119337   # workflow ghi, ĐỪNG sửa tay

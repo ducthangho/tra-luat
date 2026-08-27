@@ -2942,9 +2942,22 @@ class _GitKhoGia:
                     out += "".join(f"refs/tags/{x}\n" for x in sorted(self.tags))
         elif args[:4] == ("config", "--includes", "--null", "--list"):
             out = "".join(f"{k}\n{v}\0" for k, v in self.configs.items())
+        elif args and args[0] == "check-ref-format":
+            ref = args[-1]
+            if ref.startswith("-"):
+                return subprocess.CompletedProcess(args, 0, "", "")
+            if (not ref.startswith("refs/") or " " in ref or "^" in ref or
+                    "~" in ref or ".." in ref or ref.endswith("/")):
+                return subprocess.CompletedProcess(args, 1, "", "refname không hợp lệ")
+            out = ""
+        elif args[:3] == ("show-ref", "--verify", "--quiet"):
+            if args[-1] not in self.refs_hien_co:
+                return subprocess.CompletedProcess(args, 1, "", "")
+            out = ""
         elif args[:3] == ("rev-parse", "--verify", "--quiet"):
             ref = args[-1]
-            if ref not in self.refs_hien_co:
+            peeled = ref.endswith("^{}") and ref[:-3] in self.refs_hien_co
+            if ref not in self.refs_hien_co and not peeled:
                 return subprocess.CompletedProcess(args, 1, "", "")
             out = "a" * 40 + "\n"
         elif args and args[0] == "rev-list":
@@ -3521,6 +3534,9 @@ _CAC_CA_UPSTREAM = {
     "remotecham": ({"main"}, {"main"}, "refs/heads/main", "refs/heads/main", (1, 0)),
     "tagup": (set(), set(), "refs/tags/v1", "refs/tags/v1", (0, 0)),
     "tagupsau": (set(), set(), "refs/tags/v1", "refs/tags/v1", (0, 1)),
+    "tagpeel": (set(), set(), "refs/tags/vann^{}", "refs/tags/vann^{}", (0, 1)),
+    "refnamesai": (set(), set(), "refs/heads/ten sai", "refs/heads/ten sai", (0, 1)),
+    "refcodau": (set(), set(), "--help", "--help", (0, 1)),
 }
 
 _CAU_HINH_UPSTREAM = {
@@ -3531,6 +3547,9 @@ _CAU_HINH_UPSTREAM = {
     "remotecham": (".", "refs/heads/main"),
     "tagup": (".", "refs/tags/v1"),
     "tagupsau": (".", "refs/tags/v1"),
+    "tagpeel": (".", "refs/tags/vann^{}"),
+    "refnamesai": (".", "refs/heads/ten sai"),
+    "refcodau": (".", "--help"),
 }
 
 
@@ -3542,7 +3561,8 @@ def _chay_ca_upstream(ten):
     configs = ({f"branch.{ten}.remote": cap[0], f"branch.{ten}.merge": cap[1]}
                if cap else {})
     heads = {ten, "main"} if ten == "remotecham" else {ten}
-    tags = {cau_hinh.removeprefix("refs/tags/")} if cau_hinh.startswith("refs/tags/") else set()
+    tags = ({"vann"} if ten == "tagpeel" else
+            {cau_hinh.removeprefix("refs/tags/")} if cau_hinh.startswith("refs/tags/") else set())
     mod.GOI_GIT = _GitKhoGia(remote, local, [], heads=heads, lech={ten: lech},
                              upstreams={ten: cau_hinh} if cau_hinh else {}, configs=configs,
                              tags=tags)
@@ -3562,9 +3582,11 @@ def _kiem_ca_upstream(ten):
         bang(rc == mod.RC_OK and "NGƯỜI_GIỮ 0" in out and
              not any(x in out for x in lenh_nguy_hiem),
              f"{ten} bị chặn oan: rc={rc} {out}")
-    elif ten in {"khaihong", "khaihongkhongref"}:
+    elif ten in {"khaihong", "khaihongkhongref", "tagpeel", "refnamesai", "refcodau"}:
+        dau = (f"{ten} có config upstream nhưng không giải được" if ten.startswith("khaihong")
+               else "KHÔNG_XÁC_ĐỊNH:")
         bang(rc == mod.RC_KHONG_XAC_DINH and
-             f"{ten} có config upstream nhưng không giải được" in out and
+             dau in out and
              not any(x in out for x in lenh_nguy_hiem),
              f"{ten} không fail-close an toàn: rc={rc} {out}")
     elif ten in {"phanky", "khacten"}:
@@ -3707,6 +3729,66 @@ def t115_tag_khong_nam_trong_pham_vi_quet_lease_va_dot_bien():
                  f"mutant mở tag: ĐỎ={do}, SỐNG={song}")
         finally:
             SCRIPT = ban_goc
+
+
+@ca
+def t116_ref_chinh_xac_hinh_dang_va_bon_dot_bien_bat_buoc():
+    global SCRIPT
+    import importlib
+    def kiem_dich(ten):
+        _, out = _kiem_ca_upstream(ten)
+        if ten in {"tagpeel", "refnamesai"}:
+            bang(f"git check-ref-format {_CAC_CA_UPSTREAM[ten][2]}" in out,
+                 f"{ten} không bị chặn bởi phép kiểm hình dạng: {out}")
+        elif ten == "refcodau":
+            bang("hình dạng không an toàn" in out and "bắt đầu bằng '-'" in out,
+                 f"refcodau không bị chặn bởi chốt Python: {out}")
+    for ten in ("tagpeel", "refnamesai", "refcodau", "tagup"):
+        kiem_dich(ten)
+    nguon, ban_goc = SCRIPT.read_text(encoding="utf-8"), SCRIPT
+    muts = [
+        ("go-chot-dau-tru", '        if ref.startswith("-"):\n'
+         '            raise Chan(RC_KHONG_XAC_DINH,\n'
+         '                       f"KHÔNG_XÁC_ĐỊNH: ref có hình dạng không an toàn "\n'
+         '                       f"(bắt đầu bằng \'-\'): {ref}")\n',
+         '', {"refcodau"}),
+        ("rev-parse",
+         'hinh_dang = GOI_GIT("check-ref-format", ref, cwd=goc)\n'
+         '        if hinh_dang.returncode != 0:\n'
+         '            ly = (hinh_dang.stderr or hinh_dang.stdout or "refname không hợp lệ").strip()\n'
+         '            raise Chan(RC_KHONG_XAC_DINH,\n'
+         '                       f"KHÔNG_XÁC_ĐỊNH: git check-ref-format {ref} "\n'
+         '                       f"rc={hinh_dang.returncode}: {ly.splitlines()[0][:200]}")\n'
+         '        p = GOI_GIT("show-ref", "--verify", "--quiet", "--", ref, cwd=goc)',
+         'p = GOI_GIT("rev-parse", "--verify", "--quiet", "--end-of-options", ref, cwd=goc)',
+         {"tagpeel", "refnamesai"}),
+        ("go-check-ref-format", 'hinh_dang = GOI_GIT("check-ref-format", ref, cwd=goc)',
+         'hinh_dang = subprocess.CompletedProcess([], 0, "", "")', {"tagpeel", "refnamesai"}),
+        ("mo-pham-vi-tag",
+         '_git(goc, "for-each-ref", "--format=%(refname)", "refs/heads", "refs/remotes")',
+         '_git(goc, "for-each-ref", "--format=%(refname)", "refs/heads", "refs/remotes", "refs/tags")',
+         {"tag-khong-quet"}),
+        ("chan-tag-that", "if p.returncode == 0:\n        return True",
+         'if p.returncode == 0 and not ref.startswith("refs/tags/"):\n        return True', {"tagup"}),
+    ]
+    sys.dont_write_bytecode = True
+    try:
+        for i, (ten_mut, cu, moi, do_dung) in enumerate(muts):
+            bang(nguon.count(cu) == 1, f"neo mutant {ten_mut} không duy nhất")
+            with San() as s:
+                p = s / f"mut_ref_exact_{i}.py"
+                p.write_text(nguon.replace(cu, moi), encoding="utf-8")
+                importlib.invalidate_caches(); SCRIPT, do = p, set()
+                for ten_ca in ("tagpeel", "refnamesai", "refcodau", "tagup"):
+                    try: kiem_dich(ten_ca)
+                    except AssertionError: do.add(ten_ca)
+                if ten_mut == "mo-pham-vi-tag":
+                    try: _kiem_tag_khong_nam_trong_pham_vi_quet_lease()
+                    except AssertionError: do.add("tag-khong-quet")
+                print(f"đột biến bắt buộc {ten_mut}: thư_mục={s.name}; ĐỎ={sorted(do)}")
+                bang(do == do_dung, f"mutant {ten_mut}: ĐỎ={do}, cần={do_dung}")
+    finally:
+        SCRIPT = ban_goc
 
 
 def main() -> int:

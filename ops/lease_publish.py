@@ -336,20 +336,30 @@ def _doc_cau_hinh_git(goc: Path) -> dict[str, list[str]]:
 def _ref_ton_tai(goc: Path, ref: str) -> bool:
     """Hỏi Git về tồn tại; không dùng tập ref thuộc phạm vi quét lease."""
     try:
-        p = GOI_GIT("rev-parse", "--verify", "--quiet", "--end-of-options", ref, cwd=goc)
+        # check-ref-format không hỗ trợ option terminator: cả `--` lẫn
+        # `--end-of-options` đều rc=129, kể cả với ref hợp lệ. Chặn
+        # dấu `-` từ Python để Git không thể hiểu ref thành option.
+        if ref.startswith("-"):
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: ref có hình dạng không an toàn "
+                       f"(bắt đầu bằng '-'): {ref}")
+        hinh_dang = GOI_GIT("check-ref-format", ref, cwd=goc)
+        if hinh_dang.returncode != 0:
+            ly = (hinh_dang.stderr or hinh_dang.stdout or "refname không hợp lệ").strip()
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: git check-ref-format {ref} "
+                       f"rc={hinh_dang.returncode}: {ly.splitlines()[0][:200]}")
+        p = GOI_GIT("show-ref", "--verify", "--quiet", "--", ref, cwd=goc)
     except OSError as e:
         raise Chan(RC_KHONG_XAC_DINH,
                    f"KHÔNG_XÁC_ĐỊNH: không gọi được git: {e}") from None
     if p.returncode == 0:
-        if p.stdout.strip():
-            return True
-        raise Chan(RC_KHONG_XAC_DINH,
-                   f"KHÔNG_XÁC_ĐỊNH: git rev-parse --verify {ref} rc=0 nhưng rỗng")
+        return True
     if p.returncode == 1:
         return False
     ly = (p.stderr or p.stdout or "không có chẩn đoán").strip().splitlines()[0][:200]
     raise Chan(RC_KHONG_XAC_DINH,
-               f"KHÔNG_XÁC_ĐỊNH: git rev-parse --verify {ref} rc={p.returncode}: {ly}")
+               f"KHÔNG_XÁC_ĐỊNH: git show-ref --verify {ref} rc={p.returncode}: {ly}")
 
 
 def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[tuple[str, str, int, int, str]]:

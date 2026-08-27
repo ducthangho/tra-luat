@@ -1,0 +1,73 @@
+# Lease EXECUTOR — packet #345 (CI-CONG-IDIOM-BA-TEN).
+#
+# UỶ QUYỀN: chủ kho ra lệnh trực tiếp trong phiên 27-08-2026:
+#   "mở packet riêng cho phản chứng #337, mở rộng lease luôn"
+# Người ghi lease là phiên claude — GHI HỘ, không phải người cấp (§2).
+#
+# VÌ SAO KHÔNG "mở rộng write set của #337": lease #337 đóng băng đúng 4 tệp tài liệu/skill,
+# và cross-review codex lượt 2 trên PR #340 đã kết luận độc lập rằng tự nới nó là vi phạm
+# lease. "Mở rộng" ở đây được hiểu là CẤP LEASE MỚI phủ hai đường còn thiếu, không phải sửa
+# hồ sơ của packet đang mở.
+
+schema_version: 2
+event: lease_granted
+packet_issue: 345
+packet_id: CI-CONG-IDIOM-BA-TEN
+lease_id: ci-cong-idiom-ba-ten-exec-1-claude-20260827
+revision: 1
+
+role: executor
+provider: claude
+executor: claude
+reviewer: codex
+assurance_target: cross_approved
+review_class: sensitive
+effective_review_class: sensitive
+access: read-write-nhanh-rieng
+branch_ownership: exclusive
+
+reviewed_sha_required: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+base_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+branch: claude/ci-cong-idiom-ba-ten-exec-1
+
+write_set:
+  - .claude/dev/idiom_py_test.py
+  - .github/workflows/ci.yml
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-27 ~03:30Z bằng `ops/lease_publish.py ai-dang-giu` trên HEAD ac82ddc.
+  Phép so hai nguồn TRƯỚC khi quét, so bằng TẬP TÊN: `ls-remote --heads` 223 =
+  `for-each-ref` 223 (sau khi fetch đủ ref), `comm -23` RỖNG và `comm -13` RỖNG.
+  Lần đo ĐẦU cho 223/222 với `codex/du-luong-ca4-exec-1` CÓ trên máy chủ mà THIẾU cục bộ —
+  tức MÙ thật; đã fetch rồi mới quét, không quét trên bộ đệm cũ.
+
+write_set_khong_ai_cuong_che: >-
+  Không tầng nào kiểm diff có nằm trong write set hay không. Đây là lời dặn, không phải cổng.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-27 ("mở packet riêng cho phản chứng #337, mở rộng lease luôn")'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+
+leased_at_utc: '2026-08-27T03:35:00Z'
+lease_expires_at_utc: '2026-08-28T03:35:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 60
+
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+
+chong_lan_write_set_da_khai: >-
+  NGƯỜI_GIỮ đo được lúc cấp:
+    .claude/dev/idiom_py_test.py   -> 0  (tệp chưa tồn tại)
+    .github/workflows/ci.yml       -> 0  (7 lease chạm đường này đều HẾT_HẠN:
+                                          ci-noi-bang-vao-gate-exec-1 · -1r2 ·
+                                          plat-x4-exec-1 · plat-x5-exec-1 · -1r2 · -1r3 ·
+                                          plat-x2-exec-3)
+  "HẾT_HẠN" ở đây là phán quyết của chính bộ quét theo `lease_expires_at_utc`, không phải
+  suy đoán của người ghi.
+chong_lan_write_set_phan_xu: >-
+  KHÔNG chồng lấn. Không cần `thay_the_cho`.

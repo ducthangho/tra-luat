@@ -31,8 +31,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      # GHIM EXACT, va ghim CUNG MOT ban voi `ci.yml` + `ops-publish-lease.yml`.
+      # `t31` trong `ops/lease_publish_test.py` cuong che ca hai ve: spec tran lam CUNG MOT
+      # SHA xanh hom nay va do sau nay ma cay khong doi; hai ban ghim khac so thi hai duong
+      # chay hai runtime, va cho quen chinh la cho khong ai do. Nang ban thi nang ca ba.
       - name: cai PyYAML (bo test doc chinh tep workflow cua cong)
-        run: python -m pip install --quiet PyYAML
+        run: python -m pip install --quiet PyYAML==6.0.3
       - name: phan chung cua cong duyet-khac-danh-tinh
         run: |
           set -eu

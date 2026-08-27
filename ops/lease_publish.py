@@ -333,6 +333,25 @@ def _doc_cau_hinh_git(goc: Path) -> dict[str, list[str]]:
     return ket_qua
 
 
+def _ref_ton_tai(goc: Path, ref: str) -> bool:
+    """Hỏi Git về tồn tại; không dùng tập ref thuộc phạm vi quét lease."""
+    try:
+        p = GOI_GIT("rev-parse", "--verify", "--quiet", "--end-of-options", ref, cwd=goc)
+    except OSError as e:
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: không gọi được git: {e}") from None
+    if p.returncode == 0:
+        if p.stdout.strip():
+            return True
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: git rev-parse --verify {ref} rc=0 nhưng rỗng")
+    if p.returncode == 1:
+        return False
+    ly = (p.stderr or p.stdout or "không có chẩn đoán").strip().splitlines()[0][:200]
+    raise Chan(RC_KHONG_XAC_DINH,
+               f"KHÔNG_XÁC_ĐỊNH: git rev-parse --verify {ref} rc={p.returncode}: {ly}")
+
+
 def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[tuple[str, str, int, int, str]]:
     """Phân loại nhánh theo upstream thật; chỉ trả các quan hệ phải chặn."""
     out = _git(goc, "for-each-ref", "--format=%(refname)%09%(upstream)", "refs/heads")
@@ -360,10 +379,10 @@ def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[tuple[str, str, in
             ung_vien = "refs/remotes/origin/" + ten
             if ung_vien in tap_ref:
                 doi_ung = ung_vien
-        if doi_ung and doi_ung not in tap_ref:
+        if doi_ung and not _ref_ton_tai(goc, doi_ung):
             raise Chan(RC_KHONG_XAC_DINH,
                        f"KHÔNG_XÁC_ĐỊNH: {ten} khai upstream không có ref: {doi_ung}")
-        if doi_ung not in tap_ref:
+        if not doi_ung:
             continue
         out = _git(goc, "rev-list", "--left-right", "--count", f"{ref}...{doi_ung}")
         try:

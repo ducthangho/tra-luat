@@ -2909,11 +2909,15 @@ def t87_ba_duong_van_hanh_phai_sensitive():
 
 class _GitKhoGia:
     def __init__(self, remote, local, leases, heads=(), lech=None, upstreams=None,
-                 configs=None):
+                 configs=None, tags=()):
         import yaml
-        self.remote, self.local, self.heads = set(remote), set(local), set(heads)
+        self.remote, self.local, self.heads, self.tags = (
+            set(remote), set(local), set(heads), set(tags))
         self.lech, self.refs, self.blobs = lech or {}, {}, {}
         self.configs = dict(configs or {})
+        self.refs_hien_co = ({f"refs/heads/{x}" for x in self.heads}
+                             | {f"refs/remotes/origin/{x}" for x in self.local}
+                             | {f"refs/tags/{x}" for x in self.tags})
         self.upstreams = (dict(upstreams) if upstreams is not None else
                           {x: f"refs/remotes/origin/{x}" for x in self.heads if x in self.local})
         for i, (ref, path, lease) in enumerate(leases):
@@ -2929,11 +2933,20 @@ class _GitKhoGia:
                 out = "".join(f"refs/heads/{x}\t{self.upstreams.get(x, '')}\n"
                               for x in sorted(self.heads))
             else:
-                out = "".join(f"refs/heads/{x}\n" for x in sorted(self.heads))
-                out += "".join(f"refs/remotes/origin/{x}\n" for x in sorted(self.local))
-                out += "refs/remotes/origin/HEAD\n"
+                out = ("".join(f"refs/heads/{x}\n" for x in sorted(self.heads))
+                       if "refs/heads" in args else "")
+                if "refs/remotes" in args:
+                    out += "".join(f"refs/remotes/origin/{x}\n" for x in sorted(self.local))
+                    out += "refs/remotes/origin/HEAD\n"
+                if "refs/tags" in args:
+                    out += "".join(f"refs/tags/{x}\n" for x in sorted(self.tags))
         elif args[:4] == ("config", "--includes", "--null", "--list"):
             out = "".join(f"{k}\n{v}\0" for k, v in self.configs.items())
+        elif args[:3] == ("rev-parse", "--verify", "--quiet"):
+            ref = args[-1]
+            if ref not in self.refs_hien_co:
+                return subprocess.CompletedProcess(args, 1, "", "")
+            out = "a" * 40 + "\n"
         elif args and args[0] == "rev-list":
             ten = args[-1].split("refs/heads/", 1)[1].split("...", 1)[0]
             trai, phai = self.lech.get(ten, (0, 0))
@@ -3356,8 +3369,8 @@ def t108_moi_chot_ref_cuc_bo_co_dot_bien_rieng():
         ("tut-sau", dieu_kien, "if False:", t102_nhanh_cuc_bo_tut_sau_phai_CHAN_truoc_khu_trung_lease_id),
         ("bang", dieu_kien, "if trai == 0:", t103_nhanh_cuc_bo_bang_origin_phai_QUA),
         ("di-truoc", dieu_kien, "if trai > 0 and phai == 0:", t104_nhanh_cuc_bo_di_truoc_origin_phai_QUA),
-        ("khong-origin", "if doi_ung not in tap_ref:\n            continue",
-         "if doi_ung not in tap_ref:\n            tut_sau.append(ten)\n            continue",
+        ("khong-origin", "if not doi_ung:\n            continue",
+         "if not doi_ung:\n            tut_sau.append(ten)\n            continue",
          t105_nhanh_cuc_bo_khong_co_origin_phai_QUA),
         ("dedup", "nguoi_giu[lease_id] = None", 'nguoi_giu[lease_id + muc["ref"]] = None',
          t106_cung_lease_id_khac_noi_dung_chi_dem_MOT),
@@ -3506,6 +3519,8 @@ _CAC_CA_UPSTREAM = {
     "khaihong": ({"khaihong"}, {"khaihong"}, "", "", (0, 1)),
     "khaihongkhongref": (set(), set(), "", "", (0, 1)),
     "remotecham": ({"main"}, {"main"}, "refs/heads/main", "refs/heads/main", (1, 0)),
+    "tagup": (set(), set(), "refs/tags/v1", "refs/tags/v1", (0, 0)),
+    "tagupsau": (set(), set(), "refs/tags/v1", "refs/tags/v1", (0, 1)),
 }
 
 _CAU_HINH_UPSTREAM = {
@@ -3514,6 +3529,8 @@ _CAU_HINH_UPSTREAM = {
     "khaihong": ("khongcorenote", "refs/heads/khaihong"),
     "khaihongkhongref": ("khongcorenote", "refs/heads/khaihongkhongref"),
     "remotecham": (".", "refs/heads/main"),
+    "tagup": (".", "refs/tags/v1"),
+    "tagupsau": (".", "refs/tags/v1"),
 }
 
 
@@ -3525,8 +3542,10 @@ def _chay_ca_upstream(ten):
     configs = ({f"branch.{ten}.remote": cap[0], f"branch.{ten}.merge": cap[1]}
                if cap else {})
     heads = {ten, "main"} if ten == "remotecham" else {ten}
+    tags = {cau_hinh.removeprefix("refs/tags/")} if cau_hinh.startswith("refs/tags/") else set()
     mod.GOI_GIT = _GitKhoGia(remote, local, [], heads=heads, lech={ten: lech},
-                             upstreams={ten: cau_hinh} if cau_hinh else {}, configs=configs)
+                             upstreams={ten: cau_hinh} if cau_hinh else {}, configs=configs,
+                             tags=tags)
     with contextlib.redirect_stdout(out):
         try:
             rc = mod.lenh_ai_dang_giu(type("A", (), {"goc": ".", "duong_dan":
@@ -3539,7 +3558,7 @@ def _chay_ca_upstream(ten):
 def _kiem_ca_upstream(ten):
     rc, out, mod = _chay_ca_upstream(ten)
     lenh_nguy_hiem = ("git branch -f", "git -C", "merge --ff-only")
-    if ten in {"bang", "ditruoc", "thuancucbo", "remotecham"}:
+    if ten in {"bang", "ditruoc", "thuancucbo", "remotecham", "tagup"}:
         bang(rc == mod.RC_OK and "NGƯỜI_GIỮ 0" in out and
              not any(x in out for x in lenh_nguy_hiem),
              f"{ten} bị chặn oan: rc={rc} {out}")
@@ -3564,7 +3583,7 @@ def _kiem_ca_upstream(ten):
 
 
 @ca
-def t112_tam_ca_khoa_upstream_that_va_bon_trang_thai():
+def t112_cac_ca_khoa_upstream_that_va_bon_trang_thai():
     for ten in _CAC_CA_UPSTREAM:
         rc, out = _kiem_ca_upstream(ten)
         print(f"ca upstream {ten}: rc={rc}; " + " | ".join(out.strip().splitlines()))
@@ -3582,7 +3601,9 @@ def t113_sau_dot_bien_upstream_va_phan_ky_deu_bi_giet():
          {"phanky", "khacten"}),
         ("doi-ung-theo-ten", 'doi_ung = upstream.get(ref, "")',
          'doi_ung = ("refs/remotes/origin/" + ten if "refs/remotes/origin/" + ten in tap_ref else "")',
-         {"khacten", "khactensau", "khaihong", "remotecham"}),
+         {"khacten", "khactensau", "khaihong", "remotecham", "tagup", "tagupsau"}),
+        ("ton-tai-lai-hoi-tap-ref", "if doi_ung and not _ref_ton_tai(goc, doi_ung):",
+         "if doi_ung and doi_ung not in tap_ref:", {"tagup", "tagupsau"}),
         ("go-phat-hien-khai-hong", "if co_cau_hinh and not doi_ung:", "if False:",
          {"khaihong", "khaihongkhongref"}),
         ("khai-hong-lui-ve-ten",
@@ -3599,9 +3620,10 @@ def t113_sau_dot_bien_upstream_va_phan_ky_deu_bi_giet():
          "                           f\"branch.{ten}.remote={remote!r}, branch.{ten}.merge={merge!r}\")",
          {"khaihong"}),
         ("chan-remote-cham", "if co_cau_hinh and not doi_ung:",
-         'if co_cau_hinh and (not doi_ung or remote == "."):', {"remotecham"}),
-        ("chan-khong-upstream", "if doi_ung not in tap_ref:\n            continue",
-         'if doi_ung not in tap_ref:\n            tut_sau.append((ten, "refs/remotes/origin/" + ten, 0, 1, "TỤT_SAU"))\n            continue',
+         'if co_cau_hinh and (not doi_ung or remote == "."):',
+         {"remotecham", "tagup", "tagupsau"}),
+        ("chan-khong-upstream", "if not doi_ung:\n            continue",
+         'if not doi_ung:\n            tut_sau.append((ten, "refs/remotes/origin/" + ten, 0, 1, "TỤT_SAU"))\n            continue',
          {"thuancucbo"}),
         ("go-chot-quan-he-ref",
          'tut_sau = [m for m in bi_chan if _thong_tin_nhanh_bi_chan(m)[-1] == "TỤT_SAU"]',
@@ -3642,6 +3664,49 @@ def t114_khong_config_nhung_co_origin_cung_ten_phai_duoc_phan_loai():
         rc, out = _kiem_ca_upstream(ten)
         bang(rc == 12 and doi_ung in out,
              f"không khóa population thiếu config + có origin cùng tên: {ten}: {out}")
+
+
+def _kiem_tag_khong_nam_trong_pham_vi_quet_lease():
+    lease = _lease_quet("LEASE-TREN-TAG")
+    git = _GitKhoGia(set(), set(), [("refs/tags/v1", "ops/leases/tag.yaml", lease)],
+                     tags={"v1"})
+    rc, out, mod = _quet_gia(git)
+    bang(rc == mod.RC_OK and "LEASE-TREN-TAG" not in out and "NGƯỜI_GIỮ 0" in out,
+         f"lease trên tag bị quét: rc={rc} {out}")
+
+
+@ca
+def t115_tag_khong_nam_trong_pham_vi_quet_lease_va_dot_bien():
+    global SCRIPT
+    import importlib
+    _kiem_tag_khong_nam_trong_pham_vi_quet_lease()
+    nguon, ban_goc = SCRIPT.read_text(encoding="utf-8"), SCRIPT
+    cu = '_git(goc, "for-each-ref", "--format=%(refname)", "refs/heads", "refs/remotes")'
+    moi = '_git(goc, "for-each-ref", "--format=%(refname)", "refs/heads", "refs/remotes", "refs/tags")'
+    bang(nguon.count(cu) == 1, "neo mutant mở phạm vi tag không duy nhất")
+    with San() as s:  # mutant riêng một thư mục để không tái dùng nhầm bytecode
+        p = s / "mut_mo_pham_vi_quet_tag.py"
+        p.write_text(nguon.replace(cu, moi), encoding="utf-8")
+        sys.dont_write_bytecode = True
+        importlib.invalidate_caches()
+        SCRIPT = p
+        try:
+            try:
+                _kiem_tag_khong_nam_trong_pham_vi_quet_lease()
+            except AssertionError:
+                do = {"tag-khong-quet"}
+            else:
+                do = set()
+            song = set()
+            for ten in ("tagup", "remotecham"):
+                _kiem_ca_upstream(ten)
+                song.add(ten)
+            print(f"đột biến mở-phạm-vi-quét-tag: thư_mục={s.name}; "
+                  f"ĐỎ={sorted(do)}, đối chứng SỐNG={sorted(song)}")
+            bang(do == {"tag-khong-quet"} and song == {"tagup", "remotecham"},
+                 f"mutant mở tag: ĐỎ={do}, SỐNG={song}")
+        finally:
+            SCRIPT = ban_goc
 
 
 def main() -> int:

@@ -1,0 +1,162 @@
+# Lease EXECUTOR — `NO-326-TAG-UPSTREAM` (#347), lượt 1.
+#
+# Nợ khai lúc land PR #344. Finding P2 của connector, thread `r3869031927`, ĐỂ MỞ có chủ đích.
+# Packet MỚI ⇒ trần vòng review về lại 2 (ADR-0043), KHÔNG kế thừa lần nâng của #326.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 347
+packet_id: NO-326-TAG-UPSTREAM
+phase_key: NO-326-TAG-UPSTREAM
+revision: 2
+generation: 1
+lease_id: no-326-tag-upstream-exec-1r2-codex-20260827
+thay_the_cho: no-326-tag-upstream-exec-1-codex-20260827
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive`: packet sửa `ops/lease_publish.py`, tầng cưỡng chế write-set exclusion.
+  Trần ADR-0044 (≤3 tệp / ≤300 dòng thêm) áp thật.
+
+spec_path: null
+spec_note: >-
+  Nguồn yêu cầu: Issue #347 (mục "Xong khi"), và thread gốc
+  https://github.com/ducthangho/tra-luat/pull/344#discussion_r3869031927
+  Executor PHẢI tự đo lại, không nhận lời khai.
+
+write_set:
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-27 06:0xZ, SAU khi bia mộ `du-luong-ca4-thu-hoi-claude-20260827` đã đăng.
+  Phép so HAI NGUỒN (TẬP TÊN): ls-remote 226 · for-each-ref 226 · comm RỖNG hai chiều ·
+  không shallow. Rồi quét cả hai đường dẫn bằng mã vừa land: `NGƯỜI_GIỮ 0`, `rc=0`.
+
+branch: codex/no-326-tag-upstream-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: f715fc28139427f2c845f258f15a6d032011b716
+start_from_sha: f715fc28139427f2c845f258f15a6d032011b716
+reviewed_sha_required: f715fc28139427f2c845f258f15a6d032011b716
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 300
+  do_tu_sha: f715fc28139427f2c845f258f15a6d032011b716
+  don_vi: >-
+    `git diff --numstat f715fc28139427f2c845f258f15a6d032011b716 -- ops/lease_publish.py ops/lease_publish_test.py` — cột dòng
+    THÊM. Pathspec TRONG lệnh, KHÔNG `..HEAD`.
+  da_dung: 100
+  ghi_chu: >-
+    Packet MỚI, ngân sách về 0. `300` là trần ADR-0044 cho `sensitive`, KHÔNG phải ước lượng.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-27: "#347 lam luon di"'
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên điều phối KHÔNG thi công và SẼ là reviewer — khác nền, đúng PROTOCOL:580.
+
+leased_at_utc: '2026-08-27T07:45:00Z'
+lease_expires_at_utc: '2026-08-28T07:45:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  `ops/lease_publish.py`: `_nhanh_cuc_bo_tut_sau`, `_cac_ref_cuc_bo`, cộng hàm MỚI.
+  `ops/lease_publish_test.py`: ca mới và bảng đăng ký ca/mutant.
+  Hunk ngoài các vùng ấy ⇒ ĐỎ.
+
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ngoài write set ⇒ DỪNG ·
+  S2 vượt 300 dòng thêm ⇒ DỪNG, khai ·
+  S3 kiểm tồn tại độc lập kéo theo phải mở phạm vi quét lease ⇒ DỪNG, trình phép đo, xin
+  quyết định (đó là thay đổi CHIỀU HỎNG, không thuộc lượt này) ·
+  S4 không tái hiện được chặn oan bằng phép đo của mình ⇒ KHÔNG_ĐO_ĐƯỢC, DỪNG ·
+  S5 một ca trong t102-t114 buộc phải đổi ⇒ DỪNG, khai ·
+  S6 `origin/master` đã đi tiếp so `base_sha` mà chưa đo lại.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) KHÔNG commit, KHÔNG push, KHÔNG tạo/xoá/đổi ref.
+  (2) RIG ĐÃ DỰNG SẴN và ĐÃ KIỂM: 12 nhánh; mã hiện tại CHẶN OAN đúng `tagup`.
+  (3) Bạn đang sửa CỔNG THẨM QUYỀN GHI. Cổng CHẶN OAN còn tệ hơn không có cổng — đó chính là
+  bệnh packet này chữa. Đừng chữa nó bằng cách mở toang phạm vi quét.
+  (4) `git ls-remote` sẽ HỎNG (sandbox không mạng) — `KHÔNG_ĐO_ĐƯỢC`, khai thẳng.
+  (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+
+thay_the_ly_do: >-
+  Lượt 1 đúng hướng và đã xanh CẢ HAI nền CI trên `5ad81a5`, nhưng cross-review (connector,
+  thread `r3869605801`) đo được một **P2 THẬT**: `git rev-parse --verify` dùng BỘ PHÂN TÍCH
+  REVISION MỞ RỘNG của git, nên nó giải được cả BIỂU THỨC chứ không chỉ ref.
+  Phiên điều phối tái hiện được, git 2.43.0, tag ANNOTATED + `branch.X.merge=refs/tags/v1^{}`:
+    %(upstream)                          = refs/tags/v1^{}
+    rev-parse --verify --end-of-options  -> rc=0 kèm SHA
+    show-ref  --verify --                -> rc=1   (KHÔNG phải ref thật)
+  Và cổng HÀNH ĐỘNG theo đó — trên rig có nhánh tụt sau biểu thức, nó phát:
+    chữa: git branch -f tagpeel 'refs/tags/vann^{}'
+  tức lệnh chữa trỏ tới một BIỂU THỨC, không phải ref.
+  Trần, write set, provider, reviewer KHÔNG đổi. KHÔNG nới trần (100/300, còn 200 dòng).
+  Đây là vòng review thứ 2 — ĐÚNG trần ADR-0043 của packet MỚI, không cần `nang_tran`.
+
+viec_cua_luot_2: >-
+  MỘT việc, và nó là CÙNG MỘT HÌNH DẠNG lỗi mà lượt 1 vừa sửa — nên đọc kỹ chỗ này.
+
+  === HÌNH DẠNG ===
+
+  Lượt 1 thay câu hỏi SAI này:
+      "ref có nằm trong TẬP QUÉT LEASE không"   (tap_ref)
+  bằng câu hỏi vẫn SAI:
+      "chuỗi này có GIẢI được thành object không"  (rev-parse --verify)
+  Câu hỏi ĐÚNG là:
+      "chuỗi này có phải MỘT REF TỒN TẠI không"    (show-ref --verify)
+
+  Ba câu khác nhau. `--end-of-options` chặn tiêm CỜ, nhưng KHÔNG tắt bộ phân tích revision.
+
+  === PHẢI LÀM ===
+
+  1. `_ref_ton_tai()` dùng `git show-ref --verify --quiet -- <ref>` (ref CHÍNH XÁC).
+     `git show-ref -h` nói rõ `--verify` đòi đường dẫn ref chính xác.
+  2. Cộng thêm phép KIỂM HÌNH DẠNG: giá trị phải là một refname hợp lệ trước khi hỏi git.
+     Gợi ý: `git check-ref-format <ref>`. Không hợp lệ ⇒ `KHÔNG_XÁC_ĐỊNH` (fail-CLOSE),
+     KHÔNG lùi về tên.
+  3. GIỮ NGUYÊN mọi thứ lượt 1 và #326 đã khoá:
+     · `_cac_ref_cuc_bo` KHÔNG được đụng — phạm vi quét lease KHÔNG mở rộng
+     · `tagup` (`remote="."` + `merge=refs/tags/v1`, ref THẬT) vẫn QUA
+     · `khaihong`/`khaihongkhongref` vẫn fail-close · `remotecham`/`thuancucbo` vẫn QUA
+
+  === CA KHOÁ — rig có MƯỜI BA nhánh, ĐÃ KIỂM trước khi giao ===
+
+      (mười hai trạng thái cũ giữ nguyên hành vi)
+      tagpeel   remote="." merge='refs/tags/vann^{}' (tag ANNOTATED), TỤT SAU (0/1)
+                -> phải `KHÔNG_XÁC_ĐỊNH`, và TUYỆT ĐỐI không phát lệnh nào       [MỚI]
+
+  Kiểm bằng chính mã lượt 1 trước khi giao: nó phát
+  `git branch -f tagpeel 'refs/tags/vann^{}'`. Nên `KHÔNG_ĐO_ĐƯỢC` là câu trả lời ĐÁNG NGỜ.
+
+  Nhắc: cổng fail-close ở nhánh ĐẦU TIÊN gặp lỗi và `khaihong` đứng trước theo thứ tự chữ
+  cái. Để nhìn riêng ca tag, tạo BẢN SAO rig rồi `git config --unset` hai khoá của
+  `khaihong`/`khaihongkhongref`. Đó là bản sao để ĐO — KHÔNG phải sửa rig gốc.
+
+  === ĐỘT BIẾN BẮT BUỘC ===
+
+      · quay lại dùng `rev-parse --verify`      -> tagpeel ĐỎ
+      · gỡ phép kiểm hình dạng refname          -> tagpeel ĐỎ (hoặc ca hình dạng riêng)
+      · đưa `refs/tags/*` vào phạm vi quét lease -> phải ĐỎ (điều cấm của lượt 1)
+      · chặn oan `tagup` (ref tag THẬT)          -> tagup ĐỎ
+
+  Mỗi đột biến chạy trong THƯ MỤC RIÊNG.
+
+  === ĐỪNG ===
+
+  ĐỪNG đụng `t102`–`t115`. ĐỪNG sửa rig cho khớp mã. Rig sạch: `rig/rig_v5.sh <thư-mục-MỚI>`.

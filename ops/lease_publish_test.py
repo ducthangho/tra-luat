@@ -2908,10 +2908,14 @@ def t87_ba_duong_van_hanh_phai_sensitive():
 
 
 class _GitKhoGia:
-    def __init__(self, remote, local, leases, heads=(), lech=None):
+    def __init__(self, remote, local, leases, heads=(), lech=None, upstreams=None,
+                 configs=None):
         import yaml
         self.remote, self.local, self.heads = set(remote), set(local), set(heads)
         self.lech, self.refs, self.blobs = lech or {}, {}, {}
+        self.configs = dict(configs or {})
+        self.upstreams = (dict(upstreams) if upstreams is not None else
+                          {x: f"refs/remotes/origin/{x}" for x in self.heads if x in self.local})
         for i, (ref, path, lease) in enumerate(leases):
             blob = f"{i + 1:040x}"
             self.refs.setdefault(ref, []).append((blob, path))
@@ -2921,9 +2925,15 @@ class _GitKhoGia:
         if args[:2] == ("ls-remote", "--heads"):
             out = "".join(f"{'a' * 40}\trefs/heads/{x}\n" for x in sorted(self.remote))
         elif args and args[0] == "for-each-ref":
-            out = "".join(f"refs/heads/{x}\n" for x in sorted(self.heads))
-            out += "".join(f"refs/remotes/origin/{x}\n" for x in sorted(self.local))
-            out += "refs/remotes/origin/HEAD\n"
+            if any("%(upstream)" in str(x) for x in args):
+                out = "".join(f"refs/heads/{x}\t{self.upstreams.get(x, '')}\n"
+                              for x in sorted(self.heads))
+            else:
+                out = "".join(f"refs/heads/{x}\n" for x in sorted(self.heads))
+                out += "".join(f"refs/remotes/origin/{x}\n" for x in sorted(self.local))
+                out += "refs/remotes/origin/HEAD\n"
+        elif args[:4] == ("config", "--includes", "--null", "--list"):
+            out = "".join(f"{k}\n{v}\0" for k, v in self.configs.items())
         elif args and args[0] == "rev-list":
             ten = args[-1].split("refs/heads/", 1)[1].split("...", 1)[0]
             trai, phai = self.lech.get(ten, (0, 0))
@@ -3387,7 +3397,9 @@ def _kho_tut_sau(s: Path, trang="ranh") -> tuple[Path, Path | None]:
     _git_fixture(kho, "commit", "-qm", "cu")
     _git_fixture(kho, "branch", "a")
     _git_fixture(kho, "commit", "--allow-empty", "-qm", "moi")
+    _git_fixture(kho, "remote", "add", "origin", ".")
     _git_fixture(kho, "update-ref", "refs/remotes/origin/a", "HEAD")
+    _git_fixture(kho, "branch", "--set-upstream-to=origin/a", "a")
     wt = s / "wt giu" if trang != "ranh" else None
     if wt is not None:
         _git_fixture(kho, "worktree", "add", "-q", str(wt), "a")
@@ -3477,6 +3489,159 @@ def t111_allowlist_worktree_nam_trang_thai_va_dot_bien():
             print(f"đột biến {ten}: ĐỎ={sorted(do)}, đối chứng cho phép sống={song}")
             bang(do == dich and song == 2, f"mutant {ten}: ĐỎ={do}, cho phép sống={song}")
     SCRIPT = ban_goc
+
+
+_CAC_CA_UPSTREAM = {
+    # remote/local biểu diễn ref có mặt; cấu_hình và đối_ứng là hai khái niệm riêng.
+    "tutsau": ({"tutsau"}, {"tutsau"}, "", "refs/remotes/origin/tutsau", (0, 1)),
+    "phanky": ({"phanky"}, {"phanky"}, "", "refs/remotes/origin/phanky", (1, 1)),
+    "main": ({"main"}, {"main"}, "", "refs/remotes/origin/main", (0, 1)),
+    "bang": ({"bang"}, {"bang"}, "", "refs/remotes/origin/bang", (0, 0)),
+    "ditruoc": ({"ditruoc"}, {"ditruoc"}, "", "refs/remotes/origin/ditruoc", (1, 0)),
+    "thuancucbo": (set(), set(), "", "", (0, 0)),
+    "khacten": ({"main"}, {"main"}, "refs/remotes/origin/main",
+                 "refs/remotes/origin/main", (1, 1)),
+    "khactensau": ({"main"}, {"main"}, "refs/remotes/origin/main",
+                    "refs/remotes/origin/main", (0, 1)),
+    "khaihong": ({"khaihong"}, {"khaihong"}, "", "", (0, 1)),
+    "khaihongkhongref": (set(), set(), "", "", (0, 1)),
+    "remotecham": ({"main"}, {"main"}, "refs/heads/main", "refs/heads/main", (1, 0)),
+}
+
+_CAU_HINH_UPSTREAM = {
+    "khacten": ("origin", "refs/heads/main"),
+    "khactensau": ("origin", "refs/heads/main"),
+    "khaihong": ("khongcorenote", "refs/heads/khaihong"),
+    "khaihongkhongref": ("khongcorenote", "refs/heads/khaihongkhongref"),
+    "remotecham": (".", "refs/heads/main"),
+}
+
+
+def _chay_ca_upstream(ten):
+    import contextlib, io
+    remote, local, cau_hinh, _, lech = _CAC_CA_UPSTREAM[ten]
+    mod, out = _nap_cong(), io.StringIO()
+    cap = _CAU_HINH_UPSTREAM.get(ten)
+    configs = ({f"branch.{ten}.remote": cap[0], f"branch.{ten}.merge": cap[1]}
+               if cap else {})
+    heads = {ten, "main"} if ten == "remotecham" else {ten}
+    mod.GOI_GIT = _GitKhoGia(remote, local, [], heads=heads, lech={ten: lech},
+                             upstreams={ten: cau_hinh} if cau_hinh else {}, configs=configs)
+    with contextlib.redirect_stdout(out):
+        try:
+            rc = mod.lenh_ai_dang_giu(type("A", (), {"goc": ".", "duong_dan":
+                                                       "ops/lease_publish.py"})())
+        except mod.Chan as ex:
+            return ex.ma, out.getvalue() + ex.thong_diep, mod
+    return rc, out.getvalue(), mod
+
+
+def _kiem_ca_upstream(ten):
+    rc, out, mod = _chay_ca_upstream(ten)
+    lenh_nguy_hiem = ("git branch -f", "git -C", "merge --ff-only")
+    if ten in {"bang", "ditruoc", "thuancucbo", "remotecham"}:
+        bang(rc == mod.RC_OK and "NGƯỜI_GIỮ 0" in out and
+             not any(x in out for x in lenh_nguy_hiem),
+             f"{ten} bị chặn oan: rc={rc} {out}")
+    elif ten in {"khaihong", "khaihongkhongref"}:
+        bang(rc == mod.RC_KHONG_XAC_DINH and
+             f"{ten} có config upstream nhưng không giải được" in out and
+             not any(x in out for x in lenh_nguy_hiem),
+             f"{ten} không fail-close an toàn: rc={rc} {out}")
+    elif ten in {"phanky", "khacten"}:
+        upstream = _CAC_CA_UPSTREAM[ten][3]
+        bang(rc == mod.RC_KHONG_XAC_DINH and
+             f"NHÁNH_CỤC_BỘ_PHÂN_KỲ: {ten} -> {upstream} (1/1)" in out and
+             "KHÔNG_PHÁT_LỆNH_CHỮA" in out and not any(x in out for x in lenh_nguy_hiem),
+             f"{ten} không chẩn đoán an toàn: rc={rc} {out}")
+    else:
+        upstream = _CAC_CA_UPSTREAM[ten][3]
+        bang(rc == mod.RC_KHONG_XAC_DINH and
+             f"NHÁNH_CỤC_BỘ_TỤT_SAU: {ten} -> {upstream} (0/1)" in out and
+             f"git branch -f {ten} {upstream}" in out,
+             f"{ten} không giữ lệnh chữa đúng upstream: rc={rc} {out}")
+    return rc, out
+
+
+@ca
+def t112_tam_ca_khoa_upstream_that_va_bon_trang_thai():
+    for ten in _CAC_CA_UPSTREAM:
+        rc, out = _kiem_ca_upstream(ten)
+        print(f"ca upstream {ten}: rc={rc}; " + " | ".join(out.strip().splitlines()))
+
+
+@ca
+def t113_sau_dot_bien_upstream_va_phan_ky_deu_bi_giet():
+    global SCRIPT
+    nguon, ban_goc = SCRIPT.read_text(encoding="utf-8"), SCRIPT
+    tat_ca = set(_CAC_CA_UPSTREAM)
+    muts = [
+        ("go-phat-hien-phan-ky", "elif trai > 0 and phai > 0:", "elif False:",
+         {"phanky", "khacten"}),
+        ("phan-ky-thanh-tut-sau", 'trang_thai = "PHÂN_KỲ"', 'trang_thai = "TỤT_SAU"',
+         {"phanky", "khacten"}),
+        ("doi-ung-theo-ten", 'doi_ung = upstream.get(ref, "")',
+         'doi_ung = ("refs/remotes/origin/" + ten if "refs/remotes/origin/" + ten in tap_ref else "")',
+         {"khacten", "khactensau", "khaihong", "remotecham"}),
+        ("go-phat-hien-khai-hong", "if co_cau_hinh and not doi_ung:", "if False:",
+         {"khaihong", "khaihongkhongref"}),
+        ("khai-hong-lui-ve-ten",
+         "if co_cau_hinh and not doi_ung:\n"
+         "            raise Chan(RC_KHONG_XAC_DINH,\n"
+         "                       f\"KHÔNG_XÁC_ĐỊNH: {ten} có config upstream nhưng không giải được: \"\n"
+         "                       f\"branch.{ten}.remote={remote!r}, branch.{ten}.merge={merge!r}\")",
+         "if co_cau_hinh and not doi_ung:\n"
+         "            ung_vien = \"refs/remotes/origin/\" + ten\n"
+         "            if ung_vien in tap_ref: doi_ung = ung_vien\n"
+         "            else:\n"
+         "                raise Chan(RC_KHONG_XAC_DINH,\n"
+         "                           f\"KHÔNG_XÁC_ĐỊNH: {ten} có config upstream nhưng không giải được: \"\n"
+         "                           f\"branch.{ten}.remote={remote!r}, branch.{ten}.merge={merge!r}\")",
+         {"khaihong"}),
+        ("chan-remote-cham", "if co_cau_hinh and not doi_ung:",
+         'if co_cau_hinh and (not doi_ung or remote == "."):', {"remotecham"}),
+        ("chan-khong-upstream", "if doi_ung not in tap_ref:\n            continue",
+         'if doi_ung not in tap_ref:\n            tut_sau.append((ten, "refs/remotes/origin/" + ten, 0, 1, "TỤT_SAU"))\n            continue',
+         {"thuancucbo"}),
+        ("go-chot-quan-he-ref",
+         'tut_sau = [m for m in bi_chan if _thong_tin_nhanh_bi_chan(m)[-1] == "TỤT_SAU"]',
+         "tut_sau = list(bi_chan)", {"phanky", "khacten"}),
+        ("go-lui-ve-ten",
+         'if not doi_ung:\n'
+         '            ung_vien = "refs/remotes/origin/" + ten\n'
+         '            if ung_vien in tap_ref:\n'
+         '                doi_ung = ung_vien',
+         'if False:\n'
+         '            doi_ung = ""', {"main", "phanky", "tutsau"}),
+    ]
+    sys.dont_write_bytecode = True
+    try:
+        for i, (ten_mut, cu, moi, do_dung) in enumerate(muts):
+            bang(nguon.count(cu) == 1, f"neo mutant {ten_mut} không duy nhất")
+            with San() as s:  # mỗi mutant một thư mục: không thể dùng nhầm .pyc cùng giây/kích thước
+                p = s / f"mut_upstream_{i}.py"
+                p.write_text(nguon.replace(cu, moi), encoding="utf-8")
+                SCRIPT, do = p, set()
+                for ten_ca in _CAC_CA_UPSTREAM:
+                    try: _kiem_ca_upstream(ten_ca)
+                    except AssertionError: do.add(ten_ca)
+                song = tat_ca - do
+                print(f"đột biến {ten_mut}: thư_mục={s.name}; ĐỎ={sorted(do)}, đối chứng SỐNG={sorted(song)}")
+                bang(do == do_dung and song == tat_ca - do_dung,
+                     f"mutant {ten_mut}: ĐỎ={do}, SỐNG={song}")
+    finally:
+        SCRIPT = ban_goc
+
+
+@ca
+def t114_khong_config_nhung_co_origin_cung_ten_phai_duoc_phan_loai():
+    for ten in ("tutsau", "phanky"):
+        remote, local, cau_hinh, doi_ung, _ = _CAC_CA_UPSTREAM[ten]
+        bang(not cau_hinh and ten in remote and ten in local,
+             f"git giả chưa tách config khỏi ref cho {ten}")
+        rc, out = _kiem_ca_upstream(ten)
+        bang(rc == 12 and doi_ung in out,
+             f"không khóa population thiếu config + có origin cùng tên: {ten}: {out}")
 
 
 def main() -> int:

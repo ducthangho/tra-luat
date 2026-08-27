@@ -319,12 +319,50 @@ def _cac_ref_cuc_bo(goc: Path) -> tuple[set[str], list[str]]:
     return ten_nhanh, refs
 
 
-def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[str]:
-    """Chỉ nhận nhánh là tụt sau khi nó là tổ tiên thật sự của origin cùng tên."""
-    tap_ref, tut_sau = set(refs), []
+def _doc_cau_hinh_git(goc: Path) -> dict[str, list[str]]:
+    """Đọc config cùng giá trị mà không nhập nhằng khoảng trắng hay dòng mới."""
+    out, ket_qua = _git(goc, "config", "--includes", "--null", "--list"), {}
+    for muc in out.split("\0"):
+        if not muc:
+            continue
+        khoa, co_ngan, gia_tri = muc.partition("\n")
+        if not co_ngan or not khoa:
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: git config trả mục hỏng: {muc!r}")
+        ket_qua.setdefault(khoa, []).append(gia_tri)
+    return ket_qua
+
+
+def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[tuple[str, str, int, int, str]]:
+    """Phân loại nhánh theo upstream thật; chỉ trả các quan hệ phải chặn."""
+    out = _git(goc, "for-each-ref", "--format=%(refname)%09%(upstream)", "refs/heads")
+    upstream = {}
+    for dong in out.splitlines():
+        cot = dong.split("\t")
+        if len(cot) != 2 or not cot[0].startswith("refs/heads/"):
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: upstream có dòng hỏng: {dong!r}")
+        upstream[cot[0]] = cot[1]
+    tap_ref, tut_sau, cau_hinh = set(refs), [], _doc_cau_hinh_git(goc)
     for ref in sorted(x for x in tap_ref if x.startswith("refs/heads/")):
         ten = ref.removeprefix("refs/heads/")
-        doi_ung = "refs/remotes/origin/" + ten
+        doi_ung = upstream.get(ref, "")
+        ds_remote = cau_hinh.get(f"branch.{ten}.remote")
+        ds_merge = cau_hinh.get(f"branch.{ten}.merge")
+        remote = ds_remote[-1] if ds_remote else None
+        merge = ds_merge[-1] if ds_merge else None
+        co_cau_hinh = ds_remote is not None or ds_merge is not None
+        if co_cau_hinh and not doi_ung:
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: {ten} có config upstream nhưng không giải được: "
+                       f"branch.{ten}.remote={remote!r}, branch.{ten}.merge={merge!r}")
+        if not doi_ung:
+            ung_vien = "refs/remotes/origin/" + ten
+            if ung_vien in tap_ref:
+                doi_ung = ung_vien
+        if doi_ung and doi_ung not in tap_ref:
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: {ten} khai upstream không có ref: {doi_ung}")
         if doi_ung not in tap_ref:
             continue
         out = _git(goc, "rev-list", "--left-right", "--count", f"{ref}...{doi_ung}")
@@ -334,8 +372,26 @@ def _nhanh_cuc_bo_tut_sau(goc: Path, refs: list[str]) -> list[str]:
             raise Chan(RC_KHONG_XAC_DINH,
                        f"KHÔNG_XÁC_ĐỊNH: rev-list trả kết quả hỏng cho {ten}: {out!r}") from None
         if trai == 0 and phai > 0:
-            tut_sau.append(ten)
+            trang_thai = "TỤT_SAU"
+        elif trai > 0 and phai > 0:
+            trang_thai = "PHÂN_KỲ"
+        elif trai == 0 and phai == 0:
+            trang_thai = "BẰNG"
+        elif trai > 0 and phai == 0:
+            trang_thai = "ĐI_TRƯỚC"
+        else:
+            raise Chan(RC_KHONG_XAC_DINH,
+                       f"KHÔNG_XÁC_ĐỊNH: quan hệ ref không hợp lệ cho {ten}: {trai}/{phai}")
+        if trang_thai in {"TỤT_SAU", "PHÂN_KỲ"}:
+            tut_sau.append((ten, doi_ung, trai, phai, trang_thai))
     return tut_sau
+
+
+def _thong_tin_nhanh_bi_chan(muc) -> tuple[str, str, int, int, str]:
+    """Chuẩn hoá bản ghi; dạng chuỗi chỉ giữ tương thích cho phản chứng legacy."""
+    if isinstance(muc, str):
+        return muc, "refs/remotes/origin/" + muc, 0, 1, "TỤT_SAU"
+    return muc
 
 
 def _cac_worktree(goc: Path) -> list[dict]:
@@ -370,8 +426,9 @@ def _trang_thai_worktree(muc: dict) -> list[str]:
     return sorted(set(trang))
 def _lenh_chua_nhanh_tut_sau(goc: Path, tut_sau: list[str]) -> str:
     worktrees, lenh, chi_tiet, an_toan = _cac_worktree(goc), [], [], True
-    for ten in tut_sau:
-        ref, doi_ung = "refs/heads/" + ten, "refs/remotes/origin/" + ten
+    for muc in tut_sau:
+        ten, doi_ung, _, _, _ = _thong_tin_nhanh_bi_chan(muc)
+        ref = "refs/heads/" + ten
         giu = [wt for wt in worktrees if wt.get("branch") == ref]
         if not giu:
             lenh.append(f"git branch -f {shlex.quote(ten)} {shlex.quote(doi_ung)}")
@@ -393,12 +450,26 @@ def _quet_lease_toan_kho(goc: Path, *, doi_chieu_ref=True,
     """Đọc mỗi cặp (blob, đường dẫn) lease đúng một lần trên mọi ref cục bộ."""
     ten_cuc_bo, refs = _cac_ref_cuc_bo(goc)
     if chan_nhanh_tut_sau:
-        tut_sau = _nhanh_cuc_bo_tut_sau(goc, refs)
-        if tut_sau:
-            huong_xu_ly = _lenh_chua_nhanh_tut_sau(goc, tut_sau)
+        bi_chan = _nhanh_cuc_bo_tut_sau(goc, refs)
+        if bi_chan:
+            tut_sau = [m for m in bi_chan if _thong_tin_nhanh_bi_chan(m)[-1] == "TỤT_SAU"]
+            phan_ky = [m for m in bi_chan if _thong_tin_nhanh_bi_chan(m)[-1] == "PHÂN_KỲ"]
+            chi_tiet = []
+            if tut_sau:
+                mo_ta = ", ".join(f"{ten} -> {doi_ung} ({trai}/{phai})"
+                                   for ten, doi_ung, trai, phai, _ in
+                                   map(_thong_tin_nhanh_bi_chan, tut_sau))
+                chi_tiet.append("NHÁNH_CỤC_BỘ_TỤT_SAU: " + mo_ta +
+                                ". ai-dang-giu quét refs/heads/*; " +
+                                _lenh_chua_nhanh_tut_sau(goc, tut_sau))
+            if phan_ky:
+                mo_ta = ", ".join(f"{ten} -> {doi_ung} ({trai}/{phai})"
+                                   for ten, doi_ung, trai, phai, _ in
+                                   map(_thong_tin_nhanh_bi_chan, phan_ky))
+                chi_tiet.append("NHÁNH_CỤC_BỘ_PHÂN_KỲ: " + mo_ta +
+                                ". KHÔNG_PHÁT_LỆNH_CHỮA; người dùng tự quyết cách hợp nhất hoặc giữ commit.")
             raise Chan(RC_KHONG_XAC_DINH,
-                       "NHÁNH_CỤC_BỘ_TỤT_SAU: " + ", ".join(tut_sau) +
-                       ". ai-dang-giu quét refs/heads/*; " + huong_xu_ly)
+                       " | ".join(chi_tiet))
     if doi_chieu_ref:
         thieu = _ten_nhanh_may_chu(goc) - ten_cuc_bo
         if thieu:

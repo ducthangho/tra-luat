@@ -104,3 +104,4 @@ canh_bao_cho_nguoi_thi_hanh: >-
       sẽ âm thầm hở lại.
   (4) KHÔNG nhánh từ chối nào được mang dữ liệu lấy từ `url` ra mô tả — kể cả `scheme`.
   (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+posted_comment_id: 5439083585   # workflow ghi, ĐỪNG sửa tay

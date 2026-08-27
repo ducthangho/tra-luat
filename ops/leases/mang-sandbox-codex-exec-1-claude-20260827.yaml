@@ -374,3 +374,13 @@ LUOT_2_BI_CHAN_O_TANG_CONG_CU:
       Đổi write set để hai tệp lõi nằm ngoài `.claude/`. Cũng là revision, và nó đổi HÌNH DẠNG
       packet chứ không chỉ đổi ai thi công.
     KHONG_tu_quyet: 'Phiên điều phối không tự đổi executor, không tự đổi write set, không tự dạy đi vòng.'
+
+# Thêm TAY sau khi lease đã đăng — `posted_comment_id` ở trên giữ nguyên, KHÔNG đăng lại.
+da_bi_thay_the: mang-sandbox-codex-exec-1r2-codex-20260827
+da_bi_thay_the_vi_sao: >-
+  ĐỔI EXECUTOR `claude` → `codex` (và lật reviewer `codex` → `claude` để giữ `cross_approved`).
+  KHÔNG phải vì thi công sai: lượt 1 dưới r1 sinh ra bảng bốn tổ hợp — kết quả trung tâm của
+  packet — và phiên điều phối đã chạy lại độc lập, khớp từng ô. Lượt 2 cũng đóng thật một P1.
+  Thứ hỏng là một GIẢ ĐỊNH KHÔNG AI ĐO TRƯỚC khi cấp r1: rằng executor `claude` ghi được
+  `.claude/dev/**`. Nó KHÔNG ghi được — chốt của nền từ chối `Edit`/`Write` vào `.claude/**`.
+  §3.2 liệt kê `executor` là thứ tạo revision mới, nên đây là r2 chứ không phải sửa r1 tại chỗ.

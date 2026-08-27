@@ -1,0 +1,163 @@
+# Lease EXECUTOR — `MANG-SANDBOX-CODEX` (#334), lượt 1, BẢN SỬA ĐỔI 2.
+#
+# r2 tồn tại vì ĐÚNG MỘT lý do, và nó là lý do §3.2 liệt kê thẳng: ĐỔI EXECUTOR.
+# Lượt 2 dưới r1 bị chặn ở TẦNG CÔNG CỤ, không phải ở ngân sách: executor `claude` bị từ chối
+# vô điều kiện khi `Edit`/`Write` vào `.claude/dev/*.py` ("which is a sensitive file"). Hai trong
+# ba P1 do đó không đụng tới được.
+#
+# ĐỪNG chép nội dung r1 vào đây. r1 vẫn là chỗ đọc cho đặc tả việc, cảnh báo thi hành, và toàn bộ
+# phép đo lượt 1 — chép sang đây là tạo bản chiếu thứ hai rồi để hai bản trôi lệch, đúng bệnh đã
+# làm một packet tiền nhiệm bị `blocked`. r2 chỉ ghi thứ ĐỔI.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 334
+packet_id: MANG-SANDBOX-CODEX
+phase_key: MANG-SANDBOX-CODEX
+revision: 2
+generation: 1
+lease_id: mang-sandbox-codex-exec-1r2-codex-20260827
+
+role: executor
+provider: codex
+executor: codex
+executor_effort: xhigh
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: '`sensitive` do CỔNG tính (mặc định fail-close). KHÔNG tự hạ. Giữ nguyên từ r1.'
+
+doi_vai_ghi_chu: >-
+  ĐỔI CẢ HAI VẾ, và lật cả hai là BẮT BUỘC chứ không phải tuỳ chọn: `assurance_target:
+  cross_approved` đòi hai NỀN khác nhau, nên đổi một vế mà giữ vế kia thì cùng nền tự duyệt bài
+  của mình.
+  Việc đổi này giải QUYẾT HAI vấn đề, không phải một:
+  (1) THI CÔNG — `codex` ghi được `.claude/dev/**`. Bằng chứng ĐO ĐƯỢC, không phải suy đoán:
+  packet #319 run `ae038f02` sửa `.claude/dev/mcp_gh_test.py` với diff 56 dòng, cùng loại đường dẫn.
+  (2) REVIEW — reviewer `claude` CHẠY ĐƯỢC `codex sandbox` lồng. Phiên điều phối vừa chạy đủ bốn
+  tổ hợp trong vỏ `claude` và lấy được (a) 1 1 1 · (b) 0 0 0 · (c) 1 1 1 · (d) 0 0 0. Vòng 1 với
+  reviewer `codex` phải ghi `KHÔNG_ĐO_ĐƯỢC` cho hai trong ba cột vì sandbox lồng trả `rc=101`.
+  Nên r2 vá luôn một giới hạn CẤU TRÚC của lượt review, không chỉ đổi ai gõ phím.
+
+spec_path: null
+spec_ghi_chu: >-
+  Packet này KHÔNG có tệp đặc tả riêng; đặc tả việc nằm trong r1 (`muc_tieu`, `cach_chay_ba_cot`,
+  bốn việc) và trong thân Issue #334. r2 KHÔNG đổi đặc tả.
+
+write_set:
+  - .claude/dev/probe_mang.py
+  - .claude/dev/probe_mang_test.py
+  - docs/MANG_SANDBOX_CODEX.md
+write_set_note: >-
+  KHÔNG ĐỔI so với r1. `docs/GOI_AGENT_DA_NEN.md` vẫn NGOÀI write set và vẫn có người giữ (#318).
+
+branch: claude/mang-sandbox-codex-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+branch_ghi_chu: >-
+  Giữ NGUYÊN tên nhánh dù executor đổi sang `codex` — nhánh mang tên packet, không mang tên nền,
+  và đổi tên nhánh giữa chừng làm mọi `reviewed_sha` đã ghi trỏ vào chỗ khó truy.
+
+base_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+start_from_sha: 511a58d2392a60dc94b40918da4d39c4aeda07a3
+reviewed_sha_required: 511a58d2392a60dc94b40918da4d39c4aeda07a3
+base_ghi_chu: >-
+  `base_sha` GIỮ NGUYÊN. `S4` đo lại lúc cấp r2: `origin/master` nay `f715fc28`, `ac82ddc` VẪN là
+  tổ tiên, và `git diff --numstat ac82ddc..f715fc28` trên ĐÚNG ba đường dẫn write set ⇒ RỖNG.
+  Cùng căn cứ §3.2 đã dùng bốn lần trong phiên: `base_sha` không nằm trong danh sách thứ tạo
+  revision. Đây là lần thứ NĂM `S4` bắn trong hai ngày.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 320
+  do_tu_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+  don_vi: '`git diff --numstat ac82ddc..HEAD` trên ĐÚNG ba đường dẫn write set, cột dòng THÊM.'
+  da_dung: 316
+  bien_con_lai: 4
+  KHONG_NANG_TRAN_O_r2: >-
+    r2 KHÔNG nâng trần, cố ý. Lượt 2 chưa hề chạm trần — nó dừng vì chốt công cụ, không vì ngân
+    sách — nên chưa có PHÉP ĐO nào biện minh cho việc nâng. Nâng trần TRƯỚC khi có số đo là đúng
+    lỗi ước lượng đã sai hai lần ở #319.
+  neu_cham_320: >-
+    DỪNG theo `S2` và báo CHÍNH XÁC còn thiếu bao nhiêu dòng cho từng finding. Lúc ấy mới có cơ sở
+    để người giữ kho quyết nâng trần hay tách. Lượt 2 đã lập tiền lệ tốt: executor TỪ CHỐI ước
+    lượng khi chưa đo được, và nó đúng.
+
+viec_cua_luot_nay: >-
+  Vá HAI P1 còn lại và HAI P2 của cross-review vòng 1. Đọc verdict đầy đủ ở
+  `ops/reviews/mang-sandbox-codex-review-1-codex-verdict.md` — có bảng đột biến của reviewer và
+  gợi ý vá bốn bước cho từng finding. ĐỪNG chép lại danh sách ấy vào lease.
+  Thứ tự: `cong-dot-bien-tu-giam-van-xanh` (P1) TRƯỚC, vì nó là cổng đo mọi thứ khác; rồi
+  `ma-chan-gom-moi-loi-khong-phan-loai` (P1); rồi hai P2 nếu còn biên.
+  P1 `bon-to-hop-chua-co-lenh-nguyen-van` ĐÃ ĐÓNG ở lượt 2 và phiên điều phối đã tự kiểm bằng cách
+  rút khối bash TỪ CHÍNH TÀI LIỆU rồi chạy — ĐỪNG làm lại, ĐỪNG sửa khối lệnh ấy.
+
+canh_bao_rieng_cho_r2: >-
+  (1) `.git` mount CHỈ ĐỌC ⇒ sinh diff, phiên điều phối commit. Đừng `git commit`.
+  (2) Sandbox codex KHÔNG có mạng ⇒ không đọc được Issue hay verdict trên GitHub; phiên điều phối
+  ghi sẵn verdict thành TỆP trong thư mục làm việc.
+  (3) Executor `codex` NẰM TRONG cái hộp packet này đo. Nó KHÔNG chạy lại được bảng ba cột và bảng
+  bốn tổ hợp — `codex sandbox` lồng trả `rc=101`. ĐỪNG cố; ĐỪNG sửa các con số đã đo; ĐỪNG khai là
+  đã tái lập. Bảng số là KẾT QUẢ ĐÃ CHỐT của lượt 1, đã được phiên điều phối chạy lại độc lập.
+  Việc của r2 là MÃ và PHẢN CHỨNG, không phải đo lại.
+  (4) CẤM CHỐT TỰ CHIẾU: đừng thêm cờ trong mã sản phẩm để chứng minh một ca đã chạy. #319 mất một
+  lượt vì đúng hình dạng ấy.
+  (5) ĐỪNG làm yếu phản chứng để vừa ngân sách. Thà báo "không vừa" còn hơn báo "vừa" bằng cách đo
+  ít đi.
+
+dieu_kien_dung: >-
+  Giữ NGUYÊN `S1`, `S2`, `S3`, `S5`, `S6` của r1 — đọc ở đó, không chép lại.
+  `S4` đã đo lại ở `base_ghi_chu`.
+  `S7` (r2 THÊM): nếu executor lại bị chặn ở TẦNG CÔNG CỤ khi ghi một đường dẫn TRONG write set ⇒
+  DỪNG NGAY, ghi rõ đường dẫn nào, công cụ nào, thông điệp nguyên văn — và ĐỪNG đi vòng qua chốt
+  ấy bằng đường khác. Chốt của nền không phải chướng ngại để lách; nó là dữ kiện phải báo.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-27 — phiên điều phối báo lượt 2 bị chặn ở tầng công cụ, trình ba
+  phương án A/B/C và khuyến nghị A; người giữ kho trả lời "theo A, đổi executor sang codex đi".
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  ĐỔI theo hướng TỐT HƠN so với r1: phiên ghi lease (`claude`) nay KHÔNG còn cùng nền với executor.
+  Nhưng khai thẳng phần XẤU ĐI: reviewer nay là `claude`, CÙNG NỀN với phiên điều phối — và phiên
+  điều phối đã soạn đề bài, đã tự chạy bốn tổ hợp, đã tự kiểm bốn lệnh. ⇒ Lượt review r2 PHẢI chạy
+  ở một phiên `claude` RIÊNG, headless, clone rời, detached exact head; và đề bài phải nói rõ với
+  reviewer rằng các con số nó sắp kiểm do phiên điều phối chạy, để nó chất vấn chứ không xác nhận
+  hộ.
+
+leased_at_utc: '2026-08-27T06:20:00Z'
+lease_expires_at_utc: '2026-08-28T06:20:00Z'
+run_minutes: 1440
+
+thay_the_cho: mang-sandbox-codex-exec-1-claude-20260827
+thay_the_ly_do: >-
+  ĐÚNG MỘT thứ đổi, và §3.2 liệt kê nó: `executor` (`claude` → `codex`), kéo theo
+  `reviewer_provider` lật ngược để giữ `cross_approved`.
+  KHÔNG đổi: write set ba đường dẫn · trần 320 · đơn vị đo · base `ac82ddc` · nhánh · mục tiêu ·
+  mọi tiêu chí nghiệm thu · mọi cảnh báo thi hành của r1.
+  r1 KHÔNG bị bác về nội dung: nó cấp đúng việc, và lượt 1 dưới r1 đã sinh ra bảng bốn tổ hợp —
+  kết quả trung tâm của packet, đã được phiên điều phối chạy lại độc lập và khớp từng ô.
+  Thứ hỏng ở r1 là một giả định KHÔNG AI ĐO TRƯỚC: rằng executor `claude` ghi được `.claude/dev/**`.
+
+CHOT_CUA_NEN_DA_LO_RA:
+  hien_tuong: 'executor `claude` bị từ chối vô điều kiện khi `Edit`/`Write` vào `.claude/dev/*.py` — "which is a sensitive file"'
+  KHONG_phai_permissions_cua_kho: >-
+    `.claude/settings.json` không deny đường dẫn ấy, và clone mới CHƯA ĐƯỢC TIN nên mọi mục `allow`
+    bị bỏ qua anyway.
+  KHONG_phai_he_tep: 'phiên điều phối ghi được vào đúng tệp ấy QUA BASH (thử, ghi được, hoàn nguyên)'
+  vi_sao_chua_ai_gap:
+    p318: 'executor `claude`, write set `docs/**` — không chạm `.claude/`'
+    p319: 'write set có `.claude/dev/*.py`, executor `codex` — ghi được'
+    p334: 'lần ĐẦU executor `claude` được giao write set chạm `.claude/`'
+  he_qua_cho_ke_hoach_kho: >-
+    Từ nay, cấp lease có `.claude/**` trong write set thì PHẢI chọn executor ghi được đường dẫn ấy.
+    Đây là một ràng buộc THẬT của hạ tầng mà không tầng nào trong kho đang cưỡng chế hay cảnh báo —
+    và nó chỉ lộ ra sau khi một lượt thi công 468 giây chạy xong rồi báo không làm được gì.
+  de_xuat_ngoai_packet: >-
+    Một cổng lúc CẤP LEASE: nếu `write_set` chạm `.claude/**` mà `executor` là `claude` ⇒ chặn kèm
+    lý do. Ngoài mọi write set đang mở, nên chỉ ghi thành đề xuất.

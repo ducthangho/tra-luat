@@ -23,10 +23,8 @@ _BAC = (
     ("claude-fable-5", "max"),
 )
 
-
 class KhongDoDuoc(Exception):
     """Bằng chứng thiếu hoặc không thuộc tập hữu hạn mà kho đo được."""
-
 
 def _cac_duong_dan(duong_dan):
     if isinstance(duong_dan, str):
@@ -36,9 +34,12 @@ def _cac_duong_dan(duong_dan):
             ds = list(duong_dan)
         except TypeError as exc:
             raise KhongDoDuoc("đường dẫn không phải chuỗi/danh sách") from exc
-    # Một tệp lặp lại không được biến thành nhiều tệp để tự nâng điểm.
-    return tuple(dict.fromkeys(str(x).strip() for x in ds if str(x).strip()))
-
+    # Một tệp lặp lại không được biến thành nhiều tệp để tự nâng điểm. Rỗng là phép
+    # đo phạm vi hỏng, không phải write set nhỏ để được nhận bậc thấp.
+    ket_qua = tuple(dict.fromkeys(str(x).strip() for x in ds if str(x).strip()))
+    if not ket_qua:
+        raise KhongDoDuoc("write set rỗng")
+    return ket_qua
 
 def _vung(path):
     """Phân loại bằng allow-list; mọi thứ ngoài bảng đi vào `khong-biet`."""
@@ -56,7 +57,6 @@ def _vung(path):
         return "tai-lieu"
     return "khong-biet"
 
-
 def _bac_theo_diem(diem):
     if diem <= 0:
         return 0
@@ -66,7 +66,6 @@ def _bac_theo_diem(diem):
         return 2
     return 3
 
-
 def kiem_dinh_danh(model, effort):
     """Từ chối bí danh/mức lạ bằng phép so bằng nhau với allow-list."""
     if model not in MO_HINH_CHO_PHEP:
@@ -74,9 +73,18 @@ def kiem_dinh_danh(model, effort):
     if effort not in NO_LUC_CHO_PHEP:
         raise KhongDoDuoc("effort ngoài allow-list: %r" % (effort,))
 
-
 def chon(review_class, duong_dan, so_dong, luot, bac_truoc=None):
     """Trả ``(model, effort, giải thích)`` từ đúng các đối số đã cho."""
+    if not isinstance(review_class, str):
+        raise KhongDoDuoc("review_class không phải chuỗi")
+    review_class = review_class.strip()
+    # Lease ghi đúng một dạng; casefold sẽ tái mở lỗi "phân biệt cách viết, không phân
+    # biệt thẩm quyền" đã đo ở lease-authority-spoof.
+    if review_class not in ("sensitive", "thuong"):
+        raise KhongDoDuoc("review_class ngoài allow-list: %r" % review_class)
+    # Số âm không mô tả một diff nhỏ: nó chứng minh phép đo đầu vào đã hỏng.
+    if type(so_dong) is not int or so_dong < 0 or type(luot) is not int or luot < 1:
+        raise KhongDoDuoc("so_dong phải là số nguyên >= 0 và luot phải là số nguyên >= 1")
     ds = _cac_duong_dan(duong_dan)
     cac_vung = {_vung(p) for p in ds}
     khoan = []
@@ -120,7 +128,6 @@ def chon(review_class, duong_dan, so_dong, luot, bac_truoc=None):
         chi_tiet, diem, banh_coc, model, effort)
     return model, effort, giai_thich
 
-
 def kiem_ket_qua(yeu_cau_model, ket_qua_json):
     """Đòi bằng chứng dương từ JSON của harness, không tin lời tự khai của model.
 
@@ -147,7 +154,6 @@ def kiem_ket_qua(yeu_cau_model, ket_qua_json):
     khoa_thua = [ten for ten in model_usage if ten != khoa_khop]
     return "modelUsage: ĐẠT; khoá chứng minh=%r; khoá thừa=%r" % (khoa_khop, khoa_thua)
 
-
 def main(argv=None):
     p = argparse.ArgumentParser(description="Chọn reviewer theo độ phức tạp")
     p.add_argument("--review-class", required=True)
@@ -169,7 +175,6 @@ def main(argv=None):
     else:
         print("model: %s\neffort: %s\ngiai_thich: %s" % (model, effort, giai_thich))
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

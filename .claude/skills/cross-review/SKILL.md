@@ -50,19 +50,14 @@ Antigravity Reviewer lane trong `AGENTS.md` theo cơ chế `same_provider_approv
 | `3–4` | `claude-fable-5` | `xhigh` |
 | `>= 5` | `claude-fable-5` | `max` |
 
-Giữa các lượt của cùng packet, truyền bậc lượt trước làm `bac_truoc`: bánh cóc chỉ cho
-giữ hoặc tăng bậc, không bao giờ cho tụt khi diff còn lại nhỏ đi.
+Giữa các lượt của cùng packet, truyền bậc lượt trước làm `bac_truoc`: bánh cóc chỉ cho giữ hoặc tăng bậc, không bao giờ cho tụt khi diff còn lại nhỏ đi.
 
 Ba bẫy CLI đã đo 27-08-2026, không phải giả định:
 
 - `--effort khong-ton-tai` chỉ cảnh báo rồi lùi im lặng về mặc định; kết quả không ghi đã lùi.
 - `--model claude-khong-ton-tai-9` không chạy review nào nhưng vẫn trả `rc=0`.
-- Trong thư mục trống, 2 model hợp lệ cho `is_error=false` và mỗi lượt 1 khoá `modelUsage`;
-  model rác cho `is_error=true`, `modelUsage={}` dù vẫn `subtype=success`. Trong sandbox có
-  kho, cả 6/6 lượt đều thêm khoá phụ `claude-haiku-4-5-20251001`; model rác vẫn có 1 khoá
-  phụ nhưng thiếu model yêu cầu. **`rc` và `subtype` cùng nói dối** — bằng chứng dương là
-  `is_error is false` và model yêu cầu có mặt làm khoá hoặc `canonicalModel`; khoá thừa
-  phải được báo ra, không được dùng để từ chối.
+- Trong thư mục trống, 2 model hợp lệ cho `is_error=false` và mỗi lượt 1 khoá `modelUsage`; model rác cho `is_error=true`, `modelUsage={}` dù vẫn `subtype=success`. Trong sandbox có kho, cả 6/6 lượt đều thêm khoá phụ `claude-haiku-4-5-20251001`; model rác vẫn có 1 khoá phụ nhưng thiếu model yêu cầu.
+  **`rc` và `subtype` cùng nói dối** — bằng chứng dương là `is_error is false` và model yêu cầu có mặt làm khoá hoặc `canonicalModel`; khoá thừa phải được báo ra, không được dùng để từ chối.
 
 Chọn bậc **trước khi phóng**:
 
@@ -72,11 +67,13 @@ PY="$(command -v python3 || command -v python || command -v py)"
   --duong-dan a.py,b.md --so-dong 120 --luot 1 --json
 ```
 
-Phóng Claude reviewer headless và giữ JSON nguyên vẹn:
+Phóng Claude reviewer headless, cấp đúng công cụ cần để review, và giữ JSON nguyên vẹn:
 
 ```bash
-claude --model <id> --effort <bac> --output-format json -p ... < PROMPT.md > reviewer.json
+claude --model <id> --effort <bac> --output-format json --allowedTools Bash Read Write Edit Glob Grep --permission-mode acceptEdits --add-dir <sandbox> -p "$(cat PROMPT.md)" > reviewer.json
 ```
+
+Đo 27-08-2026: `-p "$(cat TEP)"` và `-p ... < TEP` đều chạy. Không dùng `--dangerously-skip-permissions`: dưới root nó báo *"cannot be used with root/sudo privileges for security reasons"* rồi thoát `rc=1` sau `1.151s`; dùng `--allowedTools` cùng `--permission-mode` như trên để phiên headless gọi được công cụ.
 
 Kiểm `modelUsage` **sau khi phóng**; lệnh gọi đúng vị từ fail-close dùng chung với CI:
 
@@ -85,8 +82,7 @@ PY="$(command -v python3 || command -v python || command -v py)"
 "$PY" -c 'import json,runpy,sys; m=runpy.run_path(".claude/dev/chon_reviewer.py"); print(m["kiem_ket_qua"](sys.argv[1],json.load(open(sys.argv[2],encoding="utf-8"))))' <id> reviewer.json
 ```
 
-Mục này **KHÔNG thay** `docs/PROTOCOL_DA_PHIEN.md` §8; nó chỉ nói chọn bậc nào và cú pháp
-đo model thực sự đã chạy.
+Mục này **KHÔNG thay** `docs/PROTOCOL_DA_PHIEN.md` §8; nó chỉ nói chọn bậc nào và cú pháp đo model thực sự đã chạy.
 
 ## Khi PAT là chính tài khoản tác giả PR
 

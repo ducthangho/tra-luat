@@ -29,14 +29,12 @@ BAC = (
     ("claude-fable-5", "max"),
 )
 
-
 def _nap(path=MA, nhan="nen"):
     importlib.invalidate_caches()
     sp = importlib.util.spec_from_file_location("tl351_" + nhan, str(path))
     m = importlib.util.module_from_spec(sp)
     sp.loader.exec_module(m)
     return m
-
 
 def _doi_loi(m, ham, *args):
     try:
@@ -45,27 +43,25 @@ def _doi_loi(m, ham, *args):
         return
     raise AssertionError("đầu vào không đo được nhưng không bị từ chối: %r" % (args,))
 
-
 def _bac(m, review_class, paths, so_dong=0, luot=1, bac_truoc=None):
     return m.chon(review_class, paths, so_dong, luot, bac_truoc)[:2]
-
 
 def r01_bon_bac_biet_truoc(m):
     # Năm vùng đã biết không tự sinh điểm; nếu một tiền tố trượt allow-list, ca 0 sẽ lộ.
     for path in ("scripts/tl.py", ".claude/dev/x.py", "ops/x.py",
                  "references/x.txt", "README.md"):
-        if _bac(m, "normal", [path]) != BAC[0]:
+        if _bac(m, "thuong", [path]) != BAC[0]:
             raise AssertionError("điểm 0 sai cho vùng đã biết: %s" % path)
 
     mot_diem = [
-        _bac(m, "normal", ["docs/adr/0001-x.md"]),
-        _bac(m, "normal", ["scripts/x.py"], so_dong=400),
-        _bac(m, "normal", ["scripts/x.py"], luot=3),
-        _bac(m, "normal", ["scripts/%d.py" % i for i in range(5)]),
+        _bac(m, "thuong", ["docs/adr/0001-x.md"]),
+        _bac(m, "thuong", ["scripts/x.py"], so_dong=400),
+        _bac(m, "thuong", ["scripts/x.py"], luot=3),
+        _bac(m, "thuong", ["scripts/%d.py" % i for i in range(5)]),
     ]
     if any(x != BAC[1] for x in mot_diem):
         raise AssertionError("một khoản +1 không cho bậc điểm 1–2: %r" % mot_diem)
-    if _bac(m, "normal", [".github/workflows/ci.yml"]) != BAC[1]:
+    if _bac(m, "thuong", [".github/workflows/ci.yml"]) != BAC[1]:
         raise AssertionError("vùng cong +2 không cho đúng bậc")
     if _bac(m, "sensitive", [".claude/skills/x/SKILL.md"]) != BAC[2]:
         raise AssertionError("điểm 3 không cho fable/xhigh")
@@ -74,15 +70,13 @@ def r01_bon_bac_biet_truoc(m):
     if kq[:2] != BAC[3] or "bậc cuối=claude-fable-5/max" not in kq[2]:
         raise AssertionError("điểm 5 hoặc giải thích bậc cuối sai: %r" % (kq,))
 
-
 def r02_khong_biet_day_len_cao_nhat(m):
     kq = m.chon("sensitive", ["vi-du/la.txt"], 0, 1)
     if kq[:2] != BAC[3] or "+3 chạm vùng khong-biet" not in kq[2]:
         raise AssertionError("đường lạ không fail-close lên bậc cao nhất: %r" % (kq,))
 
-
 def r03_banh_coc_hai_chieu(m):
-    giu = _bac(m, "normal", ["scripts/x.py"], bac_truoc=BAC[3])
+    giu = _bac(m, "thuong", ["scripts/x.py"], bac_truoc=BAC[3])
     if giu != BAC[3]:
         raise AssertionError("bậc trước cao hơn đã bị tụt: %r" % (giu,))
     nam_tep = [".github/workflows/ci.yml"] + ["scripts/%d.py" % i for i in range(4)]
@@ -90,25 +84,21 @@ def r03_banh_coc_hai_chieu(m):
     if khong_keo != BAC[3]:
         raise AssertionError("bậc trước thấp kéo kết quả mới xuống: %r" % (khong_keo,))
 
-
 def r04_dinh_danh_allow_list(m):
     for alias in ("opus", "fable", "sonnet"):
         _doi_loi(m, m.kiem_dinh_danh, alias, "high")
     m.kiem_dinh_danh("claude-opus-5", "high")
     _doi_loi(m, m.kiem_dinh_danh, "claude-opus-5", "khong-ton-tai")
 
-
 # Đúng 9 bản ghi ở cả hai rig của đặc tả §0(c)/(c′). Bốn cặp opus/fable trong
 # sandbox có kho khác nhau ở việc dùng công cụ, dù các trường liên quan của JSON giống
 # nhau. Giữ cả 9 nhãn để một rig không âm thầm bị rút khỏi phép đo lần nữa.
 PHU = "claude-haiku-4-5-20251001"
 
-
 def _ket_qua(loi, *models):
     return {"subtype": "success", "is_error": loi,
             "modelUsage": {x: {"canonicalModel": x.rsplit("-", 1)[0]
                                 if x == PHU else x} for x in models}}
-
 
 FIXTURE = (
     ("trống/opus", "claude-opus-5", _ket_qua(False, "claude-opus-5"), True),
@@ -121,7 +111,6 @@ FIXTURE = (
     ("kho/sonnet/không-tool", "claude-sonnet-5", _ket_qua(False, PHU, "claude-sonnet-5"), True),
     ("kho/model-rác", "claude-khong-ton-tai-9", _ket_qua(True, PHU), False),
 )
-
 
 def r05_chin_fixture_hai_rig(m):
     if len(FIXTURE) != 9:
@@ -141,7 +130,6 @@ def r05_chin_fixture_hai_rig(m):
         if nhan == "kho/model-rác" and "model yêu cầu" not in loi:
             raise AssertionError("fixture model rác bị chặn sai nhánh: %r" % loi)
 
-
 def r06_json_mo_ho_phai_do(m):
     thieu_is_error = {"modelUsage": {
         "claude-opus-5": {"canonicalModel": "claude-opus-5"}}}
@@ -156,7 +144,6 @@ def r06_json_mo_ho_phai_do(m):
     _doi_loi(m, m.kiem_ket_qua, "claude-opus-5", {"is_error": False, "modelUsage": {
         "id-theo-ngay": {"canonicalModel": "claude-fable-5"}}})
 
-
 def r07_don_dieu_moi_to_hop(m):
     """96 tổ hợp gốc; với mỗi tổ hợp, thêm từng khoản điểm và so chỉ số bậc."""
     vung = (".github/workflows/ci.yml", "docs/adr/x.md", "scripts/x.py",
@@ -166,7 +153,7 @@ def r07_don_dieu_moi_to_hop(m):
         return [path] + (["scripts/phu-%d.py" % i for i in range(4)] if nhieu else [])
 
     for review_class, path, nhieu, dai, muon in itertools.product(
-            ("normal", "sensitive"), vung, (False, True), (False, True), (False, True)):
+            ("thuong", "sensitive"), vung, (False, True), (False, True), (False, True)):
         args = (ds(path, nhieu), 400 if dai else 399, 3 if muon else 2)
         hien_tai = BAC.index(_bac(m, review_class, *args))
         cac_ban_them = [
@@ -182,6 +169,21 @@ def r07_don_dieu_moi_to_hop(m):
         if hien_tai < co_so:
             raise AssertionError("đổi từ vùng 0 điểm sang %s làm tụt bậc" % path)
 
+def r08_review_class_allow_list(m):
+    # Đo lượt 2: `sensitve`/`SENSITIVE`/None từng âm thầm bớt 2 điểm; strip thì hợp lệ.
+    for x in ("sensitve", "SENSITIVE", None):
+        _doi_loi(m, m.chon, x, ["scripts/x.py"], 0, 1)
+    if _bac(m, " sensitive ", ["scripts/x.py"]) != BAC[1]:
+        raise AssertionError("review_class hợp lệ sau strip bị từ chối")
+
+def r09_write_set_rong_khong_do_duoc(m):
+    for x in ([], "", (), [" ", ""]):
+        _doi_loi(m, m.chon, "thuong", x, 0, 1)
+
+def r10_so_am_khong_phai_pham_vi_nho(m):
+    for so_dong, luot in ((-999, 1), (0, -5), (0, 0), (1.5, 1), (0, True)):
+        _doi_loi(m, m.chon, "thuong", ["scripts/x.py"], so_dong, luot)
+    m.chon("thuong", ["scripts/x.py"], 0, 1)
 
 CA = [
     ("r01_bon_bac_biet_truoc", r01_bon_bac_biet_truoc),
@@ -191,6 +193,9 @@ CA = [
     ("r05_chin_fixture_hai_rig", r05_chin_fixture_hai_rig),
     ("r06_json_mo_ho_phai_do", r06_json_mo_ho_phai_do),
     ("r07_don_dieu_moi_to_hop", r07_don_dieu_moi_to_hop),
+    ("r08_review_class_allow_list", r08_review_class_allow_list),
+    ("r09_write_set_rong_khong_do_duoc", r09_write_set_rong_khong_do_duoc),
+    ("r10_so_am_khong_phai_pham_vi_nho", r10_so_am_khong_phai_pham_vi_nho),
 ]
 
 DOT_BIEN = {
@@ -225,8 +230,18 @@ DOT_BIEN = {
         '    if ket_qua_json.get("is_error") is not False:',
         '    if ket_qua_json.get("is_error", False) is not False:',
         ["r06_json_mo_ho_phai_do"]),
+    "review_class_la_doc_nhu_thuong": (
+        '    if review_class not in ("sensitive", "thuong"):',
+        '    if False and review_class not in ("sensitive", "thuong"):',
+        ["r08_review_class_allow_list"]),
+    "write_set_rong_van_chon": (
+        "    if not ket_qua:", "    if False and not ket_qua:",
+        ["r09_write_set_rong_khong_do_duoc"]),
+    "so_am_doc_nhu_pham_vi_nho": (
+        "    if type(so_dong) is not int or so_dong < 0 or type(luot) is not int or luot < 1:",
+        "    if type(so_dong) is not int or type(luot) is not int:",
+        ["r10_so_am_khong_phai_pham_vi_nho"]),
 }
-
 
 def _chay(m):
     dat, ly = {}, {}
@@ -239,12 +254,10 @@ def _chay(m):
             ly[ten] = "%s: %s" % (type(exc).__name__, exc)
     return dat, ly
 
-
 def _ap(van, tim, thay):
     if van.count(tim) != 1:
         raise AssertionError("mốc đột biến khớp %d chỗ: %r" % (van.count(tim), tim))
     return van.replace(tim, thay, 1)
-
 
 def main():
     nen, ly = _chay(_nap())
@@ -277,7 +290,6 @@ def main():
         return 1
     print("TỔNG: ĐẠT")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

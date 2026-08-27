@@ -54,10 +54,12 @@ jobs:
           TL_KHO: ${{ github.repository }}
           TL_PR: ${{ github.event.pull_request.number }}
           TL_TAC_GIA: ${{ github.event.pull_request.user.login }}
+          TL_HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
           set -eu
           PY="$(command -v python3 || command -v python || command -v py)"
-          "$PY"  .claude/dev/duyet_danh_tinh.py --kho "$TL_KHO" --pr "$TL_PR" --tac-gia "$TL_TAC_GIA"
+          "$PY"  .claude/dev/duyet_danh_tinh.py --kho "$TL_KHO" --pr "$TL_PR" \
+                 --tac-gia "$TL_TAC_GIA" --head-sha "$TL_HEAD"
 
   phan-chung:
     if: github.event_name == 'pull_request'

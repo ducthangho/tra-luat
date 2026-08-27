@@ -57,8 +57,8 @@ def _yaml():
     return yaml.safe_load(YML.read_text(encoding="utf-8"))
 
 
-def _rv(ai, tt="APPROVED", luc="2026-01-01T00:00:00Z"):
-    return {"user": {"login": ai}, "state": tt, "submitted_at": luc}
+def _rv(ai, tt="APPROVED", luc="2026-01-01T00:00:00Z", commit="HEAD1"):
+    return {"user": {"login": ai}, "state": tt, "submitted_at": luc, "commit_id": commit}
 
 
 # ── TẦNG A — vị từ ─────────────────────────────────────────────────────────────────────
@@ -139,6 +139,29 @@ def ca_CHI_tinh_review_MOI_NHAT(m):
         raise AssertionError("CHANGES_REQUESTED cũ đã được thay bằng APPROVED mà vẫn chặn")
 
 
+def ca_ban_duyet_CU_khong_tinh(m):
+    """Duyệt xong rồi ĐẨY THÊM COMMIT thì bản duyệt cũ thuộc về MÃ KHÁC.
+
+    Không neo vào head thì cổng đo một thứ đã hết hạn: xin duyệt lúc diff vô hại, rồi đẩy
+    tiếp. GitHub có ô "dismiss stale approvals", nhưng đó là CÀI ĐẶT KHO chứ không phải
+    thuộc tính của cổng — dựa vào nó là dựa vào thứ nằm ngoài tầm cổng, đúng lối dựa mà
+    packet này sinh ra để bỏ."""
+    duyet = [_rv("code2nguyen", commit="HEAD1")]
+    if not m.phan_quyet("ducthangho", duyet, head_sha="HEAD1")[0]:
+        raise AssertionError("bản duyệt ĐÚNG head bị chặn oan")
+    dat, ly = m.phan_quyet("ducthangho", duyet, head_sha="HEAD2")
+    if dat:
+        raise AssertionError("bản duyệt của commit CŨ vẫn được tính: " + ly)
+
+
+def ca_thieu_commit_id_khong_duoc_doc_thanh_DAT(m):
+    """Neo thì phải neo CHẶT: thiếu `commit_id` mà đang có head để so là KHÔNG ĐO ĐƯỢC."""
+    thieu = [{"user": {"login": "code2nguyen"}, "state": "APPROVED",
+              "submitted_at": "2026-01-01T00:00:00Z"}]
+    if m.phan_quyet("ducthangho", thieu, head_sha="HEAD1")[0]:
+        raise AssertionError("bản ghi THIẾU `commit_id` vẫn được tính là duyệt đúng head")
+
+
 # ── TẦNG B — hình dạng workflow ────────────────────────────────────────────────────────
 def ca_cong_KHONG_chay_tren_pull_request(m):
     """B1. `pull_request` lấy workflow TỪ NHÁNH PR ⇒ PR tự nới cổng cho mình."""
@@ -171,6 +194,15 @@ def ca_khong_co_cu_phap_bieu_thuc_trong_run(m):
         raise AssertionError("có cú pháp biểu thức trong thân `run`: %s" % xau)
 
 
+def ca_workflow_TRUYEN_head_sha(m):
+    """Vị từ neo được vào head KHÔNG có nghĩa gì nếu workflow quên truyền head vào.
+    Ca `ban_duyet_CU_khong_tinh` gọi vị từ TRỰC TIẾP, nên nó vẫn xanh trong khi cổng thật
+    mù — đúng khoảng cách giữa "hàm đúng" và "cổng đúng"."""
+    r = "".join(str(b.get("run") or "") for b in _yaml()["jobs"]["cong"]["steps"])
+    if "--head-sha" not in r:
+        raise AssertionError("job `cong` KHÔNG truyền `--head-sha` — vị từ neo mà cổng không neo")
+
+
 def ca_quyen_CHI_DOC(m):
     q = _yaml().get("permissions") or {}
     xau = [f"{k}={v}" for k, v in q.items() if str(v) != "read"]
@@ -201,17 +233,20 @@ CA = [
     ("danh_sach_cho_phep_RONG_la_DO", ca_danh_sach_cho_phep_RONG_la_DO),
     ("yeu_cau_SUA_chua_go_thi_chan", ca_yeu_cau_SUA_chua_go_thi_chan),
     ("CHI_tinh_review_MOI_NHAT", ca_CHI_tinh_review_MOI_NHAT),
+    ("ban_duyet_CU_khong_tinh", ca_ban_duyet_CU_khong_tinh),
+    ("thieu_commit_id_khong_duoc_doc_thanh_DAT", ca_thieu_commit_id_khong_duoc_doc_thanh_DAT),
     ("cong_KHONG_chay_tren_pull_request", ca_cong_KHONG_chay_tren_pull_request),
     ("cong_KHONG_checkout_head_PR", ca_cong_KHONG_checkout_head_PR),
     ("khong_co_cu_phap_bieu_thuc_trong_run", ca_khong_co_cu_phap_bieu_thuc_trong_run),
+    ("workflow_TRUYEN_head_sha", ca_workflow_TRUYEN_head_sha),
     ("quyen_CHI_DOC", ca_quyen_CHI_DOC),
     ("cong_KHONG_chay_ma_den_tu_PR", ca_cong_KHONG_chay_ma_den_tu_PR),
 ]
 
 DOT_BIEN_MA = {
     "bo_kiem_KHAC_tac_gia": (
-        "                 if st in _TAN and a in cho and a != ta)",
-        "                 if st in _TAN and a in cho)",
+        "                 if st in _TAN and a in cho and a != ta and _dung_commit(c))",
+        "                 if st in _TAN and a in cho and _dung_commit(c))",
         ["tu_duyet_bi_chan", "HOA_THUONG_khong_lam_lot_tu_duyet"]),
     "so_tho_khong_casefold": (
         '    return str(x or "").strip().casefold()',
@@ -236,6 +271,10 @@ DOT_BIEN_MA = {
         "    if not cho:\n",
         "    if False:\n",
         ["danh_sach_cho_phep_RONG_la_DO"]),
+    "bo_neo_vao_HEAD": (
+        "        return True if not head_sha else (c == str(head_sha))",
+        "        return True",
+        ["ban_duyet_CU_khong_tinh", "thieu_commit_id_khong_duoc_doc_thanh_DAT"]),
     "tac_gia_rong_van_tha": (
         "    if not ta:\n",
         "    if False:\n",
@@ -253,6 +292,10 @@ DOT_BIEN_YML = {
         "          ref: ${{ github.event.pull_request.base.ref }}\n",
         "          ref: ${{ github.event.pull_request.head.sha }}\n",
         ["cong_KHONG_checkout_head_PR"]),
+    "workflow_quen_truyen_head_sha": (
+        ' \\\n                 --tac-gia "$TL_TAC_GIA" --head-sha "$TL_HEAD"\n',
+        ' --tac-gia "$TL_TAC_GIA"\n',
+        ["workflow_TRUYEN_head_sha"]),
     "quyen_ghi": (
         "permissions:\n  contents: read\n  pull-requests: read\n",
         "permissions:\n  contents: write\n  pull-requests: read\n",

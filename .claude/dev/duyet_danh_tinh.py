@@ -53,7 +53,7 @@ def _chuan(x):
     return str(x or "").strip().casefold()
 
 
-def phan_quyet(tac_gia, reviews, cho_phep=NGUOI_DUOC_DUYET):
+def phan_quyet(tac_gia, reviews, cho_phep=NGUOI_DUOC_DUYET, head_sha=None):
     """Trả `(đạt, lý do)`.
 
     Vị từ THUẦN, nhận dữ liệu làm ĐỐI SỐ — đó là điều kiện để nó có ca BIẾT TRƯỚC ĐÁP ÁN.
@@ -62,6 +62,13 @@ def phan_quyet(tac_gia, reviews, cho_phep=NGUOI_DUOC_DUYET):
 
     `reviews`: danh sách bản ghi review của GitHub. `None` = KHÔNG ĐỌC ĐƯỢC (khác danh sách
     RỖNG, nghĩa là đọc được và không có review nào).
+
+    `head_sha`: BẢN DUYỆT PHẢI THUỘC VỀ ĐÚNG COMMIT ĐANG XÉT. Không có ràng buộc này thì
+    duyệt xong rồi đẩy thêm commit là qua được cổng với một bản duyệt cho MÃ KHÁC — tức
+    cổng đo một thứ đã hết hạn. GitHub có tuỳ chọn "dismiss stale approvals", nhưng đó là
+    một Ô TRONG CÀI ĐẶT KHO, không phải thuộc tính của cổng này; dựa vào nó là dựa vào thứ
+    nằm ngoài tầm cổng, và chính packet này sinh ra vì lối dựa ấy.
+    `head_sha=None` = KHÔNG neo (dùng cho ca test vị từ thuần); đường CLI luôn truyền.
     """
     if reviews is None:
         return False, "KHÔNG ĐO ĐƯỢC: không đọc được danh sách review"
@@ -83,16 +90,27 @@ def phan_quyet(tac_gia, reviews, cho_phep=NGUOI_DUOC_DUYET):
             continue
         khoa = ((r or {}).get("submitted_at") or "", i)
         if ai not in moi_nhat or khoa > moi_nhat[ai][0]:
-            moi_nhat[ai] = (khoa, str((r or {}).get("state") or "").upper())
+            moi_nhat[ai] = (khoa, str((r or {}).get("state") or "").upper(),
+                            str((r or {}).get("commit_id") or ""))
 
-    chan = sorted(a for a, (_, st) in moi_nhat.items() if st in _CHAN and a in cho)
+    chan = sorted(a for a, (_, st, _c) in moi_nhat.items() if st in _CHAN and a in cho)
     if chan:
         return False, "có yêu cầu SỬA chưa gỡ từ: " + ", ".join(chan)
 
-    tan = sorted(a for a, (_, st) in moi_nhat.items()
-                 if st in _TAN and a in cho and a != ta)
+    def _dung_commit(c):
+        # Neo thì phải neo CHẶT: bản ghi thiếu `commit_id` mà đang có `head_sha` để so là
+        # KHÔNG ĐO ĐƯỢC, và KHÔNG ĐO ĐƯỢC không được đọc thành ĐẠT.
+        return True if not head_sha else (c == str(head_sha))
+
+    tan = sorted(a for a, (_, st, c) in moi_nhat.items()
+                 if st in _TAN and a in cho and a != ta and _dung_commit(c))
     if not tan:
-        tu_duyet = [a for a, (_, st) in moi_nhat.items() if st in _TAN and a == ta]
+        cu_ky = sorted(a for a, (_, st, c) in moi_nhat.items()
+                       if st in _TAN and a in cho and a != ta and not _dung_commit(c))
+        if cu_ky:
+            return False, ("bản duyệt của %s thuộc commit KHÁC head hiện tại — đã cũ"
+                           % ", ".join(cu_ky))
+        tu_duyet = [a for a, (_, st, _c) in moi_nhat.items() if st in _TAN and a == ta]
         if tu_duyet:
             return False, ("chỉ có TỰ DUYỆT (%s) — cần một danh tính KHÁC" % ta)
         return False, ("chưa có bản duyệt nào từ danh tính khác `%s` trong %s"
@@ -114,6 +132,8 @@ def main() -> int:
     ap.add_argument("--pr", required=True, type=int)
     ap.add_argument("--tac-gia", default=None,
                     help="login tác giả; thiếu thì hỏi API (fail-close nếu hỏi hỏng)")
+    ap.add_argument("--head-sha", default=None,
+                    help="sha head PR; bản duyệt phải thuộc đúng commit này")
     a = ap.parse_args()
     token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN") or ""
     if not token:
@@ -129,7 +149,7 @@ def main() -> int:
         # KHÔNG nuốt: API hỏng là KHÔNG ĐO ĐƯỢC, và KHÔNG ĐO ĐƯỢC phải ĐỎ.
         print("ĐỎ: KHÔNG ĐO ĐƯỢC — API lỗi: %s: %s" % (type(e).__name__, e))
         return 2
-    dat, ly = phan_quyet(tac_gia, reviews)
+    dat, ly = phan_quyet(tac_gia, reviews, head_sha=a.head_sha)
     print(("XANH: " if dat else "ĐỎ: ") + ly)
     if not dat:
         print("      tác giả=%r · số bản ghi review=%d · được phép duyệt=%s"

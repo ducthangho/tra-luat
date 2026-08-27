@@ -87,6 +87,16 @@ _ENV_CONG = {
     "TL_HEAD": _bt("github.event.pull_request.head.sha"),
 }
 
+# `with_khoa` là ALLOW-LIST CHÍNH XÁC, không phải "những khoá bắt buộc phải có".
+# Bản đầu của allow-list này chỉ đòi hai khoá CÓ MẶT và bỏ qua khoá THỪA — cross-review lượt 2
+# (codex) đo được ba đường lách trước khi lượt ấy bị bộ lọc nội dung của nền giết giữa chừng.
+# Hai trong ba là lỗ THẬT, và cả hai là đúng bẫy B2 mà `_TOPOLOGY_CONG` sinh ra để đóng:
+#   · `repository: <kho lạ>`  — `actions/checkout` nhận khoá này, nên job cầm token của kho đi
+#     lấy mã từ KHO KHÁC rồi chạy `.claude/dev/duyet_danh_tinh.py` CỦA KHO ẤY. `ref` vẫn là
+#     `base.ref` nên `ca_cong_KHONG_checkout_head_PR` cũng không thấy gì.
+#   · `token: <bí mật khác>` — checkout bằng một credential khác, có thể có quyền ghi.
+# Cái thứ ba (`fetch-depth: 0`) vô hại, và chính vì vô hại nên nó là ca đo TÍNH CHÍNH XÁC của
+# allow-list chứ không đo mức nguy hiểm: một allow-list đúng thì từ chối cả khoá vô hại.
 _TOPOLOGY_CONG = (
     {"khoa": ("name", "uses", "with"), "uses": _CHECKOUT,
      "with_khoa": ("ref", "persist-credentials"),
@@ -198,9 +208,13 @@ def loi_topology(cac_buoc):
         if "env" in mau and dict(b.get("env") or {}) != mau["env"]:
             xau.append("bước %d: bảng `env` KHÁC bản trong allow-list" % i)
         w = b.get("with") or {}
-        thieu = sorted(set(mau.get("with_khoa") or ()) - set(w))
+        mong = set(mau.get("with_khoa") or ())
+        thieu = sorted(mong - set(w))
         if thieu:
             xau.append("bước %d: `with` thiếu %s" % (i, thieu))
+        thua_w = sorted(set(w) - mong)
+        if thua_w:
+            xau.append("bước %d: `with` có khoá NGOÀI allow-list: %s" % (i, thua_w))
         for k, v in sorted((mau.get("with_gia_tri") or {}).items()):
             if w.get(k) != v:
                 xau.append("bước %d: `with.%s`=%r, allow-list đòi %r" % (i, k, w.get(k), v))
@@ -687,6 +701,19 @@ DOT_BIEN_YML = {
         "          set -eu\n          git fetch origin \"$GITHUB_SHA\"\n"
         "          git checkout FETCH_HEAD\n"
         "      - name: do nguoi duyet khac nguoi tao PR\n",
+        ["topology_job_cong"]),
+    # ba đường lách reviewer lượt 2 đo được trên bản `with` chỉ-đòi-có-mặt.
+    "them_with_repository_kho_LA": (
+        "          persist-credentials: false\n",
+        "          persist-credentials: false\n          repository: nguoi-la/kho-doc-hai\n",
+        ["topology_job_cong"]),
+    "them_with_token_bi_mat_KHAC": (
+        "          persist-credentials: false\n",
+        "          persist-credentials: false\n          token: " + _MO_BIEU_THUC + " secrets.PAT_GHI }}\n",
+        ["topology_job_cong"]),
+    "them_with_khoa_VO_HAI": (
+        "          persist-credentials: false\n",
+        "          persist-credentials: false\n          fetch-depth: 0\n",
         ["topology_job_cong"]),
     "doi_env_TL_KHO_sang_kho_FORK": (
         "          TL_KHO: ${{ github.repository }}\n",

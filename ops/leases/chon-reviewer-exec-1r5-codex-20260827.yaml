@@ -155,3 +155,4 @@ posted_comment_id:   # workflow ghi, ĐỪNG sửa tay
 #
 # WRITE_SET KHÔNG ĐỔI. Đặc tả sống trên nhánh ops này và do phiên điều phối ghi theo lệnh chủ
 # kho; executor không cần và không được sửa nó.
+posted_comment_id: 5439409852   # workflow ghi, ĐỪNG sửa tay

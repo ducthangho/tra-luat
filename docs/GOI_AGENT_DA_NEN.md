@@ -622,7 +622,7 @@ KHÁC NHAU ở hai cấu hình. Mục dưới có ví dụ: hàng `--allowedTool
 **Mục này dùng BA trên năm hạng — nhưng KHÔNG phải ba hạng mà bản trước tưởng.** Đơn vị đếm là
 **lần GẮN NHÃN cho một mệnh đề**, không phải số lần xuất hiện của cụm chữ. TÁM mệnh đề mang nhãn:
 năm hàng bảng, cộng mệnh đề cơ chế proxy ambient, mệnh đề bộ-ba-với-quyền-ghi, và mệnh đề mạng
-sandbox ở đoạn khai chỗ tách. Đếm ra: `chiều ĐÓNG` ×1 · `chiều MỞ` ×5 · `chưa xếp được` ×2 ·
+sandbox ở đoạn khai chỗ tách. Đếm ra: `chiều ĐÓNG` ×1 · `chiều MỞ` ×4 · `chưa xếp được` ×3 ·
 `máy phát hiện` ×0 · `quan sát chưa rõ cơ chế` ×0.
 Mệnh đề thứ tám ấy TỪNG bị bỏ khỏi phép đếm vì "bằng chứng ở chỗ khác" — đó là mở đúng cái ngoại lệ
 mà cam kết trên cấm. Nay nó mang nhãn VÀ có điều kiện đo ngay cạnh nó, lấy từ phép A/B đã có sẵn
@@ -638,13 +638,14 @@ trong khi danh tính từng hạng đã đổi hết.
 bàn.** Luật hẹp `Bash(x:*)` đóng HÌNH DẠNG lệnh: đo được, fail-closed, và **không chạm quyền ghi
 vào kho**. Nên
 luận điểm đúng của mục là *chưa đo được control nào bó được quyền ghi*, với lượng từ cố ý yếu vì
-hai ô `chưa xếp được` là hai mệnh đề chưa chốt.
+ba ô `chưa xếp được` là ba mệnh đề chưa chốt.
 
 `máy phát hiện` rỗng cũng là kết luận, không phải sót: bộ ba từng bị gọi là máy phát hiện hoá ra
-KHÔNG tố cáo sự kiện đang bàn. `quan sát chưa rõ cơ chế` rỗng vì lý do riêng của TỪNG mệnh đề chưa chốt, không
-phải một lý do chung: hàng `workspace-write` không mang phiên bản lẫn số lần lặp, mà hạng ấy đòi
-lặp lại được; còn mệnh đề bộ-ba-với-quyền-ghi thì chưa ai đo CƠ CHẾ. Thiếu điều kiện thì chỗ của
-chúng là ô dư, không phải hạng gần nhất. Bảng giữ đủ năm hàng vì nó là **từ vựng dùng chung**; đừng đọc
+KHÔNG tố cáo sự kiện đang bàn. `quan sát chưa rõ cơ chế` rỗng vì lý do riêng của TỪNG mệnh đề chưa
+chốt, không phải một lý do chung: hàng `workspace-write` không mang phiên bản lẫn số lần lặp, mà
+hạng ấy đòi lặp lại được; mệnh đề bộ-ba-với-quyền-ghi thì chưa ai đo CƠ CHẾ; và mệnh đề mạng
+sandbox có phép đo nhưng phép ấy bật HAI cờ cùng lúc nên không tách được cơ chế — cùng lý do nó
+KHÔNG lên được `chiều MỞ`. Thiếu điều kiện thì chỗ của chúng là ô dư, không phải hạng gần nhất. Bảng giữ đủ năm hàng vì nó là **từ vựng dùng chung**; đừng đọc
 số hàng thành số hạng đã dùng.
 
 Luật đọc: **quan sát theo phiên bản KHÁC bất biến an ninh.** Chỉ được gọi một thứ là *ranh giới*
@@ -672,18 +673,18 @@ packet riêng. Lý do tách là một phép đếm, không phải cảm tính: b
 sinh finding về mục mạng/sandbox (tám finding), trong khi mọi tiêu chí khác của packet này đã đạt
 từ vòng ba. Mệnh đề còn đứng mà không cần bảng số nào — và nó MANG NHÃN như mọi mệnh đề khác:
 **mạng đóng của sandbox là một MẶC ĐỊNH CẤU HÌNH, không phải bất biến — biết cơ chế KHÔNG làm nó
-thành ranh giới** ⇒ **cơ chế đã xác minh — chiều MỞ**, cho câu hỏi *"nó có phải ranh giới không"*.
-ĐIỀU KIỆN ĐO nằm NGAY ĐÂY, không ở packet kia — và nó đã có sẵn trong chính tệp này: mục
-`sandbox workspace-write` phía trên đo A/B trên CÙNG một lệnh, mặc định `git ls-remote` lỗi kết
-nối, thêm `-c 'sandbox_workspace_write.network_access=true'` thì `lsremote_rc=0`. Một cờ cấu hình
-lật được đảo hẳn kết quả ⇒ cơ chế đã biết, và nó KHÔNG bó. Điều kiện của phép đo ấy: codex CLI
-trong container này, sandbox `workspace-write`, chạy ở vỏ phiên điều phối; số phụ thuộc phiên bản
-và cấu hình, đọc như QUAN SÁT CÓ ĐIỀU KIỆN ĐO. Chỗ phép đo ấy CHƯA tách được, nói thẳng: nó bật
-HAI cờ cùng lúc (`network_access` và `writable_roots`), nên "cờ mạng là thứ đảo `lsremote_rc`" là
-SUY LUẬN — hợp lý vì `ls-remote` không ghi `.git`, nhưng chưa ai chạy riêng từng cờ. Điều chưa tách
-ấy KHÔNG đụng tới mệnh đề: mệnh đề khai *"cấu hình đổi được kết quả"*, và A/B cho thấy đúng thế bất
-kể cờ nào là thủ phạm. Thứ ở packet kia là số đo đầy đủ, probe và bảng hai pha — **đừng chép chúng
-về đây**. Nhãn này KHÔNG dựa vào chúng.
+thành ranh giới** ⇒ **chưa xếp được**, cho câu hỏi *"nó có phải ranh giới không"*.
+ĐIỀU KIỆN ĐO nằm NGAY ĐÂY, không ở packet kia — mục `sandbox workspace-write` phía trên đo A/B
+trên CÙNG một lệnh: mặc định `git ls-remote` lỗi kết nối; sau khi bật **HAI** cờ cùng lúc
+(`network_access` và `writable_roots`) thì `lsremote_rc=0`. Điều kiện: codex CLI trong container
+này, sandbox `workspace-write`, vỏ phiên điều phối; số phụ thuộc phiên bản và cấu hình, đọc như
+QUAN SÁT CÓ ĐIỀU KIỆN ĐO.
+VÌ SAO `chưa xếp được` chứ không phải `chiều MỞ`: A/B hai-biến chứng minh TỔ HỢP cấu hình đổi được
+kết quả, KHÔNG đo cờ nào là nguyên nhân; `ls-remote` không ghi `.git` nên "cờ mạng là thủ phạm" là
+SUY LUẬN, mà bảng hạng đòi cơ chế ĐÃ XÁC MINH. Cũng không phải `quan sát chưa rõ cơ chế`: hạng ấy
+đòi số lần lặp và phiên bản ghi ngay tại quan sát, mục này không có. Phép tách bốn tổ hợp
+(không cờ · chỉ mạng · chỉ ghi · cả hai) thuộc packet kia; xong nó thì hạng này đo lại được.
+Thứ ở packet kia là số đo đầy đủ, probe và bảng hai pha — **đừng chép chúng về đây**.
 
 Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": `rc=0`, ref được tạo, và
 `--require-clean` **vẫn báo sạch**. Đo tiếp BA control ấy — năm hàng, vì `--allowedTools` vào bảng

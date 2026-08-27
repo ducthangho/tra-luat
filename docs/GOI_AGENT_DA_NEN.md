@@ -534,6 +534,204 @@ Lưu ý: phiên headless chạy Ở NGOÀI kho (sandbox review) không thừa k�
 `settings.json` của kho — allowlist per-run là đường duy nhất. Và **đừng kèm
 `--bare`**: nó bỏ qua cả cấu hình xác thực, phiên chết `Not logged in` (đo 20-08).
 
+#### `Bash(x:*)` KHỚP TIỀN TỐ CHUỖI LỆNH — nên nó chặn OAN gần hết phép đo thật (đo 24-08-2026)
+
+Câu "cấp allowlist HẸP theo lượt" ở trên **đúng về ý định và sai về hậu quả**, và nó đã làm hỏng
+**ba lượt cross-review liên tiếp** trong một phiên. Luật `Bash(git:*)` không khớp *"lệnh nào có
+chạy `git`"*; nó khớp *"chuỗi lệnh BẮT ĐẦU bằng `git`"*, nên mọi thứ có **ống, `;`, `>`, `$( )`,
+heredoc, hay gán biến đứng trước** đều **không khớp gì cả**. Đo được trong một lượt mà allowlist
+đã có đủ `Bash(git:*)` `Bash(python3:*)` `Bash(cd:*)` `Bash(echo:*)`:
+
+```text
+git ls-remote --heads origin 2>/dev/null | sed 's#...#' | sort > /tmp/mc   TU CHOI
+echo "may chu: $(git ls-remote --heads origin | wc -l)"                    TU CHOI
+python3 - <<'PY' ... PY                                                    TU CHOI
+M=8ba8acaa; echo ...; git merge-base --is-ancestor $M HEAD                 TU CHOI
+cd "$(git rev-parse --show-toplevel)"; python3 - <<'PY' ...                TU CHOI
+```
+
+*(Lượt ấy còn một lệnh thứ sáu bị từ chối — `bash /tmp/refscan.sh` — nhưng nó **khác nguyên nhân**:
+allowlist lượt đó không có `Bash(bash:*)`, tức bị chặn vì thiếu tên chương trình chứ không vì lệnh
+ghép. Ghi tách vì gộp nó vào năm ca trên là **lời khai rộng hơn phép đo** — cross-review bắt đúng
+chỗ này.)*
+
+Chốt của Claude Code làm **đúng** — luật tiền tố không bao được phần còn lại của lệnh ghép nên nó
+từ chối thay vì đoán. Cái sai ở phía ta: **allowlist theo tên chương trình phân biệt CÁCH VIẾT,
+không phân biệt THẨM QUYỀN**, đúng hình dạng kho đã đếm nhiều lần — lần này nó cắn chính bộ đo của
+mình. Và hậu quả không dừng ở "thiếu vài phép đo": mỗi lần bị từ chối, reviewer viết lại lệnh rồi
+thử tiếp, vòng lặp ấy làm context phình. Ba lượt, **cùng prompt, cùng exact head**:
+
+| allowlist | lượt hội thoại | bị từ chối | cache đọc | kết cục |
+|---|---:|---:|---:|---|
+| liệt kê theo tên lệnh | 78 | 5 | 10,8 M | `api_error` — mất trắng |
+| nới thêm `cd`/`bash`/`sh` | 85 | 10 | 12,8 M | `api_error` — mất trắng |
+| **`Bash` trần** | **45** | **1** | **3,7 M** | **`completed`, verdict đầy đủ** |
+
+**Ba con số ấy KHÔNG tái lập được từ kho** — đọc từ `usage` và `permission_denials` trong
+`stdout.log` của ba lượt, mà các tệp ấy nằm trong scratchpad của phiên, **không được git theo dõi**.
+Bảng trên là *chứng cứ đã đo*, không phải *phép đo bạn chạy lại được*.
+
+**Nhân quả thì CHƯA chứng minh:** ba lượt khác nhau ở **cả** allowlist **lẫn** thời điểm chạy, nên
+không loại được yếu tố phía dịch vụ — đây là **tương quan có neo**. Nói chắc được chỉ là: allowlist
+rộng cho ít lượt hơn, ít bị từ chối hơn, ít context hơn, và là cấu hình duy nhất trong ba cho ra
+verdict. Giá trước khi tìm ra: ~$39 và ba lượt chạy.
+
+**Nên làm.** Phiên **reviewer read-only** trong clone rời: cấp `Bash` **trần** cộng đúng những công
+cụ MCP chỉ đọc mà lượt ấy cần:
+
+```bash
+claude -p --model opus --effort max --permission-mode acceptEdits \
+  --allowedTools Read Glob Grep Bash \
+      mcp__github__pull_request_read mcp__github__issue_read mcp__github__get_file_contents \
+  --output-format json < PROMPT.md
+```
+
+Và **đừng gọi đó là siết an ninh** — nó chưa từng là. Giữ danh sách hẹp ở đây không mua được an
+toàn, chỉ mua được một verdict mỏng hơn, hoặc không có verdict nào.
+
+#### NĂM HẠNG bằng chứng — đọc mục dưới bằng từ vựng này, kẻo lại viết ra những câu chỏi nhau
+
+**Phạm vi của từ vựng này:** nó áp cho các **control của mục này** — BA control TRONG BẢNG, đo ở vỏ phiên
+điều phối, thành NĂM mệnh đề TRONG BẢNG (`--allowedTools` và cặp credential mỗi cái được đo ở
+hai cấu hình); văn xuôi dưới bảng mang thêm BA mệnh đề nữa; phép đếm đầy đủ nằm ngay sau bảng năm hạng.
+Mục mạng/sandbox codex và mục hai pha reviewer ĐÃ ĐƯỢC TÁCH sang **packet `MANG-SANDBOX-CODEX`,
+Issue #334** — đó là NEO DUY NHẤT cho chỗ tách; mọi câu "packet kia" phía dưới đều trỏ về đây, và
+đừng chép trạng thái động của nó vào tệp này. Cái ĐI theo lát cắt là SỐ ĐO đầy đủ, probe và bảng
+hai pha. Cái Ở LẠI là ĐÚNG MỘT mệnh đề về mạng sandbox: nó nằm TRONG phạm vi từ vựng này, mang
+nhãn, và được đếm Ở ĐÂY — nên điều kiện đo của nó cũng phải nằm ngay cạnh nó như mọi mệnh đề khác.
+Chỗ khác trong tệp dùng chữ *ranh giới* / *cưỡng chế* theo nghĩa thường (phân công giữa
+launcher và CLI ở đầu tệp; hạn chót của launcher; và *"ranh giới cắt"* là thuật ngữ Git của clone
+nông) — những chỗ ấy **không** mang hạng, và nói ra ở đây để không ai đi gắn nhãn nhầm.
+
+Vì sao cần từ vựng này: bản đầu của mục dưới tự mâu thuẫn trong sáu chục dòng — khai *"không
+tầng nào bó được"*, rồi gọi một tầng là *"hàng rào thật, có sẵn"*, rồi dùng nó làm cột **cưỡng
+chế**, rồi bảo *đừng dựa vào nó như một bảo đảm an ninh*. Cả bốn câu đều dựa trên phép đo có
+thật; thứ trôi không phải số liệu mà là **HẠNG của bằng chứng**. NĂM hạng — và **đơn vị được xếp
+hạng là một MỆNH ĐỀ KÈM ĐIỀU KIỆN ĐO**, không phải một control trần: cùng một control mang hạng
+KHÁC NHAU ở hai cấu hình. Mục dưới có ví dụ: hàng `--allowedTools` tách làm hai vì luật hẹp và
+`Bash` trần cho hai hạng khác nhau. Mọi mệnh đề sau đây mang đúng một nhãn:
+
+| hạng | nghĩa | được gọi là |
+|---|---|---|
+| **cơ chế đã xác minh — chiều ĐÓNG** | biết nó chặn BẰNG GÌ, và đã đo được nó chặn | *ranh giới*, *hàng rào* |
+| **cơ chế đã xác minh — chiều MỞ** | biết vì sao nó KHÔNG chặn, và đã đo | KHÔNG được gọi là ranh giới; nó giải thích một chỗ HỞ |
+| **quan sát chưa rõ cơ chế** | lặp lại được, nhưng chưa ai đo CƠ CHẾ ⇒ chưa biết có bền không | *quan sát* — kèm phiên bản và điều kiện đo |
+| **máy phát hiện** | không ngăn được gì; nó TỐ CÁO sau khi việc đã xảy ra | *máy phát hiện* |
+| **chưa xếp được** | không rơi gọn vào bốn hàng trên | phải GỌI TÊN là chưa xếp được, không im lặng bỏ qua |
+
+**Mục này dùng BA trên năm hạng — nhưng KHÔNG phải ba hạng mà bản trước tưởng.** Đơn vị đếm là
+**lần GẮN NHÃN cho một mệnh đề**, không phải số lần xuất hiện của cụm chữ. TÁM mệnh đề mang nhãn:
+năm hàng bảng, cộng mệnh đề cơ chế proxy ambient, mệnh đề bộ-ba-với-quyền-ghi, và mệnh đề mạng
+sandbox ở đoạn khai chỗ tách. Đếm ra: `chiều ĐÓNG` ×1 · `chiều MỞ` ×4 · `chưa xếp được` ×3 ·
+`máy phát hiện` ×0 · `quan sát chưa rõ cơ chế` ×0.
+Mệnh đề thứ tám ấy TỪNG bị bỏ khỏi phép đếm vì "bằng chứng ở chỗ khác" — đó là mở đúng cái ngoại lệ
+mà cam kết trên cấm. Nay nó mang nhãn VÀ có điều kiện đo ngay cạnh nó, lấy từ phép A/B đã có sẵn
+trong chính tệp này; thứ ở packet kia chỉ là số đo ĐẦY ĐỦ, không phải chỗ dựa của nhãn.
+
+Bản trước của chính đoạn này khai `chiều ĐÓNG` **bằng KHÔNG** rồi dựng cả một lập luận trên đó —
+rằng ô rỗng ấy chứng minh "không control nào bó được". Cross-review bác: có mệnh đề THẬT SỰ đóng.
+Ghi lại vì bài học đắt hơn con số: **quan hệ tổng còn đúng không chứng minh các số hạng còn đúng**.
+Số hạng-được-dùng vẫn là ba trước và sau khi sửa, nên mọi phép kiểm đếm-theo-quan-hệ đều xanh
+trong khi danh tính từng hạng đã đổi hết.
+
+Điều đáng nói nay KHÁC hẳn, và mạnh hơn: **có thứ đóng thật — nhưng nó không đóng ĐÚNG THỨ đang
+bàn.** Luật hẹp `Bash(x:*)` đóng HÌNH DẠNG lệnh: đo được, fail-closed, và **không chạm quyền ghi
+vào kho**. Nên
+luận điểm đúng của mục là *chưa đo được control nào bó được quyền ghi*, với lượng từ cố ý yếu vì
+ba ô `chưa xếp được` là ba mệnh đề chưa chốt.
+
+`máy phát hiện` rỗng cũng là kết luận, không phải sót: bộ ba từng bị gọi là máy phát hiện hoá ra
+KHÔNG tố cáo sự kiện đang bàn. `quan sát chưa rõ cơ chế` rỗng vì lý do riêng của TỪNG mệnh đề chưa
+chốt, không phải một lý do chung: hàng `workspace-write` không mang phiên bản lẫn số lần lặp, mà
+hạng ấy đòi lặp lại được; mệnh đề bộ-ba-với-quyền-ghi thì chưa ai đo CƠ CHẾ; và mệnh đề mạng
+sandbox có phép đo nhưng phép ấy bật HAI cờ cùng lúc nên không tách được cơ chế — cùng lý do nó
+KHÔNG lên được `chiều MỞ`. Thiếu điều kiện thì chỗ của chúng là ô dư, không phải hạng gần nhất. Bảng giữ đủ năm hàng vì nó là **từ vựng dùng chung**; đừng đọc
+số hàng thành số hạng đã dùng.
+
+Luật đọc: **quan sát theo phiên bản KHÁC bất biến an ninh.** Chỉ được gọi một thứ là *ranh giới*
+sau khi xác minh cơ chế **và đo được nó chặn**; trước đó nó là *quan sát*, và quan sát thì có hạn dùng.
+
+Hàng cuối tồn tại vì cross-review bắt được: bản đầu của bảng này chỉ có ba hàng, tự xưng *"mọi câu
+dưới đây mang đúng một nhãn"*, rồi **sai ngay ở ví dụ của chính nó** — cơ chế proxy chèn credential
+là thứ đã xác minh theo chiều MỞ, không thoả định nghĩa "đo được fail-close" của hàng đầu.
+**Một bảng phân loại tự xưng phủ hết mà không có ô dư thì không thể phủ hết**; ô dư là chỗ để cái
+chưa xếp được LỘ RA thay vì bị nhét bừa vào hàng gần nhất.
+
+#### Ba CONTROL thường bị coi là hàng rào, NĂM mệnh đề trong bảng — đo Ở VỎ PHIÊN ĐIỀU PHỐI: CHƯA đo được control nào bó được QUYỀN GHI VÀO KHO (24-08-2026)
+
+Phạm vi của mục này là **vỏ phiên điều phối** (`claude`, `Bash` trần), và thứ bị đo là **quyền ghi
+vào kho** — không phải "bó" nói chung. Phân biệt ấy quan trọng: HAI hàng `--allowedTools` dưới đây CÓ
+chặn, nhưng nó chặn theo **hình dạng lệnh**, không theo **thẩm quyền**, nên nó chặn oan phép đo mà
+không chặn được đường ghi. Hàng `codex` trong bảng là **phép đo đối chứng ở vỏ phiên**, và chỉ
+có MỘT — bảng này chưa bao giờ có hai. Bản trước viết *"Hai hàng `codex`"*: sai từ đầu, không phải
+sai do lát cắt. Sửa lần đầu còn tệ hơn, vì nó giải thích rằng hàng thứ hai "đã theo mục mạng sang
+packet kia" — **bịa một nguyên nhân cho một con số sai**, đúng lỗi mà chính tệp này lên án. Đối
+chiếu được: bảng có ĐÚNG một hàng `codex` ở `48cf331`, `f16b6bf`, `88bd4f2` và `6d0a183`.
+
+Kết quả **bên trong sandbox codex khác hẳn**, và mục ấy — cùng mục hai pha reviewer — ĐÃ TÁCH sang
+packet riêng. Lý do tách là một phép đếm, không phải cảm tính: bốn vòng cross-review liên tiếp đều
+sinh finding về mục mạng/sandbox (tám finding), trong khi mọi tiêu chí khác của packet này đã đạt
+từ vòng ba. Mệnh đề còn đứng mà không cần bảng số nào — và nó MANG NHÃN như mọi mệnh đề khác:
+**mạng đóng của sandbox là một MẶC ĐỊNH CẤU HÌNH, không phải bất biến — DÙ có biết cơ chế thì cũng
+KHÔNG làm nó thành ranh giới** ⇒ **chưa xếp được**, cho câu hỏi *"nó có phải ranh giới không"*.
+ĐIỀU KIỆN ĐO nằm NGAY ĐÂY, không ở packet kia — mục `sandbox workspace-write` phía trên đo A/B
+trên CÙNG một lệnh: mặc định `git ls-remote` lỗi kết nối; sau khi bật **HAI** cờ cùng lúc
+(`network_access` và `writable_roots`) thì `lsremote_rc=0`. Điều kiện: codex CLI trong container
+này, sandbox `workspace-write`, vỏ phiên điều phối; số phụ thuộc phiên bản và cấu hình, đọc như
+QUAN SÁT CÓ ĐIỀU KIỆN ĐO.
+VÌ SAO `chưa xếp được` chứ không phải `chiều MỞ`: A/B hai-biến chứng minh TỔ HỢP cấu hình đổi được
+kết quả, KHÔNG đo cờ nào là nguyên nhân; `ls-remote` không ghi `.git` nên "cờ mạng là thủ phạm" là
+SUY LUẬN, mà bảng hạng đòi cơ chế ĐÃ XÁC MINH. Cũng không phải `quan sát chưa rõ cơ chế`: hạng ấy
+đòi số lần lặp và phiên bản ghi ngay tại quan sát, mục này không có. Phép tách bốn tổ hợp
+(không cờ · chỉ mạng · chỉ ghi · cả hai) thuộc packet kia; xong nó thì hạng này đo lại được.
+Thứ ở packet kia là số đo đầy đủ, probe và bảng hai pha — **đừng chép chúng về đây**.
+
+Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": `rc=0`, ref được tạo, và
+`--require-clean` **vẫn báo sạch**. Đo tiếp BA control ấy — năm hàng, vì `--allowedTools` vào bảng
+hai lần (luật hẹp / `Bash` trần) và credential cũng hai lần (xoá khỏi env / token rác), đúng theo
+luật đơn vị ở trên: đếm CONTROL thì gom theo cơ chế, đếm MỆNH ĐỀ thì tách theo điều kiện đo.
+
+| tầng | phép đo | kết quả |
+|---|---|---|
+| `--allowedTools`, luật hẹp `Bash(x:*)` | gặp lệnh ghép | không khớp gì ⇒ **cơ chế đã xác minh — chiều ĐÓNG**, nhưng CHỈ đóng HÌNH DẠNG lệnh ghép (cơ chế khớp tiền tố, năm lệnh `TỪ CHỐI` đo ở mục trên); nó KHÔNG bó quyền ghi |
+| `--allowedTools`, `Bash` trần | cùng lệnh ghép | khớp mọi thứ ⇒ **cơ chế đã xác minh — chiều MỞ** |
+| `codex -s workspace-write` | ghi tệp **ngoài** cây | **`rc=0`** — tệp ngoài cây bị ghi đè thật ⇒ **CHƯA XẾP ĐƯỢC**: đo được nó KHÔNG chặn, nhưng cơ chế đã theo mục sandbox sang packet kia |
+| xoá `GITHUB_PAT` `GH_TOKEN` `GITHUB_TOKEN` `GIT_CONFIG_*` khỏi env | `git push --dry-run` lên GitHub | **`rc=0`** — vẫn đẩy được ⇒ **cơ chế đã xác minh — chiều MỞ** |
+| nhét **token RÁC** vào URL đẩy | cùng lệnh | **`rc=0`** ⇒ **cơ chế đã xác minh — chiều MỞ** |
+
+HAI dòng cuối cùng một cơ chế, và dòng chót là dòng quyết định: **proxy egress bỏ qua credential client gửi và tự chèn credential
+của nó** — nên "cấp token đọc riêng cho reviewer" cũng vô dụng, credential là **ambient ở mức
+container**. Đây là **cơ chế đã xác minh — chiều MỞ**: ta biết vì sao nó không chặn.
+Bản đầu còn viết *"ranh giới thật là clone rời + `--require-clean` + kiểm cây sạch"*. Câu ấy SAI
+về hạng, nhưng bản sửa đầu tiên cũng sai: nó gọi cả ba là **máy phát hiện**, trong khi phản chứng
+nằm ngay trên — push ĐÃ tạo ref mà `--require-clean` **vẫn báo sạch**, tức nó KHÔNG tố cáo. Đúng
+cách là hỏi **hạng cho ĐỐI TƯỢNG NÀO**. Với đối tượng của mục này — **quyền ghi/push vào kho** —
+bộ ba ấy là **CHƯA XẾP ĐƯỢC**: đo được nó không tố cáo, nhưng chưa ai đo vì sao, nên cũng không
+gọi được là chiều MỞ.
+
+Còn `--require-clean` với một đối tượng KHÁC — việc chạy một lượt trên cây bẩn — thì **hạng của
+nó không được xếp ở đây**, kể cả khi có vẻ hiển nhiên. Mục này chỉ đo **quyền ghi vào kho**, nên
+mọi kết luận về đối tượng khác phải nằm ở mục nói về vòng đời lượt chạy, mang phép đo riêng của
+nó. Câu này cố ý KHÔNG khẳng định control ấy bó hay không bó: khẳng định ở đây là lại thêm một
+mệnh đề vào một phạm vi đã tuyên bố không chứa nó — đúng lỗi cả mục sinh ra để chữa.
+
+Với phiên **executor có quyền ghi**, danh sách hẹp vẫn hợp lý: ở đó ta muốn giới hạn *hình dạng
+việc*, và executor có `settings.json` của kho làm nền.
+
+#### Bản in cuối cùng của phiên headless LÀ sản phẩm — không có lượt sau
+
+Cùng đợt đo, một lượt review khác thoát `rc=0`, `subtype: success`, `stop_reason: end_turn`, cây
+làm việc sạch — **188 lượt hội thoại, 105 911 token đầu ra, 31 phút** — rồi in đúng một câu:
+*"I'll pick this up when the probe lands."* Không có probe nào; `claude -p` không có cơ chế chạy
+nền. Toàn bộ công việc mất sạch.
+
+Hỏng kiểu này **trông y hệt thành công** ở mọi tín hiệu ta quen nhìn (`rc`, `is_error`, `subtype`,
+cây sạch); chỉ đọc **nội dung** bản in mới thấy rỗng. `rc=0` của một lượt agent **không phải bằng
+chứng có sản phẩm** — phải đo chính sản phẩm. Chốt rẻ, đã dùng lại và hiệu nghiệm: nói thẳng trong prompt rằng bản in cuối LÀ sản phẩm bàn giao,
+không có lượt sau; còn ~20% ngân sách thì **dừng đo và viết kết luận** với những gì đã có; ô nào
+chưa xong thì ghi `KHÔNG_ĐO_ĐƯỢC` kèm lý do — **đó là câu trả lời hợp lệ, im lặng thì không**; và
+lệnh nào bị từ chối quyền thì ghi vào mục *"chỗ không đo được"* rồi **đi tiếp**, đừng bỏ cả hướng đo.
+
 **Antigravity (AG).** Chế độ duyệt của AG nằm trong CÀI ĐẶT APP (Agent auto-run),
 kho không cấu hình hộ được. Khuyến nghị khi mở phiên AG cho packet của kho: bật
 auto-run cho lệnh ĐỌC + chạy test; giữ hỏi cho terminal ghi ngoài worktree, mọi thao

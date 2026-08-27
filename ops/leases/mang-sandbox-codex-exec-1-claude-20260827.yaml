@@ -281,3 +281,40 @@ HE_QUA_CHO_318:
     được, và việc nâng nhãn thành một phép đo kiểm được, không phải một con trỏ. Bản vá vòng 13
     ĐÃ ghi sẵn đường quay lại ấy vào tệp.
   vi_the_KHONG_va_318_them_lan_nua_bay_gio: true
+
+VERDICT_VONG_1:
+  hang: changes_requested
+  P1: 3
+  P2: 2
+  reviewed_sha: 2ef85c9defe1bfc41564180a486b5462d50b8f74
+  bien_nhan: ops/reviews/mang-sandbox-codex-review-1-codex-verdict.receipt.yaml
+  land_duoc_khong: 'KHÔNG — `luat_dung_LAND` chỉ cho P2 thành nợ; ba P1 đang mở.'
+  gioi_han_CAU_TRUC_cua_luot_review:
+    la_gi: >-
+      Reviewer khác nền là `codex`, mà `codex` CHÍNH LÀ cái hộp packet này đo. `codex sandbox` lồng
+      trả `rc=101` cho cả bốn tổ hợp; hàng "NGOÀI codex" cũng không tái lập được.
+    reviewer_do_duoc_gi: >-
+      Chạy `probe_mang.py` trong chính vỏ nó: `bind 1 · url 1 · git 1` — KHỚP hàng "sandbox mặc
+      định". Một trong ba hàng được kiểm chéo thật.
+    khong_de_bai_nao_chua_duoc: >-
+      Đây không phải lỗi soạn đề. Hai đường: chấp nhận rằng hai cột chỉ có phiên điều phối đo — và
+      phiên điều phối ĐÃ tự chạy lại cả bốn tổ hợp, khớp từng ô — hoặc đổi reviewer sang nền thứ
+      ba. Kho KHÔNG có nền thứ ba.
+    de_xuat: >-
+      Ghi thẳng giới hạn ấy vào `docs/MANG_SANDBOX_CODEX.md` như một mục `KHÔNG_ĐO_ĐƯỢC` mới:
+      "hai trong ba cột chưa được kiểm chéo bởi nền khác; lý do là cấu trúc, không phải thiếu sót".
+  S2_NHIEU_KHA_NANG_BAN_O_LUOT_VA:
+    bien_hien_tai: 13
+    vi_sao: >-
+      P1 `ma-chan-gom-moi-loi-khong-phan-loai` đòi tách mã trả về thành ít nhất sáu lớp cộng ca
+      khoá cho từng lớp. Gần như chắc vượt 13 dòng.
+    KHONG_tu_nang_tran: >-
+      Phiên điều phối KHÔNG tự nâng và KHÔNG tự tách. Quyết định thuộc người giữ kho khi lượt vá
+      chạm trần và báo con số ĐO ĐƯỢC.
+  bai_hoc_lan_thu_BA_trong_phien:
+    hinh_dang: 'cơ chế mới thêm vào cổng mà KHÔNG ai canh nó'
+    lan_1: '#319 — bộ chạy đột biến thiếu chốt duy-nhất'
+    lan_2: '#319 — hai dòng hậu tố ĐẠT/ĐỎ không có đột biến canh'
+    lan_3: >-
+      #334 — packet này ĐÃ CÓ chốt duy-nhất (học từ #319) nhưng chốt ấy KHÔNG CÓ PHẢN CHỨNG: xoá nó
+      đi cổng vẫn xanh. Thêm một chốt KHÔNG bằng đo được rằng chốt ấy còn sống.

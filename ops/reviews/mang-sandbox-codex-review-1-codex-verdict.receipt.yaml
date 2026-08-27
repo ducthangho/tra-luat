@@ -1,0 +1,92 @@
+# BIÊN NHẬN — cross-review lượt 1, packet MANG-SANDBOX-CODEX (#334).
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '334'
+packet_slug: MANG-SANDBOX-CODEX
+lease_id: mang-sandbox-codex-exec-1-claude-20260827
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 2ef85c9defe1bfc41564180a486b5462d50b8f74
+reviewed_tree: c89e66b2e6476bbb75fc03390153d569d9d8c90e
+luot: 1
+cross_provider: true
+assurance: cross_approved
+verdict_path: ops/reviews/mang-sandbox-codex-review-1-codex-verdict.md
+verdict_sha256: '0f95c7342f9899c466d0a09fed33b9f0698334795afb0d9267c9a1af807e49f8'
+verdict_bytes: 17499
+verdict_nguon: >-
+  `codex exec -s workspace-write -c approval_policy=never -c model_reasoning_effort=xhigh` trong
+  `launcher.py run`, clone rời detached tại exact SHA, `--require-clean`, prompt neo băm
+  `10475e766f092469`. run `886a6d36`.
+
+ket_qua_dem_duoc:
+  P1: 3
+  P2: 2
+  slug:
+    - {slug: ma-chan-gom-moi-loi-khong-phan-loai, hang: P1}
+    - {slug: cong-dot-bien-tu-giam-van-xanh, hang: P1}
+    - {slug: bon-to-hop-chua-co-lenh-nguyen-van, hang: P1}
+    - {slug: network-access-gate-rong-hon-egress, hang: P2}
+    - {slug: ban-kinh-phai-chet-che-tac-dong-cheo, hang: P2}
+
+REVIEWER_O_TRONG_CAI_HOP_DANG_DUOC_DO:
+  do_duoc: >-
+    `python3 .claude/dev/probe_mang.py` trong chính vỏ reviewer cho `bind_loopback=1 · urlopen=1 ·
+    git_ls_remote=1` — KHỚP hàng "sandbox mặc định" của bảng ba cột. Đây là điểm dữ liệu THẬT, và
+    nó kiểm được đúng một hàng.
+  KHONG_do_duoc: >-
+    Hàng "NGOÀI codex" không tái lập được. `codex sandbox` LỒNG không chạy: cả bốn tổ hợp trả
+    `rc=101` trước khi probe khởi động. Reviewer ghi lệnh đã thử và lỗi nhận được thay vì bỏ trống.
+  danh_gia_cua_dieu_phoi: >-
+    Đây là giới hạn CẤU TRÚC của packet: reviewer khác nền là `codex`, mà `codex` chính là hộp đang
+    đo. Không phiên bản đề bài nào chữa được. Hai đường: chấp nhận rằng hai trong ba cột chỉ có
+    phiên điều phối đo (và phiên điều phối ĐÃ tự chạy lại cả bốn tổ hợp, khớp từng ô), hoặc đổi
+    reviewer sang một nền thứ ba. Không có nền thứ ba trong kho.
+
+ba_P1:
+  ma-chan-gom-moi-loi-khong-phan-loai: >-
+    Hợp đồng `1 = bị chặn` RỘNG HƠN phép đo. Mọi exception và mọi rc khác 0 của tiến trình con đều
+    thành cùng một mã: URL sai cú pháp, `PATH` rỗng, kho không tồn tại, DNS/timeout/auth giả lập
+    đều cho `1`. Và bộ test CHỦ ĐỘNG bắt lỗi bug rồi đòi nó mang nhãn "chặn" — tức phản chứng đang
+    khoá đúng cái hành vi sai. Hướng vá: tách ít nhất `LOT` · `POLICY_DENIED` · `ENDPOINT_ERROR` ·
+    `TIMEOUT` · `TOOL_ERROR` · `UNKNOWN`; lỗi không nhận dạng phải thành `KHÔNG_ĐO_ĐƯỢC`, không tự
+    nâng thành "sandbox chặn".
+  cong-dot-bien-tu-giam-van-xanh: >-
+    Cổng đột biến KHÔNG có phản chứng cho CHÍNH NÓ. Reviewer xoá từng phần và cổng vẫn xanh:
+    xoá bất kỳ entry mutant nào (m1..m5) ⇒ `đột biến 4`, `TỔNG: ĐẠT`, rc=0 · xoá chốt duy-nhất
+    `goc.count(cu) != 1` ⇒ xanh · xoá fail-close nền-đỏ ⇒ xanh · xoá ghi nhận mutant sống ⇒ xanh ·
+    xoá nhánh kết luận `xau` ⇒ xanh. Cộng ba tổ hợp hai-bước cho thấy chuỗi khai thác thật.
+  bon-to-hop-chua-co-lenh-nguyen-van: >-
+    Bảng bốn tổ hợp là BẰNG CHỨNG TRUNG TÂM để cô lập hai cờ, nhưng tài liệu chỉ có một template và
+    shorthand, không có bốn lệnh chép-chạy. `DUONG_DAN_GOC` không có dòng gán. Vi phạm hợp đồng
+    "tái lập nguyên văn" của chính packet.
+  ghi_chu_cua_dieu_phoi: >-
+    P1 thứ hai là ĐÚNG cùng lớp lỗi mà #319 vừa mất một lượt vì nó, và #334 đã có chốt duy-nhất —
+    nhưng chốt ấy KHÔNG CÓ PHẢN CHỨNG. Bài học: thêm một chốt không bằng đo được chốt ấy còn sống.
+    Đây là lần thứ BA trong phiên bắt được hình dạng "cơ chế mới thêm vào cổng mà không ai canh nó".
+
+hai_P2:
+  network-access-gate-rong-hon-egress: >-
+    Loopback KHÔNG phải egress, và trong sandbox probe dừng ngay ở socket creation. Nếu cờ đảo cả
+    cột `bind` như bảng khai thì nó đang gate CAPABILITY SOCKET, rộng hơn "mạng ra ngoài" — tài liệu
+    nêu dữ kiện nhưng kết luận vẫn gọi nó đơn thuần là cờ mở mạng.
+    PHIÊN ĐIỀU PHỐI ĐÃ NGHI ĐÚNG CHỖ NÀY và viết vào đề bài; reviewer xác nhận và xếp P2.
+  ban-kinh-phai-chet-che-tac-dong-cheo: >-
+    Bán kính đột biến chỉ đo trong `phai_chet` của chính nó, nên một đột biến giết NHẦM nhiều ca
+    vẫn báo `1/1`. Đảo quy ước `MA_LOT`/`MA_CHAN` làm bốn ca đỏ mà bán kính chỉ báo một.
+
+HE_QUA_NGAN_SACH:
+  hien_tai: '307/320, biên 13'
+  uoc_luong_vá_ba_P1: >-
+    P1 thứ ba (in bốn lệnh nguyên văn) vừa biên. P1 thứ hai (phản chứng cho chính cổng đột biến)
+    có thể vừa. P1 thứ nhất (phân loại lỗi thành sáu lớp, cộng ca khoá cho từng lớp) gần như CHẮC
+    vượt 13 dòng.
+  he_qua: '`S2` nhiều khả năng bắn ở lượt vá tới. Quyết định thuộc người giữ kho: nâng trần, hay tách.'
+  KHONG_tu_quyet: true
+
+HE_QUA_CHO_318:
+  van_giu_nguyen: >-
+    #318 GIỮ `chưa xếp được`. Nay có LÝ DO THỨ HAI ngoài lý do "bằng chứng chưa land": chính bằng
+    chứng ấy đang có BA P1 mở, trong đó P1 thứ nhất chạm đúng cách probe phân loại "bị chặn".
+    Nâng nhãn của #318 dựa trên một phép đo chưa qua review là lặp lại đúng lỗi đã bị bác hai vòng.

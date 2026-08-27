@@ -95,7 +95,7 @@ target_branch_neu_land: master
 
 base_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
 start_from_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
-reviewed_sha_required: fa9a505d0926a56603cabfb998bd4832084ed68f
+reviewed_sha_required: e68e9fac23690399121b76d6ea3c35a6c5e9a067
 base_ghi_chu: >-
   `c35ae1c` = `origin/master` lúc cấp, ĐO trong phiên (không chép từ hồ sơ bàn giao), và cũng là
   merge của PR #310. Nhánh rẽ SẠCH từ đây, KHÔNG kế thừa `6c4140b` của PR #315 (đã đóng, không
@@ -116,6 +116,7 @@ lich_su_reviewed_sha:
 - {vong: 9, sha: 7d7354e14c540c3c2afd3f3a594ff2e432f6fd44, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-9-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=1. Vòng ĐẦU chấm dưới luat_dung_LAND; reviewer nói thẳng CHẶN LAND vì còn P1.'}
 - {vong: 11, sha: 12e0315a439b1e73bde57b09152bc077e04d7ee5, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-11-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0 — finding duy nhất `menh-de-sandbox-mo-coi-khong-nhan`: mệnh đề sandbox đứng ngoài hợp đồng nhãn và ngoài phép đếm.'}
 - {vong: 12, sha: fa9a505d0926a56603cabfb998bd4832084ed68f, verdict: changes_requested, bien_nhan: 'ops/reviews/doctrine-ranh-gioi-reviewer-review-12-codex-verdict.receipt.yaml', ket_qua: 'P1=1 P2=0, KHÔNG finding mới. Cùng slug `menh-de-sandbox-mo-coi-khong-nhan` — phán quyết VÁ SINH LỖI MỚI: nhãn ĐÚNG NGHĨA (reviewer tìm được neo A/B ngay trong tệp, dòng 328-339) nhưng câu phạm vi dòng 594-601 nay TỰ MÂU THUẪN với phép đếm dòng 619-625, và N4 chưa đóng. N2/N3/N5/N6/N7a/N7b ĐẠT. Biên 16 dòng.'}
+- {vong: 13, sha: e68e9fac23690399121b76d6ea3c35a6c5e9a067, verdict: 'CHƯA CÓ — bản vá vòng 12 đã đẩy, chờ phóng'}
 
 ngan_sach_kich_thuoc:
   tep_toi_da: 2
@@ -127,7 +128,15 @@ ngan_sach_kich_thuoc:
   dong_them_toi_da: 200
   do_tu_sha: c35ae1c0a1104dbd6e65a321cda3b9f9441a408b
   don_vi: '`git diff --numstat c35ae1c..HEAD -- docs/GOI_AGENT_DA_NEN.md` — cột dòng THÊM, CHỈ tệp này'
-  da_dung: 180
+  da_dung: 197   # ĐO 2026-08-27 trên `e68e9fac`; trước đó trường này đứng ở 180 từ trước vòng vá 11
+  da_dung_DA_LECH_LAN_NUA: >-
+    Trường `da_dung` đứng ở **180** trong khi đo được **184** ở `fa9a505` (vòng vá 11) và **197** ở
+    `e68e9fac` (vòng vá 12). Tức nó chưa được cập nhật qua ÍT NHẤT HAI lượt vá. Đây là lần thứ NĂM
+    hình dạng "sổ sách không theo kịp công việc" bị bắt trong cùng phiên, và lần thứ HAI trên chính
+    lease này trong một giờ (lần trước là `reviewed_sha_required` trỏ `12e0315a`).
+    Hệ quả đo được: ai lập kế hoạch vòng 13 theo con số 180 sẽ tưởng còn 20 dòng, trong khi biên
+    thật là **3**. Sai gần bảy lần.
+    Cả năm lần đều bắt được bằng cách ĐO trước khi dùng, không lần nào bằng cách đọc lại lease.
   ghi_chu: >-
     200 là trần sau khi NÂNG LẦN HAI; xem `nang_tran_lan_hai`. 198 là số ĐÃ ĐO sau vòng vá 4
     (`git diff --numstat c35ae1c -- docs/GOI_AGENT_DA_NEN.md`), không phải ước lượng.
@@ -598,3 +607,53 @@ DINH_CHINH_GHI_CHU_SKILL_CUA_VONG_12:
     Ghi chú sai ấy do CHÍNH phiên này viết cách đây một giờ, và nó thuộc loại nguy hiểm nhất: một
     cảnh báo NGHE HỢP LÝ về một thứ không xảy ra. Nếu vòng 12 ra kết quả lạ, ghi chú ấy sẵn sàng
     làm lời giải thích sai. Sửa đè thì mất dấu; ghi đính chính thì không.
+
+VONG_VA_12:
+  sha: e68e9fac23690399121b76d6ea3c35a6c5e9a067
+  duong_da_chon: 'A — giữ nhãn `chiều MỞ`, nối neo đo về phép A/B đã có sẵn trong tệp'
+  vi_sao_A_chu_khong_B: >-
+    Reviewer vòng 12 tìm ra thứ phiên điều phối KHÔNG viện tới: phép A/B chống lưng cho nhãn ĐÃ
+    NẰM TRONG CHÍNH TỆP (mục `sandbox workspace-write`), không phải ở packet #334. Nên vá là NỐI
+    NEO, không phải hạ lời khai. Đường B (hạ về `chưa xếp được`) sẽ hạ một mệnh đề có bằng chứng
+    xuống hạng thấp hơn nó xứng đáng, và còn phải tính lại phân bố.
+  hai_cho_da_sua:
+    N1: >-
+      Câu phạm vi nói "văn xuôi mang thêm HAI mệnh đề" trong khi phép đếm nói TÁM (5+3) — sửa thành
+      BA. Và gỡ câu "Từ vựng này áp cho chúng ở đó, không phải ở đây", thay bằng phân định rõ: cái
+      ĐI theo lát cắt là SỐ ĐO đầy đủ/probe/bảng hai pha; cái Ở LẠI là ĐÚNG MỘT mệnh đề, nằm TRONG
+      phạm vi và được đếm Ở ĐÂY.
+    N4: >-
+      Điều kiện đo nay nằm ngay cạnh mệnh đề: mặc định `git ls-remote` lỗi kết nối; thêm
+      `-c sandbox_workspace_write.network_access=true` thì `lsremote_rc=0`. Kèm điều kiện (codex
+      CLI trong container này, sandbox `workspace-write`, vỏ phiên điều phối).
+  KHAI_THANG_cho_chua_tach_duoc: >-
+    Phép A/B ấy bật HAI cờ cùng lúc (`network_access` và `writable_roots`), nên "cờ mạng là thứ đảo
+    `lsremote_rc`" là SUY LUẬN — hợp lý vì `ls-remote` không ghi `.git`, nhưng chưa ai chạy riêng
+    từng cờ. Bản vá nói ra điều đó, VÀ nói rõ nó không đụng tới mệnh đề: mệnh đề khai "cấu hình đổi
+    được kết quả", và A/B cho thấy đúng thế bất kể cờ nào là thủ phạm. Việc tách hai cờ thuộc #334.
+  MAU_THUAN_TU_BAN_VA_NAY_TAO_RA_va_da_tu_bat:
+    la_gi: >-
+      Sau khi đặt điều kiện đo tại chỗ, dòng 627 CŨ vẫn còn câu "mệnh đề thứ tám ấy là mệnh đề DUY
+      NHẤT có phép đo nằm ở packet khác" — ngược hẳn với đoạn vừa sửa.
+    bat_bang_gi: 'đọc lại cả hai vùng sau khi sửa, không chỉ vùng vừa gõ'
+    da_sua: true
+    vi_sao_ghi: >-
+      Đây ĐÚNG hình dạng lỗi mà năm lượt vá trước của packet đều mắc: đóng một mệnh đề ngoài-danh-
+      sách rồi để lại một câu chỏi mới ở cách đó ba chục dòng. Lần này bắt được TRƯỚC khi commit,
+      và ghi ra để lượt sau biết chỗ phải soi là VÙNG KIA, không phải vùng vừa sửa.
+  phep_dem_tu_kiem:
+    cach: 'liệt kê từng đơn vị theo dòng, KHÔNG grep cụm nhãn'
+    ket_qua: 'chiều ĐÓNG ×1 (dòng 695) · chiều MỞ ×5 (675, 696, 698, 699, 703) · chưa xếp được ×2 (697, 708) · máy phát hiện ×0 · quan sát chưa rõ cơ chế ×0 — tổng 8'
+    khop_cau_pham_vi: '5 hàng bảng + 3 mệnh đề văn xuôi = 8'
+  ba_bay_reviewer_neu_deu_tranh:
+    - 'KHÔNG chép bảng động của #334 về'
+    - 'KHÔNG đổi nhãn nên phân bố giữ nguyên 1/5/2/0/0'
+    - 'KHÔNG tạo neo thứ hai — câu "#334 là NEO DUY NHẤT cho chỗ tách" giữ nguyên văn'
+  cong_da_chay:
+    N6: 'ĐẠT — git diff --name-only chỉ in docs/GOI_AGENT_DA_NEN.md'
+    N7a: 'ĐẠT — doctrine-scan rc=0, sạch, quét 8 tệp'
+    N7b: 'ĐẠT — 197/200, biên còn 3'
+  bien_con_3_la_hep: >-
+    Vòng 13 mà đòi thêm dòng thì gần như chắc chạm trần 200. Khi ấy đường đúng KHÔNG phải nâng trần
+    lần nữa — packet #319 vừa cho thấy nâng trần bốn lần làm con số mất hết ý nghĩa. Đường đúng là
+    CẮT tiếp hoặc viết ngắn lại.

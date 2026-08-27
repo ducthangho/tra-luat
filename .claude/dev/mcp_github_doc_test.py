@@ -12,7 +12,9 @@ import os
 import subprocess
 import sys
 import tempfile
+from contextlib import redirect_stderr
 from contextlib import contextmanager
+from io import StringIO
 from pathlib import Path
 
 MODUN = Path(__file__).with_name("mcp_github_doc.py")
@@ -255,6 +257,27 @@ def t09_rpc_loi_va_ket_qua_tool_duoc_xu_ly(m=M):
             {"type": "text", "text": "a"}, {"type": "image", "data": "x"},
             {"type": "text", "text": "b"}]}}), {})
         bang(p.goi("x", {}) == "a\nb", "khong loc/noi content text")
+        p._post = lambda than: (200, json.dumps({"id": 2, "result": {
+            "isError": "true", "content": [{"type": "text", "text": "mo rong"}]}}), {})
+        bang(p.goi("x", {}) == "mo rong", "da so truthiness thay vi dung True")
+        bi_mat_url = "URL-SECRET-KHONG-DUOC-LO"
+        p.url = "https://" + bi_mat_url + "/mcp"
+        p._post = lambda than: (200, json.dumps({"id": 2, "result": {
+            "isError": True, "content": [{"type": "text", "text": "repo 404"}]}}), {})
+        mo_ta = _hong(lambda: p.goi("x", {}), m)
+        bang("may chu MCP bao loi" in mo_ta and "repo 404" in mo_ta,
+             f"mo ta loi may chu thieu text: {mo_ta}")
+        bang(bi_mat_url not in mo_ta, f"lo du lieu url trong loi: {mo_ta}")
+        _hong(lambda: p.liet_ke(), m)
+        p.bat_tay = lambda: {}
+        phien_goc = m.Phien
+        m.Phien = lambda goc: p
+        try:
+            with redirect_stderr(StringIO()):
+                rc = m._main(["mcp_github_doc.py", "goi", "x", "{}"])
+        finally:
+            m.Phien = phien_goc
+        bang(rc != 0, f"_main bao thanh cong cho isError=true: rc={rc}")
 
 
 # Mỗi mẫu chỉ thay đúng một chốt; ca đích phải đỏ trên bản mutant tương ứng.
@@ -279,6 +302,7 @@ DOT_BIEN = [
     ("nuot_loi_initialize", '        if "error" in d:\n            raise Hong("initialize loi: " + json.dumps(d["error"], ensure_ascii=False)[:300])', '        if False:\n            raise Hong("initialize loi")', "t08_loi_initialized_khong_duoc_nuot"),
     ("nuot_loi_initialized", '            if "error" in bao:\n                raise Hong("notifications/initialized loi")', '            if "error" in bao:\n                pass', "t08_loi_initialized_khong_duoc_nuot"),
     ("nuot_loi_rpc", '        if "error" in d:\n            raise Hong(f"{method} loi: " + json.dumps(d["error"], ensure_ascii=False)[:300])', '        if False:\n            raise Hong("rpc loi")', "t09_rpc_loi_va_ket_qua_tool_duoc_xu_ly"),
+    ("bo_chot_iserror", '        if isinstance(kq, dict) and kq.get("isError") is True:', '        if False:', "t09_rpc_loi_va_ket_qua_tool_duoc_xu_ly"),
 ]
 
 

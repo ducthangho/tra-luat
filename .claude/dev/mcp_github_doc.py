@@ -181,7 +181,14 @@ class Phien:
         d = self._boc(raw)
         if "error" in d:
             raise Hong(f"{method} loi: " + json.dumps(d["error"], ensure_ascii=False)[:300])
-        return d.get("result", {})
+        kq = d.get("result", {})
+        # `tools/call` bao loi nghiep vu trong result hop le, khong o JSON-RPC error.
+        # Chan tai day de moi duong dung rpc (ke ca liet_ke) deu fail-closed.
+        if isinstance(kq, dict) and kq.get("isError") is True:
+            phan = [c.get("text", "") for c in kq.get("content", [])
+                    if isinstance(c, dict) and c.get("type") == "text"]
+            raise Hong("may chu MCP bao loi: " + "\n".join(phan)[:300])
+        return kq
 
     def liet_ke(self) -> list[str]:
         return sorted(t["name"] for t in self.rpc("tools/list", {}).get("tools", []))

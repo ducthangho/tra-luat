@@ -1282,16 +1282,42 @@ def cmd_doi_chieu_uy_quyen(a, state_dir: Path) -> int:
 
     Lệnh này KHÔNG ngăn được gì và không giả vờ ngăn. Nó trả lời đúng một câu hỏi mà hôm
     nay không ai trả lời được: *bao nhiêu lần merge có khai, bao nhiêu lần không*."""
-    r = subprocess.run(["git", "-C", a.root, "log", "--merges", "--format=%H%x09%s",
-                        a.since + ".." + a.nhanh if a.since else a.nhanh],
+    # `--first-parent` KHONG phai tuy chon. Thieu no, lenh dem ca merge nam BEN TRONG nhanh
+    # phu nhu mot merge "tren master". Do duoc trong dung cua so cua Issue #338:
+    #     git rev-list --count --merges                c35ae1c..origin/master  -> 10
+    #     git rev-list --count --merges --first-parent c35ae1c..origin/master  ->  9
+    # Con so `9` toi khai o luot 1 do bang mot lenh KHAC voi lenh toi giao — cross-review
+    # bat dung cho ay. "Merge tren nhanh X" nghia la merge tren duong CHA THU NHAT cua X;
+    # muon dem toan DAG thi phai la mot che do co TEN KHAC, khong duoc am tham doi nghia.
+    if not a.since:
+        _die(RC_ARG,
+             "--since la BAT BUOC: khong co bien, lenh dem TOAN BO lich su (do tren kho "
+             "nay: 321 merge) va con so ay khong tai lap duoc giua hai luot.")
+    r = subprocess.run(["git", "-C", a.root, "rev-parse", "--verify", a.since + "^{commit}"],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        _die(RC_ARG, f"--since {a.since!r} khong phai commit doc duoc")
+    bien_day_du = r.stdout.strip()
+    r = subprocess.run(["git", "-C", a.root, "log", "--merges", "--first-parent",
+                        "--format=%H%x09%s", bien_day_du + ".." + a.nhanh],
                        capture_output=True, text=True)
     if r.returncode != 0:
         _die(RC_ARG, f"không đọc được lịch sử git: {(r.stderr or '').strip()[:200]}")
     merges = [x.split("\t", 1) for x in r.stdout.splitlines() if x.strip()]
-    so = state_dir / _KHAI_UY_QUYEN
+    # SO KHAI — thieu so thi KHONG DO DUOC, KHONG phai 0. So mac dinh nam trong
+    # `.claude/.packet_state/`, ma thu muc ay bi `.gitignore` loai (`.gitignore:32`), nen
+    # mot clone/phien moi KHONG phan biet duoc "khong co khai bao" voi "so khong duoc
+    # chuyen sang" — tra ve 0 la doc cai IM LANG thanh mot phep do. `None != False`.
+    so = Path(a.so) if getattr(a, "so", None) else (state_dir / _KHAI_UY_QUYEN)
     khai: dict[str, dict] = {}
-    if so.is_file():
-        for dong in so.read_text(encoding="utf-8").splitlines():
+    bo_qua: list[str] = []
+    if not so.is_file():
+        _die(RC_STATE,
+             f"KHONG DO DUOC: khong thay so khai bao tai {so}. Day KHONG phai 'khong co "
+             f"khai bao nao' — so mac dinh nam trong thu muc bi .gitignore loai, nen mot "
+             f"clone moi se khong co no. Tro so BEN bang --so, hoac chap nhan la chua do.")
+    if True:
+        for stt, dong in enumerate(so.read_text(encoding="utf-8").splitlines(), 1):
             if not dong.strip():
                 continue
             try:
@@ -1305,15 +1331,43 @@ def cmd_doi_chieu_uy_quyen(a, state_dir: Path) -> int:
                 # thành vô hiệu, còn ca đích thì XANH mà không đo gì.
                 # ĐO ĐƯỢC: mốc khớp 1 chỗ trên master, 2 chỗ khi có dòng ấy.
                 continue
-            if d.get("head_sha"):
-                khai[d["head_sha"]] = d
+            # KIEM LUOC DO. Ban truoc chi doi co truong `head_sha`, nen mot ban ghi cua
+            # action KHAC, hoac mot dong JSON viet tay, cung duoc tinh la khai bao merge.
+            thieu = [k for k in ("event", "action", "nguoi_cap", "bang_chung", "head_sha")
+                     if not d.get(k)]
+            if thieu:
+                bo_qua.append(f"dong {stt}: thieu {'/'.join(thieu)}")
+                continue
+            if d.get("event") != "uy_quyen_merge_KHAI_BAO":
+                bo_qua.append(f"dong {stt}: event={d.get('event')!r} khong phai khai bao")
+                continue
+            if d.get("action") != a.action:
+                bo_qua.append(f"dong {stt}: action={d.get('action')!r} != {a.action!r}")
+                continue
+            if d.get("nguoi_cap") not in NGUOI_CO_THAM_QUYEN:
+                bo_qua.append(f"dong {stt}: nguoi_cap={d.get('nguoi_cap')!r} ngoai danh sach")
+                continue
+            if not SHA_RE.match(str(d.get("head_sha"))):
+                bo_qua.append(f"dong {stt}: head_sha khong phai sha40")
+                continue
+            khai[d["head_sha"]] = d
     # Một merge được coi là CÓ KHAI khi khai báo neo vào ĐÚNG head đã merge (cha thứ hai),
     # không phải vào commit merge. Neo sai chỗ thì con số vô nghĩa.
     co_khai, khong = [], []
     for sha, tieu_de in merges:
         p2 = subprocess.run(["git", "-C", a.root, "rev-parse", sha + "^2"],
                             capture_output=True, text=True).stdout.strip()
-        (co_khai if (p2 in khai or sha in khai) else khong).append((sha, tieu_de))
+        # CHI cha thu hai. Ban truoc chu thich noi "khong phai commit merge" nhung MA lai
+        # nhan CA HAI — loi khai va hanh vi lech nhau, va ca test mang ten ay khong he dung
+        # mot ban ghi neo vao commit merge de do chieu do. Luc KHAI thi commit merge CHUA
+        # TON TAI, nen neo vao no la neo vao thu chua co.
+        (co_khai if p2 in khai else khong).append((sha, tieu_de))
+    print(f"cua so: {bien_day_du}..{a.nhanh} (first-parent)")
+    print(f"so khai bao: {so}")
+    if bo_qua:
+        print(f"BO QUA {len(bo_qua)} ban ghi khong hop luoc do:")
+        for x in bo_qua[:10]:
+            print(f"      {x}")
     print(f"merge trên {a.nhanh}: {len(merges)}")
     print(f"  CÓ khai báo    : {len(co_khai)}")
     print(f"  KHÔNG khai báo : {len(khong)}")
@@ -2008,7 +2062,10 @@ def build_parser() -> argparse.ArgumentParser:
                        help="đếm merge so với khai báo — biến KHÔNG ĐO ĐƯỢC thành SỐ")
     q.add_argument("--root", default=".")
     q.add_argument("--nhanh", default="origin/master")
-    q.add_argument("--since", help="chỉ đếm từ commit này trở đi")
+    q.add_argument("--since", required=True,
+                   help="BAT BUOC — bien duoi cua cua so; khong co thi so khong tai lap duoc")
+    q.add_argument("--action", default="merge", choices=HANH_VI_CHAN)
+    q.add_argument("--so", help="so khai bao BEN (mac dinh: trong state-dir, bi gitignore)")
     q.set_defaults(fn=cmd_doi_chieu_uy_quyen)
 
     q = sub.add_parser("doctrine-scan", help="bắt adapter chép doctrine")

@@ -616,8 +616,16 @@ def case_doi_chieu_dem_duoc_merge_co_khai_va_khong(c: Ctx):
     g("checkout", "-q", "main")
     g("merge", "--no-ff", "-q", "nhanh", "-m", "Merge nhanh")
     # chua khai gi -> 1 merge, 0 co khai
-    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main"], sd)
-    _doi(0, rc, e, "doi-chieu lan 1")
+    goc_sha = subprocess.run(["git", "-C", str(goc), "rev-list", "--max-parents=0", "HEAD"],
+                             capture_output=True, text=True).stdout.split()[0]
+    # SO RONG khac SO VANG, va do dung la phan biet packet nay vua dung: so vang =>
+    # KHONG DO DUOC (rc=8, co ca rieng `doi_chieu_THIEU_SO_la_KHONG_DO_DUOC`); so rong =>
+    # that su "0 khai bao". Tao so rong de do dung chieu thu hai.
+    (sd / "uy_quyen_merge.jsonl").parent.mkdir(parents=True, exist_ok=True)
+    (sd / "uy_quyen_merge.jsonl").write_text("", encoding="utf-8")
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main",
+                              "--since", goc_sha], sd)
+    _doi(0, rc, e, "doi-chieu lan 1 (so RONG)")
     t = _txt(o)
     if "CÓ khai báo    : 0" not in t or "KHÔNG khai báo : 1" not in t:
         raise AssertionError(f"trước khi khai phải là 0/1, được: {t!r}")
@@ -625,7 +633,8 @@ def case_doi_chieu_dem_duoc_merge_co_khai_va_khong(c: Ctx):
     rc, _, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
                               "--bang-chung", "https://x", "--head-sha", head_nhanh], sd)
     _doi(0, rc, e, "ghi-uy-quyen head nhánh")
-    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main"], sd)
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main",
+                              "--since", goc_sha], sd)
     _doi(0, rc, e, "doi-chieu lan 2")
     t = _txt(o)
     if "CÓ khai báo    : 1" not in t or "KHÔNG khai báo : 0" not in t:
@@ -650,13 +659,123 @@ def case_doi_chieu_neo_dung_HEAD_da_merge_khong_phai_commit_merge(c: Ctx):
     g("add", "b.txt"); g("commit", "-qm", "viec")
     g("checkout", "-q", "main")
     g("merge", "--no-ff", "-q", "nhanh", "-m", "Merge nhanh")
+    (sd / "uy_quyen_merge.jsonl").parent.mkdir(parents=True, exist_ok=True)
+    (sd / "uy_quyen_merge.jsonl").write_text("", encoding="utf-8")
     rc, _, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
                               "--bang-chung", "https://x", "--head-sha", "c" * 40], sd)
     _doi(0, rc, e, "ghi-uy-quyen sha vô can")
-    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main"], sd)
+    goc_sha = subprocess.run(["git", "-C", str(goc), "rev-list", "--max-parents=0", "HEAD"],
+                             capture_output=True, text=True).stdout.split()[0]
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main",
+                              "--since", goc_sha], sd)
     _doi(0, rc, e, "doi-chieu")
     if "KHÔNG khai báo : 1" not in _txt(o):
         raise AssertionError("khai vào SHA vô can KHÔNG được tính là có khai")
+    # Chieu thu hai, do duoc chu khong chi tuyen bo: khai vao chinh COMMIT MERGE cung
+    # KHONG duoc tinh. Ban truoc chu thich noi vay ma MA nhan ca hai, va ca test mang ten
+    # "khong phai commit merge" chua bao gio dung mot ban ghi nhu the.
+    merge_sha = subprocess.run(["git", "-C", str(goc), "rev-parse", "main"],
+                               capture_output=True, text=True).stdout.strip()
+    rc, _, e = run(c.script, ["ghi-uy-quyen", "--action", "merge", "--nguoi-cap", "ducthangho",
+                              "--bang-chung", "https://x", "--head-sha", merge_sha], sd)
+    _doi(0, rc, e, "ghi-uy-quyen vao COMMIT MERGE")
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main",
+                              "--since", goc_sha], sd)
+    _doi(0, rc, e, "doi-chieu sau khi khai vao commit merge")
+    if "KHÔNG khai báo : 1" not in _txt(o):
+        raise AssertionError("khai vào chính COMMIT MERGE KHÔNG được tính — lúc khai nó "
+                             "chưa tồn tại")
+
+
+def case_doi_chieu_chi_dem_FIRST_PARENT(c: Ctx):
+    """P2 `doi-chieu-dem-ca-merge-ben-nhanh` (cross-review PR #343, DA TAI HIEN).
+
+    Thieu `--first-parent`, lenh dem ca merge nam BEN TRONG nhanh phu nhu mot merge "tren
+    master". Do tren kho that, dung cua so cua Issue #338: `--merges` -> 10,
+    `--merges --first-parent` -> 9. Con so `9` executor khai o luot 1 do bang mot lenh
+    KHAC voi lenh da giao.
+
+    Fixture dung dung hinh dang ay: nhanh phu MERGE master vao no truoc, roi moi merge
+    nhanh phu vao master."""
+    sd = c.sd()
+    goc = c.tmp / f"kho-fp-{time.time_ns()}"
+    goc.mkdir(parents=True)
+    def g(*a):
+        return subprocess.run(["git", "-C", str(goc), *a], capture_output=True, text=True)
+    g("init", "--quiet", "-b", "main")
+    for k, v in (("user.email", "t@t"), ("user.name", "t"), ("commit.gpgsign", "false")):
+        g("config", k, v)
+    (goc / "a.txt").write_text("1\n", encoding="utf-8")
+    g("add", "a.txt"); g("commit", "-qm", "goc")
+    goc_sha = g("rev-parse", "HEAD").stdout.strip()
+    g("checkout", "-q", "-b", "phu")
+    (goc / "b.txt").write_text("2\n", encoding="utf-8")
+    g("add", "b.txt"); g("commit", "-qm", "viec phu")
+    g("checkout", "-q", "main")
+    (goc / "c.txt").write_text("3\n", encoding="utf-8")
+    g("add", "c.txt"); g("commit", "-qm", "viec main")
+    g("checkout", "-q", "phu")
+    g("merge", "--no-ff", "-q", "main", "-m", "Merge main VAO nhanh phu")   # merge BEN TRONG
+    g("checkout", "-q", "main")
+    g("merge", "--no-ff", "-q", "phu", "-m", "Merge phu vao main")          # merge first-parent
+    so = c.tmp / f"so-fp-{time.time_ns()}.jsonl"
+    so.write_text("", encoding="utf-8")
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(goc), "--nhanh", "main",
+                              "--since", goc_sha, "--so", str(so)], sd)
+    _doi(0, rc, e, "doi-chieu first-parent")
+    t = _txt(o)
+    if "merge trên main: 1" not in t:
+        raise AssertionError(f"phai dem DUNG 1 merge first-parent, duoc: {t!r}")
+    if "(first-parent)" not in t:
+        raise AssertionError("phai in ro cua so la first-parent")
+    # doi chung: khong first-parent thi git thay HAI merge — chung minh fixture co that
+    tho = g("rev-list", "--count", "--merges", goc_sha + "..main").stdout.strip()
+    fp = g("rev-list", "--count", "--merges", "--first-parent", goc_sha + "..main").stdout.strip()
+    if (tho, fp) != ("2", "1"):
+        raise AssertionError(f"fixture khong dung hinh dang: tho={tho} fp={fp} (can 2/1)")
+
+
+def case_doi_chieu_THIEU_SO_la_KHONG_DO_DUOC(c: Ctx):
+    """P2 `so-khai-cuc-bo-bien-mat-thanh-khong-khai`. So mac dinh nam trong thu muc bi
+    `.gitignore` loai, nen mot clone moi khong phan biet duoc "khong co khai bao" voi "so
+    khong duoc chuyen sang". Tra 0 la doc cai IM LANG thanh mot phep do."""
+    sd = c.sd()
+    rc, _, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(ROOT), "--nhanh", "HEAD",
+                              "--since", "HEAD~1",
+                              "--so", str(c.tmp / f"khong-ton-tai-{time.time_ns()}.jsonl")], sd)
+    if rc == 0:
+        raise AssertionError("thieu so PHAI la KHONG DO DUOC, khong duoc tra 0 va rc=0")
+    if "KHONG DO DUOC" not in _txt(e):
+        raise AssertionError(f"phai noi ro KHONG DO DUOC, stderr={_txt(e)[:200]!r}")
+
+
+def case_doi_chieu_TU_CHOI_ban_ghi_sai_luoc_do(c: Ctx):
+    """P2 `doi-chieu-nhan-sai-schema-va-sai-neo`. Ban truoc chi doi co truong `head_sha`,
+    nen mot ban ghi cua action KHAC hoac mot dong JSON viet tay cung duoc tinh."""
+    sd = c.sd()
+    sha_that = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"],
+                              capture_output=True, text=True).stdout.strip()
+    so = c.tmp / f"so-xau-{time.time_ns()}.jsonl"
+    xau = [
+        {"head_sha": sha_that},                                              # thieu het
+        {"event": "linh_tinh", "action": "merge", "nguoi_cap": "ducthangho",
+         "bang_chung": "x", "head_sha": sha_that},                           # sai event
+        {"event": "uy_quyen_merge_KHAI_BAO", "action": "deploy", "nguoi_cap": "ducthangho",
+         "bang_chung": "x", "head_sha": sha_that},                           # sai action
+        {"event": "uy_quyen_merge_KHAI_BAO", "action": "merge", "nguoi_cap": "codex-dispatcher",
+         "bang_chung": "x", "head_sha": sha_that},                           # nguoi cap gia mao
+        {"event": "uy_quyen_merge_KHAI_BAO", "action": "merge", "nguoi_cap": "ducthangho",
+         "bang_chung": "x", "head_sha": "deadbeef"},                         # sha khong hop le
+    ]
+    so.write_text("\n".join(json.dumps(x) for x in xau) + "\n", encoding="utf-8")
+    rc, o, e = run(c.script, ["doi-chieu-uy-quyen", "--root", str(ROOT), "--nhanh", "HEAD",
+                              "--since", "HEAD~1", "--so", str(so)], sd)
+    _doi(0, rc, e, "doi-chieu so xau")
+    t = _txt(o)
+    if "BO QUA 5 ban ghi" not in t:
+        raise AssertionError(f"phai BO QUA ca 5 ban ghi sai luoc do, duoc: {t[:300]!r}")
+    if "CÓ khai báo    : 0" not in t:
+        raise AssertionError("khong ban ghi sai nao duoc tinh la co khai")
 
 
 # --- (b) dấu vết comment -------------------------------------------------------
@@ -1249,7 +1368,9 @@ def _kich_ban_in(c: Ctx, codepage: str):
           "--bang-chung", "https://x", "--head-sha", "%040x" % 3], sd),
         # `--root ROOT`: kho THAT, vi lenh nay doc lich su git that su. `_repo_gia` chi
         # co `.git` GIA nen `git log` se hong va ca se do vi ly do sai. Lenh chi DOC.
-        (["doi-chieu-uy-quyen", "--root", str(ROOT), "--nhanh", "HEAD"], sd),
+        (["doi-chieu-uy-quyen", "--root", str(ROOT), "--nhanh", "HEAD",
+          "--since", "%040x" % 0 if False else "HEAD~1",
+          "--so", str(sd / "uy_quyen_merge.jsonl")], sd),
     ]
     da_phu = set()
     for args, state_dir in buoc:
@@ -2414,6 +2535,9 @@ CASES = [
      case_doi_chieu_dem_duoc_merge_co_khai_va_khong),
     ("doi_chieu_neo_dung_HEAD_da_merge",
      case_doi_chieu_neo_dung_HEAD_da_merge_khong_phai_commit_merge),
+    ("doi_chieu_chi_dem_FIRST_PARENT", case_doi_chieu_chi_dem_FIRST_PARENT),
+    ("doi_chieu_THIEU_SO_la_KHONG_DO_DUOC", case_doi_chieu_THIEU_SO_la_KHONG_DO_DUOC),
+    ("doi_chieu_TU_CHOI_ban_ghi_sai_luoc_do", case_doi_chieu_TU_CHOI_ban_ghi_sai_luoc_do),
     ("guard_khong_co_co_noi", case_guard_khong_co_co_noi),
     ("transition_hop_le_rc0", case_transition_hop_le_rc0),
     ("comment_id_chua_dang_ky_bi_tu_choi", case_comment_id_chua_dang_ky_bi_tu_choi),

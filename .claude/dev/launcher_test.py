@@ -3689,6 +3689,9 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
                      f"[{vi_tri}] mong {mong_goi} loi goi `claude`, do {len(nhat_ky)}")
                 return kq
 
+            def do_day_du():
+                return m._doc_mcp_json(td, kem_headers=True)
+
             def ghi(o):
                 (Path(td) / ".mcp.json").write_text(_json.dumps(o), encoding="utf-8")
 
@@ -3729,6 +3732,14 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
             bang(tt == "khoe", f"ten `GitHub` ma tra {tt}")
             ten_mong_doi[0] = "github"
 
+            ghi({"mcpServers": {"github": {}}})
+            day_du = do_day_du()
+            bang(len(day_du) == 5 and day_du[4] == {},
+                 f"headers vang mat khong tra object rong: {day_du!r}")
+            ghi({"mcpServers": {"github": {"url": "https://x", "headers": None}}})
+            day_du = do_day_du()
+            bang(not day_du[0] and day_du[4] is None and "headers" in day_du[1],
+                 f"headers falsy co mat khong bi tu choi: {day_du!r}")
             ghi({"mcpServers": {"github": {}}})
             # ...va dau ra "khong tim thay" (rc=0!) phai la KHONG DO DUOC
             mcp_out[0] = 'No MCP server named "github". Did you mean "GitHub"?\n'
@@ -6547,14 +6558,18 @@ DOT_BIEN = [
     ("mcp_ten_server_phan_biet_hoa_thuong",
      ('k.casefold() == "github"', 'k == "github"'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_bo_bat_loi_json_hong",
-     ('    except (OSError, ValueError) as e:\n        return False, f".mcp.json',
-      '    except OSError as e:\n        return False, f".mcp.json'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+     ('    except (OSError, ValueError) as e:\n'
+      '        return (False, f".mcp.json [{nguon}] khong doc/parse duoc:',
+      '    except OSError as e:\n'
+      '        return (False, f".mcp.json [{nguon}] khong doc/parse duoc:'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_bo_kiem_kieu_goc",
      ('    if not isinstance(d, dict):', '    if False:'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_bo_kiem_kieu_bang_server",
      ('    if not isinstance(srv, dict):', '    if False:'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_bo_kiem_kieu_gia_tri_server",
      ('    xau = [k for k in ten if not isinstance(srv[k], dict)]', '    xau = []'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    ("mcp_bo_kiem_kieu_headers",
+     ('    if not isinstance(headers, dict):', '    if False:'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_servers_che_khuat_mcpServers_sai_kieu",
      ('    for khoa in ("mcpServers", "servers"):\n        if khoa in d:\n'
       '            srv = d[khoa]\n            break\n    else:',

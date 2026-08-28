@@ -26,9 +26,13 @@ def ca(fn):
     return fn
 
 
+class TinHieuChotCa(AssertionError):
+    """Chỉ khung ca sinh; implementation ném AssertionError không giả được tín hiệu."""
+
+
 def bang(dieu_kien, thong_diep):
     if not dieu_kien:
-        raise AssertionError(thong_diep)
+        raise TinHieuChotCa(thong_diep)
 
 
 def _nap(path=MODUN):
@@ -70,7 +74,7 @@ def _hong(fn, m=M):
         fn()
     except m.Hong as e:
         return str(e)
-    raise AssertionError("mong doi Hong nhung ham da cho qua")
+    bang(False, "mong doi Hong nhung ham da cho qua")
 
 
 class _TraLoi:
@@ -126,6 +130,8 @@ def t01_doc_dung_server_chinh_xac_va_giai_header(m=M):
     with _cau_hinh(_cfg(headers={"A": "${TOKEN_TEST_MCP}"})) as d:
         try:
             _hong(lambda: m._doc_cau_hinh(d), m)
+        except TinHieuChotCa:
+            raise
         except Exception as e:
             raise AssertionError(f"env thiếu gây lỗi ngoài hợp đồng: {type(e).__name__}") from None
     with _cau_hinh({"mcpServers": {"github": "khong-phai-object"}}) as d:
@@ -140,6 +146,8 @@ def t01_doc_dung_server_chinh_xac_va_giai_header(m=M):
     with _cau_hinh(_cfg(headers=["khong", "phai", "object"])) as d:
         try:
             _hong(lambda: m._doc_cau_hinh(d), m)
+        except TinHieuChotCa:
+            raise
         except Exception as e:  # lỗi triển khai vô can không được giết mutant
             raise AssertionError(f"headers méo gây lỗi ngoài hợp đồng: {type(e).__name__}") from None
 
@@ -320,25 +328,46 @@ def t16_cau_hinh_doi_giua_hai_pha_khong_tron_url_credential(m=M):
     with _cau_hinh(a) as d:
         tep = d / ".mcp.json"
         doc_goc = m._launcher._doc_mcp_json
-        da_probe = []
+        da_probe, chuoi = [], []
 
-        def doc_roi_doi(goc):
-            ket_qua = doc_goc(goc)
+        def doc_aba(goc, **kw):
+            # A -> B ngay trước ảnh duy nhất -> A ngay sau ảnh ấy. URL và headers
+            # vẫn cùng thuộc B; không có lượt đọc thứ hai để ghép headers của A.
             tep.write_text(json.dumps(b), encoding="utf-8")
+            chuoi.append("B")
+            ket_qua = doc_goc(goc, **kw)
+            tep.write_text(json.dumps(a), encoding="utf-8")
+            chuoi.append("A")
             return ket_qua
 
-        m._launcher._doc_mcp_json = doc_roi_doi
+        m._launcher._doc_mcp_json = doc_aba
         goc_urlopen = m.urllib.request.urlopen
         m.urllib.request.urlopen = lambda *args, **kwargs: da_probe.append((args, kwargs))
         try:
-            mo_ta = _hong(lambda: m.Phien(d), m)
+            p = m.Phien(d)
         finally:
             m._launcher._doc_mcp_json = doc_goc
             m.urllib.request.urlopen = goc_urlopen
-        bang("thay doi trong luc doc" in mo_ta, f"khong fail-close khi doi anh: {mo_ta}")
-        bang("endpoint-a" not in mo_ta and "token-b" not in mo_ta,
-             f"nhanh tu choi cho du lieu hai anh ra mo ta: {mo_ta}")
-        bang(not da_probe, "cau hinh doi anh ma van tao luu luong mang")
+        bang(chuoi == ["B", "A"], f"khong dung dung chuoi ABA: {chuoi}")
+        bang(p.url == "https://endpoint-b.example/mcp" and
+             p._dau_goc == {"Authorization": "token-b"},
+             f"ABA ghep nham URL/headers: {p.url!r} {p._dau_goc!r}")
+        bang(not da_probe, "chi khoi tao cau hinh ma da tao luu luong mang")
+
+
+@ca
+def t17_sau_phan_tich_khong_con_doc_he_tep_de_OSError_thoat_ra(m=M):
+    with _cau_hinh(_cfg()) as d:
+        goc = Path.read_bytes
+        Path.read_bytes = lambda self: (_ for _ in ()).throw(OSError("sau phan tich"))
+        try:
+            try:
+                p = m.Phien(d)
+            except m.Hong:
+                bang(False, "van con loi doc he tep thua sau pha phan tich")
+        finally:
+            Path.read_bytes = goc
+        bang(p.url == "https://api.example/mcp", "OSError o loi doc thua lam hong cau hinh")
 
 
 @ca
@@ -399,31 +428,18 @@ def t09_rpc_loi_va_ket_qua_tool_duoc_xu_ly(m=M):
 
 # Mỗi mẫu chỉ thay đúng một chốt; ca đích phải đỏ trên bản mutant tương ứng.
 DOT_BIEN = [
-    ("chon_khoa_theo_kieu_dict",
-     '    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))\n'
-     '    anh_sau = tep.read_bytes()',
-     '    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))\n'
-     '    d_mutant = json.loads(anh_truoc.decode("utf-8"))\n'
-     '    if not co_khai and not isinstance(d_mutant.get("mcpServers"), dict):\n'
-     '        co_khai, ten_chuan, url = True, "github", "https://du-phong.example/mcp"\n'
-     '        d_mutant.pop("mcpServers", None)\n'
-     '        anh_truoc = json.dumps(d_mutant).encode("utf-8")\n'
-     '    anh_sau = anh_truoc',
-     "t10_khoa_co_mat_hong_khong_roi_sang_du_phong"),
-    ("ten_server_chi_khop_literal",
-     '    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))',
-     '    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))\n    if ten_chuan is not None and ten_chuan != "github":\n        co_khai = False',
-     "t11_ten_server_casefold_phai_duy_nhat"),
-    ("ten_server_mo_ho_chon_dai",
-     '    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))',
-     '    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))\n    if not co_khai and "server cung khop" in mo_ta:\n        co_khai, ten_chuan, url = True, "github", "https://mot.example/mcp"',
-     "t11_ten_server_casefold_phai_duy_nhat"),
-    ("bo_kiem_headers_object", '    if not isinstance(headers, dict):', '    if False:', "t01_doc_dung_server_chinh_xac_va_giai_header"),
-    ("bo_chot_hai_anh_cau_hinh",
-     '    if hashlib.sha256(anh_truoc).digest() != hashlib.sha256(anh_sau).digest():',
-     '    if False:', "t16_cau_hinh_doi_giua_hai_pha_khong_tron_url_credential"),
-    ("headers_falsy_thanh_rong", '    headers = muc["headers"] if "headers" in muc else {}',
-     '    headers = muc.get("headers") or {}', "t12_headers_falsy_co_mat_phai_bi_tu_choi"),
+    ("goi_parser_hai_lan_ghep_hai_anh",
+     '        co_khai, mo_ta, _ten_chuan, url, headers = _launcher._doc_mcp_json(\n'
+     '            str(goc), kem_headers=True)',
+     '        co_khai, mo_ta, _ten_chuan, url, _headers = _launcher._doc_mcp_json(\n'
+     '            str(goc), kem_headers=True)\n'
+     '        _co2, _mt2, _ten2, _url2, headers = _launcher._doc_mcp_json(\n'
+     '            str(goc), kem_headers=True)',
+     "t16_cau_hinh_doi_giua_hai_pha_khong_tron_url_credential"),
+    ("doc_he_tep_sau_phan_tich",
+     '            str(goc), kem_headers=True)\n    except OSError:',
+     '            str(goc), kem_headers=True)\n        (goc / ".mcp.json").read_bytes()\n    except OSError:',
+     "t17_sau_phan_tich_khong_con_doc_he_tep_de_OSError_thoat_ra"),
     ("goc_mac_dinh_theo_cwd", '    return Path(ghi_de).resolve() if ghi_de else Path(__file__).resolve().parents[2]',
      '    return Path(ghi_de or ".").resolve()', "t13_goc_mac_dinh_neo_theo_tep_va_tl_goc_ghi_de"),
     ("bo_doc_port", "        _ = p.port\n", "", "t02_moi_url_tu_choi_khong_probe_khong_ro_bi_mat"),
@@ -450,7 +466,7 @@ DOT_BIEN = [
 def _phan_hang_dot_bien(q, ca_dich):
     if q.returncode == 0:
         return "song_sot"
-    dau_assert = f"HONG {ca_dich}: AssertionError:"
+    dau_assert = f"HONG {ca_dich}: TinHieuChotCa:"
     if any(dong.strip().startswith(dau_assert) for dong in q.stdout.splitlines()):
         return "giet_that"
     return "tin_dung_gia"
@@ -461,8 +477,18 @@ def _tu_kiem_phan_hang_dot_bien():
         def __init__(self, rc, stdout):
             self.returncode, self.stdout = rc, stdout
 
-    bang(_phan_hang_dot_bien(Q(1, "HONG ca_dich: AssertionError: do chot"), "ca_dich")
-         == "giet_that", "runner khong nhan AssertionError cua ca dich")
+    bang(_phan_hang_dot_bien(Q(1, "HONG ca_dich: TinHieuChotCa: do chot"), "ca_dich")
+         == "giet_that", "runner khong nhan tin hieu rieng cua ca dich")
+    try:
+        try:
+            raise AttributeError("loi vo can")
+        except Exception as e:
+            raise AssertionError(f"doi kieu: {type(e).__name__}") from None
+    except Exception as e:
+        dau_ra_doi_kieu = f"HONG ca_dich: {type(e).__name__}: {e}"
+    bang(_phan_hang_dot_bien(Q(1, dau_ra_doi_kieu), "ca_dich") == "tin_dung_gia",
+         "runner cap tin dung khi AttributeError bi doi thanh AssertionError")
+    print("  CHOT NGUOC AttributeError -> AssertionError: TIN DUNG GIA")
     bang(_phan_hang_dot_bien(Q(1, "HONG ca_dich: TypeError: loi vo can"), "ca_dich")
          == "tin_dung_gia", "runner cap tin dung cho TypeError")
     bang(_phan_hang_dot_bien(Q(1, "HONG ca_khac: AssertionError: sai ca"), "ca_dich")

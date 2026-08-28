@@ -28,7 +28,6 @@ hai đường vận chuyển và trả lời hai câu hỏi khác nhau, không p
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import re
@@ -53,23 +52,14 @@ class Hong(Exception):
 def _doc_cau_hinh(goc: Path) -> tuple[str, dict[str, str]]:
     """Trả (url, headers đã giải biến) cho server `github` do launcher chọn.
 
-    Launcher sở hữu việc đọc lược đồ, chọn khoá và khớp tên. Client phải đọc lại
-    đúng mục đã chọn vì hợp đồng chuẩn cố ý không trả ``headers``.
+    Launcher sở hữu việc đọc lược đồ, chọn khoá, khớp tên và trả URL + headers từ
+    cùng một ảnh. Hợp đồng bốn giá trị của caller cũ vẫn là mặc định phía launcher.
     """
-    tep = goc / ".mcp.json"
     try:
-        anh_truoc = tep.read_bytes()
+        co_khai, mo_ta, _ten_chuan, url, headers = _launcher._doc_mcp_json(
+            str(goc), kem_headers=True)
     except OSError:
-        co_khai, mo_ta, _, _ = _launcher._doc_mcp_json(str(goc))
-        if not co_khai:
-            raise Hong(mo_ta)
         raise Hong("khong doc duoc .mcp.json") from None
-    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))
-    anh_sau = tep.read_bytes()
-    # Hai lượt đọc vẫn để lại một cửa sổ đua. So ảnh chỉ biến việc ghép URL của
-    # ảnh cũ với headers ảnh mới thành từ chối ồn ào; không tuyên bố xoá race.
-    if hashlib.sha256(anh_truoc).digest() != hashlib.sha256(anh_sau).digest():
-        raise Hong(".mcp.json da thay doi trong luc doc — TU CHOI")
     if not co_khai:
         raise Hong(mo_ta)
     if url is None:
@@ -77,14 +67,6 @@ def _doc_cau_hinh(goc: Path) -> tuple[str, dict[str, str]]:
         # client này là streamable HTTP nên không thể làm việc nếu thiếu URL.
         raise Hong("server `github` khong khai `url` cho client HTTP (kieu stdio?)")
 
-    # `_doc_mcp_json` không trả headers hoặc tên khoá chứa server. Chỉ phần này
-    # không tái sử dụng được; lặp đúng quy tắc ưu tiên khoá để lấy mục đã chọn.
-    d = json.loads(anh_sau.decode("utf-8"))
-    for khoa in ("mcpServers", "servers"):
-        if khoa in d:
-            srv = d[khoa]
-            break
-    muc = srv[ten_chuan]
     # `urlsplit` trì hoãn kiểm port tới lúc đọc `.port`. Phải đọc nó trong cùng
     # `try`: một bí mật ở vị trí port không được đi tiếp vào `Request`.
     try:
@@ -107,9 +89,6 @@ def _doc_cau_hinh(goc: Path) -> tuple[str, dict[str, str]]:
             return v
         return _RE_BIEN.sub(_thay, x)
 
-    headers = muc["headers"] if "headers" in muc else {}
-    if not isinstance(headers, dict):
-        raise Hong("headers cua server `github` khong phai object")
     dau = {str(k): _giai(str(v)) for k, v in headers.items()}
     # TOOLSET CON: máy chủ github-mcp-server phơi các bộ công cụ hẹp ở ĐƯỜNG DẪN CON
     # (`/mcp/x/actions` …). Chỉ cho phép nối HẬU TỐ vào URL đã khai — KHÔNG nhận URL

@@ -7,7 +7,7 @@
 
 `packet_id`: `MCP-DOC-PHAN-TICH`
 `packet_issue`: `359`
-`revision`: `2` · `generation`: `1`
+`revision`: `3` · `generation`: `1`
 `review_class`: **`sensitive`** — tệp chuyển `${GITHUB_PAT}` tới một endpoint ngoài.
 `risk`: `normal` — trần ADR-0044 `≤3 tệp/≤300 dòng` gắn với packet **chạm authority**;
 `.claude/dev/**` là dev-side, NGOÀI gói phát hành, không cổng nào đọc.
@@ -51,16 +51,23 @@ tệp"* chết theo **kiến trúc** chứ không theo bản vá.
 Số finding **tăng** theo vòng (`1 → 1 → 3`). Ngưỡng CLAUDE.md là ba. Tiền lệ: **BẢY** phát
 hiện cùng một đường ở bộ gỡ `shell_environment_policy`, chữa bằng đổi kiến trúc.
 
-## `write_set`
+## `write_set` — MỞ RỘNG ở bản sửa đổi 3
 
 ```yaml
 - type: exact
   path: .claude/dev/mcp_github_doc.py
 - type: exact
   path: .claude/dev/mcp_github_doc_test.py
+- type: exact
+  path: .claude/dev/launcher.py
+- type: exact
+  path: .claude/dev/launcher_test.py
 ```
 
-`launcher.py` **NGOÀI** write set. Mở rộng hợp đồng của nó là điều kiện dừng `S3`.
+`launcher.py` **VÀO** write set. `S3` của bản 2 được **gỡ**, và chỉ gỡ bằng thẩm quyền chủ kho.
+
+Đo trước khi mở: `ai-dang-giu` trên `.claude/dev/launcher.py` và `launcher_test.py` ⇒
+**`NGƯỜI_GIỮ 0`** cả hai. Master drift `693d68f..fe6152b` (5 tệp) **không chạm** hai tệp ấy.
 
 ## `acceptance_criteria`
 
@@ -98,3 +105,68 @@ hiện cùng một đường ở bộ gỡ `shell_environment_policy`, chữa b�
 - Sửa `launcher.py` dưới mọi hình thức.
 - Chữa nợ `spec_hash 2/74` cho các lease khác.
 - Thêm đường ghi thứ ba vào registry/Drive.
+
+
+---
+
+# BẢN SỬA ĐỔI 3 — mở `launcher.py`, vì vá vòng ngoài đã thua HAI lần
+
+## Vì sao phải sửa đặc tả thay vì vá tiếp
+
+Bản 2 cấm đụng `launcher.py` (`S3`). Dưới lệnh cấm ấy, packet chọn **tái sử dụng một phần**
+`_doc_mcp_json` — và chính lựa chọn đó đẻ ra một lớp hỏng mới, đo được qua hai vòng review:
+
+| vòng | finding | trạng thái |
+|---|---|---|
+| 1 | URL và `headers` đến từ **hai ảnh chụp** ⇒ có thể gửi token của B tới A | vá bằng so băm trước/sau |
+| 2 | **ABA đánh bại so băm**: A → B (trong lúc launcher đọc) → A. Hai băm khớp, launcher trả URL của B, client đọc headers của A | **bản vá THUA** |
+
+Đây là **mâu thuẫn kiến trúc**, không phải cẩu thả:
+
+| hướng | được | mất |
+|---|---|---|
+| ủy quyền `_doc_mcp_json` | giết lớp "hai công cụ bất đồng" | buộc **hai lần đọc** ⇒ đua |
+| tự phân tích | một ảnh, hết đua | **tái sinh** lớp trôi lệch mà packet sinh ra để giết |
+
+Không có đường thứ ba **trong** ràng buộc của bản 2. Chủ kho gỡ `S3` in-session `2026-08-27`.
+
+## `objective` (bản 3)
+
+`_doc_mcp_json` trả về **cả `headers`** (hoặc một biến thể trả đủ), để client lấy URL và
+`headers` từ **MỘT lời gọi, MỘT ảnh chụp**. Khi ấy đua biến mất **theo cấu trúc**, không phải
+bị canh — và lớp trôi lệch vẫn chết vì client vẫn không tự phân tích.
+
+## `acceptance_criteria` (bản 3) — cộng vào bản 2, không thay thế
+
+10. `_doc_cau_hinh` gọi **đúng MỘT** lần vào tầng phân tích và nhận đủ URL + `headers`.
+    Phản chứng **ABA** (A → B → A quanh lời gọi) phải **không còn ghép nhầm được**, và ca
+    test phải dựng đúng chuỗi ấy.
+11. **Không phá caller cũ của `_doc_mcp_json`.** Nó đang được `doctor` dùng qua hợp đồng
+    bốn giá trị. Giữ hợp đồng cũ dùng được, hoặc **chuyển caller một cách tường minh** và
+    chứng minh `doctor` không hồi quy. Đo, đừng khai.
+12. `launcher_test.py` phải có ca cho phần mới. **`t117` vẫn phải xanh** — mỗi mẫu đột biến
+    khớp ĐÚNG MỘT chỗ trong `launcher.py`; thêm mã có thể phá tính duy nhất ấy. Đo, đừng đoán.
+13. **Bộ phân hạng mutant không được bị lừa bởi việc ĐỔI KIỂU NGOẠI LỆ.** Đo được ở vòng 2:
+    `except Exception: raise AssertionError(...)` trong `mcp_github_doc_test.py:143` biến một
+    `AttributeError` vô can thành `AssertionError`, nên `_phan_hang_dot_bien` đếm là GIẾT THẬT.
+    Ý định của dòng ấy đúng, cách làm thì tự phá thước đo.
+    ⇒ Tín hiệu "assertion của ca đích" phải là thứ **mã triển khai không giả được** — ví dụ
+    một lớp ngoại lệ riêng, hoặc một dấu hiệu do chính khung ca sinh ra — chứ không phải cái
+    tên `AssertionError` mà bất kỳ `except` nào cũng dựng lên được.
+    **Chốt ngược:** sau khi sửa, một mutant chết vì `AttributeError` phải rơi vào hạng
+    **TÍN DỤNG GIẢ**, kể cả khi trên đường đi có một `except` đổi kiểu.
+14. `read_bytes()` (và mọi lời gọi hệ tệp sau pha phân tích) ném `OSError` phải được chuyển
+    thành `Hong`; `_main` không được để lọt traceback thay cho `KHONG_DO_DUOC/CHAN`.
+
+## Ngân sách (bản 3)
+
+`≤6` tệp / `≤1000` dòng thêm+xoá từ `base_sha`. Hiện dùng **256**. Mở write set **KHÔNG** nới
+trần kích thước.
+
+## Điều kiện dừng (bản 3)
+
+`S1` `S2` `S5` giữ nguyên. **`S3` GỠ** (được sửa `launcher.py`). `S4` giữ nguyên: không được
+xoá khác biệt PHẠM VI hợp lệ. Thêm:
+
+- `S6` sửa `_doc_mcp_json` làm `doctor` hoặc `launcher_test.py` hồi quy ⇒ DỪNG, trình phép đo.
+- `S7` phải đụng đường dẫn thứ năm ngoài write set ⇒ DỪNG.

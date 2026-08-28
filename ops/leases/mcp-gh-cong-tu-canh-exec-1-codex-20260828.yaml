@@ -49,6 +49,41 @@ write_set_note: >-
   ĐÚNG HAI đường dẫn, theo mục "write set đề xuất" của hồ sơ. `.claude/dev/mcp_gh.py` KHÔNG vào
   write set — cả bốn việc đều nằm trong tệp test; `ops/specs/mcp-gh-cuu-ho.md` chỉ để sửa MỘT
   lời khai quá mạnh ở việc thứ tư, không để viết lại đặc tả.
+QUAN_HE_VOI_319:
+  loai: 'Remediation Slice của #319 (§12)'
+  vi_sao: >-
+    #360 KHÔNG phải packet độc lập. Nó vá đúng HAI P1 khiến #319 `changes_requested` và không
+    land được; hồ sơ packet nói thẳng "Tách khỏi #319" và "cả ba đã ĐO ĐƯỢC trên `f461413a`".
+    Nên nhánh của nó NỐI TIẾP `claude/mcp-gh-cuu-ho-exec-1`, và khi #360 xong thì cây gộp mới
+    là thứ land được — đóng luôn #319.
+  §5_dependency: >-
+    §5 nói "Packet có dependency chỉ chạy sau predecessor đã integrated". Ở đây predecessor
+    KHÔNG THỂ integrated (còn 2 P1) — và đó chính là lý do #360 tồn tại. §12 gọi đúng hình dạng
+    này là Remediation Slice: "Phần còn lại thành Remediation Slice kế nhiệm, giữ nguyên stable
+    finding IDs và lịch sử." Nên đây là ngoại lệ ĐÚNG LUẬT, không phải lách.
+  lease_319: >-
+    `mcp-gh-cuu-ho-exec-1r6-codex-20260827` đã ĐÓNG SỚM (bản ghi
+    `ops/DONG_LEASE_MCP_GH_CUU_HO_r6_20260827.md`), nên hai đường write set nay NGƯỜI_GIỮ 0 và
+    lease này cầm chúng hợp lệ.
+
+BAI_HOC_CUA_CHINH_LUOT_CAP_LEASE_NAY:
+  loi: >-
+    Phiên điều phối cấp lease với `base_sha` mà TRÊN ĐÓ KHÔNG CÓ tệp trong write set — hai lần
+    liên tiếp, và lần thứ hai còn viết ra một lý lẽ nghe hợp lý ("bắt đầu gần head") để biện minh.
+    Phép đo `ai-dang-giu` chạy trước đó trả NGƯỜI_GIỮ 0 và ĐÚNG, nhưng nó trả lời câu hỏi
+    "ai đang giữ đường dẫn này", KHÔNG phải "đường dẫn này có tồn tại ở base không". Hai câu hỏi
+    khác nhau — đúng họ bài học "hỏi chỗ TIỆN TAY thay vì hỏi chỗ KẾT LUẬN ĐƯỢC GHI".
+  chot_moi_phai_thanh_thuong_le: >-
+    TRƯỚC KHI CẤP BẤT KỲ LEASE NÀO: `git cat-file -e <base_sha>:<từng đường write set>` — mọi
+    đường phải tồn tại, hoặc lease phải nói RÕ đường nào là tệp SẼ ĐƯỢC TẠO MỚI. Một lệnh, rẻ,
+    và nó bắt được đúng lỗi vừa suýt làm mất một lượt executor.
+  dem_hinh_dang: >-
+    Đây là lần thứ BA trong phiên mà đầu vào khai trong lease không khớp thực tế (r1/r2 thiếu
+    `tl_selftest.py`; r3 thiếu `RELEASE_MANIFEST.json`; nay `base_sha` không chứa write set).
+    §12: lần thứ ba thì xem lại CÁCH LÀM, không vá lần thứ tư. Cách làm mới chính là chốt ngay
+    trên, cộng với việc DẪN XUẤT closure bằng cách chạy toàn bộ gate trước khi cấp — đã áp dụng
+    ở r4 của #334 và nó chặn được lần thứ ba ở packet ấy.
+
 write_set_da_do_truoc_khi_cap: >-
   ĐO 2026-08-28 ~00:36Z bằng `ops/lease_publish.py ai-dang-giu`. Phép so HAI NGUỒN trước khi quét,
   so bằng TẬP TÊN (không bằng `wc -l`): `ls-remote --heads` 235 = `for-each-ref` 235;
@@ -65,20 +100,25 @@ write_set_da_do_truoc_khi_cap: >-
 branch: claude/mcp-gh-cong-tu-canh-exec-1
 branch_ownership: exclusive
 target_branch_neu_land: master
-base_sha: fe6152be2cb77e90b2624487e5b2403e4e4424b7
+base_sha: f461413a03b3a28ebdacde1fa17f49c894223682
 base_ghi_chu: >-
-  DỜI base 693d68fd -> fe6152be lúc 2026-08-28T01:45Z, TRƯỚC khi nhánh tồn tại nên không gì bị
-  vô hiệu. §3.2 KHÔNG liệt `base_sha` là thứ tạo revision. Lý do dời: `fe6152be` là master ngay
-  sau khi #334 land, và packet vừa rồi đốt HAI vòng vì bất ngờ closure — bắt đầu càng gần head
-  thì càng ít chỗ để bất ngờ. Write set không bị ảnh hưởng: master không chạm
-  `.claude/dev/mcp_gh_test.py` lẫn `ops/specs/mcp-gh-cuu-ho.md` trong khoảng ấy.
-  Bản chiếu KHÔNG theo: lease đã có `posted_comment_id` nên workflow bỏ qua (rc=9) và comment
-  trên Issue #360 vẫn ghi base cũ. Tệp YAML là bản CÓ THẨM QUYỀN.
-  Base là `master` NGAY SAU khi #318 land (PR #358). Chọn head mới nhất thay vì base cũ của #319
-  vì packet này không nối tiếp nhánh nào — nó là packet mới, và `S4` (master trôi) đã bắn SÁU lần
-  trong ba ngày, nên bắt đầu càng gần head càng ít phải đối chiếu §5.1 về sau.
-start_from_sha: fe6152be2cb77e90b2624487e5b2403e4e4424b7
-reviewed_sha_required: fe6152be2cb77e90b2624487e5b2403e4e4424b7
+  SỬA LẠI 2026-08-28T01:50Z. Hai bản trước của trường này ĐỀU SAI, và cái sai là của phiên điều
+  phối chứ không của ai khác:
+    bản 1 ghi `693d68fd` (master), kèm câu "packet này không nối tiếp nhánh nào — nó là packet MỚI";
+    bản 2 dời sang `fe6152be` với lý lẽ "bắt đầu càng gần head càng ít bất ngờ".
+  CẢ HAI SAI VÌ CÙNG MỘT LÝ DO: **hai đường write set KHÔNG TỒN TẠI trên master.**
+  ĐO ĐƯỢC: `git cat-file -e <ref>:<path>` quét toàn bộ `refs/remotes/origin` cho thấy
+  `.claude/dev/mcp_gh_test.py` chỉ có ở `claude/mcp-gh-cuu-ho-exec-1` và
+  `claude/doctrine-allowlist-reviewer-exec-1`; `ops/specs/mcp-gh-cuu-ho.md` chỉ có ở
+  `claude/mcp-gh-cuu-ho-exec-1`. Và `merge-base --is-ancestor f461413a fe6152be` = rc=1, tức
+  #319 CHƯA LAND. Nếu phóng executor lên master thì nó mở ra một cây KHÔNG CÓ tệp cần sửa.
+  Bắt được TRƯỚC khi phóng, bằng đúng một lệnh `wc -l` trên hai đường write set.
+  BASE ĐÚNG là `f461413a` — head của nhánh #319. Đo: mcp_gh_test.py 670 dòng, spec 359 dòng,
+  cả hai có mặt. `merge-base(f461413a, master)` = `ac82ddc5`; DRIFT tới master 23 tệp và
+  KHÔNG chạm hai đường write set; `merge-tree` vào master rc=0 (sạch).
+
+start_from_sha: f461413a03b3a28ebdacde1fa17f49c894223682
+reviewed_sha_required: f461413a03b3a28ebdacde1fa17f49c894223682
 reviewed_sha_ghi_chu: >-
   ĐỂ NGUYÊN BASE ở lượt cấp đầu — nhánh chưa tồn tại nên chưa có head để neo, mà
   `lease_publish.py` liệt `reviewed_sha_required` vào `BAT_BUOC` nên không bỏ trống được (đã đo:

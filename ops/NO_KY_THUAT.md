@@ -746,6 +746,14 @@ chịu tải của mục này nằm ở hai con số ấy, không ở tổng s�
 Tám tên cổng có nhắc: `granted_by` · `lease_expires_at_utc` · `lease_id` · `packet_issue` ·
 `posted_comment_id` · `prompt_path` · `prompt_sha256_required` · `reviewed_sha_required`.
 
+**28-08-2026 — một thể hiện của mục này đã có packet:** `#373 LEASE-TOAN-VEN`, việc 3. Cặp
+`spec_path`/`spec_hash` là cặp NẶNG NHẤT trong 239 trường không ai đọc, vì `docs/PROTOCOL_DA_PHIEN.md`
+§3.2 giao cho nó việc ĐÓNG BĂNG đặc tả. Đo trên `d4b3045`: 74 lease · 40 khai `spec_path` (0 có
+`spec_hash`) · 2 có `spec_hash` (0 có `spec_path`) · 3 khai `spec_path: null` · **giao hai tập = 0**.
+Packet ấy chỉ đóng cặp này cùng `generation`/`nang_tran`, KHÔNG đóng 237 trường còn lại —
+mục 14 vẫn mở. (Phiên điều phối đã mở nhầm một Issue trùng `#377` cho đúng phần `spec_hash` vì
+không đọc đặc tả đóng băng đã có; `#377` đóng, số đo chuyển sang `#373`.)
+
 Nặng nhất không phải các field hiếm mà là **16 trường khai ở 100% lease** và vẫn không ai đọc:
 `access` · `assurance_target` · `attempts_limit` · `attempts_used` · `base_sha` · `branch` ·
 `branch_ownership` · `event` · `granted_on_instruction` · `leased_at_utc` · `packet_id` ·
@@ -924,6 +932,28 @@ reply trước của cùng PR. **Chốt duy nhất tin được vẫn là đo th
 so độ dài và kiểm vài mốc cuối bài; "lời gọi trả thành công" không nói gì về thứ người đọc nhìn thấy.
 
 Máy chưa canh được mục này — chưa có cổng nào đọc lại comment vừa đăng.
+
+### Lần thứ BA — 28-08-2026, và lần này là thân **ISSUE**, không phải comment
+
+Mở Issue packet `#378` qua công cụ MCP `issue_write`: **gửi 6250 ký tự, lưu 3027**. Bản đã lưu đứt
+giữa câu, đúng tại `(?` của một mẫu regex có lookbehind viết trong **dấu nháy ngược ĐƠN**. Bốn mục
+cuối của đặc tả — `acceptance_criteria`, điều kiện dừng, ràng buộc, nguồn — **biến mất sạch**. Đó là
+đúng nửa hợp đồng của packet.
+
+Cùng lượt ấy, một chỗ khác trong cùng thân bài bị **gỡ nhẹ hơn**: `TÊN_TỆP.py:SỐ_DÒNG` viết bằng
+ngoặc nhọn thành `.py:` — thẻ bị gỡ, phần sau vẫn còn. Hai hành vi khác nhau trong một lần đăng:
+**thẻ có vẻ đóng được thì bị GỠ, thẻ không đóng được thì NUỐT phần còn lại.**
+
+Ba điều mục này chưa nói trước đó:
+
+1. **Không chỉ comment.** Thân Issue đi qua cùng bộ lọc. Mọi đường ghi văn bản lên GitHub đều phải
+   coi là có bộ lọc HTML ở giữa.
+2. **Dấu nháy ngược ĐƠN không che.** Khối rào ba dấu nháy ngược thì qua được (đã đo ở lần hai và
+   lần này) — nháy ngược đơn thì không. Ranh giới nằm ở KHỐI RÀO, không ở dấu nháy ngược.
+3. **Chốt "đọc ngược về" CHẠY ĐƯỢC.** Lần này phát hiện trong vòng một phút vì phiên đọc lại thân
+   bài và so độ dài — đúng thứ mục này kê. Sửa bằng cách bỏ hẳn ký tự ngoặc nhọn rồi ghi đè; đo lại
+   `6317` ký tự và bốn mục đã về. **Nhưng nó vẫn là chốt bằng kỷ luật, không phải bằng cổng** —
+   không lần nào trong ba lần có gì tự kêu.
 
 ---
 
@@ -1324,3 +1354,57 @@ Verdict là `dung_lai` và **việc vẫn land** — `#227` nay mang `state:land
 
 **Chưa có packet nhận.** Ngoài `write_set` của `#244` theo **phạm vi đặc tả** (packet ấy là
 `ai-dang-giu`), dù `ops/lease_publish_test.py` nằm trong write set của nó.
+
+---
+
+## 22. `STATE-HASH-DAC-TA-DOI-MA-KHO-KHONG-VAN-HANH` — 0 dòng mã, không phải "làm chưa tốt"
+
+`docs/PROTOCOL_DA_PHIEN.md` mô tả một cơ chế **hoàn chỉnh** và mô tả nó bằng ngôn ngữ mệnh lệnh:
+
+```
+:178  state-event comment chứa event, full post-state checkpoint, `state_hash` và
+      `prev_event_hash`, rồi mới cập nhật …
+:184  … thiếu/trùng/sai hash hay sửa/xoá fact đã consume chuyển mission sang `paused`,
+      không đoán hoặc tự chữa
+```
+
+Đo trên `master` `d4b3045a6e5ec7daf4a9ebfacb405153de04fc99`:
+
+```
+git grep 'state_hash'       -- '*.py' '*.sh' '*.yml'   → 0 tệp
+git grep 'prev_event_hash'  -- '*.py' '*.sh' '*.yml'   → 0 tệp
+git grep 'spec_hash'        -- '*.py' '*.yml'          → 0 tệp
+```
+
+**Không một dòng mã nào đọc, ghi, hay kiểm bất kỳ thứ gì trong đoạn ấy.** Cơ chế thật đang chạy là
+lease + `ops/lease_publish.py`, và nó không có checkpoint chain.
+
+### Vì sao đây là nợ RIÊNG, không gộp vào mục 14
+
+Mục 14 nói về trường **được khai mà cổng không đọc** — có dữ liệu, thiếu người kiểm. Mục này khác
+hẳn: **không có dữ liệu để mà kiểm.** Không lease nào, không comment nào, không tệp nào trong kho
+mang một `state_hash`. Đặc tả không mô tả một cổng bị bỏ quên; nó mô tả một hệ thống chưa từng tồn tại.
+
+Đó là hình dạng nguy hiểm hơn, vì nó đọc y hệt một mô tả hiện trạng. Ai đọc `PROTOCOL_DA_PHIEN.md`
+từ trên xuống sẽ tin kho có event journal có băm nối chuỗi và có hành vi `paused` khi chain gãy.
+Không có gì trong tài liệu báo rằng phần ấy là **dự kiến**.
+
+### Quyết định của chủ kho — 28-08-2026, in-session
+
+Ba đường được đặt lên bàn: (a) ghi nợ có tên, chưa làm · (b) sửa đặc tả cho khớp hiện thực ·
+(c) mở packet dựng checkpoint chain. **Chọn (a).**
+
+Dựng checkpoint chain là câu hỏi *"có nên làm việc này không"*, không phải *"vá thế nào"* — và
+`CLAUDE.md` đã chốt rằng câu hỏi ấy không được trả lời lẫn trong một packet vá lỗi. Nên mục này
+**cố tình chưa có việc phải làm**. Nó tồn tại để phần đặc tả kia thôi vô hình.
+
+### Điều kiện để mục này đóng
+
+Đóng khi **một trong hai** xảy ra, không phải khi ai đó thấy nó đã cũ:
+
+* checkpoint chain được dựng thật và có cổng đọc `state_hash` — khi ấy đo lại ba lệnh `git grep`
+  ở trên và ghi số mới; **hoặc**
+* `docs/PROTOCOL_DA_PHIEN.md` hạ đoạn ấy xuống mức **dự kiến** một cách tường minh, để người đọc
+  không còn nhầm nó là mô tả hiện trạng.
+
+Không đóng bằng cách xoá mục này.

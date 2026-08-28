@@ -1,0 +1,190 @@
+# Lease EXECUTOR — `D9-CON-HO` (#382), lượt 1, **revision 1**.
+#
+# Packet này sửa hai lỗ trong CHÍNH bản vá mà packet #369 vừa land (`58b85cc2`), do một lượt
+# cross-review ĐỘC LẬP THỨ HAI tìm ra. Nó phải sống bên trong cái ratchet nó đang sửa: `D9` hiện
+# 761/779 nên `mcp_gh_test.py` chỉ còn 18 dòng không-trắng trước khi chính cổng ấy ĐỎ.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 382
+packet_id: D9-CON-HO
+phase_key: D9-CON-HO
+revision: 1
+generation: 1
+lease_id: d9-con-ho-exec-1-codex-20260828
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` ở đây KHÔNG do một dòng nào trong `_BANG_LOP` khai, mà do MẶC ĐỊNH FAIL-CLOSE:
+  `_lop_cua_write_set` trả `sensitive` cho mọi đường KHÔNG khớp tiền tố nào trong bảng
+  (`lease_publish.py:151-152`). Phiên điều phối cấp lease này lần đầu ghi `routine` vì suy từ
+  "không chạm `.github/workflows/**`" — SAI, và CỔNG BẮT ĐƯỢC (`CHAN [10]`). Ghi lại vết vì đó là
+  đúng loại lỗi lease này sinh ra để chặn: suy ra một phân loại thay vì đọc phép tính của cổng.
+  Lớp do CỔNG tính, không tự hạ.
+
+executor_ghi_chu: >-
+  `codex` vì write set chạm `.claude/**` — nền của `claude` từ chối `Edit`/`Write` dưới đường đó,
+  và đó là lý do ĐO ĐƯỢC chứ không phải sở thích. Reviewer `claude` ⇒ cross-provider.
+
+spec_path: 'ops/specs/d9-con-ho-packet-issue-nhap.md'
+spec_ref: 'refs/heads/ops/cap-lease-tach-314'
+spec_ghi_chu: >-
+  Hồ sơ CÓ THẨM QUYỀN là tệp trên nhánh `ops/cap-lease-tach-314`. Thân Issue #382 là BẢN CHIẾU.
+  Thứ định danh là BĂM, không phải tên nhánh.
+
+write_set:
+  - .claude/dev/mcp_gh_test.py
+  - ops/specs/mcp-gh-cuu-ho.md
+write_set_note: >-
+  ĐÚNG HAI đường. `.claude/dev/mcp_gh.py` KHÔNG vào write set: cả hai lỗ đều nằm ở tầng CHỐT
+  (`D9`, `D13`) chứ không ở mã ứng dụng. Nó vẫn được ĐỌC vì `D9` đếm cả hai tệp.
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-28T10:05Z, sau khi ĐÓNG SỚM lease `d9-doi-cach-dem-exec-1r4` (packet #369 đã land
+  08:57:04Z nhưng lease còn hạn tới 2026-08-29, tức giữ vô ích cả hai đường này):
+    `.claude/dev/mcp_gh_test.py`   -> NGƯỜI_GIỮ 0
+    `ops/specs/mcp-gh-cuu-ho.md`   -> NGƯỜI_GIỮ 0
+  CHỐT ĐẮT HƠN VẺ NGOÀI: ngay SAU commit đóng lease, phép đo VẪN trả `NGƯỜI_GIỮ 1` — `ai-dang-giu`
+  quét CẢ `refs/remotes/origin/*`, và bản cũ còn sống ở ref theo dõi cho tới khi ĐẨY. Đóng lease
+  chỉ có hiệu lực với phép đo SAU KHI PUSH. Cùng họ với bài học "nghi CLONE trước khi nghi LEASE".
+
+chot_ton_tai_o_base: >-
+  `git cat-file -e 58b85cc2:.claude/dev/mcp_gh_test.py` => CÓ.
+  `git cat-file -e 58b85cc2:ops/specs/mcp-gh-cuu-ho.md` => CÓ. Không tệp viết mới nào.
+
+branch: codex/d9-con-ho-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 58b85cc293a749dde26991aae5695fd1181ac43a
+base_ghi_chu: >-
+  Master ngay sau khi #369 land — tức bản CHỨA hai lỗ mà packet này sửa. Rẽ từ mốc cũ hơn thì
+  bản vá không đối chứng được với chính thứ nó sửa.
+start_from_sha: 58b85cc293a749dde26991aae5695fd1181ac43a
+reviewed_sha_required: 58b85cc293a749dde26991aae5695fd1181ac43a
+reviewed_sha_ghi_chu: >-
+  Để nguyên base ở lượt cấp đầu (nhánh chưa tồn tại; `lease_publish.py` liệt trường này vào
+  `BAT_BUOC`). PHẢI cập nhật sang exact head khi đưa ra review.
+
+viec_cua_luot_nay: >-
+  BA việc. Việc 4 của hồ sơ (P3) CỐ Ý không làm — nó thành nợ có tên.
+  (1) `tran-779-khong-co-rang`: nâng trần mà không thêm mã phải ĐỎ NGAY TẠI `D9`.
+  (2) `D13-tu-dem-chinh-no`: mẫu đột biến CHẾT nhắm `test` phải bị `D13` BẮT, không được tự đếm
+      chính nó thành 1 nhờ nằm trong bảng `MUTATIONS`.
+  (3) Câu tại hàng `D9` của `ops/specs/mcp-gh-cuu-ho.md` phải nêu ĐÚNG đường nén kế tiếp.
+
+do_cua_phien_dieu_phoi_KHONG_phai_chep_tu_ho_so: >-
+  Phiên điều phối TỰ ĐO LẠI hai khẳng định nặng nhất thay vì chuyển tiếp con số của nguồn:
+  · `D9` trên `58b85cc2`: `mcp_gh.py` 199 + `mcp_gh_test.py` 562 = **761/779**, biên **18**.
+  · Trần KHÔNG CÓ RĂNG: thay nhất quán cả 7 chỗ `779` thành `920` trên bản sao ngoài cây rồi chạy
+    `mcp_gh_test.py` trần ⇒ `rc=0`, `TỔNG: ĐẠT`. Nâng **+141 dòng** đi qua sạch. Đã lặp lại với
+    `800` ⇒ cũng `rc=0`, `TỔNG: ĐẠT`.
+  Việc 2 và việc 3 phiên điều phối CHƯA tự đo lại — chúng đến từ hồ sơ. Đo lại là việc của bạn, và
+  mỗi chỗ hồ sơ sai mà bạn tìm ra được tính là một finding.
+
+RANG_BUOC_DAC_BIET_packet_song_trong_ratchet_no_dang_sua: >-
+  `D9` là **761/779** ⇒ `.claude/dev/mcp_gh_test.py` chỉ còn **18 dòng không-trắng**. Đây KHÔNG
+  phải bất tiện cần né — nó là phép thử của chính packet: một cổng vừa được sửa mà bản sửa không
+  sống nổi dưới cổng ấy thì bản sửa chưa đúng.
+  Không vừa 18 dòng ⇒ điều kiện dừng `S2` và câu hỏi **"tệp này có nên TÁCH ĐÔI không"** — đúng
+  `chot_chong_lap_bat_buoc` mà #369 vừa land. **KHÔNG nâng `779`.** Nâng nó ở đây là dùng chính
+  cái lỗ packet này sinh ra để bịt.
+  `ops/specs/mcp-gh-cuu-ho.md` KHÔNG nằm trong phép đếm `D9`, nên phần đặc tả không tiêu vào 18 dòng.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 26
+  do_tu_sha: 58b85cc293a749dde26991aae5695fd1181ac43a
+  don_vi: 'dòng THÊM trên TOÀN write set, `git diff --numstat`'
+  rang_buoc_con_chat_hon: >-
+    Trần 26 là trần của `numstat`. Trần THẬT SỰ CHẶN là `D9`: `mcp_gh_test.py` không được vượt
+    **18 dòng KHÔNG-TRẮNG thêm**. Hai phép đếm khác nhau (numstat đếm cả dòng trắng), và cái chặt
+    hơn thắng. Đo CẢ HAI, đừng đo một cái rồi suy ra cái kia.
+  ghi_chu: >-
+    26 = 18 (mức `D9` cho phép trên tệp test) + ~8 cho `ops/specs/mcp-gh-cuu-ho.md`. Chạm trần ⇒
+    CẮT, KHÔNG nâng, KHÔNG đổi đơn vị (§12).
+
+khong_duoc_lam:
+  - >-
+    KHÔNG đổi đơn vị đếm của `D9` sang token hay bất cứ thứ gì khác. `ops/specs/mcp-gh-cuu-ho.md`
+    cấm "đổi đơn vị lần hai", và đó là quyết định của người giữ kho, không phải của packet. Số cho
+    phương án (C) đã có trong hồ sơ để lần quyết định sau có dữ liệu — chỉ vậy thôi.
+  - >-
+    KHÔNG nâng `779`. Xem `RANG_BUOC_DAC_BIET` ở trên.
+  - >-
+    KHÔNG đuổi theo việc 4 (P3 `try/finally` thiếu ca đo hành vi). Nó là nợ có tên
+    `AG-382-P3-01-d12-thieu-ca-do-hanh-vi`, và trong 18 dòng thì đuổi theo nó là hy sinh hai việc
+    có lỗ fail-open thật cho một nợ độ phủ.
+  - >-
+    KHÔNG xoá dấu vết của lời khai sai ở việc 3. Đặc tả phải NÓI RA rằng phép đo bác bỏ mối lo cũ
+    (xoá sạch chú thích chỉ mua 11 dòng, chưa bằng biên 18) — chính lời khai sai ấy là bài học.
+
+phan_chung_bat_buoc: >-
+  Mỗi chốt mới phải có ĐỘT BIẾN RIÊNG làm nó ĐỎ, chạy trên BẢN SAO NGOÀI CÂY (`cp -r`/`git archive`
+  sang thư mục tạm), KHÔNG sửa tệp thật rồi khôi phục trong `finally` — kho đã trả giá vì cách đó.
+  · nâng `TRAN` **nhất quán** mà không thêm mã ⇒ ĐỎ **tại `D9`**, không phải ở nơi khác vì lý do
+    khác. Phân biệt hai chuyện này: bản hiện tại ở SHA cũ từng "đỏ ở 920" nhưng vì `D8(a)` kêu do
+    SỔ SÁCH, một trùng hợp số học, không phải vì `D9` canh.
+  · nới chốt duy-nhất của `D13` (`!= 1` -> `> 1`) ⇒ ĐỎ;
+  · một mẫu đột biến CHẾT nhắm `test` (0 vị trí thật trong mã) ⇒ `D13` phải BẮT;
+  · CA ĐỐI CHỨNG: 54/54 mẫu hiện có vẫn khớp đúng 1 và cổng vẫn XANH. Chốt bắt oan cũng là chốt
+    hỏng, và ở đây rủi ro dương-tính-giả là thật vì phép cắt vùng bảng có thể cắt nhầm.
+  QUÉT THEO Ý, KHÔNG THEO DIFF: câu hỏi là "mọi đường nâng trần hoặc nới chốt mà cổng vẫn xanh".
+
+do_bat_buoc: >-
+  · `python3 .claude/dev/mcp_gh_test.py` ⇒ `TỔNG: ĐẠT`, `rc=0`. ĐO `rc` BẰNG `$?` NGAY SAU LỜI GỌI
+    TRẦN, đừng qua ống — phiên điều phối đã tự mắc đúng lỗi ấy hôm nay (`| head` nuốt mã thoát).
+  · `D9` tự đếm bằng lệnh của CHÍNH BẠN (dòng không-trắng của hai tệp), không chép số hàm test in ra.
+  · `git diff --numstat 58b85cc2` trên đúng hai đường; đối chiếu CẢ trần 26 lẫn ràng buộc 18.
+  · `git diff --check` sạch.
+
+canh_bao_da_tra_gia:
+  - >-
+    Mẫu đột biến ĐƠN DÒNG tự khớp hai lần trong bảng `MUTATIONS`; mẫu NHIỀU DÒNG tự loại mình khỏi
+    bảng vì dấu xuống dòng ở đó là chuỗi thoát. Đây là họ lỗi đã nổ BA lần (#319, #360, #369) và là
+    lý do `D13` tồn tại. Bản vá `D13` của packet này đụng thẳng vào đó — cẩn thận đừng sinh lần thứ tư.
+  - >-
+    "Cổng đỏ" KHÁC "cổng đỏ VÌ ĐÚNG LÝ DO". Cả hai lỗ ở đây đều là ca cổng đỏ/xanh vì lý do phụ.
+    Với mỗi phản chứng, nói rõ NÓ ĐỎ Ở ĐÂU và VÌ VẾ NÀO.
+  - >-
+    ĐỪNG viết chuỗi tắt-CI (`[skip` + `ci]`) nguyên văn vào thông điệp commit, kể cả khi trích dẫn.
+
+dieu_kien_dung: >-
+  S1 write set đổi ⇒ dừng, đi qua revision (§3.2).
+  S2 chạm trần 26 dòng HOẶC chạm ràng buộc 18 dòng không-trắng ⇒ CẮT, không nâng, KHÔNG đổi đơn vị;
+     và hỏi câu hỏi TÁCH ĐÔI.
+  S3 cùng hình dạng lỗi lần thứ BA ⇒ dừng, xem lại CÁCH LÀM (§12).
+  S4 master trôi ⇒ đo `merge-base --is-ancestor` + `numstat` trên ĐÚNG write set.
+  S5 bản vá làm ĐỎ một cổng khác ⇒ dừng và báo, đừng vá lan.
+  S6 nếu phép cắt vùng bảng `MUTATIONS` sinh dương tính giả mà bạn không khử được trong trần ⇒
+     DỪNG và BÁO kèm ca cụ thể. Một chốt bắt oan tệ hơn chốt không bắt, vì nó dạy người ta tắt chốt.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  RIÊNG CHO PACKET NÀY, không tái dùng câu uỷ quyền gốc. Trực tiếp trong phiên 2026-08-28:
+  **"Đồng ý đề xuất. Tôi uỷ quyền cho bạn thực hiện theo phương án bạn đề xuất, được phép cấp
+  lease"**, và ngay sau đó **"Kiểm tra lại, xử lý vấn đề và làm tiếp đi"** — chủ kho tự mở Issue
+  #382 lúc 09:13Z từ một lượt cross-review độc lập của chính mình, tức chính chủ kho đưa việc này
+  vào hàng đợi; câu trên là uỷ quyền cấp lease cho nó.
+  Cách ghi trường này là hệ quả của nợ `AG-369-P2-02`: bốn revision của #369 đều trích Y HỆT một
+  câu chỉ thị gốc nên người audit không phân biệt được lần chấp thuận nào ứng với quyết định nào.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên ghi lease là `claude`; executor là `codex` ⇒ không tự cấp cho chính mình. Phiên này KHÔNG
+  viết bản vá — chỉ đo, soạn hồ sơ và cấp lease.
+  KHAI XUNG ĐỘT LỢI ÍCH: phiên này là bên đã ĐIỀU PHỐI và LAND packet #369 — tức bên để lọt cả hai
+  lỗ mà packet này sửa, và là bên đã duyệt câu khai sai ở việc 3. Reviewer phải soi lease này như
+  soi lease của bất kỳ ai khác, và soi kỹ hơn ở chỗ nó tự bào chữa.
+
+leased_at_utc: '2026-08-28T10:14:00Z'
+lease_expires_at_utc: '2026-08-29T10:14:00Z'
+run_minutes: 1440

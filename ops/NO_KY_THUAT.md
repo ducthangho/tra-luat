@@ -746,11 +746,13 @@ chịu tải của mục này nằm ở hai con số ấy, không ở tổng s�
 Tám tên cổng có nhắc: `granted_by` · `lease_expires_at_utc` · `lease_id` · `packet_issue` ·
 `posted_comment_id` · `prompt_path` · `prompt_sha256_required` · `reviewed_sha_required`.
 
-**28-08-2026 — một thể hiện của mục này đã thành packet có tên:** `#377 CONG-BAM-DAC-TA`. Cặp
+**28-08-2026 — một thể hiện của mục này đã có packet:** `#373 LEASE-TOAN-VEN`, việc 3. Cặp
 `spec_path`/`spec_hash` là cặp NẶNG NHẤT trong 239 trường không ai đọc, vì `docs/PROTOCOL_DA_PHIEN.md`
 §3.2 giao cho nó việc ĐÓNG BĂNG đặc tả. Đo trên `d4b3045`: 74 lease · 40 khai `spec_path` (0 có
 `spec_hash`) · 2 có `spec_hash` (0 có `spec_path`) · 3 khai `spec_path: null` · **giao hai tập = 0**.
-Packet ấy chỉ đóng cặp này, KHÔNG đóng 237 trường còn lại — mục 14 vẫn mở.
+Packet ấy chỉ đóng cặp này cùng `generation`/`nang_tran`, KHÔNG đóng 237 trường còn lại —
+mục 14 vẫn mở. (Phiên điều phối đã mở nhầm một Issue trùng `#377` cho đúng phần `spec_hash` vì
+không đọc đặc tả đóng băng đã có; `#377` đóng, số đo chuyển sang `#373`.)
 
 Nặng nhất không phải các field hiếm mà là **16 trường khai ở 100% lease** và vẫn không ai đọc:
 `access` · `assurance_target` · `attempts_limit` · `attempts_used` · `base_sha` · `branch` ·

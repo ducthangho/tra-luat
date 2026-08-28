@@ -8,9 +8,12 @@ import subprocess
 import sys
 import tempfile
 
+import yaml
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 GOC = (".claude/dev", ".claude/hooks", ".githooks", ".github/checks", "scripts/tl_core")
 OPS_REVIEWS = "ops/reviews/"
+MOI_TRUONG_CI = "github-actions/linux"
 MOI = {
     ".claude/dev/chon_reviewer_test.py": r"(?s)nền: (\d+)/(\d+) đạt.*TỔNG: ĐẠT",
     ".claude/dev/gh_readback_test.py": r"gh_readback tests: (\d+)/(\d+) ca QUA \(hong 0\)",
@@ -37,6 +40,7 @@ CACH_LY = {
 }
 DA_NOI = {
     ".claude/dev/ci_dang_ky_test.py",
+    ".claude/dev/duyet_danh_tinh_test.py",
     ".claude/dev/codex_cred_test.py", ".claude/dev/gate_lifecycle_test.py",
     ".claude/dev/idiom_py_test.py", ".claude/dev/launcher_test.py",
     ".claude/dev/packet_loop_test.py", ".githooks/eol_policy_test.py",
@@ -71,8 +75,18 @@ def kiem(root=ROOT, registry=DANG_KY, workflows=None, cach_ly=CACH_LY):
     for x, no in cach_ly.items():
         if not all(no.get(k) for k in ("slug", "ly_do", "moi_truong", "log")):
             loi.append("cách ly thiếu slug, lý do, môi trường hoặc log: " + x)
+        elif no["moi_truong"] != MOI_TRUONG_CI:
+            loi.append("cách ly có môi trường không hợp lệ: " + x)
     if workflows is None:
-        workflows = "\n".join(p.read_text(encoding="utf-8") for p in (root / ".github/workflows").glob("*.yml"))
+        runs = []
+        for p in (root / ".github/workflows").glob("*.yml"):
+            data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+            for job in (data.get("jobs") or {}).values():
+                for step in (job.get("steps") or []):
+                    if isinstance(step, dict) and isinstance(step.get("run"), str):
+                        runs.extend(line for line in step["run"].splitlines()
+                                    if not line.lstrip().startswith("#"))
+        workflows = "\n".join(runs)
     for x in sorted(DA_NOI):
         if x == ".claude/dev/ci_dang_ky_test.py":
             co = "python .claude/dev/ci_dang_ky_test.py --chay" in workflows
@@ -97,7 +111,7 @@ def bang_chung_xanh(text, mau):
 def moi_truong_hien_tai(env=os.environ):
     """Chỉ nhận diện khi cả hai dấu hiệu runner chuẩn cùng khớp."""
     if env.get("GITHUB_ACTIONS") == "true" and env.get("RUNNER_OS") == "Linux":
-        return "github-actions/linux"
+        return MOI_TRUONG_CI
     return None
 
 
@@ -161,6 +175,17 @@ def phan_chung():
         mutant = {".claude/dev/a_test.py": {"slug": "nợ", "ly_do": "đỏ trên CI",
                                                 "log": "log-r3"}}
         cases.append(bool(kiem(r, reg, wf, mutant)[0]))
+        # r5: neo môi trường ngoài đúng nguồn giá trị phải đỏ ở tầng cấu trúc.
+        mutant = {".claude/dev/a_test.py": {"slug": "nợ", "ly_do": "đỏ trên CI",
+                    "moi_truong": "github-actions/lin-typo", "log": "log-r3"}}
+        cases.append(any("môi trường không hợp lệ" in x for x in kiem(r, reg, wf, mutant)[0]))
+        # r5: xoá run thật, giữ nguyên lệnh trong YAML comment vẫn phải đỏ.
+        yml = r / ".github/workflows/comment.yml"
+        yml.write_text("jobs:\n  x:\n    steps:\n      - run: python .claude/dev/a_test.py\n", encoding="utf-8")
+        yml.write_text("jobs:\n  x:\n    steps:\n      # - run: python .claude/dev/a_test.py\n", encoding="utf-8")
+        old = set(DA_NOI); DA_NOI.clear(); DA_NOI.add(".claude/dev/a_test.py")
+        try: cases.append(any("CI không gọi mục" in x for x in kiem(r, reg)[0]))
+        finally: DA_NOI.clear(); DA_NOI.update(old)
         # (b) Bản sao chương trình cách ly chuyển xanh phải bị yêu cầu gỡ.
         green = base / "green_test.py"
         green.write_text("print('1/1')\n", encoding="utf-8")
@@ -174,7 +199,8 @@ def phan_chung():
     # Hai chiều bằng chứng: rc đỏ dù có dòng xanh; rc xanh nhưng thiếu dòng xanh.
     cases += [not (1 == 0 and bang_chung_xanh("TỔNG: ĐẠT", r"TỔNG: ĐẠT")),
               not (0 == 0 and bang_chung_xanh("", r"TỔNG: ĐẠT"))]
-    names += ["a-cach-ly-thieu-slug", "r4-thieu-moi-truong", "b-cach-ly-chuyen-xanh",
+    names += ["a-cach-ly-thieu-slug", "r4-thieu-moi-truong", "r5-moi-truong-sai-tap",
+              "r5-comment-gia-loi-goi", "b-cach-ly-chuyen-xanh",
               "r4-bo-so-moi-truong", "r4-khong-do-duoc-thanh-dat",
               "rc-do-ban-in-xanh", "rc-xanh-thieu-ban-in"]
     for name, ok in zip(names, cases): print(f"ĐỘT BIẾN {name}: {'ĐỎ đúng' if ok else 'LỌT'}")

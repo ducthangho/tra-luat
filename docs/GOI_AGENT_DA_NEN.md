@@ -622,7 +622,7 @@ KHÁC NHAU ở hai cấu hình. Mục dưới có ví dụ: hàng `--allowedTool
 **Mục này dùng BA trên năm hạng — nhưng KHÔNG phải ba hạng mà bản trước tưởng.** Đơn vị đếm là
 **lần GẮN NHÃN cho một mệnh đề**, không phải số lần xuất hiện của cụm chữ. TÁM mệnh đề mang nhãn:
 năm hàng bảng, cộng mệnh đề cơ chế proxy ambient, mệnh đề bộ-ba-với-quyền-ghi, và mệnh đề mạng
-sandbox ở đoạn khai chỗ tách. Đếm ra: `chiều ĐÓNG` ×1 · `chiều MỞ` ×4 · `chưa xếp được` ×3 ·
+sandbox ở đoạn khai chỗ tách. Đếm ra: `chiều ĐÓNG` ×1 · `chiều MỞ` ×5 · `chưa xếp được` ×2 ·
 `máy phát hiện` ×0 · `quan sát chưa rõ cơ chế` ×0.
 Mệnh đề thứ tám ấy TỪNG bị bỏ khỏi phép đếm vì "bằng chứng ở chỗ khác" — đó là mở đúng cái ngoại lệ
 mà cam kết trên cấm. Nay nó mang nhãn VÀ có điều kiện đo ngay cạnh nó, lấy từ phép A/B đã có sẵn
@@ -638,15 +638,14 @@ trong khi danh tính từng hạng đã đổi hết.
 bàn.** Luật hẹp `Bash(x:*)` đóng HÌNH DẠNG lệnh: đo được, fail-closed, và **không chạm quyền ghi
 vào kho**. Nên
 luận điểm đúng của mục là *chưa đo được control nào bó được quyền ghi*, với lượng từ cố ý yếu vì
-ba ô `chưa xếp được` là ba mệnh đề chưa chốt.
+hai ô `chưa xếp được` là hai mệnh đề chưa chốt.
 
 `máy phát hiện` rỗng cũng là kết luận, không phải sót: bộ ba từng bị gọi là máy phát hiện hoá ra
 KHÔNG tố cáo sự kiện đang bàn. `quan sát chưa rõ cơ chế` rỗng vì lý do riêng của TỪNG mệnh đề chưa
 chốt, không phải một lý do chung: hàng `workspace-write` không mang phiên bản lẫn số lần lặp, mà
-hạng ấy đòi lặp lại được; mệnh đề bộ-ba-với-quyền-ghi thì chưa ai đo CƠ CHẾ; và mệnh đề mạng
-sandbox có phép đo nhưng kênh `git` ở đó mang lớp `KHÔNG_ĐO_ĐƯỢC` (xem đoạn dưới) — cùng lý do nó
-KHÔNG lên được `chiều MỞ`. Thiếu điều kiện thì chỗ của chúng là ô dư, không phải hạng gần nhất. Bảng giữ đủ năm hàng vì nó là **từ vựng dùng chung**; đừng đọc
-số hàng thành số hạng đã dùng.
+hạng ấy đòi lặp lại được; mệnh đề bộ-ba-với-quyền-ghi thì chưa ai đo CƠ CHẾ. Thiếu điều kiện thì
+chỗ của chúng là ô dư, không phải hạng gần nhất. Bảng giữ đủ năm hàng vì nó là **từ vựng dùng
+chung**; đừng đọc số hàng thành số hạng đã dùng.
 
 Luật đọc: **quan sát theo phiên bản KHÁC bất biến an ninh.** Chỉ được gọi một thứ là *ranh giới*
 sau khi xác minh cơ chế **và đo được nó chặn**; trước đó nó là *quan sát*, và quan sát thì có hạn dùng.
@@ -672,21 +671,23 @@ Kết quả **bên trong sandbox codex khác hẳn**, và mục ấy — cùng m
 packet riêng. Lý do tách là một phép đếm, không phải cảm tính: bốn vòng cross-review liên tiếp đều
 sinh finding về mục mạng/sandbox (tám finding), trong khi mọi tiêu chí khác của packet này đã đạt
 từ vòng ba. Mệnh đề còn đứng mà không cần bảng số nào — và nó MANG NHÃN như mọi mệnh đề khác:
-**mạng đóng của sandbox là một MẶC ĐỊNH CẤU HÌNH, không phải bất biến — DÙ có biết cơ chế thì cũng
-KHÔNG làm nó thành ranh giới** ⇒ **chưa xếp được**, cho câu hỏi *"nó có phải ranh giới không"*.
+**socket và url của sandbox: `network_access=true` MỘT MÌNH đảo cả hai từ `POLICY_DENIED` sang
+`LOT`** ⇒ **cơ chế đã xác minh — chiều MỞ**, phạm vi CHỈ hai kênh này; hạng MỞ không phải ranh
+giới (định nghĩa ở trên) — nó giải thích VÌ SAO không chặn, không tuyên bố có chặn. `git` KHÔNG
+vào phạm vi nhãn này.
 ĐIỀU KIỆN ĐO nằm NGAY ĐÂY, không ở packet kia — mục `sandbox workspace-write` phía trên đo A/B
 trên CÙNG một lệnh: mặc định `git ls-remote` lỗi kết nối; sau khi bật **HAI** cờ cùng lúc
 (`network_access` và `writable_roots`) thì `lsremote_rc=0`. Điều kiện: codex CLI trong container
-này, sandbox `workspace-write`, vỏ phiên điều phối; số phụ thuộc phiên bản và cấu hình, đọc như
-QUAN SÁT CÓ ĐIỀU KIỆN ĐO.
-VÌ SAO `chưa xếp được` chứ không phải `chiều MỞ`, đo lại SAU KHI packet `MANG-SANDBOX-CODEX`
-(#334) land: phép tách bốn tổ hợp mà đoạn trên hẹn nay ĐÃ CÓ ở `docs/MANG_SANDBOX_CODEX.md`, nên
-lý do CŨ ("hai cờ chưa tách") không còn đứng được. Lý do MỚI nằm ở chính kênh mà mệnh đề này dùng
-làm bằng chứng — `git`: tệp bốn-tổ-hợp đó tự khai lớp của kênh `git` ở trạng thái đóng là
-`KHÔNG_ĐO_ĐƯỢC`, vì phiên đo chưa tách được sandbox chặn khỏi việc không nối tới proxy loopback
-của chính phiên đo — nên đo lại vẫn không cho biết VÌ SAO nó không chặn, điều kiện mà `chiều MỞ`
-đòi. Cũng không phải `quan sát chưa rõ cơ chế`: hạng ấy đòi số lần lặp và phiên bản ghi ngay tại
-quan sát, mục này không có. Số đo đầy đủ, probe và bảng hai pha nằm ở
+này, sandbox `workspace-write`, vỏ phiên điều phối; số phụ thuộc phiên bản và cấu hình.
+Bằng chứng MỞ cho SOCKET/URL riêng, đo lại SAU KHI packet `MANG-SANDBOX-CODEX` (#334) land: bốn
+tổ hợp (a)-(d) ở `docs/MANG_SANDBOX_CODEX.md` giữ `writable_roots` cố định và chỉ đảo
+`network_access` — một mình cờ đó lật socket/url từ `POLICY_DENIED` sang `LOT`, không phải tổ hợp
+hai cờ như phép đo `git ls-remote` ở trên; trỏ sang tệp đó, không chép bảng về đây. `git` ở trạng
+thái đóng mang lớp `KHÔNG_ĐO_ĐƯỢC` trong CHÍNH tệp ấy — phiên đo chưa tách được sandbox chặn khỏi
+việc không nối tới proxy loopback của chính phiên đo — nên với `git`, VÌ SAO không chặn vẫn chưa
+biết; giữ `KHÔNG_ĐO_ĐƯỢC`, không gộp vào nhãn MỞ trên. Loopback không phải egress: cờ này gate
+capability socket rộng hơn hai phép HTTPS ra ngoài, nên MỞ chỉ xác minh phạm vi cờ cấu hình đã đo,
+không xác minh một ranh giới mạng nói chung. Số đo đầy đủ, probe và bảng hai pha nằm ở
 `docs/MANG_SANDBOX_CODEX.md` (#334) — **đừng chép chúng về đây**.
 
 Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": `rc=0`, ref được tạo, và
@@ -698,7 +699,7 @@ luật đơn vị ở trên: đếm CONTROL thì gom theo cơ chế, đếm MỆ
 |---|---|---|
 | `--allowedTools`, luật hẹp `Bash(x:*)` | gặp lệnh ghép | không khớp gì ⇒ **cơ chế đã xác minh — chiều ĐÓNG**, nhưng CHỈ đóng HÌNH DẠNG lệnh ghép (cơ chế khớp tiền tố, năm lệnh `TỪ CHỐI` đo ở mục trên); nó KHÔNG bó quyền ghi |
 | `--allowedTools`, `Bash` trần | cùng lệnh ghép | khớp mọi thứ ⇒ **cơ chế đã xác minh — chiều MỞ** |
-| `codex -s workspace-write` | ghi tệp **ngoài** cây | **`rc=0`** — tệp ngoài cây bị ghi đè thật ⇒ **CHƯA XẾP ĐƯỢC**: đo được nó KHÔNG chặn, nhưng cơ chế đã theo mục sandbox sang packet kia |
+| `codex -s workspace-write` | ghi tệp **ngoài** cây | **`rc=0`** — tệp ngoài cây bị ghi đè thật ⇒ **CHƯA XẾP ĐƯỢC**: đo được nó KHÔNG chặn, nhưng chưa ai đo CƠ CHẾ vì sao — `docs/MANG_SANDBOX_CODEX.md` (#334) chỉ đo mạng/socket/proxy, không đo đối tượng ghi-ngoài-cây này |
 | xoá `GITHUB_PAT` `GH_TOKEN` `GITHUB_TOKEN` `GIT_CONFIG_*` khỏi env | `git push --dry-run` lên GitHub | **`rc=0`** — vẫn đẩy được ⇒ **cơ chế đã xác minh — chiều MỞ** |
 | nhét **token RÁC** vào URL đẩy | cùng lệnh | **`rc=0`** ⇒ **cơ chế đã xác minh — chiều MỞ** |
 

@@ -132,3 +132,17 @@ nen_do_truoc_khi_bat_dau: >-
   LẬP mọi số này và chúng TRÙNG. `git config core.abbrev 7` trước khi chạy cổng.
   `PYTHONDONTWRITEBYTECODE=1` + `PYTHONPYCACHEPREFIX` ra ngoài cây test.
 posted_comment_id: 5452110971   # workflow ghi, ĐỪNG sửa tay
+
+# ===================== KHAI TỬ — NEO VÀO CHỖ CHẾT =====================
+# Lease này được đăng lúc `11:43:52Z`. PR #381 merge lúc `11:44:00Z` — TÁM GIÂY sau.
+# Nên ngay khi vừa cấp, nó đã neo vào chỗ chết:
+#   · `branch: codex/w1-p1-van-chuyen-prompt-exec-1` — nhánh ĐÃ MERGE
+#   · `base_sha: 3151371d…` — nay nằm TRONG master (merge commit `907c87e`)
+# Một PR đã merge thì xong: nó không mang được việc mới, và đắp tiếp lên nhánh ấy là
+# chồng commit lên lịch sử đã merge.
+#
+# KHÔNG có gì sai về nội dung: đặc tả r3 (`2ef1fad4…`) và write set BỐN đường GIỮ NGUYÊN.
+# Chỉ base/branch đổi — §3.2 KHÔNG đòi revision cho việc đó, nên lease lượt 3 vẫn neo r3.
+#
+# Lượt 2 chưa từng phóng executor nào; không có hiện vật nào mất.
+da_bi_thay_the: w1-p1-van-chuyen-prompt-exec-3-codex-20260828

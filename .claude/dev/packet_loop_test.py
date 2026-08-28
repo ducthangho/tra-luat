@@ -570,8 +570,18 @@ def case_record_review_schema_parse_duoc_nhung_khong_khai_binding_DO(c: Ctx):
     Đây là khoảng giữa hai phép đo của `..._thieu_hoac_hong_deu_DO`: schema
     thiếu và schema hỏng đều đã bị chặn, nhưng một schema parse được mà bỏ
     trống `x-tra-luat-runtime-bindings` từng lọt sạch cưỡng chế semantic
-    identity.  Mỗi biến thể dưới đây mang verdict SAI `reviewed_sha`, nên nếu
-    binding bị bỏ qua thì `record-review` sẽ nhận và đổi state.
+    identity.
+
+    MỖI biến thể phải mang verdict mà CHỈ luật binding đang thử mới bắt được.
+    Bản đầu dùng chung một verdict sai `reviewed_sha` cho cả năm, nên hai biến
+    thể `thieu-mot-binding` và `binding-la` XANH luôn trên validator TRƯỚC bản
+    vá (đo được trên `47a50395`: cả hai cho `rc=5`) — chúng bị từ chối vì
+    binding `reviewed_sha` VẪN CÒN, không phải vì luật đang thử.  Đó đúng họ
+    bệnh `r22-mutant-properties-tin-dung-gia`: ca đỏ vì một lý do vô can.
+    Nên: bỏ binding `generation` thì verdict phải sai `generation` (sha ĐÚNG);
+    bỏ binding `reviewed_sha` thì verdict phải sai sha (generation ĐÚNG); và
+    `binding-la` phải mang verdict HỢP LỆ HOÀN TOÀN, để thứ duy nhất còn có
+    thể từ chối nó là chính luật "khoá lạ".
     """
     goc = json.loads((ROOT / ".github" / "coordination" / "schemas" /
                       "review_verdict.v1.schema.json").read_text(encoding="utf-8"))
@@ -583,20 +593,27 @@ def case_record_review_schema_parse_duoc_nhung_khong_khai_binding_DO(c: Ctx):
     def _rong():
         m = copy.deepcopy(goc); m[KHOA] = {}; return m
 
-    def _thieu_mot():
+    def _thieu_generation():
         m = copy.deepcopy(goc); m[KHOA].pop("generation"); return m
+
+    def _thieu_reviewed_sha():
+        m = copy.deepcopy(goc); m[KHOA].pop("reviewed_sha"); return m
 
     def _binding_la():
         m = copy.deepcopy(goc); m[KHOA]["khoa_khong_ai_cai_dat"] = "x"; return m
 
+    SAI_SHA = {"sha": "b" * 40}
+    SAI_GEN = {"generation": 999}
+    HOP_LE = {}
     bien_the = (
-        ("khong-khai", _bo_khoa()),
-        ("bindings-rong", _rong()),
-        ("thieu-mot-binding", _thieu_mot()),
-        ("binding-la", _binding_la()),
-        ("schema-rong-tuyet-doi", {}),
+        ("khong-khai", _bo_khoa(), SAI_SHA),
+        ("bindings-rong", _rong(), SAI_SHA),
+        ("thieu-binding-generation", _thieu_generation(), SAI_GEN),
+        ("thieu-binding-reviewed-sha", _thieu_reviewed_sha(), SAI_SHA),
+        ("binding-la", _binding_la(), HOP_LE),
+        ("schema-rong-tuyet-doi", {}, SAI_SHA),
     )
-    for ten, schema in bien_the:
+    for ten, schema, sai in bien_the:
         runtime_root = c.tmp / f"runtime-binding-{ten}"
         script, _ = _viet_cay_runtime(
             runtime_root, c.script.read_text(encoding="utf-8"),
@@ -609,7 +626,7 @@ def case_record_review_schema_parse_duoc_nhung_khong_khai_binding_DO(c: Ctx):
         state_path = sd / "wp55.json"
         before = state_path.read_bytes()
         verdict_file = fixture.verdict_file(
-            sd, 55, [], verdict="approve", sha="b" * 40)
+            sd, 55, [], verdict="approve", **sai)
         rc, _, e = run(
             script,
             ["record-review", "--packet", 55, "--provider", REVIEWER,
@@ -617,7 +634,10 @@ def case_record_review_schema_parse_duoc_nhung_khong_khai_binding_DO(c: Ctx):
              "--verdict-file", verdict_file],
             sd,
         )
-        _doi(5, rc, e, f"schema {ten} không khai binding mà vẫn nhận verdict sai SHA")
+        # rc=5 CHÍNH XÁC, không phải "khác 0": đột biến bỏ chốt `thieu` làm
+        # `bindings[khoa]` ném KeyError ⇒ rc=1. Nhận rc=1 là nhận một cú sập
+        # thay cho một phép từ chối, tức lại cấp tín dụng giả.
+        _doi(5, rc, e, f"schema {ten}: binding không được cưỡng chế")
         if state_path.read_bytes() != before:
             raise AssertionError(
                 f"binding {ten}: state đổi dù không có gì cưỡng chế semantic identity")

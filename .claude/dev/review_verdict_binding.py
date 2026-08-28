@@ -24,6 +24,18 @@ SCHEMA_REVIEW = (
 )
 
 
+# Allow-list thu HAI: schema phai TU KHAI du nang luc do HINH DANG truoc khi
+# duoc tin.  Khoi binding o tren gac ngu nghia; khoi nay gac hinh dang.  Thieu no
+# thi mot schema chi-co-binding van qua allow-list roi jsonschema nhan MOI tai
+# lieu — dung lo P1 vong 3.
+TRUONG_BAT_BUOC = (
+    "schema_version", "packet_id", "generation", "provider", "role",
+    "session_id", "model_reviewer_identity", "github_submitter_identity",
+    "reviewed_sha", "independent_from_executor_session", "review_axes",
+    "tests", "findings", "verdict", "assurance", "evidence_url",
+)
+
+
 BINDING_KEY = "x-tra-luat-runtime-bindings"
 
 # Allow-list, not deny-list.  Every key below MUST be declared by the schema:
@@ -55,6 +67,32 @@ def _read_json(path: Path, label: str):
         raise ReviewVerdictError(
             f"không parse được {label} {path}: dòng {exc.lineno}, cột {exc.colno}"
         ) from exc
+
+
+def _doi_schema_do_duoc_hinh_dang(schema: dict, schema_path) -> None:
+    """Refuse a schema that cannot measure shape, before trusting its verdict."""
+    if schema.get("type") != "object":
+        raise ReviewVerdictError(
+            f"schema review {schema_path} khong khai type='object': "
+            "khong do duoc hinh dang"
+        )
+    if schema.get("additionalProperties") is not False:
+        raise ReviewVerdictError(
+            f"schema review {schema_path} khong khai additionalProperties=false: "
+            "truong la di lot"
+        )
+    doi_hoi = schema.get("required")
+    if not isinstance(doi_hoi, list):
+        raise ReviewVerdictError(
+            f"schema review {schema_path} khong khai required: "
+            "khong truong nao bi bat buoc"
+        )
+    thieu = [ten for ten in TRUONG_BAT_BUOC if ten not in doi_hoi]
+    if thieu:
+        raise ReviewVerdictError(
+            f"schema review {schema_path} thieu truong bat buoc trong required: "
+            f"{', '.join(thieu)}"
+        )
 
 
 def _truong(doc: dict, ten: str):
@@ -102,6 +140,8 @@ def validate_review_verdict(
         raise ReviewVerdictError(
             f"schema review {schema_path} không hợp lệ: {exc.message}"
         ) from exc
+    _doi_schema_do_duoc_hinh_dang(schema, schema_path)
+
     if errors:
         first = errors[0]
         where = ".".join(str(part) for part in first.absolute_path) or "<root>"

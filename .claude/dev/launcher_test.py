@@ -6031,20 +6031,64 @@ def r21_bon_mutant_noi_semantic_allowlist_phai_lam_oracle_DO():
 @ca
 def r22_schema_yeu_lam_r17_va_r18_DO():
     goc = json.loads(SCHEMA_REVIEW.read_text(encoding="utf-8"))
-    for bo in (("properties",),
-               ("type", "required", "properties", "additionalProperties")):
+
+    # ĐỐI CHỨNG: schema gốc phải NHẬN fixture. Không có vế này thì mọi cái đỏ
+    # dưới đây có thể chỉ là fixture hỏng, và r22 tự cấp tín dụng giả.
+    with tempfile.TemporaryDirectory(prefix="schema-shape-goc-") as td:
+        goc_path = Path(td) / "review.schema.json"
+        goc_path.write_text(json.dumps(goc), encoding="utf-8")
+        try:
+            _goi_validator_verdict(_verdict_mau(), goc_path)
+        except ReviewVerdictError as e:
+            bang(False, f"ĐỐI CHỨNG hỏng: schema GỐC từ chối fixture gốc: {e}")
+
+    # Từ bản vá P1 vòng 3, validator đòi schema TỰ KHAI đủ năng lực đo hình dạng
+    # (`type`, `required` phủ đủ trường, `additionalProperties:false`) TRƯỚC khi
+    # tin nó. Nên một schema bị rút răng hình dạng không còn "dùng được nhưng đo
+    # lỏng" — nó bị TỪ CHỐI THẲNG, fixture hợp lệ cũng không đi qua.
+    #
+    # Đây là chỗ bản trước tự cấp tín dụng giả: đột biến `("properties",)` đơn độc
+    # giữ `additionalProperties:false` nên schema từ chối MỌI tài liệu; oracle đỏ
+    # ngay ở bước fixture, tức đột biến chết vì một lý do VÔ CAN. Nay không đoán
+    # "chết là được" nữa mà đòi ĐÚNG lỗi năng lực, kèm chữ ký trong thông điệp.
+    for bo in (("properties", "additionalProperties"),
+               ("type", "required", "properties", "additionalProperties"),
+               ("additionalProperties",),
+               ("required",),
+               ("type",)):
         schema = json.loads(json.dumps(goc))
         for khoa in bo:
             schema.pop(khoa)
         with tempfile.TemporaryDirectory(prefix="schema-shape-mutant-") as td:
             schema_path = Path(td) / "review.schema.json"
             schema_path.write_text(json.dumps(schema), encoding="utf-8")
-            for truong, gia_tri in (("reviewed_sha", "b" * 40), ("generation", 2)):
-                try:
-                    _oracle_schema_tu_choi(schema_path, truong, gia_tri)
-                except AssertionError:
-                    continue
-                bang(False, f"schema mutant {bo!r} SONG SOT trong oracle {truong}")
+            try:
+                _goi_validator_verdict(_verdict_mau(), schema_path)
+            except ReviewVerdictError as e:
+                if "schema review" not in str(e):
+                    bang(False,
+                         f"đột biến {bo!r} bị từ chối nhưng KHÔNG phải vì năng lực "
+                         f"schema — đổ lỗi nhầm chỗ: {e}")
+                continue
+            bang(False,
+                 f"đột biến hình dạng {bo!r} SỐNG SÓT: validator vẫn nhận một "
+                 f"schema không đo được hình dạng")
+
+    # `required` thiếu ĐÚNG MỘT trường cũng phải bị bắt — đây là biến thể mà một
+    # allow-list chỉ kiểm "có khoá required hay không" sẽ bỏ lọt.
+    for truong_bo in ("assurance", "independent_from_executor_session", "reviewed_sha"):
+        schema = json.loads(json.dumps(goc))
+        schema["required"] = [t for t in schema["required"] if t != truong_bo]
+        with tempfile.TemporaryDirectory(prefix="schema-required-mutant-") as td:
+            schema_path = Path(td) / "review.schema.json"
+            schema_path.write_text(json.dumps(schema), encoding="utf-8")
+            try:
+                _goi_validator_verdict(_verdict_mau(), schema_path)
+            except ReviewVerdictError:
+                continue
+            bang(False,
+                 f"required thiếu {truong_bo!r} mà validator vẫn nhận: "
+                 f"allow-list hình dạng không phủ từng trường")
 
 
 # ------------------------------------------------------ tự đột biến: có răng không

@@ -1,0 +1,224 @@
+# Lease EXECUTOR — `D9-DOI-CACH-DEM` (#369), lượt 1.
+#
+# Packet sinh ra từ MỘT QUYẾT ĐỊNH của người giữ kho, không phải từ một finding tự phát: nợ
+# `AG-360-P2-02` được cross-review #360 đẩy lên thành câu hỏi chính sách hai đường, và chủ kho
+# chọn (b) — ĐỔI CÁCH ĐẾM. Ghi rõ nguồn gốc vì packet này ĐỔI ĐƠN VỊ của một ratchet, việc mà
+# doctrine kho vốn cấm; nó hợp lệ CHỈ VÌ có quyết định tường minh, và điều đó phải đọc được.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 369
+packet_id: D9-DOI-CACH-DEM
+phase_key: D9-DOI-CACH-DEM
+revision: 4
+generation: 1
+lease_id: d9-doi-cach-dem-exec-1r4-codex-20260828
+thay_the_cho: d9-doi-cach-dem-exec-1r3-codex-20260828
+thay_the_ghi_chu: >-
+  BẪY ĐÃ DÍNH HAI LẦN TRONG MỘT PHIÊN: dựng lease `rN+1` từ THÂN của `rN` thì thừa kế luôn
+  `posted_comment_id` mà workflow ghi ngược, và cổng đọc thành `CHAN [9]` "lease này đã đăng rồi".
+  Trường ấy THUỘC VỀ lease cũ. Dựng revision xong thì việc đầu tiên là GỠ nó ra.
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` là MẶC ĐỊNH FAIL-CLOSE của `_BANG_LOP` (`.claude/dev/mcp_gh_test.py` không có trong
+  bảng), KHÔNG phải tín hiệu chạm thẩm quyền. Lớp do CỔNG tính, không tự hạ.
+
+executor_ghi_chu: >-
+  `codex` vì write set nằm dưới `.claude/**` — nền của `claude` từ chối `Edit`/`Write` ở đó. Lý do
+  ĐO ĐƯỢC, không phải sở thích. Reviewer `claude` ⇒ cross-provider.
+  Kèm một chốt riêng của packet này: executor KHÔNG được là bên đã viết bản vá sinh ra nợ
+  `AG-360-P2-02` — nhưng packet #360 do `codex` thi công, nên đây là CÙNG provider. Chấp nhận, vì
+  thứ chặn điểm mù ở đây là REVIEWER chéo (`claude`), và chính reviewer `claude` là bên đã TÌM RA
+  nợ này. Khai ra để không ai đọc nhầm là đã tách hoàn toàn.
+
+spec_path: 'ops/specs/d9-doi-cach-dem-packet-issue-nhap.md'
+spec_ref: 'refs/heads/ops/cap-lease-tach-314'
+spec_sha256: 11a1ede27ffbb28262d4ec196b99e5d29346b67421b8a005576bbca595c3039e
+spec_ghi_chu: >-
+  Hồ sơ CÓ THẨM QUYỀN là tệp trên nhánh `ops/cap-lease-tach-314`. Thân Issue #369 là BẢN CHIẾU.
+  Thứ định danh là BĂM, không phải tên nhánh.
+
+write_set:
+  - .claude/dev/mcp_gh_test.py
+  - ops/specs/mcp-gh-cuu-ho.md
+write_set_note: >-
+  ĐÚNG MỘT đường. `.claude/dev/mcp_gh.py` KHÔNG vào write set — packet chỉ ĐẾM nó, không sửa. Đó
+  cũng là lý do phép đếm phải đọc được từ ngoài: một trong hai số hạng nằm ở tệp packet không đụng.
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-28T05:1xZ. So HAI NGUỒN bằng TẬP TÊN trước tiên: `ls-remote --heads` 241 =
+  `for-each-ref` 241; `comm -23` RỖNG ⇒ không mù ref nào.
+  `.claude/dev/mcp_gh_test.py` -> **NGƯỜI_GIỮ 0**.
+  GHI LẠI MỘT LẦN ĐO SAI CỦA CHÍNH PHIÊN NÀY: lượt đo đầu trả `NGƯỜI_GIỮ 1:
+  mcp-gh-cong-tu-canh-exec-1-codex-20260828` — nhưng lease ấy ĐÃ ĐÓNG SỚM và bản đóng đã đẩy. Số 1
+  là TẠO TÁC của một nhánh cục bộ TỤT SAU trong chính clone dùng để đo, đúng cái bẫy tài liệu kho
+  đã cảnh báo ("nhánh tụt sau làm phép đếm NGƯỜI_GIỮ CAO HƠN sự thật"). Đồng bộ bằng
+  `merge --ff-only` rồi đo lại ⇒ 0. Ghi ra đây vì lần sau ai thấy một con số lạ thì phải nghi CLONE
+  trước khi nghi LEASE.
+
+chot_ton_tai_o_base: >-
+  `git cat-file -e 27fb9de2:.claude/dev/mcp_gh_test.py` => CÓ, 670 dòng.
+
+branch: codex/d9-doi-cach-dem-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 27fb9de28bc65a417adee66b66615de6bccbfd5e
+base_ghi_chu: 'Master ngay sau khi #359 land. Lấy mốc mới nhất để tránh một lần trôi vô ích.'
+start_from_sha: 27fb9de28bc65a417adee66b66615de6bccbfd5e
+reviewed_sha_required: 27fb9de28bc65a417adee66b66615de6bccbfd5e
+reviewed_sha_ghi_chu: >-
+  Để nguyên base ở lượt cấp đầu (nhánh chưa tồn tại; trường này thuộc `BAT_BUOC`, để null sẽ
+  `CHAN [8]`). PHẢI cập nhật sang exact head khi đưa ra review.
+
+viec_cua_luot_nay: >-
+  NĂM việc, nguyên văn ở hồ sơ:
+  (1) đổi `d9_ngan_sach_900_dong_ma` sang đếm dòng KHÔNG TRẮNG — giết đường nén theo CẤU TRÚC;
+  (2) đặt lại trần TỪ SỐ ĐO, kèm biên có LÝ DO — biên 0 chính là thứ sinh ra nợ này;
+  (3) ĐỘT BIẾN CANH cho chính luật đếm mới: đổi ngược về "mọi dòng" phải làm một ca ĐỎ;
+  (4) đóng nợ `AG-360-P2-03` — thêm `try`/`finally` cho `d12_mau_dot_bien_phai_duy_nhat`;
+  (5) đóng nợ P2 kế thừa của #319 về LỜI KHAI tiêu chí (nói `numstat` trên write set, mã lại đo
+      tổng dòng hai tệp) — sửa lời khai cho khớp thứ mã thật sự đo.
+
+cau_hoi_that_khong_co_dap_an: >-
+  Đếm dòng-không-trắng giết đường nén khoảng trắng, NHƯNG làm XOÁ CHÚ THÍCH thành đường rẻ nhất kế
+  tiếp — mà kho này coi trọng chú thích dài: phần lớn bài học đắt giá sống trong chú thích NGAY TẠI
+  MÃ. Chọn một trong ba KÈM LÝ LẼ ĐO ĐƯỢC: (A) chấp nhận và nói thẳng tại chỗ · (B) loại cả chú
+  thích đơn độc, nhưng thế là tạo áp lực xoá thứ có giá trị · (C) cách đếm khác bạn đo ra là tốt
+  hơn. KHÔNG chọn (A) chỉ vì hồ sơ liệt kê nó trước.
+
+rang_buoc_bat_buoc: >-
+  KHÔNG nới trần để cho vừa việc (4). Nếu sau khi đổi luật đếm mà vẫn không đủ chỗ cho
+  `try`/`finally` thì DỪNG và BÁO — đó là finding về chính trần MỚI.
+  Trần cũ `900` là con số của LUẬT CŨ; sau khi đổi luật nó MẤT NGHĨA. Đừng mang nó sang rồi gọi là
+  "không nâng trần" — nói rõ luật mới đo GÌ và ngưỡng mới là BAO NHIÊU.
+  Packet này ĐỔI ĐƠN VỊ MỘT LẦN, có chủ đích, được người giữ kho duyệt, kèm đột biến canh — khác
+  hẳn bốn lần đổi tuỳ tiện của #319. GHI RÕ khác biệt ấy NGAY TẠI MÃ, kẻo lượt sau đọc thành tiền
+  lệ cho phép đổi đơn vị bất kỳ lúc nào.
+
+phan_chung_bat_buoc: >-
+  Đo lại BỐN số hạng độc lập (`mcp_gh.py` và `mcp_gh_test.py`, mỗi tệp hai cách đếm) — đừng đọc số
+  trong hồ sơ. Kho có bài học "một BẤT BIẾN còn đúng không chứng minh các SỐ HẠNG còn đúng".
+  Mỗi chốt mới có ĐỘT BIẾN RIÊNG làm nó ĐỎ, chạy trên BẢN SAO NGOÀI CÂY, không sửa tệp thật.
+  Bộ test phải XANH với hai số BẰNG NHAU, và số đột biến `GIẾT THẬT` phải tăng đúng bằng số đột
+  biến canh bạn thêm — báo cả `TIN DUNG GIA` và `SONG SOT`, đừng chỉ báo con số có lợi.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 80
+  do_tu_sha: 27fb9de28bc65a417adee66b66615de6bccbfd5e
+  don_vi: 'dòng THÊM trên write set, `git diff --numstat`'
+  ghi_chu: >-
+    Năm việc nhưng đều nhỏ; 80 là biên rộng. Chạm trần ⇒ CẮT hoặc VIẾT NGẮN LẠI, KHÔNG nâng trần,
+    KHÔNG đổi đơn vị. Trớ trêu đáng nhớ: đây là packet SỬA một trần bị đánh lừa, nên nó là chỗ tệ
+    nhất để lách chính trần của mình.
+
+# ========== TIÊU CHÍ NGHIỆM THU MỚI CỦA r2 — việc thứ SÁU ==========
+viec_thu_sau_S3_da_ban: >-
+  `S3` đã bắn: hình dạng lỗi "mẫu đột biến ĐƠN DÒNG tự khớp với chính bảng `MUTATIONS` nằm trong
+  tệp đang bị quét" nay lặp lần thứ BA. Luật §12 nói lần thứ ba thì câu hỏi đúng KHÔNG phải "vá thế
+  nào" mà là "cách làm này có đúng không". Nên r2 KHÔNG chỉ đòi sửa hai mẫu; nó đòi đóng cả LỚP.
+  THÊM một ca — đề xuất tên `D13` — soi TOÀN BỘ bảng `MUTATIONS` và đòi mỗi mẫu khớp ĐÚNG MỘT chỗ
+  trong tệp đích; mẫu nào khớp ≠ 1 thì ca ĐỎ, kèm TÊN mẫu trong thông báo.
+  Rồi mới sửa hai mẫu `d9_*` cho duy nhất (cách đã dùng ở #360: neo mẫu NHIỀU DÒNG, vì trong bảng
+  các dấu xuống dòng là chuỗi thoát nên bản-trong-bảng không tự khớp).
+  Sau khi có `D13`, hai mẫu hỏng ấy phải làm `D13` ĐỎ **trước** khi bạn sửa chúng — chạy và ghi lại,
+  đó là phản chứng cho chính `D13`.
+
+vi_sao_D13_chu_khong_phai_cach_khac: >-
+  TIỀN LỆ ĐÃ CÓ TRONG KHO, và đó là lý lẽ mạnh nhất: `.claude/dev/launcher_test.py` có sẵn
+  `t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho`, với chú thích khai rõ nó sinh ra vì "ĐÃ XẢY RA
+  THẬT trong chính đợt này". Tệp ấy có chốt LỚN TIẾNG và từ đó không hỏng lần nào; `mcp_gh_test.py`
+  chỉ có chốt `src.count(old) != 1` bên trong `chay_dot_bien` — hỏng MUỘN và IM LẶNG (đột biến
+  thành `KHÔNG_ĐO_ĐƯỢC`, rồi lộ ra hai tầng sau dưới dạng `D8(a)/(b)` đỏ), và đã hỏng BA lần.
+  Cùng một bài toán, hai cách giải, và số liệu nói rõ cách nào đúng.
+  HAI ĐƯỜNG KHÁC ĐÃ XÉT VÀ LOẠI, ghi ra để lượt sau khỏi xét lại:
+  · loại bảng `MUTATIONS` khỏi vùng tìm kiếm — xoá được cái bẫy, NHƯNG khi đó một mẫu đơn dòng
+    trùng thật ở HAI CHỖ TRONG MÃ sẽ lọt im lặng, tức đổi một lỗi ồn lấy một lỗi câm;
+  · đưa `MUTATIONS` sang tệp dữ liệu riêng — sạch nhất về nguyên lý nhưng cần THÊM đường dẫn, tức
+    đổi write set ⇒ phải qua revision khác và packet khác. Nếu bạn đo ra nó đáng thì NÓI, đừng tự làm.
+
+khong_duoc_lam: >-
+  KHÔNG nới trần `759` để cho vừa `D13`. Nếu `D13` không lọt trần thì DỪNG và BÁO — đó là finding về
+  chính trần mới, đúng như `S6` đã dặn. Ngân sách 80 dòng thêm vẫn còn rộng (lượt 1 mới dùng 16).
+
+
+# ========== SỬA CỦA r4 — ĐÓNG P1, và MỞ WRITE SET cho đúng ==========
+mo_rong_write_set_ly_do: >-
+  Thêm `ops/specs/mcp-gh-cuu-ho.md`. Đây là đường DUY NHẤT làm được việc số 5, và r3 thiếu nó chính
+  là lý do việc 5 không thể hoàn thành. ĐO trước khi thêm: `ai-dang-giu ops/specs/mcp-gh-cuu-ho.md`
+  ⇒ **NGƯỜI_GIỮ 0** (ba lease `mcp-gh-cuu-ho-exec-1r4/r5/r6` đều HẾT_HẠN).
+  Đổi write set là revision theo §3.2 — đó chính là thứ `S1` đòi và executor lẽ ra phải kích hoạt.
+
+viec_cua_r4:
+  1_dong_P1: >-
+    Sửa hàng `D9` trong bảng đặc tả `ops/specs/mcp-gh-cuu-ho.md` (~dòng 202) cho khớp THỨ MÃ THẬT
+    SỰ ĐO. Hiện nó ghi "Ngân sách: `git diff --numstat` trên write set, cột dòng THÊM" — SAI: mã đo
+    TỔNG DÒNG KHÔNG-TRẮNG của HAI tệp (`mcp_gh.py` + `mcp_gh_test.py`), không liên quan `--numstat`
+    lẫn write set. Viết đúng thứ mã đo, và nêu cả ngưỡng hiện hành.
+  2_dong_P2_finding_02: >-
+    Ghi NGAY TẠI `D9` quyết định `(A)` và giới hạn của nó. Hiện mã đã CHỌN `(A)` trên thực tế
+    (`if line.strip()` không loại chú thích) nhưng **không một chữ nào nói ra** — `grep "chú thích"`
+    trả 0 dòng, và cả thông điệp commit cũng im. Một hạng mục BẮT BUỘC của packet bị bỏ trắng.
+    Phải nói thẳng: đếm cả chú thích ⇒ **xoá chú thích vẫn mua được chỗ**, và đó là đánh đổi CÓ CHỦ
+    Ý vì loại chú thích khỏi phép đếm sẽ tạo áp lực xoá thứ kho coi trọng.
+  3_sua_loi_khai_cua_chinh_lease: >-
+    Reviewer soi đúng chỗ phiên điều phối tự khai xung đột lợi ích, và bắt được: lý lẽ neo số `20`
+    nói "làm tròn lên để không phải đo lại vì một dòng", nhưng neo đo được là `4 + 9 = 13`, tức
+    chênh **7 dòng** — một biên an toàn ~50% trên neo, KHÔNG phải sai số một dòng.
+    Reviewer khẳng định phần CỐT LÕI vẫn đứng: r3 không mua dòng đã tồn tại, khác hẳn bốn lần nâng
+    của #319. Chỉ ĐỘ CHÍNH XÁC của câu giải thích là sai. Lease r4 sửa lại câu ấy ở dưới; executor
+    chỉ cần bảo đảm chú thích TẠI MÃ không lặp lại con số/cách diễn đạt sai ấy.
+
+bien_that_viec_thu_bay: >-
+  Trần `779`, biên **20** trên nền đo được `759`. NEO: chi phí đo được của phần việc cùng loại
+  trong chính packet này là **13** dòng không-trắng — `try`/`finally` cho `d12` là **+4**, và `D13`
+  (hai hàm + đăng ký `CASES` + một hàng `MUTATIONS`) là **9**. Biên `20` là **~50% trên neo 13**,
+  cố ý rộng hơn neo để một chốt kế tiếp không phải vừa khít.
+  BẢN r3 NÓI "làm tròn lên để không phải đo lại vì một dòng" — SAI về độ lớn, chênh thật là 7 dòng.
+  Cross-review bắt được, và câu sai ấy do phiên điều phối viết. Giữ lại cả cái sai ở đây vì một con
+  số có neo mà mô tả sai độ lớn vẫn là một lời khai rộng hơn phép đo.
+
+vi_sao_day_KHONG_phai_lan_nang_thu_nam_cua_319: >-
+  Reviewer đã KIỂM ĐỘC LẬP và xác nhận phần này đứng vững: #319 nâng trần để KHỚP ĐÚNG số dòng đã
+  viết (biên 0 mỗi lần); r3 nâng khi tổng hiện tại `759` ĐÃ vừa dưới trần cũ `759` — biên 0 — và
+  trần mới `779` chừa biên DƯƠNG thật cho tương lai. Trần mới không mua một dòng nào đang tồn tại.
+
+khong_duoc_lam_r4: >-
+  KHÔNG đụng `D13`, hai mẫu `d9_*`, `try`/`finally`, hay luật đếm — cross-review đã đo chúng ĐẠT
+  (`42/42` ca, `54/54` tập giết, luật đếm CÓ răng).
+  KHÔNG nới trần `779`. Việc của r4 là ~6-8 dòng; biên 20 thừa sức chứa.
+  KHÔNG khai một việc là đã làm khi chưa đo được nó đã làm — đó chính là P1 của lượt này.
+
+dieu_kien_dung: >-
+  S1 write set đổi ⇒ dừng, đi qua revision (§3.2).
+  S2 chạm trần 80 dòng ⇒ CẮT, không nâng, không đổi đơn vị.
+  S3 cùng hình dạng lỗi lần thứ BA ⇒ dừng, xem lại cách làm (§12).
+  S4 master trôi ⇒ đo `merge-base --is-ancestor` + `numstat` trên ĐÚNG write set.
+  S5 bản vá làm ĐỎ ca khác ⇒ dừng và báo.
+  S6 nếu luật đếm MỚI vẫn để hở một đường nén rẻ mà bạn không đóng được trong trần ⇒ DỪNG và BÁO
+     kèm mô tả đường ấy. Một trần mới vẫn lừa được thì tệ hơn trần cũ, vì nó trông như đã sửa.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  Trực tiếp trong phiên 2026-08-28: "chọn phương án b cho D9" — trả lời câu hỏi chính sách hai
+  đường mà cross-review #360 đẩy lên và phiên điều phối từ chối tự quyết. Nối tiếp uỷ quyền thực
+  thi cùng ngày.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên ghi lease là `claude`; executor là `codex` ⇒ không tự cấp cho chính mình. Phiên này KHÔNG
+  viết bản vá — chỉ đo, soạn hồ sơ, mở Issue và cấp lease.
+
+leased_at_utc: '2026-08-28T08:00:00Z'
+lease_expires_at_utc: '2026-08-29T08:00:00Z'
+run_minutes: 1440

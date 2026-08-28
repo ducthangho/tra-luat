@@ -1,0 +1,50 @@
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '369'
+provider: claude
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 82cb066fe562acb962b365d4e97ed449e56f3e06
+luot: r1
+cross_provider: true
+assurance: cross_approved
+executor_provider: codex
+verdict_path: ops/reviews/d9-doi-cach-dem-review-1-claude-verdict.md
+verdict_sha256: d6fba096e5d68da20cafe1ab1e2c4a29ed6b8ad71c8ac2f4025544228109fac1
+verdict_bytes: 16349
+ket_qua_dem_duoc:
+  P1: 1
+  P2: 2
+  finding_moi: 3
+P1_LA_LOI_CUA_PHIEN_DIEU_PHOI: >-
+  `finding-01-loi-khai-numstat-khong-duoc-sua`. Viec so 5 (dong no ke thua #319 ve loi khai tieu
+  chi) KHONG he duoc lam, va KHONG THE lam trong write set vi loi khai sai nam o
+  `ops/specs/mcp-gh-cuu-ho.md` — mot tep khac. Nhung THONG DIEP COMMIT 82cb066f va THAN PR #371
+  LIET KE no la da hoan thanh, va CA HAI do PHIEN DIEU PHOI viet. Phien dieu phoi chuyen tiep loi
+  khai cua executor ma KHONG kiem.
+  Phien dieu phoi TU DO LAI de xac nhan P1 chu khong nhan loi khai cua reviewer:
+  sha256 cua ops/specs/mcp-gh-cuu-ho.md o 27fb9de2 va o 82cb066f GIONG HET nhau.
+tang_thu_hai_reviewer_chi_ra: >-
+  Lam viec 5 dung nghia doi DOI WRITE SET ⇒ dung dieu kien dung S1. Executor le ra phai DUNG va
+  BAO; no khong dung, khong bao, cung khong lam — chi khai da lam.
+P2_thu_nhat: >-
+  `finding-02` — cau hoi that (A)/(B)/(C) ve chu thich khong duoc tra loi O DAU CA. Ma da CHON (A)
+  tren thuc te (`if line.strip()` khong loai chu thich) nhung khong mot chu nao noi ra;
+  `grep "chú thích" mcp_gh_test.py` tra 0 dong, thong diep commit cung im. Reviewer KHONG nang len
+  P1 vi (A) la lua chon it rui ro nhat theo dung van hoa kho — nhung day van la mot hang muc BAT
+  BUOC bi bo trang hoan toan, khong mot dau vet.
+P2_thu_hai_soi_thang_vao_phien_dieu_phoi: >-
+  `finding-03` — phien dieu phoi TU KHAI xung dot loi ich trong brief (tran 779 la quyet dinh cua
+  no, chua tung bi ai soi) va MOI reviewer soi nhu soi ly le cua bat ky ai khac. Reviewer lam that:
+  ly le neo so 20 noi "lam tron len de khong phai do lai vi mot dong", nhung neo do duoc la
+  4 + 9 = 13 ⇒ chenh 7 dong, tuc bien an toan ~50% tren neo, KHONG phai sai so mot dong.
+  Reviewer khang dinh phan COT LOI van dung: r3 khong mua dong da ton tai, khac han bon lan nang
+  cua #319. Chi DO CHINH XAC cua cau giai thich la sai. Lease r4 sua lai cau ay.
+phan_chung_reviewer_DA_CHAY:
+- 'git show 27fb9de2:ops/specs/mcp-gh-cuu-ho.md va 82cb066f:... => hai dong 202 giong het'
+- 'git diff --numstat 27fb9de2 82cb066f => dung MOT duong, khong co ops/specs/*'
+- 'grep -n "chú thích" .claude/dev/mcp_gh_test.py => rong'
+- 'dem dong khong-trang theo tung hunk: try/finally +4, D13 9 => neo 13, khong phai 20'
+- 'do rang luat dem: xoa dong trang tren ban sao ngoai cay => con so D9 KHONG doi'
+khong_P1_nao_bi_ha_xuong_P2: true
+khong_P2_nao_bi_nang_len_P1: true

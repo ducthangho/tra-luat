@@ -407,6 +407,79 @@ Phiên dev trên máy này ≠ phiên Cowork LIVE (bootstrap từ zip Package �
   không phải dữ liệu nó đo** — trước khi hành động theo một bộ quét tự viết, hãy hỏi nó một ca mà bạn
   **biết trước đáp án**.
 
+- **ĐỘT BIẾN BỊ GIẾT KHÔNG PHẢI ĐỘT BIẾN BỊ GIẾT ĐÚNG LÝ DO — và tín hiệu "đã giết" có thể
+  bị CHÍNH MÃ TEST GIẢ MẠO.** Đo 27→28-08-2026, chuỗi `#355`/`#359`. Kho đã có "đột biến có
+  thể CHƯA TỪNG ĐƯỢC CHẠY" (va chạm `.pyc`); mục này là mặt KHÁC và sâu hơn: đột biến **có**
+  chạy, ca đích **có** đỏ, mà vẫn không đo gì — vì nó chết bởi một lỗi VÔ CAN chứ không bởi
+  chốt đang thử. Bộ chạy đếm mọi mã thoát khác 0 là "giết", nên cấp **TÍN DỤNG GIẢ**.
+  Đo được: khai `22/22 bị giết` ⇒ phân hạng lại thành **19 giết thật / 3 tín dụng giả / 0 sống
+  sót** (`chon_khoa_theo_kieu_dict` chết `TypeError`; `ten_server_chi_khop_literal` chết bằng
+  một `Hong` khác; `bo_kiem_headers_object` chết `AttributeError`). Cross-review tìm được MỘT,
+  cảnh báo "có thể còn nữa"; phép đo ra **ba**.
+  **Chưa hết, và đây mới là chỗ đắt.** Bản vá vòng một phân hạng theo chuỗi `AssertionError`
+  của ca đích — và **vẫn bị lừa**, vì trong `*_test.py` có
+  `except Exception as e: raise AssertionError(f"... {type(e).__name__}")` viết ra với ý định
+  ĐÚNG (đừng để lỗi vô can giết mutant), nhưng nó **dựng lên đúng cái tín hiệu** mà bộ phân
+  hạng tin. Một `AttributeError` đi qua đó thành `AssertionError` và được đếm là GIẾT THẬT.
+  Cả bộ đo của reviewer lẫn của executor cùng báo `0 tín dụng giả`, **cùng sai, cùng một lý do**:
+  cả hai tìm một chuỗi mà bất kỳ `except` nào cũng viết ra được.
+  Chốt đúng: tín hiệu "assertion của ca đích" phải là thứ **mã triển khai không giả được** —
+  một LỚP NGOẠI LỆ RIÊNG (`TinHieuChotCa(AssertionError)`), đặt tên nó vào phép so, và neo cả
+  **TÊN CA** (assertion của ca KHÁC cũng là tín dụng giả). Kèm bốn ca tự kiểm cho chính bộ
+  phân hạng. Phản chứng bắt buộc: một mutant chết vì `AttributeError` phải rơi vào TÍN DỤNG
+  GIẢ **kể cả khi trên đường có một `except` đổi kiểu**.
+  Vì sao đáng ghi dù kho đã có cả họ bài học "thước đo nói dối": ở đây thước đo **do chính ta
+  vừa dựng ra để chống bị lừa**, và nó bị lừa bởi một dòng viết với ý định tốt. Con số mutant
+  đã được báo cho chủ kho **hai lần rồi phải rút lại**, cả hai lần vì tin một tầng mà chưa thử
+  tầng dưới nó.
+
+- **TÁI SỬ DỤNG MỘT PHẦN một bộ phân tích là mua tính nhất quán bằng một CUỘC ĐUA — và
+  so ảnh trước/sau KHÔNG đóng được nó.** Đo 27→28-08-2026 (`#359`). `mcp_github_doc.py` tự
+  viết lại bộ phân tích `.mcp.json` ⇒ lệch `launcher._doc_mcp_json` (đo được: cùng một tệp,
+  client báo `MO` còn `doctor` từ chối). Chữa bằng uỷ quyền cho bộ chuẩn ⇒ lệch chết theo
+  KIẾN TRÚC. Nhưng hợp đồng bộ chuẩn **cố ý không trả `headers`**, nên client phải đọc tệp
+  LẦN HAI ⇒ tệp đổi giữa hai lần đọc thì ghép **URL của ảnh cũ với `headers` của ảnh mới**,
+  tức gửi token của endpoint B tới endpoint A.
+  Bản vá "băm trước, băm sau, lệch thì từ chối" **THUA ABA**: A → B (đúng lúc bộ chuẩn đọc)
+  → A. Hai băm khớp, mà bộ chuẩn đã trả URL của B còn client đọc `headers` của A. Reviewer
+  tái hiện được; phản chứng chạy được.
+  **Bảng đánh đổi, và nó không có ô thứ ba:** uỷ quyền ⇒ hết lệch, buộc hai lần đọc, có đua ·
+  tự phân tích ⇒ một ảnh, hết đua, **tái sinh** đúng lớp lệch vừa giết. Lối ra duy nhất là
+  **mở rộng hợp đồng của bộ chuẩn** (`kem_headers=True` trả thêm `headers` từ CHÍNH ảnh đã
+  đọc) ⇒ một lời gọi, một ảnh chụp, đua chết theo CẤU TRÚC. Việc ấy đụng tệp nóng nên phải
+  xin thẩm quyền, và đó là quyết định đúng chứ không phải nới lỏng.
+  Nếp rút ra: **hễ phải đọc một nguồn HAI LẦN để ghép hai mảnh của cùng một quyết định, đó
+  đã là lỗi thiết kế** — đừng đi canh, hãy đổi để chỉ đọc một lần. Và đừng khai "đã loại bỏ
+  race" khi mới chỉ phát hiện được nó: viết đúng là "biến ghép nhầm âm thầm thành từ chối
+  ồn ào".
+
+- **EXECUTOR TỪ CHỐI Ở PREFLIGHT LÀ TÍNH NĂNG, KHÔNG PHẢI TRỞ NGẠI — và lời khai
+  `spec_hash` của kho đang đúng 3%.** Đo 28-08-2026. Executor `codex` DỪNG **hai lượt liên
+  tiếp**, không sửa gì, vì chỉ thị thiếu `revision`/`generation`/`Review Class` rồi thiếu
+  `spec_hash`, và vì không có hiện vật lease trong checkout để tự xác minh. Nó từ chối tự suy.
+  Kiểm lại `docs/PROTOCOL_DA_PHIEN.md` §3.2: **nó đúng** — `spec_hash` nằm trong schema tối
+  thiểu, *"khi vào `ready`, spec được đóng băng bằng `spec_hash`"*. Lỗi ở phiên điều phối.
+  Đo tiếp cho ra con số đáng ghi: trên `origin/master` có **74** lease, chỉ **2** mang
+  `spec_hash`. Protocol đòi, thực tế làm **3%** — và ba lượt trước của cùng phiên ấy đi qua
+  được chỉ vì chưa ai chặn. Nợ khai, chưa chữa.
+  Hai nếp: (a) prompt giao việc phải kèm **đường TỰ XÁC MINH** (fetch nhánh lease vào
+  workspace để executor `git show` chính tệp, thay vì nhận bảng giá trị từ điều phối);
+  (b) thiếu `spec_hash` thì **soạn đặc tả đóng băng thật** (`ops/specs/<packet-id>.md`) rồi
+  neo băm vào lease — đừng bịa một băm để lấp ô trống, cũng đừng lấy băm của tệp lease làm
+  `spec_hash`.
+
+- **LEASE KHÔNG TỰ CHẾT KHI PACKET ĐÃ LAND — và `da_bi_thay_the` là cơ chế DUY NHẤT tắt
+  được nó.** Đo 28-08-2026, con số cho nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong`: packet
+  `#355` đã merge, mà lease của nó vẫn **giữ đúng hai đường dẫn** thêm ~18 giờ tới hạn.
+  `ai-dang-giu` trả `NGƯỜI_GIỮ 1` cho một packet đã xong. Cấp lease mới cho cùng write set
+  mà không thu hồi bản cũ là **tự tạo cửa sổ hai writer** — đúng thứ write-set exclusion
+  sinh ra để chặn.
+  `_phan_loai_lease` **chỉ biết hạn**; chỉ `lenh_ai_dang_giu` đọc `da_bi_thay_the`. Nên cách
+  thu hồi sớm là cho lease MỚI khai `thay_the_cho`, và đặt `da_bi_thay_the` vào chính tệp
+  lease CŨ — chốt `_kiem_bia_mo` đòi **hai chiều**. Kèm hai bẫy đã gặp lại trong đúng lượt
+  này: cổng đọc từ **REF** nên phải **commit trước rồi mới `check`** (thiếu ⇒ `rc=8`), và
+  lease mới **không được chép `posted_comment_id`** của bản cũ.
+
 ## Đẩy ref từ phiên Claude Code trên web (đo 16-08-2026)
 Phiên web **KHÔNG xoá được ref** và **KHÔNG đẩy được `refs/tags/*`**. Cùng một `POST /git-receive-pack`:
 tạo ref → **200** kèm `X-Github-Request-Id` (đi tới GitHub); xoá ref hoặc đẩy tag → **403**, **không

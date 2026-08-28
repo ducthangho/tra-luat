@@ -1,0 +1,72 @@
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '361'
+provider: claude
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 4082ab57c74ec7396503990c2f1fa7e8291ffc30
+luot: r1
+cross_provider: true
+assurance: cross_approved
+executor_provider: codex
+verdict_path: ops/reviews/cong-ngoai-write-set-review-1-claude-verdict.md
+verdict_sha256: 353cc6747a0305d299c0e64ccc17e544ab8e99a02ab16983269f7385c4bdf8ca
+verdict_bytes: 17671
+ket_qua_dem_duoc:
+  P1: 2
+  P2: 1
+  finding_moi: 3
+day_la_luot_MOT_that_su: >-
+  Mot luot da duoc phong truoc do (runsrv361/79a15d7c) va tra ve RONG — 97 byte stdout, khong
+  verdict. Do la LOI THIET KE NHIEM VU cua phien dieu phoi: brief de reviewer nen hoa `--chay` roi
+  cho mot thong bao KHONG TON TAI trong mot luot `-p`. Khong phai mot ket qua review, nen khong
+  duoc dem la mot luot. Brief lan nay noi thang "chay TIEN CANH, dung nen hoa".
+P1_thu_nhat:
+  ten: finding-01-comment-gia-mao-loi-goi-that
+  noi_dung: >-
+    Phep kiem "CI co that su goi muc nay" la SO CHUOI CON tren toan van ban YAML noi lai, khong
+    phan biet buoc `run:` THAT voi mot dong CHU THICH nhac lai dung chuoi lenh. Reviewer tai hien
+    tren ban sao ngoai cay: xoa buoc that cua `--chay`, giu chuoi trong chu thich => `TONG: DAT`,
+    `rc=0`; lam y het voi mot muc DA_NOI => cung DAT.
+  hau_qua_do_duoc: >-
+    TOAN BO 7 bo MOI va TOAN BO 12 bo DA_NOI co the ngung chay trong CI that ma cong van xanh —
+    tai tao NGUYEN VEN lo #319 ma packet nay sinh ra de dong, chi bang mot sua doi trong dung
+    write set cua chinh packet.
+  vi_sao_reviewer_NANG_tu_P2_len_P1: >-
+    Bot connector (cung nha cung cap voi executor, nen KHONG tinh la cross-review) tung neu y nay o
+    muc P2 nhung chi noi "mot duong nam trong chu thich cung tinh la da noi", khong noi hau qua.
+    Reviewer DO hau qua roi moi nang. Day la nang co PHEP DO, khong phai nang cho chac.
+  §12: >-
+    Ho loi nay kho da tra gia BA lan (`[skip`+`ci]` trong thong diep commit · bieu thuc Actions
+    trong chu thich · workflow `paths:` khong chay lan dau). Day la bien the thu TU => soi CACH LAM,
+    khong chi va tiep. Cau hoi dung: phep kiem nay co dang doc thu GitHub THAT SU THI HANH khong.
+P1_thu_hai_la_KHUYET_TAT_CUA_HOP_DONG_r4:
+  ten: finding-03-cach-ly-moi-truong-khong-duoc-kiem-hop-le
+  noi_dung: >-
+    `moi_truong_hien_tai()` chi sinh ra HAI gia tri, nhung `kiem()` chi doi bon truong cua muc cach
+    ly KHONG RONG — khong doi `moi_truong` NAM TRONG tap gia tri ay. Mot chuoi lech (ke ca go nham)
+    lam `hien_tai != da_neo` dung o MOI noi, ke ca tren dung runner CI => luat `(b)` KHONG BAO GIO
+    thi hanh duoc, ke ca khi bo test da xanh that.
+  phien_dieu_phoi_nhan: >-
+    r4 la hop dong do CHINH PHIEN DIEU PHOI viet, va no TUYEN BO dong dung lo nay (r3 khong co pham
+    vi moi truong). Do lai: r4 moi DOI CHO lo — them duoc cai neo, khong khoa gia tri neo. Loi
+    thiet ke cua phien dieu phoi, khong phai cua executor. Ghi thang thay vi de no thanh mot dong
+    "da sua" khong ai kiem.
+P2:
+  ten: finding-02-lease-khai-sai-co-che-loai-tru-ops-reviews
+  noi_dung: >-
+    Lease khai "luat 1 (chi muc dinh cua ops/) da du loai hai ban sao luu tru ve CO CHE". Reviewer
+    vo hieu nhanh kiem ten thu muc `ops/reviews/` ma giu nguyen luat 1 => hai tep roi vao `la`,
+    `TONG: DO`, `rc=1`. Vay co che THAT la nhanh kiem ten thu muc chay TRUOC. Ma KHONG sai, chi tai
+    lieu sai — nhung rui ro that: nguoi doc tin loi khai cu se xoa nhanh ay vi tuong thua.
+  da_xu_ly: 'r5 dinh chinh ngay tai luat_pham_vi.2; executor khong phai sua ma cho viec nay.'
+hai_nhan_xet_cu_cua_bot_da_STALE:
+- 'P1 cua bot (mcp_gh D8(a) do tren Linux/py3.12 se lam gate do) => DA VA: mcp_gh_test.py nay nam trong CACH_LY tu r3'
+- 'P2 cua bot (bang chung 0/N duoc chap nhan) => DA VA o sha hien tai'
+phan_chung_reviewer_DA_CHAY:
+- 'chay tron `--chay` khong qua ong, rc do bang $?: 5 bo DAT co bang chung duong dung mau, 2 bo cach ly in KHONG DO DUOC (moi truong khong khop anchor), TONG: DAT — dung va dung LY DO'
+- 'dot bien (i)..(iv) + hai dot bien moi cua r4: 11/11 do dung'
+- 'chieu (iv) "vi tri la": dat mot _test.py o thu muc chua tung co => cong bao dung ten tep va DO'
+- 'numstat 27fb9de2..4082ab5 = 200 + 4 = 204, duoi tran 220'
+khong_P1_nao_bi_ha_xuong_P2: true
+khong_P2_nao_bi_nang_len_P1: true

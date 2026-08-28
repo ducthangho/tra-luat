@@ -1,0 +1,393 @@
+# Lease EXECUTOR — `CONG-NGOAI-WRITE-SET` (#361), lượt 1, **revision 5**.
+#
+# r5 sinh ra từ cross-review lượt 1 (`claude`, cross-provider): `changes_requested`, **P1=2**, P2=1.
+# Nó đổi HAI thứ phải đi qua revision theo §3.2 — TIÊU CHÍ NGHIỆM THU (thêm việc đóng hai P1) và
+# TRẦN (220 -> 240, có khối `ai_nang`/`vi_sao` bên dưới). Write set, executor, reviewer giữ nguyên.
+#
+# `base_sha` dời sang master mới. Việc dời base TỰ NÓ không tạo revision (§3.2) — nó đi kèm ở đây
+# vì cùng lúc phải hấp thụ một lần TRÔI ĐO ĐƯỢC: master đã thêm `.claude/dev/duyet_danh_tinh_test.py`
+# sau khi packet rẽ nhánh, và sổ đăng ký của chính packet này sẽ ĐỎ nếu merge mà không đăng ký nó.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 361
+packet_id: CONG-NGOAI-WRITE-SET
+phase_key: CONG-NGOAI-WRITE-SET
+revision: 5
+generation: 1
+lease_id: cong-ngoai-write-set-exec-1r5-codex-20260828
+thay_the_cho: cong-ngoai-write-set-exec-1r4-codex-20260828
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` ở đây KHÔNG phải mặc định fail-close mà là lớp KHAI TƯỜNG MINH của `_BANG_LOP`:
+  tiền tố `.github/workflows/` nằm thẳng trong bảng. Lớp do CỔNG tính, không tự hạ.
+
+executor_ghi_chu: >-
+  `codex` vì write set chạm `.claude/**` — nền của `claude` từ chối `Edit`/`Write` dưới đường đó,
+  và đó là lý do đo được chứ không phải sở thích. Reviewer `claude` ⇒ cross-provider.
+
+spec_path: 'ops/specs/cong-ngoai-write-set-packet-issue-nhap.md'
+spec_ref: 'refs/heads/ops/cap-lease-tach-314'
+spec_ghi_chu: >-
+  Hồ sơ CÓ THẨM QUYỀN là tệp trên nhánh `ops/cap-lease-tach-314`. Thân Issue #361 là BẢN CHIẾU.
+  Thứ định danh là BĂM, không phải tên nhánh.
+
+write_set:
+  - .github/workflows/ci.yml
+  - .claude/dev/ci_dang_ky_test.py
+write_set_note: >-
+  ĐÚNG HAI đường, y như hồ sơ đề xuất. `.claude/dev/ci_dang_ky_test.py` là tệp VIẾT MỚI (chưa tồn
+  tại ở base) — phản chứng cho phép liệt kê tự động.
+  KHÔNG lấy `.claude/dev/packet_loop.py`: nó có BỐN người giữ, và hồ sơ cố ý tránh nó vì thế.
+  Hai bộ test mục tiêu (`.claude/dev/mcp_gh_test.py`, `.claude/dev/probe_mang_test.py`) chỉ ĐỌC,
+  KHÔNG vào write set — nên việc chúng có người giữ không chặn packet này.
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-28T03:53Z. So HAI NGUỒN bằng TẬP TÊN trước tiên (chốt ĐẦU TIÊN theo bài học
+  "`for-each-ref` đọc bộ đệm cục bộ"): `ls-remote --heads` 241 = `for-each-ref` 241; `comm -23`
+  RỖNG, `comm -13` RỖNG ⇒ không mù ref nào. Đã đồng bộ MỌI nhánh cục bộ về `origin/<cùng tên>`
+  trước khi đo, vì nhánh tụt sau làm phép đếm NGƯỜI_GIỮ CAO HƠN sự thật.
+  Kết quả:
+    `.github/workflows/ci.yml`         -> NGƯỜI_GIỮ 0 (5 lease HẾT_HẠN, gồm ci-cong-idiom r1/r2)
+    `.claude/dev/ci_dang_ky_test.py`   -> NGƯỜI_GIỮ 0
+  Lượt đo cùng lúc trên hai tệp CHỈ-ĐỌC phơi ra hai lease giữ đường dẫn SAU KHI packet đã land
+  (`mcp-gh-cong-tu-canh-exec-1` và `mang-sandbox-codex-exec-1r4`) — đúng nợ
+  `AG-T0-01B-thu-hoi-lease-chua-co-duong`. Đã ĐÓNG SỚM cả hai trong cùng commit này.
+
+chot_ton_tai_o_base: >-
+  `git cat-file -e 36260236:.github/workflows/ci.yml` => CÓ.
+  `.claude/dev/ci_dang_ky_test.py` => KHÔNG có, và ĐÚNG NHƯ VẬY: đây là tệp viết mới.
+  Chốt này thành thường lệ sau khi lease #360 cấp SAI base HAI LẦN vì write set không tồn tại ở đó.
+  Bài học kèm theo: `ai-dang-giu` trả lời "ai đang giữ", KHÔNG trả lời "có tồn tại ở base không" —
+  hai câu hỏi khác nhau, và với tệp VIẾT MỚI thì "không tồn tại" là câu trả lời ĐÚNG, không phải lỗi.
+
+branch: codex/cong-ngoai-write-set-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 58b85cc293a749dde26991aae5695fd1181ac43a
+base_ghi_chu: >-
+  Master ngay sau khi #369 land. Dời base là BẮT BUỘC ở lượt này, không phải cho gọn: giữa
+  `27fb9de2` và `58b85cc2`, master thêm `.claude/dev/duyet_danh_tinh_test.py` — một tệp `*_test.py`
+  nằm THẲNG trong gốc được phép của `luat_pham_vi`. Phiên điều phối ĐÃ ĐO hậu quả bằng cách merge
+  thử `4082ab5` lên `58b85cc2` trên bản sao ngoài cây rồi chạy sổ:
+    `ĐỎ: test sống chưa đăng ký: .claude/dev/duyet_danh_tinh_test.py`
+    `ĐĂNG KÝ: 21/20` · `TỔNG: ĐỎ` · `rc=1` (đo trần, không qua ống)
+  Tức merge #361 y nguyên sẽ làm cổng ĐỎ NGAY TRÊN MASTER. Đây là cò §5.1 số 2 (DRIFT ∩ write set)
+  nổ thật, và nó phải được hấp thụ TRONG packet chứ không sau khi land.
+start_from_sha: 58b85cc293a749dde26991aae5695fd1181ac43a
+reviewed_sha_required: 58b85cc293a749dde26991aae5695fd1181ac43a
+reviewed_sha_ghi_chu: >-
+  Để nguyên base ở lượt cấp đầu (nhánh chưa tồn tại; `lease_publish.py` liệt trường này vào
+  `BAT_BUOC`, để null sẽ `CHAN [8]`). PHẢI cập nhật sang exact head khi đưa ra review.
+
+viec_cua_luot_nay: >-
+  Bốn việc, nguyên văn ở mục "Đây KHÔNG phải thêm hai dòng vào ci.yml" của hồ sơ:
+  (1) CHẠY `.claude/dev/mcp_gh_test.py` và `.claude/dev/probe_mang_test.py` trong CI;
+  (2) đòi BẰNG CHỨNG DƯƠNG chứ không chỉ `rc=0` — khớp chuỗi tổng kết mong đợi trong `stdout`,
+      vì #319 vòng 3 đã cho thấy `rc` và bản in TÁCH RỜI nhau được;
+  (3) CHỐNG DANH SÁCH GÕ TAY — `ci.yml` hiện liệt kê từng `_test.py`; thêm hai dòng nữa là tái tạo
+      đúng cái lỗ đã sinh ra nợ này. Cần phép liệt kê tự động, hoặc một chốt ĐỎ khi có `_test.py`
+      mới KHÔNG nằm trong danh sách;
+  (4) PHẢN CHỨNG CHO CHÍNH CỔNG ẤY — tối thiểu hai ca: cổng ĐỎ khi một bộ test bị gỡ khỏi danh
+      sách, và cổng ĐỎ khi bộ test in dòng xanh mà mã thoát khác 0 (hoặc ngược lại).
+
+vi_sao_packet_nay_ton_tai: >-
+  Gộp HAI nợ của HAI packet vì đo ra thì chúng là CÙNG MỘT việc:
+  · #319 nợ `khong-cong-nao-chay-bo-test` — không cổng nào chạy `mcp_gh_test.py`; tìm
+    `glob`/`rglob`/`**/*_test` trong `.github/workflows/*.yml` cho 0 kết quả. Mọi con số `40/40`,
+    `48/48` của packet ấy chỉ tồn tại KHI CÓ NGƯỜI GÕ TAY.
+  · #334 P1 `meta-test-tu-canh-khong-ai-canh` — vô hiệu hoá `t12` bằng ĐÚNG MỘT dòng thì bốn trong
+    năm phép xoá quay lại `TỔNG: ĐẠT`, `rc=0`.
+  Cả hai đòi đúng một thứ: MỘT CỔNG CHẠY CÁC BỘ TEST NÀY TỪ NGOÀI WRITE SET CỦA PACKET SỞ HỮU
+  CHÚNG — vì kẻ sửa ba tệp trong write set của một packet không đồng thời sửa được cấu hình CI đó.
+
+canh_bao_da_tra_gia:
+  - >-
+    `[skip` + `ci]` trong THÔNG ĐIỆP COMMIT là chốt đặt sai chỗ — nó sống trong LỊCH SỬ và đã tắt
+    gate của cả một PR lẫn của master. Packet này sửa CI nên đặc biệt dễ chạm: ĐỪNG viết chuỗi ấy
+    nguyên văn vào commit, KỂ CẢ khi đang trích dẫn để giải thích. Muốn nhắc thì tách chữ.
+  - >-
+    "YAML parse được" KHÁC "GitHub NHẬN". Dấu hiệu bị từ chối là một workflow run mang tên ĐƯỜNG
+    DẪN TỆP, 0 job, `conclusion: failure` — không phải một job đỏ. SÁU lượt cross-review từng kết
+    luận "YAML ok" vì chỉ kiểm bằng PyYAML, mà PyYAML không biết luật của GitHub. Phải chạy
+    `actionlint` THẬT; và nhớ `actionlint` IM LẶNG bỏ toàn bộ luật nền khi thiếu `shellcheck` rồi
+    vẫn trả `rc=0` — thiếu công cụ thì phải ĐỎ, không được tự tắt.
+  - >-
+    ĐỪNG viết cú pháp biểu thức Actions trong CHÚ THÍCH của một khối `run`: GitHub nội suy biểu
+    thức trên TOÀN BỘ thân `run` trước khi shell thấy nó, nên một cặp rỗng trong comment làm cả tệp
+    không hợp lệ. Kho đã mất một workflow vì đúng dòng comment giải thích chuyện này.
+  - >-
+    Sau MỌI lần đẩy mà bạn cần một workflow chạy, hãy ĐO là nó đã chạy (`list_workflow_runs` lọc
+    theo nhánh), đừng suy từ việc `git push` thành công. Workflow có `paths:` ĐÃ từng không chạy ở
+    lần đẩy tạo nhánh mới — nguyên nhân CHƯA BIẾT, đừng chế ra.
+  - >-
+    Cổng xanh nhờ `rc=0` là cổng CÓ THỂ BỊ LỪA — đòi BẰNG CHỨNG DƯƠNG (`N/N` hai số BẰNG NHAU).
+    Đó chính là việc số 2, đừng mắc lại nó trong lúc làm nó.
+
+phan_chung_bat_buoc: >-
+  Mỗi chốt mới phải có ĐỘT BIẾN RIÊNG làm nó ĐỎ, chạy trên BẢN SAO NGOÀI CÂY (`cp -r` sang `/tmp`),
+  không sửa tệp thật — kho đã trả giá vì đột biến ghi vào tệp thật rồi khôi phục trong `finally`.
+  Chốt nào không đỏ được ⇒ NÓI RA, đừng giấu.
+  QUÉT THEO Ý, KHÔNG THEO DIFF: câu hỏi là "mọi đường làm cho cổng xanh mà bộ test không chạy",
+  không phải "hai dòng tôi vừa thêm".
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 240
+  do_tu_sha: 58b85cc293a749dde26991aae5695fd1181ac43a
+  don_vi: 'dòng THÊM trên TOÀN write set, `git diff --numstat`'
+  ai_nang: 'claude-session, theo uỷ quyền cấp lease của ducthangho trong phiên 2026-08-28'
+  nang_tu: 220
+  nang_len: 240
+  neo_do_duoc: >-
+    NEO, không phải số tròn. Đo trên bản vá hiện có (204/220 đã dùng) và trên hai việc r5 thêm:
+    · P1-01 (phân biệt `run:` thật với chuỗi trong chú thích): phép lấy các trường `run` từ YAML đã
+      parse + một phản chứng "bước thật bị xoá, chuỗi còn trong chú thích" ~ 18 dòng;
+    · P1-02 (khoá giá trị `moi_truong` vào tập giá trị `moi_truong_hien_tai()` thật sự sinh ra) +
+      phản chứng "neo gõ nhầm làm (b) vĩnh viễn không thi hành" ~ 10 dòng;
+    · hấp thụ trôi master (đăng ký `duyet_danh_tinh_test.py` vào `DA_NOI`) ~ 1 dòng.
+    Neo = 18 + 10 + 1 = **29**. Trần mới 240 cho 204 + 29 = 233, tức biên **7 dòng trên neo
+    (~24%)** — biên ấy là để hai phản chứng không phải viết chật, KHÔNG phải chỗ chứa việc mới.
+  vi_sao_nang_MOT_LAN_nay_khac_bon_lan_cua_319: >-
+    #319 nâng để chứa dòng ĐÃ VIẾT — nâng sau khi vượt, bốn lần, và mỗi lần con số mất thêm nghĩa.
+    Đây là lần chạm trần ĐẦU TIÊN của #361, nâng TRƯỚC khi viết, cho việc mà một bên THỨ BA
+    (cross-review) đòi chứ không phải bên thi công tự đòi, và neo đo được ghi ngay trên. Nếu không
+    nâng thì chỉ còn 16 dòng cho 29 dòng việc, và cách duy nhất để vừa là cắt bớt phản chứng —
+    tức mua trần bằng cách rút răng của chính cổng này. Đó là đánh đổi tệ hơn.
+  chot_chong_lap_bat_buoc: >-
+    Chạm 240 lần nữa thì câu hỏi ĐÚNG **không phải** "nâng lên bao nhiêu" mà là **"sổ này có nên
+    TÁCH ĐÔI không"** — canh PHẠM VI (ai là test sống, ở đâu) và canh CHẠY (bằng chứng dương, rc,
+    cách ly) là hai việc khác nhau đang ở chung một tệp. Lần sau không nới trần.
+
+# ================== LUẬT PHẠM VI — TIÊU CHÍ NGHIỆM THU MỚI CỦA r2 ==================
+# Đây là thứ DUY NHẤT r2 thêm so với lượt 1. Write set, base, trần đều giữ nguyên.
+
+luat_pham_vi_ghi_chu: >-
+  Lượt 1 dừng theo `S6` vì phép liệt kê trung thực tìm ra hai bản sao lưu trữ, và lease cấm tự dựng
+  ngoại lệ. Executor xử ĐÚNG. Phiên điều phối quyết, và quyết theo doctrine đã trả giá của kho:
+  **"Danh sách CẤM không bao giờ đủ — phải đảo thành danh sách CHO PHÉP."** Một danh sách loại trừ
+  phải đoán trước mọi cách một tệp lạ có thể xuất hiện, nên thua từ trong thiết kế; một danh sách
+  cho phép chỉ phải liệt kê một tập nhỏ và biết trước.
+
+luat_pham_vi:
+  1_goc_duoc_phep: >-
+    Danh sách CHO PHÉP theo GỐC, nhỏ và biết trước. Mọi `*_test.py` nằm dưới các gốc này là
+    **TEST SỐNG** và PHẢI được cổng chạy:
+      `.claude/dev/` · `.claude/hooks/` · `.githooks/` · `.github/checks/` ·
+      `scripts/tl_core/` · `ops/` NHƯNG CHỈ MỨC ĐỈNH, không đệ quy.
+    Danh sách này do packet ĐO LẠI trên cây thật rồi chốt, không chép từ đây — con số/tên trong
+    lease là ĐO CỦA PHIÊN ĐIỀU PHỐI, không phải chân lý.
+  2_ops_reviews_la_kho_hien_vat: >-
+    `ops/reviews/**` KHÔNG phải gốc mã nguồn. Đây KHÔNG phải một ngoại lệ ad-hoc mà là phát biểu về
+    BẢN CHẤT của thư mục: nó giữ bản sao BẤT BIẾN của bằng chứng review, và `ops/reviews/README.md`
+    đã nói `luu-tru/*` là ref bền giữ các commit công bố verdict. Một bản sao LỊCH SỬ không phải mã
+    ĐANG CHẠY; chạy nó ở CI là đo một hiện vật đông lạnh rồi tưởng mình đang gác cổng.
+    Ghi lý do ĐÚNG MỘT CHỖ, đừng rải ngoại lệ theo tên tệp.
+    **ĐÍNH CHÍNH CỦA r5 (finding-02 của cross-review, P2).** r2/r3/r4 khai SAI cơ chế ở đây: chúng
+    nói "luật `1` (chỉ mức đỉnh của `ops/`) đã đủ loại hai bản sao ấy về mặt CƠ CHẾ; luật `2` chỉ
+    ghi LÝ DO". Reviewer ĐO ngược lại — vô hiệu nhánh kiểm tên thư mục `ops/reviews/` mà giữ nguyên
+    luật `1` thì hai tệp ấy KHÔNG được loại êm: chúng rơi vào `la` và cổng bắn `TỔNG: ĐỎ`, `rc=1`.
+    Vậy cơ chế THẬT là nhánh kiểm tên thư mục chạy TRƯỚC, và luật `1` KHÔNG tự lo được.
+    Vì sao đính chính này quan trọng hơn vẻ ngoài của nó: người đọc tin lời khai cũ sẽ coi nhánh
+    `OPS_REVIEWS` là thừa và xoá đi — hồi quy dễ xảy ra ĐÚNG VÌ lý do lease đưa ra để giữ nó lại sai.
+    Mã KHÔNG sai; chỉ tài liệu sai. r5 KHÔNG đổi mã ở chỗ này.
+  3_fail_close_bon_chieu: >-
+    Cổng phải ĐỎ ở CẢ BỐN chiều, không chỉ chiều "thiếu":
+      (i)   `*_test.py` dưới gốc được phép mà KHÔNG có trong sổ đăng ký ⇒ ĐỎ;
+      (ii)  mục trong sổ mà tệp KHÔNG tồn tại ⇒ ĐỎ;
+      (iii) mục trong sổ mà `ci.yml` KHÔNG thật sự gọi ⇒ ĐỎ (đây là chiều bắt được đúng cái lỗ đã
+            sinh ra packet: có tên trong sổ mà không ai chạy);
+      (iv)  `*_test.py` nằm NGOÀI mọi gốc đã biết VÀ ngoài `ops/reviews/**` ⇒ **ĐỎ**.
+    Chiều `(iv)` là thứ giữ cho danh sách cho phép KHÔNG MỤC theo thời gian: một vị trí lạ làm cổng
+    ĐỎ và buộc người phải quyết, thay vì bị bỏ qua im lặng. Thiếu `(iv)` thì "danh sách cho phép"
+    lại thoái hoá thành danh sách cấm.
+  4_hinh_thuc_so_dang_ky_do_executor_chon: >-
+    Lease chốt HỢP ĐỒNG (bốn chiều fail-close ở trên), KHÔNG chốt hình thức. Sổ đăng ký là tệp dữ
+    liệu hay là mã, sinh tự động hay khai tay — executor tự quyết và tự biện minh.
+
+bay_bo_test_chua_tung_chay_o_CI: >-
+  Phép đo của phiên điều phối lúc 2026-08-28T03:5xZ: kho có **20** tệp `*_test.py`, và **BẢY** bộ
+  KHÔNG workflow nào chạy — `gh_readback` · `mcp_gh` · `mcp_github_doc` · `probe_mang` ·
+  `pretooluse_guard` · `subagent_ghi_detect` · `nhanh_don_duoc`. Hồ sơ packet chỉ khai HAI.
+  **CHẠY TỪNG BỘ TRƯỚC KHI ĐƯA VÀO CỔNG và ghi kết quả NỀN.** Bộ nào ĐỎ SẴN thì KHAI, và nó thành
+  nợ CÓ TÊN — KHÔNG được lấy "nó đỏ" làm cớ để im lặng bỏ nó ra khỏi sổ. Đỏ sẵn là một sự thật về
+  kho, không phải một lý do để cổng mù tiếp.
+  Cảnh báo về chính bảng này: phép đo dùng `grep <basename> .github/workflows/*.yml`, tức khớp theo
+  CHUỖI chứ không theo LỜI GỌI THẬT, và nó đã hỏng CẢ HAI CHIỀU trong tay phiên điều phối — âm tính
+  giả với `ops/lease_publish_test.py` (chạy gián tiếp qua `ops/chay_lease_publish_test.sh`), dương
+  tính giả với hai bản sao lưu trữ (basename đụng đúng tên script ấy). Đo lại bằng phép đo của bạn;
+  mỗi chỗ bảng này sai mà bạn tìm ra được tính là một finding.
+
+# ========== TIÊU CHÍ NGHIỆM THU MỚI CỦA r3 — CÁCH LY CÓ NỢ CÓ TÊN ==========
+cach_ly_co_no_co_ten: >-
+  Sổ đăng ký nay phân biệt HAI trạng thái, và cả hai đều VẪN ĐƯỢC CHẠY:
+  · `chan` — bộ test phải XANH, đỏ thì cổng ĐỎ. Mặc định.
+  · `cach_ly` — bộ test ĐANG ĐỎ ở môi trường CI, đã biết, có nợ CÓ TÊN; nó vẫn được LIỆT KÊ và vẫn
+    được CHẠY, chỉ là không chặn.
+  Cách ly KHÔNG phải "bỏ ra khỏi sổ". Bỏ ra khỏi sổ là quay lại vô hình — tức xoá đúng thứ packet
+  này vừa mua được.
+
+cach_ly_fail_close_hai_chieu: >-
+  Đây là phần quyết định, thiếu nó thì cách ly thành NGHĨA ĐỊA:
+  (a) Vào cách ly BẮT BUỘC kèm `slug` nợ và LÝ DO ĐO ĐƯỢC. Mục cách ly thiếu một trong hai ⇒ cổng
+      ĐỎ. Không cho phép cách ly "trống lý do".
+  (b) Bộ đang cách ly mà CHUYỂN XANH ⇒ cổng **ĐỎ**, kèm câu bảo gỡ nó khỏi cách ly. Không có chốt
+      này thì một bộ đã tự lành vẫn nằm mãi trong cách ly và không ai biết — cách ly sẽ sống lâu
+      hơn nguyên nhân của nó.
+  Mỗi chiều (a) và (b) phải có ĐỘT BIẾN RIÊNG làm một ca ĐỎ. Chốt không có mutant là chốt sẽ hở lại.
+
+ba_no_co_ten_du_kien: >-
+  Executor tự đo lại rồi chốt danh sách; ba slug dưới đây là ĐỀ XUẤT của phiên điều phối, không
+  phải chân lý — sai chỗ nào thì nói:
+  · `AG-361-P2-01-mcp-gh-dot-bien-chap-chon-theo-may` — `mcp_gh_test.py`, `b7_bo_cam_ghi` sống sót
+    trên runner mà chết tại chỗ 3/3 lần. Bài học `.pyc` trong `CLAUDE.md` mô tả đúng cơ chế
+    (mtime tính bằng GIÂY + kích thước), nhưng CHƯA AI dựng phản chứng cho ca này ⇒ nguyên nhân là
+    GIẢ THUYẾT KHỚP, không phải đã chứng minh. Khai đúng như vậy.
+  · `AG-361-P2-02-pretooluse-guard-doi-runtime-runner-khong-co` — ba ca `t11`/`t15`/`t33` đòi
+    runtime mà runner trần không có. Bộ test có tiền điều kiện môi trường mà nó KHÔNG KHAI; cách
+    đúng về lâu dài là nó tự khai và tự bỏ qua có ghi lý do, nhưng tệp ấy NGOÀI write set.
+  · `chon_reviewer_test.py` KHÔNG phải nợ — nó chỉ là master trôi. Rebase lên `27fb9de2` rồi đăng
+    ký nó vào nhóm `chan` là xong.
+
+khong_duoc_lam_r3: >-
+  KHÔNG dùng cách ly cho một bộ test mà bạn CHƯA ĐO ở cả hai môi trường. "Đỏ ở sandbox của tôi"
+  KHÔNG đủ để cách ly — phiên điều phối đã đo được rằng `mcp_gh` và `nhanh_don_duoc` đỏ trong
+  sandbox executor mà XANH ở nơi khác. Cách ly phải neo vào ĐỎ TRÊN RUNNER CI, có log.
+  KHÔNG đụng gì ngoài hai đường write set. (Câu "KHÔNG nới trần 220" của r3 nay do
+  `ngan_sach_kich_thuoc` của r5 thay: trần là 240, nâng MỘT LẦN, có neo và có chốt chống lặp.)
+
+# ========== SỬA CỦA r4 — CÁCH LY PHẢI CÓ PHẠM VI MÔI TRƯỜNG ==========
+cach_ly_phai_neo_MOI_TRUONG: >-
+  Mục cách ly nay BẮT BUỘC khai THÊM một trường: môi trường mà cái ĐỎ được QUAN SÁT, kèm tham
+  chiếu log. Không có nó ⇒ cổng ĐỎ (mở rộng chiều `(a)`).
+  Luật `(b)` — "cách ly mà chuyển xanh ⇒ ĐỎ" — CHỈ được thi hành KHI ĐANG CHẠY TRONG ĐÚNG MÔI
+  TRƯỜNG ẤY. Ở môi trường khác, mục ấy in **`KHÔNG ĐO ĐƯỢC`** và **KHÔNG chặn**.
+  Vì sao phải là `KHÔNG ĐO ĐƯỢC` chứ không phải im lặng bỏ qua: đó là TRẠNG THÁI THỨ BA của kho
+  (`None ≠ False`). Im lặng bỏ qua thì một cách ly đã hết hạn sẽ không ai thấy ở đâu cả; in
+  `KHÔNG ĐO ĐƯỢC` thì người đọc biết chốt ấy CÓ, chỉ là chưa đo được ở đây.
+
+vi_sao_KHONG_bo_han_chieu_b: >-
+  Cám dỗ rẻ nhất là xoá luật `(b)` cho hết đỏ. ĐỪNG. `(b)` là thứ DUY NHẤT ngăn cách ly sống lâu
+  hơn nguyên nhân của nó — bỏ nó là biến cách ly thành nghĩa địa, tức đúng thứ r3 sinh ra để chặn.
+  r4 KHÔNG bỏ `(b)`; nó chỉ gắn cho `(b)` đúng phạm vi mà `(b)` đo được.
+
+phan_chung_moi_cua_r4: >-
+  Ba đột biến RIÊNG, mỗi cái làm một ca ĐỎ, chạy trên BẢN SAO NGOÀI CÂY:
+  · bỏ trường môi trường khỏi một mục cách ly ⇒ ĐỎ (chiều `(a)` mở rộng);
+  · bỏ phép so môi trường, để `(b)` bắn ở mọi nơi ⇒ ĐỎ — đây là đột biến canh chính bản sửa của
+    r4, và thiếu nó thì không ai biết phép so có thật sự được dùng;
+  · ở môi trường KHÔNG khớp, một mục cách ly đã xanh phải in `KHÔNG ĐO ĐƯỢC` chứ KHÔNG in `ĐẠT`
+    — đột biến đổi nó thành `ĐẠT` phải làm ca ĐỎ.
+  Tám phản chứng cũ VẪN phải đỏ đúng sau khi sửa.
+
+do_bat_buoc_hai_moi_truong: >-
+  Sau khi sửa, `--chay` chạy TẠI CHỖ phải cho `TỔNG: ĐẠT` (hai mục cách ly in `KHÔNG ĐO ĐƯỢC`,
+  không chặn), và phiên điều phối sẽ đo lượt CI riêng. Nếu tại chỗ vẫn ĐỎ thì bản sửa chưa xong —
+  DỪNG và BÁO, đừng nới thứ khác cho hết đỏ.
+
+dieu_kien_dung: >-
+  S1 write set đổi ⇒ dừng, đi qua revision (§3.2).
+  S2 chạm trần 240 dòng ⇒ CẮT, không nâng, KHÔNG đổi đơn vị; và hỏi câu hỏi TÁCH ĐÔI ở
+     `ngan_sach_kich_thuoc.chot_chong_lap_bat_buoc`.
+  S3 cùng hình dạng lỗi lần thứ BA ⇒ dừng, xem lại cách làm (§12).
+  S4 master trôi ⇒ đo `merge-base --is-ancestor` + `numstat` trên ĐÚNG write set.
+  S5 bản vá làm ĐỎ một cổng khác ⇒ dừng và báo, đừng vá lan.
+  S6 nếu phép liệt kê tìm ra `_test.py` mà `luat_pham_vi` ở trên KHÔNG xếp được vào ô nào ⇒ dừng
+     và BÁO kèm danh sách. r2 đã trả lời ca ĐÃ BIẾT (hai bản sao lưu trữ dưới `ops/reviews/**`);
+     `S6` nay dành cho ca CHƯA BIẾT, và vẫn KHÔNG phải chỗ để lặng lẽ thêm ngoại lệ.
+
+# ========== TIÊU CHÍ NGHIỆM THU MỚI CỦA r5 — HAI P1 CỦA CROSS-REVIEW + MỘT LẦN TRÔI ==========
+# Nguồn: `ops/reviews/cong-ngoai-write-set-review-1-claude-verdict.md` (lượt 1, cross-provider).
+# Reviewer đo bằng đột biến trên bản sao NGOÀI CÂY tại đúng sha `4082ab5`, không suy diễn.
+
+viec_cua_r5: >-
+  BỐN việc. Ba đầu đóng ba finding; việc thứ tư hấp thụ một lần trôi master đo được.
+
+viec_1_P1_chuoi_trong_chu_thich_gia_mao_loi_goi_that: >-
+  Phép kiểm "CI có thật sự gọi mục này" đang là SO CHUỖI CON trên toàn văn bản YAML nối lại của mọi
+  `.github/workflows/*.yml`. Nó không phân biệt một bước `run:` THẬT với một dòng CHÚ THÍCH nhắc lại
+  đúng chuỗi lệnh. Reviewer tái hiện: xoá bước thật của `--chay`, để lại chuỗi trong một dòng chú
+  thích ⇒ `TỔNG: ĐẠT`, `rc=0`; làm y hệt với một mục `DA_NOI` ⇒ cũng `ĐẠT`.
+  Hậu quả đo được: TOÀN BỘ 7 bộ `MOI` và TOÀN BỘ 12 bộ `DA_NOI` có thể ngừng chạy trong CI thật mà
+  cổng vẫn xanh — tái tạo NGUYÊN VẸN cái lỗ #319 mà packet này sinh ra để đóng, chỉ bằng một sửa
+  đổi trong đúng write set của chính packet.
+  ĐÂY LÀ HỌ LỖI KHO ĐÃ TRẢ GIÁ BA LẦN (`[skip` + `ci]` trong thông điệp commit · biểu thức Actions
+  trong chú thích · workflow `paths:` không chạy lần đầu). Lần này là biến thể thứ TƯ. Theo §12,
+  cùng hình dạng lỗi lặp lại ⇒ soi CÁCH LÀM: câu hỏi không phải "lọc chú thích thế nào" mà **"phép
+  kiểm này có đang đọc thứ GitHub thật sự THI HÀNH không"**.
+  Executor tự chọn cách. Reviewer ghi một hướng khả dĩ (parse YAML lấy trường `run` của từng step
+  thay vì nối văn bản thô) — đó là GỢI Ý, không phải chỉ định; cách nào khác mà ĐO ĐƯỢC là tốt hơn
+  thì làm và nói vì sao. Lưu ý PyYAML đã được cổng cài trước bước này, nên phụ thuộc ấy không mới.
+
+viec_2_P1_gia_tri_moi_truong_khong_bi_khoa_nen_luat_b_co_the_vinh_vien_chet: >-
+  `moi_truong_hien_tai()` chỉ sinh ra được HAI giá trị. Nhưng `kiem()` chỉ đòi bốn trường của một
+  mục cách ly KHÔNG RỖNG — không đòi `moi_truong` phải NẰM TRONG tập giá trị ấy. Một chuỗi lệch,
+  kể cả gõ nhầm một chữ, làm `hien_tai != da_neo` đúng ở MỌI nơi, kể cả trên đúng runner CI ⇒ luật
+  `(b)` KHÔNG BAO GIỜ thi hành được, kể cả khi bộ test đã xanh thật.
+  Nói thẳng phần thuộc về phiên điều phối: r4 là hợp đồng do CHÍNH PHIÊN NÀY viết, và nó tuyên bố
+  đóng đúng lỗ này. Đo lại cho thấy nó mới ĐỔI CHỖ lỗ — thêm được cái neo, nhưng không khoá giá trị
+  neo. Đây là lỗi thiết kế của phiên điều phối, không phải của executor.
+  Yêu cầu: giá trị `moi_truong` phải được kiểm so với tập giá trị mà hàm ấy THẬT SỰ có thể trả về,
+  lấy từ một nguồn DUY NHẤT — đừng chép tập ấy ra chỗ thứ hai, vì hai bản chép sẽ trôi khỏi nhau và
+  đó đúng là hình dạng lỗi `AG-369-P2-01` vừa ghi hôm nay.
+
+viec_3_P2_dinh_chinh_lease_da_lam_san: >-
+  finding-02 (P2) là lời khai SAI trong chính lease này, không phải lỗi mã. r5 đã đính chính ngay
+  tại `luat_pham_vi.2_ops_reviews_la_kho_hien_vat`. Executor KHÔNG phải sửa gì cho việc này; chỉ
+  cần ĐỌC nó trước khi đụng vào `tim()`, để không xoá nhánh `ops/reviews/` vì tưởng thừa.
+
+viec_4_hap_thu_troi_master_da_do: >-
+  Master (`58b85cc2`) có thêm `.claude/dev/duyet_danh_tinh_test.py`. Nó nằm trong gốc được phép, và
+  `.github/workflows/duyet-phan-chung.yml` ĐÃ gọi nó thật (`"$PY" .claude/dev/duyet_danh_tinh_test.py`)
+  — nên chỗ đúng của nó là nhóm ĐÃ ĐƯỢC NỐI, không phải nhóm cổng này tự chạy.
+  NHƯNG: đừng chép kết luận ấy từ đây. Sau khi sửa việc 1, phép kiểm "đã nối" sẽ khác trước; hãy
+  ĐO LẠI bằng phép kiểm MỚI của chính bạn rồi mới xếp nhóm. Nếu phép kiểm mới nói khác lease, tin
+  phép đo và NÓI RA — lease sai chỗ nào thì đó là một finding.
+
+phan_chung_moi_cua_r5: >-
+  Hai đột biến RIÊNG, chạy trên BẢN SAO NGOÀI CÂY, mỗi cái làm một ca ĐỎ:
+  · xoá một bước `run:` THẬT nhưng giữ nguyên chuỗi lệnh trong một dòng chú thích ⇒ cổng phải ĐỎ
+    (đột biến canh chính bản sửa của việc 1; thiếu nó thì không ai biết phép kiểm mới có răng);
+  · một mục cách ly khai `moi_truong` bằng chuỗi KHÔNG nằm trong tập giá trị thật ⇒ cổng phải ĐỎ
+    ngay ở tầng cấu trúc, không được đi tiếp thành `KHÔNG ĐO ĐƯỢC`.
+  MƯỜI MỘT phản chứng cũ VẪN phải đỏ đúng sau khi sửa. Số nào tụt là hồi quy, phải nói.
+  Chốt tự soi: sau khi sửa việc 1, hãy tự hỏi phép kiểm mới có bị lừa bởi thứ khác không —
+  `run:` nằm trong một `if:` không bao giờ đúng, một job bị `if: false`, một step bị comment cả
+  khối. Đo được cái nào hở thì KHAI, kể cả khi không vá trong trần.
+
+do_bat_buoc_cua_r5: >-
+  Sau khi sửa, tại chỗ phải cho: `python3 .claude/dev/ci_dang_ky_test.py` ⇒ `TỔNG: ĐẠT`, `rc=0`, và
+  `--chay` ⇒ `TỔNG: ĐẠT`, `rc=0`. ĐO `rc` BẰNG `$?` NGAY SAU LỜI GỌI TRẦN, đừng qua ống — phiên
+  điều phối vừa tự mắc đúng lỗi đó hôm nay (`| head` nuốt mã thoát, `rc=0` trong khi thật là `1`).
+  Và ĐO `git diff --numstat 58b85cc2` trên đúng hai đường write set, đối chiếu trần 240.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  RIÊNG CHO REVISION NÀY, không tái dùng câu uỷ quyền gốc. Trực tiếp trong phiên 2026-08-28, sau
+  khi phiên điều phối trình đề xuất tiếp theo: **"Đồng ý đề xuất. Tôi uỷ quyền cho bạn thực hiện
+  theo phương án bạn đề xuất, được phép cấp lease"**. Đề xuất được chấp thuận là: chạy hai lượt
+  cross-review còn thiếu, rồi land theo kết quả đo — r5 là hệ quả trực tiếp của kết quả ấy
+  (`changes_requested`, P1=2).
+  Vì sao ghi như thế này: nợ `AG-369-P2-02` (cross-review #369 lượt 2) chỉ ra rằng bốn revision
+  trước của packet #369 đều trích Y HỆT một câu chỉ thị gốc, nên người audit không phân biệt được
+  lần chấp thuận nào ứng với quyết định nào. Đây là lease ĐẦU TIÊN sau khi nợ ấy được ghi, và nó
+  sửa cách làm thay vì sửa ngược các tệp đã đăng.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên ghi lease là `claude`; executor là `codex` ⇒ không tự cấp cho chính mình. Phiên này KHÔNG
+  viết bản vá — chỉ đo người giữ, soạn hồ sơ và cấp lease.
+
+leased_at_utc: '2026-08-28T09:20:00Z'
+lease_expires_at_utc: '2026-08-29T09:20:00Z'
+run_minutes: 1440

@@ -291,3 +291,12 @@ leased_at_utc: '2026-08-28T07:30:00Z'
 lease_expires_at_utc: '2026-08-29T07:30:00Z'
 run_minutes: 1440
 posted_comment_id: 5449666588   # workflow ghi, ĐỪNG sửa tay
+
+da_bi_thay_the: cong-ngoai-write-set-exec-1r5-codex-20260828
+da_bi_thay_the_ly_do: >-
+  Cross-review lượt 1 (`claude`, cross-provider, reviewed_sha `4082ab5`) trả `changes_requested`
+  với **P1=2**. Một trong hai P1 (`finding-03`) là khuyết tật của CHÍNH HỢP ĐỒNG r4 này: r4 thêm
+  được cái neo môi trường nhưng KHÔNG khoá giá trị neo, nên một chuỗi lệch — kể cả gõ nhầm — làm
+  luật `(b)` vĩnh viễn không thi hành được. r4 tuyên bố đóng lỗ ấy; đo lại thì nó mới ĐỔI CHỖ lỗ.
+  r5 thêm tiêu chí nghiệm thu đóng hai P1 và nâng trần 220 -> 240 kèm neo đo được — cả hai đều là
+  thứ §3.2 đòi phải đi qua revision.

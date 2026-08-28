@@ -261,4 +261,20 @@ recorder_ghi_chu: >-
 leased_at_utc: '2026-08-28T06:45:00Z'
 lease_expires_at_utc: '2026-08-29T06:45:00Z'
 run_minutes: 1440
-posted_comment_id: 5449453123   # workflow ghi, ĐỪNG sửa tay
+
+# ------------------------- BỊ THAY THẾ -------------------------
+da_bi_thay_the: cong-ngoai-write-set-exec-1r4-codex-20260828
+da_bi_thay_the_ly_do: >-
+  KHUYẾT TẬT NẰM TRONG HỢP ĐỒNG r3, KHÔNG NẰM TRONG BẢN VÁ. Executor thi hành đúng đặc tả và đo
+  được `8/8` phản chứng đỏ đúng; lỗi là của phiên điều phối viết luật.
+  Luật `(b)` của r3 — "bộ đang cách ly mà CHUYỂN XANH ⇒ cổng ĐỎ" — KHÔNG có phạm vi môi trường.
+  Nhưng LÝ DO hai bộ ấy bị cách ly chính là chúng PHỤ THUỘC MÔI TRƯỜNG. Hệ quả đo được khi phiên
+  điều phối chạy `--chay` thật:
+    CI_DANG_KY .claude/dev/mcp_gh_test.py: ĐỎ — đã xanh, hãy gỡ khỏi cách ly
+    CI_DANG_KY .claude/hooks/pretooluse_guard_test.py: ĐỎ — đã xanh, hãy gỡ khỏi cách ly
+    TỔNG: ĐỎ
+  Tức cổng cho HAI PHÁN QUYẾT NGƯỢC NHAU ở hai môi trường: đỏ tại chỗ (vì chúng xanh ở đây), xanh
+  trên CI (vì chúng đỏ ở đó nên cách ly giữ). Tệ hơn: bản tại chỗ ĐANG BẢO người dùng gỡ đúng cái
+  cách ly mà CI vẫn cần.
+  Đây là bệnh `PHẠM VI TUYÊN BỐ phải bằng phạm vi ĐO ĐƯỢC` mà `CLAUDE.md` đã ghi — và lần này
+  chính phiên điều phối viết ra nó, trong đúng cái chốt dựng lên để chống bị lừa.

@@ -1,0 +1,35 @@
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '334'
+provider: claude
+role: reviewer
+verdict: approved
+reviewed_sha: 9f553fc8296c1d0c267cc13c9ce87cf89e30452d
+luot: r4-1
+cross_provider: true
+assurance: cross_approved
+verdict_path: ops/reviews/mang-sandbox-codex-review-r4-1-claude-verdict.md
+verdict_sha256: 3a43518466954581ddb2c8e603e39862ed0d8fd0748ca1c8c8bb559da94d8343
+verdict_bytes: 9876
+ket_qua_dem_duoc:
+  P1: 0
+  P2: 0
+  finding_moi: 0
+executor_provider: codex
+phan_chung_reviewer_DA_CHAY:
+- 'A: tl selftest tren 9f553fc8 => 1698/1698, khong [FAIL], mot lan chay, khong gap
+  panic'
+- 'B: dot bien 71->70 tren BAN SAO ngoai cay => 1697/1698 kem [FAIL] r291_docs_ngoai_goi
+  (ratchet CO RANG)'
+- 'C: khoi phuc manifest cu tren ban sao => release-verify rc=2 package_hash_match
+  false; cay that => rc=0 (manifest CO RANG)'
+- 'D: golden-test · determinism-audit --strict · doc-claims-check --strict · ci_phamvi
+  --kiem-bam · release-check --full => rc=0 het'
+- tai sinh manifest roi diff byte voi ban trong cay => RONG (chung minh khong go tay)
+- 'do lai HAI SO HANG doc lap: grep -c path => 180; find docs -name *.md => 71'
+luot_truoc_da_dong: P2 `_c291_docs_ngoai_goi__reviewer-khong-chay-duoc-selftest` (head
+  33581a93) DONG bang cach CHAY THAT — luot do bi chan vi thieu co --allowedTools,
+  khong phai vi ban va
+reviewer_tu_khai: 'Reviewer tu khai mot sai sot phuong phap o buoc (C): lan dau quen
+  khoi phuc RELEASE_MANIFEST.json ve head truoc khi do "cay that", phat hien qua git
+  status roi chay lai dung cach.'

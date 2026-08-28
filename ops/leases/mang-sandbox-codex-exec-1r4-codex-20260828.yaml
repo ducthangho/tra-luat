@@ -178,6 +178,114 @@ recorder_is_dispatcher: false
 recorder_cung_la_nguoi_thi_cong: false
 
 leased_at_utc: '2026-08-28T01:10:00Z'
+LANDED:
+  luc_utc: '2026-08-28T01:40:00Z'
+  master_truoc: 693d68fd6ae76cca2be936d0d91d6b49bec9c80c
+  master_sau: fe6152be2cb77e90b2624487e5b2403e4e4424b7
+  qua_PR: 352
+  merge_boi: 'phiên điều phối, `mcp_github_doc.py goi merge_pull_request`'
+  uy_quyen: >-
+    Chủ kho uỷ quyền thực thi trong phiên, 2026-08-28: "cấp issue, phóng codex. và triển khai
+    đến xong. tôi uỷ quyền thực thi cho bạn, khi cần quyết định từ tôi hãy tự làm theo hướng
+    tốt nhất."
+
+  CROSS_REVIEW:
+    verdict: approved
+    reviewer: claude
+    executor: codex
+    cross_provider: true
+    reviewed_sha: 9f553fc8296c1d0c267cc13c9ce87cf89e30452d
+    P1: 0
+    P2: 0
+    finding_moi: 0
+    bien_nhan: 'ops/reviews/mang-sandbox-codex-review-r4-1-claude-verdict.receipt.yaml'
+    reviewer_DA_CHAY_that: >-
+      Khác lượt trước: reviewer chạy được lệnh. (A) `tl selftest` 1698/1698; (B) đột biến
+      `71→70` trên BẢN SAO ngoài cây ⇒ 1697/1698 kèm `[FAIL] r291_docs_ngoai_goi` — ratchet CÓ
+      RĂNG; (C) khôi phục manifest cũ trên bản sao ⇒ `release-verify` rc=2
+      `package_hash_match: false`, cây thật ⇒ rc=0 — manifest CÓ RĂNG; (D) năm cổng rc=0.
+      Cộng: tái sinh manifest rồi `diff` byte với bản trong cây ⇒ RỖNG (chứng minh không gõ tay),
+      và đo lại HAI SỐ HẠNG độc lập (180 bằng `grep -c`, 71 bằng `find`) chứ không đọc quan hệ.
+    luot_review_TRUOC_va_vi_sao_blocked: >-
+      Lượt r3 (head `33581a93`) trả `blocked`, P1=0 P2=1. Lý do KHÔNG phải bản vá — mọi phép đo
+      tĩnh của nó khớp. Nó `blocked` vì KHÔNG CHẠY ĐƯỢC LỆNH NÀO: mọi lời gọi thực thi mã bị trả
+      `This command requires approval`, kể cả qua subagent. Nó từ chối cấp `cross_approved` bằng
+      suy luận tĩnh — đúng doctrine "reviewer không đo được thì review chỉ là soát chính tả".
+      Nguyên nhân là PHIÊN ĐIỀU PHỐI thiếu cờ `--allowedTools` khi phóng, không phải lỗi của
+      reviewer và cũng không phải lỗi của packet. Lượt r4 truyền `--allowedTools Bash Read Grep
+      Glob` và P2 ấy đóng bằng phép chạy thật.
+
+  DO_LAI_BANG_GIT_khong_tin_API:
+    - 'git merge-base --is-ancestor 9f553fc8 fe6152be => rc=0  (head PR #352)'
+    - 'git merge-base --is-ancestor 94474286 fe6152be => rc=0  (reviewed_sha vòng 4 của r2)'
+    - 'trên master sau land: .claude/dev/probe_mang.py CÓ · probe_mang_test.py CÓ · docs/MANG_SANDBOX_CODEX.md CÓ'
+    - 'docs/*.md trên master = 71 — đúng con số ratchet r291 vừa nâng'
+
+  KIEM_TRUOC_MERGE_de_khong_do_LAN_THU_BA:
+    ghi_chu: >-
+      Packet này đã đỏ gate HAI lần vì write set khai thiếu. Trước lần merge này, phiên điều phối
+      đo trước hai đường có thể làm đỏ lần thứ ba — thay vì phát hiện bằng lượt CI kế tiếp.
+    phep_do:
+      - 'master có THÊM `docs/*.md` nào từ base không ⇒ KHÔNG (base 70 = master 70; nhánh 71 ⇒ cây gộp 71, khớp ratchet)'
+      - 'DRIFT của master có chạm tệp NÀO TRONG GÓI không ⇒ RỖNG ⇒ manifest sinh trên cây NHÁNH vẫn đúng cho cây GỘP'
+    ket_qua: 'Cả hai sạch. Không có lần thứ ba.'
+
+  §5_1_SAU_KICH_HOAT:
+    BASE: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+    DRIFT: '18 tệp'
+    '1_xung_dot': 'KHÔNG — merge-tree rc=0'
+    '2_DRIFT_giao_write_set': 'KHÔNG — comm -12 RỖNG'
+    '3_artefact_phai_sinh_trong_DRIFT': 'KHÔNG'
+    '4_bo_dem_ratchet': 'KHÔNG — master không thêm docs/*.md nào'
+    '5_tep_nhanh_import_goi': 'KHÔNG'
+    '6_workflow_hook': 'CÓ — 6 tệp (ci.yml, 4 hook, settings.json) ⇒ CHẠY LẠI GATE SAU MERGE'
+
+  GATE_HAU_MERGE:
+    chay_o_dau: 'clone ĐỘC LẬP tại fe6152be, core.autocrlf=false core.eol=lf core.abbrev=7'
+    ket_qua:
+      release_verify_strict: 'rc=0'
+      golden_test: 'rc=0'
+      determinism_audit_strict: 'rc=0'
+      doc_claims_check_strict: 'rc=0'
+      ci_phamvi_kiem_bam: 'rc=0'
+      packet_loop_test: 'rc=0'
+      tl_selftest: '1698/1698'
+      docs_md_tren_dia: 71
+
+  BOOKKEEPING_TUNG_MUC:
+    ghi_chu: '§10.2 — duyệt TỪNG MỤC lease khai, không dừng ở hiện vật chính.'
+    muc:
+      - {ten: 'r4: tái sinh manifest bằng bộ sinh, không gõ tay',
+         phep_do: 'reviewer tái sinh độc lập rồi `diff` byte với bản trong cây',
+         ket_qua: 'diff RỖNG', trang_thai: DAT}
+      - {ten: 'r4: file_count giữ 180 ⇒ golden không phải ghi lại',
+         phep_do: 'grep -c "path" RELEASE_MANIFEST.json trên master sau land',
+         ket_qua: '180; golden-test rc=0', trang_thai: DAT}
+      - {ten: 'r3: ratchet 70→71 và 250→251, có RĂNG',
+         phep_do: 'đột biến 71→70 trên bản sao ngoài cây',
+         ket_qua: '1697/1698 kèm [FAIL] r291_docs_ngoai_goi', trang_thai: DAT}
+      - {ten: 'r1/r2: ba tệp đã approved vòng 4 có mặt trên master',
+         phep_do: 'test -f trên clone độc lập tại fe6152be',
+         ket_qua: 'cả ba CÓ', trang_thai: DAT}
+      - {ten: 'write set 5 đường, không chạm gì ngoài',
+         phep_do: 'git diff --name-only ac82ddc5 9f553fc8',
+         ket_qua: 'đúng 5 đường, khớp lease', trang_thai: DAT}
+
+  VIEC_MO_RA_SAU_KHI_334_LAND:
+    ghi_chu: >-
+      Mục 2 của `ops/BAN_GIAO_PHIEN_20260827.md`: bằng chứng bốn tổ hợp (`network_access` MỘT MÌNH
+      đảo cả ba kênh; `writable_roots` không đảo kênh nào) nay đã nằm trên `master` và đọc được từ
+      clone bất kỳ. Mệnh đề thứ tám của `docs/GOI_AGENT_DA_NEN.md` do đó ĐO LẠI ĐƯỢC và có thể lên
+      `cơ chế đã xác minh — chiều MỞ`, phân bố về `1/5/2/0/0`.
+    day_la_packet_MOI: >-
+      KHÔNG sửa lén sau land. Cần Issue + lease riêng. Nhãn `chưa xếp được` hiện tại vẫn ĐÚNG cho
+      tới khi packet ấy chạy — reviewer vòng 14 đã chốt: "hạng đo TRẠNG THÁI BẰNG CHỨNG mà người
+      đọc exact tree có thể kiểm, không phải nhãn chân trị của thế giới bên ngoài."
+
+  ban_chieu_KHONG_theo: >-
+    Lease r4 CHƯA có `posted_comment_id` lúc ghi khối này, nên `ops-publish-lease.yml` sẽ đăng nó
+    và ghi ngược id — khác ba lease trước (r3, #318, #360 đã đăng nên rc=9 và comment đứng ở bản cũ).
+
 lease_expires_at_utc: '2026-08-29T01:10:00Z'
 run_minutes: 1440
 

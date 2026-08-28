@@ -224,4 +224,22 @@ recorder_ghi_chu: >-
 leased_at_utc: '2026-08-28T05:10:00Z'
 lease_expires_at_utc: '2026-08-29T05:10:00Z'
 run_minutes: 1440
-posted_comment_id: 5448710381   # workflow ghi, ĐỪNG sửa tay
+
+# ------------------------- BỊ THAY THẾ -------------------------
+da_bi_thay_the: cong-ngoai-write-set-exec-1r3-codex-20260828
+da_bi_thay_the_ly_do: >-
+  r2 làm ĐÚNG việc và cổng CI ĐỎ — nhưng đỏ vì packet đang làm đúng việc, không phải vì bản vá sai.
+  Nối bảy bộ test chưa từng chạy vào CI thì CI lập tức phơi ra rác có sẵn. Đó CHÍNH LÀ nợ
+  `khong-cong-nao-chay-bo-test` của #319 hiện nguyên hình.
+  Ba nguyên nhân, phiên điều phối đo riêng từng cái, ba gốc KHÁC HẲN nhau:
+  · `chon_reviewer_test.py` chưa đăng ký — tệp đến ở `f5e23f1` (#351), SAU base `36260236`. Lượt
+    `pull_request` checkout commit-merge nên thấy nó. Đây là chiều `(i)` fail-close CHẠY ĐÚNG.
+  · `mcp_gh_test.py` ĐỎ trên runner (`D8(a) ĐỎ ['b7_bo_cam_ghi']`) trong khi bản master chạy
+    **3/3 lần XANH** tại chỗ — CHẬP CHỜN THEO MÁY, đúng bài học `.pyc` (mtime tính bằng GIÂY +
+    kích thước) đã ghi trong `CLAUDE.md`. Khuyết tật CÓ SẴN của bộ chạy đột biến.
+  · `pretooluse_guard_test.py` ĐỎ trên runner: `CA 31/34`, ba ca `t11`/`t15`/`t33` đỏ. Tại chỗ nó
+    XANH `34/34` (chỉ CHẬM, >2 phút). Tên `t33` nói thẳng "cổng hỏi RUNTIME chứ không parse văn
+    bản" — runner trần không có runtime ấy, nên ba ca đỏ ĐÚNG. Bộ test có TIỀN ĐIỀU KIỆN MÔI
+    TRƯỜNG mà nó không khai.
+  Không land như r2 được (master sẽ đỏ vĩnh viễn), và cũng KHÔNG bỏ ba bộ ra khỏi sổ (quay lại vô
+  hình, tức xoá đúng thứ packet vừa mua được). r3 thêm CÁCH LY CÓ NỢ CÓ TÊN.

@@ -341,7 +341,7 @@ DONG_LEASE:
 
 # ============================== LAND ==============================
 LANDED:
-  merged_at_utc: '2026-08-28T04:05:00Z'
+  merged_at_utc: '2026-08-28T03:17:25Z'
   merge_commit: a51ee16decf7879cb7ede241d3dd4b69f1e24562
   pr: 365
   target: master
@@ -374,3 +374,13 @@ LANDED:
       Reviewer vòng 4 khai thẳng là không đọc được văn bản gốc của 5 P2 vòng 2 và 2 P2 vòng 3
       (clone của họ không có nhánh `ops/cap-lease-tach-314`). Ghi lại nguyên trạng thái thứ ba
       thay vì đoán — "không đo được" không phải "không có".
+
+  DINH_CHINH_MOC_THOI_GIAN: >-
+    Bản ghi ĐẦU của khối `LANDED` này ghi `merged_at_utc` là một mốc ở TƯƠNG LAI — phiên điều phối
+    ĐOÁN giờ thay vì ĐO nó. Giá trị đúng đo bằng `git show -s --format=%cI` trên chính merge commit,
+    đổi về UTC. Ghi cái sai ra đây thay vì lặng lẽ sửa, vì đây là ĐÚNG hình dạng lỗi phiên này đã
+    mắc một lần trước đó trong ngày (đóng lease #318 bằng một mốc hết hạn ở tương lai nên lease vẫn
+    còn hiệu lực), tức lần thứ HAI của cùng một hình dạng — §12 đếm hình dạng, không chỉ đếm lỗi.
+    HAI CHỖ CÒN MANG SỐ SAI và không sửa được nữa: thông điệp commit `f731c05`/`5f10819` trên nhánh
+    này, và comment đã đăng ở Issue #319/#360/#364. Tệp lease này là nguồn CÓ THẨM QUYỀN; hai chỗ
+    kia là bản chiếu và nay đã lệch — đọc theo tệp.

@@ -133,7 +133,7 @@ posted_comment_id: 5447634674   # workflow ghi, ĐỪNG sửa tay
 
 # ============================== LAND ==============================
 LANDED:
-  merged_at_utc: '2026-08-28T04:20:00Z'
+  merged_at_utc: '2026-08-28T03:23:05Z'
   merge_commit: 36260236b17953f9000eaf17b63949609f29960b
   pr: 366
   reviewed_sha: 2fa630ae3986ea1b8f9388a704e8f972d544963f
@@ -228,3 +228,13 @@ LANDED:
   - 'verdict lượt 2 + biên nhận: đã công bố, sha256 b2394b9b…, 11300 bytes'
   - 'phép đếm: đo lại toàn tệp theo đơn vị "lần gắn nhãn cho một mệnh đề" (8 mệnh đề) ở CẢ BA mốc — base, head lượt 1, head lượt 2 — và khớp dòng 625-626 ở cả ba; `S6` không kích hoạt lần nào'
   - 'nợ: KHÔNG nợ mới nào từ packet này (P2 = 0 ở lượt cuối)'
+
+  DINH_CHINH_MOC_THOI_GIAN: >-
+    Bản ghi ĐẦU của khối `LANDED` này ghi `merged_at_utc` là một mốc ở TƯƠNG LAI — phiên điều phối
+    ĐOÁN giờ thay vì ĐO nó. Giá trị đúng đo bằng `git show -s --format=%cI` trên chính merge commit,
+    đổi về UTC. Ghi cái sai ra đây thay vì lặng lẽ sửa, vì đây là ĐÚNG hình dạng lỗi phiên này đã
+    mắc một lần trước đó trong ngày (đóng lease #318 bằng một mốc hết hạn ở tương lai nên lease vẫn
+    còn hiệu lực), tức lần thứ HAI của cùng một hình dạng — §12 đếm hình dạng, không chỉ đếm lỗi.
+    HAI CHỖ CÒN MANG SỐ SAI và không sửa được nữa: thông điệp commit `f731c05`/`5f10819` trên nhánh
+    này, và comment đã đăng ở Issue #319/#360/#364. Tệp lease này là nguồn CÓ THẨM QUYỀN; hai chỗ
+    kia là bản chiếu và nay đã lệch — đọc theo tệp.

@@ -286,7 +286,7 @@ LANDED:
     Lease r4 CHƯA có `posted_comment_id` lúc ghi khối này, nên `ops-publish-lease.yml` sẽ đăng nó
     và ghi ngược id — khác ba lease trước (r3, #318, #360 đã đăng nên rc=9 và comment đứng ở bản cũ).
 
-lease_expires_at_utc: '2026-08-29T01:10:00Z'
+lease_expires_at_utc: '2026-08-28T03:30:00Z'
 run_minutes: 1440
 
 thay_the_cho: mang-sandbox-codex-exec-1r3-codex-20260827
@@ -294,3 +294,17 @@ thay_the_ly_do: >-
   ĐÚNG MỘT thứ đổi, và §3.2 liệt kê nó: `write_set` (bốn đường → năm đường). Bia mộ
   `da_bi_thay_the` ghi vào tệp r3 TRONG CÙNG COMMIT với tệp này — `_kiem_bia_mo` chặn nếu thiếu,
   và cổng không tự sửa hồ sơ cũ.
+
+# ------------------------- ĐÓNG LEASE SỚM -------------------------
+DONG_LEASE_SOM:
+  dong_luc_utc: '2026-08-28T03:30:00Z'
+  ly_do: >-
+    Packet ĐÃ LAND mà lease còn hạn, tức nó giữ write set thêm nhiều giờ một cách vô ích. Phép đo
+    `ai-dang-giu` lúc cấp lease #361 phơi ra đúng chuyện này. Đây là nợ CÓ TÊN
+    `AG-T0-01B-thu-hoi-lease-chua-co-duong`: kho KHÔNG có đường thu hồi lease, nên cách DUY NHẤT là
+    hạ `lease_expires_at_utc` xuống một mốc ĐÃ QUA.
+  chot_moc_phai_o_QUA_KHU: >-
+    Hạ xuống một mốc ở TƯƠNG LAI thì lease VẪN CÒN HIỆU LỰC và việc đóng chỉ là hình thức — phiên
+    này đã mắc đúng lỗi ấy khi đóng lease #318 trong ngày. Mốc trên ở quá khứ so với lúc ghi
+    (`2026-08-28T03:53Z`), và sau thời điểm packet land, nên nó đóng THẬT.
+  do_lai_sau_khi_dong: 'chạy lại `ai-dang-giu` trên đường dẫn để xác nhận NGƯỜI_GIỮ giảm'

@@ -188,7 +188,7 @@ recorder_ghi_chu: >-
   KHÔNG viết bản vá — chỉ mở Issue, đo người giữ, và cấp lease.
 
 leased_at_utc: '2026-08-28T00:40:00Z'
-lease_expires_at_utc: '2026-08-29T00:40:00Z'
+lease_expires_at_utc: '2026-08-28T03:30:00Z'
 run_minutes: 1440
 
 ISSUE_MO_NHU_THE_NAO:
@@ -206,7 +206,7 @@ posted_comment_id: 5446924586   # workflow ghi, ĐỪNG sửa tay
 
 # ============================== LAND ==============================
 LANDED:
-  merged_at_utc: '2026-08-28T04:05:00Z'
+  merged_at_utc: '2026-08-28T03:17:25Z'
   merge_commit: a51ee16decf7879cb7ede241d3dd4b69f1e24562
   pr: 365
   reviewed_sha: f31cdbf3db83c94c087edb990b4df365fab1268d
@@ -300,3 +300,27 @@ LANDED:
   - 'hiện vật #319 đi kèm: `.claude/dev/mcp_gh.py` trên master => CÓ, 230 dòng'
   - 'verdict + biên nhận: đã công bố ở ops/reviews/mcp-gh-cong-tu-canh-review-1-claude-verdict{.md,.receipt.yaml}, sha256 khớp byte'
   - 'ba nợ P2: đã có TÊN trong khối NO_CO_TEN ở trên, kèm lý do vì sao không vá trong lượt này'
+
+  DINH_CHINH_MOC_THOI_GIAN: >-
+    Bản ghi ĐẦU của khối `LANDED` này ghi `merged_at_utc` là một mốc ở TƯƠNG LAI — phiên điều phối
+    ĐOÁN giờ thay vì ĐO nó. Giá trị đúng đo bằng `git show -s --format=%cI` trên chính merge commit,
+    đổi về UTC. Ghi cái sai ra đây thay vì lặng lẽ sửa, vì đây là ĐÚNG hình dạng lỗi phiên này đã
+    mắc một lần trước đó trong ngày (đóng lease #318 bằng một mốc hết hạn ở tương lai nên lease vẫn
+    còn hiệu lực), tức lần thứ HAI của cùng một hình dạng — §12 đếm hình dạng, không chỉ đếm lỗi.
+    HAI CHỖ CÒN MANG SỐ SAI và không sửa được nữa: thông điệp commit `f731c05`/`5f10819` trên nhánh
+    này, và comment đã đăng ở Issue #319/#360/#364. Tệp lease này là nguồn CÓ THẨM QUYỀN; hai chỗ
+    kia là bản chiếu và nay đã lệch — đọc theo tệp.
+
+# ------------------------- ĐÓNG LEASE SỚM -------------------------
+DONG_LEASE_SOM:
+  dong_luc_utc: '2026-08-28T03:30:00Z'
+  ly_do: >-
+    Packet ĐÃ LAND mà lease còn hạn, tức nó giữ write set thêm nhiều giờ một cách vô ích. Phép đo
+    `ai-dang-giu` lúc cấp lease #361 phơi ra đúng chuyện này. Đây là nợ CÓ TÊN
+    `AG-T0-01B-thu-hoi-lease-chua-co-duong`: kho KHÔNG có đường thu hồi lease, nên cách DUY NHẤT là
+    hạ `lease_expires_at_utc` xuống một mốc ĐÃ QUA.
+  chot_moc_phai_o_QUA_KHU: >-
+    Hạ xuống một mốc ở TƯƠNG LAI thì lease VẪN CÒN HIỆU LỰC và việc đóng chỉ là hình thức — phiên
+    này đã mắc đúng lỗi ấy khi đóng lease #318 trong ngày. Mốc trên ở quá khứ so với lúc ghi
+    (`2026-08-28T03:53Z`), và sau thời điểm packet land, nên nó đóng THẬT.
+  do_lai_sau_khi_dong: 'chạy lại `ai-dang-giu` trên đường dẫn để xác nhận NGƯỜI_GIỮ giảm'

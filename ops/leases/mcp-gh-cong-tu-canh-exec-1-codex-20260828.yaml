@@ -1,0 +1,157 @@
+# Lease EXECUTOR — `MCP-GH-CONG-TU-CANH` (#360), lượt 1.
+#
+# Packet TÁCH khỏi #319 theo quyết định của người giữ kho 2026-08-27, đúng lời hứa đã ghi TRƯỚC
+# trong lease `mcp-gh-cuu-ho-exec-1r5`: "MÃ chạm 900 ⇒ TÁCH. Không nâng lần bốn, và không đổi
+# đơn vị lần hai." #319 chạm 900/900 biên 0 và KHÔNG land được (còn 2 P1).
+#
+# Bốn việc dưới đây ĐÃ ĐO ĐƯỢC trên `f461413a`, biên nhận
+# `ops/reviews/mcp-gh-cuu-ho-kiem-doc-lap-r6.md` — không phải việc mới nghĩ ra.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 360
+packet_id: MCP-GH-CONG-TU-CANH
+phase_key: MCP-GH-CONG-TU-CANH
+revision: 1
+generation: 1
+lease_id: mcp-gh-cong-tu-canh-exec-1-codex-20260828
+
+role: executor
+provider: codex
+executor: codex
+executor_effort: xhigh
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` do CỔNG tính (mặc định fail-close của `_BANG_LOP`), KHÔNG tự hạ.
+
+executor_ghi_chu: >-
+  `codex`, KHÔNG phải `claude`. Write set chạm `.claude/**`, và nền từ chối vô điều kiện khi
+  executor `claude` gọi `Edit`/`Write` vào đó ("which is a sensitive file"). Ghi qua `Bash` thì
+  lách được, nhưng ĐỪNG dạy executor đi vòng qua chốt của nền. Đã đo trong phiên:
+  `codex-cli 0.150.1`, `launcher.py chuan-bi` bung `$CODEX_AUTH_JSON` ra `/root/.codex/auth.json`,
+  `doctor --kiem-song` rc=0 "Logged in using ChatGPT".
+
+spec_path: 'ops/specs/mcp-gh-cong-tu-canh-packet-issue-nhap.md'
+spec_ref: 'refs/heads/ops/cap-lease-tach-314'
+spec_ghi_chu: >-
+  Hồ sơ CÓ THẨM QUYỀN là tệp trên nhánh `ops/cap-lease-tach-314`. Thân Issue #360 là BẢN CHIẾU
+  do phiên điều phối đăng qua `.claude/dev/mcp_github_doc.py`; lệch thì tin tệp trong git.
+  Thứ định danh là BĂM, không phải tên nhánh — nhánh là thứ trôi và bị xoá.
+
+write_set:
+  - .claude/dev/mcp_gh_test.py
+  - ops/specs/mcp-gh-cuu-ho.md
+write_set_note: >-
+  ĐÚNG HAI đường dẫn, theo mục "write set đề xuất" của hồ sơ. `.claude/dev/mcp_gh.py` KHÔNG vào
+  write set — cả bốn việc đều nằm trong tệp test; `ops/specs/mcp-gh-cuu-ho.md` chỉ để sửa MỘT
+  lời khai quá mạnh ở việc thứ tư, không để viết lại đặc tả.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-28 ~00:36Z bằng `ops/lease_publish.py ai-dang-giu`. Phép so HAI NGUỒN trước khi quét,
+  so bằng TẬP TÊN (không bằng `wc -l`): `ls-remote --heads` 235 = `for-each-ref` 235;
+  `comm -23` RỖNG và `comm -13` RỖNG ⇒ KHÔNG mù ref nào. Đã đồng bộ mọi nhánh cục bộ về
+  `origin/<cùng tên>` trước khi đo, và đã XOÁ nhánh cục bộ rác `land-tmp` — nó là bản dựng thử
+  của phiên và đang bị bộ quét đọc như một nguồn lease thật.
+    .claude/dev/mcp_gh_test.py   ->  NGƯỜI_GIỮ 0: không có
+    ops/specs/mcp-gh-cuu-ho.md   ->  NGƯỜI_GIỮ 0: không có
+  Hồ sơ packet (soạn 2026-08-27) ghi `mcp_gh_test.py` còn bị `mcp-gh-cuu-ho-exec-1r6` giữ tới
+  `2026-08-28T03:00:00Z` và dặn KHÔNG cấp chồng. Phép đo hôm nay cho `HẾT_HẠN` trên r6 ⇒ lease ấy
+  đã ĐÓNG SỚM (bản ghi `ops/DONG_LEASE_MCP_GH_CUU_HO_r6_20260827.md`). Ràng buộc của hồ sơ đã
+  được thoả bằng ĐO, không bằng chờ đủ giờ.
+
+branch: claude/mcp-gh-cong-tu-canh-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 693d68fd6ae76cca2be936d0d91d6b49bec9c80c
+base_ghi_chu: >-
+  Base là `master` NGAY SAU khi #318 land (PR #358). Chọn head mới nhất thay vì base cũ của #319
+  vì packet này không nối tiếp nhánh nào — nó là packet mới, và `S4` (master trôi) đã bắn SÁU lần
+  trong ba ngày, nên bắt đầu càng gần head càng ít phải đối chiếu §5.1 về sau.
+start_from_sha: 693d68fd6ae76cca2be936d0d91d6b49bec9c80c
+reviewed_sha_required: 693d68fd6ae76cca2be936d0d91d6b49bec9c80c
+reviewed_sha_ghi_chu: >-
+  ĐỂ NGUYÊN BASE ở lượt cấp đầu — nhánh chưa tồn tại nên chưa có head để neo, mà
+  `lease_publish.py` liệt `reviewed_sha_required` vào `BAT_BUOC` nên không bỏ trống được (đã đo:
+  bỏ null ⇒ `CHAN [8]: thiếu trường bắt buộc`). Cùng nếp lease r4 của #318 ("Bản đầu để nguyên
+  base"). PHẢI CẬP NHẬT sang exact head khi đưa ra review lượt đầu — bản duyệt neo sai SHA là
+  bằng chứng vô hiệu, và mở lượt mới sẽ xoá mỏ neo cũ.
+
+viec_cua_luot_nay: >-
+  BỐN việc, đọc nguyên văn ở hồ sơ, KHÔNG làm theo tóm tắt này:
+  (1) `chay_dot_bien` thiếu chốt duy-nhất — nó chỉ kiểm `if old not in src`, KHÔNG kiểm
+      `src.count(old) == 1`. Chuỗi đích xuất hiện HAI lần (mã thật dòng ~660, và DỮ LIỆU trong
+      chính bảng `MUTATIONS` dòng ~597). Thêm chốt fail-close.
+  (2) HAI dòng hậu tố `ĐẠT`/`ĐỎ` không có đột biến canh — KHÔNG phải một. Dòng thứ hai (hậu tố của
+      dòng `ĐỘT BIẾN` trong `dong_dot_bien`, khoảng 450-451) là dòng phiên điều phối BỎ SÓT.
+  (3) Ca `D10-main` bị hạ thành mệnh đề luôn đúng (`assert ma_thoat(False) == 1`) — khôi phục.
+  (4) Sửa lời khai QUÁ MẠNH của đặc tả r4: *"`D11` thu hẹp bề mặt ấy xuống một dòng duy nhất"* —
+      ĐO ĐƯỢC LÀ SAI, có ít nhất BA dòng (381 `ma_thoat`, 377 `phan_dinh`, 670 `sys.exit`), và
+      reviewer vòng 4 đếm ít nhất NĂM khi cộng hai dòng hậu tố. Khác biệt THẬT: hai dòng đầu để
+      lại VẾT ĐỎ trong bản in, dòng 670 KHÔNG in gì.
+
+canh_bao_dot_bien: >-
+  ĐỘT BIẾN THEO SỐ DÒNG, KHÔNG THEO CHUỖI — và packet này chính là packet sinh ra vì lỗi ấy.
+  Chuỗi đích xuất hiện hai lần: mã thật, và dữ liệu trong bảng `MUTATIONS`. Theo chuỗi thì đánh
+  nhầm chỗ và cổng vẫn xanh.
+quet_theo_Y_khong_theo_DIFF: >-
+  Việc (2) tồn tại VÌ phiên điều phối soi DIFF và thấy đúng một dòng. Reviewer quét theo Ý —
+  "mọi dòng sinh ra hậu tố ĐẠT/ĐỎ" — và tìm ra hai. Làm việc này theo Ý, không theo diff.
+phan_chung_bat_buoc: >-
+  Mỗi chốt phải có ĐỘT BIẾN RIÊNG làm nó ĐỎ. Chốt không có đột biến canh là chốt sẽ âm thầm hở
+  lại — kho đã trả giá đúng chỗ này ở chính packet cha. Chạy trên CLONE ĐỘC LẬP (không phải git
+  worktree — worktree cho `rc=14`), với `git config core.autocrlf false && core.eol lf &&
+  core.abbrev 7`; thiếu `core.abbrev` cho ĐỎ GIẢ ở doc-claims-check/golden-test/determinism-audit.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 60
+  do_tu_sha: 693d68fd6ae76cca2be936d0d91d6b49bec9c80c
+  don_vi: 'dòng THÊM trên TOÀN write set (cả hai tệp), đo bằng `git diff --numstat base..head`'
+  ghi_chu: >-
+    Hồ sơ ước lượng ~9 dòng cho bốn việc; trần 60 là biên rộng gấp sáu, CÓ CHỦ ĐÍCH vì ước lượng
+    của phiên điều phối đã SAI HAI LẦN ở packet cha. Nhưng trần vẫn là TRẦN:
+    **chạm trần ⇒ CẮT hoặc VIẾT NGẮN LẠI, KHÔNG nâng trần** (§12). #319 đã nâng/đổi đơn vị BỐN
+    lần và con số mất hết ý nghĩa — đó chính là lý do packet này tồn tại.
+  don_vi_ghi_chu: >-
+    Hồ sơ dặn: packet cha đã ĐỔI ĐƠN VỊ một lần (từ "cả write set" sang "chỉ hai tệp mã"), nên mọi
+    báo cáo phải nêu con số theo CẢ HAI cách đọc, đừng chỉ nêu cái có lợi. Đơn vị chính thức của
+    lease này là dòng thêm trên TOÀN write set.
+
+dieu_kien_dung: >-
+  S1 write set đổi ⇒ dừng, đi qua revision (§3.2).
+  S2 chạm trần 60 dòng ⇒ dừng, CẮT chứ không nâng.
+  S3 cùng hình dạng lỗi xuất hiện lần thứ BA ⇒ dừng và xem lại cách làm, không vá lần thứ tư (§12).
+  S4 master trôi ⇒ đo `merge-base --is-ancestor` + `numstat` trên ĐÚNG write set; không chạm write
+     set thì GIỮ `base_sha`.
+  S5 bản vá làm ĐỎ ca nào khác ⇒ dừng và báo, đừng vá lần hai.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  Uỷ quyền thực thi trực tiếp trong phiên, 2026-08-28: "cấp issue, phóng codex. và triển khai đến
+  xong. tôi uỷ quyền thực thi cho bạn, khi cần quyết định từ tôi hãy tự làm theo hướng tốt nhất."
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên ghi lease là `claude`; executor `codex`; reviewer `claude` PHIÊN MỚI, read-only. Phiên này
+  KHÔNG viết bản vá — chỉ mở Issue, đo người giữ, và cấp lease.
+
+leased_at_utc: '2026-08-28T00:40:00Z'
+lease_expires_at_utc: '2026-08-29T00:40:00Z'
+run_minutes: 1440
+
+ISSUE_MO_NHU_THE_NAO:
+  boi: 'phiên điều phối, qua `.claude/dev/mcp_github_doc.py goi issue_write`'
+  vi_sao_dang_ghi: >-
+    Suốt hai ngày phiên KHÔNG mở được Issue: REST `api.github.com/repos/*` trả 403 do PROXY tự
+    sinh (không header `x-github-*` ⇒ chưa từng tới GitHub), và một phiên con sinh SAU khi chủ kho
+    cấp quyền GitHub trên claude.ai cũng bị chặn y hệt. Đường mở ra là host KHÁC —
+    `api.githubcopilot.com/mcp/` — mà `.mcp.json` của kho khai sẵn kèm
+    `Authorization: Bearer ${GITHUB_PAT}`. Client cho nó (`mcp_github_doc.py`) land ở #357/packet
+    #355 lúc ~00:15Z; mười lăm phút sau nó mở được Issue này. Ghi lại vì đây là lần đầu kho có
+    đường mở Issue từ phiên remote, và vì bài học đi kèm đáng giá hơn con số: một công cụ thất bại
+    KHÔNG phải một đường bị chặn — phải thử ít nhất hai client trước khi gọi đó là chính sách.

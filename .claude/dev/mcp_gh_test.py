@@ -481,7 +481,9 @@ def d8_quy_trach_nhiem_ba_dieu_kien():
     assert loi_d8(("c",), mutants, {"m": ()})[1] == ["m"]
     assert loi_d8(("c", "d"), mutants, {"m": ("c",)})[2] == ["d"]
 def d9_ngan_sach_dong_khong_trang():
-    # Khác bốn lần #319 nâng để chứa dòng ĐÃ VIẾT, trần 779 không mua dòng hiện có: tổng đã vừa 759; biên 20 dành cho TƯƠNG LAI, neo bằng một chốt cỡ D13 (~10) + try/finally (~4), làm tròn lên.
+    # Khác bốn lần #319 nâng để chứa dòng ĐÃ VIẾT, trần 779 không mua dòng hiện có: tổng đã vừa 759.
+    # Biên 20 cố ý rộng hơn ~50% neo đo được 13 dòng (D13: 9; try/finally: 4).
+    # Chọn (A): đếm cả chú thích; xoá chú thích vẫn mua được chỗ, nhưng loại chúng sẽ tạo áp lực xoá tri thức kho coi trọng.
     # Chạm trần 779 lần nữa thì câu hỏi đúng là "tệp này có nên TÁCH ĐÔI không", KHÔNG phải "nâng lên bao nhiêu" — §12 biến lần chạm kế tiếp thành câu hỏi KIẾN TRÚC.
     tong = sum(sum(1 for line in path.open(encoding="utf-8") if line.strip())
                for path in (NGUON, pathlib.Path(__file__)))

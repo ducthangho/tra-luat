@@ -139,6 +139,39 @@ def t01_doc_dung_server_chinh_xac_va_giai_header(m=M):
 
 
 @ca
+def t12_headers_falsy_co_mat_phai_bi_tu_choi(m=M):
+    for headers in ([], "", 0, False, None):
+        cfg = {"mcpServers": {"github": {"url": "https://api.example/mcp",
+                                           "headers": headers}}}
+        with _cau_hinh(cfg) as d:
+            mo_ta = _hong(lambda: m._doc_cau_hinh(d), m)
+            bang("headers" in mo_ta and "object" in mo_ta,
+                 f"headers={headers!r} bi phan loai sai: {mo_ta}")
+    with _cau_hinh({"mcpServers": {"github": {"url": "https://api.example/mcp"}}}) as d:
+        _, headers = m._doc_cau_hinh(d)
+        bang(headers == {}, "headers vang mat khong mac dinh thanh object rong")
+
+
+@ca
+def t13_goc_mac_dinh_neo_theo_tep_va_tl_goc_ghi_de(m=M):
+    cu = os.environ.pop("TL_GOC", None)
+    cwd = Path.cwd()
+    try:
+        os.chdir(MODUN.parent)
+        bang(m._goc_du_an() == MODUN.resolve().parents[2],
+             f"goc mac dinh troi theo CWD: {m._goc_du_an()}")
+        with tempfile.TemporaryDirectory() as d:
+            os.environ["TL_GOC"] = d
+            bang(m._goc_du_an() == Path(d).resolve(), "TL_GOC khong ghi de goc")
+    finally:
+        os.chdir(cwd)
+        if cu is None:
+            os.environ.pop("TL_GOC", None)
+        else:
+            os.environ["TL_GOC"] = cu
+
+
+@ca
 def t10_khoa_co_mat_hong_khong_roi_sang_du_phong(m=M):
     du_phong = {"github": {"url": "https://du-phong.example/mcp"}}
     for gia_tri, ten_kieu in ((None, "NoneType"), (["github"], "list")):
@@ -251,6 +284,27 @@ def t07_sse_nhieu_event_phai_lay_response_khong_lay_event_cuoi(m=M):
 
 
 @ca
+def t14_sse_nhieu_data_chi_noi_trong_mot_event(m=M):
+    raw = "\n".join([
+        'data: {"jsonrpc":"2.0",', 'data: "id":2,"result":{"ok":true}}', '',
+        'data: {"jsonrpc":"2.0","method":"khong-noi-vao-response"}', '',
+    ])
+    bang(m.Phien._boc(raw).get("result") == {"ok": True},
+         "khong ghep cac data field trong cung SSE event")
+
+
+@ca
+def t15_stdio_la_khac_pham_vi_khong_phai_lech_parser(m=M):
+    cfg = {"mcpServers": {"github": {"command": "github-mcp-server"}}}
+    with _cau_hinh(cfg) as d:
+        co_khai, _, ten, url = m._launcher._doc_mcp_json(str(d))
+        bang(co_khai and ten == "github" and url is None,
+             "launcher khong con cong nhan khai bao stdio")
+        mo_ta = _hong(lambda: m._doc_cau_hinh(d), m)
+        bang("client HTTP" in mo_ta, f"client khong khai ro pham vi HTTP: {mo_ta}")
+
+
+@ca
 def t08_loi_initialized_khong_duoc_nuot(m=M):
     init = json.dumps({"jsonrpc": "2.0", "id": 1, "result": {}})
     loi = json.dumps({"jsonrpc": "2.0", "id": None, "error": {"code": -1}})
@@ -308,26 +362,36 @@ def t09_rpc_loi_va_ket_qua_tool_duoc_xu_ly(m=M):
 
 # Mỗi mẫu chỉ thay đúng một chốt; ca đích phải đỏ trên bản mutant tương ứng.
 DOT_BIEN = [
-    ("bo_kiem_tep_config", '    if not tep.is_file():', '    if False:', "t01_doc_dung_server_chinh_xac_va_giai_header"),
     ("chon_khoa_theo_kieu_dict",
-     '    for khoa in ("mcpServers", "servers"):\n        if khoa in d:\n            srv = d[khoa]\n            break',
-     '    for khoa in ("mcpServers", "servers"):\n        if isinstance(d.get(khoa), dict):\n            srv = d[khoa]\n            break',
+     '    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))',
+     '    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))\n    if json.loads(tep.read_text()).get("mcpServers") is None:\n        co_khai, ten_chuan, url = True, "github", "https://du-phong.example/mcp"',
      "t10_khoa_co_mat_hong_khong_roi_sang_du_phong"),
-    ("bo_kiem_muc_object", '    if not isinstance(muc, dict):', '    if False:', "t01_doc_dung_server_chinh_xac_va_giai_header"),
-    ("bo_kiem_url_rong", '    if not url:', '    if False:', "t01_doc_dung_server_chinh_xac_va_giai_header"),
+    ("ten_server_chi_khop_literal",
+     '    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))',
+     '    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))\n    if ten_chuan is not None and ten_chuan != "github":\n        co_khai = False',
+     "t11_ten_server_casefold_phai_duy_nhat"),
+    ("ten_server_mo_ho_chon_dai",
+     '    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))',
+     '    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))\n    if not co_khai and "server cung khop" in mo_ta:\n        co_khai, ten_chuan, url = True, "github", "https://mot.example/mcp"',
+     "t11_ten_server_casefold_phai_duy_nhat"),
     ("bo_kiem_headers_object", '    if not isinstance(headers, dict):', '    if False:', "t01_doc_dung_server_chinh_xac_va_giai_header"),
+    ("headers_falsy_thanh_rong", '    headers = muc["headers"] if "headers" in muc else {}',
+     '    headers = muc.get("headers") or {}', "t12_headers_falsy_co_mat_phai_bi_tu_choi"),
+    ("goc_mac_dinh_theo_cwd", '    return Path(ghi_de).resolve() if ghi_de else Path(__file__).resolve().parents[2]',
+     '    return Path(ghi_de or ".").resolve()', "t13_goc_mac_dinh_neo_theo_tep_va_tl_goc_ghi_de"),
     ("bo_doc_port", "        _ = p.port\n", "", "t02_moi_url_tu_choi_khong_probe_khong_ro_bi_mat"),
     ("bo_userinfo", '    if (p.username, p.password) != (None, None):', '    if False:', "t02_moi_url_tu_choi_khong_probe_khong_ro_bi_mat"),
     ("bo_scheme", '    if p.scheme.lower() not in ("http", "https"):', '    if False:', "t02_moi_url_tu_choi_khong_probe_khong_ro_bi_mat"),
     ("bo_hostname", '    if not p.hostname:', '    if False:', "t02_moi_url_tu_choi_khong_probe_khong_ro_bi_mat"),
     ("lo_url_o_nhanh_port", 'raise Hong(f"`url` khong phan tich duoc ({type(e).__name__})")', 'raise Hong(f"`url` khong phan tich duoc: {url}")', "t02_moi_url_tu_choi_khong_probe_khong_ro_bi_mat"),
-    ("ten_server_chi_khop_literal", '    ten = [k for k in srv if k.casefold() == "github"]',
-     '    ten = [k for k in srv if k == "github"]', "t11_ten_server_casefold_phai_duy_nhat"),
     ("env_thieu_thanh_rong", '            if not v:', '            if False:', "t01_doc_dung_server_chinh_xac_va_giai_header"),
     ("bo_loc_toolset", '        if len(hau_to) > 64 or not _RE_HAU_TO.fullmatch(hau_to):', '        if False:', "t03_toolset_chi_la_hau_to_path_an_toan"),
     ("ghep_toolset_bang_chuoi", '        p = p._replace(path=p.path.rstrip("/") + "/" + hau_to)', '        p = urllib.parse.urlsplit(str(url).rstrip("/") + "/" + hau_to)', "t03_toolset_chi_la_hau_to_path_an_toan"),
     ("bo_header_github", '        if not any(k.lower().startswith("x-github") for k in dau):', '        if False:', "t06_thieu_header_github_phai_chan"),
     ("bo_giu_session", '                self.phien_id = v', '                self.phien_id = None', "t05_bat_tay_giu_session_va_gui_notification"),
+    ("sse_parse_tung_data", '        mau = su_kien or [raw]',
+     '        mau = [d[5:].lstrip() for d in raw.splitlines() if d.startswith("data:")] or [raw]',
+     "t14_sse_nhieu_data_chi_noi_trong_mot_event"),
     ("sse_lay_event_cuoi", '        for d in da_doc:\n            if "id" in d and ("result" in d or "error" in d):\n                return d', '        return da_doc[-1]', "t07_sse_nhieu_event_phai_lay_response_khong_lay_event_cuoi"),
     ("nuot_loi_initialize", '        if "error" in d:\n            raise Hong("initialize loi: " + json.dumps(d["error"], ensure_ascii=False)[:300])', '        if False:\n            raise Hong("initialize loi")', "t08_loi_initialized_khong_duoc_nuot"),
     ("nuot_loi_initialized", '            if "error" in bao:\n                raise Hong("notifications/initialized loi")', '            if "error" in bao:\n                pass', "t08_loi_initialized_khong_duoc_nuot"),

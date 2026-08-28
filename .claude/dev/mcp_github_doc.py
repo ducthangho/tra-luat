@@ -37,6 +37,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+import launcher as _launcher
+
 _GIAO_THUC = "2025-06-18"
 _QUA_HAN_GIAY = 180
 _RE_BIEN = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
@@ -48,32 +50,28 @@ class Hong(Exception):
 
 
 def _doc_cau_hinh(goc: Path) -> tuple[str, dict[str, str]]:
-    """Trả (url, headers đã giải biến) cho server tên ĐÚNG BẰNG `github`."""
+    """Trả (url, headers đã giải biến) cho server `github` do launcher chọn.
+
+    Launcher sở hữu việc đọc lược đồ, chọn khoá và khớp tên. Client phải đọc lại
+    đúng mục đã chọn vì hợp đồng chuẩn cố ý không trả ``headers``.
+    """
     tep = goc / ".mcp.json"
-    if not tep.is_file():
-        raise Hong(f"khong thay .mcp.json o {goc}")
+    co_khai, mo_ta, ten_chuan, url = _launcher._doc_mcp_json(str(goc))
+    if not co_khai:
+        raise Hong(mo_ta)
+    if url is None:
+        # Khác phạm vi có chủ ý: launcher chỉ đo CÓ KHAI (stdio hợp lệ), còn
+        # client này là streamable HTTP nên không thể làm việc nếu thiếu URL.
+        raise Hong("server `github` khong khai `url` cho client HTTP (kieu stdio?)")
+
+    # `_doc_mcp_json` không trả headers hoặc tên khoá chứa server. Chỉ phần này
+    # không tái sử dụng được; lặp đúng quy tắc ưu tiên khoá để lấy mục đã chọn.
     d = json.loads(tep.read_text(encoding="utf-8"))
-    if not isinstance(d, dict):
-        raise Hong(f".mcp.json khong phai object o goc (la {type(d).__name__})")
     for khoa in ("mcpServers", "servers"):
         if khoa in d:
             srv = d[khoa]
             break
-    else:
-        raise Hong(".mcp.json khong co khoa `mcpServers` lan `servers`")
-    if not isinstance(srv, dict):
-        raise Hong(f".mcp.json khoa `{khoa}` khong phai object (la {type(srv).__name__})")
-    ten = [k for k in srv if k.casefold() == "github"]
-    if not ten:
-        raise Hong(".mcp.json KHONG khai server ten dung bang `github`")
-    if len(ten) > 1:
-        raise Hong(f".mcp.json khai {len(ten)} server cung khop `github` sau chuan hoa hoa/thuong")
-    muc = srv[ten[0]]
-    if not isinstance(muc, dict):
-        raise Hong("server `github` khong phai object cau hinh")
-    url = muc.get("url")
-    if not url:
-        raise Hong("server `github` khong khai `url` (kieu stdio?)")
+    muc = srv[ten_chuan]
     # `urlsplit` trì hoãn kiểm port tới lúc đọc `.port`. Phải đọc nó trong cùng
     # `try`: một bí mật ở vị trí port không được đi tiếp vào `Request`.
     try:
@@ -96,7 +94,7 @@ def _doc_cau_hinh(goc: Path) -> tuple[str, dict[str, str]]:
             return v
         return _RE_BIEN.sub(_thay, x)
 
-    headers = muc.get("headers") or {}
+    headers = muc["headers"] if "headers" in muc else {}
     if not isinstance(headers, dict):
         raise Hong("headers cua server `github` khong phai object")
     dau = {str(k): _giai(str(v)) for k, v in headers.items()}
@@ -110,6 +108,12 @@ def _doc_cau_hinh(goc: Path) -> tuple[str, dict[str, str]]:
             raise Hong("TL_MCP_TOOLSET co ky tu ngoai danh sach cho phep")
         p = p._replace(path=p.path.rstrip("/") + "/" + hau_to)
     return p.geturl(), dau
+
+
+def _goc_du_an() -> Path:
+    """TL_GOC ghi đè tường minh; mặc định neo theo vị trí client như launcher."""
+    ghi_de = os.environ.get("TL_GOC")
+    return Path(ghi_de).resolve() if ghi_de else Path(__file__).resolve().parents[2]
 
 
 class Phien:
@@ -142,8 +146,17 @@ class Phien:
     @staticmethod
     def _boc(raw: str) -> dict:
         """Đọc JSON thuần hoặc response JSON-RPC trong một stream nhiều SSE event."""
-        dong_data = [d[5:].lstrip() for d in raw.splitlines() if d.startswith("data:")]
-        mau = dong_data or [raw]
+        # data fields chỉ được nối TRONG cùng event; dòng trống chốt event.
+        su_kien, data = [], []
+        for dong in raw.splitlines() + [""]:
+            if dong == "":
+                if data:
+                    su_kien.append("\n".join(data))
+                    data = []
+            elif dong.startswith("data:"):
+                gia_tri = dong[5:]
+                data.append(gia_tri[1:] if gia_tri.startswith(" ") else gia_tri)
+        mau = su_kien or [raw]
         da_doc = []
         for x in mau:
             try:
@@ -206,7 +219,7 @@ class Phien:
 
 
 def _main(argv: list[str]) -> int:
-    goc = Path(os.environ.get("TL_GOC") or ".").resolve()
+    goc = _goc_du_an()
     lenh = argv[1] if len(argv) > 1 else "do"
     try:
         p = Phien(goc)

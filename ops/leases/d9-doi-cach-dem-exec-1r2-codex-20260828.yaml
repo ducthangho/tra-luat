@@ -173,4 +173,15 @@ recorder_ghi_chu: >-
 leased_at_utc: '2026-08-28T05:45:00Z'
 lease_expires_at_utc: '2026-08-29T05:45:00Z'
 run_minutes: 1440
-posted_comment_id: 5448833408   # workflow ghi, ĐỪNG sửa tay
+
+# ------------------------- BỊ THAY THẾ -------------------------
+da_bi_thay_the: d9-doi-cach-dem-exec-1r3-codex-20260828
+da_bi_thay_the_ly_do: >-
+  r2 ĐẠT phần cấu trúc: `D13` có mặt và có răng, hai mẫu `d9_*` nay duy nhất, và phiên điều phối
+  chạy thật đo được `CA 42/42 · ĐỘT BIẾN 54/54 tập giết · D8(a)(b)(c) ĐẠT · rc=0`.
+  NHƯNG kết quả là `759/759` — **biên 0**, đúng triệu chứng mà packet sinh ra để chữa.
+  Nguyên nhân đo được: trần `759` được suy TRƯỚC khi làm việc, từ một ƯỚC LƯỢNG chi phí `10` dòng;
+  chi phí THẬT là `18`, nên biên `8` bị ăn sạch. Biên chưa từng được giao.
+  Đây KHÔNG phải lỗi của executor — nó khai thẳng chuyện này và TỪ CHỐI tự nới trần, đúng lệnh.
+  Quyết định của chủ kho chọn `(b)` có lý do tường minh là **"chừa biên thật"**; giao `759/759` là
+  chưa thi hành xong quyết định ấy. r3 sửa đúng chỗ đó và KHÔNG đổi gì khác.

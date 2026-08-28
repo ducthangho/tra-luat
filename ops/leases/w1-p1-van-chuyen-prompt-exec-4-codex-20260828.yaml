@@ -181,3 +181,4 @@ nen_do_truoc_khi_bat_dau: >-
   = `rc=1`, ĐÚNG 1 finding `ops-don-ref.yml:106` — ĐỎ SẴN, delta 0. Reviewer đã xác minh ĐỘC
   LẬP mọi số này và chúng TRÙNG. `git config core.abbrev 7` trước khi chạy cổng.
   `PYTHONDONTWRITEBYTECODE=1` + `PYTHONPYCACHEPREFIX` ra ngoài cây test.
+posted_comment_id: 5455299325   # workflow ghi, ĐỪNG sửa tay

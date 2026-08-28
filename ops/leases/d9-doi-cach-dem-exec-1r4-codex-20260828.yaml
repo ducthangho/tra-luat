@@ -315,7 +315,7 @@ LANDED:
 
 # ------------------------- ĐÓNG LEASE SỚM -------------------------
 DONG_LEASE_SOM:
-  dong_luc_utc: '2026-08-28T10:55:00Z'
+  dong_luc_utc: '2026-08-28T10:01:20Z'
   moc_ha_xuong: '2026-08-28T09:00:00Z'
   ly_do: >-
     Packet #369 ĐÃ LAND lúc `08:57:04Z` (merge `58b85cc2`) nhưng lease vẫn còn hạn tới `2026-08-29`,
@@ -325,12 +325,21 @@ DONG_LEASE_SOM:
     Đây là nợ CÓ TÊN `AG-T0-01B-thu-hoi-lease-chua-co-duong`, và Issue #385 mở ra chính vì nó: kho
     KHÔNG có lệnh thu hồi lease, nên cách DUY NHẤT là hạ `lease_expires_at_utc` xuống mốc ĐÃ QUA.
   chot_moc_phai_o_QUA_KHU: >-
-    Mốc hạ xuống (`09:00:00Z`) ở QUÁ KHỨ so với lúc ghi (`10:55Z`) và SAU thời điểm packet land
+    Mốc hạ xuống (`09:00:00Z`) ở QUÁ KHỨ so với lúc ghi (`10:01:20Z`) và SAU thời điểm packet land
     (`08:57:04Z`), nên nó đóng THẬT chứ không phải hình thức. Phiên này đã từng mắc lỗi hạ xuống
     một mốc TƯƠNG LAI khi đóng lease #318 — lease vẫn còn hiệu lực và việc đóng chỉ là chữ nghĩa.
+  DINH_CHINH_MOC_THOI_GIAN: >-
+    Bản ghi ĐẦU TIÊN của khối này ghi `dong_luc_utc: 10:55:00Z` — một mốc phiên điều phối ĐOÁN,
+    và nó ở TƯƠNG LAI: giờ thật lúc ghi là `10:01:20Z` (đo bằng `git show -s --format=%cI` trên
+    chính commit đóng lease, và `date -u`). Đã sửa. Ghi lại vết thay vì lặng lẽ thay số, vì đây là
+    LẦN THỨ HAI phiên này đoán mốc thời gian thay vì đo — lần trước là ba khối `LANDED` sáng nay.
+    Phần NỘI DUNG không đổi: `09:00:00Z` vẫn ở quá khứ so với `10:01:20Z`, nên việc đóng vẫn THẬT.
   do_lai_sau_khi_dong: >-
-    Chạy lại `ai-dang-giu` trên CẢ HAI đường và xác nhận `NGƯỜI_GIỮ` giảm về 0 — kết quả ghi trong
-    lease #382 mục `write_set_da_do_truoc_khi_cap`.
+    ĐÃ CHẠY LẠI: cả hai đường trả `HẾT_HẠN` và `NGƯỜI_GIỮ 0: không có`.
+    CHỐT ĐO ĐƯỢC, đắt hơn vẻ ngoài của nó: ngay SAU commit đóng lease, phép đo VẪN trả `NGƯỜI_GIỮ 1`
+    — vì `ai-dang-giu` quét CẢ `refs/remotes/origin/*`, và bản cũ còn sống ở ref theo dõi cho tới
+    khi ĐẨY. Tức: đóng lease chỉ có hiệu lực với phép đo SAU KHI PUSH, không phải sau khi commit.
+    Cùng họ với bài học "nghi CLONE trước khi nghi LEASE" — nhánh cục bộ tụt sau làm phép đếm SAI.
   khong_dung_da_bi_thay_the_de_dong: >-
     CỐ Ý không mượn `da_bi_thay_the` làm đường thu hồi. Issue #372 vừa đo được rằng trường ấy hạ
     `NGƯỜI_GIỮ` xuống 0 mà KHÔNG ai xác nhận cái tên nó trỏ tới — mượn nó ở đây là dùng đúng cái lỗ

@@ -131,3 +131,47 @@ thay_the_ly_do: >-
   PR ấy sửa `RELEASE_MANIFEST.json` + `CHANGELOG.md` như PHẠM VI THỪA. Không thừa — bắt buộc,
   vì cùng lý do. Hai lần, cùng một chỗ mù.
 posted_comment_id: 5451392025   # workflow ghi, ĐỪNG sửa tay
+
+# ============================== LAND ==============================
+LANDED:
+  merged_at_utc: '2026-08-28T11:04:16Z'
+  merge_commit: c9be6aa8196e9c03ae2f254f59413fd0a9847e7b
+  pr: 384
+  reviewed_sha: 874ec96387c589223264931dedce669f52102f06
+  target: master
+  so_commit: 2
+  moc_thoi_gian_ghi_chu: >-
+    `merged_at_utc` DO bang `git log -1 --format=%cI` tren chinh merge commit roi doi ve UTC.
+
+  CROSS_REVIEW:
+    reviewer_provider: claude
+    executor_provider: codex
+    cross_provider: true
+    verdict: approve
+    P1: 0
+    P2: 0
+    do_doc_lap: >-
+      Reviewer viet bo dot bien RIENG, khong dung lai dong nao cua executor: 6 chot, moi chot
+      co it nhat mot dot bien giet duoc, 0 song sot, 0 tin dung gia; chot nguoc AttributeError
+      vo can bi xep TIN DUNG GIA o ca 6/6. Tren clone DU OBJECT: selftest 1705/1705 rc=0,
+      moi cong rc=0.
+    lo_hong_cua_chinh_reviewer: >-
+      KHAI: oracle "claim khop tung byte" ban dau cua reviewer dung `:99999999` nen dot bien
+      doi `m.group(0)` thanh f-string SONG SOT; ca duy nhat tach duoc hai bieu thuc la so 0
+      dung dau, va executor da dung dung `:03`. Bo do cua executor CHAT HON o cho nay.
+
+  KHUYET_TAT_DAC_TA_BAN_1: >-
+    Dac ta ban 1 TU MAU THUAN: write set hai tep ma deu nam trong goi phat hanh 180 tep nen
+    sua chung BAT BUOC phai sinh lai RELEASE_MANIFEST.json, ma chinh dac ta lai dat S1 cam
+    duong dan thu ba. Cong gate run 33160410378 FAILURE tai release-verify strict,
+    package_hash_match false. Khuyet tat cua DAC TA, khong cua nguoi thi cong (§3.2).
+
+# THU HOI: CHUA LAM DUOC, va da DO vi sao.
+# Packet da land nhung lease nay van giu ba duong toi 2026-08-29T10:25:00Z, trong do
+# RELEASE_MANIFEST.json la artefact DUNG CHUNG — moi packet cham scripts/** deu can no.
+# Duong thu hoi duy nhat la `da_bi_thay_the: <lease khac>`, ma khong co lease ke nhiem nao de
+# tro toi. Sau khi packet #372 land (9e6d50d), viet bia mo MOT CHIEU khong con im lang nua —
+# DO tren ban sao cach ly: `ai-dang-giu RELEASE_MANIFEST.json` chuyen tu
+#   NGUOI_GIU 1  ->  CHAN [12]: KHONG_XAC_DINH: bia mo mot chieu
+# tuc thu hoi bang tay lam TE HON: tu "bi giu nhung do duoc" thanh "khong do duoc".
+# Duong dung la packet #385 [THU-HOI-LEASE]. No: AG-T0-01B-thu-hoi-lease-chua-co-duong.

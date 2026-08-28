@@ -19,6 +19,7 @@ Chạy: `python .claude/dev/packet_loop_test.py`
 
 from __future__ import annotations
 
+import copy
 import importlib.util
 import json
 import os
@@ -561,6 +562,65 @@ def case_record_review_schema_thieu_hoac_hong_deu_DO(c: Ctx):
         _doi(5, rc, e, f"schema {ten} không được fail-open")
         if state_path.read_bytes() != before:
             raise AssertionError(f"schema {ten}: state đổi dù validation không đo được")
+
+
+def case_record_review_schema_parse_duoc_nhung_khong_khai_binding_DO(c: Ctx):
+    """Schema hợp lệ mà KHÔNG khai binding thì không đo được gì — phải ĐỎ.
+
+    Đây là khoảng giữa hai phép đo của `..._thieu_hoac_hong_deu_DO`: schema
+    thiếu và schema hỏng đều đã bị chặn, nhưng một schema parse được mà bỏ
+    trống `x-tra-luat-runtime-bindings` từng lọt sạch cưỡng chế semantic
+    identity.  Mỗi biến thể dưới đây mang verdict SAI `reviewed_sha`, nên nếu
+    binding bị bỏ qua thì `record-review` sẽ nhận và đổi state.
+    """
+    goc = json.loads((ROOT / ".github" / "coordination" / "schemas" /
+                      "review_verdict.v1.schema.json").read_text(encoding="utf-8"))
+    KHOA = "x-tra-luat-runtime-bindings"
+
+    def _bo_khoa():
+        m = copy.deepcopy(goc); m.pop(KHOA); return m
+
+    def _rong():
+        m = copy.deepcopy(goc); m[KHOA] = {}; return m
+
+    def _thieu_mot():
+        m = copy.deepcopy(goc); m[KHOA].pop("generation"); return m
+
+    def _binding_la():
+        m = copy.deepcopy(goc); m[KHOA]["khoa_khong_ai_cai_dat"] = "x"; return m
+
+    bien_the = (
+        ("khong-khai", _bo_khoa()),
+        ("bindings-rong", _rong()),
+        ("thieu-mot-binding", _thieu_mot()),
+        ("binding-la", _binding_la()),
+        ("schema-rong-tuyet-doi", {}),
+    )
+    for ten, schema in bien_the:
+        runtime_root = c.tmp / f"runtime-binding-{ten}"
+        script, _ = _viet_cay_runtime(
+            runtime_root, c.script.read_text(encoding="utf-8"),
+            schema_source=json.dumps(schema, ensure_ascii=False, indent=2))
+        fixture = Ctx(script, c.tmp / f"fixture-binding-{ten}")
+        fixture.tmp.mkdir(parents=True, exist_ok=True)
+        sd = fixture.sd()
+        _doi(0, *fixture.init(sd)[0:1], b"", f"init binding {ten}")
+        fixture.den_reviewing(sd, 55, 1)
+        state_path = sd / "wp55.json"
+        before = state_path.read_bytes()
+        verdict_file = fixture.verdict_file(
+            sd, 55, [], verdict="approve", sha="b" * 40)
+        rc, _, e = run(
+            script,
+            ["record-review", "--packet", 55, "--provider", REVIEWER,
+             "--verdict", "approve", "--reviewed-sha", fixture.head(1),
+             "--verdict-file", verdict_file],
+            sd,
+        )
+        _doi(5, rc, e, f"schema {ten} không khai binding mà vẫn nhận verdict sai SHA")
+        if state_path.read_bytes() != before:
+            raise AssertionError(
+                f"binding {ten}: state đổi dù không có gì cưỡng chế semantic identity")
 
 
 def case_transition_reviewing_phai_khai_head(c: Ctx):
@@ -2872,6 +2932,8 @@ CASES = [
      case_record_review_generation_sai_khong_doi_state),
     ("record_review_schema_thieu_hoac_hong_deu_DO",
      case_record_review_schema_thieu_hoac_hong_deu_DO),
+    ("record_review_schema_parse_duoc_nhung_khong_khai_binding_DO",
+     case_record_review_schema_parse_duoc_nhung_khong_khai_binding_DO),
     ("transition_reviewing_phai_khai_head", case_transition_reviewing_phai_khai_head),
     ("approve_neo_dung_head_thi_chay", case_approve_neo_dung_head_thi_chay),
     ("head_moi_lam_ban_duyet_cu_het_hieu_luc", case_head_moi_lam_ban_duyet_cu_het_hieu_luc),

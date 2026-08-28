@@ -24,6 +24,20 @@ SCHEMA_REVIEW = (
 )
 
 
+BINDING_KEY = "x-tra-luat-runtime-bindings"
+
+# Allow-list, not deny-list.  Every key below MUST be declared by the schema:
+# a schema that omits one cannot measure that binding, so it is refused rather
+# than skipped.  Unknown keys are refused too — a binding this module does not
+# implement must never read as enforced.
+BINDING_MOC = {
+    "reviewed_sha": "exact_review_head",
+    "generation": "exact_packet_generation",
+}
+BINDING_DANH_SACH = ("role", "model_reviewer_identity.provider")
+BINDING_BAT_BUOC = tuple(BINDING_MOC) + BINDING_DANH_SACH
+
+
 class ReviewVerdictError(ValueError):
     """A verdict or its schema could not be measured as valid."""
 
@@ -41,6 +55,13 @@ def _read_json(path: Path, label: str):
         raise ReviewVerdictError(
             f"không parse được {label} {path}: dòng {exc.lineno}, cột {exc.colno}"
         ) from exc
+
+
+def _truong(doc: dict, ten: str):
+    """Read one required field, failing closed instead of raising KeyError."""
+    if ten not in doc:
+        raise ReviewVerdictError(f"verdict thiếu trường bắt buộc {ten}")
+    return doc[ten]
 
 
 def load_review_verdict(path: str | Path) -> dict:
@@ -88,35 +109,49 @@ def validate_review_verdict(
             f"verdict không qua jsonschema tại {where}: {first.message}"
         )
 
-    bindings = schema.get("x-tra-luat-runtime-bindings", {})
+    bindings = schema.get(BINDING_KEY)
+    if bindings is None:
+        raise ReviewVerdictError(
+            f"schema review {schema_path} không khai {BINDING_KEY}: "
+            "không có gì cưỡng chế semantic identity"
+        )
     if not isinstance(bindings, dict):
-        raise ReviewVerdictError("x-tra-luat-runtime-bindings phải là JSON object")
+        raise ReviewVerdictError(f"{BINDING_KEY} phải là JSON object")
 
-    if "reviewed_sha" in bindings:
-        if bindings["reviewed_sha"] != "exact_review_head":
-            raise ReviewVerdictError("binding reviewed_sha không được nhận diện")
-        if verdict["reviewed_sha"] != expected_reviewed_sha:
-            raise ReviewVerdictError(
-                "reviewed_sha của verdict không khớp exact head đã đưa ra review"
-            )
+    thieu = [khoa for khoa in BINDING_BAT_BUOC if khoa not in bindings]
+    if thieu:
+        raise ReviewVerdictError(
+            f"{BINDING_KEY} thiếu binding bắt buộc: {', '.join(sorted(thieu))}"
+        )
+    la = [khoa for khoa in bindings if khoa not in BINDING_BAT_BUOC]
+    if la:
+        raise ReviewVerdictError(
+            f"{BINDING_KEY} khai binding không nhận diện được: {', '.join(sorted(la))}"
+        )
 
-    if "generation" in bindings:
-        if bindings["generation"] != "exact_packet_generation":
-            raise ReviewVerdictError("binding generation không được nhận diện")
-        if verdict["generation"] != expected_generation:
-            raise ReviewVerdictError(
-                "generation của verdict không khớp packet generation đang chạy"
-            )
+    for khoa, moc in BINDING_MOC.items():
+        if bindings[khoa] != moc:
+            raise ReviewVerdictError(f"binding {khoa} không được nhận diện")
+    for khoa in BINDING_DANH_SACH:
+        if not isinstance(bindings[khoa], list) or not bindings[khoa]:
+            raise ReviewVerdictError(f"binding {khoa} phải là danh sách không rỗng")
 
-    if "role" in bindings and verdict["role"] not in bindings["role"]:
+    if _truong(verdict, "reviewed_sha") != expected_reviewed_sha:
+        raise ReviewVerdictError(
+            "reviewed_sha của verdict không khớp exact head đã đưa ra review"
+        )
+    if _truong(verdict, "generation") != expected_generation:
+        raise ReviewVerdictError(
+            "generation của verdict không khớp packet generation đang chạy"
+        )
+    if _truong(verdict, "role") not in bindings["role"]:
         raise ReviewVerdictError("role của verdict không nằm trong runtime binding")
-
-    identity_key = "model_reviewer_identity.provider"
-    if identity_key in bindings:
-        identity_provider = verdict["model_reviewer_identity"]["provider"]
-        if identity_provider not in bindings[identity_key]:
-            raise ReviewVerdictError(
-                "model_reviewer_identity.provider không nằm trong runtime binding"
-            )
+    danh_tinh = _truong(verdict, "model_reviewer_identity")
+    if not isinstance(danh_tinh, dict):
+        raise ReviewVerdictError("model_reviewer_identity phải là JSON object")
+    if _truong(danh_tinh, "provider") not in bindings["model_reviewer_identity.provider"]:
+        raise ReviewVerdictError(
+            "model_reviewer_identity.provider không nằm trong runtime binding"
+        )
 
     return verdict

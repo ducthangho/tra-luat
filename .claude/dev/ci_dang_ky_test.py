@@ -65,6 +65,8 @@ def tim(root):
     return song, hien_vat, la
 
 
+def bi_tat(x): return x is False or (isinstance(x, str) and x.strip().lower() in ("false", "${{ false }}"))
+
 def kiem(root=ROOT, registry=DANG_KY, workflows=None, cach_ly=CACH_LY):
     song, _, la = tim(root)
     loi = []
@@ -82,8 +84,9 @@ def kiem(root=ROOT, registry=DANG_KY, workflows=None, cach_ly=CACH_LY):
         for p in (root / ".github/workflows").glob("*.yml"):
             data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
             for job in (data.get("jobs") or {}).values():
+                if not isinstance(job, dict) or bi_tat(job.get("if")): continue
                 for step in (job.get("steps") or []):
-                    if isinstance(step, dict) and isinstance(step.get("run"), str):
+                    if isinstance(step, dict) and not bi_tat(step.get("if")) and isinstance(step.get("run"), str):
                         runs.extend(line for line in step["run"].splitlines()
                                     if not line.lstrip().startswith("#"))
         workflows = "\n".join(runs)
@@ -181,11 +184,15 @@ def phan_chung():
         cases.append(any("môi trường không hợp lệ" in x for x in kiem(r, reg, wf, mutant)[0]))
         # r5: xoá run thật, giữ nguyên lệnh trong YAML comment vẫn phải đỏ.
         yml = r / ".github/workflows/comment.yml"
-        yml.write_text("jobs:\n  x:\n    steps:\n      - run: python .claude/dev/a_test.py\n", encoding="utf-8")
         yml.write_text("jobs:\n  x:\n    steps:\n      # - run: python .claude/dev/a_test.py\n", encoding="utf-8")
         old = set(DA_NOI); DA_NOI.clear(); DA_NOI.add(".claude/dev/a_test.py")
         try: cases.append(any("CI không gọi mục" in x for x in kiem(r, reg)[0]))
         finally: DA_NOI.clear(); DA_NOI.update(old)
+        old = set(DA_NOI); DA_NOI.clear(); DA_NOI.add(".claude/dev/a_test.py")
+        for level in ("step", "job", "expr", "normal"):
+            yml.write_text("jobs:\n  x:\n" + ("    if: false\n" if level == "job" else "") + "    steps:\n      - " + (("if: ${{ false }}\n        " if level == "expr" else "if: false\n        ") if level in ("step", "expr") else "") + "run: python .claude/dev/a_test.py\n", encoding="utf-8")
+            found = any("CI không gọi mục" in x for x in kiem(r, reg)[0]); cases.append(found if level != "normal" else not found)
+        DA_NOI.clear(); DA_NOI.update(old)
         # (b) Bản sao chương trình cách ly chuyển xanh phải bị yêu cầu gỡ.
         green = base / "green_test.py"
         green.write_text("print('1/1')\n", encoding="utf-8")
@@ -200,7 +207,8 @@ def phan_chung():
     cases += [not (1 == 0 and bang_chung_xanh("TỔNG: ĐẠT", r"TỔNG: ĐẠT")),
               not (0 == 0 and bang_chung_xanh("", r"TỔNG: ĐẠT"))]
     names += ["a-cach-ly-thieu-slug", "r4-thieu-moi-truong", "r5-moi-truong-sai-tap",
-              "r5-comment-gia-loi-goi", "b-cach-ly-chuyen-xanh",
+              "r5-comment-gia-loi-goi", "r5-step-if-false", "r5-job-if-false",
+              "r5-step-if-literal-expr", "r5-normal-step", "b-cach-ly-chuyen-xanh",
               "r4-bo-so-moi-truong", "r4-khong-do-duoc-thanh-dat",
               "rc-do-ban-in-xanh", "rc-xanh-thieu-ban-in"]
     for name, ok in zip(names, cases): print(f"ĐỘT BIẾN {name}: {'ĐỎ đúng' if ok else 'LỌT'}")

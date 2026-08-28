@@ -1,0 +1,133 @@
+# Lease EXECUTOR — `W1-P1-VAN-CHUYEN-PROMPT` (#368), lượt 2, neo đặc tả r3.
+#
+# Thay thế lease lượt 1 (`w1-p1-van-chuyen-prompt-exec-1-codex-20260828`) — KHÔNG phải vì lượt
+# ấy làm sai, mà vì §3.2: cross-review trả `blocked` với 2×P1 THUỘC ĐẶC TẢ, đặc tả đi bản sửa
+# đổi 3, write set đổi ⇒ lease cũ mất hiệu lực.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 368
+packet_id: W1-P1-VAN-CHUYEN-PROMPT
+phase_key: W1-P1-VAN-CHUYEN-PROMPT
+revision: 3
+generation: 2
+lease_id: w1-p1-van-chuyen-prompt-exec-2-codex-20260828
+thay_the_cho: w1-p1-van-chuyen-prompt-exec-1-codex-20260828
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+NGOAI_LE_ADR_0041: >-
+  GIỮ NGUYÊN từ lease lượt 1. ADR-0041 ghi *"Codex chỉ nhận Packet routine/systemic"*; packet này
+  là `sensitive`. Người giữ kho duyệt NGOẠI LỆ trong phiên 28-08-2026 sau khi được trình bày đúng
+  mâu thuẫn. Thẩm quyền §2. Gắn RIÊNG packet này, KHÔNG nới ADR-0041, KHÔNG là tiền lệ.
+  Phần KHÔNG bị override vẫn tuân: *"Codex không review code mình"* ⇒ reviewer là phiên `claude`
+  KHÁC phiên điều phối. Lượt review vừa rồi đã theo đúng thế và trả `blocked`.
+
+spec_path: ops/specs/W1-P1-VAN-CHUYEN-PROMPT-r3.md
+spec_hash: 2ef1fad4fd4519d95ffdd8a113f6795d93d625e4be0963ba41db22047108d6e7
+spec_note: >-
+  BẢN SỬA ĐỔI 3. r1 (`91c5de58…`) và r2 (`4a058ce4…`) GIỮ NGUYÊN làm hồ sơ, KHÔNG xoá.
+  Executor PHẢI tự đo lại mọi con số trong đặc tả — đó là ĐO CỦA PHIÊN ĐIỀU PHỐI và của reviewer,
+  không phải chân lý.
+
+write_set:
+  - .claude/dev/review_verdict_binding.py
+  - .claude/dev/launcher_test.py
+  - .claude/dev/packet_loop.py
+  - .claude/dev/packet_loop_test.py
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-28 trước khi đăng, trên `origin/master` hiện hành. Phép so HAI NGUỒN (TẬP TÊN):
+  `ls-remote --heads` ↔ `for-each-ref`, `comm` RỖNG hai chiều, không shallow.
+  Cả bốn đường trả `NGƯỜI_GIỮ 0`. `review_verdict_binding.py` chưa tồn tại (tạo mới).
+
+ra_khoi_write_set_so_r2: >-
+  `.claude/dev/launcher.py` và `.github/coordination/schemas/review_verdict.v1.schema.json`
+  RA khỏi write set. Thay đổi đã commit tại `3151371d42557448750ca8b82e5597823c898881` GIỮ NGUYÊN, không hoàn tác.
+  Bốn P2 chạm `launcher.py` và ba P3 chạm schema thuộc PACKET NỐI TIẾP.
+
+branch: codex/w1-p1-van-chuyen-prompt-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+branch_ghi_chu: >-
+  DÙNG LẠI nhánh của lượt 1 — hiện vật `3151371d` là nền hợp lệ và PR #381 đã mở trên nó.
+  Lượt 2 đắp tiếp lên đó, không mở nhánh/PR thứ hai.
+
+base_sha: 3151371d42557448750ca8b82e5597823c898881
+start_from_sha: 3151371d42557448750ca8b82e5597823c898881
+reviewed_sha_required: 3151371d42557448750ca8b82e5597823c898881
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 4
+  dong_them_toi_da: 600
+  do_tu_sha: 3151371d42557448750ca8b82e5597823c898881
+  don_vi: >-
+    `git diff --numstat 3151371d42557448750ca8b82e5597823c898881 -- <bốn đường write set>` — THÊM cộng XOÁ. Pathspec TRONG lệnh.
+  da_dung: 0
+  tran_ADR_0044: >-
+    4 tệp < 6 và dự kiến < 1000 dòng ⇒ KHÔNG vượt ngưỡng nào, không cần khai ngoại lệ.
+    Gói nhỏ là quyết định CÓ CHỦ Ý: ADR-0044 neo từ số đo của kho — 2 tệp ⇒ một vòng một finding;
+    4 tệp ⇒ ba vòng tám finding.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-28: duyệt hướng (i) mở write set cho validator xuất xưởng;
+  duyệt TÁCH ĐÔI (r3 chỉ chữa 2×P1, P2/P3 sang packet nối tiếp); duyệt chạy tiếp bốn bước.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này soạn r1, r2 VÀ r3, và CẢ HAI P1 của lượt review đều nhắm vào đặc tả do nó
+  viết. Nó cũng là phiên ĐÃ BỎ SÓT phép đo P1-1: nó kiểm "schema có từ chối sai identity không"
+  nhưng KHÔNG kiểm "hai ca test kia có thật sự đo schema không". Nên phiên này KHÔNG được làm
+  reviewer. Cross-review phải là phiên `claude` KHÁC; phiên ấy im lặng ⇒ đọc là CHƯA CHẠY.
+
+leased_at_utc: '2026-08-28T11:43:00Z'
+lease_expires_at_utc: '2026-08-29T11:43:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  Đúng bốn tệp trong `write_set`. KHÔNG đụng `.claude/dev/launcher.py`, KHÔNG đụng
+  `.github/coordination/schemas/review_verdict.v1.schema.json` (cả hai đã RA khỏi write set),
+  KHÔNG đụng `ops/lease_publish.py`, KHÔNG đụng `.claude/dev/duyet_danh_tinh.py`.
+  Hunk ngoài bốn tệp ấy ⇒ ĐỎ.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ NĂM ⇒ DỪNG, khai ·
+  S2 vượt 600 dòng thêm+xoá ⇒ DỪNG ·
+  S3 `origin/master` đi tiếp mà CÓ chạm một trong bốn đường write set ⇒ DỪNG; master nhích mà
+  không chạm write set thì KHÔNG phải lý do dừng ·
+  S4 muốn sửa `launcher.py` hoặc schema ⇒ DỪNG, chúng thuộc packet nối tiếp ·
+  S5 muốn khai một mục ĐẠT mà không có ca `rXX_` làm nó ĐỎ được ⇒ DỪNG.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) KHÔNG commit, KHÔNG push, KHÔNG tạo/xoá/đổi ref. Phiên điều phối commit.
+  (2) GIỚI HẠN LỜI KHAI — chứng minh BYTE tới consumer adapter, KHÔNG tuyên bố model "đã hiểu".
+  (3) N4 LÀ MỤC QUAN TRỌNG NHẤT: đột biến làm YẾU schema (xoá type/required/properties/
+      additionalProperties) phải làm `r17` VÀ `r18` ĐỎ. Hiện chúng vẫn XANH trên schema rỗng
+      ruột — đó là P1-1. Không có N4 thì bạn chỉ thêm mã mới bên cạnh hai ca rỗng.
+  (4) ĐỪNG dời tầng rỗng sang tệp mới: thêm validator mà KHÔNG ai gọi là lặp lại đúng P1-1.
+      Người gọi thật là `packet_loop` `cmd_record_review` (d.998).
+  (5) Validate bằng `jsonschema` trên schema ĐỌC TỪ ĐĨA, KHÔNG bằng comparator viết tay.
+      `_schema_hop_le` hiện dùng `re.fullmatch` còn `jsonschema` dùng `re.search`, và `$` khớp
+      TRƯỚC newline cuối — đó là nợ P2 `oracle-lech-voi-jsonschema`, đừng tái tạo nó.
+  (6) Ba trạng thái: có · không · KHÔNG ĐO ĐƯỢC. Trạng thái thứ ba làm cổng ĐỎ.
+  (7) Mỗi chốt phải có ĐỘT BIẾN RIÊNG.
+  (8) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+
+nen_do_truoc_khi_bat_dau: >-
+  Tại `3151371d42557448750ca8b82e5597823c898881` (clone sạch, KHÔNG worktree): `launcher_test.py` = `164/164 ca DA CHAY QUA
+  (tong 165, bo qua 1, hong 0)`; `--dot-bien` = `157/157 dat (1 khong do duoc)`; `actionlint`
+  = `rc=1`, ĐÚNG 1 finding `ops-don-ref.yml:106` — ĐỎ SẴN, delta 0. Reviewer đã xác minh ĐỘC
+  LẬP mọi số này và chúng TRÙNG. `git config core.abbrev 7` trước khi chạy cổng.
+  `PYTHONDONTWRITEBYTECODE=1` + `PYTHONPYCACHEPREFIX` ra ngoài cây test.

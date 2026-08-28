@@ -1,0 +1,67 @@
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '369'
+provider: claude
+role: reviewer
+verdict: approved
+reviewed_sha: 245905e22b7eea2c691e3b10e9b2c91e77d3f611
+luot: r2
+cross_provider: true
+assurance: cross_approved
+executor_provider: codex
+verdict_path: ops/reviews/d9-doi-cach-dem-review-2-claude-verdict.md
+verdict_sha256: 1d73a16e3ffeaf97bae229fc5b98987eefea62a681dad83df010789bbb940a97
+verdict_bytes: 21124
+ket_qua_dem_duoc:
+  P1: 0
+  P2: 2
+  finding_moi: 2
+VI_SAO_PHAI_CO_LUOT_HAI: >-
+  Luot 1 tra P1. Ben bi bat loi KHONG duoc tu tuyen la da sua xong — do la ly do luot 2 ton tai.
+  Luot 2 do lai CA BA finding cua luot 1 o CA HAI dau (27fb9de2 va 245905e), khong nhan thong diep
+  commit / than PR / lease lam bang chung.
+ba_finding_luot_1_deu_DA_VA_THAT:
+  finding_01_P1: >-
+    ops/specs/mcp-gh-cuu-ho.md NAY co trong diff 82cb066f..245905e (1 them/1 xoa). Dong 202 khong
+    con noi "git diff --numstat tren write set" ma noi dung thu ma do. Viec mo write set di qua
+    revision r4 do ducthangho ky, base_sha KHONG doi xuyen r1..r4, r3 mang da_bi_thay_the dung cach
+    => dung §3.2, khong phai tu cap pham vi.
+  finding_02_P2: >-
+    grep "chú thích" mcp_gh_test.py tai 245905e => 1 dong (486). Reviewer xet no la mot LY LE (neu
+    lua chon + CAI GIA cua lua chon + ly do loai (B)), khong phai tuyen bo suong.
+  finding_03_P2: >-
+    Reviewer TU DUNG LAI phep tinh tu diff (khong chep cua luot 1): try/finally +4, D13 +9 => neo 13.
+    Chu thich moi ("~50% tren neo do duoc 13") khong con noi qua.
+P2_MOI_01_la_no_cua_KHO:
+  ten: AG-369-P2-01-spec-chep-cung-so-779-thay-vi-tro-truong
+  noi_dung: >-
+    Dong D9 moi chep thang literal 779 vao dac ta — dung anti-pattern ma chinh BAN GOC cua dong ay
+    canh bao ("dac ta tro sang truong co tham quyen thay vi chep lai no"; r1 ghi ≤750 roi lease nang
+    1000). Hien tai spec va ma DANG khop, nen day la rui ro TROI TUONG LAI, khong phai loi hien
+    hanh. Khong co truong lease co cau truc nao giu 779 de tro toi; literal ton tai doc lap o CA HAI
+    noi (spec + ma).
+P2_MOI_02_soi_thang_vao_phien_dieu_phoi:
+  ten: AG-369-P2-02-granted-on-instruction-bon-lan-trich-cung-mot-cau
+  noi_dung: >-
+    Ca bon revision r1..r4 ghi granted_on_instruction GIONG HET nhau tung chu, trich cau chi thi ve
+    QUYET DINH DEM ("chon phuong an b cho D9"). Cau ay khong nhac gi toi viec mo write set sang
+    ops/specs/ — mot quyet dinh RIENG, phat sinh SAU, de xu ly P1 cua cross-review. Nguoi audit chi
+    doc bon tep lease KHONG the phan biet "chu kho duyet CU THE viec mo rong" voi "phien ghi lease
+    tu suy ra uy quyen goc du rong". Day la khoang trong TRUY VET, khong phai bang chung tu cap
+    quyen sai — reviewer noi ro dieu do.
+  phien_dieu_phoi_nhan: >-
+    Dung. Loi thuoc ve phien dieu phoi (ben ghi lease), khong thuoc ve executor. Sua tu lease KE TIEP
+    tro di: granted_on_instruction phai trich dung cau chi thi ung voi QUYET DINH cua chinh revision
+    ay, khong tai su dung cau goc.
+do_truc_tiep_cua_reviewer:
+- 'CA 42/42 · DOT BIEN 54/54 · D8(a)(b)(c) DAT · rc=0 do bang $? ngay sau loi goi tran'
+- 'D9 = 761/779, dem lai doc lap bang lenh cua chinh reviewer, khong goi ham test'
+- 'D13 quet du 54 muc: nap module tuoi va tu duyet bang, khong dung chot san co lam bang chung'
+- 'r4 KHONG them chot moi nao (diff thuan chu thich + spec) => yeu cau "pha tung chot moi" la vacuous, reviewer ghi ro ly do thay vi khai da lam'
+KHONG_DO_DUOC:
+  gate_github_actions: >-
+    Moi mcp__github__* bi chan quyen trong vo reviewer; REST /repos/.../pulls/371 => 403 trong khi
+    /rate_limit => 200 (chan theo DUONG DAN, khong theo token). Reviewer khai KHONG DO DUOC thay vi
+    doan mau — dung.
+khong_P1_nao_bi_ha_xuong_P2: true
+khong_P2_nao_bi_nang_len_P1: true

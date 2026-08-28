@@ -32,6 +32,7 @@ assurance_target: cross_approved
 access: read-write
 risk: normal
 review_class: sensitive
+effective_review_class: sensitive
 
 review_class_ghi_chu: >-
   Như #355 và vì cùng lý do: `sensitive` vì tệp chuyển `${GITHUB_PAT}` tới endpoint ngoài;

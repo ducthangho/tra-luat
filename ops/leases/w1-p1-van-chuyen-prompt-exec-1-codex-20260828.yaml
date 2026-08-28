@@ -149,3 +149,4 @@ nen_do_truoc_khi_bat_dau: >-
   ca bỏ qua là `t62_qua_han_ma_khong_giet_het_cay_phai_tra_125` (fixture Windows, bản POSIX là
   `t63`). `actionlint` = `rc=1`, ĐÚNG 1 finding `ops-don-ref.yml:106 SC1003:info` — ĐỎ SẴN,
   delta = 0; số finding tăng mới là hồi quy. `git config core.abbrev 7` trước khi chạy cổng.
+posted_comment_id: 5449345328   # workflow ghi, ĐỪNG sửa tay

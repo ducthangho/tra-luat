@@ -155,3 +155,4 @@ canh_bao_bo_sung_r3: >-
   (2) `_doc_mcp_json` đang được `doctor` dùng. Giữ hợp đồng cũ dùng được, hoặc chuyển caller
       TƯỜNG MINH và chứng minh `doctor` không hồi quy.
   (3) Mở write set KHÔNG nới trần kích thước: vẫn `≤6 tệp / ≤1000 dòng`, hiện dùng 256.
+posted_comment_id: 5447612472   # workflow ghi, ĐỪNG sửa tay

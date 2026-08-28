@@ -3014,7 +3014,8 @@ def t90_A2_yaml_hong_fail_close():
 @ca
 def t91_A2c_da_bi_thay_the_van_in_nhung_khong_giu():
     ls = [("refs/remotes/origin/a", "ops/leases/a.yaml", _lease_quet("L1", da_bi_thay_the="L2")),
-          ("refs/remotes/origin/a", "ops/leases/b.yaml", _lease_quet("L2"))]
+          ("refs/remotes/origin/a", "ops/leases/b.yaml",
+           _lease_quet("L2", thay_the_cho="L1"))]
     rc, out, mod = _quet_gia(_GitKhoGia({"a"}, {"a"}, ls))
     bang(rc == mod.RC_DANG_GIU and "CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ\tL1" in out
          and "NGƯỜI_GIỮ 1: L2" in out, f"A2c sai: {out}")
@@ -3058,7 +3059,7 @@ def t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO():
         ("A2", "lease = yaml.safe_load(noi_dung)", "lease = {}"),
         ("A2b-co", 'return "HẾT_HẠN" if han <= bay_gio else "CÒN_HẠN"', 'return "CÒN_HẠN"'),
         ("A2b-khong", 'return "HẾT_HẠN" if han <= bay_gio else "CÒN_HẠN"', 'return "KHÔNG_XÁC_ĐỊNH"'),
-        ("A2c-giu", 'da_chet = bool(lease.get("da_bi_thay_the"))', 'da_chet = False'),
+        ("A2c-giu", "da_chet = bia_mo is True", "da_chet = False"),
         ("A2c-in", 'print(f"{trang_thai}{nhan}\\t{lease_id}\\t{muc[\'ref\']}:{muc[\'path\']}")', 'print("")'),
         ("A3-A6", "thieu = _ten_nhanh_may_chu(goc) - ten_cuc_bo", "thieu = set()"),
         ("A4", "if doi_chieu_ref:", "if ten_cuc_bo - _ten_nhanh_may_chu(goc): return []\n    if doi_chieu_ref:"),
@@ -3787,6 +3788,186 @@ def t116_ref_chinh_xac_hinh_dang_va_bon_dot_bien_bat_buoc():
                     except AssertionError: do.add("tag-khong-quet")
                 print(f"đột biến bắt buộc {ten_mut}: thư_mục={s.name}; ĐỎ={sorted(do)}")
                 bang(do == do_dung, f"mutant {ten_mut}: ĐỎ={do}, cần={do_dung}")
+    finally:
+        SCRIPT = ban_goc
+
+
+def _quet_ca_bia_mo(leases, duong="ops/lease_publish.py"):
+    import contextlib
+    import io
+    mod, out = _nap_cong(), io.StringIO()
+    mod.GOI_GIT = _GitKhoGia({"a"}, {"a"}, leases)
+    with contextlib.redirect_stdout(out):
+        try:
+            rc = mod.lenh_ai_dang_giu(
+                type("A", (), {"goc": ".", "duong_dan": duong})())
+        except mod.Chan as ex:
+            return ex.ma, out.getvalue() + ex.thong_diep, mod
+    return rc, out.getvalue(), mod
+
+
+@ca
+def t117_bia_mo_tro_lease_khong_ton_tai_phai_KHONG_XAC_DINH():
+    ls = [("refs/remotes/origin/a", "ops/leases/cu.yaml",
+           _lease_quet("CU", da_bi_thay_the="KHONG-TON-TAI"))]
+    rc, out, mod = _quet_ca_bia_mo(ls)
+    bang(rc == mod.RC_KHONG_XAC_DINH and "KHÔNG_XÁC_ĐỊNH" in out
+         and "CU" in out and "KHONG-TON-TAI" in out
+         and "NGƯỜI_GIỮ" not in out,
+         f"bia mộ trỏ tên không tồn tại vẫn gỡ khoá: rc={rc} {out}")
+
+
+@ca
+def t118_bia_mo_co_lease_moi_nhung_khong_tro_nguoc_phai_CHAN():
+    ls = [("refs/remotes/origin/a", "ops/leases/cu.yaml",
+           _lease_quet("CU", da_bi_thay_the="MOI")),
+          ("refs/remotes/origin/a", "ops/leases/moi.yaml",
+           _lease_quet("MOI", thay_the_cho="CU-sai"))]
+    rc, out, mod = _quet_ca_bia_mo(ls)
+    bang(rc == mod.RC_KHONG_XAC_DINH and "KHÔNG_XÁC_ĐỊNH" in out
+         and "CU" in out and "MOI" in out and "NGƯỜI_GIỮ" not in out,
+         f"lease mới không trỏ ngược vẫn hợp thức hoá bia mộ: rc={rc} {out}")
+
+
+@ca
+def t119_bia_mo_hai_chieu_day_du_van_go_lease_cu():
+    ls = [("refs/remotes/origin/a", "ops/leases/cu.yaml",
+           _lease_quet("CU", da_bi_thay_the="MOI")),
+          ("refs/remotes/origin/a", "ops/leases/moi.yaml",
+           _lease_quet("MOI", thay_the_cho="CU"))]
+    rc, out, mod = _quet_ca_bia_mo(ls)
+    bang(rc == mod.RC_DANG_GIU and "CÒN_HẠN · ĐÃ_BỊ_THAY_THẾ\tCU" in out
+         and "NGƯỜI_GIỮ 1: MOI" in out,
+         f"bia mộ hai chiều không giữ hành vi gỡ: rc={rc} {out}")
+
+
+@ca
+def t120_thay_the_cho_danh_sach_hai_lease_deu_co_bia_mo_phai_QUA():
+    mod = _nap_cong()
+    moi = lease_mau(lease_id="MOI", thay_the_cho=["CU1", "CU2"])
+    ls = [
+        ("refs/remotes/origin/a", "ops/leases/cu1.yaml",
+         _lease_quet("CU1", da_bi_thay_the="MOI")),
+        ("refs/remotes/origin/a", "ops/leases/cu2.yaml",
+         _lease_quet("CU2", da_bi_thay_the="MOI")),
+    ]
+    with San() as s:
+        (s / ".git").mkdir()
+        p = viet(s, moi)
+        mod.GOI_GIT = _GitKhoGia({"a"}, {"a"}, ls)
+        try:
+            mod.kiem(moi, p, s)
+        except mod.Chan as ex:
+            raise AssertionError(
+                f"danh sách hai bia mộ đầy đủ bị chặn: {ex.ma} {ex.thong_diep}") from ex
+    rc, out, mod = _quet_ca_bia_mo(ls + [
+        ("refs/remotes/origin/a", "ops/leases/moi.yaml",
+         _lease_quet("MOI", thay_the_cho=["CU1", "CU2"]))])
+    bang(rc == mod.RC_DANG_GIU and out.count("ĐÃ_BỊ_THAY_THẾ") == 2
+         and "NGƯỜI_GIỮ 1: MOI" in out,
+         f"phép quét không đọc danh sách hai bia mộ: rc={rc} {out}")
+
+
+@ca
+def t121_thay_the_cho_danh_sach_thieu_mot_bia_mo_phai_CHAN():
+    mod = _nap_cong()
+    moi = lease_mau(lease_id="MOI", thay_the_cho=["CU1", "CU2"])
+    with San() as s:
+        (s / ".git").mkdir()
+        p = viet(s, moi)
+        mod.GOI_GIT = _GitKhoGia({"a"}, {"a"}, [
+            ("refs/remotes/origin/a", "ops/leases/cu1.yaml",
+             _lease_quet("CU1", da_bi_thay_the="MOI")),
+            ("refs/remotes/origin/a", "ops/leases/cu2.yaml",
+             _lease_quet("CU2", da_bi_thay_the="KHAC")),
+        ])
+        try:
+            mod.kiem(moi, p, s)
+        except mod.Chan as ex:
+            bang(ex.ma == RC_NOI_DUNG and "CU2" in ex.thong_diep,
+                 f"danh sách thiếu bia mộ chặn sai: {ex.ma} {ex.thong_diep}")
+        else:
+            raise AssertionError("danh sách thiếu bia mộ CU2 vẫn đăng được")
+
+
+@ca
+def t122_hai_lease_tro_vong_cho_ket_qua_xac_dinh_khong_de_quy():
+    ls = [("refs/remotes/origin/a", "ops/leases/a.yaml",
+           _lease_quet("A", da_bi_thay_the="B", thay_the_cho="B")),
+          ("refs/remotes/origin/a", "ops/leases/b.yaml",
+           _lease_quet("B", da_bi_thay_the="A", thay_the_cho="A"))]
+    rc, out, mod = _quet_ca_bia_mo(ls)
+    bang(rc == mod.RC_OK and out.count("ĐÃ_BỊ_THAY_THẾ") == 2
+         and "NGƯỜI_GIỮ 0: không có" in out,
+         f"vòng A-B không cho kết quả xác định: rc={rc} {out}")
+
+
+@ca
+def t123_bia_mo_hong_het_han_va_khong_cham_duong_khong_duoc_lan_toa():
+    ls = [("refs/remotes/origin/a", "ops/leases/het-han.yaml",
+           _lease_quet("HET-HAN", han="2000-01-01T00:00:00Z",
+                       da_bi_thay_the="KHONG-CO-1")),
+          ("refs/remotes/origin/a", "ops/leases/khong-cham.yaml",
+           _lease_quet("KHONG-CHAM", path="x.py", da_bi_thay_the="KHONG-CO-2")),
+          ("refs/remotes/origin/a", "ops/leases/giu.yaml", _lease_quet("GIU"))]
+    rc, out, mod = _quet_ca_bia_mo(ls)
+    bang(rc == mod.RC_DANG_GIU and "HẾT_HẠN\tHET-HAN" in out
+         and "KHONG-CHAM" not in out and "NGƯỜI_GIỮ 1: GIU" in out,
+         f"bia mộ ngoài phạm vi làm hỏng câu trả lời: rc={rc} {out}")
+
+
+@ca
+def t124_bay_dot_bien_bia_mo_giet_dung_va_chi_dung_tap_dich():
+    global SCRIPT
+    nguon, ban_goc = SCRIPT.read_text(encoding="utf-8"), SCRIPT
+    dich = {
+        "t117": t117_bia_mo_tro_lease_khong_ton_tai_phai_KHONG_XAC_DINH,
+        "t118": t118_bia_mo_co_lease_moi_nhung_khong_tro_nguoc_phai_CHAN,
+        "t119": t119_bia_mo_hai_chieu_day_du_van_go_lease_cu,
+        "t120": t120_thay_the_cho_danh_sach_hai_lease_deu_co_bia_mo_phai_QUA,
+        "t121": t121_thay_the_cho_danh_sach_thieu_mot_bia_mo_phai_CHAN,
+        "t122": t122_hai_lease_tro_vong_cho_ket_qua_xac_dinh_khong_de_quy,
+        "t123": t123_bia_mo_hong_het_han_va_khong_cham_duong_khong_duoc_lan_toa,
+    }
+    muts = [
+        ("noi-vi-tu-thanh-if-False", "if bia_mo is False:", "if False:",
+         {"t117", "t118"}),
+        ("so-bang-thanh-do-chuoi",
+         "if thay_the_cho is not None and lease_cu in thay_the_cho:",
+         "if thay_the_cho is not None and any(lease_cu in ten for ten in thay_the_cho):",
+         {"t118"}),
+        ("bo-schema-danh-sach", "if isinstance(gia_tri, list):", "if False:",
+         {"t120", "t121"}),
+        ("chi-kiem-phan-tu-dau",
+         "chua_danh_dau = [ten for ten in thay_the_cho if not any(",
+         "chua_danh_dau = [ten for ten in thay_the_cho[:1] if not any(", {"t121"}),
+        ("bo-hanh-vi-go", "da_chet = bia_mo is True", "da_chet = False",
+         {"t119", "t120", "t122"}),
+        ("fail-toan-ca-het-han",
+         'if trang_thai == "CÒN_HẠN" else None)', "if True else None)", {"t123"}),
+        ("fail-toan-ca-khong-cham",
+         "if not _lease_cham_duong(lease, a.duong_dan):\n            continue",
+         "if False:\n            continue", {"t123"}),
+    ]
+    sys.dont_write_bytecode = True
+    try:
+        for i, (ten, cu, moi, do_dung) in enumerate(muts):
+            bang(nguon.count(cu) == 1, f"neo mutant {ten} không duy nhất")
+            with San() as s:
+                p = s / f"mut_bia_mo_{i}.py"
+                p.write_text(nguon.replace(cu, moi), encoding="utf-8")
+                import importlib
+                importlib.invalidate_caches()
+                SCRIPT, do = p, set()
+                for ten_ca, fn in dich.items():
+                    try:
+                        fn()
+                    except Exception:  # mutant có thể đổi cả kiểu lỗi; vẫn là ca bị giết
+                        do.add(ten_ca)
+                song = set(dich) - do
+                print(f"đột biến bia mộ {ten}: ĐỎ={sorted(do)}, SỐNG={sorted(song)}")
+                bang(do == do_dung and song == set(dich) - do_dung,
+                     f"mutant {ten}: ĐỎ={do}, cần={do_dung}; SỐNG={song}")
     finally:
         SCRIPT = ban_goc
 

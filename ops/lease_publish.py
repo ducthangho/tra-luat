@@ -553,23 +553,68 @@ def _phan_loai_lease(lease: dict, bay_gio=None) -> str:
     return "HẾT_HẠN" if han <= bay_gio else "CÒN_HẠN"
 
 
+def _danh_sach_thay_the_cho(gia_tri) -> list[str] | None:
+    """Chuẩn hoá schema cũ chuỗi và schema mới danh sách; ``None`` là sai kiểu."""
+    if gia_tri in (None, ""):
+        return []
+    if isinstance(gia_tri, str):
+        ten = gia_tri.strip()
+        return [ten] if ten else []
+    if isinstance(gia_tri, list):
+        if any(not isinstance(x, str) or not x.strip() for x in gia_tri):
+            return None
+        return [x.strip() for x in gia_tri]
+    return None
+
+
+def _bia_mo_doi_xung(lease: dict, cac_lease: list[dict]) -> bool | None:
+    """Trả ``None`` nếu không có bia mộ, còn lại xác nhận CŨ→MỚI và MỚI→CŨ.
+
+    Chỉ lập chỉ mục phẳng và so tên lease bằng nhau tuyệt đối. Không lần theo bia mộ
+    kế tiếp, nên một vòng A→B→A luôn kết thúc sau đúng một lượt quét.
+    """
+    raw_moi = lease.get("da_bi_thay_the")
+    if raw_moi in (None, ""):
+        return None
+    if not isinstance(raw_moi, str) or not raw_moi.strip():
+        return False
+    lease_moi = raw_moi.strip()
+    lease_cu = str(lease.get("lease_id") or "").strip()
+    if not lease_cu:
+        return False
+    for muc in cac_lease:
+        ban_moi = muc["lease"]
+        if str(ban_moi.get("lease_id") or "").strip() != lease_moi:
+            continue
+        thay_the_cho = _danh_sach_thay_the_cho(ban_moi.get("thay_the_cho"))
+        if thay_the_cho is not None and lease_cu in thay_the_cho:
+            return True
+    return False
+
+
 def _kiem_bia_mo(lease: dict, tep, goc=None) -> None:
-    """Lease mới chỉ được thay X sau khi X trỏ ngược lại đúng lease mới."""
-    thay_the_cho = str(lease.get("thay_the_cho") or "").strip()
+    """Lease mới chỉ được thay mọi X sau khi từng X trỏ ngược đúng lease mới."""
+    thay_the_cho = _danh_sach_thay_the_cho(lease.get("thay_the_cho"))
+    if thay_the_cho is None:
+        raise Chan(RC_NOI_DUNG,
+                   "thay_the_cho phải là một tên lease hoặc danh sách các tên lease hợp lệ")
     if not thay_the_cho:
         return
     root = _goc_kho(Path(tep), goc)
     lease_moi = str(lease.get("lease_id") or "").strip()
-    da_danh_dau = any(
-        str(muc["lease"].get("lease_id") or "").strip() == thay_the_cho
-        and str(muc["lease"].get("da_bi_thay_the") or "").strip() == lease_moi
-        for muc in _quet_lease_toan_kho(root, doi_chieu_ref=False)
-    )
-    if not da_danh_dau:
+    cac_lease = _quet_lease_toan_kho(root, doi_chieu_ref=False)
+    chua_danh_dau = [ten for ten in thay_the_cho if not any(
+        str(muc["lease"].get("lease_id") or "").strip() == ten
+        and isinstance(muc["lease"].get("da_bi_thay_the"), str)
+        and muc["lease"]["da_bi_thay_the"].strip() == lease_moi
+        for muc in cac_lease)]
+    if chua_danh_dau:
         raise Chan(RC_NOI_DUNG,
-                   f"lease mới thay_the_cho={thay_the_cho!r}, nhưng lease cũ chưa "
+                   f"lease mới thay_the_cho={thay_the_cho!r}, nhưng lease cũ "
+                   f"{chua_danh_dau!r} chưa "
                    f"mang dòng `da_bi_thay_the: {lease_moi}`; hãy thêm dòng ấy vào "
-                   f"{thay_the_cho} trước khi đăng lease mới (cổng không tự sửa hồ sơ cũ)")
+                   f"từng lease còn thiếu trước khi đăng lease mới "
+                   f"(cổng không tự sửa hồ sơ cũ)")
 
 
 def _doc_gh(mo_ta: str, *doi_so):
@@ -927,8 +972,16 @@ def lenh_ai_dang_giu(a) -> int:
         if not _lease_cham_duong(lease, a.duong_dan):
             continue
         trang_thai = _phan_loai_lease(lease)
-        da_chet = bool(lease.get("da_bi_thay_the")) and trang_thai == "CÒN_HẠN"
         lease_id = str(lease.get("lease_id") or "<thiếu lease_id>")
+        bia_mo = (_bia_mo_doi_xung(lease, cac_lease)
+                  if trang_thai == "CÒN_HẠN" else None)
+        if bia_mo is False:
+            raise Chan(
+                RC_KHONG_XAC_DINH,
+                f"KHÔNG_XÁC_ĐỊNH: bia mộ một chiều {lease_id!r} -> "
+                f"{lease.get('da_bi_thay_the')!r} tại {muc['ref']}:{muc['path']}; "
+                "không tìm thấy lease thay thế trỏ ngược bằng thay_the_cho")
+        da_chet = bia_mo is True
         nhan = " · ĐÃ_BỊ_THAY_THẾ" if da_chet else ""
         print(f"{trang_thai}{nhan}\t{lease_id}\t{muc['ref']}:{muc['path']}")
         if trang_thai == "CÒN_HẠN" and not da_chet:

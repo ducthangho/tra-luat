@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Chọn reviewer theo độ phức tạp và kiểm bằng chứng model đã chạy."""
 from __future__ import annotations
-import argparse, json, sys
+import argparse, json, posixpath, sys
 if hasattr(sys.stdout, "reconfigure"): sys.stdout.reconfigure(encoding="utf-8")
 if hasattr(sys.stderr, "reconfigure"): sys.stderr.reconfigure(encoding="utf-8")
 MO_HINH_CHO_PHEP = ("claude-opus-5", "claude-fable-5")
@@ -10,6 +10,15 @@ _BAC = (("claude-opus-5", "high"), ("claude-opus-5", "xhigh"),
         ("claude-fable-5", "xhigh"), ("claude-fable-5", "max"))
 class KhongDoDuoc(Exception):
     """Bằng chứng thiếu hoặc không thuộc tập hữu hạn mà kho đo được."""
+def _chuan_hoa_duong(duong):
+    """Chap nhan dung ban POSIX chuan, tru mot slash cuoi lam nhan thu muc."""
+    if "\\" in duong: raise KhongDoDuoc("đường dẫn chứa backslash; bản chuẩn dùng '/': %r" % duong.replace("\\", "/"))
+    if duong.startswith("/"): raise KhongDoDuoc("đường dẫn tuyệt đối %r; bản chuẩn repo-relative không có" % duong)
+    de_so = duong[:-1] if duong.endswith("/") else duong
+    chuan = posixpath.normpath(de_so)
+    if de_so != chuan: raise KhongDoDuoc("đường dẫn không chuẩn %r; bản chuẩn: %r" % (duong, chuan))
+    if chuan.startswith(".."): raise KhongDoDuoc("đường dẫn %r thoát repo; bản chuẩn repo-relative không có" % duong)
+    return chuan
 def _cac_duong_dan(duong_dan):
     if isinstance(duong_dan, str): ds = duong_dan.split(",")
     else:
@@ -19,10 +28,13 @@ def _cac_duong_dan(duong_dan):
     # `planned:` la nhan cua protocol, khong phai mot thanh phan duong dan.
     sach = []
     for x in ds:
-        duong = str(x).strip()
+        if not isinstance(x, str): raise KhongDoDuoc("đường dẫn không phải chuỗi: %r" % (x,))
+        duong = x.strip()
         if not duong: continue
         if duong.startswith("planned:"): duong = duong[len("planned:"):].strip()
         if not duong: raise KhongDoDuoc("đường dẫn sau nhãn planned: bị rỗng")
+        if duong.startswith("planned:"): raise KhongDoDuoc("nhãn planned: lặp: %r" % duong)
+        duong = _chuan_hoa_duong(duong)
         sach.append(duong)
     # Trung lap khong duoc tu nang diem; rong la phep do hong, khong phai diff nho.
     ket_qua = tuple(dict.fromkeys(sach))
@@ -44,10 +56,8 @@ def _bac_theo_diem(diem):
     return 0 if diem <= 0 else 1 if diem <= 2 else 2 if diem <= 4 else 3
 def kiem_dinh_danh(model, effort):
     """Từ chối bí danh/mức lạ bằng phép so bằng nhau với allow-list."""
-    if model not in MO_HINH_CHO_PHEP:
-        raise KhongDoDuoc("model ngoài allow-list: %r" % (model,))
-    if effort not in NO_LUC_CHO_PHEP:
-        raise KhongDoDuoc("effort ngoài allow-list: %r" % (effort,))
+    if model not in MO_HINH_CHO_PHEP: raise KhongDoDuoc("model ngoài allow-list: %r" % (model,))
+    if effort not in NO_LUC_CHO_PHEP: raise KhongDoDuoc("effort ngoài allow-list: %r" % (effort,))
 _HANG_REVIEW = {"routine": 0, "systemic": 1, "sensitive": 2}
 def _lop_review(gia_tri):
     if not isinstance(gia_tri, str): raise KhongDoDuoc("review_class không phải chuỗi")
@@ -87,9 +97,10 @@ def chon(review_class, duong_dan, so_dong, luot, bac_truoc=None):
     chi_so = _bac_theo_diem(diem)
     banh_coc = ""
     if bac_truoc is not None:
+        if not isinstance(bac_truoc, (tuple, list)) or len(bac_truoc) != 2: raise KhongDoDuoc("bậc trước phải có đúng model,effort; nhận %r" % (bac_truoc,))
+        bac_truoc = tuple(bac_truoc)
         kiem_dinh_danh(*bac_truoc)
-        if bac_truoc not in _BAC:
-            raise KhongDoDuoc("bậc trước không phải một bậc chọn hợp lệ: %r" % (bac_truoc,))
+        if bac_truoc not in _BAC: raise KhongDoDuoc("bậc trước không phải một bậc chọn hợp lệ: %r" % (bac_truoc,))
         truoc = _BAC.index(bac_truoc)
         if truoc > chi_so:
             chi_so = truoc
@@ -107,13 +118,15 @@ def kiem_ket_qua(yeu_cau_model, ket_qua_json):
     Hai luot dai ngay 27-08-2026 mang ca fable-5 va opus-4-8, nhung ``rc=0``
     va ``subtype=success``. Vi vay hai truong do khong tham gia nhanh DAT.
     Haiku co mat 8/9 luot: chi duoc cho phep, khong duoc doi phai co.
+    Gioi han: phep tap hop chi hoi model phu CO MAT, khong hoi no LAM GI;
+    fable 500 token + haiku 90000 token van DAT. Chua do share nen khong dat nguong.
     """
-    if not isinstance(ket_qua_json, dict):
-        raise KhongDoDuoc("kết quả JSON thiếu hoặc không phải object")
+    if not isinstance(yeu_cau_model, str) or not yeu_cau_model: raise KhongDoDuoc("model yêu cầu không phải chuỗi có nội dung: %r" % yeu_cau_model)
+    if not isinstance(ket_qua_json, dict): raise KhongDoDuoc("kết quả JSON thiếu hoặc không phải object")
     model_usage = ket_qua_json.get("modelUsage")
-    if not isinstance(model_usage, dict) or not model_usage:
-        raise KhongDoDuoc("modelUsage thiếu/rỗng/không phải object")
+    if not isinstance(model_usage, dict) or not model_usage: raise KhongDoDuoc("modelUsage thiếu/rỗng/không phải object")
     def danh_tinh(ten, thong_tin):
+        if not isinstance(ten, str) or not ten: raise KhongDoDuoc("khoá modelUsage không phải chuỗi có nội dung: %r" % ten)
         if isinstance(thong_tin, dict) and "canonicalModel" in thong_tin:
             can = thong_tin["canonicalModel"]
             if not isinstance(can, str) or not can:
@@ -147,6 +160,7 @@ def main(argv=None):
     p.add_argument("--so-dong", required=True, type=int)
     p.add_argument("--luot", required=True, type=int)
     p.add_argument("--bac-truoc")
+    p.add_argument("--effective-review-class")
     p.add_argument("--json", action="store_true")
     a = p.parse_args(argv)
     try:
@@ -157,8 +171,9 @@ def main(argv=None):
                 raise KhongDoDuoc("--bac-truoc phải có dạng model,effort")
             kiem_dinh_danh(*phan)
             bac_truoc = phan
-        model, effort, giai_thich = chon(
-            a.review_class, a.duong_dan, a.so_dong, a.luot, bac_truoc)
+        lop = ({"review_class": a.review_class, "effective_review_class": a.effective_review_class}
+               if a.effective_review_class is not None else a.review_class)
+        model, effort, giai_thich = chon(lop, a.duong_dan, a.so_dong, a.luot, bac_truoc)
         kiem_dinh_danh(model, effort)
     except KhongDoDuoc as exc:
         print("KHÔNG ĐO ĐƯỢC: %s" % exc, file=sys.stderr)

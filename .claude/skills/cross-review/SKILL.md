@@ -59,6 +59,8 @@ Ba bẫy CLI đã đo 27-08-2026, không phải giả định:
 - Trong 9 lượt, `haiku-4-5` có 8/9, `fable-5` 6/9, `opus-5` 3/9 và `opus-4-8` 2/9; cả hai lượt `opus-4-8` là lượt tụt giữa chừng thật.
   **`rc` và `subtype` cùng nói dối**. Danh tính mỗi mục là `canonicalModel` nếu có, ngược lại là tên khoá; bỏ qua danh tính mang tiền tố phụ `claude-haiku-`, rồi đòi tập danh tính chính bằng đúng `{model yêu cầu}`. Model yêu cầu vắng và model lạ có mặt là hai nhánh lỗi riêng. Không được đòi model phụ có mặt.
 
+Giới hạn đã biết: phép so tập chỉ hỏi model phụ **có mặt**, không hỏi nó **làm gì**; `{fable-5: 500 outputTokens, haiku: 90000}` vẫn ĐẠT. Chưa ai đo phân bố share của model phụ, nên không đặt ngưỡng token ở lượt này; phải đếm trước khi bàn ngưỡng.
+
 Probe ngắn chỉ loại được ca *model hoàn toàn không gọi được*; nó không chứng nhận lượt dài sẽ giữ model. Đo 27-08: probe xanh 3/3 rồi lượt dài vẫn tụt hoàn toàn, nên luôn kiểm `modelUsage` **sau** lượt thật.
 
 Chọn bậc **trước khi phóng**:
@@ -66,9 +68,12 @@ Chọn bậc **trước khi phóng**:
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"
 "$PY" .claude/dev/chon_reviewer.py --review-class sensitive \
+  --effective-review-class sensitive \
   --duong-dan a.py,b.md --so-dong 120 --luot 2 \
   --bac-truoc claude-fable-5,max --json
 ```
+
+Nếu lease có `effective_review_class`, đút **cả hai** trường bằng `--review-class` và `--effective-review-class`; bộ chọn tự lấy lớp cao hơn, không lấy `max` bằng tay.
 
 Phóng Claude reviewer headless, cấp đúng công cụ cần để review, và giữ JSON nguyên vẹn:
 

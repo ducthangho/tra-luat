@@ -65,13 +65,20 @@ write_set_da_do_truoc_khi_cap: >-
 branch: claude/mcp-gh-cong-tu-canh-exec-1
 branch_ownership: exclusive
 target_branch_neu_land: master
-base_sha: 693d68fd6ae76cca2be936d0d91d6b49bec9c80c
+base_sha: fe6152be2cb77e90b2624487e5b2403e4e4424b7
 base_ghi_chu: >-
+  DỜI base 693d68fd -> fe6152be lúc 2026-08-28T01:45Z, TRƯỚC khi nhánh tồn tại nên không gì bị
+  vô hiệu. §3.2 KHÔNG liệt `base_sha` là thứ tạo revision. Lý do dời: `fe6152be` là master ngay
+  sau khi #334 land, và packet vừa rồi đốt HAI vòng vì bất ngờ closure — bắt đầu càng gần head
+  thì càng ít chỗ để bất ngờ. Write set không bị ảnh hưởng: master không chạm
+  `.claude/dev/mcp_gh_test.py` lẫn `ops/specs/mcp-gh-cuu-ho.md` trong khoảng ấy.
+  Bản chiếu KHÔNG theo: lease đã có `posted_comment_id` nên workflow bỏ qua (rc=9) và comment
+  trên Issue #360 vẫn ghi base cũ. Tệp YAML là bản CÓ THẨM QUYỀN.
   Base là `master` NGAY SAU khi #318 land (PR #358). Chọn head mới nhất thay vì base cũ của #319
   vì packet này không nối tiếp nhánh nào — nó là packet mới, và `S4` (master trôi) đã bắn SÁU lần
   trong ba ngày, nên bắt đầu càng gần head càng ít phải đối chiếu §5.1 về sau.
-start_from_sha: 693d68fd6ae76cca2be936d0d91d6b49bec9c80c
-reviewed_sha_required: 693d68fd6ae76cca2be936d0d91d6b49bec9c80c
+start_from_sha: fe6152be2cb77e90b2624487e5b2403e4e4424b7
+reviewed_sha_required: fe6152be2cb77e90b2624487e5b2403e4e4424b7
 reviewed_sha_ghi_chu: >-
   ĐỂ NGUYÊN BASE ở lượt cấp đầu — nhánh chưa tồn tại nên chưa có head để neo, mà
   `lease_publish.py` liệt `reviewed_sha_required` vào `BAT_BUOC` nên không bỏ trống được (đã đo:

@@ -84,3 +84,9 @@ ghi_chu_mo_hinh_reviewer: >-
   đòi KHÔNG còn mô hình nào khác. Probe ngắn trước khi phóng KHÔNG chứng nhận được gì cho
   lượt dài — đã đo: probe xanh 3/3 rồi lượt dài vẫn tụt hoàn toàn.
 posted_comment_id: 5447629721   # workflow ghi, ĐỪNG sửa tay
+
+# Thu hồi 2026-08-28: packet #363 đã được lệnh DỪNG, nhưng lease vẫn còn hiệu lực tới
+# 2026-08-29T02:00:00Z và vẫn giữ `launcher.py` + `launcher_test.py` — chặn packet
+# W1-P1 (#368). Người giữ kho duyệt thu hồi trong phiên 28-08-2026.
+# Cơ chế: `lenh_ai_dang_giu` loại lease CÒN_HẠN mang trường này khỏi NGƯỜI_GIỮ (d.930/934).
+da_bi_thay_the: w1-p1-van-chuyen-prompt-exec-1-codex-20260828

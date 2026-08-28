@@ -99,7 +99,6 @@ reviewed_sha_ghi_chu: >-
   numstat 5 thêm / 5 xoá trên đúng `RELEASE_MANIFEST.json`). Head r3 `33581a93` KHÔNG bị vứt —
   nội dung nó mang vẫn nguyên trong `9f553fc8`; nhưng revision mới ⇒ lease cũ mất hiệu lực
   (§3.2), nên vòng review neo vào head MỚI.
-  neo sai SHA là bằng chứng vô hiệu.
 
 viec_cua_luot_nay: >-
   ĐÚNG MỘT việc, thuần cơ học: tái sinh `RELEASE_MANIFEST.json` bằng CHÍNH bộ sinh của kho —

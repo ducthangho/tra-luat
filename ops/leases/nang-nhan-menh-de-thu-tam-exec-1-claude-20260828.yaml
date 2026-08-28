@@ -1,0 +1,131 @@
+# Lease EXECUTOR — `NANG-NHAN-MENH-DE-THU-TAM` (#364), lượt 1.
+#
+# Mục 2 của `ops/BAN_GIAO_PHIEN_20260827.md` nói việc này chỉ mở ra SAU khi #334 land.
+# #334 land `2026-08-28T01:40Z` (master `fe6152be`), nên bằng chứng bốn tổ hợp trong
+# `docs/MANG_SANDBOX_CODEX.md` nay đọc được từ clone bất kỳ. Điều kiện đã thoả bằng ĐO.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 364
+packet_id: NANG-NHAN-MENH-DE-THU-TAM
+phase_key: NANG-NHAN-MENH-DE-THU-TAM
+revision: 1
+generation: 1
+lease_id: nang-nhan-menh-de-thu-tam-exec-1-claude-20260828
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: >-
+  `sensitive` là MẶC ĐỊNH FAIL-CLOSE của `_BANG_LOP` (`docs/**` không có trong bảng), KHÔNG phải
+  tín hiệu chạm thẩm quyền. Lớp do CỔNG tính, không tự hạ. Packet thuần tài liệu dev-side;
+  `docs/**` không vào gói phát hành.
+
+executor_ghi_chu: >-
+  `claude` — KHÁC #334 và #360. Write set chỉ chạm `docs/**`, KHÔNG chạm `.claude/**`, nên nền
+  không từ chối `Edit`/`Write`. Reviewer là `codex` ⇒ cross-provider, đúng như #318 đã làm cho
+  chính tệp này qua 15 vòng.
+
+spec_path: 'ops/specs/nang-nhan-menh-de-thu-tam-packet-issue-nhap.md'
+spec_ref: 'refs/heads/ops/cap-lease-tach-314'
+spec_ghi_chu: >-
+  Hồ sơ CÓ THẨM QUYỀN là tệp trên nhánh `ops/cap-lease-tach-314`. Thân Issue #364 là BẢN CHIẾU.
+  Thứ định danh là BĂM, không phải tên nhánh.
+
+write_set:
+  - docs/GOI_AGENT_DA_NEN.md
+write_set_note: >-
+  ĐÚNG MỘT đường dẫn. `docs/MANG_SANDBOX_CODEX.md` KHÔNG vào write set — packet này chỉ ĐỌC nó,
+  và chính tệp đang sửa đã dặn "đừng chép chúng về đây". Trỏ sang, đừng nhân bản.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-28 ~02:25Z. So HAI NGUỒN bằng TẬP TÊN: `ls-remote --heads` 236 = `for-each-ref` 236;
+  `comm -23` RỖNG, `comm -13` RỖNG ⇒ không mù ref nào. Đã đồng bộ nhánh cục bộ trước khi đo.
+  Lượt đo ĐẦU trả `NGƯỜI_GIỮ 1: doctrine-ranh-gioi-reviewer-exec-1r4-claude-20260826` — lease của
+  #318, packet ĐÃ LAND lúc 00:19Z mà lease còn hạn tới 22:00Z, tức giữ đường dẫn thêm gần 20
+  tiếng một cách vô ích. Đúng nợ CÓ TÊN `AG-T0-01B-thu-hoi-lease-chua-co-duong`. Đã ĐÓNG SỚM nó
+  (hạ `lease_expires_at_utc` — cách DUY NHẤT kho có; khối `DONG_LEASE_SOM` trong tệp lease ấy).
+  Đo lại sau khi đóng: `docs/GOI_AGENT_DA_NEN.md` -> **NGƯỜI_GIỮ 0: không có**.
+chot_ton_tai_o_base: >-
+  `git cat-file -e fe6152be:docs/GOI_AGENT_DA_NEN.md` => CÓ, 742 dòng. Chốt này thành thường lệ
+  sau khi lease #360 cấp SAI base hai lần vì write set không tồn tại ở đó — `ai-dang-giu` trả lời
+  "ai đang giữ", KHÔNG trả lời "có tồn tại ở base không". Hai câu hỏi khác nhau.
+
+branch: claude/nang-nhan-menh-de-thu-tam-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: fe6152be2cb77e90b2624487e5b2403e4e4424b7
+base_ghi_chu: >-
+  Master ngay sau khi #334 land — CỐ Ý, vì bằng chứng bốn tổ hợp phải có mặt trong cây thì mới
+  đọc được. Base cũ hơn sẽ không có `docs/MANG_SANDBOX_CODEX.md`.
+start_from_sha: fe6152be2cb77e90b2624487e5b2403e4e4424b7
+reviewed_sha_required: fe6152be2cb77e90b2624487e5b2403e4e4424b7
+reviewed_sha_ghi_chu: >-
+  Để nguyên base ở lượt cấp đầu (nhánh chưa tồn tại; `lease_publish.py` liệt trường này vào
+  `BAT_BUOC`, để null sẽ `CHAN [8]`). PHẢI cập nhật sang exact head khi đưa ra review.
+
+viec_cua_luot_nay: >-
+  Đọc hồ sơ packet, rồi TỰ QUYẾT một trong ba khả năng (A)(B)(C) mà hồ sơ nêu, KÈM LÝ LẼ ĐO ĐƯỢC.
+  Hồ sơ CỐ Ý không đưa đáp án. Bàn giao phiên trước gợi ý (A) — nâng lên `cơ chế đã xác minh —
+  chiều MỞ`, phân bố `1/5/2/0/0` — nhưng đó là GIẢ THUYẾT chưa đo, và chính tệp bằng chứng mang
+  hai giới hạn ngược lại (loopback không phải egress; kênh `git` là `KHÔNG_ĐO_ĐƯỢC`).
+  KHÔNG chọn (A) chỉ vì bàn giao gợi ý (A).
+
+rang_buoc_bat_buoc: >-
+  Đổi nhãn thì phải đổi CẢ BA cùng lúc: (i) nhãn của mệnh đề; (ii) đoạn `VÌ SAO ... chứ không
+  phải ...` giải thích nhãn ấy; (iii) phép đếm phân bố ở khoảng dòng 625-626. Kho hỏng BỐN LẦN
+  đúng hình dạng "sửa TRƯỜNG được nới, quên VĂN BẢN mô tả nó" — và vòng 14 của #318 bắt được
+  đúng ca ấy trên chính tệp này: nhãn hạ đúng mà nội dung mệnh đề vẫn khai "biết cơ chế".
+
+phai_doc_truoc: >-
+  `ops/reviews/doctrine-ranh-gioi-reviewer-review-{13,14,15}-codex-verdict.md` trên nhánh
+  `ops/cap-lease-tach-314`. Vòng 13 bắt được bản vá KHAI MỘT PHÉP ĐO KHÔNG XẢY RA (dòng 678 nói
+  một cờ, dòng 682 nói hai cờ, cách nhau BỐN dòng). Vòng 14 bắt nhãn/nội dung lệch nhau. Hai lỗi
+  ấy nằm chính xác ở chỗ lượt này sắp chạm vào.
+
+phan_chung_bat_buoc: >-
+  Sau khi sửa, đọc lại VÙNG KIA — bảng hạng (616-620), phép đếm (625-626), và đoạn mệnh đề
+  (674-686) — chứ không chỉ vùng vừa gõ. QUÉT THEO Ý, KHÔNG THEO DIFF: đếm lại từng hạng trong
+  toàn tệp và đối chiếu với con số ghi ở 625-626; hai số phải khớp. Nếu chọn (C) thì cũng phải
+  chứng minh bằng cách chỉ ra ĐIỀU KIỆN nào của bảng hạng chưa thoả.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 1
+  dong_them_toi_da: 50
+  do_tu_sha: fe6152be2cb77e90b2624487e5b2403e4e4424b7
+  don_vi: 'dòng THÊM trên write set, `git diff --numstat`'
+  ghi_chu: >-
+    Ước lượng hồ sơ ~25 dòng; trần 50 là biên gấp đôi. Chạm trần ⇒ CẮT hoặc VIẾT NGẮN LẠI,
+    KHÔNG nâng trần (§12). #319 đã nâng bốn lần và con số mất hết ý nghĩa.
+
+dieu_kien_dung: >-
+  S1 write set đổi ⇒ dừng, đi qua revision (§3.2).
+  S2 chạm trần 50 dòng ⇒ CẮT, không nâng.
+  S3 cùng hình dạng lỗi lần thứ BA ⇒ dừng, xem lại cách làm (§12).
+  S4 master trôi ⇒ đo `merge-base --is-ancestor` + `numstat` trên ĐÚNG write set.
+  S5 nếu thấy cần chép số đo/probe/bảng từ `docs/MANG_SANDBOX_CODEX.md` sang ⇒ DỪNG. Chính tệp
+     đang sửa cấm điều đó; muốn dẫn thì TRỎ SANG.
+  S6 nếu phép đếm lại toàn tệp KHÔNG khớp con số ở 625-626 (kể cả trước khi sửa) ⇒ dừng và báo:
+     đó là một finding riêng, không phải chỗ để lặng lẽ chỉnh số cho khớp.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  Trực tiếp trong phiên, 2026-08-28: "Packet nâng nhãn mở issue và làm đi", nối tiếp uỷ quyền
+  thực thi cùng ngày: "cấp issue, phóng codex. và triển khai đến xong. tôi uỷ quyền thực thi cho
+  bạn, khi cần quyết định từ tôi hãy tự làm theo hướng tốt nhất."
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+recorder_ghi_chu: >-
+  Phiên ghi lease là `claude`; executor cũng `claude` nhưng là PHIÊN KHÁC, phóng qua
+  `launcher.py run`; reviewer `codex` ⇒ cross-provider. Phiên này KHÔNG viết bản vá — chỉ soạn
+  hồ sơ, mở Issue, đo người giữ, và cấp lease.
+
+leased_at_utc: '2026-08-28T02:35:00Z'
+lease_expires_at_utc: '2026-08-29T02:35:00Z'
+run_minutes: 1440

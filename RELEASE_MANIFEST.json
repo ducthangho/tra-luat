@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 180,
-  "total_bytes": 7935871,
-  "package_hash": "298108fed28af6a6f2fa4ed69b3028b9950f058c535bc7258f8833fe5fe59cd8",
-  "content_hash": "298108fed28af6a6f2fa4ed69b3028b9950f058c535bc7258f8833fe5fe59cd8",
+  "total_bytes": 7943144,
+  "package_hash": "3416357457db806c6e32efbb17310831d990ff6dec94a817ebb27d8173fd8386",
+  "content_hash": "3416357457db806c6e32efbb17310831d990ff6dec94a817ebb27d8173fd8386",
   "required_missing": [],
   "files": [
     {
@@ -838,8 +838,8 @@
     },
     {
       "path": "scripts/tl_core/workflow.py",
-      "size": 125808,
-      "sha256": "e76954d5ab08a209a9a3f00e0f24578e4f8f653111f42cdc2d6535c1a8be47cf"
+      "size": 126482,
+      "sha256": "9f70c01ef13e088d1aab337c202542150ffa185c253d682ae7052b498fe2f9b3"
     },
     {
       "path": "scripts/tl_core/zip_ingest.py",
@@ -858,8 +858,8 @@
     },
     {
       "path": "scripts/tl_selftest.py",
-      "size": 2125719,
-      "sha256": "6375489a4d8620ca6fb6b44dc36a8197b31900b41df7c5d0997ad04d93153388"
+      "size": 2132318,
+      "sha256": "3ffabb08f6742482d4a731f2157a7ef1c1433af7737d07acf734d2ee1999bb67"
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",

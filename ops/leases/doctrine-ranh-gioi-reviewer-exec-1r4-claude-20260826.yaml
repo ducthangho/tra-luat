@@ -445,9 +445,16 @@ DONG_LEASE_SOM:
     `NGƯỜI_GIỮ 1: doctrine-ranh-gioi-reviewer-exec-1r4-claude-20260826` — tức chính lease này đang
     CHẶN packet kế tiếp một cách vô ích.
   sua_lan_hai: >-
-    Bản đầu đặt hạn  mà lúc ghi mới , nên lease VẪN CÒN HẠN và 
-    vẫn trả . Đặt lại  — mốc đã qua. Ghi ra vì đây đúng lỗi "đặt hạn ở
-    TƯƠNG LAI rồi tưởng đã đóng"; phép đo bắt được ngay, và bài học rẻ hơn nếu nó nằm đây.
+    HAI lỗi trong một lượt, ghi cả hai vì cái thứ hai đắt hơn.
+    (1) Bản đầu đặt hạn `2026-08-28T02:30:00Z` mà lúc ghi mới `02:22Z`, tức MỐC TƯƠNG LAI, nên
+    lease VẪN CÒN HẠN và `ai-dang-giu` vẫn trả `NGƯỜI_GIỮ 1`. Phải hạ về `2026-08-28T02:20:00Z`
+    — mốc đã qua — thì mới thành `NGƯỜI_GIỮ 0`.
+    (2) Lượt sửa (1) dùng heredoc KHÔNG TRÍCH DẪN (`<<PYEOF` thay vì `<<'PYEOF'`), nên vỏ shell
+    THỰC THI mọi cụm trong dấu huyền rồi thay bằng chuỗi RỖNG. Năm cụm bị nuốt sạch, và câu văn
+    còn lại đọc thành vô nghĩa. `yaml.safe_load` vẫn in OK — đúng nửa sau của bẫy: CỔNG CÚ PHÁP
+    XANH TRONG KHI NỘI DUNG ĐÃ HỎNG. Đây là bẫy đã được ghi nguyên văn trong bàn giao phiên
+    (`ops/BAN_GIAO_PHIEN_20260827.md` mục 7) và phiên này vẫn mắc; chỉ lộ ra vì có `assert` trên
+    NỘI DUNG chứ không chỉ trên cú pháp. Bản này viết lại bằng heredoc TRÍCH DẪN.
   cach_dong: >-
     Kho KHÔNG có đường thu hồi lease; cách DUY NHẤT là hạ `lease_expires_at_utc`. Đây đúng cách
     #319 đã đóng r6 (bản ghi `ops/DONG_LEASE_MCP_GH_CUU_HO_r6_20260827.md`). Không phải mẹo —

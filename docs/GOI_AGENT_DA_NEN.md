@@ -644,7 +644,7 @@ ba ô `chưa xếp được` là ba mệnh đề chưa chốt.
 KHÔNG tố cáo sự kiện đang bàn. `quan sát chưa rõ cơ chế` rỗng vì lý do riêng của TỪNG mệnh đề chưa
 chốt, không phải một lý do chung: hàng `workspace-write` không mang phiên bản lẫn số lần lặp, mà
 hạng ấy đòi lặp lại được; mệnh đề bộ-ba-với-quyền-ghi thì chưa ai đo CƠ CHẾ; và mệnh đề mạng
-sandbox có phép đo nhưng phép ấy bật HAI cờ cùng lúc nên không tách được cơ chế — cùng lý do nó
+sandbox có phép đo nhưng kênh `git` ở đó mang lớp `KHÔNG_ĐO_ĐƯỢC` (xem đoạn dưới) — cùng lý do nó
 KHÔNG lên được `chiều MỞ`. Thiếu điều kiện thì chỗ của chúng là ô dư, không phải hạng gần nhất. Bảng giữ đủ năm hàng vì nó là **từ vựng dùng chung**; đừng đọc
 số hàng thành số hạng đã dùng.
 
@@ -679,12 +679,15 @@ trên CÙNG một lệnh: mặc định `git ls-remote` lỗi kết nối; sau k
 (`network_access` và `writable_roots`) thì `lsremote_rc=0`. Điều kiện: codex CLI trong container
 này, sandbox `workspace-write`, vỏ phiên điều phối; số phụ thuộc phiên bản và cấu hình, đọc như
 QUAN SÁT CÓ ĐIỀU KIỆN ĐO.
-VÌ SAO `chưa xếp được` chứ không phải `chiều MỞ`: A/B hai-biến chứng minh TỔ HỢP cấu hình đổi được
-kết quả, KHÔNG đo cờ nào là nguyên nhân; `ls-remote` không ghi `.git` nên "cờ mạng là thủ phạm" là
-SUY LUẬN, mà bảng hạng đòi cơ chế ĐÃ XÁC MINH. Cũng không phải `quan sát chưa rõ cơ chế`: hạng ấy
-đòi số lần lặp và phiên bản ghi ngay tại quan sát, mục này không có. Phép tách bốn tổ hợp
-(không cờ · chỉ mạng · chỉ ghi · cả hai) thuộc packet kia; xong nó thì hạng này đo lại được.
-Thứ ở packet kia là số đo đầy đủ, probe và bảng hai pha — **đừng chép chúng về đây**.
+VÌ SAO `chưa xếp được` chứ không phải `chiều MỞ`, đo lại SAU KHI packet `MANG-SANDBOX-CODEX`
+(#334) land: phép tách bốn tổ hợp mà đoạn trên hẹn nay ĐÃ CÓ ở `docs/MANG_SANDBOX_CODEX.md`, nên
+lý do CŨ ("hai cờ chưa tách") không còn đứng được. Lý do MỚI nằm ở chính kênh mà mệnh đề này dùng
+làm bằng chứng — `git`: tệp bốn-tổ-hợp đó tự khai lớp của kênh `git` ở trạng thái đóng là
+`KHÔNG_ĐO_ĐƯỢC`, vì phiên đo chưa tách được sandbox chặn khỏi việc không nối tới proxy loopback
+của chính phiên đo — nên đo lại vẫn không cho biết VÌ SAO nó không chặn, điều kiện mà `chiều MỞ`
+đòi. Cũng không phải `quan sát chưa rõ cơ chế`: hạng ấy đòi số lần lặp và phiên bản ghi ngay tại
+quan sát, mục này không có. Số đo đầy đủ, probe và bảng hai pha nằm ở
+`docs/MANG_SANDBOX_CODEX.md` (#334) — **đừng chép chúng về đây**.
 
 Cross-review dựng remote bare tạm rồi push từ trong phiên "read-only": `rc=0`, ref được tạo, và
 `--require-clean` **vẫn báo sạch**. Đo tiếp BA control ấy — năm hàng, vì `--allowedTools` vào bảng

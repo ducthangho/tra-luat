@@ -1,0 +1,91 @@
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '361'
+provider: claude
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 7116d6c74349a91f12c3ef060de9c689aac2e822
+luot: r2
+cross_provider: true
+assurance: cross_approved
+executor_provider: codex
+verdict_path: ops/reviews/cong-ngoai-write-set-review-2-claude-verdict.md
+verdict_sha256: 71ae709baaa9e7402b33e4b7e4284a1e192a1caa5814bbde4f7f69aed990d5c0
+verdict_bytes: 19439
+ket_qua_dem_duoc:
+  P1: 1
+  P2: 2
+  finding_moi: 1
+ba_finding_luot_1_deu_dong:
+  P1_chuoi_trong_chu_thich: >-
+    DA VA THAT, CO GIOI HAN. `kiem()` nay parse YAML, lay dung truong `run:` cua tung step, va loc
+    dong chu thich NGAY TRONG than `run`. Reviewer tu dung lai kich ban cua luot 1 bang script
+    RIENG (khong dung `phan_chung()` cua chinh tep lam bang chung cho chinh no) => cong bao dung
+    `CI khong goi muc dang ky`. Nhung phep sua chua doc `if:` => sinh ra finding-02.
+  P2_lease_khai_sai_co_che: >-
+    DA VA DUNG, trong TAI LIEU. Reviewer vo hieu nhanh OPS_REVIEWS tren ban sao module that, giu
+    nguyen "luat 1" => hai tep roi vao `la`. Xac nhan dinh chinh cua r5 la DUNG: nhanh kiem ten thu
+    muc chay TRUOC va la co che loai tru THAT. Ma khong doi o r5, dung nhu lease khai.
+  P1_gia_tri_moi_truong: >-
+    DA VA THAT. `MOI_TRUONG_CI` la hang so DUY NHAT. Reviewer grep toan tep xac nhan khong co ban
+    chep thu hai nao NGOAI co che kiem: hai cho hardcode con lai la DU LIEU cua CACH_LY (dung ban
+    chat, phai la literal) va bi chinh `kiem()` xac thuc; ba cho khac chi la input test thuan.
+P1_MOI_chan_land:
+  ten: finding-02-if-false-vinh-vien-vo-hieu-chieu-iii
+  noi_dung: >-
+    Phep trich `run` KHONG doc `step.get("if")` lan `job.get("if")`. Mot step — hoac ca job — mang
+    `if: false` van co `run` la chuoi hop le, nen van khop, trong khi GitHub KHONG BAO GIO chay no.
+    Do la chieu (iii) — chinh chieu lease mo ta la "bat duoc dung cai lo da sinh ra packet".
+  do_duoc: >-
+    step-if-false LOT · job-if-false LOT · step-if-always-false-expr LOT · baseline-normal-step
+    KHONG bao loi (ca doi chung dung). Do bang script rieng tren module that o dung sha, khoi phuc
+    trang thai module ngay sau — khong de lai trang thai meo.
+  vi_sao_P1_du_executor_TU_KHAI: >-
+    `if: false` / `if: 'false'` / `if: ${{ false }}` la gia tri YAML DOC TINH DUOC, re, va QUYET
+    DINH DUOC dut khoat — khac han cac bien the o finding-03. Ban va da cam san `step`/`job` dict
+    trong tay, chi thieu mot dong kiem. De ho dung phan RE NHAT cua lo ma packet ton tai de dong,
+    sau khi da thu hep phan kho, nghia la duong lach chi co tu "sua bat ky dong nao trong workflow"
+    xuong "them dung MOT dong `if: false`" — van nam gon trong write set nay.
+    Reviewer noi thang: TU KHAI lam review KHONG BAT NGO khi tim ra, nhung khong lam giam muc
+    nghiem trong cua mot lo con song. Xep hang la viec cua reviewer, khong phai cho executor tu
+    mien tru. Phien dieu phoi CO Y khong xep hang truoc va hoi reviewer ma KHONG kem dap an.
+  cung_ho_voi_P1_luot_1: >-
+    Ca hai la "kiem SU CO MAT tinh cua van ban `run:` ma khong kiem KHA NANG thi hanh" — dung benh
+    "dem su CO MAT thay vi KHA NANG" kho da ghi nhan nhieu lan.
+P2_MOI_01:
+  ten: AG-361-P2-03-if-khong-literal-va-dead-code-shell-van-lot
+  noi_dung: >-
+    Ba bien the van LOT: (a) `if:` mang bieu thuc khong phai literal nhung luon sai; (b) lenh that
+    nam sau mot dieu kien shell khong bao gio dung; (c) lenh that nam sau `exit 0`. Ca ba doi mot
+    trinh danh gia bieu thuc Actions hoac thong dich shell tinh — VE NGUYEN TAC khong giai duoc day
+    du bang phan tich tinh. Day la gioi han CAU TRUC cua cach tiep can "doc `run:` da parse", khong
+    phai loi va duoc bang vai dong. Reviewer tu khai do tin cho DO UU TIEN chi la "vua" vi ranh gioi
+    "quyet dinh duoc tinh" vs "khong" la phan doan cua reviewer, khong phai vach co san trong kho.
+P2_MOI_02:
+  ten: AG-361-P2-04-phan-chung-write-text-goi-hai-lan
+  noi_dung: >-
+    Mot khoi trong `phan_chung()` goi `write_text()` hai lan; lan dau la dong chet. Hanh vi hien tai
+    DUNG y do cua ca test; chi gay hieu lam khi doc. Don dep, khong phai dung/sai.
+KHUYET_TAT_CUA_CHINH_LUOT_REVIEW_NAY:
+  thieu_so_chay: >-
+    Verdict ghi "`--chay`: xem phan cap nhat cuoi tep" nhung PHAN CAP NHAT AY KHONG BAO GIO DUOC
+    VIET — reviewer nen hoa `--chay` roi het luot. Brief da canh bao dung dieu nay ("chay TIEN CANH,
+    dung nen hoa roi cho thong bao") va no VAN xay ra. Ghi ra day thay vi de trong.
+  phien_dieu_phoi_da_do_thay: >-
+    Phien dieu phoi tu chay `--chay` o vo binh thuong tren DUNG cay 7116d6c:
+      TONG: DAT · rc=0 (do bang $? sau loi goi tran)
+      chon_reviewer DAT · gh_readback DAT · mcp_github_doc DAT · probe_mang DAT ·
+      subagent_ghi_detect DAT · nhanh_don_duoc DAT (8/8)
+      mcp_gh KHONG DO DUOC · pretooluse_guard KHONG DO DUOC (moi truong khong khop neo)
+      PHAN CHUNG: 13/13 do dung
+    Day la do CUA PHIEN DIEU PHOI, KHONG phai cua reviewer — khong duoc coi la mot phan cua verdict.
+  executor_bao_do_la_TAO_TAC_SANDBOX: >-
+    Executor bao `--chay` DO vi `ops/nhanh_don_duoc_test.py` ra 0/8. O vo binh thuong no ra 8/8.
+    Executor DUNG khi tu choi khai xanh va DUNG khi noi thang la khong phan biet duoc.
+KHONG_DO_DUOC:
+  gate_github_actions: >-
+    Reviewer do doc lap: `curl` toi api.github.com tra 403 KHONG kem header GitHub nao (chan o tang
+    proxy/to chuc, khong phai GitHub tu choi token). Khong suy ra mau. Trung ket luan cua phien
+    dieu phoi.
+khong_P1_nao_bi_ha_xuong_P2: true
+khong_P2_nao_bi_nang_len_P1: true

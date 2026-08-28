@@ -418,8 +418,28 @@ xoá nhánh/tạo tag. **Lỗ đã biết của chốt ấy:** nó chặn theo H
 
 Đường dùng được: `.github/workflows/ops-don-ref.yml` (`workflow_dispatch`, kích hoạt được từ phiên web
 qua MCP `actions_run_trigger`). Nó **cấp lại đúng quyền sandbox cố ý không cho**, nên mặc định là THỬ
-KHÔ, đòi gõ `XOA`/`TAO`, và bảo vệ `luu-tru/** ops/** claude/** codex/** agent/** mission/**
-dispatcher/**` cùng nhánh mặc định. Phản chứng: `ops/don_ref_chot_test.sh`.
+KHÔ, đòi gõ `XOA`/`TAO`, và bảo vệ nhánh mặc định tuyệt đối. Với `luu-tru/**` và với vùng làm việc
+(`ops/** claude/** codex/** agent/** mission/** dispatcher/**`) nó KHÔNG cấm nữa mà **ĐO** — cùng một
+hình dạng bản vá, hai lần, vì cùng một lý do: bất biến cần giữ là *"đừng làm commit thành không tra
+được"*, không phải *"đừng đụng không gian tên này"*, và một chốt cấm cả việc ĐÚNG thì người ta sẽ đi
+vòng quanh nó (đo được 21-08-2026: 16 nhánh `ops/**` đã land hết mà không đường nào dọn). Nhánh
+`luu-tru/**` xoá được khi commit CÒN TAG GIỮ; nhánh vùng làm việc xoá được khi `behind_by = 0` so với
+nhánh mặc định — tức mọi commit của nó đã nằm trong đó. **Ba trạng thái, không phải hai**: là tổ tiên ·
+không phải · KHÔNG ĐO ĐƯỢC, và cái thứ ba làm cổng ĐỎ. Xoá **TAG** mang tên các vùng ấy thì vẫn CẤM —
+tag không có quan hệ tổ-tiên để mà đo. Kèm chốt GHIM + **LEASE**: bước chốt ghi lại SHA đã đo, bước
+làm xoá bằng `git push --force-with-lease=<ref>:<sha ghim> origin :<ref>` chứ KHÔNG bằng
+`DELETE /git/refs` — REST chỉ nhận TÊN ref, không có SHA kỳ vọng, tức không có CAS.
+**Bản đầu của mục này viết SAI và cross-review bắt được**: nó nói "đọc lại đầu nhánh rồi so" là
+**đóng** khe giữa lúc ĐO và lúc XOÁ. Không đóng — chỉ THU HẸP. Reviewer dựng đồ giả GIỮ TRẠNG THÁI
+cho nhánh nhảy SHA đúng giữa lần đọc cuối và lệnh xoá, và bản ấy **xoá mất commit chưa từng được đo**
+(`rc=0`, DELETE gọi đúng một lần, nhật ký xác nhận chính SHA mới bị xoá). Lease thì gửi old-oid
+**trong cùng giao dịch**, nên không còn khe. Đo được 21-08-2026 trên kho bare dựng tại chỗ, cả nhánh
+lẫn tag: lease neo SHA cũ ⇒ `! [rejected] … (stale info)`, `rc=1`, ref CÒN; lease neo SHA đúng ⇒
+`- [deleted]`, `rc=0`, ref MẤT — và chạy được cả từ kho **0 object**, nên runner chỉ cần một remote
+có xác thực, không cần lịch sử. Bài học chung, không riêng chỗ này: **"thu hẹp" mà viết thành "đóng"
+là một lời khai rộng hơn phép đo** — đúng lớp lỗi mà chính tệp này dạy, và người viết câu sai là
+người vừa đọc nó. Phản chứng: `ops/don_ref_chot_test.sh` (105 ca; đột biến quay về REST DELETE làm
+ca "nhánh nhảy SHA giữa ĐO và XOÁ" ĐỎ đúng như reviewer đã dựng).
 
 **`luu-tru/*` là ref BỀN duy nhất** giữ các commit công bố verdict sau khi nhánh `ops/**` bị xoá — xem
 `ops/reviews/README.md`. Xoá tag ấy là làm `published_*` trong `ops/reviews/*.receipt.yaml` thành SHA

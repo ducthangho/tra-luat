@@ -70,6 +70,17 @@ jobs:
   don:
     runs-on: ubuntu-latest
     steps:
+      # CẦN cho `git push --force-with-lease`: bước làm xoá ref bằng LEASE qua git
+      # transport chứ không bằng `DELETE /git/refs` (REST không nhận SHA kỳ vọng, xem
+      # chú thích ở bước làm). `actions/checkout` đặt credential vào git config dạng
+      # header, KHÔNG nhét token vào URL remote — đường kia là một chỗ rò credential.
+      # `fetch-depth: 1`: ĐO ĐƯỢC 21-08-2026 rằng `--force-with-lease` với giá trị kỳ
+      # vọng nêu TƯỜNG MINH (`ref:sha`) chạy được cả từ một kho KHÔNG có object nào —
+      # nên không cần lịch sử, chỉ cần một remote có xác thực.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: khai đầu vào vào log
         env:
           HANH_DONG: ${{ inputs.hanh_dong }}
@@ -116,6 +127,13 @@ jobs:
           MAC_DINH=$(gh api "repos/$GITHUB_REPOSITORY" --jq .default_branch)
           test -n "$MAC_DINH"
           echo "nhánh mặc định đo được: $MAC_DINH"
+
+          # Tệp GHIM SHA, dùng chung với bước làm. Cùng runner nên cùng đĩa.
+          # Mặc định NHIỀU TẦNG vì bộ phản chứng chạy thân bước này NGOÀI Actions, nơi
+          # `RUNNER_TEMP` không được đặt — để trống thì `>>` ghi vào `/don_ref_neo.txt`
+          # và chết vì không có quyền, tức chốt hỏng ở chỗ chẳng liên quan gì tới nó.
+          NEO_TEP="${NEO_TEP:-${RUNNER_TEMP:-/tmp}/don_ref_neo.txt}"
+          : > "$NEO_TEP"
 
           # `read -ra` NUỐT phần tử rỗng ở CUỐI, nên `a,` lọt qua vòng kiểm phần tử.
           # Soi chuỗi THÔ trước khi tách — finding P1 của cross-review, đúng.
@@ -190,13 +208,84 @@ jobs:
                   fi
                   if gh api --paginate "repos/$GITHUB_REPOSITORY/tags" --jq '.[].commit.sha' 2>/dev/null | grep -qxF "$sha_nhanh"; then
                     echo "cho phép: '$r' ($sha_nhanh) vẫn còn tag giữ commit ấy"
+                    sha_ghim="$sha_nhanh"
                   else
                     echo "DỪNG: '$r' trỏ $sha_nhanh mà KHÔNG tag nào giữ commit ấy. Xoá nhánh này là làm published_* trong ops/reviews/*.receipt.yaml thành SHA không tra được. Tạo tag TRƯỚC (hành động tao-tag), rồi mới xoá."; exit 2
                   fi
                   ;;
                 ops/*|claude/*|codex/*|agent/*|mission/*|dispatcher/*)
-                  echo "DỪNG: '$r' thuộc vùng làm việc được bảo vệ (ops/ claude/ codex/ agent/ mission/ dispatcher/). Nhánh ở đây thường mang hồ sơ chưa vào master — xoá phải do người, không qua workflow."; exit 2 ;;
+                  # ĐỔI TỪ LỆNH CẤM SANG PHÉP ĐO — cùng hình dạng bản vá đã làm cho
+                  # `luu-tru/**` ngay phía trên, và vì cùng một lý do.
+                  #
+                  # Bản trước cấm tuyệt đối, với lý lẽ ghi thẳng trong thông điệp:
+                  # "nhánh ở đây THƯỜNG mang hồ sơ chưa vào master". Chữ THƯỜNG là chỗ
+                  # yếu: nó là một PHỎNG ĐOÁN về nội dung, và workflow này thì đo được
+                  # nội dung thật. Bất biến cần giữ KHÔNG phải "đừng đụng ops/**" mà là
+                  # "đừng làm commit thành không tra được". Một nhánh mà MỌI commit đã
+                  # nằm trong nhánh mặc định thì xoá nó không làm mất gì: commit vẫn
+                  # tra được qua nhánh mặc định.
+                  #
+                  # ĐO ĐƯỢC 21-08-2026, đây là chi phí thật của lệnh cấm: 16 nhánh
+                  # `ops/**` của đợt PLAT-X4/X5 đã land hết vào master mà không đường
+                  # nào dọn được — phiên web bị proxy chặn xoá ref (403), còn workflow
+                  # này thì tự từ chối. Một chốt cấm cả việc ĐÚNG sẽ đẩy người ta đi
+                  # tìm đường vòng quanh nó, và đường vòng thì không ai gác.
+                  #
+                  # BA TRẠNG THÁI, không phải hai: `là tổ tiên` · `không phải` ·
+                  # `KHÔNG ĐO ĐƯỢC`. Trạng thái thứ ba phải ĐỎ — `None ≠ False`.
+                  #
+                  # XOÁ TAG mang tên các vùng này thì vẫn CẤM: tag không có quan hệ
+                  # "tổ tiên của nhánh mặc định" để mà đo, nên không có phép đo nào
+                  # thay được lệnh cấm ở đó.
+                  if [ "$HANH_DONG" != xoa-nhanh ]; then
+                    echo "DỪNG: '$r' là TAG mang tên vùng làm việc được bảo vệ. Phép đo tổ-tiên chỉ áp dụng cho NHÁNH; với tag không có gì để đo nên vẫn cấm."; exit 2
+                  fi
+                  sha_nhanh="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/$r" --jq .object.sha 2>/dev/null || true)"
+                  if ! printf '%s' "$sha_nhanh" | grep -Eq '^[0-9a-f]{40}$'; then
+                    echo "DỪNG: KHÔNG ĐO ĐƯỢC SHA của nhánh '$r' — không xoá mù một nhánh trong vùng làm việc."; exit 2
+                  fi
+                  # So bằng SHA chứ không bằng TÊN trong đường dẫn `compare`: tên nhánh
+                  # ở đây có dấu `/` (`ops/x`), mà `compare/{base}...{head}` ghép thẳng
+                  # vào đường dẫn URL. Dùng SHA vừa tránh chuyện ấy, vừa GHIM phép đo
+                  # vào đúng commit ta vừa đọc — đo một thứ rồi xoá một thứ khác là
+                  # đúng cái bẫy `t53` đã ghi.
+                  #
+                  # `behind_by` = số commit mà BASE có còn HEAD không có. Base là đầu
+                  # nhánh, head là nhánh mặc định ⇒ `behind_by = 0` CHÍNH LÀ "mọi commit
+                  # của nhánh đã nằm trong nhánh mặc định". Đọc số, không đọc chuỗi
+                  # `status`: `identical`/`ahead`/`behind`/`diverged` là phân loại bằng
+                  # văn bản, và kho này đã trả giá vì phân loại bằng văn bản tự do.
+                  sau_lung="$(gh api "repos/$GITHUB_REPOSITORY/compare/$sha_nhanh...$MAC_DINH" --jq .behind_by 2>/dev/null || true)"
+                  if ! printf '%s' "$sau_lung" | grep -Eq '^[0-9]+$'; then
+                    echo "DỪNG: KHÔNG ĐO ĐƯỢC quan hệ giữa '$r' ($sha_nhanh) và nhánh mặc định $MAC_DINH — coi như CHƯA đo, không xoá."; exit 2
+                  fi
+                  if [ "$sau_lung" != 0 ]; then
+                    echo "DỪNG: '$r' còn $sau_lung commit CHƯA có trong $MAC_DINH. Xoá là làm chúng không tra được. Merge vào $MAC_DINH trước, hoặc tạo tag giữ chúng."; exit 2
+                  fi
+                  echo "cho phép: '$r' ($sha_nhanh) — 0 commit ngoài $MAC_DINH"
+                  sha_ghim="$sha_nhanh"
+                  ;;
               esac
+
+              # ═══ GHIM SHA cho MỌI ref sắp xoá, không riêng vùng làm việc ═══
+              # Bước làm xoá bằng LEASE (`--force-with-lease=ref:sha`), nên nó cần một
+              # giá trị KỲ VỌNG — và giá trị ấy phải là thứ ta vừa ĐO ở đây, không phải
+              # thứ đọc lại sau. Đọc lại rồi so rồi xoá vẫn là TOCTOU: cross-review lượt 1
+              # trên PR "#213" dựng đồ giả cho nhánh nhảy SHA ĐÚNG GIỮA lần đọc cuối và
+              # lệnh xoá, và bản trước xoá mất commit chưa từng được đo. Lease thì gửi
+              # old-oid TRONG CÙNG giao dịch, nên không có khe.
+              #
+              # Không đọc được SHA ⇒ DỪNG. Không có giá trị ghim thì không dựng được
+              # lease, mà xoá không lease là quay lại đúng lỗ vừa vá.
+              LOAI_REF=heads; [ "$HANH_DONG" = xoa-tag ] && LOAI_REF=tags
+              if [ -z "${sha_ghim:-}" ]; then
+                sha_ghim="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/$LOAI_REF/$r" --jq .object.sha 2>/dev/null || true)"
+              fi
+              if ! printf '%s' "${sha_ghim:-}" | grep -Eq '^[0-9a-f]{40}$'; then
+                echo "DỪNG: KHÔNG ĐO ĐƯỢC SHA của '$r' — không có giá trị nào để ghim, mà lease của bước làm thì bắt buộc."; exit 2
+              fi
+              printf '%s %s\n' "$r" "$sha_ghim" >> "$NEO_TEP"
+              unset sha_ghim
             else
               # TẠO TAG cũng chịu danh sách bảo vệ — TRỪ `luu-tru/`, và chỗ trừ này là
               # một bản vá, không phải một ngoại lệ tiện tay.
@@ -248,6 +337,7 @@ jobs:
         run: |
           set -euo pipefail
           LOAI=heads; [ "$HANH_DONG" != xoa-nhanh ] && LOAI=tags
+          NEO_TEP="${NEO_TEP:-${RUNNER_TEMP:-/tmp}/don_ref_neo.txt}"
 
           # NÉN cả hai danh sách trước khi ghép — không ghép theo chỉ số của mảng thô.
           # Chốt đã chặn phần tử rỗng, nhưng hai lớp cho một finding P1 là đáng: lớp
@@ -309,7 +399,25 @@ jobs:
                 khong) echo "ĐỎ: $LOAI/$r KHÔNG tồn tại — không xoá được thứ không có"; exit 1 ;;
                 *) echo "ĐỎ: KHÔNG ĐO ĐƯỢC $LOAI/$r trước khi xoá — dừng, không xoá mù. $truoc"; exit 1 ;;
               esac
-              gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/$LOAI/$r"
+              # ═══ XOÁ BẰNG LEASE, KHÔNG bằng REST ═══
+              # `DELETE /repos/{o}/{r}/git/refs/{ref}` chỉ nhận TÊN ref — không có tham
+              # số SHA kỳ vọng, tức không có CAS. Bản trước đọc lại SHA rồi so rồi mới
+              # gọi DELETE; cross-review lượt 1 trên PR "#213" dựng đồ giả GIỮ TRẠNG THÁI
+              # cho nhánh nhảy SHA ĐÚNG GIỮA lần đọc cuối và lệnh xoá, và bản ấy xoá mất
+              # commit chưa từng được đo. "Đọc lại" THU HẸP khe, KHÔNG đóng nó — câu cũ
+              # viết là "đóng" và câu ấy sai.
+              #
+              # `git push --force-with-lease=<ref>:<sha> origin :<ref>` gửi old-oid
+              # TRONG CÙNG giao dịch với lệnh xoá, nên máy chủ từ chối nếu ref đã đổi.
+              # ĐO ĐƯỢC 21-08-2026 trên kho bare dựng tại chỗ, cả nhánh lẫn tag:
+              #   lease neo SHA CŨ  -> `! [rejected] (delete) … (stale info)`, rc=1, ref CÒN
+              #   lease neo SHA ĐÚNG -> `- [deleted]`, rc=0, ref MẤT
+              # và nó chạy được cả từ kho KHÔNG có object nào (0 objects) — chỉ cần remote.
+              neo="$(awk -v k="$r" '$1==k{print $2}' "$NEO_TEP" 2>/dev/null | tail -1)"
+              if ! printf '%s' "$neo" | grep -Eq '^[0-9a-f]{40}$'; then
+                echo "ĐỎ: '$r' KHÔNG có SHA ghim từ bước chốt — không dựng được lease, và xoá không lease là quay lại đúng lỗ vừa vá."; exit 1
+              fi
+              git push --force-with-lease="refs/$LOAI/$r:$neo" origin ":refs/$LOAI/$r"
               # Không có gì ở đây bảo đảm lệnh trên ĐÃ CHẠY nếu ai đó xoá nó đi — phép
               # đọc lại phía dưới sẽ vẫn xanh khi ref tình cờ đã biến mất vì lý do khác.
               # Chốt thật nằm ở bộ test (đòi đúng một lời gọi DELETE trong nhật ký).

@@ -1,0 +1,122 @@
+# Lease EXECUTOR — `MCP-DOC-PHAN-TICH` (#359), lượt 1.
+#
+# Nợ khai lúc land PR #357 (#355). BA finding P2 của connector để MỞ có chủ đích:
+# `r3873588649` tìm gốc dự án · `r3873588657` `headers` falsy · `r3873588663` SSE nhiều dòng.
+#
+# Packet MỚI ⇒ trần vòng review về lại 2 (ADR-0043). KHÔNG kế thừa lần `nang_tran 2->3` của #355.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 359
+packet_id: MCP-DOC-PHAN-TICH
+phase_key: MCP-DOC-PHAN-TICH
+revision: 2
+generation: 1
+lease_id: mcp-doc-phan-tich-exec-1r2-codex-20260827
+thay_the_cho: mcp-doc-phan-tich-exec-1-codex-20260827
+
+thay_the_ly_do_r1: >-
+  KHÔNG phải thay thế một lease đang dở: packet #355 ĐÃ LAND (PR #357, merge `452335a`).
+  Nhưng lease r2 của nó vẫn CÒN HẠN tới `2026-08-28T11:30:00Z` và vẫn giữ ĐÚNG hai đường
+  dẫn này — đo được: `ai-dang-giu` trả `NGƯỜI_GIỮ 1: mcp-github-doc-exec-1r2-codex-20260827`.
+  Đó là nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong`: quyền ghi sống sót sau khi việc đã xong.
+  Cấp lease mới cho cùng write set mà KHÔNG thu hồi bản cũ là tự tạo cửa sổ hai writer —
+  đúng thứ write-set exclusion sinh ra để chặn. `da_bi_thay_the` là cơ chế DUY NHẤT tắt được
+  một lease còn hạn (`_phan_loai_lease` chỉ biết hạn; `lenh_ai_dang_giu` đọc `da_bi_thay_the`).
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  Như #355 và vì cùng lý do: `sensitive` vì tệp chuyển `${GITHUB_PAT}` tới endpoint ngoài;
+  `risk: normal` vì trần ADR-0044 `≤3 tệp / ≤300 dòng` gắn với packet CHẠM AUTHORITY, mà
+  `.claude/dev/**` là dev-side, NGOÀI gói phát hành, không cổng nào đọc.
+
+spec_path: ops/specs/MCP-DOC-PHAN-TICH.md
+spec_hash: d8bbca8ee7a85ece60f20209458bdbe64aa7336f1157f913cf14f619f22f25eb
+spec_note: >-
+  Issue #359. Executor PHẢI tự đo lại mọi con số, kể cả ba mệnh đề về khả năng tái sử dụng
+  `_doc_mcp_json` — chúng là ĐO CỦA PHIÊN ĐIỀU PHỐI, không phải chân lý.
+
+write_set:
+  - .claude/dev/mcp_github_doc.py
+  - .claude/dev/mcp_github_doc_test.py
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-27T17:0xZ trên `693d68fd`. Phép so HAI NGUỒN (TẬP TÊN): ls-remote 235 ·
+  for-each-ref 235 · `comm` RỖNG hai chiều · không shallow. Master vừa đi tiếp vì PR #358
+  (packet #318) — đã kiểm nó KHÔNG chạm write set này (`git diff --stat` rỗng).
+
+branch: codex/mcp-doc-phan-tich-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 693d68fd6ae76cca2be936d0d91d6b49bec9c80c
+start_from_sha: 693d68fd6ae76cca2be936d0d91d6b49bec9c80c
+reviewed_sha_required: 693d68fd6ae76cca2be936d0d91d6b49bec9c80c
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 6
+  dong_them_toi_da: 1000
+  do_tu_sha: 693d68fd6ae76cca2be936d0d91d6b49bec9c80c
+  don_vi: >-
+    `git diff --numstat 693d68fd6ae76cca2be936d0d91d6b49bec9c80c -- .claude/dev/mcp_github_doc.py
+    .claude/dev/mcp_github_doc_test.py` — THÊM cộng XOÁ. Pathspec TRONG lệnh, KHÔNG `..HEAD`.
+  da_dung: 0
+  ghi_chu: >-
+    Đo TỪ master mới, nên bắt đầu lại từ 0 — 622 dòng của #355 đã nằm trong `base_sha`.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-27: "cấp lease và làm như các lần"'
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+
+recorder_xung_dot_loi_ich: >-
+  KHAI LẠI, vì nó chưa mất: phiên ghi lease này chính là phiên viết BẢN NHÁP GỐC của
+  `mcp_github_doc.py`. Ba finding của packet này đều nằm trong phần tôi viết. Nên khi tôi
+  làm reviewer, phần lõi không được review độc lập với tác giả. Bù bằng cross-review
+  connector; connector im lặng ⇒ đọc là CHƯA CHẠY, không phải sạch.
+
+leased_at_utc: '2026-08-27T17:05:00Z'
+lease_expires_at_utc: '2026-08-28T17:05:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  Đúng hai tệp trong `write_set`. KHÔNG đụng `launcher.py` (tệp nóng), KHÔNG đụng
+  `.mcp.json`, KHÔNG đụng `gh_readback.py`.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ngoài write set ⇒ DỪNG ·
+  S2 vượt 1000 dòng thêm+xoá ⇒ DỪNG, khai ·
+  S3 phương án gọn nhất đòi SỬA `launcher.py` ⇒ DỪNG, trình phép đo, xin quyết định —
+  đó là mở phạm vi sang tệp nóng, KHÔNG thuộc lượt này ·
+  S4 tái sử dụng `_doc_mcp_json` làm MẤT một khác biệt PHẠM VI hợp lệ (vd khai kiểu
+  `stdio` không URL) ⇒ DỪNG, khai — "thống nhất" kiểu ấy là phá, không phải sửa ·
+  S5 `origin/master` đã đi tiếp so `base_sha` mà chưa đo lại.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) KHÔNG commit, KHÔNG push, KHÔNG tạo/xoá/đổi ref. Phiên điều phối commit.
+  (2) Ba finding này thuộc MỘT HÌNH DẠNG lặp lại — packet sinh ra để chữa GỐC, không phải
+      vá ba chỗ. Nếu bạn thấy vá lẻ gọn hơn đổi cấu trúc, hãy TRÌNH PHÉP ĐO chứ đừng tự chọn.
+  (3) Mỗi chốt phải có ĐỘT BIẾN RIÊNG làm ca đích ĐỎ; chốt không có mutant là chốt sẽ hở lại.
+  (4) Đồ giả mô phỏng TRẠNG THÁI, không diễn kịch bản. KHÔNG gọi mạng thật.
+  (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+
+thay_the_ly_do: >-
+  Lease `r1` được đăng THIẾU `spec_hash`. Executor `codex` DỪNG hai lượt liên tiếp vì đúng
+  chỗ đó, viện `docs/PROTOCOL_DA_PHIEN.md` §3.2 — `spec_hash` nằm trong schema tối thiểu, và
+  "khi vào `ready`, spec được đóng băng bằng `spec_hash`". Nó TỪ CHỐI tự suy giá trị, và nó
+  ĐÚNG: prompt của phiên điều phối thiếu, lease thiếu, không phải nó làm khó.
+  Nay có đặc tả đóng băng `ops/specs/MCP-DOC-PHAN-TICH.md`, băm `d8bbca8ee7a85ece60f20209458bdbe64aa7336f1157f913cf14f619f22f25eb`, và lease neo vào đó.
+  Đo được khi truy: trên `origin/master` có 74 lease, chỉ **2** mang `spec_hash`. Tức protocol
+  đòi mà thực tế làm 3%. `r1` theo thói quen của 72 cái kia. Con số ấy là NỢ KHAI, không thuộc
+  phạm vi packet này chữa — ghi ra để nó không tiếp tục vô hình.

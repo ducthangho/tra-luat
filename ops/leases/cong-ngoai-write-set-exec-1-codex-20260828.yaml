@@ -167,3 +167,14 @@ leased_at_utc: '2026-08-28T03:55:00Z'
 lease_expires_at_utc: '2026-08-29T03:55:00Z'
 run_minutes: 1440
 posted_comment_id: 5448228993   # workflow ghi, ĐỪNG sửa tay
+
+# ------------------------- BỊ THAY THẾ -------------------------
+da_bi_thay_the: cong-ngoai-write-set-exec-1r2-codex-20260828
+da_bi_thay_the_ly_do: >-
+  Lượt 1 DỪNG đúng theo `S6` sau 97 giây, không sửa dòng nào: phép liệt kê tự động trung thực kéo
+  vào hai bản sao LƯU TRỮ `ops/reviews/goi-va-lease-hoi-toan-kho-{1,2}/lease_publish_test.py`, và
+  lease CẤM tự dựng danh sách ngoại lệ. Executor xử đúng — nó trả câu hỏi PHẠM VI về cho phiên điều
+  phối thay vì lặng lẽ thêm ngoại lệ.
+  Phiên điều phối đã quyết (chủ kho uỷ quyền), và vì quyết định ấy là một TIÊU CHÍ NGHIỆM THU mới
+  nên phải đi qua revision theo §3.2, không được nhét vào brief. r2 mang nguyên write set, nguyên
+  base, nguyên trần — chỉ thêm luật phạm vi.

@@ -32,6 +32,8 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from review_verdict_binding import ReviewVerdictError, validate_review_verdict
+
 LAUNCHER = Path(__file__).resolve().parent / "launcher.py"
 CODEX_ENV_POLICY = Path(__file__).resolve().parent / "codex_env_policy.py"
 PY = sys.executable or "python3"
@@ -5933,44 +5935,6 @@ SCHEMA_REVIEW = (Path(__file__).resolve().parents[2] / ".github" / "coordination
                  "schemas" / "review_verdict.v1.schema.json")
 
 
-def _schema_hop_le(gia_tri, schema, runtime=None):
-    """Validator stdlib cho đúng tập keyword schema v1 đang dùng."""
-    def dung_kieu(x, ten):
-        return {"object": isinstance(x, dict), "array": isinstance(x, list),
-                "string": isinstance(x, str), "null": x is None,
-                "integer": isinstance(x, int) and not isinstance(x, bool),
-                "boolean": isinstance(x, bool)}.get(ten, False)
-    def do(x, s):
-        kieu = s.get("type")
-        if kieu and not any(dung_kieu(x, t) for t in ([kieu] if isinstance(kieu, str) else kieu)):
-            return False
-        if "const" in s and x != s["const"]: return False
-        if "enum" in s and x not in s["enum"]: return False
-        if isinstance(x, str):
-            if len(x) < s.get("minLength", 0): return False
-            if s.get("pattern") and not re.fullmatch(s["pattern"], x): return False
-        if isinstance(x, (int, float)) and not isinstance(x, bool):
-            if "minimum" in s and x < s["minimum"]: return False
-        if isinstance(x, dict):
-            if any(k not in x for k in s.get("required", [])): return False
-            p = s.get("properties", {})
-            if s.get("additionalProperties") is False and any(k not in p for k in x): return False
-            if any(k in x and not do(x[k], v) for k, v in p.items()): return False
-        if isinstance(x, list):
-            if len(x) < s.get("minItems", 0) or len(x) > s.get("maxItems", len(x)): return False
-            if s.get("uniqueItems") and len({json.dumps(v, sort_keys=True) for v in x}) != len(x): return False
-            if "items" in s and any(not do(v, s["items"]) for v in x): return False
-        return True
-    if not do(gia_tri, schema): return False
-    if runtime is None: return True
-    b = schema.get("x-tra-luat-runtime-bindings", {})
-    if "reviewed_sha" in b and gia_tri["reviewed_sha"] != runtime["reviewed_sha"]: return False
-    if "generation" in b and gia_tri["generation"] != runtime["generation"]: return False
-    if gia_tri["role"] not in b.get("role", []): return False
-    return gia_tri["model_reviewer_identity"]["provider"] in b.get(
-        "model_reviewer_identity.provider", [])
-
-
 def _verdict_mau():
     return {
         "schema_version": 1, "packet_id": "W1-P1-VAN-CHUYEN-PROMPT", "generation": 1,
@@ -5984,33 +5948,58 @@ def _verdict_mau():
     }
 
 
-def _oracle_schema_tu_choi(schema, truong, gia_tri):
-    runtime = {"reviewed_sha": "a" * 40, "generation": 1}
-    bang(_schema_hop_le(_verdict_mau(), schema, runtime), "fixture verdict goc khong hop le")
+def _goi_validator_verdict(verdict, schema_path):
+    return validate_review_verdict(
+        verdict, expected_reviewed_sha="a" * 40, expected_generation=1,
+        schema_path=schema_path)
+
+
+def _doi_validator_tu_choi(verdict, schema_path, thong_diep):
+    try:
+        _goi_validator_verdict(verdict, schema_path)
+    except ReviewVerdictError:
+        return
+    bang(False, thong_diep)
+
+
+def _oracle_schema_tu_choi(schema_path, truong, gia_tri):
+    try:
+        _goi_validator_verdict(_verdict_mau(), schema_path)
+    except ReviewVerdictError as e:
+        bang(False, f"fixture verdict goc khong hop le: {e}")
+
+    # Chốt shape độc lập với binding runtime. Nếu schema bị rút `properties` cùng
+    # các keyword object, object có khoá lạ sẽ lọt và CHÍNH r17/r18 phải đỏ.
+    sai_shape = _verdict_mau(); sai_shape["ngoai_luoc_do"] = True
+    _doi_validator_tu_choi(
+        sai_shape, schema_path,
+        "jsonschema nhan object co additional property")
+
     d = _verdict_mau()
     if truong == "identity": d["model_reviewer_identity"]["provider"] = gia_tri
     else: d[truong] = gia_tri
-    bang(not _schema_hop_le(d, schema, runtime), f"schema nhan sai {truong}={gia_tri!r}")
+    _doi_validator_tu_choi(
+        d, schema_path, f"schema nhan sai {truong}={gia_tri!r}")
 
 
 @ca
 def r17_schema_tu_choi_reviewed_sha_khac_exact_head():
-    _oracle_schema_tu_choi(json.loads(SCHEMA_REVIEW.read_text()), "reviewed_sha", "b" * 40)
+    _oracle_schema_tu_choi(SCHEMA_REVIEW, "reviewed_sha", "b" * 40)
 
 
 @ca
 def r18_schema_tu_choi_generation_khac():
-    _oracle_schema_tu_choi(json.loads(SCHEMA_REVIEW.read_text()), "generation", 2)
+    _oracle_schema_tu_choi(SCHEMA_REVIEW, "generation", 2)
 
 
 @ca
 def r19_schema_tu_choi_role_khong_duoc_cho_phep():
-    _oracle_schema_tu_choi(json.loads(SCHEMA_REVIEW.read_text()), "role", "executor")
+    _oracle_schema_tu_choi(SCHEMA_REVIEW, "role", "executor")
 
 
 @ca
 def r20_schema_tu_choi_identity_khong_duoc_cho_phep():
-    _oracle_schema_tu_choi(json.loads(SCHEMA_REVIEW.read_text()), "identity", "codex-dispatcher")
+    _oracle_schema_tu_choi(SCHEMA_REVIEW, "identity", "codex-dispatcher")
 
 
 @ca
@@ -6029,11 +6018,33 @@ def r21_bon_mutant_noi_semantic_allowlist_phai_lam_oracle_DO():
     m["x-tra-luat-runtime-bindings"]["model_reviewer_identity.provider"].append(attack)
     mutants.append((m, "identity", attack))
     for schema, truong, gia_tri in mutants:
-        try:
-            _oracle_schema_tu_choi(schema, truong, gia_tri)
-        except AssertionError:
-            continue
-        bang(False, f"mutant noi allowlist SONG SOT: {truong}")
+        with tempfile.TemporaryDirectory(prefix="schema-binding-mutant-") as td:
+            schema_path = Path(td) / "review.schema.json"
+            schema_path.write_text(json.dumps(schema), encoding="utf-8")
+            try:
+                _oracle_schema_tu_choi(schema_path, truong, gia_tri)
+            except AssertionError:
+                continue
+            bang(False, f"mutant noi allowlist SONG SOT: {truong}")
+
+
+@ca
+def r22_schema_yeu_lam_r17_va_r18_DO():
+    goc = json.loads(SCHEMA_REVIEW.read_text(encoding="utf-8"))
+    for bo in (("properties",),
+               ("type", "required", "properties", "additionalProperties")):
+        schema = json.loads(json.dumps(goc))
+        for khoa in bo:
+            schema.pop(khoa)
+        with tempfile.TemporaryDirectory(prefix="schema-shape-mutant-") as td:
+            schema_path = Path(td) / "review.schema.json"
+            schema_path.write_text(json.dumps(schema), encoding="utf-8")
+            for truong, gia_tri in (("reviewed_sha", "b" * 40), ("generation", 2)):
+                try:
+                    _oracle_schema_tu_choi(schema_path, truong, gia_tri)
+                except AssertionError:
+                    continue
+                bang(False, f"schema mutant {bo!r} SONG SOT trong oracle {truong}")
 
 
 # ------------------------------------------------------ tự đột biến: có răng không
@@ -7018,6 +7029,9 @@ def chay_dot_bien() -> int:
             ban_test = thu_muc / "launcher_test.py"
             ban_test.write_text(moi_test, encoding="utf-8")
             (thu_muc / "launcher.py").write_text(goc, encoding="utf-8")
+            (thu_muc / "review_verdict_binding.py").write_text(
+                (Path(__file__).resolve().parent / "review_verdict_binding.py").read_text(
+                    encoding="utf-8"), encoding="utf-8")
             chet = []
             loi_runner = []
             for ten_ca in phai_chet:

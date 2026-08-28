@@ -41,6 +41,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from launcher import ky_ban_ghi_luot
+from review_verdict_binding import (
+    ReviewVerdictError,
+    load_review_verdict,
+    validate_review_verdict,
+)
 
 # --- Ngưỡng ------------------------------------------------------------------
 # Hai số này KHÔNG do tệp này đặt ra; chúng là mặc định thừa kế từ envelope của
@@ -666,6 +671,7 @@ def cmd_init(a, state_dir: Path) -> int:
         "schema_version": 1,
         "packet": a.packet,
         "mission": a.mission,
+        "generation": a.generation,
         "executor": a.executor,
         "reviewer": a.reviewer,
         # `awaiting_lease`, KHÔNG phải `leased`. Bản trước ghi thẳng `leased` ở đây,
@@ -1037,6 +1043,30 @@ def cmd_record_review(a, state_dir: Path) -> int:
             f"phải vào lại 'reviewing' với head mới.",
         )
 
+    generation = st.get("generation")
+    if isinstance(generation, bool) or not isinstance(generation, int) or generation < 1:
+        _die(
+            RC_STATE,
+            "state thiếu packet generation hợp lệ — KHÔNG ĐO ĐƯỢC binding generation; "
+            "khởi tạo generation mới bằng `init --generation N`.",
+        )
+    try:
+        payload = load_review_verdict(a.verdict_file)
+        validate_review_verdict(
+            payload,
+            expected_reviewed_sha=st["reviewing_head_sha"],
+            expected_generation=generation,
+        )
+    except ReviewVerdictError as exc:
+        _die(RC_TRACE, f"verdict không hợp lệ: {exc}")
+
+    # Payload đã qua schema là nguồn review có cấu trúc; các cờ CLI chỉ là bản
+    # chiếu cho máy trạng thái cũ. Hai phía lệch thì dừng, không tự chọn một phía.
+    if payload["provider"] != a.provider:
+        _die(RC_PROVIDER, "--provider không khớp provider trong verdict file")
+    if payload["verdict"] != a.verdict:
+        _die(RC_TRACE, "--verdict không khớp verdict trong verdict file")
+
     ids = list(a.finding_id or [])
     if a.verdict == "changes_requested" and not ids:
         _die(RC_ARG, "verdict changes_requested phải có ít nhất một --finding-id SLUG")
@@ -1052,6 +1082,9 @@ def cmd_record_review(a, state_dir: Path) -> int:
     # Không có bước này thì reviewer nhắc lại một lỗi hai lần trong cùng một
     # lượt sẽ chặn oan ngay lượt đầu — đúng lỗi đã đo ở vòng 3.
     ids_duy_nhat = sorted(set(ids))
+    ids_payload = sorted({finding["finding_id"] for finding in payload["findings"]})
+    if ids_payload != ids_duy_nhat:
+        _die(RC_TRACE, "--finding-id không khớp findings trong verdict file")
 
     st["attempt_open"] = False
     st["reviews"].append(
@@ -1975,6 +2008,7 @@ def build_parser() -> argparse.ArgumentParser:
     q = sub.add_parser("init", help="khởi tạo state cho một packet")
     q.add_argument("--packet", type=int, required=True)
     q.add_argument("--mission", type=int, required=True)
+    q.add_argument("--generation", type=int, required=True)
     q.add_argument("--executor", required=True)
     q.add_argument("--reviewer", required=True)
     q.add_argument("--attempts-limit", type=int, default=MAC_DINH_TRAN_ATTEMPT)
@@ -2021,6 +2055,8 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--provider", required=True)
     q.add_argument("--verdict", required=True, choices=("approve", "changes_requested", "blocked"))
     q.add_argument("--reviewed-sha", help="exact head đã đọc; phải khớp head đưa ra review")
+    q.add_argument("--verdict-file", required=True,
+                   help="JSON verdict đầy đủ; được kiểm bằng schema đọc từ đĩa")
     q.add_argument(
         "--finding-id",
         action="append",

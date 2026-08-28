@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ducthangho/tra-luat/schemas/review_verdict.v1.schema.json",
+  "title": "tra-luat review verdict v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "packet_id",
+    "generation",
+    "provider",
+    "role",
+    "session_id",
+    "model_reviewer_identity",
+    "github_submitter_identity",
+    "reviewed_sha",
+    "independent_from_executor_session",
+    "review_axes",
+    "tests",
+    "findings",
+    "verdict",
+    "assurance",
+    "evidence_url"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "packet_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "generation": {"type": "integer", "minimum": 1},
+    "provider": {
+      "enum": ["claude", "codex", "human"]
+    },
+    "role": {"const": "reviewer"},
+    "session_id": {"type": "string", "minLength": 1},
+    "model_reviewer_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "model", "session"],
+      "properties": {
+        "provider": {
+          "enum": ["anthropic", "openai", "human"]
+        },
+        "model": {"type": "string", "minLength": 1},
+        "session": {"type": "string", "minLength": 1}
+      }
+    },
+    "github_submitter_identity": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "reviewed_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "independent_from_executor_session": {"const": true},
+    "review_axes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {"enum": ["spec", "standards_security"]}
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status", "evidence"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "status": {"enum": ["passed", "failed", "skipped", "not_run"]},
+          "evidence": {"type": "string"}
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["finding_id", "severity", "path", "line", "evidence", "recommendation"],
+        "properties": {
+          "finding_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+          "severity": {"enum": ["P0", "P1", "P2", "P3"]},
+          "path": {"type": ["string", "null"]},
+          "line": {"type": ["integer", "null"], "minimum": 1},
+          "evidence": {"type": "string", "minLength": 1},
+          "recommendation": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "verdict": {"enum": ["approve", "changes_requested", "blocked"]},
+    "assurance": {
+      "enum": ["cross_approved", "same_provider_approved", "human_audited", "review_deferred"]
+    },
+    "evidence_url": {"type": ["string", "null"], "format": "uri"}
+  },
+  "x-tra-luat-runtime-bindings": {
+    "reviewed_sha": "exact_review_head",
+    "generation": "exact_packet_generation",
+    "role": ["reviewer"],
+    "model_reviewer_identity.provider": ["anthropic", "openai", "human"]
+  }
+}

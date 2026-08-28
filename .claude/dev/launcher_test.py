@@ -5801,6 +5801,241 @@ def r11_trust_gia_tri_that_ba_chieu():
             bang(kq["trang_thai"] == mong, f"trust={gia_tri!r}: {kq}")
 
 
+@ca
+def r12_prompt_doi_ngay_sau_preflight_phai_DO():
+    """Đổi nguồn đúng sau preflight phải bị re-hash chặn trước khi sinh con."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = tao_repo(s); prompt = s / "prompt.txt"; dau = s / "con-da-chay"
+        prompt.write_text("PROMPT GOC", encoding="utf-8")
+        sha = hashlib.sha256(prompt.read_bytes()).hexdigest()
+        a = m.build_parser().parse_args([
+            "run", "--workspace", str(repo), "--run-root", str(s / "runs"),
+            "--prompt-file", str(prompt), "--expected-prompt-sha256", sha,
+            "--", PY, "-c", f"open({str(dau)!r},'w').write('x')",
+        ])
+        a.lenh = a.lenh[1:]
+        goc = m.chay_cac_probe
+
+        def doi_sau_preflight(*_a, **_k):
+            prompt.write_text("PROMPT DOI", encoding="utf-8")
+            return {}, None
+
+        m.chay_cac_probe = doi_sau_preflight
+        try:
+            try:
+                m.lenh_run(a)
+            except m.Chan as e:
+                bang(e.ma == MA_PROMPT, f"doi prompt bi chan sai ma: {e.ma}")
+            else:
+                bang(False, "doi prompt sau preflight van sinh con")
+        finally:
+            m.chay_cac_probe = goc
+        bang(not dau.exists(), "con da chay du prompt bi doi")
+
+
+@ca
+def r13_PROMPT_FILE_thieu_prompt_file_phai_DO():
+    return t70_PROMPT_FILE_ma_khong_co_prompt_file_phai_bi_CHAN()
+
+
+@ca
+def r14_run_json_bam_lai_dung_hai_log():
+    with San() as s:
+        repo = tao_repo(s); rr = s / "runs"
+        ma = ("import sys;sys.stdout.buffer.write(b'OUT\\x00BYTE');"
+              "sys.stderr.buffer.write(b'ERR\\nBYTE')")
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                 "--", PY, "-c", ma)
+        tm = next(p for p in rr.iterdir() if p.is_dir())
+        d = json.loads((tm / "run.json").read_text(encoding="utf-8"))
+        for ten in ("stdout", "stderr"):
+            raw = (tm / f"{ten}.log").read_bytes()
+            bang(d[f"{ten}_byte"] == len(raw), f"kich thuoc {ten} lech")
+            bang(d[f"{ten}_sha256"] == hashlib.sha256(raw).hexdigest(),
+                 f"bam {ten} khong phai bam byte tren dia")
+        bang(r.returncode == 0, f"launcher rc={r.returncode}: {r.stderr}")
+
+
+@ca
+def r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh():
+    with San() as s:
+        repo = tao_repo(s); cli = s / ("codex.exe" if LA_WINDOWS else "codex")
+        try:
+            os.link(Path(PY).resolve(), cli)
+        except OSError:
+            shutil.copy2(Path(PY).resolve(), cli)
+        if not LA_WINDOWS:
+            cli.chmod(0o755)
+        ds = []
+        for i in range(2):
+            rr = s / f"runs-{i}"
+            r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                     "--", str(cli), "-c", "pass")
+            bang(r.returncode == 0, f"luot {i} rc={r.returncode}: {r.stderr}")
+            ds.append(json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8")))
+        contract = [(d["provider"], d["execution_surface"], d["transport"],
+                     d["transport_sha256"]) for d in ds]
+        bang(contract[0] == contract[1], f"cung provider ma transport troi: {contract}")
+        bang(contract[0][:3] == ("openai_codex", "codex_cli", "machine"),
+             f"nhan sai contract codex: {contract[0]}")
+        bang(bool(re.fullmatch(r"[0-9a-f]{64}", contract[0][3])), "bam transport sai dang")
+
+
+@ca
+def r16_consumer_doc_dung_byte_va_trao_snapshot_cung_co_phai_DO():
+    with San() as s:
+        repo = tao_repo(s); prompt = s / "prompt.txt"
+        noi_dung = ("PROMPT đa byte cödex " + chr(92) + "u0308").encode("utf-8")
+        prompt.write_bytes(noi_dung); sha = hashlib.sha256(noi_dung).hexdigest()
+        rr = s / "runs-ok"
+        ma_doc = ("import hashlib,pathlib,sys;"
+                  "print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())")
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                 "--giu-ban-chup", "--prompt-file", str(prompt),
+                 "--expected-prompt-sha256", sha, "--", PY, "-c", ma_doc, "{PROMPT_FILE}")
+        tm = next(p for p in rr.iterdir() if p.is_dir())
+        bang(r.returncode == 0 and (tm / "stdout.log").read_text().strip() == sha,
+             "consumer khong nhan dung day byte snapshot")
+
+        rr2 = s / "runs-trao"; cho = s / "cho-phep-doc"
+        ma_cho = ("import hashlib,pathlib,sys,time\n"
+                  "p=pathlib.Path(sys.argv[1]);c=pathlib.Path(sys.argv[2])\n"
+                  "while not c.exists(): time.sleep(.02)\n"
+                  "sys.exit(0 if hashlib.sha256(p.read_bytes()).hexdigest()==sys.argv[3] else 41)")
+        pr = subprocess.Popen(
+            [PY, str(LAUNCHER_DANG_DUNG), "run", "--workspace", str(repo),
+             "--run-root", str(rr2), "--giu-ban-chup", "--prompt-file", str(prompt),
+             "--expected-prompt-sha256", sha, "--", PY, "-c", ma_cho,
+             "{PROMPT_FILE}", str(cho), sha],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            snapshot = None
+            for _ in range(200):
+                time.sleep(.02)
+                ds = list(rr2.glob("*/prompt.snapshot")) if rr2.exists() else []
+                if ds:
+                    snapshot = ds[0]; break
+            bang(snapshot is not None, "khong thay snapshot de chay phan chung")
+            mutant = bytearray(noi_dung); mutant[0] ^= 1
+            tam = snapshot.with_name("prompt.snapshot.mutant")
+            tam.write_bytes(mutant); os.replace(tam, snapshot)
+            bang(snapshot.stat().st_size == len(noi_dung), "mutant khong cung kich thuoc")
+            cho.write_text("doc", encoding="utf-8")
+            pr.wait(timeout=40)
+            bang(pr.returncode == 41, f"trao snapshot cung co ma consumer khong DO: {pr.returncode}")
+        finally:
+            if pr.poll() is None:
+                pr.kill(); pr.wait(timeout=10)
+
+
+SCHEMA_REVIEW = (Path(__file__).resolve().parents[2] / ".github" / "coordination" /
+                 "schemas" / "review_verdict.v1.schema.json")
+
+
+def _schema_hop_le(gia_tri, schema, runtime=None):
+    """Validator stdlib cho đúng tập keyword schema v1 đang dùng."""
+    def dung_kieu(x, ten):
+        return {"object": isinstance(x, dict), "array": isinstance(x, list),
+                "string": isinstance(x, str), "null": x is None,
+                "integer": isinstance(x, int) and not isinstance(x, bool),
+                "boolean": isinstance(x, bool)}.get(ten, False)
+    def do(x, s):
+        kieu = s.get("type")
+        if kieu and not any(dung_kieu(x, t) for t in ([kieu] if isinstance(kieu, str) else kieu)):
+            return False
+        if "const" in s and x != s["const"]: return False
+        if "enum" in s and x not in s["enum"]: return False
+        if isinstance(x, str):
+            if len(x) < s.get("minLength", 0): return False
+            if s.get("pattern") and not re.fullmatch(s["pattern"], x): return False
+        if isinstance(x, (int, float)) and not isinstance(x, bool):
+            if "minimum" in s and x < s["minimum"]: return False
+        if isinstance(x, dict):
+            if any(k not in x for k in s.get("required", [])): return False
+            p = s.get("properties", {})
+            if s.get("additionalProperties") is False and any(k not in p for k in x): return False
+            if any(k in x and not do(x[k], v) for k, v in p.items()): return False
+        if isinstance(x, list):
+            if len(x) < s.get("minItems", 0) or len(x) > s.get("maxItems", len(x)): return False
+            if s.get("uniqueItems") and len({json.dumps(v, sort_keys=True) for v in x}) != len(x): return False
+            if "items" in s and any(not do(v, s["items"]) for v in x): return False
+        return True
+    if not do(gia_tri, schema): return False
+    if runtime is None: return True
+    b = schema.get("x-tra-luat-runtime-bindings", {})
+    if "reviewed_sha" in b and gia_tri["reviewed_sha"] != runtime["reviewed_sha"]: return False
+    if "generation" in b and gia_tri["generation"] != runtime["generation"]: return False
+    if gia_tri["role"] not in b.get("role", []): return False
+    return gia_tri["model_reviewer_identity"]["provider"] in b.get(
+        "model_reviewer_identity.provider", [])
+
+
+def _verdict_mau():
+    return {
+        "schema_version": 1, "packet_id": "W1-P1-VAN-CHUYEN-PROMPT", "generation": 1,
+        "provider": "claude", "role": "reviewer", "session_id": "review-1",
+        "model_reviewer_identity": {"provider": "anthropic", "model": "opus",
+                                      "session": "review-1"},
+        "github_submitter_identity": None, "reviewed_sha": "a" * 40,
+        "independent_from_executor_session": True,
+        "review_axes": ["spec", "standards_security"], "tests": [], "findings": [],
+        "verdict": "approve", "assurance": "cross_approved", "evidence_url": None,
+    }
+
+
+def _oracle_schema_tu_choi(schema, truong, gia_tri):
+    runtime = {"reviewed_sha": "a" * 40, "generation": 1}
+    bang(_schema_hop_le(_verdict_mau(), schema, runtime), "fixture verdict goc khong hop le")
+    d = _verdict_mau()
+    if truong == "identity": d["model_reviewer_identity"]["provider"] = gia_tri
+    else: d[truong] = gia_tri
+    bang(not _schema_hop_le(d, schema, runtime), f"schema nhan sai {truong}={gia_tri!r}")
+
+
+@ca
+def r17_schema_tu_choi_reviewed_sha_khac_exact_head():
+    _oracle_schema_tu_choi(json.loads(SCHEMA_REVIEW.read_text()), "reviewed_sha", "b" * 40)
+
+
+@ca
+def r18_schema_tu_choi_generation_khac():
+    _oracle_schema_tu_choi(json.loads(SCHEMA_REVIEW.read_text()), "generation", 2)
+
+
+@ca
+def r19_schema_tu_choi_role_khong_duoc_cho_phep():
+    _oracle_schema_tu_choi(json.loads(SCHEMA_REVIEW.read_text()), "role", "executor")
+
+
+@ca
+def r20_schema_tu_choi_identity_khong_duoc_cho_phep():
+    _oracle_schema_tu_choi(json.loads(SCHEMA_REVIEW.read_text()), "identity", "codex-dispatcher")
+
+
+@ca
+def r21_bon_mutant_noi_semantic_allowlist_phai_lam_oracle_DO():
+    goc = json.loads(SCHEMA_REVIEW.read_text())
+    mutants = []
+    m = json.loads(json.dumps(goc)); m["x-tra-luat-runtime-bindings"].pop("reviewed_sha")
+    mutants.append((m, "reviewed_sha", "b" * 40))
+    m = json.loads(json.dumps(goc)); m["x-tra-luat-runtime-bindings"].pop("generation")
+    mutants.append((m, "generation", 2))
+    m = json.loads(json.dumps(goc)); m["properties"]["role"] = {"enum": ["reviewer", "executor"]}
+    m["x-tra-luat-runtime-bindings"]["role"].append("executor")
+    mutants.append((m, "role", "executor"))
+    m = json.loads(json.dumps(goc)); attack = "codex-dispatcher"
+    m["properties"]["model_reviewer_identity"]["properties"]["provider"]["enum"].append(attack)
+    m["x-tra-luat-runtime-bindings"]["model_reviewer_identity.provider"].append(attack)
+    mutants.append((m, "identity", attack))
+    for schema, truong, gia_tri in mutants:
+        try:
+            _oracle_schema_tu_choi(schema, truong, gia_tri)
+        except AssertionError:
+            continue
+        bang(False, f"mutant noi allowlist SONG SOT: {truong}")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -6072,7 +6307,20 @@ DOT_BIEN = [
     ("khong_chup_prompt",
      ('        if any("{PROMPT_FILE}" in x for x in lenh_con):',
       '        if False:'),
-     ["t56_prompt_doi_sau_khi_kiem_KHONG_toi_duoc_con"]),
+     ["t56_prompt_doi_sau_khi_kiem_KHONG_toi_duoc_con",
+      "r16_consumer_doc_dung_byte_va_trao_snapshot_cung_co_phai_DO"]),
+    ("prompt_sau_preflight_khong_rehash",
+     ('        if hashlib.sha256(b).hexdigest() != kq["prompt_sha256"]:',
+      '        if False:'),
+     ["r12_prompt_doi_ngay_sau_preflight_phai_DO"]),
+    ("bam_output_luon_lay_chuoi_rong",
+     ('                for khoi in iter(lambda: f.read(1024 * 1024), b""):',
+      '                for khoi in ():'),
+     ["r14_run_json_bam_lai_dung_hai_log"]),
+    ("mot_provider_hai_transport",
+     ('    ("anthropic_claude", ("claude",), "claude_code", "machine/local"),',
+      '    ("openai_codex", ("claude",), "claude_code", "machine/local"),'),
+     ["r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh"]),
     ("luu_argv_nguyen_van",
      ('"ten": a.name, "lenh": _tom_tat_lenh(a.lenh), "trang_thai": "dang_chay",',
       '"ten": a.name, "lenh": [str(x) for x in a.lenh], "trang_thai": "dang_chay",'),
@@ -6398,7 +6646,8 @@ DOT_BIEN = [
      ["t69_stop_luot_DA_KET_THUC_khong_duoc_doi_so"]),
     ("PROMPT_FILE_mo_coi_di_tiep",
      ('    elif any("{PROMPT_FILE}" in x for x in lenh_con):', '    elif False:'),
-     ["t70_PROMPT_FILE_ma_khong_co_prompt_file_phai_bi_CHAN"]),
+     ["t70_PROMPT_FILE_ma_khong_co_prompt_file_phai_bi_CHAN",
+      "r13_PROMPT_FILE_thieu_prompt_file_phai_DO"]),
     # Hai nửa của cùng một bảo đảm: ghi hở quyền, và để lại trên đĩa.
     ("ban_chup_de_ho_quyen",
      ("        _fd = os.open(ban_chup, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)",

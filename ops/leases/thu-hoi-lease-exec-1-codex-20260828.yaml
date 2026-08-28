@@ -112,3 +112,4 @@ canh_bao_cho_nguoi_thi_hanh: >-
   (4) Mỗi chốt phải có ĐỘT BIẾN RIÊNG; chốt không có mutant là chốt sẽ âm thầm hở lại.
   (5) Tín hiệu "đã giết" phải là lớp ngoại lệ mã triển khai KHÔNG giả được — bài học #359.
   (6) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
+posted_comment_id: 5452437188   # workflow ghi, ĐỪNG sửa tay

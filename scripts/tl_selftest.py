@@ -21261,10 +21261,13 @@ def run() -> int:
         # Không cổng nào trong ba cái đó ghi CON SỐ docs; chỗ ghi là đúng đây, và nó chỉ đỏ ở
         # `tl selftest`. Nếp đúng: THÊM TỆP dưới `docs/` ⇒ chạy `tl selftest` TRƯỚC khi đẩy, đừng suy
         # từ ba cổng kia.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 70 == 250
+        # KÊ KHAI SLOT (MANG-SANDBOX-CODEX / #334): 70 → **71** Markdown dưới `docs/`. Thêm đúng
+        # `docs/MANG_SANDBOX_CODEX.md`, dev-side/NGOÀI gói. `RELEASE_MANIFEST.json` KHÔNG đổi nên
+        # gói giữ **180**, trần Package 200 không nhúc nhích; cây thật = 180 + 71 = **251**.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 71 == 251
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 70
+        ok4 = (len(tren_dia) == 71
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

@@ -112,3 +112,96 @@ Và **đột biến canh chính bản vá**: nới vị từ mới thành `if Fa
 
 - Số lease đang mang bia mộ không đối chứng được: **chưa đếm** (đó là việc 4).
 - Hành vi khi bia mộ trỏ vòng: **chưa dựng**.
+
+---
+
+# BẢN SỬA ĐỔI 2 — trả lời hai câu executor lượt 1 dừng lại để hỏi
+
+Lượt 1 (`codex`, `gpt-5.6-sol/xhigh`, 493s) làm **đúng**: tái hiện phản chứng mở packet
+(`rc=11 → rc=0`), chạy phép đếm bắt buộc, rồi **DỪNG ở S4** thay vì tự đặt ngưỡng "lớn".
+Nó không khai một cổng nào là ĐẠT và ghi `not_run` cho tất cả. Đó là hành vi đúng.
+
+Bản r2 này **không đổi việc phải làm**; nó trả lời hai câu và thêm một ràng buộc.
+
+## Q1 — `7` có kích hoạt S4 không? **KHÔNG.** Và lý do là một PHÉP ĐO r1 chưa làm.
+
+r1 đếm `7 / 246` bản ghi (`7 / 236` `lease_id` duy nhất — ghi CẢ HAI mẫu số, vì bộ quét
+dedup theo `(blob, path)` nên hai con số trả lời hai câu khác nhau). Nhưng con số ấy **chưa
+phải** thứ quyết định. Thứ quyết định là **bao nhiêu trong 7 cái đó CÒN GÁC ĐƯỢC GÌ**:
+
+| lease mang bia mộ không đối chứng được | hết hạn | trạng thái | write_set |
+|---|---|---|---:|
+| `mcp-doc-phan-tich-exec-1r3-codex-20260828` | `2026-08-28T17:05:00Z` | **CÒN_HẠN** | 4 đường |
+| `plat-x8-exec-2-codex-20260822` | `2026-08-23T14:10:00Z` | HẾT_HẠN | 2 |
+| `plat-x8-exec-2r2-codex-20260822` | `2026-08-23T14:10:00Z` | HẾT_HẠN | 2 |
+| `plat-x8-exec-2r3-codex-20260822` | `2026-08-23T14:10:00Z` | HẾT_HẠN | 2 |
+| `plat-x8-exec-2r4-codex-20260822` | `2026-08-23T14:10:00Z` | HẾT_HẠN | 2 |
+| `plat-x8-exec-2r5-codex-20260822` | `2026-08-23T14:10:00Z` | HẾT_HẠN | 2 |
+| `plat-x8b-review-1-claude-20260823` | `2026-08-24T01:10:00Z` | HẾT_HẠN | **0** |
+
+**6/7 đã HẾT_HẠN từ 4–5 ngày trước.** Một bia mộ trên lease hết hạn là **trơ** — lease ấy
+không được đếm là người giữ dù bia mộ đúng hay sai, nên siết cổng không đổi gì cho nó.
+Cái thứ bảy (`0` đường write_set) thì không chạm đường nào để mà gác.
+
+Bán kính thật của việc siết là **ĐÚNG MỘT lease, 4 đường, trong ~8 giờ**. Và lease ấy chính
+là **tai nạn mà packet này sinh ra để chặn** — nó bị thu hồi bằng một bia mộ một chiều viết
+từ tệp lease của packet KHÁC. Làm nó hoá `rc=12` không phải tác dụng phụ; đó là **đúng việc**.
+
+Sáu cái `plat-x8*` là **chuỗi revision của CÙNG một lease** (`2 → 2r2 → … → 2r6`): mỗi bản cũ
+trỏ tới bản sau, bản sau không khai `thay_the_cho` trỏ ngược lại. Đó là ca `_kiem_bia_mo` sinh
+ra để cưỡng chế, chỉ là hồi ấy nó chưa chạy ở phép quét. Chúng là **nợ hồ sơ**, không phải
+quyền ghi còn sống.
+
+**Bài học ghi lại vì nó tái phát nhanh:** `7/246` là một con số đúng trả lời **sai câu hỏi**.
+Câu hỏi của S4 không phải *"có bao nhiêu hồ sơ hỏng"* mà *"siết cổng thì bao nhiêu thứ ĐANG
+DÙNG ĐƯỢC sẽ gãy"*. Cùng họ *"đếm sự CÓ MẶT thay vì KHẢ NĂNG"* mà kho đã trả giá bốn lần.
+Executor r1 **không sai** khi không tự đo cái đó — đặc tả r1 không đòi. Đặc tả sai, không phải
+người thi công.
+
+## Q2 — phạm vi fail-close: **CÓ PHẠM VI**, không fail toàn bộ phép quét
+
+Đây là câu hỏi hay nhất của lượt 1, và r1 để hở thật. Chốt:
+
+`KHÔNG_XÁC_ĐỊNH` chỉ được phát khi bia mộ hỏng nằm trên một lease mà **nếu bỏ bia mộ ấy đi
+thì nó SẼ được đếm là người giữ cho đúng đường đang hỏi** — tức đồng thời:
+- lease `CÒN_HẠN`, **và**
+- `_lease_cham_duong(lease, duong)` đúng.
+
+Không thoả cả hai ⇒ bia mộ hỏng ấy **không** được phép làm hỏng câu trả lời cho đường đó.
+
+**Vì sao không fail toàn bộ:** 7 hồ sơ hỏng mà làm MỌI lời gọi `ai-dang-giu` trả `rc=12` thì
+cổng thành **không dùng được** cho tới khi có người dọn sạch cả 7 — và cổng không dùng được là
+cổng bị người ta bỏ qua. Nặng hơn: nó **tuyên bố không-biết rộng hơn thứ thật sự không biết**,
+đúng bệnh *"phạm vi tuyên bố phải bằng phạm vi đo được"*, chỉ lộn ngược chiều. Một cổng nói
+"tôi không biết ai giữ `scripts/tl.py`" vì một lease `plat-x8` hết hạn 5 ngày trước có bia mộ
+lệch thì nó **đang nói dối theo hướng an toàn**, và lời nói dối ấy vẫn là lời nói dối.
+
+**Ràng buộc kèm, KHÔNG được bỏ:** phải có **HAI** ca đối nhau, và ca thứ hai mới là ca khó:
+- bia mộ hỏng trên lease **CÒN_HẠN CHẠM** đường đang hỏi ⇒ `rc=12`;
+- bia mộ hỏng trên lease **HẾT_HẠN**, và trên lease **CÒN_HẠN nhưng KHÔNG chạm** đường đang
+  hỏi ⇒ **`rc=0`/`rc=11` như thường**, KHÔNG `rc=12`.
+
+Thiếu ca thứ hai thì không ai biết cổng đang có phạm vi hay đang fail toàn bộ — và hai thứ ấy
+trông giống hệt nhau trên một kho sạch.
+
+## Q3 — mẫu số: khai CẢ HAI, đừng chọn một
+
+Bộ quét dedup theo `(blob, path)` ⇒ `246` bản ghi / `236` `lease_id` duy nhất. Hai con số trả
+lời hai câu khác nhau và **không** được dùng thay nhau. Mọi lời khai định lượng của packet
+phải ghi rõ đang đếm theo đơn vị nào.
+
+## Việc 5 (đường THU HỒI) — CHUYỂN sang packet riêng, KHÔNG làm ở đây
+
+r1 cho thấy 6/7 hồ sơ hỏng là **nợ hồ sơ của chuỗi revision**, không phải quyền ghi còn sống.
+Nên việc thu hồi là một bài toán **dọn dữ liệu + thêm lệnh**, tách hẳn khỏi việc **vá vị từ**.
+Gộp hai thứ vào một packet là mở write set sang `ops/leases/**` — đúng thứ lease này cấm.
+
+Packet này làm việc **1–4**. Việc **5** ra Issue riêng, mở sau khi packet này land.
+
+## Điều kiện dừng — S4 ĐƯỢC THAY, các S khác giữ nguyên
+
+`S4` cũ (số lớn ⇒ dừng) **đã được trả lời và đóng**. Thay bằng:
+
+> **S4′** — nếu phép đo lại cho ra **nhiều hơn MỘT** lease `CÒN_HẠN` mang bia mộ không đối
+> chứng được **và** chạm ít nhất một đường, ⇒ DỪNG và BÁO kèm bảng như trên. Một là số đã
+> biết và đã được duyệt; nhiều hơn nghĩa là nền đã đổi kể từ phép đo này.

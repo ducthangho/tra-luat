@@ -110,3 +110,9 @@ canh_bao_cho_nguoi_thi_hanh: >-
       359 advisory hợp lệ.
   (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
 posted_comment_id: 5450522058   # workflow ghi, ĐỪNG sửa tay
+
+# Thu hoi 2026-08-28: dac ta ban 1 TU MAU THUAN — write set hai tep deu nam trong goi phat
+# hanh, nen bat buoc sinh lai RELEASE_MANIFEST.json, ma chinh dac ta lai cam duong dan thu ba
+# (S1) va cam sua tep khac. Cong `gate` do: release-verify strict FAILURE, package_hash_match
+# false. §3.2: finding cho thay chinh spec thieu thi di qua revision moi.
+da_bi_thay_the: l7-trich-dan-thu-muc-an-exec-1r2-codex-20260828

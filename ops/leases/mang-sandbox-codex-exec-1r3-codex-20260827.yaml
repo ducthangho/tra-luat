@@ -174,6 +174,17 @@ leased_at_utc: '2026-08-27T13:55:00Z'
 lease_expires_at_utc: '2026-08-28T13:55:00Z'
 run_minutes: 1440
 
+da_bi_thay_the: mang-sandbox-codex-exec-1r4-codex-20260828
+da_bi_thay_the_ly_do: >-
+  BIA MỘ, ghi CÙNG COMMIT với lease r4 vì `_kiem_bia_mo` chặn lease mới nếu lease cũ chưa trỏ
+  ngược lại đúng nó ("cổng không tự sửa hồ sơ cũ").
+  r4 mở vì §3.2 — LẦN THỨ HAI trong cùng packet, write set lại khai THIẾU: r3 không có
+  `RELEASE_MANIFEST.json`, mà `scripts/tl_selftest.py` NẰM TRONG GÓI PHÁT HÀNH nên sửa nó làm
+  `package_hash` đổi. ĐÃ ĐO trên log CI thật (job 98719515969, head `33581a93`):
+  `package_hash_expected fea0b9ae` ≠ `current 298108fe`, `package_hash_match: false`,
+  `##[error]Process completed with exit code 2` ở bước `release-verify strict`.
+  Bản vá của r3 KHÔNG sai — hai bước `tl selftest` [21][22] đã QUA trên CI trước khi job dừng
+  ở bước [31]. Thiếu là ở WRITE SET, không ở bản vá.
 thay_the_cho: mang-sandbox-codex-exec-1r2-codex-20260827
 thay_the_ly_do: >-
   ĐÚNG MỘT thứ đổi, và §3.2 liệt kê nó: `write_set` (ba đường → bốn đường). Mọi trường khác

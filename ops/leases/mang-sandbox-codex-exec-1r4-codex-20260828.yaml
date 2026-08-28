@@ -1,0 +1,186 @@
+# Lease EXECUTOR — `MANG-SANDBOX-CODEX` (#334), lượt 1, BẢN SỬA ĐỔI 4.
+#
+# MỞ VÌ §3.2, LẦN THỨ HAI TRONG CÙNG MỘT PACKET: write set lại khai THIẾU.
+#   r1/r2 thiếu `scripts/tl_selftest.py`  ⇒ gate ĐỎ ở ratchet `r291_docs_ngoai_goi`
+#   r3    thiếu `RELEASE_MANIFEST.json`   ⇒ gate ĐỎ ở `release-verify --strict`
+# CÙNG MỘT HÌNH DẠNG, hai lần liên tiếp. Ghi thẳng ở đây thay vì để nó trôi — xem khối
+# `HINH_DANG_LAP_LAI` bên dưới. §12: "Cùng hình dạng lỗi xuất hiện lần thứ BA bắt buộc xem lại
+# có nên tiếp tục cách làm đó, không chỉ vá lần thứ tư."
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 334
+packet_id: MANG-SANDBOX-CODEX
+phase_key: MANG-SANDBOX-CODEX
+revision: 4
+generation: 1
+lease_id: mang-sandbox-codex-exec-1r4-codex-20260828
+
+role: executor
+provider: codex
+executor: codex
+executor_effort: xhigh
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+review_class: sensitive
+effective_review_class: sensitive
+review_class_ghi_chu: '`sensitive` do CỔNG tính (fail-close mặc định). KHÔNG tự hạ. Như r3.'
+
+spec_path: null
+spec_ghi_chu: >-
+  Không có tệp đặc tả riêng. r4 CHỈ nới write set thêm một đường dẫn và thêm đúng một mục việc
+  cơ học; mọi acceptance của r1/r2/r3 giữ nguyên.
+
+write_set:
+  - .claude/dev/probe_mang.py
+  - .claude/dev/probe_mang_test.py
+  - docs/MANG_SANDBOX_CODEX.md
+  - scripts/tl_selftest.py
+  - RELEASE_MANIFEST.json
+write_set_note: >-
+  NỚI THÊM ĐÚNG MỘT đường dẫn so với r3: `RELEASE_MANIFEST.json`. Câu này viết LẠI cùng lúc với
+  trường `write_set` ở trên.
+  VÌ SAO: `scripts/tl_selftest.py` NẰM TRONG GÓI PHÁT HÀNH — đo được, không suy:
+  manifest trên `master` `693d68fd` khai `file_count: 180` và danh sách `files[]` CÓ CHỨA
+  `scripts/tl_selftest.py`. Nên sửa tệp ấy làm `package_hash` đổi, và `release-verify --strict`
+  ĐỎ cho tới khi manifest được tái sinh. `file_count` KHÔNG đổi (vẫn 180 — chỉ nội dung đổi,
+  không thêm/bớt tệp) nên golden KHÔNG phải ghi lại.
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-28 ~01:10Z. So HAI NGUỒN bằng TẬP TÊN trước khi quét: `ls-remote --heads` 236 =
+  `for-each-ref` 236; `comm -23` RỖNG và `comm -13` RỖNG ⇒ không mù ref nào. Đã đồng bộ mọi
+  nhánh cục bộ về `origin/<cùng tên>` trước khi đo.
+    RELEASE_MANIFEST.json  ->  NGƯỜI_GIỮ 0: không có
+  (Bốn đường kia do chính r3 — lease bị thay — giữ.)
+
+BANG_CHUNG_GATE_DO:
+  do_luc_utc: '2026-08-28T00:55:13Z'
+  nguon: >-
+    Log job THẬT của CI, lấy qua `mcp_github_doc.py goi get_job_logs` trỏ toolset
+    `api.githubcopilot.com/mcp/x/actions`. job_id 98719515969, run 33130775824,
+    check `gate (ubuntu-latest)`, head `33581a93`.
+  loi: |
+    "package_hash_expected": "fea0b9aecd2d7850d3da489ad2b9158b6be489f3d9e0825a2183fda3de9289ba"
+    "package_hash_current":  "298108fed28af6a6f2fa4ed69b3028b9950f058c535bc7258f8833fe5fe59cd8"
+    "package_hash_match": false
+    ##[error]Process completed with exit code 2.
+  tai_lap_cuc_bo: >-
+    `release-verify --strict` trên cây nhánh cho ĐÚNG cặp số ấy — `expected fea0b9ae` là
+    `package_hash` của manifest đang nằm trong cây, `current 298108fe` là băm thật của cây.
+    Tái sinh manifest ⇒ `package_hash` thành `298108fe` ⇒ `release-verify` rc=0.
+  cac_buoc_TRUOC_do_da_QUA_tren_CI: >-
+    Suy luận này CHẮC, đã kiểm điều kiện của nó: `ci.yml` KHÔNG bước nào mang
+    `continue-on-error` (chuỗi ấy chỉ xuất hiện MỘT lần trong kho, và là chữ trong một dòng
+    CHÚ THÍCH ở dòng 278). Actions dừng job ở bước hỏng đầu tiên. `release-verify` là bước
+    [31]; hai bước `tl selftest` là [21] và [22]. ⇒ CI ĐÃ CHẠY `tl selftest` trên `33581a93`
+    và nó QUA. Log còn in `gen_instructions selftest 44/44` (bước [19]) và `workflow_audit`
+    (bước [24]), xác nhận job đi qua vùng đó.
+  panic_cuc_bo_KHONG_phai_cua_nhanh: >-
+    Trên container này `tl selftest` nay ném `pyo3_runtime.PanicException` từ
+    `cryptography` (qua `pypdf`) — HAI lần liên tiếp, trong khi CHÍNH clone ấy chạy sạch
+    `1698/1698` lúc 00:44Z và 00:45Z. `pypdf` nạp từ `/usr/local/lib/python3.11/dist-packages`
+    còn `cryptography` từ `/usr/lib/python3/dist-packages` — hai site khác nhau. Phiên có
+    `pip install llm` trong ngày, nên nghi ngờ hàng đầu là va chạm phiên bản do lượt cài ấy.
+    KHÔNG ĐO ĐƯỢC dứt điểm, và KHÔNG chặn packet: CI đã chạy `tl selftest` thật và nó qua.
+    Khai ra để lượt sau đừng truy nhầm hướng.
+
+branch: claude/mang-sandbox-codex-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: ac82ddc583f688d54bdc60e06922ec09bdab9f16
+base_ghi_chu: >-
+  GIỮ NGUYÊN. `RELEASE_MANIFEST.json` KHÔNG trôi trên master kể từ base:
+  `git log ac82ddc5..693d68fd -- RELEASE_MANIFEST.json` RỖNG, và blob giống hệt ở cả hai đầu
+  (`213737c7`). Nên đường vừa nới không có drift và sửa trên nhánh sẽ merge sạch.
+start_from_sha: 33581a9300751adb6707511f36d5aef5afd932e0
+reviewed_sha_required: 33581a9300751adb6707511f36d5aef5afd932e0
+reviewed_sha_ghi_chu: >-
+  Tạm neo head r3. PHẢI CẬP NHẬT sang exact head sau khi commit manifest tái sinh — bản duyệt
+  neo sai SHA là bằng chứng vô hiệu.
+
+viec_cua_luot_nay: >-
+  ĐÚNG MỘT việc, thuần cơ học: tái sinh `RELEASE_MANIFEST.json` bằng CHÍNH bộ sinh của kho —
+  `python3 scripts/tl.py release-manifest --root . --out RELEASE_MANIFEST.json --deterministic`.
+  KHÔNG sửa tay một dòng nào trong manifest (CLAUDE.md: artefact phái sinh phải được SINH, không
+  được gõ). Kết quả phải giữ `file_count: 180` và đổi `package_hash` sang `298108fe…`.
+  KHÔNG chạm bốn đường kia — chúng đã xong và đã qua CI ở các bước trước.
+
+phan_chung_bat_buoc: >-
+  Sau khi tái sinh, trên CLONE ĐỘC LẬP với `core.autocrlf=false core.eol=lf core.abbrev=7`:
+  `release-verify RELEASE_MANIFEST.json --strict --json` phải rc=0 (TRƯỚC đó phải TÁI LẬP được
+  rc=2 kèm `package_hash_match: false` để chứng minh phép đo có răng).
+  Và phải chạy CẢ `golden-test`, `determinism-audit --strict`, `doc-claims-check --strict`,
+  `ci_phamvi --kiem-bam`, `release-check --full` — chúng là các cổng có thể vỡ theo manifest.
+  ĐÃ ĐO TRƯỚC KHI CẤP LEASE NÀY: cả năm rc=0 sau khi tái sinh, `file_count` vẫn 180.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 5
+  dong_them_toi_da: 40
+  do_tu_sha: 33581a9300751adb6707511f36d5aef5afd932e0
+  don_vi: 'dòng THÊM trên TOÀN write set, `git diff --numstat`'
+  ghi_chu: >-
+    Tái sinh manifest đo được là `5 insertions(+), 5 deletions(-)` trên một tệp. Trần 40 là biên
+    rộng; chạm trần ⇒ CẮT, KHÔNG nâng.
+
+dieu_kien_dung: >-
+  Giữ nguyên `S1`..`S7` của r3. Thêm `S8`: nếu tái sinh manifest làm `file_count` KHÁC 180 ⇒
+  DỪNG và báo — khi ấy có tệp được thêm/bớt ngoài dự kiến, và golden cũng phải ghi lại, tức
+  write set lại thiếu lần thứ BA và phải xem lại CÁCH LÀM chứ không vá tiếp (§12).
+
+HINH_DANG_LAP_LAI:
+  dem: 2
+  cac_lan:
+    - 'r1/r2 thiếu `scripts/tl_selftest.py` ⇒ ratchet `r291_docs_ngoai_goi` ĐỎ'
+    - 'r3 thiếu `RELEASE_MANIFEST.json` ⇒ `release-verify --strict` ĐỎ'
+  goc_chung: >-
+    Kho KHÔNG có `.github/coordination/change-impact.v1.json` — tệp mà §5 mô tả là nơi khai
+    `write_closure`. Nên mọi coupling ("thêm tệp `docs/` ⇒ phải sửa ratchet trong
+    `tl_selftest.py`"; "sửa tệp TRONG GÓI ⇒ phải tái sinh manifest") chỉ sống trong đầu người,
+    và được phát hiện từng cái một, mỗi cái một lượt CI đỏ. Đây là nợ `AG-POLICY-01` đã ghi ở
+    lease r3, nay có thêm một ca đo được.
+  da_lam_gi_khac_lan_nay: >-
+    KHÔNG chỉ vá rồi đẩy. Trước khi cấp r4, phiên điều phối chạy TOÀN BỘ 22 bước gate chạy được
+    trên cây đã tái sinh manifest, để DẪN XUẤT closure thay vì khám phá nó bằng lượt CI kế tiếp.
+    Kết quả: `release-verify` rc=0, và `golden` · `determinism` · `doc-claims` · `ci-phamvi` ·
+    `release-check` đều rc=0, `file_count` giữ 180. Không cổng nào khác vỡ theo ⇒ closure ĐỦ.
+  neu_co_lan_thu_BA: >-
+    §12 bắt buộc xem lại CÁCH LÀM, không vá lần thứ tư. Hướng đã thấy: dựng
+    `change-impact.v1.json` cho hai coupling đã đo được — đó chính là việc của packet
+    `CONG-NGOAI-WRITE-SET` (#361) và nó nên được ưu tiên trước các packet nội dung.
+
+MAU_THUAN_DOCTRINE_DA_DO:
+  no: 'AG-DOCTRINE-03-manifest-worker-vs-land'
+  §10.2_noi: 'Worker CI không so feature branch với `RELEASE_MANIFEST.json` committed.'
+  thuc_te: >-
+    `ci.yml` bước [31] `release-verify strict (manifest khớp cây)` CHẠY trên mọi PR và ĐÃ CHẶN
+    đúng packet này. Doctrine và cổng nói ngược nhau.
+  tien_le_lich_su_nghieng_ve_THUC_TE: >-
+    `git log -- RELEASE_MANIFEST.json` cho ba commit cùng nguyên nhân:
+    `9c18f9e4` "manifest: tai sinh sau khi sua tl_selftest.py (cong release-verify do that)" ·
+    `e8060a9c` "release: tai sinh RELEASE_MANIFEST.json — sua tl_selftest.py lam doi BAM GOI" ·
+    `b0923ac1` "PLAT-X2 revision 3 (#195): tai sinh RELEASE_MANIFEST — `.gitignore` la tep DUOC
+    DONG GOI". Ca thứ ba đi qua ĐÚNG một revision, y như r4 này.
+  quyet_dinh: >-
+    Theo THỰC TẾ + TIỀN LỆ, không theo câu §10.2. Nhưng KHAI ra chỗ lệch thay vì im lặng: một
+    trong hai phải sửa, và quyết định ấy KHÔNG thuộc packet nội dung này.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  Uỷ quyền thực thi trực tiếp trong phiên, 2026-08-28: "cấp issue, phóng codex. và triển khai
+  đến xong. tôi uỷ quyền thực thi cho bạn, khi cần quyết định từ tôi hãy tự làm theo hướng tốt
+  nhất." Quyết định chọn r4 (nới write set + tái sinh) thay vì sửa `ci.yml` là do phiên điều
+  phối tự ra, căn cứ tiền lệ lịch sử ở khối trên.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+
+leased_at_utc: '2026-08-28T01:10:00Z'
+lease_expires_at_utc: '2026-08-29T01:10:00Z'
+run_minutes: 1440
+
+thay_the_cho: mang-sandbox-codex-exec-1r3-codex-20260827
+thay_the_ly_do: >-
+  ĐÚNG MỘT thứ đổi, và §3.2 liệt kê nó: `write_set` (bốn đường → năm đường). Bia mộ
+  `da_bi_thay_the` ghi vào tệp r3 TRONG CÙNG COMMIT với tệp này — `_kiem_bia_mo` chặn nếu thiếu,
+  và cổng không tự sửa hồ sơ cũ.

@@ -83,3 +83,4 @@ ghi_chu_mo_hinh_reviewer: >-
   Phải dùng CẢ HAI lớp: (1) mô hình yêu cầu có mặt làm khoá; (2) loại `claude-haiku-*` rồi
   đòi KHÔNG còn mô hình nào khác. Probe ngắn trước khi phóng KHÔNG chứng nhận được gì cho
   lượt dài — đã đo: probe xanh 3/3 rồi lượt dài vẫn tụt hoàn toàn.
+posted_comment_id: 5447629721   # workflow ghi, ĐỪNG sửa tay

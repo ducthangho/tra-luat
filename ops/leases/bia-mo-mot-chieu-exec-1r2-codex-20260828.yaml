@@ -164,3 +164,10 @@ canh_bao_r2_them: >-
   (11) Mọi lời khai định lượng phải ghi rõ ĐƠN VỊ: bộ quét dedup theo `(blob, path)` nên
       `246 bản ghi` và `236 lease_id` là hai câu trả lời cho hai câu hỏi khác nhau.
 posted_comment_id: 5450658166   # workflow ghi, ĐỪNG sửa tay
+
+# Thu hoi 2026-08-28: packet #372 DA LAND (PR #383, merge 9e6d50d, 11:51:22Z) nhung lease nay
+# van giu ops/lease_publish.py + test toi 09:00Z mai — khoa dung tep ma packet #385 can de VIET
+# duong thu hoi. Packet de thu hoi lease chet bi mot lease chet chan 21 gio.
+# Day KHONG phai thu hoi kieu cu: #385 THAT SU tiep quan dung hai duong ay tu #372, nen
+# `thay_the_cho` cua no la loi khai DUNG, va bia mo hai chieu duoc thoa.
+da_bi_thay_the: thu-hoi-lease-exec-1-codex-20260828

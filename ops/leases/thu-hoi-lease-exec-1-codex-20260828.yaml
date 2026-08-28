@@ -1,0 +1,114 @@
+# Lease EXECUTOR — `THU-HOI-LEASE` (#385), lượt 1.
+#
+# Packet này TIẾP QUẢN `ops/lease_publish.py` + test từ lease đã chết của #372.
+# Đó là lý do `thay_the_cho` ở đây là lời khai ĐÚNG chứ không phải mẹo gỡ khoá:
+# #385 làm tiếp đúng trên hai đường ấy, ngay sau khi #372 land.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 385
+packet_id: THU-HOI-LEASE
+phase_key: THU-HOI-LEASE
+revision: 1
+generation: 1
+lease_id: thu-hoi-lease-exec-1-codex-20260828
+thay_the_cho: bia-mo-mot-chieu-exec-1r2-codex-20260828
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` vì `ops/lease_publish.py` LÀ cổng thẩm quyền — nó quyết ai được ghi vào đâu.
+  Trần ADR-0044 cho packet chạm authority áp dụng: `≤3 tệp / ≤300 dòng thêm`.
+
+spec_path: ops/specs/THU-HOI-LEASE.md
+spec_hash: c441e7c48a9d17012986bd35d60fadfdb343d6fe45db4c42228ab680ab325966
+spec_note: >-
+  Issue #385 là bản chiếu; thứ định danh là BĂM. Executor PHẢI tự đo lại ba con số nền
+  (8 lease CÒN_HẠN không bia mộ · 3 chắc chắn sống thừa · 9 đường) — chúng là đo của phiên
+  điều phối, và lượt đo ĐẦU của chính phiên ấy đã SAI, đã khai trong đặc tả.
+
+write_set:
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-28T12:1xZ trên `9e6d50d`. Cả hai đường ⇒ NGƯỜI_GIỮ 1:
+  `bia-mo-mot-chieu-exec-1r2-codex-20260828`, lease của packet #372 ĐÃ LAND. Lease này
+  nhận bia mộ trỏ `thu-hoi-lease-exec-1` trong CÙNG commit cấp lease, nên không có cửa sổ
+  hai writer. Phép chuyển quyền đối xứng ĐÃ THỬ CHẠY trên bản sao cách ly trước khi cấp:
+  `check` ⇒ ĐĂNG ĐƯỢC; `ai-dang-giu ops/lease_publish.py` ⇒
+  `bia-mo-mot-chieu-exec-1r2 · ĐÃ_BỊ_THAY_THẾ` và `NGƯỜI_GIỮ 1: thu-hoi-lease-exec-1`.
+
+branch: codex/thu-hoi-lease-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+start_from_sha: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+reviewed_sha_required: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 300
+  do_tu_sha: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+  don_vi: >-
+    `git diff --numstat 9e6d50dcc… -- ops/lease_publish.py ops/lease_publish_test.py` — dòng THÊM.
+    Pathspec TRONG lệnh, KHÔNG `..HEAD`.
+  da_dung: 0
+  ghi_chu: >-
+    Trần ADR-0044 cho packet chạm authority. Tham chiếu: #372 dùng 64+183 = 247 dòng thêm
+    cho đúng hai tệp này, nên 300 là chật nhưng đã có tiền lệ vừa.
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-28: chọn "Tôi cấp lease + phóng codex"'
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này KHÔNG viết mã trong write set, nhưng nó là NGƯỜI REVIEW và NGƯỜI MERGE
+  packet #372 — chính bản vá mà packet này xây tiếp lên. Nó cũng đã trình một P1 SAI trên
+  PR #383 rồi tự rút. Khai ra để ai đọc tự cân: người gác cổng cho #372 đang cấp lease cho
+  packet kế thừa #372, và sẽ lại là reviewer.
+
+nguoi_mo_issue_khac_nguoi_cap_lease: >-
+  Issue #385 do MỘT PHIÊN KHÁC mở. Chủ kho quyết in-session 2026-08-28 rằng phiên này chạy nó.
+  Ghi ra vì hai phiên cùng ghi `ops/lease_publish.py` là ĐÚNG kịch bản hai-writer mà write-set
+  exclusion sinh ra để chặn — và write-set exclusion không biết có bao nhiêu phiên đang sống.
+
+leased_at_utc: '2026-08-28T12:20:00Z'
+lease_expires_at_utc: '2026-08-29T12:20:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  Đúng hai tệp trong `write_set`. KHÔNG đụng `ops/leases/**` — kể cả để thử lệnh mới.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ⇒ DỪNG ·
+  S2 vượt `≤3 tệp / ≤300` dòng thêm (ADR-0044, packet chạm authority) ⇒ DỪNG, trình phép đo ·
+  S3 phải sửa bất kỳ tệp nào trong `ops/leases/**` ⇒ DỪNG — dọn dữ liệu và vá cổng là hai rủi
+     ro khác nhau; việc 3 của Issue NẰM NGOÀI packet này ·
+  S4 vị từ thu hồi hoá ra DỄ HƠN `da_bi_thay_the` ở bất kỳ chiều nào ⇒ DỪNG, khai ·
+  S5 `origin/master` đi tiếp so `base_sha` mà chưa đo lại ·
+  S6 bất kỳ lease nào trong 8 lease CÒN_HẠN hiện có đang đăng được mà hoá thành không đăng
+     được ⇒ DỪNG, khai tên lease.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) KHÔNG commit, KHÔNG push, KHÔNG tạo/xoá/đổi ref. Phiên điều phối commit.
+  (2) Chốt KHÓ NHẤT là acceptance 5: thu hồi KHÔNG được biến thành bia mộ một chiều dưới mắt
+      `_bia_mo_doi_xung`. Hai cơ chế phải sống chung; trượt chỗ này thì packet tự tạo ra đúng
+      lớp `rc=12` mà #372 vừa sinh ra để bắt.
+  (3) Một lệnh `thu-hoi` NHẬN LỜI KHAI thì TỆ HƠN không có lệnh — nó hợp thức hoá đúng thứ
+      #372 vừa chặn. Bằng chứng phải là SHA merge, và vị từ phải kiểm nó là TỔ TIÊN của master.
+  (4) Mỗi chốt phải có ĐỘT BIẾN RIÊNG; chốt không có mutant là chốt sẽ âm thầm hở lại.
+  (5) Tín hiệu "đã giết" phải là lớp ngoại lệ mã triển khai KHÔNG giả được — bài học #359.
+  (6) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.

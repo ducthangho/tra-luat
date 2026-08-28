@@ -2850,14 +2850,16 @@ def _env_da_chuan(mt: dict[str, str] | None) -> dict[str, str]:
     return _doc_moi_truong()[0]
 
 
-def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None, str | None]:
+def _doc_mcp_json(ws: str | None, *, kem_headers: bool = False):
     """`.mcp.json` của DỰ ÁN có khai server `github` không, khai bằng TÊN NÀO, ở URL NÀO.
 
     Đây là phép đo CÓ MẶT, không phải DÙNG ĐƯỢC — và nói thẳng như vậy ở chỗ dùng.
     Nhưng nó phân biệt được "chưa khai server" (đo được, hỏng thật, chữa được) với
     "đã khai, chưa ai chứng minh nó chạy".
 
-    Trả `(có_khai, mô_tả, tên_nguyên_văn, url)`.
+    Mặc định trả `(có_khai, mô_tả, tên_nguyên_văn, url)` để giữ hợp đồng của
+    `doctor`. Khi ``kem_headers=True``, trả thêm phần tử thứ năm từ CHÍNH ảnh JSON
+    đã dùng để chọn URL; caller HTTP nhờ đó không phải đọc lại tệp rồi ghép hai ảnh.
 
     `url` LÀ THỨ RIÊNG, và `có_khai` KHÔNG phụ thuộc nó. Hai câu hỏi khác nhau:
     `mcp-cli` chỉ cần TÊN (nó hỏi CLI), `mcp-endpoint` mới cần URL. Gộp lại thì một
@@ -2874,19 +2876,20 @@ def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None, str | None]:
     else:
         goc, nguon = Path(__file__).resolve().parents[2], "goc cua launcher (khong co workspace)"
     tep = goc / ".mcp.json"
+    rong = (None,) if kem_headers else ()
     if not tep.is_file():
-        return False, f"khong thay .mcp.json o {goc} [{nguon}]", None, None
+        return (False, f"khong thay .mcp.json o {goc} [{nguon}]", None, None) + rong
     try:
         d = json.loads(tep.read_text(encoding="utf-8"))
     except (OSError, ValueError) as e:
-        return False, f".mcp.json [{nguon}] khong doc/parse duoc: {type(e).__name__}", None, None
+        return (False, f".mcp.json [{nguon}] khong doc/parse duoc: {type(e).__name__}", None, None) + rong
     # KIỂM KIỂU BA TẦNG. JSON hợp lệ vẫn có thể sai lược đồ, và mỗi tầng là một
     # finding RIÊNG của cross-review: gốc là mảng ⇒ `d.get` ném AttributeError; bảng
     # server là mảng ⇒ vòng lặp duyệt PHẦN TỬ chứ không duyệt KHOÁ; giá trị của khoá
     # `github` là `null`/chuỗi ⇒ vẫn được tuyên là "đã khai". Cùng một hình dạng lỗi
     # tụt xuống sau mỗi tầng — nên kiểm hết một lượt thay vì vá dần theo báo cáo.
     if not isinstance(d, dict):
-        return False, f".mcp.json [{nguon}] khong phai object o goc (la {type(d).__name__})", None, None
+        return (False, f".mcp.json [{nguon}] khong phai object o goc (la {type(d).__name__})", None, None) + rong
     # PHÂN BIỆT "KHÔNG CÓ KHOÁ" VỚI "CÓ KHOÁ MÀ GIÁ TRỊ HỎNG": `or` nuốt mọi giá trị
     # FALSY nên `{"mcpServers": null, "servers": {...}}` lặng lẽ rơi sang trường dự
     # phòng rồi tuyên là đã khai — một trường CHÍNH sai kiểu bị trường DỰ PHÒNG che.
@@ -2895,29 +2898,29 @@ def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None, str | None]:
             srv = d[khoa]
             break
     else:
-        return False, f".mcp.json [{nguon}] khong co khoa `mcpServers` lan `servers`", None, None
+        return (False, f".mcp.json [{nguon}] khong co khoa `mcpServers` lan `servers`", None, None) + rong
     if not isinstance(srv, dict):
-        return False, f".mcp.json [{nguon}] khoa `{khoa}` khong phai object (la {type(srv).__name__})", None, None
+        return (False, f".mcp.json [{nguon}] khoa `{khoa}` khong phai object (la {type(srv).__name__})", None, None) + rong
     # KHỚP CHÍNH XÁC sau chuẩn hoá hoa/thường, KHÔNG khớp chuỗi con: `not-github-backup`
     # từng được tính là "đã khai server github". Danh sách CHO PHÉP, không phải đoán
     # xem còn bao nhiêu cách viết.
     ten = [k for k in srv if k.casefold() == "github"]
     if not ten:
-        return False, (f".mcp.json [{nguon}] KHONG khai server ten dung bang `github` "
-                       f"(co: {', '.join(srv) or 'khong co server nao'})"), None, None
+        return (False, (f".mcp.json [{nguon}] KHONG khai server ten dung bang `github` "
+                        f"(co: {', '.join(srv) or 'khong co server nao'})"), None, None) + rong
     # NHIỀU TÊN CÙNG KHỚP ⇒ TỪ CHỐI, không chọn theo thứ tự khai báo. `claude mcp get`
     # coi `github` và `GitHub` là HAI server khác nhau (đo được: nó gợi ý "Did you
     # mean"), nên chọn `ten[0]` làm server được đo phụ thuộc THỨ TỰ KHOÁ trong JSON —
     # hai tệp cùng tập server mà đảo thứ tự sẽ cho hai nhãn khác nhau. Một phép đo bất
     # định thì không phải phép đo.
     if len(ten) > 1:
-        return False, (f".mcp.json [{nguon}] khai {len(ten)} server cung khop `github` sau "
-                       f"chuan hoa hoa/thuong ({', '.join(sorted(ten))}) — MO HO, khong biet "
-                       f"do cai nao; `claude mcp get` coi chung la hai server khac nhau"), None, None
+        return (False, (f".mcp.json [{nguon}] khai {len(ten)} server cung khop `github` sau "
+                        f"chuan hoa hoa/thuong ({', '.join(sorted(ten))}) — MO HO, khong biet "
+                        f"do cai nao; `claude mcp get` coi chung la hai server khac nhau"), None, None) + rong
     xau = [k for k in ten if not isinstance(srv[k], dict)]
     if xau:
-        return False, (f".mcp.json [{nguon}] khai `{', '.join(xau)}` nhung gia tri khong "
-                       f"phai object (la {', '.join(type(srv[k]).__name__ for k in xau)})"), None, None
+        return (False, (f".mcp.json [{nguon}] khai `{', '.join(xau)}` nhung gia tri khong "
+                        f"phai object (la {', '.join(type(srv[k]).__name__ for k in xau)})"), None, None) + rong
     # TRẢ TÊN NGUYÊN VĂN, không trả chuỗi dựng sẵn: `claude mcp get` PHÂN BIỆT HOA
     # THƯỜNG — khai `GitHub` rồi hỏi `mcp get github` thì CLI đáp `No MCP server named
     # "github". Did you mean "GitHub"?` và VẪN `rc=0`. Hai nơi phải dùng CÙNG một tên.
@@ -2941,7 +2944,15 @@ def _doc_mcp_json(ws: str | None) -> tuple[bool, str, str | None, str | None]:
         _duoi = f" @ {_noi}"
     else:
         _duoi = " (khong khai `url`)"
-    return (True, f".mcp.json [{nguon}] khai server: {ten[0]}" + _duoi, ten[0], url)
+    kq = (True, f".mcp.json [{nguon}] khai server: {ten[0]}" + _duoi, ten[0], url)
+    if not kem_headers:
+        return kq
+    muc = srv[ten[0]]
+    headers = muc["headers"] if "headers" in muc else {}
+    if not isinstance(headers, dict):
+        return (False, f".mcp.json [{nguon}] headers cua `{ten[0]}` khong phai object",
+                None, None, None)
+    return kq + (headers,)
 
 
 def _suc_khoe_mcp_github(ten: str = "github",

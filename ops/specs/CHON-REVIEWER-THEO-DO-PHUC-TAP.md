@@ -2,7 +2,7 @@
 
 ```yaml
 packet_id: CHON-REVIEWER-THEO-DO-PHUC-TAP
-revision: 6
+revision: 7
 generation: 1
 review_class: sensitive          # sua chinh duong REVIEW - thu quyet dinh ai kiem cai gi
 executor: codex
@@ -213,13 +213,74 @@ mọi packet chạm các đường quen thuộc ấy đều trả phí review đ
 | `docs/` (phần còn lại) | `tai-lieu` | tài liệu; `docs/PROTOCOL_DA_PHIEN.md` và `docs/adr/` vẫn là `giao-thuc` và đứng TRƯỚC trong thứ tự khớp |
 | `.gitignore` | `dev` | |
 
-**Tiền tố `planned:`** (protocol §8 định nghĩa) phải được **bóc ra trước khi phân loại**, rồi
-phân loại phần còn lại. `planned:ops/x.sh` là `dev`, không phải `khong-biet`. Đây là một NHÃN,
+**Tiền tố `planned:`** (protocol §8 định nghĩa) phải được **bóc ra ĐÚNG MỘT LẦN trước khi phân
+loại**, rồi phân loại phần còn lại. Bóc xong mà phần còn lại **vẫn** bắt đầu bằng `planned:`
+⇒ `KhongDoDuoc` — bóc lặp là mở lại đúng cửa vừa đóng. `planned:ops/x.sh` là `dev`, không phải `khong-biet`. Đây là một NHÃN,
 không phải một phần của đường dẫn — coi nó là đường dẫn thì mọi lease dùng nhãn hợp lệ của
 protocol đều bị tính +3 oan.
 
 Sau bổ sung, đếm lại trên đúng 51 đường ấy: **`khong-biet` = 0**. Con số này phải được đo lại
 mỗi khi bảng đổi; một bảng vùng không kèm số đếm là một bảng chưa đo.
+
+### CHUẨN HOÁ TRƯỚC KHI PHÂN LOẠI — revision 7, và đây là chỗ ĐÓNG CẢ HỌ
+
+Cho tới r6, `_vung` so **tiền tố trên CHUỖI THÔ**. Nên cùng một đường, viết khác đi một chút, rơi
+vào vùng **rộng hơn, điểm THẤP hơn, im lặng**:
+
+```
+ops/lease_publish.py              cong (+2)  |  ops//lease_publish.py             dev (0)
+ops/lease_publish.py              cong (+2)  |  ops/./lease_publish.py            dev (0)
+.github/workflows/ci.yml          cong (+2)  |  scripts/../.github/workflows/…    runtime (0)
+```
+
+Hậu quả đo được: `chon("routine", ["scripts/../ops/lease_publish.py"], 0, 1)` cho bậc **ĐÁY**
+cho một đường mà bản chuẩn cho `xhigh`.
+
+Đây là **chỗ thứ BẢY** của cùng một họ, và họ ấy có tên trong chính kho này:
+**`lease-authority-spoof` — phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN.** Sáu chỗ trước
+đều ở tầng "liệt kê không đủ"; chỗ này ở tầng **gán điểm giữa các ô của chính allow-list**.
+
+**LUẬT r7 — chuẩn hoá rồi ĐÒI BẰNG BẢN CHUẨN, đúng idiom "so NGUYÊN KHỐI với bản canonical"
+mà #348 đã dùng cho golden dict:**
+
+1. bóc `planned:` đúng một lần (trên);
+2. rỗng ⇒ `KhongDoDuoc`;
+3. chứa `\` ⇒ `KhongDoDuoc` (r6 đã có, giữ);
+4. bắt đầu bằng `/` ⇒ `KhongDoDuoc` (đường tuyệt đối);
+5. **bóc đúng MỘT dấu `/` ở cuối** — xem ô cảnh báo dưới;
+6. `duong != posixpath.normpath(duong)` ⇒ `KhongDoDuoc`, thông báo **nêu bản chuẩn**;
+7. sau chuẩn hoá còn bắt đầu bằng `..` ⇒ `KhongDoDuoc`;
+8. **chỉ khi đó** mới phân loại theo tiền tố.
+
+Trả `KhongDoDuoc` chứ **KHÔNG** trả `khong-biet`: `khong-biet` nghĩa là *"một vùng ta chưa nghĩ
+tới"* — một đường hợp lệ nhưng chưa phân loại. Một cách viết không chuẩn là **đầu vào dị dạng**,
+chuyện khác hẳn. Gộp hai thứ ấy là giấu một lớp lỗi thật sau một khoản cộng điểm, mà `+3` thì
+im lặng còn `KhongDoDuoc` thì ồn ào.
+
+> **BƯỚC 5 LÀ CHỖ SUÝT LẶP LẠI LỖI r1/r3/r4 — LẦN THỨ NĂM.** Luật thẳng *"normpath rồi từ chối
+> mọi thứ lệch"* **từ chối một đường THẬT**: `ops/reviews/` (1/54). Dấu `/` cuối là **nhãn thư
+> mục**, đầu vào hoàn toàn hợp lệ trong `write_set`. Viết luật ấy là đúng hình dạng fail-CLOSED
+> đã bắt packet này làm lại 3/4 lượt. Bóc một dấu `/` cuối trước khi so ⇒ **0/54 bị từ chối**.
+
+**SỐ ĐẾM DÁN KÈM (54 đường `write_set` thật, mọi nhánh, 28-08-2026)** — theo đúng §0(c″):
+
+```
+bi tu choi boi luat r7 : 0 / 54        <- KHONG mot dau vao hop le nao bi chan
+co tien to `planned:`  : 2 / 54
+```
+
+Và nó vẫn bắt trọn họ (đối chứng):
+
+```
+ops//lease_publish.py            khong chuan -> ops/lease_publish.py
+ops/./lease_publish.py           khong chuan -> ops/lease_publish.py
+scripts/../ops/lease_publish.py  khong chuan -> ops/lease_publish.py
+/etc/passwd                      tuyet doi
+la\la.md                         backslash
+planned:planned:ops/x.sh         planned: LAP
+ops/reviews/                     CHAP NHAN      <- nhan thu muc, hop le
+ops/lease_publish.py             CHAP NHAN
+```
 
 `khong-biet` KHÔNG được bỏ qua. Đường dẫn không phân loại được là đường ta chưa nghĩ tới, và
 bài học `lease-authority-spoof` nói thẳng: danh sách CẤM thua từ trong thiết kế, phải đảo thành
@@ -317,6 +378,21 @@ giết ca đích — không có nó thì không biết ca đang đo allow-list h
 
 ### 3.2 `kiem_dinh_danh(model, effort)` → ném `KhongDoDuoc` nếu sai
 
+**REVISION 7 — HỢP ĐỒNG LỖI ÁP CHO MỌI LỐI VÀO API, không chỉ cho miền JSON/CLI.** Đặc tả nói
+các hàm *"ném `KhongDoDuoc`"*; đo được ba mép văng **exception TRẦN** thay vì thế:
+
+- `kiem_ket_qua` gặp khoá `None` trong `modelUsage` ⇒ `AttributeError`;
+- `chon(..., bac_truoc=("claude-opus-5",))` (tuple sai arity) ⇒ `TypeError`;
+- (cùng họ) mọi kiểu sai truyền thẳng qua API.
+
+Cả ba **chỉ chạm được qua gọi API thẳng** — JSON không sinh nổi khoá `None`, CLI đã chặn dạng —
+và chiều hỏng hiện tại là ĐÓNG (`rc != 0`). Nên đây là **nợ hợp đồng, không phải lỗ**: hàm văng
+sai LOẠI lỗi so với thứ nó hứa. Người gọi bắt `KhongDoDuoc` sẽ không bắt được `TypeError`, và
+khi ấy một cổng đang-đóng đọc ra như một cổng SẬP.
+
+Luật: mọi lối vào công khai (`chon`, `kiem_dinh_danh`, `kiem_ket_qua`) chuyển kiểu/arity sai
+thành `KhongDoDuoc` kèm thông báo nêu đúng thứ nhận được.
+
 ALLOW-LIST, so BẰNG NHAU:
 
 ```
@@ -374,6 +450,23 @@ thích ngay tại hàm, không phải chỉ ở đây. Nhắc lại vì (c‴) l
 
 Thông báo ĐẠT vẫn phải **kể ra** mô hình phụ đã bỏ qua.
 
+**GIỚI HẠN ĐÃ BIẾT — revision 7 ghi ra, KHÔNG vá.** Phép so tập chỉ hỏi mô hình phụ **CÓ MẶT**
+không; nó **không hỏi mô hình phụ LÀM GÌ**. Đo được:
+
+```
+yeu cau fable-5, modelUsage = {fable-5: 500 outputTokens, haiku-4-5: 90000}  ->  DAT
+```
+
+Một lượt **tụt giữa chừng sang CHÍNH mô hình phụ** không phân biệt được với mô hình phụ trợ bình
+thường. Cơ chế tụt ấy đã xảy ra thật 2/10 lượt (đích là `opus-4-8`, và khi ấy phép so BẮT được);
+nếu nền đổi đích sang `claude-haiku-*` thì cổng **mù** — fail-OPEN im lặng, và khác `opus-4-8`,
+nhánh này **không bao giờ ĐỎ được**.
+
+**KHÔNG đặt ngưỡng token ở revision này.** `modelUsage` có sẵn số token, nhưng **chưa ai đếm
+phân bố share của mô hình phụ** trên các lượt đã lưu. Đặt ngưỡng khi chưa đếm miền là lặp lại
+đúng lỗi r1/r3/r4 — và packet này đã trả giá bốn lần cho nó. Việc đúng cho revision sau: **đếm
+share trước, rồi mới bàn ngưỡng**. `SKILL.md` phải khai giới hạn này cùng chỗ khai luật.
+
 **HƯỚNG HỎNG KHI HARNESS ĐỔI MÔ HÌNH PHỤ:** fail-CLOSED, kèm thông báo nêu đích danh mô hình lạ.
 Với một cổng danh tính đó là hướng chấp nhận được — và khi ấy allow-list được cập nhật bằng một
 phép ĐẾM mới, không bằng phỏng đoán.
@@ -397,6 +490,20 @@ cho cross-review lượt 3 của PR #349 — phải áp bánh cóc BẰNG TAY v�
 
 Giá trị sai dạng (thiếu dấu phẩy, model/effort không thuộc bảng) ⇒ `KhongDoDuoc`, KHÔNG im lặng
 bỏ qua — im lặng bỏ qua là fail-OPEN đúng loại §0(a) đã trả giá.
+
+**REVISION 7 THÊM `--effective-review-class` (tuỳ chọn).** Luật §3.1b *"lấy hạng CAO HƠN giữa
+hai trường"* hiện **chỉ sống trong API dict**: CLI nhận đúng MỘT chuỗi lớp, nên người dùng phải
+tự lấy `max` **bằng tay** rồi gõ lớp cao hơn — đúng kiểu *"áp bánh cóc bằng tay"* mà r6 vừa xoá
+đi ở §3.4.
+
+Nhẹ hơn `banh-coc-khong-co-duong-qua-cli` một bậc, và nói rõ để khỏi đọc quá tay: CLI **biểu
+diễn được** đáp án đúng, chỉ là phép `max` phải làm thủ công. Đo cho trung thực: **0/226** blob
+lease hiện có hai trường lệch nhau (108/108 bằng nhau) ⇒ hôm nay chưa ai dẫm. Nhưng ngày
+dispatcher escalate thật một lease `routine`→`sensitive` là ngày một người **làm đúng theo
+`SKILL.md`** gõ `routine`.
+
+`SKILL.md` phải dạy: *nếu lease có `effective_review_class`, đút cả hai trường* — và câu ấy là
+phần bắt buộc của revision này, không phải tuỳ chọn.
 
 ## 4. `.claude/dev/chon_reviewer_test.py` — phản chứng
 
@@ -429,6 +536,18 @@ Chạy `python3 .claude/dev/chon_reviewer_test.py`, thoát 0 khi ĐẠT.
 6g. **Ca BÁNH CÓC QUA CLI (revision 6) — bắt buộc.** Lượt 2 với diff nhỏ hơn, truyền
    `--bac-truoc` bậc lượt 1 ⇒ bậc KHÔNG được tụt. Thiếu ca này thì §3.1 vẫn không có đường
    hiện thực qua lối vào được tài liệu hoá.
+6h. **Ca ĐƯỜNG KHÔNG CHUẨN (revision 7) — bắt buộc.** `ops//lease_publish.py`,
+   `ops/./lease_publish.py`, `scripts/../ops/lease_publish.py`, `/etc/passwd` ⇒ **`KhongDoDuoc`**,
+   KHÔNG phải `khong-biet`. Thông báo phải nêu bản chuẩn.
+6i. **Ca NHÃN THƯ MỤC (revision 7) — bắt buộc, và nó ghim chiều fail-CLOSED.** `ops/reviews/`
+   (một dấu `/` cuối) phải **ĐƯỢC CHẤP NHẬN** và phân loại như `ops/reviews`. Đây là đường THẬT
+   trong `write_set` (1/54); thiếu ca này thì luật chuẩn hoá sẽ chặn oan đầu vào hợp lệ — đúng
+   lỗi r1/r3/r4.
+6j. **Ca ESCALATION QUA CLI (revision 7) — bắt buộc.** Lease `{routine, effective: sensitive}`
+   truyền qua `--review-class routine --effective-review-class sensitive` phải chấm theo
+   **sensitive**. Thiếu ca này thì luật hai-trường vẫn không có đường qua lối vào được tài liệu hoá.
+6k. **Ca HỢP ĐỒNG LỖI (revision 7) — bắt buộc.** Khoá `None` trong `modelUsage`, và `bac_truoc`
+   sai arity, phải ném **`KhongDoDuoc`** — không phải `AttributeError`/`TypeError` trần.
 6b. **Ca TỤT GIỮA CHỪNG (revision 5, §0(c‴)) — bắt buộc.** `modelUsage` mang **CẢ HAI** mô hình
    chính, ví dụ `{claude-fable-5: …, claude-opus-4-8: …}` với `is_error: false`, yêu cầu
    `claude-fable-5` ⇒ **ĐỎ**. Đây là dữ liệu THẬT của hai lượt `rv349`/`rv349b`, không phải
@@ -458,6 +577,11 @@ Chạy `python3 .claude/dev/chon_reviewer_test.py`, thoát 0 khi ĐẠT.
 | `kiem_ket_qua` ĐÒI mô hình phụ phải CÓ MẶT (thay vì cho phép) | ca `modelUsage` không có mô hình phụ |
 | `kiem_ket_qua` bỏ `canonicalModel`, chỉ so tên khoá | ca khoá-theo-ngày |
 | `kiem_ket_qua` kiểm `is_error` TRƯỚC phép so tập hợp | ca model-rác (phải chặn ở nhánh MODEL) |
+| **bỏ ưu tiên `effective_review_class`** (chỉ đọc `review_class`) | ca escalation `routine`→`sensitive` |
+| bỏ bước chuẩn hoá đường dẫn (so tiền tố trên chuỗi thô) | ca `ops//`, ca `a/../b` |
+| bóc `planned:` LẶP thay vì đúng một lần | ca `planned:planned:` |
+| bóc dấu `/` cuối NHIỀU lần thay vì đúng một | ca `ops/reviews//` |
+| trả `khong-biet` thay vì `KhongDoDuoc` cho đường không chuẩn | ca `ops//` (phải ĐỎ, không phải +3) |
 | `_cac_duong_dan` coi `\` như ký tự thường (đường Windows đuôi `.md` → `tai-lieu`) | ca backslash |
 | `chon` lấy thẳng `effective_review_class` thay vì hạng CAO HƠN | ca effective-thấp-hơn |
 | bỏ bóc tiền tố `planned:` trước khi phân loại vùng | ca nhãn `planned:` |

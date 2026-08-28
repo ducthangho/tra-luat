@@ -140,3 +140,16 @@ leased_at_utc: '2026-08-28T05:15:00Z'
 lease_expires_at_utc: '2026-08-29T05:15:00Z'
 run_minutes: 1440
 posted_comment_id: 5448751488   # workflow ghi, ĐỪNG sửa tay
+
+# ------------------------- BỊ THAY THẾ -------------------------
+da_bi_thay_the: d9-doi-cach-dem-exec-1r2-codex-20260828
+da_bi_thay_the_ly_do: >-
+  Lượt 1 bàn giao bản vá ĐÚNG HƯỚNG nhưng cổng ĐỎ, và executor KHAI THẲNG là không chạy được gate
+  đầy đủ (sandbox cấm bind socket) nên không dám khai số mutation — nó xử đúng.
+  Phiên điều phối chạy thật trong vỏ bind được: `CA 41/41 ĐẠT` nhưng `ĐỘT BIẾN 51/53 · ĐỎ`,
+  `D8(a)`/`D8(b)` ĐỎ với `['d9_dem_ca_dong_trang', 'd9_vuot_ngan_sach']`, `TỔNG: ĐỎ`, `rc=1`.
+  Nguyên nhân đo được: cả hai mẫu đột biến MỚI là ĐƠN DÒNG nên `src.count` = 2 (mã thật + chính
+  dòng dữ liệu trong bảng `MUTATIONS`) ⇒ chốt duy-nhất từ chối ⇒ tập giết RỖNG.
+  Đây là LẦN THỨ BA cùng một hình dạng (#319 `d11_xoa_d8` · #360 `d11_hau_to_dot_bien_xanh` · #369
+  hai cái cùng lúc) ⇒ `S3` bắn: DỪNG, XEM LẠI CÁCH LÀM, không vá tiếp hai mẫu rồi đi tiếp.
+  r2 mang nguyên write set, base, trần — chỉ thêm một tiêu chí nghiệm thu, nên đi qua revision (§3.2).

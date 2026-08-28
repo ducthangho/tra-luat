@@ -1,0 +1,42 @@
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '364'
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 7a79d9494fd9a656de85d53e77eefdfe26140cbd
+luot: r1
+cross_provider: true
+assurance: cross_approved
+executor_provider: claude
+verdict_path: ops/reviews/nang-nhan-menh-de-thu-tam-review-1-codex-verdict.md
+verdict_sha256: a11baf7b3dfcc6107161d60a7186ab9853bf2c4517556ac99a91e12bb61020f5
+verdict_bytes: 8614
+ket_qua_dem_duoc:
+  P1: 2
+  P2: 0
+  finding_moi: 2
+hai_P1_luot_1:
+- slug: giu-c-sai-do-dung-unknown-git-chan-pham-vi-da-xac-minh
+  severity: P1
+  mo_ta: >-
+    Executor chon (C) GIU `chua xep duoc`, dung viec kenh `git` o trang thai dong chua phan loai
+    duoc de ket luan TOAN menh de khong dat `chieu MO`. Reviewer do: day la luong tu QUA RONG.
+    Tep bang chung xac minh `network_access=true` MOT MINH dao socket va url tu POLICY_DENIED sang
+    LOT — dung dieu kien "biet vi sao no KHONG chan, va da do" cho pham vi hai kenh ay.
+    `git=UNKNOWN` va canh bao loopback BUOC THU HEP pham vi, khong XOA bang chung duong da co.
+- slug: workspace-write-con-khai-co-che-theo-packet-da-land
+  severity: P1
+  mo_ta: >-
+    Hang `codex -s workspace-write` van khai "co che da theo muc sandbox sang packet kia" — loi
+    khai trang thai da chet sau khi #334 land, va khong co hien vat chong lung: tep #334 do
+    mang/socket/proxy, khong do doi tuong ghi-ngoai-cay. Reviewer tim ra bang QUET THEO Y.
+ghi_chu: >-
+  Chinh EXECUTOR luot 1 da neu cho thu hai o muc "dang ngo khong sua" roi noi la ngoai pham vi;
+  reviewer cham P1 va no nam TRONG write set nen dong duoc ngay, khong can revision. Day la lan
+  luat "noi ra, dung im" tra cong duoc bang mot P1 that.
+phien_dieu_phoi_KHONG_tu_phan: >-
+  Brief luot 2 dua ca hai duong — NHAN P1 (chuyen sang B) hay BAC P1 (giu C, chi ra reviewer sai o
+  DAU bang phep do) — va noi thang cho cang: menh de thu tam tu khai bang chung cua no la phep A/B
+  tren `git ls-remote`, con socket/url la hai kenh cua packet kia; nhan chung vao thi phai tra loi
+  duoc cau "DIEU KIEN DO nam NGAY DAY, khong o packet kia" ma vong 13 cua #318 da bac mot lan.

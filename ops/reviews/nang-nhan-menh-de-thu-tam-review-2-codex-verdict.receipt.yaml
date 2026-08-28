@@ -1,0 +1,39 @@
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '364'
+provider: codex
+role: reviewer
+verdict: approve
+reviewed_sha: 2fa630ae3986ea1b8f9388a704e8f972d544963f
+luot: r2
+cross_provider: true
+assurance: cross_approved
+executor_provider: claude
+verdict_path: ops/reviews/nang-nhan-menh-de-thu-tam-review-2-codex-verdict.md
+verdict_sha256: b2394b9bca5d3d408513606e9a82bb47663d10278a4f6dddb23bcfd1ec35e714
+verdict_bytes: 11300
+ket_qua_dem_duoc:
+  P1: 0
+  P2: 0
+  finding_moi: 0
+hai_P1_luot_1_deu_DA_DONG_THAT: true
+phan_chung_reviewer_DA_CHAY:
+- 'merge-base --is-ancestor fe6152be 2fa630ae => 0'
+- 'git diff --numstat fe6152be 2fa630ae => 21 them / 17 xoa, dung MOT duong write set (tran 50)'
+- 'git diff --name-status => M docs/GOI_AGENT_DA_NEN.md — sua, khong them tep'
+- 'doctrine-scan --root . => rc=0, sach, 7 tep, 0 cho chep'
+- 'git diff --check fe6152be 2fa630ae => rc=0'
+- 'nl -ba ... 670-691: pham vi thu hep tuong minh; `git` bi loai ro; caveat loopback con nguyen'
+- 'nl -ba ... 698-704: cau trang thai chet o hang workspace-write DA MAT; khong nang hang'
+- 'rg tren docs/MANG_SANDBOX_CODEX.md dong 48-52: doi chieu hien vat nguon, loi trich khop'
+- 'dem lai 8 menh de theo don vi lan GAN NHAN => 1/5/2/0/0, khop dong 625-626'
+S5_tro_hay_chep: >-
+  Reviewer MUA ranh gioi hien tai: doan moi khong chep probe, bang, hay cac so 0/1 cua packet kia;
+  no ghi TAI CHO dieu kien va pham vi toi thieu de nhan co nghia, roi tro sang hien vat cho so do
+  day du. Ly le reviewer: neu chi de mot duong dan ma khong ghi doi tuong, cau hinh va chieu ket
+  qua thi menh de khong con la "menh de kem dieu kien do" theo hop dong dong 609-610.
+khong_chon_A: >-
+  Ban giao phien truoc goi y (A) — nang khong kem dieu kien, phan bo 1/5/2/0/0. CA executor LAN
+  reviewer deu khong chon (A). Phan bo cuoi cung TRUNG voi (A) nhung NOI DUNG menh de khac han:
+  (B) noi ro pham vi CHI socket va url, loai `git` tuong minh, va giu caveat loopback. Reviewer
+  luot 1 da canh bao san rui ro nay: "(A) se suy rong qua bang chung".

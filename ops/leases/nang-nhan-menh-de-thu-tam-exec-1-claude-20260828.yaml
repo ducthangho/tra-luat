@@ -130,3 +130,101 @@ leased_at_utc: '2026-08-28T02:35:00Z'
 lease_expires_at_utc: '2026-08-29T02:35:00Z'
 run_minutes: 1440
 posted_comment_id: 5447634674   # workflow ghi, ĐỪNG sửa tay
+
+# ============================== LAND ==============================
+LANDED:
+  merged_at_utc: '2026-08-28T04:20:00Z'
+  merge_commit: 36260236b17953f9000eaf17b63949609f29960b
+  pr: 366
+  reviewed_sha: 2fa630ae3986ea1b8f9388a704e8f972d544963f
+  target: master
+  so_commit: 2
+
+  KET_QUA: >-
+    Mệnh đề thứ tám chuyển từ `chưa xếp được` sang `cơ chế đã xác minh — chiều MỞ`, PHẠM VI CHỈ
+    socket và url; `git` bị loại tường minh và giữ `KHÔNG_ĐO_ĐƯỢC`; cảnh báo loopback
+    ("không xác minh một ranh giới mạng") giữ nguyên nghĩa. Phân bố `1/4/3/0/0` → `1/5/2/0/0`.
+
+  KHONG_PHAI_LA_(A)_DU_CON_SO_TRUNG: >-
+    ĐỌC KỸ CHỖ NÀY. Bàn giao phiên trước gợi ý `(A)` — nâng lên `chiều MỞ` KHÔNG KÈM ĐIỀU KIỆN,
+    phân bố `1/5/2/0/0`. Kết quả cuối TRÙNG con số của `(A)` nhưng là `(B)`, và NỘI DUNG mệnh đề
+    khác hẳn: `(B)` thu hẹp phạm vi tường minh. Cả executor lẫn reviewer đều KHÔNG chọn `(A)`;
+    reviewer lượt 1 nói thẳng rủi ro của nó — "(A) sẽ suy rộng quá bằng chứng".
+    Đây đúng là ca `MỘT BẤT BIẾN CÒN ĐÚNG KHÔNG CHỨNG MINH CÁC SỐ HẠNG CÒN ĐÚNG` soi ngược: một
+    PHÂN BỐ trùng nhau không chứng minh hai kết luận giống nhau. Ai đọc lại đừng lấy `1/5/2/0/0`
+    làm bằng chứng rằng bàn giao đã đúng.
+
+  DUONG_DI_HAI_LUOT:
+    luot_1: >-
+      Executor `claude` chọn `(C)` — GIỮ `chưa xếp được` — và BÁC giả thuyết `(A)` của bàn giao.
+      Lý lẽ: `docs/MANG_SANDBOX_CODEX.md` tự khai kênh `git` ở trạng thái đóng là
+      `KHÔNG_ĐO_ĐƯỢC` ("bị chặn bởi CHÍNH SÁCH SANDBOX hay bởi HẠ TẦNG PROXY — CHƯA TÁCH ĐƯỢC",
+      `phan_loai_git()` trả `UNKNOWN`), mà `git ls-remote` đúng là kênh mệnh đề này dùng làm bằng
+      chứng. Phiên điều phối KIỂM lời trích ấy nguyên văn trước khi commit — đó là chỗ vòng 13 của
+      #318 từng bắt được một bản vá KHAI MỘT PHÉP ĐO KHÔNG XẢY RA.
+    cross_review_1: >-
+      `changes_requested`, P1 2, P2 0. Reviewer `codex` đo ra `(B)`: bốn tổ hợp giữ
+      `writable_roots` cố định và chỉ đảo `network_access`; một mình cờ đó lật socket và url từ
+      `POLICY_DENIED` sang `LOT` — đúng điều kiện `chiều MỞ` CHO PHẠM VI HAI KÊNH ẤY.
+      `git=UNKNOWN` BUỘC THU HẸP phạm vi, không XOÁ bằng chứng dương đã có.
+    luot_2: >-
+      Executor NHẬN cả hai P1. Đổi CẢ BỐN chỗ đồng bộ (nhãn · đoạn VÌ SAO · phân bố 625-626 ·
+      câu tóm tắt 643-648), và tự tìm ra chỗ THỨ NĂM mà đặc tả không liệt kê: dòng 640
+      "ba ô `chưa xếp được`" trôi theo `3 → 2`.
+    cross_review_2: '`approve`, P1 0, P2 0, finding_moi 0 — cross_approved.'
+
+  CHO_CANG_DA_XU_THANG: >-
+    Chính tệp đang sửa viết "ĐIỀU KIỆN ĐO nằm NGAY ĐÂY, không ở packet kia", và vòng 13 của #318 đã
+    bác một lần đúng lối "packet kia là chỗ dựa của nhãn". Nhận bằng chứng socket/url của packet
+    kia vào để nâng hạng là chạm thẳng chỗ ấy. Phiên điều phối nêu chỗ căng này trong brief lượt 2
+    mà KHÔNG đưa đáp án, và giao lại cho reviewer phán ở lượt 2.
+    Reviewer MUA ranh giới: đoạn mới không chép probe/bảng/các số 0-1 của packet kia; nó ghi TẠI CHỖ
+    điều kiện và phạm vi tối thiểu để nhãn có nghĩa, rồi trỏ sang hiện vật cho số đo đầy đủ. Lý lẽ:
+    nếu chỉ để một đường dẫn mà không ghi đối tượng, cấu hình và chiều kết quả thì mệnh đề không
+    còn là "mệnh đề kèm điều kiện đo" theo hợp đồng dòng 609-610. `S5` không bị vượt.
+
+  P1_SO_2_DEN_TU_CHINH_EXECUTOR: >-
+    Hàng `codex -s workspace-write` (dòng 702) khai "cơ chế đã theo mục sandbox sang packet kia" —
+    lời khai trạng thái đã chết sau khi #334 land, và không có hiện vật chống lưng (tệp #334 đo
+    mạng/socket/proxy, KHÔNG đo đối tượng ghi-ngoài-cây). Chính EXECUTOR lượt 1 nêu chỗ này ở mục
+    "đáng ngờ không sửa" rồi nói là ngoài phạm vi; REVIEWER chấm P1, và nó nằm TRONG write set nên
+    đóng được ngay, không cần revision. Luật "nói ra, đừng im" trả công bằng một P1 thật.
+    Hạng của hàng ấy KHÔNG đổi — vẫn `chưa xếp được`; chưa có bằng chứng cơ chế cho đối tượng
+    "ghi ngoài cây", nên không được tiện tay nâng sang `chiều MỞ`.
+
+  CROSS_REVIEW:
+    reviewer_provider: codex
+    executor_provider: claude
+    cross_provider: true
+    so_luot: 2
+    verdict_cuoi: approve
+    P1: 0
+    P2: 0
+    verdict_paths:
+    - ops/reviews/nang-nhan-menh-de-thu-tam-review-1-codex-verdict.md
+    - ops/reviews/nang-nhan-menh-de-thu-tam-review-2-codex-verdict.md
+    khong_P1_nao_bi_ha_xuong_P2: true
+
+  SAU_CO_TROI_5_1_DA_DO_TRUOC_MERGE:
+  - '1 xung đột: merge-tree sạch'
+  - '2 DRIFT ∩ write set: RỖNG — master trôi 3 tệp (PR #365: hai `.claude/dev/mcp_gh*.py` + `ops/specs/mcp-gh-cuu-ho.md`), không tệp nào là `docs/GOI_AGENT_DA_NEN.md`'
+  - '3 artefact phái sinh: không chạm RELEASE_MANIFEST.json / golden'
+  - '4 ratchet: `git diff --name-status` cho `M` chứ không `A` — SỬA một tệp docs đã có, không THÊM ⇒ phép đếm `docs/**/*.md` giữ nguyên 71, gói giữ 180'
+  - '5 tệp nhập: không có'
+  - '6 workflow/hook: không chạm; vẫn gọi lại gate trên master SAU merge'
+
+  GATE:
+    truoc_merge: 'pull_request event trên 2fa630ae => success'
+    windows: >-
+      KHÔNG chạy `workflow_dispatch` riêng trên nhánh. Lý do có chủ đích: packet thuần tài liệu
+      (`M` một tệp `docs/**/*.md`), không mã phụ thuộc nền; và r245 đã đo Windows tốn GẤP ĐÔI phút
+      Actions. Lượt Windows đến từ gate trên master SAU merge. Khai ra đây vì doctrine của kho nói
+      thẳng "PR xanh KHÔNG hàm ý master xanh" — đây là lựa chọn, không phải sơ suất.
+    sau_merge: 'đã gọi workflow_dispatch trên master ngay sau merge'
+
+  SO_SACH_5_MUC_10_2:
+  - 'hiện vật: `docs/GOI_AGENT_DA_NEN.md` trên master mang nhãn MỚI ở dòng 674-677 và phân bố `1/5/2/0/0` ở 625-626'
+  - 'verdict lượt 1 + biên nhận: đã công bố, sha256 a11baf7b…, 8614 bytes'
+  - 'verdict lượt 2 + biên nhận: đã công bố, sha256 b2394b9b…, 11300 bytes'
+  - 'phép đếm: đo lại toàn tệp theo đơn vị "lần gắn nhãn cho một mệnh đề" (8 mệnh đề) ở CẢ BA mốc — base, head lượt 1, head lượt 2 — và khớp dòng 625-626 ở cả ba; `S6` không kích hoạt lần nào'
+  - 'nợ: KHÔNG nợ mới nào từ packet này (P2 = 0 ở lượt cuối)'

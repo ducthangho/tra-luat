@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Phản chứng CHẠY ĐƯỢC cho cổng `duyet-khac-danh-tinh` — packet #348.
 
-HAI TẦNG, vì cổng này có hai mặt hỏng khác hẳn nhau:
+BA TẦNG, vì cổng này có ba mặt hỏng khác hẳn nhau:
 
  (A) VỊ TỪ — `phan_quyet()` và `doc_het_review()` nhận dữ liệu/nguồn đọc làm ĐỐI SỐ, nên đo
      được bằng ca BIẾT TRƯỚC ĐÁP ÁN. Đây là bài học `MOC_MO_HO_CO_SAN` của PR #343: một vị
@@ -31,6 +31,10 @@ HAI TẦNG, vì cổng này có hai mặt hỏng khác hẳn nhau:
      `ops/RUNBOOK_TACH_DANH_TINH_GITHUB.md`. Nợ có tên:
      `ngu-nghia-trigger-chua-do-bang-PR-doi-khang`.
 
+ (C) DINH NGHIA GITHUB — PyYAML chi cho biet YAML co nap duoc, khong biet workflow co
+     duoc GitHub chap nhan. `actionlint` phai chay tren CA HAI tep cua packet; thieu cong
+     cu la KHONG DO DUOC va lam suite DO, khong duoc bo qua.
+
 MỖI ĐỘT BIẾN PHẢI GIẾT ĐÚNG VÀ CHỈ ĐÚNG TẬP CA ĐÃ KHAI. Runner chạy từng đột biến trên TOÀN
 BỘ ca chứ không chỉ tập đích, rồi đòi hai tập BẰNG NHAU. Lượt cross-review 1 phải dựng một
 runner ngoài để đo tính chất ấy; đưa nó vào đây thì bộ tự đo được, và một đột biến giết
@@ -44,6 +48,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+import yaml
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 if hasattr(sys.stderr, "reconfigure"):
@@ -54,6 +60,8 @@ ROOT = HERE.parents[1]
 MA = HERE / "duyet_danh_tinh.py"
 YML = ROOT / ".github" / "workflows" / "duyet-khac-danh-tinh.yml"    # lane TIN CẬY
 YML2 = ROOT / ".github" / "workflows" / "duyet-phan-chung.yml"       # lane PHẢN CHỨNG
+YML_GOC = YML
+YML2_GOC = YML2
 
 # DỰNG SAU KHI PHÂN TÍCH CÚ PHÁP, không cho chuỗi này đi nguyên văn trên đường truyền.
 # Cùng lý do với mẹo `chr(92)` trong `CLAUDE.md`: nội dung NÓI VỀ một cú pháp thì phải
@@ -64,10 +72,12 @@ _MO_BIEU_THUC = "$" + "{" + "{"
 # ── GOLDEN TOÀN CÂY CỦA LANE TIN CẬY ──────────────────────────────────────────────────
 _SU_KIEN_PHAN_CHUNG = {"pull_request"}
 
-# ĐO TRỰC TIẾP bằng `list(yaml.safe_load(YML).keys())`: PyYAML dùng YAML 1.1 nên `on:`
-# thành khoá bool `True`, không phải chuỗi "on". Golden giữ cây THÔ: biểu thức, thứ tự
-# `steps`, khoảng trắng và `\n` cuối thân `run` đều nguyên vẹn. Không chuẩn hoá nửa cây rồi
-# so với nửa còn lại — đổi workflow chính đáng thì cập nhật đúng một bản canonical này.
+# PyYAML dung YAML 1.1 nen `on:` thanh khoa bool `True`; `"on":` lai la chuoi. `_doc_yaml`
+# chuan hoa DUNG hai cach viet ay ve `True`, sau khi da chan ca khoa trung nguyen van lan
+# collision ngu nghia `on:` + `"on":`. Golden van CO Y CHAT hon ngu nghia GitHub o cac
+# diem sau: thu tu list `types`, kieu scalar (`false` khac `'false'`), chuoi `run` sau khi
+# YAML construct, va topology deu phai khop. No KHONG do thu tu khoa mapping hay khoang
+# trang YAML ma loader da bo. Day la pham vi co chu dich, khong phai byte-golden cua tep.
 _GOLDEN_WORKFLOW_TIN_CAY = {
     "name": "duyet khac danh tinh",
     True: {
@@ -121,9 +131,65 @@ def _nap():
     return m
 
 
+class _SafeLoaderKhongKhoaTrung(yaml.SafeLoader):
+    """SafeLoader nhung tu choi mapping co khoa lap lai thay vi lay ban ghi sau."""
+
+
+def _lap_mapping_khong_trung(loader, node, deep=False):
+    """Dung mapping mot lan; khoa lap lai la loi co ten, khong bi `dict` nuot."""
+    loader.flatten_mapping(node)
+    ket = {}
+    for khoa_node, gia_tri_node in node.value:
+        khoa = loader.construct_object(khoa_node, deep=deep)
+        try:
+            da_co = khoa in ket
+        except TypeError:
+            raise yaml.constructor.ConstructorError(
+                "dang dung mapping", node.start_mark,
+                "khoa khong hash duoc: %r" % (khoa,), khoa_node.start_mark) from None
+        if da_co:
+            raise yaml.constructor.ConstructorError(
+                "dang dung mapping", node.start_mark,
+                "khoa trung: %r" % (khoa,), khoa_node.start_mark)
+        ket[khoa] = loader.construct_object(gia_tri_node, deep=deep)
+    return ket
+
+
+_SafeLoaderKhongKhoaTrung.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _lap_mapping_khong_trung)
+
+
+def _chuan_khoa_on(d):
+    """Chap nhan `on:` hoac `"on":`, nhung khong nuot khi ca hai cung co mat."""
+    if not isinstance(d, dict) or "on" not in d:
+        return d
+    if True in d:
+        raise ValueError("khoa trung ngu nghia: 'on' (dong thoi co on: va \"on\":)")
+    return {True if k == "on" else k: v for k, v in d.items()}
+
+
 def _doc_yaml(p):
-    import yaml
-    return yaml.safe_load(p.read_text(encoding="utf-8"))
+    d = yaml.load(p.read_text(encoding="utf-8"), Loader=_SafeLoaderKhongKhoaTrung)
+    return _chuan_khoa_on(d)
+
+
+def _doc_yaml_safe_load_roi_chuan_on(p):
+    """Dot bien: giu chuan hoa `on`, nhung mo lai loi safe_load nuot khoa trung."""
+    return _chuan_khoa_on(yaml.safe_load(p.read_text(encoding="utf-8")))
+
+
+def _doc_yaml_khong_chuan_on(p):
+    """Dot bien: van chan khoa trung, nhung tu choi cach viet `"on":` hop le."""
+    return yaml.load(p.read_text(encoding="utf-8"), Loader=_SafeLoaderKhongKhoaTrung)
+
+
+def _doc_yaml_on_de_len(p):
+    """Dot bien thu tam: gap ca hai cach viet thi de `"on"` len ban `on` con lai."""
+    d = _doc_yaml_khong_chuan_on(p)
+    if isinstance(d, dict) and "on" in d:
+        d = dict(d)
+        d[True] = d.pop("on")
+    return d
 
 
 def _yaml():
@@ -426,6 +492,23 @@ def ca_cham_TRAN_TRANG_la_KHONG_DO_DUOC(m):
     raise AssertionError("chạm TRẦN mà vẫn trả về danh sách như thể đã đọc hết")
 
 
+def ca_TRAN_TRANG_MAC_DINH_co_rang(m):
+    """Goi KHONG truyen `tran` de ghim chinh hang `_TRAN_TRANG=20` cua duong that.
+
+    Ca cu truyen `tran=3`, nen doi hang thanh `10**9` van xanh. Nguon nay co 21 trang
+    day roi moi het: ban dung phai dung sau 20 lan; mutant vo tran se doc tiep va lo ra.
+    """
+    day = [_rv("nguoi", "COMMENTED", ma=1)]
+    nguon, da = _nguon([day] * 21 + [[]])
+    try:
+        m.doc_het_review("G", "t", doc=nguon, moi_trang=1)
+    except m.KhongDoDuoc:
+        if len(da) != 20:
+            raise AssertionError("tran mac dinh dung sau %d lan, doi dung 20" % len(da))
+        return
+    raise AssertionError("hang _TRAN_TRANG khong con chan duong goi mac dinh")
+
+
 def ca_phan_hoi_KHONG_phai_danh_sach_la_KHONG_DO_DUOC(m):
     nguon, _ = _nguon([{"message": "Not Found"}])
     try:
@@ -480,6 +563,164 @@ def ca_hai_lane_KHAC_context(m):
         raise AssertionError("hai lane trùng tên job: %s" % trung)
 
 
+_BIEN_THE_KHOA_TRUNG = {
+    "permissions-workflow": (
+        "name: duyet khac danh tinh\n\non:\n",
+        "name: duyet khac danh tinh\n\npermissions:\n  contents: write\n\non:\n",
+        "permissions"),
+    "permissions-job": (
+        "  cong:\n    # Giu lai",
+        "  cong:\n    permissions:\n      contents: write\n    # Giu lai",
+        "permissions"),
+    "runs-on": (
+        "    runs-on: ubuntu-latest\n",
+        "    runs-on: [self-hosted, linux]\n    runs-on: ubuntu-latest\n",
+        "runs-on"),
+    "if-always": (
+        "    if: github.event_name != 'pull_request'\n",
+        "    if: always()\n    if: github.event_name != 'pull_request'\n",
+        "if"),
+}
+
+
+def _tep_bien_the_khoa_trung(ten, thu_muc):
+    """Dua gia tri DOC o lan khai dau, giu gia tri hop le o lan sau."""
+    tim, thay, khoa = _BIEN_THE_KHOA_TRUNG[ten]
+    van = YML_GOC.read_text(encoding="utf-8")
+    if van.count(tim) != 1:
+        raise AssertionError("moc bien the %s khop %d cho" % (ten, van.count(tim)))
+    tep = Path(thu_muc) / (ten + ".yml")
+    tep.write_text(van.replace(tim, thay, 1), encoding="utf-8")
+    return tep, khoa
+
+
+def _do_cu_xanh_moi_do_khoa_trung(ten):
+    """Tra loi do hai ve: safe_load cu trung golden, loader moi chan dung khoa."""
+    with tempfile.TemporaryDirectory(prefix="tl348-dup-") as d:
+        tep, khoa = _tep_bien_the_khoa_trung(ten, d)
+        cu = yaml.safe_load(tep.read_text(encoding="utf-8"))
+        cu_xanh = cu == _GOLDEN_WORKFLOW_TIN_CAY
+        loi_moi = ""
+        try:
+            _doc_yaml(tep)
+        except Exception as e:  # noqa: BLE001 - thong diep chan la bang chung cua ca
+            loi_moi = str(e)
+        moi_do = ("khoa trung: %r" % khoa) in loi_moi
+        return cu_xanh, moi_do, loi_moi
+
+
+def _doi_khoa_trung(ten):
+    cu_xanh, moi_do, loi = _do_cu_xanh_moi_do_khoa_trung(ten)
+    if not cu_xanh:
+        raise AssertionError("fixture %s khong tai hien ban CU xanh" % ten)
+    if not moi_do:
+        raise AssertionError("loader MOI khong chan dung khoa %s: %s" % (ten, loi))
+
+
+def ca_khoa_trung_permissions_MUC_WORKFLOW_bi_chan(m):
+    _doi_khoa_trung("permissions-workflow")
+
+
+def ca_khoa_trung_permissions_MUC_JOB_bi_chan(m):
+    _doi_khoa_trung("permissions-job")
+
+
+def ca_khoa_trung_runs_on_bi_chan(m):
+    _doi_khoa_trung("runs-on")
+
+
+def ca_khoa_trung_if_always_bi_chan(m):
+    _doi_khoa_trung("if-always")
+
+
+def ca_khoa_trung_o_lane_PHAN_CHUNG_bi_chan(m):
+    """Loader chung phai chan ca tep thu hai, khong chi lane tin cay co golden."""
+    tim = "name: phan chung duyet khac danh tinh\n\non:\n"
+    thay = ("name: phan chung duyet khac danh tinh\n\npermissions:\n"
+            "  contents: write\n\non:\n")
+    van = YML2_GOC.read_text(encoding="utf-8")
+    if van.count(tim) != 1:
+        raise AssertionError("moc lane phan chung khop %d cho" % van.count(tim))
+    with tempfile.TemporaryDirectory(prefix="tl348-dup-yml2-") as d:
+        tep = Path(d) / "w.yml"
+        tep.write_text(van.replace(tim, thay, 1), encoding="utf-8")
+        if yaml.safe_load(tep.read_text(encoding="utf-8")) != _doc_yaml(YML2_GOC):
+            raise AssertionError("fixture lane phan chung khong tai hien safe_load nuot khoa")
+        try:
+            _doc_yaml(tep)
+        except Exception as e:  # noqa: BLE001 - can doi chieu thong diep khoa trung
+            if "khoa trung: 'permissions'" in str(e):
+                return
+            raise AssertionError("chan sai ly do: %s" % e) from None
+    raise AssertionError("lane phan chung van nuot khoa trung")
+
+
+def ca_khoa_on_CO_THE_TRICH_DAN(m):
+    """`on:` va `"on":` la hai cach viet hop le cua cung mot khoa GitHub."""
+    van = YML_GOC.read_text(encoding="utf-8")
+    tim, thay = "\non:\n", "\n\"on\":\n"
+    if van.count(tim) != 1:
+        raise AssertionError("moc `on` khop %d cho" % van.count(tim))
+    with tempfile.TemporaryDirectory(prefix="tl348-on-") as d:
+        tep = Path(d) / "w.yml"
+        tep.write_text(van.replace(tim, thay, 1), encoding="utf-8")
+        thuc = _doc_yaml(tep)
+        if thuc != _GOLDEN_WORKFLOW_TIN_CAY:
+            raise AssertionError("`\"on\":` hop le nhung bi golden tu choi: "
+                                 + _lech_sau(_GOLDEN_WORKFLOW_TIN_CAY, thuc))
+
+
+def ca_hai_cach_viet_on_CUNG_LUC_bi_chan(m):
+    """Bay thu tam: chuan hoa bang ghi de se nuot mot trong `on:` va `"on":`."""
+    tim = "name: duyet khac danh tinh\n\non:\n"
+    thay = ("name: duyet khac danh tinh\n\n\"on\":\n"
+            "  pull_request: {}\n\non:\n")
+    van = YML_GOC.read_text(encoding="utf-8")
+    if van.count(tim) != 1:
+        raise AssertionError("moc collision `on` khop %d cho" % van.count(tim))
+    with tempfile.TemporaryDirectory(prefix="tl348-on-collision-") as d:
+        tep = Path(d) / "w.yml"
+        tep.write_text(van.replace(tim, thay, 1), encoding="utf-8")
+        try:
+            _doc_yaml(tep)
+        except ValueError as e:
+            if "khoa trung ngu nghia: 'on'" in str(e):
+                return
+            raise AssertionError("chan sai ly do: %s" % e) from None
+    raise AssertionError("co ca `on:` va `\"on\":` ma phep chuan hoa van ghi de")
+
+
+def _kiem_actionlint(tim=None, chay=None):
+    """Lint dung hai workflow packet; thieu binary la KHONG DO DUOC va phai do."""
+    import shutil
+    import subprocess
+    tim = tim or shutil.which
+    chay = chay or subprocess.run
+    duong = tim("actionlint")
+    if not duong:
+        raise AssertionError(
+            "KHONG DO DUOC: thieu `actionlint`. PyYAML khong biet luat workflow GitHub. "
+            "Cai 1.7.7: `bash ops/cai_actionlint.sh` (hoac tai binary tu releases).")
+    p = chay([duong, str(YML_GOC), str(YML2_GOC)], capture_output=True, text=True)
+    if p.returncode != 0:
+        raise AssertionError("actionlint DO (rc=%d) tren hai workflow packet:\n%s%s"
+                             % (p.returncode, p.stdout, p.stderr))
+
+
+def ca_hai_workflow_QUA_ACTIONLINT(m):
+    _kiem_actionlint()
+
+
+def ca_thieu_ACTIONLINT_la_DO(m):
+    try:
+        _kiem_actionlint(tim=lambda _ten: None)
+    except AssertionError as e:
+        if "KHONG DO DUOC: thieu `actionlint`" in str(e):
+            return
+        raise AssertionError("thieu cong cu nhung do sai ly do: %s" % e) from None
+    raise AssertionError("thieu actionlint ma tang dinh nghia van xanh")
+
+
 CA = [
     ("tu_duyet_bi_chan", ca_tu_duyet_bi_chan),
     ("duyet_boi_danh_tinh_khac_thi_qua", ca_duyet_boi_danh_tinh_khac_thi_qua),
@@ -503,11 +744,23 @@ CA = [
     ("doc_HET_moi_trang", ca_doc_HET_moi_trang),
     ("quyet_dinh_o_TRANG_SAU_van_chan", ca_quyet_dinh_o_TRANG_SAU_van_chan),
     ("cham_TRAN_TRANG_la_KHONG_DO_DUOC", ca_cham_TRAN_TRANG_la_KHONG_DO_DUOC),
+    ("TRAN_TRANG_MAC_DINH_co_rang", ca_TRAN_TRANG_MAC_DINH_co_rang),
     ("phan_hoi_KHONG_phai_danh_sach_la_KHONG_DO_DUOC",
      ca_phan_hoi_KHONG_phai_danh_sach_la_KHONG_DO_DUOC),
     ("workflow_tin_cay_KHOP_GOLDEN", ca_workflow_tin_cay_KHOP_GOLDEN),
     ("khong_co_cu_phap_bieu_thuc_trong_run", ca_khong_co_cu_phap_bieu_thuc_trong_run),
     ("hai_lane_KHAC_context", ca_hai_lane_KHAC_context),
+    ("khoa_trung_permissions_MUC_WORKFLOW_bi_chan",
+     ca_khoa_trung_permissions_MUC_WORKFLOW_bi_chan),
+    ("khoa_trung_permissions_MUC_JOB_bi_chan",
+     ca_khoa_trung_permissions_MUC_JOB_bi_chan),
+    ("khoa_trung_runs_on_bi_chan", ca_khoa_trung_runs_on_bi_chan),
+    ("khoa_trung_if_always_bi_chan", ca_khoa_trung_if_always_bi_chan),
+    ("khoa_trung_o_lane_PHAN_CHUNG_bi_chan", ca_khoa_trung_o_lane_PHAN_CHUNG_bi_chan),
+    ("khoa_on_CO_THE_TRICH_DAN", ca_khoa_on_CO_THE_TRICH_DAN),
+    ("hai_cach_viet_on_CUNG_LUC_bi_chan", ca_hai_cach_viet_on_CUNG_LUC_bi_chan),
+    ("hai_workflow_QUA_ACTIONLINT", ca_hai_workflow_QUA_ACTIONLINT),
+    ("thieu_ACTIONLINT_la_DO", ca_thieu_ACTIONLINT_la_DO),
 ]
 
 DOT_BIEN_MA = {
@@ -582,15 +835,19 @@ DOT_BIEN_MA = {
         "        if len(lo) < moi_trang:\n            return het\n",
         "        return het\n",
         ["doc_HET_moi_trang", "quyet_dinh_o_TRANG_SAU_van_chan",
-         "cham_TRAN_TRANG_la_KHONG_DO_DUOC"]),
+         "cham_TRAN_TRANG_la_KHONG_DO_DUOC", "TRAN_TRANG_MAC_DINH_co_rang"]),
     "cham_TRAN_van_tra_ve": (
         '            raise KhongDoDuoc(\n                "review vượt trần',
         '            return het\n            raise KhongDoDuoc(\n                "review vượt trần',
-        ["cham_TRAN_TRANG_la_KHONG_DO_DUOC"]),
+        ["cham_TRAN_TRANG_la_KHONG_DO_DUOC", "TRAN_TRANG_MAC_DINH_co_rang"]),
     "bo_kiem_kieu_danh_sach": (
         "        if not isinstance(lo, list):\n",
         "        if False:\n",
         ["phan_hoi_KHONG_phai_danh_sach_la_KHONG_DO_DUOC"]),
+    "noi_TRAN_TRANG_MAC_DINH": (
+        "_TRAN_TRANG = 20",
+        "_TRAN_TRANG = 10**9",
+        ["TRAN_TRANG_MAC_DINH_co_rang"]),
 }
 
 _DICH_GOLDEN = ["workflow_tin_cay_KHOP_GOLDEN"]
@@ -696,11 +953,18 @@ DOT_BIEN_YML2 = {
 }
 
 
-def _chay(chi=None, m=None, doi_yml=None, doi_yml2=None):
-    """Trả (đạt, lý do đỏ). `doi_yml`/`doi_yml2` = (tìm, thay) áp lên bản sao YAML tạm."""
-    global YML, YML2
+def _chay(chi=None, m=None, doi_yml=None, doi_yml2=None,
+          doc_yaml=None, kiem_actionlint=None):
+    """Tra ket qua; cho dot bien thay DUNG mot tang noi bo trong pham vi mot luot."""
+    global YML, YML2, _doc_yaml, _kiem_actionlint
     cu, cu2 = YML, YML2
+    cu_doc, cu_actionlint = _doc_yaml, _kiem_actionlint
+    tam_da_tao = []
     try:
+        if doc_yaml is not None:
+            _doc_yaml = doc_yaml
+        if kiem_actionlint is not None:
+            _kiem_actionlint = kiem_actionlint
         for nhan, doi in (("yml", doi_yml), ("yml2", doi_yml2)):
             if not doi:
                 continue
@@ -709,7 +973,11 @@ def _chay(chi=None, m=None, doi_yml=None, doi_yml2=None):
             tim, thay = doi
             if goc.count(tim) != 1:
                 raise AssertionError("MỐC YAML (%s) khớp %d chỗ" % (nhan, goc.count(tim)))
-            tam = Path(tempfile.mkdtemp(prefix="tl348-")) / "w.yml"
+            # Dung context co chu so huu de mutation khong de scratch lai sau suite.
+            # TMPDIR duoc co lap theo packet; chi don dung thu muc do chinh luot nay tao.
+            chu_tam = tempfile.TemporaryDirectory(prefix="tl348-")
+            tam_da_tao.append(chu_tam)
+            tam = Path(chu_tam.name) / "w.yml"
             tam.write_text(goc.replace(tim, thay, 1), encoding="utf-8")
             if nhan == "yml":
                 YML = tam
@@ -729,6 +997,9 @@ def _chay(chi=None, m=None, doi_yml=None, doi_yml2=None):
         return dat, ly
     finally:
         YML, YML2 = cu, cu2
+        _doc_yaml, _kiem_actionlint = cu_doc, cu_actionlint
+        for chu_tam in reversed(tam_da_tao):
+            chu_tam.cleanup()
 
 
 def _ap(van, tim, thay):
@@ -747,9 +1018,31 @@ def _khai(ten, chet, dich, hong):
         hong.append(f"{ten}: khai {sorted(dich)}; thiếu={thieu} thừa={thua}")
 
 
+def _chung_minh_khoa_trung(ten):
+    if ten not in _BIEN_THE_KHOA_TRUNG:
+        print("bien the khong hop le: %s; chon: %s"
+              % (ten, ", ".join(sorted(_BIEN_THE_KHOA_TRUNG))))
+        return 2
+    cu_xanh, moi_do, loi = _do_cu_xanh_moi_do_khoa_trung(ten)
+    print("%s: CU=%s (yaml.safe_load khop golden)" %
+          (ten, "XANH" if cu_xanh else "DO"))
+    print("%s: MOI=%s (%s)" %
+          (ten, "DO" if moi_do else "XANH", loi.replace("\n", " | ")))
+    return 0 if cu_xanh and moi_do else 1
+
+
 def main() -> int:
+    if len(sys.argv) > 1:
+        if len(sys.argv) == 3 and sys.argv[1] == "--chung-minh-khoa-trung":
+            return _chung_minh_khoa_trung(sys.argv[2])
+        print("dung: duyet_danh_tinh_test.py "
+              "[--chung-minh-khoa-trung permissions-workflow|permissions-job|runs-on|if-always]")
+        return 2
+
     dat, ly = _chay()
-    so_dot_bien = len(DOT_BIEN_MA) + len(DOT_BIEN_YML) + len(DOT_BIEN_YML2)
+    so_dot_bien_noi_bo = 4
+    so_dot_bien = (len(DOT_BIEN_MA) + len(DOT_BIEN_YML) + len(DOT_BIEN_YML2)
+                   + so_dot_bien_noi_bo)
     do_san = sorted(k for k, v in dat.items() if v is False)
     print(f"nền: {sum(1 for v in dat.values() if v)}/{len(dat)} đạt")
     for k in do_san:
@@ -779,6 +1072,37 @@ def main() -> int:
         for ten, (tim, thay, dich) in sorted(bang.items()):
             d2, _ = _chay(**{khoa: (tim, thay)})
             _khai(ten, [k for k, v in d2.items() if v is False], dich, hong)
+
+    noi_bo = (
+        ("safe_load_nuot_khoa_trung",
+         {"doc_yaml": _doc_yaml_safe_load_roi_chuan_on},
+         ["khoa_trung_permissions_MUC_WORKFLOW_bi_chan",
+          "khoa_trung_permissions_MUC_JOB_bi_chan",
+          "khoa_trung_runs_on_bi_chan", "khoa_trung_if_always_bi_chan",
+          "khoa_trung_o_lane_PHAN_CHUNG_bi_chan"]),
+        ("tu_choi_khoa_on_trich_dan",
+         {"doc_yaml": _doc_yaml_khong_chuan_on},
+         ["khoa_on_CO_THE_TRICH_DAN", "hai_cach_viet_on_CUNG_LUC_bi_chan"]),
+        ("chuan_on_bang_GHI_DE",
+         {"doc_yaml": _doc_yaml_on_de_len},
+         ["hai_cach_viet_on_CUNG_LUC_bi_chan"]),
+    )
+    for ten, doi, dich in noi_bo:
+        d2, _ = _chay(**doi)
+        _khai(ten, [k for k, v in d2.items() if v is False], dich, hong)
+
+    kiem_that = _kiem_actionlint
+
+    def bo_qua_actionlint_vang(tim=None, chay=None):
+        import shutil
+        tim_that = tim or shutil.which
+        if not tim_that("actionlint"):
+            return None
+        return kiem_that(tim=tim, chay=chay)
+
+    d2, _ = _chay(kiem_actionlint=bo_qua_actionlint_vang)
+    _khai("thieu_actionlint_van_xanh",
+          [k for k, v in d2.items() if v is False], ["thieu_ACTIONLINT_la_DO"], hong)
 
     print("NỢ  : `ngu-nghia-trigger-chua-do-bang-PR-doi-khang` — tầng (B) đo HÌNH DẠNG tệp,")
     print("      KHÔNG đo hành vi trigger của GitHub. Muốn đo thật phải mở PR đối kháng;")

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Sổ test sống: kiểm phạm vi, lời gọi CI, rc và bằng chứng dương."""
 import argparse
+import os
 import pathlib
 import re
 import subprocess
@@ -11,6 +12,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 GOC = (".claude/dev", ".claude/hooks", ".githooks", ".github/checks", "scripts/tl_core")
 OPS_REVIEWS = "ops/reviews/"
 MOI = {
+    ".claude/dev/chon_reviewer_test.py": r"(?s)nền: (\d+)/(\d+) đạt.*TỔNG: ĐẠT",
     ".claude/dev/gh_readback_test.py": r"gh_readback tests: (\d+)/(\d+) ca QUA \(hong 0\)",
     ".claude/dev/mcp_gh_test.py": r"(?s)CA\s+: (\d+)/(\d+) đạt · 0 đỏ · ĐẠT.*ĐỘT BIẾN.*ĐẠT.*TỔNG: ĐẠT",
     ".claude/dev/mcp_github_doc_test.py": r"mcp_github_doc tests: (\d+)/(\d+) ca QUA \(hong 0, bo qua 0\)",
@@ -18,6 +20,20 @@ MOI = {
     ".claude/hooks/pretooluse_guard_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     ".claude/hooks/subagent_ghi_detect_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     "ops/nhanh_don_duoc_test.py": r"^(\d+)/(\d+)$",
+}
+CACH_LY = {
+    ".claude/dev/mcp_gh_test.py": {
+        "slug": "AG-361-P2-01-mcp-gh-dot-bien-chap-chon-theo-may",
+        "ly_do": "runner CI đỏ ở b7_bo_cam_ghi; .pyc là giả thuyết khớp, chưa có phản chứng",
+        "moi_truong": "github-actions/linux",
+        "log": "Issue #361, log CI r3 của phiên điều phối",
+    },
+    ".claude/hooks/pretooluse_guard_test.py": {
+        "slug": "AG-361-P2-02-pretooluse-guard-doi-runtime-runner-khong-co",
+        "ly_do": "runner CI trần đỏ t11/t15/t33 vì thiếu runtime mà bộ test đòi hỏi",
+        "moi_truong": "github-actions/linux",
+        "log": "Issue #361, log CI r3 của phiên điều phối",
+    },
 }
 DA_NOI = {
     ".claude/dev/ci_dang_ky_test.py",
@@ -45,12 +61,16 @@ def tim(root):
     return song, hien_vat, la
 
 
-def kiem(root=ROOT, registry=DANG_KY, workflows=None):
+def kiem(root=ROOT, registry=DANG_KY, workflows=None, cach_ly=CACH_LY):
     song, _, la = tim(root)
     loi = []
     loi += ["test sống chưa đăng ký: " + x for x in sorted(song - registry)]
     loi += ["mục đăng ký không có tệp: " + x for x in sorted(registry - song)]
     loi += ["test ở vị trí chưa biết: " + x for x in sorted(la)]
+    loi += ["cách ly không nằm trong sổ: " + x for x in sorted(set(cach_ly) - registry)]
+    for x, no in cach_ly.items():
+        if not all(no.get(k) for k in ("slug", "ly_do", "moi_truong", "log")):
+            loi.append("cách ly thiếu slug, lý do, môi trường hoặc log: " + x)
     if workflows is None:
         workflows = "\n".join(p.read_text(encoding="utf-8") for p in (root / ".github/workflows").glob("*.yml"))
     for x in sorted(DA_NOI):
@@ -74,15 +94,41 @@ def bang_chung_xanh(text, mau):
     return not m.groups() or len(m.groups()) != 2 or (int(m.group(1)) > 0 and m.group(1) == m.group(2))
 
 
+def moi_truong_hien_tai(env=os.environ):
+    """Chỉ nhận diện khi cả hai dấu hiệu runner chuẩn cùng khớp."""
+    if env.get("GITHUB_ACTIONS") == "true" and env.get("RUNNER_OS") == "Linux":
+        return "github-actions/linux"
+    return None
+
+
+def cach_ly_chap_nhan(ok, da_neo, hien_tai):
+    """None = không ở đúng môi trường để phán quyết nợ còn tái hiện."""
+    if hien_tai != da_neo:
+        return None
+    return not ok
+
+
 def chay_moi():
     do = 0
+    hien_tai = moi_truong_hien_tai()
     for path, mau in MOI.items():
         p = subprocess.run([sys.executable, path], cwd=ROOT, text=True, stdout=subprocess.PIPE,
                            stderr=subprocess.STDOUT)
         ok = p.returncode == 0 and bang_chung_xanh(p.stdout, mau)
         print(p.stdout, end="")
-        print(f"CI_DANG_KY {path}: {'ĐẠT' if ok else 'ĐỎ'} rc={p.returncode}")
-        do += not ok
+        if path in CACH_LY:
+            no = CACH_LY[path]
+            chap_nhan = cach_ly_chap_nhan(ok, no["moi_truong"], hien_tai)
+            if chap_nhan is None:
+                print(f"CI_DANG_KY {path}: KHÔNG ĐO ĐƯỢC — môi trường={hien_tai or 'không xác định'}")
+            elif not chap_nhan:
+                print(f"CI_DANG_KY {path}: ĐỎ — đã xanh, hãy gỡ khỏi cách ly")
+                do += 1
+            else:
+                print(f"CI_DANG_KY {path}: CÁCH LY rc={p.returncode} nợ={no['slug']}")
+        else:
+            print(f"CI_DANG_KY {path}: {'ĐẠT' if ok else 'ĐỎ'} rc={p.returncode}")
+            do += not ok
     return do
 
 
@@ -109,10 +155,28 @@ def phan_chung():
                 cases.append(bool(kiem(r, reg, wf)[0]))
             finally:
                 DA_NOI.clear(); DA_NOI.update(old)
+        # (a) Bản sao sổ cách ly mất slug phải đỏ.
+        mutant_cu = {".claude/dev/a_test.py": {"slug": "", "ly_do": "đỏ trên CI"}}
+        cases.append(bool(kiem(r, reg, wf, mutant_cu)[0]))
+        mutant = {".claude/dev/a_test.py": {"slug": "nợ", "ly_do": "đỏ trên CI",
+                                                "log": "log-r3"}}
+        cases.append(bool(kiem(r, reg, wf, mutant)[0]))
+        # (b) Bản sao chương trình cách ly chuyển xanh phải bị yêu cầu gỡ.
+        green = base / "green_test.py"
+        green.write_text("print('1/1')\n", encoding="utf-8")
+        p = subprocess.run([sys.executable, green], text=True, stdout=subprocess.PIPE)
+        xanh = p.returncode == 0 and bang_chung_xanh(p.stdout, r"^(\d+)/(\d+)$")
+        cases.append(not cach_ly_chap_nhan(xanh, "github-actions/linux", "github-actions/linux"))
+        # r4: bỏ phép so làm bản xanh bắn ở môi trường khác; đúng ra phải là None.
+        cases.append((not xanh) is not cach_ly_chap_nhan(xanh, "github-actions/linux", None))
+        # r4: đột biến đổi trạng thái thứ ba thành ĐẠT phải bị bắt.
+        cases.append(cach_ly_chap_nhan(xanh, "github-actions/linux", None) is None and True is not None)
     # Hai chiều bằng chứng: rc đỏ dù có dòng xanh; rc xanh nhưng thiếu dòng xanh.
     cases += [not (1 == 0 and bang_chung_xanh("TỔNG: ĐẠT", r"TỔNG: ĐẠT")),
               not (0 == 0 and bang_chung_xanh("", r"TỔNG: ĐẠT"))]
-    names += ["rc-do-ban-in-xanh", "rc-xanh-thieu-ban-in"]
+    names += ["a-cach-ly-thieu-slug", "r4-thieu-moi-truong", "b-cach-ly-chuyen-xanh",
+              "r4-bo-so-moi-truong", "r4-khong-do-duoc-thanh-dat",
+              "rc-do-ban-in-xanh", "rc-xanh-thieu-ban-in"]
     for name, ok in zip(names, cases): print(f"ĐỘT BIẾN {name}: {'ĐỎ đúng' if ok else 'LỌT'}")
     print(f"PHẢN CHỨNG: {sum(cases)}/{len(cases)} đỏ đúng")
     return all(cases)
@@ -125,6 +189,7 @@ def main():
     loi, tren_cay, trong_so = kiem()
     for x in loi: print("ĐỎ:", x)
     print(f"ĐĂNG KÝ: {tren_cay}/{trong_so}")
+    print(f"TRẠNG THÁI: chan={trong_so - len(CACH_LY)} cach_ly={len(CACH_LY)}")
     ok = not loi and tren_cay == trong_so and phan_chung()
     if ns.chay: ok = chay_moi() == 0 and ok
     print("TỔNG:", "ĐẠT" if ok else "ĐỎ")

@@ -480,9 +480,12 @@ def d8_quy_trach_nhiem_ba_dieu_kien():
     assert loi_d8(("c",), mutants, {"m": ("d",)})[0] == ["m"]
     assert loi_d8(("c",), mutants, {"m": ()})[1] == ["m"]
     assert loi_d8(("c", "d"), mutants, {"m": ("c",)})[2] == ["d"]
-def d9_ngan_sach_900_dong_ma():
-    tong = sum(sum(1 for _ in path.open(encoding="utf-8")) for path in (NGUON, pathlib.Path(__file__)))
-    assert tong <= 900, f"hai tệp mã dùng {tong}/900 dòng"
+def d9_ngan_sach_dong_khong_trang():
+    # Khác bốn lần #319 nâng để chứa dòng ĐÃ VIẾT, trần 779 không mua dòng hiện có: tổng đã vừa 759; biên 20 dành cho TƯƠNG LAI, neo bằng một chốt cỡ D13 (~10) + try/finally (~4), làm tròn lên.
+    # Chạm trần 779 lần nữa thì câu hỏi đúng là "tệp này có nên TÁCH ĐÔI không", KHÔNG phải "nâng lên bao nhiêu" — §12 biến lần chạm kế tiếp thành câu hỏi KIẾN TRÚC.
+    tong = sum(sum(1 for line in path.open(encoding="utf-8") if line.strip())
+               for path in (NGUON, pathlib.Path(__file__)))
+    assert tong <= 779, f"hai tệp mã dùng {tong}/779 dòng không-trắng"
 
 def d10_main_khong_chay_ca_phai_do():
     da_chay = []
@@ -516,8 +519,21 @@ def d11_chay_cli_khong_duoc_xanh_khi_d8_do():
 def d12_mau_dot_bien_phai_duy_nhat():
     global MUTATIONS
     cu, MUTATIONS = MUTATIONS, (("trung", "test", "def ", "x", "D12-duy-nhat"),)
-    _, errors = chay_dot_bien(); MUTATIONS = cu
+    try:
+        _, errors = chay_dot_bien()
+    finally:
+        MUTATIONS = cu
+    assert MUTATIONS is cu
     assert errors and errors[0].startswith("trung: KHÔNG_ĐO_ĐƯỢC (mẫu xuất hiện ")
+
+def mau_dot_bien_khong_duy_nhat(mutants, sources):
+    return [(name, sources[target].count(old)) for name, target, old, _, _ in mutants if sources[target].count(old) != 1]
+
+def d13_moi_mau_dot_bien_phai_khop_dung_mot_cho():
+    sources = {"app": NGUON.read_text(encoding="utf-8"), "test": pathlib.Path(__file__).read_text(encoding="utf-8")}
+    bad = mau_dot_bien_khong_duy_nhat(MUTATIONS, sources)
+    assert not bad, "mẫu đột biến phải khớp đúng một chỗ: " + ", ".join(f"{name}={count}" for name, count in bad)
+    assert mau_dot_bien_khong_duy_nhat((("trung", "test", "x", "y", "D13"),), {"test": "xx"}) == [("trung", 2)]
 
 # Đăng ký xong mới đóng băng; runner không sửa tuple này.
 CASES = (
@@ -540,9 +556,10 @@ CASES = (
     ("D5", d5_notification_loi_van_chuyen), ("D6", d6_hop_dong_cli_0_2_3),
     ("D7", d7_cong_xanh_chi_khi_hai_so_duong_bang_nhau),
     ("D7b", d7b_nen_do_khong_dem_dot_bien),
-    ("D8", d8_quy_trach_nhiem_ba_dieu_kien), ("D9", d9_ngan_sach_900_dong_ma),
+    ("D8", d8_quy_trach_nhiem_ba_dieu_kien), ("D9", d9_ngan_sach_dong_khong_trang),
     ("D10-main", d10_main_khong_chay_ca_phai_do), ("D11-gate", d11_chay_cli_khong_duoc_xanh_khi_d8_do),
     ("D12-duy-nhat", d12_mau_dot_bien_phai_duy_nhat),
+    ("D13-duy-nhat-toan-bang", d13_moi_mau_dot_bien_phai_khop_dung_mot_cho),
 )
 # (tên, tệp đích, mẫu cũ, mẫu mới, ca đích phải nằm trong tập giết)
 MUTATIONS = (
@@ -586,7 +603,8 @@ MUTATIONS = (
     ("d8_bo_dieu_kien_a", "test", "[name for name, target in targets.items()\n         if target not in kill_sets.get(name, ())]", "[]", "D8"),
     ("d8_bo_dieu_kien_b", "test", "        [name for name in targets if not kill_sets.get(name, ())],\n        [case for case", "        [],\n        [case for case", "D8"),
     ("d8_bo_dieu_kien_c", "test", "        [case for case in cases if case not in targets.values()],\n    )", "        [],\n    )", "D8"),
-    ("d9_vuot_ngan_sach", "test", 'def d9_ngan_sach_900_dong_ma():\n    tong = sum(sum(1 for _ in path.open(encoding="utf-8")) for path in (NGUON, pathlib.Path(__file__)))\n    assert tong <= 900', 'def d9_ngan_sach_900_dong_ma():\n    tong = sum(sum(1 for _ in path.open(encoding="utf-8")) for path in (NGUON, pathlib.Path(__file__)))\n    assert tong < 0', "D9"),
+    ("d9_dem_ca_dong_trang", "test", '    tong = sum(sum(1 for line in path.open(encoding="utf-8") if line.strip())\n               for path in (NGUON, pathlib.Path(__file__)))', '    tong = sum(sum(1 for line in path.open(encoding="utf-8"))\n               for path in (NGUON, pathlib.Path(__file__)))', "D9"),
+    ("d9_vuot_ngan_sach", "test", '               for path in (NGUON, pathlib.Path(__file__)))\n    assert tong <= 779, f"hai tệp mã dùng {tong}/779 dòng không-trắng"', '               for path in (NGUON, pathlib.Path(__file__)))\n    assert tong < 0, f"hai tệp mã dùng {tong}/779 dòng không-trắng"', "D9"),
     ("d10_main_luon_xanh", "test", "def ma_thoat(xanh):\n    return 0 if xanh else 1", "def ma_thoat(xanh):\n    return 0", "D10-main"),
     ("d11_ep_rc_xanh", "test", "def ma_thoat(xanh):\n    return 0 if xanh else 1", "def ma_thoat(xanh):\n    return 0", "D11-gate"),
     ("d11_phan_dinh_xanh", "test", "return not any(\"ĐỎ\" in line or \"KHÔNG_ĐO_ĐƯỢC\" in line for line in lines)", "return True", "D11-gate"),
@@ -596,7 +614,9 @@ MUTATIONS = (
     ("d11_bo_than_ca", "test", "    for name, fn in module.CASES:\n        ran.append(name)\n        try:\n            fn()\n        except Exception as e:  # runner phải biến mọi lỗi ca thành ĐỎ, nhưng không che nội dung\n            failed.append((name, f\"{type(e).__name__}: {e}\"))", "    for name, fn in module.CASES:\n        pass", "D11-gate"),
     ("d11_hau_to_dot_bien_xanh", "test", 'def dong_dot_bien(kill_sets, mutants, failed, errors=()):\n    if failed:\n        return "ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)"\n    ok = _co_dot_bien(mutants) and len(kill_sets) == len(mutants) and not errors\n    return f"ĐỘT BIẾN   : đã đo {len(kill_sets)}/{len(mutants)} tập giết · " + ("ĐẠT" if ok else "ĐỎ")', 'def dong_dot_bien(kill_sets, mutants, failed, errors=()):\n    if failed:\n        return "ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)"\n    ok = _co_dot_bien(mutants) and len(kill_sets) == len(mutants) and not errors\n    return f"ĐỘT BIẾN   : đã đo {len(kill_sets)}/{len(mutants)} tập giết · " + "ĐẠT"', "D11-gate"),
     ("d11_hau_to_ca_xanh", "test", '    lines = [f"CA         : {len(ran) - len(failed)}/{len(cases)} đạt · {len(failed)} đỏ · "\n             + ("ĐẠT" if _du_ca(tuple(name for name, _ in cases), ran) and not failed else "ĐỎ")]', '    lines = [f"CA         : {len(ran) - len(failed)}/{len(cases)} đạt · {len(failed)} đỏ · "\n             + "ĐẠT"]', "D11-gate"),
+    ("d12_bo_khoi_phuc", "test", "    finally:\n        MUTATIONS = cu\n    assert MUTATIONS is cu", "    finally:\n        pass\n    assert MUTATIONS is cu", "D12-duy-nhat"),
     ("d12_bo_chot_duy_nhat", "test", "        if src.count(old) != 1:\n            errors.append", "        if src.count(old) < 1:\n            errors.append", "D12-duy-nhat"),
+    ("d13_bo_chot_duy_nhat", "test", "def mau_dot_bien_khong_duy_nhat(mutants, sources):\n    return [(name, sources[target].count(old)) for name, target, old, _, _ in mutants if sources[target].count(old) != 1]", "def mau_dot_bien_khong_duy_nhat(mutants, sources):\n    return [(name, sources[target].count(old)) for name, target, old, _, _ in mutants if sources[target].count(old) < 1]", "D13-duy-nhat-toan-bang"),
 )
 
 

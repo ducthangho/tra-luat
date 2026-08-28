@@ -203,3 +203,100 @@ ISSUE_MO_NHU_THE_NAO:
     đường mở Issue từ phiên remote, và vì bài học đi kèm đáng giá hơn con số: một công cụ thất bại
     KHÔNG phải một đường bị chặn — phải thử ít nhất hai client trước khi gọi đó là chính sách.
 posted_comment_id: 5446924586   # workflow ghi, ĐỪNG sửa tay
+
+# ============================== LAND ==============================
+LANDED:
+  merged_at_utc: '2026-08-28T04:05:00Z'
+  merge_commit: a51ee16decf7879cb7ede241d3dd4b69f1e24562
+  pr: 365
+  reviewed_sha: f31cdbf3db83c94c087edb990b4df365fab1268d
+  target: master
+
+  MANG_THEO_THAN_CUA_319: >-
+    PHẢI ĐỌC TRƯỚC KHI DÙNG BẢN GHI NÀY. `base_sha` của lease này là `f461413a` = HEAD nhánh
+    #319, KHÔNG phải master — #360 là Remediation Slice, sinh ra vì #319 chạm 900/900 biên 0 nên
+    không vá tiếp trong đó được. #319 KHÔNG có PR riêng nào đang mở. Nên merge PR #365 land ĐỒNG
+    THỜI HAI packet: 11 commit, 3 tệp, 1260 dòng thêm — trong đó `.claude/dev/mcp_gh.py` (230) và
+    `ops/specs/mcp-gh-cuu-ho.md` (360) KHÔNG nằm trong write set của #360. Phiên điều phối ĐO
+    chuyện này TRƯỚC khi merge (`git log --oneline origin/master..HEAD` => 11;
+    `merge-base --is-ancestor f461413a origin/master` => KHÔNG) và khai thẳng thay vì merge lặng lẽ.
+
+  CROSS_REVIEW:
+    reviewer_provider: claude
+    executor_provider: codex
+    cross_provider: true
+    verdict: changes_requested
+    P1: 0
+    P2: 3
+    verdict_path: ops/reviews/mcp-gh-cong-tu-canh-review-1-claude-verdict.md
+    verdict_sha256: a360e3da7a8dcf3d4e9aa81e8508f76c4fb24474b3b39edfa44cbaf9af1754d7
+    verdict_bytes: 24078
+    luat_dung_LAND: >-
+      Chỉ P1 chặn land. P1 = 0 ⇒ land được, với điều kiện MỌI P2 thành nợ CÓ TÊN — ba nợ ở dưới.
+      Không P2 nào bị nâng lên P1 để giữ packet mở; không P1 nào bị hạ xuống P2 để land.
+
+  HAI_P1_CUA_319_DA_DONG_CO_PHAN_CHUNG: >-
+    Điều kiện phiên điều phối tự đặt ra và cam kết trước khi phóng lượt này: "nếu còn P1 nào hở,
+    DỪNG và báo, không hạ P1 xuống P2 để land." Reviewer đã đóng cả ba bằng đột biến chạy trên bản
+    sao NGOÀI cây, không bằng suy luận — chi tiết trong biên nhận. N7 (hậu tố dòng CA không có đột
+    biến canh) · `D10-main` là mệnh đề luôn đúng · khuyết tật NỀN (bộ chạy đột biến thiếu chốt
+    duy-nhất, 14/48 mẫu không duy nhất).
+
+  LUOT_1_DUNG_THEO_S5: >-
+    Executor lượt 1 DỪNG đúng luật khi bản vá làm đỏ ca khác, và KHÔNG khai suite xanh dù `rc=0`
+    của launcher nói ngược — bốn ca socket đỏ trong sandbox của nó là do `network_access=false`
+    (đúng bảng `docs/MANG_SANDBOX_CODEX.md` land cùng #334), không phải khuyết tật bản vá.
+    Phiên điều phối TỰ ĐO ra ba khuyết tật rồi giao lượt 2, không chuyển tiếp báo cáo executor:
+    (1) `contextlib` chưa import ⇒ `D10-main` ném NameError;
+    (2) mẫu `d11_hau_to_dot_bien_xanh` `src.count` = 2 nên chính chốt duy-nhất mới tự vô hiệu nó;
+    (3) `D9` 922/900.
+    Bài học dùng lại được: mẫu đột biến NHIỀU DÒNG tự loại mình khỏi bảng `MUTATIONS` vì dấu xuống
+    dòng ở đó là chuỗi thoát; mẫu ĐƠN DÒNG thì khớp hai lần. Đó là lý do 13 mẫu cũ phải viết lại
+    kèm tiền tố `def ...`.
+
+  TRAN_D9_KHONG_NANG: >-
+    Quyết định của phiên điều phối theo uỷ quyền: KHÔNG nâng `900`. #319 đã nâng/đổi đơn vị BỐN lần
+    và con số mất hết ý nghĩa — nâng ở đây là tái phạm ngay bên trong bản vá sửa nó. Brief lượt 2
+    nói thẳng: cắt cho vừa; cắt thật lòng mà vẫn không vừa thì DỪNG và BÁO, đó là finding về mâu
+    thuẫn giữa trần và phạm vi sửa chữa, thuộc quyền phiên điều phối chứ không phải quyền executor.
+    Executor cắt được 22 dòng và về đúng 900/900 — nhưng CÁCH cắt thành nợ `AG-360-P2-02` dưới đây.
+
+  NO_CO_TEN:
+  - AG-360-P2-01-dong-d8-thieu-canh-rieng
+  - AG-360-P2-02-d9-nen-khoang-trang-danh-vao-phep-do
+  - AG-360-P2-03-d12-thieu-try-finally
+  no_ghi_chu: >-
+    `AG-360-P2-02` là CÂU HỎI CHÍNH SÁCH cho người giữ kho, không phải lỗi có một cách vá đúng duy
+    nhất: (a) chấp nhận biên 0 và CẤM nén khoảng trắng trong quy ước tương lai, hay (b) đổi cách
+    `D9` đếm. Cả reviewer lẫn phiên điều phối đều KHÔNG tự chọn.
+    `AG-360-P2-03` không vá ngay được vì vá nó cần THÊM dòng, mà `D9` đang 900/900 biên 0 ⇒ đỏ
+    ngay. Đó chính là bằng chứng chạy được cho `AG-360-P2-02`: packet không sửa nổi P2 của chính
+    nó mà không phá ratchet của chính nó.
+    Nợ P2 cũ của #319 `d9-dong-tieu-chi-van-mo-ta-numstat-tren-write-set-nhung-ma-do-tong-dong-hai-tep-ma`
+    VẪN MỞ và cùng họ với `AG-360-P2-02` — hai lượt review độc lập chỉ vào cùng một chỗ từ hai
+    phía khác nhau. Theo §12 đó là tín hiệu "cùng hình dạng lỗi", đáng xem lại CÁCH LÀM chứ không
+    chỉ vá tiếp.
+
+  SAU_CO_TROI_5_1_DA_DO_TRUOC_MERGE:
+  - '1 xung đột: merge-tree sạch'
+  - '2 DRIFT ∩ write set: RỖNG — master đổi 23 tệp từ merge-base ac82ddc, không tệp nào giao với 3 đường của PR'
+  - '3 artefact phái sinh: PR không chạm RELEASE_MANIFEST.json / golden'
+  - '4 ratchet: `_c291_docs_ngoai_goi` chỉ đếm `docs/**/*.md`; PR thêm 0 tệp docs. Hai tệp `.claude/**` nằm trong `_RELEASE_EXCLUDE_DIRS`, `ops/**` không ratchet nào đếm (chính khối KÊ KHAI SLOT ghi điều đó)'
+  - '5 tệp nhập: không có'
+  - '6 workflow/hook: PR không chạm; vẫn chạy lại gate trên master SAU merge theo đúng cò 6'
+
+  GATE:
+    truoc_merge: 'workflow_dispatch trên f31cdbf3 => success (đủ ma trận, có Windows)'
+    pull_request_event: 'success — nợ AG-CI-01 KHÔNG tái diễn ở lượt này'
+    ag_ci_01_ghi_chu: >-
+      Khác biệt ĐO ĐƯỢC so với các lần trước: nhánh lần này do phiên điều phối đẩy bằng credential
+      git thật, không phải do workflow đẩy bằng `GITHUB_TOKEN`. Đó là GIẢ THUYẾT khớp dữ liệu, chưa
+      phải phản chứng — chưa dựng được ca đối chứng nên đừng đọc mạnh hơn thế.
+    sau_merge: 'đã gọi workflow_dispatch trên master ngay sau merge'
+
+  SO_SACH_5_MUC_10_2:
+  - 'hiện vật #360: `.claude/dev/mcp_gh_test.py` trên master => CÓ, 670 dòng (đo bằng git cat-file trên origin/master)'
+  - 'hiện vật #360: `ops/specs/mcp-gh-cuu-ho.md` trên master => CÓ, 360 dòng'
+  - 'hiện vật #319 đi kèm: `.claude/dev/mcp_gh.py` trên master => CÓ, 230 dòng'
+  - 'verdict + biên nhận: đã công bố ở ops/reviews/mcp-gh-cong-tu-canh-review-1-claude-verdict{.md,.receipt.yaml}, sha256 khớp byte'
+  - 'ba nợ P2: đã có TÊN trong khối NO_CO_TEN ở trên, kèm lý do vì sao không vá trong lượt này'

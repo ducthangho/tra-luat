@@ -1,0 +1,64 @@
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '360'
+provider: claude
+role: reviewer
+verdict: changes_requested
+reviewed_sha: f31cdbf3db83c94c087edb990b4df365fab1268d
+luot: r1
+cross_provider: true
+assurance: cross_approved
+verdict_path: ops/reviews/mcp-gh-cong-tu-canh-review-1-claude-verdict.md
+verdict_sha256: a360e3da7a8dcf3d4e9aa81e8508f76c4fb24474b3b39edfa44cbaf9af1754d7
+verdict_bytes: 24078
+ket_qua_dem_duoc:
+  P1: 0
+  P2: 3
+  finding_moi: 3
+executor_provider: codex
+phan_chung_reviewer_DA_CHAY:
+- 'suite tren f31cdbf3 => CA 41/41 dat, 0 do; DOT BIEN 51/51 tap giet DAT; D8(a)(b)(c) DAT; TONG DAT; rc=0 (do bien mã thoát truc tiep, KHONG qua pipe)'
+- 'D9 hai SO HANG do RIENG: wc -l mcp_gh.py => 230; mcp_gh_test.py => 670; tong 900/900, bien 0'
+- 'rang chot D10-main: xoa loi goi fn() that trong chay_cac_ca => AssertionError, DO'
+- 'rang chot d11_hau_to_dot_bien_xanh: ep hau to luon DAT => CA 40/41, DO D11-gate, TONG DO, rc=1'
+- 'rang chot d11_hau_to_ca_xanh: ep hau to dong CA luon DAT => dong CA noi doi nhung D11-gate DO, TONG DO, rc=1'
+- 'rang chot d12_bo_chot_duy_nhat: doi khac-1 thanh nho-hon-1 => DO D12-duy-nhat, rc=1'
+- 'quet ca 51 muc MUTATIONS do src.count(old): 0 muc co count khac 1'
+- 'do 8 cho xoa dong trang: ca 8 deu sat ham moi/sua trong dung diff nay; 48 ham khac cung tep van giu 2 dong trang'
+hai_P1_cua_319_da_dong:
+- 'N7 hau to DAT/DO cua dong CA khong co dot bien canh => DONG (phan chung d11_hau_to_ca_xanh)'
+- 'D10-main la menh de luon dung => DONG (phan chung D10-main)'
+- 'khuyet tat NEN: bo chay dot bien thieu chot duy-nhat => DONG (phan chung d12_bo_chot_duy_nhat + quet 51 mau)'
+ba_no_CO_TEN_tu_luot_nay:
+- slug: AG-360-P2-01-dong-d8-thieu-canh-rieng
+  mo_ta: >-
+    `dong_d8` la dong sinh hau to DAT/DO THU BA, khong co dot bien canh rieng. Hien VAN bi bat,
+    nhung chi nho trung hop kich ban kill_sets rong trong ca D11-gate. Doi kich ban ay la lo hong
+    mo lai — dung hinh dang N7 ma chinh packet nay sinh ra de sua.
+  vi_sao_khong_vao_luot_nay: ngoai bon viec dac ta giao; them viec thu nam la doi muc tieu, phai qua revision (§3.2)
+- slug: AG-360-P2-02-d9-nen-khoang-trang-danh-vao-phep-do
+  mo_ta: >-
+    D9 dat 900/900 mot phan bang NEN HINH THUC (8 cho xoa dong trang giua ham muc module + 2 lenh
+    ghep bang dau cham phay), noi dung logic khong giam. Bien con 0 tuyet doi: bat ky dong them nao
+    ke tiep se do D9 ngay, va duong chua re nhat luon la nen them khoang trang — mot vong xoay lam
+    tep kho doc dan trong khi con so 900 van bao "trong ngan sach".
+  cau_hoi_cho_nguoi_giu_kho: >-
+    (a) chap nhan bien 0 va CAM nen khoang trang trong quy uoc tuong lai, hay (b) doi cach D9 dem
+    (bo dong trang truoc khi dem, hoac ha tran de chua bien that). Reviewer KHONG tu chon; phien
+    dieu phoi cung khong.
+- slug: AG-360-P2-03-d12-thieu-try-finally
+  mo_ta: >-
+    Ca d12_mau_dot_bien_phai_duy_nhat gan de MUTATIONS toan cuc roi khoi phuc KHONG co try/finally.
+    Co che ro ri la THAT (da tai hien), nhung chua khai thac duoc hom nay: mau dot bien luon khong
+    duy nhat nen khong cham nhanh nem loi, va D12-duy-nhat la ca CUOI trong CASES.
+  vi_sao_khong_va_ngay: >-
+    Va no can THEM dong, ma D9 dang o 900/900 bien 0 => se do ngay. Day chinh la bang chung cho no
+    AG-360-P2-02: packet khong sua duoc P2 cua chinh no ma khong pha ratchet cua chinh no.
+khong_P2_nao_bi_nang_len_P1: true
+khong_P1_nao_bi_ha_xuong_P2: true
+ghi_chu_reviewer: >-
+  Reviewer tra loi CA HAI cau hoi phien dieu phoi giao ma khong duoc goi y dap an: (1) nen khoang
+  trang LA danh vao phep do, nhung xep P2 vi D9 dinh nghia la dem dong VAT LY nen ban va khai thac
+  dung cach no duoc DINH NGHIA chu khong lam sai phep do; (2) d12 thieu try/finally la co che that
+  nhung khong co duong khai thac hom nay. Reviewer con tu tim ra finding thu ba (dong_d8) bang phep
+  quet theo Y ma phien dieu phoi khong nghi toi.

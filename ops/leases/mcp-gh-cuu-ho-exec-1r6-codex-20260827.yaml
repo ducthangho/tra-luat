@@ -338,3 +338,39 @@ DONG_LEASE:
     Packet tách `MCP-GH-CONG-TU-CANH` — người giữ kho đang mở Issue. Hồ sơ nhập:
     `ops/specs/mcp-gh-cong-tu-canh-packet-issue-nhap.md`. Nó nhận HAI P1 của vòng 4 cộng hai việc
     phiên điều phối đã đo. **Đọc được hồ sơ ≠ được giao việc: phải có Issue + lease mới.**
+
+# ============================== LAND ==============================
+LANDED:
+  merged_at_utc: '2026-08-28T04:05:00Z'
+  merge_commit: a51ee16decf7879cb7ede241d3dd4b69f1e24562
+  pr: 365
+  target: master
+  land_qua_packet_khac: 360
+  ghi_chu: >-
+    #319 KHÔNG có PR riêng. Head của nó (`f461413a`) chính là `base_sha` của packet #360
+    `MCP-GH-CONG-TU-CANH` — Remediation Slice sinh ra vì #319 chạm 900/900 biên 0 nên không vá tiếp
+    trong đó được. Nên PR #365 của #360 land ĐỒNG THỜI cả hai: 11 commit, 3 tệp, 1260 dòng thêm.
+    Phiên điều phối ĐO chuyện này trước khi merge và khai thẳng thay vì merge lặng lẽ; sổ sách đầy
+    đủ nằm trong khối `LANDED` của lease #360.
+  hai_P1_vong_4_da_dong: >-
+    Verdict vòng 4 (`ops/reviews/mcp-gh-cuu-ho-review-4-claude-verdict.md`, reviewed_sha
+    `f461413a`) trả `changes_requested` với hai P1:
+    `hau-to-dat-do-moi-cua-ca-va-dot-bien-khong-co-dot-bien-canh` và
+    `d10-main-la-menh-de-luon-dung-khong-con-do-hanh-vi-main`; kiểm độc lập r6 thêm khuyết tật NỀN
+    (bộ chạy đột biến thiếu chốt duy-nhất, 14/48 mẫu không duy nhất).
+    Cả BA đã đóng bởi bản vá #360, mỗi cái kèm ĐỘT BIẾN chạy trên bản sao ngoài cây do reviewer
+    `claude` tự dựng — không phải suy luận, không phải lời khai của executor. Bằng chứng từng cái
+    trong `ops/reviews/mcp-gh-cong-tu-canh-review-1-claude-verdict.receipt.yaml`.
+  P2_con_mo_cua_319:
+  - slug: d9-dong-tieu-chi-van-mo-ta-numstat-tren-write-set-nhung-ma-do-tong-dong-hai-tep-ma
+    trang_thai: VẪN MỞ
+    ghi_chu: >-
+      Cùng họ với nợ mới `AG-360-P2-02-d9-nen-khoang-trang-danh-vao-phep-do`. HAI lượt review độc
+      lập, hai phía khác nhau, cùng chỉ vào ngân sách `D9`. Theo §12 đó là tín hiệu "cùng hình dạng
+      lỗi", đáng xem lại CÁCH LÀM chứ không chỉ vá tiếp.
+  - slug: cac-P2-vong-2-va-vong-3
+    trang_thai: KHÔNG ĐO ĐƯỢC
+    ghi_chu: >-
+      Reviewer vòng 4 khai thẳng là không đọc được văn bản gốc của 5 P2 vòng 2 và 2 P2 vòng 3
+      (clone của họ không có nhánh `ops/cap-lease-tach-314`). Ghi lại nguyên trạng thái thứ ba
+      thay vì đoán — "không đo được" không phải "không có".

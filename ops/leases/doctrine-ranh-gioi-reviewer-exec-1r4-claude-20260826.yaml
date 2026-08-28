@@ -357,6 +357,82 @@ recorder_ghi_chu: >-
 
 leased_at_utc: '2026-08-26T09:35:00Z'
 ban_sua_doi_2_luc_utc: '2026-08-26'
+LANDED:
+  luc_utc: '2026-08-28T00:19:29Z'
+  master_sau_land: 693d68fd6ae76cca2be936d0d91d6b49bec9c80c
+  qua_PR: 358
+  ghi_chu_PR: >-
+    KHÔNG phải PR #322. #322 và #352 kẹt hai ngày vì required check `gate (ubuntu-latest)`
+    CHƯA HỀ CHẠY: `ci.yml` chỉ có cò `push: branches: [master]` (nhánh `claude/**` không khớp)
+    và `pull_request`, mà cả hai PR do `ops-open-pr.yml` mở bằng GITHUB_TOKEN — GitHub không
+    sinh lượt chạy cho sự kiện do GITHUB_TOKEN tạo ra. #358 là nhánh gộp `claude/land-318`
+    mang ĐÚNG MỘT merge commit của #322, tách khỏi #334 vì #334 làm đỏ gate (xem lease r3).
+  merge_boi: >-
+    Phiên điều phối, qua `.claude/dev/mcp_github_doc.py goi merge_pull_request` — công cụ vừa
+    land ở #357/packet #355 lúc 00:1xZ. Trước đó phiên KHÔNG merge được: REST
+    `api.github.com/repos/*` trả 403 do PROXY tự sinh (không header `x-github-*`), và một phiên
+    con sinh sau khi chủ kho cấp quyền cũng bị chặn y hệt. Đường mở ra là
+    `api.githubcopilot.com/mcp/` — host KHÁC, `.mcp.json` của kho khai sẵn kèm
+    `Authorization: Bearer ${GITHUB_PAT}`.
+  uy_quyen: >-
+    Chủ kho uỷ quyền thực thi trong phiên, 2026-08-28: "cấp issue, phóng codex. và triển khai
+    đến xong. tôi uỷ quyền thực thi cho bạn". Trước đó đã yêu cầu merge #358 nhiều lần.
+
+  DO_LAI_BANG_GIT_khong_tin_API:
+    - 'git merge-base --is-ancestor b78a0213 693d68fd  => rc=0  (head PR #358)'
+    - 'git merge-base --is-ancestor 1c000495 693d68fd  => rc=0  (head reviewer duyệt vòng 15)'
+    - 'blob docs/GOI_AGENT_DA_NEN.md trên master = b524458842a1b155bec529b673bb59a27fff13c4'
+    - '  (base c35ae1c = 16bad9e1... ⇒ KHÁC ⇒ nội dung đã thật sự vào master)'
+
+  GATE_HAU_MERGE:
+    vi_sao_phai_chay: '§5.1 kích hoạt 6 — DRIFT từ BASE c35ae1c chạm ci.yml, .claude/hooks/*, settings.json'
+    chay_o_dau: >-
+      CLONE ĐỘC LẬP (không phải git worktree — worktree cho rc=14), đặt
+      `core.autocrlf=false core.eol=lf core.abbrev=7` đúng như bước "Force LF checkout" của CI.
+      THIẾU `core.abbrev` cho ĐỎ GIẢ ở doc-claims-check/golden-test/determinism-audit; phiên đã
+      mắc một lượt và ghi lại để lượt sau khỏi mất công.
+    ket_qua:
+      py_compile: 'rc=0'
+      packet_loop_test: 'rc=0'
+      doc_claims_check_strict: 'rc=0'
+      determinism_audit_strict: 'rc=0'
+      release_verify_strict: 'rc=0'
+      tl_selftest: '1698/1698'
+      docs_md_tren_dia: 70
+
+  BOOKKEEPING_TUNG_MUC:
+    ghi_chu: >-
+      §10.2 đòi DUYỆT TỪNG MỤC lease khai, không dừng ở hiện vật chính. Một phép `grep` thấy
+      tệp đã land trả lời đúng MỘT câu hỏi và mù với mọi mục ngoài tệp ấy.
+    muc:
+      - ten: 'viec_cua_luot_nay — KHÔNG chạm CLAUDE.md, KHÔNG chạm .claude/**, KHÔNG sửa mã'
+        phep_do: 'git diff --name-only 452335a7 693d68fd'
+        ket_qua: 'ĐÚNG MỘT đường dẫn: docs/GOI_AGENT_DA_NEN.md'
+        trang_thai: DAT
+      - ten: 'giu_nguyen_khong_lam_lai — ba finding P2 của #314 phải còn nguyên (tiêu chí N5)'
+        phep_do: 'grep -c trên bản master sau land'
+        ket_qua: '"tương quan" 1 · "stdout.log" 1 · "refscan.sh" 1 — cả ba CÒN'
+        trang_thai: DAT
+      - ten: 'trục hoà: quan sát theo phiên bản ≠ bất biến an ninh'
+        phep_do: 'grep -c trên bản master sau land'
+        ket_qua: '"quan sát" 7 · "bất biến an ninh" 1 · "fail-closed" 1 · "chưa xếp được" 6'
+        trang_thai: DAT
+      - ten: 'kích thước thay đổi khớp write set một đường dẫn'
+        phep_do: 'git diff --stat'
+        ket_qua: '1 file changed, 198 insertions(+)'
+        trang_thai: DAT
+      - ten: 'nhãn mệnh đề thứ tám nâng lên `cơ chế đã xác minh — chiều MỞ`'
+        trang_thai: KHONG_AP_DUNG_O_LUOT_NAY
+        ly_do: >-
+          Mục 2 của `ops/BAN_GIAO_PHIEN_20260827.md` nói rõ việc ấy chỉ mở ra SAU khi #334 land,
+          vì bằng chứng bốn tổ hợp nằm ở #334. #334 CHƯA land (đang ở revision r3). Nhãn
+          `chưa xếp được` hiện tại là ĐÚNG, không phải tạm bợ — reviewer vòng 14 đã chốt.
+          Đây là packet MỚI, không sửa lén sau land.
+
+  ban_chieu_KHONG_theo: >-
+    Lần thứ TƯ khai cùng chỗ lệch: lease này đã có `posted_comment_id: 5427971996` nên
+    `lease_publish.py` trả rc=9 và `ops-publish-lease.yml` bỏ qua. Comment trên Issue #318 vẫn
+    hiển thị hạn 10:00Z và KHÔNG mang khối LANDED này. Tệp YAML là bản CÓ THẨM QUYỀN.
 lease_expires_at_utc: '2026-08-28T22:00:00Z'
 run_minutes: 3600
 gia_han:

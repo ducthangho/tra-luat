@@ -93,9 +93,12 @@ base_ghi_chu: >-
   `git log ac82ddc5..693d68fd -- RELEASE_MANIFEST.json` RỖNG, và blob giống hệt ở cả hai đầu
   (`213737c7`). Nên đường vừa nới không có drift và sửa trên nhánh sẽ merge sạch.
 start_from_sha: 33581a9300751adb6707511f36d5aef5afd932e0
-reviewed_sha_required: 33581a9300751adb6707511f36d5aef5afd932e0
+reviewed_sha_required: 9f553fc8296c1d0c267cc13c9ce87cf89e30452d
 reviewed_sha_ghi_chu: >-
-  Tạm neo head r3. PHẢI CẬP NHẬT sang exact head sau khi commit manifest tái sinh — bản duyệt
+  CẬP NHẬT sang exact head sau khi commit manifest tái sinh (`9f553fc8`, đẩy 2026-08-28T01:12Z,
+  numstat 5 thêm / 5 xoá trên đúng `RELEASE_MANIFEST.json`). Head r3 `33581a93` KHÔNG bị vứt —
+  nội dung nó mang vẫn nguyên trong `9f553fc8`; nhưng revision mới ⇒ lease cũ mất hiệu lực
+  (§3.2), nên vòng review neo vào head MỚI.
   neo sai SHA là bằng chứng vô hiệu.
 
 viec_cua_luot_nay: >-

@@ -1,0 +1,62 @@
+# Lane PHAN CHUNG cua cong `duyet-khac-danh-tinh` — packet #348.
+#
+# VI SAO LA MOT TEP RIENG. Hai lane nay khong duoc o chung mot workflow, va ly do la mot
+# phep do chu khong phai so thich: khi chung o chung, job `cong` xuat hien VOI KET LUAN
+# `skipped` o lane `pull_request` (lane KHONG tin cay). Context check tren GitHub la
+# "<ten workflow> / <ten job>", nen hai lan xuat hien ay mang CUNG MOT TEN — nguoi di cau
+# hinh required check khong the phan biet "job chay tu nhanh co so" voi "job bi skip tu
+# nhanh PR", va lan ra doi cua cong da quan sat dung `cong=skipped`
+# (`runbook-chua-tach-rieng-bang-chung-cua-check-cong`, P1, cross-review luot 1).
+# Tach tep => `name:` khac => context khac. Khong con ten nao mo ho de chon nham.
+#
+# LANE NAY KHONG TIN CAY VA KHONG CAN TIN CAY. No chay `on: pull_request`, tuc dinh nghia
+# workflow den TU NHANH PR: mot PR sua duoc chinh tep nay. Dieu do CHAP NHAN DUOC vi no
+# khong cam token ghi va khong quyet dinh gi — no chi chay bo phan chung. Thu cuong che la
+# job `cong` cua tep KIA, va tep kia khong the bi PR sua vi no chay tu nhanh co so.
+name: phan chung duyet khac danh tinh
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  phan-chung:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      # GHIM EXACT, va ghim CUNG MOT ban voi `ci.yml` + `ops-publish-lease.yml`.
+      # `t31` trong `ops/lease_publish_test.py` cuong che ca hai ve: spec tran lam CUNG MOT
+      # SHA xanh hom nay va do sau nay ma cay khong doi; hai ban ghim khac so thi hai duong
+      # chay hai runtime, va cho quen chinh la cho khong ai do. Nang ban thi nang ca ba.
+      - name: cai PyYAML (bo test doc chinh tep workflow cua cong)
+        run: python -m pip install --quiet PyYAML==6.0.3
+      # `duyet_danh_tinh_test.py` co mot tang FAIL-CLOSE chay `actionlint` tren CA HAI tep
+      # `duyet-*.yml` (cho thu bay cua ho "danh sach cam doi lot allow-list": golden do CAY
+      # `safe_load`, khong do TEP, nen khoa trung YAML di lot). Tang ay DO khi thieu cong cu —
+      # dung nhu no phai the. Nen lan nay PHAI cap cong cu, khong duoc de cong tu tat.
+      #
+      # DUNG DUNG IDIOM CUA `ci.yml` (dong 81-87), ke ca ban ghim: mot cho ghim khac ban la
+      # hai duong chay hai runtime, va cho quen chinh la cho khong ai do.
+      #
+      # SHELLCHECK LA BAT BUOC, khong phai them cho du: thieu no thi `actionlint` IM LANG bo
+      # TOAN BO lop luat `SC*` roi van tra rc=0 — mot cong xanh vi khong kiem gi.
+      - name: cai actionlint (ghim exact, doi chieu bam)
+        shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/cai_actionlint.sh
+      - name: cai shellcheck (thieu no actionlint bo luat SC* trong im lang)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
+      - name: phan chung cua cong duyet-khac-danh-tinh
+        run: |
+          set -eu
+          PY="$(command -v python3 || command -v python || command -v py)"
+          "$PY"  .claude/dev/duyet_danh_tinh_test.py

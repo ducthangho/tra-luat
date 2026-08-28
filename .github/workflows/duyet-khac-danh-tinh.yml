@@ -1,0 +1,74 @@
+# Cong TIN CAY: NGUOI DUYET phai khac NGUOI TAO PR — packet #348 (TACH-DANH-TINH-GITHUB).
+#
+# TEP NAY CHI CHUA LANE TIN CAY. Ban dau no mang ca lane phan chung (`on: pull_request`)
+# trong cung mot tep; cross-review luot 1 (`runbook-chua-tach-rieng-bang-chung-cua-check-cong`,
+# P1) do duoc hau qua: cung mot workflow khai ca `pull_request` lam job `cong` xuat hien voi
+# ket luan `skipped` o lane KHONG tin cay, nen context check trung ten va nguoi cau hinh
+# branch protection khong phan biet duoc "cong tu nhanh co so" voi "cong bi skip tu nhanh PR".
+# Mot required check MO HO thi khong phai mot required check. Lane phan chung nay o
+# `.github/workflows/duyet-phan-chung.yml`, mang TEN WORKFLOW KHAC nen context cung khac.
+# KHONG dung `.github/workflows/ci.yml` vi duong ay dang bi lease cua packet #345 (DA LAND)
+# giu ma khong co duong thu hoi — no `AG-T0-01B`. Xem than lease cua #348.
+#
+# ── BAY B1: PR SUA DUOC CHINH CONG CUA NO ────────────────────────────────────────────────
+# Voi `on: pull_request`, GitHub chay workflow LAY TU NHANH PR. Nen mot PR chi can sua tep
+# nay la tu noi cong cho minh — cong tu vo hieu, va tren giao dien no van "xanh".
+# CHUA: `pull_request_target` chay workflow LAY TU NHANH CO SO. Do la ly do DUY NHAT dung
+# trigger ay o day; no khong phai tuy chon phong cach. Tap su kien cua tep nay bi bo test
+# khoa bang DANH SACH CHO PHEP (`ca_su_kien_DUNG_allow_list`) chu khong bang danh sach cam.
+#
+# ── BAY B2: `pull_request_target` CAM TOKEN va thay nhanh CO SO ──────────────────────────
+# Chinh vi no chay tu nhanh co so, no duoc cap token cua kho. Neu vo y checkout HEAD cua PR
+# roi chay bat cu thu gi tu do, MOT PR BAT KY chay duoc ma tuy y voi quyen cua token.
+# CHUA, bon lop: `permissions` chi doc O CA MUC WORKFLOW LAN MUC JOB · checkout NEO VAO
+# `base.ref` (khong bao gio `head`) · cac buoc cua job `cong` bi khoa bang DANH SACH CHO
+# PHEP TOPOLOGY (dung 2 buoc, than `run` va `env` khop nguyen van) · job `cong` KHONG chay
+# mot dong ma nao den tu PR. Ba lop dau la thu cross-review luot 1 do duoc la CON THIEU:
+# chi them `permissions: write` o muc job, hoac them mot buoc keo head PR, thi ca 18 ca cu
+# van dat (`b2-job-permissions-va-buoc-keo-head-deu-mu`, P1).
+#
+# ── BAY THU BA, da tra gia trong kho nay (16-08-2026) ────────────────────────────────────
+# GitHub noi suy bieu thuc tren TOAN BO than `run` TRUOC khi shell thay no. Mot cap ngoac
+# bieu thuc RONG nam trong mot dong CHU THICH cua `run` da lam ca tep khong hop le va
+# `ops-don-ref.yml` bi TU CHOI (run mang ten DUONG DAN TEP, 0 job). Nen o day KHONG dong
+# `run` nao chua cu phap bieu thuc — moi gia tri di qua `env:`. Bo test khoa dieu do.
+name: duyet khac danh tinh
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  cong:
+    # Giu lai du tap su kien tren da khong con `pull_request`: lop thu hai, de neu ai them
+    # su kien ay vao `on:` thi van con mot chot. Bo test doi dieu kien nay khop DUNG mot
+    # bieu thuc trong danh sach cho phep — mot ve `|| true` noi them van la tu vo hieu.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: lay ma tu NHANH CO SO (khong bao gio head PR)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          persist-credentials: false
+      - name: do nguoi duyet khac nguoi tao PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TL_KHO: ${{ github.repository }}
+          TL_PR: ${{ github.event.pull_request.number }}
+          TL_TAC_GIA: ${{ github.event.pull_request.user.login }}
+          TL_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eu
+          PY="$(command -v python3 || command -v python || command -v py)"
+          "$PY"  .claude/dev/duyet_danh_tinh.py --kho "$TL_KHO" --pr "$TL_PR" \
+                 --tac-gia "$TL_TAC_GIA" --head-sha "$TL_HEAD"

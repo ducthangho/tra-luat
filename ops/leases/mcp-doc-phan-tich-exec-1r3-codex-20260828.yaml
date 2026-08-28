@@ -258,3 +258,11 @@ LANDED:
   - 'bốn finding cũ (3 P2 của #357 + P1 vòng 2): reviewer tự đo lại, CẢ BỐN vá thật, mỗi cái kèm mutant GIẾT THẬT'
   - 'hai nợ CÓ TÊN đã ghi ở khối `NO_CO_TEN`, kèm vị trí, hậu quả nếu hở, và độ tin'
   - 'hai chỗ `KHÔNG ĐO ĐƯỢC` reviewer khai thẳng: hành vi Windows của `launcher_test.py` (container review chỉ có Linux, và reviewer TỪ CHỐI suy diễn từ số liệu CI cũ vì đó là lượt CHẠY KHÁC), và trạng thái GitHub trực tiếp của PR'
+
+# Thu hồi 2026-08-28: packet #359 ĐÃ LAND (PR #362 merge `27fb9de`, 04:55:11Z — xem khối
+# LANDED ở trên), nhưng lease vẫn còn hiệu lực tới 2026-08-28T17:05:00Z và vẫn giữ
+# `launcher.py` + `launcher_test.py`, chặn packet W1-P1 (#368). Đây đúng nợ
+# `AG-T0-01B-thu-hoi-lease-chua-co-duong`: quyền ghi sống sót sau khi việc đã xong —
+# cùng hình dạng mà chính lease này đã xử cho `mcp-github-doc-exec-1r2` của #355.
+# Người giữ kho duyệt thu hồi trong phiên 28-08-2026, SAU khi #359 land.
+da_bi_thay_the: w1-p1-van-chuyen-prompt-exec-1-codex-20260828

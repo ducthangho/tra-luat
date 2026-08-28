@@ -5,6 +5,7 @@ from __future__ import annotations
 import http.server
 import importlib
 import importlib.util
+import contextlib
 import io
 import json
 import os
@@ -438,23 +439,15 @@ def d6_hop_dong_cli_0_2_3():
     assert sum(x[0] == "goi" and x[1] == "tools/list" for x in ghi) == 2
     assert any(x[0] == "chay" and x[1] == "tool" for x in ghi)
     assert any(x[0] == "init" and x[1] == "/mcp/x/actions" for x in ghi)
-
-
 def d7_cong_xanh_chi_khi_hai_so_duong_bang_nhau():
     assert cong(("c",), ("c",), ("m",), ("m",), ())
-
-
 def dong_dot_bien(kill_sets, mutants, failed, errors=()):
     if failed:
         return "ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)"
     ok = _co_dot_bien(mutants) and len(kill_sets) == len(mutants) and not errors
     return f"ĐỘT BIẾN   : đã đo {len(kill_sets)}/{len(mutants)} tập giết · " + ("ĐẠT" if ok else "ĐỎ")
-
-
 def d7b_nen_do_khong_dem_dot_bien():
     assert "KHÔNG_ĐO_ĐƯỢC" in dong_dot_bien((), ("m",), (("c", "đỏ"),))
-
-
 def loi_d8(cases, mutants, kill_sets):
     targets = {name: target for name, *_, target in mutants}
     return (
@@ -463,8 +456,6 @@ def loi_d8(cases, mutants, kill_sets):
         [name for name in targets if not kill_sets.get(name, ())],
         [case for case in cases if case not in targets.values()],
     )
-
-
 def dong_d8(errors, failed):
     labels = ("D8(a) đích nằm trong tập giết", "D8(b) không tập giết rỗng",
               "D8(c) mọi ca có đột biến canh")
@@ -472,8 +463,6 @@ def dong_d8(errors, failed):
         return [f"{label}: KHÔNG_ĐO_ĐƯỢC (nền đỏ)" for label in labels]
     return [f"{label}: " + (f"ĐỎ {bad!r}" if bad else "ĐẠT")
             for label, bad in zip(labels, errors)]
-
-
 def bang_giao_pham_vi(mutants, kill_sets, failed):
     lines = ["GIAO PHẠM VI:", "| đột biến | đích | ca ngoài đích bị giết |",
              "|---|---|---|"]
@@ -485,23 +474,22 @@ def bang_giao_pham_vi(mutants, kill_sets, failed):
         if extra:
             rows.append(f"| {name} | {target} | {', '.join(extra)} |")
     return lines + (rows or ["| (không có) | — | — |"])
-
-
 def d8_quy_trach_nhiem_ba_dieu_kien():
     mutants = (("m", "test", "old", "new", "c"),)
     assert loi_d8(("c",), mutants, {"m": ("c", "d")}) == ([], [], [])
     assert loi_d8(("c",), mutants, {"m": ("d",)})[0] == ["m"]
     assert loi_d8(("c",), mutants, {"m": ()})[1] == ["m"]
     assert loi_d8(("c", "d"), mutants, {"m": ("c",)})[2] == ["d"]
-
-
 def d9_ngan_sach_900_dong_ma():
     tong = sum(sum(1 for _ in path.open(encoding="utf-8")) for path in (NGUON, pathlib.Path(__file__)))
     assert tong <= 900, f"hai tệp mã dùng {tong}/900 dòng"
 
-
 def d10_main_khong_chay_ca_phai_do():
-    assert ma_thoat(False) == 1
+    da_chay = []
+    class Canh: CASES = (("c", lambda: da_chay.append(True)),)
+    with contextlib.redirect_stdout(io.StringIO()):
+        assert chay_cli(Canh, (), lambda: ({}, [])) == 1
+    assert da_chay == [True]
 
 
 def d11_chay_cli_khong_duoc_xanh_khi_d8_do():
@@ -518,9 +506,18 @@ def d11_chay_cli_khong_duoc_xanh_khi_d8_do():
             assert len(da_chay) == lan and ("ĐỎ" in report) == do == (rc != 0)
             assert f"TỔNG: {'ĐỎ' if do else 'ĐẠT'}" in report
             assert all(x in report for x in ("CA ", "ĐỘT BIẾN", "D8(a)", "D8(b)", "D8(c)", "GIAO PHẠM VI"))
+        assert dong_dot_bien({}, ("m",), ()).endswith("ĐỎ")
+        Canh.CASES = (("c", lambda: (_ for _ in ()).throw(AssertionError())),)
+        out = sys.stdout = io.StringIO(); assert chay_cli(Canh, (), lambda: ({}, [])) == 1 and out.getvalue().splitlines()[0].endswith("ĐỎ")
     finally:
         sys.stdout = cu_out
 
+
+def d12_mau_dot_bien_phai_duy_nhat():
+    global MUTATIONS
+    cu, MUTATIONS = MUTATIONS, (("trung", "test", "def ", "x", "D12-duy-nhat"),)
+    _, errors = chay_dot_bien(); MUTATIONS = cu
+    assert errors and errors[0].startswith("trung: KHÔNG_ĐO_ĐƯỢC (mẫu xuất hiện ")
 
 # Đăng ký xong mới đóng băng; runner không sửa tuple này.
 CASES = (
@@ -545,9 +542,8 @@ CASES = (
     ("D7b", d7b_nen_do_khong_dem_dot_bien),
     ("D8", d8_quy_trach_nhiem_ba_dieu_kien), ("D9", d9_ngan_sach_900_dong_ma),
     ("D10-main", d10_main_khong_chay_ca_phai_do), ("D11-gate", d11_chay_cli_khong_duoc_xanh_khi_d8_do),
+    ("D12-duy-nhat", d12_mau_dot_bien_phai_duy_nhat),
 )
-
-
 # (tên, tệp đích, mẫu cũ, mẫu mới, ca đích phải nằm trong tập giết)
 MUTATIONS = (
     ("a1_cong_444", "app", "if port != CONG_CHO_PHEP:", "if port not in (CONG_CHO_PHEP, 444):", "A1"),
@@ -571,33 +567,36 @@ MUTATIONS = (
     ("b6_bo_chot_init", "app", "        kiem_dich_den(self.url)  # chốt lúc dựng là một bất biến độc lập", "        pass  # đột biến bỏ chốt init", "B6"),
     ("b7_bo_xoa_pyc", "test", "    xoa_pyc(duong)\n    cu = sys.dont_write_bytecode", "    cu = sys.dont_write_bytecode", "B7-xoa"),
     ("b7_bo_cam_ghi", "test", "    sys.dont_write_bytecode = True\n    importlib.invalidate_caches()", "    importlib.invalidate_caches()", "B7-khong-ghi"),
-    ("b7_bo_invalidate", "test", "    importlib.invalidate_caches()\n    try:\n        spec =", "    try:\n        spec =", "B7-cache"),
-    ("b7_trung_ten", "test", 'return f"mcp_gh_db_{i}.py"', 'return "mcp_gh_db.py"', "B7-ten"),
+    ("b7_bo_invalidate", "test", "    sys.dont_write_bytecode = True\n    importlib.invalidate_caches()\n    try:\n        spec =", "    sys.dont_write_bytecode = True\n    try:\n        spec =", "B7-cache"),
+    ("b7_trung_ten", "test", 'def ten_ban_sao(i: int) -> str:\n    return f"mcp_gh_db_{i}.py"', 'def ten_ban_sao(i: int) -> str:\n    return "mcp_gh_db.py"', "B7-ten"),
     ("b8_notification_co_id", "app", "if not bao_tin:", "if True:", "B8"),
     ("b9_bo_sid", "app", "                if sid:\n                    self.sid = sid", "                if False:\n                    self.sid = sid", "B9"),
-    ("c1_cho_so_ca_rong", "test", "return len(registry) > 0 and tuple(ran) == tuple(registry)", "return tuple(ran) == tuple(registry)", "C1"),
-    ("c2_cho_so_db_rong", "test", "return bool(mutants)", "return True", "C2"),
-    ("c3_cho_ca_hai_rong", "test", "    return (_du_ca(registry, ran) and _co_dot_bien(mutants)", "    return ((not registry and not mutants) or _du_ca(registry, ran) and _co_dot_bien(mutants)", "C3"),
-    ("c4_khong_goi_ca", "test", "return len(registry) > 0 and tuple(ran) == tuple(registry)", "return bool(registry)", "C4"),
+    ("c1_cho_so_ca_rong", "test", "def _du_ca(registry, ran):\n    return len(registry) > 0 and tuple(ran) == tuple(registry)", "def _du_ca(registry, ran):\n    return tuple(ran) == tuple(registry)", "C1"),
+    ("c2_cho_so_db_rong", "test", "def _co_dot_bien(mutants):\n    return bool(mutants)", "def _co_dot_bien(mutants):\n    return True", "C2"),
+    ("c3_cho_ca_hai_rong", "test", "def cong(registry, ran, mutants, killed, errors):\n    return (_du_ca(registry, ran) and _co_dot_bien(mutants)", "def cong(registry, ran, mutants, killed, errors):\n    return ((not registry and not mutants) or _du_ca(registry, ran) and _co_dot_bien(mutants)", "C3"),
+    ("c4_khong_goi_ca", "test", "def _du_ca(registry, ran):\n    return len(registry) > 0 and tuple(ran) == tuple(registry)", "def _du_ca(registry, ran):\n    return bool(registry)", "C4"),
     ("d1_bo_top_error", "app", "    if loi:\n        return loi\n    result = d[\"result\"]", "    if loi:\n        return None\n    result = d[\"result\"]", "D1"),
     ("d2_bo_iserror", "app", 'if isinstance(result, dict) and result.get("isError") is True:', "if False:", "D2"),
     ("d3_nhan_result_rong", "app", 'if not isinstance(kq.get("result"), dict) or not kq["result"]:', 'if not isinstance(kq.get("result"), dict) or False:', "D3"),
     ("d4_bo_shape", "app", "if not isinstance(d, dict):", "if False:", "D4"),
     ("d5_nuot_loi_notification", "app", "        if loi:\n            return {\"_loi\": loi}\n        return {}", "        if False:\n            return {\"_loi\": loi}\n        return {}", "D5"),
     ("d6_doi_co_cli", "app", 'argv[0] == "--liet-ke"', 'argv[0] == "--liet-ke-doi"', "D6"),
-    ("d7_cong_khong_xanh", "test", "return len(registry) > 0 and tuple(ran) == tuple(registry)", "return False", "D7"),
+    ("d7_cong_khong_xanh", "test", "def _du_ca(registry, ran):\n    return len(registry) > 0 and tuple(ran) == tuple(registry)", "def _du_ca(registry, ran):\n    return False", "D7"),
     ("d7b_dem_khi_nen_do", "test", "    if failed:\n        return \"ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)\"", "    if False:\n        return \"ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)\"", "D7b"),
-    ("d8_bo_dieu_kien_a", "test", "if target not in kill_sets.get(name, ())", "if False", "D8"),
-    ("d8_bo_dieu_kien_b", "test", "if not kill_sets.get(name, ())", "if False", "D8"),
-    ("d8_bo_dieu_kien_c", "test", "if case not in targets.values()", "if False", "D8"),
-    ("d9_vuot_ngan_sach", "test", "assert tong <= 900", "assert tong < 0", "D9"),
-    ("d10_main_luon_xanh", "test", "return 0 if xanh else 1", "return 0", "D10-main"),
-    ("d11_ep_rc_xanh", "test", "return 0 if xanh else 1", "return 0", "D11-gate"),
+    ("d8_bo_dieu_kien_a", "test", "[name for name, target in targets.items()\n         if target not in kill_sets.get(name, ())]", "[]", "D8"),
+    ("d8_bo_dieu_kien_b", "test", "        [name for name in targets if not kill_sets.get(name, ())],\n        [case for case", "        [],\n        [case for case", "D8"),
+    ("d8_bo_dieu_kien_c", "test", "        [case for case in cases if case not in targets.values()],\n    )", "        [],\n    )", "D8"),
+    ("d9_vuot_ngan_sach", "test", 'def d9_ngan_sach_900_dong_ma():\n    tong = sum(sum(1 for _ in path.open(encoding="utf-8")) for path in (NGUON, pathlib.Path(__file__)))\n    assert tong <= 900', 'def d9_ngan_sach_900_dong_ma():\n    tong = sum(sum(1 for _ in path.open(encoding="utf-8")) for path in (NGUON, pathlib.Path(__file__)))\n    assert tong < 0', "D9"),
+    ("d10_main_luon_xanh", "test", "def ma_thoat(xanh):\n    return 0 if xanh else 1", "def ma_thoat(xanh):\n    return 0", "D10-main"),
+    ("d11_ep_rc_xanh", "test", "def ma_thoat(xanh):\n    return 0 if xanh else 1", "def ma_thoat(xanh):\n    return 0", "D11-gate"),
     ("d11_phan_dinh_xanh", "test", "return not any(\"ĐỎ\" in line or \"KHÔNG_ĐO_ĐƯỢC\" in line for line in lines)", "return True", "D11-gate"),
     ("d11_xoa_d8", "test", "    lines += dong_d8(d8_errors, failed)\n    lines += bang_giao_pham_vi", "    lines += bang_giao_pham_vi", "D11-gate"),
     ("d11_xoa_tong", "test", "    lines.append(\"TỔNG: \" + (\"ĐẠT\" if xanh else \"ĐỎ\"))", "    pass", "D11-gate"),
     ("d11_xoa_ban_in", "test", "    print(\"\\n\".join(lines))", "    pass", "D11-gate"),
     ("d11_bo_than_ca", "test", "    for name, fn in module.CASES:\n        ran.append(name)\n        try:\n            fn()\n        except Exception as e:  # runner phải biến mọi lỗi ca thành ĐỎ, nhưng không che nội dung\n            failed.append((name, f\"{type(e).__name__}: {e}\"))", "    for name, fn in module.CASES:\n        pass", "D11-gate"),
+    ("d11_hau_to_dot_bien_xanh", "test", 'def dong_dot_bien(kill_sets, mutants, failed, errors=()):\n    if failed:\n        return "ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)"\n    ok = _co_dot_bien(mutants) and len(kill_sets) == len(mutants) and not errors\n    return f"ĐỘT BIẾN   : đã đo {len(kill_sets)}/{len(mutants)} tập giết · " + ("ĐẠT" if ok else "ĐỎ")', 'def dong_dot_bien(kill_sets, mutants, failed, errors=()):\n    if failed:\n        return "ĐỘT BIẾN   : KHÔNG_ĐO_ĐƯỢC (nền đỏ)"\n    ok = _co_dot_bien(mutants) and len(kill_sets) == len(mutants) and not errors\n    return f"ĐỘT BIẾN   : đã đo {len(kill_sets)}/{len(mutants)} tập giết · " + "ĐẠT"', "D11-gate"),
+    ("d11_hau_to_ca_xanh", "test", '    lines = [f"CA         : {len(ran) - len(failed)}/{len(cases)} đạt · {len(failed)} đỏ · "\n             + ("ĐẠT" if _du_ca(tuple(name for name, _ in cases), ran) and not failed else "ĐỎ")]', '    lines = [f"CA         : {len(ran) - len(failed)}/{len(cases)} đạt · {len(failed)} đỏ · "\n             + "ĐẠT"]', "D11-gate"),
+    ("d12_bo_chot_duy_nhat", "test", "        if src.count(old) != 1:\n            errors.append", "        if src.count(old) < 1:\n            errors.append", "D12-duy-nhat"),
 )
 
 
@@ -619,15 +618,16 @@ def chay_dot_bien():
     root = sys.modules[__name__]
     for i, (name, target_file, old, new, target_case) in enumerate(MUTATIONS):
         src = app_src if target_file == "app" else test_src
-        if old not in src:
-            errors.append(f"{name}: mẫu đột biến đã trôi")
+        if src.count(old) != 1:
+            errors.append(f"{name}: KHÔNG_ĐO_ĐƯỢC (mẫu xuất hiện {src.count(old)} lần)")
             continue
+        mutated = src.replace(old, new, 1)
         with tempfile.TemporaryDirectory() as d:
             folder = pathlib.Path(d)
             try:
                 if target_file == "app":
                     path = folder / ten_ban_sao(i)
-                    path.write_text(src.replace(old, new, 1), encoding="utf-8")
+                    path.write_text(mutated, encoding="utf-8")
                     mutant = nap_dot_bien(path, f"mcp_gh_db_{i}")
                     old_module, globals()["m"] = globals()["m"], mutant
                     try:
@@ -637,7 +637,7 @@ def chay_dot_bien():
                 else:
                     (folder / "mcp_gh.py").write_text(app_src, encoding="utf-8")
                     path = folder / f"mcp_gh_test_db_{i}.py"
-                    path.write_text(src.replace(old, new, 1), encoding="utf-8")
+                    path.write_text(mutated, encoding="utf-8")
                     mutant = nap_dot_bien(path, f"mcp_gh_test_db_{i}")
                     _, failed = chay_cac_ca(mutant)
                 kill_sets[name] = tuple(case for case, _ in failed)

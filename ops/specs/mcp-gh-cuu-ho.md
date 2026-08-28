@@ -233,8 +233,9 @@ là giả định. Phản chứng cho chính điều cấm này: xoá bất kỳ
 một ca CÓ TÊN — không được có dòng nào trong cơ chế mà xoá đi vẫn xanh.
 
 **`D11` KHÔNG hứa điều không hứa được.** Dòng ngoài cùng nhất — `sys.exit(chay_cli())` — vẫn có
-thể sửa thành `sys.exit(0)`, và không phép đo nào chạy TRONG tiến trình bắt được nó. `D11` thu
-hẹp bề mặt ấy xuống một dòng duy nhất và đặt một đột biến canh nó; nó không xoá bề mặt. Khai
+thể sửa thành `sys.exit(0)`, và không phép đo nào chạy TRONG tiến trình bắt được nó. `D11` không
+xoá được bề mặt, nhưng nó làm mọi đường làm giả trừ dòng ngoài cùng nhất đều phải để lại vết trong
+báo cáo. Khai
 thẳng ở đây để không ai đọc `D11` thành "cổng nay không thể bị làm giả".
 
 Đột biến chạy trên **bản sao tạm**, tên tệp riêng, không ghi vào tệp thật — kho đã trả giá cho một

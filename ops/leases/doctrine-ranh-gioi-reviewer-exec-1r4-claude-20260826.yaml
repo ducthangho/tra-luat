@@ -433,7 +433,29 @@ LANDED:
     Lần thứ TƯ khai cùng chỗ lệch: lease này đã có `posted_comment_id: 5427971996` nên
     `lease_publish.py` trả rc=9 và `ops-publish-lease.yml` bỏ qua. Comment trên Issue #318 vẫn
     hiển thị hạn 10:00Z và KHÔNG mang khối LANDED này. Tệp YAML là bản CÓ THẨM QUYỀN.
-lease_expires_at_utc: '2026-08-28T22:00:00Z'
+lease_expires_at_utc: '2026-08-28T02:30:00Z'
+DONG_LEASE_SOM:
+  luc_utc: '2026-08-28T02:30:00Z'
+  han_cu: '2026-08-28T22:00:00Z'
+  vi_sao: >-
+    Packet #318 ĐÃ LAND lúc 2026-08-28T00:19Z (master `693d68fd`, khối `LANDED` ở trên). Việc xong
+    rồi mà lease vẫn giữ `docs/GOI_AGENT_DA_NEN.md` thêm gần 20 tiếng — đó đúng là nợ CÓ TÊN
+    `AG-T0-01B-thu-hoi-lease-chua-co-duong`, và `CLAUDE.md` đã đo được nó thành số: 5 quyền ghi
+    còn sống sau khi việc đã xong. Đo lúc 02:25Z: `ai-dang-giu docs/GOI_AGENT_DA_NEN.md` trả
+    `NGƯỜI_GIỮ 1: doctrine-ranh-gioi-reviewer-exec-1r4-claude-20260826` — tức chính lease này đang
+    CHẶN packet kế tiếp một cách vô ích.
+  cach_dong: >-
+    Kho KHÔNG có đường thu hồi lease; cách DUY NHẤT là hạ `lease_expires_at_utc`. Đây đúng cách
+    #319 đã đóng r6 (bản ghi `ops/DONG_LEASE_MCP_GH_CUU_HO_r6_20260827.md`). Không phải mẹo —
+    là thứ duy nhất kho có.
+  boi: 'phiên điều phối, dưới uỷ quyền thực thi của chủ kho 2026-08-28'
+  packet_ke_tiep: >-
+    Đóng để mở đường cho packet nâng nhãn mệnh đề thứ tám của chính tệp ấy — việc mà mục 2 của
+    `ops/BAN_GIAO_PHIEN_20260827.md` nói chỉ mở ra SAU khi #334 land. #334 đã land lúc 01:40Z.
+  ban_chieu_KHONG_theo: >-
+    Lease đã có `posted_comment_id: 5427971996` nên `lease_publish.py` trả rc=9 và
+    `ops-publish-lease.yml` bỏ qua; comment trên Issue #318 KHÔNG mang khối này và vẫn hiển thị
+    hạn 10:00Z của bản đầu. Lần thứ NĂM khai cùng chỗ lệch. Tệp YAML là bản CÓ THẨM QUYỀN.
 run_minutes: 3600
 gia_han:
 - tu: '2026-08-27T10:00:00Z'

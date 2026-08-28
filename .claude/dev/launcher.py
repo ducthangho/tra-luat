@@ -92,7 +92,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = "1.4.2"
+VERSION = "1.5.0"
 
 
 def ky_ban_ghi_luot(ban_ghi: dict, khoa_hex: str) -> str:
@@ -107,7 +107,7 @@ def ky_ban_ghi_luot(ban_ghi: dict, khoa_hex: str) -> str:
                      allow_nan=False).encode("utf-8")
     return hmac.new(bytes.fromhex(khoa_hex), raw, hashlib.sha256).hexdigest()
 
-# launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu probe-qua-han-ba-trang-thai mcp-endpoint
+# launcher-nang-luc: so-dinh-luong module-python hook-phien moi-truong chuan-bi tu-cu probe-qua-han-ba-trang-thai mcp-endpoint van-chuyen-prompt
 #
 # CÙNG CƠ CHẾ với `# hook-nang-luc:` trong `.claude/hooks/session-start.sh`, áp cho
 # CHÍNH TỆP NÀY. Vì sao cần: sự cố 15-08 là hook của nhánh packet cũ hơn hook master;
@@ -138,6 +138,40 @@ MA_THIEU_CONG_CU = 12
 MA_CHUA_XAC_THUC = 13
 MA_WORKTREE = 14
 MA_PROBE = 15
+
+
+# Một provider chỉ có MỘT contract vận chuyển. Tên executable được chuẩn hoá bỏ
+# hậu tố shim đa nền trước khi tra bảng; đường dẫn tuyệt đối không làm đổi identity.
+_TRANSPORT_CONTRACTS = (
+    ("anthropic_claude", ("claude",), "claude_code", "machine/local"),
+    ("openai_codex", ("codex",), "codex_cli", "machine"),
+    ("openai_api", ("llm",), "llm_cli", "machine"),
+)
+
+
+def _dinh_danh_van_chuyen(lenh: list[str]) -> dict:
+    """Trả contract transport canonical và băm của chính contract ấy."""
+    theo_provider = {}
+    theo_lenh = {}
+    for provider, ten_lenh, surface, transport in _TRANSPORT_CONTRACTS:
+        contract = {"provider": provider, "execution_surface": surface,
+                    "transport": transport}
+        cu = theo_provider.setdefault(provider, contract)
+        if cu != contract:
+            raise RuntimeError(f"provider co nhieu transport: {provider}")
+        for ten in ten_lenh:
+            theo_lenh[ten] = contract
+    ten = Path(str(lenh[0])).name.casefold() if lenh else ""
+    for duoi in (".exe", ".cmd", ".bat"):
+        if ten.endswith(duoi):
+            ten = ten[:-len(duoi)]
+            break
+    contract = theo_lenh.get(ten, {
+        "provider": "local_process", "execution_surface": "subprocess",
+        "transport": "machine",
+    })
+    raw = json.dumps(contract, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return {**contract, "transport_sha256": hashlib.sha256(raw).hexdigest()}
 
 # Bộ đột biến dùng cùng mốc này để không thể trượt từ ~70% phép đo được xuống
 # gần 0 mà vẫn xanh. Đặt ở mã được đột biến (không đặt trong chính runner test).
@@ -1447,7 +1481,8 @@ def lenh_run(a) -> int:
             "lenh": _tom_tat_lenh(a.lenh), "trang_thai": "hong", "giai_doan": "probe",
             "bat_dau_utc": luc, "ket_thuc_utc": luc, "ma_thoat": e.ma,
             "ly_do_dung": e.thong_diep, "pid": None, "khoa_danh_tinh": None,
-            **kq, "probe": _probe_cho_so(e.probe), "bo_qua_probe_ly_do": None,
+            **kq, **_dinh_danh_van_chuyen(a.lenh),
+            "probe": _probe_cho_so(e.probe), "bo_qua_probe_ly_do": None,
         })
         raise
     kq.update(probe=_probe_cho_so(probe), bo_qua_probe_ly_do=ly_do_bo_qua)
@@ -1482,7 +1517,7 @@ def lenh_run(a) -> int:
         "ten": a.name, "lenh": _tom_tat_lenh(a.lenh), "trang_thai": "dang_chay",
         "bat_dau_utc": _bay_gio().isoformat(), "ket_thuc_utc": None,
         "ma_thoat": None, "ly_do_dung": None, "pid": None, "khoa_danh_tinh": None,
-        **kq,
+        **kq, **_dinh_danh_van_chuyen(a.lenh),
     }
     if neo:
         ban_ghi.update(nonce=neo["nonce"], attempt=neo["attempt"], void_reason=a.void_reason)
@@ -1652,11 +1687,19 @@ def lenh_run(a) -> int:
         ban_ghi["thoi_luong_giay"] = round((ket_thuc - bat_dau).total_seconds(), 3)
     except (ValueError, KeyError, TypeError):
         ban_ghi["thoi_luong_giay"] = None    # không đo được thì nói KHÔNG ĐO ĐƯỢC
-    for ten, tep in (("stdout_byte", "stdout.log"), ("stderr_byte", "stderr.log")):
+    for ten, ten_bam, tep in (("stdout_byte", "stdout_sha256", "stdout.log"),
+                              ("stderr_byte", "stderr_sha256", "stderr.log")):
         try:
-            ban_ghi[ten] = (thu_muc / tep).stat().st_size
+            duong = thu_muc / tep
+            ban_ghi[ten] = duong.stat().st_size
+            bam = hashlib.sha256()
+            with duong.open("rb") as f:
+                for khoi in iter(lambda: f.read(1024 * 1024), b""):
+                    bam.update(khoi)
+            ban_ghi[ten_bam] = bam.hexdigest()
         except OSError:
             ban_ghi[ten] = None
+            ban_ghi[ten_bam] = None
     _ghi_so(thu_muc, ban_ghi, khoa_ky)
     if a.json:
         print(json.dumps(ban_ghi, ensure_ascii=False))

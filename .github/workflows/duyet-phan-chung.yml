@@ -37,6 +37,24 @@ jobs:
       # chay hai runtime, va cho quen chinh la cho khong ai do. Nang ban thi nang ca ba.
       - name: cai PyYAML (bo test doc chinh tep workflow cua cong)
         run: python -m pip install --quiet PyYAML==6.0.3
+      # `duyet_danh_tinh_test.py` co mot tang FAIL-CLOSE chay `actionlint` tren CA HAI tep
+      # `duyet-*.yml` (cho thu bay cua ho "danh sach cam doi lot allow-list": golden do CAY
+      # `safe_load`, khong do TEP, nen khoa trung YAML di lot). Tang ay DO khi thieu cong cu —
+      # dung nhu no phai the. Nen lan nay PHAI cap cong cu, khong duoc de cong tu tat.
+      #
+      # DUNG DUNG IDIOM CUA `ci.yml` (dong 81-87), ke ca ban ghim: mot cho ghim khac ban la
+      # hai duong chay hai runtime, va cho quen chinh la cho khong ai do.
+      #
+      # SHELLCHECK LA BAT BUOC, khong phai them cho du: thieu no thi `actionlint` IM LANG bo
+      # TOAN BO lop luat `SC*` roi van tra rc=0 — mot cong xanh vi khong kiem gi.
+      - name: cai actionlint (ghim exact, doi chieu bam)
+        shell: bash
+        env:
+          AL_VER: 1.7.7
+        run: bash ops/cai_actionlint.sh
+      - name: cai shellcheck (thieu no actionlint bo luat SC* trong im lang)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh shellcheck
       - name: phan chung cua cong duyet-khac-danh-tinh
         run: |
           set -eu

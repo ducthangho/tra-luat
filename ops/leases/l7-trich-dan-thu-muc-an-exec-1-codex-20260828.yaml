@@ -1,0 +1,111 @@
+# Lease EXECUTOR — `L7-TRICH-DAN-THU-MUC-AN` (#378), lượt 1.
+#
+# Nguồn: đóng từ PR #123 (`ops/l7-symbol-aware`) ngày 2026-08-28. Nội dung PR ấy còn giá trị
+# nhưng PR đã hỏng — 13 thread chưa giải quyết, 953 commit sau lưng, conflict
+# `RELEASE_MANIFEST.json`. Packet MỚI ⇒ trần vòng review là 2 (ADR-0043), bắt đầu lại từ 0.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 378
+packet_id: L7-TRICH-DAN-THU-MUC-AN
+phase_key: L7-TRICH-DAN-THU-MUC-AN
+revision: 1
+generation: 1
+lease_id: l7-trich-dan-thu-muc-an-exec-1-codex-20260828
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` vì đây là CỔNG CHẶN PR, và packet này về bản chất làm cổng DỄ DÃI HƠN với một
+  lớp đường dẫn — đúng hướng dễ đẻ lỗ hổng. `risk: normal` vì trần `≤3 tệp / ≤300 dòng` của
+  ADR-0044 gắn với packet chạm AUTHORITY (ai được ghi, ai được duyệt, cái gì được land);
+  `doc-claims-check` gác trích dẫn trong tài liệu, không cấp lease, không quyết định land.
+  Lập luận này ĐƯỢC KHAI RA để bị phản bác, không phải để lách trần.
+
+spec_path: ops/specs/L7-TRICH-DAN-THU-MUC-AN.md
+spec_hash: edb8934e5102164934f062480adddf1e8654f7176b056f1dcb0d9b4d01506309
+spec_note: >-
+  Issue #378 là BẢN CHIẾU; thứ định danh là BĂM. Executor PHẢI tự đo lại mọi con số trong
+  đặc tả — kể cả bảng năm ca A–E và nền `ok:true / 106 tệp / L7:0 / 359 advisory`. Chúng là
+  đo của phiên điều phối, không phải chân lý.
+
+write_set:
+  - scripts/tl_core/workflow.py
+  - scripts/tl_selftest.py
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-28T08:5xZ trên `d4b3045`. `ai-dang-giu` ⇒ NGƯỜI_GIỮ 0 cho cả hai đường.
+  Phép so HAI NGUỒN (TẬP TÊN): ls-remote 247 · for-each-ref 247 · `diff` RỖNG hai chiều.
+  KHAI MỘT LẦN ĐỌC SAI của phiên điều phối, vì nó suýt thành lease sai: lượt đo ĐẦU cho
+  "NGƯỜI_GIỮ 0" trên CẢ `ops/lease_publish.py`, nhưng lúc ấy cache ref cục bộ THIẾU nhánh
+  `ops/cap-lease-bia-mo-mot-chieu`, và công cụ đã CHẶN (`rc=12 KHÔNG_XÁC_ĐỊNH: cache thiếu
+  nhánh máy chủ`) — phiên điều phối `grep` đúng dòng NGƯỜI_GIỮ và đi qua dòng CHẶN. Sau khi
+  fetch đủ, `ops/lease_publish.py` hiện NGƯỜI_GIỮ 1. Bài học: `grep` một dòng trong output
+  của cổng KHÔNG phải đọc kết quả của cổng.
+
+branch: codex/l7-trich-dan-thu-muc-an-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: d4b3045a6e5ec7daf4a9ebfacb405153de04fc99
+start_from_sha: d4b3045a6e5ec7daf4a9ebfacb405153de04fc99
+reviewed_sha_required: d4b3045a6e5ec7daf4a9ebfacb405153de04fc99
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 6
+  dong_them_toi_da: 1000
+  do_tu_sha: d4b3045a6e5ec7daf4a9ebfacb405153de04fc99
+  don_vi: >-
+    `git diff --numstat d4b3045a6e5ec7daf4a9ebfacb405153de04fc99 -- scripts/tl_core/workflow.py
+    scripts/tl_selftest.py` — THÊM cộng XOÁ. Pathspec TRONG lệnh, KHÔNG `..HEAD`.
+  da_dung: 0
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-08-28: "Mở packet đi"'
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này KHÔNG viết mã trong write set. Nhưng nó có một lệch khác phải khai:
+  comment đóng PR #123 do chính phiên này viết đã khai SAI rằng `./` `../` là lỗ hổng đang
+  sống trên `master` — suy từ mô tả lỗi của bản vá vòng một trong PR chứ không phải từ phép
+  đo. Đã đo lại bằng công cụ thật và đăng đính chính (comment 5450406330) TRƯỚC khi mở packet.
+  Nêu ra vì đặc tả này thu hẹp phạm vi đúng theo phép đo ấy; ai review phải kiểm lại nó.
+
+leased_at_utc: '2026-08-28T09:00:00Z'
+lease_expires_at_utc: '2026-08-29T09:00:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  Đúng hai tệp trong `write_set`. KHÔNG sửa bất kỳ tệp `.md` nào — packet này sửa CỔNG,
+  không sửa tài liệu.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ngoài write set ⇒ DỪNG ·
+  S2 vượt `≤6 tệp / ≤1000` dòng thêm+xoá ⇒ DỪNG, khai ·
+  S3 bản vá làm `./` hoặc `../` MẤT khỏi tầm quét ⇒ DỪNG — đó là đổi một lỗi lấy một lỗ hổng,
+     đúng thứ bản vá vòng một của PR #123 đã làm ·
+  S4 sau bản vá xuất hiện cờ L7 MỚI trên tài liệu thật ⇒ DỪNG, khai từng cái, xin quyết định.
+     ĐỪNG tự sửa tài liệu để cổng xanh ·
+  S5 `origin/master` đã đi tiếp so `base_sha` mà chưa đo lại.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) KHÔNG commit, KHÔNG push, KHÔNG tạo/xoá/đổi ref. Phiên điều phối commit.
+  (2) Mỗi chốt phải có ĐỘT BIẾN RIÊNG làm ca đích ĐỎ; chốt không có mutant là chốt sẽ hở lại.
+  (3) Mutant "bị giết" CHỈ KHI ca đích đỏ bằng tín hiệu mà mã triển khai KHÔNG GIẢ ĐƯỢC.
+      Chết vì `TypeError`/`AttributeError`/lỗi vô can ⇒ TÍN DỤNG GIẢ, hạng riêng. Trong #359
+      một `except Exception: raise AssertionError(...)` viết với ý định đúng đã lừa CẢ HAI
+      bộ đo (reviewer lẫn executor) cùng báo "0 tín dụng giả", cùng sai, cùng một lý do.
+  (4) Đo NỀN trước rồi so DELTA. Con số tuyệt đối của `doc-claims-check` vô nghĩa: nền đã có
+      359 advisory hợp lệ.
+  (5) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.

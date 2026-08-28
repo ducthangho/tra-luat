@@ -1,0 +1,76 @@
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '359'
+provider: claude
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 73c91cb2cd0da6ec571ff736f5a715e223db35c5
+luot: r1-cheo
+cross_provider: true
+assurance: cross_approved
+executor_provider: codex
+verdict_path: ops/reviews/mcp-doc-phan-tich-review-1-claude-verdict.md
+verdict_sha256: 32e189c66f12f09cec5ba7dd352dad46cb4af2744239e10fb86f86b8e0daabf1
+verdict_bytes: 14015
+ket_qua_dem_duoc:
+  P1: 0
+  P2: 1
+  P3_ghi_no_khong_chan: 1
+  finding_moi: 2
+vi_sao_can_luot_nay: >-
+  Packet da di BA vong tren chinh PR #362, ca ba deu cua `chatgpt-codex-connector[bot]` — CUNG nha
+  cung cap voi executor `codex`. Vong 3 ket luan "Didn't find any major issues. Breezy!" neo dung
+  `Reviewed commit: 73c91cb2cd`. Nhung lease khai `assurance_target: cross_approved` voi
+  `reviewer_provider: claude`, nen ba luot ay KHONG thoa dieu kien: nguoi viet va nguoi soat cung
+  mot nen thi ca mot LOP diem mu dung chung. Day la luot CHEO DAU TIEN cua packet.
+  Phien dieu phoi KHONG ha dieu kien cua lease xuong cho vua — no phong not luot con thieu.
+bon_finding_cu_reviewer_TU_DO_LAI:
+- 'r3873588649 tim goc du an => VA THAT; mutant goc_mac_dinh_theo_cwd => GIET THAT qua t13'
+- 'r3873588657 headers falsy => VA THAT; "headers" in muc thay cho `or`; mutant mcp_bo_kiem_kieu_headers => t115 DO'
+- 'r3873588663 SSE nhieu dong => VA THAT; _boc viet lai theo event/blank-line; mutant sse_parse_tung_data => GIET THAT qua t14'
+- 'P1 vong 2 "mot anh chup" => VA THAT; mutant goi_parser_hai_lan_ghep_hai_anh, kich ban A->B->A THAT (ghi de .mcp.json giua chung) => GIET THAT qua t16'
+phan_chung_reviewer_DA_CHAY:
+- 'git diff --numstat 693d68fd 73c91cb2 => dung 4 tep write_set, khong tep nao khac'
+- 'python3 launcher_test.py => 154/154 ca DA CHAY QUA (tong 155, bo qua 1 = t62 fixture Windows-only, hong 0)'
+- 'python3 mcp_github_doc_test.py => 17/17 QUA (hong 0, bo qua 0)'
+- 'python3 mcp_github_doc_test.py --dot-bien => GIET THAT 19, TIN DUNG GIA 0, SONG SOT 0'
+- 'python3 launcher.py doctor => chay sach, mcp-endpoint=OK, KET LUAN DU CONG CU BAT BUOC'
+- 'probe arity tu viet: 11 cau hinh phu 8 duong return x 2 che do kem_headers => 22/22 dung do dai'
+- 'grep -rn .mcp.json toan kho => chi launcher.py doc, mcp_github_doc.py goi launcher; khong duong doc thu hai'
+- 'git log --format=%B tren 3 commit => khong co chuoi bo-qua-CI nguyen van'
+no_CO_TEN:
+- slug: AG-359-P2-01-json-hong-thieu-mutant-arity
+  severity: P2
+  vi_tri: '.claude/dev/launcher.py:2882-2885 (nhanh JSON parse loi)'
+  mo_ta: >-
+    Chot moi cua packet la bat bien "MOI duong return cua _doc_mcp_json phai noi + rong khi
+    kem_headers=True". Reviewer kiem THAT ca 8 nhanh: 7/8 CO bao ve, nhung bao ve do la TINH CO —
+    den tu cac test cau hinh loi san co, KHONG tu mot mutant rieng cho bat bien nay. Rieng nhanh
+    JSON parse loi khong mutant nao o CA HAI bo test bat duoc. Vi pham dieu kien (3) cua lease:
+    "moi chot phai co DOT BIEN RIENG lam ca dich DO".
+  hau_qua_neu_ho: >-
+    Caller 5-bien o mcp_github_doc.py se nem ValueError khong duoc bat (except OSError boc ngoai
+    KHONG bat ValueError) — tuc chi no o nhanh HONG, cho kho phat hien nhat.
+- slug: AG-359-P3-01-except-oserror-co-ve-code-chet
+  severity: P3
+  vi_tri: '.claude/dev/mcp_github_doc.py:57-62'
+  mo_ta: >-
+    _doc_mcp_json da tu bat (OSError, ValueError) noi bo, va tep.is_file() khong truyen OSError ra
+    ngoai, nen except OSError o _doc_cau_hinh duong nhu khong con duong nao kich hoat.
+    Do: xoa han khoi try/except tren ban sao ngoai cay => van 17/17 QUA va --dot-bien van 17/17.
+  do_tin: >-
+    VUA — reviewer khai thang la khong loai tru duoc 100% mot loi vao OSError chua nghi ra. Day la
+    quan sat "co ve chet", KHONG phai khang dinh tuyet doi. Neu dung la code chet thi vo hai.
+no_nhan_thuc_tu_truc_1: >-
+  Cau hoi kien truc phien dieu phoi giao ma KHONG dua dap an — doi arity theo co (4 hay 5 phan tu)
+  co dang khong. Reviewer tra loi thang la CO BANG CHUNG CHO CA HAI PHIA va khong co cau tra loi
+  sach: dang, vi no don toan bo tri thuc "URL va headers phai cung mot lan doc" vao MOT ham MOT
+  lan goi; khong dang han, vi no THAT SU doi lop loi tu "hai lan doc" (de thay, vong 2 da bat)
+  sang "8 diem gan-giong-het-nhau phai dong bo tay" (kho thay hon — va P2 o tren chung minh dung
+  MOT trong tam da troi khoi vung phu test du CHUA troi khoi ma).
+  Ghi lai lam no NHAN THUC cho packet sau neu _doc_mcp_json con phinh them nhanh return.
+khong_P2_nao_bi_nang_len_P1: true
+khong_P1_nao_bi_ha_xuong_P2: true
+KHONG_DO_DUOC:
+- 'hanh vi tren Windows cua launcher_test.py — container review chi co Linux; reviewer TU CHOI suy dien tu so lieu CI cu vi do la so cua luot CHAY KHAC'
+- 'trang thai GitHub truc tiep cua PR #362 — sandbox reviewer khong co duong ra mang'

@@ -156,3 +156,105 @@ canh_bao_bo_sung_r3: >-
       TƯỜNG MINH và chứng minh `doctor` không hồi quy.
   (3) Mở write set KHÔNG nới trần kích thước: vẫn `≤6 tệp / ≤1000 dòng`, hiện dùng 256.
 posted_comment_id: 5447612472   # workflow ghi, ĐỪNG sửa tay
+
+# ============================== LAND ==============================
+LANDED:
+  merged_at_utc: '2026-08-28T04:55:11Z'
+  merge_commit: 27fb9de28bc65a417adee66b66615de6bccbfd5e
+  pr: 362
+  reviewed_sha: 73c91cb2cd0da6ec571ff736f5a715e223db35c5
+  target: master
+  so_commit: 3
+  moc_thoi_gian_ghi_chu: >-
+    `merged_at_utc` ĐO bằng `git show -s --format=%cI` trên chính merge commit rồi đổi về UTC,
+    KHÔNG đoán. Ghi rõ vì cùng ngày phiên này đã hai lần hỏng đúng hình dạng "ghi một mốc chưa đo".
+
+  CROSS_REVIEW:
+    reviewer_provider: claude
+    executor_provider: codex
+    cross_provider: true
+    verdict: changes_requested
+    P1: 0
+    P2: 1
+    P3_ghi_no_khong_chan: 1
+    verdict_path: ops/reviews/mcp-doc-phan-tich-review-1-claude-verdict.md
+    verdict_sha256: 32e189c66f12f09cec5ba7dd352dad46cb4af2744239e10fb86f86b8e0daabf1
+    verdict_bytes: 14015
+    luat_dung_LAND: >-
+      Chỉ P1 chặn land. P1 = 0 ⇒ land được, với điều kiện MỌI P2 thành nợ CÓ TÊN — hai nợ ở dưới.
+      Không P2 nào bị nâng lên P1; không P1 nào bị hạ xuống P2.
+
+  BA_LUOT_TRUOC_KHONG_THOA_CROSS_APPROVED: >-
+    ĐỌC KỸ CHỖ NÀY — nó là lý do lượt review này tồn tại.
+    Packet đã đi BA vòng ngay trên PR #362, cả ba của `chatgpt-codex-connector[bot]`, và vòng ba
+    kết luận *"Didn't find any major issues. Breezy!"* neo đúng `Reviewed commit: 73c91cb2cd`.
+    Nhưng connector ấy **CÙNG nhà cung cấp với executor `codex`**, trong khi lease khai
+    `assurance_target: cross_approved` với `reviewer_provider: claude`. Người viết và người soát
+    cùng một nền thì cả một LỚP điểm mù dùng chung — đó chính là thứ `cross_provider` sinh ra để
+    chặn. Phiên điều phối KHÔNG hạ điều kiện của lease xuống cho vừa hiện trạng; nó phóng nốt lượt
+    còn thiếu. Lượt `claude` này là lượt CHÉO ĐẦU TIÊN của packet.
+    Kèm bài học đọc: gate xanh KHÔNG phải đã review, và "đã review" cũng KHÔNG phải "đã review
+    CHÉO" — ba câu hỏi khác nhau, và cả ba đều phải hỏi đúng chỗ kết luận được ghi.
+
+  BON_FINDING_CU_DEU_VA_THAT:
+  - 'r3873588649 tìm gốc dự án — mutant `goc_mac_dinh_theo_cwd` ⇒ GIẾT THẬT qua `t13`'
+  - 'r3873588657 `headers` falsy — `"headers" in muc` thay cho `or`; mutant `mcp_bo_kiem_kieu_headers` ⇒ `t115` ĐỎ'
+  - 'r3873588663 SSE nhiều dòng — `_boc` viết lại theo event/blank-line; mutant `sse_parse_tung_data` ⇒ GIẾT THẬT qua `t14`'
+  - 'P1 vòng 2 "một ảnh chụp" — mutant `goi_parser_hai_lan_ghep_hai_anh`, kịch bản A→B→A THẬT (ghi đè `.mcp.json` giữa chừng) ⇒ GIẾT THẬT qua `t16`'
+  bon_finding_ghi_chu: >-
+    Reviewer TỰ ĐO LẠI cả bốn, không nhận lời khai của lượt trước. Số đo là
+    `GIET THAT`/`tin_dung_gia`/`song_sot` từ chính runner phân loại của gói, không phải `rc=0`.
+
+  NO_CO_TEN:
+  - AG-359-P2-01-json-hong-thieu-mutant-arity
+  - AG-359-P3-01-except-oserror-co-ve-code-chet
+  no_ghi_chu: >-
+    `AG-359-P2-01`: chốt mới của packet là bất biến "MỌI đường `return` của `_doc_mcp_json` phải
+    nối `+ rong` khi `kem_headers=True`". Reviewer kiểm THẬT cả 8 nhánh: 7/8 CÓ bảo vệ nhưng bảo vệ
+    ấy **TÌNH CỜ** — đến từ các test cấu hình lỗi sẵn có, không từ một mutant riêng cho bất biến
+    này; riêng nhánh JSON parse lỗi thì KHÔNG mutant nào ở cả hai bộ test bắt được. Nếu hở, caller
+    5-biến ném `ValueError` không được bắt (`except OSError` bọc ngoài KHÔNG bắt `ValueError`) —
+    tức chỉ nổ ở nhánh HỎNG, chỗ khó phát hiện nhất.
+    `AG-359-P3-01`: `except OSError` ở `_doc_cau_hinh` dường như là code chết; xoá hẳn trên bản sao
+    ngoài cây vẫn `17/17` và `--dot-bien` vẫn đủ. Reviewer khai ĐỘ TIN **vừa** và nói thẳng không
+    loại trừ được 100% một lối vào chưa nghĩ ra — quan sát "có vẻ chết", không phải khẳng định.
+
+  NO_NHAN_THUC_tu_cau_hoi_kien_truc: >-
+    Phiên điều phối giao một câu hỏi THẬT và cố ý KHÔNG đưa đáp án: `_doc_mcp_json` nay đổi ARITY
+    theo cờ (4 phần tử hay 5) — như thế có chữa được bệnh "hai ảnh chụp", hay chỉ dời nó sang "hai
+    hình dạng trả về"? Reviewer trả lời thẳng là **có bằng chứng cho CẢ HAI phía, không có câu trả
+    lời sạch**: đáng, vì nó dồn toàn bộ tri thức "URL và headers phải cùng một lần đọc" vào MỘT hàm
+    MỘT lần gọi; không đáng hẳn, vì nó THẬT SỰ đổi lớp lỗi "hai lần đọc" (dễ thấy, vòng 2 đã bắt)
+    lấy lớp "8 điểm gần-giống-hệt-nhau phải đồng bộ tay" (khó thấy hơn) — và `AG-359-P2-01` chứng
+    minh đúng MỘT trong tám đã trôi khỏi vùng phủ test dù CHƯA trôi khỏi mã.
+    Giữ nguyên câu trả lời hai chiều thay vì ép một kết luận tròn. Nếu `_doc_mcp_json` còn phình
+    thêm nhánh `return` thì đây là chỗ phải xem lại CÁCH LÀM, không phải vá tiếp.
+
+  SAU_CO_TROI_5_1_DA_DO_TRUOC_MERGE:
+  - '1 xung đột: merge-tree sạch trên master `6c2e0972`'
+  - '2 DRIFT ∩ write set: RỖNG — đo bằng `comm -12` giữa hai tập tên, master đã trôi từ merge-base `693d68fd` mà không tệp nào giao với 4 đường của PR'
+  - '3 artefact phái sinh: không chạm `RELEASE_MANIFEST.json` / golden'
+  - '4 ratchet: cả 4 đường là `M` (SỬA) chứ không `A` (THÊM) ⇒ phép đếm `docs/**/*.md` và số tệp gói không đổi; `.claude/**` vốn nằm trong `_RELEASE_EXCLUDE_DIRS`'
+  - '5 tệp nhập: không có'
+  - '6 workflow/hook: PR không chạm `.github/**` lẫn `.githooks/**`; vẫn gọi lại gate trên master SAU merge'
+
+  GATE:
+    truoc_merge_gate: 'ĐO BẰNG `workflow_id`, KHÔNG tin bộ lọc — trên `73c91cb2` có 4 lượt: `gate` (`workflow_dispatch`, đủ ma trận có Windows) success · `gate` (`pull_request`) success'
+    truoc_merge_launcher_windows: '`launcher (Windows thật)` wf=333345448 `pull_request` **success** lúc 03:47Z'
+    vi_sao_phai_do_rieng_lượt_Windows: >-
+      PR sửa `launcher.py` + `launcher_test.py` — đúng cặp tệp mà kho từng để `os.getpgid` làm
+      suite `0/103` trên Windows suốt nhiều vòng, và năm lượt cross-review trên Linux KHÔNG THỂ
+      thấy. Lần này lượt Windows CÓ chạy và xanh.
+    canh_bao_cong_cu: >-
+      Bộ lọc `workflow_id`/`head_sha` của công cụ MCP `actions_list` **BỊ BỎ QUA** — nó trả cả
+      2994 lượt bất kể tham số. Lượt đọc đầu của phiên điều phối suýt đọc một lượt `gate` thành
+      lượt `launcher-windows` vì trùng dấu thời gian. Phải lọc bằng chính trường `workflow_id`
+      trong phản hồi, đừng tin tham số truyền vào.
+    sau_merge: 'đã gọi `workflow_dispatch` trên master ngay sau merge'
+
+  SO_SACH_5_MUC_10_2:
+  - 'hiện vật: 4 tệp write set trên master sau `27fb9de2` — `launcher.py` `launcher_test.py` `mcp_github_doc.py` `mcp_github_doc_test.py`'
+  - 'verdict + biên nhận: `ops/reviews/mcp-doc-phan-tich-review-1-claude-verdict{.md,.receipt.yaml}`, sha256 `32e189c6…`, 14015 bytes, khớp byte'
+  - 'bốn finding cũ (3 P2 của #357 + P1 vòng 2): reviewer tự đo lại, CẢ BỐN vá thật, mỗi cái kèm mutant GIẾT THẬT'
+  - 'hai nợ CÓ TÊN đã ghi ở khối `NO_CO_TEN`, kèm vị trí, hậu quả nếu hở, và độ tin'
+  - 'hai chỗ `KHÔNG ĐO ĐƯỢC` reviewer khai thẳng: hành vi Windows của `launcher_test.py` (container review chỉ có Linux, và reviewer TỪ CHỐI suy diễn từ số liệu CI cũ vì đó là lượt CHẠY KHÁC), và trạng thái GitHub trực tiếp của PR'

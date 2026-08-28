@@ -1,0 +1,151 @@
+# Lease EXECUTOR — `W1-P1-VAN-CHUYEN-PROMPT` (#368), lượt 1.
+#
+# Packet mở sau khi #359 land (PR #362, merge `27fb9de`, 04:55:11Z) và sau khi HAI lease
+# xác chết được thu hồi — xem `thay_the_ly_do`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 368
+packet_id: W1-P1-VAN-CHUYEN-PROMPT
+phase_key: W1-P1-VAN-CHUYEN-PROMPT
+revision: 1
+generation: 1
+lease_id: w1-p1-van-chuyen-prompt-exec-1-codex-20260828
+thay_the_cho: probe-agent-exec-1-codex-20260828
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` vì write set chạm `.claude/dev/launcher.py` — đường PHÓNG của MỌI lượt
+  executor/reviewer của kho. Sai một chiều thì mọi lượt sau chạy trên nền vận chuyển đã hỏng.
+  `risk: normal` vì trần ADR-0044 (`≤3 tệp / ≤300 dòng`) gắn với packet CHẠM AUTHORITY, mà
+  `.claude/dev/**` là dev-side, NGOÀI gói phát hành, không cổng nào đọc.
+
+NGOAI_LE_ADR_0041: >-
+  ADR-0041 (`Accepted` 17-08-2026) ghi: *"Codex chỉ nhận Packet `routine`/`systemic` nhỏ, đóng,
+  write-set độc lập"*. Packet này là `sensitive` ⇒ theo luật thường Codex KHÔNG đủ điều kiện làm
+  Executor. Người giữ kho duyệt NGOẠI LỆ trong phiên 28-08-2026, sau khi được trình bày đúng mâu
+  thuẫn ấy. Thẩm quyền: §2 — `override` thuộc chủ kho.
+  Ngoại lệ gắn RIÊNG packet này; KHÔNG nới ADR-0041 và KHÔNG là tiền lệ cho packet `sensitive` khác.
+  Phần ADR-0041 KHÔNG bị override, vẫn phải tuân: *"PR do Codex code phải được phiên Claude mới
+  độc lập hoặc human review; Codex không review code mình"* ⇒ `reviewer_provider: claude`, và
+  phiên Claude làm reviewer phải KHÁC phiên điều phối đã soạn đặc tả.
+
+spec_path: ops/specs/W1-P1-VAN-CHUYEN-PROMPT-r2.md
+spec_hash: 4a058ce4d48c62651c8ba734a4cb064335710b5d4f6c50cf939892a06d0da4b3
+spec_note: >-
+  BẢN SỬA ĐỔI 2. Bản r1 (`91c5de581a1b8d0c2b466acc0f8f49378e439f035290f930350603c8e8370199`)
+  giữ nguyên làm hồ sơ, KHÔNG xoá — nó khai `executor: claude` và bị thay vì đúng chỗ đó.
+  Executor PHẢI tự đo lại mọi con số trong đặc tả, kể cả bảng "ĐÃ CÓ / THIẾU" — đó là ĐO CỦA
+  PHIÊN ĐIỀU PHỐI, không phải chân lý.
+
+write_set:
+  - .claude/dev/launcher.py
+  - .claude/dev/launcher_test.py
+  - .github/coordination/schemas/review_verdict.v1.schema.json
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-28T06:38:08Z trên `27fb9de`. Phép so HAI NGUỒN (TẬP TÊN): ls-remote 242 ·
+  for-each-ref 242 · `comm` RỖNG hai chiều · không shallow (refspec cấu hình đã sửa từ
+  single-branch sang `+refs/heads/*:refs/remotes/origin/*`). Cả ba đường trả `NGƯỜI_GIỮ 0`.
+  Phép đo được lặp SAU khi xoá hai nhánh tạm cục bộ, để dấu `ĐÃ_BỊ_THAY_THẾ` đọc từ
+  `refs/remotes/origin/**` chứ không phải từ nhánh của chính phiên này — nếu không thì
+  "mở khoá" chỉ là tạo tác của rig.
+
+thay_the_ly_do: >-
+  Thu hồi HAI lease xác chết cùng giữ write set này, cả hai đã hết việc mà còn hiệu lực —
+  đúng nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong`:
+  (1) `mcp-doc-phan-tich-exec-1r3-codex-20260828` (#359) — ĐÃ LAND `04:55:11Z`, lease tới `17:05:00Z`;
+  (2) `probe-agent-exec-1-codex-20260828` (#363) — đã được lệnh DỪNG, lease tới `2026-08-29T02:00:00Z`.
+  Người giữ kho duyệt thu hồi #363 trước, rồi duyệt #359 SAU khi nó land. Lúc được hỏi lần đầu
+  chủ kho từ chối thu hồi #359 và đã ĐÚNG: khi ấy PR #362 còn đang sửa `launcher.py` thật
+  (+26/−15) — lời khai "PR #362 không đụng launcher.py" trong bản giao việc đã hết đúng.
+
+thay_the_gioi_han_co_che: >-
+  KHAI THẲNG vì nó làm hồ sơ bất đối xứng: `_kiem_thay_the` đọc `thay_the_cho` bằng
+  `str(...).strip()` (`ops/lease_publish.py` d.558) ⇒ MỘT lease mới chỉ khai thay thế được MỘT
+  lease cũ. Phép loại khỏi `NGƯỜI_GIỮ` (d.930/934) lại chỉ đọc `da_bi_thay_the` trên lease CŨ.
+  Nên lease này khai `thay_the_cho` cho #363, còn #359 được thu hồi bằng trường `da_bi_thay_the`
+  MỘT CHIỀU. Đã kiểm không sinh báo động giả: `lenh_con_tro_treo` BỎ QUA lease mang
+  `da_bi_thay_the` (d.947). Ghi vào nợ: schema chưa diễn đạt được "một lease thay thế NHIỀU lease".
+
+branch: codex/w1-p1-van-chuyen-prompt-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 27fb9de28bc65a417adee66b66615de6bccbfd5e
+start_from_sha: 27fb9de28bc65a417adee66b66615de6bccbfd5e
+reviewed_sha_required: 27fb9de28bc65a417adee66b66615de6bccbfd5e
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 600
+  do_tu_sha: 27fb9de28bc65a417adee66b66615de6bccbfd5e
+  don_vi: >-
+    `git diff --numstat 27fb9de28bc65a417adee66b66615de6bccbfd5e -- .claude/dev/launcher.py
+    .claude/dev/launcher_test.py .github/coordination/schemas/review_verdict.v1.schema.json`
+    — THÊM cộng XOÁ. Pathspec TRONG lệnh, KHÔNG `..HEAD`.
+  da_dung: 0
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-28: duyệt mở packet W1-P1; duyệt làm TRỌN BA TỆP kể cả schema
+  (Q1); duyệt thu hồi lease #363 (Q2) rồi thu hồi cả #359 sau khi nó land; duyệt NGOẠI LỆ
+  ADR-0041 cho executor `codex`.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này CŨNG là phiên soạn đặc tả r1 và r2, và là phiên đã đo bảng
+  "ĐÃ CÓ / THIẾU" trong đặc tả. Nên nếu phiên này làm reviewer thì phần khung packet không được
+  soát độc lập với tác giả. Bù bằng cross-review `claude` ở một phiên KHÁC; phiên ấy im lặng ⇒
+  đọc là CHƯA CHẠY, KHÔNG phải sạch.
+
+leased_at_utc: '2026-08-28T06:45:00Z'
+lease_expires_at_utc: '2026-08-29T06:45:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  Đúng ba tệp trong `write_set`. KHÔNG đụng `.claude/dev/mcp_github_doc.py`, KHÔNG đụng
+  `.claude/dev/packet_loop.py`, KHÔNG đụng `ops/lease_publish.py`, KHÔNG đụng `.mcp.json`.
+  Hunk ngoài ba tệp ấy ⇒ ĐỎ.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ tư ngoài write set ⇒ DỪNG, khai ·
+  S2 vượt 600 dòng thêm+xoá ⇒ DỪNG, khai ·
+  S3 `origin/master` đã đi tiếp so `base_sha` mà chưa đo lại nền ⇒ DỪNG ·
+  S4 phương án đòi đổi hợp đồng `chot_prompt`/`{PROMPT_FILE}` hiện có theo cách phá caller
+  đang dùng ⇒ DỪNG, trình phép đo — phần vận chuyển ấy ĐÃ CHẠY, packet này MỞ RỘNG chứ không viết lại ·
+  S5 muốn khai một mục nghiệm thu là ĐẠT mà không có ca `rXX_` làm nó ĐỎ được ⇒ DỪNG.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) KHÔNG commit, KHÔNG push, KHÔNG tạo/xoá/đổi ref. Phiên điều phối commit.
+  (2) GIỚI HẠN LỜI KHAI — chứng minh BYTE tới consumer adapter, KHÔNG tuyên bố model "đã hiểu"
+      nội dung. Câu kiểu "đã chứng minh reviewer nhận đúng chỉ thị" là VƯỢT BIÊN, ở mọi tài liệu.
+  (3) Phần lớn vận chuyển prompt ĐÃ TỒN TẠI (`chot_prompt`, re-hash chống TOCTOU, `prompt.snapshot`
+      0600, `{PROMPT_FILE}` fail-close). ĐỪNG viết lại — hãy KHOÁ bằng ca `rXX_`. Tự đo lại trước.
+  (4) Bốn thứ thật sự thiếu: băm output (`run.json` chỉ ghi `st_size`), sổ ghi tên/băm transport
+      theo provider, consumer fixture đọc `prompt.snapshot`, và schema verdict.
+  (5) M4–M7 phải là danh sách CHO PHÉP, KHÔNG phải danh sách CẤM — và phải có đột biến NỚI danh
+      sách cho phép để chứa tên tấn công làm ca đích ĐỎ.
+  (6) Mỗi chốt phải có ĐỘT BIẾN RIÊNG; chốt không có mutant là chốt sẽ hở lại.
+  (7) `launcher.py` là TỆP NÓNG: `t117` đòi mỗi mẫu đột biến khớp ĐÚNG MỘT chỗ trong nó — thêm mã
+      có thể phá tính duy nhất ấy. ĐO, đừng đoán.
+  (8) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu, kể cả khi đang trích dẫn để giải thích.
+
+nen_do_truoc_khi_bat_dau: >-
+  Trên `27fb9de` (clone sạch, KHÔNG worktree — `chay_cac_probe()` ném `Chan(MA_WORKTREE)` khi
+  `.git` là TỆP): `launcher_test.py` = `154/154 ca DA CHAY QUA (tong 155, bo qua 1, hong 0)`;
+  ca bỏ qua là `t62_qua_han_ma_khong_giet_het_cay_phai_tra_125` (fixture Windows, bản POSIX là
+  `t63`). `actionlint` = `rc=1`, ĐÚNG 1 finding `ops-don-ref.yml:106 SC1003:info` — ĐỎ SẴN,
+  delta = 0; số finding tăng mới là hồi quy. `git config core.abbrev 7` trước khi chạy cổng.

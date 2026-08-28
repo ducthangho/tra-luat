@@ -1120,7 +1120,9 @@ _DOC_CLAIMS_LINK_RE = re.compile(r"\[[^\]\n]*\]\(([^)\s]+)\)")
 # GAS đúng đắn bị hô «vượt VERSION hiện hành» (đo 28-07). Kế hoạch §2.3 viết `v1.NN.NN` là có lý do.
 _DOC_CLAIMS_VER_RE = re.compile(r"\bv(1\.\d+\.\d+)\b")
 _DOC_CLAIMS_R_RE = re.compile(r"\br(\d{2,4})[a-z]?\b")
-_DOC_CLAIMS_PYLOC_RE = re.compile(r"\b([A-Za-z0-9_][A-Za-z0-9_./\-]*\.py):(\d+)\b")
+_DOC_CLAIMS_PYLOC_RE = re.compile(
+    r"(?<![A-Za-z0-9_./\-])([A-Za-z0-9_.][A-Za-z0-9_./\-]*\.py):(\d+)\b"
+)
 _DOC_CLAIMS_TRIM = ".,;:!?)]}»›\"'(«‹[{"
 
 
@@ -1309,14 +1311,26 @@ def _doc_claims_scan_one(doc: Path, nofence: str, nospan: str, starts: list, *,
     # ── L7: con trỏ mã <file>.py:<dòng> ───────────────────────────────────────────────────────────
     for m in _DOC_CLAIMS_PYLOC_RE.finditer(nofence):
         fname, num = m.group(1), int(m.group(2))
-        claim = f"{fname}:{num}"
+        claim = m.group(0)
         if _doc_claims_noisy(fname):
             continue
         if "/" in fname:
-            cands = [root / fname, doc.parent / fname]
+            # `./` / `../` đã được L7 hiểu từ trước như con trỏ từ gốc kho. Giữ đúng ngữ nghĩa ấy
+            # sau khi regex bắt cả tiền tố, thay vì để tiền tố vô tình biến mất ở tầng regex.
+            repo_fname = re.sub(r"^(?:\.\.?/)+", "", fname)
+            cands = [root / repo_fname, doc.parent / fname]
         else:
             cands = list(ctx["pyindex"].get(fname.rsplit("/", 1)[-1], []))
-        hit = next((c for c in cands if Path(c).is_file()), None)
+        root_resolved = root.resolve()
+        resolved_cands = []
+        for cand in cands:
+            try:
+                resolved = Path(cand).resolve()
+                if resolved.is_relative_to(root_resolved):
+                    resolved_cands.append(resolved)
+            except (OSError, RuntimeError):
+                continue
+        hit = next((c for c in resolved_cands if c.is_file()), None)
         if hit is None:
             _add("L7", m.start(), claim, "PYLOC_FILE_MISSING")
             continue

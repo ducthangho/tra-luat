@@ -24772,6 +24772,157 @@ def run() -> int:
 
     _t110("r218_docclaims_l7_dong_vuot_so_dong_file", _c218_l7_dong_vuot_so_dong_file)
 
+    # r378 — L7 giữ nguyên dấu chấm đầu, chặn resolve thoát kho và có bộ phân hạng đột biến.
+    class _R378SaiKyVong(RuntimeError):
+        """Chỉ oracle test ném được; mã triển khai không dùng lớp này."""
+
+    def _r378_mutant(old, new):
+        """Nạp một bản workflow đột biến trong namespace riêng, không ghi cây làm việc."""
+        import tl_core.workflow as _wf378
+        src = Path(_wf378.__file__).read_text(encoding="utf-8")
+        if src.count(old) != 1:
+            raise RuntimeError(f"R378_MUTATION_ANCHOR_COUNT:{src.count(old)}")
+        ns = dict(_wf378.__dict__)
+        exec(compile(src.replace(old, new), str(_wf378.__file__) + ":r378-mutant", "exec"), ns)
+        return ns
+
+    def _r378_doc(body):
+        import tempfile as _tf378
+        td = _tf378.TemporaryDirectory()
+        doc = Path(td.name) / "r378.md"
+        doc.write_text("# r378\n\n" + body + "\n", encoding="utf-8")
+        return td, doc
+
+    def _r378_run(body, ns=None, root=None):
+        import tl_core.workflow as _wf378
+        td, doc = _r378_doc(body)
+        try:
+            fn = (ns or _wf378.__dict__)["_doc_claims_check"]
+            return fn(paths=[str(doc)], root=root or _ROOT209)
+        finally:
+            td.cleanup()
+
+    def _r378_l7(report):
+        return [x for x in report.get("flags", []) if x.get("layer") == "L7"]
+
+    def _r378_classify(old, new, body, oracle, root=None):
+        """Ba hạng: killed / false_credit / survived; chỉ exception riêng của oracle là kill thật."""
+        try:
+            oracle(_r378_run(body, _r378_mutant(old, new), root=root))
+        except _R378SaiKyVong:
+            return "killed"
+        except Exception as exc:  # noqa: BLE001
+            return "false_credit:" + type(exc).__name__
+        return "survived"
+
+    def _r378_expect(predicate):
+        if not predicate:
+            raise _R378SaiKyVong("R378_EXPECTATION_MISMATCH")
+
+    _R378_REGEX = (
+        'r"(?<![A-Za-z0-9_./\\-])([A-Za-z0-9_.][A-Za-z0-9_./\\-]*\\.py):(\\d+)\\b"',
+        'r"\\b([A-Za-z0-9_][A-Za-z0-9_./\\-]*\\.py):(\\d+)\\b"',
+    )
+
+    def _c378_duong_dan_an_co_that_im():
+        body = ".claude/dev/launcher.py:1\n.github/checks/ci_phamvi.py:1"
+        normal = _r378_l7(_r378_run(body)) == []
+        cat = _r378_classify(*_R378_REGEX, body,
+                             lambda r: _r378_expect(_r378_l7(r) == []))
+        return normal and cat == "killed"
+    _t110("r378_l7_duong_dan_an_co_that_im", _c378_duong_dan_an_co_that_im)
+
+    def _c378_duong_dan_an_van_kiem_dong():
+        body = ".claude/dev/launcher.py:99999999"
+        oracle = lambda r: _r378_expect(
+            [(x["claim"], x["reason"]) for x in _r378_l7(r)]
+            == [(body, "PYLOC_LINE_OUT_OF_RANGE")])
+        normal = True
+        try:
+            oracle(_r378_run(body))
+        except _R378SaiKyVong:
+            normal = False
+        cat = _r378_classify("if num < 1 or num > total:", "if False:", body, oracle)
+        return normal and cat == "killed"
+    _t110("r378_l7_duong_dan_an_van_kiem_dong", _c378_duong_dan_an_van_kiem_dong)
+
+    def _c378_duong_dan_an_thieu_van_no():
+        body = ".claude/khong_co_that.py:3"
+        oracle = lambda r: _r378_expect(
+            [(x["claim"], x["reason"]) for x in _r378_l7(r)]
+            == [(body, "PYLOC_FILE_MISSING")])
+        normal = True
+        try:
+            oracle(_r378_run(body))
+        except _R378SaiKyVong:
+            normal = False
+        cat = _r378_classify('"PYLOC_FILE_MISSING"', '"PYLOC_FILE_GONE"', body, oracle)
+        return normal and cat == "killed"
+    _t110("r378_l7_duong_dan_an_thieu_van_no", _c378_duong_dan_an_thieu_van_no)
+
+    def _c378_claim_khop_byte():
+        body = ".claude/khong_co_that.py:03"
+        oracle = lambda r: _r378_expect(
+            [x["claim"] for x in _r378_l7(r)] == [body])
+        normal = True
+        try:
+            oracle(_r378_run(body))
+        except _R378SaiKyVong:
+            normal = False
+        cat = _r378_classify("claim = m.group(0)", 'claim = f"{fname}:{num}"', body, oracle)
+        return normal and cat == "killed"
+    _t110("r378_l7_claim_khop_tung_byte", _c378_claim_khop_byte)
+
+    def _c378_resolve_phai_o_trong_kho():
+        import tempfile as _tf378
+        with _tf378.TemporaryDirectory() as td:
+            root = Path(td) / "repo"
+            root.mkdir()
+            outside = Path(td) / "outside.py"
+            outside.write_text("x = 1\n", encoding="utf-8")
+            link = root / "r378_escape.py"
+            try:
+                link.symlink_to(outside)
+                body = "r378_escape.py:99999999"
+                oracle = lambda r: _r378_expect(
+                    [(x["claim"], x["reason"]) for x in _r378_l7(r)]
+                    == [(body, "PYLOC_FILE_MISSING")])
+                normal = True
+                try:
+                    oracle(_r378_run(body, root=root))
+                except _R378SaiKyVong:
+                    normal = False
+                cat = _r378_classify("if resolved.is_relative_to(root_resolved):", "if True:",
+                                     body, oracle, root=root)
+                return normal and cat == "killed"
+            finally:
+                link.unlink(missing_ok=True)
+    _t110("r378_l7_resolve_phai_o_trong_kho", _c378_resolve_phai_o_trong_kho)
+
+    def _c378_giu_con_tro_cham_gach_cheo():
+        body = "./scripts/tl.py:99999999\n../scripts/tl.py:99999999"
+        expected = [("./scripts/tl.py:99999999", "PYLOC_LINE_OUT_OF_RANGE"),
+                    ("../scripts/tl.py:99999999", "PYLOC_LINE_OUT_OF_RANGE")]
+        oracle = lambda r: _r378_expect(
+            [(x["claim"], x["reason"]) for x in _r378_l7(r)] == expected)
+        normal = True
+        try:
+            oracle(_r378_run(body))
+        except _R378SaiKyVong:
+            normal = False
+        cat = _r378_classify('repo_fname = re.sub(r"^(?:\\.\\.?/)+", "", fname)',
+                             "repo_fname = fname", body, oracle)
+        return normal and cat == "killed"
+    _t110("r378_l7_giu_con_tro_cham_gach_cheo", _c378_giu_con_tro_cham_gach_cheo)
+
+    def _c378_phan_hang_tin_dung_gia():
+        body = ".claude/dev/launcher.py:99999999"
+        oracle = lambda r: _r378_expect(bool(_r378_l7(r)))
+        cat = _r378_classify("fname, num = m.group(1), int(m.group(2))",
+                             'raise AttributeError("r378-mutant-vo-can")', body, oracle)
+        return cat == "false_credit:AttributeError"
+    _t110("r378_dot_bien_attributeerror_la_tin_dung_gia", _c378_phan_hang_tin_dung_gia)
+
     def _c218_che_nhieu_fence_va_span():
         """§2.4 — ca QUYẾT ĐỊNH chất lượng: CÙNG MỘT chuỗi, trong fence ⇒ IM, ngoài fence ⇒ NỔ.
         Test chỉ khẳng định 'trong fence im' sẽ XANH GIẢ khi chưa cài lớp nào ⇒ phải khẳng định CẢ HAI VẾ.

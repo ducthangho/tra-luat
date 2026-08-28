@@ -89,7 +89,32 @@ start_from_ghi_chu: >-
   Head hiện tại của nhánh. Hai commit cuối (`667c7ed8`, `cd3ceb36`) đều RỖNG — một mang
   `[open-pr]`, một để kích hoạt `pull_request: synchronize`. Tree bất biến suốt chuỗi:
   tree(94474286) == tree(667c7ed8) == tree(cd3ceb36) == 2bd7ec70da37adcebc418d68a7b871c71750b31e.
-reviewed_sha_required: cd3ceb36160c948c1f9b3e73a61491b7105fe660
+reviewed_sha_required: 33581a9300751adb6707511f36d5aef5afd932e0
+lich_su_reviewed_sha_r3:
+- vong: 'r3 lượt 1'
+  sha: 33581a9300751adb6707511f36d5aef5afd932e0
+  day_luc_utc: '2026-08-28T00:45:00Z'
+  executor: codex
+  run: '83ae92ff (launcher.py run), rc=0, 7.8 phút'
+  numstat: '5 dòng thêm / 2 xoá, 1 tệp — trần 30 dòng / 4 tệp, đo trên TOÀN write set'
+  ban_va: >-
+    dòng 21264 `len(paths) + 70 == 250` -> `+ 71 == 251`; dòng 21267 `len(tren_dia) == 70`
+    -> `== 71`; cộng khối `KÊ KHAI SLOT` ba dòng theo nếp các khối có sẵn.
+  phan_chung_phien_dieu_phoi_TU_CHAY: >-
+    KHÔNG lấy báo cáo executor làm bằng chứng. Clone ĐỘC LẬP `/home/user/wp334` (không phải
+    git worktree — worktree cho rc=14), `core.autocrlf=false core.eol=lf core.abbrev=7`:
+    stash bản vá ⇒ `tl selftest 1697/1698` kèm `[FAIL] r291_docs_ngoai_goi` (TÁI LẬP được lỗi
+    gốc); bỏ vá vào ⇒ `1698/1698`, KHÔNG `[FAIL]` nào ⇒ `S7` sạch. Executor báo cáo cùng hai
+    con số ấy, độc lập.
+  executor_khai_dang_ngo:
+    - '`.git/config` chỉ đọc trong cây làm việc ⇒ `git config` trả rc=255 dù ba giá trị đã đúng'
+    - 'global git ép ký commit bằng khoá không tồn tại ⇒ hai ca mini-repo ĐỎ GIẢ; phải override
+       `commit.gpgsign=false` mức tiến trình khi chạy selftest'
+  ai_commit: >-
+    Phiên điều phối, KHÔNG phải executor — đúng nếp `canh_bao_rieng_cho_r2` của lease trước
+    (`.git` mount chỉ đọc ⇒ executor sinh diff, phiên điều phối commit). Chỉ `git add` đúng
+    một đường dẫn trong write set; hai tệp trợ giúp `BRIEF_r3.md` và `LEASE_r3_KHONG_COMMIT.yaml`
+    KHÔNG commit và đã xoá sau khi xong.
 reviewed_sha_ghi_chu: >-
   ĐẶT LẠI về head hiện tại. Bản duyệt vòng 4 (`94474286`, P1=0 P2=0) KHÔNG bị vứt — nội dung nó
   duyệt vẫn nguyên vẹn ở tree `2bd7ec70`. Nhưng revision mới ⇒ lease cũ mất hiệu lực (§3.2), nên

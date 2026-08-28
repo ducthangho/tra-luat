@@ -1,0 +1,138 @@
+# Lease EXECUTOR — `BIA-MO-MOT-CHIEU` (#372), lượt 1.
+#
+# Packet mở sau khi phiên điều phối 28-08-2026 dựng được PHẢN CHỨNG CHẠY ĐƯỢC cho một
+# fail-open trong chính cơ chế write-set exclusion: thêm ĐÚNG MỘT dòng
+# `da_bi_thay_the: <chuỗi bịa>` vào tệp lease của người khác thì `ai-dang-giu` chuyển từ
+# `rc=11 / NGƯỜI_GIỮ 1` sang `rc=0 / NGƯỜI_GIỮ 0`. Tên được trỏ tới KHÔNG tồn tại ở ref nào.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 372
+packet_id: BIA-MO-MOT-CHIEU
+phase_key: BIA-MO-MOT-CHIEU
+revision: 1
+generation: 1
+lease_id: bia-mo-mot-chieu-exec-1-codex-20260828
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` vì write set là CHÍNH cổng write-set exclusion (`ops/lease_publish.py`) — thứ duy
+  nhất chặn hai writer trên một tệp. Sai một chiều thì mọi packet sau chạy trên một cổng đã hỏng,
+  và hỏng theo kiểu IM LẶNG: `ai-dang-giu` sẽ trả lời tự tin "không có ai giữ".
+  `risk: normal` vì `ops/**` là dev-side, NGOÀI gói phát hành.
+
+NGOAI_LE_ADR_0041: >-
+  ADR-0041 ghi *"Codex chỉ nhận Packet `routine`/`systemic` nhỏ, đóng, write-set độc lập"*.
+  Packet này là `sensitive` ⇒ theo luật thường Codex KHÔNG đủ điều kiện làm Executor.
+  Căn cứ ngoại lệ: chỉ thị THƯỜNG TRỰC của người giữ kho trong phiên 28-08-2026 —
+  *"executor thì dùng codex, xhigh; reviewer thì chọn từ opus 5 high cho tới fable 5 max tuỳ độ
+  phức tạp"* — cộng uỷ quyền tự quyết cho phiên điều phối cùng ngày. Thẩm quyền: §2, `override`
+  thuộc chủ kho.
+  KHAI THẲNG GIỚI HẠN: chỉ thị ấy đến bằng HỘI THOẠI, không phải một dấu vết trên GitHub —
+  đúng cái lỗ mà packet #348 vừa land để bịt, và cổng `duyet-khac-danh-tinh` chưa được bật
+  (nửa A của runbook còn chờ chủ kho). Ai đọc lease này KHÔNG được coi đây là bằng chứng
+  cưỡng chế được; nó là LỜI KHAI có thể đếm.
+  Ngoại lệ gắn RIÊNG packet này. Phần ADR-0041 KHÔNG bị override vẫn phải tuân:
+  *"Codex không review code mình"* ⇒ `reviewer_provider: claude`, phiên KHÁC phiên điều phối.
+
+spec_path: ops/specs/BIA-MO-MOT-CHIEU.md
+spec_hash: ca5648a1d0f3c57c0ef8518943060d5b50c7cc132f52a1edf4dc3ef4de80217e
+spec_ref: 'refs/heads/ops/cap-lease-bia-mo-mot-chieu'
+spec_note: >-
+  Đặc tả do phiên điều phối soạn từ phép đo của CHÍNH nó. Executor PHẢI tự dựng lại phản chứng
+  mở packet trước khi vá — nếu không tái hiện được `rc=11 -> rc=0` thì DỪNG và khai, vì khi ấy
+  hoặc phép đo của tôi sai, hoặc nền đã đổi, và cả hai đều đổi việc phải làm.
+
+write_set:
+  - ops/lease_publish.py
+  - ops/lease_publish_test.py
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-28T08:5xZ trên `d4b3045`. Phép so HAI NGUỒN bằng TẬP TÊN: `ls-remote --heads` 246 ·
+  `for-each-ref refs/remotes/origin` 246 · `comm` RỖNG CẢ HAI CHIỀU (chiều lệch mới là kết luận,
+  không phải con số). Cả ba đường (`lease_publish.py`, `lease_publish_test.py`, và đường đặc tả)
+  trả `NGƯỜI_GIỮ 0`.
+  GHI LẠI MỘT LẦN ĐO HỎNG, vì nó là chốt đang chạy đúng: lượt quét ĐẦU trả `rc=12`
+  `NHÁNH_CỤC_BỘ_TỤT_SAU` (nhánh chỉ định của phiên điều phối tụt 10 commit sau master). `rc=12`
+  là KHÔNG XÁC ĐỊNH, KHÔNG phải "không ai giữ" — cổng từ chối đoán, và đó là hành vi đúng.
+  Chỉ sau `git branch -f` mới có phép đo dùng được.
+
+branch: codex/bia-mo-mot-chieu-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: d4b3045a6e5ec7daf4a9ebfacb405153de04fc99
+start_from_sha: d4b3045a6e5ec7daf4a9ebfacb405153de04fc99
+reviewed_sha_required: d4b3045a6e5ec7daf4a9ebfacb405153de04fc99
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 500
+  do_tu_sha: d4b3045a6e5ec7daf4a9ebfacb405153de04fc99
+  don_vi: >-
+    `git diff --numstat d4b3045a6e5ec7daf4a9ebfacb405153de04fc99 -- ops/lease_publish.py
+    ops/lease_publish_test.py` — THÊM cộng XOÁ. Pathspec TRONG lệnh, KHÔNG `..HEAD`.
+  da_dung: 0
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-28: "tiếp tục, ủy quyền tự quyết thích hợp" sau khi được trình bày
+  phép đo mở packet; rồi "để nguyên #370, làm #372 đi" — chọn packet này một cách tường minh.
+  Vai trò theo chỉ thị thường trực cùng phiên: executor = codex xhigh, reviewer = claude chọn bậc
+  theo độ phức tạp.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này CŨNG là phiên PHÁT HIỆN lỗ, DỰNG phản chứng, và SOẠN đặc tả. Ba vai trong
+  một phiên. Nên nó KHÔNG được làm reviewer cho packet này: phần "lỗ có thật không" và phần
+  "đặc tả có đòi đúng thứ cần đòi không" sẽ không được soát độc lập với tác giả.
+  Bù bằng cross-review `claude` ở phiên KHÁC. Phiên ấy im lặng ⇒ đọc là CHƯA CHẠY, KHÔNG phải sạch.
+
+leased_at_utc: '2026-08-28T09:00:00Z'
+lease_expires_at_utc: '2026-08-29T09:00:00Z'
+run_minutes: 1440
+
+vung_duoc_phep_cham: >-
+  Đúng hai tệp trong `write_set`. KHÔNG đụng `.claude/dev/packet_loop.py`, KHÔNG đụng
+  `ops/chay_lease_publish_test.sh`, KHÔNG đụng workflow nào. Hunk ngoài hai tệp ấy ⇒ ĐỎ.
+  Tệp lease trong `ops/leases/**` là DỮ LIỆU, không phải mã — KHÔNG sửa lease nào của ai để
+  "cho cổng mới xanh". Nếu cổng mới làm một lease đang tồn tại hoá `rc=12` thì đó là ĐẦU RA
+  của việc 4, phải KHAI, không phải sửa đi.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ngoài write set ⇒ DỪNG, khai ·
+  S2 vượt 500 dòng thêm+xoá ⇒ DỪNG, khai ·
+  S3 `origin/master` đã đi tiếp so `base_sha` mà chưa đo lại nền ⇒ DỪNG ·
+  S4 phép đếm ở việc 4 cho ra số LỚN (nhiều lease đang mang bia mộ không đối chứng được) ⇒
+  DỪNG và BÁO — đặc tả nói rõ khi ấy cách chữa là đường THU HỒI tử tế, không phải siết cổng
+  rồi đi dọn hậu quả. ĐỪNG tự quyết ngưỡng "lớn" là bao nhiêu; đưa con số ra ·
+  S5 muốn khai một mục nghiệm thu là ĐẠT mà không có ca `tNN` làm nó ĐỎ được ⇒ DỪNG.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) KHÔNG commit, KHÔNG push, KHÔNG tạo/xoá/đổi ref. Phiên điều phối commit.
+  (2) TỰ DỰNG LẠI PHẢN CHỨNG MỞ PACKET TRƯỚC KHI VÁ. Nó chạy trên CLONE SANDBOX, không phải kho
+      thật: clone, tạo nhánh, nối một dòng vào tệp lease, `git update-ref` nhánh theo dõi, rồi
+      quét lại. Không tái hiện được ⇒ DỪNG.
+  (3) `da_bi_thay_the` KHÔNG được bỏ. `t91_A2c` khoá hành vi gỡ ấy CÓ CHỦ ĐÍCH, kèm đột biến canh.
+      Thứ thiếu là ĐỐI CHỨNG cho lời khai gỡ, không phải hành vi gỡ. Xoá nó là hiểu sai packet.
+  (4) Vị từ mới phải là phép SO BẰNG NHAU trên tên lease — KHÔNG dò chuỗi, KHÔNG danh sách cấm.
+      Kho đã trả giá BẢY lần cho hình dạng "danh sách cấm đội lốt allow-list" trong riêng #348.
+  (5) Không thoả ⇒ `KHÔNG_XÁC_ĐỊNH` (`rc=12`). KHÔNG phải "hết hạn", KHÔNG phải "vẫn giữ".
+      Doctrine `None ≠ False`. Đọc nó thành ĐẠT là tái tạo đúng lỗ; đọc thành "vẫn giữ" là chặn
+      oan hàng loạt lease đã thu hồi hợp lệ.
+  (6) Chạy `AL_VER=1.7.7 bash ops/chay_lease_publish_test.sh` — thiếu `actionlint`/`shellcheck`
+      thì bộ test tự hạ xuống 95/114 và VẪN in xanh ở phần còn lại. Nền hiện tại: 116/116.
+  (7) Mỗi phản chứng trong bảng của đặc tả phải thành MỘT ca `tNN`, không phải một câu trong PR.
+      Kho có bài học: nghĩ ra được phép thử mà không chạy thì phép thử ấy KHÔNG TỒN TẠI.

@@ -223,3 +223,92 @@ leased_at_utc: '2026-08-28T08:00:00Z'
 lease_expires_at_utc: '2026-08-29T08:00:00Z'
 run_minutes: 1440
 posted_comment_id: 5449933780   # workflow ghi, ĐỪNG sửa tay
+
+LANDED:
+  merged_at_utc: '2026-08-28T08:57:04Z'
+  merge_commit: 58b85cc293a749dde26991aae5695fd1181ac43a
+  pr: 371
+  reviewed_sha: 245905e22b7eea2c691e3b10e9b2c91e77d3f611
+  target: master
+
+  moc_thoi_gian_DO_CHU_KHONG_DOAN: >-
+    `08:57:04Z` đo bằng `git show -s --format=%cI origin/master` sau khi fetch, KHÔNG phải giờ
+    phiên điều phối tự nghĩ ra. Đây là chốt sinh ra từ chính lỗi của phiên này ở ba lease trước
+    (`DINH_CHINH_MOC_THOI_GIAN`): đoán mốc merge thành giờ TƯƠNG LAI rồi mới đo lại.
+
+  CROSS_REVIEW:
+    reviewer_provider: claude
+    executor_provider: codex
+    cross_provider: true
+    luot: 2
+    verdict: approved
+    P1: 0
+    P2: 2
+    verdict_path: ops/reviews/d9-doi-cach-dem-review-2-claude-verdict.md
+    verdict_sha256: 1d73a16e3ffeaf97bae229fc5b98987eefea62a681dad83df010789bbb940a97
+    verdict_bytes: 21124
+    luot_1_path: ops/reviews/d9-doi-cach-dem-review-1-claude-verdict.md
+    luot_1_verdict: changes_requested
+    VI_SAO_PHAI_CO_LUOT_2: >-
+      Lượt 1 trả P1. Bên bị bắt lỗi KHÔNG được tự tuyên là đã sửa xong — nếu phiên điều phối tự
+      xác nhận P1 đã đóng rồi land, thì cái đóng lại chính P1 ấy lại do bên đã gây ra nó phán.
+      Lượt 2 đo lại cả ba finding của lượt 1 ở CẢ HAI đầu (`27fb9de2` và `245905e`), không nhận
+      thông điệp commit / thân PR / lease làm bằng chứng.
+    luat_dung_LAND: >-
+      Chỉ P1 chặn land. P1 = 0 ⇒ land được, với điều kiện MỌI P2 thành nợ CÓ TÊN — hai nợ ở dưới.
+      Không P2 nào bị nâng lên P1 để giữ packet mở; không P1 nào bị hạ xuống P2 để land.
+
+  NO_CO_TEN:
+  - AG-369-P2-01-spec-chep-cung-so-779-thay-vi-tro-truong
+  - AG-369-P2-02-granted-on-instruction-bon-lan-trich-cung-mot-cau
+  no_ghi_chu: >-
+    Cả HAI nợ đều thuộc về phiên điều phối / kho, KHÔNG thuộc về executor.
+    `AG-369-P2-01`: dòng `D9` mới chép thẳng literal `779` vào đặc tả — đúng anti-pattern mà BẢN
+    GỐC của chính dòng ấy cảnh báo ("đặc tả trỏ sang trường có thẩm quyền thay vì chép lại nó";
+    r1 ghi ≤750 rồi lease nâng 1000). Spec và mã HIỆN ĐANG khớp (đã đo), nên là rủi ro trôi tương
+    lai chứ không phải lỗi hiện hành. Không có trường lease CÓ CẤU TRÚC nào giữ `779` để trỏ tới —
+    muốn đóng nợ này phải tạo ra trường ấy trước, việc đó ngoài write set của #369.
+    `AG-369-P2-02`: bốn revision r1..r4 ghi `granted_on_instruction` giống hệt nhau từng chữ, trích
+    câu chỉ thị về QUYẾT ĐỊNH ĐẾM ("chọn phương án b cho D9"), không nhắc gì tới việc mở write set
+    ở r4 — một quyết định RIÊNG, phát sinh SAU. Người audit chỉ đọc bốn tệp lease không phân biệt
+    được "chủ kho duyệt CỤ THỂ việc mở rộng" với "phiên ghi lease tự suy ra uỷ quyền gốc đủ rộng".
+    Sửa từ lease KẾ TIẾP trở đi, không sửa ngược bốn tệp đã đăng (sửa ngược sẽ xoá đúng dấu vết mà
+    nợ này nói tới).
+
+  SAU_CO_TROI_5_1_DA_DO:
+  - '1 xung đột: KHÔNG — merge chạy sạch, merge_commit 58b85cc2'
+  - '2 DRIFT ∩ write set: RỖNG — master đi từ 27fb9de2 tới d4b3045a chạm 5 tệp (duyet_danh_tinh.py, duyet_danh_tinh_test.py, duyet-khac-danh-tinh.yml, duyet-phan-chung.yml, RUNBOOK_TACH_DANH_TINH_GITHUB.md); không tệp nào giao với 2 đường của write set'
+  - '3 artefact phái sinh: PR không chạm RELEASE_MANIFEST.json / golden'
+  - '4 ratchet: `_c291_docs_ngoai_goi` chỉ đếm `docs/**/*.md`; PR thêm 0 tệp docs. `.claude/**` nằm trong `_RELEASE_EXCLUDE_DIRS`; `ops/specs/**` không ratchet nào đếm'
+  - '5 tệp nhập: không có'
+  - '6 workflow/hook: PR KHÔNG chạm — NHƯNG master CÓ chạm (hai workflow duyet-*.yml ở trên). Cò 6 nổ theo chiều NGƯỢC: định nghĩa cổng đổi dưới chân packet. Phải chạy lại gate trên master sau merge — xem KHONG_DO_DUOC bên dưới'
+
+  KHONG_DO_DUOC:
+    gate_github_actions: >-
+      API GitHub Actions bị chặn ở tầng tổ chức trong phiên này: `GET /repos/.../actions/runs` trả
+      403 "GitHub access is not enabled for this session", máy chủ MCP `github` khả dụng nhưng
+      KHÔNG có công cụ `actions_*` nào (44 công cụ, không cái nào đọc được lượt chạy). Connector
+      từng dùng để đọc gate ở các packet trước nay đòi cấp quyền lại, và phiên này không tương tác
+      được để chạy luồng OAuth. Reviewer đo độc lập cũng ra cùng kết luận (`/pulls/371` ⇒ 403 trong
+      khi `/rate_limit` ⇒ 200 — chặn theo ĐƯỜNG DẪN, không theo token).
+      Vì thế MÀU CỦA GATE cho `245905e` và cho master sau merge đều KHÔNG ĐO ĐƯỢC. Phiên điều phối
+      KHÔNG khai chúng là xanh và KHÔNG suy ra từ `mergeable_state`.
+    da_do_thay_the: >-
+      Bù lại bằng phép đo tại chỗ: reviewer tự chạy bộ test của write set và đo `rc` bằng `$?` ngay
+      sau lời gọi trần — `CA 42/42`, `ĐỘT BIẾN 54/54`, `D8(a)(b)(c) ĐẠT`, `rc=0`; `D9 = 761/779`
+      đếm lại độc lập; `D13` quét đủ 54 mục. Đây KHÔNG phải gate, và không được coi là gate.
+    dau_hieu_gian_tiep_KHONG_dung_lam_bang_chung: >-
+      `mergeable_state` của PR #371 là `unstable` còn của #370 là `blocked`. Suy ra từ đó rằng
+      "cổng bắt buộc của #371 đã xanh" là một SUY LUẬN, không phải phép đo — ghi ở đây đúng như
+      thế, không nâng nó lên thành khẳng định.
+
+  SO_SACH_10_2:
+    merged: 'ĐÚNG — PR #371, merge_commit 58b85cc2, đo bằng git sau khi fetch'
+    integrated: 'ĐÚNG — origin/master:ops/specs/mcp-gh-cuu-ho.md dòng 202 mang văn bản mới; origin/master:.claude/dev/mcp_gh_test.py có đúng 1 dòng chứa "chú thích"'
+    landed: 'ĐÚNG — khối này; hai nợ P2 có tên ở trên'
+    complete: 'CHƯA — Issue #369 và nhánh codex/d9-doi-cach-dem-exec-1 xử lý ngay sau khối này; hai nợ P2 vẫn MỞ theo đúng nghĩa nợ'
+    gate_sau_merge: 'KHÔNG ĐO ĐƯỢC — xem KHONG_DO_DUOC ở trên; đây là mục sổ sách CÒN HỞ, khai thẳng thay vì bỏ trống'
+
+  DONG_LEASE: >-
+    Lease r4 đóng tại đây. r1, r2, r3 đã mang `da_bi_thay_the` theo đúng `_kiem_thay_the` của
+    `ops/lease_publish.py`.

@@ -150,3 +150,18 @@ nen_do_truoc_khi_bat_dau: >-
   `t63`). `actionlint` = `rc=1`, ĐÚNG 1 finding `ops-don-ref.yml:106 SC1003:info` — ĐỎ SẴN,
   delta = 0; số finding tăng mới là hồi quy. `git config core.abbrev 7` trước khi chạy cổng.
 posted_comment_id: 5449345328   # workflow ghi, ĐỪNG sửa tay
+
+# ===================== KHAI TỬ (§3.2) =====================
+# Cross-review `claude` trả `blocked` (2×P1) trên `3151371d42557448750ca8b82e5597823c898881`.
+# CẢ HAI P1 thuộc ĐẶC TẢ r2, không thuộc executor — r2 đòi "schema từ chối reviewed_sha sai"
+# trong khi cấp write set BA đường dẫn không chứa nổi điểm cưỡng chế; executor ĐÚNG khi dừng
+# ở `S1`. Người giữ kho quyết hướng (i): mở write set cho validator XUẤT XƯỞNG.
+#
+# Đặc tả đi bản sửa đổi 3 (`2ef1fad4fd4519d95ffdd8a113f6795d93d625e4be0963ba41db22047108d6e7`)
+# với write set BỐN đường dẫn. §3.2: đổi write set "tạo revision mới VÀ LÀM LEASE CŨ MẤT HIỆU
+# LỰC" — nên lease này được khai tử TƯỜNG MINH, không để sống song song với r3.
+#
+# Hiện vật của lượt này GIỮ NGUYÊN: commit `3151371d` trên nhánh
+# `codex/w1-p1-van-chuyen-prompt-exec-1`, PR #381. `launcher.py` và schema RA khỏi write set
+# r3; thay đổi đã commit không bị hoàn tác.
+da_bi_thay_the: w1-p1-van-chuyen-prompt-exec-2-codex-20260828

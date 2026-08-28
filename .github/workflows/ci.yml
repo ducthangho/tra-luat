@@ -110,6 +110,10 @@ jobs:
         run: python .claude/dev/codex_cred_test.py
       - name: packet-loop selftest
         run: python .claude/dev/packet_loop_test.py
+      # Sổ ở ci_dang_ky_test.py được đối chiếu với phép tìm tệp trên cây. Các tệp dưới
+      # ops/reviews/** là hiện vật review bất biến, không phải mã sống để CI chạy.
+      - name: test registry (phạm vi + các bộ chưa được nối)
+        run: python .claude/dev/ci_dang_ky_test.py --chay
       # HOP DONG IDIOM BA TEN (packet #345, ke nhiem #337). Cung doctrine voi hai buoc
       # duoi: guard khong noi vao duong TU DONG thi guard chi la tai lieu (bai hoc r225).
       # Bo phan chung cua #337 song o thu muc tam, ngoai kho, khong cong => se chet theo

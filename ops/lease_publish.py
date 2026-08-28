@@ -592,6 +592,33 @@ def _bia_mo_doi_xung(lease: dict, cac_lease: list[dict]) -> bool | None:
     return False
 
 
+def _thu_hoi_hop_le(lease: dict, goc: Path) -> bool:
+    """Xác minh thu hồi bằng một commit đã đi vào ``master``; không nhận lời khai."""
+    if "da_thu_hoi" not in lease:
+        return False
+    if lease.get("da_thu_hoi") is not True:
+        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: da_thu_hoi phải đúng boolean true")
+    ly_do = lease.get("thu_hoi_ly_do")
+    sha = lease.get("thu_hoi_bang_chung")
+    if not isinstance(ly_do, str) or not ly_do.strip():
+        raise Chan(RC_KHONG_XAC_DINH, "KHÔNG_XÁC_ĐỊNH: lease khai da_thu_hoi nhưng thiếu thu_hoi_ly_do")
+    if not isinstance(sha, str) or not SHA40.fullmatch(sha.strip()):
+        raise Chan(RC_KHONG_XAC_DINH,
+                   "KHÔNG_XÁC_ĐỊNH: lease khai da_thu_hoi nhưng thiếu thu_hoi_bang_chung là SHA đầy đủ")
+    sha = sha.strip()
+    ton_tai = GOI_GIT("cat-file", "-e", f"{sha}^{{commit}}", cwd=goc)
+    if ton_tai.returncode != 0:
+        raise Chan(RC_KHONG_XAC_DINH, f"KHÔNG_XÁC_ĐỊNH: SHA thu hồi không tồn tại: {sha}")
+    to_tien = GOI_GIT("merge-base", "--is-ancestor", sha, "master", cwd=goc)
+    if to_tien.returncode == 0:
+        return True
+    if to_tien.returncode == 1:
+        raise Chan(RC_KHONG_XAC_DINH,
+                   f"KHÔNG_XÁC_ĐỊNH: SHA thu hồi có thật nhưng chưa là tổ tiên của master: {sha}")
+    raise Chan(RC_KHONG_XAC_DINH,
+               f"KHÔNG_XÁC_ĐỊNH: không đo được quan hệ SHA thu hồi với master: rc={to_tien.returncode}")
+
+
 def _kiem_bia_mo(lease: dict, tep, goc=None) -> None:
     """Lease mới chỉ được thay mọi X sau khi từng X trỏ ngược đúng lease mới."""
     thay_the_cho = _danh_sach_thay_the_cho(lease.get("thay_the_cho"))
@@ -933,6 +960,31 @@ def _ghi_comment_id(duong_dan: str, comment_id: int) -> None:
     p.write_text(noi_dung, encoding="utf-8")
 
 
+def _ghi_truong_thu_hoi(duong_dan: str, ly_do: str, sha: str) -> None:
+    """Thay top-level key tại chỗ, giữ nguyên thứ tự và chú thích của phần còn lại."""
+    p = Path(duong_dan)
+    dong = p.read_text(encoding="utf-8").splitlines(keepends=True)
+    gia_tri = {"da_thu_hoi": "true", "thu_hoi_ly_do": json.dumps(ly_do, ensure_ascii=False),
+               "thu_hoi_bang_chung": sha}
+    da_gap, ket_qua = set(), []
+    mau = re.compile(r"^(da_thu_hoi|thu_hoi_ly_do|thu_hoi_bang_chung)\s*:")
+    for raw in dong:
+        m = mau.match(raw)
+        if not m:
+            ket_qua.append(raw)
+            continue
+        khoa = m.group(1)
+        if khoa not in da_gap:
+            ket_qua.append(f"{khoa}: {gia_tri[khoa]}\n")
+            da_gap.add(khoa)
+    if ket_qua and not ket_qua[-1].endswith("\n"):
+        ket_qua[-1] += "\n"
+    for khoa in ("da_thu_hoi", "thu_hoi_ly_do", "thu_hoi_bang_chung"):
+        if khoa not in da_gap:
+            ket_qua.append(f"{khoa}: {gia_tri[khoa]}\n")
+    p.write_text("".join(ket_qua), encoding="utf-8")
+
+
 def lenh_check(a) -> int:
     lease, neo = kiem(_doc_yaml(a.tep), a.tep, getattr(a, "goc", None))
     print("LỆNH check KHÔNG CHẠY hai lớp GitHub: đo ISSUE/PR và dò comment; dùng `kiem-github`")
@@ -962,6 +1014,20 @@ def lenh_mark(a) -> int:
     return RC_OK
 
 
+def lenh_thu_hoi(a) -> int:
+    lease = _doc_yaml(a.tep)
+    if "da_thu_hoi" in lease:
+        raise Chan(RC_DA_DANG, "lease đã có trường da_thu_hoi — không thu hồi lần hai")
+    sha = a.bang_chung.strip()
+    ung_vien = dict(lease, da_thu_hoi=True, thu_hoi_ly_do=a.ly_do,
+                    thu_hoi_bang_chung=sha)
+    root = Path(a.goc or ".").resolve()
+    _thu_hoi_hop_le(ung_vien, root)
+    _ghi_truong_thu_hoi(a.tep, a.ly_do, sha)
+    print(f"đã thu hồi {lease.get('lease_id', '<thiếu lease_id>')} bằng merge {sha}")
+    return RC_OK
+
+
 def lenh_ai_dang_giu(a) -> int:
     root = Path(a.goc or ".").resolve()
     print("PHẠM_VI: quét refs/heads/*; nhánh cục bộ tụt sau origin/<cùng tên> sẽ bị CHẶN")
@@ -973,16 +1039,19 @@ def lenh_ai_dang_giu(a) -> int:
             continue
         trang_thai = _phan_loai_lease(lease)
         lease_id = str(lease.get("lease_id") or "<thiếu lease_id>")
-        bia_mo = (_bia_mo_doi_xung(lease, cac_lease)
-                  if trang_thai == "CÒN_HẠN" else None)
+        can_kiem_thu_hoi = trang_thai == "CÒN_HẠN" and "da_thu_hoi" in lease
+        da_thu_hoi = _thu_hoi_hop_le(lease, root) if can_kiem_thu_hoi else False
+        bia_mo_tho = (_bia_mo_doi_xung(lease, cac_lease)
+                       if trang_thai == "CÒN_HẠN" else None)
+        bia_mo = None if da_thu_hoi else bia_mo_tho
         if bia_mo is False:
             raise Chan(
                 RC_KHONG_XAC_DINH,
                 f"KHÔNG_XÁC_ĐỊNH: bia mộ một chiều {lease_id!r} -> "
                 f"{lease.get('da_bi_thay_the')!r} tại {muc['ref']}:{muc['path']}; "
                 "không tìm thấy lease thay thế trỏ ngược bằng thay_the_cho")
-        da_chet = bia_mo is True
-        nhan = " · ĐÃ_BỊ_THAY_THẾ" if da_chet else ""
+        da_chet = bia_mo is True or da_thu_hoi
+        nhan = " · ĐÃ_THU_HỒI" if da_thu_hoi else " · ĐÃ_BỊ_THAY_THẾ" if bia_mo is True else ""
         print(f"{trang_thai}{nhan}\t{lease_id}\t{muc['ref']}:{muc['path']}")
         if trang_thai == "CÒN_HẠN" and not da_chet:
             nguoi_giu[lease_id] = None
@@ -1036,6 +1105,12 @@ def main(argv=None) -> int:
     q.add_argument("tep")
     q.add_argument("--comment-id", type=int, required=True)
     q.set_defaults(fn=lenh_mark)
+    q = sub.add_parser("thu-hoi", help="thu hồi lease bằng SHA merge đã vào master")
+    q.add_argument("tep")
+    q.add_argument("--ly-do", required=True)
+    q.add_argument("--bang-chung", required=True, help="SHA merge đầy đủ")
+    q.add_argument("--root", dest="goc", default=".")
+    q.set_defaults(fn=lenh_thu_hoi)
     q = sub.add_parser("ai-dang-giu", help="quét toàn kho xem ai đang giữ một đường dẫn")
     q.add_argument("duong_dan")
     q.add_argument("--root", dest="goc", default=".")

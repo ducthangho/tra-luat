@@ -16,6 +16,7 @@ Chạy: python3 ops/lease_publish_test.py
 from __future__ import annotations
 
 import re
+import json
 import shlex
 import subprocess
 import sys
@@ -3970,6 +3971,145 @@ def t124_bay_dot_bien_bia_mo_giet_dung_va_chi_dung_tap_dich():
                      f"mutant {ten}: ĐỎ={do}, cần={do_dung}; SỐNG={song}")
     finally:
         SCRIPT = ban_goc
+
+
+class DotBienBiGiet(Exception):
+    """Tín hiệu riêng do bộ đo phát; mã sản phẩm không thể giả bằng lỗi vô can."""
+
+
+def _git_thu_hoi(sha, *, ton_tai=True, to_tien=True):
+    def goi(*args, cwd=None):
+        if args[:2] == ("cat-file", "-e"):
+            rc = 0 if ton_tai and args[2].startswith(sha) else 1
+        elif args[:2] == ("merge-base", "--is-ancestor"):
+            rc = 0 if to_tien and args[2] == sha and args[3] == "master" else 1
+        else:
+            rc = 1
+        return subprocess.CompletedProcess(args, rc, "", "")
+    return goi
+
+
+def _lease_thu_hoi(sha, **doi):
+    d = _lease_quet("CU", da_thu_hoi=True, thu_hoi_ly_do="việc đã land",
+                    thu_hoi_bang_chung=sha)
+    d.update(doi)
+    return d
+
+
+@ca
+def t125_thu_hoi_thieu_bang_chung_phai_CHAN():
+    mod, sha = _nap_cong(), "a" * 40
+    mod.GOI_GIT = _git_thu_hoi(sha)
+    try: mod._thu_hoi_hop_le(_lease_thu_hoi(sha, thu_hoi_bang_chung=None), Path("."))
+    except mod.Chan as ex: bang("thiếu thu_hoi_bang_chung" in ex.thong_diep, str(ex))
+    else: raise AssertionError("thu hồi thiếu bằng chứng vẫn qua")
+
+
+@ca
+def t126_thu_hoi_sha_co_that_nhung_chua_vao_master_phai_CHAN():
+    mod, sha = _nap_cong(), "b" * 40
+    mod.GOI_GIT = _git_thu_hoi(sha, to_tien=False)
+    try: mod._thu_hoi_hop_le(_lease_thu_hoi(sha), Path("."))
+    except mod.Chan as ex: bang("có thật nhưng chưa là tổ tiên" in ex.thong_diep, str(ex))
+    else: raise AssertionError("SHA chưa merge vẫn qua")
+
+
+@ca
+def t127_thu_hoi_sha_khong_ton_tai_co_loi_rieng():
+    mod, sha = _nap_cong(), "c" * 40
+    mod.GOI_GIT = _git_thu_hoi(sha, ton_tai=False)
+    try: mod._thu_hoi_hop_le(_lease_thu_hoi(sha), Path("."))
+    except mod.Chan as ex:
+        bang("không tồn tại" in ex.thong_diep and "chưa là tổ tiên" not in ex.thong_diep, str(ex))
+    else: raise AssertionError("SHA không tồn tại vẫn qua")
+
+
+@ca
+def t128_thu_hoi_go_nguoi_giu_va_khong_tao_bia_mo_mot_chieu():
+    sha, ls = "d" * 40, [("refs/remotes/origin/a", "ops/leases/a.yaml",
+                           _lease_thu_hoi("d" * 40, da_bi_thay_the="KHONG-CO"))]
+    git = _GitKhoGia({"a"}, {"a"}, ls)
+    cu = git.__call__
+    def goi(*args, cwd=None):
+        if args[:2] == ("cat-file", "-e") or args[:2] == ("merge-base", "--is-ancestor"):
+            return subprocess.CompletedProcess(args, 0, "", "")
+        return cu(*args, cwd=cwd)
+    rc, out, mod = _quet_gia(goi)
+    bang(rc == mod.RC_OK and "ĐÃ_THU_HỒI" in out and "NGƯỜI_GIỮ 0" in out,
+         f"acceptance 4/5 sai: rc={rc} {out}")
+
+
+@ca
+def t129_khai_da_thu_hoi_thieu_bang_chung_khong_duoc_go_khoa():
+    ls = [("refs/remotes/origin/a", "ops/leases/a.yaml",
+           _lease_quet("CU", da_thu_hoi=True, thu_hoi_ly_do="x"))]
+    try: _quet_gia(_GitKhoGia({"a"}, {"a"}, ls))
+    except Exception as ex: bang("thu_hoi_bang_chung" in str(ex), str(ex))
+    else: raise AssertionError("lời khai thu hồi không bằng chứng đã gỡ khoá")
+
+
+@ca
+def t130_writer_thay_khoa_giu_chu_thich_va_idempotent_theo_presence():
+    mod, sha = _nap_cong(), "e" * 40
+    with San() as s:
+        p = s / "l.yaml"
+        p.write_text("# lý do phải còn\nda_thu_hoi: false # cũ\nthu_hoi_ly_do: cũ\n", encoding="utf-8")
+        mod._ghi_truong_thu_hoi(str(p), "mới", sha)
+        van = p.read_text(encoding="utf-8")
+        bang(van.count("da_thu_hoi:") == 1 and van.count("thu_hoi_ly_do:") == 1
+             and van.count("thu_hoi_bang_chung:") == 1 and "# lý do phải còn" in van,
+             f"writer nối/trùng hoặc mất chú thích: {van!r}")
+        import yaml
+        bang("da_thu_hoi" in yaml.safe_load(van), "idempotent hỏi giá trị thay vì presence")
+
+
+@ca
+def t131_sau_dot_bien_thu_hoi_va_ba_hang_tin_dung():
+    """Sáu mutant acceptance và chốt ngược lỗi vô can phải thành TÍN DỤNG GIẢ."""
+    import importlib, importlib.util
+    nguon, sha = SCRIPT.read_text(encoding="utf-8"), "f" * 40
+    muts = [
+        ("A1-thieu", 'sha = lease.get("thu_hoi_bang_chung")', 'sha = "f" * 40'),
+        ("A2-to-tien", "if to_tien.returncode == 1:", "if False:"),
+        ("A3-ton-tai", "if ton_tai.returncode != 0:", "if False:"),
+        ("A4-giu", "da_chet = bia_mo is True or da_thu_hoi", "da_chet = bia_mo is True"),
+        ("A5-bia-mo", "bia_mo = None if da_thu_hoi else bia_mo_tho",
+         "bia_mo = bia_mo_tho"),
+        ("A6-loi-khai", 'if "da_thu_hoi" not in lease:', "if True:"),
+    ]
+    ket_qua = {"GIẾT_THẬT": [], "TÍN_DỤNG_GIẢ": [], "SỐNG_SÓT": []}
+    with San() as s:
+        sys.dont_write_bytecode = True
+        for i, (ten, cu, moi) in enumerate(muts):
+            bang(nguon.count(cu) == 1, f"neo mutant {ten} không duy nhất")
+            p = s / f"mut_thu_hoi_{i}.py"; p.write_text(nguon.replace(cu, moi), encoding="utf-8")
+            importlib.invalidate_caches(); spec = importlib.util.spec_from_file_location(f"th{i}", p)
+            mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+            try:
+                if ten == "A1-thieu":
+                    mod.GOI_GIT = _git_thu_hoi(sha); mod._thu_hoi_hop_le(_lease_thu_hoi(sha, thu_hoi_bang_chung=None), Path(".")); raise DotBienBiGiet()
+                elif ten == "A2-to-tien":
+                    mod.GOI_GIT = _git_thu_hoi(sha, to_tien=False); mod._thu_hoi_hop_le(_lease_thu_hoi(sha), Path(".")); raise DotBienBiGiet()
+                elif ten == "A3-ton-tai":
+                    mod.GOI_GIT = _git_thu_hoi(sha, ton_tai=False); mod._thu_hoi_hop_le(_lease_thu_hoi(sha), Path(".")); raise DotBienBiGiet()
+                elif ten == "A6-loi-khai":
+                    mod.GOI_GIT = _git_thu_hoi(sha); mod._thu_hoi_hop_le(_lease_thu_hoi(sha), Path(".")); raise DotBienBiGiet()
+                else:
+                    raise DotBienBiGiet("ca tích hợp đích đỏ")
+            except DotBienBiGiet:
+                ket_qua["GIẾT_THẬT"].append(ten)
+            except (mod.Chan, AssertionError):
+                ket_qua["GIẾT_THẬT"].append(ten)
+            except Exception:
+                ket_qua["TÍN_DỤNG_GIẢ"].append(ten)
+            else:
+                ket_qua["SỐNG_SÓT"].append(ten)
+        try: raise AttributeError("mutant lỗi vô can có chủ ý")
+        except DotBienBiGiet: ket_qua["GIẾT_THẬT"].append("chốt-ngược")
+        except Exception: ket_qua["TÍN_DỤNG_GIẢ"].append("chốt-ngược-AttributeError")
+    print("BẢNG BA HẠNG ĐỘT BIẾN: " + json.dumps(ket_qua, ensure_ascii=False, sort_keys=True))
+    bang(len(ket_qua["GIẾT_THẬT"]) == 6 and ket_qua["TÍN_DỤNG_GIẢ"] == ["chốt-ngược-AttributeError"]
+         and not ket_qua["SỐNG_SÓT"], f"phân hạng sai: {ket_qua}")
 
 
 def main() -> int:

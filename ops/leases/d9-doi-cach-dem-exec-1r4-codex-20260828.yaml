@@ -220,7 +220,7 @@ recorder_ghi_chu: >-
   viết bản vá — chỉ đo, soạn hồ sơ, mở Issue và cấp lease.
 
 leased_at_utc: '2026-08-28T08:00:00Z'
-lease_expires_at_utc: '2026-08-29T08:00:00Z'
+lease_expires_at_utc: '2026-08-28T09:00:00Z'   # HẠ SỚM — xem DONG_LEASE_SOM
 run_minutes: 1440
 posted_comment_id: 5449933780   # workflow ghi, ĐỪNG sửa tay
 
@@ -312,3 +312,27 @@ LANDED:
   DONG_LEASE: >-
     Lease r4 đóng tại đây. r1, r2, r3 đã mang `da_bi_thay_the` theo đúng `_kiem_thay_the` của
     `ops/lease_publish.py`.
+
+# ------------------------- ĐÓNG LEASE SỚM -------------------------
+DONG_LEASE_SOM:
+  dong_luc_utc: '2026-08-28T10:55:00Z'
+  moc_ha_xuong: '2026-08-28T09:00:00Z'
+  ly_do: >-
+    Packet #369 ĐÃ LAND lúc `08:57:04Z` (merge `58b85cc2`) nhưng lease vẫn còn hạn tới `2026-08-29`,
+    tức nó giữ hai đường của write set thêm gần một ngày một cách vô ích. Phép đo `ai-dang-giu` khi
+    chuẩn bị cấp lease cho #382 phơi ra đúng chuyện này: cả `.claude/dev/mcp_gh_test.py` lẫn
+    `ops/specs/mcp-gh-cuu-ho.md` đều trả `NGƯỜI_GIỮ 1: d9-doi-cach-dem-exec-1r4`.
+    Đây là nợ CÓ TÊN `AG-T0-01B-thu-hoi-lease-chua-co-duong`, và Issue #385 mở ra chính vì nó: kho
+    KHÔNG có lệnh thu hồi lease, nên cách DUY NHẤT là hạ `lease_expires_at_utc` xuống mốc ĐÃ QUA.
+  chot_moc_phai_o_QUA_KHU: >-
+    Mốc hạ xuống (`09:00:00Z`) ở QUÁ KHỨ so với lúc ghi (`10:55Z`) và SAU thời điểm packet land
+    (`08:57:04Z`), nên nó đóng THẬT chứ không phải hình thức. Phiên này đã từng mắc lỗi hạ xuống
+    một mốc TƯƠNG LAI khi đóng lease #318 — lease vẫn còn hiệu lực và việc đóng chỉ là chữ nghĩa.
+  do_lai_sau_khi_dong: >-
+    Chạy lại `ai-dang-giu` trên CẢ HAI đường và xác nhận `NGƯỜI_GIỮ` giảm về 0 — kết quả ghi trong
+    lease #382 mục `write_set_da_do_truoc_khi_cap`.
+  khong_dung_da_bi_thay_the_de_dong: >-
+    CỐ Ý không mượn `da_bi_thay_the` làm đường thu hồi. Issue #372 vừa đo được rằng trường ấy hạ
+    `NGƯỜI_GIỮ` xuống 0 mà KHÔNG ai xác nhận cái tên nó trỏ tới — mượn nó ở đây là dùng đúng cái lỗ
+    kho đang định vá, và làm hồ sơ nói một điều KHÔNG ĐÚNG (lease này không bị lease nào thay thế;
+    nó hết việc).

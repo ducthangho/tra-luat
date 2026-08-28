@@ -41,6 +41,57 @@ Làm bước này ở ĐẦU phiên, không phải lúc sắp review: phát hi�
 chính mình — thứ §8 không cho. (Khi cả Claude lẫn Codex hết quota, xem hướng dẫn
 Antigravity Reviewer lane trong `AGENTS.md` theo cơ chế `same_provider_approved`.)
 
+## Chọn model/effort theo độ phức tạp
+
+| điểm | model | effort |
+|---:|---|---|
+| `<= 0` | `claude-opus-5` | `high` |
+| `1–2` | `claude-opus-5` | `xhigh` |
+| `3–4` | `claude-fable-5` | `xhigh` |
+| `>= 5` | `claude-fable-5` | `max` |
+
+Giữa các lượt của cùng packet, truyền bậc lượt trước bằng `--bac-truoc model,effort` (lượt 1 bỏ cờ): bánh cóc chỉ cho giữ hoặc tăng bậc, không bao giờ cho tụt khi diff còn lại nhỏ đi.
+
+Ba bẫy CLI đã đo 27-08-2026, không phải giả định:
+
+- `--effort khong-ton-tai` chỉ cảnh báo rồi lùi im lặng về mặc định; kết quả không ghi đã lùi.
+- `--model claude-khong-ton-tai-9` không chạy review nào nhưng vẫn trả `rc=0`.
+- Trong 9 lượt, `haiku-4-5` có 8/9, `fable-5` 6/9, `opus-5` 3/9 và `opus-4-8` 2/9; cả hai lượt `opus-4-8` là lượt tụt giữa chừng thật.
+  **`rc` và `subtype` cùng nói dối**. Danh tính mỗi mục là `canonicalModel` nếu có, ngược lại là tên khoá; bỏ qua danh tính mang tiền tố phụ `claude-haiku-`, rồi đòi tập danh tính chính bằng đúng `{model yêu cầu}`. Model yêu cầu vắng và model lạ có mặt là hai nhánh lỗi riêng. Không được đòi model phụ có mặt.
+
+Giới hạn đã biết: phép so tập chỉ hỏi model phụ **có mặt**, không hỏi nó **làm gì**; `{fable-5: 500 outputTokens, haiku: 90000}` vẫn ĐẠT. Chưa ai đo phân bố share của model phụ, nên không đặt ngưỡng token ở lượt này; phải đếm trước khi bàn ngưỡng.
+
+Probe ngắn chỉ loại được ca *model hoàn toàn không gọi được*; nó không chứng nhận lượt dài sẽ giữ model. Đo 27-08: probe xanh 3/3 rồi lượt dài vẫn tụt hoàn toàn, nên luôn kiểm `modelUsage` **sau** lượt thật.
+
+Chọn bậc **trước khi phóng**:
+
+```bash
+PY="$(command -v python3 || command -v python || command -v py)"
+"$PY" .claude/dev/chon_reviewer.py --review-class sensitive \
+  --effective-review-class sensitive \
+  --duong-dan a.py,b.md --so-dong 120 --luot 2 \
+  --bac-truoc claude-fable-5,max --json
+```
+
+Nếu lease có `effective_review_class`, đút **cả hai** trường bằng `--review-class` và `--effective-review-class`; bộ chọn tự lấy lớp cao hơn, không lấy `max` bằng tay.
+
+Phóng Claude reviewer headless, cấp đúng công cụ cần để review, và giữ JSON nguyên vẹn:
+
+```bash
+claude --model <id> --effort <bac> --output-format json --allowedTools Bash Read Write Edit Glob Grep --permission-mode acceptEdits --add-dir <sandbox> -p "$(cat PROMPT.md)" > reviewer.json
+```
+
+Đo 27-08-2026: `-p "$(cat TEP)"` và `-p ... < TEP` đều chạy. Không dùng `--dangerously-skip-permissions`: dưới root nó báo *"cannot be used with root/sudo privileges for security reasons"* rồi thoát `rc=1` sau `1.151s`; dùng `--allowedTools` cùng `--permission-mode` như trên để phiên headless gọi được công cụ.
+
+Kiểm `modelUsage` **sau khi phóng**; lệnh gọi đúng vị từ fail-close dùng chung với CI:
+
+```bash
+PY="$(command -v python3 || command -v python || command -v py)"
+"$PY" -c 'import json,runpy,sys; m=runpy.run_path(".claude/dev/chon_reviewer.py"); print(m["kiem_ket_qua"](sys.argv[1],json.load(open(sys.argv[2],encoding="utf-8"))))' <id> reviewer.json
+```
+
+Mục này **KHÔNG thay** `docs/PROTOCOL_DA_PHIEN.md` §8; nó chỉ nói chọn bậc nào và cú pháp đo model thực sự đã chạy.
+
 ## Khi PAT là chính tài khoản tác giả PR
 
 `pull_request_review_write` với `event=REQUEST_CHANGES` sẽ bị GitHub từ chối:

@@ -152,3 +152,88 @@ ops/lease_publish_test.py                 rc=0    (chỉ lease HẾT_HẠN)
 
 **Packet này cấp lease được ngay.** Hai packet kia thì không — và việc 4 của packet này chính là
 thứ mở khoá cho chúng. Nên nếu chỉ chạy được một packet, **chạy packet này trước.**
+
+---
+
+# BẢN SỬA ĐỔI 2 — thu hẹp, và SỬA MỘT TIỀN ĐỀ SAI của bản 1
+
+Bản 1 (`sha256 28ce8e1e…`) đã đăng và **giữ nguyên làm hồ sơ**; bản này thay thế nó, không sửa lén.
+
+## Sửa tiền đề sai: nợ 1 KHÔNG nằm trong workflow
+
+Bản 1 xếp `.github/workflows/ops-publish-lease.yml` vào write set cho nợ 1, và chủ kho đã duyệt
+phóng packet với phạm vi ấy. **Đo lại thì sai.** Workflow chỉ **gọi**
+`python3 ops/lease_publish.py mark`. Phép nối dòng nằm ở **`ops/lease_publish.py:876`
+`_ghi_comment_id`**, và `:888` `p.write_text` là **chỗ DUY NHẤT trong toàn kho** ghi vào tệp lease.
+
+Cơ chế đầy đủ, chạy thật chứ không suy luận:
+
+```
+safe_load doc: posted_comment_id = None  ->  bool = False
+khoa CO MAT trong dict? True
+[chay _ghi_comment_id]  =>  tep co HAI dong posted_comment_id
+```
+
+Chốt idempotent `:775` hỏi `if lease.get("posted_comment_id"):`. Khoá **có mặt**, giá trị **rỗng**
+⇒ `None` ⇒ falsy ⇒ chốt không nổ ⇒ nối dòng thứ hai. Doctrine `None ≠ False` ở dạng thứ ba:
+**`None` ≠ VẮNG MẶT**.
+
+Nửa thứ hai của nợ này là của phiên điều phối: **8/8** tệp hỏng có placeholder rỗng ở dòng đầu, cả
+8 là lease phiên này viết (#348 r3–r6, #351 r5–r8). Quét `ops/`, `docs/`, `.github/`: không tài
+liệu nào bảo viết placeholder ấy. Nửa ấy **đã sửa, không tốn dòng mã** — thôi viết placeholder.
+
+**Hệ quả:** packet này KHÔNG có đường ghi khả dụng cho tới khi `ops/lease_publish.py` được nhả.
+Phóng với write set của bản 1 là giao cho executor một phạm vi không chứa chỗ phải sửa — đúng điều
+kiện dừng `S1`.
+
+## Nợ 4 (đường THU HỒI) — GỠ KHỎI PACKET NÀY, chuyển sang #385
+
+Phiên giữ #372 mở **Issue #385** cho việc ấy. Phiên này đã cam kết công khai ở #372: nếu họ mở
+Issue mới thì gỡ nợ 4 khỏi đây, để không có hai hồ sơ cho một việc. Điều kiện đã thoả.
+
+#385 phủ nó **đầy đủ hơn** bản 1: ba tuyến bằng chứng (21-08 đo 5 quyền ghi sống thừa; 28-08
+schema `thay_the_cho` một-chuỗi ép phiên W1-P1 phải viết bia mộ một chiều; phép đếm 6/7 là chuỗi
+revision), và đặt đúng câu mà bản 1 cho là quan trọng nhất — *"thu hồi phải ĐÒI BẰNG CHỨNG, không
+nhận LỜI KHAI"*, kèm nhận định *"một lệnh `thu-hoi` nhận lời khai thì tệ hơn không có lệnh"*.
+
+Nợ 4 **không còn là việc của packet này**. Đừng thi công nó ở đây.
+
+## Phạm vi còn lại — ba nợ, một đường ghi
+
+| nợ | ở đâu |
+|---|---|
+| 1 — `_ghi_comment_id` nối vô điều kiện + chốt idempotent hỏi sai câu | `ops/lease_publish.py` |
+| 2 — `lease_publish` đọc bằng `yaml.safe_load` nên mù khoá trùng (`:213`, `:529`) | `ops/lease_publish.py` |
+| 3 — `check` lỏng hơn giao thức; neo sha không ai đối chiếu | `ops/lease_publish.py` + test |
+
+Ba nợ, **một tệp**. Bản 1 đề nghị hoãn nợ 3; đề nghị ấy **rút lại** — khi cả ba đã cùng một đường
+ghi thì tách chúng chỉ tạo thêm hàng đợi, không giảm rủi ro.
+
+## write set (thay thế bản 1)
+
+- `ops/lease_publish.py`
+- `ops/lease_publish_test.py`
+
+`.github/workflows/ops-publish-lease.yml` **RA KHỎI** write set — không có gì để sửa ở đó.
+
+11 tệp trong `ops/leases/` vẫn chỉ vào write set nếu chọn `(A)`/`(C)` của câu hỏi thật ở bản 1, và
+khi ấy phải liệt kê đủ 11 đường. Lưu ý #385 đặt ràng buộc ngược lại cho packet của họ — *"KHÔNG mở
+write set sang `ops/leases/**` cùng lúc với việc sửa `ops/lease_publish.py`"* — và lý lẽ ấy áp
+dụng cho packet này y hệt. Cân nhắc lại trước khi gộp.
+
+## HÀNG ĐỢI — packet này đứng THỨ BA cho tệp của nó
+
+1. **#372 / PR #383** — đang cross-review, giữ `ops/lease_publish.py` tới `2026-08-29T09:00Z` hoặc
+   tới khi land.
+2. **#385** — khai thẳng *"Chờ #383 land trước"*; sẽ giữ tiếp cùng tệp.
+3. **packet này**.
+
+Đây là dữ kiện để chủ kho quyết, không phải lời than. Một hình dạng đáng cân nhắc: nợ 1 và 2 **có
+liên quan trực tiếp** tới #385 — #385 sẽ viết **bộ ghi thứ hai** vào tệp lease (`da_thu_hoi`), và
+tiền lệ duy nhất nó nhìn vào chính là `_ghi_comment_id` đang hỏng. Cảnh báo ấy đã gửi #385; việc
+có gộp hay không là của họ và chủ kho, packet này **không đòi**.
+
+## Câu hỏi thật của bản 1 — GIỮ NGUYÊN
+
+Câu hỏi về `(A)`/`(B)`/`(C)` cho 11 tệp đã đăng, và bẫy thứ tự *"sửa người ghi TRƯỚC, thay thế 11
+tệp SAU"*, **không đổi**. Bản sửa đổi này chỉ đổi write set và bỏ nợ 4.

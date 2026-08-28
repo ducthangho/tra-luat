@@ -237,3 +237,79 @@ có gộp hay không là của họ và chủ kho, packet này **không đòi**.
 
 Câu hỏi về `(A)`/`(B)`/`(C)` cho 11 tệp đã đăng, và bẫy thứ tự *"sửa người ghi TRƯỚC, thay thế 11
 tệp SAU"*, **không đổi**. Bản sửa đổi này chỉ đổi write set và bỏ nợ 4.
+
+---
+
+# BẢN SỬA ĐỔI 3 — nhận phép đo `spec_hash` từ Issue #377 (nay đóng vì trùng)
+
+Một phiên khác mở **#377** cho đúng phần `spec_hash` của nợ 3, rồi đóng vì trùng với packet này và
+chuyển phép đo sang. Nội dung ấy không nên chỉ sống trong một comment, nên gộp vào đây.
+
+## Phép đo — ĐÃ ĐO LẠI ĐỘC LẬP trên `d4b3045`
+
+| | #377 khai | phiên này đo lại | khớp? |
+|---|---:|---:|---|
+| lease trong `ops/leases/` | 74 | **74** | ✓ |
+| khai `spec_path` | 40 | **37 có giá trị + 3 `null` = 40 khoá** | ✓ (xem chú thích) |
+| có `spec_hash` | 2 | **2** | ✓ |
+| khai `spec_path: null` | 3 | **3** | ✓ |
+| **giao của hai tập** | **0** | **0** | ✓ |
+
+**Chú thích, đọc hẹp lại một dòng:** khối số của #377 liệt kê `40 / 2 / 3` liền nhau nên **dễ đọc
+thành một phân hoạch**. Ba tệp `spec_path: null` là **tập con** của 40, không phải hạng mục thứ ba
+cộng thêm. Số lease có `spec_path` **mang giá trị thật** là **37**. Kết luận không đổi.
+
+**Không một lease nào trên master vừa nêu đặc tả vừa đóng băng nó.** 37 lease trỏ vào một tệp đặc
+tả mà không gì ngăn tệp ấy bị sửa sau khi lease đã cấp; 2 lease (`wp55-r2-review-3/4`) mang băm
+**không neo vào tệp nào**; 3 lease (`plat-x5-exec-1*`) khai đặc tả là chữ `null` và cổng vẫn nhận.
+
+Cổng chưa bao giờ hỏi — đo lại và xác nhận:
+
+```
+$ grep -n 'spec_hash\|spec_path' ops/lease_publish.py
+(khong co ket qua)
+
+ops/lease_publish.py:108
+BAT_BUOC = ("packet_issue", "lease_id", "granted_by",
+            "lease_expires_at_utc", "reviewed_sha_required")
+```
+
+`0/37` không phải kỷ luật kém. Đó là **hình dạng chuẩn của một điều khoản không có ai kiểm** — cùng
+họ với `review_rounds_used` (chưa từng tồn tại trong tệp `.py` nào) và với `so-canon` của ADR-0043.
+
+## Sáu chốt cho nợ 3, phần `spec_hash`
+
+1. Có `spec_path` mà thiếu `spec_hash` ⇒ CHẶN.
+2. Có `spec_hash` mà thiếu `spec_path` ⇒ CHẶN.
+3. `spec_path` là `null` / `~` / rỗng / chỉ khoảng trắng ⇒ CHẶN.
+4. Có cả hai ⇒ đọc tệp tại `spec_path` **TỪ REF, KHÔNG từ cây làm việc**, băm sha256, so. Lệch ⇒
+   CHẶN, thông điệp nêu **cả hai** băm.
+5. `spec_path` trỏ ra ngoài kho, hoặc không tồn tại tại REF ⇒ CHẶN, **mã phân biệt được với (4)**.
+6. `spec_hash` không phải 64 hex thường ⇒ CHẶN. `SHA256` regex đã có sẵn ở `ops/lease_publish.py:118`.
+
+## Chốt (4) là chỗ dễ sai nhất — ĐỌC TỪ REF
+
+Kho đã trả giá đúng chỗ này ba lần trong chuỗi `#347` → `#359` → `#378`: `check` đọc từ **REF**,
+nên một tệp vừa sửa trong cây làm việc mà chưa commit thì cổng **không thấy**. Ngày 28-08, cấp
+lease `r2` cho `#378` bị chặn đúng vì lý do ấy.
+
+Một bản cài đặt đọc `Path(spec_path).read_bytes()` sẽ **xanh trên máy người cấp lease và đỏ trên
+CI** — hoặc tệ hơn: xanh ở cả hai trong khi băm chứng nhận một thứ **không có trong lịch sử**.
+
+**Phản chứng bắt buộc, một ca `tNN`:** sửa tệp đặc tả trong cây làm việc **mà không commit**, rồi
+chạy `check`. Kết quả phải theo REF, không theo cây.
+
+## Phạm vi — chủ kho đã chốt, và cái giá được nói thẳng
+
+Chủ kho chốt in-session `2026-08-28`: **chỉ chốt NHẤT QUÁN**, không bắt lease nào phải có đặc tả.
+Một lease bỏ **cả hai** trường vẫn qua cổng.
+
+Cái giá: **đường né còn nguyên.** Ai không muốn bị đối chiếu băm thì bỏ luôn `spec_path`, và cổng
+im. Ghi ra đây để người sau không tưởng nợ 3 đã đóng kín. Việc có bắt buộc đặc tả hay không là
+quyết định doctrine (§2), **không thuộc packet này**.
+
+## Ngoài phạm vi — ghi để khỏi bị kéo vào
+
+`docs/PROTOCOL_DA_PHIEN.md:178/184` mô tả state-event comment mang `state_hash` + `prev_event_hash`
+và hành vi `paused` khi chain gãy. `git grep` trên `d4b3045`: **0 tệp** cho cả hai. Kho không vận
+hành cơ chế đó. Đã có nợ riêng ở PR #380 (`NO_KY_THUAT.md` mục 22). **Không làm ở đây.**

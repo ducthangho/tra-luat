@@ -46,7 +46,7 @@ on:
       - 'ops/leases/**.yml'
 
 permissions:
-  contents: write   # ghi ngược posted_comment_id vào nhánh ops/**
+  contents: read    # CHỈ ĐỌC — đủ cho `checkout`. Workflow này không còn ghi vào kho.
   issues: write     # đăng comment
 
 concurrency:
@@ -55,20 +55,14 @@ concurrency:
 
 jobs:
   dang:
-    # CHỐNG LẶP — thay cho `[skip ci]` trong thông điệp commit.
-    # Bước cuối ghi ngược `posted_comment_id` vào đúng `ops/leases/**` mà workflow này
-    # theo dõi, nên về nguyên tắc nó tự kích hoạt một lượt nữa. Trước đây chặn bằng
-    # `[skip ci]` — sai chỗ: dấu đó sống trong LỊCH SỬ, và khi commit ghi ngược thành
-    # HEAD của một PR thì nó tắt gate của PR ấy (đã đụng thật, PR #100, 0 check run).
-    # Chốt phải nằm ở LƯỢT CHẠY, không nằm trong commit.
+    # CHỐNG LẶP — nay KHÔNG CÒN LÀ CHỐT CHỊU LỰC, và nói thẳng như vậy.
+    # Workflow này từng tự sinh một commit ghi ngược `posted_comment_id` vào đúng
+    # `ops/leases/**` mà nó theo dõi, nên nó tự kích hoạt lại chính mình. Packet #396
+    # đã BỎ HẲN bước ấy: không còn `git commit`/`git push`, và `permissions` chỉ còn
+    # `contents: read`. Nguồn đệ quy đã biến mất chứ không phải bị chặn.
     #
-    # Hai lớp, và lớp nào cũng đủ một mình:
-    #   1. GitHub KHÔNG sinh lượt chạy mới cho push thực hiện bằng `GITHUB_TOKEN`
-    #      (trừ workflow_dispatch/repository_dispatch) — đây là chống đệ quy sẵn có.
-    #   2. `if:` dưới đây, phòng khi lớp 1 đổi hoặc push đi bằng token khác.
-    # Kể cả hai lớp cùng thủng thì cũng KHÔNG thành vòng lặp vô hạn: chốt idempotent
-    # trong `lease_publish.py` trả rc=9 cho lease đã có `posted_comment_id`, nên lượt
-    # thừa không đăng gì và không ghi ngược gì — nó dừng sau đúng một vòng.
+    # Giữ `if:` lại làm phòng thủ chiều sâu cho một bot TƯƠNG LAI đẩy vào `ops/leases/**`,
+    # không phải vì đường cũ còn sống. Đừng đọc nó như bằng chứng rằng có gì đó cần chặn.
     if: github.event.head_commit.author.name != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
@@ -78,9 +72,9 @@ jobs:
 
       # GHIM EXACT, cùng số với `ci.yml`. Cross-review PR "#134" (codex) đo được lỗ spec
       # trần có ở CẢ HAI workflow, không chỉ ở bản vá mới — nên sửa một chỗ là để lại
-      # đúng lỗ ấy ở chỗ NGUY HIỂM HƠN: đường này chạy với `contents: write` +
-      # `issues: write`, và bộ kiểm nó chạy là thứ DUY NHẤT đứng giữa một tệp YAML và một
-      # comment mang danh nghĩa kho. Một dependency trôi ở đây là trôi ngay dưới chân cổng.
+      # đúng lỗ ấy ở chỗ NGUY HIỂM HƠN: đường này chạy với `issues: write`, và bộ kiểm nó
+      # chạy là thứ DUY NHẤT đứng giữa một tệp YAML và một comment mang danh nghĩa kho.
+      # Một dependency trôi ở đây là trôi ngay dưới chân cổng.
       # Hai chỗ phải cùng số; lệch nhau thì bên quên cập nhật chính là bên đẩy lọt.
       - name: cài PyYAML
         run: python3 -m pip install --quiet PyYAML==6.0.3
@@ -270,39 +264,6 @@ jobs:
               ''|*[!0-9]*) bao_chan "gh không trả về comment id: $ID"; continue;;
             esac
             echo "đã đăng comment $ID lên #$ISSUE"
-
-            set +e
-            python3 "$NEO/ops/lease_publish.py" mark "$tep" --comment-id "$ID"
-            rc=$?
-            set -e
-            if [ "$rc" != "0" ]; then
-              bao_chan "không ghi được comment id (rc=$rc)"
-              continue
-            fi
-            rc=0
-            if ! echo "DA_DOI=1" >> "$GITHUB_ENV"; then rc=1; fi
-            if [ "$rc" != "0" ]; then
-              bao_chan "không ghi được GITHUB_ENV (rc=$rc)"
-              continue
-            fi
             echo "::endgroup::"
           done < ds.txt
           if [ "$BI_CHAN" != "0" ]; then exit 1; fi
-
-      - name: ghi ngược comment id
-        if: always() && env.DA_DOI == '1'
-        run: |
-          set -euo pipefail
-          git config user.name  'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add ops/leases
-          # KHÔNG nhét dấu skip-ci vào thông điệp commit. Bản trước có, và đã trả giá:
-          # dấu ấy nằm lại trong LỊCH SỬ, nên khi commit ghi ngược thành HEAD của một
-          # PR thì nó tắt luôn gate của PR đó — PR hiện `mergeable_state: clean` vì
-          # KHÔNG cổng nào chạy, chứ không phải vì cổng xanh, và trên giao diện hai
-          # trạng thái ấy nhìn giống hệt nhau. Đụng thật ở PR #100 (14-08-2026):
-          # `get_check_runs` trả total_count = 0.
-          # Chống lặp nay do `if:` ở mức job lo (xem đầu tệp) — chốt ấy chỉ ảnh hưởng
-          # LƯỢT CHẠY, không để lại vết trong lịch sử kho.
-          git commit -m "ops: ghi posted_comment_id sau khi đăng lease"
-          git push origin HEAD:'${{ github.ref_name }}'

@@ -799,15 +799,26 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
     # được lease. Đừng mô tả nó như thay thế tương đương; nó không phải.
     #
     # VÀ MẤT MỘT THỨ NỮA, tách riêng vì nó KHÁC hẳn "mất mạng thì chờ" (cross-review
-    # codex 29-08-2026, finding 3): dấu "đã đăng" nay là một HIỆN VẬT SỬA ĐƯỢC. Nó chỉ
-    # tồn tại chừng nào comment còn sống, còn thuộc `github-actions[bot]`, và body còn
-    # bắt đầu ĐÚNG bằng `**Lease `<id>`**`. Xoá comment, hay sửa một ký tự ở đầu nó, là
-    # dấu biến mất — và lượt sau sẽ đăng TRÙNG. Nói cho ĐÚNG PHẠM VI (cross-review codex
-    # lượt 2 bắt được chỗ này khai rộng): mất dấu là khi bản CỦA BOT bị sửa/thay/xoá.
-    # Một comment người thật đăng THÊM, trong khi comment bot vẫn còn nguyên, KHÔNG làm
-    # mất dấu. `posted_comment_id` nằm trong git thì
-    # không mất theo thao tác quản trị Issue. Đây là hồi quy về ĐỘ BỀN, không phải về
-    # tính sẵn sàng; `t126` ghim đúng hành vi này để nó không âm thầm đổi.
+    # codex 29-08-2026): dấu "đã đăng" nay là một HIỆN VẬT SỬA ĐƯỢC, sống trong CSDL
+    # Issue chứ không trong git.
+    #
+    # Khai bằng VỊ TỪ, không bằng danh sách — hai lượt cross-review đều bắt được danh
+    # sách vừa rộng vừa hẹp. Vị từ đúng là: dấu của lease `L` tồn tại KHI VÀ CHỈ KHI
+    # Issue hiện có ít nhất một comment mà `user.login == "github-actions[bot]"` VÀ body
+    # BẮT ĐẦU đúng bằng ``**Lease `L`**``.
+    #
+    # Bốn hệ quả suy thẳng từ vị từ ấy, không cần nhớ thêm:
+    #   - xoá comment ấy      ⇒ mất dấu;
+    #   - sửa PREFIX của nó   ⇒ mất dấu (sửa phần SAU prefix thì KHÔNG — vị từ chỉ đọc
+    #                            phần đầu);
+    #   - thay nó bằng bản của danh tính khác ⇒ mất dấu; nhưng một comment người thật
+    #     đăng THÊM, trong khi bản của bot còn nguyên, thì KHÔNG;
+    #   - dấu neo theo `lease_id`: một `lease_id` khác là một dấu KHÁC, nên revision mới
+    #     luôn đăng được — đó là ĐÚNG Ý ĐỒ, không phải mất dấu.
+    #
+    # Mất dấu ⇒ lượt sau đăng TRÙNG. `posted_comment_id` nằm trong git thì không mất
+    # theo thao tác quản trị Issue. Đây là hồi quy về ĐỘ BỀN, không phải về tính sẵn
+    # sàng; `t126` ghim đúng vị từ này để nó không âm thầm đổi.
     thieu = [k for k in BAT_BUOC if lease.get(k) in (None, "")]
     if thieu:
         raise Chan(RC_NOI_DUNG, f"thiếu trường bắt buộc: {', '.join(thieu)}")

@@ -269,16 +269,27 @@ def phan_chung():
             return chay_moi(moi=gia_moi, cach_ly=gia_no, chay_mot=lambda _p: rc_ban_in,
                             doc_moi_truong=lambda: nen, doc_trong_ci=lambda: o_trong_ci)
 
-    # Hai ca cuối phủ nhánh `chap_nhan is False` (bộ cách ly ĐÃ XANH) đi qua chính
-    # `chay_moi`. Thiếu chúng thì đột biến TỪNG PHẦN `do += chap_nhan is None and
-    # o_trong_ci` sống sót cả 27 ca — finding P1 của cross-review codex trên
-    # `dc72c16b`, đã tái lập: đột biến ấy cho rc=0. Bảo chứng tầng tiêu thụ phải phủ
-    # MỌI nhánh đếm, không chỉ nhánh trạng thái thứ ba.
-    cases += [_dem(True, None, (1, "0/1\n")) == 1,
-              _dem(False, None, (1, "0/1\n")) == 0,
-              _dem(True, "github-actions/linux", (1, "0/1\n")) == 0,
-              _dem(True, "github-actions/linux", (0, "1/1\n")) == 1,
-              _dem(False, "github-actions/linux", (0, "1/1\n")) == 1]
+    # PHỦ TRỌN MIỀN ĐẾM, không vá lẻ từng ô. Hình dạng "tầng tiêu thụ hở một ô" đã
+    # xuất hiện BA lần trong chính packet này: (1) khuyết tật gốc — trạng thái thứ ba
+    # không được đếm; (2) finding P1 cross-review lượt 1 trên `dc72c16b` — nhánh
+    # `chap_nhan is False` không ca nào đi qua `chay_moi`, đột biến `do += chap_nhan
+    # is None and o_trong_ci` sống sót 27/27; (3) finding P1 lượt 2 trên `9ab5eb36` —
+    # ô `(True, ngoài CI)` còn hở, đột biến sống sót 29/29. Cả ba đã tái lập được.
+    # `PROTOCOL §12`: cùng hình dạng lần thứ BA thì phải xem lại CÁCH LÀM, không vá
+    # lần thứ tư. Nên canh bằng BẢNG TRỌN MIỀN: 3 giá trị `chap_nhan` × 2 giá trị
+    # `o_trong_ci` = 6 ô, mỗi ô một ca đi qua chính `chay_moi`. Thêm giá trị mới vào
+    # miền mà quên ca thì bảng này hở lộ ra ngay, khác hẳn danh sách ca rời rạc.
+    #
+    # Cách dựng từng ô: `chap_nhan is None` cần nền KHÁC neo; `True` cần nền KHỚP neo
+    # và bộ test ĐỎ (cách ly còn hiệu lực); `False` cần nền KHỚP neo và bộ test XANH
+    # (đã hết nợ, phải đòi gỡ khỏi cách ly).
+    MIEN_DEM = [(None, True, 1), (None, False, 0),
+                (True, True, 0), (True, False, 0),
+                (False, True, 1), (False, False, 1)]
+    for _cn, _ci, _mong in MIEN_DEM:
+        _nen = None if _cn is None else "github-actions/linux"
+        _kq = (0, "1/1\n") if _cn is False else (1, "0/1\n")
+        cases.append(_dem(_ci, _nen, _kq) == _mong)
     names += ["a-cach-ly-thieu-slug", "r4-thieu-moi-truong", "r5-moi-truong-sai-tap",
               "r5-comment-gia-loi-goi", "r5-step-if-false", "r5-job-if-false",
               "r5-step-if-literal-expr", "r5-normal-step", "b-cach-ly-chuyen-xanh",
@@ -288,10 +299,10 @@ def phan_chung():
               "r6-vi-tu-da-xanh-van-do", "r6-vi-tu-cach-ly-hop-le-khong-do",
               "r6-trong-ci-khong-doi-runner-os", "r6-thieu-github-actions-khong-phai-ci",
               "r6-github-actions-false-khong-phai-ci",
-              "r6-TIEU-THU-trong-ci-phai-dem", "r6-TIEU-THU-ngoai-ci-khong-dem",
-              "r6-TIEU-THU-nen-khop-neo-van-cach-ly",
-              "r6-TIEU-THU-cach-ly-da-xanh-phai-dem",
-              "r6-TIEU-THU-da-xanh-dem-ca-ngoai-ci"]
+              "r6-TIEU-THU-o-none-trong-ci", "r6-TIEU-THU-o-none-ngoai-ci",
+              "r6-TIEU-THU-o-cach-ly-hop-le-trong-ci",
+              "r6-TIEU-THU-o-cach-ly-hop-le-ngoai-ci",
+              "r6-TIEU-THU-o-da-xanh-trong-ci", "r6-TIEU-THU-o-da-xanh-ngoai-ci"]
     for name, ok in zip(names, cases): print(f"ĐỘT BIẾN {name}: {'ĐỎ đúng' if ok else 'LỌT'}")
     print(f"PHẢN CHỨNG: {sum(cases)}/{len(cases)} đỏ đúng")
     return all(cases)

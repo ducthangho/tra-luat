@@ -3935,8 +3935,11 @@ def t126_dau_da_dang_la_HIEN_VAT_SUA_DUOC_chu_khong_phai_ban_ghi_git():
     Trước #396 dấu "đã đăng" là `posted_comment_id` NẰM TRONG GIT: sửa hay xoá comment
     trên Issue không làm nó mất. Sau #396 dấu duy nhất là chính comment ấy, nhận diện
     bằng `user.login == "github-actions[bot]"` và body bắt đầu đúng bằng
-    ``**Lease `<id>`**``. Ba thao tác QUẢN TRỊ ISSUE bình thường đều xoá được dấu:
-    xoá comment, sửa một ký tự ở đầu body, hoặc đăng lại dưới danh nghĩa khác.
+    ``**Lease `<id>`**``. Ba thao tác QUẢN TRỊ ISSUE bình thường đều xoá được dấu, và cả
+    ba đều tác động lên CHÍNH BẢN CỦA BOT: xoá nó, sửa một ký tự ở đầu body của nó, hoặc
+    thay nó bằng một bản của danh tính khác. Một comment người thật đăng THÊM, trong khi
+    bản của bot vẫn còn, KHÔNG làm mất dấu — ca thứ ba dưới đây dựng danh sách chỉ còn
+    bản của người thật, tức mô hình hoá THAY THẾ chứ không phải THÊM VÀO.
 
     Ca này KHÔNG khẳng định hành vi ấy là tốt. Nó khẳng định hành vi ấy là ĐÃ BIẾT.
     Cross-review codex 29-08-2026 (finding 3) chỉ ra rằng `danh_doi` của đặc tả mới chỉ
@@ -3962,7 +3965,7 @@ def t126_dau_da_dang_la_HIEN_VAT_SUA_DUOC_chu_khong_phai_ban_ghi_git():
     for nhan, comments in (
             ("xoá comment", {55: []}),
             ("thêm một ký tự vào ĐẦU body", {55: [{"id": 7, "body": "." + dau, "user": bot}]}),
-            ("người thật đăng lại thay bot",
+            ("bản của bot bị THAY bằng bản của người thật",
              {55: [{"id": 7, "body": dau, "user": {"login": "ducthangho"}}]})):
         ex = do(nhan, comments)
         bang(ex is None,

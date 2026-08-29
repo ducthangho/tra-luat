@@ -802,7 +802,10 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
     # codex 29-08-2026, finding 3): dấu "đã đăng" nay là một HIỆN VẬT SỬA ĐƯỢC. Nó chỉ
     # tồn tại chừng nào comment còn sống, còn thuộc `github-actions[bot]`, và body còn
     # bắt đầu ĐÚNG bằng `**Lease `<id>`**`. Xoá comment, hay sửa một ký tự ở đầu nó, là
-    # dấu biến mất — và lượt sau sẽ đăng TRÙNG. `posted_comment_id` nằm trong git thì
+    # dấu biến mất — và lượt sau sẽ đăng TRÙNG. Nói cho ĐÚNG PHẠM VI (cross-review codex
+    # lượt 2 bắt được chỗ này khai rộng): mất dấu là khi bản CỦA BOT bị sửa/thay/xoá.
+    # Một comment người thật đăng THÊM, trong khi comment bot vẫn còn nguyên, KHÔNG làm
+    # mất dấu. `posted_comment_id` nằm trong git thì
     # không mất theo thao tác quản trị Issue. Đây là hồi quy về ĐỘ BỀN, không phải về
     # tính sẵn sàng; `t126` ghim đúng hành vi này để nó không âm thầm đổi.
     thieu = [k for k in BAT_BUOC if lease.get(k) in (None, "")]

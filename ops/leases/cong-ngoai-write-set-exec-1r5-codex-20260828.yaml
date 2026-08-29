@@ -16,6 +16,7 @@ phase_key: CONG-NGOAI-WRITE-SET
 revision: 5
 generation: 1
 lease_id: cong-ngoai-write-set-exec-1r5-codex-20260828
+da_bi_thay_the: ci-cai-jsonschema-exec-1-claude-20260829
 thay_the_cho: cong-ngoai-write-set-exec-1r4-codex-20260828
 
 role: executor

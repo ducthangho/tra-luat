@@ -52,12 +52,16 @@ jobs:
     #   lượt ubuntu-only (PR #392)      21m52s  -> success, chỉ còn ~3 phút biên
     #   lượt workflow_dispatch #1       25m19s  -> cancelled
     #   lượt workflow_dispatch #2       25m09s  -> cancelled
+    #   lượt workflow_dispatch #3       45m17s  -> cancelled  (SAU khi nâng lên 45)
+    #   lượt ubuntu-only (PR #392, lần 2) 25m14s -> success  — ĐÃ VƯỢT trần 25 cũ
+    # Nâng tiếp 45 -> 60 theo chỉ đạo chủ kho. Nhưng A5 KHÔNG còn đòi Windows: xem đặc
+    # tả r3. Trần 60 là chỗ trống cho lần ĐO SAU, không phải lời hứa rằng Windows sẽ qua.
     # Hai lượt dispatch dừng ở ĐÚNG 25 phút, tức chạm trần job chứ không phải bị huỷ do
     # tranh chấp concurrency. Job nào trong ma trận chạm trần thì KHÔNG ĐO ĐƯỢC bằng bộ
     # công cụ hiện có (`get_job_logs` trả `failed_jobs: 0` vì job bị huỷ không tính là
     # "failed"); quy cho `windows-latest` là SUY LUẬN từ chỗ ubuntu-only về đích.
     # NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN: gate 22 phút và đang lớn dần là nợ riêng.
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"

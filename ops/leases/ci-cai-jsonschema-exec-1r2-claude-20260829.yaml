@@ -13,6 +13,7 @@ phase_key: CI-CAI-JSONSCHEMA
 revision: 2
 generation: 1
 lease_id: ci-cai-jsonschema-exec-1r2-claude-20260829
+da_bi_thay_the: ci-cai-jsonschema-exec-1r3-claude-20260829
 thay_the_cho: ci-cai-jsonschema-exec-1-claude-20260829
 
 ly_do_thu_hoi: >-

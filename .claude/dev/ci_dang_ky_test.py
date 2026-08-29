@@ -269,9 +269,16 @@ def phan_chung():
             return chay_moi(moi=gia_moi, cach_ly=gia_no, chay_mot=lambda _p: rc_ban_in,
                             doc_moi_truong=lambda: nen, doc_trong_ci=lambda: o_trong_ci)
 
+    # Hai ca cuối phủ nhánh `chap_nhan is False` (bộ cách ly ĐÃ XANH) đi qua chính
+    # `chay_moi`. Thiếu chúng thì đột biến TỪNG PHẦN `do += chap_nhan is None and
+    # o_trong_ci` sống sót cả 27 ca — finding P1 của cross-review codex trên
+    # `dc72c16b`, đã tái lập: đột biến ấy cho rc=0. Bảo chứng tầng tiêu thụ phải phủ
+    # MỌI nhánh đếm, không chỉ nhánh trạng thái thứ ba.
     cases += [_dem(True, None, (1, "0/1\n")) == 1,
               _dem(False, None, (1, "0/1\n")) == 0,
-              _dem(True, "github-actions/linux", (1, "0/1\n")) == 0]
+              _dem(True, "github-actions/linux", (1, "0/1\n")) == 0,
+              _dem(True, "github-actions/linux", (0, "1/1\n")) == 1,
+              _dem(False, "github-actions/linux", (0, "1/1\n")) == 1]
     names += ["a-cach-ly-thieu-slug", "r4-thieu-moi-truong", "r5-moi-truong-sai-tap",
               "r5-comment-gia-loi-goi", "r5-step-if-false", "r5-job-if-false",
               "r5-step-if-literal-expr", "r5-normal-step", "b-cach-ly-chuyen-xanh",
@@ -282,7 +289,9 @@ def phan_chung():
               "r6-trong-ci-khong-doi-runner-os", "r6-thieu-github-actions-khong-phai-ci",
               "r6-github-actions-false-khong-phai-ci",
               "r6-TIEU-THU-trong-ci-phai-dem", "r6-TIEU-THU-ngoai-ci-khong-dem",
-              "r6-TIEU-THU-nen-khop-neo-van-cach-ly"]
+              "r6-TIEU-THU-nen-khop-neo-van-cach-ly",
+              "r6-TIEU-THU-cach-ly-da-xanh-phai-dem",
+              "r6-TIEU-THU-da-xanh-dem-ca-ngoai-ci"]
     for name, ok in zip(names, cases): print(f"ĐỘT BIẾN {name}: {'ĐỎ đúng' if ok else 'LỌT'}")
     print(f"PHẢN CHỨNG: {sum(cases)}/{len(cases)} đỏ đúng")
     return all(cases)

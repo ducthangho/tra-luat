@@ -75,8 +75,8 @@ jobs:
           python-version: "3.12"
       # G5 cần PyYAML + actionlint + shellcheck nhưng phải đứng trước phép test/compile
       # đầu tiên. T6 chỉ cho phép đúng allowlist setup nhỏ trước G5.
-      - name: cài PyYAML (bộ cổng đăng lease cần)
-        run: python -m pip install --quiet PyYAML==6.0.3
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
       - name: cài actionlint cho G5
         shell: bash
         env:

@@ -84,6 +84,16 @@ def t2_canary_thieu_shellcheck_phai_SUY_GIAM():
         chi_al = Path(tmp) / "chi-al"
         chi_al.mkdir()
         shutil.copy2(al, chi_al / Path(al).name); (chi_al / Path(al).name).chmod(0o755)
+        # Ý ĐỊNH của ca này là "VẮNG shellcheck", KHÔNG phải "vắng mọi thứ". Từ #391 bản
+        # kê có một công cụ `bat_buoc` chạy bằng `python`; PATH cô lập làm nó thành
+        # KHÔNG_ĐO_ĐƯỢC và nuốt mất kết luận SUY_GIẢM mà ca này đi đo. Đặt một shim gọi
+        # THẲNG interpreter tuyệt đối: không kéo thêm thư mục nào lên PATH, nên shellcheck
+        # vẫn vắng đúng như trước.
+        shim = chi_al / "python"
+        shim.write_text(f'#!/bin/sh\nexec {sys.executable} "$@"\n', encoding="utf-8")
+        shim.chmod(0o755)
+        bang(shutil.which("shellcheck", path=str(chi_al)) is None,
+             "PATH cô lập vẫn thấy shellcheck ⇒ ca này không còn đo cái nó nói là đo")
         rc, out, _ = chay("kiem-tra", "--json", env=dict(os.environ, PATH=str(chi_al)))
         bang("SUY_GIAM" in out, f"shellcheck cô lập khỏi PATH mà canary không SUY_GIẢM: "
                                  f"rc={rc}\n{out[:500]}")
@@ -142,8 +152,8 @@ def t6_ci_kiem_ban_ke_truoc_moi_test_nang():
         "Force LF checkout (hash parity với manifest)": (
             "git config --global core.autocrlf false", "git config --global core.eol lf",
             "git config --global core.abbrev 7"),
-        "cài PyYAML (bộ cổng đăng lease cần)": (
-            "python -m pip install --quiet PyYAML==6.0.3",),
+        "cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)": (
+            "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",),
         "cài actionlint cho G5": ("bash ops/cai_actionlint.sh",),
         "cài shellcheck cho G5 (cài xong đo lại)": ("bash ops/cai_cong_cu.sh shellcheck",),
     }
@@ -409,6 +419,135 @@ def _do_ban_kinh(ten_dot_bien):
     finally:
         g[bp] = cu
         shutil.rmtree(cay, ignore_errors=True)
+
+
+# --------------------------------------------------------------- T16/T17 (#391)
+# LUẬT: thêm một công cụ/gói vào bất kỳ mã nào của kho thì phải khai nó trong
+# `ops/cong_cu.yaml` kèm lệnh cài cho MỌI nền mà cổng chạy trên đó. Luật viết trong
+# tài liệu KHÔNG CHẠY — nên nó nằm ở đây, dạng ca test.
+#
+# Sinh ra vì `from jsonschema` vào kho ở `47a50395` mà không ai khai: `gate` ĐỎ liên
+# tục từ đó với `ModuleNotFoundError`, và bốn vòng cross-review không thấy vì cả bốn
+# chạy trong container có sẵn gói.
+
+_THU_MUC_QUET = (".claude/dev", "ops")
+
+
+def _goi_ngoai(goc: Path, thu_muc=_THU_MUC_QUET) -> dict:
+    """Tự dẫn xuất tập module BÊN THỨ BA mà kho import. KHÔNG ghi cứng tên nào.
+
+    Ghi cứng `"jsonschema"` là danh sách CẤM trá hình: đóng đúng lần này rồi mù với
+    gói kế tiếp. Ở đây quét AST, loại stdlib, loại stem tệp nội bộ — nên gói mới tự
+    lọt vào tầm mắt mà không ai phải nhớ cập nhật danh sách.
+    """
+    import ast
+    noi_bo = set()
+    tep = []
+    for d in thu_muc:
+        thu = goc / d
+        if not thu.is_dir():
+            continue
+        for q in sorted(thu.glob("*.py")):
+            noi_bo.add(q.stem)
+            tep.append(q)
+    ra: dict = {}
+    for q in tep:
+        try:
+            cay = ast.parse(q.read_text(encoding="utf-8"))
+        except (SyntaxError, UnicodeDecodeError):
+            continue
+        for n in ast.walk(cay):
+            if isinstance(n, ast.Import):
+                tens = [a.name.split(".")[0] for a in n.names]
+            elif isinstance(n, ast.ImportFrom) and n.level == 0 and n.module:
+                tens = [n.module.split(".")[0]]
+            else:
+                continue
+            for t in tens:
+                if t in sys.stdlib_module_names or t in noi_bo:
+                    continue
+                ra.setdefault(t, []).append(str(q.relative_to(goc)))
+    return ra
+
+
+# Tên gói phân phối khác tên module import ở một số gói; ánh xạ ĐÚNG chỗ lệch, không
+# nới phép so. Thiếu ánh xạ mà tên lệch thì ca ĐỎ — đó là hành vi mong muốn.
+_MODULE_SANG_BAN_KE = {"yaml": "PyYAML"}
+
+
+def _doi_cay_day_du(goc: Path) -> None:
+    """Ba trạng thái: cây THIẾU thứ để đo là KHÔNG_ĐO_ĐƯỢC, không phải ĐỎ.
+
+    Phân biệt hai chuyện khác hẳn nhau: (a) thư mục vắng HẲN ⇒ đang chạy trên cây tạm
+    của bộ đột biến, ca này không đo được ở đây; (b) thư mục CÓ mà không tìm ra gì ⇒
+    vấn đề thật, phải ĐỎ. Trộn hai cái là tự cấp tín dụng giả.
+    """
+    thieu = [str(x) for x in (goc / "ops" / "cong_cu.yaml",
+                              goc / ".github" / "workflows" / "ci.yml")
+             if not x.is_file()]
+    thieu += [d for d in _THU_MUC_QUET if not (goc / d).is_dir()]
+    if thieu:
+        raise BoQuaMoiTruong(
+            "cây đang chạy KHÔNG đầy đủ (thiếu: " + ", ".join(thieu) + ") — ca này đo "
+            "quan hệ giữa bản kê, ci.yml và mã nguồn, nên ở đây là KHÔNG_ĐO_ĐƯỢC")
+
+
+@ca
+def t16_moi_goi_ben_thu_ba_phai_duoc_khai_trong_ban_ke():
+    """Luật công cụ, dạng đo được. Không ghi cứng tên gói nào."""
+    # Bộ chạy đột biến gán lại `GOC` sang một cây TẠM chỉ chứa tệp bị đột biến
+    # (`_do_ban_kinh` d.416). Cây ấy không có thứ ca này đo ⇒ KHÔNG_ĐO_ĐƯỢC, KHÔNG phải
+    # ĐỎ. Đọc sự VẮNG MẶT thành bằng chứng phủ định là đúng bệnh "chết vì lý do vô can":
+    # nó sẽ khiến mọi đột biến `ci.yml` trông như bị ca này bắt được.
+    _doi_cay_day_du(GOC)
+    ban_ke = yaml.safe_load((GOC / "ops" / "cong_cu.yaml").read_text(encoding="utf-8"))
+    khai = set(ban_ke["cong_cu"])
+    ci = (GOC / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+
+    ngoai = _goi_ngoai(GOC)
+    bang(ngoai, "phép quét không thấy gói bên thứ ba NÀO — bộ quét hỏng, không phải kho sạch")
+    for ten, cac_tep in sorted(ngoai.items()):
+        ten_ke = _MODULE_SANG_BAN_KE.get(ten, ten)
+        # KHÔNG có cửa thoát "hoặc thấy tên trong ci.yml": bản kê là nguồn DUY NHẤT.
+        # Bản đầu của ca này có mệnh đề ấy và ĐO ĐƯỢC là nó vô hiệu hoá cả ca — gỡ
+        # `jsonschema` khỏi bản kê mà ca vẫn XANH vì tên còn trong ci.yml.
+        bang(ten_ke in khai,
+             f"gói bên thứ ba {ten!r} (import ở {cac_tep[0]}) chưa được khai trong "
+             f"ops/cong_cu.yaml — thêm công cụ thì phải bảo đảm nền cài nó")
+
+    # CHỐT CÓ RĂNG, chạy được NGAY HÔM NAY: phụ thuộc thật có thể chưa xuất hiện, nên
+    # nếu không tự dựng một ca đỏ thì ca này xanh mà chưa đo gì — đúng bệnh "có MẶT
+    # khác có ĐO".
+    with tempfile.TemporaryDirectory(prefix="quet-goi-") as td:
+        gia = Path(td)
+        (gia / "ops").mkdir()
+        (gia / "ops" / "mot_tep.py").write_text(
+            "import mot_goi_khong_ai_khai\n", encoding="utf-8")
+        thay = _goi_ngoai(gia, ("ops",))
+        bang("mot_goi_khong_ai_khai" in thay,
+             "bộ quét KHÔNG thấy import giả ⇒ nó không có răng, mọi cái xanh ở trên vô nghĩa")
+
+
+@ca
+def t17_ban_ghim_trong_ban_ke_khop_ban_ghim_trong_ci():
+    """Hai chỗ ghim lệch nhau là hai bản trôi — cổng phải bắt được."""
+    _doi_cay_day_du(GOC)          # xem chú thích ở t16
+    ban_ke = yaml.safe_load((GOC / "ops" / "cong_cu.yaml").read_text(encoding="utf-8"))
+    ci = (GOC / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    do_duoc = 0
+    for ten, dn in sorted(ban_ke["cong_cu"].items()):
+        ghim = dn.get("ban_ghim")
+        if not ghim:
+            continue
+        if f"{ten}=={ghim}" in ci:
+            do_duoc += 1
+            continue
+        # Tên có mặt trong ci.yml nhưng KHÁC bản ghim ⇒ trôi. Tên vắng hẳn thì công cụ
+        # ấy do đường khác cài (vd script riêng), không phải chuyện của ca này.
+        bang(f"{ten}==" not in ci,
+             f"{ten}: bản ghim trong cong_cu.yaml là {ghim!r} nhưng ci.yml ghim khác")
+    bang(do_duoc >= 1,
+         "không đo được cặp ghim nào — ca này đang xanh mà chưa đo gì")
 
 
 def main() -> int:

@@ -1,0 +1,130 @@
+# Lease EXECUTOR — `CI-CAI-JSONSCHEMA` (#391), lượt 1, neo đặc tả r2.
+#
+# THU HỒI, KHÔNG PHẢI KẾ TỤC. Trường `thay_the_cho` dưới đây trỏ sang lease của packet
+# #361 vì cổng `ai-dang-giu` bản master RAISE `KHÔNG_XÁC_ĐỊNH` với bia mộ MỘT CHIỀU
+# (`lease_publish.py:978-983`, packet #372 BIA-MO-MOT-CHIEU) — cặp hai chiều là bắt buộc
+# về mặt cơ chế. Nó KHÔNG có nghĩa #391 kế tục #361. Xem `ly_do_thu_hoi`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 391
+packet_id: CI-CAI-JSONSCHEMA
+phase_key: CI-CAI-JSONSCHEMA
+revision: 2
+generation: 1
+lease_id: ci-cai-jsonschema-exec-1r2-claude-20260829
+thay_the_cho: ci-cai-jsonschema-exec-1-claude-20260829
+
+ly_do_thu_hoi: >-
+  Lease `cong-ngoai-write-set-exec-1r5-codex-20260828` (packet #361) giữ
+  `.github/workflows/ci.yml` tới 2026-08-29T09:20:00Z, nhưng VIỆC CỦA NÓ ĐÃ LAND:
+  PR #370 merge 2026-08-28T11:43:57Z; hiện vật `.claude/dev/ci_dang_ky_test.py` CÓ trên
+  master; commit cuối chạm `ci.yml` trên master là `6a056a4` "ci: sổ đăng ký test +
+  fail-close bốn chiều — cổng chạy bộ test TỪ NGOÀI write set", đúng việc của #361.
+  Đây là nợ `AG-T0-01B-thu-hoi-lease-chua-co-duong` (Issue #385): "CHƯA HẾT HẠN" không
+  phải "CÒN HIỆU LỰC". Chủ kho duyệt thu hồi trong phiên 29-08-2026 sau khi được trình
+  bày đúng bốn phép đo trên. #361 vẫn `open`; packet này KHÔNG đụng gì của #361.
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+spec_path: ops/specs/CI-CAI-JSONSCHEMA-r2.md
+spec_hash: 83438f420e010d3993648ce5a276f19ae363859a77718bd82c478d772c5f1aa1
+spec_note: >-
+  BẢN SỬA ĐỔI 2. Bản 1 (`d98702ff…`) GIỮ NGUYÊN làm hồ sơ, KHÔNG xoá. Bản 1 đúng nguyên
+  nhân nhưng sai tầm: nó vá một tên gói thay vì đóng lớp. Executor PHẢI tự đo lại mọi con
+  số — đặc tả CỐ Ý không chép số nền.
+
+write_set:
+  - ops/cong_cu.yaml
+  - ops/cong_cu_test.py
+  - .github/workflows/ci.yml
+
+write_set_da_do_truoc_khi_cap: >-
+  So HAI NGUỒN ref trước khi quét: máy chủ 256 · đệm cục bộ 256 · `comm` cả hai chiều RỖNG
+  ⇒ không mù. Quét bằng cổng bản MASTER (`lease_publish.py` của nhánh cũ tụt sau 34 commit,
+  thiếu 64 dòng gồm cưỡng chế bia mộ hai chiều — đã đo và KHÔNG làm sai kết luận nào):
+  `ops/cong_cu.yaml` NGƯỜI_GIỮ 0 · `ops/cong_cu_test.py` NGƯỜI_GIỮ 0 ·
+  `.github/workflows/ci.yml` rc=11 NGƯỜI_GIỮ 1 = lease #361 nêu ở `ly_do_thu_hoi`.
+
+branch: ops/cai-jsonschema-391
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+start_from_sha: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+reviewed_sha_required: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  "Đồng ý. Xử lý #391, #361 rồi Mở packet cho mục 1+2+3 rồi làm luôn" — phiên 29-08-2026.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_cung_la_nguoi_thi_cong: true
+
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này CŨNG là phiên soạn đặc tả r1+r2 VÀ sẽ thi công. Nặng hơn: chính phiên
+  này gây ra lỗi mà packet đi chữa — commit `47a50395` thêm `from jsonschema` mà không
+  khai phụ thuộc, và phiên này không mở CI lần nào suốt bốn vòng review. Nên nó KHÔNG được
+  làm reviewer: cross-review phải là phiên `codex`; phiên ấy im lặng ⇒ đọc là CHƯA CHẠY.
+
+nang_nguong_S2:
+  ai_nang: ducthangho
+  tham_quyen: chủ kho (§2)
+  nguong_cu: 120 dòng thêm+xoá
+  nguong_moi: 200 dòng thêm+xoá
+  do_duoc_khi_nang: '3 tệp · +169 −4 · thêm+xoá = 173'
+  can_cu: >-
+    Việc đã XONG và ba cổng ĐỀU XANH khi ngưỡng chạm: cong_cu_test ca=17 · đột biến=15 ·
+    lỗi 0 · kiem-tra DAT · actionlint rc=1 1 finding (delta 0 so nền). Phần vượt KHÔNG
+    phải phình phạm vi: write set vẫn ĐÚNG BA đường như đặc tả r2, không thêm tệp nào.
+    +141 dòng của `ops/cong_cu_test.py` gồm hai ca mới, hai helper, bản sửa `t2` bắt buộc
+    (thêm công cụ `bat_buoc` chạy bằng `python` làm PATH cô lập của t2 nuốt mất kết luận
+    SUY_GIẢM — 3 lỗi đột biến, phải sửa mới xanh lại), và chú thích ghi lại ba bài học ĐO
+    ĐƯỢC. Cắt chú thích cho vừa ngưỡng là gian lận cổng, nên không cắt.
+  pham_vi: Gắn RIÊNG packet #391. KHÔNG nới S2 cho packet khác, KHÔNG là tiền lệ.
+  vet_that_bai_truoc_do: >-
+    Packet W1-P1 (#368) vượt đúng ngưỡng này mà KHÔNG kiểm — phiên điều phối kiểm ADR-0044
+    (1000) rồi bỏ qua S2 (600) nằm ngay trong lease nó đang làm việc dưới quyền. Lần này
+    kiểm trước khi commit và nó tripped ở 173/120; packet DỪNG và KHAI thay vì tự nâng.
+    Không có cổng máy nào canh S2 — nó là kỷ luật đọc, và lần trước kỷ luật ấy đã hỏng.
+
+leased_at_utc: '2026-08-29T02:05:00Z'
+lease_expires_at_utc: '2026-08-29T14:05:00Z'
+run_minutes: 720
+
+vung_duoc_phep_cham: >-
+  Đúng ba tệp trong `write_set`. KHÔNG đụng `ops/cong_cu.py` (đã đo là không cần sửa),
+  KHÔNG `ops/lease_publish.py`, KHÔNG `.claude/dev/**` (đang bị lease
+  `w1-p1-van-chuyen-prompt-exec-4` giữ). Hunk ngoài ba tệp ⇒ ĐỎ.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ TƯ — kể cả khi hoá ra `ops/cong_cu.py` phải sửa ⇒ DỪNG, khai ·
+  S2 ĐÃ NÂNG 120 → 200 (xem `nang_nguong_S2`); vượt 200 ⇒ DỪNG ·
+  S3 `origin/master` đi tiếp mà CÓ chạm một trong ba đường ⇒ DỪNG ·
+  S4 muốn ghi cứng tên `jsonschema` làm phép đo bao phủ ⇒ DỪNG, xem A2 ·
+  S5 muốn nới `T6` thay vì cập nhật ⇒ DỪNG, nới là gỡ cổng ·
+  S6 chạm trần HAI vòng review (ADR-0043) ⇒ DỪNG, không tự nâng.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) GIỚI HẠN LỜI KHAI — chứng minh BYTE tới consumer adapter.
+  (2) Ba trạng thái: có · không · KHÔNG ĐO ĐƯỢC. Thứ ba làm cổng ĐỎ.
+  (3) `python` KHÔNG `python3` trong mọi probe và lệnh cài — Windows phổ biến không có
+      `python3` (CLAUDE.md).
+  (4) A5 đòi gate XANH trên CẢ HAI nền; `gate (windows-latest)` phải gọi tay
+      `workflow_dispatch` — gắn nhãn `windows` KHÔNG sinh lượt chạy nào vì `ci.yml`
+      khai `pull_request:` không kèm `types:`.
+  (5) `actionlint` thiếu `shellcheck` trên PATH thì tự tắt tích hợp TRONG IM LẶNG và trả
+      `rc=0 / 0 finding` — trông TỐT HƠN nền, thật ra không đo gì.
+  (6) Mỗi chốt phải có ĐỘT BIẾN RIÊNG.
+  (7) Dùng `.claude/dev/mcp_gh.py` để gọi GitHub, ĐỪNG tự dựng client — nó đã biết cả hai
+      endpoint (`/mcp/` và `/mcp/x/actions`); phiên trước tự dựng client nháp chỉ biết
+      `/mcp/` rồi mù với CI suốt bốn vòng review.

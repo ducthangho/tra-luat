@@ -44,6 +44,7 @@ tràn (ví dụ làm YAML không phân tích được) lộ ra ngay thay vì đi
 from __future__ import annotations
 
 import importlib.util
+import pathlib
 import sys
 import tempfile
 from pathlib import Path
@@ -232,9 +233,13 @@ def _lech_sau(mong, thuc, duong="$"):
     return "%s: lệch nhưng không định vị được" % duong
 
 
-def _rv(ai, tt="APPROVED", luc="2026-01-01T00:00:00Z", commit="HEAD1", ma=None, kieu="User"):
+def _rv(ai, tt="APPROVED", luc="2026-01-01T00:00:00Z", commit="HEAD1", ma=None, kieu="User",
+        hiep="COLLABORATOR"):
+    """`hiep` = `author_association` của GitHub. Mặc định `COLLABORATOR` vì đó là giá trị
+    THẬT của mọi bản duyệt hợp lệ trên kho này (đo trên #389 và #392); ca nào muốn thử
+    người KHÔNG có thẩm quyền thì truyền tường minh."""
     r = {"user": {"login": ai, "type": kieu}, "state": tt, "submitted_at": luc,
-         "commit_id": commit}
+         "commit_id": commit, "author_association": hiep}
     if ma is not None:
         r["id"] = ma
     return r
@@ -265,10 +270,16 @@ def ca_duyet_boi_danh_tinh_khac_thi_qua(m):
         raise AssertionError("duyệt bởi danh tính khác bị chặn oan: " + ly)
 
 
-def ca_nguoi_ngoai_danh_sach_khong_tinh(m):
-    dat, _ = m.phan_quyet("ducthangho", [_rv("nguoi-la-hoan-toan")])
+def ca_nguoi_KHONG_co_tham_quyen_khong_tinh(m):
+    """Login trông chính đáng nhưng KHÔNG mang thẩm quyền thì không được tính.
+
+    Ca này trước đây đo "tên ngoài danh sách". Từ #386 cổng không còn xét tên, nên tiền đề
+    phải đổi theo — nếu để nguyên, `_rv` mặc định `COLLABORATOR` sẽ làm ca XANH vì một lý do
+    VÔ CAN và ta mất một chốt mà không ai biết.
+    """
+    dat, _ = m.phan_quyet("ducthangho", [_rv("nguoi-la-hoan-toan", hiep="NONE")])
     if dat:
-        raise AssertionError("login NGOÀI danh sách cho phép vẫn được tính là duyệt")
+        raise AssertionError("login KHÔNG có thẩm quyền vẫn được tính là duyệt")
 
 
 def ca_HOA_THUONG_khong_lam_lot_tu_duyet(m):
@@ -304,9 +315,15 @@ def ca_tac_gia_rong_la_DO(m):
 
 
 def ca_danh_sach_cho_phep_RONG_la_DO(m):
-    dat, ly = m.phan_quyet("ducthangho", [_rv("code2nguyen")], cho_phep=())
+    """Tập THẨM QUYỀN rỗng ⇒ cổng không có nghĩa ⇒ ĐỎ.
+
+    Tên ca giữ nguyên vì đột biến `cho_phep_RONG_van_tha` neo vào nó; thứ đổi là tham số,
+    từ danh sách TÊN sang tập THẨM QUYỀN. Bất biến không đổi: một cổng có allow-list rỗng
+    thì tha tất, và tha tất phải là ĐỎ chứ không phải xanh.
+    """
+    dat, ly = m.phan_quyet("ducthangho", [_rv("code2nguyen")], tham_quyen=())
     if dat or "RỖNG" not in ly:
-        raise AssertionError("danh sách cho phép RỖNG mà cổng vẫn xanh: " + ly)
+        raise AssertionError("tập thẩm quyền RỖNG mà cổng vẫn xanh: " + ly)
 
 
 def ca_yeu_cau_SUA_chua_go_thi_chan(m):
@@ -347,7 +364,12 @@ def ca_ban_duyet_CU_khong_tinh(m):
 
 def ca_thieu_commit_id_khong_duoc_doc_thanh_DAT(m):
     """Neo thì phải neo CHẶT: thiếu `commit_id` mà đang có head để so là KHÔNG ĐO ĐƯỢC."""
+    # `author_association` PHẢI có, dù ca này không đo thẩm quyền: thiếu nó thì bản ghi bị
+    # từ chối vì KHÔNG CÓ THẨM QUYỀN chứ không phải vì thiếu neo, và ca vẫn "xanh" khi đột
+    # biến `bo_neo_vao_HEAD` gỡ neo — đúng một ca TÍN DỤNG GIẢ. Đo được: trước khi thêm
+    # dòng này, `bo_neo_vao_HEAD` không giết nổi ca này.
     thieu = [{"user": {"login": "code2nguyen"}, "state": "APPROVED",
+              "author_association": "COLLABORATOR",
               "submitted_at": "2026-01-01T00:00:00Z"}]
     if m.phan_quyet("ducthangho", thieu, head_sha="HEAD1")[0]:
         raise AssertionError("bản ghi THIẾU `commit_id` vẫn được tính là duyệt đúng head")
@@ -721,10 +743,88 @@ def ca_thieu_ACTIONLINT_la_DO(m):
     raise AssertionError("thieu actionlint ma tang dinh nghia van xanh")
 
 
+# ------------------------------------------------------------------ #386 (A1..A4)
+# Cổng cũ so TÊN với một hằng chép cứng nên phân biệt CÁCH VIẾT chứ không phân biệt
+# THẨM QUYỀN. Đo trên PR #392: `notebyme88 APPROVED COLLABORATOR sha=2ff4b8dc` mà cổng
+# vẫn ĐỎ với "số bản ghi review=2 · được phép duyệt=ducthangho, code2nguyen".
+
+_HEAD_392 = "2ff4b8dc6e867fcde3d89e8807837fd8b83dfad4"
+
+
+def ca_A1_du_lieu_that_cua_392_phai_DAT(m):
+    """A1 — dữ liệu THẬT của #392. Ca này phải ĐỎ trên nền và XANH sau vá."""
+    dat, ly = m.phan_quyet(
+        "ducthangho",
+        [_rv("notebyme88", commit=_HEAD_392, luc="2026-08-29T02:38:44Z")],
+        head_sha=_HEAD_392)
+    if not dat:
+        raise AssertionError(
+            "collaborator THẬT duyệt đúng head mà cổng vẫn chặn: " + ly)
+
+
+def ca_A2_CONTRIBUTOR_va_NONE_bi_tu_choi(m):
+    """A2 — `CONTRIBUTOR` nghĩa là TỪNG có commit được merge, KHÔNG phải có quyền ghi.
+
+    Người ngoài gửi một PR được merge sẽ mang nhãn ấy vĩnh viễn; tính nó là thẩm quyền
+    thì cổng mở cho bất kỳ ai từng đóng góp một lần.
+    """
+    for hiep in ("CONTRIBUTOR", "NONE", "FIRST_TIME_CONTRIBUTOR", ""):
+        dat, _ = m.phan_quyet(
+            "ducthangho",
+            [_rv("nguoi-ngoai", commit=_HEAD_392, hiep=hiep)],
+            head_sha=_HEAD_392)
+        if dat:
+            raise AssertionError("author_association=%r được tính là thẩm quyền" % hiep)
+
+
+def ca_A2b_ba_thu_hang_co_tham_quyen_deu_DAT(m):
+    """A2 chiều BẮT OAN: cả ba thứ hạng có quyền ghi đều phải qua."""
+    for hiep in ("OWNER", "COLLABORATOR", "MEMBER"):
+        dat, ly = m.phan_quyet(
+            "ducthangho",
+            [_rv("nguoi-co-quyen", commit=_HEAD_392, hiep=hiep)],
+            head_sha=_HEAD_392)
+        if not dat:
+            raise AssertionError("author_association=%r bị chặn oan: %s" % (hiep, ly))
+
+
+def ca_A3_khong_con_duong_nao_di_bang_TEN(m):
+    """A3 — hằng chép cứng phải biến mất khỏi NGUỒN, không chỉ khỏi luồng chạy.
+
+    Đọc từ tệp nguồn chứ không từ `dir(m)`: một hằng còn nằm đó mà tạm thời không ai gọi
+    vẫn là đường sẽ được dùng lại.
+    """
+    nguon = (pathlib.Path(__file__).resolve().parent / "duyet_danh_tinh.py").read_text(
+        encoding="utf-8")
+    if "NGUOI_DUOC_DUYET" in nguon:
+        raise AssertionError(
+            "`NGUOI_DUOC_DUYET` vẫn còn trong nguồn — danh sách TÊN song song sẽ trôi "
+            "y như cái vừa trôi, và người bị gỡ collaborator vẫn duyệt được")
+
+
+def ca_A4_bot_mang_COLLABORATOR_van_bi_chan(m):
+    """A4 — bot được thêm làm collaborator sẽ mang `COLLABORATOR` và lọt qua A2.
+
+    Bản ghi cố ý khai `type="User"` — trường ấy là TUỲ CHỌN trong hợp đồng và mã cố ý
+    fail-open trên nó, nên chốt `[bot]` phải đứng ĐỘC LẬP, không dựa vào `type`.
+    """
+    dat, _ = m.phan_quyet(
+        "ducthangho",
+        [_rv("mot-con-bot[bot]", commit=_HEAD_392, kieu="User", hiep="COLLABORATOR")],
+        head_sha=_HEAD_392)
+    if dat:
+        raise AssertionError("bot mang COLLABORATOR vẫn được tính là danh tính duyệt")
+
+
 CA = [
+    ("A1_du_lieu_that_cua_392_phai_DAT", ca_A1_du_lieu_that_cua_392_phai_DAT),
+    ("A2_CONTRIBUTOR_va_NONE_bi_tu_choi", ca_A2_CONTRIBUTOR_va_NONE_bi_tu_choi),
+    ("A2b_ba_thu_hang_co_tham_quyen_deu_DAT", ca_A2b_ba_thu_hang_co_tham_quyen_deu_DAT),
+    ("A3_khong_con_duong_nao_di_bang_TEN", ca_A3_khong_con_duong_nao_di_bang_TEN),
+    ("A4_bot_mang_COLLABORATOR_van_bi_chan", ca_A4_bot_mang_COLLABORATOR_van_bi_chan),
     ("tu_duyet_bi_chan", ca_tu_duyet_bi_chan),
     ("duyet_boi_danh_tinh_khac_thi_qua", ca_duyet_boi_danh_tinh_khac_thi_qua),
-    ("nguoi_ngoai_danh_sach_khong_tinh", ca_nguoi_ngoai_danh_sach_khong_tinh),
+    ("nguoi_KHONG_co_tham_quyen_khong_tinh", ca_nguoi_KHONG_co_tham_quyen_khong_tinh),
     ("HOA_THUONG_khong_lam_lot_tu_duyet", ca_HOA_THUONG_khong_lam_lot_tu_duyet),
     ("KHONG_DOC_DUOC_review_la_DO", ca_KHONG_DOC_DUOC_review_la_DO),
     ("khong_co_review_nao_la_DO", ca_khong_co_review_nao_la_DO),
@@ -764,9 +864,22 @@ CA = [
 ]
 
 DOT_BIEN_MA = {
+    # --- #386: mỗi chốt MỚI phải có đột biến RIÊNG, nếu không nó là tầng rỗng.
+    "bo_chot_bot": (
+        "        if ai.endswith(_HAU_TO_BOT):\n            continue\n",
+        "",
+        ["A4_bot_mang_COLLABORATOR_van_bi_chan"]),
+    "noi_tham_quyen_nhan_CONTRIBUTOR": (
+        'THAM_QUYEN_DUOC_DUYET = ("OWNER", "COLLABORATOR", "MEMBER")',
+        'THAM_QUYEN_DUOC_DUYET = ("OWNER", "COLLABORATOR", "MEMBER", "CONTRIBUTOR")',
+        ["A2_CONTRIBUTOR_va_NONE_bi_tu_choi"]),
+    "bo_kiem_THAM_QUYEN": (
+        "                 if st in _TAN and hq in cho and a != ta and _dung_commit(c))",
+        "                 if st in _TAN and a != ta and _dung_commit(c))",
+        ["A2_CONTRIBUTOR_va_NONE_bi_tu_choi", "nguoi_KHONG_co_tham_quyen_khong_tinh"]),
     "bo_kiem_KHAC_tac_gia": (
-        "                 if st in _TAN and a in cho and a != ta and _dung_commit(c))",
-        "                 if st in _TAN and a in cho and _dung_commit(c))",
+        "                 if st in _TAN and hq in cho and a != ta and _dung_commit(c))",
+        "                 if st in _TAN and hq in cho and _dung_commit(c))",
         ["tu_duyet_bi_chan", "HOA_THUONG_khong_lam_lot_tu_duyet"]),
     "so_tho_khong_casefold": (
         '    return str(x or "").strip().casefold()',

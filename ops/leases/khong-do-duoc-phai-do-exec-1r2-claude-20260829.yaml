@@ -1,0 +1,154 @@
+# Lease EXECUTOR — `KHONG-DO-DUOC-PHAI-DO` (#401), **revision 2, generation 2**.
+#
+# Thay lease `...exec-1-claude-20260829`. Bia mộ ĐỐI XỨNG: lease cũ mang
+# `da_bi_thay_the` trỏ tới lease này, lease này mang `thay_the_cho` trỏ ngược lại.
+#
+# Lease cũ KHÔNG bị thu hồi vì thi hành sai. Nó mất hiệu lực vì ĐẶC TẢ nó neo vào đã
+# bị thay: cross-review tìm ra rằng chính tiêu chí `A3` của revision 1 quá yếu, và
+# §3.2 nói finding cho thấy spec thiếu thì đi qua revision mới.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 401
+packet_id: KHONG-DO-DUOC-PHAI-DO
+phase_key: KHONG-DO-DUOC-PHAI-DO
+revision: 2
+generation: 2
+lease_id: khong-do-duoc-phai-do-exec-1r2-claude-20260829
+thay_the_cho: khong-do-duoc-phai-do-exec-1-claude-20260829
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: human_audited
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` là lớp MÁY TÍNH RA: `_tinh_lop_tu_write_set(['.claude/dev/ci_dang_ky_test.py'])`
+  ⇒ `sensitive`. ĐỌC ĐÚNG LÝ DO: đường dẫn KHÔNG khớp tiền tố nào trong `_BANG_LOP`; lớp
+  đến từ giá trị MẶC ĐỊNH fail-closed, KHÔNG phải vì packet chạm authority. Vẫn áp trần
+  `≤3 tệp / ≤300 dòng thêm` theo fail-closed, nhưng CẤM khai ngược lại rằng packet "chạm
+  authority" để mượn uy tín cụm từ ấy.
+
+spec_path: ops/specs/KHONG-DO-DUOC-PHAI-DO-r2.md
+spec_hash: fb5f1acc5dc3ed447d1f282acd60d9dab707f485cf14c75a581c159adeb0cab1
+spec_note: >-
+  Băm đo 18:46Z 29-08-2026 bằng `sha256sum ops/specs/KHONG-DO-DUOC-PHAI-DO-r2.md` trên
+  nhánh này. Đặc tả r1 (`3d8bf94c…`) VẪN Ở LẠI trong kho làm hồ sơ — không sửa đè, vì sửa
+  đè là làm băm trong lease r1 trỏ vào thứ không còn tồn tại.
+
+# BỘ ĐẾM REVIEW — chép sang, KHÔNG nạp lại. Đây là chỗ dễ lách nhất của cả tệp.
+codex_review_calls_used: 2
+codex_review_calls_max: 2
+review_rounds_used: 2
+tran_review_ghi_chu: >-
+  CẠN 2/2 trên PR #404. Hai lượt đều sinh output thật (lượt 1: 18:08:50→18:11:37Z, 42.584
+  token; lượt 2: 18:36:58→18:38:48Z) nên đều TÍNH theo §12.
+  REVISION NÀY KHÔNG NẠP LẠI BỘ ĐẾM, và KHÔNG được mở PR mới để có bộ đếm sạch. Revision
+  là đường HỢP LỆ cho spec sai; nhưng nếu nó đồng thời rửa sạch bộ đếm review thì nó thành
+  đúng "cờ nới bí mật" mà §12 cấm, chỉ khác là mặc áo hợp lệ. Vì vậy packet r2 giữ NGUYÊN
+  nhánh và PR #404, và mức assurance HẠ xuống `human_audited` (§8 mục 2) thay vì
+  `cross_approved` vốn không còn với tới được.
+  Ai đọc hồ sơ này về sau: hai lượt review đã dùng đều ĐÚNG — mỗi lượt tìm ra một ô hở
+  THẬT, đã tái lập được. Trần cạn không phải vì lãng phí.
+
+write_set:
+  - .claude/dev/ci_dang_ky_test.py
+
+write_set_da_do_truoc_khi_cap: >-
+  Không đổi so r1. Lease duy nhất từng giữ đường này là lease r1, nay đã có bia mộ đối xứng
+  trỏ về lease này, nên không có cửa sổ hai writer.
+
+branch: claude/khong-do-duoc-phai-do-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+target_pull_request: 404
+
+branch_ghi_chu: >-
+  GIỮ NGUYÊN nhánh và PR của generation 1 — đây là ngoại lệ có chủ ý so §4 ("generation mới
+  được đọc diff cũ nhưng không tự cherry-pick"). §4 viết câu ấy cho ca THU HỒI lease khi
+  worker cũ có thể còn sống; ở đây executor không đổi, không có worker song song, và mã tại
+  `ad3f417f` ĐÃ thoả `A3` mới. Mở nhánh/PR mới ở đây không mua thêm an toàn nào, mà lại nạp
+  lại bộ đếm review — tức mua đúng thứ §12 cấm.
+
+base_sha: 3922add45e256ca436994cc48c3a2c227f73f43e
+start_from_sha: ad3f417fc4c752bf937c3e70cce98efa0c3b6070
+reviewed_sha_required: ad3f417fc4c752bf937c3e70cce98efa0c3b6070
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 300
+  do_tu_sha: 3922add45e256ca436994cc48c3a2c227f73f43e
+  don_vi: >-
+    `git diff --numstat 3922add4 -- .claude/dev/ci_dang_ky_test.py` — dòng THÊM.
+    Pathspec TRONG lệnh, KHÔNG `..HEAD`.
+  da_dung: 107
+  ghi_chu: >-
+    ĐO 18:44Z 29-08-2026 tại `ad3f417f`: `+107/−15` ⇒ còn 193 dòng thêm dưới trần. Con số
+    này chống đỡ một lời khai về THẨM QUYỀN (cổng ADR-0044 ĐẠT hay cần ngoại lệ chủ kho),
+    nên PHẢI ĐO LẠI trước mỗi bước công bố, không chép dòng này. Bài học `PLAT-X8`: cùng
+    con số trôi 4 lần, lần thứ tư khai sai một cổng là ĐẠT.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-29 18:4xZ: sau khi cross-review lượt 2 cho `do_not_land` với
+  finding P1 thứ hai cùng hình dạng, chủ kho quyết (1) REVISION ĐẶC TẢ, siết `A3` thành
+  PHỦ TRỌN MIỀN; (2) mở phiên mới để làm tiếp.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_cung_la_nguoi_thi_cong: true
+
+recorder_xung_dot_loi_ich: >-
+  KHAI THẲNG: phiên ghi lease này cũng là phiên đã thi hành generation 1. §2 cho phép một
+  tác nhân giữ các vai ở NHỮNG PHIÊN KHÁC NHAU; ở đây nhập nhằng, và lần này nặng hơn r1
+  vì `assurance_target` đã hạ xuống `human_audited` — tức KHÔNG còn cross-provider làm đối
+  trọng. Bù lại bằng: (a) thẩm quyền đến từ `granted_by: ducthangho`; (b) `A8` đòi verdict
+  người-thật neo đúng `reviewed_sha` TRƯỚC khi land; (c) chủ kho đã quyết chuyển việc sang
+  PHIÊN MỚI, nên phiên audit không phải phiên đã viết mã.
+  Ai đọc hồ sơ này hãy tự cân: đây là điểm yếu assurance thật của packet, không phải hình thức.
+
+leased_at_utc: '2026-08-29T18:46:00Z'
+lease_expires_at_utc: '2026-08-30T02:46:00Z'
+run_minutes: 480
+
+thoi_han_ngan_co_chu_y: >-
+  480 phút, không phải 1440. Kho CHƯA CÓ đường thu hồi lease (nợ đang mở, Issue #400): đo
+  18:44Z 29-08, lease của packet #396 đã land từ 16:12Z vẫn CÒN_HẠN tới 12:40Z hôm sau.
+  Chưa có đường thu hồi thì thứ duy nhất giới hạn thiệt hại là ĐẶT HẠN NGẮN. Giảm nhẹ,
+  KHÔNG phải chữa: lease này cũng sẽ sống thừa tới 02:46Z dù packet land sớm.
+
+vung_duoc_phep_cham: >-
+  ĐÚNG MỘT tệp: `.claude/dev/ci_dang_ky_test.py`. KHÔNG đụng `ops/leases/**`, KHÔNG đụng
+  `ops/specs/**`, KHÔNG đụng `.github/workflows/ci.yml`.
+  ĐỌC KỸ: "không được chạm" nghĩa là không sửa VÀ không land qua nhánh packet. Phiên trước
+  từng đọc câu tương đương thành "cấm sửa, không cấm land" rồi merge nhánh lease vào nhánh
+  packet; cross-review bác đúng, phải revert, và cái revert ấy đẻ ra nợ N11. §12 gọi đó là
+  "cờ nới bí mật". Cần đổi phạm vi ⇒ Packet revision, không tự nới.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ hai ⇒ DỪNG, trình phép đo ·
+  S2 vượt `≤3 tệp / ≤300` dòng thêm ⇒ DỪNG, KHÔNG tự khai cổng ĐẠT ·
+  S3 phải sửa `ops/leases/**`, `ops/specs/**` hoặc `ci.yml` ⇒ DỪNG ·
+  S4 `A3` không đạt được TRỌN MIỀN — tức có ô nào mà đột biến làm sai riêng nó KHÔNG làm bộ
+     test đỏ ⇒ DỪNG. Khai ĐẠT bằng "ít nhất một ca đỏ" là lặp lại đúng lỗi của r1 ·
+  S5 `origin/master` đi tiếp so `base_sha` mà chưa đo lại ·
+  S6 phát hiện việc chữa đòi đụng N5 mới xong ⇒ DỪNG, đó là packet khác ·
+  S7 `ĐĂNG KÝ: 21/21` hoặc bộ đột biến cũ đổi màu ⇒ DỪNG, đã hồi quy ·
+  S8 CÓ Ý ĐỊNH gọi thêm codex review ⇒ DỪNG. Trần 2/2 đã CẠN và revision KHÔNG nạp lại.
+     Đường còn lại là `human_audited`, không phải một lượt codex nữa.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) Mã tại `ad3f417f` ĐÃ thoả `A3` mới (bảng `MIEN_DEM` 6 ô, 8/8 đột biến bị bắt, phản
+      chứng 30/30). Việc còn lại KHÔNG phải viết thêm mã, mà là: đo lại A5/A6 trên exact
+      head, và lấy `A8` — verdict người-thật.
+  (2) Packet này làm Windows ĐỎ THÊM (1 → 3), KHÔNG bớt. `master` vẫn đỏ tới khi N5 xong.
+      Đó là chủ ý. ĐỪNG "sửa" thêm cho master xanh.
+  (3) A7 KHÔNG ĐO ĐƯỢC theo quyết định chủ kho. A6 xanh KHÔNG thay được A7.
+  (4) Hình dạng "tầng tiêu thụ hở một ô" đã xuất hiện BA lần trong packet này. Nếu bạn tìm
+      ra ô thứ tư, ĐỪNG vá lẻ — đó là dấu hiệu miền chưa được liệt kê đúng, đi lại `A3b`.
+  (5) KHÔNG `git push` thẳng master, KHÔNG ép qua ruleset.

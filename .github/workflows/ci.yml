@@ -47,7 +47,21 @@ jobs:
               && '["ubuntu-latest","windows-latest"]'
               || '["ubuntu-latest"]') }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
+    # r391 — NÂNG 25 -> 45 THEO CHỈ ĐẠO CHỦ KHO, và lý do phải ghi lại vì con số cũ
+    # KHÔNG sai lúc nó được đặt: gate đã chậm dần tới sát trần. Đo 29-08-2026:
+    #   lượt ubuntu-only (PR #392)      21m52s  -> success, chỉ còn ~3 phút biên
+    #   lượt workflow_dispatch #1       25m19s  -> cancelled
+    #   lượt workflow_dispatch #2       25m09s  -> cancelled
+    #   lượt workflow_dispatch #3       45m17s  -> cancelled  (SAU khi nâng lên 45)
+    #   lượt ubuntu-only (PR #392, lần 2) 25m14s -> success  — ĐÃ VƯỢT trần 25 cũ
+    # Nâng tiếp 45 -> 60 theo chỉ đạo chủ kho. Nhưng A5 KHÔNG còn đòi Windows: xem đặc
+    # tả r3. Trần 60 là chỗ trống cho lần ĐO SAU, không phải lời hứa rằng Windows sẽ qua.
+    # Hai lượt dispatch dừng ở ĐÚNG 25 phút, tức chạm trần job chứ không phải bị huỷ do
+    # tranh chấp concurrency. Job nào trong ma trận chạm trần thì KHÔNG ĐO ĐƯỢC bằng bộ
+    # công cụ hiện có (`get_job_logs` trả `failed_jobs: 0` vì job bị huỷ không tính là
+    # "failed"); quy cho `windows-latest` là SUY LUẬN từ chỗ ubuntu-only về đích.
+    # NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN: gate 22 phút và đang lớn dần là nợ riêng.
+    timeout-minutes: 60
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
@@ -75,8 +89,8 @@ jobs:
           python-version: "3.12"
       # G5 cần PyYAML + actionlint + shellcheck nhưng phải đứng trước phép test/compile
       # đầu tiên. T6 chỉ cho phép đúng allowlist setup nhỏ trước G5.
-      - name: cài PyYAML (bộ cổng đăng lease cần)
-        run: python -m pip install --quiet PyYAML==6.0.3
+      - name: cài PyYAML + jsonschema (cổng đăng lease + validator verdict cần)
+        run: python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0
       - name: cài actionlint cho G5
         shell: bash
         env:

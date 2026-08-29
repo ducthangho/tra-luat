@@ -11,6 +11,18 @@
 # canary(fixture ops/canary/<tên>.yml minh chứng CÓ HIỆU LỰC, không chỉ có mặt).
 schema_version: 1
 cong_cu:
+  PyYAML:
+    # Khai để LUẬT ở `t16` có hiệu lực: mọi gói bên thứ ba phải có mặt trong bản kê.
+    # `ban_ghim: null` CÓ CHỦ ĐÍCH — `ci.yml` giữ quyền ghim (6.0.3). Container dev
+    # hiện có 6.0.1; ghim ở đây sẽ làm cổng ĐỎ vì một trôi lệch KHÔNG thuộc packet này.
+    # Trôi lệch ấy là nợ có thật, đã khai ở phần báo cáo, không nuốt.
+    bat_buoc: true
+    ban_ghim: null
+    probe:
+      - ten: mac_dinh
+        lenh: [python, -c, "import importlib.metadata as m; print(m.version('PyYAML'))"]
+        regex: '(?m)^(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)$'
+    cai: {lenh: "python -m pip install --quiet PyYAML==6.0.3"}
   actionlint:
     bat_buoc: true
     ban_ghim: "1.7.7"
@@ -18,6 +30,20 @@ cong_cu:
     cai: {lenh: "bash ops/cai_actionlint.sh", moi_truong: {AL_VER: "1.7.7"}}
     canary: actionlint_shellcheck
     chinh_sach: blocking
+  jsonschema:
+    # `.claude/dev/review_verdict_binding.py` import ở MỨC MODULE, mà `packet_loop.py`
+    # import lại nó — nên thiếu gói này thì cổng gate lifecycle KHÔNG IMPORT NỔI, không
+    # phải "chạy yếu đi". Đo được: `gate` ĐỎ liên tục từ `47a50395` với
+    # `ModuleNotFoundError: No module named 'jsonschema'`, và không ai thấy suốt bốn vòng
+    # cross-review vì cả bốn chạy trong container có sẵn gói.
+    # `python` KHÔNG `python3`: Windows phổ biến chỉ có `python`/`py` (CLAUDE.md).
+    bat_buoc: true
+    ban_ghim: "4.26.0"
+    probe:
+      - ten: mac_dinh
+        lenh: [python, -c, "import importlib.metadata as m; print(m.version('jsonschema'))"]
+        regex: '(?m)^(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)$'
+    cai: {lenh: "python -m pip install --quiet jsonschema==4.26.0"}
   shellcheck:
     # KHÔNG bắt buộc: actionlint tự dò shellcheck trên PATH, ÂM THẦM bỏ lớp luật SC* khi
     # vắng (rc=0) — canary trên bắt đúng sự âm thầm đó (T2).

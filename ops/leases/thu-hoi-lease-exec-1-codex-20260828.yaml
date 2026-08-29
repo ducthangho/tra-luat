@@ -113,3 +113,8 @@ canh_bao_cho_nguoi_thi_hanh: >-
   (5) Tín hiệu "đã giết" phải là lớp ngoại lệ mã triển khai KHÔNG giả được — bài học #359.
   (6) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu.
 posted_comment_id: 5452437188   # workflow ghi, ĐỪNG sửa tay
+
+# THU HỒI — bia mộ đối xứng. Packet #385 chưa land (PR #388 còn mở), nhưng chủ kho quyết
+# in-session 12:22Z 29-08-2026 rằng write set này chuyển sang packet #396 `BO-GHI-NGUOC`.
+# Chiều ngược nằm ở `thay_the_cho` của lease kế nhiệm; `_bia_mo_doi_xung` đòi ĐỦ HAI CHIỀU.
+da_bi_thay_the: bo-ghi-nguoc-exec-1-claude-20260829

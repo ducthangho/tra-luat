@@ -813,8 +813,10 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
     #                            phần đầu);
     #   - thay nó bằng bản của danh tính khác ⇒ mất dấu; nhưng một comment người thật
     #     đăng THÊM, trong khi bản của bot còn nguyên, thì KHÔNG;
-    #   - dấu neo theo `lease_id`: một `lease_id` khác là một dấu KHÁC, nên revision mới
-    #     luôn đăng được — đó là ĐÚNG Ý ĐỒ, không phải mất dấu.
+    #   - dấu neo theo `lease_id`: dấu của ID cũ KHÔNG chặn một lease mang ID khác.
+    #     CHỈ VẬY THÔI — đây là câu về DẤU, không phải câu về cổng. Một lease ID mới vẫn
+    #     có thể bị chặn bởi dấu của CHÍNH ID mới, bởi fail-close, thẩm quyền, hạn, lớp
+    #     review hay neo prompt. Đừng đọc thành "revision mới luôn đăng được".
     #
     # Mất dấu ⇒ lượt sau đăng TRÙNG. `posted_comment_id` nằm trong git thì không mất
     # theo thao tác quản trị Issue. Đây là hồi quy về ĐỘ BỀN, không phải về tính sẵn

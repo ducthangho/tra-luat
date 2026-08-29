@@ -128,3 +128,4 @@ canh_bao_cho_nguoi_thi_hanh: >-
   (7) Dùng `.claude/dev/mcp_gh.py` để gọi GitHub, ĐỪNG tự dựng client — nó đã biết cả hai
       endpoint (`/mcp/` và `/mcp/x/actions`); phiên trước tự dựng client nháp chỉ biết
       `/mcp/` rồi mù với CI suốt bốn vòng review.
+posted_comment_id: 5459769735   # workflow ghi, ĐỪNG sửa tay

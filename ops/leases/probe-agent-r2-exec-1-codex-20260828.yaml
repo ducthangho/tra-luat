@@ -1,0 +1,245 @@
+# Lease EXECUTOR — packet #379 `PROBE-AGENT-KHONG-BIEN-MAT`, BẢN SỬA ĐỔI 2, lượt 1.
+#
+# TRẠNG THÁI: **BẢN NHÁP — CHƯA ĐĂNG, CHƯA CÓ HIỆU LỰC.**
+# Còn ĐÚNG MỘT trường phải điền lúc cấp: `reviewed_sha_required` / `base_sha` /
+# `start_from_sha` = băm commit merge của #368 vào master. Chưa điền thì `lease_publish.py
+# check` CHẶN — fail-close có chủ ý, để bản nháp không thể bị đăng nhầm.
+#
+# Kế nhiệm của #363 — packet ấy DỪNG theo lệnh chủ kho mà không viết dòng mã nào, lease của
+# nó đã bị #368 thu hồi (`da_bi_thay_the`). Lỗ còn nguyên, tái hiện được trên `58b85cc`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 379
+packet_id: PROBE-AGENT-KHONG-BIEN-MAT
+phase_key: PROBE-AGENT-KHONG-BIEN-MAT
+revision: 2
+generation: 1
+lease_id: probe-agent-r2-exec-1-codex-20260828
+
+role: executor
+provider: codex
+executor: codex
+reviewer_provider: claude
+assurance_target: cross_approved
+access: read-write
+risk: sensitive
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` vì write set chạm `.claude/dev/launcher.py` — đường PHÓNG của MỌI lượt
+  executor/reviewer của kho. Chính packet này sinh ra vì một chốt trên đường ấy vắng mặt
+  CÓ ĐIỀU KIỆN mà không ai biết.
+
+NGOAI_LE_ADR_0041: >-
+  ADR-0041 (`Accepted` 17-08-2026) ghi *"Codex chỉ nhận Packet routine/systemic nhỏ, đóng,
+  write-set độc lập"*. Packet này là `sensitive` ⇒ theo luật thường Codex KHÔNG đủ điều kiện
+  làm Executor. Người giữ kho duyệt NGOẠI LỆ trong phiên 28-08-2026, đường (a), sau khi được
+  trình bày đúng mâu thuẫn ấy và được nói rõ ngoại lệ của #368 khai "không là tiền lệ".
+  Thẩm quyền: §2 — `override` thuộc chủ kho.
+  Ngoại lệ gắn RIÊNG packet #379; KHÔNG nới ADR-0041, KHÔNG là tiền lệ cho packet
+  `sensitive` khác. Phần ADR-0041 KHÔNG bị override vẫn phải tuân: *"PR do Codex code phải
+  được phiên Claude mới độc lập hoặc human review; Codex không review code mình"* ⇒
+  `reviewer_provider: claude`, và phiên Claude reviewer phải KHÁC phiên điều phối này.
+
+spec_path: ops/specs/PROBE-AGENT-KHONG-BIEN-MAT-r2.md
+spec_hash: 8c3f72c77244b500c7ef5e98e21f132a8a2ca09f06a1a2bf91538a16387c9f13
+spec_note: >-
+  BẢN SỬA ĐỔI 2, neo tại commit `49a07a9bca92793a93dceb47c3f2c68ffb9f03cd`, nhánh
+  `ops/spec-probe-agent-r2` — CHƯA vào master. Tìm ở `master` trước, chưa thấy thì fetch
+  nhánh ấy. Thứ định danh tệp là BĂM, không phải tên nhánh.
+  Bản r1 (`bbaf30cd972852c5b8d351f5e3a8ba4016327f52fb9cd72d880590a43a0b0eee`) giữ nguyên
+  làm hồ sơ, KHÔNG xoá — nó dán ba con số đã trôi và r2 đã sửa.
+  Phiên điều phối đã đọc ngược từ remote và so băm: KHỚP TỪNG BYTE.
+
+write_set:
+  - .claude/dev/launcher.py
+  - .claude/dev/launcher_test.py
+
+write_set_da_do_truoc_khi_cap: >-
+  ĐO 2026-08-29T06:51:34Z, ngay trước khi cấp. So HAI NGUỒN bằng TẬP TÊN TRƯỚC:
+  `ls-remote --heads` 258 = `for-each-ref` 258, `comm` RỖNG **hai chiều**, không shallow,
+  `git merge --ff-only origin/master` sạch. Rồi mới quét:
+  `ai-dang-giu .claude/dev/launcher.py` -> **rc=0 NGƯỜI_GIỮ 0** ·
+  `ai-dang-giu .claude/dev/launcher_test.py` -> **rc=0 NGƯỜI_GIỮ 0**.
+  Phép quét được CHẠY LẠI ngay trước lúc đăng, không dùng kết quả trên đây — cửa sổ giữa quét
+  và đăng đúng là chỗ sự cố #359/#363 chui qua.
+phu_thuoc_thu_tu: >-
+  depends_on: [368] — **ĐÃ THOẢ**. #368 (W1-P1) land lúc PR #381 merge, commit `907c87e`;
+  lease `w1-p1-van-chuyen-prompt-exec-1-codex-20260828` hết hạn `2026-08-29T06:45:00Z` và nay
+  phân loại HẾT_HẠN, không còn là NGƯỜI_GIỮ. Không thu hồi ai, không cấp chồng: lease này được
+  ghi khi cả hai đường đã `rc=0`.
+  Nhắc lại phép đo đã trả giá: land KHÔNG tự nhả lease — `ai-dang-giu` chỉ thôi tính một lease
+  khi nó HẾT_HẠN hoặc mang `da_bi_thay_the`. Ở đây là nhánh HẾT_HẠN.
+branch: codex/probe-agent-r2-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+start_from_sha: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+reviewed_sha_required: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+neo_ghi_chu: >-
+  Neo vào **`origin/master` hiện tại** `9e6d50dccd886817864c1ca5fd1c8207d4643654`, KHÔNG neo vào
+  `907c87e` (commit merge của #368) — vì master đã đi tiếp hai lần sau đó
+  (`9ad3c52` PR #370 packet #361, rồi `9e6d50d` PR #383 packet #372) và neo vào bản cũ hơn là
+  bắt executor bắt đầu từ cây đã tụt sau.
+  ĐÃ KIỂM nội dung write set: `git diff --numstat 3151371 9e6d50d -- launcher.py launcher_test.py`
+  ⇒ **RỖNG**, tức hai đường này ở master hiện tại y hệt head #368. Nên nền đo trên `3151371`
+  chuyển sang được, và vẫn phải TỰ ĐO LẠI trên chính mỏ neo.
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 220
+  do_tu_sha: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+  don_vi: >-
+    `git diff --numstat SHA -- .claude/dev/launcher.py .claude/dev/launcher_test.py`
+    — THÊM cộng XOÁ. Pathspec TRONG lệnh, KHÔNG dùng `..HEAD`.
+  da_dung: 0
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-28: duyệt đường (a) — NGOẠI LỆ ADR-0041 gắn riêng packet #379
+  ⇒ executor `codex` xhigh, reviewer `claude`; duyệt cấp lease nhưng CHỈ GHI khi #368 nhả
+  write set (chủ kho chọn "soạn sẵn, chỉ GHI khi rc=0"), KHÔNG cấp chồng.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+recorder_cung_la_nguoi_thi_cong: false
+
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này là phiên ĐIỀU PHỐI #379: nó đã đo nền, đo bẫy `t117`, đo cửa thứ hai
+  suy agent, và soạn chính tệp này. Nó KHÔNG soạn đặc tả r2. Dù vậy, phiên này KHÔNG được
+  làm reviewer của packet — §13 đòi reviewer là phiên MỚI, checkout/context độc lập.
+  Phiên reviewer im lặng ⇒ đọc là CHƯA CHẠY, KHÔNG phải sạch.
+
+leased_at_utc: '2026-08-29T06:55:00Z'
+lease_expires_at_utc: '2026-08-30T06:55:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 60
+
+attempts_used: 0
+attempts_limit: 3
+review_rounds_limit: 2
+review_rounds_used_truoc_luot_nay: 0
+
+executor_model: codex xhigh
+reviewer_bac: >-
+  `claude-opus-5` / `xhigh` — KẾT QUẢ CHẠY CÔNG CỤ, không ước tính:
+  `chon_reviewer.py --review-class sensitive --effective-review-class sensitive
+  --duong-dan .claude/dev/launcher.py,.claude/dev/launcher_test.py --so-dong 220 --luot 1
+  --json` ⇒ `{"model":"claude-opus-5","effort":"xhigh","giai_thich":"+2
+  review_class=sensitive; tổng=2"}` rc=0, đo 2026-08-28.
+  KIỂM `modelUsage` SAU lượt thật bằng vị từ fail-close dùng chung với CI
+  (`kiem_ket_qua` trong `chon_reviewer.py`) — đừng tự dựng phép kiểm. Ba bẫy CLI đã đo:
+  `--effort` sai lùi IM LẶNG về mặc định; `--model` không tồn tại thì KHÔNG chạy review nào
+  mà vẫn `rc=0`; trong 9 lượt mô hình yêu cầu chỉ phục vụ 3/9. `rc` và `subtype` CÙNG nói dối.
+  Probe ngắn KHÔNG chứng nhận được lượt dài.
+
+vung_duoc_phep_cham: >-
+  ĐÚNG hai tệp trong `write_set`. KHÔNG đụng `.claude/dev/packet_loop.py`, KHÔNG đụng
+  `ops/lease_publish.py`, KHÔNG đụng `.claude/dev/mcp_gh.py`, KHÔNG đụng
+  `.github/coordination/**`. Hunk ngoài hai tệp ấy ⇒ ĐỎ, DỪNG và khai.
+
+dieu_kien_dung: >-
+  S1 cần một đường dẫn thứ ba ngoài write set ⇒ DỪNG, khai ·
+  S2 vượt 220 dòng thêm+xoá ⇒ DỪNG, NÉN ·
+  S3 `origin/master` đã đi tiếp so `base_sha` mà chưa đo lại nền ⇒ DỪNG ·
+  S4 muốn chữa bằng PHÂN TÍCH CÚ PHÁP CHUỖI SHELL ⇒ DỪNG — §0/§6 đặc tả cấm tuyệt đối ·
+  S5 muốn khai một mục nghiệm thu là ĐẠT mà không có ca `rXX_` làm nó ĐỎ được ⇒ DỪNG ·
+  S6 `t117` đỏ, hoặc một mutant CŨ đột nhiên `giết 0/1` ⇒ DỪNG, đó là triệu chứng §8.1.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) KHÔNG commit vào master, KHÔNG merge, KHÔNG tạo/xoá ref ngoài nhánh của mình.
+  (2) BẪY `t117` — ĐÃ CỤ THỂ HOÁ, ĐO ĐƯỢC, KHÔNG PHẢI CẢNH BÁO SUÔNG. Chuỗi
+      `Path(str(lenh[0])).name.casefold()` có 1 chỗ trên `58b85cc` (d.1054, chính là đích),
+      nhưng 2 chỗ trên nhánh #368 (d.164 MỚI trong `_dinh_danh_van_chuyen`, và đích dời
+      xuống d.1088) — bản mới ĐỨNG TRƯỚC đích. `chay_dot_bien` thay chỗ khớp ĐẦU TIÊN.
+      ⇒ CẤM dùng chuỗi trần ấy làm mẫu tìm-thay; phải neo bằng chuỗi CHỨA
+      `("claude", "claude.exe")` hoặc thân `chay_cac_probe`. Chạy `t117` RIÊNG và ĐỌC KẾT
+      QUẢ RIÊNG của nó, đừng đọc tổng.
+  (3) GIỚI HẠN PHẠM VI PHẢI KHAI THẲNG. Sau khi #368 land, `launcher.py` có HAI cửa suy
+      agent từ `lenh[0]`, và cửa kia mang ĐÚNG điểm mù này — đo được trên `3151371`:
+      `_dinh_danh_van_chuyen(["bash","-c","cd \"$0\" && claude -p x","/tmp"])` trả
+      `provider=local_process`. Packet này đóng cửa `chay_cac_probe`, KHÔNG đóng cửa kia.
+      Chủ kho đã chốt GIỮ NGUYÊN phạm vi r2. Handoff PHẢI khai: một `run.json` có thể mang
+      `agent_da_khai: "claude"` (đúng, do KHAI) cạnh `provider: "local_process"` (sai, do
+      SUY). ĐỪNG khai rộng hơn thứ đã đóng.
+  (4) Ca mới KHÔNG được im lặng biến mất trên Windows (§8.2): chạy được cả hai nền, HOẶC
+      `BO QUA <tên>: <lý do cụ thể>` theo đúng nếp 15 ca đang có. Báo cáo phải phân loại
+      TỪNG ca mới theo hai nhánh ấy. Packet sinh ra vì một chốt biến mất không để lại dấu;
+      để bộ test của chính nó lặp lại hình dạng ấy thì hỏng nghĩa.
+  (5) Danh sách CHO PHÉP, không phải danh sách CẤM. `AGENT_CHO_PHEP` so BẰNG NHAU sau
+      `strip()`, KHÔNG casefold, KHÔNG đoán gần đúng. `VO_SHELL` chỉ là gợi ý BẮT BUỘC KHAI
+      cho vỏ đã biết; vỏ lạ rơi vào nhánh "còn lại ⇒ khong" — nói thẳng giới hạn ấy trong
+      docstring.
+  (6) Mỗi chốt phải có ĐỘT BIẾN RIÊNG; chốt không có mutant là chốt sẽ âm thầm hở lại.
+      Nền có ca ĐỎ ⇒ TỪ CHỐI công bố điểm đột biến.
+  (7) Dùng CLONE ĐỘC LẬP, KHÔNG `git worktree` — `chay_cac_probe` ném `MA_WORKTREE(14)` khi
+      `.git` là TỆP, có chủ ý. `--run-root` phải nằm NGOÀI kho (trong kho đẻ `extra_files`
+      ⇒ `release-verify` đỏ). `git config core.abbrev 7` trước khi chạy cổng.
+  (8) ĐỪNG viết chuỗi bỏ-qua-CI nguyên văn ở bất cứ đâu, kể cả khi trích dẫn để giải thích.
+  (9) Đẩy nhánh SỚM ngay khi có commit đầu tiên — hiện vật nằm trong container phù du,
+      mất theo container. #363 đã mất trọn theo đường này.
+
+nen_do_truoc_khi_bat_dau: >-
+  ĐO LẠI trên chính mỏ neo, đừng chép — §12: "run mới phải ĐO LẠI… trí nhớ ấm không thay được
+  phép đo". Số của phiên điều phối, ĐO 2026-08-29 trên `9e6d50d`, KÈM ĐIỀU KIỆN ĐO
+  (clone THẬT `.git` là THƯ MỤC, không shallow, `core.abbrev=7`, cây sạch,
+  `actionlint 1.7.7` + `shellcheck 0.10.0` CÓ MẶT):
+  · `launcher_test.py` Linux = **164/164** (tổng 165, bỏ qua 1 = `t62` fixture Windows, hỏng 0) rc=0
+  · `ops/lease_publish_test.py` = **124/124**, bỏ qua 0, rc=0
+  · `doctrine-scan` · `adr-song` · `doc-claims-check --strict` · `workflow-audit --strict`
+    · `release-verify --strict` — cả năm rc=0
+  HAI CON SỐ ĐÃ TRÔI TRONG 20 GIỜ, đừng dùng bản cũ: `launcher_test` `154/154` (nền `58b85cc`,
+  trước khi #368 land) và `lease_publish_test` `116/116` (trước khi #372 `BIA-MO-MOT-CHIEU` land
+  và thêm 8 ca vào `ops/lease_publish*`). Không con nào là hồi quy — cả hai là ca mới của packet
+  khác. Đây đúng lý do đặc tả bắt executor tự đo chứ đừng chép bảng.
+  Thiếu `actionlint`/`shellcheck` thì `lease_publish_test` mất ĐÚNG 1 ca (`t33` fail-close
+  "KHÔNG ĐO ĐƯỢC") — đó là MÔI TRƯỜNG, không phải hồi quy. Kho KHÔNG cài sẵn hai công cụ ấy.
+  Cổng đỏ ⇒ đo nền trên `origin/master` sạch rồi so DELTA; đỏ sẵn thì ghi "đỏ sẵn, delta = 0".
+dieu_kien_land_da_do: >-
+  ĐO 2026-08-28, và KHÔNG có trong đặc tả r2 lẫn bản giao việc — biết trước rẻ hơn nhiều:
+  (a) `duyet khac danh tinh` (land ở #348, `d4b3045`, SAU nền đặc tả) đòi một bản ghi review
+      GitHub state `APPROVED`, neo ĐÚNG head, từ danh tính KHÁC tác giả PR;
+      `NGUOI_DUOC_DUYET = ("ducthangho", "code2nguyen")` và `COMMENTED` bị loại tường minh.
+      `GITHUB_PAT` của container LÀ `ducthangho` (đo bằng `get_me`) ⇒ verdict cross-review
+      phải do `code2nguyen` đăng bằng `pull_request_review_write`, KHÔNG bằng comment.
+      Đường comment mà `cross-review/SKILL.md` nêu cho ca "PAT là tác giả PR" KHÔNG thoả cổng này.
+      Việc dựng danh tính ấy là VIỆC CỦA NGƯỜI (`ops/RUNBOOK_TACH_DANH_TINH_GITHUB.md` nửa A).
+  (b) Gắn nhãn `windows` cho PR NGAY KHI MỞ. `launcher-windows.yml` bắn ở
+      `types: [opened, synchronize, reopened, labeled]` nhưng JOB có
+      `if: event_name != 'pull_request' || contains(labels, 'windows')` ⇒ PR không nhãn vẫn
+      sinh một check `launcher (Windows that)` với kết luận `skipped` — KHÔNG phải vắng mặt,
+      và `skipped` trên giao diện đọc như một check vô hại.
+  (c) §5.1 ngoại lệ master-drift KHÔNG áp cho packet này nếu #368 land trước: `DRIFT` giao
+      write set ≠ rỗng ⇒ trúng kích hoạt #2 ⇒ PHẢI chạy lại cổng sau merge.
+  (d) Merge phải có chủ kho duyệt TỪNG LẦN; `packet_loop.py guard --action merge` chặn vai
+      executor (`rc=7`).
+
+prompt_ngoai_kho: >-
+  Prompt executor đã soạn xong và ĐO ĐƯỢC, nhưng nằm NGOÀI kho — phiên điều phối chưa có lease
+  chạm `ops/`, đúng lý do #363 cũng không commit được prompt của nó.
+  Tệp: `PROMPT_EXECUTOR_379.md`, 236 dòng,
+  `sha256 424959e08d1716cfb652a6fa3e5e22a1ba03372dc80706b4cb88cdae89ef9f2d`.
+  CỐ Ý KHÔNG dùng cặp `prompt_path`/`prompt_sha256_required`: cặp ấy fail-close khi tệp không có
+  trong kho (`_kiem_neo_prompt`), và khai một con băm không kèm địa chỉ tra được là đúng lỗi đã
+  chặn wp55 hai ngày. Khi có lease, commit prompt vào kho rồi mới chuyển sang cặp trường chuẩn.
+
+phong_da_chung_minh_chay: >-
+  ĐO 2026-08-28 trên `58b85cc`, clone ĐỘC LẬP, `--run-root` ngoài kho, `codex-cli 0.150.1`:
+  lệnh phóng dùng `{PROMPT_FILE}` cho `rc=0`, stdout `PONG-LAUNCHER`, `prompt_kin_hoan_toan: true`,
+  7.035s. Đường dùng `-` (stdin) THẤT BẠI `rc=1` `"No prompt provided via stdin."` — launcher
+  KHÔNG bơm stdin, nó THAY chỗ giữ. Lệnh đầy đủ nằm trong prompt executor.
+  CÙNG lượt chạy ấy là TANG VẬT của lỗ packet đang chữa, lấy trên đường phóng THẬT:
+  `lenh[0]=bash` · `probe=['ghi','spawn','workspace']` · không có `probe_bo_qua` · không có
+  `agent_da_khai` · `ma_thoat=0`. Cổng xanh, chốt vắng, không một dòng cảnh báo.
+
+no_co_ten:
+  - AGENT-SUY-TU-LENH0-CON-CUA-THU-HAI: >-
+      Sau #368, `_dinh_danh_van_chuyen` vẫn suy provider từ `lenh[0]` và vẫn mù với vỏ shell.
+      Packet #379 cố ý KHÔNG đóng cửa ấy (chủ kho chốt giữ phạm vi r2). Cần một packet riêng,
+      hoặc một revision sau khi cả hai đã land.
+  - AG-T0-01B-thu-hoi-lease-chua-co-duong: >-
+      Kho vẫn không có lệnh thu hồi lease. Đường duy nhất tắt một lease còn hạn là đăng bản
+      mới mang `da_bi_thay_the`. Nợ này đã cắn ít nhất 5 lần trong 4 ngày; lần này nó quyết
+      định luôn thời điểm packet #379 mở được.

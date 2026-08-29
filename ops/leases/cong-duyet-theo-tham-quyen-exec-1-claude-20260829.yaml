@@ -1,0 +1,105 @@
+# Lease EXECUTOR — `CONG-DUYET-THEO-THAM-QUYEN` (#386), lượt 1.
+#
+# THU HỒI, KHÔNG PHẢI KẾ TỤC. `thay_the_cho` trỏ sang lease của packet #348 vì cổng
+# `ai-dang-giu` bản master RAISE `KHÔNG_XÁC_ĐỊNH` với bia mộ MỘT CHIỀU — cặp hai chiều
+# là bắt buộc về cơ chế. Xem `ly_do_thu_hoi`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 386
+packet_id: CONG-DUYET-THEO-THAM-QUYEN
+phase_key: CONG-DUYET-THEO-THAM-QUYEN
+revision: 1
+generation: 1
+lease_id: cong-duyet-theo-tham-quyen-exec-1-claude-20260829
+thay_the_cho: tach-danh-tinh-github-exec-1r6-codex-20260828
+
+ly_do_thu_hoi: >-
+  Lease `tach-danh-tinh-github-exec-1r6-codex-20260828` (packet #348) giữ hai đường của
+  write set này tới 2026-08-29T04:05:00Z, nhưng việc đã xong: Issue #348 **CLOSED**;
+  `.claude/dev/duyet_danh_tinh.py` và `ops/RUNBOOK_TACH_DANH_TINH_GITHUB.md` đều CÓ trên
+  master. Nợ `AG-T0-01B` (Issue #385) — "CHƯA HẾT HẠN" không phải "CÒN HIỆU LỰC"; đây là
+  lần thứ TƯ trong một phiên vấp đúng nợ này. Chủ kho duyệt thu hồi trong phiên 29-08-2026.
+  Packet #386 KHÔNG kế tục #348, chỉ chạm hai đường mà #348 đã xong việc trên đó.
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+spec_path: ops/specs/CONG-DUYET-THEO-THAM-QUYEN.md
+spec_hash: 89188f12fa60ab13c0af5ff3b74e833b8235a855c99aa7a7b81df6c3d29de3f9
+spec_note: >-
+  BẢN 1, soạn qua skill `soan-spec` với sáu câu hỏi biên giới đã được chủ kho trả lời
+  ĐỒNG Ý cả sáu. Executor PHẢI tự đo lại mọi con số — đặc tả ghi kèm thời điểm đo, và một
+  con số không ghi ĐIỀU KIỆN ĐO thì sẽ trôi mà không ai biết.
+
+write_set:
+  - .claude/dev/duyet_danh_tinh.py
+  - .claude/dev/duyet_danh_tinh_test.py
+
+write_set_da_do_truoc_khi_cap: >-
+  So HAI NGUỒN ref: máy chủ 257 · đệm 257 · `comm` cả hai chiều RỖNG ⇒ không mù.
+  Quét bằng cổng bản MASTER lúc 02:46Z: lần đầu trả `rc=12 KHÔNG_XÁC_ĐỊNH` vì nhánh cục bộ
+  tụt sau origin — cổng tự in cách chữa, đã fast-forward rồi đo lại. Kết quả: cả hai đường
+  `rc=11`, NGƯỜI_GIỮ 1 = lease #348 nêu ở `ly_do_thu_hoi`. `mcp_gh.py` TRỐNG (rc=0) và
+  `mcp_gh_test.py` bị `d9-con-ho-exec-1` (#382, Issue OPEN) giữ — đó là lý do packet P-B
+  tách riêng, KHÔNG gộp vào đây.
+
+branch: ops/cong-duyet-tham-quyen-386
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+start_from_sha: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+reviewed_sha_required: 9e6d50dccd886817864c1ca5fd1c8207d4643654
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  "Đồng ý cả sáu, soạn spec cho P-A trước, sau đó cấp lease và hoàn thành nhanh đi" —
+  phiên 29-08-2026, sau vòng hỏi biên giới sáu câu của skill `soan-spec`.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_cung_la_nguoi_thi_cong: true
+
+recorder_xung_dot_loi_ich: >-
+  Phiên ghi lease này CŨNG soạn đặc tả VÀ sẽ thi công. Nó cũng là phiên đã ĐO ra khuyết
+  tật (#392: `notebyme88 APPROVED COLLABORATOR` mà cổng vẫn ĐỎ) nên có động cơ muốn bản vá
+  của mình đúng. Vì vậy nó KHÔNG được làm reviewer: cross-review phải là phiên `codex`
+  KHÁC; phiên ấy im lặng ⇒ đọc là CHƯA CHẠY.
+
+leased_at_utc: '2026-08-29T02:55:00Z'
+lease_expires_at_utc: '2026-08-29T14:55:00Z'
+run_minutes: 720
+
+vung_duoc_phep_cham: >-
+  Đúng hai tệp trong `write_set`. KHÔNG đụng `.github/workflows/duyet-khac-danh-tinh.yml`
+  (giữ nguyên chữ ký CLI), KHÔNG `.claude/dev/mcp_gh.py` (thuộc packet P-B), KHÔNG
+  `ops/lease_publish.py`. Hunk ngoài hai tệp ⇒ ĐỎ.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ BA — kể cả khi hoá ra phải sửa `duyet-khac-danh-tinh.yml` ⇒ DỪNG, khai ·
+  S2 vượt 300 dòng thêm hoặc 2 tệp ⇒ DỪNG, khai (vế NGHIÊM ADR-0044 cho `sensitive`) ·
+  S3 `origin/master` đi tiếp mà CÓ chạm một trong hai đường ⇒ DỪNG ·
+  S4 muốn giữ lại `NGUOI_DUOC_DUYET` "cho chắc" ⇒ DỪNG, xem M3 ·
+  S5 muốn khai một mục ĐẠT mà không có ca làm nó ĐỎ được ⇒ DỪNG ·
+  S6 chạm trần HAI vòng review (ADR-0043) ⇒ DỪNG, không tự nâng.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) GIỚI HẠN LỜI KHAI — chứng minh BYTE tới consumer adapter.
+  (2) Ba trạng thái: có · không · KHÔNG ĐO ĐƯỢC. Thứ ba làm cổng ĐỎ.
+  (3) A1 đòi ca ĐỎ TRÊN NỀN và XANH SAU VÁ. Không có vế "đỏ trên nền" thì ca không chứng
+      minh được nó đo bản vá.
+  (4) A4 đòi hai chốt ĐỘC LẬP: ca bot phải ĐỎ khi và chỉ khi gỡ chốt `[bot]`, KHÔNG phải
+      khi gỡ chốt `type`. Cùng đỏ ⇒ chưa độc lập ⇒ M4 chưa đạt.
+  (5) `phan_quyet` là vị từ THUẦN — giữ nguyên tính thuần, đừng cho nó tự gọi API.
+  (6) Mỗi chốt phải có ĐỘT BIẾN RIÊNG.
+  (7) Dùng `.claude/dev/mcp_gh.py` để gọi GitHub, ĐỪNG tự dựng client; nó biết cả
+      `/mcp/` lẫn `/mcp/x/actions`.
+posted_comment_id: 5459905568   # workflow ghi, ĐỪNG sửa tay

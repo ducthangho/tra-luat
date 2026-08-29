@@ -44,7 +44,23 @@ if hasattr(sys.stderr, "reconfigure"):
 # `ducthangho` NẰM TRONG danh sách và điều đó KHÔNG làm cổng vô nghĩa: luật "khác tác giả"
 # mới là thứ làm việc. Phiên chạy bằng credential của `ducthangho`, nên khi phiên mở PR thì
 # chỉ `code2nguyen` thoả được — tức đúng một danh tính mà phiên KHÔNG cầm.
-NGUOI_DUOC_DUYET = ("ducthangho", "code2nguyen")
+# THẨM QUYỀN, KHÔNG PHẢI TÊN. Bản trước chép cứng hai login và vì thế phân biệt CÁCH
+# VIẾT chứ không phân biệt THẨM QUYỀN — đo được trên PR #392: `notebyme88` là collaborator
+# THẬT, đã APPROVED đúng head `2ff4b8dc`, mà cổng vẫn ĐỎ vì tên không nằm trong danh sách.
+#
+# Chiều hỏng NGUY HIỂM HƠN đi cùng nó: người bị GỠ khỏi collaborator vẫn nằm trong danh
+# sách chép cứng nên vẫn duyệt được, vô thời hạn. Đọc thẩm quyền từ CHÍNH bản ghi review
+# đóng cả hai chiều bằng một chốt.
+#
+# `CONTRIBUTOR` KHÔNG có ở đây: nó nghĩa là *từng có commit được merge*, không phải có
+# quyền ghi — người ngoài gửi một PR được merge sẽ mang nhãn ấy vĩnh viễn.
+THAM_QUYEN_DUOC_DUYET = ("OWNER", "COLLABORATOR", "MEMBER")
+
+# GitHub gắn hậu tố `[bot]` vào login của mọi app. Chốt này ĐỘC LẬP với chốt
+# `user.type != "User"` ở dưới, và phải giữ độc lập: `type` là trường TUỲ CHỌN trong hợp
+# đồng nên mã cố ý fail-open trên nó, còn hậu tố `[bot]` là bất biến. Một bot được thêm
+# làm collaborator sẽ mang `COLLABORATOR` và lọt qua chốt thẩm quyền nếu thiếu chốt này.
+_HAU_TO_BOT = "[bot]"
 
 # BA state là QUYẾT ĐỊNH; `COMMENTED` và `PENDING` KHÔNG phải.
 # Cross-review lượt 1 (`commented-pending-xoa-quyet-dinh-cu`, P1) đo được cả hai chiều hỏng
@@ -122,9 +138,12 @@ def _moc(luc):
 
 
 def _quyet_dinh_cuoi(ban_ghi):
-    """Quyết định CÒN HIỆU LỰC của MỘT người: `(state, commit_id)`, hoặc `None` nếu không có.
+    """Quyết định CÒN HIỆU LỰC của MỘT người: `(state, commit_id, tham_quyen)`, hoặc `None`.
 
-    `ban_ghi` = danh sách `(luc, ma, state, commit_id)` đã lọc chỉ còn state QUYẾT ĐỊNH.
+    `ban_ghi` = danh sách `(luc, ma, state, commit_id, tham_quyen)` đã lọc chỉ còn state
+    QUYẾT ĐỊNH. Thẩm quyền đi THEO bản ghi thắng, không phải theo người: GitHub tính
+    `author_association` tại thời điểm gửi review, nên bản duyệt mới nhất mang thẩm quyền
+    mới nhất mà ta đo được.
     Ném `KhongDoDuoc` khi hai bản ghi cùng mốc thời gian mâu thuẫn nhau mà `id` không tách
     được — thà ĐỎ còn hơn ĐẠT vì tình cờ."""
     if not ban_ghi:
@@ -132,12 +151,12 @@ def _quyet_dinh_cuoi(ban_ghi):
     luc_max = max(x[0] for x in ban_ghi)
     dong = [x for x in ban_ghi if x[0] == luc_max]
     if len(dong) == 1:
-        return dong[0][2], dong[0][3]
+        return dong[0][2], dong[0][3], dong[0][4]
     ma = [x[1] for x in dong]
     if all(x is not None for x in ma) and len(set(ma)) == len(ma):
         thang = max(dong, key=lambda x: x[1])
-        return thang[2], thang[3]
-    khac = {(x[2], x[3]) for x in dong}
+        return thang[2], thang[3], thang[4]
+    khac = {(x[2], x[3], x[4]) for x in dong}
     if len(khac) == 1:
         return next(iter(khac))
     raise KhongDoDuoc(
@@ -145,7 +164,7 @@ def _quyet_dinh_cuoi(ban_ghi):
         % (len(dong), luc_max, sorted(khac)))
 
 
-def phan_quyet(tac_gia, reviews, cho_phep=NGUOI_DUOC_DUYET, head_sha=None):
+def phan_quyet(tac_gia, reviews, tham_quyen=THAM_QUYEN_DUOC_DUYET, head_sha=None):
     """Trả `(đạt, lý do)`.
 
     Vị từ THUẦN, nhận dữ liệu làm ĐỐI SỐ — đó là điều kiện để nó có ca BIẾT TRƯỚC ĐÁP ÁN.
@@ -167,9 +186,9 @@ def phan_quyet(tac_gia, reviews, cho_phep=NGUOI_DUOC_DUYET, head_sha=None):
     ta = _chuan(tac_gia)
     if not ta:
         return False, "KHÔNG ĐO ĐƯỢC: không xác định được tác giả PR"
-    cho = {_chuan(x) for x in (cho_phep or ()) if _chuan(x)}
+    cho = {str(x).strip().upper() for x in (tham_quyen or ()) if str(x).strip()}
     if not cho:
-        return False, "danh sách người được duyệt RỖNG — cổng không có nghĩa"
+        return False, "tập thẩm quyền RỖNG — cổng không có nghĩa"
 
     # GOM THEO NGƯỜI, CHỈ LẤY STATE QUYẾT ĐỊNH. GitHub cho một người duyệt rồi đổi ý; cộng
     # dồn mọi bản ghi thì một `APPROVED` đã bị thay bằng `CHANGES_REQUESTED` vẫn tính là
@@ -187,6 +206,9 @@ def phan_quyet(tac_gia, reviews, cho_phep=NGUOI_DUOC_DUYET, head_sha=None):
         # trên một trường tuỳ chọn là tự chặn cổng thật để đổi lấy một mối đe doạ giả định.
         if str(u.get("type") or "User") != "User":
             continue
+        # Chốt THỨ HAI, độc lập: `type` tuỳ chọn nên fail-open được; `[bot]` thì không.
+        if ai.endswith(_HAU_TO_BOT):
+            continue
         st = str((r or {}).get("state") or "").upper()
         if st not in _QUYET_DINH:
             continue
@@ -197,7 +219,8 @@ def phan_quyet(tac_gia, reviews, cho_phep=NGUOI_DUOC_DUYET, head_sha=None):
             # bỏ qua nghĩa là một bản CHANGES_REQUESTED có mốc lạ biến mất khỏi phép tính.
             return False, "KHÔNG ĐO ĐƯỢC: %s — %s" % (ai, e)
         theo_nguoi.setdefault(ai, []).append(
-            (luc, _ma_so(r), st, str((r or {}).get("commit_id") or "")))
+            (luc, _ma_so(r), st, str((r or {}).get("commit_id") or ""),
+             str((r or {}).get("author_association") or "").strip().upper()))
 
     moi_nhat = {}
     for ai, bg in theo_nguoi.items():
@@ -208,7 +231,8 @@ def phan_quyet(tac_gia, reviews, cho_phep=NGUOI_DUOC_DUYET, head_sha=None):
         if qd:
             moi_nhat[ai] = qd
 
-    chan = sorted(a for a, (st, _c) in moi_nhat.items() if st in _CHAN and a in cho)
+    chan = sorted(a for a, (st, _c, hq) in moi_nhat.items()
+                  if st in _CHAN and hq in cho)
     if chan:
         return False, "có yêu cầu SỬA chưa gỡ từ: " + ", ".join(chan)
 
@@ -217,18 +241,18 @@ def phan_quyet(tac_gia, reviews, cho_phep=NGUOI_DUOC_DUYET, head_sha=None):
         # KHÔNG ĐO ĐƯỢC, và KHÔNG ĐO ĐƯỢC không được đọc thành ĐẠT.
         return True if not head_sha else (c == str(head_sha))
 
-    tan = sorted(a for a, (st, c) in moi_nhat.items()
-                 if st in _TAN and a in cho and a != ta and _dung_commit(c))
+    tan = sorted(a for a, (st, c, hq) in moi_nhat.items()
+                 if st in _TAN and hq in cho and a != ta and _dung_commit(c))
     if not tan:
-        cu_ky = sorted(a for a, (st, c) in moi_nhat.items()
-                       if st in _TAN and a in cho and a != ta and not _dung_commit(c))
+        cu_ky = sorted(a for a, (st, c, hq) in moi_nhat.items()
+                       if st in _TAN and hq in cho and a != ta and not _dung_commit(c))
         if cu_ky:
             return False, ("bản duyệt của %s thuộc commit KHÁC head hiện tại — đã cũ"
                            % ", ".join(cu_ky))
-        tu_duyet = [a for a, (st, _c) in moi_nhat.items() if st in _TAN and a == ta]
+        tu_duyet = [a for a, (st, _c, _h) in moi_nhat.items() if st in _TAN and a == ta]
         if tu_duyet:
             return False, ("chỉ có TỰ DUYỆT (%s) — cần một danh tính KHÁC" % ta)
-        return False, ("chưa có bản duyệt nào từ danh tính khác `%s` trong %s"
+        return False, ("chưa có bản duyệt nào từ danh tính khác `%s` mang thẩm quyền %s"
                        % (ta, ", ".join(sorted(cho))))
     return True, "đã duyệt bởi danh tính khác tác giả: " + ", ".join(tan)
 
@@ -305,8 +329,8 @@ def main() -> int:
     dat, ly = phan_quyet(tac_gia, reviews, head_sha=a.head_sha)
     print(("XANH: " if dat else "ĐỎ: ") + ly)
     if not dat:
-        print("      tác giả=%r · số bản ghi review=%d · được phép duyệt=%s"
-              % (tac_gia, len(reviews), ", ".join(NGUOI_DUOC_DUYET)))
+        print("      tác giả=%r · số bản ghi review=%d · thẩm quyền được chấp nhận=%s"
+              % (tac_gia, len(reviews), ", ".join(THAM_QUYEN_DUOC_DUYET)))
     return 0 if dat else 1
 
 

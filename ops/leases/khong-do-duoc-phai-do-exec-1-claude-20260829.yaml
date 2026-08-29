@@ -12,6 +12,13 @@ phase_key: KHONG-DO-DUOC-PHAI-DO
 revision: 1
 generation: 1
 lease_id: khong-do-duoc-phai-do-exec-1-claude-20260829
+da_bi_thay_the: khong-do-duoc-phai-do-exec-1r2-claude-20260829
+bia_mo_ghi_chu: >-
+  Bia mộ đặt 18:4xZ 29-08-2026 theo quyết định Packet revision của chủ kho. Lease này
+  KHÔNG bị thu hồi vì thi hành sai — nó hết hiệu lực vì ĐẶC TẢ nó neo vào (revision 1,
+  `3d8bf94c…`) đã được thay bằng revision 2 (`fb5f1acc…`), mà §3.2 nói đổi acceptance
+  là tạo revision mới và làm lease cũ mất hiệu lực. Bia mộ ĐỐI XỨNG: lease r2 mang
+  `thay_the_cho` trỏ ngược về đây, đúng thứ `_bia_mo_doi_xung` đòi.
 
 role: executor
 provider: claude

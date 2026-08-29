@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Sổ test sống: kiểm phạm vi, lời gọi CI, rc và bằng chứng dương."""
 import argparse
+import contextlib
+import io
 import os
 import pathlib
 import re
@@ -125,26 +127,66 @@ def cach_ly_chap_nhan(ok, da_neo, hien_tai):
     return not ok
 
 
-def chay_moi():
+def trong_ci(env=os.environ):
+    """Có đang chạy TRONG CI không — ĐỘC LẬP với `moi_truong_hien_tai`.
+
+    Hai câu hỏi khác nhau và phải hỏi riêng: `moi_truong_hien_tai` hỏi *"nền nào"*
+    và đòi CẢ `RUNNER_OS == Linux`, nên trên `windows-latest` nó trả None. Nếu dùng
+    nó để suy ra "có ở CI không" thì Windows bị coi là ngoài CI và cổng lại làm tròn
+    lên đúng như cũ.
+    """
+    return env.get("GITHUB_ACTIONS") == "true"
+
+
+def dem_la_do(chap_nhan, o_trong_ci):
+    """Phán quyết CÓ TÍNH LÀ ĐỎ KHÔNG — bất biến nằm ở TẦNG TIÊU THỤ.
+
+    `cach_ly_chap_nhan` đã trung thực trả None cho trạng thái thứ ba, và đột biến
+    `r4-khong-do-duoc-thanh-dat` canh đúng điều đó. Nhưng chỗ LÀM TRÒN LÊN nằm ở nơi
+    TIÊU THỤ giá trị ấy, nên bất biến phải được cưỡng chế ở đây, nếu không ta chỉ có
+    thêm một bảo chứng giả thứ hai (#401).
+
+    None trong CI ⇒ ĐỎ (fail-closed). None ngoài CI ⇒ không đỏ: chạy cục bộ cũng giải
+    ra None, làm đỏ ở đó thì mọi lượt `--chay` trên máy lập trình viên đỏ vĩnh viễn.
+    """
+    if chap_nhan is None:
+        return bool(o_trong_ci)
+    return not chap_nhan
+
+
+def _chay_that(path):
+    p = subprocess.run([sys.executable, path], cwd=ROOT, text=True, stdout=subprocess.PIPE,
+                       stderr=subprocess.STDOUT)
+    return p.returncode, p.stdout
+
+
+def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
+             doc_moi_truong=moi_truong_hien_tai, doc_trong_ci=trong_ci):
+    """Bốn tham số sau là ĐƯỜNG NỐI ĐỂ ĐO, không phải cấu hình: phản chứng phải gọi
+    được chính hàm này với bộ chạy giả, nếu không tầng tiêu thụ lại không ai canh."""
     do = 0
-    hien_tai = moi_truong_hien_tai()
-    for path, mau in MOI.items():
-        p = subprocess.run([sys.executable, path], cwd=ROOT, text=True, stdout=subprocess.PIPE,
-                           stderr=subprocess.STDOUT)
-        ok = p.returncode == 0 and bang_chung_xanh(p.stdout, mau)
-        print(p.stdout, end="")
-        if path in CACH_LY:
-            no = CACH_LY[path]
+    hien_tai = doc_moi_truong()
+    o_trong_ci = doc_trong_ci()
+    for path, mau in moi.items():
+        rc, ban_in = chay_mot(path)
+        ok = rc == 0 and bang_chung_xanh(ban_in, mau)
+        print(ban_in, end="")
+        if path in cach_ly:
+            no = cach_ly[path]
             chap_nhan = cach_ly_chap_nhan(ok, no["moi_truong"], hien_tai)
-            if chap_nhan is None:
-                print(f"CI_DANG_KY {path}: KHÔNG ĐO ĐƯỢC — môi trường={hien_tai or 'không xác định'}")
+            nen = hien_tai or "không xác định"
+            if chap_nhan is None and o_trong_ci:
+                print(f"CI_DANG_KY {path}: ĐỎ — KHÔNG ĐO ĐƯỢC trong CI, môi trường={nen}, "
+                      f"cách ly neo {no['moi_truong']}")
+            elif chap_nhan is None:
+                print(f"CI_DANG_KY {path}: KHÔNG ĐO ĐƯỢC (ngoài CI) — môi trường={nen}")
             elif not chap_nhan:
                 print(f"CI_DANG_KY {path}: ĐỎ — đã xanh, hãy gỡ khỏi cách ly")
-                do += 1
             else:
-                print(f"CI_DANG_KY {path}: CÁCH LY rc={p.returncode} nợ={no['slug']}")
+                print(f"CI_DANG_KY {path}: CÁCH LY rc={rc} nợ={no['slug']}")
+            do += dem_la_do(chap_nhan, o_trong_ci)
         else:
-            print(f"CI_DANG_KY {path}: {'ĐẠT' if ok else 'ĐỎ'} rc={p.returncode}")
+            print(f"CI_DANG_KY {path}: {'ĐẠT' if ok else 'ĐỎ'} rc={rc}")
             do += not ok
     return do
 
@@ -206,11 +248,41 @@ def phan_chung():
     # Hai chiều bằng chứng: rc đỏ dù có dòng xanh; rc xanh nhưng thiếu dòng xanh.
     cases += [not (1 == 0 and bang_chung_xanh("TỔNG: ĐẠT", r"TỔNG: ĐẠT")),
               not (0 == 0 and bang_chung_xanh("", r"TỔNG: ĐẠT"))]
+    # r6 (#401): VỊ TỪ trung thực rồi mà NƠI TIÊU THỤ vẫn làm tròn lên được — đó là
+    # khuyết tật đã sống sót qua r4 và r5. Nên canh cả hai tầng.
+    cases += [dem_la_do(None, True) is True, dem_la_do(None, False) is False,
+              dem_la_do(False, False) is True, dem_la_do(True, True) is False]
+    # r6: `trong_ci` phải ĐỘC LẬP với `moi_truong_hien_tai` — thiếu RUNNER_OS vẫn là CI,
+    # còn không có GITHUB_ACTIONS thì dù có RUNNER_OS vẫn KHÔNG phải CI.
+    cases += [trong_ci({"GITHUB_ACTIONS": "true"}) is True,
+              trong_ci({"RUNNER_OS": "Linux"}) is False,
+              trong_ci({"GITHUB_ACTIONS": "false", "RUNNER_OS": "Linux"}) is False]
+    # r6: TẦNG TIÊU THỤ — gọi chính `chay_moi` với bộ chạy giả. Gỡ phép cộng ở đó ra thì
+    # ba ca này ĐỎ; đó là điều mà đột biến canh-vị-từ `r4-khong-do-duoc-thanh-dat` KHÔNG
+    # bắt được, và là lý do nợ N6 lọt cổng trên windows-latest.
+    gia_moi = {"gia_test.py": r"^(\d+)/(\d+)$"}
+    gia_no = {"gia_test.py": {"slug": "gia", "ly_do": "gia",
+                              "moi_truong": "github-actions/linux", "log": "gia"}}
+
+    def _dem(o_trong_ci, nen, rc_ban_in):
+        with contextlib.redirect_stdout(io.StringIO()):
+            return chay_moi(moi=gia_moi, cach_ly=gia_no, chay_mot=lambda _p: rc_ban_in,
+                            doc_moi_truong=lambda: nen, doc_trong_ci=lambda: o_trong_ci)
+
+    cases += [_dem(True, None, (1, "0/1\n")) == 1,
+              _dem(False, None, (1, "0/1\n")) == 0,
+              _dem(True, "github-actions/linux", (1, "0/1\n")) == 0]
     names += ["a-cach-ly-thieu-slug", "r4-thieu-moi-truong", "r5-moi-truong-sai-tap",
               "r5-comment-gia-loi-goi", "r5-step-if-false", "r5-job-if-false",
               "r5-step-if-literal-expr", "r5-normal-step", "b-cach-ly-chuyen-xanh",
               "r4-bo-so-moi-truong", "r4-khong-do-duoc-thanh-dat",
-              "rc-do-ban-in-xanh", "rc-xanh-thieu-ban-in"]
+              "rc-do-ban-in-xanh", "rc-xanh-thieu-ban-in",
+              "r6-vi-tu-none-trong-ci-la-do", "r6-vi-tu-none-ngoai-ci-khong-do",
+              "r6-vi-tu-da-xanh-van-do", "r6-vi-tu-cach-ly-hop-le-khong-do",
+              "r6-trong-ci-khong-doi-runner-os", "r6-thieu-github-actions-khong-phai-ci",
+              "r6-github-actions-false-khong-phai-ci",
+              "r6-TIEU-THU-trong-ci-phai-dem", "r6-TIEU-THU-ngoai-ci-khong-dem",
+              "r6-TIEU-THU-nen-khop-neo-van-cach-ly"]
     for name, ok in zip(names, cases): print(f"ĐỘT BIẾN {name}: {'ĐỎ đúng' if ok else 'LỌT'}")
     print(f"PHẢN CHỨNG: {sum(cases)}/{len(cases)} đỏ đúng")
     return all(cases)

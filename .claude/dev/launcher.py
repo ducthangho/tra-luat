@@ -140,8 +140,8 @@ MA_WORKTREE = 14
 MA_PROBE = 15
 
 AGENT_CHO_PHEP = ("claude", "codex", "khong")
-VO_SHELL = ("bash", "sh", "dash", "zsh", "ksh", "cmd", "cmd.exe",
-            "powershell", "powershell.exe", "pwsh", "pwsh.exe")
+HAU_TO_SHIM = (".exe", ".cmd", ".bat")
+VO_SHELL = ("bash", "sh", "dash", "zsh", "ksh", "cmd", "powershell", "pwsh")
 CAC_PROBE_AGENT = ("claude_trust",)
 
 
@@ -167,7 +167,7 @@ def _dinh_danh_van_chuyen(lenh: list[str]) -> dict:
         for ten in ten_lenh:
             theo_lenh[ten] = contract
     ten = Path(str(lenh[0])).name.casefold() if lenh else ""
-    for duoi in (".exe", ".cmd", ".bat"):
+    for duoi in HAU_TO_SHIM:
         if ten.endswith(duoi):
             ten = ten[:-len(duoi)]
             break
@@ -1088,15 +1088,17 @@ def _probe_cho_so(ds: dict) -> dict:
 
 
 def _chon_agent(lenh: list[str], agent: str | None) -> tuple[str | None, str]:
-    """Chọn từ khai báo/argv[0]; không đọc script shell hay đoán vỏ chưa biết."""
+    """Khai báo thắng argv[0], không đọc script shell; vỏ chưa biết và lệnh bọc như env/sudo/exec/nohup/xargs vẫn mở, nên phải dùng --agent."""
     ten = Path(str(lenh[0])).name.casefold()
     if agent is not None:
         da_khai = agent.strip()
         if da_khai not in AGENT_CHO_PHEP:
             raise Chan(MA_THAM_SO, "--agent phai la claude, codex hoac khong", {})
         return da_khai, da_khai
-    if ten.endswith(".exe") and ten[:-4] in AGENT_CHO_PHEP:
-        ten = ten[:-4]
+    for duoi in HAU_TO_SHIM:
+        if ten.endswith(duoi):
+            ten = ten[:-len(duoi)]
+            break
     if ten in AGENT_CHO_PHEP:
         return None, ten
     if ten in VO_SHELL:
@@ -1502,13 +1504,15 @@ def lenh_check(a) -> int:
 
 
 def lenh_run(a) -> int:
+    if a.agent and len(a.agent) > 1:
+        raise Chan(MA_THAM_SO, "co --agent bi lap; y dinh khong ro, KHONG doan")
     if not a.lenh:
         raise Chan(MA_THAM_SO, "thieu lenh de chay (dat sau dau --)")
     kq = chay_cac_chot(a)
-    agent_da_khai = agent_suy_ra = None
-    thong_tin_agent = _thong_tin_probe(None, None, {})
+    agent_da_khai, agent_suy_ra = (a.agent[0].strip() if a.agent else None), None
+    thong_tin_agent = _thong_tin_probe(agent_da_khai, None, {})
     try:
-        agent_da_khai, agent_suy_ra = _chon_agent(a.lenh, a.agent)
+        agent_da_khai, agent_suy_ra = _chon_agent(a.lenh, agent_da_khai)
         thong_tin_agent = _thong_tin_probe(agent_da_khai, agent_suy_ra, {})
         probe, ly_do_bo_qua = chay_cac_probe(
             kq["workspace"], a.lenh, a.bo_qua_probe, agent_suy_ra)
@@ -4011,7 +4015,7 @@ def build_parser():
                    help="giu prompt.snapshot sau khi con thoat (mac dinh XOA: no chua noi dung prompt)")
     r.add_argument("--bo-qua-probe", metavar="LY_DO",
                    help="cho run tiep khi probe hong; bat buoc ghi ly do vao run.json")
-    r.add_argument("--agent", metavar="TEN",
+    r.add_argument("--agent", metavar="TEN", action="append",
                    help="khai agent: claude, codex, hoac khong")
     r.add_argument("lenh", nargs=argparse.REMAINDER)
     r.set_defaults(fn=lenh_run)

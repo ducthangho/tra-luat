@@ -799,28 +799,21 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
     # được lease. Đừng mô tả nó như thay thế tương đương; nó không phải.
     #
     # VÀ MẤT MỘT THỨ NỮA, tách riêng vì nó KHÁC hẳn "mất mạng thì chờ" (cross-review
-    # codex 29-08-2026): dấu "đã đăng" nay là một HIỆN VẬT SỬA ĐƯỢC, sống trong CSDL
-    # Issue chứ không trong git.
+    # codex 29-08-2026): dấu "đã đăng" nay là HIỆN VẬT SỬA ĐƯỢC, sống trong CSDL Issue
+    # chứ không trong git.
     #
-    # Khai bằng VỊ TỪ, không bằng danh sách — hai lượt cross-review đều bắt được danh
-    # sách vừa rộng vừa hẹp. Vị từ đúng là: dấu của lease `L` tồn tại KHI VÀ CHỈ KHI
-    # Issue hiện có ít nhất một comment mà `user.login == "github-actions[bot]"` VÀ body
-    # BẮT ĐẦU đúng bằng ``**Lease `L`**``.
+    # Khai bằng VỊ TỪ, và CHỈ vị từ. Bản trước liệt kê thêm bốn "hệ quả" cho dễ đọc, và
+    # BỐN lượt cross-review liên tiếp mỗi lượt bắt được đúng một mục trong danh sách ấy
+    # rộng hơn vị từ. Danh sách chính là bề mặt sinh lỗi, nên nó bị bỏ chứ không vá tiếp:
     #
-    # Bốn hệ quả suy thẳng từ vị từ ấy, không cần nhớ thêm:
-    #   - xoá comment ấy      ⇒ mất dấu;
-    #   - sửa PREFIX của nó   ⇒ mất dấu (sửa phần SAU prefix thì KHÔNG — vị từ chỉ đọc
-    #                            phần đầu);
-    #   - thay nó bằng bản của danh tính khác ⇒ mất dấu; nhưng một comment người thật
-    #     đăng THÊM, trong khi bản của bot còn nguyên, thì KHÔNG;
-    #   - dấu neo theo `lease_id`: dấu của ID cũ KHÔNG chặn một lease mang ID khác.
-    #     CHỈ VẬY THÔI — đây là câu về DẤU, không phải câu về cổng. Một lease ID mới vẫn
-    #     có thể bị chặn bởi dấu của CHÍNH ID mới, bởi fail-close, thẩm quyền, hạn, lớp
-    #     review hay neo prompt. Đừng đọc thành "revision mới luôn đăng được".
+    #   Dấu của lease `L` tồn tại KHI VÀ CHỈ KHI Issue hiện có ÍT NHẤT MỘT comment mà
+    #   `user.login == "github-actions[bot]"` VÀ body BẮT ĐẦU đúng bằng `**Lease `L`**`.
     #
-    # Mất dấu ⇒ lượt sau đăng TRÙNG. `posted_comment_id` nằm trong git thì không mất
-    # theo thao tác quản trị Issue. Đây là hồi quy về ĐỘ BỀN, không phải về tính sẵn
-    # sàng; `t126` ghim đúng vị từ này để nó không âm thầm đổi.
+    # Điều đáng lo suy thẳng từ đó: thao tác quản trị Issue nào làm biến mất comment khớp
+    # CUỐI CÙNG thì làm mất dấu; mất dấu thì CHỐT NÀY không còn chặn — các chốt khác của
+    # `kiem_github` vẫn áp dụng, nên đừng đọc thành "sẽ đăng trùng".
+    # `posted_comment_id` nằm trong git thì không mất theo thao tác quản trị Issue. Đây
+    # là hồi quy về ĐỘ BỀN, không phải tính sẵn sàng. `t126` ghim vị từ bằng ba ca âm.
     thieu = [k for k in BAT_BUOC if lease.get(k) in (None, "")]
     if thieu:
         raise Chan(RC_NOI_DUNG, f"thiếu trường bắt buộc: {', '.join(thieu)}")

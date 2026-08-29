@@ -3936,12 +3936,16 @@ def t126_dau_da_dang_la_HIEN_VAT_SUA_DUOC_chu_khong_phai_ban_ghi_git():
     trên Issue không làm nó mất. Sau #396 dấu duy nhất là chính comment ấy.
 
     Vị từ đúng — ca này ghim nó, chứ không ghim một danh sách thao tác: dấu của lease `L`
-    tồn tại KHI VÀ CHỈ KHI Issue hiện có ít nhất một comment mà
+    tồn tại KHI VÀ CHỈ KHI Issue hiện có ÍT NHẤT MỘT comment mà
     `user.login == "github-actions[bot]"` VÀ body BẮT ĐẦU đúng bằng ``**Lease `L`**``.
 
-    Ba ca ÂM dưới đây là ba cách phá vị từ ấy: danh sách rỗng (xoá), prefix bị phá (sửa
-    ĐẦU body — sửa phần SAU prefix thì KHÔNG mất dấu), và danh sách chỉ còn bản của danh
-    tính khác (THAY THẾ, không phải THÊM VÀO — thêm vào mà bản bot còn thì vẫn chặn).
+    Lượng từ "ít nhất một" là chỗ dễ trượt nhất, nên ba ca ÂM dưới đây đều dựng danh sách
+    KHÔNG CÒN bản khớp nào: rỗng hẳn; còn một bản của bot nhưng prefix đã bị phá; còn một
+    bản đúng prefix nhưng của danh tính khác. Chúng KHÔNG khẳng định "xoá một comment là
+    mất dấu" — còn một bản khớp khác thì dấu vẫn còn.
+
+    Ca DƯƠNG dùng body có nội dung SAU prefix và vẫn chặn, tức sửa phần sau prefix không
+    làm mất dấu.
 
     Ca này KHÔNG khẳng định hành vi ấy là tốt. Nó khẳng định hành vi ấy là ĐÃ BIẾT.
     Cross-review codex 29-08-2026 (finding 3) chỉ ra rằng `danh_doi` của đặc tả mới chỉ

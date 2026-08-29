@@ -15,6 +15,7 @@ Chạy: python3 ops/lease_publish_test.py
 
 from __future__ import annotations
 
+import os
 import re
 import shlex
 import subprocess
@@ -42,9 +43,37 @@ def ca(fn):
 
 
 def chay(*doi_so, env=None, cwd=None):
+    # HERMETIC (packet #396, đóng N9). `env=None` giao cho `subprocess.run` KẾ THỪA cả
+    # môi trường cha — kể cả `GITHUB_ACTOR` mà runner của Actions luôn đặt. Cổng thẩm
+    # quyền trong `lease_publish.py` đọc đúng biến ấy, nên bộ test đang tự bắn vào chân
+    # mình: đo 29-08-2026, một lượt merge do `notebyme88` bấm làm 29 ca ĐỎ oan.
+    #
+    # Mặc định xoá ĐÚNG một biến. Ca nào cần actor thì truyền `env=` tường minh — lúc đó
+    # lời khai của ca thắng, và đó là điều đúng: ca ấy đang ĐO hành vi theo actor.
+    if env is None:
+        env = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
     p = subprocess.run([sys.executable, str(SCRIPT), *[str(x) for x in doi_so]],
                        capture_output=True, text=True, env=env, cwd=cwd)
     return p.returncode, p.stdout, p.stderr
+
+
+def _kiem_sach(mod, *doi_so):
+    """Gọi `kiem()` TRONG TIẾN TRÌNH với `GITHUB_ACTOR` đã gỡ (packet #396, đóng N9).
+
+    Đường thứ ba rò actor, và là đường khó thấy nhất: `chay()` spawn tiến trình con nên
+    còn nhìn thấy `env=`, `_goi_lop_gh` có `patch.dict` nên còn nhìn thấy chỗ để sửa —
+    còn ở đây ca test gọi THẲNG hàm sản phẩm, nên nó đọc `os.environ` của chính suite mà
+    không có cái móc nào lộ ra.
+
+    KHÔNG chữa bằng `os.environ.pop` toàn cục ở đầu suite. Làm thế thì `t125` (A/B) trở
+    thành HẰNG ĐÚNG: lượt con có actor sẽ tự gỡ actor ngay khi khởi động, hai lượt giống
+    nhau DO CẤU TẠO chứ không phải do các helper hermetic. Một ca không thể đỏ thì không
+    phải một ca.
+    """
+    from unittest import mock
+    moi = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
+    with mock.patch.dict(os.environ, moi, clear=True):
+        return mod.kiem(*doi_so)
 
 
 def _doc_do_gia(tep: Path, rc: int, stdout: str, stderr: str, mo_ta: str) -> str:
@@ -167,7 +196,17 @@ def _goi_lop_gh(gh: GhGia, ten: str, *args, env_them=None, bo_qua=()):
     mod.GOI_GH = gh
     for ten_bo_qua in bo_qua:
         setattr(mod, ten_bo_qua, lambda *a: None)
+    # HERMETIC (packet #396, đóng N9). `clear=True` TRÔNG NHƯ cách ly nhưng nó cách ly
+    # bằng chính bản sao đã mang `GITHUB_ACTOR` của runner. Đo 29-08-2026 trên `ef4098d4`:
+    # `env -u GITHUB_ACTOR` ⇒ 123/124, `GITHUB_ACTOR=notebyme88` ⇒ 94/124 — chênh 29 ca,
+    # và `t124` còn báo SAI TẬP ĐÍCH của bẫy đột biến. Verdict của bộ test không được phụ
+    # thuộc vào việc AI BẤM NÚT MERGE.
+    #
+    # Xoá ĐÚNG một biến, KHÔNG dùng `os.environ.pop` toàn cục: cái đó quá thô và sẽ che
+    # mất chính ca cần chứng minh hành vi khi actor VẮNG. Ca nào cần actor thì đặt tường
+    # minh qua `env_them` — `t02d` làm đúng như vậy.
     moi = dict(os.environ)
+    moi.pop("GITHUB_ACTOR", None)
     moi.update(env_them or {})
     try:
         with mock.patch.dict(os.environ, moi, clear=True):
@@ -321,14 +360,6 @@ def t07_packet_issue_khong_phai_so_bi_CHAN():
 
 
 @ca
-def t08_da_dang_roi_thi_BAO_BO_QUA_khong_dang_lai():
-    """Idempotent: workflow chạy lại (retry, re-run) KHÔNG được đăng trùng."""
-    with San() as s:
-        rc, _, e = chay("check", viet(s, lease_mau(posted_comment_id=5288831421)))
-        bang(rc == RC_DA_DANG, f"sẽ đăng trùng: rc={rc} {e}")
-
-
-@ca
 def t09_body_in_ra_nguyen_van_YAML_de_doi_chieu():
     """Thân comment phải chứa lại chính khối YAML — người đọc đối chiếu được."""
     with San() as s:
@@ -347,16 +378,6 @@ def t10_body_TU_CHOI_lease_khong_hop_le():
     with San() as s:
         rc, _, e = chay("body", viet(s, lease_mau(granted_by="codex")))
         bang(rc == RC_TU_CAP, f"`body` bỏ qua chốt: rc={rc} {e}")
-
-
-@ca
-def t11_mark_ghi_comment_id_vao_tep():
-    with San() as s:
-        p = viet(s, lease_mau())
-        rc, _, e = chay("mark", p, "--comment-id", "5288831421")
-        bang(rc == RC_OK, f"mark hỏng: rc={rc} {e}")
-        rc2, _, _ = chay("check", p)
-        bang(rc2 == RC_DA_DANG, f"mark xong mà check vẫn đòi đăng: rc={rc2}")
 
 
 @ca
@@ -2292,6 +2313,7 @@ def t50_ngoai_Actions_phai_KHAI_hai_lop_vang():
         import os
         moi = dict(os.environ)
         moi.pop("GITHUB_ACTIONS", None)
+        moi.pop("GITHUB_ACTOR", None)   # ngoài Actions thì actor của runner cũng không có
         rc, o, e = chay("check", viet(s, lease_mau()), env=moi)
         bang(rc == RC_OK and "KHÔNG CHẠY" in o and "ISSUE/PR" in o
              and "comment" in o and "kiem-github" in o,
@@ -2322,21 +2344,12 @@ if cmd=='check': raise SystemExit(9 if d['lease_id']==os.environ.get('CHECK_RC9'
 if cmd=='body' and d['lease_id']=='giua' and os.environ.get('GUARD_HONG')=='body': raise SystemExit(8)
 if cmd=='body' and d['lease_id']=='giua' and os.environ.get('GUARD_HONG')=='payload': sys.stdout.buffer.write(bytes([255])); raise SystemExit(0)
 if cmd=='body': print(f\"**Lease `{d['lease_id']}`**\")
-if cmd=='mark' and d['lease_id']=='giua' and os.environ.get('GUARD_HONG')=='mark': raise SystemExit(8)
-if cmd=='mark':
- p.write_text(p.read_text(encoding='utf-8')+'posted_comment_id: '+sys.argv[4]+'\\n',encoding='utf-8')
- if os.environ.get('GUARD_HONG')=='github_env':
-  e=pathlib.Path(os.environ['GITHUB_ENV'])
-  if d['lease_id']=='giua': e.unlink(missing_ok=True); e.mkdir()
-  elif d['lease_id']=='cuoi': e.rmdir(); e.write_text('DA_DOI=1\\n')
 """.replace("import pathlib", "import os,pathlib"), encoding="utf-8")
         (neo / "ops" / "gh_gia.py").write_text(
             """import json,os,pathlib,re,sys
 a=sys.argv[1:]; p=pathlib.Path(os.environ['GH_GIA_STATE']); d=json.loads(p.read_text())
 raw=pathlib.Path(a[a.index('--input')+1]).read_text(); body='**Lease `giua`**' if os.environ.get('GUARD_HONG')=='payload' and not raw else json.loads(raw)['body']
 m=re.search(r'\\*\\*Lease `([^`]+)`\\*\\*',body); lease='giua' if os.environ.get('GUARD_HONG')=='body' and m is None else m.group(1)
-ge=pathlib.Path(os.environ['GITHUB_ENV']); snap=ge.read_text() if ge.is_file() else ''
-d['snapshots'].append([lease,snap]); p.write_text(json.dumps(d))
 if lease==os.environ.get('POST_HONG'): print('POST hong',file=sys.stderr); raise SystemExit(42)
 ds=d['comments']; ds.append({'id':9000+len(ds),'body':body,'lease':lease}); p.write_text(json.dumps(d))
 if lease=='giua' and os.environ.get('GUARD_HONG')=='post_rc': print(ds[-1]['id']); raise SystemExit(1)
@@ -2351,7 +2364,7 @@ print('khong-phai-so' if lease=='giua' and os.environ.get('GUARD_HONG')=='case_i
             "".join(f"ops/leases/{x}.yaml\n" for x in ("dau", "giua", "cuoi")),
             encoding="utf-8")
         state, ghe, log = goc / "state.json", goc / "github_env", goc / "argv.log"
-        state.write_text('{"comments":[],"snapshots":[]}', encoding="utf-8")
+        state.write_text('{"comments":[]}', encoding="utf-8")
         py = Path(sys.executable).resolve().as_posix()
         than = than.replace("python3 ", f"'{py}' ").replace(
             "gh api ", f"'{py}' \"$NEO/ops/gh_gia.py\" api ").replace(
@@ -2367,11 +2380,6 @@ print('khong-phai-so' if lease=='giua' and os.environ.get('GUARD_HONG')=='case_i
         d = json.loads(state.read_text(encoding="utf-8"))
         return {"rc": p.returncode, "bodies": "\n".join(x["body"] for x in d["comments"]),
                 "posts": [x["lease"] for x in d["comments"]],
-                "marks": {x: "posted_comment_id:" in
-                          (goc / "ops" / "leases" / f"{x}.yaml").read_text(encoding="utf-8")
-                          for x in ("dau", "giua", "cuoi")},
-                "snapshots": dict(d["snapshots"]),
-                "env": _doc_do_gia(ghe, p.returncode, p.stdout, p.stderr, "GITHUB_ENV giả"),
                 "calls": [x.split()[:2] for x in _doc_do_gia(
                     log, p.returncode, p.stdout, p.stderr, "nhật ký argv giả").splitlines()],
                 "out": p.stdout + p.stderr}
@@ -2381,19 +2389,8 @@ print('khong-phai-so' if lease=='giua' and os.environ.get('GUARD_HONG')=='case_i
 def t51_lease_giua_bi_chan_van_xu_ly_het_nhung_luot_DO():
     kq = _chay_buoc_dang(check_hong="giua")
     bang(kq["rc"] != 0 and "`dau`" in kq["bodies"] and "`cuoi`" in kq["bodies"]
-         and "`giua`" not in kq["bodies"] and "DA_DOI=1" in kq["env"],
+         and "`giua`" not in kq["bodies"],
          f"không cô lập lỗi check: {kq}")
-
-
-@ca
-def t52_buoc_ghi_nguoc_phai_chay_sau_buoc_dang_DO():
-    kq = _chay_buoc_dang(post_hong="giua")
-    dieu_kien = str(_buoc_workflow("ghi ngược comment id").get("if") or "")
-    bang(kq["rc"] != 0 and "`dau`" in kq["bodies"] and "`cuoi`" in kq["bodies"]
-         and "`giua`" not in kq["bodies"] and "DA_DOI=1" in kq["env"]
-         and "DA_DOI=1" in kq["snapshots"].get("giua", "")
-         and "always()" in dieu_kien and "env.DA_DOI == '1'" in dieu_kien,
-         f"POST giữa không được cô lập/ghi ngay DA_DOI: if={dieu_kien!r}, {kq}")
 
 
 @ca
@@ -2523,8 +2520,6 @@ SO_GUARD_DANG = {
     r'''bao_chan "không dựng được payload (rc=$rc)"''': ("payload", VE_TRUOC_POST),
     r'''bao_chan "đăng comment hỏng (rc=$rc)"''': ("post_rc", VE_SAU_POST),
     r'''bao_chan "gh không trả về comment id: $ID"''': ("case_id", VE_SAU_POST),
-    r'''bao_chan "không ghi được comment id (rc=$rc)"''': ("mark", VE_SAU_POST),
-    r'''bao_chan "không ghi được GITHUB_ENV (rc=$rc)"''': ("github_env", VE_SAU_POST),
 }
 
 
@@ -2568,13 +2563,12 @@ def t65_bo_trich_rong_hoac_hong_phai_DO():
 
 @ca
 def t66_moi_guard_co_phan_chung_va_ve_theo_vi_tri():
-    than, ve = _buoc_workflow("đăng")["run"], _ve_dan_xuat()
-    mark = next(x for x, (loi, _) in SO_GUARD_DANG.items() if loi == "mark")
+    ve = _ve_dan_xuat()
     for guard, (loi, _) in SO_GUARD_DANG.items():
         kq = _chay_buoc_dang(guard_hong=loi)
-        co_post, da_mark = ve[guard] == VE_SAU_POST, than.index(guard) > than.index(mark)
+        co_post = ve[guard] == VE_SAU_POST
         bang(kq["rc"] == 1 and kq["posts"].count("dau") == kq["posts"].count("cuoi") == 1
-             and kq["posts"].count("giua") == int(co_post) and kq["marks"]["giua"] == da_mark
+             and kq["posts"].count("giua") == int(co_post)
              and "BI_CHAN=1" in kq["out"], f"guard {loi}, vế {ve[guard]} sai: {kq}")
 
 
@@ -2587,10 +2581,17 @@ def t67_ve_khang_dinh_phai_khop_vi_tri_dan_xuat_tu_YAML():
 
 
 @ca
-def t68_post_rc_hong_khong_duoc_mark():
+def t68_post_rc_hong_van_COMMENT_DA_LEN_va_buoc_phai_DO():
+    """`gh` trả rc!=0 SAU khi comment đã lên là ca khó nhất của đường đăng.
+
+    Trước packet #396 ca này đo "không được `mark`". Bước ghi ngược đã bị gỡ nên vế ấy
+    không còn đối tượng — nhưng SỰ KIỆN thì vẫn còn, và nó vẫn phải làm bước ĐỎ chứ
+    không được nuốt. Chống lặp cho lượt chạy lại nay là `_kiem_comment_da_co`, ONLINE:
+    comment `giua` ĐÃ nằm trên Issue nên lượt sau sẽ thấy và bỏ qua. Đó là
+    **at-least-once**, KHÔNG phải exactly-once — đừng khai rộng hơn."""
     kq = _chay_buoc_dang(guard_hong="post_rc")
     bang(kq["rc"] == 1 and kq["posts"].count("giua") == 1
-         and not kq["marks"]["giua"], f"POST rc=1 bị mark: {kq}")
+         and "BI_CHAN=1" in kq["out"], f"POST rc=1 không làm bước ĐỎ: {kq}")
 
 
 def _dong_tong_ket(qua: int, da_chay: int, bo_qua: int) -> str:
@@ -2607,13 +2608,14 @@ def t69_W1_W2_thieu_dau_ra_do_gia_phai_bao_du_ba_manh():
 
 
 @ca
-def t70_W6_matrix_co_Windows_phai_chay_lai_tam_ca():
+def t70_W6_matrix_co_Windows_phai_chay_lai_bay_ca():
     job = {"runs-on": "${{ matrix.os }}", "strategy": {"matrix": {
         "os": ["ubuntu-latest", "windows-latest"]}}}
     ly_do = _ly_do_bo_qua_workflow(WORKFLOW_DANG, "dang", nen="nt", job=job)
     doc_than = [fn.__name__ for fn in CA if "_chay_buoc_dang" in fn.__code__.co_names]
-    bang(not ly_do and len(doc_than) == 8,
-         f"matrix có Windows vẫn bỏ qua hoặc không dẫn xuất đủ tám ca: {ly_do!r}, {doc_than}")
+    # BẢY, không phải tám: packet #396 gỡ `t52` cùng bước ghi ngược mà nó ghim.
+    bang(not ly_do and len(doc_than) == 7,
+         f"matrix có Windows vẫn bỏ qua hoặc không dẫn xuất đủ bảy ca: {ly_do!r}, {doc_than}")
 
 
 def _chay_main_meta(fn, nen=None):
@@ -3036,20 +3038,6 @@ def t92_A3_A4_A5_A6_so_tap_ten_ref():
 
 
 @ca
-def t93_A7_dau_dang_duoc_doc_toan_kho_theo_dung_lease_id():
-    mod = _nap_cong()
-    git = _GitKhoGia({"a"}, {"a"}, [
-        ("refs/remotes/origin/a", "ops/leases/a.yaml", _lease_quet("DUNG", posted_comment_id=7)),
-        ("refs/remotes/origin/a", "ops/leases/b.yaml", _lease_quet("KHAC", posted_comment_id=8))])
-    mod.GOI_GIT = git
-    with San() as s:
-        (s / ".git").mkdir(); p = viet(s, _lease_quet("DUNG"))
-        try: mod._kiem_dau_toan_kho({"lease_id": "DUNG"}, p, s)
-        except mod.Chan as ex: bang(ex.ma == RC_DA_DANG and "comment 7" in ex.thong_diep, str(ex))
-        else: raise AssertionError("A7 không thấy dấu cùng lease_id trên ref khác")
-
-
-@ca
 def t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO():
     """Chạy mutant trên tệp riêng, tắt bytecode; in đủ số chạy/bị giết."""
     import importlib, importlib.util, contextlib, io
@@ -3064,7 +3052,6 @@ def t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO():
         ("A3-A6", "thieu = _ten_nhanh_may_chu(goc) - ten_cuc_bo", "thieu = set()"),
         ("A4", "if doi_chieu_ref:", "if ten_cuc_bo - _ten_nhanh_may_chu(goc): return []\n    if doi_chieu_ref:"),
         ("A5", 'if not ref or ref.endswith("/HEAD"):', 'if not ref:'),
-        ("A7", 'for muc in _quet_lease_toan_kho(root, doi_chieu_ref=False):', 'for muc in []:'),
     ]
     with San() as s:
         sys.dont_write_bytecode = True
@@ -3077,7 +3064,6 @@ def t94_A8_moi_ca_co_dot_bien_ma_san_pham_lam_DO():
             dich = (t89_A1_A2b_quet_du_hai_nguoi_giu_va_ba_trang_thai if ten == "A1" or ten.startswith("A2b")
                     else t90_A2_yaml_hong_fail_close if ten == "A2"
                     else t91_A2c_da_bi_thay_the_van_in_nhung_khong_giu if ten.startswith("A2c")
-                    else t93_A7_dau_dang_duoc_doc_toan_kho_theo_dung_lease_id if ten == "A7"
                     else t92_A3_A4_A5_A6_so_tap_ten_ref)
             cu_nap = globals()["_nap_cong"]; globals()["_nap_cong"] = lambda: mod
             try: dich()
@@ -3139,39 +3125,6 @@ def t96_lease_cham_duong_khop_tuyet_doi_khong_phai_chua():
 
 
 @ca
-def t97_kiem_dau_toan_kho_phai_fail_close_khi_git_that_bai():
-    """`_kiem_dau_toan_kho` gọi THẲNG `GOI_GIT("rev-parse", "--git-dir", …)` — KHÔNG đi
-    qua `_git()` — rồi `except OSError: return` / `if p.returncode != 0: return` lặng
-    lẽ. Đây là hình dạng y hệt lỗ mà `t95` vừa khoá cho `_git()`, nhưng ở một đường gọi
-    KHÁC không chạm `_git()` nên `t95` không bắt được nó — và đây KHÔNG phải một đột
-    biến giả định: đo trực tiếp trên `ops/lease_publish.py` hôm nay (chưa sửa gì) đã
-    fail-OPEN sẵn. `.git/` được xác nhận CÓ MẶT ngay phía trên (dòng `if not (root /
-    ".git").exists(): return`) nên từ điểm này git lỗi là LỖI THẬT, không phải "không
-    phải kho" — im lặng bỏ qua đúng là bỏ qua chốt "đã đăng" của `kiem()`, tức cổng
-    đăng lease thật (`lenh_check`/`lenh_body`/`lenh_kiem_github` đều gọi `kiem()` TRƯỚC
-    khi đăng) có thể đăng TRÙNG một lease đã đăng khi git tạm thời lỗi."""
-    import subprocess as sp
-    mod = _nap_cong()
-
-    def gia_hong(*args, cwd=None):
-        return sp.CompletedProcess(args, 128, "", "fatal: giả lập git chết")
-
-    mod.GOI_GIT = gia_hong
-    with San() as s:
-        (s / ".git").mkdir()
-        p = viet(s, _lease_quet("DUNG"))
-        try:
-            mod._kiem_dau_toan_kho({"lease_id": "DUNG"}, p, s)
-        except mod.Chan as ex:
-            bang(ex.ma == mod.RC_KHONG_XAC_DINH, f"t97 sai mã: {ex}")
-        else:
-            raise AssertionError(
-                "t97: `_kiem_dau_toan_kho` coi git lỗi thật (rev-parse --git-dir rc!=0) "
-                "là 'không phải kho' và bỏ qua lặng lẽ — cổng đăng lease sẽ KHÔNG bắt "
-                "được lease đã đăng trùng khi git tạm thời lỗi")
-
-
-@ca
 def t98_truc_phan_biet_la_NEN_chu_khong_phai_TEN_TEP():
     """Cặp với `t73`: CÙNG tuple, ĐỔI mỗi nền, phải ra kết quả NGƯỢC nhau.
 
@@ -3216,7 +3169,7 @@ def t99_con_tro_treo_chan_xau_khong_chan_ten_truong_cua_spec_va_quet_nguoc():
             if duoi:
                 p.write_text(p.read_text(encoding="utf-8") + duoi, encoding="utf-8")
             try:
-                mod.kiem(lease, p, s)
+                _kiem_sach(mod, lease, p, s)
             except mod.Chan as ex:
                 bang(not phai_qua and ex.ma == RC_NOI_DUNG and "con trỏ treo" in ex.thong_diep,
                      f"check chặn sai {ten}: {ex.ma} {ex.thong_diep}")
@@ -3263,7 +3216,7 @@ def t100_bia_mo_doi_dau_cu_thieu_danh_dau_nhung_cho_ca_dung():
             mod.GOI_GIT = _GitKhoGia({"a"}, {"a"}, [
                 ("refs/remotes/origin/a", "ops/leases/cu.yaml", cu)])
             try:
-                mod.kiem(moi, p, s)
+                _kiem_sach(mod, moi, p, s)
             except mod.Chan as ex:
                 bang(not phai_qua and ex.ma == RC_NOI_DUNG and
                      "da_bi_thay_the: MOI" in ex.thong_diep and "CU" in ex.thong_diep,
@@ -3856,7 +3809,7 @@ def t120_thay_the_cho_danh_sach_hai_lease_deu_co_bia_mo_phai_QUA():
         p = viet(s, moi)
         mod.GOI_GIT = _GitKhoGia({"a"}, {"a"}, ls)
         try:
-            mod.kiem(moi, p, s)
+            _kiem_sach(mod, moi, p, s)
         except mod.Chan as ex:
             raise AssertionError(
                 f"danh sách hai bia mộ đầy đủ bị chặn: {ex.ma} {ex.thong_diep}") from ex
@@ -3882,7 +3835,7 @@ def t121_thay_the_cho_danh_sach_thieu_mot_bia_mo_phai_CHAN():
              _lease_quet("CU2", da_bi_thay_the="KHAC")),
         ])
         try:
-            mod.kiem(moi, p, s)
+            _kiem_sach(mod, moi, p, s)
         except mod.Chan as ex:
             bang(ex.ma == RC_NOI_DUNG and "CU2" in ex.thong_diep,
                  f"danh sách thiếu bia mộ chặn sai: {ex.ma} {ex.thong_diep}")
@@ -3970,6 +3923,54 @@ def t124_bay_dot_bien_bia_mo_giet_dung_va_chi_dung_tap_dich():
                      f"mutant {ten}: ĐỎ={do}, cần={do_dung}; SỐNG={song}")
     finally:
         SCRIPT = ban_goc
+
+
+@ca
+def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
+    """A/B: chạy lại TOÀN SUITE hai lượt, khác nhau ĐÚNG một biến `GITHUB_ACTOR`.
+
+    VÌ SAO CẦN CA NÀY, và vì sao nó không thể là một khẳng định rẻ hơn. Bộ test này
+    dựng môi trường con ở NHIỀU chỗ — `_goi_lop_gh`, và một tá ca tự `subprocess.run`
+    với `dict(os.environ, …)`. Một ca chỉ soi `_goi_lop_gh` sẽ kiểm CÁCH SỬA hôm nay,
+    không kiểm TÍNH CHẤT cần giữ; helper rò thứ hai thêm vào tháng sau sẽ lọt.
+
+    Đo được, 29-08-2026 trên `ef4098d4` (trước khi vá): `env -u GITHUB_ACTOR` ⇒ 123/124,
+    `GITHUB_ACTOR=notebyme88` ⇒ 94/124. Chênh 29 ca, và `t124` còn báo sai TẬP ĐÍCH của
+    bẫy đột biến — tức rò actor không chỉ làm đỏ, nó làm hỏng chính bẫy.
+
+    So bằng TẬP TÊN ca đỏ chứ không bằng con số: hai lượt cùng ra `n/m` mà đỏ ở những ca
+    KHÁC nhau thì phép so bằng số vẫn xanh — đúng hình dạng "bất biến còn đúng, số hạng
+    đã trôi" mà `soan-spec` §L5 cảnh báo.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ dòng `moi.pop("GITHUB_ACTOR", None)` trong `_goi_lop_gh`.
+    """
+    import os
+    import re
+    import subprocess
+    if os.environ.get("LP_AB_CON") == "1":
+        return          # lượt con: KHÔNG tự gọi lại mình (chống đệ quy)
+
+    nen = dict(os.environ, LP_AB_CON="1")
+    nen.pop("GITHUB_ACTOR", None)
+
+    def luot(nhan, mt):
+        p = subprocess.run([sys.executable, str(Path(__file__).resolve())],
+                           env=mt, capture_output=True, text=True)
+        m = re.search(r"lease_publish: (\d+)/(\d+) đạt", p.stdout)
+        bang(m, f"lượt {nhan}: KHÔNG ĐO ĐƯỢC dòng tổng kết; rc={p.returncode}, "
+                f"stdout={p.stdout[-400:]!r}, stderr={p.stderr[-400:]!r}")
+        do = frozenset(re.findall(r"(?m)^  ĐỎ  (\w+):", p.stdout))
+        return p.returncode, m.group(1), m.group(2), do
+
+    khong_actor = luot("KHÔNG actor", nen)
+    co_actor = luot("CÓ actor lạ", dict(nen, GITHUB_ACTOR="ke-la-mat-khong-co-quyen"))
+
+    bang(khong_actor == co_actor,
+         "verdict của bộ test ĐỔI theo `GITHUB_ACTOR` của môi trường — "
+         "một helper nào đó đang kế thừa nó thay vì dựng môi trường con hermetic. "
+         f"không-actor=(rc={khong_actor[0]}, {khong_actor[1]}/{khong_actor[2]}), "
+         f"có-actor=(rc={co_actor[0]}, {co_actor[1]}/{co_actor[2]}), "
+         f"lệch ở các ca: {sorted(khong_actor[3] ^ co_actor[3])}")
 
 
 def main() -> int:

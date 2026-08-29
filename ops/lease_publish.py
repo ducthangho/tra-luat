@@ -21,7 +21,7 @@ MÃ THOÁT
   4  `granted_by` là tên một PROVIDER — agent tự cấp lease cho mình
   6  mỏ neo prompt hỏng (thiếu `prompt_path`, tệp không có, hoặc băm lệch)
   8  nội dung lease sai (thiếu trường, sai dạng, hết hạn, YAML hỏng)
-  9  lease ĐÃ đăng rồi (trong tệp hoặc comment Issue) — BỎ QUA, không đăng lại
+  9  lease ĐÃ có comment trên Issue — BỎ QUA, không đăng lại
  10  lớp review khai không khớp lớp cổng tính từ write_set
 """
 
@@ -784,29 +784,6 @@ def _kiem_neo_prompt(lease: dict, tep: Path, goc) -> str:
     return thuc
 
 
-def _kiem_dau_toan_kho(lease: dict, tep=None, goc=None) -> None:
-    if not tep:
-        return
-    root = _goc_kho(Path(tep), goc)
-    if not (root / ".git").exists():
-        return
-    try:
-        Path(tep).resolve().relative_to(root)
-    except ValueError:
-        return  # fixture/bản sao rời, không phải tệp lease trong kho đang quét
-    # `.git` có mặt (đã kiểm ở trên) nên từ đây git lỗi là LỖI THẬT, không phải "không
-    # phải kho" — phải đi qua `_git()` để fail-close (`Chan(RC_KHONG_XAC_DINH)`) thay vì
-    # `return` lặng lẽ, kẻo cổng đăng lease bỏ qua đúng chốt "đã đăng" khi git tạm lỗi.
-    _git(root, "rev-parse", "--git-dir")
-    lease_id = str(lease.get("lease_id") or "")
-    for muc in _quet_lease_toan_kho(root, doi_chieu_ref=False):
-        ban = muc["lease"]
-        if str(ban.get("lease_id") or "") == lease_id and ban.get("posted_comment_id"):
-            raise Chan(RC_DA_DANG,
-                       f"lease {lease_id!r} đã đăng (comment {ban['posted_comment_id']}) "
-                       f"trên {muc['ref']}:{muc['path']} — bỏ qua")
-
-
 def kiem(lease: dict, tep=None, goc=None) -> tuple:
     """Kiểm thuần và trả `(lease, băm prompt)`; ném `Chan` nếu không hợp lệ.
 
@@ -815,13 +792,11 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
     có trường `prompt_path` — nghĩa là gỡ hẳn chốt kiểm băm đi thì nó vẫn in y
     nguyên. Một dòng xác nhận không đi kèm việc kiểm là thứ tệ hơn im lặng.
     """
-    # Idempotent trước tiên: workflow bị chạy lại (retry, re-run tay, push lại
-    # cùng commit) KHÔNG được đăng trùng một lease.
-    if lease.get("posted_comment_id"):
-        raise Chan(RC_DA_DANG,
-                   f"lease {lease.get('lease_id')!r} đã đăng "
-                   f"(comment {lease['posted_comment_id']}) — bỏ qua")
-    _kiem_dau_toan_kho(lease, tep, goc)
+    # ĐÁNH ĐỔI ĐÃ KHAI (packet #396): hai chốt idempotent chạy ĐƯỢC OFFLINE — một
+    # trong tệp, một XUYÊN NHÁNH — đã bị gỡ cùng đường ghi ngược sinh ra chúng.
+    # Chống lặp nay chỉ còn `_kiem_comment_da_co`: ONLINE, một lớp, và FAIL-CLOSE.
+    # An toàn hơn về tính đúng, YẾU hơn về tính sẵn sàng — mất mạng là không đăng
+    # được lease. Đừng mô tả nó như thay thế tương đương; nó không phải.
     thieu = [k for k in BAT_BUOC if lease.get(k) in (None, "")]
     if thieu:
         raise Chan(RC_NOI_DUNG, f"thiếu trường bắt buộc: {', '.join(thieu)}")
@@ -918,21 +893,6 @@ def dung_than(lease: dict, duong_dan: str) -> str:
     )
 
 
-def _ghi_comment_id(duong_dan: str, comment_id: int) -> None:
-    """Nối một dòng vào cuối tệp — KHÔNG dump lại YAML.
-
-    `yaml.safe_dump` sẽ sắp xếp lại khoá và **xoá sạch chú thích**, mà chú thích
-    trong lease chính là chỗ ghi vì sao từng trường có giá trị đó. Nối một dòng
-    giữ nguyên tệp người viết.
-    """
-    p = Path(duong_dan)
-    noi_dung = p.read_text(encoding="utf-8")
-    if not noi_dung.endswith("\n"):
-        noi_dung += "\n"
-    noi_dung += f"posted_comment_id: {int(comment_id)}   # workflow ghi, ĐỪNG sửa tay\n"
-    p.write_text(noi_dung, encoding="utf-8")
-
-
 def lenh_check(a) -> int:
     lease, neo = kiem(_doc_yaml(a.tep), a.tep, getattr(a, "goc", None))
     print("LỆNH check KHÔNG CHẠY hai lớp GitHub: đo ISSUE/PR và dò comment; dùng `kiem-github`")
@@ -952,13 +912,6 @@ def lenh_body(a) -> int:
 def lenh_kiem_github(a) -> int:
     lease, _ = kiem_github(_doc_yaml(a.tep), a.tep, getattr(a, "goc", None))
     print(f"hai lớp GitHub ĐÃ QUA cho lease {lease['lease_id']} trên issue #{lease['packet_issue']}")
-    return RC_OK
-
-
-def lenh_mark(a) -> int:
-    _doc_yaml(a.tep)          # đọc để chắc tệp còn hợp lệ trước khi ghi thêm
-    _ghi_comment_id(a.tep, a.comment_id)
-    print(f"đã ghi posted_comment_id={a.comment_id} vào {a.tep}")
     return RC_OK
 
 
@@ -1032,10 +985,6 @@ def main(argv=None) -> int:
         q.add_argument("--root", dest="goc", default=None,
                        help="gốc kho để tính `prompt_path` (mặc định: tìm .git đi lên)")
         q.set_defaults(fn=fn)
-    q = sub.add_parser("mark", help="ghi posted_comment_id vào tệp sau khi đăng xong")
-    q.add_argument("tep")
-    q.add_argument("--comment-id", type=int, required=True)
-    q.set_defaults(fn=lenh_mark)
     q = sub.add_parser("ai-dang-giu", help="quét toàn kho xem ai đang giữ một đường dẫn")
     q.add_argument("duong_dan")
     q.add_argument("--root", dest="goc", default=".")

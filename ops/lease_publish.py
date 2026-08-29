@@ -797,6 +797,14 @@ def kiem(lease: dict, tep=None, goc=None) -> tuple:
     # Chống lặp nay chỉ còn `_kiem_comment_da_co`: ONLINE, một lớp, và FAIL-CLOSE.
     # An toàn hơn về tính đúng, YẾU hơn về tính sẵn sàng — mất mạng là không đăng
     # được lease. Đừng mô tả nó như thay thế tương đương; nó không phải.
+    #
+    # VÀ MẤT MỘT THỨ NỮA, tách riêng vì nó KHÁC hẳn "mất mạng thì chờ" (cross-review
+    # codex 29-08-2026, finding 3): dấu "đã đăng" nay là một HIỆN VẬT SỬA ĐƯỢC. Nó chỉ
+    # tồn tại chừng nào comment còn sống, còn thuộc `github-actions[bot]`, và body còn
+    # bắt đầu ĐÚNG bằng `**Lease `<id>`**`. Xoá comment, hay sửa một ký tự ở đầu nó, là
+    # dấu biến mất — và lượt sau sẽ đăng TRÙNG. `posted_comment_id` nằm trong git thì
+    # không mất theo thao tác quản trị Issue. Đây là hồi quy về ĐỘ BỀN, không phải về
+    # tính sẵn sàng; `t126` ghim đúng hành vi này để nó không âm thầm đổi.
     thieu = [k for k in BAT_BUOC if lease.get(k) in (None, "")]
     if thieu:
         raise Chan(RC_NOI_DUNG, f"thiếu trường bắt buộc: {', '.join(thieu)}")

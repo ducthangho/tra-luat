@@ -26,6 +26,9 @@ from pathlib import Path, PurePosixPath
 
 HERE = Path(__file__).resolve().parent
 SCRIPT = HERE / "lease_publish.py"
+# Cờ NỘI BỘ của `t125`, cố ý là ĐỐI SỐ chứ không phải biến môi trường: argv không
+# được kế thừa, nên không môi trường nào tắt được phép A/B một cách tình cờ.
+CO_AB = "--ab-con-noi-bo"
 WORKFLOW_DANG = HERE.parent / ".github" / "workflows" / "ops-publish-lease.yml"
 
 RC_OK, RC_THAM_SO, RC_TU_CAP, RC_DA_DANG, RC_NOI_DUNG, RC_NEO, RC_LOP = 0, 2, 4, 9, 8, 6, 10
@@ -3926,6 +3929,49 @@ def t124_bay_dot_bien_bia_mo_giet_dung_va_chi_dung_tap_dich():
 
 
 @ca
+def t126_dau_da_dang_la_HIEN_VAT_SUA_DUOC_chu_khong_phai_ban_ghi_git():
+    """GHIM hồi quy ĐỘ BỀN mà packet #396 tạo ra — có chủ ý, và phải đo được.
+
+    Trước #396 dấu "đã đăng" là `posted_comment_id` NẰM TRONG GIT: sửa hay xoá comment
+    trên Issue không làm nó mất. Sau #396 dấu duy nhất là chính comment ấy, nhận diện
+    bằng `user.login == "github-actions[bot]"` và body bắt đầu đúng bằng
+    ``**Lease `<id>`**``. Ba thao tác QUẢN TRỊ ISSUE bình thường đều xoá được dấu:
+    xoá comment, sửa một ký tự ở đầu body, hoặc đăng lại dưới danh nghĩa khác.
+
+    Ca này KHÔNG khẳng định hành vi ấy là tốt. Nó khẳng định hành vi ấy là ĐÃ BIẾT.
+    Cross-review codex 29-08-2026 (finding 3) chỉ ra rằng `danh_doi` của đặc tả mới chỉ
+    khai "mất mạng thì không đăng được" — tức khai thiếu đúng vế này.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: đổi `startswith` thành `in`, hoặc bỏ chốt `user.login`.
+    """
+    lease = lease_mau(lease_id="lease-sua-duoc")
+
+    def do(nhan, comments):
+        ex, _ = _goi_lop_gh(GhGia(comments=comments), "_kiem_comment_da_co",
+                            "o/r", lease, env_them=ENV_GITHUB)
+        return ex
+
+    dau = "**Lease `lease-sua-duoc`**"
+    bot = {"login": "github-actions[bot]"}
+
+    ex = do("nguyên vẹn", {55: [{"id": 7, "body": dau + " — bản chiếu", "user": bot}]})
+    bang(ex is not None and ex.ma == RC_DA_DANG,
+         f"comment nguyên vẹn mà KHÔNG thấy dấu — chống lặp đã hỏng hẳn: {ex}")
+
+    # Ba cách MẤT dấu. Cả ba đều là thao tác quản trị Issue hợp lệ, không ai phá hoại.
+    for nhan, comments in (
+            ("xoá comment", {55: []}),
+            ("thêm một ký tự vào ĐẦU body", {55: [{"id": 7, "body": "." + dau, "user": bot}]}),
+            ("người thật đăng lại thay bot",
+             {55: [{"id": 7, "body": dau, "user": {"login": "ducthangho"}}]})):
+        ex = do(nhan, comments)
+        bang(ex is None,
+             f"{nhan}: ca này ghim hành vi FAIL-OPEN đã biết, nhưng cổng lại CHẶN ({ex}) "
+             f"— nếu ai đó vừa vá cho bền hơn thì đấy là tin TỐT: hãy sửa ca này và khai "
+             f"lại mục `danh_doi`, đừng nới lời khẳng định cho vừa.")
+
+
+@ca
 def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
     """A/B: chạy lại TOÀN SUITE hai lượt, khác nhau ĐÚNG một biến `GITHUB_ACTOR`.
 
@@ -3942,25 +3988,35 @@ def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
     KHÁC nhau thì phép so bằng số vẫn xanh — đúng hình dạng "bất biến còn đúng, số hạng
     đã trôi" mà `soan-spec` §L5 cảnh báo.
 
-    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ dòng `moi.pop("GITHUB_ACTOR", None)` trong `_goi_lop_gh`.
+    Chống đệ quy đi bằng ĐỐI SỐ DÒNG LỆNH, không bằng biến môi trường. Bản đầu dùng
+    `LP_AB_CON=1` và cross-review codex 29-08-2026 (finding 1) chỉ ra ngay: biến môi
+    trường được KẾ THỪA, nên chỉ cần `LP_AB_CON=1` có sẵn trong môi trường là ca này
+    lặng lẽ `return` và vẫn được tính ĐẠT — đo được: `LP_AB_CON=1 python <tệp này>` cho
+    `120/120` và chạy nhanh, tức A/B không hề chạy. `sys.argv` không kế thừa, nên không
+    có cấu hình môi trường nào vô hiệu hoá được ca này.
+
+    ĐỘT BIẾN LÀM CA NÀY ĐỎ: bỏ dòng `moi.pop("GITHUB_ACTOR", None)` trong `_goi_lop_gh`,
+    hoặc bỏ lọc `env` trong `chay()`, hoặc bỏ `patch.dict` trong `_kiem_sach`.
     """
-    import os
     import re
     import subprocess
-    if os.environ.get("LP_AB_CON") == "1":
+    if CO_AB in sys.argv:
         return          # lượt con: KHÔNG tự gọi lại mình (chống đệ quy)
 
-    nen = dict(os.environ, LP_AB_CON="1")
-    nen.pop("GITHUB_ACTOR", None)
+    nen = {k: v for k, v in os.environ.items() if k != "GITHUB_ACTOR"}
 
     def luot(nhan, mt):
-        p = subprocess.run([sys.executable, str(Path(__file__).resolve())],
+        p = subprocess.run([sys.executable, str(Path(__file__).resolve()), CO_AB],
                            env=mt, capture_output=True, text=True)
         m = re.search(r"lease_publish: (\d+)/(\d+) đạt", p.stdout)
         bang(m, f"lượt {nhan}: KHÔNG ĐO ĐƯỢC dòng tổng kết; rc={p.returncode}, "
                 f"stdout={p.stdout[-400:]!r}, stderr={p.stderr[-400:]!r}")
         do = frozenset(re.findall(r"(?m)^  ĐỎ  (\w+):", p.stdout))
-        return p.returncode, m.group(1), m.group(2), do
+        # Phải so CẢ ca BỎ QUA. Hai lượt bỏ qua những ca KHÁC nhau nhưng CÙNG SỐ LƯỢNG
+        # sẽ cho cùng mẫu số, cùng số đạt và cùng tập đỏ — tuple vẫn bằng nhau trong khi
+        # tập ca THỰC SỰ ĐƯỢC ĐO đã khác. Cross-review codex 29-08-2026, finding 2.
+        bo = frozenset(re.findall(r"(?m)^  BỎ QUA (\w+):", p.stdout))
+        return p.returncode, m.group(1), m.group(2), do, bo
 
     khong_actor = luot("KHÔNG actor", nen)
     co_actor = luot("CÓ actor lạ", dict(nen, GITHUB_ACTOR="ke-la-mat-khong-co-quyen"))
@@ -3970,7 +4026,8 @@ def t125_AB_toan_suite_KHONG_doi_verdict_theo_ambient_actor():
          "một helper nào đó đang kế thừa nó thay vì dựng môi trường con hermetic. "
          f"không-actor=(rc={khong_actor[0]}, {khong_actor[1]}/{khong_actor[2]}), "
          f"có-actor=(rc={co_actor[0]}, {co_actor[1]}/{co_actor[2]}), "
-         f"lệch ở các ca: {sorted(khong_actor[3] ^ co_actor[3])}")
+         f"lệch ở ca ĐỎ: {sorted(khong_actor[3] ^ co_actor[3])}, "
+         f"lệch ở ca BỎ QUA: {sorted(khong_actor[4] ^ co_actor[4])}")
 
 
 def main() -> int:

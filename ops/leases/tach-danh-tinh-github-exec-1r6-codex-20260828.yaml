@@ -26,6 +26,7 @@ packet_issue: 348
 packet_id: TACH-DANH-TINH-GITHUB
 generation: 1
 lease_id: tach-danh-tinh-github-exec-1r6-codex-20260828
+da_bi_thay_the: cong-duyet-theo-tham-quyen-exec-1-claude-20260829
 revision: 6
 thay_the_cho: tach-danh-tinh-github-exec-1r5-codex-20260828
 

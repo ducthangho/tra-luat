@@ -116,6 +116,17 @@ def tao_claude_gia(goc: Path) -> Path:
     return dich
 
 
+def tao_lenh_gia(goc: Path, ten: str) -> Path:
+    dich = goc / (f"{ten}.exe" if LA_WINDOWS else ten)
+    try:
+        os.link(Path(PY).resolve(), dich)
+    except OSError:
+        shutil.copy2(Path(PY).resolve(), dich)
+    if not LA_WINDOWS:
+        dich.chmod(0o755)
+    return dich
+
+
 def head_cua(d: Path) -> str:
     p = subprocess.run(["git", "-C", str(d), "rev-parse", "HEAD"],
                        capture_output=True, text=True)
@@ -5882,6 +5893,124 @@ def r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh():
         bang(bool(re.fullmatch(r"[0-9a-f]{64}", contract[0][3])), "bam transport sai dang")
 
 
+def _probe_bang_khai_bao(agent: str):
+    m = _tai_launcher_thu()
+    dat = {"trang_thai": "DAT", "chi_tiet": "fixture"}
+    m._probe_workspace = lambda _ws: dat
+    m._probe_ghi = lambda _ws: dat
+    m._probe_spawn = lambda _lenh, _ws: dat
+    m._probe_trust_claude = lambda _ws: dat
+    lenh = ["bash", "-c", "noi dung vo shell khong duoc doc"]
+    da_khai, suy_ra = m._chon_agent(lenh, agent)
+    ds, _ = m.chay_cac_probe(".", lenh, None, suy_ra)
+    return m, da_khai, suy_ra, ds
+
+
+@ca
+def r22_claude_truc_tiep_khong_co_agent_van_chay_trust():
+    with San() as s:
+        repo = tao_repo(s); cli = tao_claude_gia(s); home = s / "home"; home.mkdir()
+        rr = s / "runs"; env = dict(os.environ, HOME=str(home), USERPROFILE=str(home))
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                 "--", str(cli), "-c", "pass", env=env)
+        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(r.returncode == MA_PROBE and "claude_trust" in d["probe"]
+             and d["agent_da_khai"] is None and d["agent_suy_ra"] == "claude"
+             and "--bo-qua-probe" in r.stderr and "tuong tac" in r.stderr,
+             f"claude truc tiep lam mat trust/loi khuyen: {r.returncode} {r.stderr} {d}")
+
+
+@ca
+def r23_bash_khong_khai_agent_bi_chan_du_ba_y():
+    with San() as s:
+        repo = tao_repo(s); rr = s / "runs"
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr), "--", "bash")
+        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(r.returncode == MA_THAM_SO and "vo shell" in r.stderr
+             and "--agent claude|codex" in r.stderr and "--agent khong" in r.stderr
+             and d["probe_da_chay"] == [] and d["probe_bo_qua"] == ["claude_trust"],
+             f"bash khong khai khong fail-close du ba y: {r.returncode} {r.stderr} {d}")
+
+
+@ca
+def r24_bash_khai_claude_ghi_de_suy_luan_va_chay_trust():
+    _m, da_khai, suy_ra, ds = _probe_bang_khai_bao("claude")
+    bang((da_khai, suy_ra) == ("claude", "claude") and "claude_trust" in ds,
+         f"khai claude khong ghi de bash: {(da_khai, suy_ra, ds)}")
+
+
+@ca
+def r25_bash_khai_khong_thi_khong_chay_probe_agent():
+    _m, da_khai, suy_ra, ds = _probe_bang_khai_bao("khong")
+    bang((da_khai, suy_ra) == ("khong", "khong") and "claude_trust" not in ds,
+         f"khai khong van chay probe agent: {(da_khai, suy_ra, ds)}")
+
+
+@ca
+def r26_bash_khai_codex_bo_qua_trust_co_khai():
+    m, da_khai, suy_ra, ds = _probe_bang_khai_bao("codex")
+    tt = m._thong_tin_probe(da_khai, suy_ra, ds)
+    bang("claude_trust" not in ds and tt["probe_bo_qua"] == ["claude_trust"],
+         f"codex khong khai probe bo qua: {ds} {tt}")
+
+
+@ca
+def r27_pwsh_va_cmd_khong_khai_deu_bi_chan():
+    m = _tai_launcher_thu(); ket_qua = []
+    for vo in ("pwsh", "cmd"):
+        try:
+            m._chon_agent([vo], None)
+        except m.Chan as e:
+            ket_qua.append(e.ma)
+        else:
+            ket_qua.append(None)
+    bang(ket_qua == [MA_THAM_SO, MA_THAM_SO], f"vo shell ngoai bash lot chot: {ket_qua}")
+
+
+@ca
+def r28_git_khong_khai_khong_bi_chan_oan():
+    m = _tai_launcher_thu()
+    bang(m._chon_agent(["git"], None) == (None, "khong"), "git bi doan la agent/vo shell")
+
+
+@ca
+def r29_agent_allowlist_phan_biet_hoa_thuong_va_chinh_ta():
+    m = _tai_launcher_thu(); ma = []
+    for sai in ("Claude", "CLAUDE", "claudex"):
+        try:
+            m._chon_agent(["git"], sai)
+        except m.Chan as e:
+            ma.append(e.ma)
+    bang(ma == [MA_THAM_SO] * 3, f"allow-list nhan gia tri gan dung: {ma}")
+
+
+@ca
+def r30_run_json_ghi_dung_probe_da_chay_va_bo_qua():
+    with San() as s:
+        repo = tao_repo(s); rr = s / "runs"; cli = tao_lenh_gia(s, "codex")
+        r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                 "--", str(cli), "-c", "pass")
+        d = json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8"))
+        bang(r.returncode == 0 and d["probe_da_chay"] == ["ghi", "spawn", "workspace"]
+             and d["probe_bo_qua"] == ["claude_trust"],
+             f"so probe da chay/bo qua sai: {r.returncode} {d}")
+
+
+@ca
+def r31_run_json_phan_biet_suy_ra_null_voi_khai_khong():
+    with San() as s:
+        repo = tao_repo(s); ds = []
+        for i, them in enumerate(([], ["--agent", "khong"])):
+            rr = s / f"runs-{i}"
+            r = chay("run", "--workspace", str(repo), "--run-root", str(rr),
+                     *them, "--", PY, "-c", "pass")
+            bang(r.returncode == 0, f"run {i} hong: {r.returncode} {r.stderr}")
+            ds.append(json.loads((next(rr.iterdir()) / "run.json").read_text(encoding="utf-8")))
+        bang(ds[0]["agent_da_khai"] is None and ds[0]["agent_suy_ra"] == "khong"
+             and ds[1]["agent_da_khai"] == ds[1]["agent_suy_ra"] == "khong",
+             f"so gop null va khai khong: {ds}")
+
+
 @ca
 def r16_consumer_doc_dung_byte_va_trao_snapshot_cung_co_phai_DO():
     with San() as s:
@@ -6091,6 +6220,28 @@ DOT_BIEN = [
      ('    return {ten: {"trang_thai": kq["trang_thai"], "chi_tiet": kq["chi_tiet"]}',
       '    return {ten: {"trang_thai": ("DAT" if kq["trang_thai"] == "KHONG_DO_DUOC" else kq["trang_thai"]), "chi_tiet": kq["chi_tiet"]}'),
      ["r09_run_json_giu_ba_trang_thai_probe"]),
+    ("agent_bo_chan_vo_shell",
+     ('    if ten in VO_SHELL:\n        raise Chan(MA_THAM_SO,',
+      '    if False:\n        raise Chan(MA_THAM_SO,'),
+     ["r23_bash_khong_khai_agent_bi_chan_du_ba_y",
+      "r27_pwsh_va_cmd_khong_khai_deu_bi_chan"]),
+    ("agent_khai_bao_khong_ghi_de_lenh0",
+     ('        return da_khai, da_khai\n'
+      '    if ten.endswith(".exe") and ten[:-4] in AGENT_CHO_PHEP:',
+      '        return da_khai, "khong"\n'
+      '    if ten.endswith(".exe") and ten[:-4] in AGENT_CHO_PHEP:'),
+     ["r24_bash_khai_claude_ghi_de_suy_luan_va_chay_trust"]),
+    ("agent_allowlist_nhan_casefold",
+     ('        da_khai = agent.strip()', '        da_khai = agent.strip().casefold()'),
+     ["r29_agent_allowlist_phan_biet_hoa_thuong_va_chinh_ta"]),
+    ("agent_probe_bo_qua_luon_rong",
+     ('        "probe_bo_qua": sorted(set(CAC_PROBE_AGENT) - set(probe_can_chay)),',
+      '        "probe_bo_qua": [],'),
+     ["r30_run_json_ghi_dung_probe_da_chay_va_bo_qua"]),
+    ("agent_gop_null_voi_khai_khong",
+     ('        "agent_da_khai": agent_da_khai,',
+      '        "agent_da_khai": agent_suy_ra if agent_da_khai is None else agent_da_khai,'),
+     ["r31_run_json_phan_biet_suy_ra_null_voi_khai_khong"]),
     # Ca "rc=0 ma stdout RONG" duoc chan o BON cho doc lap: guard trong
     # _git_mot_dong, kiem SHA_RE trong chot_head, kiem `not top` trong chot_workspace,
     # va kiem `not ref` trong chot_ref. DA DO: bo RIENG bat ky cho nao cung KHONG ca nao chet -

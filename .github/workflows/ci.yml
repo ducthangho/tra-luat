@@ -47,7 +47,17 @@ jobs:
               && '["ubuntu-latest","windows-latest"]'
               || '["ubuntu-latest"]') }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
+    # r391 — NÂNG 25 -> 45 THEO CHỈ ĐẠO CHỦ KHO, và lý do phải ghi lại vì con số cũ
+    # KHÔNG sai lúc nó được đặt: gate đã chậm dần tới sát trần. Đo 29-08-2026:
+    #   lượt ubuntu-only (PR #392)      21m52s  -> success, chỉ còn ~3 phút biên
+    #   lượt workflow_dispatch #1       25m19s  -> cancelled
+    #   lượt workflow_dispatch #2       25m09s  -> cancelled
+    # Hai lượt dispatch dừng ở ĐÚNG 25 phút, tức chạm trần job chứ không phải bị huỷ do
+    # tranh chấp concurrency. Job nào trong ma trận chạm trần thì KHÔNG ĐO ĐƯỢC bằng bộ
+    # công cụ hiện có (`get_job_logs` trả `failed_jobs: 0` vì job bị huỷ không tính là
+    # "failed"); quy cho `windows-latest` là SUY LUẬN từ chỗ ubuntu-only về đích.
+    # NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN: gate 22 phút và đang lớn dần là nợ riêng.
+    timeout-minutes: 45
     env:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"

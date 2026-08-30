@@ -42,9 +42,9 @@ spec_note: >-
   Băm đo 09:57Z 30-08-2026 trên nội dung tệp ở CHÍNH commit này. ĐO LẠI trước khi merge: sửa
   đặc tả sau khi cấp lease là làm băm này trỏ vào thứ không còn tồn tại.
 
-codex_review_calls_used: 0
+codex_review_calls_used: 1
 codex_review_calls_max: 2
-review_rounds_used: 0
+review_rounds_used: 1
 tran_review_ghi_chu: >-
   Bắt đầu 0/2 vì đây là packet MỚI. Bộ đếm CẠN 2/2 của `N5-LENH-HOOK-WINDOWS` KHÔNG liên quan
   và KHÔNG được mượn theo chiều nào — kể cả khi lease này thay thế lease ấy. Thay thế một
@@ -72,7 +72,7 @@ branch_ownership: exclusive
 target_branch_neu_land: master
 
 base_sha: 6fa8a7451c751076983017e072d84ca6618ff58f
-reviewed_sha_required: 21e48dea1a058aa6c2566fcd432c87bba1547036
+reviewed_sha_required: 44ea74eed30c56d0d20b132c0c2b31a13ab76431
 reviewed_sha_ghi_chu: >-
   Generation 1 chưa có commit công việc nào, nên mỏ neo khởi đầu bằng `base_sha`, theo quy ước
   đang chạy của kho. BẮT BUỘC dời sang exact head TRƯỚC khi xin review hoặc land (§8) — để
@@ -112,6 +112,25 @@ cap_nhat_sau_cross_review_luot_1: >-
   BỘ ĐẾM THỦ CÔNG VẪN 0/2 — lượt connector không tính vào trần §12, và KHÔNG được mượn theo
   chiều ngược lại để khai là đã có cross-review đủ điều kiện land.
 
+cap_nhat_truoc_luot_review_2: >-
+  DỜI NEO TRƯỚC KHI GỌI REVIEWER, không phải sau: `reviewed_sha_required` từ `21e48dea` sang
+  exact head `44ea74e`. §8 — approval luôn neo `reviewed_sha`; xin duyệt khi lease còn neo
+  commit cũ là xin duyệt một cây KHÔNG chứa việc đã làm. Đây là lần dời THỨ HAI của packet,
+  vì head đổi sau mỗi lượt vá; packet N5 vấp đúng chỗ này và ăn một finding P1.
+
+  BỘ ĐẾM: `codex_review_calls_used` 0 -> 1, `review_rounds_used` 0 -> 1. Lượt 1 là lượt
+  cross-review CỤC BỘ chạy `codex exec -c model_reasoning_effort=xhigh` trong sandbox ngoài
+  kho; nó cho `changes_requested` với một P1 kèm diff `git apply --check` đi qua, và P1 ấy
+  ĐÚNG (probe hỏng bị đánh đồng với nền utf-8 ⇒ runner in `TONG: DAT` và `rc=0` trong khi hồi
+  quy `m20` còn trong cây). Đã vá ở `44ea74e`.
+
+  KHÔNG tính vào bộ đếm: các lượt do CONNECTOR GitHub tự chạy khi mở PR (#419 `fe78350`,
+  #420 `85b3c64`). Chúng là lượt tự động, không phải lượt thủ công của §12. Nhưng cũng KHÔNG
+  được mượn ngược lại để khai là đã đủ cross-review — chúng đã ra P1 và P2, không phải approve.
+
+  SAU LƯỢT 2, BỘ ĐẾM CẠN 2/2. Lượt 2 mà còn `changes_requested` thì packet KHÔNG được land
+  bằng cách gọi thêm lượt nữa; phải trình người giữ.
+
 ngan_sach_kich_thuoc:
   tep_toi_da: 2
   dong_them_toi_da: 300
@@ -119,7 +138,7 @@ ngan_sach_kich_thuoc:
   don_vi: >-
     `git diff --numstat 6fa8a745 -- .claude/hooks/subagent_ghi_detect.py
     .claude/hooks/subagent_ghi_detect_test.py` — dòng THÊM. Pathspec TRONG lệnh, KHÔNG `..HEAD`.
-  da_dung: 271
+  da_dung: 298
   ghi_chu: >-
     PHẢI ĐO LẠI trước mỗi bước công bố, không chép dòng này. Bài học `PLAT-X8`: cùng con số
     trôi bốn lần, lần thứ tư khai sai một cổng là ĐẠT.

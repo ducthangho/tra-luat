@@ -55,12 +55,24 @@ def _git(cwd, *args):
     """Tra (rc, stdout). `--no-optional-locks` la BAT BUOC o CA HAI lan chup:
     `git status` tran co the refresh stat data va GHI `.git/index` ma porcelain khong
     lo — dac ta §2 co phep do A/B cho viec nay. Thieu co ay thi chinh detector ghi."""
+    # v1.36.x (#412 loi B) — KHONG `text=True`. Che do van ban cua `subprocess` giai ma
+    # bang `locale.getpreferredencoding()`, tren may chu kho la cp1258, trong khi
+    # `getfilesystemencoding()` la utf-8. Do duoc: `Quoc hoi` (U+1ED1 U+1ED9) ve tay hook
+    # thanh U+00E1 U+00BB U+2018 / U+2122 — khop chinh xac "utf-8 encode roi decode cp1258".
+    # Hau qua: `top` meo => `mu_noi_dung` day, detector ghim o `unknown` MOI luot.
+    #
+    # `surrogateescape` chu KHONG `strict`, va day la lua chon CO CHU DICH: `strict` se bien
+    # mot duong dan ngoai ASCII thanh `unknown`, tuc TAI TAO dung su mu dang chua — chi doi
+    # tu meo AM THAM sang fail-close ON AO. Detector phai SO hai anh chup; `surrogateescape`
+    # round-trip khong mat byte nao nen hai anh so duoc.
+    # Khac #417 (`ops/lease_publish.py`): o do doi tuong la mot CONG, va cong thi `strict`
+    # dung hon. Cung lop khuyet tat, hai lua chon nguoc nhau, vi hai VAI khac nhau.
     try:
         p = subprocess.run(["git", "--no-optional-locks", "-C", str(cwd), *args],
-                           capture_output=True, text=True, timeout=120)
+                           capture_output=True, timeout=120)
     except (OSError, subprocess.SubprocessError) as e:
         return 128, "loi goi git: %s" % e
-    return p.returncode, p.stdout
+    return p.returncode, p.stdout.decode("utf-8", "surrogateescape")
 
 
 def _chup(cwd):
@@ -227,8 +239,25 @@ def _so(truoc, sau):
 
 
 def main() -> int:
+    # v1.36.x (#412 loi B) — KHONG `json.load(sys.stdin)`. `sys.stdin` giai ma bang
+    # `locale.getpreferredencoding()` (cp1258 tren may chu kho), nen truong `cwd` cua payload
+    # bi meo TRUOC khi hook nhin thay no; `git rev-parse` sau do that bai tren cwd meo va
+    # `SubagentStart` ghi baseline `hong`. Doc BYTE roi giai ma utf-8 TUONG MINH.
+    #
+    # `strict` o day (khac `_git` o tren): payload harness khong phai utf-8 hop le la loi
+    # THAT, khong phai chuyen locale cua may. Hanh vi `except -> return 0` GIU NGUYEN — no la
+    # duong da co, doi no la viec khac va khong nam trong write set cua packet nay.
+    #
+    # `sys.stdin.buffer` co the VANG (stdin bi thay bang mot doi tuong khong co `.buffer`,
+    # thuong gap trong test). Lui ve doc van ban roi ma hoa nguoc bang chinh encoding cua
+    # luong ay — khong bao gio lui ve `json.load`, vi lui nhu the la lui vao dung khuyet tat.
     try:
-        data = json.load(sys.stdin)
+        luong = getattr(sys.stdin, "buffer", None)
+        if luong is not None:
+            tho = luong.read()
+        else:
+            tho = sys.stdin.read().encode(sys.stdin.encoding or "utf-8", "surrogateescape")
+        data = json.loads(tho.decode("utf-8"))
     except Exception:
         return 0                                  # khong doc duoc payload -> im lang
     su_kien = str(data.get("hook_event_name") or "")

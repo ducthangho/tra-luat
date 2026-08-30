@@ -47,9 +47,18 @@ def _moi_truong_git_dong(env=None):
     return e
 
 
-def _cay():
-    """Dung mot worktree git TAM co mot commit. Tra duong dan."""
+def _cay(ten_con=None):
+    """Dung mot worktree git TAM co mot commit. Tra duong dan.
+
+    `ten_con` khac None => dung cay trong mot THU MUC CON mang ten ay. Them cho `t25`:
+    khuyet tat #412 CHI can khi duong dan chua ky tu ngoai ASCII, ma `mkdtemp` luon cho
+    ten thuan ASCII — nen mot ca dung `_cay()` tran KHONG THE do duoc no. Day dung la
+    hinh dang "ca co MAT khac ca co DO".
+    """
     d = tempfile.mkdtemp(prefix="tl329-cay-")
+    if ten_con:
+        d = str(pathlib.Path(d) / ten_con)
+        pathlib.Path(d).mkdir()
     env = _moi_truong_git_dong()
 
     def sh(*a):
@@ -98,6 +107,31 @@ def goi(su_kien, agent, aid, cwd, snap, hook=None):
     except Exception:
         return p.returncode, "KHONG-PHAI-JSON", err[:200]
     return p.returncode, d.get("ket_qua"), d.get("ly_do", "")
+
+
+def goi_byte(su_kien, agent, aid, cwd, snap, hook=None):
+    """Nhu `goi` nhung gui stdin dang BYTE utf-8 va doc stderr dang BYTE.
+
+    BAT BUOC cho `t25`, khong phai cho gon: `goi` dung `text=True`, nen Python MA HOA stdin
+    bang encoding cua LOCALE (cp1258 tren may chu kho). Ky tu `o.` (U+1ECD) KHONG ma hoa
+    duoc bang cp1258, nen CHINH BO TEST se nem UnicodeEncodeError truoc khi hook kip chay —
+    ca se do vi ly do KHONG lien quan gi toi khuyet tat dang do. Harness that gui BYTE utf-8.
+
+    Tra (rc, ket_qua, ly_do, chi_tiet).
+    """
+    tho = json.dumps({"hook_event_name": su_kien, "agent_type": agent,
+                      "agent_id": aid, "cwd": cwd}, ensure_ascii=False).encode("utf-8")
+    p = subprocess.run([sys.executable, "-B", str(hook or HOOK)], input=tho,
+                       capture_output=True,
+                       env={**os.environ, "TL_SUBAGENT_SNAP_DIR": snap})
+    err = p.stderr.decode("utf-8", "replace").strip()
+    if not err:
+        return p.returncode, None, "", {}
+    try:
+        d = json.loads(err.splitlines()[-1])
+    except Exception:
+        return p.returncode, "KHONG-PHAI-JSON", err[:200], {}
+    return p.returncode, d.get("ket_qua"), d.get("ly_do", ""), (d.get("chi_tiet") or {})
 
 
 def _snap():
@@ -640,6 +674,52 @@ def duoc_cong_bo_diem(do_san):
     return not do_san
 
 
+def t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung(h):
+    """#412 loi B — CA HAI duong giai ma (`sys.stdin` va `_git`) phai doc utf-8 TUONG MINH.
+
+    CHOT BAT BUOC, chep tu #412: ca nay PHAI chay tren duong dan CO KY TU NGOAI ASCII. Tren
+    duong dan ASCII khuyet tat VO HINH, nen mot ca dat o `/tmp/abc` se XANH ma KHONG DO GI.
+
+    Phu HAI lop ky tu, va su khac nhau ay la CO THAT chu khong phai trang tri:
+      MEO      `o'`(U+1ED1) `o.`(U+1ED9)  -> byte tiep dien 0x91 0x99, cp1258 CO dinh nghia
+                                            => giai ma sai AM THAM, khong nem.
+      O_TRONG  `o.`(U+1ECD) `e`(U+1EC1)   -> byte 0x8d 0x81 la O TRONG cua cp1258
+                                            => `strict` NEM; `surrogateescape` cho surrogate.
+    Dung mot minh "Quoc hoi" la chi cham lop MEO, tuc do HUT mot nua.
+
+    KHANG DINH BANG SO, KHONG bang `rc`: `_MA_CLEAN`, `_MA_CHANGED`, `_MA_UNKNOWN` deu bang 0
+    (D1 = CHI TO CAO), nen `rc` la 0 KE CA KHI MU. Hai so la tieu chi:
+        so_duong_da_bam_noi_dung > 0        so duong MU == 0
+    Ve so thu hai: `clean` CHI dat toi duoc khi `mu_nd` rong — nhanh fail-close ngay tren no
+    tra `unknown` neu con bat ky duong nao khong bam duoc. Nen `ket_qua == "clean"` CHINH LA
+    phep khang dinh "0 duong MU"; khi ca do, thong diep in ra danh sach `khong_bam_duoc` that
+    de nguoi doc thay so ay chu khong phai doan.
+    """
+    for nhan, lop in (("Quốc hội", "MEO"), ("Học ề ở", "O_TRONG")):
+        c, s = _cay(nhan), _snap()
+        # PHAI co it nhat MOT duong xuat hien trong `git status` o CA HAI anh chup, neu
+        # khong thi `noi_dung` rong va `so_duong_da_bam_noi_dung` bang 0 — ca se DO du ban
+        # va DUNG. Do duoc khi viet ca nay: cay `_cay()` tran la cay SACH, status rong.
+        # Tep nay co TRUOC Start va KHONG doi toi Stop => ket qua van `clean`, nhung duong
+        # ay duoc bam noi dung, dung thu ca dang khang dinh.
+        # Dat duoi `.tl_state/` vi no bi ignore, va D3 mo `--ignored` chinh cho vung nay.
+        (pathlib.Path(c) / ".tl_state").mkdir(exist_ok=True)
+        (pathlib.Path(c) / ".tl_state" / "ke-hoach.json").write_text(
+            '{"x": 1}' + chr(10), encoding="utf-8")
+        goi_byte("SubagentStart", "tl-auditor", "a25" + lop, c, s, h)
+        rc, kq, ly, ct = goi_byte("SubagentStop", "tl-auditor", "a25" + lop, c, s, h)
+        shutil.rmtree(c, ignore_errors=True)
+        if kq != "clean":
+            mu = (ct.get("khong_bam_duoc") or [])
+            return (False, f"[{lop}] duong dan ngoai ASCII -> {kq}; so duong MU={len(mu)} "
+                           f"(mong doi ket_qua=clean, MU=0); ly do: {ly[:100]}")
+        bam = ct.get("so_duong_da_bam_noi_dung")
+        if not isinstance(bam, int) or bam <= 0:
+            return (False, f"[{lop}] so_duong_da_bam_noi_dung={bam!r} (mong doi > 0) — "
+                           "cay do duoc nhung khong bam noi dung duong nao")
+    return (True, "ca hai lop ky tu: bam duoc noi dung (> 0) va 0 duong MU")
+
+
 def t22_cham_diem_dot_bien_CO_RANG(h):
     """Ca BIET TRUOC DAP AN cho hai ham tren — bon chieu, ca tha lan to."""
     xau = []
@@ -706,10 +786,43 @@ CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT,
       t22_cham_diem_dot_bien_CO_RANG, t22b_fixture_KHONG_an_cau_hinh_git_ngoai,
       t23_doi_ten_anh_chup_la_UNKNOWN,
-      t24_index_cua_LINKED_WORKTREE_van_duoc_dinh_vi]
+      t24_index_cua_LINKED_WORKTREE_van_duoc_dinh_vi,
+      # --- #412 loi B: giai ma utf-8 tuong minh o ca hai duong ---
+      t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
+    # --- #412 loi B: MOI duong va co MOT dot bien RIENG. Hai duong hong DOC LAP nhau,
+    # nen mot dot bien chung se khong phan biet duoc duong nao con rang.
+    # --- #412 loi B: MOI duong co MOT dot bien RIENG, va moi dot bien la mot ban LUI
+    # TRUNG THANH ve ma TRUOC khi va — KHONG phai mot sua doi mot phan.
+    # DA TRA GIA khi viet ca nay: ban dau `m22` chi thay DONG giai ma va giu lai doan doc
+    # byte o tren, nen mutant doc het stdin roi moi goi `json.load(sys.stdin)` tren mot
+    # luong DA CAN. No chet vi stdin RONG, khong phai vi codepage — dung hinh dang TIN
+    # DUNG GIA cua #355/#359: dot bien BI GIET nhung khong bi giet DUNG LY DO. `m20` cung
+    # vay: doi mot minh loi goi sang `text=True` thi dong duoi con `.decode()` tren mot
+    # `str` => `AttributeError`, cung la mot cai chet VO CAN.
+    ("m20_git_tro_lai_text_True",
+     '''capture_output=True, timeout=120)
+    except (OSError, subprocess.SubprocessError) as e:
+        return 128, "loi goi git: %s" % e
+    return p.returncode, p.stdout.decode("utf-8", "surrogateescape")''',
+     '''capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.SubprocessError) as e:
+        return 128, "loi goi git: %s" % e
+    return p.returncode, p.stdout'''),
+    ("m21_git_giai_ma_bang_LOCALE_thay_vi_utf8",
+     '''p.stdout.decode("utf-8", "surrogateescape")''',
+     '''p.stdout.decode(__import__("locale").getpreferredencoding(False),
+                     "surrogateescape")'''),
+    ("m22_stdin_tro_lai_json_load",
+     '''        luong = getattr(sys.stdin, "buffer", None)
+        if luong is not None:
+            tho = luong.read()
+        else:
+            tho = sys.stdin.read().encode(sys.stdin.encoding or "utf-8", "surrogateescape")
+        data = json.loads(tho.decode("utf-8"))''',
+     '''        data = json.load(sys.stdin)'''),
     ("m1_bo_co_ignored",
      '"status", "--porcelain=v1", "-uall", "--ignored"',
      '"status", "--porcelain=v1", "-uall"'),

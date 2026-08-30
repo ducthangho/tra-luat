@@ -311,6 +311,28 @@ Mỗi tiêu chí nêu **phép đo nào làm nó ĐỎ** (L3). Tiêu chí không 
   `ĐẠT`. Chép số **TỪ ĐẦU RA MÁY**, đừng gõ tay — chính bộ ấy in dòng *"đếm bằng máy — chép vào hồ sơ
   TỪ ĐÂY"*.
 
+### `A3`–`A6` — LUẬT CHUNG: mọi ca phải đo **QUA CỔNG THẬT**, không gọi thẳng hàm nhận diện
+
+**Bắt buộc.** Mỗi ca của `A3`, `A4`, `A6` phải: dựng một cây kho giả có `.git` thật và một diff thật,
+rồi gọi **cổng** đúng như `packet_loop_test.py` gọi nó — đi qua giải `BASE`, qua `git diff
+--diff-filter=A`, qua bước bỏ khối rào, rồi mới tới ba dạng nhận diện. **CẤM** ca nào chỉ `import`
+rồi gọi thẳng hàm nhận diện với một chuỗi dựng sẵn.
+
+**Vì sao ghi thành luật thay vì tin phiên thi công nhớ:** đây là một lỗ **đã trả giá thật**, cùng
+ngày, ở packet anh em **#418**. Cross-review lượt 2 của nó (`xhigh`) ra một **P1 ĐÚNG**: ca `t26` đo
+**hàm thuần** `phan_loai_dot_bien` nhưng **không** đo **dây nối** tại chỗ gọi trong `chay()`.
+Reviewer đột biến **đúng một đối số ở call-site** (`env_cp` → `None`), **không đụng** hàm phân loại —
+và kết quả là: probe vẫn đo được `cp1258` (nền vẫn "ĐO ĐƯỢC"), **cả ba** mutant codepage bị **THA**,
+`t26` **vẫn xanh**, runner vẫn công bố `TONG: DAT` với **`rc=0`**. Vá ở `b115366`.
+
+Đó là hình dạng *"ca có MẶT khác ca có ĐO"* ở dạng nguy nhất: **hàm đúng, dây nối sai, và mọi tín
+hiệu đều xanh.** Cổng Đ2 có đúng cấu trúc dễ mắc lỗi ấy — một hàm nhận diện thuần cộng một chuỗi
+dây nối (`BASE` → `diff` → bỏ rào → nhận diện), và **bốn trong sáu** kẽ hở mà cross-review đã tìm
+thấy trên chính đặc tả này nằm ở **dây nối**, không nằm ở hàm.
+
+**Hệ quả cho `A5`:** phải có một đột biến **chỉ đụng call-site** — giữ nguyên hàm nhận diện, làm hỏng
+một đối số truyền vào nó — và đột biến ấy phải làm ca đích **ĐỎ**.
+
 ### `A3` (Đ2) — cổng có RĂNG: phải ĐỎ trên một spec mới thiếu bộ đếm
 
 - **ĐẠT khi:** dựng một spec giả `ops/specs/<tên tạm>.md` **thêm mới trong diff** và **không** có
@@ -345,6 +367,7 @@ Bộ `packet_loop_test.py` cưỡng chế *"mỗi LỚP LÁCH phải có đột 
 | **lui dạng 2 về `\b[A-F]\s*=\s*\d` (khớp bất kỳ đâu)** | **ĐỎ** — câu phủ định mang số lọt |
 | **bỏ `\b` sau `\d+` ở dạng 2** | **ĐỎ** — `A = 8unknown` lọt |
 | **siết luật tiêu đề thành "hết dòng hoặc `—`/`-`/`:`"** | **ĐỎ** — ca bắt-oan `## hinh_dang_ke_thua (L4)` |
+| **ĐỘT BIẾN DÂY NỐI: chỉ đụng call-site, giữ nguyên hàm nhận diện** — hỏng một đối số truyền vào (ví dụ: bỏ bước bỏ khối rào **ở chỗ gọi**, hoặc truyền nội dung CHƯA cắt mục) | **ĐỎ** — nếu nó SỐNG thì ca đang đo hàm thuần, không đo cổng (`A3`–`A6` luật chung) |
 
 - **ĐỎ khi:** bất kỳ đột biến nào **SỐNG SÓT**, hoặc bị giết bởi một ca **KHÁC** ca đích, hoặc bị
   giết bằng một ngoại lệ **không phải** assertion của ca đích (tín dụng giả — xem bài học `#355`/`#359`).

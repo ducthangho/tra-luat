@@ -164,7 +164,18 @@ git diff --diff-filter=A --name-only <BASE>...HEAD -- ops/specs/
 |---|---|
 | lượt `pull_request` | `origin/$GITHUB_BASE_REF` |
 | lượt `push` lên `master` | `HEAD^1` (cha thứ nhất của commit merge) |
+| lượt `workflow_dispatch` | `git merge-base HEAD refs/remotes/origin/master` |
 | **không giải được `BASE`** | **KHÔNG ĐO ĐƯỢC ⇒ ĐỎ** |
+
+**Hàng `workflow_dispatch` là BẮT BUỘC, không phải cho đủ bộ** — thiếu nó thì đặc tả **tự mâu thuẫn**:
+`A7` đòi một lượt `workflow_dispatch`, `ci.yml:126` chạy `packet_loop_test.py` trong đúng lượt ấy, và
+nếu `BASE` không giải được thì cổng mới phải khai `KHÔNG ĐO ĐƯỢC ⇒ ĐỎ` **ngay trong lượt dùng để
+nghiệm thu** — tức `A7` không bao giờ đạt được. Phát hiện bởi cross-review `codex` trên PR #415
+(finding P1, `09:39Z 30-08-2026`); phiên soạn spec **không tự thấy**.
+
+Dispatch ngay trên `master` cho `merge-base = HEAD` ⇒ tập spec THÊM MỚI **rỗng** ⇒ XANH. Đó **không**
+phải fail-open: so `master` với chính nó thì thật sự không có spec nào được thêm. Trên một nhánh có
+spec mới, `merge-base` là điểm rẽ và `--diff-filter=A` bắt đúng tệp ấy.
 
 **Ngoại lệ tha DUY NHẤT:** cây rõ ràng là **bản sao rời** — không có `.git`. Trong kho thật mà
 thiếu thì **ĐỎ**. Đây là chốt của bài học `t24` (*"ca có MẶT khác ca có ĐO"*): một nhánh
@@ -198,7 +209,12 @@ cạnh nhau. Đó là bắt theo **hình dáng ngẫu nhiên**, không theo **th
 |---|---|---|
 | 1 | hàng bảng bộ đếm | dòng khớp `^\|\s*\*{0,2}[A-F]\*{0,2}\s*\|.*\|\s*\*{0,2}\d+\*{0,2}\s*\|` |
 | 2 | cặp phẳng | `\b[A-F]\s*=\s*\d` |
-| 3 | miễn có khai báo | chuỗi nguyên văn `khong_ap_dung` |
+| 3 | miễn, **có lý do** | `khong_ap_dung` cộng **văn bản khác rỗng** sau nó trên cùng dòng (sau dấu `:` hoặc khoảng trắng), tối thiểu **20 ký tự không phải khoảng trắng** |
+
+**Dạng 3 đòi LÝ DO, không chỉ đòi cái nhãn.** Bản đầu nhận diện `khong_ap_dung` bằng chuỗi trần, nên
+một spec mới chỉ cần gõ đúng nhãn ấy là **đi vòng qua** bộ đếm mà không phải khai vì sao — cổng biến
+thành nghi lễ. Phát hiện bởi cross-review `codex` trên PR #415 (finding P2, `09:39Z 30-08-2026`).
+`A6` vì vậy mang thêm **một ca ÂM**: nhãn trần, không lý do ⇒ **ĐỎ**.
 
 **Đây là danh sách CHO PHÉP có chủ ý** — CLAUDE.md: *"Danh sách CẤM không bao giờ đủ; nó phân biệt
 CÁCH VIẾT chứ không phân biệt THẨM QUYỀN."* Một danh sách cấm ở đây sẽ phải đoán trước mọi kiểu viết
@@ -278,15 +294,21 @@ Bộ `packet_loop_test.py` cưỡng chế *"mỗi LỚP LÁCH phải có đột 
 | đổi `--diff-filter=A` thành quét **toàn bộ** `ops/specs` | **ĐỎ** (vì 19 spec cũ sẽ đỏ ⇒ ca bắt-oan bắt được) |
 | bỏ nhánh fail-close, cho `BASE` không giải được đi qua thành XANH | **ĐỎ** |
 | nới ngoại lệ "bản sao rời" thành *"không giải được `BASE` thì tha"* | **ĐỎ** |
+| **bỏ hàng `workflow_dispatch` khỏi bảng `BASE`** | **ĐỎ** — ca đích phải chạy được với `GITHUB_EVENT_NAME=workflow_dispatch` |
+| **nhận `khong_ap_dung` trần, không đòi lý do** | **ĐỎ** — ca âm của `A6` |
 
 - **ĐỎ khi:** bất kỳ đột biến nào **SỐNG SÓT**, hoặc bị giết bởi một ca **KHÁC** ca đích, hoặc bị
   giết bằng một ngoại lệ **không phải** assertion của ca đích (tín dụng giả — xem bài học `#355`/`#359`).
 
 ### `A6` (Đ2) — ca BẮT-OAN: không được đỏ oan
 
-- **ĐẠT khi:** một spec mới **CÓ** bộ đếm hợp lệ ⇒ **XANH**; và một spec khai `khong_ap_dung` kèm
-  lý do ⇒ **XANH**; và diff **không thêm** spec nào ⇒ **XANH**.
-- **ĐỎ khi:** bất kỳ ca nào trong ba ca ấy đỏ.
+- **ĐẠT khi (ba ca DƯƠNG):** spec mới **CÓ** bộ đếm hợp lệ ⇒ **XANH** · spec khai `khong_ap_dung`
+  **kèm lý do khác rỗng** ⇒ **XANH** · diff **không thêm** spec nào ⇒ **XANH**.
+- **ĐẠT khi (hai ca ÂM):** spec mới khai `khong_ap_dung` **TRẦN, không lý do** ⇒ **ĐỎ** ·
+  spec mới có mục `hinh_dang_ke_thua` nhưng **rỗng** ⇒ **ĐỎ**.
+- **ĐỎ khi:** bất kỳ ca dương nào đỏ, **hoặc** bất kỳ ca âm nào xanh. Thiếu ca âm thì `A6` chỉ chứng
+  minh cổng *không kêu bậy*, không chứng minh nó *kêu đúng lúc* — và một cổng chỉ có ca dương là
+  cổng không ai biết có răng hay không.
 
 ### `A7` — bằng chứng **Windows** trên exact head
 
@@ -358,12 +380,20 @@ prompt/spec. Chép sang đây để giữ liên tục hồ sơ, **không** để
 ### bộ đếm review
 
 - `reviewer_provider`: **`codex`** · `assurance_target`: **`cross_approved`**.
-- `codex_review_calls_max`: **3** · `codex_review_calls_used`: **0** · `review_rounds_used`: **0**.
-- **Chủ kho chọn 3, rộng hơn khuyến nghị 2 của phiên soạn spec.** Ghi thẳng vì nó là một nới lỏng có
-  chủ ý: lý do là packet mang một mục **THIẾT KẾ** (cổng mới), không chỉ sửa chữ. Ai đọc hồ sơ hãy cân
-  rằng bộ đếm này **rộng hơn tiền lệ #405 (2/2)**.
-- Đổi prompt, phiên hay tên attempt **KHÔNG** reset bộ đếm (§12). Cạn 3/3 mà chưa `approve` ⇒
-  `blocked`, trình chủ kho, **không** xin lượt 4.
+- `codex_review_calls_max`: **2** · `codex_review_calls_used`: **0** · `review_rounds_used`: **0**.
+- **Đây KHÔNG phải một lựa chọn của packet — nó là trần của PROTOCOL.** `docs/PROTOCOL_DA_PHIEN.md`
+  nói ba chỗ: d.**579** *"Trần 2 lượt Codex/PR, các bộ đếm §12, và mức assurance theo class không đổi"* ·
+  d.**597** *"Mỗi PR được dùng tối đa hai lượt Codex"* · d.**811–812** *"tối đa hai trên một PR"*.
+  Trần tính **theo PR**, không theo packet.
+- **Ghi lại một lỗi của phiên soạn spec, vì nó là hình dạng A ngay trong hồ sơ chống hình dạng A:**
+  bản đầu khai `max: 3`. Phiên soạn spec đã **dựng một lựa chọn trái protocol rồi mời chủ kho chọn**,
+  và chủ kho chọn `3` từ thực đơn hỏng ấy — phiên **không kiểm protocol trước khi hỏi**. Cross-review
+  `codex` bắt được trên PR #415 (finding P1, `09:39Z 30-08-2026`) và phép kiểm tại nguồn gốc xác nhận
+  reviewer đúng. Muốn vượt trần thì phải là **override tường minh của chủ kho** viện §2, ghi thành một
+  dòng riêng trong lease — **không** bằng cách để một con số rộng nằm im trong đặc tả.
+- Đổi prompt, phiên hay tên attempt **KHÔNG** reset bộ đếm (§12). Chạm **2/2** mà chưa `approve` ⇒
+  **Review Rescue Checkpoint** (§ trần review budget), **không** phải tự khai `blocked`, và **không**
+  được gọi thêm bằng prompt/phiên khác để lách trần.
 - Lớp `sensitive` ⇒ `same_provider_approved` **KHÔNG** thay được `cross_approved` (§8).
 - `codex` đã chứng minh khả dụng bằng **lời gọi thật** (không phải `codex login status`, thứ NÓI DỐI):
   `codex exec --skip-git-repo-check` ⇒ `rc=0`, `08:22:52Z` và `09:22:4xZ 30-08-2026`.

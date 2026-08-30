@@ -1,6 +1,11 @@
-# ĐẶC TẢ ĐÓNG BĂNG — `N6-HOOK-GIAI-MA-UTF8`
+# ĐẶC TẢ ĐÓNG BĂNG — `N7-HOOK-GIAI-MA-UTF8`
 
 Packet Issue: #418 · Nợ gốc: #412 · Khuyết tật họ hàng đã tách: #417
+
+ĐỔI TÊN N6 -> N7 (10:1xZ 30-08-2026): `N6` ĐÃ BỊ CHIẾM bởi
+`N6-LOI-KHAI-RONG-HON-PHEP-DO` (#411, nhánh `ops/dac-ta-n6-loi-khai`, có TRƯỚC packet này).
+Đo bằng cách quét `ops/specs` trên MỌI ref, không chỉ master — cùng lý do `ops/leases` không
+nằm một chỗ. Hai packet trùng số là hai hồ sơ không phân biệt được; đổi số là rẻ nhất.
 
 Đặc tả này ĐÓNG BĂNG khi lease neo băm của nó. Sửa tệp này sau khi cấp lease là làm
 `spec_hash` trỏ vào thứ không còn tồn tại — đường đi vòng qua §3.2, không phải sửa chính tả.

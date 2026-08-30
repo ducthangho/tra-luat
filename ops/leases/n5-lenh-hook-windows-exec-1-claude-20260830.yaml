@@ -17,7 +17,7 @@ lease_id: n5-lenh-hook-windows-exec-1-claude-20260830
 # quyền ghi cho một việc đã xong: đúng nợ `AG-T0-01B` / #400. `_phan_loai_lease` chỉ
 # biết HẠN, nên hạn 10:53:00Z tự nó KHÔNG tắt được lease; chỉ dòng dưới đây tắt được.
 # Chốt `_kiem_bia_mo` đòi HAI CHIỀU: lease mới khai `thay_the_cho` trỏ về đây.
-da_bi_thay_the: n6-hook-giai-ma-utf8-exec-1-claude-20260830
+da_bi_thay_the: n7-hook-giai-ma-utf8-exec-1-claude-20260830
 
 role: executor
 provider: claude

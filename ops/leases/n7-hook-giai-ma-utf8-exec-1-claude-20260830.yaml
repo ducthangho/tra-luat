@@ -1,4 +1,7 @@
-# Lease EXECUTOR — `N6-HOOK-GIAI-MA-UTF8` (#418), revision 1, generation 1.
+# Lease EXECUTOR — `N7-HOOK-GIAI-MA-UTF8` (#418), revision 1, generation 1.
+#
+# ĐỔI TÊN N6 -> N7: `N6` đã bị `N6-LOI-KHAI-RONG-HON-PHEP-DO` (#411) chiếm TRƯỚC.
+# Chỉ lộ ra khi quét `ops/specs` trên MỌI ref — trên master một mình thì KHÔNG thấy.
 #
 # THAY THẾ `n5-lenh-hook-windows-exec-1-claude-20260830`: packet #405 của lease ấy ĐÃ LAND
 # (`7a2f177` là tổ tiên của `origin/master`, đo bằng `merge-base --is-ancestor`, KHÔNG dùng
@@ -9,11 +12,11 @@
 schema_version: 2
 event: executor_lease_granted
 packet_issue: 418
-packet_id: N6-HOOK-GIAI-MA-UTF8
-phase_key: N6-HOOK-GIAI-MA-UTF8
+packet_id: N7-HOOK-GIAI-MA-UTF8
+phase_key: N7-HOOK-GIAI-MA-UTF8
 revision: 1
 generation: 1
-lease_id: n6-hook-giai-ma-utf8-exec-1-claude-20260830
+lease_id: n7-hook-giai-ma-utf8-exec-1-claude-20260830
 
 thay_the_cho: n5-lenh-hook-windows-exec-1-claude-20260830
 
@@ -33,8 +36,8 @@ review_class_ghi_chu: >-
   fail-closed, KHÔNG phải vì packet chạm authority. CẤM khai ngược lại rằng packet "chạm
   authority" để mượn uy tín cụm từ ấy.
 
-spec_path: ops/specs/N6-HOOK-GIAI-MA-UTF8.md
-spec_hash: c428abb6fb484bb7cb259894d28cd2dc0d2ae3940561c8058eb6f962f4e3dd73
+spec_path: ops/specs/N7-HOOK-GIAI-MA-UTF8.md
+spec_hash: a203733a3cc8a4729bf5925facba3779f6d8f00360872159fab05e4556f0514e
 spec_note: >-
   Băm đo 09:57Z 30-08-2026 trên nội dung tệp ở CHÍNH commit này. ĐO LẠI trước khi merge: sửa
   đặc tả sau khi cấp lease là làm băm này trỏ vào thứ không còn tồn tại.
@@ -64,7 +67,7 @@ write_set_da_do_truoc_khi_cap: >-
   chính là lease đang bị thay thế bằng commit này. Sau bia mộ ⇒ kỳ vọng `NGƯỜI_GIỮ 0`.
   PHẢI ĐO LẠI sau commit, không suy.
 
-branch: claude/n6-hook-giai-ma-utf8-exec-1
+branch: claude/n7-hook-giai-ma-utf8-exec-1
 branch_ownership: exclusive
 target_branch_neu_land: master
 

@@ -109,7 +109,52 @@ def goi(su_kien, agent, aid, cwd, snap, hook=None):
     return p.returncode, d.get("ket_qua"), d.get("ly_do", "")
 
 
-def goi_byte(su_kien, agent, aid, cwd, snap, hook=None):
+# ── #412: DIEU KIEN DO DUOC cua khuyet tat codepage ───────────────────────────────────
+# Khuyet tat #412 CHI bieu hien khi encoding mac dinh cua tien trinh KHAC utf-8. Tren Ubuntu
+# CI ambient LA utf-8, nen `m20`/`m21`/`m22` hanh xu Y HET ban da va va SONG SOT — runner tinh
+# mutant song la DO, tuc commit dung van lam cong Linux do. Cross-review codex bat dung ca nay
+# tren PR #419 (P1), va ho da chay thu tung mutant duoi utf-8 de chung minh.
+#
+# Chua bang HAI lop, khong phai mot:
+#   1. THU EP mot moi truong khong-utf8 cho tien trinh con (tren Linux `LC_ALL=C` cong
+#      `PYTHONCOERCECLOCALE=0` cong `PYTHONUTF8=0` tat ca PEP 538/540);
+#   2. DO xem ep co AN khong bang cach HOI CHINH tien trinh con, roi moi quyet dinh.
+# Do 30-08-2026 tren Windows: ep KHONG doi gi (cp1258 truoc va sau) vi Windows dung ACP chu
+# khong dung locale POSIX — nhung o do ambient DA khac utf-8 nen van do duoc. Nen phep quyet
+# dinh phai la THUOC TINH DO DUOC ("con giai ma bang gi"), KHONG phai ten nen: mot may Windows
+# dat UTF-8 code page phai bi tinh la KHONG DO DUOC, va mot may Linux ep duoc thi phai DO.
+_EP_CODEPAGE = {"LC_ALL": "C", "LANG": "C", "PYTHONCOERCECLOCALE": "0", "PYTHONUTF8": "0"}
+_PROBE_ENC = ("import codecs,locale;"
+              "print(codecs.lookup(locale.getpreferredencoding(False)).name)")
+
+
+def _encoding_cua_con(env):
+    """HOI chinh tien trinh con no se giai ma bang gi. Khong suy tu ten nen."""
+    try:
+        r = subprocess.run([sys.executable, "-c", _PROBE_ENC],
+                           capture_output=True, text=True, env=env, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return (r.stdout or "").strip()
+
+
+def moi_truong_do_duoc_codepage():
+    """Tra (env, encoding). env=None nghia la KHONG DO DUOC tren nen nay.
+
+    Uu tien moi truong DA EP; neu ep khong an thi thu ambient; ca hai deu utf-8 thi chiu.
+    """
+    da_ep = {**os.environ, **_EP_CODEPAGE}
+    enc = _encoding_cua_con(da_ep)
+    if enc and enc != "utf-8":
+        return da_ep, enc
+    thuong = dict(os.environ)
+    enc2 = _encoding_cua_con(thuong)
+    if enc2 and enc2 != "utf-8":
+        return thuong, enc2
+    return None, (enc or enc2 or "(khong hoi duoc)")
+
+
+def goi_byte(su_kien, agent, aid, cwd, snap, hook=None, env=None):
     """Nhu `goi` nhung gui stdin dang BYTE utf-8 va doc stderr dang BYTE.
 
     BAT BUOC cho `t25`, khong phai cho gon: `goi` dung `text=True`, nen Python MA HOA stdin
@@ -123,7 +168,8 @@ def goi_byte(su_kien, agent, aid, cwd, snap, hook=None):
                       "agent_id": aid, "cwd": cwd}, ensure_ascii=False).encode("utf-8")
     p = subprocess.run([sys.executable, "-B", str(hook or HOOK)], input=tho,
                        capture_output=True,
-                       env={**os.environ, "TL_SUBAGENT_SNAP_DIR": snap})
+                       env={**(env if env is not None else os.environ),
+                            "TL_SUBAGENT_SNAP_DIR": snap})
     err = p.stderr.decode("utf-8", "replace").strip()
     if not err:
         return p.returncode, None, "", {}
@@ -656,6 +702,30 @@ def t24_index_cua_LINKED_WORKTREE_van_duoc_dinh_vi(h):
 # Cung MOT LOP loi voi `MOC_MO_HO_CO_SAN` cua PR #343: mot phep kiem tu bao ve minh bang
 # chinh thu can duoc bao ve. Duong ra giong het: tach VI TU khoi DU LIEU, cho no nhan doi
 # so, roi cho no mot ca BIET TRUOC DAP AN. Khong tim chuoi trong ma nua.
+# ── #412: BA DOT BIEN NAY CHI DO DUOC KHI NEN KHAC utf-8 ─────────────────────────────
+# Chung lat nguoc dung duong giai ma, nen duoi utf-8 ban da va va ban chua va cho KET QUA
+# Y HET — mutant SONG SOT ma khong chung minh duoc gi. Neu de nguyen thi commit DUNG van lam
+# cong Linux DO (cross-review codex, P1 tren PR #419, ho da chay thu tung mutant duoi utf-8).
+#
+# BA trang thai, khong phai hai: GIET · SONG · KHONG DO DUOC. Trang thai thu ba KHONG duoc
+# tinh la giet (khong thoi phong diem) va KHONG tinh la song (khong lam do gia), nhung PHAI
+# duoc GOI TEN va noi ro no duoc do o dau — mot ca lang le bo qua la mot cong khong ton tai.
+_DOT_BIEN_PHU_THUOC_CODEPAGE = frozenset({
+    "m20_git_tro_lai_text_True",
+    "m21_git_giai_ma_bang_LOCALE_thay_vi_utf8",
+    "m22_stdin_tro_lai_json_load",
+})
+
+
+def phan_loai_dot_bien(ten, env_cp):
+    """`"khong_do_duoc"` hoac `"do_duoc"`. Ham THUAN, nhan `env_cp` lam DOI SO chu khong tu
+    hoi moi truong — de `t26` goi duoc voi mot ca biet truoc dap an. Mot vi cham diem chi
+    song trong `main()` thi khong ca nao cham toi, va no se am tham troi."""
+    if ten in _DOT_BIEN_PHU_THUOC_CODEPAGE and env_cp is None:
+        return "khong_do_duoc"
+    return "do_duoc"
+
+
 def giet_duoc(do_san, ket_qua):
     """Ca bi dot bien GIET = PASS o NEN ma FAIL o MUTANT. Hieu so, khong phai tap tho.
 
@@ -695,7 +765,8 @@ def t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung(h):
     phep khang dinh "0 duong MU"; khi ca do, thong diep in ra danh sach `khong_bam_duoc` that
     de nguoi doc thay so ay chu khong phai doan.
     """
-    for nhan, lop in (("Quốc hội", "MEO"), ("Học ề ở", "O_TRONG")):
+    env, enc = moi_truong_do_duoc_codepage()
+    for nhan, lop in (("Quốc hội", "MEO"), ("Học ề ọ", "O_TRONG")):
         c, s = _cay(nhan), _snap()
         # PHAI co it nhat MOT duong xuat hien trong `git status` o CA HAI anh chup, neu
         # khong thi `noi_dung` rong va `so_duong_da_bam_noi_dung` bang 0 — ca se DO du ban
@@ -706,8 +777,9 @@ def t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung(h):
         (pathlib.Path(c) / ".tl_state").mkdir(exist_ok=True)
         (pathlib.Path(c) / ".tl_state" / "ke-hoach.json").write_text(
             '{"x": 1}' + chr(10), encoding="utf-8")
-        goi_byte("SubagentStart", "tl-auditor", "a25" + lop, c, s, h)
-        rc, kq, ly, ct = goi_byte("SubagentStop", "tl-auditor", "a25" + lop, c, s, h)
+        goi_byte("SubagentStart", "tl-auditor", "a25" + lop, c, s, h, env=env)
+        rc, kq, ly, ct = goi_byte("SubagentStop", "tl-auditor", "a25" + lop, c, s, h,
+                                  env=env)
         shutil.rmtree(c, ignore_errors=True)
         if kq != "clean":
             mu = (ct.get("khong_bam_duoc") or [])
@@ -717,7 +789,40 @@ def t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung(h):
         if not isinstance(bam, int) or bam <= 0:
             return (False, f"[{lop}] so_duong_da_bam_noi_dung={bam!r} (mong doi > 0) — "
                            "cay do duoc nhung khong bam noi dung duong nao")
-    return (True, "ca hai lop ky tu: bam duoc noi dung (> 0) va 0 duong MU")
+    return (True, "ca hai lop ky tu duoi encoding %r: bam noi dung > 0, 0 duong MU"
+                  % enc)
+
+
+def t26_dot_bien_phu_thuoc_codepage_khong_bi_tinh_la_SONG(h):
+    """Trang thai THU BA cua cham diem dot bien phai TU NO duoc do.
+
+    Vi sao ca nay ton tai: `m20`/`m21`/`m22` lat nguoc duong giai ma, nen duoi utf-8 ban da va
+    va ban chua va cho ket qua Y HET va mutant SONG SOT. Runner tinh mutant song la DO ⇒ commit
+    DUNG van lam cong Linux do (cross-review codex, P1 tren PR #419). Ba trang thai — GIET ·
+    SONG · KHONG DO DUOC — la cach chua, nhung mot vi cham diem KHONG CO CA NAO CHAM TOI thi
+    se am tham troi. Nen ca nay do CHINH vi cham diem ay, khong do detector.
+
+    Hai chieu, va can ca hai: nen utf-8 ⇒ ba dot bien ay `khong_do_duoc`; nen khac utf-8 ⇒
+    `do_duoc`. Thieu chieu thu hai thi mot vi "luon tra khong_do_duoc" van qua — tuc chot mat
+    rang va moi dot bien codepage se duoc tha vinh vien.
+    """
+    loi = []
+    for ten in sorted(_DOT_BIEN_PHU_THUOC_CODEPAGE):
+        if phan_loai_dot_bien(ten, None) != "khong_do_duoc":
+            loi.append(f"{ten}: nen utf-8 (env=None) phai la khong_do_duoc")
+        if phan_loai_dot_bien(ten, {"LC_ALL": "C"}) != "do_duoc":
+            loi.append(f"{ten}: nen khac utf-8 phai la do_duoc")
+    # Dot bien KHONG thuoc tap ay thi KHONG BAO GIO duoc tha, ke ca tren nen utf-8.
+    for ten, _, _ in DOT_BIEN:
+        if ten in _DOT_BIEN_PHU_THUOC_CODEPAGE:
+            continue
+        if phan_loai_dot_bien(ten, None) != "do_duoc":
+            loi.append(f"{ten}: khong phu thuoc codepage ma bi tha tren nen utf-8")
+    if loi:
+        return (False, "; ".join(loi[:3]))
+    return (True, f"3 trang thai dung: {len(_DOT_BIEN_PHU_THUOC_CODEPAGE)} dot bien duoc tha "
+                  f"DUNG tren nen utf-8, {len(DOT_BIEN) - len(_DOT_BIEN_PHU_THUOC_CODEPAGE)} "
+                  f"dot bien khac KHONG bao gio duoc tha")
 
 
 def t22_cham_diem_dot_bien_CO_RANG(h):
@@ -788,7 +893,8 @@ CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t23_doi_ten_anh_chup_la_UNKNOWN,
       t24_index_cua_LINKED_WORKTREE_van_duoc_dinh_vi,
       # --- #412 loi B: giai ma utf-8 tuong minh o ca hai duong ---
-      t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung]
+      t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung,
+      t26_dot_bien_phu_thuoc_codepage_khong_bi_tinh_la_SONG]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
@@ -996,6 +1102,7 @@ def chay():
             print(f"  ok   {f.__name__:52} {msg}")
     goc = HOOK.read_text(encoding="utf-8")
     song = []
+    khong_do = []
     # ── DOT BIEN CHI CO NGHIA KHI NEN XANH ───────────────────────────────────────────────
     # Ban truoc dem `giet = [f for f in CA if not f(tep)[0]]` — KHONG he tham chieu `do_san`.
     # Nen khi nen do, MOI dot bien "giet" tam thuong bang chinh cac ca da do san, va runner
@@ -1009,7 +1116,13 @@ def chay():
     # #336 phai ap BANG TAY tung luot; nay may cuong che.
     print("--- DOT BIEN ---")
     with tempfile.TemporaryDirectory() as d:
+        env_cp, enc_cp = moi_truong_do_duoc_codepage()
         for ten, cu, moi in DOT_BIEN:
+            if phan_loai_dot_bien(ten, env_cp) == "khong_do_duoc":
+                print(f"  KHONG DO DUOC {ten:30} nen giai ma bang {enc_cp!r}; khuyet tat #412"
+                      f" khong bieu hien duoi utf-8 -> do o lane windows")
+                khong_do.append(ten)
+                continue
             cap = [(cu, moi)] if isinstance(cu, str) else list(zip(cu, moi))
             if any(c not in goc for c, _ in cap):
                 print(f"  MOC KHONG CON TRONG MA: {ten} -> dot bien nay CHUA TUNG CHAY")
@@ -1038,7 +1151,8 @@ def chay():
         song.extend(song_st)
     # `tap_giet` co Y CHI dem rieng `DOT_BIEN`: hai kenh kia co bo dem rieng, cong chung
     # vao mot ty le se lam con so `18/18` cua nen troi ma khong ai biet vi sao.
-    tap_giet = len(DOT_BIEN) - len(song) + len(song_test) + len(song_st)
+    tap_giet = (len(DOT_BIEN) - len(khong_do) - len(song)
+                + len(song_test) + len(song_st))
     if not duoc_cong_bo_diem(do_san):
         print(f"TONG: CA {len(CA) - do}/{len(CA)} dat")
         print(f"TONG: DIEM DOT BIEN BI TU CHOI — nen co {len(do_san)} ca DO SAN "
@@ -1046,7 +1160,14 @@ def chay():
               f"Sua nen xanh truoc, roi moi doc duoc so dot bien.")
     else:
         print(f"TONG: CA {len(CA) - do}/{len(CA)} dat · "
-              f"DOT BIEN {tap_giet}/{len(DOT_BIEN)} bi giet")
+              f"DOT BIEN {tap_giet}/{len(DOT_BIEN) - len(khong_do)} bi giet"
+              + (f" · {len(khong_do)} KHONG DO DUOC tren nen nay" if khong_do else ""))
+    if khong_do:
+        # Goi TEN, va noi ro do o DAU. "Khong do duoc" khac "dat"; giau no di la bien mot
+        # cho mu thanh mot con so dep.
+        print("TONG: KHONG DO DUOC tren nen nay: " + ", ".join(sorted(khong_do)))
+        print("      Ba dot bien ay lat nguoc duong giai ma, chi phan biet duoc khi encoding")
+        print("      mac dinh KHAC utf-8. Lane `windows` cua `ci.yml` la noi chung duoc do.")
     dat = (len(CA) > 0 and do == 0 and len(DOT_BIEN) > 0 and not song)
     print("TONG:", "DAT" if dat else "DO")
     # ── A10 — RANH GIOI CUA CHINH BO TEST NAY, khai o day chu khong giau trong PR ──

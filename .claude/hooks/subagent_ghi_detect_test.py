@@ -420,6 +420,39 @@ def t20_duong_KHONG_bam_duoc_thi_UNKNOWN_khong_phai_clean(h):
                 f"(mong doi unknown + co ten duong)")
 
 
+def _van_tay_nen_chay():
+    """VAN TAY cua nen chay, TRA VE danh sach dong (khong tu in) — N5, packet #405.
+
+    Vi sao ca nay tung KHONG chan doan duoc: no bat `capture_output` roi chi giu
+    `stderr`, va tren `windows-latest` ca bon to hop cho `rc=1` voi `stderr` RONG.
+    `stderr` rong khong phai "khong co loi" — no la KENH SAI. Ba manh duoi day la
+    thu toi thieu de biet CAI GI dang chay:
+      - `bash` phan giai ve dau (Git Bash hay `System32/bash.exe` vo WSL);
+      - `bash --version`;
+      - `stdout` cua chinh lenh hook.
+    VANG MAT va RONG la hai ket luan khac nhau, nen chuoi rong van phai in ra chu.
+    """
+    duong = shutil.which("bash")
+    ra = ["VANTAY bash-which  : " + (duong if duong else "KHONG TIM THAY")]
+    try:
+        r = subprocess.run(["bash", "--version"], capture_output=True, text=True)
+        dong = (r.stdout or "").split("\n")[0].strip()
+        ra.append("VANTAY bash-version: " + (dong if dong else "STDOUT RONG")
+                  + f" (rc={r.returncode})")
+    except OSError as e:
+        ra.append(f"VANTAY bash-version: KHONG GOI DUOC ({type(e).__name__}: {e})")
+    return ra
+
+
+def _van_tay_lenh(nhan, r):
+    """rc + CA HAI kenh cua mot lan chay lenh hook. Rong thi NOI LA RONG."""
+    out = (r.stdout or "").strip()
+    err = (r.stderr or "").strip()
+    return [f"VANTAY {nhan}: rc={r.returncode}",
+            f"VANTAY {nhan}: stdout=" + (out[:400] if out else "RONG"),
+            f"VANTAY {nhan}: stderr=" + (err[:400] if err else "RONG")]
+
+
 def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h):
     """P1 `hook-khong-co-fallback-project-dir` (cross-review PR #342, DA TAI HIEN).
 
@@ -431,6 +464,7 @@ def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h):
     troi lech, va ca se do mot dieu khong con dung."""
     goc = HERE.parent.parent
     d = json.loads((goc / ".claude" / "settings.json").read_text(encoding="utf-8"))
+    van_tay = []
     xau = []
     for su_kien in ("SubagentStart", "SubagentStop"):
         nhom = (d.get("hooks") or {}).get(su_kien) or []
@@ -449,8 +483,19 @@ def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h):
                                                  "agent_id": f"t21{nhan}{su_kien}",
                                                  "cwd": str(goc)}),
                                capture_output=True, text=True, env=env)
+            van_tay += _van_tay_lenh(f"{su_kien}/{nhan}", r)
             if r.returncode != 0:
-                xau.append(f"{su_kien}/{nhan}: rc={r.returncode} {(r.stderr or '')[:80]}")
+                xau.append(f"{su_kien}/{nhan}: rc={r.returncode} "
+                           f"stdout={(r.stdout or '').strip()[:80] or 'RONG'} "
+                           f"stderr={(r.stderr or '').strip()[:80] or 'RONG'}")
+    # IN VAN TAY CHI KHI CO TO HOP HONG. Ly do do duoc, khong phai gu thoi quen:
+    # `get_job_logs` tra 500 dong tren `original_length: 1180` (do 21:5xZ 29-08-2026) va
+    # cat o DAU. Bo test nay chay lai trong moi dot bien, nen in vo dieu kien sinh 266
+    # dong — du de day chinh bang chung can doc ra khoi cua so con lai. Chan doan chi co
+    # gia tri o luot HONG; o luot xanh no la nhieu nuot mat tin hieu.
+    if xau:
+        for dong in _van_tay_nen_chay() + van_tay:
+            print(dong)
     return (not xau, f"lenh hook chay duoc o 2 su kien x 2 nen -> dung {4 - len(xau)}/4"
                      + (f"; SAI: {xau}" if xau else ""))
 

@@ -64,6 +64,9 @@ phải finding, và người nhận phải tự dựng lại bản vá từ văn
 - **bản vá**: diff áp được — reviewer tự chạy `git apply --check` và ghi mã thoát vào
   verdict — hoặc patch plan đánh số theo từng tệp/dòng khi diff không dựng được, kèm lý do
   chọn đường sau.
+- đính patch thì luật ở `docs/PROTOCOL_DA_PHIEN.md` §8 — tra ở đó, đừng suy lại từ đầu
+  (artifact không phải ref · nhãn nguyên văn · executor tự áp tự đo · `hint_provenance` ·
+  packet `sensitive` giới hạn theo LOẠI TỆP).
 
 ### Approver / Land Operator
 

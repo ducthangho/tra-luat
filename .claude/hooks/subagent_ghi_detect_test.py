@@ -111,12 +111,11 @@ def goi(su_kien, agent, aid, cwd, snap, hook=None):
 
 # ── #412: DIEU KIEN DO DUOC cua khuyet tat codepage ───────────────────────────────────
 # Khuyet tat #412 CHI bieu hien khi encoding mac dinh KHAC utf-8. Tren CI Ubuntu ambient LA
-# utf-8, nen `m20`/`m21`/`m22` hanh xu Y HET ban da va va SONG SOT ⇒ commit DUNG van lam cong
-# Linux do (cross-review codex, P1 tren PR #419, ho chay thu tung mutant duoi utf-8).
-# Chua bang HAI lop: (1) THU EP moi truong khong-utf8 cho tien trinh con; (2) DO xem ep co AN
-# khong bang cach HOI CHINH tien trinh con. Do 30-08-2026: tren Windows ep KHONG doi gi
-# (cp1258 truoc va sau, vi Windows dung ACP) nhung ambient DA khac utf-8 nen van do duoc.
-# Nen phep quyet dinh la THUOC TINH DO DUOC, KHONG phai ten nen.
+# utf-8 nen `m20`/`m21`/`m22` SONG SOT ⇒ commit DUNG van lam cong Linux do (P1 PR #419).
+# Chua bang HAI lop: (1) THU EP moi truong khong-utf8; (2) DO xem ep co AN khong bang cach
+# HOI CHINH tien trinh con. Do 30-08-2026: tren Windows ep KHONG doi gi (cp1258 truoc va sau,
+# vi Windows dung ACP) nhung ambient DA khac utf-8 nen van do duoc — phep quyet dinh phai la
+# THUOC TINH DO DUOC, KHONG phai ten nen.
 _EP_CODEPAGE = {"LC_ALL": "C", "LANG": "C", "PYTHONCOERCECLOCALE": "0", "PYTHONUTF8": "0"}
 _PROBE_ENC = ("import codecs,locale;"
               "print(codecs.lookup(locale.getpreferredencoding(False)).name)")
@@ -143,10 +142,9 @@ def moi_truong_do_duoc_codepage():
 
     Uu tien moi truong DA EP; neu ep khong an thi thu ambient; ca hai deu utf-8 thi chiu.
     """
-    # PROBE HONG KHAC NEN UTF-8 (P1 cross-review xhigh). Ban truoc tra "" khi probe hong roi
-    # danh dong "" voi "nen utf-8" ⇒ spawn that bai / rc khac 0 / stdout rong deu THA ba
-    # mutant; reviewer dung mini-runner chung minh runner in `TONG: DAT` va `rc=0` TRONG KHI
-    # hoi quy `m20` dang ton tai. Nay probe hong thi NEM: fail-close, khong fail-excuse.
+    # PROBE HONG KHAC NEN UTF-8 (P1 cross-review xhigh). Ban truoc tra "" roi danh dong ""
+    # voi "nen utf-8" ⇒ spawn hong / rc khac 0 / stdout rong deu THA ba mutant, va runner in
+    # `TONG: DAT` + `rc=0` TRONG KHI hoi quy `m20` con trong cay. Nay probe hong thi NEM.
     da_ep = {**os.environ, **_EP_CODEPAGE}
     enc = _encoding_cua_con(da_ep)
     if not enc:
@@ -806,8 +804,7 @@ def t26_dot_bien_phu_thuoc_codepage_khong_bi_tinh_la_SONG(h):
     "luon tra khong_do_duoc" van qua, tuc moi dot bien codepage duoc tha vinh vien.
     """
     loi = []
-    # Chieu THU BA (cross-review xhigh doi): probe HONG phai NEM. Ban truoc chi goi
-    # `phan_loai_dot_bien` bang doi so gia lap nen KHONG cham `_encoding_cua_con`.
+    # Chieu THU BA: probe HONG phai NEM (ban truoc chi goi `phan_loai_dot_bien` gia lap).
     probe_goc = _encoding_cua_con
     try:
         globals()["_encoding_cua_con"] = lambda env: ""
@@ -819,8 +816,8 @@ def t26_dot_bien_phu_thuoc_codepage_khong_bi_tinh_la_SONG(h):
             loi.append("probe hong bi danh dong voi nen utf-8 va tha dot bien")
     finally:
         globals()["_encoding_cua_con"] = probe_goc
-    # Chieu THU TU: chay `_encoding_cua_con` THAT (khong stub). Chieu ba stub ca ham nen than
-    # no khong bao gio chay — do la ly do chot "stdout rong" tung KHONG co mutant giet duoc.
+    # Chieu THU TU: chay `_encoding_cua_con` THAT. Chieu ba stub ca ham nen than no khong
+    # bao gio chay — ly do chot "stdout rong" tung KHONG co mutant giet duoc.
     ma_goc = _PROBE_ENC
     # `rc != 0` KHONG kem stdout thi chot "rong" da bat, nen dot bien go chot rc SONG SOT —
     # tuc no THUA o ca ay. Ca phan biet duoc phai la rc khac 0 MA VAN in ra encoding.
@@ -1166,6 +1163,9 @@ def chay():
             else:
                 print(f"  SONG {ten:34} KHONG ca nao do -> chot nay KHONG CO RANG")
                 song.append(ten)
+        # Nen DO DUOC ma van co mutant bi tha ⇒ day noi HONG. `t26` do HAM THUAN, khong do
+        # CHO GOI: doi mot doi so o day (`env_cp`->`None`) tha ca ba mutant ma `t26` van xanh.
+        phan_loai_hong = env_cp is not None and bool(khong_do)
     # Dot bien nham CHINH bo test — chi co nghia khi nen xanh, y het tap tren.
     song_test = []
     song_st = []
@@ -1195,7 +1195,8 @@ def chay():
         print("TONG: KHONG DO DUOC tren nen nay: " + ", ".join(sorted(khong_do)))
         print("      Ba dot bien ay lat nguoc duong giai ma, chi phan biet duoc khi encoding")
         print("      mac dinh KHAC utf-8. Lane `windows` cua `ci.yml` la noi chung duoc do.")
-    dat = (len(CA) > 0 and do == 0 and len(DOT_BIEN) > 0 and not song)
+    dat = (len(CA) > 0 and do == 0 and len(DOT_BIEN) > 0 and not song
+           and not phan_loai_hong)
     print("TONG:", "DAT" if dat else "DO")
     # ── A10 — RANH GIOI CUA CHINH BO TEST NAY, khai o day chu khong giau trong PR ──
     print("A10 : hieu luc cua `SubagentStop` exit 2 tren nen — KHONG DO DUOC trong bo nay.")

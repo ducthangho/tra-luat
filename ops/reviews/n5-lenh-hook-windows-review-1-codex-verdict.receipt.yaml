@@ -1,0 +1,104 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 1 của PR #407 (packet #405 `N5-LENH-HOOK-WINDOWS`).
+#
+# ĐỌC TRƯỚC: biên nhận này do CHÍNH phiên thi công ghi — tức bên kém độc lập nhất để khai
+# lượt review đã diễn ra thế nào. Phần KIỂM ĐƯỢC không phụ thuộc lời tôi: `verdict_sha256`
+# khoá BYTE của bản trong kho, nên ai sửa nó về sau đều lộ. Phần TÓM TẮT thì là lời tôi —
+# đọc thẳng `verdict_path`.
+#
+# Đặc tả packet ghi rằng `#329`/PR #342 sinh ra ca `t21` nhưng KHÔNG để lại biên nhận nào
+# trong `ops/reviews/`. Biên nhận này tồn tại để packet #405 không lặp lại đúng khoảng trống ấy.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '405'
+packet_slug: N5-LENH-HOOK-WINDOWS
+lease_id: n5-lenh-hook-windows-exec-1-claude-20260830
+lease_ghi_chu: >-
+  Đây là lease EXECUTOR, KHÔNG phải lease review. Kho chưa cấp lease riêng cho vai reviewer
+  ở packet này. Ghi `lease_id` của executor vào đây là để truy vết bộ đếm
+  `codex_review_calls_used`, KHÔNG phải khai rằng reviewer có lease.
+
+provider: codex
+role: reviewer
+verdict: changes_requested
+reviewed_sha: 472f11bd96e7e10779a0681fa1b52a93df85ee9d
+luot: 1
+cross_provider: true
+assurance: cross_approved
+assurance_ghi_chu: >-
+  Executor `claude`, reviewer `codex` — khác nền, thoả `cross_approved`. NHƯNG verdict do
+  container của phiên tác giả PR vận chuyển; §8 nói thẳng thứ đó KHÔNG thành merge
+  authorization. Packet `sensitive` vẫn cần thêm cổng `duyệt khác danh tính` bằng một login
+  KHÁC `ducthangho` — và phiên đẩy bằng PAT nên actor = `ducthangho`, tức chủ kho KHÔNG tự
+  duyệt được.
+
+verdict_path: ops/reviews/n5-lenh-hook-windows-review-1-codex-verdict.md
+verdict_sha256: d7eaeb150756a5957acd6e0354bdca8ebbfd43a6d8aa10af7ab826c77e09d0c4
+verdict_bytes: 5653
+verdict_nguon: >-
+  `codex exec --skip-git-repo-check --sandbox workspace-write` trong container phiên; tệp gốc
+  `<sandbox>/VERDICT.md`. Phiên chép và KHÔNG sửa — nhưng đó là LỜI KHAI của tôi, không phải
+  phép đo; xem `verdict_doi_chieu`.
+verdict_doi_chieu: >-
+  CHỨNG MINH: bản trong kho không đổi kể từ lúc ghi — `verdict_sha256` đo trên chính
+  `verdict_path`, ai sửa về sau đều lộ. Đó là CHỐNG SỬA VỀ SAU, và nó thật.
+  KHÔNG CHỨNG MINH: rằng bản chép khớp thứ reviewer đã sinh ra. Băm đo trên BẢN SAO nên nó
+  chỉ nói bản sao khớp CHÍNH NÓ — một vòng tròn. Cắt vòng cần một client thứ hai lấy bản gốc
+  rồi băm độc lập, và container phiên KHÔNG có đường ấy (proxy chặn `api.github.com/repos/*`).
+  TRẠNG THÁI ĐÚNG LÀ TRẠNG THÁI THỨ BA: KHÔNG ĐO ĐƯỢC, không phải "đã kiểm".
+
+sandbox_reviewer:
+  duong_dan_trong_container: '<scratchpad>/review1/'
+  noi_dung: 'kho.git (bare) · cay/ tại 472f11bd · nen/ tại 1dedb8b5 · diff.patch · DAC_TA.md · LEASE.yaml · log job windows 99207635597 đầy đủ 1187/1187 dòng'
+  core_abbrev_ghim: 7
+  doi_chieu_cong_truoc_khi_giao: >-
+    `python -B .claude/hooks/subagent_ghi_detect_test.py` cho CÙNG 30 ca có tên, CÙNG kết quả
+    trong `cay/` và trong cây gốc của executor; không ca nào lệch. §8 đòi phép đối chiếu này
+    vì "lệch là lỗi sandbox cho tới khi chứng minh ngược lại".
+
+finding_luot_1:
+- id: P1-lease-con-neo-vao-base
+  hang: P1
+  ve: quy trình
+  noi_dung: >-
+    Xin review khi `reviewed_sha_required` còn là `1dedb8b5` (base) trong khi head xin review
+    là `472f11bd`. Chính lease quy định phải dời neo TRƯỚC khi xin review hoặc land.
+  phien_nhan: true
+  da_chua_boi: >-
+    Chính nhánh điều phối mang biên nhận này — lease đã dời sang `472f11bd`. Không chữa được
+    từ nhánh packet vì `vung_duoc_phep_cham` cấm chạm `ops/leases/**` từ đó.
+- id: P2-so-ref-khai-mo-ho-va-thieu-manifest
+  hang: P2
+  ve: xuất xứ bằng chứng
+  noi_dung: >-
+    Hồ sơ review khai "bare clone, 267 ref" mà không nói là 267 `refs/heads`, và phiên đã XOÁ
+    manifest ref khỏi bundle trước khi giao, nên reviewer không chạy `comm` được và đo ra
+    `show-ref | wc -l` = 307.
+  phien_nhan: true
+  phan_ra_con_so: >-
+    307 = 267 nhánh thật + 1 ref `refs/heads/HEAD` do refspec `+refs/remotes/origin/*:refs/heads/*`
+    của phiên đẻ ra + 39 tag. Con số 267 của phiên ĐÚNG về nhánh, nhưng lời khai mơ hồ và
+    KHÔNG tái lập được như đã giao — đó mới là finding, và nó đúng.
+  da_chua_boi: 'chưa — phải sửa bundle trước lượt review 2'
+finding_ve_ma: 0
+finding_ve_ma_ghi_chu: >-
+  KHÔNG finding nào chạm vào mã. Câu hỏi trọng tâm — "đổi `bash` sang đường dẫn tuyệt đối có
+  phải rút ruột ca không" — reviewer trả lời thẳng là KHÔNG: nó loại sai khác tìm executable
+  của `CreateProcess` mà vẫn giữ đủ ma trận 2x2, và đột biến settings chứng minh nhánh dự
+  phòng còn được canh.
+
+khong_do_duoc_reviewer_tu_khai:
+- 'A1 (vân tay lượt `33289633514`): log giao cho reviewer là lượt XANH nên không có khối `VANTAY`; sandbox không có Windows và không có log job `99198878779`. Reviewer khai KHÔNG ĐO ĐƯỢC — phiên phải đưa log ấy vào bundle lượt 2.'
+- 'A2/A5 chạy lại trên Windows: sandbox không có runner Windows. Reviewer chỉ đếm lại được trên log.'
+- '`original_length = 1187`: là metadata NGOÀI tệp log, không tự chứng minh được từ chính artifact.'
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-30T05:48:00Z'
+
+receipt_khong_khai:
+- 'Không khai lượt này đủ cho land — verdict là `changes_requested`, và cổng `duyệt khác danh tính` chưa có.'
+- 'Không khai A1 đã được kiểm chéo — reviewer khai thẳng là KHÔNG ĐO ĐƯỢC vì thiếu log lượt vân tay.'
+- 'Không khai bundle lượt 1 là đủ — P2 chứng minh nó thiếu manifest đối chứng.'

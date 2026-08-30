@@ -18,6 +18,9 @@ revision: 3
 generation: 1
 lease_id: n7-hook-giai-ma-utf8-exec-1r3-claude-20260830
 
+# BIA MỘ — thay bằng revision 4, chủ kho UỶ QUYỀN cho phiên tự quyết việc nới trần.
+da_bi_thay_the: n7-hook-giai-ma-utf8-exec-1r4-claude-20260830
+
 
 
 thay_the_cho:

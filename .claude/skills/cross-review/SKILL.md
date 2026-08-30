@@ -142,9 +142,13 @@ Sau khi phóng, **kiểm reviewer đã tuân cấm**: `git -C "$RV" status --por
 ## Chạy nền kia trong sandbox
 
 ```bash
+BAC_MONG_DOI=<bac>   # DUY NHAT mot cho dat bac; validator ben duoi doc lai chinh bien nay
 codex exec -s workspace-write --skip-git-repo-check --cd <sandbox> \
-  -c model_reasoning_effort=<bac> --json - < PROMPT.md > codex.jsonl
+  -c model_reasoning_effort="$BAC_MONG_DOI" --json - < PROMPT.md > codex.jsonl
 ```
+
+Phóng và kiểm phải chạy **CÙNG MỘT SHELL**: `BAC_MONG_DOI` không sống qua hai lần gọi shell
+khác nhau, và một biến rỗng lọt tới máy chủ là đúng ca hỏng mà chốt dưới sinh ra để chặn.
 
 Bậc lấy theo **cùng bảng thang** ở mục *Chọn model/effort* — bảng ấy trước đây chỉ được đọc cho lane
 Claude, nên lane codex chạy ở mặc định một cách **im lặng**. Tên bậc của codex là
@@ -152,7 +156,9 @@ Claude, nên lane codex chạy ở mặc định một cách **im lặng**. Tên
 `max` ánh xạ sang `max`, mọi ô `xhigh` của bảng giữ nguyên `xhigh`.
 
 PROMPT phải đòi mỗi finding mang đủ **ba phần bắt buộc của `AGENTS.md` mục Reviewer** (phép đo ·
-phản chứng · bản vá) cộng **phân hạng** `P1|P2|P3` như khung `VERDICT.md` bên dưới.
+phản chứng · bản vá) cộng **phân hạng** `P1|P2|P3` như khung `VERDICT.md` bên dưới, VÀ trỏ
+reviewer sang hợp đồng gợi ý vá ở `docs/PROTOCOL_DA_PHIEN.md` §7 — ba phần ấy là BẰNG CHỨNG,
+không phải cả hợp đồng. Trỏ, đừng chép §7 vào đây.
 
 #### Đo bậc effort ĐÃ DÙNG — ba trạng thái, đo 30-08-2026 trên `codex-cli 0.146.0`
 
@@ -170,7 +176,11 @@ Không được suy từ `rc=0`. Ba phép đo, mỗi phép trả lời một câ
 
 ```bash
 PY="$(command -v python3 || command -v python || command -v py)"
-BAC_MONG_DOI=xhigh
+: "${BAC_MONG_DOI:?BAC_MONG_DOI rong - dat o khoi phong, CUNG shell}"
+case "$BAC_MONG_DOI" in
+  none|minimal|low|medium|high|xhigh|max) ;;
+  *) echo "BAC khong thuoc tap codex: $BAC_MONG_DOI" >&2; exit 1 ;;
+esac
 "$PY" - "$BAC_MONG_DOI" codex.jsonl <<'EOF'
 import glob, json, os, sys
 bac, stdout_jsonl = sys.argv[1], sys.argv[2]

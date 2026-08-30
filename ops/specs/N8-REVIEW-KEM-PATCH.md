@@ -37,12 +37,23 @@ Packet này **KHÔNG** hứa đổi effort của connector; nói thẳng để k
 Bằng chứng connector CÓ đọc `AGENTS.md`: hai finding của nó trích thẳng `AGENTS.md:L103-L105`
 và `AGENTS.md:L29-L34` làm căn cứ. Nên `AGENTS.md` là đòn bẩy duy nhất với kênh ấy.
 
-## 3. Write set — ĐÚNG 2 tệp
+## 3. Write set — ĐÚNG 3 tệp
 
 ```
 AGENTS.md
 .claude/skills/cross-review/SKILL.md
+RELEASE_MANIFEST.json
 ```
+
+`RELEASE_MANIFEST.json` vào write set từ revision 2, KHÔNG phải vì packet nở phạm vi mà vì
+phiên điều phối soạn THIẾU: `AGENTS.md` nằm trong manifest (`files[2]`) và `ci.yml` chạy
+`release-verify --strict` **không có `if:`** — mọi packet chạm `AGENTS.md` mà không tái sinh
+manifest đều ĐỎ CI theo kiến trúc.
+
+CẢNH BÁO ĐÃ TRẢ GIÁ: khi mở write set ở r2, tôi sửa `write_set` và trần nhưng **quên §3 này và
+quên dòng `S6`** — ba hiện vật cùng nói về một con số, tôi sửa một. Connector bắt được cả hai
+(P1 trên PR #425). Ai nới write set lần sau phải sửa ĐỦ BA CHỖ: `write_set`,
+`ngan_sach_kich_thuoc`, và dòng `S6` — cộng mục này.
 
 Đo `2026-08-30`, cả hai `NGƯỜI_GIỮ 0` (`SKILL.md` chỉ có hai lease đã HẾT_HẠN).
 

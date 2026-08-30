@@ -12,6 +12,13 @@ revision: 1
 generation: 1
 lease_id: n8-review-kem-patch-exec-1-claude-20260830
 
+# BIA MỘ — thay bằng revision 2 lúc 2026-08-30, chủ kho duyệt trực tiếp.
+# Lý do KHÔNG phải packet nở phạm vi: phiên ĐIỀU PHỐI soạn write set thiếu. `AGENTS.md`
+# nằm trong `RELEASE_MANIFEST.json` (`files[2]`), mà `ci.yml` chạy `release-verify --strict`
+# KHÔNG có `if:` ⇒ vô điều kiện. Sửa `AGENTS.md` mà không tái sinh manifest thì CI ĐỎ.
+# Phiên thi hành DỪNG đúng theo `S1` thay vì tự chạm đường thứ ba — đó là hành vi ĐÚNG.
+da_bi_thay_the: n8-review-kem-patch-exec-1r2-claude-20260830
+
 role: executor
 provider: claude
 executor: claude

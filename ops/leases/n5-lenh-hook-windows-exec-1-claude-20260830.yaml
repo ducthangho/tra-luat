@@ -11,6 +11,14 @@ revision: 1
 generation: 1
 lease_id: n5-lenh-hook-windows-exec-1-claude-20260830
 
+# BIA MỘ — thu hồi sớm 2026-08-30 09:57Z, chủ kho duyệt trực tiếp trong phiên.
+# Packet #405 ĐÃ LAND (`7a2f177` là tổ tiên của `origin/master`, đo bằng
+# `merge-base --is-ancestor`, KHÔNG dùng nhãn `merged` — nợ N11), nên lease này giữ
+# quyền ghi cho một việc đã xong: đúng nợ `AG-T0-01B` / #400. `_phan_loai_lease` chỉ
+# biết HẠN, nên hạn 10:53:00Z tự nó KHÔNG tắt được lease; chỉ dòng dưới đây tắt được.
+# Chốt `_kiem_bia_mo` đòi HAI CHIỀU: lease mới khai `thay_the_cho` trỏ về đây.
+da_bi_thay_the: n6-hook-giai-ma-utf8-exec-1-claude-20260830
+
 role: executor
 provider: claude
 executor: claude

@@ -1,0 +1,145 @@
+# Lease EXECUTOR — `N6-HOOK-GIAI-MA-UTF8` (#418), revision 1, generation 1.
+#
+# THAY THẾ `n5-lenh-hook-windows-exec-1-claude-20260830`: packet #405 của lease ấy ĐÃ LAND
+# (`7a2f177` là tổ tiên của `origin/master`, đo bằng `merge-base --is-ancestor`, KHÔNG dùng
+# nhãn `merged` — nợ N11). Lease cũ còn hạn tới 10:53:00Z nhưng việc đã xong: đúng nợ
+# `AG-T0-01B` / #400 (lease không tự chết khi packet đã land). Thu hồi bằng BIA MỘ HAI CHIỀU —
+# tệp lease cũ nhận dòng `da_bi_thay_the` trong CÙNG commit này; `_kiem_bia_mo` đòi hai chiều.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 418
+packet_id: N6-HOOK-GIAI-MA-UTF8
+phase_key: N6-HOOK-GIAI-MA-UTF8
+revision: 1
+generation: 1
+lease_id: n6-hook-giai-ma-utf8-exec-1-claude-20260830
+
+thay_the_cho: n5-lenh-hook-windows-exec-1-claude-20260830
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` là lớp MÁY TÍNH RA: `_tinh_lop_tu_write_set` trên cả hai đường dẫn ⇒ `sensitive`.
+  ĐỌC ĐÚNG LÝ DO: không đường nào khớp tiền tố trong `_BANG_LOP`; lớp đến từ giá trị MẶC ĐỊNH
+  fail-closed, KHÔNG phải vì packet chạm authority. CẤM khai ngược lại rằng packet "chạm
+  authority" để mượn uy tín cụm từ ấy.
+
+spec_path: ops/specs/N6-HOOK-GIAI-MA-UTF8.md
+spec_hash: c428abb6fb484bb7cb259894d28cd2dc0d2ae3940561c8058eb6f962f4e3dd73
+spec_note: >-
+  Băm đo 09:57Z 30-08-2026 trên nội dung tệp ở CHÍNH commit này. ĐO LẠI trước khi merge: sửa
+  đặc tả sau khi cấp lease là làm băm này trỏ vào thứ không còn tồn tại.
+
+codex_review_calls_used: 0
+codex_review_calls_max: 2
+review_rounds_used: 0
+tran_review_ghi_chu: >-
+  Bắt đầu 0/2 vì đây là packet MỚI. Bộ đếm CẠN 2/2 của `N5-LENH-HOOK-WINDOWS` KHÔNG liên quan
+  và KHÔNG được mượn theo chiều nào — kể cả khi lease này thay thế lease ấy. Thay thế một
+  lease KHÔNG kế thừa bộ đếm của nó. Đổi prompt, phiên hay tên attempt không reset (§12).
+
+write_set:
+  - .claude/hooks/subagent_ghi_detect.py
+  - .claude/hooks/subagent_ghi_detect_test.py
+
+write_set_da_do_truoc_khi_cap: >-
+  Đo 09:39Z–09:57Z 30-08-2026 bằng `ops/lease_publish.py ai-dang-giu` cho từng đường dẫn.
+  HAI CẢNH BÁO VỀ CHÍNH PHÉP ĐO NÀY, đừng đọc nó như một dòng thủ tục:
+  (a) Bộ quét KHÔNG CHẠY ĐƯỢC ở chế độ mặc định trên máy này — `rc=12 KHÔNG_XÁC_ĐỊNH` vì
+  chính khuyết tật codepage (nay là #417). Phải chạy dưới `PYTHONUTF8=1` mới có câu trả lời;
+  `PYTHONUTF8=1` ở đây là RIG ĐO, không phải bản vá.
+  (b) Chạy trong bản sao sạch (`git clone` cộng fetch đầy đủ) vì kho chính có nhánh cục bộ
+  khai upstream đã chết ⇒ bộ quét fail-close. Tập ref của bản sao là SIÊU TẬP của máy chủ
+  (403 so 269), tức chiều an toàn: chỉ có thể tìm THỪA người giữ, không thể tìm HỤT.
+  Kết quả: cả hai đường dẫn ⇒ `NGƯỜI_GIỮ 1`, đúng một lease `n5-...-20260830`, và lease ấy
+  chính là lease đang bị thay thế bằng commit này. Sau bia mộ ⇒ kỳ vọng `NGƯỜI_GIỮ 0`.
+  PHẢI ĐO LẠI sau commit, không suy.
+
+branch: claude/n6-hook-giai-ma-utf8-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 6fa8a7451c751076983017e072d84ca6618ff58f
+reviewed_sha_required: 6fa8a7451c751076983017e072d84ca6618ff58f
+reviewed_sha_ghi_chu: >-
+  Generation 1 chưa có commit công việc nào, nên mỏ neo khởi đầu bằng `base_sha`, theo quy ước
+  đang chạy của kho. BẮT BUỘC dời sang exact head TRƯỚC khi xin review hoặc land (§8) — để
+  nguyên giá trị này rồi xin duyệt là xin duyệt một cây KHÔNG chứa việc đã làm. Packet N5 vấp
+  đúng chỗ này và ăn một finding P1; đừng lặp.
+
+base_ghi_chu: >-
+  Đo 09:57Z 30-08-2026, hai nguồn khớp: `git ls-remote origin refs/heads/master` và
+  `git rev-parse origin/master` ⇒ `6fa8a745`. Nhãn `merged` của GitHub KHÔNG dùng làm bằng
+  chứng (nợ N11); ancestry cộng băm nội dung mới là.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 300
+  do_tu_sha: 6fa8a7451c751076983017e072d84ca6618ff58f
+  don_vi: >-
+    `git diff --numstat 6fa8a745 -- .claude/hooks/subagent_ghi_detect.py
+    .claude/hooks/subagent_ghi_detect_test.py` — dòng THÊM. Pathspec TRONG lệnh, KHÔNG `..HEAD`.
+  da_dung: 0
+  ghi_chu: >-
+    PHẢI ĐO LẠI trước mỗi bước công bố, không chép dòng này. Bài học `PLAT-X8`: cùng con số
+    trôi bốn lần, lần thứ tư khai sai một cổng là ĐẠT.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-30 khoảng 09:50Z: chủ kho được trình ba lựa chọn cho tình huống
+  lease N5 còn hạn mà packet đã land, và chọn "Thu hồi ngay bằng bia mộ hai chiều". Cùng lượt
+  ấy chốt tách #417 thành issue riêng ưu tiên cao, và duyệt đăng kết quả đo bước 1 lên #412.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_cung_la_nguoi_thi_cong: true
+
+recorder_xung_dot_loi_ich: >-
+  KHAI THẲNG: phiên ghi lease này cũng là phiên thi hành. §2 cho phép một tác nhân giữ các vai
+  ở NHỮNG PHIÊN KHÁC NHAU; ở đây nhập nhằng. Đối trọng: (a) thẩm quyền đến từ
+  `granted_by: ducthangho`, cấp trực tiếp cho ĐÚNG hành động thu hồi này; (b)
+  `assurance_target: cross_approved` giữ codex làm đối trọng khác nền; (c) mọi tiêu chí nghiệm
+  thu neo vào SỐ đọc từ báo cáo detector, không neo vào lời khai của phiên.
+  Đây là điểm yếu assurance thật, không phải hình thức.
+
+leased_at_utc: '2026-08-30T09:57:26Z'
+lease_expires_at_utc: '2026-08-30T17:57:26Z'
+run_minutes: 480
+
+vung_duoc_phep_cham: >-
+  ĐÚNG HAI tệp trong `write_set`. KHÔNG đụng `.claude/settings.json` (lối A đã bị loại ở #412,
+  nên nhu cầu chạm tệp ấy là dấu hiệu đi sai lối, không phải chi tiết thi công).
+  KHÔNG đụng `ops/lease_publish.py` (đó là #417). KHÔNG đụng `.github/workflows/**`.
+  KHÔNG đụng `ops/leases/**` hay `ops/specs/**` TỪ NHÁNH PACKET.
+  ĐỌC KỸ: "không được chạm" nghĩa là không sửa VÀ không land qua nhánh packet — phiên trước
+  từng đọc câu tương đương thành "cấm sửa, không cấm land" rồi merge nhánh lease vào nhánh
+  packet; cross-review bác đúng, phải revert, và cái revert ấy đẻ ra nợ N11.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ⇒ DỪNG, trình phép đo ·
+  S2 phải sửa `.claude/settings.json` ⇒ DỪNG, đó là lối A đã bị loại ·
+  S3 ca chỉ chạy được trên Windows ⇒ khai THẲNG, CẤM để nó im lặng bỏ qua trên Linux ·
+  S4 `origin/master` đi tiếp so `base_sha` mà chưa đo lại ⇒ DỪNG ·
+  S5 phải đụng `ops/lease_publish.py` ⇒ DỪNG, đó là #417 ·
+  S6 vượt hai tệp hoặc 300 dòng thêm ⇒ DỪNG, KHÔNG tự khai cổng ADR-0044 là ĐẠT.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) `rc` của hook là `0` KỂ CẢ KHI MÙ (D1 = CHỈ TỐ CÁO; `_MA_CLEAN`, `_MA_CHANGED`,
+  `_MA_UNKNOWN` đều bằng 0). Nghiệm thu bằng `so_duong_da_bam_noi_dung` và `mu_noi_dung`,
+  KHÔNG bằng `rc`. Ai chẩn đoán "hook trả 1" là đã đi sai nhánh.
+  (2) Ca đặt ở đường dẫn ASCII sẽ XANH mà KHÔNG ĐO GÌ. Phải dựng kho tạm ở đường dẫn có dấu.
+  (3) `Quốc hội` chỉ chạm lớp MÉO (byte `0x91` và `0x99`, cp1258 CÓ định nghĩa). Lớp Ô TRỐNG
+  cần `ọ ề ờ ớ ỏ Ị Ở Ố`. Phủ CẢ HAI; dùng một mình `Quốc hội` là đo hụt — xem bảng mục 5 spec.
+  (4) `core.abbrev=7` phải ghim TRONG mọi clone hay sandbox.
+  (5) KHÔNG `git push` thẳng master, KHÔNG ép qua ruleset.
+  (6) Bộ quét lease KHÔNG chạy được ở chế độ mặc định trên máy này (#417) — cần `PYTHONUTF8=1`
+  làm rig. Đừng đọc `rc=12` thành "không có ai giữ".

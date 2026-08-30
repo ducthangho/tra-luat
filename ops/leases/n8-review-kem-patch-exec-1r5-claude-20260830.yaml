@@ -41,9 +41,9 @@ spec_note: >-
   ĐO LẠI trước khi merge: sửa đặc tả sau khi cấp lease là làm băm này trỏ vào thứ không còn
   tồn tại, và đó là đường đi vòng qua §3.2 chứ không phải một lần sửa chính tả.
 
-codex_review_calls_used: 1
+codex_review_calls_used: 2
 codex_review_calls_max: 4
-review_rounds_used: 1
+review_rounds_used: 2
 tran_review_ghi_chu: >-
   Packet MỚI, bắt đầu 0/2. KHÔNG mượn bộ đếm của `N7-HOOK-GIAI-MA-UTF8` (đang 1/2) theo bất kỳ
   chiều nào. Lưu ý riêng của packet này: lượt review do CONNECTOR tự chạy khi mở PR KHÔNG tính
@@ -72,7 +72,7 @@ branch_ownership: exclusive
 target_branch_neu_land: master
 
 base_sha: 6fa8a7451c751076983017e072d84ca6618ff58f
-reviewed_sha_required: 6411e82195703306974e8438a6220d6b685d9369
+reviewed_sha_required: a11943f71100ae2e592667edcb9338421f0b92b1
 reviewed_sha_ghi_chu: >-
   Generation 1 chưa có commit công việc nào nên mỏ neo khởi đầu bằng `base_sha`.
   BẮT BUỘC dời sang exact head TRƯỚC khi xin review hoặc land (§8). Packet N5 vấp đúng chỗ này
@@ -95,7 +95,7 @@ ngan_sach_kich_thuoc:
     `git diff --numstat 6fa8a745 -- AGENTS.md .claude/skills/cross-review/SKILL.md
     RELEASE_MANIFEST.json` — dòng
     THÊM. Pathspec TRONG lệnh, KHÔNG `..HEAD`.
-  da_dung: 84
+  da_dung: 94
   ghi_chu: >-
     Trần 200 CHẬT CÓ CHỦ ĐÍCH: đây là hai tệp QUẢN TRỊ, và việc phải làm là thêm một yêu cầu
     cùng một cờ CLI — không phải viết lại tài liệu. Chạm trần là dấu hiệu packet đang nở phạm
@@ -236,6 +236,36 @@ ly_do_revision_5: >-
   CHECKLIST đã chạy cho revision này, vì ba P1 trước sinh ra từ việc sửa một chỗ quên chỗ khác:
   `write_set` 3 · `ngan_sach_kich_thuoc` 3/220 · dòng `S6` 3/220 · `SPEC.md` §3 "ĐÚNG 3 tệp" ·
   `spec_hash` khớp đĩa · `generation` 2 · bộ đếm 1/4 · neo `6411e821` · bia mộ hai chiều.
+
+ket_qua_luot_2_va_doi_neo: >-
+  Lượt 2: `REQUEST_CHANGES`, hai finding, cả hai ĐÚNG và đã vá. Neo dời `6411e821` sang
+  `a11943f7` TRƯỚC lượt 3. `da_dung` 84 sang 94. Bộ đếm 1 sang 2 trên trần 4.
+
+  P1 ĐÁNG GHI NHẤT CỦA CẢ PACKET: bản vá F2 đóng fail-open trên GIÁ TRỊ nhưng gán cứng KỲ
+  VỌNG. Lệnh phóng dùng bậc theo bảng (`high, xhigh, xhigh, max` — HAI trong bốn ô không phải
+  `xhigh`), còn validator gán cứng `xhigh`. Hai hằng số ĐỘC LẬP cho cùng một giá trị.
+  Phản chứng: lane chọn `max`, rollout ghi `xhigh`, validator trả `rc=0` ⇒ FALSE GREEN.
+  Tức phiên thi hành vá fail-open ở một mặt rồi MỞ LẠI ĐÚNG LỚP LỖI ẤY ở mặt kia — và chính nó
+  tự khai như vậy. Chữa bằng MỘT NGUỒN SỰ THẬT cộng guard rỗng/ngoài-tập, đo được ba vế:
+  nền PASS · đột biến gán cứng validator FAIL · đột biến gán cứng lệnh phóng FAIL; và trên
+  rollout THẬT: `xhigh` rc=0, `max` rc=1 (`SAI BAC`), `low` rc=1.
+
+  P2: `§7` xuất hiện ĐÚNG 0 lần trong `SKILL.md` trong khi `AGENTS.md` đã trỏ — hai tệp nói hai
+  điều khác nhau. Đo lại sau vá: 2 lần. Adapter TRỎ §7 chứ không chép bốn điều kiện vào.
+
+  `diff.patch` báo `byte_equal=False` KHÔNG phải lỗi bundle: reviewer tự truy ra `git diff` từ
+  mirror BARE rút gọn index hash thành 8 ký tự (8191 byte) còn cây ghim `abbrev=7` cho 8185 =
+  bundle. Đây là ca hiếm reviewer tự bác phát hiện của chính mình bằng phép đo.
+
+  Điều phối kiểm độc lập, ba lời khai KHỚP: head `a11943f7`; `75 1` + `14 0` + `5 5` = 3 tệp /
+  94 dòng thêm; không đường thứ tư; `§7` nay có 2 lần trong `SKILL.md`.
+
+  CHƯA GIẢI QUYẾT — P1 write set chứa tệp land-only: `RELEASE_MANIFEST.json` vẫn trong
+  `write_set` và vẫn có trong diff (`5 5`). Protocol dòng 652 cấm worker sửa tệp ấy, dòng 710
+  nói CI worker KHÔNG so feature branch với manifest committed. Nhưng `ci.yml` LẠI chạy
+  `release-verify --strict` vô điều kiện. Đó là MÂU THUẪN giữa protocol và cấu hình CI thật,
+  không phải lỗi của phiên thi hành — và gỡ manifest ra sẽ làm CI đỏ. Cần quyết định của chủ
+  kho, ghi ở đây để không bốc hơi.
 
 vung_duoc_phep_cham: >-
   ĐÚNG BA tệp trong `write_set`. KHÔNG đụng `docs/PROTOCOL_DA_PHIEN.md` (adapter lệch protocol

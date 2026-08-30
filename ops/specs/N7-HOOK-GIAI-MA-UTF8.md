@@ -82,9 +82,26 @@ Chọn ký tự có chủ đích — hai lớp KHÁC NHAU, và đây là chỗ d
 | lớp | ví dụ | byte tiếp diễn | cp1258 | hành vi |
 |---|---|---|---|---|
 | MÉO | `ố`(U+1ED1) `ộ`(U+1ED9) | `0x91` `0x99` | CÓ định nghĩa | méo, KHÔNG ném |
-| Ô TRỐNG | `ọ` `ề` `ờ` `ớ` `ỏ` `Ị` `Ở` `Ố`(U+1ED0) | `0x8d` `0x81` `0x9d` `0x9a` `0x8f` `0x8a` `0x9e` `0x90` | Ô TRỐNG | ném (hoặc surrogate) |
+| Ô TRỐNG | `ề`(U+1EC1) `Ị`(U+1ECA) `ọ`(U+1ECD) `Ỏ`(U+1ECE) `ỏ`(U+1ECF) `Ố`(U+1ED0) `Ớ`(U+1EDA) `ờ`(U+1EDD) `Ở`(U+1EDE) | `0x81` `0x8a` `0x8d` `0x8e` `0x8f` `0x90` `0x9a` `0x9d` `0x9e` | Ô TRỐNG | ném (hoặc surrogate) |
 
 Ca phải phủ **cả hai** lớp. `Quốc hội` chỉ chạm lớp MÉO — dùng một mình là đo hụt.
+
+**BẢNG TRÊN SINH TỪ PHÉP ĐO, ĐỪNG GÕ TAY — và đây là chỗ đã sai một lần.** Bản đầu xếp `ớ`
+THƯỜNG (U+1EDB) vào lớp Ô TRỐNG; sai, vì `ớ` là `e1 bb 9b` và cp1258 **có** định nghĩa `0x9b`
+(U+203A). Chỉ `Ớ` **HOA** (U+1EDA, `0x9a`) mới là ô trống. Cross-review codex bắt đúng ô ấy
+(P2 trên PR #420). Cùng lượt, tôi còn xếp nhầm `ở` THƯỜNG (U+1EDF, `0x9f` — **có** định nghĩa)
+vào lớp ô trống ở thân PR #419 và trong một fixture.
+
+Cặp hoa/thường lệch nhau đúng 1 byte và **chỉ một bản là ô trống**, nên mắt thường đọc không ra:
+
+| cặp | THƯỜNG | lớp | HOA | lớp |
+|---|---|---|---|---|
+| ơ + sắc | `ớ` U+1EDB `0x9b` | MÉO | `Ớ` U+1EDA `0x9a` | Ô TRỐNG |
+| ơ + hỏi | `ở` U+1EDF `0x9f` | MÉO | `Ở` U+1EDE `0x9e` | Ô TRỐNG |
+
+Quy tắc sinh bảng (kiểm được, không trôi): với `e1 bb XX` thì codepoint là `U+1EC0 + (XX-0x80)`;
+lớp Ô TRỐNG là đúng tập `XX` mà `bytes([XX]).decode("cp1258")` ném. Ai sửa bảng này phải sinh
+lại bằng phép ấy rồi dán, đừng chọn ví dụ bằng trực giác.
 
 ## 6. Đột biến bắt buộc
 

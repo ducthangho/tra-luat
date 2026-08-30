@@ -37,7 +37,7 @@ review_class_ghi_chu: >-
   authority" để mượn uy tín cụm từ ấy.
 
 spec_path: ops/specs/N7-HOOK-GIAI-MA-UTF8.md
-spec_hash: a203733a3cc8a4729bf5925facba3779f6d8f00360872159fab05e4556f0514e
+spec_hash: d6a7881286567f3a59a6084cfb365e6c54bd249cd2689af9d7eac754c548e5d2
 spec_note: >-
   Băm đo 09:57Z 30-08-2026 trên nội dung tệp ở CHÍNH commit này. ĐO LẠI trước khi merge: sửa
   đặc tả sau khi cấp lease là làm băm này trỏ vào thứ không còn tồn tại.
@@ -72,7 +72,7 @@ branch_ownership: exclusive
 target_branch_neu_land: master
 
 base_sha: 6fa8a7451c751076983017e072d84ca6618ff58f
-reviewed_sha_required: fe78350de08e742491e798c2c485e8cc409ae765
+reviewed_sha_required: 21e48dea1a058aa6c2566fcd432c87bba1547036
 reviewed_sha_ghi_chu: >-
   Generation 1 chưa có commit công việc nào, nên mỏ neo khởi đầu bằng `base_sha`, theo quy ước
   đang chạy của kho. BẮT BUỘC dời sang exact head TRƯỚC khi xin review hoặc land (§8) — để
@@ -98,6 +98,20 @@ ngan_sach_da_do_lai_14_5xZ: >-
   `git diff --numstat 6fa8a745 -- <hai đường write set>` = `32 3` + `116 3` ⇒ 2 tệp, 148
   dòng THÊM. Dưới trần `≤2 tệp / ≤300 dòng thêm`. ĐO LẠI trước mỗi bước công bố, đừng chép.
 
+cap_nhat_sau_cross_review_luot_1: >-
+  Lượt 1 do connector codex tự chạy khi mở PR (KHÔNG tiêu lượt nào của trần thủ công 2/2).
+  Ba finding, cả ba ĐÚNG và đã vá:
+  · #419 P1 — trên Ubuntu `getpreferredencoding` là utf-8 nên `m20`/`m21`/`m22` hành xử y hệt
+  bản đã vá và SỐNG SÓT ⇒ commit đúng vẫn làm cổng Linux đỏ. Chữa bằng ép môi trường
+  không-utf8 rồi ĐO xem ép có ăn, cộng trạng thái thứ ba `KHÔNG ĐO ĐƯỢC` có gọi tên; kèm `t26`
+  đo chính vị chấm điểm ấy.
+  · #420 P1 — đòi `NGƯỜI_GIỮ` đúng bằng 1. N5 hết hạn 10:53Z; đo lại 15:13Z cho
+  `NGƯỜI_GIỮ 1: n7-hook-giai-ma-utf8-exec-1-claude-20260830`. ĐẠT.
+  · #420 P2 — bảng ký tự xếp nhầm `ớ` THƯỜNG vào lớp ô trống. Đúng; và sai rộng hơn codex nêu:
+  `ở` THƯỜNG cũng bị xếp nhầm ở thân PR #419. Bảng nay sinh từ phép đo, kèm bảng cặp hoa/thường.
+  BỘ ĐẾM THỦ CÔNG VẪN 0/2 — lượt connector không tính vào trần §12, và KHÔNG được mượn theo
+  chiều ngược lại để khai là đã có cross-review đủ điều kiện land.
+
 ngan_sach_kich_thuoc:
   tep_toi_da: 2
   dong_them_toi_da: 300
@@ -105,7 +119,7 @@ ngan_sach_kich_thuoc:
   don_vi: >-
     `git diff --numstat 6fa8a745 -- .claude/hooks/subagent_ghi_detect.py
     .claude/hooks/subagent_ghi_detect_test.py` — dòng THÊM. Pathspec TRONG lệnh, KHÔNG `..HEAD`.
-  da_dung: 148
+  da_dung: 271
   ghi_chu: >-
     PHẢI ĐO LẠI trước mỗi bước công bố, không chép dòng này. Bài học `PLAT-X8`: cùng con số
     trôi bốn lần, lần thứ tư khai sai một cổng là ĐẠT.

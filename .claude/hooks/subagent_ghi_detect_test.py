@@ -420,6 +420,9 @@ def t20_duong_KHONG_bam_duoc_thi_UNKNOWN_khong_phai_clean(h):
                 f"(mong doi unknown + co ten duong)")
 
 
+_VAN_TAY_DA_IN = []      # in DUNG MOT LAN moi tien trinh — ly do o cuoi `t21`
+
+
 def _bash_tuyet_doi():
     """Phan giai `bash` thanh DUONG DAN TUYET DOI truoc khi phong. `(duong, None)` hoac
     `(None, ly_do)` — KHONG bao gio im lang cho qua.
@@ -537,9 +540,15 @@ def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h, doi_lenh=None):
     # cat o DAU. Bo test nay chay lai trong moi dot bien, nen in vo dieu kien sinh 266
     # dong — du de day chinh bang chung can doc ra khoi cua so con lai. Chan doan chi co
     # gia tri o luot HONG; o luot xanh no la nhieu nuot mat tin hieu.
-    # Duoi dot bien (`doi_lenh` khac None) thi DO la ket qua MONG DOI, nen van tay o do
-    # khong chan doan gi ve nen chay — chi lam day cua so log ma `A6` phai dem.
-    if xau and doi_lenh is None:
+    # HAI cua chan, do 04:3xZ 30-08-2026 tren mot cay CO DOT BIEN THAT:
+    #   · `doi_lenh` khac None  -> DO la ket qua MONG DOI, van tay khong chan doan gi;
+    #   · `_VAN_TAY_DA_IN`      -> bo CA chay LAI trong TUNG dot bien `DOT_BIEN`, nen mot
+    #     `t21` do sinh 19 khoi x 17 dong = 333 dong. RIENG no da vuot cua so 500 dong ma
+    #     `get_job_logs` tra ve (do: `original_length: 1904` -> 500 dong), tuc chinh phep
+    #     chan doan day bang chung can doc ra khoi cua so. In MOT lan la du: ca 19 khoi
+    #     giong het nhau.
+    if xau and doi_lenh is None and not _VAN_TAY_DA_IN:
+        _VAN_TAY_DA_IN.append(1)
         for dong in _van_tay_nen_chay() + van_tay:
             print(dong)
     return (not xau, f"lenh hook chay duoc o 2 su kien x 2 nen -> dung {4 - len(xau)}/4"

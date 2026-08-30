@@ -1,0 +1,160 @@
+# Lease EXECUTOR — `N5-LENH-HOOK-WINDOWS` (#405), revision 1, generation 1.
+#
+# Lease ĐẦU TIÊN của packet. Không thay lease nào, nên không có `thay_the_cho`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 405
+packet_id: N5-LENH-HOOK-WINDOWS
+phase_key: N5-LENH-HOOK-WINDOWS
+revision: 1
+generation: 1
+lease_id: n5-lenh-hook-windows-exec-1-claude-20260830
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` là lớp MÁY TÍNH RA: `_tinh_lop_tu_write_set` trên cả ba đường dẫn ⇒ `sensitive`.
+  ĐỌC ĐÚNG LÝ DO: không đường nào khớp tiền tố trong `_BANG_LOP`; lớp đến từ giá trị MẶC ĐỊNH
+  fail-closed, KHÔNG phải vì packet chạm authority. Vẫn áp trần `≤3 tệp / ≤300 dòng thêm` theo
+  fail-closed, nhưng CẤM khai ngược lại rằng packet "chạm authority" để mượn uy tín cụm từ ấy.
+
+spec_path: ops/specs/N5-LENH-HOOK-WINDOWS.md
+spec_hash: 930b12ef41aa58e2efa42473518466de547dac0cd3df3090f2467e3b6579a557
+spec_note: >-
+  Băm đo 02:52Z 30-08-2026 bằng `sha256sum ops/specs/N5-LENH-HOOK-WINDOWS.md` trên nhánh này.
+  ĐO LẠI băm trước khi merge: sửa đặc tả sau khi cấp lease là làm băm này trỏ vào thứ không
+  còn tồn tại, và đó là đường đi vòng qua §3.2 chứ không phải một lần sửa chính tả.
+
+# BỘ ĐẾM REVIEW — packet MỚI, bắt đầu sạch. Đây là chỗ dễ lách nhất của cả tệp.
+codex_review_calls_used: 0
+codex_review_calls_max: 2
+review_rounds_used: 0
+tran_review_ghi_chu: >-
+  Bắt đầu 0/2 vì đây là packet MỚI, không phải revision của packet cũ. Bộ đếm của
+  `KHONG-DO-DUOC-PHAI-DO` (2/2, cạn) KHÔNG liên quan và KHÔNG được mượn theo chiều nào.
+  Đổi prompt, phiên hay tên attempt không reset bộ đếm này (§12).
+
+write_set:
+  - .claude/hooks/subagent_ghi_detect_test.py
+  - .claude/settings.json
+  - .claude/hooks/subagent_ghi_detect.py
+
+write_set_da_do_truoc_khi_cap: >-
+  Đo 02:48:09Z 30-08-2026 bằng `ops/lease_publish.py ai-dang-giu` cho từng đường dẫn trên
+  bản sao ĐÃ unshallow và đã mở lại refspec đầy đủ (265/265 nhánh, `comm` rỗng hai chiều):
+  cả ba đều `NGƯỜI_GIỮ 0`. Không có cửa sổ hai writer.
+
+branch: claude/n5-lenh-hook-windows-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 1dedb8b52e857e397c74084359d6e0e39b5734c4
+reviewed_sha_required: 1dedb8b52e857e397c74084359d6e0e39b5734c4
+reviewed_sha_ghi_chu: >-
+  Generation 1 chưa có commit công việc nào, nên mỏ neo khởi đầu = `base_sha`, theo đúng quy ước
+  đang chạy của kho (`bo-ghi-nguoc-exec-1`, `ci-cai-jsonschema-exec-1`, `ag-t0-01b-exec-1`,
+  `cong-duyet-theo-tham-quyen-exec-1` đều `reviewed_sha_required == base_sha` ở gen 1).
+  BẮT BUỘC dời sang exact head TRƯỚC khi xin review hoặc land: §8 *"Approval luôn neo
+  `reviewed_sha`; commit mới buộc review lại"*. Để nguyên giá trị này rồi xin duyệt là xin duyệt
+  một cây KHÔNG chứa việc đã làm — đúng hình dạng N10 (`commit_id` chạy theo head, cổng ĐẠT sai).
+
+base_ghi_chu: >-
+  Đo 02:48:09Z 30-08-2026, HAI nguồn khớp: `git ls-remote origin refs/heads/master` và
+  `git rev-parse origin/master`. Nhãn `merged` của GitHub KHÔNG được dùng làm bằng chứng
+  (nợ N11) — ancestry cộng băm NỘI DUNG mới là.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 3
+  dong_them_toi_da: 300
+  do_tu_sha: 1dedb8b52e857e397c74084359d6e0e39b5734c4
+  don_vi: >-
+    `git diff --numstat 1dedb8b5 -- .claude/hooks/subagent_ghi_detect_test.py
+    .claude/settings.json .claude/hooks/subagent_ghi_detect.py` — dòng THÊM.
+    Pathspec TRONG lệnh, KHÔNG `..HEAD`.
+  da_dung: 0
+  ghi_chu: >-
+    Trần này CHẬT THẬT, không phải hình thức: tiền lệ gần nhất chạm đúng ba tệp này
+    (`1a0df2a`) là `+341/−35` — ĐÃ vượt 300. Con số `da_dung` chống đỡ một lời khai về
+    THẨM QUYỀN (cổng ADR-0044 ĐẠT, hay cần ngoại lệ chủ kho), nên PHẢI ĐO LẠI trước mỗi
+    bước công bố, không chép dòng này. Bài học `PLAT-X8`: cùng con số trôi 4 lần, lần thứ
+    tư khai sai một cổng là ĐẠT.
+
+ngan_sach_do_windows:
+  ci_dispatch_toi_da: 3
+  ci_dispatch_da_dung: 0
+  don_vi: 'số lượt `workflow_dispatch` trên `ci.yml` do packet này kích hoạt'
+  ghi_chu: >-
+    Lượt 1 BẮT BUỘC là lượt thu vân tay (`A1`), không phải lượt thử sửa. Giá đo
+    20:29Z–21:22Z 29-08-2026: ≈122–136 phút TÍNH TIỀN mỗi lượt (windows 51–55 phút × hệ số 2,
+    cộng ubuntu 20–26). Kho ĐÃ cạn hạn mức Actions một lần thật (`ci.yml` r245). Số dư thật
+    KHÔNG đo được từ phiên này (proxy chặn `api.github.com/repos/*`, MCP không có tool billing)
+    ⇒ trần 3 là PHÒNG NGỪA, không phải tính từ số dư.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-30 ~02:4xZ: chủ kho nói "mở packet cho N5", sau đó "Duyệt gói"
+  cho trọn gói khuyến nghị 5 câu của vòng `soan-spec` (một packet · write set 3 tệp · trần 3
+  lượt dispatch với lượt 1 thu vân tay · ba lối sửa có thứ tự cứng · cross_approved bằng codex
+  cộng duyệt khác danh tính).
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_cung_la_nguoi_thi_cong: true
+
+recorder_xung_dot_loi_ich: >-
+  KHAI THẲNG: phiên ghi lease này cũng sẽ là phiên thi hành. §2 cho phép một tác nhân giữ các
+  vai ở NHỮNG PHIÊN KHÁC NHAU; ở đây nhập nhằng. Đối trọng: (a) thẩm quyền đến từ
+  `granted_by: ducthangho`; (b) `assurance_target: cross_approved` giữ codex làm đối trọng
+  khác nền — KHÔNG hạ xuống `human_audited` như packet trước; (c) mọi tiêu chí nghiệm thu đều
+  neo vào log CI công khai, không neo vào lời khai của phiên.
+  Ai đọc hồ sơ này hãy tự cân: đây là điểm yếu assurance thật, không phải hình thức.
+
+leased_at_utc: '2026-08-30T02:53:00Z'
+lease_expires_at_utc: '2026-08-30T10:53:00Z'
+run_minutes: 480
+
+thoi_han_ngan_co_chu_y: >-
+  480 phút, không phải 1440. Kho CHƯA CÓ đường thu hồi lease (nợ #400 đang mở): lease r2 của
+  packet #401 land từ 19:3xZ vẫn CÒN_HẠN tới 02:46Z hôm sau, đo lại 02:48Z mới thấy HẾT_HẠN.
+  Chưa có đường thu hồi thì thứ duy nhất giới hạn thiệt hại là ĐẶT HẠN NGẮN. Giảm nhẹ,
+  KHÔNG phải chữa.
+
+vung_duoc_phep_cham: >-
+  ĐÚNG BA tệp trong `write_set`. KHÔNG đụng `.github/workflows/**`, KHÔNG đụng
+  `.claude/dev/ci_dang_ky_test.py`, KHÔNG đụng `ops/leases/**` hay `ops/specs/**` từ nhánh packet.
+  ĐỌC KỸ: "không được chạm" nghĩa là không sửa VÀ không land qua nhánh packet. Phiên trước từng
+  đọc câu tương đương thành "cấm sửa, không cấm land" rồi merge nhánh lease vào nhánh packet;
+  cross-review bác đúng, phải revert, và cái revert ấy đẻ ra nợ N11.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ tư ⇒ DỪNG, trình phép đo ·
+  S2 vượt `≤3 tệp / ≤300` dòng thêm ⇒ DỪNG, KHÔNG tự khai cổng ADR-0044 là ĐẠT ·
+  S3 phải sửa `.github/workflows/**` ⇒ DỪNG ·
+  S4 phép đo chỉ vào LỐI 3 (bỏ qua có tên) ⇒ DỪNG, xin chủ kho duyệt riêng — phiên không tự chọn ·
+  S5 chạm trần 3 lượt dispatch mà `A2` chưa xanh ⇒ DỪNG, `blocked` + failure evidence ·
+  S6 `origin/master` đi tiếp so `base_sha` mà chưa đo lại ⇒ DỪNG ·
+  S7 `A4` hồi quy (ca `< 30` hoặc đột biến bị giết `< 18`) ⇒ DỪNG ·
+  S8 phát hiện phải đụng `ci_dang_ky_test.py` hoặc hai bộ `cach_ly` ⇒ DỪNG, đó là packet khác.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) Packet này KHÔNG làm `master` xanh: `3 → 2` dòng đỏ trên Windows, `TỔNG` vẫn `ĐỎ`, và
+      ĐÓ LÀ ĐẠT. Hai dòng còn lại là hai bộ `cach_ly` neo `github-actions/linux`, luôn đỏ trên
+      Windows theo chủ ý #401. Đừng "sửa" thêm cho master xanh.
+  (2) `stderr` RỖNG không phải "không có lỗi" — nó là KÊNH SAI. Đọc `stdout`.
+  (3) `subagent_ghi_detect.py:43` đặt `_MA_CLEAN = _MA_CHANGED = _MA_UNKNOWN = 0`; hook KHÔNG
+      THỂ sinh `rc=1`. Ai chẩn đoán "hook trả 1" là đã đi sai nhánh.
+  (4) Hình dạng "chốt neo Linux, Windows không phán quyết được" đã đếm được BA lần (xem
+      `hinh_dang_ke_thua` trong spec). §12 buộc XEM LẠI CÁCH LÀM ở lần thứ ba. Packet này cố ý
+      chỉ xử mục 1; mục 3 là câu hỏi THIẾT KẾ và là nợ riêng. Nới write set để với tới nó chính
+      là vá lần thứ tư.
+  (5) `core.abbrev=7` phải ghim TRONG mọi clone/sandbox.
+  (6) KHÔNG `git push` thẳng master, KHÔNG ép qua ruleset.

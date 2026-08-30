@@ -19,9 +19,7 @@ da_bi_thay_the: n8-review-kem-patch-exec-1r4-claude-20260830
 
 
 thay_the_cho:
-  - n8-review-kem-patch-exec-1-claude-20260830
   - n8-review-kem-patch-exec-1r2-claude-20260830
-
 
 role: executor
 provider: claude

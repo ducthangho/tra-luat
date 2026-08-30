@@ -72,7 +72,7 @@ branch_ownership: exclusive
 target_branch_neu_land: master
 
 base_sha: 6fa8a7451c751076983017e072d84ca6618ff58f
-reviewed_sha_required: dfef15c6d83a18ba612d27ccb33cc79e33840f2c
+reviewed_sha_required: 629ab4ae4b516966c0ebcaaf6cf57d58dcf26803
 reviewed_sha_ghi_chu: >-
   Generation 1 chưa có commit công việc nào nên mỏ neo khởi đầu bằng `base_sha`.
   BẮT BUỘC dời sang exact head TRƯỚC khi xin review hoặc land (§8). Packet N5 vấp đúng chỗ này
@@ -95,7 +95,7 @@ ngan_sach_kich_thuoc:
     `git diff --numstat 6fa8a745 -- AGENTS.md .claude/skills/cross-review/SKILL.md
     RELEASE_MANIFEST.json` — dòng
     THÊM. Pathspec TRONG lệnh, KHÔNG `..HEAD`.
-  da_dung: 57
+  da_dung: 65
   ghi_chu: >-
     Trần 200 CHẬT CÓ CHỦ ĐÍCH: đây là hai tệp QUẢN TRỊ, và việc phải làm là thêm một yêu cầu
     cùng một cờ CLI — không phải viết lại tài liệu. Chạm trần là dấu hiệu packet đang nở phạm
@@ -158,6 +158,28 @@ ly_do_revision_3: >-
   Nên chép luật vào `AGENTS.md` sẽ KHÔNG bị máy bắt. Cổng im lặng không có nghĩa việc ấy đúng.
   Trần dòng 210 → 220 chỉ để chứa con trỏ một-hai dòng cộng chú thích, không phải để nới cho
   phần văn bản.
+
+cap_nhat_truoc_khi_xin_review: >-
+  DỜI NEO TRƯỚC KHI MỞ PR, không phải sau: `reviewed_sha_required` từ `dfef15c6` sang exact head
+  `629ab4ae`. Phiên thi hành TỪ CHỐI mở PR khi neo còn cũ — đúng, vì mở PR là XIN REVIEW
+  (connector tự bắn), và §8 buộc approval neo `reviewed_sha`. Packet N5 vấp đúng chỗ này và ăn
+  một finding P1; N7 phải dời neo BA lần vì head đổi sau mỗi lượt vá.
+
+  `ngan_sach_kich_thuoc.da_dung` 57 → 65, đo bằng đúng đơn vị đã khai:
+  `git diff --numstat 6fa8a745 -- AGENTS.md .claude/skills/cross-review/SKILL.md
+  RELEASE_MANIFEST.json` = `47 1` + `13 0` + `5 5` ⇒ 3 tệp, 65 dòng thêm. Trần 3/220.
+  Manifest đổi ĐÚNG 5 dòng như lease r2 dự báo, và `file_count` giữ 180 nên golden KHÔNG ghi lại.
+
+  CỔNG MÙ ĐÃ ĐƯỢC BIẾN THÀNH PHÉP ĐO, ghi lại vì nó là hiện vật hiếm: phiên thi hành tự chĩa
+  `doctrine-scan --path AGENTS.md` vào tệp mà cổng mặc định KHÔNG quét ⇒ `rc=6`, 2 chỗ. Rồi ĐO
+  NỀN: cùng lệnh trên bản tại `6fa8a745` ⇒ `rc=6`, ĐÚNG 2 chỗ ấy. **DELTA = 0** — đỏ sẵn, con
+  trỏ mới không đẻ thêm. Đây đúng doctrine "đo nền trước khi nghi bản vá của mình"; nếu chỉ chạy
+  bản mới thì `rc=6` đã bị đọc thành hồi quy do chính packet gây ra.
+
+  LỆCH QUY ƯỚC ĐÃ BIẾT, khai chứ không sửa: hậu tố ngày của `lease_id` này là `20260831` (giờ
+  CỤC BỘ UTC+7) trong khi kho dùng giờ UTC — lease được cấp lúc `2026-08-30T17:5xZ`. Đổi tên
+  lease bây giờ sẽ làm hỏng bia mộ hai chiều đang khớp và mọi con trỏ đã đăng, nên giữ nguyên và
+  ghi ở đây. Lease sau dùng UTC.
 
 vung_duoc_phep_cham: >-
   ĐÚNG BA tệp trong `write_set`. KHÔNG đụng `docs/PROTOCOL_DA_PHIEN.md` (adapter lệch protocol

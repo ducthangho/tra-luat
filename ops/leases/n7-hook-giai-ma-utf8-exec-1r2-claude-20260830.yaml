@@ -1,0 +1,214 @@
+# Lease EXECUTOR — `N7-HOOK-GIAI-MA-UTF8` (#418), revision 1, generation 1.
+#
+# ĐỔI TÊN N6 -> N7: `N6` đã bị `N6-LOI-KHAI-RONG-HON-PHEP-DO` (#411) chiếm TRƯỚC.
+# Chỉ lộ ra khi quét `ops/specs` trên MỌI ref — trên master một mình thì KHÔNG thấy.
+#
+# THAY THẾ `n5-lenh-hook-windows-exec-1-claude-20260830`: packet #405 của lease ấy ĐÃ LAND
+# (`7a2f177` là tổ tiên của `origin/master`, đo bằng `merge-base --is-ancestor`, KHÔNG dùng
+# nhãn `merged` — nợ N11). Lease cũ còn hạn tới 10:53:00Z nhưng việc đã xong: đúng nợ
+# `AG-T0-01B` / #400 (lease không tự chết khi packet đã land). Thu hồi bằng BIA MỘ HAI CHIỀU —
+# tệp lease cũ nhận dòng `da_bi_thay_the` trong CÙNG commit này; `_kiem_bia_mo` đòi hai chiều.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 418
+packet_id: N7-HOOK-GIAI-MA-UTF8
+phase_key: N7-HOOK-GIAI-MA-UTF8
+revision: 2
+generation: 1
+lease_id: n7-hook-giai-ma-utf8-exec-1r2-claude-20260830
+
+
+thay_the_cho:
+  - n5-lenh-hook-windows-exec-1-claude-20260830
+  - n7-hook-giai-ma-utf8-exec-1-claude-20260830
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` là lớp MÁY TÍNH RA: `_tinh_lop_tu_write_set` trên cả hai đường dẫn ⇒ `sensitive`.
+  ĐỌC ĐÚNG LÝ DO: không đường nào khớp tiền tố trong `_BANG_LOP`; lớp đến từ giá trị MẶC ĐỊNH
+  fail-closed, KHÔNG phải vì packet chạm authority. CẤM khai ngược lại rằng packet "chạm
+  authority" để mượn uy tín cụm từ ấy.
+
+spec_path: ops/specs/N7-HOOK-GIAI-MA-UTF8.md
+spec_hash: d6a7881286567f3a59a6084cfb365e6c54bd249cd2689af9d7eac754c548e5d2
+spec_note: >-
+  Băm đo 09:57Z 30-08-2026 trên nội dung tệp ở CHÍNH commit này. ĐO LẠI trước khi merge: sửa
+  đặc tả sau khi cấp lease là làm băm này trỏ vào thứ không còn tồn tại.
+
+codex_review_calls_used: 2
+codex_review_calls_max: 3
+review_rounds_used: 2
+tran_review_ghi_chu: >-
+  Bắt đầu 0/2 vì đây là packet MỚI. Bộ đếm CẠN 2/2 của `N5-LENH-HOOK-WINDOWS` KHÔNG liên quan
+  và KHÔNG được mượn theo chiều nào — kể cả khi lease này thay thế lease ấy. Thay thế một
+  lease KHÔNG kế thừa bộ đếm của nó. Đổi prompt, phiên hay tên attempt không reset (§12).
+
+write_set:
+  - .claude/hooks/subagent_ghi_detect.py
+  - .claude/hooks/subagent_ghi_detect_test.py
+
+write_set_da_do_truoc_khi_cap: >-
+  Đo 09:39Z–09:57Z 30-08-2026 bằng `ops/lease_publish.py ai-dang-giu` cho từng đường dẫn.
+  HAI CẢNH BÁO VỀ CHÍNH PHÉP ĐO NÀY, đừng đọc nó như một dòng thủ tục:
+  (a) Bộ quét KHÔNG CHẠY ĐƯỢC ở chế độ mặc định trên máy này — `rc=12 KHÔNG_XÁC_ĐỊNH` vì
+  chính khuyết tật codepage (nay là #417). Phải chạy dưới `PYTHONUTF8=1` mới có câu trả lời;
+  `PYTHONUTF8=1` ở đây là RIG ĐO, không phải bản vá.
+  (b) Chạy trong bản sao sạch (`git clone` cộng fetch đầy đủ) vì kho chính có nhánh cục bộ
+  khai upstream đã chết ⇒ bộ quét fail-close. Tập ref của bản sao là SIÊU TẬP của máy chủ
+  (403 so 269), tức chiều an toàn: chỉ có thể tìm THỪA người giữ, không thể tìm HỤT.
+  Kết quả: cả hai đường dẫn ⇒ `NGƯỜI_GIỮ 1`, đúng một lease `n5-...-20260830`, và lease ấy
+  chính là lease đang bị thay thế bằng commit này. Sau bia mộ ⇒ kỳ vọng `NGƯỜI_GIỮ 0`.
+  PHẢI ĐO LẠI sau commit, không suy.
+
+branch: claude/n7-hook-giai-ma-utf8-exec-1
+branch_ownership: exclusive
+target_branch_neu_land: master
+
+base_sha: 6fa8a7451c751076983017e072d84ca6618ff58f
+reviewed_sha_required: b115366c5118ef2f70463b658bb60e881a533692
+reviewed_sha_ghi_chu: >-
+  Generation 1 chưa có commit công việc nào, nên mỏ neo khởi đầu bằng `base_sha`, theo quy ước
+  đang chạy của kho. BẮT BUỘC dời sang exact head TRƯỚC khi xin review hoặc land (§8) — để
+  nguyên giá trị này rồi xin duyệt là xin duyệt một cây KHÔNG chứa việc đã làm. Packet N5 vấp
+  đúng chỗ này và ăn một finding P1; đừng lặp.
+
+base_ghi_chu: >-
+  Đo 09:57Z 30-08-2026, hai nguồn khớp: `git ls-remote origin refs/heads/master` và
+  `git rev-parse origin/master` ⇒ `6fa8a745`. Nhãn `merged` của GitHub KHÔNG dùng làm bằng
+  chứng (nợ N11); ancestry cộng băm nội dung mới là.
+
+reviewed_sha_da_doi_ghi_chu: >-
+  DỜI TỪ `base_sha` SANG EXACT HEAD `fe78350d` lúc 14:5xZ 30-08-2026, TRƯỚC khi gọi
+  cross-review — không phải sau. Lý do dời là §8: approval luôn neo `reviewed_sha`, nên xin
+  duyệt trong khi lease còn neo vào base là xin duyệt một cây KHÔNG chứa việc đã làm.
+  Packet N5 vấp đúng chỗ này và ăn một finding P1; lease này đã ghi cảnh báo trước ở
+  `reviewed_sha_ghi_chu`, nên vấp lần nữa thì không còn cớ nào.
+  HỆ QUẢ CỦA CHÍNH DÒNG NÀY: mọi commit mới sau `fe78350d` buộc review lại và buộc dời
+  neo lần nữa. Nếu CI đòi sửa thì phải dời trước khi xin lượt review kế tiếp.
+
+ngan_sach_da_do_lai_14_5xZ: >-
+  `ngan_sach_kich_thuoc.da_dung` 0 -> 148, đo bằng đúng đơn vị đã khai:
+  `git diff --numstat 6fa8a745 -- <hai đường write set>` = `32 3` + `116 3` ⇒ 2 tệp, 148
+  dòng THÊM. Dưới trần `≤2 tệp / ≤300 dòng thêm`. ĐO LẠI trước mỗi bước công bố, đừng chép.
+
+cap_nhat_sau_cross_review_luot_1: >-
+  Lượt 1 do connector codex tự chạy khi mở PR (KHÔNG tiêu lượt nào của trần thủ công 2/2).
+  Ba finding, cả ba ĐÚNG và đã vá:
+  · #419 P1 — trên Ubuntu `getpreferredencoding` là utf-8 nên `m20`/`m21`/`m22` hành xử y hệt
+  bản đã vá và SỐNG SÓT ⇒ commit đúng vẫn làm cổng Linux đỏ. Chữa bằng ép môi trường
+  không-utf8 rồi ĐO xem ép có ăn, cộng trạng thái thứ ba `KHÔNG ĐO ĐƯỢC` có gọi tên; kèm `t26`
+  đo chính vị chấm điểm ấy.
+  · #420 P1 — đòi `NGƯỜI_GIỮ` đúng bằng 1. N5 hết hạn 10:53Z; đo lại 15:13Z cho
+  `NGƯỜI_GIỮ 1: n7-hook-giai-ma-utf8-exec-1-claude-20260830`. ĐẠT.
+  · #420 P2 — bảng ký tự xếp nhầm `ớ` THƯỜNG vào lớp ô trống. Đúng; và sai rộng hơn codex nêu:
+  `ở` THƯỜNG cũng bị xếp nhầm ở thân PR #419. Bảng nay sinh từ phép đo, kèm bảng cặp hoa/thường.
+  BỘ ĐẾM THỦ CÔNG VẪN 0/2 — lượt connector không tính vào trần §12, và KHÔNG được mượn theo
+  chiều ngược lại để khai là đã có cross-review đủ điều kiện land.
+
+cap_nhat_truoc_luot_review_2: >-
+  DỜI NEO TRƯỚC KHI GỌI REVIEWER, không phải sau: `reviewed_sha_required` từ `21e48dea` sang
+  exact head `44ea74e`. §8 — approval luôn neo `reviewed_sha`; xin duyệt khi lease còn neo
+  commit cũ là xin duyệt một cây KHÔNG chứa việc đã làm. Đây là lần dời THỨ HAI của packet,
+  vì head đổi sau mỗi lượt vá; packet N5 vấp đúng chỗ này và ăn một finding P1.
+
+  BỘ ĐẾM: `codex_review_calls_used` 0 -> 1, `review_rounds_used` 0 -> 1. Lượt 1 là lượt
+  cross-review CỤC BỘ chạy `codex exec -c model_reasoning_effort=xhigh` trong sandbox ngoài
+  kho; nó cho `changes_requested` với một P1 kèm diff `git apply --check` đi qua, và P1 ấy
+  ĐÚNG (probe hỏng bị đánh đồng với nền utf-8 ⇒ runner in `TONG: DAT` và `rc=0` trong khi hồi
+  quy `m20` còn trong cây). Đã vá ở `44ea74e`.
+
+  KHÔNG tính vào bộ đếm: các lượt do CONNECTOR GitHub tự chạy khi mở PR (#419 `fe78350`,
+  #420 `85b3c64`). Chúng là lượt tự động, không phải lượt thủ công của §12. Nhưng cũng KHÔNG
+  được mượn ngược lại để khai là đã đủ cross-review — chúng đã ra P1 và P2, không phải approve.
+
+  SAU LƯỢT 2, BỘ ĐẾM CẠN 2/2. Lượt 2 mà còn `changes_requested` thì packet KHÔNG được land
+  bằng cách gọi thêm lượt nữa; phải trình người giữ.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 2
+  dong_them_toi_da: 300
+  do_tu_sha: 6fa8a7451c751076983017e072d84ca6618ff58f
+  don_vi: >-
+    `git diff --numstat 6fa8a745 -- .claude/hooks/subagent_ghi_detect.py
+    .claude/hooks/subagent_ghi_detect_test.py` — dòng THÊM. Pathspec TRONG lệnh, KHÔNG `..HEAD`.
+  da_dung: 300
+  ghi_chu: >-
+    PHẢI ĐO LẠI trước mỗi bước công bố, không chép dòng này. Bài học `PLAT-X8`: cùng con số
+    trôi bốn lần, lần thứ tư khai sai một cổng là ĐẠT.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-30 khoảng 09:50Z: chủ kho được trình ba lựa chọn cho tình huống
+  lease N5 còn hạn mà packet đã land, và chọn "Thu hồi ngay bằng bia mộ hai chiều". Cùng lượt
+  ấy chốt tách #417 thành issue riêng ưu tiên cao, và duyệt đăng kết quả đo bước 1 lên #412.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_cung_la_nguoi_thi_cong: true
+
+recorder_xung_dot_loi_ich: >-
+  KHAI THẲNG: phiên ghi lease này cũng là phiên thi hành. §2 cho phép một tác nhân giữ các vai
+  ở NHỮNG PHIÊN KHÁC NHAU; ở đây nhập nhằng. Đối trọng: (a) thẩm quyền đến từ
+  `granted_by: ducthangho`, cấp trực tiếp cho ĐÚNG hành động thu hồi này; (b)
+  `assurance_target: cross_approved` giữ codex làm đối trọng khác nền; (c) mọi tiêu chí nghiệm
+  thu neo vào SỐ đọc từ báo cáo detector, không neo vào lời khai của phiên.
+  Đây là điểm yếu assurance thật, không phải hình thức.
+
+leased_at_utc: '2026-08-30T09:57:26Z'
+lease_expires_at_utc: '2026-08-30T21:54:24Z'
+run_minutes: 480
+
+ly_do_revision_2: >-
+  NÂNG TRẦN REVIEW 2 → 3 và gia hạn tới 21:54:24Z. Chủ kho duyệt trực tiếp lúc 16:54Z.
+  Lượt 2 (cross-review cục bộ xhigh) ra `changes_requested` với một P1 ĐÚNG: `t26` đo HÀM
+  THUẦN `phan_loai_dot_bien` nhưng KHÔNG đo DÂY NỐI tại chỗ gọi trong `chay()`. Reviewer đột
+  biến đúng một đối số ở call-site (`env_cp` → `None`), không đụng hàm phân loại: probe vẫn đo
+  được `cp1258` (nền ĐO ĐƯỢC) mà cả ba mutant codepage bị THA, `t26` vẫn xanh, runner vẫn công
+  bố `TONG: DAT` với `rc=0`. Đã vá ở `b115366`; phản chứng hai vế `NEN rc=0 DAT` ·
+  `DOT-BIEN rc=1 DO`. Bản vá ấy CHƯA AI REVIEW và bộ đếm đã cạn — không land được, cũng không
+  xin duyệt được. Đã trình người giữ như lease r1 bắt buộc; người giữ chọn cấp thêm lượt.
+  ĐỌC ĐÚNG Ý NGHĨA SỐ 3 — nó KHÔNG phải "được thoải mái hơn". Đây là lần thứ BA trong cùng
+  packet một P1 mang CÙNG HÌNH DẠNG: "không đo được" bị biến thành "đạt" (lần 1 đường
+  git/stdin, lần 2 probe hỏng, lần 3 dây nối). §12 buộc XEM LẠI CÁCH LÀM ở lần thứ ba, không
+  phải vá tiếp lần thứ tư. Lượt 3 mà lại ra cùng hình dạng ấy thì câu hỏi đúng là "thiết kế
+  chấm điểm đột biến có sai từ gốc không", KHÔNG phải "vá chỗ nào nữa".
+  Lượt do CONNECTOR GitHub tự chạy vẫn KHÔNG tính vào trần này.
+
+vung_duoc_phep_cham: >-
+  ĐÚNG HAI tệp trong `write_set`. KHÔNG đụng `.claude/settings.json` (lối A đã bị loại ở #412,
+  nên nhu cầu chạm tệp ấy là dấu hiệu đi sai lối, không phải chi tiết thi công).
+  KHÔNG đụng `ops/lease_publish.py` (đó là #417). KHÔNG đụng `.github/workflows/**`.
+  KHÔNG đụng `ops/leases/**` hay `ops/specs/**` TỪ NHÁNH PACKET.
+  ĐỌC KỸ: "không được chạm" nghĩa là không sửa VÀ không land qua nhánh packet — phiên trước
+  từng đọc câu tương đương thành "cấm sửa, không cấm land" rồi merge nhánh lease vào nhánh
+  packet; cross-review bác đúng, phải revert, và cái revert ấy đẻ ra nợ N11.
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ ba ⇒ DỪNG, trình phép đo ·
+  S2 phải sửa `.claude/settings.json` ⇒ DỪNG, đó là lối A đã bị loại ·
+  S3 ca chỉ chạy được trên Windows ⇒ khai THẲNG, CẤM để nó im lặng bỏ qua trên Linux ·
+  S4 `origin/master` đi tiếp so `base_sha` mà chưa đo lại ⇒ DỪNG ·
+  S5 phải đụng `ops/lease_publish.py` ⇒ DỪNG, đó là #417 ·
+  S6 vượt hai tệp hoặc 300 dòng thêm ⇒ DỪNG, KHÔNG tự khai cổng ADR-0044 là ĐẠT.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) `rc` của hook là `0` KỂ CẢ KHI MÙ (D1 = CHỈ TỐ CÁO; `_MA_CLEAN`, `_MA_CHANGED`,
+  `_MA_UNKNOWN` đều bằng 0). Nghiệm thu bằng `so_duong_da_bam_noi_dung` và `mu_noi_dung`,
+  KHÔNG bằng `rc`. Ai chẩn đoán "hook trả 1" là đã đi sai nhánh.
+  (2) Ca đặt ở đường dẫn ASCII sẽ XANH mà KHÔNG ĐO GÌ. Phải dựng kho tạm ở đường dẫn có dấu.
+  (3) `Quốc hội` chỉ chạm lớp MÉO (byte `0x91` và `0x99`, cp1258 CÓ định nghĩa). Lớp Ô TRỐNG
+  cần `ọ ề ờ ớ ỏ Ị Ở Ố`. Phủ CẢ HAI; dùng một mình `Quốc hội` là đo hụt — xem bảng mục 5 spec.
+  (4) `core.abbrev=7` phải ghim TRONG mọi clone hay sandbox.
+  (5) KHÔNG `git push` thẳng master, KHÔNG ép qua ruleset.
+  (6) Bộ quét lease KHÔNG chạy được ở chế độ mặc định trên máy này (#417) — cần `PYTHONUTF8=1`
+  làm rig. Đừng đọc `rc=12` thành "không có ai giữ".

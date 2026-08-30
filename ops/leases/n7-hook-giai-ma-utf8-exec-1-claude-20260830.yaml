@@ -18,6 +18,12 @@ revision: 1
 generation: 1
 lease_id: n7-hook-giai-ma-utf8-exec-1-claude-20260830
 
+# BIA MỘ — thay bằng revision 2 lúc 16:54Z 30-08-2026, chủ kho duyệt trực tiếp.
+# Lý do: bộ đếm review CẠN 2/2 mà lượt 2 ra `changes_requested`, và bản vá cho P1 lượt ấy
+# CHƯA AI REVIEW. Lease r1 tự khai: cạn bộ đếm thì packet không được land bằng cách gọi
+# thêm lượt — phải trình người giữ. Đã trình, và người giữ chọn CẤP THÊM LƯỢT.
+da_bi_thay_the: n7-hook-giai-ma-utf8-exec-1r2-claude-20260830
+
 thay_the_cho: n5-lenh-hook-windows-exec-1-claude-20260830
 
 role: executor

@@ -88,9 +88,10 @@ Thứ **CỐ Ý** không làm, kèm lý do:
 2. **KHÔNG đụng `ops/lease_publish_test.py`** dù `t26`/`t27` ở đó là chỗ đặt tự nhiên nhất.
    Đo `09:07:25Z 30-08`: đang bị lease `bo-ghi-nguoc-exec-1-claude-20260829` (packet **#396**) giữ
    tới `2026-08-30T12:40:00Z`. Đụng vào là tự tạo cửa sổ hai writer.
-3. **KHÔNG sửa ngược các spec đã đóng băng.** Đo `09:29:19Z 30-08-2026` bằng ĐÚNG luật chặt mà Đ2
-   sẽ cài (xem `dang_duoc_chap_nhan`), neo theo **TIÊU ĐỀ MỤC**: `ops/specs` có **53** tệp · **27**
-   có mục `hinh_dang_ke_thua` · **26** không có mục · trong 27 mục ấy: **8 ĐẠT**, **19 TRƯỢT**.
+3. **KHÔNG sửa ngược các spec đã đóng băng.** Đo `15:20:10Z 30-08-2026` bằng ĐÚNG luật chặt mà Đ2
+   sẽ cài (xem `dang_duoc_chap_nhan`), neo theo **TIÊU ĐỀ MỤC** và đã bỏ khối rào: `ops/specs` có
+   **53** tệp · **27** có mục `hinh_dang_ke_thua` · **26** không có mục · trong 27 mục ấy:
+   **3 ĐẠT**, **24 TRƯỢT**.
    (Bốn số hạng, không chỉ hiệu — L5: *kiểm SỐ HẠNG, đừng kiểm quan hệ*.) Spec là hiện vật **có băm**
    mà lease neo vào; sửa ngược làm băm trong lease cũ trỏ vào thứ không còn tồn tại. Cổng phải
    **diff-scoped** (chủ kho chốt vòng 3).
@@ -205,11 +206,47 @@ cạnh nhau. Đó là bắt theo **hình dáng ngẫu nhiên**, không theo **th
 
 **Vì vậy luật KHÔNG hỏi "có số không". Nó đòi ĐÚNG MỘT trong ba dạng dưới đây, không dạng nào khác:**
 
+**TIỀN XỬ LÝ BẮT BUỘC — bỏ khối rào trước, rồi mới tìm.** Xoá mọi khối ```` ``` ```` trước khi quét
+(`re.sub(r'^```.*?^```', '', t, flags=re.M|re.S)`). Thiếu bước này thì một tiêu đề nằm trong **ví dụ
+minh hoạ** cũng được tính là mục thật.
+
+**ĐỊNH VỊ MỤC — tiêu đề phải gọi ĐÚNG TÊN mục:**
+
+```
+^#{2,3}[ \t]+`?hinh_dang_ke_thua`?(?![A-Za-z0-9_])
+```
+
+Chốt `(?![A-Za-z0-9_])` là thứ đóng lỗ: nếu không có nó thì `## hinh_dang_ke_thua_placeholder` và
+`### hinh_dang_ke_thuaXYZ` **đều khớp** (đo được). Nhưng phải là **ký tự định danh**, không phải
+"hết dòng hoặc một dấu trong danh sách" — bản đầu của luật này đòi hết dòng hoặc `—`/`-`/`:` và
+**chặn oan hai spec thật**: `ag-t0-01b.md` (`## \`hinh_dang_ke_thua\` (L4)`) và `mcp-gh-cuu-ho.md`
+(`## hinh_dang_ke_thua (L4)`). Trang trí sau tên là chuyện của người viết; thứ phải cấm là tên bị
+**nối dài**.
+
+Mục kết thúc ở tiêu đề `^#{2,3}[ \t]` kế tiếp.
+
+**BA DẠNG ĐƯỢC CHẤP NHẬN, không dạng nào khác:**
+
 | # | dạng được chấp nhận | nhận diện |
 |---|---|---|
-| 1 | hàng bảng bộ đếm | dòng khớp `^\|\s*\*{0,2}[A-F]\*{0,2}\s*\|.*\|\s*\*{0,2}\d+\*{0,2}\s*\|` |
-| 2 | cặp phẳng | `\b[A-F]\s*=\s*\d` |
-| 3 | miễn, **có lý do** | `khong_ap_dung` cộng **văn bản khác rỗng** sau nó trên cùng dòng (sau dấu `:` hoặc khoảng trắng), tối thiểu **20 ký tự không phải khoảng trắng** |
+| 1 | hàng bảng bộ đếm | `^\|\s*\*{0,2}[A-F]\*{0,2}\s*\|.*\|\s*\*{0,2}\d+\*{0,2}\s*\|` |
+| 2 | **DÒNG KHAI BÁO trọn vẹn** | `^[\s*\-·\|`]*(?:\*{0,2}[A-F]\*{0,2}\s*=\s*\d+\b[\s*·\|`]*)+$` |
+| 3 | miễn, **có lý do** | `^[\s*\-`]*khong_ap_dung\s*:\s*(\S.*)$`, và nhóm bắt được phải có **≥ 20 ký tự không phải khoảng trắng** |
+
+**Dạng 2 phải là DÒNG TRỌN VẸN, không phải "có xuất hiện đâu đó".** Bản đầu dùng
+`\b[A-F]\s*=\s*\d` và nó nhận cả ba thứ sau — đo được, không suy:
+
+| chuỗi | luật cũ | luật mới |
+|---|---|---|
+| `Không thể chép bộ đếm tiền nhiệm: A = 8 vì thiếu hồ sơ` | **KHỚP** | từ chối |
+| `A = 8unknown` | **KHỚP** | từ chối (`\b` sau `\d+` cộng neo `$`) |
+| ``ví dụ minh hoạ: `B = 2` `` | **KHỚP** | từ chối |
+| `A = 8` · `A = 7   B = 2   C = 1   D = 3   E = 4   F = 2` · `- **A** = 8` | khớp | **khớp** (giữ) |
+
+Ca thứ nhất là ca đắt nhất: đó là một câu **PHỦ ĐỊNH** — nó nói thẳng rằng bộ đếm **không** chép
+được — mà luật cũ vẫn đọc thành "đã chép". Và nó **không phải giả định**: `N5-LENH-HOOK-WINDOWS.md`
+mở mục của nó bằng đúng câu *"Không chép được bộ đếm tiền nhiệm"*. Chỉ cần câu ấy có kèm một con số
+là cổng đã mù đúng chỗ nó sinh ra để soi.
 
 **Dạng 3 đòi LÝ DO, không chỉ đòi cái nhãn.** Bản đầu nhận diện `khong_ap_dung` bằng chuỗi trần, nên
 một spec mới chỉ cần gõ đúng nhãn ấy là **đi vòng qua** bộ đếm mà không phải khai vì sao — cổng biến
@@ -220,8 +257,14 @@ thành nghi lễ. Phát hiện bởi cross-review `codex` trên PR #415 (finding
 CÁCH VIẾT chứ không phân biệt THẨM QUYỀN."* Một danh sách cấm ở đây sẽ phải đoán trước mọi kiểu viết
 bộ đếm và thua từ trong thiết kế.
 
-**Phép đo nền của chính luật này** (`09:29:19Z 30-08-2026`, 53 tệp): `27` có mục · `8` ĐẠT · `19` TRƯỢT ·
-`N5-LENH-HOOK-WINDOWS.md` **TRƯỢT** (nuôi `A4`) · đặc tả này **ĐẠT** (nuôi `A6`).
+**Phép đo nền của chính luật này, sau khi siết** (`15:20:10Z 30-08-2026`, luật ở trên chạy trên
+`ops/specs`): **53** tệp · **27** có mục · **3** ĐẠT · **24** TRƯỢT · `N5-LENH-HOOK-WINDOWS.md`
+**TRƯỢT** (nuôi `A4`) · đặc tả này **ĐẠT** (nuôi `A6`) · `ag-t0-01b.md` và `mcp-gh-cuu-ho.md`
+**vẫn được nhận là có mục** (chốt bắt-oan của luật tiêu đề).
+
+`ĐẠT` tụt `8 → 3` **là kết quả mong muốn, không phải hồi quy**: năm tệp kia trước đây "đạt" nhờ một
+con số nằm trong văn xuôi, không phải nhờ một bộ đếm được chép. Ba tệp còn lại — `LEASE-DANG-WINDOWS.md`,
+`lease-hoi-toan-kho.md`, và đặc tả này — là ba tệp thật sự mang bộ đếm.
 
 ## `vi_sao_KHONG_dung_cong_da_de_xuat_o_vong_1`
 
@@ -276,7 +319,7 @@ Mỗi tiêu chí nêu **phép đo nào làm nó ĐỎ** (L3). Tiêu chí không 
 
 ### `A4` (Đ2) — CHỐNG BẢO CHỨNG GIẢ: cổng phải ĐỎ trên chính `N5-LENH-HOOK-WINDOWS.md`
 
-- **Bằng chứng nền (`09:29:19Z 30-08-2026`, neo theo TIÊU ĐỀ MỤC):**
+- **Bằng chứng nền (`15:20:10Z 30-08-2026`, luật chặt: neo TIÊU ĐỀ MỤC, đã bỏ khối rào):**
   `ops/specs/N5-LENH-HOOK-WINDOWS.md` **có** mục `hinh_dang_ke_thua` (1390 ký tự) nhưng **trượt cả ba
   dạng được chấp nhận** — không hàng bảng bộ đếm, không cặp `<A-F> = <số>`, không `khong_ap_dung`, và
   không nhắc tên hình dạng A. Đó **chính là** đường mà lỗi #411 đi lọt.
@@ -295,17 +338,39 @@ Bộ `packet_loop_test.py` cưỡng chế *"mỗi LỚP LÁCH phải có đột 
 | bỏ nhánh fail-close, cho `BASE` không giải được đi qua thành XANH | **ĐỎ** |
 | nới ngoại lệ "bản sao rời" thành *"không giải được `BASE` thì tha"* | **ĐỎ** |
 | **bỏ hàng `workflow_dispatch` khỏi bảng `BASE`** | **ĐỎ** — ca đích phải chạy được với `GITHUB_EVENT_NAME=workflow_dispatch` |
-| **nhận `khong_ap_dung` trần, không đòi lý do** | **ĐỎ** — ca âm của `A6` |
+| **nhận `khong_ap_dung` trần, không đòi lý do** | **ĐỎ** |
+| **hạ ngưỡng lý do từ 20 xuống 1 ký tự** | **ĐỎ** — ca biên `19` bắt được |
+| **bỏ `(?![A-Za-z0-9_])` khỏi luật tiêu đề** | **ĐỎ** — `## hinh_dang_ke_thua_placeholder` lọt |
+| **bỏ bước xoá khối rào** | **ĐỎ** — tiêu đề trong ví dụ minh hoạ lọt |
+| **lui dạng 2 về `\b[A-F]\s*=\s*\d` (khớp bất kỳ đâu)** | **ĐỎ** — câu phủ định mang số lọt |
+| **bỏ `\b` sau `\d+` ở dạng 2** | **ĐỎ** — `A = 8unknown` lọt |
+| **siết luật tiêu đề thành "hết dòng hoặc `—`/`-`/`:`"** | **ĐỎ** — ca bắt-oan `## hinh_dang_ke_thua (L4)` |
 
 - **ĐỎ khi:** bất kỳ đột biến nào **SỐNG SÓT**, hoặc bị giết bởi một ca **KHÁC** ca đích, hoặc bị
   giết bằng một ngoại lệ **không phải** assertion của ca đích (tín dụng giả — xem bài học `#355`/`#359`).
 
 ### `A6` (Đ2) — ca BẮT-OAN: không được đỏ oan
 
-- **ĐẠT khi (ba ca DƯƠNG):** spec mới **CÓ** bộ đếm hợp lệ ⇒ **XANH** · spec khai `khong_ap_dung`
-  **kèm lý do khác rỗng** ⇒ **XANH** · diff **không thêm** spec nào ⇒ **XANH**.
-- **ĐẠT khi (hai ca ÂM):** spec mới khai `khong_ap_dung` **TRẦN, không lý do** ⇒ **ĐỎ** ·
-  spec mới có mục `hinh_dang_ke_thua` nhưng **rỗng** ⇒ **ĐỎ**.
+- **ĐẠT khi (ca DƯƠNG):** spec mới có hàng bảng bộ đếm ⇒ **XANH** · có dòng khai báo trọn vẹn
+  (`A = 8`, và cả dạng nhiều cặp `A = 7   B = 2 …`) ⇒ **XANH** · khai `khong_ap_dung` kèm lý do
+  **≥ 20 ký tự không phải khoảng trắng** ⇒ **XANH** · tiêu đề có trang trí (`(L4)`, `— L4`, `: ghi
+  chú`) ⇒ vẫn nhận là mục ⇒ **XANH** · diff **không thêm** spec nào ⇒ **XANH**.
+- **ĐẠT khi (ca ÂM) — mỗi dòng dưới đây phải làm cổng ĐỎ:**
+
+  | ca âm | vì sao |
+  |---|---|
+  | `khong_ap_dung` TRẦN, không lý do | nhãn không thay được lý do |
+  | `khong_ap_dung: x` (**1** ký tự) | dưới ngưỡng |
+  | `khong_ap_dung: ` + **19** ký tự | **sát dưới** ngưỡng — ca biên |
+  | lý do chỉ nằm ở **dòng sau**, cùng dòng rỗng | luật đòi cùng dòng |
+  | mục `hinh_dang_ke_thua` **rỗng** | không có gì để chép |
+  | `## hinh_dang_ke_thua_placeholder` | tên bị nối dài, không phải mục này |
+  | tiêu đề đúng nhưng nằm **trong khối rào** | ví dụ minh hoạ không phải mục |
+  | `Không thể chép … A = 8 vì thiếu hồ sơ` | câu **phủ định** mang con số |
+  | `A = 8unknown` | thiếu biên sau chữ số |
+
+  **Ngưỡng 20 phải có ca ở CẢ HAI phía (19 ⇒ ĐỎ, 20 ⇒ XANH).** Không có cặp ấy thì con số 20 là
+  một lời khai chứ không phải một tiêu chí — nó không thể đỏ, nên nó không tồn tại.
 - **ĐỎ khi:** bất kỳ ca dương nào đỏ, **hoặc** bất kỳ ca âm nào xanh. Thiếu ca âm thì `A6` chỉ chứng
   minh cổng *không kêu bậy*, không chứng minh nó *kêu đúng lúc* — và một cổng chỉ có ca dương là
   cổng không ai biết có răng hay không.

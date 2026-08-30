@@ -35,9 +35,9 @@ spec_note: >-
   còn tồn tại, và đó là đường đi vòng qua §3.2 chứ không phải một lần sửa chính tả.
 
 # BỘ ĐẾM REVIEW — packet MỚI, bắt đầu sạch. Đây là chỗ dễ lách nhất của cả tệp.
-codex_review_calls_used: 1
+codex_review_calls_used: 2
 codex_review_calls_max: 2
-review_rounds_used: 1
+review_rounds_used: 2
 tran_review_ghi_chu: >-
   Bắt đầu 0/2 vì đây là packet MỚI, không phải revision của packet cũ. Bộ đếm của
   `KHONG-DO-DUOC-PHAI-DO` (2/2, cạn) KHÔNG liên quan và KHÔNG được mượn theo chiều nào.
@@ -184,3 +184,14 @@ ngan_sach_da_do_lai_05_4xZ: >-
   A1) và `33292942199` (A2/A5/A6). CÒN 1 lượt. Hai con số này TRƯỚC ĐÓ SAI ở master vì
   không ai cập nhật được chúng từ nhánh packet — `vung_duoc_phep_cham` cấm chạm `ops/leases/**`
   từ đó. Đường đúng là nhánh điều phối riêng, và đây là nó.
+
+bo_dem_review_ghi_chu_luot_2: >-
+  `codex_review_calls_used` 1 -> 2 và `review_rounds_used` 1 -> 2. BỘ ĐẾM NAY CẠN (2/2).
+  Lượt 2 cho `approve`: cả hai finding lượt 1 `ĐÃ VÁ THẬT`, 0 finding mới. `cross_approved`
+  ĐẠT TẠI EXACT SHA `472f11bd`.
+  NHƯNG KHÔNG ĐƯỢC ĐỌC THÀNH "packet land có cổng": PR #407 đã merge (`7a2f177`) TRƯỚC khi
+  lượt này chạy, lúc verdict lượt 1 còn `changes_requested`. Chính reviewer nêu caveat ấy.
+  Còn hai cổng CHƯA đóng, ghi ở `verdict_usage_caveats` của biên nhận lượt 2:
+  (a) mọi bản duyệt khác danh tính THÂN RỖNG 0 ký tự ⇒ không có hiện vật "ghi evidence audit";
+  (b) Windows vẫn 2 dòng đỏ, và đó là HỎNG THẬT chứ không chỉ "không đo được" — nới nhãn sẽ
+      KHÔNG làm nó xanh. Là packet khác (`S8`).

@@ -1,0 +1,97 @@
+# BIÊN NHẬN GIAO HÀNG — cross-review lượt 2/2 (LƯỢT CUỐI) của PR #407, packet #405.
+#
+# ĐỌC TRƯỚC: biên nhận do CHÍNH phiên thi công ghi — bên kém độc lập nhất để khai lượt review
+# đã diễn ra thế nào. Phần KIỂM ĐƯỢC không phụ thuộc lời tôi: `verdict_sha256` khoá BYTE bản
+# trong kho. Phần TÓM TẮT là lời tôi — đọc thẳng `verdict_path`.
+
+schema_version: 1
+kind: review_delivery_receipt
+packet_id: '405'
+packet_slug: N5-LENH-HOOK-WINDOWS
+lease_id: n5-lenh-hook-windows-exec-1-claude-20260830
+lease_ghi_chu: >-
+  Lease EXECUTOR, KHÔNG phải lease review. Ghi vào đây để truy vết bộ đếm
+  `codex_review_calls_used`, không phải khai reviewer có lease.
+
+provider: codex
+role: reviewer
+verdict: approve
+reviewed_sha: 472f11bd96e7e10779a0681fa1b52a93df85ee9d
+luot: 2
+la_luot_cuoi: true
+cross_provider: true
+assurance: cross_approved
+assurance_ghi_chu: >-
+  Executor `claude`, reviewer `codex` — khác nền. Với lượt này `cross_approved` ĐẠT
+  TẠI EXACT SHA `472f11bd`. NHƯNG xem `verdict_usage_caveats`: PR đã land TRƯỚC lượt này,
+  nên thao tác land không có cổng, và một `approve` sau đó không hồi tố.
+
+verdict_path: ops/reviews/n5-lenh-hook-windows-review-2-codex-verdict.md
+verdict_sha256: b5c512543526c4f2ac0681097eb0d7f6360f4b699c0b775d014a3c8dff07ac49
+verdict_bytes: 5953
+verdict_nguon: >-
+  `codex exec --skip-git-repo-check --sandbox workspace-write` trong container phiên; tệp gốc
+  `<sandbox>/VERDICT2.md`. Phiên chép và KHÔNG sửa — LỜI KHAI của tôi, không phải phép đo.
+verdict_doi_chieu: >-
+  CHỨNG MINH: bản trong kho không đổi kể từ lúc ghi. KHÔNG CHỨNG MINH: bản chép khớp thứ
+  reviewer sinh ra — băm đo trên BẢN SAO nên chỉ nói bản sao khớp CHÍNH NÓ. Cắt vòng cần một
+  client thứ hai lấy bản gốc rồi băm độc lập; container phiên KHÔNG có đường ấy (proxy chặn
+  `api.github.com/repos/*`). Trạng thái đúng: KHÔNG ĐO ĐƯỢC.
+
+evidence_channel: github_pr_comment
+evidence_url: https://github.com/ducthangho/tra-luat/pull/407#issuecomment-5467327479
+evidence_ghi_chu: >-
+  Đọc ngược về và `diff`: KHỚP TỪNG BYTE (khác lượt 1, vốn lệch thực thể HTML). Nội dung ở đó
+  là bản CHIẾU; nguồn có thẩm quyền là tệp `verdict_path`.
+
+doi_chieu_luot_1:
+  P1_lease_con_neo_vao_base: ĐÃ VÁ THẬT
+  P2_so_ref_khai_mo_ho_thieu_manifest: ĐÃ VÁ THẬT
+  finding_moi: 0
+doi_chieu_ghi_chu: >-
+  Reviewer TỰ đọc blob lease ở `master/` chứ không nhận bản khai trong hồ sơ, TỰ chạy `comm`
+  hai chiều trên hai manifest, TỰ áp đột biến `ms1` (`t21` 4/4 -> 2/4), TỰ thay
+  `shutil.which` trả `None` để kiểm nhánh fail-closed, và TỰ đếm log vân tay.
+
+sandbox_reviewer:
+  noi_dung: 'kho.git (268 heads + 39 tag) · cay/ 472f11bd · nen/ 1dedb8b5 · master/ 7a2f1777 · hai manifest ref · DAC_TA.md · LEASE_TREN_MASTER.yaml · VERDICT_LUOT_1.md · log vân tay 99198878779 (1904/1904) · log xanh 99207635597 (1187/1187)'
+  core_abbrev_ghim: 7
+  doi_chieu_cong_truoc_khi_giao: 'cay/ và master/ đều CA 30/30 · DOT BIEN 18/18 · TONG: DAT · rc=0'
+
+verdict_usage_caveats:
+- id: approve-luot-2-KHONG-hop-thuc-hoa-lan-land-sai-thu-tu
+  noi_dung: >-
+    PR #407 đã merge vào master (`7a2f177`) TRƯỚC khi lượt review cuối này chạy, lúc verdict
+    lượt 1 còn `changes_requested`. `approve` này chỉ nói exact SHA đạt đặc tả theo các phép
+    đo hiện có; nó KHÔNG hồi tố biến lần land ấy thành một lần land có cổng. Reviewer tự nêu
+    caveat này, phiên không thêm vào.
+- id: duyet-khac-danh-tinh-VAN-THAN-RONG-0-ky-tu
+  noi_dung: >-
+    Cổng `duyệt khác danh tính` ĐẠT phần cơ học (`notebyme88` khác `ducthangho`, neo đúng
+    exact head) nhưng MỌI bản duyệt vẫn thân RỖNG 0 ký tự ⇒ nửa "ghi evidence audit" của §8
+    mục 2 KHÔNG CÓ HIỆN VẬT. Lần thứ tư trở lên cùng hình dạng. Chưa đóng.
+- id: windows-2-dong-do-la-HONG-THAT-khong-phai-chi-KHONG-DO-DUOC
+  noi_dung: >-
+    Phiên rà kỹ log Windows `99207635597` theo yêu cầu chủ kho: hai bộ `cach_ly` KHÔNG chỉ
+    "không đo được" — chúng HỎNG THẬT trên Windows. `mcp_gh_test.py`: CA 42/42 và ĐỘT BIẾN
+    54/54 đều ĐẠT, nhưng `D8(a) đích nằm trong tập giết: ĐỎ ['b7_bo_cam_ghi']` ⇒ TỔNG ĐỎ.
+    `pretooluse_guard_test.py`: `TONG: CA 30/34`, bốn ca đỏ thật (`t11_lo_336_co_that_VA_bi_chan`
+    · `t14_co_khong_ton_tai_phan_biet_duoc_voi_bi_chan` · `t15_cong_kiem_bang_khop_nguon_that`
+    · `t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban`) và HAI đột biến SỐNG
+    (`m18_noi_bang_co_git_cho_output` · `m26_cong_fail_OPEN_khi_khong_hoi_duoc_runtime`).
+    HỆ QUẢ: nới `moi_truong_hien_tai()` để nhận Windows sẽ KHÔNG làm Windows xanh — hai bộ
+    chuyển từ "KHÔNG ĐO ĐƯỢC ⇒ ĐỎ" sang "đo được ⇒ VẪN ĐỎ", vẫn đúng 2 dòng, và mất luôn cái
+    nhãn đang nói thật. Muốn xanh phải sửa THẬT 6 ca + 2 đột biến sống. Đây là packet KHÁC
+    (`S8`), và §12 đòi xem lại CÁCH LÀM ở lần thứ ba của hình dạng này.
+
+delivered: true
+delivered_by: claude-session
+authoritative_source: repo_file
+receipt_written_by: claude-session
+receipt_written_at_utc: '2026-08-30T07:10:00Z'
+
+receipt_khong_khai:
+- 'Không khai lần land của #407 là có cổng — nó không có, và một approve sau đó không hồi tố.'
+- 'Không khai cổng `duyệt khác danh tính` đã ĐẠT trọn vẹn — thân rỗng 0 ký tự, không có hiện vật audit.'
+- 'Không khai Windows sẽ xanh sau packet này — nó KHÔNG, và caveat thứ ba giải thích vì sao nới nhãn cũng không giúp.'
+- 'Không khai đã quét hết lời khai rộng hơn phép đo — reviewer tự khai còn nhiều mục KHÔNG ĐO ĐƯỢC trong sandbox.'

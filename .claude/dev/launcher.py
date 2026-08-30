@@ -1900,6 +1900,12 @@ CONG_CU = [
     {"ten": "llm", "bat_buoc": False, "ung_vien": ["llm"],
      "vi_sao": "CLI client goi OpenAI API (provider: openai_api, surface: llm_cli)",
      "cai": {"*": "pip install llm  (hoac: uv tool install llm / brew install llm)"}},
+    {"ten": "agy", "bat_buoc": False, "ung_vien": ["agy"],
+     "vi_sao": "CLI client cho Google Antigravity (provider: google_antigravity, surface: antigravity)",
+     "cai": {"Windows": "irm https://antigravity.google/cli/install.ps1 | iex",
+             "Darwin": "curl -fsSL https://antigravity.google/cli/install.sh | bash",
+             "Linux": "curl -fsSL https://antigravity.google/cli/install.sh | bash"},
+     "xac_thuc": ["models"]},
 ]
 
 # MODULE PYTHON — bảng RIÊNG, cố ý không nhét vào `CONG_CU`.
@@ -2113,6 +2119,8 @@ def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]
             them(ten0, Path(local) / "Microsoft" / "WinGet" / "Links" / "rg.exe")
         elif c["ten"] == "gh":
             them(ten0, Path(pf) / "GitHub CLI" / "gh.exe")
+        elif c["ten"] == "agy" and local:
+            them(ten0, Path(local) / "agy" / "bin" / "agy.exe")
     return [(t, x) for t, x in ra if Path(x).is_file()]
 
 
@@ -2806,6 +2814,66 @@ def _do_openai_llm(moi_truong: dict[str, str] | None = None,
         return ("DUNG_DUOC", f"{ver} · kiem song: thanh cong (gpt-4o-mini)")
     err_msg = p_song.stderr.strip() or p_song.stdout.strip()
     return ("CHUA_XAC_THUC", f"{ver} · kiem song HONG (rc={p_song.returncode}): {err_msg[:60]}")
+
+
+def _do_antigravity(moi_truong: dict[str, str] | None = None) -> tuple[str, str]:
+    """Đo năng lực gọi Antigravity CLI (`agy`) — AG-T0-01B.
+
+    Bốn trạng thái (Spec 6.2):
+      DUNG_DUOC: `agy models` rc=0 và có đầu ra (stdout+stderr)
+      CO_MAT: `--version` rc=0 nhưng `models` rc≠0 — đã cài, chưa đăng nhập
+      KHONG_DO_DUOC: timeout hoặc OSError hoặc cả hai probe thất bại — không làm tròn thành THIEU
+      THIEU: không thấy binary, kể cả sau đường lùi PATH trên Windows
+    """
+    mt = _env_da_chuan(moi_truong)
+    candidates = _cac_duong_dan({"ten": "agy", "ung_vien": ["agy"]}, mt)
+    if not candidates:
+        return ("THIEU", "chua cai agy CLI — irm https://antigravity.google/cli/install.ps1 | iex (Windows) / curl -fsSL https://antigravity.google/cli/install.sh | bash")
+
+    loi_cuoi = None
+    co_mat_str = None
+    for _, duong_agy in candidates:
+        # Probe 1: Thử `models` để kiểm xác thực (Spec 6.2 & 6.3)
+        try:
+            p_mod = _chay_van_ban_an_toan([duong_agy, "models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
+        except subprocess.TimeoutExpired:
+            loi_cuoi = ("KHONG_DO_DUOC", f"probe models timeout sau {PROBE_TIMEOUT_GIAY:.1f}s")
+            continue
+        except (OSError, subprocess.SubprocessError) as e:
+            loi_cuoi = ("KHONG_DO_DUOC", f"probe models khong chay duoc: {type(e).__name__}")
+            continue
+
+        out_mod = (p_mod.stdout or "") + (p_mod.stderr or "")
+        co_loi_ra = bool(out_mod.strip())
+
+        if p_mod.returncode == 0 and co_loi_ra:
+            so_dong = len([d for d in out_mod.splitlines() if d.strip()])
+            return ("DUNG_DUOC", f"da xac thuc qua `agy models` ({so_dong} model)")
+
+        # Probe 2: Nếu models rc != 0 (hoặc cả hai luồng rỗng), probe `--version`
+        try:
+            p_ver = _chay_van_ban_an_toan([duong_agy, "--version"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
+        except subprocess.TimeoutExpired:
+            loi_cuoi = ("KHONG_DO_DUOC", f"probe --version timeout sau {PROBE_TIMEOUT_GIAY:.1f}s")
+            continue
+        except (OSError, subprocess.SubprocessError) as e:
+            loi_cuoi = ("KHONG_DO_DUOC", f"probe --version khong chay duoc: {type(e).__name__}")
+            continue
+
+        out_ver = (p_ver.stdout or "") + (p_ver.stderr or "")
+        dong_ver = [d.strip() for d in out_ver.splitlines() if d.strip()]
+        ver_str = dong_ver[0][:40] if dong_ver else "agy"
+
+        if p_ver.returncode == 0:
+            co_mat_str = ("CO_MAT", f"{ver_str} · chua dang nhap — chay `agy` (mo TUI de login)")
+        else:
+            loi_cuoi = ("KHONG_DO_DUOC", f"probe agy that bai (models rc={p_mod.returncode}, --version rc={p_ver.returncode})")
+
+    if co_mat_str:
+        return co_mat_str
+    if loi_cuoi:
+        return loi_cuoi
+    return ("KHONG_DO_DUOC", "probe agy khong xac dinh")
 
 
 _RE_SLUG_GITHUB = re.compile(r"github\.com[:/]+([^/]+/[^/\s]+?)(?:\.git)?/*$")
@@ -3519,6 +3587,9 @@ KHA_NANG = [
     {"ten": "openai-llm", "do": lambda ws, ks=False: _do_openai_llm(_MOI_TRUONG_DA_DOC, ks),
      "vi_sao": "provider openai_api qua execution_surface llm_cli (§4, §5 ops/OPENAI_LLM_PROVIDER.md)",
      "khac_phuc": "pip install llm && export OPENAI_API_KEY=... (hoac llm keys set openai)"},
+    {"ten": "antigravity", "do": lambda ws, ks=False: _do_antigravity(_MOI_TRUONG_DA_DOC),
+     "vi_sao": "provider google_antigravity qua execution_surface antigravity (AG-T0-01B)",
+     "khac_phuc": "cai agy CLI va chay `agy` (mo TUI de dang nhap)"},
 ]
 
 

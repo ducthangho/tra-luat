@@ -5666,6 +5666,139 @@ def t144_run_ghi_nonce_va_hmac_khong_lo_khoa():
 
 
 @ca
+def t145_agy_cong_cu_va_kha_nang():
+    """N1 & N2: agy trong CONG_CU và antigravity trong KHA_NANG."""
+    m = _tai_launcher_thu()
+    ds_agy = [c for c in m.CONG_CU if c.get("ten") == "agy"]
+    bang(len(ds_agy) == 1, f"CONG_CU phai co dung 1 muc agy: {ds_agy}")
+    c_agy = ds_agy[0]
+    bang(c_agy.get("bat_buoc") is False, f"agy khong phai bat_buoc=False: {c_agy}")
+    bang(c_agy.get("xac_thuc") == ["models"], f"xac_thuc cua agy phai la ['models']: {c_agy}")
+    bang(c_agy.get("ung_vien") == ["agy"], f"ung_vien cua agy phai la ['agy']: {c_agy}")
+
+    ds_kn = [k for k in m.KHA_NANG if k.get("ten") == "antigravity"]
+    bang(len(ds_kn) == 1, f"KHA_NANG phai co dung 1 muc antigravity: {ds_kn}")
+    k_ag = ds_kn[0]
+    bang("google_antigravity" in k_ag.get("vi_sao", "") and "antigravity" in k_ag.get("vi_sao", ""),
+         f"vi_sao cua antigravity phai neu ro provider: {k_ag}")
+
+
+@ca
+def t146_do_antigravity_cac_trang_thai_va_luong():
+    """N3-N7, N9: _do_antigravity đọc cả 2 luồng, không gọi trần, không vào LAM_DUOC_VIEC."""
+    m = _tai_launcher_thu()
+    goc_cac = m._cac_duong_dan
+    goc_chay = m._chay_van_ban_an_toan
+    nhat_ky_lenh = []
+
+    m._cac_duong_dan = lambda c, mt: [("agy", "/gia/bin/agy")]
+
+    def gia_chay(lenh, env=None, timeout=None):
+        nhat_ky_lenh.append(list(lenh))
+        # N3: khong bao gio goi agy tran
+        bang(len(lenh) >= 2 and lenh[0] == "/gia/bin/agy", f"goi agy tran hoac sai lenh: {lenh}")
+        # N4: khong goi -p / --print
+        bang("-p" not in lenh and "--print" not in lenh, f"goi -p trong doctor mac dinh: {lenh}")
+        sub = lenh[1]
+        if sub == "models":
+            # N5: models rc=0 tren stderr duy nhat van la DUNG_DUOC
+            return subprocess.CompletedProcess(lenh, 0, stdout="", stderr="gemini-2.5-pro\ngemini-2.5-flash\n")
+        return subprocess.CompletedProcess(lenh, 0, stdout="1.1.17", stderr="")
+
+    try:
+        m._chay_van_ban_an_toan = gia_chay
+        tt, mo_ta = m._do_antigravity({})
+        bang(tt == "DUNG_DUOC", f"stderr-only models phai la DUNG_DUOC: tt={tt}, mo_ta={mo_ta}")
+
+        # N7: rc=0 ca 2 luong rong => KHONG DUNG_DUOC (CO_MAT)
+        m._chay_van_ban_an_toan = lambda lenh, env=None, timeout=None: subprocess.CompletedProcess(
+            lenh, 0, stdout="", stderr=""
+        ) if lenh[1] == "models" else subprocess.CompletedProcess(lenh, 0, stdout="1.1.17", stderr="")
+        tt2, mo_ta2 = m._do_antigravity({})
+        bang(tt2 == "CO_MAT", f"rc=0 rong ca hai luong khong duoc la DUNG_DUOC: tt2={tt2}")
+
+        # models rc!=0 va --version rc!=0 => KHONG_DO_DUOC (khong duoc CO_MAT)
+        m._chay_van_ban_an_toan = lambda lenh, env=None, timeout=None: subprocess.CompletedProcess(
+            lenh, 1, stdout="", stderr="error"
+        )
+        tt_both_fail, _ = m._do_antigravity({})
+        bang(tt_both_fail == "KHONG_DO_DUOC", f"ca hai probe fail phai la KHONG_DO_DUOC: tt={tt_both_fail}")
+
+        # Fallback candidate: ung vien 1 loi, ung vien 2 thanh cong => DUNG_DUOC
+        m._cac_duong_dan = lambda c, mt: [("agy", "/gia/shim/agy"), ("agy", "/gia/bin/agy")]
+        def gia_fallback_cand(lenh, env=None, timeout=None):
+            if "/gia/shim/agy" in lenh[0]:
+                raise OSError("broken shim")
+            return subprocess.CompletedProcess(lenh, 0, stdout="gemini-2.5-pro\n", stderr="")
+        m._chay_van_ban_an_toan = gia_fallback_cand
+        tt_cand, _ = m._do_antigravity({})
+        bang(tt_cand == "DUNG_DUOC", f"ung vien fallback phai cuu duoc: tt={tt_cand}")
+        m._cac_duong_dan = lambda c, mt: [("agy", "/gia/bin/agy")]
+
+        # N6: TimeoutExpired / OSError => KHONG_DO_DUOC
+        def gia_timeout(lenh, env=None, timeout=None):
+            raise subprocess.TimeoutExpired(lenh, timeout or 8.0)
+        m._chay_van_ban_an_toan = gia_timeout
+        tt3, _ = m._do_antigravity({})
+        bang(tt3 == "KHONG_DO_DUOC", f"TimeoutExpired phai la KHONG_DO_DUOC, khong lam tron thanh THIEU: tt3={tt3}")
+
+        def gia_oserror(lenh, env=None, timeout=None):
+            raise OSError("Permission denied")
+        m._chay_van_ban_an_toan = gia_oserror
+        tt4, _ = m._do_antigravity({})
+        bang(tt4 == "KHONG_DO_DUOC", f"OSError phai la KHONG_DO_DUOC: tt4={tt4}")
+
+        # N9: antigravity khong vao LAM_DUOC_VIEC
+        nguon = Path(m.__file__).read_text(encoding="utf-8")
+        khoi = nguon[nguon.index("LAM_DUOC_VIEC = {"):]
+        khoi = khoi[:khoi.index("}") + 1]
+        bang('"antigravity"' not in khoi and "'antigravity'" not in khoi,
+             f"antigravity bi tinh vao LAM_DUOC_VIEC: {khoi!r}")
+    finally:
+        m._cac_duong_dan = goc_cac
+        m._chay_van_ban_an_toan = goc_chay
+
+
+@ca
+def t147_agy_fallback_localappdata_windows():
+    """N8: Windows fallback %LOCALAPPDATA%\\agy\\bin\\agy.exe khi which trượt."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        local_app = s / "LocalAppData"
+        agy_bin = local_app / "agy" / "bin"
+        agy_bin.mkdir(parents=True)
+        agy_exe = agy_bin / "agy.exe"
+        agy_exe.write_text("fake binary", encoding="utf-8")
+
+        env_gia = {
+            "PATH": "",
+            "LOCALAPPDATA": str(local_app),
+            "ProgramFiles": str(s / "PF"),
+        }
+
+        # Gia lap platform Windows
+        goc_plat = m.platform.system
+        m.platform.system = lambda: "Windows"
+        try:
+            duong = m._cac_duong_dan({"ten": "agy", "ung_vien": ["agy"]}, env_gia)
+            bang(len(duong) >= 1 and duong[0][1] == str(agy_exe),
+                 f"Windows fallback LOCALAPPDATA khong tim thay agy.exe: {duong}")
+
+            # _do_antigravity tren fallback khong bi THIEU
+            goc_chay = m._chay_van_ban_an_toan
+            m._chay_van_ban_an_toan = lambda lenh, env=None, timeout=None: subprocess.CompletedProcess(
+                lenh, 0, stdout="model-1\n", stderr=""
+            )
+            try:
+                tt, _ = m._do_antigravity(env_gia)
+                bang(tt == "DUNG_DUOC", f"fallback LOCALAPPDATA phai DUNG_DUOC, khong phai THIEU: {tt}")
+            finally:
+                m._chay_van_ban_an_toan = goc_chay
+        finally:
+            m.platform.system = goc_plat
+
+
+@ca
 def r01_worktree_that_bi_chan():
     with San() as s:
         wt = tao_worktree(s); dau = s / "da-chay"; rr = s / "runs"
@@ -6863,6 +6996,53 @@ DOT_BIEN = [
     ("mcp_mat_env_da_chuan_hoa",
      ('                           env=moi_truong, stdin=subprocess.DEVNULL,',
       '                           stdin=subprocess.DEVNULL,'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    # --- AG-T0-01B: MƯỜI ĐỘT BIẾN CHO AGY VÀ ANTIGRAVITY (N1-N9) -------------------
+    ("agy_cong_cu_xoa_muc",
+     ('    {"ten": "agy", "bat_buoc": False, "ung_vien": ["agy"],\n'
+      '     "vi_sao": "CLI client cho Google Antigravity (provider: google_antigravity, surface: antigravity)",\n'
+      '     "cai": {"Windows": "irm https://antigravity.google/cli/install.ps1 | iex",\n'
+      '             "Darwin": "curl -fsSL https://antigravity.google/cli/install.sh | bash",\n'
+      '             "Linux": "curl -fsSL https://antigravity.google/cli/install.sh | bash"},\n'
+      '     "xac_thuc": ["models"]},',
+      ''),
+     ["t145_agy_cong_cu_va_kha_nang"]),
+    ("agy_xac_thuc_sang_version",
+     ('     "xac_thuc": ["models"]},', '     "xac_thuc": ["--version"]},'),
+     ["t145_agy_cong_cu_va_kha_nang"]),
+    ("agy_kha_nang_xoa_muc",
+     ('    {"ten": "antigravity", "do": lambda ws, ks=False: _do_antigravity(_MOI_TRUONG_DA_DOC),\n'
+      '     "vi_sao": "provider google_antigravity qua execution_surface antigravity (AG-T0-01B)",\n'
+      '     "khac_phuc": "cai agy CLI va chay `agy` (mo TUI de dang nhap)"},',
+      ''),
+     ["t145_agy_cong_cu_va_kha_nang"]),
+    ("agy_goi_tran",
+     ('        p_mod = _chay_van_ban_an_toan([duong_agy, "models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)',
+      '        p_mod = _chay_van_ban_an_toan([duong_agy], env=mt, timeout=PROBE_TIMEOUT_GIAY)'),
+     ["t146_do_antigravity_cac_trang_thai_va_luong"]),
+    ("agy_goi_p_mac_dinh",
+     ('        p_mod = _chay_van_ban_an_toan([duong_agy, "models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)',
+      '        p_mod = _chay_van_ban_an_toan([duong_agy, "-p", "models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)'),
+     ["t146_do_antigravity_cac_trang_thai_va_luong"]),
+    ("agy_probe_models_chi_doc_stdout",
+     ('    out_mod = (p_mod.stdout or "") + (p_mod.stderr or "")',
+      '    out_mod = p_mod.stdout or ""'),
+     ["t146_do_antigravity_cac_trang_thai_va_luong"]),
+    ("agy_probe_models_timeout_thanh_thieu",
+     ('            loi_cuoi = ("KHONG_DO_DUOC", f"probe models timeout sau {PROBE_TIMEOUT_GIAY:.1f}s")',
+      '            loi_cuoi = ("THIEU", f"probe models timeout sau {PROBE_TIMEOUT_GIAY:.1f}s")'),
+     ["t146_do_antigravity_cac_trang_thai_va_luong"]),
+    ("agy_probe_models_bo_kiem_loi_ra",
+     ('    if p_mod.returncode == 0 and co_loi_ra:',
+      '    if p_mod.returncode == 0:'),
+     ["t146_do_antigravity_cac_trang_thai_va_luong"]),
+    ("agy_windows_bo_fallback_localappdata",
+     ('        elif c["ten"] == "agy" and local:',
+      '        elif False:'),
+     ["t147_agy_fallback_localappdata_windows"]),
+    ("antigravity_tinh_vao_LAM_DUOC_VIEC",
+     ('    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho"}',
+      '    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho", "antigravity"}'),
+     ["t146_do_antigravity_cac_trang_thai_va_luong"]),
 ]
 
 

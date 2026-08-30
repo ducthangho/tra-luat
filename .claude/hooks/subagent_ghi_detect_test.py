@@ -420,6 +420,32 @@ def t20_duong_KHONG_bam_duoc_thi_UNKNOWN_khong_phai_clean(h):
                 f"(mong doi unknown + co ten duong)")
 
 
+def _bash_tuyet_doi():
+    """Phan giai `bash` thanh DUONG DAN TUYET DOI truoc khi phong. `(duong, None)` hoac
+    `(None, ly_do)` — KHONG bao gio im lang cho qua.
+
+    Vi sao khong dung ten tran (do 03:5xZ 30-08-2026, job `99198878779`): tren Windows
+    `subprocess.run(["bash", ...])` di qua `CreateProcess`, ma `CreateProcess` do THU MUC
+    HE THONG (`System32`) TRUOC moi muc cua `PATH`. Runner `windows-latest` co
+    `System32\\bash.exe` — VO WSL — nen ten tran phong ra vo WSL, in
+    "Windows Subsystem for Linux has no installed distributions." ra STDOUT (khong phai
+    stderr, va bang UTF-16) roi thoat 1 TRUOC khi lenh hook chay mot byte nao.
+
+    Chinh su BAT DONG giua hai cach do la bang chung: `shutil.which("bash")` (do theo
+    `PATH`) tra ve `C:\\Program Files\\Git\\bin\\bash.EXE`, con `CreateProcess` tra ve vo
+    WSL. Hai ket qua khac nhau cho cung mot ten ⇒ day la TAO TAC CUA VO BOC, khong phai
+    tinh chat cua lenh hook. Dung duong dan tuyet doi lam ca TRUNG THUC HON voi thu no
+    von phai do: lenh hook co chay duoc duoi mot shell POSIX that hay khong. Day KHONG
+    phai rut ruot ca — khang dinh van doi du `4/4`, xem `t21`.
+    """
+    duong = shutil.which("bash")
+    if not duong:
+        return None, "khong phan giai duoc `bash` tren PATH"
+    if not pathlib.Path(duong).is_file():
+        return None, f"`bash` phan giai ve {duong} nhung do khong phai mot tep"
+    return duong, None
+
+
 def _van_tay_nen_chay():
     """VAN TAY cua nen chay, TRA VE danh sach dong (khong tu in) — N5, packet #405.
 
@@ -434,13 +460,21 @@ def _van_tay_nen_chay():
     """
     duong = shutil.which("bash")
     ra = ["VANTAY bash-which  : " + (duong if duong else "KHONG TIM THAY")]
-    try:
-        r = subprocess.run(["bash", "--version"], capture_output=True, text=True)
-        dong = (r.stdout or "").split("\n")[0].strip()
-        ra.append("VANTAY bash-version: " + (dong if dong else "STDOUT RONG")
-                  + f" (rc={r.returncode})")
-    except OSError as e:
-        ra.append(f"VANTAY bash-version: KHONG GOI DUOC ({type(e).__name__}: {e})")
+    # GOI HAI LAN CO CHU Y: ten tran (di qua `CreateProcess`) va duong dan tuyet doi.
+    # Hai dong khac nhau CHINH LA con bo — xem `_bash_tuyet_doi`. Giu ca hai thi lan sau
+    # ai doc log cung thay ngay, khong phai suy dien lai tu dau.
+    for nhan, argv in (("bash-version    ", ["bash", "--version"]),
+                       ("bash-version-abs", [duong, "--version"] if duong else None)):
+        if argv is None:
+            ra.append(f"VANTAY {nhan}: KHONG PHAN GIAI DUOC -> khong goi duoc")
+            continue
+        try:
+            r = subprocess.run(argv, capture_output=True, text=True)
+            dong = (r.stdout or "").split("\n")[0].strip()
+            ra.append(f"VANTAY {nhan}: " + (dong if dong else "STDOUT RONG")
+                      + f" (rc={r.returncode})")
+        except OSError as e:
+            ra.append(f"VANTAY {nhan}: KHONG GOI DUOC ({type(e).__name__}: {e})")
     return ra
 
 
@@ -453,7 +487,7 @@ def _van_tay_lenh(nhan, r):
             f"VANTAY {nhan}: stderr=" + (err[:400] if err else "RONG")]
 
 
-def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h):
+def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h, doi_lenh=None):
     """P1 `hook-khong-co-fallback-project-dir` (cross-review PR #342, DA TAI HIEN).
 
     `CLAUDE_PROJECT_DIR` KHONG duoc dat trong phien remote — chinh `CLAUDE.md:541` ghi lai
@@ -461,8 +495,16 @@ def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h):
     `/.claude/hooks/...` va thoat 2 TRUOC khi detector doc duoc payload.
 
     Ca nay doc lenh TU `.claude/settings.json` chu khong chep lai — chep lai la hai ban se
-    troi lech, va ca se do mot dieu khong con dung."""
+    troi lech, va ca se do mot dieu khong con dung.
+
+    `doi_lenh` la moc cua KENH DOT BIEN THU BA (`DOT_BIEN_SETTINGS`): mot ham nhan chuoi
+    lenh va tra ve ban da doi. Chi `_chay_dot_bien_settings` truyen no; nen that luon
+    `None`. No ton tai de chinh ca nay CHUNG MINH duoc minh con do duoc."""
     goc = HERE.parent.parent
+    bash, ly_do = _bash_tuyet_doi()
+    if bash is None:
+        return (False, f"KHONG DO DUOC: {ly_do} -> khong phong duoc lenh hook. Trang thai "
+                       f"thu ba CO TEN: khong phan quyet duoc thi la DO, KHONG lam tron len.")
     d = json.loads((goc / ".claude" / "settings.json").read_text(encoding="utf-8"))
     van_tay = []
     xau = []
@@ -472,12 +514,14 @@ def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h):
             xau.append(f"{su_kien}: CHUA DANG KY")
             continue
         lenh = nhom[0]["hooks"][0]["command"]
+        if doi_lenh is not None:
+            lenh = doi_lenh(lenh)
         for nhan, moi_truong in (("khong dat", {}),
                                  ("co dat", {"CLAUDE_PROJECT_DIR": str(goc)})):
             env = {k: v for k, v in os.environ.items() if k != "CLAUDE_PROJECT_DIR"}
             env.update(moi_truong)
             env["TL_SUBAGENT_SNAP_DIR"] = _snap()
-            r = subprocess.run(["bash", "-c", lenh], cwd=str(goc / ".claude" / "dev"),
+            r = subprocess.run([bash, "-c", lenh], cwd=str(goc / ".claude" / "dev"),
                                input=json.dumps({"hook_event_name": "SubagentStart",
                                                  "agent_type": "tl-auditor",
                                                  "agent_id": f"t21{nhan}{su_kien}",
@@ -493,7 +537,9 @@ def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h):
     # cat o DAU. Bo test nay chay lai trong moi dot bien, nen in vo dieu kien sinh 266
     # dong — du de day chinh bang chung can doc ra khoi cua so con lai. Chan doan chi co
     # gia tri o luot HONG; o luot xanh no la nhieu nuot mat tin hieu.
-    if xau:
+    # Duoi dot bien (`doi_lenh` khac None) thi DO la ket qua MONG DOI, nen van tay o do
+    # khong chan doan gi ve nen chay — chi lam day cua so log ma `A6` phai dem.
+    if xau and doi_lenh is None:
         for dong in _van_tay_nen_chay() + van_tay:
             print(dong)
     return (not xau, f"lenh hook chay duoc o 2 su kien x 2 nen -> dung {4 - len(xau)}/4"
@@ -732,6 +778,53 @@ DOT_BIEN_NHAM_TEST = [
 ]
 
 
+# ── DOT BIEN NHAM `.claude/settings.json` — KENH THU BA ─────────────────────────────────
+# Do 04:2xZ 30-08-2026: `DOT_BIEN` chi sua TEP SAN PHAM (`HOOK`), `DOT_BIEN_NHAM_TEST` chi
+# sua TEP TEST. KHONG kenh nao cham toi `.claude/settings.json` — nghia la bat bien ma
+# `t21` sinh ra de canh (nhanh du phong `CLAUDE_PROJECT_DIR` NGAY TRONG lenh hook) truoc
+# nay KHONG AI CANH. Rut ruot `t21` thi khong phep do nao trong kho doi mau, va "ca xanh"
+# se doc thanh "bat bien con day" trong khi hai chuyen ay da roi nhau.
+DOT_BIEN_SETTINGS = [
+    ("ms1_bo_nhanh_du_phong_project_dir",
+     '[ -n "$D" ] || D="$(git rev-parse --show-toplevel 2>/dev/null)"; '
+     '[ -n "$D" ] || D="$PWD"; ',
+     "",
+     "t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT"),
+]
+
+
+def _chay_dot_bien_settings():
+    """Tra danh sach dot bien SONG (khong lam ca dich do). Rong = chot co rang.
+
+    Ap dot bien len CHUOI LENH DA PHAN GIAI tu JSON, KHONG len van ban JSON tho: moc o do
+    khong troi theo cach escape dau nhay. Moc khong khop DUNG MOT CHO tren CA HAI su kien
+    thi khai SONG chu khong im — mot moc troi bao "SONG" y het mot chot khong co rang,
+    trong khi that ra dot bien CHUA TUNG CHAY, va do la benh "ca co MAT khac ca co DO".
+    """
+    d = json.loads((HERE.parent.parent / ".claude" / "settings.json")
+                   .read_text(encoding="utf-8"))
+    lenh = [n["hooks"][0]["command"]
+            for su in ("SubagentStart", "SubagentStop")
+            for n in ((d.get("hooks") or {}).get(su) or [])[:1]]
+    song = []
+    for ten, cu, moi, dich in DOT_BIEN_SETTINGS:
+        if len(lenh) != 2 or any(x.count(cu) != 1 for x in lenh):
+            print(f"  MOC KHOP {[x.count(cu) for x in lenh]} CHO (mong doi [1, 1]): {ten} "
+                  f"-> dot bien nay KHONG do gi")
+            song.append(ten)
+            continue
+        try:
+            ok, msg = globals()[dich](None, doi_lenh=lambda c: c.replace(cu, moi, 1))
+        except Exception as e:                       # ban dot bien no = ca dich CHET
+            ok, msg = False, f"{type(e).__name__}: {e}"
+        if not ok:
+            print(f"  GIET {ten:34} lam DO: {dich} ({msg[:60]})")
+        else:
+            print(f"  SONG {ten:34} KHONG lam do {dich} -> chot nay KHONG CO RANG")
+            song.append(ten)
+    return song
+
+
 def _chay_dot_bien_nham_test():
     """Tra danh sach dot bien SONG (khong lam ca dich do). Rong = ca ba chot co rang.
 
@@ -813,11 +906,17 @@ def chay():
                 song.append(ten)
     # Dot bien nham CHINH bo test — chi co nghia khi nen xanh, y het tap tren.
     song_test = []
+    song_st = []
     if duoc_cong_bo_diem(do_san) and "TL329_KHONG_LAP" not in os.environ:
         print("--- DOT BIEN NHAM BO TEST ---")
         song_test = _chay_dot_bien_nham_test()
         song.extend(song_test)
-    tap_giet = len(DOT_BIEN) - len(song) + len(song_test)
+        print("--- DOT BIEN NHAM settings.json ---")
+        song_st = _chay_dot_bien_settings()
+        song.extend(song_st)
+    # `tap_giet` co Y CHI dem rieng `DOT_BIEN`: hai kenh kia co bo dem rieng, cong chung
+    # vao mot ty le se lam con so `18/18` cua nen troi ma khong ai biet vi sao.
+    tap_giet = len(DOT_BIEN) - len(song) + len(song_test) + len(song_st)
     if not duoc_cong_bo_diem(do_san):
         print(f"TONG: CA {len(CA) - do}/{len(CA)} dat")
         print(f"TONG: DIEM DOT BIEN BI TU CHOI — nen co {len(do_san)} ca DO SAN "

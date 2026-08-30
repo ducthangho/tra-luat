@@ -272,6 +272,32 @@ cap_nhat_truoc_luot_6: >-
   CHỮA: khôi phục từ commit trước, ghi lại bằng đường NGUYÊN TỬ (tệp tạm cùng thư mục rồi
   `os.replace`), và KHÔNG viết chuỗi thoát nào trong nội dung — mô tả surrogate bằng lời.
 
+override_tran_review_codex:
+  la_override: true
+  tran_normative: 2
+  nguon_tran: 'docs/PROTOCOL_DA_PHIEN.md:597 va :806-816'
+  owner: ducthangho
+  reason: >-
+    Chủ kho được trình đầy đủ phát hiện rằng trần 2 lượt Codex/PR là NORMATIVE, rằng
+    `codex_review_calls_max` trong lease KHÔNG đè được nó, và rằng protocol gọi thẳng việc gọi
+    thêm bằng prompt/phiên khác là LÁCH TRẦN. Chủ kho tái khẳng định và cho phép lượt 6.
+    Căn cứ: §2 dòng 45 trao `override` cho người có thẩm quyền; dòng 606 buộc override phải là
+    QUYẾT ĐỊNH CÓ AUDIT; dòng 278 buộc ngoại lệ có owner/reason/expiry/human approval.
+    Mục này LÀ bản audit ấy.
+  expiry: 'hết hiệu lực khi lease r4 hết hạn 2026-08-30T21:54:24Z, không gia hạn ngầm'
+  pham_vi: 'ĐÚNG một lượt (lượt 6) trên PR #419. KHÔNG mở cho packet khác, KHÔNG mở cho lượt 7.'
+  khong_duoc_doc_thanh: >-
+    (a) Trần normative đã đổi — KHÔNG, nó vẫn là 2.
+    (b) Các lượt 3/4/5 trở thành hợp lệ hồi tố — KHÔNG. Chúng đã chạy TRƯỚC khi phát hiện trần,
+        và lời khai `codex_review_calls_max: 4` rồi `6` ở các revision trước là SAI: một trường
+        lease không đè được chuẩn protocol. Giữ nguyên làm lịch sử, không sửa thành hợp lệ.
+    (c) Review Rescue Checkpoint đã được miễn — KHÔNG. Nếu lượt 6 chưa approve thì packet vào
+        checkpoint, và đường ra là `human_audited` hoặc Stable Slice/PR mới, không phải lượt 7.
+  loi_cua_dieu_phoi: >-
+    Phiên điều phối nâng trần ở r3 và r4 mà KHÔNG tra protocol trước. Đó là lần thứ ba trong
+    phiên mắc đúng lỗi "trả lời từ suy luận thay vì hỏi chỗ luật được ghi". Cross-review hiện
+    vật `ops/` bắt được, và nó bắt được vì được cấp CHÍNH tệp protocol để đối chiếu.
+
 vung_duoc_phep_cham: >-
   ĐÚNG HAI tệp trong `write_set`. KHÔNG đụng `.claude/settings.json` (lối A đã bị loại ở #412,
   nên nhu cầu chạm tệp ấy là dấu hiệu đi sai lối, không phải chi tiết thi công).

@@ -10,6 +10,7 @@ trong khi runner in "24/24" — mot con so trong docstring khong the tu cap nhat
 Moi ca dung cay git TAM (khong bao gio cham kho that), va anh chup di sang thu muc tam
 RIENG qua `TL_SUBAGENT_SNAP_DIR`.
 """
+import importlib.util
 import json
 import os
 import pathlib
@@ -675,6 +676,77 @@ def duoc_cong_bo_diem(do_san):
     return not do_san
 
 
+def _nap_hook_de_do(h, nhan):
+    """Nap ban hook nen/dot-bien de do truc tiep hai bien giai ma."""
+    spec = importlib.util.spec_from_file_location("tl329_%s" % nhan, str(h or HOOK))
+    hook = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(hook)
+    return hook
+
+
+def t25a_git_doc_byte_utf8_khong_phu_thuoc_locale(h):
+    """Gia lap CHINH `subprocess(text=True)`: byte UTF-8 bi text layer doc bang cp1258."""
+    hook = _nap_hook_de_do(h, "git_utf8")
+    mong_doi = "C:/tmp/Quốc hội\n"
+    tho = mong_doi.encode("utf-8")
+    run_goc = hook.subprocess.run
+
+    def run_gia(*args, **kwargs):
+        class KetQua:
+            returncode = 0
+        kq = KetQua()
+        kq.stdout = (tho.decode("cp1258", "surrogateescape")
+                     if kwargs.get("text") else tho)
+        return kq
+
+    hook.subprocess.run = run_gia
+    try:
+        rc, ra = hook._git(".", "rev-parse", "--show-toplevel")
+    finally:
+        hook.subprocess.run = run_goc
+    return (rc == 0 and ra == mong_doi,
+            "_git tra %s (mong doi byte UTF-8 -> %s)" % (ascii(ra), ascii(mong_doi)))
+
+
+def t25b_stdin_doc_byte_utf8_khong_phu_thuoc_locale(h):
+    """Cung payload: `.buffer` la UTF-8, con text layer gia lap giai ma bang cp1258."""
+    hook = _nap_hook_de_do(h, "stdin_utf8")
+    cwd = "C:/tmp/Quốc hội"
+    tho = json.dumps({"hook_event_name": "SubagentStart", "agent_type": "tl-auditor",
+                      "agent_id": "t25b", "cwd": cwd}, ensure_ascii=False).encode("utf-8")
+
+    class ByteStdin:
+        def read(self):
+            return tho
+
+    class TextStdin:
+        encoding = "cp1258"
+        buffer = ByteStdin()
+
+        def read(self):
+            return tho.decode("cp1258", "surrogateescape")
+
+    da_thay = []
+    with tempfile.TemporaryDirectory(prefix="tl329-t25b-") as d:
+        hook._thu_muc_anh = lambda: pathlib.Path(d)
+        hook._don_rac = lambda *args, **kwargs: None
+        hook._ghi_nguyen_tu = lambda *args, **kwargs: None
+
+        def chup(cwd_da_doc):
+            da_thay.append(cwd_da_doc)
+            return {}, None
+
+        hook._chup = chup
+        stdin_goc = hook.sys.stdin
+        hook.sys.stdin = TextStdin()
+        try:
+            hook.main()
+        finally:
+            hook.sys.stdin = stdin_goc
+    return (da_thay == [cwd],
+            "main truyen cwd=%s vao _chup (mong doi %s)" % (ascii(da_thay), ascii(cwd)))
+
+
 def t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung(h):
     """#412 loi B — CA HAI duong giai ma (`sys.stdin` va `_git`) phai doc utf-8 TUONG MINH.
 
@@ -801,12 +873,31 @@ CA = [t1_khong_ghi_thi_clean, t2_ghi_tep_theo_doi_thi_changed,
       t23_doi_ten_anh_chup_la_UNKNOWN,
       t24_index_cua_LINKED_WORKTREE_van_duoc_dinh_vi,
       # --- #412 loi B: giai ma utf-8 tuong minh o ca hai duong ---
+      t25a_git_doc_byte_utf8_khong_phu_thuoc_locale,
+      t25b_stdin_doc_byte_utf8_khong_phu_thuoc_locale,
       t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
 DOT_BIEN = [
     # --- #412 loi B: MOI duong va co MOT dot bien RIENG. Hai duong hong DOC LAP nhau,
     # nen mot dot bien chung se khong phan biet duoc duong nao con rang.
+    ("m23_git_tro_lai_text_True",
+     '''capture_output=True, timeout=120)
+    except (OSError, subprocess.SubprocessError) as e:
+        return 128, "loi goi git: %s" % e
+    return p.returncode, p.stdout.decode("utf-8", "surrogateescape")''',
+     '''capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.SubprocessError) as e:
+        return 128, "loi goi git: %s" % e
+    return p.returncode, p.stdout'''),
+    ("m24_stdin_tro_lai_json_load",
+     '''        luong = getattr(sys.stdin, "buffer", None)
+        if luong is not None:
+            tho = luong.read()
+        else:
+            tho = sys.stdin.read().encode(sys.stdin.encoding or "utf-8", "surrogateescape")
+        data = json.loads(tho.decode("utf-8"))''',
+     '''        data = json.load(sys.stdin)'''),
     ("m1_bo_co_ignored",
      '"status", "--porcelain=v1", "-uall", "--ignored"',
      '"status", "--porcelain=v1", "-uall"'),

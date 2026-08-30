@@ -18,6 +18,11 @@ revision: 2
 generation: 1
 lease_id: n7-hook-giai-ma-utf8-exec-1r2-claude-20260830
 
+# BIA MỘ — thay bằng revision 3 lúc 18:0xZ 30-08-2026, chủ kho chỉ thị trực tiếp.
+# Lý do: bộ đếm review CẠN 3/3, mà bản THU HẸP `09251d85` chưa ai review. Bản ấy GỠ mã chứ
+# không thêm (300 → 132 dòng), tức là một cây KHÁC HẲN thứ ba lượt trước đã soi.
+da_bi_thay_the: n7-hook-giai-ma-utf8-exec-1r3-claude-20260830
+
 
 thay_the_cho:
   - n5-lenh-hook-windows-exec-1-claude-20260830

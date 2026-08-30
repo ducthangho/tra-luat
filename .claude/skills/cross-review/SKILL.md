@@ -142,8 +142,54 @@ Sau khi phóng, **kiểm reviewer đã tuân cấm**: `git -C "$RV" status --por
 ## Chạy nền kia trong sandbox
 
 ```bash
-codex exec -s workspace-write --skip-git-repo-check --cd <sandbox> - < PROMPT.md
+codex exec -s workspace-write --skip-git-repo-check --cd <sandbox> \
+  -c model_reasoning_effort=<bac> --json - < PROMPT.md > codex.jsonl
 ```
+
+Bậc lấy theo **cùng bảng thang** ở mục *Chọn model/effort* — bảng ấy trước đây chỉ được đọc cho lane
+Claude, nên lane codex chạy ở mặc định một cách **im lặng**. Tên bậc của codex là
+`none minimal low medium high xhigh max` (do máy chủ liệt kê, xem dưới), không trùng tên bậc Claude:
+`max` ánh xạ sang `max`, mọi ô `xhigh` của bảng giữ nguyên `xhigh`.
+
+PROMPT phải đòi mỗi finding mang đủ **ba phần bắt buộc của `AGENTS.md` mục Reviewer** (phép đo ·
+phản chứng · bản vá) cộng **phân hạng** `P1|P2|P3` như khung `VERDICT.md` bên dưới.
+
+#### Đo bậc effort ĐÃ DÙNG — ba trạng thái, đo 30-08-2026 trên `codex-cli 0.146.0`
+
+Không được suy từ `rc=0`. Ba phép đo, mỗi phép trả lời một câu khác nhau:
+
+1. **Cờ có tới máy chủ không** — ĐẠT. `-c model_reasoning_effort=khongtontai` trả **`rc=1`**, sự kiện
+   `turn.failed`, thân là **HTTP 400** `[ReasoningEffortParam] [reasoning.effort] [invalid_enum_value]
+   Invalid value: 'khongtontai'. Supported values are: 'none', 'minimal', 'low', 'medium', 'high',
+   'xhigh', and 'max'.` Bậc sai làm cổng ĐỎ ngay — codex **không** lùi im lặng như `--effort` của
+   Claude. Đây là bằng chứng mạnh nhất, vì chính máy chủ đọc và bác giá trị.
+2. **Bậc nào đã được yêu cầu** — ĐẠT, nhưng phải đi tìm ở tệp phiên: `--json` trên **stdout KHÔNG
+   phơi effort** (đo: 4 dòng `thread.started` · `turn.started` · `item.completed` · `turn.completed`,
+   không dòng nào có khoá effort). Nơi ghi là rollout của phiên, khoá `payload.effort` trong sự kiện
+   `type: "turn_context"`; nối bằng `thread_id` ở dòng `thread.started`:
+
+```bash
+TID=$(head -1 codex.jsonl | "$PY" -c 'import json,sys; print(json.load(sys.stdin)["thread_id"])')
+"$PY" - "$TID" <<'EOF'
+import glob, json, os, sys
+tid = sys.argv[1]
+tep = glob.glob(os.path.expanduser("~/.codex/sessions/*/*/*/rollout-*" + tid + ".jsonl"))
+if not tep: sys.exit("KHONG DO DUOC: khong co rollout cho " + tid)
+for dong in open(tep[0], encoding="utf-8"):
+    d = json.loads(dong)
+    if d.get("type") == "turn_context":
+        print(d["payload"].get("effort")); break
+else: sys.exit("KHONG DO DUOC: khong co turn_context")
+EOF
+```
+
+   Nó **bám theo cờ**, không phải hằng số: cùng lệnh với `xhigh` ⇒ `xhigh`, với `low` ⇒ `low`.
+   `--ephemeral` xoá đúng tệp này, nên đừng bật nó cho lượt review.
+3. **Máy chủ đã ÁP bậc ấy chưa** — **KHÔNG ĐO ĐƯỢC** từ đây, và đừng viết ngược lại. Rollout ghi bậc
+   được **YÊU CẦU**, không phải bậc được **CHẤP NHẬN**: lượt `khongtontai` bị máy chủ bác 400 mà
+   `payload.effort` vẫn ghi `'khongtontai'`. Nên phép kiểm dùng được là **cặp** — rollout khớp bậc
+   mong đợi **VÀ** lượt kết thúc `turn.completed` chứ không `turn.failed`. Thiếu vế sau thì tệp phiên
+   chỉ chứng minh ta đã gõ gì, không chứng minh model đã nghĩ ở bậc nào.
 
 Sandbox là thư mục ngoài kho, chứa sẵn: `SPEC.md` · `diff.patch` · `numstat.txt` · trích protocol ·
 `EVIDENCE.md` (số đo gate — thiếu nó sẽ ra kết luận "KHÔNG ĐO ĐƯỢC") · bản sao cây sau sửa. Trong

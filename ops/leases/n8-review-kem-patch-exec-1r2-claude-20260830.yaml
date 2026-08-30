@@ -12,6 +12,12 @@ revision: 2
 generation: 1
 lease_id: n8-review-kem-patch-exec-1r2-claude-20260830
 
+# BIA MỘ — thay bằng revision 3 lúc 2026-08-31, chủ kho duyệt trực tiếp.
+# Lý do: ĐẶC TẢ ĐỔI (thêm §4.1b — con trỏ sang protocol §8 về patch-as-hint), tức closure
+# đổi. §3.2 đóng băng spec bằng `spec_hash`; sửa spec mà giữ lease cũ là làm băm trỏ vào thứ
+# không còn tồn tại — đường đi vòng qua protocol. Nên đi qua revision mới, không sửa lén.
+da_bi_thay_the: n8-review-kem-patch-exec-1r3-claude-20260831
+
 thay_the_cho: n8-review-kem-patch-exec-1-claude-20260830
 
 

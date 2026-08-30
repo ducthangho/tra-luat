@@ -56,6 +56,28 @@ phải mang gì. Thêm: mỗi finding phải có **phép đo** (lệnh + output 
 `KHÔNG ĐO ĐƯỢC` và vì sao), **phản chứng**, và **bản vá** dạng diff áp được hoặc patch plan
 đánh số.
 
+### 4.1b `AGENTS.md` — CON TRỎ sang §8 protocol về patch-as-hint, KHÔNG chép luật
+
+Thêm ở mục `### Reviewer` **đúng một con trỏ**: quy tắc reviewer đính patch nằm ở
+`docs/PROTOCOL_DA_PHIEN.md` §8 (patch là ARTIFACT không phải ref; nhãn nguyên văn bắt buộc;
+executor phải tự áp và tự đo; `hint_provenance` bắt buộc khai; với packet `sensitive` chỉ đủ
+điều kiện cho tệp TEST thuần hoặc tooling ngoài authority/gate/runtime).
+
+**CẤM CHÉP NỘI DUNG LUẬT SANG `AGENTS.md`.** Ba lý do, và lý do thứ ba là lý do đắt nhất:
+
+1. Protocol là nguồn quy tắc duy nhất; hai bản sẽ trôi lệch.
+2. Bản protocol CHẶT HƠN mọi bản tóm tắt — nó phân loại theo LOẠI TỆP, thứ dễ bị bỏ khi tóm.
+3. `doctrine-scan` quét `.claude/skills/**/*.md` và `CLAUDE.md`, **KHÔNG quét `AGENTS.md`** (đo
+   30-08-2026 bằng cách đọc `cmd_doctrine_scan`). Nên nếu chép vào đó thì **máy sẽ không bắt
+   được**. Cổng im lặng KHÔNG có nghĩa việc ấy đúng — đây đúng chỗ phải tự giữ kỷ luật.
+
+Con trỏ nên ngắn: một tới hai dòng, theo giọng gạch đầu dòng của mục ấy.
+
+Xuất xứ yêu cầu này: phiên điều phối trả lời một câu hỏi của chủ kho về "reviewer gửi patch,
+executor áp thấy đạt thì có được approve luôn không" **bằng suy luận từ đầu**, rồi mới phát hiện
+§8 đã quy định trọn vẹn và chặt hơn. Con trỏ này tồn tại để phiên sau tra được ngay, thay vì lại
+nghĩ lại từ đầu.
+
 ### 4.2 `.claude/skills/cross-review/SKILL.md` — lệnh phóng codex
 
 Lệnh hiện tại (dòng ~145) **không có cờ effort nào**:

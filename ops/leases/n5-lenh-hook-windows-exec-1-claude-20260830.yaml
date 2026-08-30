@@ -35,9 +35,9 @@ spec_note: >-
   còn tồn tại, và đó là đường đi vòng qua §3.2 chứ không phải một lần sửa chính tả.
 
 # BỘ ĐẾM REVIEW — packet MỚI, bắt đầu sạch. Đây là chỗ dễ lách nhất của cả tệp.
-codex_review_calls_used: 0
+codex_review_calls_used: 1
 codex_review_calls_max: 2
-review_rounds_used: 0
+review_rounds_used: 1
 tran_review_ghi_chu: >-
   Bắt đầu 0/2 vì đây là packet MỚI, không phải revision của packet cũ. Bộ đếm của
   `KHONG-DO-DUOC-PHAI-DO` (2/2, cạn) KHÔNG liên quan và KHÔNG được mượn theo chiều nào.
@@ -58,7 +58,7 @@ branch_ownership: exclusive
 target_branch_neu_land: master
 
 base_sha: 1dedb8b52e857e397c74084359d6e0e39b5734c4
-reviewed_sha_required: 1dedb8b52e857e397c74084359d6e0e39b5734c4
+reviewed_sha_required: 472f11bd96e7e10779a0681fa1b52a93df85ee9d
 reviewed_sha_ghi_chu: >-
   Generation 1 chưa có commit công việc nào, nên mỏ neo khởi đầu = `base_sha`, theo đúng quy ước
   đang chạy của kho (`bo-ghi-nguoc-exec-1`, `ci-cai-jsonschema-exec-1`, `ag-t0-01b-exec-1`,
@@ -80,7 +80,7 @@ ngan_sach_kich_thuoc:
     `git diff --numstat 1dedb8b5 -- .claude/hooks/subagent_ghi_detect_test.py
     .claude/settings.json .claude/hooks/subagent_ghi_detect.py` — dòng THÊM.
     Pathspec TRONG lệnh, KHÔNG `..HEAD`.
-  da_dung: 0
+  da_dung: 158
   ghi_chu: >-
     Trần này CHẬT THẬT, không phải hình thức: tiền lệ gần nhất chạm đúng ba tệp này
     (`1a0df2a`) là `+341/−35` — ĐÃ vượt 300. Con số `da_dung` chống đỡ một lời khai về
@@ -90,7 +90,7 @@ ngan_sach_kich_thuoc:
 
 ngan_sach_do_windows:
   ci_dispatch_toi_da: 3
-  ci_dispatch_da_dung: 0
+  ci_dispatch_da_dung: 2
   don_vi: 'số lượt `workflow_dispatch` trên `ci.yml` do packet này kích hoạt'
   ghi_chu: >-
     Lượt 1 BẮT BUỘC là lượt thu vân tay (`A1`), không phải lượt thử sửa. Giá đo
@@ -158,3 +158,29 @@ canh_bao_cho_nguoi_thi_hanh: >-
       là vá lần thứ tư.
   (5) `core.abbrev=7` phải ghim TRONG mọi clone/sandbox.
   (6) KHÔNG `git push` thẳng master, KHÔNG ép qua ruleset.
+
+# ── CẬP NHẬT SAU LƯỢT REVIEW 1 (ghi 2026-08-30 ~05:4xZ) ────────────────────────────────
+reviewed_sha_da_doi_ghi_chu: >-
+  `reviewed_sha_required` dời từ `base_sha` sang exact head `472f11bd` SAU khi cross-review
+  lượt 1 của codex ra finding **P1**: xin review trong khi lease còn neo vào base là xin duyệt
+  một cây KHÔNG chứa việc đã làm. Finding ĐÚNG, phiên nhận. Đây chính là điều mà
+  `reviewed_sha_ghi_chu` ở trên đã cảnh báo trước và phiên vẫn vấp — ghi lại để lần sau dời
+  neo TRƯỚC khi gọi reviewer, không phải sau.
+  HỆ QUẢ CỦA CHÍNH DÒNG NÀY: mọi approval neo `reviewed_sha`; commit mới sau `472f11bd` buộc
+  review lại (§8). Nếu nhánh packet đi tiếp, dòng này lại cũ và phải dời lần nữa.
+
+bo_dem_review_ghi_chu_luot_1: >-
+  `codex_review_calls_used` 0 -> 1 và `review_rounds_used` 0 -> 1. Lượt 1 cho
+  `changes_requested` với hai finding, CẢ HAI về quy trình/xuất xứ, KHÔNG finding nào về mã:
+  P1 = neo lease (đã chữa bằng chính tệp này); P2 = hồ sơ review khai `267 ref` mơ hồ và
+  phiên đã xoá manifest đối chứng khỏi bundle, nên reviewer đo được `307` (= 267 nhánh thật
+  + 1 ref `refs/heads/HEAD` do refspec của phiên đẻ ra + 39 tag) và KHÔNG chạy `comm` được.
+  CÒN ĐÚNG MỘT LƯỢT (1/2). Đổi prompt, phiên hay tên attempt KHÔNG reset bộ đếm này (§12).
+
+ngan_sach_da_do_lai_05_4xZ: >-
+  `ngan_sach_kich_thuoc.da_dung` 0 -> 158, đo bằng đúng đơn vị đã khai:
+  `git diff --numstat 1dedb8b5 -- <ba đường write set>` = `158 5` trên MỘT tệp. Dưới trần
+  `≤3 tệp / ≤300 dòng thêm`. `ci_dispatch_da_dung` 0 -> 2: lượt `33289633514` (thu vân tay,
+  A1) và `33292942199` (A2/A5/A6). CÒN 1 lượt. Hai con số này TRƯỚC ĐÓ SAI ở master vì
+  không ai cập nhật được chúng từ nhánh packet — `vung_duoc_phep_cham` cấm chạm `ops/leases/**`
+  từ đó. Đường đúng là nhánh điều phối riêng, và đây là nó.

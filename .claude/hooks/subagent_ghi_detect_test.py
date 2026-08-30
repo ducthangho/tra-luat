@@ -10,6 +10,7 @@ trong khi runner in "24/24" — mot con so trong docstring khong the tu cap nhat
 Moi ca dung cay git TAM (khong bao gio cham kho that), va anh chup di sang thu muc tam
 RIENG qua `TL_SUBAGENT_SNAP_DIR`.
 """
+import contextlib
 import importlib.util
 import json
 import os
@@ -684,13 +685,22 @@ def _nap_hook_de_do(h, nhan):
     return hook
 
 
+@contextlib.contextmanager
+def _tam_thay(doi_tuong, ten, gia_tri):
+    """Thay thuoc tinh toan cuc va khoi phuc ke ca khi loi den ngay luc gan."""
+    goc = getattr(doi_tuong, ten)
+    try:
+        setattr(doi_tuong, ten, gia_tri)
+        yield
+    finally:
+        setattr(doi_tuong, ten, goc)
+
+
 def t25a_git_doc_byte_utf8_khong_phu_thuoc_locale(h):
     """Gia lap CHINH `subprocess(text=True)`: byte UTF-8 bi text layer doc bang cp1258."""
     hook = _nap_hook_de_do(h, "git_utf8")
     mong_doi = "C:/tmp/Quốc hội\n"
     tho = mong_doi.encode("utf-8")
-    run_goc = hook.subprocess.run
-
     def run_gia(*args, **kwargs):
         class KetQua:
             returncode = 0
@@ -699,13 +709,15 @@ def t25a_git_doc_byte_utf8_khong_phu_thuoc_locale(h):
                      if kwargs.get("text") else tho)
         return kq
 
-    hook.subprocess.run = run_gia
-    try:
+    with _tam_thay(hook.subprocess, "run", run_gia):
         rc, ra = hook._git(".", "rev-parse", "--show-toplevel")
-    finally:
-        hook.subprocess.run = run_goc
-    return (rc == 0 and ra == mong_doi,
-            "_git tra %s (mong doi byte UTF-8 -> %s)" % (ascii(ra), ascii(mong_doi)))
+        tho = b"bad-\xff\n"       # khong phai UTF-8, nhung cp1258 doc duoc 0xff
+        try:
+            rc_loi, ra_loi = hook._git(".", "status")
+        except UnicodeDecodeError as e:
+            return False, "_git dung strict thay vi surrogateescape: %s" % e
+    return (rc == 0 and ra == mong_doi and rc_loi == 0 and ra_loi == "bad-\udcff\n",
+            "utf8=%s; byte-loi=%s" % (ascii(ra), ascii(ra_loi)))
 
 
 def t25b_stdin_doc_byte_utf8_khong_phu_thuoc_locale(h):
@@ -737,14 +749,15 @@ def t25b_stdin_doc_byte_utf8_khong_phu_thuoc_locale(h):
             return {}, None
 
         hook._chup = chup
-        stdin_goc = hook.sys.stdin
-        hook.sys.stdin = TextStdin()
-        try:
+        with _tam_thay(hook.sys, "stdin", TextStdin()):
             hook.main()
-        finally:
-            hook.sys.stdin = stdin_goc
-    return (da_thay == [cwd],
-            "main truyen cwd=%s vao _chup (mong doi %s)" % (ascii(da_thay), ascii(cwd)))
+            dung = da_thay == [cwd]
+            da_thay.clear()
+            tho = (b'{"hook_event_name":"SubagentStart","agent_type":"tl-auditor",'
+                   b'"agent_id":"t25b-loi","cwd":"bad-\xff"}')
+            rc_loi = hook.main()
+    return (dung and rc_loi == 0 and not da_thay,
+            "utf8_dung=%s; invalid_rc=%s; _chup=%s" % (dung, rc_loi, ascii(da_thay)))
 
 
 def t25_duong_dan_NGOAI_ASCII_van_bam_duoc_noi_dung(h):
@@ -898,6 +911,12 @@ DOT_BIEN = [
             tho = sys.stdin.read().encode(sys.stdin.encoding or "utf-8", "surrogateescape")
         data = json.loads(tho.decode("utf-8"))''',
      '''        data = json.load(sys.stdin)'''),
+    ("m25_git_doi_surrogateescape_thanh_strict",
+     'p.stdout.decode("utf-8", "surrogateescape")',
+     'p.stdout.decode("utf-8")'),
+    ("m26_stdin_doi_strict_thanh_surrogateescape",
+     'data = json.loads(tho.decode("utf-8"))',
+     'data = json.loads(tho.decode("utf-8", "surrogateescape"))'),
     ("m1_bo_co_ignored",
      '"status", "--porcelain=v1", "-uall", "--ignored"',
      '"status", "--porcelain=v1", "-uall"'),

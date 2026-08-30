@@ -169,22 +169,40 @@ Không được suy từ `rc=0`. Ba phép đo, mỗi phép trả lời một câ
    `type: "turn_context"`; nối bằng `thread_id` ở dòng `thread.started`:
 
 ```bash
-TID=$(head -1 codex.jsonl | "$PY" -c 'import json,sys; print(json.load(sys.stdin)["thread_id"])')
-"$PY" - "$TID" <<'EOF'
+PY="$(command -v python3 || command -v python || command -v py)"
+BAC_MONG_DOI=xhigh
+"$PY" - "$BAC_MONG_DOI" codex.jsonl <<'EOF'
 import glob, json, os, sys
-tid = sys.argv[1]
+bac, stdout_jsonl = sys.argv[1], sys.argv[2]
+dong = [json.loads(l) for l in open(stdout_jsonl, encoding="utf-8") if l.strip()]
+if not dong: sys.exit("KHONG DO DUOC: codex.jsonl rong")
+tid = dong[0].get("thread_id")
+if not tid: sys.exit("KHONG DO DUOC: dong dau khong co thread_id")
 tep = glob.glob(os.path.expanduser("~/.codex/sessions/*/*/*/rollout-*" + tid + ".jsonl"))
 if not tep: sys.exit("KHONG DO DUOC: khong co rollout cho " + tid)
-for dong in open(tep[0], encoding="utf-8"):
-    d = json.loads(dong)
+eff = None
+for l in open(tep[0], encoding="utf-8"):
+    d = json.loads(l)
     if d.get("type") == "turn_context":
-        print(d["payload"].get("effort")); break
-else: sys.exit("KHONG DO DUOC: khong co turn_context")
+        eff = d.get("payload", {}).get("effort"); break
+if not isinstance(eff, str) or not eff:
+    sys.exit("KHONG DO DUOC: turn_context thieu payload.effort kieu chuoi")
+if eff != bac: sys.exit("SAI BAC: mong doi %s, rollout ghi %s" % (bac, eff))
+ket = [d.get("type") for d in dong if d.get("type") in ("turn.completed", "turn.failed")]
+if "turn.failed" in ket: sys.exit("LUOT HONG: turn.failed")
+if "turn.completed" not in ket: sys.exit("KHONG DO DUOC: khong co turn.completed")
+print("effort=%s; terminal=turn.completed" % eff)
 EOF
 ```
 
    Nó **bám theo cờ**, không phải hằng số: cùng lệnh với `xhigh` ⇒ `xhigh`, với `low` ⇒ `low`.
    `--ephemeral` xoá đúng tệp này, nên đừng bật nó cho lượt review.
+   Khối trên **FAIL-CLOSE**, và đó là bản vá của một lỗi đã đo: bản đầu chỉ
+   `print(payload.get("effort"))` rồi thoát 0, nên thiếu khoá `effort` in `None` mà vẫn XANH và
+   `low` khi mong đợi `xhigh` cũng XANH — trong khi văn ngay dưới khai phép kiểm là một CẶP.
+   Lời khai rộng hơn mã đúng bằng lớp lỗi mục này sinh ra để chặn. Nay mã làm đúng điều đã khai:
+   thoát khác 0 khi thiếu rollout · thiếu `turn_context` · `effort` thiếu/rỗng/không phải chuỗi ·
+   `effort` khác bậc mong đợi · có `turn.failed` · không có `turn.completed`.
 3. **Máy chủ đã ÁP bậc ấy chưa** — **KHÔNG ĐO ĐƯỢC** từ đây, và đừng viết ngược lại. Rollout ghi bậc
    được **YÊU CẦU**, không phải bậc được **CHẤP NHẬN**: lượt `khongtontai` bị máy chủ bác 400 mà
    `payload.effort` vẫn ghi `'khongtontai'`. Nên phép kiểm dùng được là **cặp** — rollout khớp bậc

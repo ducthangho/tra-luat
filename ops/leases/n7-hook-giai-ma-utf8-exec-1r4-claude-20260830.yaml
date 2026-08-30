@@ -46,9 +46,9 @@ spec_note: >-
   Băm đo 09:57Z 30-08-2026 trên nội dung tệp ở CHÍNH commit này. ĐO LẠI trước khi merge: sửa
   đặc tả sau khi cấp lease là làm băm này trỏ vào thứ không còn tồn tại.
 
-codex_review_calls_used: 5
+codex_review_calls_used: 6
 codex_review_calls_max: 6
-review_rounds_used: 5
+review_rounds_used: 6
 tran_review_ghi_chu: >-
   Bắt đầu 0/2 vì đây là packet MỚI. Bộ đếm CẠN 2/2 của `N5-LENH-HOOK-WINDOWS` KHÔNG liên quan
   và KHÔNG được mượn theo chiều nào — kể cả khi lease này thay thế lease ấy. Thay thế một
@@ -294,6 +294,31 @@ override_tran_review_codex:
     Phiên điều phối nâng trần ở r3 và r4 mà KHÔNG tra protocol trước. Đó là lần thứ ba trong
     phiên mắc đúng lỗi "trả lời từ suy luận thay vì hỏi chỗ luật được ghi". Cross-review hiện
     vật `ops/` bắt được, và nó bắt được vì được cấp CHÍNH tệp protocol để đối chiếu.
+
+ket_qua_luot_6: >-
+  VERDICT: approve — lượt đầu tiên trong sáu lượt. Neo đúng `5791ae6`: verdict nhắc SHA ấy, và
+  băm blob HAI tệp trong sandbox khớp tuyệt đối với `5791ae6` (`522bca2e` và `df370a3d`).
+  Bộ đếm nay 6/6 CẠN, và override chỉ cấp ĐÚNG lượt này — không còn lượt nào.
+
+  APPROVE CÓ RĂNG, không phải approve lười. Bằng chứng reviewer trình:
+  · Đảo ngược bản vá lượt 5 để dựng lại cây TRƯỚC đó, rồi chứng minh `m25`/`m26` TỪNG SỐNG ở
+    cây ấy — tức finding lượt 5 là thật — và nay chết ở cây hiện tại.
+  · Đo độ trung thành của fake bằng TIẾN TRÌNH CON THẬT trên `cp1258`, bốn đầu vào, `equal=True`
+    cả bốn. Và nói thẳng fake KHÔNG phải mô hình tổng quát cho mọi byte cp1258.
+  · Chỉ ra `m25`/`m26` SỐNG ở ca tích hợp `t25` và giải thích vì sao đó là ĐÚNG phân công: `t25`
+    chạy trên payload UTF-8 hợp lệ nên không phân biệt được chính sách lỗi; hai ca vi mô mới có
+    trách nhiệm ấy và đã giết chúng.
+  · Đối chiếu từng finding lượt 5 theo bốn nhãn, cả hai đều `ĐÃ VÁ THẬT`.
+
+  GIỚI HẠN reviewer TỰ KHAI, giữ nguyên chứ không làm tròn: bộ test ĐẦY ĐỦ không chạy được
+  trong sandbox vì `t21` cần fixture ngoài hai tệp, và ràng buộc phạm vi cấm đọc ra ngoài.
+  Reviewer nói rõ KHÔNG dùng `rc=0` của hook để lấp khoảng đó. Bù đắp nằm ở CI: `gate
+  (ubuntu-latest)` đã chạy trọn và XANH tại `09251d85`, và tại `5791ae6` cũng XANH.
+
+  CÒN THIẾU ĐỂ LAND, và điều phối KHÔNG tự làm được: cổng `cong` ĐỎ vì KHÔNG review nào neo
+  `5791ae6`. Bản duyệt của `notebyme88` neo `09251d85`, đã thành cũ sau hai commit `43c1ebd` và
+  `5791ae6` — đúng §8 "commit mới buộc review lại". Cần một bản duyệt từ danh tính KHÁC
+  `ducthangho` tại ĐÚNG `5791ae6`.
 
 vung_duoc_phep_cham: >-
   ĐÚNG HAI tệp trong `write_set`. KHÔNG đụng `.claude/settings.json` (lối A đã bị loại ở #412,

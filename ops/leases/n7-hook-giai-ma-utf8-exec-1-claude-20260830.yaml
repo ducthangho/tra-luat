@@ -72,7 +72,7 @@ branch_ownership: exclusive
 target_branch_neu_land: master
 
 base_sha: 6fa8a7451c751076983017e072d84ca6618ff58f
-reviewed_sha_required: 6fa8a7451c751076983017e072d84ca6618ff58f
+reviewed_sha_required: fe78350de08e742491e798c2c485e8cc409ae765
 reviewed_sha_ghi_chu: >-
   Generation 1 chưa có commit công việc nào, nên mỏ neo khởi đầu bằng `base_sha`, theo quy ước
   đang chạy của kho. BẮT BUỘC dời sang exact head TRƯỚC khi xin review hoặc land (§8) — để
@@ -84,6 +84,20 @@ base_ghi_chu: >-
   `git rev-parse origin/master` ⇒ `6fa8a745`. Nhãn `merged` của GitHub KHÔNG dùng làm bằng
   chứng (nợ N11); ancestry cộng băm nội dung mới là.
 
+reviewed_sha_da_doi_ghi_chu: >-
+  DỜI TỪ `base_sha` SANG EXACT HEAD `fe78350d` lúc 14:5xZ 30-08-2026, TRƯỚC khi gọi
+  cross-review — không phải sau. Lý do dời là §8: approval luôn neo `reviewed_sha`, nên xin
+  duyệt trong khi lease còn neo vào base là xin duyệt một cây KHÔNG chứa việc đã làm.
+  Packet N5 vấp đúng chỗ này và ăn một finding P1; lease này đã ghi cảnh báo trước ở
+  `reviewed_sha_ghi_chu`, nên vấp lần nữa thì không còn cớ nào.
+  HỆ QUẢ CỦA CHÍNH DÒNG NÀY: mọi commit mới sau `fe78350d` buộc review lại và buộc dời
+  neo lần nữa. Nếu CI đòi sửa thì phải dời trước khi xin lượt review kế tiếp.
+
+ngan_sach_da_do_lai_14_5xZ: >-
+  `ngan_sach_kich_thuoc.da_dung` 0 -> 148, đo bằng đúng đơn vị đã khai:
+  `git diff --numstat 6fa8a745 -- <hai đường write set>` = `32 3` + `116 3` ⇒ 2 tệp, 148
+  dòng THÊM. Dưới trần `≤2 tệp / ≤300 dòng thêm`. ĐO LẠI trước mỗi bước công bố, đừng chép.
+
 ngan_sach_kich_thuoc:
   tep_toi_da: 2
   dong_them_toi_da: 300
@@ -91,7 +105,7 @@ ngan_sach_kich_thuoc:
   don_vi: >-
     `git diff --numstat 6fa8a745 -- .claude/hooks/subagent_ghi_detect.py
     .claude/hooks/subagent_ghi_detect_test.py` — dòng THÊM. Pathspec TRONG lệnh, KHÔNG `..HEAD`.
-  da_dung: 0
+  da_dung: 148
   ghi_chu: >-
     PHẢI ĐO LẠI trước mỗi bước công bố, không chép dòng này. Bài học `PLAT-X8`: cùng con số
     trôi bốn lần, lần thứ tư khai sai một cổng là ĐẠT.

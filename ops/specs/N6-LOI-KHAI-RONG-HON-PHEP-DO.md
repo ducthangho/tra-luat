@@ -1,10 +1,10 @@
-# ĐẶC TẢ PACKET — `N6-LOI-KHAI-RONG-HON-PHEP-DO` **revision 1**
+# ĐẶC TẢ PACKET — `N6-LOI-KHAI-RONG-HON-PHEP-DO` **revision 2**
 
 | | |
 |---|---|
 | `packet_id` | `N6-LOI-KHAI-RONG-HON-PHEP-DO` |
 | `packet_issue` | **#411** |
-| `revision` | 1 |
+| `revision` | 2 |
 | `generation` | 1 |
 | `executor` | `claude` |
 | `environment` | `cloud` |
@@ -25,9 +25,11 @@ Hai nguồn, cả hai bắt buộc:
    (#408 comment `5467512515`). Packet #405 **đã land** (`master` `7a2f177`), nên không sửa được
    dưới lease của nó.
 2. **Quyết định trực tiếp của chủ kho trong phiên `soan-spec` này** (`30-08-2026`, vòng 1–3):
-   bộ đếm hình dạng **A → 8**, và packet phải có **HAI** mục — không chỉ sửa một câu chữ. Xem
-   `hinh_dang_ke_thua`. Đây là điều kiện tiên quyết: **một packet chỉ sửa docstring là bản vá thứ 8
-   của cùng hình dạng, đúng thứ chốt kế thừa nói KHÔNG nên làm.**
+   packet phải có **HAI** mục — không chỉ sửa một câu chữ. Đo lại lịch sử ở revision 2 cho thấy bộ
+   đếm đúng là **A: 8 → 9**, không phải `7 → 8`: `t33-doi-shellcheck-r3.md` đã ghi quyết định tăng
+   A lên 8 tại commit `f9dae73` ngày `23-08-2026`, trước lời khai `Đ1a`. Xem
+   `hinh_dang_ke_thua`. Đây là điều kiện tiên quyết: **một packet chỉ sửa docstring là vá suông biểu
+   hiện thứ 9 của cùng hình dạng, đúng thứ chốt kế thừa nói KHÔNG nên làm.**
 
 ## `vi_sao_sensitive`
 
@@ -107,7 +109,7 @@ Thứ **CỐ Ý** không làm, kèm lý do:
 ## `muc_tieu`
 
 Hai mục tiêu. **Đ2 là điều kiện để packet này tồn tại**, không phải phần thêm nếm — bỏ Đ2 thì
-packet trở lại đúng hình dạng "vá lần 8" mà chốt kế thừa cấm.
+packet trở lại đúng hình dạng "vá suông biểu hiện thứ 9" mà chốt kế thừa cấm.
 
 | # | mục tiêu | chiếu vào (L2) |
 |---|---|---|
@@ -164,8 +166,10 @@ git diff --diff-filter=A --name-only <BASE>...HEAD -- ops/specs/
 | tình huống | `BASE` |
 |---|---|
 | lượt `pull_request` | `origin/$GITHUB_BASE_REF` |
-| lượt `push` lên `master` | `HEAD^1` (cha thứ nhất của commit merge) |
+| lượt `push` lên `master` | trường `before` trong JSON tại `$GITHUB_EVENT_PATH`; phải là SHA 40 hex, tồn tại bằng `git cat-file -e "$BASE^{commit}"`, và không được là zero-SHA |
 | lượt `workflow_dispatch` | `git merge-base HEAD refs/remotes/origin/master` |
+| chạy local (`GITHUB_ACTIONS != true` và `GITHUB_EVENT_NAME` rỗng) | `git merge-base HEAD refs/remotes/origin/master` |
+| `GITHUB_ACTIONS == true` nhưng event rỗng/lạ | **KHÔNG ĐO ĐƯỢC ⇒ ĐỎ** |
 | **không giải được `BASE`** | **KHÔNG ĐO ĐƯỢC ⇒ ĐỎ** |
 
 **Hàng `workflow_dispatch` là BẮT BUỘC, không phải cho đủ bộ** — thiếu nó thì đặc tả **tự mâu thuẫn**:
@@ -178,11 +182,21 @@ Dispatch ngay trên `master` cho `merge-base = HEAD` ⇒ tập spec THÊM MỚI 
 phải fail-open: so `master` với chính nó thì thật sự không có spec nào được thêm. Trên một nhánh có
 spec mới, `merge-base` là điểm rẽ và `--diff-filter=A` bắt đúng tệp ấy.
 
+**Không dùng `HEAD^1` cho `push`.** Một push có thể mang nhiều commit; nếu commit đầu thêm spec thiếu
+bộ đếm và commit cuối chỉ sửa tệp khác thì `HEAD^1...HEAD` cho tập spec mới rỗng. `before...HEAD`
+trong payload đo trọn update ref. Ca âm phải dựng đúng chuỗi ba commit này.
+
+**Đường local là một đường thật, không phải ngoại lệ bản sao rời.** Lệnh `A2` chạy trong clone có
+`.git` nhưng bình thường không có `GITHUB_EVENT_NAME`; thiếu hàng local thì chính lượt test bắt buộc
+đi vào `KHÔNG ĐO ĐƯỢC ⇒ ĐỎ`. Chỉ chấp nhận hàng local khi không ở GitHub Actions, để việc xoá/giả
+event trong CI không biến thành một fallback xanh.
+
 **Ngoại lệ tha DUY NHẤT:** cây rõ ràng là **bản sao rời** — không có `.git`. Trong kho thật mà
 thiếu thì **ĐỎ**. Đây là chốt của bài học `t24` (*"ca có MẶT khác ca có ĐO"*): một nhánh
 "không thấy thì bỏ qua" từng làm suite báo `24/24` trong khi ca ấy không đo gì.
 
-**`fetch-depth: 0` đã có sẵn** — `ci.yml:86`, đo `09:10:39Z 30-08` ⇒ `merge-base`/`HEAD^1` dùng được
+**`fetch-depth: 0` đã có sẵn** — `ci.yml:86`, đo `09:10:39Z 30-08` ⇒ `merge-base`, commit `before`
+trong payload và phép diff lịch sử dùng được
 trên runner. **Không có tiền lệ diff-scoped nào** trong hai bộ test cổng (`packet_loop_test.py`,
 `lease_publish_test.py`) — đây là cái đầu tiên, nên luật phải tự đứng, không mượn khuôn có sẵn.
 
@@ -206,32 +220,59 @@ cạnh nhau. Đó là bắt theo **hình dáng ngẫu nhiên**, không theo **th
 
 **Vì vậy luật KHÔNG hỏi "có số không". Nó đòi ĐÚNG MỘT trong ba dạng dưới đây, không dạng nào khác:**
 
-**TIỀN XỬ LÝ BẮT BUỘC — bỏ khối rào trước, rồi mới tìm.** Xoá mọi khối ```` ``` ```` trước khi quét
-(`re.sub(r'^```.*?^```', '', t, flags=re.M|re.S)`). Thiếu bước này thì một tiêu đề nằm trong **ví dụ
-minh hoạ** cũng được tính là mục thật.
+**TIỀN XỬ LÝ BẮT BUỘC — quét khối rào theo trạng thái, rồi mới tìm.** Chuẩn hoá nội dung về NFC,
+`splitlines()`, sau đó quét từng dòng với opener:
+
+```python
+_FENCE_OPEN = re.compile(
+    r'^[ \t]{0,3}(?P<fence>`{3,}|~{3,})(?P<info>[^\r\n]*)$')
+```
+
+Opener backtick không hợp lệ nếu `info` chứa backtick. Closer phải (a) dùng **cùng ký tự** với opener,
+(b) dài **ít nhất** bằng opener, và (c) sau fence chỉ còn `[ \t]*`; regex dựng từ trạng thái là
+`rf'^[ \t]{{0,3}}{re.escape(ch)}{{{open_len},}}[ \t]*$'`. Mọi dòng từ opener qua closer được thay
+bằng dòng rỗng để giữ vị trí. `~~~` và fence dài hơn ba đều phải được che. Gặp EOF khi fence còn mở
+⇒ **KHÔNG ĐO ĐƯỢC ⇒ ĐỎ**; không được để nguyên phần còn lại rồi quét. Một ` ```not-a-close` bên trong
+fence bốn backtick không phải closer.
 
 **ĐỊNH VỊ MỤC — tiêu đề phải gọi ĐÚNG TÊN mục:**
 
-```
-^#{2,3}[ \t]+`?hinh_dang_ke_thua`?(?![A-Za-z0-9_])
+```python
+_HEAD = re.compile(
+    r'^(?P<hash>#{2,3})[ \t]+(?P<name>`hinh_dang_ke_thua`|hinh_dang_ke_thua)')
 ```
 
-Chốt `(?![A-Za-z0-9_])` là thứ đóng lỗ: nếu không có nó thì `## hinh_dang_ke_thua_placeholder` và
-`### hinh_dang_ke_thuaXYZ` **đều khớp** (đo được). Nhưng phải là **ký tự định danh**, không phải
-"hết dòng hoặc một dấu trong danh sách" — bản đầu của luật này đòi hết dòng hoặc `—`/`-`/`:` và
-**chặn oan hai spec thật**: `ag-t0-01b.md` (`## \`hinh_dang_ke_thua\` (L4)`) và `mcp-gh-cuu-ho.md`
-(`## hinh_dang_ke_thua (L4)`). Trang trí sau tên là chuyện của người viết; thứ phải cấm là tên bị
-**nối dài**.
+Hai dấu backtick phải đi thành cặp theo đúng một trong hai nhánh trên. Sau match, nhìn ký tự kế tiếp
+(nếu có) bằng `unicodedata.category`: từ chối backtick, `_`, mọi nhóm `L*`, `M*`, `N*`, và `Pc`.
+Chốt này là
+Unicode-aware; `(?![A-Za-z0-9_])` không đủ vì `## hinh_dang_ke_thuaé` vẫn lọt. Trang trí
+`(L4)`, `— L4`, `: ghi chú` vẫn được phép. Hai spec thật `ag-t0-01b.md` và `mcp-gh-cuu-ho.md` phải
+vẫn được nhận là có mục.
 
-Mục kết thúc ở tiêu đề `^#{2,3}[ \t]` kế tiếp.
+Sau khi che fence, phải có **đúng một** tiêu đề khớp; `0` hoặc `>1` ⇒ ĐỎ. Mục kết thúc ở tiêu đề ATX
+kế tiếp có cấp **nhỏ hơn hoặc bằng** cấp của tiêu đề mục (`#` cũng kết thúc một mục `##`); tiêu đề con
+cấp sâu hơn vẫn thuộc mục. Như vậy một mục rỗng không thể mượn `A = 8` nằm sau `#` kế tiếp, và hai mục
+cùng tên không thể dùng mục thứ nhất để che mục thứ hai.
 
 **BA DẠNG ĐƯỢC CHẤP NHẬN, không dạng nào khác:**
 
-| # | dạng được chấp nhận | nhận diện |
-|---|---|---|
-| 1 | hàng bảng bộ đếm | `^\|\s*\*{0,2}[A-F]\*{0,2}\s*\|.*\|\s*\*{0,2}\d+\*{0,2}\s*\|` |
-| 2 | **DÒNG KHAI BÁO trọn vẹn** | `^[\s*\-·\|`]*(?:\*{0,2}[A-F]\*{0,2}\s*=\s*\d+\b[\s*·\|`]*)+$` |
-| 3 | miễn, **có lý do** | `^[\s*\-`]*khong_ap_dung\s*:\s*(\S.*)$`, và nhóm bắt được phải có **≥ 20 ký tự không phải khoảng trắng** |
+Chạy `fullmatch()` **riêng trên từng phần tử của `section.splitlines()`**, không chạy `search()` đa
+dòng. Ba regex (ASCII digit là có chủ ý cho bộ đếm chuẩn) là:
+
+```python
+_TABLE = re.compile(
+    r'[ \t]*\|[ \t]*\*{0,2}[A-F]\*{0,2}[ \t]*\|[^\r\n]*\|'
+    r'[ \t]*\*{0,2}[0-9]+\*{0,2}[ \t]*\|[^\r\n]*')
+_DECL = re.compile(
+    r'[ \t*\-·|`]*(?:\*{0,2}[A-F]\*{0,2}[ \t]*=[ \t]*'
+    r'[0-9]+(?!\w)[ \t*·|`]*)+')
+_NOT_APPLICABLE = re.compile(
+    r'[ \t*\-`]*khong_ap_dung[ \t]*:[ \t]*(\S[^\r\n]*)')
+```
+
+`_NOT_APPLICABLE` chỉ ĐẠT khi nhóm 1 có **≥20 ký tự không phải khoảng trắng**. Dùng `[ \t]`, không
+dùng `\s`: trong Python, `\s` ăn cả newline, nên regex cũ nhận sai cả `A =\n8`, hàng bảng bị bẻ đôi,
+và `khong_ap_dung:\n<lý-do-20-ký-tự>` dù hợp đồng đòi cùng một dòng.
 
 **Dạng 2 phải là DÒNG TRỌN VẸN, không phải "có xuất hiện đâu đó".** Bản đầu dùng
 `\b[A-F]\s*=\s*\d` và nó nhận cả ba thứ sau — đo được, không suy:
@@ -239,7 +280,7 @@ Mục kết thúc ở tiêu đề `^#{2,3}[ \t]` kế tiếp.
 | chuỗi | luật cũ | luật mới |
 |---|---|---|
 | `Không thể chép bộ đếm tiền nhiệm: A = 8 vì thiếu hồ sơ` | **KHỚP** | từ chối |
-| `A = 8unknown` | **KHỚP** | từ chối (`\b` sau `\d+` cộng neo `$`) |
+| `A = 8unknown` | **KHỚP** | từ chối (`(?!\w)` cộng `fullmatch`) |
 | ``ví dụ minh hoạ: `B = 2` `` | **KHỚP** | từ chối |
 | `A = 8` · `A = 7   B = 2   C = 1   D = 3   E = 4   F = 2` · `- **A** = 8` | khớp | **khớp** (giữ) |
 
@@ -262,9 +303,11 @@ bộ đếm và thua từ trong thiết kế.
 **TRƯỢT** (nuôi `A4`) · đặc tả này **ĐẠT** (nuôi `A6`) · `ag-t0-01b.md` và `mcp-gh-cuu-ho.md`
 **vẫn được nhận là có mục** (chốt bắt-oan của luật tiêu đề).
 
-`ĐẠT` tụt `8 → 3` **là kết quả mong muốn, không phải hồi quy**: năm tệp kia trước đây "đạt" nhờ một
-con số nằm trong văn xuôi, không phải nhờ một bộ đếm được chép. Ba tệp còn lại — `LEASE-DANG-WINDOWS.md`,
-`lease-hoi-toan-kho.md`, và đặc tả này — là ba tệp thật sự mang bộ đếm.
+`ĐẠT` tụt `8 → 3` **là kết quả cú pháp mong muốn, không phải hồi quy**. Nó chỉ nói ba tệp
+`LEASE-DANG-WINDOWS.md`, `lease-hoi-toan-kho.md`, và đặc tả này theo đúng hình thức mới; **không** được
+đọc rộng thành *"chỉ ba tệp trong kho thật sự mang bộ đếm"*. Phản chứng: `t33-doi-shellcheck-r3.md`
+ghi quyết định `A = 8` có thẩm quyền trong mục `bo_dem_A`, ngoài tên mục mà cổng mới canh. Cổng cố ý
+không sửa ngược tệp cũ, còn phép đo lịch sử vẫn phải đọc tệp ấy.
 
 ## `vi_sao_KHONG_dung_cong_da_de_xuat_o_vong_1`
 
@@ -356,17 +399,29 @@ Bộ `packet_loop_test.py` cưỡng chế *"mỗi LỚP LÁCH phải có đột 
 | đột biến | phải làm ca đích |
 |---|---|
 | nới luật để spec **thiếu bộ đếm** đi lọt | **ĐỎ** |
-| đổi `--diff-filter=A` thành quét **toàn bộ** `ops/specs` | **ĐỎ** (vì 19 spec cũ sẽ đỏ ⇒ ca bắt-oan bắt được) |
+| đổi `--diff-filter=A` thành quét **toàn bộ** `ops/specs` | **ĐỎ** (trên exact base `6fa8a745`: 52 spec cũ = 2 ĐẠT + **50 ĐỎ**, gồm 26 thiếu mục + 24 có mục nhưng sai dạng) |
 | bỏ nhánh fail-close, cho `BASE` không giải được đi qua thành XANH | **ĐỎ** |
 | nới ngoại lệ "bản sao rời" thành *"không giải được `BASE` thì tha"* | **ĐỎ** |
 | **bỏ hàng `workflow_dispatch` khỏi bảng `BASE`** | **ĐỎ** — ca đích phải chạy được với `GITHUB_EVENT_NAME=workflow_dispatch` |
+| **bỏ hàng local hoặc coi local là event lạ** | **ĐỎ** — ca đích chạy trong clone thật, không đặt biến GitHub |
+| **lui `push` từ payload `before` về `HEAD^1`** | **ĐỎ** — rig ba commit (base · thêm spec thiếu đếm · commit đuôi không đụng spec) phải bắt spec ở commit giữa |
 | **nhận `khong_ap_dung` trần, không đòi lý do** | **ĐỎ** |
 | **hạ ngưỡng lý do từ 20 xuống 1 ký tự** | **ĐỎ** — ca biên `19` bắt được |
-| **bỏ `(?![A-Za-z0-9_])` khỏi luật tiêu đề** | **ĐỎ** — `## hinh_dang_ke_thua_placeholder` lọt |
-| **bỏ bước xoá khối rào** | **ĐỎ** — tiêu đề trong ví dụ minh hoạ lọt |
+| **hạ biên Unicode về `(?![A-Za-z0-9_])`** | **ĐỎ** — `## hinh_dang_ke_thuaé` lọt |
+| **không từ chối backtick lẻ sau tên trần** | **ĐỎ** — tên trần kèm một backtick đóng lẻ lọt dù backtick không đi thành cặp |
+| **chỉ che fence ba backtick** | **ĐỎ** — tiêu đề trong `~~~markdown` lọt |
+| **coi mọi dòng bắt đầu bằng ba backtick là closer** | **ĐỎ** — ` ```not-a-close` đóng oan fence bốn backtick |
+| **tha hoặc để nguyên phần sau fence không đóng** | **ĐỎ** — ca phải nhận đúng `KHÔNG ĐO ĐƯỢC`, không đổi thành thiếu mục hay XANH |
+| **nhận mục đầu tiên thay vì đòi đúng một mục** | **ĐỎ** — tệp có hai mục cùng tên lọt |
+| **chỉ cắt mục ở `##`/`###`, không cắt ở `#` kế tiếp** | **ĐỎ** — mục rỗng mượn `A = 8` sau H1 lọt |
 | **lui dạng 2 về `\b[A-F]\s*=\s*\d` (khớp bất kỳ đâu)** | **ĐỎ** — câu phủ định mang số lọt |
-| **bỏ `\b` sau `\d+` ở dạng 2** | **ĐỎ** — `A = 8unknown` lọt |
+| **bỏ `(?!\w)` sau số ở dạng 2** | **ĐỎ** — `A = 8unknown` lọt |
+| **đổi `[ \t]` về `\s` trong dạng 1** | **ĐỎ** — một hàng bảng bị bẻ hai dòng lọt |
+| **đổi `[ \t]` về `\s` trong dạng 2** | **ĐỎ** — `A =\n8` lọt |
+| **đổi `[ \t]` sau dấu `:` về `\s` trong dạng 3** | **ĐỎ** — lý do chỉ ở dòng kế tiếp lọt |
 | **siết luật tiêu đề thành "hết dòng hoặc `—`/`-`/`:`"** | **ĐỎ** — ca bắt-oan `## hinh_dang_ke_thua (L4)` |
+| **lui mỏ neo bộ đếm N6 từ `A: 8 → 9` về `7 → 8`** | **ĐỎ** — ca đọc `t33-doi-shellcheck-r3.md` tại `f9dae73` phải thấy A đã là 8 trước `97049d7` |
+| **chép lại số cũ `19` spec đỏ hoặc `47` receipt thành số của exact base** | **ĐỎ** — ca tự đo base phải ra `52 = 2 + 50` và `57 receipt / 0 hit F = 2` |
 | **ĐỘT BIẾN DÂY NỐI: chỉ đụng call-site, giữ nguyên hàm nhận diện** — hỏng một đối số truyền vào (ví dụ: bỏ bước bỏ khối rào **ở chỗ gọi**, hoặc truyền nội dung CHƯA cắt mục) | **ĐỎ** — nếu nó SỐNG thì ca đang đo hàm thuần, không đo cổng (`A3`–`A6` luật chung) |
 
 - **ĐỎ khi:** bất kỳ đột biến nào **SỐNG SÓT**, hoặc bị giết bởi một ca **KHÁC** ca đích, hoặc bị
@@ -377,7 +432,10 @@ Bộ `packet_loop_test.py` cưỡng chế *"mỗi LỚP LÁCH phải có đột 
 - **ĐẠT khi (ca DƯƠNG):** spec mới có hàng bảng bộ đếm ⇒ **XANH** · có dòng khai báo trọn vẹn
   (`A = 8`, và cả dạng nhiều cặp `A = 7   B = 2 …`) ⇒ **XANH** · khai `khong_ap_dung` kèm lý do
   **≥ 20 ký tự không phải khoảng trắng** ⇒ **XANH** · tiêu đề có trang trí (`(L4)`, `— L4`, `: ghi
-  chú`) ⇒ vẫn nhận là mục ⇒ **XANH** · diff **không thêm** spec nào ⇒ **XANH**.
+  chú`) ⇒ vẫn nhận là mục ⇒ **XANH** · hàng `| A | | 8 |` có ô mô tả rỗng ⇒ **XANH** · CRLF với
+  `A = 8` cùng dòng ⇒ **XANH** · diff **không thêm**
+  spec nào ⇒ **XANH** · chạy local trong clone thật, không có biến GitHub ⇒ giải được BASE và **XANH**
+  khi diff không có spec sai.
 - **ĐẠT khi (ca ÂM) — mỗi dòng dưới đây phải làm cổng ĐỎ:**
 
   | ca âm | vì sao |
@@ -386,14 +444,36 @@ Bộ `packet_loop_test.py` cưỡng chế *"mỗi LỚP LÁCH phải có đột 
   | `khong_ap_dung: x` (**1** ký tự) | dưới ngưỡng |
   | `khong_ap_dung: ` + **19** ký tự | **sát dưới** ngưỡng — ca biên |
   | lý do chỉ nằm ở **dòng sau**, cùng dòng rỗng | luật đòi cùng dòng |
+  | `A =` ở một dòng, `8` ở dòng kế | khai báo không cùng dòng |
+  | hàng bảng bắt đầu bằng ô A ở một dòng, các ô mô tả và số 8 ở dòng kế | không phải một hàng bảng |
   | mục `hinh_dang_ke_thua` **rỗng** | không có gì để chép |
   | `## hinh_dang_ke_thua_placeholder` | tên bị nối dài, không phải mục này |
-  | tiêu đề đúng nhưng nằm **trong khối rào** | ví dụ minh hoạ không phải mục |
+  | `## hinh_dang_ke_thuaé` | hậu tố định danh Unicode, không phải tên đúng |
+  | tên `hinh_dang_ke_thua` kèm một backtick đóng lẻ | không phải tên trần hay cặp backtick hợp lệ |
+  | tiêu đề dạng setext (`hinh_dang_ke_thua` rồi `====`) | không phải tiêu đề ATX được hợp đồng chấp nhận |
+  | tiêu đề đúng nhưng nằm trong fence ba backtick có info string `markdown` | ví dụ minh hoạ không phải mục |
+  | tiêu đề đúng nhưng nằm trong fence `~~~markdown` | fence ngã cũng là khối rào |
+  | fence bốn backtick chứa dòng ` ```not-a-close`, rồi tiêu đề + `A = 8` | dòng ba backtick có chữ sau không đóng fence bốn ký tự |
+  | fence bốn backtick chứa một fence ba backtick và tiêu đề + `A = 8` | fence ngắn lồng trong không đóng opener dài hơn |
+  | fence mở nhưng không đóng | **KHÔNG ĐO ĐƯỢC ⇒ ĐỎ** với lỗi đích danh |
+  | hai tiêu đề `hinh_dang_ke_thua`, mục đầu có `A = 8` | tên mục trùng là mơ hồ |
+  | mục rỗng, sau đó `# Mục khác` rồi `A = 8` | H1 kết thúc mục; không được mượn số phía sau |
   | `Không thể chép … A = 8 vì thiếu hồ sơ` | câu **phủ định** mang con số |
   | `A = 8unknown` | thiếu biên sau chữ số |
+  | hàng bảng có ô A, ô mô tả, rồi ô bộ đếm rỗng | không có số để chép |
+  | push ba commit: commit giữa thêm spec thiếu bộ đếm, commit cuối không đụng `ops/specs` | payload `before...HEAD` phải bắt commit giữa và làm cổng ĐỎ |
 
   **Ngưỡng 20 phải có ca ở CẢ HAI phía (19 ⇒ ĐỎ, 20 ⇒ XANH).** Không có cặp ấy thì con số 20 là
   một lời khai chứ không phải một tiêu chí — nó không thể đỏ, nên nó không tồn tại.
+
+  **Ca tự kiểm nguồn số:** đọc blob `t33-doi-shellcheck-r3.md` tại commit `f9dae73` phải ra `A = 8`,
+  commit ấy phải là tổ tiên của base `6fa8a745`, và commit `97049d7` chứa `Đ1a` phải đến sau; đặc tả
+  N6 phải khai hàng A là `8 → 9`. Đổi một trong hai số về `7 → 8` ⇒ ca ĐỎ.
+
+  **Ca tự kiểm hai số nền dễ trôi:** chạy luật trên cây `6fa8a745` phải ra `52 spec = 2 ĐẠT + 50
+  ĐỎ` khi quét toàn bộ; đếm `ops/reviews/*.receipt.yaml` ở cùng commit phải ra `57`, rồi quét nội dung
+  57 receipt phải ra `0` hit `F = 2`. Bất kỳ số hạng nào lệch, hoặc đột biến thay `50/57` bằng
+  `19/47`, làm ca ĐỎ; không chỉ assert quan hệ tổng.
 - **ĐỎ khi:** bất kỳ ca dương nào đỏ, **hoặc** bất kỳ ca âm nào xanh. Thiếu ca âm thì `A6` chỉ chứng
   minh cổng *không kêu bậy*, không chứng minh nó *kêu đúng lúc* — và một cổng chỉ có ca dương là
   cổng không ai biết có răng hay không.
@@ -412,13 +492,17 @@ Bộ `packet_loop_test.py` cưỡng chế *"mỗi LỚP LÁCH phải có đột 
 
 ## `hinh_dang_ke_thua` — L4
 
-**Nguồn là hồ sơ có băm, không phải trí nhớ.** Bộ đếm chép từ
-`ops/specs/LEASE-DANG-WINDOWS-r4.md` (chốt `ed5353d`, `2026-08-23 03:30`), xác nhận chéo bởi
-`ops/specs/t33-doi-shellcheck-r2.md` (dẫn quyết định của chủ kho tại `#269`):
+**Nguồn là hồ sơ có băm, không phải trí nhớ.** Mỏ neo mới nhất trước packet này là
+`ops/specs/t33-doi-shellcheck-r3.md` tại commit `f9dae73` (`2026-08-23 10:53:48Z`, SHA-256 blob
+`9d55174de5f54bbf6089c179bf54e3b7f0b0c8174a02ab558f99c3df8583667d`): mục `bo_dem_A` ghi quyết
+định trực tiếp của chủ kho **tăng A từ 7 lên 8**. Commit ấy là tổ tiên của base `6fa8a745`.
+`LEASE-DANG-WINDOWS-r4.md` tại `ed5353d` (`2026-08-23 03:30:23Z`) và
+`t33-doi-shellcheck-r2.md` chỉ là hai snapshot **sớm hơn**, xác nhận nền 7 trước lần tăng đó; không
+được dùng snapshot sớm hơn để đè bản ghi muộn hơn.
 
 | | hình dạng | kế thừa | packet này |
 |---|---|---|---|
-| **A** | *lời khai rộng hơn phép đo* | 7 | **→ 8** |
+| **A** | *lời khai rộng hơn phép đo* | 8 | **→ 9** |
 | **B** | *mượn tiền lệ mà không đo xem nó áp dụng được không* | 2 | 2 |
 | **C** | *phản chứng bắt buộc còn thiếu* | 1 | 1 |
 | **D** | *đặt câu hỏi kiểm chứng ở sai độ phân giải / sai pha* | 3 | 3 |
@@ -429,19 +513,24 @@ Bộ `packet_loop_test.py` cưỡng chế *"mỗi LỚP LÁCH phải có đột 
 **lần phạm**, không đếm lần vá — tiền lệ của chủ kho tại `#269`: *"vá một biểu hiện ĐÃ ĐẾM thì không
 khai biểu hiện mới"*.
 
-**Vì sao A → 8, đo được:** lời khai `Đ1a` sinh bởi commit `97049d7` (`2026-08-30 04:29`), tức **SAU**
-mốc chốt `A = 7` (`2026-08-23 03:30`) ⇒ **biểu hiện MỚI, chưa hồ sơ nào đếm**. Quét mọi spec và biên
-nhận sau `23-08` (`09:00:04Z 30-08`) ⇒ **không tệp nào tăng A**. Và `ops/specs/N5-LENH-HOOK-WINDOWS.md`
-**không chép bộ đếm A** — đó chính là cơ chế hỏng mà Đ2 sinh ra để chặn.
+**Vì sao A → 9, đo được:** `t33-doi-shellcheck-r3.md` đã đưa A lên 8 ở `f9dae73`. Lời khai `Đ1a`
+sinh bởi commit `97049d7` (`2026-08-30 04:29:09Z`), tức **SAU** mốc ấy, và là một biểu hiện mới theo
+đúng đơn vị L1 ⇒ 8 → 9. Phản chứng cho lời khai cũ *"không tệp nào tăng A"* chạy ngay trên base:
+`git grep -n 'A = 8' 6fa8a745 -- ops/specs/t33-doi-shellcheck-r3.md` trả dòng 104/110. Đồng thời
+`ops/specs/N5-LENH-HOOK-WINDOWS.md` không chép bộ đếm A — đó chính là cơ chế hỏng mà Đ2 sinh ra để
+chặn, nhưng sự thiếu ấy không xoá bản ghi A = 8 đã tồn tại ở tệp khác.
 
-**Chốt kế thừa nói: `A lần 8 ⇒ DỪNG, không vá.`** Chủ kho đã phán quyết ở vòng 1: **không dừng hẳn,
-nhưng cũng không cho vá suông** — packet phải mang **Đ2**, tức thứ khiến lần 9 không xảy ra. Ai đọc
-hồ sơ này hãy cân đúng: **nếu Đ2 bị cắt trong lúc thi công thì điều kiện tồn tại của packet mất, và
-lối đúng là DỪNG chứ không phải land riêng Đ1.** Xem `dieu_kien_dung` `S4`.
+**Chốt `A lần 8 ⇒ DỪNG, không vá` đã kêu từ `t33-doi-shellcheck-r3`.** Quyết định trực tiếp của chủ
+kho cho packet hiện tại là không dừng hẳn nhưng cũng không cho vá suông: packet phải mang **Đ2**,
+tức thay đổi cách làm để biểu hiện thứ 10 không lặp lại. Ai đọc hồ sơ này hãy cân đúng: **nếu Đ2 bị
+cắt trong lúc thi công thì điều kiện tồn tại của packet mất, và lối đúng là DỪNG chứ không phải land
+riêng Đ1.** Xem `dieu_kien_dung` `S4`.
 
-**CẢNH BÁO VỀ `F` — KHÔNG được dùng làm cổng dừng.** `ops/specs/t33-doi-shellcheck-r2.md:337` đính
-chính: quét **47** biên nhận trên master ⇒ **0** hiện vật cho `F = 2`; ba chỗ duy nhất nhắc nó đều là
-prompt/spec. Chép sang đây để giữ liên tục hồ sơ, **không** để làm cổng. Packet này **KHÔNG** khai
+**CẢNH BÁO VỀ `F` — KHÔNG được dùng làm cổng dừng.** Snapshot lịch sử tại commit `1eddba5` của
+`t33-doi-shellcheck-r2.md` có **47** tệp `*.receipt.yaml` và **0** hiện vật cho `F = 2`. Đo lại trên
+exact base `6fa8a745`: **57** receipt, vẫn **0** hit `F = 2` trong `ops/reviews`; số hạng 47 đã trôi
+nhưng kết luận 0 không đổi. Các chỗ nhắc `F = 2` đều là prompt/spec, không phải biên nhận. Chép sang
+đây để giữ liên tục hồ sơ, **không** để làm cổng. Packet này **KHÔNG** khai
 *"F lần 3 ⇒ DỪNG"* dù hình dạng thoạt trông khớp (`A7` giải quyết chuyện Windows bằng một tiêu chí
 đo được, không bằng một bộ đếm không có hiện vật).
 
@@ -492,8 +581,9 @@ Ghi thẳng, không giấu sau chữ "có thể":
 
 1. **Ước `+232` dòng là ƯỚC, không phải đo.** Nó ngoại suy từ `adr-song`. Con số thật chỉ có sau khi
    viết. Nếu vượt 300 ⇒ `S2`, KHÔNG tự khai cổng ADR-0044 là ĐẠT.
-2. **Chưa đo hành vi luật `BASE` trên lượt `push:master` thật.** `HEAD^1` của commit merge là lý
-   thuyết đúng; chưa có lượt CI nào chạy nó. `A7` là chỗ duy nhất phát hiện được.
+2. **Chưa đo hành vi luật `BASE` trên lượt `push:master` thật.** Reviewer revision 2 đã dựng rig ba
+   commit và chứng minh `HEAD^1` bỏ lọt còn payload `before` bắt được; chưa có lượt CI thật nào chạy
+   đường payload. `A7` chỉ đo `workflow_dispatch`, không thay phép đo push này.
 3. **Chưa đo trên Windows.** Toàn bộ số nền (`ca 278` v.v.) đo trên Linux container. Lượt
    `pull_request` cũng chỉ ubuntu.
 4. **`ai-dang-giu` đếm thiếu nhánh** (4 thật vs 3 in ra). Mọi phép đo write set trong tệp này dùng nó,

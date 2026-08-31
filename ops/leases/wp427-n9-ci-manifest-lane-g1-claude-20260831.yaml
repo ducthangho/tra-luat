@@ -103,7 +103,7 @@ branch_ghi_chu: >-
   generation. Sửa từ packet này trở đi thay vì đổi tên nhánh đang có review neo vào.
 
 base_sha: c9a2e9c2fe19a7c0e5bc8d3297c3b89f90fd1606
-reviewed_sha_required: c9a2e9c2fe19a7c0e5bc8d3297c3b89f90fd1606
+reviewed_sha_required: 2b82a9bcc5e454612e04b5b063d5a160ddb99142
 reviewed_sha_ghi_chu: >-
   Generation 1 chưa có commit công việc nên neo khởi đầu bằng `base_sha`. BẮT BUỘC dời sang
   exact head TRƯỚC khi xin review (§8). Packet N5 ăn P1 vì bỏ bước này; N7 phải dời neo BA lần.
@@ -122,7 +122,7 @@ ngan_sach_kich_thuoc:
   don_vi: >-
     `git diff --numstat c9a2e9c2 -- .github/workflows/ci.yml` — dòng THÊM. Pathspec TRONG
     lệnh, KHÔNG `..HEAD`.
-  da_dung: 0
+  da_dung: 57
   ghi_chu: >-
     Trần 80 CHẬT CÓ CHỦ ĐÍCH: việc phải làm là thêm điều kiện lane cho MỘT bước và dựng phép
     kiểm thay thế. Chạm trần là dấu hiệu packet đang nở phạm vi. ĐO LẠI trước mỗi bước công bố.
@@ -144,6 +144,41 @@ phien_thi_hanh: >-
   cùng tác nhân giữ vai khác nhau ở NHỮNG PHIÊN KHÁC NHAU).
   Phiên thi hành PHẢI tự xác minh: fetch nhánh lease rồi `git show` chính tệp này, đối chiếu
   `spec_hash`. Đừng nhận bảng giá trị từ điều phối.
+
+cap_nhat_truoc_khi_xin_review: >-
+  DỜI NEO sang exact head `2b82a9bc` TRƯỚC khi mở PR. `da_dung` 0 sang 57 (trần 80), đo
+  `git diff --numstat c9a2e9c2 -- .github/workflows/ci.yml` ⇒ `57 1`, đúng một tệp.
+
+  PHÁT HIỆN QUYẾT ĐỊNH CỦA PHIÊN THI HÀNH, ghi lại vì nó sửa chính đặc tả này:
+  làm ĐÚNG NGUYÊN VĂN `PROTOCOL:711-715` cho ra một phép kiểm **KHÔNG THỂ ĐỎ**. Manifest tạm
+  sinh TỪ CHÍNH cây nên nó hấp thụ luôn tệp thừa. Đo trên `c9a2e9c2`, cây thêm đúng 1 tệp:
+  manifest committed ⇒ `rc=2` nêu tên; manifest tạm ⇒ `rc=0`, `extra_files` RỖNG,
+  `file_count` 180 sang 181.
+  Nên lane worker KHÔNG dừng ở `release-verify` mà thêm lớp thứ hai: mọi tệp trong manifest tạm
+  PHẢI được git theo dõi. Đột biến gỡ chốt ấy ⇒ ca tệp-thừa chuyển `rc=0`, mutant SỐNG ⇒ chốt
+  đúng là thứ cấp răng.
+  Đặc tả §2 chỉ nói "dùng manifest tạm"; nếu thi hành theo chữ mà không đo thì packet đã land
+  một cổng không thể đỏ — đúng lớp lỗi cả kho đang chống.
+
+  THU HẸP CÓ CHỦ ĐÍCH, khai chứ không giấu: ở lane worker lớp "file thừa" hẹp lại còn ca
+  UNTRACKED; tệp PR cố ý thêm và ĐÃ commit thì lane worker XANH. Ca ấy chuyển hẳn cho lane land,
+  nơi manifest committed vẫn bắt (đo `rc=2`, `extra_files`).
+
+  `workflow_dispatch` xếp theo `github.ref` chứ không theo `github.event_name`: dispatch trên
+  master ⇒ lane land, dispatch trên nhánh làm việc ⇒ lane worker. Lý do: thứ quyết định mức
+  nghiêm là REF ĐANG ĐƯỢC GÁC, không phải cách bấm nút — và biểu thức ấy đã dùng nguyên văn ở
+  `concurrency` và `matrix.os`, nên KHÔNG mở bề mặt điều kiện mới.
+
+  `actionlint` — NỀN KHÔNG TÁI HIỆN ĐƯỢC, khai thẳng: `ci.yml` `rc=0` ở CẢ hai vế, delta 0.
+  Nhưng nền `rc=1` cộng `SC1003:info` ghi trong `CLAUDE.md` KHÔNG tái hiện: trên host Windows
+  này shellcheck-integration TREO ở `ops-don-ref.yml` (`rc=124`) ở CẢ hai vế. Cô lập bằng A/B
+  trên `-shellcheck=`: tắt ⇒ rc=0 tức thì, bật ⇒ timeout. Đó là `KHÔNG ĐO ĐƯỢC` của NỀN, không
+  phải hồi quy của packet — và là một con số trong `CLAUDE.md` đã hết hạn theo điều kiện đo.
+
+  CHƯA ĐO ĐƯỢC, phiên thi hành tự khai: `doc_pointers` (312) và an-toàn-đường-dẫn trên đường
+  manifest tạm CÓ MẶT trong output nhưng CHƯA đột biến để chứng minh có răng — chỉ `skill_links`
+  đã đo. Chú thích trong `ci.yml` nói "vẫn gác" cho cả ba; hai mục kia là lời khai rộng hơn phép
+  đo, cần lượt review soi.
 
 vung_duoc_phep_cham: >-
   ĐÚNG MỘT tệp `.github/workflows/ci.yml`. KHÔNG đụng workflow khác, KHÔNG đụng

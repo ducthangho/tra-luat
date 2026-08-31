@@ -62,6 +62,18 @@ environment:
 
 heartbeat_at: '2026-08-31T03:07:35Z'
 lease_until: '2026-08-31T11:07:35Z'
+leased_at_utc: '2026-08-31T03:07:35Z'
+lease_expires_at_utc: '2026-08-31T11:07:35Z'
+run_minutes: 480
+
+hai_ten_cho_mot_thu_ghi_chu: >-
+  `lease_until` va `lease_expires_at_utc` la CUNG MOT moc thoi gian, co y ghi ca hai.
+  Phat hien khi chay cong: `lease_publish.py check` tra `rc=8 thieu truong bat buoc:
+  lease_expires_at_utc`, trong khi cross-review hien vat doi `lease_until` theo schema
+  `PROTOCOL:208-219`. Hai ten cho cung mot thu, va CONG moi la thu that su chay —
+  schema tren giay khong chan duoc ai. Ghi ca hai de vua qua cong vua khop schema, va
+  KHAI RA day de nguoi sau khong tuong minh chep thua. Day la mot lech THAT giua tai
+  lieu va cong, dang thanh mot no rieng chu khong phai loi cua lease nay.
 
 bon_truong_fencing_ghi_chu: >-
   `environment`, `write_set_hash`, `heartbeat_at`, `lease_until` có mặt ở đây vì cross-review

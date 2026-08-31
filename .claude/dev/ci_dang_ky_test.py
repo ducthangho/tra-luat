@@ -33,12 +33,6 @@ MOI = {
     "ops/nhanh_don_duoc_test.py": r"^(\d+)/(\d+)$",
 }
 CACH_LY = {
-    ".claude/dev/mcp_gh_test.py": {
-        "slug": "AG-361-P2-01-mcp-gh-dot-bien-chap-chon-theo-may",
-        "ly_do": "runner CI đỏ ở b7_bo_cam_ghi; .pyc là giả thuyết khớp, chưa có phản chứng",
-        "moi_truong": "github-actions/linux",
-        "log": "Issue #361, log CI r3 của phiên điều phối",
-    },
     ".claude/hooks/pretooluse_guard_test.py": {
         "slug": "AG-361-P2-02-pretooluse-guard-doi-runtime-runner-khong-co",
         "ly_do": "runner CI trần đỏ t11/t15/t33 vì thiếu runtime mà bộ test đòi hỏi",

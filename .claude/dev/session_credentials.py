@@ -20,6 +20,33 @@ SECRET_ENV = ("CODEX_AUTH_JSON", "CLAUDE_CODE_OAUTH_TOKEN", "GITHUB_PAT", "TL_MA
 TOKEN_RE = re.compile(r"sk-ant-oat\d+-[A-Za-z0-9_-]{20,}")
 TOKEN_PREFIX = "sk-ant-oat"
 
+# Child processes get an intentionally small operational environment rather
+# than a copy of the agent's environment.  In particular, this prevents a
+# credential intended for one provider from becoming ambient authority in a
+# different provider's CLI.
+CHILD_ENV_KEYS = frozenset({
+    "PATH", "HOME", "USER", "LOGNAME", "SHELL", "TERM",
+    "TMPDIR", "TMP", "TEMP",
+    "LANG", "LANGUAGE", "LC_ALL", "TZ",
+    "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY",
+    "http_proxy", "https_proxy", "all_proxy", "no_proxy",
+    "SSL_CERT_FILE", "SSL_CERT_DIR", "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE",
+    "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "CODEX_HOME",
+    "PYTHONUTF8", "PYTHONIOENCODING",
+})
+
+
+def _child_env(source, **required: str) -> dict[str, str]:
+    """Return benign process settings plus only this child's credential."""
+    child = {key: value for key, value in source.items()
+             if key in CHILD_ENV_KEYS or key.startswith("LC_")}
+    # Keep this invariant explicit even if a secret is accidentally added to
+    # CHILD_ENV_KEYS in a future change.
+    for key in SECRET_ENV:
+        child.pop(key, None)
+    child.update(required)
+    return child
+
 
 def _result(status: str, **details) -> dict:
     if status not in STATUSES:
@@ -109,7 +136,7 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
     """Run ``claude setup-token`` on a real PTY, relay prompts, retain token privately."""
     import pty
 
-    child = dict(os.environ if env is None else env)
+    child = _child_env(os.environ if env is None else env)
     input_stream = sys.stdin if input_stream is None else input_stream
     output_stream = sys.stdout if output_stream is None else output_stream
     master, slave = pty.openpty()
@@ -174,8 +201,7 @@ def claude_probe(token_file: Path | None = None, *, timeout=20, env=None) -> dic
             return _result("not_measured", reason="credential_file_unreadable")
     if not token:
         return _result("missing", reason="CLAUDE_CODE_OAUTH_TOKEN")
-    child = dict(source, CLAUDE_CODE_OAUTH_TOKEN=token)
-    child.pop("ANTHROPIC_API_KEY", None)
+    child = _child_env(source, CLAUDE_CODE_OAUTH_TOKEN=token)
     marker = "TRALUAT-CLAUDE-CREDENTIAL-OK"
     try:
         p = subprocess.run(["claude", "-p", f"Print exactly: {marker}"], stdin=subprocess.DEVNULL,
@@ -199,9 +225,7 @@ def github_probe(repo: str, *, timeout: int = 20, env=None) -> dict:
     token = source.get("GITHUB_PAT")
     if not token:
         return _result("missing", endpoints={})
-    child = dict(source, GH_TOKEN=token)
-    for key in ("GITHUB_PAT", "GITHUB_TOKEN"):
-        child.pop(key, None)
+    child = _child_env(source, GH_TOKEN=token)
     results = {}
     for endpoint in ("user", f"repos/{repo}"):
         try:
@@ -232,7 +256,8 @@ def tl_bootstrap(env_name: str, secrets_file: Path | None, *, timeout: int = 600
         cmd += ["--secrets-file", str(secrets_file)]
     try:
         p = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
-                           timeout=timeout, env=dict(source))
+                           timeout=timeout,
+                           env=_child_env(source, TL_MASTER_KEY=source["TL_MASTER_KEY"]))
     except subprocess.TimeoutExpired:
         return _result("not_measured", reason="timeout")
     except OSError:

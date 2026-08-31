@@ -12,6 +12,11 @@ revision: 5
 generation: 2
 lease_id: n8-review-kem-patch-exec-1r5-claude-20260830
 
+# BIA MO — thay bang revision 6: lease r5 DA HET HAN luc 00:21Z 31-08 va cong tu choi
+# dang no ('dang mot lease chet thi nguoi nhan tuong co quyen ma khong co'). Kem dien S4
+# do #419 land lam base_sha cu.
+da_bi_thay_the: wp421-n8-review-kem-patch-g2-claude-20260831
+
 
 
 

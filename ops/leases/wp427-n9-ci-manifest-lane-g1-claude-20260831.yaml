@@ -1,0 +1,166 @@
+# Lease EXECUTOR — `N9-CI-MANIFEST-LANE` (#427), revision 1, generation 1.
+#
+# Lease ĐẦU TIÊN của packet. Không thay lease nào, nên KHÔNG có `thay_the_cho`.
+# Packet do một PHIÊN KHÁC thi hành — xem `phien_thi_hanh`.
+
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 427
+packet_id: wp427
+phase_key: N9-CI-MANIFEST-LANE
+revision: 1
+generation: 1
+lease_id: wp427-n9-ci-manifest-lane-g1-claude-20260831
+
+role: executor
+provider: claude
+executor: claude
+reviewer_provider: codex
+assurance_target: cross_approved
+access: read-write
+risk: normal
+review_class: sensitive
+effective_review_class: sensitive
+
+review_class_ghi_chu: >-
+  `sensitive` KHÔNG phải do mặc định fail-closed lần này — nó khớp tường minh:
+  `.github/workflows/**` là CI authority, protocol liệt kê thẳng trong danh sách `sensitive`.
+  Khác N7/N8, nơi lớp đến từ giá trị mặc định. Đọc đúng lý do, đừng gộp hai ca.
+
+spec_path: ops/specs/N9-CI-MANIFEST-LANE.md
+spec_hash: c5bc1b60bf61513e9b991392da5d08f557f883b0e67f2d16e5d287cf2c2d4511
+spec_note: >-
+  Băm đo 03:07Z 31-08-2026 trên nội dung tệp ở CHÍNH commit này. ĐO LẠI trước khi merge.
+
+codex_review_calls_used: 0
+codex_review_calls_max: 2
+review_rounds_used: 0
+tran_review_ghi_chu: >-
+  Trần 2 là NORMATIVE (`PROTOCOL:597`, `:806-816`), KHÔNG phải con số lease tự đặt. Packet N7
+  cùng phiên đã vượt trần này và phải đi đường override có audit của chủ kho; ĐỪNG lặp lại
+  như thể đó là chuyện thường. Chạm trần mà chưa approve ⇒ Review Rescue Checkpoint, và với
+  `sensitive` thì đường ra là `human_audited` hoặc Stable Slice/PR mới.
+
+write_set:
+  - .github/workflows/ci.yml
+
+write_set_hash: b1e4fcd28055c712644fe84f6a1e30a41018cf387dd808cec348f2e505e33a2a
+write_set_hash_cach_tinh: >-
+  `sha256` của các đường dẫn ĐÃ SẮP XẾP, nối bằng `\n`, có `\n` cuối, mã hoá utf-8.
+  PHẢI ghi cách tính ra đây vì KHÔNG CÓ TIỀN LỆ: đo 31-08-2026 trên `origin/master`,
+  **0/82** lease có trường này và KHÔNG có hàm nào trong kho tính nó. Ai thêm hàm chuẩn về
+  sau phải đối chiếu với công thức này, hoặc đổi cả hai cùng lúc.
+
+environment:
+  os: windows
+  python: '3.13.1'
+  git: '2.47.1.windows.1'
+  ghi_chu: >-
+    Máy chủ kho. `locale.getpreferredencoding(False)` = `cp1258`, `getfilesystemencoding` =
+    `utf-8` — nền đã đẻ ra #412 và #417. Packet này KHÔNG chạy mã Python bị ảnh hưởng, nhưng
+    mọi bộ quét lease vẫn cần `PYTHONUTF8=1` làm rig đo cho tới khi #417 được vá.
+
+heartbeat_at: '2026-08-31T03:07:35Z'
+lease_until: '2026-08-31T11:07:35Z'
+
+bon_truong_fencing_ghi_chu: >-
+  `environment`, `write_set_hash`, `heartbeat_at`, `lease_until` có mặt ở đây vì cross-review
+  hiện vật `ops/` (31-08-2026) ra P1 rằng lease thiếu chúng so với schema `PROTOCOL:208-219`.
+  Finding ĐÚNG. Nhưng đo tiếp cho khỏi đọc lệch: trên `origin/master`, **0/82** lease có bất kỳ
+  trường nào trong bốn trường ấy, và chỉ **27/82** dùng `packet_id: wp<issue>`.
+  Nên đây là KHOẢNG CÁCH TOÀN KHO giữa schema và thực hành, KHÔNG phải sơ suất riêng của một
+  lease. Ghi con số ra đây để: (a) không ai đọc lease N7/N8 thiếu bốn trường này thành cẩu thả
+  cá biệt; (b) không ai đọc lease này thành "chuẩn đang chạy" — nó là lease ĐẦU TIÊN có đủ.
+  Cùng họ với phát hiện `spec_hash` chỉ đạt 3% (2/74) hồi 28-08.
+
+write_set_da_do_truoc_khi_cap: >-
+  Đo 31-08-2026 bằng `ops/lease_publish.py ai-dang-giu` trên bản sao đầy đủ (413 remote ref):
+  `.github/workflows/ci.yml` ⇒ `NGƯỜI_GIỮ 0` (hai lease chạm đường này —
+  `cong-ngoai-write-set-exec-1r5-codex-20260828` và `plat-x2-exec-3-claude-20260820` — đều
+  HẾT_HẠN). Quét cả tiền tố `.github/workflows/` cũng ⇒ `NGƯỜI_GIỮ 0`.
+  HAI CẢNH BÁO VỀ CHÍNH PHÉP ĐO: (a) cần `PYTHONUTF8=1` vì #417; (b) lượt quét đầu bị CHẶN
+  `NHÁNH_CỤC_BỘ_TỤT_SAU: master (0/8)` — cổng fail-close ĐÚNG và tự nêu cách chữa, phải
+  `merge --ff-only` rồi đo lại. Nếu nó im lặng trả 0 thì lease này cấp trên một phép đo mù.
+
+branch: agent/wp427-g1-claude
+branch_ownership: exclusive
+target_branch_neu_land: master
+branch_ghi_chu: >-
+  Tên nhánh theo ĐÚNG khuôn `PROTOCOL:214` (`agent/wp<issue>-g<generation>-<executor>`), khác
+  N7/N8 vốn dùng `claude/<slug>-exec-1` và bị cross-review bắt là không mang fencing token
+  generation. Sửa từ packet này trở đi thay vì đổi tên nhánh đang có review neo vào.
+
+base_sha: c9a2e9c2fe19a7c0e5bc8d3297c3b89f90fd1606
+reviewed_sha_required: c9a2e9c2fe19a7c0e5bc8d3297c3b89f90fd1606
+reviewed_sha_ghi_chu: >-
+  Generation 1 chưa có commit công việc nên neo khởi đầu bằng `base_sha`. BẮT BUỘC dời sang
+  exact head TRƯỚC khi xin review (§8). Packet N5 ăn P1 vì bỏ bước này; N7 phải dời neo BA lần.
+
+base_ghi_chu: >-
+  `c9a2e9c2` là `origin/master` SAU khi #419 land (packet N7, bản vá #412). Đo bằng
+  `git rev-parse origin/master`; nhãn `merged` KHÔNG dùng làm bằng chứng (nợ N11).
+  CẢNH BÁO: packet #421 (N8) đang mở với `base_sha: 6fa8a745` nay ĐÃ CŨ — merge #419 kích hoạt
+  `S4` cho nó. Không ảnh hưởng packet này, nhưng đừng lấy `6fa8a745` làm nền cho bất cứ phép đo
+  nào ở đây.
+
+ngan_sach_kich_thuoc:
+  tep_toi_da: 1
+  dong_them_toi_da: 80
+  do_tu_sha: c9a2e9c2fe19a7c0e5bc8d3297c3b89f90fd1606
+  don_vi: >-
+    `git diff --numstat c9a2e9c2 -- .github/workflows/ci.yml` — dòng THÊM. Pathspec TRONG
+    lệnh, KHÔNG `..HEAD`.
+  da_dung: 0
+  ghi_chu: >-
+    Trần 80 CHẬT CÓ CHỦ ĐÍCH: việc phải làm là thêm điều kiện lane cho MỘT bước và dựng phép
+    kiểm thay thế. Chạm trần là dấu hiệu packet đang nở phạm vi. ĐO LẠI trước mỗi bước công bố.
+
+granted_by: ducthangho
+granted_on_instruction: >-
+  direct, in-session, 2026-08-31: chủ kho được trình ba đường xử mâu thuẫn manifest và chọn
+  "(1) Sửa ci.yml cho release-verify --strict chỉ chạy ở lane land", rồi chỉ thị "Tôi chọn (a)"
+  cho thứ tự làm packet này TRƯỚC khi quay lại N8.
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: true
+recorder_cung_la_nguoi_thi_cong: false
+
+phien_thi_hanh: >-
+  Packet do một PHIÊN KHÁC thi hành. Phiên ghi lease này là ĐIỀU PHỐI và KHÔNG thi công.
+  Khác packet N7, nơi hai vai nhập nhằng trong cùng một phiên và cross-review đã bắt đúng đó
+  (`PROTOCOL:27-29` buộc một phiên một vai trên một đơn vị công việc; `:47-50, 202-206` chỉ cho
+  cùng tác nhân giữ vai khác nhau ở NHỮNG PHIÊN KHÁC NHAU).
+  Phiên thi hành PHẢI tự xác minh: fetch nhánh lease rồi `git show` chính tệp này, đối chiếu
+  `spec_hash`. Đừng nhận bảng giá trị từ điều phối.
+
+vung_duoc_phep_cham: >-
+  ĐÚNG MỘT tệp `.github/workflows/ci.yml`. KHÔNG đụng workflow khác, KHÔNG đụng
+  `docs/PROTOCOL_DA_PHIEN.md` (packet này làm CI KHỚP protocol, không sửa protocol cho khớp
+  CI), KHÔNG đụng `ops/leases/**` hay `ops/specs/**` từ nhánh packet, KHÔNG đụng
+  `RELEASE_MANIFEST.json` (chính tệp land-only đang gây tranh cãi — chạm nó là tái tạo đúng
+  vấn đề packet sinh ra để chữa).
+
+dieu_kien_dung: >-
+  S1 cần đường dẫn thứ hai ⇒ DỪNG, trình phép đo ·
+  S2 muốn sửa `docs/PROTOCOL_DA_PHIEN.md` ⇒ DỪNG ·
+  S3 không đo được lớp bảo vệ "file thừa" còn giữ ⇒ DỪNG, KHÔNG land một bản chỉ tắt cổng ·
+  S4 `origin/master` đi tiếp so `base_sha` mà chưa đo lại ⇒ DỪNG ·
+  S5 `actionlint` không chạy được ⇒ ĐỎ, không được bỏ qua ·
+  S6 vượt 1 tệp hoặc 80 dòng thêm ⇒ DỪNG, KHÔNG tự khai cổng ADR-0044 là ĐẠT.
+
+canh_bao_cho_nguoi_thi_hanh: >-
+  (1) ĐỪNG chỉ tắt bước `--strict` ở lane PR. Nó đang bảo vệ "file THỪA trong cây mà manifest
+  không có ⇒ ĐỎ". Phải dựng phép kiểm thay thế bằng manifest TẠM ngoài repo (`PROTOCOL:711-715`)
+  và ĐO rằng nó vẫn bắt được ca ấy.
+  (2) `actionlint` BẮT BUỘC, và thiếu công cụ thì ĐỎ. Sáu lượt cross-review từng cùng kết luận
+  "YAML ok" cho một tệp mà GitHub TỪ CHỐI — vì cả sáu chỉ kiểm bằng PyYAML.
+  (3) Dấu hiệu GitHub từ chối workflow KHÔNG phải job đỏ: đó là một run mang tên ĐƯỜNG DẪN TỆP,
+  0 job, `conclusion: failure`. `get_job_logs` trả `total_jobs: 0` nên tìm log sẽ không thấy gì.
+  (4) ĐỪNG viết cú pháp biểu thức Actions trong CHÚ THÍCH của thân `run` — một cặp rỗng trong
+  comment làm cả tệp không hợp lệ.
+  (5) Nền `actionlint` ĐỎ SẴN (`rc=1`, `ops-don-ref.yml:106 SC1003:info` khi có `shellcheck`).
+  Đo nền trước khi nghi bản vá của mình, và ghi rõ `shellcheck` có mặt hay không.
+  (6) Workflow có `paths:` đã từng KHÔNG chạy ở lần đẩy tạo nhánh MỚI — nguyên nhân chưa ai
+  biết. Sau mỗi lần đẩy, ĐO là workflow đã chạy (`list_workflow_runs` lọc theo nhánh), đừng suy
+  từ `git push` thành công.
+  (7) `core.abbrev=7` ghim trong mọi clone/sandbox. KHÔNG push thẳng master.

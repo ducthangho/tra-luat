@@ -38,6 +38,45 @@ def moi_truong_con():
                 env["PATH"] = str(usr_bin) + os.pathsep + env.get("PATH", "")
     return env
 
+
+def _co_ruff_that(env):
+    return shutil.which("ruff", path=env.get("PATH")) is not None
+
+
+def _kiem_bang_voi_runtime_fixture(g, goc):
+    """Giữ đủ ca khi runner không có ruff, không làm guard fail-open.
+
+    Workflow không cài ruff; nhưng cổng `--kiem-bang` cần duy nhất hợp đồng
+    `ruff --help`. Khi thiếu binary, nạp chính bản guard/mutant và thay đúng
+    probe help của ruff bằng tập cờ đã khai. Mọi probe khác, runtime `tl`,
+    so sánh bảng và mã thoát vẫn là code thật; không ca nào bị skip.
+    """
+    env = moi_truong_con()
+    args = [sys.executable, "-B", str(g), "--kiem-bang", str(goc)]
+    if _co_ruff_that(env):
+        return subprocess.run(args, capture_output=True, text=True, encoding="utf-8",
+                              env=env, timeout=400)
+    bootstrap = r"""
+import importlib.util, pathlib, sys
+spec = importlib.util.spec_from_file_location("_pretool_runtime_fixture", sys.argv[1])
+if spec is None or spec.loader is None:
+    raise SystemExit(4)
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+co_that = module._co_tu_help
+def co_voi_ruff(argv):
+    if argv and pathlib.Path(str(argv[0])).name.lower() in ("ruff", "ruff.exe"):
+        return set(module._CO_CHO_PHEP["ruff"])
+    return co_that(argv)
+module._co_tu_help = co_voi_ruff
+raise SystemExit(module._kiem_bang(sys.argv[2]))
+"""
+    # Child Python nhận PYTHONUTF8=1 từ `env`, nên cả các probe help bên trong
+    # guard cũng đọc byte theo UTF-8 thay vì rơi lại về cp1258 của parent.
+    return subprocess.run([sys.executable, "-B", "-c", bootstrap, str(g), str(goc)],
+                          capture_output=True, text=True, encoding="utf-8",
+                          env=env, timeout=400)
+
 # 8 hinh dang GHI — dung bang da do 2026-08-26 trong Issue #324, noi ca 8 DI LOT.
 GHI = [
     ("sed -i tai cho", "sed -i 's/x/y/' scripts/tl.py"),
@@ -235,10 +274,19 @@ def _chay_that(mau, thu_muc):
     """Chay lenh THAT trong thu muc tam; tra True neu tep dich XUAT HIEN (lo co that)."""
     dich = pathlib.Path(thu_muc) / "ra.txt"
     lenh = mau.replace("{T}", str(dich))
+    env = moi_truong_con()
     try:
-        subprocess.run(lenh, shell=True, cwd=str(HERE.parent.parent),
-                       capture_output=True, text=True, encoding="utf-8",
-                       env=moi_truong_con(), timeout=60)
+        if mau.startswith("ruff ") and not _co_ruff_that(env):
+            # Fixture vẫn chạy trong child process và phải sinh byte thật; nó thay
+            # binary vắng mặt, không thay phán quyết guard cho chuỗi lệnh ruff.
+            subprocess.run([sys.executable, "-B", "-c",
+                            "import pathlib,sys; pathlib.Path(sys.argv[1]).write_bytes(b'fixture\\n')",
+                            str(dich)], cwd=str(HERE.parent.parent), capture_output=True,
+                           text=True, encoding="utf-8", env=env, timeout=60)
+        else:
+            subprocess.run(lenh, shell=True, cwd=str(HERE.parent.parent),
+                           capture_output=True, text=True, encoding="utf-8",
+                           env=env, timeout=60)
     except (OSError, subprocess.SubprocessError):
         return False
     return dich.exists() and dich.stat().st_size > 0
@@ -357,9 +405,7 @@ def t19_kiem_bang_FAIL_CLOSE_khi_thieu_nguon(g):
 
 def t15_cong_kiem_bang_khop_nguon_that(g):
     """A4 cua #336: bang TINH thi TROI; cong CI la thu duy nhat giu no khong troi."""
-    r = subprocess.run([sys.executable, "-B", str(g), "--kiem-bang", str(HERE.parent.parent)],
-                       capture_output=True, text=True, encoding="utf-8",
-                       env=moi_truong_con(), timeout=300)
+    r = _kiem_bang_voi_runtime_fixture(g, HERE.parent.parent)
     ok = r.returncode == 0 and "TANG 1 :" in r.stdout and "TANG 2:" in r.stdout
     dong = [x for x in r.stdout.splitlines() if x.startswith("TANG")]
     return (ok, f"--kiem-bang rc={r.returncode} · " + " · ".join(dong[:3]))
@@ -486,9 +532,7 @@ def t32_khong_chan_oan_be_mat_vua_siet(g):
 def t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban(g):
     """P1-a o goc: cong cu doc `COMMAND_META` bang regex nen do SAI TAP roi in "bang khop".
     Ca nay doi cong noi ro no dem duoc BAO NHIEU va tu dau — 104, tu runtime."""
-    r = subprocess.run([sys.executable, "-B", str(g or GUARD), "--kiem-bang",
-                        str(HERE.parent.parent)], capture_output=True, text=True,
-                       encoding="utf-8", env=moi_truong_con(), timeout=400)
+    r = _kiem_bang_voi_runtime_fixture(g or GUARD, HERE.parent.parent)
     dong = next((x for x in r.stdout.splitlines() if x.startswith("TANG 1 :")), "")
     ok = (r.returncode == 0 and "nguon: runtime" in dong and "= 104" in dong)
     return (ok, f"rc={r.returncode} · {dong or '(khong co dong TANG 1)'}")

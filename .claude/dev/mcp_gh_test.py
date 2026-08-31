@@ -17,6 +17,10 @@ import threading
 import urllib.error
 import urllib.request
 
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="backslashreplace")
+
 GOC = pathlib.Path(__file__).resolve().parent
 NGUON = GOC / "mcp_gh.py"
 
@@ -319,8 +323,15 @@ def b7_tat_ghi_bytecode():
     with tempfile.TemporaryDirectory() as d:
         path = pathlib.Path(d) / "khong_pyc.py"
         path.write_text("X = 1\n", encoding="utf-8")
-        nap_dot_bien(path, "khong_pyc")
-        assert not list(pathlib.Path(d).glob("__pycache__/*")), "loader để lại .pyc"
+        cu = sys.dont_write_bytecode
+        try:
+            # `python -B` đặt sẵn True và từng làm mutant bỏ chính phép gán này
+            # vẫn xanh. Ép tiền điều kiện ngược để ca đo loader, không đo outer CLI.
+            sys.dont_write_bytecode = False
+            nap_dot_bien(path, "khong_pyc")
+            assert not list(pathlib.Path(d).glob("__pycache__/*")), "loader để lại .pyc"
+        finally:
+            sys.dont_write_bytecode = cu
 
 
 def b7_invalidate_cache():

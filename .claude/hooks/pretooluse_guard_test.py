@@ -10,14 +10,33 @@ trong finally la bom hen gio"), moi ban sao mot TEN RIENG + chay bang `-B`, de t
 `.pyc` da tung tuoc rang moi mutant (CPython coi .pyc con hop le theo (mtime GIAY, kich thuoc)).
 """
 import json
+import os
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="backslashreplace")
+
 HERE = pathlib.Path(__file__).resolve().parent
 GUARD = HERE / "pretooluse_guard.py"
+
+
+def moi_truong_con():
+    """Child Python đọc UTF-8; Windows thấy bộ Unix đi kèm Git for Windows."""
+    env = os.environ.copy()
+    env["PYTHONUTF8"] = "1"
+    if os.name == "nt":
+        git = shutil.which("git")
+        if git:
+            usr_bin = pathlib.Path(git).resolve().parents[1] / "usr" / "bin"
+            if usr_bin.is_dir():
+                env["PATH"] = str(usr_bin) + os.pathsep + env.get("PATH", "")
+    return env
 
 # 8 hinh dang GHI — dung bang da do 2026-08-26 trong Issue #324, noi ca 8 DI LOT.
 GHI = [
@@ -97,7 +116,8 @@ def hoi(guard, cmd, agent=None):
     if agent:
         d["agent_type"] = agent
     p = subprocess.run([sys.executable, "-B", str(guard)], input=json.dumps(d),
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, encoding="utf-8",
+                       env=moi_truong_con())
     out = (p.stdout or "").strip()
     if not out:
         return "allow", ""
@@ -125,7 +145,8 @@ def t4_phien_chinh_y_het_ban_master(g):
     """Doi chieu SONG SONG voi ban tren origin/master. Khong lay duoc ban ay => DO, khong bo qua."""
     try:
         cu = subprocess.run(["git", "show", "origin/master:.claude/hooks/pretooluse_guard.py"],
-                            cwd=HERE, capture_output=True, text=True, check=True).stdout
+                            cwd=HERE, capture_output=True, text=True, encoding="utf-8",
+                            env=moi_truong_con(), check=True).stdout
     except Exception as e:
         return (False, f"KHONG DO DUOC ban master de doi chieu ({type(e).__name__}) -> fail-close")
     if not cu.strip():
@@ -216,7 +237,8 @@ def _chay_that(mau, thu_muc):
     lenh = mau.replace("{T}", str(dich))
     try:
         subprocess.run(lenh, shell=True, cwd=str(HERE.parent.parent),
-                       capture_output=True, text=True, timeout=60)
+                       capture_output=True, text=True, encoding="utf-8",
+                       env=moi_truong_con(), timeout=60)
     except (OSError, subprocess.SubprocessError):
         return False
     return dich.exists() and dich.stat().st_size > 0
@@ -259,10 +281,15 @@ def t14_co_khong_ton_tai_phan_biet_duoc_voi_bi_chan(g):
     """A3 cua #336 — chinh lo muc 5. `diff --output` KHONG TON TAI: phai phan biet duoc
     "guard chan" voi "chuong trinh tu choi doi so". Ca nay do CA HAI phia."""
     quyet, ly = hoi(g, "diff --output=scripts/ra.txt CLAUDE.md CONTEXT.md", "tl-auditor")
-    r = subprocess.run("diff --output=/tmp/khong-bao-gio-tao CLAUDE.md CONTEXT.md",
-                       shell=True, cwd=str(HERE.parent.parent), capture_output=True, text=True)
-    khong_ton_tai = "unrecognized option" in (r.stderr or "")
-    tao_tep = pathlib.Path("/tmp/khong-bao-gio-tao").exists()
+    with tempfile.TemporaryDirectory() as d:
+        dich = pathlib.Path(d) / "khong-bao-gio-tao"
+        r = subprocess.run(f'diff --output="{dich}" CLAUDE.md CONTEXT.md',
+                           shell=True, cwd=str(HERE.parent.parent), capture_output=True,
+                           text=True, encoding="utf-8", env=moi_truong_con())
+        loi = ((r.stderr or "") + (r.stdout or "")).lower()
+        khong_ton_tai = (r.returncode != 0 and "output" in loi and any(
+            x in loi for x in ("unrecognized option", "unknown option", "invalid option", "illegal option")))
+        tao_tep = dich.exists()
     ok = (quyet == "deny" and "danh sach cho phep" in ly and khong_ton_tai and not tao_tep)
     return (ok, f"co KHONG TON TAI: guard={quyet} · ly-do-la-allowlist="
                 f"{'danh sach cho phep' in ly} · diff-tu-choi={khong_ton_tai} · "
@@ -320,7 +347,8 @@ def t19_kiem_bang_FAIL_CLOSE_khi_thieu_nguon(g):
     khong ton tai dung luc no can nhat. Dot bien m20 SONG truoc khi co ca nay."""
     with tempfile.TemporaryDirectory() as d:
         r = subprocess.run([sys.executable, "-B", str(g), "--kiem-bang", d],
-                           capture_output=True, text=True, timeout=300)
+                           capture_output=True, text=True, encoding="utf-8",
+                           env=moi_truong_con(), timeout=300)
     ok = r.returncode != 0 and "KHONG DO DUOC" in (r.stderr or "")
     return (ok, f"goc KHONG co command_registry.py -> rc={r.returncode} "
                 f"(mong doi khac 0), co 'KHONG DO DUOC' tren stderr="
@@ -330,7 +358,8 @@ def t19_kiem_bang_FAIL_CLOSE_khi_thieu_nguon(g):
 def t15_cong_kiem_bang_khop_nguon_that(g):
     """A4 cua #336: bang TINH thi TROI; cong CI la thu duy nhat giu no khong troi."""
     r = subprocess.run([sys.executable, "-B", str(g), "--kiem-bang", str(HERE.parent.parent)],
-                       capture_output=True, text=True, timeout=300)
+                       capture_output=True, text=True, encoding="utf-8",
+                       env=moi_truong_con(), timeout=300)
     ok = r.returncode == 0 and "TANG 1 :" in r.stdout and "TANG 2:" in r.stdout
     dong = [x for x in r.stdout.splitlines() if x.startswith("TANG")]
     return (ok, f"--kiem-bang rc={r.returncode} · " + " · ".join(dong[:3]))
@@ -458,7 +487,8 @@ def t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban(g):
     """P1-a o goc: cong cu doc `COMMAND_META` bang regex nen do SAI TAP roi in "bang khop".
     Ca nay doi cong noi ro no dem duoc BAO NHIEU va tu dau — 104, tu runtime."""
     r = subprocess.run([sys.executable, "-B", str(g or GUARD), "--kiem-bang",
-                        str(HERE.parent.parent)], capture_output=True, text=True, timeout=400)
+                        str(HERE.parent.parent)], capture_output=True, text=True,
+                       encoding="utf-8", env=moi_truong_con(), timeout=400)
     dong = next((x for x in r.stdout.splitlines() if x.startswith("TANG 1 :")), "")
     ok = (r.returncode == 0 and "nguon: runtime" in dong and "= 104" in dong)
     return (ok, f"rc={r.returncode} · {dong or '(khong co dong TANG 1)'}")

@@ -12,10 +12,16 @@ import tempfile
 
 import yaml
 
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="backslashreplace")
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 GOC = (".claude/dev", ".claude/hooks", ".githooks", ".github/checks", "scripts/tl_core")
 OPS_REVIEWS = "ops/reviews/"
 MOI_TRUONG_CI = "github-actions/linux"
+MOI_TRUONG_WINDOWS = "github-actions/windows"
+MOI_TRUONG_DA_BIET = frozenset({MOI_TRUONG_CI, MOI_TRUONG_WINDOWS})
 MOI = {
     ".claude/dev/chon_reviewer_test.py": r"(?s)nền: (\d+)/(\d+) đạt.*TỔNG: ĐẠT",
     ".claude/dev/gh_readback_test.py": r"gh_readback tests: (\d+)/(\d+) ca QUA \(hong 0\)",
@@ -79,7 +85,7 @@ def kiem(root=ROOT, registry=DANG_KY, workflows=None, cach_ly=CACH_LY):
     for x, no in cach_ly.items():
         if not all(no.get(k) for k in ("slug", "ly_do", "moi_truong", "log")):
             loi.append("cách ly thiếu slug, lý do, môi trường hoặc log: " + x)
-        elif no["moi_truong"] != MOI_TRUONG_CI:
+        elif no["moi_truong"] not in MOI_TRUONG_DA_BIET:
             loi.append("cách ly có môi trường không hợp lệ: " + x)
     if workflows is None:
         runs = []
@@ -115,16 +121,22 @@ def bang_chung_xanh(text, mau):
 
 def moi_truong_hien_tai(env=os.environ):
     """Chỉ nhận diện khi cả hai dấu hiệu runner chuẩn cùng khớp."""
-    if env.get("GITHUB_ACTIONS") == "true" and env.get("RUNNER_OS") == "Linux":
-        return MOI_TRUONG_CI
+    if env.get("GITHUB_ACTIONS") == "true":
+        runner = env.get("RUNNER_OS")
+        if runner in ("Linux", "Windows"):
+            return f"github-actions/{runner.lower()}"
     return None
 
 
 def cach_ly_chap_nhan(ok, da_neo, hien_tai):
-    """None = không ở đúng môi trường để phán quyết nợ còn tái hiện."""
-    if hien_tai != da_neo:
+    """Cách ly chỉ áp trên OS neo; OS đã biết khác neo dùng kết quả thật."""
+    if hien_tai is None:
         return None
-    return not ok
+    if hien_tai == da_neo:
+        return not ok
+    if hien_tai in MOI_TRUONG_DA_BIET:
+        return ok
+    return None
 
 
 def trong_ci(env=os.environ):
@@ -180,6 +192,9 @@ def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
                       f"cách ly neo {no['moi_truong']}")
             elif chap_nhan is None:
                 print(f"CI_DANG_KY {path}: KHÔNG ĐO ĐƯỢC (ngoài CI) — môi trường={nen}")
+            elif hien_tai != no["moi_truong"]:
+                print(f"CI_DANG_KY {path}: {'ĐẠT' if ok else 'ĐỎ'} — KHÔNG CÁCH LY trên {nen}, "
+                      f"neo={no['moi_truong']}, rc={rc}")
             elif not chap_nhan:
                 print(f"CI_DANG_KY {path}: ĐỎ — đã xanh, hãy gỡ khỏi cách ly")
             else:
@@ -224,6 +239,10 @@ def phan_chung():
         mutant = {".claude/dev/a_test.py": {"slug": "nợ", "ly_do": "đỏ trên CI",
                     "moi_truong": "github-actions/lin-typo", "log": "log-r3"}}
         cases.append(any("môi trường không hợp lệ" in x for x in kiem(r, reg, wf, mutant)[0]))
+        windows_anchor = {".claude/dev/a_test.py": {"slug": "nợ", "ly_do": "đỏ trên CI",
+                           "moi_truong": MOI_TRUONG_WINDOWS, "log": "log-r3"}}
+        cases.append(not any("môi trường không hợp lệ" in x
+                             for x in kiem(r, reg, wf, windows_anchor)[0]))
         # r5: xoá run thật, giữ nguyên lệnh trong YAML comment vẫn phải đỏ.
         yml = r / ".github/workflows/comment.yml"
         yml.write_text("jobs:\n  x:\n    steps:\n      # - run: python .claude/dev/a_test.py\n", encoding="utf-8")
@@ -257,6 +276,27 @@ def phan_chung():
     cases += [trong_ci({"GITHUB_ACTIONS": "true"}) is True,
               trong_ci({"RUNNER_OS": "Linux"}) is False,
               trong_ci({"GITHUB_ACTIONS": "false", "RUNNER_OS": "Linux"}) is False]
+    # wp430: cách ly Linux chỉ áp trên Linux. Windows đã biết phải dùng kết quả thật;
+    # runner CI lạ vẫn giữ trạng thái thứ ba để fail-closed ở tầng tiêu thụ.
+    cases += [moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "Linux"}) == MOI_TRUONG_CI,
+              moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "Windows"}) == MOI_TRUONG_WINDOWS,
+              moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "macOS"}) is None,
+              cach_ly_chap_nhan(False, MOI_TRUONG_CI, MOI_TRUONG_CI) is True,
+              cach_ly_chap_nhan(True, MOI_TRUONG_CI, MOI_TRUONG_CI) is False,
+              cach_ly_chap_nhan(True, MOI_TRUONG_CI, MOI_TRUONG_WINDOWS) is True,
+              cach_ly_chap_nhan(False, MOI_TRUONG_CI, MOI_TRUONG_WINDOWS) is False,
+              cach_ly_chap_nhan(False, MOI_TRUONG_WINDOWS, MOI_TRUONG_WINDOWS) is True,
+              cach_ly_chap_nhan(True, MOI_TRUONG_WINDOWS, MOI_TRUONG_WINDOWS) is False]
+    win_moi = {"gia_test.py": r"^(\d+)/(\d+)$"}
+    win_no = {"gia_test.py": {"slug": "gia", "ly_do": "gia",
+                               "moi_truong": MOI_TRUONG_CI, "log": "gia"}}
+    win_out = io.StringIO()
+    with contextlib.redirect_stdout(win_out):
+        win_do = chay_moi(moi=win_moi, cach_ly=win_no,
+                          chay_mot=lambda _p: (0, "1/1\n"),
+                          doc_moi_truong=lambda: MOI_TRUONG_WINDOWS,
+                          doc_trong_ci=lambda: True)
+    cases.append(win_do == 0 and "KHÔNG CÁCH LY" in win_out.getvalue())
     # r6: TẦNG TIÊU THỤ — gọi chính `chay_moi` với bộ chạy giả. Gỡ phép cộng ở đó ra thì
     # ba ca này ĐỎ; đó là điều mà đột biến canh-vị-từ `r4-khong-do-duoc-thanh-dat` KHÔNG
     # bắt được, và là lý do nợ N6 lọt cổng trên windows-latest.
@@ -291,6 +331,7 @@ def phan_chung():
         _kq = (0, "1/1\n") if _cn is False else (1, "0/1\n")
         cases.append(_dem(_ci, _nen, _kq) == _mong)
     names += ["a-cach-ly-thieu-slug", "r4-thieu-moi-truong", "r5-moi-truong-sai-tap",
+              "wp430-neo-windows-hop-le",
               "r5-comment-gia-loi-goi", "r5-step-if-false", "r5-job-if-false",
               "r5-step-if-literal-expr", "r5-normal-step", "b-cach-ly-chuyen-xanh",
               "r4-bo-so-moi-truong", "r4-khong-do-duoc-thanh-dat",
@@ -299,6 +340,11 @@ def phan_chung():
               "r6-vi-tu-da-xanh-van-do", "r6-vi-tu-cach-ly-hop-le-khong-do",
               "r6-trong-ci-khong-doi-runner-os", "r6-thieu-github-actions-khong-phai-ci",
               "r6-github-actions-false-khong-phai-ci",
+              "wp430-nhan-linux", "wp430-nhan-windows", "wp430-runner-la-van-khong-biet",
+              "wp430-linux-do-duoc-cach-ly", "wp430-linux-xanh-lo-no-cu",
+              "wp430-windows-xanh-theo-ket-qua-that", "wp430-windows-do-theo-ket-qua-that",
+              "wp430-anchor-windows-do-duoc-cach-ly", "wp430-anchor-windows-xanh-lo-no-cu",
+              "wp430-ban-in-noi-ro-windows-khong-cach-ly",
               "r6-TIEU-THU-o-none-trong-ci", "r6-TIEU-THU-o-none-ngoai-ci",
               "r6-TIEU-THU-o-cach-ly-hop-le-trong-ci",
               "r6-TIEU-THU-o-cach-ly-hop-le-ngoai-ci",

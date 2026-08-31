@@ -1003,7 +1003,14 @@ def t53_doctor_bao_du_khi_du():
     đường nào phụ thuộc đồng hồ tường dẫn tới 12 — t129/t130/t132/t135 khoá từng
     tầng của bản vá, t131 khoá chiều ngược (hỏng thật vẫn 12).
     """
-    r = chay("doctor", "--json")
+    # Doctor's agent-auth probes describe the host account, not launcher logic.
+    # In CI mode agent CLIs are intentionally optional, making this fixture
+    # independent of whichever developer happens to be logged in.
+    env = dict(os.environ, CI="true")
+    for name in ("CODEX_HOME", "CODEX_AUTH_JSON", "ANTHROPIC_API_KEY",
+                 "CLAUDE_CODE_OAUTH_TOKEN", "GH_TOKEN", "GITHUB_TOKEN", "GITHUB_PAT"):
+        env.pop(name, None)
+    r = chay("doctor", "--json", env=env)
     # GIỮ NGUYÊN stdout của đúng lượt thoát khác 0 — hai lần săn flake này đều hụt
     # vì bộ chạy nuốt mất JSON, mà JSON mới là thứ nêu tên thủ phạm (ops/NO_KY_THUAT.md
     # dặn tường minh). Đừng bao giờ rút gọn thông điệp này về chỉ còn stderr.

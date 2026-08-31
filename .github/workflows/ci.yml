@@ -507,9 +507,65 @@ jobs:
         run: python .github/checks/ci_phamvi_test.py
       - name: release-check full
         run: python scripts/tl.py release-check --full --json
+      # ── LANE LAND vs LANE WORKER — chia theo REF ĐANG ĐƯỢC GÁC, không theo cò (packet #427) ──
+      # `PROTOCOL:652` cấm worker sửa `RELEASE_MANIFEST.json`; `PROTOCOL:710` cấm worker CI so
+      # feature branch với manifest COMMITTED. Bước ngay dưới làm ĐÚNG thứ bị cấm ấy, mà trước
+      # packet này nó chạy VÔ ĐIỀU KIỆN trong job `gate` (cả push, pull_request lẫn dispatch) —
+      # tức cấu hình CI ÉP worker vi phạm protocol. Đã đẻ một P1 thật ở packet #421, nơi lease
+      # phải cấp `RELEASE_MANIFEST.json` vào write set chỉ để CI xanh.
+      #
+      # ĐIỀU KIỆN CHỌN LANE là `github.ref`, KHÔNG phải `github.event_name` — và đây cũng là câu
+      # trả lời cho `workflow_dispatch`: thứ quyết định mức nghiêm là REF ĐANG ĐƯỢC GÁC, không
+      # phải cách lượt chạy được bấm. Push master và dispatch TRÊN master đều đang gác thứ sắp
+      # phát hành ⇒ lane land; PR và dispatch trên nhánh làm việc đều đang gác việc chưa land ⇒
+      # lane worker. Chia thế thì dispatch không còn khoảng xám, và KHÔNG phải thêm mặt điều kiện
+      # thứ hai: biểu thức này đã dùng nguyên văn ở `concurrency` và ở `matrix.os` phía trên.
+      # (CLAUDE.md: đúng chỗ này đã hỏng hai lần vì logic điều kiện — đừng mở bề mặt mới.)
       # --strict: file THỪA trong cây mà manifest không có ⇒ ĐỎ (bản cũ chỉ cảnh báo rồi trôi qua)
-      - name: release-verify strict (manifest khớp cây)
+      - name: release-verify strict (lane LAND — manifest committed)
+        if: github.ref == 'refs/heads/master'
         run: python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json
+      # LANE WORKER. `PROTOCOL:711-715` nêu đường thay thế: sinh manifest TẠM ngoài repo rồi
+      # verify trên đó. NHƯNG PHẢI ĐO — làm đúng NGUYÊN VĂN hai dòng ấy thôi thì được một phép
+      # kiểm KHÔNG THỂ ĐỎ, vì manifest tạm sinh TỪ CHÍNH cây nên nó hấp thụ luôn tệp thừa.
+      # Đo 31-08-2026 trên `c9a2e9c2`, cây thêm đúng 1 tệp:
+      #   manifest committed -> rc=2, `extra_files` nêu đúng tên tệp
+      #   manifest tạm       -> rc=0, `extra_files` RỖNG, `file_count` 180 -> 181
+      # Nên bước này KHÔNG dừng ở `release-verify`. Hai lớp răng, mỗi lớp có phản chứng đã chạy:
+      #  (1) `release-manifest` tự ĐỎ khi thiếu required release file — đo: xoá
+      #      `references/API_CONTRACT.md` ⇒ rc=2, `required_missing` nêu đúng tên. `release-verify`
+      #      trên manifest tạm vẫn gác `skill_links` (15) + `doc_pointers` (312) + an toàn đường dẫn.
+      #  (2) mọi tệp trong manifest tạm PHẢI được git theo dõi. Rác build, tệp tạm, artefact của
+      #      bước trước lọt vào cây mà không ai commit ⇒ ĐỎ. Đo: tệp thừa untracked ⇒ rc=1, in tên.
+      # THU HẸP CÓ CHỦ ĐÍCH, nói thẳng kẻo ai đọc rộng hơn phép đo: tệp PR CỐ Ý thêm và ĐÃ commit
+      # thì lane worker XANH (đo: cùng tệp ấy sau `git add` ⇒ rc=0). Lớp "file thừa" ở lane worker
+      # vì thế hẹp lại còn ca UNTRACKED; ca tệp-mới-đã-commit chuyển hẳn cho lane land, nơi manifest
+      # committed vẫn bắt (đo: rc=2, `extra_files`). Tái sinh manifest là việc của phiên land
+      # (CLAUDE.md §Quy ước deploy mục 5) — đúng phân công `PROTOCOL:652`.
+      - name: release-verify strict (lane WORKER — manifest TẠM ngoài repo)
+        if: github.ref != 'refs/heads/master'
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAM="$RUNNER_TEMP/tl-manifest-tam.json"
+          NKY="$RUNNER_TEMP/tl-manifest-tam.log"
+          # Cả hai lệnh in ~900 dòng JSON, nên đẩy ra tệp — nhưng IM LẶNG lúc ĐỎ là mất chẩn
+          # đoán đúng lúc cần nhất, nên hỏng thì `cat` ra log. Đã đo: redirect chạy được cả khi
+          # `RUNNER_TEMP` mang dạng Windows (ổ đĩa + dấu chéo ngược) dưới Git Bash.
+          python scripts/tl.py release-manifest --root . --out "$TAM" --json > "$NKY" || { cat "$NKY"; exit 1; }
+          python scripts/tl.py release-verify "$TAM" --root . --strict --json > "$NKY" || { cat "$NKY"; exit 1; }
+          python - "$TAM" <<'PY'
+          import json, subprocess, sys
+          ra = subprocess.run(["git", "ls-files", "-z"], capture_output=True, check=True).stdout
+          theo_doi = set(ra.decode("utf-8").split(chr(0))) - {""}
+          duong = [f["path"] for f in json.load(open(sys.argv[1], encoding="utf-8"))["files"]]
+          thua = sorted(p for p in duong if p not in theo_doi)
+          for p in thua:
+              print("TEP THUA trong cay, git khong theo doi:", p)
+          if thua:
+              sys.exit(1)
+          print("manifest tam:", len(duong), "tep, tat ca deu duoc git theo doi")
+          PY
       - name: release-bundle x2 cùng SHA-256
         shell: bash
         run: |

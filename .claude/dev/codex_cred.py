@@ -76,6 +76,11 @@ _URL = re.compile(r"https://\S*device\S*")
 # BÊN KIA, ta không kiểm soát — nhưng vẫn đòi có gạch nối và toàn hoa/số để khỏi nhặt nhầm.
 _MA = re.compile(r"\b([A-Z0-9]{3,6}-[A-Z0-9]{3,6})\b")
 
+def effective_codex_home(env=None) -> Path:
+    """The one CODEX_HOME rule: explicit environment, otherwise ~/.codex."""
+    env = os.environ if env is None else env
+    return Path(env.get("CODEX_HOME") or os.path.expanduser("~/.codex")).expanduser()
+
 
 def _in(*a):
     print(*a, flush=True)
@@ -393,7 +398,7 @@ def cmd_lay(a) -> int:
     _ghi_bi_mat(ra, (b64 + "\n").encode("ascii"))
 
     if a.cai_de:
-        that = Path(os.path.expanduser("~/.codex/auth.json"))
+        that = effective_codex_home() / "auth.json"
         that.parent.mkdir(parents=True, exist_ok=True)
         bak = _sao_luu(that)
         _ghi_bi_mat(that, auth_bytes)
@@ -432,7 +437,7 @@ def cmd_lay(a) -> int:
 
 def cmd_kiem(a) -> int:
     """Đo credential ĐANG dùng: còn sống thật không, còn bao lâu."""
-    home = Path(a.codex_home) if a.codex_home else Path(os.path.expanduser("~/.codex"))
+    home = Path(a.codex_home).expanduser() if a.codex_home else effective_codex_home()
     auth = home / "auth.json"
     if not auth.is_file():
         _in(f"KHÔNG_ĐO_ĐƯỢC: không có {auth}")

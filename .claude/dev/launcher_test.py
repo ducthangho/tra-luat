@@ -37,6 +37,10 @@ CODEX_ENV_POLICY = Path(__file__).resolve().parent / "codex_env_policy.py"
 PY = sys.executable or "python3"
 LA_WINDOWS = platform.system() == "Windows"
 
+# Authentication of the machine running the tests is not fixture input.  Tests
+# that exercise CODEX_HOME provide it explicitly.
+os.environ.pop("CODEX_HOME", None)
+
 MA_OK, MA_THAM_SO, MA_GIT, MA_HEAD, MA_REF = 0, 2, 3, 4, 5
 MA_BAN, MA_PROMPT, MA_HAN, MA_VA_CHAM, MA_DANH_TINH, MA_QUA_HAN = 6, 7, 8, 9, 10, 124
 MA_WORKTREE, MA_PROBE = 14, 15
@@ -57,6 +61,11 @@ LAUNCHER_DANG_DUNG = LAUNCHER
 
 
 def chay(*doi_so, cwd=None, env=None) -> subprocess.CompletedProcess:
+    # The runner itself may be Codex and therefore export CODEX_HOME.  Do not let
+    # host authentication state leak into fixtures unless a test opts in.
+    if env is None:
+        env = dict(os.environ)
+        env.pop("CODEX_HOME", None)
     return subprocess.run([PY, str(LAUNCHER_DANG_DUNG), *doi_so], capture_output=True,
                           text=True, cwd=cwd, env=env)
 

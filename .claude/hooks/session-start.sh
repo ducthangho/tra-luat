@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that session-credential-bootstrap
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -42,6 +42,10 @@ fi
 
 GOC="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$GOC"
+
+# One deterministic CODEX_HOME rule.  Exporting the resolved fallback makes the
+# hook, launcher and CLI agree without exposing any credential value.
+export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 
 # `command -v` chứ không `which`: có sẵn ở mọi shell POSIX và không phụ thuộc gói ngoài.
 co() { command -v "$1" >/dev/null 2>&1; }

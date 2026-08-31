@@ -2070,6 +2070,12 @@ def _doc_moi_truong() -> tuple[dict[str, str], dict]:
     return con, cong_khai
 
 
+def _codex_home(moi_truong: dict[str, str] | None = None) -> Path:
+    """Honor CODEX_HOME everywhere, with the documented ~/.codex fallback."""
+    mt = os.environ if moi_truong is None else moi_truong
+    return Path(mt.get("CODEX_HOME") or os.path.expanduser("~/.codex")).expanduser()
+
+
 def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]:
     """Mọi executable khớp trong PATH chụp sẵn, rồi các vị trí nền chuẩn.
 
@@ -2386,7 +2392,7 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
     thoc = os.environ.get("CODEX_AUTH_JSON", "").strip()
     if not thoc:
         return ket
-    dich = Path(os.path.expanduser("~/.codex/auth.json"))
+    dich = _codex_home() / "auth.json"
     # Giải mã SỚM để so mốc; phần kiểm lược đồ đầy đủ vẫn ở dưới, không bỏ.
     noi_dung_tam = None
     for thu in (thoc, None):
@@ -2553,7 +2559,7 @@ def _han_token_codex() -> dict:
     ra = {"doc_duoc": False, "last_refresh": None, "tuoi_anh_chup_gio": None,
           "gio_con_lai": {}}
     try:
-        d = json.loads(Path(os.path.expanduser("~/.codex/auth.json"))
+        d = json.loads((_codex_home() / "auth.json")
                        .read_text(encoding="utf-8"))
     except Exception:
         return ra
@@ -2595,7 +2601,7 @@ def _co_chan_codex() -> str | None:
     terminal thì KHÔNG có gì đọc cờ — muốn chặn tới đó phải là cơ chế khác (đổi PATH,
     gói bọc), và ta KHÔNG làm thế vì nó lại là thứ sửa môi trường sau lưng người dùng.
     """
-    co = Path(os.path.expanduser("~/.codex")) / CO_CHAN_CODEX
+    co = _codex_home() / CO_CHAN_CODEX
     if not co.exists():
         return None
     return (f"BI CHAN: {co} ton tai — config codex con khoi "

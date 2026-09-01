@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import argparse
 import base64
+import contextlib
 import errno
 import json
 import os
 import re
+import secrets
 import select
+import stat
 import subprocess
 import sys
 import tempfile
@@ -38,6 +41,7 @@ CHILD_ENV_KEYS = frozenset({
     "http_proxy", "https_proxy", "all_proxy", "no_proxy",
     "SSL_CERT_FILE", "SSL_CERT_DIR", "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE",
     "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "CODEX_HOME",
+    "XDG_DATA_HOME", "GOOGLE_WORKSPACE_CLI_CONFIG_DIR", "TL_CACHE_DIR",
     "PYTHONUTF8", "PYTHONIOENCODING",
 })
 
@@ -66,32 +70,164 @@ def codex_home(env=None) -> Path:
 
 
 def secret_destination(path: Path) -> Path:
-    """Return ``path`` only when its resolved target is outside this checkout."""
+    """Return the canonical target only when it is outside this checkout."""
     target = path.expanduser()
     resolved = target.resolve(strict=False)
     repository = REPOSITORY_ROOT.resolve(strict=True)
     if resolved == repository or repository in resolved.parents:
         raise UnsafeSecretDestination(f"refusing repository secret destination: {target}")
-    return target
+    if target.is_symlink():
+        raise OSError(f"refusing symlink destination: {target}")
+    # Callers must use this value.  Returning the mutable alias after validating
+    # ``resolved`` re-opens the parent-link swap that the policy just closed.
+    return resolved
 
 
-def _atomic_secret(path: Path, data: bytes) -> None:
-    path = secret_destination(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    if path.is_symlink():
-        raise OSError(f"refusing symlink destination: {path}")
-    fd, name = tempfile.mkstemp(prefix=f".{path.name}.tmp-", dir=path.parent)
-    tmp = Path(name)
+@contextlib.contextmanager
+def _hold_parent_directory(parent: Path):
+    """Prevent replacement of a validated Windows parent while it is in use."""
+    if os.name != "nt":
+        yield
+        return
+    import ctypes
+    from ctypes import wintypes
+    create_file = ctypes.windll.kernel32.CreateFileW
+    create_file.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
+                            wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD,
+                            wintypes.HANDLE]
+    create_file.restype = wintypes.HANDLE
+    close_handle = ctypes.windll.kernel32.CloseHandle
+    close_handle.argtypes = [wintypes.HANDLE]
+    close_handle.restype = wintypes.BOOL
+    # Share read/write but deliberately not delete: rename/replacement of this
+    # directory is refused until the secret write completes.
+    handle = create_file(str(parent), 0x80, 0x1 | 0x2, None, 3, 0x02000000, None)
+    invalid = ctypes.c_void_p(-1).value
+    if handle in (None, invalid):
+        raise ctypes.WinError()
+    try:
+        yield
+    finally:
+        close_handle(handle)
+
+
+def _write_secret_fd(fd: int, data: bytes) -> None:
     try:
         os.fchmod(fd, 0o600)
-        with os.fdopen(fd, "wb") as out:
-            out.write(data)
-            out.flush()
-            os.fsync(out.fileno())
-        os.replace(tmp, path)
-        os.chmod(path, 0o600)
+    except Exception:
+        os.close(fd)
+        raise
+    with os.fdopen(fd, "wb") as out:
+        out.write(data)
+        out.flush()
+        os.fsync(out.fileno())
+
+
+def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    parent_fd = os.open(path.parent, flags)
+    created_name = None
+    try:
+        named = os.stat(path.parent, follow_symlinks=False)
+        opened = os.fstat(parent_fd)
+        if (named.st_dev, named.st_ino) != (opened.st_dev, opened.st_ino):
+            raise OSError("validated secret parent changed before use")
+        if exclusive:
+            created_name = path.name
+            fd = os.open(created_name,
+                         os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                         0o600, dir_fd=parent_fd)
+            _write_secret_fd(fd, data)
+        else:
+            for _ in range(128):
+                candidate = f".{path.name}.tmp-{secrets.token_hex(12)}"
+                try:
+                    fd = os.open(candidate,
+                                 os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                                 0o600, dir_fd=parent_fd)
+                except FileExistsError:
+                    continue
+                created_name = candidate
+                break
+            else:
+                raise OSError("could not allocate secret temporary file")
+            _write_secret_fd(fd, data)
+            try:
+                existing = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+            except FileNotFoundError:
+                existing = None
+            if existing is not None and stat.S_ISLNK(existing.st_mode):
+                raise OSError(f"refusing symlink destination: {path}")
+            os.replace(created_name, path.name,
+                       src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
+            created_name = None
+        try:
+            os.fsync(parent_fd)
+        except OSError as exc:
+            if exc.errno not in (errno.EINVAL, getattr(errno, "ENOTSUP", errno.EINVAL)):
+                raise
+        return path
+    except Exception:
+        if created_name is not None:
+            try:
+                os.unlink(created_name, dir_fd=parent_fd)
+            except OSError:
+                pass
+        raise
     finally:
-        tmp.unlink(missing_ok=True)
+        os.close(parent_fd)
+
+
+def _atomic_secret_path(path: Path, data: bytes, *, exclusive: bool) -> Path:
+    """Fallback used while a Windows parent handle prevents path replacement."""
+    with _hold_parent_directory(path.parent):
+        identity = path.parent.stat()
+        parent_id = (identity.st_dev, identity.st_ino)
+        if exclusive:
+            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_TRUNC, 0o600)
+            created = path
+            try:
+                _write_secret_fd(fd, data)
+                return path
+            except Exception:
+                created.unlink(missing_ok=True)
+                raise
+        fd, name = tempfile.mkstemp(prefix=f".{path.name}.tmp-", dir=path.parent)
+        tmp = Path(name)
+        try:
+            _write_secret_fd(fd, data)
+            current = path.parent.stat()
+            if (current.st_dev, current.st_ino) != parent_id:
+                raise OSError("validated secret parent changed before replace")
+            if path.is_symlink():
+                raise OSError(f"refusing symlink destination: {path}")
+            os.replace(tmp, path)
+            os.chmod(path, 0o600)
+            return path
+        finally:
+            tmp.unlink(missing_ok=True)
+
+
+def _atomic_secret(path: Path, data: bytes, *, exclusive: bool = False) -> Path:
+    """Write through the validated parent identity, never through its old alias."""
+    path = secret_destination(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path = secret_destination(path)
+    if (os.name == "posix" and hasattr(os, "O_DIRECTORY") and hasattr(os, "O_NOFOLLOW")
+            and os.open in os.supports_dir_fd and os.replace in os.supports_dir_fd):
+        return _atomic_secret_dirfd(path, data, exclusive=exclusive)
+    return _atomic_secret_path(path, data, exclusive=exclusive)
+
+
+def codex_destination_check(*, env=None) -> dict:
+    source = os.environ if env is None else env
+    try:
+        target = secret_destination(codex_home(source) / "auth.json")
+    except UnsafeSecretDestination:
+        return _result("rejected", reason="secret_destination_in_repository")
+    except OSError:
+        return _result("not_measured", reason="write_failed")
+    return _result("passed", credential_file=str(target), secret_printed=False)
 
 
 def materialize_codex(*, env=None) -> dict:
@@ -100,12 +236,10 @@ def materialize_codex(*, env=None) -> dict:
     if not encoded:
         return _result("missing", reason="CODEX_AUTH_JSON")
     target = codex_home(source) / "auth.json"
-    try:
-        secret_destination(target)
-    except UnsafeSecretDestination:
-        return _result("rejected", reason="secret_destination_in_repository")
-    except OSError:
-        return _result("not_measured", reason="write_failed")
+    checked = codex_destination_check(env=source)
+    if checked["status"] != "passed":
+        return checked
+    target = Path(checked["credential_file"])
     try:
         raw = base64.b64decode(encoded, validate=True)
         parsed = json.loads(raw)
@@ -294,15 +428,34 @@ def tl_bootstrap(env_name: str, secrets_file: Path | None, *, timeout: int = 600
         script = (repository / "scripts" / "tl.py").resolve(strict=True)
         if script.parent.parent != repository:
             return _result("not_measured", reason="unexpected_tl_script")
-        resolved_secrets = secrets_file.expanduser().resolve(strict=False)
+        resolved_secrets = secret_destination(secrets_file)
+        child = _child_env(source, TL_MASTER_KEY=source["TL_MASTER_KEY"])
+        child["HOME"] = str(secret_destination(Path(child.get("HOME") or Path.home())))
+        for key in ("XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME",
+                    "GOOGLE_WORKSPACE_CLI_CONFIG_DIR", "TL_CACHE_DIR",
+                    "TMPDIR", "TMP", "TEMP"):
+            if child.get(key):
+                child[key] = str(secret_destination(Path(child[key])))
+        home = Path(child["HOME"])
+        delegated_targets = [
+            home / ".tra_luat_config.json",
+            home / ".notebooklm-mcp-cli" / "auth.json",
+            home / ".local" / "bin" / "gws",
+            Path(child.get("GOOGLE_WORKSPACE_CLI_CONFIG_DIR")
+                 or home / ".config" / "gws") / "credentials.json",
+        ]
+        for target in delegated_targets:
+            secret_destination(target)
         cmd = [sys.executable, str(script), "bootstrap", "--env", env_name,
                "--secrets-file", str(resolved_secrets)]
         p = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
                            timeout=timeout,
                            cwd=repository,
-                           env=_child_env(source, TL_MASTER_KEY=source["TL_MASTER_KEY"]))
+                           env=child)
     except subprocess.TimeoutExpired:
         return _result("not_measured", reason="timeout")
+    except UnsafeSecretDestination:
+        return _result("rejected", reason="secret_destination_in_repository")
     except OSError:
         return _result("not_measured", reason="cli_missing")
     return _result("passed" if p.returncode == 0 else "rejected", returncode=p.returncode)
@@ -333,9 +486,11 @@ def main(argv=None) -> int:
     b = sub.add_parser("tl-bootstrap"); b.add_argument("--env", choices=("code", "cowork", "chat"), required=True); b.add_argument("--secrets-file", required=True); b.add_argument("--timeout", type=int, default=600)
     i = sub.add_parser("bootstrap"); i.add_argument("--repo", default="ducthangho/tra-luat"); i.add_argument("--env", choices=("code", "cowork", "chat"), required=True); i.add_argument("--secrets-file", required=True); i.add_argument("--claude-token-file")
     sub.add_parser("codex-materialize")
+    sub.add_parser("codex-destination-check")
     sub.add_parser("status")
     a = ap.parse_args(argv)
     if a.command == "codex-materialize": result = materialize_codex()
+    elif a.command == "codex-destination-check": result = codex_destination_check()
     elif a.command == "claude-capture": result = capture_claude(Path(a.output), timeout=a.timeout)
     elif a.command == "github-probe": result = github_probe(a.repo, timeout=a.timeout)
     elif a.command == "tl-bootstrap": result = tl_bootstrap(a.env, Path(a.secrets_file) if a.secrets_file else None, timeout=a.timeout)

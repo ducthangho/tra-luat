@@ -94,6 +94,7 @@ from pathlib import Path
 
 from session_credentials import (
     UnsafeSecretDestination as _UnsafeSecretDestination,
+    _atomic_secret as _shared_atomic_secret,
     secret_destination as _shared_secret_destination,
 )
 
@@ -2409,6 +2410,10 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
         return [{"ten": "codex", "ok": False, "doi": False,
                  "cach": "HONG: repository secret destination",
                  "duong_dan": str(dich)}]
+    except OSError:
+        return [{"ten": "codex", "ok": False, "doi": False,
+                 "cach": "KHONG DO DUOC: credential destination lookup failed",
+                 "duong_dan": str(dich)}]
     # Giải mã SỚM để so mốc; phần kiểm lược đồ đầy đủ vẫn ở dưới, không bỏ.
     noi_dung_tam = None
     for thu in (thoc, None):
@@ -2481,20 +2486,19 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
         return [{"ten": "codex", "ok": True, "doi": True,
                  "cach": cach + " (thử khan)", "duong_dan": str(dich)}]
 
-    # Chốt 4 — tệp tạm, quyền hẹp, rồi mới thay.
-    dich.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
-    fd, tam = tempfile.mkstemp(dir=str(dich.parent))
+    # Chốt 4 — writer dùng đúng canonical target và giữ identity của parent
+    # xuyên suốt create/replace.  Một check path rồi tự mkstemp lại ở đây sẽ mở
+    # lại parent-swap mà shared policy vừa đóng.
     try:
-        os.write(fd, noi_dung.encode("utf-8"))
-        os.close(fd)
-        os.chmod(tam, 0o600)
-        os.replace(tam, dich)
-    except BaseException:
-        try:
-            os.unlink(tam)
-        except OSError:
-            pass
-        raise
+        dich = _shared_atomic_secret(dich, noi_dung.encode("utf-8"))
+    except _UnsafeSecretDestination:
+        return [{"ten": "codex", "ok": False, "doi": False,
+                 "cach": "HONG: repository secret destination",
+                 "duong_dan": str(dich)}]
+    except OSError:
+        return [{"ten": "codex", "ok": False, "doi": False,
+                 "cach": "KHONG DO DUOC: credential write failed",
+                 "duong_dan": str(dich)}]
     return [{"ten": "codex", "ok": True, "doi": True, "cach": cach,
              "duong_dan": str(dich)}]
 

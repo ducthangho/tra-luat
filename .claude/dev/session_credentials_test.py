@@ -108,6 +108,30 @@ def run():
         except OSError as exc:
             assert str(exc).startswith("refusing repository secret destination:")
 
+        # The value returned by the guard is the write capability.  If a
+        # caller-controlled parent link changes immediately after validation,
+        # the writer must stay on the canonical directory that was validated.
+        if os.name != "nt":
+            safe_slot = root / "safe-slot"; safe_slot.mkdir()
+            with tempfile.TemporaryDirectory(prefix="credential-race-", dir=repo) as rd:
+                repo_slot = Path(rd)
+                moving_parent = root / "moving-parent"
+                moving_parent.symlink_to(safe_slot, target_is_directory=True)
+                original_guard = m.secret_destination
+
+                def validate_then_swap(path):
+                    canonical = original_guard(path)
+                    if Path(path) == moving_parent / "auth.json":
+                        moving_parent.unlink()
+                        moving_parent.symlink_to(repo_slot, target_is_directory=True)
+                    return canonical
+
+                with mock.patch.object(m, "secret_destination", side_effect=validate_then_swap):
+                    m._atomic_secret(moving_parent / "auth.json", b"FIXTURE_ONLY")
+                assert (safe_slot / "auth.json").read_bytes() == b"FIXTURE_ONLY"
+                assert not (repo_slot / "auth.json").exists(), \
+                    "post-validation parent swap redirected secret into repository"
+
         # An actual child sees a TTY, displays an interactive prompt, consumes input,
         # and emits the credential split over writes.  The parent must stream the
         # prompt while never forwarding the credential.
@@ -228,6 +252,34 @@ os.write(1,b'A'*180 + b'\\n')
             dispatch.assert_not_called()
 
         secrets_file = root / "s.enc"
+        safe_home = root / "safe-home"; safe_home.mkdir()
+        safe_xdg = root / "safe-xdg"; safe_xdg.mkdir()
+        safe_tmp = root / "safe-tmp"; safe_tmp.mkdir()
+
+        # The encrypted input and every delegated storage root are part of the
+        # same repository boundary.  Refusal must happen before TL is spawned.
+        with tempfile.TemporaryDirectory(prefix="tl-boundary-", dir=repo) as rd:
+            repo_slot = Path(rd)
+            unsafe_cases = [
+                (repo_slot / "s.enc", {"HOME": str(safe_home)}),
+                (secrets_file, {"HOME": str(repo_slot)}),
+                (secrets_file, {"HOME": str(safe_home),
+                                "XDG_CONFIG_HOME": str(repo_slot / "xdg")}),
+                (secrets_file, {"HOME": str(safe_home),
+                                "TMPDIR": str(repo_slot / "tmp")}),
+            ]
+            linked_bundle_parent = root / "tl-repo-link"
+            if os.name != "nt":
+                linked_bundle_parent.symlink_to(repo_slot, target_is_directory=True)
+                unsafe_cases.append((linked_bundle_parent / "linked.enc",
+                                     {"HOME": str(safe_home)}))
+            for bundle, extra_env in unsafe_cases:
+                with mock.patch.object(m.subprocess, "run") as run_child:
+                    rejected = m.tl_bootstrap("cowork", bundle, env={
+                        "TL_MASTER_KEY": "TL_CANARY", **extra_env})
+                assert rejected["status"] == "rejected", (bundle, extra_env, rejected)
+                run_child.assert_not_called()
+
         hostile = root / "hostile"; (hostile / "scripts").mkdir(parents=True)
         hostile_marker = hostile / "fake-tl-ran"
         (hostile / "scripts" / "tl.py").write_text(
@@ -241,7 +293,8 @@ os.write(1,b'A'*180 + b'\\n')
                 result = m.tl_bootstrap("cowork", relative_secrets, env={
                     "TL_MASTER_KEY": "TL_CANARY", "CODEX_AUTH_JSON": "CODEX_CANARY",
                     "CLAUDE_CODE_OAUTH_TOKEN": "CLAUDE_CANARY", "GITHUB_PAT": "GH_CANARY",
-                    "OPENAI_API_KEY": "VENDOR_CANARY", "TMPDIR": "/tmp/test"})
+                    "OPENAI_API_KEY": "VENDOR_CANARY", "HOME": str(safe_home),
+                    "XDG_CONFIG_HOME": str(safe_xdg), "TMPDIR": str(safe_tmp)})
         finally:
             os.chdir(previous_cwd)
         assert result["status"] == "passed"
@@ -250,7 +303,10 @@ os.write(1,b'A'*180 + b'\\n')
         assert child_argv[-2:] == ["--secrets-file", str(secrets_file.resolve())]
         assert run_child.call_args.kwargs["cwd"] == expected_repository
         assert run_child.call_args.kwargs["env"] == {
-            "TMPDIR": "/tmp/test", "TL_MASTER_KEY": "TL_CANARY"}
+            "HOME": str(safe_home.resolve()),
+            "XDG_CONFIG_HOME": str(safe_xdg.resolve()),
+            "TMPDIR": str(safe_tmp.resolve()),
+            "TL_MASTER_KEY": "TL_CANARY"}
         assert not hostile_marker.exists()
 
         calls = []

@@ -61,6 +61,7 @@ from pathlib import Path
 
 from session_credentials import (
     UnsafeSecretDestination as _UnsafeSecretDestination,
+    _atomic_secret as _shared_atomic_secret,
     secret_destination as _shared_secret_destination,
 )
 
@@ -253,22 +254,8 @@ def _gio_con_lai(auth: Path) -> float | None:
 
 
 def _ghi_bi_mat(dich: Path, noi_dung: bytes) -> None:
-    """Ghi 0600 bằng tệp độc quyền rồi replace; không đi theo symlink/hardlink đích."""
-    dich = _secret_destination(dich)
-    fd, ten = tempfile.mkstemp(prefix=f".{dich.name}.tmp-", dir=dich.parent)
-    tam = Path(ten)
-    try:
-        with os.fdopen(fd, "wb") as f:
-            f.write(noi_dung)
-            f.flush()
-            os.fsync(f.fileno())
-        os.chmod(tam, 0o600)
-        os.replace(tam, dich)
-    finally:
-        try:
-            tam.unlink()
-        except FileNotFoundError:
-            pass
+    """Use the shared canonical, parent-bound atomic writer."""
+    _shared_atomic_secret(dich, noi_dung)
 
 
 def _sao_luu(dich: Path) -> Path | None:
@@ -281,41 +268,31 @@ def _sao_luu(dich: Path) -> Path | None:
     Không chữa bằng đồng hồ mịn hơn (`time_ns` vẫn có thể trùng khi hệ thống lùi giờ);
     chữa bằng cách HỎI hệ tệp cho tới khi có tên trống.
     """
-    dich = _secret_destination(dich)
     if not hasattr(os, "O_NOFOLLOW"):
         raise OSError("từ chối sao lưu: nền thiếu os.O_NOFOLLOW")
     if dich.is_symlink():
         raise OSError(f"từ chối sao lưu qua symlink: {dich}")
+    dich = _secret_destination(dich)
     if not dich.is_file():
         return None
+    nguon_fd = os.open(dich, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        with os.fdopen(nguon_fd, "rb") as nguon:
+            noi_dung = nguon.read()
+    except Exception:
+        try:
+            os.close(nguon_fd)
+        except OSError:
+            pass
+        raise
     goc = f"{dich.name}.bak-{int(time.time())}"
     i = 0
     while True:
         bak = dich.with_name(goc if i == 0 else f"{goc}.{i}")
         try:
-            fd = os.open(bak, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_TRUNC, 0o600)
-            break
+            return _shared_atomic_secret(bak, noi_dung, exclusive=True)
         except FileExistsError:
             i += 1
-    try:
-        with os.fdopen(fd, "wb") as ra:
-            # Chính lần MỞ nguồn mới là chốt use-time; guard đầu hàm bảo đảm cờ có thật,
-            # nên getattr không bao giờ được phép suy biến thành mở trần.
-            nguon_fd = os.open(dich, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
-            try:
-                nguon = os.fdopen(nguon_fd, "rb")
-            except Exception:
-                os.close(nguon_fd)
-                raise
-            with nguon:
-                shutil.copyfileobj(nguon, ra)
-            ra.flush()
-            os.fsync(ra.fileno())
-        os.chmod(bak, 0o600)
-        return bak
-    except Exception:
-        bak.unlink(missing_ok=True)
-        raise
 
 
 def soan_tep_dan(b64: str, luc_utc: str, gio_con: float | None) -> str:
@@ -389,9 +366,11 @@ def cmd_lay(a) -> int:
     tep_dan = Path(a.tep_dan) if a.tep_dan else ra.with_name("CODEX_AUTH_JSON_setup.md")
     that = effective_codex_home() / "auth.json" if a.cai_de else None
     try:
-        for destination in (tam / "auth.json", ra, tep_dan, that):
-            if destination is not None:
-                _secret_destination(destination)
+        tam = _secret_destination(tam / "auth.json").parent
+        ra = _secret_destination(ra)
+        tep_dan = _secret_destination(tep_dan)
+        if that is not None:
+            that = _secret_destination(that)
     except _UnsafeSecretDestination:
         _in("ĐỎ: từ chối repository secret destination")
         return RC[DO]
@@ -417,21 +396,28 @@ def cmd_lay(a) -> int:
         return RC[DO]
     _in(f"kiểm sống: {vi_sao}")
 
-    auth_bytes = auth.read_bytes()
-    b64 = base64.b64encode(auth_bytes).decode("ascii")
-    _ghi_bi_mat(ra, (b64 + "\n").encode("ascii"))
+    try:
+        auth_bytes = auth.read_bytes()
+        b64 = base64.b64encode(auth_bytes).decode("ascii")
+        _ghi_bi_mat(ra, (b64 + "\n").encode("ascii"))
 
-    if a.cai_de:
-        that.parent.mkdir(parents=True, exist_ok=True)
-        bak = _sao_luu(that)
-        _ghi_bi_mat(that, auth_bytes)
-        _in(f"đã cài đè {that}" + (f" (sao lưu: {bak})" if bak else ""))
+        if a.cai_de:
+            that.parent.mkdir(parents=True, exist_ok=True)
+            bak = _sao_luu(that)
+            _ghi_bi_mat(that, auth_bytes)
+            _in(f"đã cài đè {that}" + (f" (sao lưu: {bak})" if bak else ""))
 
-    # Tệp hướng dẫn dán: bước CUỐI của lệnh, không phải việc làm tay sau đó. Phiên nào
-    # cũng phải giao được cùng một thứ cho chủ kho, nên nó thuộc về mã.
-    gio_con = _gio_con_lai(auth)
-    _ghi_bi_mat(tep_dan, soan_tep_dan(
-        b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))
+        # Tệp hướng dẫn dán: bước CUỐI của lệnh, không phải việc làm tay sau đó. Phiên nào
+        # cũng phải giao được cùng một thứ cho chủ kho, nên nó thuộc về mã.
+        gio_con = _gio_con_lai(auth)
+        _ghi_bi_mat(tep_dan, soan_tep_dan(
+            b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))
+    except _UnsafeSecretDestination:
+        _in("ĐỎ: từ chối repository secret destination tại điểm ghi")
+        return RC[DO]
+    except OSError:
+        _in("KHÔNG_ĐO_ĐƯỢC: lỗi I/O tại điểm ghi credential")
+        return RC[KHONG_DO_DUOC]
 
     _in("")
     _in("ĐẠT — credential mới, đã chứng minh bằng lời gọi thật.")

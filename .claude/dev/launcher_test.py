@@ -2384,6 +2384,28 @@ def t145_CODEX_HOME_trong_kho_khong_duoc_nhan_credential():
                 bang(not (Path(td) / ".codex-linked" / "auth.json").exists(),
                      "launcher da ghi credential qua parent symlink vao repository")
 
+    # Policy refusal and local inability to resolve the path are distinct
+    # states.  A local filesystem error must be reported, not escape the API.
+    m = _tai_launcher_thu()
+    old_env = m.os.environ
+    original_destination = m._credential_destination
+    try:
+        m.os.environ = {
+            "CODEX_AUTH_JSON": '{"tokens":{"access":"FIXTURE_ONLY"}}',
+            "CODEX_HOME": tempfile.mkdtemp(prefix="launcher-unresolved-"),
+        }
+        def lookup_failed(_path):
+            raise OSError("lookup failed")
+        m._credential_destination = lookup_failed
+        unresolved = m.chuan_bi_xac_thuc(that_su=True)
+    finally:
+        m._credential_destination = original_destination
+        m.os.environ = old_env
+    bang(len(unresolved) == 1 and unresolved[0].get("ok") is False,
+         f"loi resolve cuc bo phai co ket qua cau truc, duoc {unresolved}")
+    bang("KHONG DO DUOC" in unresolved[0].get("cach", "").upper(),
+         f"loi resolve bi tron voi policy rejection: {unresolved}")
+
 
 @ca
 def t146_hook_phai_dung_chung_codex_materialize_guard():
@@ -2396,6 +2418,47 @@ def t146_hook_phai_dung_chung_codex_materialize_guard():
          "hook khong goi entry point materialize co repository guard")
     bang('dst = os.path.join(os.path.expanduser("~"), ".codex", "auth.json")' not in hook,
          "hook con writer rieng hard-code ~/.codex va bo qua CODEX_HOME/guard")
+
+    # Execute the real auth block from the hook.  A successful `login status`
+    # must not get a chance to bypass destination validation.
+    if LA_WINDOWS:
+        return "bo qua tren Windows (auth block la bash; duong POSIX do o CI ubuntu)"
+    guard_start = hook.index("# --- CODEX SECRET DESTINATION GUARD")
+    guard_end = hook.index("# --- END CODEX SECRET DESTINATION GUARD", guard_start)
+    guard_end = hook.index("\n", guard_end) + 1
+    destination_guard = hook[guard_start:guard_end]
+    start = hook.index('if [ -n "${CODEX_AUTH_JSON:-}" ]')
+    end = hook.index("# --- KHOI PHUC credential codex", start)
+    auth_block = hook[start:end]
+    repo = LAUNCHER.resolve().parents[2]
+    with tempfile.TemporaryDirectory(prefix="hook-codex-home-", dir=repo) as rd, \
+         tempfile.TemporaryDirectory(prefix="hook-codex-bin-") as bd:
+        log = Path(bd) / "codex-calls.log"
+        fake = Path(bd) / "codex"
+        fake.write_text(
+            '#!/bin/sh\nprintf "%s\\n" "$*" >> "$CODEX_CALL_LOG"\nexit 0\n',
+            encoding="utf-8")
+        fake.chmod(0o755)
+        script = (
+            "set -euo pipefail\n"
+            'GOC="$TEST_GOC"; PY="$TEST_PY"; CODEX_BI_CHAN=0\n'
+            'co() { command -v "$1" >/dev/null 2>&1; }\n'
+            + destination_guard + auth_block
+        )
+        env = dict(os.environ)
+        env.update({
+            "PATH": f"{bd}{os.pathsep}{env.get('PATH', '')}",
+            "TEST_GOC": str(repo), "TEST_PY": PY,
+            "CODEX_CALL_LOG": str(log),
+            "CODEX_HOME": str(Path(rd) / ".codex"),
+            "CODEX_AUTH_JSON": '{"tokens":{"access":"FIXTURE_ONLY"}}',
+        })
+        result = subprocess.run(["/bin/bash", "-c", script], capture_output=True,
+                                text=True, env=env, timeout=30)
+        bang(result.returncode == 0,
+             f"auth block phai fail-closed sach, rc={result.returncode}: {result.stderr!r}")
+        bang(not log.exists(),
+             f"hook da goi codex truoc guard: {log.read_text() if log.exists() else ''}")
 
 
 @ca

@@ -431,6 +431,64 @@ def t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth(M):
             "đã cài credential vào repository"
 
 
+def t15_cmd_lay_phai_dung_duong_canonical_guard_tra_ve(M):
+    """Preflight is not advisory: every later operation uses its returned path."""
+    root = Path(tempfile.mkdtemp(prefix="codex-canonical-"))
+    alias_home, real_home = root / "alias-home", root / "real-home"
+    real_home.mkdir()
+    (real_home / "auth.json").write_text(
+        '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
+        encoding="utf-8")
+    alias_b64, real_b64 = root / "alias.b64", root / "real.b64"
+    alias_setup, real_setup = root / "alias.md", root / "real.md"
+    mapping = {
+        alias_home / "auth.json": real_home / "auth.json",
+        alias_b64: real_b64,
+        alias_setup: real_setup,
+    }
+    M._secret_destination = lambda p: mapping.get(Path(p), Path(p).resolve())
+    homes = []
+    M._co_codex = lambda: "/gia/codex"
+    M._chay_device_auth = lambda home, _timeout: (homes.append(Path(home)) or (True, "ok"))
+    M._kiem_song = lambda _home: (True, "rc=0")
+
+    class A:
+        codex_home, ra, tep_dan = str(alias_home), str(alias_b64), str(alias_setup)
+        han_giay, in_gia_tri, cai_de = 5, False, False
+
+    import io
+    from contextlib import redirect_stdout
+    with redirect_stdout(io.StringIO()):
+        rc = M.cmd_lay(A())
+    assert rc == M.RC[M.DAT], f"canonical destinations not honored, rc={rc}"
+    assert homes == [real_home], f"device auth used unchecked alias: {homes}"
+    assert real_b64.is_file() and real_setup.is_file(), "outputs missed canonical targets"
+    assert not alias_b64.exists() and not alias_setup.exists(), "writer reused unchecked aliases"
+
+
+def t16_cmd_lay_phan_loai_tu_choi_tai_diem_ghi(M):
+    root = Path(tempfile.mkdtemp(prefix="codex-use-time-"))
+    (root / "auth.json").write_text(
+        '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
+        encoding="utf-8")
+    M._co_codex = lambda: "/gia/codex"
+    M._chay_device_auth = lambda *_a: (True, "ok")
+    M._kiem_song = lambda _home: (True, "rc=0")
+
+    class A:
+        codex_home, ra, tep_dan = str(root), str(root / "out.b64"), str(root / "setup.md")
+        han_giay, in_gia_tri, cai_de = 5, False, False
+
+    import io
+    from contextlib import redirect_stdout
+    for error, expected in ((M._UnsafeSecretDestination("parent changed"), M.RC[M.DO]),
+                            (OSError("disk lookup failed"), M.RC[M.KHONG_DO_DUOC])):
+        M._ghi_bi_mat = lambda *_a, _error=error: (_ for _ in ()).throw(_error)
+        with redirect_stdout(io.StringIO()):
+            rc = M.cmd_lay(A())
+        assert rc == expected, f"use-time {type(error).__name__} mapped to rc={rc}"
+
+
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
       t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0, t4_kiem_song_bat_credential_bi_tu_choi,
       t5_kiem_song_dat_khi_co_dau_hieu, t6_khong_in_gia_tri_khi_khong_co_co,
@@ -438,7 +496,9 @@ CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan
       t9_cmd_lay_GHI_tep_huong_dan_dan, t10_gio_con_lai_doc_exp_va_bu_padding,
       t11_sao_luu_tu_choi_symlink, t12_sao_luu_O_NOFOLLOW_tai_diem_doc,
       t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW,
-      t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth]
+      t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth,
+      t15_cmd_lay_phai_dung_duong_canonical_guard_tra_ve,
+      t16_cmd_lay_phan_loai_tu_choi_tai_diem_ghi]
 
 # ─────────────────────────── đột biến ───────────────────────────
 # (nhãn, chuỗi CŨ, chuỗi MỚI, ca ĐÍCH phải chết)
@@ -467,18 +527,18 @@ DOT_BIEN = [
      "t5_kiem_song_dat_khi_co_dau_hieu"),
     ("t6_in_bi_mat_luon", "if a.in_gia_tri:", "if True:",
      "t6_khong_in_gia_tri_khi_khong_co_co"),
-    # Gỡ O_EXCL ⇒ tên vừa bị giữ bị mở+truncate thay vì thử tên kế tiếp.
-    ("t7_bo_mo_doc_quyen", "os.O_CREAT | os.O_EXCL | os.O_TRUNC",
-     "os.O_CREAT | os.O_TRUNC",
+    # Gỡ exclusive ⇒ tên vừa bị giữ bị replace thay vì thử tên kế tiếp.
+    ("t7_bo_mo_doc_quyen", "_shared_atomic_secret(bak, noi_dung, exclusive=True)",
+     "_shared_atomic_secret(bak, noi_dung, exclusive=False)",
      "t7_sao_luu_khong_de_ban_cu"),
     # Gỡ hẳn bước sinh tệp: đúng bệnh "làm tay rồi lần sau quên".
     # Bỏ TRỌN khối sinh tệp (cả write_text lẫn chmod). Bản trước chỉ bỏ write_text nên
     # `os.chmod` phía sau ném FileNotFoundError và giết luôn t6 — đó là đột biến làm hỏng
     # HÀM cho mọi ca, không phải đột biến đo đúng tính chất t9 canh.
     ("t9_khong_sinh_tep_dan",
-     '    _ghi_bi_mat(tep_dan, soan_tep_dan(\n'
-     '        b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))',
-     "    pass", "t9_cmd_lay_GHI_tep_huong_dan_dan"),
+     '        _ghi_bi_mat(tep_dan, soan_tep_dan(\n'
+     '            b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))',
+     "        pass", "t9_cmd_lay_GHI_tep_huong_dan_dan"),
     # Bỏ bù padding base64url — ca t10 phải ĐỎ, và đây là lỗi thật rất dễ lọt.
     ("t10_khong_bu_padding", '\n    than += "=" * (-len(than) % 4)', "",
      "t10_gio_con_lai_doc_exp_va_bu_padding"),

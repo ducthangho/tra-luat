@@ -34,6 +34,7 @@ from launcher import ky_ban_ghi_luot
 HERE = Path(__file__).resolve().parent
 CANONICAL = HERE / "packet_loop.py"
 ROOT = HERE.parents[1]
+LAUNCHER_RUNTIME_FILES = ("launcher.py", "session_credentials.py")
 
 # --- CÔ LẬP GIT KHỎI CẤU HÌNH NGOÀI (cross-review codex, PR #343, cùng lớp với P1-a của
 # PR #342) --------------------------------------------------------------------------
@@ -124,6 +125,15 @@ class BoQua(Exception):
     pass
 
 
+def _chep_launcher_runtime(destination: Path) -> Path:
+    """Materialize the declared sibling dependency closure for launcher.py."""
+    destination.mkdir(parents=True, exist_ok=True)
+    for name in LAUNCHER_RUNTIME_FILES:
+        (destination / name).write_text((HERE / name).read_text(encoding="utf-8"),
+                                        encoding="utf-8", newline="\n")
+    return destination / "launcher.py"
+
+
 def anh_doctor(**doi) -> str:
     d = {"thieu_bat_buoc": [], "chua_xac_thuc": [],
          "he_dieu_hanh": platform.system()}
@@ -164,7 +174,7 @@ def run(script: Path, args, state_dir=None, env_extra=None):
 def run_json_that(c, sd, reason="infrastructure", xong=False, loi_probe=False) -> Path:
     launcher = c.script.with_name("launcher.py")
     if not launcher.is_file():
-        launcher.write_text((HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
+        launcher = _chep_launcher_runtime(c.script.parent)
     rr = c.tmp / f"runs{c._n}-{reason}-{int(xong)}-{time.time_ns()}"
     cmd = [sys.executable, str(launcher), "run", "--workspace", str(ROOT),
            "--run-root", str(rr), "--attempt-state", str(sd / "wp55.json"),
@@ -1330,6 +1340,18 @@ def case_anh_doctor_nen_chung_tuoi_chi_begin(c: Ctx):
 def case_ma_in_thang_gioi_han_cung_principal(c: Ctx):
     s = (HERE / "launcher.py").read_text(encoding="utf-8")
     assert "chống VÔ Ý" in s and "chống PHÁT LẠI" in s and "cùng principal" in s
+
+
+def case_launcher_ban_sao_roi_import_duoc(c: Ctx):
+    """A copied launcher must reach its CLI instead of dying during import."""
+    d = c.tmp / "isolated-launcher"
+    copied = _chep_launcher_runtime(d)
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    p = subprocess.run([sys.executable, str(copied), "--help"], cwd=d,
+                       capture_output=True, text=True, env=env)
+    _doi(0, p.returncode, p.stderr.encode("utf-8", "replace"),
+         "launcher copy died before CLI")
 
 
 def case_void_attempt_allowlist(c: Ctx):
@@ -2771,6 +2793,7 @@ CASES = [
     ("void_xong_van_mo_lai_duoc_luot", case_void_xong_van_mo_lai_duoc_luot),
     ("void_attempt_ly_do_tu_che_bi_tu_choi", case_void_attempt_ly_do_tu_che_bi_tu_choi),
     ("void_sau_review_bi_chan", case_void_sau_review_bi_chan),
+    ("launcher_ban_sao_roi_import_duoc", case_launcher_ban_sao_roi_import_duoc),
     ("doctrine_scan_sach_xanh", case_doctrine_scan_sach_xanh),
     ("doctrine_scan_bom_cum_tu_do", case_doctrine_scan_bom_cum_tu_do),
     ("doctrine_scan_bat_doctrine_THAT_tu_protocol", case_doctrine_scan_bat_doctrine_THAT_tu_protocol),
@@ -4490,8 +4513,7 @@ def case_dot_bien_test_khai_bao_chay_va_giet_dung_ca(c: Ctx):
     mut_dir.mkdir(parents=True, exist_ok=True)
     script = mut_dir / "packet_loop.py"
     script.write_text(goc, encoding="utf-8", newline="\n")
-    (mut_dir / "launcher.py").write_text(
-        (HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
+    _chep_launcher_runtime(mut_dir)
     test_mut = mut_dir / "packet_loop_test.py"
     test_mut.write_text(than, encoding="utf-8", newline="\n")
     spec = importlib.util.spec_from_file_location("packet_loop_test_khoa_neo", test_mut)
@@ -4604,6 +4626,15 @@ def main() -> int:
         # doctrine KHÔNG được đụng tới máy trạng thái, và ngược lại. Đụng nghĩa là nó
         # không nhắm đúng tầng nó khai.
         print("\ntự chứng minh suite KHÔNG RỖNG (ca đích ĐỎ · đối chứng khác họ XANH):")
+        probe_dir = tmp / "launcher_runtime_preflight"
+        probe_launcher = _chep_launcher_runtime(probe_dir)
+        probe_env = os.environ.copy(); probe_env.pop("PYTHONPATH", None)
+        probe = subprocess.run([sys.executable, str(probe_launcher), "--help"],
+                               cwd=probe_dir, capture_output=True, text=True, env=probe_env)
+        if probe.returncode != 0:
+            print("  ĐỎ  launcher runtime copy không import/chạy được trước mutation: "
+                  + (probe.stderr or probe.stdout)[-500:])
+            return 1
         for ten_mut, (tim, thay, phai_chet) in MUTANTS.items():
             cap = _cap_thay_the(tim, thay)
             than, dot_bien_test, thieu = _phan_loai_dot_bien(
@@ -4618,8 +4649,7 @@ def main() -> int:
             for t, th in cap:
                 than = than.replace(t, th, 1)
             mut.write_text(goc if dot_bien_test else than, encoding="utf-8", newline="\n")
-            (mut_dir / "launcher.py").write_text(
-                (HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
+            _chep_launcher_runtime(mut_dir)
             suite = sys.modules[__name__]
             if dot_bien_test:
                 test_mut = mut_dir / "packet_loop_test.py"

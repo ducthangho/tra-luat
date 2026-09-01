@@ -60,6 +60,17 @@ else
   exit 1
 fi
 
+# --- CODEX SECRET DESTINATION GUARD -----------------------------------------
+# Chạy TRƯỚC mọi lần gọi binary codex, kể cả `--version` và `login status`.
+# "Đã đăng nhập" chỉ nói file đọc được; nó không cấp quyền dùng file trong kho.
+CODEX_BI_CHAN=0
+if ! "$PY" "$GOC/.claude/dev/session_credentials.py" codex-destination-check >/dev/null
+then
+  CODEX_BI_CHAN=1
+  echo "[session-start] !! CHAN MOI DUONG CODEX CUA KHO: CODEX_HOME/auth.json khong co destination an toan"
+fi
+# --- END CODEX SECRET DESTINATION GUARD -------------------------------------
+
 # CÓ MẶT ≠ CHẠY ĐƯỢC. `command -v` chỉ chứng minh có đường dẫn: audit dựng hai tệp
 # RỖNG tên git.exe/python.exe mà doctor vẫn báo xanh, và trên Windows `rg.exe` nằm
 # trong PATH nhưng chạy ra "Access is denied". Probe thật: có timeout, đòi rc=0 VÀ
@@ -121,9 +132,11 @@ echo "[session-start] goc du an: $GOC"
 # --- CLI agent chính thức. Idempotent: đã có thì không đụng (container được
 # cache sau khi hook xong, nên lần sau vào thẳng).
 if co npm; then
-  if ! co_chay codex; then
+  if [ "$CODEX_BI_CHAN" = 0 ] && ! co_chay codex; then
     echo "[session-start] cai @openai/codex ..."
     npm install -g @openai/codex >/dev/null 2>&1 || echo "[session-start] CANH BAO: cai codex that bai"
+  elif [ "$CODEX_BI_CHAN" != 0 ]; then
+    echo "[session-start] codex: BO QUA probe/cai dat — secret destination bi chan"
   fi
   if ! co_chay claude; then
     echo "[session-start] cai @anthropic-ai/claude-code ..."
@@ -281,7 +294,7 @@ fi
 #
 # Nen: hook DOC, dat co chan, va in cach chua. Nguoi dung tu chay `--go` roi tu `mv`.
 # Ca lop rui ro tren chet theo KIEN TRUC, khong theo ban va.
-if co codex; then
+if co codex && [ "$CODEX_BI_CHAN" = 0 ]; then
   MA_GO=0
   "$PY" "$GOC/.claude/dev/codex_env_policy.py" 2>&1 | sed 's/^/[session-start] /' || MA_GO=$?
   # KHONG doc `${PIPESTATUS[0]}` o day. Ban truoc co dong do, kem chu thich "`set -o

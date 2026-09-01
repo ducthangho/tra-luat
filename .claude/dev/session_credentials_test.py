@@ -6,6 +6,7 @@ import json
 import os
 import stat
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from unittest import mock
@@ -15,7 +16,112 @@ spec = importlib.util.spec_from_file_location("session_credentials", P)
 m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
 
 
+def directory_root_lock(module):
+    """Exact directory roots are guarded as directories, not as file targets."""
+    repository = P.resolve().parents[2]
+    module.REPOSITORY_ROOT = repository
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td)
+        secrets_file = root / "bundle.enc"
+        safe_home = root / "safe-home"; safe_home.mkdir()
+        worktree = root / "exact-worktree"; (worktree / ".git").mkdir(parents=True)
+        directory_keys = (
+            "HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME",
+            "GOOGLE_WORKSPACE_CLI_CONFIG_DIR", "TL_CACHE_DIR",
+            "TMPDIR", "TMP", "TEMP",
+        )
+
+        # Every directory-valued input must reject the candidate itself when
+        # that candidate is the worktree root.  The older file-target guard
+        # began at candidate.parent and therefore missed exactly this case.
+        for key in directory_keys:
+            env = {"TL_MASTER_KEY": "TL_CANARY", "HOME": str(safe_home),
+                   key: str(worktree)}
+            with mock.patch.object(module.subprocess, "run") as child:
+                result = module.tl_bootstrap("cowork", secrets_file, env=env)
+            assert result == {
+                "status": "rejected", "reason": "secret_destination_in_repository"
+            }, (key, result)
+            child.assert_not_called()
+
+        # Bare repositories and an exact link alias have the same boundary.
+        bare = root / "bare.git"
+        (bare / "objects").mkdir(parents=True); (bare / "refs").mkdir()
+        (bare / "HEAD").write_text("ref: refs/heads/main\n", encoding="utf-8")
+        (bare / "config").write_text("[core]\n\tbare = true\n", encoding="utf-8")
+        try:
+            module.directory_destination(bare)
+            assert False, "exact bare-repository directory root accepted"
+        except module.UnsafeSecretDestination:
+            pass
+        with mock.patch.object(module.subprocess, "run") as child:
+            result = module.tl_bootstrap("cowork", secrets_file, env={
+                "TL_MASTER_KEY": "TL_CANARY", "HOME": str(bare)})
+        assert result == {
+            "status": "rejected", "reason": "secret_destination_in_repository"
+        }, result
+        child.assert_not_called()
+
+        alias = root / "repository-alias"
+        alias_available = False
+        if os.name == "nt":
+            alias_available = subprocess.run(
+                ["cmd.exe", "/d", "/c", "mklink", "/J", str(alias), str(worktree)],
+                stdin=subprocess.DEVNULL, capture_output=True).returncode == 0
+        else:
+            alias.symlink_to(worktree, target_is_directory=True)
+            alias_available = True
+        if alias_available:
+            try:
+                module.directory_destination(alias)
+                assert False, "exact repository link/junction alias accepted"
+            except module.UnsafeSecretDestination:
+                pass
+            with mock.patch.object(module.subprocess, "run") as child:
+                result = module.tl_bootstrap("cowork", secrets_file, env={
+                    "TL_MASTER_KEY": "TL_CANARY", "HOME": str(alias)})
+            assert result == {
+                "status": "rejected", "reason": "secret_destination_in_repository"
+            }, result
+            child.assert_not_called()
+
+        # External roots, including roots that do not exist yet, retain the
+        # delegated-child behavior and are passed in canonical form.
+        for key in directory_keys:
+            future = root / "future" / key.lower()
+            env = {"TL_MASTER_KEY": "TL_CANARY", "HOME": str(safe_home),
+                   key: str(future)}
+            completed = mock.Mock(returncode=0)
+            with mock.patch.object(module.subprocess, "run", return_value=completed) as child:
+                result = module.tl_bootstrap("cowork", secrets_file, env=env)
+            assert result["status"] == "passed", (key, result)
+            assert child.call_count == 1
+            assert child.call_args.kwargs["env"][key] == str(future.resolve(strict=False))
+
+
+def run_mutations():
+    """Kill the packet's named directory-root mutant with only its lock test."""
+    source = P.read_text(encoding="utf-8")
+    old = "    return _guard_destination(path, include_candidate=True)"
+    new = "    return _guard_destination(path, include_candidate=False)"
+    assert source.count(old) == 1, "directory_guard_skips_candidate_itself site missing"
+    with tempfile.TemporaryDirectory(prefix="session-credential-mutant-") as td:
+        mutant_path = Path(td) / "session_credentials.py"
+        mutant_path.write_text(source.replace(old, new), encoding="utf-8", newline="\n")
+        mutant_spec = importlib.util.spec_from_file_location(
+            "session_credentials_directory_guard_mutant", mutant_path)
+        mutant = importlib.util.module_from_spec(mutant_spec)
+        mutant_spec.loader.exec_module(mutant)
+        try:
+            directory_root_lock(mutant)
+        except AssertionError:
+            print("PASS directory_guard_skips_candidate_itself (killed 1/1)")
+            return
+    raise AssertionError("directory_guard_skips_candidate_itself survived")
+
+
 def run():
+    directory_root_lock(m)
     expected_repository = P.resolve().parents[2]
     assert m.REPOSITORY_ROOT == expected_repository
     with tempfile.TemporaryDirectory() as td:
@@ -210,6 +316,26 @@ def run():
                     m._atomic_secret(held_parent / "auth.json", b"FIXTURE_ONLY")
                 assert (moved_parent / "auth.json").read_bytes() == b"FIXTURE_ONLY"
                 assert not (Path(rd) / "auth.json").exists()
+
+            # Threat-model decision: a concurrent actor that can REPARENT the
+            # already-open directory object is not swapping the pathname to a
+            # different target.  The capability deliberately remains bound to
+            # the same inode, so moving that inode under a repository also
+            # moves the eventual write there.  This is outside the supported
+            # pathname-race boundary and must stay explicit in the docs.
+            decision_repo = root / "reparent-repository"
+            (decision_repo / ".git").mkdir(parents=True)
+            reparented = root / "opened-parent-reparented"; reparented.mkdir()
+            moved_under_repo = decision_repo / "same-opened-directory"
+            original_validate = m._validate_parent_capability
+            def validate_then_reparent(directory_fd):
+                original_validate(directory_fd)
+                reparented.rename(moved_under_repo)
+            with mock.patch.object(m, "_validate_parent_capability",
+                                   side_effect=validate_then_reparent):
+                m._atomic_secret(reparented / "auth.json", b"FIXTURE_ONLY")
+            assert (moved_under_repo / "auth.json").read_bytes() == b"FIXTURE_ONLY"
+            assert not (reparented / "auth.json").exists()
 
             # A target symlink created at the last instant is replaced as a
             # directory entry; it is never followed to the repository victim.
@@ -529,4 +655,10 @@ os.write(1,b'A'*180 + b'\\n')
     print("PASS session_credentials_test")
 
 
-if __name__ == "__main__": run()
+if __name__ == "__main__":
+    if sys.argv[1:] == ["--dot-bien"]:
+        run_mutations()
+    elif sys.argv[1:]:
+        raise SystemExit("usage: session_credentials_test.py [--dot-bien]")
+    else:
+        run()

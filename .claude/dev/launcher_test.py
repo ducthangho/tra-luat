@@ -43,7 +43,7 @@ os.environ.pop("CODEX_HOME", None)
 
 MA_OK, MA_THAM_SO, MA_GIT, MA_HEAD, MA_REF = 0, 2, 3, 4, 5
 MA_BAN, MA_PROMPT, MA_HAN, MA_VA_CHAM, MA_DANH_TINH, MA_QUA_HAN = 6, 7, 8, 9, 10, 124
-MA_WORKTREE, MA_PROBE = 14, 15
+MA_CHUA_XAC_THUC, MA_WORKTREE, MA_PROBE = 13, 14, 15
 
 CA: list = []
 
@@ -6243,6 +6243,101 @@ def r21_bon_mutant_noi_semantic_allowlist_phai_lam_oracle_DO():
         bang(False, f"mutant noi allowlist SONG SOT: {truong}")
 
 
+@ca
+def r22_run_codex_tieu_thu_co_chan_truoc_probe_va_Popen():
+    """Generic `run` shares the Codex refusal at both child-start boundaries."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = tao_repo(s)
+        original_chot = m.chay_cac_chot
+        original_probe = m.chay_cac_probe
+        original_block = m._co_chan_codex
+        original_which = m.shutil.which
+        original_popen = m.subprocess.Popen
+        try:
+            # Raw basename, absolute paths, PATH resolution, and Windows
+            # PATHEXT/shim suffixes all identify the same Codex provider.
+            forms = [
+                ("codex", None),
+                (str(s / "bin" / "CoDeX"), None),
+                (r"C:\\fixture\\CODEX.EXE", None),
+                (r"C:\\fixture\\codex.CmD", None),
+                (r"C:\\fixture\\codex.BAT", None),
+                (r"C:\\fixture\\codex.COM", None),
+                ("provider-shim", r"C:\\resolved\\codex.CMD"),
+            ]
+            for command, resolved in forms:
+                events = []
+                a = m.build_parser().parse_args([
+                    "run", "--workspace", str(repo), "--run-root", str(s / "runs"),
+                    "--", command,
+                ])
+                a.lenh = a.lenh[1:]
+                m.chay_cac_chot = lambda _a: {"workspace": str(repo)}
+                m.chay_cac_probe = lambda *_a, **_k: events.append("probe")
+                m._co_chan_codex = lambda: "BI CHAN fixture"
+                m.shutil.which = lambda name, _resolved=resolved: (
+                    _resolved if name == command and _resolved else None)
+                m.subprocess.Popen = lambda *_a, **_k: events.append("popen")
+                try:
+                    m.lenh_run(a)
+                except m.Chan as exc:
+                    bang(exc.ma == MA_CHUA_XAC_THUC and "BI CHAN" in exc.thong_diep,
+                         f"{command!r} bi chan sai: {exc.ma} {exc.thong_diep!r}")
+                else:
+                    bang(False, f"{command!r} khong tieu thu co chan")
+                bang(events == [], f"{command!r} da start child truoc refusal: {events}")
+
+            # A non-Codex command remains outside this provider-specific gate.
+            reached_probe = []
+            a = m.build_parser().parse_args([
+                "run", "--workspace", str(repo), "--run-root", str(s / "negative-runs"),
+                "--", "not-codex",
+            ])
+            a.lenh = a.lenh[1:]
+            m.chay_cac_chot = lambda _a: {"workspace": str(repo)}
+            m.shutil.which = lambda _name: r"C:\\resolved\\not-codex.CMD"
+            m._co_chan_codex = lambda: (_ for _ in ()).throw(
+                AssertionError("non-Codex command consulted Codex block"))
+            m.chay_cac_probe = lambda *_a, **_k: reached_probe.append(True)
+            try:
+                m.lenh_run(a)
+            except (TypeError, ValueError):
+                pass
+            bang(reached_probe == [True], "non-Codex command did not reach capability probe")
+
+            # The flag can appear after capability probing.  Re-read it at the
+            # final execution boundary and still start zero Codex children.
+            a = m.build_parser().parse_args([
+                "run", "--workspace", str(repo), "--run-root", str(s / "late-runs"),
+                "--", "codex",
+            ])
+            a.lenh = a.lenh[1:]
+            m.subprocess.Popen = original_popen
+            m.shutil.which = original_which
+            precomputed_chot = original_chot(a)
+            answers = iter((None, "BI CHAN late fixture"))
+            m.chay_cac_chot = lambda _a: precomputed_chot
+            m.chay_cac_probe = lambda *_a, **_k: ({}, None)
+            m.shutil.which = lambda name: r"C:\\resolved\\codex.CMD" if name == "codex" else None
+            m._co_chan_codex = lambda: next(answers)
+            m.subprocess.Popen = lambda *_a, **_k: (_ for _ in ()).throw(
+                AssertionError("late Codex block still reached Popen"))
+            try:
+                m.lenh_run(a)
+            except m.Chan as exc:
+                bang(exc.ma == MA_CHUA_XAC_THUC and "late fixture" in exc.thong_diep,
+                     f"late block bi chan sai: {exc.ma} {exc.thong_diep!r}")
+            else:
+                bang(False, "late Codex block did not stop final execution")
+        finally:
+            m.chay_cac_chot = original_chot
+            m.chay_cac_probe = original_probe
+            m._co_chan_codex = original_block
+            m.shutil.which = original_which
+            m.subprocess.Popen = original_popen
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -6305,6 +6400,11 @@ DOT_BIEN = [
      ('    return {ten: {"trang_thai": kq["trang_thai"], "chi_tiet": kq["chi_tiet"]}',
       '    return {ten: {"trang_thai": ("DAT" if kq["trang_thai"] == "KHONG_DO_DUOC" else kq["trang_thai"]), "chi_tiet": kq["chi_tiet"]}'),
      ["r09_run_json_giu_ba_trang_thai_probe"]),
+    ("run_codex_bypasses_co_chan",
+     [('    _chan_run_codex(a.lenh)', '    pass  # mutant bypasses pre-probe block'),
+      ('        _chan_run_codex(lenh_con)',
+       '        pass  # mutant bypasses final-execution block')],
+     ["r22_run_codex_tieu_thu_co_chan_truoc_probe_va_Popen"]),
     # Ca "rc=0 ma stdout RONG" duoc chan o BON cho doc lap: guard trong
     # _git_mot_dong, kiem SHA_RE trong chot_head, kiem `not top` trong chot_workspace,
     # va kiem `not ref` trong chot_ref. DA DO: bo RIENG bat ky cho nao cung KHONG ca nao chet -

@@ -93,23 +93,38 @@ def _is_repository_root(candidate: Path) -> bool:
             and (candidate / "config").is_file())
 
 
-def secret_destination(path: Path) -> Path:
-    """Preflight and canonicalize a secret target outside every repository.
+def _guard_destination(path: Path, *, include_candidate: bool) -> Path:
+    """Canonicalize a file or directory target outside every repository.
 
     This path check is deliberately not the writer's authority.  The writer
     opens the actual parent directory and repeats the repository test by file
     descriptor before it creates a byte.  Callers still use this canonical
     value so a benign alias cannot drift between their own preflight and use.
+
+    File targets begin at their parent.  Directory-valued environment roots
+    must include the candidate itself: a directory can itself be a worktree or
+    bare repository even when its parent is harmless.
     """
     target = path.expanduser()
     resolved = target.resolve(strict=False)
-    if target.is_symlink():
-        raise OSError(f"refusing symlink destination: {target}")
-    for candidate in (resolved.parent, *resolved.parent.parents):
+    start = resolved if include_candidate else resolved.parent
+    for candidate in (start, *start.parents):
         if _is_repository_root(candidate):
             raise UnsafeSecretDestination(
                 f"refusing repository secret destination: {target}")
+    if target.is_symlink():
+        raise OSError(f"refusing symlink destination: {target}")
     return resolved
+
+
+def secret_destination(path: Path) -> Path:
+    """Preflight and canonicalize a secret file target."""
+    return _guard_destination(path, include_candidate=False)
+
+
+def directory_destination(path: Path) -> Path:
+    """Preflight and canonicalize a delegated directory-valued root."""
+    return _guard_destination(path, include_candidate=True)
 
 
 def _stat_at(directory_fd: int, name: str):
@@ -581,13 +596,13 @@ def tl_bootstrap(env_name: str, secrets_file: Path | None, *, timeout: int = 600
         if script.parent.parent != repository:
             return _result("not_measured", reason="unexpected_tl_script")
         resolved_secrets = secret_destination(secrets_file)
-        home = str(secret_destination(Path(source.get("HOME") or Path.home())))
+        home = str(directory_destination(Path(source.get("HOME") or Path.home())))
         storage = {"HOME": home}
         for key in ("XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME",
                     "GOOGLE_WORKSPACE_CLI_CONFIG_DIR", "TL_CACHE_DIR",
                     "TMPDIR", "TMP", "TEMP"):
             if source.get(key):
-                storage[key] = str(secret_destination(Path(source[key])))
+                storage[key] = str(directory_destination(Path(source[key])))
         child = _child_env(source, TL_MASTER_KEY=source["TL_MASTER_KEY"], **storage)
         home = Path(child["HOME"])
         delegated_targets = [

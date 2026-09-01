@@ -155,6 +155,34 @@ _TRANSPORT_CONTRACTS = (
     ("openai_api", ("llm",), "llm_cli", "machine"),
 )
 
+_EXECUTABLE_SUFFIXES = (".exe", ".cmd", ".bat", ".com")
+
+
+def _ten_chuong_trinh(value: str) -> str:
+    """Normalize an executable basename for both POSIX and Windows spellings."""
+    # `Path` on POSIX does not treat a backslash as a separator.  Tests and WSL
+    # can still receive a Windows path, so split both forms deliberately.
+    name = re.split(r"[\\/]", str(value))[-1].casefold()
+    for suffix in _EXECUTABLE_SUFFIXES:
+        if name.endswith(suffix):
+            return name[:-len(suffix)]
+    return name
+
+
+def _la_lenh_codex(lenh: list[str]) -> bool:
+    """Identify Codex from argv spelling or the executable resolved on PATH."""
+    if not lenh:
+        return False
+    command = str(lenh[0])
+    candidates = [command]
+    try:
+        resolved = shutil.which(command)
+    except (OSError, TypeError):
+        resolved = None
+    if resolved:
+        candidates.append(resolved)
+    return any(_ten_chuong_trinh(candidate) == "codex" for candidate in candidates)
+
 
 def _dinh_danh_van_chuyen(lenh: list[str]) -> dict:
     """Trả contract transport canonical và băm của chính contract ấy."""
@@ -168,11 +196,7 @@ def _dinh_danh_van_chuyen(lenh: list[str]) -> dict:
             raise RuntimeError(f"provider co nhieu transport: {provider}")
         for ten in ten_lenh:
             theo_lenh[ten] = contract
-    ten = Path(str(lenh[0])).name.casefold() if lenh else ""
-    for duoi in (".exe", ".cmd", ".bat"):
-        if ten.endswith(duoi):
-            ten = ten[:-len(duoi)]
-            break
+    ten = _ten_chuong_trinh(str(lenh[0])) if lenh else ""
     contract = theo_lenh.get(ten, {
         "provider": "local_process", "execution_surface": "subprocess",
         "transport": "machine",
@@ -1452,6 +1476,14 @@ def _tim_luot(run_root: Path, dinh_danh: str) -> Path | None:
 
 # -------------------------------------------------------------------- lệnh chạy
 
+def _chan_run_codex(lenh: list[str]) -> None:
+    """Consume the shared Codex refusal for the generic launcher surface."""
+    if not _la_lenh_codex(lenh):
+        return
+    reason = _co_chan_codex()
+    if reason:
+        raise Chan(MA_CHUA_XAC_THUC, reason)
+
 def lenh_check(a) -> int:
     kq = chay_cac_chot(a)
     if a.json:
@@ -1475,6 +1507,7 @@ def lenh_run(a) -> int:
     if not a.lenh:
         raise Chan(MA_THAM_SO, "thieu lenh de chay (dat sau dau --)")
     kq = chay_cac_chot(a)
+    _chan_run_codex(a.lenh)
     try:
         probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe)
     except Chan as e:
@@ -1578,6 +1611,15 @@ def lenh_run(a) -> int:
     else:
         # nhóm tiến trình riêng: điều kiện CẦN để giết được cả con cháu sau này
         them["start_new_session"] = True
+    try:
+        _chan_run_codex(lenh_con)
+    except Chan as e:
+        ban_ghi.update(trang_thai="hong", giai_doan="pre_execution_policy",
+                       ma_thoat=e.ma, ly_do_dung=e.thong_diep,
+                       ket_thuc_utc=_bay_gio().isoformat())
+        _ghi_so(thu_muc, ban_ghi, khoa_ky)
+        f_out.close(); f_err.close()
+        raise
     try:
         p = subprocess.Popen(lenh_con, cwd=kq["workspace"],
                              stdout=f_out, stderr=f_err, stdin=subprocess.DEVNULL, **them)

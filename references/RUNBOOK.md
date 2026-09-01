@@ -149,12 +149,18 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > ra ngoài repository, kể cả qua parent symlink; hook kiểm `CODEX_HOME` trước mọi lần
 > gọi Codex, kể cả khi `codex login status` sẽ báo đã đăng nhập. Từ chối sẽ đặt
 > `TRA_LUAT_CODEX_BLOCKED=1`; launcher phải giữ chốt đó qua mọi đường Codex, kể cả
-> doctor cuối. Writer giữ **actual opened parent capability** đã kiểm và làm toàn bộ
-> create/chmod/fsync/replace tương đối với capability ấy; không quay lại đường dẫn.
+> generic `run -- codex` (tên trần/absolute/PATH-resolved và shim Windows), trước
+> capability probe lẫn final spawn, cùng doctor cuối. Writer giữ **actual opened parent
+> capability** đã kiểm và làm toàn bộ create/chmod/fsync/replace tương đối với capability
+> ấy; không quay lại đường dẫn. Bảo đảm này chặn việc đổi alias sang thư mục KHÁC, không
+> bao gồm actor có quyền reparent chính directory inode đã mở sau validation; capability
+> sẽ đi theo inode ấy, nên threat model mạnh hơn phải dùng confinement/quyền của OS.
 > POSIX có primitives cần thiết; Windows thiếu primitives tương đương thì fail closed
 > trước child/write và báo `not_measured`. Hai lệnh TL bắt buộc
 > `--secrets-file`; entry point từ chối bundle trong repository, kiểm/canonicalize
-> HOME/XDG/GWS/cache/temp mà TL child có thể ghi, rồi neo child vào `scripts/tl.py` và
+> chính candidate và mọi ancestor của HOME/XDG/GWS/cache/temp mà TL child có thể ghi
+> (exact worktree/bare root và link/junction alias bị từ chối; external root chưa tồn tại
+> vẫn được canonicalize rồi giao child), rồi neo child vào `scripts/tl.py` và
 > cwd của chính repository. Codex device-auth chỉ dùng storage private do process tạo,
 > không nhận `CODEX_HOME` từ caller, rồi copy-out bằng guarded writer. NLM restore chỉ
 > nhận đúng `auth.json`, `profiles/default/cookies.json`, và

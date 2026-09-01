@@ -99,29 +99,91 @@ def directory_root_lock(module):
             assert child.call_args.kwargs["env"][key] == str(future.resolve(strict=False))
 
 
-def run_mutations():
-    """Kill the packet's named directory-root mutant with only its lock test."""
-    source = P.read_text(encoding="utf-8")
-    old = "    return _guard_destination(path, include_candidate=True)"
-    new = "    return _guard_destination(path, include_candidate=False)"
-    assert source.count(old) == 1, "directory_guard_skips_candidate_itself site missing"
-    with tempfile.TemporaryDirectory(prefix="session-credential-mutant-") as td:
-        mutant_path = Path(td) / "session_credentials.py"
-        mutant_path.write_text(source.replace(old, new), encoding="utf-8", newline="\n")
-        mutant_spec = importlib.util.spec_from_file_location(
-            "session_credentials_directory_guard_mutant", mutant_path)
-        mutant = importlib.util.module_from_spec(mutant_spec)
-        mutant_spec.loader.exec_module(mutant)
+def provider_home_lock(module):
+    """Ambient temp roots never select or reach provider credential storage."""
+    original_repository = module.REPOSITORY_ROOT
+    original_tempdir = tempfile.tempdir
+    with tempfile.TemporaryDirectory(prefix="provider-home-lock-") as td:
+        root = Path(td)
+        repo = root / "repo"; (repo / ".git").mkdir(parents=True)
+        ambient = repo / "ambient-temp"; ambient.mkdir()
+        module.REPOSITORY_ROOT = repo
+        source = {
+            "PATH": os.environ.get("PATH", ""),
+            "TMPDIR": str(ambient), "TMP": str(ambient), "TEMP": str(ambient),
+            "CODEX_AUTH_JSON": "CODEX_CANARY",
+            "CLAUDE_CODE_OAUTH_TOKEN": "CLAUDE_CANARY",
+            "GITHUB_PAT": "GH_CANARY", "TL_MASTER_KEY": "TL_CANARY",
+        }
         try:
-            directory_root_lock(mutant)
-        except AssertionError:
-            print("PASS directory_guard_skips_candidate_itself (killed 1/1)")
-            return
-    raise AssertionError("directory_guard_skips_candidate_itself survived")
+            # tempfile caches its selected root.  Reset it so this is a real
+            # ambient-temp attack, not a source-dict-only simulation.
+            with mock.patch.dict(os.environ, {
+                    "TMPDIR": str(ambient), "TMP": str(ambient), "TEMP": str(ambient)}):
+                tempfile.tempdir = None
+                with module._isolated_child_env(
+                        source, CLAUDE_CODE_OAUTH_TOKEN="CLAUDE_CANARY") as child:
+                    keys = {"HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME",
+                            "XDG_DATA_HOME", "XDG_STATE_HOME", "TMPDIR", "TMP", "TEMP"}
+                    assert keys <= set(child), child
+                    resolved = [Path(child[key]).resolve(strict=True) for key in keys]
+                    assert all(repo.resolve() not in (path, *path.parents) for path in resolved), child
+                    assert len({child["TMPDIR"], child["TMP"], child["TEMP"]}) == 1
+                    assert child["CLAUDE_CODE_OAUTH_TOKEN"] == "CLAUDE_CANARY"
+                    assert not (set(module.SECRET_ENV) - {"CLAUDE_CODE_OAUTH_TOKEN"}) & set(child)
+
+            # Allocation/permission failure is a pre-child refusal for both
+            # subprocess-based provider probes.
+            with mock.patch.object(module, "_private_provider_home",
+                                   side_effect=OSError("fixture secure-root failure")), \
+                 mock.patch.object(module.subprocess, "run") as child:
+                claude = module.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S"})
+                github = module.github_probe("o/r", env={"GITHUB_PAT": "S"})
+            assert claude == {"status": "not_measured",
+                              "reason": "provider_storage_unavailable"}
+            assert github == {"status": "not_measured",
+                              "reason": "provider_storage_unavailable", "endpoints": {}}
+            child.assert_not_called()
+        finally:
+            module.REPOSITORY_ROOT = original_repository
+            tempfile.tempdir = original_tempdir
+
+
+def run_mutations():
+    """Kill each packet-named mutant with only its focused lock test."""
+    source = P.read_text(encoding="utf-8")
+    mutants = [
+        ("directory_guard_skips_candidate_itself",
+         "    return _guard_destination(path, include_candidate=True)",
+         "    return _guard_destination(path, include_candidate=False)", directory_root_lock),
+        ("provider_home_honors_ambient_temp_root",
+         '        root = Path(tempfile.mkdtemp(prefix="tl-provider-home-", dir=base))',
+         '        root = Path(tempfile.mkdtemp(prefix="tl-provider-home-", dir=None))',
+         provider_home_lock),
+    ]
+    killed = 0
+    with tempfile.TemporaryDirectory(prefix="session-credential-mutant-") as td:
+        for index, (name, old, new, lock) in enumerate(mutants):
+            assert source.count(old) == 1, f"{name} site missing"
+            mutant_path = Path(td) / f"session_credentials_{index}.py"
+            mutant_path.write_text(source.replace(old, new), encoding="utf-8", newline="\n")
+            mutant_spec = importlib.util.spec_from_file_location(
+                f"session_credentials_mutant_{index}", mutant_path)
+            mutant = importlib.util.module_from_spec(mutant_spec)
+            mutant_spec.loader.exec_module(mutant)
+            try:
+                lock(mutant)
+            except (AssertionError, OSError):
+                killed += 1
+                print(f"PASS {name} (killed 1/1)")
+                continue
+            raise AssertionError(f"{name} survived")
+    print(f"PASS session credential mutations (killed {killed}/{len(mutants)})")
 
 
 def run():
     directory_root_lock(m)
+    provider_home_lock(m)
     expected_repository = P.resolve().parents[2]
     assert m.REPOSITORY_ROOT == expected_repository
     with tempfile.TemporaryDirectory() as td:
@@ -513,7 +575,9 @@ os.write(1,b'A'*180 + b'\\n')
                    and x[1]["env"].get("PATH") == "/bin"
                    and x[1]["env"].get("GH_TOKEN") == "GH_CANARY"
                    and set(x[1]["env"]) == {"PATH", "HOME", "XDG_CONFIG_HOME",
-                                              "XDG_CACHE_HOME", "XDG_DATA_HOME", "GH_TOKEN"}
+                                              "XDG_CACHE_HOME", "XDG_DATA_HOME",
+                                              "XDG_STATE_HOME", "TMPDIR", "TMP", "TEMP",
+                                              "GH_TOKEN"}
                    for x in seen)
         for code in (401, 403, 404):
             denied = mock.Mock(returncode=1,
@@ -538,7 +602,9 @@ os.write(1,b'A'*180 + b'\\n')
         assert kwargs["env"].get("CLAUDE_CODE_OAUTH_TOKEN") == "CLAUDE_CANARY"
         assert kwargs["env"]["HOME"] != "/home/test"
         assert set(kwargs["env"]) == {"HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME",
-                                      "XDG_DATA_HOME", "CLAUDE_CODE_OAUTH_TOKEN"}
+                                      "XDG_DATA_HOME", "XDG_STATE_HOME",
+                                      "TMPDIR", "TMP", "TEMP",
+                                      "CLAUDE_CODE_OAUTH_TOKEN"}
         no_marker = mock.Mock(returncode=0, stdout="done\n", stderr="")
         with mock.patch.object(m.subprocess, "run", return_value=no_marker):
             assert m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S"})["status"] == "rejected"

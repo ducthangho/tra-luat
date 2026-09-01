@@ -6249,6 +6249,17 @@ def r22_run_codex_tieu_thu_co_chan_truoc_probe_va_Popen():
     m = _tai_launcher_thu()
     with San() as s:
         repo = tao_repo(s)
+        provider_bin = s / "bin"; provider_bin.mkdir()
+        provider_paths = []
+        for name in ("CoDeX", "CODEX.EXE", "codex.CmD", "codex.BAT", "codex.COM"):
+            path = provider_bin / name
+            path.write_text("fixture", encoding="utf-8"); path.chmod(0o700)
+            provider_paths.append(str(path))
+        resolved_dir = provider_bin / "resolved"; resolved_dir.mkdir()
+        resolved_codex = resolved_dir / "codex.CMD"
+        resolved_codex.write_text("fixture", encoding="utf-8"); resolved_codex.chmod(0o700)
+        resolved_non_codex = provider_bin / "not-codex.CMD"
+        resolved_non_codex.write_text("fixture", encoding="utf-8"); resolved_non_codex.chmod(0o700)
         original_chot = m.chay_cac_chot
         original_probe = m.chay_cac_probe
         original_block = m._co_chan_codex
@@ -6259,12 +6270,8 @@ def r22_run_codex_tieu_thu_co_chan_truoc_probe_va_Popen():
             # PATHEXT/shim suffixes all identify the same Codex provider.
             forms = [
                 ("codex", None),
-                (str(s / "bin" / "CoDeX"), None),
-                (r"C:\\fixture\\CODEX.EXE", None),
-                (r"C:\\fixture\\codex.CmD", None),
-                (r"C:\\fixture\\codex.BAT", None),
-                (r"C:\\fixture\\codex.COM", None),
-                ("provider-shim", r"C:\\resolved\\codex.CMD"),
+                *((path, None) for path in provider_paths),
+                ("provider-shim", str(resolved_codex)),
             ]
             for command, resolved in forms:
                 events = []
@@ -6296,7 +6303,8 @@ def r22_run_codex_tieu_thu_co_chan_truoc_probe_va_Popen():
             ])
             a.lenh = a.lenh[1:]
             m.chay_cac_chot = lambda _a: {"workspace": str(repo)}
-            m.shutil.which = lambda _name: r"C:\\resolved\\not-codex.CMD"
+            m.shutil.which = lambda name: (
+                str(resolved_non_codex) if name == "not-codex" else None)
             m._co_chan_codex = lambda: (_ for _ in ()).throw(
                 AssertionError("non-Codex command consulted Codex block"))
             m.chay_cac_probe = lambda *_a, **_k: reached_probe.append(True)
@@ -6319,7 +6327,7 @@ def r22_run_codex_tieu_thu_co_chan_truoc_probe_va_Popen():
             answers = iter((None, "BI CHAN late fixture"))
             m.chay_cac_chot = lambda _a: precomputed_chot
             m.chay_cac_probe = lambda *_a, **_k: ({}, None)
-            m.shutil.which = lambda name: r"C:\\resolved\\codex.CMD" if name == "codex" else None
+            m.shutil.which = lambda name: str(resolved_codex) if name == "codex" else None
             m._co_chan_codex = lambda: next(answers)
             m.subprocess.Popen = lambda *_a, **_k: (_ for _ in ()).throw(
                 AssertionError("late Codex block still reached Popen"))
@@ -6336,6 +6344,96 @@ def r22_run_codex_tieu_thu_co_chan_truoc_probe_va_Popen():
             m._co_chan_codex = original_block
             m.shutil.which = original_which
             m.subprocess.Popen = original_popen
+
+
+@ca
+def r23_run_codex_alias_phai_bind_target_mot_lan_cho_moi_consumer():
+    """A renamed executable alias cannot hide Codex or be swapped after policy."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = tao_repo(s)
+        bin_dir = s / "provider-bin"; bin_dir.mkdir()
+        target = bin_dir / "codex.exe"
+        target.write_text("fixture executable", encoding="utf-8")
+        target.chmod(0o700)
+        alias = bin_dir / "renamed-agent.exe"
+        try:
+            alias.symlink_to(target.name)
+        except OSError:
+            # Some Windows hosts deny symlink creation.  A hard-link still
+            # exercises executable identity (same file, misleading basename).
+            os.link(target, alias)
+
+        original_chot = m.chay_cac_chot
+        original_probe = m.chay_cac_probe
+        original_block = m._co_chan_codex
+        original_which = m.shutil.which
+        original_popen = m.subprocess.Popen
+        original_job = m._job_windows
+        original_key = m._khoa_danh_tinh
+        original_group = m._thanh_vien_nhom
+        try:
+            def fixture_which(name):
+                if name == "renamed-agent":
+                    return str(alias)
+                if name == "codex":
+                    return str(target)
+                return original_which(name)
+
+            m.shutil.which = fixture_which
+            identity = m._resolve_executable_identity(
+                ["renamed-agent", "--fixture"], str(repo))
+            bound = str(target.resolve(strict=True))
+            bang(identity["argv"][0] == bound, identity)
+            bang(m._la_lenh_codex(identity), "alias target did not identify Codex")
+            bang(m._dinh_danh_van_chuyen(identity)["provider"] == "openai_codex",
+                 "transport did not consume the bound provider identity")
+
+            a = m.build_parser().parse_args([
+                "run", "--workspace", str(repo), "--run-root", str(s / "runs"),
+                "--", "renamed-agent", "--fixture",
+            ])
+            a.lenh = a.lenh[1:]
+            precomputed_chot = original_chot(a)
+            events = []
+
+            class Child:
+                pid = 424242
+
+                def poll(self):
+                    return 0
+
+                def wait(self, timeout=None):
+                    return 0
+
+            m.chay_cac_chot = lambda _a: precomputed_chot
+            m.chay_cac_probe = lambda _w, argv, _skip: (
+                events.append(("probe", list(argv))) or ({}, None))
+            m._co_chan_codex = lambda: events.append(("codex-policy", None))
+            m.subprocess.Popen = lambda argv, **_k: (
+                events.append(("popen", list(argv))) or Child())
+            m._job_windows = lambda _pid: None
+            m._khoa_danh_tinh = lambda _pid: "fixture-process-key"
+            m._thanh_vien_nhom = lambda _pid: []
+            bang(m.lenh_run(a) == 0, "fixture child did not finish")
+
+            probe_argv = next(value for kind, value in events if kind == "probe")
+            popen_argv = next(value for kind, value in events if kind == "popen")
+            bang(probe_argv[0] == bound and popen_argv[0] == bound,
+                 f"consumers diverged from bound executable: {events}")
+            bang(sum(kind == "codex-policy" for kind, _ in events) == 2,
+                 f"Codex policy did not guard both boundaries: {events}")
+            record = json.loads(next((s / "runs").glob("*/run.json")).read_text())
+            bang(record["provider"] == "openai_codex", record)
+        finally:
+            m.chay_cac_chot = original_chot
+            m.chay_cac_probe = original_probe
+            m._co_chan_codex = original_block
+            m.shutil.which = original_which
+            m.subprocess.Popen = original_popen
+            m._job_windows = original_job
+            m._khoa_danh_tinh = original_key
+            m._thanh_vien_nhom = original_group
 
 
 # ------------------------------------------------------ tự đột biến: có răng không
@@ -6401,10 +6499,15 @@ DOT_BIEN = [
       '    return {ten: {"trang_thai": ("DAT" if kq["trang_thai"] == "KHONG_DO_DUOC" else kq["trang_thai"]), "chi_tiet": kq["chi_tiet"]}'),
      ["r09_run_json_giu_ba_trang_thai_probe"]),
     ("run_codex_bypasses_co_chan",
-     [('    _chan_run_codex(a.lenh)', '    pass  # mutant bypasses pre-probe block'),
-      ('        _chan_run_codex(lenh_con)',
+     [('    bound_argv = identity["argv"]\n    _chan_run_codex(identity)',
+       '    bound_argv = identity["argv"]\n    pass  # mutant bypasses pre-probe block'),
+      ('        _chan_run_codex(identity)',
        '        pass  # mutant bypasses final-execution block')],
      ["r22_run_codex_tieu_thu_co_chan_truoc_probe_va_Popen"]),
+    ("run_codex_alias_target_not_resolved",
+     ('            resolved_path, matched_provider = _resolve_executable_alias(candidate_path)',
+      '            resolved_path, matched_provider = candidate_path, None'),
+     ["r23_run_codex_alias_phai_bind_target_mot_lan_cho_moi_consumer"]),
     # Ca "rc=0 ma stdout RONG" duoc chan o BON cho doc lap: guard trong
     # _git_mot_dong, kiem SHA_RE trong chot_head, kiem `not top` trong chot_workspace,
     # va kiem `not ref` trong chot_ref. DA DO: bo RIENG bat ky cho nao cung KHONG ca nao chet -
@@ -6647,8 +6750,8 @@ DOT_BIEN = [
       '    ("openai_codex", ("claude",), "claude_code", "machine/local"),'),
      ["r15_moi_provider_chi_mot_transport_va_hai_luot_on_dinh"]),
     ("luu_argv_nguyen_van",
-     ('"ten": a.name, "lenh": _tom_tat_lenh(a.lenh), "trang_thai": "dang_chay",',
-      '"ten": a.name, "lenh": [str(x) for x in a.lenh], "trang_thai": "dang_chay",'),
+     ('"ten": a.name, "lenh": _tom_tat_lenh(bound_argv), "trang_thai": "dang_chay",',
+      '"ten": a.name, "lenh": [str(x) for x in bound_argv], "trang_thai": "dang_chay",'),
      ["t59_so_KHONG_luu_doi_so_nguyen_van"]),
     ("doctor_tin_which",
      ('            chay_duoc, pb, qua_han = _phien_ban(d, env=moi_truong,\n'

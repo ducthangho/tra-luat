@@ -169,22 +169,77 @@ def _ten_chuong_trinh(value: str) -> str:
     return name
 
 
-def _la_lenh_codex(lenh: list[str]) -> bool:
-    """Identify Codex from argv spelling or the executable resolved on PATH."""
+def _provider_for_name(value: str) -> str | None:
+    name = _ten_chuong_trinh(value)
+    for provider, command_names, _surface, _transport in _TRANSPORT_CONTRACTS:
+        if name in command_names:
+            return provider
+    return None
+
+
+def _resolve_executable_alias(candidate_path: Path) -> tuple[Path, str | None]:
+    """Resolve an executable alias and identify providers by the bound file."""
+    resolved = candidate_path.resolve(strict=True)
+    if not resolved.is_file():
+        raise OSError("resolved executable is not a regular file")
+    providers = set(filter(None, (
+        _provider_for_name(str(candidate_path)), _provider_for_name(str(resolved)))))
+    canonical = resolved
+    # A renamed hard-link has no symlink target name.  Compare its file identity
+    # with each provider executable found on PATH and bind that canonical target.
+    for provider, names, _surface, _transport in _TRANSPORT_CONTRACTS:
+        for name in names:
+            try:
+                known_text = shutil.which(name)
+                known = Path(known_text).resolve(strict=True) if known_text else None
+                same = known is not None and os.path.samefile(resolved, known)
+            except (OSError, TypeError, ValueError):
+                same = False
+                known = None
+            if same:
+                providers.add(provider)
+                canonical = known
+    if len(providers) > 1:
+        raise OSError("executable identity matches multiple providers")
+    return canonical, (next(iter(providers)) if providers else None)
+
+
+def _resolve_executable_identity(lenh: list[str], workspace: str | Path) -> dict:
+    """Resolve and bind argv[0] once for policy, probe, transport, and spawn."""
     if not lenh:
-        return False
-    command = str(lenh[0])
-    candidates = [command]
+        raise Chan(MA_THAM_SO, "thieu executable")
+    argv = [str(value) for value in lenh]
+    command = argv[0]
+    raw_provider = _provider_for_name(command)
     try:
-        resolved = shutil.which(command)
+        selected = shutil.which(command)
     except (OSError, TypeError):
-        resolved = None
-    if resolved:
-        candidates.append(resolved)
-    return any(_ten_chuong_trinh(candidate) == "codex" for candidate in candidates)
+        selected = None
+    if selected is None and ("/" in command or "\\" in command):
+        path = Path(command).expanduser()
+        selected = str(path if path.is_absolute() else Path(workspace) / path)
+    matched_provider = None
+    if selected is not None:
+        candidate_path = Path(selected)
+        try:
+            resolved_path, matched_provider = _resolve_executable_alias(candidate_path)
+        except OSError as exc:
+            raise Chan(MA_THAM_SO, f"khong bind duoc executable: {exc}") from None
+        argv[0] = str(resolved_path)
+    if raw_provider and matched_provider and raw_provider != matched_provider:
+        raise Chan(MA_THAM_SO, "executable spelling and target identify different providers")
+    return {"argv": argv, "provider": matched_provider or raw_provider,
+            "original_argv0": command}
 
 
-def _dinh_danh_van_chuyen(lenh: list[str]) -> dict:
+def _la_lenh_codex(identity) -> bool:
+    """Identify Codex only from the already-bound executable identity."""
+    if isinstance(identity, dict):
+        return identity.get("provider") == "openai_codex"
+    return bool(identity) and _provider_for_name(str(identity[0])) == "openai_codex"
+
+
+def _dinh_danh_van_chuyen(identity) -> dict:
     """Trả contract transport canonical và băm của chính contract ấy."""
     theo_provider = {}
     theo_lenh = {}
@@ -196,11 +251,16 @@ def _dinh_danh_van_chuyen(lenh: list[str]) -> dict:
             raise RuntimeError(f"provider co nhieu transport: {provider}")
         for ten in ten_lenh:
             theo_lenh[ten] = contract
-    ten = _ten_chuong_trinh(str(lenh[0])) if lenh else ""
-    contract = theo_lenh.get(ten, {
+    if isinstance(identity, dict):
+        provider = identity.get("provider")
+        contract = theo_provider.get(provider)
+    else:
+        ten = _ten_chuong_trinh(str(identity[0])) if identity else ""
+        contract = theo_lenh.get(ten)
+    contract = contract or {
         "provider": "local_process", "execution_surface": "subprocess",
         "transport": "machine",
-    })
+    }
     raw = json.dumps(contract, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return {**contract, "transport_sha256": hashlib.sha256(raw).hexdigest()}
 
@@ -1476,9 +1536,9 @@ def _tim_luot(run_root: Path, dinh_danh: str) -> Path | None:
 
 # -------------------------------------------------------------------- lệnh chạy
 
-def _chan_run_codex(lenh: list[str]) -> None:
+def _chan_run_codex(identity) -> None:
     """Consume the shared Codex refusal for the generic launcher surface."""
-    if not _la_lenh_codex(lenh):
+    if not _la_lenh_codex(identity):
         return
     reason = _co_chan_codex()
     if reason:
@@ -1507,9 +1567,12 @@ def lenh_run(a) -> int:
     if not a.lenh:
         raise Chan(MA_THAM_SO, "thieu lenh de chay (dat sau dau --)")
     kq = chay_cac_chot(a)
-    _chan_run_codex(a.lenh)
+    identity = _resolve_executable_identity(a.lenh, kq["workspace"])
+    bound_argv = identity["argv"]
+    _chan_run_codex(identity)
     try:
-        probe, ly_do_bo_qua = chay_cac_probe(kq["workspace"], a.lenh, a.bo_qua_probe)
+        probe, ly_do_bo_qua = chay_cac_probe(
+            kq["workspace"], bound_argv, a.bo_qua_probe)
     except Chan as e:
         if e.probe is None:
             raise
@@ -1518,10 +1581,10 @@ def lenh_run(a) -> int:
         luc = _bay_gio().isoformat()
         _ghi_so(run_root / sid, {
             "version": VERSION, "run_id": rid, "short_id": sid, "ten": a.name,
-            "lenh": _tom_tat_lenh(a.lenh), "trang_thai": "hong", "giai_doan": "probe",
+            "lenh": _tom_tat_lenh(bound_argv), "trang_thai": "hong", "giai_doan": "probe",
             "bat_dau_utc": luc, "ket_thuc_utc": luc, "ma_thoat": e.ma,
             "ly_do_dung": e.thong_diep, "pid": None, "khoa_danh_tinh": None,
-            **kq, **_dinh_danh_van_chuyen(a.lenh),
+            **kq, **_dinh_danh_van_chuyen(identity),
             "probe": _probe_cho_so(e.probe), "bo_qua_probe_ly_do": None,
         })
         raise
@@ -1554,10 +1617,10 @@ def lenh_run(a) -> int:
 
     ban_ghi = {
         "version": VERSION, "run_id": rid, "short_id": sid,
-        "ten": a.name, "lenh": _tom_tat_lenh(a.lenh), "trang_thai": "dang_chay",
+        "ten": a.name, "lenh": _tom_tat_lenh(bound_argv), "trang_thai": "dang_chay",
         "bat_dau_utc": _bay_gio().isoformat(), "ket_thuc_utc": None,
         "ma_thoat": None, "ly_do_dung": None, "pid": None, "khoa_danh_tinh": None,
-        **kq, **_dinh_danh_van_chuyen(a.lenh),
+        **kq, **_dinh_danh_van_chuyen(identity),
     }
     if neo:
         ban_ghi.update(nonce=neo["nonce"], attempt=neo["attempt"], void_reason=a.void_reason)
@@ -1569,7 +1632,7 @@ def lenh_run(a) -> int:
     # (2) nếu lệnh có {PROMPT_FILE} thì con đọc BẢN CHỤP bất biến trong thư mục lượt
     # chạy, khép hẳn cửa sổ SAU khi sinh con. Không dùng {PROMPT_FILE} thì lớp (2)
     # không có — và điều đó được nói thẳng trong sổ, không giả vờ là đã kín.
-    lenh_con = [str(x) for x in a.lenh]
+    lenh_con = list(bound_argv)
     if kq.get("prompt_sha256"):
         b = Path(a.prompt_file).expanduser().read_bytes()
         if hashlib.sha256(b).hexdigest() != kq["prompt_sha256"]:
@@ -1612,7 +1675,7 @@ def lenh_run(a) -> int:
         # nhóm tiến trình riêng: điều kiện CẦN để giết được cả con cháu sau này
         them["start_new_session"] = True
     try:
-        _chan_run_codex(lenh_con)
+        _chan_run_codex(identity)
     except Chan as e:
         ban_ghi.update(trang_thai="hong", giai_doan="pre_execution_policy",
                        ma_thoat=e.ma, ly_do_dung=e.thong_diep,

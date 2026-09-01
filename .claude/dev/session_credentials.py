@@ -11,6 +11,7 @@ import os
 import re
 import secrets
 import select
+import shutil
 import stat
 import subprocess
 import sys
@@ -58,18 +59,101 @@ def _child_env(source, **required: str) -> dict[str, str]:
     return child
 
 
+def _trusted_provider_temp_base() -> Path:
+    """Select a process-trusted temp base without consulting ambient temp vars."""
+    if os.name == "posix":
+        candidate = Path("/tmp")
+    elif os.name == "nt":
+        # Since Python 3.13, mkdir(mode=0o700) applies a private Windows ACL.
+        # Older runtimes cannot make that guarantee with stdlib primitives.
+        if sys.version_info < (3, 13):
+            raise OSError("private Windows provider directory ACL unavailable")
+        try:
+            import ctypes
+            buffer = ctypes.create_unicode_buffer(32768)
+            # CSIDL_LOCAL_APPDATA is resolved by the shell, independently of
+            # caller-controlled TMPDIR/TMP/TEMP/LOCALAPPDATA environment data.
+            result = ctypes.windll.shell32.SHGetFolderPathW(
+                None, 0x001C, None, 0, buffer)
+        except (AttributeError, OSError, ValueError) as exc:
+            raise OSError("Windows LocalAppData lookup unavailable") from exc
+        if result != 0 or not buffer.value:
+            raise OSError(f"Windows LocalAppData lookup failed: {result}")
+        candidate = Path(buffer.value) / "Temp"
+    else:
+        raise OSError("private provider storage unsupported on this platform")
+    base = candidate.resolve(strict=True)
+    if not base.is_dir() or base.is_symlink():
+        raise OSError("trusted provider temp base is not a plain directory")
+    return directory_destination(base)
+
+
+def _validate_private_provider_directory(path: Path) -> Path:
+    """Validate one process-created private directory, including reparse state."""
+    resolved = directory_destination(path).resolve(strict=True)
+    info = path.lstat()
+    if stat.S_ISLNK(info.st_mode):
+        raise OSError("provider directory is a symlink")
+    reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+    if reparse and getattr(info, "st_file_attributes", 0) & reparse:
+        raise OSError("provider directory is a reparse point")
+    if os.name == "posix" and stat.S_IMODE(info.st_mode) != 0o700:
+        raise OSError("provider directory mode is not 0700")
+    return resolved
+
+
+def _make_private_provider_directory(path: Path) -> Path:
+    path.mkdir(mode=0o700)
+    return _validate_private_provider_directory(path)
+
+
+@contextlib.contextmanager
+def _private_provider_home():
+    """Yield a validated disposable provider HOME outside repository control."""
+    base = _trusted_provider_temp_base()
+    root = None
+    try:
+        root = Path(tempfile.mkdtemp(prefix="tl-provider-home-", dir=base))
+        root = _validate_private_provider_directory(root)
+        home = _make_private_provider_directory(root / "home")
+        _make_private_provider_directory(root / "tmp")
+        _make_private_provider_directory(home / ".config")
+        local = _make_private_provider_directory(home / ".local")
+        _make_private_provider_directory(local / "share")
+        _make_private_provider_directory(local / "state")
+        _make_private_provider_directory(home / ".cache")
+        yield home
+    finally:
+        if root is not None:
+            shutil.rmtree(root, ignore_errors=True)
+
+
+def _provider_child_env_for_home(source, home: Path, **required: str) -> dict[str, str]:
+    """Bind every provider storage variable to one validated private hierarchy."""
+    home = _validate_private_provider_directory(Path(home))
+    root = _validate_private_provider_directory(home.parent)
+    tmp = _validate_private_provider_directory(root / "tmp")
+    config = _validate_private_provider_directory(home / ".config")
+    cache = _validate_private_provider_directory(home / ".cache")
+    data = _validate_private_provider_directory(home / ".local" / "share")
+    state = _validate_private_provider_directory(home / ".local" / "state")
+    return _child_env(
+        source,
+        HOME=str(home),
+        XDG_CONFIG_HOME=str(config),
+        XDG_CACHE_HOME=str(cache),
+        XDG_DATA_HOME=str(data),
+        XDG_STATE_HOME=str(state),
+        TMPDIR=str(tmp), TMP=str(tmp), TEMP=str(tmp),
+        **required,
+    )
+
+
 @contextlib.contextmanager
 def _isolated_child_env(source, **required: str):
-    """Give one provider a disposable home plus only its explicit credential."""
-    with tempfile.TemporaryDirectory(prefix="tl-provider-home-") as home:
-        yield _child_env(
-            source,
-            HOME=home,
-            XDG_CONFIG_HOME=str(Path(home) / ".config"),
-            XDG_CACHE_HOME=str(Path(home) / ".cache"),
-            XDG_DATA_HOME=str(Path(home) / ".local" / "share"),
-            **required,
-        )
+    """Give one provider a disposable hierarchy plus its explicit credential."""
+    with _private_provider_home() as home:
+        yield _provider_child_env_for_home(source, home, **required)
 
 
 def _result(status: str, **details) -> dict:
@@ -454,11 +538,11 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
     import pty
 
     source = os.environ if env is None else env
-    child_home = tempfile.TemporaryDirectory(prefix="tl-provider-home-")
-    child = _child_env(source, HOME=child_home.name,
-                       XDG_CONFIG_HOME=str(Path(child_home.name) / ".config"),
-                       XDG_CACHE_HOME=str(Path(child_home.name) / ".cache"),
-                       XDG_DATA_HOME=str(Path(child_home.name) / ".local" / "share"))
+    provider_env = _isolated_child_env(source)
+    try:
+        child = provider_env.__enter__()
+    except OSError:
+        return _result("not_measured", reason="provider_storage_unavailable")
     input_stream = sys.stdin if input_stream is None else input_stream
     output_stream = sys.stdout if output_stream is None else output_stream
     master, slave = pty.openpty()
@@ -466,7 +550,7 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
         proc = subprocess.Popen(["claude", "setup-token"], stdin=slave, stdout=slave,
                                 stderr=slave, env=child, close_fds=True)
     except OSError:
-        os.close(master); os.close(slave); child_home.cleanup()
+        os.close(master); os.close(slave); provider_env.__exit__(None, None, None)
         return _result("not_measured", reason="cli_missing")
     os.close(slave)
     deadline, captured, pending = time.monotonic() + timeout, "", ""
@@ -505,7 +589,7 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
         os.close(master)
         if proc.poll() is None:
             proc.kill(); proc.wait()
-        child_home.cleanup()
+        provider_env.__exit__(None, None, None)
     _drain_sanitized(pending, output_stream, final=True)
     found = TOKEN_RE.findall(captured)
     if proc.returncode or len(found) != 1:
@@ -532,13 +616,16 @@ def claude_probe(token_file: Path | None = None, *, timeout=20, env=None) -> dic
     marker = "TRALUAT-CLAUDE-CREDENTIAL-OK"
     try:
         with _isolated_child_env(source, CLAUDE_CODE_OAUTH_TOKEN=token) as child:
-            p = subprocess.run(["claude", "-p", f"Print exactly: {marker}"],
-                               stdin=subprocess.DEVNULL, capture_output=True, text=True,
-                               timeout=timeout, env=child)
-    except subprocess.TimeoutExpired:
-        return _result("not_measured", reason="timeout")
+            try:
+                p = subprocess.run(["claude", "-p", f"Print exactly: {marker}"],
+                                   stdin=subprocess.DEVNULL, capture_output=True, text=True,
+                                   timeout=timeout, env=child)
+            except subprocess.TimeoutExpired:
+                return _result("not_measured", reason="timeout")
+            except OSError:
+                return _result("not_measured", reason="cli_missing")
     except OSError:
-        return _result("not_measured", reason="cli_missing")
+        return _result("not_measured", reason="provider_storage_unavailable")
     combined = ((p.stderr or "") + "\n" + (p.stdout or "")).lower()
     refused = any(word in combined for word in ("401", "403", "unauthorized", "authentication",
                                                  "invalid token", "oauth", "login"))
@@ -566,18 +653,21 @@ def github_probe(repo: str, *, timeout: int = 20, env=None) -> dict:
     if not token:
         return _result("missing", endpoints={})
     results = {}
-    with _isolated_child_env(source, GH_TOKEN=token) as child:
-        for endpoint in ("user", f"repos/{repo}"):
-            try:
-                p = subprocess.run(["gh", "api", endpoint, "--include", "--silent"], capture_output=True,
-                                   text=True, timeout=timeout, env=child)
-            except subprocess.TimeoutExpired:
-                results[endpoint] = "network_error"
-            except OSError:
-                results[endpoint] = "not_measured"
-            else:
-                results[endpoint] = "passed" if p.returncode == 0 else (
-                    _github_failure_status(p.stdout, p.stderr))
+    try:
+        with _isolated_child_env(source, GH_TOKEN=token) as child:
+            for endpoint in ("user", f"repos/{repo}"):
+                try:
+                    p = subprocess.run(["gh", "api", endpoint, "--include", "--silent"], capture_output=True,
+                                       text=True, timeout=timeout, env=child)
+                except subprocess.TimeoutExpired:
+                    results[endpoint] = "network_error"
+                except OSError:
+                    results[endpoint] = "not_measured"
+                else:
+                    results[endpoint] = "passed" if p.returncode == 0 else (
+                        _github_failure_status(p.stdout, p.stderr))
+    except OSError:
+        return _result("not_measured", reason="provider_storage_unavailable", endpoints={})
     vals = set(results.values())
     status = "passed" if vals == {"passed"} else "rejected" if "rejected" in vals else (
         "not_measured" if vals == {"not_measured"} else "network_error")

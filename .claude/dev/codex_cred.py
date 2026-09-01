@@ -55,10 +55,8 @@ import os
 import re
 import select
 import shutil
-import stat
 import subprocess
 import sys
-import tempfile
 import time
 from pathlib import Path
 
@@ -66,7 +64,8 @@ from session_credentials import (
     UnsafeSecretDestination as _UnsafeSecretDestination,
     _atomic_secret as _shared_atomic_secret,
     _checked_secret_destination as _shared_checked_secret_destination,
-    _child_env as _shared_child_env,
+    _private_provider_home as _shared_private_provider_home,
+    _provider_child_env_for_home as _shared_provider_child_env,
     _read_secret_bytes as _shared_read_secret_bytes,
     secret_destination as _shared_secret_destination,
 )
@@ -133,10 +132,11 @@ def _chay_device_auth(codex_home: Path, han_giay: int) -> tuple[bool, str]:
 
     if not codex_home.is_dir():
         return (False, "private CODEX_HOME không tồn tại")
-    moi = _shared_child_env(
-        os.environ, HOME=str(codex_home), CODEX_HOME=str(codex_home),
-        XDG_CONFIG_HOME=str(codex_home / ".config"),
-        XDG_CACHE_HOME=str(codex_home / ".cache"))
+    try:
+        moi = _shared_provider_child_env(
+            os.environ, codex_home, CODEX_HOME=str(codex_home))
+    except OSError as e:
+        return (False, f"provider storage không an toàn: {type(e).__name__}")
     chu, con = pty.openpty()  # sự thật (2): không có TTY thì codex im lặng hoàn toàn
     try:
         p = subprocess.Popen([_co_codex() or "codex", "login", "--device-auth"],
@@ -199,10 +199,11 @@ def _kiem_song(codex_home: Path) -> tuple[bool, str]:
     lenh = _co_codex()
     if not lenh:
         return (False, "không có codex trên PATH")
-    moi = _shared_child_env(
-        os.environ, HOME=str(codex_home), CODEX_HOME=str(codex_home),
-        XDG_CONFIG_HOME=str(codex_home / ".config"),
-        XDG_CACHE_HOME=str(codex_home / ".cache"))
+    try:
+        moi = _shared_provider_child_env(
+            os.environ, codex_home, CODEX_HOME=str(codex_home))
+    except OSError as e:
+        return (False, f"provider storage không an toàn: {type(e).__name__}")
     try:
         with open(os.devnull) as rong:
             p = subprocess.run([lenh, "exec", "--skip-git-repo-check",
@@ -362,21 +363,25 @@ def cmd_lay(a) -> int:
 
     # Acquisition storage is always created by this process.  There is no CLI
     # or function argument that can redirect Codex into caller-owned storage.
-    # Ignore caller-controlled TMPDIR on POSIX.  The caller may choose copy-out
-    # destinations, but never the storage in which device-auth itself runs.
-    private_root = "/tmp" if os.name == "posix" else None
-    with tempfile.TemporaryDirectory(prefix="codex-cred-", dir=private_root) as private_name:
-        tam = Path(private_name)
+    # Ignore caller-controlled TMPDIR/TMP/TEMP on every supported platform.
+    # The shared allocator also binds all child temp and XDG roots beneath the
+    # same process-created hierarchy used by Claude and GitHub probes.
+    try:
+        provider_home = _shared_private_provider_home()
+        private_home = provider_home.__enter__()
+        tam = private_home
+    except OSError:
+        _in("KHÔNG_ĐO_ĐƯỢC: không thiết lập được provider home riêng")
+        return RC[KHONG_DO_DUOC]
+    try:
         try:
-            if os.name == "posix":
-                os.chmod(tam, 0o700)
-                if stat.S_IMODE(tam.stat().st_mode) != 0o700:
-                    raise OSError("private CODEX_HOME mode 0700 unavailable")
             tam = _shared_checked_secret_destination(tam / "auth.json").parent
         except (_UnsafeSecretDestination, OSError):
             _in("KHÔNG_ĐO_ĐƯỢC: không thiết lập được CODEX_HOME riêng theo capability")
             return RC[KHONG_DO_DUOC]
         return _cmd_lay_private(a, tam)
+    finally:
+        provider_home.__exit__(None, None, None)
 
 
 def _cmd_lay_private(a, tam: Path) -> int:

@@ -72,7 +72,8 @@ def kiem_song_bang_codex_gia(M, rc=0, ra="", loi=""):
         try:
             os.chdir(d)
             M._co_codex = lambda: sys.executable
-            return M._kiem_song(d)
+            with M._shared_private_provider_home() as provider_home:
+                return M._kiem_song(provider_home)
         finally:
             os.chdir(cwd)
 
@@ -478,13 +479,17 @@ def t17_lay_khong_con_codex_home_va_windows_fail_closed(M):
     except SystemExit as exc:
         assert exc.code == 2
     root = Path(tempfile.mkdtemp(prefix="codex-private-home-"))
+    ambient = root / "caller-temp"; ambient.mkdir()
     spawned = []
-    private_roots = []
-    real_private_directory = M.tempfile.TemporaryDirectory
-    def process_private_directory(*args, **kwargs):
-        private_roots.append(kwargs.get("dir"))
-        return real_private_directory(*args, **kwargs)
-    M.tempfile.TemporaryDirectory = process_private_directory
+    private_homes = []
+    real_private_home = M._shared_private_provider_home
+    from contextlib import contextmanager
+    @contextmanager
+    def process_private_home():
+        with real_private_home() as home:
+            private_homes.append(Path(home))
+            yield home
+    M._shared_private_provider_home = process_private_home
     M._co_codex = lambda: "/gia/codex"
     def device_auth(home, _timeout):
         spawned.append(Path(home))
@@ -499,10 +504,19 @@ def t17_lay_khong_con_codex_home_va_windows_fail_closed(M):
         han_giay, in_gia_tri, cai_de = 5, False, False
     import io
     from contextlib import redirect_stdout
-    with redirect_stdout(io.StringIO()):
-        rc = M.cmd_lay(A())
-    assert private_roots == ([None] if os.name == "nt" else ["/tmp"]), \
-        f"device-auth storage followed ambient temp selection: {private_roots}"
+    old_temp = {key: os.environ.get(key) for key in ("TMPDIR", "TMP", "TEMP")}
+    try:
+        os.environ.update({key: str(ambient) for key in old_temp})
+        with redirect_stdout(io.StringIO()):
+            rc = M.cmd_lay(A())
+    finally:
+        for key, value in old_temp.items():
+            if value is None: os.environ.pop(key, None)
+            else: os.environ[key] = value
+    assert len(private_homes) == 1
+    assert ambient.resolve() not in (private_homes[0].resolve(strict=False),
+                                     *private_homes[0].resolve(strict=False).parents), \
+        f"device-auth storage followed ambient temp selection: {private_homes}"
     if os.name == "nt":
         assert rc == M.RC[M.KHONG_DO_DUOC]
         assert not spawned, "Windows fail-close happened after device-auth spawn"
@@ -574,13 +588,12 @@ DOT_BIEN = [
      "    noi_dung = dich.read_bytes()",
      "t12_sao_luu_O_NOFOLLOW_tai_diem_doc"),
     ("t17_caller_redirects_private_home",
-     "        tam = Path(private_name)",
-     '        tam = Path(getattr(a, "codex_home", None) or private_name)',
+     "        tam = private_home",
+     '        tam = Path(getattr(a, "codex_home", None) or private_home)',
      "t17_lay_khong_con_codex_home_va_windows_fail_closed"),
-    ("t18_private_home_uses_ambient_tmpdir",
-     '    private_root = "/tmp" if os.name == "posix" else None',
-     "    private_root = None",
-     "t17_lay_khong_con_codex_home_va_windows_fail_closed"),
+    # Ambient temp selection moved into the shared provider allocator.  Its
+    # focused lock and named mutant now live in session_credentials_test.py;
+    # retaining a duplicate source mutation here would target dead ownership.
 ]
 
 
@@ -622,9 +635,8 @@ def main() -> int:
     xau = []
     ten_ca = {case.__name__ for case in CA}
     dot_bien = [mutant for mutant in DOT_BIEN if mutant[3] in ten_ca
-                and not (os.name == "nt" and mutant[0] in {
-                    "t17_caller_redirects_private_home",
-                    "t18_private_home_uses_ambient_tmpdir"})]
+                and not (os.name == "nt" and mutant[0] ==
+                         "t17_caller_redirects_private_home")]
     for nhan, cu, moi, dich in dot_bien:
         if goc.count(cu) != 1:
             print(f"  ĐỎ  {nhan}: mỏ neo xuất hiện {goc.count(cu)} lần, cần đúng 1")

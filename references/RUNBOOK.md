@@ -156,7 +156,11 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > cho chốt Codex, transport record, capability probe và final spawn; identity không resolve
 > được hoặc mơ hồ thì fail trước child. Writer giữ **actual opened parent
 > capability** đã kiểm và làm toàn bộ create/chmod/fsync/replace tương đối với capability
-> ấy; không quay lại đường dẫn. Bảo đảm này chặn việc đổi alias sang thư mục KHÁC, không
+> ấy; không quay lại đường dẫn. Trên POSIX writer bắt đầu từ trusted root fd, mở từng
+> component đã có và tạo từng component còn thiếu tương đối với directory fd đang giữ;
+> không `mkdir` theo pathname rồi reopen. Cả writer session và writer NLM/GWS đều fail
+> trước khi ghi byte secret nếu một missing component bị thay bằng symlink. Bảo đảm này
+> chặn việc đổi alias sang thư mục KHÁC, không
 > bao gồm actor có quyền reparent chính directory inode đã mở sau validation; capability
 > sẽ đi theo inode ấy, nên threat model mạnh hơn phải dùng confinement/quyền của OS.
 > POSIX có primitives cần thiết; Windows thiếu primitives tương đương thì fail closed
@@ -178,7 +182,12 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > capability-read `CODEX_HOME/auth.json` trước khi cấp provider storage hoặc spawn; direct repository
 > và parent-link từ chối với zero child. Kết quả đóng gồm `passed`/`rejected`/`not_measured`: thiếu CLI,
 > timeout, local spawn/provider/cleanup không đo được là `not_measured`; chỉ refusal credential/model
-> có bằng chứng (hoặc policy refusal) là `rejected`. Credential directory đã validate chỉ làm
+> có bằng chứng (hoặc policy refusal) là `rejected`. Với Claude, nonzero chỉ là `network_error`
+> khi stderr/stdout có bằng chứng transport cụ thể (connection reset/refused, DNS...); lỗi local
+> hoặc nonzero không phân loại được là `not_measured`. `tl-bootstrap` giữ nguyên contract rc của
+> child: `0→passed`; `1→not_measured/degraded`; `2→not_measured/precondition`;
+> `3→rejected/credential_or_bundle_rejected`; rc khác `→not_measured/unclassified_exit`.
+> Credential directory đã validate chỉ làm
 > `CODEX_HOME`, còn `HOME`/XDG/temp nằm trong một hierarchy private tách biệt; credential
 > directory thường chỉ có `auth.json` không cần provider-home scaffold. Đường device-auth
 > `lay` không nhận `CODEX_HOME` từ caller và chỉ copy-out bằng guarded writer; cleanup hỏng ghi đè

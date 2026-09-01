@@ -115,6 +115,87 @@ def _wp433_nlm_parent_link_boundary(tg) -> bool:
     return True
 
 
+def _wp433_nlm_missing_parent_capability(tg) -> bool:
+    """Lock ``tl_missing_parent_creation_uses_pathname_before_capability``."""
+    import os
+    import stat
+    import tempfile
+    from pathlib import Path
+
+    with tempfile.TemporaryDirectory(prefix="tl-nlm-missing-parent-") as raw:
+        root = Path(raw)
+        ordinary = root / "ordinary" / "nested" / "auth.json"
+        if os.name == "posix":
+            tg._tl_atomic_secret(ordinary, b"POSITIVE_FIXTURE")
+            assert ordinary.read_bytes() == b"POSITIVE_FIXTURE"
+            assert stat.S_IMODE(ordinary.stat().st_mode) == 0o600
+        else:
+            try:
+                tg._tl_atomic_secret(ordinary, b"POSITIVE_FIXTURE")
+            except OSError as exc:
+                assert "handle-relative" in str(exc)
+            else:
+                raise AssertionError("Windows TL writer used a pathname fallback")
+            assert not ordinary.exists()
+            return True
+
+        missing = root / "missing-component"
+        external = root / "substituted-external"
+        external.mkdir()
+        attacked = missing / "nested" / "auth.json"
+        original_destination = tg._tl_secret_destination
+
+        def substitute_missing_component(path):
+            canonical = original_destination(path)
+            missing.symlink_to(external, target_is_directory=True)
+            return canonical
+
+        tg._tl_secret_destination = substitute_missing_component
+        try:
+            try:
+                tg._tl_atomic_secret(attacked, b"RACE_FIXTURE")
+            except OSError:
+                pass
+            else:
+                raise AssertionError(
+                    "missing-parent substitution redirected the TL writer")
+        finally:
+            tg._tl_secret_destination = original_destination
+        assert not (external / "nested" / "auth.json").exists(), \
+            "TL secret bytes reached the substituted directory"
+    return True
+
+
+def _wp433_tl_missing_parent_mutation_killed(tg) -> bool:
+    """Execute the named TL pathname-mkdir mutant against its focused lock."""
+    import os
+    import types
+    from pathlib import Path
+
+    if os.name != "posix":
+        return True
+    source = Path(tg.__file__).read_text(encoding="utf-8")
+    anchor = "    return _tl_walk_parent_capability(path.parent, create=create)"
+    replacement = (
+        "    flags = _tl_directory_flags()\n"
+        "    path.parent.mkdir(parents=True, exist_ok=True)\n"
+        "    directory_fd = os.open(path.parent, flags)\n"
+        "    _tl_validate_parent(directory_fd)\n"
+        "    return directory_fd"
+    )
+    assert source.count(anchor) == 1, "TL missing-parent mutant anchor drifted"
+    mutant = types.ModuleType("tl_gws_wp433_missing_parent_mutant")
+    mutant.__file__ = str(Path(tg.__file__).resolve())
+    exec(compile(source.replace(anchor, replacement), mutant.__file__, "exec"),
+         mutant.__dict__)
+    try:
+        _wp433_nlm_missing_parent_capability(mutant)
+    except AssertionError:
+        return True
+    raise AssertionError(
+        "tl_missing_parent_creation_uses_pathname_before_capability survived")
+
+
 class _hush:
     """v1.31.2 (log deploy user 2026-07-03 'Vẫn lỗi'): NUỐT stdout/stderr của các test CỐ TÌNH đi nhánh lỗi —
     argparse chặn '--row-kind xyz' (in usage+error là PASS-by-design), retry-transient mock, CẮT BATCH loud,
@@ -30176,47 +30257,65 @@ def run() -> int:
             if victim.read_text(encoding="utf-8") != "UNCHANGED":
                 return False
 
-            # Ancestor swap after path preflight: actual opened capability must
-            # see the repository.  Then delete that validator as a mutation
-            # witness and prove this exact case reaches the vulnerable write.
-            alias = root / "race-alias"; (alias / "nested").mkdir(parents=True)
-            moved = root / "race-alias-before-swap"
+            # Reparent the already-open final component into a repository just
+            # before final ancestry validation.  The per-component no-follow
+            # checks cannot see that new parent; the final validator must.
             race_repo = root / "race-repo"
             (race_repo / ".git").mkdir(parents=True)
-            (race_repo / "nested").mkdir()
-            original_destination = _tg433._tl_secret_destination
-            def swap_ancestor(path):
-                canonical = original_destination(path)
-                alias.rename(moved)
-                alias.symlink_to(race_repo, target_is_directory=True)
-                return canonical
-            _tg433._tl_secret_destination = swap_ancestor
-            try:
-                try:
-                    _tg433._tl_atomic_secret(alias / "nested" / "auth.json", b"FIXTURE_ONLY")
-                    return False
-                except _tg433._UnsafeSecretDestination:
-                    pass
-            finally:
-                _tg433._tl_secret_destination = original_destination
-            if (race_repo / "nested" / "auth.json").exists():
-                return False
+            original_component_check = _tg433._tl_fd_repository_root
 
-            alias.unlink(); moved.rename(alias)
-            original_validate = _tg433._tl_validate_parent
-            _tg433._tl_secret_destination = swap_ancestor
-            _tg433._tl_validate_parent = lambda _fd: None
+            def exercise_reparent(*, delete_final_validator):
+                source_parent = root / (
+                    "race-parent-mutant" if delete_final_validator
+                    else "race-parent-control")
+                source_parent.mkdir()
+                moved_parent = race_repo / source_parent.name
+                identity = (source_parent.stat().st_dev,
+                            source_parent.stat().st_ino)
+                moved_once = False
+
+                def reparent_before_final(directory_fd):
+                    nonlocal moved_once
+                    opened = _os433.fstat(directory_fd)
+                    if (not moved_once
+                            and (opened.st_dev, opened.st_ino) == identity):
+                        source_parent.rename(moved_parent)
+                        moved_once = True
+                    return original_component_check(directory_fd)
+
+                original_validate = _tg433._tl_validate_parent
+                _tg433._tl_fd_repository_root = reparent_before_final
+                if delete_final_validator:
+                    _tg433._tl_validate_parent = lambda _fd: None
+                try:
+                    _tg433._tl_atomic_secret(
+                        source_parent / "auth.json", b"FIXTURE_ONLY")
+                finally:
+                    _tg433._tl_fd_repository_root = original_component_check
+                    _tg433._tl_validate_parent = original_validate
+                return moved_parent
+
             try:
-                _tg433._tl_atomic_secret(alias / "nested" / "auth.json", b"FIXTURE_ONLY")
-            finally:
-                _tg433._tl_secret_destination = original_destination
-                _tg433._tl_validate_parent = original_validate
-            return ((race_repo / "nested" / "auth.json").read_bytes()
+                exercise_reparent(delete_final_validator=False)
+                return False
+            except _tg433._UnsafeSecretDestination:
+                pass
+            control_parent = race_repo / "race-parent-control"
+            if (control_parent / "auth.json").exists():
+                return False
+            mutant_parent = exercise_reparent(delete_final_validator=True)
+            return ((mutant_parent / "auth.json").read_bytes()
                     == b"FIXTURE_ONLY")
 
     _t110("wp433_nlm_secret_boundary", _c433_nlm_secret_boundary)
     _t110("wp433_nlm_parent_link_to_external_is_canonicalized",
           lambda: _wp433_nlm_parent_link_boundary(
+              __import__("tl_gws")))
+    _t110("wp433_nlm_missing_parent_creation_is_capability_relative",
+          lambda: _wp433_nlm_missing_parent_capability(
+              __import__("tl_gws")))
+    _t110("wp433_nlm_missing_parent_pathname_mutant_killed",
+          lambda: _wp433_tl_missing_parent_mutation_killed(
               __import__("tl_gws")))
 
     # r332 — ĐỘ PHỦ REGISTRY PHẢI ĐO Ở ĐƯỜNG NGƯỜI TA THẬT SỰ CHẠY.

@@ -621,20 +621,73 @@ def _tl_validate_parent(directory_fd: int) -> None:
         os.close(current)
 
 
-def _tl_open_parent(path: Path, *, create: bool = True) -> int:
+def _tl_walk_parent_capability(parent: Path, *, create: bool) -> int:
+    """Open/create an absolute parent only through POSIX dir-fd operations."""
     flags = _tl_directory_flags()
-    if create:
-        path.parent.mkdir(parents=True, exist_ok=True)
+    if not parent.is_absolute():
+        raise OSError("secret parent must be absolute")
+    components = parent.parts[1:]
+    if any(component in ("", ".", "..") for component in components):
+        raise OSError("invalid secret parent component")
     try:
-        directory_fd = os.open(path.parent, flags)
+        current = os.open(os.path.sep, flags)
     except (TypeError, NotImplementedError) as exc:
-        raise OSError("cannot open secret parent capability") from exc
+        raise OSError("cannot open trusted secret root capability") from exc
     try:
-        _tl_validate_parent(directory_fd)
+        for component in components:
+            try:
+                child = os.open(component, flags, dir_fd=current)
+            except FileNotFoundError:
+                if not create:
+                    raise
+                try:
+                    os.mkdir(component, mode=0o700, dir_fd=current)
+                except FileExistsError:
+                    pass
+                except (TypeError, NotImplementedError) as exc:
+                    raise OSError(
+                        "directory-relative secret mkdir unavailable") from exc
+                try:
+                    child = os.open(component, flags, dir_fd=current)
+                except (TypeError, NotImplementedError) as exc:
+                    raise OSError(
+                        "directory-relative secret open unavailable") from exc
+                except OSError as exc:
+                    installed = _tl_stat_at(current, component)
+                    if installed is not None and stat.S_ISLNK(installed.st_mode):
+                        raise _UnsafeSecretDestination(
+                            "refusing linked secret parent capability") from exc
+                    raise
+            except (TypeError, NotImplementedError) as exc:
+                raise OSError(
+                    "directory-relative secret open unavailable") from exc
+            except OSError as exc:
+                installed = _tl_stat_at(current, component)
+                if installed is not None and stat.S_ISLNK(installed.st_mode):
+                    raise _UnsafeSecretDestination(
+                        "refusing linked secret parent capability") from exc
+                raise
+            try:
+                opened = os.fstat(child)
+                if not stat.S_ISDIR(opened.st_mode):
+                    raise OSError("secret parent component is not a directory")
+                if _tl_fd_repository_root(child):
+                    raise _UnsafeSecretDestination(
+                        "refusing repository secret parent capability")
+            except Exception:
+                os.close(child)
+                raise
+            os.close(current)
+            current = child
+        _tl_validate_parent(current)
     except Exception:
-        os.close(directory_fd)
+        os.close(current)
         raise
-    return directory_fd
+    return current
+
+
+def _tl_open_parent(path: Path, *, create: bool = True) -> int:
+    return _tl_walk_parent_capability(path.parent, create=create)
 
 
 def _tl_unlink_identity(directory_fd: int, name: str,

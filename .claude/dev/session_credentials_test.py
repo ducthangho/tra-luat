@@ -263,6 +263,93 @@ def provider_cleanup_lock(module):
                 remove_fixture(entry)
 
 
+def missing_parent_capability_lock(module):
+    """A missing component cannot become a pathname redirection seam."""
+    with tempfile.TemporaryDirectory(prefix="secret-parent-capability-") as td:
+        root = Path(td)
+        ordinary = root / "ordinary" / "nested" / "auth.json"
+        if os.name == "posix":
+            module._atomic_secret(ordinary, b"POSITIVE_FIXTURE")
+            assert ordinary.read_bytes() == b"POSITIVE_FIXTURE"
+            assert stat.S_IMODE(ordinary.stat().st_mode) == 0o600
+        else:
+            try:
+                module._atomic_secret(ordinary, b"POSITIVE_FIXTURE")
+                assert False, "Windows writer used a pathname fallback"
+            except OSError as exc:
+                assert "handle-relative" in str(exc)
+            assert not ordinary.exists()
+            return
+
+        missing = root / "missing-component"
+        external = root / "substituted-external"
+        external.mkdir()
+        attacked = missing / "nested" / "auth.json"
+        original_destination = module.secret_destination
+
+        def substitute_missing_component(path):
+            canonical = original_destination(path)
+            missing.symlink_to(external, target_is_directory=True)
+            return canonical
+
+        with mock.patch.object(
+                module, "secret_destination",
+                side_effect=substitute_missing_component):
+            try:
+                module._atomic_secret(attacked, b"RACE_FIXTURE")
+                assert False, "missing-parent substitution redirected the writer"
+            except OSError:
+                pass
+        assert not (external / "nested" / "auth.json").exists(), \
+            "secret bytes reached the substituted directory"
+
+
+def claude_status_lock(module):
+    """Claude status is evidence-based, with unknown local failure unmeasured."""
+    cases = (
+        (mock.Mock(returncode=1, stdout="", stderr="401 unauthorized"), "rejected"),
+        (mock.Mock(returncode=1, stdout="", stderr="model is not available for this account"),
+         "rejected"),
+        (mock.Mock(returncode=7, stdout="", stderr="connection reset by peer"),
+         "network_error"),
+        (mock.Mock(returncode=7, stdout="", stderr="local configuration parse failed"),
+         "not_measured"),
+        (mock.Mock(returncode=7, stdout="", stderr="local network profile is invalid"),
+         "not_measured"),
+    )
+    for completed, expected in cases:
+        with mock.patch.object(module.subprocess, "run", return_value=completed):
+            result = module.claude_probe(
+                env={"CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"})
+        assert result["status"] == expected, (completed.stderr, result)
+
+
+def tl_status_lock(module):
+    """TL bootstrap preserves the delegated command's closed exit contract."""
+    expected_by_rc = {
+        0: ("passed", None),
+        1: ("not_measured", "degraded"),
+        2: ("not_measured", "precondition"),
+        3: ("rejected", "credential_or_bundle_rejected"),
+        9: ("not_measured", "unclassified_exit"),
+    }
+    with tempfile.TemporaryDirectory(prefix="tl-status-contract-") as td:
+        root = Path(td)
+        home = root / "home"
+        home.mkdir()
+        for returncode, (expected, reason) in expected_by_rc.items():
+            completed = mock.Mock(returncode=returncode, stdout="", stderr="")
+            with mock.patch.object(
+                    module.subprocess, "run", return_value=completed) as child:
+                result = module.tl_bootstrap(
+                    "cowork", root / "fixture.enc",
+                    env={"TL_MASTER_KEY": "INERT_FIXTURE", "HOME": str(home)})
+            assert result["status"] == expected, (returncode, result)
+            assert result["returncode"] == returncode
+            assert result.get("reason") == reason, (returncode, result)
+            child.assert_called_once()
+
+
 def run_mutations():
     """Kill each packet-named mutant with only its focused lock test."""
     source = P.read_text(encoding="utf-8")
@@ -278,7 +365,32 @@ def run_mutations():
          "            _checked_provider_cleanup(root, root_identity)",
          "            shutil.rmtree(root, ignore_errors=True)",
          provider_cleanup_lock),
+        ("claude_unknown_nonzero_becomes_network_error",
+         '        return _result("not_measured", returncode=p.returncode)',
+         '        return _result("network_error", returncode=p.returncode)',
+         claude_status_lock),
+        ("tl_degraded_rc1_becomes_rejected",
+         '        1: ("not_measured", "degraded"),',
+         '        1: ("rejected", "credential_or_bundle_rejected"),',
+         tl_status_lock),
+        ("tl_precondition_rc2_becomes_rejected",
+         '        2: ("not_measured", "precondition"),',
+         '        2: ("rejected", "credential_or_bundle_rejected"),',
+         tl_status_lock),
     ]
+    if os.name == "posix":
+        mutants.append((
+            "missing_parent_creation_uses_pathname_before_capability",
+            "    return _walk_parent_capability(path.parent, create=create)",
+            "    path.parent.mkdir(parents=True, exist_ok=True)\n"
+            "    parent_fd = os.open(path.parent, _directory_flags())\n"
+            "    _validate_parent_capability(parent_fd)\n"
+            "    return parent_fd",
+            missing_parent_capability_lock,
+        ))
+    else:
+        print("SKIP missing_parent_creation_uses_pathname_before_capability "
+              "(POSIX capability primitive unavailable)")
     killed = 0
     with tempfile.TemporaryDirectory(prefix="session-credential-mutant-") as td:
         for index, (name, old, new, lock) in enumerate(mutants):
@@ -303,6 +415,9 @@ def run():
     directory_root_lock(m)
     provider_home_lock(m)
     provider_cleanup_lock(m)
+    missing_parent_capability_lock(m)
+    claude_status_lock(m)
+    tl_status_lock(m)
     expected_repository = P.resolve().parents[2]
     assert m.REPOSITORY_ROOT == expected_repository
     with tempfile.TemporaryDirectory() as td:
@@ -534,24 +649,53 @@ def run():
                 assert target_path.read_bytes() == b"FIXTURE_ONLY"
                 assert not target_path.is_symlink()
 
-            # Mutation witness: deleting the actual-capability ancestry check
-            # makes the ancestor attack above write into the repository.  This
-            # proves the race case is sensitive to the control it claims.
-            mutant_alias = root / "mutant-parent"; (mutant_alias / "nested").mkdir(parents=True)
-            mutant_moved = root / "mutant-parent-before-swap"
-            mutant_repo = root / "mutant-repo"; (mutant_repo / ".git").mkdir(parents=True)
-            (mutant_repo / "nested").mkdir()
-            original_guard = m.secret_destination
-            def mutant_swap(path):
-                canonical = original_guard(path)
-                mutant_alias.rename(mutant_moved)
-                mutant_alias.symlink_to(mutant_repo, target_is_directory=True)
-                return canonical
-            with mock.patch.object(m, "secret_destination", side_effect=mutant_swap), \
-                 mock.patch.object(m, "_validate_parent_capability", return_value=None):
-                m._atomic_secret(mutant_alias / "nested" / "auth.json", b"FIXTURE_ONLY")
-            assert (mutant_repo / "nested" / "auth.json").read_bytes() == b"FIXTURE_ONLY", \
-                "mutation witness did not reach the vulnerable behavior"
+            # Mutation witness: reparent the already-open final component into
+            # a repository immediately before the final ancestry validation.
+            # Component no-follow checks cannot see this; deleting only the
+            # final validator must therefore reach the vulnerable write.
+            mutant_repo = root / "mutant-repo"
+            (mutant_repo / ".git").mkdir(parents=True)
+            original_component_check = m._fd_is_repository_root
+
+            def exercise_reparent(*, delete_final_validator):
+                source_parent = root / (
+                    "mutant-parent-deleted" if delete_final_validator
+                    else "mutant-parent-control")
+                source_parent.mkdir()
+                moved_parent = mutant_repo / source_parent.name
+                identity = (source_parent.stat().st_dev, source_parent.stat().st_ino)
+                moved = False
+
+                def reparent_before_final(directory_fd):
+                    nonlocal moved
+                    opened = os.fstat(directory_fd)
+                    if not moved and (opened.st_dev, opened.st_ino) == identity:
+                        source_parent.rename(moved_parent)
+                        moved = True
+                    return original_component_check(directory_fd)
+
+                patches = [mock.patch.object(
+                    m, "_fd_is_repository_root", side_effect=reparent_before_final)]
+                if delete_final_validator:
+                    patches.append(mock.patch.object(
+                        m, "_validate_parent_capability", return_value=None))
+                with patches[0]:
+                    if delete_final_validator:
+                        with patches[1]:
+                            m._atomic_secret(source_parent / "auth.json", b"FIXTURE_ONLY")
+                    else:
+                        try:
+                            m._atomic_secret(source_parent / "auth.json", b"FIXTURE_ONLY")
+                            assert False, "pre-validation reparent entered repository"
+                        except m.UnsafeSecretDestination:
+                            pass
+                return moved_parent
+
+            control_parent = exercise_reparent(delete_final_validator=False)
+            assert not (control_parent / "auth.json").exists()
+            mutant_parent = exercise_reparent(delete_final_validator=True)
+            assert (mutant_parent / "auth.json").read_bytes() == b"FIXTURE_ONLY", \
+                "final ancestry-validator mutant did not reach vulnerable behavior"
 
         # Bare repositories are repositories too; there is no `.git` entry to
         # save a worktree-only boundary check.

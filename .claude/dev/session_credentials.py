@@ -325,20 +325,75 @@ def _validate_parent_capability(parent_fd: int) -> None:
         os.close(current)
 
 
-def _open_parent_capability(path: Path, *, create: bool) -> int:
+def _walk_parent_capability(parent: Path, *, create: bool) -> int:
+    """Open/create an absolute parent by walking from the POSIX root fd."""
     flags = _directory_flags()
-    if create:
-        path.parent.mkdir(parents=True, exist_ok=True)
+    if not parent.is_absolute():
+        raise OSError("secret parent must be absolute")
+    components = parent.parts[1:]
+    if any(component in ("", ".", "..") for component in components):
+        raise OSError("invalid secret parent component")
     try:
-        parent_fd = os.open(path.parent, flags)
+        current = os.open(os.path.sep, flags)
     except (TypeError, NotImplementedError) as exc:
-        raise OSError("cannot open secret parent capability") from exc
+        raise OSError("cannot open trusted secret root capability") from exc
     try:
-        _validate_parent_capability(parent_fd)
+        for component in components:
+            try:
+                child = os.open(component, flags, dir_fd=current)
+            except FileNotFoundError:
+                if not create:
+                    raise
+                try:
+                    os.mkdir(component, mode=0o700, dir_fd=current)
+                except FileExistsError:
+                    # A concurrent creator is accepted only if the following
+                    # no-follow open proves it installed a real directory.
+                    pass
+                except (TypeError, NotImplementedError) as exc:
+                    raise OSError(
+                        "directory-relative secret mkdir unavailable") from exc
+                try:
+                    child = os.open(component, flags, dir_fd=current)
+                except (TypeError, NotImplementedError) as exc:
+                    raise OSError(
+                        "directory-relative secret open unavailable") from exc
+                except OSError as exc:
+                    installed = _stat_at(current, component)
+                    if installed is not None and stat.S_ISLNK(installed.st_mode):
+                        raise UnsafeSecretDestination(
+                            "refusing linked secret parent capability") from exc
+                    raise
+            except (TypeError, NotImplementedError) as exc:
+                raise OSError(
+                    "directory-relative secret open unavailable") from exc
+            except OSError as exc:
+                installed = _stat_at(current, component)
+                if installed is not None and stat.S_ISLNK(installed.st_mode):
+                    raise UnsafeSecretDestination(
+                        "refusing linked secret parent capability") from exc
+                raise
+            try:
+                opened = os.fstat(child)
+                if not stat.S_ISDIR(opened.st_mode):
+                    raise OSError("secret parent component is not a directory")
+                if _fd_is_repository_root(child):
+                    raise UnsafeSecretDestination(
+                        "refusing repository secret parent capability")
+            except Exception:
+                os.close(child)
+                raise
+            os.close(current)
+            current = child
+        _validate_parent_capability(current)
     except Exception:
-        os.close(parent_fd)
+        os.close(current)
         raise
-    return parent_fd
+    return current
+
+
+def _open_parent_capability(path: Path, *, create: bool) -> int:
+    return _walk_parent_capability(path.parent, create=create)
 
 
 def _checked_secret_destination(path: Path, *, create_parent: bool = True) -> Path:
@@ -679,10 +734,22 @@ def claude_probe(token_file: Path | None = None, *, timeout=20, env=None) -> dic
     except OSError:
         return _result("not_measured", reason="provider_storage_unavailable")
     combined = ((p.stderr or "") + "\n" + (p.stdout or "")).lower()
-    refused = any(word in combined for word in ("401", "403", "unauthorized", "authentication",
-                                                 "invalid token", "oauth", "login"))
+    refused = any(word in combined for word in (
+        "401", "403", "unauthorized", "authentication", "invalid token",
+        "oauth", "login", "model not found", "model access",
+        "model is not available", "unsupported model",
+    ))
+    network_failed = any(word in combined for word in (
+        "connection reset", "connection refused", "unable to connect",
+        "could not connect", "could not resolve", "name resolution", "dns failure",
+        "socket error", "econnreset", "econnrefused", "etimedout",
+    ))
     if p.returncode != 0:
-        return _result("rejected" if refused else "network_error", returncode=p.returncode)
+        if refused:
+            return _result("rejected", returncode=p.returncode)
+        if network_failed:
+            return _result("network_error", returncode=p.returncode)
+        return _result("not_measured", returncode=p.returncode)
     if marker not in (p.stdout or ""):
         return _result("rejected", reason="marker_missing", returncode=0)
     return _result("passed", returncode=0)
@@ -768,7 +835,18 @@ def tl_bootstrap(env_name: str, secrets_file: Path | None, *, timeout: int = 600
         return _result("rejected", reason="secret_destination_in_repository")
     except OSError:
         return _result("not_measured", reason="cli_missing")
-    return _result("passed" if p.returncode == 0 else "rejected", returncode=p.returncode)
+    outcomes = {
+        0: ("passed", None),
+        1: ("not_measured", "degraded"),
+        2: ("not_measured", "precondition"),
+        3: ("rejected", "credential_or_bundle_rejected"),
+    }
+    status, reason = outcomes.get(
+        p.returncode, ("not_measured", "unclassified_exit"))
+    details = {"returncode": p.returncode}
+    if reason is not None:
+        details["reason"] = reason
+    return _result(status, **details)
 
 
 def bootstrap_session(repo: str, env_name: str, secrets_file: Path | None,

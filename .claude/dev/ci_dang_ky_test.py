@@ -32,14 +32,7 @@ MOI = {
     ".claude/hooks/subagent_ghi_detect_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     "ops/nhanh_don_duoc_test.py": r"^(\d+)/(\d+)$",
 }
-CACH_LY = {
-    ".claude/hooks/pretooluse_guard_test.py": {
-        "slug": "AG-361-P2-02-pretooluse-guard-doi-runtime-runner-khong-co",
-        "ly_do": "runner CI trần đỏ t11/t15/t33 vì thiếu runtime mà bộ test đòi hỏi",
-        "moi_truong": "github-actions/linux",
-        "log": "Issue #361, log CI r3 của phiên điều phối",
-    },
-}
+CACH_LY = {}
 DA_NOI = {
     ".claude/dev/ci_dang_ky_test.py",
     ".claude/dev/duyet_danh_tinh_test.py",

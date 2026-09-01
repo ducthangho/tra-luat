@@ -697,13 +697,23 @@ def _tl_unlink_identity(directory_fd: int, name: str,
         os.unlink(name, dir_fd=directory_fd)
 
 
+def _tl_created_secret_identity(fd: int) -> tuple[int, int]:
+    """Bind the exact O_EXCL-created inode before chmod or any byte write."""
+    opened = os.fstat(fd)
+    if not stat.S_ISREG(opened.st_mode):
+        raise OSError("created TL secret target is not a regular file")
+    return opened.st_dev, opened.st_ino
+
+
 def _tl_atomic_secret(path, data: bytes) -> Path:
     """Atomic 0600 write relative only to the parent capability we validated."""
     target = _tl_secret_destination(path)
     directory_fd = _tl_open_parent(target)
-    temporary = None
+    created_name = None
+    cleanup_names = []
     identity = None
     fd = -1
+    identity_guard_fd = -1
     try:
         for _ in range(128):
             candidate = f".{target.name}.tmp-{secrets.token_hex(12)}"
@@ -715,16 +725,23 @@ def _tl_atomic_secret(path, data: bytes) -> Path:
                 continue
             except (TypeError, NotImplementedError) as exc:
                 raise OSError("relative secret create unavailable") from exc
-            temporary = candidate
+            created_name = candidate
+            cleanup_names.append(candidate)
             break
         else:
             raise OSError("could not allocate secret temporary file")
+        identity = _tl_created_secret_identity(fd)
+        # Keep the created inode alive until cleanup has finished.  Otherwise a
+        # hostile unlink/recreate can immediately reuse the same (dev, ino),
+        # making a pathname-only identity check delete the replacement.
+        identity_guard_fd = os.dup(fd)
         try:
             os.fchmod(fd, 0o600)
             opened = os.fstat(fd)
+            if (opened.st_dev, opened.st_ino) != identity:
+                raise OSError("created TL secret identity changed before write")
             if stat.S_IMODE(opened.st_mode) != 0o600:
                 raise OSError("secret mode 0600 was not established")
-            identity = (opened.st_dev, opened.st_ino)
             with os.fdopen(fd, "wb") as out:
                 fd = -1
                 out.write(data)
@@ -733,15 +750,20 @@ def _tl_atomic_secret(path, data: bytes) -> Path:
         finally:
             if fd != -1:
                 os.close(fd)
+                fd = -1
         existing = _tl_stat_at(directory_fd, target.name)
         if existing is not None and stat.S_ISLNK(existing.st_mode):
             raise OSError(f"refusing symlink secret destination: {target}")
         try:
-            os.replace(temporary, target.name,
+            # Keep both possible names until parent fsync succeeds.  Adding the
+            # final name before replace also covers a wrapper that performs the
+            # rename and then raises; identity checks make the extra lookup safe.
+            if target.name not in cleanup_names:
+                cleanup_names.append(target.name)
+            os.replace(created_name, target.name,
                        src_dir_fd=directory_fd, dst_dir_fd=directory_fd)
         except (TypeError, NotImplementedError) as exc:
             raise OSError("relative secret replace unavailable") from exc
-        temporary = None
         installed = _tl_stat_at(directory_fd, target.name)
         if (installed is None or (installed.st_dev, installed.st_ino) != identity
                 or stat.S_IMODE(installed.st_mode) != 0o600):
@@ -751,15 +773,20 @@ def _tl_atomic_secret(path, data: bytes) -> Path:
         except OSError as exc:
             if exc.errno not in (errno.EINVAL, getattr(errno, "ENOTSUP", errno.EINVAL)):
                 raise
+        cleanup_names.clear()
         return target
     except Exception:
-        if temporary is not None:
+        for cleanup_name in cleanup_names:
             try:
-                _tl_unlink_identity(directory_fd, temporary, identity)
-            except OSError:
+                _tl_unlink_identity(directory_fd, cleanup_name, identity)
+            except Exception:
                 pass
         raise
     finally:
+        if fd != -1:
+            os.close(fd)
+        if identity_guard_fd != -1:
+            os.close(identity_guard_fd)
         os.close(directory_fd)
 
 

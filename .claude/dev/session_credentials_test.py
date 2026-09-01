@@ -16,6 +16,203 @@ spec = importlib.util.spec_from_file_location("session_credentials", P)
 m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
 
 
+def _fixture_bound(module, name):
+    """Bind a real inert absolute executable for classifier-only tests."""
+    executable = Path(sys.executable).resolve(strict=True)
+    identity = module._provider_file_identity(executable)
+    return module._BoundProviderExecutable(
+        provider=name,
+        kind="direct",
+        executable=executable,
+        launch_support=(),
+        identities=((executable, identity),),
+        sanitized_path=str(executable.parent),
+    )
+
+
+def _safe_executable_directory():
+    """Allocate outside both this repository and the process temp tree."""
+    return tempfile.TemporaryDirectory(
+        prefix="wp433-provider-executable-", dir=P.resolve().parents[3])
+
+
+def _write_executable(path: Path, body: str = "#!/bin/sh\nexit 0\n") -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(body, encoding="utf-8", newline="\n")
+    path.chmod(0o755)
+    return path
+
+
+def provider_executable_lock(module):
+    """Provider credentials cross only one absolute, identity-bound executable."""
+    original_repository = module.REPOSITORY_ROOT
+    with _safe_executable_directory() as safe_raw:
+        safe = Path(safe_raw)
+        module.REPOSITORY_ROOT = P.resolve().parents[2]
+        try:
+            if os.name == "nt":
+                node = _write_executable(safe / "node.exe", "inert-node-fixture\n")
+                cli = _write_executable(
+                    safe / "node_modules" / "claude" / "cli.js",
+                    "inert-cli-fixture\n")
+                npm_body = ('@ECHO off\n"%dp0%\\node.exe" '
+                            '"%dp0%\\node_modules\\claude\\cli.js" %*\n')
+                claude = _write_executable(safe / "claude.cmd", npm_body)
+                gh = _write_executable(safe / "gh.exe", "fixture\n")
+                path_env = str(safe)
+                common = {"PATH": path_env, "PATHEXT": ".EXE;.CMD"}
+            else:
+                real = _write_executable(safe / "claude-real")
+                claude = safe / "claude"
+                claude.symlink_to(real)
+                gh = _write_executable(safe / "gh")
+                common = {"PATH": str(safe)}
+
+            marker = "TRALUAT-CLAUDE-CREDENTIAL-OK"
+            completed = mock.Mock(returncode=0, stdout=marker + "\n", stderr="")
+            with mock.patch.object(module.subprocess, "run", return_value=completed) as child:
+                result = module.claude_probe(env={
+                    **common, "CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"})
+            assert result["status"] == "passed", result
+            argv = child.call_args.args[0]
+            assert Path(argv[0]).is_absolute(), argv
+            assert argv[0].lower() != "claude", argv
+            assert "INERT_FIXTURE" not in repr(argv)
+            if os.name == "nt":
+                assert Path(argv[0]).resolve() == node.resolve(), argv
+                assert Path(argv[1]).resolve() == cli.resolve(), argv
+                assert str(claude.resolve()).lower() not in repr(argv).lower(), argv
+            else:
+                assert Path(argv[0]).is_absolute(), argv
+                assert Path(argv[-3]).resolve() == real.resolve(), argv
+
+            ok = mock.Mock(returncode=0, stdout="", stderr="")
+            with mock.patch.object(module.subprocess, "run", return_value=ok) as child:
+                result = module.github_probe(
+                    "o/r", env={**common, "GITHUB_PAT": "INERT_FIXTURE"})
+            assert result["status"] == "passed", result
+            assert child.call_count == 2
+            assert all(Path(call.args[0][0]).is_absolute()
+                       and call.args[0][0].lower() != "gh"
+                       and "INERT_FIXTURE" not in repr(call.args[0])
+                       for call in child.call_args_list)
+
+            # Invalid discovery roots are rejected before the credential key
+            # is even read.  A mapping that explodes on that read proves order.
+            class CredentialTripwire(dict):
+                def get(self, key, default=None):
+                    if key in ("CLAUDE_CODE_OAUTH_TOKEN", "GITHUB_PAT"):
+                        raise AssertionError("credential read before executable validation")
+                    return super().get(key, default)
+
+            # The interpreter/script is launch authority too.  Replacing a
+            # bound support file must fail before the credential-bearing child.
+            if os.name == "nt":
+                support_common = common
+                support_bound = module._bind_provider_executable(
+                    "claude", support_common)
+                assert support_bound.kind == "npm-cmd"
+                assert len(support_bound.launch_support) == 2
+                support_target = support_bound.launch_support[0]
+                support_target.unlink()
+                _write_executable(support_target, "malicious-node-fixture\n")
+            else:
+                _write_executable(real, "#!/usr/bin/env node\n")
+                support_target = _write_executable(safe / "node")
+                support_common = {"PATH": str(safe)}
+                support_bound = module._bind_provider_executable(
+                    "claude", support_common)
+                assert support_bound.kind == "posix-script"
+                assert len(support_bound.launch_support) == 1
+                support_argv = module._provider_argv(
+                    support_bound, ["--inert-fixture"])
+                assert Path(support_argv[0]).resolve() == support_target.resolve()
+                assert Path(support_argv[1]).resolve() == real.resolve()
+                assert support_argv[2:] == ["--inert-fixture"]
+                support_target.unlink()
+                _write_executable(support_target, "#!/bin/sh\nexit 9\n")
+            with mock.patch.object(
+                    module, "_bind_provider_executable",
+                    return_value=support_bound), \
+                 mock.patch.object(module.subprocess, "run") as child:
+                support_changed = module.claude_probe(env={
+                    **support_common,
+                    "CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"})
+            assert support_changed["status"] == "not_measured", support_changed
+            child.assert_not_called()
+            if os.name == "nt":
+                _write_executable(node, "inert-node-fixture\n")
+            else:
+                _write_executable(real)
+
+                # Two PATH-resolved interpreters are ambiguity; the credential
+                # key tripwire proves neither unbound node can receive it.
+                _write_executable(real, "#!/usr/bin/env node\n")
+                malicious = safe / "malicious"; malicious.mkdir()
+                _write_executable(malicious / "node", "#!/bin/sh\nexit 9\n")
+                ambiguous_support = CredentialTripwire(
+                    PATH=os.pathsep.join((str(safe), str(malicious))))
+                with mock.patch.object(module.subprocess, "run") as child:
+                    assert module.claude_probe(
+                        env=ambiguous_support)["status"] == "not_measured"
+                child.assert_not_called()
+                _write_executable(real)
+
+            invalid_sources = (
+                CredentialTripwire(PATH=""),
+                CredentialTripwire(PATH="."),
+                CredentialTripwire(PATH=str(module.REPOSITORY_ROOT)),
+            )
+            with mock.patch.object(module.subprocess, "run") as child:
+                for source in invalid_sources:
+                    assert module.claude_probe(env=source)["status"] == "not_measured"
+                    assert module.github_probe("o/r", env=source)["status"] == "not_measured"
+            child.assert_not_called()
+
+            with tempfile.TemporaryDirectory(prefix="wp433-provider-temp-") as temp_raw:
+                temp_root = Path(temp_raw)
+                _write_executable(temp_root / ("claude.cmd" if os.name == "nt" else "claude"))
+                temp_source = CredentialTripwire(
+                    PATH=str(temp_root), **({"PATHEXT": ".CMD"} if os.name == "nt" else {}))
+                with mock.patch.object(module.subprocess, "run") as child:
+                    assert module.claude_probe(env=temp_source)["status"] == "not_measured"
+                child.assert_not_called()
+
+            # More than one trusted candidate is ambiguity, not PATH priority.
+            other = safe / "other"; other.mkdir()
+            _write_executable(other / ("claude.exe" if os.name == "nt" else "claude"))
+            ambiguous = {**common, "PATH": os.pathsep.join((str(safe), str(other))),
+                         "CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"}
+            with mock.patch.object(module.subprocess, "run") as child:
+                assert module.claude_probe(env=ambiguous)["status"] == "not_measured"
+            child.assert_not_called()
+
+            # Replacement after binding but before spawn must start no child.
+            bound = module._bind_provider_executable("claude", common)
+            bound.executable.unlink()
+            replacement_body = (npm_body.replace("@ECHO off", "@ECHO off\n@REM upgraded")
+                                if os.name == "nt" else "#!/bin/sh\nexit 9\n")
+            replacement = _write_executable(bound.executable, replacement_body)
+            assert replacement.exists()
+            with mock.patch.object(module, "_bind_provider_executable", return_value=bound), \
+                 mock.patch.object(module.subprocess, "run") as child:
+                changed = module.claude_probe(env={
+                    **common, "CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"})
+            assert changed["status"] == "not_measured", changed
+            child.assert_not_called()
+
+            # A separate invocation discovers the replacement as a normal
+            # provider upgrade and binds its new identity.
+            with mock.patch.object(
+                    module.subprocess, "run", return_value=completed) as child:
+                upgraded = module.claude_probe(env={
+                    **common, "CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"})
+            assert upgraded["status"] == "passed", upgraded
+            child.assert_called_once()
+        finally:
+            module.REPOSITORY_ROOT = original_repository
+
+
 def directory_root_lock(module):
     """Exact directory roots are guarded as directories, not as file targets."""
     repository = P.resolve().parents[2]
@@ -136,6 +333,9 @@ def provider_home_lock(module):
             # subprocess-based provider probes.
             with mock.patch.object(module, "_private_provider_home",
                                    side_effect=OSError("fixture secure-root failure")), \
+                 mock.patch.object(module, "_bind_provider_executable",
+                                   side_effect=lambda name, _source:
+                                       _fixture_bound(module, name)), \
                  mock.patch.object(module.subprocess, "run") as child:
                 claude = module.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S"})
                 github = module.github_probe("o/r", env={"GITHUB_PAT": "S"})
@@ -188,6 +388,8 @@ def provider_cleanup_lock(module):
         base = private_base(Path(raw))
         try:
             with mock.patch.object(module, "_trusted_provider_temp_base", return_value=base), \
+                 mock.patch.object(module, "_bind_provider_executable",
+                                   return_value=_fixture_bound(module, "claude")), \
                  mock.patch.object(module.shutil, "rmtree",
                                    side_effect=OSError("fixture delete failure")), \
                  mock.patch.object(module.subprocess, "run", return_value=good):
@@ -202,6 +404,8 @@ def provider_cleanup_lock(module):
         base = private_base(Path(raw))
         try:
             with mock.patch.object(module, "_trusted_provider_temp_base", return_value=base), \
+                 mock.patch.object(module, "_bind_provider_executable",
+                                   return_value=_fixture_bound(module, "claude")), \
                  mock.patch.object(module.shutil, "rmtree", return_value=None), \
                  mock.patch.object(module.subprocess, "run", return_value=good):
                 result = module.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "FIXTURE"})
@@ -251,6 +455,8 @@ def provider_cleanup_lock(module):
 
         try:
             with mock.patch.object(module, "_trusted_provider_temp_base", return_value=base), \
+                 mock.patch.object(module, "_bind_provider_executable",
+                                   return_value=_fixture_bound(module, "claude")), \
                  mock.patch.object(module.shutil, "rmtree", side_effect=observed_rmtree), \
                  mock.patch.object(module.subprocess, "run", side_effect=child_run):
                 result = module.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "FIXTURE"})
@@ -458,10 +664,117 @@ def claude_status_lock(module):
          "not_measured"),
     )
     for completed, expected in cases:
-        with mock.patch.object(module.subprocess, "run", return_value=completed):
+        with mock.patch.object(module, "_bind_provider_executable",
+                               return_value=_fixture_bound(module, "claude")), \
+             mock.patch.object(module.subprocess, "run", return_value=completed):
             result = module.claude_probe(
                 env={"CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"})
         assert result["status"] == expected, (completed.stderr, result)
+
+    marker = "TRALUAT-CLAUDE-CREDENTIAL-OK"
+    zero_exit_cases = (
+        (mock.Mock(returncode=0, stdout="done\n", stderr=""),
+         "not_measured", "marker_missing"),
+        (mock.Mock(returncode=0, stdout=f"prefix-{marker}-suffix\n", stderr=""),
+         "not_measured", "marker_missing"),
+        (mock.Mock(returncode=0, stdout="", stderr="invalid OAuth token"),
+         "rejected", None),
+        (mock.Mock(returncode=0, stdout="", stderr="connection refused"),
+         "network_error", None),
+        (mock.Mock(returncode=0, stdout=marker + "\n", stderr=""),
+         "passed", None),
+    )
+    for completed, expected, reason in zero_exit_cases:
+        with mock.patch.object(module, "_bind_provider_executable",
+                               return_value=_fixture_bound(module, "claude")), \
+             mock.patch.object(module.subprocess, "run", return_value=completed):
+            result = module.claude_probe(
+                env={"CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"})
+        assert result["status"] == expected, (completed.stderr, completed.stdout, result)
+        assert result.get("reason") == reason, result
+
+
+def claude_capture_status_lock(module):
+    """setup-token uses the same closed refusal/transport classification."""
+    if os.name != "posix":
+        print("SKIP claude_capture_unknown_nonzero_becomes_rejected "
+              "(POSIX PTY/capability primitive unavailable)")
+        return
+    cases = (
+        (7, "local configuration parse failed", "not_measured"),
+        (7, "login configuration parse failed", "not_measured"),
+        (7, "OAuth callback configuration is malformed", "not_measured"),
+        (7, "authentication helper crashed locally", "not_measured"),
+        (7, "local cache record 401 is malformed", "not_measured"),
+        (7, "local port 403 is already in use", "not_measured"),
+        (7, "invalid OAuth token", "rejected"),
+        (7, "connection reset by peer", "network_error"),
+        (0, "setup completed without a token", "not_measured"),
+    )
+    with _safe_executable_directory() as raw, \
+         tempfile.TemporaryDirectory(prefix="wp433-capture-output-") as output_raw:
+        bindir = Path(raw)
+        output_root = Path(output_raw)
+        fake = bindir / "claude"
+        for index, (returncode, evidence, expected) in enumerate(cases):
+            _write_executable(
+                fake,
+                f"#!{sys.executable}\n"
+                "import os\n"
+                f"os.write(1, {evidence!r}.encode() + b'\\n')\n"
+                f"raise SystemExit({returncode})\n")
+            output = output_root / f"capture-{index}.token"
+            result = module.capture_claude(
+                output, timeout=5, env={"PATH": str(bindir)},
+                input_stream=io.StringIO(), output_stream=io.StringIO())
+            assert result["status"] == expected, (returncode, evidence, result)
+            assert not output.exists(), (returncode, evidence, result)
+
+
+def github_status_lock(module):
+    """GitHub failures require GitHub auth headers or bounded transport proof."""
+    passed = mock.Mock(returncode=0, stdout="", stderr="")
+    cases = (
+        (mock.Mock(returncode=1,
+                   stdout="HTTP/2 401\nX-GitHub-Request-Id: FIXTURE\n", stderr=""),
+         "rejected"),
+        (mock.Mock(returncode=1,
+                   stdout="HTTP/2 403\nX-GitHub-Request-Id: FIXTURE\n", stderr=""),
+         "rejected"),
+        (mock.Mock(returncode=1,
+                   stdout="HTTP/2 404\nX-GitHub-Request-Id: FIXTURE\n", stderr=""),
+         "rejected"),
+        (mock.Mock(returncode=1, stdout="HTTP/1.1 403 Forbidden\n", stderr=""),
+         "not_measured"),
+        (mock.Mock(returncode=1, stdout="", stderr="connection reset by peer"),
+         "network_error"),
+        (mock.Mock(returncode=1, stdout="", stderr="local configuration parse failed"),
+         "not_measured"),
+        (mock.Mock(returncode=1, stdout="", stderr="unknown failure"),
+         "not_measured"),
+    )
+    for failed, expected in cases:
+        with mock.patch.object(module, "_bind_provider_executable",
+                               return_value=_fixture_bound(module, "gh")), \
+             mock.patch.object(module.subprocess, "run",
+                               side_effect=(passed, failed)):
+            result = module.github_probe("o/r", env={"GITHUB_PAT": "INERT_FIXTURE"})
+        assert result["status"] == expected, (failed.stdout, failed.stderr, result)
+        assert result["endpoints"]["user"] == "passed"
+        assert result["endpoints"]["repos/o/r"] == expected
+
+    # A later proxy response without GitHub headers cannot borrow an earlier
+    # GitHub header from a different HTTP block.
+    mixed_block = mock.Mock(
+        returncode=1,
+        stdout=("HTTP/2 200\nX-GitHub-Request-Id: REAL\n\n"
+                "HTTP/1.1 403 Forbidden\nServer: proxy\n"), stderr="")
+    with mock.patch.object(module, "_bind_provider_executable",
+                           return_value=_fixture_bound(module, "gh")), \
+         mock.patch.object(module.subprocess, "run",
+                           side_effect=(passed, mixed_block)):
+        result = module.github_probe("o/r", env={"GITHUB_PAT": "INERT_FIXTURE"})
+    assert result["status"] == "not_measured", result
 
 
 def tl_status_lock(module):
@@ -505,20 +818,48 @@ def run_mutations():
          "            _checked_provider_cleanup(root, root_identity)",
          "            shutil.rmtree(root, ignore_errors=True)",
          provider_cleanup_lock),
+        ("provider_probe_uses_ambient_PATH_argv0",
+         "                argv = _provider_argv(\n"
+         "                    bound, [\"-p\", f\"Print exactly: {marker}\"])\n"
+         "                p = subprocess.run(argv,",
+         "                argv = [\"claude\", \"-p\", f\"Print exactly: {marker}\"]\n"
+         "                p = subprocess.run(argv,",
+         provider_executable_lock),
         ("claude_local_login_config_error_becomes_rejected",
-         "    refused = _claude_refusal_evidenced(combined)",
-         "    refused = (_claude_refusal_evidenced(combined) or any(\n"
-         "        word in combined for word in (\"login\", \"oauth\", \"authentication\")))",
+         "    if _claude_refusal_evidenced(combined):",
+         "    if (_claude_refusal_evidenced(combined) or any(\n"
+         "            word in combined for word in\n"
+         "            (\"login\", \"oauth\", \"authentication\"))):",
          claude_status_lock),
         ("claude_bare_403_becomes_rejected",
-         "    refused = _claude_refusal_evidenced(combined)",
-         "    refused = (_claude_refusal_evidenced(combined) or any(\n"
-         "        word in combined for word in (\"401\", \"403\")))",
+         "    if _claude_refusal_evidenced(combined):",
+         "    if (_claude_refusal_evidenced(combined) or any(\n"
+         "            word in combined for word in (\"401\", \"403\"))):",
          claude_status_lock),
         ("claude_unknown_nonzero_becomes_network_error",
-         '        return _result("not_measured", returncode=p.returncode)',
-         '        return _result("network_error", returncode=p.returncode)',
+         "    if _transport_failure_evidenced(combined):\n"
+         "        return \"network_error\"\n"
+         "    return \"not_measured\"",
+         "    if _transport_failure_evidenced(combined):\n"
+         "        return \"network_error\"\n"
+         "    return \"network_error\"",
          claude_status_lock),
+        ("claude_rc0_marker_missing_becomes_rejected",
+         "        if status == \"not_measured\":\n"
+         "            details[\"reason\"] = \"marker_missing\"\n"
+         "        return _result(status, **details)",
+         "        if status == \"not_measured\":\n"
+         "            return _result(\"rejected\", reason=\"marker_missing\", returncode=0)\n"
+         "        return _result(status, **details)",
+         claude_status_lock),
+        ("github_local_config_error_becomes_network_error",
+         "    if _transport_failure_evidenced(combined.lower()):\n"
+         "        return \"network_error\"\n"
+         "    return \"not_measured\"",
+         "    if _transport_failure_evidenced(combined.lower()):\n"
+         "        return \"network_error\"\n"
+         "    return \"network_error\"",
+         github_status_lock),
         ("tl_degraded_rc1_becomes_rejected",
          '        1: ("not_measured", "degraded"),',
          '        1: ("rejected", "credential_or_bundle_rejected"),',
@@ -529,6 +870,31 @@ def run_mutations():
          tl_status_lock),
     ]
     if os.name == "posix":
+        mutants.append((
+            "provider_launch_support_is_unbound",
+            '        return "posix-script", (support,), (), identities',
+            '        return "direct", (), (), []',
+            provider_executable_lock,
+        ))
+    else:
+        mutants.append((
+            "provider_launch_support_is_unbound",
+            '    return ("npm-cmd", (node, script), (),\n'
+            '            [(node, node_identity), (script, script_identity)])',
+            '    return ("direct", (), (), [])',
+            provider_executable_lock,
+        ))
+    if os.name == "posix":
+        mutants.append((
+            "claude_capture_unknown_nonzero_becomes_rejected",
+            "    if proc.returncode:\n"
+            "        status = _claude_failure_status(combined)\n"
+            "        return _result(status, reason=\"setup_failed\", returncode=proc.returncode)",
+            "    if proc.returncode:\n"
+            "        status = \"rejected\"\n"
+            "        return _result(status, reason=\"setup_failed\", returncode=proc.returncode)",
+            claude_capture_status_lock,
+        ))
         mutants.append((
             "session_partial_write_forgets_created_identity",
             "                created_identity = _created_secret_identity(fd)\n"
@@ -554,6 +920,8 @@ def run_mutations():
             missing_parent_capability_lock,
         ))
     else:
+        print("SKIP claude_capture_unknown_nonzero_becomes_rejected "
+              "(POSIX PTY/capability primitive unavailable)")
         print("SKIP session_partial_write_forgets_created_identity "
               "(POSIX capability primitive unavailable)")
         print("SKIP missing_parent_creation_uses_pathname_before_capability "
@@ -580,15 +948,18 @@ def run_mutations():
 
 def run():
     directory_root_lock(m)
+    provider_executable_lock(m)
     provider_home_lock(m)
     provider_cleanup_lock(m)
     missing_parent_capability_lock(m)
     secret_write_cleanup_lock(m)
     claude_status_lock(m)
+    claude_capture_status_lock(m)
+    github_status_lock(m)
     tl_status_lock(m)
     expected_repository = P.resolve().parents[2]
     assert m.REPOSITORY_ROOT == expected_repository
-    with tempfile.TemporaryDirectory() as td:
+    with tempfile.TemporaryDirectory() as td, _safe_executable_directory() as executable_td:
         root = Path(td)
         assert m.codex_home({"CODEX_HOME": str(root / "custom")}) == root / "custom"
         with mock.patch.object(m.Path, "home", return_value=root):
@@ -932,9 +1303,9 @@ def run():
         # An actual child sees a TTY, displays an interactive prompt, consumes input,
         # and emits the credential split over writes.  The parent must stream the
         # prompt while never forwarding the credential.
-        bindir = root / "bin"; bindir.mkdir()
+        bindir = Path(executable_td)
         fake = bindir / "claude"
-        fake.write_text("""#!/usr/bin/env python3
+        fake.write_text(f"""#!{sys.executable}
 import json,os,sys,time
 assert os.isatty(0) and os.isatty(1) and os.isatty(2)
 open(os.path.join(os.path.dirname(__file__), 'setup-env.json'), 'w').write(json.dumps(dict(os.environ)))
@@ -944,11 +1315,14 @@ os.write(1,b'sk-ant-oat01-' + b'A'*180); time.sleep(.02)
 os.write(1,b'A'*180 + b'\\n')
 """, encoding="utf-8")
         fake.chmod(0o755)
+        fake_gh = bindir / "gh"
+        fake_gh.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8", newline="\n")
+        fake_gh.chmod(0o755)
         out, displayed = root / "claude.token", io.StringIO()
         read_fd, write_fd = os.pipe(); os.write(write_fd, b"yes\n"); os.close(write_fd)
         with os.fdopen(read_fd) as user_input:
             result = m.capture_claude(out, timeout=5,
-                env={"PATH": f"{bindir}{os.pathsep}{os.environ['PATH']}",
+                env={"PATH": str(bindir),
                      "CODEX_AUTH_JSON": "CODEX_CANARY",
                      "CLAUDE_CODE_OAUTH_TOKEN": "CLAUDE_CANARY",
                      "GITHUB_PAT": "GH_CANARY", "TL_MASTER_KEY": "TL_CANARY",
@@ -968,7 +1342,7 @@ os.write(1,b'A'*180 + b'\\n')
                                side_effect=m.UnsafeSecretDestination("swapped parent")), \
              os.fdopen(read_fd) as user_input:
             raced = m.capture_claude(raced_out, timeout=5,
-                env={"PATH": f"{bindir}{os.pathsep}{os.environ['PATH']}"},
+                env={"PATH": str(bindir)},
                 input_stream=user_input, output_stream=raced_display)
         assert raced == {"status": "rejected", "reason": "secret_destination_in_repository"}
         assert not raced_out.exists()
@@ -979,7 +1353,7 @@ os.write(1,b'A'*180 + b'\\n')
             read_fd, write_fd = os.pipe(); os.write(write_fd, b"yes\n"); os.close(write_fd)
             with os.fdopen(read_fd) as user_input:
                 result = m.capture_claude(repo_output, timeout=5,
-                    env={"PATH": f"{bindir}{os.pathsep}{os.environ['PATH']}"},
+                    env={"PATH": str(bindir)},
                     input_stream=user_input, output_stream=rejected_display)
             assert result == {"status": "rejected", "reason": "secret_destination_in_repository"}
             assert not repo_output.exists()
@@ -1000,10 +1374,10 @@ os.write(1,b'A'*180 + b'\\n')
             result = m.github_probe("o/r", env={"GITHUB_PAT": "GH_CANARY",
                 "CODEX_AUTH_JSON": "CODEX_CANARY", "CLAUDE_CODE_OAUTH_TOKEN": "CLAUDE_CANARY",
                 "TL_MASTER_KEY": "TL_CANARY", "GITHUB_TOKEN": "OTHER_GH_CANARY",
-                "PATH": "/bin", "X": "1"})
+                "PATH": str(bindir), "X": "1"})
         assert result["status"] == "passed" and len(seen) == 2
         assert all("CANARY" not in repr(x[0])
-                   and x[1]["env"].get("PATH") == "/bin"
+                   and x[1]["env"].get("PATH") == str(bindir.resolve())
                    and x[1]["env"].get("GH_TOKEN") == "GH_CANARY"
                    and set(x[1]["env"]) == {"PATH", "HOME", "XDG_CONFIG_HOME",
                                               "XDG_CACHE_HOME", "XDG_DATA_HOME",
@@ -1014,11 +1388,13 @@ os.write(1,b'A'*180 + b'\\n')
             denied = mock.Mock(returncode=1,
                 stdout=f"HTTP/2 {code}\nX-GitHub-Request-Id: FIXTURE\n", stderr="")
             with mock.patch.object(m.subprocess, "run", return_value=denied):
-                assert m.github_probe("o/r", env={"GITHUB_PAT": "S"})["status"] == "rejected"
+                assert m.github_probe("o/r", env={"GITHUB_PAT": "S",
+                    "PATH": str(bindir)})["status"] == "rejected"
         proxy_403 = mock.Mock(returncode=1, stdout="HTTP/1.1 403 Forbidden\n", stderr="")
         with mock.patch.object(m.subprocess, "run", return_value=proxy_403):
-            assert m.github_probe("o/r", env={"GITHUB_PAT": "S"})["status"] == "network_error"
-        assert m.github_probe("o/r", env={})["status"] == "missing"
+            assert m.github_probe("o/r", env={"GITHUB_PAT": "S",
+                "PATH": str(bindir)})["status"] == "not_measured"
+        assert m.github_probe("o/r", env={"PATH": str(bindir)})["status"] == "missing"
 
         marker = "TRALUAT-CLAUDE-CREDENTIAL-OK"
         good = mock.Mock(returncode=0, stdout=marker + "\n", stderr="")
@@ -1026,24 +1402,30 @@ os.write(1,b'A'*180 + b'\\n')
             assert m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "CLAUDE_CANARY",
                 "CODEX_AUTH_JSON": "CODEX_CANARY", "GITHUB_PAT": "GH_CANARY",
                 "TL_MASTER_KEY": "TL_CANARY", "ANTHROPIC_API_KEY": "VENDOR_CANARY",
-                "HOME": "/home/test"})["status"] == "passed"
+                "HOME": "/home/test", "PATH": str(bindir)})["status"] == "passed"
         command, kwargs = run_child.call_args
-        assert command[0][1] == "-p" and kwargs["stdin"] is m.subprocess.DEVNULL
+        assert command[0][-2] == "-p" and kwargs["stdin"] is m.subprocess.DEVNULL
         assert "CANARY" not in repr(command)
         assert kwargs["env"].get("CLAUDE_CODE_OAUTH_TOKEN") == "CLAUDE_CANARY"
+        assert kwargs["env"].get("PATH") == str(bindir.resolve())
         assert kwargs["env"]["HOME"] != "/home/test"
-        assert set(kwargs["env"]) == {"HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME",
+        assert set(kwargs["env"]) == {"PATH", "HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME",
                                       "XDG_DATA_HOME", "XDG_STATE_HOME",
                                       "TMPDIR", "TMP", "TEMP",
                                       "CLAUDE_CODE_OAUTH_TOKEN"}
         no_marker = mock.Mock(returncode=0, stdout="done\n", stderr="")
         with mock.patch.object(m.subprocess, "run", return_value=no_marker):
-            assert m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S"})["status"] == "rejected"
+            missing_marker = m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S",
+                "PATH": str(bindir)})
+        assert missing_marker == {"status": "not_measured",
+                                  "reason": "marker_missing", "returncode": 0}
         refused = mock.Mock(returncode=1, stdout="", stderr="401 unauthorized")
         with mock.patch.object(m.subprocess, "run", return_value=refused):
-            assert m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S"})["status"] == "rejected"
+            assert m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S",
+                "PATH": str(bindir)})["status"] == "rejected"
         with mock.patch.object(m.subprocess, "run", side_effect=m.subprocess.TimeoutExpired("claude", 1)):
-            assert m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S"})["status"] == "not_measured"
+            assert m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S",
+                "PATH": str(bindir)})["status"] == "not_measured"
 
         with mock.patch.object(m.subprocess, "run") as run_child:
             missing_file = m.tl_bootstrap("cowork", None, env={

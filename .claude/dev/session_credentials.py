@@ -11,6 +11,7 @@ import os
 import re
 import secrets
 import select
+import shlex
 import shutil
 import stat
 import subprocess
@@ -18,7 +19,7 @@ import sys
 import tempfile
 import time
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 STATUSES = ("missing", "rejected", "network_error", "not_measured", "passed")
 SECRET_ENV = ("CODEX_AUTH_JSON", "CLAUDE_CODE_OAUTH_TOKEN", "GITHUB_PAT", "TL_MASTER_KEY")
@@ -29,6 +30,32 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 
 class UnsafeSecretDestination(OSError):
     """A secret target resolves into this repository."""
+
+
+class _ProviderExecutableError(OSError):
+    """A provider executable could not be bound without ambient authority."""
+
+    def __init__(self, reason: str):
+        super().__init__(reason)
+        self.reason = reason
+
+
+class _BoundProviderExecutable:
+    __slots__ = ("provider", "kind", "executable", "launch_support",
+                 "launch_arguments", "identities", "sanitized_path")
+
+    def __init__(self, *, provider: str, kind: str, executable: Path,
+                 launch_support: tuple[Path, ...],
+                 identities: tuple[tuple[Path, tuple[int, int, int, int]], ...],
+                 sanitized_path: str,
+                 launch_arguments: tuple[str, ...] = ()):
+        self.provider = provider
+        self.kind = kind
+        self.executable = executable
+        self.launch_support = launch_support
+        self.launch_arguments = launch_arguments
+        self.identities = identities
+        self.sanitized_path = sanitized_path
 
 
 # Child processes get an intentionally small operational environment rather
@@ -57,6 +84,270 @@ def _child_env(source, **required: str) -> dict[str, str]:
         child.pop(key, None)
     child.update(required)
     return child
+
+
+def _path_within(path: Path, root: Path) -> bool:
+    try:
+        path.relative_to(root)
+        return True
+    except ValueError:
+        return False
+
+
+def _provider_file_identity(path: Path) -> tuple[int, int, int, int]:
+    """Bind both directory identity and content-changing stat metadata."""
+    info = path.lstat()
+    reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+    if (not stat.S_ISREG(info.st_mode) or stat.S_ISLNK(info.st_mode)
+            or (reparse and getattr(info, "st_file_attributes", 0) & reparse)):
+        raise _ProviderExecutableError("provider_executable_untrusted")
+    return (info.st_dev, info.st_ino, info.st_size,
+            getattr(info, "st_mtime_ns", int(info.st_mtime * 1_000_000_000)))
+
+
+def _provider_forbidden_roots() -> tuple[Path, ...]:
+    roots = [REPOSITORY_ROOT.resolve(strict=True)]
+    try:
+        roots.append(_trusted_provider_temp_base().resolve(strict=True))
+    except OSError as exc:
+        raise _ProviderExecutableError("provider_executable_untrusted") from exc
+    return tuple(roots)
+
+
+def _provider_path_is_trusted(path: Path,
+                              forbidden: tuple[Path, ...]) -> bool:
+    return not any(_path_within(path, root) for root in forbidden)
+
+
+def _provider_candidate(alias: Path, forbidden: tuple[Path, ...],
+                        *, executable: bool = True):
+    """Resolve one regular provider/support file without accepting a reparse."""
+    try:
+        alias_info = alias.lstat()
+        reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+        if (os.name == "nt"
+                and (stat.S_ISLNK(alias_info.st_mode)
+                     or (reparse and getattr(
+                         alias_info, "st_file_attributes", 0) & reparse))):
+            return None
+        target = alias.resolve(strict=True)
+        if (not _provider_path_is_trusted(alias, forbidden)
+                or not _provider_path_is_trusted(target, forbidden)):
+            return None
+        identity = _provider_file_identity(target)
+        if executable and os.name == "posix" and not os.access(target, os.X_OK):
+            return None
+        return alias, target, identity
+    except (OSError, _ProviderExecutableError):
+        return None
+
+
+def _provider_named_support(name: str, directories: list[Path],
+                            forbidden: tuple[Path, ...]):
+    """Bind exactly one bare interpreter name from the sanitized path."""
+    if (not name or Path(name).name != name
+            or not re.fullmatch(r"[A-Za-z0-9_.+\-]+", name)):
+        raise _ProviderExecutableError("provider_launch_support_untrusted")
+    candidate_name = name + ".exe" if os.name == "nt" and not name.lower().endswith(".exe") else name
+    candidates = []
+    for directory in directories:
+        candidate = _provider_candidate(
+            directory / candidate_name, forbidden, executable=True)
+        if candidate is not None:
+            candidates.append(candidate)
+    if len(candidates) != 1:
+        reason = ("provider_launch_support_missing" if not candidates
+                  else "provider_launch_support_ambiguous")
+        raise _ProviderExecutableError(reason)
+    return candidates[0]
+
+
+def _posix_provider_plan(executable: Path, directories: list[Path],
+                         forbidden: tuple[Path, ...]):
+    """Turn a shebang into an absolute interpreter launch, never kernel PATH lookup."""
+    try:
+        with executable.open("rb") as source:
+            first = source.readline(4097)
+    except OSError as exc:
+        raise _ProviderExecutableError("provider_launch_support_untrusted") from exc
+    if not first.startswith(b"#!"):
+        return "direct", (), (), []
+    if len(first) > 4096 or not first.endswith((b"\n", b"\r")):
+        raise _ProviderExecutableError("provider_launch_support_untrusted")
+    try:
+        words = shlex.split(first[2:].decode("utf-8", "strict").strip())
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise _ProviderExecutableError("provider_launch_support_untrusted") from exc
+    if not words or len(words) > 2 or not Path(words[0]).is_absolute():
+        raise _ProviderExecutableError("provider_launch_support_untrusted")
+    interpreter = _provider_candidate(Path(words[0]), forbidden, executable=True)
+    if interpreter is None:
+        raise _ProviderExecutableError("provider_launch_support_untrusted")
+    _, interpreter_target, interpreter_identity = interpreter
+    identities = [(interpreter_target, interpreter_identity)]
+    if interpreter_target.name == "env":
+        if len(words) != 2:
+            raise _ProviderExecutableError("provider_launch_support_untrusted")
+        _, support, support_identity = _provider_named_support(
+            words[1], directories, forbidden)
+        identities.append((support, support_identity))
+        return "posix-script", (support,), (), identities
+    return ("posix-script", (interpreter_target,), tuple(words[1:]),
+            identities)
+
+
+def _windows_npm_plan(executable: Path, directories: list[Path],
+                      forbidden: tuple[Path, ...]):
+    """Recognize an npm cmd shim but launch its bound node and JS directly."""
+    suffix = executable.suffix.lower()
+    if suffix in (".exe", ".com"):
+        return "direct", (), (), []
+    if suffix != ".cmd":
+        raise _ProviderExecutableError("provider_launch_support_untrusted")
+    try:
+        raw = executable.read_bytes()
+        if len(raw) > 65536:
+            raise _ProviderExecutableError("provider_launch_support_untrusted")
+        text = raw.decode("utf-8-sig", "strict")
+    except (OSError, UnicodeDecodeError) as exc:
+        raise _ProviderExecutableError("provider_launch_support_untrusted") from exc
+    script_matches = re.findall(
+        r'(?im)"%dp0%\\([^"\r\n]+?\.js)"\s+%\*\s*$', text)
+    if len(script_matches) != 1:
+        raise _ProviderExecutableError("provider_launch_support_untrusted")
+    relative = PureWindowsPath(script_matches[0])
+    if (relative.is_absolute() or relative.drive or relative.root
+            or any(part in ("", ".", "..") for part in relative.parts)):
+        raise _ProviderExecutableError("provider_launch_support_untrusted")
+    script_alias = executable.parent.joinpath(*relative.parts)
+    script_candidate = _provider_candidate(
+        script_alias, forbidden, executable=False)
+    if script_candidate is None:
+        raise _ProviderExecutableError("provider_launch_support_untrusted")
+    _, script, script_identity = script_candidate
+
+    sibling_node = executable.parent / "node.exe"
+    try:
+        sibling_node.lstat()
+    except FileNotFoundError:
+        _, node, node_identity = _provider_named_support(
+            "node", directories, forbidden)
+    except OSError as exc:
+        raise _ProviderExecutableError("provider_launch_support_untrusted") from exc
+    else:
+        node_candidate = _provider_candidate(
+            sibling_node, forbidden, executable=True)
+        if node_candidate is None:
+            raise _ProviderExecutableError("provider_launch_support_untrusted")
+        _, node, node_identity = node_candidate
+    return ("npm-cmd", (node, script), (),
+            [(node, node_identity), (script, script_identity)])
+
+
+def _bind_provider_executable(name: str, source) -> _BoundProviderExecutable:
+    """Resolve exactly one provider from a closed, absolute discovery path."""
+    if name not in ("claude", "gh"):
+        raise _ProviderExecutableError("provider_executable_untrusted")
+    raw_path = source.get("PATH")
+    if not isinstance(raw_path, str) or not raw_path:
+        raise _ProviderExecutableError("provider_executable_missing")
+    forbidden = _provider_forbidden_roots()
+    directories = []
+    seen_directories = set()
+    for raw in raw_path.split(os.pathsep):
+        if not raw:
+            continue
+        lexical = Path(raw).expanduser()
+        if not lexical.is_absolute():
+            continue
+        try:
+            directory = lexical.resolve(strict=True)
+        except OSError:
+            continue
+        if (not directory.is_dir()
+                or not _provider_path_is_trusted(directory, forbidden)):
+            continue
+        key = os.path.normcase(str(directory))
+        if key not in seen_directories:
+            seen_directories.add(key)
+            directories.append(directory)
+    if not directories:
+        raise _ProviderExecutableError("provider_executable_untrusted")
+
+    if os.name == "nt":
+        raw_extensions = source.get("PATHEXT") or ".COM;.EXE;.BAT;.CMD"
+        allowed = {".com", ".exe", ".bat", ".cmd"}
+        extensions = []
+        for extension in raw_extensions.split(";"):
+            extension = extension.strip().lower()
+            if extension in allowed and extension not in extensions:
+                extensions.append(extension)
+        candidate_names = [name + extension for extension in extensions]
+    else:
+        candidate_names = [name]
+
+    candidates = []
+    for directory in directories:
+        for candidate_name in candidate_names:
+            alias = directory / candidate_name
+            candidate = _provider_candidate(
+                alias, forbidden, executable=True)
+            if candidate is not None:
+                candidates.append(candidate)
+    if not candidates:
+        raise _ProviderExecutableError("provider_executable_missing")
+    if len(candidates) != 1:
+        raise _ProviderExecutableError("provider_executable_ambiguous")
+
+    alias, executable, identity = candidates[0]
+    identities = [(executable, identity)]
+    if os.name == "posix":
+        kind, support, launch_arguments, support_identities = (
+            _posix_provider_plan(executable, directories, forbidden))
+    else:
+        kind, support, launch_arguments, support_identities = (
+            _windows_npm_plan(executable, directories, forbidden))
+    identities.extend(support_identities)
+    return _BoundProviderExecutable(
+        provider=name,
+        kind=kind,
+        executable=executable,
+        launch_support=support,
+        launch_arguments=launch_arguments,
+        identities=tuple(identities),
+        sanitized_path=os.pathsep.join(str(path) for path in directories),
+    )
+
+
+def _revalidate_bound_provider(bound: _BoundProviderExecutable) -> None:
+    for path, identity in bound.identities:
+        try:
+            current = _provider_file_identity(path)
+        except (OSError, _ProviderExecutableError) as exc:
+            raise _ProviderExecutableError("provider_executable_changed") from exc
+        if current != identity:
+            raise _ProviderExecutableError("provider_executable_changed")
+
+
+def _provider_argv(bound: _BoundProviderExecutable,
+                   arguments: list[str]) -> list[str]:
+    """Revalidate immediately before constructing an absolute-only launch."""
+    _revalidate_bound_provider(bound)
+    if bound.kind == "direct":
+        return [str(bound.executable), *arguments]
+    if bound.kind == "posix-script" and len(bound.launch_support) == 1:
+        return [str(bound.launch_support[0]), *bound.launch_arguments,
+                str(bound.executable), *arguments]
+    if bound.kind == "npm-cmd" and len(bound.launch_support) == 2:
+        return [str(bound.launch_support[0]), str(bound.launch_support[1]),
+                *arguments]
+    raise _ProviderExecutableError("provider_executable_untrusted")
+
+
+def _bound_provider_source(source, bound: _BoundProviderExecutable) -> dict:
+    child_source = dict(source)
+    child_source["PATH"] = bound.sanitized_path
+    return child_source
 
 
 def _trusted_provider_temp_base() -> Path:
@@ -671,14 +962,23 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
     input_stream = sys.stdin if input_stream is None else input_stream
     output_stream = sys.stdout if output_stream is None else output_stream
     try:
-        with _isolated_child_env(source) as child:
+        bound = _bind_provider_executable("claude", source)
+        provider_source = _bound_provider_source(source, bound)
+    except _ProviderExecutableError as exc:
+        return _result("not_measured", reason=exc.reason)
+    try:
+        with _isolated_child_env(provider_source) as child:
             master, slave = pty.openpty()
             try:
-                proc = subprocess.Popen(["claude", "setup-token"], stdin=slave, stdout=slave,
+                argv = _provider_argv(bound, ["setup-token"])
+                proc = subprocess.Popen(argv, stdin=slave, stdout=slave,
                                         stderr=slave, env=child, close_fds=True)
+            except _ProviderExecutableError as exc:
+                os.close(master); os.close(slave)
+                return _result("not_measured", reason=exc.reason)
             except OSError:
                 os.close(master); os.close(slave)
-                return _result("not_measured", reason="cli_missing")
+                return _result("not_measured", reason="provider_spawn_failed")
             os.close(slave)
             deadline, captured, pending = time.monotonic() + timeout, "", ""
             input_fd = None
@@ -722,8 +1022,15 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
         return _result("not_measured", reason="provider_storage_unavailable")
     _drain_sanitized(pending, output_stream, final=True)
     found = TOKEN_RE.findall(captured)
-    if proc.returncode or len(found) != 1:
-        return _result("rejected", reason="setup_failed")
+    combined = captured.lower()
+    if proc.returncode:
+        status = _claude_failure_status(combined)
+        return _result(status, reason="setup_failed", returncode=proc.returncode)
+    if len(found) != 1:
+        status = _claude_failure_status(combined)
+        if status == "not_measured":
+            return _result(status, reason="token_missing_or_ambiguous", returncode=0)
+        return _result(status, reason="setup_failed", returncode=0)
     try:
         _atomic_secret(output, (found[0] + "\n").encode())
     except UnsafeSecretDestination:
@@ -753,8 +1060,40 @@ def _claude_refusal_evidenced(combined: str) -> bool:
     return any(pattern.search(combined) for pattern in _CLAUDE_REFUSAL_PATTERNS)
 
 
+_TRANSPORT_FAILURE_PATTERNS = tuple(re.compile(pattern) for pattern in (
+    r"\bconnection (?:reset|refused|timed out)\b",
+    r"\b(?:unable|could not|failed) to connect\b",
+    r"\b(?:could not|failed to) resolve (?:host|hostname)\b",
+    r"\b(?:name resolution|dns lookup|dns resolution) (?:failed|failure)\b",
+    r"\bnetwork is unreachable\b",
+    r"\bno route to host\b",
+    r"\b(?:socket error|econnreset|econnrefused|etimedout)\b",
+    r"\btls handshake (?:failed|failure|timed out)\b",
+))
+
+
+def _transport_failure_evidenced(combined: str) -> bool:
+    return any(pattern.search(combined) for pattern in _TRANSPORT_FAILURE_PATTERNS)
+
+
+def _claude_failure_status(combined: str) -> str:
+    if _claude_refusal_evidenced(combined):
+        return "rejected"
+    if _transport_failure_evidenced(combined):
+        return "network_error"
+    return "not_measured"
+
+
+def _exact_marker_present(output: str, marker: str) -> bool:
+    return any(line.strip() == marker for line in (output or "").splitlines())
+
+
 def claude_probe(token_file: Path | None = None, *, timeout=20, env=None) -> dict:
     source = os.environ if env is None else env
+    try:
+        bound = _bind_provider_executable("claude", source)
+    except _ProviderExecutableError as exc:
+        return _result("not_measured", reason=exc.reason)
     token = source.get("CLAUDE_CODE_OAUTH_TOKEN")
     if not token and token_file:
         try:
@@ -765,60 +1104,75 @@ def claude_probe(token_file: Path | None = None, *, timeout=20, env=None) -> dic
         return _result("missing", reason="CLAUDE_CODE_OAUTH_TOKEN")
     marker = "TRALUAT-CLAUDE-CREDENTIAL-OK"
     try:
-        with _isolated_child_env(source, CLAUDE_CODE_OAUTH_TOKEN=token) as child:
+        provider_source = _bound_provider_source(source, bound)
+        with _isolated_child_env(
+                provider_source, CLAUDE_CODE_OAUTH_TOKEN=token) as child:
             try:
-                p = subprocess.run(["claude", "-p", f"Print exactly: {marker}"],
+                argv = _provider_argv(
+                    bound, ["-p", f"Print exactly: {marker}"])
+                p = subprocess.run(argv,
                                    stdin=subprocess.DEVNULL, capture_output=True, text=True,
                                    timeout=timeout, env=child)
             except subprocess.TimeoutExpired:
                 return _result("not_measured", reason="timeout")
+            except _ProviderExecutableError as exc:
+                return _result("not_measured", reason=exc.reason)
             except OSError:
-                return _result("not_measured", reason="cli_missing")
+                return _result("not_measured", reason="provider_spawn_failed")
     except OSError:
         return _result("not_measured", reason="provider_storage_unavailable")
     combined = ((p.stderr or "") + "\n" + (p.stdout or "")).lower()
-    refused = _claude_refusal_evidenced(combined)
-    network_failed = any(word in combined for word in (
-        "connection reset", "connection refused", "unable to connect",
-        "could not connect", "could not resolve", "name resolution", "dns failure",
-        "socket error", "econnreset", "econnrefused", "etimedout",
-    ))
     if p.returncode != 0:
-        if refused:
-            return _result("rejected", returncode=p.returncode)
-        if network_failed:
-            return _result("network_error", returncode=p.returncode)
-        return _result("not_measured", returncode=p.returncode)
-    if marker not in (p.stdout or ""):
-        return _result("rejected", reason="marker_missing", returncode=0)
+        return _result(_claude_failure_status(combined), returncode=p.returncode)
+    if not _exact_marker_present(p.stdout or "", marker):
+        status = _claude_failure_status(combined)
+        details = {"returncode": 0}
+        if status == "not_measured":
+            details["reason"] = "marker_missing"
+        return _result(status, **details)
     return _result("passed", returncode=0)
 
 
 def _github_failure_status(stdout: str, stderr: str) -> str:
     """Classify auth only from an HTTP response evidenced as GitHub's."""
     combined = (stdout or "") + "\n" + (stderr or "")
-    statuses = re.findall(r"(?mi)^HTTP/\S+\s+(\d{3})\b", combined)
-    status = int(statuses[-1]) if statuses else None
-    from_github = re.search(r"(?mi)^X-GitHub-[^:]+:", combined) is not None
-    if from_github and status in (401, 403, 404):
-        return "rejected"
-    return "network_error"
+    status_lines = list(re.finditer(
+        r"(?mi)^HTTP/\S+\s+(\d{3})\b[^\r\n]*", combined))
+    for index, match in enumerate(status_lines):
+        block_end = (status_lines[index + 1].start()
+                     if index + 1 < len(status_lines) else len(combined))
+        block = combined[match.end():block_end]
+        if (int(match.group(1)) in (401, 403, 404)
+                and re.search(r"(?mi)^X-GitHub-[^:]+:", block)):
+            return "rejected"
+    if _transport_failure_evidenced(combined.lower()):
+        return "network_error"
+    return "not_measured"
 
 
 def github_probe(repo: str, *, timeout: int = 20, env=None) -> dict:
     source = os.environ if env is None else env
+    try:
+        bound = _bind_provider_executable("gh", source)
+    except _ProviderExecutableError as exc:
+        return _result("not_measured", reason=exc.reason, endpoints={})
     token = source.get("GITHUB_PAT")
     if not token:
         return _result("missing", endpoints={})
     results = {}
     try:
-        with _isolated_child_env(source, GH_TOKEN=token) as child:
+        provider_source = _bound_provider_source(source, bound)
+        with _isolated_child_env(provider_source, GH_TOKEN=token) as child:
             for endpoint in ("user", f"repos/{repo}"):
                 try:
-                    p = subprocess.run(["gh", "api", endpoint, "--include", "--silent"], capture_output=True,
+                    argv = _provider_argv(
+                        bound, ["api", endpoint, "--include", "--silent"])
+                    p = subprocess.run(argv, capture_output=True,
                                        text=True, timeout=timeout, env=child)
                 except subprocess.TimeoutExpired:
                     results[endpoint] = "network_error"
+                except _ProviderExecutableError:
+                    results[endpoint] = "not_measured"
                 except OSError:
                     results[endpoint] = "not_measured"
                 else:
@@ -828,7 +1182,7 @@ def github_probe(repo: str, *, timeout: int = 20, env=None) -> dict:
         return _result("not_measured", reason="provider_storage_unavailable", endpoints={})
     vals = set(results.values())
     status = "passed" if vals == {"passed"} else "rejected" if "rejected" in vals else (
-        "not_measured" if vals == {"not_measured"} else "network_error")
+        "network_error" if "network_error" in vals else "not_measured")
     return _result(status, endpoints=results)
 
 

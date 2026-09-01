@@ -196,6 +196,228 @@ def _wp433_tl_missing_parent_mutation_killed(tg) -> bool:
         "tl_missing_parent_creation_uses_pathname_before_capability survived")
 
 
+def _wp433_tl_secret_cleanup_boundary(tg) -> bool:
+    """Failed TL writes remove only their exact created inode."""
+    import os
+    import stat
+    import tempfile
+    from pathlib import Path
+    from unittest import mock
+
+    if os.name != "posix":
+        print("  [SKIP] wp433_tl_secret_cleanup_boundary "
+              "(POSIX capability primitive unavailable)")
+        return True
+
+    class InjectedFailure(OSError):
+        pass
+
+    class FaultingFile:
+        def __init__(self, fd, stage, failure):
+            self.fd = fd
+            self.stage = stage
+            self.failure = failure
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, _kind, _value, _traceback):
+            os.close(self.fd)
+
+        def fileno(self):
+            return self.fd
+
+        def write(self, data):
+            if self.stage == "write":
+                os.write(self.fd, data[:max(1, len(data) // 3)])
+                raise self.failure
+            os.write(self.fd, data)
+            return len(data)
+
+        def flush(self):
+            if self.stage == "flush":
+                raise self.failure
+
+    def exercise_failure(root: Path, stage: str) -> None:
+        target = root / f"{stage}.json"
+        failure = InjectedFailure(f"fixture-{stage}")
+        patches = []
+        if stage in ("write", "flush"):
+            patches.append(mock.patch.object(
+                tg.os, "fdopen",
+                side_effect=lambda fd, _mode: FaultingFile(fd, stage, failure)))
+        elif stage == "chmod":
+            patches.append(mock.patch.object(tg.os, "fchmod", side_effect=failure))
+        elif stage in ("file_fsync", "directory_fsync"):
+            real_fsync = tg.os.fsync
+            calls = 0
+
+            def faulting_fsync(fd):
+                nonlocal calls
+                calls += 1
+                if calls == (1 if stage == "file_fsync" else 2):
+                    raise failure
+                return real_fsync(fd)
+
+            patches.append(mock.patch.object(tg.os, "fsync", side_effect=faulting_fsync))
+        elif stage == "post_replace_verification":
+            real_stat_at = tg._tl_stat_at
+            target_checks = 0
+
+            def faulting_stat_at(directory_fd, name):
+                nonlocal target_checks
+                if name == target.name:
+                    target_checks += 1
+                    if target_checks == 2:
+                        return None
+                return real_stat_at(directory_fd, name)
+
+            patches.append(mock.patch.object(
+                tg, "_tl_stat_at", side_effect=faulting_stat_at))
+        else:
+            raise AssertionError(stage)
+
+        try:
+            with patches[0]:
+                tg._tl_atomic_secret(target, b"INERT_TL_SECRET_FIXTURE")
+        except InjectedFailure as caught:
+            assert caught is failure, "cleanup replaced the original TL exception"
+        except OSError as caught:
+            assert stage == "post_replace_verification", (stage, caught)
+        else:
+            raise AssertionError(f"TL {stage} failure was swallowed")
+        assert not target.exists(), (stage, "credential target survived")
+        assert list(root.iterdir()) == [], (stage, list(root.iterdir()))
+
+    def exercise_replacement(root: Path, *, after_replace: bool) -> None:
+        target = root / ("replacement-final.json" if after_replace
+                         else "replacement-temp.json")
+        replacement = b"ATTACKER_REPLACEMENT_FIXTURE"
+        failure = InjectedFailure("fixture-replacement")
+        if after_replace:
+            real_fsync = tg.os.fsync
+            calls = 0
+
+            def replace_then_fail(fd):
+                nonlocal calls
+                calls += 1
+                if calls == 2:
+                    target.unlink()
+                    target.write_bytes(replacement)
+                    raise failure
+                return real_fsync(fd)
+
+            patcher = mock.patch.object(tg.os, "fsync", side_effect=replace_then_fail)
+        else:
+            class ReplacingFile(FaultingFile):
+                def write(self, data):
+                    os.write(self.fd, data)
+                    entries = list(root.iterdir())
+                    assert len(entries) == 1, entries
+                    entries[0].unlink()
+                    entries[0].write_bytes(replacement)
+                    raise self.failure
+
+            patcher = mock.patch.object(
+                tg.os, "fdopen",
+                side_effect=lambda fd, _mode: ReplacingFile(
+                    fd, "replacement", failure))
+        try:
+            with patcher:
+                tg._tl_atomic_secret(target, b"INERT_TL_SECRET_FIXTURE")
+        except InjectedFailure as caught:
+            assert caught is failure, "cleanup replaced replacement failure"
+        else:
+            raise AssertionError("TL replacement failure was swallowed")
+        entries = list(root.iterdir())
+        assert len(entries) == 1 and entries[0].read_bytes() == replacement, entries
+
+    with tempfile.TemporaryDirectory(prefix="tl-secret-cleanup-") as raw:
+        base = Path(raw)
+        for stage in ("chmod", "write", "flush", "file_fsync",
+                      "post_replace_verification", "directory_fsync"):
+            root = base / stage
+            root.mkdir()
+            exercise_failure(root, stage)
+        for after_replace in (False, True):
+            root = base / ("replace-final" if after_replace else "replace-temp")
+            root.mkdir()
+            exercise_replacement(root, after_replace=after_replace)
+
+        # Cleanup trouble never replaces the write exception.
+        root = base / "cleanup-error"; root.mkdir()
+        failure = InjectedFailure("fixture-original")
+        with mock.patch.object(tg.os, "fchmod", side_effect=failure), \
+             mock.patch.object(tg, "_tl_unlink_identity",
+                               side_effect=RuntimeError("fixture-cleanup")):
+            try:
+                tg._tl_atomic_secret(root / "auth.json", b"INERT")
+            except InjectedFailure as caught:
+                assert caught is failure
+            else:
+                raise AssertionError("cleanup error replaced/swallowed original")
+
+        positive = base / "positive" / "auth.json"
+        tg._tl_atomic_secret(positive, b"INERT_TL_POSITIVE")
+        assert positive.read_bytes() == b"INERT_TL_POSITIVE"
+        assert stat.S_IMODE(positive.stat().st_mode) == 0o600
+    return True
+
+
+def _wp433_tl_secret_cleanup_mutations_killed(tg) -> bool:
+    """Execute both R11 named TL cleanup mutants against the focused lock."""
+    import os
+    import types
+    from pathlib import Path
+
+    if os.name != "posix":
+        print("  [SKIP] wp433_tl_secret_cleanup_mutations_killed "
+              "(POSIX capability primitive unavailable)")
+        return True
+    source = Path(tg.__file__).read_text(encoding="utf-8")
+    mutants = (
+        (
+            "tl_fchmod_failure_forgets_created_identity",
+            "        identity = _tl_created_secret_identity(fd)\n"
+            "        # Keep the created inode alive until cleanup has finished.  Otherwise a\n"
+            "        # hostile unlink/recreate can immediately reuse the same (dev, ino),\n"
+            "        # making a pathname-only identity check delete the replacement.\n"
+            "        identity_guard_fd = os.dup(fd)\n"
+            "        try:\n"
+            "            os.fchmod(fd, 0o600)",
+            "        write_identity = _tl_created_secret_identity(fd)\n"
+            "        # Keep the created inode alive until cleanup has finished.  Otherwise a\n"
+            "        # hostile unlink/recreate can immediately reuse the same (dev, ino),\n"
+            "        # making a pathname-only identity check delete the replacement.\n"
+            "        identity_guard_fd = os.dup(fd)\n"
+            "        try:\n"
+            "            os.fchmod(fd, 0o600)\n"
+            "            identity = write_identity",
+        ),
+        (
+            "tl_writer_drops_final_name_before_directory_fsync",
+            "            if target.name not in cleanup_names:\n"
+            "                cleanup_names.append(target.name)\n"
+            "            os.replace(created_name, target.name,",
+            "            cleanup_names.clear()\n"
+            "            os.replace(created_name, target.name,",
+        ),
+    )
+    for index, (name, anchor, replacement) in enumerate(mutants):
+        assert source.count(anchor) == 1, f"{name} anchor drifted"
+        mutant = types.ModuleType(f"tl_gws_wp433_r11_mutant_{index}")
+        mutant.__file__ = str(Path(tg.__file__).resolve())
+        exec(compile(source.replace(anchor, replacement), mutant.__file__, "exec"),
+             mutant.__dict__)
+        try:
+            _wp433_tl_secret_cleanup_boundary(mutant)
+        except AssertionError:
+            print(f"  [PASS] {name} (killed by cleanup behavior)")
+            continue
+        raise AssertionError(f"{name} survived")
+    return True
+
+
 class _hush:
     """v1.31.2 (log deploy user 2026-07-03 'Vẫn lỗi'): NUỐT stdout/stderr của các test CỐ TÌNH đi nhánh lỗi —
     argparse chặn '--row-kind xyz' (in usage+error là PASS-by-design), retry-transient mock, CẮT BATCH loud,
@@ -30316,6 +30538,12 @@ def run() -> int:
               __import__("tl_gws")))
     _t110("wp433_nlm_missing_parent_pathname_mutant_killed",
           lambda: _wp433_tl_missing_parent_mutation_killed(
+              __import__("tl_gws")))
+    _t110("wp433_tl_secret_cleanup_boundary",
+          lambda: _wp433_tl_secret_cleanup_boundary(
+              __import__("tl_gws")))
+    _t110("wp433_tl_secret_cleanup_mutations_killed",
+          lambda: _wp433_tl_secret_cleanup_mutations_killed(
               __import__("tl_gws")))
 
     # r332 — ĐỘ PHỦ REGISTRY PHẢI ĐO Ở ĐƯỜNG NGƯỜI TA THẬT SỰ CHẠY.

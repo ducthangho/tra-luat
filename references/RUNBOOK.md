@@ -189,7 +189,9 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > có bằng chứng ngữ cảnh đóng (hoặc policy refusal) là `rejected`; từ local trần `login`/`oauth`/
 > `authentication` và số trần `401`/`403` không phải refusal evidence. Với Claude, nonzero chỉ là `network_error`
 > khi stderr/stdout có bằng chứng transport cụ thể (connection reset/refused, DNS...); lỗi local
-> hoặc nonzero không phân loại được là `not_measured`. `tl-bootstrap` giữ nguyên contract rc của
+> hoặc nonzero không phân loại được là `not_measured`; rc `0` thiếu marker thành công standalone chính xác
+> cũng là `not_measured`, không phải approve. GitHub chỉ coi HTTP 401/403/404 là `rejected` khi cùng response
+> block có header GitHub; proxy/local output không được mượn header từ block trước. `tl-bootstrap` giữ nguyên contract rc của
 > child: `0→passed`; `1→not_measured/degraded`; `2→not_measured/precondition`;
 > `3→rejected/credential_or_bundle_rejected`; rc khác `→not_measured/unclassified_exit`.
 > Credential directory đã validate chỉ làm
@@ -202,6 +204,18 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > parent là link/junction/reparse (kể cả resolve ra external non-repository) bị từ chối trước schema
 > planning; mọi generated target parent được kiểm hết trước lần ghi đầu tiên. Component thường chưa
 > tồn tại vẫn được phép để guarded writer tạo.
+>
+> Trước khi đọc token/token-file, Claude capture/probe và GitHub probe resolve provider từ duy nhất
+> các PATH entry tuyệt đối đã cấp, loại repository và process-trusted temp, rồi yêu cầu đúng một candidate.
+> POSIX cho phép symlink alias tới regular executable, nhưng shebang phải resolve thành interpreter tuyệt đối
+> đã bind (kể cả `#!/usr/bin/env node` chỉ khi có đúng một `node`). Windows chỉ dò `.com/.exe/.bat/.cmd`;
+> `.cmd` chỉ được nhận khi đúng npm shim và bind được cả `node.exe` lẫn JS entry, rồi launch hai file tuyệt đối
+> ấy trực tiếp; script/shim khác fail closed. Provider và mọi launch-support identity đều được kiểm lại ngay
+> trước spawn; argv0 và PATH child đều tuyệt đối/sanitized. Candidate/support thiếu, mơ hồ, không tin cậy hoặc bị thay đổi ⇒ zero child,
+> `not_measured`; invocation kế tiếp tự bind bản nâng cấp mới. Secret không xuất hiện trong argv/report.
+> Writer NLM/GWS ghi identity ngay sau `O_EXCL` trước chmod, giữ inode đó mở qua cleanup để chặn tái sử dụng
+> `(dev, ino)`, và giữ cả tên temp/final cho đến khi parent-directory fsync thành công. Lỗi từ chmod đến
+> directory fsync chỉ xoá đúng inode của writer, bảo toàn replacement và exception gốc.
 > **Windows (Claude Code):** bấm đúp `tl-setup.cmd` (gốc skill) — menu: [1] Setup 1 lần (cài gws + auth +
 > tự tạo `TL_MASTER_KEY` + mã hoá secrets + in lệnh Cowork vào `COWORK-paste.txt`), [2] Đổi token GAS,
 > [3] Kiểm tra. Sau setup: Code chạy thẳng; Cowork dán khối trong `COWORK-paste.txt`.

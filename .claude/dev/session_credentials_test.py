@@ -40,6 +40,33 @@ def run():
         assert not blocked_auth.exists()
         assert m.materialize_codex(env={})["status"] == "missing"
         assert m.materialize_codex(env={"CODEX_AUTH_JSON": "!"})["status"] == "rejected"
+        no_tokens = base64.b64encode(b'{"not_tokens":{}}').decode()
+        assert m.materialize_codex(env={"CODEX_AUTH_JSON": no_tokens,
+                                        "CODEX_HOME": str(root / "no-tokens")}) == {
+            "status": "rejected", "reason": "malformed_CODEX_AUTH_JSON"}
+        assert not (root / "no-tokens" / "auth.json").exists()
+
+        # Public materialization must fail closed before a caller-controlled
+        # CODEX_HOME can place auth.json anywhere in this checkout.
+        repo = P.resolve().parents[2]
+        with tempfile.TemporaryDirectory(prefix="credential-direct-", dir=repo) as rd:
+            repo_home = Path(rd) / ".codex"
+            result = m.materialize_codex(env={"CODEX_AUTH_JSON": encoded,
+                                                "CODEX_HOME": str(repo_home)})
+            assert result == {"status": "rejected", "reason": "secret_destination_in_repository"}
+            assert not (repo_home / "auth.json").exists()
+
+        # Resolving only the final filename is insufficient: an innocent-looking
+        # external parent can itself be a symlink back into the checkout.
+        with tempfile.TemporaryDirectory(prefix="credential-linked-", dir=repo) as rd:
+            repo_slot = Path(rd)
+            linked_parent = root / "linked-parent"
+            linked_parent.symlink_to(repo_slot, target_is_directory=True)
+            linked_home = linked_parent / ".codex"
+            result = m.materialize_codex(env={"CODEX_AUTH_JSON": encoded,
+                                                "CODEX_HOME": str(linked_home)})
+            assert result == {"status": "rejected", "reason": "secret_destination_in_repository"}
+            assert not (repo_slot / ".codex" / "auth.json").exists()
 
         direct_output = m.REPOSITORY_ROOT / "docs" / ".blocked-claude-token"
         assert not direct_output.exists()
@@ -98,6 +125,18 @@ os.write(1,b'A'*180 + b'\\n')
         assert "sk-ant" not in displayed.getvalue() and "A"*20 not in displayed.getvalue()
         assert "[REDACTED]" in displayed.getvalue()
         assert stat.S_IMODE(out.stat().st_mode) == 0o600
+
+        with tempfile.TemporaryDirectory(prefix="claude-capture-", dir=repo) as rd:
+            repo_output, rejected_display = Path(rd) / "claude.token", io.StringIO()
+            read_fd, write_fd = os.pipe(); os.write(write_fd, b"yes\n"); os.close(write_fd)
+            with os.fdopen(read_fd) as user_input:
+                result = m.capture_claude(repo_output, timeout=5,
+                    env={"PATH": f"{bindir}{os.pathsep}{os.environ['PATH']}"},
+                    input_stream=user_input, output_stream=rejected_display)
+            assert result == {"status": "rejected", "reason": "secret_destination_in_repository"}
+            assert not repo_output.exists()
+            assert "sk-ant" not in rejected_display.getvalue()
+
         setup_env = json.loads((bindir / "setup-env.json").read_text())
         assert "PATH" in setup_env
         assert not set(m.SECRET_ENV) & set(setup_env)
@@ -161,12 +200,14 @@ os.write(1,b'A'*180 + b'\\n')
                     assert exc.code == 2
             dispatch.assert_not_called()
 
+        secrets_file = root / "s.enc"
         with mock.patch.object(m.subprocess, "run", return_value=mock.Mock(returncode=0)) as run_child:
-            result = m.tl_bootstrap("cowork", root / "secrets.enc", env={
+            result = m.tl_bootstrap("cowork", secrets_file, env={
                 "TL_MASTER_KEY": "TL_CANARY", "CODEX_AUTH_JSON": "CODEX_CANARY",
                 "CLAUDE_CODE_OAUTH_TOKEN": "CLAUDE_CANARY", "GITHUB_PAT": "GH_CANARY",
                 "OPENAI_API_KEY": "VENDOR_CANARY", "TMPDIR": "/tmp/test"})
         assert result["status"] == "passed"
+        assert run_child.call_args.args[0][-2:] == ["--secrets-file", str(secrets_file)]
         assert run_child.call_args.kwargs["env"] == {
             "TMPDIR": "/tmp/test", "TL_MASTER_KEY": "TL_CANARY"}
 
@@ -188,7 +229,16 @@ os.write(1,b'A'*180 + b'\\n')
             combined = m.bootstrap_session("o/r", "cowork", root / "secrets.enc", None, env={})
         assert combined["status"] == "passed" and calls == ["codex", "claude", "github", "tl"]
         assert set(combined["components"]) == {"codex", "claude", "github", "tl"}
-        assert m.tl_bootstrap("cowork", None, env={})["status"] == "missing"
+        # Both public orchestration commands reject the incomplete invocation
+        # at argument parsing, before any provider component can run.
+        for argv in (["tl-bootstrap", "--env", "cowork"],
+                     ["bootstrap", "--env", "cowork"]):
+            try:
+                m.main(argv)
+            except SystemExit as exc:
+                assert exc.code == 2
+            else:
+                raise AssertionError(f"missing --secrets-file accepted: {argv}")
     print("PASS session_credentials_test")
 
 

@@ -372,17 +372,48 @@ def t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW(M):
     assert bak and bak.read_text() == "AN-TOAN", "chặn oan nền có O_NOFOLLOW"
 
 
+def t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth(M):
+    repo = GOC.resolve().parents[2]
+    with tempfile.TemporaryDirectory() as sd, \
+         tempfile.TemporaryDirectory(prefix="codex-cred-repo-", dir=repo) as rd:
+        source = Path(sd)
+        (source / "auth.json").write_text(
+            '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
+            encoding="utf-8")
+        spawned = []
+        M._co_codex = lambda: "/gia/codex"
+        M._chay_device_auth = lambda *_a: (spawned.append(True) or (True, "ok"))
+        M._kiem_song = lambda _home: (True, "rc=0")
+
+        class A:
+            codex_home, ra, tep_dan = str(source), str(Path(rd) / "b64.txt"), None
+            han_giay, in_gia_tri, cai_de = 5, False, False
+
+        import io
+        from contextlib import redirect_stdout
+        with redirect_stdout(io.StringIO()):
+            rc = M.cmd_lay(A())
+        assert rc == M.RC[M.DO], f"đích trong repository phải ĐỎ, được rc={rc}"
+        assert not spawned, "đã chạy device-auth trước khi kiểm secret destination"
+        assert not (Path(rd) / "b64.txt").exists(), "đã ghi credential vào repository"
+
+
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
       t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0, t4_kiem_song_bat_credential_bi_tu_choi,
       t5_kiem_song_dat_khi_co_dau_hieu, t6_khong_in_gia_tri_khi_khong_co_co,
       t7_sao_luu_khong_de_ban_cu, t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT,
       t9_cmd_lay_GHI_tep_huong_dan_dan, t10_gio_con_lai_doc_exp_va_bu_padding,
       t11_sao_luu_tu_choi_symlink, t12_sao_luu_O_NOFOLLOW_tai_diem_doc,
-      t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW]
+      t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW,
+      t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth]
 
 # ─────────────────────────── đột biến ───────────────────────────
 # (nhãn, chuỗi CŨ, chuỗi MỚI, ca ĐÍCH phải chết)
 DOT_BIEN = [
+    ("t14_bo_chan_repository_destination",
+     "    return _shared_secret_destination(path)",
+     "    return path",
+     "t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth"),
     # Đột biến của t1 phải chạm ĐÚNG tính chất t1 canh (rút đúng url+mã từ đầu ra CÓ ANSI).
     # Bản đầu nới lỏng regex url thành r"device" — nó giết cả t2, vì chuỗi "device code
     # login flow" khớp. Đó là đột biến ĐO HAI THỨ, không phải chốt trói nhầm: sửa đột

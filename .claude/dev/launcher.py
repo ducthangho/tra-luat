@@ -92,6 +92,8 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+from session_credentials import secret_destination as _shared_secret_destination
+
 VERSION = "1.5.0"
 
 
@@ -2076,6 +2078,11 @@ def _codex_home(moi_truong: dict[str, str] | None = None) -> Path:
     return Path(mt.get("CODEX_HOME") or os.path.expanduser("~/.codex")).expanduser()
 
 
+def _credential_destination(path: Path) -> Path:
+    """Use the credential entry point's single repository-boundary policy."""
+    return _shared_secret_destination(path)
+
+
 def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]:
     """Mọi executable khớp trong PATH chụp sẵn, rồi các vị trí nền chuẩn.
 
@@ -2393,6 +2400,12 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
     if not thoc:
         return ket
     dich = _codex_home() / "auth.json"
+    try:
+        dich = _credential_destination(dich)
+    except OSError:
+        return [{"ten": "codex", "ok": False, "doi": False,
+                 "cach": "HONG: repository secret destination",
+                 "duong_dan": str(dich)}]
     # Giải mã SỚM để so mốc; phần kiểm lược đồ đầy đủ vẫn ở dưới, không bỏ.
     noi_dung_tam = None
     for thu in (thoc, None):

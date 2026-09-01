@@ -21,6 +21,11 @@ TOKEN_RE = re.compile(r"sk-ant-oat\d+-[A-Za-z0-9_-]{20,}")
 TOKEN_PREFIX = "sk-ant-oat"
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 
+
+class UnsafeSecretDestination(OSError):
+    """A secret target resolves into this repository."""
+
+
 # Child processes get an intentionally small operational environment rather
 # than a copy of the agent's environment.  In particular, this prevents a
 # credential intended for one provider from becoming ambient authority in a
@@ -61,12 +66,25 @@ def codex_home(env=None) -> Path:
 
 
 def _inside_repository(path: Path) -> bool:
-    return path.resolve(strict=False).is_relative_to(REPOSITORY_ROOT)
+    try:
+        secret_destination(path)
+    except UnsafeSecretDestination:
+        return True
+    return False
+
+
+def secret_destination(path: Path) -> Path:
+    """Return ``path`` only when its resolved target is outside this checkout."""
+    target = path.expanduser()
+    resolved = target.resolve(strict=False)
+    repository = REPOSITORY_ROOT.resolve(strict=True)
+    if resolved == repository or repository in resolved.parents:
+        raise UnsafeSecretDestination(f"refusing repository secret destination: {target}")
+    return target
 
 
 def _atomic_secret(path: Path, data: bytes) -> None:
-    if _inside_repository(path):
-        raise OSError(f"refusing repository secret destination: {path}")
+    path = secret_destination(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.is_symlink():
         raise OSError(f"refusing symlink destination: {path}")
@@ -95,12 +113,14 @@ def materialize_codex(*, env=None) -> dict:
     try:
         raw = base64.b64decode(encoded, validate=True)
         parsed = json.loads(raw)
-        if not isinstance(parsed, dict):
-            raise ValueError("not an object")
+        if not isinstance(parsed, dict) or not isinstance(parsed.get("tokens"), dict):
+            raise ValueError("missing tokens object")
     except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
         return _result("rejected", reason="malformed_CODEX_AUTH_JSON")
     try:
         _atomic_secret(target, raw)
+    except UnsafeSecretDestination:
+        return _result("rejected", reason="secret_destination_in_repository")
     except OSError:
         return _result("not_measured", reason="write_failed")
     return _result("passed", credential_file=str(target), secret_printed=False)
@@ -143,7 +163,9 @@ def _drain_sanitized(pending: str, stream, *, final: bool = False) -> str:
 def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=None,
                    output_stream=None) -> dict:
     """Run ``claude setup-token`` on a real PTY, relay prompts, retain token privately."""
-    if _inside_repository(output):
+    try:
+        output = secret_destination(output)
+    except UnsafeSecretDestination:
         return _result("rejected", reason="secret_destination_in_repository")
     import pty
 
@@ -301,9 +323,11 @@ def main(argv=None) -> int:
     g = sub.add_parser("github-probe"); g.add_argument("--repo", default="ducthangho/tra-luat"); g.add_argument("--timeout", type=int, default=20)
     b = sub.add_parser("tl-bootstrap"); b.add_argument("--env", choices=("code", "cowork", "chat"), required=True); b.add_argument("--secrets-file", required=True); b.add_argument("--timeout", type=int, default=600)
     i = sub.add_parser("bootstrap"); i.add_argument("--repo", default="ducthangho/tra-luat"); i.add_argument("--env", choices=("code", "cowork", "chat"), required=True); i.add_argument("--secrets-file", required=True); i.add_argument("--claude-token-file")
+    sub.add_parser("codex-materialize")
     sub.add_parser("status")
     a = ap.parse_args(argv)
-    if a.command == "claude-capture": result = capture_claude(Path(a.output), timeout=a.timeout)
+    if a.command == "codex-materialize": result = materialize_codex()
+    elif a.command == "claude-capture": result = capture_claude(Path(a.output), timeout=a.timeout)
     elif a.command == "github-probe": result = github_probe(a.repo, timeout=a.timeout)
     elif a.command == "tl-bootstrap": result = tl_bootstrap(a.env, Path(a.secrets_file) if a.secrets_file else None, timeout=a.timeout)
     elif a.command == "bootstrap": result = bootstrap_session(a.repo, a.env, Path(a.secrets_file) if a.secrets_file else None, Path(a.claude_token_file) if a.claude_token_file else None)

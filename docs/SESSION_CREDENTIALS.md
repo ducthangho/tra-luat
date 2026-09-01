@@ -19,3 +19,6 @@ or refused (including GitHub HTTP 401/403/404); `network_error` means the GitHub
 `not_measured` means no reliable measurement was possible (missing CLI, timeout,
 or local I/O failure); and `passed` requires the relevant operation to complete.
 Never paste a token into an argument, issue, log, repository file, or Git history.
+Do not place `CODEX_HOME`, Claude token output, or the encrypted TL bundle under
+the checkout; warnings in documentation are not a substitute for the enforced
+resolved-path guard.

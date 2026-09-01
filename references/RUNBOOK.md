@@ -160,7 +160,8 @@ export TL_MASTER_KEY='<passphrase mạnh>'
 python scripts/tl.py secrets-stage
 # [COWORK] mỗi phiên — env-aware: nạp GAS token + full config (+ gws binary/cred ở Code/Cowork)
 export TL_MASTER_KEY='<passphrase>'
-#   agent tải SECRETS_FILEID qua Drive MCP → lưu /tmp/s.enc  (Cowork token-less); Code có token thì tự webapp-fetch
+#   agent tải SECRETS_FILEID qua Drive MCP → lưu /tmp/s.enc NGOÀI repository
+#   (Cowork token-less); Code có token thì tự webapp-fetch. --secrets-file là bắt buộc.
 python scripts/tl.py bootstrap --env cowork --secrets-file /tmp/s.enc
 python scripts/tl.py ping ; python scripts/tl.py gws-ping --env cowork
 ```

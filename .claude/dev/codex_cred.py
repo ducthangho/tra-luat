@@ -59,6 +59,8 @@ import tempfile
 import time
 from pathlib import Path
 
+from session_credentials import secret_destination as _shared_secret_destination
+
 DAT, DO, KHONG_DO_DUOC = "DAT", "DO", "KHONG_DO_DUOC"
 RC = {DAT: 0, DO: 2, KHONG_DO_DUOC: 3}
 RC_ARG = 4
@@ -80,6 +82,11 @@ def effective_codex_home(env=None) -> Path:
     """The one CODEX_HOME rule: explicit environment, otherwise ~/.codex."""
     env = os.environ if env is None else env
     return Path(env.get("CODEX_HOME") or os.path.expanduser("~/.codex")).expanduser()
+
+
+def _secret_destination(path: Path) -> Path:
+    """Use the credential entry point's single repository-boundary policy."""
+    return _shared_secret_destination(path)
 
 
 def _in(*a):
@@ -244,6 +251,7 @@ def _gio_con_lai(auth: Path) -> float | None:
 
 def _ghi_bi_mat(dich: Path, noi_dung: bytes) -> None:
     """Ghi 0600 bằng tệp độc quyền rồi replace; không đi theo symlink/hardlink đích."""
+    dich = _secret_destination(dich)
     fd, ten = tempfile.mkstemp(prefix=f".{dich.name}.tmp-", dir=dich.parent)
     tam = Path(ten)
     try:
@@ -373,6 +381,16 @@ def cmd_lay(a) -> int:
 
     tam_ctx = None if a.codex_home else tempfile.TemporaryDirectory(prefix="codex-cred-")
     tam = Path(a.codex_home) if a.codex_home else Path(tam_ctx.name)
+    ra = Path(a.ra) if a.ra else Path("/tmp/CODEX_AUTH_JSON.b64")
+    tep_dan = Path(a.tep_dan) if a.tep_dan else ra.with_name("CODEX_AUTH_JSON_setup.md")
+    that = effective_codex_home() / "auth.json" if a.cai_de else None
+    try:
+        for destination in (tam / "auth.json", ra, tep_dan, that):
+            if destination is not None:
+                _secret_destination(destination)
+    except OSError:
+        _in("ĐỎ: từ chối repository secret destination")
+        return RC[DO]
     _in(f"CODEX_HOME tạm: {tam}   (bản đang dùng ở ~/.codex KHÔNG bị đụng)")
     ok, dau_ra = _chay_device_auth(tam, a.han_giay)
     if not ok:
@@ -394,11 +412,9 @@ def cmd_lay(a) -> int:
 
     auth_bytes = auth.read_bytes()
     b64 = base64.b64encode(auth_bytes).decode("ascii")
-    ra = Path(a.ra) if a.ra else Path("/tmp/CODEX_AUTH_JSON.b64")
     _ghi_bi_mat(ra, (b64 + "\n").encode("ascii"))
 
     if a.cai_de:
-        that = effective_codex_home() / "auth.json"
         that.parent.mkdir(parents=True, exist_ok=True)
         bak = _sao_luu(that)
         _ghi_bi_mat(that, auth_bytes)
@@ -407,7 +423,6 @@ def cmd_lay(a) -> int:
     # Tệp hướng dẫn dán: bước CUỐI của lệnh, không phải việc làm tay sau đó. Phiên nào
     # cũng phải giao được cùng một thứ cho chủ kho, nên nó thuộc về mã.
     gio_con = _gio_con_lai(auth)
-    tep_dan = Path(a.tep_dan) if a.tep_dan else ra.with_name("CODEX_AUTH_JSON_setup.md")
     _ghi_bi_mat(tep_dan, soan_tep_dan(
         b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))
 

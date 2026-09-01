@@ -2252,6 +2252,9 @@ def t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao():
     # đúng bệnh "cổng phụ thuộc môi trường" mà đợt này vừa mất ba lượt vì nó.
     m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
                                   "gio_con_lai": {"access_token": 100.0}}
+    # This case measures status-line parsing, not the repository policy flag.
+    # Empty fixture environments on Windows cannot resolve ``~`` at all.
+    m._co_chan_codex = lambda: None
 
     def _ra(rc, text):
         class P:
@@ -2334,6 +2337,43 @@ def t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac():
          f"thong diep phai neu CA HAI duong da thu, duoc {ket[0]['cach']!r}")
     bang(not (Path(nha) / ".codex" / "auth.json").exists(),
          "tu choi ma van ghi tep la fail-open")
+
+
+@ca
+def t145_CODEX_HOME_trong_kho_khong_duoc_nhan_credential():
+    """CODEX_HOME is configuration, not permission to write a secret into git."""
+    m = _tai_launcher_thu()
+    repo = LAUNCHER.resolve().parents[2]
+    with tempfile.TemporaryDirectory(prefix="launcher-credential-", dir=repo) as td:
+        home = Path(td) / ".codex"
+        old_env = m.os.environ
+        try:
+            m.os.environ = {
+                "CODEX_AUTH_JSON": '{"tokens":{"access":"FIXTURE_ONLY"}}',
+                "CODEX_HOME": str(home),
+            }
+            result = m.chuan_bi_xac_thuc(that_su=True)
+        finally:
+            m.os.environ = old_env
+        bang(len(result) == 1 and result[0].get("ok") is False,
+             f"CODEX_HOME trong kho phai bi tu choi, duoc {result}")
+        bang("repository" in result[0].get("cach", "").lower(),
+             f"ly do khong neo dung security boundary: {result}")
+        bang(not (home / "auth.json").exists(),
+             "launcher da ghi credential vao repository")
+
+
+@ca
+def t146_hook_phai_dung_chung_codex_materialize_guard():
+    hook_path = LAUNCHER.parent.parent / "hooks" / "session-start.sh"
+    ly_do = _bo_qua_neu_ban_sao_roi_thieu(hook_path)
+    if ly_do:
+        return ly_do
+    hook = hook_path.read_text(encoding="utf-8")
+    bang('session_credentials.py" codex-materialize' in hook,
+         "hook khong goi entry point materialize co repository guard")
+    bang('dst = os.path.join(os.path.expanduser("~"), ".codex", "auth.json")' not in hook,
+         "hook con writer rieng hard-code ~/.codex va bo qua CODEX_HOME/guard")
 
 
 @ca
@@ -6055,6 +6095,10 @@ def r21_bon_mutant_noi_semantic_allowlist_phai_lam_oracle_DO():
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
+    ("bo_chan_credential_trong_repository",
+     ('    return _shared_secret_destination(path)',
+      '    return path'),
+     ["t145_CODEX_HOME_trong_kho_khong_duoc_nhan_credential"]),
     ("bo_ky_ban_ghi_luot",
      ('    if khoa_ky:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)',
       '    if False:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)'),

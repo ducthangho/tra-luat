@@ -223,9 +223,20 @@ def _resolve_executable_identity(lenh: list[str], workspace: str | Path) -> dict
         candidate_path = Path(selected)
         try:
             resolved_path, matched_provider = _resolve_executable_alias(candidate_path)
+        except FileNotFoundError:
+            # A plain path that does not exist yet is not an executable alias.
+            # Leave it to the existing capability probe so the refusal is
+            # recorded as a probe-stage failure in the run ledger.  A broken
+            # symlink is still an alias whose target identity cannot be bound,
+            # so it must fail closed here before any child can start.
+            if candidate_path.is_symlink():
+                raise Chan(MA_THAM_SO,
+                           "khong bind duoc executable: broken alias") from None
+            selected = None
         except OSError as exc:
             raise Chan(MA_THAM_SO, f"khong bind duoc executable: {exc}") from None
-        argv[0] = str(resolved_path)
+        if selected is not None:
+            argv[0] = str(resolved_path)
     if raw_provider and matched_provider and raw_provider != matched_provider:
         raise Chan(MA_THAM_SO, "executable spelling and target identify different providers")
     return {"argv": argv, "provider": matched_provider or raw_provider,

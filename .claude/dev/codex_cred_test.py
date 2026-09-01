@@ -432,7 +432,21 @@ def t15_cmd_lay_phai_dung_duong_canonical_guard_tra_ve(M):
         alias_setup: real_setup,
     }
     checked = M._shared_checked_secret_destination
-    M._shared_checked_secret_destination = lambda p: mapping.get(Path(p), checked(Path(p)))
+    guard_calls = []
+    underlying_calls = []
+
+    def canonical_guard(path, *, create_parent=True):
+        path = Path(path)
+        guard_calls.append((path, create_parent))
+        if path in mapping:
+            # Mapping models a canonical capability returned by the guard.  Do
+            # not evaluate the real guard as an eager ``dict.get`` fallback:
+            # touching the unchecked alias would defeat this fixture's seam.
+            return mapping[path]
+        underlying_calls.append((path, create_parent))
+        return checked(path, create_parent=create_parent)
+
+    M._shared_checked_secret_destination = canonical_guard
     homes = []
     M._co_codex = lambda: "/gia/codex"
     def device_auth(home, _timeout):
@@ -458,6 +472,13 @@ def t15_cmd_lay_phai_dung_duong_canonical_guard_tra_ve(M):
     assert not caller_home.exists(), "caller-owned CODEX_HOME was touched"
     assert real_b64.is_file() and real_setup.is_file(), "outputs missed canonical targets"
     assert not alias_b64.exists() and not alias_setup.exists(), "writer reused unchecked aliases"
+    private_auth = homes[0] / "auth.json"
+    assert (private_auth, False) in guard_calls, \
+        f"post-login auth recheck was allowed to create parents: {guard_calls}"
+    assert (alias_b64, True) in guard_calls and (alias_setup, True) in guard_calls, \
+        f"output aliases did not pass through the canonical guard: {guard_calls}"
+    assert all(path not in mapping for path, _create_parent in underlying_calls), \
+        f"canonical mapping evaluated the unchecked alias eagerly: {underlying_calls}"
 
 
 def t16_cmd_lay_phan_loai_tu_choi_tai_diem_ghi(M):
@@ -952,8 +973,10 @@ DOT_BIEN = [
      "    noi_dung = dich.read_bytes()",
      "t12_sao_luu_O_NOFOLLOW_tai_diem_doc"),
     ("t17_caller_redirects_private_home",
-     "        tam = private_home",
-     '        tam = Path(getattr(a, "codex_home", None) or private_home)',
+     '                tam = _shared_checked_secret_destination(\n'
+     '                    private_home / "auth.json").parent',
+     '                tam = _shared_checked_secret_destination(\n'
+     '                    Path(getattr(a, "codex_home", None) or private_home) / "auth.json").parent',
      "t17_lay_khong_con_codex_home_va_windows_fail_closed"),
     ("kiem_song_requires_private_provider_scaffold",
      "                    os.environ, provider_home, CODEX_HOME=str(auth.parent))",
@@ -966,6 +989,10 @@ DOT_BIEN = [
      '    target = Path(codex_home).expanduser() / "auth.json"\n'
      '    return target, target.read_bytes()',
      "t19_kiem_song_guard_dich_truoc_doc_cap_phat_va_child"),
+    ("codex_auth_recheck_recreates_parent",
+     '        Path(codex_home).expanduser() / "auth.json", create_parent=False)',
+     '        Path(codex_home).expanduser() / "auth.json", create_parent=True)',
+     "t15_cmd_lay_phai_dung_duong_canonical_guard_tra_ve"),
     ("kiem_song_unmeasured_collapses_to_rejected",
      '    if result.status is LiveStatus.NOT_MEASURED:\n'
      '        return RC[KHONG_DO_DUOC]',

@@ -31,6 +31,37 @@ def run():
         assert m.materialize_codex(env={})["status"] == "missing"
         assert m.materialize_codex(env={"CODEX_AUTH_JSON": "!"})["status"] == "rejected"
 
+        with mock.patch.dict(m.os.environ, {
+            "CODEX_AUTH_JSON": encoded,
+            "CODEX_HOME": str(root / "cli-codex"),
+        }, clear=True), mock.patch.object(m.sys, "stdout", new=io.StringIO()):
+            assert m.main(["codex-materialize"]) == 0
+        assert (root / "cli-codex" / "auth.json").read_bytes() == auth
+
+        repo = root / "repo"
+        (repo / ".git").mkdir(parents=True)
+        rejected = m.materialize_codex(env={
+            "CODEX_AUTH_JSON": encoded,
+            "CODEX_HOME": str(repo / ".codex"),
+        })
+        assert rejected == {"status": "rejected", "reason": "repository_destination"}
+        assert not (repo / ".codex" / "auth.json").exists()
+
+        repo_secret_dir = repo / "secrets"
+        repo_secret_dir.mkdir()
+        linked_parent = root / "linked-parent"
+        linked_parent.symlink_to(repo_secret_dir, target_is_directory=True)
+        rejected = m.capture_claude(linked_parent / "claude.token")
+        assert rejected == {"status": "rejected", "reason": "repository_destination"}
+        assert not (repo_secret_dir / "claude.token").exists()
+
+        with mock.patch.dict(m.os.environ, {
+            "CODEX_AUTH_JSON": encoded,
+            "CODEX_HOME": str(repo / ".codex-cli"),
+        }, clear=True), mock.patch.object(m.sys, "stdout", new=io.StringIO()):
+            assert m.main(["codex-materialize"]) == 3
+        assert not (repo / ".codex-cli" / "auth.json").exists()
+
         # An actual child sees a TTY, displays an interactive prompt, consumes input,
         # and emits the credential split over writes.  The parent must stream the
         # prompt while never forwarding the credential.
@@ -65,6 +96,20 @@ os.write(1,b'A'*180 + b'\\n')
         assert "PATH" in setup_env
         assert not set(m.SECRET_ENV) & set(setup_env)
         assert not any("CANARY" in value for value in setup_env.values())
+
+        for failure, expected in (
+            (m.RepositoryDestinationError("late destination swap"),
+             {"status": "rejected", "reason": "repository_destination"}),
+            (OSError("disk refused write"),
+             {"status": "not_measured", "reason": "write_failed"}),
+        ):
+            read_fd, write_fd = os.pipe(); os.write(write_fd, b"yes\n"); os.close(write_fd)
+            with os.fdopen(read_fd) as user_input, \
+                 mock.patch.object(m, "_atomic_secret", side_effect=failure):
+                result = m.capture_claude(root / "late-write.token", timeout=5,
+                    env={"PATH": f"{bindir}{os.pathsep}{os.environ['PATH']}"},
+                    input_stream=user_input, output_stream=io.StringIO())
+            assert result == expected
         link = root / "link"; link.symlink_to(out)
         try: m._atomic_secret(link, b"x"); assert False
         except OSError: pass
@@ -107,13 +152,30 @@ os.write(1,b'A'*180 + b'\\n')
             assert m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S"})["status"] == "not_measured"
 
         with mock.patch.object(m.subprocess, "run", return_value=mock.Mock(returncode=0)) as run_child:
-            result = m.tl_bootstrap("cowork", None, env={
+            result = m.tl_bootstrap("cowork", None, env={"TL_MASTER_KEY": "TL_CANARY"})
+        assert result == {"status": "rejected", "reason": "secrets_file_required"}
+        run_child.assert_not_called()
+
+        secrets_file = root / "secrets.enc"
+        with mock.patch.object(m.subprocess, "run", return_value=mock.Mock(returncode=0)) as run_child:
+            result = m.tl_bootstrap("cowork", secrets_file, env={
                 "TL_MASTER_KEY": "TL_CANARY", "CODEX_AUTH_JSON": "CODEX_CANARY",
                 "CLAUDE_CODE_OAUTH_TOKEN": "CLAUDE_CANARY", "GITHUB_PAT": "GH_CANARY",
                 "OPENAI_API_KEY": "VENDOR_CANARY", "TMPDIR": "/tmp/test"})
         assert result["status"] == "passed"
+        assert run_child.call_args.args[0][-2:] == ["--secrets-file", str(secrets_file)]
         assert run_child.call_args.kwargs["env"] == {
             "TMPDIR": "/tmp/test", "TL_MASTER_KEY": "TL_CANARY"}
+
+        for argv in (["tl-bootstrap", "--env", "cowork"],
+                     ["bootstrap", "--env", "cowork"]):
+            with mock.patch.object(m.sys, "stdout", new=io.StringIO()), \
+                 mock.patch.object(m.sys, "stderr", new=io.StringIO()):
+                try:
+                    m.main(argv)
+                    assert False, f"parser accepted missing --secrets-file: {argv}"
+                except SystemExit as exc:
+                    assert exc.code == 2
 
         calls = []
         def component(name, status="passed"):

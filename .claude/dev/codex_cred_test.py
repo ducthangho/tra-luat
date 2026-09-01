@@ -372,13 +372,57 @@ def t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW(M):
     assert bak and bak.read_text() == "AN-TOAN", "chặn oan nền có O_NOFOLLOW"
 
 
+def t14_moi_dich_credential_phai_o_ngoai_repository(M):
+    """Chặn trước device-auth cho CODEX_HOME, --ra, --tep-dan và --cai-de."""
+    root = Path(tempfile.mkdtemp())
+    repo = root / "repo"
+    (repo / ".git").mkdir(parents=True)
+    safe_home = root / "safe-home"
+    safe_home.mkdir()
+    (safe_home / "auth.json").write_bytes(b'{"tokens":{"access_token":"S"}}')
+    called = []
+    M._co_codex = lambda: "/gia/codex"
+    M._chay_device_auth = lambda *_a: (called.append(True) or (True, "ok"))
+    M._kiem_song = lambda _home: (True, "rc=0")
+
+    class A:
+        codex_home, ra, tep_dan = str(repo / ".codex"), str(root / "out.b64"), None
+        han_giay, in_gia_tri, cai_de = 5, False, False
+
+    import io
+    from contextlib import redirect_stdout
+    with redirect_stdout(io.StringIO()):
+        assert M.cmd_lay(A()) == M.RC[M.DO]
+    assert not called and not (repo / ".codex" / "auth.json").exists()
+
+    secret_dir = repo / "secrets"
+    secret_dir.mkdir()
+    linked_parent = root / "linked-parent"
+    linked_parent.symlink_to(secret_dir, target_is_directory=True)
+    A.codex_home, A.ra = str(safe_home), str(linked_parent / "out.b64")
+    with redirect_stdout(io.StringIO()):
+        assert M.cmd_lay(A()) == M.RC[M.DO]
+    assert not called and not (secret_dir / "out.b64").exists()
+
+    old_env = M.os.environ
+    try:
+        M.os.environ = {"CODEX_HOME": str(repo / ".installed")}
+        A.ra, A.tep_dan, A.cai_de = str(root / "out.b64"), str(root / "setup.md"), True
+        with redirect_stdout(io.StringIO()):
+            assert M.cmd_lay(A()) == M.RC[M.DO]
+    finally:
+        M.os.environ = old_env
+    assert not called and not (repo / ".installed" / "auth.json").exists()
+
+
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
       t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0, t4_kiem_song_bat_credential_bi_tu_choi,
       t5_kiem_song_dat_khi_co_dau_hieu, t6_khong_in_gia_tri_khi_khong_co_co,
       t7_sao_luu_khong_de_ban_cu, t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT,
       t9_cmd_lay_GHI_tep_huong_dan_dan, t10_gio_con_lai_doc_exp_va_bu_padding,
       t11_sao_luu_tu_choi_symlink, t12_sao_luu_O_NOFOLLOW_tai_diem_doc,
-      t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW]
+      t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW,
+      t14_moi_dich_credential_phai_o_ngoai_repository]
 
 # ─────────────────────────── đột biến ───────────────────────────
 # (nhãn, chuỗi CŨ, chuỗi MỚI, ca ĐÍCH phải chết)
@@ -412,9 +456,9 @@ DOT_BIEN = [
     # `os.chmod` phía sau ném FileNotFoundError và giết luôn t6 — đó là đột biến làm hỏng
     # HÀM cho mọi ca, không phải đột biến đo đúng tính chất t9 canh.
     ("t9_khong_sinh_tep_dan",
-     '    _ghi_bi_mat(tep_dan, soan_tep_dan(\n'
-     '        b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))',
-     "    pass", "t9_cmd_lay_GHI_tep_huong_dan_dan"),
+     '        _ghi_bi_mat(tep_dan, soan_tep_dan(\n'
+     '            b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))',
+     "        pass", "t9_cmd_lay_GHI_tep_huong_dan_dan"),
     # Bỏ bù padding base64url — ca t10 phải ĐỎ, và đây là lỗi thật rất dễ lọt.
     ("t10_khong_bu_padding", '\n    than += "=" * (-len(than) % 4)', "",
      "t10_gio_con_lai_doc_exp_va_bu_padding"),
@@ -430,6 +474,10 @@ DOT_BIEN = [
      '    if not hasattr(os, "O_NOFOLLOW"):\n'
      '        raise OSError("từ chối sao lưu: nền thiếu os.O_NOFOLLOW")\n', "",
      "t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW"),
+    ("t14_bo_preflight_repository",
+     "                _require_external_secret_destination(dich)",
+     "                pass",
+     "t14_moi_dich_credential_phai_o_ngoai_repository"),
 ]
 
 

@@ -92,6 +92,12 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+from session_credentials import (
+    RepositoryDestinationError,
+    _atomic_secret,
+    _require_external_secret_destination,
+)
+
 VERSION = "1.5.0"
 
 
@@ -2393,6 +2399,14 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
     if not thoc:
         return ket
     dich = _codex_home() / "auth.json"
+    try:
+        _require_external_secret_destination(dich)
+    except RepositoryDestinationError:
+        return [{"ten": "codex", "ok": False, "duong_dan": str(dich),
+                 "cach": "HỎNG: từ chối đích credential nằm trong repository"}]
+    except OSError:
+        return [{"ten": "codex", "ok": False, "duong_dan": str(dich),
+                 "cach": "HỎNG: không xác minh được đích credential"}]
     # Giải mã SỚM để so mốc; phần kiểm lược đồ đầy đủ vẫn ở dưới, không bỏ.
     noi_dung_tam = None
     for thu in (thoc, None):
@@ -2465,20 +2479,15 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
         return [{"ten": "codex", "ok": True, "doi": True,
                  "cach": cach + " (thử khan)", "duong_dan": str(dich)}]
 
-    # Chốt 4 — tệp tạm, quyền hẹp, rồi mới thay.
-    dich.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
-    fd, tam = tempfile.mkstemp(dir=str(dich.parent))
+    # Chốt 4 — guard lại ngay tại writer, tệp tạm, quyền hẹp, rồi mới thay.
     try:
-        os.write(fd, noi_dung.encode("utf-8"))
-        os.close(fd)
-        os.chmod(tam, 0o600)
-        os.replace(tam, dich)
-    except BaseException:
-        try:
-            os.unlink(tam)
-        except OSError:
-            pass
-        raise
+        _atomic_secret(dich, noi_dung.encode("utf-8"))
+    except RepositoryDestinationError:
+        return [{"ten": "codex", "ok": False, "duong_dan": str(dich),
+                 "cach": "HỎNG: đích credential đổi thành đường dẫn trong repository"}]
+    except OSError:
+        return [{"ten": "codex", "ok": False, "duong_dan": str(dich),
+                 "cach": "HỎNG: không ghi được credential"}]
     return [{"ten": "codex", "ok": True, "doi": True, "cach": cach,
              "duong_dan": str(dich)}]
 

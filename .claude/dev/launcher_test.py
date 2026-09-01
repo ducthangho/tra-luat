@@ -2335,6 +2335,26 @@ def t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac():
     bang(not (Path(nha) / ".codex" / "auth.json").exists(),
          "tu choi ma van ghi tep la fail-open")
 
+    # CODEX_HOME là một credential destination, nên cả đường trực tiếp và parent
+    # symlink trỏ vào repository phải bị chặn trước khi tạo auth.json.
+    goc = Path(tempfile.mkdtemp())
+    repo = goc / "repo"
+    (repo / ".git").mkdir(parents=True)
+    homes = [repo / ".codex"]
+    (repo / "secrets").mkdir()
+    linked_parent = goc / "linked-parent"
+    try:
+        linked_parent.symlink_to(repo / "secrets", target_is_directory=True)
+        homes.append(linked_parent)
+    except OSError:
+        pass  # Windows không có SeCreateSymbolicLinkPrivilege; WSL đo nhánh này.
+    for home in homes:
+        m.os.environ = {"CODEX_AUTH_JSON": that, "CODEX_HOME": str(home)}
+        ket = m.chuan_bi_xac_thuc(that_su=True)
+        bang(len(ket) == 1 and not ket[0]["ok"],
+             f"CODEX_HOME trong repository phai bi tu choi: {home}: {ket}")
+        bang(not (home / "auth.json").exists(), f"da ghi credential vao repository: {home}")
+
 
 @ca
 def t87_khong_duoc_xuat_digest_on_dinh_cua_gia_tri_bien():
@@ -2435,6 +2455,11 @@ def t88_hook_phien_do_theo_NANG_LUC_khong_theo_bam_toan_tep():
         nl = m._nang_luc_hook(that.read_text(encoding="utf-8", errors="replace"))
         bang({"codex-auth-restore", "rg-bat-buoc", "doctor-kha-dung"} <= nl,
              f"hook THAT cua kho khai thieu nang luc: {sorted(nl)}")
+        noi_dung_hook = that.read_text(encoding="utf-8", errors="replace")
+        bang("codex-materialize" in noi_dung_hook,
+             "hook phai goi guarded credential materializer chung")
+        bang('os.path.expanduser("~"), ".codex", "auth.json"' not in noi_dung_hook,
+             "hook con hard-code ~/.codex/auth.json")
 
 
 @ca
@@ -6927,6 +6952,10 @@ def chay_dot_bien() -> int:
     khong_do = 0
     tam = Path(tempfile.mkdtemp(prefix="lt_db_"))
     try:
+        # Mutant chạy như một script độc lập, nên dependency production mới phải
+        # nằm cạnh nó. Nếu thiếu, mọi ca chết ở import và mutation gate xanh giả.
+        shutil.copy2(LAUNCHER.with_name("session_credentials.py"),
+                     tam / "session_credentials.py")
         for muc in DOT_BIEN:
             ten, cap, phai_chet = muc[0], muc[1], muc[2]
             # Phan tu thu TU (tuy chon) = ('posix'|'windows', ly do). Co dot bien
@@ -6965,7 +6994,7 @@ def chay_dot_bien() -> int:
                 hong += 1
                 continue
             LAUNCHER_DANG_DUNG = ban_sao
-            chet, bo_qua = [], []
+            chet, bo_qua, loi_setup = [], [], []
             for fn in CA:
                 if fn.__name__ not in phai_chet:
                     continue
@@ -6980,8 +7009,14 @@ def chay_dot_bien() -> int:
                         bo_qua.append(fn.__name__)
                 except AssertionError:
                     chet.append(fn.__name__)
+                except (ImportError, ModuleNotFoundError) as e:
+                    loi_setup.append(f"{fn.__name__}({type(e).__name__})")
                 except Exception as e:  # noqa: BLE001
                     chet.append(f"{fn.__name__}({type(e).__name__})")
+            if loi_setup:
+                hong += 1
+                print(f"  {ten:<28} SAI - loi setup/import: {', '.join(loi_setup)}")
+                continue
             can_do = len(phai_chet) - len(bo_qua)
             if can_do == 0:
                 khong_do += 1
@@ -7034,6 +7069,8 @@ def chay_dot_bien() -> int:
             ban_test = thu_muc / "launcher_test.py"
             ban_test.write_text(moi_test, encoding="utf-8")
             (thu_muc / "launcher.py").write_text(goc, encoding="utf-8")
+            shutil.copy2(LAUNCHER.with_name("session_credentials.py"),
+                         thu_muc / "session_credentials.py")
             chet = []
             loi_runner = []
             for ten_ca in phai_chet:

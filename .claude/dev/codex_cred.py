@@ -59,6 +59,12 @@ import tempfile
 import time
 from pathlib import Path
 
+from session_credentials import (
+    RepositoryDestinationError,
+    _atomic_secret,
+    _require_external_secret_destination,
+)
+
 DAT, DO, KHONG_DO_DUOC = "DAT", "DO", "KHONG_DO_DUOC"
 RC = {DAT: 0, DO: 2, KHONG_DO_DUOC: 3}
 RC_ARG = 4
@@ -244,20 +250,7 @@ def _gio_con_lai(auth: Path) -> float | None:
 
 def _ghi_bi_mat(dich: Path, noi_dung: bytes) -> None:
     """Ghi 0600 bằng tệp độc quyền rồi replace; không đi theo symlink/hardlink đích."""
-    fd, ten = tempfile.mkstemp(prefix=f".{dich.name}.tmp-", dir=dich.parent)
-    tam = Path(ten)
-    try:
-        with os.fdopen(fd, "wb") as f:
-            f.write(noi_dung)
-            f.flush()
-            os.fsync(f.fileno())
-        os.chmod(tam, 0o600)
-        os.replace(tam, dich)
-    finally:
-        try:
-            tam.unlink()
-        except FileNotFoundError:
-            pass
+    _atomic_secret(dich, noi_dung)
 
 
 def _sao_luu(dich: Path) -> Path | None:
@@ -373,7 +366,20 @@ def cmd_lay(a) -> int:
 
     tam_ctx = None if a.codex_home else tempfile.TemporaryDirectory(prefix="codex-cred-")
     tam = Path(a.codex_home) if a.codex_home else Path(tam_ctx.name)
-    _in(f"CODEX_HOME tạm: {tam}   (bản đang dùng ở ~/.codex KHÔNG bị đụng)")
+    ra = Path(a.ra) if a.ra else Path("/tmp/CODEX_AUTH_JSON.b64")
+    tep_dan = Path(a.tep_dan) if a.tep_dan else ra.with_name("CODEX_AUTH_JSON_setup.md")
+    that = effective_codex_home() / "auth.json" if a.cai_de else None
+    try:
+        for dich in (tam / "auth.json", ra, tep_dan, that):
+            if dich is not None:
+                _require_external_secret_destination(dich)
+    except RepositoryDestinationError:
+        _in("ĐỎ: từ chối ghi credential vào trong repository.")
+        return RC[DO]
+    except OSError:
+        _in("KHÔNG_ĐO_ĐƯỢC: không xác minh được đích ghi credential.")
+        return RC[KHONG_DO_DUOC]
+    _in(f"CODEX_HOME tạm: {tam}   (đích cài {effective_codex_home()} CHƯA bị đụng)")
     ok, dau_ra = _chay_device_auth(tam, a.han_giay)
     if not ok:
         _in("KHÔNG_ĐO_ĐƯỢC: chưa hoàn tất device-auth.")
@@ -394,22 +400,26 @@ def cmd_lay(a) -> int:
 
     auth_bytes = auth.read_bytes()
     b64 = base64.b64encode(auth_bytes).decode("ascii")
-    ra = Path(a.ra) if a.ra else Path("/tmp/CODEX_AUTH_JSON.b64")
-    _ghi_bi_mat(ra, (b64 + "\n").encode("ascii"))
-
-    if a.cai_de:
-        that = effective_codex_home() / "auth.json"
-        that.parent.mkdir(parents=True, exist_ok=True)
-        bak = _sao_luu(that)
-        _ghi_bi_mat(that, auth_bytes)
-        _in(f"đã cài đè {that}" + (f" (sao lưu: {bak})" if bak else ""))
-
-    # Tệp hướng dẫn dán: bước CUỐI của lệnh, không phải việc làm tay sau đó. Phiên nào
-    # cũng phải giao được cùng một thứ cho chủ kho, nên nó thuộc về mã.
     gio_con = _gio_con_lai(auth)
-    tep_dan = Path(a.tep_dan) if a.tep_dan else ra.with_name("CODEX_AUTH_JSON_setup.md")
-    _ghi_bi_mat(tep_dan, soan_tep_dan(
-        b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))
+    try:
+        _ghi_bi_mat(ra, (b64 + "\n").encode("ascii"))
+
+        if that is not None:
+            that.parent.mkdir(parents=True, exist_ok=True)
+            _require_external_secret_destination(that)
+            bak = _sao_luu(that)
+            _ghi_bi_mat(that, auth_bytes)
+            _in(f"đã cài đè {that}" + (f" (sao lưu: {bak})" if bak else ""))
+
+        # Tệp hướng dẫn dán: bước CUỐI của lệnh, không phải việc làm tay sau đó.
+        _ghi_bi_mat(tep_dan, soan_tep_dan(
+            b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))
+    except RepositoryDestinationError:
+        _in("ĐỎ: đích credential đã đổi thành đường dẫn trong repository — dừng.")
+        return RC[DO]
+    except OSError:
+        _in("KHÔNG_ĐO_ĐƯỢC: không ghi được credential vào đích đã chọn.")
+        return RC[KHONG_DO_DUOC]
 
     _in("")
     _in("ĐẠT — credential mới, đã chứng minh bằng lời gọi thật.")
@@ -481,7 +491,7 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--tep-dan",
                    help="tệp .md hướng dẫn dán (mặc định cạnh --ra); GỬI tệp này cho chủ kho")
     q.add_argument("--cai-de", action="store_true",
-                   help="cài đè ~/.codex/auth.json (có sao lưu) để dùng ngay trong phiên này")
+                   help="cài đè CODEX_HOME/auth.json có hiệu lực (có sao lưu)")
     q.set_defaults(fn=cmd_lay)
 
     q = sub.add_parser("kiem", help="đo credential đang dùng")

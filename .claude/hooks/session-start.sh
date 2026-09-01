@@ -308,32 +308,11 @@ if [ -n "${CODEX_AUTH_JSON:-}" ] && co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; t
   if codex login status >/dev/null 2>&1 </dev/null; then
     echo "[session-start] codex: da dang nhap san — GIU nguyen, khong ghi de"
   else
-    if "$PY" - <<'PYEOF'
-import base64, binascii, json, os, sys, tempfile
-raw = os.environ.get("CODEX_AUTH_JSON", "").strip()
-try:
-    data = base64.b64decode(raw, validate=True)
-except (binascii.Error, ValueError):
-    sys.exit(1)                      # KHONG in noi dung, ke ca doan dau
-try:
-    d = json.loads(data)
-except Exception:
-    sys.exit(2)
-if not isinstance(d, dict) or "tokens" not in d:
-    sys.exit(3)                      # thieu khoa bat buoc
-dst = os.path.join(os.path.expanduser("~"), ".codex", "auth.json")
-os.makedirs(os.path.dirname(dst), mode=0o700, exist_ok=True)
-fd, tmp = tempfile.mkstemp(dir=os.path.dirname(dst))
-try:
-    os.write(fd, data); os.close(fd)
-    os.chmod(tmp, 0o600); os.replace(tmp, dst)
-except BaseException:
-    os.unlink(tmp); raise
-PYEOF
+    if "$PY" .claude/dev/session_credentials.py codex-materialize >/dev/null
     then
       echo "[session-start] codex: da khoi phuc auth tu CODEX_AUTH_JSON"
     else
-      echo "[session-start] CANH BAO: CODEX_AUTH_JSON khong dung dang (base64 cua auth.json) — bo qua"
+      echo "[session-start] CANH BAO: khong khoi phuc CODEX_AUTH_JSON (sai dang hoac dich khong an toan) — bo qua"
     fi
   fi
 fi

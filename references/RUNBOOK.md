@@ -143,8 +143,15 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 
 **A0.4c — UNIFIED bootstrap: GAS token + GWS cred chung 1 khoá gốc `TL_MASTER_KEY` (env-aware).**
 
-> Phiên ephemeral có một entry point secret-safe cho Codex, Claude subscription,
-> GitHub và việc điều phối bootstrap hiện hữu: xem `docs/SESSION_CREDENTIALS.md`.
+> Phiên ephemeral dùng entry point `.claude/dev/session_credentials.py`; báo cáo chỉ
+> chứa trạng thái đóng `missing|rejected|network_error|not_measured|passed`, không chứa
+> secret. `CODEX_HOME` là đích Codex có hiệu lực (mặc định `~/.codex`); bắt Claude token
+> bằng `claude-capture --output /tmp/claude.token`; đặt `GITHUB_PAT` rồi chạy
+> `github-probe --repo ducthangho/tra-luat`; và chạy TL bằng
+> `tl-bootstrap --env cowork --secrets-file /tmp/s.enc` hoặc lệnh gộp `bootstrap`.
+> Mọi đích ghi credential phải resolve ngoài repository, kể cả qua symlinked parent.
+> Hai lệnh TL luôn bắt buộc `--secrets-file`; không có đường tải bundle ngầm trong
+> entry point. Credential mỗi provider chỉ đi vào child process của chính provider đó.
 > **Windows (Claude Code):** bấm đúp `tl-setup.cmd` (gốc skill) — menu: [1] Setup 1 lần (cài gws + auth +
 > tự tạo `TL_MASTER_KEY` + mã hoá secrets + in lệnh Cowork vào `COWORK-paste.txt`), [2] Đổi token GAS,
 > [3] Kiểm tra. Sau setup: Code chạy thẳng; Cowork dán khối trong `COWORK-paste.txt`.
@@ -158,7 +165,7 @@ export TL_MASTER_KEY='<passphrase mạnh>'
 python scripts/tl.py secrets-stage
 # [COWORK] mỗi phiên — env-aware: nạp GAS token + full config (+ gws binary/cred ở Code/Cowork)
 export TL_MASTER_KEY='<passphrase>'
-#   agent tải SECRETS_FILEID qua Drive MCP → lưu /tmp/s.enc  (Cowork token-less); Code có token thì tự webapp-fetch
+#   materialize bundle mã hoá thành /tmp/s.enc trước khi gọi entry point (không lưu trong repository)
 python scripts/tl.py bootstrap --env cowork --secrets-file /tmp/s.enc
 python scripts/tl.py ping ; python scripts/tl.py gws-ping --env cowork
 ```

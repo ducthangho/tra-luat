@@ -150,7 +150,9 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > gọi Codex, kể cả khi `codex login status` sẽ báo đã đăng nhập. Từ chối sẽ đặt
 > `TRA_LUAT_CODEX_BLOCKED=1`; launcher phải giữ chốt đó qua mọi đường Codex, kể cả
 > generic `run -- codex`. Generic run resolve/bind executable identity đúng một lần,
-> kể cả alias symlink/reparse đổi tên hoặc hard-link cùng file, rồi dùng cùng bound target
+> kể cả alias symlink/reparse đổi tên hoặc hard-link cùng file. argv0 tương đối có thành phần
+> đường dẫn được neo vào workspace đã khai **trước mọi PATH lookup**; chỉ tên lệnh trần mới dùng
+> PATH/PATHEXT. Sau đó dùng cùng bound target
 > cho chốt Codex, transport record, capability probe và final spawn; identity không resolve
 > được hoặc mơ hồ thì fail trước child. Writer giữ **actual opened parent
 > capability** đã kiểm và làm toàn bộ create/chmod/fsync/replace tương đối với capability
@@ -167,15 +169,25 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > chỉ dùng hierarchy private do process tạo từ trusted OS temp base (`/tmp` hoặc Windows
 > Shell LocalAppData, không theo ambient `TMPDIR`/`TMP`/`TEMP`). Child bị bind `HOME`, mọi
 > XDG root và cả ba temp vars vào hierarchy đó; permission/repository/symlink/reparse không
-> kiểm chắc được thì fail trước child. Chốt này không chống actor đồng thời cùng OS principal
+> kiểm chắc được thì fail trước child. Cleanup quarantine rồi đối chiếu đúng identity root đã cấp,
+> kiểm lỗi xoá và residual; root bị đổi thành link/junction/reparse không được đưa cho recursive
+> delete. Cleanup raise hoặc còn residual luôn hạ kết quả thành `not_measured`, kể cả inner call vừa
+> định trả thành công. Chốt này không chống actor đồng thời cùng OS principal
 > có quyền reparent hierarchy đã tạo; threat model mạnh hơn phải dùng namespace/principal
-> confinement của OS. Riêng Codex live-check giữ credential directory đã validate chỉ làm
+> confinement của OS trong lúc child còn đang dùng storage. Riêng Codex live-check guard +
+> capability-read `CODEX_HOME/auth.json` trước khi cấp provider storage hoặc spawn; direct repository
+> và parent-link từ chối với zero child. Kết quả đóng gồm `passed`/`rejected`/`not_measured`: thiếu CLI,
+> timeout, local spawn/provider/cleanup không đo được là `not_measured`; chỉ refusal credential/model
+> có bằng chứng (hoặc policy refusal) là `rejected`. Credential directory đã validate chỉ làm
 > `CODEX_HOME`, còn `HOME`/XDG/temp nằm trong một hierarchy private tách biệt; credential
 > directory thường chỉ có `auth.json` không cần provider-home scaffold. Đường device-auth
-> `lay` không nhận `CODEX_HOME` từ caller và chỉ copy-out bằng guarded writer. NLM restore chỉ
+> `lay` không nhận `CODEX_HOME` từ caller và chỉ copy-out bằng guarded writer; cleanup hỏng ghi đè
+> một kết quả inner ĐẠT thành KHÔNG_ĐO_ĐƯỢC. NLM restore chỉ
 > nhận đúng `auth.json`, `profiles/default/cookies.json`, và
-> `profiles/default/metadata.json`; traversal/extra profile/link-junction-reparse bị
-> từ chối trước lần ghi đầu tiên.
+> `profiles/default/metadata.json`; traversal/extra profile bị từ chối. Base hoặc existing lexical
+> parent là link/junction/reparse (kể cả resolve ra external non-repository) bị từ chối trước schema
+> planning; mọi generated target parent được kiểm hết trước lần ghi đầu tiên. Component thường chưa
+> tồn tại vẫn được phép để guarded writer tạo.
 > **Windows (Claude Code):** bấm đúp `tl-setup.cmd` (gốc skill) — menu: [1] Setup 1 lần (cài gws + auth +
 > tự tạo `TL_MASTER_KEY` + mã hoá secrets + in lệnh Cowork vào `COWORK-paste.txt`), [2] Đổi token GAS,
 > [3] Kiểm tra. Sau setup: Code chạy thẳng; Cowork dán khối trong `COWORK-paste.txt`.

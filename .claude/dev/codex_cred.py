@@ -58,6 +58,7 @@ import shutil
 import subprocess
 import sys
 import time
+from enum import Enum
 from pathlib import Path
 
 from session_credentials import (
@@ -79,6 +80,50 @@ HAN_MAC_DINH_GIAY = 15 * 60
 # Lời gọi kiểm sống phải rẻ và có đáp án BIẾT TRƯỚC — xem `_kiem_song`.
 HAN_KIEM_SONG_GIAY = 120
 DAU_HIEU_SONG = "TRALUAT-CRED-OK"
+
+
+class LiveStatus(str, Enum):
+    """Closed result vocabulary for a real Codex measurement."""
+
+    PASSED = "passed"
+    REJECTED = "rejected"
+    NOT_MEASURED = "not_measured"
+
+    def __bool__(self):
+        raise TypeError("LiveStatus has no truth value; compare an enum member explicitly")
+
+
+class LiveResult:
+    __slots__ = ("status", "reason")
+
+    def __init__(self, status: LiveStatus, reason: str):
+        if not isinstance(status, LiveStatus):
+            raise TypeError(f"invalid Codex live status: {status!r}")
+        self.status = status
+        self.reason = reason
+
+    def __repr__(self):
+        return f"LiveResult(status={self.status.value!r}, reason={self.reason!r})"
+
+    def __bool__(self):
+        raise TypeError("LiveResult has no truth value; inspect .status explicitly")
+
+
+def _live_result(status: LiveStatus, reason: str) -> LiveResult:
+    if not isinstance(status, LiveStatus):
+        raise TypeError(f"invalid Codex live status: {status!r}")
+    return LiveResult(status, reason)
+
+
+def _live_result_rc(result: LiveResult) -> int:
+    if result.status is LiveStatus.PASSED:
+        return RC[DAT]
+    if result.status is LiveStatus.REJECTED:
+        return RC[DO]
+    if result.status is LiveStatus.NOT_MEASURED:
+        return RC[KHONG_DO_DUOC]
+    raise ValueError(f"unhandled Codex live status: {result.status!r}")
+
 
 _ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
 # URL device: chốt theo TIỀN TỐ https, không khớp lỏng, để không nhặt nhầm chữ trong câu.
@@ -189,7 +234,14 @@ def _chay_device_auth(codex_home: Path, han_giay: int) -> tuple[bool, str]:
     return (p.returncode == 0, gom)
 
 
-def _kiem_song(codex_home: Path) -> tuple[bool, str]:
+def _checked_codex_auth(codex_home: Path) -> tuple[Path, bytes]:
+    """Bind one canonical auth capability before any live-check resource use."""
+    target = _shared_checked_secret_destination(
+        Path(codex_home).expanduser() / "auth.json", create_parent=False)
+    return target, _shared_read_secret_bytes(target)
+
+
+def _kiem_song_checked(auth: Path) -> LiveResult:
     """BẰNG CHỨNG DƯƠNG: gọi codex thật và đòi đúng một chuỗi biết trước.
 
     KHÔNG dùng `codex login status` — nó chỉ kiểm tệp đọc được. Kho này đã trả giá HAI lần
@@ -198,7 +250,7 @@ def _kiem_song(codex_home: Path) -> tuple[bool, str]:
     """
     lenh = _co_codex()
     if not lenh:
-        return (False, "không có codex trên PATH")
+        return _live_result(LiveStatus.NOT_MEASURED, "không có codex trên PATH")
     try:
         # CODEX_HOME is credential storage, not the provider process HOME.  It
         # may be an ordinary validated directory containing only auth.json.
@@ -207,9 +259,11 @@ def _kiem_song(codex_home: Path) -> tuple[bool, str]:
         with _shared_private_provider_home() as provider_home:
             try:
                 moi = _shared_provider_child_env(
-                    os.environ, provider_home, CODEX_HOME=str(codex_home))
+                    os.environ, provider_home, CODEX_HOME=str(auth.parent))
             except OSError as e:
-                return (False, f"provider storage không an toàn: {type(e).__name__}")
+                return _live_result(
+                    LiveStatus.NOT_MEASURED,
+                    f"provider storage không an toàn: {type(e).__name__}")
             try:
                 with open(os.devnull) as rong:
                     p = subprocess.run([lenh, "exec", "--skip-git-repo-check",
@@ -218,23 +272,48 @@ def _kiem_song(codex_home: Path) -> tuple[bool, str]:
                                        timeout=HAN_KIEM_SONG_GIAY, encoding="utf-8",
                                        errors="replace")
             except subprocess.TimeoutExpired:
-                return (False, f"quá hạn {HAN_KIEM_SONG_GIAY}s")
+                return _live_result(
+                    LiveStatus.NOT_MEASURED, f"quá hạn {HAN_KIEM_SONG_GIAY}s")
             except (OSError, subprocess.SubprocessError) as e:
-                return (False, f"không chạy được: {type(e).__name__}")
+                return _live_result(
+                    LiveStatus.NOT_MEASURED, f"không chạy được: {type(e).__name__}")
     except OSError as e:
-        return (False, f"provider storage không an toàn: {type(e).__name__}")
+        return _live_result(
+            LiveStatus.NOT_MEASURED,
+            f"provider storage không an toàn: {type(e).__name__}")
     stdout, stderr = p.stdout or "", p.stderr or ""
     ra = stdout + stderr
     for dau in ("token_revoked", "refresh_token_invalidated", "401 unauthorized",
-                "please log in again", "could not be refreshed"):
+                "please log in again", "could not be refreshed", "model_not_found",
+                "model is not supported", "unsupported model",
+                "does not exist or you do not have access"):
         if dau in ra.lower():
-            return (False, f"credential BỊ TỪ CHỐI ({dau})")
+            return _live_result(
+                LiveStatus.REJECTED, f"credential/model BỊ TỪ CHỐI ({dau})")
     if p.returncode != 0:
-        return (False, f"codex exec thoát rc={p.returncode}")
+        return _live_result(
+            LiveStatus.NOT_MEASURED, f"codex exec thoát rc={p.returncode} không rõ nguyên nhân")
     # Chỉ stdout là câu trả lời. Stderr có thể echo chính prompt, vốn đã chứa dấu hiệu.
     if DAU_HIEU_SONG not in stdout:
-        return (False, "rc=0 nhưng KHÔNG thấy dấu hiệu sống trong stdout")
-    return (True, f"rc={p.returncode}, có {DAU_HIEU_SONG}")
+        return _live_result(
+            LiveStatus.NOT_MEASURED,
+            "rc=0 nhưng KHÔNG thấy dấu hiệu sống trong stdout")
+    return _live_result(LiveStatus.PASSED, f"rc={p.returncode}, có {DAU_HIEU_SONG}")
+
+
+def _kiem_song(codex_home: Path) -> LiveResult:
+    """Standalone live check: guard/read auth before provider allocation or child."""
+    try:
+        auth, _ = _checked_codex_auth(codex_home)
+    except _UnsafeSecretDestination:
+        return _live_result(LiveStatus.REJECTED, "từ chối CODEX_HOME trong repository")
+    except FileNotFoundError:
+        return _live_result(LiveStatus.NOT_MEASURED, "không có auth.json")
+    except OSError as e:
+        return _live_result(
+            LiveStatus.NOT_MEASURED,
+            f"không kiểm được CODEX_HOME theo capability: {type(e).__name__}")
+    return _kiem_song_checked(auth)
 
 
 def _gio_con_lai(auth: Path) -> float | None:
@@ -376,21 +455,19 @@ def cmd_lay(a) -> int:
     # The shared allocator also binds all child temp and XDG roots beneath the
     # same process-created hierarchy used by Claude and GitHub probes.
     try:
-        provider_home = _shared_private_provider_home()
-        private_home = provider_home.__enter__()
-        tam = private_home
+        with _shared_private_provider_home() as private_home:
+            try:
+                tam = _shared_checked_secret_destination(
+                    private_home / "auth.json").parent
+            except (_UnsafeSecretDestination, OSError):
+                _in("KHÔNG_ĐO_ĐƯỢC: không thiết lập được CODEX_HOME riêng theo capability")
+                return RC[KHONG_DO_DUOC]
+            return _cmd_lay_private(a, tam)
     except OSError:
-        _in("KHÔNG_ĐO_ĐƯỢC: không thiết lập được provider home riêng")
+        # Includes checked cleanup failure after an otherwise successful inner
+        # return: an undeleted raw credential hierarchy cannot be reported ĐẠT.
+        _in("KHÔNG_ĐO_ĐƯỢC: provider home riêng không tạo/xoá sạch được")
         return RC[KHONG_DO_DUOC]
-    try:
-        try:
-            tam = _shared_checked_secret_destination(tam / "auth.json").parent
-        except (_UnsafeSecretDestination, OSError):
-            _in("KHÔNG_ĐO_ĐƯỢC: không thiết lập được CODEX_HOME riêng theo capability")
-            return RC[KHONG_DO_DUOC]
-        return _cmd_lay_private(a, tam)
-    finally:
-        provider_home.__exit__(None, None, None)
 
 
 def _cmd_lay_private(a, tam: Path) -> int:
@@ -415,19 +492,31 @@ def _cmd_lay_private(a, tam: Path) -> int:
         _in(_sach(dau_ra)[-1200:])
         return RC[KHONG_DO_DUOC]
 
-    auth = tam / "auth.json"
-    if not auth.is_file():
-        _in(f"ĐỎ: login báo xong nhưng không có {auth}")
+    try:
+        auth, _ = _checked_codex_auth(tam)
+    except FileNotFoundError:
+        _in(f"ĐỎ: login báo xong nhưng không có {tam / 'auth.json'}")
         return RC[DO]
+    except _UnsafeSecretDestination:
+        _in("ĐỎ: từ chối CODEX_HOME trong repository")
+        return RC[DO]
+    except OSError:
+        _in("KHÔNG_ĐO_ĐƯỢC: không kiểm được CODEX_HOME theo capability")
+        return RC[KHONG_DO_DUOC]
 
     _in("đã nhận credential — đang KIỂM SỐNG bằng một lời gọi codex thật…")
-    song, vi_sao = _kiem_song(tam)
-    if not song:
-        _in(f"ĐỎ: credential mới KHÔNG dùng được — {vi_sao}")
-        return RC[DO]
-    _in(f"kiểm sống: {vi_sao}")
+    live = _kiem_song_checked(auth)
+    if live.status is LiveStatus.REJECTED:
+        _in(f"ĐỎ: credential mới BỊ TỪ CHỐI — {live.reason}")
+        return _live_result_rc(live)
+    if live.status is LiveStatus.NOT_MEASURED:
+        _in(f"KHÔNG_ĐO_ĐƯỢC: chưa chứng minh credential mới — {live.reason}")
+        return _live_result_rc(live)
+    _in(f"kiểm sống: {live.reason}")
 
     try:
+        # A successful Codex call may rotate auth.json.  Re-read the same
+        # canonical destination through the capability reader before export.
         auth_bytes = _shared_read_secret_bytes(auth)
         b64 = base64.b64encode(auth_bytes).decode("ascii")
         _ghi_bi_mat(ra, (b64 + "\n").encode("ascii"))
@@ -477,13 +566,20 @@ def _cmd_lay_private(a, tam: Path) -> int:
 def cmd_kiem(a) -> int:
     """Đo credential ĐANG dùng: còn sống thật không, còn bao lâu."""
     home = Path(a.codex_home).expanduser() if a.codex_home else effective_codex_home()
-    auth = home / "auth.json"
-    if not auth.is_file():
-        _in(f"KHÔNG_ĐO_ĐƯỢC: không có {auth}")
+    try:
+        auth, auth_bytes = _checked_codex_auth(home)
+    except FileNotFoundError:
+        _in(f"KHÔNG_ĐO_ĐƯỢC: không có {home / 'auth.json'}")
+        return RC[KHONG_DO_DUOC]
+    except _UnsafeSecretDestination:
+        _in(f"ĐỎ: từ chối CODEX_HOME trong repository: {home}")
+        return RC[DO]
+    except OSError as e:
+        _in(f"KHÔNG_ĐO_ĐƯỢC: không kiểm được {home / 'auth.json'} ({type(e).__name__})")
         return RC[KHONG_DO_DUOC]
     try:
-        d = json.loads(auth.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as e:
+        d = json.loads(auth_bytes)
+    except (UnicodeDecodeError, json.JSONDecodeError) as e:
         _in(f"ĐỎ: {auth} không đọc được ({type(e).__name__})")
         return RC[DO]
     if not isinstance(d, dict):
@@ -500,9 +596,9 @@ def cmd_kiem(a) -> int:
     if not a.kiem_song:
         _in("CHƯA CHỨNG MINH khả dụng — thêm --kiem-song để gọi thật (tốn quota).")
         return RC[KHONG_DO_DUOC]
-    song, vi_sao = _kiem_song(home)
-    _in(f"kiểm sống  : {vi_sao}")
-    return RC[DAT] if song else RC[DO]
+    live = _kiem_song_checked(auth)
+    _in(f"kiểm sống  [{live.status.value}]: {live.reason}")
+    return _live_result_rc(live)
 
 
 def build_parser() -> argparse.ArgumentParser:

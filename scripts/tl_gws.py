@@ -536,6 +536,34 @@ def _tl_secret_destination(path) -> Path:
     return resolved
 
 
+def _tl_nlm_restore_path(path) -> Path:
+    """Return an absolute lexical path only if every existing component is plain.
+
+    This guard deliberately runs before ``Path.resolve``: resolving a caller's
+    link/junction into an ordinary external directory would erase the fact that
+    the restore authority was delegated through a reparse point. Missing
+    components are allowed and are later created by the capability-bound writer.
+    """
+    target = Path(path).expanduser()
+    if any(part == os.pardir for part in target.parts):
+        raise OSError("refusing parent traversal in NLM restore base")
+    if not target.is_absolute():
+        target = Path.cwd() / target
+    components = list(reversed((target, *target.parents)))
+    reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+    for component in components:
+        try:
+            info = component.lstat()
+        except FileNotFoundError:
+            # A descendant cannot exist before its missing lexical ancestor;
+            # leave the ordinary nonexistent suffix to the guarded writer.
+            break
+        if (stat.S_ISLNK(info.st_mode)
+                or (reparse and getattr(info, "st_file_attributes", 0) & reparse)):
+            raise OSError(f"refusing linked/reparse NLM restore component: {component}")
+    return target
+
+
 def _tl_stat_at(directory_fd: int, name: str):
     try:
         return os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
@@ -703,9 +731,16 @@ def _nlm_auth_plan(nlm) -> list[tuple[str, bytes]]:
 
 
 def _write_nlm_auth(base, nlm) -> int:
+    restore_base = _tl_nlm_restore_path(base)
     plan = _nlm_auth_plan(nlm)
-    targets = [(_tl_secret_destination(Path(base).expanduser().joinpath(*rel.split("/"))), data)
-               for rel, data in plan]
+    lexical_targets = [(restore_base.joinpath(*rel.split("/")), data)
+                       for rel, data in plan]
+    # Reject generated nested target parents before canonicalization can erase
+    # a link and before auth.json (the first schema member) can be written.
+    for target, _ in lexical_targets:
+        _tl_nlm_restore_path(target.parent)
+    targets = [(_tl_secret_destination(target), data)
+               for target, data in lexical_targets]
     # Validate all existing parent capabilities before the first file write.
     # Each actual write opens and validates again to close the intervening race.
     for target, _ in targets:

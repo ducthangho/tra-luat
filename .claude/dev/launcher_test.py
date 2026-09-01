@@ -6579,6 +6579,131 @@ def r24_probe_claude_phai_dung_provider_da_bind_khong_dung_basename():
             m._thanh_vien_nhom = original_group
 
 
+@ca
+def r25_relative_path_bearing_exec_neo_workspace_truoc_PATH_va_dung_chung_identity():
+    """Relative argv0 with a separator belongs to the declared workspace.
+
+    ``shutil.which`` interprets a path-bearing relative name from the launcher's
+    caller cwd.  That cwd is not the declared workspace, so consulting it first
+    lets an unrelated executable win.  Bind the workspace path once; policy,
+    probe, ledger, transport, and final spawn must all consume that identity.
+    Bare PATH/PATHEXT, absolute paths, and plain missing-path probe behavior are
+    controls for the neighboring semantics that must remain unchanged.
+    """
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = tao_repo(s)
+        relative = str(Path("tools") / "codex")
+        workspace_cli = repo / relative
+        workspace_cli.parent.mkdir(parents=True)
+        workspace_cli.write_text("workspace executable", encoding="utf-8")
+        workspace_cli.chmod(0o700)
+
+        caller_cli = s / "caller" / relative
+        caller_cli.parent.mkdir(parents=True)
+        caller_cli.write_text("caller-cwd executable", encoding="utf-8")
+        caller_cli.chmod(0o700)
+
+        path_cli = s / "path-bin" / "bare-tool.CMD"
+        path_cli.parent.mkdir()
+        path_cli.write_text("PATH/PATHEXT executable", encoding="utf-8")
+        path_cli.chmod(0o700)
+        absolute_cli = s / "absolute" / "local-tool"
+        absolute_cli.parent.mkdir()
+        absolute_cli.write_text("absolute executable", encoding="utf-8")
+        absolute_cli.chmod(0o700)
+
+        original_chot = m.chay_cac_chot
+        original_probe = m.chay_cac_probe
+        original_block = m._co_chan_codex
+        original_which = m.shutil.which
+        original_popen = m.subprocess.Popen
+        original_job = m._job_windows
+        original_key = m._khoa_danh_tinh
+        original_group = m._thanh_vien_nhom
+        which_calls = []
+
+        def fixture_which(name):
+            which_calls.append(str(name))
+            if str(name) == relative:
+                # This is exactly what a caller-cwd interpretation can return.
+                return str(caller_cli)
+            if str(name) == "bare-tool":
+                return str(path_cli)
+            return original_which(name)
+
+        class Child:
+            pid = 424244
+
+            def poll(self):
+                return 0
+
+            def wait(self, timeout=None):
+                return 0
+
+        try:
+            m.shutil.which = fixture_which
+            identity = m._resolve_executable_identity(
+                [relative, "--fixture"], str(repo))
+            bound = str(workspace_cli.resolve(strict=True))
+            bang(identity["argv"][0] == bound,
+                 f"caller cwd won over workspace: {identity}")
+            bang(relative not in which_calls,
+                 f"path-bearing argv0 was sent through PATH first: {which_calls}")
+
+            # Neighboring controls: bare names still delegate PATH/PATHEXT;
+            # absolute commands keep their canonical target; an ordinary missing
+            # relative path remains unbound for the existing probe-stage ledger.
+            bare = m._resolve_executable_identity(["bare-tool"], str(repo))
+            bang(bare["argv"][0] == str(path_cli.resolve(strict=True))
+                 and "bare-tool" in which_calls, f"bare PATH control drifted: {bare}")
+            absolute = m._resolve_executable_identity([str(absolute_cli)], str(repo))
+            bang(absolute["argv"][0] == str(absolute_cli.resolve(strict=True)),
+                 f"absolute control drifted: {absolute}")
+            missing_name = str(Path("missing") / "plain-tool")
+            missing = m._resolve_executable_identity([missing_name], str(repo))
+            bang(missing["argv"][0] == missing_name,
+                 f"plain missing path no longer reaches capability probe: {missing}")
+
+            a = m.build_parser().parse_args([
+                "run", "--workspace", str(repo), "--run-root", str(s / "runs"),
+                "--", relative, "--fixture",
+            ])
+            a.lenh = a.lenh[1:]
+            precomputed_chot = original_chot(a)
+            events = []
+            m.chay_cac_chot = lambda _a: dict(precomputed_chot)
+            m.chay_cac_probe = lambda _ws, one_identity, _skip: (
+                events.append(("probe", dict(one_identity))) or ({}, None))
+            m._co_chan_codex = lambda: events.append(("policy", None)) or None
+            m.subprocess.Popen = lambda argv, **_k: (
+                events.append(("spawn", list(argv))) or Child())
+            m._job_windows = lambda _pid: None
+            m._khoa_danh_tinh = lambda _pid: "fixture-process-key"
+            m._thanh_vien_nhom = lambda _pid: []
+            bang(m.lenh_run(a) == 0, "workspace-bound fixture child did not finish")
+
+            probed = next(value for kind, value in events if kind == "probe")
+            spawned = next(value for kind, value in events if kind == "spawn")
+            bang(probed["argv"][0] == bound and spawned[0] == bound,
+                 f"downstream consumers diverged from workspace identity: {events}")
+            bang(sum(kind == "policy" for kind, _ in events) == 2,
+                 f"policy did not consume the same Codex identity twice: {events}")
+            record = json.loads(next((s / "runs").glob("*/run.json")).read_text())
+            bang(record["provider"] == "openai_codex"
+                 and record["lenh"] == m._tom_tat_lenh([bound, "--fixture"]),
+                 f"ledger/transport did not reuse bound identity: {record}")
+        finally:
+            m.chay_cac_chot = original_chot
+            m.chay_cac_probe = original_probe
+            m._co_chan_codex = original_block
+            m.shutil.which = original_which
+            m.subprocess.Popen = original_popen
+            m._job_windows = original_job
+            m._khoa_danh_tinh = original_key
+            m._thanh_vien_nhom = original_group
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
@@ -6651,6 +6776,10 @@ DOT_BIEN = [
      ('            resolved_path, matched_provider = _resolve_executable_alias(candidate_path)',
       '            resolved_path, matched_provider = candidate_path, None'),
      ["r23_run_codex_alias_phai_bind_target_mot_lan_cho_moi_consumer"]),
+    ("relative_path_bearing_exec_uses_caller_cwd",
+     ('        selected = str(path if path.is_absolute() else Path(workspace) / path)',
+      '        selected = str(path if path.is_absolute() else Path.cwd() / path)'),
+     ["r25_relative_path_bearing_exec_neo_workspace_truoc_PATH_va_dung_chung_identity"]),
     ("probe_claude_reinfers_bound_argv0_basename",
      ('    if identity.get("provider") == "anthropic_claude":',
       '    if Path(str(lenh[0])).name.casefold() in ("claude", "claude.exe"):'),

@@ -107,14 +107,66 @@ def _make_private_provider_directory(path: Path) -> Path:
     return _validate_private_provider_directory(path)
 
 
+def _private_provider_identity(path: Path) -> tuple[int, int]:
+    """Return the identity of one plain allocated root without following it."""
+    info = Path(path).lstat()
+    reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+    if (not stat.S_ISDIR(info.st_mode) or stat.S_ISLNK(info.st_mode)
+            or (reparse and getattr(info, "st_file_attributes", 0) & reparse)):
+        raise OSError("provider cleanup root is linked, reparsed, or not a directory")
+    return (info.st_dev, info.st_ino)
+
+
+def _checked_provider_cleanup(root: Path, identity: tuple[int, int]) -> None:
+    """Remove only the exact allocated root and verify that no residual remains."""
+    root = Path(root)
+    try:
+        current = _private_provider_identity(root)
+    except FileNotFoundError:
+        return
+    if current != identity:
+        raise OSError("provider cleanup root identity changed")
+
+    # Atomically take the exact verified entry out of its public temp name.
+    # Re-check after rename: if the source was swapped between lstat and rename,
+    # do not hand the substituted link/reparse point to recursive deletion.
+    for _ in range(128):
+        tombstone = root.with_name(
+            f".{root.name}.cleanup-{secrets.token_hex(12)}")
+        try:
+            tombstone.lstat()
+        except FileNotFoundError:
+            break
+    else:
+        raise OSError("could not allocate provider cleanup tombstone")
+    os.replace(root, tombstone)
+    if _private_provider_identity(tombstone) != identity:
+        raise OSError("provider cleanup root changed during quarantine")
+
+    shutil.rmtree(tombstone)
+    try:
+        tombstone.lstat()
+    except FileNotFoundError:
+        pass
+    else:
+        raise OSError("provider cleanup left a residual root")
+    try:
+        root.lstat()
+    except FileNotFoundError:
+        return
+    raise OSError("provider cleanup root name was recreated")
+
+
 @contextlib.contextmanager
 def _private_provider_home():
     """Yield a validated disposable provider HOME outside repository control."""
     base = _trusted_provider_temp_base()
     root = None
+    root_identity = None
     try:
         root = Path(tempfile.mkdtemp(prefix="tl-provider-home-", dir=base))
         root = _validate_private_provider_directory(root)
+        root_identity = _private_provider_identity(root)
         home = _make_private_provider_directory(root / "home")
         _make_private_provider_directory(root / "tmp")
         _make_private_provider_directory(home / ".config")
@@ -124,8 +176,8 @@ def _private_provider_home():
         _make_private_provider_directory(home / ".cache")
         yield home
     finally:
-        if root is not None:
-            shutil.rmtree(root, ignore_errors=True)
+        if root is not None and root_identity is not None:
+            _checked_provider_cleanup(root, root_identity)
 
 
 def _provider_child_env_for_home(source, home: Path, **required: str) -> dict[str, str]:
@@ -538,58 +590,58 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
     import pty
 
     source = os.environ if env is None else env
-    provider_env = _isolated_child_env(source)
-    try:
-        child = provider_env.__enter__()
-    except OSError:
-        return _result("not_measured", reason="provider_storage_unavailable")
     input_stream = sys.stdin if input_stream is None else input_stream
     output_stream = sys.stdout if output_stream is None else output_stream
-    master, slave = pty.openpty()
     try:
-        proc = subprocess.Popen(["claude", "setup-token"], stdin=slave, stdout=slave,
-                                stderr=slave, env=child, close_fds=True)
+        with _isolated_child_env(source) as child:
+            master, slave = pty.openpty()
+            try:
+                proc = subprocess.Popen(["claude", "setup-token"], stdin=slave, stdout=slave,
+                                        stderr=slave, env=child, close_fds=True)
+            except OSError:
+                os.close(master); os.close(slave)
+                return _result("not_measured", reason="cli_missing")
+            os.close(slave)
+            deadline, captured, pending = time.monotonic() + timeout, "", ""
+            input_fd = None
+            try:
+                input_fd = input_stream.fileno()
+            except (AttributeError, OSError):
+                pass
+            try:
+                while True:
+                    if time.monotonic() >= deadline:
+                        proc.kill(); proc.wait()
+                        return _result("not_measured", reason="timeout")
+                    readers = [master] + ([input_fd] if input_fd is not None else [])
+                    ready, _, _ = select.select(readers, [], [], .1)
+                    if input_fd in ready:
+                        chunk = os.read(input_fd, 4096)
+                        if chunk:
+                            os.write(master, chunk)
+                    if master in ready:
+                        try:
+                            raw = os.read(master, 4096)
+                        except OSError as exc:
+                            if exc.errno != errno.EIO:
+                                raise
+                            raw = b""
+                        if raw:
+                            text = raw.decode("utf-8", "replace")
+                            captured += text
+                            pending = _drain_sanitized(pending + text, output_stream)
+                        elif proc.poll() is not None:
+                            break
+                    if proc.poll() is not None and master not in ready:
+                        break
+            finally:
+                os.close(master)
+                if proc.poll() is None:
+                    proc.kill(); proc.wait()
     except OSError:
-        os.close(master); os.close(slave); provider_env.__exit__(None, None, None)
-        return _result("not_measured", reason="cli_missing")
-    os.close(slave)
-    deadline, captured, pending = time.monotonic() + timeout, "", ""
-    input_fd = None
-    try:
-        input_fd = input_stream.fileno()
-    except (AttributeError, OSError):
-        pass
-    try:
-        while True:
-            if time.monotonic() >= deadline:
-                proc.kill(); proc.wait()
-                return _result("not_measured", reason="timeout")
-            readers = [master] + ([input_fd] if input_fd is not None else [])
-            ready, _, _ = select.select(readers, [], [], .1)
-            if input_fd in ready:
-                chunk = os.read(input_fd, 4096)
-                if chunk:
-                    os.write(master, chunk)
-            if master in ready:
-                try:
-                    raw = os.read(master, 4096)
-                except OSError as exc:
-                    if exc.errno != errno.EIO:
-                        raise
-                    raw = b""
-                if raw:
-                    text = raw.decode("utf-8", "replace")
-                    captured += text
-                    pending = _drain_sanitized(pending + text, output_stream)
-                elif proc.poll() is not None:
-                    break
-            if proc.poll() is not None and master not in ready:
-                break
-    finally:
-        os.close(master)
-        if proc.poll() is None:
-            proc.kill(); proc.wait()
-        provider_env.__exit__(None, None, None)
+        # A cleanup failure raised by the context exit overrides any inner
+        # would-be success/timeout return and prevents secret materialization.
+        return _result("not_measured", reason="provider_storage_unavailable")
     _drain_sanitized(pending, output_stream, final=True)
     found = TOKEN_RE.findall(captured)
     if proc.returncode or len(found) != 1:

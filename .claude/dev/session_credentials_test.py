@@ -149,6 +149,120 @@ def provider_home_lock(module):
             tempfile.tempdir = original_tempdir
 
 
+def provider_cleanup_lock(module):
+    """Cleanup failure/residual/swap can never leave a provider probe passed."""
+    marker = "TRALUAT-CLAUDE-CREDENTIAL-OK"
+    good = mock.Mock(returncode=0, stdout=marker + "\n", stderr="")
+    real_rmtree = module.shutil.rmtree
+    real_subprocess_run = subprocess.run
+
+    def private_base(root: Path) -> Path:
+        base = root / "trusted-provider-base"
+        base.mkdir(mode=0o700)
+        return base
+
+    def remove_fixture(entry: Path) -> None:
+        try:
+            info = entry.lstat()
+        except FileNotFoundError:
+            return
+        reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+        if stat.S_ISLNK(info.st_mode):
+            entry.unlink()
+        elif reparse and getattr(info, "st_file_attributes", 0) & reparse:
+            os.rmdir(entry)
+        else:
+            real_rmtree(entry)
+
+    # Positive control: the allocated exact root and cleanup tombstones vanish.
+    with tempfile.TemporaryDirectory(prefix="provider-cleanup-positive-") as raw:
+        base = private_base(Path(raw))
+        with mock.patch.object(module, "_trusted_provider_temp_base", return_value=base):
+            with module._private_provider_home() as home:
+                allocated = Path(home).parent
+                assert allocated.is_dir()
+        assert not allocated.exists() and list(base.iterdir()) == []
+
+    # A raising delete already must be surfaced as not_measured, never passed.
+    with tempfile.TemporaryDirectory(prefix="provider-cleanup-raise-") as raw:
+        base = private_base(Path(raw))
+        try:
+            with mock.patch.object(module, "_trusted_provider_temp_base", return_value=base), \
+                 mock.patch.object(module.shutil, "rmtree",
+                                   side_effect=OSError("fixture delete failure")), \
+                 mock.patch.object(module.subprocess, "run", return_value=good):
+                result = module.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "FIXTURE"})
+            assert result["status"] == "not_measured", result
+        finally:
+            for entry in list(base.iterdir()):
+                remove_fixture(entry)
+
+    # The old ignore_errors path converts a silent residual into a false pass.
+    with tempfile.TemporaryDirectory(prefix="provider-cleanup-residual-") as raw:
+        base = private_base(Path(raw))
+        try:
+            with mock.patch.object(module, "_trusted_provider_temp_base", return_value=base), \
+                 mock.patch.object(module.shutil, "rmtree", return_value=None), \
+                 mock.patch.object(module.subprocess, "run", return_value=good):
+                result = module.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "FIXTURE"})
+            assert result["status"] == "not_measured", \
+                f"silent cleanup residual was reported as {result}"
+            assert list(base.iterdir()), "fixture did not leave the required residual root"
+        finally:
+            for entry in list(base.iterdir()):
+                remove_fixture(entry)
+
+    # Swap the exact allocated name to an external link/junction while the
+    # child runs. Cleanup must reject it before asking rmtree to touch it.
+    with tempfile.TemporaryDirectory(prefix="provider-cleanup-swap-") as raw:
+        fixture = Path(raw)
+        base = private_base(fixture)
+        victim = fixture / "external-victim"
+        victim.mkdir()
+        marker_file = victim / "MUST_SURVIVE"
+        marker_file.write_text("UNCHANGED", encoding="utf-8")
+        moved = base / "allocated-before-swap"
+        cleanup_calls = []
+
+        def swapped_root(info):
+            reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+            return (stat.S_ISLNK(info.st_mode)
+                    or bool(reparse and getattr(info, "st_file_attributes", 0) & reparse))
+
+        def child_run(_cmd, **kwargs):
+            allocated_root = Path(kwargs["env"]["HOME"]).parent
+            allocated_root.rename(moved)
+            if os.name == "nt":
+                made = real_subprocess_run(
+                    ["cmd.exe", "/d", "/c", "mklink", "/J",
+                     str(allocated_root), str(victim)],
+                    stdin=subprocess.DEVNULL, capture_output=True).returncode == 0
+                assert made, "could not construct cleanup junction swap fixture"
+            else:
+                allocated_root.symlink_to(victim, target_is_directory=True)
+            return good
+
+        def observed_rmtree(path, *args, **kwargs):
+            candidate = Path(path)
+            if swapped_root(candidate.lstat()):
+                cleanup_calls.append(candidate)
+                return None  # mutation witness: never follow the external link
+            return real_rmtree(path, *args, **kwargs)
+
+        try:
+            with mock.patch.object(module, "_trusted_provider_temp_base", return_value=base), \
+                 mock.patch.object(module.shutil, "rmtree", side_effect=observed_rmtree), \
+                 mock.patch.object(module.subprocess, "run", side_effect=child_run):
+                result = module.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "FIXTURE"})
+            assert result["status"] == "not_measured", result
+            assert cleanup_calls == [], \
+                f"cleanup handed a swapped root link to rmtree: {cleanup_calls}"
+            assert marker_file.read_text(encoding="utf-8") == "UNCHANGED"
+        finally:
+            for entry in list(base.iterdir()):
+                remove_fixture(entry)
+
+
 def run_mutations():
     """Kill each packet-named mutant with only its focused lock test."""
     source = P.read_text(encoding="utf-8")
@@ -160,6 +274,10 @@ def run_mutations():
          '        root = Path(tempfile.mkdtemp(prefix="tl-provider-home-", dir=base))',
          '        root = Path(tempfile.mkdtemp(prefix="tl-provider-home-", dir=None))',
          provider_home_lock),
+        ("provider_cleanup_failure_is_silently_ignored",
+         "            _checked_provider_cleanup(root, root_identity)",
+         "            shutil.rmtree(root, ignore_errors=True)",
+         provider_cleanup_lock),
     ]
     killed = 0
     with tempfile.TemporaryDirectory(prefix="session-credential-mutant-") as td:
@@ -184,6 +302,7 @@ def run_mutations():
 def run():
     directory_root_lock(m)
     provider_home_lock(m)
+    provider_cleanup_lock(m)
     expected_repository = P.resolve().parents[2]
     assert m.REPOSITORY_ROOT == expected_repository
     with tempfile.TemporaryDirectory() as td:

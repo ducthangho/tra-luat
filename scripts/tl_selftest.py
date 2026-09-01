@@ -12,6 +12,109 @@ import os as _hos
 import sys as _hsys
 
 
+def _wp433_nlm_parent_link_boundary(tg) -> bool:
+    """Focused lock for ``nlm_parent_link_to_external_is_canonicalized``."""
+    import os
+    import stat
+    import subprocess
+    import tempfile
+    from pathlib import Path
+
+    payload = {
+        "auth.json": '{"cookies":[]}',
+        "profiles/default/cookies.json": "[]",
+        "profiles/default/metadata.json": '{"last_validated":"fixture"}',
+    }
+
+    def make_directory_link(link: Path, target: Path) -> None:
+        if os.name == "nt":
+            made = subprocess.run(
+                ["cmd.exe", "/d", "/c", "mklink", "/J", str(link), str(target)],
+                stdin=subprocess.DEVNULL, capture_output=True).returncode == 0
+            assert made, "could not construct required junction/reparse fixture"
+        else:
+            link.symlink_to(target, target_is_directory=True)
+
+    def reject_before_plan(base: Path) -> None:
+        calls = []
+        original_plan = tg._nlm_auth_plan
+
+        def observed_plan(document):
+            calls.append("plan")
+            return original_plan(document)
+
+        tg._nlm_auth_plan = observed_plan
+        try:
+            try:
+                tg._write_nlm_auth(base, {})  # deliberately invalid if planning wins
+            except ValueError as exc:
+                raise AssertionError(
+                    "NLM schema planning ran before base/parent link rejection") from exc
+            except OSError as exc:
+                message = str(exc).lower()
+                assert "link" in message or "reparse" in message, message
+            else:
+                raise AssertionError("linked NLM restore base was accepted")
+        finally:
+            tg._nlm_auth_plan = original_plan
+        assert calls == [], f"planning happened before link rejection: {calls}"
+
+    with tempfile.TemporaryDirectory(prefix="tl-nlm-parent-link-") as raw:
+        root = Path(raw)
+        external = root / "external"
+        external.mkdir()
+        linked = root / "external-link"
+        make_directory_link(linked, external)
+
+        # Supplied base is itself a link, then the same link is a nested
+        # existing parent of an otherwise nonexistent base.
+        reject_before_plan(linked)
+        reject_before_plan(linked / "ordinary-missing" / "base")
+        assert not list(external.rglob("*.json")), "external link target was written"
+
+        # A generated target parent linked outside the base is rejected after
+        # schema planning but before the first write (auth.json comes first).
+        nested_base = root / "nested-base"
+        nested_base.mkdir()
+        nested_link = nested_base / "profiles"
+        make_directory_link(nested_link, external)
+        writes = []
+        original_write = tg._tl_atomic_secret
+        tg._tl_atomic_secret = lambda *_a, **_k: writes.append(True)
+        try:
+            try:
+                tg._write_nlm_auth(nested_base, payload)
+            except OSError as exc:
+                message = str(exc).lower()
+                assert "link" in message or "reparse" in message, message
+            else:
+                raise AssertionError("nested linked target parent was accepted")
+        finally:
+            tg._tl_atomic_secret = original_write
+        assert writes == [], f"write began before nested parent rejection: {writes}"
+        assert not (nested_base / "auth.json").exists()
+
+        # Ordinary nonexistent components remain admissible. POSIX exercises
+        # the complete writer; Windows checks the lexical guard because the
+        # production writer intentionally lacks handle-relative primitives.
+        ordinary = root / "ordinary" / "missing" / "base"
+        guarded = tg._tl_nlm_restore_path(ordinary)
+        assert guarded == ordinary.absolute() and not ordinary.exists()
+        if os.name == "posix":
+            assert tg._write_nlm_auth(ordinary, payload) == len(payload)
+            for rel in payload:
+                target = ordinary.joinpath(*rel.split("/"))
+                assert target.is_file() and stat.S_IMODE(target.stat().st_mode) == 0o600
+        else:
+            try:
+                tg._write_nlm_auth(ordinary, payload)
+            except OSError as exc:
+                assert "handle-relative" in str(exc)
+            else:
+                raise AssertionError("Windows writer did not fail closed")
+    return True
+
+
 class _hush:
     """v1.31.2 (log deploy user 2026-07-03 'Vẫn lỗi'): NUỐT stdout/stderr của các test CỐ TÌNH đi nhánh lỗi —
     argparse chặn '--row-kind xyz' (in usage+error là PASS-by-design), retry-transient mock, CẮT BATCH loud,
@@ -30030,7 +30133,7 @@ def run() -> int:
                     try:
                         _tg433._write_nlm_auth(junction, {"auth.json": "FIXTURE_ONLY"})
                         return False
-                    except _tg433._UnsafeSecretDestination:
+                    except (_tg433._UnsafeSecretDestination, OSError):
                         pass
                     if (fake_repo / "auth.json").exists():
                         return False
@@ -30055,7 +30158,7 @@ def run() -> int:
             try:
                 _tg433._write_nlm_auth(linked_base, payload)
                 return False
-            except _tg433._UnsafeSecretDestination:
+            except (_tg433._UnsafeSecretDestination, OSError):
                 pass
             if (linked_base / "auth.json").exists():
                 return False
@@ -30112,6 +30215,9 @@ def run() -> int:
                     == b"FIXTURE_ONLY")
 
     _t110("wp433_nlm_secret_boundary", _c433_nlm_secret_boundary)
+    _t110("wp433_nlm_parent_link_to_external_is_canonicalized",
+          lambda: _wp433_nlm_parent_link_boundary(
+              __import__("tl_gws")))
 
     # r332 — ĐỘ PHỦ REGISTRY PHẢI ĐO Ở ĐƯỜNG NGƯỜI TA THẬT SỰ CHẠY.
     # Bối cảnh: trong AG-T0-03, bản vá F8 đổi `compute_parser_coverage` từ

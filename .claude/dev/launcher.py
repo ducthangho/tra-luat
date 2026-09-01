@@ -211,13 +211,19 @@ def _resolve_executable_identity(lenh: list[str], workspace: str | Path) -> dict
     argv = [str(value) for value in lenh]
     command = argv[0]
     raw_provider = _provider_for_name(command)
-    try:
-        selected = shutil.which(command)
-    except (OSError, TypeError):
-        selected = None
-    if selected is None and ("/" in command or "\\" in command):
+    path_bearing = "/" in command or "\\" in command
+    if path_bearing:
+        # A relative path belongs to the declared workspace, never to the
+        # launcher's caller cwd.  ``shutil.which`` treats names containing a
+        # separator as paths and would resolve them from that unrelated cwd.
         path = Path(command).expanduser()
         selected = str(path if path.is_absolute() else Path(workspace) / path)
+    else:
+        try:
+            # Bare names deliberately retain PATH/PATHEXT semantics.
+            selected = shutil.which(command)
+        except (OSError, TypeError):
+            selected = None
     matched_provider = None
     if selected is not None:
         candidate_path = Path(selected)

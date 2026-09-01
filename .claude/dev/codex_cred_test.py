@@ -72,6 +72,11 @@ def kiem_song_bang_codex_gia(M, rc=0, ra="", loi=""):
         try:
             os.chdir(d)
             M._co_codex = lambda: sys.executable
+            # These cases measure Codex response classification, not the
+            # platform's directory-relative secret primitives.
+            M._shared_checked_secret_destination = (
+                lambda path, *, create_parent=True: Path(path))
+            M._shared_read_secret_bytes = lambda _path: b'{"tokens":{"refresh_token":"FIXTURE"}}'
             with M._shared_private_provider_home() as provider_home:
                 return M._kiem_song(provider_home)
         finally:
@@ -112,26 +117,34 @@ def t2_chua_thay_thi_tra_None_khong_doan(M):
 
 def t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0(M):
     # rc=0 + đầu ra RỖNG là ca ĐÃ XẢY RA THẬT (r244). Cổng tin rc là cổng bị lừa.
-    ok, vi_sao = kiem_song_bang_codex_gia(M)
-    assert not ok, "rc=0 + đầu ra rỗng mà vẫn báo SỐNG"
-    assert "dấu hiệu sống" in vi_sao, vi_sao
-    assert not kiem_song_bang_codex_gia(
-        M, loi=f"echo prompt {M.DAU_HIEU_SONG}")[0], "tin dấu hiệu bị echo ở stderr"
+    result = kiem_song_bang_codex_gia(M)
+    assert result.status is M.LiveStatus.NOT_MEASURED, "rc=0 + đầu ra rỗng mà vẫn báo SỐNG"
+    assert "dấu hiệu sống" in result.reason, result.reason
+    assert kiem_song_bang_codex_gia(
+        M, loi=f"echo prompt {M.DAU_HIEU_SONG}").status is M.LiveStatus.NOT_MEASURED, \
+        "tin dấu hiệu bị echo ở stderr"
 
 
 def t4_kiem_song_bat_credential_bi_tu_choi(M):
-    ok, vi_sao = kiem_song_bang_codex_gia(
+    result = kiem_song_bang_codex_gia(
         M, ra=M.DAU_HIEU_SONG, loi="error: refresh_token_invalidated")
-    assert not ok, "có dấu hiệu bị từ chối mà vẫn báo SỐNG"
-    assert "TỪ CHỐI" in vi_sao, vi_sao
+    assert result.status is M.LiveStatus.REJECTED, "có dấu hiệu bị từ chối mà vẫn báo SỐNG"
+    assert "TỪ CHỐI" in result.reason, result.reason
 
 
 def t5_kiem_song_dat_khi_co_dau_hieu(M):
     # Chiều BẮT OAN: đủ điều kiện thì phải ĐẠT, không cảnh báo thừa.
-    assert not kiem_song_bang_codex_gia(
-        M, rc=7, ra=f"{M.DAU_HIEU_SONG}\n")[0], "rc!=0 mà vẫn báo SỐNG"
-    ok, _ = kiem_song_bang_codex_gia(M, ra=f"{M.DAU_HIEU_SONG}\n")
-    assert ok, "đầu ra có dấu hiệu sống mà vẫn báo CHẾT"
+    assert kiem_song_bang_codex_gia(
+        M, rc=7, ra=f"{M.DAU_HIEU_SONG}\n").status is M.LiveStatus.NOT_MEASURED, \
+        "rc!=0 mà vẫn báo SỐNG"
+    result = kiem_song_bang_codex_gia(M, ra=f"{M.DAU_HIEU_SONG}\n")
+    assert result.status is M.LiveStatus.PASSED, "đầu ra có dấu hiệu sống mà vẫn báo CHẾT"
+
+
+def gia_kiem_song_dat(M, reason="rc=0, có dấu hiệu"):
+    result = M.LiveResult(M.LiveStatus.PASSED, reason)
+    M._kiem_song = lambda *_a, **_k: result
+    M._kiem_song_checked = lambda *_a, **_k: result
 
 
 def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
@@ -143,7 +156,7 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
         (home / "auth.json").write_bytes(bi_mat)
         return (True, "ok")
     M._chay_device_auth = device_auth
-    M._kiem_song = lambda home: (True, "rc=0, có dấu hiệu")
+    gia_kiem_song_dat(M)
     ra_tep = d / "b64.txt"
     vat_giu = d / "khong-duoc-doi.txt"
     vat_giu.write_text("GIU-NGUYEN")
@@ -229,7 +242,7 @@ def t9_cmd_lay_GHI_tep_huong_dan_dan(M):
         (home / "auth.json").write_bytes(bi_mat)
         return (True, "ok")
     M._chay_device_auth = device_auth
-    M._kiem_song = lambda home: (True, "rc=0")
+    gia_kiem_song_dat(M, "rc=0")
     tep_dan = d / "huong_dan.md"
 
     class A:
@@ -269,6 +282,9 @@ def t10_gio_con_lai_doc_exp_va_bu_padding(M):
         f = d / f"auth-hong-{i}.json"; f.write_text(_j.dumps(obj))
         assert M._gio_con_lai(f) is None, f"auth dị dạng {i} làm văng/ra số"
     (d / "auth.json").write_text("[]")
+    M._shared_checked_secret_destination = (
+        lambda path, *, create_parent=True: Path(path))
+    M._shared_read_secret_bytes = lambda path: Path(path).read_bytes()
     class A:
         codex_home, kiem_song = str(d), False
     import io as _io
@@ -360,7 +376,7 @@ def t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth(M):
                 encoding="utf-8")
             return (True, "ok")
         M._chay_device_auth = device_auth
-        M._kiem_song = lambda _home: (True, "rc=0")
+        gia_kiem_song_dat(M, "rc=0")
         import io
         from contextlib import redirect_stdout
         linked_parent = source / "linked-repository-parent"
@@ -426,7 +442,7 @@ def t15_cmd_lay_phai_dung_duong_canonical_guard_tra_ve(M):
             encoding="utf-8")
         return (True, "ok")
     M._chay_device_auth = device_auth
-    M._kiem_song = lambda _home: (True, "rc=0")
+    gia_kiem_song_dat(M, "rc=0")
 
     class A:
         codex_home, ra, tep_dan = str(caller_home), str(alias_b64), str(alias_setup)
@@ -456,7 +472,7 @@ def t16_cmd_lay_phan_loai_tu_choi_tai_diem_ghi(M):
             encoding="utf-8")
         return (True, "ok")
     M._chay_device_auth = device_auth
-    M._kiem_song = lambda _home: (True, "rc=0")
+    gia_kiem_song_dat(M, "rc=0")
 
     class A:
         codex_home, ra, tep_dan = str(root), str(root / "out.b64"), str(root / "setup.md")
@@ -497,7 +513,7 @@ def t17_lay_khong_con_codex_home_va_windows_fail_closed(M):
             '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}')
         return (True, "ok")
     M._chay_device_auth = device_auth
-    M._kiem_song = lambda _home: (True, "rc=0")
+    gia_kiem_song_dat(M, "rc=0")
     class A:
         codex_home = str(root / "CALLER-DIRECTED")
         ra, tep_dan = str(root / "out.b64"), str(root / "setup.md")
@@ -563,6 +579,13 @@ def t18_kiem_song_CODEX_HOME_thuong_dung_provider_home_rieng(M):
     M._shared_private_provider_home = observed_private_home
     M._shared_provider_child_env = observed_child_env
     M._co_codex = lambda: sys.executable
+    if os.name == "nt":
+        # This case measures the split between credential storage and provider
+        # storage. Windows capability fail-close is covered by t19; inject the
+        # already-validated auth capability so the positive control can run.
+        M._shared_checked_secret_destination = (
+            lambda path, *, create_parent=True: Path(path))
+        M._shared_read_secret_bytes = lambda path: Path(path).read_bytes()
     old_cwd = os.getcwd()
     isolated_keys = ("CODEX_AUTH_JSON", "CLAUDE_CODE_OAUTH_TOKEN", "GITHUB_PAT",
                      "TL_MASTER_KEY", "TMPDIR", "TMP", "TEMP")
@@ -578,7 +601,7 @@ def t18_kiem_song_CODEX_HOME_thuong_dung_provider_home_rieng(M):
             "TL_MASTER_KEY": "AMBIENT-TL",
             "TMPDIR": str(ambient), "TMP": str(ambient), "TEMP": str(ambient),
         })
-        ok, reason = M._kiem_song(codex_home)
+        result = M._kiem_song(codex_home)
     finally:
         os.chdir(old_cwd)
         for key, value in old_env.items():
@@ -587,7 +610,8 @@ def t18_kiem_song_CODEX_HOME_thuong_dung_provider_home_rieng(M):
             else:
                 os.environ[key] = value
 
-    assert ok, f"ordinary CODEX_HOME required provider scaffold: {reason}"
+    assert result.status is M.LiveStatus.PASSED, \
+        f"ordinary CODEX_HOME required provider scaffold: {result.reason}"
     assert len(private_roots) == 1 and len(child_envs) == 1, \
         f"live check did not allocate exactly one private provider context: {private_roots}"
     private_root, child = private_roots[0], child_envs[0]
@@ -615,10 +639,253 @@ def t18_kiem_song_CODEX_HOME_thuong_dung_provider_home_rieng(M):
         yield  # pragma: no cover - makes this a contextmanager
 
     M._shared_private_provider_home = unavailable_private_home
+    real_subprocess_run = M.subprocess.run
     M.subprocess.run = lambda *_a, **_k: child_started.append(True)
-    ok, reason = M._kiem_song(codex_home)
-    assert not ok and "provider storage" in reason, reason
+    try:
+        result = M._kiem_song(codex_home)
+    finally:
+        M.subprocess.run = real_subprocess_run
+    assert result.status is M.LiveStatus.NOT_MEASURED \
+        and "provider storage" in result.reason, result
     assert child_started == [], "live check spawned before private provider allocation passed"
+
+
+def _gia_tri_trang_thai_song(result):
+    """Read old/new shapes so a RED reports behavior, not a missing test helper."""
+    status = result.status if hasattr(result, "status") else result[0]
+    return getattr(status, "value", status)
+
+
+def t19_kiem_song_guard_dich_truoc_doc_cap_phat_va_child(M):
+    """Repository aliases stop before read/provider/child; canonical auth is reused."""
+    from contextlib import contextmanager
+    import subprocess as _sp
+    from types import SimpleNamespace
+
+    repository = GOC.resolve().parents[2]
+    events = []
+
+    @contextmanager
+    def forbidden_provider():
+        events.append("provider")
+        raise AssertionError("provider allocated before Codex destination guard")
+        yield  # pragma: no cover - contextmanager shape only
+
+    M._co_codex = lambda: sys.executable
+    M._shared_private_provider_home = forbidden_provider
+    with tempfile.TemporaryDirectory(prefix="codex-direct-repo-", dir=repository) as raw_repo:
+        direct_home = Path(raw_repo)
+        (direct_home / "auth.json").write_text(
+            '{"tokens":{"refresh_token":"FIXTURE_ONLY"}}', encoding="utf-8")
+        result = M._kiem_song(direct_home)
+        assert _gia_tri_trang_thai_song(result) == "rejected", result
+        assert events == [], f"repository destination consumed resources first: {events}"
+
+    # Parent link/junction resolving into the repository has the same ordering.
+    with tempfile.TemporaryDirectory(prefix="codex-guard-link-") as raw:
+        root = Path(raw)
+        linked = root / "linked-repository"
+        if os.name == "nt":
+            made = _sp.run(
+                ["cmd.exe", "/d", "/c", "mklink", "/J", str(linked), str(repository)],
+                stdin=_sp.DEVNULL, capture_output=True).returncode == 0
+        else:
+            linked.symlink_to(repository, target_is_directory=True)
+            made = True
+        assert made, "could not construct required parent link/junction fixture"
+        result = M._kiem_song(linked / "CODEX-HOME")
+        assert _gia_tri_trang_thai_song(result) == "rejected", result
+        assert events == [], f"linked repository destination consumed resources first: {events}"
+
+    # A benign alias must be replaced by the one canonical identity returned by
+    # the shared guard before the credential read, provider allocation, or child.
+    with tempfile.TemporaryDirectory(prefix="codex-guard-order-") as raw:
+        root = Path(raw)
+        alias_home = root / "alias-home"
+        canonical_home = root / "canonical-home"
+        canonical_auth = canonical_home / "auth.json"
+        provider_home = root / "provider-root" / "home"
+        provider_home.mkdir(parents=True)
+
+        def checked(path, *, create_parent=True):
+            events.append(("guard", Path(path), create_parent))
+            return canonical_auth
+
+        def read_secret(path):
+            events.append(("read", Path(path)))
+            return b'{"tokens":{"refresh_token":"FIXTURE_ONLY"}}'
+
+        @contextmanager
+        def observed_provider():
+            events.append("provider")
+            yield provider_home
+
+        def child_env(_source, _provider_home, **required):
+            events.append(("env", dict(required)))
+            return {"CODEX_HOME": required["CODEX_HOME"]}
+
+        def child_run(*_args, **kwargs):
+            events.append(("child", kwargs["env"]["CODEX_HOME"]))
+            return SimpleNamespace(returncode=0, stdout=M.DAU_HIEU_SONG + "\n", stderr="")
+
+        events.clear()
+        M._shared_checked_secret_destination = checked
+        M._shared_read_secret_bytes = read_secret
+        M._shared_private_provider_home = observed_provider
+        M._shared_provider_child_env = child_env
+        M.subprocess.run = child_run
+        result = M._kiem_song(alias_home)
+        assert _gia_tri_trang_thai_song(result) == "passed", result
+        assert events == [
+            ("guard", alias_home / "auth.json", False),
+            ("read", canonical_auth),
+            "provider",
+            ("env", {"CODEX_HOME": str(canonical_home)}),
+            ("child", str(canonical_home)),
+        ], f"guard/read/provider/child order or canonical identity drifted: {events}"
+
+
+def t20_kiem_song_ba_trang_thai_dong_va_caller_khong_truthiness(M):
+    """Only evidenced refusal is rejected; both callers preserve all 3 statuses."""
+    from contextlib import contextmanager, redirect_stdout
+    from types import SimpleNamespace
+    import io
+
+    root = Path(tempfile.mkdtemp(prefix="codex-live-status-"))
+    auth = root / "auth.json"
+    auth_bytes = b'{"last_refresh":"fixture","tokens":{"refresh_token":"FIXTURE_ONLY"}}'
+    auth.write_bytes(auth_bytes)
+    provider_home = root / "provider" / "home"
+    provider_home.mkdir(parents=True)
+
+    M._shared_checked_secret_destination = (
+        lambda path, *, create_parent=True: auth)
+    M._shared_read_secret_bytes = lambda path: auth_bytes
+
+    @contextmanager
+    def provider():
+        yield provider_home
+
+    @contextmanager
+    def unavailable_provider():
+        raise OSError("fixture provider unavailable")
+        yield
+
+    @contextmanager
+    def cleanup_failure_provider():
+        yield provider_home
+        raise OSError("fixture checked cleanup failure")
+
+    M._shared_private_provider_home = provider
+    M._shared_provider_child_env = lambda *_a, **required: dict(required)
+
+    def measure(*, cli=sys.executable, outcome=None, provider_factory=provider):
+        M._co_codex = lambda: cli
+        M._shared_private_provider_home = provider_factory
+        if isinstance(outcome, BaseException):
+            M.subprocess.run = lambda *_a, **_k: (_ for _ in ()).throw(outcome)
+        else:
+            M.subprocess.run = lambda *_a, **_k: outcome
+        return _gia_tri_trang_thai_song(M._kiem_song(root))
+
+    cases = {
+        "missing_cli": measure(cli=None),
+        "timeout": measure(outcome=M.subprocess.TimeoutExpired("codex", 1)),
+        "spawn": measure(outcome=OSError("fixture spawn failure")),
+        "provider": measure(outcome=None, provider_factory=unavailable_provider),
+        "cleanup": measure(outcome=SimpleNamespace(
+            returncode=0, stdout=M.DAU_HIEU_SONG + "\n", stderr=""),
+            provider_factory=cleanup_failure_provider),
+        "plain_nonzero": measure(outcome=SimpleNamespace(
+            returncode=7, stdout="", stderr="upstream unavailable")),
+        "marker_missing": measure(outcome=SimpleNamespace(
+            returncode=0, stdout="", stderr="")),
+        "refused": measure(outcome=SimpleNamespace(
+            returncode=7, stdout="", stderr="401 unauthorized")),
+        "passed": measure(outcome=SimpleNamespace(
+            returncode=0, stdout=M.DAU_HIEU_SONG + "\n", stderr="")),
+    }
+    assert cases == {
+        "missing_cli": "not_measured",
+        "timeout": "not_measured",
+        "spawn": "not_measured",
+        "provider": "not_measured",
+        "cleanup": "not_measured",
+        "plain_nonzero": "not_measured",
+        "marker_missing": "not_measured",
+        "refused": "rejected",
+        "passed": "passed",
+    }, cases
+
+    def live_result(value, reason="fixture"):
+        if hasattr(M, "LiveResult"):
+            return M.LiveResult(M.LiveStatus(value), reason)
+        # Old shape makes the focused RED expose the two-state collapse.
+        return (value == "passed", reason)
+
+    # cmd_kiem must keep its missing-auth contract and must not coerce a status.
+    missing = root / "missing" / "auth.json"
+    M._shared_checked_secret_destination = (
+        lambda path, *, create_parent=True: missing if Path(path).parent.name == "missing" else auth)
+    real_read = M._shared_read_secret_bytes
+    M._shared_read_secret_bytes = lambda path: (
+        (_ for _ in ()).throw(FileNotFoundError(str(path)))
+        if Path(path) == missing else auth_bytes)
+    class MissingArgs:
+        codex_home, kiem_song = str(missing.parent), True
+    missing_out = io.StringIO()
+    with redirect_stdout(missing_out):
+        missing_rc = M.cmd_kiem(MissingArgs())
+    assert missing_rc == M.RC[M.KHONG_DO_DUOC]
+    assert "KHÔNG_ĐO_ĐƯỢC: không có" in missing_out.getvalue()
+    M._shared_read_secret_bytes = real_read
+
+    class CheckArgs:
+        codex_home, kiem_song = str(root), True
+    for value, expected in (("passed", M.RC[M.DAT]),
+                            ("rejected", M.RC[M.DO]),
+                            ("not_measured", M.RC[M.KHONG_DO_DUOC])):
+        result = live_result(value)
+        M._kiem_song = lambda *_a, _result=result, **_k: _result
+        M._kiem_song_checked = lambda *_a, _result=result, **_k: _result
+        with redirect_stdout(io.StringIO()):
+            rc = M.cmd_kiem(CheckArgs())
+        assert rc == expected, f"cmd_kiem collapsed {value} to rc={rc}"
+
+    # Acquisition caller has the same mapping after device auth succeeds.
+    M._shared_checked_secret_destination = lambda path, **_k: Path(path)
+    M._shared_read_secret_bytes = lambda _path: auth_bytes
+    M._chay_device_auth = lambda home, _timeout: (
+        (home / "auth.json").write_bytes(auth_bytes) is not None, "ok")
+    M._ghi_bi_mat = lambda *_a, **_k: None
+    M._gio_con_lai = lambda _path: None
+    class AcquireArgs:
+        ra, tep_dan = str(root / "out.b64"), str(root / "setup.md")
+        cai_de, in_gia_tri, han_giay = False, False, 5
+    for value, expected in (("passed", M.RC[M.DAT]),
+                            ("rejected", M.RC[M.DO]),
+                            ("not_measured", M.RC[M.KHONG_DO_DUOC])):
+        result = live_result(value)
+        M._kiem_song = lambda *_a, _result=result, **_k: _result
+        M._kiem_song_checked = lambda *_a, _result=result, **_k: _result
+        with redirect_stdout(io.StringIO()):
+            rc = M._cmd_lay_private(AcquireArgs(), root)
+        assert rc == expected, f"_cmd_lay_private collapsed {value} to rc={rc}"
+
+    # Checked context exit happens after the inner return expression. It must
+    # still override a would-be DAT acquisition result.
+    @contextmanager
+    def cleanup_fails_after_inner_return():
+        yield root
+        raise OSError("fixture cleanup failed after return")
+    M._co_codex = lambda: sys.executable
+    M._shared_private_provider_home = cleanup_fails_after_inner_return
+    M._shared_checked_secret_destination = lambda path, **_k: Path(path)
+    M._cmd_lay_private = lambda *_a, **_k: M.RC[M.DAT]
+    with redirect_stdout(io.StringIO()):
+        rc = M.cmd_lay(AcquireArgs())
+    assert rc == M.RC[M.KHONG_DO_DUOC], \
+        f"cleanup failure after inner DAT return survived as rc={rc}"
 
 
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
@@ -626,7 +893,9 @@ CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan
       t5_kiem_song_dat_khi_co_dau_hieu, t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT,
       t10_gio_con_lai_doc_exp_va_bu_padding,
       t17_lay_khong_con_codex_home_va_windows_fail_closed,
-      t18_kiem_song_CODEX_HOME_thuong_dung_provider_home_rieng]
+      t18_kiem_song_CODEX_HOME_thuong_dung_provider_home_rieng,
+      t19_kiem_song_guard_dich_truoc_doc_cap_phat_va_child,
+      t20_kiem_song_ba_trang_thai_dong_va_caller_khong_truthiness]
 if os.name != "nt":
     CA += [t6_khong_in_gia_tri_khi_khong_co_co, t7_sao_luu_khong_de_ban_cu,
            t9_cmd_lay_GHI_tep_huong_dan_dan, t11_sao_luu_tu_choi_symlink,
@@ -652,8 +921,8 @@ DOT_BIEN = [
      "t2_chua_thay_thi_tra_None_khong_doan"),
     ("t3_tin_rc0", 'if DAU_HIEU_SONG not in stdout:', 'if False:',
      "t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0"),
-    ("t4_bo_dau_hieu_tu_choi", '"please log in again", "could not be refreshed"):',
-     '"please log in again",):' + "\n" + " " * 8 + 'dau = "\\x00khong-bao-gio-khop"',
+    ("t4_bo_dau_hieu_tu_choi", "        if dau in ra.lower():",
+     "        if False:",
      "t4_kiem_song_bat_credential_bi_tu_choi"),
     ("t5_bo_dieu_kien_rc0", "if p.returncode != 0:", "if False:",
      "t5_kiem_song_dat_khi_co_dau_hieu"),
@@ -687,9 +956,22 @@ DOT_BIEN = [
      '        tam = Path(getattr(a, "codex_home", None) or private_home)',
      "t17_lay_khong_con_codex_home_va_windows_fail_closed"),
     ("kiem_song_requires_private_provider_scaffold",
-     "                    os.environ, provider_home, CODEX_HOME=str(codex_home))",
-     "                    os.environ, codex_home, CODEX_HOME=str(codex_home))",
+     "                    os.environ, provider_home, CODEX_HOME=str(auth.parent))",
+     "                    os.environ, auth.parent, CODEX_HOME=str(auth.parent))",
      "t18_kiem_song_CODEX_HOME_thuong_dung_provider_home_rieng"),
+    ("codex_kiem_song_skips_destination_guard",
+     '    target = _shared_checked_secret_destination(\n'
+     '        Path(codex_home).expanduser() / "auth.json", create_parent=False)\n'
+     '    return target, _shared_read_secret_bytes(target)',
+     '    target = Path(codex_home).expanduser() / "auth.json"\n'
+     '    return target, target.read_bytes()',
+     "t19_kiem_song_guard_dich_truoc_doc_cap_phat_va_child"),
+    ("kiem_song_unmeasured_collapses_to_rejected",
+     '    if result.status is LiveStatus.NOT_MEASURED:\n'
+     '        return RC[KHONG_DO_DUOC]',
+     '    if result.status is LiveStatus.NOT_MEASURED:\n'
+     '        return RC[DO]',
+     "t20_kiem_song_ba_trang_thai_dong_va_caller_khong_truthiness"),
     # Ambient temp selection moved into the shared provider allocator.  Its
     # focused lock and named mutant now live in session_credentials_test.py;
     # retaining a duplicate source mutation here would target dead ownership.

@@ -427,13 +427,27 @@ def _read_secret_bytes(path: Path) -> bytes:
         os.close(parent_fd)
 
 
-def _write_secret_fd(fd: int, data: bytes) -> tuple[int, int]:
+def _created_secret_identity(fd: int) -> tuple[int, int]:
+    """Bind a just-created inode before any operation that can fail."""
+    try:
+        opened = os.fstat(fd)
+        if not stat.S_ISREG(opened.st_mode):
+            raise OSError("created secret target is not a regular file")
+        return opened.st_dev, opened.st_ino
+    except Exception:
+        os.close(fd)
+        raise
+
+
+def _write_secret_fd(fd: int, data: bytes,
+                     identity: tuple[int, int]) -> None:
     try:
         os.fchmod(fd, 0o600)
         mode = os.fstat(fd)
+        if (mode.st_dev, mode.st_ino) != identity:
+            raise OSError("created secret identity changed before write")
         if stat.S_IMODE(mode.st_mode) != 0o600:
             raise OSError("secret mode 0600 was not established")
-        identity = (mode.st_dev, mode.st_ino)
     except Exception:
         os.close(fd)
         raise
@@ -441,7 +455,6 @@ def _write_secret_fd(fd: int, data: bytes) -> tuple[int, int]:
         out.write(data)
         out.flush()
         os.fsync(out.fileno())
-    return identity
 
 
 def _unlink_identity(directory_fd: int, name: str,
@@ -467,13 +480,13 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
                              0o600, dir_fd=parent_fd)
             except (TypeError, NotImplementedError) as exc:
                 raise OSError("relative secret create unavailable") from exc
-            created_identity = _write_secret_fd(fd, data)
+            created_identity = _created_secret_identity(fd)
+            _write_secret_fd(fd, data, created_identity)
             installed = _stat_at(parent_fd, created_name)
             if (installed is None
                     or (installed.st_dev, installed.st_ino) != created_identity
                     or stat.S_IMODE(installed.st_mode) != 0o600):
                 raise OSError("exclusive secret target changed during write")
-            created_name = None
         else:
             for _ in range(128):
                 candidate = f".{path.name}.tmp-{secrets.token_hex(12)}"
@@ -486,10 +499,11 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
                 except (TypeError, NotImplementedError) as exc:
                     raise OSError("relative secret create unavailable") from exc
                 created_name = candidate
+                created_identity = _created_secret_identity(fd)
                 break
             else:
                 raise OSError("could not allocate secret temporary file")
-            created_identity = _write_secret_fd(fd, data)
+            _write_secret_fd(fd, data, created_identity)
             try:
                 existing = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
             except FileNotFoundError:
@@ -501,7 +515,6 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
                            src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
             except (TypeError, NotImplementedError) as exc:
                 raise OSError("relative secret replace unavailable") from exc
-            created_name = None
             installed = _stat_at(parent_fd, path.name)
             if (installed is None
                     or (installed.st_dev, installed.st_ino) != created_identity
@@ -512,12 +525,22 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
         except OSError as exc:
             if exc.errno not in (errno.EINVAL, getattr(errno, "ENOTSUP", errno.EINVAL)):
                 raise
+        created_name = None
         return path
     except Exception:
+        cleanup_names = []
         if created_name is not None:
+            cleanup_names.append(created_name)
+        if (not exclusive and created_identity is not None
+                and path.name not in cleanup_names):
+            # os.replace can succeed before a wrapper or the following parent
+            # fsync raises.  Identity comparison makes checking both names safe:
+            # an old destination or an attacker replacement is never removed.
+            cleanup_names.append(path.name)
+        for cleanup_name in cleanup_names:
             try:
-                _unlink_identity(parent_fd, created_name, created_identity)
-            except OSError:
+                _unlink_identity(parent_fd, cleanup_name, created_identity)
+            except Exception:
                 pass
         raise
     finally:
@@ -710,6 +733,26 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
     return _result("passed", credential_file=str(output), secret_printed=False)
 
 
+_CLAUDE_REFUSAL_PATTERNS = tuple(re.compile(pattern) for pattern in (
+    r"\b(?:401\s+unauthorized|403\s+forbidden)\b",
+    r"\b(?:invalid|expired|revoked)\s+(?:oauth\s+)?(?:token|credentials?|api key)\b",
+    r"\b(?:oauth\s+)?(?:token|credentials?|api key)\s+"
+    r"(?:is\s+|has\s+)?(?:invalid|expired|revoked|rejected)\b",
+    r"\bauthentication\s+(?:failed|rejected|denied)\s*[:\-]?\s*"
+    r"(?:invalid|expired|revoked|missing)\s+(?:oauth\s+)?(?:token|credentials?)\b",
+    r"\blogin\s+(?:required|rejected|denied)\b",
+    r"\bmodel not found\b",
+    r"\bmodel access(?: is)? (?:denied|rejected)\b",
+    r"\bmodel is not available(?: for (?:this|the) account)?\b",
+    r"\bunsupported model\b",
+))
+
+
+def _claude_refusal_evidenced(combined: str) -> bool:
+    """Accept only closed credential/model refusal phrases, not broad words."""
+    return any(pattern.search(combined) for pattern in _CLAUDE_REFUSAL_PATTERNS)
+
+
 def claude_probe(token_file: Path | None = None, *, timeout=20, env=None) -> dict:
     source = os.environ if env is None else env
     token = source.get("CLAUDE_CODE_OAUTH_TOKEN")
@@ -734,11 +777,7 @@ def claude_probe(token_file: Path | None = None, *, timeout=20, env=None) -> dic
     except OSError:
         return _result("not_measured", reason="provider_storage_unavailable")
     combined = ((p.stderr or "") + "\n" + (p.stdout or "")).lower()
-    refused = any(word in combined for word in (
-        "401", "403", "unauthorized", "authentication", "invalid token",
-        "oauth", "login", "model not found", "model access",
-        "model is not available", "unsupported model",
-    ))
+    refused = _claude_refusal_evidenced(combined)
     network_failed = any(word in combined for word in (
         "connection reset", "connection refused", "unable to connect",
         "could not connect", "could not resolve", "name resolution", "dns failure",

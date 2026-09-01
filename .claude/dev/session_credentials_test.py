@@ -304,10 +304,140 @@ def missing_parent_capability_lock(module):
             "secret bytes reached the substituted directory"
 
 
+def secret_write_cleanup_lock(module):
+    """Failed writes remove only their exact created inode, never a replacement."""
+    if os.name != "posix":
+        print("SKIP session_partial_write_forgets_created_identity "
+              "(POSIX capability primitive unavailable)")
+        return
+
+    class InjectedWriteFailure(OSError):
+        pass
+
+    class FaultingFile:
+        def __init__(self, fd, stage, failure):
+            self.fd = fd
+            self.stage = stage
+            self.failure = failure
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, _kind, _value, _traceback):
+            os.close(self.fd)
+
+        def fileno(self):
+            return self.fd
+
+        def write(self, data):
+            if self.stage == "partial_write":
+                os.write(self.fd, data[:max(1, len(data) // 3)])
+                raise self.failure
+            os.write(self.fd, data)
+            return len(data)
+
+        def flush(self):
+            if self.stage == "flush":
+                raise self.failure
+
+    def exercise_failure(root, stage, exclusive):
+        target = root / f"{stage}-{'exclusive' if exclusive else 'atomic'}.json"
+        failure = InjectedWriteFailure(f"fixture-{stage}")
+        patches = []
+        if stage in ("partial_write", "flush"):
+            patches.append(mock.patch.object(
+                module.os, "fdopen",
+                side_effect=lambda fd, _mode: FaultingFile(fd, stage, failure)))
+        elif stage == "chmod":
+            patches.append(mock.patch.object(
+                module.os, "fchmod", side_effect=failure))
+        else:
+            real_fsync = module.os.fsync
+            calls = 0
+
+            def faulting_fsync(fd):
+                nonlocal calls
+                calls += 1
+                failure_call = 1 if stage == "file_fsync" else 2
+                if calls == failure_call:
+                    raise failure
+                return real_fsync(fd)
+
+            patches.append(mock.patch.object(
+                module.os, "fsync", side_effect=faulting_fsync))
+
+        try:
+            with patches[0]:
+                module._atomic_secret(
+                    target, b"INERT_PARTIAL_WRITE_FIXTURE", exclusive=exclusive)
+            assert False, f"{stage} failure was swallowed"
+        except InjectedWriteFailure as caught:
+            assert caught is failure, "cleanup replaced the original exception"
+
+        assert not target.exists(), (stage, exclusive, "credential target survived")
+        assert list(root.iterdir()) == [], (stage, exclusive, list(root.iterdir()))
+
+    def exercise_replacement(root, exclusive):
+        target = root / ("replacement-exclusive.json" if exclusive
+                         else "replacement-atomic.json")
+        failure = InjectedWriteFailure("fixture-replacement")
+
+        class ReplacingFile(FaultingFile):
+            def write(self, data):
+                os.write(self.fd, data)
+                entries = list(root.iterdir())
+                assert len(entries) == 1, entries
+                created = entries[0]
+                created.unlink()
+                created.write_bytes(b"ATTACKER_REPLACEMENT_FIXTURE")
+                raise self.failure
+
+        with mock.patch.object(
+                module.os, "fdopen",
+                side_effect=lambda fd, _mode: ReplacingFile(
+                    fd, "replacement", failure)):
+            try:
+                module._atomic_secret(
+                    target, b"INERT_REPLACED_FIXTURE", exclusive=exclusive)
+                assert False, "replacement fixture failure was swallowed"
+            except InjectedWriteFailure as caught:
+                assert caught is failure, "cleanup replaced the original exception"
+
+        entries = list(root.iterdir())
+        assert len(entries) == 1, entries
+        assert entries[0].read_bytes() == b"ATTACKER_REPLACEMENT_FIXTURE"
+        if not exclusive:
+            assert not target.exists(), "atomic temp replacement became final target"
+
+    with tempfile.TemporaryDirectory(prefix="secret-write-cleanup-") as td:
+        base = Path(td)
+        for exclusive in (False, True):
+            for stage in (
+                    "chmod", "partial_write", "flush",
+                    "file_fsync", "directory_fsync"):
+                root = base / f"{stage}-{'x' if exclusive else 'a'}"
+                root.mkdir()
+                exercise_failure(root, stage, exclusive)
+            replacement_root = base / f"replacement-{'x' if exclusive else 'a'}"
+            replacement_root.mkdir()
+            exercise_replacement(replacement_root, exclusive)
+
+        for exclusive in (False, True):
+            positive = base / f"positive-{'x' if exclusive else 'a'}" / "auth.json"
+            module._atomic_secret(
+                positive, b"INERT_POSITIVE_FIXTURE", exclusive=exclusive)
+            assert positive.read_bytes() == b"INERT_POSITIVE_FIXTURE"
+            assert stat.S_IMODE(positive.stat().st_mode) == 0o600
+
+
 def claude_status_lock(module):
     """Claude status is evidence-based, with unknown local failure unmeasured."""
     cases = (
         (mock.Mock(returncode=1, stdout="", stderr="401 unauthorized"), "rejected"),
+        (mock.Mock(returncode=1, stdout="", stderr="403 forbidden"), "rejected"),
+        (mock.Mock(returncode=1, stdout="", stderr="invalid OAuth token"), "rejected"),
+        (mock.Mock(returncode=1, stdout="", stderr="authentication failed: invalid credentials"),
+         "rejected"),
         (mock.Mock(returncode=1, stdout="", stderr="model is not available for this account"),
          "rejected"),
         (mock.Mock(returncode=7, stdout="", stderr="connection reset by peer"),
@@ -315,6 +445,16 @@ def claude_status_lock(module):
         (mock.Mock(returncode=7, stdout="", stderr="local configuration parse failed"),
          "not_measured"),
         (mock.Mock(returncode=7, stdout="", stderr="local network profile is invalid"),
+         "not_measured"),
+        (mock.Mock(returncode=7, stdout="", stderr="login configuration parse failed"),
+         "not_measured"),
+        (mock.Mock(returncode=7, stdout="", stderr="OAuth callback configuration is malformed"),
+         "not_measured"),
+        (mock.Mock(returncode=7, stdout="", stderr="authentication helper crashed locally"),
+         "not_measured"),
+        (mock.Mock(returncode=7, stdout="", stderr="local cache record 401 is malformed"),
+         "not_measured"),
+        (mock.Mock(returncode=7, stdout="", stderr="local port 403 is already in use"),
          "not_measured"),
     )
     for completed, expected in cases:
@@ -365,6 +505,16 @@ def run_mutations():
          "            _checked_provider_cleanup(root, root_identity)",
          "            shutil.rmtree(root, ignore_errors=True)",
          provider_cleanup_lock),
+        ("claude_local_login_config_error_becomes_rejected",
+         "    refused = _claude_refusal_evidenced(combined)",
+         "    refused = (_claude_refusal_evidenced(combined) or any(\n"
+         "        word in combined for word in (\"login\", \"oauth\", \"authentication\")))",
+         claude_status_lock),
+        ("claude_bare_403_becomes_rejected",
+         "    refused = _claude_refusal_evidenced(combined)",
+         "    refused = (_claude_refusal_evidenced(combined) or any(\n"
+         "        word in combined for word in (\"401\", \"403\")))",
+         claude_status_lock),
         ("claude_unknown_nonzero_becomes_network_error",
          '        return _result("not_measured", returncode=p.returncode)',
          '        return _result("network_error", returncode=p.returncode)',
@@ -380,6 +530,21 @@ def run_mutations():
     ]
     if os.name == "posix":
         mutants.append((
+            "session_partial_write_forgets_created_identity",
+            "                created_identity = _created_secret_identity(fd)\n"
+            "                break\n"
+            "            else:\n"
+            "                raise OSError(\"could not allocate secret temporary file\")\n"
+            "            _write_secret_fd(fd, data, created_identity)",
+            "                write_identity = _created_secret_identity(fd)\n"
+            "                break\n"
+            "            else:\n"
+            "                raise OSError(\"could not allocate secret temporary file\")\n"
+            "            _write_secret_fd(fd, data, write_identity)\n"
+            "            created_identity = write_identity",
+            secret_write_cleanup_lock,
+        ))
+        mutants.append((
             "missing_parent_creation_uses_pathname_before_capability",
             "    return _walk_parent_capability(path.parent, create=create)",
             "    path.parent.mkdir(parents=True, exist_ok=True)\n"
@@ -389,6 +554,8 @@ def run_mutations():
             missing_parent_capability_lock,
         ))
     else:
+        print("SKIP session_partial_write_forgets_created_identity "
+              "(POSIX capability primitive unavailable)")
         print("SKIP missing_parent_creation_uses_pathname_before_capability "
               "(POSIX capability primitive unavailable)")
     killed = 0
@@ -416,6 +583,7 @@ def run():
     provider_home_lock(m)
     provider_cleanup_lock(m)
     missing_parent_capability_lock(m)
+    secret_write_cleanup_lock(m)
     claude_status_lock(m)
     tl_status_lock(m)
     expected_repository = P.resolve().parents[2]

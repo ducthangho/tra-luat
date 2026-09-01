@@ -28,8 +28,45 @@ def run():
         target = root / "codex" / "auth.json"
         assert result["status"] == "passed" and target.read_bytes() == auth
         assert stat.S_IMODE(target.stat().st_mode) == 0o600 and "private" not in repr(result)
+        blocked_codex_home = m.REPOSITORY_ROOT / "docs" / ".blocked-codex-home"
+        blocked_auth = blocked_codex_home / "auth.json"
+        assert not blocked_auth.exists()
+        with mock.patch.object(m, "_atomic_secret") as writer:
+            blocked = m.materialize_codex(env={"CODEX_AUTH_JSON": encoded,
+                "CODEX_HOME": str(blocked_codex_home)})
+        assert blocked == {"status": "rejected",
+                           "reason": "secret_destination_in_repository"}
+        writer.assert_not_called()
+        assert not blocked_auth.exists()
         assert m.materialize_codex(env={})["status"] == "missing"
         assert m.materialize_codex(env={"CODEX_AUTH_JSON": "!"})["status"] == "rejected"
+
+        direct_output = m.REPOSITORY_ROOT / "docs" / ".blocked-claude-token"
+        assert not direct_output.exists()
+        with mock.patch.object(m.subprocess, "Popen", side_effect=OSError("must not spawn")) as popen:
+            blocked = m.capture_claude(direct_output, timeout=1, env={},
+                input_stream=io.StringIO(), output_stream=io.StringIO())
+        assert blocked == {"status": "rejected",
+                           "reason": "secret_destination_in_repository"}
+        popen.assert_not_called()
+        assert not direct_output.exists()
+
+        repo_link = root / "repo-parent-link"
+        repo_link.symlink_to(m.REPOSITORY_ROOT, target_is_directory=True)
+        linked_output = repo_link / "docs" / ".blocked-parent-token"
+        with mock.patch.object(m.subprocess, "Popen", side_effect=OSError("must not spawn")) as popen:
+            blocked = m.capture_claude(linked_output, timeout=1, env={},
+                input_stream=io.StringIO(), output_stream=io.StringIO())
+        assert blocked == {"status": "rejected",
+                           "reason": "secret_destination_in_repository"}
+        popen.assert_not_called()
+        assert not linked_output.exists()
+        atomic_linked_output = repo_link / "AGENTS.md" / "auth.json"
+        try:
+            m._atomic_secret(atomic_linked_output, b"not-a-secret")
+            assert False
+        except OSError as exc:
+            assert str(exc).startswith("refusing repository secret destination:")
 
         # An actual child sees a TTY, displays an interactive prompt, consumes input,
         # and emits the credential split over writes.  The parent must stream the
@@ -106,8 +143,26 @@ os.write(1,b'A'*180 + b'\\n')
         with mock.patch.object(m.subprocess, "run", side_effect=m.subprocess.TimeoutExpired("claude", 1)):
             assert m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S"})["status"] == "not_measured"
 
+        with mock.patch.object(m.subprocess, "run") as run_child:
+            missing_file = m.tl_bootstrap("cowork", None, env={
+                "TL_MASTER_KEY": "TL_CANARY", "TMPDIR": "/tmp/test"})
+        assert missing_file == {"status": "missing", "reason": "secrets_file"}
+        run_child.assert_not_called()
+
+        for argv, target in ((["tl-bootstrap", "--env", "cowork"], "tl_bootstrap"),
+                             (["bootstrap", "--env", "cowork"], "bootstrap_session")):
+            with mock.patch.object(m, target, side_effect=AssertionError("must not dispatch")) as dispatch, \
+                 mock.patch.object(m.sys, "stdout", io.StringIO()), \
+                 mock.patch.object(m.sys, "stderr", io.StringIO()):
+                try:
+                    m.main(argv)
+                    assert False
+                except SystemExit as exc:
+                    assert exc.code == 2
+            dispatch.assert_not_called()
+
         with mock.patch.object(m.subprocess, "run", return_value=mock.Mock(returncode=0)) as run_child:
-            result = m.tl_bootstrap("cowork", None, env={
+            result = m.tl_bootstrap("cowork", root / "secrets.enc", env={
                 "TL_MASTER_KEY": "TL_CANARY", "CODEX_AUTH_JSON": "CODEX_CANARY",
                 "CLAUDE_CODE_OAUTH_TOKEN": "CLAUDE_CANARY", "GITHUB_PAT": "GH_CANARY",
                 "OPENAI_API_KEY": "VENDOR_CANARY", "TMPDIR": "/tmp/test"})
@@ -123,7 +178,14 @@ os.write(1,b'A'*180 + b'\\n')
              mock.patch.object(m, "claude_probe", side_effect=component("claude")), \
              mock.patch.object(m, "github_probe", side_effect=component("github")), \
              mock.patch.object(m, "tl_bootstrap", side_effect=component("tl")):
-            combined = m.bootstrap_session("o/r", "cowork", None, None, env={})
+            missing_combined = m.bootstrap_session("o/r", "cowork", None, None, env={})
+        assert missing_combined == {"status": "missing", "reason": "secrets_file"}
+        assert calls == []
+        with mock.patch.object(m, "materialize_codex", side_effect=component("codex")), \
+             mock.patch.object(m, "claude_probe", side_effect=component("claude")), \
+             mock.patch.object(m, "github_probe", side_effect=component("github")), \
+             mock.patch.object(m, "tl_bootstrap", side_effect=component("tl")):
+            combined = m.bootstrap_session("o/r", "cowork", root / "secrets.enc", None, env={})
         assert combined["status"] == "passed" and calls == ["codex", "claude", "github", "tl"]
         assert set(combined["components"]) == {"codex", "claude", "github", "tl"}
         assert m.tl_bootstrap("cowork", None, env={})["status"] == "missing"

@@ -19,6 +19,7 @@ STATUSES = ("missing", "rejected", "network_error", "not_measured", "passed")
 SECRET_ENV = ("CODEX_AUTH_JSON", "CLAUDE_CODE_OAUTH_TOKEN", "GITHUB_PAT", "TL_MASTER_KEY")
 TOKEN_RE = re.compile(r"sk-ant-oat\d+-[A-Za-z0-9_-]{20,}")
 TOKEN_PREFIX = "sk-ant-oat"
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 
 # Child processes get an intentionally small operational environment rather
 # than a copy of the agent's environment.  In particular, this prevents a
@@ -59,7 +60,13 @@ def codex_home(env=None) -> Path:
     return Path(env.get("CODEX_HOME") or Path.home() / ".codex").expanduser()
 
 
+def _inside_repository(path: Path) -> bool:
+    return path.resolve(strict=False).is_relative_to(REPOSITORY_ROOT)
+
+
 def _atomic_secret(path: Path, data: bytes) -> None:
+    if _inside_repository(path):
+        raise OSError(f"refusing repository secret destination: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.is_symlink():
         raise OSError(f"refusing symlink destination: {path}")
@@ -82,6 +89,9 @@ def materialize_codex(*, env=None) -> dict:
     encoded = source.get("CODEX_AUTH_JSON")
     if not encoded:
         return _result("missing", reason="CODEX_AUTH_JSON")
+    target = codex_home(source) / "auth.json"
+    if _inside_repository(target):
+        return _result("rejected", reason="secret_destination_in_repository")
     try:
         raw = base64.b64decode(encoded, validate=True)
         parsed = json.loads(raw)
@@ -89,7 +99,6 @@ def materialize_codex(*, env=None) -> dict:
             raise ValueError("not an object")
     except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
         return _result("rejected", reason="malformed_CODEX_AUTH_JSON")
-    target = codex_home(source) / "auth.json"
     try:
         _atomic_secret(target, raw)
     except OSError:
@@ -134,6 +143,8 @@ def _drain_sanitized(pending: str, stream, *, final: bool = False) -> str:
 def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=None,
                    output_stream=None) -> dict:
     """Run ``claude setup-token`` on a real PTY, relay prompts, retain token privately."""
+    if _inside_repository(output):
+        return _result("rejected", reason="secret_destination_in_repository")
     import pty
 
     child = _child_env(os.environ if env is None else env)
@@ -249,11 +260,12 @@ def github_probe(repo: str, *, timeout: int = 20, env=None) -> dict:
 
 def tl_bootstrap(env_name: str, secrets_file: Path | None, *, timeout: int = 600, env=None) -> dict:
     source = os.environ if env is None else env
+    if secrets_file is None:
+        return _result("missing", reason="secrets_file")
     if not source.get("TL_MASTER_KEY"):
         return _result("missing", reason="TL_MASTER_KEY")
-    cmd = [sys.executable, "scripts/tl.py", "bootstrap", "--env", env_name]
-    if secrets_file:
-        cmd += ["--secrets-file", str(secrets_file)]
+    cmd = [sys.executable, "scripts/tl.py", "bootstrap", "--env", env_name,
+           "--secrets-file", str(secrets_file)]
     try:
         p = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
                            timeout=timeout,
@@ -267,6 +279,8 @@ def tl_bootstrap(env_name: str, secrets_file: Path | None, *, timeout: int = 600
 
 def bootstrap_session(repo: str, env_name: str, secrets_file: Path | None,
                       claude_token_file: Path | None, *, env=None) -> dict:
+    if secrets_file is None:
+        return _result("missing", reason="secrets_file")
     source = os.environ if env is None else env
     components = {
         "codex": materialize_codex(env=source),
@@ -285,8 +299,8 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="command", required=True)
     c = sub.add_parser("claude-capture"); c.add_argument("--output", required=True); c.add_argument("--timeout", type=int, default=300)
     g = sub.add_parser("github-probe"); g.add_argument("--repo", default="ducthangho/tra-luat"); g.add_argument("--timeout", type=int, default=20)
-    b = sub.add_parser("tl-bootstrap"); b.add_argument("--env", choices=("code", "cowork", "chat"), required=True); b.add_argument("--secrets-file"); b.add_argument("--timeout", type=int, default=600)
-    i = sub.add_parser("bootstrap"); i.add_argument("--repo", default="ducthangho/tra-luat"); i.add_argument("--env", choices=("code", "cowork", "chat"), required=True); i.add_argument("--secrets-file"); i.add_argument("--claude-token-file")
+    b = sub.add_parser("tl-bootstrap"); b.add_argument("--env", choices=("code", "cowork", "chat"), required=True); b.add_argument("--secrets-file", required=True); b.add_argument("--timeout", type=int, default=600)
+    i = sub.add_parser("bootstrap"); i.add_argument("--repo", default="ducthangho/tra-luat"); i.add_argument("--env", choices=("code", "cowork", "chat"), required=True); i.add_argument("--secrets-file", required=True); i.add_argument("--claude-token-file")
     sub.add_parser("status")
     a = ap.parse_args(argv)
     if a.command == "claude-capture": result = capture_claude(Path(a.output), timeout=a.timeout)

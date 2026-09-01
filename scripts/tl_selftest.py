@@ -24667,7 +24667,13 @@ def run() -> int:
         with _tf218.TemporaryDirectory() as td:
             d = _r218_doc(td, "\n".join(_dong))
             rc, j, _ = _r218_run("--path", str(d))
-        return rc == 0 and j.get("ok") is True and j.get("flags") == [] and j.get("files_scanned") == 1
+        _ok218 = (rc == 0 and j.get("ok") is True and j.get("flags") == []
+                  and j.get("files_scanned") == 1)
+        if not _ok218:
+            print("  [r218-clean-diagnostic] " + json.dumps({
+                "rc": rc, "ok": j.get("ok"), "files_scanned": j.get("files_scanned"),
+                "flags": j.get("flags")}, ensure_ascii=False), file=_hsys.stderr)
+        return _ok218
 
     _t110("r218_docclaims_sach_khong_bao_gia", _c218_sach_khong_bao_gia)
 
@@ -29969,6 +29975,143 @@ def run() -> int:
           lambda: _release_fixture44()["topology_ok"])
     _t110("wp44_missing_bundled_module_named",
           lambda: _release_fixture44()["missing_named"])
+
+    # WP433 r4 — mọi output NLM đi qua lược đồ đường dẫn đóng và writer
+    # capability-relative.  Ca này chạy positive/race thật trên POSIX; Windows
+    # đo hợp đồng fail-closed vì stdlib không có handle-relative rename.
+    def _c433_nlm_secret_boundary():
+        import os as _os433, stat as _st433, subprocess as _sp433
+        import tempfile as _tf433
+        from pathlib import Path as _P433
+        import tl_gws as _tg433
+
+        payload = {
+            "auth.json": '{"cookies":[]}',
+            "profiles/default/cookies.json": "[]",
+            "profiles/default/metadata.json": '{"last_validated":"fixture"}',
+        }
+        hostile = (
+            {"../auth.json": "x"},
+            {"/tmp/auth.json": "x"},
+            {r"profiles\default\cookies.json": "x"},
+            {"profiles/default/../auth.json": "x"},
+            {"profiles/other/cookies.json": "x"},
+            {"profiles/default/cookies.json/child": "x"},
+            {"auth.json": b"not-text"},
+        )
+        for document in hostile:
+            try:
+                _tg433._nlm_auth_plan(document)
+                return False
+            except ValueError:
+                pass
+
+        with _tf433.TemporaryDirectory(prefix="tl-nlm-boundary-") as raw:
+            root = _P433(raw)
+            base = root / "positive"
+            if _os433.name == "nt":
+                try:
+                    _tg433._write_nlm_auth(base, payload)
+                    return False
+                except OSError as exc:
+                    if "handle-relative" not in str(exc):
+                        return False
+                if any(base.rglob("*.json")):
+                    return False
+
+                fake_repo = root / "fake-repo"
+                (fake_repo / ".git").mkdir(parents=True)
+                junction = root / "repo-junction"
+                made = _sp433.run(
+                    ["cmd.exe", "/d", "/c", "mklink", "/J",
+                     str(junction), str(fake_repo)],
+                    stdin=_sp433.DEVNULL, capture_output=True).returncode == 0
+                if made:
+                    try:
+                        _tg433._write_nlm_auth(junction, {"auth.json": "FIXTURE_ONLY"})
+                        return False
+                    except _tg433._UnsafeSecretDestination:
+                        pass
+                    if (fake_repo / "auth.json").exists():
+                        return False
+                return True
+
+            if _tg433._write_nlm_auth(base, payload) != 3:
+                return False
+            for rel, text in payload.items():
+                target = base.joinpath(*rel.split("/"))
+                if (target.read_text(encoding="utf-8") != text
+                        or _st433.S_IMODE(target.stat().st_mode) != 0o600):
+                    return False
+
+            # Pre-existing nested parent link into a repository must reject the
+            # complete plan before auth.json (the first file) is written.
+            fake_repo = root / "linked-repo"
+            (fake_repo / ".git").mkdir(parents=True)
+            (fake_repo / "profiles" / "default").mkdir(parents=True)
+            linked_base = root / "linked-base"; linked_base.mkdir()
+            (linked_base / "profiles").symlink_to(
+                fake_repo / "profiles", target_is_directory=True)
+            try:
+                _tg433._write_nlm_auth(linked_base, payload)
+                return False
+            except _tg433._UnsafeSecretDestination:
+                pass
+            if (linked_base / "auth.json").exists():
+                return False
+
+            # A final target link is rejected and its repository victim is not
+            # opened, truncated, or replaced.
+            target_base = root / "target-base"; target_base.mkdir()
+            victim = fake_repo / "victim"; victim.write_text("UNCHANGED", encoding="utf-8")
+            (target_base / "auth.json").symlink_to(victim)
+            try:
+                _tg433._write_nlm_auth(target_base, {"auth.json": "FIXTURE_ONLY"})
+                return False
+            except OSError:
+                pass
+            if victim.read_text(encoding="utf-8") != "UNCHANGED":
+                return False
+
+            # Ancestor swap after path preflight: actual opened capability must
+            # see the repository.  Then delete that validator as a mutation
+            # witness and prove this exact case reaches the vulnerable write.
+            alias = root / "race-alias"; (alias / "nested").mkdir(parents=True)
+            moved = root / "race-alias-before-swap"
+            race_repo = root / "race-repo"
+            (race_repo / ".git").mkdir(parents=True)
+            (race_repo / "nested").mkdir()
+            original_destination = _tg433._tl_secret_destination
+            def swap_ancestor(path):
+                canonical = original_destination(path)
+                alias.rename(moved)
+                alias.symlink_to(race_repo, target_is_directory=True)
+                return canonical
+            _tg433._tl_secret_destination = swap_ancestor
+            try:
+                try:
+                    _tg433._tl_atomic_secret(alias / "nested" / "auth.json", b"FIXTURE_ONLY")
+                    return False
+                except _tg433._UnsafeSecretDestination:
+                    pass
+            finally:
+                _tg433._tl_secret_destination = original_destination
+            if (race_repo / "nested" / "auth.json").exists():
+                return False
+
+            alias.unlink(); moved.rename(alias)
+            original_validate = _tg433._tl_validate_parent
+            _tg433._tl_secret_destination = swap_ancestor
+            _tg433._tl_validate_parent = lambda _fd: None
+            try:
+                _tg433._tl_atomic_secret(alias / "nested" / "auth.json", b"FIXTURE_ONLY")
+            finally:
+                _tg433._tl_secret_destination = original_destination
+                _tg433._tl_validate_parent = original_validate
+            return ((race_repo / "nested" / "auth.json").read_bytes()
+                    == b"FIXTURE_ONLY")
+
+    _t110("wp433_nlm_secret_boundary", _c433_nlm_secret_boundary)
 
     # r332 — ĐỘ PHỦ REGISTRY PHẢI ĐO Ở ĐƯỜNG NGƯỜI TA THẬT SỰ CHẠY.
     # Bối cảnh: trong AG-T0-03, bản vá F8 đổi `compute_parser_coverage` từ

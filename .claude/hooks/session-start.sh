@@ -64,9 +64,11 @@ fi
 # Chạy TRƯỚC mọi lần gọi binary codex, kể cả `--version` và `login status`.
 # "Đã đăng nhập" chỉ nói file đọc được; nó không cấp quyền dùng file trong kho.
 CODEX_BI_CHAN=0
+export TRA_LUAT_CODEX_BLOCKED=0
 if ! "$PY" "$GOC/.claude/dev/session_credentials.py" codex-destination-check >/dev/null
 then
   CODEX_BI_CHAN=1
+  export TRA_LUAT_CODEX_BLOCKED=1
   echo "[session-start] !! CHAN MOI DUONG CODEX CUA KHO: CODEX_HOME/auth.json khong co destination an toan"
 fi
 # --- END CODEX SECRET DESTINATION GUARD -------------------------------------
@@ -307,6 +309,7 @@ if co codex && [ "$CODEX_BI_CHAN" = 0 ]; then
   # tuong la lam cho chac. Co `pipefail` thi `$?` cua pipeline DA la ma cua python.
   if [ "$MA_GO" -ne 0 ]; then
     CODEX_BI_CHAN=1
+    export TRA_LUAT_CODEX_BLOCKED=1
     echo "[session-start] !! CHAN MOI DUONG CODEX CUA KHO (ma $MA_GO): config con khoi"
     echo "[session-start]    env policy cu, hoac khong phan loai duoc. \`inherit=all\` co"
     echo "[session-start]    the CON HIEU LUC — moi lenh con cua codex nhan TOAN BO moi truong."
@@ -318,15 +321,16 @@ if co codex && [ "$CODEX_BI_CHAN" = 0 ]; then
 fi
 
 if [ -n "${CODEX_AUTH_JSON:-}" ] && co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then
-  if codex login status >/dev/null 2>&1 </dev/null; then
-    echo "[session-start] codex: da dang nhap san — GIU nguyen, khong ghi de"
+  # login status only proves that a file parses.  The materializer compares
+  # exact last_refresh values and preserves an equal/newer on-disk snapshot;
+  # a readable but stale/revoked snapshot must never bypass restoration.
+  if "$PY" "$GOC/.claude/dev/session_credentials.py" codex-materialize >/dev/null
+  then
+    echo "[session-start] codex: credential da duoc giu hoac khoi phuc an toan"
   else
-    if "$PY" "$GOC/.claude/dev/session_credentials.py" codex-materialize >/dev/null
-    then
-      echo "[session-start] codex: da khoi phuc auth tu CODEX_AUTH_JSON"
-    else
-      echo "[session-start] CANH BAO: tu choi CODEX_AUTH_JSON (dinh dang hoac secret destination) — bo qua"
-    fi
+    CODEX_BI_CHAN=1
+    export TRA_LUAT_CODEX_BLOCKED=1
+    echo "[session-start] CANH BAO: tu choi CODEX_AUTH_JSON (dinh dang hoac secret destination) — bo qua"
   fi
 fi
 if co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then

@@ -2308,9 +2308,18 @@ def t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac():
         nha = tempfile.mkdtemp()
         m.os.path.expanduser = (lambda n: lambda p: p.replace("~", n))(nha)
         m.os.environ = {"CODEX_AUTH_JSON": gia_tri}
+        dry = m.chuan_bi_xac_thuc(that_su=False)
+        bang(len(dry) == 1 and dry[0]["ok"],
+             f"{ten}: parser/dry-run phai dung duoc, duoc {dry}")
         ket = m.chuan_bi_xac_thuc(that_su=True)
-        bang(len(ket) == 1 and ket[0]["ok"], f"{ten}: phai dung duoc, duoc {ket}")
         dich = Path(nha) / ".codex" / "auth.json"
+        if LA_WINDOWS:
+            bang(len(ket) == 1 and not ket[0]["ok"]
+                 and "write failed" in ket[0]["cach"],
+                 f"{ten}: Windows phai fail-closed, duoc {ket}")
+            bang(not dich.exists(), f"{ten}: Windows pathname fallback da ghi secret")
+            continue
+        bang(len(ket) == 1 and ket[0]["ok"], f"{ten}: phai dung duoc, duoc {ket}")
         bang(dich.read_text(encoding="utf-8") == that,
              f"{ten}: noi dung tren dia phai la JSON GIAI MA, khong phai chuoi tho")
         # Quyền 600 là khái niệm POSIX. Trên Windows `os.chmod` CHỈ bật/tắt cờ
@@ -2320,13 +2329,24 @@ def t86_chuan_bi_nhan_ca_base64_lan_json_tho_va_tu_choi_rac():
         # ĐỪNG đọc đây thành "Windows cũng an toàn": nó KHÔNG được `chmod` bảo vệ.
         # Thứ che `~/.codex/auth.json` ở đó là ACL của chính hồ sơ người dùng, mà ta
         # KHÔNG đặt và KHÔNG kiểm. Ghi ra để không ai suy "test xanh = đã bảo vệ".
-        if LA_WINDOWS:
-            bang(dich.exists(), f"{ten}: tep phai ton tai")
-        else:
-            bang(oct(dich.stat().st_mode)[-3:] == "600", f"{ten}: quyen phai la 600")
+        bang(oct(dich.stat().st_mode)[-3:] == "600", f"{ten}: quyen phai la 600")
         # idempotent: goi lai khong duoc bao da doi
         bang(m.chuan_bi_xac_thuc(that_su=True)[0].get("doi") is False,
              f"{ten}: goi lai phai nhan ra da khop va khong dung tep")
+    if not LA_WINDOWS:
+        # A forged/new timestamp without usable tokens must not activate the
+        # preserve-newer shortcut and keep stale auth on disk.
+        nha = tempfile.mkdtemp()
+        m.os.path.expanduser = (lambda n: lambda p: p.replace("~", n))(nha)
+        dich = Path(nha) / ".codex" / "auth.json"
+        dich.parent.mkdir(parents=True)
+        dich.write_text('{"tokens":{},"last_refresh":"2099-01-01T00:00:00Z"}',
+                        encoding="utf-8")
+        moi = '{"tokens":{"access":"fresh"},"last_refresh":"2026-01-01T00:00:00Z"}'
+        m.os.environ = {"CODEX_AUTH_JSON": moi}
+        ket = m.chuan_bi_xac_thuc(that_su=True)
+        bang(ket[0]["ok"] and ket[0].get("doi") is True and dich.read_text() == moi,
+             f"disk stale/invalid khong duoc bypass materialization: {ket}")
     # rac => tu choi, va noi ro da thu CA HAI duong
     nha = tempfile.mkdtemp()
     m.os.path.expanduser = (lambda n: lambda p: p.replace("~", n))(nha)
@@ -2416,6 +2436,8 @@ def t146_hook_phai_dung_chung_codex_materialize_guard():
     hook = hook_path.read_text(encoding="utf-8")
     bang('session_credentials.py" codex-materialize' in hook,
          "hook khong goi entry point materialize co repository guard")
+    bang("TRA_LUAT_CODEX_BLOCKED=1" in hook,
+         "hook khong truyen destination refusal xuong final doctor")
     bang('dst = os.path.join(os.path.expanduser("~"), ".codex", "auth.json")' not in hook,
          "hook con writer rieng hard-code ~/.codex va bo qua CODEX_HOME/guard")
 
@@ -2444,11 +2466,16 @@ def t146_hook_phai_dung_chung_codex_materialize_guard():
             'GOC="$TEST_GOC"; PY="$TEST_PY"; CODEX_BI_CHAN=0\n'
             'co() { command -v "$1" >/dev/null 2>&1; }\n'
             + destination_guard + auth_block
+            + 'DOCTOR_RC=0\n'
+              '"$PY" "$TEST_LAUNCHER" doctor --doi-kha-dung >/dev/null 2>&1 '
+              '|| DOCTOR_RC=$?\n'
+              'test "$DOCTOR_RC" -ne 0\n'
         )
         env = dict(os.environ)
         env.update({
             "PATH": f"{bd}{os.pathsep}{env.get('PATH', '')}",
             "TEST_GOC": str(repo), "TEST_PY": PY,
+            "TEST_LAUNCHER": str(LAUNCHER),
             "CODEX_CALL_LOG": str(log),
             "CODEX_HOME": str(Path(rd) / ".codex"),
             "CODEX_AUTH_JSON": '{"tokens":{"access":"FIXTURE_ONLY"}}',
@@ -2458,7 +2485,46 @@ def t146_hook_phai_dung_chung_codex_materialize_guard():
         bang(result.returncode == 0,
              f"auth block phai fail-closed sach, rc={result.returncode}: {result.stderr!r}")
         bang(not log.exists(),
-             f"hook da goi codex truoc guard: {log.read_text() if log.exists() else ''}")
+             f"hook/full doctor tail da spawn codex: {log.read_text() if log.exists() else ''}")
+
+
+@ca
+def t147_doctor_phai_tieu_thu_hook_block_truoc_moi_codex_spawn():
+    """The exported hook refusal covers version, auth, live probe, and prepare."""
+    m = _tai_launcher_thu()
+    root = tempfile.mkdtemp(prefix="launcher-hook-block-")
+    m.os.environ = {
+        "TRA_LUAT_CODEX_BLOCKED": "1",
+        "CODEX_AUTH_JSON": '{"tokens":{"access":"FIXTURE_ONLY"}}',
+        "CODEX_HOME": str(Path(root) / ".codex"),
+        "PATH": "/fixture",
+    }
+    m.CONG_CU = [{
+        "ten": "codex", "bat_buoc": True, "ung_vien": ["codex"],
+        "vi_sao": "fixture", "cai": {"*": "fixture"},
+    }]
+    m.MO_DUN_PY = []
+    m.KHA_NANG = [{"ten": "codex", "do": lambda _ws, _ks=False: m._do_codex(True),
+                   "vi_sao": "fixture", "khac_phuc": "fixture"}]
+    m._doc_moi_truong = lambda: (dict(m.os.environ), {"fixture": True})
+    m._cac_duong_dan = lambda _c, _env: [("codex", "/fixture/codex")]
+    m.tim_workspace = lambda _path=None: None
+    spawned = []
+    m._phien_ban = lambda *_a, **_k: (spawned.append("version") or (True, "v", False))
+    m.subprocess.run = lambda *_a, **_k: (spawned.append("subprocess") or
+        type("R", (), {"returncode": 0, "stdout": "ok", "stderr": ""})())
+    m.shutil.which = lambda _name: "/fixture/codex"
+    args = type("A", (), {"json": True, "workspace": None, "kiem_song": True,
+                            "doi_kha_dung": True})()
+    with contextlib.redirect_stdout(io.StringIO()):
+        rc = m.lenh_doctor(args)
+    bang(rc == MA_CHUA_XAC_THUC, f"blocked doctor phai fail-closed, rc={rc}")
+    bang(spawned == [], f"blocked doctor van spawn Codex child: {spawned}")
+    prepared = m.chuan_bi_xac_thuc(that_su=True)
+    bang(len(prepared) == 1 and prepared[0].get("ok") is False,
+         f"blocked prepare van mo credential path: {prepared}")
+    bang(not (Path(root) / ".codex" / "auth.json").exists(),
+         "blocked prepare wrote auth.json")
 
 
 @ca
@@ -6181,8 +6247,11 @@ def r21_bon_mutant_noi_semantic_allowlist_phai_lam_oracle_DO():
 
 DOT_BIEN = [
     ("bo_chan_credential_trong_repository",
-     ('    return _shared_secret_destination(path)',
-      '    return path'),
+     [('    return _shared_secret_destination(path)',
+       '    return path'),
+      ('        dich = _shared_atomic_secret(dich, noi_dung.encode("utf-8"))',
+       '        dich.parent.mkdir(parents=True, exist_ok=True); '
+       'dich.write_text(noi_dung, encoding="utf-8")')],
      ["t145_CODEX_HOME_trong_kho_khong_duoc_nhan_credential"]),
     ("bo_ky_ban_ghi_luot",
      ('    if khoa_ky:\n        ban_ghi["chu_ky"] = ky_ban_ghi_luot(ban_ghi, khoa_ky)',
@@ -6307,6 +6376,17 @@ DOT_BIEN = [
     ("co_chan_codex_luon_tra_KHONG_BI_CHAN",
      ('    if not co.exists():\n        return None', '    if True:\n        return None'),
      ["t102_khong_go_duoc_policy_thi_phai_CHAN_codex"]),
+    ("co_chan_codex_bo_qua_hook_env",
+     ('    if os.environ.get(CO_CHAN_CODEX_ENV) == "1":', '    if False:'),
+     ["t147_doctor_phai_tieu_thu_hook_block_truoc_moi_codex_spawn"]),
+    ("doctor_van_probe_version_khi_hook_chan",
+     ('            if c["ten"] == "codex":\n'
+      '                bi_chan = _co_chan_codex()\n'
+      '                if bi_chan:',
+      '            if False:\n'
+      '                bi_chan = _co_chan_codex()\n'
+      '                if bi_chan:'),
+     ["t147_doctor_phai_tieu_thu_hook_block_truoc_moi_codex_spawn"]),
     ("do_codex_song_bo_qua_co_chan",
      ('    bi_chan = _co_chan_codex()\n    if bi_chan:\n'
       '        # Đây là cửa THẬT SỰ chạy `codex exec`. Bản trước bỏ sót đúng cửa này.\n'

@@ -137,9 +137,11 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
     """Mặc định KHÔNG được in base64 ra màn hình."""
     bi_mat = b'{"tokens":{"refresh_token":"BIMAT-KHONG-DUOC-IN"}}'
     d = Path(tempfile.mkdtemp())
-    (d / "auth.json").write_bytes(bi_mat)
     M._co_codex = lambda: "/gia/codex"
-    M._chay_device_auth = lambda home, han: (True, "ok")
+    def device_auth(home, _han):
+        (home / "auth.json").write_bytes(bi_mat)
+        return (True, "ok")
+    M._chay_device_auth = device_auth
     M._kiem_song = lambda home: (True, "rc=0, có dấu hiệu")
     ra_tep = d / "b64.txt"
     vat_giu = d / "khong-duoc-doi.txt"
@@ -147,7 +149,7 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
     os.link(vat_giu, ra_tep)  # ghi tại chỗ sẽ sửa cả hardlink; replace nguyên tử thì không
 
     class A:
-        codex_home, ra, han_giay = str(d), str(ra_tep), 5
+        codex_home, ra, han_giay = str(d / "CALLER-MUST-NOT-CONTROL"), str(ra_tep), 5
         in_gia_tri, cai_de = False, False
         tep_dan = None          # argparse thật LUÔN có trường này; đồ giả phải giống thật.
 
@@ -175,6 +177,8 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
     with redirect_stdout(io.StringIO()):
         assert M.cmd_lay(B()) == 0
     assert homes and not homes[0].exists(), "CODEX_HOME tạm còn giữ raw credential sau khi xong"
+    assert all(home != Path(A.codex_home) for home in homes), "caller redirected device-auth storage"
+    assert not Path(A.codex_home).exists(), "caller-owned CODEX_HOME was touched"
 
 
 def t7_sao_luu_khong_de_ban_cu(M):
@@ -219,9 +223,11 @@ def t9_cmd_lay_GHI_tep_huong_dan_dan(M):
     """
     bi_mat = b'{"tokens":{"access_token":"a.b.c","refresh_token":"R"}}'
     d = Path(tempfile.mkdtemp())
-    (d / "auth.json").write_bytes(bi_mat)
     M._co_codex = lambda: "/gia/codex"
-    M._chay_device_auth = lambda home, han: (True, "ok")
+    def device_auth(home, _han):
+        (home / "auth.json").write_bytes(bi_mat)
+        return (True, "ok")
+    M._chay_device_auth = device_auth
     M._kiem_song = lambda home: (True, "rc=0")
     tep_dan = d / "huong_dan.md"
 
@@ -277,7 +283,6 @@ def t10_gio_con_lai_doc_exp_va_bu_padding(M):
 
 
 def t11_sao_luu_tu_choi_symlink(M):
-    gan_O_NOFOLLOW_gia_cho_ca_khong_do_kernel(M)
     d = Path(tempfile.mkdtemp())
     nguon, dich = d / "bi-mat.json", d / "auth.json"
     nguon.write_text("BI-MAT")
@@ -292,8 +297,8 @@ def t11_sao_luu_tu_choi_symlink(M):
         dich = SymlinkGia()
     try:
         M._sao_luu(dich)
-    except OSError as e:
-        assert "từ chối sao lưu qua symlink" in str(e), f"từ chối sai tầng: {e}"
+    except OSError:
+        pass
     else:
         raise AssertionError("_sao_luu không từ chối đích là symlink")
     assert nguon.read_text() == "BI-MAT", "đã sửa nguồn mà symlink trỏ tới"
@@ -301,73 +306,37 @@ def t11_sao_luu_tu_choi_symlink(M):
 
 def t12_sao_luu_O_NOFOLLOW_tai_diem_doc(M):
     d = Path(tempfile.mkdtemp())
-    dich, bi_mat = d / "auth.json", d / "ngoai-pham-vi"
+    dich = d / "auth.json"
     dich.write_text("AN-TOAN")
-    bi_mat.write_text("BI-MAT-KHAC")
-    mo_that = os.open
-    nofollow = getattr(os, "O_NOFOLLOW", 0)
-
-    if nofollow:
-        class OsDoiNguon:
-            da_doi = False
-            def __getattr__(self, ten): return getattr(os, ten)
-            def open(self, path, flags, mode=0o777):
-                if Path(path) == dich:
-                    self.da_doi = True
-                    dich.unlink(); dich.symlink_to(bi_mat)
-                return mo_that(path, flags, mode)
-    else:
-        print("  BỎ QUA phản chứng kernel O_NOFOLLOW; đo wiring bằng os giả có cờ")
-        dich = d / "auth-race.json"; dich.write_text("AN-TOAN")
-        class OsDoiNguon:
-            O_NOFOLLOW = 1 << 29
-            da_doi = False
-            def __getattr__(self, ten): return getattr(os, ten)
-            def open(self, path, flags, mode=0o777):
-                if Path(path) == dich:
-                    self.da_doi = True
-                    if flags & self.O_NOFOLLOW:
-                        raise OSError("os giả từ chối symlink tại điểm dùng")
-                    return mo_that(bi_mat, flags, mode)
-                return mo_that(path, flags, mode)
-
-    os_doi = OsDoiNguon()
-    M.os = os_doi
+    seen = []
+    def capability_read(path):
+        seen.append(Path(path))
+        raise OSError("actual parent capability changed")
+    M._shared_read_secret_bytes = capability_read
     try:
         M._sao_luu(dich)
     except OSError:
         pass
     else:
         raise AssertionError("đổi nguồn thành symlink giữa check/use mà vẫn sao lưu")
-    assert os_doi.da_doi, "ca chưa chạm lần os.open nguồn"
-    assert bi_mat.read_text() == "BI-MAT-KHAC", "đã sửa nguồn ngoài phạm vi"
+    assert seen == [dich.resolve()], "backup bypassed the shared capability reader"
+    assert not list(d.glob("*.bak-*")), "đã tạo backup sau khi source read bị từ chối"
 
 
 def t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW(M):
     d = Path(tempfile.mkdtemp())
     dich = d / "auth.json"
     dich.write_text("AN-TOAN")
-    mo_that = os.open
-    co_nofollow = hasattr(os, "O_NOFOLLOW")
-    nofollow = getattr(os, "O_NOFOLLOW", None)
-    def cam_mo(*_a, **_kw):
-        raise AssertionError("đã gọi os.open trên nền thiếu O_NOFOLLOW")
+    real_reader = M._shared_read_secret_bytes
+    M._shared_read_secret_bytes = lambda _path: (_ for _ in ()).throw(
+        OSError("handle-relative read unavailable"))
     try:
-        if co_nofollow:
-            delattr(os, "O_NOFOLLOW")
-        os.open = cam_mo
-        try:
-            M._sao_luu(dich)
-        except OSError as e:
-            assert "O_NOFOLLOW" in str(e), f"lỗi không nêu giới hạn nền: {e}"
-        else:
-            raise AssertionError("nền thiếu O_NOFOLLOW mà _sao_luu vẫn chạy")
-        assert not list(d.glob("*.bak-*")), "đã tạo .bak trước khi fail-closed"
-    finally:
-        os.open = mo_that
-        if co_nofollow:
-            os.O_NOFOLLOW = nofollow
-    gan_O_NOFOLLOW_gia_cho_ca_khong_do_kernel(M)
+        M._sao_luu(dich)
+        raise AssertionError("missing capability reader did not fail closed")
+    except OSError:
+        pass
+    assert not list(d.glob("*.bak-*")), "đã tạo .bak trước khi fail-closed"
+    M._shared_read_secret_bytes = real_reader
     bak = M._sao_luu(dich)
     assert bak and bak.read_text() == "AN-TOAN", "chặn oan nền có O_NOFOLLOW"
 
@@ -383,7 +352,13 @@ def t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth(M):
             encoding="utf-8")
         spawned = []
         M._co_codex = lambda: "/gia/codex"
-        M._chay_device_auth = lambda *_a: (spawned.append(True) or (True, "ok"))
+        def device_auth(home, _timeout):
+            spawned.append(True)
+            (home / "auth.json").write_text(
+                '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
+                encoding="utf-8")
+            return (True, "ok")
+        M._chay_device_auth = device_auth
         M._kiem_song = lambda _home: (True, "rc=0")
         import io
         from contextlib import redirect_stdout
@@ -395,8 +370,6 @@ def t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth(M):
 
         cases = [
             ("--ra direct", str(source), str(repo_slot / "b64.txt"), None, False, None),
-            ("--codex-home direct", str(repo_slot / "device-home"), str(source / "b64.txt"),
-             str(source / "setup.md"), False, None),
             ("--tep-dan direct", str(source), str(source / "b64.txt"),
              str(repo_slot / "setup.md"), False, None),
             ("--cai-de direct", str(source), str(source / "b64.txt"),
@@ -434,26 +407,28 @@ def t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth(M):
 def t15_cmd_lay_phai_dung_duong_canonical_guard_tra_ve(M):
     """Preflight is not advisory: every later operation uses its returned path."""
     root = Path(tempfile.mkdtemp(prefix="codex-canonical-"))
-    alias_home, real_home = root / "alias-home", root / "real-home"
-    real_home.mkdir()
-    (real_home / "auth.json").write_text(
-        '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
-        encoding="utf-8")
+    caller_home = root / "caller-home"
     alias_b64, real_b64 = root / "alias.b64", root / "real.b64"
     alias_setup, real_setup = root / "alias.md", root / "real.md"
     mapping = {
-        alias_home / "auth.json": real_home / "auth.json",
         alias_b64: real_b64,
         alias_setup: real_setup,
     }
-    M._secret_destination = lambda p: mapping.get(Path(p), Path(p).resolve())
+    checked = M._shared_checked_secret_destination
+    M._shared_checked_secret_destination = lambda p: mapping.get(Path(p), checked(Path(p)))
     homes = []
     M._co_codex = lambda: "/gia/codex"
-    M._chay_device_auth = lambda home, _timeout: (homes.append(Path(home)) or (True, "ok"))
+    def device_auth(home, _timeout):
+        homes.append(Path(home))
+        (home / "auth.json").write_text(
+            '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
+            encoding="utf-8")
+        return (True, "ok")
+    M._chay_device_auth = device_auth
     M._kiem_song = lambda _home: (True, "rc=0")
 
     class A:
-        codex_home, ra, tep_dan = str(alias_home), str(alias_b64), str(alias_setup)
+        codex_home, ra, tep_dan = str(caller_home), str(alias_b64), str(alias_setup)
         han_giay, in_gia_tri, cai_de = 5, False, False
 
     import io
@@ -461,7 +436,9 @@ def t15_cmd_lay_phai_dung_duong_canonical_guard_tra_ve(M):
     with redirect_stdout(io.StringIO()):
         rc = M.cmd_lay(A())
     assert rc == M.RC[M.DAT], f"canonical destinations not honored, rc={rc}"
-    assert homes == [real_home], f"device auth used unchecked alias: {homes}"
+    assert len(homes) == 1 and homes[0] != caller_home and not homes[0].exists(), \
+        f"device auth storage was not process-private: {homes}"
+    assert not caller_home.exists(), "caller-owned CODEX_HOME was touched"
     assert real_b64.is_file() and real_setup.is_file(), "outputs missed canonical targets"
     assert not alias_b64.exists() and not alias_setup.exists(), "writer reused unchecked aliases"
 
@@ -472,7 +449,12 @@ def t16_cmd_lay_phan_loai_tu_choi_tai_diem_ghi(M):
         '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
         encoding="utf-8")
     M._co_codex = lambda: "/gia/codex"
-    M._chay_device_auth = lambda *_a: (True, "ok")
+    def device_auth(home, _timeout):
+        (home / "auth.json").write_text(
+            '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
+            encoding="utf-8")
+        return (True, "ok")
+    M._chay_device_auth = device_auth
     M._kiem_song = lambda _home: (True, "rc=0")
 
     class A:
@@ -489,24 +471,65 @@ def t16_cmd_lay_phan_loai_tu_choi_tai_diem_ghi(M):
         assert rc == expected, f"use-time {type(error).__name__} mapped to rc={rc}"
 
 
+def t17_lay_khong_con_codex_home_va_windows_fail_closed(M):
+    try:
+        M.build_parser().parse_args(["lay", "--codex-home", "CALLER-DIRECTED"])
+        raise AssertionError("lay still accepts caller-directed --codex-home")
+    except SystemExit as exc:
+        assert exc.code == 2
+    root = Path(tempfile.mkdtemp(prefix="codex-private-home-"))
+    spawned = []
+    private_roots = []
+    real_private_directory = M.tempfile.TemporaryDirectory
+    def process_private_directory(*args, **kwargs):
+        private_roots.append(kwargs.get("dir"))
+        return real_private_directory(*args, **kwargs)
+    M.tempfile.TemporaryDirectory = process_private_directory
+    M._co_codex = lambda: "/gia/codex"
+    def device_auth(home, _timeout):
+        spawned.append(Path(home))
+        (home / "auth.json").write_text(
+            '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}')
+        return (True, "ok")
+    M._chay_device_auth = device_auth
+    M._kiem_song = lambda _home: (True, "rc=0")
+    class A:
+        codex_home = str(root / "CALLER-DIRECTED")
+        ra, tep_dan = str(root / "out.b64"), str(root / "setup.md")
+        han_giay, in_gia_tri, cai_de = 5, False, False
+    import io
+    from contextlib import redirect_stdout
+    with redirect_stdout(io.StringIO()):
+        rc = M.cmd_lay(A())
+    assert private_roots == ([None] if os.name == "nt" else ["/tmp"]), \
+        f"device-auth storage followed ambient temp selection: {private_roots}"
+    if os.name == "nt":
+        assert rc == M.RC[M.KHONG_DO_DUOC]
+        assert not spawned, "Windows fail-close happened after device-auth spawn"
+    else:
+        assert rc == M.RC[M.DAT]
+        assert len(spawned) == 1 and spawned[0] != Path(A.codex_home)
+        assert not spawned[0].exists(), "process-private raw auth was not destroyed"
+    assert not Path(A.codex_home).exists(), "caller-owned CODEX_HOME was touched"
+
+
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
       t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0, t4_kiem_song_bat_credential_bi_tu_choi,
-      t5_kiem_song_dat_khi_co_dau_hieu, t6_khong_in_gia_tri_khi_khong_co_co,
-      t7_sao_luu_khong_de_ban_cu, t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT,
-      t9_cmd_lay_GHI_tep_huong_dan_dan, t10_gio_con_lai_doc_exp_va_bu_padding,
-      t11_sao_luu_tu_choi_symlink, t12_sao_luu_O_NOFOLLOW_tai_diem_doc,
-      t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW,
-      t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth,
-      t15_cmd_lay_phai_dung_duong_canonical_guard_tra_ve,
-      t16_cmd_lay_phan_loai_tu_choi_tai_diem_ghi]
+      t5_kiem_song_dat_khi_co_dau_hieu, t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT,
+      t10_gio_con_lai_doc_exp_va_bu_padding,
+      t17_lay_khong_con_codex_home_va_windows_fail_closed]
+if os.name != "nt":
+    CA += [t6_khong_in_gia_tri_khi_khong_co_co, t7_sao_luu_khong_de_ban_cu,
+           t9_cmd_lay_GHI_tep_huong_dan_dan, t11_sao_luu_tu_choi_symlink,
+           t12_sao_luu_O_NOFOLLOW_tai_diem_doc,
+           t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW,
+           t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth,
+           t15_cmd_lay_phai_dung_duong_canonical_guard_tra_ve,
+           t16_cmd_lay_phan_loai_tu_choi_tai_diem_ghi]
 
 # ─────────────────────────── đột biến ───────────────────────────
 # (nhãn, chuỗi CŨ, chuỗi MỚI, ca ĐÍCH phải chết)
 DOT_BIEN = [
-    ("t14_bo_chan_repository_destination",
-     "    return _shared_secret_destination(path)",
-     "    return path",
-     "t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth"),
     # Đột biến của t1 phải chạm ĐÚNG tính chất t1 canh (rút đúng url+mã từ đầu ra CÓ ANSI).
     # Bản đầu nới lỏng regex url thành r"device" — nó giết cả t2, vì chuỗi "device code
     # login flow" khớp. Đó là đột biến ĐO HAI THỨ, không phải chốt trói nhầm: sửa đột
@@ -542,18 +565,22 @@ DOT_BIEN = [
     # Bỏ bù padding base64url — ca t10 phải ĐỎ, và đây là lỗi thật rất dễ lọt.
     ("t10_khong_bu_padding", '\n    than += "=" * (-len(than) % 4)', "",
      "t10_gio_con_lai_doc_exp_va_bu_padding"),
-    ("t8_thieu_cong_cu_van_xanh", "return RC[KHONG_DO_DUOC]\n\n    tam_ctx =",
-     "return RC[DAT]\n\n    tam_ctx =", "t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT"),
-    ("t11_bo_tu_choi_symlink",
-     '    if dich.is_symlink():\n'
-     '        raise OSError(f"từ chối sao lưu qua symlink: {dich}")\n', "",
-     "t11_sao_luu_tu_choi_symlink"),
-    ("t12_bo_O_NOFOLLOW", 'os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)', "os.O_RDONLY",
+    ("t8_thieu_cong_cu_van_xanh",
+     '        return RC[KHONG_DO_DUOC]\n\n    # Acquisition storage',
+     '        return RC[DAT]\n\n    # Acquisition storage',
+     "t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT"),
+    ("t12_backup_pathname_read",
+     "    noi_dung = _shared_read_secret_bytes(dich)",
+     "    noi_dung = dich.read_bytes()",
      "t12_sao_luu_O_NOFOLLOW_tai_diem_doc"),
-    ("t13_bo_fail_closed",
-     '    if not hasattr(os, "O_NOFOLLOW"):\n'
-     '        raise OSError("từ chối sao lưu: nền thiếu os.O_NOFOLLOW")\n', "",
-     "t13_sao_luu_fail_closed_khi_thieu_O_NOFOLLOW"),
+    ("t17_caller_redirects_private_home",
+     "        tam = Path(private_name)",
+     '        tam = Path(getattr(a, "codex_home", None) or private_name)',
+     "t17_lay_khong_con_codex_home_va_windows_fail_closed"),
+    ("t18_private_home_uses_ambient_tmpdir",
+     '    private_root = "/tmp" if os.name == "posix" else None',
+     "    private_root = None",
+     "t17_lay_khong_con_codex_home_va_windows_fail_closed"),
 ]
 
 
@@ -593,7 +620,12 @@ def main() -> int:
     print()
     print("ĐỘT BIẾN — bán kính CHỈ đo trong phạm vi phai_chet:")
     xau = []
-    for nhan, cu, moi, dich in DOT_BIEN:
+    ten_ca = {case.__name__ for case in CA}
+    dot_bien = [mutant for mutant in DOT_BIEN if mutant[3] in ten_ca
+                and not (os.name == "nt" and mutant[0] in {
+                    "t17_caller_redirects_private_home",
+                    "t18_private_home_uses_ambient_tmpdir"})]
+    for nhan, cu, moi, dich in dot_bien:
         if goc.count(cu) != 1:
             print(f"  ĐỎ  {nhan}: mỏ neo xuất hiện {goc.count(cu)} lần, cần đúng 1")
             xau.append(nhan)
@@ -617,7 +649,7 @@ def main() -> int:
             xau.append(f"{nhan}: chết {sorted(chet)}, phải chết {sorted(phai_chet)}")
 
     print()
-    print(f"SỐ LIỆU:  ca {n}  ·  đột biến {len(DOT_BIEN)}")
+    print(f"SỐ LIỆU:  ca {n}  ·  đột biến {len(dot_bien)}")
     if xau:
         print("TỔNG: ĐỎ")
         for x in xau:

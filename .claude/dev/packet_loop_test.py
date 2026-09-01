@@ -3243,6 +3243,29 @@ CASES += [
     ("adr_song_du_dong_that_van_xanh", case_adr_song_du_dong_that_van_xanh),
     ("adr_song_pre_vo_hai_khong_bat_oan", case_adr_song_pre_vo_hai_khong_bat_oan),
 ]
+
+
+def case_launcher_runtime_giu_ranh_gioi_credential(c: Ctx):
+    """Bản sao runtime phải mang đúng writer guard, không import lén từ checkout."""
+    runtime = c.tmp / "launcher_credential_runtime"
+    launcher = _chep_launcher_runtime(runtime)
+    companion = runtime / "session_credentials.py"
+    if not launcher.is_file() or not companion.is_file():
+        raise AssertionError("runtime launcher thiếu session_credentials.py")
+    spec = importlib.util.spec_from_file_location("session_credentials_runtime_wp433", companion)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    repository = runtime / "fake-repository"
+    (repository / ".git").mkdir(parents=True)
+    try:
+        module.secret_destination(repository / "auth.json")
+    except module.UnsafeSecretDestination:
+        return
+    raise AssertionError("runtime companion cho phép secret destination trong repository")
+
+
+CASES += [("launcher_runtime_giu_ranh_gioi_credential",
+           case_launcher_runtime_giu_ranh_gioi_credential)]
 # Mười dạng vùng-không-render, mỗi dạng MỘT ca có tên riêng — để một đột biến chỉ
 # giết đúng dạng nó làm hở, không gộp thành một chỗ chết chung.
 CASES += [(f"adr_song_quen_dong_{ten}", _ca_quen_dong(chen, ten))

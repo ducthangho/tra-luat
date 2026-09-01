@@ -95,6 +95,7 @@ from pathlib import Path
 from session_credentials import (
     UnsafeSecretDestination as _UnsafeSecretDestination,
     _atomic_secret as _shared_atomic_secret,
+    _read_secret_bytes as _shared_read_secret_bytes,
     secret_destination as _shared_secret_destination,
 )
 
@@ -2400,6 +2401,10 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
     ĐÚNG rằng TỆP không phải JSON — nó không hề nói BIẾN sai.
     """
     ket = []
+    bi_chan = _co_chan_codex()
+    if bi_chan:
+        return [{"ten": "codex", "ok": False, "doi": False,
+                 "cach": bi_chan}]
     thoc = os.environ.get("CODEX_AUTH_JSON", "").strip()
     if not thoc:
         return ket
@@ -2423,7 +2428,11 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
             except Exception:
                 break
         try:
-            json.loads(thu)
+            decoded = json.loads(thu)
+            tokens = decoded.get("tokens") if isinstance(decoded, dict) else None
+            if (not isinstance(tokens, dict)
+                    or not any(isinstance(value, str) and value for value in tokens.values())):
+                continue
             noi_dung_tam = thu
             break
         except Exception:
@@ -2448,8 +2457,17 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
     # `<=` giữ bản trên ĐĨA. Với refresh token XOAY VÒNG, bản đĩa giữ lại có thể đã bị
     # vô hiệu bởi chính lần đăng nhập mới — tức chốt lại bảo vệ đúng bản đã chết, đúng
     # sự cố mà nó sinh ra để chặn. Làm tròn chỉ để NGƯỜI ĐỌC, đừng để MÁY QUYẾT ĐỊNH.
-    moc_dia = _moc_refresh(_last_refresh_cua(dich.read_text(encoding="utf-8"))
-                           ) if dich.exists() else None
+    noi_dung_dia = None
+    try:
+        noi_dung_dia = _shared_read_secret_bytes(dich).decode("utf-8")
+        decoded_disk = json.loads(noi_dung_dia)
+        disk_tokens = decoded_disk.get("tokens") if isinstance(decoded_disk, dict) else None
+        if (not isinstance(disk_tokens, dict)
+                or not any(isinstance(value, str) and value for value in disk_tokens.values())):
+            noi_dung_dia = None
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        noi_dung_dia = None
+    moc_dia = _moc_refresh(_last_refresh_cua(noi_dung_dia)) if noi_dung_dia else None
     moc_bien = _moc_refresh(_last_refresh_cua(noi_dung_tam)) if noi_dung_tam else None
     if moc_dia is not None and moc_bien is not None and moc_dia >= moc_bien:
         return [{"ten": "codex", "ok": True, "doi": False,
@@ -2470,8 +2488,10 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
             d = json.loads(thu)
         except Exception:
             continue
-        if not isinstance(d, dict) or "tokens" not in d:
-            cach = f"HỎNG: giải được ({ten_cach}) nhưng thiếu khoá bắt buộc 'tokens'"
+        tokens = d.get("tokens") if isinstance(d, dict) else None
+        if (not isinstance(tokens, dict)
+                or not any(isinstance(value, str) and value for value in tokens.values())):
+            cach = f"HỎNG: giải được ({ten_cach}) nhưng 'tokens' rỗng hoặc không hợp lệ"
             continue
         noi_dung, cach = thu, ten_cach
         break
@@ -2479,7 +2499,7 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
         return [{"ten": "codex", "ok": False, "duong_dan": str(dich),
                  "cach": cach or "HỎNG: không phải base64-của-JSON, cũng không phải JSON thô"}]
 
-    if dich.exists() and dich.read_text(encoding="utf-8") == noi_dung:
+    if noi_dung_dia == noi_dung:
         return [{"ten": "codex", "ok": True, "doi": False,
                  "cach": cach + " (đã khớp, không đụng)", "duong_dan": str(dich)}]
     if not that_su:
@@ -2560,6 +2580,7 @@ _TOKEN_KHONG_XET_HAN = frozenset({"id_token"})
 # Hai tệp, một tên: đổi một bên mà quên bên kia thì chốt an ninh im lặng biến mất, nên
 # `t102` khoá bằng cách ĐỌC hằng của tệp kia chứ không chép lại chuỗi.
 CO_CHAN_CODEX = "tra-luat-CHAN-CODEX"
+CO_CHAN_CODEX_ENV = "TRA_LUAT_CODEX_BLOCKED"
 
 
 def _last_refresh_cua(noi_dung: str):
@@ -2621,6 +2642,9 @@ def _co_chan_codex() -> str | None:
     terminal thì KHÔNG có gì đọc cờ — muốn chặn tới đó phải là cơ chế khác (đổi PATH,
     gói bọc), và ta KHÔNG làm thế vì nó lại là thứ sửa môi trường sau lưng người dùng.
     """
+    if os.environ.get(CO_CHAN_CODEX_ENV) == "1":
+        return ("BI CHAN: session hook da tu choi CODEX_HOME destination hoac "
+                "codex environment policy; khong spawn bat ky codex child nao")
     co = _codex_home() / CO_CHAN_CODEX
     if not co.exists():
         return None
@@ -3645,6 +3669,15 @@ def lenh_doctor(a) -> int:
         loi_xac_thuc = None
         xac_thuc_chua_do = None
         for ten_uv, d in _cac_duong_dan(c, moi_truong):
+            if c["ten"] == "codex":
+                bi_chan = _co_chan_codex()
+                if bi_chan:
+                    # The hook's destination/policy refusal must survive into
+                    # the final doctor tail.  Even ``codex --version`` is a
+                    # Codex child and therefore must not start here.
+                    thay = {"goi_bang": ten_uv, "duong_dan": d,
+                            "phien_ban": bi_chan}
+                    break
             con_lai = het_han - time.monotonic()
             if con_lai <= 0:
                 # HẾT NGÂN SÁCH KHÔNG PHẢI "CÔNG CỤ HỎNG" — trạng thái thứ ba.

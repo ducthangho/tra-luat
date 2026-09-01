@@ -34,8 +34,10 @@ CHỐT AN TOÀN
   màn hình là bí mật nằm lại trong nhật ký phiên, mà nhật ký sống lâu hơn phiên.
 * Thành công CHỈ được công bố sau một **lời gọi codex THẬT** (`_kiem_song`). `codex login
   status` NÓI DỐI — nó chỉ kiểm tệp đọc được, rc=0 trong khi mọi lời gọi trả 401.
-* **Giới hạn Windows:** stdlib thiếu `os.O_NOFOLLOW`, nên `_sao_luu` fail-closed: không
-  đọc nguồn, không tạo `.bak`; không dựa vào check-then-use `is_symlink()`.
+* Device-auth luôn chạy trong `CODEX_HOME` private do chính process tạo; caller không có
+  tham số đổi storage thu nhận. Copy-out chỉ đi qua shared guarded writer.
+* **Giới hạn Windows:** runtime này không có primitives handle-relative tương đương POSIX,
+  nên mọi copy/backup/install secret fail-closed trước khi chạy device-auth hoặc ghi tệp.
 
 MÃ THOÁT (cùng quy ước `ops/cong_cu.py`)
     0  ĐẠT            việc xong VÀ đã chứng minh bằng lời gọi thật
@@ -53,6 +55,7 @@ import os
 import re
 import select
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -62,6 +65,9 @@ from pathlib import Path
 from session_credentials import (
     UnsafeSecretDestination as _UnsafeSecretDestination,
     _atomic_secret as _shared_atomic_secret,
+    _checked_secret_destination as _shared_checked_secret_destination,
+    _child_env as _shared_child_env,
+    _read_secret_bytes as _shared_read_secret_bytes,
     secret_destination as _shared_secret_destination,
 )
 
@@ -125,8 +131,12 @@ def _chay_device_auth(codex_home: Path, han_giay: int) -> tuple[bool, str]:
     """
     import pty
 
-    codex_home.mkdir(parents=True, exist_ok=True)  # sự thật (3): phải TỒN TẠI trước
-    moi = dict(os.environ, CODEX_HOME=str(codex_home))
+    if not codex_home.is_dir():
+        return (False, "private CODEX_HOME không tồn tại")
+    moi = _shared_child_env(
+        os.environ, HOME=str(codex_home), CODEX_HOME=str(codex_home),
+        XDG_CONFIG_HOME=str(codex_home / ".config"),
+        XDG_CACHE_HOME=str(codex_home / ".cache"))
     chu, con = pty.openpty()  # sự thật (2): không có TTY thì codex im lặng hoàn toàn
     try:
         p = subprocess.Popen([_co_codex() or "codex", "login", "--device-auth"],
@@ -189,7 +199,10 @@ def _kiem_song(codex_home: Path) -> tuple[bool, str]:
     lenh = _co_codex()
     if not lenh:
         return (False, "không có codex trên PATH")
-    moi = dict(os.environ, CODEX_HOME=str(codex_home))
+    moi = _shared_child_env(
+        os.environ, HOME=str(codex_home), CODEX_HOME=str(codex_home),
+        XDG_CONFIG_HOME=str(codex_home / ".config"),
+        XDG_CACHE_HOME=str(codex_home / ".cache"))
     try:
         with open(os.devnull) as rong:
             p = subprocess.run([lenh, "exec", "--skip-git-repo-check",
@@ -268,23 +281,10 @@ def _sao_luu(dich: Path) -> Path | None:
     Không chữa bằng đồng hồ mịn hơn (`time_ns` vẫn có thể trùng khi hệ thống lùi giờ);
     chữa bằng cách HỎI hệ tệp cho tới khi có tên trống.
     """
-    if not hasattr(os, "O_NOFOLLOW"):
-        raise OSError("từ chối sao lưu: nền thiếu os.O_NOFOLLOW")
-    if dich.is_symlink():
-        raise OSError(f"từ chối sao lưu qua symlink: {dich}")
     dich = _secret_destination(dich)
     if not dich.is_file():
         return None
-    nguon_fd = os.open(dich, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
-    try:
-        with os.fdopen(nguon_fd, "rb") as nguon:
-            noi_dung = nguon.read()
-    except Exception:
-        try:
-            os.close(nguon_fd)
-        except OSError:
-            pass
-        raise
+    noi_dung = _shared_read_secret_bytes(dich)
     goc = f"{dich.name}.bak-{int(time.time())}"
     i = 0
     while True:
@@ -360,17 +360,34 @@ def cmd_lay(a) -> int:
         _in("KHÔNG_ĐO_ĐƯỢC: không có `codex` trên PATH — cài rồi chạy lại.")
         return RC[KHONG_DO_DUOC]
 
-    tam_ctx = None if a.codex_home else tempfile.TemporaryDirectory(prefix="codex-cred-")
-    tam = Path(a.codex_home) if a.codex_home else Path(tam_ctx.name)
+    # Acquisition storage is always created by this process.  There is no CLI
+    # or function argument that can redirect Codex into caller-owned storage.
+    # Ignore caller-controlled TMPDIR on POSIX.  The caller may choose copy-out
+    # destinations, but never the storage in which device-auth itself runs.
+    private_root = "/tmp" if os.name == "posix" else None
+    with tempfile.TemporaryDirectory(prefix="codex-cred-", dir=private_root) as private_name:
+        tam = Path(private_name)
+        try:
+            if os.name == "posix":
+                os.chmod(tam, 0o700)
+                if stat.S_IMODE(tam.stat().st_mode) != 0o700:
+                    raise OSError("private CODEX_HOME mode 0700 unavailable")
+            tam = _shared_checked_secret_destination(tam / "auth.json").parent
+        except (_UnsafeSecretDestination, OSError):
+            _in("KHÔNG_ĐO_ĐƯỢC: không thiết lập được CODEX_HOME riêng theo capability")
+            return RC[KHONG_DO_DUOC]
+        return _cmd_lay_private(a, tam)
+
+
+def _cmd_lay_private(a, tam: Path) -> int:
     ra = Path(a.ra) if a.ra else Path("/tmp/CODEX_AUTH_JSON.b64")
     tep_dan = Path(a.tep_dan) if a.tep_dan else ra.with_name("CODEX_AUTH_JSON_setup.md")
     that = effective_codex_home() / "auth.json" if a.cai_de else None
     try:
-        tam = _secret_destination(tam / "auth.json").parent
-        ra = _secret_destination(ra)
-        tep_dan = _secret_destination(tep_dan)
+        ra = _shared_checked_secret_destination(ra)
+        tep_dan = _shared_checked_secret_destination(tep_dan)
         if that is not None:
-            that = _secret_destination(that)
+            that = _shared_checked_secret_destination(that)
     except _UnsafeSecretDestination:
         _in("ĐỎ: từ chối repository secret destination")
         return RC[DO]
@@ -397,7 +414,7 @@ def cmd_lay(a) -> int:
     _in(f"kiểm sống: {vi_sao}")
 
     try:
-        auth_bytes = auth.read_bytes()
+        auth_bytes = _shared_read_secret_bytes(auth)
         b64 = base64.b64encode(auth_bytes).decode("ascii")
         _ghi_bi_mat(ra, (b64 + "\n").encode("ascii"))
 
@@ -480,7 +497,6 @@ def build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="lenh", required=True)
 
     q = sub.add_parser("lay", help="chạy device-auth rồi xuất base64 cho CODEX_AUTH_JSON")
-    q.add_argument("--codex-home", help="thư mục tạm (mặc định tên ngẫu nhiên an toàn trong temp)")
     q.add_argument("--ra", help="tệp ghi base64 (mặc định /tmp/CODEX_AUTH_JSON.b64)")
     q.add_argument("--han-giay", type=int, default=HAN_MAC_DINH_GIAY,
                    help=f"hạn chờ người dùng (mặc định {HAN_MAC_DINH_GIAY}s = hạn của mã)")

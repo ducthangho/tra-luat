@@ -147,11 +147,19 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > GitHub và việc điều phối bootstrap hiện hữu: xem `docs/SESSION_CREDENTIALS.md`.
 > Mọi đích ghi secret (`CODEX_HOME/auth.json`, `claude-capture --output`) phải resolve
 > ra ngoài repository, kể cả qua parent symlink; hook kiểm `CODEX_HOME` trước mọi lần
-> gọi Codex, kể cả khi `codex login status` sẽ báo đã đăng nhập. Writer dùng canonical
-> target và giữ parent đã kiểm xuyên suốt create/replace. Hai lệnh TL bắt buộc
+> gọi Codex, kể cả khi `codex login status` sẽ báo đã đăng nhập. Từ chối sẽ đặt
+> `TRA_LUAT_CODEX_BLOCKED=1`; launcher phải giữ chốt đó qua mọi đường Codex, kể cả
+> doctor cuối. Writer giữ **actual opened parent capability** đã kiểm và làm toàn bộ
+> create/chmod/fsync/replace tương đối với capability ấy; không quay lại đường dẫn.
+> POSIX có primitives cần thiết; Windows thiếu primitives tương đương thì fail closed
+> trước child/write và báo `not_measured`. Hai lệnh TL bắt buộc
 > `--secrets-file`; entry point từ chối bundle trong repository, kiểm/canonicalize
 > HOME/XDG/GWS/cache/temp mà TL child có thể ghi, rồi neo child vào `scripts/tl.py` và
-> cwd của chính repository.
+> cwd của chính repository. Codex device-auth chỉ dùng storage private do process tạo,
+> không nhận `CODEX_HOME` từ caller, rồi copy-out bằng guarded writer. NLM restore chỉ
+> nhận đúng `auth.json`, `profiles/default/cookies.json`, và
+> `profiles/default/metadata.json`; traversal/extra profile/link-junction-reparse bị
+> từ chối trước lần ghi đầu tiên.
 > **Windows (Claude Code):** bấm đúp `tl-setup.cmd` (gốc skill) — menu: [1] Setup 1 lần (cài gws + auth +
 > tự tạo `TL_MASTER_KEY` + mã hoá secrets + in lệnh Cowork vào `COWORK-paste.txt`), [2] Đổi token GAS,
 > [3] Kiểm tra. Sau setup: Code chạy thẳng; Cowork dán khối trong `COWORK-paste.txt`.

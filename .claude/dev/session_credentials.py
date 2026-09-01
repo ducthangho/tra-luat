@@ -16,6 +16,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from datetime import datetime
 from pathlib import Path
 
 STATUSES = ("missing", "rejected", "network_error", "not_measured", "passed")
@@ -34,15 +35,14 @@ class UnsafeSecretDestination(OSError):
 # credential intended for one provider from becoming ambient authority in a
 # different provider's CLI.
 CHILD_ENV_KEYS = frozenset({
-    "PATH", "HOME", "USER", "LOGNAME", "SHELL", "TERM",
+    "PATH", "USER", "LOGNAME", "SHELL", "TERM",
     "TMPDIR", "TMP", "TEMP",
     "LANG", "LANGUAGE", "LC_ALL", "TZ",
     "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY",
     "http_proxy", "https_proxy", "all_proxy", "no_proxy",
     "SSL_CERT_FILE", "SSL_CERT_DIR", "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE",
-    "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "CODEX_HOME",
-    "XDG_DATA_HOME", "GOOGLE_WORKSPACE_CLI_CONFIG_DIR", "TL_CACHE_DIR",
     "PYTHONUTF8", "PYTHONIOENCODING",
+    "SystemRoot", "WINDIR", "COMSPEC", "PATHEXT",
 })
 
 
@@ -58,6 +58,20 @@ def _child_env(source, **required: str) -> dict[str, str]:
     return child
 
 
+@contextlib.contextmanager
+def _isolated_child_env(source, **required: str):
+    """Give one provider a disposable home plus only its explicit credential."""
+    with tempfile.TemporaryDirectory(prefix="tl-provider-home-") as home:
+        yield _child_env(
+            source,
+            HOME=home,
+            XDG_CONFIG_HOME=str(Path(home) / ".config"),
+            XDG_CACHE_HOME=str(Path(home) / ".cache"),
+            XDG_DATA_HOME=str(Path(home) / ".local" / "share"),
+            **required,
+        )
+
+
 def _result(status: str, **details) -> dict:
     if status not in STATUSES:
         raise ValueError(f"invalid status: {status}")
@@ -69,51 +83,151 @@ def codex_home(env=None) -> Path:
     return Path(env.get("CODEX_HOME") or Path.home() / ".codex").expanduser()
 
 
+def _is_repository_root(candidate: Path) -> bool:
+    """Recognize both a worktree and a bare Git repository."""
+    if (candidate / ".git").exists():
+        return True
+    return ((candidate / "HEAD").is_file()
+            and (candidate / "objects").is_dir()
+            and (candidate / "refs").is_dir()
+            and (candidate / "config").is_file())
+
+
 def secret_destination(path: Path) -> Path:
-    """Return the canonical target only when it is outside this checkout."""
+    """Preflight and canonicalize a secret target outside every repository.
+
+    This path check is deliberately not the writer's authority.  The writer
+    opens the actual parent directory and repeats the repository test by file
+    descriptor before it creates a byte.  Callers still use this canonical
+    value so a benign alias cannot drift between their own preflight and use.
+    """
     target = path.expanduser()
     resolved = target.resolve(strict=False)
-    repository = REPOSITORY_ROOT.resolve(strict=True)
-    if resolved == repository or repository in resolved.parents:
-        raise UnsafeSecretDestination(f"refusing repository secret destination: {target}")
     if target.is_symlink():
         raise OSError(f"refusing symlink destination: {target}")
-    # Callers must use this value.  Returning the mutable alias after validating
-    # ``resolved`` re-opens the parent-link swap that the policy just closed.
+    for candidate in (resolved.parent, *resolved.parent.parents):
+        if _is_repository_root(candidate):
+            raise UnsafeSecretDestination(
+                f"refusing repository secret destination: {target}")
     return resolved
 
 
-@contextlib.contextmanager
-def _hold_parent_directory(parent: Path):
-    """Prevent replacement of a validated Windows parent while it is in use."""
-    if os.name != "nt":
-        yield
-        return
-    import ctypes
-    from ctypes import wintypes
-    create_file = ctypes.windll.kernel32.CreateFileW
-    create_file.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD,
-                            wintypes.LPVOID, wintypes.DWORD, wintypes.DWORD,
-                            wintypes.HANDLE]
-    create_file.restype = wintypes.HANDLE
-    close_handle = ctypes.windll.kernel32.CloseHandle
-    close_handle.argtypes = [wintypes.HANDLE]
-    close_handle.restype = wintypes.BOOL
-    # Share read/write but deliberately not delete: rename/replacement of this
-    # directory is refused until the secret write completes.
-    handle = create_file(str(parent), 0x80, 0x1 | 0x2, None, 3, 0x02000000, None)
-    invalid = ctypes.c_void_p(-1).value
-    if handle in (None, invalid):
-        raise ctypes.WinError()
+def _stat_at(directory_fd: int, name: str):
     try:
-        yield
+        return os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+    except FileNotFoundError:
+        return None
+
+
+def _fd_is_repository_root(directory_fd: int) -> bool:
+    dotgit = _stat_at(directory_fd, ".git")
+    if dotgit is not None:
+        return True
+    head = _stat_at(directory_fd, "HEAD")
+    objects = _stat_at(directory_fd, "objects")
+    refs = _stat_at(directory_fd, "refs")
+    config = _stat_at(directory_fd, "config")
+    return bool(head and stat.S_ISREG(head.st_mode)
+                and objects and stat.S_ISDIR(objects.st_mode)
+                and refs and stat.S_ISDIR(refs.st_mode)
+                and config and stat.S_ISREG(config.st_mode))
+
+
+def _directory_flags() -> int:
+    required = ("O_DIRECTORY", "O_NOFOLLOW")
+    if os.name != "posix" or any(not hasattr(os, name) for name in required):
+        # Windows has no stdlib handle-relative create/rename API.  A held
+        # directory handle plus pathname operations is still a pathname
+        # fallback, so this generation intentionally fails closed there.
+        raise OSError("handle-relative secret writer unavailable on this platform")
+    return (os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+            | getattr(os, "O_CLOEXEC", 0))
+
+
+def _validate_parent_capability(parent_fd: int) -> None:
+    """Walk ``..`` from the opened capability and reject any repository."""
+    flags = _directory_flags()
+    current = os.dup(parent_fd)
+    seen = set()
+    try:
+        while True:
+            opened = os.fstat(current)
+            identity = (opened.st_dev, opened.st_ino)
+            if identity in seen:
+                raise OSError("secret parent ancestry loop")
+            seen.add(identity)
+            if _fd_is_repository_root(current):
+                raise UnsafeSecretDestination(
+                    "refusing repository secret parent capability")
+            # Do not consult os.supports_dir_fd.  CPython 3.14 omits working
+            # combinations (notably os.replace) from that registry.
+            parent = os.open("..", flags, dir_fd=current)
+            parent_identity = os.fstat(parent)
+            if identity == (parent_identity.st_dev, parent_identity.st_ino):
+                os.close(parent)
+                break
+            os.close(current)
+            current = parent
+    except (TypeError, NotImplementedError) as exc:
+        raise OSError("directory-relative secret primitives unavailable") from exc
     finally:
-        close_handle(handle)
+        os.close(current)
 
 
-def _write_secret_fd(fd: int, data: bytes) -> None:
+def _open_parent_capability(path: Path, *, create: bool) -> int:
+    flags = _directory_flags()
+    if create:
+        path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        parent_fd = os.open(path.parent, flags)
+    except (TypeError, NotImplementedError) as exc:
+        raise OSError("cannot open secret parent capability") from exc
+    try:
+        _validate_parent_capability(parent_fd)
+    except Exception:
+        os.close(parent_fd)
+        raise
+    return parent_fd
+
+
+def _checked_secret_destination(path: Path, *, create_parent: bool = True) -> Path:
+    """Return a canonical path only after validating its actual parent handle."""
+    target = secret_destination(path)
+    parent_fd = _open_parent_capability(target, create=create_parent)
+    os.close(parent_fd)
+    return target
+
+
+def _read_secret_bytes(path: Path) -> bytes:
+    """Read a regular file relative to the validated parent capability."""
+    target = secret_destination(path)
+    parent_fd = _open_parent_capability(target, create=False)
+    fd = -1
+    try:
+        try:
+            fd = os.open(target.name, os.O_RDONLY | os.O_NOFOLLOW,
+                         dir_fd=parent_fd)
+        except (TypeError, NotImplementedError) as exc:
+            raise OSError("relative secret read unavailable") from exc
+        opened = os.fstat(fd)
+        if not stat.S_ISREG(opened.st_mode):
+            raise OSError("secret source is not a regular file")
+        with os.fdopen(fd, "rb") as source:
+            fd = -1
+            return source.read()
+    finally:
+        if fd != -1:
+            os.close(fd)
+        os.close(parent_fd)
+
+
+def _write_secret_fd(fd: int, data: bytes) -> tuple[int, int]:
     try:
         os.fchmod(fd, 0o600)
+        mode = os.fstat(fd)
+        if stat.S_IMODE(mode.st_mode) != 0o600:
+            raise OSError("secret mode 0600 was not established")
+        identity = (mode.st_dev, mode.st_ino)
     except Exception:
         os.close(fd)
         raise
@@ -121,23 +235,39 @@ def _write_secret_fd(fd: int, data: bytes) -> None:
         out.write(data)
         out.flush()
         os.fsync(out.fileno())
+    return identity
+
+
+def _unlink_identity(directory_fd: int, name: str,
+                     identity: tuple[int, int] | None) -> None:
+    if identity is None:
+        return
+    existing = _stat_at(directory_fd, name)
+    if existing is None or (existing.st_dev, existing.st_ino) != identity:
+        return
+    os.unlink(name, dir_fd=directory_fd)
 
 
 def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
-    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
-    parent_fd = os.open(path.parent, flags)
+    parent_fd = _open_parent_capability(path, create=True)
     created_name = None
+    created_identity = None
     try:
-        named = os.stat(path.parent, follow_symlinks=False)
-        opened = os.fstat(parent_fd)
-        if (named.st_dev, named.st_ino) != (opened.st_dev, opened.st_ino):
-            raise OSError("validated secret parent changed before use")
         if exclusive:
             created_name = path.name
-            fd = os.open(created_name,
-                         os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
-                         0o600, dir_fd=parent_fd)
-            _write_secret_fd(fd, data)
+            try:
+                fd = os.open(created_name,
+                             os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                             0o600, dir_fd=parent_fd)
+            except (TypeError, NotImplementedError) as exc:
+                raise OSError("relative secret create unavailable") from exc
+            created_identity = _write_secret_fd(fd, data)
+            installed = _stat_at(parent_fd, created_name)
+            if (installed is None
+                    or (installed.st_dev, installed.st_ino) != created_identity
+                    or stat.S_IMODE(installed.st_mode) != 0o600):
+                raise OSError("exclusive secret target changed during write")
+            created_name = None
         else:
             for _ in range(128):
                 candidate = f".{path.name}.tmp-{secrets.token_hex(12)}"
@@ -147,20 +277,30 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
                                  0o600, dir_fd=parent_fd)
                 except FileExistsError:
                     continue
+                except (TypeError, NotImplementedError) as exc:
+                    raise OSError("relative secret create unavailable") from exc
                 created_name = candidate
                 break
             else:
                 raise OSError("could not allocate secret temporary file")
-            _write_secret_fd(fd, data)
+            created_identity = _write_secret_fd(fd, data)
             try:
                 existing = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
             except FileNotFoundError:
                 existing = None
             if existing is not None and stat.S_ISLNK(existing.st_mode):
                 raise OSError(f"refusing symlink destination: {path}")
-            os.replace(created_name, path.name,
-                       src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
+            try:
+                os.replace(created_name, path.name,
+                           src_dir_fd=parent_fd, dst_dir_fd=parent_fd)
+            except (TypeError, NotImplementedError) as exc:
+                raise OSError("relative secret replace unavailable") from exc
             created_name = None
+            installed = _stat_at(parent_fd, path.name)
+            if (installed is None
+                    or (installed.st_dev, installed.st_ino) != created_identity
+                    or stat.S_IMODE(installed.st_mode) != 0o600):
+                raise OSError("secret target changed during replace")
         try:
             os.fsync(parent_fd)
         except OSError as exc:
@@ -170,7 +310,7 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
     except Exception:
         if created_name is not None:
             try:
-                os.unlink(created_name, dir_fd=parent_fd)
+                _unlink_identity(parent_fd, created_name, created_identity)
             except OSError:
                 pass
         raise
@@ -178,56 +318,38 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
         os.close(parent_fd)
 
 
-def _atomic_secret_path(path: Path, data: bytes, *, exclusive: bool) -> Path:
-    """Fallback used while a Windows parent handle prevents path replacement."""
-    with _hold_parent_directory(path.parent):
-        identity = path.parent.stat()
-        parent_id = (identity.st_dev, identity.st_ino)
-        if exclusive:
-            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_TRUNC, 0o600)
-            created = path
-            try:
-                _write_secret_fd(fd, data)
-                return path
-            except Exception:
-                created.unlink(missing_ok=True)
-                raise
-        fd, name = tempfile.mkstemp(prefix=f".{path.name}.tmp-", dir=path.parent)
-        tmp = Path(name)
-        try:
-            _write_secret_fd(fd, data)
-            current = path.parent.stat()
-            if (current.st_dev, current.st_ino) != parent_id:
-                raise OSError("validated secret parent changed before replace")
-            if path.is_symlink():
-                raise OSError(f"refusing symlink destination: {path}")
-            os.replace(tmp, path)
-            os.chmod(path, 0o600)
-            return path
-        finally:
-            tmp.unlink(missing_ok=True)
-
-
 def _atomic_secret(path: Path, data: bytes, *, exclusive: bool = False) -> Path:
-    """Write through the validated parent identity, never through its old alias."""
+    """Write only relative to the parent capability that passed validation."""
     path = secret_destination(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path = secret_destination(path)
-    if (os.name == "posix" and hasattr(os, "O_DIRECTORY") and hasattr(os, "O_NOFOLLOW")
-            and os.open in os.supports_dir_fd and os.replace in os.supports_dir_fd):
-        return _atomic_secret_dirfd(path, data, exclusive=exclusive)
-    return _atomic_secret_path(path, data, exclusive=exclusive)
+    return _atomic_secret_dirfd(path, data, exclusive=exclusive)
 
 
 def codex_destination_check(*, env=None) -> dict:
     source = os.environ if env is None else env
     try:
-        target = secret_destination(codex_home(source) / "auth.json")
+        target = _checked_secret_destination(codex_home(source) / "auth.json")
     except UnsafeSecretDestination:
         return _result("rejected", reason="secret_destination_in_repository")
     except OSError:
         return _result("not_measured", reason="write_failed")
     return _result("passed", credential_file=str(target), secret_printed=False)
+
+
+def _refresh_timestamp(document: dict) -> datetime | None:
+    value = document.get("last_refresh")
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None else None
+
+
+def _valid_codex_document(document) -> bool:
+    tokens = document.get("tokens") if isinstance(document, dict) else None
+    return (isinstance(tokens, dict)
+            and any(isinstance(value, str) and value for value in tokens.values()))
 
 
 def materialize_codex(*, env=None) -> dict:
@@ -243,17 +365,32 @@ def materialize_codex(*, env=None) -> dict:
     try:
         raw = base64.b64decode(encoded, validate=True)
         parsed = json.loads(raw)
-        if not isinstance(parsed, dict) or not isinstance(parsed.get("tokens"), dict):
+        if not _valid_codex_document(parsed):
             raise ValueError("missing tokens object")
     except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
         return _result("rejected", reason="malformed_CODEX_AUTH_JSON")
     try:
+        try:
+            disk_raw = _read_secret_bytes(target)
+            disk = json.loads(disk_raw)
+        except FileNotFoundError:
+            disk_raw, disk = b"", None
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+            disk_raw, disk = b"", None
+        if disk_raw == raw:
+            return _result("passed", credential_file=str(target), changed=False,
+                           secret_printed=False)
+        disk_refresh = _refresh_timestamp(disk) if _valid_codex_document(disk) else None
+        env_refresh = _refresh_timestamp(parsed)
+        if disk_refresh is not None and env_refresh is not None and disk_refresh >= env_refresh:
+            return _result("passed", credential_file=str(target), changed=False,
+                           reason="on_disk_newer_or_equal", secret_printed=False)
         _atomic_secret(target, raw)
     except UnsafeSecretDestination:
         return _result("rejected", reason="secret_destination_in_repository")
     except OSError:
         return _result("not_measured", reason="write_failed")
-    return _result("passed", credential_file=str(target), secret_printed=False)
+    return _result("passed", credential_file=str(target), changed=True, secret_printed=False)
 
 
 def _emit_sanitized(data: str, stream) -> None:
@@ -294,14 +431,19 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
                    output_stream=None) -> dict:
     """Run ``claude setup-token`` on a real PTY, relay prompts, retain token privately."""
     try:
-        output = secret_destination(output)
+        output = _checked_secret_destination(output)
     except UnsafeSecretDestination:
         return _result("rejected", reason="secret_destination_in_repository")
     except OSError:
         return _result("not_measured", reason="write_failed")
     import pty
 
-    child = _child_env(os.environ if env is None else env)
+    source = os.environ if env is None else env
+    child_home = tempfile.TemporaryDirectory(prefix="tl-provider-home-")
+    child = _child_env(source, HOME=child_home.name,
+                       XDG_CONFIG_HOME=str(Path(child_home.name) / ".config"),
+                       XDG_CACHE_HOME=str(Path(child_home.name) / ".cache"),
+                       XDG_DATA_HOME=str(Path(child_home.name) / ".local" / "share"))
     input_stream = sys.stdin if input_stream is None else input_stream
     output_stream = sys.stdout if output_stream is None else output_stream
     master, slave = pty.openpty()
@@ -309,7 +451,7 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
         proc = subprocess.Popen(["claude", "setup-token"], stdin=slave, stdout=slave,
                                 stderr=slave, env=child, close_fds=True)
     except OSError:
-        os.close(master); os.close(slave)
+        os.close(master); os.close(slave); child_home.cleanup()
         return _result("not_measured", reason="cli_missing")
     os.close(slave)
     deadline, captured, pending = time.monotonic() + timeout, "", ""
@@ -348,6 +490,7 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
         os.close(master)
         if proc.poll() is None:
             proc.kill(); proc.wait()
+        child_home.cleanup()
     _drain_sanitized(pending, output_stream, final=True)
     found = TOKEN_RE.findall(captured)
     if proc.returncode or len(found) != 1:
@@ -371,11 +514,12 @@ def claude_probe(token_file: Path | None = None, *, timeout=20, env=None) -> dic
             return _result("not_measured", reason="credential_file_unreadable")
     if not token:
         return _result("missing", reason="CLAUDE_CODE_OAUTH_TOKEN")
-    child = _child_env(source, CLAUDE_CODE_OAUTH_TOKEN=token)
     marker = "TRALUAT-CLAUDE-CREDENTIAL-OK"
     try:
-        p = subprocess.run(["claude", "-p", f"Print exactly: {marker}"], stdin=subprocess.DEVNULL,
-                           capture_output=True, text=True, timeout=timeout, env=child)
+        with _isolated_child_env(source, CLAUDE_CODE_OAUTH_TOKEN=token) as child:
+            p = subprocess.run(["claude", "-p", f"Print exactly: {marker}"],
+                               stdin=subprocess.DEVNULL, capture_output=True, text=True,
+                               timeout=timeout, env=child)
     except subprocess.TimeoutExpired:
         return _result("not_measured", reason="timeout")
     except OSError:
@@ -390,27 +534,35 @@ def claude_probe(token_file: Path | None = None, *, timeout=20, env=None) -> dic
     return _result("passed", returncode=0)
 
 
+def _github_failure_status(stdout: str, stderr: str) -> str:
+    """Classify auth only from an HTTP response evidenced as GitHub's."""
+    combined = (stdout or "") + "\n" + (stderr or "")
+    statuses = re.findall(r"(?mi)^HTTP/\S+\s+(\d{3})\b", combined)
+    status = int(statuses[-1]) if statuses else None
+    from_github = re.search(r"(?mi)^X-GitHub-[^:]+:", combined) is not None
+    if from_github and status in (401, 403, 404):
+        return "rejected"
+    return "network_error"
+
+
 def github_probe(repo: str, *, timeout: int = 20, env=None) -> dict:
     source = os.environ if env is None else env
     token = source.get("GITHUB_PAT")
     if not token:
         return _result("missing", endpoints={})
-    child = _child_env(source, GH_TOKEN=token)
     results = {}
-    for endpoint in ("user", f"repos/{repo}"):
-        try:
-            p = subprocess.run(["gh", "api", endpoint, "--silent"], capture_output=True,
-                               text=True, timeout=timeout, env=child)
-        except subprocess.TimeoutExpired:
-            results[endpoint] = "network_error"
-        except OSError:
-            results[endpoint] = "not_measured"
-        else:
-            low = ((p.stderr or "") + (p.stdout or "")).lower()
-            auth_failure = any(x in low for x in ("401", "403", "404", "bad credentials",
-                                                   "authentication", "not found"))
-            results[endpoint] = "passed" if p.returncode == 0 else (
-                "rejected" if auth_failure else "network_error")
+    with _isolated_child_env(source, GH_TOKEN=token) as child:
+        for endpoint in ("user", f"repos/{repo}"):
+            try:
+                p = subprocess.run(["gh", "api", endpoint, "--include", "--silent"], capture_output=True,
+                                   text=True, timeout=timeout, env=child)
+            except subprocess.TimeoutExpired:
+                results[endpoint] = "network_error"
+            except OSError:
+                results[endpoint] = "not_measured"
+            else:
+                results[endpoint] = "passed" if p.returncode == 0 else (
+                    _github_failure_status(p.stdout, p.stderr))
     vals = set(results.values())
     status = "passed" if vals == {"passed"} else "rejected" if "rejected" in vals else (
         "not_measured" if vals == {"not_measured"} else "network_error")
@@ -429,13 +581,14 @@ def tl_bootstrap(env_name: str, secrets_file: Path | None, *, timeout: int = 600
         if script.parent.parent != repository:
             return _result("not_measured", reason="unexpected_tl_script")
         resolved_secrets = secret_destination(secrets_file)
-        child = _child_env(source, TL_MASTER_KEY=source["TL_MASTER_KEY"])
-        child["HOME"] = str(secret_destination(Path(child.get("HOME") or Path.home())))
+        home = str(secret_destination(Path(source.get("HOME") or Path.home())))
+        storage = {"HOME": home}
         for key in ("XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME",
                     "GOOGLE_WORKSPACE_CLI_CONFIG_DIR", "TL_CACHE_DIR",
                     "TMPDIR", "TMP", "TEMP"):
-            if child.get(key):
-                child[key] = str(secret_destination(Path(child[key])))
+            if source.get(key):
+                storage[key] = str(secret_destination(Path(source[key])))
+        child = _child_env(source, TL_MASTER_KEY=source["TL_MASTER_KEY"], **storage)
         home = Path(child["HOME"])
         delegated_targets = [
             home / ".tra_luat_config.json",

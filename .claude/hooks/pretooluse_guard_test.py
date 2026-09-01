@@ -402,9 +402,7 @@ def t19_kiem_bang_FAIL_CLOSE_khi_thieu_nguon(g):
     """Rang cho nhanh "KHONG DO DUOC" cua TANG 1. Mot cong tu tat khi thieu nguon la cong
     khong ton tai dung luc no can nhat. Dot bien m20 SONG truoc khi co ca nay."""
     with tempfile.TemporaryDirectory() as d:
-        r = subprocess.run([sys.executable, "-B", str(g), "--kiem-bang", d],
-                           capture_output=True, text=True, encoding="utf-8",
-                           env=moi_truong_con(), timeout=300)
+        r = _kiem_bang_voi_runtime_fixture(g, d)
     ok = r.returncode != 0 and "KHONG DO DUOC" in (r.stderr or "")
     return (ok, f"goc KHONG co command_registry.py -> rc={r.returncode} "
                 f"(mong doi khac 0), co 'KHONG DO DUOC' tren stderr="

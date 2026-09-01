@@ -169,8 +169,10 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > XDG root và cả ba temp vars vào hierarchy đó; permission/repository/symlink/reparse không
 > kiểm chắc được thì fail trước child. Chốt này không chống actor đồng thời cùng OS principal
 > có quyền reparent hierarchy đã tạo; threat model mạnh hơn phải dùng namespace/principal
-> confinement của OS. Codex không nhận `CODEX_HOME` từ caller và chỉ
-> copy-out bằng guarded writer. NLM restore chỉ
+> confinement của OS. Riêng Codex live-check giữ credential directory đã validate chỉ làm
+> `CODEX_HOME`, còn `HOME`/XDG/temp nằm trong một hierarchy private tách biệt; credential
+> directory thường chỉ có `auth.json` không cần provider-home scaffold. Đường device-auth
+> `lay` không nhận `CODEX_HOME` từ caller và chỉ copy-out bằng guarded writer. NLM restore chỉ
 > nhận đúng `auth.json`, `profiles/default/cookies.json`, và
 > `profiles/default/metadata.json`; traversal/extra profile/link-junction-reparse bị
 > từ chối trước lần ghi đầu tiên.

@@ -1184,10 +1184,12 @@ def _probe_cho_so(ds: dict) -> dict:
             for ten, kq in ds.items()}
 
 
-def chay_cac_probe(ws: str, lenh: list[str], bo_qua: str | None) -> tuple[dict, str | None]:
+def chay_cac_probe(ws: str, identity: dict, bo_qua: str | None) -> tuple[dict, str | None]:
+    """Run capability probes from the executable identity bound at dispatch."""
+    lenh = identity["argv"]
     ds = {"workspace": _probe_workspace(ws), "ghi": _probe_ghi(ws),
           "spawn": _probe_spawn(str(lenh[0]), ws)}
-    if Path(str(lenh[0])).name.casefold() in ("claude", "claude.exe"):
+    if identity.get("provider") == "anthropic_claude":
         ds["claude_trust"] = _probe_trust_claude(ws)
     ly_do = bo_qua.strip() if bo_qua is not None else None
     if bo_qua is not None and not ly_do:
@@ -1583,7 +1585,7 @@ def lenh_run(a) -> int:
     _chan_run_codex(identity)
     try:
         probe, ly_do_bo_qua = chay_cac_probe(
-            kq["workspace"], bound_argv, a.bo_qua_probe)
+            kq["workspace"], identity, a.bo_qua_probe)
     except Chan as e:
         if e.probe is None:
             raise

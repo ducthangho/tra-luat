@@ -6407,8 +6407,8 @@ def r23_run_codex_alias_phai_bind_target_mot_lan_cho_moi_consumer():
                     return 0
 
             m.chay_cac_chot = lambda _a: precomputed_chot
-            m.chay_cac_probe = lambda _w, argv, _skip: (
-                events.append(("probe", list(argv))) or ({}, None))
+            m.chay_cac_probe = lambda _w, identity, _skip: (
+                events.append(("probe", list(identity["argv"]))) or ({}, None))
             m._co_chan_codex = lambda: events.append(("codex-policy", None))
             m.subprocess.Popen = lambda argv, **_k: (
                 events.append(("popen", list(argv))) or Child())
@@ -6430,6 +6430,149 @@ def r23_run_codex_alias_phai_bind_target_mot_lan_cho_moi_consumer():
             m.chay_cac_probe = original_probe
             m._co_chan_codex = original_block
             m.shutil.which = original_which
+            m.subprocess.Popen = original_popen
+            m._job_windows = original_job
+            m._khoa_danh_tinh = original_key
+            m._thanh_vien_nhom = original_group
+
+
+@ca
+def r24_probe_claude_phai_dung_provider_da_bind_khong_dung_basename():
+    """Claude trust follows bound provider identity even when argv[0] is cli.js."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = tao_repo(s)
+        cli_js = s / "provider" / "cli.js"
+        cli_js.parent.mkdir()
+        cli_js.write_text("fixture executable", encoding="utf-8")
+        cli_js.chmod(0o700)
+        original_chot = m.chay_cac_chot
+        original_resolve = m._resolve_executable_identity
+        original_workspace = m._probe_workspace
+        original_write = m._probe_ghi
+        original_spawn = m._probe_spawn
+        original_trust = m._probe_trust_claude
+        original_popen = m.subprocess.Popen
+        original_job = m._job_windows
+        original_key = m._khoa_danh_tinh
+        original_group = m._thanh_vien_nhom
+        preflight_args = m.build_parser().parse_args([
+            "run", "--workspace", str(repo), "--run-root", str(s / "preflight"),
+            "--", "local-cli",
+        ])
+        preflight_args.lenh = preflight_args.lenh[1:]
+        precomputed_chot = original_chot(preflight_args)
+        trust_state = {"value": "DAT"}
+        trust_calls = []
+        popen_calls = []
+
+        class Child:
+            pid = 424243
+
+            def poll(self):
+                return 0
+
+            def wait(self, timeout=None):
+                return 0
+
+        try:
+            m.chay_cac_chot = lambda _a: dict(precomputed_chot)
+            m._probe_workspace = lambda _ws: {"trang_thai": "DAT", "chi_tiet": "fixture"}
+            m._probe_ghi = lambda _ws: {"trang_thai": "DAT", "chi_tiet": "fixture"}
+            m._probe_spawn = lambda _cmd, _ws: {"trang_thai": "DAT", "chi_tiet": "fixture"}
+
+            def probe_trust(_ws, _home=None):
+                trust_calls.append(trust_state["value"])
+                return {"trang_thai": trust_state["value"], "chi_tiet": "fixture trust"}
+
+            m._probe_trust_claude = probe_trust
+            m.subprocess.Popen = lambda argv, **_k: (
+                popen_calls.append(list(argv)) or Child())
+            m._job_windows = lambda _pid: None
+            m._khoa_danh_tinh = lambda _pid: "fixture-process-key"
+            m._thanh_vien_nhom = lambda _pid: []
+
+            identities = {
+                # This is the exact downstream state after a Claude shim/alias
+                # has been bound once to Anthropic's provider-neutral cli.js.
+                "claude-alias": {
+                    "argv": [str(cli_js)], "provider": "anthropic_claude",
+                    "original_argv0": "claude-alias",
+                },
+                "claude.cmd": {
+                    "argv": ["claude.cmd"], "provider": "anthropic_claude",
+                    "original_argv0": "claude.cmd",
+                },
+                "local-cli": {
+                    "argv": [str(cli_js)], "provider": None,
+                    "original_argv0": "local-cli",
+                },
+            }
+            m._resolve_executable_identity = lambda argv, _ws: identities[argv[0]]
+
+            # Both missing and explicit-false trust refuse before child start,
+            # and the refusal ledger preserves the provider/trust evidence.
+            for index, state in enumerate(("KHONG_DO_DUOC", "DO"), 1):
+                trust_state["value"] = state
+                before_popen = len(popen_calls)
+                a = m.build_parser().parse_args([
+                    "run", "--workspace", str(repo),
+                    "--run-root", str(s / f"refusal-{index}"),
+                    "--", "claude-alias",
+                ])
+                a.lenh = a.lenh[1:]
+                try:
+                    m.lenh_run(a)
+                except m.Chan as exc:
+                    bang(exc.ma == MA_PROBE, f"trust={state} bi chan sai: {exc.ma}")
+                else:
+                    bang(False, f"trust={state} van cho Claude alias chay")
+                bang(len(popen_calls) == before_popen,
+                     f"trust={state} van cham Popen: {popen_calls[before_popen:]}")
+                record = json.loads(next((s / f"refusal-{index}").glob("*/run.json")).read_text())
+                bang(record["provider"] == "anthropic_claude"
+                     and record["probe"]["claude_trust"]["trang_thai"] == state,
+                     f"ledger refusal mat provider/trust: {record}")
+
+            # Trusted aliases and ordinary Claude shims both run the trust probe
+            # and may proceed to Popen.
+            for index, command in enumerate(("claude-alias", "claude.cmd"), 1):
+                trust_state["value"] = "DAT"
+                before_trust = len(trust_calls)
+                before_popen = len(popen_calls)
+                a = m.build_parser().parse_args([
+                    "run", "--workspace", str(repo),
+                    "--run-root", str(s / f"trusted-{index}"),
+                    "--", command,
+                ])
+                a.lenh = a.lenh[1:]
+                bang(m.lenh_run(a) == 0, f"trusted {command} bi chan")
+                bang(len(trust_calls) == before_trust + 1
+                     and len(popen_calls) == before_popen + 1,
+                     f"trusted {command} khong qua dung probe/Popen")
+
+            # The same cli.js path without a bound Claude provider stays a local
+            # process: it neither consults Claude trust nor gets blocked by it.
+            trust_state["value"] = "DO"
+            before_trust = len(trust_calls)
+            before_popen = len(popen_calls)
+            a = m.build_parser().parse_args([
+                "run", "--workspace", str(repo),
+                "--run-root", str(s / "non-claude"),
+                "--", "local-cli",
+            ])
+            a.lenh = a.lenh[1:]
+            bang(m.lenh_run(a) == 0, "non-Claude cli.js bi chan oan")
+            bang(len(trust_calls) == before_trust
+                 and len(popen_calls) == before_popen + 1,
+                 "non-Claude control consulted trust or missed Popen")
+        finally:
+            m.chay_cac_chot = original_chot
+            m._resolve_executable_identity = original_resolve
+            m._probe_workspace = original_workspace
+            m._probe_ghi = original_write
+            m._probe_spawn = original_spawn
+            m._probe_trust_claude = original_trust
             m.subprocess.Popen = original_popen
             m._job_windows = original_job
             m._khoa_danh_tinh = original_key
@@ -6508,6 +6651,10 @@ DOT_BIEN = [
      ('            resolved_path, matched_provider = _resolve_executable_alias(candidate_path)',
       '            resolved_path, matched_provider = candidate_path, None'),
      ["r23_run_codex_alias_phai_bind_target_mot_lan_cho_moi_consumer"]),
+    ("probe_claude_reinfers_bound_argv0_basename",
+     ('    if identity.get("provider") == "anthropic_claude":',
+      '    if Path(str(lenh[0])).name.casefold() in ("claude", "claude.exe"):'),
+     ["r24_probe_claude_phai_dung_provider_da_bind_khong_dung_basename"]),
     # Ca "rc=0 ma stdout RONG" duoc chan o BON cho doc lap: guard trong
     # _git_mot_dong, kiem SHA_RE trong chot_head, kiem `not top` trong chot_workspace,
     # va kiem `not ref` trong chot_ref. DA DO: bo RIENG bat ky cho nao cung KHONG ca nao chet -

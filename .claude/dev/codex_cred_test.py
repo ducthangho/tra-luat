@@ -527,11 +527,106 @@ def t17_lay_khong_con_codex_home_va_windows_fail_closed(M):
     assert not Path(A.codex_home).exists(), "caller-owned CODEX_HOME was touched"
 
 
+def t18_kiem_song_CODEX_HOME_thuong_dung_provider_home_rieng(M):
+    """Live check keeps credentials in CODEX_HOME and all other state elsewhere."""
+    from contextlib import contextmanager
+
+    root = Path(tempfile.mkdtemp(prefix="codex-live-split-"))
+    codex_home = root / "credentials"
+    codex_home.mkdir(mode=0o700)
+    (codex_home / "auth.json").write_text(
+        '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
+        encoding="utf-8")
+    fake = root / "fake"
+    fake.mkdir()
+    (fake / "exec").write_text(
+        "import sys\n"
+        f"sys.stdout.write({(M.DAU_HIEU_SONG + chr(10))!r})\n",
+        encoding="utf-8")
+
+    real_private_home = M._shared_private_provider_home
+    real_child_env = M._shared_provider_child_env
+    private_roots = []
+    child_envs = []
+
+    @contextmanager
+    def observed_private_home():
+        with real_private_home() as home:
+            private_roots.append(Path(home).parent)
+            yield home
+
+    def observed_child_env(source, home, **required):
+        env = real_child_env(source, home, **required)
+        child_envs.append(dict(env))
+        return env
+
+    M._shared_private_provider_home = observed_private_home
+    M._shared_provider_child_env = observed_child_env
+    M._co_codex = lambda: sys.executable
+    old_cwd = os.getcwd()
+    isolated_keys = ("CODEX_AUTH_JSON", "CLAUDE_CODE_OAUTH_TOKEN", "GITHUB_PAT",
+                     "TL_MASTER_KEY", "TMPDIR", "TMP", "TEMP")
+    old_env = {key: os.environ.get(key) for key in isolated_keys}
+    ambient = root / "ambient-temp"
+    ambient.mkdir()
+    try:
+        os.chdir(fake)
+        os.environ.update({
+            "CODEX_AUTH_JSON": "AMBIENT-CODEX",
+            "CLAUDE_CODE_OAUTH_TOKEN": "AMBIENT-CLAUDE",
+            "GITHUB_PAT": "AMBIENT-GITHUB",
+            "TL_MASTER_KEY": "AMBIENT-TL",
+            "TMPDIR": str(ambient), "TMP": str(ambient), "TEMP": str(ambient),
+        })
+        ok, reason = M._kiem_song(codex_home)
+    finally:
+        os.chdir(old_cwd)
+        for key, value in old_env.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+    assert ok, f"ordinary CODEX_HOME required provider scaffold: {reason}"
+    assert len(private_roots) == 1 and len(child_envs) == 1, \
+        f"live check did not allocate exactly one private provider context: {private_roots}"
+    private_root, child = private_roots[0], child_envs[0]
+    assert Path(child["CODEX_HOME"]) == codex_home, child
+    for key in ("HOME", "XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME",
+                "XDG_STATE_HOME", "TMPDIR", "TMP", "TEMP"):
+        path = Path(child[key])
+        assert path == private_root or private_root in path.parents, \
+            f"{key} escaped private provider context: {path} vs {private_root}"
+    assert Path(child["HOME"]) != codex_home, "credential directory reused as provider HOME"
+    assert ambient != private_root and ambient not in private_root.parents, \
+        f"private provider context followed ambient temp: {private_root}"
+    for key in ("CODEX_AUTH_JSON", "CLAUDE_CODE_OAUTH_TOKEN", "GITHUB_PAT", "TL_MASTER_KEY"):
+        assert key not in child, f"ambient credential leaked into Codex live check: {key}"
+    assert not private_root.exists(), "private provider context survived live-check cleanup"
+    assert sorted(path.name for path in codex_home.iterdir()) == ["auth.json"], \
+        "live check scaffolded HOME/XDG/TMP inside ordinary CODEX_HOME"
+
+    # Allocation/validation refusal is still before subprocess start.
+    child_started = []
+
+    @contextmanager
+    def unavailable_private_home():
+        raise OSError("fixture private provider storage unavailable")
+        yield  # pragma: no cover - makes this a contextmanager
+
+    M._shared_private_provider_home = unavailable_private_home
+    M.subprocess.run = lambda *_a, **_k: child_started.append(True)
+    ok, reason = M._kiem_song(codex_home)
+    assert not ok and "provider storage" in reason, reason
+    assert child_started == [], "live check spawned before private provider allocation passed"
+
+
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,
       t3_kiem_song_doi_DAU_HIEU_khong_tin_rc0, t4_kiem_song_bat_credential_bi_tu_choi,
       t5_kiem_song_dat_khi_co_dau_hieu, t8_thieu_codex_la_KHONG_DO_DUOC_khong_phai_DAT,
       t10_gio_con_lai_doc_exp_va_bu_padding,
-      t17_lay_khong_con_codex_home_va_windows_fail_closed]
+      t17_lay_khong_con_codex_home_va_windows_fail_closed,
+      t18_kiem_song_CODEX_HOME_thuong_dung_provider_home_rieng]
 if os.name != "nt":
     CA += [t6_khong_in_gia_tri_khi_khong_co_co, t7_sao_luu_khong_de_ban_cu,
            t9_cmd_lay_GHI_tep_huong_dan_dan, t11_sao_luu_tu_choi_symlink,
@@ -591,6 +686,10 @@ DOT_BIEN = [
      "        tam = private_home",
      '        tam = Path(getattr(a, "codex_home", None) or private_home)',
      "t17_lay_khong_con_codex_home_va_windows_fail_closed"),
+    ("kiem_song_requires_private_provider_scaffold",
+     "                    os.environ, provider_home, CODEX_HOME=str(codex_home))",
+     "                    os.environ, codex_home, CODEX_HOME=str(codex_home))",
+     "t18_kiem_song_CODEX_HOME_thuong_dung_provider_home_rieng"),
     # Ambient temp selection moved into the shared provider allocator.  Its
     # focused lock and named mutant now live in session_credentials_test.py;
     # retaining a duplicate source mutation here would target dead ownership.

@@ -200,20 +200,29 @@ def _kiem_song(codex_home: Path) -> tuple[bool, str]:
     if not lenh:
         return (False, "không có codex trên PATH")
     try:
-        moi = _shared_provider_child_env(
-            os.environ, codex_home, CODEX_HOME=str(codex_home))
+        # CODEX_HOME is credential storage, not the provider process HOME.  It
+        # may be an ordinary validated directory containing only auth.json.
+        # Allocate a separate private hierarchy for HOME/XDG/TMP so live checks
+        # never require or create provider-home scaffold beside credentials.
+        with _shared_private_provider_home() as provider_home:
+            try:
+                moi = _shared_provider_child_env(
+                    os.environ, provider_home, CODEX_HOME=str(codex_home))
+            except OSError as e:
+                return (False, f"provider storage không an toàn: {type(e).__name__}")
+            try:
+                with open(os.devnull) as rong:
+                    p = subprocess.run([lenh, "exec", "--skip-git-repo-check",
+                                        f"In ra dung mot tu: {DAU_HIEU_SONG}"],
+                                       stdin=rong, capture_output=True, text=True, env=moi,
+                                       timeout=HAN_KIEM_SONG_GIAY, encoding="utf-8",
+                                       errors="replace")
+            except subprocess.TimeoutExpired:
+                return (False, f"quá hạn {HAN_KIEM_SONG_GIAY}s")
+            except (OSError, subprocess.SubprocessError) as e:
+                return (False, f"không chạy được: {type(e).__name__}")
     except OSError as e:
         return (False, f"provider storage không an toàn: {type(e).__name__}")
-    try:
-        with open(os.devnull) as rong:
-            p = subprocess.run([lenh, "exec", "--skip-git-repo-check",
-                                f"In ra dung mot tu: {DAU_HIEU_SONG}"],
-                               stdin=rong, capture_output=True, text=True, env=moi,
-                               timeout=HAN_KIEM_SONG_GIAY, encoding="utf-8", errors="replace")
-    except subprocess.TimeoutExpired:
-        return (False, f"quá hạn {HAN_KIEM_SONG_GIAY}s")
-    except (OSError, subprocess.SubprocessError) as e:
-        return (False, f"không chạy được: {type(e).__name__}")
     stdout, stderr = p.stdout or "", p.stderr or ""
     ra = stdout + stderr
     for dau in ("token_revoked", "refresh_token_invalidated", "401 unauthorized",

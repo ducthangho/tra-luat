@@ -15,6 +15,8 @@ m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
 
 
 def run():
+    expected_repository = P.resolve().parents[2]
+    assert m.REPOSITORY_ROOT == expected_repository
     with tempfile.TemporaryDirectory() as td:
         root = Path(td)
         assert m.codex_home({"CODEX_HOME": str(root / "custom")}) == root / "custom"
@@ -28,7 +30,7 @@ def run():
         target = root / "codex" / "auth.json"
         assert result["status"] == "passed" and target.read_bytes() == auth
         assert stat.S_IMODE(target.stat().st_mode) == 0o600 and "private" not in repr(result)
-        blocked_codex_home = m.REPOSITORY_ROOT / "docs" / ".blocked-codex-home"
+        blocked_codex_home = expected_repository / "docs" / ".blocked-codex-home"
         blocked_auth = blocked_codex_home / "auth.json"
         assert not blocked_auth.exists()
         with mock.patch.object(m, "_atomic_secret") as writer:
@@ -38,6 +40,10 @@ def run():
                            "reason": "secret_destination_in_repository"}
         writer.assert_not_called()
         assert not blocked_auth.exists()
+        with mock.patch.object(m, "secret_destination", side_effect=OSError("lookup failed")):
+            unresolved = m.materialize_codex(env={"CODEX_AUTH_JSON": encoded,
+                                                  "CODEX_HOME": str(root / "unresolved")})
+        assert unresolved == {"status": "not_measured", "reason": "write_failed"}
         assert m.materialize_codex(env={})["status"] == "missing"
         assert m.materialize_codex(env={"CODEX_AUTH_JSON": "!"})["status"] == "rejected"
         no_tokens = base64.b64encode(b'{"not_tokens":{}}').decode()
@@ -48,7 +54,7 @@ def run():
 
         # Public materialization must fail closed before a caller-controlled
         # CODEX_HOME can place auth.json anywhere in this checkout.
-        repo = P.resolve().parents[2]
+        repo = expected_repository
         with tempfile.TemporaryDirectory(prefix="credential-direct-", dir=repo) as rd:
             repo_home = Path(rd) / ".codex"
             result = m.materialize_codex(env={"CODEX_AUTH_JSON": encoded,
@@ -68,7 +74,7 @@ def run():
             assert result == {"status": "rejected", "reason": "secret_destination_in_repository"}
             assert not (repo_slot / ".codex" / "auth.json").exists()
 
-        direct_output = m.REPOSITORY_ROOT / "docs" / ".blocked-claude-token"
+        direct_output = expected_repository / "docs" / ".blocked-claude-token"
         assert not direct_output.exists()
         with mock.patch.object(m.subprocess, "Popen", side_effect=OSError("must not spawn")) as popen:
             blocked = m.capture_claude(direct_output, timeout=1, env={},
@@ -78,8 +84,15 @@ def run():
         popen.assert_not_called()
         assert not direct_output.exists()
 
+        with mock.patch.object(m, "secret_destination", side_effect=OSError("lookup failed")), \
+             mock.patch.object(m.subprocess, "Popen") as popen:
+            unresolved = m.capture_claude(root / "unresolved-claude", timeout=1, env={},
+                input_stream=io.StringIO(), output_stream=io.StringIO())
+        assert unresolved == {"status": "not_measured", "reason": "write_failed"}
+        popen.assert_not_called()
+
         repo_link = root / "repo-parent-link"
-        repo_link.symlink_to(m.REPOSITORY_ROOT, target_is_directory=True)
+        repo_link.symlink_to(expected_repository, target_is_directory=True)
         linked_output = repo_link / "docs" / ".blocked-parent-token"
         with mock.patch.object(m.subprocess, "Popen", side_effect=OSError("must not spawn")) as popen:
             blocked = m.capture_claude(linked_output, timeout=1, env={},
@@ -125,6 +138,20 @@ os.write(1,b'A'*180 + b'\\n')
         assert "sk-ant" not in displayed.getvalue() and "A"*20 not in displayed.getvalue()
         assert "[REDACTED]" in displayed.getvalue()
         assert stat.S_IMODE(out.stat().st_mode) == 0o600
+
+        # A parent can be swapped into the repository after the early preflight.
+        # The use-time guard must still classify that policy refusal as rejected.
+        raced_out, raced_display = root / "raced-claude.token", io.StringIO()
+        read_fd, write_fd = os.pipe(); os.write(write_fd, b"yes\n"); os.close(write_fd)
+        with mock.patch.object(m, "_atomic_secret",
+                               side_effect=m.UnsafeSecretDestination("swapped parent")), \
+             os.fdopen(read_fd) as user_input:
+            raced = m.capture_claude(raced_out, timeout=5,
+                env={"PATH": f"{bindir}{os.pathsep}{os.environ['PATH']}"},
+                input_stream=user_input, output_stream=raced_display)
+        assert raced == {"status": "rejected", "reason": "secret_destination_in_repository"}
+        assert not raced_out.exists()
+        assert "sk-ant" not in raced_display.getvalue() and "A"*20 not in raced_display.getvalue()
 
         with tempfile.TemporaryDirectory(prefix="claude-capture-", dir=repo) as rd:
             repo_output, rejected_display = Path(rd) / "claude.token", io.StringIO()
@@ -201,15 +228,30 @@ os.write(1,b'A'*180 + b'\\n')
             dispatch.assert_not_called()
 
         secrets_file = root / "s.enc"
-        with mock.patch.object(m.subprocess, "run", return_value=mock.Mock(returncode=0)) as run_child:
-            result = m.tl_bootstrap("cowork", secrets_file, env={
-                "TL_MASTER_KEY": "TL_CANARY", "CODEX_AUTH_JSON": "CODEX_CANARY",
-                "CLAUDE_CODE_OAUTH_TOKEN": "CLAUDE_CANARY", "GITHUB_PAT": "GH_CANARY",
-                "OPENAI_API_KEY": "VENDOR_CANARY", "TMPDIR": "/tmp/test"})
+        hostile = root / "hostile"; (hostile / "scripts").mkdir(parents=True)
+        hostile_marker = hostile / "fake-tl-ran"
+        (hostile / "scripts" / "tl.py").write_text(
+            f"from pathlib import Path\nPath({str(hostile_marker)!r}).write_text('ran')\n",
+            encoding="utf-8")
+        relative_secrets = Path(os.path.relpath(secrets_file, hostile))
+        previous_cwd = Path.cwd()
+        try:
+            os.chdir(hostile)
+            with mock.patch.object(m.subprocess, "run", return_value=mock.Mock(returncode=0)) as run_child:
+                result = m.tl_bootstrap("cowork", relative_secrets, env={
+                    "TL_MASTER_KEY": "TL_CANARY", "CODEX_AUTH_JSON": "CODEX_CANARY",
+                    "CLAUDE_CODE_OAUTH_TOKEN": "CLAUDE_CANARY", "GITHUB_PAT": "GH_CANARY",
+                    "OPENAI_API_KEY": "VENDOR_CANARY", "TMPDIR": "/tmp/test"})
+        finally:
+            os.chdir(previous_cwd)
         assert result["status"] == "passed"
-        assert run_child.call_args.args[0][-2:] == ["--secrets-file", str(secrets_file)]
+        child_argv = run_child.call_args.args[0]
+        assert Path(child_argv[1]).resolve() == expected_repository / "scripts" / "tl.py"
+        assert child_argv[-2:] == ["--secrets-file", str(secrets_file.resolve())]
+        assert run_child.call_args.kwargs["cwd"] == expected_repository
         assert run_child.call_args.kwargs["env"] == {
             "TMPDIR": "/tmp/test", "TL_MASTER_KEY": "TL_CANARY"}
+        assert not hostile_marker.exists()
 
         calls = []
         def component(name, status="passed"):

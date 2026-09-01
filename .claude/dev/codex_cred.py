@@ -59,7 +59,10 @@ import tempfile
 import time
 from pathlib import Path
 
-from session_credentials import secret_destination as _shared_secret_destination
+from session_credentials import (
+    UnsafeSecretDestination as _UnsafeSecretDestination,
+    secret_destination as _shared_secret_destination,
+)
 
 DAT, DO, KHONG_DO_DUOC = "DAT", "DO", "KHONG_DO_DUOC"
 RC = {DAT: 0, DO: 2, KHONG_DO_DUOC: 3}
@@ -278,6 +281,7 @@ def _sao_luu(dich: Path) -> Path | None:
     Không chữa bằng đồng hồ mịn hơn (`time_ns` vẫn có thể trùng khi hệ thống lùi giờ);
     chữa bằng cách HỎI hệ tệp cho tới khi có tên trống.
     """
+    dich = _secret_destination(dich)
     if not hasattr(os, "O_NOFOLLOW"):
         raise OSError("từ chối sao lưu: nền thiếu os.O_NOFOLLOW")
     if dich.is_symlink():
@@ -388,9 +392,12 @@ def cmd_lay(a) -> int:
         for destination in (tam / "auth.json", ra, tep_dan, that):
             if destination is not None:
                 _secret_destination(destination)
-    except OSError:
+    except _UnsafeSecretDestination:
         _in("ĐỎ: từ chối repository secret destination")
         return RC[DO]
+    except OSError:
+        _in("KHÔNG_ĐO_ĐƯỢC: không resolve được secret destination")
+        return RC[KHONG_DO_DUOC]
     _in(f"CODEX_HOME tạm: {tam}   (bản đang dùng ở ~/.codex KHÔNG bị đụng)")
     ok, dau_ra = _chay_device_auth(tam, a.han_giay)
     if not ok:

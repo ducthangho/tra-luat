@@ -2362,6 +2362,28 @@ def t145_CODEX_HOME_trong_kho_khong_duoc_nhan_credential():
         bang(not (home / "auth.json").exists(),
              "launcher da ghi credential vao repository")
 
+        # The configured path can look external while a parent symlink resolves
+        # back into this checkout.  Exercise the real repository independently
+        # of the production policy constant imported by launcher.
+        if not LA_WINDOWS:
+            with tempfile.TemporaryDirectory() as outside:
+                linked_parent = Path(outside) / "repo-parent"
+                linked_parent.symlink_to(Path(td), target_is_directory=True)
+                linked_home = linked_parent / ".codex-linked"
+                old_env = m.os.environ
+                try:
+                    m.os.environ = {
+                        "CODEX_AUTH_JSON": '{"tokens":{"access":"FIXTURE_ONLY"}}',
+                        "CODEX_HOME": str(linked_home),
+                    }
+                    linked_result = m.chuan_bi_xac_thuc(that_su=True)
+                finally:
+                    m.os.environ = old_env
+                bang(len(linked_result) == 1 and linked_result[0].get("ok") is False,
+                     f"parent symlink vao kho phai bi tu choi, duoc {linked_result}")
+                bang(not (Path(td) / ".codex-linked" / "auth.json").exists(),
+                     "launcher da ghi credential qua parent symlink vao repository")
+
 
 @ca
 def t146_hook_phai_dung_chung_codex_materialize_guard():

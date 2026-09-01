@@ -377,6 +377,7 @@ def t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth(M):
     with tempfile.TemporaryDirectory() as sd, \
          tempfile.TemporaryDirectory(prefix="codex-cred-repo-", dir=repo) as rd:
         source = Path(sd)
+        repo_slot = Path(rd)
         (source / "auth.json").write_text(
             '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
             encoding="utf-8")
@@ -384,18 +385,50 @@ def t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth(M):
         M._co_codex = lambda: "/gia/codex"
         M._chay_device_auth = lambda *_a: (spawned.append(True) or (True, "ok"))
         M._kiem_song = lambda _home: (True, "rc=0")
-
-        class A:
-            codex_home, ra, tep_dan = str(source), str(Path(rd) / "b64.txt"), None
-            han_giay, in_gia_tri, cai_de = 5, False, False
-
         import io
         from contextlib import redirect_stdout
-        with redirect_stdout(io.StringIO()):
-            rc = M.cmd_lay(A())
-        assert rc == M.RC[M.DO], f"đích trong repository phải ĐỎ, được rc={rc}"
-        assert not spawned, "đã chạy device-auth trước khi kiểm secret destination"
-        assert not (Path(rd) / "b64.txt").exists(), "đã ghi credential vào repository"
+        linked_parent = source / "linked-repository-parent"
+        try:
+            linked_parent.symlink_to(repo_slot, target_is_directory=True)
+        except OSError:
+            linked_parent = None
+
+        cases = [
+            ("--ra direct", str(source), str(repo_slot / "b64.txt"), None, False, None),
+            ("--codex-home direct", str(repo_slot / "device-home"), str(source / "b64.txt"),
+             str(source / "setup.md"), False, None),
+            ("--tep-dan direct", str(source), str(source / "b64.txt"),
+             str(repo_slot / "setup.md"), False, None),
+            ("--cai-de direct", str(source), str(source / "b64.txt"),
+             str(source / "setup.md"), True, repo_slot / "installed-home"),
+        ]
+        if linked_parent is not None:
+            cases.append(("parent symlink", str(source), str(linked_parent / "linked.b64"),
+                          str(source / "setup.md"), False, None))
+
+        original_effective_home = M.effective_codex_home
+        try:
+            for name, codex_home, ra, tep_dan, cai_de, install_home in cases:
+                spawned.clear()
+                M.effective_codex_home = (lambda p=install_home: p) \
+                    if install_home is not None else original_effective_home
+
+                class A:
+                    han_giay, in_gia_tri = 5, False
+
+                args = A()
+                args.codex_home, args.ra, args.tep_dan = codex_home, ra, tep_dan
+                args.cai_de = cai_de
+                with redirect_stdout(io.StringIO()):
+                    rc = M.cmd_lay(args)
+                assert rc == M.RC[M.DO], f"{name}: đích trong repository phải ĐỎ, rc={rc}"
+                assert not spawned, f"{name}: đã chạy device-auth trước destination guard"
+        finally:
+            M.effective_codex_home = original_effective_home
+        assert not list(repo_slot.rglob("*.b64")), "đã ghi credential vào repository"
+        assert not (repo_slot / "setup.md").exists(), "đã ghi tệp dán vào repository"
+        assert not (repo_slot / "installed-home" / "auth.json").exists(), \
+            "đã cài credential vào repository"
 
 
 CA = [t1_doc_duoc_url_va_ma_tu_dau_ra_that, t2_chua_thay_thi_tra_None_khong_doan,

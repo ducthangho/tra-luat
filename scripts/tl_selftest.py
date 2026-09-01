@@ -21264,10 +21264,13 @@ def run() -> int:
         # KÊ KHAI SLOT (MANG-SANDBOX-CODEX / #334): 70 → **71** Markdown dưới `docs/`. Thêm đúng
         # `docs/MANG_SANDBOX_CODEX.md`, dev-side/NGOÀI gói. `RELEASE_MANIFEST.json` KHÔNG đổi nên
         # gói giữ **180**, trần Package 200 không nhúc nhích; cây thật = 180 + 71 = **251**.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 71 == 251
+        # KÊ KHAI SLOT (credential bootstrap / #431): 71 → **72** Markdown dưới `docs/`. Thêm đúng
+        # `docs/SESSION_CREDENTIALS.md`, tài liệu vận hành dev-side/NGOÀI gói. Package vẫn **180**,
+        # trần 200 không đổi; cây thật = 180 + 72 = **252**.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 72 == 252
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 71
+        ok4 = (len(tren_dia) == 72
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))

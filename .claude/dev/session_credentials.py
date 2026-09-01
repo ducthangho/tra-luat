@@ -65,14 +65,6 @@ def codex_home(env=None) -> Path:
     return Path(env.get("CODEX_HOME") or Path.home() / ".codex").expanduser()
 
 
-def _inside_repository(path: Path) -> bool:
-    try:
-        secret_destination(path)
-    except UnsafeSecretDestination:
-        return True
-    return False
-
-
 def secret_destination(path: Path) -> Path:
     """Return ``path`` only when its resolved target is outside this checkout."""
     target = path.expanduser()
@@ -108,8 +100,12 @@ def materialize_codex(*, env=None) -> dict:
     if not encoded:
         return _result("missing", reason="CODEX_AUTH_JSON")
     target = codex_home(source) / "auth.json"
-    if _inside_repository(target):
+    try:
+        secret_destination(target)
+    except UnsafeSecretDestination:
         return _result("rejected", reason="secret_destination_in_repository")
+    except OSError:
+        return _result("not_measured", reason="write_failed")
     try:
         raw = base64.b64decode(encoded, validate=True)
         parsed = json.loads(raw)
@@ -167,6 +163,8 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
         output = secret_destination(output)
     except UnsafeSecretDestination:
         return _result("rejected", reason="secret_destination_in_repository")
+    except OSError:
+        return _result("not_measured", reason="write_failed")
     import pty
 
     child = _child_env(os.environ if env is None else env)
@@ -220,7 +218,12 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
     found = TOKEN_RE.findall(captured)
     if proc.returncode or len(found) != 1:
         return _result("rejected", reason="setup_failed")
-    _atomic_secret(output, (found[0] + "\n").encode())
+    try:
+        _atomic_secret(output, (found[0] + "\n").encode())
+    except UnsafeSecretDestination:
+        return _result("rejected", reason="secret_destination_in_repository")
+    except OSError:
+        return _result("not_measured", reason="write_failed")
     return _result("passed", credential_file=str(output), secret_printed=False)
 
 
@@ -286,11 +289,17 @@ def tl_bootstrap(env_name: str, secrets_file: Path | None, *, timeout: int = 600
         return _result("missing", reason="secrets_file")
     if not source.get("TL_MASTER_KEY"):
         return _result("missing", reason="TL_MASTER_KEY")
-    cmd = [sys.executable, "scripts/tl.py", "bootstrap", "--env", env_name,
-           "--secrets-file", str(secrets_file)]
     try:
+        repository = REPOSITORY_ROOT.resolve(strict=True)
+        script = (repository / "scripts" / "tl.py").resolve(strict=True)
+        if script.parent.parent != repository:
+            return _result("not_measured", reason="unexpected_tl_script")
+        resolved_secrets = secrets_file.expanduser().resolve(strict=False)
+        cmd = [sys.executable, str(script), "bootstrap", "--env", env_name,
+               "--secrets-file", str(resolved_secrets)]
         p = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
                            timeout=timeout,
+                           cwd=repository,
                            env=_child_env(source, TL_MASTER_KEY=source["TL_MASTER_KEY"]))
     except subprocess.TimeoutExpired:
         return _result("not_measured", reason="timeout")

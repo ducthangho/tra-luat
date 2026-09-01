@@ -147,6 +147,7 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > GitHub và việc điều phối bootstrap hiện hữu: xem `docs/SESSION_CREDENTIALS.md`.
 > Mọi đích ghi secret (`CODEX_HOME/auth.json`, `claude-capture --output`) phải resolve
 > ra ngoài repository, kể cả qua parent symlink; hai lệnh TL bắt buộc `--secrets-file`.
+> Entry point resolve đường bundle trước, rồi neo TL child vào `scripts/tl.py` và cwd của chính repository.
 > **Windows (Claude Code):** bấm đúp `tl-setup.cmd` (gốc skill) — menu: [1] Setup 1 lần (cài gws + auth +
 > tự tạo `TL_MASTER_KEY` + mã hoá secrets + in lệnh Cowork vào `COWORK-paste.txt`), [2] Đổi token GAS,
 > [3] Kiểm tra. Sau setup: Code chạy thẳng; Cowork dán khối trong `COWORK-paste.txt`.

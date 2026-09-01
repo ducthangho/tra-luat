@@ -92,7 +92,10 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from session_credentials import secret_destination as _shared_secret_destination
+from session_credentials import (
+    UnsafeSecretDestination as _UnsafeSecretDestination,
+    secret_destination as _shared_secret_destination,
+)
 
 VERSION = "1.5.0"
 
@@ -2402,7 +2405,7 @@ def chuan_bi_xac_thuc(that_su: bool = True) -> list[dict]:
     dich = _codex_home() / "auth.json"
     try:
         dich = _credential_destination(dich)
-    except OSError:
+    except _UnsafeSecretDestination:
         return [{"ten": "codex", "ok": False, "doi": False,
                  "cach": "HONG: repository secret destination",
                  "duong_dan": str(dich)}]

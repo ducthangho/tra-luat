@@ -46,10 +46,12 @@ def _co_ruff_that(env):
 def _kiem_bang_voi_runtime_fixture(g, goc):
     """Giữ đủ ca khi runner không có ruff, không làm guard fail-open.
 
-    Workflow không cài ruff; nhưng cổng `--kiem-bang` cần duy nhất hợp đồng
-    `ruff --help`. Khi thiếu binary, nạp chính bản guard/mutant và thay đúng
-    probe help của ruff bằng tập cờ đã khai. Mọi probe khác, runtime `tl`,
-    so sánh bảng và mã thoát vẫn là code thật; không ca nào bị skip.
+    Workflow không cài ruff; nhưng cổng `--kiem-bang` cần hợp đồng
+    `--help` của các chương trình trong bảng. Khi ruff vắng mặt, nạp
+    chính bản guard/mutant: probe help thật vẫn chạy trước; chỉ probe trả
+    `None` của một tên đã có trong `_CO_CHO_PHEP` mới dùng tập cờ
+    fixture. Runtime `tl`, so sánh bảng và mã thoát vẫn là code thật;
+    không ca nào bị skip.
     """
     env = moi_truong_con()
     args = [sys.executable, "-B", str(g), "--kiem-bang", str(goc)]
@@ -65,9 +67,15 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 co_that = module._co_tu_help
 def co_voi_ruff(argv):
-    if argv and pathlib.Path(str(argv[0])).name.lower() in ("ruff", "ruff.exe"):
-        return set(module._CO_CHO_PHEP["ruff"])
-    return co_that(argv)
+    ket_qua = co_that(argv)
+    if ket_qua is not None or not argv:
+        return ket_qua
+    ten = pathlib.Path(str(argv[0])).name.lower()
+    if ten.endswith(".exe"):
+        ten = ten[:-4]
+    if ten in module._CO_CHO_PHEP:
+        return set(module._CO_CHO_PHEP[ten])
+    return None
 module._co_tu_help = co_voi_ruff
 raise SystemExit(module._kiem_bang(sys.argv[2]))
 """

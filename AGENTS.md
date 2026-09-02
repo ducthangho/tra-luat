@@ -55,6 +55,20 @@ Lệch một điều kiện trên thì không tự sửa cho khớp; báo ngư�
 - khai đúng model, provider, execution surface và transport thực tế;
 - không suy model reviewer identity từ tài khoản dùng để đăng verdict lên GitHub.
 
+Phần BẰNG CHỨNG bắt buộc của MỖI finding — thiếu một phần thì đó là *hướng vá bằng lời*,
+không phải finding, và người nhận phải tự dựng lại bản vá từ văn xuôi:
+
+- **phép đo**: lệnh đã chạy kèm output thật; không đo được thì ghi `KHÔNG ĐO ĐƯỢC` và vì
+  sao — suy luận không thay được số đo, và im lặng không được đọc thành đã đo;
+- **phản chứng**: cách tái hiện lỗi trên bản chưa vá, và đột biến làm bản đã vá ĐỎ trở lại;
+- **bản vá**: diff áp được — reviewer tự chạy `git apply --check` và ghi mã thoát vào
+  verdict — hoặc patch plan đánh số theo từng tệp/dòng khi diff không dựng được, kèm lý do
+  chọn đường sau.
+
+Ba gạch trên KHÔNG phải hợp đồng đầy đủ của một finding: hợp đồng gợi ý vá nằm ở
+`docs/PROTOCOL_DA_PHIEN.md` §7 và đòi nhiều phần hơn, còn quy tắc đính patch nằm ở §8. Tra
+hai mục ấy, đừng suy lại từ đầu và đừng đọc ba gạch này thành danh sách đủ.
+
 ### Approver / Land Operator
 
 - chỉ thao tác trên exact SHA đã được ủy quyền bền;

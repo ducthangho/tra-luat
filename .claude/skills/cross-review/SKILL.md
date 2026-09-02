@@ -142,8 +142,82 @@ Sau khi phóng, **kiểm reviewer đã tuân cấm**: `git -C "$RV" status --por
 ## Chạy nền kia trong sandbox
 
 ```bash
-codex exec -s workspace-write --skip-git-repo-check --cd <sandbox> - < PROMPT.md
+BAC_MONG_DOI=<bac>   # DUY NHAT mot cho dat bac; validator ben duoi doc lai chinh bien nay
+codex exec -s workspace-write --skip-git-repo-check --cd <sandbox> \
+  -c model_reasoning_effort="$BAC_MONG_DOI" --json - < PROMPT.md > codex.jsonl
 ```
+
+Phóng và kiểm phải chạy **CÙNG MỘT SHELL**: `BAC_MONG_DOI` không sống qua hai lần gọi shell
+khác nhau, và một biến rỗng lọt tới máy chủ là đúng ca hỏng mà chốt dưới sinh ra để chặn.
+
+Bậc lấy theo **cùng bảng thang** ở mục *Chọn model/effort* — bảng ấy trước đây chỉ được đọc cho lane
+Claude, nên lane codex chạy ở mặc định một cách **im lặng**. Tên bậc của codex là
+`none minimal low medium high xhigh max` (do máy chủ liệt kê, xem dưới), không trùng tên bậc Claude:
+`max` ánh xạ sang `max`, mọi ô `xhigh` của bảng giữ nguyên `xhigh`.
+
+PROMPT phải đòi mỗi finding mang đủ **ba phần bắt buộc của `AGENTS.md` mục Reviewer** (phép đo ·
+phản chứng · bản vá) cộng **phân hạng** `P1|P2|P3` như khung `VERDICT.md` bên dưới, VÀ trỏ
+reviewer sang hợp đồng gợi ý vá ở `docs/PROTOCOL_DA_PHIEN.md` §7 — ba phần ấy là BẰNG CHỨNG,
+không phải cả hợp đồng. Trỏ, đừng chép §7 vào đây.
+
+#### Đo bậc effort ĐÃ DÙNG — ba trạng thái, đo 30-08-2026 trên `codex-cli 0.146.0`
+
+Không được suy từ `rc=0`. Ba phép đo, mỗi phép trả lời một câu khác nhau:
+
+1. **Cờ có tới máy chủ không** — ĐẠT. `-c model_reasoning_effort=khongtontai` trả **`rc=1`**, sự kiện
+   `turn.failed`, thân là **HTTP 400** `[ReasoningEffortParam] [reasoning.effort] [invalid_enum_value]
+   Invalid value: 'khongtontai'. Supported values are: 'none', 'minimal', 'low', 'medium', 'high',
+   'xhigh', and 'max'.` Bậc sai làm cổng ĐỎ ngay — codex **không** lùi im lặng như `--effort` của
+   Claude. Đây là bằng chứng mạnh nhất, vì chính máy chủ đọc và bác giá trị.
+2. **Bậc nào đã được yêu cầu** — ĐẠT, nhưng phải đi tìm ở tệp phiên: `--json` trên **stdout KHÔNG
+   phơi effort** (đo: 4 dòng `thread.started` · `turn.started` · `item.completed` · `turn.completed`,
+   không dòng nào có khoá effort). Nơi ghi là rollout của phiên, khoá `payload.effort` trong sự kiện
+   `type: "turn_context"`; nối bằng `thread_id` ở dòng `thread.started`:
+
+```bash
+PY="$(command -v python3 || command -v python || command -v py)"
+: "${BAC_MONG_DOI:?BAC_MONG_DOI rong - dat o khoi phong, CUNG shell}"
+case "$BAC_MONG_DOI" in
+  none|minimal|low|medium|high|xhigh|max) ;;
+  *) echo "BAC khong thuoc tap codex: $BAC_MONG_DOI" >&2; exit 1 ;;
+esac
+"$PY" - "$BAC_MONG_DOI" codex.jsonl <<'EOF'
+import glob, json, os, sys
+bac, stdout_jsonl = sys.argv[1], sys.argv[2]
+dong = [json.loads(l) for l in open(stdout_jsonl, encoding="utf-8") if l.strip()]
+if not dong: sys.exit("KHONG DO DUOC: codex.jsonl rong")
+tid = dong[0].get("thread_id")
+if not tid: sys.exit("KHONG DO DUOC: dong dau khong co thread_id")
+tep = glob.glob(os.path.expanduser("~/.codex/sessions/*/*/*/rollout-*" + tid + ".jsonl"))
+if not tep: sys.exit("KHONG DO DUOC: khong co rollout cho " + tid)
+eff = None
+for l in open(tep[0], encoding="utf-8"):
+    d = json.loads(l)
+    if d.get("type") == "turn_context":
+        eff = d.get("payload", {}).get("effort"); break
+if not isinstance(eff, str) or not eff:
+    sys.exit("KHONG DO DUOC: turn_context thieu payload.effort kieu chuoi")
+if eff != bac: sys.exit("SAI BAC: mong doi %s, rollout ghi %s" % (bac, eff))
+ket = [d.get("type") for d in dong if d.get("type") in ("turn.completed", "turn.failed")]
+if "turn.failed" in ket: sys.exit("LUOT HONG: turn.failed")
+if "turn.completed" not in ket: sys.exit("KHONG DO DUOC: khong co turn.completed")
+print("effort=%s; terminal=turn.completed" % eff)
+EOF
+```
+
+   Nó **bám theo cờ**, không phải hằng số: cùng lệnh với `xhigh` ⇒ `xhigh`, với `low` ⇒ `low`.
+   `--ephemeral` xoá đúng tệp này, nên đừng bật nó cho lượt review.
+   Khối trên **FAIL-CLOSE**, và đó là bản vá của một lỗi đã đo: bản đầu chỉ
+   `print(payload.get("effort"))` rồi thoát 0, nên thiếu khoá `effort` in `None` mà vẫn XANH và
+   `low` khi mong đợi `xhigh` cũng XANH — trong khi văn ngay dưới khai phép kiểm là một CẶP.
+   Lời khai rộng hơn mã đúng bằng lớp lỗi mục này sinh ra để chặn. Nay mã làm đúng điều đã khai:
+   thoát khác 0 khi thiếu rollout · thiếu `turn_context` · `effort` thiếu/rỗng/không phải chuỗi ·
+   `effort` khác bậc mong đợi · có `turn.failed` · không có `turn.completed`.
+3. **Máy chủ đã ÁP bậc ấy chưa** — **KHÔNG ĐO ĐƯỢC** từ đây, và đừng viết ngược lại. Rollout ghi bậc
+   được **YÊU CẦU**, không phải bậc được **CHẤP NHẬN**: lượt `khongtontai` bị máy chủ bác 400 mà
+   `payload.effort` vẫn ghi `'khongtontai'`. Nên phép kiểm dùng được là **cặp** — rollout khớp bậc
+   mong đợi **VÀ** lượt kết thúc `turn.completed` chứ không `turn.failed`. Thiếu vế sau thì tệp phiên
+   chỉ chứng minh ta đã gõ gì, không chứng minh model đã nghĩ ở bậc nào.
 
 Sandbox là thư mục ngoài kho, chứa sẵn: `SPEC.md` · `diff.patch` · `numstat.txt` · trích protocol ·
 `EVIDENCE.md` (số đo gate — thiếu nó sẽ ra kết luận "KHÔNG ĐO ĐƯỢC") · bản sao cây sau sửa. Trong

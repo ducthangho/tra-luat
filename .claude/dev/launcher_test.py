@@ -141,9 +141,14 @@ class San:
         shutil.rmtree(self.d, ignore_errors=True)
 
 
+class TinHieuChotCa(AssertionError):
+    """Tín hiệu ngoại lệ riêng của chốt test trong harness, ngăn tín dụng giả khi đột biến."""
+    pass
+
+
 def bang(dieu_kien, thong_diep):
     if not dieu_kien:
-        raise AssertionError(thong_diep)
+        raise TinHieuChotCa(thong_diep)
 
 
 def _con_song_that(pid: int) -> bool:
@@ -2943,7 +2948,7 @@ def t105_doctor_auth_hong_thi_DO_du_binary_chay_duoc():
         su_kien.append("resolve") or [("gia", "/gia/bin")]
     )
     m._phien_ban = lambda *_a, **_k: (su_kien.append("version") or (True, "gia 1", False))
-    m._xac_thuc = lambda *_a, **_k: (su_kien.append("auth") or (False, "rc=1", False))
+    m._xac_thuc_kem_dau_ra = lambda *_a, **_k: (su_kien.append("auth") or (False, "rc=1", False, ""))
     a = type("A", (), {"json": True, "workspace": None, "doi_kha_dung": False})()
     out = io.StringIO()
     with contextlib.redirect_stdout(out):
@@ -3570,10 +3575,9 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
     # khop ten nao — ca canh VAN XANH ma khong con canh gi, va dot bien them
     # `"mcp-endpoint"` vao `LAM_DUOC_VIEC` SONG SOT. Do la lo do duoc TRUOC khi viet ma,
     # nen no o day: moi ten moi phai duoc them vao danh sach nay.
-    for _ten_mcp in ("mcp", "mcp-cli", "mcp-endpoint"):
+    for _ten_mcp in ("mcp", "mcp-cli", "mcp-endpoint", "antigravity", "agy"):
         bang(f'"{_ten_mcp}"' not in khoi and f"'{_ten_mcp}'" not in khoi,
-             f"`{_ten_mcp}` bi tinh vao LAM_DUOC_VIEC — do MCP KHONG chung minh PHIEN "
-             f"goi duoc cong cu: {khoi!r}")
+             f"`{_ten_mcp}` bi tinh vao LAM_DUOC_VIEC — do MCP/antigravity KHONG phai thao tac kho hop le: {khoi!r}")
     for phai_co in ("git", "gh-kho", "rest-kho"):
         bang(phai_co in khoi, f"LAM_DUOC_VIEC thieu duong `{phai_co}`: {khoi!r}")
 
@@ -4561,9 +4565,9 @@ def t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU():
     _san_doctor_mot_cong_cu(m, co_xac_thuc=True)
     m._phien_ban = lambda *_a, **_k: (True, "gia 1", False)
     goi = []
-    m._xac_thuc = lambda *_a, **_k: (
+    m._xac_thuc_kem_dau_ra = lambda *_a, **_k: (
         goi.append(_k.get("timeout")) or
-        (False, "probe xac thuc timeout sau 0.1s", True))
+        (False, "probe xac thuc timeout sau 0.1s", True, ""))
     rc, d = _doctor_json(m)
     bang(rc == MA_OK and d["thieu_bat_buoc"] == [],
          f"auth qua han van thanh THIEU: rc={rc}, thieu={d['thieu_bat_buoc']}")
@@ -4577,7 +4581,7 @@ def t132_xac_thuc_qua_han_la_CHUA_DO_khong_phai_THIEU():
     bang(goi[0] and goi[1] and abs(goi[1] - 2 * goi[0]) < 1e-6,
          f"retry auth phai duoc han GAP DOI luot 1: {goi}")
 
-    m._xac_thuc = lambda *_a, **_k: (False, "rc=1", False)
+    m._xac_thuc_kem_dau_ra = lambda *_a, **_k: (False, "rc=1", False, "")
     rc2, d2 = _doctor_json(m)
     bang(rc2 == MA_THIEU_CONG_CU and d2["thieu_bat_buoc"] == ["cham"],
          f"auth hong THAT phai van la THIEU: rc={rc2}, thieu={d2['thieu_bat_buoc']}")
@@ -4762,10 +4766,10 @@ def t136_qua_han_roi_hong_that_o_luot_retry_van_la_THIEU():
     def xt(*_a, **_k):
         goi2.append(1)
         if len(goi2) == 1:
-            return (False, "probe xac thuc timeout sau 0.1s", True)
-        return (False, "rc=1", False)
+            return (False, "probe xac thuc timeout sau 0.1s", True, "")
+        return (False, "rc=1", False, "")
 
-    m2._xac_thuc = xt
+    m2._xac_thuc_kem_dau_ra = xt
     rc2, d2 = _doctor_json(m2)
     bang(rc2 == MA_THIEU_CONG_CU and d2["thieu_bat_buoc"] == ["cham"],
          f"auth hong that o luot retry ma khong la THIEU: rc={rc2}, "
@@ -4822,7 +4826,7 @@ def t138_auth_het_ngan_sach_phai_vao_CHUA_DO():
     m._tran_doctor = lambda: 10.0
     m._phien_ban = lambda *_a, **_k: (True, "gia 1", False)
     goi_auth = []
-    m._xac_thuc = lambda *_a, **_k: (goi_auth.append(1) or (True, "ok", False))
+    m._xac_thuc_kem_dau_ra = lambda *_a, **_k: (goi_auth.append(1) or (True, "ok", False, "ok\n"))
     moc = iter([0.0, 1.0])
     monotonic_goc = m.time.monotonic
     try:
@@ -4891,8 +4895,8 @@ def t140_doctor_text_tach_CHUA_DO_khoi_THIEU_va_DU():
     m2 = _tai_launcher_thu()
     _san_doctor_mot_cong_cu(m2, co_xac_thuc=True)
     m2._phien_ban = lambda *_a, **_k: (True, "gia 1", False)
-    m2._xac_thuc = lambda *_a, **_k: (
-        False, "probe xac thuc timeout sau 0.1s", True)
+    m2._xac_thuc_kem_dau_ra = lambda *_a, **_k: (
+        False, "probe xac thuc timeout sau 0.1s", True, "")
     rc2, vb2 = doctor_text(m2)
     bang(rc2 == MA_OK and re.search(r"^\s+CHUA_DO\s+cham\s+.*xac thuc", vb2, re.M),
          f"auth qua han khong mang nhan/ly do CHUA_DO: rc={rc2}, vb={vb2!r}")
@@ -5666,6 +5670,251 @@ def t144_run_ghi_nonce_va_hmac_khong_lo_khoa():
 
 
 @ca
+def t145_agy_cong_cu_va_kha_nang():
+    """N1 & N2: agy trong CONG_CU và antigravity trong KHA_NANG."""
+    m = _tai_launcher_thu()
+    ds_agy = [c for c in m.CONG_CU if c.get("ten") == "agy"]
+    bang(len(ds_agy) == 1, f"CONG_CU phai co dung 1 muc agy: {ds_agy}")
+    c_agy = ds_agy[0]
+    bang(c_agy.get("bat_buoc") is False, f"agy khong phai bat_buoc=False: {c_agy}")
+    bang(c_agy.get("xac_thuc") == ["models"], f"xac_thuc cua agy phai la ['models']: {c_agy}")
+    bang(c_agy.get("ung_vien") == ["agy"], f"ung_vien cua agy phai la ['agy']: {c_agy}")
+
+    ds_kn = [k for k in m.KHA_NANG if k.get("ten") == "antigravity"]
+    bang(len(ds_kn) == 1, f"KHA_NANG phai co dung 1 muc antigravity: {ds_kn}")
+    k_ag = ds_kn[0]
+    bang("google_antigravity" in k_ag.get("vi_sao", "") and "antigravity" in k_ag.get("vi_sao", ""),
+         f"vi_sao cua antigravity phai neu ro provider: {k_ag}")
+
+
+@ca
+def t146_do_antigravity_cac_trang_thai_va_luong():
+    """N3-N7, N9: _do_antigravity đọc cả 2 luồng, không gọi trần, không vào LAM_DUOC_VIEC."""
+    m = _tai_launcher_thu()
+    goc_cac = m._cac_duong_dan
+    goc_chay = m._chay_van_ban_an_toan
+    goc_sub_run = m.subprocess.run
+    nhat_ky_lenh = []
+
+    m._cac_duong_dan = lambda c, mt: [("agy", "/gia/bin/agy")]
+
+    def gia_chay(lenh, env=None, timeout=None, **kwargs):
+        nhat_ky_lenh.append(list(lenh))
+        # N3: khong bao gio goi agy tran
+        bang(len(lenh) >= 2 and lenh[0] == "/gia/bin/agy", f"goi agy tran hoac sai lenh: {lenh}")
+        # N4: khong goi -p / --print
+        bang("-p" not in lenh and "--print" not in lenh, f"goi -p trong doctor mac dinh: {lenh}")
+        sub = lenh[1]
+        if sub == "models":
+            # N5: models rc=0 tren stderr duy nhat van la DUNG_DUOC
+            return subprocess.CompletedProcess(lenh, 0, stdout="", stderr="gemini-2.5-pro\ngemini-2.5-flash\n")
+        return subprocess.CompletedProcess(lenh, 0, stdout="1.1.17", stderr="")
+
+    try:
+        m._chay_van_ban_an_toan = gia_chay
+        m.subprocess.run = gia_chay
+        tt, mo_ta = m._do_antigravity({})
+        bang(tt == "DUNG_DUOC", f"stderr-only models phai la DUNG_DUOC: tt={tt}, mo_ta={mo_ta}")
+
+        # N7: rc=0 ca 2 luong rong => KHONG_DO_DUOC (Finding 1: Spec 6.2, khong lam tron thanh CO_MAT hay DUNG_DUOC)
+        m._cac_duong_dan = lambda c, mt: [("agy", "/gia/bin/agy")]
+        def gia_rong(lenh, env=None, timeout=None, **kwargs):
+            return subprocess.CompletedProcess(
+                lenh, 0, stdout="", stderr=""
+            ) if lenh[1] == "models" else subprocess.CompletedProcess(lenh, 0, stdout="1.1.17", stderr="")
+        m._chay_van_ban_an_toan = gia_rong
+        m.subprocess.run = gia_rong
+        tt2, mo_ta2 = m._do_antigravity({})
+        bang(tt2 == "KHONG_DO_DUOC", f"rc=0 rong ca hai luong phai la KHONG_DO_DUOC: tt2={tt2}, mo_ta2={mo_ta2}")
+
+        # models rc!=0 va --version rc!=0 => KHONG_DO_DUOC (khong duoc CO_MAT)
+        def gia_fail(lenh, env=None, timeout=None, **kwargs):
+            return subprocess.CompletedProcess(lenh, 1, stdout="", stderr="error")
+        m._chay_van_ban_an_toan = gia_fail
+        m.subprocess.run = gia_fail
+        tt_both_fail, _ = m._do_antigravity({})
+        bang(tt_both_fail == "KHONG_DO_DUOC", f"ca hai probe fail phai la KHONG_DO_DUOC: tt={tt_both_fail}")
+
+        # Fallback candidate: ung vien 1 loi, ung vien 2 thanh cong => DUNG_DUOC
+        m._cac_duong_dan = lambda c, mt: [("agy", "/gia/shim/agy"), ("agy", "/gia/bin/agy")]
+        def gia_fallback_cand(lenh, env=None, timeout=None, **kwargs):
+            if "/gia/shim/agy" in lenh[0]:
+                raise OSError("broken shim")
+            return subprocess.CompletedProcess(lenh, 0, stdout="gemini-2.5-pro\n", stderr="")
+        m._chay_van_ban_an_toan = gia_fallback_cand
+        m.subprocess.run = gia_fallback_cand
+        tt_cand, _ = m._do_antigravity({})
+        bang(tt_cand == "DUNG_DUOC", f"ung vien fallback phai cuu duoc: tt={tt_cand}")
+        m._cac_duong_dan = lambda c, mt: [("agy", "/gia/bin/agy")]
+
+        # P2 cross-review (codex, 15f2dbf): `models` thanh cong MOT lan la du bang chung.
+        # Lan goi thu HAI bat ky (dem dong, thong ke) neu ném => phai KHONG duoc lat ket luan.
+        so_lan = {"n": 0}
+        def gia_mot_lan(lenh, env=None, timeout=None, **kwargs):
+            if lenh[1] == "models":
+                so_lan["n"] += 1
+                if so_lan["n"] == 1:
+                    return subprocess.CompletedProcess(lenh, 0, stdout="", stderr="gemini-2.5-pro\ngemini-2.5-flash\n")
+                raise OSError("agy models bi goi lan thu hai")
+            return subprocess.CompletedProcess(lenh, 0, stdout="1.1.17", stderr="")
+        m._chay_van_ban_an_toan = gia_mot_lan
+        m.subprocess.run = gia_mot_lan
+        # Hop dong cua ca: KHONG duoc nem. Bat ngoai le roi dua vao `bang` de cai chet cua
+        # mutant mang tin hieu cua CHINH ca nay (TinHieuChotCa), khong phai OSError vo can.
+        try:
+            tt_mot, mo_ta_mot = m._do_antigravity({})
+        except Exception as e:  # noqa: BLE001 — chinh la hanh vi dang do
+            tt_mot, mo_ta_mot = "NEM", f"{type(e).__name__}: {e}"
+        bang(tt_mot == "DUNG_DUOC" and "2 model" in mo_ta_mot,
+             f"models thanh cong lan 1 ma ket luan lat/dem sai: tt={tt_mot}, mo_ta={mo_ta_mot}")
+        bang(so_lan["n"] == 1, f"`agy models` bi goi {so_lan['n']} lan trong mot luot do, mong 1")
+
+        # N6: TimeoutExpired / OSError => KHONG_DO_DUOC
+        def gia_timeout(lenh, env=None, timeout=None, **kwargs):
+            raise subprocess.TimeoutExpired(lenh, timeout or 8.0)
+        m._chay_van_ban_an_toan = gia_timeout
+        m.subprocess.run = gia_timeout
+        tt3, _ = m._do_antigravity({})
+        bang(tt3 == "KHONG_DO_DUOC", f"TimeoutExpired phai la KHONG_DO_DUOC, khong lam tron thanh THIEU: tt3={tt3}")
+
+        def gia_oserror(lenh, env=None, timeout=None, **kwargs):
+            raise OSError("Permission denied")
+        m._chay_van_ban_an_toan = gia_oserror
+        m.subprocess.run = gia_oserror
+        tt4, _ = m._do_antigravity({})
+        bang(tt4 == "KHONG_DO_DUOC", f"OSError phai la KHONG_DO_DUOC: tt4={tt4}")
+
+        # N9: antigravity khong duoc tinh vao LAM_DUOC_VIEC cua _do_github
+        # Test theo hanh vi: khi chi co duong ngoai LAM_DUOC_VIEC mo, _do_github phai la CHUA_XAC_THUC
+        m._git = lambda ws, *a: (1, "", "fail")
+        m._do_rest_github = lambda url, **_k: ("chan", "HTTP 403", False)
+        m._doc_mcp_json = lambda ws, **_k: (False, "chua khai", None, None)
+        tt_gh, mo_ta_gh = m._do_github("/gia/ws")
+        bang(tt_gh == "CHUA_XAC_THUC",
+             f"antigravity hoac cac duong khong phai kho khong duoc lam _do_github thanh DUNG_DUOC: {tt_gh}")
+    finally:
+        m._cac_duong_dan = goc_cac
+        m._chay_van_ban_an_toan = goc_chay
+        m.subprocess.run = goc_sub_run
+
+
+@ca
+def t147_agy_fallback_localappdata_windows():
+    """N8: Windows fallback %LOCALAPPDATA%\\agy\\bin\\agy.exe khi which trượt."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        local_app = s / "LocalAppData"
+        agy_bin = local_app / "agy" / "bin"
+        agy_bin.mkdir(parents=True)
+        agy_exe = agy_bin / "agy.exe"
+        agy_exe.write_text("fake binary", encoding="utf-8")
+
+        env_gia = {
+            "PATH": "",
+            "LOCALAPPDATA": str(local_app),
+            "ProgramFiles": str(s / "PF"),
+        }
+
+        # Gia lap platform Windows
+        goc_plat = m.platform.system
+        m.platform.system = lambda: "Windows"
+        try:
+            duong = m._cac_duong_dan({"ten": "agy", "ung_vien": ["agy"]}, env_gia)
+            bang(len(duong) >= 1 and duong[0][1] == str(agy_exe),
+                 f"Windows fallback LOCALAPPDATA khong tim thay agy.exe: {duong}")
+
+            # _do_antigravity tren fallback khong bi THIEU
+            goc_chay = m._chay_van_ban_an_toan
+            goc_sub_run = m.subprocess.run
+            gia_mock = lambda lenh, env=None, timeout=None, **kwargs: subprocess.CompletedProcess(
+                lenh, 0, stdout="model-1\n", stderr=""
+            )
+            m._chay_van_ban_an_toan = gia_mock
+            m.subprocess.run = gia_mock
+            try:
+                tt, mo_ta = m._do_antigravity(env_gia)
+                bang(tt == "DUNG_DUOC", f"fallback LOCALAPPDATA phai DUNG_DUOC, khong phai THIEU: {tt}")
+                bang("đã cài, PATH phiên này chưa thấy — mở terminal mới" in mo_ta,
+                     f"fallback LOCALAPPDATA phai co chan doan PATH: {mo_ta}")
+            finally:
+                m._chay_van_ban_an_toan = goc_chay
+                m.subprocess.run = goc_sub_run
+        finally:
+            m.platform.system = goc_plat
+
+
+@ca
+def t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG():
+    """P2 cross-review PR #426 (codex, tren 4639462): `lenh_doctor` da chay probe
+    `xac_thuc` (`agy models`) cho bang CONG_CU, roi `_do_antigravity` o khoi KHA_NANG
+    chay lai CUNG lenh ay. `models` di mang: lan hai qua han/nem thi ket luan lat.
+
+    Do dau-cuoi qua `lenh_doctor`: lan goi `models` DAU tien thanh cong (stderr-only,
+    van la bang chung), MOI lan sau nem OSError. Mong: dung MOT lan goi, CONG_CU agy
+    `xac_thuc_ok=True`, KHA_NANG antigravity DUNG_DUOC dem dung 2 model, va
+    `--doi-kha-dung` thoat 0 (khong bi lat thanh chua-chung-minh).
+
+    Chot phan hai: bang ket qua la CUA MOT LUOT — luot `doctor` ke tiep phai xoa sach,
+    khong doc anh chup cu (mutant xoa `.clear()` chet o ve nay, va CHI o ve nay: xem
+    chu thich tai cho).
+    """
+    m = _tai_launcher_thu()
+    c_agy = [dict(c) for c in m.CONG_CU if c.get("ten") == "agy"]
+    k_ag = [dict(k) for k in m.KHA_NANG if k.get("ten") == "antigravity"]
+    bang(len(c_agy) == 1 and len(k_ag) == 1, "thieu muc agy/antigravity de dung san")
+    m.CONG_CU = c_agy
+    m.KHA_NANG = k_ag
+    m.MODULE_PY = []
+    m._doc_moi_truong = lambda: (
+        {"PATH": "P", "TL_LAUNCHER_ENV_DA_DOC": "1"}, {"da_doc_truoc_cong_cu": True})
+    m._cac_duong_dan = lambda _c, _e: [("agy", "/gia/bin/agy")]
+    so_lan = {"n": 0}
+
+    def gia_mot_lan(lenh, env=None, timeout=None, **kwargs):
+        if lenh[0] == "/gia/bin/agy" and lenh[1] == "models":
+            so_lan["n"] += 1
+            if so_lan["n"] == 1:
+                return subprocess.CompletedProcess(
+                    lenh, 0, stdout="", stderr="gemini-2.5-pro\ngemini-2.5-flash\n")
+            raise OSError("agy models bi goi lan thu hai trong cung luot doctor")
+        return subprocess.CompletedProcess(lenh, 0, stdout="1.1.17", stderr="")
+
+    m._chay_van_ban_an_toan = gia_mot_lan
+    m.subprocess.run = gia_mot_lan
+    rc, d = _doctor_json(m, doi_kha_dung=True)
+    cc = [c for c in d["cong_cu"] if c.get("ten") == "agy"]
+    kn = [k for k in d["kha_nang"] if k.get("ten") == "antigravity"]
+    bang(len(cc) == 1 and cc[0].get("xac_thuc_ok") is True,
+         f"CONG_CU agy phai xac_thuc_ok=True tu lan probe dau: {cc}")
+    bang(len(kn) == 1 and kn[0].get("trang_thai") == "DUNG_DUOC"
+         and "2 model" in kn[0].get("chi_tiet", ""),
+         f"KHA_NANG antigravity phai DUNG_DUOC va dem 2 model tu DAU RA cua probe doctor: {kn}")
+    bang(so_lan["n"] == 1,
+         f"`agy models` bi goi {so_lan['n']} lan trong MOT luot doctor, mong 1")
+    bang(rc == 0, f"--doi-kha-dung phai thoat 0 khi bang chung duong da co: rc={rc}")
+
+    # Luot ke tiep: bang CONG_CU KHONG con muc agy (khong ai ghi probe `models` luot nay),
+    # va `agy models` nay that bai. KHA_NANG antigravity phai TU do lai va ra CO_MAT;
+    # doc anh chup DUNG_DUOC cua luot truoc la lay bang chung cu lam bang chung moi.
+    # (Neu luot hai van co muc agy trong CONG_CU thi khoa bi ghi de truoc khi doc, nen
+    # ve nay moi la ve duy nhat lam mutant bo `.clear()` chet — da do: mutant song sot
+    # voi kich ban "cung muc, probe hong".)
+    def gia_hong(lenh, env=None, timeout=None, **kwargs):
+        if lenh[0] == "/gia/bin/agy" and lenh[1] == "models":
+            return subprocess.CompletedProcess(lenh, 1, stdout="", stderr="not logged in\n")
+        return subprocess.CompletedProcess(lenh, 0, stdout="1.1.17", stderr="")
+    m._chay_van_ban_an_toan = gia_hong
+    m.subprocess.run = gia_hong
+    m.CONG_CU = []
+    rc2, d2 = _doctor_json(m, doi_kha_dung=True)
+    kn2 = [k for k in d2["kha_nang"] if k.get("ten") == "antigravity"]
+    bang(len(kn2) == 1 and kn2[0].get("trang_thai") == "CO_MAT",
+         f"luot doctor sau phai do lai, khong doc anh chup luot truoc: {kn2}")
+    bang(rc2 == m.MA_CHUA_XAC_THUC,
+         f"--doi-kha-dung voi antigravity CO_MAT phai thoat {m.MA_CHUA_XAC_THUC}: rc2={rc2}")
+
+
+@ca
 def r01_worktree_that_bi_chan():
     with San() as s:
         wt = tao_worktree(s); dau = s / "da-chay"; rr = s / "runs"
@@ -6416,8 +6665,8 @@ DOT_BIEN = [
       '        return (False, f"timeout sau {timeout:.1f}s", False)'),
      ["t135_phien_ban_va_xac_thuc_bao_qua_han_bang_CO_KIEU"]),
     ("xac_thuc_timeout_khong_mang_co_qua_han",
-     ('        return (False, f"probe xac thuc timeout sau {timeout:.1f}s", True)',
-      '        return (False, f"probe xac thuc timeout sau {timeout:.1f}s", False)'),
+     ('        return (False, f"probe xac thuc timeout sau {timeout:.1f}s", True, "")',
+      '        return (False, f"probe xac thuc timeout sau {timeout:.1f}s", False, "")'),
      ["t135_phien_ban_va_xac_thuc_bao_qua_han_bang_CO_KIEU"]),
     # Đường chớp thứ hai: auth quá hạn quay lại là `xac_thuc_ok=False` ⇒ THIẾU.
     ("xac_thuc_qua_han_van_la_THIEU",
@@ -6863,6 +7112,72 @@ DOT_BIEN = [
     ("mcp_mat_env_da_chuan_hoa",
      ('                           env=moi_truong, stdin=subprocess.DEVNULL,',
       '                           stdin=subprocess.DEVNULL,'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+    # --- AG-T0-01B: MƯỜI ĐỘT BIẾN CHO AGY VÀ ANTIGRAVITY (N1-N9) -------------------
+    ("agy_cong_cu_xoa_muc",
+     ('    {"ten": "agy", "bat_buoc": False, "ung_vien": ["agy"],\n'
+      '     "vi_sao": "CLI client cho Google Antigravity (provider: google_antigravity, surface: antigravity)",\n'
+      '     "cai": {"Windows": "irm https://antigravity.google/cli/install.ps1 | iex",\n'
+      '             "Darwin": "curl -fsSL https://antigravity.google/cli/install.sh | bash",\n'
+      '             "Linux": "curl -fsSL https://antigravity.google/cli/install.sh | bash"},\n'
+      '     "xac_thuc": ["models"]},',
+      ''),
+     ["t145_agy_cong_cu_va_kha_nang"]),
+    ("agy_xac_thuc_sang_version",
+     ('     "xac_thuc": ["models"]},', '     "xac_thuc": ["--version"]},'),
+     ["t145_agy_cong_cu_va_kha_nang"]),
+    ("agy_kha_nang_xoa_muc",
+     ('    {"ten": "antigravity", "do": lambda ws, ks=False: _do_antigravity(_MOI_TRUONG_DA_DOC),\n'
+      '     "vi_sao": "provider google_antigravity qua execution_surface antigravity (AG-T0-01B)",\n'
+      '     "khac_phuc": "cai agy CLI va chay `agy` (mo TUI de dang nhap)"},',
+      ''),
+     ["t145_agy_cong_cu_va_kha_nang"]),
+    ("agy_goi_xac_thuc_models",
+     ('            ok_xt, mo_ta_xt, qua_han_xt, ra_xt = _xac_thuc_kem_dau_ra(duong_agy, ["models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)',
+      '            ok_xt, mo_ta_xt, qua_han_xt, ra_xt = _xac_thuc_kem_dau_ra(duong_agy, [], env=mt, timeout=PROBE_TIMEOUT_GIAY)'),
+     ["t146_do_antigravity_cac_trang_thai_va_luong"]),
+    # P2 cross-review 4639462: `_do_antigravity` bo qua bang ket qua cua `doctor` va tu chay
+    # `agy models` lan hai trong cung luot => ca dau-cuoi t148 chet (OSError lan hai -> CO_MAT).
+    ("agy_bo_qua_ket_qua_doctor",
+     ('        da_do = _XAC_THUC_DA_DO.get((duong_agy, ("models",)))',
+      '        da_do = None'),
+     ["t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG"]),
+    # ...va mat kia: `doctor` quen ghi ket qua probe vao bang => cung ca ay chet.
+    ("doctor_khong_ghi_ket_qua_xac_thuc",
+     ('                _XAC_THUC_DA_DO[(thay["duong_dan"], tuple(c["xac_thuc"]))] = (\n'
+      '                    xac_thuc_ok is True, xt_mo_ta_cuoi, bool(xt_qua_han), xt_dau_ra)',
+      '                pass'),
+     ["t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG"]),
+    # ...va bang song qua hai luot: luot sau doc anh chup luot truoc => ve thu hai cua t148 chet.
+    ("doctor_khong_xoa_bang_xac_thuc_luot_truoc",
+     ('    _XAC_THUC_DA_DO.clear()        # lượt mới, bằng chứng mới — không đọc ảnh chụp cũ',
+      '    pass'),
+     ["t148_doctor_chay_agy_models_MOT_lan_cho_ca_CONG_CU_lan_KHA_NANG"]),
+    # P2 cross-review 15f2dbf: quay lai goi `agy models` lan hai de dem dong => ca "mot lan" chet.
+    ("agy_goi_models_lan_hai",
+     ('            so_dong = len([d for d in ra_xt.splitlines() if d.strip()])',
+      '            p_mod = _chay_van_ban_an_toan([duong_agy, "models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)\n'
+      '            so_dong = len([d for d in ((p_mod.stdout or "") + (p_mod.stderr or "")).splitlines() if d.strip()])'),
+     ["t146_do_antigravity_cac_trang_thai_va_luong"]),
+    ("agy_probe_models_timeout_thanh_thieu",
+     ('        if qua_han_xt:\n            loi_cuoi = ("KHONG_DO_DUOC", f"probe models timeout sau {PROBE_TIMEOUT_GIAY:.1f}s{duoi_path}")',
+      '        if qua_han_xt:\n            loi_cuoi = ("THIEU", f"probe models timeout sau {PROBE_TIMEOUT_GIAY:.1f}s{duoi_path}")'),
+     ["t146_do_antigravity_cac_trang_thai_va_luong"]),
+    ("agy_probe_models_rong_thanh_co_mat",
+     ('        if mo_ta_xt == "rc=0 nhung khong co bang chung xac thuc":\n            # Finding 1: models rc=0 nhưng không có đầu ra -> KHONG_DO_DUOC (không làm tròn thành CO_MAT hay DUNG_DUOC)\n            loi_cuoi = ("KHONG_DO_DUOC", f"probe models khong co dau ra (rc=0 nhung khong co bang chung xac thuc){duoi_path}")',
+      '        if mo_ta_xt == "rc=0 nhung khong co bang chung xac thuc":\n            co_mat_str = ("CO_MAT", f"chua dang nhap{duoi_path}")'),
+     ["t146_do_antigravity_cac_trang_thai_va_luong"]),
+    ("agy_windows_bo_fallback_localappdata",
+     ('        elif c["ten"] == "agy" and local:',
+      '        elif False:'),
+     ["t147_agy_fallback_localappdata_windows"]),
+    ("agy_windows_fallback_bo_chan_doan_path",
+     ('        duoi_path = " · đã cài, PATH phiên này chưa thấy — mở terminal mới" if la_fallback else ""',
+      '        duoi_path = ""'),
+     ["t147_agy_fallback_localappdata_windows"]),
+    ("antigravity_tinh_vao_LAM_DUOC_VIEC",
+     ('    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho"}',
+      '    LAM_DUOC_VIEC = {"git", "gh-kho", "rest-kho", "antigravity"}'),
+     ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
 ]
 
 
@@ -6962,8 +7277,11 @@ def chay_dot_bien() -> int:
                     # thu — một cổng không bao giờ xanh được thì người ta sẽ bỏ qua nó.
                     if isinstance(kq, str):
                         bo_qua.append(fn.__name__)
-                except AssertionError:
+                except TinHieuChotCa:
                     chet.append(fn.__name__)
+                except AssertionError as e:
+                    # AssertionError trần không qua TinHieuChotCa (hoặc từ ca khác/thư viện)
+                    chet.append(f"{fn.__name__}(AssertionError:{e})")
                 except Exception as e:  # noqa: BLE001
                     chet.append(f"{fn.__name__}({type(e).__name__})")
             can_do = len(phai_chet) - len(bo_qua)

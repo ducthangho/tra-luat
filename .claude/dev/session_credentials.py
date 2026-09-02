@@ -25,6 +25,7 @@ from provider_exec import (
     ProviderExecutableError as _ProviderExecutableError,
     bind_provider_executable,
     bound_provider_source as _shared_bound_provider_source,
+    private_provider_directory_acl_available as _shared_private_provider_acl_available,
     provider_argv as _shared_provider_argv,
     provider_file_identity as _provider_file_identity,
     revalidate_bound_provider as _revalidate_bound_provider,
@@ -86,6 +87,10 @@ def _bound_provider_source(source, bound: _BoundProviderExecutable) -> dict:
 
 def _trusted_provider_temp_base() -> Path:
     return _shared_trusted_provider_temp_base()
+
+
+def _private_provider_directory_acl_available() -> bool:
+    return _shared_private_provider_acl_available()
 
 
 def _validate_private_provider_directory(path: Path) -> Path:
@@ -160,6 +165,8 @@ def _checked_provider_cleanup(root: Path, identity: tuple[int, int]) -> None:
 @contextlib.contextmanager
 def _private_provider_home():
     """Yield a validated disposable provider HOME outside repository control."""
+    if not _private_provider_directory_acl_available():
+        raise OSError("private provider directory ACL unavailable")
     base = _trusted_provider_temp_base()
     root = None
     root_identity = None

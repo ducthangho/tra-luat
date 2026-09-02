@@ -230,6 +230,25 @@ def provider_executable_lock(module):
             module.REPOSITORY_ROOT = original_repository
 
 
+def windows_pre313_provider_binding_lock(module):
+    """Windows 3.11 can bind provider identity without allocating secret storage."""
+    if os.name != "nt":
+        print("SKIP windows_pre313_provider_binding_lock (Windows-only behavior)")
+        return
+    provider_module = sys.modules[module.bind_provider_executable.__module__]
+    with _safe_executable_directory() as safe_raw:
+        safe = Path(safe_raw)
+        executable = _write_executable(safe / "gh.exe", "inert-gh-fixture\n")
+        source = {"PATH": str(safe), "PATHEXT": ".EXE"}
+        with mock.patch.object(provider_module.sys, "version_info", (3, 11, 9)):
+            bound = module.bind_provider_executable(
+                "gh", source, repository_root=P.resolve().parents[2])
+        assert bound.kind == "direct", bound
+        assert bound.executable == executable.resolve(strict=True), bound
+        assert bound.identities == ((bound.executable,
+                                     module._provider_file_identity(bound.executable)),)
+
+
 def directory_root_lock(module):
     """Exact directory roots are guarded as directories, not as file targets."""
     repository = P.resolve().parents[2]
@@ -364,6 +383,25 @@ def provider_home_lock(module):
         finally:
             module.REPOSITORY_ROOT = original_repository
             tempfile.tempdir = original_tempdir
+
+
+def provider_private_acl_unavailable_lock(module):
+    """Unavailable private ACL semantics refuse before allocation or credential child."""
+    with mock.patch.object(
+            module, "_private_provider_directory_acl_available",
+            return_value=False), \
+         mock.patch.object(module, "_bind_provider_executable",
+                           return_value=_fixture_bound(module, "claude")), \
+         mock.patch.object(module.tempfile, "mkdtemp") as allocate, \
+         mock.patch.object(module.subprocess, "run") as child:
+        result = module.claude_probe(env={
+            "PATH": str(Path(sys.executable).resolve().parent),
+            "CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE",
+        })
+    assert result == {"status": "not_measured",
+                      "reason": "provider_storage_unavailable"}, result
+    allocate.assert_not_called()
+    child.assert_not_called()
 
 
 def provider_cleanup_lock(module):
@@ -914,6 +952,14 @@ def run_mutations():
         ("directory_guard_skips_candidate_itself",
          "    return _guard_destination(path, include_candidate=True)",
          "    return _guard_destination(path, include_candidate=False)", directory_root_lock),
+        ("provider_home_allocates_without_private_acl",
+         "    if not _private_provider_directory_acl_available():\n"
+         "        raise OSError(\"private provider directory ACL unavailable\")\n"
+         "    base = _trusted_provider_temp_base()",
+         "    if False:\n"
+         "        raise OSError(\"private provider directory ACL unavailable\")\n"
+         "    base = _trusted_provider_temp_base()",
+         provider_private_acl_unavailable_lock),
         ("provider_home_honors_ambient_temp_root",
          '        root = Path(tempfile.mkdtemp(prefix="tl-provider-home-", dir=base))',
          '        root = Path(tempfile.mkdtemp(prefix="tl-provider-home-", dir=None))',
@@ -1073,18 +1119,34 @@ def run_mutations():
             "        if not lexical.is_absolute():",
             "        lexical = Path(raw).expanduser()\n"
             "        if not lexical.is_absolute():",
+            provider_executable_lock,
         )]
         if os.name == "posix":
             provider_mutants.append((
                 "provider_launch_support_is_unbound",
                 '        return "posix-script", (support,), (), identities',
-                '        return "direct", (), (), []'))
+                '        return "direct", (), (), []',
+                provider_executable_lock))
         else:
-            provider_mutants.append((
-                "provider_launch_support_is_unbound",
-                '    return ("npm-cmd", (node, script), (),\n'
-                '            [(node, node_identity), (script, script_identity)])',
-                '    return ("direct", (), (), [])'))
+            provider_mutants.extend((
+                (
+                    "provider_temp_lookup_requires_private_acl",
+                    '    elif os.name == "nt":\n        try:',
+                    '    elif os.name == "nt":\n'
+                    '        if sys.version_info < (3, 13):\n'
+                    '            raise OSError('
+                    '"private Windows provider directory ACL unavailable")\n'
+                    '        try:',
+                    windows_pre313_provider_binding_lock,
+                ),
+                (
+                    "provider_launch_support_is_unbound",
+                    '    return ("npm-cmd", (node, script), (),\n'
+                    '            [(node, node_identity), (script, script_identity)])',
+                    '    return ("direct", (), (), [])',
+                    provider_executable_lock,
+                ),
+            ))
         original_globals = {
             "bind_provider_executable": m.bind_provider_executable,
             "_shared_provider_argv": m._shared_provider_argv,
@@ -1093,7 +1155,7 @@ def run_mutations():
             "_ProviderExecutableError": m._ProviderExecutableError,
         }
         try:
-            for index, (name, old, new) in enumerate(provider_mutants):
+            for index, (name, old, new, lock) in enumerate(provider_mutants):
                 assert provider_source.count(old) == 1, f"{name} site missing"
                 mutant_path = Path(td) / f"provider_exec_{index}.py"
                 mutant_path.write_text(
@@ -1109,7 +1171,7 @@ def run_mutations():
                 m._BoundProviderExecutable = mutant.BoundProviderExecutable
                 m._ProviderExecutableError = mutant.ProviderExecutableError
                 try:
-                    provider_executable_lock(m)
+                    lock(m)
                 except (AssertionError, OSError):
                     killed += 1
                     print(f"PASS {name} (killed 1/1)")
@@ -1125,7 +1187,9 @@ def run_mutations():
 def run():
     directory_root_lock(m)
     provider_executable_lock(m)
+    windows_pre313_provider_binding_lock(m)
     provider_home_lock(m)
+    provider_private_acl_unavailable_lock(m)
     provider_cleanup_lock(m)
     missing_parent_capability_lock(m)
     secret_write_cleanup_lock(m)

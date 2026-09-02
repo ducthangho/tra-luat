@@ -72,13 +72,19 @@ def provider_file_identity(path: Path) -> FileIdentity:
     )
 
 
+def private_provider_directory_acl_available() -> bool:
+    """Whether mode=0700 creates private provider directories on this runtime."""
+    return (
+        os.name == "posix"
+        or (os.name == "nt" and sys.version_info >= (3, 13))
+    )
+
+
 def trusted_provider_temp_base() -> Path:
     """Find the process temp tree without trusting caller-controlled temp vars."""
     if os.name == "posix":
         candidate = Path("/tmp")
     elif os.name == "nt":
-        if sys.version_info < (3, 13):
-            raise OSError("private Windows provider directory ACL unavailable")
         try:
             import ctypes
             from ctypes import wintypes

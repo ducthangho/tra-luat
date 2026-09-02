@@ -163,6 +163,7 @@ def t6_ci_kiem_ban_ke_truoc_moi_test_nang():
             "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",),
         "cài actionlint cho G5": ("bash ops/cai_actionlint.sh",),
         "cài shellcheck cho G5 (cài xong đo lại)": ("bash ops/cai_cong_cu.sh shellcheck",),
+        "cài rg cho G5 (cài xong đo lại)": ("bash ops/cai_cong_cu.sh rg",),
     }
     uses_setup = {"actions/checkout@v4", "actions/setup-python@v5"}
     for i, b in enumerate(buoc[:idx_kiem[0]]):

@@ -99,6 +99,9 @@ jobs:
       - name: cài shellcheck cho G5 (cài xong đo lại)
         shell: bash
         run: bash ops/cai_cong_cu.sh shellcheck
+      - name: cài rg cho G5 (cài xong đo lại)
+        shell: bash
+        run: bash ops/cai_cong_cu.sh rg
       - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)
         shell: bash
         run: |

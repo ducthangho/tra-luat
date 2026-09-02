@@ -1055,7 +1055,15 @@ def _doc_dep_probe() -> list:
         try:
             __import__(ten)
             return True
-        except Exception:  # noqa: BLE001 — import hỏng cũng coi như không có
+        except KeyboardInterrupt:
+            raise
+        except BaseException:  # noqa: BLE001 — import hỏng cũng coi như không có
+            # r337 (đo 02-09-2026, container remote) — fix: `import pypdf` kéo `cryptography` 41.0.7
+            # thiếu `cffi` ⇒ pyo3 ném `PanicException`, kế thừa BaseException chứ không phải Exception,
+            # nên `except Exception` cũ để nó XUYÊN QUA và giết cả `tl doctor` ngay tại phép đo phụ
+            # thuộc — một lệnh chẩn đoán chết vì một phép đo là lệnh vắng mặt đúng lúc cần nó nhất.
+            # Import hỏng vì BẤT KỲ lý do gì đều là "không có" (cùng doctrine `launcher.py doctor`);
+            # chỉ Ctrl-C được xuyên qua vì đó là ý người dùng, không phải trạng thái của module.
             return False
 
     return [

@@ -24923,6 +24923,61 @@ def run() -> int:
         return cat == "false_credit:AttributeError"
     _t110("r378_dot_bien_attributeerror_la_tin_dung_gia", _c378_phan_hang_tin_dung_gia)
 
+    # r337 (đo 02-09-2026, container remote) — `tl doctor` KHÔNG được chết vì một phép đo phụ thuộc.
+    # Ca thật: `import pypdf` kéo `cryptography` 41.0.7 thiếu `cffi` ⇒ pyo3 ném `PanicException`
+    # (kế thừa BaseException), `except Exception` cũ để nó xuyên qua và giết cả doctor. Đo bằng
+    # module GIẢ trên sys.path, không phụ thuộc máy có cryptography hỏng hay không.
+    def _r337_chay(ten_loi, fn=None):
+        """Đặt `pypdf`/`pdfplumber` giả ném `ten_loi` lúc import rồi gọi `_doc_dep_probe`.
+        Trả ("ok", ket_qua) · ("nem", lop_ngoai_le). Khôi phục sys.path/sys.modules trong finally."""
+        import tempfile as _tf337, sys as _sys337
+        from pathlib import Path as _P337
+        import tl_core.ops_misc as _om337
+        fn = fn or _om337._doc_dep_probe
+        cu = {t: _sys337.modules.pop(t, None) for t in ("pypdf", "pdfplumber")}
+        with _tf337.TemporaryDirectory() as td:
+            for t in cu:
+                (_P337(td) / f"{t}.py").write_text(f"raise {ten_loi}('r337-gia')\n", encoding="utf-8")
+            _sys337.path.insert(0, td)
+            try:
+                return ("ok", fn())
+            except BaseException as e:  # noqa: BLE001 — oracle test, phân hạng theo LỚP
+                return ("nem", type(e))
+            finally:
+                if td in _sys337.path:
+                    _sys337.path.remove(td)
+                for t, m in cu.items():
+                    _sys337.modules.pop(t, None)
+                    if m is not None:
+                        _sys337.modules[t] = m
+
+    def _c337_khong_chet_vi_BaseException():
+        tt, kq = _r337_chay("BaseException")
+        pdf = next((d for d in (kq if tt == "ok" else []) if d["ten"].startswith("pypdf")), None)
+        return tt == "ok" and pdf is not None and pdf["co"] is False
+    _t110("r337_doctor_dep_probe_khong_chet_vi_BaseException", _c337_khong_chet_vi_BaseException)
+
+    def _c337_van_nha_KeyboardInterrupt():
+        tt, kq = _r337_chay("KeyboardInterrupt")
+        return tt == "nem" and kq is KeyboardInterrupt
+    _t110("r337_doctor_dep_probe_van_nha_KeyboardInterrupt", _c337_van_nha_KeyboardInterrupt)
+
+    def _c337_dot_bien_except_Exception_lam_DO():
+        """Đột biến quay về `except Exception` phải làm ca thuận ĐỎ — không có nó thì ca trên đo gì?"""
+        import inspect as _ins337, textwrap as _tw337
+        import tl_core.ops_misc as _om337
+        old = "        except BaseException:  # noqa: BLE001"
+        src = _tw337.dedent(_ins337.getsource(_om337._doc_dep_probe))
+        old = _tw337.dedent(old)
+        if src.count(old) != 1:
+            raise RuntimeError(f"R337_MUTATION_ANCHOR_COUNT:{src.count(old)}")
+        ns = dict(_om337.__dict__)
+        exec(compile(src.replace(old, old.replace("BaseException", "Exception")),
+                     _om337.__file__ + ":r337-mutant", "exec"), ns)
+        tt, kq = _r337_chay("BaseException", fn=ns["_doc_dep_probe"])
+        return tt == "nem" and kq is BaseException
+    _t110("r337_dot_bien_except_Exception_lam_DO", _c337_dot_bien_except_Exception_lam_DO)
+
     def _c218_che_nhieu_fence_va_span():
         """§2.4 — ca QUYẾT ĐỊNH chất lượng: CÙNG MỘT chuỗi, trong fence ⇒ IM, ngoài fence ⇒ NỔ.
         Test chỉ khẳng định 'trong fence im' sẽ XANH GIẢ khi chưa cài lớp nào ⇒ phải khẳng định CẢ HAI VẾ.

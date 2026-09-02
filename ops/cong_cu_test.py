@@ -92,6 +92,13 @@ def t2_canary_thieu_shellcheck_phai_SUY_GIAM():
         shim = chi_al / "python"
         shim.write_text(f'#!/bin/sh\nexec {sys.executable} "$@"\n', encoding="utf-8")
         shim.chmod(0o755)
+        # Bản kê chung còn mang các binary bắt buộc của launcher. Cho chúng đi qua
+        # bằng symlink tuyệt đối, nhưng cố ý KHÔNG đưa shellcheck vào PATH cô lập.
+        for ten in ("git", "rg", "bash"):
+            dich = shutil.which(ten)
+            if not dich:
+                raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC T2: thiếu {ten} đối chứng")
+            (chi_al / ten).symlink_to(dich)
         bang(shutil.which("shellcheck", path=str(chi_al)) is None,
              "PATH cô lập vẫn thấy shellcheck ⇒ ca này không còn đo cái nó nói là đo")
         rc, out, _ = chay("kiem-tra", "--json", env=dict(os.environ, PATH=str(chi_al)))
@@ -156,6 +163,7 @@ def t6_ci_kiem_ban_ke_truoc_moi_test_nang():
             "python -m pip install --quiet PyYAML==6.0.3 jsonschema==4.26.0",),
         "cài actionlint cho G5": ("bash ops/cai_actionlint.sh",),
         "cài shellcheck cho G5 (cài xong đo lại)": ("bash ops/cai_cong_cu.sh shellcheck",),
+        "cài rg cho G5 (cài xong đo lại)": ("bash ops/cai_cong_cu.sh rg",),
     }
     uses_setup = {"actions/checkout@v4", "actions/setup-python@v5"}
     for i, b in enumerate(buoc[:idx_kiem[0]]):
@@ -550,7 +558,112 @@ def t17_ban_ghim_trong_ban_ke_khop_ban_ghim_trong_ci():
          "không đo được cặp ghim nào — ca này đang xanh mà chưa đo gì")
 
 
+@ca
+def t18_inventory_bat_buoc_cua_launcher_phai_nam_trong_ban_ke():
+    """Launcher và preflight CI không được giữ hai danh sách bắt buộc bị trôi."""
+    _doi_cay_day_du(GOC)
+    import runpy
+    p = GOC / ".claude" / "dev" / "launcher.py"
+    launcher_ns = runpy.run_path(str(p), run_name="launcher_inventory_t18")
+    launcher = {x["ten"] for x in launcher_ns["CONG_CU"] if x.get("bat_buoc") is True}
+    ban_ke = yaml.safe_load((GOC / "ops" / "cong_cu.yaml").read_text(encoding="utf-8"))
+    chung = set(ban_ke["cong_cu"])
+    thieu = launcher - chung
+    bang(not thieu, f"launcher khai bắt buộc nhưng bản kê chung bỏ sót: {sorted(thieu)}")
+    bang({"rg", "bash"} <= launcher, "đối chứng launcher mất rg/bash nên t18 không còn răng")
+
+
+@ca
+def t19_moi_cong_cu_bat_buoc_co_cong_thuc_ba_nen():
+    """Bỏ một recipe nền phải đỏ trước khi môi trường đó cần cài thật."""
+    _doi_cay_day_du(GOC)
+    ban_ke = yaml.safe_load((GOC / "ops" / "cong_cu.yaml").read_text(encoding="utf-8"))
+    for ten, dn in ban_ke["cong_cu"].items():
+        if not (dn["bat_buoc"] or dn.get("chuan_bi")):
+            continue
+        cai = dn.get("cai") or {}
+        if "lenh" in cai:  # công thức portable dùng chung ba nền
+            continue
+        thieu = {n for n in ("linux", "macos", "windows") if not (cai.get(n) or {}).get("lenh")}
+        bang(not thieu, f"{ten}: thiếu công thức cài cho {sorted(thieu)}")
+
+
+@ca
+def t20_che_do_cai_tat_ca_bootstrap_pyyaml_dung_ban_ghim():
+    """Lệnh chuẩn bị chung phải tồn tại và pin bootstrap khớp CI/bản kê."""
+    _doi_cay_day_du(GOC)
+    sh = CAI_SH.read_text(encoding="utf-8")
+    bk = yaml.safe_load((GOC / "ops" / "cong_cu.yaml").read_text(encoding="utf-8"))
+    ci = (GOC / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    bang('TEN" = "--bat-buoc"' in sh and 'for cong_cu in "${BAT_BUOC[@]}"' in sh,
+         "cai_cong_cu.sh chưa có đường cài mọi công cụ bắt buộc")
+    import re
+    pins = set(re.findall(r"PyYAML==(\d+(?:\.\d+)+)", sh + "\n" + ci))
+    bang(pins == {"6.0.3"}, f"bootstrap PyYAML trôi phiên bản giữa script và CI: {pins}")
+    bang(bk["cong_cu"]["PyYAML"]["bat_buoc"] is True,
+         "PyYAML bootstrap mà không bắt buộc trong bản kê")
+
+
+def batch_behavior_test() -> None:
+    """Batch giữ PATH từ installer con và chạy được từ CWD ngoài root.
+
+    Không đưa vào `CA`: đây là integration control cho wrapper, không được dùng để
+    nhận công giết thêm các mutation đơn vị T1..T15.
+    """
+    bash = shutil.which("bash")
+    if not bash:
+        raise BoQuaMoiTruong("KHÔNG ĐO ĐƯỢC batch: thiếu bash")
+    with tempfile.TemporaryDirectory(prefix="cong-cu-batch-") as td:
+        root = Path(td); ops = root / "ops"; ops.mkdir(); out = root / "installed"
+        fake_bin = root / "fake-bin"; fake_bin.mkdir(); pip_ready = root / "pip-ready"
+        shutil.copy2(CAI_SH, ops / "cai_cong_cu.sh")
+        shutil.copy2(SCRIPT, ops / "cong_cu.py")
+        name = "batch-path-t21"
+        manifest = {"schema_version": 1, "cong_cu": {name: {
+            "bat_buoc": True, "ban_ghim": "1.2.3",
+            "probe": [{"ten": "mac_dinh", "lenh": [name, "--version"],
+                       "regex": r"(\d+\.\d+\.\d+)"}],
+            "cai": {"lenh": (f"mkdir -p '{out}'; printf '#!/bin/sh\\necho 1.2.3\\n' "
+                                f"> '{out / name}'; chmod +x '{out / name}'; echo '{out}'")}}}}
+        (ops / "cong_cu.yaml").write_text(yaml.safe_dump(manifest), encoding="utf-8")
+        fake_python = fake_bin / "python"
+        fake_python.write_text(
+            "#!/bin/sh\n"
+            f"MARKER='{pip_ready}'\nREAL='{sys.executable}'\n"
+            "[ \"${1:-}\" = -c ] && [ \"${2:-}\" = 'import yaml' ] && "
+            "[ ! -e \"$MARKER\" ] && exit 1\n"
+            "[ \"${1:-}\" = -c ] && [ \"${2:-}\" = 'import pip' ] && "
+            "[ ! -e \"$MARKER\" ] && exit 1\n"
+            "[ \"${1:-}\" = -m ] && [ \"${2:-}\" = ensurepip ] && "
+            "{ : > \"$MARKER\"; exit 0; }\n"
+            "[ \"${1:-}\" = -m ] && [ \"${2:-}\" = pip ] && exit 0\n"
+            "exec \"$REAL\" \"$@\"\n", encoding="utf-8")
+        fake_python.chmod(0o755)
+        env = dict(os.environ, PATH=str(fake_bin) + os.pathsep + os.environ.get("PATH", ""))
+        p = subprocess.run([bash, "./cai_cong_cu.sh", "--bat-buoc"], cwd=ops,
+                           env=env, capture_output=True, text=True, timeout=60)
+        bang(p.returncode == 0 and '"trang_thai_tong": "DAT"' in p.stdout,
+             f"batch không giữ PATH/caller-CWD: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+        bang(pip_ready.is_file(), "batch gọi pip trước khi bootstrap ensurepip")
+
+
+def python_alias_behavior_test() -> None:
+    """Probe `python` dùng interpreter chạy cong_cu.py, không đòi alias trên PATH."""
+    with tempfile.TemporaryDirectory(prefix="cong-cu-python3-") as td:
+        root = Path(td); only = root / "bin"; only.mkdir()
+        (only / "python3").symlink_to(sys.executable)
+        bk = ghi_ban_ke(root, {"python": {"bat_buoc": True, "ban_ghim": None,
+            "probe": [{"ten": "mac_dinh", "lenh": ["python", "--version"],
+                       "regex": r"Python\s+(\d+\.\d+\.\d+)"}]}})
+        rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk), "--json",
+                          env=dict(os.environ, PATH=str(only)))
+        bang(rc == 0 and '"trang_thai_tong": "DAT"' in out,
+             f"máy chỉ có python3 bị probe alias python chặn: rc={rc}\n{out}")
+
+
 def main() -> int:
+    batch_behavior_test()
+    python_alias_behavior_test()
     qua, hong, bo_qua = 0, [], []
     for fn in CA:
         try:

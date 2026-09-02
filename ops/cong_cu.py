@@ -23,6 +23,8 @@ def doc_ban_ke(duong):
     for ten, dn in d["cong_cu"].items():
         if not isinstance(dn, dict) or not isinstance(dn.get("bat_buoc"), bool):
             raise SystemExit(f"ban ke '{ten}': 'bat_buoc' phai la bool")
+        if "chuan_bi" in dn and not isinstance(dn["chuan_bi"], bool):
+            raise SystemExit(f"ban ke '{ten}': 'chuan_bi' phai la bool")
         bg = dn.get("ban_ghim")
         if bg is not None and (not isinstance(bg, str) or not bg.strip()):
             raise SystemExit(f"ban ke '{ten}': 'ban_ghim' chi nhan chuoi khac rong hoac null")
@@ -60,6 +62,9 @@ def nen_hien_tai():
 
 def _chay(argv, timeout=20):
     """Trả (rc, output, lỗi-khởi-chạy); timeout là ĐÃ chạy nhưng hỏng, khác không mở được."""
+    # `cai_cong_cu.sh` chấp nhận python/python3/py. Probe module và probe `python`
+    # phải đo đúng interpreter đã chọn để máy chỉ có python3 không đỏ sau khi vừa cài.
+    argv = [sys.executable, *argv[1:]] if argv and argv[0] == "python" else argv
     try:
         p = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
         return p.returncode, (p.stdout or "") + (p.stderr or ""), None

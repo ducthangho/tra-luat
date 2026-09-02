@@ -23,6 +23,8 @@ def doc_ban_ke(duong):
     for ten, dn in d["cong_cu"].items():
         if not isinstance(dn, dict) or not isinstance(dn.get("bat_buoc"), bool):
             raise SystemExit(f"ban ke '{ten}': 'bat_buoc' phai la bool")
+        if "chuan_bi" in dn and not isinstance(dn["chuan_bi"], bool):
+            raise SystemExit(f"ban ke '{ten}': 'chuan_bi' phai la bool")
         bg = dn.get("ban_ghim")
         if bg is not None and (not isinstance(bg, str) or not bg.strip()):
             raise SystemExit(f"ban ke '{ten}': 'ban_ghim' chi nhan chuoi khac rong hoac null")
@@ -58,8 +60,57 @@ def nen_hien_tai():
     if t.startswith("win") or t in ("mingw", "msys", "cygwin"): return "windows"
     return t or "unknown"
 
+def _bash_windows(path=None, system_root=None, program_files=None, git=None):
+    """Windows: KHÔNG để CreateProcess tự tra `bash`. Nó tra `%SystemRoot%\\System32` TRƯỚC
+    PATH, mà `System32\\bash.exe` là bộ PHÓNG WSL — không phải GNU bash: thiếu distro thì
+    `bash --version` rc=1, có distro thì trả bash của distro, đằng nào cũng không phải Git
+    Bash mà hook SessionStart cần. Đo 02-09-2026, run 33612364175 lane windows-latest: bước
+    G5 chạy TRONG Git Bash mà probe bash vẫn `rc=1, mong [0]`, `ban_thay: null`.
+
+    Thứ tự: `CONG_CU_BASH` → PATH (loại mọi ứng viên nằm DƯỚI SystemRoot — đó là một tệp
+    cụ thể do HĐH cấp, không phải danh sách cấm theo tên) → Git for Windows cạnh `git`
+    (`<Git>\\bin`, `<Git>\\usr\\bin`) → `%ProgramFiles%\\Git` (cùng hai vị trí launcher
+    đã dùng). Không thấy gì thì trả None để probe hỏng THẬT, không đoán.
+    Tham số chỉ để test ép nền: mặc định đọc từ môi trường lúc gọi."""
+    env = os.environ
+    chi_dinh = env.get("CONG_CU_BASH")
+    if chi_dinh and Path(chi_dinh).is_file():
+        return chi_dinh
+    path = env.get("PATH", "") if path is None else path
+    sr = env.get("SystemRoot", "") if system_root is None else system_root
+    sr_norm = os.path.normcase(os.path.abspath(sr)).rstrip("\\/") if sr else None
+
+    def duoi_system_root(u):
+        if not sr_norm:
+            return False
+        q = os.path.normcase(os.path.abspath(str(u)))
+        return q == sr_norm or q.startswith(sr_norm + os.sep) or q.startswith(sr_norm + "/")
+
+    ung_vien = []
+    for d in path.split(os.pathsep):
+        if d:
+            ung_vien += [Path(d) / "bash.exe", Path(d) / "bash"]
+    git = shutil.which("git", path=path) if git is None else git
+    if git:
+        g = Path(git).resolve()
+        for goc_git in (g.parent.parent, g.parent.parent.parent):
+            ung_vien += [goc_git / "bin" / "bash.exe", goc_git / "usr" / "bin" / "bash.exe"]
+    pf = env.get("ProgramFiles", r"C:\Program Files") if program_files is None else program_files
+    ung_vien += [Path(pf) / "Git" / "bin" / "bash.exe", Path(pf) / "Git" / "usr" / "bin" / "bash.exe"]
+    for u in ung_vien:
+        if u.is_file() and not duoi_system_root(u):
+            return str(u)
+    return None
+
 def _chay(argv, timeout=20):
     """Trả (rc, output, lỗi-khởi-chạy); timeout là ĐÃ chạy nhưng hỏng, khác không mở được."""
+    # `cai_cong_cu.sh` chấp nhận python/python3/py. Probe module và probe `python`
+    # phải đo đúng interpreter đã chọn để máy chỉ có python3 không đỏ sau khi vừa cài.
+    argv = [sys.executable, *argv[1:]] if argv and argv[0] == "python" else argv
+    if os.name == "nt" and argv and argv[0] == "bash":
+        # Xem `_bash_windows`: đường dẫn TUYỆT ĐỐI để CreateProcess không rẽ vào System32.
+        bash_gb = _bash_windows()
+        argv = [bash_gb, *argv[1:]] if bash_gb else argv
     try:
         p = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
         return p.returncode, (p.stdout or "") + (p.stderr or ""), None
@@ -69,7 +120,7 @@ def _chay(argv, timeout=20):
     except OSError as ex:
         # Python native tren Windows khong chay truc tiep script shebang khong co `.exe`;
         # duong lui nay giu probe script dung duoc trong Git Bash, binary that van di duong tren.
-        bash = os.environ.get("CONG_CU_BASH") or shutil.which("bash")
+        bash = _bash_windows() if os.name == "nt" else (os.environ.get("CONG_CU_BASH") or shutil.which("bash"))
         if os.name == "nt" and bash:
             for d in os.environ.get("PATH", "").split(os.pathsep):
                 ung = Path(d) / argv[0]

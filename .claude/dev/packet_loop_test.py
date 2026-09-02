@@ -34,7 +34,11 @@ from launcher import ky_ban_ghi_luot
 HERE = Path(__file__).resolve().parent
 CANONICAL = HERE / "packet_loop.py"
 ROOT = HERE.parents[1]
-LAUNCHER_RUNTIME_FILES = ("launcher.py", "session_credentials.py")
+LAUNCHER_RUNTIME_FILES = (
+    "launcher.py",
+    "provider_exec.py",
+    "session_credentials.py",
+)
 
 # --- CÔ LẬP GIT KHỎI CẤU HÌNH NGOÀI (cross-review codex, PR #343, cùng lớp với P1-a của
 # PR #342) --------------------------------------------------------------------------
@@ -1349,9 +1353,24 @@ def case_launcher_ban_sao_roi_import_duoc(c: Ctx):
     env = os.environ.copy()
     env.pop("PYTHONPATH", None)
     p = subprocess.run([sys.executable, str(copied), "--help"], cwd=d,
-                       capture_output=True, text=True, env=env)
-    _doi(0, p.returncode, p.stderr.encode("utf-8", "replace"),
-         "launcher copy died before CLI")
+                       capture_output=True, env=env)
+    stderr = p.stderr.decode("utf-8", "replace")
+    if p.returncode != 0 and "No module named 'provider_exec'" in stderr:
+        raise AssertionError(
+            "isolated launcher runtime copy omitted provider_exec.py: " + stderr
+        )
+    _doi(0, p.returncode, p.stderr, "launcher copy died before CLI")
+
+
+def case_launcher_runtime_copy_closure_la_tuple_dong(c: Ctx):
+    """The inert launcher fixture copies exactly its declared runtime siblings."""
+    expected = ("launcher.py", "provider_exec.py", "session_credentials.py")
+    if not isinstance(LAUNCHER_RUNTIME_FILES, tuple):
+        raise AssertionError("launcher runtime closure phải là tuple đóng")
+    if LAUNCHER_RUNTIME_FILES != expected:
+        raise AssertionError(
+            f"launcher runtime closure lệch: {LAUNCHER_RUNTIME_FILES!r} != {expected!r}"
+        )
 
 
 def case_void_attempt_allowlist(c: Ctx):
@@ -2794,6 +2813,8 @@ CASES = [
     ("void_attempt_ly_do_tu_che_bi_tu_choi", case_void_attempt_ly_do_tu_che_bi_tu_choi),
     ("void_sau_review_bi_chan", case_void_sau_review_bi_chan),
     ("launcher_ban_sao_roi_import_duoc", case_launcher_ban_sao_roi_import_duoc),
+    ("launcher_runtime_copy_closure_la_tuple_dong",
+     case_launcher_runtime_copy_closure_la_tuple_dong),
     ("doctrine_scan_sach_xanh", case_doctrine_scan_sach_xanh),
     ("doctrine_scan_bom_cum_tu_do", case_doctrine_scan_bom_cum_tu_do),
     ("doctrine_scan_bat_doctrine_THAT_tu_protocol", case_doctrine_scan_bat_doctrine_THAT_tu_protocol),
@@ -3950,6 +3971,12 @@ MUTANTS = {
         "",
         ["ac19_bang_vai_tro_THAT_van_bi_bat"],
     ),
+    "launcher_runtime_copy_omits_provider_exec": (
+        '    "provider_exec.py",\n',
+        "",
+        ["launcher_ban_sao_roi_import_duoc",
+         "launcher_runtime_copy_closure_la_tuple_dong"],
+    ),
 }
 
 # Phân loại là KHAI BÁO: tên chỉ có mặt ở đây mới được sửa test harness.
@@ -3960,6 +3987,7 @@ MUTANTS_NHAM_TEST = frozenset({
     "git_co_lap_bo_sot_pham_vi_lenh",
     "git_co_lap_lui_ve_ghim_khoa",
     "git_co_lap_tha_vo_dieu_kien",
+    "launcher_runtime_copy_omits_provider_exec",
     "moc_kiem_noi_vo_dieu_kien",
     "moc_kiem_to_vo_dieu_kien",
     "phan_loai_lai_dot_bien_test_bang_suy_luan",

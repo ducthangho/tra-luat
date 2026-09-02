@@ -94,42 +94,41 @@ def t2_canary_thieu_shellcheck_phai_SUY_GIAM():
         raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC T2: máy này thiếu công cụ bắt buộc {hong_ngoai} "
                              f"ngay ngoài vùng cô lập — cài rồi đo lại")
     with tempfile.TemporaryDirectory() as tmp:
-        chi_al = Path(tmp) / "chi-al"
-        chi_al.mkdir()
-        shutil.copy2(al, chi_al / Path(al).name); (chi_al / Path(al).name).chmod(0o755)
-        # Ý ĐỊNH của ca này là "VẮNG shellcheck", KHÔNG phải "vắng mọi thứ". Từ #391 bản
-        # kê có một công cụ `bat_buoc` chạy bằng `python`; PATH cô lập làm nó thành
-        # KHÔNG_ĐO_ĐƯỢC và nuốt mất kết luận SUY_GIẢM mà ca này đi đo. Đặt một shim gọi
-        # THẲNG interpreter tuyệt đối: không kéo thêm thư mục nào lên PATH, nên shellcheck
-        # vẫn vắng đúng như trước.
-        shim = chi_al / "python"
-        shim.write_text(f'#!/bin/sh\nexec {sys.executable} "$@"\n', encoding="utf-8")
-        shim.chmod(0o755)
-        # Bản kê chung còn mang các binary bắt buộc của launcher. Cho chúng đi qua
-        # bằng symlink tuyệt đối, nhưng cố ý KHÔNG đưa shellcheck vào PATH cô lập.
-        for ten in ("git", "rg", "bash"):
-            dich = shutil.which(ten)
-            if not dich:
-                raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC T2: thiếu {ten} đối chứng")
-            # Tên symlink = tên tệp ĐÍCH (`git.exe` trên Windows): CreateProcess chỉ tìm
-            # `git.exe`, symlink tên trần `git` không chạy được ⇒ git/rg ĐỎ vì lý do VÔ CAN,
-            # tổng ĐỎ dù canary bị đột biến ⇒ mutant `t2_go_canary` SỐNG SÓT trên
-            # windows-latest (run 33630217222). Trên Linux tên đích vẫn là `git`, không đổi.
-            (chi_al / Path(dich).name).symlink_to(dich)
-        bang(shutil.which("shellcheck", path=str(chi_al)) is None,
-             "PATH cô lập vẫn thấy shellcheck ⇒ ca này không còn đo cái nó nói là đo")
-        rc, out, _ = chay("kiem-tra", "--json", env=dict(os.environ, PATH=str(chi_al)))
-        bang("SUY_GIAM" in out, f"shellcheck cô lập khỏi PATH mà canary không SUY_GIẢM: "
-                                 f"rc={rc}\n{out[:500]}")
-        bang(rc != 0, "canary SUY_GIẢM phải kéo tổng thể khỏi ĐẠT (rc=0)")
+        # CÁCH CÔ LẬP ĐÃ ĐỔI (đo 02-09-2026, run 33631185695 lane windows-latest). Bản cũ dựng
+        # PATH chỉ có bản sao actionlint rồi symlink git/rg/bash vào — sống được khi bản kê
+        # chỉ có actionlint (tĩnh), chết ngay khi #446 thêm binary thật: symlink tới `.exe`
+        # trên Windows chạy với "thư mục ứng dụng" là thư mục symlink nên thiếu DLL
+        # (git/bash rc=0xC0000135), còn rg là shim choco đọc `.shim` cạnh nó (rc=-1). Tức
+        # git/rg/bash ĐỎ vì lý do vô can, tổng ĐỎ bất kể canary, và mutant canary sống sót.
+        # Nay GIỮ PATH THẬT, chỉ che shellcheck: một DECOY tên `shellcheck[.exe]` đứng đầu
+        # PATH. Decoy là bản sao actionlint — tĩnh, tự đứng, chắc chắn KHÔNG phải shellcheck:
+        # probe `shellcheck --version` không parse ra `version: x.y.z` ⇒ shellcheck != DAT;
+        # actionlint thật tìm thấy decoy trước, gọi nó thất bại ⇒ không có SC1003. Cả hai nền
+        # cùng một cơ chế, không symlink, không đụng thư mục hệ thống.
+        che = Path(tmp) / "che-sc"
+        che.mkdir()
+        decoy = che / ("shellcheck" + Path(al).suffix)
+        shutil.copy2(al, decoy); decoy.chmod(0o755)
+        path_moi = str(che) + os.pathsep + os.environ.get("PATH", "")
+        thay = shutil.which("shellcheck", path=path_moi)
+        bang(thay and Path(thay).resolve() == decoy.resolve(),
+             f"decoy không đứng đầu PATH ⇒ ca này không còn đo cái nó nói là đo: {thay!r}")
+        rc, out, _ = chay("kiem-tra", "--json", env=dict(os.environ, PATH=path_moi))
+        bang(rc != 0, f"shellcheck bị che mà tổng vẫn ĐẠT (rc=0):\n{out[:500]}")
+        bc = json.loads(out)
+        # Điều ca này ĐO: canary ĐỎ, không sạch. Hai thông điệp đều là ĐỎ — `SUY_GIAM` khi bộ
+        # đo thấy shellcheck != DAT (đường bình thường với decoy), và "du shellcheck co mat"
+        # khi một khuyết tật KHÁC của bộ đo (vd parse hụt, việc của t10) làm decoy thành DAT.
+        # Không đòi riêng SUY_GIAM: ca sẽ chết theo đột biến t10 thay vì theo đột biến của nó.
+        cn = [c for c in bc["canary"] if c.get("ten") == "actionlint_shellcheck"]
+        bang(cn and cn[0]["trang_thai"] == "DO", f"canary phải ĐỎ khi shellcheck bị che: {cn}")
+        bang("SUY_GIAM" in cn[0]["chi_tiet"] or "du shellcheck co mat" in cn[0]["chi_tiet"],
+             f"canary ĐỎ nhưng không nói vì shellcheck: {cn[0]['chi_tiet']!r}")
         # rc≠0 phải đến TỪ canary: mọi công cụ bắt buộc phải ĐẠT, còn không thì ca này
         # xanh nhờ một lỗi khác và mất răng với chính đột biến nó sinh ra để bắt.
-        bc = json.loads(out)
         vo_can = [(c.get("ten"), c["chi_tiet"]) for c in bc["cong_cu"]
                   if c["bat_buoc"] and c["trang_thai"] != "DAT"]
         bang(not vo_can, f"công cụ bắt buộc ĐỎ vì lý do vô can, tổng đỏ không còn đo canary: {vo_can}")
-        cn = [c for c in bc["canary"] if c.get("ten") == "actionlint_shellcheck"]
-        bang(cn and cn[0]["trang_thai"] == "DO", f"canary phải ĐỎ (không chỉ có chữ SUY_GIAM): {cn}")
 
 @ca
 def t3_du_cong_cu_dung_ban_khong_canh_bao_thua():

@@ -63,8 +63,18 @@ CHILD_ENV_KEYS = frozenset({
 
 def _child_env(source, **required: str) -> dict[str, str]:
     """Return benign process settings plus only this child's credential."""
-    child = {key: value for key, value in source.items()
-             if key in CHILD_ENV_KEYS or key.startswith("LC_")}
+    # Windows uppercases environment names (os.environ exposes SYSTEMROOT, not the
+    # canonical SystemRoot) and treats them case-insensitively, so the allowlist
+    # must match case-insensitively there.  A dropped SystemRoot makes native
+    # Bun-based providers fastfail 0xC0000409 before any output.  POSIX names are
+    # case-sensitive, so the lowercase proxy spellings stay distinct there.
+    if os.name == "nt":
+        allowed = {name.casefold() for name in CHILD_ENV_KEYS}
+        child = {key: value for key, value in source.items()
+                 if key.casefold() in allowed or key.casefold().startswith("lc_")}
+    else:
+        child = {key: value for key, value in source.items()
+                 if key in CHILD_ENV_KEYS or key.startswith("LC_")}
     # Keep this invariant explicit even if a secret is accidentally added to
     # CHILD_ENV_KEYS in a future change.
     for key in SECRET_ENV:

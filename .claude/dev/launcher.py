@@ -1278,16 +1278,43 @@ def _probe_provider_spawn(identity: dict, ws: str) -> dict:
 def _probe_trust_claude(ws: str, home: Path | None = None) -> dict:
     try:
         data = json.loads(((home or Path.home()) / ".claude.json").read_text(encoding="utf-8"))
-        muc = data.get("projects", {}).get(str(Path(ws).resolve()))
+        du_an = data.get("projects", {})
+        muc_tieu = str(Path(ws).resolve())
+        if platform.system() == "Windows":
+            # ĐÃ ĐO (WP433 R16/R17): Claude canonical hoá khoá dự án bằng '/', còn
+            # `str(Path(ws).resolve())` trên Windows trả '\'. Trên Windows '\' và
+            # '/' là CÙNG separator và hệ tệp mặc định không phân biệt hoa thường,
+            # nên GOM MỌI khoá chuẩn-hoá-tương-đương — KỂ CẢ chính tả khớp chính
+            # xác — rồi bắt tất cả đồng thuận. R16 chỉ quét khi khớp chính xác trả
+            # None, nên khoá true + khoá tương đương false ra DAT, và một khoá
+            # null/không hợp lệ ở chính tả khớp chính xác lọt xuống một khoá true
+            # tương đương. Ở đây một khoá không phải dict-boolean, hay hai verdict
+            # khác nhau, đều fail-closed. POSIX giữ khớp chính xác: ở đó '\' là ký
+            # tự TÊN TỆP hợp lệ nên chuẩn hoá sẽ trộn hai dự án thật sự khác nhau.
+            khoa_chuan = muc_tieu.replace("\\", "/").casefold()
+            ung = [v for k, v in du_an.items()
+                   if isinstance(k, str)
+                   and k.replace("\\", "/").casefold() == khoa_chuan]
+        else:
+            ung = [v for k, v in du_an.items() if k == muc_tieu]
     except (OSError, TypeError, AttributeError, json.JSONDecodeError):
         return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "khong doc duoc trust Claude"}
-    if not isinstance(muc, dict) or "hasTrustDialogAccepted" not in muc:
+    if not ung:
         return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "thieu khoa trust Claude"}
-    if muc["hasTrustDialogAccepted"] is True:
+    verdicts = set()
+    for v in ung:
+        if not isinstance(v, dict) or "hasTrustDialogAccepted" not in v:
+            return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "thieu khoa trust Claude"}
+        gt = v["hasTrustDialogAccepted"]
+        if gt is not True and gt is not False:
+            return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "trust Claude khong phai boolean"}
+        verdicts.add(gt)
+    if len(verdicts) != 1:
+        return {"trang_thai": "KHONG_DO_DUOC",
+                "chi_tiet": "trust Claude mau thuan giua cac khoa cung duong dan"}
+    if True in verdicts:
         return {"trang_thai": "DAT", "chi_tiet": "Claude trust=true"}
-    if muc["hasTrustDialogAccepted"] is False:
-        return {"trang_thai": "DO", "chi_tiet": "Claude trust=false"}
-    return {"trang_thai": "KHONG_DO_DUOC", "chi_tiet": "trust Claude khong phai boolean"}
+    return {"trang_thai": "DO", "chi_tiet": "Claude trust=false"}
 
 
 def _probe_cho_so(ds: dict) -> dict:
@@ -1835,6 +1862,13 @@ def lenh_run(a) -> int:
     f_err = (thu_muc / "stderr.log").open("w", encoding="utf-8")
     them = {}
     if platform.system() == "Windows":
+        # ĐÃ ĐO LẠI (WP433 R17, Windows thật, claude.exe native): fastfail
+        # 0xC0000409 không-một-byte là do env con RƠI SystemRoot — allowlist
+        # phân biệt hoa thường, đã sửa tại `session_credentials._child_env` —
+        # KHÔNG phải do cờ này, cũng không phải do handle danh tính giữ qua
+        # CreateProcess: với SystemRoot đúng, `--version` ĐẠT cả khi có
+        # CREATE_NEW_PROCESS_GROUP lẫn khi handle đang giữ. Giữ nguyên đường
+        # pre-R16: cờ cho MỌI lệnh Windows, Job Object best-effort sau sinh.
         them["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
     else:
         # nhóm tiến trình riêng: điều kiện CẦN để giết được cả con cháu sau này
@@ -2219,6 +2253,12 @@ CONG_CU = [
     {"ten": "llm", "bat_buoc": False, "ung_vien": ["llm"],
      "vi_sao": "CLI client goi OpenAI API (provider: openai_api, surface: llm_cli)",
      "cai": {"*": "pip install llm  (hoac: uv tool install llm / brew install llm)"}},
+    {"ten": "agy", "bat_buoc": False, "ung_vien": ["agy"],
+     "vi_sao": "CLI client cho Google Antigravity (provider: google_antigravity, surface: antigravity)",
+     "cai": {"Windows": "irm https://antigravity.google/cli/install.ps1 | iex",
+             "Darwin": "curl -fsSL https://antigravity.google/cli/install.sh | bash",
+             "Linux": "curl -fsSL https://antigravity.google/cli/install.sh | bash"},
+     "xac_thuc": ["models"]},
 ]
 
 # MODULE PYTHON — bảng RIÊNG, cố ý không nhét vào `CONG_CU`.
@@ -2261,6 +2301,18 @@ MODULE_PY = [
 # Bảng KHA_NANG gọi `_do_github` qua lambda nên không nhận được tham số; để `None`
 # thì probe lại rơi về `os.environ` tức đúng bản giữ chỗ mà ta vừa loại.
 _MOI_TRUONG_DA_DOC: dict[str, str] | None = None
+
+# KẾT QUẢ PROBE XÁC THỰC CỦA LƯỢT `doctor` ĐANG CHẠY — khoá (đường dẫn, đối số), giá
+# trị là bộ bốn của `_xac_thuc_kem_dau_ra` (ok, mô tả, quá hạn, đầu ra gộp).
+# Vì sao có: cross-review PR "#426" (codex, P2 trên `4639462`) — `lenh_doctor` đã chạy
+# `agy models` cho bảng `CONG_CU` (`xac_thuc`), rồi `_do_antigravity` ở khối `KHA_NANG`
+# chạy lại CÙNG lệnh ấy chỉ để kết luận lại một chuyện đã có bằng chứng. `models` đi
+# mạng: lần hai có thể quá hạn/ném trong khi lần một đã dương, và cổng tự lật kết
+# luận. Nên mỗi lượt `doctor` chạy probe ĐÚNG MỘT LẦN và mọi phép đo sau đọc lại.
+# Chỉ `lenh_doctor` ghi; `lenh_doctor` xoá sạch khi bắt đầu để lượt sau không đọc
+# ảnh chụp của lượt trước. Gọi `_do_antigravity` NGOÀI `doctor` thì bảng rỗng và nó
+# tự chạy probe như cũ — hợp đồng độc lập của hàm không đổi.
+_XAC_THUC_DA_DO: dict[tuple[str, tuple[str, ...]], tuple[bool, str, bool, str]] = {}
 
 _LA_WINDOWS = platform.system() == "Windows"
 PROBE_TIMEOUT_GIAY = 25.0 if _LA_WINDOWS else 8.0
@@ -2443,6 +2495,8 @@ def _cac_duong_dan(c: dict, moi_truong: dict[str, str]) -> list[tuple[str, str]]
             them(ten0, Path(local) / "Microsoft" / "WinGet" / "Links" / "rg.exe")
         elif c["ten"] == "gh":
             them(ten0, Path(pf) / "GitHub CLI" / "gh.exe")
+        elif c["ten"] == "agy" and local:
+            them(ten0, Path(local) / "agy" / "bin" / "agy.exe")
     return [(t, x) for t, x in ra if Path(x).is_file()]
 
 
@@ -2483,7 +2537,24 @@ def _phien_ban(duong_dan: str, *, env=None,
 
 def _xac_thuc(duong_dan: str, doi_so: list[str], *, env=None,
               timeout=PROBE_TIMEOUT_GIAY) -> tuple[bool, str, bool]:
+    """Bọc `_xac_thuc_kem_dau_ra`, bỏ phần tử đầu ra — hợp đồng ba phần tử cho caller
+    ngoài. `doctor` KHÔNG gọi hàm này nữa mà gọi thẳng hàm dưới (nó cần đầu ra để
+    ghi vào `_XAC_THUC_DA_DO`), nên test muốn giả probe auth của `doctor` phải giả
+    `_xac_thuc_kem_dau_ra` (bộ bốn). Ai cần ĐẦU RA của chính probe ấy (đếm dòng,
+    chẩn đoán) thì gọi hàm dưới, ĐỪNG chạy lại lệnh."""
+    ok, mo_ta, qua_han, _ = _xac_thuc_kem_dau_ra(duong_dan, doi_so, env=env, timeout=timeout)
+    return (ok, mo_ta, qua_han)
+
+
+def _xac_thuc_kem_dau_ra(duong_dan: str, doi_so: list[str], *, env=None,
+                         timeout=PROBE_TIMEOUT_GIAY) -> tuple[bool, str, bool, str]:
     """Probe auth không tương tác; không bao giờ trả stdout/stderr có credential.
+
+    Phần tử thứ tư là stdout+stderr GỘP của chính lần chạy này — để caller dùng
+    lại thay vì gọi lệnh lần hai. Cross-review PR "#426" (codex, P2 trên
+    `15f2dbf`): `_do_antigravity` từng gọi `agy models` thêm một lần chỉ để đếm
+    dòng; lần hai ấy đi mạng, quá hạn/OSError sẽ ném thẳng lên `lenh_doctor` và
+    lật kết luận thành KHONG_DO_DUOC dù đã có bằng chứng dương trong tay.
 
     `rc=0` MỘT MÌNH không phải bằng chứng — đúng doctrine "đòi BẰNG CHỨNG DƯƠNG,
     đừng tin rc". Một CLI thiếu subcommand có thể thoát 0 và không in gì; đọc thế
@@ -2506,15 +2577,16 @@ def _xac_thuc(duong_dan: str, doi_so: list[str], *, env=None,
                            stdin=subprocess.DEVNULL, env=env, timeout=max(0.1, timeout),
                            encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:
-        return (False, f"probe xac thuc timeout sau {timeout:.1f}s", True)
+        return (False, f"probe xac thuc timeout sau {timeout:.1f}s", True, "")
     except (OSError, subprocess.SubprocessError) as e:
-        return (False, type(e).__name__, False)
-    co_loi_ra = bool(((p.stdout or "") + (p.stderr or "")).strip())
+        return (False, type(e).__name__, False, "")
+    dau_ra = (p.stdout or "") + (p.stderr or "")
+    co_loi_ra = bool(dau_ra.strip())
     if p.returncode != 0:
-        return (False, f"rc={p.returncode}", False)
+        return (False, f"rc={p.returncode}", False, dau_ra)
     if not co_loi_ra:
-        return (False, "rc=0 nhung khong co bang chung xac thuc", False)
-    return (True, "ok", False)
+        return (False, "rc=0 nhung khong co bang chung xac thuc", False, dau_ra)
+    return (True, "ok", False, dau_ra)
 
 
 def _in_an_toan(chuoi: str) -> bool:
@@ -3189,6 +3261,73 @@ def _do_openai_llm(moi_truong: dict[str, str] | None = None,
         return ("DUNG_DUOC", f"{ver} · kiem song: thanh cong (gpt-4o-mini)")
     err_msg = p_song.stderr.strip() or p_song.stdout.strip()
     return ("CHUA_XAC_THUC", f"{ver} · kiem song HONG (rc={p_song.returncode}): {err_msg[:60]}")
+
+
+def _do_antigravity(moi_truong: dict[str, str] | None = None) -> tuple[str, str]:
+    """Đo năng lực gọi Antigravity CLI (`agy`) — AG-T0-01B.
+
+    Bốn trạng thái (Spec 6.2):
+      DUNG_DUOC: `agy models` rc=0 và có đầu ra (stdout+stderr) — đã xác thực
+      CO_MAT: `--version` rc=0 nhưng `models` rc≠0 — đã cài, chưa đăng nhập
+      KHONG_DO_DUOC: timeout, OSError, models rc=0 không đầu ra, hoặc cả hai probe thất bại — không làm tròn thành THIEU
+      THIEU: không thấy binary, kể cả sau đường lùi PATH trên Windows
+    """
+    mt = _env_da_chuan(moi_truong)
+    candidates = _cac_duong_dan({"ten": "agy", "ung_vien": ["agy"]}, mt)
+    if not candidates:
+        return ("THIEU", "chua cai agy CLI — irm https://antigravity.google/cli/install.ps1 | iex (Windows) / curl -fsSL https://antigravity.google/cli/install.sh | bash")
+
+    path_items = [p for p in mt.get("PATH", "").split(os.pathsep) if p]
+    loi_cuoi = None
+    co_mat_str = None
+    for _, duong_agy in candidates:
+        la_fallback = False
+        if platform.system() == "Windows":
+            la_fallback = not any(Path(p).resolve() == Path(duong_agy).parent.resolve() for p in path_items if Path(p).exists()) if path_items else True
+        duoi_path = " · đã cài, PATH phiên này chưa thấy — mở terminal mới" if la_fallback else ""
+
+        # Probe 1: Thử `_xac_thuc` với subcommand `models` (Spec 6.2 & 6.3).
+        # Trong một lượt `doctor`, bảng `CONG_CU` (`xac_thuc: ["models"]`) ĐÃ chạy đúng
+        # lệnh này trên đúng đường dẫn này — đọc lại bằng chứng ấy thay vì chạy lần
+        # hai (P2 cross-review PR "#426" trên `4639462`). Ngoài `doctor` bảng rỗng.
+        da_do = _XAC_THUC_DA_DO.get((duong_agy, ("models",)))
+        if da_do is not None:
+            ok_xt, mo_ta_xt, qua_han_xt, ra_xt = da_do
+        else:
+            ok_xt, mo_ta_xt, qua_han_xt, ra_xt = _xac_thuc_kem_dau_ra(duong_agy, ["models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
+        if ok_xt:
+            # Đếm dòng từ ĐẦU RA CỦA CHÍNH PROBE VỪA CHẠY — không gọi `agy models` lần hai.
+            # `models` đi mạng: lần hai quá hạn/OSError sẽ ném lên `lenh_doctor` và lật
+            # bằng chứng dương thành KHONG_DO_DUOC (P2 cross-review PR "#426").
+            so_dong = len([d for d in ra_xt.splitlines() if d.strip()])
+            return ("DUNG_DUOC", f"da xac thuc qua `agy models` ({so_dong} model){duoi_path}")
+
+        if qua_han_xt:
+            loi_cuoi = ("KHONG_DO_DUOC", f"probe models timeout sau {PROBE_TIMEOUT_GIAY:.1f}s{duoi_path}")
+            continue
+
+        if mo_ta_xt == "rc=0 nhung khong co bang chung xac thuc":
+            # Finding 1: models rc=0 nhưng không có đầu ra -> KHONG_DO_DUOC (không làm tròn thành CO_MAT hay DUNG_DUOC)
+            loi_cuoi = ("KHONG_DO_DUOC", f"probe models khong co dau ra (rc=0 nhung khong co bang chung xac thuc){duoi_path}")
+            continue
+
+        # Probe 2: Nếu models rc != 0 hoặc lỗi khác, probe `--version` (Spec 6.2)
+        chay_ver, dong_ver, qua_han_ver = _phien_ban(duong_agy, env=mt, timeout=PROBE_TIMEOUT_GIAY)
+        if qua_han_ver:
+            loi_cuoi = ("KHONG_DO_DUOC", f"probe --version timeout sau {PROBE_TIMEOUT_GIAY:.1f}s{duoi_path}")
+            continue
+
+        if chay_ver:
+            ver_str = dong_ver[:40] if dong_ver else "agy"
+            co_mat_str = ("CO_MAT", f"{ver_str} · chua dang nhap — chay `agy` (mo TUI de login){duoi_path}")
+        else:
+            loi_cuoi = ("KHONG_DO_DUOC", f"probe agy that bai (models: {mo_ta_xt}, --version: {dong_ver}){duoi_path}")
+
+    if co_mat_str:
+        return co_mat_str
+    if loi_cuoi:
+        return loi_cuoi
+    return ("KHONG_DO_DUOC", "probe agy khong xac dinh")
 
 
 _RE_SLUG_GITHUB = re.compile(r"github\.com[:/]+([^/]+/[^/\s]+?)(?:\.git)?/*$")
@@ -3919,6 +4058,9 @@ KHA_NANG = [
     {"ten": "openai-llm", "do": lambda ws, ks=False: _do_openai_llm(_MOI_TRUONG_DA_DOC, ks),
      "vi_sao": "provider openai_api qua execution_surface llm_cli (§4, §5 ops/OPENAI_LLM_PROVIDER.md)",
      "khac_phuc": "pip install llm && export OPENAI_API_KEY=... (hoac llm keys set openai)"},
+    {"ten": "antigravity", "do": lambda ws, ks=False: _do_antigravity(_MOI_TRUONG_DA_DOC),
+     "vi_sao": "provider google_antigravity qua execution_surface antigravity (AG-T0-01B)",
+     "khac_phuc": "cai agy CLI va chay `agy` (mo TUI de dang nhap)"},
 ]
 
 
@@ -4002,6 +4144,7 @@ def lenh_doctor(a) -> int:
     moi_truong, moi_truong_cong_khai = _doc_moi_truong()
     global _MOI_TRUONG_DA_DOC
     _MOI_TRUONG_DA_DOC = moi_truong
+    _XAC_THUC_DA_DO.clear()        # lượt mới, bằng chứng mới — không đọc ảnh chụp cũ
     he = platform.system()
     ket = []
     thieu_bat_buoc = []
@@ -4077,9 +4220,10 @@ def lenh_doctor(a) -> int:
                 xac_thuc_ok, loi_xac_thuc = None, "doctor het ngan sach"
                 xac_thuc_chua_do = loi_xac_thuc
             else:
-                xac_thuc_ok, loi_xac_thuc, xt_qua_han = _xac_thuc(
+                xac_thuc_ok, loi_xac_thuc, xt_qua_han, xt_dau_ra = _xac_thuc_kem_dau_ra(
                     thay["duong_dan"], c["xac_thuc"], env=moi_truong,
                     timeout=min(PROBE_TIMEOUT_GIAY, con_lai))
+                xt_mo_ta_cuoi = loi_xac_thuc   # mô tả của LƯỢT CUỐI, không ghép chuỗi retry
                 if not xac_thuc_ok and xt_qua_han:
                     # ĐƯỜNG CHỚP THỨ HAI của `t53`, cùng cơ chế với probe `--version`
                     # ngay trên: probe auth cũng gọi CLI chậm, quá hạn từng rơi thẳng
@@ -4087,9 +4231,10 @@ def lenh_doctor(a) -> int:
                     # Cùng hai lớp vá: retry hạn gấp đôi, rồi mới nhận là CHƯA ĐO ĐƯỢC.
                     con_lai = het_han - time.monotonic()
                     if con_lai > 0:
-                        xac_thuc_ok, loi_2, xt_qua_han = _xac_thuc(
+                        xac_thuc_ok, loi_2, xt_qua_han, xt_dau_ra = _xac_thuc_kem_dau_ra(
                             thay["duong_dan"], c["xac_thuc"], env=moi_truong,
                             timeout=min(2 * PROBE_TIMEOUT_GIAY, con_lai))
+                        xt_mo_ta_cuoi = loi_2
                         if not xac_thuc_ok:
                             loi_xac_thuc = f"luot 1: {loi_xac_thuc} · luot 2: {loi_2}"
                     if not xac_thuc_ok and xt_qua_han:
@@ -4098,6 +4243,12 @@ def lenh_doctor(a) -> int:
                         xac_thuc_ok = None
                         xac_thuc_chua_do = f"probe xac thuc QUA HAN, chua do duoc: {loi_xac_thuc}"
                         loi_xac_thuc = xac_thuc_chua_do
+                # GHI LẠI KẾT QUẢ CUỐI (sau retry) cho khối `KHA_NANG` đọc — probe auth
+                # chạy MỘT lần mỗi lượt `doctor`, xem chú thích ở `_XAC_THUC_DA_DO`.
+                # Quá hạn cả hai lượt cũng ghi (ok=False, qua_han=True): phép đo sau
+                # phải thấy "CHƯA ĐO ĐƯỢC" chứ không được tự chạy thêm lần ba.
+                _XAC_THUC_DA_DO[(thay["duong_dan"], tuple(c["xac_thuc"]))] = (
+                    xac_thuc_ok is True, xt_mo_ta_cuoi, bool(xt_qua_han), xt_dau_ra)
         cai = c["cai"].get(he) or c["cai"].get("*") or ""
         bb = _bat_buoc(c, moi_truong)
         muc = {"ten": c["ten"], "bat_buoc": bb, "co": thay is not None,

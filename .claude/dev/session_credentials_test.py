@@ -401,6 +401,118 @@ def provider_handle_cleanup_and_upgrade_lock(module):
             child.wait(timeout=10)
 
 
+def _native_provider_executable():
+    """Return the installed native ``.exe`` provider outside forbidden roots.
+
+    Only the direct-exe shape reproduces WP433-R16-SEC-035: the native (Bun)
+    build fastfails 0xC0000409 with no output when the scrubbed child env lacks
+    SystemRoot, while the ``.cmd`` shim shape launches node instead of the
+    native image.  Returns None (SKIP) when no such provider is installed on
+    this host or on POSIX.
+    """
+    if os.name != "nt":
+        return None
+    found = shutil.which("claude")
+    if not found:
+        return None
+    path = Path(found)
+    if path.suffix.lower() != ".exe":
+        return None
+    try:
+        return path.resolve(strict=True)
+    except OSError:
+        return None
+
+
+def _windows_write_open_is_denied(path: Path) -> None:
+    """Assert the object cannot be opened for write while held -- without ever
+    writing a byte, so a real installed binary is never mutated."""
+    try:
+        handle = path.open("rb+")
+    except OSError as exc:
+        assert (getattr(exc, "winerror", None) in (5, 32, 33)
+                or exc.errno in (errno.EACCES, errno.EPERM)), exc
+        return
+    handle.close()
+    raise AssertionError(
+        f"native identity was write-openable during CreateProcess: {path}")
+
+
+def provider_child_env_keeps_windows_system_root_lock(module):
+    """WP433 R17 SEC-035 (env): the scrubbed provider child env must retain
+    SystemRoot under the Windows uppercase spelling.  os.environ exposes
+    SYSTEMROOT there, and a case-sensitive allowlist silently dropped it, so
+    every provider-scoped native (Bun) launch fastfailed 0xC0000409 with no
+    output.  Secrets stay scrubbed; POSIX keeps case-sensitive names so a
+    Windows-cased spelling is not folded in.
+    """
+    source = {"SYSTEMROOT": r"C:\Windows", "WINDIR": r"C:\Windows",
+              "PATH": r"C:\tools", "PATHEXT": ".EXE",
+              "CLAUDE_CODE_OAUTH_TOKEN": "sk-ant-oat-canary"}
+    with mock.patch.object(module.os, "name", "nt"):
+        child = module._child_env(source, HOME="H")
+    assert child.get("SYSTEMROOT") == r"C:\Windows", child
+    assert child.get("HOME") == "H", child
+    assert "CLAUDE_CODE_OAUTH_TOKEN" not in child, "secret leaked into child env"
+    with mock.patch.object(module.os, "name", "posix"):
+        posix_child = module._child_env(
+            {"SYSTEMROOT": "/x", "SystemRoot": "/y", "PATH": "/z"})
+    assert posix_child.get("SystemRoot") == "/y", posix_child
+    assert "SYSTEMROOT" not in posix_child, posix_child
+
+
+def native_provider_executes_while_identity_held_through_createprocess_lock(module):
+    """The supported native ``.exe`` provider runs to a clean exit while its own
+    image stays write/delete-locked THROUGH CreateProcess (WP433-R16-SEC-035).
+
+    MEASURED (WP433 R17, real Windows): the R16 fastfail 0xC0000409 with zero
+    output was caused by the scrubbed child env dropping SystemRoot through
+    case-sensitive allowlisting -- never by these identity handles, whose
+    FILE_SHARE_READ sharing stays compatible with everything the child image
+    does at startup.  This lock proves the restored hold-through-Popen
+    boundary AND the corrected environment end to end: the identity is
+    write/delete-locked during CreateProcess and the native child still runs
+    to rc0 with version output.
+    """
+    if os.name != "nt":
+        print("SKIP native_provider_executes_while_identity_held_through_createprocess_lock (Windows-only)")
+        return
+    native = _native_provider_executable()
+    if native is None:
+        print("SKIP native_provider_executes_while_identity_held_through_createprocess_lock (native provider .exe not installed)")
+        return
+    provider_module = sys.modules[module.bind_provider_executable.__module__]
+    source = {"PATH": str(native.parent), "PATHEXT": ".COM;.EXE;.BAT;.CMD",
+              "SystemRoot": os.environ.get("SystemRoot", r"C:\Windows")}
+    bound = provider_module.bind_provider_path(
+        "claude", native, source, repository_root=P.resolve().parents[2])
+    assert bound.kind == "direct", bound
+    # Launch under the SAME scrubbed provider child env the launcher/session
+    # paths build: that is where the native binary actually runs, and where it
+    # fastfails 0xC0000409 if the case-sensitive allowlist drops SystemRoot on
+    # Windows.  The lock thus proves the held-identity boundary AND a working
+    # scrubbed environment end to end.
+    scrubbed = module._child_env(
+        dict(os.environ), USERPROFILE=os.environ.get("USERPROFILE", ""))
+    assert "SYSTEMROOT" in {k.upper() for k in scrubbed}, "SystemRoot dropped from child env"
+    real_popen = subprocess.Popen
+    entered = []
+
+    def createprocess(argv, **kwargs):
+        entered.append(True)
+        _windows_write_open_is_denied(native)
+        return real_popen(argv, **kwargs)
+
+    proc = provider_module.popen_bound_provider(
+        bound, ("--version",), stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=scrubbed,
+        _popen_factory=createprocess)
+    out, err = proc.communicate(timeout=120)
+    assert entered == [True], entered
+    assert proc.returncode == 0, (proc.returncode, (err or b"")[:200])
+    assert (out or b"").strip(), "native provider produced no version output"
+
+
 def directory_root_lock(module):
     """Exact directory roots are guarded as directories, not as file targets."""
     repository = P.resolve().parents[2]
@@ -1158,6 +1270,10 @@ def run_mutations():
     """Kill each packet-named mutant with only its focused lock test."""
     source = P.read_text(encoding="utf-8")
     mutants = [
+        ("provider_child_env_drops_windows_system_root",
+         '                 if key.casefold() in allowed or key.casefold().startswith("lc_")}',
+         '                 if key in CHILD_ENV_KEYS or key.startswith("LC_")}',
+         provider_child_env_keeps_windows_system_root_lock),
         ("directory_guard_skips_candidate_itself",
          "    return _guard_destination(path, include_candidate=True)",
          "    return _guard_destination(path, include_candidate=False)", directory_root_lock),
@@ -1386,6 +1502,12 @@ def run_mutations():
                     '        _release_windows_provider_handles(handles)',
                     provider_identity_held_through_createprocess_lock,
                 ),
+                (
+                    "provider_windows_share_write_delete_weakens_identity_hold",
+                    '        0x00000001,             # FILE_SHARE_READ; deny WRITE and DELETE',
+                    '        0x00000001 | 0x00000002 | 0x00000004,  # FILE_SHARE_READ; deny WRITE and DELETE',
+                    provider_identity_held_through_createprocess_lock,
+                ),
             ))
         original_globals = {
             "bind_provider_executable": m.bind_provider_executable,
@@ -1431,6 +1553,8 @@ def run():
     provider_identity_held_through_createprocess_lock(m)
     provider_support_identity_held_through_createprocess_lock(m)
     provider_handle_cleanup_and_upgrade_lock(m)
+    provider_child_env_keeps_windows_system_root_lock(m)
+    native_provider_executes_while_identity_held_through_createprocess_lock(m)
     provider_home_lock(m)
     provider_private_acl_unavailable_lock(m)
     provider_acl_unavailable_precedes_credential_read_lock(m)

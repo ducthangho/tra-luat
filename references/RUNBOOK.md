@@ -152,15 +152,19 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > generic `run -- codex`. Generic run resolve/bind executable identity đúng một lần,
 > kể cả alias symlink/reparse đổi tên hoặc hard-link cùng file. argv0 tương đối có thành phần
 > đường dẫn được neo vào workspace đã khai **trước mọi PATH lookup**; chỉ tên lệnh trần mới dùng
-> PATH/PATHEXT. Sau đó dùng cùng bound target
+> PATH/PATHEXT. Provider child từ generic run chỉ nhận credential của chính provider và PATH
+> sanitized; credential ambient của provider khác không được kế thừa, còn generic non-provider
+> giữ contract môi trường cũ. Sau đó dùng cùng bound target
 > cho chốt Codex, transport record, capability probe và final spawn; identity không resolve
 > được hoặc mơ hồ thì fail trước child. Writer giữ **actual opened parent
 > capability** đã kiểm và làm toàn bộ create/chmod/fsync/replace tương đối với capability
 > ấy; không quay lại đường dẫn. Riêng shared session credential writer giữ identity của inode
 > ngay sau `O_CREAT|O_EXCL`, trước chmod/write/flush/fsync. Lỗi về sau của shared writer,
-> kể cả parent-directory fsync sau replace, chỉ
+> kể cả mọi lỗi parent-directory fsync (`EINVAL`/`ENOTSUP`/`EIO`) sau replace, chỉ
 > được xoá entry còn đúng identity đó; replacement khác inode phải sống và exception gốc
-> không bị cleanup che. Trên POSIX writer bắt đầu từ trusted root fd, mở từng
+> không bị cleanup che. Exceptional unwind phải thử đóng hết descriptor còn sở hữu; close/unlink
+> phụ không được thay exception write/durability đầu tiên, nhưng close hỏng khi trước đó chưa có lỗi
+> vẫn là failure. Trên POSIX writer bắt đầu từ trusted root fd, mở từng
 > component đã có và tạo từng component còn thiếu tương đối với directory fd đang giữ;
 > không `mkdir` theo pathname rồi reopen. Cả writer session và writer NLM/GWS đều fail
 > trước khi ghi byte secret nếu một missing component bị thay bằng symlink. Bảo đảm này
@@ -191,7 +195,9 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > khi stderr/stdout có bằng chứng transport cụ thể (connection reset/refused, DNS...); lỗi local
 > hoặc nonzero không phân loại được là `not_measured`; rc `0` thiếu marker thành công standalone chính xác
 > cũng là `not_measured`, không phải approve. GitHub chỉ coi HTTP 401/403/404 là `rejected` khi cùng response
-> block có header GitHub; proxy/local output không được mượn header từ block trước. `tl-bootstrap` giữ nguyên contract rc của
+> header section có `X-GitHub-*`; body line, proxy/local output và block khác không được cấp bằng chứng.
+> Timeout của `gh` không kèm bằng chứng transport-failure độc lập là `not_measured`, không phải
+> `network_error`. `tl-bootstrap` giữ nguyên contract rc của
 > child: `0→passed`; `1→not_measured/degraded`; `2→not_measured/precondition`;
 > `3→rejected/credential_or_bundle_rejected`; rc khác `→not_measured/unclassified_exit`.
 > Credential directory đã validate chỉ làm
@@ -206,7 +212,8 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > tồn tại vẫn được phép để guarded writer tạo.
 >
 > Trước khi đọc token/token-file, Claude capture/probe và GitHub probe resolve provider từ duy nhất
-> các PATH entry tuyệt đối đã cấp, loại repository và process-trusted temp, rồi yêu cầu đúng một candidate.
+> các raw PATH entry vốn đã tuyệt đối, loại entry rỗng/tương đối/tilde-relative mà không expand `~`
+> hay hỏi ambient `HOME`, loại repository và process-trusted temp, rồi yêu cầu đúng một candidate.
 > POSIX cho phép symlink alias tới regular executable, nhưng shebang phải resolve thành interpreter tuyệt đối
 > đã bind (kể cả `#!/usr/bin/env node` chỉ khi có đúng một `node`). Windows chỉ dò `.com/.exe/.bat/.cmd`;
 > `.cmd` chỉ được nhận khi đúng npm shim và bind được cả `node.exe` lẫn JS entry, rồi launch hai file tuyệt đối
@@ -215,7 +222,8 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > `not_measured`; invocation kế tiếp tự bind bản nâng cấp mới. Secret không xuất hiện trong argv/report.
 > Writer NLM/GWS ghi identity ngay sau `O_EXCL` trước chmod, giữ inode đó mở qua cleanup để chặn tái sử dụng
 > `(dev, ino)`, và giữ cả tên temp/final cho đến khi parent-directory fsync thành công. Lỗi từ chmod đến
-> directory fsync chỉ xoá đúng inode của writer, bảo toàn replacement và exception gốc.
+> directory fsync (kể cả `EINVAL`/`ENOTSUP`/`EIO`) chỉ xoá đúng inode của writer, bảo toàn replacement
+> và exception gốc; toàn bộ descriptor còn lại vẫn được thử close, với close-only failure là fatal.
 > **Windows (Claude Code):** bấm đúp `tl-setup.cmd` (gốc skill) — menu: [1] Setup 1 lần (cài gws + auth +
 > tự tạo `TL_MASTER_KEY` + mã hoá secrets + in lệnh Cowork vào `COWORK-paste.txt`), [2] Đổi token GAS,
 > [3] Kiểm tra. Sau setup: Code chạy thẳng; Cowork dán khối trong `COWORK-paste.txt`.

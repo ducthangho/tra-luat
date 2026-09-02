@@ -169,6 +169,23 @@ def provider_executable_lock(module):
                     assert module.github_probe("o/r", env=source)["status"] == "not_measured"
             child.assert_not_called()
 
+            # PATH is an authority declaration, not shell syntax.  In
+            # particular, a raw relative tilde must not be expanded through
+            # the launcher's ambient HOME before the credential tripwire.
+            tilde_home = safe / "tilde-home"
+            tilde_bin = tilde_home / "bin"
+            _write_executable(
+                tilde_bin / ("claude.exe" if os.name == "nt" else "claude"))
+            tilde_source = CredentialTripwire(
+                PATH=str(Path("~") / "bin"),
+                **({"PATHEXT": ".EXE"} if os.name == "nt" else {}))
+            with mock.patch.dict(os.environ, {
+                    "HOME": str(tilde_home), "USERPROFILE": str(tilde_home)}), \
+                 mock.patch.object(module.subprocess, "run") as child:
+                result = module.claude_probe(env=tilde_source)
+            assert result["status"] == "not_measured", result
+            child.assert_not_called()
+
             with tempfile.TemporaryDirectory(prefix="wp433-provider-temp-") as temp_raw:
                 temp_root = Path(temp_raw)
                 _write_executable(temp_root / ("claude.cmd" if os.name == "nt" else "claude"))
@@ -635,6 +652,76 @@ def secret_write_cleanup_lock(module):
             assert positive.read_bytes() == b"INERT_POSITIVE_FIXTURE"
             assert stat.S_IMODE(positive.stat().st_mode) == 0o600
 
+        # A directory durability boundary is mandatory.  Filesystems that
+        # report EINVAL/ENOTSUP for directory fsync are unsupported for this
+        # writer; they are not a successful write with weaker durability.
+        unsupported = {errno for errno in (
+            getattr(module.errno, "EINVAL", None),
+            getattr(module.errno, "ENOTSUP", None),
+        ) if errno is not None}
+        for error_number in unsupported:
+            root = base / f"unsupported-fsync-{error_number}"
+            root.mkdir()
+            target = root / "auth.json"
+            real_fsync = module.os.fsync
+
+            def unsupported_directory_fsync(fd, *, _errno=error_number):
+                if stat.S_ISDIR(module.os.fstat(fd).st_mode):
+                    raise OSError(_errno, "unsupported directory fsync fixture")
+                return real_fsync(fd)
+
+            with mock.patch.object(
+                    module.os, "fsync", side_effect=unsupported_directory_fsync):
+                try:
+                    module._atomic_secret(target, b"INERT_UNSUPPORTED_FIXTURE")
+                    assert False, f"directory fsync errno {error_number} was accepted"
+                except OSError as caught:
+                    assert caught.errno == error_number, caught
+            assert not target.exists(), (error_number, target)
+            assert list(root.iterdir()) == [], (error_number, list(root.iterdir()))
+
+        # Cleanup is best-effort, but it must never replace the write or
+        # durability exception that triggered cleanup.  The parent descriptor
+        # close is still attempted and its own failure is secondary.
+        root = base / "parent-close-original-precedence"
+        root.mkdir()
+        target = root / "auth.json"
+        primary = InjectedWriteFailure("primary-directory-fsync")
+        close_attempts = []
+        real_fsync = module.os.fsync
+        real_close = module.os.close
+        real_open_parent = module._open_parent_capability
+        captured_parent = [None]
+
+        def capture_parent(*args, **kwargs):
+            fd = real_open_parent(*args, **kwargs)
+            captured_parent[0] = fd
+            return fd
+
+        def primary_directory_fsync(fd):
+            if stat.S_ISDIR(module.os.fstat(fd).st_mode):
+                raise primary
+            return real_fsync(fd)
+
+        def failing_parent_close(fd):
+            is_target_parent = fd == captured_parent[0]
+            close_attempts.append((fd, is_target_parent))
+            real_close(fd)
+            if is_target_parent:
+                raise OSError("parent close fixture")
+
+        with mock.patch.object(
+                module, "_open_parent_capability", side_effect=capture_parent), \
+             mock.patch.object(module.os, "fsync", side_effect=primary_directory_fsync), \
+             mock.patch.object(module.os, "close", side_effect=failing_parent_close):
+            try:
+                module._atomic_secret(target, b"INERT_CLOSE_FIXTURE")
+                assert False, "primary durability failure was swallowed"
+            except InjectedWriteFailure as caught:
+                assert caught is primary, "parent close replaced original exception"
+        assert any(is_parent for _, is_parent in close_attempts), close_attempts
+        assert not target.exists(), target
+
 
 def claude_status_lock(module):
     """Claude status is evidence-based, with unknown local failure unmeasured."""
@@ -746,6 +833,11 @@ def github_status_lock(module):
          "rejected"),
         (mock.Mock(returncode=1, stdout="HTTP/1.1 403 Forbidden\n", stderr=""),
          "not_measured"),
+        (mock.Mock(
+            returncode=1,
+            stdout=("HTTP/2 403 Forbidden\r\nServer: fixture\r\n\r\n"
+                    "X-GitHub-Request-Id: BODY-SPOOF\r\n"), stderr=""),
+         "not_measured"),
         (mock.Mock(returncode=1, stdout="", stderr="connection reset by peer"),
          "network_error"),
         (mock.Mock(returncode=1, stdout="", stderr="local configuration parse failed"),
@@ -775,6 +867,18 @@ def github_status_lock(module):
                            side_effect=(passed, mixed_block)):
         result = module.github_probe("o/r", env={"GITHUB_PAT": "INERT_FIXTURE"})
     assert result["status"] == "not_measured", result
+
+    # Timeout alone proves that this bounded endpoint was not measured.  It
+    # does not independently prove a network/transport failure.
+    timeout = subprocess.TimeoutExpired(["gh", "api"], 20)
+    with mock.patch.object(module, "_bind_provider_executable",
+                           return_value=_fixture_bound(module, "gh")), \
+         mock.patch.object(module.subprocess, "run",
+                           side_effect=(passed, timeout)):
+        result = module.github_probe("o/r", env={"GITHUB_PAT": "INERT_FIXTURE"})
+    assert result["status"] == "not_measured", result
+    assert result["endpoints"] == {
+        "user": "passed", "repos/o/r": "not_measured"}, result
 
 
 def tl_status_lock(module):
@@ -860,6 +964,16 @@ def run_mutations():
          "        return \"network_error\"\n"
          "    return \"network_error\"",
          github_status_lock),
+        ("github_timeout_without_transport_evidence_becomes_network_error",
+         '                except subprocess.TimeoutExpired:\n'
+         '                    results[endpoint] = "not_measured"',
+         '                except subprocess.TimeoutExpired:\n'
+         '                    results[endpoint] = "network_error"',
+         github_status_lock),
+        ("github_body_line_is_accepted_as_response_header",
+         '        headers = block[:header_end.start()] if header_end else block',
+         '        headers = block',
+         github_status_lock),
         ("tl_degraded_rc1_becomes_rejected",
          '        1: ("not_measured", "degraded"),',
          '        1: ("rejected", "credential_or_bundle_rejected"),',
@@ -869,21 +983,6 @@ def run_mutations():
          '        2: ("rejected", "credential_or_bundle_rejected"),',
          tl_status_lock),
     ]
-    if os.name == "posix":
-        mutants.append((
-            "provider_launch_support_is_unbound",
-            '        return "posix-script", (support,), (), identities',
-            '        return "direct", (), (), []',
-            provider_executable_lock,
-        ))
-    else:
-        mutants.append((
-            "provider_launch_support_is_unbound",
-            '    return ("npm-cmd", (node, script), (),\n'
-            '            [(node, node_identity), (script, script_identity)])',
-            '    return ("direct", (), (), [])',
-            provider_executable_lock,
-        ))
     if os.name == "posix":
         mutants.append((
             "claude_capture_unknown_nonzero_becomes_rejected",
@@ -919,6 +1018,29 @@ def run_mutations():
             "    return parent_fd",
             missing_parent_capability_lock,
         ))
+        mutants.extend((
+            (
+                "session_directory_fsync_unsupported_is_treated_as_success",
+                "        os.fsync(parent_fd)\n        created_name = None",
+                "        try:\n            os.fsync(parent_fd)\n"
+                "        except OSError as exc:\n"
+                "            if exc.errno not in (errno.EINVAL, getattr(errno, 'ENOTSUP', errno.EINVAL)):\n"
+                "                raise\n        created_name = None",
+                secret_write_cleanup_lock,
+            ),
+            (
+                "session_parent_close_failure_replaces_original",
+                "    if primary is not None:\n"
+                "        raise primary.with_traceback(primary_traceback)\n"
+                "    if close_error is not None:\n        raise close_error\n"
+                "    return result",
+                "    if close_error is not None:\n        raise close_error\n"
+                "    if primary is not None:\n"
+                "        raise primary.with_traceback(primary_traceback)\n"
+                "    return result",
+                secret_write_cleanup_lock,
+            ),
+        ))
     else:
         print("SKIP claude_capture_unknown_nonzero_becomes_rejected "
               "(POSIX PTY/capability primitive unavailable)")
@@ -943,7 +1065,61 @@ def run_mutations():
                 print(f"PASS {name} (killed 1/1)")
                 continue
             raise AssertionError(f"{name} survived")
-    print(f"PASS session credential mutations (killed {killed}/{len(mutants)})")
+        provider_path = P.with_name("provider_exec.py")
+        provider_source = provider_path.read_text(encoding="utf-8")
+        provider_mutants = [(
+            "provider_path_expands_relative_tilde_entry",
+            "        lexical = Path(raw)\n"
+            "        if not lexical.is_absolute():",
+            "        lexical = Path(raw).expanduser()\n"
+            "        if not lexical.is_absolute():",
+        )]
+        if os.name == "posix":
+            provider_mutants.append((
+                "provider_launch_support_is_unbound",
+                '        return "posix-script", (support,), (), identities',
+                '        return "direct", (), (), []'))
+        else:
+            provider_mutants.append((
+                "provider_launch_support_is_unbound",
+                '    return ("npm-cmd", (node, script), (),\n'
+                '            [(node, node_identity), (script, script_identity)])',
+                '    return ("direct", (), (), [])'))
+        original_globals = {
+            "bind_provider_executable": m.bind_provider_executable,
+            "_shared_provider_argv": m._shared_provider_argv,
+            "_provider_file_identity": m._provider_file_identity,
+            "_BoundProviderExecutable": m._BoundProviderExecutable,
+            "_ProviderExecutableError": m._ProviderExecutableError,
+        }
+        try:
+            for index, (name, old, new) in enumerate(provider_mutants):
+                assert provider_source.count(old) == 1, f"{name} site missing"
+                mutant_path = Path(td) / f"provider_exec_{index}.py"
+                mutant_path.write_text(
+                    provider_source.replace(old, new), encoding="utf-8", newline="\n")
+                mutant_spec = importlib.util.spec_from_file_location(
+                    f"provider_exec_mutant_{index}", mutant_path)
+                mutant = importlib.util.module_from_spec(mutant_spec)
+                sys.modules[mutant_spec.name] = mutant
+                mutant_spec.loader.exec_module(mutant)
+                m.bind_provider_executable = mutant.bind_provider_executable
+                m._shared_provider_argv = mutant.provider_argv
+                m._provider_file_identity = mutant.provider_file_identity
+                m._BoundProviderExecutable = mutant.BoundProviderExecutable
+                m._ProviderExecutableError = mutant.ProviderExecutableError
+                try:
+                    provider_executable_lock(m)
+                except (AssertionError, OSError):
+                    killed += 1
+                    print(f"PASS {name} (killed 1/1)")
+                    continue
+                raise AssertionError(f"{name} survived")
+        finally:
+            for key, value in original_globals.items():
+                setattr(m, key, value)
+    total = len(mutants) + len(provider_mutants)
+    print(f"PASS session credential mutations (killed {killed}/{total})")
 
 
 def run():

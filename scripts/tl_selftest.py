@@ -222,6 +222,9 @@ def _wp433_tl_secret_cleanup_boundary(tg) -> bool:
             return self
 
         def __exit__(self, _kind, _value, _traceback):
+            self.close()
+
+        def close(self):
             os.close(self.fd)
 
         def fileno(self):
@@ -361,6 +364,99 @@ def _wp433_tl_secret_cleanup_boundary(tg) -> bool:
         tg._tl_atomic_secret(positive, b"INERT_TL_POSITIVE")
         assert positive.read_bytes() == b"INERT_TL_POSITIVE"
         assert stat.S_IMODE(positive.stat().st_mode) == 0o600
+
+        # Parent-directory durability is mandatory.  An unsupported directory
+        # fsync is a failed secret write, not permission to report a weaker
+        # success contract.
+        unsupported = {number for number in (
+            getattr(tg.errno, "EINVAL", None),
+            getattr(tg.errno, "ENOTSUP", None),
+        ) if number is not None}
+        for number in unsupported:
+            root = base / f"unsupported-directory-fsync-{number}"
+            root.mkdir()
+            target = root / "auth.json"
+            real_fsync = tg.os.fsync
+
+            def unsupported_directory_fsync(fd, *, _number=number):
+                if stat.S_ISDIR(tg.os.fstat(fd).st_mode):
+                    raise OSError(_number, "unsupported directory fsync fixture")
+                return real_fsync(fd)
+
+            with mock.patch.object(
+                    tg.os, "fsync", side_effect=unsupported_directory_fsync):
+                try:
+                    tg._tl_atomic_secret(target, b"INERT_UNSUPPORTED_TL")
+                except OSError as caught:
+                    assert caught.errno == number, caught
+                else:
+                    raise AssertionError(
+                        f"directory fsync errno {number} was accepted")
+            assert not target.exists(), (number, target)
+            assert list(root.iterdir()) == [], (number, list(root.iterdir()))
+
+        # Descriptor cleanup attempts every close but cannot replace the
+        # original write/durability failure.  The regular descriptor here is
+        # the identity guard; the directory descriptor must still be closed
+        # after that guard close reports its own failure.
+        root = base / "close-original-precedence"; root.mkdir()
+        target = root / "auth.json"
+        primary = InjectedFailure("fixture-primary-directory-fsync")
+        close_kinds = []
+        real_fsync = tg.os.fsync
+        real_close = tg.os.close
+
+        def primary_directory_fsync(fd):
+            if stat.S_ISDIR(tg.os.fstat(fd).st_mode):
+                raise primary
+            return real_fsync(fd)
+
+        def failing_guard_close(fd):
+            try:
+                is_directory = stat.S_ISDIR(tg.os.fstat(fd).st_mode)
+            except OSError:
+                is_directory = False
+            close_kinds.append("directory" if is_directory else "guard")
+            real_close(fd)
+            if not is_directory:
+                raise OSError("fixture identity-guard close")
+
+        with mock.patch.object(tg.os, "fsync", side_effect=primary_directory_fsync), \
+             mock.patch.object(tg.os, "close", side_effect=failing_guard_close):
+            try:
+                tg._tl_atomic_secret(target, b"INERT_CLOSE_TL")
+            except InjectedFailure as caught:
+                assert caught is primary, "guard close replaced original TL failure"
+            else:
+                raise AssertionError("primary TL durability failure was swallowed")
+        assert "guard" in close_kinds and "directory" in close_kinds, close_kinds
+        assert not target.exists(), target
+
+        # Conversely, a close failure on an otherwise successful operation is
+        # fatal and all remaining descriptors are still attempted.
+        root = base / "successful-close-failure"; root.mkdir()
+        target = root / "auth.json"
+        close_kinds = []
+        real_close = tg.os.close
+
+        def success_guard_close(fd):
+            try:
+                is_directory = stat.S_ISDIR(tg.os.fstat(fd).st_mode)
+            except OSError:
+                is_directory = False
+            close_kinds.append("directory" if is_directory else "guard")
+            real_close(fd)
+            if not is_directory:
+                raise OSError("fixture successful guard close")
+
+        with mock.patch.object(tg.os, "close", side_effect=success_guard_close):
+            try:
+                tg._tl_atomic_secret(target, b"INERT_SUCCESS_CLOSE_TL")
+            except OSError as caught:
+                assert "guard close" in str(caught), caught
+            else:
+                raise AssertionError("successful guard close failure was swallowed")
+        assert "guard" in close_kinds and "directory" in close_kinds, close_kinds
     return True
 
 
@@ -383,6 +479,9 @@ def _wp433_tl_secret_cleanup_mutations_killed(tg) -> bool:
             "        # hostile unlink/recreate can immediately reuse the same (dev, ino),\n"
             "        # making a pathname-only identity check delete the replacement.\n"
             "        identity_guard_fd = os.dup(fd)\n"
+            "        write_primary = None\n"
+            "        write_traceback = None\n"
+            "        out = None\n"
             "        try:\n"
             "            os.fchmod(fd, 0o600)",
             "        write_identity = _tl_created_secret_identity(fd)\n"
@@ -390,6 +489,9 @@ def _wp433_tl_secret_cleanup_mutations_killed(tg) -> bool:
             "        # hostile unlink/recreate can immediately reuse the same (dev, ino),\n"
             "        # making a pathname-only identity check delete the replacement.\n"
             "        identity_guard_fd = os.dup(fd)\n"
+            "        write_primary = None\n"
+            "        write_traceback = None\n"
+            "        out = None\n"
             "        try:\n"
             "            os.fchmod(fd, 0o600)\n"
             "            identity = write_identity",
@@ -402,6 +504,30 @@ def _wp433_tl_secret_cleanup_mutations_killed(tg) -> bool:
             "            cleanup_names.clear()\n"
             "            os.replace(created_name, target.name,",
         ),
+        (
+            "tl_directory_fsync_unsupported_is_treated_as_success",
+            "        os.fsync(directory_fd)\n"
+            "        cleanup_names.clear()",
+            "        try:\n"
+            "            os.fsync(directory_fd)\n"
+            "        except OSError as exc:\n"
+            "            if exc.errno not in (errno.EINVAL, getattr(errno, 'ENOTSUP', errno.EINVAL)):\n"
+            "                raise\n"
+            "        cleanup_names.clear()",
+        ),
+        (
+            "tl_guard_close_failure_replaces_original",
+            "    if primary is not None:\n"
+            "        raise primary.with_traceback(primary_traceback)\n"
+            "    if close_error is not None:\n"
+            "        raise close_error\n"
+            "    return result",
+            "    if close_error is not None:\n"
+            "        raise close_error\n"
+            "    if primary is not None:\n"
+            "        raise primary.with_traceback(primary_traceback)\n"
+            "    return result",
+        ),
     )
     for index, (name, anchor, replacement) in enumerate(mutants):
         assert source.count(anchor) == 1, f"{name} anchor drifted"
@@ -411,8 +537,8 @@ def _wp433_tl_secret_cleanup_mutations_killed(tg) -> bool:
              mutant.__dict__)
         try:
             _wp433_tl_secret_cleanup_boundary(mutant)
-        except AssertionError:
-            print(f"  [PASS] {name} (killed by cleanup behavior)")
+        except (AssertionError, OSError) as exc:
+            print(f"  [PASS] {name} (killed by {type(exc).__name__})")
             continue
         raise AssertionError(f"{name} survived")
     return True

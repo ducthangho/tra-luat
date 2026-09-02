@@ -11,7 +11,6 @@ import os
 import re
 import secrets
 import select
-import shlex
 import shutil
 import stat
 import subprocess
@@ -19,7 +18,18 @@ import sys
 import tempfile
 import time
 from datetime import datetime
-from pathlib import Path, PureWindowsPath
+from pathlib import Path
+
+from provider_exec import (
+    BoundProviderExecutable as _BoundProviderExecutable,
+    ProviderExecutableError as _ProviderExecutableError,
+    bind_provider_executable,
+    bound_provider_source as _shared_bound_provider_source,
+    provider_argv as _shared_provider_argv,
+    provider_file_identity as _provider_file_identity,
+    revalidate_bound_provider as _revalidate_bound_provider,
+    trusted_provider_temp_base as _shared_trusted_provider_temp_base,
+)
 
 STATUSES = ("missing", "rejected", "network_error", "not_measured", "passed")
 SECRET_ENV = ("CODEX_AUTH_JSON", "CLAUDE_CODE_OAUTH_TOKEN", "GITHUB_PAT", "TL_MASTER_KEY")
@@ -30,32 +40,6 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 
 class UnsafeSecretDestination(OSError):
     """A secret target resolves into this repository."""
-
-
-class _ProviderExecutableError(OSError):
-    """A provider executable could not be bound without ambient authority."""
-
-    def __init__(self, reason: str):
-        super().__init__(reason)
-        self.reason = reason
-
-
-class _BoundProviderExecutable:
-    __slots__ = ("provider", "kind", "executable", "launch_support",
-                 "launch_arguments", "identities", "sanitized_path")
-
-    def __init__(self, *, provider: str, kind: str, executable: Path,
-                 launch_support: tuple[Path, ...],
-                 identities: tuple[tuple[Path, tuple[int, int, int, int]], ...],
-                 sanitized_path: str,
-                 launch_arguments: tuple[str, ...] = ()):
-        self.provider = provider
-        self.kind = kind
-        self.executable = executable
-        self.launch_support = launch_support
-        self.launch_arguments = launch_arguments
-        self.identities = identities
-        self.sanitized_path = sanitized_path
 
 
 # Child processes get an intentionally small operational environment rather
@@ -86,297 +70,22 @@ def _child_env(source, **required: str) -> dict[str, str]:
     return child
 
 
-def _path_within(path: Path, root: Path) -> bool:
-    try:
-        path.relative_to(root)
-        return True
-    except ValueError:
-        return False
-
-
-def _provider_file_identity(path: Path) -> tuple[int, int, int, int]:
-    """Bind both directory identity and content-changing stat metadata."""
-    info = path.lstat()
-    reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
-    if (not stat.S_ISREG(info.st_mode) or stat.S_ISLNK(info.st_mode)
-            or (reparse and getattr(info, "st_file_attributes", 0) & reparse)):
-        raise _ProviderExecutableError("provider_executable_untrusted")
-    return (info.st_dev, info.st_ino, info.st_size,
-            getattr(info, "st_mtime_ns", int(info.st_mtime * 1_000_000_000)))
-
-
-def _provider_forbidden_roots() -> tuple[Path, ...]:
-    roots = [REPOSITORY_ROOT.resolve(strict=True)]
-    try:
-        roots.append(_trusted_provider_temp_base().resolve(strict=True))
-    except OSError as exc:
-        raise _ProviderExecutableError("provider_executable_untrusted") from exc
-    return tuple(roots)
-
-
-def _provider_path_is_trusted(path: Path,
-                              forbidden: tuple[Path, ...]) -> bool:
-    return not any(_path_within(path, root) for root in forbidden)
-
-
-def _provider_candidate(alias: Path, forbidden: tuple[Path, ...],
-                        *, executable: bool = True):
-    """Resolve one regular provider/support file without accepting a reparse."""
-    try:
-        alias_info = alias.lstat()
-        reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
-        if (os.name == "nt"
-                and (stat.S_ISLNK(alias_info.st_mode)
-                     or (reparse and getattr(
-                         alias_info, "st_file_attributes", 0) & reparse))):
-            return None
-        target = alias.resolve(strict=True)
-        if (not _provider_path_is_trusted(alias, forbidden)
-                or not _provider_path_is_trusted(target, forbidden)):
-            return None
-        identity = _provider_file_identity(target)
-        if executable and os.name == "posix" and not os.access(target, os.X_OK):
-            return None
-        return alias, target, identity
-    except (OSError, _ProviderExecutableError):
-        return None
-
-
-def _provider_named_support(name: str, directories: list[Path],
-                            forbidden: tuple[Path, ...]):
-    """Bind exactly one bare interpreter name from the sanitized path."""
-    if (not name or Path(name).name != name
-            or not re.fullmatch(r"[A-Za-z0-9_.+\-]+", name)):
-        raise _ProviderExecutableError("provider_launch_support_untrusted")
-    candidate_name = name + ".exe" if os.name == "nt" and not name.lower().endswith(".exe") else name
-    candidates = []
-    for directory in directories:
-        candidate = _provider_candidate(
-            directory / candidate_name, forbidden, executable=True)
-        if candidate is not None:
-            candidates.append(candidate)
-    if len(candidates) != 1:
-        reason = ("provider_launch_support_missing" if not candidates
-                  else "provider_launch_support_ambiguous")
-        raise _ProviderExecutableError(reason)
-    return candidates[0]
-
-
-def _posix_provider_plan(executable: Path, directories: list[Path],
-                         forbidden: tuple[Path, ...]):
-    """Turn a shebang into an absolute interpreter launch, never kernel PATH lookup."""
-    try:
-        with executable.open("rb") as source:
-            first = source.readline(4097)
-    except OSError as exc:
-        raise _ProviderExecutableError("provider_launch_support_untrusted") from exc
-    if not first.startswith(b"#!"):
-        return "direct", (), (), []
-    if len(first) > 4096 or not first.endswith((b"\n", b"\r")):
-        raise _ProviderExecutableError("provider_launch_support_untrusted")
-    try:
-        words = shlex.split(first[2:].decode("utf-8", "strict").strip())
-    except (UnicodeDecodeError, ValueError) as exc:
-        raise _ProviderExecutableError("provider_launch_support_untrusted") from exc
-    if not words or len(words) > 2 or not Path(words[0]).is_absolute():
-        raise _ProviderExecutableError("provider_launch_support_untrusted")
-    interpreter = _provider_candidate(Path(words[0]), forbidden, executable=True)
-    if interpreter is None:
-        raise _ProviderExecutableError("provider_launch_support_untrusted")
-    _, interpreter_target, interpreter_identity = interpreter
-    identities = [(interpreter_target, interpreter_identity)]
-    if interpreter_target.name == "env":
-        if len(words) != 2:
-            raise _ProviderExecutableError("provider_launch_support_untrusted")
-        _, support, support_identity = _provider_named_support(
-            words[1], directories, forbidden)
-        identities.append((support, support_identity))
-        return "posix-script", (support,), (), identities
-    return ("posix-script", (interpreter_target,), tuple(words[1:]),
-            identities)
-
-
-def _windows_npm_plan(executable: Path, directories: list[Path],
-                      forbidden: tuple[Path, ...]):
-    """Recognize an npm cmd shim but launch its bound node and JS directly."""
-    suffix = executable.suffix.lower()
-    if suffix in (".exe", ".com"):
-        return "direct", (), (), []
-    if suffix != ".cmd":
-        raise _ProviderExecutableError("provider_launch_support_untrusted")
-    try:
-        raw = executable.read_bytes()
-        if len(raw) > 65536:
-            raise _ProviderExecutableError("provider_launch_support_untrusted")
-        text = raw.decode("utf-8-sig", "strict")
-    except (OSError, UnicodeDecodeError) as exc:
-        raise _ProviderExecutableError("provider_launch_support_untrusted") from exc
-    script_matches = re.findall(
-        r'(?im)"%dp0%\\([^"\r\n]+?\.js)"\s+%\*\s*$', text)
-    if len(script_matches) != 1:
-        raise _ProviderExecutableError("provider_launch_support_untrusted")
-    relative = PureWindowsPath(script_matches[0])
-    if (relative.is_absolute() or relative.drive or relative.root
-            or any(part in ("", ".", "..") for part in relative.parts)):
-        raise _ProviderExecutableError("provider_launch_support_untrusted")
-    script_alias = executable.parent.joinpath(*relative.parts)
-    script_candidate = _provider_candidate(
-        script_alias, forbidden, executable=False)
-    if script_candidate is None:
-        raise _ProviderExecutableError("provider_launch_support_untrusted")
-    _, script, script_identity = script_candidate
-
-    sibling_node = executable.parent / "node.exe"
-    try:
-        sibling_node.lstat()
-    except FileNotFoundError:
-        _, node, node_identity = _provider_named_support(
-            "node", directories, forbidden)
-    except OSError as exc:
-        raise _ProviderExecutableError("provider_launch_support_untrusted") from exc
-    else:
-        node_candidate = _provider_candidate(
-            sibling_node, forbidden, executable=True)
-        if node_candidate is None:
-            raise _ProviderExecutableError("provider_launch_support_untrusted")
-        _, node, node_identity = node_candidate
-    return ("npm-cmd", (node, script), (),
-            [(node, node_identity), (script, script_identity)])
-
-
 def _bind_provider_executable(name: str, source) -> _BoundProviderExecutable:
-    """Resolve exactly one provider from a closed, absolute discovery path."""
-    if name not in ("claude", "gh"):
-        raise _ProviderExecutableError("provider_executable_untrusted")
-    raw_path = source.get("PATH")
-    if not isinstance(raw_path, str) or not raw_path:
-        raise _ProviderExecutableError("provider_executable_missing")
-    forbidden = _provider_forbidden_roots()
-    directories = []
-    seen_directories = set()
-    for raw in raw_path.split(os.pathsep):
-        if not raw:
-            continue
-        lexical = Path(raw).expanduser()
-        if not lexical.is_absolute():
-            continue
-        try:
-            directory = lexical.resolve(strict=True)
-        except OSError:
-            continue
-        if (not directory.is_dir()
-                or not _provider_path_is_trusted(directory, forbidden)):
-            continue
-        key = os.path.normcase(str(directory))
-        if key not in seen_directories:
-            seen_directories.add(key)
-            directories.append(directory)
-    if not directories:
-        raise _ProviderExecutableError("provider_executable_untrusted")
-
-    if os.name == "nt":
-        raw_extensions = source.get("PATHEXT") or ".COM;.EXE;.BAT;.CMD"
-        allowed = {".com", ".exe", ".bat", ".cmd"}
-        extensions = []
-        for extension in raw_extensions.split(";"):
-            extension = extension.strip().lower()
-            if extension in allowed and extension not in extensions:
-                extensions.append(extension)
-        candidate_names = [name + extension for extension in extensions]
-    else:
-        candidate_names = [name]
-
-    candidates = []
-    for directory in directories:
-        for candidate_name in candidate_names:
-            alias = directory / candidate_name
-            candidate = _provider_candidate(
-                alias, forbidden, executable=True)
-            if candidate is not None:
-                candidates.append(candidate)
-    if not candidates:
-        raise _ProviderExecutableError("provider_executable_missing")
-    if len(candidates) != 1:
-        raise _ProviderExecutableError("provider_executable_ambiguous")
-
-    alias, executable, identity = candidates[0]
-    identities = [(executable, identity)]
-    if os.name == "posix":
-        kind, support, launch_arguments, support_identities = (
-            _posix_provider_plan(executable, directories, forbidden))
-    else:
-        kind, support, launch_arguments, support_identities = (
-            _windows_npm_plan(executable, directories, forbidden))
-    identities.extend(support_identities)
-    return _BoundProviderExecutable(
-        provider=name,
-        kind=kind,
-        executable=executable,
-        launch_support=support,
-        launch_arguments=launch_arguments,
-        identities=tuple(identities),
-        sanitized_path=os.pathsep.join(str(path) for path in directories),
-    )
-
-
-def _revalidate_bound_provider(bound: _BoundProviderExecutable) -> None:
-    for path, identity in bound.identities:
-        try:
-            current = _provider_file_identity(path)
-        except (OSError, _ProviderExecutableError) as exc:
-            raise _ProviderExecutableError("provider_executable_changed") from exc
-        if current != identity:
-            raise _ProviderExecutableError("provider_executable_changed")
+    return bind_provider_executable(
+        name, source, repository_root=REPOSITORY_ROOT)
 
 
 def _provider_argv(bound: _BoundProviderExecutable,
                    arguments: list[str]) -> list[str]:
-    """Revalidate immediately before constructing an absolute-only launch."""
-    _revalidate_bound_provider(bound)
-    if bound.kind == "direct":
-        return [str(bound.executable), *arguments]
-    if bound.kind == "posix-script" and len(bound.launch_support) == 1:
-        return [str(bound.launch_support[0]), *bound.launch_arguments,
-                str(bound.executable), *arguments]
-    if bound.kind == "npm-cmd" and len(bound.launch_support) == 2:
-        return [str(bound.launch_support[0]), str(bound.launch_support[1]),
-                *arguments]
-    raise _ProviderExecutableError("provider_executable_untrusted")
+    return _shared_provider_argv(bound, arguments)
 
 
 def _bound_provider_source(source, bound: _BoundProviderExecutable) -> dict:
-    child_source = dict(source)
-    child_source["PATH"] = bound.sanitized_path
-    return child_source
+    return _shared_bound_provider_source(source, bound)
 
 
 def _trusted_provider_temp_base() -> Path:
-    """Select a process-trusted temp base without consulting ambient temp vars."""
-    if os.name == "posix":
-        candidate = Path("/tmp")
-    elif os.name == "nt":
-        # Since Python 3.13, mkdir(mode=0o700) applies a private Windows ACL.
-        # Older runtimes cannot make that guarantee with stdlib primitives.
-        if sys.version_info < (3, 13):
-            raise OSError("private Windows provider directory ACL unavailable")
-        try:
-            import ctypes
-            buffer = ctypes.create_unicode_buffer(32768)
-            # CSIDL_LOCAL_APPDATA is resolved by the shell, independently of
-            # caller-controlled TMPDIR/TMP/TEMP/LOCALAPPDATA environment data.
-            result = ctypes.windll.shell32.SHGetFolderPathW(
-                None, 0x001C, None, 0, buffer)
-        except (AttributeError, OSError, ValueError) as exc:
-            raise OSError("Windows LocalAppData lookup unavailable") from exc
-        if result != 0 or not buffer.value:
-            raise OSError(f"Windows LocalAppData lookup failed: {result}")
-        candidate = Path(buffer.value) / "Temp"
-    else:
-        raise OSError("private provider storage unsupported on this platform")
-    base = candidate.resolve(strict=True)
-    if not base.is_dir() or base.is_symlink():
-        raise OSError("trusted provider temp base is not a plain directory")
-    return directory_destination(base)
+    return _shared_trusted_provider_temp_base()
 
 
 def _validate_private_provider_directory(path: Path) -> Path:
@@ -591,29 +300,62 @@ def _validate_parent_capability(parent_fd: int) -> None:
     flags = _directory_flags()
     current = os.dup(parent_fd)
     seen = set()
+    primary = None
+    primary_traceback = None
     try:
-        while True:
-            opened = os.fstat(current)
-            identity = (opened.st_dev, opened.st_ino)
-            if identity in seen:
-                raise OSError("secret parent ancestry loop")
-            seen.add(identity)
-            if _fd_is_repository_root(current):
-                raise UnsafeSecretDestination(
-                    "refusing repository secret parent capability")
-            # Do not consult os.supports_dir_fd.  CPython 3.14 omits working
-            # combinations (notably os.replace) from that registry.
-            parent = os.open("..", flags, dir_fd=current)
-            parent_identity = os.fstat(parent)
-            if identity == (parent_identity.st_dev, parent_identity.st_ino):
-                os.close(parent)
-                break
+        try:
+            while True:
+                opened = os.fstat(current)
+                identity = (opened.st_dev, opened.st_ino)
+                if identity in seen:
+                    raise OSError("secret parent ancestry loop")
+                seen.add(identity)
+                if _fd_is_repository_root(current):
+                    raise UnsafeSecretDestination(
+                        "refusing repository secret parent capability")
+                # Do not consult os.supports_dir_fd.  CPython 3.14 omits working
+                # combinations (notably os.replace) from that registry.
+                parent = os.open("..", flags, dir_fd=current)
+                try:
+                    parent_identity = os.fstat(parent)
+                except BaseException as exc:
+                    parent_traceback = exc.__traceback__
+                    try:
+                        os.close(parent)
+                    except BaseException:
+                        pass
+                    raise exc.with_traceback(parent_traceback)
+                if identity == (parent_identity.st_dev, parent_identity.st_ino):
+                    os.close(parent)
+                    break
+                previous = current
+                current = parent
+                try:
+                    os.close(previous)
+                except BaseException as exc:
+                    close_traceback = exc.__traceback__
+                    try:
+                        os.close(current)
+                    except BaseException:
+                        pass
+                    current = -1
+                    raise exc.with_traceback(close_traceback)
+        except (TypeError, NotImplementedError) as exc:
+            raise OSError(
+                "directory-relative secret primitives unavailable") from exc
+    except BaseException as exc:
+        primary = exc
+        primary_traceback = exc.__traceback__
+    close_error = None
+    if current != -1:
+        try:
             os.close(current)
-            current = parent
-    except (TypeError, NotImplementedError) as exc:
-        raise OSError("directory-relative secret primitives unavailable") from exc
-    finally:
-        os.close(current)
+        except BaseException as exc:
+            close_error = exc
+    if primary is not None:
+        raise primary.with_traceback(primary_traceback)
+    if close_error is not None:
+        raise close_error
 
 
 def _walk_parent_capability(parent: Path, *, create: bool) -> int:
@@ -671,15 +413,37 @@ def _walk_parent_capability(parent: Path, *, create: bool) -> int:
                 if _fd_is_repository_root(child):
                     raise UnsafeSecretDestination(
                         "refusing repository secret parent capability")
-            except Exception:
-                os.close(child)
-                raise
-            os.close(current)
+            except BaseException as primary:
+                primary_traceback = primary.__traceback__
+                try:
+                    os.close(child)
+                except BaseException:
+                    pass
+                raise primary.with_traceback(primary_traceback)
+            previous = current
             current = child
+            try:
+                os.close(previous)
+            except BaseException as primary:
+                # A failed close has ambiguous descriptor state and must not be
+                # retried.  The child capability is still ours and must be
+                # closed, while the first close failure remains authoritative.
+                primary_traceback = primary.__traceback__
+                try:
+                    os.close(current)
+                except BaseException:
+                    pass
+                current = -1
+                raise primary.with_traceback(primary_traceback)
         _validate_parent_capability(current)
-    except Exception:
-        os.close(current)
-        raise
+    except BaseException as primary:
+        primary_traceback = primary.__traceback__
+        if current != -1:
+            try:
+                os.close(current)
+            except BaseException:
+                pass
+        raise primary.with_traceback(primary_traceback)
     return current
 
 
@@ -725,13 +489,20 @@ def _created_secret_identity(fd: int) -> tuple[int, int]:
         if not stat.S_ISREG(opened.st_mode):
             raise OSError("created secret target is not a regular file")
         return opened.st_dev, opened.st_ino
-    except Exception:
-        os.close(fd)
-        raise
+    except BaseException as primary:
+        primary_traceback = primary.__traceback__
+        try:
+            os.close(fd)
+        except BaseException:
+            pass
+        raise primary.with_traceback(primary_traceback)
 
 
 def _write_secret_fd(fd: int, data: bytes,
                      identity: tuple[int, int]) -> None:
+    out = None
+    primary = None
+    primary_traceback = None
     try:
         os.fchmod(fd, 0o600)
         mode = os.fstat(fd)
@@ -739,13 +510,26 @@ def _write_secret_fd(fd: int, data: bytes,
             raise OSError("created secret identity changed before write")
         if stat.S_IMODE(mode.st_mode) != 0o600:
             raise OSError("secret mode 0600 was not established")
-    except Exception:
-        os.close(fd)
-        raise
-    with os.fdopen(fd, "wb") as out:
+        out = os.fdopen(fd, "wb")
+        fd = -1
         out.write(data)
         out.flush()
         os.fsync(out.fileno())
+    except BaseException as exc:
+        primary = exc
+        primary_traceback = exc.__traceback__
+    close_error = None
+    try:
+        if out is not None:
+            out.close()
+        elif fd != -1:
+            os.close(fd)
+    except BaseException as exc:
+        close_error = exc
+    if primary is not None:
+        raise primary.with_traceback(primary_traceback)
+    if close_error is not None:
+        raise close_error
 
 
 def _unlink_identity(directory_fd: int, name: str,
@@ -762,6 +546,9 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
     parent_fd = _open_parent_capability(path, create=True)
     created_name = None
     created_identity = None
+    primary = None
+    primary_traceback = None
+    result = None
     try:
         if exclusive:
             created_name = path.name
@@ -811,14 +598,12 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
                     or (installed.st_dev, installed.st_ino) != created_identity
                     or stat.S_IMODE(installed.st_mode) != 0o600):
                 raise OSError("secret target changed during replace")
-        try:
-            os.fsync(parent_fd)
-        except OSError as exc:
-            if exc.errno not in (errno.EINVAL, getattr(errno, "ENOTSUP", errno.EINVAL)):
-                raise
+        os.fsync(parent_fd)
         created_name = None
-        return path
-    except Exception:
+        result = path
+    except BaseException as exc:
+        primary = exc
+        primary_traceback = exc.__traceback__
         cleanup_names = []
         if created_name is not None:
             cleanup_names.append(created_name)
@@ -831,11 +616,18 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
         for cleanup_name in cleanup_names:
             try:
                 _unlink_identity(parent_fd, cleanup_name, created_identity)
-            except Exception:
+            except BaseException:
                 pass
-        raise
-    finally:
+    close_error = None
+    try:
         os.close(parent_fd)
+    except BaseException as exc:
+        close_error = exc
+    if primary is not None:
+        raise primary.with_traceback(primary_traceback)
+    if close_error is not None:
+        raise close_error
+    return result
 
 
 def _atomic_secret(path: Path, data: bytes, *, exclusive: bool = False) -> Path:
@@ -1142,8 +934,10 @@ def _github_failure_status(stdout: str, stderr: str) -> str:
         block_end = (status_lines[index + 1].start()
                      if index + 1 < len(status_lines) else len(combined))
         block = combined[match.end():block_end]
+        header_end = re.search(r"\r?\n\r?\n", block)
+        headers = block[:header_end.start()] if header_end else block
         if (int(match.group(1)) in (401, 403, 404)
-                and re.search(r"(?mi)^X-GitHub-[^:]+:", block)):
+                and re.search(r"(?mi)^X-GitHub-[^:]+:", headers)):
             return "rejected"
     if _transport_failure_evidenced(combined.lower()):
         return "network_error"
@@ -1170,7 +964,7 @@ def github_probe(repo: str, *, timeout: int = 20, env=None) -> dict:
                     p = subprocess.run(argv, capture_output=True,
                                        text=True, timeout=timeout, env=child)
                 except subprocess.TimeoutExpired:
-                    results[endpoint] = "network_error"
+                    results[endpoint] = "not_measured"
                 except _ProviderExecutableError:
                     results[endpoint] = "not_measured"
                 except OSError:

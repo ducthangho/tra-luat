@@ -596,29 +596,62 @@ def _tl_validate_parent(directory_fd: int) -> None:
     flags = _tl_directory_flags()
     current = os.dup(directory_fd)
     seen = set()
+    primary = None
+    primary_traceback = None
     try:
-        while True:
-            opened = os.fstat(current)
-            identity = (opened.st_dev, opened.st_ino)
-            if identity in seen:
-                raise OSError("secret parent ancestry loop")
-            seen.add(identity)
-            if _tl_fd_repository_root(current):
-                raise _UnsafeSecretDestination(
-                    "refusing repository secret parent capability")
-            # Do not gate on os.supports_dir_fd: Python 3.14 omits working
-            # os.replace(dir_fd=...) support from that advisory registry.
-            parent = os.open("..", flags, dir_fd=current)
-            parent_identity = os.fstat(parent)
-            if identity == (parent_identity.st_dev, parent_identity.st_ino):
-                os.close(parent)
-                break
+        try:
+            while True:
+                opened = os.fstat(current)
+                identity = (opened.st_dev, opened.st_ino)
+                if identity in seen:
+                    raise OSError("secret parent ancestry loop")
+                seen.add(identity)
+                if _tl_fd_repository_root(current):
+                    raise _UnsafeSecretDestination(
+                        "refusing repository secret parent capability")
+                # Do not gate on os.supports_dir_fd: Python 3.14 omits working
+                # os.replace(dir_fd=...) support from that advisory registry.
+                parent = os.open("..", flags, dir_fd=current)
+                try:
+                    parent_identity = os.fstat(parent)
+                except BaseException as exc:
+                    parent_traceback = exc.__traceback__
+                    try:
+                        os.close(parent)
+                    except BaseException:
+                        pass
+                    raise exc.with_traceback(parent_traceback)
+                if identity == (parent_identity.st_dev, parent_identity.st_ino):
+                    os.close(parent)
+                    break
+                previous = current
+                current = parent
+                try:
+                    os.close(previous)
+                except BaseException as exc:
+                    close_traceback = exc.__traceback__
+                    try:
+                        os.close(current)
+                    except BaseException:
+                        pass
+                    current = -1
+                    raise exc.with_traceback(close_traceback)
+        except (TypeError, NotImplementedError) as exc:
+            raise OSError(
+                "directory-relative secret primitives unavailable") from exc
+    except BaseException as exc:
+        primary = exc
+        primary_traceback = exc.__traceback__
+    close_error = None
+    if current != -1:
+        try:
             os.close(current)
-            current = parent
-    except (TypeError, NotImplementedError) as exc:
-        raise OSError("directory-relative secret primitives unavailable") from exc
-    finally:
-        os.close(current)
+        except BaseException as exc:
+            close_error = exc
+    if primary is not None:
+        raise primary.with_traceback(primary_traceback)
+    if close_error is not None:
+        raise close_error
 
 
 def _tl_walk_parent_capability(parent: Path, *, create: bool) -> int:
@@ -674,15 +707,34 @@ def _tl_walk_parent_capability(parent: Path, *, create: bool) -> int:
                 if _tl_fd_repository_root(child):
                     raise _UnsafeSecretDestination(
                         "refusing repository secret parent capability")
-            except Exception:
-                os.close(child)
-                raise
-            os.close(current)
+            except BaseException as primary:
+                primary_traceback = primary.__traceback__
+                try:
+                    os.close(child)
+                except BaseException:
+                    pass
+                raise primary.with_traceback(primary_traceback)
+            previous = current
             current = child
+            try:
+                os.close(previous)
+            except BaseException as primary:
+                primary_traceback = primary.__traceback__
+                try:
+                    os.close(current)
+                except BaseException:
+                    pass
+                current = -1
+                raise primary.with_traceback(primary_traceback)
         _tl_validate_parent(current)
-    except Exception:
-        os.close(current)
-        raise
+    except BaseException as primary:
+        primary_traceback = primary.__traceback__
+        if current != -1:
+            try:
+                os.close(current)
+            except BaseException:
+                pass
+        raise primary.with_traceback(primary_traceback)
     return current
 
 
@@ -714,6 +766,9 @@ def _tl_atomic_secret(path, data: bytes) -> Path:
     identity = None
     fd = -1
     identity_guard_fd = -1
+    primary = None
+    primary_traceback = None
+    result = None
     try:
         for _ in range(128):
             candidate = f".{target.name}.tmp-{secrets.token_hex(12)}"
@@ -735,6 +790,9 @@ def _tl_atomic_secret(path, data: bytes) -> Path:
         # hostile unlink/recreate can immediately reuse the same (dev, ino),
         # making a pathname-only identity check delete the replacement.
         identity_guard_fd = os.dup(fd)
+        write_primary = None
+        write_traceback = None
+        out = None
         try:
             os.fchmod(fd, 0o600)
             opened = os.fstat(fd)
@@ -742,15 +800,28 @@ def _tl_atomic_secret(path, data: bytes) -> Path:
                 raise OSError("created TL secret identity changed before write")
             if stat.S_IMODE(opened.st_mode) != 0o600:
                 raise OSError("secret mode 0600 was not established")
-            with os.fdopen(fd, "wb") as out:
-                fd = -1
-                out.write(data)
-                out.flush()
-                os.fsync(out.fileno())
-        finally:
-            if fd != -1:
+            out = os.fdopen(fd, "wb")
+            fd = -1
+            out.write(data)
+            out.flush()
+            os.fsync(out.fileno())
+        except BaseException as exc:
+            write_primary = exc
+            write_traceback = exc.__traceback__
+        write_close_error = None
+        try:
+            if out is not None:
+                out.close()
+            elif fd != -1:
                 os.close(fd)
-                fd = -1
+        except BaseException as exc:
+            write_close_error = exc
+        if fd != -1:
+            fd = -1
+        if write_primary is not None:
+            raise write_primary.with_traceback(write_traceback)
+        if write_close_error is not None:
+            raise write_close_error
         existing = _tl_stat_at(directory_fd, target.name)
         if existing is not None and stat.S_ISLNK(existing.st_mode):
             raise OSError(f"refusing symlink secret destination: {target}")
@@ -768,26 +839,31 @@ def _tl_atomic_secret(path, data: bytes) -> Path:
         if (installed is None or (installed.st_dev, installed.st_ino) != identity
                 or stat.S_IMODE(installed.st_mode) != 0o600):
             raise OSError("secret target changed during replace")
-        try:
-            os.fsync(directory_fd)
-        except OSError as exc:
-            if exc.errno not in (errno.EINVAL, getattr(errno, "ENOTSUP", errno.EINVAL)):
-                raise
+        os.fsync(directory_fd)
         cleanup_names.clear()
-        return target
-    except Exception:
+        result = target
+    except BaseException as exc:
+        primary = exc
+        primary_traceback = exc.__traceback__
         for cleanup_name in cleanup_names:
             try:
                 _tl_unlink_identity(directory_fd, cleanup_name, identity)
-            except Exception:
+            except BaseException:
                 pass
-        raise
-    finally:
-        if fd != -1:
-            os.close(fd)
-        if identity_guard_fd != -1:
-            os.close(identity_guard_fd)
-        os.close(directory_fd)
+    close_error = None
+    for descriptor in (fd, identity_guard_fd, directory_fd):
+        if descriptor == -1:
+            continue
+        try:
+            os.close(descriptor)
+        except BaseException as exc:
+            if close_error is None:
+                close_error = exc
+    if primary is not None:
+        raise primary.with_traceback(primary_traceback)
+    if close_error is not None:
+        raise close_error
+    return result
 
 
 def _nlm_auth_plan(nlm) -> list[tuple[str, bytes]]:

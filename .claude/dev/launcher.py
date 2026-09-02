@@ -92,9 +92,18 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+from provider_exec import (
+    ProviderExecutableError as _ProviderExecutableError,
+    bind_provider_executable as _bind_provider_executable,
+    bind_provider_path as _bind_provider_path,
+    bound_provider_source as _bound_provider_source,
+    provider_argv as _provider_argv,
+    revalidate_bound_provider as _revalidate_provider,
+)
 from session_credentials import (
     UnsafeSecretDestination as _UnsafeSecretDestination,
     _atomic_secret as _shared_atomic_secret,
+    _child_env as _provider_child_base,
     _read_secret_bytes as _shared_read_secret_bytes,
     secret_destination as _shared_secret_destination,
 )
@@ -152,8 +161,40 @@ MA_PROBE = 15
 _TRANSPORT_CONTRACTS = (
     ("anthropic_claude", ("claude",), "claude_code", "machine/local"),
     ("openai_codex", ("codex",), "codex_cli", "machine"),
+    ("github", ("gh",), "github_cli", "machine"),
     ("openai_api", ("llm",), "llm_cli", "machine"),
 )
+
+_BOUND_PROVIDER_NAMES = {
+    "anthropic_claude": "claude",
+    "openai_codex": "codex",
+    "github": "gh",
+}
+
+
+def _bind_launcher_provider(name: str, source: dict[str, str]):
+    return _bind_provider_executable(
+        name, source, repository_root=Path(__file__).resolve().parents[2])
+
+
+def _provider_child_env(source: dict[str, str], bound, provider: str) -> dict[str, str]:
+    """Keep storage plus only the credential owned by this provider child."""
+    required = {}
+    for key in ("HOME", "USERPROFILE", "CODEX_HOME", "CLAUDE_CONFIG_DIR"):
+        value = source.get(key)
+        if value:
+            required[key] = value
+    credential_keys = {
+        "codex": (),
+        "claude": ("CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY"),
+        "gh": ("GH_TOKEN",),
+    }[provider]
+    for key in credential_keys:
+        value = source.get(key)
+        if value:
+            required[key] = value
+    return _provider_child_base(
+        _bound_provider_source(source, bound), **required)
 
 _EXECUTABLE_SUFFIXES = (".exe", ".cmd", ".bat", ".com")
 
@@ -245,8 +286,38 @@ def _resolve_executable_identity(lenh: list[str], workspace: str | Path) -> dict
             argv[0] = str(resolved_path)
     if raw_provider and matched_provider and raw_provider != matched_provider:
         raise Chan(MA_THAM_SO, "executable spelling and target identify different providers")
-    return {"argv": argv, "provider": matched_provider or raw_provider,
-            "original_argv0": command}
+    provider = matched_provider or raw_provider
+    identity = {"argv": argv, "provider": provider,
+                "original_argv0": command}
+    provider_name = _BOUND_PROVIDER_NAMES.get(provider)
+    if provider_name is not None and selected is not None:
+        try:
+            bound = _bind_provider_path(
+                provider_name, Path(argv[0]), os.environ,
+                repository_root=Path(__file__).resolve().parents[2])
+            identity["provider_capability"] = bound
+            identity["provider_arguments"] = tuple(argv[1:])
+            identity["argv"] = _provider_argv(bound, argv[1:])
+        except _ProviderExecutableError as exc:
+            raise Chan(MA_THAM_SO,
+                       f"khong bind duoc provider executable: {exc.reason}") from None
+    return identity
+
+
+def _identity_argv(identity: dict) -> list[str]:
+    """Revalidate a provider capability immediately before a child boundary."""
+    bound = identity.get("provider_capability")
+    if bound is None:
+        return list(identity["argv"])
+    argv = _provider_argv(bound, identity.get("provider_arguments", ()))
+    identity["argv"] = argv
+    return argv
+
+
+def _revalidate_identity(identity: dict) -> None:
+    bound = identity.get("provider_capability")
+    if bound is not None:
+        _revalidate_provider(bound)
 
 
 def _la_lenh_codex(identity) -> bool:
@@ -1192,7 +1263,12 @@ def _probe_cho_so(ds: dict) -> dict:
 
 def chay_cac_probe(ws: str, identity: dict, bo_qua: str | None) -> tuple[dict, str | None]:
     """Run capability probes from the executable identity bound at dispatch."""
-    lenh = identity["argv"]
+    try:
+        lenh = _identity_argv(identity)
+    except _ProviderExecutableError as exc:
+        raise Chan(MA_PROBE, f"provider executable changed: {exc.reason}", {
+            "provider_executable": {
+                "trang_thai": "KHONG_DO_DUOC", "chi_tiet": exc.reason}}) from None
     ds = {"workspace": _probe_workspace(ws), "ghi": _probe_ghi(ws),
           "spawn": _probe_spawn(str(lenh[0]), ws)}
     if identity.get("provider") == "anthropic_claude":
@@ -1702,7 +1778,31 @@ def lenh_run(a) -> int:
         _ghi_so(thu_muc, ban_ghi, khoa_ky)
         f_out.close(); f_err.close()
         raise
+    provider_child = None
+    bound = identity.get("provider_capability")
+    provider_name = _BOUND_PROVIDER_NAMES.get(identity.get("provider"))
+    if bound is not None and provider_name is not None:
+        # Generic local commands intentionally retain the caller environment.
+        # A provider child is credential-bearing, however, so it receives the
+        # same provider-scoped allowlist as doctor/session paths.  Build it only
+        # after binding; the identity is still revalidated at the final boundary
+        # below, immediately before Popen.
+        provider_child = _provider_child_env(
+            dict(os.environ), bound, provider_name)
     try:
+        _revalidate_identity(identity)
+    except _ProviderExecutableError as exc:
+        ban_ghi.update(trang_thai="hong", giai_doan="pre_execution_provider",
+                       ma_thoat=MA_THAM_SO,
+                       ly_do_dung=f"provider executable changed: {exc.reason}",
+                       ket_thuc_utc=_bay_gio().isoformat())
+        _ghi_so(thu_muc, ban_ghi, khoa_ky)
+        f_out.close(); f_err.close()
+        raise Chan(MA_THAM_SO,
+                   f"provider executable changed: {exc.reason}") from None
+    try:
+        if provider_child is not None:
+            them["env"] = provider_child
         p = subprocess.Popen(lenh_con, cwd=kq["workspace"],
                              stdout=f_out, stderr=f_err, stdin=subprocess.DEVNULL, **them)
     except (OSError, ValueError) as e:
@@ -2778,7 +2878,9 @@ def _co_chan_codex() -> str | None:
             f"`python3 .claude/dev/codex_env_policy.py --go` roi TU thay tep")
 
 
-def _do_codex_song(han_giay: int = 90, duong_dan: str | None = None) -> tuple[bool, str]:
+def _do_codex_song(han_giay: int = 90, duong_dan: str | None = None,
+                   *, bound=None,
+                   moi_truong: dict[str, str] | None = None) -> tuple[bool, str]:
     """Phép thử SỐNG: gọi `codex` thật và soi lỗi xác thực.
 
     ĐẮT (tốn quota + mạng) nên KHÔNG chạy mặc định — chỉ khi phía gọi đòi
@@ -2793,15 +2895,26 @@ def _do_codex_song(han_giay: int = 90, duong_dan: str | None = None) -> tuple[bo
     if bi_chan:
         # Đây là cửa THẬT SỰ chạy `codex exec`. Bản trước bỏ sót đúng cửa này.
         return (False, bi_chan)
-    lenh = duong_dan or shutil.which("codex") or "codex"
+    source = dict(os.environ if moi_truong is None else moi_truong)
     try:
+        if bound is None:
+            if duong_dan is not None:
+                bound = _bind_provider_path(
+                    "codex", Path(duong_dan), source,
+                    repository_root=Path(__file__).resolve().parents[2])
+            else:
+                bound = _bind_launcher_provider("codex", source)
+        child = _provider_child_env(source, bound, "codex")
         with open(os.devnull) as rong:
-            p = subprocess.run([lenh, "exec", "--skip-git-repo-check", "in ra: ok"],
+            argv = _provider_argv(
+                bound, ["exec", "--skip-git-repo-check", "in ra: ok"])
+            p = subprocess.run(argv,
                                stdin=rong, capture_output=True, text=True,
-                               timeout=han_giay, encoding="utf-8", errors="replace")
+                               timeout=han_giay, encoding="utf-8", errors="replace",
+                               env=child)
     except subprocess.TimeoutExpired:
         return (False, f"qua han {han_giay}s")
-    except (OSError, subprocess.SubprocessError) as e:
+    except (OSError, subprocess.SubprocessError, _ProviderExecutableError) as e:
         return (False, f"khong chay duoc: {type(e).__name__}")
     ra = ((p.stdout or "") + (p.stderr or "")).lower()
     for dau in ("token_revoked", "refresh_token_invalidated", "token_invalidated",
@@ -2827,13 +2940,13 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
     Nay: `rc != 0` là CHƯA XÁC THỰC, dứt khoát; chữ chỉ dùng để giải thích, và tìm
     trong TOÀN BỘ đầu ra chứ không riêng dòng nào.
     """
-    duong_codex = shutil.which("codex")
-    if not duong_codex:
-        return ("THIEU", "chua cai — npm install -g @openai/codex")
+    source = dict(os.environ)
     bi_chan = _co_chan_codex()
     if bi_chan:
         return ("CHUA_XAC_THUC", bi_chan)
     try:
+        bound = _bind_launcher_provider("codex", source)
+        child = _provider_child_env(source, bound, "codex")
         # Spawn bằng ĐƯỜNG DẪN `which` đã trả, KHÔNG spawn tên trần. ĐO 19-08-2026
         # trên Windows (packet PLAT-M3, #185): `shutil.which` thấy
         # `...\nodejs\codex.CMD` (tra PATHEXT), nhưng CreateProcessW với tên trần
@@ -2842,10 +2955,15 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
         # Một `doctor` mà hai probe của nó phân giải cùng một tên ra hai kết quả
         # ngược nhau là doctor tự mâu thuẫn; mọi spawn CLI agent (.cmd shim của
         # npm) phải đi qua đường dẫn resolve.
-        p = subprocess.run([duong_codex, "login", "status"], capture_output=True,
-                           text=True, timeout=30, encoding="utf-8", errors="replace")
+        argv = _provider_argv(bound, ["login", "status"])
+        p = subprocess.run(argv, capture_output=True, text=True, timeout=30,
+                           encoding="utf-8", errors="replace", env=child)
         ra = ((p.stdout or "") + (p.stderr or ""))
         rc = p.returncode
+    except _ProviderExecutableError as e:
+        if e.reason == "provider_executable_missing":
+            return ("THIEU", "chua cai — npm install -g @openai/codex")
+        return ("KHONG_DO_DUOC", f"khong bind duoc codex: {e.reason}")
     except (OSError, subprocess.SubprocessError) as e:
         return ("KHONG_DO_DUOC", f"khong chay duoc: {type(e).__name__}")
     # Câu trạng thái nằm ở đâu cũng được — lọc dòng nhiễu (WARNING/hint) rồi lấy
@@ -2895,7 +3013,7 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
             # đây, nên đòi kiểm sống mà KHÔNG BAO GIỜ kiểm — phép đo bị chính cảnh báo
             # nuốt mất. "Sắp hết hạn" và "còn dùng được không" là HAI câu hỏi khác nhau.
             if kiem_song:
-                song, ly_do = _do_codex_song(duong_dan=duong_codex)
+                song, ly_do = _do_codex_song(bound=bound, moi_truong=source)
                 if not song:
                     return ("CHUA_XAC_THUC", f"kiem song HONG: {ly_do} · {chi_tiet}")
                 vi_sao.append(f"kiem song: {ly_do} (VAN dung duoc)")
@@ -2903,7 +3021,7 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
         if not kiem_song:
             return ("CO_CREDENTIAL",
                     f"{chi_tiet} · CHUA chung minh dung duoc (them --kiem-song de goi that)")
-        song, vi_sao = _do_codex_song(duong_dan=duong_codex)
+        song, vi_sao = _do_codex_song(bound=bound, moi_truong=source)
         if song:
             return ("DUNG_DUOC", f"{chi_tiet} · kiem song: {vi_sao}")
         return ("CHUA_XAC_THUC", f"kiem song HONG: {vi_sao} · {chi_tiet}")
@@ -2916,8 +3034,12 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
 
 
 def _do_claude() -> tuple[str, str]:
-    if not shutil.which("claude"):
-        return ("THIEU", "chua cai — npm install -g @anthropic-ai/claude-code")
+    try:
+        _bind_launcher_provider("claude", dict(os.environ))
+    except _ProviderExecutableError as exc:
+        if exc.reason == "provider_executable_missing":
+            return ("THIEU", "chua cai — npm install -g @anthropic-ai/claude-code")
+        return ("KHONG_DO_DUOC", f"khong bind duoc claude: {exc.reason}")
     tep = Path(os.path.expanduser("~/.claude/.credentials.json"))
     # ĐÒI GIÁ TRỊ, không chỉ đòi TÊN. `ANTHROPIC_API_KEY=""` là chỗ giữ chỗ rất phổ
     # biến trong `.env` mẫu; đếm nó là credential thì `DUNG_DUOC` — nhãn DUY NHẤT được
@@ -3203,8 +3325,6 @@ def _suc_khoe_mcp_github(ten: str = "github",
 
     Trả (`khoe` | `hong` | `khong_do_duoc`, chi tiết).
     """
-    if not shutil.which("claude"):
-        return ("khong_do_duoc", "khong co `claude` de hoi `mcp get`")
     # CHUAN HOA NGAY TAI DAY, khong tin call-site. `subprocess.run(env=None)` KE THUA
     # `os.environ` THO — tuc dung bien GIU CHO ma `_doc_moi_truong` vua loai, dung lop
     # P2 mà #143 đã vá một lần. Bản trước để mặc định `None` đi thẳng xuống, và
@@ -3214,10 +3334,15 @@ def _suc_khoe_mcp_github(ten: str = "github",
     # trường thô lọt xuống.
     moi_truong = _env_da_chuan(moi_truong)
     try:
-        r = subprocess.run(["claude", "mcp", "get", ten], capture_output=True, text=True,
+        bound = _bind_launcher_provider("claude", moi_truong)
+        child = _provider_child_env(moi_truong, bound, "claude")
+        argv = _provider_argv(bound, ["mcp", "get", ten])
+        r = subprocess.run(argv, capture_output=True, text=True,
                            encoding="utf-8", errors="replace",
-                           env=moi_truong, stdin=subprocess.DEVNULL,
+                           env=child, stdin=subprocess.DEVNULL,
                            timeout=PROBE_TIMEOUT_GIAY)
+    except _ProviderExecutableError as e:
+        return ("khong_do_duoc", f"khong bind duoc `claude`: {e.reason}")
     except (OSError, subprocess.SubprocessError) as e:
         return ("khong_do_duoc", f"`claude mcp get {ten}` khong chay duoc: {type(e).__name__}")
     # LẤY `Status:` ĐẦU TIÊN — lựa chọn CÓ TẢI TRỌNG, không phải tình cờ. Đo được:
@@ -3401,7 +3526,6 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     if moi_truong is None:
         moi_truong, _ = _doc_moi_truong()
     mt = moi_truong
-    tok = mt.get("GH_TOKEN") or None
     duong = []
     if ws:
         rc, out, _ = _git(ws, "ls-remote", "--heads", "origin", "HEAD")
@@ -3410,17 +3534,28 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     # chưa" (nó thoát 1 khi có vấn đề xác thực). Bản trước đếm `shutil.which("gh")` là
     # một ĐƯỜNG MỞ, nên ngoài repo thì chỉ cần CÀI `gh` là `any(...)` thành True và
     # GitHub được gắn `DUNG_DUOC` mà không có lấy một đường đã xác thực nào.
-    if shutil.which("gh"):
+    try:
+        bound_gh = _bind_launcher_provider("gh", mt)
+    except _ProviderExecutableError as exc:
+        bound_gh = None
+        gh_bind_reason = exc.reason
+    if bound_gh is not None:
         try:
-            pg = subprocess.run(["gh", "auth", "status"], capture_output=True, text=True,
-                                encoding="utf-8", errors="replace",
-                                env=mt, stdin=subprocess.DEVNULL, timeout=20)
+            child = _provider_child_env(mt, bound_gh, "gh")
+            argv = _provider_argv(bound_gh, ["auth", "status"])
+            pg = subprocess.run(argv, capture_output=True, text=True,
+                                encoding="utf-8", errors="replace", env=child,
+                                stdin=subprocess.DEVNULL, timeout=20)
             duong.append(("gh-cli", pg.returncode == 0,
                           "da xac thuc" if pg.returncode == 0 else f"CHUA xac thuc (rc={pg.returncode})"))
+        except _ProviderExecutableError as e:
+            duong.append(("gh-cli", False, f"provider changed: {e.reason}"))
         except (OSError, subprocess.SubprocessError) as e:
             duong.append(("gh-cli", False, f"khong chay duoc: {type(e).__name__}"))
     else:
-        duong.append(("gh-cli", False, "chua cai"))
+        duong.append(("gh-cli", False,
+                      "chua cai" if gh_bind_reason == "provider_executable_missing"
+                      else f"khong bind duoc: {gh_bind_reason}"))
 
     # --- REST: ĐO, KHÔNG ĐOÁN.
     # Bản trước NỐI THÊM câu "REST truc tiep co the bi proxy chan (403)" vào MỌI kết
@@ -3435,6 +3570,7 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     # Đo 17-08-2026: đường một `mo`, đường hai `chan`. Nên câu đúng KHÔNG phải
     # "REST bị chặn" mà là "REST bị chặn ĐÚNG CHỖ làm việc", và đó mới là điều đáng
     # nói với người đọc.
+    tok = mt.get("GH_TOKEN") or None
     tt_chung, mt_chung, _ = _do_rest_github("https://api.github.com/rate_limit", token=tok)
     # CHẨN ĐOÁN, KHÔNG TÍNH vào kết luận "dùng được" — xem `_tinh_kha_dung` dưới.
     duong.append(("rest-chung", tt_chung == "mo", mt_chung))

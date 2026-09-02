@@ -61,6 +61,12 @@ import time
 from enum import Enum
 from pathlib import Path
 
+from provider_exec import (
+    ProviderExecutableError as _ProviderExecutableError,
+    bind_provider_executable as _bind_provider_executable,
+    bound_provider_source as _bound_provider_source,
+    provider_argv as _provider_argv,
+)
 from session_credentials import (
     UnsafeSecretDestination as _UnsafeSecretDestination,
     _atomic_secret as _shared_atomic_secret,
@@ -167,7 +173,13 @@ def _co_codex() -> str | None:
     return shutil.which("codex")
 
 
-def _chay_device_auth(codex_home: Path, han_giay: int) -> tuple[bool, str]:
+def _bind_codex(source=None):
+    source = os.environ if source is None else source
+    return _bind_provider_executable(
+        "codex", source, repository_root=Path(__file__).resolve().parents[2])
+
+
+def _chay_device_auth(codex_home: Path, han_giay: int, bound) -> tuple[bool, str]:
     """Chạy `codex login --device-auth` qua PTY, in URL+mã NGAY khi thấy.
 
     Trả (thành_công, toàn_bộ_đầu_ra). Không phán xét kết quả ở đây — việc phán xét
@@ -178,15 +190,17 @@ def _chay_device_auth(codex_home: Path, han_giay: int) -> tuple[bool, str]:
     if not codex_home.is_dir():
         return (False, "private CODEX_HOME không tồn tại")
     try:
+        source = _bound_provider_source(os.environ, bound)
         moi = _shared_provider_child_env(
-            os.environ, codex_home, CODEX_HOME=str(codex_home))
+            source, codex_home, CODEX_HOME=str(codex_home))
     except OSError as e:
         return (False, f"provider storage không an toàn: {type(e).__name__}")
     chu, con = pty.openpty()  # sự thật (2): không có TTY thì codex im lặng hoàn toàn
     try:
-        p = subprocess.Popen([_co_codex() or "codex", "login", "--device-auth"],
+        argv = _provider_argv(bound, ["login", "--device-auth"])
+        p = subprocess.Popen(argv,
                              stdin=con, stdout=con, stderr=con, env=moi, close_fds=True)
-    except OSError as e:
+    except (OSError, _ProviderExecutableError) as e:
         os.close(chu); os.close(con)
         return (False, f"không chạy được codex: {type(e).__name__}: {e}")
     os.close(con)
@@ -241,16 +255,21 @@ def _checked_codex_auth(codex_home: Path) -> tuple[Path, bytes]:
     return target, _shared_read_secret_bytes(target)
 
 
-def _kiem_song_checked(auth: Path) -> LiveResult:
+def _bound_codex_auth(codex_home: Path):
+    """Guard destination, bind executable, then and only then read credential."""
+    target = _shared_checked_secret_destination(
+        Path(codex_home).expanduser() / "auth.json", create_parent=False)
+    bound = _bind_codex()
+    return target, _shared_read_secret_bytes(target), bound
+
+
+def _kiem_song_checked(auth: Path, bound) -> LiveResult:
     """BẰNG CHỨNG DƯƠNG: gọi codex thật và đòi đúng một chuỗi biết trước.
 
     KHÔNG dùng `codex login status` — nó chỉ kiểm tệp đọc được. Kho này đã trả giá HAI lần
     vì tin nó: một lần dán nhãn DÙNG_ĐƯỢC sai, một lần để một chốt bảo vệ đúng bản đã chết.
     Và không đòi mỗi `rc=0`: rc=0 kèm đầu ra RỖNG là ca đã có thật (r244).
     """
-    lenh = _co_codex()
-    if not lenh:
-        return _live_result(LiveStatus.NOT_MEASURED, "không có codex trên PATH")
     try:
         # CODEX_HOME is credential storage, not the provider process HOME.  It
         # may be an ordinary validated directory containing only auth.json.
@@ -258,23 +277,26 @@ def _kiem_song_checked(auth: Path) -> LiveResult:
         # never require or create provider-home scaffold beside credentials.
         with _shared_private_provider_home() as provider_home:
             try:
+                source = _bound_provider_source(os.environ, bound)
                 moi = _shared_provider_child_env(
-                    os.environ, provider_home, CODEX_HOME=str(auth.parent))
+                    source, provider_home, CODEX_HOME=str(auth.parent))
             except OSError as e:
                 return _live_result(
                     LiveStatus.NOT_MEASURED,
                     f"provider storage không an toàn: {type(e).__name__}")
             try:
                 with open(os.devnull) as rong:
-                    p = subprocess.run([lenh, "exec", "--skip-git-repo-check",
-                                        f"In ra dung mot tu: {DAU_HIEU_SONG}"],
+                    argv = _provider_argv(
+                        bound, ["exec", "--skip-git-repo-check",
+                                f"In ra dung mot tu: {DAU_HIEU_SONG}"])
+                    p = subprocess.run(argv,
                                        stdin=rong, capture_output=True, text=True, env=moi,
                                        timeout=HAN_KIEM_SONG_GIAY, encoding="utf-8",
                                        errors="replace")
             except subprocess.TimeoutExpired:
                 return _live_result(
                     LiveStatus.NOT_MEASURED, f"quá hạn {HAN_KIEM_SONG_GIAY}s")
-            except (OSError, subprocess.SubprocessError) as e:
+            except (OSError, subprocess.SubprocessError, _ProviderExecutableError) as e:
                 return _live_result(
                     LiveStatus.NOT_MEASURED, f"không chạy được: {type(e).__name__}")
     except OSError as e:
@@ -304,7 +326,7 @@ def _kiem_song_checked(auth: Path) -> LiveResult:
 def _kiem_song(codex_home: Path) -> LiveResult:
     """Standalone live check: guard/read auth before provider allocation or child."""
     try:
-        auth, _ = _checked_codex_auth(codex_home)
+        auth, _, bound = _bound_codex_auth(codex_home)
     except _UnsafeSecretDestination:
         return _live_result(LiveStatus.REJECTED, "từ chối CODEX_HOME trong repository")
     except FileNotFoundError:
@@ -313,7 +335,7 @@ def _kiem_song(codex_home: Path) -> LiveResult:
         return _live_result(
             LiveStatus.NOT_MEASURED,
             f"không kiểm được CODEX_HOME theo capability: {type(e).__name__}")
-    return _kiem_song_checked(auth)
+    return _kiem_song_checked(auth, bound)
 
 
 def _gio_con_lai(auth: Path) -> float | None:
@@ -445,8 +467,10 @@ dán vào issue/PR/chat. **Dán xong thì xoá tệp này.**
 
 
 def cmd_lay(a) -> int:
-    if not _co_codex():
-        _in("KHÔNG_ĐO_ĐƯỢC: không có `codex` trên PATH — cài rồi chạy lại.")
+    try:
+        bound = _bind_codex()
+    except _ProviderExecutableError as exc:
+        _in(f"KHÔNG_ĐO_ĐƯỢC: không bind được `codex` — {exc.reason}.")
         return RC[KHONG_DO_DUOC]
 
     # Acquisition storage is always created by this process.  There is no CLI
@@ -462,7 +486,7 @@ def cmd_lay(a) -> int:
             except (_UnsafeSecretDestination, OSError):
                 _in("KHÔNG_ĐO_ĐƯỢC: không thiết lập được CODEX_HOME riêng theo capability")
                 return RC[KHONG_DO_DUOC]
-            return _cmd_lay_private(a, tam)
+            return _cmd_lay_private(a, tam, bound)
     except OSError:
         # Includes checked cleanup failure after an otherwise successful inner
         # return: an undeleted raw credential hierarchy cannot be reported ĐẠT.
@@ -470,7 +494,7 @@ def cmd_lay(a) -> int:
         return RC[KHONG_DO_DUOC]
 
 
-def _cmd_lay_private(a, tam: Path) -> int:
+def _cmd_lay_private(a, tam: Path, bound) -> int:
     ra = Path(a.ra) if a.ra else Path("/tmp/CODEX_AUTH_JSON.b64")
     tep_dan = Path(a.tep_dan) if a.tep_dan else ra.with_name("CODEX_AUTH_JSON_setup.md")
     that = effective_codex_home() / "auth.json" if a.cai_de else None
@@ -486,7 +510,7 @@ def _cmd_lay_private(a, tam: Path) -> int:
         _in("KHÔNG_ĐO_ĐƯỢC: không resolve được secret destination")
         return RC[KHONG_DO_DUOC]
     _in(f"CODEX_HOME tạm: {tam}   (bản đang dùng ở ~/.codex KHÔNG bị đụng)")
-    ok, dau_ra = _chay_device_auth(tam, a.han_giay)
+    ok, dau_ra = _chay_device_auth(tam, a.han_giay, bound)
     if not ok:
         _in("KHÔNG_ĐO_ĐƯỢC: chưa hoàn tất device-auth.")
         _in(_sach(dau_ra)[-1200:])
@@ -505,7 +529,7 @@ def _cmd_lay_private(a, tam: Path) -> int:
         return RC[KHONG_DO_DUOC]
 
     _in("đã nhận credential — đang KIỂM SỐNG bằng một lời gọi codex thật…")
-    live = _kiem_song_checked(auth)
+    live = _kiem_song_checked(auth, bound)
     if live.status is LiveStatus.REJECTED:
         _in(f"ĐỎ: credential mới BỊ TỪ CHỐI — {live.reason}")
         return _live_result_rc(live)
@@ -567,7 +591,11 @@ def cmd_kiem(a) -> int:
     """Đo credential ĐANG dùng: còn sống thật không, còn bao lâu."""
     home = Path(a.codex_home).expanduser() if a.codex_home else effective_codex_home()
     try:
-        auth, auth_bytes = _checked_codex_auth(home)
+        if a.kiem_song:
+            auth, auth_bytes, bound = _bound_codex_auth(home)
+        else:
+            auth, auth_bytes = _checked_codex_auth(home)
+            bound = None
     except FileNotFoundError:
         _in(f"KHÔNG_ĐO_ĐƯỢC: không có {home / 'auth.json'}")
         return RC[KHONG_DO_DUOC]
@@ -596,7 +624,7 @@ def cmd_kiem(a) -> int:
     if not a.kiem_song:
         _in("CHƯA CHỨNG MINH khả dụng — thêm --kiem-song để gọi thật (tốn quota).")
         return RC[KHONG_DO_DUOC]
-    live = _kiem_song_checked(auth)
+    live = _kiem_song_checked(auth, bound)
     _in(f"kiểm sống  [{live.status.value}]: {live.reason}")
     return _live_result_rc(live)
 

@@ -43,6 +43,26 @@ def nap(nguon: str, nhan: str):
     return m
 
 
+def cai_provider_gia(M):
+    """Use an inert typed-capability adapter; individual cases control `_co_codex`."""
+    class Bound:
+        def __init__(self, executable):
+            self.executable = Path(executable)
+            self.sanitized_path = str(self.executable.parent)
+
+    def bind(_source=None):
+        executable = M._co_codex()
+        if not executable:
+            raise M._ProviderExecutableError("provider_executable_missing")
+        return Bound(executable)
+
+    M._bind_codex = bind
+    M._provider_argv = lambda bound, arguments: [
+        str(bound.executable), *map(str, arguments)]
+    M._bound_provider_source = lambda source, bound: {
+        **dict(source), "PATH": bound.sanitized_path}
+
+
 # ── đầu ra THẬT của `codex login --device-auth`, chép nguyên (kèm ANSI) từ lần đo
 #    2026-08-23. Giữ nguyên byte: nếu codex đổi định dạng, ca này phải ĐỎ chứ không
 #    được im lặng thích nghi.
@@ -152,7 +172,7 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
     bi_mat = b'{"tokens":{"refresh_token":"BIMAT-KHONG-DUOC-IN"}}'
     d = Path(tempfile.mkdtemp())
     M._co_codex = lambda: "/gia/codex"
-    def device_auth(home, _han):
+    def device_auth(home, _han, _bound):
         (home / "auth.json").write_bytes(bi_mat)
         return (True, "ok")
     M._chay_device_auth = device_auth
@@ -182,7 +202,7 @@ def t6_khong_in_gia_tri_khi_khong_co_co(M, capsys=None):
     doi_tep_kin(ra_tep, "tệp bí mật không phải 0600")
 
     homes = []
-    def dang_nhap_tam(home, _han):
+    def dang_nhap_tam(home, _han, _bound):
         homes.append(home); (home / "auth.json").write_bytes(bi_mat)
         return (True, "ok")
     M._chay_device_auth = dang_nhap_tam
@@ -238,7 +258,7 @@ def t9_cmd_lay_GHI_tep_huong_dan_dan(M):
     bi_mat = b'{"tokens":{"access_token":"a.b.c","refresh_token":"R"}}'
     d = Path(tempfile.mkdtemp())
     M._co_codex = lambda: "/gia/codex"
-    def device_auth(home, _han):
+    def device_auth(home, _han, _bound):
         (home / "auth.json").write_bytes(bi_mat)
         return (True, "ok")
     M._chay_device_auth = device_auth
@@ -369,7 +389,7 @@ def t14_cmd_lay_tu_choi_dich_trong_repository_truoc_device_auth(M):
             encoding="utf-8")
         spawned = []
         M._co_codex = lambda: "/gia/codex"
-        def device_auth(home, _timeout):
+        def device_auth(home, _timeout, _bound):
             spawned.append(True)
             (home / "auth.json").write_text(
                 '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
@@ -449,7 +469,7 @@ def t15_cmd_lay_phai_dung_duong_canonical_guard_tra_ve(M):
     M._shared_checked_secret_destination = canonical_guard
     homes = []
     M._co_codex = lambda: "/gia/codex"
-    def device_auth(home, _timeout):
+    def device_auth(home, _timeout, _bound):
         homes.append(Path(home))
         (home / "auth.json").write_text(
             '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
@@ -487,7 +507,7 @@ def t16_cmd_lay_phan_loai_tu_choi_tai_diem_ghi(M):
         '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
         encoding="utf-8")
     M._co_codex = lambda: "/gia/codex"
-    def device_auth(home, _timeout):
+    def device_auth(home, _timeout, _bound):
         (home / "auth.json").write_text(
             '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}',
             encoding="utf-8")
@@ -528,7 +548,7 @@ def t17_lay_khong_con_codex_home_va_windows_fail_closed(M):
             yield home
     M._shared_private_provider_home = process_private_home
     M._co_codex = lambda: "/gia/codex"
-    def device_auth(home, _timeout):
+    def device_auth(home, _timeout, _bound):
         spawned.append(Path(home))
         (home / "auth.json").write_text(
             '{"tokens":{"access_token":"a.b.c","refresh_token":"FIXTURE"}}')
@@ -736,6 +756,14 @@ def t19_kiem_song_guard_dich_truoc_doc_cap_phat_va_child(M):
             events.append(("read", Path(path)))
             return b'{"tokens":{"refresh_token":"FIXTURE_ONLY"}}'
 
+        class Bound:
+            executable = Path(sys.executable)
+            sanitized_path = str(Path(sys.executable).parent)
+
+        def bind_codex(_source=None):
+            events.append("bind")
+            return Bound()
+
         @contextmanager
         def observed_provider():
             events.append("provider")
@@ -751,6 +779,7 @@ def t19_kiem_song_guard_dich_truoc_doc_cap_phat_va_child(M):
 
         events.clear()
         M._shared_checked_secret_destination = checked
+        M._bind_codex = bind_codex
         M._shared_read_secret_bytes = read_secret
         M._shared_private_provider_home = observed_provider
         M._shared_provider_child_env = child_env
@@ -759,6 +788,7 @@ def t19_kiem_song_guard_dich_truoc_doc_cap_phat_va_child(M):
         assert _gia_tri_trang_thai_song(result) == "passed", result
         assert events == [
             ("guard", alias_home / "auth.json", False),
+            "bind",
             ("read", canonical_auth),
             "provider",
             ("env", {"CODEX_HOME": str(canonical_home)}),
@@ -876,7 +906,7 @@ def t20_kiem_song_ba_trang_thai_dong_va_caller_khong_truthiness(M):
     # Acquisition caller has the same mapping after device auth succeeds.
     M._shared_checked_secret_destination = lambda path, **_k: Path(path)
     M._shared_read_secret_bytes = lambda _path: auth_bytes
-    M._chay_device_auth = lambda home, _timeout: (
+    M._chay_device_auth = lambda home, _timeout, _bound: (
         (home / "auth.json").write_bytes(auth_bytes) is not None, "ok")
     M._ghi_bi_mat = lambda *_a, **_k: None
     M._gio_con_lai = lambda _path: None
@@ -890,7 +920,7 @@ def t20_kiem_song_ba_trang_thai_dong_va_caller_khong_truthiness(M):
         M._kiem_song = lambda *_a, _result=result, **_k: _result
         M._kiem_song_checked = lambda *_a, _result=result, **_k: _result
         with redirect_stdout(io.StringIO()):
-            rc = M._cmd_lay_private(AcquireArgs(), root)
+            rc = M._cmd_lay_private(AcquireArgs(), root, M._bind_codex())
         assert rc == expected, f"_cmd_lay_private collapsed {value} to rc={rc}"
 
     # Checked context exit happens after the inner return expression. It must
@@ -979,20 +1009,28 @@ DOT_BIEN = [
      '                    Path(getattr(a, "codex_home", None) or private_home) / "auth.json").parent',
      "t17_lay_khong_con_codex_home_va_windows_fail_closed"),
     ("kiem_song_requires_private_provider_scaffold",
-     "                    os.environ, provider_home, CODEX_HOME=str(auth.parent))",
-     "                    os.environ, auth.parent, CODEX_HOME=str(auth.parent))",
+     "                    source, provider_home, CODEX_HOME=str(auth.parent))",
+     "                    source, auth.parent, CODEX_HOME=str(auth.parent))",
      "t18_kiem_song_CODEX_HOME_thuong_dung_provider_home_rieng"),
     ("codex_kiem_song_skips_destination_guard",
      '    target = _shared_checked_secret_destination(\n'
      '        Path(codex_home).expanduser() / "auth.json", create_parent=False)\n'
-     '    return target, _shared_read_secret_bytes(target)',
+     '    bound = _bind_codex()\n'
+     '    return target, _shared_read_secret_bytes(target), bound',
      '    target = Path(codex_home).expanduser() / "auth.json"\n'
-     '    return target, target.read_bytes()',
+     '    bound = _bind_codex()\n'
+     '    return target, target.read_bytes(), bound',
      "t19_kiem_song_guard_dich_truoc_doc_cap_phat_va_child"),
     ("codex_auth_recheck_recreates_parent",
+     'def _bound_codex_auth(codex_home: Path):\n'
+     '    """Guard destination, bind executable, then and only then read credential."""\n'
+     '    target = _shared_checked_secret_destination(\n'
      '        Path(codex_home).expanduser() / "auth.json", create_parent=False)',
+     'def _bound_codex_auth(codex_home: Path):\n'
+     '    """Guard destination, bind executable, then and only then read credential."""\n'
+     '    target = _shared_checked_secret_destination(\n'
      '        Path(codex_home).expanduser() / "auth.json", create_parent=True)',
-     "t15_cmd_lay_phai_dung_duong_canonical_guard_tra_ve"),
+     "t19_kiem_song_guard_dich_truoc_doc_cap_phat_va_child"),
     ("kiem_song_unmeasured_collapses_to_rejected",
      '    if result.status is LiveStatus.NOT_MEASURED:\n'
      '        return RC[KHONG_DO_DUOC]',
@@ -1015,6 +1053,7 @@ def chay_suite(M, chi_chay: set[str] | None = None) -> set[str]:
         # không cô lập thì ca sau ăn bản vá của ca trước và bán kính đo ra sai.
         Mi = nap(M.__nguon__, M.__nhan__)
         Mi.__nguon__, Mi.__nhan__ = M.__nguon__, M.__nhan__
+        cai_provider_gia(Mi)
         try:
             ca(Mi)
         except Exception as e:

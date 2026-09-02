@@ -80,31 +80,55 @@ def t2_canary_thieu_shellcheck_phai_SUY_GIAM():
     if not al:
         raise BoQuaMoiTruong("actionlint không có trên PATH — cần HÀNH VI THẬT, không giả "
             "lập được. Chạy sau khi `ops/cai_cong_cu.sh actionlint` cài để có bằng chứng dương.")
+    # Ba trạng thái: công cụ bắt buộc đã ĐỎ NGOÀI vùng cô lập là thiếu MÔI TRƯỜNG (vd container
+    # dev không có jsonschema) ⇒ KHÔNG_ĐO_ĐƯỢC, không phải ĐỎ. Chỉ khi nó ĐẠT ngoài mà ĐỎ trong
+    # vùng cô lập thì vùng cô lập của chính ca này hỏng — đó mới là ĐỎ (chốt ở cuối ca).
+    rc0, out0, _ = chay("kiem-tra", "--json")
+    try:
+        # `.get("ten")`: ca này không đo vân tay `ten` (việc của t8) — đừng chết theo đột biến t8.
+        hong_ngoai = [c.get("ten") for c in json.loads(out0)["cong_cu"]
+                      if c["bat_buoc"] and c["trang_thai"] != "DAT"]
+    except (ValueError, KeyError, TypeError):
+        raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC T2: kiem-tra ngoài vùng cô lập không trả JSON (rc={rc0})")
+    if hong_ngoai:
+        raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC T2: máy này thiếu công cụ bắt buộc {hong_ngoai} "
+                             f"ngay ngoài vùng cô lập — cài rồi đo lại")
     with tempfile.TemporaryDirectory() as tmp:
-        chi_al = Path(tmp) / "chi-al"
-        chi_al.mkdir()
-        shutil.copy2(al, chi_al / Path(al).name); (chi_al / Path(al).name).chmod(0o755)
-        # Ý ĐỊNH của ca này là "VẮNG shellcheck", KHÔNG phải "vắng mọi thứ". Từ #391 bản
-        # kê có một công cụ `bat_buoc` chạy bằng `python`; PATH cô lập làm nó thành
-        # KHÔNG_ĐO_ĐƯỢC và nuốt mất kết luận SUY_GIẢM mà ca này đi đo. Đặt một shim gọi
-        # THẲNG interpreter tuyệt đối: không kéo thêm thư mục nào lên PATH, nên shellcheck
-        # vẫn vắng đúng như trước.
-        shim = chi_al / "python"
-        shim.write_text(f'#!/bin/sh\nexec {sys.executable} "$@"\n', encoding="utf-8")
-        shim.chmod(0o755)
-        # Bản kê chung còn mang các binary bắt buộc của launcher. Cho chúng đi qua
-        # bằng symlink tuyệt đối, nhưng cố ý KHÔNG đưa shellcheck vào PATH cô lập.
-        for ten in ("git", "rg", "bash"):
-            dich = shutil.which(ten)
-            if not dich:
-                raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC T2: thiếu {ten} đối chứng")
-            (chi_al / ten).symlink_to(dich)
-        bang(shutil.which("shellcheck", path=str(chi_al)) is None,
-             "PATH cô lập vẫn thấy shellcheck ⇒ ca này không còn đo cái nó nói là đo")
-        rc, out, _ = chay("kiem-tra", "--json", env=dict(os.environ, PATH=str(chi_al)))
-        bang("SUY_GIAM" in out, f"shellcheck cô lập khỏi PATH mà canary không SUY_GIẢM: "
-                                 f"rc={rc}\n{out[:500]}")
-        bang(rc != 0, "canary SUY_GIẢM phải kéo tổng thể khỏi ĐẠT (rc=0)")
+        # CÁCH CÔ LẬP ĐÃ ĐỔI (đo 02-09-2026, run 33631185695 lane windows-latest). Bản cũ dựng
+        # PATH chỉ có bản sao actionlint rồi symlink git/rg/bash vào — sống được khi bản kê
+        # chỉ có actionlint (tĩnh), chết ngay khi #446 thêm binary thật: symlink tới `.exe`
+        # trên Windows chạy với "thư mục ứng dụng" là thư mục symlink nên thiếu DLL
+        # (git/bash rc=0xC0000135), còn rg là shim choco đọc `.shim` cạnh nó (rc=-1). Tức
+        # git/rg/bash ĐỎ vì lý do vô can, tổng ĐỎ bất kể canary, và mutant canary sống sót.
+        # Nay GIỮ PATH THẬT, chỉ che shellcheck: một DECOY tên `shellcheck[.exe]` đứng đầu
+        # PATH. Decoy là bản sao actionlint — tĩnh, tự đứng, chắc chắn KHÔNG phải shellcheck:
+        # probe `shellcheck --version` không parse ra `version: x.y.z` ⇒ shellcheck != DAT;
+        # actionlint thật tìm thấy decoy trước, gọi nó thất bại ⇒ không có SC1003. Cả hai nền
+        # cùng một cơ chế, không symlink, không đụng thư mục hệ thống.
+        che = Path(tmp) / "che-sc"
+        che.mkdir()
+        decoy = che / ("shellcheck" + Path(al).suffix)
+        shutil.copy2(al, decoy); decoy.chmod(0o755)
+        path_moi = str(che) + os.pathsep + os.environ.get("PATH", "")
+        thay = shutil.which("shellcheck", path=path_moi)
+        bang(thay and Path(thay).resolve() == decoy.resolve(),
+             f"decoy không đứng đầu PATH ⇒ ca này không còn đo cái nó nói là đo: {thay!r}")
+        rc, out, _ = chay("kiem-tra", "--json", env=dict(os.environ, PATH=path_moi))
+        bang(rc != 0, f"shellcheck bị che mà tổng vẫn ĐẠT (rc=0):\n{out[:500]}")
+        bc = json.loads(out)
+        # Điều ca này ĐO: canary ĐỎ, không sạch. Hai thông điệp đều là ĐỎ — `SUY_GIAM` khi bộ
+        # đo thấy shellcheck != DAT (đường bình thường với decoy), và "du shellcheck co mat"
+        # khi một khuyết tật KHÁC của bộ đo (vd parse hụt, việc của t10) làm decoy thành DAT.
+        # Không đòi riêng SUY_GIAM: ca sẽ chết theo đột biến t10 thay vì theo đột biến của nó.
+        cn = [c for c in bc["canary"] if c.get("ten") == "actionlint_shellcheck"]
+        bang(cn and cn[0]["trang_thai"] == "DO", f"canary phải ĐỎ khi shellcheck bị che: {cn}")
+        bang("SUY_GIAM" in cn[0]["chi_tiet"] or "du shellcheck co mat" in cn[0]["chi_tiet"],
+             f"canary ĐỎ nhưng không nói vì shellcheck: {cn[0]['chi_tiet']!r}")
+        # rc≠0 phải đến TỪ canary: mọi công cụ bắt buộc phải ĐẠT, còn không thì ca này
+        # xanh nhờ một lỗi khác và mất răng với chính đột biến nó sinh ra để bắt.
+        vo_can = [(c.get("ten"), c["chi_tiet"]) for c in bc["cong_cu"]
+                  if c["bat_buoc"] and c["trang_thai"] != "DAT"]
+        bang(not vo_can, f"công cụ bắt buộc ĐỎ vì lý do vô can, tổng đỏ không còn đo canary: {vo_can}")
 
 @ca
 def t3_du_cong_cu_dung_ban_khong_canh_bao_thua():
@@ -357,7 +381,11 @@ DOT_BIEN = {
         '[ -n "$TEN" ] || { echo "cai_cong_cu: thieu ten cong cu (vi du: actionlint)" >&2; exit 2; }\n',
         '[ -n "$TEN" ] || { echo "cai_cong_cu: thieu ten cong cu (vi du: actionlint)" >&2; exit 2; }\n'
         'command -v "$TEN" >/dev/null 2>&1 && exit 0  # đột biến: thoát sớm\n',
-        "CAI_SH", ("ops/cong_cu.py",) + _PHU, "t5_cai_cong_cu_khong_thoat_som_khi_da_co_tren_PATH"),
+        # `ops/cai_actionlint.sh` phải có trong cây tạm: thiếu nó thì t5 chết vì `rc=127 No such
+        # file` — chết VÔ CAN, tín dụng giả (đo 02-09-2026 khi thêm t23). Có nó, t5 vẫn chết
+        # đúng lý do "đo lại phải thấy bản 1.7.7".
+        "CAI_SH", ("ops/cong_cu.py", "ops/cai_actionlint.sh") + _PHU,
+        "t5_cai_cong_cu_khong_thoat_som_khi_da_co_tren_PATH"),
     "t6_day_g5_sau_py_compile": (".github/workflows/ci.yml",
         "      - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)\n",
         "      - name: py_compile dot bien TRUOC G5\n"
@@ -402,6 +430,24 @@ DOT_BIEN = {
     "t15_blocking_bat_oan": ("ops/cong_cu.py",
         '    if "SC1003" in ra:\n', '    if False:  # đột biến\n',
         "SCRIPT", _PHU, "t15_blocking_du_cong_cu_phai_DAT_khong_bat_oan"),
+    # #445 gen 4 — regex git quay về bản cắt hậu tố: `2.55.0.windows.5` lại thành token cụt.
+    # Đột biến vào YAML nên patch GOC; cây tạm thiếu `.claude/dev` ⇒ t16..t20 tự BỎ QUA.
+    "t21_git_regex_cat_hau_to": ("ops/cong_cu.yaml",
+        r"regex: '(?m)^git version\s+(\d+\.\d+\.\d+(?:[.+-][0-9A-Za-z.+-]*)?)'}]",
+        r"regex: '(?m)^git version\s+(\d+\.\d+\.\d+)'}]  # đột biến: cắt hậu tố",
+        "GOC", ("ops/cong_cu.py", ".github/workflows/ci.yml", "ops/canary/actionlint_shellcheck.yml"),
+        "t21_git_for_windows_hau_to_nha_cung_cap_phai_DAT_va_bat_tron"),
+    # #445 gen 4 — bỏ chốt loại SystemRoot: bộ phóng WSL ở đầu PATH lại được chọn.
+    "t22_bash_lay_ca_system_root": ("ops/cong_cu.py",
+        "        if u.is_file() and not duoi_system_root(u):\n",
+        "        if u.is_file():  # đột biến: không loại SystemRoot\n",
+        "SCRIPT", _PHU, "t22_bash_windows_khong_lay_bo_phong_wsl_o_system_root"),
+    # #445 gen 4 — bỏ cắt CR khi đọc tên công cụ: stdout CRLF của python lại thành 'rg\r'.
+    "t23_bo_cat_CR_ten_cong_cu": ("ops/cai_cong_cu.sh",
+        "    cong_cu=\"${cong_cu%$'\\r'}\"\n",
+        "    :  # đột biến: không cắt CR\n",
+        "CAI_SH", ("ops/cong_cu.py", "ops/cai_actionlint.sh") + _PHU,
+        "t23_batch_chiu_duoc_stdout_CRLF_cua_python_windows"),
 }
 
 def _chay_1_ca(fn):
@@ -428,6 +474,81 @@ def _do_ban_kinh(ten_dot_bien):
         g[bp] = cu
         shutil.rmtree(cay, ignore_errors=True)
 
+
+# --------------------------------------------------------------- T21/T22 (#445 gen 4)
+# Hai ca ĐỎ THẬT trên lane windows-latest của master ngay sau khi #446 merge (run
+# 33612364175, bước G5, `python ops/cong_cu.py kiem-tra --json` rc=2). Sổ land ghi MỘT
+# nguyên nhân (git); log ghi HAI (git + bash). Mỗi ca dưới đây neo đúng một.
+
+@ca
+def t21_git_for_windows_hau_to_nha_cung_cap_phai_DAT_va_bat_tron():
+    """Bản kê THẬT phải nhận `git version 2.55.0.windows.5` là MỘT token, không cắt.
+
+    Regex cũ bắt `2.55.0` rồi `_cat_tien_to_token` từ chối vì ký tự kế là `.` — hành vi
+    từ chối ấy ĐÚNG (t10) nên chỗ sửa là regex, không phải chốt. Ba đầu ra thật của ba
+    nền đi qua cùng một regex đọc từ `ops/cong_cu.yaml`, KHÔNG chép regex vào test."""
+    goc_yaml = GOC / "ops" / "cong_cu.yaml"
+    if not goc_yaml.is_file():
+        raise BoQuaMoiTruong("cây đang chạy thiếu ops/cong_cu.yaml — KHÔNG_ĐO_ĐƯỢC")
+    regex = yaml.safe_load(goc_yaml.read_text(encoding="utf-8"))["cong_cu"]["git"]["probe"][0]["regex"]
+    mau = (("git version 2.55.0.windows.5", "2.55.0.windows.5"),   # Git for Windows
+           ("git version 2.43.0", "2.43.0"),                        # Linux
+           ("git version 2.39.3 (Apple Git-146)", "2.39.3"))         # macOS
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        for i, (dong, mong) in enumerate(mau):
+            d = tmp / f"bin{i}"; ten = f"git-gia-t21-{i}"
+            bin_gia(d, ten, f"#!/bin/sh\necho '{dong}'\n")
+            bk = ghi_ban_ke(tmp, {"git": {"bat_buoc": True, "ban_ghim": None,
+                "probe": [{"ten": "mac_dinh", "lenh": [ten, "--version"], "regex": regex}]}})
+            rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk), "--json", env=moi_truong(d))
+            bang(rc == 0, f"{dong!r} bị bản kê thật từ chối: rc={rc}\n{out}")
+            thay = json.loads(out)["cong_cu"][0]["ban_thay"]["mac_dinh"]
+            bang(thay == mong, f"{dong!r}: mong token {mong!r}, bản kê đọc thành {thay!r}")
+
+@ca
+def t22_bash_windows_khong_lay_bo_phong_wsl_o_system_root():
+    """`_bash_windows` phải bỏ qua `%SystemRoot%\\System32\\bash.exe` (bộ phóng WSL) dù nó
+    đứng ĐẦU PATH, và tìm được Git Bash cạnh `git` khi PATH không có bash nào khác.
+
+    Chạy trên mọi nền: hàm nhận tham số ép PATH/SystemRoot/git, còn `_chay` chỉ gọi nó
+    khi `os.name == "nt"` — mặt ấy do lane windows-latest đo thật."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        sr = tmp / "Windows"; sys32 = sr / "System32"
+        wsl = bin_gia(sys32, "bash.exe", "#!/bin/sh\necho 'Windows Subsystem for Linux has no installed distributions.'\nexit 1\n")
+        git_dir = tmp / "Git"; gb_usr = git_dir / "usr" / "bin"; gb_bin = git_dir / "bin"
+        gb1 = bin_gia(gb_usr, "bash.exe", "#!/bin/sh\necho 'GNU bash, version 5.2.37(1)-release (x86_64-pc-msys)'\n")
+        gb2 = bin_gia(gb_bin, "bash.exe", "#!/bin/sh\necho 'GNU bash, version 5.2.37(1)-release (x86_64-pc-msys)'\n")
+        git_exe = bin_gia(git_dir / "cmd", "git.exe", "#!/bin/sh\necho 'git version 2.55.0.windows.5'\n")
+        ma = (
+            "import runpy, sys, os\n"
+            f"m = runpy.run_path({str(SCRIPT)!r})\n"
+            "f = m['_bash_windows']\n"
+            f"sr = {str(sr)!r}; s32 = {str(sys32)!r}; usr = {str(gb_usr)!r}; g = {str(git_exe)!r}; pf = {str(tmp / 'khong-co')!r}\n"
+            "sep = os.pathsep\n"
+            # (a) System32 đứng ĐẦU PATH, Git Bash đứng sau ⇒ phải chọn Git Bash
+            "print('A', f(path=s32 + sep + usr, system_root=sr, program_files=pf, git=''))\n"
+            # (b) PATH CHỈ có System32, không bash nào khác; `git` biết ⇒ suy Git Bash cạnh git
+            "print('B', f(path=s32, system_root=sr, program_files=pf, git=g))\n"
+            # (c) không có gì ngoài WSL ⇒ None, KHÔNG đoán
+            "print('C', f(path=s32, system_root=sr, program_files=pf, git=''))\n"
+            # (d) đối chứng: SystemRoot rỗng thì không có gì để loại, bash đầu PATH được chọn
+            "print('D', f(path=usr, system_root='', program_files=pf, git=''))\n"
+        )
+        env = dict(os.environ); env.pop("CONG_CU_BASH", None)
+        p = subprocess.run([sys.executable, "-c", ma], env=env, cwd=GOC,
+                           capture_output=True, text=True, timeout=60)
+        bang(p.returncode == 0, f"gọi _bash_windows hỏng: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+        kq = dict(l.split(" ", 1) for l in p.stdout.splitlines() if " " in l)
+        # So sau khi resolve CẢ HAI vế: trên windows-latest, tempfile trả tên ngắn 8.3
+        # (`RUNNER~1`) còn `_bash_windows` resolve() thành `runneradmin` (run 33630217222, B đỏ oan).
+        chuan = lambda x: os.path.normcase(str(Path(x).resolve())) if x and x != "None" else x
+        bang(chuan(kq.get("A")) == chuan(gb1), f"(A) System32 đứng đầu PATH mà chọn {kq.get('A')!r}, mong {str(gb1)!r}")
+        bang(chuan(kq.get("B")) == chuan(gb2), f"(B) không suy được Git Bash cạnh git: {kq.get('B')!r}, mong {str(gb2)!r}")
+        bang(kq.get("C") == "None", f"(C) chỉ có WSL mà vẫn trả {kq.get('C')!r} — đoán thay vì hỏng thật")
+        bang(chuan(kq.get("D")) == chuan(gb1), f"(D) đối chứng SystemRoot rỗng: {kq.get('D')!r}")
+        bang(str(wsl) not in p.stdout, f"bộ phóng WSL lọt vào kết quả: {p.stdout}")
 
 # --------------------------------------------------------------- T16/T17 (#391)
 # LUẬT: thêm một công cụ/gói vào bất kỳ mã nào của kho thì phải khai nó trong
@@ -604,12 +725,12 @@ def t20_che_do_cai_tat_ca_bootstrap_pyyaml_dung_ban_ghim():
          "PyYAML bootstrap mà không bắt buộc trong bản kê")
 
 
-def batch_behavior_test() -> None:
-    """Batch giữ PATH từ installer con và chạy được từ CWD ngoài root.
+def _chay_batch(crlf: bool):
+    """Dựng cây tạm + python giả rồi chạy `cai_cong_cu.sh --bat-buoc`. Trả (p, pip_ready).
 
-    Không đưa vào `CA`: đây là integration control cho wrapper, không được dùng để
-    nhận công giết thêm các mutation đơn vị T1..T15.
-    """
+    `crlf=True` cho python giả in CRLF — đúng thứ Git Bash trên Windows nhận từ python
+    native (text mode). Tái hiện được trên Linux, nên t23 đo được ở đây, không đợi lane
+    windows-latest."""
     bash = shutil.which("bash")
     if not bash:
         raise BoQuaMoiTruong("KHÔNG ĐO ĐƯỢC batch: thiếu bash")
@@ -627,8 +748,11 @@ def batch_behavior_test() -> None:
                                 f"> '{out / name}'; chmod +x '{out / name}'; echo '{out}'")}}}}
         (ops / "cong_cu.yaml").write_text(yaml.safe_dump(manifest), encoding="utf-8")
         fake_python = fake_bin / "python"
+        # Nhánh CRLF: đi qua ống `sed` để mỗi dòng stdout kết thúc bằng \r\n, giữ rc của python.
+        duoi = ('"$REAL" "$@" | sed \'s/$/\\r/\'; exit "${PIPESTATUS[0]}"\n' if crlf
+                else "exec \"$REAL\" \"$@\"\n")
         fake_python.write_text(
-            "#!/bin/sh\n"
+            "#!/bin/bash\n"
             f"MARKER='{pip_ready}'\nREAL='{sys.executable}'\n"
             "[ \"${1:-}\" = -c ] && [ \"${2:-}\" = 'import yaml' ] && "
             "[ ! -e \"$MARKER\" ] && exit 1\n"
@@ -637,14 +761,39 @@ def batch_behavior_test() -> None:
             "[ \"${1:-}\" = -m ] && [ \"${2:-}\" = ensurepip ] && "
             "{ : > \"$MARKER\"; exit 0; }\n"
             "[ \"${1:-}\" = -m ] && [ \"${2:-}\" = pip ] && exit 0\n"
-            "exec \"$REAL\" \"$@\"\n", encoding="utf-8")
+            + duoi, encoding="utf-8")
         fake_python.chmod(0o755)
         env = dict(os.environ, PATH=str(fake_bin) + os.pathsep + os.environ.get("PATH", ""))
         p = subprocess.run([bash, "./cai_cong_cu.sh", "--bat-buoc"], cwd=ops,
                            env=env, capture_output=True, text=True, timeout=60)
-        bang(p.returncode == 0 and '"trang_thai_tong": "DAT"' in p.stdout,
-             f"batch không giữ PATH/caller-CWD: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
-        bang(pip_ready.is_file(), "batch gọi pip trước khi bootstrap ensurepip")
+        return p, pip_ready.is_file()
+
+
+def batch_behavior_test() -> None:
+    """Batch giữ PATH từ installer con và chạy được từ CWD ngoài root.
+
+    Không đưa vào `CA`: đây là integration control cho wrapper, không được dùng để
+    nhận công giết thêm các mutation đơn vị T1..T15.
+    """
+    p, pip_ready = _chay_batch(crlf=False)
+    bang(p.returncode == 0 and '"trang_thai_tong": "DAT"' in p.stdout,
+         f"batch không giữ PATH/caller-CWD: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+    bang(pip_ready, "batch gọi pip trước khi bootstrap ensurepip")
+
+
+@ca
+def t23_batch_chiu_duoc_stdout_CRLF_cua_python_windows():
+    """Git Bash trên Windows nhận stdout CRLF từ python native; `read -r` giữ `\r`.
+
+    Đo thật: run 33629605694 lane windows-latest, `batch_behavior_test` rc=3 với
+    "khong biet cong cu 'batch-path-t21\r'" — lỗi có sẵn trong #446, bị che vì master chưa
+    từng chạy tới bước này (G5 chết trước ở git/bash). Tái hiện trên Linux bằng python giả
+    in CRLF; ca ĐỎ trước bản vá, XANH sau."""
+    p, _ = _chay_batch(crlf=True)
+    bang(p.returncode == 0 and '"trang_thai_tong": "DAT"' in p.stdout,
+         f"stdout CRLF làm batch hỏng: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+    bang("\\r" not in p.stderr and "khong biet cong cu" not in p.stderr,
+         f"vẫn lọt \\r vào tên công cụ: {p.stderr}")
 
 
 def python_alias_behavior_test() -> None:

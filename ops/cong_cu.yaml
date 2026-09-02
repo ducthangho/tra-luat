@@ -12,9 +12,14 @@
 schema_version: 1
 cong_cu:
   git:
+    # Git for Windows in `git version 2.55.0.windows.5` — hậu tố nhà cung cấp nối bằng
+    # DẤU CHẤM, không phải `-`/`+` như PEP 440. Regex cũ bắt `2.55.0` rồi `_cat_tien_to_token`
+    # từ chối ĐÚNG vì ký tự kế là `.` ⇒ lane windows-latest ĐỎ ở G5 ngay lượt master đầu
+    # tiên sau #446 (run 33612364175). Regex nay bắt trọn tới hết token; Linux (`2.43.0`)
+    # và macOS (`2.39.3 (Apple Git-146)`) dừng ở xuống dòng / khoảng trắng như trước.
     bat_buoc: true
     ban_ghim: null
-    probe: [{ten: mac_dinh, lenh: [git, --version], regex: '(?m)^git version\s+(\d+\.\d+\.\d+)'}]
+    probe: [{ten: mac_dinh, lenh: [git, --version], regex: '(?m)^git version\s+(\d+\.\d+\.\d+(?:[.+-][0-9A-Za-z.+-]*)?)'}]
     cai:
       linux: {lenh: 'sudo apt-get install -y git && dirname "$(command -v git)"'}
       macos: {lenh: 'brew install git && dirname "$(command -v git)"'}

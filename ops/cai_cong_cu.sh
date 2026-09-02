@@ -36,7 +36,14 @@ if [ "$TEN" = "--bat-buoc" ]; then
     "${PY[@]}" -m pip install --quiet PyYAML==6.0.3
   fi
   BAT_BUOC=()
-  while IFS= read -r cong_cu; do BAT_BUOC+=("$cong_cu"); done < <("${PY[@]}" -c '
+  # Windows: stdout cua python (text mode) la CRLF, `read -r` GIU `\r` => ten cong cu
+  # thanh 'rg\r' va cong_cu.py tra "khong biet cong cu". Do that: run 33629605694 lane
+  # windows-latest, batch rc=3 voi "khong biet cong cu 'batch-path-t21\r'". Cat CR o
+  # phia DOC vi day la noi CRLF den; python phia kia khong doi duoc newline cua -c.
+  while IFS= read -r cong_cu; do
+    cong_cu="${cong_cu%$'\r'}"
+    [ -n "$cong_cu" ] && BAT_BUOC+=("$cong_cu")
+  done < <("${PY[@]}" -c '
 import yaml
 d=yaml.safe_load(open("ops/cong_cu.yaml", encoding="utf-8"))
 print("\n".join(k for k,v in d["cong_cu"].items() if v["bat_buoc"] or v.get("chuan_bi")))')
@@ -53,6 +60,7 @@ DAU_RA="$("${PY[@]}" "$GOC/ops/cong_cu.py" cai-lenh "$TEN")" || {
   echo "cai_cong_cu: '$TEN' khong co cong thuc cai tu dong cho nen nay" >&2
   exit 3
 }
+DAU_RA="${DAU_RA//$'\r'/}"  # cung ly do CRLF o tren: LENH/bien moi truong khong duoc mang \r
 LENH="$(printf '%s\n' "$DAU_RA" | head -1)"
 while IFS= read -r dong; do
   case "$dong" in *=*) export "${dong?}" ;; esac
@@ -61,6 +69,7 @@ done < <(printf '%s\n' "$DAU_RA" | tail -n +2)
 # eval TREN LENH doc tu ban ke cua CHINH kho — khong phai dau vao nguoi dung/mang ngoai.
 KET_QUA_CAI="$(eval "$LENH")"
 DICH="$(printf '%s\n' "$KET_QUA_CAI" | tail -1)"
+DICH="${DICH%$'\r'}"  # trinh cai Windows (choco) in CRLF; \r lam `[ -d ]` sai am tham
 [ -d "$DICH" ] && export PATH="$DICH:$PATH"
 
 "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --chi "$TEN" --json

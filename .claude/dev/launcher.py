@@ -2161,7 +2161,22 @@ def _phien_ban(duong_dan: str, *, env=None,
 
 def _xac_thuc(duong_dan: str, doi_so: list[str], *, env=None,
               timeout=PROBE_TIMEOUT_GIAY) -> tuple[bool, str, bool]:
+    """Bọc `_xac_thuc_kem_dau_ra`, bỏ phần tử đầu ra — hợp đồng ba phần tử cho mọi
+    caller cũ (bảng `CONG_CU`, `doctor`). Ai cần ĐẦU RA của chính probe ấy (đếm
+    dòng, chẩn đoán) thì gọi hàm dưới, ĐỪNG chạy lại lệnh."""
+    ok, mo_ta, qua_han, _ = _xac_thuc_kem_dau_ra(duong_dan, doi_so, env=env, timeout=timeout)
+    return (ok, mo_ta, qua_han)
+
+
+def _xac_thuc_kem_dau_ra(duong_dan: str, doi_so: list[str], *, env=None,
+                         timeout=PROBE_TIMEOUT_GIAY) -> tuple[bool, str, bool, str]:
     """Probe auth không tương tác; không bao giờ trả stdout/stderr có credential.
+
+    Phần tử thứ tư là stdout+stderr GỘP của chính lần chạy này — để caller dùng
+    lại thay vì gọi lệnh lần hai. Cross-review PR "#426" (codex, P2 trên
+    `15f2dbf`): `_do_antigravity` từng gọi `agy models` thêm một lần chỉ để đếm
+    dòng; lần hai ấy đi mạng, quá hạn/OSError sẽ ném thẳng lên `lenh_doctor` và
+    lật kết luận thành KHONG_DO_DUOC dù đã có bằng chứng dương trong tay.
 
     `rc=0` MỘT MÌNH không phải bằng chứng — đúng doctrine "đòi BẰNG CHỨNG DƯƠNG,
     đừng tin rc". Một CLI thiếu subcommand có thể thoát 0 và không in gì; đọc thế
@@ -2184,15 +2199,16 @@ def _xac_thuc(duong_dan: str, doi_so: list[str], *, env=None,
                            stdin=subprocess.DEVNULL, env=env, timeout=max(0.1, timeout),
                            encoding="utf-8", errors="replace")
     except subprocess.TimeoutExpired:
-        return (False, f"probe xac thuc timeout sau {timeout:.1f}s", True)
+        return (False, f"probe xac thuc timeout sau {timeout:.1f}s", True, "")
     except (OSError, subprocess.SubprocessError) as e:
-        return (False, type(e).__name__, False)
-    co_loi_ra = bool(((p.stdout or "") + (p.stderr or "")).strip())
+        return (False, type(e).__name__, False, "")
+    dau_ra = (p.stdout or "") + (p.stderr or "")
+    co_loi_ra = bool(dau_ra.strip())
     if p.returncode != 0:
-        return (False, f"rc={p.returncode}", False)
+        return (False, f"rc={p.returncode}", False, dau_ra)
     if not co_loi_ra:
-        return (False, "rc=0 nhung khong co bang chung xac thuc", False)
-    return (True, "ok", False)
+        return (False, "rc=0 nhung khong co bang chung xac thuc", False, dau_ra)
+    return (True, "ok", False, dau_ra)
 
 
 def _in_an_toan(chuoi: str) -> bool:
@@ -2841,12 +2857,12 @@ def _do_antigravity(moi_truong: dict[str, str] | None = None) -> tuple[str, str]
         duoi_path = " · đã cài, PATH phiên này chưa thấy — mở terminal mới" if la_fallback else ""
 
         # Probe 1: Thử `_xac_thuc` với subcommand `models` (Spec 6.2 & 6.3)
-        ok_xt, mo_ta_xt, qua_han_xt = _xac_thuc(duong_agy, ["models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
+        ok_xt, mo_ta_xt, qua_han_xt, ra_xt = _xac_thuc_kem_dau_ra(duong_agy, ["models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
         if ok_xt:
-            # Lấy số dòng từ probe an toàn để thống kê
-            p_mod = _chay_van_ban_an_toan([duong_agy, "models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
-            out_mod = (p_mod.stdout or "") + (p_mod.stderr or "")
-            so_dong = len([d for d in out_mod.splitlines() if d.strip()])
+            # Đếm dòng từ ĐẦU RA CỦA CHÍNH PROBE VỪA CHẠY — không gọi `agy models` lần hai.
+            # `models` đi mạng: lần hai quá hạn/OSError sẽ ném lên `lenh_doctor` và lật
+            # bằng chứng dương thành KHONG_DO_DUOC (P2 cross-review PR "#426").
+            so_dong = len([d for d in ra_xt.splitlines() if d.strip()])
             return ("DUNG_DUOC", f"da xac thuc qua `agy models` ({so_dong} model){duoi_path}")
 
         if qua_han_xt:

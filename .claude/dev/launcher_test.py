@@ -5747,6 +5747,28 @@ def t146_do_antigravity_cac_trang_thai_va_luong():
         bang(tt_cand == "DUNG_DUOC", f"ung vien fallback phai cuu duoc: tt={tt_cand}")
         m._cac_duong_dan = lambda c, mt: [("agy", "/gia/bin/agy")]
 
+        # P2 cross-review (codex, 15f2dbf): `models` thanh cong MOT lan la du bang chung.
+        # Lan goi thu HAI bat ky (dem dong, thong ke) neu ném => phai KHONG duoc lat ket luan.
+        so_lan = {"n": 0}
+        def gia_mot_lan(lenh, env=None, timeout=None, **kwargs):
+            if lenh[1] == "models":
+                so_lan["n"] += 1
+                if so_lan["n"] == 1:
+                    return subprocess.CompletedProcess(lenh, 0, stdout="", stderr="gemini-2.5-pro\ngemini-2.5-flash\n")
+                raise OSError("agy models bi goi lan thu hai")
+            return subprocess.CompletedProcess(lenh, 0, stdout="1.1.17", stderr="")
+        m._chay_van_ban_an_toan = gia_mot_lan
+        m.subprocess.run = gia_mot_lan
+        # Hop dong cua ca: KHONG duoc nem. Bat ngoai le roi dua vao `bang` de cai chet cua
+        # mutant mang tin hieu cua CHINH ca nay (TinHieuChotCa), khong phai OSError vo can.
+        try:
+            tt_mot, mo_ta_mot = m._do_antigravity({})
+        except Exception as e:  # noqa: BLE001 — chinh la hanh vi dang do
+            tt_mot, mo_ta_mot = "NEM", f"{type(e).__name__}: {e}"
+        bang(tt_mot == "DUNG_DUOC" and "2 model" in mo_ta_mot,
+             f"models thanh cong lan 1 ma ket luan lat/dem sai: tt={tt_mot}, mo_ta={mo_ta_mot}")
+        bang(so_lan["n"] == 1, f"`agy models` bi goi {so_lan['n']} lan trong mot luot do, mong 1")
+
         # N6: TimeoutExpired / OSError => KHONG_DO_DUOC
         def gia_timeout(lenh, env=None, timeout=None, **kwargs):
             raise subprocess.TimeoutExpired(lenh, timeout or 8.0)
@@ -6572,8 +6594,8 @@ DOT_BIEN = [
       '        return (False, f"timeout sau {timeout:.1f}s", False)'),
      ["t135_phien_ban_va_xac_thuc_bao_qua_han_bang_CO_KIEU"]),
     ("xac_thuc_timeout_khong_mang_co_qua_han",
-     ('        return (False, f"probe xac thuc timeout sau {timeout:.1f}s", True)',
-      '        return (False, f"probe xac thuc timeout sau {timeout:.1f}s", False)'),
+     ('        return (False, f"probe xac thuc timeout sau {timeout:.1f}s", True, "")',
+      '        return (False, f"probe xac thuc timeout sau {timeout:.1f}s", False, "")'),
      ["t135_phien_ban_va_xac_thuc_bao_qua_han_bang_CO_KIEU"]),
     # Đường chớp thứ hai: auth quá hạn quay lại là `xac_thuc_ok=False` ⇒ THIẾU.
     ("xac_thuc_qua_han_van_la_THIEU",
@@ -7039,8 +7061,14 @@ DOT_BIEN = [
       ''),
      ["t145_agy_cong_cu_va_kha_nang"]),
     ("agy_goi_xac_thuc_models",
-     ('        ok_xt, mo_ta_xt, qua_han_xt = _xac_thuc(duong_agy, ["models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)',
-      '        ok_xt, mo_ta_xt, qua_han_xt = _xac_thuc(duong_agy, [], env=mt, timeout=PROBE_TIMEOUT_GIAY)'),
+     ('        ok_xt, mo_ta_xt, qua_han_xt, ra_xt = _xac_thuc_kem_dau_ra(duong_agy, ["models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)',
+      '        ok_xt, mo_ta_xt, qua_han_xt, ra_xt = _xac_thuc_kem_dau_ra(duong_agy, [], env=mt, timeout=PROBE_TIMEOUT_GIAY)'),
+     ["t146_do_antigravity_cac_trang_thai_va_luong"]),
+    # P2 cross-review 15f2dbf: quay lai goi `agy models` lan hai de dem dong => ca "mot lan" chet.
+    ("agy_goi_models_lan_hai",
+     ('            so_dong = len([d for d in ra_xt.splitlines() if d.strip()])',
+      '            p_mod = _chay_van_ban_an_toan([duong_agy, "models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)\n'
+      '            so_dong = len([d for d in ((p_mod.stdout or "") + (p_mod.stderr or "")).splitlines() if d.strip()])'),
      ["t146_do_antigravity_cac_trang_thai_va_luong"]),
     ("agy_probe_models_timeout_thanh_thieu",
      ('        if qua_han_xt:\n            loi_cuoi = ("KHONG_DO_DUOC", f"probe models timeout sau {PROBE_TIMEOUT_GIAY:.1f}s{duoi_path}")',

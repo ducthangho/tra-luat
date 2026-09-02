@@ -357,7 +357,11 @@ DOT_BIEN = {
         '[ -n "$TEN" ] || { echo "cai_cong_cu: thieu ten cong cu (vi du: actionlint)" >&2; exit 2; }\n',
         '[ -n "$TEN" ] || { echo "cai_cong_cu: thieu ten cong cu (vi du: actionlint)" >&2; exit 2; }\n'
         'command -v "$TEN" >/dev/null 2>&1 && exit 0  # đột biến: thoát sớm\n',
-        "CAI_SH", ("ops/cong_cu.py",) + _PHU, "t5_cai_cong_cu_khong_thoat_som_khi_da_co_tren_PATH"),
+        # `ops/cai_actionlint.sh` phải có trong cây tạm: thiếu nó thì t5 chết vì `rc=127 No such
+        # file` — chết VÔ CAN, tín dụng giả (đo 02-09-2026 khi thêm t23). Có nó, t5 vẫn chết
+        # đúng lý do "đo lại phải thấy bản 1.7.7".
+        "CAI_SH", ("ops/cong_cu.py", "ops/cai_actionlint.sh") + _PHU,
+        "t5_cai_cong_cu_khong_thoat_som_khi_da_co_tren_PATH"),
     "t6_day_g5_sau_py_compile": (".github/workflows/ci.yml",
         "      - name: G5 kiem ban ke cong cu + T1..T8 (packet #290)\n",
         "      - name: py_compile dot bien TRUOC G5\n"
@@ -414,6 +418,12 @@ DOT_BIEN = {
         "        if u.is_file() and not duoi_system_root(u):\n",
         "        if u.is_file():  # đột biến: không loại SystemRoot\n",
         "SCRIPT", _PHU, "t22_bash_windows_khong_lay_bo_phong_wsl_o_system_root"),
+    # #445 gen 4 — bỏ cắt CR khi đọc tên công cụ: stdout CRLF của python lại thành 'rg\r'.
+    "t23_bo_cat_CR_ten_cong_cu": ("ops/cai_cong_cu.sh",
+        "    cong_cu=\"${cong_cu%$'\\r'}\"\n",
+        "    :  # đột biến: không cắt CR\n",
+        "CAI_SH", ("ops/cong_cu.py", "ops/cai_actionlint.sh") + _PHU,
+        "t23_batch_chiu_duoc_stdout_CRLF_cua_python_windows"),
 }
 
 def _chay_1_ca(fn):
@@ -688,12 +698,12 @@ def t20_che_do_cai_tat_ca_bootstrap_pyyaml_dung_ban_ghim():
          "PyYAML bootstrap mà không bắt buộc trong bản kê")
 
 
-def batch_behavior_test() -> None:
-    """Batch giữ PATH từ installer con và chạy được từ CWD ngoài root.
+def _chay_batch(crlf: bool):
+    """Dựng cây tạm + python giả rồi chạy `cai_cong_cu.sh --bat-buoc`. Trả (p, pip_ready).
 
-    Không đưa vào `CA`: đây là integration control cho wrapper, không được dùng để
-    nhận công giết thêm các mutation đơn vị T1..T15.
-    """
+    `crlf=True` cho python giả in CRLF — đúng thứ Git Bash trên Windows nhận từ python
+    native (text mode). Tái hiện được trên Linux, nên t23 đo được ở đây, không đợi lane
+    windows-latest."""
     bash = shutil.which("bash")
     if not bash:
         raise BoQuaMoiTruong("KHÔNG ĐO ĐƯỢC batch: thiếu bash")
@@ -711,8 +721,11 @@ def batch_behavior_test() -> None:
                                 f"> '{out / name}'; chmod +x '{out / name}'; echo '{out}'")}}}}
         (ops / "cong_cu.yaml").write_text(yaml.safe_dump(manifest), encoding="utf-8")
         fake_python = fake_bin / "python"
+        # Nhánh CRLF: đi qua ống `sed` để mỗi dòng stdout kết thúc bằng \r\n, giữ rc của python.
+        duoi = ('"$REAL" "$@" | sed \'s/$/\\r/\'; exit "${PIPESTATUS[0]}"\n' if crlf
+                else "exec \"$REAL\" \"$@\"\n")
         fake_python.write_text(
-            "#!/bin/sh\n"
+            "#!/bin/bash\n"
             f"MARKER='{pip_ready}'\nREAL='{sys.executable}'\n"
             "[ \"${1:-}\" = -c ] && [ \"${2:-}\" = 'import yaml' ] && "
             "[ ! -e \"$MARKER\" ] && exit 1\n"
@@ -721,14 +734,39 @@ def batch_behavior_test() -> None:
             "[ \"${1:-}\" = -m ] && [ \"${2:-}\" = ensurepip ] && "
             "{ : > \"$MARKER\"; exit 0; }\n"
             "[ \"${1:-}\" = -m ] && [ \"${2:-}\" = pip ] && exit 0\n"
-            "exec \"$REAL\" \"$@\"\n", encoding="utf-8")
+            + duoi, encoding="utf-8")
         fake_python.chmod(0o755)
         env = dict(os.environ, PATH=str(fake_bin) + os.pathsep + os.environ.get("PATH", ""))
         p = subprocess.run([bash, "./cai_cong_cu.sh", "--bat-buoc"], cwd=ops,
                            env=env, capture_output=True, text=True, timeout=60)
-        bang(p.returncode == 0 and '"trang_thai_tong": "DAT"' in p.stdout,
-             f"batch không giữ PATH/caller-CWD: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
-        bang(pip_ready.is_file(), "batch gọi pip trước khi bootstrap ensurepip")
+        return p, pip_ready.is_file()
+
+
+def batch_behavior_test() -> None:
+    """Batch giữ PATH từ installer con và chạy được từ CWD ngoài root.
+
+    Không đưa vào `CA`: đây là integration control cho wrapper, không được dùng để
+    nhận công giết thêm các mutation đơn vị T1..T15.
+    """
+    p, pip_ready = _chay_batch(crlf=False)
+    bang(p.returncode == 0 and '"trang_thai_tong": "DAT"' in p.stdout,
+         f"batch không giữ PATH/caller-CWD: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+    bang(pip_ready, "batch gọi pip trước khi bootstrap ensurepip")
+
+
+@ca
+def t23_batch_chiu_duoc_stdout_CRLF_cua_python_windows():
+    """Git Bash trên Windows nhận stdout CRLF từ python native; `read -r` giữ `\r`.
+
+    Đo thật: run 33629605694 lane windows-latest, `batch_behavior_test` rc=3 với
+    "khong biet cong cu 'batch-path-t21\r'" — lỗi có sẵn trong #446, bị che vì master chưa
+    từng chạy tới bước này (G5 chết trước ở git/bash). Tái hiện trên Linux bằng python giả
+    in CRLF; ca ĐỎ trước bản vá, XANH sau."""
+    p, _ = _chay_batch(crlf=True)
+    bang(p.returncode == 0 and '"trang_thai_tong": "DAT"' in p.stdout,
+         f"stdout CRLF làm batch hỏng: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+    bang("\\r" not in p.stderr and "khong biet cong cu" not in p.stderr,
+         f"vẫn lọt \\r vào tên công cụ: {p.stderr}")
 
 
 def python_alias_behavior_test() -> None:

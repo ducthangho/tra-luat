@@ -2820,9 +2820,9 @@ def _do_antigravity(moi_truong: dict[str, str] | None = None) -> tuple[str, str]
     """Đo năng lực gọi Antigravity CLI (`agy`) — AG-T0-01B.
 
     Bốn trạng thái (Spec 6.2):
-      DUNG_DUOC: `agy models` rc=0 và có đầu ra (stdout+stderr)
+      DUNG_DUOC: `agy models` rc=0 và có đầu ra (stdout+stderr) — đã xác thực
       CO_MAT: `--version` rc=0 nhưng `models` rc≠0 — đã cài, chưa đăng nhập
-      KHONG_DO_DUOC: timeout hoặc OSError hoặc cả hai probe thất bại — không làm tròn thành THIEU
+      KHONG_DO_DUOC: timeout, OSError, models rc=0 không đầu ra, hoặc cả hai probe thất bại — không làm tròn thành THIEU
       THIEU: không thấy binary, kể cả sau đường lùi PATH trên Windows
     """
     mt = _env_da_chuan(moi_truong)
@@ -2830,44 +2830,45 @@ def _do_antigravity(moi_truong: dict[str, str] | None = None) -> tuple[str, str]
     if not candidates:
         return ("THIEU", "chua cai agy CLI — irm https://antigravity.google/cli/install.ps1 | iex (Windows) / curl -fsSL https://antigravity.google/cli/install.sh | bash")
 
+    path_items = [p for p in mt.get("PATH", "").split(os.pathsep) if p]
     loi_cuoi = None
     co_mat_str = None
     for _, duong_agy in candidates:
-        # Probe 1: Thử `models` để kiểm xác thực (Spec 6.2 & 6.3)
-        try:
+        la_fallback = False
+        if platform.system() == "Windows":
+            duong_dir = str(Path(duong_agy).parent).casefold()
+            la_fallback = not any(Path(p).resolve() == Path(duong_agy).parent.resolve() for p in path_items if Path(p).exists()) if path_items else True
+        duoi_path = " · đã cài, PATH phiên này chưa thấy — mở terminal mới" if la_fallback else ""
+
+        # Probe 1: Thử `_xac_thuc` với subcommand `models` (Spec 6.2 & 6.3)
+        ok_xt, mo_ta_xt, qua_han_xt = _xac_thuc(duong_agy, ["models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
+        if ok_xt:
+            # Lấy số dòng từ probe an toàn để thống kê
             p_mod = _chay_van_ban_an_toan([duong_agy, "models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
-        except subprocess.TimeoutExpired:
-            loi_cuoi = ("KHONG_DO_DUOC", f"probe models timeout sau {PROBE_TIMEOUT_GIAY:.1f}s")
-            continue
-        except (OSError, subprocess.SubprocessError) as e:
-            loi_cuoi = ("KHONG_DO_DUOC", f"probe models khong chay duoc: {type(e).__name__}")
-            continue
-
-        out_mod = (p_mod.stdout or "") + (p_mod.stderr or "")
-        co_loi_ra = bool(out_mod.strip())
-
-        if p_mod.returncode == 0 and co_loi_ra:
+            out_mod = (p_mod.stdout or "") + (p_mod.stderr or "")
             so_dong = len([d for d in out_mod.splitlines() if d.strip()])
-            return ("DUNG_DUOC", f"da xac thuc qua `agy models` ({so_dong} model)")
+            return ("DUNG_DUOC", f"da xac thuc qua `agy models` ({so_dong} model){duoi_path}")
 
-        # Probe 2: Nếu models rc != 0 (hoặc cả hai luồng rỗng), probe `--version`
-        try:
-            p_ver = _chay_van_ban_an_toan([duong_agy, "--version"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
-        except subprocess.TimeoutExpired:
-            loi_cuoi = ("KHONG_DO_DUOC", f"probe --version timeout sau {PROBE_TIMEOUT_GIAY:.1f}s")
-            continue
-        except (OSError, subprocess.SubprocessError) as e:
-            loi_cuoi = ("KHONG_DO_DUOC", f"probe --version khong chay duoc: {type(e).__name__}")
+        if qua_han_xt:
+            loi_cuoi = ("KHONG_DO_DUOC", f"probe models timeout sau {PROBE_TIMEOUT_GIAY:.1f}s{duoi_path}")
             continue
 
-        out_ver = (p_ver.stdout or "") + (p_ver.stderr or "")
-        dong_ver = [d.strip() for d in out_ver.splitlines() if d.strip()]
-        ver_str = dong_ver[0][:40] if dong_ver else "agy"
+        if mo_ta_xt == "rc=0 nhung khong co bang chung xac thuc":
+            # Finding 1: models rc=0 nhưng không có đầu ra -> KHONG_DO_DUOC (không làm tròn thành CO_MAT hay DUNG_DUOC)
+            loi_cuoi = ("KHONG_DO_DUOC", f"probe models khong co dau ra (rc=0 nhung khong co bang chung xac thuc){duoi_path}")
+            continue
 
-        if p_ver.returncode == 0:
-            co_mat_str = ("CO_MAT", f"{ver_str} · chua dang nhap — chay `agy` (mo TUI de login)")
+        # Probe 2: Nếu models rc != 0 hoặc lỗi khác, probe `--version` (Spec 6.2)
+        chay_ver, dong_ver, qua_han_ver = _phien_ban(duong_agy, env=mt, timeout=PROBE_TIMEOUT_GIAY)
+        if qua_han_ver:
+            loi_cuoi = ("KHONG_DO_DUOC", f"probe --version timeout sau {PROBE_TIMEOUT_GIAY:.1f}s{duoi_path}")
+            continue
+
+        if chay_ver:
+            ver_str = dong_ver[:40] if dong_ver else "agy"
+            co_mat_str = ("CO_MAT", f"{ver_str} · chua dang nhap — chay `agy` (mo TUI de login){duoi_path}")
         else:
-            loi_cuoi = ("KHONG_DO_DUOC", f"probe agy that bai (models rc={p_mod.returncode}, --version rc={p_ver.returncode})")
+            loi_cuoi = ("KHONG_DO_DUOC", f"probe agy that bai (models: {mo_ta_xt}, --version: {dong_ver}){duoi_path}")
 
     if co_mat_str:
         return co_mat_str

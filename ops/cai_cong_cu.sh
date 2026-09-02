@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ops/cai_cong_cu.sh <ten> — doc ops/cong_cu.yaml (G1), cai roi DO LAI bang cong_cu.py,
+# ops/cai_cong_cu.sh <ten>|--bat-buoc — doc ops/cong_cu.yaml (G1), cai roi DO LAI,
 # KHONG tin rc trinh cai (r244). Giu 2 tinh chat cua cai_actionlint.sh: ban ghim o MOT noi
 # (YAML) · KHONG `command -v` roi thoat som (T5). `cai.lenh` PHAI in duong dan vua cai lam
 # DONG CUOI stdout de dua vao PATH truoc buoc DO LAI; khong in duong dan (vd pip) thi
@@ -14,6 +14,23 @@ if command -v python >/dev/null 2>&1; then PY=(python)
 elif command -v python3 >/dev/null 2>&1; then PY=(python3)
 elif command -v py >/dev/null 2>&1; then PY=(py -3)
 else echo "cai_cong_cu: khong tim thay python, python3 hay py" >&2; exit 4
+fi
+
+if [ "$TEN" = "--bat-buoc" ]; then
+  # PyYAML la bootstrap cua chinh ban ke. Ghim nay duoc t20 doi chieu voi YAML/CI;
+  # khong the doc YAML de tim cong thuc cai khi module doc YAML chua ton tai.
+  "${PY[@]}" -c 'import yaml' 2>/dev/null || "${PY[@]}" -m pip install --quiet PyYAML==6.0.3
+  BAT_BUOC=()
+  while IFS= read -r cong_cu; do BAT_BUOC+=("$cong_cu"); done < <("${PY[@]}" -c '
+import yaml
+d=yaml.safe_load(open("ops/cong_cu.yaml", encoding="utf-8"))
+print("\n".join(k for k,v in d["cong_cu"].items() if v["bat_buoc"] or v.get("chuan_bi")))')
+  [ "${#BAT_BUOC[@]}" -gt 0 ] || { echo "cai_cong_cu: ban ke khong co cong cu bat buoc" >&2; exit 5; }
+  for cong_cu in "${BAT_BUOC[@]}"; do
+    "$0" "$cong_cu"
+  done
+  "${PY[@]}" "$GOC/ops/cong_cu.py" kiem-tra --json
+  exit $?
 fi
 DAU_RA="$("${PY[@]}" "$GOC/ops/cong_cu.py" cai-lenh "$TEN")" || {
   echo "cai_cong_cu: '$TEN' khong co cong thuc cai tu dong cho nen nay" >&2

@@ -23,6 +23,8 @@ def doc_ban_ke(duong):
     for ten, dn in d["cong_cu"].items():
         if not isinstance(dn, dict) or not isinstance(dn.get("bat_buoc"), bool):
             raise SystemExit(f"ban ke '{ten}': 'bat_buoc' phai la bool")
+        if "chuan_bi" in dn and not isinstance(dn["chuan_bi"], bool):
+            raise SystemExit(f"ban ke '{ten}': 'chuan_bi' phai la bool")
         bg = dn.get("ban_ghim")
         if bg is not None and (not isinstance(bg, str) or not bg.strip()):
             raise SystemExit(f"ban ke '{ten}': 'ban_ghim' chi nhan chuoi khac rong hoac null")

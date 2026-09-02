@@ -92,6 +92,13 @@ def t2_canary_thieu_shellcheck_phai_SUY_GIAM():
         shim = chi_al / "python"
         shim.write_text(f'#!/bin/sh\nexec {sys.executable} "$@"\n', encoding="utf-8")
         shim.chmod(0o755)
+        # Bản kê chung còn mang các binary bắt buộc của launcher. Cho chúng đi qua
+        # bằng symlink tuyệt đối, nhưng cố ý KHÔNG đưa shellcheck vào PATH cô lập.
+        for ten in ("git", "rg", "bash"):
+            dich = shutil.which(ten)
+            if not dich:
+                raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC T2: thiếu {ten} đối chứng")
+            (chi_al / ten).symlink_to(dich)
         bang(shutil.which("shellcheck", path=str(chi_al)) is None,
              "PATH cô lập vẫn thấy shellcheck ⇒ ca này không còn đo cái nó nói là đo")
         rc, out, _ = chay("kiem-tra", "--json", env=dict(os.environ, PATH=str(chi_al)))
@@ -548,6 +555,52 @@ def t17_ban_ghim_trong_ban_ke_khop_ban_ghim_trong_ci():
              f"{ten}: bản ghim trong cong_cu.yaml là {ghim!r} nhưng ci.yml ghim khác")
     bang(do_duoc >= 1,
          "không đo được cặp ghim nào — ca này đang xanh mà chưa đo gì")
+
+
+@ca
+def t18_inventory_bat_buoc_cua_launcher_phai_nam_trong_ban_ke():
+    """Launcher và preflight CI không được giữ hai danh sách bắt buộc bị trôi."""
+    _doi_cay_day_du(GOC)
+    import runpy
+    p = GOC / ".claude" / "dev" / "launcher.py"
+    launcher_ns = runpy.run_path(str(p), run_name="launcher_inventory_t18")
+    launcher = {x["ten"] for x in launcher_ns["CONG_CU"] if x.get("bat_buoc") is True}
+    ban_ke = yaml.safe_load((GOC / "ops" / "cong_cu.yaml").read_text(encoding="utf-8"))
+    chung = set(ban_ke["cong_cu"])
+    thieu = launcher - chung
+    bang(not thieu, f"launcher khai bắt buộc nhưng bản kê chung bỏ sót: {sorted(thieu)}")
+    bang({"rg", "bash"} <= launcher, "đối chứng launcher mất rg/bash nên t18 không còn răng")
+
+
+@ca
+def t19_moi_cong_cu_bat_buoc_co_cong_thuc_ba_nen():
+    """Bỏ một recipe nền phải đỏ trước khi môi trường đó cần cài thật."""
+    _doi_cay_day_du(GOC)
+    ban_ke = yaml.safe_load((GOC / "ops" / "cong_cu.yaml").read_text(encoding="utf-8"))
+    for ten, dn in ban_ke["cong_cu"].items():
+        if not (dn["bat_buoc"] or dn.get("chuan_bi")):
+            continue
+        cai = dn.get("cai") or {}
+        if "lenh" in cai:  # công thức portable dùng chung ba nền
+            continue
+        thieu = {n for n in ("linux", "macos", "windows") if not (cai.get(n) or {}).get("lenh")}
+        bang(not thieu, f"{ten}: thiếu công thức cài cho {sorted(thieu)}")
+
+
+@ca
+def t20_che_do_cai_tat_ca_bootstrap_pyyaml_dung_ban_ghim():
+    """Lệnh chuẩn bị chung phải tồn tại và pin bootstrap khớp CI/bản kê."""
+    _doi_cay_day_du(GOC)
+    sh = CAI_SH.read_text(encoding="utf-8")
+    bk = yaml.safe_load((GOC / "ops" / "cong_cu.yaml").read_text(encoding="utf-8"))
+    ci = (GOC / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    bang('TEN" = "--bat-buoc"' in sh and 'for cong_cu in "${BAT_BUOC[@]}"' in sh,
+         "cai_cong_cu.sh chưa có đường cài mọi công cụ bắt buộc")
+    import re
+    pins = set(re.findall(r"PyYAML==(\d+(?:\.\d+)+)", sh + "\n" + ci))
+    bang(pins == {"6.0.3"}, f"bootstrap PyYAML trôi phiên bản giữa script và CI: {pins}")
+    bang(bk["cong_cu"]["PyYAML"]["bat_buoc"] is True,
+         "PyYAML bootstrap mà không bắt buộc trong bản kê")
 
 
 def main() -> int:

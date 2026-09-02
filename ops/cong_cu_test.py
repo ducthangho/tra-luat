@@ -80,6 +80,19 @@ def t2_canary_thieu_shellcheck_phai_SUY_GIAM():
     if not al:
         raise BoQuaMoiTruong("actionlint không có trên PATH — cần HÀNH VI THẬT, không giả "
             "lập được. Chạy sau khi `ops/cai_cong_cu.sh actionlint` cài để có bằng chứng dương.")
+    # Ba trạng thái: công cụ bắt buộc đã ĐỎ NGOÀI vùng cô lập là thiếu MÔI TRƯỜNG (vd container
+    # dev không có jsonschema) ⇒ KHÔNG_ĐO_ĐƯỢC, không phải ĐỎ. Chỉ khi nó ĐẠT ngoài mà ĐỎ trong
+    # vùng cô lập thì vùng cô lập của chính ca này hỏng — đó mới là ĐỎ (chốt ở cuối ca).
+    rc0, out0, _ = chay("kiem-tra", "--json")
+    try:
+        # `.get("ten")`: ca này không đo vân tay `ten` (việc của t8) — đừng chết theo đột biến t8.
+        hong_ngoai = [c.get("ten") for c in json.loads(out0)["cong_cu"]
+                      if c["bat_buoc"] and c["trang_thai"] != "DAT"]
+    except (ValueError, KeyError, TypeError):
+        raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC T2: kiem-tra ngoài vùng cô lập không trả JSON (rc={rc0})")
+    if hong_ngoai:
+        raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC T2: máy này thiếu công cụ bắt buộc {hong_ngoai} "
+                             f"ngay ngoài vùng cô lập — cài rồi đo lại")
     with tempfile.TemporaryDirectory() as tmp:
         chi_al = Path(tmp) / "chi-al"
         chi_al.mkdir()
@@ -98,13 +111,25 @@ def t2_canary_thieu_shellcheck_phai_SUY_GIAM():
             dich = shutil.which(ten)
             if not dich:
                 raise BoQuaMoiTruong(f"KHÔNG ĐO ĐƯỢC T2: thiếu {ten} đối chứng")
-            (chi_al / ten).symlink_to(dich)
+            # Tên symlink = tên tệp ĐÍCH (`git.exe` trên Windows): CreateProcess chỉ tìm
+            # `git.exe`, symlink tên trần `git` không chạy được ⇒ git/rg ĐỎ vì lý do VÔ CAN,
+            # tổng ĐỎ dù canary bị đột biến ⇒ mutant `t2_go_canary` SỐNG SÓT trên
+            # windows-latest (run 33630217222). Trên Linux tên đích vẫn là `git`, không đổi.
+            (chi_al / Path(dich).name).symlink_to(dich)
         bang(shutil.which("shellcheck", path=str(chi_al)) is None,
              "PATH cô lập vẫn thấy shellcheck ⇒ ca này không còn đo cái nó nói là đo")
         rc, out, _ = chay("kiem-tra", "--json", env=dict(os.environ, PATH=str(chi_al)))
         bang("SUY_GIAM" in out, f"shellcheck cô lập khỏi PATH mà canary không SUY_GIẢM: "
                                  f"rc={rc}\n{out[:500]}")
         bang(rc != 0, "canary SUY_GIẢM phải kéo tổng thể khỏi ĐẠT (rc=0)")
+        # rc≠0 phải đến TỪ canary: mọi công cụ bắt buộc phải ĐẠT, còn không thì ca này
+        # xanh nhờ một lỗi khác và mất răng với chính đột biến nó sinh ra để bắt.
+        bc = json.loads(out)
+        vo_can = [(c.get("ten"), c["chi_tiet"]) for c in bc["cong_cu"]
+                  if c["bat_buoc"] and c["trang_thai"] != "DAT"]
+        bang(not vo_can, f"công cụ bắt buộc ĐỎ vì lý do vô can, tổng đỏ không còn đo canary: {vo_can}")
+        cn = [c for c in bc["canary"] if c.get("ten") == "actionlint_shellcheck"]
+        bang(cn and cn[0]["trang_thai"] == "DO", f"canary phải ĐỎ (không chỉ có chữ SUY_GIAM): {cn}")
 
 @ca
 def t3_du_cong_cu_dung_ban_khong_canh_bao_thua():
@@ -517,10 +542,13 @@ def t22_bash_windows_khong_lay_bo_phong_wsl_o_system_root():
                            capture_output=True, text=True, timeout=60)
         bang(p.returncode == 0, f"gọi _bash_windows hỏng: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
         kq = dict(l.split(" ", 1) for l in p.stdout.splitlines() if " " in l)
-        bang(kq.get("A") == str(gb1), f"(A) System32 đứng đầu PATH mà chọn {kq.get('A')!r}, mong {str(gb1)!r}")
-        bang(kq.get("B") == str(gb2), f"(B) không suy được Git Bash cạnh git: {kq.get('B')!r}, mong {str(gb2)!r}")
+        # So sau khi resolve CẢ HAI vế: trên windows-latest, tempfile trả tên ngắn 8.3
+        # (`RUNNER~1`) còn `_bash_windows` resolve() thành `runneradmin` (run 33630217222, B đỏ oan).
+        chuan = lambda x: os.path.normcase(str(Path(x).resolve())) if x and x != "None" else x
+        bang(chuan(kq.get("A")) == chuan(gb1), f"(A) System32 đứng đầu PATH mà chọn {kq.get('A')!r}, mong {str(gb1)!r}")
+        bang(chuan(kq.get("B")) == chuan(gb2), f"(B) không suy được Git Bash cạnh git: {kq.get('B')!r}, mong {str(gb2)!r}")
         bang(kq.get("C") == "None", f"(C) chỉ có WSL mà vẫn trả {kq.get('C')!r} — đoán thay vì hỏng thật")
-        bang(kq.get("D") == str(gb1), f"(D) đối chứng SystemRoot rỗng: {kq.get('D')!r}")
+        bang(chuan(kq.get("D")) == chuan(gb1), f"(D) đối chứng SystemRoot rỗng: {kq.get('D')!r}")
         bang(str(wsl) not in p.stdout, f"bộ phóng WSL lọt vào kết quả: {p.stdout}")
 
 # --------------------------------------------------------------- T16/T17 (#391)

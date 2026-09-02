@@ -19,6 +19,7 @@ Chạy: `python .claude/dev/packet_loop_test.py`
 
 from __future__ import annotations
 
+import copy
 import importlib.util
 import json
 import os
@@ -116,6 +117,7 @@ BIEN_BC = "TL_MOI_TRUONG_JSON"
 VOID_DUYET = ["--khong-co-bang-chung", "--ai-cho-phep", "ducthangho",
               "--can-cu", "ca test có người duyệt"]
 _ANH_SACH = []
+_SCHEMA_GOC = object()
 
 
 # --- hạ tầng ------------------------------------------------------------------
@@ -203,6 +205,29 @@ def _doi(expect: int, rc: int, err: bytes, msg: str) -> None:
         raise AssertionError(f"{msg}: đòi rc={expect}, được rc={rc}; stderr={_txt(err)!r}")
 
 
+def _viet_cay_runtime(root: Path, packet_source: str, *, test_source=None,
+                      schema_source=_SCHEMA_GOC):
+    """Build a temporary runnable tree; never mutate tracked product or schema files."""
+    dev = root / ".claude" / "dev"
+    dev.mkdir(parents=True, exist_ok=True)
+    script = dev / "packet_loop.py"
+    script.write_text(packet_source, encoding="utf-8", newline="\n")
+    for name in ("launcher.py", "review_verdict_binding.py"):
+        (dev / name).write_text((HERE / name).read_text(encoding="utf-8"), encoding="utf-8")
+    if schema_source is _SCHEMA_GOC:
+        schema_source = (ROOT / ".github" / "coordination" / "schemas" /
+                         "review_verdict.v1.schema.json").read_text(encoding="utf-8")
+    if schema_source is not None:
+        schema = root / ".github" / "coordination" / "schemas" / "review_verdict.v1.schema.json"
+        schema.parent.mkdir(parents=True, exist_ok=True)
+        schema.write_text(schema_source, encoding="utf-8")
+    test_path = None
+    if test_source is not None:
+        test_path = dev / "packet_loop_test.py"
+        test_path.write_text(test_source, encoding="utf-8", newline="\n")
+    return script, test_path
+
+
 class Ctx:
     def __init__(self, script: Path, tmp: Path):
         self.script = script
@@ -216,7 +241,7 @@ class Ctx:
         return d
 
     def init(self, sd: Path, packet=55, executor=EXECUTOR, reviewer=REVIEWER, extra=(),
-             lease=True):
+             lease=True, generation=1):
         """init, rồi GHI LUÔN một lease hợp lệ (mặc định).
 
         `init` chỉ đưa packet tới `awaiting_lease`, nên phần lớn ca ở dưới — vốn đo
@@ -226,6 +251,7 @@ class Ctx:
         rc, o, e = run(
             self.script,
             ["init", "--packet", packet, "--mission", 54,
+             "--generation", generation,
              "--executor", executor, "--reviewer", reviewer, *extra],
             sd,
         )
@@ -263,6 +289,45 @@ class Ctx:
         """Head giả nhưng ĐÚNG DẠNG git oid, khác nhau theo lượt."""
         return f"{luot:040x}"
 
+    def verdict_file(self, sd, packet, ids, verdict="changes_requested", luot=1,
+                     sha=None, generation=None, provider=REVIEWER):
+        """Write a complete verdict fixture; product code must read it from disk."""
+        if generation is None:
+            st = json.loads((Path(sd) / f"wp{packet}.json").read_text(encoding="utf-8"))
+            generation = st["generation"]
+        reviewed_sha = self.head(luot) if sha is None else sha
+        identity_provider = {"claude": "anthropic", "codex": "openai",
+                             "human": "human"}.get(provider, "openai")
+        payload = {
+            "schema_version": 1,
+            "packet_id": f"wp{packet}",
+            "generation": generation,
+            "provider": provider,
+            "role": "reviewer",
+            "session_id": f"review-{packet}-{luot}",
+            "model_reviewer_identity": {
+                "provider": identity_provider,
+                "model": "fixture-model",
+                "session": f"review-{packet}-{luot}",
+            },
+            "github_submitter_identity": None,
+            "reviewed_sha": reviewed_sha,
+            "independent_from_executor_session": True,
+            "review_axes": ["spec", "standards_security"],
+            "tests": [],
+            "findings": [
+                {"finding_id": fid, "severity": "P1", "path": None, "line": None,
+                 "evidence": "fixture evidence", "recommendation": "fixture remediation"}
+                for fid in ids
+            ],
+            "verdict": verdict,
+            "assurance": "cross_approved",
+            "evidence_url": None,
+        }
+        path = self.tmp / f"verdict-{packet}-{luot}-{time.time_ns()}.json"
+        path.write_text(json.dumps(payload), encoding="utf-8")
+        return path
+
     def den_reviewing(self, sd: Path, packet: int, luot: int):
         """begin-attempt → record-post → transition reviewing (neo head của lượt)."""
         rc, _, e = run(self.script, ["begin-attempt", "--packet", packet, "--provider", EXECUTOR], sd)
@@ -278,8 +343,11 @@ class Ctx:
         return cid
 
     def review(self, sd, packet, ids, verdict="changes_requested", descs=(), luot=1, sha=None):
+        verdict_file = self.verdict_file(
+            sd, packet, ids, verdict=verdict, luot=luot, sha=sha)
         args = ["record-review", "--packet", packet, "--provider", REVIEWER, "--verdict", verdict,
-                "--reviewed-sha", self.head(luot) if sha is None else sha]
+                "--reviewed-sha", self.head(luot) if sha is None else sha,
+                "--verdict-file", verdict_file]
         for i in ids:
             args += ["--finding-id", i]
         for d in descs:
@@ -319,11 +387,13 @@ def case_review_sai_provider_thoat_4(c: Ctx):
     sd = c.sd()
     _doi(0, *c.init(sd)[0:1], b"", "init")
     c.den_reviewing(sd, 55, 1)
+    verdict_file = c.verdict_file(
+        sd, 55, ["sai-nen-review"], verdict="changes_requested", provider=EXECUTOR)
     rc, _, e = run(
         c.script,
         ["record-review", "--packet", 55, "--provider", EXECUTOR,
          "--verdict", "changes_requested", "--finding-id", "sai-nen-review",
-         "--reviewed-sha", c.head(1)],
+         "--reviewed-sha", c.head(1), "--verdict-file", verdict_file],
         sd,
     )
     _doi(4, rc, e, "executor tự review chính mình phải bị chặn")
@@ -415,14 +485,162 @@ def case_review_thieu_hoac_sai_dang_sha(c: Ctx):
     sd = c.sd()
     _doi(0, *c.init(sd)[0:1], b"", "init")
     c.den_reviewing(sd, 55, 1)
+    verdict_file = c.verdict_file(sd, 55, [], verdict="approve")
     rc, _, e = run(c.script,
                    ["record-review", "--packet", 55, "--provider", REVIEWER,
-                    "--verdict", "approve"], sd)
+                    "--verdict", "approve", "--verdict-file", verdict_file], sd)
     _doi(5, rc, e, "thiếu --reviewed-sha phải bị từ chối")
     for xau in ("1bca750", "Z" * 40, "A" * 40, ""):
         rc, _, e = c.review(sd, 55, [], verdict="approve", sha=xau)
         if rc == 0:
             raise AssertionError(f"--reviewed-sha sai dạng {xau!r} phải bị từ chối")
+
+
+def case_record_review_goi_validator_va_khong_doi_state(c: Ctx):
+    """Verdict file sai SHA bị validator chặn dù bản chiếu CLI mang SHA đúng."""
+    sd = c.sd()
+    _doi(0, *c.init(sd)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    state_path = sd / "wp55.json"
+    before = state_path.read_bytes()
+    verdict_file = c.verdict_file(
+        sd, 55, [], verdict="approve", sha="b" * 40)
+    rc, _, e = run(
+        c.script,
+        ["record-review", "--packet", 55, "--provider", REVIEWER,
+         "--verdict", "approve", "--reviewed-sha", c.head(1),
+         "--verdict-file", verdict_file],
+        sd,
+    )
+    _doi(5, rc, e, "verdict file sai reviewed_sha phải bị validator chặn")
+    if state_path.read_bytes() != before:
+        raise AssertionError("record-review đã đổi state dù verdict file không qua validator")
+
+
+def case_record_review_generation_sai_khong_doi_state(c: Ctx):
+    sd = c.sd()
+    _doi(0, *c.init(sd, generation=1)[0:1], b"", "init")
+    c.den_reviewing(sd, 55, 1)
+    state_path = sd / "wp55.json"
+    before = state_path.read_bytes()
+    verdict_file = c.verdict_file(
+        sd, 55, [], verdict="approve", generation=2)
+    rc, _, e = run(
+        c.script,
+        ["record-review", "--packet", 55, "--provider", REVIEWER,
+         "--verdict", "approve", "--reviewed-sha", c.head(1),
+         "--verdict-file", verdict_file],
+        sd,
+    )
+    _doi(5, rc, e, "verdict file sai generation phải bị validator chặn")
+    if state_path.read_bytes() != before:
+        raise AssertionError("record-review đã đổi state dù generation sai")
+
+
+def case_record_review_schema_thieu_hoac_hong_deu_DO(c: Ctx):
+    """Schema không đo được là lỗi; cả hai nhánh giữ state byte-exact."""
+    for ten, schema_source in (("thieu", None), ("hong", "{")):
+        runtime_root = c.tmp / f"runtime-schema-{ten}"
+        script, _ = _viet_cay_runtime(
+            runtime_root, c.script.read_text(encoding="utf-8"),
+            schema_source=schema_source)
+        fixture = Ctx(script, c.tmp / f"fixture-schema-{ten}")
+        fixture.tmp.mkdir(parents=True, exist_ok=True)
+        sd = fixture.sd()
+        _doi(0, *fixture.init(sd)[0:1], b"", f"init schema {ten}")
+        fixture.den_reviewing(sd, 55, 1)
+        state_path = sd / "wp55.json"
+        before = state_path.read_bytes()
+        verdict_file = fixture.verdict_file(sd, 55, [], verdict="approve")
+        rc, _, e = run(
+            script,
+            ["record-review", "--packet", 55, "--provider", REVIEWER,
+             "--verdict", "approve", "--reviewed-sha", fixture.head(1),
+             "--verdict-file", verdict_file],
+            sd,
+        )
+        _doi(5, rc, e, f"schema {ten} không được fail-open")
+        if state_path.read_bytes() != before:
+            raise AssertionError(f"schema {ten}: state đổi dù validation không đo được")
+
+
+def case_record_review_schema_parse_duoc_nhung_khong_khai_binding_DO(c: Ctx):
+    """Schema hợp lệ mà KHÔNG khai binding thì không đo được gì — phải ĐỎ.
+
+    Đây là khoảng giữa hai phép đo của `..._thieu_hoac_hong_deu_DO`: schema
+    thiếu và schema hỏng đều đã bị chặn, nhưng một schema parse được mà bỏ
+    trống `x-tra-luat-runtime-bindings` từng lọt sạch cưỡng chế semantic
+    identity.
+
+    MỖI biến thể phải mang verdict mà CHỈ luật binding đang thử mới bắt được.
+    Bản đầu dùng chung một verdict sai `reviewed_sha` cho cả năm, nên hai biến
+    thể `thieu-mot-binding` và `binding-la` XANH luôn trên validator TRƯỚC bản
+    vá (đo được trên `47a50395`: cả hai cho `rc=5`) — chúng bị từ chối vì
+    binding `reviewed_sha` VẪN CÒN, không phải vì luật đang thử.  Đó đúng họ
+    bệnh `r22-mutant-properties-tin-dung-gia`: ca đỏ vì một lý do vô can.
+    Nên: bỏ binding `generation` thì verdict phải sai `generation` (sha ĐÚNG);
+    bỏ binding `reviewed_sha` thì verdict phải sai sha (generation ĐÚNG); và
+    `binding-la` phải mang verdict HỢP LỆ HOÀN TOÀN, để thứ duy nhất còn có
+    thể từ chối nó là chính luật "khoá lạ".
+    """
+    goc = json.loads((ROOT / ".github" / "coordination" / "schemas" /
+                      "review_verdict.v1.schema.json").read_text(encoding="utf-8"))
+    KHOA = "x-tra-luat-runtime-bindings"
+
+    def _bo_khoa():
+        m = copy.deepcopy(goc); m.pop(KHOA); return m
+
+    def _rong():
+        m = copy.deepcopy(goc); m[KHOA] = {}; return m
+
+    def _thieu_generation():
+        m = copy.deepcopy(goc); m[KHOA].pop("generation"); return m
+
+    def _thieu_reviewed_sha():
+        m = copy.deepcopy(goc); m[KHOA].pop("reviewed_sha"); return m
+
+    def _binding_la():
+        m = copy.deepcopy(goc); m[KHOA]["khoa_khong_ai_cai_dat"] = "x"; return m
+
+    SAI_SHA = {"sha": "b" * 40}
+    SAI_GEN = {"generation": 999}
+    HOP_LE = {}
+    bien_the = (
+        ("khong-khai", _bo_khoa(), SAI_SHA),
+        ("bindings-rong", _rong(), SAI_SHA),
+        ("thieu-binding-generation", _thieu_generation(), SAI_GEN),
+        ("thieu-binding-reviewed-sha", _thieu_reviewed_sha(), SAI_SHA),
+        ("binding-la", _binding_la(), HOP_LE),
+        ("schema-rong-tuyet-doi", {}, SAI_SHA),
+    )
+    for ten, schema, sai in bien_the:
+        runtime_root = c.tmp / f"runtime-binding-{ten}"
+        script, _ = _viet_cay_runtime(
+            runtime_root, c.script.read_text(encoding="utf-8"),
+            schema_source=json.dumps(schema, ensure_ascii=False, indent=2))
+        fixture = Ctx(script, c.tmp / f"fixture-binding-{ten}")
+        fixture.tmp.mkdir(parents=True, exist_ok=True)
+        sd = fixture.sd()
+        _doi(0, *fixture.init(sd)[0:1], b"", f"init binding {ten}")
+        fixture.den_reviewing(sd, 55, 1)
+        state_path = sd / "wp55.json"
+        before = state_path.read_bytes()
+        verdict_file = fixture.verdict_file(
+            sd, 55, [], verdict="approve", **sai)
+        rc, _, e = run(
+            script,
+            ["record-review", "--packet", 55, "--provider", REVIEWER,
+             "--verdict", "approve", "--reviewed-sha", fixture.head(1),
+             "--verdict-file", verdict_file],
+            sd,
+        )
+        # rc=5 CHÍNH XÁC, không phải "khác 0": đột biến bỏ chốt `thieu` làm
+        # `bindings[khoa]` ném KeyError ⇒ rc=1. Nhận rc=1 là nhận một cú sập
+        # thay cho một phép từ chối, tức lại cấp tín dụng giả.
+        _doi(5, rc, e, f"schema {ten}: binding không được cưỡng chế")
+        if state_path.read_bytes() != before:
+            raise AssertionError(
+                f"binding {ten}: state đổi dù không có gì cưỡng chế semantic identity")
 
 
 def case_transition_reviewing_phai_khai_head(c: Ctx):
@@ -1528,10 +1746,14 @@ def _kich_ban_in(c: Ctx, codepage: str):
     # MỒ CÔI và lệnh trả rc=11, tức kịch bản codepage sẽ đo nhầm ĐƯỜNG THẤT BẠI (chỉ in stderr)
     # thay vì đường thành công. Chốt PHỦ ở cuối hàm bắt đúng chuyện này khi phép mồ côi vừa thêm.
     (r_bn / "ops" / "reviews" / "v.md").write_text("verdict\n", encoding="utf-8")
+    verdict_cp = c.verdict_file(
+        sd, 55, ["loi-co-dau-tieng-viet"], verdict="changes_requested",
+        luot=2, generation=1)
 
     buoc = [
         (["where"], None),
         (["init", "--packet", 55, "--mission", 54,
+          "--generation", 1,
           "--executor", EXECUTOR, "--reviewer", REVIEWER], sd),
         # `record-lease` cũng in tiếng Việt nên nó THUỘC kịch bản này, không phải
         # chỉ là bước dọn đường: bỏ nó ra là mất luôn phép đo codepage cho một lệnh.
@@ -1557,6 +1779,7 @@ def _kich_ban_in(c: Ctx, codepage: str):
           "--head-sha", "%040x" % 2], sd),
         (["record-review", "--packet", 55, "--provider", REVIEWER, "--verdict", "changes_requested",
           "--reviewed-sha", "%040x" % 2,
+          "--verdict-file", verdict_cp,
           "--finding-id", "loi-co-dau-tieng-viet", "--finding-desc", "mô tả có dấu tiếng Việt"], sd),
         (["status", "--packet", 55], sd),
         (["doctrine-scan", "--root", r], None),
@@ -2342,9 +2565,11 @@ def case_g5_void_o_reviewing_khong_ket_thuc_bang_approve(c: Ctx):
     tt = c.state(sd, 55)
     if tt == "reviewing":
         raise AssertionError("void để state KẸT ở 'reviewing' — begin-attempt sẽ rc=8")
+    verdict_file = c.verdict_file(sd, 55, [], verdict="approve")
     rc, _, e = run(c.script,
                    ["record-review", "--packet", 55, "--provider", REVIEWER,
-                    "--verdict", "approve", "--reviewed-sha", c.head(1)], sd)
+                    "--verdict", "approve", "--reviewed-sha", c.head(1),
+                    "--verdict-file", verdict_file], sd)
     if rc == 0:
         raise AssertionError("approve được với attempts_used=0 — bản duyệt của lượt KHÔNG TỒN TẠI")
     rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
@@ -2372,9 +2597,11 @@ def case_g5_record_review_doi_LUOT_DANG_MO(c: Ctx):
     st["attempt_open"] = False          # lượt đã đóng nhưng state kẹt ở reviewing
     p.write_text(_json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
                  encoding="utf-8")
+    verdict_file = c.verdict_file(sd, 55, [], verdict="approve")
     rc, _, e = run(c.script,
                    ["record-review", "--packet", 55, "--provider", REVIEWER,
-                    "--verdict", "approve", "--reviewed-sha", c.head(1)], sd)
+                    "--verdict", "approve", "--reviewed-sha", c.head(1),
+                    "--verdict-file", verdict_file], sd)
     _doi(8, rc, e, "ghi được review khi KHÔNG có lượt nào đang mở")
 
 
@@ -2389,9 +2616,11 @@ def case_g5_record_review_doi_SO_LUOT_LON_HON_0(c: Ctx):
     st["attempts_used"] = 0             # lượt vẫn "mở" nhưng số lượt là 0
     p.write_text(_json.dumps(st, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
                  encoding="utf-8")
+    verdict_file = c.verdict_file(sd, 55, [], verdict="approve")
     rc, _, e = run(c.script,
                    ["record-review", "--packet", 55, "--provider", REVIEWER,
-                    "--verdict", "approve", "--reviewed-sha", c.head(1)], sd)
+                    "--verdict", "approve", "--reviewed-sha", c.head(1),
+                    "--verdict-file", verdict_file], sd)
     _doi(8, rc, e, "ghi được review cho lượt số 0")
 
 
@@ -2717,6 +2946,14 @@ CASES = [
     ("init_khong_co_co_ghi_de", case_init_khong_co_co_ghi_de),
     ("review_phai_neo_head_da_dua_ra_review", case_review_phai_neo_head_da_dua_ra_review),
     ("review_thieu_hoac_sai_dang_sha", case_review_thieu_hoac_sai_dang_sha),
+    ("record_review_goi_validator_va_khong_doi_state",
+     case_record_review_goi_validator_va_khong_doi_state),
+    ("record_review_generation_sai_khong_doi_state",
+     case_record_review_generation_sai_khong_doi_state),
+    ("record_review_schema_thieu_hoac_hong_deu_DO",
+     case_record_review_schema_thieu_hoac_hong_deu_DO),
+    ("record_review_schema_parse_duoc_nhung_khong_khai_binding_DO",
+     case_record_review_schema_parse_duoc_nhung_khong_khai_binding_DO),
     ("transition_reviewing_phai_khai_head", case_transition_reviewing_phai_khai_head),
     ("approve_neo_dung_head_thi_chay", case_approve_neo_dung_head_thi_chay),
     ("head_moi_lam_ban_duyet_cu_het_hieu_luc", case_head_moi_lam_ban_duyet_cu_het_hieu_luc),
@@ -3872,6 +4109,22 @@ MUTANTS = {
         '    d = _kiem_anh_moi_truong(duong, can_sach=False, d=d, kiem_tuoi=True)',
         ["anh_doctor_nen_chung_tuoi_chi_begin"],
     ),
+    "bo_goi_validator_review": (
+        '        validate_review_verdict(\n'
+        '            payload,\n'
+        '            expected_reviewed_sha=st["reviewing_head_sha"],\n'
+        '            expected_generation=generation,\n'
+        '        )',
+        '        pass  # đột biến: verdict file không đi qua validator',
+        ["record_review_goi_validator_va_khong_doi_state"],
+    ),
+    "validation_hong_fail_open": (
+        '    except ReviewVerdictError as exc:\n'
+        '        _die(RC_TRACE, f"verdict không hợp lệ: {exc}")',
+        '    except ReviewVerdictError:\n'
+        '        pass  # đột biến: schema không đo được vẫn đi tiếp',
+        ["record_review_schema_thieu_hoac_hong_deu_DO"],
+    ),
     # Hai chốt của `void-reviewing-accepts-attempt-zero`, hai đột biến RỜI NHAU.
     "bo_void_roi_reviewing": (
         '    if st["state"] == "reviewing":\n        st["state"] = "running"',
@@ -4487,13 +4740,7 @@ def case_dot_bien_test_khai_bao_chay_va_giet_dung_ca(c: Ctx):
     for neo, thay_the in cap:
         than = than.replace(neo, thay_the, 1)
     mut_dir = c.tmp / "test_harness_mutant"
-    mut_dir.mkdir(parents=True, exist_ok=True)
-    script = mut_dir / "packet_loop.py"
-    script.write_text(goc, encoding="utf-8", newline="\n")
-    (mut_dir / "launcher.py").write_text(
-        (HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
-    test_mut = mut_dir / "packet_loop_test.py"
-    test_mut.write_text(than, encoding="utf-8", newline="\n")
+    script, test_mut = _viet_cay_runtime(mut_dir, goc, test_source=than)
     spec = importlib.util.spec_from_file_location("packet_loop_test_khoa_neo", test_mut)
     suite = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(suite)
@@ -4613,17 +4860,13 @@ def main() -> int:
                 that_bai_tong += len(thieu)
                 continue
             mut_dir = tmp / f"mut_{ten_mut}"
-            mut_dir.mkdir(parents=True, exist_ok=True)
-            mut = mut_dir / "packet_loop.py"
             for t, th in cap:
                 than = than.replace(t, th, 1)
-            mut.write_text(goc if dot_bien_test else than, encoding="utf-8", newline="\n")
-            (mut_dir / "launcher.py").write_text(
-                (HERE / "launcher.py").read_text(encoding="utf-8"), encoding="utf-8")
+            mut, test_mut = _viet_cay_runtime(
+                mut_dir, goc if dot_bien_test else than,
+                test_source=than if dot_bien_test else None)
             suite = sys.modules[__name__]
             if dot_bien_test:
-                test_mut = mut_dir / "packet_loop_test.py"
-                test_mut.write_text(than, encoding="utf-8", newline="\n")
                 spec = importlib.util.spec_from_file_location(f"packet_loop_test_{ten_mut}", test_mut)
                 suite = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(suite)

@@ -6,12 +6,14 @@ import os
 import re
 import shlex
 import stat
+import subprocess
 import sys
 import tempfile
+import hashlib
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path, PureWindowsPath
-from typing import Mapping, Sequence
+from typing import Callable, Mapping, Sequence
 
 
 class Provider(str, Enum):
@@ -28,7 +30,7 @@ class ProviderExecutableError(OSError):
         self.reason = reason
 
 
-FileIdentity = tuple[int, int, int, int, int]
+FileIdentity = tuple[int | str, ...]
 
 
 @dataclass(frozen=True)
@@ -58,6 +60,12 @@ def _within(path: Path, root: Path) -> bool:
 
 def provider_file_identity(path: Path) -> FileIdentity:
     """Bind a plain file plus metadata that changes on replacement/content edit."""
+    if os.name == "nt":
+        handle = _open_windows_provider_handle(path)
+        try:
+            return _windows_provider_identity(handle)
+        finally:
+            _close_windows_provider_handle(handle)
     info = path.lstat()
     reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
     if (not stat.S_ISREG(info.st_mode) or stat.S_ISLNK(info.st_mode)
@@ -70,6 +78,147 @@ def provider_file_identity(path: Path) -> FileIdentity:
         getattr(info, "st_mtime_ns", int(info.st_mtime * 1_000_000_000)),
         getattr(info, "st_ctime_ns", int(info.st_ctime * 1_000_000_000)),
     )
+
+
+def _windows_api():
+    """Return the small Win32 file-capability API used by provider launch."""
+    import ctypes
+    from ctypes import wintypes
+
+    class FileTime(ctypes.Structure):
+        _fields_ = (("low", wintypes.DWORD), ("high", wintypes.DWORD))
+
+    class ByHandleFileInformation(ctypes.Structure):
+        _fields_ = (
+            ("attributes", wintypes.DWORD),
+            ("creation_time", FileTime),
+            ("last_access_time", FileTime),
+            ("last_write_time", FileTime),
+            ("volume_serial", wintypes.DWORD),
+            ("size_high", wintypes.DWORD),
+            ("size_low", wintypes.DWORD),
+            ("links", wintypes.DWORD),
+            ("file_index_high", wintypes.DWORD),
+            ("file_index_low", wintypes.DWORD),
+        )
+
+    kernel32 = ctypes.windll.kernel32
+    kernel32.CreateFileW.argtypes = (
+        wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID,
+        wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE)
+    kernel32.CreateFileW.restype = wintypes.HANDLE
+    kernel32.GetFileInformationByHandle.argtypes = (
+        wintypes.HANDLE, ctypes.POINTER(ByHandleFileInformation))
+    kernel32.GetFileInformationByHandle.restype = wintypes.BOOL
+    kernel32.ReadFile.argtypes = (
+        wintypes.HANDLE, wintypes.LPVOID, wintypes.DWORD,
+        ctypes.POINTER(wintypes.DWORD), wintypes.LPVOID)
+    kernel32.ReadFile.restype = wintypes.BOOL
+    kernel32.SetFilePointerEx.argtypes = (
+        wintypes.HANDLE, ctypes.c_longlong,
+        ctypes.POINTER(ctypes.c_longlong), wintypes.DWORD)
+    kernel32.SetFilePointerEx.restype = wintypes.BOOL
+    kernel32.SetHandleInformation.argtypes = (
+        wintypes.HANDLE, wintypes.DWORD, wintypes.DWORD)
+    kernel32.SetHandleInformation.restype = wintypes.BOOL
+    kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
+    kernel32.CloseHandle.restype = wintypes.BOOL
+    return ctypes, wintypes, kernel32, ByHandleFileInformation
+
+
+def _open_windows_provider_handle(path: Path) -> int:
+    """Open one non-inheritable read capability denying write/delete sharing."""
+    ctypes, wintypes, kernel32, _information = _windows_api()
+    handle = kernel32.CreateFileW(
+        str(Path(path)),
+        0x80000000,             # GENERIC_READ
+        0x00000001,             # FILE_SHARE_READ; deny WRITE and DELETE
+        None,
+        3,                      # OPEN_EXISTING
+        0x00200000,             # FILE_FLAG_OPEN_REPARSE_POINT
+        None,
+    )
+    invalid = ctypes.c_void_p(-1).value
+    if handle in (None, invalid):
+        raise ctypes.WinError()
+    if not kernel32.SetHandleInformation(
+            wintypes.HANDLE(handle), 0x00000001, 0):  # HANDLE_FLAG_INHERIT
+        error = ctypes.WinError()
+        kernel32.CloseHandle(wintypes.HANDLE(handle))
+        raise error
+    return int(handle)
+
+
+def _close_windows_provider_handle(handle: int) -> None:
+    _ctypes, wintypes, kernel32, _information = _windows_api()
+    kernel32.CloseHandle(wintypes.HANDLE(handle))
+
+
+def _windows_provider_identity(handle: int) -> FileIdentity:
+    """Hash and identify the exact object addressed by an already-held handle."""
+    ctypes, wintypes, kernel32, Information = _windows_api()
+    information = Information()
+    if not kernel32.GetFileInformationByHandle(
+            wintypes.HANDLE(handle), ctypes.byref(information)):
+        raise ctypes.WinError()
+    if information.attributes & (0x00000010 | 0x00000400):
+        raise ProviderExecutableError("provider_executable_untrusted")
+    if not kernel32.SetFilePointerEx(
+            wintypes.HANDLE(handle), 0, None, 0):  # FILE_BEGIN
+        raise ctypes.WinError()
+    digest = hashlib.sha256()
+    buffer = ctypes.create_string_buffer(1024 * 1024)
+    while True:
+        count = wintypes.DWORD()
+        if not kernel32.ReadFile(
+                wintypes.HANDLE(handle), buffer, len(buffer),
+                ctypes.byref(count), None):
+            raise ctypes.WinError()
+        if count.value == 0:
+            break
+        digest.update(buffer.raw[:count.value])
+    file_index = (
+        int(information.file_index_high) << 32) | int(information.file_index_low)
+    size = (int(information.size_high) << 32) | int(information.size_low)
+    last_write = (
+        int(information.last_write_time.high) << 32
+    ) | int(information.last_write_time.low)
+    creation = (
+        int(information.creation_time.high) << 32
+    ) | int(information.creation_time.low)
+    return (
+        int(information.volume_serial), file_index, size,
+        last_write, creation, digest.hexdigest(),
+    )
+
+
+def _read_windows_provider_file(
+        path: Path, expected: FileIdentity, *, maximum: int) -> bytes:
+    """Read one bound Windows object while denying concurrent replacement."""
+    handle = _open_windows_provider_handle(path)
+    try:
+        identity = _windows_provider_identity(handle)
+        if identity != expected or int(identity[2]) > maximum:
+            raise ProviderExecutableError("provider_launch_support_untrusted")
+        # Identity hashing left the fresh handle at EOF; read once more for the
+        # small npm shim whose bytes define the launch-support plan.
+        ctypes, wintypes, kernel32, _information = _windows_api()
+        if not kernel32.SetFilePointerEx(wintypes.HANDLE(handle), 0, None, 0):
+            raise ctypes.WinError()
+        output = bytearray()
+        buffer = ctypes.create_string_buffer(min(maximum + 1, 65537))
+        while len(output) <= maximum:
+            count = wintypes.DWORD()
+            if not kernel32.ReadFile(
+                    wintypes.HANDLE(handle), buffer, len(buffer),
+                    ctypes.byref(count), None):
+                raise ctypes.WinError()
+            if count.value == 0:
+                return bytes(output)
+            output.extend(buffer.raw[:count.value])
+        raise ProviderExecutableError("provider_launch_support_untrusted")
+    finally:
+        _close_windows_provider_handle(handle)
 
 
 def private_provider_directory_acl_available() -> bool:
@@ -252,17 +401,16 @@ def _posix_plan(executable: Path, directories: list[Path],
     return ("posix-script", (interpreter_target,), tuple(words[1:]), identities)
 
 
-def _windows_plan(executable: Path, directories: list[Path],
-                  forbidden: tuple[Path, ...]):
+def _windows_plan(executable: Path, executable_identity: FileIdentity,
+                  directories: list[Path], forbidden: tuple[Path, ...]):
     suffix = executable.suffix.lower()
     if suffix in (".exe", ".com"):
         return "direct", (), (), []
     if suffix != ".cmd":
         raise ProviderExecutableError("provider_launch_support_untrusted")
     try:
-        raw = executable.read_bytes()
-        if len(raw) > 65536:
-            raise ProviderExecutableError("provider_launch_support_untrusted")
+        raw = _read_windows_provider_file(
+            executable, executable_identity, maximum=65536)
         text = raw.decode("utf-8-sig", "strict")
     except (OSError, UnicodeDecodeError) as exc:
         raise ProviderExecutableError("provider_launch_support_untrusted") from exc
@@ -303,7 +451,7 @@ def _build_bound(name: str, executable: Path, identity: FileIdentity,
             executable, directories, forbidden)
     else:
         kind, support, launch_arguments, support_identities = _windows_plan(
-            executable, directories, forbidden)
+            executable, identity, directories, forbidden)
     identities.extend(support_identities)
     return BoundProviderExecutable(
         provider=name, kind=kind, executable=executable,
@@ -389,3 +537,95 @@ def bound_provider_source(source: Mapping[str, str],
     child_source = dict(source)
     child_source["PATH"] = bound.sanitized_path
     return child_source
+
+
+def _acquire_windows_provider_handles(
+        bound: BoundProviderExecutable) -> list[int]:
+    """Open and validate all launch identities as one process-creation guard."""
+    handles: list[int] = []
+    try:
+        for path, expected in bound.identities:
+            handle = _open_windows_provider_handle(path)
+            try:
+                actual = _windows_provider_identity(handle)
+                if actual != expected:
+                    raise ProviderExecutableError("provider_executable_changed")
+            except BaseException:
+                _close_windows_provider_handle(handle)
+                raise
+            handles.append(handle)
+        return handles
+    except BaseException as exc:
+        for handle in reversed(handles):
+            _close_windows_provider_handle(handle)
+        if isinstance(exc, ProviderExecutableError):
+            raise
+        raise ProviderExecutableError("provider_executable_changed") from exc
+
+
+def _release_windows_provider_handles(handles: Sequence[int]) -> None:
+    for handle in reversed(handles):
+        _close_windows_provider_handle(handle)
+
+
+def popen_bound_provider(
+        bound: BoundProviderExecutable, arguments: Sequence[str], *,
+        _popen_factory: Callable | None = None, **kwargs):
+    """Create a provider process while Windows identities remain write-locked.
+
+    Windows handles cover the executable, shim/interpreter, and every launch
+    support file.  They are non-inheritable and close immediately after Popen
+    returns from CreateProcessW, never for the lifetime of the child.  POSIX
+    retains the pre-existing metadata revalidation and Popen behavior.
+    """
+    factory = subprocess.Popen if _popen_factory is None else _popen_factory
+    if os.name != "nt":
+        return factory(provider_argv(bound, arguments), **kwargs)
+    handles = _acquire_windows_provider_handles(bound)
+    try:
+        argv = provider_argv(bound, arguments)
+        return factory(argv, **kwargs)
+    finally:
+        _release_windows_provider_handles(handles)
+
+
+def run_bound_provider(
+        bound: BoundProviderExecutable, arguments: Sequence[str], *,
+        input=None, capture_output: bool = False, timeout=None,
+        check: bool = False, _popen_factory: Callable | None = None, **kwargs):
+    """``subprocess.run`` semantics with a Windows hold-through-Popen boundary."""
+    if os.name != "nt" and _popen_factory is None:
+        return subprocess.run(
+            provider_argv(bound, arguments), input=input,
+            capture_output=capture_output, timeout=timeout, check=check, **kwargs)
+    if input is not None:
+        if kwargs.get("stdin") is not None:
+            raise ValueError("stdin and input arguments may not both be used")
+        kwargs["stdin"] = subprocess.PIPE
+    if capture_output:
+        if kwargs.get("stdout") is not None or kwargs.get("stderr") is not None:
+            raise ValueError(
+                "stdout and stderr arguments may not be used with capture_output")
+        kwargs["stdout"] = subprocess.PIPE
+        kwargs["stderr"] = subprocess.PIPE
+    process = popen_bound_provider(
+        bound, arguments, _popen_factory=_popen_factory, **kwargs)
+    with process:
+        try:
+            stdout, stderr = process.communicate(input, timeout=timeout)
+        except subprocess.TimeoutExpired as exc:
+            process.kill()
+            if sys.platform == "win32":
+                exc.stdout, exc.stderr = process.communicate()
+            else:
+                process.wait()
+            raise
+        except BaseException:
+            process.kill()
+            process.wait()
+            raise
+        returncode = process.poll()
+        if check and returncode:
+            raise subprocess.CalledProcessError(
+                returncode, process.args, output=stdout, stderr=stderr)
+    return subprocess.CompletedProcess(process.args, returncode, stdout, stderr)

@@ -26,9 +26,11 @@ from provider_exec import (
     bind_provider_executable,
     bound_provider_source as _shared_bound_provider_source,
     private_provider_directory_acl_available as _shared_private_provider_acl_available,
+    popen_bound_provider as _shared_popen_bound_provider,
     provider_argv as _shared_provider_argv,
     provider_file_identity as _provider_file_identity,
     revalidate_bound_provider as _revalidate_bound_provider,
+    run_bound_provider as _shared_run_bound_provider,
     trusted_provider_temp_base as _shared_trusted_provider_temp_base,
 )
 
@@ -81,6 +83,16 @@ def _provider_argv(bound: _BoundProviderExecutable,
     return _shared_provider_argv(bound, arguments)
 
 
+def _popen_provider(bound: _BoundProviderExecutable,
+                    arguments, **kwargs):
+    return _shared_popen_bound_provider(bound, arguments, **kwargs)
+
+
+def _run_provider(bound: _BoundProviderExecutable,
+                  arguments, **kwargs):
+    return _shared_run_bound_provider(bound, arguments, **kwargs)
+
+
 def _bound_provider_source(source, bound: _BoundProviderExecutable) -> dict:
     return _shared_bound_provider_source(source, bound)
 
@@ -91,6 +103,12 @@ def _trusted_provider_temp_base() -> Path:
 
 def _private_provider_directory_acl_available() -> bool:
     return _shared_private_provider_acl_available()
+
+
+def _preflight_private_provider_storage() -> None:
+    """Refuse before credential access when private provider ACLs are absent."""
+    if not _private_provider_directory_acl_available():
+        raise OSError("private provider directory ACL unavailable")
 
 
 def _validate_private_provider_directory(path: Path) -> Path:
@@ -165,8 +183,10 @@ def _checked_provider_cleanup(root: Path, identity: tuple[int, int]) -> None:
 @contextlib.contextmanager
 def _private_provider_home():
     """Yield a validated disposable provider HOME outside repository control."""
-    if not _private_provider_directory_acl_available():
-        raise OSError("private provider directory ACL unavailable")
+    # Keep the allocation-time check even though credential-bearing callers
+    # preflight immediately after binding.  This is defense in depth for every
+    # direct allocator consumer and closes a capability-change race.
+    _preflight_private_provider_storage()
     base = _trusted_provider_temp_base()
     root = None
     root_identity = None
@@ -769,9 +789,9 @@ def capture_claude(output: Path, *, timeout: int = 300, env=None, input_stream=N
         with _isolated_child_env(provider_source) as child:
             master, slave = pty.openpty()
             try:
-                argv = _provider_argv(bound, ["setup-token"])
-                proc = subprocess.Popen(argv, stdin=slave, stdout=slave,
-                                        stderr=slave, env=child, close_fds=True)
+                proc = _popen_provider(
+                    bound, ["setup-token"], stdin=slave, stdout=slave,
+                    stderr=slave, env=child, close_fds=True)
             except _ProviderExecutableError as exc:
                 os.close(master); os.close(slave)
                 return _result("not_measured", reason=exc.reason)
@@ -893,6 +913,10 @@ def claude_probe(token_file: Path | None = None, *, timeout=20, env=None) -> dic
         bound = _bind_provider_executable("claude", source)
     except _ProviderExecutableError as exc:
         return _result("not_measured", reason=exc.reason)
+    try:
+        _preflight_private_provider_storage()
+    except OSError:
+        return _result("not_measured", reason="provider_storage_unavailable")
     token = source.get("CLAUDE_CODE_OAUTH_TOKEN")
     if not token and token_file:
         try:
@@ -907,11 +931,10 @@ def claude_probe(token_file: Path | None = None, *, timeout=20, env=None) -> dic
         with _isolated_child_env(
                 provider_source, CLAUDE_CODE_OAUTH_TOKEN=token) as child:
             try:
-                argv = _provider_argv(
-                    bound, ["-p", f"Print exactly: {marker}"])
-                p = subprocess.run(argv,
-                                   stdin=subprocess.DEVNULL, capture_output=True, text=True,
-                                   timeout=timeout, env=child)
+                p = _run_provider(
+                    bound, ["-p", f"Print exactly: {marker}"],
+                    stdin=subprocess.DEVNULL, capture_output=True, text=True,
+                    timeout=timeout, env=child)
             except subprocess.TimeoutExpired:
                 return _result("not_measured", reason="timeout")
             except _ProviderExecutableError as exc:
@@ -957,6 +980,11 @@ def github_probe(repo: str, *, timeout: int = 20, env=None) -> dict:
         bound = _bind_provider_executable("gh", source)
     except _ProviderExecutableError as exc:
         return _result("not_measured", reason=exc.reason, endpoints={})
+    try:
+        _preflight_private_provider_storage()
+    except OSError:
+        return _result(
+            "not_measured", reason="provider_storage_unavailable", endpoints={})
     token = source.get("GITHUB_PAT")
     if not token:
         return _result("missing", endpoints={})
@@ -966,10 +994,9 @@ def github_probe(repo: str, *, timeout: int = 20, env=None) -> dict:
         with _isolated_child_env(provider_source, GH_TOKEN=token) as child:
             for endpoint in ("user", f"repos/{repo}"):
                 try:
-                    argv = _provider_argv(
-                        bound, ["api", endpoint, "--include", "--silent"])
-                    p = subprocess.run(argv, capture_output=True,
-                                       text=True, timeout=timeout, env=child)
+                    p = _run_provider(
+                        bound, ["api", endpoint, "--include", "--silent"],
+                        capture_output=True, text=True, timeout=timeout, env=child)
                 except subprocess.TimeoutExpired:
                     results[endpoint] = "not_measured"
                 except _ProviderExecutableError:

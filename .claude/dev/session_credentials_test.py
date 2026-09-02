@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 import base64
+import contextlib
+import errno
 import importlib.util
 import io
 import json
 import os
 import stat
 import subprocess
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -70,11 +73,14 @@ def provider_executable_lock(module):
 
             marker = "TRALUAT-CLAUDE-CREDENTIAL-OK"
             completed = mock.Mock(returncode=0, stdout=marker + "\n", stderr="")
-            with mock.patch.object(module.subprocess, "run", return_value=completed) as child:
+            with mock.patch.object(
+                    module, "_shared_run_bound_provider",
+                    return_value=completed) as child:
                 result = module.claude_probe(env={
                     **common, "CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"})
             assert result["status"] == "passed", result
-            argv = child.call_args.args[0]
+            bound, arguments = child.call_args.args[:2]
+            argv = module._provider_argv(bound, arguments)
             assert Path(argv[0]).is_absolute(), argv
             assert argv[0].lower() != "claude", argv
             assert "INERT_FIXTURE" not in repr(argv)
@@ -87,15 +93,18 @@ def provider_executable_lock(module):
                 assert Path(argv[-3]).resolve() == real.resolve(), argv
 
             ok = mock.Mock(returncode=0, stdout="", stderr="")
-            with mock.patch.object(module.subprocess, "run", return_value=ok) as child:
+            with mock.patch.object(
+                    module, "_shared_run_bound_provider", return_value=ok) as child:
                 result = module.github_probe(
                     "o/r", env={**common, "GITHUB_PAT": "INERT_FIXTURE"})
             assert result["status"] == "passed", result
             assert child.call_count == 2
-            assert all(Path(call.args[0][0]).is_absolute()
-                       and call.args[0][0].lower() != "gh"
-                       and "INERT_FIXTURE" not in repr(call.args[0])
-                       for call in child.call_args_list)
+            provider_argvs = [module._provider_argv(*call.args[:2])
+                              for call in child.call_args_list]
+            assert all(Path(argv[0]).is_absolute()
+                       and argv[0].lower() != "gh"
+                       and "INERT_FIXTURE" not in repr(argv)
+                       for argv in provider_argvs)
 
             # Invalid discovery roots are rejected before the credential key
             # is even read.  A mapping that explodes on that read proves order.
@@ -134,7 +143,7 @@ def provider_executable_lock(module):
             with mock.patch.object(
                     module, "_bind_provider_executable",
                     return_value=support_bound), \
-                 mock.patch.object(module.subprocess, "run") as child:
+                 mock.patch.object(module.subprocess, "Popen") as child:
                 support_changed = module.claude_probe(env={
                     **support_common,
                     "CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"})
@@ -152,7 +161,7 @@ def provider_executable_lock(module):
                 _write_executable(malicious / "node", "#!/bin/sh\nexit 9\n")
                 ambiguous_support = CredentialTripwire(
                     PATH=os.pathsep.join((str(safe), str(malicious))))
-                with mock.patch.object(module.subprocess, "run") as child:
+                with mock.patch.object(module.subprocess, "Popen") as child:
                     assert module.claude_probe(
                         env=ambiguous_support)["status"] == "not_measured"
                 child.assert_not_called()
@@ -163,7 +172,7 @@ def provider_executable_lock(module):
                 CredentialTripwire(PATH="."),
                 CredentialTripwire(PATH=str(module.REPOSITORY_ROOT)),
             )
-            with mock.patch.object(module.subprocess, "run") as child:
+            with mock.patch.object(module.subprocess, "Popen") as child:
                 for source in invalid_sources:
                     assert module.claude_probe(env=source)["status"] == "not_measured"
                     assert module.github_probe("o/r", env=source)["status"] == "not_measured"
@@ -181,7 +190,7 @@ def provider_executable_lock(module):
                 **({"PATHEXT": ".EXE"} if os.name == "nt" else {}))
             with mock.patch.dict(os.environ, {
                     "HOME": str(tilde_home), "USERPROFILE": str(tilde_home)}), \
-                 mock.patch.object(module.subprocess, "run") as child:
+                 mock.patch.object(module.subprocess, "Popen") as child:
                 result = module.claude_probe(env=tilde_source)
             assert result["status"] == "not_measured", result
             child.assert_not_called()
@@ -191,7 +200,7 @@ def provider_executable_lock(module):
                 _write_executable(temp_root / ("claude.cmd" if os.name == "nt" else "claude"))
                 temp_source = CredentialTripwire(
                     PATH=str(temp_root), **({"PATHEXT": ".CMD"} if os.name == "nt" else {}))
-                with mock.patch.object(module.subprocess, "run") as child:
+                with mock.patch.object(module.subprocess, "Popen") as child:
                     assert module.claude_probe(env=temp_source)["status"] == "not_measured"
                 child.assert_not_called()
 
@@ -200,7 +209,7 @@ def provider_executable_lock(module):
             _write_executable(other / ("claude.exe" if os.name == "nt" else "claude"))
             ambiguous = {**common, "PATH": os.pathsep.join((str(safe), str(other))),
                          "CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"}
-            with mock.patch.object(module.subprocess, "run") as child:
+            with mock.patch.object(module.subprocess, "Popen") as child:
                 assert module.claude_probe(env=ambiguous)["status"] == "not_measured"
             child.assert_not_called()
 
@@ -212,7 +221,7 @@ def provider_executable_lock(module):
             replacement = _write_executable(bound.executable, replacement_body)
             assert replacement.exists()
             with mock.patch.object(module, "_bind_provider_executable", return_value=bound), \
-                 mock.patch.object(module.subprocess, "run") as child:
+                 mock.patch.object(module.subprocess, "Popen") as child:
                 changed = module.claude_probe(env={
                     **common, "CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"})
             assert changed["status"] == "not_measured", changed
@@ -221,7 +230,8 @@ def provider_executable_lock(module):
             # A separate invocation discovers the replacement as a normal
             # provider upgrade and binds its new identity.
             with mock.patch.object(
-                    module.subprocess, "run", return_value=completed) as child:
+                    module, "_shared_run_bound_provider",
+                    return_value=completed) as child:
                 upgraded = module.claude_probe(env={
                     **common, "CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"})
             assert upgraded["status"] == "passed", upgraded
@@ -247,6 +257,148 @@ def windows_pre313_provider_binding_lock(module):
         assert bound.executable == executable.resolve(strict=True), bound
         assert bound.identities == ((bound.executable,
                                      module._provider_file_identity(bound.executable)),)
+
+
+@contextlib.contextmanager
+def _windows_npm_provider_fixture(module):
+    """Yield one writable, real-CreateProcess npm provider outside forbidden roots."""
+    if os.name != "nt":
+        yield None
+        return
+    node_source = shutil.which("node.exe") or shutil.which("node")
+    assert node_source, "real-Windows provider identity tests require node.exe"
+    provider_module = sys.modules[module.bind_provider_executable.__module__]
+    with _safe_executable_directory() as safe_raw:
+        safe = Path(safe_raw)
+        node = safe / "node.exe"
+        shutil.copy2(node_source, node)
+        script = safe / "cli.js"
+        script.write_text("setTimeout(() => {}, 5000);\n", encoding="utf-8", newline="\n")
+        shim = safe / "codex.cmd"
+        shim.write_text(
+            '@ECHO off\n"%dp0%\\node.exe" "%dp0%\\cli.js" %*\n',
+            encoding="utf-8", newline="\n")
+        source = {"PATH": str(safe), "PATHEXT": ".CMD;.EXE"}
+        bound = provider_module.bind_provider_path(
+            "codex", shim, source, repository_root=P.resolve().parents[2])
+        yield provider_module, bound, node, shim, script, source
+
+
+def _windows_write_is_denied_while_held(path: Path) -> None:
+    try:
+        with path.open("r+b") as stream:
+            stream.write(b"X")
+    except OSError as exc:
+        assert (getattr(exc, "winerror", None) in (5, 32, 33)
+                or exc.errno in (errno.EACCES, errno.EPERM)), exc
+        return
+    raise AssertionError(f"provider identity was writable during CreateProcess: {path}")
+
+
+def provider_identity_held_through_createprocess_lock(module):
+    """The Windows executable object is write/delete-locked through real Popen."""
+    if os.name != "nt":
+        print("SKIP provider_identity_held_through_createprocess_lock (Windows-only)")
+        return
+    with _windows_npm_provider_fixture(module) as fixture:
+        provider_module, bound, node, _shim, _script, _source = fixture
+        real_popen = subprocess.Popen
+        entered = []
+
+        def createprocess(argv, **kwargs):
+            entered.append(True)
+            _windows_write_is_denied_while_held(node)
+            return real_popen(argv, **kwargs)
+
+        child = provider_module.popen_bound_provider(
+            bound, (), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL, _popen_factory=createprocess)
+        try:
+            assert entered == [True]
+            assert child.poll() is None, "real Windows child did not survive Popen return"
+        finally:
+            child.kill()
+            child.wait(timeout=10)
+
+
+def provider_support_identity_held_through_createprocess_lock(module):
+    """Every npm shim/script support object is locked through real Popen."""
+    if os.name != "nt":
+        print("SKIP provider_support_identity_held_through_createprocess_lock (Windows-only)")
+        return
+    with _windows_npm_provider_fixture(module) as fixture:
+        provider_module, bound, _node, shim, script, _source = fixture
+        real_popen = subprocess.Popen
+
+        def createprocess(argv, **kwargs):
+            _windows_write_is_denied_while_held(shim)
+            _windows_write_is_denied_while_held(script)
+            return real_popen(argv, **kwargs)
+
+        child = provider_module.popen_bound_provider(
+            bound, (), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL, _popen_factory=createprocess)
+        try:
+            assert child.poll() is None, "support lock test child exited before observation"
+        finally:
+            child.kill()
+            child.wait(timeout=10)
+
+
+def provider_handle_cleanup_and_upgrade_lock(module):
+    """Creation handles close on error/success and a later bind accepts an upgrade."""
+    if os.name != "nt":
+        print("SKIP provider_handle_cleanup_and_upgrade_lock (Windows-only)")
+        return
+    with _windows_npm_provider_fixture(module) as fixture:
+        provider_module, bound, _node, _shim, script, source = fixture
+        original = script.read_bytes()
+        replacement = original.replace(b"5000", b"1000")
+        assert len(replacement) == len(original) and replacement != original
+        stamp = script.stat().st_mtime_ns
+
+        def failed_createprocess(_argv, **_kwargs):
+            _windows_write_is_denied_while_held(script)
+            raise OSError("fixture CreateProcess failure")
+
+        try:
+            provider_module.popen_bound_provider(
+                bound, (), _popen_factory=failed_createprocess)
+        except OSError as exc:
+            assert "fixture CreateProcess failure" in str(exc)
+        else:
+            raise AssertionError("fixture CreateProcess failure was swallowed")
+
+        # Error cleanup is immediate: same-size replacement plus restored mtime
+        # succeeds only after every provider handle has closed.
+        script.write_bytes(replacement)
+        os.utime(script, ns=(stamp, stamp))
+
+        called = []
+        try:
+            provider_module.popen_bound_provider(
+                bound, (), _popen_factory=lambda *_a, **_k: called.append(True))
+        except module._ProviderExecutableError as exc:
+            assert exc.reason == "provider_executable_changed", exc.reason
+        else:
+            raise AssertionError("same-size/restored-mtime provider rewrite was accepted")
+        assert called == [], "rewritten provider reached CreateProcess"
+
+        upgraded = provider_module.bind_provider_path(
+            "codex", bound.executable, source,
+            repository_root=P.resolve().parents[2])
+        real_popen = subprocess.Popen
+        child = provider_module.popen_bound_provider(
+            upgraded, (), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL, _popen_factory=real_popen)
+        try:
+            assert child.poll() is None, "upgraded provider did not launch independently"
+            # Success cleanup is also immediate; the child lifetime is longer
+            # than this write, so a leaked/long-lived support handle fails here.
+            script.write_bytes(original)
+        finally:
+            child.kill()
+            child.wait(timeout=10)
 
 
 def directory_root_lock(module):
@@ -372,7 +524,7 @@ def provider_home_lock(module):
                  mock.patch.object(module, "_bind_provider_executable",
                                    side_effect=lambda name, _source:
                                        _fixture_bound(module, name)), \
-                 mock.patch.object(module.subprocess, "run") as child:
+                 mock.patch.object(module, "_run_provider") as child:
                 claude = module.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S"})
                 github = module.github_probe("o/r", env={"GITHUB_PAT": "S"})
             assert claude == {"status": "not_measured",
@@ -392,8 +544,15 @@ def provider_private_acl_unavailable_lock(module):
             return_value=False), \
          mock.patch.object(module, "_bind_provider_executable",
                            return_value=_fixture_bound(module, "claude")), \
-         mock.patch.object(module.tempfile, "mkdtemp") as allocate, \
-         mock.patch.object(module.subprocess, "run") as child:
+         mock.patch.object(
+             module.tempfile, "mkdtemp",
+             side_effect=AssertionError("allocation before ACL preflight")) as allocate, \
+         mock.patch.object(module, "_run_provider") as child:
+        try:
+            with module._private_provider_home():
+                raise AssertionError("private provider home entered without ACL")
+        except OSError:
+            pass
         result = module.claude_probe(env={
             "PATH": str(Path(sys.executable).resolve().parent),
             "CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE",
@@ -402,6 +561,56 @@ def provider_private_acl_unavailable_lock(module):
                       "reason": "provider_storage_unavailable"}, result
     allocate.assert_not_called()
     child.assert_not_called()
+
+
+def provider_acl_unavailable_precedes_credential_read_lock(module):
+    """Bind first, then refuse on ACL capability before every secret/temp read."""
+    events = []
+
+    class ExplodingCredentialSource(dict):
+        def get(self, key, default=None):
+            if key in ("CLAUDE_CODE_OAUTH_TOKEN", "GITHUB_PAT"):
+                events.append(f"credential:{key}")
+                raise AssertionError(f"credential mapping read before ACL refusal: {key}")
+            return super().get(key, default)
+
+    class ExplodingTokenFile:
+        def read_text(self, **_kwargs):
+            events.append("token-file")
+            raise AssertionError("token file read before ACL refusal")
+
+    def bind(name, _source):
+        events.append(f"bind:{name}")
+        return _fixture_bound(module, name)
+
+    def acl_available():
+        events.append("acl")
+        return False
+
+    source = ExplodingCredentialSource()
+    with mock.patch.object(module, "_bind_provider_executable", side_effect=bind), \
+         mock.patch.object(module, "_private_provider_directory_acl_available",
+                           side_effect=acl_available), \
+         mock.patch.object(module, "_trusted_provider_temp_base",
+                           side_effect=AssertionError("temp lookup before ACL refusal")), \
+         mock.patch.object(module.tempfile, "mkdtemp",
+                           side_effect=AssertionError("allocation before ACL refusal")), \
+         mock.patch.object(module, "_run_provider",
+                           side_effect=AssertionError("child before ACL refusal")):
+        claude = module.claude_probe(
+            ExplodingTokenFile(), env=source)
+        assert claude == {
+            "status": "not_measured", "reason": "provider_storage_unavailable"
+        }, claude
+        assert events == ["bind:claude", "acl"], events
+
+        events.clear()
+        github = module.github_probe("o/r", env=source)
+        assert github == {
+            "status": "not_measured", "reason": "provider_storage_unavailable",
+            "endpoints": {},
+        }, github
+        assert events == ["bind:gh", "acl"], events
 
 
 def provider_cleanup_lock(module):
@@ -447,7 +656,7 @@ def provider_cleanup_lock(module):
                                    return_value=_fixture_bound(module, "claude")), \
                  mock.patch.object(module.shutil, "rmtree",
                                    side_effect=OSError("fixture delete failure")), \
-                 mock.patch.object(module.subprocess, "run", return_value=good):
+                 mock.patch.object(module, "_run_provider", return_value=good):
                 result = module.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "FIXTURE"})
             assert result["status"] == "not_measured", result
         finally:
@@ -462,7 +671,7 @@ def provider_cleanup_lock(module):
                  mock.patch.object(module, "_bind_provider_executable",
                                    return_value=_fixture_bound(module, "claude")), \
                  mock.patch.object(module.shutil, "rmtree", return_value=None), \
-                 mock.patch.object(module.subprocess, "run", return_value=good):
+                 mock.patch.object(module, "_run_provider", return_value=good):
                 result = module.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "FIXTURE"})
             assert result["status"] == "not_measured", \
                 f"silent cleanup residual was reported as {result}"
@@ -488,7 +697,7 @@ def provider_cleanup_lock(module):
             return (stat.S_ISLNK(info.st_mode)
                     or bool(reparse and getattr(info, "st_file_attributes", 0) & reparse))
 
-        def child_run(_cmd, **kwargs):
+        def child_run(_bound, _arguments, **kwargs):
             allocated_root = Path(kwargs["env"]["HOME"]).parent
             allocated_root.rename(moved)
             if os.name == "nt":
@@ -513,7 +722,7 @@ def provider_cleanup_lock(module):
                  mock.patch.object(module, "_bind_provider_executable",
                                    return_value=_fixture_bound(module, "claude")), \
                  mock.patch.object(module.shutil, "rmtree", side_effect=observed_rmtree), \
-                 mock.patch.object(module.subprocess, "run", side_effect=child_run):
+                 mock.patch.object(module, "_run_provider", side_effect=child_run):
                 result = module.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "FIXTURE"})
             assert result["status"] == "not_measured", result
             assert cleanup_calls == [], \
@@ -791,7 +1000,7 @@ def claude_status_lock(module):
     for completed, expected in cases:
         with mock.patch.object(module, "_bind_provider_executable",
                                return_value=_fixture_bound(module, "claude")), \
-             mock.patch.object(module.subprocess, "run", return_value=completed):
+             mock.patch.object(module, "_run_provider", return_value=completed):
             result = module.claude_probe(
                 env={"CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"})
         assert result["status"] == expected, (completed.stderr, result)
@@ -812,7 +1021,7 @@ def claude_status_lock(module):
     for completed, expected, reason in zero_exit_cases:
         with mock.patch.object(module, "_bind_provider_executable",
                                return_value=_fixture_bound(module, "claude")), \
-             mock.patch.object(module.subprocess, "run", return_value=completed):
+             mock.patch.object(module, "_run_provider", return_value=completed):
             result = module.claude_probe(
                 env={"CLAUDE_CODE_OAUTH_TOKEN": "INERT_FIXTURE"})
         assert result["status"] == expected, (completed.stderr, completed.stdout, result)
@@ -886,7 +1095,7 @@ def github_status_lock(module):
     for failed, expected in cases:
         with mock.patch.object(module, "_bind_provider_executable",
                                return_value=_fixture_bound(module, "gh")), \
-             mock.patch.object(module.subprocess, "run",
+             mock.patch.object(module, "_run_provider",
                                side_effect=(passed, failed)):
             result = module.github_probe("o/r", env={"GITHUB_PAT": "INERT_FIXTURE"})
         assert result["status"] == expected, (failed.stdout, failed.stderr, result)
@@ -901,7 +1110,7 @@ def github_status_lock(module):
                 "HTTP/1.1 403 Forbidden\nServer: proxy\n"), stderr="")
     with mock.patch.object(module, "_bind_provider_executable",
                            return_value=_fixture_bound(module, "gh")), \
-         mock.patch.object(module.subprocess, "run",
+         mock.patch.object(module, "_run_provider",
                            side_effect=(passed, mixed_block)):
         result = module.github_probe("o/r", env={"GITHUB_PAT": "INERT_FIXTURE"})
     assert result["status"] == "not_measured", result
@@ -911,7 +1120,7 @@ def github_status_lock(module):
     timeout = subprocess.TimeoutExpired(["gh", "api"], 20)
     with mock.patch.object(module, "_bind_provider_executable",
                            return_value=_fixture_bound(module, "gh")), \
-         mock.patch.object(module.subprocess, "run",
+         mock.patch.object(module, "_run_provider",
                            side_effect=(passed, timeout)):
         result = module.github_probe("o/r", env={"GITHUB_PAT": "INERT_FIXTURE"})
     assert result["status"] == "not_measured", result
@@ -953,13 +1162,23 @@ def run_mutations():
          "    return _guard_destination(path, include_candidate=True)",
          "    return _guard_destination(path, include_candidate=False)", directory_root_lock),
         ("provider_home_allocates_without_private_acl",
-         "    if not _private_provider_directory_acl_available():\n"
-         "        raise OSError(\"private provider directory ACL unavailable\")\n"
+         "    _preflight_private_provider_storage()\n"
          "    base = _trusted_provider_temp_base()",
-         "    if False:\n"
-         "        raise OSError(\"private provider directory ACL unavailable\")\n"
+         "    if False: _preflight_private_provider_storage()\n"
          "    base = _trusted_provider_temp_base()",
          provider_private_acl_unavailable_lock),
+        ("provider_acl_preflight_after_credential_read",
+         "    try:\n"
+         "        _preflight_private_provider_storage()\n"
+         "    except OSError:\n"
+         "        return _result(\"not_measured\", reason=\"provider_storage_unavailable\")\n"
+         "    token = source.get(\"CLAUDE_CODE_OAUTH_TOKEN\")",
+         "    token = source.get(\"CLAUDE_CODE_OAUTH_TOKEN\")\n"
+         "    try:\n"
+         "        _preflight_private_provider_storage()\n"
+         "    except OSError:\n"
+         "        return _result(\"not_measured\", reason=\"provider_storage_unavailable\")",
+         provider_acl_unavailable_precedes_credential_read_lock),
         ("provider_home_honors_ambient_temp_root",
          '        root = Path(tempfile.mkdtemp(prefix="tl-provider-home-", dir=base))',
          '        root = Path(tempfile.mkdtemp(prefix="tl-provider-home-", dir=None))',
@@ -969,11 +1188,10 @@ def run_mutations():
          "            shutil.rmtree(root, ignore_errors=True)",
          provider_cleanup_lock),
         ("provider_probe_uses_ambient_PATH_argv0",
-         "                argv = _provider_argv(\n"
-         "                    bound, [\"-p\", f\"Print exactly: {marker}\"])\n"
-         "                p = subprocess.run(argv,",
-         "                argv = [\"claude\", \"-p\", f\"Print exactly: {marker}\"]\n"
-         "                p = subprocess.run(argv,",
+         "                p = _run_provider(\n"
+         "                    bound, [\"-p\", f\"Print exactly: {marker}\"],",
+         "                p = subprocess.run(\n"
+         "                    [\"claude\", \"-p\", f\"Print exactly: {marker}\"],",
          provider_executable_lock),
         ("claude_local_login_config_error_becomes_rejected",
          "    if _claude_refusal_evidenced(combined):",
@@ -1146,6 +1364,28 @@ def run_mutations():
                     '    return ("direct", (), (), [])',
                     provider_executable_lock,
                 ),
+                (
+                    "provider_metadata_identity_accepts_same_size_rewrite",
+                    '        last_write, creation, digest.hexdigest(),\n'
+                    '    )',
+                    '        last_write, creation,\n'
+                    '    )',
+                    provider_handle_cleanup_and_upgrade_lock,
+                ),
+                (
+                    "provider_handle_released_before_createprocess",
+                    '        argv = provider_argv(bound, arguments)\n'
+                    '        return factory(argv, **kwargs)\n'
+                    '    finally:\n'
+                    '        _release_windows_provider_handles(handles)',
+                    '        argv = provider_argv(bound, arguments)\n'
+                    '        _release_windows_provider_handles(handles)\n'
+                    '        handles.clear()\n'
+                    '        return factory(argv, **kwargs)\n'
+                    '    finally:\n'
+                    '        _release_windows_provider_handles(handles)',
+                    provider_identity_held_through_createprocess_lock,
+                ),
             ))
         original_globals = {
             "bind_provider_executable": m.bind_provider_executable,
@@ -1188,8 +1428,12 @@ def run():
     directory_root_lock(m)
     provider_executable_lock(m)
     windows_pre313_provider_binding_lock(m)
+    provider_identity_held_through_createprocess_lock(m)
+    provider_support_identity_held_through_createprocess_lock(m)
+    provider_handle_cleanup_and_upgrade_lock(m)
     provider_home_lock(m)
     provider_private_acl_unavailable_lock(m)
+    provider_acl_unavailable_precedes_credential_read_lock(m)
     provider_cleanup_lock(m)
     missing_parent_capability_lock(m)
     secret_write_cleanup_lock(m)
@@ -1608,9 +1852,10 @@ os.write(1,b'A'*180 + b'\\n')
         except OSError: pass
 
         seen = []
-        def fake_run(cmd, **kw):
-            seen.append((cmd, kw)); return mock.Mock(returncode=0, stdout="", stderr="")
-        with mock.patch.object(m.subprocess, "run", side_effect=fake_run):
+        def fake_run(bound, arguments, **kw):
+            seen.append((m._provider_argv(bound, arguments), kw))
+            return mock.Mock(returncode=0, stdout="", stderr="")
+        with mock.patch.object(m, "_run_provider", side_effect=fake_run):
             result = m.github_probe("o/r", env={"GITHUB_PAT": "GH_CANARY",
                 "CODEX_AUTH_JSON": "CODEX_CANARY", "CLAUDE_CODE_OAUTH_TOKEN": "CLAUDE_CANARY",
                 "TL_MASTER_KEY": "TL_CANARY", "GITHUB_TOKEN": "OTHER_GH_CANARY",
@@ -1627,25 +1872,25 @@ os.write(1,b'A'*180 + b'\\n')
         for code in (401, 403, 404):
             denied = mock.Mock(returncode=1,
                 stdout=f"HTTP/2 {code}\nX-GitHub-Request-Id: FIXTURE\n", stderr="")
-            with mock.patch.object(m.subprocess, "run", return_value=denied):
+            with mock.patch.object(m, "_run_provider", return_value=denied):
                 assert m.github_probe("o/r", env={"GITHUB_PAT": "S",
                     "PATH": str(bindir)})["status"] == "rejected"
         proxy_403 = mock.Mock(returncode=1, stdout="HTTP/1.1 403 Forbidden\n", stderr="")
-        with mock.patch.object(m.subprocess, "run", return_value=proxy_403):
+        with mock.patch.object(m, "_run_provider", return_value=proxy_403):
             assert m.github_probe("o/r", env={"GITHUB_PAT": "S",
                 "PATH": str(bindir)})["status"] == "not_measured"
         assert m.github_probe("o/r", env={"PATH": str(bindir)})["status"] == "missing"
 
         marker = "TRALUAT-CLAUDE-CREDENTIAL-OK"
         good = mock.Mock(returncode=0, stdout=marker + "\n", stderr="")
-        with mock.patch.object(m.subprocess, "run", return_value=good) as run_child:
+        with mock.patch.object(m, "_run_provider", return_value=good) as run_child:
             assert m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "CLAUDE_CANARY",
                 "CODEX_AUTH_JSON": "CODEX_CANARY", "GITHUB_PAT": "GH_CANARY",
                 "TL_MASTER_KEY": "TL_CANARY", "ANTHROPIC_API_KEY": "VENDOR_CANARY",
                 "HOME": "/home/test", "PATH": str(bindir)})["status"] == "passed"
         command, kwargs = run_child.call_args
-        assert command[0][-2] == "-p" and kwargs["stdin"] is m.subprocess.DEVNULL
-        assert "CANARY" not in repr(command)
+        assert command[1][0] == "-p" and kwargs["stdin"] is m.subprocess.DEVNULL
+        assert "CANARY" not in repr(command[:2])
         assert kwargs["env"].get("CLAUDE_CODE_OAUTH_TOKEN") == "CLAUDE_CANARY"
         assert kwargs["env"].get("PATH") == str(bindir.resolve())
         assert kwargs["env"]["HOME"] != "/home/test"
@@ -1654,16 +1899,17 @@ os.write(1,b'A'*180 + b'\\n')
                                       "TMPDIR", "TMP", "TEMP",
                                       "CLAUDE_CODE_OAUTH_TOKEN"}
         no_marker = mock.Mock(returncode=0, stdout="done\n", stderr="")
-        with mock.patch.object(m.subprocess, "run", return_value=no_marker):
+        with mock.patch.object(m, "_run_provider", return_value=no_marker):
             missing_marker = m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S",
                 "PATH": str(bindir)})
         assert missing_marker == {"status": "not_measured",
                                   "reason": "marker_missing", "returncode": 0}
         refused = mock.Mock(returncode=1, stdout="", stderr="401 unauthorized")
-        with mock.patch.object(m.subprocess, "run", return_value=refused):
+        with mock.patch.object(m, "_run_provider", return_value=refused):
             assert m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S",
                 "PATH": str(bindir)})["status"] == "rejected"
-        with mock.patch.object(m.subprocess, "run", side_effect=m.subprocess.TimeoutExpired("claude", 1)):
+        with mock.patch.object(m, "_run_provider",
+                               side_effect=m.subprocess.TimeoutExpired("claude", 1)):
             assert m.claude_probe(env={"CLAUDE_CODE_OAUTH_TOKEN": "S",
                 "PATH": str(bindir)})["status"] == "not_measured"
 

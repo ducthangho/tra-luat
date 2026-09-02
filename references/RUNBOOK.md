@@ -155,8 +155,10 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > PATH/PATHEXT. Provider child từ generic run chỉ nhận credential của chính provider và PATH
 > sanitized; credential ambient của provider khác không được kế thừa, còn generic non-provider
 > giữ contract môi trường cũ. Sau đó dùng cùng bound target
-> cho chốt Codex, transport record, capability probe và final spawn; identity không resolve
-> được hoặc mơ hồ thì fail trước child. Writer giữ **actual opened parent
+> cho chốt Codex, transport record, capability probe và final spawn. Provider credential-bearing
+> đã nhận diện mà không có bound capability hợp lệ không thể dùng probe override để tới final spawn:
+> launcher ghi đúng một ledger `pre_execution_provider` có cấu trúc và chạy zero child. Chỉ generic
+> non-provider thiếu lệnh mới giữ probe-override cùng full ambient environment. Writer giữ **actual opened parent
 > capability** đã kiểm và làm toàn bộ create/chmod/fsync/replace tương đối với capability
 > ấy; không quay lại đường dẫn. Riêng shared session credential writer giữ identity của inode
 > ngay sau `O_CREAT|O_EXCL`, trước chmod/write/flush/fsync. Lỗi về sau của shared writer,
@@ -181,7 +183,9 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > chỉ dùng hierarchy private do process tạo từ trusted OS temp base (`/tmp` hoặc Windows
 > Shell LocalAppData, không theo ambient `TMPDIR`/`TMP`/`TEMP`). Child bị bind `HOME`, mọi
 > XDG root và cả ba temp vars vào hierarchy đó; permission/repository/symlink/reparse không
-> kiểm chắc được thì fail trước child. Cleanup quarantine rồi đối chiếu đúng identity root đã cấp,
+> kiểm chắc được thì fail trước child. Claude/GitHub bind provider trước, rồi preflight khả năng ACL
+> private **trước mọi** credential mapping/token-file read, trusted-temp lookup, allocation hay child;
+> allocation kiểm lại lần nữa để phòng thủ nhiều lớp. Cleanup quarantine rồi đối chiếu đúng identity root đã cấp,
 > kiểm lỗi xoá và residual; root bị đổi thành link/junction/reparse không được đưa cho recursive
 > delete. Cleanup raise hoặc còn residual luôn hạ kết quả thành `not_measured`, kể cả inner call vừa
 > định trả thành công. Chốt này không chống actor đồng thời cùng OS principal
@@ -217,9 +221,13 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > POSIX cho phép symlink alias tới regular executable, nhưng shebang phải resolve thành interpreter tuyệt đối
 > đã bind (kể cả `#!/usr/bin/env node` chỉ khi có đúng một `node`). Windows chỉ dò `.com/.exe/.bat/.cmd`;
 > `.cmd` chỉ được nhận khi đúng npm shim và bind được cả `node.exe` lẫn JS entry, rồi launch hai file tuyệt đối
-> ấy trực tiếp; script/shim khác fail closed. Provider và mọi launch-support identity đều được kiểm lại ngay
-> trước spawn; argv0 và PATH child đều tuyệt đối/sanitized. Candidate/support thiếu, mơ hồ, không tin cậy hoặc bị thay đổi ⇒ zero child,
-> `not_measured`; invocation kế tiếp tự bind bản nâng cấp mới. Secret không xuất hiện trong argv/report.
+> ấy trực tiếp; script/shim khác fail closed. Trên Windows, ngay trước spawn, executable và mọi npm
+> shim/interpreter/JS support identity được mở thành exact-object handle không kế thừa, deny write/delete sharing,
+> rồi kiểm metadata + content digest từ chính handle đang giữ. Handle sống qua lúc `CreateProcessW` trả về và đóng
+> trên cả success/failure ngay sau process creation, không khóa suốt đời child. Vì vậy rewrite cùng size rồi phục hồi
+> timestamp vẫn bị từ chối; invocation độc lập kế tiếp vẫn bind được nâng cấp thật. POSIX giữ immediate identity
+> revalidation. argv0 và PATH child đều tuyệt đối/sanitized. Candidate/support thiếu, mơ hồ, không tin cậy hoặc bị
+> thay đổi ⇒ zero child, `not_measured`. Secret không xuất hiện trong argv/report.
 > Writer NLM/GWS ghi identity ngay sau `O_EXCL` trước chmod, giữ inode đó mở qua cleanup để chặn tái sử dụng
 > `(dev, ino)`, và giữ cả tên temp/final cho đến khi parent-directory fsync thành công. Lỗi từ chmod đến
 > directory fsync (kể cả `EINVAL`/`ENOTSUP`/`EIO`) chỉ xoá đúng inode của writer, bảo toàn replacement

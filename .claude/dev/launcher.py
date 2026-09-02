@@ -97,8 +97,10 @@ from provider_exec import (
     bind_provider_executable as _bind_provider_executable,
     bind_provider_path as _bind_provider_path,
     bound_provider_source as _bound_provider_source,
+    popen_bound_provider as _popen_bound_provider,
     provider_argv as _provider_argv,
     revalidate_bound_provider as _revalidate_provider,
+    run_bound_provider as _run_bound_provider,
 )
 from session_credentials import (
     UnsafeSecretDestination as _UnsafeSecretDestination,
@@ -195,6 +197,14 @@ def _provider_child_env(source: dict[str, str], bound, provider: str) -> dict[st
             required[key] = value
     return _provider_child_base(
         _bound_provider_source(source, bound), **required)
+
+
+def _provider_popen(bound, arguments, **kwargs):
+    return _popen_bound_provider(bound, arguments, **kwargs)
+
+
+def _provider_run(bound, arguments, **kwargs):
+    return _run_bound_provider(bound, arguments, **kwargs)
 
 _EXECUTABLE_SUFFIXES = (".exe", ".cmd", ".bat", ".com")
 
@@ -1241,6 +1251,30 @@ def _probe_spawn(chuong_trinh: str, ws: str) -> dict:
     return {"trang_thai": "DO", "chi_tiet": f"rc={p.returncode}; output={len(ra)} ky tu"}
 
 
+def _probe_provider_spawn(identity: dict, ws: str) -> dict:
+    """Probe a bound provider with its scoped environment and held identity."""
+    bound = identity.get("provider_capability")
+    provider_name = _BOUND_PROVIDER_NAMES.get(identity.get("provider"))
+    if bound is None or provider_name is None:
+        return {"trang_thai": "KHONG_DO_DUOC",
+                "chi_tiet": "provider executable capability unavailable"}
+    try:
+        child = _provider_child_env(dict(os.environ), bound, provider_name)
+        p = _provider_run(
+            bound, ["--version"], capture_output=True, text=True,
+            encoding="utf-8", errors="replace", env=child,
+            stdin=subprocess.DEVNULL, timeout=30, cwd=ws)
+    except (OSError, subprocess.SubprocessError, _ProviderExecutableError) as exc:
+        return {"trang_thai": "DO",
+                "chi_tiet": f"spawn --version: {type(exc).__name__}"}
+    output = (p.stdout or "") + (p.stderr or "")
+    if p.returncode == 0 and bool(output.strip()):
+        return {"trang_thai": "DAT",
+                "chi_tiet": f"rc=0; output={len(output.encode('utf-8'))}B"}
+    return {"trang_thai": "DO",
+            "chi_tiet": f"rc={p.returncode}; output={len(output)} ky tu"}
+
+
 def _probe_trust_claude(ws: str, home: Path | None = None) -> dict:
     try:
         data = json.loads(((home or Path.home()) / ".claude.json").read_text(encoding="utf-8"))
@@ -1269,8 +1303,11 @@ def chay_cac_probe(ws: str, identity: dict, bo_qua: str | None) -> tuple[dict, s
         raise Chan(MA_PROBE, f"provider executable changed: {exc.reason}", {
             "provider_executable": {
                 "trang_thai": "KHONG_DO_DUOC", "chi_tiet": exc.reason}}) from None
+    spawn = (_probe_provider_spawn(identity, ws)
+             if identity.get("provider_capability") is not None
+             else _probe_spawn(str(lenh[0]), ws))
     ds = {"workspace": _probe_workspace(ws), "ghi": _probe_ghi(ws),
-          "spawn": _probe_spawn(str(lenh[0]), ws)}
+          "spawn": spawn}
     if identity.get("provider") == "anthropic_claude":
         ds["claude_trust"] = _probe_trust_claude(ws)
     ly_do = bo_qua.strip() if bo_qua is not None else None
@@ -1639,6 +1676,32 @@ def _chan_run_codex(identity) -> None:
     if reason:
         raise Chan(MA_CHUA_XAC_THUC, reason)
 
+
+def _require_bound_provider_for_run(a, kq: dict, identity: dict) -> None:
+    """Fail closed and ledger a recognized provider lacking its capability."""
+    provider_name = _BOUND_PROVIDER_NAMES.get(identity.get("provider"))
+    if provider_name is None or identity.get("provider_capability") is not None:
+        return
+    reason = "provider_executable_missing"
+    run_root = Path(a.run_root).expanduser().resolve()
+    rid, sid = _cap_id(run_root)
+    now = _bay_gio().isoformat()
+    _ghi_so(run_root / sid, {
+        "version": VERSION, "run_id": rid, "short_id": sid, "ten": a.name,
+        "lenh": _tom_tat_lenh(identity["argv"]), "trang_thai": "hong",
+        "giai_doan": "pre_execution_provider",
+        "bat_dau_utc": now, "ket_thuc_utc": now, "ma_thoat": MA_THAM_SO,
+        "ly_do_dung": reason, "pid": None, "khoa_danh_tinh": None,
+        **kq, **_dinh_danh_van_chuyen(identity),
+        "pre_execution": {
+            "provider_capability": {
+                "status": "not_measured", "reason": reason,
+            },
+        },
+        "bo_qua_probe_ly_do": None,
+    })
+    raise Chan(MA_THAM_SO, f"khong bind duoc provider executable: {reason}")
+
 def lenh_check(a) -> int:
     kq = chay_cac_chot(a)
     if a.json:
@@ -1664,6 +1727,9 @@ def lenh_run(a) -> int:
     kq = chay_cac_chot(a)
     identity = _resolve_executable_identity(a.lenh, kq["workspace"])
     bound_argv = identity["argv"]
+    bound_arguments = (list(identity.get("provider_arguments", ()))
+                       if identity.get("provider_capability") is not None else None)
+    _require_bound_provider_for_run(a, kq, identity)
     _chan_run_codex(identity)
     try:
         probe, ly_do_bo_qua = chay_cac_probe(
@@ -1748,6 +1814,10 @@ def lenh_run(a) -> int:
         ban_ghi["prompt_ban_chup"] = str(ban_chup)
         if any("{PROMPT_FILE}" in x for x in lenh_con):
             lenh_con = [x.replace("{PROMPT_FILE}", str(ban_chup)) for x in lenh_con]
+            if bound_arguments is not None:
+                bound_arguments = [
+                    x.replace("{PROMPT_FILE}", str(ban_chup))
+                    for x in bound_arguments]
             ban_ghi["prompt_kin_hoan_toan"] = True
         else:
             ban_ghi["prompt_kin_hoan_toan"] = False
@@ -1803,8 +1873,26 @@ def lenh_run(a) -> int:
     try:
         if provider_child is not None:
             them["env"] = provider_child
-        p = subprocess.Popen(lenh_con, cwd=kq["workspace"],
-                             stdout=f_out, stderr=f_err, stdin=subprocess.DEVNULL, **them)
+        if bound is not None:
+            p = _provider_popen(
+                bound, bound_arguments or (), cwd=kq["workspace"],
+                stdout=f_out, stderr=f_err, stdin=subprocess.DEVNULL, **them)
+        else:
+            p = subprocess.Popen(
+                lenh_con, cwd=kq["workspace"], stdout=f_out, stderr=f_err,
+                stdin=subprocess.DEVNULL, **them)
+    except _ProviderExecutableError as exc:
+        ban_ghi.update(
+            trang_thai="hong", giai_doan="pre_execution_provider",
+            ma_thoat=MA_THAM_SO,
+            ly_do_dung=f"provider executable changed: {exc.reason}",
+            ket_thuc_utc=_bay_gio().isoformat(),
+            pre_execution={"provider_capability": {
+                "status": "not_measured", "reason": exc.reason}})
+        _ghi_so(thu_muc, ban_ghi, khoa_ky)
+        f_out.close(); f_err.close()
+        raise Chan(
+            MA_THAM_SO, f"provider executable changed: {exc.reason}") from None
     except (OSError, ValueError) as e:
         ban_ghi.update(trang_thai="hong", ly_do_dung=f"khong chay duoc lenh: {e}",
                        ket_thuc_utc=_bay_gio().isoformat())
@@ -2906,12 +2994,11 @@ def _do_codex_song(han_giay: int = 90, duong_dan: str | None = None,
                 bound = _bind_launcher_provider("codex", source)
         child = _provider_child_env(source, bound, "codex")
         with open(os.devnull) as rong:
-            argv = _provider_argv(
-                bound, ["exec", "--skip-git-repo-check", "in ra: ok"])
-            p = subprocess.run(argv,
-                               stdin=rong, capture_output=True, text=True,
-                               timeout=han_giay, encoding="utf-8", errors="replace",
-                               env=child)
+            p = _provider_run(
+                bound, ["exec", "--skip-git-repo-check", "in ra: ok"],
+                stdin=rong, capture_output=True, text=True,
+                timeout=han_giay, encoding="utf-8", errors="replace",
+                env=child)
     except subprocess.TimeoutExpired:
         return (False, f"qua han {han_giay}s")
     except (OSError, subprocess.SubprocessError, _ProviderExecutableError) as e:
@@ -2955,9 +3042,9 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
         # Một `doctor` mà hai probe của nó phân giải cùng một tên ra hai kết quả
         # ngược nhau là doctor tự mâu thuẫn; mọi spawn CLI agent (.cmd shim của
         # npm) phải đi qua đường dẫn resolve.
-        argv = _provider_argv(bound, ["login", "status"])
-        p = subprocess.run(argv, capture_output=True, text=True, timeout=30,
-                           encoding="utf-8", errors="replace", env=child)
+        p = _provider_run(
+            bound, ["login", "status"], capture_output=True, text=True, timeout=30,
+            encoding="utf-8", errors="replace", env=child)
         ra = ((p.stdout or "") + (p.stderr or ""))
         rc = p.returncode
     except _ProviderExecutableError as e:
@@ -3336,11 +3423,10 @@ def _suc_khoe_mcp_github(ten: str = "github",
     try:
         bound = _bind_launcher_provider("claude", moi_truong)
         child = _provider_child_env(moi_truong, bound, "claude")
-        argv = _provider_argv(bound, ["mcp", "get", ten])
-        r = subprocess.run(argv, capture_output=True, text=True,
-                           encoding="utf-8", errors="replace",
-                           env=child, stdin=subprocess.DEVNULL,
-                           timeout=PROBE_TIMEOUT_GIAY)
+        r = _provider_run(
+            bound, ["mcp", "get", ten], capture_output=True, text=True,
+            encoding="utf-8", errors="replace", env=child,
+            stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)
     except _ProviderExecutableError as e:
         return ("khong_do_duoc", f"khong bind duoc `claude`: {e.reason}")
     except (OSError, subprocess.SubprocessError) as e:
@@ -3539,13 +3625,14 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     except _ProviderExecutableError as exc:
         bound_gh = None
         gh_bind_reason = exc.reason
+    gh_child = None
     if bound_gh is not None:
         try:
-            child = _provider_child_env(mt, bound_gh, "gh")
-            argv = _provider_argv(bound_gh, ["auth", "status"])
-            pg = subprocess.run(argv, capture_output=True, text=True,
-                                encoding="utf-8", errors="replace", env=child,
-                                stdin=subprocess.DEVNULL, timeout=20)
+            gh_child = _provider_child_env(mt, bound_gh, "gh")
+            pg = _provider_run(
+                bound_gh, ["auth", "status"], capture_output=True, text=True,
+                encoding="utf-8", errors="replace", env=gh_child,
+                stdin=subprocess.DEVNULL, timeout=20)
             duong.append(("gh-cli", pg.returncode == 0,
                           "da xac thuc" if pg.returncode == 0 else f"CHUA xac thuc (rc={pg.returncode})"))
         except _ProviderExecutableError as e:
@@ -3607,18 +3694,21 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
     # `shutil.which("gh")`, rồi `rest-chung`, giờ tới `gh auth status`. Ba lần thì
     # sai nằm ở ĐỊNH NGHĨA, không ở từng bản vá — nên "làm được việc" từ đây neo
     # vào một thao tác kho ĐÃ THÀNH CÔNG, không neo vào probe.
-    if shutil.which("gh") and slug:
+    if bound_gh is not None and gh_child is not None and slug:
         try:
-            pk = subprocess.run(["gh", "api", f"repos/{slug}", "--jq", ".full_name"],
-                                capture_output=True, text=True,
-                                encoding="utf-8", errors="replace", env=mt,
-                                stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)
+            pk = _provider_run(
+                bound_gh, ["api", f"repos/{slug}", "--jq", ".full_name"],
+                capture_output=True, text=True, encoding="utf-8", errors="replace",
+                env=gh_child, stdin=subprocess.DEVNULL,
+                timeout=PROBE_TIMEOUT_GIAY)
             duong.append(("gh-kho", pk.returncode == 0 and bool((pk.stdout or "").strip()),
                           "doc duoc kho" if pk.returncode == 0 else f"rc={pk.returncode}"))
-        except (OSError, subprocess.SubprocessError) as e:
+        except (OSError, subprocess.SubprocessError, _ProviderExecutableError) as e:
             duong.append(("gh-kho", False, type(e).__name__))
-    elif shutil.which("gh"):
+    elif bound_gh is not None:
         duong.append(("gh-kho", False, "khong doc duoc slug origin"))
+    else:
+        duong.append(("gh-kho", False, f"khong bind duoc: {gh_bind_reason}"))
 
     # --- MCP: ĐƯỜNG KHO THẬT SỰ DÙNG, và tới bản này mới ĐO thay vì khai trong chú thích.
     # Hai bước tách bạch, vì chúng hỏng khác nhau và chữa khác nhau:

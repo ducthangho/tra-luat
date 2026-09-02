@@ -65,7 +65,8 @@ from provider_exec import (
     ProviderExecutableError as _ProviderExecutableError,
     bind_provider_executable as _bind_provider_executable,
     bound_provider_source as _bound_provider_source,
-    provider_argv as _provider_argv,
+    popen_bound_provider as _popen_bound_provider,
+    run_bound_provider as _run_bound_provider,
 )
 from session_credentials import (
     UnsafeSecretDestination as _UnsafeSecretDestination,
@@ -197,9 +198,9 @@ def _chay_device_auth(codex_home: Path, han_giay: int, bound) -> tuple[bool, str
         return (False, f"provider storage không an toàn: {type(e).__name__}")
     chu, con = pty.openpty()  # sự thật (2): không có TTY thì codex im lặng hoàn toàn
     try:
-        argv = _provider_argv(bound, ["login", "--device-auth"])
-        p = subprocess.Popen(argv,
-                             stdin=con, stdout=con, stderr=con, env=moi, close_fds=True)
+        p = _popen_bound_provider(
+            bound, ["login", "--device-auth"], stdin=con, stdout=con,
+            stderr=con, env=moi, close_fds=True)
     except (OSError, _ProviderExecutableError) as e:
         os.close(chu); os.close(con)
         return (False, f"không chạy được codex: {type(e).__name__}: {e}")
@@ -286,13 +287,12 @@ def _kiem_song_checked(auth: Path, bound) -> LiveResult:
                     f"provider storage không an toàn: {type(e).__name__}")
             try:
                 with open(os.devnull) as rong:
-                    argv = _provider_argv(
+                    p = _run_bound_provider(
                         bound, ["exec", "--skip-git-repo-check",
-                                f"In ra dung mot tu: {DAU_HIEU_SONG}"])
-                    p = subprocess.run(argv,
-                                       stdin=rong, capture_output=True, text=True, env=moi,
-                                       timeout=HAN_KIEM_SONG_GIAY, encoding="utf-8",
-                                       errors="replace")
+                                f"In ra dung mot tu: {DAU_HIEU_SONG}"],
+                        stdin=rong, capture_output=True, text=True, env=moi,
+                        timeout=HAN_KIEM_SONG_GIAY, encoding="utf-8",
+                        errors="replace")
             except subprocess.TimeoutExpired:
                 return _live_result(
                     LiveStatus.NOT_MEASURED, f"quá hạn {HAN_KIEM_SONG_GIAY}s")

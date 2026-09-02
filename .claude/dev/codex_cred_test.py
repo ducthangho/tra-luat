@@ -47,7 +47,12 @@ def cai_provider_gia(M):
     """Use an inert typed-capability adapter; individual cases control `_co_codex`."""
     class Bound:
         def __init__(self, executable):
+            self.provider = "codex"
+            self.kind = "direct"
             self.executable = Path(executable)
+            self.launch_support = ()
+            self.launch_arguments = ()
+            self.identities = ()
             self.sanitized_path = str(self.executable.parent)
 
     def bind(_source=None):
@@ -680,12 +685,12 @@ def t18_kiem_song_CODEX_HOME_thuong_dung_provider_home_rieng(M):
         yield  # pragma: no cover - makes this a contextmanager
 
     M._shared_private_provider_home = unavailable_private_home
-    real_subprocess_run = M.subprocess.run
-    M.subprocess.run = lambda *_a, **_k: child_started.append(True)
+    real_provider_run = M._run_bound_provider
+    M._run_bound_provider = lambda *_a, **_k: child_started.append(True)
     try:
         result = M._kiem_song(codex_home)
     finally:
-        M.subprocess.run = real_subprocess_run
+        M._run_bound_provider = real_provider_run
     assert result.status is M.LiveStatus.NOT_MEASURED \
         and "provider storage" in result.reason, result
     assert child_started == [], "live check spawned before private provider allocation passed"
@@ -783,7 +788,7 @@ def t19_kiem_song_guard_dich_truoc_doc_cap_phat_va_child(M):
         M._shared_read_secret_bytes = read_secret
         M._shared_private_provider_home = observed_provider
         M._shared_provider_child_env = child_env
-        M.subprocess.run = child_run
+        M._run_bound_provider = child_run
         result = M._kiem_song(alias_home)
         assert _gia_tri_trang_thai_song(result) == "passed", result
         assert events == [
@@ -834,9 +839,9 @@ def t20_kiem_song_ba_trang_thai_dong_va_caller_khong_truthiness(M):
         M._co_codex = lambda: cli
         M._shared_private_provider_home = provider_factory
         if isinstance(outcome, BaseException):
-            M.subprocess.run = lambda *_a, **_k: (_ for _ in ()).throw(outcome)
+            M._run_bound_provider = lambda *_a, **_k: (_ for _ in ()).throw(outcome)
         else:
-            M.subprocess.run = lambda *_a, **_k: outcome
+            M._run_bound_provider = lambda *_a, **_k: outcome
         return _gia_tri_trang_thai_song(M._kiem_song(root))
 
     cases = {

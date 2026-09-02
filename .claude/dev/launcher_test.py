@@ -29,6 +29,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from types import SimpleNamespace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -125,6 +126,16 @@ def tao_claude_gia(goc: Path) -> Path:
     if not LA_WINDOWS:
         dich.chmod(0o755)
     return dich
+
+
+def _provider_fixture(name: str, path: str | Path | None = None):
+    """Inert bound capability for tests that replace the provider spawn seam."""
+    executable = Path(path or PY).resolve(strict=False)
+    return SimpleNamespace(
+        provider=name, kind="direct", executable=executable,
+        launch_support=(), launch_arguments=(), identities=(),
+        sanitized_path=str(executable.parent),
+    )
 
 
 def moi_truong_provider_gia(home: Path, executable: Path) -> dict[str, str]:
@@ -2313,13 +2324,14 @@ def t85_do_codex_khong_duoc_fail_open_khi_dong_dau_la_canh_bao():
     # This case measures status-line parsing, not the repository policy flag.
     # Empty fixture environments on Windows cannot resolve ``~`` at all.
     m._co_chan_codex = lambda: None
+    m._bind_launcher_provider = lambda *_a, **_k: _provider_fixture("codex")
 
     def _ra(rc, text):
         class P:
             returncode = rc
             stdout = text
             stderr = ""
-        m.subprocess.run = lambda *_a, **_k: P()
+        m._provider_run = lambda *_a, **_k: P()
 
     canh_bao = ("WARNING: proceeding, even though we could not create PATH "
                 "aliases: Refusing to create helper binaries\n")
@@ -2965,7 +2977,8 @@ def t93_do_codex_khong_duoc_nang_nhan_vuot_qua_bang_chung():
         returncode = 0
         stdout = "Logged in using ChatGPT\n"
         stderr = ""
-    m.subprocess.run = lambda *_a, **_k: P()
+    m._bind_launcher_provider = lambda *_a, **_k: _provider_fixture("codex")
+    m._provider_run = lambda *_a, **_k: P()
 
     # (a) token con han, KHONG kiem song => CO_CREDENTIAL, TUYET DOI khong DUNG_DUOC
     m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
@@ -3021,7 +3034,8 @@ def t94_canh_bao_TRUOC_khi_credential_het_han():
         returncode = 0
         stdout = "Logged in using ChatGPT\n"
         stderr = ""
-    m.subprocess.run = lambda *_a, **_k: P()
+    m._bind_launcher_provider = lambda *_a, **_k: _provider_fixture("codex")
+    m._provider_run = lambda *_a, **_k: P()
 
     def dat(gio_con_lai, tuoi):
         m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
@@ -3099,7 +3113,8 @@ def t96_kiem_song_phai_chay_KE_CA_khi_sap_het_han():
         returncode = 0
         stdout = "Logged in using ChatGPT\n"
         stderr = ""
-    m.subprocess.run = lambda *_a, **_k: P()
+    m._bind_launcher_provider = lambda *_a, **_k: _provider_fixture("codex")
+    m._provider_run = lambda *_a, **_k: P()
     m._han_token_codex = lambda: {"doc_duoc": True, "last_refresh": "x",
                                   "tuoi_anh_chup_gio": 40.0,
                                   "gio_con_lai": {"access_token": 199.0}}
@@ -3504,20 +3519,21 @@ def t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec():
 
     m._git = gia_git
     m.shutil.which = lambda t: "/gia/gh" if t == "gh" else None
+    m._bind_launcher_provider = lambda *_a, **_k: _provider_fixture("gh", "/gia/gh")
 
     class P:
         def __init__(self, rc, out=""):
             self.returncode, self.stdout, self.stderr = rc, out, ""
 
     # gh CO va DA XAC THUC, nhung thao tac muc kho HONG; REST kho cung hong.
-    def chay(cmd, **_k):
-        if Path(cmd[0]).name == "gh" and cmd[1:3] == ["auth", "status"]:
+    def chay(_bound, arguments, **_k):
+        if list(arguments[:2]) == ["auth", "status"]:
             return P(0, "Logged in")
-        if Path(cmd[0]).name == "gh" and cmd[1:2] == ["api"]:
+        if list(arguments[:1]) == ["api"]:
             return P(1)                      # 403 o duong viec that
         return P(1)
 
-    m.subprocess.run = chay
+    m._provider_run = chay
     m._do_rest_github = lambda url, **_k: (
         ("mo", "HTTP 200", True) if "rate_limit" in url else ("chan", "HTTP 403", False))
     nhan, mo_ta = m._do_github("/gia/ws")     # co ws de lay slug, nhung git se hong
@@ -3525,11 +3541,11 @@ def t111_gh_da_xac_thuc_KHONG_phai_bang_chung_lam_duoc_viec():
          f"gh xac thuc + rate_limit mo ma da goi la DUNG_DUOC: {nhan} | {mo_ta}")
 
     # Chieu NGUOC: thao tac muc kho THANH CONG thi phai la DUNG_DUOC.
-    def chay2(cmd, **_k):
-        if Path(cmd[0]).name == "gh" and cmd[1:2] == ["api"]:
+    def chay2(_bound, arguments, **_k):
+        if list(arguments[:1]) == ["api"]:
             return P(0, "o/r\n")
         return P(0, "Logged in")
-    m.subprocess.run = chay2
+    m._provider_run = chay2
     nhan2, mo_ta2 = m._do_github("/gia/ws")
     bang(nhan2 == "DUNG_DUOC", f"thao tac kho thanh cong ma van CHUA_XAC_THUC: {nhan2} | {mo_ta2}")
 
@@ -3600,16 +3616,17 @@ def t113_probe_github_phai_nhan_credential_DA_CHUAN_HOA():
 
     m._git = gia_git
     m.shutil.which = lambda t: "/gia/gh" if t == "gh" else None
+    m._bind_launcher_provider = lambda *_a, **_k: _provider_fixture("gh", "/gia/gh")
     m.os.environ = {"GH_TOKEN": "GIU_CHO"}          # bản CŨ, chưa chuẩn hoá
 
     class P:
         returncode, stdout, stderr = 0, "o/r", ""
 
-    def chay(cmd, **k):
+    def chay(_bound, _arguments, **k):
         thay.setdefault("env", []).append((k.get("env") or {}).get("GH_TOKEN"))
         return P()
 
-    m.subprocess.run = chay
+    m._provider_run = chay
     m._do_rest_github = lambda url, **k: (
         thay.setdefault("tok", []).append(k.get("token")) or ("mo", "HTTP 200", True))
 
@@ -3688,6 +3705,8 @@ def t103_nam_finding_cua_bot_review_PR128():
     # ve chuoi rong vi van dang dung ban gia cua phan (b). Giu ban goc, tra lai ngay.
     goc_run = m.subprocess.run
     goi = []
+    m._bind_launcher_provider = lambda *_a, **_k: _provider_fixture("gh", "/gia/gh")
+    m._do_rest_github = lambda *_a, **_k: ("chan", "fixture", False)
 
     class Rc:
         def __init__(self, rc):
@@ -3705,7 +3724,7 @@ def t103_nam_finding_cua_bot_review_PR128():
     # duoc ten kho, tuc KHONG CO cach nao chung minh lam duoc viec — va "chua chung
     # minh duoc" phai doc la chua, khong duoc doc thanh dat.
     for rc_gh in (1, 0):
-        m.subprocess.run = lambda *_a, **_k: (goi.append(1), Rc(rc_gh))[1]
+        m._provider_run = lambda *_a, **_k: (goi.append(1), Rc(rc_gh))[1]
         tt, mo_ta = m._do_github(None)      # KHONG co workspace => khong co duong kho
         bang(tt != "DUNG_DUOC",
              f"gh rc={rc_gh} ma van goi la DUNG_DUOC khi chua lam noi viec gi: {mo_ta!r}")
@@ -3718,11 +3737,11 @@ def t103_nam_finding_cua_bot_review_PR128():
     m._git = lambda ws, *a: (0, "https://github.com/o/r.git", "")
     m._do_rest_github = lambda url, **_k: ("chan", "HTTP 403", False)
 
-    def chay_kho(cmd, **_k):
+    def chay_kho(_bound, _arguments, **_k):
         goi.append(1)
-        return Rc(0) if cmd[:2] == ["gh", "api"] else Rc(0)
+        return Rc(0)
 
-    m.subprocess.run = chay_kho
+    m._provider_run = chay_kho
     tt_kho, mo_ta_kho = m._do_github("/gia/ws")
     bang(tt_kho == "DUNG_DUOC",
          f"thao tac muc kho thanh cong ma van {tt_kho}: {mo_ta_kho!r}")
@@ -3798,7 +3817,12 @@ def t103_nam_finding_cua_bot_review_PR128():
             break
     if vo is None:
         return f"khong co bash CHAY DUOC tren nen nay (da thu: {ung_vien})"
-    r = subprocess.run([vo, "-c", kich], capture_output=True, text=True, timeout=30)
+    vo_path = Path(vo).resolve(strict=False)
+    shell_path = os.pathsep.join((
+        str(vo_path.parent), str(vo_path.parent.parent / "usr" / "bin")))
+    r = subprocess.run(
+        [vo, "-c", kich], capture_output=True, text=True, timeout=30,
+        env={**dict(os.environ), "PATH": shell_path})
     bang(r.stdout.strip() == "3 1",
          f"hinh dang pipeline khong dua duoc ma 3 toi co chan ({vo}): {r.stdout!r}")
 
@@ -3891,6 +3915,7 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
                "  Status: ⏸ Pending approval (run `claude` to approve)\n")
 
     goc_run, goc_which = m.subprocess.run, m.shutil.which
+    goc_bind, goc_provider_run = m._bind_launcher_provider, m._provider_run
     mcp_out, co_claude, nhat_ky = [KHOE], [True], []
     ten_mong_doi = ["github"]
     ENV_SENTINEL = [None]        # dat khi ca TU truyen env; None = goi theo mac dinh
@@ -3906,7 +3931,8 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
                  "encoding": "utf-8", "errors": "replace",
                  "timeout": m.PROBE_TIMEOUT_GIAY})
 
-    def gia_run(cmd, *_a, **_k):
+    def gia_run(bound, arguments, *_a, **_k):
+        cmd = [str(bound.executable), *map(str, arguments)]
         if list(cmd)[1:2] != ["mcp"]:
             return Rc(1)                       # gh/git: ngoai pham vi ca nay
         # DO GIA TU TU CHOI loi goi lech dac ta — chot TOAN PHAN, khong opt-in. Bon
@@ -3936,7 +3962,13 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
     m.shutil.which = lambda t, *a, **k: (
         ("/usr/bin/claude" if co_claude[0] else None) if t == "claude"
         else None if t == "gh" else goc_which(t, *a, **k))
-    m.subprocess.run = gia_run
+    def bind_fixture(name, _source):
+        if name == "claude" and co_claude[0]:
+            return _provider_fixture("claude", "/usr/bin/claude")
+        raise m._ProviderExecutableError("provider_executable_missing")
+
+    m._bind_launcher_provider = bind_fixture
+    m._provider_run = gia_run
     try:
         with tempfile.TemporaryDirectory() as td:
             def do(mong_goi=1, vi_tri=""):
@@ -4059,6 +4091,7 @@ def t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec():
             co_claude[0] = True
     finally:
         m.subprocess.run, m.shutil.which = goc_run, goc_which
+        m._bind_launcher_provider, m._provider_run = goc_bind, goc_provider_run
 
 
 @ca
@@ -4119,7 +4152,7 @@ def t117_moi_mau_dot_bien_phai_khop_DUNG_MOT_cho():
 
 @ca
 def t116_moi_ham_ca_phai_duoc_DANG_KY_bang_decorator():
-    """Mọi `def tNN_...`/`rNN_...` phải có `@ca` ngay trên — nếu không, ca KHÔNG CHẠY.
+    """Mọi ca đánh số hoặc packet-named lock phải có `@ca` ngay trên.
 
     VÌ SAO CÓ CA NÀY: tôi vừa tự gây ra đúng lỗi ấy khi chèn `t115`. Điểm chèn rơi vào
     GIỮA `@ca` và `def t101_...`, nên decorator của `t101` quay sang trang trí `t115`:
@@ -4142,14 +4175,20 @@ def t116_moi_ham_ca_phai_duoc_DANG_KY_bang_decorator():
     """
     import re as _re
     dong = Path(__file__).read_text(encoding="utf-8").splitlines()
-    ham = [(i, l) for i, l in enumerate(dong) if _re.match(r"^def [tr]\d+_", l)]
+    packet_locks = {
+        "unresolved_provider_override_zero_child_lock",
+        "generic_missing_command_override_behavior_lock",
+    }
+    ham = [(i, l) for i, l in enumerate(dong)
+           if (_re.match(r"^def [tr]\d+_", l)
+               or any(l.startswith(f"def {name}(") for name in packet_locks))]
     thieu = [l.split("(")[0][4:] for i, l in ham if i == 0 or dong[i - 1].strip() != "@ca"]
     bang(not thieu, f"ca co mat trong TEP ma KHONG duoc dang ky (thieu `@ca`): {thieu}")
     # ...va so ca DA DANG KY phai khop so ham. Hai phep dem doc lap: mot doc TEP, mot
     # doc bang `CA` da nap. Lech nhau nghia la co ca bi trang tri hai lan, hoac co
     # `@ca` gan cho thu khong phai ca.
     bang(len(ham) == len(CA),
-         f"{len(ham)} ham `tNN_/rNN_` nhung `CA` co {len(CA)} muc — co cho dang ky lech")
+         f"{len(ham)} ham ca nhung `CA` co {len(CA)} muc — co cho dang ky lech")
 
 
 @ca
@@ -4868,14 +4907,17 @@ def t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran():
     goi = []
     m.shutil.which = lambda t: "/gia/codex.cmd" if t == "codex" else None
     m._co_chan_codex = lambda: None
+    expected = str(Path("/gia/codex.cmd").resolve(strict=False))
+    m._bind_launcher_provider = lambda *_a, **_k: _provider_fixture("codex", expected)
 
     class PLoi:
         returncode, stdout, stderr = 1, "", "Not logged in"
 
+    m._provider_run = lambda bound, arguments, **_k: (
+        goi.append([str(bound.executable), *map(str, arguments)]) or PLoi())
     m.subprocess.run = lambda cmd, **_k: (goi.append(list(cmd)) or PLoi())
     tt, _mo_ta = m._do_codex()
     bang(tt in ("CHUA_XAC_THUC", "CAN_CHUAN_BI"), f"fixture lech: {tt}")
-    expected = str(Path("/gia/codex.cmd").resolve(strict=False))
     bang(goi and goi[0][0] == expected,
          f"_do_codex van spawn ten tran: {goi[:1]}")
 
@@ -4884,7 +4926,8 @@ def t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran():
     class POk:
         returncode, stdout, stderr = 0, "Logged in using ChatGPT", ""
 
-    m.subprocess.run = lambda cmd, **_k: (goi.append(list(cmd)) or POk())
+    m._provider_run = lambda bound, arguments, **_k: (
+        goi.append([str(bound.executable), *map(str, arguments)]) or POk())
     do_codex_song_goc = m._do_codex_song
     goi_song = []
 
@@ -4910,7 +4953,8 @@ def t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran():
 
     m._do_codex_song = do_codex_song_goc
     goi.clear()
-    m.subprocess.run = lambda cmd, **_k: (goi.append(list(cmd)) or POk())
+    m._provider_run = lambda bound, arguments, **_k: (
+        goi.append([str(bound.executable), *map(str, arguments)]) or POk())
     m._do_codex_song()
     bang(goi and goi[0][0] == expected,
          f"_do_codex_song van spawn ten tran: {goi[:1]}")
@@ -6336,15 +6380,15 @@ def r22_run_codex_tieu_thu_co_chan_truoc_probe_va_Popen():
         original_provider_argv = m._provider_argv
         original_revalidate_provider = m._revalidate_provider
         try:
-            m._bind_provider_path = lambda _name, path, _source, **_kwargs: {
-                "path": Path(path).resolve(strict=True)}
+            m._bind_provider_path = lambda name, path, _source, **_kwargs: (
+                _provider_fixture(name, Path(path).resolve(strict=True)))
             m._provider_argv = lambda bound, arguments: [
-                str(bound["path"]), *map(str, arguments)]
+                str(bound.executable), *map(str, arguments)]
             m._revalidate_provider = lambda _bound: None
             # Raw basename, absolute paths, PATH resolution, and Windows
             # PATHEXT/shim suffixes all identify the same Codex provider.
             forms = [
-                ("codex", None),
+                ("codex", str(resolved_codex)),
                 *((path, None) for path in provider_paths),
                 ("provider-shim", str(resolved_codex)),
             ]
@@ -6447,6 +6491,7 @@ def r23_run_codex_alias_phai_bind_target_mot_lan_cho_moi_consumer():
         original_block = m._co_chan_codex
         original_which = m.shutil.which
         original_popen = m.subprocess.Popen
+        original_provider_popen = m._provider_popen
         original_job = m._job_windows
         original_key = m._khoa_danh_tinh
         original_group = m._thanh_vien_nhom
@@ -6455,10 +6500,10 @@ def r23_run_codex_alias_phai_bind_target_mot_lan_cho_moi_consumer():
         original_revalidate_provider = m._revalidate_provider
         original_provider_child_env = m._provider_child_env
         try:
-            m._bind_provider_path = lambda _name, path, _source, **_kwargs: {
-                "path": Path(path).resolve(strict=True)}
+            m._bind_provider_path = lambda name, path, _source, **_kwargs: (
+                _provider_fixture(name, Path(path).resolve(strict=True)))
             m._provider_argv = lambda bound, arguments: [
-                str(bound["path"]), *map(str, arguments)]
+                str(bound.executable), *map(str, arguments)]
             m._revalidate_provider = lambda _bound: None
             m._provider_child_env = lambda _source, _bound, _provider: {
                 "PATH": "fixture-provider-path"}
@@ -6499,8 +6544,8 @@ def r23_run_codex_alias_phai_bind_target_mot_lan_cho_moi_consumer():
             m.chay_cac_probe = lambda _w, identity, _skip: (
                 events.append(("probe", list(identity["argv"]))) or ({}, None))
             m._co_chan_codex = lambda: events.append(("codex-policy", None))
-            m.subprocess.Popen = lambda argv, **_k: (
-                events.append(("popen", list(argv)))
+            m._provider_popen = lambda bound, arguments, **_k: (
+                events.append(("popen", m._provider_argv(bound, arguments)))
                 or events.append(("popen-env", dict(_k.get("env") or {})))
                 or Child())
             m._job_windows = lambda _pid: None
@@ -6525,6 +6570,7 @@ def r23_run_codex_alias_phai_bind_target_mot_lan_cho_moi_consumer():
             m._co_chan_codex = original_block
             m.shutil.which = original_which
             m.subprocess.Popen = original_popen
+            m._provider_popen = original_provider_popen
             m._job_windows = original_job
             m._khoa_danh_tinh = original_key
             m._thanh_vien_nhom = original_group
@@ -6549,8 +6595,11 @@ def r24_probe_claude_phai_dung_provider_da_bind_khong_dung_basename():
         original_workspace = m._probe_workspace
         original_write = m._probe_ghi
         original_spawn = m._probe_spawn
+        original_provider_spawn = m._probe_provider_spawn
         original_trust = m._probe_trust_claude
         original_popen = m.subprocess.Popen
+        original_provider_popen = m._provider_popen
+        original_provider_child_env = m._provider_child_env
         original_job = m._job_windows
         original_key = m._khoa_danh_tinh
         original_group = m._thanh_vien_nhom
@@ -6578,28 +6627,40 @@ def r24_probe_claude_phai_dung_provider_da_bind_khong_dung_basename():
             m._probe_workspace = lambda _ws: {"trang_thai": "DAT", "chi_tiet": "fixture"}
             m._probe_ghi = lambda _ws: {"trang_thai": "DAT", "chi_tiet": "fixture"}
             m._probe_spawn = lambda _cmd, _ws: {"trang_thai": "DAT", "chi_tiet": "fixture"}
+            m._probe_provider_spawn = lambda _identity, _ws: {
+                "trang_thai": "DAT", "chi_tiet": "fixture provider"}
 
             def probe_trust(_ws, _home=None):
                 trust_calls.append(trust_state["value"])
                 return {"trang_thai": trust_state["value"], "chi_tiet": "fixture trust"}
 
             m._probe_trust_claude = probe_trust
+            m._provider_child_env = lambda *_a, **_k: {"PATH": "fixture-provider-path"}
+            m._provider_popen = lambda bound, arguments, **_k: (
+                popen_calls.append([str(bound.executable), *map(str, arguments)])
+                or Child())
             m.subprocess.Popen = lambda argv, **_k: (
                 popen_calls.append(list(argv)) or Child())
             m._job_windows = lambda _pid: None
             m._khoa_danh_tinh = lambda _pid: "fixture-process-key"
             m._thanh_vien_nhom = lambda _pid: []
 
+            alias_capability = _provider_fixture("claude", cli_js)
+            shim_capability = _provider_fixture("claude", "claude.cmd")
             identities = {
                 # This is the exact downstream state after a Claude shim/alias
                 # has been bound once to Anthropic's provider-neutral cli.js.
                 "claude-alias": {
                     "argv": [str(cli_js)], "provider": "anthropic_claude",
                     "original_argv0": "claude-alias",
+                    "provider_capability": alias_capability,
+                    "provider_arguments": [],
                 },
                 "claude.cmd": {
                     "argv": ["claude.cmd"], "provider": "anthropic_claude",
                     "original_argv0": "claude.cmd",
+                    "provider_capability": shim_capability,
+                    "provider_arguments": [],
                 },
                 "local-cli": {
                     "argv": [str(cli_js)], "provider": None,
@@ -6670,8 +6731,11 @@ def r24_probe_claude_phai_dung_provider_da_bind_khong_dung_basename():
             m._probe_workspace = original_workspace
             m._probe_ghi = original_write
             m._probe_spawn = original_spawn
+            m._probe_provider_spawn = original_provider_spawn
             m._probe_trust_claude = original_trust
             m.subprocess.Popen = original_popen
+            m._provider_popen = original_provider_popen
+            m._provider_child_env = original_provider_child_env
             m._job_windows = original_job
             m._khoa_danh_tinh = original_key
             m._thanh_vien_nhom = original_group
@@ -6888,9 +6952,142 @@ def r26_launcher_bound_executable_replaced_after_probe():
                 m.os.environ["PATHEXT"] = original_pathext
 
 
+@ca
+def unresolved_provider_override_zero_child_lock():
+    """A recognized unresolved provider is non-overridable and gets a ledger."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = tao_repo(s)
+        run_root = s / "runs"
+        command = str(Path("tools") / "codex")
+        a = m.build_parser().parse_args([
+            "run", "--workspace", str(repo), "--run-root", str(run_root),
+            "--bo-qua-probe", "fixture generic probe override", "--", command,
+        ])
+        a.lenh = a.lenh[1:]
+        precomputed_chot = m.chay_cac_chot(a)
+        calls = []
+
+        class Child:
+            pid = 424245
+
+            def poll(self):
+                return 0
+
+            def wait(self, timeout=None):
+                return 0
+
+        original_chot = m.chay_cac_chot
+        original_probe = m.chay_cac_probe
+        original_policy = m._co_chan_codex
+        original_child_env = m._provider_child_env
+        original_popen = m.subprocess.Popen
+        try:
+            m.chay_cac_chot = lambda _a: dict(precomputed_chot)
+            m.chay_cac_probe = lambda *_a, **_k: (
+                calls.append("probe") or ({}, "fixture generic probe override"))
+            m._co_chan_codex = lambda: calls.append("policy")
+            m._provider_child_env = lambda *_a, **_k: (
+                calls.append("child-env") or dict(m.os.environ))
+            m.subprocess.Popen = lambda *_a, **_k: (
+                calls.append(("popen", _k)) or Child())
+            try:
+                m.lenh_run(a)
+            except m.Chan as exc:
+                bang(exc.ma == MA_THAM_SO,
+                     f"unresolved provider refused with wrong code: {exc.ma}")
+            else:
+                bang(False, "unresolved provider override reached final spawn")
+        finally:
+            m.chay_cac_chot = original_chot
+            m.chay_cac_probe = original_probe
+            m._co_chan_codex = original_policy
+            m._provider_child_env = original_child_env
+            m.subprocess.Popen = original_popen
+
+        bang(calls == [], f"unresolved provider crossed a child boundary: {calls}")
+        records = list(run_root.glob("*/run.json"))
+        bang(len(records) == 1, f"missing structured refusal ledger: {records}")
+        record = json.loads(records[0].read_text(encoding="utf-8"))
+        pre_execution = record.get("pre_execution", {}).get("provider_capability", {})
+        bang(record.get("trang_thai") == "hong"
+             and record.get("giai_doan") == "pre_execution_provider"
+             and record.get("provider") == "openai_codex"
+             and record.get("pid") is None
+             and pre_execution.get("status") == "not_measured"
+             and pre_execution.get("reason") == "provider_executable_missing",
+             f"unresolved provider ledger lost structured evidence: {record}")
+
+
+@ca
+def generic_missing_command_override_behavior_lock():
+    """A generic missing command retains explicit probe-override behavior."""
+    m = _tai_launcher_thu()
+    with San() as s:
+        repo = tao_repo(s)
+        run_root = s / "runs"
+        command = str(Path("tools") / "generic-missing")
+        a = m.build_parser().parse_args([
+            "run", "--workspace", str(repo), "--run-root", str(run_root),
+            "--bo-qua-probe", "fixture accepts generic missing command", "--", command,
+        ])
+        a.lenh = a.lenh[1:]
+        precomputed_chot = m.chay_cac_chot(a)
+        events = []
+
+        class Child:
+            pid = 424246
+
+            def poll(self):
+                return 0
+
+            def wait(self, timeout=None):
+                return 0
+
+        originals = (
+            m.chay_cac_chot, m._probe_workspace, m._probe_ghi, m._probe_spawn,
+            m.subprocess.Popen, m._job_windows, m._khoa_danh_tinh,
+            m._thanh_vien_nhom,
+        )
+        try:
+            m.chay_cac_chot = lambda _a: dict(precomputed_chot)
+            m._probe_workspace = lambda _ws: {
+                "trang_thai": "DAT", "chi_tiet": "fixture workspace"}
+            m._probe_ghi = lambda _ws: {
+                "trang_thai": "DAT", "chi_tiet": "fixture write"}
+            m._probe_spawn = lambda program, _ws: (
+                events.append(("probe", program)) or {
+                    "trang_thai": "DO", "chi_tiet": "fixture missing"})
+            m.subprocess.Popen = lambda argv, **kwargs: (
+                events.append(("popen", list(argv), dict(kwargs))) or Child())
+            m._job_windows = lambda _pid: None
+            m._khoa_danh_tinh = lambda _pid: "fixture-process-key"
+            m._thanh_vien_nhom = lambda _pid: []
+            bang(m.lenh_run(a) == 0, "generic missing override no longer reaches spawn")
+        finally:
+            (m.chay_cac_chot, m._probe_workspace, m._probe_ghi, m._probe_spawn,
+             m.subprocess.Popen, m._job_windows, m._khoa_danh_tinh,
+             m._thanh_vien_nhom) = originals
+
+        popen = next(event for event in events if event[0] == "popen")
+        bang(popen[1] == [command] and "env" not in popen[2],
+             f"generic command lost argv/ambient-env behavior: {events}")
+        record = json.loads(next(run_root.glob("*/run.json")).read_text(encoding="utf-8"))
+        bang(record.get("provider") == "local_process"
+             and record.get("bo_qua_probe_ly_do") ==
+             "fixture accepts generic missing command",
+             f"generic override ledger drifted: {record}")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [
+    ("unresolved_provider_override_reaches_final_spawn",
+     ('    _require_bound_provider_for_run(a, kq, identity)\n'
+      '    _chan_run_codex(identity)',
+      '    if False: _require_bound_provider_for_run(a, kq, identity)\n'
+      '    _chan_run_codex(identity)'),
+     ["unresolved_provider_override_zero_child_lock"]),
     ("bo_chan_credential_trong_repository",
      [('    return _shared_secret_destination(path)',
        '    return path'),
@@ -6951,8 +7148,8 @@ DOT_BIEN = [
       '    return {ten: {"trang_thai": ("DAT" if kq["trang_thai"] == "KHONG_DO_DUOC" else kq["trang_thai"]), "chi_tiet": kq["chi_tiet"]}'),
      ["r09_run_json_giu_ba_trang_thai_probe"]),
     ("run_codex_bypasses_co_chan",
-     [('    bound_argv = identity["argv"]\n    _chan_run_codex(identity)',
-       '    bound_argv = identity["argv"]\n    pass  # mutant bypasses pre-probe block'),
+     [('    _require_bound_provider_for_run(a, kq, identity)\n    _chan_run_codex(identity)',
+       '    _require_bound_provider_for_run(a, kq, identity)\n    pass  # mutant bypasses pre-probe block'),
       ('        _chan_run_codex(identity)',
        '        pass  # mutant bypasses final-execution block')],
      ["r22_run_codex_tieu_thu_co_chan_truoc_probe_va_Popen"]),
@@ -6961,8 +7158,10 @@ DOT_BIEN = [
       '            resolved_path, matched_provider = candidate_path, None'),
      ["r23_run_codex_alias_phai_bind_target_mot_lan_cho_moi_consumer"]),
     ("launcher_bound_executable_replaced_after_probe",
-     ('        _revalidate_identity(identity)',
-      '        pass  # mutant skips final provider identity revalidation'),
+     [('        _revalidate_identity(identity)',
+       '        pass  # mutant skips final provider identity revalidation'),
+      ('        if bound is not None:\n            p = _provider_popen(',
+       '        if False and bound is not None:\n            p = _provider_popen(')],
      ["r26_launcher_bound_executable_replaced_after_probe"]),
     ("relative_path_bearing_exec_uses_caller_cwd",
      ('        selected = str(path if path.is_absolute() else Path(workspace) / path)',
@@ -7391,13 +7590,16 @@ DOT_BIEN = [
      ["t141_comment_timeout_phai_co_version_nguon_va_phep_do"]),
     # Bug B (đo 19-08-2026, Windows): bypass absolute capability argv.
     ("do_codex_spawn_ten_tran",
-     ('        argv = _provider_argv(bound, ["login", "status"])',
-      '        argv = ["codex", "login", "status"]'),
+     ('        p = _provider_run(\n'
+      '            bound, ["login", "status"],',
+      '        p = subprocess.run(\n'
+      '            ["codex", "login", "status"],'),
      ["t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran"]),
     ("do_codex_song_spawn_ten_tran",
-     ('            argv = _provider_argv(\n'
-      '                bound, ["exec", "--skip-git-repo-check", "in ra: ok"])',
-      '            argv = ["codex", "exec", "--skip-git-repo-check", "in ra: ok"]'),
+     ('            p = _provider_run(\n'
+      '                bound, ["exec", "--skip-git-repo-check", "in ra: ok"],',
+      '            p = subprocess.run(\n'
+      '                ["codex", "exec", "--skip-git-repo-check", "in ra: ok"],'),
      ["t133_do_codex_spawn_bang_duong_dan_da_resolve_khong_ten_tran"]),
     ("footer_van_khuyen_bat_kiem_song",
      ('            if getattr(a, "kiem_song", False):\n'
@@ -7509,8 +7711,12 @@ DOT_BIEN = [
     # Bỏ resolve() -> bản chụp đi tới con dưới dạng đường dẫn tương đối theo cwd
     # của LAUNCHER, con đọc theo cwd của NÓ.
     ("run_root_khong_resolve",
-     ("    run_root = Path(a.run_root).expanduser().resolve()\n    rid, sid = _cap_id(run_root)",
-      "    run_root = Path(a.run_root).expanduser()\n    rid, sid = _cap_id(run_root)"),
+     ("    run_root = Path(a.run_root).expanduser().resolve()\n"
+      "    rid, sid = _cap_id(run_root)   # _cap_id đã TẠO thư mục (giành chỗ nguyên tử)\n"
+      "    thu_muc = run_root / sid",
+      "    run_root = Path(a.run_root).expanduser()\n"
+      "    rid, sid = _cap_id(run_root)   # _cap_id đã TẠO thư mục (giành chỗ nguyên tử)\n"
+      "    thu_muc = run_root / sid"),
      ["t65_run_root_TUONG_DOI_van_giao_duoc_ban_chup_cho_con"]),
     # --- vòng 3 đợt 2: 12 mục NÊN SỬA.
     ("kho_bo_o_dung_ba_doan",
@@ -7723,8 +7929,10 @@ DOT_BIEN = [
       '    _ds = list(_RE_STATUS.finditer(_RE_ANSI.sub("", r.stdout or "")))\n'
       '    kq = _ds[-1] if _ds else None'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_hoi_ten_dung_san_thay_vi_ten_da_khai",
-     ('        argv = _provider_argv(bound, ["mcp", "get", ten])',
-      '        argv = _provider_argv(bound, ["mcp", "get", "github"])'),
+     ('        r = _provider_run(\n'
+      '            bound, ["mcp", "get", ten],',
+      '        r = _provider_run(\n'
+      '            bound, ["mcp", "get", "github"],'),
      ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     # ĐỘT BIẾN CỦA REVIEWER LƯỢT 7 — lượt thứ NĂM của lớp "đo đồ giả", và là lượt đầu
     # tìm được sau khi chốt đã đảo thành danh sách CHO PHÉP. Giữ cả hai chiều: bỏ chuẩn
@@ -7736,16 +7944,20 @@ DOT_BIEN = [
      ('    if mt is not None:\n        return mt', '    if False:\n        return mt'),
      ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_ep_env_None_o_loi_goi",
-     ('                           env=child, stdin=subprocess.DEVNULL,',
-      '                           env=None, stdin=subprocess.DEVNULL,'),
+     ('            encoding="utf-8", errors="replace", env=child,\n'
+      '            stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)',
+      '            encoding="utf-8", errors="replace", env=None,\n'
+      '            stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)'),
      ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("rest_kho_khong_do_duoc_bi_gop_thanh_hong",
      ('        duong.append(("rest-kho", None, "khong doc duoc slug origin -> KHONG DO DUOC"))',
       '        duong.append(("rest-kho", False, "khong doc duoc slug origin -> KHONG DO DUOC"))'),
      ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
     ("mcp_mat_env_da_chuan_hoa",
-     ('                           env=child, stdin=subprocess.DEVNULL,',
-      '                           stdin=subprocess.DEVNULL,'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
+     ('            encoding="utf-8", errors="replace", env=child,\n'
+      '            stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)',
+      '            encoding="utf-8", errors="replace",\n'
+      '            stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)'), ["t115_duong_MCP_phai_duoc_DO_va_KHONG_duoc_tinh_la_lam_duoc_viec"]),
 ]
 
 

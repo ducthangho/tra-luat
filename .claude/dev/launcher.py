@@ -1949,6 +1949,18 @@ MODULE_PY = [
 # thì probe lại rơi về `os.environ` tức đúng bản giữ chỗ mà ta vừa loại.
 _MOI_TRUONG_DA_DOC: dict[str, str] | None = None
 
+# KẾT QUẢ PROBE XÁC THỰC CỦA LƯỢT `doctor` ĐANG CHẠY — khoá (đường dẫn, đối số), giá
+# trị là bộ bốn của `_xac_thuc_kem_dau_ra` (ok, mô tả, quá hạn, đầu ra gộp).
+# Vì sao có: cross-review PR "#426" (codex, P2 trên `4639462`) — `lenh_doctor` đã chạy
+# `agy models` cho bảng `CONG_CU` (`xac_thuc`), rồi `_do_antigravity` ở khối `KHA_NANG`
+# chạy lại CÙNG lệnh ấy chỉ để kết luận lại một chuyện đã có bằng chứng. `models` đi
+# mạng: lần hai có thể quá hạn/ném trong khi lần một đã dương, và cổng tự lật kết
+# luận. Nên mỗi lượt `doctor` chạy probe ĐÚNG MỘT LẦN và mọi phép đo sau đọc lại.
+# Chỉ `lenh_doctor` ghi; `lenh_doctor` xoá sạch khi bắt đầu để lượt sau không đọc
+# ảnh chụp của lượt trước. Gọi `_do_antigravity` NGOÀI `doctor` thì bảng rỗng và nó
+# tự chạy probe như cũ — hợp đồng độc lập của hàm không đổi.
+_XAC_THUC_DA_DO: dict[tuple[str, tuple[str, ...]], tuple[bool, str, bool, str]] = {}
+
 _LA_WINDOWS = platform.system() == "Windows"
 PROBE_TIMEOUT_GIAY = 25.0 if _LA_WINDOWS else 8.0
 
@@ -2161,9 +2173,11 @@ def _phien_ban(duong_dan: str, *, env=None,
 
 def _xac_thuc(duong_dan: str, doi_so: list[str], *, env=None,
               timeout=PROBE_TIMEOUT_GIAY) -> tuple[bool, str, bool]:
-    """Bọc `_xac_thuc_kem_dau_ra`, bỏ phần tử đầu ra — hợp đồng ba phần tử cho mọi
-    caller cũ (bảng `CONG_CU`, `doctor`). Ai cần ĐẦU RA của chính probe ấy (đếm
-    dòng, chẩn đoán) thì gọi hàm dưới, ĐỪNG chạy lại lệnh."""
+    """Bọc `_xac_thuc_kem_dau_ra`, bỏ phần tử đầu ra — hợp đồng ba phần tử cho caller
+    ngoài. `doctor` KHÔNG gọi hàm này nữa mà gọi thẳng hàm dưới (nó cần đầu ra để
+    ghi vào `_XAC_THUC_DA_DO`), nên test muốn giả probe auth của `doctor` phải giả
+    `_xac_thuc_kem_dau_ra` (bộ bốn). Ai cần ĐẦU RA của chính probe ấy (đếm dòng,
+    chẩn đoán) thì gọi hàm dưới, ĐỪNG chạy lại lệnh."""
     ok, mo_ta, qua_han, _ = _xac_thuc_kem_dau_ra(duong_dan, doi_so, env=env, timeout=timeout)
     return (ok, mo_ta, qua_han)
 
@@ -2852,12 +2866,18 @@ def _do_antigravity(moi_truong: dict[str, str] | None = None) -> tuple[str, str]
     for _, duong_agy in candidates:
         la_fallback = False
         if platform.system() == "Windows":
-            duong_dir = str(Path(duong_agy).parent).casefold()
             la_fallback = not any(Path(p).resolve() == Path(duong_agy).parent.resolve() for p in path_items if Path(p).exists()) if path_items else True
         duoi_path = " · đã cài, PATH phiên này chưa thấy — mở terminal mới" if la_fallback else ""
 
-        # Probe 1: Thử `_xac_thuc` với subcommand `models` (Spec 6.2 & 6.3)
-        ok_xt, mo_ta_xt, qua_han_xt, ra_xt = _xac_thuc_kem_dau_ra(duong_agy, ["models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
+        # Probe 1: Thử `_xac_thuc` với subcommand `models` (Spec 6.2 & 6.3).
+        # Trong một lượt `doctor`, bảng `CONG_CU` (`xac_thuc: ["models"]`) ĐÃ chạy đúng
+        # lệnh này trên đúng đường dẫn này — đọc lại bằng chứng ấy thay vì chạy lần
+        # hai (P2 cross-review PR "#426" trên `4639462`). Ngoài `doctor` bảng rỗng.
+        da_do = _XAC_THUC_DA_DO.get((duong_agy, ("models",)))
+        if da_do is not None:
+            ok_xt, mo_ta_xt, qua_han_xt, ra_xt = da_do
+        else:
+            ok_xt, mo_ta_xt, qua_han_xt, ra_xt = _xac_thuc_kem_dau_ra(duong_agy, ["models"], env=mt, timeout=PROBE_TIMEOUT_GIAY)
         if ok_xt:
             # Đếm dòng từ ĐẦU RA CỦA CHÍNH PROBE VỪA CHẠY — không gọi `agy models` lần hai.
             # `models` đi mạng: lần hai quá hạn/OSError sẽ ném lên `lenh_doctor` và lật
@@ -3690,6 +3710,7 @@ def lenh_doctor(a) -> int:
     moi_truong, moi_truong_cong_khai = _doc_moi_truong()
     global _MOI_TRUONG_DA_DOC
     _MOI_TRUONG_DA_DOC = moi_truong
+    _XAC_THUC_DA_DO.clear()        # lượt mới, bằng chứng mới — không đọc ảnh chụp cũ
     he = platform.system()
     ket = []
     thieu_bat_buoc = []
@@ -3756,9 +3777,10 @@ def lenh_doctor(a) -> int:
                 xac_thuc_ok, loi_xac_thuc = None, "doctor het ngan sach"
                 xac_thuc_chua_do = loi_xac_thuc
             else:
-                xac_thuc_ok, loi_xac_thuc, xt_qua_han = _xac_thuc(
+                xac_thuc_ok, loi_xac_thuc, xt_qua_han, xt_dau_ra = _xac_thuc_kem_dau_ra(
                     thay["duong_dan"], c["xac_thuc"], env=moi_truong,
                     timeout=min(PROBE_TIMEOUT_GIAY, con_lai))
+                xt_mo_ta_cuoi = loi_xac_thuc   # mô tả của LƯỢT CUỐI, không ghép chuỗi retry
                 if not xac_thuc_ok and xt_qua_han:
                     # ĐƯỜNG CHỚP THỨ HAI của `t53`, cùng cơ chế với probe `--version`
                     # ngay trên: probe auth cũng gọi CLI chậm, quá hạn từng rơi thẳng
@@ -3766,9 +3788,10 @@ def lenh_doctor(a) -> int:
                     # Cùng hai lớp vá: retry hạn gấp đôi, rồi mới nhận là CHƯA ĐO ĐƯỢC.
                     con_lai = het_han - time.monotonic()
                     if con_lai > 0:
-                        xac_thuc_ok, loi_2, xt_qua_han = _xac_thuc(
+                        xac_thuc_ok, loi_2, xt_qua_han, xt_dau_ra = _xac_thuc_kem_dau_ra(
                             thay["duong_dan"], c["xac_thuc"], env=moi_truong,
                             timeout=min(2 * PROBE_TIMEOUT_GIAY, con_lai))
+                        xt_mo_ta_cuoi = loi_2
                         if not xac_thuc_ok:
                             loi_xac_thuc = f"luot 1: {loi_xac_thuc} · luot 2: {loi_2}"
                     if not xac_thuc_ok and xt_qua_han:
@@ -3777,6 +3800,12 @@ def lenh_doctor(a) -> int:
                         xac_thuc_ok = None
                         xac_thuc_chua_do = f"probe xac thuc QUA HAN, chua do duoc: {loi_xac_thuc}"
                         loi_xac_thuc = xac_thuc_chua_do
+                # GHI LẠI KẾT QUẢ CUỐI (sau retry) cho khối `KHA_NANG` đọc — probe auth
+                # chạy MỘT lần mỗi lượt `doctor`, xem chú thích ở `_XAC_THUC_DA_DO`.
+                # Quá hạn cả hai lượt cũng ghi (ok=False, qua_han=True): phép đo sau
+                # phải thấy "CHƯA ĐO ĐƯỢC" chứ không được tự chạy thêm lần ba.
+                _XAC_THUC_DA_DO[(thay["duong_dan"], tuple(c["xac_thuc"]))] = (
+                    xac_thuc_ok is True, xt_mo_ta_cuoi, bool(xt_qua_han), xt_dau_ra)
         cai = c["cai"].get(he) or c["cai"].get("*") or ""
         bb = _bat_buoc(c, moi_truong)
         muc = {"ten": c["ten"], "bat_buoc": bb, "co": thay is not None,

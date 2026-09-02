@@ -62,6 +62,9 @@ def nen_hien_tai():
 
 def _chay(argv, timeout=20):
     """Trả (rc, output, lỗi-khởi-chạy); timeout là ĐÃ chạy nhưng hỏng, khác không mở được."""
+    # `cai_cong_cu.sh` chấp nhận python/python3/py. Probe module và probe `python`
+    # phải đo đúng interpreter đã chọn để máy chỉ có python3 không đỏ sau khi vừa cài.
+    argv = [sys.executable, *argv[1:]] if argv and argv[0] == "python" else argv
     try:
         p = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
         return p.returncode, (p.stdout or "") + (p.stderr or ""), None

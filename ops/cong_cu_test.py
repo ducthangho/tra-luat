@@ -604,7 +604,66 @@ def t20_che_do_cai_tat_ca_bootstrap_pyyaml_dung_ban_ghim():
          "PyYAML bootstrap mà không bắt buộc trong bản kê")
 
 
+def batch_behavior_test() -> None:
+    """Batch giữ PATH từ installer con và chạy được từ CWD ngoài root.
+
+    Không đưa vào `CA`: đây là integration control cho wrapper, không được dùng để
+    nhận công giết thêm các mutation đơn vị T1..T15.
+    """
+    bash = shutil.which("bash")
+    if not bash:
+        raise BoQuaMoiTruong("KHÔNG ĐO ĐƯỢC batch: thiếu bash")
+    with tempfile.TemporaryDirectory(prefix="cong-cu-batch-") as td:
+        root = Path(td); ops = root / "ops"; ops.mkdir(); out = root / "installed"
+        fake_bin = root / "fake-bin"; fake_bin.mkdir(); pip_ready = root / "pip-ready"
+        shutil.copy2(CAI_SH, ops / "cai_cong_cu.sh")
+        shutil.copy2(SCRIPT, ops / "cong_cu.py")
+        name = "batch-path-t21"
+        manifest = {"schema_version": 1, "cong_cu": {name: {
+            "bat_buoc": True, "ban_ghim": "1.2.3",
+            "probe": [{"ten": "mac_dinh", "lenh": [name, "--version"],
+                       "regex": r"(\d+\.\d+\.\d+)"}],
+            "cai": {"lenh": (f"mkdir -p '{out}'; printf '#!/bin/sh\\necho 1.2.3\\n' "
+                                f"> '{out / name}'; chmod +x '{out / name}'; echo '{out}'")}}}}
+        (ops / "cong_cu.yaml").write_text(yaml.safe_dump(manifest), encoding="utf-8")
+        fake_python = fake_bin / "python"
+        fake_python.write_text(
+            "#!/bin/sh\n"
+            f"MARKER='{pip_ready}'\nREAL='{sys.executable}'\n"
+            "[ \"${1:-}\" = -c ] && [ \"${2:-}\" = 'import yaml' ] && "
+            "[ ! -e \"$MARKER\" ] && exit 1\n"
+            "[ \"${1:-}\" = -c ] && [ \"${2:-}\" = 'import pip' ] && "
+            "[ ! -e \"$MARKER\" ] && exit 1\n"
+            "[ \"${1:-}\" = -m ] && [ \"${2:-}\" = ensurepip ] && "
+            "{ : > \"$MARKER\"; exit 0; }\n"
+            "[ \"${1:-}\" = -m ] && [ \"${2:-}\" = pip ] && exit 0\n"
+            "exec \"$REAL\" \"$@\"\n", encoding="utf-8")
+        fake_python.chmod(0o755)
+        env = dict(os.environ, PATH=str(fake_bin) + os.pathsep + os.environ.get("PATH", ""))
+        p = subprocess.run([bash, "./cai_cong_cu.sh", "--bat-buoc"], cwd=ops,
+                           env=env, capture_output=True, text=True, timeout=60)
+        bang(p.returncode == 0 and '"trang_thai_tong": "DAT"' in p.stdout,
+             f"batch không giữ PATH/caller-CWD: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+        bang(pip_ready.is_file(), "batch gọi pip trước khi bootstrap ensurepip")
+
+
+def python_alias_behavior_test() -> None:
+    """Probe `python` dùng interpreter chạy cong_cu.py, không đòi alias trên PATH."""
+    with tempfile.TemporaryDirectory(prefix="cong-cu-python3-") as td:
+        root = Path(td); only = root / "bin"; only.mkdir()
+        (only / "python3").symlink_to(sys.executable)
+        bk = ghi_ban_ke(root, {"python": {"bat_buoc": True, "ban_ghim": None,
+            "probe": [{"ten": "mac_dinh", "lenh": ["python", "--version"],
+                       "regex": r"Python\s+(\d+\.\d+\.\d+)"}]}})
+        rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk), "--json",
+                          env=dict(os.environ, PATH=str(only)))
+        bang(rc == 0 and '"trang_thai_tong": "DAT"' in out,
+             f"máy chỉ có python3 bị probe alias python chặn: rc={rc}\n{out}")
+
+
 def main() -> int:
+    batch_behavior_test()
+    python_alias_behavior_test()
     qua, hong, bo_qua = 0, [], []
     for fn in CA:
         try:

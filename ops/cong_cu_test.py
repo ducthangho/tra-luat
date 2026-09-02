@@ -402,6 +402,18 @@ DOT_BIEN = {
     "t15_blocking_bat_oan": ("ops/cong_cu.py",
         '    if "SC1003" in ra:\n', '    if False:  # đột biến\n',
         "SCRIPT", _PHU, "t15_blocking_du_cong_cu_phai_DAT_khong_bat_oan"),
+    # #445 gen 4 — regex git quay về bản cắt hậu tố: `2.55.0.windows.5` lại thành token cụt.
+    # Đột biến vào YAML nên patch GOC; cây tạm thiếu `.claude/dev` ⇒ t16..t20 tự BỎ QUA.
+    "t21_git_regex_cat_hau_to": ("ops/cong_cu.yaml",
+        r"regex: '(?m)^git version\s+(\d+\.\d+\.\d+(?:[.+-][0-9A-Za-z.+-]*)?)'}]",
+        r"regex: '(?m)^git version\s+(\d+\.\d+\.\d+)'}]  # đột biến: cắt hậu tố",
+        "GOC", ("ops/cong_cu.py", ".github/workflows/ci.yml", "ops/canary/actionlint_shellcheck.yml"),
+        "t21_git_for_windows_hau_to_nha_cung_cap_phai_DAT_va_bat_tron"),
+    # #445 gen 4 — bỏ chốt loại SystemRoot: bộ phóng WSL ở đầu PATH lại được chọn.
+    "t22_bash_lay_ca_system_root": ("ops/cong_cu.py",
+        "        if u.is_file() and not duoi_system_root(u):\n",
+        "        if u.is_file():  # đột biến: không loại SystemRoot\n",
+        "SCRIPT", _PHU, "t22_bash_windows_khong_lay_bo_phong_wsl_o_system_root"),
 }
 
 def _chay_1_ca(fn):
@@ -428,6 +440,78 @@ def _do_ban_kinh(ten_dot_bien):
         g[bp] = cu
         shutil.rmtree(cay, ignore_errors=True)
 
+
+# --------------------------------------------------------------- T21/T22 (#445 gen 4)
+# Hai ca ĐỎ THẬT trên lane windows-latest của master ngay sau khi #446 merge (run
+# 33612364175, bước G5, `python ops/cong_cu.py kiem-tra --json` rc=2). Sổ land ghi MỘT
+# nguyên nhân (git); log ghi HAI (git + bash). Mỗi ca dưới đây neo đúng một.
+
+@ca
+def t21_git_for_windows_hau_to_nha_cung_cap_phai_DAT_va_bat_tron():
+    """Bản kê THẬT phải nhận `git version 2.55.0.windows.5` là MỘT token, không cắt.
+
+    Regex cũ bắt `2.55.0` rồi `_cat_tien_to_token` từ chối vì ký tự kế là `.` — hành vi
+    từ chối ấy ĐÚNG (t10) nên chỗ sửa là regex, không phải chốt. Ba đầu ra thật của ba
+    nền đi qua cùng một regex đọc từ `ops/cong_cu.yaml`, KHÔNG chép regex vào test."""
+    goc_yaml = GOC / "ops" / "cong_cu.yaml"
+    if not goc_yaml.is_file():
+        raise BoQuaMoiTruong("cây đang chạy thiếu ops/cong_cu.yaml — KHÔNG_ĐO_ĐƯỢC")
+    regex = yaml.safe_load(goc_yaml.read_text(encoding="utf-8"))["cong_cu"]["git"]["probe"][0]["regex"]
+    mau = (("git version 2.55.0.windows.5", "2.55.0.windows.5"),   # Git for Windows
+           ("git version 2.43.0", "2.43.0"),                        # Linux
+           ("git version 2.39.3 (Apple Git-146)", "2.39.3"))         # macOS
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        for i, (dong, mong) in enumerate(mau):
+            d = tmp / f"bin{i}"; ten = f"git-gia-t21-{i}"
+            bin_gia(d, ten, f"#!/bin/sh\necho '{dong}'\n")
+            bk = ghi_ban_ke(tmp, {"git": {"bat_buoc": True, "ban_ghim": None,
+                "probe": [{"ten": "mac_dinh", "lenh": [ten, "--version"], "regex": regex}]}})
+            rc, out, _ = chay("kiem-tra", "--ban-ke", str(bk), "--json", env=moi_truong(d))
+            bang(rc == 0, f"{dong!r} bị bản kê thật từ chối: rc={rc}\n{out}")
+            thay = json.loads(out)["cong_cu"][0]["ban_thay"]["mac_dinh"]
+            bang(thay == mong, f"{dong!r}: mong token {mong!r}, bản kê đọc thành {thay!r}")
+
+@ca
+def t22_bash_windows_khong_lay_bo_phong_wsl_o_system_root():
+    """`_bash_windows` phải bỏ qua `%SystemRoot%\\System32\\bash.exe` (bộ phóng WSL) dù nó
+    đứng ĐẦU PATH, và tìm được Git Bash cạnh `git` khi PATH không có bash nào khác.
+
+    Chạy trên mọi nền: hàm nhận tham số ép PATH/SystemRoot/git, còn `_chay` chỉ gọi nó
+    khi `os.name == "nt"` — mặt ấy do lane windows-latest đo thật."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        sr = tmp / "Windows"; sys32 = sr / "System32"
+        wsl = bin_gia(sys32, "bash.exe", "#!/bin/sh\necho 'Windows Subsystem for Linux has no installed distributions.'\nexit 1\n")
+        git_dir = tmp / "Git"; gb_usr = git_dir / "usr" / "bin"; gb_bin = git_dir / "bin"
+        gb1 = bin_gia(gb_usr, "bash.exe", "#!/bin/sh\necho 'GNU bash, version 5.2.37(1)-release (x86_64-pc-msys)'\n")
+        gb2 = bin_gia(gb_bin, "bash.exe", "#!/bin/sh\necho 'GNU bash, version 5.2.37(1)-release (x86_64-pc-msys)'\n")
+        git_exe = bin_gia(git_dir / "cmd", "git.exe", "#!/bin/sh\necho 'git version 2.55.0.windows.5'\n")
+        ma = (
+            "import runpy, sys, os\n"
+            f"m = runpy.run_path({str(SCRIPT)!r})\n"
+            "f = m['_bash_windows']\n"
+            f"sr = {str(sr)!r}; s32 = {str(sys32)!r}; usr = {str(gb_usr)!r}; g = {str(git_exe)!r}; pf = {str(tmp / 'khong-co')!r}\n"
+            "sep = os.pathsep\n"
+            # (a) System32 đứng ĐẦU PATH, Git Bash đứng sau ⇒ phải chọn Git Bash
+            "print('A', f(path=s32 + sep + usr, system_root=sr, program_files=pf, git=''))\n"
+            # (b) PATH CHỈ có System32, không bash nào khác; `git` biết ⇒ suy Git Bash cạnh git
+            "print('B', f(path=s32, system_root=sr, program_files=pf, git=g))\n"
+            # (c) không có gì ngoài WSL ⇒ None, KHÔNG đoán
+            "print('C', f(path=s32, system_root=sr, program_files=pf, git=''))\n"
+            # (d) đối chứng: SystemRoot rỗng thì không có gì để loại, bash đầu PATH được chọn
+            "print('D', f(path=usr, system_root='', program_files=pf, git=''))\n"
+        )
+        env = dict(os.environ); env.pop("CONG_CU_BASH", None)
+        p = subprocess.run([sys.executable, "-c", ma], env=env, cwd=GOC,
+                           capture_output=True, text=True, timeout=60)
+        bang(p.returncode == 0, f"gọi _bash_windows hỏng: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+        kq = dict(l.split(" ", 1) for l in p.stdout.splitlines() if " " in l)
+        bang(kq.get("A") == str(gb1), f"(A) System32 đứng đầu PATH mà chọn {kq.get('A')!r}, mong {str(gb1)!r}")
+        bang(kq.get("B") == str(gb2), f"(B) không suy được Git Bash cạnh git: {kq.get('B')!r}, mong {str(gb2)!r}")
+        bang(kq.get("C") == "None", f"(C) chỉ có WSL mà vẫn trả {kq.get('C')!r} — đoán thay vì hỏng thật")
+        bang(kq.get("D") == str(gb1), f"(D) đối chứng SystemRoot rỗng: {kq.get('D')!r}")
+        bang(str(wsl) not in p.stdout, f"bộ phóng WSL lọt vào kết quả: {p.stdout}")
 
 # --------------------------------------------------------------- T16/T17 (#391)
 # LUẬT: thêm một công cụ/gói vào bất kỳ mã nào của kho thì phải khai nó trong

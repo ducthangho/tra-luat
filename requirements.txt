@@ -12,6 +12,12 @@
 #
 # BẮT BUỘC cho đường nạp PDF — thiếu là CHẶN CỨNG, không phải giảm chất lượng:
 pypdf>=4.0
+# r337 (đo 02-09-2026, container Claude Code remote): `import pypdf` CHẾT dù pip báo đủ — pypdf nạp
+# `cryptography` (provider mã hoá tuỳ chọn), mà ảnh container có `cryptography` 41.0.7 HỆ THỐNG
+# (`/usr/lib/python3/dist-packages`) thiếu `_cffi_backend` ⇒ pyo3 ném PanicException (không phải
+# ImportError nên pypdf không tự lùi). Đo A/B cùng interpreter: thêm `cffi` ⇒ `import pypdf` OK;
+# không ⇒ panic. `cffi` là thứ đúng để cài: nó là phụ thuộc mà gói hệ thống kia khai mà không có.
+cffi
 #
 # TUỲ CHỌN (không đưa vào danh sách cài để giữ `pip install -r requirements.txt` nhẹ):
 #   · python-docx  — đọc .docx sát cấu trúc gốc hơn. Thiếu vẫn chạy: nhánh bóc-tag từ r317 đã

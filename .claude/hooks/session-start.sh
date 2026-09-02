@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that pip-bang-chung-import
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -177,8 +177,9 @@ fi
 #   qua du chua bao gio cai o do (sai han khi moi du an mot venv).
 # Sua hai chuyen: (1) moc neo theo CA sha LAN sys.prefix (venv nao), va nam trong
 # .git/ cua du an chu khong phai TMPDIR dung chung; (2) truoc khi tin moc, DOI
-# BANG CHUNG DUONG bang `pip install --dry-run` - no im lang va nhanh khi da du,
-# va bao thieu khi moi truong khong con khop.
+# BANG CHUNG DUONG. Ban dau lay `pip install --dry-run` lam bang chung — SAI, xem
+# r337 ngay duoi: dry-run tra rc=0 ke ca khi "Would install", nen no khong bao thieu
+# bao gio. Bang chung duong nay la IMPORT DUOC tung goi trong requirements.txt.
 if [ -f requirements.txt ]; then
   KHO_MOC="$("$PY" -c "import subprocess,sys;print(subprocess.run(['git','rev-parse','--git-dir'],capture_output=True,text=True).stdout.strip() or '.')" 2>/dev/null || echo .)"
   VAN_TAY="$( "$PY" -c "
@@ -186,22 +187,52 @@ import hashlib, sys
 h = hashlib.sha256(open('requirements.txt','rb').read()).hexdigest()[:16]
 print(h + '_' + hashlib.sha256(sys.prefix.encode()).hexdigest()[:8])" )"
   DAU="$KHO_MOC/.tl_reqs_$VAN_TAY"
+  # BANG CHUNG DUONG = IMPORT DUOC, khong phai `pip install --dry-run` (r337, do 02-09-2026).
+  # Ban truoc tin ma thoat cua dry-run: no tra rc=0 KE CA khi in "Would install cffi-2.1.1"
+  # (pip 24.0 — dry-run chi that bai khi KHONG GIAI DUOC phu thuoc), nen chot ay chua bao gio
+  # noi "thieu"; hook in "moi truong con khop" roi bo qua pip mai. Va ke ca khi pip du, goi
+  # co mat van co the KHONG NAP DUOC: pypdf 6.16.2 co mat ma `import pypdf` chet PanicException
+  # vi cryptography he thong thieu _cffi_backend — duong nap PDF hong ma khong ai biet toi luc
+  # `tl doctor` (luc do cung chet theo). Cung benh "CO MAT != DUNG DUOC" cua `co_chay`, doi
+  # doi tuong tu binary sang module. Ten module = ten goi da chuan hoa (pypdf, cffi); bat
+  # BaseException vi PanicException KHONG phai Exception; chi cho KeyboardInterrupt xuyen qua.
+  reqs_import_duoc() {
+    "$PY" - <<'PYEOF'
+import re, sys
+hong = []
+for dong in open("requirements.txt", encoding="utf-8"):
+    dong = dong.split("#", 1)[0].strip()
+    if not dong or dong.startswith("-"):
+        continue
+    ten = re.split(r"[<>=!~\[; ]", dong, 1)[0].strip().lower().replace("-", "_")
+    try:
+        __import__(ten)
+    except KeyboardInterrupt:
+        raise
+    except BaseException as e:  # PanicException (pyo3) khong phai Exception
+        hong.append(f"{ten}: {type(e).__name__}")
+if hong:
+    print("[session-start] goi trong requirements.txt KHONG import duoc: " + " · ".join(hong))
+    sys.exit(1)
+PYEOF
+  }
   CAN_CAI=1
   if [ -f "$DAU" ]; then
-    # Moc noi da cai. Kiem lai bang bang chung duong truoc khi tin.
-    if "$PY" -m pip install --dry-run --quiet -r requirements.txt >/dev/null 2>&1; then
-      echo "[session-start] requirements.txt khong doi va moi truong con khop — bo qua pip"
+    if reqs_import_duoc; then
+      echo "[session-start] requirements.txt khong doi va moi goi import duoc — bo qua pip"
       CAN_CAI=0
     else
-      echo "[session-start] moc con nhung moi truong KHONG con khop — cai lai"
+      echo "[session-start] moc con nhung goi KHONG import duoc — cai lai"
     fi
   fi
   if [ "$CAN_CAI" = 1 ]; then
     echo "[session-start] cai requirements.txt ..."
-    if "$PY" -m pip install --quiet -r requirements.txt; then
-      : > "$DAU"
+    if "$PY" -m pip install --quiet -r requirements.txt && reqs_import_duoc; then
+      : > "$DAU"     # moc CHI duoc dat khi da chung minh import duoc
     else
-      echo "[session-start] CANH BAO: pip that bai"
+      rm -f "$DAU"   # khong de lai moc "da cai" cho mot moi truong chua chung minh
+      echo "[session-start] CANH BAO: requirements.txt CHUA DUNG DUOC (xem dong tren)."
+      echo "[session-start]   chua: $PY -m pip install --force-reinstall -r requirements.txt ; roi $PY scripts/tl.py doctor --offline"
     fi
   fi
 fi

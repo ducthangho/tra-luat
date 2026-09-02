@@ -24966,7 +24966,7 @@ def run() -> int:
         """Đột biến quay về `except Exception` phải làm ca thuận ĐỎ — không có nó thì ca trên đo gì?"""
         import inspect as _ins337, textwrap as _tw337
         import tl_core.ops_misc as _om337
-        old = "        except BaseException:  # noqa: BLE001"
+        old = "        except BaseException as e:  # noqa: BLE001"
         src = _tw337.dedent(_ins337.getsource(_om337._doc_dep_probe))
         old = _tw337.dedent(old)
         if src.count(old) != 1:
@@ -24977,6 +24977,34 @@ def run() -> int:
         tt, kq = _r337_chay("BaseException", fn=ns["_doc_dep_probe"])
         return tt == "nem" and kq is BaseException
     _t110("r337_dot_bien_except_Exception_lam_DO", _c337_dot_bien_except_Exception_lam_DO)
+
+    def _c337_import_hong_khac_thieu():
+        """Module CÓ MẶT mà import nổ ⇒ hậu quả phải nêu 'import HỎNG' kèm LỚP lỗi; THIẾU hẳn thì không."""
+        tt, kq = _r337_chay("BaseException")
+        pdf = next((d for d in (kq if tt == "ok" else []) if d["ten"].startswith("pypdf")), None)
+        hong_ok = pdf is not None and "import HỎNG" in pdf["hau_qua"] and "BaseException" in pdf["hau_qua"]
+        import sys as _sys337b
+        import tl_core.ops_misc as _om337b
+        cu = {t: _sys337b.modules.pop(t, None) for t in ("pypdf", "pdfplumber")}
+        try:
+            # THIẾU hẳn: che import bằng finder trả None cho hai tên này.
+            class _Chan337:
+                def find_spec(self, name, path=None, target=None):
+                    if name in ("pypdf", "pdfplumber"):
+                        raise ModuleNotFoundError(name)
+                    return None
+            _sys337b.meta_path.insert(0, _Chan337())
+            try:
+                thieu = next(d for d in _om337b._doc_dep_probe() if d["ten"].startswith("pypdf"))
+            finally:
+                _sys337b.meta_path.pop(0)
+        finally:
+            for t, m in cu.items():
+                _sys337b.modules.pop(t, None)
+                if m is not None:
+                    _sys337b.modules[t] = m
+        return hong_ok and thieu["co"] is False and "import HỎNG" not in thieu["hau_qua"]
+    _t110("r337_import_hong_khac_thieu", _c337_import_hong_khac_thieu)
 
     def _c218_che_nhieu_fence_va_span():
         """§2.4 — ca QUYẾT ĐỊNH chất lượng: CÙNG MỘT chuỗi, trong fence ⇒ IM, ngoài fence ⇒ NỔ.

@@ -279,32 +279,47 @@ def _tai_launcher_thu():
     m = _nap_sach(LAUNCHER_DANG_DUNG)
 
     # Most historical launcher cases measure doctor classification or policy,
-    # not filesystem executable capabilities.  Give those inert cases a typed
-    # adapter driven by their existing `shutil.which` fixtures.  R26 restores
+    # not filesystem executable capabilities.  Give those inert cases the same
+    # full `BoundProviderExecutable` shape as `_provider_fixture`, driven by
+    # their existing `shutil.which` fixtures.  R19 (run 33696739010): the
+    # shared execution boundary behind `_provider_run` consumes EVERY field of
+    # the production dataclass, so the old partial adapter died with
+    # `AttributeError: ... no attribute 'identities'` on any gh-present host
+    # before the case reached its intended assertion, while the Windows branch
+    # masked the same defect as `provider_executable_changed`.  R26 restores
     # the real shared capability explicitly and owns replacement/revalidation.
-    class FixtureBound:
-        def __init__(self, provider, executable):
-            self.provider = provider
-            self.executable = Path(executable).resolve(strict=False)
-            self.sanitized_path = str(self.executable.parent)
-
     m._r12_real_bind_launcher_provider = m._bind_launcher_provider
     m._r12_real_bind_provider_path = m._bind_provider_path
     m._r12_real_provider_argv = m._provider_argv
     m._r12_real_revalidate_provider = m._revalidate_provider
+    m._r12_real_run_bound_provider = m._run_bound_provider
 
     def fixture_bind(name, _source):
         executable = m.shutil.which(name)
         if not executable:
             raise m._ProviderExecutableError("provider_executable_missing")
-        return FixtureBound(name, executable)
+        return _provider_fixture(name, executable)
+
+    def fixture_run_bound(bound, arguments, *, input=None, capture_output=False,
+                          timeout=None, check=False, **kwargs):
+        # The POSIX short-circuit of `provider_exec.run_bound_provider`,
+        # verbatim: the REAL `provider_argv` revalidates the bound fixture and
+        # builds argv, then the module-visible `subprocess.run` (the seam the
+        # cases already patch) executes.  Every host thereby measures the
+        # contract the Ubuntu job enforces, and no case can drift into
+        # spawning a real provider through the Windows Popen branch.
+        return m.subprocess.run(
+            m._r12_real_provider_argv(bound, arguments), input=input,
+            capture_output=capture_output, timeout=timeout, check=check,
+            **kwargs)
 
     m._bind_launcher_provider = fixture_bind
-    m._bind_provider_path = lambda name, path, _source, **_kwargs: FixtureBound(
-        name, path)
+    m._bind_provider_path = lambda name, path, _source, **_kwargs: (
+        _provider_fixture(name, path))
     m._provider_argv = lambda bound, arguments: [
         str(bound.executable), *map(str, arguments)]
     m._revalidate_provider = lambda _bound: None
+    m._run_bound_provider = fixture_run_bound
     return m
 
 
@@ -6116,6 +6131,81 @@ def t146_do_antigravity_cac_trang_thai_va_luong():
         m._cac_duong_dan = goc_cac
         m._chay_van_ban_an_toan = goc_chay
         m.subprocess.run = goc_sub_run
+
+
+@ca
+def r19_fixture_bound_du_hop_dong_bound_provider_executable():
+    """The inert fixture adapter must carry the FULL BoundProviderExecutable contract.
+
+    Origin: manual exact-head run 33696739010 (Ubuntu job 100467128055, gh
+    preinstalled) killed t146 with `AttributeError: 'FixtureBound' object has
+    no attribute 'identities'` inside `_provider_run` -> `run_bound_provider`
+    -> `provider_argv` -> `revalidate_bound_provider`, BEFORE the case reached
+    its intended assertion.  On Windows the same defect was masked by
+    `_acquire_windows_provider_handles` as
+    `ProviderExecutableError(provider_executable_changed)`, so the local suite
+    stayed green.  This lock drives the gh-present/POSIX-semantic path
+    deterministically on every platform: `which` is stubbed (no dependence on
+    an ambient gh) and no provider process is spawned.
+
+    Two layers, each red BY NAME when a required fixture field is removed:
+      1. compare the adapter against the fields of the PRODUCTION dataclass
+         (`dataclasses.fields`), an independent source - removing
+         `launch_support`/`launch_arguments` goes red here even though the
+         `direct` argv branch never touches them;
+      2. drive the fixture through the REAL boundary - revalidation consumes
+         `identities`, argv construction consumes `kind`, `_provider_run`
+         must hand the exact argv to the `subprocess.run` seam, and
+         `_bound_provider_source` consumes `sanitized_path`.
+    """
+    import dataclasses
+    import provider_exec
+
+    m = _tai_launcher_thu()
+    goc_which = m.shutil.which
+    goc_run = m.subprocess.run
+    try:
+        m.shutil.which = lambda t, *a, **k: "/gia/bin/gh" if t == "gh" else None
+        hop_dong = [truong.name for truong in dataclasses.fields(
+            provider_exec.BoundProviderExecutable)]
+        bound = m._bind_launcher_provider("gh", dict(PATH="/gia/bin"))
+        thieu = [ten for ten in hop_dong if not hasattr(bound, ten)]
+        bang(not thieu,
+             f"fixture bind thieu truong hop dong provider: {thieu} - duong "
+             f"gh-present se chet AttributeError nhu run 33696739010")
+        bound_path = m._bind_provider_path("gh", "/gia/bin/gh", dict())
+        thieu_path = [ten for ten in hop_dong if not hasattr(bound_path, ten)]
+        bang(not thieu_path,
+             f"fixture cua _bind_provider_path thieu truong: {thieu_path}")
+
+        # The REAL boundary consumes the inert fixture: empty identities are
+        # legitimate TEST DATA (revalidation iterates an empty tuple) and
+        # kind="direct" builds an absolute argv.
+        m._r12_real_revalidate_provider(bound)
+        argv = m._r12_real_provider_argv(bound, ["auth", "status"])
+        bang(argv == [str(bound.executable), "auth", "status"],
+             f"provider_argv THAT khong dung duoc fixture direct: {argv}")
+
+        nhat_ky = []
+
+        def gia_run(lenh, **_k):
+            nhat_ky.append(list(lenh))
+            return subprocess.CompletedProcess(lenh, 1, stdout="", stderr="")
+
+        m.subprocess.run = gia_run
+        pg = m._provider_run(bound, ["auth", "status"],
+                             capture_output=True, text=True)
+        bang(nhat_ky == [argv] and pg.returncode == 1,
+             f"_provider_run khong day fixture qua boundary that toi seam "
+             f"subprocess.run: {nhat_ky}")
+
+        nguon_con = m._bound_provider_source(dict(PATH="/goc"), bound)
+        duong_con = nguon_con.get("PATH")
+        bang(duong_con == bound.sanitized_path,
+             f"sanitized_path khong duoc tieu thu khi dung PATH con: {duong_con!r}")
+    finally:
+        m.shutil.which = goc_which
+        m.subprocess.run = goc_run
 
 
 @ca

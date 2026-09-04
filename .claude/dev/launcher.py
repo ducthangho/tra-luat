@@ -72,6 +72,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import contextlib
 import hashlib
 import hmac
 import json
@@ -105,8 +106,10 @@ from provider_exec import (
 from session_credentials import (
     UnsafeSecretDestination as _UnsafeSecretDestination,
     _atomic_secret as _shared_atomic_secret,
-    _child_env as _provider_child_base,
+    _private_provider_home as _shared_private_provider_home,
+    _provider_child_env_for_home as _shared_provider_child_env_for_home,
     _read_secret_bytes as _shared_read_secret_bytes,
+    directory_destination as _shared_directory_destination,
     secret_destination as _shared_secret_destination,
 )
 
@@ -179,24 +182,116 @@ def _bind_launcher_provider(name: str, source: dict[str, str]):
         name, source, repository_root=Path(__file__).resolve().parents[2])
 
 
-def _provider_child_env(source: dict[str, str], bound, provider: str) -> dict[str, str]:
-    """Keep storage plus only the credential owned by this provider child."""
-    required = {}
-    for key in ("HOME", "USERPROFILE", "CODEX_HOME", "CLAUDE_CONFIG_DIR"):
+_PROVIDER_CREDENTIAL_KEYS = dict(
+    codex=(),
+    claude=("CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY"),
+    gh=("GH_TOKEN",),
+)
+
+
+def _ambient_home(source: dict[str, str]) -> Path | None:
+    """Ambient user home, dùng DUY NHẤT để định vị credential directory
+    canonical đã tài liệu hoá của một provider — không bao giờ được trao
+    thẳng cho provider child.  Không phân giải được thì trả None: môi trường
+    không có home thì cũng không có trạng thái đăng nhập canonical để giữ."""
+    raw = source.get("HOME") or source.get("USERPROFILE")
+    try:
+        return Path(raw).expanduser() if raw else Path("~").expanduser()
+    except RuntimeError:
+        return None
+
+
+def _mo_rong_bien_tuong_minh(raw: str, ten: str) -> Path:
+    """Expand một biến storage TƯỜNG MINH; không phân giải được là fail closed."""
+    try:
+        return Path(raw).expanduser()
+    except RuntimeError as exc:
+        raise OSError(f"khong phan giai duoc {ten}") from exc
+
+
+def _canonical_provider_storage(source: dict[str, str],
+                                provider: str) -> dict[str, str]:
+    """Credential directory canonical đã tài liệu hoá của ĐÚNG provider này.
+
+    Private HOME không được vô tình giấu mất trạng thái đăng nhập trên đĩa
+    mà hợp đồng provider cho phép, nên đúng MỘT thư mục đó được bind lại vào
+    child bằng chính biến provider tài liệu hoá.  Validation dùng cùng chốt
+    ranh giới repository của các writer credential; một biến tường minh không
+    an toàn/không phân giải được thì ném — zero child.  Môi trường không có
+    home nào phân giải được thì KHÔNG có trạng thái đăng nhập canonical để
+    giữ: child chỉ còn hierarchy private (đúng hợp đồng cũ của môi trường
+    khuyết home).
+    """
+    if provider == "codex":
+        try:
+            target = _codex_home(source)
+        except RuntimeError:
+            return dict()
+        return dict(CODEX_HOME=str(_shared_directory_destination(target)))
+    if provider == "claude":
+        raw = source.get("CLAUDE_CONFIG_DIR")
+        if raw:
+            return dict(CLAUDE_CONFIG_DIR=str(_shared_directory_destination(
+                _mo_rong_bien_tuong_minh(raw, "CLAUDE_CONFIG_DIR"))))
+        home = _ambient_home(source)
+        if home is None:
+            return dict()
+        return dict(CLAUDE_CONFIG_DIR=str(
+            _shared_directory_destination(home / ".claude")))
+    if provider == "gh":
+        raw = source.get("GH_CONFIG_DIR")
+        if raw:
+            return dict(GH_CONFIG_DIR=str(_shared_directory_destination(
+                _mo_rong_bien_tuong_minh(raw, "GH_CONFIG_DIR"))))
+        if source.get("XDG_CONFIG_HOME"):
+            return dict(GH_CONFIG_DIR=str(_shared_directory_destination(
+                _mo_rong_bien_tuong_minh(source["XDG_CONFIG_HOME"],
+                                         "XDG_CONFIG_HOME") / "gh")))
+        home = _ambient_home(source)
+        if home is None:
+            return dict()
+        return dict(GH_CONFIG_DIR=str(
+            _shared_directory_destination(home / ".config" / "gh")))
+    raise OSError(f"unknown provider storage contract: {provider}")
+
+
+@contextlib.contextmanager
+def _provider_child_env(source: dict[str, str], bound, provider: str):
+    """MỘT hierarchy HOME/XDG/temp private đã validate cho provider child.
+
+    Hierarchy do process tạo và context-managed: tồn tại trước khi child
+    khởi động và chỉ được checked-cleanup sau khi child đã kết thúc, nên
+    ambient HOME/USERPROFILE/TMPDIR/TMP/TEMP không bao giờ chọn được provider
+    storage.  Chỉ credential tường minh của CHÍNH provider này và credential
+    directory canonical đã tài liệu hoá đi qua ranh giới; allocation hỏng ném
+    ngay tại đây — trước mọi child — và cleanup hỏng ném khi thoát context.
+    """
+    required = _canonical_provider_storage(source, provider)
+    for key in _PROVIDER_CREDENTIAL_KEYS[provider]:
         value = source.get(key)
         if value:
             required[key] = value
-    credential_keys = {
-        "codex": (),
-        "claude": ("CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY"),
-        "gh": ("GH_TOKEN",),
-    }[provider]
-    for key in credential_keys:
-        value = source.get(key)
-        if value:
-            required[key] = value
-    return _provider_child_base(
-        _bound_provider_source(source, bound), **required)
+    with _shared_private_provider_home() as home:
+        child = _shared_provider_child_env_for_home(
+            _bound_provider_source(source, bound), home, **required)
+        if os.name == "nt":
+            # Provider native trên Windows tra profile qua USERPROFILE; nó
+            # phải đi theo hierarchy private, không theo giá trị ambient.
+            child["USERPROFILE"] = child["HOME"]
+        yield child
+
+
+def _dong_provider_storage(storage) -> BaseException | None:
+    """Đóng private provider storage; trả về (không ném) lỗi cleanup.
+
+    Caller quyết định hậu quả: trên đường thành công lỗi này phải chặn
+    success; trong lúc đang unwind một primary exception thì primary thắng.
+    """
+    try:
+        storage.close()
+    except BaseException as exc:
+        return exc
+    return None
 
 
 def _provider_popen(bound, arguments, **kwargs):
@@ -267,7 +362,15 @@ def _resolve_executable_identity(lenh: list[str], workspace: str | Path) -> dict
         # A relative path belongs to the declared workspace, never to the
         # launcher's caller cwd.  ``shutil.which`` treats names containing a
         # separator as paths and would resolve them from that unrelated cwd.
-        path = Path(command).expanduser()
+        if command.startswith("~"):
+            # Tilde spelling in a path-bearing argv0 would expand through
+            # ambient HOME, which is caller state, not workspace authority.
+            # A shell-expanded spelling arrives already absolute; anything
+            # still starting with "~" is refused before any child.
+            raise Chan(MA_THAM_SO,
+                       "argv0 tuong doi mang '~' khong duoc expand tu ambient "
+                       "HOME; dung duong dan tuyet doi da duoc shell expand")
+        path = Path(command)
         selected = str(path if path.is_absolute() else Path(workspace) / path)
     else:
         try:
@@ -947,6 +1050,77 @@ def _pid_trong_job(job) -> list[int] | None:
         return None
 
 
+def _tat_job_windows(job) -> bool:
+    """TerminateJobObject cho ĐÚNG job này. True = tín hiệu đã gửi được.
+
+    Phạm vi là chính cái job vừa nhốt con: KHÔNG duyệt tiến trình toàn máy,
+    KHÔNG đi theo ảnh chụp cha-con, nên không cách nào chạm vào tiến trình lạ.
+    """
+    try:
+        import ctypes
+        return bool(ctypes.windll.kernel32.TerminateJobObject(job, 1))
+    except (OSError, AttributeError, ValueError):
+        return False
+
+
+def _dong_tay_cam_job(job) -> bool:
+    """Đóng ĐÚNG MỘT tay cầm job. True = đã đóng được."""
+    try:
+        import ctypes
+        return bool(ctypes.windll.kernel32.CloseHandle(job))
+    except (OSError, AttributeError, ValueError):
+        return False
+
+
+def _yen_job_windows(job, han_giay: float = 5.0,
+                     nhip_giay: float = 0.05) -> str | None:
+    """Lắng hậu duệ của ĐÚNG job này rồi đóng tay cầm. None = đã yên.
+
+    WP433-R20-SEC-042: đường THÀNH CÔNG trước đây phó mặc việc đóng job cho lúc
+    interpreter thoát, tức là SAU khi private provider storage đã bị dọn. Một hậu
+    duệ còn sống trong job vẫn đang giữ một tệp dưới HOME private, nên `rmtree`
+    hỏng và lượt chạy trả 1 kèm "provider private storage cleanup that bai"
+    trong khi con chính đã thoát 0 (đo được ở lượt tự nhiên
+    c6b16cc481754e638c456f5b0428fc26). Thứ tự đúng là: lắng job TRƯỚC, dọn SAU.
+
+    Ba tính chất, và mỗi cái đều là một cách hỏng đã thấy ở kho này:
+      · phạm vi — chỉ `TerminateJobObject` + `_pid_trong_job` của CHÍNH job này;
+        không liệt kê tiến trình toàn máy, không giết theo tên/ảnh chụp;
+      · CHỜ CÓ HẠN — đợi danh sách pid của job rỗng, nhưng có hạn chót; không
+        đo được hoặc chưa rỗng thì NÓI RA để phía gọi fail closed, không ngủ vô hạn
+        và cũng không vá bằng "thử dọn lại vài lần";
+      · tay cầm được đóng ĐÚNG MỘT LẦN trên MỌI đường — kể cả khi primitive ném.
+    Lỗi ở đây trả về dạng chuỗi chứ không ném: phía gọi đang ở `finally` của một
+    primary error và primary error phải thắng.
+    """
+    if job is None:
+        return None                  # POSIX, hoặc job tạo không nổi: không có gì để lắng
+    ly_do = None
+    try:
+        con = _pid_trong_job(job)
+        if con != []:                # `!= []`: None là KHÔNG ĐO ĐƯỢC, không phải rỗng
+            if not _tat_job_windows(job):
+                ly_do = "TerminateJobObject that bai"
+            else:
+                het = time.monotonic() + max(0.0, han_giay)
+                while True:
+                    con = _pid_trong_job(job)
+                    if con == []:
+                        break
+                    con_lai = het - time.monotonic()
+                    if con_lai <= 0:
+                        ly_do = ("khong doc duoc danh sach pid trong job"
+                                 if con is None
+                                 else f"job con {len(con)} tien trinh")
+                        break
+                    time.sleep(min(nhip_giay, con_lai))
+    except (OSError, AttributeError, ValueError) as e:
+        ly_do = f"lang job loi: {type(e).__name__}"
+    if not _dong_tay_cam_job(job):
+        ly_do = ly_do or "khong dong duoc tay cam job"
+    return ly_do
+
+
 def _giet_windows(pid: int, khoa: str | None = None,
                   anh: dict[int, str] | None = None, job=None) -> KetGiet:
     """Giết trên Windows: taskkill trước, rồi TerminateProcess nếu vẫn sống.
@@ -1259,11 +1433,12 @@ def _probe_provider_spawn(identity: dict, ws: str) -> dict:
         return {"trang_thai": "KHONG_DO_DUOC",
                 "chi_tiet": "provider executable capability unavailable"}
     try:
-        child = _provider_child_env(dict(os.environ), bound, provider_name)
-        p = _provider_run(
-            bound, ["--version"], capture_output=True, text=True,
-            encoding="utf-8", errors="replace", env=child,
-            stdin=subprocess.DEVNULL, timeout=30, cwd=ws)
+        with _provider_child_env(
+                dict(os.environ), bound, provider_name) as child:
+            p = _provider_run(
+                bound, ["--version"], capture_output=True, text=True,
+                encoding="utf-8", errors="replace", env=child,
+                stdin=subprocess.DEVNULL, timeout=30, cwd=ws)
     except (OSError, subprocess.SubprocessError, _ProviderExecutableError) as exc:
         return {"trang_thai": "DO",
                 "chi_tiet": f"spawn --version: {type(exc).__name__}"}
@@ -1883,19 +2058,39 @@ def lenh_run(a) -> int:
         f_out.close(); f_err.close()
         raise
     provider_child = None
+    provider_storage = contextlib.ExitStack()
     bound = identity.get("provider_capability")
     provider_name = _BOUND_PROVIDER_NAMES.get(identity.get("provider"))
     if bound is not None and provider_name is not None:
         # Generic local commands intentionally retain the caller environment.
-        # A provider child is credential-bearing, however, so it receives the
-        # same provider-scoped allowlist as doctor/session paths.  Build it only
-        # after binding; the identity is still revalidated at the final boundary
-        # below, immediately before Popen.
-        provider_child = _provider_child_env(
-            dict(os.environ), bound, provider_name)
+        # A provider child is credential-bearing, however, so it receives one
+        # process-created private HOME/XDG/temp hierarchy plus only its own
+        # credential/canonical credential directory (WP433-R19-SEC-037).  The
+        # context spans the entire child lifetime: allocation failure starts
+        # zero children, cleanup failure prevents success.  The identity is
+        # still revalidated at the final boundary below, immediately before
+        # Popen.
+        try:
+            provider_child = provider_storage.enter_context(
+                _provider_child_env(dict(os.environ), bound, provider_name))
+        except OSError as exc:
+            ban_ghi.update(
+                trang_thai="hong", giai_doan="pre_execution_provider_storage",
+                ma_thoat=MA_THAM_SO,
+                ly_do_dung=("provider private storage unavailable: "
+                            f"{type(exc).__name__}"),
+                ket_thuc_utc=_bay_gio().isoformat())
+            _ghi_so(thu_muc, ban_ghi, khoa_ky)
+            f_out.close(); f_err.close()
+            raise Chan(MA_THAM_SO,
+                       "provider private storage unavailable: "
+                       f"{type(exc).__name__}") from None
     try:
         _revalidate_identity(identity)
     except _ProviderExecutableError as exc:
+        loi_kho = _dong_provider_storage(provider_storage)
+        if loi_kho is not None:
+            ban_ghi["provider_storage_don_dep"] = f"that bai: {type(loi_kho).__name__}"
         ban_ghi.update(trang_thai="hong", giai_doan="pre_execution_provider",
                        ma_thoat=MA_THAM_SO,
                        ly_do_dung=f"provider executable changed: {exc.reason}",
@@ -1916,6 +2111,9 @@ def lenh_run(a) -> int:
                 lenh_con, cwd=kq["workspace"], stdout=f_out, stderr=f_err,
                 stdin=subprocess.DEVNULL, **them)
     except _ProviderExecutableError as exc:
+        loi_kho = _dong_provider_storage(provider_storage)
+        if loi_kho is not None:
+            ban_ghi["provider_storage_don_dep"] = f"that bai: {type(loi_kho).__name__}"
         ban_ghi.update(
             trang_thai="hong", giai_doan="pre_execution_provider",
             ma_thoat=MA_THAM_SO,
@@ -1928,6 +2126,9 @@ def lenh_run(a) -> int:
         raise Chan(
             MA_THAM_SO, f"provider executable changed: {exc.reason}") from None
     except (OSError, ValueError) as e:
+        loi_kho = _dong_provider_storage(provider_storage)
+        if loi_kho is not None:
+            ban_ghi["provider_storage_don_dep"] = f"that bai: {type(loi_kho).__name__}"
         ban_ghi.update(trang_thai="hong", ly_do_dung=f"khong chay duoc lenh: {e}",
                        ket_thuc_utc=_bay_gio().isoformat())
         _ghi_so(thu_muc, ban_ghi, khoa_ky)
@@ -1982,6 +2183,15 @@ def lenh_run(a) -> int:
     finally:
         f_out.close()
         f_err.close()
+        # WP433-R20-SEC-042: LẮNG job TRƯỚC KHI dọn private storage. Con chính
+        # đã thoát không có nghĩa hậu duệ trong job của nó đã thoát, và hậu duệ
+        # còn sống thì còn giữ tệp dưới HOME private — `rmtree` hỏng và lượt
+        # chạy nói dối là "cleanup that bai" trong khi con thoát 0. Chỉ đường
+        # provider mới có storage để dọn, nên POSIX (job None) và lệnh chung
+        # không đi qua đây.
+        loi_yen_job = (_yen_job_windows(job)
+                       if provider_child is not None else None)
+        loi_don_dep = _dong_provider_storage(provider_storage)
 
     if khoa is None and qua_han:
         # không giết được vì không có khoá: nói thẳng, đừng báo "đã dừng"
@@ -2007,7 +2217,27 @@ def lenh_run(a) -> int:
         # chạy bị ngắt giữa chừng và con bị giết, mà `trang_thai` — đúng trường
         # `status` liệt kê — nói là kết thúc bình thường. Cùng lớp lỗi với t50.
         ban_ghi["trang_thai"] = ("bi_ngat" if bi_ngat
-                                 else "qua_han" if qua_han else "xong")
+                                 else "qua_han" if qua_han
+                                 else "hong" if loi_don_dep is not None
+                                 else "hong" if loi_yen_job is not None
+                                 else "xong")
+    # Lắng job hỏng là fail closed RIÊNG của nó: nó THÊM lý do và chỉ nâng mã khi
+    # mã đang là 0, đúng luật mà cleanup hỏng đã theo — primary error đến trước
+    # thì primary error thắng.
+    if loi_yen_job is not None:
+        ban_ghi["job_windows_yen"] = f"that bai: {loi_yen_job}"
+        ban_ghi["ly_do_dung"] = ((ban_ghi.get("ly_do_dung") or "")
+                                 + ("; " if ban_ghi.get("ly_do_dung") else "")
+                                 + "windows job settlement that bai")
+        if ma == 0:
+            ma = 1
+    if loi_don_dep is not None:
+        ban_ghi["provider_storage_don_dep"] = f"that bai: {type(loi_don_dep).__name__}"
+        ban_ghi["ly_do_dung"] = ((ban_ghi.get("ly_do_dung") or "")
+                                 + ("; " if ban_ghi.get("ly_do_dung") else "")
+                                 + "provider private storage cleanup that bai")
+        if ma == 0:
+            ma = 1
     # Wrapper thoát KHÔNG có nghĩa bản chụp đã hết việc: nó có thể vừa
     # sinh cháu, và cháu mới là người mở {PROMPT_FILE}. Xoá ngay khi p.wait()
     # trả về tạo một TOCTOU do chính launcher gây ra: sổ báo xong/rc=0
@@ -2589,6 +2819,171 @@ def _xac_thuc_kem_dau_ra(duong_dan: str, doi_so: list[str], *, env=None,
     return (True, "ok", False, dau_ra)
 
 
+_RE_PHIEN_BAN_KIN = re.compile(r"\d+(?:\.\d+){1,3}")
+
+
+def _phien_ban_bound(bound, provider_name: str, *, source: dict[str, str],
+                     timeout=None) -> tuple[bool, str, bool]:
+    """`--version` cho provider DA BIND: bound runner + private scoped env.
+
+    Cung hop dong ba phan tu voi `_phien_ban`, nhung KHONG bao gio replay dau
+    ra tho cua provider vao ket qua: `phien_ban` chi la token phien ban da
+    validate hoac mot chuoi dong.  Private storage khong cap phat duoc thi
+    probe la khong chay duoc — zero child, fail closed; identity duoc
+    revalidate ngay truoc spawn boi chinh bound runner.
+    """
+    if timeout is None:
+        timeout = PROBE_TIMEOUT_GIAY
+    try:
+        with _provider_child_env(dict(source), bound, provider_name) as child:
+            p = _provider_run(
+                bound, ["--version"], capture_output=True, text=True,
+                stdin=subprocess.DEVNULL, env=child,
+                timeout=max(0.1, timeout), encoding="utf-8", errors="replace")
+    except subprocess.TimeoutExpired:
+        return (False, f"bound probe timeout sau {timeout:.1f}s", True)
+    except _ProviderExecutableError as e:
+        return (False, f"khong bind duoc: {e.reason}", False)
+    except (OSError, subprocess.SubprocessError) as e:
+        return (False, f"khong chay duoc: {type(e).__name__}", False)
+    output = (p.stdout or "") + (p.stderr or "")
+    if p.returncode != 0 or not output.strip():
+        return (False,
+                f"rc={p.returncode}" + ("" if output.strip() else ", khong in gi"),
+                False)
+    version = _RE_PHIEN_BAN_KIN.search(output)
+    return (True,
+            version.group(0) if version else "chay duoc, khong doc duoc phien ban",
+            False)
+
+
+def _xac_thuc_bound(bound, provider_name: str, doi_so: list[str], *,
+                    source: dict[str, str],
+                    timeout=None) -> tuple[bool, str, bool, str]:
+    """Probe auth cho provider DA BIND — bo bon cung hop dong voi
+    `_xac_thuc_kem_dau_ra`, mo ta chi dung vocabulary dong.  Phan tu thu tu
+    (dau ra tho) chi song trong tien trinh cho `_XAC_THUC_DA_DO`; khong bao
+    gio duoc in vao report hay hook log.
+    """
+    if timeout is None:
+        timeout = PROBE_TIMEOUT_GIAY
+    try:
+        with _provider_child_env(dict(source), bound, provider_name) as child:
+            p = _provider_run(
+                bound, list(doi_so), capture_output=True, text=True,
+                stdin=subprocess.DEVNULL, env=child,
+                timeout=max(0.1, timeout), encoding="utf-8", errors="replace")
+    except subprocess.TimeoutExpired:
+        return (False, f"bound auth probe timeout sau {timeout:.1f}s", True, "")
+    except _ProviderExecutableError as e:
+        return (False, f"khong bind duoc: {e.reason}", False, "")
+    except (OSError, subprocess.SubprocessError) as e:
+        return (False, type(e).__name__, False, "")
+    dau_ra = (p.stdout or "") + (p.stderr or "")
+    if p.returncode != 0:
+        return (False, f"rc={p.returncode}", False, dau_ra)
+    if not dau_ra.strip():
+        return (False, "rc=0 nhung khong co bang chung xac thuc", False, dau_ra)
+    return (True, "ok", False, dau_ra)
+
+
+def _do_cong_cu_provider(c: dict, provider_name: str,
+                         moi_truong: dict[str, str], het_han: float):
+    """Do MOT provider (claude/codex/gh) cua bang `CONG_CU` qua bound
+    capability duy nhat — khong chon executable bang PATH chup san, khong
+    copy ambient environment vao child (WP433-R19-SPEC-037).  Tra dung bo
+    trang thai ma vong lap `lenh_doctor` dung cho moi cong cu; moi duong tu
+    choi (repository/temp/relative/ambiguous/replaced) la zero child.
+    """
+    thay = None
+    co_mat_nhung_hong = None
+    het_ngan_sach = None
+    qua_han_probe = None
+    xac_thuc_ok = None
+    loi_xac_thuc = None
+    xac_thuc_chua_do = None
+
+    def bo_trang_thai():
+        return (thay, co_mat_nhung_hong, het_ngan_sach, qua_han_probe,
+                xac_thuc_ok, loi_xac_thuc, xac_thuc_chua_do)
+
+    if provider_name == "codex":
+        bi_chan = _co_chan_codex()
+        if bi_chan:
+            # The hook's destination/policy refusal must survive into the
+            # final doctor tail.  Even `codex --version` is a Codex child and
+            # must not start here; the candidate path is display-only.
+            for ten_uv, d in _cac_duong_dan(c, moi_truong):
+                thay = dict(goi_bang=ten_uv, duong_dan=d, phien_ban=bi_chan)
+                break
+            return bo_trang_thai()
+    con_lai = het_han - time.monotonic()
+    if con_lai <= 0:
+        het_ngan_sach = dict(
+            goi_bang=provider_name, duong_dan="",
+            ly_do="doctor het ngan sach truoc khi do toi day")
+        return bo_trang_thai()
+    try:
+        bound = _bind_launcher_provider(provider_name, moi_truong)
+    except _ProviderExecutableError as exc:
+        if exc.reason != "provider_executable_missing":
+            # Repository/temp/relative/ambiguous/replaced candidates are a
+            # COMPLETED refusal measurement: zero children, closed reason.
+            co_mat_nhung_hong = dict(
+                goi_bang=provider_name, duong_dan="",
+                loi=f"khong bind duoc: {exc.reason}")
+        return bo_trang_thai()
+    duong_dan = str(bound.executable)
+    chay_duoc, pb, qua_han = _phien_ban_bound(
+        bound, provider_name, source=moi_truong,
+        timeout=min(PROBE_TIMEOUT_GIAY, con_lai))
+    if not chay_duoc and qua_han:
+        # Cung hai lop va chong "doctor chop" (t53) nhu duong legacy: retry
+        # MOT luot voi han gap doi, van qua han thi la CHUA DO DUOC.
+        con_lai = het_han - time.monotonic()
+        if con_lai > 0:
+            chay_duoc, pb2, qua_han = _phien_ban_bound(
+                bound, provider_name, source=moi_truong,
+                timeout=min(2 * PROBE_TIMEOUT_GIAY, con_lai))
+            pb = pb2 if chay_duoc else f"luot 1: {pb} · luot 2: {pb2}"
+    if chay_duoc:
+        thay = dict(goi_bang=provider_name, duong_dan=duong_dan, phien_ban=pb)
+    elif qua_han:
+        qua_han_probe = dict(
+            goi_bang=provider_name, duong_dan=duong_dan,
+            ly_do=f"probe --version QUA HAN, chua do duoc: {pb}")
+    else:
+        co_mat_nhung_hong = dict(
+            goi_bang=provider_name, duong_dan=duong_dan, loi=pb)
+    if thay is not None and c.get("xac_thuc"):
+        con_lai = het_han - time.monotonic()
+        if con_lai <= 0:
+            xac_thuc_ok, loi_xac_thuc = None, "doctor het ngan sach"
+            xac_thuc_chua_do = loi_xac_thuc
+        else:
+            xac_thuc_ok, loi_xac_thuc, xt_qua_han, xt_dau_ra = _xac_thuc_bound(
+                bound, provider_name, c["xac_thuc"], source=moi_truong,
+                timeout=min(PROBE_TIMEOUT_GIAY, con_lai))
+            xt_mo_ta_cuoi = loi_xac_thuc
+            if not xac_thuc_ok and xt_qua_han:
+                con_lai = het_han - time.monotonic()
+                if con_lai > 0:
+                    xac_thuc_ok, loi_2, xt_qua_han, xt_dau_ra = _xac_thuc_bound(
+                        bound, provider_name, c["xac_thuc"], source=moi_truong,
+                        timeout=min(2 * PROBE_TIMEOUT_GIAY, con_lai))
+                    xt_mo_ta_cuoi = loi_2
+                    if not xac_thuc_ok:
+                        loi_xac_thuc = f"luot 1: {loi_xac_thuc} · luot 2: {loi_2}"
+                if not xac_thuc_ok and xt_qua_han:
+                    xac_thuc_ok = None
+                    xac_thuc_chua_do = ("probe xac thuc QUA HAN, chua do duoc: "
+                                        + loi_xac_thuc)
+                    loi_xac_thuc = xac_thuc_chua_do
+            _XAC_THUC_DA_DO[(thay["duong_dan"], tuple(c["xac_thuc"]))] = (
+                xac_thuc_ok is True, xt_mo_ta_cuoi, bool(xt_qua_han), xt_dau_ra)
+    return bo_trang_thai()
+
+
 def _in_an_toan(chuoi: str) -> bool:
     """In một dòng; ống bị đóng thì thôi, KHÔNG đổi kết luận đã tính xong.
 
@@ -3064,8 +3459,8 @@ def _do_codex_song(han_giay: int = 90, duong_dan: str | None = None,
                     repository_root=Path(__file__).resolve().parents[2])
             else:
                 bound = _bind_launcher_provider("codex", source)
-        child = _provider_child_env(source, bound, "codex")
-        with open(os.devnull) as rong:
+        with _provider_child_env(source, bound, "codex") as child, \
+                open(os.devnull) as rong:
             p = _provider_run(
                 bound, ["exec", "--skip-git-repo-check", "in ra: ok"],
                 stdin=rong, capture_output=True, text=True,
@@ -3105,7 +3500,6 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
         return ("CHUA_XAC_THUC", bi_chan)
     try:
         bound = _bind_launcher_provider("codex", source)
-        child = _provider_child_env(source, bound, "codex")
         # Spawn bằng ĐƯỜNG DẪN `which` đã trả, KHÔNG spawn tên trần. ĐO 19-08-2026
         # trên Windows (packet PLAT-M3, #185): `shutil.which` thấy
         # `...\nodejs\codex.CMD` (tra PATHEXT), nhưng CreateProcessW với tên trần
@@ -3114,9 +3508,10 @@ def _do_codex(kiem_song: bool = False) -> tuple[str, str]:
         # Một `doctor` mà hai probe của nó phân giải cùng một tên ra hai kết quả
         # ngược nhau là doctor tự mâu thuẫn; mọi spawn CLI agent (.cmd shim của
         # npm) phải đi qua đường dẫn resolve.
-        p = _provider_run(
-            bound, ["login", "status"], capture_output=True, text=True, timeout=30,
-            encoding="utf-8", errors="replace", env=child)
+        with _provider_child_env(source, bound, "codex") as child:
+            p = _provider_run(
+                bound, ["login", "status"], capture_output=True, text=True,
+                timeout=30, encoding="utf-8", errors="replace", env=child)
         ra = ((p.stdout or "") + (p.stderr or ""))
         rc = p.returncode
     except _ProviderExecutableError as e:
@@ -3561,11 +3956,11 @@ def _suc_khoe_mcp_github(ten: str = "github",
     moi_truong = _env_da_chuan(moi_truong)
     try:
         bound = _bind_launcher_provider("claude", moi_truong)
-        child = _provider_child_env(moi_truong, bound, "claude")
-        r = _provider_run(
-            bound, ["mcp", "get", ten], capture_output=True, text=True,
-            encoding="utf-8", errors="replace", env=child,
-            stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)
+        with _provider_child_env(moi_truong, bound, "claude") as child:
+            r = _provider_run(
+                bound, ["mcp", "get", ten], capture_output=True, text=True,
+                encoding="utf-8", errors="replace", env=child,
+                stdin=subprocess.DEVNULL, timeout=PROBE_TIMEOUT_GIAY)
     except _ProviderExecutableError as e:
         return ("khong_do_duoc", f"khong bind duoc `claude`: {e.reason}")
     except (OSError, subprocess.SubprocessError) as e:
@@ -3765,13 +4160,15 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
         bound_gh = None
         gh_bind_reason = exc.reason
     gh_child = None
+    gh_storage = contextlib.ExitStack()
     if bound_gh is not None:
         try:
-            gh_child = _provider_child_env(mt, bound_gh, "gh")
+            gh_child = gh_storage.enter_context(
+                _provider_child_env(mt, bound_gh, "gh"))
             pg = _provider_run(
-                bound_gh, ["auth", "status"], capture_output=True, text=True,
-                encoding="utf-8", errors="replace", env=gh_child,
-                stdin=subprocess.DEVNULL, timeout=20)
+                bound_gh, ["auth", "status"], capture_output=True,
+                text=True, encoding="utf-8", errors="replace",
+                env=gh_child, stdin=subprocess.DEVNULL, timeout=20)
             duong.append(("gh-cli", pg.returncode == 0,
                           "da xac thuc" if pg.returncode == 0 else f"CHUA xac thuc (rc={pg.returncode})"))
         except _ProviderExecutableError as e:
@@ -3848,6 +4245,23 @@ def _do_github(ws: str | None, moi_truong: dict[str, str] | None = None) -> tupl
         duong.append(("gh-kho", False, "khong doc duoc slug origin"))
     else:
         duong.append(("gh-kho", False, f"khong bind duoc: {gh_bind_reason}"))
+    loi_gh_storage = _dong_provider_storage(gh_storage)
+    if loi_gh_storage is not None:
+        # WP433-R19-SEC-037: dọn dẹp private storage THẤT BẠI thì mọi kết quả
+        # sinh ra QUA context đó (`gh-cli`, `gh-kho`) mất quyền tính là đường
+        # thành công — cùng luật fail-closed mà `lenh_run` đã theo (cleanup
+        # hỏng ⇒ `trang_thai="hong"` dù con thoát 0). Bản trước chỉ THÊM dòng
+        # `gh-storage=khong` trong khi `gh-kho=True` vẫn nằm đó, nên một mình
+        # đường provider hỏng-dọn-dẹp vẫn kéo tổng kết lên `DUNG_DUOC`. Bằng
+        # chứng độc lập (`git`, `rest-*`) không đi qua private storage nên giữ
+        # nguyên phán xét của chúng; mô tả thay thế nói lý do đóng, không mang
+        # dữ liệu provider.
+        duong = [(ten, False, "private storage don dep that bai -> fail closed")
+                 if ten in ("gh-cli", "gh-kho") and ok else (ten, ok, chi_tiet)
+                 for ten, ok, chi_tiet in duong]
+        duong.append(("gh-storage", False,
+                      "provider storage cleanup that bai: "
+                      f"{type(loi_gh_storage).__name__}"))
 
     # --- MCP: ĐƯỜNG KHO THẬT SỰ DÙNG, và tới bản này mới ĐO thay vì khai trong chú thích.
     # Hai bước tách bạch, vì chúng hỏng khác nhau và chữa khác nhau:
@@ -4082,6 +4496,62 @@ def lenh_moi_truong(a) -> int:
     return MA_OK
 
 
+def lenh_hook_probe(a) -> int:
+    """Probe provider cho session hook: bound capability + private scoped env.
+
+    Dau ra CHI la vocabulary dong (mot dong `hook-probe <ten>: <trang-thai>`)
+    — khong bao gio replay dau ra tho cua provider vao hook log
+    (WP433-R19-SPEC-037).  Ma thoat: 0 = chay duoc / da do auth; 12 = chua
+    cai; 13 = bi chan / khong bind duoc / khong chay duoc / chua do duoc;
+    2 = ten khong thuoc hop dong provider.
+    """
+    ten = a.ten
+    if ten not in _BOUND_PROVIDER_NAMES.values():
+        _in_an_toan(f"hook-probe {ten}: khong phai provider")
+        return MA_THAM_SO
+    moi_truong, _cong_khai = _doc_moi_truong()
+    if ten == "codex":
+        # Destination/policy guard truoc MOI codex child, ke ca probe nay.
+        bi_chan = _co_chan_codex()
+        if bi_chan:
+            _in_an_toan(f"hook-probe {ten}: bi-chan")
+            return MA_CHUA_XAC_THUC
+    try:
+        bound = _bind_launcher_provider(ten, moi_truong)
+    except _ProviderExecutableError as exc:
+        if exc.reason == "provider_executable_missing":
+            _in_an_toan(f"hook-probe {ten}: thieu")
+            return MA_THIEU_CONG_CU
+        _in_an_toan(f"hook-probe {ten}: khong-bind-duoc ({exc.reason})")
+        return MA_CHUA_XAC_THUC
+    if getattr(a, "auth", False):
+        if ten != "codex":
+            _in_an_toan(f"hook-probe {ten}: khong ho tro --auth")
+            return MA_THAM_SO
+        ok, _mo_ta, qua_han, dau_ra = _xac_thuc_bound(
+            bound, ten, ["login", "status"], source=moi_truong, timeout=30)
+        if qua_han:
+            _in_an_toan("hook-probe codex --auth: khong-do-duoc (qua han)")
+            return MA_CHUA_XAC_THUC
+        if ok and "not logged in" not in dau_ra.lower():
+            # Chi chung minh tep credential doc duoc — xem chu thich
+            # `codex login status NOI DOI` tai `_do_codex`.
+            _in_an_toan("hook-probe codex --auth: co-credential")
+            return MA_OK
+        _in_an_toan("hook-probe codex --auth: chua-dang-nhap")
+        return MA_CHUA_XAC_THUC
+    chay_duoc, pb, qua_han = _phien_ban_bound(
+        bound, ten, source=moi_truong, timeout=PROBE_TIMEOUT_GIAY)
+    if chay_duoc:
+        _in_an_toan(f"hook-probe {ten}: chay-duoc {pb}")
+        return MA_OK
+    if qua_han:
+        _in_an_toan(f"hook-probe {ten}: khong-do-duoc (qua han)")
+        return MA_CHUA_XAC_THUC
+    _in_an_toan(f"hook-probe {ten}: khong-chay-duoc ({pb})")
+    return MA_CHUA_XAC_THUC
+
+
 def lenh_chuan_bi(a) -> int:
     ket = chuan_bi_xac_thuc(that_su=not a.thu_khan)
     if not ket:
@@ -4161,7 +4631,14 @@ def lenh_doctor(a) -> int:
         xac_thuc_ok = None
         loi_xac_thuc = None
         xac_thuc_chua_do = None
-        for ten_uv, d in _cac_duong_dan(c, moi_truong):
+        provider_name = (c["ten"] if c["ten"] in _BOUND_PROVIDER_NAMES.values()
+                         else None)
+        if provider_name is not None:
+            (thay, co_mat_nhung_hong, het_ngan_sach, qua_han_probe,
+             xac_thuc_ok, loi_xac_thuc, xac_thuc_chua_do) = (
+                _do_cong_cu_provider(c, provider_name, moi_truong, het_han))
+        for ten_uv, d in ([] if provider_name is not None
+                          else _cac_duong_dan(c, moi_truong)):
             if c["ten"] == "codex":
                 bi_chan = _co_chan_codex()
                 if bi_chan:
@@ -4213,7 +4690,8 @@ def lenh_doctor(a) -> int:
                 continue
             co_mat_nhung_hong = {"goi_bang": ten_uv,
                                  "duong_dan": d, "loi": pb}
-        if thay is not None and c.get("xac_thuc"):
+        if (provider_name is None and thay is not None
+                and c.get("xac_thuc")):
             con_lai = het_han - time.monotonic()
             if con_lai <= 0:
                 # Cũng vậy: chưa đo được auth thì để `None`, đừng khai là SAI.
@@ -4551,6 +5029,14 @@ def build_parser():
                         help="dung credential tu bien ra dia cho CLI can doc tu dia (codex)")
     cb.add_argument("--thu-khan", action="store_true", help="chi bao se lam gi, khong ghi")
     cb.set_defaults(fn=lenh_chuan_bi)
+
+    hp = sub.add_parser(
+        "hook-probe",
+        help="probe provider cho session hook (bound capability, dau ra dong)")
+    hp.add_argument("ten", help="claude | codex | gh")
+    hp.add_argument("--auth", action="store_true",
+                    help="do trang thai dang nhap (chi codex), in trang thai dong")
+    hp.set_defaults(fn=lenh_hook_probe)
 
     k = sub.add_parser("stop", help="dung mot luot chay (giet ca cay tien trinh)")
     k.add_argument("--run-root", required=True)

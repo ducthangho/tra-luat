@@ -152,16 +152,30 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > generic `run -- codex`. Generic run resolve/bind executable identity đúng một lần,
 > kể cả alias symlink/reparse đổi tên hoặc hard-link cùng file. argv0 tương đối có thành phần
 > đường dẫn được neo vào workspace đã khai **trước mọi PATH lookup**; chỉ tên lệnh trần mới dùng
-> PATH/PATHEXT. Provider child từ generic run chỉ nhận credential của chính provider và PATH
-> sanitized; credential ambient của provider khác không được kế thừa, còn generic non-provider
-> giữ contract môi trường cũ. Sau đó dùng cùng bound target
+> PATH/PATHEXT. argv0 tương đối còn mang `~` bị từ chối trước mọi child: launcher không bao giờ
+> expanduser qua ambient `HOME`, còn đường tuyệt đối do shell expand vẫn hợp lệ. Provider child
+> từ generic run, doctor probe và hook helper nhận MỘT hierarchy `HOME`/XDG/temp private do
+> process tạo (context sống trọn đời child) cộng PATH sanitized; ambient
+> `HOME`/`USERPROFILE`/`TMPDIR`/`TMP`/`TEMP` không bao giờ chọn provider storage, chỉ credential
+> tường minh của chính provider hoặc credential directory canonical đã tài liệu hoá
+> (`CODEX_HOME` · `CLAUDE_CONFIG_DIR` · `GH_CONFIG_DIR`) được bind lại — private HOME không giấu
+> trạng thái đăng nhập canonical mà hợp đồng provider cho phép; allocation hỏng là zero child,
+> checked-cleanup hỏng chặn success; generic non-provider giữ contract môi trường cũ. Doctor
+> version/auth cho claude/codex/gh và probe/status của session hook chỉ đi qua đúng bound
+> capability + bound runner ấy (hook uỷ quyền `launcher.py hook-probe`), revalidate ở final
+> spawn, giữ Codex destination guard trước mọi codex child, và chỉ in vocabulary trạng thái
+> ĐÓNG — đầu ra thô của provider không vào doctor report hay hook log; candidate
+> repository/temp/relative/ambiguous/replaced là zero child. Sau đó dùng cùng bound target
 > cho chốt Codex, transport record, capability probe và final spawn. Provider credential-bearing
 > đã nhận diện mà không có bound capability hợp lệ không thể dùng probe override để tới final spawn:
 > launcher ghi đúng một ledger `pre_execution_provider` có cấu trúc và chạy zero child. Chỉ generic
 > non-provider thiếu lệnh mới giữ probe-override cùng full ambient environment. Writer giữ **actual opened parent
 > capability** đã kiểm và làm toàn bộ create/chmod/fsync/replace tương đối với capability
 > ấy; không quay lại đường dẫn. Riêng shared session credential writer giữ identity của inode
-> ngay sau `O_CREAT|O_EXCL`, trước chmod/write/flush/fsync. Lỗi về sau của shared writer,
+> ngay sau `O_CREAT|O_EXCL`, trước chmod/write/flush/fsync, và giữ MỞ một duplicate capability
+> tới đúng inode ấy qua replace, post-install verification, parent-directory fsync và cleanup —
+> unlink/recreate không tái sử dụng được `(dev, ino)` khi các phép so identity theo pathname
+> còn tin nó. Lỗi về sau của shared writer,
 > kể cả mọi lỗi parent-directory fsync (`EINVAL`/`ENOTSUP`/`EIO`) sau replace, chỉ
 > được xoá entry còn đúng identity đó; replacement khác inode phải sống và exception gốc
 > không bị cleanup che. Exceptional unwind phải thử đóng hết descriptor còn sở hữu; close/unlink
@@ -198,8 +212,10 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > `authentication` và số trần `401`/`403` không phải refusal evidence. Với Claude, nonzero chỉ là `network_error`
 > khi stderr/stdout có bằng chứng transport cụ thể (connection reset/refused, DNS...); lỗi local
 > hoặc nonzero không phân loại được là `not_measured`; rc `0` thiếu marker thành công standalone chính xác
-> cũng là `not_measured`, không phải approve. GitHub chỉ coi HTTP 401/403/404 là `rejected` khi cùng response
-> header section có `X-GitHub-*`; body line, proxy/local output và block khác không được cấp bằng chứng.
+> cũng là `not_measured`, không phải approve. GitHub chỉ coi HTTP 401/403/404 là `rejected` khi `X-GitHub-*`
+> nằm trong CÙNG một response-header section hợp lệ về cú pháp: một dòng malformed xen giữa vô hiệu cả
+> block, EOF được phép kết thúc header-only output thật, còn body line, proxy/local output hay block
+> khác không cấp — và không dựng nổi — bằng chứng.
 > Timeout của `gh` không kèm bằng chứng transport-failure độc lập là `not_measured`, không phải
 > `network_error`. `tl-bootstrap` giữ nguyên contract rc của
 > child: `0→passed`; `1→not_measured/degraded`; `2→not_measured/precondition`;

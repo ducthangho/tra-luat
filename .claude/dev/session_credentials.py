@@ -535,6 +535,27 @@ def _created_secret_identity(fd: int) -> tuple[int, int]:
         raise primary.with_traceback(primary_traceback)
 
 
+def _created_secret_identity_guard(fd: int) -> tuple[tuple[int, int], int]:
+    """Bind the created inode and keep one duplicate capability to it open.
+
+    The duplicate must outlive the write channel: replace verification, the
+    parent-directory fsync, and failure cleanup all compare ``(dev, ino)`` by
+    pathname, and an unlink/recreate could otherwise recycle that identity
+    the moment the only descriptor closes.
+    """
+    identity = _created_secret_identity(fd)
+    try:
+        guard_fd = os.dup(fd)
+    except BaseException as primary:
+        primary_traceback = primary.__traceback__
+        try:
+            os.close(fd)
+        except BaseException:
+            pass
+        raise primary.with_traceback(primary_traceback)
+    return identity, guard_fd
+
+
 def _write_secret_fd(fd: int, data: bytes,
                      identity: tuple[int, int]) -> None:
     out = None
@@ -583,6 +604,7 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
     parent_fd = _open_parent_capability(path, create=True)
     created_name = None
     created_identity = None
+    identity_guard_fd = -1
     primary = None
     primary_traceback = None
     result = None
@@ -595,7 +617,8 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
                              0o600, dir_fd=parent_fd)
             except (TypeError, NotImplementedError) as exc:
                 raise OSError("relative secret create unavailable") from exc
-            created_identity = _created_secret_identity(fd)
+            created_identity, identity_guard_fd = (
+                _created_secret_identity_guard(fd))
             _write_secret_fd(fd, data, created_identity)
             installed = _stat_at(parent_fd, created_name)
             if (installed is None
@@ -614,7 +637,8 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
                 except (TypeError, NotImplementedError) as exc:
                     raise OSError("relative secret create unavailable") from exc
                 created_name = candidate
-                created_identity = _created_secret_identity(fd)
+                created_identity, identity_guard_fd = (
+                    _created_secret_identity_guard(fd))
                 break
             else:
                 raise OSError("could not allocate secret temporary file")
@@ -656,10 +680,14 @@ def _atomic_secret_dirfd(path: Path, data: bytes, *, exclusive: bool) -> Path:
             except BaseException:
                 pass
     close_error = None
-    try:
-        os.close(parent_fd)
-    except BaseException as exc:
-        close_error = exc
+    for descriptor in (identity_guard_fd, parent_fd):
+        if descriptor == -1:
+            continue
+        try:
+            os.close(descriptor)
+        except BaseException as exc:
+            if close_error is None:
+                close_error = exc
     if primary is not None:
         raise primary.with_traceback(primary_traceback)
     if close_error is not None:
@@ -965,20 +993,54 @@ def claude_probe(token_file: Path | None = None, *, timeout=20, env=None) -> dic
     return _result("passed", returncode=0)
 
 
+_GITHUB_STATUS_LINE_RE = re.compile(r"(?i)^HTTP/\S+\s+(\d{3})\b")
+# RFC 7230 field-name: one or more tchar then a colon.  Anything else inside a
+# header section (including indented obs-fold continuations) is malformed.
+_GITHUB_HEADER_FIELD_RE = re.compile(r"^[!#$%&'*+.^_`|~0-9A-Za-z-]+:")
+_GITHUB_EVIDENCE_HEADER_RE = re.compile(r"(?i)^X-GitHub-[^:]+:")
+
+
 def _github_failure_status(stdout: str, stderr: str) -> str:
-    """Classify auth only from an HTTP response evidenced as GitHub's."""
+    """Classify auth only from an HTTP response evidenced as GitHub's.
+
+    Each response is read as one stateful header section: evidence counts
+    only between a status line and its blank-line or EOF terminator, and only
+    when every line of that section is a syntactically valid header field.
+    EOF may terminate genuine header-only ``gh api --include --silent``
+    output, a malformed intervening line invalidates that whole block, and
+    once a response body begins nothing later can start or feed another
+    header section.
+    """
     combined = (stdout or "") + "\n" + (stderr or "")
-    status_lines = list(re.finditer(
-        r"(?mi)^HTTP/\S+\s+(\d{3})\b[^\r\n]*", combined))
-    for index, match in enumerate(status_lines):
-        block_end = (status_lines[index + 1].start()
-                     if index + 1 < len(status_lines) else len(combined))
-        block = combined[match.end():block_end]
-        header_end = re.search(r"\r?\n\r?\n", block)
-        headers = block[:header_end.start()] if header_end else block
-        if (int(match.group(1)) in (401, 403, 404)
-                and re.search(r"(?mi)^X-GitHub-[^:]+:", headers)):
+    lines = [line[:-1] if line.endswith("\r") else line
+             for line in combined.split("\n")]
+    total = len(lines)
+    index = 0
+    while index < total:
+        status = _GITHUB_STATUS_LINE_RE.match(lines[index])
+        index += 1
+        if status is None:
+            continue
+        end = index
+        while end < total and lines[end] != "":
+            end += 1
+        section = lines[index:end]
+        terminated_by_blank = end < total
+        index = end
+        section_valid = all(
+            _GITHUB_HEADER_FIELD_RE.match(line) for line in section)
+        evidence_lines = section
+        if (section_valid and int(status.group(1)) in (401, 403, 404)
+                and any(_GITHUB_EVIDENCE_HEADER_RE.match(line)
+                        for line in evidence_lines)):
             return "rejected"
+        if terminated_by_blank:
+            index += 1
+            if (index < total
+                    and _GITHUB_STATUS_LINE_RE.match(lines[index]) is None):
+                # A response body begins here; body lines cannot start or
+                # feed another header section.
+                break
     if _transport_failure_evidenced(combined.lower()):
         return "network_error"
     return "not_measured"

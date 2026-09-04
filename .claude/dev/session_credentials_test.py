@@ -1082,6 +1082,213 @@ def secret_write_cleanup_lock(module):
         assert not target.exists(), target
 
 
+def session_created_inode_guard_through_durability_lock(module):
+    """WP433-R19-SEC-038: the exact O_EXCL-created inode stays open from
+    identity capture through replace verification, parent-directory
+    durability, and cleanup, so ``(dev, ino)`` cannot be recycled while any
+    pathname-based identity comparison still trusts it."""
+    if os.name != "posix":
+        print("SKIP session_created_inode_guard_through_durability_lock "
+              "(POSIX capability primitive unavailable)")
+        return
+
+    def open_identities():
+        found = set()
+        for candidate in range(3, 512):
+            try:
+                info = os.fstat(candidate)
+            except OSError:
+                continue
+            found.add((info.st_dev, info.st_ino))
+        return found
+
+    class InjectedDurabilityFailure(OSError):
+        pass
+
+    real_identity = module._created_secret_identity
+    real_fsync = module.os.fsync
+    real_close = module.os.close
+    real_unlink_identity = module._unlink_identity
+
+    with tempfile.TemporaryDirectory(prefix="secret-inode-guard-") as td:
+        base = Path(td)
+
+        # 1) Success path: a descriptor to the created inode is still open at
+        # the directory-durability boundary, and it does not leak afterwards.
+        for exclusive in (False, True):
+            target = base / f"guard-{'x' if exclusive else 'a'}" / "auth.json"
+            captured = {}
+            observed = {}
+
+            def spy_identity(fd):
+                identity = real_identity(fd)
+                captured["identity"] = identity
+                return identity
+
+            def durability_fsync(fd):
+                if stat.S_ISDIR(module.os.fstat(fd).st_mode):
+                    observed["guard_open_at_directory_fsync"] = (
+                        captured["identity"] in open_identities())
+                return real_fsync(fd)
+
+            with mock.patch.object(module, "_created_secret_identity",
+                                   side_effect=spy_identity), \
+                 mock.patch.object(module.os, "fsync",
+                                   side_effect=durability_fsync):
+                module._atomic_secret(target, b"INERT_GUARD_FIXTURE",
+                                      exclusive=exclusive)
+            assert observed.get("guard_open_at_directory_fsync") is True, (
+                exclusive,
+                "created-inode capability was closed before directory durability")
+            assert captured["identity"] not in open_identities(), (
+                exclusive, "created-inode guard descriptor leaked")
+            assert target.read_bytes() == b"INERT_GUARD_FIXTURE"
+            assert stat.S_IMODE(target.stat().st_mode) == 0o600
+
+        # 2) Directory-durability failure: the guard is still open while
+        # cleanup decides what to unlink, only the exact created inode is
+        # removed, and the primary error survives cleanup and unwind.
+        for exclusive in (False, True):
+            root = base / f"cleanup-{'x' if exclusive else 'a'}"
+            root.mkdir()
+            target = root / "auth.json"
+            primary = InjectedDurabilityFailure("fixture-directory-fsync")
+            captured = {}
+            observed = {}
+
+            def spy_identity2(fd):
+                identity = real_identity(fd)
+                captured["identity"] = identity
+                return identity
+
+            def failing_directory_fsync(fd):
+                if stat.S_ISDIR(module.os.fstat(fd).st_mode):
+                    raise primary
+                return real_fsync(fd)
+
+            def spy_unlink(directory_fd, name, identity):
+                observed["guard_open_at_cleanup"] = (
+                    captured["identity"] in open_identities())
+                return real_unlink_identity(directory_fd, name, identity)
+
+            with mock.patch.object(module, "_created_secret_identity",
+                                   side_effect=spy_identity2), \
+                 mock.patch.object(module.os, "fsync",
+                                   side_effect=failing_directory_fsync), \
+                 mock.patch.object(module, "_unlink_identity",
+                                   side_effect=spy_unlink):
+                try:
+                    module._atomic_secret(target, b"INERT_GUARD_CLEANUP",
+                                          exclusive=exclusive)
+                    assert False, "primary durability failure was swallowed"
+                except InjectedDurabilityFailure as caught:
+                    assert caught is primary, (
+                        "cleanup/unwind replaced the primary exception")
+            assert observed.get("guard_open_at_cleanup") is True, (
+                exclusive,
+                "created-inode capability was closed before cleanup finished")
+            assert captured["identity"] not in open_identities(), (
+                exclusive, "created-inode guard descriptor leaked after failure")
+            assert list(root.iterdir()) == [], (exclusive, list(root.iterdir()))
+
+        # 3) A close failure on an otherwise successful write is fatal: some
+        # descriptor to the created inode must be closed through descriptor
+        # unwind, and its failure must surface instead of a silent success.
+        for exclusive in (False, True):
+            target = base / f"close-{'x' if exclusive else 'a'}" / "auth.json"
+            captured = {}
+            guard_closes = []
+
+            def spy_identity3(fd):
+                identity = real_identity(fd)
+                captured["identity"] = identity
+                return identity
+
+            def failing_guard_close(fd):
+                try:
+                    info = module.os.fstat(fd)
+                    is_guard = (info.st_dev, info.st_ino) == captured.get("identity")
+                except OSError:
+                    is_guard = False
+                real_close(fd)
+                if is_guard:
+                    guard_closes.append(fd)
+                    raise OSError("guard close fixture")
+
+            with mock.patch.object(module, "_created_secret_identity",
+                                   side_effect=spy_identity3), \
+                 mock.patch.object(module.os, "close",
+                                   side_effect=failing_guard_close):
+                try:
+                    module._atomic_secret(target, b"INERT_CLOSE_FATAL",
+                                          exclusive=exclusive)
+                    swallowed = True
+                except OSError:
+                    swallowed = False
+            assert guard_closes, (
+                exclusive,
+                "no created-inode capability was closed through descriptor unwind")
+            assert not swallowed, (
+                exclusive, "close failure on a successful path became success")
+            assert target.read_bytes() == b"INERT_CLOSE_FATAL", (
+                exclusive, "durable install disappeared on close failure")
+
+        # 4) A guard-close failure never replaces an earlier primary failure.
+        for exclusive in (False, True):
+            root = base / f"precedence-{'x' if exclusive else 'a'}"
+            root.mkdir()
+            target = root / "auth.json"
+            primary = InjectedDurabilityFailure("fixture-primary-write")
+            captured = {}
+
+            class FlushFaultingFile:
+                def __init__(self, fd):
+                    self.fd = fd
+
+                def fileno(self):
+                    return self.fd
+
+                def write(self, data):
+                    os.write(self.fd, data)
+                    return len(data)
+
+                def flush(self):
+                    raise primary
+
+                def close(self):
+                    real_close(self.fd)
+
+            def spy_identity4(fd):
+                identity = real_identity(fd)
+                captured["identity"] = identity
+                return identity
+
+            def failing_guard_close2(fd):
+                try:
+                    info = module.os.fstat(fd)
+                    is_guard = (info.st_dev, info.st_ino) == captured.get("identity")
+                except OSError:
+                    is_guard = False
+                real_close(fd)
+                if is_guard:
+                    raise OSError("secondary guard close fixture")
+
+            with mock.patch.object(module, "_created_secret_identity",
+                                   side_effect=spy_identity4), \
+                 mock.patch.object(module.os, "fdopen",
+                                   side_effect=lambda fd, _mode: FlushFaultingFile(fd)), \
+                 mock.patch.object(module.os, "close",
+                                   side_effect=failing_guard_close2):
+                try:
+                    module._atomic_secret(target, b"INERT_PRECEDENCE",
+                                          exclusive=exclusive)
+                    assert False, "primary write failure was swallowed"
+                except InjectedDurabilityFailure as caught:
+                    assert caught is primary, (
+                        "guard close failure replaced the primary exception")
+            assert list(root.iterdir()) == [], (exclusive, list(root.iterdir()))
+
+
 def claude_status_lock(module):
     """Claude status is evidence-based, with unknown local failure unmeasured."""
     cases = (
@@ -1240,6 +1447,64 @@ def github_status_lock(module):
         "user": "passed", "repos/o/r": "not_measured"}, result
 
 
+def github_malformed_header_block_not_auth_evidence_lock(module):
+    """WP433-R19-SPEC-040: X-GitHub evidence counts only inside one
+    syntactically valid 401/403/404 response-header section.  A malformed
+    intervening line invalidates that block; EOF may terminate genuine
+    header-only ``gh api --include --silent`` output; body lines, proxy text,
+    or another block can never supply the evidence."""
+    passed = mock.Mock(returncode=0, stdout="", stderr="")
+    cases = (
+        # Exact R19 counterexample: an unterminated malformed remainder is
+        # not a header section, so its X-GitHub line is not evidence.
+        ("HTTP/2 403 Forbidden\r\nnot-a-header\r\n"
+         "X-GitHub-Request-Id: BODY-SPOOF\r\n", "", "not_measured"),
+        ("HTTP/2 403 Forbidden\nnot-a-header\n"
+         "X-GitHub-Request-Id: BODY-SPOOF\n", "", "not_measured"),
+        # A malformed line after genuine evidence still invalidates the block.
+        ("HTTP/2 403\nX-GitHub-Request-Id: REAL\nnot-a-header\n",
+         "", "not_measured"),
+        # Indented continuation / whitespace-in-name lines are not fields.
+        ("HTTP/2 403\n folded: value\nX-GitHub-Request-Id: REAL\n",
+         "", "not_measured"),
+        ("HTTP/2 401\nBad Header: x\nX-GitHub-Request-Id: REAL\n",
+         "", "not_measured"),
+        # EOF-terminated genuine header-only output stays rejected (CRLF+LF).
+        ("HTTP/2 403 Forbidden\r\nX-GitHub-Request-Id: REAL\r\n"
+         "Content-Type: application/json\r\n", "", "rejected"),
+        ("HTTP/2 401\nX-GitHub-Request-Id: REAL\n", "", "rejected"),
+        # Blank-line-terminated genuine headers with a body stay rejected.
+        ("HTTP/2 404\nX-GitHub-Request-Id: REAL\n\nmessage missing body\n",
+         "", "rejected"),
+        # Body lines cannot carry evidence.
+        ("HTTP/2 403\nServer: fixture\n\nX-GitHub-Request-Id: BODY\n",
+         "", "not_measured"),
+        # A response body cannot fabricate a later header block.
+        ("HTTP/2 200\nServer: ok\n\nbody text\nHTTP/2 403\n"
+         "X-GitHub-Request-Id: FAKE\n", "", "not_measured"),
+        # Proxy text without GitHub headers stays unmeasured.
+        ("HTTP/1.1 403 Forbidden\nServer: proxy\n", "", "not_measured"),
+        # Consecutive genuine blocks (interim then final) still classify.
+        ("HTTP/1.1 100 Continue\n\nHTTP/2 403\nX-GitHub-Request-Id: REAL\n",
+         "", "rejected"),
+        # A malformed block never borrows evidence, but independent bounded
+        # transport evidence still classifies as network_error.
+        ("HTTP/2 403\nnot-a-header\nX-GitHub-Request-Id: SPOOF\n",
+         "connection reset by peer", "network_error"),
+    )
+    for stdout_text, stderr_text, expected in cases:
+        failed = mock.Mock(returncode=1, stdout=stdout_text, stderr=stderr_text)
+        with mock.patch.object(module, "_bind_provider_executable",
+                               return_value=_fixture_bound(module, "gh")), \
+             mock.patch.object(module, "_run_provider",
+                               side_effect=(passed, failed)):
+            result = module.github_probe(
+                "o/r", env=dict(GITHUB_PAT="INERT_FIXTURE"))
+        assert result["status"] == expected, (stdout_text, stderr_text, result)
+        assert result["endpoints"]["repos/o/r"] == expected, (
+            stdout_text, stderr_text, result)
+
+
 def tl_status_lock(module):
     """TL bootstrap preserves the delegated command's closed exit contract."""
     expected_by_rc = {
@@ -1351,9 +1616,14 @@ def run_mutations():
          '                    results[endpoint] = "network_error"',
          github_status_lock),
         ("github_body_line_is_accepted_as_response_header",
-         '        headers = block[:header_end.start()] if header_end else block',
-         '        headers = block',
+         "        evidence_lines = section",
+         "        evidence_lines = lines[index - len(section):]",
          github_status_lock),
+        ("github_non_header_line_before_xgithub_is_accepted",
+         "        section_valid = all(\n"
+         "            _GITHUB_HEADER_FIELD_RE.match(line) for line in section)",
+         "        section_valid = True",
+         github_malformed_header_block_not_auth_evidence_lock),
         ("tl_degraded_rc1_becomes_rejected",
          '        1: ("not_measured", "degraded"),',
          '        1: ("rejected", "credential_or_bundle_rejected"),',
@@ -1376,18 +1646,26 @@ def run_mutations():
         ))
         mutants.append((
             "session_partial_write_forgets_created_identity",
-            "                created_identity = _created_secret_identity(fd)\n"
+            "                created_identity, identity_guard_fd = (\n"
+            "                    _created_secret_identity_guard(fd))\n"
             "                break\n"
             "            else:\n"
             "                raise OSError(\"could not allocate secret temporary file\")\n"
             "            _write_secret_fd(fd, data, created_identity)",
-            "                write_identity = _created_secret_identity(fd)\n"
+            "                write_identity, identity_guard_fd = (\n"
+            "                    _created_secret_identity_guard(fd))\n"
             "                break\n"
             "            else:\n"
             "                raise OSError(\"could not allocate secret temporary file\")\n"
             "            _write_secret_fd(fd, data, write_identity)\n"
             "            created_identity = write_identity",
             secret_write_cleanup_lock,
+        ))
+        mutants.append((
+            "session_created_inode_guard_closed_before_directory_durability",
+            "    return identity, guard_fd",
+            "    os.close(guard_fd)\n    return identity, -1",
+            session_created_inode_guard_through_durability_lock,
         ))
         mutants.append((
             "missing_parent_creation_uses_pathname_before_capability",
@@ -1427,6 +1705,8 @@ def run_mutations():
         print("SKIP session_partial_write_forgets_created_identity "
               "(POSIX capability primitive unavailable)")
         print("SKIP missing_parent_creation_uses_pathname_before_capability "
+              "(POSIX capability primitive unavailable)")
+        print("SKIP session_created_inode_guard_closed_before_directory_durability "
               "(POSIX capability primitive unavailable)")
     killed = 0
     with tempfile.TemporaryDirectory(prefix="session-credential-mutant-") as td:
@@ -1561,9 +1841,11 @@ def run():
     provider_cleanup_lock(m)
     missing_parent_capability_lock(m)
     secret_write_cleanup_lock(m)
+    session_created_inode_guard_through_durability_lock(m)
     claude_status_lock(m)
     claude_capture_status_lock(m)
     github_status_lock(m)
+    github_malformed_header_block_not_auth_evidence_lock(m)
     tl_status_lock(m)
     expected_repository = P.resolve().parents[2]
     assert m.REPOSITORY_ROOT == expected_repository

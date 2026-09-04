@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that session-credential-bootstrap
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that session-credential-bootstrap hook-probe-bound-provider
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -133,14 +133,18 @@ echo "[session-start] goc du an: $GOC"
 
 # --- CLI agent chính thức. Idempotent: đã có thì không đụng (container được
 # cache sau khi hook xong, nên lần sau vào thẳng).
+# Probe provider KHONG con di duong `co_chay` (ambient PATH + spawn tho):
+# moi phep do codex/claude uy quyen cho `launcher.py hook-probe` — bound
+# capability, revalidation, private scoped env, dau ra DONG
+# (WP433-R19-SPEC-037). `co_chay` chi con cho cong cu thuong (rg).
 if co npm; then
-  if [ "$CODEX_BI_CHAN" = 0 ] && ! co_chay codex; then
+  if [ "$CODEX_BI_CHAN" = 0 ] && ! "$PY" "$GOC/.claude/dev/launcher.py" hook-probe codex; then
     echo "[session-start] cai @openai/codex ..."
     npm install -g @openai/codex >/dev/null 2>&1 || echo "[session-start] CANH BAO: cai codex that bai"
   elif [ "$CODEX_BI_CHAN" != 0 ]; then
     echo "[session-start] codex: BO QUA probe/cai dat — secret destination bi chan"
   fi
-  if ! co_chay claude; then
+  if ! "$PY" "$GOC/.claude/dev/launcher.py" hook-probe claude; then
     echo "[session-start] cai @anthropic-ai/claude-code ..."
     npm install -g @anthropic-ai/claude-code >/dev/null 2>&1 || echo "[session-start] CANH BAO: cai claude that bai"
   fi
@@ -334,8 +338,10 @@ if [ -n "${CODEX_AUTH_JSON:-}" ] && co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; t
   fi
 fi
 if co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then
-  # BẰNG CHỨNG DƯƠNG, không suy từ việc đã ghi tệp: hỏi chính codex.
-  echo "[session-start] codex auth: $(codex login status 2>&1 </dev/null | head -1)"
+  # BẰNG CHỨNG DƯƠNG, không suy từ việc đã ghi tệp — nhưng KHÔNG replay đầu
+  # ra thô của provider vào log: helper bound in đúng MỘT dòng trạng thái
+  # ĐÓNG (WP433-R19-SPEC-037) và tự giữ destination guard trước codex child.
+  echo "[session-start] codex auth: $("$PY" "$GOC/.claude/dev/launcher.py" hook-probe codex --auth </dev/null || true)"
 elif co codex; then
   echo "[session-start] codex auth: BO QUA — codex dang bi chan (xem tren)"
 fi

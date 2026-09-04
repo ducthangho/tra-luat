@@ -22,6 +22,7 @@ MOI = {
     ".claude/dev/mcp_gh_test.py": r"(?s)CA\s+: (\d+)/(\d+) đạt · 0 đỏ · ĐẠT.*ĐỘT BIẾN.*ĐẠT.*TỔNG: ĐẠT",
     ".claude/dev/mcp_github_doc_test.py": r"mcp_github_doc tests: (\d+)/(\d+) ca QUA \(hong 0, bo qua 0\)",
     ".claude/dev/probe_mang_test.py": r"(?s)tự đột biến cổng: 9/9 chết.*nền: 11/11 đạt.*TỔNG: ĐẠT",
+    ".claude/dev/session_credentials_test.py": r"PASS session_credentials_test(?: \(Windows fail-closed\))?",
     ".claude/hooks/pretooluse_guard_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     ".claude/hooks/subagent_ghi_detect_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     "ops/nhanh_don_duoc_test.py": r"^(\d+)/(\d+)$",
@@ -51,6 +52,17 @@ DA_NOI = {
     "scripts/tl_core/command_registry_test.py",
 }
 DANG_KY = set(MOI) | DA_NOI
+TAI_LIEU_SESSION = "docs/SESSION_CREDENTIALS.md"
+NEO_TAI_LIEU_SESSION = (
+    "actual opened parent capability",
+    "TRA_LUAT_CODEX_BLOCKED",
+    "process-created private",
+    "auth.json",
+    "profiles/default/cookies.json",
+    "profiles/default/metadata.json",
+    "Windows",
+    "not_measured",
+)
 
 
 def tim(root):
@@ -111,6 +123,16 @@ def bang_chung_xanh(text, mau):
     if not m:
         return False
     return not m.groups() or len(m.groups()) != 2 or (int(m.group(1)) > 0 and m.group(1) == m.group(2))
+
+
+def kiem_tai_lieu_session(root=ROOT):
+    """Ratchet hẹp: chỉ tài liệu ranh giới credential của phiên thuộc cổng này."""
+    path = root / TAI_LIEU_SESSION
+    if not path.is_file():
+        return [f"thiếu tài liệu credential phiên: {TAI_LIEU_SESSION}"]
+    text = path.read_text(encoding="utf-8")
+    return [f"tài liệu credential phiên thiếu neo: {anchor}"
+            for anchor in NEO_TAI_LIEU_SESSION if anchor not in text]
 
 
 def moi_truong_hien_tai(env=os.environ):
@@ -252,6 +274,16 @@ def phan_chung():
     # khuyết tật đã sống sót qua r4 và r5. Nên canh cả hai tầng.
     cases += [dem_la_do(None, True) is True, dem_la_do(None, False) is False,
               dem_la_do(False, False) is True, dem_la_do(True, True) is False]
+    # WP433: ratchet tài liệu chỉ canh đúng một file và phải đỏ khi mất một nghĩa bắt buộc.
+    with tempfile.TemporaryDirectory(prefix="ci-session-doc-") as d:
+        root_doc = pathlib.Path(d)
+        doc = root_doc / TAI_LIEU_SESSION
+        doc.parent.mkdir(parents=True)
+        doc.write_text("\n".join(NEO_TAI_LIEU_SESSION), encoding="utf-8")
+        cases.append(kiem_tai_lieu_session(root_doc) == [])
+        doc.write_text("\n".join(NEO_TAI_LIEU_SESSION[1:]), encoding="utf-8")
+        cases.append(any(NEO_TAI_LIEU_SESSION[0] in x
+                         for x in kiem_tai_lieu_session(root_doc)))
     # r6: `trong_ci` phải ĐỘC LẬP với `moi_truong_hien_tai` — thiếu RUNNER_OS vẫn là CI,
     # còn không có GITHUB_ACTIONS thì dù có RUNNER_OS vẫn KHÔNG phải CI.
     cases += [trong_ci({"GITHUB_ACTIONS": "true"}) is True,
@@ -297,6 +329,7 @@ def phan_chung():
               "rc-do-ban-in-xanh", "rc-xanh-thieu-ban-in",
               "r6-vi-tu-none-trong-ci-la-do", "r6-vi-tu-none-ngoai-ci-khong-do",
               "r6-vi-tu-da-xanh-van-do", "r6-vi-tu-cach-ly-hop-le-khong-do",
+              "wp433-tai-lieu-session-du-neo", "wp433-tai-lieu-session-mat-neo-do",
               "r6-trong-ci-khong-doi-runner-os", "r6-thieu-github-actions-khong-phai-ci",
               "r6-github-actions-false-khong-phai-ci",
               "r6-TIEU-THU-o-none-trong-ci", "r6-TIEU-THU-o-none-ngoai-ci",
@@ -313,6 +346,7 @@ def main():
     ap.add_argument("--chay", action="store_true")
     ns = ap.parse_args()
     loi, tren_cay, trong_so = kiem()
+    loi += kiem_tai_lieu_session()
     for x in loi: print("ĐỎ:", x)
     print(f"ĐĂNG KÝ: {tren_cay}/{trong_so}")
     print(f"TRẠNG THÁI: chan={trong_so - len(CACH_LY)} cach_ly={len(CACH_LY)}")

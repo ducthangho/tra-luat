@@ -34,8 +34,10 @@ CHỐT AN TOÀN
   màn hình là bí mật nằm lại trong nhật ký phiên, mà nhật ký sống lâu hơn phiên.
 * Thành công CHỈ được công bố sau một **lời gọi codex THẬT** (`_kiem_song`). `codex login
   status` NÓI DỐI — nó chỉ kiểm tệp đọc được, rc=0 trong khi mọi lời gọi trả 401.
-* **Giới hạn Windows:** stdlib thiếu `os.O_NOFOLLOW`, nên `_sao_luu` fail-closed: không
-  đọc nguồn, không tạo `.bak`; không dựa vào check-then-use `is_symlink()`.
+* Device-auth luôn chạy trong `CODEX_HOME` private do chính process tạo; caller không có
+  tham số đổi storage thu nhận. Copy-out chỉ đi qua shared guarded writer.
+* **Giới hạn Windows:** runtime này không có primitives handle-relative tương đương POSIX,
+  nên mọi copy/backup/install secret fail-closed trước khi chạy device-auth hoặc ghi tệp.
 
 MÃ THOÁT (cùng quy ước `ops/cong_cu.py`)
     0  ĐẠT            việc xong VÀ đã chứng minh bằng lời gọi thật
@@ -55,9 +57,26 @@ import select
 import shutil
 import subprocess
 import sys
-import tempfile
 import time
+from enum import Enum
 from pathlib import Path
+
+from provider_exec import (
+    ProviderExecutableError as _ProviderExecutableError,
+    bind_provider_executable as _bind_provider_executable,
+    bound_provider_source as _bound_provider_source,
+    popen_bound_provider as _popen_bound_provider,
+    run_bound_provider as _run_bound_provider,
+)
+from session_credentials import (
+    UnsafeSecretDestination as _UnsafeSecretDestination,
+    _atomic_secret as _shared_atomic_secret,
+    _checked_secret_destination as _shared_checked_secret_destination,
+    _private_provider_home as _shared_private_provider_home,
+    _provider_child_env_for_home as _shared_provider_child_env,
+    _read_secret_bytes as _shared_read_secret_bytes,
+    secret_destination as _shared_secret_destination,
+)
 
 DAT, DO, KHONG_DO_DUOC = "DAT", "DO", "KHONG_DO_DUOC"
 RC = {DAT: 0, DO: 2, KHONG_DO_DUOC: 3}
@@ -69,12 +88,66 @@ HAN_MAC_DINH_GIAY = 15 * 60
 HAN_KIEM_SONG_GIAY = 120
 DAU_HIEU_SONG = "TRALUAT-CRED-OK"
 
+
+class LiveStatus(str, Enum):
+    """Closed result vocabulary for a real Codex measurement."""
+
+    PASSED = "passed"
+    REJECTED = "rejected"
+    NOT_MEASURED = "not_measured"
+
+    def __bool__(self):
+        raise TypeError("LiveStatus has no truth value; compare an enum member explicitly")
+
+
+class LiveResult:
+    __slots__ = ("status", "reason")
+
+    def __init__(self, status: LiveStatus, reason: str):
+        if not isinstance(status, LiveStatus):
+            raise TypeError(f"invalid Codex live status: {status!r}")
+        self.status = status
+        self.reason = reason
+
+    def __repr__(self):
+        return f"LiveResult(status={self.status.value!r}, reason={self.reason!r})"
+
+    def __bool__(self):
+        raise TypeError("LiveResult has no truth value; inspect .status explicitly")
+
+
+def _live_result(status: LiveStatus, reason: str) -> LiveResult:
+    if not isinstance(status, LiveStatus):
+        raise TypeError(f"invalid Codex live status: {status!r}")
+    return LiveResult(status, reason)
+
+
+def _live_result_rc(result: LiveResult) -> int:
+    if result.status is LiveStatus.PASSED:
+        return RC[DAT]
+    if result.status is LiveStatus.REJECTED:
+        return RC[DO]
+    if result.status is LiveStatus.NOT_MEASURED:
+        return RC[KHONG_DO_DUOC]
+    raise ValueError(f"unhandled Codex live status: {result.status!r}")
+
+
 _ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
 # URL device: chốt theo TIỀN TỐ https, không khớp lỏng, để không nhặt nhầm chữ trong câu.
 _URL = re.compile(r"https://\S*device\S*")
 # Mã một lần: codex in dạng `8FY2-J8PNS`. Cho phép độ dài khác nhau vì đây là định dạng của
 # BÊN KIA, ta không kiểm soát — nhưng vẫn đòi có gạch nối và toàn hoa/số để khỏi nhặt nhầm.
 _MA = re.compile(r"\b([A-Z0-9]{3,6}-[A-Z0-9]{3,6})\b")
+
+def effective_codex_home(env=None) -> Path:
+    """The one CODEX_HOME rule: explicit environment, otherwise ~/.codex."""
+    env = os.environ if env is None else env
+    return Path(env.get("CODEX_HOME") or os.path.expanduser("~/.codex")).expanduser()
+
+
+def _secret_destination(path: Path) -> Path:
+    """Use the credential entry point's single repository-boundary policy."""
+    return _shared_secret_destination(path)
 
 
 def _in(*a):
@@ -101,7 +174,13 @@ def _co_codex() -> str | None:
     return shutil.which("codex")
 
 
-def _chay_device_auth(codex_home: Path, han_giay: int) -> tuple[bool, str]:
+def _bind_codex(source=None):
+    source = os.environ if source is None else source
+    return _bind_provider_executable(
+        "codex", source, repository_root=Path(__file__).resolve().parents[2])
+
+
+def _chay_device_auth(codex_home: Path, han_giay: int, bound) -> tuple[bool, str]:
     """Chạy `codex login --device-auth` qua PTY, in URL+mã NGAY khi thấy.
 
     Trả (thành_công, toàn_bộ_đầu_ra). Không phán xét kết quả ở đây — việc phán xét
@@ -109,13 +188,20 @@ def _chay_device_auth(codex_home: Path, han_giay: int) -> tuple[bool, str]:
     """
     import pty
 
-    codex_home.mkdir(parents=True, exist_ok=True)  # sự thật (3): phải TỒN TẠI trước
-    moi = dict(os.environ, CODEX_HOME=str(codex_home))
+    if not codex_home.is_dir():
+        return (False, "private CODEX_HOME không tồn tại")
+    try:
+        source = _bound_provider_source(os.environ, bound)
+        moi = _shared_provider_child_env(
+            source, codex_home, CODEX_HOME=str(codex_home))
+    except OSError as e:
+        return (False, f"provider storage không an toàn: {type(e).__name__}")
     chu, con = pty.openpty()  # sự thật (2): không có TTY thì codex im lặng hoàn toàn
     try:
-        p = subprocess.Popen([_co_codex() or "codex", "login", "--device-auth"],
-                             stdin=con, stdout=con, stderr=con, env=moi, close_fds=True)
-    except OSError as e:
+        p = _popen_bound_provider(
+            bound, ["login", "--device-auth"], stdin=con, stdout=con,
+            stderr=con, env=moi, close_fds=True)
+    except (OSError, _ProviderExecutableError) as e:
         os.close(chu); os.close(con)
         return (False, f"không chạy được codex: {type(e).__name__}: {e}")
     os.close(con)
@@ -163,39 +249,93 @@ def _chay_device_auth(codex_home: Path, han_giay: int) -> tuple[bool, str]:
     return (p.returncode == 0, gom)
 
 
-def _kiem_song(codex_home: Path) -> tuple[bool, str]:
+def _checked_codex_auth(codex_home: Path) -> tuple[Path, bytes]:
+    """Bind one canonical auth capability before any live-check resource use."""
+    target = _shared_checked_secret_destination(
+        Path(codex_home).expanduser() / "auth.json", create_parent=False)
+    return target, _shared_read_secret_bytes(target)
+
+
+def _bound_codex_auth(codex_home: Path):
+    """Guard destination, bind executable, then and only then read credential."""
+    target = _shared_checked_secret_destination(
+        Path(codex_home).expanduser() / "auth.json", create_parent=False)
+    bound = _bind_codex()
+    return target, _shared_read_secret_bytes(target), bound
+
+
+def _kiem_song_checked(auth: Path, bound) -> LiveResult:
     """BẰNG CHỨNG DƯƠNG: gọi codex thật và đòi đúng một chuỗi biết trước.
 
     KHÔNG dùng `codex login status` — nó chỉ kiểm tệp đọc được. Kho này đã trả giá HAI lần
     vì tin nó: một lần dán nhãn DÙNG_ĐƯỢC sai, một lần để một chốt bảo vệ đúng bản đã chết.
     Và không đòi mỗi `rc=0`: rc=0 kèm đầu ra RỖNG là ca đã có thật (r244).
     """
-    lenh = _co_codex()
-    if not lenh:
-        return (False, "không có codex trên PATH")
-    moi = dict(os.environ, CODEX_HOME=str(codex_home))
     try:
-        with open(os.devnull) as rong:
-            p = subprocess.run([lenh, "exec", "--skip-git-repo-check",
+        # CODEX_HOME is credential storage, not the provider process HOME.  It
+        # may be an ordinary validated directory containing only auth.json.
+        # Allocate a separate private hierarchy for HOME/XDG/TMP so live checks
+        # never require or create provider-home scaffold beside credentials.
+        with _shared_private_provider_home() as provider_home:
+            try:
+                source = _bound_provider_source(os.environ, bound)
+                moi = _shared_provider_child_env(
+                    source, provider_home, CODEX_HOME=str(auth.parent))
+            except OSError as e:
+                return _live_result(
+                    LiveStatus.NOT_MEASURED,
+                    f"provider storage không an toàn: {type(e).__name__}")
+            try:
+                with open(os.devnull) as rong:
+                    p = _run_bound_provider(
+                        bound, ["exec", "--skip-git-repo-check",
                                 f"In ra dung mot tu: {DAU_HIEU_SONG}"],
-                               stdin=rong, capture_output=True, text=True, env=moi,
-                               timeout=HAN_KIEM_SONG_GIAY, encoding="utf-8", errors="replace")
-    except subprocess.TimeoutExpired:
-        return (False, f"quá hạn {HAN_KIEM_SONG_GIAY}s")
-    except (OSError, subprocess.SubprocessError) as e:
-        return (False, f"không chạy được: {type(e).__name__}")
+                        stdin=rong, capture_output=True, text=True, env=moi,
+                        timeout=HAN_KIEM_SONG_GIAY, encoding="utf-8",
+                        errors="replace")
+            except subprocess.TimeoutExpired:
+                return _live_result(
+                    LiveStatus.NOT_MEASURED, f"quá hạn {HAN_KIEM_SONG_GIAY}s")
+            except (OSError, subprocess.SubprocessError, _ProviderExecutableError) as e:
+                return _live_result(
+                    LiveStatus.NOT_MEASURED, f"không chạy được: {type(e).__name__}")
+    except OSError as e:
+        return _live_result(
+            LiveStatus.NOT_MEASURED,
+            f"provider storage không an toàn: {type(e).__name__}")
     stdout, stderr = p.stdout or "", p.stderr or ""
     ra = stdout + stderr
     for dau in ("token_revoked", "refresh_token_invalidated", "401 unauthorized",
-                "please log in again", "could not be refreshed"):
+                "please log in again", "could not be refreshed", "model_not_found",
+                "model is not supported", "unsupported model",
+                "does not exist or you do not have access"):
         if dau in ra.lower():
-            return (False, f"credential BỊ TỪ CHỐI ({dau})")
+            return _live_result(
+                LiveStatus.REJECTED, f"credential/model BỊ TỪ CHỐI ({dau})")
     if p.returncode != 0:
-        return (False, f"codex exec thoát rc={p.returncode}")
+        return _live_result(
+            LiveStatus.NOT_MEASURED, f"codex exec thoát rc={p.returncode} không rõ nguyên nhân")
     # Chỉ stdout là câu trả lời. Stderr có thể echo chính prompt, vốn đã chứa dấu hiệu.
     if DAU_HIEU_SONG not in stdout:
-        return (False, "rc=0 nhưng KHÔNG thấy dấu hiệu sống trong stdout")
-    return (True, f"rc={p.returncode}, có {DAU_HIEU_SONG}")
+        return _live_result(
+            LiveStatus.NOT_MEASURED,
+            "rc=0 nhưng KHÔNG thấy dấu hiệu sống trong stdout")
+    return _live_result(LiveStatus.PASSED, f"rc={p.returncode}, có {DAU_HIEU_SONG}")
+
+
+def _kiem_song(codex_home: Path) -> LiveResult:
+    """Standalone live check: guard/read auth before provider allocation or child."""
+    try:
+        auth, _, bound = _bound_codex_auth(codex_home)
+    except _UnsafeSecretDestination:
+        return _live_result(LiveStatus.REJECTED, "từ chối CODEX_HOME trong repository")
+    except FileNotFoundError:
+        return _live_result(LiveStatus.NOT_MEASURED, "không có auth.json")
+    except OSError as e:
+        return _live_result(
+            LiveStatus.NOT_MEASURED,
+            f"không kiểm được CODEX_HOME theo capability: {type(e).__name__}")
+    return _kiem_song_checked(auth, bound)
 
 
 def _gio_con_lai(auth: Path) -> float | None:
@@ -238,21 +378,8 @@ def _gio_con_lai(auth: Path) -> float | None:
 
 
 def _ghi_bi_mat(dich: Path, noi_dung: bytes) -> None:
-    """Ghi 0600 bằng tệp độc quyền rồi replace; không đi theo symlink/hardlink đích."""
-    fd, ten = tempfile.mkstemp(prefix=f".{dich.name}.tmp-", dir=dich.parent)
-    tam = Path(ten)
-    try:
-        with os.fdopen(fd, "wb") as f:
-            f.write(noi_dung)
-            f.flush()
-            os.fsync(f.fileno())
-        os.chmod(tam, 0o600)
-        os.replace(tam, dich)
-    finally:
-        try:
-            tam.unlink()
-        except FileNotFoundError:
-            pass
+    """Use the shared canonical, parent-bound atomic writer."""
+    _shared_atomic_secret(dich, noi_dung)
 
 
 def _sao_luu(dich: Path) -> Path | None:
@@ -265,40 +392,18 @@ def _sao_luu(dich: Path) -> Path | None:
     Không chữa bằng đồng hồ mịn hơn (`time_ns` vẫn có thể trùng khi hệ thống lùi giờ);
     chữa bằng cách HỎI hệ tệp cho tới khi có tên trống.
     """
-    if not hasattr(os, "O_NOFOLLOW"):
-        raise OSError("từ chối sao lưu: nền thiếu os.O_NOFOLLOW")
-    if dich.is_symlink():
-        raise OSError(f"từ chối sao lưu qua symlink: {dich}")
+    dich = _secret_destination(dich)
     if not dich.is_file():
         return None
+    noi_dung = _shared_read_secret_bytes(dich)
     goc = f"{dich.name}.bak-{int(time.time())}"
     i = 0
     while True:
         bak = dich.with_name(goc if i == 0 else f"{goc}.{i}")
         try:
-            fd = os.open(bak, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_TRUNC, 0o600)
-            break
+            return _shared_atomic_secret(bak, noi_dung, exclusive=True)
         except FileExistsError:
             i += 1
-    try:
-        with os.fdopen(fd, "wb") as ra:
-            # Chính lần MỞ nguồn mới là chốt use-time; guard đầu hàm bảo đảm cờ có thật,
-            # nên getattr không bao giờ được phép suy biến thành mở trần.
-            nguon_fd = os.open(dich, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
-            try:
-                nguon = os.fdopen(nguon_fd, "rb")
-            except Exception:
-                os.close(nguon_fd)
-                raise
-            with nguon:
-                shutil.copyfileobj(nguon, ra)
-            ra.flush()
-            os.fsync(ra.fileno())
-        os.chmod(bak, 0o600)
-        return bak
-    except Exception:
-        bak.unlink(missing_ok=True)
-        raise
 
 
 def soan_tep_dan(b64: str, luc_utc: str, gio_con: float | None) -> str:
@@ -362,49 +467,101 @@ dán vào issue/PR/chat. **Dán xong thì xoá tệp này.**
 
 
 def cmd_lay(a) -> int:
-    if not _co_codex():
-        _in("KHÔNG_ĐO_ĐƯỢC: không có `codex` trên PATH — cài rồi chạy lại.")
+    try:
+        bound = _bind_codex()
+    except _ProviderExecutableError as exc:
+        _in(f"KHÔNG_ĐO_ĐƯỢC: không bind được `codex` — {exc.reason}.")
         return RC[KHONG_DO_DUOC]
 
-    tam_ctx = None if a.codex_home else tempfile.TemporaryDirectory(prefix="codex-cred-")
-    tam = Path(a.codex_home) if a.codex_home else Path(tam_ctx.name)
+    # Acquisition storage is always created by this process.  There is no CLI
+    # or function argument that can redirect Codex into caller-owned storage.
+    # Ignore caller-controlled TMPDIR/TMP/TEMP on every supported platform.
+    # The shared allocator also binds all child temp and XDG roots beneath the
+    # same process-created hierarchy used by Claude and GitHub probes.
+    try:
+        with _shared_private_provider_home() as private_home:
+            try:
+                tam = _shared_checked_secret_destination(
+                    private_home / "auth.json").parent
+            except (_UnsafeSecretDestination, OSError):
+                _in("KHÔNG_ĐO_ĐƯỢC: không thiết lập được CODEX_HOME riêng theo capability")
+                return RC[KHONG_DO_DUOC]
+            return _cmd_lay_private(a, tam, bound)
+    except OSError:
+        # Includes checked cleanup failure after an otherwise successful inner
+        # return: an undeleted raw credential hierarchy cannot be reported ĐẠT.
+        _in("KHÔNG_ĐO_ĐƯỢC: provider home riêng không tạo/xoá sạch được")
+        return RC[KHONG_DO_DUOC]
+
+
+def _cmd_lay_private(a, tam: Path, bound) -> int:
+    ra = Path(a.ra) if a.ra else Path("/tmp/CODEX_AUTH_JSON.b64")
+    tep_dan = Path(a.tep_dan) if a.tep_dan else ra.with_name("CODEX_AUTH_JSON_setup.md")
+    that = effective_codex_home() / "auth.json" if a.cai_de else None
+    try:
+        ra = _shared_checked_secret_destination(ra)
+        tep_dan = _shared_checked_secret_destination(tep_dan)
+        if that is not None:
+            that = _shared_checked_secret_destination(that)
+    except _UnsafeSecretDestination:
+        _in("ĐỎ: từ chối repository secret destination")
+        return RC[DO]
+    except OSError:
+        _in("KHÔNG_ĐO_ĐƯỢC: không resolve được secret destination")
+        return RC[KHONG_DO_DUOC]
     _in(f"CODEX_HOME tạm: {tam}   (bản đang dùng ở ~/.codex KHÔNG bị đụng)")
-    ok, dau_ra = _chay_device_auth(tam, a.han_giay)
+    ok, dau_ra = _chay_device_auth(tam, a.han_giay, bound)
     if not ok:
         _in("KHÔNG_ĐO_ĐƯỢC: chưa hoàn tất device-auth.")
         _in(_sach(dau_ra)[-1200:])
         return RC[KHONG_DO_DUOC]
 
-    auth = tam / "auth.json"
-    if not auth.is_file():
-        _in(f"ĐỎ: login báo xong nhưng không có {auth}")
+    try:
+        auth, _ = _checked_codex_auth(tam)
+    except FileNotFoundError:
+        _in(f"ĐỎ: login báo xong nhưng không có {tam / 'auth.json'}")
         return RC[DO]
+    except _UnsafeSecretDestination:
+        _in("ĐỎ: từ chối CODEX_HOME trong repository")
+        return RC[DO]
+    except OSError:
+        _in("KHÔNG_ĐO_ĐƯỢC: không kiểm được CODEX_HOME theo capability")
+        return RC[KHONG_DO_DUOC]
 
     _in("đã nhận credential — đang KIỂM SỐNG bằng một lời gọi codex thật…")
-    song, vi_sao = _kiem_song(tam)
-    if not song:
-        _in(f"ĐỎ: credential mới KHÔNG dùng được — {vi_sao}")
+    live = _kiem_song_checked(auth, bound)
+    if live.status is LiveStatus.REJECTED:
+        _in(f"ĐỎ: credential mới BỊ TỪ CHỐI — {live.reason}")
+        return _live_result_rc(live)
+    if live.status is LiveStatus.NOT_MEASURED:
+        _in(f"KHÔNG_ĐO_ĐƯỢC: chưa chứng minh credential mới — {live.reason}")
+        return _live_result_rc(live)
+    _in(f"kiểm sống: {live.reason}")
+
+    try:
+        # A successful Codex call may rotate auth.json.  Re-read the same
+        # canonical destination through the capability reader before export.
+        auth_bytes = _shared_read_secret_bytes(auth)
+        b64 = base64.b64encode(auth_bytes).decode("ascii")
+        _ghi_bi_mat(ra, (b64 + "\n").encode("ascii"))
+
+        if a.cai_de:
+            that.parent.mkdir(parents=True, exist_ok=True)
+            bak = _sao_luu(that)
+            _ghi_bi_mat(that, auth_bytes)
+            _in(f"đã cài đè {that}" + (f" (sao lưu: {bak})" if bak else ""))
+
+        # Tệp hướng dẫn dán: bước CUỐI của lệnh, không phải việc làm tay sau đó. Phiên nào
+        # cũng phải giao được cùng một thứ cho chủ kho, nên nó thuộc về mã.
+        gio_con = _gio_con_lai(auth)
+        _ghi_bi_mat(tep_dan, soan_tep_dan(
+            b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))
+    except _UnsafeSecretDestination:
+        _in("ĐỎ: từ chối repository secret destination tại điểm ghi")
         return RC[DO]
-    _in(f"kiểm sống: {vi_sao}")
-
-    auth_bytes = auth.read_bytes()
-    b64 = base64.b64encode(auth_bytes).decode("ascii")
-    ra = Path(a.ra) if a.ra else Path("/tmp/CODEX_AUTH_JSON.b64")
-    _ghi_bi_mat(ra, (b64 + "\n").encode("ascii"))
-
-    if a.cai_de:
-        that = Path(os.path.expanduser("~/.codex/auth.json"))
-        that.parent.mkdir(parents=True, exist_ok=True)
-        bak = _sao_luu(that)
-        _ghi_bi_mat(that, auth_bytes)
-        _in(f"đã cài đè {that}" + (f" (sao lưu: {bak})" if bak else ""))
-
-    # Tệp hướng dẫn dán: bước CUỐI của lệnh, không phải việc làm tay sau đó. Phiên nào
-    # cũng phải giao được cùng một thứ cho chủ kho, nên nó thuộc về mã.
-    gio_con = _gio_con_lai(auth)
-    tep_dan = Path(a.tep_dan) if a.tep_dan else ra.with_name("CODEX_AUTH_JSON_setup.md")
-    _ghi_bi_mat(tep_dan, soan_tep_dan(
-        b64, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), gio_con).encode("utf-8"))
+    except OSError:
+        _in("KHÔNG_ĐO_ĐƯỢC: lỗi I/O tại điểm ghi credential")
+        return RC[KHONG_DO_DUOC]
 
     _in("")
     _in("ĐẠT — credential mới, đã chứng minh bằng lời gọi thật.")
@@ -432,14 +589,25 @@ def cmd_lay(a) -> int:
 
 def cmd_kiem(a) -> int:
     """Đo credential ĐANG dùng: còn sống thật không, còn bao lâu."""
-    home = Path(a.codex_home) if a.codex_home else Path(os.path.expanduser("~/.codex"))
-    auth = home / "auth.json"
-    if not auth.is_file():
-        _in(f"KHÔNG_ĐO_ĐƯỢC: không có {auth}")
+    home = Path(a.codex_home).expanduser() if a.codex_home else effective_codex_home()
+    try:
+        if a.kiem_song:
+            auth, auth_bytes, bound = _bound_codex_auth(home)
+        else:
+            auth, auth_bytes = _checked_codex_auth(home)
+            bound = None
+    except FileNotFoundError:
+        _in(f"KHÔNG_ĐO_ĐƯỢC: không có {home / 'auth.json'}")
+        return RC[KHONG_DO_DUOC]
+    except _UnsafeSecretDestination:
+        _in(f"ĐỎ: từ chối CODEX_HOME trong repository: {home}")
+        return RC[DO]
+    except OSError as e:
+        _in(f"KHÔNG_ĐO_ĐƯỢC: không kiểm được {home / 'auth.json'} ({type(e).__name__})")
         return RC[KHONG_DO_DUOC]
     try:
-        d = json.loads(auth.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as e:
+        d = json.loads(auth_bytes)
+    except (UnicodeDecodeError, json.JSONDecodeError) as e:
         _in(f"ĐỎ: {auth} không đọc được ({type(e).__name__})")
         return RC[DO]
     if not isinstance(d, dict):
@@ -456,9 +624,9 @@ def cmd_kiem(a) -> int:
     if not a.kiem_song:
         _in("CHƯA CHỨNG MINH khả dụng — thêm --kiem-song để gọi thật (tốn quota).")
         return RC[KHONG_DO_DUOC]
-    song, vi_sao = _kiem_song(home)
-    _in(f"kiểm sống  : {vi_sao}")
-    return RC[DAT] if song else RC[DO]
+    live = _kiem_song_checked(auth, bound)
+    _in(f"kiểm sống  [{live.status.value}]: {live.reason}")
+    return _live_result_rc(live)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -467,7 +635,6 @@ def build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="lenh", required=True)
 
     q = sub.add_parser("lay", help="chạy device-auth rồi xuất base64 cho CODEX_AUTH_JSON")
-    q.add_argument("--codex-home", help="thư mục tạm (mặc định tên ngẫu nhiên an toàn trong temp)")
     q.add_argument("--ra", help="tệp ghi base64 (mặc định /tmp/CODEX_AUTH_JSON.b64)")
     q.add_argument("--han-giay", type=int, default=HAN_MAC_DINH_GIAY,
                    help=f"hạn chờ người dùng (mặc định {HAN_MAC_DINH_GIAY}s = hạn của mã)")

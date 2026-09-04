@@ -12,7 +12,7 @@
 # Chạy thử tay:  CLAUDE_CODE_REMOTE=true ./.claude/hooks/session-start.sh
 #
 # ------------------------------------------------------------------------------------
-# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that
+# hook-nang-luc: codex-auth-restore rg-bat-buoc doctor-kha-dung pip-bang-chung-duong codex-env-policy codex-env-policy-thu-hoi codex-env-policy-fail-close codex-env-policy-chi-doc co-chay-probe moi-truong-doc-truoc github-nguon-that session-credential-bootstrap hook-probe-bound-provider
 # ------------------------------------------------------------------------------------
 # DÒNG TRÊN LÀ HỢP ĐỒNG, KHÔNG PHẢI CHÚ THÍCH. `launcher.py doctor` (mục `hook-phien`)
 # đọc nó ở CẢ hook đang checkout LẪN hook trên `origin/master`, rồi báo động khi bản
@@ -43,6 +43,10 @@ fi
 GOC="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 cd "$GOC"
 
+# One deterministic CODEX_HOME rule.  Exporting the resolved fallback makes the
+# hook, launcher and CLI agree without exposing any credential value.
+export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+
 # `command -v` chứ không `which`: có sẵn ở mọi shell POSIX và không phụ thuộc gói ngoài.
 co() { command -v "$1" >/dev/null 2>&1; }
 
@@ -55,6 +59,19 @@ else
   echo "[session-start] HONG: khong co python/python3 de probe"
   exit 1
 fi
+
+# --- CODEX SECRET DESTINATION GUARD -----------------------------------------
+# Chạy TRƯỚC mọi lần gọi binary codex, kể cả `--version` và `login status`.
+# "Đã đăng nhập" chỉ nói file đọc được; nó không cấp quyền dùng file trong kho.
+CODEX_BI_CHAN=0
+export TRA_LUAT_CODEX_BLOCKED=0
+if ! "$PY" "$GOC/.claude/dev/session_credentials.py" codex-destination-check >/dev/null
+then
+  CODEX_BI_CHAN=1
+  export TRA_LUAT_CODEX_BLOCKED=1
+  echo "[session-start] !! CHAN MOI DUONG CODEX CUA KHO: CODEX_HOME/auth.json khong co destination an toan"
+fi
+# --- END CODEX SECRET DESTINATION GUARD -------------------------------------
 
 # CÓ MẶT ≠ CHẠY ĐƯỢC. `command -v` chỉ chứng minh có đường dẫn: audit dựng hai tệp
 # RỖNG tên git.exe/python.exe mà doctor vẫn báo xanh, và trên Windows `rg.exe` nằm
@@ -116,12 +133,18 @@ echo "[session-start] goc du an: $GOC"
 
 # --- CLI agent chính thức. Idempotent: đã có thì không đụng (container được
 # cache sau khi hook xong, nên lần sau vào thẳng).
+# Probe provider KHONG con di duong `co_chay` (ambient PATH + spawn tho):
+# moi phep do codex/claude uy quyen cho `launcher.py hook-probe` — bound
+# capability, revalidation, private scoped env, dau ra DONG
+# (WP433-R19-SPEC-037). `co_chay` chi con cho cong cu thuong (rg).
 if co npm; then
-  if ! co_chay codex; then
+  if [ "$CODEX_BI_CHAN" = 0 ] && ! "$PY" "$GOC/.claude/dev/launcher.py" hook-probe codex; then
     echo "[session-start] cai @openai/codex ..."
     npm install -g @openai/codex >/dev/null 2>&1 || echo "[session-start] CANH BAO: cai codex that bai"
+  elif [ "$CODEX_BI_CHAN" != 0 ]; then
+    echo "[session-start] codex: BO QUA probe/cai dat — secret destination bi chan"
   fi
-  if ! co_chay claude; then
+  if ! "$PY" "$GOC/.claude/dev/launcher.py" hook-probe claude; then
     echo "[session-start] cai @anthropic-ai/claude-code ..."
     npm install -g @anthropic-ai/claude-code >/dev/null 2>&1 || echo "[session-start] CANH BAO: cai claude that bai"
   fi
@@ -277,7 +300,7 @@ fi
 #
 # Nen: hook DOC, dat co chan, va in cach chua. Nguoi dung tu chay `--go` roi tu `mv`.
 # Ca lop rui ro tren chet theo KIEN TRUC, khong theo ban va.
-if co codex; then
+if co codex && [ "$CODEX_BI_CHAN" = 0 ]; then
   MA_GO=0
   "$PY" "$GOC/.claude/dev/codex_env_policy.py" 2>&1 | sed 's/^/[session-start] /' || MA_GO=$?
   # KHONG doc `${PIPESTATUS[0]}` o day. Ban truoc co dong do, kem chu thich "`set -o
@@ -290,6 +313,7 @@ if co codex; then
   # tuong la lam cho chac. Co `pipefail` thi `$?` cua pipeline DA la ma cua python.
   if [ "$MA_GO" -ne 0 ]; then
     CODEX_BI_CHAN=1
+    export TRA_LUAT_CODEX_BLOCKED=1
     echo "[session-start] !! CHAN MOI DUONG CODEX CUA KHO (ma $MA_GO): config con khoi"
     echo "[session-start]    env policy cu, hoac khong phan loai duoc. \`inherit=all\` co"
     echo "[session-start]    the CON HIEU LUC — moi lenh con cua codex nhan TOAN BO moi truong."
@@ -301,41 +325,23 @@ if co codex; then
 fi
 
 if [ -n "${CODEX_AUTH_JSON:-}" ] && co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then
-  if codex login status >/dev/null 2>&1 </dev/null; then
-    echo "[session-start] codex: da dang nhap san — GIU nguyen, khong ghi de"
+  # login status only proves that a file parses.  The materializer compares
+  # exact last_refresh values and preserves an equal/newer on-disk snapshot;
+  # a readable but stale/revoked snapshot must never bypass restoration.
+  if "$PY" "$GOC/.claude/dev/session_credentials.py" codex-materialize >/dev/null
+  then
+    echo "[session-start] codex: credential da duoc giu hoac khoi phuc an toan"
   else
-    if "$PY" - <<'PYEOF'
-import base64, binascii, json, os, sys, tempfile
-raw = os.environ.get("CODEX_AUTH_JSON", "").strip()
-try:
-    data = base64.b64decode(raw, validate=True)
-except (binascii.Error, ValueError):
-    sys.exit(1)                      # KHONG in noi dung, ke ca doan dau
-try:
-    d = json.loads(data)
-except Exception:
-    sys.exit(2)
-if not isinstance(d, dict) or "tokens" not in d:
-    sys.exit(3)                      # thieu khoa bat buoc
-dst = os.path.join(os.path.expanduser("~"), ".codex", "auth.json")
-os.makedirs(os.path.dirname(dst), mode=0o700, exist_ok=True)
-fd, tmp = tempfile.mkstemp(dir=os.path.dirname(dst))
-try:
-    os.write(fd, data); os.close(fd)
-    os.chmod(tmp, 0o600); os.replace(tmp, dst)
-except BaseException:
-    os.unlink(tmp); raise
-PYEOF
-    then
-      echo "[session-start] codex: da khoi phuc auth tu CODEX_AUTH_JSON"
-    else
-      echo "[session-start] CANH BAO: CODEX_AUTH_JSON khong dung dang (base64 cua auth.json) — bo qua"
-    fi
+    CODEX_BI_CHAN=1
+    export TRA_LUAT_CODEX_BLOCKED=1
+    echo "[session-start] CANH BAO: tu choi CODEX_AUTH_JSON (dinh dang hoac secret destination) — bo qua"
   fi
 fi
 if co codex && [ "${CODEX_BI_CHAN:-0}" = 0 ]; then
-  # BẰNG CHỨNG DƯƠNG, không suy từ việc đã ghi tệp: hỏi chính codex.
-  echo "[session-start] codex auth: $(codex login status 2>&1 </dev/null | head -1)"
+  # BẰNG CHỨNG DƯƠNG, không suy từ việc đã ghi tệp — nhưng KHÔNG replay đầu
+  # ra thô của provider vào log: helper bound in đúng MỘT dòng trạng thái
+  # ĐÓNG (WP433-R19-SPEC-037) và tự giữ destination guard trước codex child.
+  echo "[session-start] codex auth: $("$PY" "$GOC/.claude/dev/launcher.py" hook-probe codex --auth </dev/null || true)"
 elif co codex; then
   echo "[session-start] codex auth: BO QUA — codex dang bi chan (xem tren)"
 fi

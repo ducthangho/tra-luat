@@ -679,13 +679,69 @@ def t17_ban_ghim_trong_ban_ke_khop_ban_ghim_trong_ci():
          "không đo được cặp ghim nào — ca này đang xanh mà chưa đo gì")
 
 
+def _cac_ten_import_tuyet_doi(tep: Path) -> set[str]:
+    """Tên GỐC của mọi import tuyệt đối (level-0) trong một tệp .py, kể cả trong hàm."""
+    import ast
+    ra: set[str] = set()
+    for n in ast.walk(ast.parse(tep.read_text(encoding="utf-8"))):
+        if isinstance(n, ast.Import):
+            ra |= {a.name.split(".")[0] for a in n.names}
+        elif isinstance(n, ast.ImportFrom) and n.level == 0 and n.module:
+            ra.add(n.module.split(".")[0])
+    return ra
+
+
+def _nap_kieu_script(tep: Path, run_name: str) -> dict:
+    """Nạp `tep` với ĐÚNG ngữ nghĩa tra module ANH EM của chạy script trực tiếp.
+
+    `python .claude/dev/launcher.py` đặt thư mục script lên đầu `sys.path` nên
+    `import provider_exec` thấy anh em cùng thư mục; `runpy.run_path` từ gốc kho
+    thì KHÔNG (run 33696608104: t18 chết `ModuleNotFoundError: provider_exec`
+    trước khi đo inventory, kéo 16/18 đột biến thành giết-oan). Ba việc, đủ cả
+    ba mới hermetic: (1) chèn thư mục của `tep` — tuyệt đối, không dựa
+    CWD/PYTHONPATH — vào ĐẦU `sys.path`; (2) TẨY khỏi `sys.modules` mọi tên
+    trong bao đóng import anh em (AST đệ quy cùng thư mục, trừ stdlib) — một bản
+    `provider_exec` NGOẠI LAI đã cache không được im lặng trả lời thay cây đang
+    đo, KỂ CẢ khi tệp anh em đã bị xoá (tên vẫn nằm trong AST của kẻ import nó);
+    (3) trả NGUYÊN TRẠNG `sys.path`/`sys.modules` trong `finally`, kể cả khi
+    launcher hay một anh em ném giữa chừng. Phản chứng cho cả ba điều nằm ở
+    `launcher_loader_behavior_test`.
+    """
+    thu_muc = tep.parent
+    bao_dong: set[str] = set()
+    hang, da_doc = [tep], set()
+    while hang:
+        t = hang.pop()
+        if t in da_doc or not t.is_file():
+            continue
+        da_doc.add(t)
+        for ten in _cac_ten_import_tuyet_doi(t):
+            if ten not in sys.stdlib_module_names and ten not in bao_dong:
+                bao_dong.add(ten)
+                hang.append(thu_muc / f"{ten}.py")
+    import runpy
+    khoa_truoc = set(sys.modules)
+    path_truoc = list(sys.path)
+    cat: dict = {}
+    try:
+        for ten in bao_dong:
+            if ten in sys.modules:
+                cat[ten] = sys.modules.pop(ten)
+        sys.path.insert(0, str(thu_muc))
+        return runpy.run_path(str(tep), run_name=run_name)
+    finally:
+        sys.path[:] = path_truoc
+        for ten in set(sys.modules) - khoa_truoc:
+            del sys.modules[ten]
+        sys.modules.update(cat)
+
+
 @ca
 def t18_inventory_bat_buoc_cua_launcher_phai_nam_trong_ban_ke():
     """Launcher và preflight CI không được giữ hai danh sách bắt buộc bị trôi."""
     _doi_cay_day_du(GOC)
-    import runpy
-    p = GOC / ".claude" / "dev" / "launcher.py"
-    launcher_ns = runpy.run_path(str(p), run_name="launcher_inventory_t18")
+    launcher_ns = _nap_kieu_script(GOC / ".claude" / "dev" / "launcher.py",
+                                   run_name="launcher_inventory_t18")
     launcher = {x["ten"] for x in launcher_ns["CONG_CU"] if x.get("bat_buoc") is True}
     ban_ke = yaml.safe_load((GOC / "ops" / "cong_cu.yaml").read_text(encoding="utf-8"))
     chung = set(ban_ke["cong_cu"])
@@ -800,7 +856,18 @@ def python_alias_behavior_test() -> None:
     """Probe `python` dùng interpreter chạy cong_cu.py, không đòi alias trên PATH."""
     with tempfile.TemporaryDirectory(prefix="cong-cu-python3-") as td:
         root = Path(td); only = root / "bin"; only.mkdir()
-        (only / "python3").symlink_to(sys.executable)
+        try:
+            (only / "python3").symlink_to(sys.executable)
+        except OSError as e:
+            # ERROR_PRIVILEGE_NOT_HELD (WinError 1314): máy Windows không cấp quyền
+            # tạo symlink (thiếu Developer Mode/elevation) thì KHÔNG DỰNG ĐƯỢC fixture
+            # — KHÔNG_ĐO_ĐƯỢC, không phải ĐỎ (ba trạng thái, như CA). Hai lane CI đều
+            # tạo được symlink nên phép đo thật vẫn diễn ra ở đó.
+            if getattr(e, "winerror", None) != 1314:
+                raise
+            print("  BỎ QUA python_alias_behavior_test: khong co quyen tao symlink "
+                  "(WinError 1314)")
+            return
         bk = ghi_ban_ke(root, {"python": {"bat_buoc": True, "ban_ghim": None,
             "probe": [{"ten": "mac_dinh", "lenh": ["python", "--version"],
                        "regex": r"Python\s+(\d+\.\d+\.\d+)"}]}})
@@ -810,9 +877,53 @@ def python_alias_behavior_test() -> None:
              f"máy chỉ có python3 bị probe alias python chặn: rc={rc}\n{out}")
 
 
+def launcher_loader_behavior_test() -> None:
+    """Chốt có RĂNG cho `_nap_kieu_script`, đo trên cây giả — KHÔNG vào `CA` để
+    không nhận công giết hộ đột biến nào (cùng lý do `batch_behavior_test`).
+
+    (a) anh em nạp từ THƯ MỤC SCRIPT, không phải từ bản đã cache ngoài; (b) XOÁ
+    tệp anh em ⇒ `ModuleNotFoundError` nêu ĐÚNG tên — bản cache có sẵn không được
+    im lặng trả lời thay (đúng lỗ làm t18 xanh giả); (c) `sys.path`/`sys.modules`
+    về NGUYÊN TRẠNG sau cả đường ĐẠT lẫn đường NÉM, trả đúng OBJECT cũ.
+    """
+    # Làm NÓNG công cụ của chính loader (ast/runpy) TRƯỚC khi chụp ảnh sys.modules:
+    # lần gọi đầu tiên mới import chúng, mà (c) đo NGUYÊN TRẠNG fixture chứ không đo
+    # việc stdlib của loader được cache — thiếu bước này (c) đỏ oan khi ca chạy trước t18.
+    import ast, runpy, types  # noqa: F401
+    ten = "phu_thuoc_gia_t18"
+    with tempfile.TemporaryDirectory(prefix="nap-launcher-") as td:
+        d = Path(td)
+        (d / f"{ten}.py").write_text("NGUON = 'tu_cay_that'\n", encoding="utf-8")
+        (d / "launcher_gia.py").write_text(
+            f"import {ten}\nNGUON = {ten}.NGUON\n", encoding="utf-8")
+        decoy = types.ModuleType(ten)
+        decoy.NGUON = "tu_cache_ngoai"
+        sys.modules[ten] = decoy
+        try:
+            path_truoc, khoa_truoc = list(sys.path), set(sys.modules)
+            ns = _nap_kieu_script(d / "launcher_gia.py", run_name="launcher_gia_t18")
+            bang(ns["NGUON"] == "tu_cay_that",
+                 f"(a) anh em lấy từ {ns['NGUON']!r}, không phải từ thư mục script")
+            bang(sys.path == path_truoc and set(sys.modules) == khoa_truoc
+                 and sys.modules[ten] is decoy,
+                 "(c) đường ĐẠT không trả nguyên trạng sys.path/sys.modules")
+            (d / f"{ten}.py").unlink()          # "xoá bao đóng anh em"
+            try:
+                _nap_kieu_script(d / "launcher_gia.py", run_name="launcher_gia_t18")
+                bang(False, "(b) xoá anh em mà vẫn nạp được — cache ngoài trả lời thay")
+            except ModuleNotFoundError as ex:
+                bang(ten in str(ex), f"(b) đỏ nhưng SAI lý do: {ex}")
+            bang(sys.path == path_truoc and set(sys.modules) == khoa_truoc
+                 and sys.modules[ten] is decoy,
+                 "(c) đường NÉM không trả nguyên trạng sys.path/sys.modules")
+        finally:
+            sys.modules.pop(ten, None)
+
+
 def main() -> int:
     batch_behavior_test()
     python_alias_behavior_test()
+    launcher_loader_behavior_test()
     qua, hong, bo_qua = 0, [], []
     for fn in CA:
         try:

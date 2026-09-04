@@ -13,6 +13,8 @@ import sys
 import re
 import json
 import stat
+import errno
+import secrets
 import base64
 import hashlib
 import tarfile
@@ -505,6 +507,404 @@ def _secrets_fetch(a, fid: str):
 
 
 _NLM_AUTH_RELS = ("auth.json", "profiles/default/cookies.json", "profiles/default/metadata.json")
+_NLM_AUTH_RELSET = frozenset(_NLM_AUTH_RELS)
+_TL_REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+
+
+class _UnsafeSecretDestination(OSError):
+    pass
+
+
+def _tl_repository_root(candidate: Path) -> bool:
+    if (candidate / ".git").exists():
+        return True
+    return ((candidate / "HEAD").is_file()
+            and (candidate / "objects").is_dir()
+            and (candidate / "refs").is_dir()
+            and (candidate / "config").is_file())
+
+
+def _tl_secret_destination(path) -> Path:
+    target = Path(path).expanduser()
+    resolved = target.resolve(strict=False)
+    if target.is_symlink():
+        raise OSError(f"refusing symlink secret destination: {target}")
+    for candidate in (resolved.parent, *resolved.parent.parents):
+        if _tl_repository_root(candidate):
+            raise _UnsafeSecretDestination(
+                f"refusing repository secret destination: {target}")
+    return resolved
+
+
+def _tl_nlm_restore_path(path) -> Path:
+    """Return an absolute lexical path only if every existing component is plain.
+
+    This guard deliberately runs before ``Path.resolve``: resolving a caller's
+    link/junction into an ordinary external directory would erase the fact that
+    the restore authority was delegated through a reparse point. Missing
+    components are allowed and are later created by the capability-bound writer.
+    """
+    target = Path(path).expanduser()
+    if any(part == os.pardir for part in target.parts):
+        raise OSError("refusing parent traversal in NLM restore base")
+    if not target.is_absolute():
+        target = Path.cwd() / target
+    components = list(reversed((target, *target.parents)))
+    reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+    for component in components:
+        try:
+            info = component.lstat()
+        except FileNotFoundError:
+            # A descendant cannot exist before its missing lexical ancestor;
+            # leave the ordinary nonexistent suffix to the guarded writer.
+            break
+        if (stat.S_ISLNK(info.st_mode)
+                or (reparse and getattr(info, "st_file_attributes", 0) & reparse)):
+            raise OSError(f"refusing linked/reparse NLM restore component: {component}")
+    return target
+
+
+def _tl_stat_at(directory_fd: int, name: str):
+    try:
+        return os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+    except FileNotFoundError:
+        return None
+
+
+def _tl_fd_repository_root(directory_fd: int) -> bool:
+    if _tl_stat_at(directory_fd, ".git") is not None:
+        return True
+    head = _tl_stat_at(directory_fd, "HEAD")
+    objects = _tl_stat_at(directory_fd, "objects")
+    refs = _tl_stat_at(directory_fd, "refs")
+    config = _tl_stat_at(directory_fd, "config")
+    return bool(head and stat.S_ISREG(head.st_mode)
+                and objects and stat.S_ISDIR(objects.st_mode)
+                and refs and stat.S_ISDIR(refs.st_mode)
+                and config and stat.S_ISREG(config.st_mode))
+
+
+def _tl_directory_flags() -> int:
+    if (os.name != "posix" or not hasattr(os, "O_DIRECTORY")
+            or not hasattr(os, "O_NOFOLLOW")):
+        raise OSError("handle-relative secret writer unavailable on this platform")
+    return (os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+            | getattr(os, "O_CLOEXEC", 0))
+
+
+def _tl_validate_parent(directory_fd: int) -> None:
+    flags = _tl_directory_flags()
+    current = os.dup(directory_fd)
+    seen = set()
+    primary = None
+    primary_traceback = None
+    try:
+        try:
+            while True:
+                opened = os.fstat(current)
+                identity = (opened.st_dev, opened.st_ino)
+                if identity in seen:
+                    raise OSError("secret parent ancestry loop")
+                seen.add(identity)
+                if _tl_fd_repository_root(current):
+                    raise _UnsafeSecretDestination(
+                        "refusing repository secret parent capability")
+                # Do not gate on os.supports_dir_fd: Python 3.14 omits working
+                # os.replace(dir_fd=...) support from that advisory registry.
+                parent = os.open("..", flags, dir_fd=current)
+                try:
+                    parent_identity = os.fstat(parent)
+                except BaseException as exc:
+                    parent_traceback = exc.__traceback__
+                    try:
+                        os.close(parent)
+                    except BaseException:
+                        pass
+                    raise exc.with_traceback(parent_traceback)
+                if identity == (parent_identity.st_dev, parent_identity.st_ino):
+                    os.close(parent)
+                    break
+                previous = current
+                current = parent
+                try:
+                    os.close(previous)
+                except BaseException as exc:
+                    close_traceback = exc.__traceback__
+                    try:
+                        os.close(current)
+                    except BaseException:
+                        pass
+                    current = -1
+                    raise exc.with_traceback(close_traceback)
+        except (TypeError, NotImplementedError) as exc:
+            raise OSError(
+                "directory-relative secret primitives unavailable") from exc
+    except BaseException as exc:
+        primary = exc
+        primary_traceback = exc.__traceback__
+    close_error = None
+    if current != -1:
+        try:
+            os.close(current)
+        except BaseException as exc:
+            close_error = exc
+    if primary is not None:
+        raise primary.with_traceback(primary_traceback)
+    if close_error is not None:
+        raise close_error
+
+
+def _tl_walk_parent_capability(parent: Path, *, create: bool) -> int:
+    """Open/create an absolute parent only through POSIX dir-fd operations."""
+    flags = _tl_directory_flags()
+    if not parent.is_absolute():
+        raise OSError("secret parent must be absolute")
+    components = parent.parts[1:]
+    if any(component in ("", ".", "..") for component in components):
+        raise OSError("invalid secret parent component")
+    try:
+        current = os.open(os.path.sep, flags)
+    except (TypeError, NotImplementedError) as exc:
+        raise OSError("cannot open trusted secret root capability") from exc
+    try:
+        for component in components:
+            try:
+                child = os.open(component, flags, dir_fd=current)
+            except FileNotFoundError:
+                if not create:
+                    raise
+                try:
+                    os.mkdir(component, mode=0o700, dir_fd=current)
+                except FileExistsError:
+                    pass
+                except (TypeError, NotImplementedError) as exc:
+                    raise OSError(
+                        "directory-relative secret mkdir unavailable") from exc
+                try:
+                    child = os.open(component, flags, dir_fd=current)
+                except (TypeError, NotImplementedError) as exc:
+                    raise OSError(
+                        "directory-relative secret open unavailable") from exc
+                except OSError as exc:
+                    installed = _tl_stat_at(current, component)
+                    if installed is not None and stat.S_ISLNK(installed.st_mode):
+                        raise _UnsafeSecretDestination(
+                            "refusing linked secret parent capability") from exc
+                    raise
+            except (TypeError, NotImplementedError) as exc:
+                raise OSError(
+                    "directory-relative secret open unavailable") from exc
+            except OSError as exc:
+                installed = _tl_stat_at(current, component)
+                if installed is not None and stat.S_ISLNK(installed.st_mode):
+                    raise _UnsafeSecretDestination(
+                        "refusing linked secret parent capability") from exc
+                raise
+            try:
+                opened = os.fstat(child)
+                if not stat.S_ISDIR(opened.st_mode):
+                    raise OSError("secret parent component is not a directory")
+                if _tl_fd_repository_root(child):
+                    raise _UnsafeSecretDestination(
+                        "refusing repository secret parent capability")
+            except BaseException as primary:
+                primary_traceback = primary.__traceback__
+                try:
+                    os.close(child)
+                except BaseException:
+                    pass
+                raise primary.with_traceback(primary_traceback)
+            previous = current
+            current = child
+            try:
+                os.close(previous)
+            except BaseException as primary:
+                primary_traceback = primary.__traceback__
+                try:
+                    os.close(current)
+                except BaseException:
+                    pass
+                current = -1
+                raise primary.with_traceback(primary_traceback)
+        _tl_validate_parent(current)
+    except BaseException as primary:
+        primary_traceback = primary.__traceback__
+        if current != -1:
+            try:
+                os.close(current)
+            except BaseException:
+                pass
+        raise primary.with_traceback(primary_traceback)
+    return current
+
+
+def _tl_open_parent(path: Path, *, create: bool = True) -> int:
+    return _tl_walk_parent_capability(path.parent, create=create)
+
+
+def _tl_unlink_identity(directory_fd: int, name: str,
+                        identity: tuple[int, int] | None) -> None:
+    existing = _tl_stat_at(directory_fd, name) if identity is not None else None
+    if existing is not None and (existing.st_dev, existing.st_ino) == identity:
+        os.unlink(name, dir_fd=directory_fd)
+
+
+def _tl_created_secret_identity(fd: int) -> tuple[int, int]:
+    """Bind the exact O_EXCL-created inode before chmod or any byte write."""
+    opened = os.fstat(fd)
+    if not stat.S_ISREG(opened.st_mode):
+        raise OSError("created TL secret target is not a regular file")
+    return opened.st_dev, opened.st_ino
+
+
+def _tl_atomic_secret(path, data: bytes) -> Path:
+    """Atomic 0600 write relative only to the parent capability we validated."""
+    target = _tl_secret_destination(path)
+    directory_fd = _tl_open_parent(target)
+    created_name = None
+    cleanup_names = []
+    identity = None
+    fd = -1
+    identity_guard_fd = -1
+    primary = None
+    primary_traceback = None
+    result = None
+    try:
+        for _ in range(128):
+            candidate = f".{target.name}.tmp-{secrets.token_hex(12)}"
+            try:
+                fd = os.open(candidate,
+                             os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                             0o600, dir_fd=directory_fd)
+            except FileExistsError:
+                continue
+            except (TypeError, NotImplementedError) as exc:
+                raise OSError("relative secret create unavailable") from exc
+            created_name = candidate
+            cleanup_names.append(candidate)
+            break
+        else:
+            raise OSError("could not allocate secret temporary file")
+        identity = _tl_created_secret_identity(fd)
+        # Keep the created inode alive until cleanup has finished.  Otherwise a
+        # hostile unlink/recreate can immediately reuse the same (dev, ino),
+        # making a pathname-only identity check delete the replacement.
+        identity_guard_fd = os.dup(fd)
+        write_primary = None
+        write_traceback = None
+        out = None
+        try:
+            os.fchmod(fd, 0o600)
+            opened = os.fstat(fd)
+            if (opened.st_dev, opened.st_ino) != identity:
+                raise OSError("created TL secret identity changed before write")
+            if stat.S_IMODE(opened.st_mode) != 0o600:
+                raise OSError("secret mode 0600 was not established")
+            out = os.fdopen(fd, "wb")
+            fd = -1
+            out.write(data)
+            out.flush()
+            os.fsync(out.fileno())
+        except BaseException as exc:
+            write_primary = exc
+            write_traceback = exc.__traceback__
+        write_close_error = None
+        try:
+            if out is not None:
+                out.close()
+            elif fd != -1:
+                os.close(fd)
+        except BaseException as exc:
+            write_close_error = exc
+        if fd != -1:
+            fd = -1
+        if write_primary is not None:
+            raise write_primary.with_traceback(write_traceback)
+        if write_close_error is not None:
+            raise write_close_error
+        existing = _tl_stat_at(directory_fd, target.name)
+        if existing is not None and stat.S_ISLNK(existing.st_mode):
+            raise OSError(f"refusing symlink secret destination: {target}")
+        try:
+            # Keep both possible names until parent fsync succeeds.  Adding the
+            # final name before replace also covers a wrapper that performs the
+            # rename and then raises; identity checks make the extra lookup safe.
+            if target.name not in cleanup_names:
+                cleanup_names.append(target.name)
+            os.replace(created_name, target.name,
+                       src_dir_fd=directory_fd, dst_dir_fd=directory_fd)
+        except (TypeError, NotImplementedError) as exc:
+            raise OSError("relative secret replace unavailable") from exc
+        installed = _tl_stat_at(directory_fd, target.name)
+        if (installed is None or (installed.st_dev, installed.st_ino) != identity
+                or stat.S_IMODE(installed.st_mode) != 0o600):
+            raise OSError("secret target changed during replace")
+        os.fsync(directory_fd)
+        cleanup_names.clear()
+        result = target
+    except BaseException as exc:
+        primary = exc
+        primary_traceback = exc.__traceback__
+        for cleanup_name in cleanup_names:
+            try:
+                _tl_unlink_identity(directory_fd, cleanup_name, identity)
+            except BaseException:
+                pass
+    close_error = None
+    for descriptor in (fd, identity_guard_fd, directory_fd):
+        if descriptor == -1:
+            continue
+        try:
+            os.close(descriptor)
+        except BaseException as exc:
+            if close_error is None:
+                close_error = exc
+    if primary is not None:
+        raise primary.with_traceback(primary_traceback)
+    if close_error is not None:
+        raise close_error
+    return result
+
+
+def _nlm_auth_plan(nlm) -> list[tuple[str, bytes]]:
+    """Validate the complete closed schema before allowing the first write."""
+    if not isinstance(nlm, dict) or not nlm:
+        raise ValueError("nlm_auth must be a non-empty object")
+    if any(not isinstance(key, str) for key in nlm):
+        raise ValueError("nlm_auth path must be text")
+    unknown = set(nlm) - _NLM_AUTH_RELSET
+    if unknown:
+        raise ValueError("unknown nlm_auth path")
+    plan = []
+    for rel in _NLM_AUTH_RELS:
+        if rel not in nlm:
+            continue
+        content = nlm[rel]
+        if not isinstance(content, str):
+            raise ValueError("nlm_auth content must be text")
+        plan.append((rel, content.encode("utf-8")))
+    return plan
+
+
+def _write_nlm_auth(base, nlm) -> int:
+    restore_base = _tl_nlm_restore_path(base)
+    plan = _nlm_auth_plan(nlm)
+    lexical_targets = [(restore_base.joinpath(*rel.split("/")), data)
+                       for rel, data in plan]
+    # Reject generated nested target parents before canonicalization can erase
+    # a link and before auth.json (the first schema member) can be written.
+    for target, _ in lexical_targets:
+        _tl_nlm_restore_path(target.parent)
+    targets = [(_tl_secret_destination(target), data)
+               for target, data in lexical_targets]
+    # Validate all existing parent capabilities before the first file write.
+    # Each actual write opens and validates again to close the intervening race.
+    for target, _ in targets:
+        directory_fd = _tl_open_parent(target)
+        os.close(directory_fd)
+    for target, data in targets:
+        _tl_atomic_secret(target, data)
+    return len(targets)
 
 
 def _nlm_sync_authjson_from_profile(base):
@@ -1086,18 +1486,15 @@ def cmd_nlm_auth_pull(a) -> int:
         print("[nlm-auth-pull] ⚠ bundle chưa có nlm_auth — ở Code chạy `tl secrets-set --nlm` trước.", file=sys.stderr)
         return 1
     nbase = os.path.expanduser("~/.notebooklm-mcp-cli")
-    for rel, content in nlm.items():
-        dst = os.path.join(nbase, *str(rel).split("/"))
-        os.makedirs(os.path.dirname(dst), exist_ok=True)
-        with open(dst, "w", encoding="utf-8") as f:
-            f.write(content)
-        try:
-            os.chmod(dst, 0o600)
-        except OSError:
-            pass
+    try:
+        written = _write_nlm_auth(nbase, nlm)
+    except (OSError, ValueError) as exc:
+        print(f"[nlm-auth-pull] ✗ từ chối nlm_auth không an toàn: {type(exc).__name__}",
+              file=sys.stderr)
+        return 3
     age = _nlm_auth_age_days(nlm)
     agestr = f" (~{age:.0f} ngày tuổi)" if age is not None else ""
-    print(f"[nlm-auth-pull] ✓ nlm auth {len(nlm)} file → ~/.notebooklm-mcp-cli{agestr} [nguồn {src}]. Kiểm: nlm login --check"
+    print(f"[nlm-auth-pull] ✓ nlm auth {written} file → ~/.notebooklm-mcp-cli{agestr} [nguồn {src}]. Kiểm: nlm login --check"
           + _nlm_cookie_age_note(age))
     return 0
 
@@ -1133,6 +1530,7 @@ def cmd_bootstrap(a) -> int:
         print(f"[bootstrap] ✗ giải mã lỗi: {e} (TL_MASTER_KEY khác lúc stage?)", file=sys.stderr)
         return 3
     print(f"[bootstrap] env={env} · bundle giải mã OK (nguồn .enc: {src})")
+    degraded = False                       # B8: mọi secret write fail-closed phải nổi lên exit code
     # 1) FULL config (token + rootFolderId/categories/…) → env + MERGE vào ~/.tra_luat_config.json
     if bundle.get("token"):
         os.environ["TL_TOKEN"] = bundle["token"]
@@ -1147,49 +1545,45 @@ def cmd_bootstrap(a) -> int:
                 existing = {}
         existing.update({k: v for k, v in bundle.items() if k != "gws_cred"})   # MERGE, không clobber
         try:
-            with open(cfgp, "w", encoding="utf-8") as f:
-                json.dump(existing, f, ensure_ascii=False)
-            os.chmod(cfgp, 0o600)
+            _tl_atomic_secret(cfgp, json.dumps(existing, ensure_ascii=False).encode("utf-8"))
             print(f"[bootstrap] ✓ config (token + {len([k for k in bundle if k!='gws_cred'])} khoá) → env + {cfgp} (chmod 600)")
         except OSError as e:
-            print(f"[bootstrap] ✓ token nạp env (ghi config lỗi: {e})")
+            print(f"[bootstrap] ⚠ token chỉ nạp env; từ chối ghi config: {type(e).__name__}",
+                  file=sys.stderr)
+            degraded = True
     else:
         print("[bootstrap] ⚠ bundle thiếu GAS token.", file=sys.stderr)
     # 2) gws (Code/Cowork): binary nếu thiếu + cred từ bundle
-    degraded = False                       # B8: theo dõi để exit code phản ánh đúng (không "nuốt" lỗi → trả 0)
     if env in ("code", "cowork"):
         # Ghi gws cred TRƯỚC (để cài binary dùng được direct-media raw thay vì webapp b64).
         if bundle.get("gws_cred"):
             cfgdir = os.environ.get("GOOGLE_WORKSPACE_CLI_CONFIG_DIR") or os.path.expanduser("~/.config/gws")
-            os.makedirs(cfgdir, exist_ok=True)
             dest = os.path.join(cfgdir, "credentials.json")
-            with open(dest, "wb") as f:
-                f.write(bundle["gws_cred"].encode("utf-8"))
             try:
-                os.chmod(dest, 0o600)
-            except OSError:
-                pass
-            print(f"[bootstrap] ✓ gws cred → {dest} (chmod 600)")
+                dest = str(_tl_atomic_secret(dest, bundle["gws_cred"].encode("utf-8")))
+                print(f"[bootstrap] ✓ gws cred → {dest} (chmod 600)")
+            except OSError as exc:
+                print(f"[bootstrap] ⚠ từ chối ghi gws cred không an toàn: {type(exc).__name__}",
+                      file=sys.stderr)
+                degraded = True
         else:
             print("[bootstrap] ⚠ bundle thiếu gws_cred — gws sẽ chưa auth (op vẫn fallback GAS).", file=sys.stderr)
             degraded = True
         if bundle.get("nlm_auth"):                     # nạp auth nlm (cookies) → nlm chạy headless, khỏi `nlm login`
-            nbase = os.path.expanduser("~/.notebooklm-mcp-cli")
-            for rel, content in bundle["nlm_auth"].items():
-                dst = os.path.join(nbase, *str(rel).split("/"))
-                os.makedirs(os.path.dirname(dst), exist_ok=True)
-                with open(dst, "w", encoding="utf-8") as f:
-                    f.write(content)
-                try:
-                    os.chmod(dst, 0o600)
-                except OSError:
-                    pass
-            age = _nlm_auth_age_days(bundle["nlm_auth"])
-            agestr = f" · cookie ~{age:.0f} ngày tuổi" if age is not None else ""
-            print(f"[bootstrap] ✓ nlm auth ({len(bundle['nlm_auth'])} file) → ~/.notebooklm-mcp-cli (nlm headless){agestr}")
-            _agenote = _nlm_cookie_age_note(age)       # ngưỡng/thông điệp thống nhất mọi đường nạp (A log 2026-07-05)
-            if _agenote:
-                print(f"[bootstrap]{_agenote}", file=sys.stderr)
+            try:
+                written = _write_nlm_auth(os.path.expanduser("~/.notebooklm-mcp-cli"),
+                                          bundle["nlm_auth"])
+            except (OSError, ValueError) as exc:
+                print(f"[bootstrap] ⚠ từ chối nlm_auth không an toàn: {type(exc).__name__}",
+                      file=sys.stderr)
+                degraded = True
+            else:
+                age = _nlm_auth_age_days(bundle["nlm_auth"])
+                agestr = f" · cookie ~{age:.0f} ngày tuổi" if age is not None else ""
+                print(f"[bootstrap] ✓ nlm auth ({written} file) → ~/.notebooklm-mcp-cli (nlm headless){agestr}")
+                _agenote = _nlm_cookie_age_note(age)       # ngưỡng/thông điệp thống nhất mọi đường nạp (A log 2026-07-05)
+                if _agenote:
+                    print(f"[bootstrap]{_agenote}", file=sys.stderr)
         if not _imp("gws_bridge").gws_exe() and not getattr(a, "no_gws", False):
             print("[bootstrap] gws chưa có PATH → cài binary (direct-media nếu có cred)…")
             try:
@@ -1302,14 +1696,11 @@ def _gws_auth_load(token: str, fid: str):
     except Exception as e:  # noqa: BLE001
         return False, f"giải mã lỗi: {e}"
     cfgdir = os.environ.get("GOOGLE_WORKSPACE_CLI_CONFIG_DIR") or os.path.expanduser("~/.config/gws")
-    os.makedirs(cfgdir, exist_ok=True)
     dest = os.path.join(cfgdir, "credentials.json")
-    with open(dest, "wb") as f:
-        f.write(cred)
     try:
-        os.chmod(dest, 0o600)
-    except OSError:
-        pass
+        dest = str(_tl_atomic_secret(dest, cred))
+    except OSError as exc:
+        return False, f"từ chối credential destination không an toàn: {type(exc).__name__}"
     return True, dest
 
 
@@ -1389,15 +1780,10 @@ def _nlm_auth_load(token: str, fid: str, force: bool = False):
                        "LÀM MẤT cookie tươi hơn đang có. Muốn cố ý: `--force`. Đường đúng khi cookie "
                        "chết hẳn: `nlm login` (tương tác) rồi `tl nlm-auth-stage` để làm tươi bundle.")
     nbase = os.path.expanduser("~/.notebooklm-mcp-cli")
-    for rel, content in nlm.items():
-        dst = os.path.join(nbase, *str(rel).split("/"))
-        os.makedirs(os.path.dirname(dst), exist_ok=True)
-        with open(dst, "w", encoding="utf-8") as f:
-            f.write(content)
-        try:
-            os.chmod(dst, 0o600)
-        except OSError:
-            pass
+    try:
+        written = _write_nlm_auth(nbase, nlm)
+    except (OSError, ValueError) as exc:
+        return False, f"từ chối nlm_auth không an toàn: {type(exc).__name__}"
     age = _nlm_auth_age_days(nlm)
     # r208c 3.1: bundle có thể mang sẵn PHIÊN ĐÃ CHẾT — đo tươi 25-07: bản trên Drive chứa đúng token
     # xoay hết hạn −129' y như jar cục bộ, nạp về KHÔNG hồi sinh được gì. Đây chính là lý do vòng lặp
@@ -1413,7 +1799,7 @@ def _nlm_auth_load(token: str, fid: str, force: bool = False):
                       "phải `nlm login` (tương tác) rồi `tl nlm-auth-stage` để làm tươi bundle.")
     except Exception:  # noqa: BLE001 — cảnh báo best-effort, không chặn nạp
         pass
-    return True, (f"~/.notebooklm-mcp-cli ({len(nlm)} file"
+    return True, (f"~/.notebooklm-mcp-cli ({written} file"
                   + (f", ~{age:.0f} ngày tuổi" if age is not None else "") + ")"
                   + _nlm_cookie_age_note(age) + _rot_b)
 

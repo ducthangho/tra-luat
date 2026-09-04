@@ -12,6 +12,538 @@ import os as _hos
 import sys as _hsys
 
 
+def _wp433_nlm_parent_link_boundary(tg) -> bool:
+    """Focused lock for ``nlm_parent_link_to_external_is_canonicalized``."""
+    import os
+    import stat
+    import subprocess
+    import tempfile
+    from pathlib import Path
+
+    payload = {
+        "auth.json": '{"cookies":[]}',
+        "profiles/default/cookies.json": "[]",
+        "profiles/default/metadata.json": '{"last_validated":"fixture"}',
+    }
+
+    def make_directory_link(link: Path, target: Path) -> None:
+        if os.name == "nt":
+            made = subprocess.run(
+                ["cmd.exe", "/d", "/c", "mklink", "/J", str(link), str(target)],
+                stdin=subprocess.DEVNULL, capture_output=True).returncode == 0
+            assert made, "could not construct required junction/reparse fixture"
+        else:
+            link.symlink_to(target, target_is_directory=True)
+
+    def reject_before_plan(base: Path) -> None:
+        calls = []
+        original_plan = tg._nlm_auth_plan
+
+        def observed_plan(document):
+            calls.append("plan")
+            return original_plan(document)
+
+        tg._nlm_auth_plan = observed_plan
+        try:
+            try:
+                tg._write_nlm_auth(base, {})  # deliberately invalid if planning wins
+            except ValueError as exc:
+                raise AssertionError(
+                    "NLM schema planning ran before base/parent link rejection") from exc
+            except OSError as exc:
+                message = str(exc).lower()
+                assert "link" in message or "reparse" in message, message
+            else:
+                raise AssertionError("linked NLM restore base was accepted")
+        finally:
+            tg._nlm_auth_plan = original_plan
+        assert calls == [], f"planning happened before link rejection: {calls}"
+
+    with tempfile.TemporaryDirectory(prefix="tl-nlm-parent-link-") as raw:
+        root = Path(raw)
+        external = root / "external"
+        external.mkdir()
+        linked = root / "external-link"
+        make_directory_link(linked, external)
+
+        # Supplied base is itself a link, then the same link is a nested
+        # existing parent of an otherwise nonexistent base.
+        reject_before_plan(linked)
+        reject_before_plan(linked / "ordinary-missing" / "base")
+        assert not list(external.rglob("*.json")), "external link target was written"
+
+        # A generated target parent linked outside the base is rejected after
+        # schema planning but before the first write (auth.json comes first).
+        nested_base = root / "nested-base"
+        nested_base.mkdir()
+        nested_link = nested_base / "profiles"
+        make_directory_link(nested_link, external)
+        writes = []
+        original_write = tg._tl_atomic_secret
+        tg._tl_atomic_secret = lambda *_a, **_k: writes.append(True)
+        try:
+            try:
+                tg._write_nlm_auth(nested_base, payload)
+            except OSError as exc:
+                message = str(exc).lower()
+                assert "link" in message or "reparse" in message, message
+            else:
+                raise AssertionError("nested linked target parent was accepted")
+        finally:
+            tg._tl_atomic_secret = original_write
+        assert writes == [], f"write began before nested parent rejection: {writes}"
+        assert not (nested_base / "auth.json").exists()
+
+        # Ordinary nonexistent components remain admissible. POSIX exercises
+        # the complete writer; Windows checks the lexical guard because the
+        # production writer intentionally lacks handle-relative primitives.
+        ordinary = root / "ordinary" / "missing" / "base"
+        guarded = tg._tl_nlm_restore_path(ordinary)
+        assert guarded == ordinary.absolute() and not ordinary.exists()
+        if os.name == "posix":
+            assert tg._write_nlm_auth(ordinary, payload) == len(payload)
+            for rel in payload:
+                target = ordinary.joinpath(*rel.split("/"))
+                assert target.is_file() and stat.S_IMODE(target.stat().st_mode) == 0o600
+        else:
+            try:
+                tg._write_nlm_auth(ordinary, payload)
+            except OSError as exc:
+                assert "handle-relative" in str(exc)
+            else:
+                raise AssertionError("Windows writer did not fail closed")
+    return True
+
+
+def _wp433_nlm_missing_parent_capability(tg) -> bool:
+    """Lock ``tl_missing_parent_creation_uses_pathname_before_capability``."""
+    import os
+    import stat
+    import tempfile
+    from pathlib import Path
+
+    with tempfile.TemporaryDirectory(prefix="tl-nlm-missing-parent-") as raw:
+        root = Path(raw)
+        ordinary = root / "ordinary" / "nested" / "auth.json"
+        if os.name == "posix":
+            tg._tl_atomic_secret(ordinary, b"POSITIVE_FIXTURE")
+            assert ordinary.read_bytes() == b"POSITIVE_FIXTURE"
+            assert stat.S_IMODE(ordinary.stat().st_mode) == 0o600
+        else:
+            try:
+                tg._tl_atomic_secret(ordinary, b"POSITIVE_FIXTURE")
+            except OSError as exc:
+                assert "handle-relative" in str(exc)
+            else:
+                raise AssertionError("Windows TL writer used a pathname fallback")
+            assert not ordinary.exists()
+            return True
+
+        missing = root / "missing-component"
+        external = root / "substituted-external"
+        external.mkdir()
+        attacked = missing / "nested" / "auth.json"
+        original_destination = tg._tl_secret_destination
+
+        def substitute_missing_component(path):
+            canonical = original_destination(path)
+            missing.symlink_to(external, target_is_directory=True)
+            return canonical
+
+        tg._tl_secret_destination = substitute_missing_component
+        try:
+            try:
+                tg._tl_atomic_secret(attacked, b"RACE_FIXTURE")
+            except OSError:
+                pass
+            else:
+                raise AssertionError(
+                    "missing-parent substitution redirected the TL writer")
+        finally:
+            tg._tl_secret_destination = original_destination
+        assert not (external / "nested" / "auth.json").exists(), \
+            "TL secret bytes reached the substituted directory"
+    return True
+
+
+def _wp433_tl_missing_parent_mutation_killed(tg) -> bool:
+    """Execute the named TL pathname-mkdir mutant against its focused lock."""
+    import os
+    import types
+    from pathlib import Path
+
+    if os.name != "posix":
+        return True
+    source = Path(tg.__file__).read_text(encoding="utf-8")
+    anchor = "    return _tl_walk_parent_capability(path.parent, create=create)"
+    replacement = (
+        "    flags = _tl_directory_flags()\n"
+        "    path.parent.mkdir(parents=True, exist_ok=True)\n"
+        "    directory_fd = os.open(path.parent, flags)\n"
+        "    _tl_validate_parent(directory_fd)\n"
+        "    return directory_fd"
+    )
+    assert source.count(anchor) == 1, "TL missing-parent mutant anchor drifted"
+    mutant = types.ModuleType("tl_gws_wp433_missing_parent_mutant")
+    mutant.__file__ = str(Path(tg.__file__).resolve())
+    exec(compile(source.replace(anchor, replacement), mutant.__file__, "exec"),
+         mutant.__dict__)
+    try:
+        _wp433_nlm_missing_parent_capability(mutant)
+    except AssertionError:
+        return True
+    raise AssertionError(
+        "tl_missing_parent_creation_uses_pathname_before_capability survived")
+
+
+def _wp433_tl_secret_cleanup_boundary(tg) -> bool:
+    """Failed TL writes remove only their exact created inode."""
+    import os
+    import stat
+    import tempfile
+    from pathlib import Path
+    from unittest import mock
+
+    if os.name != "posix":
+        print("  [SKIP] wp433_tl_secret_cleanup_boundary "
+              "(POSIX capability primitive unavailable)")
+        return True
+
+    class InjectedFailure(OSError):
+        pass
+
+    class FaultingFile:
+        def __init__(self, fd, stage, failure):
+            self.fd = fd
+            self.stage = stage
+            self.failure = failure
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, _kind, _value, _traceback):
+            self.close()
+
+        def close(self):
+            os.close(self.fd)
+
+        def fileno(self):
+            return self.fd
+
+        def write(self, data):
+            if self.stage == "write":
+                os.write(self.fd, data[:max(1, len(data) // 3)])
+                raise self.failure
+            os.write(self.fd, data)
+            return len(data)
+
+        def flush(self):
+            if self.stage == "flush":
+                raise self.failure
+
+    def exercise_failure(root: Path, stage: str) -> None:
+        target = root / f"{stage}.json"
+        failure = InjectedFailure(f"fixture-{stage}")
+        patches = []
+        if stage in ("write", "flush"):
+            patches.append(mock.patch.object(
+                tg.os, "fdopen",
+                side_effect=lambda fd, _mode: FaultingFile(fd, stage, failure)))
+        elif stage == "chmod":
+            patches.append(mock.patch.object(tg.os, "fchmod", side_effect=failure))
+        elif stage in ("file_fsync", "directory_fsync"):
+            real_fsync = tg.os.fsync
+            calls = 0
+
+            def faulting_fsync(fd):
+                nonlocal calls
+                calls += 1
+                if calls == (1 if stage == "file_fsync" else 2):
+                    raise failure
+                return real_fsync(fd)
+
+            patches.append(mock.patch.object(tg.os, "fsync", side_effect=faulting_fsync))
+        elif stage == "post_replace_verification":
+            real_stat_at = tg._tl_stat_at
+            target_checks = 0
+
+            def faulting_stat_at(directory_fd, name):
+                nonlocal target_checks
+                if name == target.name:
+                    target_checks += 1
+                    if target_checks == 2:
+                        return None
+                return real_stat_at(directory_fd, name)
+
+            patches.append(mock.patch.object(
+                tg, "_tl_stat_at", side_effect=faulting_stat_at))
+        else:
+            raise AssertionError(stage)
+
+        try:
+            with patches[0]:
+                tg._tl_atomic_secret(target, b"INERT_TL_SECRET_FIXTURE")
+        except InjectedFailure as caught:
+            assert caught is failure, "cleanup replaced the original TL exception"
+        except OSError as caught:
+            assert stage == "post_replace_verification", (stage, caught)
+        else:
+            raise AssertionError(f"TL {stage} failure was swallowed")
+        assert not target.exists(), (stage, "credential target survived")
+        assert list(root.iterdir()) == [], (stage, list(root.iterdir()))
+
+    def exercise_replacement(root: Path, *, after_replace: bool) -> None:
+        target = root / ("replacement-final.json" if after_replace
+                         else "replacement-temp.json")
+        replacement = b"ATTACKER_REPLACEMENT_FIXTURE"
+        failure = InjectedFailure("fixture-replacement")
+        if after_replace:
+            real_fsync = tg.os.fsync
+            calls = 0
+
+            def replace_then_fail(fd):
+                nonlocal calls
+                calls += 1
+                if calls == 2:
+                    target.unlink()
+                    target.write_bytes(replacement)
+                    raise failure
+                return real_fsync(fd)
+
+            patcher = mock.patch.object(tg.os, "fsync", side_effect=replace_then_fail)
+        else:
+            class ReplacingFile(FaultingFile):
+                def write(self, data):
+                    os.write(self.fd, data)
+                    entries = list(root.iterdir())
+                    assert len(entries) == 1, entries
+                    entries[0].unlink()
+                    entries[0].write_bytes(replacement)
+                    raise self.failure
+
+            patcher = mock.patch.object(
+                tg.os, "fdopen",
+                side_effect=lambda fd, _mode: ReplacingFile(
+                    fd, "replacement", failure))
+        try:
+            with patcher:
+                tg._tl_atomic_secret(target, b"INERT_TL_SECRET_FIXTURE")
+        except InjectedFailure as caught:
+            assert caught is failure, "cleanup replaced replacement failure"
+        else:
+            raise AssertionError("TL replacement failure was swallowed")
+        entries = list(root.iterdir())
+        assert len(entries) == 1 and entries[0].read_bytes() == replacement, entries
+
+    with tempfile.TemporaryDirectory(prefix="tl-secret-cleanup-") as raw:
+        base = Path(raw)
+        for stage in ("chmod", "write", "flush", "file_fsync",
+                      "post_replace_verification", "directory_fsync"):
+            root = base / stage
+            root.mkdir()
+            exercise_failure(root, stage)
+        for after_replace in (False, True):
+            root = base / ("replace-final" if after_replace else "replace-temp")
+            root.mkdir()
+            exercise_replacement(root, after_replace=after_replace)
+
+        # Cleanup trouble never replaces the write exception.
+        root = base / "cleanup-error"; root.mkdir()
+        failure = InjectedFailure("fixture-original")
+        with mock.patch.object(tg.os, "fchmod", side_effect=failure), \
+             mock.patch.object(tg, "_tl_unlink_identity",
+                               side_effect=RuntimeError("fixture-cleanup")):
+            try:
+                tg._tl_atomic_secret(root / "auth.json", b"INERT")
+            except InjectedFailure as caught:
+                assert caught is failure
+            else:
+                raise AssertionError("cleanup error replaced/swallowed original")
+
+        positive = base / "positive" / "auth.json"
+        tg._tl_atomic_secret(positive, b"INERT_TL_POSITIVE")
+        assert positive.read_bytes() == b"INERT_TL_POSITIVE"
+        assert stat.S_IMODE(positive.stat().st_mode) == 0o600
+
+        # Parent-directory durability is mandatory.  An unsupported directory
+        # fsync is a failed secret write, not permission to report a weaker
+        # success contract.
+        unsupported = {number for number in (
+            getattr(tg.errno, "EINVAL", None),
+            getattr(tg.errno, "ENOTSUP", None),
+        ) if number is not None}
+        for number in unsupported:
+            root = base / f"unsupported-directory-fsync-{number}"
+            root.mkdir()
+            target = root / "auth.json"
+            real_fsync = tg.os.fsync
+
+            def unsupported_directory_fsync(fd, *, _number=number):
+                if stat.S_ISDIR(tg.os.fstat(fd).st_mode):
+                    raise OSError(_number, "unsupported directory fsync fixture")
+                return real_fsync(fd)
+
+            with mock.patch.object(
+                    tg.os, "fsync", side_effect=unsupported_directory_fsync):
+                try:
+                    tg._tl_atomic_secret(target, b"INERT_UNSUPPORTED_TL")
+                except OSError as caught:
+                    assert caught.errno == number, caught
+                else:
+                    raise AssertionError(
+                        f"directory fsync errno {number} was accepted")
+            assert not target.exists(), (number, target)
+            assert list(root.iterdir()) == [], (number, list(root.iterdir()))
+
+        # Descriptor cleanup attempts every close but cannot replace the
+        # original write/durability failure.  The regular descriptor here is
+        # the identity guard; the directory descriptor must still be closed
+        # after that guard close reports its own failure.
+        root = base / "close-original-precedence"; root.mkdir()
+        target = root / "auth.json"
+        primary = InjectedFailure("fixture-primary-directory-fsync")
+        close_kinds = []
+        real_fsync = tg.os.fsync
+        real_close = tg.os.close
+
+        def primary_directory_fsync(fd):
+            if stat.S_ISDIR(tg.os.fstat(fd).st_mode):
+                raise primary
+            return real_fsync(fd)
+
+        def failing_guard_close(fd):
+            try:
+                is_directory = stat.S_ISDIR(tg.os.fstat(fd).st_mode)
+            except OSError:
+                is_directory = False
+            close_kinds.append("directory" if is_directory else "guard")
+            real_close(fd)
+            if not is_directory:
+                raise OSError("fixture identity-guard close")
+
+        with mock.patch.object(tg.os, "fsync", side_effect=primary_directory_fsync), \
+             mock.patch.object(tg.os, "close", side_effect=failing_guard_close):
+            try:
+                tg._tl_atomic_secret(target, b"INERT_CLOSE_TL")
+            except InjectedFailure as caught:
+                assert caught is primary, "guard close replaced original TL failure"
+            else:
+                raise AssertionError("primary TL durability failure was swallowed")
+        assert "guard" in close_kinds and "directory" in close_kinds, close_kinds
+        assert not target.exists(), target
+
+        # Conversely, a close failure on an otherwise successful operation is
+        # fatal and all remaining descriptors are still attempted.
+        root = base / "successful-close-failure"; root.mkdir()
+        target = root / "auth.json"
+        close_kinds = []
+        real_close = tg.os.close
+
+        def success_guard_close(fd):
+            try:
+                is_directory = stat.S_ISDIR(tg.os.fstat(fd).st_mode)
+            except OSError:
+                is_directory = False
+            close_kinds.append("directory" if is_directory else "guard")
+            real_close(fd)
+            if not is_directory:
+                raise OSError("fixture successful guard close")
+
+        with mock.patch.object(tg.os, "close", side_effect=success_guard_close):
+            try:
+                tg._tl_atomic_secret(target, b"INERT_SUCCESS_CLOSE_TL")
+            except OSError as caught:
+                assert "guard close" in str(caught), caught
+            else:
+                raise AssertionError("successful guard close failure was swallowed")
+        assert "guard" in close_kinds and "directory" in close_kinds, close_kinds
+    return True
+
+
+def _wp433_tl_secret_cleanup_mutations_killed(tg) -> bool:
+    """Execute both R11 named TL cleanup mutants against the focused lock."""
+    import os
+    import types
+    from pathlib import Path
+
+    if os.name != "posix":
+        print("  [SKIP] wp433_tl_secret_cleanup_mutations_killed "
+              "(POSIX capability primitive unavailable)")
+        return True
+    source = Path(tg.__file__).read_text(encoding="utf-8")
+    mutants = (
+        (
+            "tl_fchmod_failure_forgets_created_identity",
+            "        identity = _tl_created_secret_identity(fd)\n"
+            "        # Keep the created inode alive until cleanup has finished.  Otherwise a\n"
+            "        # hostile unlink/recreate can immediately reuse the same (dev, ino),\n"
+            "        # making a pathname-only identity check delete the replacement.\n"
+            "        identity_guard_fd = os.dup(fd)\n"
+            "        write_primary = None\n"
+            "        write_traceback = None\n"
+            "        out = None\n"
+            "        try:\n"
+            "            os.fchmod(fd, 0o600)",
+            "        write_identity = _tl_created_secret_identity(fd)\n"
+            "        # Keep the created inode alive until cleanup has finished.  Otherwise a\n"
+            "        # hostile unlink/recreate can immediately reuse the same (dev, ino),\n"
+            "        # making a pathname-only identity check delete the replacement.\n"
+            "        identity_guard_fd = os.dup(fd)\n"
+            "        write_primary = None\n"
+            "        write_traceback = None\n"
+            "        out = None\n"
+            "        try:\n"
+            "            os.fchmod(fd, 0o600)\n"
+            "            identity = write_identity",
+        ),
+        (
+            "tl_writer_drops_final_name_before_directory_fsync",
+            "            if target.name not in cleanup_names:\n"
+            "                cleanup_names.append(target.name)\n"
+            "            os.replace(created_name, target.name,",
+            "            cleanup_names.clear()\n"
+            "            os.replace(created_name, target.name,",
+        ),
+        (
+            "tl_directory_fsync_unsupported_is_treated_as_success",
+            "        os.fsync(directory_fd)\n"
+            "        cleanup_names.clear()",
+            "        try:\n"
+            "            os.fsync(directory_fd)\n"
+            "        except OSError as exc:\n"
+            "            if exc.errno not in (errno.EINVAL, getattr(errno, 'ENOTSUP', errno.EINVAL)):\n"
+            "                raise\n"
+            "        cleanup_names.clear()",
+        ),
+        (
+            "tl_guard_close_failure_replaces_original",
+            "    if primary is not None:\n"
+            "        raise primary.with_traceback(primary_traceback)\n"
+            "    if close_error is not None:\n"
+            "        raise close_error\n"
+            "    return result",
+            "    if close_error is not None:\n"
+            "        raise close_error\n"
+            "    if primary is not None:\n"
+            "        raise primary.with_traceback(primary_traceback)\n"
+            "    return result",
+        ),
+    )
+    for index, (name, anchor, replacement) in enumerate(mutants):
+        assert source.count(anchor) == 1, f"{name} anchor drifted"
+        mutant = types.ModuleType(f"tl_gws_wp433_r11_mutant_{index}")
+        mutant.__file__ = str(Path(tg.__file__).resolve())
+        exec(compile(source.replace(anchor, replacement), mutant.__file__, "exec"),
+             mutant.__dict__)
+        try:
+            _wp433_tl_secret_cleanup_boundary(mutant)
+        except (AssertionError, OSError) as exc:
+            print(f"  [PASS] {name} (killed by {type(exc).__name__})")
+            continue
+        raise AssertionError(f"{name} survived")
+    return True
+
+
 class _hush:
     """v1.31.2 (log deploy user 2026-07-03 'Vẫn lỗi'): NUỐT stdout/stderr của các test CỐ TÌNH đi nhánh lỗi —
     argparse chặn '--row-kind xyz' (in usage+error là PASS-by-design), retry-transient mock, CẮT BATCH loud,
@@ -21264,10 +21796,13 @@ def run() -> int:
         # KÊ KHAI SLOT (MANG-SANDBOX-CODEX / #334): 70 → **71** Markdown dưới `docs/`. Thêm đúng
         # `docs/MANG_SANDBOX_CODEX.md`, dev-side/NGOÀI gói. `RELEASE_MANIFEST.json` KHÔNG đổi nên
         # gói giữ **180**, trần Package 200 không nhúc nhích; cây thật = 180 + 71 = **251**.
-        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 71 == 251
+        # KÊ KHAI SLOT (credential bootstrap / #431): 71 → **72** Markdown dưới `docs/`. Thêm đúng
+        # `docs/SESSION_CREDENTIALS.md`, tài liệu vận hành dev-side/NGOÀI gói. Package vẫn **180**,
+        # trần 200 không đổi; cây thật = 180 + 72 = **252**.
+        ok3 = int(j.get("file_count") or 0) == len(paths) and len(paths) + 72 == 252
         d = root / "docs"
         tren_dia = sorted(d.rglob("*.md")) if d.is_dir() else []
-        ok4 = (len(tren_dia) == 71
+        ok4 = (len(tren_dia) == 72
                and all(not _rel209._release_should_include(q, root) for q in tren_dia)
                and all(set(q.relative_to(root).parts) & _rel209._RELEASE_EXCLUDE_DIRS == {"docs"}
                        for q in tren_dia))
@@ -24664,7 +25199,13 @@ def run() -> int:
         with _tf218.TemporaryDirectory() as td:
             d = _r218_doc(td, "\n".join(_dong))
             rc, j, _ = _r218_run("--path", str(d))
-        return rc == 0 and j.get("ok") is True and j.get("flags") == [] and j.get("files_scanned") == 1
+        _ok218 = (rc == 0 and j.get("ok") is True and j.get("flags") == []
+                  and j.get("files_scanned") == 1)
+        if not _ok218:
+            print("  [r218-clean-diagnostic] " + json.dumps({
+                "rc": rc, "ok": j.get("ok"), "files_scanned": j.get("files_scanned"),
+                "flags": j.get("flags")}, ensure_ascii=False), file=_hsys.stderr)
+        return _ok218
 
     _t110("r218_docclaims_sach_khong_bao_gia", _c218_sach_khong_bao_gia)
 
@@ -29966,6 +30507,170 @@ def run() -> int:
           lambda: _release_fixture44()["topology_ok"])
     _t110("wp44_missing_bundled_module_named",
           lambda: _release_fixture44()["missing_named"])
+
+    # WP433 r4 — mọi output NLM đi qua lược đồ đường dẫn đóng và writer
+    # capability-relative.  Ca này chạy positive/race thật trên POSIX; Windows
+    # đo hợp đồng fail-closed vì stdlib không có handle-relative rename.
+    def _c433_nlm_secret_boundary():
+        import os as _os433, stat as _st433, subprocess as _sp433
+        import tempfile as _tf433
+        from pathlib import Path as _P433
+        import tl_gws as _tg433
+
+        payload = {
+            "auth.json": '{"cookies":[]}',
+            "profiles/default/cookies.json": "[]",
+            "profiles/default/metadata.json": '{"last_validated":"fixture"}',
+        }
+        hostile = (
+            {"../auth.json": "x"},
+            {"/tmp/auth.json": "x"},
+            {r"profiles\default\cookies.json": "x"},
+            {"profiles/default/../auth.json": "x"},
+            {"profiles/other/cookies.json": "x"},
+            {"profiles/default/cookies.json/child": "x"},
+            {"auth.json": b"not-text"},
+        )
+        for document in hostile:
+            try:
+                _tg433._nlm_auth_plan(document)
+                return False
+            except ValueError:
+                pass
+
+        with _tf433.TemporaryDirectory(prefix="tl-nlm-boundary-") as raw:
+            root = _P433(raw)
+            base = root / "positive"
+            if _os433.name == "nt":
+                try:
+                    _tg433._write_nlm_auth(base, payload)
+                    return False
+                except OSError as exc:
+                    if "handle-relative" not in str(exc):
+                        return False
+                if any(base.rglob("*.json")):
+                    return False
+
+                fake_repo = root / "fake-repo"
+                (fake_repo / ".git").mkdir(parents=True)
+                junction = root / "repo-junction"
+                made = _sp433.run(
+                    ["cmd.exe", "/d", "/c", "mklink", "/J",
+                     str(junction), str(fake_repo)],
+                    stdin=_sp433.DEVNULL, capture_output=True).returncode == 0
+                if made:
+                    try:
+                        _tg433._write_nlm_auth(junction, {"auth.json": "FIXTURE_ONLY"})
+                        return False
+                    except (_tg433._UnsafeSecretDestination, OSError):
+                        pass
+                    if (fake_repo / "auth.json").exists():
+                        return False
+                return True
+
+            if _tg433._write_nlm_auth(base, payload) != 3:
+                return False
+            for rel, text in payload.items():
+                target = base.joinpath(*rel.split("/"))
+                if (target.read_text(encoding="utf-8") != text
+                        or _st433.S_IMODE(target.stat().st_mode) != 0o600):
+                    return False
+
+            # Pre-existing nested parent link into a repository must reject the
+            # complete plan before auth.json (the first file) is written.
+            fake_repo = root / "linked-repo"
+            (fake_repo / ".git").mkdir(parents=True)
+            (fake_repo / "profiles" / "default").mkdir(parents=True)
+            linked_base = root / "linked-base"; linked_base.mkdir()
+            (linked_base / "profiles").symlink_to(
+                fake_repo / "profiles", target_is_directory=True)
+            try:
+                _tg433._write_nlm_auth(linked_base, payload)
+                return False
+            except (_tg433._UnsafeSecretDestination, OSError):
+                pass
+            if (linked_base / "auth.json").exists():
+                return False
+
+            # A final target link is rejected and its repository victim is not
+            # opened, truncated, or replaced.
+            target_base = root / "target-base"; target_base.mkdir()
+            victim = fake_repo / "victim"; victim.write_text("UNCHANGED", encoding="utf-8")
+            (target_base / "auth.json").symlink_to(victim)
+            try:
+                _tg433._write_nlm_auth(target_base, {"auth.json": "FIXTURE_ONLY"})
+                return False
+            except OSError:
+                pass
+            if victim.read_text(encoding="utf-8") != "UNCHANGED":
+                return False
+
+            # Reparent the already-open final component into a repository just
+            # before final ancestry validation.  The per-component no-follow
+            # checks cannot see that new parent; the final validator must.
+            race_repo = root / "race-repo"
+            (race_repo / ".git").mkdir(parents=True)
+            original_component_check = _tg433._tl_fd_repository_root
+
+            def exercise_reparent(*, delete_final_validator):
+                source_parent = root / (
+                    "race-parent-mutant" if delete_final_validator
+                    else "race-parent-control")
+                source_parent.mkdir()
+                moved_parent = race_repo / source_parent.name
+                identity = (source_parent.stat().st_dev,
+                            source_parent.stat().st_ino)
+                moved_once = False
+
+                def reparent_before_final(directory_fd):
+                    nonlocal moved_once
+                    opened = _os433.fstat(directory_fd)
+                    if (not moved_once
+                            and (opened.st_dev, opened.st_ino) == identity):
+                        source_parent.rename(moved_parent)
+                        moved_once = True
+                    return original_component_check(directory_fd)
+
+                original_validate = _tg433._tl_validate_parent
+                _tg433._tl_fd_repository_root = reparent_before_final
+                if delete_final_validator:
+                    _tg433._tl_validate_parent = lambda _fd: None
+                try:
+                    _tg433._tl_atomic_secret(
+                        source_parent / "auth.json", b"FIXTURE_ONLY")
+                finally:
+                    _tg433._tl_fd_repository_root = original_component_check
+                    _tg433._tl_validate_parent = original_validate
+                return moved_parent
+
+            try:
+                exercise_reparent(delete_final_validator=False)
+                return False
+            except _tg433._UnsafeSecretDestination:
+                pass
+            control_parent = race_repo / "race-parent-control"
+            if (control_parent / "auth.json").exists():
+                return False
+            mutant_parent = exercise_reparent(delete_final_validator=True)
+            return ((mutant_parent / "auth.json").read_bytes()
+                    == b"FIXTURE_ONLY")
+
+    _t110("wp433_nlm_secret_boundary", _c433_nlm_secret_boundary)
+    _t110("wp433_nlm_parent_link_to_external_is_canonicalized",
+          lambda: _wp433_nlm_parent_link_boundary(
+              __import__("tl_gws")))
+    _t110("wp433_nlm_missing_parent_creation_is_capability_relative",
+          lambda: _wp433_nlm_missing_parent_capability(
+              __import__("tl_gws")))
+    _t110("wp433_nlm_missing_parent_pathname_mutant_killed",
+          lambda: _wp433_tl_missing_parent_mutation_killed(
+              __import__("tl_gws")))
+    _t110("wp433_tl_secret_cleanup_boundary",
+          lambda: _wp433_tl_secret_cleanup_boundary(
+              __import__("tl_gws")))
+    _t110("wp433_tl_secret_cleanup_mutations_killed",
+          lambda: _wp433_tl_secret_cleanup_mutations_killed(
+              __import__("tl_gws")))
 
     # r332 — ĐỘ PHỦ REGISTRY PHẢI ĐO Ở ĐƯỜNG NGƯỜI TA THẬT SỰ CHẠY.
     # Bối cảnh: trong AG-T0-03, bản vá F8 đổi `compute_parser_coverage` từ

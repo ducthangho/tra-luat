@@ -142,6 +142,112 @@ python scripts/tl.py gws-ping --env cowork        # auth=ok → rc 0 (KHÔNG c�
 > Nạp riêng: `tl gws-auth-load`; bỏ qua auto-auth: `gws-bootstrap-cowork --no-auth`.
 
 **A0.4c — UNIFIED bootstrap: GAS token + GWS cred chung 1 khoá gốc `TL_MASTER_KEY` (env-aware).**
+
+> Phiên ephemeral có một entry point secret-safe cho Codex, Claude subscription,
+> GitHub và việc điều phối bootstrap hiện hữu: xem `docs/SESSION_CREDENTIALS.md`.
+> Mọi đích ghi secret (`CODEX_HOME/auth.json`, `claude-capture --output`) phải resolve
+> ra ngoài repository, kể cả qua parent symlink; hook kiểm `CODEX_HOME` trước mọi lần
+> gọi Codex, kể cả khi `codex login status` sẽ báo đã đăng nhập. Từ chối sẽ đặt
+> `TRA_LUAT_CODEX_BLOCKED=1`; launcher phải giữ chốt đó qua mọi đường Codex, kể cả
+> generic `run -- codex`. Generic run resolve/bind executable identity đúng một lần,
+> kể cả alias symlink/reparse đổi tên hoặc hard-link cùng file. argv0 tương đối có thành phần
+> đường dẫn được neo vào workspace đã khai **trước mọi PATH lookup**; chỉ tên lệnh trần mới dùng
+> PATH/PATHEXT. argv0 tương đối còn mang `~` bị từ chối trước mọi child: launcher không bao giờ
+> expanduser qua ambient `HOME`, còn đường tuyệt đối do shell expand vẫn hợp lệ. Provider child
+> từ generic run, doctor probe và hook helper nhận MỘT hierarchy `HOME`/XDG/temp private do
+> process tạo (context sống trọn đời child) cộng PATH sanitized; ambient
+> `HOME`/`USERPROFILE`/`TMPDIR`/`TMP`/`TEMP` không bao giờ chọn provider storage, chỉ credential
+> tường minh của chính provider hoặc credential directory canonical đã tài liệu hoá
+> (`CODEX_HOME` · `CLAUDE_CONFIG_DIR` · `GH_CONFIG_DIR`) được bind lại — private HOME không giấu
+> trạng thái đăng nhập canonical mà hợp đồng provider cho phép; allocation hỏng là zero child,
+> checked-cleanup hỏng chặn success; generic non-provider giữ contract môi trường cũ. Doctor
+> version/auth cho claude/codex/gh và probe/status của session hook chỉ đi qua đúng bound
+> capability + bound runner ấy (hook uỷ quyền `launcher.py hook-probe`), revalidate ở final
+> spawn, giữ Codex destination guard trước mọi codex child, và chỉ in vocabulary trạng thái
+> ĐÓNG — đầu ra thô của provider không vào doctor report hay hook log; candidate
+> repository/temp/relative/ambiguous/replaced là zero child. Sau đó dùng cùng bound target
+> cho chốt Codex, transport record, capability probe và final spawn. Provider credential-bearing
+> đã nhận diện mà không có bound capability hợp lệ không thể dùng probe override để tới final spawn:
+> launcher ghi đúng một ledger `pre_execution_provider` có cấu trúc và chạy zero child. Chỉ generic
+> non-provider thiếu lệnh mới giữ probe-override cùng full ambient environment. Writer giữ **actual opened parent
+> capability** đã kiểm và làm toàn bộ create/chmod/fsync/replace tương đối với capability
+> ấy; không quay lại đường dẫn. Riêng shared session credential writer giữ identity của inode
+> ngay sau `O_CREAT|O_EXCL`, trước chmod/write/flush/fsync, và giữ MỞ một duplicate capability
+> tới đúng inode ấy qua replace, post-install verification, parent-directory fsync và cleanup —
+> unlink/recreate không tái sử dụng được `(dev, ino)` khi các phép so identity theo pathname
+> còn tin nó. Lỗi về sau của shared writer,
+> kể cả mọi lỗi parent-directory fsync (`EINVAL`/`ENOTSUP`/`EIO`) sau replace, chỉ
+> được xoá entry còn đúng identity đó; replacement khác inode phải sống và exception gốc
+> không bị cleanup che. Exceptional unwind phải thử đóng hết descriptor còn sở hữu; close/unlink
+> phụ không được thay exception write/durability đầu tiên, nhưng close hỏng khi trước đó chưa có lỗi
+> vẫn là failure. Trên POSIX writer bắt đầu từ trusted root fd, mở từng
+> component đã có và tạo từng component còn thiếu tương đối với directory fd đang giữ;
+> không `mkdir` theo pathname rồi reopen. Cả writer session và writer NLM/GWS đều fail
+> trước khi ghi byte secret nếu một missing component bị thay bằng symlink. Bảo đảm này
+> chặn việc đổi alias sang thư mục KHÁC, không
+> bao gồm actor có quyền reparent chính directory inode đã mở sau validation; capability
+> sẽ đi theo inode ấy, nên threat model mạnh hơn phải dùng confinement/quyền của OS.
+> POSIX có primitives cần thiết; Windows thiếu primitives tương đương thì fail closed
+> trước child/write và báo `not_measured`. Hai lệnh TL bắt buộc
+> `--secrets-file`; entry point từ chối bundle trong repository, kiểm/canonicalize
+> chính candidate và mọi ancestor của HOME/XDG/GWS/cache/temp mà TL child có thể ghi
+> (exact worktree/bare root và link/junction alias bị từ chối; external root chưa tồn tại
+> vẫn được canonicalize rồi giao child), rồi neo child vào `scripts/tl.py` và
+> cwd của chính repository. Claude capture/probe, GitHub probe và Codex device-auth/live-check
+> chỉ dùng hierarchy private do process tạo từ trusted OS temp base (`/tmp` hoặc Windows
+> Shell LocalAppData, không theo ambient `TMPDIR`/`TMP`/`TEMP`). Child bị bind `HOME`, mọi
+> XDG root và cả ba temp vars vào hierarchy đó; permission/repository/symlink/reparse không
+> kiểm chắc được thì fail trước child. Claude/GitHub bind provider trước, rồi preflight khả năng ACL
+> private **trước mọi** credential mapping/token-file read, trusted-temp lookup, allocation hay child;
+> allocation kiểm lại lần nữa để phòng thủ nhiều lớp. Cleanup quarantine rồi đối chiếu đúng identity root đã cấp,
+> kiểm lỗi xoá và residual; root bị đổi thành link/junction/reparse không được đưa cho recursive
+> delete. Cleanup raise hoặc còn residual luôn hạ kết quả thành `not_measured`, kể cả inner call vừa
+> định trả thành công. Chốt này không chống actor đồng thời cùng OS principal
+> có quyền reparent hierarchy đã tạo; threat model mạnh hơn phải dùng namespace/principal
+> confinement của OS trong lúc child còn đang dùng storage. Riêng Codex live-check guard +
+> capability-read `CODEX_HOME/auth.json` trước khi cấp provider storage hoặc spawn; direct repository
+> và parent-link từ chối với zero child. Kết quả đóng gồm `passed`/`rejected`/`not_measured`: thiếu CLI,
+> timeout, local spawn/provider/cleanup không đo được là `not_measured`; chỉ refusal credential/model
+> có bằng chứng ngữ cảnh đóng (hoặc policy refusal) là `rejected`; từ local trần `login`/`oauth`/
+> `authentication` và số trần `401`/`403` không phải refusal evidence. Với Claude, nonzero chỉ là `network_error`
+> khi stderr/stdout có bằng chứng transport cụ thể (connection reset/refused, DNS...); lỗi local
+> hoặc nonzero không phân loại được là `not_measured`; rc `0` thiếu marker thành công standalone chính xác
+> cũng là `not_measured`, không phải approve. GitHub chỉ coi HTTP 401/403/404 là `rejected` khi `X-GitHub-*`
+> nằm trong CÙNG một response-header section hợp lệ về cú pháp: một dòng malformed xen giữa vô hiệu cả
+> block, EOF được phép kết thúc header-only output thật, còn body line, proxy/local output hay block
+> khác không cấp — và không dựng nổi — bằng chứng.
+> Timeout của `gh` không kèm bằng chứng transport-failure độc lập là `not_measured`, không phải
+> `network_error`. `tl-bootstrap` giữ nguyên contract rc của
+> child: `0→passed`; `1→not_measured/degraded`; `2→not_measured/precondition`;
+> `3→rejected/credential_or_bundle_rejected`; rc khác `→not_measured/unclassified_exit`.
+> Credential directory đã validate chỉ làm
+> `CODEX_HOME`, còn `HOME`/XDG/temp nằm trong một hierarchy private tách biệt; credential
+> directory thường chỉ có `auth.json` không cần provider-home scaffold. Đường device-auth
+> `lay` không nhận `CODEX_HOME` từ caller và chỉ copy-out bằng guarded writer; cleanup hỏng ghi đè
+> một kết quả inner ĐẠT thành KHÔNG_ĐO_ĐƯỢC. NLM restore chỉ
+> nhận đúng `auth.json`, `profiles/default/cookies.json`, và
+> `profiles/default/metadata.json`; traversal/extra profile bị từ chối. Base hoặc existing lexical
+> parent là link/junction/reparse (kể cả resolve ra external non-repository) bị từ chối trước schema
+> planning; mọi generated target parent được kiểm hết trước lần ghi đầu tiên. Component thường chưa
+> tồn tại vẫn được phép để guarded writer tạo.
+>
+> Trước khi đọc token/token-file, Claude capture/probe và GitHub probe resolve provider từ duy nhất
+> các raw PATH entry vốn đã tuyệt đối, loại entry rỗng/tương đối/tilde-relative mà không expand `~`
+> hay hỏi ambient `HOME`, loại repository và process-trusted temp, rồi yêu cầu đúng một candidate.
+> POSIX cho phép symlink alias tới regular executable, nhưng shebang phải resolve thành interpreter tuyệt đối
+> đã bind (kể cả `#!/usr/bin/env node` chỉ khi có đúng một `node`). Windows chỉ dò `.com/.exe/.bat/.cmd`;
+> `.cmd` chỉ được nhận khi đúng npm shim và bind được cả `node.exe` lẫn JS entry, rồi launch hai file tuyệt đối
+> ấy trực tiếp; script/shim khác fail closed. Trên Windows, ngay trước spawn, executable và mọi npm
+> shim/interpreter/JS support identity được mở thành exact-object handle không kế thừa, deny write/delete sharing,
+> rồi kiểm metadata + content digest từ chính handle đang giữ. Handle sống qua lúc `CreateProcessW` trả về và đóng
+> trên cả success/failure ngay sau process creation, không khóa suốt đời child. Vì vậy rewrite cùng size rồi phục hồi
+> timestamp vẫn bị từ chối; invocation độc lập kế tiếp vẫn bind được nâng cấp thật. POSIX giữ immediate identity
+> revalidation. argv0 và PATH child đều tuyệt đối/sanitized. Candidate/support thiếu, mơ hồ, không tin cậy hoặc bị
+> thay đổi ⇒ zero child, `not_measured`. Secret không xuất hiện trong argv/report.
+> Writer NLM/GWS ghi identity ngay sau `O_EXCL` trước chmod, giữ inode đó mở qua cleanup để chặn tái sử dụng
+> `(dev, ino)`, và giữ cả tên temp/final cho đến khi parent-directory fsync thành công. Lỗi từ chmod đến
+> directory fsync (kể cả `EINVAL`/`ENOTSUP`/`EIO`) chỉ xoá đúng inode của writer, bảo toàn replacement
+> và exception gốc; toàn bộ descriptor còn lại vẫn được thử close, với close-only failure là fatal.
 > **Windows (Claude Code):** bấm đúp `tl-setup.cmd` (gốc skill) — menu: [1] Setup 1 lần (cài gws + auth +
 > tự tạo `TL_MASTER_KEY` + mã hoá secrets + in lệnh Cowork vào `COWORK-paste.txt`), [2] Đổi token GAS,
 > [3] Kiểm tra. Sau setup: Code chạy thẳng; Cowork dán khối trong `COWORK-paste.txt`.
@@ -155,7 +261,8 @@ export TL_MASTER_KEY='<passphrase mạnh>'
 python scripts/tl.py secrets-stage
 # [COWORK] mỗi phiên — env-aware: nạp GAS token + full config (+ gws binary/cred ở Code/Cowork)
 export TL_MASTER_KEY='<passphrase>'
-#   agent tải SECRETS_FILEID qua Drive MCP → lưu /tmp/s.enc  (Cowork token-less); Code có token thì tự webapp-fetch
+#   agent tải SECRETS_FILEID qua Drive MCP → lưu /tmp/s.enc NGOÀI repository
+#   (Cowork token-less); Code có token thì tự webapp-fetch. --secrets-file là bắt buộc.
 python scripts/tl.py bootstrap --env cowork --secrets-file /tmp/s.enc
 python scripts/tl.py ping ; python scripts/tl.py gws-ping --env cowork
 ```

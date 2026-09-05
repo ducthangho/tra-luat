@@ -4059,3 +4059,235 @@ def cmd_doc_patch(a) -> int:
                              ket_qua=kq["ket_qua"],
                              undo="tl doc-patch --undo " + rid + " --apply --confirm yes"), True)
     return 0
+
+
+# ══════════ LỚP 3 — `rasoat-dot-check`: cổng kiểm CUỐI ĐỢT (READ-ONLY, offline) ══════════
+# Ba chốt máy cho ba lỗi NGƯỜI lặp lại, đo được trên hồ sơ ATVSLĐ (7 Đợt kế hoạch / 11 lượt thực tế):
+#   L3-1 NFC     — số kho "750" được thừa kế qua nhiều lượt mà không đo lại; đo lại trên bản đã chuẩn hoá
+#                  cho con số khác hẳn ⇒ mọi phép ĐẾM phải chạy trên NFC, lệch thì DỪNG chứ không tự sửa.
+#   L3-2 3 KHOÁ  — ba lần kết luận "kho thiếu" sai vì tra MỘT khoá: ILO 81 (kho lưu `ILO-081`) ·
+#                  NĐ 217/2025 (dừng sau khi thấy NĐ 216/2025) · NQ 66.17/2026 (lọc máy móc theo loại).
+#   L3-3 TÁI LẬP — số liệu lệch giữa Phiếu / Báo cáo / Phụ lục vì không ghi "đếm trên gì, tiêu chí nào".
+# KHÔNG phải vòng lặp thứ hai (RASOAT_HOSO_LOOP dòng đầu: KHÔNG xây engine mới): lệnh này không sinh đơn
+# vị, không ghi state, không gọi mạng/NLM/Drive. Nó chỉ ĐỌC sổ của lượt rà và trả verdict.
+
+_DOT_CHECK_SCHEMA = "rasoat_dot_check.v1"
+_TRA_KHO_TRUONG = ("thoi_diem", "muc_tieu", "ket_qua", "lenh")   # sổ sách — thiếu = chưa ghi sổ
+_TRA_KHO_KHOA = ("khoa_so_hieu", "khoa_ten", "khoa_dinh_danh")    # mỗi dòng ghi ÍT NHẤT MỘT khoá đã tra
+_DOT_CHECK_THIEU_TT = ("cho_tai", "cho_nguoi_tai")
+_DOT_CHECK_SO_TRA_KHO = "rasoat_tra_kho.jsonl"
+
+
+def _dinh_danh_chuan_hoa(s) -> str:
+    """Khoá THỨ BA khi tra kho (`references/RASOAT_HOSO_LOOP.md` §10). BỌC `norm_sohieu` SẴN CÓ — SKILL.md
+    §0 #15 cấm viết lại cái đã có — và chỉ thêm đúng hai biệt lệ ĐÃ ĐO ĐƯỢC:
+      · `_` → `-` trước khi chuẩn hoá (tên file Drive dùng `_`, registry dùng `/`);
+      · công ước ILO đệm 0 tới 3 chữ số: `ILO 81` ≡ `ILO81` ≡ `ILO-81` ≡ `ILO-081` (ca tra sót thật).
+    GIỮ dấu chấm phần số (`66.17/2026/NQ-CP` → `66.17-2026-NQ-CP`): đó là số hiệu thật, không phải nhiễu."""
+    raw = unicodedata.normalize("NFC", str(s or "")).strip()
+    if not raw:
+        return ""
+    key = norm_sohieu(raw.replace("_", "-"))
+    m = re.fullmatch(r"ILO-?(\d{1,3})", key)
+    return "ILO-%03d" % int(m.group(1)) if m else key
+
+
+def _nfc_lech(text) -> list:
+    """Số dòng (1-based) chưa ở dạng NFC. Fail-CLOSED: nêu ĐÍCH DANH dòng lệch, KHÔNG âm thầm chuẩn hoá
+    rồi đếm tiếp — đếm trên bản vừa tự sửa là mất luôn bằng chứng vì sao số cũ khác số mới."""
+    out = []
+    for i, line in enumerate(str(text or "").split("\n"), 1):
+        if unicodedata.normalize("NFC", line) != line:
+            out.append(i)
+            if len(out) >= 50:
+                break
+    return out
+
+
+def _dot_check_nfc(files) -> dict:
+    lech = []
+    for p in files:
+        fp = Path(p)
+        try:
+            t = fp.read_text(encoding="utf-8")
+        except Exception as e:  # noqa: BLE001
+            lech.append({"file": fp.name, "ma": "KHONG_DOC_DUOC", "chi_tiet": str(e), "dong": []})
+            continue
+        d = _nfc_lech(t)
+        if d:
+            lech.append({"file": fp.name, "ma": "CHUA_CHUAN_HOA_NFC", "dong": d})
+    return {"so_file_da_quet": len(files), "lech": lech, "ok": not lech}
+
+
+def _tra_kho_doc(path) -> tuple:
+    """Đọc sổ `rasoat_tra_kho.jsonl` (khuôn `TRA_KHO_LOG_v1`). Mục thiếu trường = coi như CHƯA ghi sổ,
+    cùng luật với `BUG_LEDGER_v1` 8 trường."""
+    rows, hong = [], []
+    p = Path(path)
+    if not p.exists():
+        return rows, [{"dong": 0, "ma": "SO_TRA_KHO_KHONG_TON_TAI", "file": p.name}]
+    try:
+        noi_dung = p.read_text(encoding="utf-8")
+    except Exception as e:  # noqa: BLE001
+        return rows, [{"dong": 0, "ma": "SO_TRA_KHO_KHONG_DOC_DUOC", "chi_tiet": str(e)}]
+    for i, line in enumerate(noi_dung.split("\n"), 1):
+        s = line.strip()
+        if not s:
+            continue
+        try:
+            r = json.loads(s)
+        except Exception:  # noqa: BLE001
+            hong.append({"dong": i, "ma": "JSON_HONG"})
+            continue
+        if not isinstance(r, dict):
+            hong.append({"dong": i, "ma": "JSON_HONG"})
+            continue
+        thieu = [k for k in _TRA_KHO_TRUONG if not str(r.get(k) or "").strip()]
+        if thieu:
+            hong.append({"dong": i, "ma": "THIEU_TRUONG", "truong": thieu})
+            continue
+        # Dòng KHÔNG khai khoá nào = không nói được đã tra bằng gì ⇒ vô nghĩa với chốt 3 khoá.
+        if not any(str(r.get(k) or "").strip() for k in _TRA_KHO_KHOA):
+            hong.append({"dong": i, "ma": "KHONG_KHAI_KHOA", "truong": list(_TRA_KHO_KHOA)})
+            continue
+        rows.append(r)
+    return rows, hong
+
+
+def _dot_check_tra_kho(claims, rows) -> dict:
+    """Kết luận «kho thiếu văn bản X» chỉ hợp lệ khi CẢ BA khoá đã được tra và đều `not_found`.
+    So khớp mục tiêu bằng ĐỊNH DANH CHUẨN HOÁ, nên `ILO 81` và `ILO-081` là MỘT — chính chỗ ba ca
+    tra sót đã lọt."""
+    theo_dd = {}
+    for r in rows:
+        theo_dd.setdefault(_dinh_danh_chuan_hoa(r.get("muc_tieu")), []).append(r)
+    phat_hien = []
+    for c in claims:
+        dd = _dinh_danh_chuan_hoa(c)
+        lien_quan = theo_dd.get(dd) or []
+        if not lien_quan:
+            phat_hien.append({"muc_tieu": c, "dinh_danh": dd, "ma": "KHONG_CO_LOG_TRA_KHO"})
+            continue
+        da_tra = sorted({k for r in lien_quan for k in _TRA_KHO_KHOA if str(r.get(k) or "").strip()})
+        thieu = [k for k in _TRA_KHO_KHOA if k not in da_tra]
+        if thieu:
+            phat_hien.append({"muc_tieu": c, "dinh_danh": dd, "ma": "THIEU_KHOA",
+                              "khoa_da_tra": da_tra, "khoa_thieu": thieu})
+            continue
+        if any(str(r.get("ket_qua") or "") == "found" for r in lien_quan):
+            phat_hien.append({"muc_tieu": c, "dinh_danh": dd, "ma": "CO_HIT_MA_VAN_KET_LUAN_THIEU"})
+    return {"so_ket_luan_thieu": len(claims), "phat_hien": phat_hien, "ok": not phat_hien}
+
+
+def _dot_check_so_lieu(docs, ngay_chot, dem_tren) -> dict:
+    """Hàm THUẦN — đếm lại từ `master/*.json` (chạy lại bao nhiêu lần cũng ra một số) và xuất SỔ TÁI LẬP:
+    mỗi con số kèm ĐẾM TRÊN GÌ · TIÊU CHÍ NÀO · NGÀY CHỐT NÀO. Không có ngày chốt ⇒ số không tái lập được."""
+    theo_tc, tong, van_ban = {}, 0, set()
+    for _name, d in docs:
+        muc = (d or {}).get("phat_hien") or (d or {}).get("noi_dung") or []
+        for ph in muc if isinstance(muc, list) else []:
+            if not isinstance(ph, dict):
+                continue
+            tong += 1
+            tc = unicodedata.normalize("NFC", str(ph.get("tieu_chi") or "").strip()) or "(chưa ghi tiêu chí)"
+            theo_tc[tc] = theo_tc.get(tc, 0) + 1
+            vb = _dinh_danh_chuan_hoa(ph.get("van_ban"))
+            if vb:
+                van_ban.add(vb)
+    so = [{"ten": "so_phat_hien", "gia_tri": tong, "tieu_chi": "(tất cả)"},
+          {"ten": "so_van_ban_bi_cham", "gia_tri": len(van_ban), "tieu_chi": "(tất cả)"}]
+    so += [{"ten": "so_phat_hien_theo_tieu_chi", "gia_tri": v, "tieu_chi": k}
+           for k, v in sorted(theo_tc.items())]
+    cach = "đếm phần tử `phat_hien`/`noi_dung` sau chuẩn hoá NFC; `van_ban` quy về định danh chuẩn hoá"
+    for r in so:
+        r["dem_tren"], r["ngay_chot"], r["cach_dem"] = dem_tren, ngay_chot, cach
+    thieu_ngay = not str(ngay_chot or "").strip()
+    return {"so_lieu": so, "thieu_ngay_chot": thieu_ngay, "ok": not thieu_ngay}
+
+
+def cmd_rasoat_dot_check(a) -> int:
+    """READ-ONLY cổng kiểm CUỐI ĐỢT — ba chốt L3-1 NFC · L3-2 tra kho 3 khoá · L3-3 số liệu tái lập.
+    Offline hoàn toàn: chỉ đọc `<out-dir>` của lượt rà; không mạng, không NLM/Drive, không ghi state.
+    rc=0 sạch · rc=1 CÓ PHÁT HIỆN (là VERDICT dữ liệu, không phải lệnh hỏng — khuôn EXIT CODE SKILL.md
+    §2) · rc=2 lỗi đầu vào, hoặc `--strict` mà có phát hiện."""
+    inp = str(getattr(a, "in_dir", "") or "").strip()
+    p = Path(inp) if inp else None
+    if not p or not p.is_dir():
+        _print_json_or_text({"schema": _DOT_CHECK_SCHEMA, "ok": False,
+                             "error": "IN_KHONG_PHAI_THU_MUC: " + (inp or "(trống)"),
+                             "fix": "trỏ `--in` vào <out-dir> của lượt rà (ngoài cây skill)"}, True)
+        return 2
+    dot = str(getattr(a, "dot", "") or "").strip()
+    state_path = Path(str(getattr(a, "state", "") or "").strip() or (p / "rasoat_state.json"))
+    master_dir = p / "master"
+    so_tra_kho = p / _DOT_CHECK_SO_TRA_KHO
+
+    state = {}
+    state_loi = ""
+    if state_path.exists():
+        try:
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+        except Exception as e:  # noqa: BLE001
+            state_loi = "STATE_JSON_HONG: " + str(e)
+    else:
+        state_loi = "STATE_KHONG_TON_TAI"
+
+    # ① claims = mọi kết luận "kho thiếu" của Đợt: q_ingest `cho_tai`/`cho_nguoi_tai` + `--claim` rời.
+    claims = []
+    for m in (state.get("q_ingest") or []) if isinstance(state, dict) else []:
+        if not isinstance(m, dict):
+            continue
+        if dot and str(m.get("dot_id") or "") != dot:
+            continue
+        if str(m.get("trang_thai") or "") in _DOT_CHECK_THIEU_TT:
+            claims.append(str(m.get("so_hieu") or "").strip())
+    claims += [str(c).strip() for c in (getattr(a, "claim", None) or [])]
+    claims = sorted({c for c in claims if c})
+
+    master_files = sorted(master_dir.glob("*.json")) if master_dir.is_dir() else []
+    docs, master_hong = [], []
+    for f in master_files:
+        if _rasoat_la_ban_sao(f.name):
+            continue
+        try:
+            docs.append((f.name, json.loads(f.read_text(encoding="utf-8"))))
+        except Exception as e:  # noqa: BLE001
+            master_hong.append({"file": f.name, "ma": "JSON_HONG", "chi_tiet": str(e)})
+
+    # ② chốt 1 — NFC trước MỌI phép đếm (quét đúng những file mà số liệu được đếm trên đó)
+    quet = [f for f in master_files if not _rasoat_la_ban_sao(f.name)]
+    for extra in (state_path, so_tra_kho, p / "BANG_MASTER.json", p / "rasoat_bugs.md"):
+        if extra.exists():
+            quet.append(extra)
+    nfc = _dot_check_nfc(quet)
+
+    # ③ chốt 2 — tra kho 3 khoá
+    rows, tra_kho_hong = _tra_kho_doc(so_tra_kho)
+    tra_kho = _dot_check_tra_kho(claims, rows)
+    tra_kho["so_hong"] = len(tra_kho_hong)
+    tra_kho["hong"] = tra_kho_hong
+    if tra_kho_hong:
+        tra_kho["ok"] = False
+
+    # ④ chốt 3 — số liệu tái lập
+    ngay_chot = str(getattr(a, "ngay_chot", "") or "").strip() or str((state or {}).get("cap_nhat") or "").strip()
+    dem_tren = str(master_dir) if master_dir.is_dir() else "(không có thư mục master/)"
+    so_lieu = _dot_check_so_lieu(docs, ngay_chot, dem_tren)
+
+    findings = (len(nfc["lech"]) + len(tra_kho["phat_hien"]) + len(tra_kho_hong)
+                + len(master_hong) + (1 if so_lieu["thieu_ngay_chot"] else 0))
+    payload = {"schema": _DOT_CHECK_SCHEMA, "in": str(p), "dot": dot or None,
+               "ok": findings == 0 and not state_loi,
+               "state": {"file": str(state_path), "loi": state_loi or None},
+               "chot_1_nfc": nfc, "chot_2_tra_kho": tra_kho, "chot_3_so_lieu": so_lieu,
+               "master_hong": master_hong, "so_phat_hien_cong": findings,
+               "fix": "NFC lệch ⇒ chuẩn hoá nguồn rồi đếm lại; thiếu khoá ⇒ tra nốt khoá còn thiếu "
+                      "TRƯỚC khi kết luận thiếu; thiếu ngày chốt ⇒ khai `--ngay-chot`"}
+    out = str(getattr(a, "out", "") or "").strip()
+    if out:
+        Path(out).write_text(_json_dumps(payload) + "\n", encoding="utf-8")
+        payload["out"] = out
+    _print_json_or_text(payload, True)
+    if state_loi or (findings and bool(getattr(a, "strict", False))):
+        return 2
+    return 1 if findings else 0

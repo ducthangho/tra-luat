@@ -1311,6 +1311,7 @@ _CREDS_LAZY_CMDS = frozenset({
     "rasoat-merge",   # handler tự khai "Không gọi mạng, không NLM" — thuần cục bộ, không có đường dùng creds
     "state-get",      # handler CÓ `except SystemExit → CAN_WEBAPP_LIVE` (rc=2 + JSON) nhưng là CODE CHẾT khi main() thoát trước
     "state-put",      # nhánh `--dry-run` return TRƯỚC load_creds (cục bộ thuần) + cùng `CAN_WEBAPP_LIVE` chết như trên
+    "rasoat-dot-check",   # LỚP 3: chỉ đọc <out-dir> cục bộ — cùng lớp doc-claims-check/rasoat-merge
 })
 
 
@@ -1542,6 +1543,8 @@ _STUB_MAP = {
         '_docpatch_tim_file', '_docpatch_sha', '_docpatch_cache_dir', 'cmd_doc_patch',   # r217 sửa-theo-điểm (note CUỐI dòng — I11)
         '_rasoat_corpus_hieu_luc',   # r295 RAS-13 predicate corpus-hiệu-lực dùng chung (note CUỐI dòng — I11)
         '_rasoat_state_validate', '_rasoat_state_newest',   # r295 RAS-09/RAS-03 (note CUỐI dòng — I11)
+        '_dinh_danh_chuan_hoa', '_nfc_lech', '_dot_check_nfc', '_tra_kho_doc', '_dot_check_tra_kho',
+        '_dot_check_so_lieu', 'cmd_rasoat_dot_check',   # LỚP 3 cổng cuối Đợt (note CUỐI dòng — I11)
     ],
     "nlm_ops": [
         '_slice_dieu', '_split_source_ids', '_strip_font_runs', '_vbqppl_notebooks',   # I11
@@ -1756,6 +1759,11 @@ _NLM_ROTATION_COOKIE_NAMES = _tl_nlm_ops._NLM_ROTATION_COOKIE_NAMES  # r208c 3.1
 _RASOAT_STATE_ALLOWED = _tl_lookup_ops._RASOAT_STATE_ALLOWED         # r213 ĐỢT 5 — HẰNG re-export trực tiếp (bẫy I11)
 _RASOAT_BANG_SCHEMA = _tl_lookup_ops._RASOAT_BANG_SCHEMA             # r213 ĐỢT 5 — như trên
 _RASOAT_VB_META_FIELDS = _tl_lookup_ops._RASOAT_VB_META_FIELDS       # r213 ĐỢT 5 — như trên
+_DOT_CHECK_SCHEMA = _tl_lookup_ops._DOT_CHECK_SCHEMA                 # LỚP 3 — HẰNG re-export trực tiếp (bẫy I11)
+_TRA_KHO_TRUONG = _tl_lookup_ops._TRA_KHO_TRUONG                     # LỚP 3 — như trên
+_TRA_KHO_KHOA = _tl_lookup_ops._TRA_KHO_KHOA                         # LỚP 3 — như trên
+_DOT_CHECK_THIEU_TT = _tl_lookup_ops._DOT_CHECK_THIEU_TT             # LỚP 3 — như trên
+_DOT_CHECK_SO_TRA_KHO = _tl_lookup_ops._DOT_CHECK_SO_TRA_KHO         # LỚP 3 — như trên
 
 # ── I11: re-export bảng hằng đã chuyển (hàm rebase đọc globals tl → giữ tên tại đây) ──
 INSTRUCTION_REQUIRED = _tl_ops_misc.INSTRUCTION_REQUIRED

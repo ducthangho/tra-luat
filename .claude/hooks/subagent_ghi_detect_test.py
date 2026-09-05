@@ -459,7 +459,34 @@ def t20_duong_KHONG_bam_duoc_thi_UNKNOWN_khong_phai_clean(h):
 _VAN_TAY_DA_IN = []      # in DUNG MOT LAN moi tien trinh — ly do o cuoi `t21`
 
 
-def _bash_tuyet_doi():
+def _ung_vien_bash():
+    """Liet ke co thu tu, khong dong nhat `co tep` voi `chay duoc`."""
+    ds = []
+
+    def them(p):
+        if not p:
+            return
+        p = str(pathlib.Path(p))
+        khoa = os.path.normcase(os.path.abspath(p))
+        if all(os.path.normcase(os.path.abspath(x)) != khoa for x in ds):
+            ds.append(p)
+
+    # Giu ung vien PATH dau tien de probe co the TU CHOI vo System32 that.
+    them(shutil.which("bash"))
+    if os.name == "nt":
+        git = shutil.which("git")
+        if git:
+            g = pathlib.Path(git)
+            roots = [p for p in g.parents if p.name.lower() == "git"]
+            if not roots:
+                roots = [g.parent.parent]
+            for root in roots[:1]:
+                them(root / "bin" / "bash.exe")
+                them(root / "usr" / "bin" / "bash.exe")
+    return ds
+
+
+def _bash_tuyet_doi(ung_vien=None, chay=subprocess.run):
     """Phan giai `bash` thanh DUONG DAN TUYET DOI truoc khi phong. `(duong, None)` hoac
     `(None, ly_do)` — KHONG bao gio im lang cho qua.
 
@@ -477,12 +504,48 @@ def _bash_tuyet_doi():
     von phai do: lenh hook co chay duoc duoi mot shell POSIX that hay khong. Day KHONG
     phai rut ruot ca — khang dinh van doi du `4/4`, xem `t21`.
     """
-    duong = shutil.which("bash")
-    if not duong:
-        return None, "khong phan giai duoc `bash` tren PATH"
-    if not pathlib.Path(duong).is_file():
-        return None, f"`bash` phan giai ve {duong} nhung do khong phai mot tep"
-    return duong, None
+    cac = list(_ung_vien_bash() if ung_vien is None else ung_vien)
+    bi_tu_choi = []
+    for duong in cac:
+        if not pathlib.Path(duong).is_file():
+            bi_tu_choi.append(f"{duong}: khong phai tep")
+            continue
+        try:
+            v = chay([duong, "--version"], stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE, timeout=15)
+            c = chay([duong, "-c", ":"], stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE, timeout=15)
+        except (OSError, subprocess.SubprocessError) as e:
+            bi_tu_choi.append(f"{duong}: {type(e).__name__}: {e}")
+            continue
+        dau_ra = (v.stdout or b"") + (v.stderr or b"")
+        dung_duoc = (v.returncode == 0 and b"gnu bash" in dau_ra.lower()
+                     and c.returncode == 0)
+        if not dung_duoc:  # named-mutant: reject-present-unusable-bash
+            tom = dau_ra[:100].decode("utf-8", "backslashreplace").strip()
+            bi_tu_choi.append(f"{duong}: version_rc={v.returncode} shell_rc={c.returncode} "
+                              f"output={tom or 'RONG'}")
+            continue
+        return duong, None
+    if not cac:
+        return None, "khong phan giai duoc `bash`"
+    return None, "khong co bash dung duoc: " + "; ".join(bi_tu_choi)
+
+
+def _probe_bash_co_rang():
+    """Phan chung doc lap nen: tep co mat nhung hong phai bi bo qua."""
+    with tempfile.TemporaryDirectory(prefix="tl329-bash-") as d:
+        hong, tot = pathlib.Path(d) / "hong.exe", pathlib.Path(d) / "tot.exe"
+        hong.touch()
+        tot.touch()
+
+        def gia(argv, **_kwargs):
+            ok = os.path.normcase(os.path.abspath(argv[0])) == os.path.normcase(str(tot))
+            out = b"GNU bash, version fixture" if ok and argv[1] == "--version" else b""
+            return subprocess.CompletedProcess(argv, 0 if ok else 1, out, b"")
+
+        chon, _ = _bash_tuyet_doi([str(hong), str(tot)], gia)
+        return chon is not None and os.path.normcase(chon) == os.path.normcase(str(tot))
 
 
 def _van_tay_nen_chay():
@@ -498,7 +561,9 @@ def _van_tay_nen_chay():
     VANG MAT va RONG la hai ket luan khac nhau, nen chuoi rong van phai in ra chu.
     """
     duong = shutil.which("bash")
-    ra = ["VANTAY bash-which  : " + (duong if duong else "KHONG TIM THAY")]
+    chon, ly_do = _bash_tuyet_doi()
+    ra = ["VANTAY bash-which  : " + (duong if duong else "KHONG TIM THAY"),
+          "VANTAY bash-chon   : " + (chon if chon else f"KHONG ({ly_do})")]
     # GOI HAI LAN CO CHU Y: ten tran (di qua `CreateProcess`) va duong dan tuyet doi.
     # Hai dong khac nhau CHINH LA con bo — xem `_bash_tuyet_doi`. Giu ca hai thi lan sau
     # ai doc log cung thay ngay, khong phai suy dien lai tu dau.
@@ -539,6 +604,8 @@ def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h, doi_lenh=None):
     `doi_lenh` la moc cua KENH DOT BIEN THU BA (`DOT_BIEN_SETTINGS`): mot ham nhan chuoi
     lenh va tra ve ban da doi. Chi `_chay_dot_bien_settings` truyen no; nen that luon
     `None`. No ton tai de chinh ca nay CHUNG MINH duoc minh con do duoc."""
+    if not _probe_bash_co_rang():
+        return (False, "fixture resolver da chap nhan bash co mat nhung khong chay duoc")
     goc = HERE.parent.parent
     bash, ly_do = _bash_tuyet_doi()
     if bash is None:
@@ -991,6 +1058,10 @@ DOT_BIEN_NHAM_TEST = [
      "    for k in [k for k in e if _la_cau_hinh_pham_vi_lenh(k)]:\n        del e[k]\n",
      "    pass  # dot bien: bo sot kenh cau hinh pham vi lenh\n",
      "t22b_fixture_KHONG_an_cau_hinh_git_ngoai"),
+    ("subagent_present_unusable_bash_is_accepted",
+     "        if not dung_duoc:  # named-mutant: reject-present-unusable-bash\n",
+     "        if False:  # named-mutant: subagent_present_unusable_bash_is_accepted\n",
+     "t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT"),
 ]
 
 

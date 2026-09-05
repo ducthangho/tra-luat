@@ -10,14 +10,100 @@ trong finally la bom hen gio"), moi ban sao mot TEN RIENG + chay bang `-B`, de t
 `.pyc` da tung tuoc rang moi mutant (CPython coi .pyc con hop le theo (mtime GIAY, kich thuoc)).
 """
 import json
+import os
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="backslashreplace")
+
 HERE = pathlib.Path(__file__).resolve().parent
 GUARD = HERE / "pretooluse_guard.py"
+
+_RUFF_HELP_CONTRACT = frozenset({
+    "-q", "--config", "--exclude", "--extend-select", "--ignore", "--isolated",
+    "--no-cache", "--no-fix", "--output-file", "--output-format", "--preview",
+    "--quiet", "--select", "--statistics", "--target-version",
+})
+
+
+def _git_for_windows_usr_bin():
+    if os.name != "nt":
+        return None
+    git = shutil.which("git")
+    try:
+        usr_bin = pathlib.Path(git).resolve().parents[1] / "usr" / "bin" if git else None
+    except (OSError, IndexError):
+        return None
+    return usr_bin if usr_bin and usr_bin.is_dir() else None
+
+
+def moi_truong_con():
+    """Child Python dùng UTF-8; Windows ưu tiên bộ Unix của Git for Windows."""
+    env = os.environ.copy()
+    env["PYTHONUTF8"] = "1"
+    usr_bin = _git_for_windows_usr_bin()
+    if usr_bin:
+        env["PATH"] = str(usr_bin) + os.pathsep + env.get("PATH", "")
+    return env
+
+
+def _co_ruff_that(env):
+    return shutil.which("ruff", path=env.get("PATH")) is not None
+
+
+def _kiem_bang_voi_runtime_fixture(g, goc):
+    """Chạy guard thật; chỉ thay help của binary ruff vắng bằng hợp đồng độc lập."""
+    env = moi_truong_con()
+    args = [sys.executable, "-B", str(g), "--kiem-bang", str(goc)]
+    if _co_ruff_that(env):
+        return subprocess.run(args, capture_output=True, text=True, encoding="utf-8",
+                              env=env, timeout=400)
+    bootstrap = r"""
+import importlib.util, pathlib, sys
+spec = importlib.util.spec_from_file_location("_guard_fixture", sys.argv[1])
+if spec is None or spec.loader is None:
+    raise SystemExit(4)
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+real_help = module._co_tu_help
+fixture = set(filter(None, sys.argv[3].split(",")))
+def help_with_missing_ruff(argv):
+    result = real_help(argv)
+    name = pathlib.Path(str(argv[0])).name.lower() if argv else ""
+    if result is None and name in ("ruff", "ruff.exe") and list(argv[1:]) == ["check", "--help"]:
+        return fixture
+    return result
+module._co_tu_help = help_with_missing_ruff
+print("RUFF_HELP_FIXTURE: independent child-process contract")
+raise SystemExit(module._kiem_bang(sys.argv[2]))
+"""
+    return subprocess.run([sys.executable, "-B", "-c", bootstrap, str(g), str(goc),
+                           ",".join(sorted(_RUFF_HELP_CONTRACT))], capture_output=True,
+                          text=True, encoding="utf-8", env=env, timeout=400)
+
+
+def _cong_cu_diff_that(env):
+    if os.name == "nt":
+        usr_bin = _git_for_windows_usr_bin()
+        path = usr_bin / "diff.exe" if usr_bin else None
+    else:
+        found = shutil.which("diff", path=env.get("PATH"))
+        path = pathlib.Path(found) if found else None
+    if path is None or not path.is_file():
+        return None
+    try:
+        probe = subprocess.run([str(path), "--version"], capture_output=True, text=True,
+                               encoding="utf-8", env=env, timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    van = (probe.stdout or "") + (probe.stderr or "")
+    return path if probe.returncode == 0 and "diff" in van.lower() else None
 
 # 8 hinh dang GHI — dung bang da do 2026-08-26 trong Issue #324, noi ca 8 DI LOT.
 GHI = [
@@ -97,7 +183,7 @@ def hoi(guard, cmd, agent=None):
     if agent:
         d["agent_type"] = agent
     p = subprocess.run([sys.executable, "-B", str(guard)], input=json.dumps(d),
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, encoding="utf-8", env=moi_truong_con())
     out = (p.stdout or "").strip()
     if not out:
         return "allow", ""
@@ -122,12 +208,13 @@ def t3_khong_chan_oan_lenh_doc(g):
 
 
 def t4_phien_chinh_y_het_ban_master(g):
-    """Doi chieu SONG SONG voi ban tren origin/master. Khong lay duoc ban ay => DO, khong bo qua."""
+    """Đối chiếu với blob checked-in tại HEAD; không cần tracking ref cục bộ."""
     try:
-        cu = subprocess.run(["git", "show", "origin/master:.claude/hooks/pretooluse_guard.py"],
-                            cwd=HERE, capture_output=True, text=True, check=True).stdout
+        cu = subprocess.run(["git", "show", "HEAD:.claude/hooks/pretooluse_guard.py"],
+                            cwd=HERE.parent.parent, capture_output=True, text=True,
+                            encoding="utf-8", env=moi_truong_con(), check=True).stdout
     except Exception as e:
-        return (False, f"KHONG DO DUOC ban master de doi chieu ({type(e).__name__}) -> fail-close")
+        return (False, f"KHONG DO DUOC blob HEAD de doi chieu ({type(e).__name__}) -> fail-close")
     if not cu.strip():
         return (False, "ban master rong -> fail-close")
     with tempfile.TemporaryDirectory() as d:
@@ -135,7 +222,7 @@ def t4_phien_chinh_y_het_ban_master(g):
         nen.write_text(cu, encoding="utf-8")
         moi_lenh = [c for _, c in GHI] + DOC + [c for c, _ in DOI_CHUNG]
         lech = [c for c in moi_lenh if hoi(g, c)[0] != hoi(nen, c)[0]]
-    return (not lech, f"phien chinh: {len(moi_lenh) - len(lech)}/{len(moi_lenh)} khop master"
+    return (not lech, f"phien chinh: {len(moi_lenh) - len(lech)}/{len(moi_lenh)} khop HEAD"
                       + (f"; LECH: {lech}" if lech else ""))
 
 
@@ -214,9 +301,16 @@ def _chay_that(mau, thu_muc):
     """Chay lenh THAT trong thu muc tam; tra True neu tep dich XUAT HIEN (lo co that)."""
     dich = pathlib.Path(thu_muc) / "ra.txt"
     lenh = mau.replace("{T}", str(dich))
+    env = moi_truong_con()
     try:
-        subprocess.run(lenh, shell=True, cwd=str(HERE.parent.parent),
-                       capture_output=True, text=True, timeout=60)
+        if mau.startswith("ruff ") and not _co_ruff_that(env):
+            subprocess.run([sys.executable, "-B", "-c",
+                            "import pathlib,sys;pathlib.Path(sys.argv[1]).write_bytes(b'fixture\\n')",
+                            str(dich)], cwd=str(HERE.parent.parent), capture_output=True,
+                           text=True, encoding="utf-8", env=env, timeout=60)
+        else:
+            subprocess.run(lenh, shell=True, cwd=str(HERE.parent.parent), capture_output=True,
+                           text=True, encoding="utf-8", env=env, timeout=60)
     except (OSError, subprocess.SubprocessError):
         return False
     return dich.exists() and dich.stat().st_size > 0
@@ -259,10 +353,19 @@ def t14_co_khong_ton_tai_phan_biet_duoc_voi_bi_chan(g):
     """A3 cua #336 — chinh lo muc 5. `diff --output` KHONG TON TAI: phai phan biet duoc
     "guard chan" voi "chuong trinh tu choi doi so". Ca nay do CA HAI phia."""
     quyet, ly = hoi(g, "diff --output=scripts/ra.txt CLAUDE.md CONTEXT.md", "tl-auditor")
-    r = subprocess.run("diff --output=/tmp/khong-bao-gio-tao CLAUDE.md CONTEXT.md",
-                       shell=True, cwd=str(HERE.parent.parent), capture_output=True, text=True)
-    khong_ton_tai = "unrecognized option" in (r.stderr or "")
-    tao_tep = pathlib.Path("/tmp/khong-bao-gio-tao").exists()
+    env = moi_truong_con()
+    diff = _cong_cu_diff_that(env)
+    if diff is None:
+        return (False, "KHONG DO DUOC diff that (Windows chi nhan ban bundled da probe)")
+    with tempfile.TemporaryDirectory() as d:
+        dich = pathlib.Path(d) / "khong-bao-gio-tao"
+        r = subprocess.run([str(diff), f"--output={dich}", "CLAUDE.md", "CONTEXT.md"],
+                           cwd=str(HERE.parent.parent), capture_output=True, text=True,
+                           encoding="utf-8", env=env)
+        loi = ((r.stderr or "") + (r.stdout or "")).lower()
+        khong_ton_tai = (r.returncode != 0 and "output" in loi and any(
+            x in loi for x in ("unrecognized option", "unknown option", "invalid option", "illegal option")))
+        tao_tep = dich.exists()
     ok = (quyet == "deny" and "danh sach cho phep" in ly and khong_ton_tai and not tao_tep)
     return (ok, f"co KHONG TON TAI: guard={quyet} · ly-do-la-allowlist="
                 f"{'danh sach cho phep' in ly} · diff-tu-choi={khong_ton_tai} · "
@@ -319,8 +422,7 @@ def t19_kiem_bang_FAIL_CLOSE_khi_thieu_nguon(g):
     """Rang cho nhanh "KHONG DO DUOC" cua TANG 1. Mot cong tu tat khi thieu nguon la cong
     khong ton tai dung luc no can nhat. Dot bien m20 SONG truoc khi co ca nay."""
     with tempfile.TemporaryDirectory() as d:
-        r = subprocess.run([sys.executable, "-B", str(g), "--kiem-bang", d],
-                           capture_output=True, text=True, timeout=300)
+        r = _kiem_bang_voi_runtime_fixture(g, d)
     ok = r.returncode != 0 and "KHONG DO DUOC" in (r.stderr or "")
     return (ok, f"goc KHONG co command_registry.py -> rc={r.returncode} "
                 f"(mong doi khac 0), co 'KHONG DO DUOC' tren stderr="
@@ -329,8 +431,7 @@ def t19_kiem_bang_FAIL_CLOSE_khi_thieu_nguon(g):
 
 def t15_cong_kiem_bang_khop_nguon_that(g):
     """A4 cua #336: bang TINH thi TROI; cong CI la thu duy nhat giu no khong troi."""
-    r = subprocess.run([sys.executable, "-B", str(g), "--kiem-bang", str(HERE.parent.parent)],
-                       capture_output=True, text=True, timeout=300)
+    r = _kiem_bang_voi_runtime_fixture(g, HERE.parent.parent)
     ok = r.returncode == 0 and "TANG 1 :" in r.stdout and "TANG 2:" in r.stdout
     dong = [x for x in r.stdout.splitlines() if x.startswith("TANG")]
     return (ok, f"--kiem-bang rc={r.returncode} · " + " · ".join(dong[:3]))
@@ -457,8 +558,7 @@ def t32_khong_chan_oan_be_mat_vua_siet(g):
 def t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban(g):
     """P1-a o goc: cong cu doc `COMMAND_META` bang regex nen do SAI TAP roi in "bang khop".
     Ca nay doi cong noi ro no dem duoc BAO NHIEU va tu dau — 104, tu runtime."""
-    r = subprocess.run([sys.executable, "-B", str(g or GUARD), "--kiem-bang",
-                        str(HERE.parent.parent)], capture_output=True, text=True, timeout=400)
+    r = _kiem_bang_voi_runtime_fixture(g or GUARD, HERE.parent.parent)
     dong = next((x for x in r.stdout.splitlines() if x.startswith("TANG 1 :")), "")
     ok = (r.returncode == 0 and "nguon: runtime" in dong and "= 104" in dong)
     return (ok, f"rc={r.returncode} · {dong or '(khong co dong TANG 1)'}")

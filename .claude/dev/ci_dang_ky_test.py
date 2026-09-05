@@ -12,10 +12,19 @@ import tempfile
 
 import yaml
 
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="backslashreplace")
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 GOC = (".claude/dev", ".claude/hooks", ".githooks", ".github/checks", "scripts/tl_core")
 OPS_REVIEWS = "ops/reviews/"
 MOI_TRUONG_CI = "github-actions/linux"
+MOI_TRUONG_WINDOWS = "github-actions/windows"
+MOI_TRUONG_DA_BIET = frozenset({MOI_TRUONG_CI, MOI_TRUONG_WINDOWS})
+LAUNCHER_WORKFLOW = ROOT / ".github/workflows/launcher-windows.yml"
+LAUNCHER_MATRIX = "${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only' && '[\"windows-latest\"]' || '[\"windows-latest\",\"ubuntu-latest\"]') }}"
+LAUNCHER_PYTHON = "${{ matrix.os == 'windows-latest' && '3.13' || '3.11' }}"
 MOI = {
     ".claude/dev/chon_reviewer_test.py": r"(?s)nền: (\d+)/(\d+) đạt.*TỔNG: ĐẠT",
     ".claude/dev/gh_readback_test.py": r"gh_readback tests: (\d+)/(\d+) ca QUA \(hong 0\)",
@@ -26,20 +35,7 @@ MOI = {
     ".claude/hooks/subagent_ghi_detect_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     "ops/nhanh_don_duoc_test.py": r"^(\d+)/(\d+)$",
 }
-CACH_LY = {
-    ".claude/dev/mcp_gh_test.py": {
-        "slug": "AG-361-P2-01-mcp-gh-dot-bien-chap-chon-theo-may",
-        "ly_do": "runner CI đỏ ở b7_bo_cam_ghi; .pyc là giả thuyết khớp, chưa có phản chứng",
-        "moi_truong": "github-actions/linux",
-        "log": "Issue #361, log CI r3 của phiên điều phối",
-    },
-    ".claude/hooks/pretooluse_guard_test.py": {
-        "slug": "AG-361-P2-02-pretooluse-guard-doi-runtime-runner-khong-co",
-        "ly_do": "runner CI trần đỏ t11/t15/t33 vì thiếu runtime mà bộ test đòi hỏi",
-        "moi_truong": "github-actions/linux",
-        "log": "Issue #361, log CI r3 của phiên điều phối",
-    },
-}
+CACH_LY = {}
 DA_NOI = {
     ".claude/dev/ci_dang_ky_test.py",
     ".claude/dev/duyet_danh_tinh_test.py",
@@ -69,6 +65,42 @@ def tim(root):
 
 def bi_tat(x): return x is False or (isinstance(x, str) and x.strip().lower() in ("false", "${{ false }}"))
 
+
+def loi_launcher_windows(source=None):
+    source = LAUNCHER_WORKFLOW.read_text(encoding="utf-8") if source is None else source
+    try:
+        data = yaml.safe_load(source) or {}
+    except yaml.YAMLError as e:
+        return [f"launcher Windows YAML lỗi: {e}"]
+    triggers = data.get("on", data.get(True))
+    loi = []
+    if not isinstance(triggers, dict):
+        return ["launcher Windows thiếu trigger map"]
+    dispatch = triggers.get("workflow_dispatch")
+    runner = ((dispatch or {}).get("inputs") or {}).get("runner_set") if isinstance(dispatch, dict) else None
+    expected = {"required": True, "default": "windows-only", "type": "choice",
+                "options": ["windows-only", "windows-and-ubuntu"]}
+    if not isinstance(runner, dict) or any(runner.get(k) != v for k, v in expected.items()):
+        loi.append("launcher Windows sai hợp đồng workflow_dispatch.runner_set")
+    if not all(name in triggers for name in ("push", "pull_request")):
+        loi.append("launcher Windows thiếu hợp đồng non-dispatch")
+    job = ((data.get("jobs") or {}).get("launcher") or {})
+    matrix = ((job.get("strategy") or {}).get("matrix") or {}).get("os")
+    if matrix != LAUNCHER_MATRIX:
+        loi.append("launcher Windows sai ánh xạ runner dispatch/non-dispatch")
+    setup = next((s for s in (job.get("steps") or [])
+                  if isinstance(s, dict) and s.get("uses") == "actions/setup-python@v5"), {})
+    if (setup.get("with") or {}).get("python-version") != LAUNCHER_PYTHON:
+        loi.append("launcher Windows sai ánh xạ Python Windows=3.13 Ubuntu=3.11")
+    return loi
+
+
+def giet_windows_311_launcher_workflow(source):
+    if source.count(LAUNCHER_PYTHON) != 1:
+        return False
+    mutant = source.replace(LAUNCHER_PYTHON, "3.11", 1)
+    return bool(loi_launcher_windows(mutant))
+
 def kiem(root=ROOT, registry=DANG_KY, workflows=None, cach_ly=CACH_LY):
     song, _, la = tim(root)
     loi = []
@@ -79,7 +111,7 @@ def kiem(root=ROOT, registry=DANG_KY, workflows=None, cach_ly=CACH_LY):
     for x, no in cach_ly.items():
         if not all(no.get(k) for k in ("slug", "ly_do", "moi_truong", "log")):
             loi.append("cách ly thiếu slug, lý do, môi trường hoặc log: " + x)
-        elif no["moi_truong"] != MOI_TRUONG_CI:
+        elif no["moi_truong"] not in MOI_TRUONG_DA_BIET:
             loi.append("cách ly có môi trường không hợp lệ: " + x)
     if workflows is None:
         runs = []
@@ -115,16 +147,18 @@ def bang_chung_xanh(text, mau):
 
 def moi_truong_hien_tai(env=os.environ):
     """Chỉ nhận diện khi cả hai dấu hiệu runner chuẩn cùng khớp."""
-    if env.get("GITHUB_ACTIONS") == "true" and env.get("RUNNER_OS") == "Linux":
-        return MOI_TRUONG_CI
+    if env.get("GITHUB_ACTIONS") == "true" and env.get("RUNNER_OS") in ("Linux", "Windows"):
+        return f"github-actions/{env['RUNNER_OS'].lower()}"
     return None
 
 
 def cach_ly_chap_nhan(ok, da_neo, hien_tai):
-    """None = không ở đúng môi trường để phán quyết nợ còn tái hiện."""
-    if hien_tai != da_neo:
+    """OS đã biết khác neo dùng kết quả thật; nền lạ vẫn không được làm tròn lên."""
+    if hien_tai is None:
         return None
-    return not ok
+    if hien_tai == da_neo:
+        return not ok
+    return ok if hien_tai in MOI_TRUONG_DA_BIET else None
 
 
 def trong_ci(env=os.environ):
@@ -155,7 +189,8 @@ def dem_la_do(chap_nhan, o_trong_ci):
 
 
 def _chay_that(path):
-    p = subprocess.run([sys.executable, path], cwd=ROOT, text=True, stdout=subprocess.PIPE,
+    p = subprocess.run([sys.executable, path], cwd=ROOT, text=True, encoding="utf-8",
+                       errors="backslashreplace", stdout=subprocess.PIPE,
                        stderr=subprocess.STDOUT)
     return p.returncode, p.stdout
 
@@ -180,6 +215,8 @@ def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
                       f"cách ly neo {no['moi_truong']}")
             elif chap_nhan is None:
                 print(f"CI_DANG_KY {path}: KHÔNG ĐO ĐƯỢC (ngoài CI) — môi trường={nen}")
+            elif hien_tai != no["moi_truong"]:
+                print(f"CI_DANG_KY {path}: {'ĐẠT' if ok else 'ĐỎ'} — KHÔNG CÁCH LY trên {nen}, rc={rc}")
             elif not chap_nhan:
                 print(f"CI_DANG_KY {path}: ĐỎ — đã xanh, hãy gỡ khỏi cách ly")
             else:
@@ -257,6 +294,11 @@ def phan_chung():
     cases += [trong_ci({"GITHUB_ACTIONS": "true"}) is True,
               trong_ci({"RUNNER_OS": "Linux"}) is False,
               trong_ci({"GITHUB_ACTIONS": "false", "RUNNER_OS": "Linux"}) is False]
+    cases += [moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "Linux"}) == MOI_TRUONG_CI,
+              moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "Windows"}) == MOI_TRUONG_WINDOWS,
+              moi_truong_hien_tai({"GITHUB_ACTIONS": "true", "RUNNER_OS": "macOS"}) is None,
+              cach_ly_chap_nhan(True, MOI_TRUONG_CI, MOI_TRUONG_WINDOWS) is True,
+              cach_ly_chap_nhan(False, MOI_TRUONG_CI, MOI_TRUONG_WINDOWS) is False]
     # r6: TẦNG TIÊU THỤ — gọi chính `chay_moi` với bộ chạy giả. Gỡ phép cộng ở đó ra thì
     # ba ca này ĐỎ; đó là điều mà đột biến canh-vị-từ `r4-khong-do-duoc-thanh-dat` KHÔNG
     # bắt được, và là lý do nợ N6 lọt cổng trên windows-latest.
@@ -290,6 +332,11 @@ def phan_chung():
         _nen = None if _cn is None else "github-actions/linux"
         _kq = (0, "1/1\n") if _cn is False else (1, "0/1\n")
         cases.append(_dem(_ci, _nen, _kq) == _mong)
+    try:
+        cases.append(giet_windows_311_launcher_workflow(
+            LAUNCHER_WORKFLOW.read_text(encoding="utf-8")))
+    except OSError:
+        cases.append(False)
     names += ["a-cach-ly-thieu-slug", "r4-thieu-moi-truong", "r5-moi-truong-sai-tap",
               "r5-comment-gia-loi-goi", "r5-step-if-false", "r5-job-if-false",
               "r5-step-if-literal-expr", "r5-normal-step", "b-cach-ly-chuyen-xanh",
@@ -299,10 +346,13 @@ def phan_chung():
               "r6-vi-tu-da-xanh-van-do", "r6-vi-tu-cach-ly-hop-le-khong-do",
               "r6-trong-ci-khong-doi-runner-os", "r6-thieu-github-actions-khong-phai-ci",
               "r6-github-actions-false-khong-phai-ci",
+              "wp430-nhan-linux", "wp430-nhan-windows", "wp430-runner-la-fail-close",
+              "wp430-windows-xanh-that", "wp430-windows-do-that",
               "r6-TIEU-THU-o-none-trong-ci", "r6-TIEU-THU-o-none-ngoai-ci",
               "r6-TIEU-THU-o-cach-ly-hop-le-trong-ci",
               "r6-TIEU-THU-o-cach-ly-hop-le-ngoai-ci",
-              "r6-TIEU-THU-o-da-xanh-trong-ci", "r6-TIEU-THU-o-da-xanh-ngoai-ci"]
+              "r6-TIEU-THU-o-da-xanh-trong-ci", "r6-TIEU-THU-o-da-xanh-ngoai-ci",
+              "windows_311_launcher_workflow"]
     for name, ok in zip(names, cases): print(f"ĐỘT BIẾN {name}: {'ĐỎ đúng' if ok else 'LỌT'}")
     print(f"PHẢN CHỨNG: {sum(cases)}/{len(cases)} đỏ đúng")
     return all(cases)
@@ -311,11 +361,19 @@ def phan_chung():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--chay", action="store_true")
+    ap.add_argument("--mutant", choices=("windows_311_launcher_workflow",))
     ns = ap.parse_args()
+    if ns.mutant:
+        killed = giet_windows_311_launcher_workflow(LAUNCHER_WORKFLOW.read_text(encoding="utf-8"))
+        print(f"MUTANT {ns.mutant}: {'GIẾT' if killed else 'SỐNG'}")
+        return 1 if killed else 0
     loi, tren_cay, trong_so = kiem()
+    launcher_loi = loi_launcher_windows()
+    loi += launcher_loi
     for x in loi: print("ĐỎ:", x)
     print(f"ĐĂNG KÝ: {tren_cay}/{trong_so}")
     print(f"TRẠNG THÁI: chan={trong_so - len(CACH_LY)} cach_ly={len(CACH_LY)}")
+    print(f"LAUNCHER WINDOWS: {'4/4 hợp đồng' if not launcher_loi else 'ĐỎ'}")
     ok = not loi and tren_cay == trong_so and phan_chung()
     if ns.chay: ok = chay_moi() == 0 and ok
     print("TỔNG:", "ĐẠT" if ok else "ĐỎ")

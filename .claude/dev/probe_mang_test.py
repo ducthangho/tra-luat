@@ -40,8 +40,12 @@ def t2_dns_loi(M):
 def t3_timeout(M):
     assert url_loi(M, TimeoutError("timeout"))["lop"] == M.TIMEOUT
 def t4_path_rong(M):
-    with mock.patch.dict(os.environ, {"PATH": ""}):
-        assert M.kenh_git_ls_remote()["lop"] == M.TOOL_ERROR
+    # PATH rong khong dong nghia executable vang mat tren Windows: CreateProcess van co
+    # the tim git qua App Paths. Mo phong dung bien san pham that su bat.
+    with mock.patch.object(M.subprocess, "run",
+                           side_effect=FileNotFoundError("git")):  # probe-missing-tool
+        x = M.kenh_git_ls_remote()
+    assert (x["lop"], x["stage"]) == (M.TOOL_ERROR, "spawn")
 def t5_kho_khong_ton_tai(M):
     x = git_loi(M, b"fatal: repository not found"); assert (x["lop"], x["rc"]) == (M.REPOSITORY_ERROR, 128)
 def t6_auth_loi(M):
@@ -73,7 +77,11 @@ def t10_main_schema_va_fail_close(M):
             assert M.main() == 0
     dong = out.getvalue().splitlines()
     assert len(dong) == 3 and all(" class=" in d and " stage=" in d for d in dong)
-    with mock.patch.object(M, "kenh_urlopen", return_value=M.kq(M.UNKNOWN, "urlopen")):
+    # Ca thu hai van phai offline: khong de socket/git that lot ra sau khi ba patch tren
+    # het hieu luc.
+    with mock.patch.object(M, "kenh_socket_loopback", return_value=a), \
+         mock.patch.object(M, "kenh_urlopen", return_value=M.kq(M.UNKNOWN, "urlopen")), \
+         mock.patch.object(M, "kenh_git_ls_remote", return_value=c):
         with contextlib.redirect_stdout(io.StringIO()):
             assert M.main() == 1
 def t11_ma_phan_loai_doc_nhat(M):
@@ -146,7 +154,23 @@ def t12_cong_dot_bien_tu_canh(_M):
         m = nap(bo_dong(ts, "# canh-" + key), "self_" + key)
         assert (go(gate, goc, **kw), go(m.gate, goc, **kw)) == (1, 0)
     print("tự đột biến cổng: 9/9 chết (m1..m5 + 4 dòng cơ chế)")
+    cu = 'side_effect=FileNotFoundError("git")):  ' + "# probe-missing-tool"
+    moi = ('return_value=mock.MagicMock(returncode=0)):  '
+           '# probe_missing_tool_executes_git')
+    assert ts.count(cu) == 1
+    m = nap(ts.replace(cu, moi, 1), "probe_missing_tool_executes_git")
+    san_pham = nap(goc, "probe_missing_tool_product")
+    t4_path_rong(san_pham)
+    try:
+        m.t4_path_rong(san_pham)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("named mutant da song")
+    print("named mutant probe_missing_tool_executes_git: 1/1 chết")
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
     try:
         t12_cong_dot_bien_tu_canh(None)
     except Exception as e:

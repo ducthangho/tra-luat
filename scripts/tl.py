@@ -1543,7 +1543,7 @@ _STUB_MAP = {
         '_docpatch_tim_file', '_docpatch_sha', '_docpatch_cache_dir', 'cmd_doc_patch',   # r217 sửa-theo-điểm (note CUỐI dòng — I11)
         '_rasoat_corpus_hieu_luc',   # r295 RAS-13 predicate corpus-hiệu-lực dùng chung (note CUỐI dòng — I11)
         '_rasoat_state_validate', '_rasoat_state_newest',   # r295 RAS-09/RAS-03 (note CUỐI dòng — I11)
-        '_dinh_danh_chuan_hoa', '_nfc_lech', '_dot_check_nfc', '_tra_kho_doc', '_dot_check_tra_kho',
+        '_dinh_danh_chuan_hoa', '_nfc_lech', '_nfc_lech_json', '_dot_check_nfc', '_tra_kho_doc', '_dot_check_tra_kho',
         '_dot_check_so_lieu', 'cmd_rasoat_dot_check',   # LỚP 3 cổng cuối Đợt (note CUỐI dòng — I11)
     ],
     "nlm_ops": [

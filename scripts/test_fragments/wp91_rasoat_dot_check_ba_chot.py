@@ -33,7 +33,11 @@ def _goi(tl_module, args):
 
 def _dung_ho_so(root: Path, *, nfc_lech=False, ngay_chot=True, du_khoa=True):
     (root / "master").mkdir(parents=True)
-    state = {"schema": "rasoat_plan.v1", "ho_so_id": "hs", "dot": [{"dot_id": "dot-01"}],
+    # `dot` phải đủ BA trường bắt buộc (`RASOAT_PLAN_SCHEMA.md` §8). Fixture bản đầu chỉ khai
+    # `dot_id`; ca `wp94`/H1 siết validator đúng theo đặc tả nên nó ĐỎ — fixture sai, không phải
+    # bản vá sai. Giữ ghi chú để lần sau không ai "sửa cho xanh" bằng cách nới validator.
+    state = {"schema": "rasoat_plan.v1", "ho_so_id": "hs",
+             "dot": [{"dot_id": "dot-01", "ten": "Đợt 1", "trang_thai": "dang_ra"}],
              "q_ingest": [{"so_hieu": "217/2025/ND-CP", "trang_thai": "cho_tai", "dot_id": "dot-01"}]}
     if ngay_chot:
         state["cap_nhat"] = "2026-09-03T17:00:00"

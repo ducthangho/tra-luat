@@ -3358,6 +3358,20 @@ def _rasoat_meta_folder(a):
                 "`--folder-id <id>` hoặc đặt env TL_META_FOLDER_ID.")
 
 
+def _rasoat_thieu_gia_tri(v) -> bool:
+    """PURE — "trường này CÓ giá trị dùng được không", dùng CHUNG cho mọi phép đòi trường của
+    `_rasoat_state_validate`. Sinh ra vì hai phép kiểm khác nhau đã tồn tại song song cho cùng một
+    loại ràng buộc (`.strip()` cho trường nền, truthiness cho trường có điều kiện) và chỗ lệch ấy
+    cho `"dong_luc": " "` đi lọt. Xử luôn list/dict RỖNG: `gioi_han_da_biet: []` là "chưa khai",
+    không phải "đã khai rỗng" — mà `str([]).strip()` lại là `"[]"`, truthy, nên phép kiểm chuỗi
+    trần cũng sai ở đúng chỗ ấy."""
+    if v is None:
+        return True
+    if isinstance(v, (list, dict, tuple, set)):
+        return len(v) == 0
+    return not str(v).strip()
+
+
 def _rasoat_state_validate(obj) -> tuple:
     """PURE — r295 (RAS-09, audit lõi 31-07): validate `rasoat_plan.v1` TRƯỚC khi ghi lên Drive.
 
@@ -3420,11 +3434,21 @@ def _rasoat_state_validate(obj) -> tuple:
                 # LỚP B — §8 còn khai trường bắt buộc THEO TRẠNG THÁI. Bỏ chúng thì luật "cấm đóng
                 # im lặng" mất hiệu lực đúng lúc cần nhất: khai `da_dong_co_gioi_han` mà không có
                 # `gioi_han_da_biet` CHÍNH LÀ đóng im lặng, chỉ khác cái nhãn.
+                # Trường có điều kiện phải dùng CÙNG phép kiểm với trường nền. Bản trước dùng
+                # `not _x.get(...)` nên `"dong_luc": " "` (một dấu cách) là truthy ⇒ LỌT. Hai phép
+                # kiểm khác nhau cho cùng một loại ràng buộc là chỗ lệch tự mọc ra; nay một hàm.
                 for _tt_can, _truong in (("da_dong_co_gioi_han", "gioi_han_da_biet"),
                                          ("da_dong_co_gioi_han", "dong_luc"),
                                          ("da_dong", "dong_luc"), ("dang_ra", "mo_luc")):
-                    if _tt == _tt_can and not _x.get(_truong):
+                    if _tt == _tt_can and _rasoat_thieu_gia_tri(_x.get(_truong)):
                         errs.append(f"DOT[{_i}]_THIEU_{_truong.upper()}_KHI_{_tt.upper()}")
+            # §8 bất biến 1: TỐI ĐA MỘT Đợt `dang_ra`. Kiểm từng-bản-ghi không bao giờ thấy điều
+            # này — nó là ràng buộc của TẬP HỢP, nên phải kiểm sau vòng lặp. Hai Đợt chồng nhau thì
+            # `dry_rounds_lien_tiep` và Q-INGEST không quy được về Đợt nào.
+            _dang_ra = [str(x.get("dot_id") or "") for x in _dot
+                        if isinstance(x, dict) and str(x.get("trang_thai") or "").strip() == "dang_ra"]
+            if len(_dang_ra) > 1:
+                errs.append("DOT_NHIEU_HON_MOT_DANG_RA:" + ",".join(sorted(_dang_ra)[:5]))
     for _khoa, _tt_hop_le in (("q_units", _TT_UNIT), ("q_ingest", _TT_INGEST), ("q_nlm", _TT_NLM)):
         _q = obj.get(_khoa)
         if _q is None:

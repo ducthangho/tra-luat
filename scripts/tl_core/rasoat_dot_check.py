@@ -206,8 +206,13 @@ def _dot_check_tra_kho(claims, rows) -> dict:
                 v = str(r.get(k) or "").strip()
                 if not v:
                     continue
-                if k == "khoa_dinh_danh" and _dinh_danh_chuan_hoa(v) != dd:
-                    lech_dd.append({"da_ghi": v, "chuan_hoa_thanh": _dinh_danh_chuan_hoa(v)})
+                # Bản trước chỉ ràng `khoa_dinh_danh`; `khoa_so_hieu` chỉ cần KHÁC RỖNG nên dòng
+                # ghi NHẦM số hiệu vẫn thoả "đủ 3 khoá". Ràng MỌI khoá máy-so-được với mục tiêu.
+                # Khai thẳng giới hạn: `khoa_ten` là VĂN XUÔI, không quy về định danh được, nên chỉ
+                # kiểm KHÁC RỖNG — đó là chỗ máy KHÔNG gác được, người phải đọc.
+                if k in ("khoa_dinh_danh", "khoa_so_hieu") and _dinh_danh_chuan_hoa(v) != dd:
+                    lech_dd.append({"khoa": k, "da_ghi": v,
+                                    "chuan_hoa_thanh": _dinh_danh_chuan_hoa(v)})
                     continue
                 da_tra.add(k)
         da_tra = sorted(da_tra)
@@ -313,8 +318,16 @@ def cmd_rasoat_dot_check(a) -> int:
                      for u in _md if str(u.get("trang_thai") or "") == "done"}
     _done_cua_dot.discard("")
     if dot:
+        # Bản trước chỉ hỏi "có unit nào mang dot_id này". Một Đợt KHÔNG có bản ghi metadata trong
+        # `state.dot` thì không có tên/trạng thái/mốc/giới hạn — không có gì để đóng, mà cổng vẫn
+        # trả thành công. §8 đòi metadata cho MỖI Đợt ⇒ thiếu = KHÔNG ĐO ĐƯỢC.
+        _bg = [x for x in ((state.get("dot") or []) if isinstance(state, dict) else [])
+               if isinstance(x, dict) and str(x.get("dot_id") or "").strip() == dot]
+        if len(_bg) != 1:
+            dot_loi = ("DOT_KHONG_CO_BAN_GHI: state.dot có %d bản ghi mang dot_id=%r (phải đúng 1) "
+                       "⇒ Đợt không có metadata để đóng" % (len(_bg), dot))
         unit_cua_dot = {str(u.get("unit_id") or "").strip() for u in _md}
-        if not unit_cua_dot:
+        if not dot_loi and not unit_cua_dot:
             dot_loi = ("DOT_KHONG_ANH_XA_DUOC_UNIT: state.q_units không có mục nào mang dot_id=%r "
                        "⇒ không lọc được master theo Đợt" % dot)
     docs, master_hong = [], []
@@ -366,7 +379,12 @@ def cmd_rasoat_dot_check(a) -> int:
     nfc = _dot_check_nfc(quet)
 
     # ③ chốt 2 — tra kho 3 khoá
-    rows, tra_kho_hong = _tra_kho_doc(so_tra_kho)
+    # Sổ tra kho tồn tại để CHỨNG MINH một kết luận «kho thiếu». Không kết luận nào thì không có gì
+    # phải chứng minh — đòi sổ khi ấy là CHẶN OAN. Vẫn kiểm đủ khi sổ CÓ MẶT: có mà hỏng thì vẫn ĐỎ.
+    if claims or so_tra_kho.exists():
+        rows, tra_kho_hong = _tra_kho_doc(so_tra_kho)
+    else:
+        rows, tra_kho_hong = [], []
     tra_kho = _dot_check_tra_kho(claims, rows)
     tra_kho["so_hong"] = len(tra_kho_hong)
     tra_kho["hong"] = tra_kho_hong
@@ -380,7 +398,17 @@ def cmd_rasoat_dot_check(a) -> int:
     # tiếp ra CÙNG một hình dạng: NFC lệch (F6) · thiếu phiếu/đếm đúp (H2) · master hỏng (#5) — mỗi
     # lần chỉ chặn đúng ca vừa nêu rồi ca kế tiếp lại lọt. Gom vào một danh sách thì nguồn lỗi thứ
     # tư chỉ tốn MỘT DÒNG và tự động chặn; đó là chữa LỚP chứ không chữa CA.
-    ly_do_khong_dem = ([] if nfc["ok"] else ["NFC_CHUA_DAT"])         + (["PAYLOAD_KHONG_DAY_DU"] if thieu_payload else [])         + (["MASTER_HONG"] if master_hong else [])
+    # ★ BẢNG NÀY LÀ NƠI DUY NHẤT khai "thế nào là tập đếm KHÔNG đáng tin". Thêm tín hiệu toàn vẹn
+    # nào sau này thì THÊM MỘT DÒNG VÀO ĐÂY, đừng viết nhánh `if` mới ở chỗ khác. Vì sao nhấn: bản
+    # trước cũng TỰ NHẬN là "vá theo LỚP" mà chỉ gom BA tín hiệu tôi đang biết, bỏ quên `dot_loi`/
+    # `state_loi` — nên `--dot` sai vẫn công bố `kha_dung:true` với số 0. Lời khai "đã chữa LỚP" khi
+    # ấy RỘNG HƠN phép đo; bảng tường minh làm chỗ bỏ quên lộ ra ngay.
+    _TIN_HIEU_TOAN_VEN = ((not nfc["ok"], "NFC_CHUA_DAT"),
+                          (bool(thieu_payload), "PAYLOAD_KHONG_DAY_DU"),
+                          (bool(master_hong), "MASTER_HONG"),
+                          (bool(dot_loi), "DOT_KHONG_XAC_DINH"),
+                          (bool(state_loi), "STATE_KHONG_HOP_LE"))
+    ly_do_khong_dem = [_ma for _dk, _ma in _TIN_HIEU_TOAN_VEN if _dk]
     if not ly_do_khong_dem:
         so_lieu = _dot_check_so_lieu(docs, ngay_chot, dem_tren)
     else:
@@ -405,7 +433,10 @@ def cmd_rasoat_dot_check(a) -> int:
                       "TRƯỚC khi kết luận thiếu; thiếu ngày chốt ⇒ khai `--ngay-chot`"}
     out = str(getattr(a, "out", "") or "").strip()
     if out:
-        Path(out).write_text(_json_dumps(payload) + "\n", encoding="utf-8")
+        # Seam canonical (`release.py::_write_text_atomic`): tạo thư mục cha, UTF-8+LF bất kể OS,
+        # ghi tmp cùng thư mục rồi `os.replace`. `write_text` trần: thiếu cha ⇒ FileNotFoundError,
+        # ngắt giữa chừng ⇒ tệp CỤT, Windows còn dính CRLF — ba đường hỏng cho một dòng.
+        _write_text_atomic(Path(out), _json_dumps(payload) + "\n")
         payload["out"] = out
     _print_json_or_text(payload, True)
     # đầu vào KHÔNG ĐO ĐƯỢC (state hỏng · `--dot` không ánh xạ được) = LỖI LỆNH rc=2, khác hẳn

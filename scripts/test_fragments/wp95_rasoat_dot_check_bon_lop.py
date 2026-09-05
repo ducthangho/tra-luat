@@ -16,6 +16,11 @@ phải 'vá thế nào'"*. Nên ca này khẳng định LỚP:
      claim rỗng đều qua".
   D  một chốt chỉ sống ở MỘT NHÁNH là chốt vắng mặt ở nhánh kia: coverage đơn vị `done` phải chạy
      cả khi KHÔNG truyền `--dot`.
+
+LƯỢT 4 — cùng bốn LỚP ấy, nhưng đo TÍNH TOÀN. Lượt 3 tôi tuyên bố "vá theo LỚP" mà thực tế chỉ gom
+các nguồn ĐANG BIẾT, nên lượt review kế tiếp lại ra đúng ba hình dạng cũ: `dot_loi`/`state_loi` không
+nằm trong vị từ A · `.strip()` không áp cho nhánh có điều kiện của B · sổ tra kho bị đòi cả khi không
+có kết luận nào (C). Các khẳng định dưới đây kiểm MỌI nguồn của từng lớp, chứ không kiểm nguồn mới nhất.
 """
 
 import contextlib
@@ -103,8 +108,46 @@ def run(tl_module):
                    {"u1.json": _unit()})
         c_rong = go("c2", _st(session_claim={"id": None}), {"u1.json": _unit()})
 
+        # ── LỚP A phải TOÀN: `--dot` sai và state hỏng cũng là lỗi tính toàn vẹn ──
+        DOT = [{"dot_id": "dot-01", "ten": "D1", "trang_thai": "dang_ra", "mo_luc": "2026-09-01"}]
+        QU = [{"unit_id": "u1", "dot_id": "dot-01", "trang_thai": "pending"}]
+        a_dot_sai = go("a5", _st(dot=DOT, q_units=QU), {"u1.json": _unit()}, co=("--dot", "dot-99"))
+        a_state = go("a6", {"schema": "sai", "q_units": "hong"}, {"u1.json": _unit()})
+
+        # ── #2 — MỌI khoá máy-so-được phải ràng với mục tiêu (ca thật: tìm 217 mà dừng ở 216) ──
+        e_sai = _goi(tl_module, ["rasoat-dot-check", "--in", str(_dung(
+            t / "e1", _st(dot=DOT, q_units=QU), {"u1.json": _unit()})), "--json"])
+        (t / "e1" / "rasoat_tra_kho.jsonl").write_text(json.dumps(
+            dict(_dong(), khoa_so_hieu="216/2025/ND-CP"), ensure_ascii=False) + "\n", encoding="utf-8")
+        e_sai = _goi(tl_module, ["rasoat-dot-check", "--in", str(t / "e1"), "--json"])
+
+        # ── #3/#4/#7 — validator: bản ghi `dot`, MỘT `dang_ra`, và trắng-sau-strip ──
+        f_khong_bg = go("f1", _st(q_units=[{"unit_id": "u1", "dot_id": "dot-9", "trang_thai": "done"}]),
+                        {"u1.json": _unit()}, co=("--dot", "dot-9"))
+        f_hai_dangra = go("f2", _st(dot=DOT + [{"dot_id": "b", "ten": "B", "trang_thai": "dang_ra",
+                                                "mo_luc": "x"}]), {"u1.json": _unit()})
+        f_trang = go("f3", _st(dot=[{"dot_id": "a", "ten": "A", "trang_thai": "da_dong",
+                                     "dong_luc": " "}]), {"u1.json": _unit()})
+        f_list_rong = go("f4", _st(dot=[{"dot_id": "a", "ten": "A", "dong_luc": "x",
+                                         "trang_thai": "da_dong_co_gioi_han",
+                                         "gioi_han_da_biet": []}]), {"u1.json": _unit()})
+
+        # ── #6 — không kết luận «kho thiếu» nào thì KHÔNG được đòi sổ (chặn oan) ──
+        g = t / "g1"
+        (g / "master").mkdir(parents=True)
+        (g / "rasoat_state.json").write_text(json.dumps(
+            {"schema": "rasoat_plan.v1", "cap_nhat": "2026-09-05"}, ensure_ascii=False), encoding="utf-8")
+        (g / "master" / "u1.json").write_text(json.dumps(_unit(), ensure_ascii=False), encoding="utf-8")
+        g_no_claim = _goi(tl_module, ["rasoat-dot-check", "--in", str(g), "--json"])
+
+        # ── #8 — `--out` dưới thư mục cha CHƯA TỒN TẠI phải ghi được (writer nguyên tử) ──
+        _out = t / "chua" / "co" / "kq.json"
+        h_out = _goi(tl_module, ["rasoat-dot-check", "--in", str(t / "lanh"), "--json", "--out", str(_out)])
+        h_out_ok = _out.exists()
+
         # ── LỚP D: coverage chạy cả khi KHÔNG có `--dot` (ca a_thieu ở trên đã bỏ `--dot`) ──
-        d_co_dot = go("d1", _st(q_units=[{"unit_id": "u1", "dot_id": "dot-01", "trang_thai": "done"},
+        d_co_dot = go("d1", _st(dot=DOT,
+                                q_units=[{"unit_id": "u1", "dot_id": "dot-01", "trang_thai": "done"},
                                          {"unit_id": "u9", "dot_id": "dot-01", "trang_thai": "done"}]),
                       {"u1.json": _unit()}, co=("--dot", "dot-01"))
 
@@ -131,4 +174,19 @@ def run(tl_module):
                      for x in (d_co_dot[1].get("thieu_payload") or []))
              and any(x.get("ma") == "DON_VI_DONE_THIEU_PHIEU_MASTER" and x.get("unit_id") == "u9"
                      for x in (a_thieu[1].get("thieu_payload") or [])))
-    return bool(lanh and lop_a and lop_b and lop_c and lop_d)
+    # LỚP A TOÀN — SÁU nguồn lỗi khác nhau, MỘT hệ quả. Đây là điều "vá từng ca" không bảo đảm.
+    lop_a_toan = all(_kd(p) is False and _rong(p) for _, p in (a_dot_sai, a_state))
+    # #2 — khoá số hiệu lệch ⇒ không được tính là đã tra, và phải NÊU giá trị sai
+    khoa_toan = (e_sai[0] == 1 and any(
+        f.get("ma") == "THIEU_KHOA" and "khoa_so_hieu" in (f.get("khoa_thieu") or [])
+        and any(x.get("khoa") == "khoa_so_hieu" for x in (f.get("khoa_dinh_danh_lech") or []))
+        for f in (e_sai[1].get("chot_2_tra_kho", {}).get("phat_hien") or [])))
+    val_toan = (f_khong_bg[0] == 2 and "DOT_KHONG_CO_BAN_GHI" in str(f_khong_bg[1].get("dot_loi") or "")
+                and f_hai_dangra[0] == 2
+                and "DOT_NHIEU_HON_MOT_DANG_RA" in str(f_hai_dangra[1].get("state", {}).get("loi") or "")
+                # trắng-sau-strip VÀ list rỗng phải cùng bị bắt — hai dạng "có mà không dùng được"
+                and f_trang[0] == 2 and f_list_rong[0] == 2)
+    khong_chan_oan = g_no_claim[0] == 0 and g_no_claim[1].get("ok") is True
+    out_toan = h_out[0] == 0 and h_out_ok
+    return bool(lanh and lop_a and lop_b and lop_c and lop_d
+                and lop_a_toan and khoa_toan and val_toan and khong_chan_oan and out_toan)

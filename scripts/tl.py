@@ -1543,7 +1543,7 @@ _STUB_MAP = {
         '_docpatch_norm', '_docpatch_vung_doc', '_docpatch_vung_ghi', '_docpatch_ap',
         '_docpatch_tim_file', '_docpatch_sha', '_docpatch_cache_dir', 'cmd_doc_patch',   # r217 sửa-theo-điểm (note CUỐI dòng — I11)
         '_rasoat_corpus_hieu_luc',   # r295 RAS-13 predicate corpus-hiệu-lực dùng chung (note CUỐI dòng — I11)
-        '_rasoat_state_validate', '_rasoat_state_newest',   # r295 RAS-09/RAS-03 (note CUỐI dòng — I11)
+        '_rasoat_state_validate', '_rasoat_state_newest', '_rasoat_thieu_gia_tri',   # r295 RAS-09/RAS-03 (note CUỐI dòng — I11)
     ],
     "rasoat_dot_check": [
         '_dinh_danh_chuan_hoa', '_nfc_lech', '_nfc_lech_json', '_dot_check_nfc', '_tra_kho_doc',

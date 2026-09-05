@@ -39,7 +39,7 @@
     "don vi done khong bao gio reset ve pending toan phan tru khi anchor vo",
     "PHA 4: `rasoat-merge --in <out-dir>/master` dung duoc bang master, roi rasoat_phuluc.py --in <bang master> ra phu luc 03-07 (r213: rasoat_phuluc.py cung tu nhan khuon S6 nen --in master/ chay thang duoc; TRUOC r213 dong nay la LOI KHONG DUOC KIEM - PHA 4 sap that ngay 26-07)",
     "bang master co o metadata trong (ngay/hieu_luc_tu) thi phai HIEN trong _thieu_o_metadata - khong duoc bia de lap o",
-    "DONG DOT: `rasoat-dot-check --in <out-dir> --dot <dot_id> --strict` rc=0 TRUOC khi chot dot.trang_thai=done — ba chot NFC / tra kho 3 khoa / so lieu tai lap deu dat. rc=1 = CO PHAT HIEN (verdict du lieu), rc=2 = loi dau vao hoac --strict co phat hien; ca hai deu CHAN dong Dot"
+    "DONG DOT: `rasoat-dot-check --in <out-dir> --dot <dot_id> --strict` rc=0 TRUOC khi chot dot.trang_thai=da_dong (hoac da_dong_co_gioi_han) — ba chot NFC / tra kho 3 khoa / so lieu tai lap deu dat. rc=1 = CO PHAT HIEN (verdict du lieu), rc=2 = loi dau vao hoac --strict co phat hien; ca hai deu CHAN dong Dot"
   ],
   "stop_conditions": [
     "HOI TU: het pending + Q-INGEST rong + dry_rounds >= 2",

@@ -92,7 +92,10 @@ def run(tl_module):
 
         # F5 — hai Đợt, hỏi dot-01: chỉ được đếm unit của dot-01.
         # `trang_thai` bắt buộc ở MỌI hàng đợi (§3) — fixture cũ thiếu, validator siết nên ĐỎ.
-        hai_dot = _state(q_units=[{"unit_id": "u1", "dot_id": "dot-01", "trang_thai": "pending"},
+        # §8: MỖI Đợt phải có bản ghi metadata trong `dot`; thiếu ⇒ `--dot` KHÔNG ĐO ĐƯỢC (rc=2).
+        hai_dot = _state(dot=[{"dot_id": "dot-01", "ten": "Đợt 1", "trang_thai": "dang_ra", "mo_luc": "2026-09-01"},
+                              {"dot_id": "dot-02", "ten": "Đợt 2", "trang_thai": "chua_mo"}],
+                         q_units=[{"unit_id": "u1", "dot_id": "dot-01", "trang_thai": "pending"},
                                   {"unit_id": "u2", "dot_id": "dot-02", "trang_thai": "pending"}])
         d5 = _dung(t / "f5", hai_dot,
                    {"u1.json": _unit(), "u2.json": {"unit_id": "u2", "phat_hien": [
@@ -128,7 +131,9 @@ def run(tl_module):
           and any(h.get("ma") == "KHUON_KHONG_NHAN_RA" for h in (p_m.get("master_hong") or [])))
     f5 = (rc5 == 0 and _dem(p5) == 1          # chỉ Đợt 01
           and rc5b == 0 and _dem(p5b) == 2    # không truyền --dot thì đếm cả hai — chứng minh fixture có 2
-          and rc5c == 2 and str(p5c.get("dot_loi") or "").startswith("DOT_KHONG_ANH_XA_DUOC_UNIT"))
+          # `dot-99` không có CẢ bản ghi metadata LẪN unit. Nay lý do nêu ra là cái THIẾU TRƯỚC
+          # (`DOT_KHONG_CO_BAN_GHI`) — chính xác hơn bản cũ; chỉ đòi đúng lớp "Đợt không giải được".
+          and rc5c == 2 and str(p5c.get("dot_loi") or "").startswith("DOT_KHONG_"))
     f6 = (rc6 == 1 and p6["chot_3_so_lieu"].get("kha_dung") is False
           and not (p6["chot_3_so_lieu"].get("so_lieu") or [])
           and p6["chot_1_nfc"]["ok"] is False)

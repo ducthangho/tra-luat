@@ -100,13 +100,16 @@ def run(tl_module):
         rc2, p2 = _goi(tl_module, ["rasoat-dot-check", "--in", str(d2), "--json"])
 
         # G3 — phiếu ĐÚNG nhưng đặt tên khác: phải theo `unit_id` trong payload, không theo tên tệp.
-        st3 = _st(qi, q_units=[{"unit_id": "u1", "dot_id": "dot-01", "trang_thai": "done"}])
+        # §8: `--dot` đòi ĐÚNG MỘT bản ghi metadata trong `dot`.
+        st3 = _st(qi, dot=[{"dot_id": "dot-01", "ten": "Đợt 1", "trang_thai": "dang_ra", "mo_luc": "2026-09-01"}],
+                  q_units=[{"unit_id": "u1", "dot_id": "dot-01", "trang_thai": "done"}])
         rc3, p3 = _goi(tl_module, ["rasoat-dot-check", "--in", str(
             _dung(t / "g3", st3, {"other.json": _unit()}, [_dong(ILO, "ILO-081")])),
             "--dot", "dot-01", "--json"])
         # …và đơn vị `done` KHÔNG có phiếu nào = KHÔNG ĐO ĐƯỢC, không phải "Đợt sạch" (A6).
-        st3b = _st(qi, q_units=[{"unit_id": "u1", "dot_id": "dot-01", "trang_thai": "done"},
-                                {"unit_id": "u9", "dot_id": "dot-01", "trang_thai": "done"}])
+        st3b = _st(qi, dot=[{"dot_id": "dot-01", "ten": "Đợt 1", "trang_thai": "dang_ra", "mo_luc": "2026-09-01"}],
+                   q_units=[{"unit_id": "u1", "dot_id": "dot-01", "trang_thai": "done"},
+                            {"unit_id": "u9", "dot_id": "dot-01", "trang_thai": "done"}])
         rc3b, p3b = _goi(tl_module, ["rasoat-dot-check", "--in", str(
             _dung(t / "g3b", st3b, {"u1.json": _unit()}, [_dong(ILO, "ILO-081")])),
             "--dot", "dot-01", "--json"])

@@ -173,7 +173,7 @@ hoạch / 11 lượt thực tế):
 | Cổng | Bắt loại ảnh hưởng | Lệnh | Khi nào chạy | Hệ quả |
 |---|---|---|---|---|
 | 1. Dẫn chiếu | D dẫn chiếu / bị dẫn chiếu | `tl relation-check` 2 chiều | **MẶC ĐỊNH** — mọi nguồn mới flip corpus | sinh `doi_chieu_bo_sung`, **chỉ so phần giao** |
-| 2. Chồng chéo nội dung | trùng phạm vi/thuật ngữ/thẩm quyền, KHÔNG qua dẫn chiếu | `tl rasoat-chongcheo <base> --target <D>` | **theo ngưỡng** (dưới) | sinh `doi_chieu_bo_sung` cho cặp vượt ngưỡng |
+| 2. Chồng chéo nội dung | trùng phạm vi/thuật ngữ/thẩm quyền, KHÔNG qua dẫn chiếu | `tl rasoat-chongcheo <base> --target <D>` **chỉ dựng TẬP LIÊN QUAN (lớp DISCOVERY)** — KHÔNG có phép so hai văn bản theo ngưỡng, và **không lệnh `tl` nào hiện có** làm việc đó (`tl overlap` là trích NGUYÊN VĂN Điều bị sửa, không phải so cặp) | **NGƯỜI đọc nguyên văn quyết định** — cổng này KHÔNG máy hoá được, đừng đánh dấu xong khi mới chạy discovery | sinh `doi_chieu_bo_sung` cho cặp người xác nhận |
 | 3. Tác động chính sách | đổi tiêu chí đánh giá / địa chỉ xử lý | **rà ngang theo tiêu chí xuyên chương** — KHÔNG mở lại từng đơn vị | chỉ khi D thuộc **nhóm chính sách** | đánh dấu tiêu chí xuyên chương phải rà lại; đơn vị `done` GIỮ NGUYÊN |
 
 **Ngưỡng cổng 2 — CHƯA HIỆU CHỈNH, phải khai là giả định.** Đề xuất khởi điểm: chạy cổng 2 cho cặp

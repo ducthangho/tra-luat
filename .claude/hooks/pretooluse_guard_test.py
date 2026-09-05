@@ -14,7 +14,6 @@ import json
 import os
 import pathlib
 import re
-import shlex
 import shutil
 import subprocess
 import sys
@@ -56,19 +55,36 @@ def _git_for_windows_usr_bin():
     return None
 
 
-def _moi_truong_co_git():
-    env = os.environ.copy()
+def _moi_truong_co_git(env=None):
+    env = dict(os.environ if env is None else env)
     usr_bin = _git_for_windows_usr_bin()
     if usr_bin:
         env["PATH"] = str(usr_bin) + os.pathsep + env.get("PATH", "")
     return env
 
 
-def moi_truong_do():
+def moi_truong_do(env=None):
     """Measurement children use explicit UTF-8 and Git-for-Windows tools."""
-    env = _moi_truong_co_git()
+    env = _moi_truong_co_git(env)
     env["PYTHONUTF8"] = "1"
     env["PYTHONIOENCODING"] = "utf-8"
+    return env
+
+
+def _la_cau_hinh_git_pham_vi_lenh(k):
+    if k in ("GIT_CONFIG_COUNT", "GIT_CONFIG_PARAMETERS"):
+        return True
+    return any(k.startswith(p) and k[len(p):].isdigit()
+               for p in ("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_"))
+
+
+def _moi_truong_git_repo(env=None):
+    """Bo cau hinh Git pham vi lenh roi bind dung checkout dang do."""
+    env = moi_truong_do(env)
+    for k in [k for k in env if _la_cau_hinh_git_pham_vi_lenh(k)]:
+        del env[k]
+    env.update({"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "safe.directory",
+                "GIT_CONFIG_VALUE_0": str(HERE.parent.parent.resolve())})
     return env
 
 
@@ -234,10 +250,16 @@ def t3_khong_chan_oan_lenh_doc(g):
 def t4_phien_chinh_khop_packet_base(g):
     """Đối chiếu với parent/base được packet cấp quyền, không so HEAD với chính nó."""
     try:
+        # Tu tiem mot command-scope config sai de ca nay CHUNG MINH lop loc co tac dung,
+        # thay vi chi xanh khi runner tinh co khong mang cau hinh nao vao child.
+        thu = dict(os.environ, GIT_CONFIG_COUNT="1",
+                   GIT_CONFIG_KEY_0="safe.directory",
+                   GIT_CONFIG_VALUE_0="C:/R12/khong-phai-checkout")
         cu = subprocess.run(["git", "show",
                              f"{PACKET_BASE_SHA}:.claude/hooks/pretooluse_guard.py"],
                             cwd=HERE.parent.parent, capture_output=True, text=True,
-                            encoding="utf-8", env=moi_truong_do(), check=True).stdout
+                            encoding="utf-8", env=_moi_truong_git_repo(thu),
+                            check=True).stdout
     except Exception as e:
         return (False, f"KHONG DO DUOC blob base {PACKET_BASE_SHA[:12]} "
                        f"({type(e).__name__}) -> fail-close")
@@ -340,10 +362,12 @@ DOC_336 = [
 def _chay_that(mau, thu_muc):
     """Chay lenh THAT trong thu muc tam; tra True neu tep dich XUAT HIEN (lo co that)."""
     dich = pathlib.Path(thu_muc) / "ra.txt"
-    env = moi_truong_do()
+    env = _moi_truong_git_repo()
     if mau.startswith("ruff ") and _ruff_01515_that(env) is None:
         return False
-    argv = [x.replace("{T}", str(dich)) for x in shlex.split(mau)]
+    # Hai template GHI_336 la argv don gian co chu y. Khong dua duong Windows qua bo
+    # tach POSIX: thay placeholder sau khi tach bang khoang trang giu nguyen destination.
+    argv = [x.replace("{T}", str(dich)) for x in mau.split()]
     try:
         subprocess.run(argv, cwd=str(HERE.parent.parent), capture_output=True,
                        text=True, encoding="utf-8", env=env, timeout=60)

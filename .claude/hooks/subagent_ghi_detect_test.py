@@ -27,7 +27,7 @@ HOOK = HERE / "subagent_ghi_detect.py"
 
 def _la_cau_hinh_pham_vi_lenh(k):
     """`GIT_CONFIG_COUNT` + `GIT_CONFIG_KEY_<n>`/`VALUE_<n>` — kenh cau hinh PHAM VI LENH."""
-    if k == "GIT_CONFIG_COUNT":
+    if k in ("GIT_CONFIG_COUNT", "GIT_CONFIG_PARAMETERS"):
         return True
     for tien_to in ("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_"):
         # Xoa MOI cap danh so, khong chi nhung cap duoi `COUNT` hien tai: bo sot mot cap
@@ -37,7 +37,7 @@ def _la_cau_hinh_pham_vi_lenh(k):
     return False
 
 
-def _moi_truong_git_dong(env=None):
+def _moi_truong_git_dong(env=None, safe_directory=None):
     """Moi truong KHONG doc cau hinh git ngoai nao. Nhan `env` lam DOI SO de `t22b` goi
     duoc voi mot nen THU DICH dung san — mot ham chi sua `os.environ` thi khong co cach
     nao cho no mot ca biet truoc dap an."""
@@ -47,6 +47,9 @@ def _moi_truong_git_dong(env=None):
     e.update({"GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull,
               "GIT_AUTHOR_NAME": "tl329", "GIT_AUTHOR_EMAIL": "tl329@invalid",
               "GIT_COMMITTER_NAME": "tl329", "GIT_COMMITTER_EMAIL": "tl329@invalid"})
+    if safe_directory is not None:
+        e.update({"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "safe.directory",
+                  "GIT_CONFIG_VALUE_0": str(pathlib.Path(safe_directory).resolve())})
     return e
 
 
@@ -658,7 +661,9 @@ def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h, doi_lenh=None):
             lenh = doi_lenh(lenh)
         for nhan, moi_truong in (("khong dat", {}),
                                  ("co dat", {"CLAUDE_PROJECT_DIR": str(goc)})):
-            env = {k: v for k, v in os.environ.items() if k != "CLAUDE_PROJECT_DIR"}
+            env = _moi_truong_git_dong(
+                {k: v for k, v in os.environ.items() if k != "CLAUDE_PROJECT_DIR"},
+                safe_directory=goc)
             env.update(moi_truong)
             env["TL_SUBAGENT_SNAP_DIR"] = _snap()
             r = subprocess.run([bash, "-c", lenh], cwd=str(goc / ".claude" / "dev"),

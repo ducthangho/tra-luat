@@ -125,7 +125,8 @@ def run(tl_module):
                   [_dong(ILO, "ILO-081")])), "--json"])
         rch1b, ph1b = _goi(tl_module, ["rasoat-dot-check", "--in", str(
             _dung(t / "h1b", _st(qi, dot=[{"dot_id": "dot-01", "ten": "Đợt 1",
-                                           "trang_thai": "dang_ra"}]),
+                                           "trang_thai": "dang_ra",
+                                           "mo_luc": "2026-09-01T08:00:00"}]),
                   {"u1.json": _unit()}, [_dong(ILO, "ILO-081")])), "--json"])
 
         # H3 — hai tệp cùng `unit_id`; H2 — số liệu phải KHÔNG khả dụng khi tập đếm không toàn vẹn.

@@ -1891,7 +1891,7 @@ COMMAND_META = {
     # (_rasoat_state_scope fail-CLOSED: danh sách tên đóng + folder _meta/ bắt buộc) + --dry-run.
     "rasoat-merge":          _m("low", False, "local", False, True, True, "rasoat_hoso", None, True, "lookup_ops", generated=True),
     # LỚP 3 — cổng kiểm cuối Đợt: READ-ONLY, chỉ ghi khi người gọi tự khai `--out` (khuôn doc-claims-check)
-    "rasoat-dot-check":      _m("low", True, "local", False, False, True, "rasoat_hoso", None, True, "lookup_ops", generated=True),
+    "rasoat-dot-check":      _m("low", True, "local", False, False, True, "rasoat_hoso", None, True, "rasoat_dot_check", generated=True),
     "state-get":             _m("low", True, "none", False, False, True, "rasoat_hoso", None, True, "lookup_ops", generated=True),
     "state-put":             dict(_m("medium", False, "drive", False, True, True, "rasoat_hoso", None, True, "lookup_ops", generated=True),
                                   builtin_gate="rasoat_state_scope_guard"),

@@ -91,8 +91,9 @@ def run(tl_module):
                                      str(_dung(t / "f4", _state(), {"u1.json": {}}, [_dong()])), "--json"])
 
         # F5 — hai Đợt, hỏi dot-01: chỉ được đếm unit của dot-01.
-        hai_dot = _state(q_units=[{"unit_id": "u1", "dot_id": "dot-01"},
-                                  {"unit_id": "u2", "dot_id": "dot-02"}])
+        # `trang_thai` bắt buộc ở MỌI hàng đợi (§3) — fixture cũ thiếu, validator siết nên ĐỎ.
+        hai_dot = _state(q_units=[{"unit_id": "u1", "dot_id": "dot-01", "trang_thai": "pending"},
+                                  {"unit_id": "u2", "dot_id": "dot-02", "trang_thai": "pending"}])
         d5 = _dung(t / "f5", hai_dot,
                    {"u1.json": _unit(), "u2.json": {"unit_id": "u2", "phat_hien": [
                        {"key": "P9", "tieu_chi": "T9", "van_ban": "thuộc Đợt khác"}]}}, [_dong()])

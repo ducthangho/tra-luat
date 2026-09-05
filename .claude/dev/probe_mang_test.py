@@ -12,6 +12,9 @@ import tempfile
 import urllib.error
 from pathlib import Path
 from unittest import mock
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="backslashreplace")
 sys.dont_write_bytecode = True
 GOC = Path(__file__).with_name("probe_mang.py")
 SO_DOT_BIEN_MONG_DOI = 5
@@ -169,8 +172,6 @@ def t12_cong_dot_bien_tu_canh(_M):
         raise AssertionError("named mutant da song")
     print("named mutant probe_missing_tool_executes_git: 1/1 chết")
 def main() -> int:
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
     try:
         t12_cong_dot_bien_tu_canh(None)
     except Exception as e:

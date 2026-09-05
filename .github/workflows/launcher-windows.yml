@@ -42,7 +42,7 @@ concurrency:
 jobs:
   launcher:
     strategy:
-      fail-fast: false        # phải thấy CẢ HAI nền để lập bảng parity
+      fail-fast: false        # push/PR đo hai nền; dispatch mặc định Windows, có lựa chọn parity
       matrix:
         # Gọi tay mặc định chỉ trả phút cho Windows; push/PR vẫn đo đủ hai nền.
         os: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only' && '["windows-latest"]' || '["windows-latest","ubuntu-latest"]') }}

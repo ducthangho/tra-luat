@@ -7,6 +7,7 @@ LINT thuần: chứng minh cổng `RASOAT_ENTRY_GATE_v1` (a) được nhắc tr�
 `rasoat-dot-check` (LỚP 3).
 """
 
+import json
 import re
 from pathlib import Path
 
@@ -16,6 +17,7 @@ _GATE = "RASOAT_ENTRY_GATE_v1"
 _KHOA_GATE = ("tien_kiem:", "doc_state:", "truoc:", "chan_dung:", "chan_lan_ghi:",
               "dot_tuan_tu:", "nap_giua_chung:", "tra_kho_3_khoa:", "dem_nfc:")
 _KHOA_LOG = ("truong_bat_buoc:", "ket_qua:", "ket_luan_thieu_hop_le:", "so_file:")
+_LENH_CONG = "rasoat-dot-check"
 
 
 def _block(text: str, name: str) -> str:
@@ -29,6 +31,23 @@ def _kernel_ok(skill_md: str) -> bool:
     return (_GATE in head
             and "CỔNG VÀO RÀ SOÁT HỒ SƠ" in head
             and re.search(r"^20\. \*\*CỔNG VÀO RÀ SOÁT HỒ SƠ", head, re.M) is not None)
+
+
+def _the_ok(card: dict) -> bool:
+    """F1 (cross-review P1) — cổng LỚP 3 phải nằm TRÊN ĐƯỜNG ĐI MẶC ĐỊNH, không chỉ tồn tại.
+
+    Bản đầu có đủ lệnh + đủ tài liệu mà thẻ `rasoat_hoso` KHÔNG nhắc nó ở `recommended_commands`
+    lẫn `verify`, và §1bis đóng Đợt được với 4 vế không vế nào gọi nó ⇒ cổng không gác gì. Đó đúng
+    khuyết tật mà LỚP 2 sinh ra để chữa, tái phát ngay bên trong bản vá của chính nó."""
+    return (any(_LENH_CONG in str(c) for c in (card.get("recommended_commands") or []))
+            and any(_LENH_CONG in str(v) for v in (card.get("verify") or [])))
+
+
+def _dong_dot_ok(loop_md: str) -> bool:
+    """Điều kiện đóng Đợt phải ĐẾM cả cổng máy — 4 vế lời khai + 1 vế phép ĐO."""
+    return ("đủ cả 5" in loop_md
+            and re.search(r"^5\. \*\*CỔNG MÁY CUỐI ĐỢT", loop_md, re.M) is not None
+            and _LENH_CONG in loop_md)
 
 
 def _loop_ok(loop_md: str) -> bool:
@@ -45,13 +64,21 @@ def run(tl_module):  # noqa: ARG001 — lint thuần, không cần tl
     root = Path(__file__).resolve().parents[2]
     skill = (root / "SKILL.md").read_text(encoding="utf-8")
     loop = (root / "references" / "RASOAT_HOSO_LOOP.md").read_text(encoding="utf-8")
-    if not (_kernel_ok(skill) and _loop_ok(loop)):
+    card = json.loads((root / "references" / "workflows" / "rasoat_hoso.json").read_text(encoding="utf-8"))
+    if not (_kernel_ok(skill) and _loop_ok(loop) and _the_ok(card) and _dong_dot_ok(loop)):
         return False
     # PHẢN CHỨNG (phép đo phải phân biệt được):
     #  1. cổng chỉ nằm ở bảng tham chiếu cuối kernel  → ĐỎ
     #  2. khối máy đọc thiếu một khoá                 → ĐỎ
     #  3. sổ tra kho không được khai trong WRITE_PATHS→ ĐỎ
+    #  4. gỡ cổng khỏi `recommended_commands` HOẶC khỏi `verify` của thẻ → ĐỎ (F1)
+    #  5. hạ điều kiện đóng Đợt về 4 vế → ĐỎ (F1)
     doi_cho = skill.replace("20. **CỔNG VÀO RÀ SOÁT HỒ SƠ", "zz. **cong vao ra soat ho so")
     thieu_khoa = loop.replace("dem_nfc:", "xx_dem_nfc_da_bo:")
     mat_so = loop.replace("<out-dir>/rasoat_tra_kho.jsonl\n", "")
-    return (not _kernel_ok(doi_cho)) and (not _loop_ok(thieu_khoa)) and (not _loop_ok(mat_so))
+    bo_rec = dict(card, recommended_commands=[c for c in card["recommended_commands"]
+                                              if _LENH_CONG not in str(c)])
+    bo_verify = dict(card, verify=[v for v in card["verify"] if _LENH_CONG not in str(v)])
+    ha_ve = loop.replace("đủ cả 5", "đủ cả 4").replace("5. **CỔNG MÁY CUỐI ĐỢT", "x. cong may cuoi dot")
+    return ((not _kernel_ok(doi_cho)) and (not _loop_ok(thieu_khoa)) and (not _loop_ok(mat_so))
+            and (not _the_ok(bo_rec)) and (not _the_ok(bo_verify)) and (not _dong_dot_ok(ha_ve)))

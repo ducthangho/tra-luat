@@ -74,13 +74,20 @@ dem_nfc: moi phep DEM chay tren van ban da chuan hoa Unicode NFC
 nguyên**: hai Đợt chồng nhau thì `dry_rounds_lien_tiep` và Q-INGEST không quy được về Đợt nào, và điều kiện
 đóng Đợt mất nghĩa.
 
-**Điều kiện đóng MỘT Đợt — đủ cả 4.** Thiếu vế nào mà vẫn đóng ⇒ `dot.trang_thai="da_dong_co_gioi_han"`
+**Điều kiện đóng MỘT Đợt — đủ cả 5.** Thiếu vế nào mà vẫn đóng ⇒ `dot.trang_thai="da_dong_co_gioi_han"`
 kèm mục tương ứng trong `gioi_han_da_biet` (cùng khuôn §7.1 `RASOAT_PLAN_SCHEMA.md`; **cấm đóng im lặng**):
 
 1. Mọi đơn vị mang `dot_id` này ở `done`/`blocked` — 0 mục `pending`/`doing` (`blocked` ⇒ khai giới hạn).
 2. Q-INGEST không còn mục `cho_tai`/`cho_nguoi_tai` **thuộc Đợt này**; còn ⇒ khai giới hạn.
 3. Phần Phiếu rà soát thuộc Đợt đã cập nhật: `tl rasoat-merge --in <out-dir>/master --check` rc=0.
 4. Đã sinh **hai danh sách bàn giao** dưới đây và chuyển cho người xử lý.
+5. **CỔNG MÁY CUỐI ĐỢT đạt:** `tl rasoat-dot-check --in <out-dir> --dot <dot_id> --strict` **rc=0**.
+   Ba chốt: NFC trước mọi phép đếm · kết luận «kho thiếu X» phải có log tra ĐỦ 3 khoá đều `not_found` ·
+   sổ số liệu tái lập. **rc=1 = CÓ PHÁT HIỆN** (verdict dữ liệu), **rc=2** = lỗi đầu vào hoặc `--strict`
+   có phát hiện — **cả hai đều CHẶN đóng Đợt**. Đừng đọc `rc≠0` thành «lệnh hỏng» rồi bỏ qua.
+   *Vì sao là ĐIỀU KIỆN chứ không phải gợi ý:* cả 4 vế trên đều là **lời khai của phiên rà**;
+   riêng vế này là **phép ĐO**. Một cổng không nằm trên đường đi mặc định là cổng không tồn tại — đúng
+   khuyết tật mà §1bis này sinh ra để chữa. Thẻ `rasoat_hoso` khai nó ở `recommended_commands` + `verify`.
 
 **Hai danh sách bàn giao — sinh sau MỖI Đợt, không dồn tới cuối hồ sơ:**
 

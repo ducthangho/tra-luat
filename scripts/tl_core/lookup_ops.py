@@ -4076,6 +4076,11 @@ _TRA_KHO_TRUONG = ("thoi_diem", "muc_tieu", "ket_qua", "lenh")   # sổ sách �
 _TRA_KHO_KHOA = ("khoa_so_hieu", "khoa_ten", "khoa_dinh_danh")    # mỗi dòng ghi ÍT NHẤT MỘT khoá đã tra
 _DOT_CHECK_THIEU_TT = ("cho_tai", "cho_nguoi_tai")
 _DOT_CHECK_SO_TRA_KHO = "rasoat_tra_kho.jsonl"
+# F2 (cross-review P1, tái hiện được): bản đầu chỉ từ chối ĐÚNG chuỗi `found`, nên một dòng
+# `ket_qua="error"` — tra HỎNG, không tra ra kết quả — vẫn được tính là bằng chứng `not_found`
+# và cho rc=0 `ok:true`. Danh sách CẤM lại thua danh sách CHO PHÉP đúng một lần nữa: enum ĐÓNG,
+# giá trị lạ ⇒ dòng vào `hong` (fail-closed), KHÔNG im lặng coi là đã tra.
+_TRA_KHO_KET_QUA = ("not_found", "found")
 
 
 def _dinh_danh_chuan_hoa(s) -> str:
@@ -4150,6 +4155,12 @@ def _tra_kho_doc(path) -> tuple:
         if not any(str(r.get(k) or "").strip() for k in _TRA_KHO_KHOA):
             hong.append({"dong": i, "ma": "KHONG_KHAI_KHOA", "truong": list(_TRA_KHO_KHOA)})
             continue
+        # F2: `ket_qua` phải nằm trong enum ĐÓNG. `error`/lỗi chính tả/phản hồi lạ = KHÔNG BIẾT kết
+        # quả, mà "không biết" ≠ "không có" — đúng doctrine ba trạng thái, `None` ≠ `False`.
+        if str(r.get("ket_qua") or "").strip() not in _TRA_KHO_KET_QUA:
+            hong.append({"dong": i, "ma": "KET_QUA_NGOAI_ENUM",
+                         "gia_tri": str(r.get("ket_qua") or ""), "cho_phep": list(_TRA_KHO_KET_QUA)})
+            continue
         rows.append(r)
     return rows, hong
 
@@ -4174,8 +4185,11 @@ def _dot_check_tra_kho(claims, rows) -> dict:
             phat_hien.append({"muc_tieu": c, "dinh_danh": dd, "ma": "THIEU_KHOA",
                               "khoa_da_tra": da_tra, "khoa_thieu": thieu})
             continue
-        if any(str(r.get("ket_qua") or "") == "found" for r in lien_quan):
-            phat_hien.append({"muc_tieu": c, "dinh_danh": dd, "ma": "CO_HIT_MA_VAN_KET_LUAN_THIEU"})
+        # F2: đòi MỌI dòng liên quan đều đúng `not_found`. Bản đầu chỉ hỏi "có dòng nào `found`
+        # không" — mệnh đề ấy đúng nhưng KHÔNG đủ: nó im lặng với mọi giá trị thứ ba.
+        if not all(str(r.get("ket_qua") or "").strip() == "not_found" for r in lien_quan):
+            phat_hien.append({"muc_tieu": c, "dinh_danh": dd, "ma": "CO_HIT_MA_VAN_KET_LUAN_THIEU",
+                              "ket_qua_da_ghi": sorted({str(r.get("ket_qua") or "") for r in lien_quan})})
     return {"so_ket_luan_thieu": len(claims), "phat_hien": phat_hien, "ok": not phat_hien}
 
 
@@ -4229,6 +4243,15 @@ def cmd_rasoat_dot_check(a) -> int:
             state = json.loads(state_path.read_text(encoding="utf-8"))
         except Exception as e:  # noqa: BLE001
             state_loi = "STATE_JSON_HONG: " + str(e)
+        else:
+            # F3 (cross-review P1, tái hiện được): «đọc được JSON» KHÁC «state hợp lệ».
+            # `{"schema":"wrong","q_units":"broken"}` từng cho rc=0 `ok:true` — hàng đợi sai kiểu bị
+            # đọc thành RỖNG, nên KHÔNG claim nào được rút ra và cổng im lặng báo sạch. Tái dùng
+            # `_rasoat_state_validate` (RAS-09) thay vì tự chế: SKILL.md §0 #15.
+            _ok_st, _errs = _rasoat_state_validate(state)
+            if not _ok_st:
+                state_loi = "STATE_KHONG_HOP_LE: " + "; ".join(_errs[:6])
+                state = {}
     else:
         state_loi = "STATE_KHONG_TON_TAI"
 
@@ -4245,14 +4268,40 @@ def cmd_rasoat_dot_check(a) -> int:
     claims = sorted({c for c in claims if c})
 
     master_files = sorted(master_dir.glob("*.json")) if master_dir.is_dir() else []
+    # F5 (cross-review P2, tái hiện được): bản đầu chỉ lọc `q_ingest` theo `--dot` còn master thì nạp
+    # SẠCH mọi file ⇒ hồ sơ hai Đợt, hỏi `--dot dot-01`, vẫn đếm cả unit của `dot-02`. Một con số mang
+    # nhãn "Đợt 01" mà đếm trên dữ liệu Đợt khác là đúng lớp lỗi §10 sinh ra để chặn.
+    # Ánh xạ unit→Đợt nằm ở `state.q_units[].dot_id` (RASOAT_PLAN_SCHEMA §2/§8); THIẾU ánh xạ mà vẫn
+    # hỏi một Đợt ⇒ KHÔNG ĐO ĐƯỢC, phải nói ra chứ không trả kết quả một phần.
+    dot_loi, unit_cua_dot = "", None
+    if dot:
+        _qu = (state.get("q_units") or []) if isinstance(state, dict) else []
+        unit_cua_dot = {str(u.get("unit_id") or "").strip()
+                        for u in _qu if isinstance(u, dict) and str(u.get("dot_id") or "") == dot}
+        if not unit_cua_dot:
+            dot_loi = ("DOT_KHONG_ANH_XA_DUOC_UNIT: state.q_units không có mục nào mang dot_id=%r "
+                       "⇒ không lọc được master theo Đợt" % dot)
+    if unit_cua_dot:
+        master_files = [f for f in master_files if f.stem in unit_cua_dot]
     docs, master_hong = [], []
     for f in master_files:
         if _rasoat_la_ban_sao(f.name):
             continue
         try:
-            docs.append((f.name, json.loads(f.read_text(encoding="utf-8"))))
+            _d = json.loads(f.read_text(encoding="utf-8"))
         except Exception as e:  # noqa: BLE001
             master_hong.append({"file": f.name, "ma": "JSON_HONG", "chi_tiet": str(e)})
+            continue
+        # F4 (cross-review P1, tái hiện được): `master/u1.json = {}` giải mã SẠCH rồi được đếm là
+        # "0 phát hiện" ⇒ báo cáo trắng trông y hệt một Đợt thật sự không có phát hiện nào. Đây đúng
+        # bệnh «vắng mặt vì sạch» và «vắng mặt vì hỏng» nhìn giống nhau. `_rasoat_unit_shape` (r213/b)
+        # đã là nguồn chân lý DUY NHẤT cho khuôn ấy và tự nó dặn bên gọi FAIL-CLOSED trên `unknown`.
+        _khuon = _rasoat_unit_shape(_d)
+        if _khuon == "unknown":
+            master_hong.append({"file": f.name, "ma": "KHUON_KHONG_NHAN_RA",
+                                "chi_tiet": "không phải unit_v1 lẫn bang_v1"})
+            continue
+        docs.append((f.name, _d))
 
     # ② chốt 1 — NFC trước MỌI phép đếm (quét đúng những file mà số liệu được đếm trên đó)
     quet = [f for f in master_files if not _rasoat_la_ban_sao(f.name)]
@@ -4272,12 +4321,24 @@ def cmd_rasoat_dot_check(a) -> int:
     # ④ chốt 3 — số liệu tái lập
     ngay_chot = str(getattr(a, "ngay_chot", "") or "").strip() or str((state or {}).get("cap_nhat") or "").strip()
     dem_tren = str(master_dir) if master_dir.is_dir() else "(không có thư mục master/)"
-    so_lieu = _dot_check_so_lieu(docs, ngay_chot, dem_tren)
+    if nfc["ok"]:
+        so_lieu = _dot_check_so_lieu(docs, ngay_chot, dem_tren)
+    else:
+        # F6 (cross-review P2, tái hiện được): chốt ① tự hứa "lệch thì DỪNG, không tự chuẩn hoá rồi
+        # đếm tiếp", nhưng bản đầu vẫn gọi hàm đếm — mà hàm ấy `NFC-normalize` từng trường trong bộ
+        # nhớ ⇒ xuất ra một bộ số trông tái lập được, đếm trên bản KHÁC với bản trên đĩa. Đó đúng là
+        # "lời khai rộng hơn phép đo". Giữ NGUYÊN hình dạng payload, chỉ khai KHÔNG KHẢ DỤNG.
+        so_lieu = {"so_lieu": [], "thieu_ngay_chot": not str(ngay_chot or "").strip(),
+                   "kha_dung": False, "ly_do": "NFC_CHUA_DAT: không đếm khi nguồn chưa chuẩn hoá",
+                   "ok": False}
+    so_lieu.setdefault("kha_dung", True)
 
     findings = (len(nfc["lech"]) + len(tra_kho["phat_hien"]) + len(tra_kho_hong)
-                + len(master_hong) + (1 if so_lieu["thieu_ngay_chot"] else 0))
+                + len(master_hong) + (1 if so_lieu["thieu_ngay_chot"] else 0)
+                + (0 if so_lieu.get("kha_dung", True) else 1))
     payload = {"schema": _DOT_CHECK_SCHEMA, "in": str(p), "dot": dot or None,
-               "ok": findings == 0 and not state_loi,
+               "dot_loi": dot_loi or None,
+               "ok": findings == 0 and not state_loi and not dot_loi,
                "state": {"file": str(state_path), "loi": state_loi or None},
                "chot_1_nfc": nfc, "chot_2_tra_kho": tra_kho, "chot_3_so_lieu": so_lieu,
                "master_hong": master_hong, "so_phat_hien_cong": findings,
@@ -4288,6 +4349,8 @@ def cmd_rasoat_dot_check(a) -> int:
         Path(out).write_text(_json_dumps(payload) + "\n", encoding="utf-8")
         payload["out"] = out
     _print_json_or_text(payload, True)
-    if state_loi or (findings and bool(getattr(a, "strict", False))):
+    # đầu vào KHÔNG ĐO ĐƯỢC (state hỏng · `--dot` không ánh xạ được) = LỖI LỆNH rc=2, khác hẳn
+    # rc=1 "có phát hiện" — trộn hai thứ là biến một phép đo bất khả thi thành một verdict dữ liệu.
+    if state_loi or dot_loi or (findings and bool(getattr(a, "strict", False))):
         return 2
     return 1 if findings else 0

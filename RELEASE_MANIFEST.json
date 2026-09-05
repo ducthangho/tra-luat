@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 180,
-  "total_bytes": 7984050,
-  "package_hash": "15e7e7a4549981d1da79c534eb5f1290902d921fecd962c63cdc25ad17e47835",
-  "content_hash": "15e7e7a4549981d1da79c534eb5f1290902d921fecd962c63cdc25ad17e47835",
+  "total_bytes": 8000778,
+  "package_hash": "268d0ee04979be55c437d85f31f3802209eda0fe2a8949f60d0eda4836f2f96f",
+  "content_hash": "268d0ee04979be55c437d85f31f3802209eda0fe2a8949f60d0eda4836f2f96f",
   "required_missing": [],
   "files": [
     {
@@ -158,8 +158,8 @@
     },
     {
       "path": "references/RASOAT_HOSO_LOOP.md",
-      "size": 33706,
-      "sha256": "84d56a83eaad2481d2c3fc0e3d00b2d38b90bf30c344153b5b5333ce7bc32288"
+      "size": 34602,
+      "sha256": "75db3d8755da2ad9cca30f8e147408b2431afffd85793819aba36657a9253537"
     },
     {
       "path": "references/RASOAT_PLAN_SCHEMA.md",
@@ -343,8 +343,8 @@
     },
     {
       "path": "references/golden/workflow_audit.json",
-      "size": 31010,
-      "sha256": "f1312426e374cb76a4d9cabe48da0792a304a9802e8cc5f68ca274d23dff9b81"
+      "size": 31146,
+      "sha256": "e5781dc12deb429fdf98207b14d55fecc946d5b2c90124d27c083eb486156e39"
     },
     {
       "path": "references/linhvuc_phapdien.json",
@@ -453,8 +453,8 @@
     },
     {
       "path": "references/workflows/rasoat_hoso.json",
-      "size": 5603,
-      "sha256": "9d36971c3570ed72dcafb6c6762c2520654290eecc6c56fffee3ce17f6e848f9"
+      "size": 6119,
+      "sha256": "6b8fc68336d59ad6b4e9a32a4f1b26c6170e7ec86af2079b957208af404254a2"
     },
     {
       "path": "references/workflows/release_bundle.json",
@@ -683,8 +683,8 @@
     },
     {
       "path": "scripts/tl.py",
-      "size": 230635,
-      "sha256": "61e4f98f09e4c544edee55f6b79bd05c2075c1951849f7d3cfbd092137a33afd"
+      "size": 230756,
+      "sha256": "863cd08e46ccf739fd9b7e95395d7b1538e7267fd41d6e460098d80ab0af4fd5"
     },
     {
       "path": "scripts/tl_boot.py",
@@ -768,8 +768,8 @@
     },
     {
       "path": "scripts/tl_core/lookup_ops.py",
-      "size": 275949,
-      "sha256": "348a6f4566fbae91c4b825da9ebe3cf95868c5632f31d41cda443a782d18462c"
+      "size": 281097,
+      "sha256": "e89720b63188a017f503db447d3545507ad898ef6adeaf5b1629dea29c832272"
     },
     {
       "path": "scripts/tl_core/nlm_admin_ops.py",
@@ -863,8 +863,8 @@
     },
     {
       "path": "scripts/tl_test_fragments_bundled.py",
-      "size": 29888,
-      "sha256": "fc5c8498a7d864421b4f3fb5c766269caab8c730b22863c962b0366704ea1b3c"
+      "size": 39799,
+      "sha256": "f3ae32f887199f760a9c4d5f49b07213dc5d81b4a3aa8851408a898fc60e36e0"
     },
     {
       "path": "scripts/tra_cuu.py",

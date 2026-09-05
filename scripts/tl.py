@@ -1762,6 +1762,7 @@ _RASOAT_VB_META_FIELDS = _tl_lookup_ops._RASOAT_VB_META_FIELDS       # r213 Đ�
 _DOT_CHECK_SCHEMA = _tl_lookup_ops._DOT_CHECK_SCHEMA                 # LỚP 3 — HẰNG re-export trực tiếp (bẫy I11)
 _TRA_KHO_TRUONG = _tl_lookup_ops._TRA_KHO_TRUONG                     # LỚP 3 — như trên
 _TRA_KHO_KHOA = _tl_lookup_ops._TRA_KHO_KHOA                         # LỚP 3 — như trên
+_TRA_KHO_KET_QUA = _tl_lookup_ops._TRA_KHO_KET_QUA                   # LỚP 3 F2 enum ĐÓNG — như trên (bẫy I11)
 _DOT_CHECK_THIEU_TT = _tl_lookup_ops._DOT_CHECK_THIEU_TT             # LỚP 3 — như trên
 _DOT_CHECK_SO_TRA_KHO = _tl_lookup_ops._DOT_CHECK_SO_TRA_KHO         # LỚP 3 — như trên
 

@@ -792,6 +792,10 @@
         },
         {
           "available": true,
+          "command": "rasoat-dot-check --in <out-dir> --dot <dot_id> --strict --json"
+        },
+        {
+          "available": true,
           "command": "frontier-expand --json"
         },
         {

@@ -77,6 +77,20 @@ VAN_CHUYEN_NGUOI_DONG_BANG = "human"
 ASSURANCE_CUA_NGUOI_DONG_BANG = ("human_audited",)
 ASSURANCE_CUA_MO_HINH_DONG_BANG = ("cross_approved", "same_provider_approved")
 HOP_DONG_HUMAN_DONG_BANG = {"be_mat": frozenset({"manual_audit"}), "van_chuyen": frozenset({"human"})}
+# BA câu neo luật chép tay — CHÉP TAY từ `AGENTS.md` §4 và `docs/PROTOCOL_DA_PHIEN.md` §8, KHÔNG
+# import từ `bnv2._NEO_LUAT_CHEP_TAY`. `R8-01` đo được vì sao: `_cay_guong` bản trước lấy danh sách
+# neo TỪ CHÍNH SẢN PHẨM, nên hàng PROTOCOL của `c28` xoá CẢ HAI câu cùng lúc và bỏ kiểm RIÊNG một
+# luật thì luật kia vẫn làm hàng ấy đỏ. Hai mutant, mỗi cái thêm một `continue` bỏ đúng một neo,
+# **sống sót qua toàn suite** (`45/45 · 57/57 · 2/2`, rc=0, `TỔNG: ĐẠT`). Phụ thuộc vòng: một oracle
+# hỏi sản phẩm "anh neo vào câu nào" rồi xoá đúng câu ấy sẽ CO THEO mỗi lần sản phẩm bỏ bớt neo.
+NEO_LUAT_DONG_BANG = (
+    ("ASSURANCE_CAM_THEO_PROVIDER[openai_chatgpt]", "AGENTS.md",
+     "tự tạo `cross_approved`, `same_provider_approved` hoặc `human_audited`"),
+    ("ASSURANCE_CUA_NGUOI", "docs/PROTOCOL_DA_PHIEN.md",
+     "`human_audited`: người audit có danh tính bền trên GitHub"),
+    ("ASSURANCE_CUA_MO_HINH", "docs/PROTOCOL_DA_PHIEN.md",
+     "`cross_approved`: Claude review Codex hoặc Codex review Claude"),
+)
 # BA nguồn mà cổng đọc — chép tay để rig không hỏi cổng "anh cần gì" rồi chép đúng thứ cổng nói.
 NGUON_PHU = ("AGENTS.md", "docs/PROTOCOL_DA_PHIEN.md", ".claude/dev/launcher.py")
 # Hằng của cổng mà MỌI đột biến mức tệp phải giữ nguyên trừ khi khai đích danh (`bo_qua_parity`).
@@ -886,7 +900,8 @@ def c27_loai_CO_KHOANG_TRANG_khong_duoc_tron_khoi_phep_do():
 
 def _cay_guong(tmp: Path, co_launcher=True, than_launcher=None, co_agents=True,
                bo_cau_neo=False, sua_launcher=None, sua_agents=None,
-               co_protocol=True, sua_protocol=None, bo_cau_neo_cua=None, kho_rieng=True):
+               co_protocol=True, sua_protocol=None, bo_cau_neo_cua=None, bo_neo_luat=None,
+               kho_rieng=True):
     """Cây GƯƠNG đủ để chạy CLI THẬT: cổng + ba nguồn phụ + (mặc định) kho git có biên nhận.
 
     Chép chính tệp thật rồi bỏ/đổi ĐÚNG nguồn cần hỏng — không mô phỏng lại cổng, vì một
@@ -902,9 +917,17 @@ def _cay_guong(tmp: Path, co_launcher=True, than_launcher=None, co_agents=True,
     # biến lĩnh "KHÔNG RĂNG" oan. Đo được ngay lượt đầu: `m18`/`m19` báo không răng trong khi
     # phép làm yếu có thật. Đúng lớp lỗi "rig đo thứ khác với thứ được công bố".
     shutil.copyfile(Path(bnv2.__file__), tmp / "ops" / "bien_nhan_v2.py")
+    # `R8-01`: danh sách neo lấy từ ORACLE ĐỘC LẬP, không từ `bnv2._NEO_LUAT_CHEP_TAY`. Một
+    # fixture hỏi sản phẩm "anh neo vào câu nào" thì khi sản phẩm bỏ một neo, fixture thôi xoá
+    # câu ấy và ca đích xanh lên — chốt co theo thứ nó phải canh.
     neo_theo_tep = {}
-    for _luat, tep_neo, cau in bnv2._NEO_LUAT_CHEP_TAY:
+    for _luat, tep_neo, cau in NEO_LUAT_DONG_BANG:
         neo_theo_tep.setdefault(tep_neo, []).append(cau)
+    if bo_neo_luat is not None:
+        chon = [r for r in NEO_LUAT_DONG_BANG if r[0] == bo_neo_luat]
+        dung(len(chon) == 1,
+             f"KHÔNG ĐO ĐƯỢC: `bo_neo_luat={bo_neo_luat!r}` khớp {len(chon)} mục của oracle, đòi ĐÚNG 1")
+        neo_theo_tep = {chon[0][1]: [chon[0][2]]}
 
     def _ghi_nguon(rel, co, than, sua, xoa_neo):
         if not co and than is None:
@@ -914,6 +937,11 @@ def _cay_guong(tmp: Path, co_launcher=True, than_launcher=None, co_agents=True,
         doi = than is not None or sua is not None or xoa_neo
         if xoa_neo:
             for cau in neo_theo_tep.get(rel, []):
+                # Mẫu khớp KHÁC 1 chỗ ⇒ rig lệch oracle, KHÔNG phải kết quả của ca: một phép
+                # `replace` hụt để nguồn nguyên vẹn và ca đích sẽ xanh mà chẳng đo gì
+                # ("ca có MẶT khác ca có ĐO").
+                dung(van.count(cau) == 1,
+                     f"KHÔNG ĐO ĐƯỢC: câu neo {cau!r} khớp {van.count(cau)} chỗ trong `{rel}`, đòi ĐÚNG 1")
                 van = van.replace(cau, "(đã xoá)")
         if sua:
             van = sua(van)
@@ -923,8 +951,10 @@ def _cay_guong(tmp: Path, co_launcher=True, than_launcher=None, co_agents=True,
             dung((tmp / rel).read_bytes() == goc_b,
                  f"rig cây gương làm lệch nguồn phụ `{rel}` dù không khai thay — không đo được")
 
-    xoa_a = bo_cau_neo or bo_cau_neo_cua == "AGENTS.md"
-    xoa_p = bo_cau_neo or bo_cau_neo_cua == "docs/PROTOCOL_DA_PHIEN.md"
+    xoa_a = bool(bo_cau_neo or bo_cau_neo_cua == "AGENTS.md"
+                 or (bo_neo_luat and "AGENTS.md" in neo_theo_tep))
+    xoa_p = bool(bo_cau_neo or bo_cau_neo_cua == "docs/PROTOCOL_DA_PHIEN.md"
+                 or (bo_neo_luat and "docs/PROTOCOL_DA_PHIEN.md" in neo_theo_tep))
     _ghi_nguon("AGENTS.md", co_agents, None, sua_agents, xoa_a)
     _ghi_nguon("docs/PROTOCOL_DA_PHIEN.md", co_protocol, None, sua_protocol, xoa_p)
     _ghi_nguon(".claude/dev/launcher.py", co_launcher, than_launcher, sua_launcher, False)
@@ -1067,8 +1097,8 @@ def c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA():
          2, "van_chuyen=`machine` khác hợp đồng"),
         # --- từng NEO luật chép tay, theo TỪNG tệp nguồn
         ("AGENTS.md mất câu biện minh", {"bo_cau_neo_cua": "AGENTS.md"}, 2, "luật chép tay mất neo"),
-        ("PROTOCOL mất câu neo phân vùng người/mô hình",
-         {"bo_cau_neo_cua": "docs/PROTOCOL_DA_PHIEN.md"}, 2, "luật chép tay mất neo"),
+        # HAI neo của PROTOCOL tách thành hai LƯỢT RIÊNG ở khối dưới, không phải một hàng ở đây:
+        # một hàng xoá cả hai câu thì bỏ kiểm RIÊNG một luật vẫn đỏ nhờ luật kia (`R8-01`).
         # --- byte KHÔNG giải mã được ở MỖI nguồn
         ("launcher có byte KHÔNG giải mã được",
          {"sua_launcher": lambda v: v.encode("utf-8") + b"\n# \xff\xfe\n"},
@@ -1099,6 +1129,46 @@ def c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA():
             bang(not ket_toi,
                  f"{ten}: {len(ket_toi)} biên nhận bị KẾT TỘI trong khi lỗi ở NGUỒN — lỗi ĐO thành "
                  f"lỗi DỮ LIỆU:\n      " + "\n      ".join(x[:140] for x in ket_toi[:4]))
+    # --- `R8-01`: MỖI neo luật một LƯỢT RIÊNG, mất ĐÚNG một câu, câu kia giữ NGUYÊN BYTE.
+    # Reviewer đo được hai mutant (mỗi cái `continue` bỏ đúng một neo) SỐNG SÓT qua toàn suite
+    # `45/45 · 57/57 · 2/2`, rc=0, `TỔNG: ĐẠT` — vì hàng cũ xoá cả hai câu cùng lúc nên luật còn
+    # lại vẫn làm hàng ấy đỏ. Bảng câu chữ ở đây là `NEO_LUAT_DONG_BANG` (chép tay), KHÔNG phải
+    # `bnv2._NEO_LUAT_CHEP_TAY`: một oracle sinh từ sản phẩm sẽ co theo sản phẩm.
+    neo_protocol = [r for r in NEO_LUAT_DONG_BANG if r[1] == "docs/PROTOCOL_DA_PHIEN.md"]
+    dung(len(neo_protocol) == 2,
+         f"KHÔNG ĐO ĐƯỢC: oracle có {len(neo_protocol)} neo PROTOCOL, khối này dựng cho ĐÚNG 2")
+    for luat, tep_neo, cau in neo_protocol:
+        kia = [c for _l, _t, c in neo_protocol if c != cau]
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            cong = _cay_guong(tmp, bo_neo_luat=luat)
+            # RIG TRƯỚC KẾT QUẢ: mất đúng câu này, và câu KIA còn nguyên byte trong bản gương.
+            van_guong = (tmp / tep_neo).read_text(encoding="utf-8")
+            dung(cau not in van_guong,
+                 f"KHÔNG ĐO ĐƯỢC: `{luat}` — rig KHÔNG xoá được câu neo, ca sẽ xanh mà chẳng đo gì")
+            dung(all(van_guong.count(c) == 1 for c in kia),
+                 f"KHÔNG ĐO ĐƯỢC: `{luat}` — rig đụng cả câu neo KIA, lượt này mất HAI neo chứ không một")
+            r = subprocess.run([sys.executable, str(cong), "--root", str(tmp)],
+                               capture_output=True, text=True)
+            hop = r.stdout + r.stderr
+            ket_toi = [x for x in r.stderr.splitlines() if x.startswith("  ĐỎ")]
+            bang("Traceback" not in hop,
+                 f"mất RIÊNG neo `{luat}`: cổng CHẾT bằng traceback:\n{r.stderr[-400:]}")
+            bang(r.returncode == 2,
+                 f"mất RIÊNG neo `{luat}`: đòi rc=2, được {r.returncode}\n{r.stderr[-400:]}")
+            # ĐÚNG THUỘC TÍNH: thông báo phải nêu ĐÚNG luật mất neo — không phải chỉ "mất neo"
+            # chung chung, và KHÔNG được nêu luật kia (nêu cả hai = vẫn không phân biệt được).
+            bang(f"không còn câu biện minh cho `{luat}`" in hop,
+                 f"mất RIÊNG neo `{luat}`: thông báo không nêu ĐÚNG tên luật: {hop[-400:]!r}")
+            for _l, _t, _c in neo_protocol:
+                if _l != luat:
+                    bang(f"không còn câu biện minh cho `{_l}`" not in hop,
+                         f"mất RIÊNG neo `{luat}`: thông báo còn kết tội `{_l}` — hai neo che nhau")
+            bang("TỔNG: ĐẠT" not in r.stdout,
+                 f"mất RIÊNG neo `{luat}`: mất một neo mà vẫn `TỔNG: ĐẠT`: {r.stdout[-200:]!r}")
+            bang(not ket_toi,
+                 f"mất RIÊNG neo `{luat}`: {len(ket_toi)} biên nhận bị KẾT TỘI trong khi lỗi ở "
+                 f"NGUỒN — lỗi ĐO thành lỗi DỮ LIỆU: {ket_toi[:2]}")
     # LƯỢT LỖI HỖN HỢP: nguồn hỏng + một biên nhận sai THẬT ở chốt KHÔNG phụ thuộc nguồn. Trạng
     # thái thứ ba thắng ở mã thoát (rc=2), nhưng biên nhận sai VẪN phải được báo sai — "không đo
     # được hợp đồng" không phải "miễn kiểm" (reviewer: *"Bỏ mọi kiểm khi nguồn lỗi lại che vi
@@ -1939,6 +2009,25 @@ NO_DONG_BANG = {
 }
 
 
+@ca
+def c43_bang_neo_luat_cua_san_pham_phai_khop_ORACLE_chep_tay():
+    """`R8-01`: bảng neo của sản phẩm là TẬP CON KHÔNG ĐƯỢC CO của oracle chép tay.
+
+    Vì sao cần một ca riêng chứ không để `c28` gánh: `c28` xoá câu neo trong NGUỒN rồi đo cổng.
+    Phép làm yếu ở đây đi lối khác — bỏ một MỤC khỏi `_NEO_LUAT_CHEP_TAY` — và nếu fixture còn
+    lấy danh sách neo từ chính bảng ấy (bản trước) thì nó thôi xoá câu tương ứng, nguồn còn
+    nguyên, cổng rc=0 và MỌI ca xanh. Fixture co theo đúng thứ nó phải canh. Oracle nằm ở
+    `NEO_LUAT_DONG_BANG` — chép tay từ hai nguồn phụ, không import từ cổng."""
+    bang(tuple(bnv2._NEO_LUAT_CHEP_TAY) == NEO_LUAT_DONG_BANG,
+         f"`_NEO_LUAT_CHEP_TAY` LỆCH oracle chép tay:\n  sản phẩm={tuple(bnv2._NEO_LUAT_CHEP_TAY)}\n"
+         f"  oracle  ={NEO_LUAT_DONG_BANG}")
+    # …và mỗi câu của oracle phải CÓ THẬT, đúng một chỗ, trong nguồn nó khai. Thiếu chốt này thì
+    # một oracle chép sai (câu không tồn tại) làm `c28` xoá hụt và cả hai lượt xanh mà không đo gì.
+    for luat, tep_neo, cau in NEO_LUAT_DONG_BANG:
+        n = (GOC / tep_neo).read_text(encoding="utf-8").count(cau)
+        bang(n == 1, f"câu neo của `{luat}` khớp {n} chỗ trong `{tep_neo}`, đòi ĐÚNG 1")
+
+
 _mri_that = bnv2._mri
 _thieu_that = bnv2._thieu
 
@@ -2406,6 +2495,32 @@ def _dot_bien():
        lambda: _dot_bien_tep("    if loi_bm:\n        return {}, loi_bm", "    if False:\n        return {}, loi_bm"),
        "c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA",
        "phép B của reviewer: mất bảng bí danh bề mặt ⇒ `None` đi vào vòng unpack",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    # `R8-01` — HAI phép làm yếu reviewer chạy SỐNG SÓT qua toàn suite (`45/45 · 57/57 · 2/2`,
+    # rc=0, `TỔNG: ĐẠT`): mỗi cái bỏ ĐÚNG MỘT neo luật. Chúng sống được vì hàng PROTOCOL cũ của
+    # `c28` xoá CẢ HAI câu cùng lúc, nên luật còn lại vẫn làm hàng ấy đỏ. Nay mỗi neo có lượt
+    # riêng và mỗi mutant phải chết ở ĐÚNG thuộc tính: thông báo nêu tên luật CỦA NÓ.
+    _VONG_NEO = "    for luat, tep, cau in _NEO_LUAT_CHEP_TAY:"
+    do("m56_bo_RIENG_chot_neo_ASSURANCE_CUA_NGUOI",
+       lambda: _dot_bien_tep(_VONG_NEO,
+                             _VONG_NEO + '\n        if luat == "ASSURANCE_CUA_NGUOI":\n            continue'),
+       "c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA",
+       "mất neo `human_audited` của PROTOCOL §8 mà cổng vẫn nhận nguồn",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m57_bo_RIENG_chot_neo_ASSURANCE_CUA_MO_HINH",
+       lambda: _dot_bien_tep(_VONG_NEO,
+                             _VONG_NEO + '\n        if luat == "ASSURANCE_CUA_MO_HINH":\n            continue'),
+       "c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA",
+       "mất neo `cross_approved` của PROTOCOL §8 mà cổng vẫn nhận nguồn",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    # …và lối làm yếu THỨ HAI của cùng chốt: bỏ một MỤC khỏi bảng neo. Fixture bản trước lấy
+    # danh sách neo TỪ bảng ấy nên nó co theo và `c28` vẫn xanh; oracle chép tay bắt được.
+    do("m58_bo_MOT_MUC_khoi_bang_neo_cua_san_pham",
+       lambda: _dot_bien_tep(
+           '    ("ASSURANCE_CUA_NGUOI", "docs/PROTOCOL_DA_PHIEN.md",\n'
+           '     "`human_audited`: người audit có danh tính bền trên GitHub"),\n', ""),
+       "c43_bang_neo_luat_cua_san_pham_phai_khop_ORACLE_chep_tay",
+       "bảng neo CO LẠI trong im lặng — oracle chép tay không được co theo",
        doi_chung="c18_neo_git_DUNG_thi_qua")
 
     # R7-03 — TỰ KIỂM RIG: reviewer bơm mất hàng `_BE_MAT_BI_DANH` vào RIÊNG bản launcher mà rig

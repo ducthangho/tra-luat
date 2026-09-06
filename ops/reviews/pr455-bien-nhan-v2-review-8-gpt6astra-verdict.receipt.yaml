@@ -138,5 +138,20 @@ tuan_thu_cam: >-
   ngoai clone. Khong commit, khong push.
 
 trang_thai_va: >-
-  CHUA VA luc ghi bien nhan nay. Ba finding se duoc va o PR nay, boi mot phien rieng.
-  Bien nhan ton tai KHONG co nghia la da dong.
+  DA VA ca ba, tren nhanh claude/tra-luat-process-review-o4d7kb (PR #460).
+  R8-01: oracle doc lap NEO_LUAT_DONG_BANG (chep tay, khong lay tu bnv2._NEO_LUAT_CHEP_TAY);
+  _cay_guong(bo_neo_luat=...) xoa MOT neo chi dinh; hang PROTOCOL cua c28 tach thanh HAI luot,
+  moi luot mat dung mot cau va giu cau kia nguyen byte; them c43 khoa bang neo san pham voi
+  oracle. Do duoc: hai mutant cua reviewer TAI HIEN song sot truoc khi va (45/45 . 57/57 . 2/2,
+  rc=0, TONG: DAT), sau khi va thi m56/m57/m58 deu giet_that va chet dung thuoc tinh (thong bao
+  neu DUNG ten luat cua no, khong neu luat kia; m56/m57 chet o MA THOAT rc=2 chu khong o thong
+  bao). Dot bien chinh ban va tren ban sao tam: go khoi hai luot => m56/m57 SONG lai; cho c43
+  lay oracle tu san pham => m58 SONG lai.
+  R8-02 va R8-03: sua VAN BAN trong CHANGELOG (thong diep commit c0f18ac nam trong lich su
+  master, khong sua duoc - da noi thang dieu do). Bo "do ba lop"; ha lop quyen CLI xuong
+  NGHI VAN chua co trace; tach bang transport thanh hai hang cung don vi qua hai moc; sua
+  "ca sau rc=2" thanh 1 doi chung rc=0 + 5 nguon hong rc=2; neo dieu kien do cho m49.
+  So thu tu hinh dang "loi DO thanh loi DU LIEU": README.md sua NAM -> TU (executor dung),
+  kem dinh nghia hinh dang o CHANGELOG va docstring _muc_cam_theo_provider.
+  Nen sau va (head 5898e5f + ban va): 46/46 ca . 60/60 dot bien . 2/2 tu kiem . TONG: DAT;
+  CLI rc=0, 17 DAT v2, 0 vi pham, 0 KHONG DO DUOC, tong 70.

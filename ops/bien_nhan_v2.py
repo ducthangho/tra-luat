@@ -660,7 +660,13 @@ def _thieu(d: dict) -> list[str]:
 def _muc_cam_theo_provider(prov):
     """Mức assurance mà provider `prov` KHÔNG được tự khai → lý do. RỖNG khi nguồn chưa đo được.
 
-    `R7-01`, lần thứ TƯ cùng hình dạng trong PR này: khi nguồn provider hỏng, `PROVIDER_HOP_DONG`
+    `R7-01`, lần thứ TƯ cùng HÌNH DẠNG trong PR này — và hình dạng ấy có ĐỊNH NGHĨA, kẻo lần sau
+    lại đếm bằng trí nhớ rồi ra hai số ngược nhau (`R8-03` đo được: docstring này ghi TƯ còn
+    `ops/reviews/README.md` ghi NĂM): *một lỗi ĐO — nguồn/phụ thuộc hỏng, tức cổng KHÔNG BIẾT —
+    bị báo thành VI PHẠM của receipt, tức cổng KẾT TỘI một hiện vật đúng.* Không tính crash, mất
+    trạng thái, hay lỗi giàn đo không sinh cáo buộc. Bốn neo: `R4-02`@`4ef73e6` · `R5-01`@`670071b` ·
+    finding connector@`670071b` (vá ở `b7a53ba`) · `R7-01`@`ca960160`. Không có đợt thứ năm.
+    Khi nguồn provider hỏng, `PROVIDER_HOP_DONG`
     rỗng và bản trước suy *"không hợp đồng ⇒ không thẩm quyền"* cho MỌI provider ⇒ **11 biên
     nhận nguyên byte bị kết tội** `KHÔNG có hợp đồng` (rc=2 nhưng kèm 11 dòng ĐỎ), trong khi lỗi
     nằm ở NGUỒN. Mọi giới hạn suy từ provider chỉ được suy khi nguồn ĐÃ ĐO ĐƯỢC; nguồn hỏng thì

@@ -6443,11 +6443,14 @@ def r345_cac_phep_do_cuc_bo_van_dung():
             # `r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO`.
             # r355b — cross-review lượt 1 (codex) P1-01: sentinel VẪN có một giá trị làm
             # marker ĐÚNG. Đo được: `evaluate({"sys_platform": "khong_he_co"})` -> True.
-            # Đường ấy KHÔNG tới được qua hook (dòng 369 gọi `evaluate()` KHÔNG đối số,
-            # tức luôn dùng môi trường thật, mà `sys.platform` không bao giờ là chuỗi đó),
-            # nên rủi ro thực tế bằng 0. Vẫn đổi, vì một MÂU THUẪN đúng theo CẤU TẠO mạnh
-            # hơn một sentinel chỉ đúng chừng nào chưa ai đặt tên nền như vậy — đúng nếp
-            # "đảo danh sách CẤM thành danh sách CHO PHÉP" của kho. Đo lại cả bốn:
+            # Đường override ấy KHÔNG do caller của hook cung cấp (dòng 369 gọi
+            # `evaluate()` KHÔNG đối số), và CHƯA chứng minh được lỗi reachable trong đường
+            # hook thật đã đo. KHÔNG khẳng định "rủi ro bằng 0" cho mọi môi trường — lượt 2
+            # (codex) đo: `evaluate()` không đối số KHÔNG chứng minh `sys.platform` bất biến;
+            # sửa `sys.platform` ngay trong interpreter thì sentinel CŨ cho True kể cả khi
+            # không đối số, còn mâu thuẫn MỚI vẫn False. Đổi, vì một MÂU THUẪN đúng theo
+            # CẤU TẠO mạnh hơn một sentinel chỉ đúng chừng nào chưa ai đặt tên nền như vậy
+            # — đúng nếp "đảo danh sách CẤM thành danh sách CHO PHÉP" của kho. Đo lại cả bốn:
             #   mac_dinh=False · ep khong_he_co=False · ep win32=False · ep linux=False
             ("marker khong khop",
              'khong_he_ton_tai_r345; sys_platform == "win32" and sys_platform != "win32"\n', 0),

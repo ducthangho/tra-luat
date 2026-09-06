@@ -63,11 +63,14 @@ của nền chạy.
 **P1-01 — sentinel vẫn có MỘT giá trị làm marker ĐÚNG.** Đo được:
 `Requirement(...).marker.evaluate({"sys_platform": "khong_he_co"})` → `True`.
 
-Nói cho đúng phạm vi: đường ấy **không tới được qua hook** — `session-start.sh:369` gọi
-`evaluate()` **không đối số**, tức luôn dùng môi trường thật, mà `sys.platform` không bao giờ là
-chuỗi đó. Rủi ro thực tế bằng 0. Vẫn nhận, vì một **mâu thuẫn** đúng theo CẤU TẠO mạnh hơn
-một sentinel chỉ đúng chừng nào chưa ai đặt tên nền như vậy — cùng nếp *"danh sách CẤM không
-bao giờ đủ"*. Nay dùng `sys_platform == "win32" and sys_platform != "win32"`:
+Nói cho đúng phạm vi: đường override ấy **không do caller của hook cung cấp** —
+`session-start.sh:369` gọi `evaluate()` **không đối số** — và **chưa chứng minh được lỗi
+reachable trong đường hook thật đã đo**. KHÔNG khẳng định "rủi ro bằng 0" cho mọi môi trường:
+cross-review lượt 2 (codex) đo rằng `evaluate()` không đối số **không chứng minh `sys.platform`
+bất biến** — sửa `sys.platform` ngay trong interpreter thì sentinel CŨ cho `True` kể cả khi
+không đối số, còn mâu thuẫn MỚI vẫn `False`. Vẫn nhận, vì một **mâu thuẫn** đúng theo CẤU TẠO
+mạnh hơn một sentinel chỉ đúng chừng nào chưa ai đặt tên nền như vậy — cùng nếp *"danh sách
+CẤM không bao giờ đủ"*. Nay dùng `sys_platform == "win32" and sys_platform != "win32"`:
 
 | marker | mặc định | ép `khong_he_co` | ép `win32` | ép `linux` |
 |---|---|---|---|---|

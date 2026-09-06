@@ -1,0 +1,99 @@
+# BIEN NHAN v2 — cross-review luot 2 cua PR #455, reviewer codex, tren head c595292.
+#
+# LUOT NAY SOI CHINH BAN VA CUA LUOT 1 — va tim tiep 4 finding, trong do mot cai la
+# `tin dung gia` o tang NGU NGHIA cua chinh bang dot bien: `m7`/`m9` khong noi URL nhu ten
+# khai, nen ca dich chet vi ly do KHAC. `12/12` dung theo bo phan hang ma khong chung minh
+# 12 thuoc tinh da bi khoa.
+
+schema_version: 2
+receipt_id: pr455-bien-nhan-v2-review-2-codex-20260906-0bc966b1
+kind: review_delivery_receipt
+packet_id: 'PR455-BIEN-NHAN-V2'
+lease_id: khong-co-lease
+phase_key: PR455-CONG-LUOC-DO-BIEN-NHAN-V2
+luot: 2
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: changes_requested
+verdict_path: ops/reviews/pr455-bien-nhan-v2-review-2-codex-verdict.md
+verdict_sha256: b6f169f69cf719645b93ca0e2bcb4aff16295b2d8a09714ddb4b41beefd45814
+verdict_bytes: 22876
+reviewed_sha: c595292cb63fb8c09d7d7b482cda20f9d5f0917f
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  session_run_id: 0bc966b1409f4ca39f0f3707bdcb20d8
+  prompt_sha256: 2f091abac3779eae6510b9b3ca82bbfe96c1025ea9ef510512b4474538576767
+  prompt_kin_hoan_toan: true
+  thoi_luong_giay: 410.681
+  ma_thoat: 0
+  neo_boi_launcher: >-
+    launcher.py run boc codex exec trong CLONE ROI (1720 commit, khong nong), detached dung
+    reviewed_sha, --require-clean, prompt truyen qua bien PROMPT_FILE nen con doc BAN CHUP
+    BAT BIEN.
+  KHONG_do_duoc: >-
+    ID MODEL CU THE va phien ban cua no. Khai openai_codex/codex_cli la muc chinh xac nhat
+    do duoc.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    ADR-0040: bien nhan do tai khoan tac gia dang KHONG thanh required check hay merge
+    authorization.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Neo bang verdict_sha256 + commit DAU TIEN chua tep verdict. GHIM O COMMIT SAU, vi mot
+    commit khong chua duoc bam cua chinh no — cung ly do bon bien nhan v2 chuan cua kho lam
+    hai buoc.
+evidence_url: https://github.com/ducthangho/tra-luat/blob/GHIM_O_COMMIT_SAU/ops/reviews/pr455-bien-nhan-v2-review-2-codex-verdict.md
+authoritative_source: repo_file
+evidence_channel: repo_file
+
+phat_hien_chinh: >-
+  R2-01 (P1): trang thai chua xac minh van thanh cong XANH — bom deadbeef*5 vao mot bien nhan
+  ⇒ stderr in 1 KHONG DO DUOC ma rc=0 va TONG: DAT; kem hai cach doc anchor.loai (schema
+  strip(), dispatch tho) nen mot chuoi co khoang trang TRON khoi phep do; va hai loai mo neo
+  con lai (protected_evidence_ref, check_object) bi bo qua LANG LE.
+  R2-02 (P2): bam blob so tren byte DA CHUAN HOA — _git tra stdout.strip() nen cung mot blob
+  duoc chap nhan voi HAI digest khac nhau.
+  R2-03 (P2): ma tran khoa TEN yeu cau, chua khoa NHANH — ba dot bien san pham (bo kiem actor,
+  nhanh MRI khong-phai-dict, doi dieu kien assurance or thanh and) deu van 23/23, 12/12.
+  R2-04 (P2): m7/m9 KHONG noi URL nhu ten khai; ca dich chet vi ly do khac. Tin dung gia o
+  tang NGU NGHIA.
+  Reviewer cung DONG bon finding vong 1 va tu do lai tung cai.
+
+verdict_nguon: >-
+  launcher.py run boc codex exec trong clone roi day du 1720 commit, khong nong, detached
+  dung c595292, worktree sach, prompt neo sha256.
+verdict_doi_chieu: >-
+  CHUNG MINH: prompt nao chay tren head nao, cay sach, luot chay lam viec that (410,7 giay,
+  verdict 22.876 byte, stderr 537.790 byte). Ban trong kho BYTE-EXACT (cmp rc=0, sha256
+  b6f169f6). Reviewer TU TRICH REGEX TU AST cua ban va de kiem m7/m9 — khong viet regex thay
+  the, tuc do chinh thu dang chay. KHONG CHUNG MINH: identity model. KHONG DO DUOC.
+
+verdict_usage_caveats:
+  - id: BON-FINDING-VONG-2-DA-VA-nhung-VA-CAN-REVIEW-LAI
+    noi_dung: >-
+      Ca bon finding vong 2 da duoc va trong cung PR, nhung BAN VA CHUA duoc review. Day la
+      lan thu BA trong cung mot PR mot ban va sinh ra finding moi, nen dung doc "da va" thanh
+      "da dong". Chua dong.
+  - id: cross_approved-dua-tren-PROVIDER-khong-phai-MODEL
+    noi_dung: >-
+      Nhu cac luot truoc: muc cross_approved phan biet PROVIDER, do duoc bang launcher.py run.
+      Thu KHONG do duoc la MODEL nao trong provider ay.
+  - id: phan-cong-CAM-tu-soan-phan-chung
+    noi_dung: >-
+      Nhu cac luot truoc: cam reviewer tu soan chuoi tan cong. Do phu hep hon mot luot khong
+      rang buoc.
+
+delivered: true
+delivered_by: claude-session
+recorder_cung_la_nguoi_thi_cong: true

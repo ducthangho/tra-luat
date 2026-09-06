@@ -93,7 +93,12 @@ def v2_du():
         # URL blob GHIM COMMIT: `c22` vừa bắt được chính fixture này khai
         # `canonical_ancestry` với một URL PR — mỏ neo tự khai mà phép đo không chạy.
         "evidence_url": "https://github.com/o/r/blob/" + "c" * 40 + "/ops/reviews/a-verdict.md",
-        "model_reviewer_identity": {"provider": "openai_codex", "surface": "codex_cli"},
+        # Đủ HÌNH DẠNG attestation: provider trong danh sách cho phép · surface · và
+        # `session_run_id` (hoặc `KHONG_do_duoc` giải thích vì sao thiếu). Chốt `_mri` chặt
+        # hơn đã bắt chính fixture này — lần thứ hai trong đợt một chốt mới bắt fixture của
+        # chính bộ test, và cả hai lần fixture mới là thứ sai.
+        "model_reviewer_identity": {"provider": "openai_codex", "surface": "codex_cli",
+                                    "session_run_id": "f" * 32},
         "github_submitter_identity": {"actor": "ducthangho"},
         "anchor": {"loai": "canonical_ancestry", "cuong_do": "trung_binh"},
     }
@@ -112,19 +117,51 @@ def _pha_anchor_cuong_do(d):
 # `ANCHOR_KHOA` · gỡ `reviewed_sha` khỏi `TRUONG_VO_HUONG`; cả ba vẫn `15/15, 5/5`. Cùng
 # một hình dạng: có ca âm cho VÀI trường, không có cho TỪNG trường. Vá từng tên ca là vá
 # từng đột biến; ma trận là vá cái LỚP.
+# MA TRẬN YÊU CẦU — chép từ `PROTOCOL §8` dòng 453-454, **KHÔNG import từ cổng**.
+#
+# Mỗi mục: (tên yêu cầu, cách phá fixture, chuỗi phải có trong thông báo lỗi).
+# MỘT YÊU CẦU CÓ NHIỀU HÀNG — mỗi hàng phá một NHÁNH khác nhau. Vòng 1 sinh đúng một ca cho
+# mỗi TÊN yêu cầu và cross-review vòng 2 (R2-03) đo được ba đột biến sản phẩm vẫn sống:
+# bỏ kiểm `actor` trong `_gsi` · cho nhánh MRI không-phải-dict trả `None` · đổi điều kiện
+# assurance từ `or` thành `and`. Tên yêu cầu vẫn đủ, `c16` vẫn xanh — nhưng NHÁNH thì hở.
+# "Đúng một ca mỗi yêu cầu" là SÀN của độ phủ, không phải TRẦN.
 MA_TRAN = (
     ("schema_version",            lambda d: d.__setitem__("schema_version", 1),        "schema_version"),
+    ("schema_version",            lambda d: d.pop("schema_version"),                   "schema_version"),
     ("receipt_id",                lambda d: d.pop("receipt_id"),                       "receipt_id"),
-    # SHA VIẾT TẮT — chính ca reviewer dựng: bản trước chỉ đòi "chuỗi không rỗng".
+    ("receipt_id",                lambda d: d.__setitem__("receipt_id", "   "),        "receipt_id"),
+    # SHA VIẾT TẮT — ca reviewer vòng 1 dựng.
     ("reviewed_sha",              lambda d: d.__setitem__("reviewed_sha", "a" * 7),    "reviewed_sha"),
+    ("reviewed_sha",              lambda d: d.__setitem__("reviewed_sha", "A" * 40),   "reviewed_sha"),
+    ("reviewed_sha",              lambda d: d.pop("reviewed_sha"),                     "reviewed_sha"),
     ("verdict_path",              lambda d: d.pop("verdict_path"),                     "verdict_path"),
     ("verdict_sha256",            lambda d: d.__setitem__("verdict_sha256", "khong-phai-bam"), "verdict_sha256"),
+    ("verdict_sha256",            lambda d: d.__setitem__("verdict_sha256", "b" * 63), "verdict_sha256"),
     ("evidence_url",              lambda d: d.__setitem__("evidence_url", "http://e"), "evidence_url"),
-    # Ánh xạ KHÔNG RỖNG nhưng RỖNG NGHĨA — bản trước nhận `{x: 1}` là "có identity".
+    ("evidence_url",              lambda d: d.pop("evidence_url"),                     "evidence_url"),
+    # --- `model_reviewer_identity`: bốn NHÁNH, không phải một ---
     ("model_reviewer_identity",   lambda d: d.__setitem__("model_reviewer_identity", {"x": 1}), "model_reviewer_identity"),
-    # `null` HỢP LỆ (có ca dương riêng); `"banana"` / `false` / `[]` thì không.
+    ("model_reviewer_identity",   lambda d: d.__setitem__("model_reviewer_identity", "chuoi"), "model_reviewer_identity"),
+    ("model_reviewer_identity",   lambda d: d.__setitem__("model_reviewer_identity", {}), "model_reviewer_identity"),
+    ("model_reviewer_identity",   lambda d: d.__setitem__("model_reviewer_identity",
+                                                          {"provider": "khong-co-thuc"}), "CHO PHÉP"),
+    ("model_reviewer_identity",   lambda d: d.__setitem__("model_reviewer_identity",
+                                                          {"provider": "anthropic"}), "surface"),
+    ("model_reviewer_identity",   lambda d: d.__setitem__("model_reviewer_identity",
+                                                          {"provider": "anthropic", "surface": "cli"}),
+                                                          "session_run_id"),
+    # --- `github_submitter_identity`: bốn NHÁNH ---
     ("github_submitter_identity", lambda d: d.__setitem__("github_submitter_identity", "banana"), "github_submitter_identity"),
-    ("anchor",                    _pha_anchor_cuong_do,                                "anchor.cuong_do"),
+    ("github_submitter_identity", lambda d: d.__setitem__("github_submitter_identity", False), "github_submitter_identity"),
+    ("github_submitter_identity", lambda d: d.__setitem__("github_submitter_identity", []), "github_submitter_identity"),
+    # `actor` RỖNG trong một ánh xạ hợp lệ — đúng đột biến R2-03 số 1 mà vòng 1 mù.
+    ("github_submitter_identity", lambda d: d.__setitem__("github_submitter_identity", {"actor": "  "}), "actor"),
+    ("github_submitter_identity", lambda d: d.pop("github_submitter_identity"),        "github_submitter_identity"),
+    ("anchor",                    lambda d: d.pop("anchor"),                           "anchor"),
+    ("anchor",                    lambda d: d.__setitem__("anchor", "chuoi"),          "anchor"),
+    ("anchor.loai",               lambda d: d["anchor"].__setitem__("loai", ""),       "anchor.loai"),
+    ("anchor.loai",               lambda d: d["anchor"].__setitem__("loai", "canonical_ancestryy"), "CHO PHÉP"),
+    ("anchor.cuong_do",           _pha_anchor_cuong_do,                                "anchor.cuong_do"),
 )
 
 
@@ -204,9 +241,9 @@ def c4d_assurance_vuot_bang_chung_doc_lap_thi_DO():
     một mức assurance hàm ý review có thẩm quyền."""
     with tempfile.TemporaryDirectory() as t:
         d = v2_du()
-        d["model_reviewer_identity"] = {"provider": "anthropic",
+        d["model_reviewer_identity"] = {"provider": "anthropic", "surface": "claude_code_cli",
                                         "che_do": "subagent_trong_phien_dieu_phoi",
-                                        "neo_boi_launcher": None}
+                                        "KHONG_do_duoc": "khong co phien rieng"}
         d["assurance"] = "same_provider_approved"
         tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
         n, loi = _kiem(tmp, allowlist={}, no_da_do={})
@@ -216,6 +253,40 @@ def c4d_assurance_vuot_bang_chung_doc_lap_thi_DO():
         tmp2 = _cay(Path(t + "/x"), {"a-verdict.receipt.yaml": d})
         n2, loi2 = _kiem(tmp2, allowlist={}, no_da_do={})
         bang(n2 == 0, f"ĐỐI CHỨNG: `review_deferred` phải QUA, được: {loi2}")
+
+
+@ca
+def c4e_assurance_CHI_co_dieu_kien_che_do():
+    """Từng điều kiện ĐƠN ĐỘC phải đủ để chặn — R2-03 số 3 đo được đổi `or` thành `and` vẫn xanh
+    vì `c4d` bật CẢ HAI điều kiện cùng lúc. Một ca bật hết mọi điều kiện không phân biệt được
+    `or` với `and`."""
+    with tempfile.TemporaryDirectory() as t:
+        d = v2_du()
+        d["model_reviewer_identity"] = {"provider": "anthropic", "surface": "cli",
+                                        "session_run_id": "e" * 32,      # CÓ bằng chứng
+                                        "che_do": "subagent_trong_phien_dieu_phoi"}
+        d["assurance"] = "cross_approved"
+        tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
+        n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+        bang(n == 1 and "phiên điều phối" in loi[0],
+             f"tự khai subagent (dù CÓ run_id) phải chặn mức approval, được: {loi}")
+
+
+@ca
+def c4f_assurance_CHI_thieu_bang_chung():
+    with tempfile.TemporaryDirectory() as t:
+        d = v2_du()
+        d["model_reviewer_identity"] = {"provider": "anthropic", "surface": "cli",
+                                        "KHONG_do_duoc": "x"}          # KHÔNG che_do, KHÔNG run_id
+        d["assurance"] = "cross_approved"
+        tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
+        n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+        bang(n == 1 and "session_run_id" in loi[0],
+             f"thiếu bằng chứng độc lập phải chặn mức approval, được: {loi}")
+        d["model_reviewer_identity"]["phien_doc_lap"] = True
+        tmp2 = _cay(Path(t + "/y"), {"a-verdict.receipt.yaml": d})
+        n2, loi2 = _kiem(tmp2, allowlist={}, no_da_do={})
+        bang(n2 == 0, f"ĐỐI CHỨNG: khai `phien_doc_lap` tường minh phải QUA, được: {loi2}")
 
 
 @ca
@@ -265,7 +336,7 @@ def c16_MA_TRAN_phu_DUNG_tap_yeu_cau_cua_cong():
     Thêm một yêu cầu vào cổng mà quên ca âm ⇒ ĐỎ ở đây. Gỡ một yêu cầu khỏi cổng ⇒ cũng ĐỎ.
     Đây là chốt giữ cho ma trận không tụt lại phía sau lược đồ."""
     cua_cong = {k for k, _ in bnv2.YEU_CAU}
-    cua_test = {ten for ten, _, _ in MA_TRAN}
+    cua_test = {ten for ten, _, _ in MA_TRAN}   # nhiều hàng có thể trùng tên: đó là NHÁNH
     bang(cua_cong == cua_test,
          f"ma trận LỆCH tập yêu cầu của cổng.\n"
          f"      cổng có mà test thiếu ca âm: {sorted(cua_cong - cua_test)}\n"
@@ -475,6 +546,16 @@ def c21_object_khong_tra_duoc_la_KHONG_DO_DUOC_chu_khong_phai_DO():
         bang(not loi, f"object vắng KHÔNG được thành vi phạm: {loi}")
         bang(any("KHÔNG ĐO ĐƯỢC" in x and "reviewed_sha" in x for x in tk["chua_do"]),
              f"object vắng phải vào danh sách KHÔNG ĐO ĐƯỢC, được: {tk['chua_do']}")
+        # NỬA SAU, và đây là chỗ bản trước hở: soi danh sách nội bộ KHÔNG chứng minh CLI
+        # làm gì với nó. Cross-review vòng 2 (P1) đo được `1 KHÔNG ĐO ĐƯỢC` trên stderr mà
+        # `rc=0` + `TỔNG: ĐẠT` — cổng CI bắt buộc vẫn xanh với một SHA bịa. Ca phải neo
+        # MÃ THOÁT, không neo trạng thái trong bộ nhớ.
+        r = subprocess.run([sys.executable, str(CONG), "--root", str(tmp)],
+                           capture_output=True, text=True)
+        bang(r.returncode == bnv2.RC_KHONG_DO_DUOC,
+             f"CLI phải trả rc={bnv2.RC_KHONG_DO_DUOC} khi có KHÔNG ĐO ĐƯỢC, được {r.returncode}")
+        bang("TỔNG: ĐẠT" not in r.stdout,
+             f"CLI KHÔNG được in marker tổng đạt khi còn chưa đo: {r.stdout[-200:]!r}")
 
 
 @ca
@@ -590,6 +671,35 @@ NO_DONG_BANG = {
 }
 
 
+_mri_that = bnv2._mri
+_thieu_that = bnv2._thieu
+
+
+def _thieu_or_thanh_and(d):
+    """Đột biến: chốt chéo assurance đòi CẢ HAI điều kiện thay vì MỘT."""
+    loi = [msg for _, kt in bnv2.YEU_CAU for msg in [kt(d)] if msg]
+    mri = d.get("model_reviewer_identity")
+    if isinstance(mri, dict):
+        trong_phien = "subagent" in str(mri.get("che_do") or "").lower()
+        co_bang_chung = bool(str(mri.get("session_run_id") or "").strip()) or bool(mri.get("phien_doc_lap"))
+        khai = str(d.get("assurance") or d.get("assurance_dat") or "").strip()
+        if khai in bnv2.ASSURANCE_CAN_DOC_LAP and (trong_phien and not co_bang_chung):
+            loi.append("khai vượt bằng chứng (phiên điều phối)")
+    return loi
+
+
+_git_that = bnv2._git
+
+
+def _git_bo_kiem_duong_dan(root, *args, timeout=20):
+    """Đột biến GIỮ nhận dạng URL và GIỮ mọi lời gọi khác; chỉ làm phép tra đường dẫn
+    trong commit LUÔN trỏ về tệp có thật. Mô phỏng đúng "cổng thôi kiểm đường dẫn"."""
+    if len(args) >= 2 and args[0] == "rev-parse" and ":" in str(args[1]):
+        goc = str(args[1]).split(":", 1)[0]
+        return _git_that(root, "rev-parse", f"{goc}:ops/reviews/x-verdict.md", timeout=timeout)
+    return _git_that(root, *args, timeout=timeout)
+
+
 def _chay_1(fn):
     global _CA
     _CA = fn.__name__
@@ -611,15 +721,16 @@ def _dot_bien():
     """Mỗi đột biến phải làm ĐÚNG ca đích ĐỎ. Không đỏ ⇒ ca ấy rỗng."""
     ra = []
 
-    def do(ten, sua, ca_dich, mo_ta):
+    def do(ten, sua, ca_dich, mo_ta, doi_chung=None):
         # BẢN SAO SÂU, không phải tham chiếu: đột biến dưới đây sửa TẠI CHỖ
         # (`dict.__setitem__`), nên `setattr` lại chính object đã bẩn thì khôi phục ĐƯỢC SỐ
         # KHÔNG — và mọi ca chạy sau sẽ đo trên một cổng đã bị nới. Đúng bài học "đột biến
         # ghi vào tệp THẬT rồi khôi phục" của kho, chỉ đổi tệp thành object.
         cu = {k: copy.deepcopy(getattr(bnv2, k))
               for k in ("ALLOWLIST_CUTOVER", "NO_DA_DO", "YEU_CAU",
-                        "ANCHOR_LOAI_CHO_PHEP", "ANCHOR_KHOA", "_HEX40",
-                        "_HEX64", "_BLOB_URL", "_blob_khop")}
+                        "ANCHOR_LOAI_CHO_PHEP", "_HEX40",
+                        "_HEX64", "_BLOB_URL", "_blob_khop", "_doc_loai", "_git",
+                        "_mri", "_gsi", "_thieu", "RC_KHONG_DO_DUOC")}
         sua()
         try:
             fn = next(f for f in CA if f.__name__ == ca_dich)
@@ -628,6 +739,15 @@ def _dot_bien():
             for k, v in cu.items():
                 setattr(bnv2, k, v)
         ok = tt == "giet_that"
+        # ĐỐI CHỨNG DƯỚI ĐỘT BIẾN (R2-04): một đột biến "từ chối tất cả" cũng giết được ca
+        # đích, nhưng nó đo SỰ SỤP ĐỔ chứ không đo thuộc tính được công bố. Nếu ca dương vẫn
+        # phải xanh dưới đột biến mà nó đỏ, thì đây KHÔNG phải răng.
+        if ok and doi_chung:
+            fn_dc = next(f for f in CA if f.__name__ == doi_chung)
+            tt_dc, ct_dc = _chay_1(fn_dc)
+            if tt_dc != "qua":
+                ok = False
+                mo_ta += f" — NHƯNG đối chứng {doi_chung} cũng đỏ ({tt_dc}): đột biến phá cả cổng"
         ra.append((ten, ca_dich, ok, tt, ((ct or "").splitlines() or [""])[0][:80]))
         print(f"  {'CÓ RĂNG ' if ok else 'KHÔNG RĂNG'} {ten:38s} → {ca_dich} = {tt}  ({mo_ta})")
 
@@ -664,21 +784,43 @@ def _dot_bien():
        lambda: setattr(bnv2, "_HEX40", __import__("re").compile(r"\A[0-9a-f]{7,40}\Z")),
        "c17_MA_TRAN_moi_yeu_cau_co_MOT_ca_am",
        "đúng ca reviewer dựng: SHA 7 ký tự phải ĐỎ")
-    do("m7_bo_hoan_toan_phep_do_MO_NEO_GIT",
-       lambda: setattr(bnv2, "_BLOB_URL", __import__("re").compile(r"\\AKHONG_KHOP_GI\\Z")),
-       "c19_neo_git_SAI_DUONG_DAN_thi_DO", "gỡ phép đo mỏ neo ⇒ trỏ hụt lọt")
+    do("m7_bo_phep_kiem_DUONG_DAN_trong_commit",
+       lambda: setattr(bnv2, "_git", _git_bo_kiem_duong_dan),
+       "c19_neo_git_SAI_DUONG_DAN_thi_DO", "bỏ kiểm đường dẫn, GIỮ nhận dạng URL",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
     # Bản đầu của m8 nhắm `_HEX64` vào `c17` và KHÔNG CÓ RĂNG: nới chốt hình dạng không
     # làm ca ma trận đỏ vì fixture ấy không mang mỏ neo blob. Đột biến đo số không thì phải
     # sửa cho đúng đích, không phải bỏ đi — nay nó nhắm thẳng phép so băm blob.
+    # R2-04: m7/m9 bản trước KHÔNG nới URL như tên khai — chúng làm verifier TỪ CHỐI ngay ở
+    # hình dạng, nên ca đích chết vì lý do KHÁC và `12/12` không chứng minh 12 thuộc tính đã
+    # bị khoá. Đây là `tin_dung_gia` ở tầng NGỮ NGHĨA: assert có chạy, nhưng đo khác điều
+    # được công bố. Nay mỗi đột biến kèm ĐỐI CHỨNG `c18` (mỏ neo đúng) phải VẪN QUA — một
+    # đột biến "từ chối tất cả" sẽ rớt đối chứng ấy thay vì lĩnh tín dụng.
     do("m9_cho_canonical_ancestry_dung_URL_khong_ghim",
-       lambda: setattr(bnv2, "_BLOB_URL", __import__("re").compile(r"\\A(?:.*)\\Z")),
-       "c19_neo_git_SAI_DUONG_DAN_thi_DO", "nới dạng URL ⇒ phép đo trỏ hụt")
+       lambda: setattr(bnv2, "_doc_loai", lambda a: "protected_evidence_ref"),
+       "c22_canonical_ancestry_ma_URL_khong_ghim_thi_DO", "dispatch đọc sai loại ⇒ trốn phép đo",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m8_neo_git_khong_so_bam_blob",
        lambda: setattr(bnv2, "_blob_khop", lambda a, b: True),
        "c20_neo_git_BAM_LECH_thi_DO", "cổng thôi so băm blob")
-    do("m6_bo_kiem_cuong_do_cua_anchor",
-       lambda: setattr(bnv2, "ANCHOR_KHOA", ("loai",)),
-       "c17_MA_TRAN_moi_yeu_cau_co_MOT_ca_am", "đột biến reviewer chạy được, bản cũ mù")
+    do("m6_bo_yeu_cau_anchor_cuong_do",
+       lambda: setattr(bnv2, "YEU_CAU", tuple(x for x in bnv2.YEU_CAU if x[0] != "anchor.cuong_do")),
+       "c16_MA_TRAN_phu_DUNG_tap_yeu_cau_cua_cong", "gỡ một yêu cầu con của anchor")
+    do("m12_assurance_doi_OR_thanh_AND",
+       lambda: setattr(bnv2, "_thieu", _thieu_or_thanh_and),
+       "c4e_assurance_CHI_co_dieu_kien_che_do", "R2-03 số 3: một ca bật cả hai điều kiện thì mù")
+    do("m13_go_tong_hop_trang_thai_THU_BA",
+       lambda: setattr(bnv2, "RC_KHONG_DO_DUOC", bnv2.RC_SACH),
+       "c21_object_khong_tra_duoc_la_KHONG_DO_DUOC_chu_khong_phai_DO",
+       "KHÔNG ĐO ĐƯỢC lại thành cổng xanh")
+    do("m10_bo_kiem_actor_cua_submitter",
+       lambda: setattr(bnv2, "_gsi", lambda d: None if "github_submitter_identity" in d
+                       else "thiếu khoá `github_submitter_identity`"),
+       "c17_MA_TRAN_moi_yeu_cau_co_MOT_ca_am", "R2-03 số 1: vòng 1 mù với nhánh này")
+    do("m11_MRI_khong_phai_dict_van_qua",
+       lambda: setattr(bnv2, "_mri", lambda d: None if not isinstance(
+           d.get("model_reviewer_identity"), dict) else _mri_that(d)),
+       "c17_MA_TRAN_moi_yeu_cau_co_MOT_ca_am", "R2-03 số 2: nhánh không-phải-dict")
     return ra
 
 

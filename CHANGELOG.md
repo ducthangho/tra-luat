@@ -73,9 +73,38 @@ Nên bản vá không thêm vài ca có tên mà đổi **cơ chế**: một `MA
 ca âm cho MỖI yêu cầu, cộng `c16` đòi ma trận phủ **đúng** tập yêu cầu của cổng — thêm hoặc bớt
 một yêu cầu mà quên ca âm là ĐỎ.
 
+## Vòng ba: sáu finding nữa, và một `tín dụng giả` ở tầng NGỮ NGHĨA
+
+Vòng 2 (head `c595292`, hai reviewer độc lập) ra tiếp **3 P1 + 3 P2** — trong đó ba chỗ nữa
+cùng một hình dạng, và một chỗ là bệnh của chính bộ chấm đột biến:
+
+- **`KHÔNG ĐO ĐƯỢC` vẫn thành cổng XANH.** Đo: bơm `deadbeef`×5 vào một biên nhận ⇒ stderr
+  in `1 KHÔNG ĐO ĐƯỢC`, mà **`rc=0` và `TỔNG: ĐẠT`** — một SHA bịa đi qua được cổng CI bắt
+  buộc. Chính docstring của tệp ấy viết *"một cổng tự tắt khi thiếu công cụ là cổng không tồn
+  tại đúng lúc nó cần nhất"*, rồi tôi dựng đúng cái ngược lại. Nay `chua_do` không rỗng ⇒
+  **`rc=2`** và KHÔNG in marker tổng đạt. Mã 2 nói *không kết luận được*, khác mã 1.
+- **`canonical_ancestry` kiểm bằng `cat-file -e` = object TỒN TẠI**, nên một commit nhánh rẽ
+  hay dangling vẫn qua. Nay kiểm **TỔ TIÊN** của HEAD đang validate.
+- **`_mri` nhận `{provider: "bất kỳ chuỗi nào"}`** — lần thứ ba cùng một bệnh ở đúng trường
+  ấy, mỗi lần chật hơn một nấc: nhận mọi ánh xạ → đòi có khoá → nay đòi provider thuộc danh
+  sách **CHO PHÉP** + `surface` + (`session_run_id` hoặc `KHONG_do_duoc` giải thích).
+- **Hai cách đọc cùng một trường.** `_anchor` chuẩn hoá `loai` bằng `strip()` còn dispatch so
+  giá trị THÔ ⇒ `" canonical_ancestry "` qua chốt hình dạng rồi **trốn** khỏi phép đo git.
+  Lỗi không nằm ở phép so nào — nó nằm ở chỗ có **HAI**.
+- **Băm blob so trên byte ĐÃ CHUẨN HOÁ**: `_git` trả `stdout.strip()`, nên cùng một blob được
+  chấp nhận với **hai digest khác nhau**. Nay chỉ đọc đường bytes.
+- **`m7`/`m9` KHÔNG nới URL như tên khai** — chúng làm verifier từ chối ngay ở hình dạng, nên
+  ca đích chết vì lý do KHÁC. `12/12` đúng theo bộ phân hạng mà **không chứng minh 12 thuộc
+  tính đã bị khoá**. Đây là `tín dụng giả` ở tầng **NGỮ NGHĨA**, tầng thứ ba của cùng lớp lỗi
+  `R5-01`. Nay mỗi đột biến kèm **đối chứng dương phải VẪN XANH dưới đột biến** — một đột biến
+  "từ chối tất cả" sẽ rớt đối chứng thay vì lĩnh tín dụng.
+
+Và một chỗ bộ chấm **không với tới được predicate**: `YEU_CAU` giữ tham chiếu hàm lúc dựng
+bảng, nên hai đột biến nhắm `_mri`/`_gsi` không đổi được gì. Nay bảng gọi qua tên toàn cục.
+
 ## Răng
 
-`ops/bien_nhan_v2_test.py`: **22 ca · 11/11 đột biến CÓ RĂNG**, gồm đúng hai thứ protocol đòi —
+`ops/bien_nhan_v2_test.py`: **25 ca · 16/16 đột biến CÓ RĂNG**, gồm đúng hai thứ protocol đòi —
 biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
 của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`
 lúc nạp nên **tự nở theo** khi ai sửa mã nguồn — đúng bệnh mà chú thích cách đó ba chục dòng vừa

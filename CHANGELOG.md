@@ -1,3 +1,45 @@
+# ★ dev-side — r349: va chạm vân tay (im lặng SAI), và một chẩn đoán tự mâu thuẫn (2026-09-06)
+
+Vòng 9 ra năm finding; **một cái tôi đã tự tìm và vá ở r348 trước khi lượt review về** (`..`
+trong RECORD), nên hai bên gặp nhau độc lập. Bốn cái còn lại đều tái hiện trước khi vá.
+
+## Ba lỗ của khối băm — cái đầu thuộc lớp chưa từng gặp trong chuỗi này
+
+Tám vòng trước toàn **báo động giả** (nói hỏng trong khi đúng). Lỗ này ngược lại: **im lặng
+SAI**. Băm nội dung THÔ nên hai bố cục include khác nhau cho **cùng một chuỗi byte** —
+chuyển `somepkg` từ tệp `-c` (chỉ *ràng buộc*) sang tệp `-r` (*CÀI THẬT*) ⇒ vân tay y hệt
+⇒ mốc sống sót ⇒ **gói mới khai báo không bao giờ được cài**. Chữa bằng đóng KHUNG từng
+tệp (độ dài + đường dẫn + độ dài + nội dung), nên không bố cục nào trùng được bố cục khác.
+
+Hai lỗ còn lại cùng họ "luật của pip rộng hơn luật của tôi": một dòng **chú thích** kết
+thúc bằng dấu chéo ngược kéo chỉ thị `-r` kế tiếp vào chính nó rồi bị cắt mất (pip miễn
+trừ dòng khớp `COMMENT_RE` khỏi phép nối), và **đối số dính liền** `-rextra.txt` là một
+token duy nhất mà không nhánh nào nhận ra.
+
+Đo lại: **7/7** — ba lỗ mới đóng, bốn dạng cũ không hồi quy.
+
+## Chẩn đoán tự mâu thuẫn
+
+`_doc_dep_probe` tính `co = pypdf or pdfplumber` (**đúng**) nhưng vẫn in `loi_import`
+(**sai**): `pypdf` hỏng + `pdfplumber` chạy ⇒ `co=True` mà hậu quả vẫn ghi *"MỌI .pdf bị
+chặn … cài lại phụ thuộc"*. Cùng doctrine với `codex login status` NÓI DỐI — một công cụ
+báo sai trạng thái **tệ hơn** công cụ vắng mặt, vì nó đẩy người đọc đi sai hướng. Nay:
+còn đường chạy thì nói "đường PDF vẫn chạy" và **vẫn nhắc** backend hỏng (không nuốt thông
+tin chẩn đoán); hỏng thật thì vẫn nói bị chặn. Ba trạng thái đo đủ, có răng hai chiều.
+
+## Hai lần fixture của tôi sai chứ không phải mã sai
+
+Đo backend PDF, lần đầu tôi kết luận nhầm vì môi trường thật vẫn có `pypdf` nên ca "cả hai
+thiếu" **dựng không thành**; lần hai tôi quên tạo `pdfplumber.py` nên ca "dự phòng chạy"
+đo nhầm sang "dự phòng thiếu". Phải chặn bằng meta-path finder mới dựng đúng ba trạng
+thái. Đúng bệnh **"ca có MẶT khác ca có ĐO"**: cả hai lần ca vẫn chạy và vẫn in số — chỉ
+là số ấy không đo cái tôi nghĩ nó đo.
+
+Cổng: 7/7 ca vân tay · 3/3 trạng thái backend PDF · `launcher_test` **180/180** (bỏ qua 1 —
+fixture Windows) · `tl --selftest` **1709/1709** · ruff `--select F` delta so `6f97fda` =
+**0** (`ops_misc.py` 403/403 · `launcher_test.py` 4/4) · `bash -n` OK · `git diff --check`
+rc=0.
+
 # ★ dev-side — r348: đường lui của r347 mang vào một BÁO ĐỘNG GIẢ, tự tìm ra (2026-09-06)
 
 `_module_cua()` — thứ vừa thêm ở r347 để chữa lỗ Python <3.10 — suy **sai** cho gói **chỉ

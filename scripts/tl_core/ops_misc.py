@@ -1076,14 +1076,27 @@ def _doc_dep_probe() -> list:
             # chỉ Ctrl-C được xuyên qua vì đó là ý người dùng, không phải trạng thái của module.
             return False
 
+    # r349 — MỘT backend HỎNG mà backend KIA chạy thì đường PDF KHÔNG bị chặn, nên đừng
+    # nói là bị chặn. Bản r337 tính `co` bằng `pypdf or pdfplumber` (đúng) nhưng vẫn in
+    # `loi_import` (sai): `pypdf` hỏng + `pdfplumber` chạy ⇒ `co=True` mà hậu quả vẫn ghi
+    # "MỌI .pdf bị chặn ... cài lại phụ thuộc". Một chẩn đoán tự mâu thuẫn thì đẩy người
+    # đọc đi sai hướng — cùng doctrine với `codex login status` NÓI DỐI.
+    _pdf_co = _co_mod("pypdf") or _co_mod("pdfplumber")
+    if _pdf_co:
+        # Còn đường chạy: chỉ NHẮC backend hỏng, không tuyên bố bị chặn.
+        _pdf_hq = ("đường PDF vẫn chạy" + (
+            " (nhưng " + "; ".join(f"{k} → {v}" for k, v in loi_import.items())
+            + " — bản dự phòng đang gánh)" if loi_import else ""))
+    elif loi_import:
+        _pdf_hq = ("MỌI .pdf bị chặn (reason=pdf_probe_unavailable, r315). "
+                   "CÓ MẶT nhưng import HỎNG ("
+                   + "; ".join(f"{k} → {v}" for k, v in loi_import.items())
+                   + ") — cài lại phụ thuộc: pip install -r requirements.txt")
+    else:
+        _pdf_hq = ("MỌI .pdf bị chặn (reason=pdf_probe_unavailable, r315). "
+                   "Cài: pip install pypdf")
     return [
-        {"ten": "pypdf|pdfplumber", "bat_buoc": True,
-         "co": _co_mod("pypdf") or _co_mod("pdfplumber"),
-         "hau_qua": "MỌI .pdf bị chặn (reason=pdf_probe_unavailable, r315). "
-                    + ("CÓ MẶT nhưng import HỎNG ("
-                       + "; ".join(f"{k} → {v}" for k, v in loi_import.items())
-                       + ") — cài lại phụ thuộc: pip install -r requirements.txt"
-                       if loi_import else "Cài: pip install pypdf")},
+        {"ten": "pypdf|pdfplumber", "bat_buoc": True, "co": _pdf_co, "hau_qua": _pdf_hq},
         {"ten": "pdftotext (poppler-utils)", "bat_buoc": True,
          "co": bool(_sh319.which("pdftotext")),
          "hau_qua": "không bóc được text .pdf. Cài: apt-get install poppler-utils"},

@@ -6684,6 +6684,131 @@ def r348_dot_bien_bo_isidentifier_lam_ca_dich_DO():
              "dot bien go `isidentifier()` VAN xanh — ca dich khong do chot ay")
 
 
+# r349 — BA lỗ của khối băm vân tay, tất cả đều làm MỐC SỐNG SÓT SAI, và một chẩn đoán
+# TỰ MÂU THUẪN. Cả bốn tái hiện được trước khi vá.
+_R349_VT = [
+    # (nhãn, requirements.txt, tệp include, biến môi trường)
+    ("chuyen dong giua hai tep include", None, None, {}),   # xu ly rieng ben duoi
+    ("chu thich ket thuc dau cheo nguoc", "# chu thich \\\n-r extra.txt\n", "extra.txt", {}),
+    ("doi so dinh lien -rextra.txt",      "-rextra.txt\n",                  "extra.txt", {}),
+    ("cu: -r extra.txt",                  "-r extra.txt\n",                 "extra.txt", {}),
+    ("cu: -r co nhay",                    "-r 'extra file.txt'\n",          "extra file.txt", {}),
+    ("cu: noi dong that",                 "-r \\\nextra.txt\n",             "extra.txt", {}),
+    ("cu: --requirement=$BIEN",           "--requirement=${REQ}\n",         "extra.txt", {"REQ": "extra.txt"}),
+]
+
+
+@ca
+def r349_van_tay_khong_duoc_de_moc_song_sot_sai():
+    """Ba lỗ mới + bốn dạng cũ, đo theo HÀNH VI: sửa tệp include ⇒ vân tay phải ĐỔI.
+
+    Lỗ nguy nhất là VA CHẠM: bản trước băm nội dung THÔ nên hai bố cục include khác nhau
+    cho **cùng một chuỗi byte**. Chuyển `somepkg` từ tệp `-c` (chỉ ràng buộc) sang tệp
+    `-r` (CÀI THẬT) ⇒ vân tay y hệt ⇒ mốc sống sót ⇒ gói mới khai báo không bao giờ được
+    cài. Chữa bằng đóng KHUNG từng tệp (độ dài + đường dẫn + độ dài + nội dung).
+    """
+    duong = LAUNCHER.parent.parent / "hooks" / "session-start.sh"
+    ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
+    if ly_do:
+        return ly_do
+    if os.name == "nt":
+        return "bo qua: khoi VAN_TAY la shell POSIX"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        lot = []
+        # VA CHAM: cung chuoi byte, hai bo cuc khac nhau.
+        (d / "requirements.txt").write_text("-r req.txt\n-c con.txt\n", encoding="utf-8")
+        (d / "req.txt").write_text("", encoding="utf-8")
+        (d / "con.txt").write_text("somepkg\n", encoding="utf-8")
+        a = _r347_van_tay(d, {})
+        (d / "req.txt").write_text("somepkg\n", encoding="utf-8")
+        (d / "con.txt").write_text("", encoding="utf-8")
+        b = _r347_van_tay(d, {})
+        if not a or a == b:
+            lot.append("chuyen dong giua hai tep include (VA CHAM)")
+        for nhan, reqs, ten, env in _R349_VT[1:]:
+            (d / "requirements.txt").write_text(reqs, encoding="utf-8")
+            (d / ten).write_text("pypdf>=3.0\n", encoding="utf-8")
+            a = _r347_van_tay(d, env)
+            (d / ten).write_text("pypdf>=4.0\n", encoding="utf-8")
+            b = _r347_van_tay(d, env)
+            if not a or a == b:
+                lot.append(nhan)
+        bang(not lot, "van tay KHONG DOI (moc song sot sai): " + " · ".join(lot))
+
+
+@ca
+def r349_backend_PDF_du_phong_chay_thi_dung_noi_la_bi_chan():
+    """Một chẩn đoán TỰ MÂU THUẪN đẩy người đọc đi sai hướng.
+
+    r337 tính `co = pypdf or pdfplumber` (đúng) nhưng vẫn in `loi_import` (sai): `pypdf`
+    hỏng + `pdfplumber` chạy ⇒ `co=True` mà hậu quả vẫn ghi *"MỌI .pdf bị chặn … cài lại
+    phụ thuộc"*. Cùng doctrine với `codex login status` NÓI DỐI — công cụ báo sai trạng
+    thái tệ hơn công cụ vắng mặt.
+    """
+    import sys as _s
+    import tempfile as _tf
+    goc = Path(__file__).resolve().parents[2] / "scripts"
+    duong = goc / "tl_core" / "ops_misc.py"
+    ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
+    if ly_do:
+        return ly_do
+    them = str(goc) not in _s.path
+    if them:
+        _s.path.insert(0, str(goc))
+    try:
+        import tl_core.ops_misc as om
+    except ImportError as e:
+        return f"KHONG DO DUOC: khong import duoc ops_misc ({e})"
+
+    class _Chan:
+        def __init__(self, ten):
+            self.ten = set(ten)
+
+        def find_spec(self, name, path=None, target=None):
+            if name in self.ten:
+                raise ModuleNotFoundError(name)
+            return None
+
+    def do(hong, tot, chan):
+        cu = {t: _s.modules.pop(t, None) for t in ("pypdf", "pdfplumber")}
+        with _tf.TemporaryDirectory() as td2:
+            p = Path(td2)
+            for t in hong:
+                (p / f"{t}.py").write_text("raise BaseException('r349')\n", encoding="utf-8")
+            for t in tot:
+                (p / f"{t}.py").write_text("", encoding="utf-8")
+            _s.path.insert(0, td2)
+            f = _Chan(chan)
+            _s.meta_path.insert(0, f)
+            try:
+                return next(x for x in om._doc_dep_probe() if x["ten"].startswith("pypdf"))
+            finally:
+                _s.meta_path.remove(f)
+                _s.path.remove(td2)
+                for t, m in cu.items():
+                    _s.modules.pop(t, None)
+                    if m is not None:
+                        _s.modules[t] = m
+    try:
+        d1 = do(["pypdf"], ["pdfplumber"], [])
+        bang(d1["co"] is True, "backend du phong chay ma `co` van False")
+        bang("bị chặn" not in d1["hau_qua"],
+             f"du phong CHAY ma van noi bi chan: {d1['hau_qua'][:110]!r}")
+        bang("pypdf" in d1["hau_qua"],
+             "khong nhac backend hong — mat thong tin chan doan that")
+        # RĂNG hai chiều: hỏng THẬT thì vẫn phải nói bị chặn.
+        d2 = do(["pypdf"], [], ["pdfplumber"])
+        bang(d2["co"] is False and "bị chặn" in d2["hau_qua"],
+             "ca hai duong hong ma khong noi bi chan — chot mat rang")
+        d3 = do([], [], ["pypdf", "pdfplumber"])
+        bang(d3["co"] is False and "pip install pypdf" in d3["hau_qua"],
+             "thieu han ma khong khuyen cai")
+    finally:
+        if them and str(goc) in _s.path:
+            _s.path.remove(str(goc))
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [

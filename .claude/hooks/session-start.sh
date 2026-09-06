@@ -189,21 +189,27 @@ if [ -f requirements.txt ]; then
   # (KHONG DO DUOC != giong nhau): tep xuat hien lai sau nay se doi bam.
   VAN_TAY="$( "$PY" -c "
 import hashlib, os, re, shlex, sys
-# r347 — PHAN TICH CHI THI INCLUDE THEO LUAT PIP, khong bang mot regex hep.
-# Ban truoc bo sot ba dang ma pip DEU NHAN: duong dan CO NHAY, dong NOI bang dau cheo
-# nguoc, va BIEN MOI TRUONG. Ca ba deu khien tep duoc include khong lot vao van tay ⇒
-# sua no ma van tay KHONG DOI ⇒ moc song sot ⇒ hook bo qua cai dat.
-# Dung shlex de tach token (no lo dau nhay) + expandvars cho bien moi truong.
+# r349 — BA lo cua khoi bam, tat ca deu lam MOC SONG SOT SAI (do duoc truoc khi va):
+#  (1) VA CHAM: bam noi dung THO nen hai bo cuc include khac nhau cho cung mot chuoi byte.
+#      Chuyen 'somepkg' tu con.txt sang req.txt (mot ben rang buoc, mot ben CAI THAT) ⇒
+#      van tay Y HET. Chua bang cach dong KHUNG tung tep: do dai duong dan + duong dan +
+#      do dai noi dung + noi dung, nen khong bo cuc nao trung duoc bo cuc khac.
+#  (2) NOI DONG NUOT CHI THI: mot dong CHU THICH ket thuc bang dau cheo nguoc keo dong
+#      '-r' ke tiep vao chinh no, roi buoc cat chu thich xoa ca hai. pip KHONG the:
+#      no mien tru dong khop COMMENT_RE khoi phep noi. Chua bang cach kiem tra truoc.
+#  (3) DOI SO DINH LIEN: '-rextra.txt' la mot token duy nhat sau shlex, khong nhanh nao
+#      nhan ra. pip nhan dang nay va giai duoc.
 CT = re.compile(r'(^|\\s)#.*\$')
 CHI_THI = ('-r', '--requirement', '-c', '--constraint')
+NGAN = ('-r', '-c')
 h = hashlib.sha256()
 da = set()
 
 def cac_dong(noi_dung):
-    # Noi dong bi cat bang dau cheo nguoc TRUOC khi cat chu thich, dung nhu pip.
     gop, dem = [], ''
     for d in noi_dung.splitlines():
-        if d.endswith(chr(92)):
+        # Dong CHU THICH khong bao gio la dong noi — dung luat cua pip.
+        if d.endswith(chr(92)) and not CT.search(d):
             dem += d[:-1]
             continue
         gop.append(dem + d)
@@ -212,18 +218,24 @@ def cac_dong(noi_dung):
         gop.append(dem)
     return gop
 
+def khung(nhan, du_lieu):
+    # Dong khung: do dai + noi dung cho CA HAI phan, nen khong ghep nao trung ghep khac.
+    h.update(str(len(nhan)).encode() + b':' + nhan)
+    h.update(str(len(du_lieu)).encode() + b':' + du_lieu)
+
 def an(duong):
     thuc = os.path.realpath(duong)
     if thuc in da:
         return
     da.add(thuc)
+    nhan = os.path.relpath(thuc, os.getcwd()).encode('utf-8', 'replace')
     try:
         noi_dung = open(duong, 'rb').read()
     except OSError:
-        # KHONG DO DUOC != giong nhau: dua chinh duong dan vao bam.
-        h.update(b'KHONG_DOC_DUOC:' + duong.encode('utf-8', 'replace'))
+        # KHONG DO DUOC != giong nhau.
+        khung(nhan, b'KHONG_DOC_DUOC')
         return
-    h.update(noi_dung)
+    khung(nhan, noi_dung)
     goc = os.path.dirname(os.path.abspath(duong))
     for dong in cac_dong(noi_dung.decode('utf-8', 'replace')):
         dong = CT.sub('', dong).strip()
@@ -232,7 +244,7 @@ def an(duong):
         try:
             tok = shlex.split(dong)
         except ValueError:
-            h.update(b'KHONG_TACH_DUOC:' + dong.encode('utf-8', 'replace'))
+            khung(b'KHONG_TACH_DUOC', dong.encode('utf-8', 'replace'))
             continue
         i = 0
         while i < len(tok):
@@ -242,6 +254,8 @@ def an(duong):
             elif t in CHI_THI and i + 1 < len(tok):
                 con = tok[i + 1]
                 i += 1
+            elif len(t) > 2 and t[:2] in NGAN:
+                con = t[2:]          # dang dinh lien: -rextra.txt
             i += 1
             if con:
                 an(os.path.join(goc, os.path.expandvars(con)))

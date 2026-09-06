@@ -6430,7 +6430,20 @@ def r345_cac_phep_do_cuc_bo_van_dung():
             ("ban thoa",                   "pypdf>=3.0\n", 0),
             ("lech ban",                   "pypdf>=4.0\n", 1),
             ("marker khong khop",          'pywin32; sys_platform == "win32"\n', 0),
-            ("marker chua dau thang",      'pypdf; os_name == "posix#x"\n', 0),
+            # r356 — HANG NAY TUNG KHONG THE DO. Ban cu (`pypdf; os_name == "posix#x"`,
+            # mong 0) cho 0 o CA HAI nhanh: luat DUNG thi marker `==` sai tren moi nen ⇒
+            # `continue`; luat HONG thi dong bi cat con `pypdf; os_name == "posix` ⇒ `_Req`
+            # nem ⇒ `except BaseException: continue`. Hai duong khac nhau, CUNG mot so, nen
+            # cai `#` — thu duy nhat hang nay sinh ra de canh — khong quyet dinh gi.
+            # Do duoc (06-09-2026, Windows 11 py3.13.1 VA Linux/WSL py3.12.3): thay
+            # `_CHU_THICH` bang luat tho `re.compile(r"#.*$")` thi ca dich VAN XANH.
+            #
+            # Ban moi lat ky vong sang 1 va doi `==` thanh `!=`: marker DUNG tren moi nen ⇒
+            # goi vang mat lo ra ⇒ 1. Luat hong van cat thanh `... != "posix` ⇒ parse loi ⇒
+            # 0 ⇒ ca dich DO. Hang nay va hang "goi thieu han" dung CHUNG mot goi vang mat,
+            # nen bien duy nhat con lai la cai `#` giua chuoi — dot bien khoa dieu do o
+            # `r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO`.
+            ("marker chua dau thang",      'khong_he_ton_tai_r345; os_name != "posix#x"\n', 1),
             ("chu thich sau khoang trang", "pypdf>=3.0  # ghi chu\n", 0),
             ("URL tran toi host chet",     "http://127.0.0.1:9/x-1.0-py3-none-any.whl\n", 0),
             ("VCS git+http",               "git+http://127.0.0.1:9/x.git\n", 0),
@@ -6471,15 +6484,25 @@ def r345_lop_tham_import_van_co_rang():
 
 
 @ca
-def r345_dot_bien_hai_phep_do_cuc_bo_lam_ca_dich_DO():
-    """Hai đột biến, mỗi cái nhắm một phép đo cục bộ. Không có chúng thì ca trên đo gì?"""
+def r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO():
+    """Ba đột biến, mỗi cái nhắm một phép đo cục bộ. Không có chúng thì ca trên đo gì?
+
+    r356 thêm cái thứ ba — luật `#` của `_CHU_THICH`. Trước đó hàng "marker chua dau thang"
+    KHÔNG có đột biến nào, và đó là cách nó trôi thành một hàng không thể đỏ: hai nhánh của
+    luật ấy dẫn tới cùng số 0 qua hai đường khác nhau (`continue` vì marker sai · `continue`
+    vì parse lỗi). Một con số đúng vì HAI lý do là một con số không đo được lý do nào.
+    """
     than = _r338_than_hook()
     if not than:
         return "bo qua ban sao roi (khong co session-start.sh)"
     neo_ban = "            if not thoa:"
     neo_vang = '                hong.append(f"{_r.name}: VANG MAT (khong co metadata)")'
+    # LUAT `#` cua pip, chep nguyen van tu than hook. `r'...'` de `\s` khong bi
+    # Python giai ma o DAY — chuoi phai khop TUNG BYTE voi dong trong `session-start.sh`.
+    neo_chu_thich = r'_CHU_THICH = re.compile(r"(^|\s)#.*$")'
     bang(than.count(neo_ban) == 1, f"R345_ANCHOR_BAN:{than.count(neo_ban)}")
     bang(than.count(neo_vang) == 1, f"R345_ANCHOR_VANG:{than.count(neo_vang)}")
+    bang(than.count(neo_chu_thich) == 1, f"R345_ANCHOR_CHU_THICH:{than.count(neo_chu_thich)}")
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)
         py = _r345_venv(d)
@@ -6492,6 +6515,15 @@ def r345_dot_bien_hai_phep_do_cuc_bo_lam_ca_dich_DO():
                         "definitely_not_installed_r345 @ http://127.0.0.1:9/x.whl\n",
                         "--kiem-ban") == 0,
              "dot bien bo phep kiem VANG MAT VAN DO — ca vang mat khong do phep kiem ay")
+        # r356 — RANG cho hang "marker chua dau thang". Luat THO `#.*$` la dung HINH DANG
+        # loi lich su (cat `#` o BAT KY dau), khong phai mot dot bien bia ra: no cat
+        # `... != "posix#x"` thanh `... != "posix` ⇒ `_Req` nem ⇒ `continue` ⇒ 0, trong khi
+        # ca dich mong 1. Ca hai ve doc lap voi nen, nen no DO tren CA HAI nen.
+        bang(_r345_chay(py, d, than.replace(neo_chu_thich,
+                                            r'_CHU_THICH = re.compile(r"#.*$")'),
+                        'khong_he_ton_tai_r345; os_name != "posix#x"\n',
+                        "--kiem-ban") == 0,
+             "dot bien luat # VAN DO — ca marker-chua-dau-thang khong do luat `#` ay")
 
 
 # r347 — hai lỗ CỤ THỂ của r345, cộng một LỜI KHAI bị thu hẹp.

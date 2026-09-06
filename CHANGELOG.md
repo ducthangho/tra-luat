@@ -1,3 +1,97 @@
+# ★ dev-side — r356: một hàng KHÔNG THỂ ĐỎ — luật `#` của `_CHU_THICH` chưa từng được đo (2026-09-07)
+
+Hàng trong bảng `ca_ds` của `r345_cac_phep_do_cuc_bo_van_dung`:
+
+```python
+("marker chua dau thang",      'pypdf; os_name == "posix#x"\n', 0),
+```
+
+sinh ra để canh luật của `_CHU_THICH` trong `.claude/hooks/session-start.sh:304` —
+pip chỉ coi `#` là chú thích khi nó ở **đầu dòng** hoặc **sau khoảng trắng**; `#` giữa
+một chuỗi (marker, fragment URL) là ký tự HỢP LỆ. Hàng ấy **không thể đỏ**: cả hai
+nhánh của luật đều cho `0`, qua hai đường khác nhau.
+
+| luật | dòng sau khi cắt | đường đi | mã |
+|---|---|---|---|
+| ĐÚNG `(^\|\s)#.*$` | `pypdf; os_name == "posix#x"` | marker `==` sai trên MỌI nền ⇒ `continue` | 0 |
+| HỎNG `#.*$` | `pypdf; os_name == "posix` | `_Req` ném ⇒ `except BaseException: continue` | 0 |
+
+Một con số đúng vì **hai** lý do là một con số không đo được lý do nào. Cùng họ với
+*"CÓ MẶT khác CÓ ĐO"* trong `CLAUDE.md`, ở dạng chật hơn: ca **có** chạy, hàng **có**
+so, mà biến nó sinh ra để canh thì không quyết định gì.
+
+## Đo, không suy luận — 2×2 trên CẢ HAI nền
+
+Đo thẳng trên một HÀNG (không đi qua ca đích, nên không bị hàng khác làm nhiễm), thay
+`_CHU_THICH` trong bộ nhớ:
+
+| hàng | mong | luật ĐÚNG | luật THÔ (đột biến) | răng? |
+|---|---|---|---|---|
+| CŨ `pypdf; os_name == "posix#x"` | 0 | 0 | **0** | KHÔNG |
+| MỚI `khong_he_ton_tai_r345; os_name != "posix#x"` | 1 | 1 | **0** | CÓ |
+
+Số y hệt nhau trên Windows 11 / py3.13.1 và Linux (WSL Ubuntu) / py3.12.3.
+
+## Bản vá
+
+```python
+("marker chua dau thang",      'khong_he_ton_tai_r345; os_name != "posix#x"\n', 1),
+```
+
+Hai thứ đổi, mỗi thứ một lý do:
+
+* `==` → `!=` làm marker **ĐÚNG trên mọi nền** ⇒ gói vắng mặt lộ ra ⇒ `1`. Kỳ vọng vì
+  thế **độc lập với nền chạy** — đúng bệnh mà `r355` (PR #458) đang chữa cho hàng
+  `"marker khong khop"` ngay trên nó; không lặp lại nó ở hàng này.
+* `pypdf` → `khong_he_ton_tai_r345`, **cùng gói vắng mặt** với hàng `"goi thieu han"`
+  bên dưới, nên hai hàng ấy nay khác nhau **đúng MỘT biến**: cái `#` giữa chuỗi.
+
+Luật hỏng vẫn cắt thành `... != "posix` ⇒ parse lỗi ⇒ `continue` ⇒ `0` ≠ `1` ⇒ ca đích ĐỎ.
+
+## RĂNG — đột biến thứ ba
+
+`r345_dot_bien_hai_...` → **`r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO`**. Neo
+`_CHU_THICH = re.compile(r"(^|\s)#.*$")`, đòi `than.count(neo) == 1`, thay bằng luật thô
+`re.compile(r"#.*$")` — đúng **hình dạng lỗi lịch sử**, không phải một đột biến bịa ra —
+rồi đòi hàng ấy trả `0`, tức ca đích ĐỎ.
+
+## GIẾT ĐÚNG LÝ DO, không phải tín dụng giả
+
+Hai vế dựng trong **một** lệnh, trên **một** rig, nạp từ nguồn với `__file__` trỏ đúng
+chỗ (không ghi tệp nào vào kho):
+
+| nền | vế | ca đích, hook THẬT | đột biến luật `#` ⇒ ca đích |
+|---|---|---|---|
+| Linux WSL py3.12.3 | nền (`origin/master`) | QUA | **QUA** — đột biến SỐNG SÓT |
+| Linux WSL py3.12.3 | sau (đã vá) | QUA | **ĐỎ** `marker chua dau thang: duoc 0, mong 1` |
+| Windows 11 py3.13.1 | nền (`origin/master`) | ĐỎ¹ | ĐỎ¹ — **cùng thông điệp với vế nền**, không nhắc hàng đích |
+| Windows 11 py3.13.1 | sau (đã vá) | ĐỎ¹ | **ĐỎ** ¹ + `· marker chua dau thang: duoc 0, mong 1` |
+
+Chết bằng `TinHieuChotCa` **và** thông điệp nhắc đúng nhãn hàng — hai điều kiện, không
+phải "mã thoát khác 0" (R5-01..R5-04). Chân Windows của vế nền là **ca sách giáo khoa
+của tín dụng giả**: nó chết đúng lớp ngoại lệ, mà vì một hàng KHÁC — chỉ phép so nhãn
+mới tách được.
+
+¹ `r345_cac_phep_do_cuc_bo_van_dung` **đỏ sẵn trên Windows ở `origin/master`**, hàng
+`"marker khong khop"` (`pywin32; sys_platform == "win32"` — đúng bệnh kỳ-vọng-phụ-thuộc-nền).
+Đo được ở **CI, không phải chỉ tại chỗ**: run `34048685334` trên chính `1b3caa1`
+(`ubuntu-latest` success · `windows-latest` failure, `164/165 ca DA CHAY QUA (tong 182,
+bo qua 17, hong 1)`). **Delta của r356 = 0** ở hàng ấy; PR #458 (r355) đang chữa nó.
+Hàng `"marker chua dau thang"` **không có trong danh sách hỏng** khi hook là bản THẬT
+ở cả hai vế — tức hàng mới QUA trên Windows; nó chỉ lộ ra khi luật `#` bị đột biến.
+
+## Va chạm đã biết với PR #458 — nói thẳng để người land thứ hai không đánh mất một ca
+
+PR #458 (`r355`) đổi **cùng** hàm `r345_dot_bien_hai_...` thành `..._ba_...` và thêm một
+đột biến thứ ba **KHÁC** (phép lọc environment marker). r356 làm y hệt thao tác đổi tên
+với đột biến của **luật `#`**. Hai bản vá **không loại trừ nhau** — chúng canh hai luật
+khác nhau của cùng một vòng lặp.
+
+**Cách hoà giải, bắt buộc:** bên land sau **giữ CẢ BỐN đột biến** và đổi tên thành
+`r345_dot_bien_bon_phep_do_cuc_bo_lam_ca_dich_DO`. Giải xung đột bằng cách chọn một
+phía là **đánh mất một ca** — và một ca bị mất ở đây là một luật quay về trạng thái
+không đo được, đúng thứ cả hai packet vừa bỏ công dựng.
+
 # ★ dev-side — r354: tái sinh RELEASE_MANIFEST sau khi PR #449 land (2026-09-06)
 
 `gate` master trên `3500369` (merge PR #449) **ĐỎ** ở bước `release-verify strict

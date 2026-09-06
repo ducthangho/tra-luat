@@ -1,7 +1,10 @@
 # Phản biện đề xuất "Cải tiến quy trình Build – Review – CI"
 
 - **Kho:** `ducthangho/tra-luat` · **PR #452** · **Trạng thái:** phản biện thiết kế, CHƯA thi công.
-- **Bản 6**, sau **BỐN** lượt cross-review (2 cùng nền Claude, 2 khác nền codex).
+- **Bản 7**, sau **NĂM** lượt cross-review (2 cùng nền Claude, 3 khác nền codex).
+- **Lượt 5 chạy SAU KHI PR đã merge** — phiên điều phối merge một phút sau khi lượt review ấy bắt
+  đầu, nên hai commit cuối vào `master` không có lượt khác nền nào kết luận. Lượt 5 là bản **vá lỗ
+  hổng**, không phải cổng trước-merge. Xem phụ lục J.
 - **Cách đọc:** đọc **§1** là đủ để quyết định. Mọi thứ dưới `PHỤ LỤC` là **bằng chứng và lịch sử** —
   giữ lại để kiểm được, không phải để đọc.
 - **Vì sao tách:** cross-review lượt 4 (`R4-02`, **P1**) đo được rằng bản trước **không có một kết luận
@@ -22,13 +25,25 @@
 | **Chưa quyết định được** | 9 mục còn lại. Chúng **đã được VIẾT** trong protocol/ADR/skill, nhưng **trạng thái cưỡng chế phần lớn là `chưa đo`** — và "đã có" một mình **KHÔNG** phải lý do bác |
 
 **Vì sao mục 5 đứng đầu, và đây là kết quả mạnh nhất của cả đợt:** chính tài liệu này là phản chứng thực
-nghiệm cho nó. Qua năm bản, tôi mắc **cùng một lớp lỗi năm lần** — đọc *sự CÓ MẶT* thành *KHẢ NĂNG*:
+nghiệm cho nó. Qua bảy bản, tôi mắc **cùng một lớp lỗi sáu lần** — đọc *sự CÓ MẶT* thành *KHẢ NĂNG*:
 
 > "có trong tài liệu ⇒ có hiệu lực" → "không có mã trong 6 tệp ⇒ không hiệu lực" →
 > "không khai `nang_tran` ⇒ không vượt trần" → "`spec_path` có ⇒ đã neo đặc tả" →
-> "bốn reviewer bỏ sót" (họ chưa từng thấy câu đó).
+> "bốn reviewer bỏ sót" (họ chưa từng thấy câu đó) → **"lớp ngoại lệ riêng ⇒ chốt đích đã chạy"**.
 
 Mỗi lần được chỉ, tôi sửa **đúng dòng được chỉ** và bỏ sót **cả lớp**. Không lần nào tự phát hiện.
+
+**Lần thứ sáu là lần đắt nhất, vì nó nằm BÊN TRONG bản vá dựng ra để chặn lớp ấy.** Bản vá `R4-04` tạo một
+lớp ngoại lệ riêng `TinHieuChotCa` để không ai giả được tín hiệu "chốt đã bắt". Nó đóng đúng cái mutant bị
+gọi tên. Nhưng `bang()` còn được dùng làm **chốt khởi chạy tiến trình con**, nên một crash vô can trong sản
+phẩm vẫn ăn tín dụng giết: reviewer lượt 5 bơm một `raise KeyError` vào `_bash_windows`, con chết trước khi
+ca kịp đo thuộc tính nào, mà bộ phân hạng vẫn báo `giet_that`. Năm lần trước còn có thể đổ cho người viết
+cẩu thả. Lần này người viết đang **cố ý** vá theo lớp, có tên lớp, có năm ca tự kiểm cho lớp — và vẫn
+trượt, vì cả năm ca tự kiểm chạy **trong cùng một tiến trình**.
+
+Kết luận thực hành, và nó chính là mục 5: thứ bắt được lỗi ấy **không** phải một reviewer đọc kỹ hơn, mà
+một phép đo **đi qua ranh giới tiến trình** — tức một reviewer có **năng lực ĐO**. Đó cũng là lý do bước 2
+ở §1.2 tồn tại.
 
 ## 1.2 Việc cần làm — MỘT thứ tự duy nhất
 
@@ -40,7 +55,7 @@ chưa được phép đo nào chứng minh.
 | # | Việc | Vì sao trước | Trạng thái |
 |---|---|---|---|
 | 1 | **Không có biên nhận thì không land** — nối `packet_loop.py bien-nhan` vào land gate | Lỗ ĐO ĐƯỢC: packet **#249** chạy **bốn** vòng cross-review, để lại **0** biên nhận, suite vẫn xanh. Mã cổng **đã có**, phản chứng **đã có**. Không có bước này thì mọi metric đều đo trên tập thiếu | chưa làm |
-| 2 | **Cổng NĂNG LỰC ĐO cho reviewer** — bundle bị từ chối nếu verdict mang khẳng định định lượng mà không kèm bằng chứng đã cấp mirror | `PROTOCOL §8` **đã là luật** (mirror + ghim `core.abbrev=7`) và có **0 cổng**. Lượt 3–4 cho thấy reviewer đo được thì tìm ra thứ reviewer chỉ-đọc không tìm ra | chưa làm |
+| 2 | **Cổng NĂNG LỰC ĐO cho reviewer** — ở **preflight**, TRƯỚC khi lượt review chạy: quét **cả bốn** đầu vào mà `PROTOCOL §8` liệt kê (đặc tả · handoff · bảng bằng chứng · verdict); bundle nào mang khẳng định **phụ thuộc kho** mà không kèm mirror **đọc được đúng revision cần đo** thì bị từ chối | `PROTOCOL §8` **đã là luật** (mirror + ghim `core.abbrev=7`) và có **0 cổng**. Lượt 3–4 cho thấy reviewer đo được thì tìm ra thứ reviewer chỉ-đọc không tìm ra. **Bản đầu của hàng này chỉ kiểm VERDICT và `R5-03` bác:** con số cần đo thường nằm trong **đặc tả** mà verdict không lặp lại, và nếu hiểu verdict là **đầu ra** của lượt sắp chạy thì kiểm ở đó đã **quá muộn** để cấp năng lực cho chính lượt ấy. Chốt phải là **có mặt ⇒ chưa đủ**: `.git` tồn tại không phải mirror dùng được — đúng lớp lỗi tệp này đếm sáu lần | chưa làm |
 | 3 | **Thống nhất TỪ VỰNG mỏ neo đặc tả** (ba tầng: locator / định danh byte / đã xác minh) rồi mới cưỡng chế | Cưỡng chế một tên trong nhiều tên sẽ bắt oan lease đang làm đúng bằng tên khác. Xem §2 hàng 3 | chưa làm |
 | 4 | **ĐO Windows trước khi BẮT BUỘC Windows** — chạy một lượt `workflow_dispatch` để biết nó có hoàn tất trong trần 60 không | **0/3** lượt dispatch từng hoàn tất. Bắt buộc một phép kiểm chưa từng XANH là tự tạo deadlock | chưa làm |
 | 5 | **Mở rộng phép ĐO RĂNG sang các cổng còn lại** | Lượt 4 đo 6 cổng, tìm ra **2** cổng hỏng thật (`R4-04`, `R4-05`). Cả hai **đã vá** trong PR này. Kho còn nhiều cổng chưa ai đo | 2/N đã làm |
@@ -61,15 +76,30 @@ Hiện `ci.yml` không khai `types:` nên gắn nhãn **không** bắn nó — t
 - **Vật bị phản biện KHÔNG có hiện vật trong kho.** Đề xuất 13 mục chưa được đóng băng thành tệp có băm,
   nên mọi câu *"đề xuất viết: …"* không kiểm được (`R4-02`). Muốn chắc thì đóng băng nó vào `ops/specs/`.
 - **Lượt 1–2 là `same_provider`**, chỉ lượt 3–4 là `cross_approved`. Xem phụ lục H.
-- **Ràng buộc phân công** (cấm reviewer tự soạn phản chứng) làm **hẹp độ phủ** của cả hai lượt khác nền.
+- **Ràng buộc phân công** (cấm reviewer tự soạn phản chứng) làm **hẹp độ phủ** của cả ba lượt khác nền.
+- **"0 âm tính giả" của lượt 5 chỉ đúng TRONG TẬP ĐÃ ĐO** — 18 cặp control–mutant hiện có. Reviewer
+  tự khai: năm ca tự kiểm đều nằm **cùng tiến trình**, nên chúng bỏ sót đúng đường `R5-01`. Đừng đọc
+  con số ấy thành *"bộ phân hạng đã đúng với mọi crash"*.
 
 ## 1.4 Cách kiểm trang này còn nhất quán không
 
 Trang quyết định phải cho **cùng một thứ tự** và **cùng một trạng thái** như phần bằng chứng. Phép kiểm:
 
 Chạy `ops/kiem_trang_quyet_dinh.sh`. Nó cắt §1 ra, **bỏ mọi khối mã** (nếu không thì chính lệnh kiểm
-sẽ khớp mẫu của nó — đã xảy ra ở lần viết đầu), rồi tìm các chuỗi **đã bị rút**. Phải trả **rỗng**;
-còn sót một chuỗi nghĩa là trang quyết định lại lệch khỏi bằng chứng — đúng bệnh `R4-02`.
+sẽ khớp mẫu của nó — đã xảy ra ở lần viết đầu), rồi tìm các chuỗi **đã bị rút**.
+
+**BA trạng thái, không phải hai:** `0` sạch · `1` còn lời khai đã rút · `2` **KHÔNG ĐO ĐƯỢC**. Bản đầu chỉ
+có hai, và `R5-02` đo được rằng nó **báo sạch khi mù**: `grep` trả `1` khi không khớp nhưng `>1` khi không
+thực hiện được phép đo, mà cả hai cùng rơi xuống nhánh in "sạch" — nên regex hỏng cho `rc=0 "sạch"`, và
+cắt mất mốc kết thúc cũng cho `rc=0`. Cùng họ với *"cổng không nói dối, nó VẮNG MẶT"*, chỉ tệ hơn: cổng
+này **có mặt** và **nói sạch**. Phản chứng chạy được: `ops/kiem_trang_quyet_dinh_test.sh` — 7 ca (đòi
+`0·2·2·2·2·2·1`) cộng **4 phép đo răng**, trong đó hai đột biến đưa cổng về **đúng hình dạng cũ** và tái
+hiện lại chính ba con số reviewer đo được.
+
+**Và khai thẳng giới hạn của chính phép kiểm này: KHÔNG workflow nào chạy nó.** `ci_dang_ky_test.py`
+chỉ quét `*_test.py`, nên một `*_test.sh` không nằm trong sổ và không có gì báo động nếu nó thối rữa.
+Đây là chốt **chạy tay**. Nói ra rẻ hơn nhiều so với để người đọc tưởng có máy canh — đúng bài học
+*"phạm vi TUYÊN BỐ phải bằng phạm vi ĐO ĐƯỢC"*.
 
 ---
 
@@ -84,7 +114,7 @@ Mỗi hàng: điều được khai · số đo · lệnh tái hiện. Chi tiết
 | Mỏ neo đặc tả — **ba tầng**, tổng 82 | **44** có định danh byte · **3** chỉ locator (cả ba khai `ban_thao_chua_duyet`) · **3** khoá `spec_path` = `null` · **32** không có gì · **"đã xác minh băm + thẩm quyền" = KHÔNG ĐO ĐƯỢC** | `grep -lE '^ *(spec_hash\|spec_sha256_required\|spec_sha256): *[^ ]' ops/leases/*.yaml \| wc -l` |
 | Trần vòng review **không có cổng** | `nang_tran` xuất hiện **0** lần trong `ops/lease_publish.py`; **1/82** lease có khối ấy; §20 ghi `ADR-0043 \| 0 cổng` | `grep -c nang_tran ops/lease_publish.py` |
 | Vòng review để lại **0 hiện vật** | packet **#249**: 4 vòng, 0 biên nhận, suite 98/98 xanh | docstring `cmd_bien_nhan` trong `.claude/dev/packet_loop.py` |
-| Cổng **có** răng — nhưng phải đo mới biết | Lượt 4 đo 6 cổng → tìm ra **2** hỏng thật. Sau khi vá: `cong_cu_test` **23/23 · bỏ qua=0 · lỗi đột biến=0**; `packet_loop` **278/278 · BỎ QUA=0**; đột biến gỡ cổng sổ comment ⇒ 3 ca **ĐỎ** (261/278) trong khi **trước** bản vá chúng vẫn XANH | `python3 ops/cong_cu_test.py` · `python3 .claude/dev/packet_loop_test.py` |
+| Cổng **có** răng — nhưng phải đo mới biết | Lượt 4 đo 6 cổng → tìm ra **2** hỏng thật. Sau khi vá (kể cả `R5-01`): `cong_cu_test` **23/23 · bỏ qua=0 · 7 ca tự kiểm bộ phân hạng · lỗi đột biến=0**, và phản chứng `R5-01` **qua ranh giới tiến trình** cho `tin_dung_gia` (trước bản vá: `giet_that`); `packet_loop` **278/278 · BỎ QUA=0**; đột biến gỡ cổng sổ comment ⇒ 3 ca **ĐỎ** (261/278) trong khi **trước** bản vá chúng vẫn XANH | `python3 ops/cong_cu_test.py` · `python3 .claude/dev/packet_loop_test.py` |
 | Chốt trong kho **không tự chứng nhận được** | `.claude/dev/duyet_danh_tinh.py`: *"mọi chốt dựng trong kho đều là chốt chủ kho tự dựng cho chính mình"*; cổng chạy trên runner GitHub là **cơ chế đầu tiên** không tự chứng nhận | `sed -n '1,12p' .claude/dev/duyet_danh_tinh.py` |
 
 ---
@@ -92,6 +122,8 @@ Mỗi hàng: điều được khai · số đo · lệnh tái hiện. Chi tiết
 # PHỤ LỤC
 
 Từ đây trở xuống là **bằng chứng và lịch sử**. Không cần đọc để quyết định.
+
+**Đổi tên mục (bản 6):** mục từng tên là **§0** nay là **PHỤ LỤC A**. Con trỏ tự dẫn đã đổi theo; các hàng trong **nhật ký J** vẫn giữ nguyên chữ `§0` vì chúng là **ghi chép về trạng thái CŨ** — sửa chúng là sửa lịch sử. `R5-04` bắt đúng lớp lỗi này: bản 6 đổi mục mà để lại con trỏ.
 Nguồn có thẩm quyền của mỗi lượt review là tệp verdict + biên nhận trong `ops/reviews/`, không phải
 bản tóm ở đây.
 
@@ -153,7 +185,7 @@ thay vì THẨM QUYỀN*. Ghi lại thay vì xoá, vì một phản biện giấ
 |---|---|---|---|
 | 1. Ba tầng kiểm tra | **ĐÃ CÓ, mạnh hơn** | §10.1 — **sáu tầng T0–T5** + classifier/aggregator | Bản đề xuất là bản RÚT GỌN của thứ đang có. Gộp T3/T4/T5 thành "full CI" xoá mất phân biệt integration-freeze / canonical / release artifact. |
 | 2. Hoãn full CI khỏi vòng lặp | **MÂU THUẪN** | §10.1 | Xem F1. Ngoài ra §10.1 đã cấm trước: selector chỉ được activate sau **shadow 2–4 tuần** chứng minh không bỏ sót failure. Đề xuất chính là activate selector, mà không kèm shadow evidence. |
-| 3. Architecture review gate | **ĐÃ CÓ, chưa đo cưỡng chế** | §3.2 + skill `soan-spec` + 46 ADR | **RÚT cả `17%` LẪN `61%`** — xem §0: mỏ neo đặc tả có **ba tầng**, `44/82` có định danh byte, và bậc *"đã xác minh băm + thẩm quyền"* là **KHÔNG ĐO ĐƯỢC**. §20 không có ô cổng cho §3.2 ⇒ trạng thái là **chưa đo**. |
+| 3. Architecture review gate | **ĐÃ CÓ, chưa đo cưỡng chế** | §3.2 + skill `soan-spec` + 46 ADR | **RÚT cả `17%` LẪN `61%`** — xem **PHỤ LỤC A**: mỏ neo đặc tả có **ba tầng**, `44/82` có định danh byte, và bậc *"đã xác minh băm + thẩm quyền"* là **KHÔNG ĐO ĐƯỢC**. §20 không có ô cổng cho §3.2 ⇒ trạng thái là **chưa đo**. |
 | 4. Chuẩn hoá severity | **ĐÃ CÓ, mạnh hơn** | verdict có severity/evidence (§ dòng 845); class `sensitive/systemic/routine` (ADR-0036); P0/P1 | Đề xuất **hai** bậc P1/P2; kho có P0 và có class theo rủi ro. Xem F4 về trạng thái thứ ba. |
 | 5. Tìm theo bug class | **MỚI — GIỮ** | doctrine có bản mạnh hơn ("danh sách CẤM → danh sách CHO PHÉP"; "đếm HÌNH DẠNG lỗi") nhưng chưa vào prompt reviewer | Mục giá trị nhất của cả đề xuất. |
 | 6. Root-cause vs local patch | **MỚI, nhưng xung đột** | — | Xem F5: root cause có thể nằm NGOÀI write set đã đóng băng. |
@@ -378,7 +410,7 @@ với *"cổng xanh nhờ `rc=0` là cổng có thể bị lừa"*. Kho đã có
 root cause"*, re-run tối đa một lần và chỉ trong ca đã nêu tên) — đề xuất nới nó ra.
 
 **M6 — Cấp NĂNG LỰC ĐO không cấp TÍNH ĐỘC LẬP.** §8 có bốn mức assurance; biên nhận có `assurance` ở
-**31/57** và `cross_provider` ở **40/57**. Toàn bộ mẫu n=9 của §0 là reviewer `claude` (**8/9**). Cấp mirror
+**31/57** và `cross_provider` ở **40/57**. Toàn bộ mẫu n=9 của **PHỤ LỤC A** là reviewer `claude` (**8/9**). Cấp mirror
 làm reviewer đo giỏi hơn nhưng **không** làm nó bớt mù ở chỗ cùng mô hình cùng mù — §8 đã đặt tên cho rủi ro
 ấy (*"self-review đội lốt cross-review"*). MVP-1 bản đầu liệt kê trường bắt buộc mà **không có `assurance`**,
 tức mở khoá metric nhưng không phân biệt được duyệt chéo với duyệt cùng nền. Lượt review sinh ra tệp này
@@ -387,7 +419,7 @@ cũng đúng như vậy: nó là `same_provider`, và nói thẳng ở §8 dư�
 **M7 — Biên nhận là bằng chứng TỰ KHAI, và tệp này dùng nó như bằng chứng ngoại kiểm.**
 `packet_loop.py` nói thẳng: *"hiện vật cục bộ chỉ chứng minh có biên nhận + verdict tự khai, không chứng
 minh commit tồn tại hoặc có bao nhiêu vòng review đã thật sự chạy… nên **không được gọi số đếm này là số
-vòng review**"*. Toàn bộ bảng §0 (trừ ba dòng CI) đứng trên đúng nguồn ấy, và bản đầu của §6 **không** liệt
+vòng review**"*. Toàn bộ bảng **PHỤ LỤC A** (trừ ba dòng CI) đứng trên đúng nguồn ấy, và bản đầu của §6 **không** liệt
 kê giới hạn này.
 
 ---
@@ -435,9 +467,14 @@ kê giới hạn này.
    nào cần soạn nội dung nhạy cảm thì mô tả bằng lời. Đã chữa hai lượt chết liên tiếp.
    **(c) Tự khai thiên vị của thứ mình giao.** Giao bảng 21 con số kèm chính script trích ra nó và nói
    thẳng nó lọc theo danh sách đơn vị đoán trước ⇒ reviewer trả về hai finding, một nhắm thẳng bộ lọc.
-   **(d) TÁCH BA TẦNG mỏ neo đặc tả TRƯỚC** (locator / định danh byte / đã xác minh — xem §0 và MVP-2), rồi mới cưỡng chế — vòng review tốn nhiều nhất là vòng cãi nhau về đặc tả.
+   **(d) TÁCH BA TẦNG mỏ neo đặc tả TRƯỚC** (locator / định danh byte / đã xác minh — xem **PHỤ LỤC A** và MVP-2), rồi mới cưỡng chế — vòng review tốn nhiều nhất là vòng cãi nhau về đặc tả.
 10. **Minimum viable process — BẢN ĐẦU CÓ BA VIỆC, CẢ BA ĐỀU HỎNG. Cross-review lượt 1 phá từng cái;
-    dưới đây là bản đã sửa, xếp lại theo thứ tự rẻ-trước.**
+    dưới đây là bản của BẢN 5, xếp lại theo thứ tự rẻ-trước.**
+
+    > **HẾT HIỆU LỰC LÀM KHUYẾN NGHỊ (bản 6).** Thứ tự đang có hiệu lực là bảng 5 bước ở **§1.2**; mục
+    > này giữ lại vì nó ghi *vì sao* từng việc được sửa, không phải để chọn việc nào làm trước. `R5-04`
+    > bắt bản 6 để lại đúng chỗ này tự xưng là "bản đã sửa" rồi gọi MVP-4 là số một, trong khi §1.2 đã
+    > chọn thứ tự khác.
 
     **MVP-1 · Không có biên nhận thì không land.** Bản đầu viết *"đóng schema biên nhận"* như phải làm từ
     đầu. Sai hai lần: (a) schema **đã tồn tại** — `.github/coordination/schemas/review_verdict.v1.schema.json`
@@ -453,13 +490,13 @@ kê giới hạn này.
     · **THÊM luật nhất quán chéo `packet_id` ↔ `lease_id`.** Đo: **18** biên nhận khai `packet_id: wp55`
       nhưng `lease_id` của chúng thuộc **≥5** dòng việc khác nhau (`don-nhanh-base` 7 · `wp55-r2` 2 ·
       `doctor-github-mcp` 2 · `tao-tag-luu-tru` 1 · `don-nhanh-kien-truc-gh` 1 …). Nên "15 packet riêng biệt"
-      ở §0 **không phải 15 packet**, và mọi mẫu số theo packet sai im lặng.
+      ở **PHỤ LỤC A** **không phải 15 packet**, và mọi mẫu số theo packet sai im lặng.
     · **Ghi `schema_version` + NGÀY HIỆU LỰC.** Biên nhận là bằng chứng đã giao, không sửa hồi tố; siết
       schema mà không khai ngày ⇒ cổng đỏ vĩnh viễn trên hiện vật cũ.
 
     **MVP-2 · Thống nhất TỪ VỰNG mỏ neo đặc tả TRƯỚC, cưỡng chế SAU.** Bản đầu nói "cưỡng chế `spec_hash`
     (đang 17%)". Bản 3 sửa thành "bốn tên, 61% đã neo" — **cũng sai**, và `R4-01` bắt: nó gộp
-    **locator** vào **định danh byte**. Phân rã đúng ở §0: **44** có định danh byte · **3** chỉ có
+    **locator** vào **định danh byte**. Phân rã đúng ở **PHỤ LỤC A**: **44** có định danh byte · **3** chỉ có
     locator và **tự khai là bản thảo chưa duyệt** · **3** có khoá `spec_path` nhưng `null` · **32**
     không có gì · và bậc **"đã xác minh băm + thẩm quyền" là KHÔNG ĐO ĐƯỢC**.
     **Bỏ hẳn tỉ lệ "đang làm đúng"** — cả `40/82` lẫn `48,8%` đều chưa có bằng chứng; *"có giá trị
@@ -467,7 +504,7 @@ kê giới hạn này.
     canon, khai ánh xạ cho ba tên kia, rồi mới dựng cổng.
 
     **MVP-3 · ĐO Windows trước, đừng BẮT BUỘC Windows.** Bản đầu bắt buộc một lượt `workflow_dispatch`
-    trước lượt review đầu. Bốn phản chứng, ba nằm trong chính §0: (a) **0/3** lượt dispatch từng hoàn tất —
+    trước lượt review đầu. Bốn phản chứng, ba nằm trong chính **PHỤ LỤC A**: (a) **0/3** lượt dispatch từng hoàn tất —
     bắt buộc một phép kiểm chưa từng XANH; (b) dispatch kích hoạt cả hai nền ⇒ ước tính **≥112 phút tính
     tiền** cho MỘT lượt, cạn hạn ở ~14–18 packet trong khi §12 cho trần 20; (c) `concurrency.group` của
     dispatch khoá theo `github.ref` còn của PR khoá theo số PR ⇒ **hai group khác nhau**, nên
@@ -522,7 +559,7 @@ nhưng có một bẫy đã đo được: cấp cho reviewer **một tài liệu
 đúng ba lượt đầu của PR #250 (4 → 11 → 2 finding, **0 con số phân rã**).
 
 Muốn bản phản biện của Codex có giá trị hơn bản này, phải cấp cho nó **năng lực đo**: mirror kho + bảng
-§0 + chính các lệnh đã sinh ra bảng ấy, kèm lời khai thẳng rằng bảng này **thiên vị** — nó chỉ đếm thứ
+**PHỤ LỤC A** + chính các lệnh đã sinh ra bảng ấy, kèm lời khai thẳng rằng bảng này **thiên vị** — nó chỉ đếm thứ
 tôi nghĩ ra để đếm, và mỗi con số nó thiếu mà Codex tìm được thì tính là finding.
 
 Và **nguồn có thẩm quyền là TỆP NÀY trong kho**, có băm. Bản chiếu lên Issue/PR chỉ là bản chiếu.
@@ -572,7 +609,7 @@ không. Finding ấy đứng nguyên.
    có cổng thật, fail-closed, **7** ca phản chứng `RC_LOP`, ghim băm trong workflow — và nó land
    **23-08-2026**, đúng **một ngày sau** mốc `22-08-2026` mà §20 tự ghi ở đầu cột. Tôi dùng một phép đo
    **có ghi ngày** mà không kiểm ngày.
-3. **Tiền đề bị chính §0 của tệp này bác** — nhưng **KHÔNG mạnh như bản 3 đã viết**; xem ngay dưới.
+3. **Tiền đề bị chính PHỤ LỤC A của tệp này bác** — nhưng **KHÔNG mạnh như bản 3 đã viết**; xem ngay dưới.
 
 **BẢN 3 PHẠM LẠI CÙNG MỘT LỚP LỖI, LẦN THỨ TƯ — cross-review lượt 3 (codex, KHÁC NỀN) bắt.**
 
@@ -747,12 +784,13 @@ phải cho hai provider **cùng bundle, cùng nhiệm vụ, cùng SHA**, và gi�
 | # | Bản 4 khai | Phép đo nói | Xử lý |
 |---|---|---|---|
 | 31 | *"bốn reviewer cùng nền đọc qua câu 61–99%"* | câu ấy **0 lần** ở `07eb236` và `ba76a78` — hai SHA họ review; xuất hiện lần đầu ở `d3bc218`. Phép suy sai đến từ **chính verdict lượt 2** | **RÚT** kết luận M6 (`R4-03`) |
-| 32 | tài liệu đã dùng được để quyết định | **KHÔNG** — chỉ dẫn hành động **mâu thuẫn trực tiếp**: dòng 128 vẫn coi chỉ ô "vi phạm đo được" là việc, ngược dòng 125–126; **BA** thứ cùng được gọi "số một" | `R4-02` **P1** — chưa xử lý, xem dưới |
-| 33 | MVP-2 đã vá theo `N1` | phần quyết định **vẫn** khai 61% và 40/82 "đang làm đúng" | `R4-01` — chưa xử lý |
+| 32 | tài liệu đã dùng được để quyết định | **KHÔNG** — chỉ dẫn hành động **mâu thuẫn trực tiếp**: dòng 128 vẫn coi chỉ ô "vi phạm đo được" là việc, ngược dòng 125–126; **BA** thứ cùng được gọi "số một" | `R4-02` **P1** — **ĐÃ xử lý ở bản 6** (tái cấu trúc §1/§2/PHỤ LỤC). `R5-02`/`R5-04` sau đó bắt phần **còn sót** của chính lần tái cấu trúc ấy |
+| 33 | MVP-2 đã vá theo `N1` | phần quyết định **vẫn** khai 61% và 40/82 "đang làm đúng" | `R4-01` — **ĐÃ vá ở bản 5–6**; lượt 5 đọc lại phân rã `44/3/3/32` ở **cả bốn** snapshot và xác nhận |
 | 34 | (chưa đo) | `cong_cu` cấp **TÍN DỤNG GIẾT GIẢ**: mutant chết vì lỗi **ngoài** assertion đích vẫn được đếm là bị giết | `R4-04` |
 | 35 | (chưa đo) | ba ca comment-id đang đo **chốt head-sha** thay vì sổ comment | `R4-05` |
 
-**`R4-02` là finding P1 và tôi CHƯA xử lý nó, vì nó là quyết định của chủ kho, không phải của tôi.**
+**`R4-02` là finding P1. Bản 6 ĐÃ xử lý nó sau khi chủ kho chốt ("tái cấu trúc luôn").** Câu dưới đây
+giữ nguyên vì nó ghi lý do tôi dừng lại hỏi — nhưng nó **không còn mô tả trạng thái hiện tại**.
 Reviewer trả lời thẳng câu H3 mà phiên điều phối đặt ra:
 
 > *"Tệp còn giá trị làm hồ sơ bằng chứng, nhưng **chưa đạt mục tiêu giúp quyết định quy trình**."*
@@ -764,3 +802,33 @@ Nhận định biên tập của tôi…"* — tức nó **không** giả vờ �
 
 Việc ấy đổi tài liệu này từ **nhật ký** thành **bản quyết định**, và đó là lựa chọn về mục đích, nên
 để chủ kho chốt.
+
+### Lượt 5 (codex, khác nền) — chạy SAU KHI MERGE, và đó là một lỗi quy trình
+
+Phiên điều phối merge PR #452 **một phút** sau khi một lượt review khác nền bắt đầu, nên hai commit cuối
+(`a0978ee` vá `R4-04`/`R4-01`/`R4-05`, `bbf05ea` tái cấu trúc) vào `master` **không** có lượt khác nền nào
+kết luận. Lượt 5 chạy trên `master` `4951f55`, soi đúng `git diff 2fb43fc bbf05ea`. Đó là **vá lỗ hổng**,
+không phải cổng trước-merge — `CLAUDE.md` đã ghi sẵn bài học *"Gate xanh KHÔNG phải đã được review"*, và
+đây là lần trả giá.
+
+| # | Bản 6 khai | Phép đo nói | Xử lý |
+|---|---|---|---|
+| 36 | `R4-04` đã vá | **VÁ HỜ Ở CẤP LỚP.** `TinHieuChotCa` chỉ chứng minh lỗi đi qua `bang()` của **ca đang chạy**, KHÔNG chứng minh **assertion nghiệp vụ đích** đã chạy. Bơm `raise KeyError` vào đầu `_bash_windows`: con chết rc=1, chưa tới phép kiểm chọn Git Bash, mà bộ phân hạng vẫn trả `giet_that`. Toàn bán kính: **chỉ `t22` chết, 0 ca `tin_dung_gia`** ⇒ cả kiểm tên ca lẫn bán kính 1/23 đều mù | `R5-01` — **ĐÃ vá**: lớp `LoiDungCa` + `dung()` cho chốt giàn giáo; ranh giới khai **tại chỗ gọi**, không đoán theo mã thoát |
+| 37 | chốt shell canh trang quyết định | **ĐỒNG NHẤT "đo hỏng" VỚI "không tìm thấy".** `grep` trả 1 khi không khớp và **>1 khi không đo được**, cả hai rơi xuống nhánh in SẠCH; `set -euo pipefail` không chữa được lệnh trong điều kiện `if`. Đo: regex hỏng ⇒ **rc=0 "sạch"**; mất mốc kết thúc ⇒ **rc=0**; đổi tên mốc ⇒ **rc=1 bắt oan** | `R5-02` — **ĐÃ vá**: ba trạng thái `0/1/2`, đòi đúng một cặp mốc theo thứ tự; `ops/kiem_trang_quyet_dinh_test.sh` 7 ca + 4 phép đo răng |
+| 38 | bước 2 của §1.2 | kiểm trên **verdict**, trong khi `PROTOCOL §8` đòi phân loại **khi đóng bundle** (đặc tả · handoff · bảng bằng chứng · verdict). Con số cần đo thường nằm trong đặc tả; và nếu verdict là **đầu ra** của lượt sắp chạy thì kiểm ở đó đã **quá muộn** | `R5-03` — **ĐÃ sửa** hợp đồng bước 2 |
+| 39 | tái cấu trúc xong | còn con trỏ tự dẫn **"xem §0"** sau khi §0 biến mất; phụ lục E tự xưng *"bản đã sửa"* rồi gọi MVP-4 là số một trong khi §1.2 chọn thứ tự khác; cuối J còn *"`R4-02` CHƯA xử lý"* | `R5-04` — **ĐÃ sửa** con trỏ + đóng dấu hết hiệu lực |
+
+**Xác nhận ĐÃ VÁ THẬT** (lượt 5 tự đo lại, không nhận lời khai): `R4-01` (phân rã `44/3/3/32` đọc lại được
+ở **cả bốn** snapshot `c03a409`/`2fb43fc`/`bbf05ea`/HEAD) · `R4-03` (câu *61–99%* **vắng** ở `07eb236` và
+`ba76a78`, **có** ở `d3bc218`) · `R4-05` (gỡ lời gọi sổ comment ⇒ cả ba ca đỏ; gỡ riêng từng chốt ⇒ đúng
+một ca đỏ). **Âm tính giả:** 18 cặp control–mutant ⇒ 18/18 chết đúng thuộc tính đang đo, **0 âm tính giả
+trong tập ấy** — và reviewer tự khai giới hạn: năm ca tự kiểm đều nằm **cùng tiến trình**, nên chúng bỏ
+sót đúng đường `R5-01`.
+
+**Cái đáng nhớ của lượt này** không phải bốn finding, mà là: `R5-01` nằm **bên trong chính bản vá dựng ra
+để chặn lớp lỗi ấy**. `R4-04` sửa đúng cái mutant bị gọi tên (`t13`) và bỏ sót **hình dạng** của nó
+(bất kỳ ca nào dùng `bang()` làm chốt khởi chạy). Đó là lần thứ **sáu** trong cùng đợt của cùng một lớp —
+và là bằng chứng mạnh nhất mà đợt này sinh ra cho **mục 5 của đề xuất gốc** (tìm theo *lớp* lỗi, không
+theo lỗi): năm lần trước còn có thể đổ cho người viết cẩu thả; lần này người viết đang **cố ý** vá theo
+lớp, có tên lớp, có ca tự kiểm cho lớp — vẫn trượt. Cách duy nhất bắt được nó là một phép đo **đi qua
+ranh giới tiến trình**, tức một reviewer có **năng lực ĐO**, không phải một reviewer đọc kỹ hơn.

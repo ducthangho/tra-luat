@@ -42,14 +42,57 @@ class TinHieuChotCa(AssertionError):
     """
 
 
+class LoiDungCa(Exception):
+    """Hỏng ở bước DỰNG/KHỞI CHẠY/GIẢI MÃ của một ca — KHÔNG phải tín hiệu chốt.
+
+    VÌ SAO CÓ (cross-review lượt 5 `R5-01`, đo được): lớp `TinHieuChotCa` ở trên
+    chỉ chứng minh lỗi đi qua `bang()` CỦA CA ĐANG CHẠY. Nó KHÔNG chứng minh
+    **assertion nghiệp vụ đích** đã chạy. `t22` dùng chính `bang()` để kiểm tiến
+    trình con khởi chạy được, TRƯỚC khi đọc bốn kết quả A/B/C/D. Reviewer bơm duy
+    nhất `raise KeyError("rv5_unrelated_crash")` vào đầu `_bash_windows`: con chết
+    rc=1, stdout rỗng, KHÔNG tới phép kiểm chọn Git Bash — mà `_chay_1_ca` vẫn trả
+    `giet_that`. Chạy toàn bán kính: CHỈ `t22` chết, 0 ca `tin_dung_gia`; nên cả
+    phép kiểm TÊN CA lẫn bán kính 1/23 đều không ngăn được tín dụng này.
+
+    Tức bản vá `R4-04` đóng được PHẢN CHỨNG CỤ THỂ mà KHÔNG đóng được LỚP — đúng
+    lớp lỗi "vá dòng được gọi tên, bỏ sót hình dạng của nó" mà `CLAUDE.md` chép
+    lại nhiều lần, lần này nằm TRONG chính bản vá dựng ra để chặn nó.
+
+    RANH GIỚI, và nó KHÔNG suy được từ mã thoát (reviewer cảnh báo thẳng: "hạ mọi
+    rc khác 0 thành tín dụng giả sẽ làm mất tín dụng hợp lệ của ca kiểm mã thoát"):
+    · `chay(...)`/`cai_cong_cu.sh` là SẢN PHẨM đang bị đo ⇒ `rc` là hợp đồng của
+      nó ⇒ dùng `bang()`, và `t7` `t9` `t11` `t20` sống bằng đúng những `rc` ấy.
+    · đoạn `python -c` do CHÍNH bộ test soạn ra để gọi vào sản phẩm là GIÀN GIÁO
+      ⇒ dùng `dung()`.
+    Người viết ca khai ranh giới ấy tại chỗ gọi; không có luật máy nào đoán hộ.
+    """
+
+
 _CA_DANG_CHAY = None
 
 
 def bang(dk, msg):
+    """Chốt NGHIỆP VỤ của ca đang chạy. Hỏng ở đây = đột biến bị giết THẬT.
+
+    KHÔNG có tham số `chot=` để đặt tên từng assertion, dù reviewer có gợi ý. Bản
+    nháp đã thêm một tham số như thế rồi KHÔNG chỗ gọi nào dùng — tức đúng thứ tệp
+    này tồn tại để tố cáo: một thứ CÓ MẶT mà không có KHẢ NĂNG nào. Phép phân biệt
+    thật sự nằm ở việc người viết chọn `bang()` hay `dung()`; `DOT_BIEN` neo theo
+    CA chứ không theo chốt, nên một nhãn chốt lúc này không ai đọc. Thêm lại khi
+    có phép đo cần nó, kèm phản chứng cho chính nhãn ấy."""
     if not dk:
         ex = TinHieuChotCa(msg)
         ex.ca_nguon = _CA_DANG_CHAY
         raise ex
+
+def dung(dk, msg):
+    """Chốt GIÀN GIÁO (dựng fixture / khởi chạy tiến trình con / giải mã đầu ra).
+
+    Hỏng ở đây nghĩa là ca KHÔNG ĐO ĐƯỢC thuộc tính của nó — bộ phân hạng phải
+    đọc thành `tin_dung_gia`, KHÔNG phải `giet_that`. `main()` vẫn tính nó là ĐỎ
+    của suite: "không đo được" khác "đạt", và cũng khác "đột biến bị bắt"."""
+    if not dk:
+        raise LoiDungCa(msg)
 
 def chay(*args, env=None):
     p = subprocess.run([sys.executable, str(SCRIPT), *args], env=env, cwd=GOC,
@@ -478,9 +521,11 @@ def _chay_1_ca(fn):
     """Trả (trạng_thái, chi_tiết) với BỐN trạng thái, không phải hai.
 
     `giet_that`   — ca chết bằng CHỐT CỦA CHÍNH NÓ (`TinHieuChotCa` mang đúng tên ca).
-    `tin_dung_gia` — ca chết vì thứ KHÁC: crash, parse hỏng, fixture sai, hoặc một
-                    `AssertionError` trần do đường nào đó dựng lên. Đây KHÔNG phải
-                    bằng chứng đột biến bị chốt bắt, và không được đếm là giết.
+    `tin_dung_gia` — ca chết vì thứ KHÁC: crash, parse hỏng, fixture sai, một
+                    `AssertionError` trần do đường nào đó dựng lên, hoặc một chốt
+                    GIÀN GIÁO (`dung()`) không qua — trường hợp cuối là R5-01, nơi
+                    tiến trình con chết trước khi ca kịp đo thuộc tính của mình.
+                    Đây KHÔNG phải bằng chứng đột biến bị chốt bắt.
     `bo_qua`      — thiếu môi trường. `qua` — sống sót.
     """
     global _CA_DANG_CHAY
@@ -490,6 +535,9 @@ def _chay_1_ca(fn):
         return "qua", None
     except BoQuaMoiTruong as ex:
         return "bo_qua", str(ex)
+    except LoiDungCa as ex:
+        # R5-01: giàn giáo hỏng ⇒ thuộc tính đích CHƯA CHẠY ⇒ không có gì để cấp tín dụng.
+        return "tin_dung_gia", f"giàn giáo hỏng (chưa tới chốt nghiệp vụ): {ex}"
     except TinHieuChotCa as ex:
         nguon = getattr(ex, "ca_nguon", None)
         if nguon != fn.__name__:
@@ -577,7 +625,10 @@ def t22_bash_windows_khong_lay_bo_phong_wsl_o_system_root():
         env = dict(os.environ); env.pop("CONG_CU_BASH", None)
         p = subprocess.run([sys.executable, "-c", ma], env=env, cwd=GOC,
                            capture_output=True, text=True, timeout=60)
-        bang(p.returncode == 0, f"gọi _bash_windows hỏng: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
+        # GIÀN GIÁO, không phải chốt nghiệp vụ: đoạn `python -c` trên do CHÍNH ca này
+        # soạn ra. Nó chết ⇒ bốn phép so A/B/C/D bên dưới CHƯA CHẠY ⇒ `dung()`, để
+        # không ai được cấp tín dụng giết cho một crash vô can (R5-01).
+        dung(p.returncode == 0, f"gọi _bash_windows hỏng: rc={p.returncode}\n{p.stdout}\n{p.stderr}")
         kq = dict(l.split(" ", 1) for l in p.stdout.splitlines() if " " in l)
         # So sau khi resolve CẢ HAI vế: trên windows-latest, tempfile trả tên ngắn 8.3
         # (`RUNNER~1`) còn `_bash_windows` resolve() thành `runneradmin` (run 33630217222, B đỏ oan).
@@ -881,12 +932,30 @@ def _tu_kiem_phan_hang() -> int:
         ex.ca_nguon = "mot_ca_khac_hoan_toan"
         raise ex
 
+    def f_gian_giao_khoi_chay_hong():
+        # R5-01: tiến trình con của ca chết ⇒ chốt nghiệp vụ bên dưới CHƯA CHẠY.
+        p = subprocess.run([sys.executable, "-c", "raise KeyError('rv5_unrelated_crash')"],
+                           capture_output=True, text=True, timeout=60)
+        dung(p.returncode == 0, f"giàn giáo chết: rc={p.returncode}")
+        bang(False, "KHÔNG ĐƯỢC tới đây — nếu tới thì `dung()` đã mất răng")
+
+    def g_chot_ma_thoat_van_la_giet_that():
+        # ĐỐI CHỨNG NGƯỢC, và nó là cái đắt: reviewer cảnh báo thẳng rằng "hạ mọi rc
+        # khác 0 thành tín dụng giả sẽ làm mất tín dụng hợp lệ của ca kiểm mã thoát".
+        # `t7` `t9` `t11` `t20` sống bằng đúng những `rc` ấy. Ca này phải là `giet_that`.
+        p = subprocess.run([sys.executable, "-c", "raise SystemExit(3)"],
+                           capture_output=True, text=True, timeout=60)
+        bang(p.returncode == 0, f"sản phẩm trả rc={p.returncode} — rc LÀ hợp đồng của nó")
+
     mong = {"a_chot_that": "giet_that", "b_parse_hong": "tin_dung_gia",
             "c_thieu_khoa": "tin_dung_gia", "d_wrapper_doi_kieu": "tin_dung_gia",
-            "e_chot_cua_ca_khac": "tin_dung_gia"}
+            "e_chot_cua_ca_khac": "tin_dung_gia",
+            "f_gian_giao_khoi_chay_hong": "tin_dung_gia",
+            "g_chot_ma_thoat_van_la_giet_that": "giet_that"}
     loi = 0
     print(f"\nTỰ KIỂM BỘ PHÂN HẠNG ({len(mong)} ca):")
-    for fn in (a_chot_that, b_parse_hong, c_thieu_khoa, d_wrapper_doi_kieu, e_chot_cua_ca_khac):
+    for fn in (a_chot_that, b_parse_hong, c_thieu_khoa, d_wrapper_doi_kieu, e_chot_cua_ca_khac,
+               f_gian_giao_khoi_chay_hong, g_chot_ma_thoat_van_la_giet_that):
         tt, ct = _chay_1_ca(fn)
         if tt != mong[fn.__name__]:
             print(f"  ĐỎ  {fn.__name__}: mong {mong[fn.__name__]!r}, thực {tt!r} — {ct}")
@@ -894,6 +963,51 @@ def _tu_kiem_phan_hang() -> int:
         else:
             print(f"  ok  {fn.__name__} → {tt}")
     return loi
+
+
+def _tu_kiem_gian_giao() -> int:
+    """Chạy LẠI đúng phản chứng của reviewer lượt 5 cho `R5-01`, trên bản sao tạm.
+
+    Năm ca tự kiểm ở trên đều nằm TRONG CÙNG TIẾN TRÌNH — chính vì thế chúng bỏ sót
+    đường này (reviewer nói thẳng như vậy). Phép đo dưới đây đi qua ranh giới tiến
+    trình THẬT: bơm duy nhất `raise KeyError("rv5_unrelated_crash")` vào đầu
+    `_bash_windows` của `ops/cong_cu.py`, rồi hỏi bộ phân hạng xem `t22` chết kiểu gì.
+
+    TRƯỚC bản vá: `giet_that` (tín dụng giả — thuộc tính WSL chưa hề được đo).
+    SAU bản vá:   `tin_dung_gia`.
+    Gỡ `dung()` ở `t22` về `bang()` ⇒ phép đo này phải ĐỎ. Đó là RĂNG của bản vá."""
+    ten = "rv5_gian_giao_crash"
+    neo = "def _bash_windows(path=None, system_root=None, program_files=None, git=None):\n"
+    thay = neo + '    raise KeyError("rv5_unrelated_crash")  # đột biến R5-01: crash VÔ CAN\n'
+    ds = [f for f in CA if f.__name__.startswith("t22_")]
+    print("\nTỰ KIỂM GIÀN GIÁO (phản chứng R5-01 qua ranh giới TIẾN TRÌNH):")
+    if len(ds) != 1:
+        print(f"  KHÔNG_ĐO_ĐƯỢC: tìm thấy {len(ds)} ca t22_*, đòi đúng 1 — ca đã đổi tên?")
+        return 1
+    t22 = ds[0]
+    tt, ct = _chay_1_ca(t22)
+    if tt == "bo_qua":
+        print(f"  BỎ QUA control t22: {ct}")
+        return 0
+    if tt != "qua":
+        print(f"  KHÔNG_ĐO_ĐƯỢC: control t22 → {tt!r} ({ct}) — mong 'qua'; đột biến bên dưới vô nghĩa")
+        return 1
+    print("  ok  control t22 → qua")
+    cay, dich = _dung_cay_dot_bien(ten, "ops/cong_cu.py", neo, thay, _PHU)
+    g, cu = globals(), globals()["SCRIPT"]
+    g["SCRIPT"] = dich
+    try:
+        tt, ct = _chay_1_ca(t22)
+    finally:
+        g["SCRIPT"] = cu
+        shutil.rmtree(cay, ignore_errors=True)
+    if tt != "tin_dung_gia":
+        print(f"  ĐỎ  crash VÔ CAN trong `_bash_windows` được phân hạng {tt!r} — {str(ct)[:200]}\n"
+              f"      Đây là R5-01: mutant chết TRƯỚC khi ca kịp đo thuộc tính của nó mà vẫn "
+              f"được cấp tín dụng giết.")
+        return 1
+    print(f"  ok  crash vô can → tin_dung_gia ({str(ct).splitlines()[0][:90]})")
+    return 0
 
 
 def main() -> int:
@@ -917,6 +1031,7 @@ def main() -> int:
     print(f"\ncong_cu_test: {qua}/{len(CA) - len(bo_qua)} đạt; tổng={len(CA)}, bỏ qua={len(bo_qua)}")
 
     loi_db = _tu_kiem_phan_hang()
+    loi_db += _tu_kiem_gian_giao()
     print(f"\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một):")
     for ten_db, cfg in DOT_BIEN.items():
         ca_dich = cfg[-1]

@@ -1,0 +1,79 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 4 cua PR #452, KHAC NEN (codex).
+#
+# LUOT NAY LAT MOT KET LUAN MA PHIEN DIEU PHOI VUA TUYEN BO O BAN 4.
+# Ban 4 khai: "bon reviewer cung nen doc qua cau 61-99% ma khong dung lai".
+# R4-03 do: cau ay KHONG TON TAI o 07eb236 va ba76a78 — hai SHA ma luot 1 va 2
+# review. No xuat hien lan dau o d3bc218. Va phep suy 50/82 + 81/82 den tu CHINH
+# verdict luot 2 (dong 39). Nen khong phai "bon nguoi bo sot"; that la: mot phan
+# tich sinh ra loi, tac gia nhan vao, khac nen bac bo.
+# Phien dieu phoi da DO LAI: grep cau ay tren bon SHA cho 0/0/1/4. Khop.
+
+schema_version: 2
+kind: review_delivery_receipt
+packet_id: 'PR452-PHAN-BIEN-QUY-TRINH'
+lease_id: khong-co-lease
+phase_key: PHAN-BIEN-QUY-TRINH-BUILD-REVIEW
+luot: 4
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: changes_requested
+verdict_path: ops/reviews/phan-bien-quy-trinh-review-4-codex-verdict.md
+verdict_sha256: e612ee4679e3dd3779743b6e23def881c0b86b5bcbef5d5f977c8dbcfa3e31ef
+verdict_bytes: 24917
+reviewed_sha: 2fb43fc8e3fd6dacd6bb9e42731e751d3de2e262
+
+run_neo:
+  run_id: 06ceaec97a1e454a970cda425836dcf1
+  prompt_sha256: 1c226c017450f101331d79939639c99b61751f428ba7fed84fc5ae009d93f89f
+  prompt_kin_hoan_toan: true
+  worktree_sach: true
+  thoi_luong_giay: 790.574
+  stdout_byte: 349
+  stderr_byte: 754537
+  ma_thoat: 0
+
+phat_hien_chinh: >-
+  R4-03 (P2) — LAT KET LUAN M6 CUA BAN 4. Xem khoi chu thich tren.
+  R4-02 (P1, tra loi H3) — tai lieu KHONG CO mot ket luan hien hanh nhat quan:
+  dong 125-126 doi kiem do phu/rang va khong loai luat chi vi co cong, nhung dong
+  128 van chi coi o "vi pham do duoc" la viec; BA thu cung duoc goi "so mot"
+  (MVP-1, MVP-4, va cau hoan moi muc con lai); MVP-2 van dua tren N1 chua va.
+  Reviewer tra loi thang cau H3: "Tep con gia tri lam ho so bang chung, nhung CHUA
+  DAT muc tieu giup quyet dinh quy trinh." Va no TU KHAI khong do thoi gian doc —
+  day la nhan dinh bien tap, khong phai phep do.
+  R4-01 (P2) — N1 chua duoc truyen toi MVP-2: phan quyet dinh van khai 61% va
+  40/82 "dang lam dung", trong khi "co gia tri bam" chua phai "da xac minh bam va
+  tham quyen".
+  R4-04 (P2) — cong_cu cap TIN DUNG GIET GIA: mutant chet vi loi NGOAI assertion
+  dich van duoc dem la bi giet.
+  R4-05 (P2) — ba ca comment-id dang do chot head-sha thay vi so comment.
+
+verdict_nguon: >-
+  launcher.py run boc codex exec --sandbox workspace-write trong CLONE ROI, day du
+  1684 commit, detached dung reviewed_sha, core.abbrev ghim 7. Prompt neo sha256,
+  truyen qua cho thay PROMPT_FILE nen con doc BAN CHUP BAT BIEN.
+verdict_doi_chieu: >-
+  CHUNG MINH: prompt nao chay tren head nao, cay sach, luot chay lam viec that
+  (790,6 giay, verdict 24.917 byte). KHONG CHUNG MINH: noi dung verdict khop tung
+  chu thu reviewer sinh ra — bam do tren BAN SAO da chep vao kho. KHONG DO DUOC.
+authoritative_source: repo_file
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/pull/452
+
+verdict_usage_caveats:
+  - id: M6-DA-BI-LAT-dung-doc-ban-4-nhu-ket-luan
+    noi_dung: >-
+      Moi cau trong ban 4 va trong bien nhan luot 3 noi "bon reviewer cung nen bo
+      sot cau 61-99%" la SAI va da duoc rut o ban 5. Cau ay khong ton tai o SHA ho
+      review. Ket luan ve diem mu provider KHONG con duoc do nay do lung.
+  - id: phan-cong-CAM-tu-soan-phan-chung
+    noi_dung: >-
+      Nhu luot 3: cam reviewer tu soan chuoi tan cong, nen do phu hep hon mot luot
+      khong rang buoc.
+
+delivered: true
+delivered_by: claude-session
+recorder_cung_la_nguoi_thi_cong: true

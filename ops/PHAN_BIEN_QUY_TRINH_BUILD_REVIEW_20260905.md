@@ -614,27 +614,57 @@ TRƯỚC** — và ba bản của tệp này là bằng chứng thực nghiệm 
 | 29 | bảng ba ô | thiếu ô **chưa đủ bằng chứng** và ô **có cổng nhưng chưa kiểm răng** | thêm cả hai |
 | 30 | M4 *"cổng có đỏ được không"* — chưa ai đo | **ĐÃ ĐO**: 6 cổng (`RC_DOCTRINE` · `bien-nhan` · `RC_LOP` · `t26` · `t27` · `t33`) đột biến trên bản sao, **tất cả ĐỎ đúng ca đích**, kiểm bằng **nội dung assertion** chứ không chỉ `rc≠0`; control **4/4, rc=0, bỏ qua=0** | ghi nhận — reviewer tự khai *"không suy thành mọi cổng đều được bảo vệ"* |
 
-**ĐÂY LÀ CÂU TRẢ LỜI THỰC NGHIỆM CHO M6, và nó rõ hơn mong đợi.**
+**BẢN 4 KHAI MỘT KẾT LUẬN M6 SAI — cross-review lượt 4 lật, và tôi đã đo lại rồi nhận (`R4-03`).**
 
-M6 nói: cấp năng lực đo **không** cấp tính độc lập; hai phiên cùng mô hình mù cùng chỗ. Đo được:
+Bản 4 viết: *"Bốn reviewer cùng nền đọc qua câu `61–99%` mà không dừng lại."* Đo:
 
-| | reviewer | tìm ra lớp lỗi "đếm vắng mặt thành tuân thủ" ở kết luận trung tâm? |
+| SHA | reviewer nào review nó | câu `61–99%` có mặt? |
 |---|---|---|
-| lượt 1 (2 reviewer) | Claude | không |
-| lượt 2 (2 reviewer) | Claude | không |
-| **lượt 3 (1 reviewer)** | **codex** | **có — ngay lượt đầu** |
+| `07eb236` | lượt 1 (2 phiên Claude) | **0 lần** |
+| `ba76a78` | lượt 2 (2 phiên Claude) | **0 lần** |
+| `d3bc218` | — | xuất hiện **lần đầu** |
 
-Bốn reviewer cùng nền đọc qua câu *"61–99%"* mà không dừng lại; nó **được viết ra ở bản 3 để sửa** hai
-lỗi mà chính họ vừa tìm. Và trớ trêu đúng chỗ: lỗi ấy **cùng lớp** với hai lỗi kia — chỉ đổi biến. Ba
-lỗi đo mà tác giả tự bắt trong phiên (`rg` bỏ tệp ẩn · `rc=$?` sau ống · kho nông) cũng **không**
-reviewer cùng nền nào bắt được.
+**Họ không thể "đọc qua" một câu chưa tồn tại.** Và phép suy `50/82` + `81/82` đến từ **chính
+verdict lượt 2** (dòng 39 của `phan-bien-quy-trinh-review-2-claude-verdict.md`).
 
-Nên kết luận về M6 không còn là suy đoán: **cùng nền có một điểm mù có hệ thống ở lớp lỗi phương pháp
-của chính tác giả**, và khác nền mua được đúng lớp ấy. Đó là lý lẽ định lượng mạnh nhất mà cả đợt này
-sinh ra cho việc giữ `cross_approved` là bắt buộc với phạm vi nhạy cảm — mạnh hơn mọi lập luận trong
-§2 hay §5.
+Nên chuỗi sự kiện đúng — và chỉ chừng này là kiểm được:
 
-**Và phải nói cả chiều ngược, kẻo lại là lời khai rộng hơn phép đo:** đây là **n=1** lượt khác nền, có
-ràng buộc phân công (cấm tự soạn phản chứng) nên độ phủ hẹp hơn, và nó **không** chứng minh codex giỏi
-hơn — chỉ chứng minh **khác nền thấy được chỗ cùng nền mù**. Một lượt Claude thứ năm có thể cũng tìm
-ra; điều đó chưa ai đo.
+> lượt 2 (cùng nền) **sinh ra** phép suy sai → tác giả **nhận vào** bản 3 → lượt 3 (khác nền)
+> **bác bằng phản chứng**.
+
+Đó **không phải** "4 bỏ sót so 1 bắt được". Bảng so sánh của bản 4 dùng **hai đầu vào khác nhau**,
+nên nó không đo được điều nó tuyên bố. Câu *"cùng nền có điểm mù có hệ thống"* và
+*"không còn là suy đoán"* đều **bị rút**.
+
+**Đây là lần thứ NĂM cùng một lớp lỗi** — lời khai rộng hơn phép đo — và lần này nó nằm ở đúng
+câu tôi viết ra để tổng kết về chính điểm mù của mình. Cái đáng ghi không phải con số nào, mà là:
+**một kết luận về việc mình hay sai ở đâu cũng sai theo đúng kiểu ấy.**
+
+**Cái gì còn đứng:** lượt 3 và 4 (khác nền) đã tìm ra `N1`, `N2`, `R4-01`…`R4-05` — những finding
+**có thật, đo được, đã được phiên điều phối kiểm lại**. Điều đó đủ để nói cross-review khác nền
+**có giá trị đo được**, nhưng **không** đủ để định lượng "điểm mù theo provider". Muốn đo điều ấy
+phải cho hai provider **cùng bundle, cùng nhiệm vụ, cùng SHA**, và giữ cả lượt thất bại — chưa ai làm.
+
+
+### Lượt 4 (trên `2fb43fc`) — codex lần hai; và nó lật kết luận M6 của bản 4
+
+| # | Bản 4 khai | Phép đo nói | Xử lý |
+|---|---|---|---|
+| 31 | *"bốn reviewer cùng nền đọc qua câu 61–99%"* | câu ấy **0 lần** ở `07eb236` và `ba76a78` — hai SHA họ review; xuất hiện lần đầu ở `d3bc218`. Phép suy sai đến từ **chính verdict lượt 2** | **RÚT** kết luận M6 (`R4-03`) |
+| 32 | tài liệu đã dùng được để quyết định | **KHÔNG** — chỉ dẫn hành động **mâu thuẫn trực tiếp**: dòng 128 vẫn coi chỉ ô "vi phạm đo được" là việc, ngược dòng 125–126; **BA** thứ cùng được gọi "số một" | `R4-02` **P1** — chưa xử lý, xem dưới |
+| 33 | MVP-2 đã vá theo `N1` | phần quyết định **vẫn** khai 61% và 40/82 "đang làm đúng" | `R4-01` — chưa xử lý |
+| 34 | (chưa đo) | `cong_cu` cấp **TÍN DỤNG GIẾT GIẢ**: mutant chết vì lỗi **ngoài** assertion đích vẫn được đếm là bị giết | `R4-04` |
+| 35 | (chưa đo) | ba ca comment-id đang đo **chốt head-sha** thay vì sổ comment | `R4-05` |
+
+**`R4-02` là finding P1 và tôi CHƯA xử lý nó, vì nó là quyết định của chủ kho, không phải của tôi.**
+Reviewer trả lời thẳng câu H3 mà phiên điều phối đặt ra:
+
+> *"Tệp còn giá trị làm hồ sơ bằng chứng, nhưng **chưa đạt mục tiêu giúp quyết định quy trình**."*
+
+Và nó tự khai đúng phạm vi: *"Chưa đo thời gian đọc của chủ kho hoặc thử nghiệm người dùng 5 phút.
+Nhận định biên tập của tôi…"* — tức nó **không** giả vờ đây là phép đo. Đề nghị của nó: một **trang
+đầu chỉ chứa quyết định hiện hành + bằng chứng + giới hạn + thứ tự bước tiếp**, đẩy §9 và mọi đoạn
+*"bản đầu viết / rút lại"* sang phụ lục — git đã giữ bản cũ, không cần lặp câu sai trong phần khuyến nghị.
+
+Việc ấy đổi tài liệu này từ **nhật ký** thành **bản quyết định**, và đó là lựa chọn về mục đích, nên
+để chủ kho chốt.

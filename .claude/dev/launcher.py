@@ -162,7 +162,14 @@ _TRANSPORT_CONTRACTS = (
 # (provider, execution_surface, transport) — cùng ba trường với `_TRANSPORT_CONTRACTS`,
 # trừ tên lệnh vì không có lệnh nào.
 _PROVIDER_NGOAI_CLI = (
-    ("google_antigravity", "antigravity", "machine"),
+    # `machine/local`, KHÔNG phải `machine` — chép đúng `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md`
+    # §2 hàng "Google Antigravity". Cross-review PR #460 đo được hàng này LỆCH nguồn, và lệch
+    # theo chiều CHẶN NHẦM: một biên nhận Antigravity khai TRUNG THỰC `machine/local` bị cổng
+    # TỪ CHỐI, còn khai SAI `machine` thì ĐƯỢC NHẬN — validation đảo ngược. Cùng LỚP với
+    # `R7-02` (chặn quá rộng theo một hằng chép tay lệch nguồn). `anthropic_claude` trong
+    # `_TRANSPORT_CONTRACTS` vốn đã dùng `machine/local`, nên dạng giá trị này được hỗ trợ sẵn
+    # và Antigravity là hàng DUY NHẤT còn lệch.
+    ("google_antigravity", "antigravity", "machine/local"),
     ("openai_chatgpt", "chatgpt_web", "human_mediated"),
     # Human Auditor — bộ ba chép từ bảng provider chuyển tiếp
     # (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §2, hàng "Human Auditor"). Cross-review PR #455

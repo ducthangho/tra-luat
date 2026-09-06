@@ -27,6 +27,24 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 | `pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md` | `NAM-PHAT-HIEN-VONG-7-CHUA-VA-luc-ghi-bien-nhan` | Lúc ghi biên nhận, **cả năm finding CHƯA được vá** — một executor khác (`claude-fable-5-1`, max effort) đang thi công theo các ô `GỢI Ý VÁ`. Đừng đọc sự tồn tại của biên nhận thành *"đã đóng"*. |
 | `pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md` | `approve_with_findings-KHONG-phai-du-dieu-kien-LAND` | Như các lượt trước. Trạng thái GitHub trực tiếp là **KHÔNG ĐO ĐƯỢC** từ sandbox. |
 | `pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md` | `phan-cong-CAM-tu-soan-phan-chung` | Như các lượt trước — và lượt này ràng buộc ấy **chặn được một hướng đo thật** (fixture human-audit của `R7-02`), nên độ phủ về phía đó **hẹp hơn thật sự**. |
+<a id="caveat-neo-canonical-ancestry-chi-dung-khi-land-bang-merge"></a>
+> **CAVEAT CÓ TÊN — `neo-canonical-ancestry-chi-dung-khi-land-bang-merge`** (mở 06-09-2026, PR #460).
+> Mọi lời khai *"bảy neo của #455 là tổ tiên của master"* — và mọi `anchor.loai: canonical_ancestry`
+> trong `ops/reviews/*.receipt.yaml` — **đúng KHI VÀ CHỈ KHI kho land bằng MERGE COMMIT; land bằng
+> SQUASH thì bảy neo ấy thành KHÔNG-PHẢI-TỔ-TIÊN** và cổng `ops/bien_nhan_v2.py` sẽ báo vi phạm.
+> Hôm nay không nổ vì `origin/master` = `cacaba3` là merge commit (hai cha `1b3caa11` + `c0f18ac`).
+>
+> **ĐO ĐƯỢC (06-09-2026):** `git cat-file -t 403fe125…` ⇒ object **không tồn tại** (squash commit do
+> reviewer tự dựng, không phải hiện vật của kho); `merge-base --is-ancestor` cho `78ac0ddf` `4488ff1d`
+> `c0f18ac1` `ca960160` `b912e5f` `4ef73e6` `670071b` `b7a53ba` ⇒ **cả tám LÀ tổ tiên**; cổng chạy
+> trên clone ghim đúng `cacaba3` ⇒ `rc=0`, `16 ĐẠT v2`, `0 vi phạm`, `0 KHÔNG ĐO ĐƯỢC`, tổng 69.
+> Nên kết luận *"master ĐỎ"* của lượt ấy **SAI**; TIỀN ĐỀ bên dưới thì **ĐÚNG**.
+>
+> **KHÔNG ĐO ĐƯỢC:** không có ca test cục bộ nào cưỡng chế được *"kho phải land bằng merge"* — bất
+> biến ấy sống ở nút merge của GitHub, ngoài tầm bộ test. `c45` trong `ops/bien_nhan_v2_test.py` chỉ
+> khoá **tiền đề** (cùng một cây: merge ⇒ còn tổ tiên, squash ⇒ mất), **không** khoá chính sách.
+> Đổi cơ chế neo là thay đổi KIẾN TRÚC ⇒ **packet riêng**, không làm trong PR #460.
+
 | `pr455-bien-nhan-v2-review-6-codex-verdict.md` | `R6-02-DONG-THEO-KIEN-TRUC-khong-theo-ban-va` | `R6-02` đo trên `5a78c15`. Trên head sau khi đổi sang **bảng có cấu trúc**, chính phép đo ấy cho **5 cặp surface nguyên vẹn** — vì `AGENTS.md` thôi cấp bề mặt, chỉ còn đối chiếu. Lớp lỗi chết theo **CẤU TRÚC**, không theo một bản vá, nên **không có ca canh riêng cho nó**. *"Đã đóng"* ở đây nghĩa là *"đường ấy không còn tồn tại"*, không phải *"đã thêm một chốt"*. |
 | `pr455-bien-nhan-v2-review-6-codex-verdict.md` | `HAI-P2-VONG-6-DA-VA-nhung-VA-CAN-REVIEW-LAI` | Cả hai P2 đã vá **trong cùng PR**, nhưng **bản vá chưa được review** — lần thứ **BẢY** liên tiếp. **Chưa đóng.** |
 | `pr455-bien-nhan-v2-review-6-codex-verdict.md` | `48-48-la-so-mutant-DUOC-CHON-khong-phai-khong-gian-loi` | Nguyên văn reviewer: *"`42/42` là số mutant **được chọn**, không phải toàn bộ không gian lỗi"* — còn nguyên sau khi lên `48/48`. Và reviewer lượt 5 đã khai **một mutant còn sống** (phục hồi ép `str` tại `che_do`) mà **họ chọn** không nâng thành finding; nó vẫn là **nợ độ phủ**. |

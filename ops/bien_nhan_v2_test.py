@@ -83,6 +83,19 @@ HOP_DONG_HUMAN_DONG_BANG = {"be_mat": frozenset({"manual_audit"}), "van_chuyen":
 # luật thì luật kia vẫn làm hàng ấy đỏ. Hai mutant, mỗi cái thêm một `continue` bỏ đúng một neo,
 # **sống sót qua toàn suite** (`45/45 · 57/57 · 2/2`, rc=0, `TỔNG: ĐẠT`). Phụ thuộc vòng: một oracle
 # hỏi sản phẩm "anh neo vào câu nào" rồi xoá đúng câu ấy sẽ CO THEO mỗi lần sản phẩm bỏ bớt neo.
+# BỘ BA provider — CHÉP TAY từ `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §2, bảng "Nhận dạng
+# provider và execution surface". Cross-review PR #460 đo được hàng Antigravity trong
+# `launcher.py` LỆCH nguồn (`machine` thay vì `machine/local`) và lệch theo chiều CHẶN NHẦM:
+# biên nhận khai TRUNG THỰC bị từ chối, khai SAI được nhận. Oracle nằm ở ĐÂY, không đọc từ
+# `launcher.py`, vì một oracle hỏi chính bảng nó kiểm thì không canh được gì.
+BO_BA_PROVIDER_DONG_BANG = (
+    ("google_antigravity", "antigravity", "machine/local"),
+    ("openai_chatgpt", "chatgpt_web", "human_mediated"),
+    ("anthropic_claude", "claude_code", "machine/local"),
+    ("openai_codex", "codex_cli", "machine"),
+    ("human", "manual_audit", "human"),
+)
+KE_HOACH_PROVIDER = "ops/KE_HOACH_THI_CONG_DA_PROVIDER.md"
 NEO_LUAT_DONG_BANG = (
     ("ASSURANCE_CAM_THEO_PROVIDER[openai_chatgpt]", "AGENTS.md",
      "tự tạo `cross_approved`, `same_provider_approved` hoặc `human_audited`"),
@@ -976,7 +989,7 @@ def _cay_guong(tmp: Path, co_launcher=True, than_launcher=None, co_agents=True,
 # tên/đổi chỗ làm `_thay_1` báo KHÔNG ĐO ĐƯỢC thay vì im lặng sửa hụt.
 HANG_CODEX = '    ("openai_codex", ("codex",), "codex_cli", "machine"),'
 HANG_API = '    ("openai_api", ("llm",), "llm_cli", "machine"),'
-HANG_AG = '    ("google_antigravity", "antigravity", "machine"),'
+HANG_AG = '    ("google_antigravity", "antigravity", "machine/local"),'
 HANG_BD = '    ("anthropic", "anthropic_claude"),'
 HANG_BM = '    ("claude_code_cli", "claude_code"),'
 
@@ -1046,7 +1059,7 @@ def c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA():
          {"sua_launcher": _thay_1(HANG_API, '    ("openai_api", ("llm",), "llm_cli"),')},
          2, "`_TRANSPORT_CONTRACTS` hàng 3 có 3 cột, lược đồ đòi 4"),
         ("hàng `_PROVIDER_NGOAI_CLI` thừa cột",
-         {"sua_launcher": _thay_1(HANG_AG, '    ("google_antigravity", "antigravity", "machine", "thua"),')},
+         {"sua_launcher": _thay_1(HANG_AG, '    ("google_antigravity", "antigravity", "machine/local", "thua"),')},
          2, "`_PROVIDER_NGOAI_CLI` hàng 1 có 4 cột, lược đồ đòi 3"),
         ("hàng `_PROVIDER_BI_DANH` thiếu cột",
          {"sua_launcher": _thay_1(HANG_BD, '    ("anthropic",),')},
@@ -1349,9 +1362,18 @@ TRUONG_ATTESTATION = (
     ("github_submitter_identity.actor",
      lambda d, v: d["github_submitter_identity"].__setitem__("actor", v), "actor"),
     ("anchor.loai", lambda d, v: d["anchor"].__setitem__("loai", v), "anchor.loai"),
+    # `R8-04`: trường TUỲ CHỌN cũng phải phân biệt VẮNG với CÓ-MÀ-HỎNG. `transport` từng lọt
+    # MỌI kiểu không-phải-chuỗi vì `_chuoi` trả `None` cho cả hai và nhánh `if vc and …` gộp
+    # chúng; chỉ chuỗi-sai-hợp-đồng mới bị bắt. Nó nằm ở ĐÂY, trong ma trận chung, chứ không
+    # thành một ca lẻ — cùng lý do `_chuoi` là MỘT cửa: vá một danh sách không phải vá một lớp.
+    ("model_reviewer_identity.transport",
+     lambda d, v: d["model_reviewer_identity"].__setitem__("transport", v), "transport"),
     ("anchor.cuong_do", lambda d, v: d["anchor"].__setitem__("cuong_do", v), "anchor.cuong_do"),
 )
-KIEU_KHONG_PHAI_CHUOI = ({"fake": 1}, ["fake"], 123, True)
+# `R8-04` thêm `""`: chuỗi RỖNG là một trong các giá trị reviewer đo được lọt qua `transport`,
+# và nó là ca biên riêng — đúng KIỂU chuỗi, nhưng `_chuoi` vẫn trả `None`, nên nó đi CHUNG
+# nhánh với "vắng mặt" y như các kiểu sai. Đo trước khi thêm: cả 6 trường còn lại đã chặn nó.
+KIEU_KHONG_PHAI_CHUOI = ({"fake": 1}, ["fake"], 123, True, "")
 
 
 @ca
@@ -2028,6 +2050,94 @@ def c43_bang_neo_luat_cua_san_pham_phai_khop_ORACLE_chep_tay():
         bang(n == 1, f"câu neo của `{luat}` khớp {n} chỗ trong `{tep_neo}`, đòi ĐÚNG 1")
 
 
+@ca
+def c44_bo_ba_provider_phai_KHOP_nguon_ke_hoach_va_hang_LECH_phai_doi_hanh_vi():
+    """`R8-05`: `launcher.py` là NGUỒN CÓ CẤU TRÚC của hợp đồng — lệch nguồn là chặn/nhận sai.
+
+    Ba tầng, vì hai tầng đầu chỉ so chuỗi và không chứng minh hàng ấy QUYẾT ĐỊNH điều gì:
+      (a) mỗi bộ ba của oracle chép tay phải có trong bảng `launcher.py`, **đúng cả cột vận chuyển**;
+      (b) oracle chép tay phải khớp CHÍNH bảng §2 của kế hoạch — kẻo oracle và nguồn cùng trôi;
+      (c) WITNESS ĐỐI XỨNG trên cây gương: với hàng THẬT, biên nhận Antigravity khai TRUNG THỰC
+          `machine/local` phải ĐƯỢC NHẬN; với hàng LỆCH (`machine`, đúng bản trước bản vá) chính
+          biên nhận ấy phải BỊ TỪ CHỐI. Không có (c) thì (a)/(b) chỉ là hai chuỗi bằng nhau."""
+    # (a) bảng launcher ⊇ oracle, khớp từng cột
+    hang = {r[0]: r for r in (_doc_bang_launcher("_TRANSPORT_CONTRACTS")
+                              + _doc_bang_launcher("_PROVIDER_NGOAI_CLI")) if r}
+    for prov, be_mat, van_chuyen in BO_BA_PROVIDER_DONG_BANG:
+        r = hang.get(prov)
+        bang(r is not None, f"`{prov}` KHÔNG có hàng nào trong bảng của launcher.py")
+        bang(r[-2:] == [be_mat, van_chuyen],
+             f"hàng `{prov}` LỆCH oracle §2: launcher={r[-2:]} oracle={[be_mat, van_chuyen]}")
+    # (b) oracle ⊆ bảng §2 của kế hoạch, đọc Ô CUỐI chứ không dò substring (`machine` là tiền tố
+    #     của `machine/local`, nên `in` sẽ khớp nhầm và chốt mất răng đúng chỗ cần nó nhất).
+    van = (GOC / KE_HOACH_PROVIDER).read_text(encoding="utf-8")
+    for prov, _be_mat, van_chuyen in BO_BA_PROVIDER_DONG_BANG:
+        dong = [l for l in van.splitlines() if l.startswith("|") and f"`{prov}`" in l]
+        bang(len(dong) == 1,
+             f"`{prov}`: tìm được {len(dong)} hàng trong §2 của `{KE_HOACH_PROVIDER}`, đòi ĐÚNG 1")
+        o = [c.strip().strip("`") for c in dong[0].strip("|").split("|")]
+        bang(o[-1] == van_chuyen,
+             f"`{prov}`: §2 khai vận chuyển {o[-1]!r}, oracle chép tay {van_chuyen!r}")
+    # (c) witness đối xứng — hàng ấy phải ĐỔI HÀNH VI, không chỉ đổi chuỗi
+    d = v2_du()
+    d["model_reviewer_identity"].update(provider="google_antigravity", surface="antigravity",
+                                        transport="machine/local")
+    for nhan, kw, mong_nhan in (("hàng THẬT (machine/local)", {}, True),
+                                ("hàng LỆCH (machine)",
+                                 {"sua_launcher": _thay_1(HANG_AG,
+                                  '    ("google_antigravity", "antigravity", "machine"),')}, False)):
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            cong = _cay_guong(tmp, kho_rieng=False, **kw)
+            sp = importlib.util.spec_from_file_location(f"bnv2_ag_{abs(hash(nhan)) % 10**8}", cong)
+            mod = importlib.util.module_from_spec(sp)
+            sp.loader.exec_module(mod)
+            loi = mod._thieu(copy.deepcopy(d))
+            duoc_nhan = not any("transport" in x for x in loi)
+            bang(duoc_nhan == mong_nhan,
+                 f"{nhan}: biên nhận Antigravity khai TRUNG THỰC `machine/local` "
+                 f"{'phải ĐƯỢC NHẬN' if mong_nhan else 'phải BỊ TỪ CHỐI'}, được: {loi[:1]}")
+
+
+@ca
+def c45_neo_canonical_ancestry_KHONG_song_sot_qua_land_bang_SQUASH():
+    """`R8-06` — khoá TIỀN ĐỀ của một nợ đã khai, KHÔNG khoá chính sách land của kho.
+
+    Cross-review lượt 8 (codex) kết luận master ĐỎ vì `#455` land bằng squash. **Kết luận SAI**:
+    `origin/master` là MERGE commit (hai cha) và cả bảy neo ĐỀU là tổ tiên; cổng chạy trên chính
+    `cacaba3` cho `rc=0`. Nhưng TIỀN ĐỀ thì ĐÚNG, và ca này là phản chứng chạy được cho nó: cùng
+    một NỘI DUNG cây, land bằng merge thì neo còn là tổ tiên, land bằng squash thì KHÔNG.
+
+    PHẠM VI — nói thẳng kẻo bị đọc rộng hơn: ca này KHÔNG đo kho thật và KHÔNG cưỡng chế
+    "phải land bằng merge". Bất biến ấy sống ở GitHub (nút merge), ngoài tầm một ca test cục bộ;
+    ép nó ở đây là **KHÔNG ĐO ĐƯỢC** đội lốt đã đo. Xem caveat có tên trong `ops/reviews/README.md`."""
+    import subprocess as _sp
+    with tempfile.TemporaryDirectory() as t:
+        d = Path(t)
+        def g(*a, **kw):
+            return _sp.run(["git", "-C", str(d), *a], capture_output=True, text=True, **kw)
+        dung(g("init", "-q", "-b", "main", ".").returncode == 0, "KHÔNG ĐO ĐƯỢC: git init hỏng")
+        g("config", "user.email", "t@t.t"); g("config", "user.name", "t")
+        g("config", "commit.gpgsign", "false")      # CI ký commit; fixture không có khoá
+        (d / "f").write_text("base\n"); g("add", "-A"); g("commit", "-qm", "base")
+        g("checkout", "-qb", "nhanh")
+        (d / "g").write_text("x\n"); g("add", "-A"); g("commit", "-qm", "neo")
+        neo = g("rev-parse", "HEAD").stdout.strip()
+        dung(len(neo) == 40, f"KHÔNG ĐO ĐƯỢC: không lấy được SHA neo: {neo!r}")
+        g("checkout", "-q", "main")
+        dung(g("merge", "-q", "--no-ff", "nhanh", "-m", "merge").returncode == 0,
+             "KHÔNG ĐO ĐƯỢC: merge hỏng")
+        bang(g("merge-base", "--is-ancestor", neo, "HEAD").returncode == 0,
+             "land bằng MERGE mà neo KHÔNG còn là tổ tiên — tiền đề của ca này sai")
+        g("checkout", "-q", "-B", "main2", "main~1")
+        dung(g("merge", "--squash", "nhanh").returncode == 0, "KHÔNG ĐO ĐƯỢC: merge --squash hỏng")
+        g("commit", "-qm", "squash")
+        bang(g("rev-parse", "main^{tree}").stdout == g("rev-parse", "HEAD^{tree}").stdout,
+             "KHÔNG ĐO ĐƯỢC: hai lối land ra CÂY KHÁC nhau — phép so không còn cô lập lịch sử")
+        bang(g("merge-base", "--is-ancestor", neo, "HEAD").returncode != 0,
+             "land bằng SQUASH mà neo VẪN là tổ tiên — nợ `canonical_ancestry` không còn như đã khai")
+
+
 _mri_that = bnv2._mri
 _thieu_that = bnv2._thieu
 
@@ -2521,6 +2631,30 @@ def _dot_bien():
            '     "`human_audited`: người audit có danh tính bền trên GitHub"),\n', ""),
        "c43_bang_neo_luat_cua_san_pham_phai_khop_ORACLE_chep_tay",
        "bảng neo CO LẠI trong im lặng — oracle chép tay không được co theo",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    # `R8-04`/`R8-05` — cross-review lượt 8 bổ sung (codex, trên `c0f18ac`).
+    # `m59` là bản vá QUAY NGƯỢC NGUYÊN VĂN: gộp lại "vắng" với "có mà hỏng". Đột biến `if False`
+    # KHÔNG dùng được ở đây và đó là bài học riêng: dưới nó `vc=None` rơi xuống chốt hợp đồng
+    # (`None not in {...}` ⇒ True) nên giá trị VẪN bị chặn, chỉ khác thông báo — `c34` vẫn xanh và
+    # đột biến lĩnh "không răng" OAN. Phải đột biến về đúng HÌNH DẠNG cũ mới đo được.
+    _TRANSPORT_MOI = ('        if "transport" in v:\n'
+                      '            vc = _chuoi(v.get("transport"))\n'
+                      '            if vc is None:\n'
+                      '                return (f"`model_reviewer_identity.transport`={v.get(\'transport\')!r} CÓ MẶT nhưng "\n'
+                      '                        f"không phải chuỗi không rỗng — VẮNG khác CÓ-MÀ-HỎNG, im lặng không phải "\n'
+                      '                        f"lời khai")\n'
+                      '            if vc not in hd["van_chuyen"]:')
+    _TRANSPORT_CU = ('        vc = _chuoi(v.get("transport"))\n'
+                     '        if vc and vc not in hd["van_chuyen"]:')
+    do("m59_transport_gop_VANG_voi_CO_MA_HONG",
+       lambda: _dot_bien_tep(_TRANSPORT_MOI, _TRANSPORT_CU),
+       "c34_MOI_truong_attestation_phai_la_CHUOI_khong_chi_truthy",
+       "`{fake:1}` `[..]` `7` `True` `''` lọt LẶNG y như vắng mặt — chỉ chuỗi-sai bị bắt",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m60_bo_HAN_chot_hop_dong_van_chuyen",
+       lambda: _dot_bien_tep('            if vc not in hd["van_chuyen"]:', "            if False:"),
+       "c44_bo_ba_provider_phai_KHOP_nguon_ke_hoach_va_hang_LECH_phai_doi_hanh_vi",
+       "hàng launcher thôi QUYẾT ĐỊNH gì — witness đối xứng của `c44` mất vế TỪ CHỐI",
        doi_chung="c18_neo_git_DUNG_thi_qua")
 
     # R7-03 — TỰ KIỂM RIG: reviewer bơm mất hàng `_BE_MAT_BI_DANH` vào RIÊNG bản launcher mà rig

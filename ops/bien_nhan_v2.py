@@ -390,10 +390,22 @@ def _mri(d):
         # 06-09-2026 trên `4488ff1`: 1/15 — đòi ngay vẫn là bắt oan cả kho), nhưng KHAI SAI
         # thì chặn: một bộ ba SAI SỰ THẬT tệ hơn một bộ ba khuyết.
         # Nợ đã khai: chưa đòi khai `transport`, xem caveat trong biên nhận lượt 6.
-        vc = _chuoi(v.get("transport"))
-        if vc and vc not in hd["van_chuyen"]:
-            return (f"`model_reviewer_identity.transport`={vc!r} không phải vận chuyển của "
-                    f"provider `{prov}` — hợp đồng của kho cho {sorted(hd['van_chuyen'])}")
+        # `R8-04`: VẮNG khác CÓ-MÀ-HỎNG, và `_chuoi` trả `None` cho CẢ HAI. Bản trước gộp hai
+        # trạng thái ấy vào một nhánh `if vc and …`, nên CHỈ một chuỗi SAI bị bắt còn MỌI kiểu
+        # khác lọt LẶNG. Đo được trên một biên nhận hợp lệ, chỉ đổi mỗi trường này:
+        # `{'fake': 1}` · `''` · `7` · `['machine']` · `True` · `None` ⇒ **0 lỗi**, y hệt "vắng hẳn";
+        # chỉ `'human'` (chuỗi sai hợp đồng) mới ra 1 lỗi. Đúng doctrine `None ≠ False` của kho —
+        # cùng LỚP với `_chuoi` đã vá cho `surface`/`session_run_id`, chỉ khác ở chỗ trường này
+        # TUỲ CHỌN nên nhánh "vắng" hợp lệ đã che mất nhánh "có mà hỏng".
+        if "transport" in v:
+            vc = _chuoi(v.get("transport"))
+            if vc is None:
+                return (f"`model_reviewer_identity.transport`={v.get('transport')!r} CÓ MẶT nhưng "
+                        f"không phải chuỗi không rỗng — VẮNG khác CÓ-MÀ-HỎNG, im lặng không phải "
+                        f"lời khai")
+            if vc not in hd["van_chuyen"]:
+                return (f"`model_reviewer_identity.transport`={vc!r} không phải vận chuyển của "
+                        f"provider `{prov}` — hợp đồng của kho cho {sorted(hd['van_chuyen'])}")
     rid = _chuoi(v.get("session_run_id"))
     if not rid and not _chuoi(v.get("KHONG_do_duoc")):
         return ("`model_reviewer_identity` không có `session_run_id` và cũng KHÔNG khai "

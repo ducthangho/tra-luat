@@ -550,15 +550,64 @@ HÌNH THỨC; không có gì bắt một câu văn khai rộng hơn phép đo đ
 mang **ĐIỀU KIỆN ĐO** (head nào · tập nào · đơn vị nào), và mỗi khẳng định hẹp đúng bằng phép đo đã
 chạy. Riêng `R8-01` thì có: hai mutant sống-rồi-chết là phép đo, không phải lời hứa.
 
+### Lượt 8 bổ sung — ba finding codex trên `c0f18ac`, đăng SAU khi #455 đã merge
+
+Ba finding nữa tới sau khi #455 land. Vá cùng đợt, và **cả ba đều tự đo lại** chứ không nhận lời khai.
+
+**`R8-04` (P2) — `transport` không phải chuỗi bị NUỐT LẶNG.** `_chuoi()` trả `None` cho **cả**
+"vắng mặt" **lẫn** "có mặt nhưng hỏng kiểu", rồi nhánh `if vc and vc not in hd["van_chuyen"]` đối xử
+hai thứ ấy y hệt — nên **chỉ chuỗi-sai-hợp-đồng bị bắt**, mọi kiểu khác lọt. Đo trên một biên nhận
+hợp lệ, chỉ đổi mỗi trường ấy (`_thieu` gọi thẳng): `{'fake': 1}` · `''` · `7` · `['machine']` ·
+`True` · `None` ⇒ **0 lỗi**, không phân biệt được với `(vắng hẳn)` ⇒ 0 lỗi; chỉ `'human'` ⇒ 1 lỗi.
+Hai giá trị cuối là của phiên này tìm thêm, ngoài bảng reviewer gửi. Vá đúng doctrine `None ≠ False`:
+phân biệt bằng `"transport" in v`, CÓ-MÀ-HỎNG thành lỗi riêng, VẮNG vẫn hợp lệ (trường tuỳ chọn).
+Khoá bằng cách thêm `transport` vào **ma trận kiểu** `TRUONG_ATTESTATION` của `c34` — chỗ của cả LỚP,
+không phải một ca lẻ — cộng `""` vào bảng kiểu (đo trước: 6 trường còn lại đã chặn nó).
+
+**`R8-05` (P2) — hàng Antigravity trong `launcher.py` LỆCH nguồn, và lệch theo chiều CHẶN NHẦM.**
+`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §2 khai `machine/local`; `_PROVIDER_NGOAI_CLI` khai `machine`.
+Hệ quả đo được: biên nhận Antigravity khai **TRUNG THỰC** `machine/local` bị **TỪ CHỐI**, khai **SAI**
+`machine` thì **ĐƯỢC NHẬN** — validation đảo ngược. Đối chiếu **cả 5 hàng** của §2 (không chỉ hàng
+được chỉ): Antigravity là hàng **duy nhất** lệch; `anthropic_claude` vốn đã dùng `machine/local`, nên
+dạng giá trị ấy được hỗ trợ sẵn. Cùng LỚP `R7-02` (chặn quá rộng vì một hằng lệch nguồn). Vá hàng, và
+khoá bằng `c44` **ba tầng**: (a) bảng launcher ⊇ oracle chép tay `BO_BA_PROVIDER_DONG_BANG`; (b) oracle
+khớp **ô cuối** của bảng §2 — so ô, không dò substring, vì `machine` là **tiền tố** của `machine/local`
+và một phép `in` sẽ mất răng đúng chỗ cần nó nhất; (c) **witness đối xứng**: hàng thật ⇒ biên nhận
+trung thực ĐƯỢC NHẬN, hàng lệch ⇒ chính nó BỊ TỪ CHỐI. Thiếu (c) thì (a)/(b) chỉ là hai chuỗi bằng nhau.
+
+**`R8-06` (P1 của codex) — KẾT LUẬN SAI, NỢ BÊN DƯỚI LÀ THẬT.** Codex khai `403fe125…` là squash
+commit của #455 nên bảy neo không phải tổ tiên và master đỏ. Đo lại: `git cat-file -t 403fe125…` ⇒
+object **KHÔNG TỒN TẠI**; `origin/master` = `cacaba3`, **merge commit** hai cha (`1b3caa11` +
+`c0f18ac`); `merge-base --is-ancestor` cho **cả tám** neo ⇒ **LÀ tổ tiên**; cổng chạy trên clone
+**ghim đúng `cacaba3`** (kiểm `rev-parse HEAD` khớp trước khi tin số — lượt clone đầu **âm thầm rơi về
+nhánh khác** và suýt cho một con số của cây sai) ⇒ `rc=0 · 16 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC ·
+tổng 69`. **Master không đỏ.** Nhưng tiền đề ĐÚNG, và có phản chứng chạy được: cùng một CÂY, land bằng
+merge ⇒ neo còn là tổ tiên; land bằng **squash** ⇒ **không còn**. Ghi thành **caveat CÓ TÊN**
+`neo-canonical-ancestry-chi-dung-khi-land-bang-merge` trong `ops/reviews/README.md`, và khoá **tiền đề**
+bằng `c45`. **KHÔNG ĐO ĐƯỢC** — và nói thẳng thay vì bịa: không ca cục bộ nào cưỡng chế được *"kho phải
+land bằng merge"*; bất biến ấy sống ở nút merge của GitHub. Đổi cơ chế neo là thay đổi KIẾN TRÚC ⇒
+packet riêng, **không** làm trong PR này.
+
+**Và bài học của đợt bổ sung, đắt hơn cả ba finding:** codex bắt đầu review lúc `19:36:33Z`, #455
+merge lúc `19:37:13Z` — **40 giây sau**. `CLAUDE.md` có nguyên một mục về đúng chuyện đó (*"Gate xanh
+KHÔNG phải đã được review"*, PR #104/#105). Cổng xanh và review sạch trả lời **hai câu hỏi khác nhau**;
+lần này ba finding thật đi vào master vì chỉ câu thứ nhất được hỏi.
+
+**Một đột biến đặt sai hình dạng, ghi lại vì nó suýt cấp tín dụng oan:** bản đầu của `m59` dùng
+`if False:` cho nhánh kiểu mới. Dưới nó `vc=None` **rơi xuống** chốt hợp đồng (`None not in {...}` ⇒
+True) nên giá trị VẪN bị chặn, chỉ khác thông báo — `c34` xanh, đột biến lĩnh *"không răng"* OAN. Chỉ
+khi đột biến quay về **đúng hình dạng cũ** (`if vc and …`) nó mới chết: `5/40` cặp (trường × kiểu)
+không bị chặn, cả 5 đều là `transport`. Cùng họ *"đột biến sai chỗ ≠ mã sai"*.
+
 ### Đo lại sau bản vá lượt 8 (head `5898e5f` + bản vá, Linux, py3.11.15, `core.abbrev=7`)
 
 | cổng | mã thoát | dòng tổng kết THẬT |
 |---|---|---|
-| `ops/bien_nhan_v2_test.py` | 0 | `46/46 ca đạt · 60/60 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 42/60 khai đối chứng` · `TỔNG: ĐẠT` |
+| `ops/bien_nhan_v2_test.py` | 0 | `48/48 ca đạt · 62/62 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 44/62 khai đối chứng` · `TỔNG: ĐẠT` |
 | `ops/bien_nhan_v2.py --root .` | 0 | `17 ĐẠT v2 · 11/11 miễn trừ legacy · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 70` |
 
-Nền trước bản vá trên cùng head: `45/45 · 57/57 · 2/2 · 39/57`. Delta là **+1 ca** (`c43`) và **+3 đột
-biến** (`m56` `m57` `m58`) — đúng bằng thứ thêm vào, không ca nào mất.
+Nền trước bản vá trên cùng head: `45/45 · 57/57 · 2/2 · 39/57`. Delta là **+3 ca** (`c43` `c44` `c45`)
+và **+5 đột biến** (`m56` `m57` `m58` `m59` `m60`) — đúng bằng thứ thêm vào, không ca nào mất.
 
 **MỘT PHÉP ĐO CỦA MÔI TRƯỜNG, không phải của bản vá:** container phiên này mở ra ở trạng thái **clone
 nông, 2 ref cục bộ / 298 ref trên máy chủ**, nên `bien_nhan_v2.py --root .` cho `rc=2` với **8 KHÔNG ĐO

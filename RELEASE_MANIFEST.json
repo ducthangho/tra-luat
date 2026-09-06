@@ -6,9 +6,9 @@
   "webapp_target": "2.21.2p",
   "root_name": "tra-luat",
   "file_count": 180,
-  "total_bytes": 8061881,
-  "package_hash": "e2a68a3cabf4473b9286fddf00dc9f7757508e36a0af28062da5a17f389d773b",
-  "content_hash": "e2a68a3cabf4473b9286fddf00dc9f7757508e36a0af28062da5a17f389d773b",
+  "total_bytes": 8066921,
+  "package_hash": "0b4fa14d47a5c15cf7156ae4041a6a4b1d21969d49d8beccd5d4eb2ef715f378",
+  "content_hash": "0b4fa14d47a5c15cf7156ae4041a6a4b1d21969d49d8beccd5d4eb2ef715f378",
   "required_missing": [],
   "files": [
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "size": 767559,
-      "sha256": "79c373b17044be2f7078a322dc01c228b02c347ef68ec507f53a2d3e56212882"
+      "size": 772599,
+      "sha256": "65a1288a2d0867f2628281c9126b73755e79dbc94b9465c675805928e1f7ddc3"
     },
     {
       "path": "CONTEXT.md",

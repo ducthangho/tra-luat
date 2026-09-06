@@ -250,9 +250,21 @@ Kèm hai fixture của **chính bộ test** bị chốt mới bắt — lần th
 bốn lần fixture mới là thứ sai: `c19` chỉ đổi URL nên chết vì chốt `verdict_path` mới thay vì vì
 nhánh "trỏ hụt"; `c31` gán `codex_cli` cho **mọi** provider nên vướng chốt bộ ba.
 
+**Và lần thứ HAI trong đợt tôi tự bắn trúng trước reviewer — vào đúng chỗ vừa vá.** Prompt vòng
+6 khai mục 1 là *"bí danh lịch sử `{anthropic, human}` được MIỄN chốt bộ ba — miễn ấy có thành
+đường lách không?"*, và chạy nó ngay: `{provider: anthropic, surface: banana, session_run_id}`
++ `cross_approved` ⇒ **0 vi phạm**. Cùng lớp với P1 vừa đóng, chỉ đổi từ **QUYỀN** sang **BỀ
+MẶT**: một miễn trừ tương thích **không có biên** là một đường lách vĩnh viễn. Nay bí danh cũng
+phải khai một bề mặt kho **thật sự biết** (hợp nhất bề mặt chính tắc + `BE_MAT_LICH_SU`), và
+`c38` **neo hằng chép tay ấy vào HIỆN VẬT**: mọi biên nhận đang ĐẠT v2 phải nằm trong biên —
+không có neo thì `BE_MAT_LICH_SU` là một danh sách bịa, đặt đúng chỗ nguy nhất.
+
+Chốt ấy lập tức bắt **năm fixture** của chính bộ test dùng `surface: "cli"` — một bề mặt **không
+tồn tại** trong kho. Lần thứ năm và thứ sáu trong đợt, và **cả sáu lần fixture mới là thứ sai**.
+
 ## Răng
 
-`ops/bien_nhan_v2_test.py`: **40 ca · 42/42 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
+`ops/bien_nhan_v2_test.py`: **41 ca · 43/43 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
 hai thứ protocol đòi —
 biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
 của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`

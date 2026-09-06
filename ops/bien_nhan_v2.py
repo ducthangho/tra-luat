@@ -258,6 +258,17 @@ def _provider_chinh_tac():
 # nhận lượt 1-2 dùng nó. Giữ làm BÍ DANH có khai, không âm thầm — đổi cách đọc một tên đã
 # nằm trong hiện vật là viết lại lịch sử.
 PROVIDER_LICH_SU = frozenset({"anthropic", "human"})
+# BỀ MẶT LỊCH SỬ — đo từ HIỆN VẬT, không bịa. Sáu biên nhận v2 của kho dùng
+# `anthropic`/`claude_code_cli`, và `claude_code_cli` KHÔNG có trong hợp đồng transport
+# (ở đó là `claude_code`). Giữ nó là BÍ DANH CÓ KHAI, y như `anthropic`.
+#
+# VÌ SAO CÓ: miễn trừ dựng ở vòng trước cho bí danh lịch sử khỏi chốt bộ ba là một CỬA MỞ.
+# Phiên thi công tự dựng phản chứng cho đúng chỗ mình vừa khai là mỏng (mục 1 của prompt
+# vòng 6) và nó TRÚNG: `{provider: anthropic, surface: banana, session_run_id}` +
+# `cross_approved` ⇒ **0 vi phạm**. Một miễn trừ tương thích mà không có biên là một
+# đường lách vĩnh viễn — cùng lớp với "nhận một TÊN thì nhận luôn QUYỀN" ở vòng trước,
+# chỉ đổi từ QUYỀN sang BỀ MẶT.
+BE_MAT_LICH_SU = frozenset({"claude_code_cli"})
 PROVIDER_CHINH_TAC, PROVIDER_BE_MAT, PROVIDER_NGUON_HONG = _provider_chinh_tac()
 PROVIDER_CHO_PHEP = frozenset(PROVIDER_CHINH_TAC) | PROVIDER_LICH_SU
 
@@ -294,6 +305,12 @@ def _mri(d):
     # LỊCH SỬ (`anthropic`, `human`) không nằm trong đó và được MIỄN — cố ý, vì hiện vật cũ
     # dùng `anthropic`/`claude_code_cli`, và siết chúng là bắt oan một tên đã nằm trong lịch sử.
     hop_le = PROVIDER_BE_MAT.get(prov)
+    if hop_le is None and prov in PROVIDER_LICH_SU:
+        # BÍ DANH cũng phải có BIÊN. Không bịa ràng buộc riêng cho từng bí danh (không có
+        # nguồn nào khai), nhưng bề mặt phải là một bề mặt kho THẬT SỰ biết: hợp nhất mọi
+        # bề mặt chính tắc cộng bề mặt lịch sử đã khai. `banana` rớt, `claude_code_cli` qua.
+        hop_le = frozenset().union(*PROVIDER_BE_MAT.values()) | BE_MAT_LICH_SU \
+            if PROVIDER_BE_MAT else None
     if PROVIDER_NGUON_HONG is None and hop_le and be_mat not in hop_le:
         return (f"`model_reviewer_identity.surface`={be_mat!r} không phải bề mặt của provider "
                 f"`{prov}` — hợp đồng của kho cho {sorted(hop_le)}")

@@ -153,7 +153,7 @@ MA_TRAN = (
     ("model_reviewer_identity",   lambda d: d.__setitem__("model_reviewer_identity",
                                                           {"provider": "anthropic"}), "surface"),
     ("model_reviewer_identity",   lambda d: d.__setitem__("model_reviewer_identity",
-                                                          {"provider": "anthropic", "surface": "cli"}),
+                                                          {"provider": "anthropic", "surface": "claude_code_cli"}),
                                                           "session_run_id"),
     # SAI KIỂU, không phải VẮNG. `R4-01` (`mri_rid_str_coercion`) đo được: phục hồi phép ép
     # `str(rid)` ở `_mri` vẫn qua cả suite, vì ca kiểu duy nhất (`c4g`) đi đường `_thieu` và
@@ -353,7 +353,7 @@ def c4e_assurance_CHI_co_dieu_kien_che_do():
     `or` với `and`."""
     with tempfile.TemporaryDirectory() as t:
         d = v2_du()
-        d["model_reviewer_identity"] = {"provider": "anthropic", "surface": "cli",
+        d["model_reviewer_identity"] = {"provider": "anthropic", "surface": "claude_code_cli",
                                         "session_run_id": "e" * 32,      # CÓ bằng chứng
                                         "che_do": "subagent_trong_phien_dieu_phoi"}
         d["assurance"] = "cross_approved"
@@ -367,7 +367,7 @@ def c4e_assurance_CHI_co_dieu_kien_che_do():
 def c4f_assurance_CHI_thieu_bang_chung():
     with tempfile.TemporaryDirectory() as t:
         d = v2_du()
-        d["model_reviewer_identity"] = {"provider": "anthropic", "surface": "cli",
+        d["model_reviewer_identity"] = {"provider": "anthropic", "surface": "claude_code_cli",
                                         "KHONG_do_duoc": "x"}          # KHÔNG che_do, KHÔNG run_id
         d["assurance"] = "cross_approved"
         tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
@@ -387,9 +387,9 @@ def c4g_bang_chung_doc_lap_phai_dung_KIEU():
     Cùng lớp "CÓ MẶT khác KHẢ NĂNG", ở tầng KIỂU DỮ LIỆU. Cross-review vòng 3 (P1) đo được."""
     for ten, mri in (
         ("phien_doc_lap là chuỗi 'false'",
-         {"provider": "anthropic", "surface": "cli", "KHONG_do_duoc": "x", "phien_doc_lap": "false"}),
+         {"provider": "anthropic", "surface": "claude_code_cli", "KHONG_do_duoc": "x", "phien_doc_lap": "false"}),
         ("session_run_id là ánh xạ",
-         {"provider": "anthropic", "surface": "cli", "session_run_id": {"a": 1}, "KHONG_do_duoc": "x"}),
+         {"provider": "anthropic", "surface": "claude_code_cli", "session_run_id": {"a": 1}, "KHONG_do_duoc": "x"}),
     ):
         with tempfile.TemporaryDirectory() as t:
             d = v2_du(); d["model_reviewer_identity"] = mri; d["assurance"] = "cross_approved"
@@ -1276,6 +1276,51 @@ def c37_URL_phai_neo_DUNG_duong_dan_bien_nhan_khai():
 
 
 @ca
+def c38_BI_DANH_lich_su_cung_phai_co_BIEN():
+    """Một miễn trừ tương thích mà không có biên là một đường lách VĨNH VIỄN.
+
+    Phiên thi công tự dựng phản chứng cho đúng chỗ mình vừa khai là mỏng (mục 1 của prompt
+    vòng 6) và nó TRÚNG: `{provider: anthropic, surface: banana, session_run_id}` +
+    `cross_approved` ⇒ **0 vi phạm**. Cùng lớp với *"nhận một TÊN thì nhận luôn QUYỀN"* của
+    vòng trước, chỉ đổi từ QUYỀN sang BỀ MẶT."""
+    for prov in sorted(bnv2.PROVIDER_LICH_SU):
+        with tempfile.TemporaryDirectory() as t:
+            d = v2_du()
+            d["model_reviewer_identity"] = {"provider": prov, "surface": "banana",
+                                            "session_run_id": "f" * 32}
+            d["assurance"] = "cross_approved"
+            tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
+            n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+            bang(n >= 1 and any("không phải bề mặt của provider" in x for x in loi),
+                 f"bí danh {prov!r} + bề mặt bịa phải ĐỎ, được: {loi}")
+    # ĐỐI CHỨNG: bề mặt LỊCH SỬ thật sự đang dùng phải QUA — chốt không được bắt oan hiện vật.
+    with tempfile.TemporaryDirectory() as t:
+        d = v2_du()
+        d["model_reviewer_identity"] = {"provider": "anthropic", "surface": "claude_code_cli",
+                                        "session_run_id": "f" * 32}
+        tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
+        n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+        bang(n == 0, f"ĐỐI CHỨNG: `anthropic`/`claude_code_cli` phải QUA, được: {loi}")
+    # NEO CHO HẰNG CHÉP TAY: mọi biên nhận ĐANG ĐẠT v2 trong kho phải nằm trong biên ấy.
+    # Không có neo này thì `BE_MAT_LICH_SU` là một danh sách bịa — và một danh sách bịa
+    # trong một chốt allow-list là chỗ nguy nhất có thể đặt nó.
+    import yaml as _y
+    tm = GOC / bnv2.THU_MUC
+    dung(tm.is_dir(), f"KHÔNG ĐO ĐƯỢC: thiếu {tm}")
+    cho_phep = frozenset().union(*bnv2.PROVIDER_BE_MAT.values()) | bnv2.BE_MAT_LICH_SU
+    ngoai = []
+    for f in sorted(tm.glob("*.receipt.yaml")):
+        d = _y.safe_load(f.read_text(encoding="utf-8")) or {}
+        if not isinstance(d, dict) or bnv2._thieu(d):
+            continue                      # chỉ soi tệp ĐANG ĐẠT v2
+        bm = (d.get("model_reviewer_identity") or {}).get("surface")
+        if isinstance(bm, str) and bm.strip() and bm.strip() not in cho_phep:
+            ngoai.append(f"{f.name}: `{bm}`")
+    bang(not ngoai, f"{len(ngoai)} biên nhận ĐANG ĐẠT dùng bề mặt ngoài biên đã khai "
+                    f"{sorted(cho_phep)}:\n      " + "\n      ".join(ngoai[:5]))
+
+
+@ca
 def c14_cli_ba_trang_thai():
     """Mã thoát CLI phải là 0/1/2 đúng ba trạng thái — đọc rc TRỰC TIẾP, không qua pipeline."""
     r = subprocess.run([sys.executable, str(CONG), "--root", str(GOC)],
@@ -1735,6 +1780,12 @@ def _dot_bien():
            bo_qua_parity=("PROVIDER_CHO_PHEP",)),
        "c31_hop_dong_provider_doc_DU_BA_NGUON_khong_chep_tay",
        "`R5-02`: nới danh sách bằng chính token trong nguồn",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m40_bi_danh_lich_su_KHONG_co_bien",
+       lambda: _dot_bien_tep("    if hop_le is None and prov in PROVIDER_LICH_SU:",
+                             "    if False:"),
+       "c38_BI_DANH_lich_su_cung_phai_co_BIEN",
+       "miễn trừ tương thích thành đường lách vĩnh viễn",
        doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m10_bo_kiem_actor_cua_submitter",
        lambda: setattr(bnv2, "_gsi", lambda d: None if "github_submitter_identity" in d

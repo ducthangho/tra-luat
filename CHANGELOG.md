@@ -1,3 +1,98 @@
+# ★ dev-side — r356: kỳ vọng của fixture phụ thuộc NỀN CHẠY (2026-09-06)
+
+`launcher-windows.yml` ĐỬe trên `master` liên tục từ khi PR #449 land — run
+`34023635438` (`3500369`) và `34025725347` (`4951f55`), cùng một chữ ký:
+
+```
+HONG r345_cac_phep_do_cuc_bo_van_dung: phep do cuc bo sai: marker khong khop: duoc 1, mong 0
+164/165 ca DA CHAY QUA (tong 182, bo qua 17, hong 1)
+```
+
+`ubuntu-latest` **success** ở cả hai lượt. Đúng một ca đỏ, và nó chỉ đỏ trên một nền.
+
+## Nguyên nhân — fixture, không phải sản phẩm
+
+Hàng trong bảng `ca_ds` của `r345_cac_phep_do_cuc_bo_van_dung`:
+
+```python
+("marker khong khop", 'pywin32; sys_platform == "win32"
+', 0),
+```
+
+Kỳ vọng `0` chỉ đúng khi marker **không áp dụng**. Trên `windows-latest`,
+`sys_platform == "win32"` là **ĐÚNG**, nên `pywin32` thật sự bị đòi; venv của
+`_r345_venv` chỉ cài `pypdf` nên hook báo `VANG MAT` ⇒ `1`. Tên hàng khai nó đo
+*"marker không khớp thì bỏ qua dòng"*, nhưng thứ quyết định kết quả lại là **nền
+đang chạy**. Nó xanh trên Ubuntu vì marker SAI ở đó — không phải vì hook lọc đúng.
+
+## Bản vá
+
+Dùng `sys_platform == "khong_he_co"` (sai trên MỌI nền) và gói `khong_he_ton_tai_r345`
+— **cùng gói vắng mặt** với hàng `"goi thieu han"` ngay dưới. Hai hàng ấy nay khác
+nhau **đúng MỘT biến**: cái marker.
+
+## RĂNG — đột biến thứ ba, đo trên CẢ HAI nền
+
+`r345_dot_bien_hai_...` đổi tên thành `r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO`.
+Gỡ phép lọc marker (`if _r.marker is not None and not _r.marker.evaluate():` →
+`if False:`) thì hàng ấy phải lật `0 → 1`.
+
+Phản chứng chạy **sống** (vá `_r338_than_hook` trong bộ nhớ, **không** ghi đè tệp
+thật rồi khôi phục trong `finally` — kho đã trả giá cho kiểu đó):
+
+| nền | ca đích, hook THẬT | gỡ lọc marker |
+|---|---|---|
+| Windows 11 / py3.13.1 | QUA | **ĐỎ** `marker khong khop: duoc 1, mong 0` |
+| Linux (WSL Ubuntu) / py3.12.3 | QUA | **ĐỎ** `marker khong khop: duoc 1, mong 0` |
+
+Chết bằng `TinHieuChotCa` và thông điệp nhắc đúng nhãn hàng ⇒ không phải
+**tín dụng giả** (R5-01..R5-04).
+
+## Đo nền — delta
+
+| | trước | sau |
+|---|---|---|
+| Windows, bộ đầy đủ | `164/165` — `hong 1` (CI) | **`165/165` — `hong 0`** (tại chỗ; `tong 182, bo qua 17` giống CI) |
+| Linux, `r345_cac_phep_do_cuc_bo_van_dung` | QUA | QUA |
+
+Rà toàn bảng: **không hàng nào khác** có kỳ vọng phụ thuộc `sys_platform`/`os_name`
+của nền chạy.
+
+## Cross-review lượt 1 (codex) — `changes_requested`, P1 1 · P2 1, đã nhận cả hai
+
+**P1-01 — sentinel vẫn có MỘT giá trị làm marker ĐÚNG.** Đo được:
+`Requirement(...).marker.evaluate({"sys_platform": "khong_he_co"})` → `True`.
+
+Nói cho đúng phạm vi: đường override ấy **không do caller của hook cung cấp** —
+`session-start.sh:369` gọi `evaluate()` **không đối số** — và **chưa chứng minh được lỗi
+reachable trong đường hook thật đã đo**. KHÔNG khẳng định "rủi ro bằng 0" cho mọi môi trường:
+cross-review lượt 2 (codex) đo rằng `evaluate()` không đối số **không chứng minh `sys.platform`
+bất biến** — sửa `sys.platform` ngay trong interpreter thì sentinel CŨ cho `True` kể cả khi
+không đối số, còn mâu thuẫn MỚI vẫn `False`. Vẫn nhận, vì một **mâu thuẫn** đúng theo CẤU TẠO
+mạnh hơn một sentinel chỉ đúng chừng nào chưa ai đặt tên nền như vậy — cùng nếp *"danh sách
+CẤM không bao giờ đủ"*. Nay dùng `sys_platform == "win32" and sys_platform != "win32"`:
+
+| marker | mặc định | ép `khong_he_co` | ép `win32` | ép `linux` |
+|---|---|---|---|---|
+| sentinel (cũ) | False | **True** | False | False |
+| mâu thuẫn (mới) | False | **False** | False | False |
+
+Đo lại sau vá, **cùng băm `966a33ec3d9a4da1` trên cả hai nền**: ca đích QUA · ca đột biến QUA ·
+gỡ lọc marker ⇒ ĐỎ với thông điệp `marker khong khop: duoc 1, mong 0`, chết bằng `TinHieuChotCa`.
+
+**P2-01 — băm "sau" của phép A/B Linux KHÔNG neo vào `reviewed_sha`.** Đúng, và đã truy được
+nguyên nhân: `123529a6…` là tệp **trước khi đổi số `r354` → `r356`**; tệp tại `867dd858` là
+`b899cb29…`. Phản chứng: thay `r356`→`r354` trong byte của head cho lại đúng `123529a6…`.
+Phép A/B chạy trên một bản trung gian, nên **lời khai rộng hơn phép đo** — đúng lớp lỗi tệp này
+tố cáo nhiều nhất. Đã chạy lại A/B neo đúng exact head.
+
+## NỢ ĐÃ ĐO, không chữa ở đây
+
+Hàng `("marker chua dau thang", 'pypdf; os_name == "posix#x"', 0)` **không thể đỏ**:
+cả hai nhánh đều cho 0 (luật đúng ⇒ marker sai ⇒ bỏ qua; luật hỏng ⇒ parse lỗi ⇒
+bỏ qua). Đo được: thay `_CHU_THICH` bằng luật thô `re.compile(r"#.*$")` ⇒ ca đích
+**VẪN XANH** ⇒ toàn bảng không có răng với luật `#`. Bất biến KHÁC, để packet riêng.
+
 # ★ dev-side — r355: lược đồ biên nhận v2 có cổng sau 19 ngày làm luật suông (2026-09-06)
 
 Cross-review codex trên PR #454 (`3d5eaeb`) ra một finding P2: biên nhận lượt 5 khai

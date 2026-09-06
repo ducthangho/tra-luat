@@ -204,7 +204,7 @@ tiên nó lộ ngay tại chỗ.
 
 ## Răng
 
-`ops/bien_nhan_v2_test.py`: **37 ca · 32/32 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
+`ops/bien_nhan_v2_test.py`: **37 ca · 33/33 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
 hai thứ protocol đòi —
 biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
 của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`

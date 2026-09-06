@@ -1374,6 +1374,12 @@ def _dot_bien():
     do("m8_neo_git_khong_so_bam_blob",
        lambda: setattr(bnv2, "_blob_khop", lambda a, b: True),
        "c20_neo_git_BAM_LECH_thi_DO", "cổng thôi so băm blob")
+    # Connector (P2, `#discussion_r3944298447`) chỉ tên đúng chỗ này: bảng cũ có MỘT hàng
+    # `anchor` và nó chỉ phá `cuong_do`, nên gỡ `loai` khỏi yêu cầu vẫn xanh. Hai khoá là
+    # HAI yêu cầu, và mỗi cái phải có đột biến RIÊNG — không mượn nhau.
+    do("m30_bo_yeu_cau_anchor_loai",
+       lambda: setattr(bnv2, "YEU_CAU", tuple(x for x in bnv2.YEU_CAU if x[0] != "anchor.loai")),
+       "c16_MA_TRAN_phu_DUNG_tap_yeu_cau_cua_cong", "gỡ `anchor.loai` khỏi cổng")
     do("m6_bo_yeu_cau_anchor_cuong_do",
        lambda: setattr(bnv2, "YEU_CAU", tuple(x for x in bnv2.YEU_CAU if x[0] != "anchor.cuong_do")),
        "c16_MA_TRAN_phu_DUNG_tap_yeu_cau_cua_cong", "gỡ một yêu cầu con của anchor")

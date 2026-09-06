@@ -615,6 +615,24 @@ không tra được.
   Hook nay chỉ **PHÁT HIỆN** (đọc, đặt cờ chặn, in cách chữa) — KHÔNG ghi vào config.
   Gỡ là `codex_env_policy.py --go`, dựng bản đã gỡ ra tệp **bên cạnh**; người dùng tự
   `diff` rồi `mv`. Chi tiết `docs/GOI_AGENT_DA_NEN.md`.
+- **`launcher.py run` KHÔNG tự giải shim — người GỌI phải truyền ĐƯỜNG DẪN ĐÃ RESOLVE.**
+  Đo 06-09-2026 trên Windows: `run ... -- codex exec ...` với tên trần ⇒ `CHAN [15]: probe nang luc
+  khong dat: spawn=DO`, chi tiết `spawn --version: FileNotFoundError` — trong khi `doctor` cùng lúc báo
+  `codex` CÓ và `--kiem-song` rc=0. Không mâu thuẫn: `shutil.which` tra PATHEXT nên thấy `codex.CMD`, còn
+  `CreateProcessW` chỉ tự thêm `.exe`. `launcher.py` đã ghi bài học này ngay tại `_do_codex`, nhưng
+  `_probe_spawn` dùng `lenh[0]` **như người gọi đưa vào**, nên chốt ấy không che đường `run`. Dùng
+  `$CODEX_CLI_PATH` (bản nhị phân vendored) hoặc `shutil.which('codex')`. `_TRANSPORT_CONTRACTS` cắt
+  `.exe/.cmd/.bat` trước khi tra bảng nên danh tính vẫn ra `openai_codex` — đã kiểm trong `run.json`.
+- **`launcher.py run` cho con `stdin=DEVNULL`** (dòng 1576), nên `codex exec -` hay bất kỳ CLI nào đọc
+  prompt qua stdin sẽ nhận EOF và chạy với prompt RỖNG. Truyền prompt làm ĐỐI SỐ, hoặc trỏ CLI
+  đọc một tệp. `--prompt-file` và `--expected-prompt-sha256` phải đi CẶP — thiếu một cái thì `CHAN [2]`.
+- **`claude --output-format json` có thể chèn MỘT DÒNG CẢNH BÁO TRƯỚC JSON.** Đo 06-09-2026:
+  không chuyển hướng stdin thì dòng đầu là `Warning: no stdin data received in 3s…` ⇒ `json.load`
+  ném `Expecting value: line 1 column 1`, trong khi `rc=0` và việc đã làm XONG. Đừng đọc lỗi parse ấy
+  thành "phiên hỏng": chạy kèm `< /dev/null`, hoặc cắt từ dấu `{` đầu tiên rồi mới parse. Cùng họ
+  với bẫy stdin của `codex exec`, nhưng hỏng theo kiểu KHÁC: codex thì TREO, claude thì làm bẩn stdout.
+  Kiểm model ĐÃ CHẠY bằng `modelUsage[*].canonicalModel`, không bằng `rc`; vị từ dùng chung với CI là
+  `kiem_ket_qua` trong `.claude/dev/chon_reviewer.py` (đã kiểm hai chiều: đúng model ⇒ ĐẠT, model khác ⇒ ném).
 - `rg` là công cụ **BẮT BUỘC** (từ 15-08-2026). Thiếu nó lệnh tìm của agent gãy giữa
   chừng chứ KHÔNG tự lùi về `grep` — phiên vẫn "chạy" nhưng tra cứu mù. Hook phiên thử
   apt-get (có/không sudo, có/không `update`) rồi cargo, và đòi bằng chứng `rg --version`.
@@ -856,7 +874,10 @@ sau build từ master mới nhất và đã bao gồm việc của phiên trư�
    có chốt, trôi lệch theo máy) đã BỎ — cả hai nền dùng script TRONG repo.
 4. **SAU khi push:** không tin thông báo "đã đẩy". Tải lại từ Drive và đối chiếu **md5/sha256 + VERSION**
    (`deploy-package.sh` bước 5 làm sẵn). Chưa byte-match thì coi như CHƯA deploy.
-5. **Thêm/xoá tệp trong cây ⇒ tái sinh `RELEASE_MANIFEST.json`, và ghi lại golden NẾU số đếm kiểm kê đổi.**
+5. **Thêm/xoá tệp — HOẶC ĐỔI NỘI DUNG một tệp CÓ TRONG manifest — ⇒ tái sinh `RELEASE_MANIFEST.json`, và ghi lại golden NẾU số đếm kiểm kê đổi.**
+   **Bản trước của dòng này chỉ viết "Thêm/xoá tệp" — HẸP HƠN chính sự cố nó sinh ra để chặn.**
+   `RELEASE_MANIFEST.json` băm NỘI DUNG từng tệp, nên sửa một tệp đã có sẵn cũng làm sha lệch dù `file_count` KHÔNG đổi. Đo 06-09-2026 (r356): sửa `CHANGELOG.md` ⇒ manifest giữ `9e1c4b27…` trong khi thực tế `20779e38…`, `file_count` vẫn 180 cả hai bên. **`CHANGELOG.md` và `requirements.txt` NẰM TRONG manifest; `CLAUDE.md`, `.claude/**`, `docs/**`, `ops/**` thì KHÔNG** — hỏi trước khi đoán.
+   Và **lane PR KHÔNG bắt được**: `ci.yml` cho `release-verify strict (lane LAND)` điều kiện `if: github.ref == 'refs/heads/master'`, còn lane WORKER sinh manifest TẠM từ chính cây nên nó **hấp thụ** mọi thay đổi nội dung ⇒ PR xanh, master ĐỎ. Muốn biết trước khi merge thì chạy ĐÚNG lệnh của lane LAND tại chỗ: `python scripts/tl.py release-verify RELEASE_MANIFEST.json --strict --json` (đòi `ok=true` và `expected == checked`).
    Bỏ bước này thì phiên deploy KẾ TIẾP ăn gate đỏ không phải do nó (bài học r238: `nlm_auth_convert.py`
    làm `files_scanned` 67→68, golden không ghi lại ⇒ `golden` + `determinism` đỏ trên master cho phiên sau).
    Nhắc: `golden-test --write` vẫn CẤM cho diff của một move (R6); chỉ ghi lại khi đã KIỂM diễn biến thực tế

@@ -1,0 +1,89 @@
+# BIEN NHAN GIAO HANG — cross-review LUOT 2 cua PR #458 (packet r356), KHAC NEN (codex).
+#
+# LUOT 2 `approve`, P1 0 P2 0. Reviewer TU DO 512 to hop moi truong marker
+# (8 sys_platform x 4 os_name x 4 platform_system x 4 python_version) ⇒ 512 False, 0 True;
+# tu tinh lai ca bon bam; xac nhan go loc marker van giet dung hang bang `TinHieuChotCa`.
+# Muc F THU HEP mot loi khai cua executor: khong nhan cau "rui ro thuc te bang 0" lam chung
+# nhan cho moi moi truong, vi sua `sys.platform` ngay trong interpreter thi sentinel CU cho
+# True ke ca khi `evaluate()` khong doi so. Executor da nhan va sua chu o hai cho.
+
+schema_version: 2
+receipt_id: r356-fixture-phu-thuoc-nen-review-2-codex-20260906-6acf204b
+kind: review_delivery_receipt
+packet_id: 'PR458-R356-FIXTURE-PHU-THUOC-NEN'
+lease_id: khong-co-lease
+phase_key: R356-FIXTURE-PHU-THUOC-NEN
+luot: 2
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: approve
+verdict_path: ops/reviews/r356-fixture-phu-thuoc-nen-review-2-codex-verdict.md
+verdict_sha256: ac4f887211ce8a86df15c48466fe9a06b824969d201b4c7b754730b5a2a33cbf
+verdict_bytes: 15561
+reviewed_sha: 581afd26b2d8d990385fc82f5a4d9f6e916bbd8c
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  model_id: gpt-6-astra
+  reasoning_effort: xhigh
+  nguon_khai_model: >-
+    Banner do CHINH `codex` in ra dau phien, doc lai tu `stderr.log` cua luot chay:
+    dong `model: gpt-6-astra` va `reasoning effort: xhigh`. KHONG phai gia dinh cua nguoi goi.
+  session_run_id: 6acf204be56a401f8fde9144655a7df8
+  prompt_sha256: e8eeb0da34097883f0d0b5482949340aecae9c3e6fba74e18ef55348994ba384
+  prompt_kin_hoan_toan: false
+  thoi_luong_giay: 1786.894
+  ma_thoat: 0
+  neo_boi_launcher: >-
+    `launcher.py run` boc `codex exec` trong CLONE ROI (khong phai worktree), detached dung
+    `reviewed_sha`, `--require-clean`, `--expected-repo`, va prompt neo `--expected-prompt-sha256`.
+    Launcher TU CHOI chay neu lech ⇒ bon thu ay do duoc, khong phai loi khai.
+  KHONG_do_duoc: >-
+    (a) Model co GIU nguyen suot luot chay hay khong. Banner chi in luc KHOI DONG; khong co
+    `modelUsage` cho `codex` nhu ben `claude`, nen mot lan tut model giua chung se KHONG lo ra.
+    (b) `prompt_kin_hoan_toan` la FALSE: prompt truyen vao la mot cau bootstrap tro codex doc
+    `PROMPT.md` trong sandbox, nen noi dung that KHONG di qua duong neo bam cua launcher —
+    `prompt_sha256` neo tep PROMPT.md, khong neo chuoi doi so.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: bien nhan do tai khoan tac gia dang KHONG thanh required check hay merge
+    authorization. Truong nay ghi AI VAN CHUYEN, khong cap tham quyen.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Neo bang `verdict_sha256` + commit `669ba586` — commit DAU TIEN chua tep verdict trong kho.
+    KHONG tag `luu-tru/*`, KHONG protected ref, KHONG check object ⇒ mo neo TRUNG BINH: no chet
+    neu lich su bi viet lai.
+
+run_neo:
+  run_id: 6acf204be56a401f8fde9144655a7df8
+  prompt_sha256: e8eeb0da34097883f0d0b5482949340aecae9c3e6fba74e18ef55348994ba384
+  prompt_kin_hoan_toan: false
+  worktree_sach: true
+  thoi_luong_giay: 1786.894
+  stdout_byte: 278
+  stderr_byte: 1291713
+  ma_thoat: 0
+
+P1: 0
+P2: 0
+
+authoritative_source: repo_file
+evidence_channel: repo_file
+evidence_url: https://github.com/ducthangho/tra-luat/blob/669ba5866cf249d3d9f89a542d48b5d2e60fdfd0/ops/reviews/r356-fixture-phu-thuoc-nen-review-2-codex-verdict.md
+evidence_url_ghi_chu: >-
+  DA GHIM theo commit `669ba586`, commit dau tien chua tep. KHONG dung URL PR: `t26` chi kiem
+  hinh dang `https://` nen URL nao cung qua, va URL PR la mo neo TROI.
+
+delivered: true
+delivered_by: claude-session
+recorder_cung_la_nguoi_thi_cong: true

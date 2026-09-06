@@ -33,17 +33,49 @@ trừ"*: sửa một tệp trong danh sách là MẤT miễn trừ.
 Năm biên nhận của đợt này thì nâng THẬT (có `run_id`, băm prompt, thời lượng đo được), nên nợ
 là 42 chứ không phải 47.
 
-## Cái suýt lọt, và vì sao nó ở lại thành nợ có tên
+## Cái suýt lọt — và nợ tôi khai ra để né nó dựa trên MỘT TIỀN ĐỀ SAI
 
 Lúc nâng, tôi chỉ có SHA viết tắt `482971b` cho một tệp và **bịa nốt 32 ký tự** để có một chuỗi
-40 hex. Nó qua mọi phép kiểm hình dạng; chỉ lộ vì tự đọc lại rồi chạy `git rev-parse`. Cổng
-KHÔNG vá được chỗ này bằng cách gọi git: `actions/checkout` mặc định `depth: 1` nên
-`git cat-file -e` sẽ ĐỎ GIẢ trên CI cho SHA hợp lệ — đúng bẫy clone nông. Khai thành nợ
-`BIEN-NHAN-V2-KHONG-KIEM-SHA-CO-THAT`, không giả vờ đã đóng.
+40 hex. Nó qua mọi phép kiểm hình dạng; chỉ lộ vì tự đọc lại rồi chạy `git rev-parse`. Tôi khai
+thành nợ `BIEN-NHAN-V2-KHONG-KIEM-SHA-CO-THAT` với lý do *"`actions/checkout` mặc định
+`depth: 1` nên `git cat-file -e` sẽ ĐỎ GIẢ"*.
+
+**Lý do ấy SAI, và cross-review PR #455 (`F4`) bắt được bằng cách đọc chính tệp workflow:**
+`.github/workflows/ci.yml:86` **đã** đặt `fetch-depth: 0` từ `r226`, kèm chú thích giải thích
+đúng cái bẫy tôi viện dẫn — kho đã trả giá và đã chữa từ lâu. Tôi khai một ràng buộc mà **không
+đo nó**, rồi viết tiền đề ấy vào **bốn** chỗ (docstring cổng, docstring test, commit, mô tả PR)
+như một đánh đổi kỹ thuật có lý.
+
+Nay cổng ĐO thật: `_neo_git` kiểm `reviewed_sha` là commit có thật, kiểm `evidence_url` dạng
+`blob/<sha>/<đường dẫn>` trỏ đúng đường dẫn có trong commit ấy, và so **băm blob** với
+`verdict_sha256`. Ba trạng thái: object vắng ⇒ **KHÔNG ĐO ĐƯỢC**, in riêng, KHÔNG thành vi
+phạm — reviewer nói thẳng *"Thiếu lịch sử không phải bằng chứng giả mạo."* Đo trên kho thật:
+**9/9 biên nhận có commit thật, đường dẫn thật, blob khớp băm; 0 KHÔNG ĐO ĐƯỢC.**
+
+## Vòng hai: cross-review tìm BỐN chỗ, ba P1 — và cả ba cùng một hình dạng
+
+Hai reviewer độc lập (connector `@codex review` + một lượt `launcher.py run` trong clone rời
+đầy đủ) hội tụ vào cùng bốn chỗ. Ba P1, và đọc chúng cạnh nhau thì thấy **một hình dạng duy
+nhất** — đọc *sự CÓ MẶT* thành *KHẢ NĂNG*:
+
+- **identity**: `model_reviewer_identity: {x: 1}` và `github_submitter_identity: "banana"` /
+  `false` / `[]` đều QUA. Cổng identity đo đúng **sự có mặt của khoá**.
+- **bánh cóc**: baseline chỉ đóng băng **TÊN**. Phản chứng chạy được: sửa một biên nhận nợ rồi
+  cập nhật băm trong `NO_DA_DO` ⇒ **rc=0, 15/15, 5/5** — đã tái đóng băng một bản KHÔNG ĐẠT v2.
+- **SHA**: `reviewed_sha` chỉ cần "chuỗi không rỗng" ⇒ `'deadbeef'*5` và cả
+  `'khong-phai-sha-gi-ca'` đều QUA.
+
+Và bộ test bỏ lọt **ba đột biến sản phẩm** (gỡ `TRUONG_CO_MAT` · gỡ `cuong_do` khỏi
+`ANCHOR_KHOA` · gỡ `reviewed_sha` khỏi `TRUONG_VO_HUONG`) — cả ba vẫn `15/15, 5/5`. Nguyên
+nhân chung: có ca âm cho **vài** trường, không có cho **từng** trường.
+
+Nên bản vá không thêm vài ca có tên mà đổi **cơ chế**: một `MA_TRAN` chép từ spec sinh ĐÚNG MỘT
+ca âm cho MỖI yêu cầu, cộng `c16` đòi ma trận phủ **đúng** tập yêu cầu của cổng — thêm hoặc bớt
+một yêu cầu mà quên ca âm là ĐỎ.
 
 ## Răng
 
-`ops/bien_nhan_v2_test.py`: **15 ca · 5/5 đột biến CÓ RĂNG**, gồm đúng hai thứ protocol đòi —
+`ops/bien_nhan_v2_test.py`: **22 ca · 11/11 đột biến CÓ RĂNG**, gồm đúng hai thứ protocol đòi —
 biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
 của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`
 lúc nạp nên **tự nở theo** khi ai sửa mã nguồn — đúng bệnh mà chú thích cách đó ba chục dòng vừa

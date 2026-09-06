@@ -39,15 +39,24 @@ HAI DANH SÁCH ĐÓNG BĂNG, và cả hai neo bằng **tên tệp + băm** chứ
     cho ID model. Một biên nhận bịa nguyên khối identity vẫn qua cổng này.
   · Nó không kiểm `github_submitter_identity` có đúng người đăng hay không, và `ADR-0040` nói
     rõ biên nhận do tài khoản tác giả đăng KHÔNG thành required check.
-  · Nó không đọc git, không ra mạng. `evidence_url` chỉ kiểm HÌNH DẠNG — **KHÔNG kiểm commit
-    trong URL có THẬT không**. Nợ này có bằng chứng đã suýt trả giá: khi nâng năm biên nhận
-    `phan-bien-quy-trinh-*` lên v2, phiên soạn chỉ có SHA VIẾT TẮT `482971b` cho một tệp và đã
-    **bịa nốt 32 ký tự còn lại** để có một chuỗi 40 hex; nó lọt qua mọi phép kiểm hình dạng, chỉ
-    lộ vì người viết tự đọc lại rồi chạy `git rev-parse`. Vì sao KHÔNG vá bằng cách gọi git:
-    `actions/checkout` mặc định `depth: 1`, nên `git cat-file -e <sha>` sẽ ĐỎ GIẢ trên CI cho
-    những SHA hoàn toàn hợp lệ — đúng bẫy "clone nông" mà `CLAUDE.md` đã ghi là mất 2,5 giờ.
-    Chữa đúng cần `fetch-depth: 0` cho bước ấy; **chưa làm**, khai thành nợ
-    `BIEN-NHAN-V2-KHONG-KIEM-SHA-CO-THAT`.
+  · **Nó KHÔNG chứng minh identity là THẬT.** `model_reviewer_identity` đủ khoá không chứng
+    minh model nào đã review — bốn biên nhận v2 chuẩn của kho đều tự khai `KHONG_do_duoc` cho
+    ID model, và đó là trạng thái ĐÚNG. Một biên nhận bịa nguyên khối identity vẫn qua cổng này.
+  · Nó không kiểm `github_submitter_identity` có đúng người đăng hay không; `ADR-0040` nói rõ
+    biên nhận do tài khoản tác giả đăng KHÔNG thành required check.
+  · Nó KHÔNG chứng minh canonical ancestry, ref protection hay thẩm quyền trên GitHub —
+    `_neo_git` chỉ chứng minh **object có thật, đường dẫn có thật, và blob khớp băm đã khai**.
+
+MỘT TIỀN ĐỀ SAI ĐÃ ĐƯỢC RÚT — ghi lại vì cái sai đáng nhớ hơn bản vá. Bản đầu KHÔNG kiểm
+mỏ neo bằng git và khai thành nợ `BIEN-NHAN-V2-KHONG-KIEM-SHA-CO-THAT`, với lý do
+*"`actions/checkout` mặc định `depth: 1` nên `git cat-file -e` sẽ ĐỎ GIẢ trên CI"*. Lý do ấy
+**SAI trên chính kho này**: `.github/workflows/ci.yml:86` đã đặt `fetch-depth: 0` từ `r226`,
+kèm chú thích giải thích ĐÚNG cái bẫy được viện dẫn — kho đã trả giá và đã chữa từ lâu. Tôi
+khai một ràng buộc mà KHÔNG ĐO nó, rồi viết tiền đề ấy vào docstring, commit, CHANGELOG và
+mô tả PR như một đánh đổi kỹ thuật có lý. Cross-review PR #455 (F4) bắt được bằng cách đọc
+chính tệp workflow. Hậu quả đo được lúc ấy: `reviewed_sha` = `'deadbeef'*5` (40 hex, không
+tồn tại) QUA CỔNG, và `'khong-phai-sha-gi-ca'` cũng QUA — vì trường ấy chỉ cần "chuỗi không
+rỗng". Nay `_neo_git` đo thật, và thiếu object là KHÔNG ĐO ĐƯỢC chứ không phải "bịa".
 
 Phản chứng chạy được: `ops/bien_nhan_v2_test.py`.
 """
@@ -55,6 +64,8 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -67,12 +78,96 @@ THU_MUC = "ops/reviews"
 # --- Lược đồ v2 tối thiểu, chép theo `PROTOCOL §8` dòng 453-454 -------------------------
 # "Đích v2 tối thiểu có `schema_version: 2`, receipt ID, `reviewed_sha`, verdict path/hash,
 #  hai identity ở trên, evidence URL và khai loại/cường độ mỏ neo."
-TRUONG_VO_HUONG = ("receipt_id", "reviewed_sha", "verdict_path", "verdict_sha256", "evidence_url")
-# `github_submitter_identity` được phép là `null` — lược đồ ở dòng 430 ghi
-# "<github actor or null when not published>". Nên đòi KHOÁ CÓ MẶT, không đòi giá trị.
-TRUONG_CO_MAT = ("github_submitter_identity",)
-TRUONG_ANH_XA = ("model_reviewer_identity", "anchor")
+_HEX40 = re.compile(r"\A[0-9a-f]{40}\Z")
+_HEX64 = re.compile(r"\A[0-9a-f]{64}\Z")
+# `blob/<40hex>/<đường dẫn>` trong `evidence_url` của mỏ neo `canonical_ancestry`.
+_BLOB_URL = re.compile(r"/blob/([0-9a-f]{40})/(.+)\Z")
+
 ANCHOR_KHOA = ("loai", "cuong_do")
+
+
+def _co_chuoi(d, k):
+    v = d.get(k)
+    return None if isinstance(v, str) and v.strip() else f"thiếu/rỗng `{k}`"
+
+
+def _khop(d, k, re_, mo_ta):
+    v = d.get(k)
+    if not isinstance(v, str) or not v.strip():
+        return f"thiếu/rỗng `{k}`"
+    return None if re_.match(v.strip()) else f"`{k}`={v.strip()[:24]!r} không phải {mo_ta}"
+
+
+def _mri(d):
+    """`model_reviewer_identity` phải là ánh xạ có `provider` — KHÔNG chỉ là 'có khoá'.
+
+    Đo được (cross-review PR #455, F2/P1-B): bản đầu nhận `{x: 1}`, tức cổng identity đo
+    đúng SỰ CÓ MẶT của khoá. Chỉ đòi `provider`: lược đồ chi tiết của khối này CHƯA có
+    trong protocol, nên siết thêm là tự bịa hợp đồng — bốn biên nhận v2 chuẩn của kho đều
+    khai `KHONG_do_duoc` cho ID model, và đó là trạng thái ĐÚNG, không phải thiếu sót."""
+    v = d.get("model_reviewer_identity")
+    if not isinstance(v, dict) or not v:
+        return "thiếu/rỗng ánh xạ `model_reviewer_identity`"
+    if not str(v.get("provider") or "").strip():
+        return "`model_reviewer_identity` không có `provider` — ánh xạ không rỗng KHÔNG phải attestation"
+    return None
+
+
+def _gsi(d):
+    """`null` HỢP LỆ (dòng 430: "<github actor or null when not published>"), VẮNG KHOÁ thì không.
+
+    Nhưng `false` / `[]` / `"banana"` cũng KHÔNG hợp lệ — bản đầu nhận cả ba (F2/P1-B)."""
+    if "github_submitter_identity" not in d:
+        return "thiếu khoá `github_submitter_identity` (null hợp lệ, VẮNG thì không)"
+    v = d["github_submitter_identity"]
+    if v is None:
+        return None
+    if not isinstance(v, dict):
+        return f"`github_submitter_identity` là {type(v).__name__}, đòi ánh xạ hoặc null"
+    if not str(v.get("actor") or "").strip():
+        return "`github_submitter_identity` không null mà không có `actor`"
+    return None
+
+
+def _anchor(d):
+    a = d.get("anchor")
+    if not isinstance(a, dict) or not a:
+        return ["thiếu/rỗng ánh xạ `anchor`"]
+    loi = [f"`anchor.{k}` thiếu/rỗng" for k in ANCHOR_KHOA if not str(a.get(k) or "").strip()]
+    loai = str(a.get("loai") or "").strip()
+    if loai and loai not in ANCHOR_LOAI_CHO_PHEP:
+        loi.append(f"`anchor.loai`={loai!r} ngoài danh sách CHO PHÉP {sorted(ANCHOR_LOAI_CHO_PHEP)}")
+    return loi
+
+
+# BẢNG YÊU CẦU — chép từ `PROTOCOL §8` dòng 453-454, MỘT MỤC MỘT PHÉP KIỂM.
+#
+# Vì sao là bảng chứ không phải mấy vòng `for` như bản đầu: cross-review đo được BA đột biến
+# sản phẩm mà bộ test cũ KHÔNG bắt (gỡ `TRUONG_CO_MAT` · gỡ `cuong_do` khỏi `ANCHOR_KHOA` ·
+# gỡ `reviewed_sha` khỏi `TRUONG_VO_HUONG`) — cả ba vẫn `15/15, 5/5`. Nguyên nhân: bộ test có
+# ca âm cho VÀI trường, không có cho TỪNG trường. Nay mỗi mục ở đây có đúng một ca âm trong
+# `ops/bien_nhan_v2_test.py`, và bảng kỳ vọng bên ấy được CHÉP RIÊNG chứ không import từ đây —
+# một oracle sinh từ chính thứ nó kiểm thì co theo mỗi lần cổng bị nới.
+YEU_CAU = (
+    ("schema_version", lambda d: None if d.get("schema_version") == 2
+     else f"schema_version={d.get('schema_version')!r}, đòi 2"),
+    ("receipt_id", lambda d: _co_chuoi(d, "receipt_id")),
+    ("reviewed_sha", lambda d: _khop(d, "reviewed_sha", _HEX40, "Git OID đầy đủ 40 hex thường")),
+    ("verdict_path", lambda d: _co_chuoi(d, "verdict_path")),
+    ("verdict_sha256", lambda d: _khop(d, "verdict_sha256", _HEX64, "sha256 64 hex thường")),
+    ("evidence_url", lambda d: _co_chuoi(d, "evidence_url")
+     or (None if str(d.get("evidence_url", "")).strip().startswith("https://")
+         else "`evidence_url` không bắt đầu bằng `https://`")),
+    ("model_reviewer_identity", _mri),
+    ("github_submitter_identity", _gsi),
+    ("anchor", lambda d: "; ".join(_anchor(d)) or None),
+)
+
+# Mức assurance HÀM Ý một lượt review có thẩm quyền. Biên nhận nào TỰ KHAI là chạy bằng
+# subagent trong cùng phiên điều phối (không phiên riêng, không neo launcher) thì KHÔNG được
+# khai mức ấy — F3 của cross-review PR #455: chính khối identity mới thêm nói tính độc lập là
+# KHÔNG ĐO ĐƯỢC rồi lấy đó biện minh cho `same_provider_approved`.
+ASSURANCE_CAN_DOC_LAP = frozenset({"cross_approved", "same_provider_approved", "human_audited"})
 # Ba loại mỏ neo protocol liệt kê (dòng 455): "canonical ancestry, protected evidence ref hoặc
 # check object". DANH SÁCH CHO PHÉP, không phải danh sách cấm — bài học `v1.36.68`: danh sách
 # cấm phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN.
@@ -198,31 +293,106 @@ def _bam(p: Path) -> str:
 
 
 def _thieu(d: dict) -> list[str]:
-    """Trả danh sách lý do tệp KHÔNG đạt v2. Rỗng = đạt."""
-    loi = []
-    if d.get("schema_version") != 2:
-        loi.append(f"schema_version={d.get('schema_version')!r}, đòi 2")
-    for k in TRUONG_VO_HUONG:
-        v = d.get(k)
-        if not isinstance(v, str) or not v.strip():
-            loi.append(f"thiếu/rỗng `{k}`")
-    for k in TRUONG_CO_MAT:
-        if k not in d:
-            loi.append(f"thiếu khoá `{k}` (được phép null, KHÔNG được phép vắng)")
-    for k in TRUONG_ANH_XA:
-        v = d.get(k)
-        if not isinstance(v, dict) or not v:
-            loi.append(f"thiếu/rỗng ánh xạ `{k}`")
-    a = d.get("anchor")
-    if isinstance(a, dict) and a:
-        for k in ANCHOR_KHOA:
-            if not str(a.get(k) or "").strip():
-                loi.append(f"`anchor.{k}` thiếu/rỗng")
-        loai = str(a.get("loai") or "").strip()
-        if loai and loai not in ANCHOR_LOAI_CHO_PHEP:
-            loi.append(f"`anchor.loai`={loai!r} ngoài danh sách CHO PHÉP "
-                       f"{sorted(ANCHOR_LOAI_CHO_PHEP)}")
+    """Trả danh sách lý do tệp KHÔNG đạt v2. Rỗng = đạt (theo CẤU TRÚC)."""
+    loi = [msg for _, kt in YEU_CAU for msg in [kt(d)] if msg]
+    # Chốt CHÉO: assurance vs. bằng chứng độc lập mà chính biên nhận tự khai.
+    mri = d.get("model_reviewer_identity")
+    if isinstance(mri, dict):
+        trong_phien = "subagent" in str(mri.get("che_do") or "").lower()
+        khong_neo = "neo_boi_launcher" in mri and not mri.get("neo_boi_launcher")
+        khai = str(d.get("assurance") or d.get("assurance_dat") or "").strip()
+        if (trong_phien or khong_neo) and khai in ASSURANCE_CAN_DOC_LAP:
+            loi.append(
+                f"khai `{khai}` trong khi tự khai KHÔNG có phiên độc lập "
+                f"(che_do={mri.get('che_do')!r}, neo_boi_launcher={mri.get('neo_boi_launcher')!r}) "
+                f"— mức ấy hàm ý một lượt review có thẩm quyền; dùng `review_deferred`")
     return loi
+
+
+def _git(root: Path, *args, timeout=20):
+    """Chạy git trong `root`. Trả (rc, stdout) — KHÔNG ném, để người gọi phân ba trạng thái."""
+    try:
+        p = subprocess.run(["git", "-C", str(root), *args], capture_output=True,
+                           text=True, timeout=timeout)
+        return p.returncode, p.stdout.strip()
+    except (OSError, subprocess.SubprocessError) as ex:      # noqa: BLE001
+        return 127, f"{type(ex).__name__}: {ex}"
+
+
+def _blob_khop(that: str, khai: str) -> bool:
+    """Phép so băm blob, TÁCH RIÊNG để đột biến nhắm được đúng nó.
+
+    Bản trước để phép so nội tuyến, nên đột biến duy nhất giết được ca `c20` là phá
+    `_BLOB_URL` — mà cái ấy giết cả cụm, tức không PHÂN BIỆT được "cổng còn so băm" với
+    "cổng còn nhận ra URL". Một đột biến giết cả cụm không chứng minh từng chốt còn răng."""
+    return that == khai
+
+
+def _neo_git(root: Path, ten: str, d: dict):
+    """Xác minh mỏ neo bằng GIT. Trả (loi, chua_do_duoc) — hai danh sách RIÊNG.
+
+    BA TRẠNG THÁI, và trạng thái thứ ba KHÔNG được đọc thành trạng thái thứ hai: object
+    không tra được nghĩa là KHÔNG ĐO ĐƯỢC (clone nông, lịch sử chưa fetch), **không** phải
+    "SHA bịa". Reviewer nói thẳng chỗ này: *"Thiếu lịch sử không phải bằng chứng giả mạo."*
+
+    VÌ SAO CÓ, và đây là phần đắt: bản đầu KHÔNG kiểm gì và khai thành nợ với lý do
+    *"`actions/checkout` mặc định `depth: 1` nên `git cat-file -e` sẽ đỏ giả"*. Lý do ấy
+    SAI trên chính kho này — `.github/workflows/ci.yml:86` đã đặt `fetch-depth: 0` từ `r226`,
+    kèm chú thích giải thích đúng cái bẫy được viện dẫn. Tôi khai một ràng buộc mà KHÔNG ĐO
+    nó, rồi viết tiền đề sai ấy vào docstring, commit, CHANGELOG và mô tả PR."""
+    loi, chua = [], []
+    sha = str(d.get("reviewed_sha") or "").strip()
+    if _HEX40.match(sha):
+        rc, _ = _git(root, "cat-file", "-e", f"{sha}^{{commit}}")
+        if rc == 127:
+            chua.append(f"{ten}: KHÔNG ĐO ĐƯỢC `reviewed_sha` — không gọi được git")
+        elif rc != 0:
+            chua.append(f"{ten}: KHÔNG ĐO ĐƯỢC `reviewed_sha` {sha[:12]}… — object không tra "
+                        f"được ở cây này (clone nông / chưa fetch), KHÔNG kết luận là bịa")
+    a = d.get("anchor") or {}
+    url = str(d.get("evidence_url") or "").strip()
+    if not (isinstance(a, dict) and a.get("loai") == "canonical_ancestry"):
+        return loi, chua
+    m = _BLOB_URL.search(url)
+    if not m:
+        # LỖ TỰ TÌM (không phải từ reviewer): khai `canonical_ancestry` rồi đặt `evidence_url`
+        # là URL PR thì phép đo git IM LẶNG không chạy — mỏ neo TỰ KHAI mà không ai đo, và
+        # cổng vẫn in "sạch". Đó là "một loại mỏ neo cổng không kiểm được thì trốn luôn khỏi
+        # phép kiểm", cùng lớp với ba finding P1 của lượt này. Đo: cả 9 biên nhận ĐẠT hiện có
+        # đều đã ghim blob URL, nên siết chỗ này không bắt oan ai.
+        loi.append(f"{ten}: khai `anchor.loai: canonical_ancestry` nhưng `evidence_url` KHÔNG "
+                   f"phải URL blob ghim commit (`/blob/<40 hex>/<đường dẫn>`) — mỏ neo kiểu ấy "
+                   f"KHÔNG đo được, mà không đo được thì không được khai là canonical ancestry")
+        return loi, chua
+    commit, duong = m.group(1), m.group(2)
+    rc, _ = _git(root, "cat-file", "-e", f"{commit}^{{commit}}")
+    if rc != 0:
+        chua.append(f"{ten}: KHÔNG ĐO ĐƯỢC commit `{commit[:12]}…` trong `evidence_url`")
+        return loi, chua
+    rc, oid = _git(root, "rev-parse", f"{commit}:{duong}")
+    if rc != 0:
+        loi.append(f"{ten}: `evidence_url` khai commit `{commit[:12]}…` CÓ THẬT nhưng "
+                   f"KHÔNG chứa đường dẫn `{duong}` — mỏ neo trỏ hụt")
+        return loi, chua
+    rc, noi_dung = _git(root, "cat-file", "-p", oid)
+    if rc != 0:
+        chua.append(f"{ten}: KHÔNG ĐO ĐƯỢC nội dung blob {oid[:12]}…")
+        return loi, chua
+    that = hashlib.sha256(noi_dung.encode("utf-8")).hexdigest()
+    khai = str(d.get("verdict_sha256") or "").strip()
+    if that != khai:
+        # `cat-file -p` qua text mode có thể đổi kết thúc dòng trên Windows; đo lại bằng
+        # đường nhị phân trước khi kết luận, kẻo báo động giả theo NỀN.
+        try:
+            pb = subprocess.run(["git", "-C", str(root), "cat-file", "-p", oid],
+                                capture_output=True, timeout=20)
+            that = hashlib.sha256(pb.stdout).hexdigest()
+        except (OSError, subprocess.SubprocessError):        # noqa: BLE001
+            pass
+    if not _blob_khop(that, khai):
+        loi.append(f"{ten}: blob tại `evidence_url` băm {that[:12]}… nhưng biên nhận khai "
+                   f"`verdict_sha256` {khai[:12]}… — mỏ neo KHÔNG trỏ đúng thứ nó khai")
+    return loi, chua
 
 
 def kiem(root: Path, allowlist=None, no_da_do=None):
@@ -247,7 +417,7 @@ def kiem(root: Path, allowlist=None, no_da_do=None):
     if not ds:
         raise KhongDoDuoc(f"{tm} không có tệp `*.receipt.yaml` nào — mốc neo đã đổi?")
 
-    loi, dat, mien_tru, nod = [], 0, 0, 0
+    loi, chua_do, dat, mien_tru, nod = [], [], 0, 0, 0
     for p in ds:
         ten, b = p.name, _bam(p)
         if ten in al:
@@ -267,6 +437,10 @@ def kiem(root: Path, allowlist=None, no_da_do=None):
             continue
         vi_pham = _thieu(d)
         if not vi_pham:
+            g_loi, g_chua = _neo_git(root, ten, d)
+            vi_pham += g_loi
+            chua_do.extend(g_chua)
+        if not vi_pham:
             dat += 1
             if ten in no:
                 loi.append(f"{ten}: ĐÃ ĐẠT v2 mà vẫn nằm trong `NO_DA_DO` — gỡ nó khỏi danh "
@@ -282,7 +456,8 @@ def kiem(root: Path, allowlist=None, no_da_do=None):
             continue
         loi.append(f"{ten}: KHÔNG đạt v2 và KHÔNG nằm trong danh sách nào — "
                    + " · ".join(vi_pham))
-    return loi, {"tong": len(ds), "dat": dat, "mien_tru": mien_tru, "no": nod}
+    return loi, {"tong": len(ds), "dat": dat, "mien_tru": mien_tru, "no": nod,
+                  "chua_do": chua_do}
 
 
 class KhongDoDuoc(Exception):
@@ -309,8 +484,12 @@ def main(argv=None) -> int:
         return RC_SACH
     for x in loi:
         print(f"  ĐỎ  {x}", file=sys.stderr)
+    for x in tk.get("chua_do") or []:
+        # In RIÊNG. Đây là trạng thái THỨ BA — không phải "sạch", cũng không phải "vi phạm".
+        print(f"  KHÔNG ĐO ĐƯỢC  {x}", file=sys.stderr)
     print(f"\nbien_nhan_v2: {tk['dat']} ĐẠT v2 · {tk['mien_tru']}/{len(ALLOWLIST_CUTOVER)} miễn trừ "
-          f"legacy (băm khớp) · {tk['no']} NỢ đóng băng · {len(loi)} vi phạm · tổng {tk['tong']}")
+          f"legacy (băm khớp) · {tk['no']} NỢ đóng băng · {len(loi)} vi phạm · "
+          f"{len(tk.get('chua_do') or [])} KHÔNG ĐO ĐƯỢC · tổng {tk['tong']}")
     if loi:
         print("TỔNG: ĐỎ", file=sys.stderr)
         return RC_VI_PHAM

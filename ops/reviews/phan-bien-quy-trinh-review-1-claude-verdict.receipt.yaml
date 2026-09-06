@@ -19,7 +19,18 @@ role: reviewer
 provider: claude
 executor_provider: claude
 cross_provider: false
-assurance: same_provider_approved
+assurance: review_deferred
+assurance_ghi_chu: >-
+  HA TU `same_provider_approved` theo finding F3 cua cross-review PR #455 (codex,
+  head 663da64). Ly do do duoc, va no nam ngay trong chinh khoi identity moi them:
+  luot nay chay bang SUBAGENT TRONG cung phien dieu phoi — khong phien rieng, khong
+  worktree rieng, khong `run_id`, khong bam prompt. `PROTOCOL §8` doi same-provider
+  CUNG phai la mot phien MOI voi context/worktree rieng, nen thieu bang chung doc lap
+  KHONG tro thanh mot muc approval. Ban truoc lay chinh cau "tinh doc lap KHONG DO
+  DUOC" de bien minh cho muc approval — do la loi khai RONG HON phep do.
+  `review_deferred` KHONG co nghia "chua tung review": verdict CO THAT va con nguyen
+  byte; thu thieu la THAM QUYEN, khong phai lo trinh. Chi phuc hoi muc approval neu
+  tim duoc bang chung doc lap KIEM DUOC — khong bia `run_id` hay bam prompt hoi to.
 verdict: changes_requested
 verdict_path: ops/reviews/phan-bien-quy-trinh-review-1-claude-verdict.md
 verdict_sha256: d8b67321f239d37dc8ad3d9c2c9ed26325aaa504eaee133f1984364f5571663c
@@ -85,6 +96,10 @@ evidence_url_ghi_chu: >-
 verdict_usage_caveats:
   - id: same-provider-KHONG-phai-cross
     noi_dung: >-
+      DA HA XUONG `review_deferred` theo F3 cua cross-review PR #455: luot nay chay
+      bang SUBAGENT trong cung phien dieu phoi, khong co phien rieng nen thieu bang
+      chung doc lap — ma thieu bang chung doc lap thi KHONG thanh mot muc approval.
+      Cau duoi day la ly do LICH SU cua muc cu, giu lai de tra:
       `codex` trong container trả 401 và `access token could not be refreshed`
       (`CODEX_AUTH_JSON` last_refresh 2026-08-23, đã 14 ngày; refresh token xoay
       vòng). Không có credential provider thứ hai nào khác. Nên nhãn đúng là

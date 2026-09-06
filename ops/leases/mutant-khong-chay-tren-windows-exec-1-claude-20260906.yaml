@@ -1,0 +1,83 @@
+schema_version: 2
+event: executor_lease_granted
+packet_issue: 456
+packet_id: MUTANT-KHONG-CHAY-TREN-WINDOWS
+revision: 1
+generation: 1
+lease_id: mutant-khong-chay-tren-windows-exec-1-claude-20260906
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+environment: cloud
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/MUTANT-KHONG-CHAY-TREN-WINDOWS.md
+spec_sha256: 8c5d3653790a85025fcd3a70914c4dd51c107ccafd8edfb1e2ddd65840dbea53
+spec_hash: 8c5d3653790a85025fcd3a70914c4dd51c107ccafd8edfb1e2ddd65840dbea53
+
+write_set:
+  - .claude/hooks/pretooluse_guard_test.py
+  - .claude/dev/ci_dang_ky_test.py
+
+branch: claude/cap-nhat-trang-thai-pr-taxzax
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 4f6d42ad7a54aead89fedaaf89a408ff4557ea54
+start_from_sha: 4f6d42ad7a54aead89fedaaf89a408ff4557ea54
+reviewed_sha_required: 4f6d42ad7a54aead89fedaaf89a408ff4557ea54
+
+granted_by: ducthangho
+granted_on_instruction: 'direct, in-session, 2026-09-06 — chủ kho duyệt mở packet ("tạo issue + lease mới để rút ngắn test, tách job, nới timeout"), rồi chốt hướng qua ba vòng chất vấn: Q8=(a) giữ bằng chứng dương có điều kiện theo nền · Q9=(i) chỉ pretooluse_guard_test · Q10 Windows QUAY LẠI CI.'
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+leased_at_utc: '2026-09-06T14:30:07Z'
+lease_expires_at_utc: '2026-09-07T14:30:07Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+ly_do_cap: >-
+  gate (windows-latest) trên master LUÔN hết giờ: 60.3 phút, conclusion=cancelled, đo trên
+  HAI commit master liên tiếp (3500369 và 4f6d42a). Master không có chân Windows nào chạy
+  trọn, và tình trạng ấy không tự khỏi. Đo được chi phí: test registry 44.3p trên Windows so
+  14.6p ubuntu; trong đó pretooluse_guard_test chiếm 346/496 giây (70%) trên Linux, và tách
+  nền/đột biến trên BẢN SAO cho 10s nền so 346s đầy đủ — tức đột biến là 97% chi phí bộ ấy.
+  Đột biến đo BỘ TEST CÓ RĂNG KHÔNG, là tính chất của logic test chứ không của nền, nên chạy
+  nó trên Windows là đo lại cùng một sự thật với giá gấp ba.
+
+viec_trong_lease:
+  - 'Trên Windows: KHÔNG chạy vòng lặp đột biến; ca nền vẫn chạy đủ.'
+  - 'Trên Windows: in dòng bằng chứng DƯƠNG riêng, tự khai đột biến không đo ở đây và đo ở đâu.'
+  - 'Sổ đăng ký chấp nhận dòng ấy CHỈ khi nền là Windows; hai chiều đều phải có phản chứng.'
+  - 'Linux giữ nguyên tuyệt đối: vẫn 34 đột biến, vẫn dòng `DOT BIEN x/y bi giet`.'
+  - 'Chạy workflow_dispatch ci.yml trên nhánh packet để ĐO chân Windows thật (A5).'
+
+dieu_kien_dung:
+  - 'Chạm bất kỳ đường dẫn nào ngoài HAI đường đã khai — đổi revision, KHÔNG tự mở write set.'
+  - 'Nâng `timeout-minutes` trong ci.yml — hình dạng ấy đã hỏng BA lần (25→45→60) và ci.yml:63
+     tự kết luận "NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN". Lần thứ tư là điều kiện DỪNG.'
+  - 'Làm chốt `len(DOT_BIEN) > 0` im trên Windows thay vì thay bằng chốt tương đương — đó là
+     xoá bằng chứng dương để mua cổng xanh (bài học #319 "tập rỗng thoả not song").'
+  - 'Bỏ qua ca nền trên Windows — chỉ đột biến được cắt, ca nền là thứ THẬT SỰ cần Windows.'
+  - 'Sửa `.github/workflows/ci.yml`: CỐ Ý ngoài write set. Tổng Windows thật chưa đo (60.2p là
+     số BỊ CẮT, bước 19→43 chưa từng chạy). Thiếu chỗ thì mở packet kế, đừng sửa cổng theo đoán.'
+  - 'A5 ĐỎ (job Windows vẫn cancelled) là KẾT QUẢ ĐO, không phải thất bại — báo chủ kho, đừng
+     tự nới trần để ép nó xanh.'
+
+ghi_chu_dang: >-
+  Lần đẩy TẠO nhánh `ops/cap-lease-456` (`537afd0`, 2026-09-06) KHÔNG kích hoạt
+  `ops-publish-lease.yml`: đo qua `actions_list` lọc `head_branch`, ra ĐÚNG 1 lượt và nó là
+  `ops — mở PR bằng git` (skipped). Khớp ca đã ghi trong CLAUDE.md (đo 21-08-2026, nguyên nhân
+  CHƯA BIẾT — đừng chế ra). Chữa bằng commit này: đẩy lên nhánh ĐÃ TỒN TẠI, cùng bộ lọc, cùng
+  thư mục — đường đã có bằng chứng chạy. Ghi lại vì triệu chứng mới là thứ đáng nhớ: một
+  workflow ta trông cậy có thể VẮNG MẶT đúng lần đẩy đầu, và vắng mặt trông y hệt xanh.

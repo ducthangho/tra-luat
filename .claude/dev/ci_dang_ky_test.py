@@ -31,9 +31,28 @@ MOI = {
     ".claude/dev/mcp_gh_test.py": r"(?s)CA\s+: (\d+)/(\d+) đạt · 0 đỏ · ĐẠT.*ĐỘT BIẾN.*ĐẠT.*TỔNG: ĐẠT",
     ".claude/dev/mcp_github_doc_test.py": r"mcp_github_doc tests: (\d+)/(\d+) ca QUA \(hong 0, bo qua 0\)",
     ".claude/dev/probe_mang_test.py": r"(?s)tự đột biến cổng: 9/9 chết.*named mutant probe_missing_tool_executes_git: 1/1 chết.*nền: 11/11 đạt.*TỔNG: ĐẠT",
+    # GIU NGUYEN `\d+` — M4 dong bang hanh vi Linux, va mau nay la duong Linux di qua.
+    # Lo #319 (`0/0 bi giet` lot vi `bang_chung_xanh` chi soi hai nhom CA) CO THAT va
+    # co SAN tu base, nhung bit no o day la doi hanh vi Linux — ngoai pham vi packet
+    # #456. Chot tuong duong duoc dat o duong WINDOWS (`MOI_WINDOWS`), la noi dot bien
+    # bat buoc cua A2 thuc su bieu hien. Lo phia Linux de lai cho packet ke.
     ".claude/hooks/pretooluse_guard_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     ".claude/hooks/subagent_ghi_detect_test.py": r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet.*TONG: DAT",
     "ops/nhanh_don_duoc_test.py": r"^(\d+)/(\d+)$",
+}
+# Tap mau THAY THE, chi dung khi nen dang chay la Windows. Windows nhan HAI dang:
+#   (a) dong da cat dot bien;  (b) dong Linux day du — ai do chay tay do du van DAT (A3).
+# CA HAI deu doi so dot bien KHAC 0 (`[1-9]\d*`). Do la chot tuong duong `len(DOT_BIEN)>0`
+# o tang so dang ky, va la thu giet dot bien bat buoc thu hai cua A2 (nhanh Windows in
+# `DOT BIEN 0/0 bi giet`). Dat o DAY chu khong o `MOI` vi dot bien ay bieu hien tren
+# WINDOWS; siet `MOI` se doi hanh vi Linux, trai M4 (finding P2 cross-review luot 1).
+MOI_WINDOWS = {
+    ".claude/hooks/pretooluse_guard_test.py": (
+        r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN [1-9]\d* muc KHONG DO TREN WINDOWS"
+        r".*TONG: DAT",
+        r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN [1-9]\d*/[1-9]\d* bi giet"
+        r".*TONG: DAT",
+    ),
 }
 CACH_LY = {}
 DA_NOI = {
@@ -198,6 +217,32 @@ def moi_truong_hien_tai(env=os.environ):
     return None
 
 
+def nen_la_windows(ten_nen=None):
+    """Nen CHAY THAT cua tien trinh nay — KHONG phai nen CI khai trong bien moi truong.
+
+    Phai hoi `os.name`, dung hoi `moi_truong_hien_tai()`: bo test con chay CUNG mot OS
+    voi so dang ky nay, va no quyet dinh in dong Windows theo `os.name`. Neu hoi bien CI
+    thi mot luot chay TAY tren may Windows (khong co GITHUB_ACTIONS) se bi coi la
+    khong-Windows, va dong hop le cua no bi cham DO — do la lam tron XUONG, cung ho voi
+    loi lam tron LEN ma `dem_la_do` sinh ra de chan.
+    """
+    return (os.name if ten_nen is None else ten_nen) == "nt"
+
+
+def mau_theo_nen(path, mau, la_windows):
+    """Tap mau duoc chap nhan cho `path` tren nen dang chay.
+
+    Windows dung tap THAY THE trong `MOI_WINDOWS` — KHONG kem `mau` goc. Co chu dich:
+    tap ay da chua dang Linux (sieu chat hon), nen A3 "dong Linux tren nen Windows van
+    DAT" van giu, DONG THOI `0/0 bi giet` bi tu choi tren Windows. Neu kem ca `mau` goc
+    thi mau long se nhan `0/0` va dot bien bat buoc thu hai cua A2 SONG.
+
+    Nen khac: chi `mau` goc, khong doi mot chut nao so voi base (M4).
+    """
+    mau_nen = MOI_WINDOWS.get(path)
+    return list(mau_nen) if (la_windows and mau_nen) else [mau]
+
+
 def cach_ly_chap_nhan(ok, da_neo, hien_tai):
     """OS đã biết khác neo dùng kết quả thật; nền lạ vẫn không được làm tròn lên."""
     if hien_tai is None:
@@ -242,15 +287,22 @@ def _chay_that(path):
 
 
 def chay_moi(moi=MOI, cach_ly=CACH_LY, chay_mot=_chay_that,
-             doc_moi_truong=moi_truong_hien_tai, doc_trong_ci=trong_ci):
-    """Bốn tham số sau là ĐƯỜNG NỐI ĐỂ ĐO, không phải cấu hình: phản chứng phải gọi
-    được chính hàm này với bộ chạy giả, nếu không tầng tiêu thụ lại không ai canh."""
+             doc_moi_truong=moi_truong_hien_tai, doc_trong_ci=trong_ci,
+             doc_nen_windows=nen_la_windows):
+    """Năm tham số sau là ĐƯỜNG NỐI ĐỂ ĐO, không phải cấu hình: phản chứng phải gọi
+    được chính hàm này với bộ chạy giả, nếu không tầng tiêu thụ lại không ai canh.
+
+    `doc_nen_windows` là seam thứ năm, thêm cho packet #456: nếu nền chỉ đọc được
+    qua `os.name` thật thì phản chứng A3 phải có máy Windows mới chạy được, tức là
+    không ai canh — đúng thứ bốn seam kia sinh ra để tránh."""
     do = 0
     hien_tai = doc_moi_truong()
     o_trong_ci = doc_trong_ci()
+    la_windows = doc_nen_windows()
     for path, mau in moi.items():
         rc, ban_in = chay_mot(path)
-        ok = rc == 0 and bang_chung_xanh(ban_in, mau)
+        ok = rc == 0 and any(bang_chung_xanh(ban_in, m)
+                             for m in mau_theo_nen(path, mau, la_windows))
         print(ban_in, end="")
         if path in cach_ly:
             no = cach_ly[path]
@@ -388,6 +440,42 @@ def phan_chung():
               unknown[0] == 1 and "KHÔNG ĐO ĐƯỢC" in unknown[1],
               windows[0] == 0 and "CÁCH LY" in windows[1],
               cach_ly_chap_nhan(True, MOI_TRUONG_CI, "github-actions/macos") is None]
+    # ── packet #456: SO DANG KY PHAN BIET DUOC NEN ────────────────────────────────────
+    # Di qua chinh `chay_moi`, khong goi thang `mau_theo_nen`: khuyet tat "lam tron" nam o
+    # NOI TIEU THU gia tri, va do la bai hoc r6/#401 da tra gia ba lan trong tep nay.
+    # HAI CHIEU, khong phai mot: dong Windows tren Linux phai DO, VA dong Linux tren
+    # Windows phai DAT (Windows do du bang tay thi khong duoc phat).
+    _P456 = ".claude/hooks/pretooluse_guard_test.py"
+    _WIN456 = ("TONG: CA 39/39 dat · DOT BIEN 34 muc KHONG DO TREN WINDOWS"
+               " — do tren ubuntu-latest\nTONG: DAT\n")
+    _LNX456 = "TONG: CA 39/39 dat · DOT BIEN 34/34 bi giet\nTONG: DAT\n"
+    # `0/0 bi giet` = tap RONG thoa `not song` (#319). Tren WINDOWS phai DO — do la dot
+    # bien bat buoc thu hai cua A2. Tren LINUX no VAN DUOC NHAN, y het base: lo #319 phia
+    # Linux co san tu truoc, va bit no o day la doi hanh vi Linux — trai M4. Ca duoi khoa
+    # ca hai chieu ay, ke ca chieu "van con lo", de khong ai vo tinh siet roi pha M4.
+    _RONG456 = "TONG: CA 39/39 dat · DOT BIEN 0/0 bi giet\nTONG: DAT\n"
+    # Mau Linux NGUYEN BAN cua base — neo cung, khong doc tu `MOI` (doc tu `MOI` thi
+    # sua `MOI` se keo ca ca test di theo, va ca test thanh guong soi chinh no).
+    _MAU_BASE456 = (r"(?s)TONG: CA (\d+)/(\d+) dat · DOT BIEN \d+/\d+ bi giet"
+                    r".*TONG: DAT")
+
+    def _dem_nen(ban_in, la_windows):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            return chay_moi(moi={_P456: MOI[_P456]}, cach_ly={},
+                            chay_mot=lambda _p: (0, ban_in),
+                            doc_moi_truong=lambda: MOI_TRUONG_CI,
+                            doc_trong_ci=lambda: True,
+                            doc_nen_windows=lambda: la_windows)
+
+    cases += [_dem_nen(_WIN456, False) == 1, _dem_nen(_WIN456, True) == 0,
+              _dem_nen(_LNX456, True) == 0, _dem_nen(_LNX456, False) == 0,
+              _dem_nen(_RONG456, True) == 1,
+              # M4: duong Linux phai giong BASE tung dau vao, ke ca dau vao xau.
+              _dem_nen(_RONG456, False) == 0,
+              MOI[_P456] == _MAU_BASE456,
+              all(bang_chung_xanh(x, MOI[_P456]) is bang_chung_xanh(x, _MAU_BASE456)
+                  for x in (_LNX456, _RONG456, _WIN456))]
     try:
         launcher_source = LAUNCHER_WORKFLOW.read_text(encoding="utf-8")
         cases.append(giet_windows_311_launcher_workflow(launcher_source))
@@ -417,6 +505,14 @@ def phan_chung():
                "r6-TIEU-THU-o-da-xanh-trong-ci", "r6-TIEU-THU-o-da-xanh-ngoai-ci",
                "wp430-known-other-consumer", "wp430-unknown-consumer",
                "wp430-windows-anchor-positive", "wp430-unknown-predicate",
+              "p456-dong-windows-tren-linux-la-DO",
+              "p456-dong-windows-tren-windows-DAT",
+              "p456-dong-linux-tren-windows-DAT",
+              "p456-dong-linux-tren-linux-khong-doi",
+              "p456-dot-bien-0-tren-0-DO-tren-windows",
+              "p456-linux-nhan-0-tren-0-Y-HET-base",
+              "p456-mau-linux-KHONG-DOI-so-voi-base",
+              "p456-linux-A-B-tung-dau-vao-khop-base",
                "windows_311_launcher_workflow", "launcher-semantic-spacing",
                "ruff-pin-required", "ruff-version-probe-required"]
     for name, ok in zip(names, cases): print(f"ĐỘT BIẾN {name}: {'ĐỎ đúng' if ok else 'LỌT'}")

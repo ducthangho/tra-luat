@@ -6363,6 +6363,49 @@ def r345_than_hook_KHONG_duoc_co_duong_mang_nao():
     bang(not xau, f"than hook goi ham chay tien trinh/mang: {sorted(xau)}")
 
 
+# Chặn socket ở tầng THƯ VIỆN rồi chạy thân hook: nếu nó chạm mạng bằng BẤT KỲ cách nào,
+# phép mở socket sẽ ném và thân hook (vốn bắt `BaseException` khắp nơi) biến nó thành một
+# mục `hong` ⇒ mã thoát đổi. Đây là phép đo HÀNH VI, không phải phép đo cú pháp.
+_R345_CHAN_MANG = (
+    "import socket as _s\n"
+    "def _cam(*a, **k):\n"
+    "    raise OSError('r345: cam mo socket')\n"
+    "_s.socket = _cam\n"
+    "_s.create_connection = _cam\n"
+    "_s.socketpair = _cam\n"
+)
+
+
+@ca
+def r345_chan_socket_that_ma_than_hook_van_chay_dung():
+    """Lớp HÀNH VI, vì lớp AST có ĐIỂM MÙ đã đo được.
+
+    Phép đo AST chỉ thấy `import x` tĩnh. Tự kiểm bằng bốn phản chứng: `__import__('socket')`
+    · `__import__` với tên dựng động · `importlib.import_module` · `ctypes` — **cả bốn LỌT**.
+    Nên nó bắt được ca thực tế (ai đó thêm lại `import subprocess`) chứ không phải mọi
+    đường, và khai đúng như thế thay vì để người đọc tưởng nó phủ hết.
+
+    Ca này đóng phần còn lại theo HÀNH VI: chặn `socket` rồi đòi thân hook vẫn trả lời
+    ĐÚNG — chạm mạng kiểu gì cũng lộ.
+    """
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r345_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        bang(_r345_chay(py, d, _R345_CHAN_MANG + than, "pypdf>=3.0\n", "--kiem-ban") == 0,
+             "chan socket lam than hook doi cau tra loi — tuc no CO cham mang")
+        bang(_r345_chay(py, d, _R345_CHAN_MANG + than, "pypdf>=4.0\n", "--kiem-ban") == 1,
+             "chan socket lam mat phep do lech ban")
+        # RĂNG: một thân hook CÓ chạm mạng phải làm ca này ĐỎ, nếu không nó đo cái gì?
+        co_mang = than + ("\nimport socket as _t\n_t.socket()\n")
+        bang(_r345_chay(py, d, _R345_CHAN_MANG + co_mang, "pypdf>=3.0\n", "--kiem-ban") != 0,
+             "than hook CO cham mang ma ca nay VAN xanh — phep chan socket khong co rang")
+
+
 @ca
 def r345_cac_phep_do_cuc_bo_van_dung():
     than = _r338_than_hook()

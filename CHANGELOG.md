@@ -1,3 +1,32 @@
+# ★ dev-side — r346: ca chống-mạng của r345 CÓ ĐIỂM MÙ, và lời khai đã rộng hơn phép đo (2026-09-06)
+
+Commit r345 viết rằng ca `r345_than_hook_KHONG_duoc_co_duong_mang_nao` là *"phép đo cấu
+trúc, cả lớp mở-phiên-chậm-vì-mạng chết theo KIẾN TRÚC"*. Tự kiểm bằng bốn phản chứng cho
+thấy câu ấy **rộng hơn phép đo**: phép đo AST chỉ thấy `import x` **tĩnh**, nên
+`__import__('socket')` · `__import__` với tên dựng động · `importlib.import_module` ·
+`ctypes` **lọt cả bốn**.
+
+Nó vẫn có răng cho ca THỰC TẾ — ai đó thêm lại `import subprocess` thì ĐỎ ngay, và điều ấy
+đã đo hai chiều ở r345. Nhưng "bắt được ca thực tế" khác "cả lớp chết theo kiến trúc", và
+viết câu thứ hai khi chỉ đo được câu thứ nhất là đúng lớp lỗi kho này đã trả giá nhiều
+lần: **lời khai rộng hơn phép đo**. Lần này nạn nhân là chính cái chốt vừa dựng ra để
+chống bị lừa — cùng họ với *"cổng vắng mặt trông giống cổng xanh"*.
+
+Chữa bằng một lớp **HÀNH VI**, không phải bằng cách nới danh sách tên module (nới danh
+sách là danh sách CẤM, và kho đã học rằng nó thua từ trong thiết kế): chặn `socket` ở tầng
+thư viện rồi đòi thân hook **vẫn trả lời đúng**. Thân hook bắt `BaseException` khắp nơi
+nên một phép mở socket bị chặn sẽ biến thành mục `hong` ⇒ mã thoát đổi ⇒ lộ. Cách viết
+nào cũng lộ, vì phép đo đứng ở tầng dưới mọi cách viết.
+
+Kèm răng: một thân hook **có** chạm mạng (`socket.socket()` nối thêm) phải làm ca ấy ĐỎ —
+không có phản chứng đó thì phép chặn socket chỉ là một câu lệnh không ai biết có tác dụng.
+
+Điểm mù của lớp AST nay ghi thẳng trong docstring của ca, thay vì để người đọc tưởng nó
+phủ hết.
+
+Cổng: `launcher_test` **173/173** (bỏ qua 1 — fixture Windows) · ruff `--select F` delta
+= **0** · `bash -n` OK.
+
 # ★ dev-side — r345: BỎ HẲN phép hỏi pip lúc mở phiên; 13 finding, 7 vòng, hai hình dạng (2026-09-06)
 
 Vòng 7 ra ba P2, và một trong đó **bác bỏ bảo đảm của cả thiết kế** chứ không phải chỉ ra

@@ -293,9 +293,23 @@ Kèm một nguyên tắc thay cho một danh sách: **KHÔNG HỢP ĐỒNG ⇒ K
 chưa khai được bề mặt/vận chuyển thì không được khai một mức assurance hàm ý review có thẩm
 quyền. Nó chặn luôn cả provider hợp lệ **mới thêm mà quên hợp đồng**, tức chặn cái chưa xảy ra.
 
+**`R6-01` — một ca mỗi TÊN là sàn của độ phủ; một ca mỗi GIÁ TRỊ cũng vậy.** Lượt 6 (`5a78c15`,
+`approve_with_findings`, **0 P1**) đo được **bốn** phép làm yếu sống sót vì ca cũ chỉ thử **đúng
+giá trị fixture chọn**: giao `cam` với `{cross_approved}` làm mất hai mức cấm còn lại; đặt
+`hop_le=None` cho ba provider ngoài hai tên ca dùng làm ba provider ấy mất kiểm bề mặt. Nay `c36`
+là **ma trận** — mọi mức cấm × mọi provider bị cấm, và mọi provider có hợp đồng × một bề mặt
+**mượn của provider khác** (không bịa tên nào) — cộng một bản **đóng băng chép từ `AGENTS.md` §4**
+để oracle không co theo cổng.
+
+**`R6-02` đã đóng theo KIẾN TRÚC, không theo bản vá.** Lượt 6 đo được: xoá riêng dòng
+`execution_surface: chatgpt_web` khỏi `AGENTS.md` ⇒ bản đồ còn 4 cặp mà `openai_chatgpt` vẫn được
+nhận, `rc=0`. Trên head sau khi đổi sang **bảng có cấu trúc**, chính phép đo ấy cho **5 cặp
+nguyên vẹn** — vì `AGENTS.md` thôi cấp bề mặt, chỉ còn đối chiếu. Một lớp lỗi chết theo cấu trúc
+thì không cần ca canh nó.
+
 ## Răng
 
-`ops/bien_nhan_v2_test.py`: **41 ca · 46/46 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
+`ops/bien_nhan_v2_test.py`: **41 ca · 48/48 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
 hai thứ protocol đòi —
 biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
 của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`

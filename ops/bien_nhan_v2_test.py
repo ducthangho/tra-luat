@@ -62,6 +62,16 @@ _BNV2_THAT = bnv2
 _TAM_DOT_BIEN: list = []
 
 
+# CHÉP TAY từ `AGENTS.md` §4 — *"ChatGPT Web không được … tự tạo `cross_approved`,
+# `same_provider_approved` hoặc `human_audited`"*. KHÔNG import từ cổng: một oracle sinh từ
+# chính module nó kiểm sẽ CO THEO mỗi lần cổng bị nới. Cross-review vòng 6 (`R6-01`) đo
+# được: giao `cam` với tập chỉ chứa `cross_approved` ⇒ mất hai mức cấm còn lại mà cả suite
+# vẫn xanh, vì `c36` chỉ thử mức ĐẦU TIÊN.
+ASSURANCE_CAM_DONG_BANG = {
+    "openai_chatgpt": ("cross_approved", "same_provider_approved", "human_audited"),
+}
+
+
 class TinHieuChotCa(AssertionError):
     """Chỉ `bang()` phát ra. Bài học `R5-01`: một `AssertionError` trần thì mã nào cũng dựng được."""
 
@@ -1227,45 +1237,69 @@ def c35_KHONG_duoc_NOI_danh_sach_provider_bang_van_ban_tu_do():
 
 @ca
 def c36_provider_KHONG_mang_theo_quyen_cua_provider_khac():
-    """Nhận một tên vào danh sách CHO PHÉP **không** nhận luôn quyền của tên khác.
+    """MA TRẬN: mọi mức assurance bị cấm × mọi provider có hợp đồng — không chỉ mức/tên ĐẦU.
 
-    Connector (P1 trên `670071b`): bản vá vòng trước nới danh sách để nhận `openai_chatgpt`
-    — đúng — nhưng chỉ mang theo cái TÊN, bỏ lại GIỚI HẠN đi kèm nó. `AGENTS.md` §4 nói
-    tường minh ChatGPT Web *"không được … tự tạo `cross_approved`, `same_provider_approved`
-    hoặc `human_audited`"*. Đo được: `{openai_chatgpt, surface: banana, session_run_id}` +
-    `cross_approved` ⇒ **0 vi phạm**."""
-    for ten, sua, phai_chua in (
-        ("bề mặt lạ cho một provider chính tắc",
-         {"provider": "openai_chatgpt", "surface": "banana", "session_run_id": "f" * 32},
-         "không phải bề mặt của provider"),
-        ("bề mặt ĐÚNG mà khai mức có thẩm quyền",
-         {"provider": "openai_chatgpt", "surface": "chatgpt_web", "session_run_id": "f" * 32},
-         "KHÔNG được tự tạo"),
-        ("bề mặt lạ cho provider CLI",
-         {"provider": "openai_codex", "surface": "chatgpt_web", "session_run_id": "f" * 32},
-         "không phải bề mặt của provider"),
-        # BỘ BA đủ ba trường. `AGENTS.md` §4 đòi ChatGPT Web khai `transport: human_mediated`;
-        # khai `machine` là một bộ ba SAI SỰ THẬT, tệ hơn một bộ ba khuyết (P2 trên `5a78c15`).
-        ("vận chuyển SAI cho provider chính tắc",
-         {"provider": "openai_chatgpt", "surface": "chatgpt_web", "transport": "machine",
-          "session_run_id": "f" * 32},
-         "không phải vận chuyển của provider"),
-        # KHÔNG HỢP ĐỒNG ⇒ KHÔNG THẨM QUYỀN — nguyên tắc, không phải danh sách.
-        ("provider KHÔNG có hợp đồng khai mức có thẩm quyền",
-         {"provider": "human", "surface": "x", "session_run_id": "f" * 32},
-         "KHÔNG có hợp đồng"),
-    ):
+    `R6-01` đo được **bốn** phép làm yếu sống sót vì ca cũ chỉ thử **giá trị mà fixture
+    chọn**: giao `cam` với `{cross_approved}` mất hai mức còn lại; đặt `hop_le=None` cho ba
+    provider ngoài hai tên ca dùng thì ba provider ấy mất kiểm bề mặt. *"Một ca mỗi TÊN là
+    SÀN của độ phủ, không phải TRẦN"* — ở đây là một ca mỗi GIÁ TRỊ."""
+    # (a) bảng cấm của cổng phải khớp TUYỆT ĐỐI bản đóng băng chép từ `AGENTS.md` §4.
+    bang(({k: tuple(sorted(v)) for k, v in bnv2.ASSURANCE_CAM_THEO_PROVIDER.items()}
+          == {k: tuple(sorted(v)) for k, v in ASSURANCE_CAM_DONG_BANG.items()}),
+         f"`ASSURANCE_CAM_THEO_PROVIDER` LỆCH bản đóng băng: "
+         f"cổng={ {k: sorted(v) for k, v in bnv2.ASSURANCE_CAM_THEO_PROVIDER.items()} } "
+         f"đóng băng={ {k: sorted(v) for k, v in ASSURANCE_CAM_DONG_BANG.items()} }")
+    hong = []
+    # (b) MỖI mức cấm × MỖI provider bị cấm.
+    for prov, muc in sorted(ASSURANCE_CAM_DONG_BANG.items()):
+        hd = bnv2.PROVIDER_HOP_DONG.get(prov)
+        dung(hd, f"KHÔNG ĐO ĐƯỢC: provider bị cấm {prov!r} không có hợp đồng")
+        for m in muc:
+            with tempfile.TemporaryDirectory() as t:
+                d = v2_du()
+                d["model_reviewer_identity"] = {"provider": prov,
+                                                "surface": sorted(hd["be_mat"])[0],
+                                                "session_run_id": "f" * 32}
+                d["assurance"] = m
+                tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
+                n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+                if not (n >= 1 and any("KHÔNG được tự tạo" in x for x in loi)):
+                    hong.append(f"{prov} + {m}: không bị chặn ({loi})")
+    # (c) MỖI provider có hợp đồng × một bề mặt của provider KHÁC (không bịa tên nào).
+    for prov, hd in sorted(bnv2.PROVIDER_HOP_DONG.items()):
+        khac = sorted(set().union(*[v["be_mat"] for k, v in bnv2.PROVIDER_HOP_DONG.items()
+                                    if k != prov]) - set(hd["be_mat"]))
+        dung(khac, f"KHÔNG ĐO ĐƯỢC: không có bề mặt của provider khác để mượn thử cho {prov}")
         with tempfile.TemporaryDirectory() as t:
-            d = v2_du(); d["model_reviewer_identity"] = sua; d["assurance"] = "cross_approved"
+            d = v2_du()
+            d["model_reviewer_identity"] = {"provider": prov, "surface": khac[0],
+                                            "session_run_id": "f" * 32}
+            d["assurance"] = "review_deferred"
             tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
             n, loi = _kiem(tmp, allowlist={}, no_da_do={})
-            bang(n >= 1 and any(phai_chua in x for x in loi),
-                 f"{ten}: phải ĐỎ vì {phai_chua!r}, được: {loi}")
-    # ĐỐI CHỨNG DƯƠNG — chốt này KHÔNG được bắt oan một lượt advisory hợp lệ.
+            if not (n >= 1 and any("không phải bề mặt của provider" in x for x in loi)):
+                hong.append(f"{prov} + bề mặt mượn {khac[0]!r}: không bị chặn ({loi})")
+    # (d) vận chuyển SAI, và (e) provider KHÔNG hợp đồng khai mức có thẩm quyền.
+    for ten, mri, phai_chua in (
+        ("vận chuyển SAI",
+         {"provider": "openai_chatgpt", "surface": "chatgpt_web", "transport": "machine",
+          "session_run_id": "f" * 32}, "không phải vận chuyển của provider"),
+        ("provider KHÔNG hợp đồng",
+         {"provider": sorted(bnv2.PROVIDER_KHONG_HOP_DONG)[0], "surface": "x",
+          "session_run_id": "f" * 32}, "KHÔNG có hợp đồng"),
+    ):
+        with tempfile.TemporaryDirectory() as t:
+            d = v2_du(); d["model_reviewer_identity"] = mri; d["assurance"] = "cross_approved"
+            tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
+            n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+            if not (n >= 1 and any(phai_chua in x for x in loi)):
+                hong.append(f"{ten}: không bị chặn ({loi})")
+    bang(not hong, f"{len(hong)} nhánh KHÔNG bị chặn:\n      " + "\n      ".join(hong[:8]))
+    # ĐỐI CHỨNG DƯƠNG — chốt không được bắt oan một lượt advisory hợp lệ.
     with tempfile.TemporaryDirectory() as t:
         d = v2_du()
         d["model_reviewer_identity"] = {"provider": "openai_chatgpt", "surface": "chatgpt_web",
-                                        "session_run_id": "f" * 32}
+                                        "transport": "human_mediated", "session_run_id": "f" * 32}
         d["assurance"] = "advisory_review"
         tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
         n, loi = _kiem(tmp, allowlist={}, no_da_do={})
@@ -1860,6 +1894,22 @@ def _dot_bien():
            "    if False:"),
        "c37_URL_phai_neo_DUNG_duong_dan_bien_nhan_khai",
        "`../../x` và `/x` chuẩn hoá về `x` rồi khớp URL", doi_chung="c18_neo_git_DUNG_thi_qua")
+    # `R6-01` nêu đích danh hai phép làm yếu này: cả hai chỉ bớt MỘT PHẦN GIÁ TRỊ, nên ca
+    # cũ (thử đúng giá trị fixture chọn) mù hoàn toàn.
+    do("m44_chi_cam_MOT_muc_assurance",
+       lambda: _dot_bien_tep("        cam = set(ASSURANCE_CAM_THEO_PROVIDER.get(prov, frozenset()))",
+                             '        cam = set(ASSURANCE_CAM_THEO_PROVIDER.get(prov, frozenset())) '
+                             '& {"cross_approved"}'),
+       "c36_provider_KHONG_mang_theo_quyen_cua_provider_khac",
+       "mất cấm `same_provider_approved` và `human_audited`",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m45_chi_kiem_be_mat_cho_HAI_provider",
+       lambda: _dot_bien_tep(
+           "    hd = PROVIDER_HOP_DONG.get(prov)",
+           '    hd = PROVIDER_HOP_DONG.get(prov) if prov in ("openai_chatgpt", "openai_codex") else None'),
+       "c36_provider_KHONG_mang_theo_quyen_cua_provider_khac",
+       "ba provider chính tắc khác mất kiểm bề mặt",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m10_bo_kiem_actor_cua_submitter",
        lambda: setattr(bnv2, "_gsi", lambda d: None if "github_submitter_identity" in d
                        else "thiếu khoá `github_submitter_identity`"),

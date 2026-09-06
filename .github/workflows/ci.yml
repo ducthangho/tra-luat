@@ -131,6 +131,14 @@ jobs:
         run: python .claude/dev/codex_cred_test.py
       - name: packet-loop selftest
         run: python .claude/dev/packet_loop_test.py
+      # CONG LUOC DO v2 CHO BIEN NHAN REVIEW (PROTOCOL §8, dong 453-458). Dac ta co tu
+      # `2f84531` (18-08-2026) va KHONG AI THI CONG: do tren `3bc2895`, 62 bien nhan / 10
+      # khai v2 / chi 4 du truong, va `t26` chi kiem verdict path + bam. Chinh hai bien nhan
+      # v2 dau tien cua kho da TU KHAI khoang trong ay (`PLAT-X8b-CHUA-CO-BO-KIEM-RECEIPT-V2`).
+      # Noi vao day vi guard khong nam tren duong TU DONG thi guard chi la tai lieu (r225) —
+      # va do chinh la bai hoc `ops/kiem_trang_quyet_dinh.sh` con dang no.
+      - name: bien-nhan v2 selftest
+        run: python ops/bien_nhan_v2_test.py
       # Sổ ở ci_dang_ky_test.py được đối chiếu với phép tìm tệp trên cây. Các tệp dưới
       # ops/reviews/** là hiện vật review bất biến, không phải mã sống để CI chạy.
       - name: test registry (phạm vi + các bộ chưa được nối)

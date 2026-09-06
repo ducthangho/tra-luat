@@ -1,0 +1,119 @@
+# BIEN NHAN v2 — cross-review luot 4 cua PR #455, reviewer codex, tren head 4ef73e6.
+#
+# LUOT THU HAI LIEN TIEP KHONG CON P1. Hai P2 + mot P3, ca ba deu ve DO PHU cua phep do,
+# tru R4-02 la loi SAN PHAM: nguon provider khong doc duoc bi doi thanh ket luan receipt
+# vi pham — loi DO bao thanh loi DU LIEU.
+
+schema_version: 2
+receipt_id: pr455-bien-nhan-v2-review-4-codex-20260906-d0266c01
+kind: review_delivery_receipt
+packet_id: 'PR455-BIEN-NHAN-V2'
+lease_id: khong-co-lease
+phase_key: PR455-CONG-LUOC-DO-BIEN-NHAN-V2
+luot: 4
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: approve_with_findings
+verdict_path: ops/reviews/pr455-bien-nhan-v2-review-4-codex-verdict.md
+verdict_sha256: 3708d03a1fd871ac143f74eaacd13fdf943fe5c3e0704b77a23640b13addda1c
+verdict_bytes: 28602
+reviewed_sha: 4ef73e69d5f3c419634118983723355e25e38305
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  session_run_id: d0266c01c4a24dd8a55d02b4ffbdd6b2
+  prompt_sha256: c9acb5fab99c8a169992b902e6b8b44c42f4c3c315fcc4abdad533899cbea679
+  prompt_kin_hoan_toan: true
+  thoi_luong_giay: 598.419
+  ma_thoat: 0
+  neo_boi_launcher: >-
+    launcher.py run boc `codex exec` trong CLONE ROI 1727 commit (is-shallow=false),
+    detached dung reviewed_sha, --require-clean (worktree_sach: true), prompt truyen qua
+    bien PROMPT_FILE nen con doc BAN CHUP BAT BIEN.
+  KHONG_do_duoc: >-
+    ID MODEL CU THE va phien ban. `surface: codex_cli` la thu PHIA TA do duoc (launcher
+    goi dung CLI ay); CHINH REVIEWER thi khai be mat thuc thi cua no la "Codex service/API
+    voi shell trong Linux container", transport `machine`, va TU CHOI tu khai la "Codex CLI
+    duoc launcher chung thuc". Hai loi khai nay khong mau thuan — chung noi ve HAI LOP khac
+    nhau — nhung cho nao khong do duoc thi ghi thang ra day.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    ADR-0040: bien nhan do tai khoan tac gia dang KHONG thanh required check hay merge
+    authorization.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Neo bang verdict_sha256 + commit DAU TIEN chua tep verdict (c34832a5). GHIM O COMMIT
+    SAU vi mot commit khong chua duoc bam cua chinh no.
+evidence_url: https://github.com/ducthangho/tra-luat/blob/c34832a58bc4e4a2b23d67eb2d6d3df96814ab9e/ops/reviews/pr455-bien-nhan-v2-review-4-codex-verdict.md
+authoritative_source: repo_file
+evidence_channel: repo_file
+
+phat_hien_chinh: >-
+  KHONG CON P1 (luot thu hai lien tiep). Reviewer XAC NHAN R3-01/R3-02 da va that: trich
+  NGUYEN lambda m7 hong tu AST cua c595292 roi tha vao bo test hien tai ⇒ no bi bao KHONG
+  RANG dung nhu phai the.
+  R4-01 (P2): tam phep lam yeu ma toan suite van 31/31 · 21/21 — MOT hinh dang: thieu ca
+  NHANH. c14 chi chay ca sach + thieu thu muc, c23 chi khoa ket qua hon hop ⇒ nhanh CHI co
+  vi pham khong ai cham (return RC_VI_PHAM -> RC_SACH song sot). Nam phep go `chua` trong
+  _neo_git deu lot vi c26 chi bom loi o merge-base. Chot kieu o _mri bi chot assurance che.
+  R4-02 (P2, SAN PHAM): _provider_chinh_tac nuot ngoai le roi tra tap rong ⇒ thieu
+  launcher.py la cong KET TOI mot bien nhan openai_codex hop le ("chuoi tu do khong phai
+  attestation", rc=1, 1 vi pham, 0 chua do). Loi DO bao thanh loi DU LIEU.
+  R4-03 (P3): tu so loai m14 ra ma mau so van giu no; ti le "6/21" chep tay lech ngay o
+  doan vua sua mot loi khai rong hon phep do.
+
+verdict_nguon: >-
+  launcher.py run boc codex exec trong clone roi 1727 commit, khong nong, detached dung
+  4ef73e6, worktree sach, prompt neo sha256 c9acb5fa.
+verdict_doi_chieu: >-
+  CHUNG MINH: prompt nao chay tren head nao, cay sach, luot chay lam viec that (598,4 giay,
+  verdict 28.602 byte, stderr 562.769 byte). Ban trong kho BYTE-EXACT (cmp rc=0, sha256
+  3708d03a). Reviewer chi tao VERDICT.md trong clone: `git status --porcelain` chi co mot
+  dong `?? VERDICT.md`, va `git log 4ef73e6..HEAD` RONG. Reviewer TU TRICH lambda tu AST cua
+  mot commit CU de kiem ban va, va TU KHAI mot luot replay hong la loi gian do chu khong
+  phai test san pham that bai. KHONG CHUNG MINH: identity model. KHONG DO DUOC.
+
+verdict_usage_caveats:
+  - id: BA-PHAT-HIEN-VONG-4-DA-VA-nhung-VA-CAN-REVIEW-LAI
+    noi_dung: >-
+      Ca ba phat hien da duoc va trong cung PR (vong va 5), nhung BAN VA CHUA duoc review.
+      Lan thu NAM lien tiep. Va chinh ban va nay lai bi doi chung bat mot loi GIAN DO
+      (`_cay_guong` chep ban THAT thay vi ban dang hieu luc ⇒ hai dot bien bi bao KHONG RANG
+      oan) — lan thu HAI lien tiep rig tu de ra ket luan sai. Dung doc "da va" thanh "da
+      dong". Chua dong.
+  - id: R4-01-la-DO-PHU-TEST-khong-phai-chot-san-pham-bi-bo
+    noi_dung: >-
+      Reviewer noi thang: "Khong ket luan ma san pham hien tai da bo tam chot nay" va
+      "Script A hien ghi nhan trang thai TRUOC SUA, khong phai assertion rang tam mutant da
+      chet". Tam phep lam yeu ay do do phu HOI QUY cua bo test, khong phai tam lo dang song
+      trong cong. Doc nguoc lai la doc sai.
+  - id: approve_with_findings-KHONG-phai-du-dieu-kien-LAND
+    noi_dung: >-
+      Nguyen van: "Bao cao khong tu tao cross_approved, approval GitHub hoac land
+      authorization". not_run: full legacy selftest, workflow-audit/golden/determinism,
+      release-bundle, parity Windows/CRLF, readback CI tu xa, LIVE/merge/deploy. Chua bao
+      tron moi nhanh kieu YAML/I/O, tin hieu giet tien trinh, loi don thu muc, hay moi dang
+      lech cay guong.
+  - id: cross_approved-dua-tren-PROVIDER-khong-phai-MODEL
+    noi_dung: >-
+      Nhu cac luot truoc: muc cross_approved phan biet PROVIDER, do duoc bang launcher.py
+      run. Thu KHONG do duoc la MODEL nao trong provider ay — va luot nay reviewer con TU
+      KHAI khong co chung thuc doc lap ve backend/model version.
+  - id: phan-cong-CAM-tu-soan-phan-chung
+    noi_dung: >-
+      Nhu cac luot truoc: cam reviewer tu soan chuoi tan cong. Do phu hep hon mot luot khong
+      rang buoc.
+
+delivered: true
+delivered_by: claude-session
+recorder_cung_la_nguoi_thi_cong: true

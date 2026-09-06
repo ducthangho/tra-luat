@@ -9,6 +9,7 @@
 # xếp hạng nó. Ghi biên nhận là cách duy nhất làm câu ấy thôi đúng.
 
 schema_version: 2
+receipt_id: phan-bien-quy-trinh-review-2-claude-20260906-89a77faa
 kind: review_delivery_receipt
 packet_id: 'PR452-PHAN-BIEN-QUY-TRINH'
 lease_id: khong-co-lease
@@ -18,12 +19,52 @@ role: reviewer
 provider: claude
 executor_provider: claude
 cross_provider: false
-assurance: same_provider_approved
+assurance: review_deferred
+assurance_ghi_chu: >-
+  HA TU `same_provider_approved` theo finding F3 cua cross-review PR #455 (codex,
+  head 663da64). Ly do do duoc, va no nam ngay trong chinh khoi identity moi them:
+  luot nay chay bang SUBAGENT TRONG cung phien dieu phoi — khong phien rieng, khong
+  worktree rieng, khong `run_id`, khong bam prompt. `PROTOCOL §8` doi same-provider
+  CUNG phai la mot phien MOI voi context/worktree rieng, nen thieu bang chung doc lap
+  KHONG tro thanh mot muc approval. Ban truoc lay chinh cau "tinh doc lap KHONG DO
+  DUOC" de bien minh cho muc approval — do la loi khai RONG HON phep do.
+  `review_deferred` KHONG co nghia "chua tung review": verdict CO THAT va con nguyen
+  byte; thu thieu la THAM QUYEN, khong phai lo trinh. Chi phuc hoi muc approval neu
+  tim duoc bang chung doc lap KIEM DUOC — khong bia `run_id` hay bam prompt hoi to.
 verdict: changes_requested
 verdict_path: ops/reviews/phan-bien-quy-trinh-review-2-claude-verdict.md
 verdict_sha256: 89a77faa6f5e1e8f80aa63a40c186729dec65bec82c69225564235b454dc3935
 verdict_bytes: 5063
 reviewed_sha: ba76a7874489252b2fff9f90063a95ed7ee06a2e
+
+model_reviewer_identity:
+  provider: anthropic
+  surface: claude_code_cli
+  che_do: subagent_trong_phien_dieu_phoi
+  neo_boi_launcher: null
+  KHONG_do_duoc: >-
+    (a) ID MODEL CỤ THỂ — không đường nào trong phiên trả model đang phục vụ.
+    (b) TÍNH ĐỘC LẬP — lượt này chạy bằng công cụ Agent NGAY TRONG phiên điều phối, không
+    phải một phiên riêng do `launcher.py run` neo. Nên không có `run_id`, không có băm prompt,
+    không có phép đo thời lượng. Đó chính là lý do `assurance` ở đây là
+    `same_provider_approved` chứ không phải `cross_approved` — và đừng đọc khối này mạnh hơn
+    thế: nó khai ĐƯỜNG CHẠY, không chứng minh danh tính model.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    `ADR-0040`: biên nhận do tài khoản tác giả đăng KHÔNG thành required check hay merge
+    authorization. Trường này ghi AI VẬN CHUYỂN, không cấp thẩm quyền.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: >-
+    Neo bằng `verdict_sha256` + commit ĐẦU TIÊN chứa tệp verdict (`76318fa1`), đã đo
+    là byte-identical với bản hôm nay. KHÔNG tag `luu-tru/*`, KHÔNG protected ref, KHÔNG check
+    object ⇒ mỏ neo TRUNG BÌNH: nó chết nếu lịch sử bị viết lại. Phiên web không đẩy được
+    `refs/tags/*` (đo 16-08-2026: 403 do proxy egress), nên nâng lên mức MẠNH cần đường khác.
 
 nhiem_vu: >-
   HAI reviewer song song: (A) bản vá có RĂNG không (đột biến từng dòng §9); (B) tấn công chính cú đảo.
@@ -46,11 +87,19 @@ verdict_doi_chieu: >-
   KHÔNG ĐO ĐƯỢC, không phải "đã kiểm".
 authoritative_source: repo_file
 evidence_channel: repo_file
-evidence_url: https://github.com/ducthangho/tra-luat/pull/452
+evidence_url: https://github.com/ducthangho/tra-luat/blob/76318fa106019611fbd5ea9ec6e2553bb7773faf/ops/reviews/phan-bien-quy-trinh-review-2-claude-verdict.md
+evidence_url_ghi_chu: >-
+  ĐÃ GHIM theo commit `76318fa1` — commit ĐẦU TIÊN chứa tệp verdict; đã đo bản tại
+  commit ấy khớp từng byte với bản hôm nay. Bản trước trỏ URL PR, là mỏ neo TRÔI: `t26` chỉ
+  kiểm hình dạng `https://` nên URL nào cũng qua — cổng không phân biệt bền với trôi.
 
 verdict_usage_caveats:
   - id: same-provider-KHONG-phai-cross
     noi_dung: >-
+      DA HA XUONG `review_deferred` theo F3 cua cross-review PR #455: luot nay chay
+      bang SUBAGENT trong cung phien dieu phoi, khong co phien rieng nen thieu bang
+      chung doc lap — ma thieu bang chung doc lap thi KHONG thanh mot muc approval.
+      Cau duoi day la ly do LICH SU cua muc cu, giu lai de tra:
       `codex` trong container trả 401 và `access token could not be refreshed`
       (`CODEX_AUTH_JSON` last_refresh 2026-08-23, đã 14 ngày; refresh token xoay
       vòng). Không có credential provider thứ hai nào khác. Nên nhãn đúng là

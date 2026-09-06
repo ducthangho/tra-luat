@@ -202,9 +202,21 @@ Reviewer connector trên cùng head `4ef73e6` ra **một P1** mà lượt `launc
 `giàn giáo hỏng` thay vì đội lốt "KHÔNG RĂNG". Lần thứ ba rig lệch trong ba vòng, và là lần đầu
 tiên nó lộ ngay tại chỗ.
 
+**Rồi chính bản vá ấy mở một lỗ MỚI, và lần này tôi tự bắn trúng trước khi reviewer chạy.**
+Trong prompt vòng 5 tôi liệt kê hướng tấn công *"một regex khớp nhầm là NỚI danh sách CHO PHÉP"* —
+rồi, theo đúng bài học *"nghĩ ra được phép thử mà không chạy thì phép thử ấy không tồn tại"*, chạy
+nó ngay thay vì để nằm trong tài liệu. **Trúng:** thả đúng một dòng
+`# ghi chu: provider ke_gian qua execution_surface x` vào cuối `launcher.py` ⇒ `ke_gian` được
+**CHẤP NHẬN**. Bài học `v1.36.68` ở dạng mới: đảo danh sách CẤM thành danh sách CHO PHÉP là đúng,
+nhưng một danh sách cho phép **rút từ VĂN BẢN TỰ DO** thì lại nới được bằng văn bản tự do — cái
+tôi đổi là NGUỒN, không phải HÌNH DẠNG rủi ro. Nay chỉ đọc hằng CHUỖI **bên trong** literal
+`CONG_CU`/`KHA_NANG` (qua AST — **chú thích không nằm trong AST**) và khối **mã rào** của
+`AGENTS.md`; bảng nào vắng ⇒ `KHÔNG ĐO ĐƯỢC`, không thu hẹp im lặng. `c35` đo **bốn** hướng nới
+(chú thích · chuỗi ngoài bảng · docstring · văn xuôi Markdown) kèm đối chứng dương, `m31` khoá.
+
 ## Răng
 
-`ops/bien_nhan_v2_test.py`: **37 ca · 33/33 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
+`ops/bien_nhan_v2_test.py`: **38 ca · 34/34 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
 hai thứ protocol đòi —
 biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
 của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`

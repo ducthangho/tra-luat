@@ -1086,6 +1086,66 @@ def c34b_PHAN_CHUNG_NGUYEN_VAN_cua_connector():
              f"phản chứng nguyên văn của connector phải ĐỎ vì `surface`, được: {loi}")
 
 
+def _nap_guong(tmp: Path, bom_launcher="", bom_agents=""):
+    """Nạp cổng từ một CÂY GƯƠNG có thể BƠM THÊM văn bản vào hai nguồn từ vựng.
+
+    Dùng để đo hướng tấn công *nới danh sách CHO PHÉP*: cây thật không bị đụng, và phần bơm
+    là văn bản HỢP LỆ về cú pháp — đúng thứ một lần sửa vô hại có thể mang theo."""
+    (tmp / "ops").mkdir(parents=True, exist_ok=True)
+    (tmp / ".claude" / "dev").mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(Path(bnv2.__file__), tmp / "ops" / "bien_nhan_v2.py")
+    (tmp / ".claude" / "dev" / "launcher.py").write_text(
+        (GOC / ".claude" / "dev" / "launcher.py").read_text(encoding="utf-8") + bom_launcher,
+        encoding="utf-8")
+    (tmp / "AGENTS.md").write_text(
+        (GOC / "AGENTS.md").read_text(encoding="utf-8") + bom_agents, encoding="utf-8")
+    sp = importlib.util.spec_from_file_location(
+        f"bnv2_guong_{abs(hash(bom_launcher + bom_agents)) % 10**8}",
+        tmp / "ops" / "bien_nhan_v2.py")
+    mod = importlib.util.module_from_spec(sp)
+    sp.loader.exec_module(mod)
+    return mod
+
+
+@ca
+def c35_KHONG_duoc_NOI_danh_sach_provider_bang_van_ban_tu_do():
+    """Danh sách CHO PHÉP nới được bằng một dòng CHÚ THÍCH thì KHÔNG phải danh sách cho phép.
+
+    Phiên thi công tự dựng phản chứng này TRƯỚC khi reviewer chạy, và nó BẮN TRÚNG bản vừa
+    viết: thả đúng một dòng `# … provider ke_gian qua execution_surface …` vào cuối
+    `launcher.py` ⇒ `ke_gian` được CHẤP NHẬN. Bài học `v1.36.68` ở dạng mới: đảo danh sách
+    cấm thành danh sách cho phép là ĐÚNG, nhưng một danh sách cho phép rút từ VĂN BẢN TỰ DO
+    thì lại nới được bằng văn bản tự do.
+
+    Nay chỉ đọc: hằng CHUỖI **trong** literal `CONG_CU`/`KHA_NANG` (AST — chú thích KHÔNG
+    nằm trong AST), và khối MÃ RÀO của `AGENTS.md` (không phải văn xuôi)."""
+    with tempfile.TemporaryDirectory() as t:
+        nen = _nap_guong(Path(t) / "nen")
+        bang(nen.PROVIDER_NGUON_HONG is None,
+             f"ĐỐI CHỨNG DƯƠNG hỏng — cây gương phải đọc được ba nguồn: {nen.PROVIDER_NGUON_HONG}")
+        bang(nen.PROVIDER_CHO_PHEP == bnv2.PROVIDER_CHO_PHEP,
+             f"cây gương lệch cây thật: {sorted(nen.PROVIDER_CHO_PHEP)} "
+             f"≠ {sorted(bnv2.PROVIDER_CHO_PHEP)}")
+    bang_tan_cong = (
+        ("chú thích cuối launcher.py", "ke_gian_1",
+         {"bom_launcher": "\n# ghi chu vo thuong: provider ke_gian_1 qua execution_surface x\n"}),
+        ("chuỗi NGOÀI hai bảng", "ke_gian_2",
+         {"bom_launcher": '\n_GHI_CHU = "provider ke_gian_2 qua execution_surface x"\n'}),
+        ("docstring cuối launcher.py", "ke_gian_3",
+         {"bom_launcher": '\ndef _x():\n    """provider ke_gian_3 qua execution_surface x"""\n'}),
+        ("văn xuôi trong AGENTS.md", "ke_gian_4",
+         {"bom_agents": "\nprovider: ke_gian_4\n"}),
+    )
+    hong = []
+    for i, (ten, ke_gian, kw) in enumerate(bang_tan_cong):
+        with tempfile.TemporaryDirectory() as t:
+            mod = _nap_guong(Path(t) / f"g{i}", **kw)
+            if ke_gian in mod.PROVIDER_CHO_PHEP:
+                hong.append(f"{ten}: NỚI được danh sách CHO PHÉP bằng văn bản tự do")
+    bang(not hong, f"{len(hong)}/{len(bang_tan_cong)} hướng nới được:\n      "
+                   + "\n      ".join(hong))
+
+
 @ca
 def c14_cli_ba_trang_thai():
     """Mã thoát CLI phải là 0/1/2 đúng ba trạng thái — đọc rc TRỰC TIẾP, không qua pipeline."""
@@ -1494,6 +1554,14 @@ def _dot_bien():
        "c31_hop_dong_provider_doc_DU_BA_NGUON_khong_chep_tay",
        "đọc MỘT nguồn ⇒ `google_antigravity` và `openai_chatgpt` bị từ chối",
        doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m31_quet_TOAN_TEP_thay_vi_hai_bang",
+       lambda: _dot_bien_tep(
+           '        van = "\\n".join(x.value for x in ast.walk(nut)\n'
+           '                        if isinstance(x, ast.Constant) and isinstance(x.value, str))',
+           "        van = van_launcher",
+           bo_qua_parity=("PROVIDER_CHO_PHEP",)),
+       "c35_KHONG_duoc_NOI_danh_sach_provider_bang_van_ban_tu_do",
+       "một dòng chú thích lại cấp được quyền", doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m10_bo_kiem_actor_cua_submitter",
        lambda: setattr(bnv2, "_gsi", lambda d: None if "github_submitter_identity" in d
                        else "thiếu khoá `github_submitter_identity`"),

@@ -170,12 +170,35 @@ def _provider_chinh_tac():
     # bản chép tay — bị TỪ CHỐI, và `openai_chatgpt` (AGENTS.md §4 khai đích danh) cũng
     # rớt. Sửa một nguồn chép tay bằng MỘT nguồn đọc được vẫn là thu hẹp nếu từ vựng thật
     # nằm ở BA chỗ: chốt "đọc, không chép" chỉ đúng khi đọc ĐỦ chỗ.
-    ngoai = set(re.findall(r"provider\s+([a-z0-9_]+)\s+qua\s+execution_surface", van_launcher))
-    web = set(re.findall(r"(?m)^provider:\s*([a-z0-9_]+)\s*$", van_agents))
-    if not ngoai:
-        return set(), f"`{nguon}` không còn dòng `provider … qua execution_surface` nào"
+    # PHẠM VI HẸP, không quét cả tệp. Đây là một danh sách **CHO PHÉP**, và một danh sách
+    # cho phép nới được bằng một dòng CHÚ THÍCH thì không phải danh sách cho phép.
+    # Đo được (phiên thi công tự dựng phản chứng trước khi reviewer chạy): thêm đúng một
+    # dòng `# ghi chu vo thuong: provider ke_gian qua execution_surface gia_mao` vào CUỐI
+    # `launcher.py` ⇒ `ke_gian` được CHẤP NHẬN. Bản trước quét toàn tệp nên bất kỳ chú
+    # thích, docstring hay chuỗi nào cũng cấp được quyền. Nay chỉ đọc:
+    #   · các hằng CHUỖI nằm TRONG chính literal `CONG_CU` (AST, không phải văn bản), và
+    #   · các khối MÃ RÀO của `AGENTS.md` (nơi §4 khai `provider: …`), không phải văn xuôi.
+    # Thêm một provider vẫn làm được — nhưng phải sửa CẤU TRÚC, không phải thả một dòng chữ.
+    ngoai = set()
+    for bang in ("CONG_CU", "KHA_NANG"):
+        nut = next((n for n in ast.walk(cay)
+                    if isinstance(n, ast.Assign) and n.targets
+                    and getattr(n.targets[0], "id", "") == bang), None)
+        if nut is None:
+            return set(), f"`{nguon}` không có literal `{bang}` đọc được"
+        van = "\n".join(x.value for x in ast.walk(nut)
+                        if isinstance(x, ast.Constant) and isinstance(x.value, str))
+        # HAI dạng khai đang cùng tồn tại trong hai bảng ấy; đọc cả hai chứ đừng chọn một
+        # rồi kết luận "không còn provider nào" — đó lại là thu hẹp im lặng.
+        tim = (set(re.findall(r"provider\s+([a-z0-9_]+)\s+qua\s+execution_surface", van))
+               | set(re.findall(r"provider:\s*([a-z0-9_]+)\s*,\s*surface:", van)))
+        if not tim:
+            return set(), f"`{nguon}`: literal `{bang}` không còn khai `provider` nào"
+        ngoai |= tim
+    rao = re.findall(r"(?ms)^```[a-z]*\n(.*?)^```", van_agents)
+    web = set(re.findall(r"(?m)^provider:\s*([a-z0-9_]+)\s*$", "\n".join(rao)))
     if not web:
-        return set(), f"`{tv}` không còn khối khai `provider: …` nào"
+        return set(), f"`{tv}`: khối mã rào không còn khai `provider: …` nào"
     return hd | ngoai | web, None
 
 

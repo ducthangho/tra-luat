@@ -1,3 +1,51 @@
+# ★ dev-side — r353: bản vá chống "tín dụng giết giả" tự dính đúng bệnh nó chữa (2026-09-06)
+
+Cross-review lượt 5 (codex, chạy trên `master` `4951f55` SAU khi PR #452 đã merge) ra bốn
+finding. Cái đáng ghi là `R5-01`: bản vá `R4-04` — dựng ra để bộ chấm đột biến thôi cấp tín
+dụng giết cho một crash vô can — **vẫn cấp tín dụng ấy**, chỉ qua một đường khác.
+
+## Lớp ngoại lệ riêng chứng minh ĐƯỜNG, không chứng minh CHỐT
+
+`TinHieuChotCa` chỉ nói "lỗi đi qua `bang()` của ca đang chạy". Nó KHÔNG nói **assertion
+nghiệp vụ đích** đã chạy. `t22` dùng chính `bang()` làm chốt **khởi chạy tiến trình con**,
+trước khi đọc bốn kết quả A/B/C/D. Reviewer bơm duy nhất `raise KeyError` vào đầu
+`_bash_windows`: con chết `rc=1`, chưa tới phép kiểm chọn Git Bash — mà bộ phân hạng vẫn
+trả `giet_that`. Chạy toàn bán kính: **chỉ `t22` chết, 0 ca `tin_dung_gia`**, nên cả phép
+kiểm TÊN CA lẫn bán kính 1/23 đều mù.
+
+Chữa: lớp `LoiDungCa` + hàm `dung()` cho chốt **giàn giáo** (dựng fixture · khởi chạy · giải
+mã) — `_chay_1_ca` đọc nó thành `tin_dung_gia`. Ranh giới khai **tại chỗ gọi**, KHÔNG đoán
+theo mã thoát: `chay(...)`/`cai_cong_cu.sh` là sản phẩm đang bị đo nên `rc` là hợp đồng của
+nó. Reviewer cảnh báo đúng chỗ đó, và đột biến C đo được cái giá của bản vá quá tay: hạ mọi
+chốt mang `rc=` thành giàn giáo làm **năm** đột biến thật (`t2` `t3` `t7` `t9` `t10`) mất
+tín dụng hợp lệ.
+
+Răng: đột biến A đưa `t22` về `bang()` ⇒ phép đo mới ĐỎ với đúng chữ `giet_that` reviewer
+đã thấy. Thêm hai ca tự kiểm `f`/`g` và một phản chứng **đi qua ranh giới tiến trình** —
+năm ca tự kiểm cũ đều chạy trong cùng tiến trình nên chúng bỏ sót đúng đường này.
+
+## Và cổng shell mới cũng nói dối theo cách kinh điển
+
+`R5-02`: `ops/kiem_trang_quyet_dinh.sh` đồng nhất "phép đo thất bại" với "không tìm thấy".
+`grep` trả `1` khi không khớp và `>1` khi **không thực hiện được** phép đo, mà cả hai rơi
+xuống nhánh in SẠCH; `set -euo pipefail` không chữa được vì lệnh nằm trong điều kiện `if`.
+Đo: regex hỏng ⇒ `rc=0 "sạch"` · mất mốc kết thúc ⇒ `rc=0` · đổi tên mốc ⇒ `rc=1` bắt oan.
+Nay ba trạng thái `0/1/2`, đòi đúng một cặp mốc theo thứ tự, kèm
+`ops/kiem_trang_quyet_dinh_test.sh` (7 ca + 4 phép đo răng, hai đột biến tái hiện lại đúng
+ba con số trên). Khai thẳng: **không workflow nào chạy cổng ấy** — `ci_dang_ky_test.py` chỉ
+quét `*_test.py`.
+
+## Bài học, không phải con số
+
+Đây là lần thứ **sáu** trong cùng một đợt của cùng một lớp lỗi (đọc *sự CÓ MẶT* thành *KHẢ
+NĂNG*), và là lần đắt nhất vì nó nằm **bên trong bản vá dựng ra để chặn lớp ấy**: có tên
+lớp, có ca tự kiểm cho lớp, vẫn trượt. Thứ bắt được nó không phải một reviewer đọc kỹ hơn
+mà một phép đo **đi qua ranh giới tiến trình** — tức reviewer có **năng lực ĐO**.
+
+Nhắc thêm một lỗi quy trình của chính đợt này: PR #452 được merge **một phút** sau khi lượt
+review ấy bắt đầu, nên hai commit cuối vào `master` không có lượt khác nền nào kết luận.
+`CLAUDE.md` đã ghi sẵn *"Gate xanh KHÔNG phải đã được review"*; đây là lần trả giá.
+
 # ★ dev-side — r352: luật thô của r351 vẫn thủng ở BIẾN MÔI TRƯỜNG (2026-09-06)
 
 Vòng 11 ra **một** finding (giảm từ bốn), và nó bắt đúng chỗ tôi **tự kiểm mà không nghĩ

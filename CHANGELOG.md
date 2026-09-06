@@ -176,9 +176,35 @@ KHÔNG RĂNG oan. Chép bản **đang hiệu lực** thì cả hai có răng. C�
 được công bố"*, lần thứ hai trong hai vòng liên tiếp — và cả hai lần đều lộ vì đối chứng, không vì
 đọc mã.
 
+## Vòng sáu: một P1 THẬT, và nó là LỚP tôi vừa vá dở ở vòng trước
+
+Reviewer connector trên cùng head `4ef73e6` ra **một P1** mà lượt `launcher.py run` không thấy:
+
+- **P1 — `str(v or "").strip()` biến MỌI thứ thành lời khai.** `surface: {fake: 1}` cộng
+  `KHONG_do_duoc: {fake: 1}` ⇒ `_thieu` trả **KHÔNG vi phạm nào**; kèm `phien_doc_lap: true` là
+  biên nhận ấy lĩnh `cross_approved` trong khi **không có bề mặt thực thi hợp lệ lẫn lời giải
+  thích**. Đo lại: đúng.
+  Điều đáng ghi không phải lỗi mà là **hình dạng của bản vá trước nó**: vòng 4 tôi vá ĐÚNG lớp
+  này cho `session_run_id` và `phien_doc_lap` — rồi **dừng lại**, bỏ sót hai trường trong **cùng
+  một hàm**. Vá những chỗ mình vừa nhìn thấy là vá một **danh sách**, không phải một **lớp**. Nay
+  mọi trường attestation đi qua đúng một cửa `_chuoi`, và `c34` là **bảng** phủ 7 trường × 4 kiểu
+  không-phải-chuỗi (28 cặp), cộng `c34b` dựng lại **nguyên văn** phản chứng của reviewer.
+- **P2 — "đọc, không chép" chỉ đúng khi đọc ĐỦ CHỖ.** Bản vá vòng 4 rút danh sách provider từ
+  `_TRANSPORT_CONTRACTS`, nhưng bảng ấy chỉ có provider đi qua **CLI của launcher**. Hệ quả đo
+  được: `google_antigravity` — vốn **đã được chấp nhận** ở bản chép tay cũ — bị **TỪ CHỐI**, và
+  `openai_chatgpt` (AGENTS.md §4 khai đích danh, `provider: openai_chatgpt`) cũng rớt. Tức bản vá
+  chống-chép-tay **thu hẹp** tập hợp lệ. Nay đọc **ba nguồn**: `_TRANSPORT_CONTRACTS` (AST) ·
+  `provider … qua execution_surface` trong bảng `CONG_CU` của launcher · khối `provider: …` trong
+  `AGENTS.md`. Mất **bất kỳ** nguồn nào ⇒ `KHÔNG ĐO ĐƯỢC`, và `c28` có hàng riêng cho từng đường.
+
+**Và chốt parity bắt rig NGAY, không tốn một vòng review.** Thêm nguồn thứ ba làm cây gương thiếu
+`AGENTS.md` ⇒ `PROVIDER_CHO_PHEP` của bản sao lệch bản thật ⇒ **mười** đột biến mức tệp bị báo
+`giàn giáo hỏng` thay vì đội lốt "KHÔNG RĂNG". Lần thứ ba rig lệch trong ba vòng, và là lần đầu
+tiên nó lộ ngay tại chỗ.
+
 ## Răng
 
-`ops/bien_nhan_v2_test.py`: **35 ca · 30/30 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
+`ops/bien_nhan_v2_test.py`: **37 ca · 32/32 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
 hai thứ protocol đòi —
 biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
 của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`

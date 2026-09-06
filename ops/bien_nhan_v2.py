@@ -88,6 +88,22 @@ _BLOB_URL = re.compile(r"/blob/([0-9a-f]{40})/(.+)\Z")
 # `m6` nhắm vào nó và lập tức mất răng đúng lúc bản vá làm nó vô dụng.
 
 
+def _chuoi(v):
+    """Giá trị CHỈ được coi là LỜI KHAI khi nó là CHUỖI không rỗng.
+
+    `str(v or "").strip()` biến MỌI thứ thành lời khai: `{fake: 1}` ra `"{'fake': 1}"`,
+    một danh sách ra `"[...]"`. Cross-review connector trên head `4ef73e6` (P1) đo được
+    `surface: {fake: 1}` cộng `KHONG_do_duoc: {fake: 1}` ⇒ `_thieu` trả **KHÔNG vi phạm
+    nào**, nên một biên nhận không có bề mặt thực thi hợp lệ **lẫn** lời giải thích vẫn
+    lĩnh `cross_approved`.
+
+    ĐÂY LÀ MỘT LỚP, KHÔNG PHẢI HAI TRƯỜNG. Vòng trước tôi vá đúng lớp ấy cho
+    `session_run_id` và `phien_doc_lap` rồi **dừng lại** — bỏ sót hai trường trong CÙNG
+    một hàm. Vá một lớp bằng cách sửa những chỗ mình vừa nhìn thấy là vá một danh sách,
+    không phải vá một lớp; nên nay MỌI trường attestation đi qua đúng một cửa này."""
+    return v.strip() if isinstance(v, str) and v.strip() else None
+
+
 def _co_chuoi(d, k):
     v = d.get(k)
     return None if isinstance(v, str) and v.strip() else f"thiếu/rỗng `{k}`"
@@ -121,22 +137,46 @@ def _provider_chinh_tac():
     phép kiểm danh sách provider KHÔNG chạy khi nguồn không đọc được — vì không đo được
     thì không kết luận được, theo cả hai chiều. Cổng vẫn ĐỎ, nên đây không phải fail-open:
     nó chỉ đỏ ĐÚNG LÝ DO."""
-    nguon = Path(__file__).resolve().parent.parent / ".claude" / "dev" / "launcher.py"
+    goc = Path(__file__).resolve().parent.parent
+    nguon = goc / ".claude" / "dev" / "launcher.py"
+    tv = goc / "AGENTS.md"
     try:
         import ast
-        cay = ast.parse(nguon.read_text(encoding="utf-8"))
+        van_launcher = nguon.read_text(encoding="utf-8")
+        van_agents = tv.read_text(encoding="utf-8")
     except OSError as ex:
-        return set(), f"không đọc được `{nguon}`: {type(ex).__name__}: {ex}"
+        return set(), f"không đọc được nguồn từ vựng provider: {type(ex).__name__}: {ex}"
+    try:
+        cay = ast.parse(van_launcher)
     except SyntaxError as ex:                                    # noqa: BLE001
         return set(), f"`{nguon}` không phân tích được: {ex}"
+
+    # NGUỒN 1 — hợp đồng transport CLI (`_TRANSPORT_CONTRACTS`).
+    hd = None
     for n in ast.walk(cay):
         if (isinstance(n, ast.Assign) and n.targets
                 and getattr(n.targets[0], "id", "") == "_TRANSPORT_CONTRACTS"):
             try:
-                return {t.elts[0].value for t in n.value.elts}, None
+                hd = {t.elts[0].value for t in n.value.elts}
             except (AttributeError, IndexError, TypeError) as ex:
                 return set(), f"`_TRANSPORT_CONTRACTS` có hình dạng lạ: {type(ex).__name__}: {ex}"
-    return set(), f"`{nguon}` không có phép gán `_TRANSPORT_CONTRACTS`"
+            break
+    if hd is None:
+        return set(), f"`{nguon}` không có phép gán `_TRANSPORT_CONTRACTS`"
+
+    # NGUỒN 2 và 3 — provider KHÔNG đi qua CLI của launcher, nên `_TRANSPORT_CONTRACTS`
+    # KHÔNG BAO GIỜ chứa chúng. Cross-review connector (P2, head `4ef73e6`) đo được: bản
+    # trước rút danh sách CHỈ từ nguồn 1 nên `google_antigravity` — vốn ĐÃ ĐƯỢC CHẤP NHẬN ở
+    # bản chép tay — bị TỪ CHỐI, và `openai_chatgpt` (AGENTS.md §4 khai đích danh) cũng
+    # rớt. Sửa một nguồn chép tay bằng MỘT nguồn đọc được vẫn là thu hẹp nếu từ vựng thật
+    # nằm ở BA chỗ: chốt "đọc, không chép" chỉ đúng khi đọc ĐỦ chỗ.
+    ngoai = set(re.findall(r"provider\s+([a-z0-9_]+)\s+qua\s+execution_surface", van_launcher))
+    web = set(re.findall(r"(?m)^provider:\s*([a-z0-9_]+)\s*$", van_agents))
+    if not ngoai:
+        return set(), f"`{nguon}` không còn dòng `provider … qua execution_surface` nào"
+    if not web:
+        return set(), f"`{tv}` không còn khối khai `provider: …` nào"
+    return hd | ngoai | web, None
 
 
 # `anthropic` (không hậu tố) là DẠNG LỊCH SỬ: bốn biên nhận v2 chuẩn của kho và hai biên
@@ -161,9 +201,9 @@ def _mri(d):
     v = d.get("model_reviewer_identity")
     if not isinstance(v, dict) or not v:
         return "thiếu/rỗng ánh xạ `model_reviewer_identity`"
-    prov = str(v.get("provider") or "").strip()
+    prov = _chuoi(v.get("provider"))
     if not prov:
-        return "`model_reviewer_identity` không có `provider`"
+        return "`model_reviewer_identity` không có `provider` (chuỗi không rỗng)"
     # KHÔNG kết luận khi nguồn chính tắc không đọc được. `PROVIDER_CHO_PHEP` lúc ấy chỉ
     # còn hai bí danh lịch sử, nên phép so này sẽ KẾT TỘI một provider hợp lệ — lỗi ĐO báo
     # thành lỗi DỮ LIỆU (`R4-02`). Trạng thái thứ ba do `kiem` ghi ra, và nó làm cổng ĐỎ
@@ -171,10 +211,10 @@ def _mri(d):
     if PROVIDER_NGUON_HONG is None and prov not in PROVIDER_CHO_PHEP:
         return (f"`model_reviewer_identity.provider`={prov!r} ngoài danh sách CHO PHÉP "
                 f"{sorted(PROVIDER_CHO_PHEP)} — chuỗi tự do không phải attestation")
-    if not str(v.get("surface") or "").strip():
-        return "`model_reviewer_identity` không có `surface` (bề mặt thực thi)"
-    rid = v.get("session_run_id")
-    if not (isinstance(rid, str) and rid.strip()) and not str(v.get("KHONG_do_duoc") or "").strip():
+    if not _chuoi(v.get("surface")):
+        return "`model_reviewer_identity` không có `surface` (bề mặt thực thi, chuỗi không rỗng)"
+    rid = _chuoi(v.get("session_run_id"))
+    if not rid and not _chuoi(v.get("KHONG_do_duoc")):
         return ("`model_reviewer_identity` không có `session_run_id` và cũng KHÔNG khai "
                 "`KHONG_do_duoc` giải thích vì sao thiếu — im lặng không phải lời khai")
     return None
@@ -191,21 +231,21 @@ def _gsi(d):
         return None
     if not isinstance(v, dict):
         return f"`github_submitter_identity` là {type(v).__name__}, đòi ánh xạ hoặc null"
-    if not str(v.get("actor") or "").strip():
+    if not _chuoi(v.get("actor")):
         return "`github_submitter_identity` không null mà không có `actor`"
     return None
 
 
 def _doc_loai(a):
     """Đọc `anchor.loai` CHUẨN HOÁ — nguồn DUY NHẤT cho cả schema lẫn dispatch."""
-    return str((a or {}).get("loai") or "").strip() if isinstance(a, dict) else ""
+    return (_chuoi(a.get("loai")) or "") if isinstance(a, dict) else ""
 
 
 def _anchor_khoa(d, k):
     a = d.get("anchor")
     if not isinstance(a, dict) or not a:
         return None                      # đã có mục `anchor` riêng lo việc này
-    return None if str(a.get(k) or "").strip() else f"`anchor.{k}` thiếu/rỗng"
+    return None if _chuoi(a.get(k)) else f"`anchor.{k}` thiếu/rỗng (đòi chuỗi không rỗng)"
 
 
 def _anchor_loai(d):
@@ -396,16 +436,15 @@ def _thieu(d: dict) -> list[str]:
     # `phien_doc_lap` dương. Thiếu cả hai thì không được khai mức hàm ý review có thẩm quyền.
     mri = d.get("model_reviewer_identity")
     if isinstance(mri, dict):
-        tu_khai_trong_phien = "subagent" in str(mri.get("che_do") or "").lower()
+        tu_khai_trong_phien = "subagent" in (_chuoi(mri.get("che_do")) or "").lower()
         # KIỂU, không chỉ TRUTHINESS. Cross-review vòng 3 (P1) đo được: `phien_doc_lap:
         # "false"` là CHUỖI KHÔNG RỖNG nên truthy ⇒ qua; và `session_run_id` là một ÁNH XẠ
         # cũng sống sót phép ép `str(...)`. Một biên nhận tự khai KHÔNG có phiên đo được vẫn
         # lĩnh mức assurance độc lập. Cùng lớp "CÓ MẶT khác KHẢ NĂNG", lần này ở tầng KIỂU
         # DỮ LIỆU: một giá trị có mặt không có nghĩa nó khẳng định điều ta tưởng.
-        run_id = mri.get("session_run_id")
-        co_run_id = isinstance(run_id, str) and bool(run_id.strip())
-        co_bang_chung = co_run_id or mri.get("phien_doc_lap") is True
-        khai = str(d.get("assurance") or d.get("assurance_dat") or "").strip()
+        co_bang_chung = (_chuoi(mri.get("session_run_id")) is not None
+                         or mri.get("phien_doc_lap") is True)
+        khai = _chuoi(d.get("assurance")) or _chuoi(d.get("assurance_dat")) or ""
         if khai in ASSURANCE_CAN_DOC_LAP and (tu_khai_trong_phien or not co_bang_chung):
             ly_do = ("tự khai chạy trong phiên điều phối" if tu_khai_trong_phien
                      else "không có `session_run_id` lẫn `phien_doc_lap`")

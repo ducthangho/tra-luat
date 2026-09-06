@@ -371,7 +371,7 @@ Bốn mutant reviewer đòi chết độc lập — `m46`/`m47` (arity RIÊNG t�
 `m49` (điều kiện nguồn-đo-được ở `_thieu`) — đều CÓ RĂNG; `m49` chết đúng bằng con số *"11 biên nhận
 THẬT bị KẾT TỘI"* trên `c40` (chạy CLI từ cây gương hỏng nguồn lên `--root` kho thật). **Con số ấy
 neo vào TẬP BIÊN NHẬN, không phải vào bản vá** (`R8-03`): **11 trên tập 68 của executor** (`4488ff1`);
-đo lại là **12 trên 69** (`c0f18ac`) và **13 trên 70** (head lượt 8) — cùng một mutant, cùng một chốt,
+đo lại là **12 trên 69** (`c0f18ac`) và **13 trên 70** (head `2d5fb72` của lượt vá này — KHÔNG phải `c0f18ac`, head mà verdict lượt 8 neo) — cùng một mutant, cùng một chốt,
 chỉ mẫu số lớn dần vì kho thêm biên nhận. Số lịch sử giữ nguyên: sửa `11` thành số hiện tại làm mất
 tính đúng của nó tại mốc nó được đo. Và **không** đóng băng `69`/`12` vào suite — chúng sẽ đổi ở
 biên nhận hợp lệ kế tiếp.
@@ -417,7 +417,7 @@ nó. Hàng ấy do phiên điều phối áp trong cây chính; mọi số dư�
 `_BE_MAT_BI_DANH` vào riêng bản launcher rig chép: bốn hằng parity vẫn bằng nhau mà hợp đồng đã khác.
 Vá: `c28` mở theo TỪNG thành phần lược đồ (mỗi bảng: vắng/rỗng/khai hai lần/không literal · mỗi cột:
 arity từng bảng, kiểu từng ô · từng đích bí danh · từng cột đối chiếu AGENTS · từng câu neo theo tệp ·
-byte hỏng từng nguồn — **34 hàng** đếm bằng AST, mỗi hàng đòi rc đúng, bằng chứng dương, KHÔNG
+byte hỏng từng nguồn — **34 hàng** *(số của base `5898e5f`; head lượt 8 tách hàng PROTOCOL thành hai lượt riêng nên còn **33 hàng tuple** + 2 lượt neo + 1 lượt hỗn hợp, `R9-F07`)* đếm bằng AST, mỗi hàng đòi rc đúng, bằng chứng dương, KHÔNG
 traceback, KHÔNG kết tội); cây gương có biên nhận `b` khai `cross_approved` nên nhánh kết tội nằm trên
 đường đo; một lượt
 HỖN HỢP (nguồn hỏng + biên nhận sai thật) đòi rc=2 mà biên nhận sai VẪN bị báo. `_dot_bien_tep` so
@@ -454,7 +454,8 @@ khớp". `1/15` **ĐÚNG** trên cơ sở của nó; thứ sai là đem nó so v
 mỗi hàng một đơn vị, đi qua cùng hai mốc. Đo lại 06-09-2026 bằng `git ls-tree` + `git show` +
 `yaml.safe_load`, `transport` đếm ở trường **có cấu trúc** `model_reviewer_identity.transport` (đếm
 bằng substring trên YAML đã dump cho **3/4** — nó bắt cả chữ "transport" trong prose; con số đúng chỉ
-ra khi hỏi đúng trường), còn "ĐẠT v2" là chạy **cổng của head này** trên byte receipt lấy từ từng mốc:
+ra khi hỏi đúng trường. **Điều kiện đo:** `3/4` là trên **TOÀN BỘ** 68/69 receipt; nếu chỉ tính tập
+**tự khai v2** thì phép substring cho `2/3` — cùng một bộ quét, hai mẫu số, `R9-F07`), còn "ĐẠT v2" là chạy **cổng của head này** trên byte receipt lấy từ từng mốc:
 `4488ff1` 68 receipt / 16 tự khai v2 / 15 ĐẠT; `c0f18ac` 69 / 17 / 16.
 
 Ô cuối **giữ nguyên** — reviewer lượt 8 xác nhận phép bác này ĐÚNG. Nó sửa một lời khai SAI của bản
@@ -478,7 +479,7 @@ hàng `human` trong `launcher.py`), Linux, py3.11.15, `core.abbrev=7`:
 | `ops/bien_nhan_v2_test.py` | 0 | `45/45 ca đạt · 57/57 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 39/57 khai đối chứng` · `TỔNG: ĐẠT` |
 | `ops/bien_nhan_v2.py --root .` | 0 | `16 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 69` |
 | `.claude/dev/ci_dang_ky_test.py` | 0 | `PHẢN CHỨNG: 51/51 đỏ đúng` · `TỔNG: ĐẠT` |
-| `.claude/dev/launcher_test.py` | 0 | `181/181 ca DA CHAY QUA (tong 182, bo qua 1, hong 0)` |
+| `.claude/dev/launcher_test.py` | 0 | `181/181 ca DA CHAY QUA (tong 182, bo qua 1, hong 0)` — **ĐIỀU KIỆN ĐO** (`R9-F08`): con số này cần **mạng + dựng được venv/pip**. Trong sandbox reviewer CẤM MẠNG, tám ca venv không dựng được nên nó đo `173/173 (tổng 182, **bỏ qua 9**, hỏng 0)` ở CẢ head lẫn base — tức **không tái lập được 181**, và đó là **sai khác BẰNG CHỨNG**, không phải hồi quy. Ai chép lại số 181 phải kèm điều kiện này. |
 | `ops/lease_publish_test.py` | 0 | `121/121 đạt; đã chạy=121, bỏ qua=0` |
 | `packet_loop doctrine-scan` | 0 | `sạch — đã quét 7 tệp, 0 chỗ chép doctrine` |
 | `packet_loop adr-song` | 0 | `sạch — 46 ADR trên đĩa, 46 dòng trong §20, khớp 1–1` |
@@ -562,13 +563,13 @@ hợp lệ, chỉ đổi mỗi trường ấy (`_thieu` gọi thẳng): `{'fake'
 Hai giá trị cuối là của phiên này tìm thêm, ngoài bảng reviewer gửi. Vá đúng doctrine `None ≠ False`:
 phân biệt bằng `"transport" in v`, CÓ-MÀ-HỎNG thành lỗi riêng, VẮNG vẫn hợp lệ (trường tuỳ chọn).
 Khoá bằng cách thêm `transport` vào **ma trận kiểu** `TRUONG_ATTESTATION` của `c34` — chỗ của cả LỚP,
-không phải một ca lẻ — cộng `""` vào bảng kiểu (đo trước: 6 trường còn lại đã chặn nó).
+không phải một ca lẻ — cộng `""` vào bảng kiểu (đo trước trên base `5898e5f`: ma trận có **7** trường và **cả 7/7** đã chặn chuỗi rỗng — bản đầu viết "6", reviewer lượt 9 đếm lại ra 7, `R9-F07`). Lượt 9 còn đo được một lỗ NỮA của chính đoạn này: `None` được khai là *"phản chứng tìm thêm"* nhưng **không** có trong ma trận, nên bỏ riêng chặn null vẫn qua toàn suite `48/48 · 62/62`. Nay `None` vào ma trận và có `m61` đo riêng nó (`R9-F02`).
 
 **`R8-05` (P2) — hàng Antigravity trong `launcher.py` LỆCH nguồn, và lệch theo chiều CHẶN NHẦM.**
 `ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §2 khai `machine/local`; `_PROVIDER_NGOAI_CLI` khai `machine`.
 Hệ quả đo được: biên nhận Antigravity khai **TRUNG THỰC** `machine/local` bị **TỪ CHỐI**, khai **SAI**
 `machine` thì **ĐƯỢC NHẬN** — validation đảo ngược. Đối chiếu **cả 5 hàng** của §2 (không chỉ hàng
-được chỉ): Antigravity là hàng **duy nhất** lệch; `anthropic_claude` vốn đã dùng `machine/local`, nên
+được chỉ): Antigravity là hàng **duy nhất lệch CỘT TRANSPORT** — và câu ấy phải nói ĐÚNG PHẠM VI (`R9-F05`): bản đầu viết *"duy nhất lệch §2"*, rộng hơn phép đo, vì tầng (b) chỉ so ô transport. Nay `c44` đối chiếu **cả cột surface**, và reviewer lượt 9 đã dựng phản chứng cho lỗ ấy: đổi riêng ô surface Antigravity trong bản sao kế hoạch, `c44` bản cũ **vẫn qua**, bản mới **ĐỎ**. Ngoại lệ khai thẳng: hàng Codex của §2 là prose nhiều giá trị (*"`codex_cli` hoặc Codex service"*) và *"Codex service"* **chưa có tên máy trong hợp đồng dữ liệu** — nợ CHÍNH SÁCH, không vá ở PR này. `anthropic_claude` vốn đã dùng `machine/local`, nên
 dạng giá trị ấy được hỗ trợ sẵn. Cùng LỚP `R7-02` (chặn quá rộng vì một hằng lệch nguồn). Vá hàng, và
 khoá bằng `c44` **ba tầng**: (a) bảng launcher ⊇ oracle chép tay `BO_BA_PROVIDER_DONG_BANG`; (b) oracle
 khớp **ô cuối** của bảng §2 — so ô, không dò substring, vì `machine` là **tiền tố** của `machine/local`
@@ -596,18 +597,21 @@ lần này ba finding thật đi vào master vì chỉ câu thứ nhất đượ
 **Một đột biến đặt sai hình dạng, ghi lại vì nó suýt cấp tín dụng oan:** bản đầu của `m59` dùng
 `if False:` cho nhánh kiểu mới. Dưới nó `vc=None` **rơi xuống** chốt hợp đồng (`None not in {...}` ⇒
 True) nên giá trị VẪN bị chặn, chỉ khác thông báo — `c34` xanh, đột biến lĩnh *"không răng"* OAN. Chỉ
-khi đột biến quay về **đúng hình dạng cũ** (`if vc and …`) nó mới chết: `5/40` cặp (trường × kiểu)
-không bị chặn, cả 5 đều là `transport`. Cùng họ *"đột biến sai chỗ ≠ mã sai"*.
+khi đột biến quay về **đúng hình dạng cũ** (`if vc and …`) nó mới chết. **Điều kiện đo của con số**: `5/40` là
+**5 giá trị `transport` lọt** trên mẫu **8 trường × 5 kiểu**, đo lúc ma trận chưa có `None`. Sau khi
+`R9-F02` thêm `None` vào ma trận, cùng mutant ấy cho **6/48** (8 × 6). Hai số đúng ở hai mốc khác
+nhau; đừng đọc số sau thành số trước. Cùng họ *"đột biến sai chỗ ≠ mã sai"*.
 
 ### Đo lại sau bản vá lượt 8 (head `5898e5f` + bản vá, Linux, py3.11.15, `core.abbrev=7`)
 
 | cổng | mã thoát | dòng tổng kết THẬT |
 |---|---|---|
-| `ops/bien_nhan_v2_test.py` | 0 | `48/48 ca đạt · 62/62 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 44/62 khai đối chứng` · `TỔNG: ĐẠT` |
+| `ops/bien_nhan_v2_test.py` | 0 | `48/48 ca đạt · 63/63 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 45/63 khai đối chứng` · `TỔNG: ĐẠT` |
 | `ops/bien_nhan_v2.py --root .` | 0 | `17 ĐẠT v2 · 11/11 miễn trừ legacy · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 70` |
 
 Nền trước bản vá trên cùng head: `45/45 · 57/57 · 2/2 · 39/57`. Delta là **+3 ca** (`c43` `c44` `c45`)
-và **+5 đột biến** (`m56` `m57` `m58` `m59` `m60`) — đúng bằng thứ thêm vào, không ca nào mất.
+và **+6 đột biến** (`m56`…`m61`) — đúng bằng thứ thêm vào, không ca nào mất. (`m61` đến từ vòng vá
+`R9-F02`; bảng này đo ở head sau khi vá xong lượt 9.)
 
 **MỘT PHÉP ĐO CỦA MÔI TRƯỜNG, không phải của bản vá:** container phiên này mở ra ở trạng thái **clone
 nông, 2 ref cục bộ / 298 ref trên máy chủ**, nên `bien_nhan_v2.py --root .` cho `rc=2` với **8 KHÔNG ĐO

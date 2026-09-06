@@ -1373,7 +1373,11 @@ TRUONG_ATTESTATION = (
 # `R8-04` thêm `""`: chuỗi RỖNG là một trong các giá trị reviewer đo được lọt qua `transport`,
 # và nó là ca biên riêng — đúng KIỂU chuỗi, nhưng `_chuoi` vẫn trả `None`, nên nó đi CHUNG
 # nhánh với "vắng mặt" y như các kiểu sai. Đo trước khi thêm: cả 6 trường còn lại đã chặn nó.
-KIEU_KHONG_PHAI_CHUOI = ({"fake": 1}, ["fake"], 123, True, "")
+# `R9-F02` thêm `None`: bản trước khai `None` là "phản chứng tìm thêm" cho `transport` nhưng KHÔNG
+# đưa nó vào ma trận, nên `5/40` đúng mà null KHÔNG bị khoá — reviewer lượt 9 đo được: đột biến coi
+# riêng null là "vắng mặt" bỏ được một hành vi ĐÃ CÔNG BỐ mà toàn suite vẫn `48/48 · 62/62`, rc=0.
+# Ca có MẶT (trong lời khai) khác ca có ĐO (trong ma trận).
+KIEU_KHONG_PHAI_CHUOI = ({"fake": 1}, ["fake"], 123, True, "", None)
 
 
 @ca
@@ -2071,13 +2075,30 @@ def c44_bo_ba_provider_phai_KHOP_nguon_ke_hoach_va_hang_LECH_phai_doi_hanh_vi():
     # (b) oracle ⊆ bảng §2 của kế hoạch, đọc Ô CUỐI chứ không dò substring (`machine` là tiền tố
     #     của `machine/local`, nên `in` sẽ khớp nhầm và chốt mất răng đúng chỗ cần nó nhất).
     van = (GOC / KE_HOACH_PROVIDER).read_text(encoding="utf-8")
-    for prov, _be_mat, van_chuyen in BO_BA_PROVIDER_DONG_BANG:
+    for prov, be_mat_s2, van_chuyen in BO_BA_PROVIDER_DONG_BANG:
         dong = [l for l in van.splitlines() if l.startswith("|") and f"`{prov}`" in l]
         bang(len(dong) == 1,
              f"`{prov}`: tìm được {len(dong)} hàng trong §2 của `{KE_HOACH_PROVIDER}`, đòi ĐÚNG 1")
-        o = [c.strip().strip("`") for c in dong[0].strip("|").split("|")]
-        bang(o[-1] == van_chuyen,
+        o = [c.strip() for c in dong[0].strip("|").split("|")]
+        bang(o[-1].strip("`") == van_chuyen,
              f"`{prov}`: §2 khai vận chuyển {o[-1]!r}, oracle chép tay {van_chuyen!r}")
+        # `R9-F05`: đối chiếu CẢ cột surface, không chỉ transport. Bản trước chỉ so ô cuối, nên
+        # lời khai "Antigravity là hàng DUY NHẤT lệch §2" rộng hơn phép đo — reviewer lượt 9 đổi
+        # riêng ô surface trong bản sao kế hoạch và `c44` VẪN QUA.
+        # Ô surface có HAI dạng trong §2: một token trong dấu nháy ngược, hoặc prose nhiều giá trị
+        # (hàng Codex: "`codex_cli` hoặc Codex service"). Khai thẳng ngoại lệ ấy thay vì lờ đi:
+        # dạng nhiều giá trị chỉ đòi surface của oracle CÓ MẶT như một token, và *"Codex service"*
+        # chưa có tên máy trong hợp đồng dữ liệu — đó là nợ CHÍNH SÁCH, không vá trong PR này.
+        token = _RE.findall(r"`([^`]+)`", o[-2])
+        if len(token) == 1 and " hoặc " not in o[-2]:
+            bang(token[0] == be_mat_s2,
+                 f"`{prov}`: §2 khai bề mặt {token[0]!r}, oracle chép tay {be_mat_s2!r}")
+        else:
+            bang(be_mat_s2 in token,
+                 f"`{prov}`: ô bề mặt §2 nhiều giá trị {o[-2]!r} mà KHÔNG chứa {be_mat_s2!r}")
+            bang(prov == "openai_codex",
+                 f"`{prov}`: ô bề mặt nhiều giá trị — mới chỉ khai ngoại lệ cho `openai_codex`, "
+                 f"thêm hàng dạng này phải quyết cách biểu diễn trong hợp đồng dữ liệu trước")
     # (c) witness đối xứng — hàng ấy phải ĐỔI HÀNH VI, không chỉ đổi chuỗi
     d = v2_du()
     d["model_reviewer_identity"].update(provider="google_antigravity", surface="antigravity",
@@ -2093,10 +2114,19 @@ def c44_bo_ba_provider_phai_KHOP_nguon_ke_hoach_va_hang_LECH_phai_doi_hanh_vi():
             mod = importlib.util.module_from_spec(sp)
             sp.loader.exec_module(mod)
             loi = mod._thieu(copy.deepcopy(d))
-            duoc_nhan = not any("transport" in x for x in loi)
-            bang(duoc_nhan == mong_nhan,
-                 f"{nhan}: biên nhận Antigravity khai TRUNG THỰC `machine/local` "
-                 f"{'phải ĐƯỢC NHẬN' if mong_nhan else 'phải BỊ TỪ CHỐI'}, được: {loi[:1]}")
+            # `R9-F04`: vế DƯƠNG đòi danh sách lỗi RỖNG, không phải "không có chữ transport".
+            # Bản trước dùng `not any("transport" in x …)` nên một receipt hỏng vì lý do KHÁC
+            # (reviewer đo bằng `receipt_id` rỗng ⇒ `_thieu` trả `thiếu/rỗng receipt_id`) vẫn
+            # được đọc là ĐƯỢC NHẬN — đúng khoảng cách hành vi/diagnostic mà ca này định khoá.
+            if mong_nhan:
+                bang(loi == [],
+                     f"{nhan}: biên nhận Antigravity khai TRUNG THỰC `machine/local` phải ĐƯỢC NHẬN "
+                     f"SẠCH (0 lỗi), được {len(loi)} lỗi: {loi[:2]}")
+            else:
+                bang(any("transport" in x for x in loi),
+                     f"{nhan}: phải BỊ TỪ CHỐI vì `transport`, được: {loi[:2]}")
+                bang(not any("receipt_id" in x or "surface" in x for x in loi),
+                     f"{nhan}: vế ÂM phải đỏ vì ĐÚNG transport, không vì trường khác: {loi[:2]}")
 
 
 @ca
@@ -2110,7 +2140,13 @@ def c45_neo_canonical_ancestry_KHONG_song_sot_qua_land_bang_SQUASH():
 
     PHẠM VI — nói thẳng kẻo bị đọc rộng hơn: ca này KHÔNG đo kho thật và KHÔNG cưỡng chế
     "phải land bằng merge". Bất biến ấy sống ở GitHub (nút merge), ngoài tầm một ca test cục bộ;
-    ép nó ở đây là **KHÔNG ĐO ĐƯỢC** đội lốt đã đo. Xem caveat có tên trong `ops/reviews/README.md`."""
+    ép nó ở đây là **KHÔNG ĐO ĐƯỢC** đội lốt đã đo. Xem caveat có tên trong `ops/reviews/README.md`.
+
+    `R9-F06` — MỆNH ĐỀ PHẢI HẸP ĐÚNG BẰNG PHÉP ĐO. Bản đầu viết *"đúng khi và chỉ khi land bằng
+    MERGE COMMIT"*: **SAI**, vì **fast-forward cũng giữ nguyên neo** — reviewer lượt 9 đổi đúng
+    lựa chọn merge trong fixture này sang FF và ca vẫn qua. Thứ phá quan hệ tổ tiên là **SQUASH**
+    (thay commit của nhánh bằng một commit MỚI), và chỉ phá những neo **chưa** nằm sẵn trong lịch
+    sử nhánh đích. Nên ca này nay đo **BA** lối land, không hai."""
     import subprocess as _sp
     with tempfile.TemporaryDirectory() as t:
         d = Path(t)
@@ -2124,18 +2160,54 @@ def c45_neo_canonical_ancestry_KHONG_song_sot_qua_land_bang_SQUASH():
         (d / "g").write_text("x\n"); g("add", "-A"); g("commit", "-qm", "neo")
         neo = g("rev-parse", "HEAD").stdout.strip()
         dung(len(neo) == 40, f"KHÔNG ĐO ĐƯỢC: không lấy được SHA neo: {neo!r}")
+        # `R9-F03`: BA TRẠNG THÁI, không phải hai. Bản trước dùng `returncode != 0` cho vế squash,
+        # nên `rc=128` (git KHÔNG ĐO ĐƯỢC: sai đối số, kho hỏng, object thiếu) được đếm y hệt
+        # `rc=1` ("không phải tổ tiên") và ca vẫn XANH — reviewer lượt 9 bơm 128 vào đúng lời gọi
+        # cuối, mọi lời gọi khác chạy thật, và ca QUA. Một ca không đo được tiền đề mà báo đạt thì
+        # tệ hơn không có ca. Nay lỗi công cụ thành `LoiDungCa` (giàn giáo), không thành kết quả.
+        def to_tien(sha, mo_ta):
+            r = g("merge-base", "--is-ancestor", sha, "HEAD")
+            dung(r.returncode in (0, 1),
+                 f"KHÔNG ĐO ĐƯỢC quan hệ tổ tiên ({mo_ta}): git thoát {r.returncode}, "
+                 f"chỉ 0/1 mới là câu trả lời — {r.stderr.strip()[:120]}")
+            return r.returncode == 0
+
+        def cay(ref):
+            r = g("rev-parse", f"{ref}^{{tree}}")
+            oid = r.stdout.strip()
+            dung(r.returncode == 0 and len(oid) == 40 and all(c in "0123456789abcdef" for c in oid),
+                 f"KHÔNG ĐO ĐƯỢC cây của `{ref}`: rc={r.returncode} oid={oid!r}")
+            return oid
+
         g("checkout", "-q", "main")
         dung(g("merge", "-q", "--no-ff", "nhanh", "-m", "merge").returncode == 0,
              "KHÔNG ĐO ĐƯỢC: merge hỏng")
-        bang(g("merge-base", "--is-ancestor", neo, "HEAD").returncode == 0,
+        bang(to_tien(neo, "sau MERGE"),
              "land bằng MERGE mà neo KHÔNG còn là tổ tiên — tiền đề của ca này sai")
         g("checkout", "-q", "-B", "main2", "main~1")
         dung(g("merge", "--squash", "nhanh").returncode == 0, "KHÔNG ĐO ĐƯỢC: merge --squash hỏng")
         g("commit", "-qm", "squash")
-        bang(g("rev-parse", "main^{tree}").stdout == g("rev-parse", "HEAD^{tree}").stdout,
+        bang(cay("main") == cay("HEAD"),
              "KHÔNG ĐO ĐƯỢC: hai lối land ra CÂY KHÁC nhau — phép so không còn cô lập lịch sử")
-        bang(g("merge-base", "--is-ancestor", neo, "HEAD").returncode != 0,
+        bang(not to_tien(neo, "sau SQUASH"),
              "land bằng SQUASH mà neo VẪN là tổ tiên — nợ `canonical_ancestry` không còn như đã khai")
+        # LỐI THỨ BA — FAST-FORWARD: cũng GIỮ neo, nên "chỉ merge commit mới giữ" là mệnh đề SAI.
+        # Đo nó ở đây thay vì chỉ sửa câu chữ: một mệnh đề hẹp mà không có ca thì lần sau lại nới ra.
+        g("checkout", "-q", "-B", "main3", "main~1")
+        r_ff = g("merge", "-q", "--ff-only", "nhanh")
+        dung(r_ff.returncode == 0, f"KHÔNG ĐO ĐƯỢC: fast-forward hỏng — {r_ff.stderr.strip()[:120]}")
+        bang(to_tien(neo, "sau FAST-FORWARD"),
+             "land bằng FAST-FORWARD mà neo MẤT tư cách tổ tiên — mệnh đề của caveat sai chiều")
+        # TỰ KIỂM chính chốt ba trạng thái (`R9-F03`): hỏi quan hệ tổ tiên của một SHA KHÔNG TỒN
+        # TẠI ⇒ git thoát 128 ⇒ phải thành `LoiDungCa` (giàn giáo), KHÔNG thành "không phải tổ
+        # tiên". Nghĩ ra phép thử mà không chạy thì phép thử ấy không tồn tại.
+        try:
+            to_tien("0" * 40, "tự kiểm lỗi công cụ")
+        except LoiDungCa:
+            pass
+        else:
+            bang(False, "chốt ba trạng thái KHÔNG bắt được lỗi git 128 — nó đang đọc lỗi ĐO "
+                        "thành câu trả lời 'không phải tổ tiên'")
 
 
 _mri_that = bnv2._mri
@@ -2655,6 +2727,15 @@ def _dot_bien():
        lambda: _dot_bien_tep('            if vc not in hd["van_chuyen"]:', "            if False:"),
        "c44_bo_ba_provider_phai_KHOP_nguon_ke_hoach_va_hang_LECH_phai_doi_hanh_vi",
        "hàng launcher thôi QUYẾT ĐỊNH gì — witness đối xứng của `c44` mất vế TỪ CHỐI",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    # `R9-F02` — reviewer lượt 9: bỏ RIÊNG chặn null vẫn qua TOÀN suite (`48/48 · 62/62`, rc=0),
+    # vì `None` chưa có trong ma trận kiểu. Đột biến coi `transport: null` là "vắng mặt" — đúng
+    # hình dạng lỗ, không phải một `if False` tiện tay.
+    do("m61_transport_null_bi_coi_la_VANG_MAT",
+       lambda: _dot_bien_tep('        if "transport" in v:',
+                             '        if v.get("transport") is not None:'),
+       "c34_MOI_truong_attestation_phai_la_CHUOI_khong_chi_truthy",
+       "`transport: null` lọt vì bị gộp vào nhánh VẮNG — hành vi đã công bố mà không ai canh",
        doi_chung="c18_neo_git_DUNG_thi_qua")
 
     # R7-03 — TỰ KIỂM RIG: reviewer bơm mất hàng `_BE_MAT_BI_DANH` vào RIÊNG bản launcher mà rig

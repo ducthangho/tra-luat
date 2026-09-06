@@ -203,6 +203,32 @@ def _doi(expect: int, rc: int, err: bytes, msg: str) -> None:
         raise AssertionError(f"{msg}: đòi rc={expect}, được rc={rc}; stderr={_txt(err)!r}")
 
 
+# Head hợp lệ dùng cho các ca ĐO SỔ COMMENT. Nó KHÔNG phải chi tiết trang trí:
+# `transition --to reviewing` chặn thiếu `--head-sha` TRƯỚC khi gọi
+# `_tieu_thu_comment_id` (xem `packet_loop.py`), nên một ca quên head sẽ nhận
+# đúng `RC_TRACE` vì lý do KHÁC và xanh mà không đo gì.
+HEAD_HOP_LE = "0" * 39 + "1"
+
+
+def _doi_ly_do(expect: int, rc: int, err: bytes, phai_chua: str, msg: str) -> None:
+    """Đòi CẢ mã thoát LẪN lý do — neo mã trần là chốt rỗng.
+
+    VÌ SAO CÓ (cross-review lượt 4 `R4-05`, đo được): ba ca sổ comment gọi
+    `transition --to reviewing --comment-id …` mà KHÔNG cấp `--head-sha`. Lệnh
+    trả `RC_TRACE` ngay ở chốt head, TRƯỚC khi sổ comment được đụng tới; ba ca
+    chỉ so mã nên cả ba xanh. Đột biến thay `_tieu_thu_comment_id(...)` bằng
+    `{}` — tức GỠ HẲN cổng sổ comment — mà cả ba VẪN xanh. Chúng mang tên sổ
+    comment nhưng đang đo chốt head-sha.
+    """
+    if rc != expect:
+        raise AssertionError(f"{msg}: đòi rc={expect}, được rc={rc}; stderr={_txt(err)!r}")
+    t = _txt(err)
+    if phai_chua not in t:
+        raise AssertionError(
+            f"{msg}: rc đúng nhưng LÝ DO sai — đòi chứa {phai_chua!r}, stderr={t!r}. "
+            f"Mã thoát trùng nhau không chứng minh chốt nào đã chạy.")
+
+
 class Ctx:
     def __init__(self, script: Path, tmp: Path):
         self.script = script
@@ -998,8 +1024,9 @@ def case_comment_id_chua_dang_ky_bi_tu_choi(c: Ctx):
     rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
     _doi(0, rc, e, "begin-attempt")
     rc, _, e = run(c.script,
-                   ["transition", "--packet", 55, "--to", "reviewing", "--comment-id", "5258163128"], sd)
-    _doi(5, rc, e, "ID chưa ghi sổ phải bị từ chối")
+                   ["transition", "--packet", 55, "--to", "reviewing",
+                    "--comment-id", "5258163128", "--head-sha", HEAD_HOP_LE], sd)
+    _doi_ly_do(5, rc, e, "chưa có trong sổ", "ID chưa ghi sổ phải bị từ chối")
 
 
 def case_comment_id_dung_lai_bi_tu_choi(c: Ctx):
@@ -1039,8 +1066,9 @@ def case_comment_id_sai_transition_bi_tu_choi(c: Ctx):
                    ["record-post", "--packet", 55, "--for", "accepted", "--comment-id", "7770000002"], sd)
     _doi(0, rc, e, "record-post accepted")
     rc, _, e = run(c.script,
-                   ["transition", "--packet", 55, "--to", "reviewing", "--comment-id", "7770000002"], sd)
-    _doi(5, rc, e, "ID đăng ký cho transition khác không dùng chéo được")
+                   ["transition", "--packet", 55, "--to", "reviewing",
+                    "--comment-id", "7770000002", "--head-sha", HEAD_HOP_LE], sd)
+    _doi_ly_do(5, rc, e, "accepted", "ID đăng ký cho transition khác không dùng chéo được")
 
 
 def case_thieu_comment_id_chan_transition(c: Ctx):
@@ -1048,8 +1076,9 @@ def case_thieu_comment_id_chan_transition(c: Ctx):
     _doi(0, *c.init(sd)[0:1], b"", "init")
     rc, _, e = run(c.script, ["begin-attempt", "--packet", 55, "--provider", EXECUTOR], sd)
     _doi(0, rc, e, "begin-attempt")
-    rc, _, e = run(c.script, ["transition", "--packet", 55, "--to", "reviewing"], sd)
-    _doi(5, rc, e, "chưa đăng comment thì transition phải bị chặn")
+    rc, _, e = run(c.script,
+                   ["transition", "--packet", 55, "--to", "reviewing", "--head-sha", HEAD_HOP_LE], sd)
+    _doi_ly_do(5, rc, e, "thiếu --comment-id", "chưa đăng comment thì transition phải bị chặn")
 
 
 def case_record_post_id_sai_dang_bi_tu_choi(c: Ctx):

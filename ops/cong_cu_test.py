@@ -24,8 +24,32 @@ class BoQuaMoiTruong(Exception):
 def ca(fn):
     CA.append(fn); return fn
 
+class TinHieuChotCa(AssertionError):
+    """Tín hiệu CHỐT của một ca — CHỈ `bang()` phát ra nó.
+
+    VÌ SAO CÓ (cross-review lượt 4 `R4-04`, đo được, không phải lo xa): bộ chấm
+    đột biến cũ gom MỌI Exception thành "chết" rồi cấp tín dụng giết. Đo:
+    đột biến `t13_mat_requiredness_khi_tool_bien_mat` bỏ `**goc` nên aggregator
+    ném `KeyError: 'chinh_sach'`, tiến trình con chết với stdout RỖNG, và ca đích
+    chết ở `json.loads(out)` bằng `JSONDecodeError` — CHƯA TỪNG chạy tới `bang()`.
+    Runner vẫn in "ok … giết đúng". Tức mutant bị giết bởi một lỗi VÔ CAN.
+
+    Chốt đúng phải là thứ mã triển khai KHÔNG GIẢ ĐƯỢC. Một `AssertionError`
+    trần thì bất kỳ `except Exception: raise AssertionError(...)` nào cũng dựng
+    lên được — và `CLAUDE.md` ghi rằng bản vá vòng một của một bộ phân hạng khác
+    đã thua đúng cách ấy, bởi một dòng viết với ý định TỐT. Nên tín hiệu ở đây là
+    một LỚP RIÊNG, cộng dấu TÊN CA: assertion của ca KHÁC cũng là tín dụng giả.
+    """
+
+
+_CA_DANG_CHAY = None
+
+
 def bang(dk, msg):
-    if not dk: raise AssertionError(msg)
+    if not dk:
+        ex = TinHieuChotCa(msg)
+        ex.ca_nguon = _CA_DANG_CHAY
+        raise ex
 
 def chay(*args, env=None):
     p = subprocess.run([sys.executable, str(SCRIPT), *args], env=env, cwd=GOC,
@@ -422,7 +446,7 @@ DOT_BIEN = {
         "SCRIPT", _PHU, "t12_vang_chinh_sach_canary_mac_dinh_blocking"),
     "t13_mat_requiredness_khi_tool_bien_mat": ("ops/cong_cu.py",
         '        return {**goc, "trang_thai": KHONG_DO_DUOC, "chi_tiet": f"khong goi duoc \'{ten_chu}\'"}\n',
-        '        return {"ten": ten_canary, "trang_thai": KHONG_DO_DUOC, "chi_tiet": "mat tool"}  # đột biến\n',
+        '        return {**goc, "trang_thai": DAT, "chi_tiet": "mat tool"}  # đột biến\n',
         "SCRIPT", _PHU, "t13_actionlint_bien_mat_giua_probe_va_canary"),
     "t14_advisory_keo_tong": ("ops/cong_cu.py",
         '        if kq["chinh_sach"] == "advisory":\n', '        if False:  # đột biến\n',
@@ -451,17 +475,31 @@ DOT_BIEN = {
 }
 
 def _chay_1_ca(fn):
-    # Trả (trạng_thái, chi_tiết): qua | bo_qua (thiếu môi trường, KHÔNG tính
-    # là chết) | chet (ca đích PHẢI rơi vào đây).
+    """Trả (trạng_thái, chi_tiết) với BỐN trạng thái, không phải hai.
+
+    `giet_that`   — ca chết bằng CHỐT CỦA CHÍNH NÓ (`TinHieuChotCa` mang đúng tên ca).
+    `tin_dung_gia` — ca chết vì thứ KHÁC: crash, parse hỏng, fixture sai, hoặc một
+                    `AssertionError` trần do đường nào đó dựng lên. Đây KHÔNG phải
+                    bằng chứng đột biến bị chốt bắt, và không được đếm là giết.
+    `bo_qua`      — thiếu môi trường. `qua` — sống sót.
+    """
+    global _CA_DANG_CHAY
+    _CA_DANG_CHAY = fn.__name__
     try:
         fn()
         return "qua", None
     except BoQuaMoiTruong as ex:
         return "bo_qua", str(ex)
-    except AssertionError as ex:
-        return "chet", str(ex)
-    except Exception as ex:  # noqa: BLE001 — chết dưới đột biến là dữ liệu đo
-        return "chet", f"{type(ex).__name__}: {ex}"
+    except TinHieuChotCa as ex:
+        nguon = getattr(ex, "ca_nguon", None)
+        if nguon != fn.__name__:
+            # Chốt của ca KHÁC lọt vào đây: vẫn là tín dụng giả.
+            return "tin_dung_gia", f"chốt của ca khác ({nguon!r}): {ex}"
+        return "giet_that", str(ex)
+    except Exception as ex:  # noqa: BLE001 — chết dưới đột biến là DỮ LIỆU, không phải kết luận
+        return "tin_dung_gia", f"{type(ex).__name__}: {ex}"
+    finally:
+        _CA_DANG_CHAY = None
 
 def _do_ban_kinh(ten_dot_bien):
     tep, tim, thay, bp, phu_thuoc, ca_dich = DOT_BIEN[ten_dot_bien]
@@ -810,6 +848,54 @@ def python_alias_behavior_test() -> None:
              f"máy chỉ có python3 bị probe alias python chặn: rc={rc}\n{out}")
 
 
+
+def _tu_kiem_phan_hang() -> int:
+    """Ca tự kiểm CHO CHÍNH bộ phân hạng — bộ chấm cũng là mã, cũng sai được.
+
+    `CLAUDE.md` ghi một ca đã trả giá: bản vá vòng một của một bộ phân hạng khác
+    phân loại theo CHUỖI `AssertionError`, và thua vì trong bộ test có một
+    `except Exception as e: raise AssertionError(...)` viết với ý định ĐÚNG —
+    nó dựng lên đúng tín hiệu mà bộ phân hạng tin. Ca `d` dưới đây là phản chứng
+    cho đúng cái bẫy ấy: nếu ai đó hạ `TinHieuChotCa` xuống `AssertionError`
+    trần thì `d` phải ĐỎ.
+    """
+    import json as _json
+
+    def a_chot_that():
+        bang(False, "chốt của chính ca này")
+
+    def b_parse_hong():
+        _json.loads("")                      # JSONDecodeError — lỗi VÔ CAN
+
+    def c_thieu_khoa():
+        {}["chinh_sach"]                     # KeyError — đúng đường chết của R4-04
+
+    def d_wrapper_doi_kieu():
+        try:
+            {}["chinh_sach"]
+        except Exception as e:               # noqa: BLE001
+            raise AssertionError(f"bọc lại: {type(e).__name__}")   # Ý ĐỊNH TỐT, VẪN LÀ TÍN DỤNG GIẢ
+
+    def e_chot_cua_ca_khac():
+        ex = TinHieuChotCa("chốt mang tên ca khác")
+        ex.ca_nguon = "mot_ca_khac_hoan_toan"
+        raise ex
+
+    mong = {"a_chot_that": "giet_that", "b_parse_hong": "tin_dung_gia",
+            "c_thieu_khoa": "tin_dung_gia", "d_wrapper_doi_kieu": "tin_dung_gia",
+            "e_chot_cua_ca_khac": "tin_dung_gia"}
+    loi = 0
+    print(f"\nTỰ KIỂM BỘ PHÂN HẠNG ({len(mong)} ca):")
+    for fn in (a_chot_that, b_parse_hong, c_thieu_khoa, d_wrapper_doi_kieu, e_chot_cua_ca_khac):
+        tt, ct = _chay_1_ca(fn)
+        if tt != mong[fn.__name__]:
+            print(f"  ĐỎ  {fn.__name__}: mong {mong[fn.__name__]!r}, thực {tt!r} — {ct}")
+            loi += 1
+        else:
+            print(f"  ok  {fn.__name__} → {tt}")
+    return loi
+
+
 def main() -> int:
     batch_behavior_test()
     python_alias_behavior_test()
@@ -830,7 +916,7 @@ def main() -> int:
         print(f"  ĐỎ  {ten}: {ly}")
     print(f"\ncong_cu_test: {qua}/{len(CA) - len(bo_qua)} đạt; tổng={len(CA)}, bỏ qua={len(bo_qua)}")
 
-    loi_db = 0
+    loi_db = _tu_kiem_phan_hang()
     print(f"\nBÁN KÍNH ĐỘT BIẾN ({len(DOT_BIEN)} đột biến, mỗi ca đúng một):")
     for ten_db, cfg in DOT_BIEN.items():
         ca_dich = cfg[-1]
@@ -841,14 +927,22 @@ def main() -> int:
             loi_db += 1
             continue
         tt_dich = ket[ca_dich][0]
-        chet = sorted(t for t, (tt, _) in ket.items() if tt == "chet")
+        chet = sorted(t for t, (tt, _) in ket.items() if tt in ("giet_that", "tin_dung_gia"))
         oan = [t for t in chet if t != ca_dich]
         bk = f"{len(chet)}/{len(CA)}"
+        gia = sorted(t for t, (tt, _) in ket.items() if tt == "tin_dung_gia")
         if tt_dich == "bo_qua":
             print(f"  KHÔNG_ĐO_ĐƯỢC {ten_db}: đích '{ca_dich}' bị BỎ QUA — {ket[ca_dich][1]}")
             loi_db += 1
-        elif tt_dich != "chet":
+        elif tt_dich == "tin_dung_gia":
+            print(f"  ĐỎ  {ten_db}: TÍN DỤNG GIẢ — đích '{ca_dich}' chết KHÔNG PHẢI bằng chốt của nó: "
+                  f"{ket[ca_dich][1]}")
+            loi_db += 1
+        elif tt_dich != "giet_that":
             print(f"  ĐỎ  {ten_db}: đích '{ca_dich}' vẫn XANH ⇒ đột biến không giết được gì")
+            loi_db += 1
+        elif gia:
+            print(f"  ĐỎ  {ten_db}: ca {gia} chết bằng lỗi VÔ CAN (tín dụng giả) ⇒ bán kính không đọc được")
             loi_db += 1
         elif oan:
             print(f"  ĐỎ  {ten_db}: giết THÊM {oan} ngoài đích '{ca_dich}' (bán kính {bk}) ⇒ trói nhầm thứ")

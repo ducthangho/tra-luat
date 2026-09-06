@@ -1,4 +1,4 @@
-# ★ dev-side — r354: lược đồ biên nhận v2 có cổng sau 19 ngày làm luật suông (2026-09-06)
+# ★ dev-side — r355: lược đồ biên nhận v2 có cổng sau 19 ngày làm luật suông (2026-09-06)
 
 Cross-review codex trên PR #454 (`3d5eaeb`) ra một finding P2: biên nhận lượt 5 khai
 `assurance: cross_approved` mà thiếu **cả bốn** thứ `PROTOCOL §8` (dòng 453-458) đòi ở đích v2,
@@ -53,6 +53,73 @@ phải NỚI nó để chứa tên tấn công mới có răng.
 
 Nối vào `ci.yml` và đăng ký ở `ci_dang_ky_test.py` (22/22) — guard không nằm trên đường TỰ ĐỘNG
 thì guard chỉ là tài liệu.
+# ★ dev-side — r354: tái sinh RELEASE_MANIFEST sau khi PR #449 land (2026-09-06)
+
+`gate` master trên `3500369` (merge PR #449) **ĐỎ** ở bước `release-verify strict
+(lane LAND — manifest committed)`, `rc=2`, bốn tệp lệch sha256. Đây đúng bài học
+r238 mà `CLAUDE.md` §Quy ước deploy mục 5 đã ghi sẵn: đổi nội dung cây mà không tái
+sinh manifest thì **phiên deploy KẾ TIẾP ăn gate đỏ không phải do nó**.
+
+## Đo nền TRƯỚC khi nghi bản vá — và nền SẠCH, nên delta là của tôi
+
+Theo mục 7 (`gate đỏ ⇒ chạy lại trên origin/master sạch, so DELTA`), đo cả hai vế
+trong **một** lệnh, mỗi vế là một `git show` trên đúng commit:
+
+| tệp | trên `2ac970f` (master TRƯỚC merge) | trên `4951f55` (master SAU) |
+|---|---|---|
+| `CHANGELOG.md` | KHỚP | LỆCH `25a7ae03…` → `30802c1b…` |
+| `requirements.txt` | KHỚP | LỆCH `baa00d08…` → `402c04d9…` |
+| `scripts/tl_core/ops_misc.py` | KHỚP | LỆCH `8849d2b2…` → `142f7ad7…` |
+| `scripts/tl_selftest.py` | KHỚP | LỆCH `3ffabb08…` → `869c2f0b…` |
+
+Bốn tệp lệch là **đúng bốn tệp trong manifest mà PR #449 sửa nội dung** (PR còn sửa
+`.claude/dev/launcher_test.py` và `.claude/hooks/session-start.sh`, cả hai nằm ngoài
+gói phát hành nên không có trong manifest). Không tệp nào được thêm hay xoá:
+`expected_file_count 180 == checked_file_count 180`, `extra_files: []`,
+`missing_from_current_manifest: []`.
+
+**Sửa một lời khai sai của chính phiên này:** lúc chẩn đoán tôi nói `baa00d08…` là
+"băm cũ đã trôi từ trước". Không phải — phép đo trên `2ac970f` cho thấy nó KHỚP.
+Manifest sạch trước khi tôi merge; chính thay đổi nội dung của tôi làm nó cũ.
+
+## Vì sao lane PR không bắt được
+
+`ci.yml:532` gắn `if: github.ref == 'refs/heads/master'` cho bước này — lane WORKER
+sinh manifest TẠM từ chính cây nên nó **hấp thụ** mọi thay đổi nội dung. Đây là mặt
+thứ hai của bài học "PR xanh KHÔNG hàm ý master xanh" ở `CLAUDE.md`: lần trước là
+chân Windows, lần này là một BƯỚC chỉ tồn tại ở lane LAND. `98ed924` xanh 100% trên
+lane PR trong khi commit merge của nó làm master đỏ.
+
+## Bản vá — thuần tái sinh băm, KHÔNG chạm golden
+
+`python scripts/tl.py release-manifest --out RELEASE_MANIFEST.json`. Diff so bản
+committed đúng **22 dòng**: 4 cặp `size`/`sha256` của bốn tệp trên, cộng
+`total_bytes` + `package_hash` + `content_hash` tổng hợp. Không dòng nào thêm/bớt
+mục ⇒ số đếm kiểm kê KHÔNG đổi ⇒ **không phải ghi lại golden** (mục 5 chỉ đòi ghi
+lại golden khi số đếm đổi, và `references/golden/` không chứa `package_hash` nào).
+
+`release-manifest` tất định theo thiết kế — `determinism_note` trong chính tệp khai
+*"Manifest không chứa timestamp hay đường dẫn tuyệt đối; package_hash tính từ
+path,size,sha256 đã sort"* — nên bản vá này tái lập được từ cây.
+
+**Thứ tự bắt buộc:** ghi CHANGELOG TRƯỚC rồi mới tái sinh manifest. Ngược lại thì
+chính mục changelog này làm `CHANGELOG.md` lệch băm vừa ghi — bản vá tự phá.
+
+## Rủi ro đã nêu, và nó xảy ra trong vòng một giờ
+
+Bản đầu của mục này ghi: *"nếu một PR khác sửa nội dung tệp thuộc gói và merge trước
+thì manifest lại cũ ngay"*. PR #454 land đúng như thế — nó sửa `CHANGELOG.md` (tệp
+CÓ trong manifest) trong lúc bản vá còn nằm ở PR. Cửa sổ: khoảng một giờ.
+
+Nên phải nói cho đúng phạm vi: bản vá này **không** chặn được lớp lỗi, nó chỉ dọn
+một lần. Chừng nào lane PR còn không so cây với manifest committed — mà `PROTOCOL:710`
+cấm đúng điều đó, và packet #427 đóng bề mặt ấy sau một P1 thật ở #421 — thì mỗi lần
+sửa nội dung một tệp thuộc gói vẫn để lại master đỏ cho phiên kế tiếp. Đó là khoảng
+trống thiết kế, cần một quyết định riêng, KHÔNG phải thứ vá được trong PR này.
+
+Kèm một va chạm nhỏ đáng ghi: hai mục cùng mang số `r353` (bản này và bản của #454).
+Số r đánh theo phiên nên hai phiên song song sinh trùng là chuyện tất yếu, không phải
+sự cố; bản land trước giữ số, bản này lùi thành `r354`.
 
 # ★ dev-side — r353: bản vá chống "tín dụng giết giả" tự dính đúng bệnh nó chữa (2026-09-06)
 

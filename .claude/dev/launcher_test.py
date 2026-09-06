@@ -6435,12 +6435,22 @@ def r345_cac_phep_do_cuc_bo_van_dung():
             # nay xanh tren Ubuntu va do tren Windows THEO THIET KE CUA FIXTURE, khong
             # phai theo loi san pham: master do lien tuc tu khi #449 land (run
             # 34023635438, 34025725347) va tai hien duoc tai cho tren Windows.
-            # Nay dung `sys_platform == "khong_he_co"` — SAI tren MOI nen — va DUNG goi
+            # Nay dung mot MENH DE MAU THUAN — SAI theo CAU TAO, khong phu thuoc gia tri
+            # cua bien — va DUNG goi
             # `khong_he_ton_tai_r345` nhu hang "goi thieu han" ngay duoi. Hai hang ay khac
             # nhau DUNG MOT BIEN: cai marker. Nen go phep loc marker la hang nay lat
             # 0 -> 1 tren CA HAI nen — dot bien khoa dieu do o
             # `r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO`.
-            ("marker khong khop",          'khong_he_ton_tai_r345; sys_platform == "khong_he_co"\n', 0),
+            # r355b — cross-review lượt 1 (codex) P1-01: sentinel VẪN có một giá trị làm
+            # marker ĐÚNG. Đo được: `evaluate({"sys_platform": "khong_he_co"})` -> True.
+            # Đường ấy KHÔNG tới được qua hook (dòng 369 gọi `evaluate()` KHÔNG đối số,
+            # tức luôn dùng môi trường thật, mà `sys.platform` không bao giờ là chuỗi đó),
+            # nên rủi ro thực tế bằng 0. Vẫn đổi, vì một MÂU THUẪN đúng theo CẤU TẠO mạnh
+            # hơn một sentinel chỉ đúng chừng nào chưa ai đặt tên nền như vậy — đúng nếp
+            # "đảo danh sách CẤM thành danh sách CHO PHÉP" của kho. Đo lại cả bốn:
+            #   mac_dinh=False · ep khong_he_co=False · ep win32=False · ep linux=False
+            ("marker khong khop",
+             'khong_he_ton_tai_r345; sys_platform == "win32" and sys_platform != "win32"\n', 0),
             ("marker chua dau thang",      'pypdf; os_name == "posix#x"\n', 0),
             ("chu thich sau khoang trang", "pypdf>=3.0  # ghi chu\n", 0),
             ("URL tran toi host chet",     "http://127.0.0.1:9/x-1.0-py3-none-any.whl\n", 0),
@@ -6517,7 +6527,7 @@ def r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO():
         # nen bien duy nhat con lai la cai marker: dot bien nay do DUNG phep loc ay chu
         # khong do thu gi khac. Ca hai ve deu doc lap voi nen, nen no DO tren CA HAI nen.
         bang(_r345_chay(py, d, than.replace(neo_marker, "            if False:"),
-                        'khong_he_ton_tai_r345; sys_platform == "khong_he_co"\n',
+                        'khong_he_ton_tai_r345; sys_platform == "win32" and sys_platform != "win32"\n',
                         "--kiem-ban") == 1,
              "dot bien bo phep loc marker VAN XANH — ca marker khong do phep loc ay")
 

@@ -58,6 +58,31 @@ Chết bằng `TinHieuChotCa` và thông điệp nhắc đúng nhãn hàng ⇒ k
 Rà toàn bảng: **không hàng nào khác** có kỳ vọng phụ thuộc `sys_platform`/`os_name`
 của nền chạy.
 
+## Cross-review lượt 1 (codex) — `changes_requested`, P1 1 · P2 1, đã nhận cả hai
+
+**P1-01 — sentinel vẫn có MỘT giá trị làm marker ĐÚNG.** Đo được:
+`Requirement(...).marker.evaluate({"sys_platform": "khong_he_co"})` → `True`.
+
+Nói cho đúng phạm vi: đường ấy **không tới được qua hook** — `session-start.sh:369` gọi
+`evaluate()` **không đối số**, tức luôn dùng môi trường thật, mà `sys.platform` không bao giờ là
+chuỗi đó. Rủi ro thực tế bằng 0. Vẫn nhận, vì một **mâu thuẫn** đúng theo CẤU TẠO mạnh hơn
+một sentinel chỉ đúng chừng nào chưa ai đặt tên nền như vậy — cùng nếp *"danh sách CẤM không
+bao giờ đủ"*. Nay dùng `sys_platform == "win32" and sys_platform != "win32"`:
+
+| marker | mặc định | ép `khong_he_co` | ép `win32` | ép `linux` |
+|---|---|---|---|---|
+| sentinel (cũ) | False | **True** | False | False |
+| mâu thuẫn (mới) | False | **False** | False | False |
+
+Đo lại sau vá, **cùng băm `966a33ec3d9a4da1` trên cả hai nền**: ca đích QUA · ca đột biến QUA ·
+gỡ lọc marker ⇒ ĐỎ với thông điệp `marker khong khop: duoc 1, mong 0`, chết bằng `TinHieuChotCa`.
+
+**P2-01 — băm "sau" của phép A/B Linux KHÔNG neo vào `reviewed_sha`.** Đúng, và đã truy được
+nguyên nhân: `123529a6…` là tệp **trước khi đổi số `r354` → `r355`**; tệp tại `867dd858` là
+`b899cb29…`. Phản chứng: thay `r355`→`r354` trong byte của head cho lại đúng `123529a6…`.
+Phép A/B chạy trên một bản trung gian, nên **lời khai rộng hơn phép đo** — đúng lớp lỗi tệp này
+tố cáo nhiều nhất. Đã chạy lại A/B neo đúng exact head.
+
 ## NỢ ĐÃ ĐO, không chữa ở đây
 
 Hàng `("marker chua dau thang", 'pypdf; os_name == "posix#x"', 0)` **không thể đỏ**:

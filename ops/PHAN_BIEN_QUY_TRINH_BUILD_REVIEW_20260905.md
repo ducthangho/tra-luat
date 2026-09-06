@@ -1,19 +1,101 @@
 # Phản biện đề xuất "Cải tiến quy trình Build – Review – CI"
 
-- **Ngày đo:** bản 1 đo 05-09-2026 tại `c03a409`; bản 2–3 đo 06-09-2026 tại `07eb236`/`ba76a78` · **Người viết:** phiên Claude Code
-- **Trạng thái:** phản biện thiết kế, CHƯA thi công. Không sửa mã, không mở packet.
-- **Bản 2 — sau cross-review lượt 1 (06-09-2026).** Hai reviewer độc lập, hai hướng tấn công tách biệt.
-  Kết quả: **kết luận trung tâm bị ĐẢO**, 4+8 finding P1 được nhận sau khi phiên chính tự đo lại từng cái.
-  Những chỗ bản đầu sai được **giữ lại và ghi rõ**, không xoá — một phản biện giấu chỗ nó tự sai thì
-  không dùng được. Nhật ký ở §9.
-- **Phạm vi:** đề xuất 13 mục + 10 câu hỏi do chủ kho chuyển tới, dự kiến đưa song song cho Codex.
-
-Tài liệu này KHÔNG nhắc lại luật của protocol. Luật ở `docs/PROTOCOL_DA_PHIEN.md`; từ vựng ở `CONTEXT.md`.
-Chỗ nào tệp này lệch protocol thì TỆP NÀY sai.
+- **Kho:** `ducthangho/tra-luat` · **PR #452** · **Trạng thái:** phản biện thiết kế, CHƯA thi công.
+- **Bản 6**, sau **BỐN** lượt cross-review (2 cùng nền Claude, 2 khác nền codex).
+- **Cách đọc:** đọc **§1** là đủ để quyết định. Mọi thứ dưới `PHỤ LỤC` là **bằng chứng và lịch sử** —
+  giữ lại để kiểm được, không phải để đọc.
+- **Vì sao tách:** cross-review lượt 4 (`R4-02`, **P1**) đo được rằng bản trước **không có một kết luận
+  hiện hành nhất quán** — ba thứ cùng được gọi "việc số một", và phần khuyến nghị còn mang những con số
+  đã bị rút ở phần bằng chứng. Reviewer trả lời thẳng: *"còn giá trị làm hồ sơ bằng chứng, nhưng chưa đạt
+  mục tiêu giúp quyết định quy trình."* Bản này tách hai vai ấy ra.
 
 ---
 
-## 0. Bảng đo — mọi phản biện dưới đây neo vào đây
+# §1. TRANG QUYẾT ĐỊNH
+
+## 1.1 Kết luận về đề xuất 13 mục
+
+| | |
+|---|---|
+| **Bác, có phép đo** | **mục 2** (hoãn full CI) · **mục 11** (đưa kiểm tra đa nền vào pre-flight) · **mục 9** (nới cho `approve`) |
+| **Nên làm TRƯỚC mọi thứ khác** | **mục 5** — *tìm theo bug class, không theo từng finding* |
+| **Chưa quyết định được** | 9 mục còn lại. Chúng **đã được VIẾT** trong protocol/ADR/skill, nhưng **trạng thái cưỡng chế phần lớn là `chưa đo`** — và "đã có" một mình **KHÔNG** phải lý do bác |
+
+**Vì sao mục 5 đứng đầu, và đây là kết quả mạnh nhất của cả đợt:** chính tài liệu này là phản chứng thực
+nghiệm cho nó. Qua năm bản, tôi mắc **cùng một lớp lỗi năm lần** — đọc *sự CÓ MẶT* thành *KHẢ NĂNG*:
+
+> "có trong tài liệu ⇒ có hiệu lực" → "không có mã trong 6 tệp ⇒ không hiệu lực" →
+> "không khai `nang_tran` ⇒ không vượt trần" → "`spec_path` có ⇒ đã neo đặc tả" →
+> "bốn reviewer bỏ sót" (họ chưa từng thấy câu đó).
+
+Mỗi lần được chỉ, tôi sửa **đúng dòng được chỉ** và bỏ sót **cả lớp**. Không lần nào tự phát hiện.
+
+## 1.2 Việc cần làm — MỘT thứ tự duy nhất
+
+Tiêu chí xếp: **rẻ nhất trong số những việc MỞ KHOÁ được phép đo tiếp theo** đứng trước. Đây là
+**phán đoán**, không phải phép đo — chưa ai đo lợi ích của từng bước. Bản trước gọi tới **ba** thứ khác
+nhau là thứ phải làm đầu tiên; bảng dưới đây có **đúng một** thứ tự, và tôi khai thẳng rằng thứ tự ấy
+chưa được phép đo nào chứng minh.
+
+| # | Việc | Vì sao trước | Trạng thái |
+|---|---|---|---|
+| 1 | **Không có biên nhận thì không land** — nối `packet_loop.py bien-nhan` vào land gate | Lỗ ĐO ĐƯỢC: packet **#249** chạy **bốn** vòng cross-review, để lại **0** biên nhận, suite vẫn xanh. Mã cổng **đã có**, phản chứng **đã có**. Không có bước này thì mọi metric đều đo trên tập thiếu | chưa làm |
+| 2 | **Cổng NĂNG LỰC ĐO cho reviewer** — bundle bị từ chối nếu verdict mang khẳng định định lượng mà không kèm bằng chứng đã cấp mirror | `PROTOCOL §8` **đã là luật** (mirror + ghim `core.abbrev=7`) và có **0 cổng**. Lượt 3–4 cho thấy reviewer đo được thì tìm ra thứ reviewer chỉ-đọc không tìm ra | chưa làm |
+| 3 | **Thống nhất TỪ VỰNG mỏ neo đặc tả** (ba tầng: locator / định danh byte / đã xác minh) rồi mới cưỡng chế | Cưỡng chế một tên trong nhiều tên sẽ bắt oan lease đang làm đúng bằng tên khác. Xem §2 hàng 3 | chưa làm |
+| 4 | **ĐO Windows trước khi BẮT BUỘC Windows** — chạy một lượt `workflow_dispatch` để biết nó có hoàn tất trong trần 60 không | **0/3** lượt dispatch từng hoàn tất. Bắt buộc một phép kiểm chưa từng XANH là tự tạo deadlock | chưa làm |
+| 5 | **Mở rộng phép ĐO RĂNG sang các cổng còn lại** | Lượt 4 đo 6 cổng, tìm ra **2** cổng hỏng thật (`R4-04`, `R4-05`). Cả hai **đã vá** trong PR này. Kho còn nhiều cổng chưa ai đo | 2/N đã làm |
+
+**Việc gần như miễn phí, làm ngay:** thêm `types: [..., labeled]` vào `pull_request:` của `ci.yml`.
+Hiện `ci.yml` không khai `types:` nên gắn nhãn **không** bắn nó — trong khi `launcher-windows.yml` thì có.
+
+## 1.3 Giới hạn — cái gì tài liệu này KHÔNG chứng minh
+
+Đọc mục này trước khi trích bất kỳ con số nào ở phụ lục.
+
+- **Tỉ lệ VI PHẠM của mỗi luật: CHƯA AI ĐO.** Đây là biến đúng để xếp ưu tiên, và cả năm bản đều
+  chưa đo nó. Ba lần tôi thử thay thế nó bằng một proxy (*luật có được viết / có được mã hoá / có khoá
+  nào đó không*) và cả ba lần đều sai.
+- **"Điểm mù theo provider": KHÔNG ĐO ĐƯỢC.** Bản 4 khai *"4 bỏ sót so 1 bắt được"*; `R4-03` bác — hai
+  vế dùng **đầu vào khác nhau**. Muốn đo phải cho hai provider **cùng bundle, cùng nhiệm vụ, cùng SHA**,
+  và giữ cả lượt thất bại.
+- **Vật bị phản biện KHÔNG có hiện vật trong kho.** Đề xuất 13 mục chưa được đóng băng thành tệp có băm,
+  nên mọi câu *"đề xuất viết: …"* không kiểm được (`R4-02`). Muốn chắc thì đóng băng nó vào `ops/specs/`.
+- **Lượt 1–2 là `same_provider`**, chỉ lượt 3–4 là `cross_approved`. Xem phụ lục H.
+- **Ràng buộc phân công** (cấm reviewer tự soạn phản chứng) làm **hẹp độ phủ** của cả hai lượt khác nền.
+
+## 1.4 Cách kiểm trang này còn nhất quán không
+
+Trang quyết định phải cho **cùng một thứ tự** và **cùng một trạng thái** như phần bằng chứng. Phép kiểm:
+
+Chạy `ops/kiem_trang_quyet_dinh.sh`. Nó cắt §1 ra, **bỏ mọi khối mã** (nếu không thì chính lệnh kiểm
+sẽ khớp mẫu của nó — đã xảy ra ở lần viết đầu), rồi tìm các chuỗi **đã bị rút**. Phải trả **rỗng**;
+còn sót một chuỗi nghĩa là trang quyết định lại lệch khỏi bằng chứng — đúng bệnh `R4-02`.
+
+---
+
+# §2. Bằng chứng cho từng quyết định
+
+Mỗi hàng: điều được khai · số đo · lệnh tái hiện. Chi tiết ở phụ lục.
+
+| Khai | Số đo | Lệnh |
+|---|---|---|
+| Bác **mục 2**: CI không phải tài nguyên "dồi dào" | gate Linux **6,6′** (13-08) → **21m52s–25m14s** (29-08) = chậm **3,4×**; `ci.yml:63` tự khai *"gate 22 phút và đang lớn dần là nợ riêng"* | `sed -n '20,64p' .github/workflows/ci.yml` |
+| Bác **mục 11**: Linux không đo được Windows | `os.getpgid` làm suite **0/103** trên `windows-latest`; **5** lượt review Linux không thấy | `CLAUDE.md`, mục "API CHỈ CÓ TRÊN MỘT NỀN" |
+| Mỏ neo đặc tả — **ba tầng**, tổng 82 | **44** có định danh byte · **3** chỉ locator (cả ba khai `ban_thao_chua_duyet`) · **3** khoá `spec_path` = `null` · **32** không có gì · **"đã xác minh băm + thẩm quyền" = KHÔNG ĐO ĐƯỢC** | `grep -lE '^ *(spec_hash\|spec_sha256_required\|spec_sha256): *[^ ]' ops/leases/*.yaml \| wc -l` |
+| Trần vòng review **không có cổng** | `nang_tran` xuất hiện **0** lần trong `ops/lease_publish.py`; **1/82** lease có khối ấy; §20 ghi `ADR-0043 \| 0 cổng` | `grep -c nang_tran ops/lease_publish.py` |
+| Vòng review để lại **0 hiện vật** | packet **#249**: 4 vòng, 0 biên nhận, suite 98/98 xanh | docstring `cmd_bien_nhan` trong `.claude/dev/packet_loop.py` |
+| Cổng **có** răng — nhưng phải đo mới biết | Lượt 4 đo 6 cổng → tìm ra **2** hỏng thật. Sau khi vá: `cong_cu_test` **23/23 · bỏ qua=0 · lỗi đột biến=0**; `packet_loop` **278/278 · BỎ QUA=0**; đột biến gỡ cổng sổ comment ⇒ 3 ca **ĐỎ** (261/278) trong khi **trước** bản vá chúng vẫn XANH | `python3 ops/cong_cu_test.py` · `python3 .claude/dev/packet_loop_test.py` |
+| Chốt trong kho **không tự chứng nhận được** | `.claude/dev/duyet_danh_tinh.py`: *"mọi chốt dựng trong kho đều là chốt chủ kho tự dựng cho chính mình"*; cổng chạy trên runner GitHub là **cơ chế đầu tiên** không tự chứng nhận | `sed -n '1,12p' .claude/dev/duyet_danh_tinh.py` |
+
+---
+
+# PHỤ LỤC
+
+Từ đây trở xuống là **bằng chứng và lịch sử**. Không cần đọc để quyết định.
+Nguồn có thẩm quyền của mỗi lượt review là tệp verdict + biên nhận trong `ops/reviews/`, không phải
+bản tóm ở đây.
+
+## A. Bảng đo đầy đủ
 
 Đo trên chính kho, tại `c03a409`. Lệnh tái hiện ghi kèm để người đọc không phải tin lời khai.
 
@@ -65,103 +147,7 @@ thay vì THẨM QUYỀN*. Ghi lại thay vì xoá, vì một phản biện giấ
 
 ---
 
-## 1. Kết luận ngắn — BẢN 3, sau HAI lượt cross-review
-
-**Ba bản, ba biến, hai bản đầu đo sai biến.**
-
-| bản | đo cái gì | kết quả |
-|---|---|---|
-| 1 | luật có được **VIẾT** không | sai — nhầm "có trong tài liệu" với "đang có hiệu lực" |
-| 2 | luật có được **MÃ HOÁ** không | sai — và sai theo cách trớ trêu hơn (dưới) |
-| **3** | luật có bị **VI PHẠM** không | đo được từ 82 lease + 57 biên nhận |
-
-**Bản 1 sai** như đã ghi: nó bác 9 mục bằng lý lẽ *"đã có rồi"* mà chưa hề tra xem chúng có được cưỡng chế
-không. Finding ấy đứng nguyên.
-
-**Bản 2 sửa quá tay, và cross-review lượt 2 bắt bằng ba phản chứng độc lập:**
-
-1. **Bằng chứng KHÔNG GIAO với kết luận.** Bản 2 trưng bảng 8 ADR `0 cổng` để đỡ câu *"9 mục ấy phần lớn
-   0 cổng"*. Nhưng **không mục nào trong 9 mục neo vào bất kỳ ADR nào trong 8 cái đó** — chúng neo vào
-   §10.1, §3.2, §12, `PROTOCOL:198`, `cross-review/SKILL.md`, và **ADR-0036**, mà §20 xếp ADR-0036 là
-   `có nhắc: packet_loop.py×29`. Tôi đo phân bố trên tập ADR rồi khai kết luận về tập "9 mục"; giao của
-   hai tập là **rỗng**.
-2. **Một dòng của bảng ấy SAI TẠI HEAD.** §20 ghi `ADR-0038 | 0 cổng`. Đo: `ops/lease_publish.py:189`
-   có cổng thật, fail-closed, **7** ca phản chứng `RC_LOP`, ghim băm trong workflow — và nó land
-   **23-08-2026**, đúng **một ngày sau** mốc `22-08-2026` mà §20 tự ghi ở đầu cột. Tôi dùng một phép đo
-   **có ghi ngày** mà không kiểm ngày.
-3. **Tiền đề bị chính §0 của tệp này bác** — nhưng **KHÔNG mạnh như bản 3 đã viết**; xem ngay dưới.
-
-**BẢN 3 PHẠM LẠI CÙNG MỘT LỚP LỖI, LẦN THỨ TƯ — cross-review lượt 3 (codex, KHÁC NỀN) bắt.**
-
-Bản 3 viết: *"Luật không cổng vẫn ràng buộc được, ở mức 61–99%"*, dựa trên hai tử số **50/82** và
-**81/82**. Cả hai đếm **sự VẮNG MẶT của một khoá thành TUÂN THỦ**:
-
-- **81/82 = 82 − 1** lấy "không khai `nang_tran`" làm "không vượt trần". Không khai có **ít nhất hai**
-  nghĩa: *không cần nâng*, hoặc *đã nới mà thiếu khai báo*. Đo trường liên quan trực tiếp:
-  **41** lease **không khai** `review_rounds_limit` · **23** khai `2` · **18** khai **>2**, và
-  **17/18** trong số ấy **không có** `nang_tran`; **6** lease tự ghi đã dùng **>2** vòng.
-- **50/82** gộp `spec_path` vào "mỏ neo", trong khi **3** lease dùng nó cho **bản thảo chưa duyệt** (cố ý
-  không neo) và **3** lease có khoá ấy với giá trị **`null`**.
-
-**Và đây là chỗ phải nói cho đúng, kẻo lại sai theo chiều ngược — đúng lỗi bản 2 đã mắc:**
-17–18 **KHÔNG** được đọc thành "17–18 vi phạm". Còn ngày hiệu lực của ADR, miễn trừ và thẩm quyền, đơn
-vị đếm vòng, và nhiều lease thuộc cùng một việc. Trạng thái đúng của phần lớn quần thể là **CHƯA ĐỦ
-BẰNG CHỨNG** — ô thứ ba, không phải một trong hai ô kia.
-
-Nên câu *"luật không cổng vẫn ràng buộc được 61–99%"* **bị rút**. Thứ còn đứng: `0 cổng` **không** đủ
-để kết luận "không được cưỡng chế" (bản 2 sai), nhưng cũng **không** có phép đo nào hiện có đỡ được
-mệnh đề ngược. Cả hai chiều đều là **chưa đo**.
-
-Và `0 cổng` là **9/30 = 30%** của bảng §20 (15 `có nhắc`, 6 `chưa đo`) — **thiểu số**, không phải "phần lớn".
-
-**Hình dạng của cái sai đáng nhớ hơn cái sai.** Bản 1 suy *"có trong tài liệu ⇒ có hiệu lực"*. Bản 2 suy
-*"không có mã trong 6 tệp ⇒ không hiệu lực"*. Đó là **cùng một phép suy một chiều từ sự CÓ MẶT sang KHẢ
-NĂNG**, chỉ đảo dấu. Bản 2 phạm lại chính lỗi nó vừa đặt tên, **trong câu dùng để đặt tên nó**.
-
-### Biến đúng, và nó rẻ
-
-Với mỗi luật, đo **tỉ lệ vi phạm trên hiện vật** (lease · biên nhận · PR), không đo `grep` trong 6 tệp.
-Ba ô, không phải hai:
-
-| ô | nghĩa | trạng thái đo được hôm nay |
-|---|---|---|
-| có cổng | cưỡng chế bằng mã | `ADR-0038` — 13/13 lease `schema_version: 2` tuân |
-| không cổng **nhưng tuân** | luật sống bằng kỷ luật | **CHƯA CHỨNG MINH ĐƯỢC** — hai tử số bản 3 dùng đều đếm vắng mặt thành tuân (lượt 3, `N2`) |
-| không cổng **và có vi phạm đo được** | việc cần làm | chưa ai đo |
-| **chưa đủ bằng chứng** | thiếu ngày hiệu lực / thẩm quyền / đơn vị đếm | **ô bản 3 BỎ QUÊN** — và nó chứa phần lớn quần thể (41/82 không khai limit) |
-
-Cộng một ô nữa mà lượt 3 nêu và bản 3 cũng bỏ: **có cổng nhưng CHƯA KIỂM ĐỘ PHỦ/RĂNG**. "Có cổng"
-không phải lý do loại một luật khỏi danh sách việc.
-
-Chỉ ô thứ ba là việc. Đó là trục duy nhất khiến chữ *"theo thứ tự rủi ro"* có nghĩa, và **cả ba bản đều
-chưa đo nó**.
-
-### Điều CẢ BA bản đều im lặng, và nó quyết định giá trị của mọi MVP
-
-`.claude/dev/duyet_danh_tinh.py` khai thẳng, có ngày, có packet:
-
-> *"phiên chạy bằng credential CỦA CHỦ KHO, nên **mọi chốt dựng trong kho đều là chốt chủ kho tự dựng cho
-> chính mình** — `guard --action merge` chặn một NHÃN VAI, không chặn một THẨM QUYỀN. Cổng này chạy trên
-> RUNNER CỦA GITHUB bằng `GITHUB_TOKEN`, KHÔNG bằng credential của phiên… Đó là **cơ chế đầu tiên ở đây
-> không tự chứng nhận**."*
-
-Nên *"biến luật thành cổng"* **chưa phải việc thứ ba**. Việc thứ ba là làm cho cổng ràng buộc được **chính
-người dựng ra nó** — nửa ngoài kho (danh tính chạy-việc khác admin, `master` siết không-bypass), đã có
-runbook `ops/RUNBOOK_TACH_DANH_TINH_GITHUB.md` và **còn treo**. Chừng nào nửa ấy chưa xong, mọi cổng trong
-kho là **khuyến nghị**, và bốn MVP dưới đây có giá trị đúng bằng kỷ luật của người chạy chúng.
-
-Trớ trêu, và kiểm được: cổng đã chặn PR chứa chính tệp này suốt phiên — `duyet khac danh tinh` — **là cổng
-đầu tiên ấy**. Câu trả lời cho câu hỏi tài liệu đặt ra nằm ngay trên cái PR mang nó.
-
-### Ba mục vẫn nên bác — lý do đã lọc lại
-
-Chỉ giữ mục nào **không** dựa vào công thức *"đã có ⇒ bác"*: mục **2** và **11** (bác bằng phép đo hành vi,
-xem F1/F2), mục **9** (bác vì đổi nghĩa một giá trị canon **có mã cưỡng chế** — `CHUYEN_HOP_LE["blocked"]
-= ()`). Các mục 1, 4, 13 trước đây bị bác vì *"trùng lặp"* nay hạ xuống **CHƯA QUYẾT ĐỊNH ĐƯỢC**: chúng neo
-vào §10.1/§12, mà §20 không có ô cổng nào cho hai mục ấy. Mục 7, 8, 10 giữ nguyên lý do bác vì lý do thật
-là **va chạm từ vựng**, và cái đó có cổng đỏ được thật (`RC_DOCTRINE = 6`, `doctrine-scan`).
-
-## 2. Đối chiếu 13 mục với protocol đang hiệu lực
+## B. Đối chiếu 13 mục với protocol đang hiệu lực
 
 | Mục đề xuất | Đã có? | Ở đâu | Nhận xét |
 |---|---|---|---|
@@ -181,7 +167,7 @@ là **va chạm từ vựng**, và cái đó có cổng đỏ được thật (`
 
 ---
 
-## 3. Sáu phản biện có phản chứng đo được
+## C. Sáu phản biện có phản chứng đo được
 
 ### F1 — Tiền đề chi phí của mục 2 SAI theo phép đo, và nó tối ưu nhầm tài nguyên
 
@@ -352,7 +338,7 @@ trần', mà là không có bộ đếm nào"*. Metric sống trong văn xuôi t
 
 ---
 
-## 4. Failure mode đề xuất CHƯA nêu (câu hỏi 4)
+## D. Failure mode đề xuất CHƯA nêu (M1–M7)
 
 **M1 — Lượt review chết không để lại verdict.** Đo trên packet #298: **3 trong 4 lượt không sinh verdict**
 — lượt 1 có verdict nhưng không ai ghi ra tệp; lượt 2 và 3 **bị bộ lọc nội dung của nền cắt giữa chừng**.
@@ -406,7 +392,7 @@ kê giới hạn này.
 
 ---
 
-## 5. Trả lời trực tiếp 10 câu hỏi
+## E. Trả lời trực tiếp 10 câu hỏi
 
 1. **Giữ:** mục 5 (bug class) — mục giá trị nhất; mục 12 (regression test từ finding), nâng thành cổng
    máy đo được; mục 6 phần *phân loại* (với ba nhánh, xem F5); danh mục kiểm tra của mục 11 (giữ danh mục,
@@ -504,7 +490,7 @@ kê giới hạn này.
 
 ---
 
-## 6. Điều tệp này KHÔNG đo được (nói thẳng, không lấp)
+## F. Điều tệp này KHÔNG đo được
 
 - **Số vòng review trung bình mỗi packet: KHÔNG ĐO ĐƯỢC.** `luot` chỉ có ở 7/57 biên nhận. Tiền đề của
   cả đề xuất (*"số vòng đang tăng cao"*) vì vậy **chưa được kiểm** — nó có thể đúng, nhưng hôm nay nó là
@@ -529,7 +515,7 @@ kê giới hạn này.
 
 ---
 
-## 7. Ghi chú về chính cách đặt câu hỏi
+## G. Ghi chú về chính cách đặt câu hỏi
 
 Chủ kho đề nghị đưa cùng bản này cho Claude và Codex độc lập rồi gộp hai bản phản biện. **Hướng đúng**,
 nhưng có một bẫy đã đo được: cấp cho reviewer **một tài liệu văn xuôi** thì thu về **soát chính tả** —
@@ -544,7 +530,7 @@ Và **nguồn có thẩm quyền là TỆP NÀY trong kho**, có băm. Bản chi
 
 ---
 
-## 8. Mức assurance của chính tệp này — `same_provider`, KHÔNG phải `cross_approved`
+## H. Mức assurance và xuất xứ của từng lượt review
 
 Nói thẳng vì §8 protocol tồn tại đúng để chặn kiểu nhập nhèm này. Cross-review lượt 1 chạy bằng **hai phiên
 Claude độc lập**, không phải codex. Lý do là phép đo, không phải lựa chọn: `codex` trong container này trả
@@ -560,7 +546,105 @@ Khi khôi phục được codex, chạy lại đúng bộ prompt ấy qua `launc
 
 ---
 
-## 9. Nhật ký cross-review — cái gì bị lật
+## I. Các kết luận CŨ đã bị lật (giữ để tra, ĐỪNG trích như đang hiệu lực)
+
+### Bản 3 → bản 5, từng bước bị lật
+
+**Ba bản, ba biến, hai bản đầu đo sai biến.**
+
+| bản | đo cái gì | kết quả |
+|---|---|---|
+| 1 | luật có được **VIẾT** không | sai — nhầm "có trong tài liệu" với "đang có hiệu lực" |
+| 2 | luật có được **MÃ HOÁ** không | sai — và sai theo cách trớ trêu hơn (dưới) |
+| **3** | luật có bị **VI PHẠM** không | đo được từ 82 lease + 57 biên nhận |
+
+**Bản 1 sai** như đã ghi: nó bác 9 mục bằng lý lẽ *"đã có rồi"* mà chưa hề tra xem chúng có được cưỡng chế
+không. Finding ấy đứng nguyên.
+
+**Bản 2 sửa quá tay, và cross-review lượt 2 bắt bằng ba phản chứng độc lập:**
+
+1. **Bằng chứng KHÔNG GIAO với kết luận.** Bản 2 trưng bảng 8 ADR `0 cổng` để đỡ câu *"9 mục ấy phần lớn
+   0 cổng"*. Nhưng **không mục nào trong 9 mục neo vào bất kỳ ADR nào trong 8 cái đó** — chúng neo vào
+   §10.1, §3.2, §12, `PROTOCOL:198`, `cross-review/SKILL.md`, và **ADR-0036**, mà §20 xếp ADR-0036 là
+   `có nhắc: packet_loop.py×29`. Tôi đo phân bố trên tập ADR rồi khai kết luận về tập "9 mục"; giao của
+   hai tập là **rỗng**.
+2. **Một dòng của bảng ấy SAI TẠI HEAD.** §20 ghi `ADR-0038 | 0 cổng`. Đo: `ops/lease_publish.py:189`
+   có cổng thật, fail-closed, **7** ca phản chứng `RC_LOP`, ghim băm trong workflow — và nó land
+   **23-08-2026**, đúng **một ngày sau** mốc `22-08-2026` mà §20 tự ghi ở đầu cột. Tôi dùng một phép đo
+   **có ghi ngày** mà không kiểm ngày.
+3. **Tiền đề bị chính §0 của tệp này bác** — nhưng **KHÔNG mạnh như bản 3 đã viết**; xem ngay dưới.
+
+**BẢN 3 PHẠM LẠI CÙNG MỘT LỚP LỖI, LẦN THỨ TƯ — cross-review lượt 3 (codex, KHÁC NỀN) bắt.**
+
+Bản 3 viết: *"Luật không cổng vẫn ràng buộc được, ở mức 61–99%"*, dựa trên hai tử số **50/82** và
+**81/82**. Cả hai đếm **sự VẮNG MẶT của một khoá thành TUÂN THỦ**:
+
+- **81/82 = 82 − 1** lấy "không khai `nang_tran`" làm "không vượt trần". Không khai có **ít nhất hai**
+  nghĩa: *không cần nâng*, hoặc *đã nới mà thiếu khai báo*. Đo trường liên quan trực tiếp:
+  **41** lease **không khai** `review_rounds_limit` · **23** khai `2` · **18** khai **>2**, và
+  **17/18** trong số ấy **không có** `nang_tran`; **6** lease tự ghi đã dùng **>2** vòng.
+- **50/82** gộp `spec_path` vào "mỏ neo", trong khi **3** lease dùng nó cho **bản thảo chưa duyệt** (cố ý
+  không neo) và **3** lease có khoá ấy với giá trị **`null`**.
+
+**Và đây là chỗ phải nói cho đúng, kẻo lại sai theo chiều ngược — đúng lỗi bản 2 đã mắc:**
+17–18 **KHÔNG** được đọc thành "17–18 vi phạm". Còn ngày hiệu lực của ADR, miễn trừ và thẩm quyền, đơn
+vị đếm vòng, và nhiều lease thuộc cùng một việc. Trạng thái đúng của phần lớn quần thể là **CHƯA ĐỦ
+BẰNG CHỨNG** — ô thứ ba, không phải một trong hai ô kia.
+
+Nên câu *"luật không cổng vẫn ràng buộc được 61–99%"* **bị rút**. Thứ còn đứng: `0 cổng` **không** đủ
+để kết luận "không được cưỡng chế" (bản 2 sai), nhưng cũng **không** có phép đo nào hiện có đỡ được
+mệnh đề ngược. Cả hai chiều đều là **chưa đo**.
+
+Và `0 cổng` là **9/30 = 30%** của bảng §20 (15 `có nhắc`, 6 `chưa đo`) — **thiểu số**, không phải "phần lớn".
+
+**Hình dạng của cái sai đáng nhớ hơn cái sai.** Bản 1 suy *"có trong tài liệu ⇒ có hiệu lực"*. Bản 2 suy
+*"không có mã trong 6 tệp ⇒ không hiệu lực"*. Đó là **cùng một phép suy một chiều từ sự CÓ MẶT sang KHẢ
+NĂNG**, chỉ đảo dấu. Bản 2 phạm lại chính lỗi nó vừa đặt tên, **trong câu dùng để đặt tên nó**.
+
+### Biến đúng, và nó rẻ
+
+Với mỗi luật, đo **tỉ lệ vi phạm trên hiện vật** (lease · biên nhận · PR), không đo `grep` trong 6 tệp.
+Ba ô, không phải hai:
+
+| ô | nghĩa | trạng thái đo được hôm nay |
+|---|---|---|
+| có cổng | cưỡng chế bằng mã | `ADR-0038` — 13/13 lease `schema_version: 2` tuân |
+| không cổng **nhưng tuân** | luật sống bằng kỷ luật | **CHƯA CHỨNG MINH ĐƯỢC** — hai tử số bản 3 dùng đều đếm vắng mặt thành tuân (lượt 3, `N2`) |
+| không cổng **và có vi phạm đo được** | việc cần làm | chưa ai đo |
+| **chưa đủ bằng chứng** | thiếu ngày hiệu lực / thẩm quyền / đơn vị đếm | **ô bản 3 BỎ QUÊN** — và nó chứa phần lớn quần thể (41/82 không khai limit) |
+
+Cộng một ô nữa mà lượt 3 nêu và bản 3 cũng bỏ: **có cổng nhưng CHƯA KIỂM ĐỘ PHỦ/RĂNG**. "Có cổng"
+không phải lý do loại một luật khỏi danh sách việc.
+
+Chỉ ô thứ ba là việc. Đó là trục duy nhất khiến chữ *"theo thứ tự rủi ro"* có nghĩa, và **cả ba bản đều
+chưa đo nó**.
+
+### Điều CẢ BA bản đều im lặng, và nó quyết định giá trị của mọi MVP
+
+`.claude/dev/duyet_danh_tinh.py` khai thẳng, có ngày, có packet:
+
+> *"phiên chạy bằng credential CỦA CHỦ KHO, nên **mọi chốt dựng trong kho đều là chốt chủ kho tự dựng cho
+> chính mình** — `guard --action merge` chặn một NHÃN VAI, không chặn một THẨM QUYỀN. Cổng này chạy trên
+> RUNNER CỦA GITHUB bằng `GITHUB_TOKEN`, KHÔNG bằng credential của phiên… Đó là **cơ chế đầu tiên ở đây
+> không tự chứng nhận**."*
+
+Nên *"biến luật thành cổng"* **chưa phải việc thứ ba**. Việc thứ ba là làm cho cổng ràng buộc được **chính
+người dựng ra nó** — nửa ngoài kho (danh tính chạy-việc khác admin, `master` siết không-bypass), đã có
+runbook `ops/RUNBOOK_TACH_DANH_TINH_GITHUB.md` và **còn treo**. Chừng nào nửa ấy chưa xong, mọi cổng trong
+kho là **khuyến nghị**, và bốn MVP dưới đây có giá trị đúng bằng kỷ luật của người chạy chúng.
+
+Trớ trêu, và kiểm được: cổng đã chặn PR chứa chính tệp này suốt phiên — `duyet khac danh tinh` — **là cổng
+đầu tiên ấy**. Câu trả lời cho câu hỏi tài liệu đặt ra nằm ngay trên cái PR mang nó.
+
+### Ba mục vẫn nên bác — lý do đã lọc lại
+
+Chỉ giữ mục nào **không** dựa vào công thức *"đã có ⇒ bác"*: mục **2** và **11** (bác bằng phép đo hành vi,
+xem F1/F2), mục **9** (bác vì đổi nghĩa một giá trị canon **có mã cưỡng chế** — `CHUYEN_HOP_LE["blocked"]
+= ()`). Các mục 1, 4, 13 trước đây bị bác vì *"trùng lặp"* nay hạ xuống **CHƯA QUYẾT ĐỊNH ĐƯỢC**: chúng neo
+vào §10.1/§12, mà §20 không có ô cổng nào cho hai mục ấy. Mục 7, 8, 10 giữ nguyên lý do bác vì lý do thật
+là **va chạm từ vựng**, và cái đó có cổng đỏ được thật (`RC_DOCTRINE = 6`, `doctrine-scan`).
+
+## J. Nhật ký cross-review — cái gì bị lật qua năm bản
 
 ### Lượt 1 (trên `07eb236`)
 

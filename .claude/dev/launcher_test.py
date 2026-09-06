@@ -6429,7 +6429,7 @@ def r345_cac_phep_do_cuc_bo_van_dung():
         ca_ds = [
             ("ban thoa",                   "pypdf>=3.0\n", 0),
             ("lech ban",                   "pypdf>=4.0\n", 1),
-            # r355 — KY VONG CUA FIXTURE KHONG DUOC PHU THUOC NEN CHAY.
+            # r356 — KY VONG CUA FIXTURE KHONG DUOC PHU THUOC NEN CHAY.
             # Ban truoc viet 'pywin32; sys_platform == "win32"' va mong 0. Marker ay DUNG
             # tren windows-latest, nen pywin32 THAT SU bi doi, venv khong co no => 1. Ca
             # nay xanh tren Ubuntu va do tren Windows THEO THIET KE CUA FIXTURE, khong
@@ -6441,7 +6441,7 @@ def r345_cac_phep_do_cuc_bo_van_dung():
             # nhau DUNG MOT BIEN: cai marker. Nen go phep loc marker la hang nay lat
             # 0 -> 1 tren CA HAI nen — dot bien khoa dieu do o
             # `r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO`.
-            # r355b — cross-review lượt 1 (codex) P1-01: sentinel VẪN có một giá trị làm
+            # r356b — cross-review lượt 1 (codex) P1-01: sentinel VẪN có một giá trị làm
             # marker ĐÚNG. Đo được: `evaluate({"sys_platform": "khong_he_co"})` -> True.
             # Đường override ấy KHÔNG do caller của hook cung cấp (dòng 369 gọi
             # `evaluate()` KHÔNG đối số), và CHƯA chứng minh được lỗi reachable trong đường
@@ -6498,7 +6498,7 @@ def r345_lop_tham_import_van_co_rang():
 def r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO():
     """Ba đột biến, mỗi cái nhắm một phép đo cục bộ. Không có chúng thì ca trên đo gì?
 
-    r355 thêm cái thứ ba — phép lọc environment marker. Trước đó hàng "marker khong khop"
+    r356 thêm cái thứ ba — phép lọc environment marker. Trước đó hàng "marker khong khop"
     KHÔNG có đột biến nào, và đó chính là cách nó trôi thành một kỳ vọng phụ thuộc nền mà
     không ai thấy: hàng ấy xanh trên Ubuntu vì marker SAI ở đó, chứ không vì hook lọc đúng.
     Hai lý do khác nhau cho cùng một con số trên MỘT nền — chỉ nền KIA tách được chúng, và
@@ -6525,7 +6525,7 @@ def r345_dot_bien_ba_phep_do_cuc_bo_lam_ca_dich_DO():
                         "definitely_not_installed_r345 @ http://127.0.0.1:9/x.whl\n",
                         "--kiem-ban") == 0,
              "dot bien bo phep kiem VANG MAT VAN DO — ca vang mat khong do phep kiem ay")
-        # r355 — RANG cho hang "marker khong khop". Go phep loc marker thi goi VANG MAT
+        # r356 — RANG cho hang "marker khong khop". Go phep loc marker thi goi VANG MAT
         # phai lo ra => 1. Hang ay va hang "goi thieu han" dung CHUNG mot goi vang mat,
         # nen bien duy nhat con lai la cai marker: dot bien nay do DUNG phep loc ay chu
         # khong do thu gi khac. Ca hai ve deu doc lap voi nen, nen no DO tren CA HAI nen.

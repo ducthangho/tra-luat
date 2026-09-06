@@ -1,0 +1,110 @@
+schema_version: 2
+event: executor_lease_granted
+
+# ── BA Ô CHỦ KHO ĐIỀN, không ai khác điền được ──────────────────────────────────────
+# `packet_issue`  : số hiệu Issue sau khi đăng (phải là ISSUE, không phải PR).
+# `granted_by`    : `ducthangho` — `record-lease` TỪ CHỐI tên provider (`claude`/`codex`).
+# `granted_on_instruction`: dấu vết BỀN của uỷ quyền (URL/ID comment cấp lease).
+packet_issue:
+granted_by:
+granted_on_instruction:
+# ───────────────────────────────────────────────────────────────────────────────────
+
+packet_id: GATE-TACH-JOB-CAT-CHI-PHI
+revision: 1
+generation: 1
+lease_id: gate-tach-job-cat-chi-phi-exec-1-claude-20260906
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+environment: cloud
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md
+spec_sha256: 38f69d747f93786df58eaf61629ff570660e6502ad45e233eb933526ec99ce8c
+spec_hash: 38f69d747f93786df58eaf61629ff570660e6502ad45e233eb933526ec99ce8c
+
+write_set:
+  - .github/workflows/ci.yml
+
+branch: claude/gate-tach-job-cat-chi-phi
+branch_ownership: exclusive
+target_branch_neu_land: master
+base_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+start_from_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+reviewed_sha_required: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+# MẶC ĐỊNH 24 giờ, KHÔNG phải phép đo — chủ kho đặt lại tại lúc cấp.
+leased_at_utc: '2026-09-06T18:30:00Z'
+lease_expires_at_utc: '2026-09-07T18:30:00Z'
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+# KHÔNG có `thay_the_cho`: đo 17:46Z 06-09-2026, `ai-dang-giu .github/workflows/ci.yml` ⇒
+# `NGƯỜI_GIỮ 0: không có`. Packet này KHÔNG giao write set với ba packet mutant-Windows nên
+# chạy song song được với chúng.
+
+ly_do_cap: >-
+  Nợ do chính `ci.yml:63` tự khai: "NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN: gate 22 phút và đang
+  lớn dần là nợ riêng". Khi #456 được soạn, nợ ấy CHƯA BÀN ĐƯỢC vì tổng thời gian Windows
+  thật chưa ai đo — job luôn bị cắt ở trần. #456 đã land và LẦN ĐẦU sinh ra số đo ấy.
+  Đo run 34045664423 (nhánh, head `426bfc0`) lúc 17:41Z và run 34048685345 (master, head
+  `1b3caa1`, đã chạy trọn) lúc 18:10Z 06-09-2026: Windows 43,20p `success` 43/43 (nhánh) ·
+  42,28p `success` 43/43 (master). Biên dưới trần 60: 16,80p (nhánh) · 17,72p (master) — mỏng.
+  Hai bước nặng nhất = 63,5 % chi phí Windows (`test registry` 17,70 = 41,0 % ·
+  `packet-loop selftest` 9,70 = 22,5 %). Chênh job − Σbước = 0,03 phút ⇒ không có chi phí ẩn
+  ngoài các bước; mọi khoản cắt phải cắt vào một bước có tên.
+  "Bỏ bước trùng" ĐÃ ĐO và KHÔNG CÓ: 39 bước khai, 0 bước có thân `run` trùng nhau (17:59Z).
+  Tách ba job ⇒ job dài nhất Windows 43,20 → 21,03 phút (−51,3 %), NHƯNG phút TÍNH TIỀN
+  110,65 → 126,23 (+14,1 %) vì trả tiền thiết lập ba lần thay vì một. Khoản tăng ấy đụng đúng
+  chỗ kho này đã chết một lần — `ci.yml:19-24` ghi CI đứng hình từ 12-08-2026 vì cạn hạn mức
+  2.000 phút/tháng — nên nó là con số CHỦ KHO DUYỆT TRƯỚC, không phải con số phiên thi công
+  tự nuốt.
+
+viec_trong_lease:
+  - 'Tách `test registry` và `packet-loop selftest` sang job riêng, CÙNG ma trận nền với `gate`.'
+  - 'Giữ độ phủ: tập `(tên bước, nền, conclusion)` sau khi tách phải BẰNG ĐÚNG tập trước khi
+     tách. So bằng TẬP, không bằng `wc -l` — hai tập lệch vẫn có thể cùng lực lượng.'
+  - 'Giữ nguyên biểu thức `fromJSON(...)` của ma trận cho mọi job mới — KHÔNG thêm một mặt
+     điều kiện nào. Lực lượng tập chuỗi biểu thức phân biệt phải không tăng.'
+  - 'Giữ `timeout-minutes: 60` trên MỌI job.'
+  - 'ĐO và CÔNG BỐ phút tính tiền tăng thêm; ngưỡng ≤ 135,00 phút tính tiền.'
+  - 'In ra danh sách tên job mới, đúng dạng chuỗi mà branch protection dùng.'
+  - '`actionlint` phải có DELTA = 0 so `origin/master` đo trong CÙNG một lệnh, cùng môi trường
+     — không phải `rc = 0` (kho đã đo `rc=1` khi có `shellcheck`, `rc=0` khi vắng).'
+
+dieu_kien_dung:
+  - 'Nâng `timeout-minutes` — hình dạng đã hỏng BA lần (25→45→60), `ci.yml:63` tự kết luận
+     "NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN", `PROTOCOL §12` cấm vá lần thứ tư. Điều kiện DỪNG.'
+  - 'HẠ `timeout-minutes` để "ép kỷ luật" — biến một job chậm thành `cancelled`, tức đổi một
+     vấn đề đọc được lấy một vấn đề vô hình. Trần đứng nguyên ở 60.'
+  - 'Thêm bất kỳ mặt ĐIỀU KIỆN nào (theo diff / theo nhãn / `paths:`) — đã có đặc tả đóng băng
+     `ops/specs/CI-FASTPATH-THEO-DIFF.md` và bản triển khai ĐÃ BỊ BỎ (PR #247 đóng, không
+     merge). Kho đã trả giá HAI lần cho logic điều kiện của workflow. Tách job là thêm JOB,
+     không thêm ĐIỀU KIỆN.'
+  - 'Song song hoá TRONG `test registry` — chạm `.claude/dev/ci_dang_ky_test.py`, giao write
+     set với ba packet kia. Nợ có tên: SONG-SONG-HOA-TRONG-TEST-REGISTRY.'
+  - 'Cắt đột biến của `packet_loop_test.py` — 9,70 phút Windows (22,5 %), đáng giá, nhưng ở
+     `.claude/dev/**` chứ không ở `ci.yml`. Nợ có tên: MUTANT-WINDOWS-PACKET-LOOP.'
+  - 'Đổi tập bước hoặc đổi lệnh của bất kỳ bước nào — packet này chỉ đổi bước ấy nằm trong
+     JOB nào.'
+  - 'Viết cú pháp `${{ }}` trong comment của `run:` — GitHub nội suy TOÀN BỘ thân `run` trước
+     khi shell thấy nó, và kho đã bị từ chối cả tệp vì đúng chuyện đó (`ops-don-ref.yml`,
+     run 31971137920: 0 job, `conclusion: failure`).'
+  - 'Merge khi branch protection chưa require CẢ BA job — tách một job đang được require thành
+     ba mà chỉ require một là THÁO CỔNG bằng một thao tác trông như tối ưu hoá. Nửa này KHÔNG
+     ĐO ĐƯỢC từ phiên thi công; nợ có tên PLAT-X5-required-status-check, việc của chủ kho.'
+  - 'A1 hoặc A5 ĐỎ là KẾT QUẢ ĐO, không phải thất bại thiết kế — báo chủ kho, đừng nới gì.'

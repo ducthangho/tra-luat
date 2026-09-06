@@ -6351,6 +6351,74 @@ def r338_dot_bien_bo_ban_do_lam_ca_dich_DO():
          "dot bien lam doi ca rang — do o tren khong quy duoc cho ban do")
 
 
+# r339 — vá P2 của codex trên PR #449, ĐÃ TÁI HIỆN trước khi vá: IMPORT ĐƯỢC không
+# chứng minh ĐÚNG BẢN. Phản chứng: `requirements.txt` đòi `pypdf>=4.0`, môi trường cài
+# `pypdf` 3.17.4 ⇒ import chạy ngon ⇒ chốt rc=0 ⇒ hook BỎ QUA pip và giữ nguyên một môi
+# trường không còn thoả `requirements.txt` — đúng thứ trôi mà chốt ấy sinh ra để sửa.
+#
+# Ca này dựng một venv THẬT rồi cài một bản CỐ Ý sai, vì đó là cách duy nhất phân biệt
+# "chốt đọc specifier" với "chốt chỉ import". Cần mạng nên bỏ qua khi không cài được —
+# và khi bỏ qua thì nói thẳng là KHÔNG ĐO ĐƯỢC, không đếm là ĐẠT.
+def _r339_venv(td: Path):
+    v = td / "v"
+    subprocess.run([PY, "-m", "venv", str(v)], capture_output=True, timeout=300)
+    py = v / ("Scripts" if os.name == "nt" else "bin") / ("python.exe" if os.name == "nt" else "python")
+    if not py.exists():
+        return None
+    p = subprocess.run([str(py), "-m", "pip", "install", "--quiet", "pypdf==3.17.4"],
+                       capture_output=True, text=True, timeout=600)
+    if p.returncode != 0:
+        return None
+    return py
+
+
+@ca
+def r339_import_duoc_khong_chung_minh_dung_ban():
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r339_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        (d / "requirements.txt").write_text("pypdf>=4.0\n", encoding="utf-8")
+        def chay(*them):
+            return subprocess.run([str(py), "-c", than, *them], cwd=d,
+                                  capture_output=True, text=True, timeout=300)
+        # `--kiem-ban` = câu hỏi "có được BỎ QUA pip không" ⇒ lệch bản phải ĐỎ
+        r = chay("--kiem-ban")
+        bang(r.returncode == 1, "lech ban ma chot van XANH — hook se bo qua pip va giu moi truong troi")
+        bang("KHONG thoa" in (r.stdout + r.stderr),
+             f"do ĐỎ nhưng khong noi ro la lech BAN: {(r.stdout + r.stderr)[:120]!r}")
+        # Sau khi pip vừa chạy thì pip là thẩm quyền — chế độ thường KHÔNG đo bản.
+        bang(chay().returncode == 0, "che do thuong khong duoc doi bản — se thanh chot do thuong truc")
+        # RĂNG hai chiều: bản THOẢ thì tuyệt đối không được báo động giả.
+        (d / "requirements.txt").write_text("pypdf>=3.0\n", encoding="utf-8")
+        bang(chay("--kiem-ban").returncode == 0, "ban THOA ma van bao hong — bao dong gia")
+
+
+@ca
+def r339_dot_bien_bo_kiem_ban_lam_ca_dich_DO():
+    """Đột biến bỏ phép so specifier phải làm ca trên ĐỎ — nếu không, ca kia đo gì?"""
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    neo = "    if not thoa:"
+    bang(than.count(neo) == 1, f"R339_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
+    dot_bien = than.replace(neo, "    if False:")
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r339_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        (d / "requirements.txt").write_text("pypdf>=4.0\n", encoding="utf-8")
+        r = subprocess.run([str(py), "-c", dot_bien, "--kiem-ban"], cwd=d,
+                           capture_output=True, text=True, timeout=300)
+        bang(r.returncode == 0,
+             "dot bien bo phep so specifier VAN DO — cai DO cua ca dich khong quy duoc cho phep so ay")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [

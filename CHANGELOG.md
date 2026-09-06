@@ -1,3 +1,38 @@
+# ★ dev-side — r339: IMPORT ĐƯỢC không chứng minh ĐÚNG BẢN (P2 của codex trên PR #449) (2026-09-06)
+
+Codex review trên `3028506` ra một P2, và nó **đúng** — đã tái hiện bằng phản chứng chạy
+được TRƯỚC khi vá: `requirements.txt` đòi `pypdf>=4.0`, môi trường cài `pypdf` 3.17.4 ⇒
+`import pypdf` chạy ngon ⇒ chốt trả `rc=0` ⇒ hook **bỏ qua pip** và giữ nguyên một môi
+trường không còn thoả `requirements.txt`. Đúng thứ trôi mà chốt ấy sinh ra để sửa. Cùng họ
+"CÓ MẶT ≠ DÙNG ĐƯỢC", thêm một nấc: **DÙNG ĐƯỢC ≠ ĐÚNG BẢN**.
+
+- **Chỉ kiểm bản ở chế độ `--kiem-ban`**, tức lúc trả lời câu *"có được BỎ QUA pip không"*.
+  Sau khi pip vừa chạy xong thì pip là thẩm quyền và môi trường thoả theo cách đúng; đòi
+  thêm một phép đo ở đó chỉ tạo ra **chốt đỏ thường trực** trên máy thiếu bộ phân tích
+  specifier — đúng cái bẫy vừa trả giá ở r338 với bản ghim `==6.0.3`.
+- **`pip._vendor.packaging` là đường lui, và nó ĐO ĐƯỢC chứ không phải đoán:** `packaging`
+  trần **không có** trong venv trần, bản vendor của pip có ở **cả hai** nền — mà hook này
+  vốn đã đòi pip.
+- **KHÔNG ĐO ĐƯỢC ≠ ĐẠT.** Thiếu bộ phân tích hoặc thiếu metadata ⇒ báo
+  `KHONG_DO_DUOC_BAN`, nghĩa là *đừng bỏ qua pip* — để pip quyết. Tự chữa, không phải chốt chết.
+- **Thông điệp lỗi phải nói đúng chuyện gì hỏng.** Lệch bản mà in "KHONG import duoc" là
+  đẩy người đọc đi sai hướng; nay là `requirements.txt CHUA THOA (import hong hoac lech ban)`.
+
+**`t116` bắt được một lỗi thật của chính lượt vá này.** Hai ca mới ban đầu đặt tên
+`r338b_...`; bộ đăng ký khớp khuôn `^def [tr]\d+_` nên chữ `b` sau số làm chúng **có mặt
+trong `CA` mà không được đếm là hàm ca** ⇒ `171` hàm so `173` mục ⇒ ĐỎ. Chạy riêng từng ca
+thì **xanh cả hai**, tức chỉ lượt chạy ĐẦY ĐỦ mới thấy. Đổi tên thành `r339_`.
+
+Đo răng hai chiều, một biến, hai vế dựng trong **cùng một lệnh**: hook chưa vá ⇒ ca đích
+**ĐỎ** (`lech ban ma chot van XANH`); chỉ thay đúng tệp hook ⇒ **XANH**. Kèm ca răng (bản
+THOẢ tuyệt đối không được báo động giả; chế độ thường không được đòi bản) và đột biến bỏ
+phép so specifier phải làm ca đích ĐỎ.
+
+Cổng: `launcher_test` **172/172** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta so
+`3028506` = **0** · `bash -n` OK · `git diff --check` rc=0 · quét mẫu bí mật trên 129 dòng
+thêm: 0 khớp · hook chạy thật hai lượt, lượt 2 đi đúng đường `--kiem-ban`.
+
 # ★ dev-side — r338: bằng chứng dương của hook không phủ PyYAML, và ba lớp bẫy khi vá (2026-09-06)
 
 r337 đổi bằng chứng của bước pip từ mã thoát `pip install --dry-run` sang **import được

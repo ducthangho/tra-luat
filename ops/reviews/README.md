@@ -14,6 +14,9 @@ không — nên nó được nâng lên đây, và `t27` ĐỎ nếu bảng dư�
 
 | tệp verdict | id | phải làm gì khi chạy lại |
 |---|---|---|
+| `pr455-bien-nhan-v2-review-2-codex-verdict.md` | `BON-FINDING-VONG-2-DA-VA-nhung-VA-CAN-REVIEW-LAI` | Cả bốn finding vòng 2 đã vá **trong cùng PR**, nhưng **bản vá chưa được review**. Đây là lần thứ **BA** trong cùng một PR mà một bản vá sinh ra finding mới — đừng đọc *"đã vá"* thành *"đã đóng"*. **Chưa đóng.** |
+| `pr455-bien-nhan-v2-review-2-codex-verdict.md` | `cross_approved-dua-tren-PROVIDER-khong-phai-MODEL` | Như các lượt trước: mức phân biệt **PROVIDER**, đo được bằng `launcher.py run`; thứ **không** đo được là **MODEL nào** trong provider ấy. |
+| `pr455-bien-nhan-v2-review-2-codex-verdict.md` | `phan-cong-CAM-tu-soan-phan-chung` | Như các lượt trước: **cấm** reviewer tự soạn chuỗi tấn công ⇒ **độ phủ hẹp hơn**. |
 | `pr455-bien-nhan-v2-review-1-codex-verdict.md` | `BON-FINDING-DA-VA-nhung-VA-CAN-REVIEW-LAI` | Cả bốn finding **đã được vá trong cùng PR**, nhưng **bản vá chưa được review**. Chính đợt này đã đo được một bản vá chống *"tín dụng giết giả"* **tự dính bệnh nó chữa** (`R5-01`), nên đừng đọc *"đã vá"* thành *"đã đóng"*. **Chưa đóng.** |
 | `pr455-bien-nhan-v2-review-1-codex-verdict.md` | `cross_approved-dua-tren-PROVIDER-khong-phai-MODEL` | Mức `cross_approved` phân biệt **PROVIDER** (`claude` thi công · `codex` review), đo được bằng `launcher.py run`. Thứ **không** đo được là **MODEL nào** trong provider ấy — reviewer tự khai điều đó ngay trong verdict (*"được chỉ thị hệ thống định danh là GPT-6 nhưng không có chứng thực độc lập"*). |
 | `pr455-bien-nhan-v2-review-1-codex-verdict.md` | `phan-cong-CAM-tu-soan-phan-chung` | Như các lượt trước: **cấm** reviewer tự soạn chuỗi tấn công (hai lượt cross-review của kho đã **chết giữa chừng** vì đúng việc ấy). Thay bằng: chạy phản chứng có sẵn + **đột biến bản vá**. **Độ phủ hẹp hơn** một lượt không ràng buộc. |

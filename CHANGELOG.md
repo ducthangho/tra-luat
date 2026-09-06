@@ -1,4 +1,4 @@
-# ★ dev-side — r353: tái sinh RELEASE_MANIFEST sau khi PR #449 land (2026-09-06)
+# ★ dev-side — r354: tái sinh RELEASE_MANIFEST sau khi PR #449 land (2026-09-06)
 
 `gate` master trên `3500369` (merge PR #449) **ĐỎ** ở bước `release-verify strict
 (lane LAND — manifest committed)`, `rc=2`, bốn tệp lệch sha256. Đây đúng bài học
@@ -49,6 +49,70 @@ path,size,sha256 đã sort"* — nên bản vá này tái lập được từ c�
 
 **Thứ tự bắt buộc:** ghi CHANGELOG TRƯỚC rồi mới tái sinh manifest. Ngược lại thì
 chính mục changelog này làm `CHANGELOG.md` lệch băm vừa ghi — bản vá tự phá.
+
+## Rủi ro đã nêu, và nó xảy ra trong vòng một giờ
+
+Bản đầu của mục này ghi: *"nếu một PR khác sửa nội dung tệp thuộc gói và merge trước
+thì manifest lại cũ ngay"*. PR #454 land đúng như thế — nó sửa `CHANGELOG.md` (tệp
+CÓ trong manifest) trong lúc bản vá còn nằm ở PR. Cửa sổ: khoảng một giờ.
+
+Nên phải nói cho đúng phạm vi: bản vá này **không** chặn được lớp lỗi, nó chỉ dọn
+một lần. Chừng nào lane PR còn không so cây với manifest committed — mà `PROTOCOL:710`
+cấm đúng điều đó, và packet #427 đóng bề mặt ấy sau một P1 thật ở #421 — thì mỗi lần
+sửa nội dung một tệp thuộc gói vẫn để lại master đỏ cho phiên kế tiếp. Đó là khoảng
+trống thiết kế, cần một quyết định riêng, KHÔNG phải thứ vá được trong PR này.
+
+Kèm một va chạm nhỏ đáng ghi: hai mục cùng mang số `r353` (bản này và bản của #454).
+Số r đánh theo phiên nên hai phiên song song sinh trùng là chuyện tất yếu, không phải
+sự cố; bản land trước giữ số, bản này lùi thành `r354`.
+
+# ★ dev-side — r353: bản vá chống "tín dụng giết giả" tự dính đúng bệnh nó chữa (2026-09-06)
+
+Cross-review lượt 5 (codex, chạy trên `master` `4951f55` SAU khi PR #452 đã merge) ra bốn
+finding. Cái đáng ghi là `R5-01`: bản vá `R4-04` — dựng ra để bộ chấm đột biến thôi cấp tín
+dụng giết cho một crash vô can — **vẫn cấp tín dụng ấy**, chỉ qua một đường khác.
+
+## Lớp ngoại lệ riêng chứng minh ĐƯỜNG, không chứng minh CHỐT
+
+`TinHieuChotCa` chỉ nói "lỗi đi qua `bang()` của ca đang chạy". Nó KHÔNG nói **assertion
+nghiệp vụ đích** đã chạy. `t22` dùng chính `bang()` làm chốt **khởi chạy tiến trình con**,
+trước khi đọc bốn kết quả A/B/C/D. Reviewer bơm duy nhất `raise KeyError` vào đầu
+`_bash_windows`: con chết `rc=1`, chưa tới phép kiểm chọn Git Bash — mà bộ phân hạng vẫn
+trả `giet_that`. Chạy toàn bán kính: **chỉ `t22` chết, 0 ca `tin_dung_gia`**, nên cả phép
+kiểm TÊN CA lẫn bán kính 1/23 đều mù.
+
+Chữa: lớp `LoiDungCa` + hàm `dung()` cho chốt **giàn giáo** (dựng fixture · khởi chạy · giải
+mã) — `_chay_1_ca` đọc nó thành `tin_dung_gia`. Ranh giới khai **tại chỗ gọi**, KHÔNG đoán
+theo mã thoát: `chay(...)`/`cai_cong_cu.sh` là sản phẩm đang bị đo nên `rc` là hợp đồng của
+nó. Reviewer cảnh báo đúng chỗ đó, và đột biến C đo được cái giá của bản vá quá tay: hạ mọi
+chốt mang `rc=` thành giàn giáo làm **năm** đột biến thật (`t2` `t3` `t7` `t9` `t10`) mất
+tín dụng hợp lệ.
+
+Răng: đột biến A đưa `t22` về `bang()` ⇒ phép đo mới ĐỎ với đúng chữ `giet_that` reviewer
+đã thấy. Thêm hai ca tự kiểm `f`/`g` và một phản chứng **đi qua ranh giới tiến trình** —
+năm ca tự kiểm cũ đều chạy trong cùng tiến trình nên chúng bỏ sót đúng đường này.
+
+## Và cổng shell mới cũng nói dối theo cách kinh điển
+
+`R5-02`: `ops/kiem_trang_quyet_dinh.sh` đồng nhất "phép đo thất bại" với "không tìm thấy".
+`grep` trả `1` khi không khớp và `>1` khi **không thực hiện được** phép đo, mà cả hai rơi
+xuống nhánh in SẠCH; `set -euo pipefail` không chữa được vì lệnh nằm trong điều kiện `if`.
+Đo: regex hỏng ⇒ `rc=0 "sạch"` · mất mốc kết thúc ⇒ `rc=0` · đổi tên mốc ⇒ `rc=1` bắt oan.
+Nay ba trạng thái `0/1/2`, đòi đúng một cặp mốc theo thứ tự, kèm
+`ops/kiem_trang_quyet_dinh_test.sh` (7 ca + 4 phép đo răng, hai đột biến tái hiện lại đúng
+ba con số trên). Khai thẳng: **không workflow nào chạy cổng ấy** — `ci_dang_ky_test.py` chỉ
+quét `*_test.py`.
+
+## Bài học, không phải con số
+
+Đây là lần thứ **sáu** trong cùng một đợt của cùng một lớp lỗi (đọc *sự CÓ MẶT* thành *KHẢ
+NĂNG*), và là lần đắt nhất vì nó nằm **bên trong bản vá dựng ra để chặn lớp ấy**: có tên
+lớp, có ca tự kiểm cho lớp, vẫn trượt. Thứ bắt được nó không phải một reviewer đọc kỹ hơn
+mà một phép đo **đi qua ranh giới tiến trình** — tức reviewer có **năng lực ĐO**.
+
+Nhắc thêm một lỗi quy trình của chính đợt này: PR #452 được merge **một phút** sau khi lượt
+review ấy bắt đầu, nên hai commit cuối vào `master` không có lượt khác nền nào kết luận.
+`CLAUDE.md` đã ghi sẵn *"Gate xanh KHÔNG phải đã được review"*; đây là lần trả giá.
 
 # ★ dev-side — r352: luật thô của r351 vẫn thủng ở BIẾN MÔI TRƯỜNG (2026-09-06)
 

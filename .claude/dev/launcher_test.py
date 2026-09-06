@@ -6438,9 +6438,9 @@ def r342_dot_bien_bo_hoi_pip_lam_ca_dich_DO():
     than = _r338_than_hook()
     if not than:
         return "bo qua ban sao roi (khong co session-start.sh)"
-    neo = "if kiem_ban:\n    p = subprocess.run("
+    neo = "if kiem_ban and not _co_xa:"
     bang(than.count(neo) == 1, f"R342_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
-    dot_bien = than.replace(neo, "if False:\n    p = subprocess.run(")
+    dot_bien = than.replace(neo, "if False:")
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)
         py = _r342_venv(d)
@@ -6452,6 +6452,61 @@ def r342_dot_bien_bo_hoi_pip_lam_ca_dich_DO():
         bang(r.returncode == 0,
              "dot bien go CA khoi hoi pip ma van DO — cai DO cua ca doi chieu khong "
              "quy duoc cho phep hoi pip")
+
+
+# r343 — `--no-index` KHÔNG làm phép đo offline, và đây là lớp lỗi MỚI do chính việc uỷ
+# quyền cho pip (r342) mở ra. `--no-index` chỉ tắt TRA CỨU CHỈ MỤC; một direct reference
+# (`gói @ https://…`) vẫn được pip đi lấy. Phản chứng đã chạy: URL tới một host chết ⇒
+# pip thử rồi thoát 1 sau **8,5s** ⇒ mỗi lần mở phiên chậm thêm chừng ấy VÀ luôn đi
+# đường cài lại. Một chốt chẩn đoán làm chậm mọi phiên là chốt sẽ bị gỡ.
+#
+# Ca đo CẢ HAI hậu quả — mã thoát và THỜI GIAN — vì cái hại chính là độ trễ.
+_R343_URL = "pypdf @ http://127.0.0.1:9/pypdf-3.17.4-py3-none-any.whl\n"
+
+
+@ca
+def r343_direct_reference_tu_xa_khong_duoc_lam_cham_phien():
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r342_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        (d / "requirements.txt").write_text(_R343_URL, encoding="utf-8")
+        t0 = time.monotonic()
+        r = subprocess.run([str(py), "-c", than, "--kiem-ban"], cwd=d,
+                           capture_output=True, text=True, timeout=600)
+        mat = time.monotonic() - t0
+        bang(r.returncode == 0,
+             "direct reference toi host CHET van ep di duong cai lai — moi phien se cai lai")
+        # 5s: rong rai so voi 0,2s do duoc, nhung van duoi 8,5s cua ban chua va.
+        bang(mat < 5.0, f"phep do cham {mat:.1f}s — pip da di lay URL that du co --no-index")
+
+
+@ca
+def r343_dot_bien_bo_chot_direct_reference_lam_ca_dich_DO():
+    """Gỡ phép dò direct reference ⇒ ca trên phải ĐỎ (chậm hoặc ép cài lại)."""
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    neo = "if kiem_ban and not _co_xa:"
+    bang(than.count(neo) == 1, f"R343_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
+    dot_bien = than.replace(neo, "if kiem_ban:")
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r342_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        (d / "requirements.txt").write_text(_R343_URL, encoding="utf-8")
+        t0 = time.monotonic()
+        r = subprocess.run([str(py), "-c", dot_bien, "--kiem-ban"], cwd=d,
+                           capture_output=True, text=True, timeout=600)
+        mat = time.monotonic() - t0
+        bang(r.returncode != 0 or mat >= 5.0,
+             f"dot bien go chot VAN nhanh va VAN xanh (rc={r.returncode}, {mat:.1f}s) — "
+             "ca dich khong do chot direct reference")
 
 
 # ------------------------------------------------------ tự đột biến: có răng không

@@ -1,3 +1,43 @@
+# ★ dev-side — r343: `--no-index` KHÔNG làm phép đo offline (lớp lỗi r342 tự mở ra) (2026-09-06)
+
+Lượt review sau r342 ra **một** P2 (giảm từ ba), và nó trả lời đúng câu hỏi tôi đặt cho
+reviewer — *"uỷ quyền cho pip có mở ra lớp lỗi MỚI nào không?"*. **Có.**
+
+`--no-index` chỉ tắt **tra cứu chỉ mục**; một **direct reference** (`gói @ https://…`) vẫn
+được pip đi lấy. Phản chứng đã chạy: `pypdf @ http://127.0.0.1:9/…whl` tới một host chết ⇒
+pip thử rồi thoát 1 sau **8,5s** ⇒ **mỗi** lần mở phiên chậm thêm chừng ấy VÀ luôn đi đường
+cài lại. Một chốt chẩn đoán làm chậm mọi phiên là chốt sẽ bị gỡ — nên đây không phải phiền
+toái nhỏ, nó ăn đúng vào lý do chốt tồn tại.
+
+Đáng ghi vì lập luận sai nằm trong chính commit r342: ở đó tôi viết *"kèm `--no-index` để
+hook phiên không phụ thuộc mạng"* và **khai thẳng với reviewer rằng đó là LẬP LUẬN chứ chưa
+phải phép đo, xin một phản chứng nếu có**. Phản chứng có thật, và tới trong một lượt. Bài
+học không phải "đọc `--help` kỹ hơn" mà là: **một mệnh đề tự khai là chưa đo thì phải được
+đo, không phải được ghi chú rồi cho qua** — ghi chú không làm nó đúng lên.
+
+Chữa bằng hai lớp, chiều rủi ro của cả hai đều an toàn:
+
+1. **Có direct reference từ xa ⇒ KHÔNG hỏi pip.** Lúc ấy mốc (băm theo `requirements.txt`
+   + `sys.prefix`) cộng phép thăm import là thứ ta có; khai thẳng là không đo được bản chứ
+   đừng giả vờ đã đo.
+2. **Chặn thời gian cho mọi trường hợp khác** — `--retries 0`, `--timeout 3`, và hạn của
+   chính tiến trình con — để một lỗ còn sót không bao giờ treo phiên.
+
+Khe hở của phép dò direct reference chỉ dẫn tới *"hỏi pip có chặn thời gian"*, không dẫn
+tới *"chặn phiên"*.
+
+Đo sau khi vá: `8,5s / rc=1` → **`0,2s / rc=0`**; bốn ca khác (bản thoả · lệch bản · marker
+không khớp · gói thiếu hẳn) không hồi quy. Ca `r343` đo **cả hai** hậu quả — mã thoát VÀ
+thời gian — vì cái hại chính là độ trễ; đột biến gỡ chốt phải làm ca đích ĐỎ.
+
+**Neo đột biến của `r342` gãy vì bản vá này** (`if kiem_ban:` → `if kiem_ban and not
+_co_xa:`) và suite bắt được ngay — đúng công dụng của phép đếm neo: nó biến một đột biến
+âm thầm mất răng thành một ca ĐỎ ồn ào.
+
+Cổng: `launcher_test` **174/174** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta
+= **0** · `bash -n` OK · `git diff --check` rc=0 · hook chạy thật hai lượt đúng thiết kế.
+
 # ★ dev-side — r342: NGỪNG TỰ QUYẾT, HỎI PIP — bảy finding một hình dạng (2026-09-06)
 
 Lượt review thứ tư trên `37af367` ra **ba P2 nữa** — direct reference (`foo @ URL`),

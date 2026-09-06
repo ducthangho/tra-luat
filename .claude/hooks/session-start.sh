@@ -226,11 +226,38 @@ import json, re, subprocess, sys
 kiem_ban = "--kiem-ban" in sys.argv[1:]
 hong = []
 
-if kiem_ban:
-    p = subprocess.run([sys.executable, "-m", "pip", "install", "--dry-run", "--report", "-",
-                        "--quiet", "--no-index", "-r", "requirements.txt"],
-                       capture_output=True, text=True)
-    if p.returncode != 0:
+# r343 — `--no-index` KHONG lam phep do nay offline. Do la lop loi MOI do chinh viec uy
+# quyen cho pip mo ra, va no la cau tra loi cho dung cau hoi da dat cho reviewer.
+# `--no-index` chi tat TRA CUU CHI MUC; mot DIRECT REFERENCE (`goi @ https://...`) van
+# duoc pip di lay. Phan chung: `pypdf @ http://127.0.0.1:9/...whl` toi mot host chet ⇒
+# pip thu roi thoat 1 sau **8,5s** ⇒ MOI lan mo phien cham thêm chung ay giay VA luon
+# di duong cai lai. Mot chot chan doan lam cham moi phien la chot se bi go.
+#
+# Chua bang HAI lop, va chieu rui ro cua ca hai deu an toan:
+#   1. Co direct reference tu xa ⇒ KHONG hoi pip. Luc ay moc (bam theo requirements.txt
+#      + sys.prefix) cong phep tham import la thu ta co; khai thang la KHONG do duoc ban
+#      chu dung gia vo la da do.
+#   2. Van chan thoi gian cho moi truong hop khac (`--retries 0`, `--timeout`, va han
+#      cua chinh tien trinh con) — de mot lo con sot khong bao gio treo phien.
+# Khe ho cua phep DO tim direct reference chi dan toi "hoi pip co chan thoi gian",
+# khong dan toi "chan phien".
+_XA = re.compile(r"@\s*(?!file:)[A-Za-z][A-Za-z0-9+.-]*://")
+try:
+    _co_xa = any(_XA.search(_d) for _d in open("requirements.txt", encoding="utf-8"))
+except OSError:
+    _co_xa = True                      # khong doc duoc ⇒ dung hoi pip, fail sang lop phu
+
+if kiem_ban and not _co_xa:
+    try:
+        p = subprocess.run([sys.executable, "-m", "pip", "install", "--dry-run", "--report", "-",
+                            "--quiet", "--no-index", "--retries", "0", "--timeout", "3",
+                            "-r", "requirements.txt"],
+                           capture_output=True, text=True, timeout=60)
+    except subprocess.TimeoutExpired:
+        p = None
+    if p is None:
+        hong.append("pip: KHONG DO DUOC (qua han) — coi nhu chua thoa")
+    elif p.returncode != 0:
         hong.append("pip: moi truong CHUA thoa requirements.txt")
     else:
         try:

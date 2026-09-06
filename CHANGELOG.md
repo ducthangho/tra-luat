@@ -328,10 +328,129 @@ giả vờ có răng trên POSIX. Phản chứng thật của nó là một phé
 Và một lần nữa: lỗi này **không nằm trong sản phẩm**, nó nằm trong bộ đo. Lần thứ **bảy** trong
 đợt một chốt/nền mới bắt đúng fixture của chính bộ test.
 
+## Vòng chín: reviewer KHÁC NỀN tìm bốn P2 + một P3 — ba trong bốn là lớp đã vá SÁU lần
+
+Lượt 7 là lượt đầu tiên do một provider thứ ba review (`gpt-6-astra`, max effort, **1405,7s**), verdict
+`ops/reviews/pr455-bien-nhan-v2-review-7-gpt6astra-verdict.md`, head `ca960160`. Không P1 mới. Bản vá
+này (executor: Claude, cây rời detached `4488ff1`) đóng cả năm; mỗi cái có ca khoá và đột biến chết
+ĐÚNG thuộc tính — reviewer đã chỉ ra một lần tín dụng sai thuộc tính (`R7-04`) nên lần này dòng chết
+của từng mutant được ghi lại nguyên văn trong `BAO_CAO_EXECUTOR.md`.
+
+**`R7-01` — nguồn hợp đồng hỏng vẫn thành KẾT TỘI, hoặc CRASH lúc import.** Lại đúng hình dạng
+*"lỗi ĐO thành lỗi DỮ LIỆU"*, lần này ở ngay NGƯỜI TẠO dữ liệu nguồn — **không kèm số thứ tự, vì số
+ấy không neo được**: bản executor viết *"lần thứ TƯ"*, dòng `ops/reviews/README.md` do phiên điều phối
+viết ghi *"lần thứ NĂM"*, còn verdict lượt 7 **không đếm** (`rg "lần thứ"` trên tệp verdict ⇒ rỗng).
+Hai con số cùng nằm trong kho, ngược nhau, cả hai chép tay — nên bỏ hẳn, giữ thứ ĐO ĐƯỢC là `11/68`
+dưới đây. Chi tiết: `_bang`
+trả hàng bất kỳ số cột, hai vòng unpack bí danh nằm ngoài khối bắt lỗi ⇒ hàng thiếu cột là
+`ValueError` lúc import (rc=1, không stdout); kiểm kiểu chỉ áp cho TÊN provider ⇒ surface/transport
+`None` thành hợp đồng `[None]` ⇒ **9 biên nhận nguyên byte bị kết tội, 0 chưa đo**; và khi nguồn hỏng,
+`_thieu` suy *"không hợp đồng ⇒ không thẩm quyền"* cho mọi provider ⇒ **11 cáo buộc oan** kèm rc=2.
+Vá theo lớp: `_LUOC_DO_BANG` (4/3/2/2 cột), `_bang` trả `(hàng, lỗi)` — `ast.literal_eval` ở mức
+module, đúng một lần, arity và kiểu TỪNG Ô, lỗi nêu bảng/hàng/cột; đích bí danh bề mặt phải tồn tại
+(bản trước lặng lẽ bỏ qua); `_muc_cam_theo_provider` chỉ suy giới hạn khi `PROVIDER_NGUON_HONG is
+None`, còn kiểm kiểu/SHA/độc lập vẫn chạy. Chạy lại đúng bảng sáu biến đổi nguồn của reviewer trên 68
+biên nhận thật: **cả sáu rc=2 · 0 ĐỎ · 0 traceback** (trước: 11 oan / crash / crash / rc=1 / rc=1).
+Bốn mutant reviewer đòi chết độc lập — `m46`/`m47` (arity RIÊNG từng bảng bí danh), `m48` (kiểu ô),
+`m49` (điều kiện nguồn-đo-được ở `_thieu`) — đều CÓ RĂNG; `m49` chết đúng bằng con số *"11 biên nhận
+THẬT bị KẾT TỘI"* trên `c40` (chạy CLI từ cây gương hỏng nguồn lên `--root` kho thật).
+
+**`R7-02` — `human` chép tay vào tập "KHÔNG hợp đồng", nên bị cấm cả `human_audited`.** Câu
+*"provider không có hợp đồng nào trong kho"* sai với bảng chuyển tiếp (`KE_HOACH_THI_CONG_DA_PROVIDER`
+§2 đã khai `human / manual_audit / human`), và `_thieu` cấm provider-không-hợp-đồng mọi mức của
+`ASSURANCE_CAN_DOC_LAP` — kể cả mức `PROTOCOL §8` dành ĐÚNG cho người audit. Vá: hàng
+`("human", "manual_audit", "human")` vào `_PROVIDER_NGOAI_CLI`; gỡ hẳn `PROVIDER_KHONG_HOP_DONG` (danh
+sách CHO PHÉP = hợp đồng ∪ bí danh, không còn ngăn "có tên mà không hợp đồng"); phân vùng mức
+assurance NGƯỜI/MÔ HÌNH suy từ cột VẬN CHUYỂN của hợp đồng (`human` ⇒ chỉ `human_audited`; khác ⇒
+không `human_audited`), neo hai câu §8 vào `docs/PROTOCOL_DA_PHIEN.md` — nguồn luật THỨ BA, đọc và
+fail-close như `AGENTS.md`. Mặt thứ ba của cùng lớp, chưa ai chỉ: một MÔ HÌNH khai `human_audited` từng
+đi qua `_thieu` không vướng gì (chỉ ChatGPT bị §4 cấm đích danh) — nay chặn, có ca và mutant riêng
+(`m52`). `c41` dựng fixture human-audit TỐI THIỂU theo §8 (không nâng hai biên nhận human lịch sử):
+dương qua cả tiến trình lẫn CLI; người khai mức mô hình ĐỎ; thiếu `phien_doc_lap` ĐỎ; evidence chỉ là
+comment GitHub ⇒ `protected_evidence_ref` ⇒ trạng thái THỨ BA. Nói thẳng phạm vi: cổng vẫn chỉ kiểm
+CẤU TRÚC — danh tính GitHub bền của người audit KHÔNG đo được từ một tệp trong kho, như mọi provider.
+**Hàng launcher KHÔNG vào được cây executor** — và câu ấy phải nói ĐÚNG LỚP. Executor khai *"hệ
+thống quyền của nền chặn mọi sửa dưới `.claude/`"*; phiên điều phối **đo ba lớp** thay vì nhận lời
+khai: (a) hệ thống tệp — `read_bytes` rồi `write_bytes` lên chính `.claude/dev/launcher.py` trong cây
+ấy ⇒ **GHI ĐƯỢC**; (b) hook gác của kho — bơm một bản ghi `Edit` trỏ đúng tệp ấy vào
+`pretooluse_guard.py` ⇒ **rc=0**, không chặn; (c) loại trừ ⇒ chốt nằm ở **lớp quyền của CLI `claude`**
+(`acceptEdits` không tự duyệt sửa dưới `.claude/`). Hệ quả vận hành y hệt, nhưng "nền" và "hệ thống
+tệp" là hai lớp khác nhau, và ghi sai lớp là tái phạm đúng bài học *"phải biết mình đang đứng ở LỚP
+NÀO"*. Hàng ấy do phiên điều phối áp trong cây chính; mọi số dưới đây đo SAU khi đã áp.
+
+**`R7-03` — ma trận nguồn và parity còn mù.** Reviewer bỏ riêng chốt đối chiếu SURFACE của
+`AGENTS.md` (A) và riêng chốt thiếu bảng bí danh BỀ MẶT (B): cả hai `41/41 · 48/48`. Và bơm mất hàng
+`_BE_MAT_BI_DANH` vào riêng bản launcher rig chép: bốn hằng parity vẫn bằng nhau mà hợp đồng đã khác.
+Vá: `c28` mở theo TỪNG thành phần lược đồ (mỗi bảng: vắng/rỗng/khai hai lần/không literal · mỗi cột:
+arity từng bảng, kiểu từng ô · từng đích bí danh · từng cột đối chiếu AGENTS · từng câu neo theo tệp ·
+byte hỏng từng nguồn — **34 hàng** đếm bằng AST, mỗi hàng đòi rc đúng, bằng chứng dương, KHÔNG
+traceback, KHÔNG kết tội); cây gương có biên nhận `b` khai `cross_approved` nên nhánh kết tội nằm trên
+đường đo; một lượt
+HỖN HỢP (nguồn hỏng + biên nhận sai thật) đòi rc=2 mà biên nhận sai VẪN bị báo. `_dot_bien_tep` so
+BYTE ba nguồn phụ và parity **11 hằng** (thêm `PROVIDER_HOP_DONG`/`PROVIDER_BI_DANH`/
+`PROVIDER_NGUON_HONG`…); mutant cố ý đổi map (`m20` `m29` `m31` `m39`) khai đích danh phần miễn —
+`m31` hoá ra đổi cả `PROVIDER_HOP_DONG` trên cây thật vì launcher CÓ hai chuỗi `vi_sao` khớp mẫu nó
+dò, điều bản trước không biết. `_cay_guong` khai riêng phần cố ý thay, ghi bytes (Windows). `m54`/`m55`
+= hai phép A/B; `m53` TỰ KIỂM rig (bơm y hệt reviewer ⇒ phải bị phân GIÀN GIÁO, `mong_gian_giao`);
+`c42` so hai builder trên 68 biên nhận thật. `rig_probe.py` nguyên văn của reviewer nay chết ngay ở
+`LoiDungCa` parity byte.
+
+**`R7-04` — `m43` giết vì CÂU CHỮ.** Mutant cũ chỉ đổi chốt absolute/`..` thành `False` mà giữ normalizer
+mới, nên `../../x` vẫn bị chốt so URL chặn — `c37` chết vì thông báo KHÁC, còn mô tả nói "chuẩn hoá rồi
+lọt". Tín dụng đo sai thuộc tính, cùng họ `R2-04`. Nay `m43` phục hồi đúng `.lstrip("./")`, `c37` tách
+"được NHẬN (0 lỗi)" khỏi "sai lý do"; `path_probe.py` nguyên văn của reviewer chạy lại: fixture `../../`
+thành **0 lỗi, 1 đạt** dưới mutant trước khi assertion đầu giết nó, đối chứng `c18` sạch.
+
+**`R7-05`** — header biên nhận lượt 6 gom hai P2 thành "đều về ĐỘ PHỦ"; nay phân loại đúng ba loại
+(độ phủ · hành vi sản phẩm · mô tả phạm vi), chỉ sửa chú thích, verdict và băm giữ nguyên byte.
+
+Số đi kèm phải ghi ĐIỀU KIỆN ĐO, kẻo trôi tiếp — ba phép đo, hai mốc khác nhau:
+
+| đo cái gì | trên `4488ff1` (nền executor) | trên head land (sau bản vá) |
+|---|---|---|
+| biên nhận khai `transport` | **1/15** | **2/17** tệp khai `schema_version: 2` (cổng nhận 16) |
+| provider chính tắc từ bảng | 5 | **6** (thêm `human`) |
+| bí danh từ bảng | 1 | 1 |
+| tên provider **chép tay** trong `bien_nhan_v2.py` | **1** — `PROVIDER_KHONG_HOP_DONG = frozenset({"human"})` | **0** — hằng ấy gỡ hẳn |
+
+Ô cuối sửa một lời khai SAI của bản executor: nó ghi *"0 chép tay"* cho `4488ff1`. Đo lại bằng
+`git show 4488ff1:ops/bien_nhan_v2.py` ⇒ hằng chép tay CÓ ở đó (dòng 269), đúng như reviewer đếm.
+Nó gán trạng thái SAU bản vá cho mốc TRƯỚC bản vá — đúng bệnh **ghép sai lượt**, và trớ trêu là nó
+xảy ra ngay trong finding sinh ra để sửa hai con số chép tay sai.
+
+**Một con số của executor hết hạn ngay lúc nó viết:** báo cáo khai `ops/lease_publish_test.py`
+**120/121**, `t27` đỏ vì verdict lượt 7 chưa có dòng mục lục trong `ops/reviews/README.md` — đúng
+**trên cây của nó** (`4488ff1`), và nó đã tự đo nền để chứng minh delta = 0. Nhưng head land là
+`b912e5f`, commit ấy ĐÃ thêm dòng mục lục, nên phiên điều phối đo lại: **121/121, bỏ qua 0**. Không
+ai sai; con số ấy neo vào một base khác. Ghi ra vì một số không kèm base thì lần đọc sau sẽ đọc
+thành "có một ca đỏ kinh niên".
+
+**PHIÊN ĐIỀU PHỐI CHẠY LẠI, KHÔNG CHÉP SỐ CỦA EXECUTOR.** Đo trên head land (`b912e5f` + bản vá +
+hàng `human` trong `launcher.py`), Linux, py3.11.15, `core.abbrev=7`:
+
+| cổng | mã thoát | dòng tổng kết THẬT |
+|---|---|---|
+| `ops/bien_nhan_v2_test.py` | 0 | `45/45 ca đạt · 57/57 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 39/57 khai đối chứng` · `TỔNG: ĐẠT` |
+| `ops/bien_nhan_v2.py --root .` | 0 | `16 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 69` |
+| `.claude/dev/ci_dang_ky_test.py` | 0 | `PHẢN CHỨNG: 51/51 đỏ đúng` · `TỔNG: ĐẠT` |
+| `.claude/dev/launcher_test.py` | 0 | `181/181 ca DA CHAY QUA (tong 182, bo qua 1, hong 0)` |
+| `ops/lease_publish_test.py` | 0 | `121/121 đạt; đã chạy=121, bỏ qua=0` |
+| `packet_loop doctrine-scan` | 0 | `sạch — đã quét 7 tệp, 0 chỗ chép doctrine` |
+| `packet_loop adr-song` | 0 | `sạch — 46 ADR trên đĩa, 46 dòng trong §20, khớp 1–1` |
+| `tl.py golden-test --json` | 0 | `ok: true`, 20 ca |
+| `tl.py doc-claims-check --strict --json` | 0 | `ok: true` |
+| `tl.py determinism-audit --strict --json` | 0 | `ok: true` |
+| `tl.py release-verify --strict --json` | 0 | `ok: true` sau khi tái sinh `RELEASE_MANIFEST.json` (chỉ băm/kích thước `CHANGELOG.md` đổi; `expected_file_count` giữ **180**, `extra_files` rỗng ⇒ **không** ghi lại golden) |
+
+Ba con số của executor đã được kiểm chéo bằng phép đo độc lập chứ không đọc: `c28` **34 hàng** và
+`HANG_PARITY` **11 hằng** đếm lại bằng AST trên chính suite (khớp), còn `1/15` · `0 chép tay` thì
+**không khớp** và đã sửa ở bảng trên.
+
 ## Răng
 
-`ops/bien_nhan_v2_test.py`: **42 ca · 48/48 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
-hai thứ protocol đòi —
+`ops/bien_nhan_v2_test.py` (đo 06-09-2026 trên bản sao `4488ff1` có hàng `human`): **45 ca · 57/57
+đột biến thường CÓ RĂNG · 2/2 ca tự kiểm · 39/57 khai đối chứng**; trên cây thiếu hàng ấy: 44/45 ·
+54/57 · 2/2 — đúng `c41` KHÔNG ĐO ĐƯỢC và ba mutant nhắm nó. Gồm đúng hai thứ protocol đòi —
 biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
 của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`
 lúc nạp nên **tự nở theo** khi ai sửa mã nguồn — đúng bệnh mà chú thích cách đó ba chục dòng vừa

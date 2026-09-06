@@ -46,6 +46,9 @@ HAI DANH SÁCH ĐÓNG BĂNG, và cả hai neo bằng **tên tệp + băm** chứ
     biên nhận do tài khoản tác giả đăng KHÔNG thành required check.
   · Nó KHÔNG chứng minh canonical ancestry, ref protection hay thẩm quyền trên GitHub —
     `_neo_git` chỉ chứng minh **object có thật, đường dẫn có thật, và blob khớp băm đã khai**.
+  · Với người audit (`human`) cũng vậy: `phien_doc_lap: true` là LỜI KHAI độc lập của người
+    ký, và danh tính GitHub bền mà `PROTOCOL §8` đòi KHÔNG đo được từ một tệp trong kho — cổng
+    chỉ kiểm hợp đồng (`manual_audit`/`human`), mức được khai, và mỏ neo git của bản chiếu.
 
 MỘT TIỀN ĐỀ SAI ĐÃ ĐƯỢC RÚT — ghi lại vì cái sai đáng nhớ hơn bản vá. Bản đầu KHÔNG kiểm
 mỏ neo bằng git và khai thành nợ `BIEN-NHAN-V2-KHONG-KIEM-SHA-CO-THAT`, với lý do
@@ -120,7 +123,7 @@ def _khop(d, k, re_, mo_ta):
 # *"không được … tự tạo `cross_approved`, `same_provider_approved` hoặc `human_audited`"*,
 # và *"Review của ChatGPT Web được ghi là `advisory_review`"*. Luật ấy là VĂN XUÔI — không
 # rút được bằng máy — nên nó nằm đây; `_provider_chinh_tac` đòi câu biện minh CÒN TRONG
-# `AGENTS.md`, mất thì trạng thái THỨ BA.
+# nguồn luật, mất thì trạng thái THỨ BA.
 #
 # VÌ SAO CÓ: cross-review connector trên `670071b` (P1). Bản vá vòng trước NỚI danh sách
 # provider để nhận `openai_chatgpt` — đúng — nhưng chỉ mang theo cái TÊN, không mang theo
@@ -128,11 +131,35 @@ def _khop(d, k, re_, mo_ta):
 # session_run_id: …}` + `assurance: cross_approved` ⇒ **0 vi phạm**. Một lượt advisory biến
 # thành bằng chứng identity có thẩm quyền. Nhận một tên vào danh sách CHO PHÉP mà bỏ lại
 # ràng buộc đi kèm nó là nới quyền, không phải sửa lỗi bắt oan.
-_NEO_LUAT_ASSURANCE = {
-    "openai_chatgpt": "tự tạo `cross_approved`, `same_provider_approved` hoặc `human_audited`",
-}
+#
+# MỖI LUẬT CHÉP TAY = (tên luật, tệp nguồn, câu phải còn NGUYÊN VĂN trong tệp ấy). Hai câu
+# sau (R7-02) neo phân vùng NGƯỜI/MÔ HÌNH của mức assurance vào `PROTOCOL §8` mục 1-3 —
+# xem `ASSURANCE_CUA_NGUOI`/`ASSURANCE_CUA_MO_HINH` bên dưới.
+NGUON_LUAT = ("AGENTS.md", "docs/PROTOCOL_DA_PHIEN.md")
+_NEO_LUAT_CHEP_TAY = (
+    ("ASSURANCE_CAM_THEO_PROVIDER[openai_chatgpt]", "AGENTS.md",
+     "tự tạo `cross_approved`, `same_provider_approved` hoặc `human_audited`"),
+    ("ASSURANCE_CUA_NGUOI", "docs/PROTOCOL_DA_PHIEN.md",
+     "`human_audited`: người audit có danh tính bền trên GitHub"),
+    ("ASSURANCE_CUA_MO_HINH", "docs/PROTOCOL_DA_PHIEN.md",
+     "`cross_approved`: Claude review Codex hoặc Codex review Claude"),
+)
 ASSURANCE_CAM_THEO_PROVIDER = {
     "openai_chatgpt": frozenset({"cross_approved", "same_provider_approved", "human_audited"}),
+}
+
+# LƯỢC ĐỒ TỪNG BẢNG NGUỒN — tên cột theo thứ tự. `lenh` là bộ tên lệnh (tuple chuỗi), cột
+# khác là chuỗi không rỗng. Cross-review lượt 7 (`R7-01`, P2) đo được trên 68 biên nhận nguyên
+# byte: `_bang` bản trước trả hàng BẤT KỲ số cột và hai vòng unpack bí danh nằm NGOÀI khối
+# bắt lỗi ⇒ hàng thiếu cột là `ValueError` lúc IMPORT, CLI chết `rc=1` không stdout; kiểm kiểu
+# chỉ áp cho TÊN provider ⇒ surface/transport `None` thành hợp đồng `[None]` và **9 biên nhận
+# nguyên byte bị KẾT TỘI, 0 chưa đo**. Cùng hình dạng "lỗi ĐO thành lỗi DỮ LIỆU" (`R4-02`),
+# lần này ở ngay nơi TẠO dữ liệu nguồn. Bảng có cấu trúc thì phải được kiểm ĐỦ cấu trúc.
+_LUOC_DO_BANG = {
+    "_TRANSPORT_CONTRACTS": ("provider", "lenh", "execution_surface", "transport"),
+    "_PROVIDER_NGOAI_CLI":  ("provider", "execution_surface", "transport"),
+    "_PROVIDER_BI_DANH":    ("bi_danh", "provider"),
+    "_BE_MAT_BI_DANH":      ("bi_danh", "execution_surface"),
 }
 
 
@@ -163,7 +190,11 @@ def _provider_chinh_tac():
     try:
         import ast
         van_launcher = nguon.read_text(encoding="utf-8")
-        van_agents = tv.read_text(encoding="utf-8")
+        # NGUỒN LUẬT — `AGENTS.md` (đối chiếu hợp đồng + neo luật §4) và `PROTOCOL` (neo
+        # phân vùng người/mô hình, R7-02). Thiếu một tệp là thiếu nguồn, không phải "luật
+        # vẫn đúng".
+        van_luat = {t: (goc / t).read_text(encoding="utf-8") for t in NGUON_LUAT}
+        van_agents = van_luat["AGENTS.md"]
     except (OSError, UnicodeDecodeError) as ex:
         # `UnicodeDecodeError` KHÔNG phải `OSError`. Cross-review vòng 5 (`R5-01`) đo được:
         # bơm một byte không giải mã được vào một trong hai nguồn ⇒ ngoại lệ ném lúc IMPORT,
@@ -176,58 +207,94 @@ def _provider_chinh_tac():
         return {}, f"`{nguon}` không phân tích được: {ex}"
 
     def _bang(ten):
-        nut = next((n for n in ast.walk(cay)
-                    if isinstance(n, ast.Assign) and n.targets
-                    and getattr(n.targets[0], "id", "") == ten), None)
-        if nut is None or not isinstance(nut.value, ast.Tuple):
-            return None
+        """Trả (hàng ĐÃ KIỂM lược đồ, lý do hỏng). Lỗi nêu bảng/hàng/cột — KHÔNG ném.
+
+        `R7-01`: bản trước trả hàng bất kỳ số cột và để người gọi unpack ⇒ lỗi DỮ LIỆU
+        NGUỒN thoát ra lúc import. Nay mọi ô được kiểm TRƯỚC khi ai unpack: arity theo
+        `_LUOC_DO_BANG`, chuỗi không rỗng cho mọi cột trừ `lenh`. Chỉ nhận literal thuần
+        (`ast.literal_eval`) ở MỨC MODULE và ĐÚNG MỘT lần — bảng được tính toán hay khai hai
+        lần thì không biết bảng nào là nguồn."""
+        cot = _LUOC_DO_BANG[ten]
+        nuts = [n for n in cay.body if isinstance(n, ast.Assign) and len(n.targets) == 1
+                and getattr(n.targets[0], "id", "") == ten]
+        if not nuts or not isinstance(nuts[0].value, ast.Tuple):
+            return None, (f"`{nguon}`: `{ten}` thiếu hoặc sai hình dạng (đòi một tuple literal "
+                          f"ở mức module)")
+        if len(nuts) > 1:
+            return None, (f"`{nguon}`: `{ten}` khai {len(nuts)} lần ở mức module — không biết "
+                          f"bảng nào là nguồn")
+        try:
+            gia_tri = ast.literal_eval(nuts[0].value)
+        except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError) as ex:
+            return None, (f"`{nguon}`: `{ten}` không phải literal thuần ({type(ex).__name__}) — "
+                          f"bảng nguồn không được tính toán hay tham chiếu tên")
         ra = []
-        for t in nut.value.elts:
-            if not isinstance(t, ast.Tuple):
-                return None
-            ra.append([x.value if isinstance(x, ast.Constant) else x for x in t.elts])
-        return ra
+        for i, hang in enumerate(gia_tri, 1):
+            if not isinstance(hang, tuple):
+                return None, f"`{nguon}`: `{ten}` hàng {i} không phải tuple"
+            if len(hang) != len(cot):
+                return None, (f"`{nguon}`: `{ten}` hàng {i} có {len(hang)} cột, lược đồ đòi "
+                              f"{len(cot)} ({', '.join(cot)})")
+            for c, x in zip(cot, hang):
+                if c == "lenh":
+                    ok = (isinstance(x, tuple) and bool(x)
+                          and all(isinstance(y, str) and y and y.strip() == y for y in x))
+                    mo_ta = "bộ tên lệnh (tuple chuỗi không rỗng)"
+                else:
+                    ok = isinstance(x, str) and bool(x) and x.strip() == x
+                    mo_ta = "chuỗi không rỗng, không thừa khoảng trắng"
+                if not ok:
+                    return None, (f"`{nguon}`: `{ten}` hàng {i} cột `{c}` = {x!r} không phải "
+                                  f"{mo_ta}")
+            ra.append(hang)
+        return ra, None
 
     # CHỈ NGUỒN CÓ CẤU TRÚC. Bản trước gom MỌI hằng chuỗi dưới `CONG_CU`/`KHA_NANG` rồi
     # dò regex — nên chính chuỗi `vi_sao` mô tả của một mục cũng cấp được quyền
     # (cross-review, P2 trên `5a78c15`: đổi một chuỗi lý do thành `provider ke_gian_5 qua
     # execution_surface forged` ⇒ `ke_gian_5` vào danh sách CHO PHÉP, không lỗi nguồn nào).
     # Đổi NGUỒN mà giữ HÌNH DẠNG (đọc prose) thì lỗ chỉ đổi chỗ — lần thứ hai liên tiếp.
-    hd = _bang("_TRANSPORT_CONTRACTS")
-    if hd is None:
-        return {}, f"`{nguon}`: `_TRANSPORT_CONTRACTS` thiếu hoặc sai hình dạng"
+    hd, loi_hd = _bang("_TRANSPORT_CONTRACTS")
+    if loi_hd:
+        return {}, loi_hd
     if not hd:
         return {}, f"`{nguon}`: `_TRANSPORT_CONTRACTS` RỖNG — có mặt mà không dùng được"
-    ngoai = _bang("_PROVIDER_NGOAI_CLI")
-    if ngoai is None:
-        return {}, f"`{nguon}`: `_PROVIDER_NGOAI_CLI` thiếu hoặc sai hình dạng"
+    ngoai, loi_ngoai = _bang("_PROVIDER_NGOAI_CLI")
+    if loi_ngoai:
+        return {}, loi_ngoai
     if not ngoai:
         return {}, f"`{nguon}`: `_PROVIDER_NGOAI_CLI` RỖNG"
+    # BÍ DANH cũng đọc từ bảng, và được CHUẨN HOÁ trước mọi phép kiểm theo provider. Hai
+    # bảng, hai chốt RIÊNG — gộp `bd is None or bd_bm is None` thành một `if` là để một
+    # phép làm yếu bỏ riêng vế sau đi qua cả suite (`R7-03`, phép B).
+    bd, loi_bd = _bang("_PROVIDER_BI_DANH")
+    if loi_bd:
+        return {}, loi_bd
+    bd_bm, loi_bm = _bang("_BE_MAT_BI_DANH")
+    if loi_bm:
+        return {}, loi_bm
 
+    # Từ đây MỌI hàng đã đúng lược đồ: unpack không còn là chỗ lỗi dữ liệu thoát ra.
     hop_dong = {}
-    try:
-        for prov, _lenh, be_mat, van_chuyen in hd:
-            hop_dong.setdefault(prov, {"be_mat": set(), "van_chuyen": set()})
-            hop_dong[prov]["be_mat"].add(be_mat)
-            hop_dong[prov]["van_chuyen"].add(van_chuyen)
-        for prov, be_mat, van_chuyen in ngoai:
-            hop_dong.setdefault(prov, {"be_mat": set(), "van_chuyen": set()})
-            hop_dong[prov]["be_mat"].add(be_mat)
-            hop_dong[prov]["van_chuyen"].add(van_chuyen)
-    except (TypeError, ValueError) as ex:
-        return {}, f"`{nguon}`: bảng provider sai số cột ({type(ex).__name__}: {ex})"
-    if not all(isinstance(k, str) and k for k in hop_dong):
-        return {}, f"`{nguon}`: bảng provider có tên không phải chuỗi"
+    for prov, _lenh, be_mat, van_chuyen in hd:
+        hop_dong.setdefault(prov, {"be_mat": set(), "van_chuyen": set()})
+        hop_dong[prov]["be_mat"].add(be_mat)
+        hop_dong[prov]["van_chuyen"].add(van_chuyen)
+    for prov, be_mat, van_chuyen in ngoai:
+        hop_dong.setdefault(prov, {"be_mat": set(), "van_chuyen": set()})
+        hop_dong[prov]["be_mat"].add(be_mat)
+        hop_dong[prov]["van_chuyen"].add(van_chuyen)
 
-    # BÍ DANH cũng đọc từ bảng, và được CHUẨN HOÁ trước mọi phép kiểm theo provider.
-    bd = _bang("_PROVIDER_BI_DANH")
-    bd_bm = _bang("_BE_MAT_BI_DANH")
-    if bd is None or bd_bm is None:
-        return {}, f"`{nguon}`: thiếu bảng bí danh (`_PROVIDER_BI_DANH`/`_BE_MAT_BI_DANH`)"
     for cu_, moi_ in bd:
         if moi_ not in hop_dong:
             return {}, f"`{nguon}`: bí danh `{cu_}` trỏ `{moi_}` không có hợp đồng"
+    # ĐÚNG MIỀN: đích của bí danh bề mặt phải là một bề mặt CÓ trong hợp đồng. Bản trước
+    # lặng lẽ bỏ qua đích không khớp — bí danh chết mà không ai biết (`R7-01`).
+    moi_be_mat = set().union(*(v["be_mat"] for v in hop_dong.values()))
     for cu_, moi_ in bd_bm:
+        if moi_ not in moi_be_mat:
+            return {}, (f"`{nguon}`: bí danh bề mặt `{cu_}` trỏ `{moi_}` không phải bề mặt "
+                        f"của provider nào — bí danh không có đích là bí danh chết")
         for v in hop_dong.values():
             if moi_ in v["be_mat"]:
                 v["be_mat"].add(cu_)
@@ -250,10 +317,10 @@ def _provider_chinh_tac():
                 return {}, (f"`{tv}` khai `{ten}` với {khoa}=`{g.group(1)}` khác hợp đồng "
                             f"{sorted(hop_dong[ten][khoa])} — hai nguồn LỆCH nhau")
 
-    for prov, cau in _NEO_LUAT_ASSURANCE.items():
-        if cau not in van_agents:
-            return {}, (f"`{tv}` không còn câu biện minh cho giới hạn assurance của "
-                        f"`{prov}` ({cau!r}) — luật chép tay mất neo")
+    for luat, tep, cau in _NEO_LUAT_CHEP_TAY:
+        if cau not in van_luat[tep]:
+            return {}, (f"`{goc / tep}` không còn câu biện minh cho `{luat}` ({cau!r}) — "
+                        f"luật chép tay mất neo")
     return ({"hop_dong": {k: {"be_mat": frozenset(v["be_mat"]),
                               "van_chuyen": frozenset(v["van_chuyen"])}
                           for k, v in hop_dong.items()},
@@ -263,15 +330,19 @@ def _provider_chinh_tac():
 # `anthropic` (không hậu tố) là DẠNG LỊCH SỬ: bốn biên nhận v2 chuẩn của kho và hai biên
 # nhận lượt 1-2 dùng nó. Giữ làm BÍ DANH có khai, không âm thầm — đổi cách đọc một tên đã
 # nằm trong hiện vật là viết lại lịch sử.
-# `human` là provider KHÔNG có hợp đồng nào trong kho. Giữ nó đọc được, nhưng KHÔNG hợp
-# đồng ⇒ KHÔNG thẩm quyền: `_thieu` chặn mọi mức assurance hàm ý review độc lập cho một
-# provider không có hợp đồng. Nguyên tắc, không phải danh sách: chưa khai thì chưa có quyền.
-PROVIDER_KHONG_HOP_DONG = frozenset({"human"})
+#
+# `human` KHÔNG còn là tên chép tay ở đây. Bản trước giữ `PROVIDER_KHONG_HOP_DONG = {"human"}`
+# với lý lẽ *"provider KHÔNG có hợp đồng nào trong kho"* — SAI với bảng provider chuyển tiếp
+# (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §2 đã khai `human / manual_audit / human`), và
+# hệ quả đo được (`R7-02`): `_thieu` cấm provider-không-hợp-đồng MỌI mức của
+# `ASSURANCE_CAN_DOC_LAP`, kể cả `human_audited` — mức mà `PROTOCOL §8` dành ĐÚNG cho người
+# audit — nên một biên nhận v2 human-audit hợp lệ bị loại vô điều kiện theo TÊN. Nay `human`
+# có hợp đồng trong `_PROVIDER_NGOAI_CLI` của `launcher.py` như mọi provider khác; danh
+# sách CHO PHÉP = tên có hợp đồng ∪ bí danh, không còn ngăn "có tên mà không hợp đồng".
 _HD, PROVIDER_NGUON_HONG = _provider_chinh_tac()
 PROVIDER_HOP_DONG = _HD.get("hop_dong", {})
 PROVIDER_BI_DANH = _HD.get("bi_danh", {})
-PROVIDER_CHO_PHEP = frozenset(PROVIDER_HOP_DONG) | frozenset(PROVIDER_BI_DANH) \
-    | PROVIDER_KHONG_HOP_DONG
+PROVIDER_CHO_PHEP = frozenset(PROVIDER_HOP_DONG) | frozenset(PROVIDER_BI_DANH)
 
 
 def _chuan_hoa_provider(prov):
@@ -315,8 +386,9 @@ def _mri(d):
         if be_mat not in hd["be_mat"]:
             return (f"`model_reviewer_identity.surface`={be_mat!r} không phải bề mặt của "
                     f"provider `{prov}` — hợp đồng của kho cho {sorted(hd['be_mat'])}")
-        # `transport` KHÔNG bắt buộc (0/14 hiện vật khai nó — đòi ngay là bắt oan cả kho),
-        # nhưng KHAI SAI thì chặn: một bộ ba SAI SỰ THẬT tệ hơn một bộ ba khuyết.
+        # `transport` KHÔNG bắt buộc (0/14 hiện vật khai nó lúc vá, `b7a53ba`; đo lại
+        # 06-09-2026 trên `4488ff1`: 1/15 — đòi ngay vẫn là bắt oan cả kho), nhưng KHAI SAI
+        # thì chặn: một bộ ba SAI SỰ THẬT tệ hơn một bộ ba khuyết.
         # Nợ đã khai: chưa đòi khai `transport`, xem caveat trong biên nhận lượt 6.
         vc = _chuoi(v.get("transport"))
         if vc and vc not in hd["van_chuyen"]:
@@ -408,6 +480,19 @@ YEU_CAU = (
 # khai mức ấy — F3 của cross-review PR #455: chính khối identity mới thêm nói tính độc lập là
 # KHÔNG ĐO ĐƯỢC rồi lấy đó biện minh cho `same_provider_approved`.
 ASSURANCE_CAN_DOC_LAP = frozenset({"cross_approved", "same_provider_approved", "human_audited"})
+# PHÂN VÙNG MỨC ASSURANCE THEO LOẠI REVIEWER — suy từ cột `transport` của HỢP ĐỒNG, không từ
+# tên; neo ở `PROTOCOL §8` mục 1-3 qua `_NEO_LUAT_CHEP_TAY`. `R7-02`: bản trước cấm `human` mọi
+# mức của `ASSURANCE_CAN_DOC_LAP` (xem chú thích trên `_HD`); và cùng LỚP ấy còn một mặt chưa ai
+# chỉ: một mô hình khai `human_audited` đi qua `_thieu` không vướng gì (chỉ `openai_chatgpt` bị
+# `AGENTS.md` §4 cấm đích danh). Hai mặt của một luật: vận chuyển `human` ⇒ NGƯỜI ⇒ chỉ được
+# `human_audited`; mọi vận chuyển khác (`machine`, `machine/local`, `human_mediated` — người
+# CHUYỂN TIẾP đầu ra của một mô hình, danh tính reviewer vẫn là mô hình) ⇒ MÔ HÌNH ⇒ không
+# được `human_audited`. Hợp đồng vận chuyển HỖN HỢP (`human` + khác) chưa có trong kho; nếu
+# xuất hiện thì coi là mô hình — siết `human_audited`, không siết mức mô hình. Ghi ra để không
+# ai đọc thành đã đo.
+VAN_CHUYEN_NGUOI = "human"
+ASSURANCE_CUA_NGUOI = frozenset({"human_audited"})
+ASSURANCE_CUA_MO_HINH = frozenset({"cross_approved", "same_provider_approved"})
 # Ba loại mỏ neo protocol liệt kê (dòng 455): "canonical ancestry, protected evidence ref hoặc
 # check object". DANH SÁCH CHO PHÉP, không phải danh sách cấm — bài học `v1.36.68`: danh sách
 # cấm phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN.
@@ -555,21 +640,12 @@ def _thieu(d: dict) -> list[str]:
                          or mri.get("phien_doc_lap") is True)
         khai = _chuoi(d.get("assurance")) or _chuoi(d.get("assurance_dat")) or ""
         prov = _chuan_hoa_provider(_chuoi(mri.get("provider")) or "")
-        cam = set(ASSURANCE_CAM_THEO_PROVIDER.get(prov, frozenset()))
-        # KHÔNG HỢP ĐỒNG ⇒ KHÔNG THẨM QUYỀN. Nguyên tắc thay cho một danh sách: chưa khai
-        # được bề mặt/vận chuyển thì chưa có gì để đối chiếu, nên không được khai một mức
-        # hàm ý review có thẩm quyền. Chặn luôn cả provider hợp lệ mới thêm mà quên hợp đồng.
-        if prov and prov not in PROVIDER_HOP_DONG:
-            cam |= set(ASSURANCE_CAN_DOC_LAP)
+        cam = _muc_cam_theo_provider(prov)
         if khai in cam:
-            # HAI LÝ DO KHÁC NHAU, nói đúng cái nào đang áp — một thông báo sai lý do đẩy
-            # người đọc đi sửa nhầm chỗ, đúng bệnh `R4-02` ở tầng văn bản.
-            ly_do = ("`AGENTS.md` §4 giới hạn provider này ở `advisory_review`"
-                     if prov in ASSURANCE_CAM_THEO_PROVIDER
-                     else f"provider `{prov}` KHÔNG có hợp đồng bề mặt/vận chuyển nào trong kho "
-                          f"— chưa khai thì chưa có thẩm quyền")
+            # LÝ DO ĐÚNG CÁI ĐANG ÁP — một thông báo sai lý do đẩy người đọc đi sửa nhầm
+            # chỗ, đúng bệnh `R4-02` ở tầng văn bản.
             loi.append(
-                f"provider `{prov}` KHÔNG được tự tạo `{khai}` — {ly_do}; nhận một tên vào "
+                f"provider `{prov}` KHÔNG được tự tạo `{khai}` — {cam[khai]}; nhận một tên vào "
                 f"danh sách CHO PHÉP không mang theo quyền của tên khác")
         if khai in ASSURANCE_CAN_DOC_LAP and (tu_khai_trong_phien or not co_bang_chung):
             ly_do = ("tự khai chạy trong phiên điều phối" if tu_khai_trong_phien
@@ -579,6 +655,43 @@ def _thieu(d: dict) -> list[str]:
                 f"một lượt review có thẩm quyền; dùng `review_deferred`, hoặc khai "
                 f"`phien_doc_lap` kèm căn cứ")
     return loi
+
+
+def _muc_cam_theo_provider(prov):
+    """Mức assurance mà provider `prov` KHÔNG được tự khai → lý do. RỖNG khi nguồn chưa đo được.
+
+    `R7-01`, lần thứ TƯ cùng hình dạng trong PR này: khi nguồn provider hỏng, `PROVIDER_HOP_DONG`
+    rỗng và bản trước suy *"không hợp đồng ⇒ không thẩm quyền"* cho MỌI provider ⇒ **11 biên
+    nhận nguyên byte bị kết tội** `KHÔNG có hợp đồng` (rc=2 nhưng kèm 11 dòng ĐỎ), trong khi lỗi
+    nằm ở NGUỒN. Mọi giới hạn suy từ provider chỉ được suy khi nguồn ĐÃ ĐO ĐƯỢC; nguồn hỏng thì
+    `kiem` đã ghi trạng thái thứ ba cho cả lượt. Những chốt KHÔNG phụ thuộc nguồn (kiểu, SHA,
+    bằng chứng phiên độc lập) vẫn chạy — "chưa đo được hợp đồng" không phải "miễn kiểm"."""
+    cam = {}
+    if PROVIDER_NGUON_HONG is not None or not prov:
+        return cam
+    for m in ASSURANCE_CAM_THEO_PROVIDER.get(prov, frozenset()):
+        cam.setdefault(m, "`AGENTS.md` §4 giới hạn provider này ở `advisory_review`")
+    hd = PROVIDER_HOP_DONG.get(prov)
+    if hd is None:
+        # KHÔNG HỢP ĐỒNG ⇒ KHÔNG THẨM QUYỀN. Nguyên tắc thay cho một danh sách: chưa khai
+        # được bề mặt/vận chuyển thì chưa có gì để đối chiếu, nên không được khai một mức
+        # hàm ý review có thẩm quyền. Chặn luôn cả tên được nhét TAY vào danh sách CHO PHÉP.
+        for m in ASSURANCE_CAN_DOC_LAP:
+            cam.setdefault(m, f"provider `{prov}` KHÔNG có hợp đồng bề mặt/vận chuyển nào "
+                              f"trong kho — chưa khai thì chưa có thẩm quyền")
+        return cam
+    # PHÂN VÙNG NGƯỜI / MÔ HÌNH theo HỢP ĐỒNG vận chuyển (`R7-02`) — xem `ASSURANCE_CUA_NGUOI`.
+    la_nguoi = hd["van_chuyen"] == {VAN_CHUYEN_NGUOI}
+    if la_nguoi:
+        for m in ASSURANCE_CUA_MO_HINH:
+            cam.setdefault(m, f"`{m}` là mức review giữa các MÔ HÌNH (`PROTOCOL §8`); `{prov}` "
+                              f"là NGƯỜI theo hợp đồng vận chuyển `{VAN_CHUYEN_NGUOI}` — mức của "
+                              f"người audit là `human_audited`")
+    else:
+        for m in ASSURANCE_CUA_NGUOI:
+            cam.setdefault(m, f"`{m}` là mức của NGƯỜI audit (`PROTOCOL §8`); `{prov}` là MÔ "
+                              f"HÌNH theo hợp đồng vận chuyển {sorted(hd['van_chuyen'])}")
+    return cam
 
 
 def _git(root: Path, *args, timeout=20):
@@ -755,7 +868,9 @@ def kiem(root: Path, allowlist=None, no_da_do=None):
         # phải khuyết tật của từng biên nhận. Nói thẳng phép kiểm nào KHÔNG chạy, kẻo
         # "cổng đỏ" bị đọc thành "đã đo và biên nhận sai".
         chua_do.append(f"KHÔNG ĐO ĐƯỢC danh sách provider chính tắc — {PROVIDER_NGUON_HONG}; "
-                       f"phép kiểm `model_reviewer_identity.provider` KHÔNG chạy lượt này")
+                       f"mọi phép kiểm suy từ provider (danh sách CHO PHÉP, bề mặt/vận chuyển, "
+                       f"giới hạn assurance theo provider) KHÔNG chạy lượt này — kiểm kiểu, SHA "
+                       f"và bằng chứng phiên độc lập vẫn chạy")
     for p in ds:
         ten, b = p.name, _bam(p)
         if ten in al:

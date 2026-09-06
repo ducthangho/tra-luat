@@ -1,8 +1,12 @@
 # BIEN NHAN v2 — cross-review luot 6 cua PR #455, reviewer codex, tren head 5a78c15.
 #
-# LUOT THU TU LIEN TIEP KHONG CON P1 tu duong `launcher.py run`. Hai P2 + mot P3, va ca hai
-# P2 deu ve DO PHU: chot moi khoa dung PHAN GIA TRI ma fixture chon, va mot duong mat du
-# lieu nguon van duoc bao sach.
+# LUOT THU TU LIEN TIEP KHONG CON P1 tu duong `launcher.py run`. Hai P2 + mot P3, KHAC LOAI:
+#   R6-01 (P2) la DO PHU        — chot moi khoa dung PHAN GIA TRI ma fixture chon.
+#   R6-02 (P2) la HANH VI SAN PHAM — nguon mat rieng dong surface van duoc bao sach: phan loai
+#              nguon KHONG DU hop dong, khong phai loi test (verdict tu noi da do NGUON).
+#   R6-03 (P3) la MO TA PHAM VI  — noi "bo ba" khi chua doc transport.
+# Ban dau cua header nay gom ca hai P2 thanh "deu ve DO PHU"; cross-review luot 7 (`R7-05`,
+# gpt-6-astra) bac. Chi sua TOM TAT nay; verdict va cac truong bam giu nguyen byte.
 
 schema_version: 2
 receipt_id: pr455-bien-nhan-v2-review-6-codex-20260906-c7af46a4

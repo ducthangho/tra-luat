@@ -164,6 +164,14 @@ _TRANSPORT_CONTRACTS = (
 _PROVIDER_NGOAI_CLI = (
     ("google_antigravity", "antigravity", "machine"),
     ("openai_chatgpt", "chatgpt_web", "human_mediated"),
+    # Human Auditor — bộ ba chép từ bảng provider chuyển tiếp
+    # (`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §2, hàng "Human Auditor"). Cross-review PR #455
+    # lượt 7 (`R7-02`) đo được: `human` từng bị bộ kiểm biên nhận chép tay vào tập "KHÔNG hợp
+    # đồng" nên bị cấm cả `human_audited` — mức `PROTOCOL §8` dành ĐÚNG cho người audit.
+    # Vận chuyển là `human`, KHÔNG phải `human_mediated`: ở đây người LÀ reviewer, không phải
+    # người chuyển tiếp đầu ra của một mô hình. Cột ấy là thứ bộ kiểm dùng để phân vùng mức
+    # assurance người/mô hình, nên đừng đổi nó khi "dọn cho gọn".
+    ("human", "manual_audit", "human"),
 )
 
 # BÍ DANH LỊCH SỬ → tên chính tắc. Hiện vật cũ của kho khai `anthropic` và

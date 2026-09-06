@@ -1,6 +1,6 @@
 # Phản biện đề xuất "Cải tiến quy trình Build – Review – CI"
 
-- **Ngày đo:** 05-09-2026 · **HEAD:** `c03a409` (= `origin/master`) · **Người viết:** phiên Claude Code
+- **Ngày đo:** bản 1 đo 05-09-2026 tại `c03a409`; bản 2–3 đo 06-09-2026 tại `07eb236`/`ba76a78` · **Người viết:** phiên Claude Code
 - **Trạng thái:** phản biện thiết kế, CHƯA thi công. Không sửa mã, không mở packet.
 - **Bản 2 — sau cross-review lượt 1 (06-09-2026).** Hai reviewer độc lập, hai hướng tấn công tách biệt.
   Kết quả: **kết luận trung tâm bị ĐẢO**, 4+8 finding P1 được nhận sau khi phiên chính tự đo lại từng cái.
@@ -55,52 +55,83 @@ thay vì THẨM QUYỀN*. Ghi lại thay vì xoá, vì một phản biện giấ
 
 ---
 
-## 1. Kết luận ngắn — ĐÃ ĐẢO SAU CROSS-REVIEW LƯỢT 1
+## 1. Kết luận ngắn — BẢN 3, sau HAI lượt cross-review
 
-**Bản đầu kết luận: "9/13 mục đã tồn tại ⇒ đề xuất thêm được ít; vấn đề là TUÂN THỦ chứ không phải
-THIẾT KẾ." Cross-review lượt 1 lật câu ấy, và tôi đã tự đo lại rồi nhận.**
+**Ba bản, ba biến, hai bản đầu đo sai biến.**
 
-Chỗ hỏng không nằm ở con số 9. Nó nằm ở chữ **"đã có"**. Tôi đọc "có mặt trong tài liệu" thành
-"đang có hiệu lực" — đúng lỗi *đếm sự CÓ MẶT thay vì KHẢ NĂNG* mà tệp này dùng để bác mục 11 của
-đề xuất. §20 của protocol có sẵn cột **"cổng đã ĐO"** để trả lời chính câu hỏi ấy, và tôi **chưa hề
-tra nó**. Đo:
-
-| ADR | luật | cổng đã ĐO |
+| bản | đo cái gì | kết quả |
 |---|---|---|
-| `ADR-0032` · `0037` · `0038` · `0039` · `0040` · `0043` · `0044` · `0045` | (tám ADR) | **`0 cổng`** |
-| `ADR-0046` | | `0 cổng vận hành` |
+| 1 | luật có được **VIẾT** không | sai — nhầm "có trong tài liệu" với "đang có hiệu lực" |
+| 2 | luật có được **MÃ HOÁ** không | sai — và sai theo cách trớ trêu hơn (dưới) |
+| **3** | luật có bị **VI PHẠM** không | đo được từ 82 lease + 57 biên nhận |
 
-`docs/PROTOCOL_DA_PHIEN.md:1105` định nghĩa `0 cổng` là **phép đo MẠNH**: *"không tệp cổng nào
-(`ops/lease_publish.py`, `.claude/dev/packet_loop.py`, …)"*. Và §20 dặn trước rằng *"có nhắc"* là
-**PROXY**, không phải cưỡng chế.
+**Bản 1 sai** như đã ghi: nó bác 9 mục bằng lý lẽ *"đã có rồi"* mà chưa hề tra xem chúng có được cưỡng chế
+không. Finding ấy đứng nguyên.
 
-**Nên câu đúng là: 9/13 đã được VIẾT, phần lớn có `0 cổng`.** Hệ quả đảo ngược khuyến nghị:
+**Bản 2 sửa quá tay, và cross-review lượt 2 bắt bằng ba phản chứng độc lập:**
 
-> Với một mục đã viết mà **không cổng nào cưỡng chế**, "đã có rồi" **KHÔNG phải lý do bác một đề xuất** —
-> vì đề xuất có thể chính là **phần cưỡng chế còn thiếu**.
+1. **Bằng chứng KHÔNG GIAO với kết luận.** Bản 2 trưng bảng 8 ADR `0 cổng` để đỡ câu *"9 mục ấy phần lớn
+   0 cổng"*. Nhưng **không mục nào trong 9 mục neo vào bất kỳ ADR nào trong 8 cái đó** — chúng neo vào
+   §10.1, §3.2, §12, `PROTOCOL:198`, `cross-review/SKILL.md`, và **ADR-0036**, mà §20 xếp ADR-0036 là
+   `có nhắc: packet_loop.py×29`. Tôi đo phân bố trên tập ADR rồi khai kết luận về tập "9 mục"; giao của
+   hai tập là **rỗng**.
+2. **Một dòng của bảng ấy SAI TẠI HEAD.** §20 ghi `ADR-0038 | 0 cổng`. Đo: `ops/lease_publish.py:189`
+   có cổng thật, fail-closed, **7** ca phản chứng `RC_LOP`, ghim băm trong workflow — và nó land
+   **23-08-2026**, đúng **một ngày sau** mốc `22-08-2026` mà §20 tự ghi ở đầu cột. Tôi dùng một phép đo
+   **có ghi ngày** mà không kiểm ngày.
+3. **Tiền đề bị chính §0 của tệp này bác.** Bản 2 suy *"`0 cổng` ⇒ không được cưỡng chế"*. Đo:
 
-Ba phản chứng cụ thể, mỗi cái tự nó đủ phá lập luận cũ:
+   | luật | số lần xuất hiện trong 6 tệp cổng của §20 | hiện vật TUÂN |
+   |---|---|---|
+   | mỏ neo đặc tả | **0** ở cả sáu | **50/82 = 61,0%** |
+   | trần vòng ADR-0043 | `nang_tran` **0** | **81/82** giữ trần |
 
-- **Trần 2 vòng (ADR-0043)** — bản đầu gọi là *"2 lượt/PR, **cứng**"*. Đo: `nang_tran` xuất hiện **0 lần**
-  trong `ops/lease_publish.py`; đúng **1/82** lease có khối ấy; §20 ghi `ADR-0043 | 0 cổng — so-canon chưa
-  tồn tại`. Trần **nới được** và **không ai canh**. Tôi lấy nó làm ví dụ về "tài nguyên khan hiếm, cứng"
-  trong khi nó là ví dụ về **luật không có cổng**.
-- **`spec_hash` (§3.2)** — không phải "chạy 17%". Kho có **bốn tên** cho mỏ neo đặc tả, đo theo khả năng
-  ra **61%**, và §3.2 đòi `spec_hash` trên **Work Packet Issue** trong khi schema lease ở §4 **không có
-  trường ấy**. Tôi đo sai loại hiện vật rồi đọc kết quả thành tỉ lệ vô kỷ luật.
-- **Năng lực đo của reviewer** — bản đầu trình bày như phát hiện riêng (*"đòn bẩy mạnh nhất đã biết"*).
-  Thực ra `docs/PROTOCOL_DA_PHIEN.md` §8 **đã là luật hiện hành**, kèm cả `git clone --bare` lẫn ràng buộc
-  `core.abbrev = 7`. Nó là **mục thứ 10 của danh sách "đã có"**, và nó cũng `0 cổng`. Tôi áp tiêu chuẩn
-  *"đã có ⇒ đừng thêm"* cho 9 mục của người khác, rồi trình bày một luật đã có của kho như thứ mình nghĩ ra.
+   **Luật không cổng vẫn ràng buộc được, ở mức 61–99%.**
 
-**Kết luận thay thế.** Cả đề xuất lẫn bản phản biện đầu đều cãi nhau ở **sai tầng**. Đề xuất muốn thêm
-LUẬT; bản phản biện đầu đáp "luật có rồi". Phép đo nói: **luật có rồi, CỔNG thì không.** Việc đáng làm
-không phải viết thêm tầng quy trình, cũng không phải "cưỡng chế cho đúng luật đang có" như bản đầu nói —
-mà là **biến các luật đã viết thành cổng chạy được, theo thứ tự rủi ro**. Đó là việc thứ ba, và cả hai
-bên đều chưa nói tới nó.
+Và `0 cổng` là **9/30 = 30%** của bảng §20 (15 `có nhắc`, 6 `chưa đo`) — **thiểu số**, không phải "phần lớn".
 
-Ba mục vẫn nên **bác**, nhưng lý do đổi: mục 2 và 11 bác vì phép đo (F1, F2 — F1 nay yếu hơn bản đầu, xem
-đó); mục 9 bác vì nó **đổi nghĩa một giá trị canon** (F3 đã viết lại).
+**Hình dạng của cái sai đáng nhớ hơn cái sai.** Bản 1 suy *"có trong tài liệu ⇒ có hiệu lực"*. Bản 2 suy
+*"không có mã trong 6 tệp ⇒ không hiệu lực"*. Đó là **cùng một phép suy một chiều từ sự CÓ MẶT sang KHẢ
+NĂNG**, chỉ đảo dấu. Bản 2 phạm lại chính lỗi nó vừa đặt tên, **trong câu dùng để đặt tên nó**.
+
+### Biến đúng, và nó rẻ
+
+Với mỗi luật, đo **tỉ lệ vi phạm trên hiện vật** (lease · biên nhận · PR), không đo `grep` trong 6 tệp.
+Ba ô, không phải hai:
+
+| ô | nghĩa | ví dụ đo được |
+|---|---|---|
+| có cổng | cưỡng chế bằng mã | `ADR-0038` — 13/13 lease `schema_version: 2` tuân |
+| không cổng **nhưng tuân** | luật sống bằng kỷ luật | mỏ neo đặc tả 61% · trần vòng 81/82 |
+| không cổng **và có vi phạm đo được** | ← **việc cần làm** | phải đo mới biết; chưa ai đo |
+
+Chỉ ô thứ ba là việc. Đó là trục duy nhất khiến chữ *"theo thứ tự rủi ro"* có nghĩa, và **cả ba bản đều
+chưa đo nó**.
+
+### Điều CẢ BA bản đều im lặng, và nó quyết định giá trị của mọi MVP
+
+`.claude/dev/duyet_danh_tinh.py` khai thẳng, có ngày, có packet:
+
+> *"phiên chạy bằng credential CỦA CHỦ KHO, nên **mọi chốt dựng trong kho đều là chốt chủ kho tự dựng cho
+> chính mình** — `guard --action merge` chặn một NHÃN VAI, không chặn một THẨM QUYỀN. Cổng này chạy trên
+> RUNNER CỦA GITHUB bằng `GITHUB_TOKEN`, KHÔNG bằng credential của phiên… Đó là **cơ chế đầu tiên ở đây
+> không tự chứng nhận**."*
+
+Nên *"biến luật thành cổng"* **chưa phải việc thứ ba**. Việc thứ ba là làm cho cổng ràng buộc được **chính
+người dựng ra nó** — nửa ngoài kho (danh tính chạy-việc khác admin, `master` siết không-bypass), đã có
+runbook `ops/RUNBOOK_TACH_DANH_TINH_GITHUB.md` và **còn treo**. Chừng nào nửa ấy chưa xong, mọi cổng trong
+kho là **khuyến nghị**, và bốn MVP dưới đây có giá trị đúng bằng kỷ luật của người chạy chúng.
+
+Trớ trêu, và kiểm được: cổng đã chặn PR chứa chính tệp này suốt phiên — `duyet khac danh tinh` — **là cổng
+đầu tiên ấy**. Câu trả lời cho câu hỏi tài liệu đặt ra nằm ngay trên cái PR mang nó.
+
+### Ba mục vẫn nên bác — lý do đã lọc lại
+
+Chỉ giữ mục nào **không** dựa vào công thức *"đã có ⇒ bác"*: mục **2** và **11** (bác bằng phép đo hành vi,
+xem F1/F2), mục **9** (bác vì đổi nghĩa một giá trị canon **có mã cưỡng chế** — `CHUYEN_HOP_LE["blocked"]
+= ()`). Các mục 1, 4, 13 trước đây bị bác vì *"trùng lặp"* nay hạ xuống **CHƯA QUYẾT ĐỊNH ĐƯỢC**: chúng neo
+vào §10.1/§12, mà §20 không có ô cổng nào cho hai mục ấy. Mục 7, 8, 10 giữ nguyên lý do bác vì lý do thật
+là **va chạm từ vựng**, và cái đó có cổng đỏ được thật (`RC_DOCTRINE = 6`, `doctrine-scan`).
 
 ## 2. Đối chiếu 13 mục với protocol đang hiệu lực
 
@@ -108,7 +139,7 @@ Ba mục vẫn nên **bác**, nhưng lý do đổi: mục 2 và 11 bác vì phé
 |---|---|---|---|
 | 1. Ba tầng kiểm tra | **ĐÃ CÓ, mạnh hơn** | §10.1 — **sáu tầng T0–T5** + classifier/aggregator | Bản đề xuất là bản RÚT GỌN của thứ đang có. Gộp T3/T4/T5 thành "full CI" xoá mất phân biệt integration-freeze / canonical / release artifact. |
 | 2. Hoãn full CI khỏi vòng lặp | **MÂU THUẪN** | §10.1 | Xem F1. Ngoài ra §10.1 đã cấm trước: selector chỉ được activate sau **shadow 2–4 tuần** chứng minh không bỏ sót failure. Đề xuất chính là activate selector, mà không kèm shadow evidence. |
-| 3. Architecture review gate | **ĐÃ CÓ** | §3.2 `spec_hash` đóng băng ở `ready`; skill `soan-spec`; `ops/THAM_DINH_*` (5 vòng); 46 ADR | Đang chạy **17%**. Cần cưỡng chế, không cần thêm gate. |
+| 3. Architecture review gate | **ĐÃ CÓ, chưa đo cưỡng chế** | §3.2 + skill `soan-spec` + 46 ADR | **RÚT `17%`** (§0): mỏ neo đặc tả có **bốn tên**, đo theo khả năng = **61%**. §20 không có ô cổng cho §3.2 ⇒ trạng thái là **chưa đo**, không phải "không cần thêm gate". |
 | 4. Chuẩn hoá severity | **ĐÃ CÓ, mạnh hơn** | verdict có severity/evidence (§ dòng 845); class `sensitive/systemic/routine` (ADR-0036); P0/P1 | Đề xuất **hai** bậc P1/P2; kho có P0 và có class theo rủi ro. Xem F4 về trạng thái thứ ba. |
 | 5. Tìm theo bug class | **MỚI — GIỮ** | doctrine có bản mạnh hơn ("danh sách CẤM → danh sách CHO PHÉP"; "đếm HÌNH DẠNG lỗi") nhưng chưa vào prompt reviewer | Mục giá trị nhất của cả đề xuất. |
 | 6. Root-cause vs local patch | **MỚI, nhưng xung đột** | — | Xem F5: root cause có thể nằm NGOÀI write set đã đóng băng. |
@@ -352,17 +383,17 @@ kê giới hạn này.
 1. **Giữ:** mục 5 (bug class) — mục giá trị nhất; mục 12 (regression test từ finding), nâng thành cổng
    máy đo được; mục 6 phần *phân loại* (với ba nhánh, xem F5); danh mục kiểm tra của mục 11 (giữ danh mục,
    đổi chỗ đặt); mục 3 phần *tiêu chí kích hoạt* — nó cụ thể hơn §3.2 và nên nhập vào `soan-spec`.
-2. **Bureaucracy:** mục 7, 8, 10 trùng với `T0/T1`, state `ready/reviewing`, và ADR-0036. Chúng thêm từ vựng
+2. **Bureaucracy — ĐÃ LỌC LẠI theo §1 bản 3.** Chỉ giữ lý do bác nào neo được vào một cổng ĐỎ ĐƯỢC: mục 7, 8, 10 trùng với `T0/T1`, state `ready/reviewing`, và ADR-0036. Chúng thêm từ vựng
    thứ hai cho khái niệm đã có tên — đúng thứ `doctrine-scan` sinh ra để chặn (`rc=6`).
-3. **Trùng lặp:** mục 1 (⊂ §10.1), 4 (⊂ severity + review class), 13 (⊂ §12 ba bộ đếm). Mục 13 không chỉ
+3. **Trùng lặp — HẠ XUỐNG "chưa quyết định được".** Mục 1/4/13 neo vào §10.1 và §12, mà §20 không có ô cổng cho hai mục ấy ⇒ trạng thái là `chưa đo`, và theo §1 bản 3 thì "đã có" một mình không đủ để bác. Nguyên văn cũ: mục 1 (⊂ §10.1), 4 (⊂ severity + review class), 13 (⊂ §12 ba bộ đếm). Mục 13 không chỉ
    trùng mà còn **thô hơn**: nó gộp ba bộ đếm §12 thành một.
-4. **Failure mode chưa nêu:** M1–M5 ở §4. Nặng nhất là **M4 (răng của cổng)** và **M1 (lượt chết không verdict)**.
+4. **Failure mode chưa nêu:** M1–M7 ở §4. Nặng nhất là **M4 (răng của cổng)** và **M1 (lượt chết không verdict)**.
 5. **Merge policy P1/P2:** thiếu P0, thiếu trạng thái thứ ba, và Strict/Normal thô hơn ba class
    `sensitive/systemic/routine` đang chạy. `P2 = 0` cho Strict mode là bẫy: nó biến mọi nhận xét
    maintainability thành blocker của core runtime, tức tạo đúng cái "improvement nhỏ giữ feature lớn
    trong review vô thời hạn" mà mục 10 nói muốn tránh. **Giữ ba class hiện có; không thêm hai mode.**
-6. **Rủi ro hoãn full CI:** xem F1 + F2. Cụ thể với kho này: (a) tiêu tài nguyên khan (2 lượt/PR) để
-   tiết kiệm tài nguyên co giãn; (b) reviewer đọc mã **chưa từng được đo trên Windows** — và với PR
+6. **Rủi ro hoãn full CI:** xem F1 + F2. Cụ thể với kho này: (a) **RÚT** — xem F1(a): "phút Actions co giãn" không có cơ sở, và trần 2 lượt/PR **nới được** bằng
+   `nang_tran`; (b) reviewer đọc mã **chưa từng được đo trên Windows** — và với PR
    thường, lần merge chính là lần đo Windows ĐẦU TIÊN; (c) kéo dài `leased → landed` ⇒ lease hết hạn (M2);
    (d) lợi ích hứa đã bị `concurrency` thu phần lớn từ r245.
 7. **Chia pre-flight / CI theo một luật, không theo danh sách:**
@@ -390,7 +421,7 @@ kê giới hạn này.
    nào cần soạn nội dung nhạy cảm thì mô tả bằng lời. Đã chữa hai lượt chết liên tiếp.
    **(c) Tự khai thiên vị của thứ mình giao.** Giao bảng 21 con số kèm chính script trích ra nó và nói
    thẳng nó lọc theo danh sách đơn vị đoán trước ⇒ reviewer trả về hai finding, một nhắm thẳng bộ lọc.
-   **(d) Cưỡng chế `spec_hash`** (đang 17%) — vòng review tốn nhiều nhất là vòng cãi nhau về đặc tả.
+   **(d) Thống nhất TỪ VỰNG mỏ neo đặc tả TRƯỚC** (bốn tên, 61% — xem MVP-2), rồi mới cưỡng chế — vòng review tốn nhiều nhất là vòng cãi nhau về đặc tả.
 10. **Minimum viable process — BẢN ĐẦU CÓ BA VIỆC, CẢ BA ĐỀU HỎNG. Cross-review lượt 1 phá từng cái;
     dưới đây là bản đã sửa, xếp lại theo thứ tự rẻ-trước.**
 
@@ -414,7 +445,7 @@ kê giới hạn này.
 
     **MVP-2 · Thống nhất TỪ VỰNG mỏ neo đặc tả TRƯỚC, cưỡng chế SAU.** Bản đầu nói "cưỡng chế `spec_hash`
     (đang 17%)". Phép đo nói kho có **bốn tên** cho một khái niệm và **61%** lease đã neo được đặc tả.
-    Cưỡng chế một tên trong bốn sẽ bắt oan 44% lease đang làm đúng bằng tên khác. Việc đúng: chọn một tên
+    Cưỡng chế một tên trong bốn sẽ bắt oan **40/82 = 48,8%** lease đang làm đúng bằng tên khác (bản 2 ghi "44%" = 61 − 17, tức trộn nền đo mới với con số 17% vừa bị rút — cross-review lượt 2 bắt). Việc đúng: chọn một tên
     canon, khai ánh xạ cho ba tên kia, rồi mới dựng cổng.
 
     **MVP-3 · ĐO Windows trước, đừng BẮT BUỘC Windows.** Bản đầu bắt buộc một lượt `workflow_dispatch`
@@ -497,7 +528,9 @@ Khi khôi phục được codex, chạy lại đúng bộ prompt ấy qua `launc
 
 ---
 
-## 9. Nhật ký cross-review lượt 1 — cái gì bị lật
+## 9. Nhật ký cross-review — cái gì bị lật
+
+### Lượt 1 (trên `07eb236`)
 
 | # | Bản đầu khai | Phép đo nói | Xử lý |
 |---|---|---|---|
@@ -510,7 +543,7 @@ Khi khôi phục được codex, chạy lại đúng bộ prompt ấy qua `launc
 | 7 | PR #250 là "phản chứng đo được" | nguồn cấm dùng như gate đã kiểm | rút, hạ xuống giả thuyết |
 | 8 | MVP-1 "đóng schema" | schema **đã có**, chỉ chưa nối; lỗ thật là vòng **0 biên nhận** | viết lại MVP-1 |
 | 9 | MVP-3 bắt buộc Windows dispatch | **0/3** lượt từng hoàn tất; ≥112 phút/lượt; không bị cancel | hạ xuống "đo trước" |
-| 10 | "số vòng review KHÔNG ĐO ĐƯỢC" | `bien-nhan` đếm theo `reviewed_sha`, 57/57 | sửa §6 |
+| 10 | "số vòng review KHÔNG ĐO ĐƯỢC" | `bien-nhan` lọc `role: reviewer` (**55**/57) rồi khử trùng theo `reviewed_sha` ⇒ **52** vòng phân biệt, KHÔNG phải 57. Và `packet_loop.py` cấm gọi số ấy là "số vòng review" (M7 trích đúng câu đó) | bản 2 sửa SAI; bản 3 sửa lại |
 | 11 | "15 packet riêng biệt" | 18 biên nhận `wp55` trải ≥5 dòng việc | thêm luật nhất quán vào MVP-1 |
 | 12 | lệnh tái hiện ở §0 | **không tái hiện được** bảng | sửa lệnh |
 | 13 | "6 biến thể lẻ" | `blocked` là canon ⇒ 5; **91,2%** đã canon | sửa §0 |
@@ -523,3 +556,29 @@ workflow rồi kết luận cho bảy; đếm một tên trường rồi kết l
 tài liệu" thành "đang có hiệu lực". Đó là dữ liệu về **phương pháp**, không phải về đề xuất — và nó ủng hộ
 đúng mục 5 của đề xuất (*tìm theo bug class, không theo từng finding*), mục mà bản đầu đã khen là giá trị
 nhất mà không nhận ra mình đang minh hoạ cho nó.
+
+
+### Lượt 2 (trên `ba76a78`) — hai reviewer: một đo RĂNG của bản vá, một tấn công cú đảo
+
+| # | Bản 2 khai | Phép đo nói | Xử lý ở bản 3 |
+|---|---|---|---|
+| 15 | cú đảo: "9 mục phần lớn `0 cổng`" | bảng 8 ADR **KHÔNG GIAO** với 9 mục | rút bảng, đổi biến (§1) |
+| 16 | `ADR-0038 \| 0 cổng` | **SAI tại HEAD** — cổng land 23-08, sau mốc đo 22-08 một ngày | §1 nêu; dùng phép đo có ngày phải kiểm ngày |
+| 17 | "`0 cổng` ⇒ không cưỡng chế" | §0 bác: mỏ neo 61% với **0 dòng mã**; trần vòng 81/82 | đổi sang biến **tỉ lệ vi phạm** |
+| 18 | "phần lớn" | `0 cổng` = **9/30 = 30%**, thiểu số | sửa §1 |
+| 19 | vá `spec_hash` | **5 trường khác đo y hệt cách sai ấy** — `assurance` cũng 4 tên, **17** tệp TỪ CHỐI khai bị đếm thành đã khai | §0 quét theo LỚP |
+| 20 | §1 đảo | §2 và §5 **không đổi một ô** — vẫn "17%", "co giãn", "trùng lặp" | truyền vào §2/§5 |
+| 21 | MVP-2 "bắt oan 44%" | 61 − 17 trộn nền đo; đúng là **40/82 = 48,8%** | sửa |
+| 22 | §9 dòng 10 "57/57" | `bien-nhan` lọc `role` (55) rồi khử trùng ⇒ **52** | sửa |
+| 23 | §9 dòng 14 "đã đánh dấu" | §0 **chưa hề bị sửa**, vẫn in "cạn ~ngày 11" | sửa tại chỗ |
+| 24 | — | **hai lượt review để lại 0 hiện vật** — đúng khuyết tật MVP-1 xếp số một | viết `ops/reviews/phan-bien-quy-trinh-review-{1,2}-*.receipt.yaml` |
+| 25 | — | *"mọi chốt dựng trong kho là chốt chủ kho tự dựng cho chính mình"* (`duyet_danh_tinh.py`) | thêm vào §1 — nó quyết định giá trị của mọi MVP |
+
+**HÌNH DẠNG CỦA HAI LƯỢT, và đây mới là thứ đáng giữ.** Lượt 1 đặt tên hai lớp lỗi (*lời khai rộng hơn
+phép đo*, *đếm CÓ MẶT thay vì KHẢ NĂNG*). Bản 2 vá **đúng những dòng được chỉ** rồi để nguyên năm dòng cùng
+bệnh, và **phạm lại lớp thứ hai theo chiều ngược** ngay trong câu dùng để đặt tên nó. Tức: **được chỉ lỗi
+không đủ để hết lỗi; phải quét theo LỚP.** Đó chính là mục 5 của đề xuất gốc (*tìm theo bug class, không
+theo từng finding*) — mục mà bản 1 khen là giá trị nhất rồi tự mình không làm, hai lần liên tiếp.
+
+Nên phán quyết cuối cùng về đề xuất gốc đổi: **mục 5 không phải "phần mới đáng giữ", nó là phần đáng làm
+TRƯỚC** — và ba bản của tệp này là bằng chứng thực nghiệm cho nó.

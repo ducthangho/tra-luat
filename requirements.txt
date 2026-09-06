@@ -12,6 +12,37 @@
 #
 # BẮT BUỘC cho đường nạp PDF — thiếu là CHẶN CỨNG, không phải giảm chất lượng:
 pypdf>=4.0
+# r337 (đo 02-09-2026, container Claude Code remote): `import pypdf` CHẾT dù pip báo đủ — pypdf nạp
+# `cryptography` (provider mã hoá tuỳ chọn), mà ảnh container có `cryptography` 41.0.7 HỆ THỐNG
+# (`/usr/lib/python3/dist-packages`) thiếu `_cffi_backend` ⇒ pyo3 ném PanicException (không phải
+# ImportError nên pypdf không tự lùi). Đo A/B cùng interpreter: thêm `cffi` ⇒ `import pypdf` OK;
+# không ⇒ panic. `cffi` là thứ đúng để cài: nó là phụ thuộc mà gói hệ thống kia khai mà không có.
+cffi
+#
+# r338 (đo 06-09-2026): PyYAML là phụ thuộc THẬT của đường ops — `ops/lease_publish.py`
+# (3 chỗ) và `.claude/dev/packet_loop.py:1812` đều `import yaml`. Nhưng nó KHÔNG nằm ở
+# đây, nên bằng chứng dương của hook (`reqs_import_duoc`, r337) chưa bao giờ phủ tới nó:
+# máy thiếu PyYAML vẫn được hook cấp mốc "đủ", rồi cổng đăng lease chết `ImportError`
+# giữa chừng — đúng lớp "CÓ MẶT ≠ DÙNG ĐƯỢC" mà r337 dựng chốt để chặn.
+#
+# KHÔNG GHIM `==6.0.3` Ở ĐÂY, và đây là phép đo chứ không phải sở thích. Ba workflow
+# ghim số ấy (`ci.yml:93` · `duyet-phan-chung.yml:39` · `ops-publish-lease.yml:80`) và
+# bản đầu của dòng này ghim theo cho "khớp CI". Chạy hook THẬT thì hỏng ngay trên
+# container này: python hệ thống có PyYAML 6.0.1 do distro cài, nên
+# `pip install -r requirements.txt` phải GỠ nó trước và chết
+# `ERROR: Cannot uninstall PyYAML 6.0.1, RECORD file not found ... installed by debian`
+# ⇒ pip rc≠0 ⇒ hook rẽ nhánh hỏng, xoá mốc, in CẢNH BÁO ở MỌI lượt mở phiên. Tức bản
+# ghim biến một chốt chẩn đoán thành một chốt đỏ thường trực.
+# `>=6.0` đo lại trên CÙNG interpreter: no-op sạch, không gỡ gì, rc=0. Cùng idiom với
+# `pypdf>=4.0` ngay trên.
+#
+# CẢNH BÁO VỀ PHÉP ĐO: `pip install --dry-run` trả **rc=0 cho cả ba** dạng (`==6.0.3`
+# · `>=6.0` · trần), kể cả dạng vừa hỏng thật — đúng lý do r337 đã bác dry-run làm bằng
+# chứng. Muốn biết dạng nào chạy được thì phải cài THẬT trên interpreter thật.
+#
+# Hệ quả có chủ đích: CI vẫn chạy 6.0.3 (ba dòng trên tự ghim), máy dev lấy bản ≥6.0
+# sẵn có. Nợ đã khai, chưa chữa: không cổng nào canh ba dòng ghim ấy khớp nhau.
+PyYAML>=6.0
 #
 # TUỲ CHỌN (không đưa vào danh sách cài để giữ `pip install -r requirements.txt` nhẹ):
 #   · python-docx  — đọc .docx sát cấu trúc gốc hơn. Thiếu vẫn chạy: nhánh bóc-tag từ r317 đã

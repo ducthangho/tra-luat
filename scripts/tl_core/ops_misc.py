@@ -1050,18 +1050,53 @@ def _doc_dep_probe() -> list:
 
     `bat_buoc=True` = thiếu là CHẶN CỨNG một đường nạp; `False` = giảm chất lượng, vẫn chạy."""
     import shutil as _sh319
+    import importlib.util as _ilu319
+    loi_import = {}   # r337: tên module → "Lớp: thông điệp" khi CÓ MẶT mà import HỎNG
 
     def _co_mod(ten):
         try:
             __import__(ten)
             return True
-        except Exception:  # noqa: BLE001 — import hỏng cũng coi như không có
+        except KeyboardInterrupt:
+            raise
+        except BaseException as e:  # noqa: BLE001 — import hỏng cũng coi như không có
+            # "CÓ MẶT nhưng import HỎNG" khác "THIẾU": pip/hook báo đủ mà vẫn hỏng thì lời
+            # khuyên `pip install` là sai chỗ — người đọc cần biết LỚP lỗi để đi đúng hướng.
+            try:
+                co_mat = _ilu319.find_spec(ten) is not None
+            except BaseException:  # noqa: BLE001 — find_spec cũng có thể nổ trên cây hỏng
+                co_mat = False
+            if co_mat:
+                loi_import[ten] = f"{type(e).__name__}: {str(e)[:80]}"
+            # r337 (đo 02-09-2026, container remote) — fix: `import pypdf` kéo `cryptography` 41.0.7
+            # thiếu `cffi` ⇒ pyo3 ném `PanicException`, kế thừa BaseException chứ không phải Exception,
+            # nên `except Exception` cũ để nó XUYÊN QUA và giết cả `tl doctor` ngay tại phép đo phụ
+            # thuộc — một lệnh chẩn đoán chết vì một phép đo là lệnh vắng mặt đúng lúc cần nó nhất.
+            # Import hỏng vì BẤT KỲ lý do gì đều là "không có" (cùng doctrine `launcher.py doctor`);
+            # chỉ Ctrl-C được xuyên qua vì đó là ý người dùng, không phải trạng thái của module.
             return False
 
+    # r349 — MỘT backend HỎNG mà backend KIA chạy thì đường PDF KHÔNG bị chặn, nên đừng
+    # nói là bị chặn. Bản r337 tính `co` bằng `pypdf or pdfplumber` (đúng) nhưng vẫn in
+    # `loi_import` (sai): `pypdf` hỏng + `pdfplumber` chạy ⇒ `co=True` mà hậu quả vẫn ghi
+    # "MỌI .pdf bị chặn ... cài lại phụ thuộc". Một chẩn đoán tự mâu thuẫn thì đẩy người
+    # đọc đi sai hướng — cùng doctrine với `codex login status` NÓI DỐI.
+    _pdf_co = _co_mod("pypdf") or _co_mod("pdfplumber")
+    if _pdf_co:
+        # Còn đường chạy: chỉ NHẮC backend hỏng, không tuyên bố bị chặn.
+        _pdf_hq = ("đường PDF vẫn chạy" + (
+            " (nhưng " + "; ".join(f"{k} → {v}" for k, v in loi_import.items())
+            + " — bản dự phòng đang gánh)" if loi_import else ""))
+    elif loi_import:
+        _pdf_hq = ("MỌI .pdf bị chặn (reason=pdf_probe_unavailable, r315). "
+                   "CÓ MẶT nhưng import HỎNG ("
+                   + "; ".join(f"{k} → {v}" for k, v in loi_import.items())
+                   + ") — cài lại phụ thuộc: pip install -r requirements.txt")
+    else:
+        _pdf_hq = ("MỌI .pdf bị chặn (reason=pdf_probe_unavailable, r315). "
+                   "Cài: pip install pypdf")
     return [
-        {"ten": "pypdf|pdfplumber", "bat_buoc": True,
-         "co": _co_mod("pypdf") or _co_mod("pdfplumber"),
-         "hau_qua": "MỌI .pdf bị chặn (reason=pdf_probe_unavailable, r315). Cài: pip install pypdf"},
+        {"ten": "pypdf|pdfplumber", "bat_buoc": True, "co": _pdf_co, "hau_qua": _pdf_hq},
         {"ten": "pdftotext (poppler-utils)", "bat_buoc": True,
          "co": bool(_sh319.which("pdftotext")),
          "hau_qua": "không bóc được text .pdf. Cài: apt-get install poppler-utils"},

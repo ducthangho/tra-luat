@@ -1,3 +1,609 @@
+# ★ dev-side — r352: luật thô của r351 vẫn thủng ở BIẾN MÔI TRƯỜNG (2026-09-06)
+
+Vòng 11 ra **một** finding (giảm từ bốn), và nó bắt đúng chỗ tôi **tự kiểm mà không nghĩ
+ra**. pip **giải biến môi trường TRƯỚC** khi phân tích option, nên một dòng `${INCLUDE}`
+với `INCLUDE='-r extra.txt'` kéo được tệp khác vào trong khi ký tự đầu là `$` chứ không
+phải `-`. Đo: pip **có** kéo `extra.txt`; luật thô lần một trả `0`.
+
+## Câu hỏi ĐÚNG, phép thử THIẾU MỘT DẠNG
+
+Đáng ghi vì tôi đã hỏi chính xác câu này ở lượt trước — *"pip có dạng nào không bắt đầu
+bằng `-` mà vẫn kéo tệp khác vào không?"* — rồi tự đo bằng `pypdf -r extra.txt`, thấy pip
+không đệ quy, và kết luận **"không thủng"**. Tôi đọc `break_args_options` rồi dừng;
+reviewer đọc tiếp tới `expand_env_variables`. Nghĩ ra được câu hỏi không có nghĩa là đã
+trả lời được nó — và một phép thử thiếu dạng thì cho ra đúng cái cảm giác "đã kiểm".
+
+Chữa theo đúng tinh thần r351: **thô hơn nữa** — dòng nào **chứa dấu đô-la** cũng tính là
+có chỉ thị. Cố ý KHÔNG đọc giá trị biến và KHÔNG chép luật `${UPPER_CASE}` của pip: chép
+luật chính là thứ đã hỏng bảy lần. Chiều sai vẫn an toàn — một dòng có `$` vô hại chỉ tốn
+thêm một lượt pip.
+
+## Ca khoá của chính bản vá này SUÝT không có răng
+
+Thêm hai dạng `${INCLUDE}` / `$INCLUDE` vào bảng ca xong, phép đo răng hai chiều cho
+**XANH ở CẢ HAI vế** — tức ca không đo gì. Lý do: fixture không đặt biến, nên pip thất
+bại, nên không có mốc nào được đặt, nên ca xanh **vì lý do sai**. Đặt `INCLUDE='-r
+extra.txt'` thì hook chưa vá đặt mốc = 1 và ca ĐỎ đúng như phải thế.
+
+Đây là lần thứ **ba** trong đợt phép đo răng cứu một ca xanh vô nghĩa, và lần này nạn nhân
+là ca vừa viết để khoá bản vá. Ca xanh không chứng minh gì nếu chưa ai thử giết nó — kể cả
+khi ca ấy vừa ra đời từ một finding thật.
+
+Cổng: `launcher_test` **181/181** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `ops/cong_cu_test.py` **0 đỏ** · `tl --selftest`
+**1709/1709** · ruff `--select F` delta = **0** · `bash -n` OK · `git diff --check` rc=0 ·
+quét mẫu bí mật 25 dòng thêm: 0 khớp · hook chạy thật hai lượt đúng thiết kế · bốn dạng đo
+lại (`${INCLUDE}` · `$INCLUDE` · `-r extra.txt` ⇒ không mốc; `pypdf>=3.0` ⇒ có mốc).
+
+# ★ dev-side — r351: ngừng bắt chước cú pháp pip; hình dạng lỗi lặp LẦN THỨ HAI (2026-09-06)
+
+Vòng 10 ra bốn finding, **tất cả ở bộ phân tích chỉ thị include**, và tôi **không vá từng
+cái** — bỏ cả bộ phân tích. Lý do là HÌNH DẠNG, không phải bốn lỗi ấy.
+
+| lượt | tôi tự làm gì | finding | chữa bằng |
+|---|---|---|---|
+| r338–r341 | tự phân tích **dòng requirement** | 5 | uỷ quyền cho pip (r342) |
+| r347 · r349 · r350 · vòng 10 | tự phân tích **chỉ thị include** | ~7 | **ngừng phân tích** (r351) |
+
+Mỗi vòng vá xong lại lộ một luật pip chép chưa đúng: `expand_env_variables` chỉ nhận
+`${UPPER}` và bỏ giá trị rỗng · `join_lines` dùng `strip(backslash)` chứ không bỏ MỘT ký
+tự · `realpath` gộp làm mất một nhánh symlink · chuỗi `KHONG_DOC_DUOC` trong tệp thật
+trùng trạng thái tệp bị xoá. Lần này **không uỷ quyền cho pip được**: phép băm phải chạy
+offline, mà pip thì không.
+
+## Luật mới thô — và thô là điểm mạnh
+
+Ký tự đầu không-trắng của một dòng là `-` ⇒ có chỉ thị ⇒ **không đặt mốc**, để pip quyết.
+Nó **không cần biết cú pháp pip**, nên không có gì để chép sai. Một dòng `# -r x` bị tính
+nhầm chỉ tốn một lượt pip thừa — **chiều sai duy nhất là AN TOÀN**. Cả lớp "chép sai luật
+của pip" chết theo KIẾN TRÚC, không còn nhánh nào để vá.
+
+Đo: **chín** dạng chỉ thị (gồm hai dạng vòng 10 vừa bắt: nhiều dấu chéo ngược, và biến
+môi trường) — không dạng nào đặt mốc. **Răng chiều ngược**: không có chỉ thị thì VẪN phải
+đặt mốc, kẻo bản vá thành "không bao giờ đặt mốc" — đúng kiểu chốt không thể đỏ.
+
+## Giá phải trả — ĐO, không khẳng định
+
+Kho nào dùng `-r`/`-c`/`-e` sẽ chạy pip mỗi lượt mở phiên. Kho này **không có chỉ thị
+nào**, nên giá ở đây bằng **không** — và điều đó được khoá bằng một ca test, để ai thêm
+chỉ thị sau này thì ca ấy đỏ và người thêm biết mình đang đánh đổi gì. Nói cái giá ra
+thành một ca chạy được, thay vì một câu trong tài liệu sẽ trôi.
+
+Cổng: 9/9 dạng chỉ thị · `launcher_test` **181/181** (bỏ qua 1 — fixture Windows) ·
+`ops/cong_cu_test.py` **22/22** (cổng vừa đỏ vì r349, nay xanh) · `tl --selftest`
+**1709/1709** · ruff `--select F` delta = **0** · `bash -n` OK · `git diff --check` rc=0 ·
+`doc-claims-check --strict` rc=0 · hook chạy thật hai lượt đúng thiết kế.
+
+# ★ dev-side — r350: `gate` ĐỎ vì ca test của r349, và cổng đẩy tôi sang cách test đúng hơn (2026-09-06)
+
+`gate (ubuntu-latest)` đỏ trên `a2c0194` — **lần đầu trong cả chuỗi này cổng đo mã đỏ vì
+lỗi của tôi**, không phải cổng duyệt. Bước đỏ: *"G5 kiểm bản kê công cụ + T1..T8"*.
+
+Nguyên nhân: ca `t16` trong `ops/cong_cu_test.py` đòi **mọi gói bên thứ ba import trong
+cây phải được khai ở `ops/cong_cu.yaml`**. Ca `r349` của tôi `import tl_core` trực tiếp
+trong `launcher_test.py`, nên bộ quét xếp `tl_core` vào bên thứ ba ⇒ đỏ, kéo theo 17 dòng
+đỏ dây chuyền vì mọi đột biến đều "giết thêm" ca ấy.
+
+## Cách sửa dễ nhất là cách sai
+
+Nới `ops/cong_cu.yaml` để `tl_core` được chấp nhận sẽ làm cổng xanh trong một phút — và
+hạ một chốt thật. Chính `t16` ghi trong mã rằng bản đầu của nó từng có cửa thoát *"hoặc
+thấy tên trong ci.yml"*, và **đo được** rằng cửa ấy vô hiệu hoá cả ca (gỡ `jsonschema`
+khỏi bản kê mà ca vẫn xanh).
+
+Chữa đúng: **chạy phép đo trong TIẾN TRÌNH CON** thay vì import. Hai lợi ích, và cái thứ
+hai tôi không lường trước:
+
+1. Đo trên interpreter **sạch** — không phải nghịch `sys.modules`/`sys.meta_path` của
+   chính bộ test. Đây đúng là thứ đã làm tôi **dựng sai fixture hai lần** ở r349.
+2. Không import gói ngoài cây ⇒ `t16` không có gì để bắt.
+
+Tức cổng không chỉ chặn một vi phạm hình thức — **nó đẩy tôi sang cách test đúng hơn về
+bản chất**. Đáng ghi vì phản xạ đầu tiên khi gặp cổng đỏ là hỏi *"làm sao cho nó xanh"*,
+trong khi câu hỏi đúng là *"cổng đang nói gì về thiết kế của mình"*.
+
+## Một con số phải nói cho đúng
+
+Chạy `ops/cong_cu_test.py` cục bộ vẫn cho `rc=1`, và đó **không phải hồi quy**:
+`actionlint` không có trên PATH trong container này ⇒ ca `t2_canary_thieu_shellcheck` bị
+BỎ QUA ⇒ đột biến của nó thành `KHÔNG_ĐO_ĐƯỢC` ⇒ cổng fail-close, đúng thiết kế
+(`CLAUDE.md`: một cổng tự tắt khi thiếu công cụ là cổng không tồn tại đúng lúc cần nhất).
+Đo nền `origin/master`: **rc=1, cùng một con số** ⇒ delta = 0. Thứ đã đổi là `t16` không
+còn ĐỎ và `22/22` khớp hệt nền.
+
+Cổng: `ops/cong_cu_test.py` **22/22 đạt** (bỏ qua 1 — thiếu `actionlint` cục bộ, delta so
+master = 0) · `launcher_test` **180/180** (bỏ qua 1 — fixture Windows).
+
+# ★ dev-side — r349: va chạm vân tay (im lặng SAI), và một chẩn đoán tự mâu thuẫn (2026-09-06)
+
+Vòng 9 ra năm finding; **một cái tôi đã tự tìm và vá ở r348 trước khi lượt review về** (`..`
+trong RECORD), nên hai bên gặp nhau độc lập. Bốn cái còn lại đều tái hiện trước khi vá.
+
+## Ba lỗ của khối băm — cái đầu thuộc lớp chưa từng gặp trong chuỗi này
+
+Tám vòng trước toàn **báo động giả** (nói hỏng trong khi đúng). Lỗ này ngược lại: **im lặng
+SAI**. Băm nội dung THÔ nên hai bố cục include khác nhau cho **cùng một chuỗi byte** —
+chuyển `somepkg` từ tệp `-c` (chỉ *ràng buộc*) sang tệp `-r` (*CÀI THẬT*) ⇒ vân tay y hệt
+⇒ mốc sống sót ⇒ **gói mới khai báo không bao giờ được cài**. Chữa bằng đóng KHUNG từng
+tệp (độ dài + đường dẫn + độ dài + nội dung), nên không bố cục nào trùng được bố cục khác.
+
+Hai lỗ còn lại cùng họ "luật của pip rộng hơn luật của tôi": một dòng **chú thích** kết
+thúc bằng dấu chéo ngược kéo chỉ thị `-r` kế tiếp vào chính nó rồi bị cắt mất (pip miễn
+trừ dòng khớp `COMMENT_RE` khỏi phép nối), và **đối số dính liền** `-rextra.txt` là một
+token duy nhất mà không nhánh nào nhận ra.
+
+Đo lại: **7/7** — ba lỗ mới đóng, bốn dạng cũ không hồi quy.
+
+## Chẩn đoán tự mâu thuẫn
+
+`_doc_dep_probe` tính `co = pypdf or pdfplumber` (**đúng**) nhưng vẫn in `loi_import`
+(**sai**): `pypdf` hỏng + `pdfplumber` chạy ⇒ `co=True` mà hậu quả vẫn ghi *"MỌI .pdf bị
+chặn … cài lại phụ thuộc"*. Cùng doctrine với `codex login status` NÓI DỐI — một công cụ
+báo sai trạng thái **tệ hơn** công cụ vắng mặt, vì nó đẩy người đọc đi sai hướng. Nay:
+còn đường chạy thì nói "đường PDF vẫn chạy" và **vẫn nhắc** backend hỏng (không nuốt thông
+tin chẩn đoán); hỏng thật thì vẫn nói bị chặn. Ba trạng thái đo đủ, có răng hai chiều.
+
+## Hai lần fixture của tôi sai chứ không phải mã sai
+
+Đo backend PDF, lần đầu tôi kết luận nhầm vì môi trường thật vẫn có `pypdf` nên ca "cả hai
+thiếu" **dựng không thành**; lần hai tôi quên tạo `pdfplumber.py` nên ca "dự phòng chạy"
+đo nhầm sang "dự phòng thiếu". Phải chặn bằng meta-path finder mới dựng đúng ba trạng
+thái. Đúng bệnh **"ca có MẶT khác ca có ĐO"**: cả hai lần ca vẫn chạy và vẫn in số — chỉ
+là số ấy không đo cái tôi nghĩ nó đo.
+
+Cổng: 7/7 ca vân tay · 3/3 trạng thái backend PDF · `launcher_test` **180/180** (bỏ qua 1 —
+fixture Windows) · `tl --selftest` **1709/1709** · ruff `--select F` delta so `6f97fda` =
+**0** (`ops_misc.py` 403/403 · `launcher_test.py` 4/4) · `bash -n` OK · `git diff --check`
+rc=0.
+
+# ★ dev-side — r348: đường lui của r347 mang vào một BÁO ĐỘNG GIẢ, tự tìm ra (2026-09-06)
+
+`_module_cua()` — thứ vừa thêm ở r347 để chữa lỗ Python <3.10 — suy **sai** cho gói **chỉ
+có CLI**. RECORD của loại gói ấy ghi đường kiểu `../../../bin/clix`, nên đoạn đầu là `..`:
+không bắt đầu bằng gạch dưới, không trùng hậu tố loại trừ nào, nên lọt qua và hook đi
+`__import__("..")`. Đo được trước khi vá: **`rc=1` cho một môi trường HOÀN TOÀN ĐÚNG**.
+
+Đúng lớp **BÁO ĐỘNG GIẢ** đã sinh ra bảy finding đầu của chuỗi này — và lần này do chính
+bản vá của tôi mang vào, ở commit ngay sau. Chuỗi r343 → r344 đã dạy đúng bài này (một
+cửa thoát tự thêm sinh hai lỗ mới); r347 → r348 lặp lại nó ở quy mô nhỏ hơn.
+
+Chốt là **`isidentifier()`**: tên module hợp lệ luôn là một định danh Python. Đây là danh
+sách **CHO PHÉP** (thứ hợp lệ mới qua), không phải thêm `..` vào danh sách cấm — bài học
+r344 áp thẳng vào đây, lần này áp *trước* khi bị bắt.
+
+**Cách tìm ra đáng ghi hơn bản vá.** Tôi gửi reviewer ba câu hỏi về chính bản vá r347, rồi
+thay vì ngồi đợi trả lời thì đi đo câu số 2 (*"dạng gói nào làm `_module_cua` suy sai?"*).
+Ba dạng dựng thử — gói chỉ có CLI · wheel có `.data` · không có `top_level.txt` — và dạng
+đầu tiên đỏ ngay. Bài học: **một câu hỏi đủ tốt để gửi reviewer thì cũng đủ tốt để tự
+chạy**; gửi đi rồi chờ là biến một phép đo rẻ thành một vòng review.
+
+Cổng: 3/3 dạng gói đúng · `launcher_test` **178/178** (bỏ qua 1 — fixture Windows) ·
+`tl --selftest` **1709/1709** · ruff `--select F` delta = **0** · `bash -n` OK ·
+`git diff --check` rc=0.
+
+# ★ dev-side — r347: hai lỗ của r345, và một lời khai bị thu hẹp LẦN THỨ HAI (2026-09-06)
+
+Vòng 8 (16 finding). Hai lỗ cụ thể, cả hai tái hiện được trước khi vá:
+
+- **Python 3.8/3.9 mất phép thăm import.** `packages_distributions` chỉ có từ 3.10, nên
+  trên hai nền ta **cố ý hỗ trợ** thì `ban_do` rỗng ⇒ vòng thăm không thăm gì ⇒ lớp bảo
+  vệ r337 biến mất **im lặng**. Đo: giả lập bỏ `packages_distributions` rồi phá
+  `pypdf/__init__.py` ⇒ chốt trả **0** thay vì 1. Chữa bằng đường lui `_module_cua()`
+  đọc `top_level.txt`, thiếu thì suy từ `dist.files`.
+- **Cú pháp include của pip rộng hơn regex của tôi.** `-r 'có nháy'` · nối dòng bằng dấu
+  chéo ngược · `--requirement=${BIẾN}` — pip nhận cả ba, regex cũ bỏ sót cả ba ⇒ sửa tệp
+  được include mà **vân tay không đổi** ⇒ mốc sống sót ⇒ hook bỏ qua cài đặt. Chữa bằng
+  `shlex` (lo dấu nháy) + `expandvars` + nối dòng trước khi cắt chú thích, đúng thứ tự
+  pip làm. Đo theo **hành vi**, không soi biểu thức: sửa tệp include ở cả bốn dạng ⇒ vân
+  tay đổi ở cả bốn.
+
+## Lời khai "offline" bị thu hẹp lần thứ HAI
+
+r345 viết hook *"offline theo cấu tạo"*. r346 đã thu hẹp lần một (phép đo AST chỉ thấy
+`import` tĩnh). Lượt này reviewer thu hẹp lần hai, và đúng: **mạng vẫn có thể đến từ chính
+việc `import` một gói đã khai**, nếu module ấy mở kết nối lúc nạp — họ đo bằng một gói
+tổng hợp, listener đếm **1 kết nối**.
+
+Không bịt ở đây, và nói rõ vì sao: bịt nó cần một **hộp cát mạng thật**, trong khi phép
+thăm import — thứ **duy nhất** thấy được lớp lỗi r337 — buộc phải nạp mã của gói. Nên câu
+đúng là **"mã hook không tự gọi mạng"**, còn chạm mạng gián tiếp qua gói được khai là
+**giới hạn được khai**, không phải lỗ được vá.
+
+Đáng ghi: cùng một câu đã phải sửa **hai lần trong hai commit liên tiếp**, mỗi lần vì một
+hướng khác nhau. Viết một câu bảo đảm rộng thì rẻ; đo đủ để đỡ nó thì không — và mỗi chỗ
+chưa đo là một chỗ sẽ bị bác.
+
+Cổng: 6/6 ca `<3.10` và `>=3.10` đúng · 4/4 dạng include bắt được · `launcher_test`
+**176/176** (bỏ qua 1 — fixture Windows) · đột biến **170/170** (1 không đo được trên nền
+này) · `tl --selftest` **1709/1709** · ruff `--select F` delta = **0** · `bash -n` OK ·
+`git diff --check` rc=0 · `doc-claims-check --strict` rc=0 · quét mẫu bí mật 211 dòng
+thêm: 0 khớp · hook chạy thật hai lượt đúng thiết kế.
+
+# ★ dev-side — r346: ca chống-mạng của r345 CÓ ĐIỂM MÙ, và lời khai đã rộng hơn phép đo (2026-09-06)
+
+Commit r345 viết rằng ca `r345_than_hook_KHONG_duoc_co_duong_mang_nao` là *"phép đo cấu
+trúc, cả lớp mở-phiên-chậm-vì-mạng chết theo KIẾN TRÚC"*. Tự kiểm bằng bốn phản chứng cho
+thấy câu ấy **rộng hơn phép đo**: phép đo AST chỉ thấy `import x` **tĩnh**, nên
+`__import__('socket')` · `__import__` với tên dựng động · `importlib.import_module` ·
+`ctypes` **lọt cả bốn**.
+
+Nó vẫn có răng cho ca THỰC TẾ — ai đó thêm lại `import subprocess` thì ĐỎ ngay, và điều ấy
+đã đo hai chiều ở r345. Nhưng "bắt được ca thực tế" khác "cả lớp chết theo kiến trúc", và
+viết câu thứ hai khi chỉ đo được câu thứ nhất là đúng lớp lỗi kho này đã trả giá nhiều
+lần: **lời khai rộng hơn phép đo**. Lần này nạn nhân là chính cái chốt vừa dựng ra để
+chống bị lừa — cùng họ với *"cổng vắng mặt trông giống cổng xanh"*.
+
+Chữa bằng một lớp **HÀNH VI**, không phải bằng cách nới danh sách tên module (nới danh
+sách là danh sách CẤM, và kho đã học rằng nó thua từ trong thiết kế): chặn `socket` ở tầng
+thư viện rồi đòi thân hook **vẫn trả lời đúng**. Thân hook bắt `BaseException` khắp nơi
+nên một phép mở socket bị chặn sẽ biến thành mục `hong` ⇒ mã thoát đổi ⇒ lộ. Cách viết
+nào cũng lộ, vì phép đo đứng ở tầng dưới mọi cách viết.
+
+Kèm răng: một thân hook **có** chạm mạng (`socket.socket()` nối thêm) phải làm ca ấy ĐỎ —
+không có phản chứng đó thì phép chặn socket chỉ là một câu lệnh không ai biết có tác dụng.
+
+Điểm mù của lớp AST nay ghi thẳng trong docstring của ca, thay vì để người đọc tưởng nó
+phủ hết.
+
+Cổng: `launcher_test` **173/173** (bỏ qua 1 — fixture Windows) · ruff `--select F` delta
+= **0** · `bash -n` OK.
+
+# ★ dev-side — r345: BỎ HẲN phép hỏi pip lúc mở phiên; 13 finding, 7 vòng, hai hình dạng (2026-09-06)
+
+Vòng 7 ra ba P2, và một trong đó **bác bỏ bảo đảm của cả thiết kế** chứ không phải chỉ ra
+một khe hở. Đo trực tiếp bằng socket đếm kết nối: một gói **đã cài** có
+`Requires-Dist: childpkg @ http://…/x.whl` khiến pip đi lấy URL ấy **ngay cả khi**
+`requirements.txt` chỉ có một dòng TRẦN và đã có `--no-index` — **1 kết nối**. Nghĩa là
+**không thể bảo đảm offline bằng cách soi tệp requirements**: thứ quyết định nằm trong
+metadata của gói đã cài, ngoài tầm mọi phép đọc tệp.
+
+## Đếm hình dạng, không đếm lỗi — và lần này có HAI hình dạng
+
+| vòng | hình dạng | kết cục |
+|---|---|---|
+| r338–r341 (5 finding) | **ta tự làm thay pip** (ghim bản · bản đã cài · marker · `#`) | r342 uỷ quyền cho pip |
+| r343–r345 (8 finding) | **mọi cách làm phép hỏi pip an toàn đều thua** | r345 bỏ hẳn phép hỏi pip |
+
+`CLAUDE.md` đặt ngưỡng ở ba lần cùng hình dạng. Hình dạng thứ nhất tôi nhận ra ở lần thứ
+năm; hình dạng thứ hai ở lần thứ ba — nhưng chỉ vì phản chứng ép, không phải vì tôi tự
+đếm. Chuỗi r343 → r344 là hai lần vá liên tiếp cho **cùng một bảo đảm không thể giữ
+được**: `--no-index` không chặn direct reference, rồi danh sách CẤM lọt URL trần và
+`git+`. Đáng ghi hơn cả: **r343 dựng lại đúng cơ chế "ta tự quyết" mà r342 sinh ra để
+bỏ** — tôi viết bài học vào commit r342 rồi vi phạm nó ở commit ngay sau.
+
+## Còn lại: ba phép đo CỤC BỘ, offline theo cấu tạo
+
+- **bản đã cài có thoả specifier không** — `importlib.metadata` + `SpecifierSet`;
+- **gói có còn đó không** — `distribution()`; vắng mặt là hỏng;
+- **`import` có chạy không** — lớp lỗi r337 mà pip không bao giờ thấy.
+
+Hai finding còn lại của vòng cũng chữa: `distribution` nay **import riêng** (gộp một câu
+`from … import a, b` làm nhánh `ImportError` vứt luôn `distribution` trên Python 3.8/3.9 —
+đúng các nền ta cố ý hỗ trợ), và `VAN_TAY` nay **băm cả tệp `-r`/`-c` được include** (đệ
+quy, giải đường tương đối theo tệp chứa nó, chặn chu trình; đọc không được thì đưa chính
+đường dẫn vào băm, vì `KHÔNG ĐO ĐƯỢC` ≠ `giống nhau`). Phản chứng: sửa `extra.txt` từ
+`pypdf>=3.0` sang `>=4.0` ⇒ vân tay đổi `a86b9149…` → `9d02d12a…`.
+
+## Bất biến mạnh nhất, và nó đo được mà không cần dựng gì
+
+`r345_than_hook_KHONG_duoc_co_duong_mang_nao` đọc **cây cú pháp** của thân hook và đòi
+không có `subprocess` · `socket` · `urllib` · `http`. Đây không phải lời hứa "chúng tôi
+tin là offline" mà là một phép đo cấu trúc: cả lớp *"mở phiên chậm vì mạng"* chết theo
+KIẾN TRÚC. Đo răng hai chiều — bản `3a19298` chưa vá làm ca này **ĐỎ**
+(`import module co duong mang: ['subprocess']`), chỉ thay tệp hook ⇒ **XANH**.
+
+## Khai thẳng thứ đã mất
+
+Không còn phép giải phụ thuộc của pip, nên **extras sâu và `-r` lồng nhau không được kiểm
+nội dung**. Bù ở chỗ khác: vân tay băm cả tệp include nên sửa chúng làm mốc hết hiệu lực
+và pip thật sự chạy lại. Đổi một phép đo **không bảo đảm được** lấy một phép đo **bảo đảm
+được** — và nói rõ cái giá thay vì giấu nó.
+
+Cổng: 10/10 ca cục bộ đúng (gồm URL trần · `git+` · direct reference · vắng mặt) · phản
+chứng metadata bắc cầu **0 kết nối** (trước: 1) · `launcher_test` **172/172** (bỏ qua 1 —
+fixture Windows) · đột biến **170/170** (1 không đo được trên nền này) · `tl --selftest`
+**1709/1709** · ruff `--select F` delta = **0** · `bash -n` OK · `git diff --check` rc=0 ·
+quét mẫu bí mật 184 dòng thêm: 0 khớp · hook chạy thật hai lượt đúng thiết kế · phép đo
+thời gian 5 lượt liên tiếp: **0,19s** ổn định (1,27s lượt đầu là khởi động nguội).
+
+# ★ dev-side — r344: đảo danh sách CẤM thành danh sách CHO PHÉP, và tôi vừa tái phạm đúng thứ mình vừa sửa (2026-09-06)
+
+Lượt review thứ sáu ra hai P2, và **cả hai đều là hậu quả của `_co_xa`** — cái cửa thoát
+tôi tự thêm ở r343. Tức r343 dựng lại một cơ chế *"ta tự quyết"*, đúng thứ r342 sinh ra để
+bỏ, và nó thủng ngay lượt sau.
+
+Thủng theo đúng cách `CLAUDE.md` đã tiên đoán: `_co_xa` dò `@ scheme://` nên **URL TRẦN**
+(`http://host/x.whl`) và **VCS** (`git+https://…`) lọt sạch — đo được `rc=1` sau 0,97s và
+0,65s, tức mỗi phiên vẫn chạm mạng rồi đi đường cài lại. *"Danh sách CẤM phải đoán trước
+MỌI cách viết nên thua từ trong thiết kế; danh sách cho phép chỉ phải liệt kê một tập NHỎ
+và BIẾT TRƯỚC."*
+
+**Đảo lại:** chỉ hỏi pip khi **mọi** dòng là `Requirement` trần (có tên, có thể có
+specifier/marker, **không** có `url`); có `-r`/`-c`/`-e` hay bất kỳ URL nào ⇒ không hỏi.
+Chiều rủi ro của khe hở nay **ngược**: bỏ sót một dạng hợp lệ chỉ làm ta hỏi pip *ít hơn*,
+không bao giờ làm pip đi lấy mạng lúc mở phiên. Đo sau vá: **0,09–0,15s** ở cả ba dạng
+nguồn từ xa (trước: 0,65s · 0,97s · 8,5s).
+
+**P2 thứ hai — gói VẮNG MẶT bị coi là đủ.** Khi danh sách cho phép từ chối, lớp phụ là thứ
+duy nhất còn lại, mà nó lại lặng lẽ bỏ qua gói không có trong `ban_do` ⇒ một mốc cũ cộng
+một gói đã gỡ khiến chốt trả 0 mãi mãi. Chữa bằng kiểm **metadata** (`importlib.metadata`),
+KHÔNG phải kiểm module — gói chỉ có CLI hoặc gói meta thì không phơi module nào cả.
+
+**BA KỲ VỌNG ĐẦU CỦA TÔI TRONG BẢNG ĐO LÀ SAI, KHÔNG PHẢI MÃ SAI.** Tôi viết "URL trần
+phải `rc=1`", trong khi thiết kế nói ngược: allowlist từ chối ⇒ lui về mốc + thăm import ⇒
+`rc=0`. Thứ giữ cho việc ấy an toàn là **mốc khoá theo `sha256(requirements.txt)`** và chỉ
+được đặt SAU khi `pip install` thành công (`: > "$DAU"`) — nên một tệp hỏng hay một URL
+chết **không bao giờ đặt được mốc**, và sửa tệp thì băm đổi, mốc hết hiệu lực. Đã đo cả hai
+vế thay vì khẳng định. Bài học: khi ba ca cùng "đỏ", hãy hỏi *"kỳ vọng của tôi có đúng
+không"* trước khi hỏi *"mã sai ở đâu"*.
+
+**Một bất biến bị THU HẸP, và nói ra thay vì lặng lẽ bỏ ca:** "đối chiếu với pip" nay chỉ
+áp cho tệp mà danh sách cho phép NHẬN. Hai ca `dòng hỏng` và `-r` rời khỏi bảng parity, kèm
+lý do ngay trong mã. **Khoảng trống còn lại, khai thẳng:** gói bị gỡ SAU khi mốc đã đặt,
+trên một dòng mà `Requirement` không phân tích được (URL trần, VCS) ⇒ không phát hiện được;
+dạng `tên @ url` thì phát hiện được, và `r344` đo đúng chỗ đó.
+
+Cổng: `launcher_test` **175/175** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta
+= **0** · `bash -n` OK · `git diff --check` rc=0 · hook chạy thật hai lượt đúng thiết kế.
+
+# ★ dev-side — r343: `--no-index` KHÔNG làm phép đo offline (lớp lỗi r342 tự mở ra) (2026-09-06)
+
+Lượt review sau r342 ra **một** P2 (giảm từ ba), và nó trả lời đúng câu hỏi tôi đặt cho
+reviewer — *"uỷ quyền cho pip có mở ra lớp lỗi MỚI nào không?"*. **Có.**
+
+`--no-index` chỉ tắt **tra cứu chỉ mục**; một **direct reference** (`gói @ https://…`) vẫn
+được pip đi lấy. Phản chứng đã chạy: `pypdf @ http://127.0.0.1:9/…whl` tới một host chết ⇒
+pip thử rồi thoát 1 sau **8,5s** ⇒ **mỗi** lần mở phiên chậm thêm chừng ấy VÀ luôn đi đường
+cài lại. Một chốt chẩn đoán làm chậm mọi phiên là chốt sẽ bị gỡ — nên đây không phải phiền
+toái nhỏ, nó ăn đúng vào lý do chốt tồn tại.
+
+Đáng ghi vì lập luận sai nằm trong chính commit r342: ở đó tôi viết *"kèm `--no-index` để
+hook phiên không phụ thuộc mạng"* và **khai thẳng với reviewer rằng đó là LẬP LUẬN chứ chưa
+phải phép đo, xin một phản chứng nếu có**. Phản chứng có thật, và tới trong một lượt. Bài
+học không phải "đọc `--help` kỹ hơn" mà là: **một mệnh đề tự khai là chưa đo thì phải được
+đo, không phải được ghi chú rồi cho qua** — ghi chú không làm nó đúng lên.
+
+Chữa bằng hai lớp, chiều rủi ro của cả hai đều an toàn:
+
+1. **Có direct reference từ xa ⇒ KHÔNG hỏi pip.** Lúc ấy mốc (băm theo `requirements.txt`
+   + `sys.prefix`) cộng phép thăm import là thứ ta có; khai thẳng là không đo được bản chứ
+   đừng giả vờ đã đo.
+2. **Chặn thời gian cho mọi trường hợp khác** — `--retries 0`, `--timeout 3`, và hạn của
+   chính tiến trình con — để một lỗ còn sót không bao giờ treo phiên.
+
+Khe hở của phép dò direct reference chỉ dẫn tới *"hỏi pip có chặn thời gian"*, không dẫn
+tới *"chặn phiên"*.
+
+Đo sau khi vá: `8,5s / rc=1` → **`0,2s / rc=0`**; bốn ca khác (bản thoả · lệch bản · marker
+không khớp · gói thiếu hẳn) không hồi quy. Ca `r343` đo **cả hai** hậu quả — mã thoát VÀ
+thời gian — vì cái hại chính là độ trễ; đột biến gỡ chốt phải làm ca đích ĐỎ.
+
+**Neo đột biến của `r342` gãy vì bản vá này** (`if kiem_ban:` → `if kiem_ban and not
+_co_xa:`) và suite bắt được ngay — đúng công dụng của phép đếm neo: nó biến một đột biến
+âm thầm mất răng thành một ca ĐỎ ồn ào.
+
+Cổng: `launcher_test` **174/174** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta
+= **0** · `bash -n` OK · `git diff --check` rc=0 · hook chạy thật hai lượt đúng thiết kế.
+
+# ★ dev-side — r342: NGỪNG TỰ QUYẾT, HỎI PIP — bảy finding một hình dạng (2026-09-06)
+
+Lượt review thứ tư trên `37af367` ra **ba P2 nữa** — direct reference (`foo @ URL`),
+extras (`foo[x]`), và chỉ thị `-r`/`-c`/`-e` — nâng tổng lên **BẢY finding, một hình
+dạng**: *bộ phân tích TỰ VIẾT của hook lệch khỏi luật của pip.*
+
+| vòng | ta tự làm gì | hậu quả đo được |
+|---|---|---|
+| r338 | ghim `==6.0.3` | pip phải gỡ gói distro ⇒ hook đỏ mọi lượt |
+| r339 | tự đòi bản ở chế độ hậu-pip | chốt đỏ thường trực khi thiếu bộ phân tích |
+| r340 | tự cắt marker | pip `rc=0`, chốt `rc=1` |
+| r341 | tự cắt `#` | pip `rc=0`, chốt `rc=1` |
+| +3 | direct ref · extras · `-r` | pip `rc=1`, chốt `rc=0` — lần này **lọt**, không phải chặn |
+
+`CLAUDE.md` đã ghi ngưỡng cho đúng tình huống này: **đếm HÌNH DẠNG lỗi, đừng chỉ đếm
+lỗi** — lặp ba lần trở lên thì câu hỏi đúng là *"có nên làm việc này không"*. Vòng năm là
+lúc trả lời: **không**.
+
+**Thẩm quyền chuyển sang pip.** `pip install --dry-run --report -` trả KẾ HOẠCH dạng JSON;
+`install` rỗng nghĩa là môi trường ĐÃ thoả. Marker, extras, direct reference, `-r`/`-c`/`-e`,
+phiên bản, cú pháp chú thích — pip lo hết. Kèm `--no-index` để hook phiên không phụ thuộc
+mạng: đã thoả ⇒ `install=[]` trong **0,4s**; chưa thoả ⇒ pip thoát khác 0. Cả hai ánh xạ
+đúng sang câu hỏi *"có được bỏ qua pip không"*.
+
+**KHÔNG mâu thuẫn với r337.** r337 bác `--dry-run` vì đọc **mã thoát** (pip 24.0 trả rc=0
+kể cả khi in "Would install"). Đọc **kế hoạch** là một phép đo khác hẳn — đó chính là bằng
+chứng dương mà lúc ấy còn thiếu, không phải quay về cái oracle đã bị bác.
+
+**Lớp phụ giữ lại, và CỐ Ý yếu đi.** pip không thấy được lớp lỗi r337: gói CÓ MẶT, ĐÚNG BẢN,
+mà `import` chết (`PanicException`). Nên vẫn thăm import — nhưng nay dòng nào ta không hiểu
+thì **BỎ QUA** chứ không báo hỏng. Cả bảy finding đều sinh ra từ chỗ khe hở của bộ phân tích
+tự viết biến thành BÁO ĐỘNG GIẢ; nay khe hở chỉ dẫn tới *thăm ít hơn*, không bao giờ tới
+*chặn phiên*. Đổi chiều rủi ro sang hướng an toàn.
+
+**Tám ca `r338`–`r341` bị THAY, không phải sửa cho xanh** — chúng khoá một thiết kế không
+còn tồn tại (đo từng nhánh của bộ phân tích tự viết). Bốn ca `r342` khoá hợp đồng mới:
+mã thoát **khớp pip** trên 10 lớp (đo: **0/10 lệch**, gồm cả `-r` và extras mà bản cũ trả
+lời sai) · lớp phụ **có răng** (phá `pypdf/__init__.py` mà giữ metadata: pip `rc=0`, chốt
+`rc=1`) · **khe hở không được chặn phiên** (cho `Requirement` biến mất hoàn toàn, môi
+trường đã thoả vẫn XANH) · đột biến gỡ cả khối hỏi pip phải làm ca đối chiếu ĐỎ.
+
+**Một đột biến sống sót ở đây KHÔNG phải mã sai — nó đặt sai chỗ, và ca tự lộ ra.** Bản đầu
+của đột biến chỉ nuốt nhánh *"kế hoạch không rỗng"*, trong khi với `pypdf>=4.0` + `--no-index`
+pip KHÔNG GIẢI ĐƯỢC nên nhánh `rc != 0` bắt trước ⇒ mutant vẫn ĐỎ. Đúng bài học *"đột biến
+SỐNG SÓT không luôn nghĩa là test yếu"*. Nay gỡ CẢ khối. **Khai thẳng chỗ chưa đo:** nhánh
+*kế hoạch không rỗng* không được đo RIÊNG — muốn chạm nó phải có kho wheel cục bộ.
+
+Cổng: `launcher_test` **172/172** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta so
+`033d67d` = **0** · `bash -n` OK · `git diff --check` rc=0 · hook chạy thật hai lượt đúng
+thiết kế.
+
+# ★ dev-side — r341: `#` không phải lúc nào cũng là chú thích, và LẦN THỨ TƯ cùng một lớp lỗi (2026-09-06)
+
+P2 thứ ba của codex trên `033d67d`, **đúng**, đã tái hiện trước khi vá: pip chỉ coi `#` là
+chú thích khi nó ở **đầu dòng** hoặc đi **sau khoảng trắng**; `#` nằm giữa một chuỗi —
+marker, hay fragment của direct URL — là ký tự HỢP LỆ. Phản chứng:
+`pypdf; os_name == "posix#x"` ⇒ pip `rc=0` (marker sai nên bỏ qua), bản trước cắt ở `#`
+đầu tiên ⇒ dòng cụt ⇒ `InvalidRequirement` ⇒ `rc=1`.
+
+**Đây là lần thứ TƯ trong một ngày cùng lớp CHỐT ĐỎ THƯỜNG TRỰC**, và cả bốn có chung một
+gốc: *ta tự làm một việc mà pip đã có luật riêng.*
+
+| | ta tự làm gì | pip làm gì |
+|---|---|---|
+| r338 | ghim `==6.0.3` | phải gỡ gói distro ⇒ hỏng |
+| r339 | tự đòi bản ở chế độ hậu-pip | pip đã là thẩm quyền |
+| r340 | tự cắt marker | pip đánh giá marker |
+| r341 | tự cắt `#` | pip có luật cắt riêng |
+
+Điều đáng ghi nhất **không phải bản vá mà là cách r340 hụt**: commit r340 viết ra bài học
+"ngừng tự phân tích", chuyển việc cho `Requirement` — rồi **để nguyên dòng `split("#")`
+ngay phía trên chỗ vừa sửa**. Chuyển được phần phân tích mà bỏ sót phần TIỀN XỬ LÝ, và
+đúng chỗ bỏ sót ấy là lỗi kế tiếp. Bài học: khi kết luận "đừng tự làm việc này nữa", phải
+đi hết **cả đường dẫn tới nó**, không chỉ đoạn đang bị chỉ ra.
+
+Chép **LUẬT** của pip (`(^|\s)#`) chứ KHÔNG import bộ phân tích nội bộ: reviewer dặn đúng
+một điều đang định làm sai — `pip._internal` là API không ổn định, buộc hook vào đó là đổi
+một lớp trôi này lấy một lớp trôi khác.
+
+**Một hàng trong bảng đo của chính lượt này không đo cái nó ghi.** Vòng lặp kiểm chạy
+`pip install` trước mỗi ca, nên tới hàng `pypdf>=4.0` thì pip **đã nâng cấp** pypdf — hàng
+ấy in "không hồi quy" trong khi ca đã mất điều kiện. Đo lại trên rig giữ nguyên
+`pypdf` 3.17.4: r339 vẫn `rc=1`, r340 và r341 đều `rc=0`. Cùng bệnh *"ca có MẶT khác ca có
+ĐO"*, lần này nạn nhân là bảng dựng ra để chứng minh không hồi quy.
+
+Bảy ca đối chiếu **thẳng với pip** trên cùng một venv (marker chứa `#` · chú thích thật sau
+khoảng trắng · chú thích đầu dòng · chú thích sau TAB · marker không khớp · lệch bản · dòng
+hỏng): mã thoát của chốt khớp pip ở **cả bảy**. Răng hai chiều, một biến, hai vế dựng trong
+cùng một lệnh: hook chưa vá ⇒ ca đích **ĐỎ**; chỉ thay tệp hook ⇒ **XANH**. Ca răng giữ cho
+bản vá không hẹp thành "giữ nguyên chú thích thật", và đột biến quay về `split("#")` vô điều
+kiện phải làm ca đích ĐỎ.
+
+Cổng: `launcher_test` **176/176** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta so
+`033d67d` = **0** · `bash -n` OK · `git diff --check` rc=0 · hook chạy thật hai lượt đúng
+thiết kế.
+
+# ★ dev-side — r340: một DÒNG requirements không chỉ là TÊN (P2 thứ hai của codex) (2026-09-06)
+
+Lượt review thứ hai trên `1474d7d` ra P2 *"Respect requirement markers before probing
+imports"*, và nó **đúng** — đã tái hiện trước khi vá. Trên Linux với
+`pywin32; sys_platform == "win32"`: **pip trả `rc=0`** và nói thẳng *"Ignoring pywin32:
+markers ... don't match your environment"*, còn chốt trả **`rc=1` ở CẢ HAI chế độ** ⇒ sau
+mỗi lần pip THÀNH CÔNG, hook vẫn xoá mốc và cảnh báo lại ở lượt sau.
+
+**Đây là lần thứ BA trong cùng một ngày lớp lỗi CHỐT ĐỎ THƯỜNG TRỰC tái phát** — r338
+(ghim `==6.0.3` bắt pip gỡ gói distro), r339 (đòi bản ở chế độ hậu-pip), giờ là marker.
+Ba lần cùng một hình dạng thì câu hỏi đúng không còn là *"vá thế nào"* mà là *"có nên tự
+làm việc này không"*, đúng như bài học **BẢY phát hiện cùng MỘT đường** đã ghi. Nên bản vá
+này không thêm một nhánh nữa vào biểu thức chính quy mà **ngừng tự phân tích**: giao cả
+dòng cho `Requirement` — thứ pip dùng — và lấy tên + specifier + marker từ MỘT nguồn.
+
+- **Marker không áp dụng ⇒ bỏ qua dòng**, vì pip cũng bỏ qua. Đòi import một thứ pip cố ý
+  không cài là tự chế ra bất đồng với thẩm quyền.
+- **Dòng hỏng ⇒ fail-closed**, không `continue` lặng lẽ: bộ phân tích của pip từ chối thì
+  ta cũng từ chối (`InvalidRequirement`).
+- **Thiếu bộ phân tích + dòng CÓ marker ⇒ `KHONG_DO_DUOC_MARKER`**. Đoán xem marker có áp
+  dụng hay không chính là cái vừa hỏng.
+
+Sáu ca đo sau khi vá, trên cùng một venv: marker không khớp (cả hai chế độ) ⇒ rc=0 · marker
+khớp + gói thiếu thật ⇒ rc=1 · lệch bản (P2 trước) ⇒ rc=1, không hồi quy · bản thoả ⇒ rc=0
+· dòng hỏng ⇒ rc=1. Đo răng hai chiều, một biến, hai vế dựng trong cùng một lệnh: hook chưa
+vá ⇒ ca đích **ĐỎ**; chỉ thay đúng tệp hook ⇒ **XANH**. Đột biến gỡ phép đánh giá marker
+phải làm ca đích ĐỎ.
+
+Cổng: `launcher_test` **174/174** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta so
+`1474d7d` = **0** · `bash -n` OK · `git diff --check` rc=0 · hook chạy thật hai lượt đúng
+thiết kế.
+
+# ★ dev-side — r339: IMPORT ĐƯỢC không chứng minh ĐÚNG BẢN (P2 của codex trên PR #449) (2026-09-06)
+
+Codex review trên `3028506` ra một P2, và nó **đúng** — đã tái hiện bằng phản chứng chạy
+được TRƯỚC khi vá: `requirements.txt` đòi `pypdf>=4.0`, môi trường cài `pypdf` 3.17.4 ⇒
+`import pypdf` chạy ngon ⇒ chốt trả `rc=0` ⇒ hook **bỏ qua pip** và giữ nguyên một môi
+trường không còn thoả `requirements.txt`. Đúng thứ trôi mà chốt ấy sinh ra để sửa. Cùng họ
+"CÓ MẶT ≠ DÙNG ĐƯỢC", thêm một nấc: **DÙNG ĐƯỢC ≠ ĐÚNG BẢN**.
+
+- **Chỉ kiểm bản ở chế độ `--kiem-ban`**, tức lúc trả lời câu *"có được BỎ QUA pip không"*.
+  Sau khi pip vừa chạy xong thì pip là thẩm quyền và môi trường thoả theo cách đúng; đòi
+  thêm một phép đo ở đó chỉ tạo ra **chốt đỏ thường trực** trên máy thiếu bộ phân tích
+  specifier — đúng cái bẫy vừa trả giá ở r338 với bản ghim `==6.0.3`.
+- **`pip._vendor.packaging` là đường lui, và nó ĐO ĐƯỢC chứ không phải đoán:** `packaging`
+  trần **không có** trong venv trần, bản vendor của pip có ở **cả hai** nền — mà hook này
+  vốn đã đòi pip.
+- **KHÔNG ĐO ĐƯỢC ≠ ĐẠT.** Thiếu bộ phân tích hoặc thiếu metadata ⇒ báo
+  `KHONG_DO_DUOC_BAN`, nghĩa là *đừng bỏ qua pip* — để pip quyết. Tự chữa, không phải chốt chết.
+- **Thông điệp lỗi phải nói đúng chuyện gì hỏng.** Lệch bản mà in "KHONG import duoc" là
+  đẩy người đọc đi sai hướng; nay là `requirements.txt CHUA THOA (import hong hoac lech ban)`.
+
+**`t116` bắt được một lỗi thật của chính lượt vá này.** Hai ca mới ban đầu đặt tên
+`r338b_...`; bộ đăng ký khớp khuôn `^def [tr]\d+_` nên chữ `b` sau số làm chúng **có mặt
+trong `CA` mà không được đếm là hàm ca** ⇒ `171` hàm so `173` mục ⇒ ĐỎ. Chạy riêng từng ca
+thì **xanh cả hai**, tức chỉ lượt chạy ĐẦY ĐỦ mới thấy. Đổi tên thành `r339_`.
+
+Đo răng hai chiều, một biến, hai vế dựng trong **cùng một lệnh**: hook chưa vá ⇒ ca đích
+**ĐỎ** (`lech ban ma chot van XANH`); chỉ thay đúng tệp hook ⇒ **XANH**. Kèm ca răng (bản
+THOẢ tuyệt đối không được báo động giả; chế độ thường không được đòi bản) và đột biến bỏ
+phép so specifier phải làm ca đích ĐỎ.
+
+Cổng: `launcher_test` **172/172** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta so
+`3028506` = **0** · `bash -n` OK · `git diff --check` rc=0 · quét mẫu bí mật trên 129 dòng
+thêm: 0 khớp · hook chạy thật hai lượt, lượt 2 đi đúng đường `--kiem-ban`.
+
+# ★ dev-side — r338: bằng chứng dương của hook không phủ PyYAML, và ba lớp bẫy khi vá (2026-09-06)
+
+r337 đổi bằng chứng của bước pip từ mã thoát `pip install --dry-run` sang **import được
+từng gói trong `requirements.txt`**. Chốt đúng, nhưng phạm vi của nó bằng đúng nội dung
+tệp ấy — mà PyYAML **không nằm trong đó**, dù `ops/lease_publish.py` (3 chỗ) và
+`.claude/dev/packet_loop.py:1812` đều `import yaml`. Máy thiếu PyYAML vẫn được hook cấp
+mốc "đủ", rồi cổng đăng lease chết `ImportError` giữa chừng. Cùng bệnh "phạm vi TUYÊN BỐ
+phải bằng phạm vi ĐO ĐƯỢC", lần này ở dạng **một chốt đúng đặt trên một danh sách thiếu**.
+
+Vá thì đụng liền ba bẫy, không bẫy nào lộ ra bằng đọc code:
+
+- **TÊN GÓI (pip) ≠ TÊN MODULE (import).** Thêm `PyYAML` vào tệp là chốt r337 ĐỎ ngay:
+  nó suy tên bằng chuẩn hoá chuỗi ⇒ `pyyaml` ⇒ `ModuleNotFoundError`, trong khi
+  `import yaml` chạy tốt. Một chốt fail-close báo động GIẢ thì chặn phiên y như chốt
+  đúng — và bản vá cho lỗ "CÓ MẶT ≠ DÙNG ĐƯỢC" suýt tự dựng lại lỗ ấy ở chiều ngược.
+  Chữa bằng `importlib.metadata.packages_distributions()`: **hỏi metadata của bản ĐÃ CÀI**
+  thay vì đoán từ tên. Bảng tay đổi tên cũng là đoán, chỉ là đoán sớm hơn.
+- **Module gạch dưới là bản tăng tốc TUỲ CHỌN, đòi chúng là tái tạo đúng lớp lỗi vừa sửa.**
+  Metadata khai PyYAML gồm cả `_yaml` (C ext của libyaml). Phản chứng đã chạy: chặn
+  `_yaml` bằng meta-path finder rồi `import yaml` **vẫn OK** — `yaml/__init__.py` bọc nó
+  trong `try: from .cyaml import * / except ImportError`. Đòi `_yaml` là báo giả trên
+  mọi máy cài PyYAML thuần Python. Nên bản đồ chỉ lấy module KHÔNG gạch dưới.
+- **Ghim `==6.0.3` cho "khớp CI" làm hook ĐỎ THƯỜNG TRỰC — chỉ lộ vì chạy hook THẬT.**
+  Ba workflow ghim số ấy, nên bản đầu ghim theo. Chạy thật: python hệ thống có PyYAML
+  6.0.1 do distro cài ⇒ `pip install -r` phải GỠ nó trước ⇒
+  `ERROR: Cannot uninstall PyYAML 6.0.1, RECORD file not found ... installed by debian`
+  ⇒ pip rc≠0 ⇒ hook rẽ nhánh hỏng, xoá mốc, in CẢNH BÁO ở **mọi** lượt mở phiên. Đổi
+  sang `>=6.0` (cùng idiom `pypdf>=4.0`): no-op sạch, rc=0. CI giữ pin riêng của nó.
+
+**Và phép đo suýt chọn nhầm cách chữa.** Để so ba dạng (`==6.0.3` · `>=6.0` · trần) tôi
+chạy `pip install --dry-run`: nó trả **rc=0 cho cả ba**, kể cả dạng vừa hỏng thật. Đúng
+lý do r337 đã bác dry-run làm bằng chứng — và tôi gần như dùng lại chính cái oracle hỏng
+ấy để chọn bản vá cho lỗ do nó gây ra. Con số chỉ ra khi cài THẬT trên interpreter thật.
+
+**Đo răng, không nhận ca xanh.** `r338_ten_goi_pip_khac_ten_module_import` trích thân
+Python **từ chính tệp hook** (không chép lại — hai bản sẽ trôi lệch), và có ca răng: gói
+không tồn tại vẫn phải ĐỎ, kẻo bản vá chỉ là "luôn trả 0".
+`r338_dot_bien_bo_ban_do_lam_ca_dich_DO` gỡ bảng ánh xạ và đòi ca đích ĐỎ, cộng chiều
+ngược (đột biến không được làm đổi ca răng) để cái ĐỎ ấy quy được cho bảng ánh xạ.
+A/B một biến, hai vế dựng trong CÙNG một lệnh: hook chưa vá ⇒ ca đích **ĐỎ**; chỉ thay
+đúng tệp hook ⇒ **XANH**.
+
+Cổng: `launcher_test` **170/170** (bỏ qua 1, fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta
+so `057308d` = **0** trên cả ba tệp · `bash -n` OK · `git diff --check` rc=0 · quét mẫu
+bí mật trên 123 dòng thêm: 0 khớp · hook chạy thật hai lượt: lượt 1 cài + đặt mốc, lượt 2
+"không đổi và mọi gói import được — bỏ qua pip".
+
+Nợ đã khai, chưa chữa: `PyYAML` nay ghim ở **bốn** chỗ (ba workflow + tệp này) và không
+cổng nào canh chúng khớp nhau.
+
 # ★ dev-side — vòng 7b: bản vá ĐÚNG của vòng 7 làm đỏ Windows, và vì sao (2026-08-13)
 
 Vòng 7 sửa `if not con:` thành `con == []` — **đúng**, vì `None` là KHÔNG ĐO ĐƯỢC chứ

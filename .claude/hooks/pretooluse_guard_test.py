@@ -772,6 +772,62 @@ def t36_moi_ca_DINH_NGHIA_deu_phai_DANG_KY(h):
             + (f"; DANG KY MA KHONG CO: {ma}" if ma else ""))
 
 
+# ── NEN: Windows KHONG chay vong lap dot bien ─────────────────────────────────────────
+# DO 06-09-2026 tren Linux: bo nay 346s, trong do NEN-ONLY 10s => dot bien = 336s = 97%
+# chi phi cua bo, ~68% chi phi ca buoc `test registry`. Tren windows-latest ca buoc ay
+# ton 44,3 phut va job `gate` bi CAT o tran 60 phut (`cancelled`) hai luot master lien
+# tiep — tuc chan Windows CHUA BAO GIO chay tron. Cat vong lap dot bien khoi Windows la
+# cat dung khoan ay; ca NEN van chay du, khong bo ca nao.
+#
+# Ba ham duoi day la HAM THUAN, cung ly do voi `giet_duoc`/`duoc_cong_bo_diem` ben duoi:
+# phan chung phai ep duoc CA HAI nhanh nen ma KHONG can may Windows that.
+def nen_bo_qua_dot_bien(ten_nen=None):
+    """Nen `nt` (Windows) thi KHONG chay vong lap dot bien. Vi tu THUAN de do duoc."""
+    return (os.name if ten_nen is None else ten_nen) == "nt"
+
+
+def dat_windows(so_ca, do, so_dot_bien):
+    """Tieu chi DAT cua nhanh Windows — DOI SO DUONG hai ve, y het nhanh Linux.
+
+    `so_dot_bien > 0` la CHOT TUONG DUONG cua `len(DOT_BIEN) > 0` o nhanh Linux, KHONG
+    duoc bo. Bai hoc #319 la "tap RONG thoa `not song`": neu bang dot bien rong thi bo
+    test da mat chinh thu no dang khai la "se do o cho khac", nen loi hua ay thanh loi
+    hua suong — phai DO, du o day khong chay dot bien nao.
+    """
+    return so_ca > 0 and do == 0 and so_dot_bien > 0
+
+
+def dong_windows(so_ca_dat, so_ca, so_dot_bien):
+    """Dong bang chung DUONG cua Windows: khai RO dot bien khong do o day, va do O DAU.
+
+    KHONG duoc mang chu `bi giet` — o day khong giet cai nao. Dong `DOT BIEN 0/0 bi giet`
+    chinh la hinh dang ma #319 sinh ra de chan, nen no phai TRUOT o so dang ky.
+    """
+    return (f"TONG: CA {so_ca_dat}/{so_ca} dat · "
+            f"DOT BIEN {so_dot_bien} muc KHONG DO TREN WINDOWS — do tren ubuntu-latest")
+
+
+def t45_windows_bang_dot_bien_RONG_thi_KHONG_dat(g):
+    """Chot TUONG DUONG `len(DOT_BIEN) > 0` cho nhanh Windows (bai hoc #319)."""
+    return (not dat_windows(36, 0, 0) and not dat_windows(0, 0, 34)
+            and not dat_windows(36, 1, 34) and dat_windows(36, 0, 34),
+            "Windows: bang dot bien RONG / khong ca / co ca DO -> KHONG dat")
+
+
+def t46_dong_windows_KHONG_gia_dang_dong_linux(g):
+    """Dong Windows khong duoc doi lot dong Linux — no chua do gi de ma 'giet'."""
+    d = dong_windows(36, 36, 34)
+    return ("bi giet" not in d and "KHONG DO TREN WINDOWS" in d and "ubuntu-latest" in d,
+            "Windows: dong bang chung khai dung noi dot bien duoc do")
+
+
+def t47_vi_tu_nen_chi_cat_dot_bien_tren_nt(g):
+    """Cat dot bien la hanh vi RIENG cua Windows; nen khac phai chay du."""
+    return (nen_bo_qua_dot_bien("nt") and not nen_bo_qua_dot_bien("posix")
+            and not nen_bo_qua_dot_bien("java"),
+            "vi tu nen: chi 'nt' moi cat vong lap dot bien")
+
+
 CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
       t3_khong_chan_oan_lenh_doc, t4_phien_chinh_khop_packet_base,
       t5_doi_chung_van_ask, t6_agent_la_khong_bi_ap_luat,
@@ -801,6 +857,9 @@ CA = [t1_agent_bi_chan_moi_hinh_dang_ghi, t2_ca_hai_agent_deu_bi_chan,
       t42_bo_dem_khoa_theo_BAM_khong_theo_THOI_GIAN,
       t43_hook_quyet_dinh_duoi_code_page_mac_dinh,
       t44_thieu_Ruff_01515_lam_cong_do,
+      t45_windows_bang_dot_bien_RONG_thi_KHONG_dat,
+      t46_dong_windows_KHONG_gia_dang_dong_linux,
+      t47_vi_tu_nen_chi_cat_dot_bien_tren_nt,
       t36_moi_ca_DINH_NGHIA_deu_phai_DANG_KY]
 
 # --- DOT BIEN: moi cai go DUNG MOT tinh chat, va phai lam it nhat mot ca DO ---
@@ -939,6 +998,15 @@ def chay():
         if not ok:
             do_san.add(f.__name__)
         print(f"  {'DAT ' if ok else 'DO  '} {f.__name__:38} {mo_ta}")
+
+    # WINDOWS: cat DUNG vong lap dot bien, khong cat gi khac. Ca NEN o tren DA chay du —
+    # bo ca nen la lam mu chan Windows, khac han voi bo phep DO LAI cua dot bien.
+    # Tieu chi `dat` van doi SO DUONG hai ve qua `dat_windows`, khong duoc im.
+    if nen_bo_qua_dot_bien():
+        dat = dat_windows(len(CA), do, len(DOT_BIEN))
+        print(dong_windows(len(CA) - do, len(CA), len(DOT_BIEN)))
+        print("TONG:", "DAT" if dat else "DO")
+        return 0 if dat else 1
 
     print("DOT BIEN (moi cai PHAI lam it nhat mot ca DO):")
     song = []

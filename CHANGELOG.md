@@ -608,6 +608,7 @@ nhau; đừng đọc số sau thành số trước. Cùng họ *"đột biến s
 |---|---|---|
 | `ops/bien_nhan_v2_test.py` | 0 | `48/48 ca đạt · 63/63 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 45/63 khai đối chứng` · `TỔNG: ĐẠT` |
 | `ops/bien_nhan_v2.py --root .` | 0 | `17 ĐẠT v2 · 11/11 miễn trừ legacy · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 70` |
+| `ops/lease_publish_test.py` | 0 | `121/121 đạt; đã chạy=121, bỏ qua=0` — **và ĐIỀU KIỆN ĐO của nó đã ĐỔI giữa chừng, ghi lại kẻo con số cũ bị đọc nhầm.** Các thông điệp commit của đợt này khai `120/121, chỉ t33`: đúng **với điều kiện đã nêu ở đó** — container thiếu `actionlint`, nên `t33` fail-close (*"KHÔNG ĐO ĐƯỢC"* ⇒ ĐỎ) **đúng thiết kế**, không phải hồi quy. Sau khi cài đủ công cụ bằng chính script của kho (`ops/cai_actionlint.sh` + `ops/cai_cong_cu.sh shellcheck`), `t33` **đo được** và xanh: head và `origin/master` đo trong **CÙNG một lệnh** đều `121/121`, `0` dòng ĐỎ ⇒ delta = 0 ở **cả hai** nền đo. Quan sát kèm, đúng thứ doctrine đã cảnh báo: `actionlint` **có** `shellcheck` bật thêm luật nền và báo 1 finding `SC1003:info` ở `ops-don-ref.yml` — **đỏ sẵn trên master**, và `t33` không đọc tệp ấy nên không ảnh hưởng |
 
 Nền trước bản vá trên cùng head: `45/45 · 57/57 · 2/2 · 39/57`. Delta là **+3 ca** (`c43` `c44` `c45`)
 và **+6 đột biến** (`m56`…`m61`) — đúng bằng thứ thêm vào, không ca nào mất. (`m61` đến từ vòng vá

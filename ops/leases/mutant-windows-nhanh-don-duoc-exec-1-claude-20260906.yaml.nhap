@@ -3,12 +3,15 @@
 # `t23` của `ops/lease_publish_test.py` chỉ đọc `suffix in (".yaml", ".yml")` — nên nháp KHÔNG bị
 # tính là lease đang giữ. Đo 19:33–19:34Z 06-09-2026 trong bản sao đủ 299 ref: đuôi `.yaml` ⇒
 # `ai-dang-giu ops/nhanh_don_duoc_test.py` = NGƯỜI_GIỮ 1 (chính nháp này); đuôi `.nhap` ⇒ 0.
-# `check` vẫn chạy trên tên này (19:31Z: rc=8, thiếu packet_issue/granted_by).
+# `check` vẫn chạy trên tên này — đo lại 21:00Z 06-09-2026 trên cây b1c2284: rc=8, thiếu 3 trường
+# packet_issue/granted_by/lease_expires_at_utc (bản này đã bỏ hạn điền sẵn; 19:31Z là bản trung gian).
 # ĐỔI TÊN VỀ `.yaml` LÀ BƯỚC CUỐI khi cấp thật, SAU khi điền đủ các ô dưới đây.
 schema_version: 2
 event: executor_lease_granted
 
-# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP — SÁU ô, không ai khác điền được ──────────────────
+# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP — 6 ô: packet_issue · mission_issue · granted_by ·
+#    granted_on_instruction · leased_at_utc · lease_expires_at_utc (yaml.safe_load 21:00Z 06-09-2026: đúng
+#    6 trường null trong tệp này) — không ai khác điền được ──────────────────────────────────
 # `packet_issue`  : số hiệu Issue sau khi đăng (phải là ISSUE, không phải PR).
 # `mission_issue` : Mission Issue chứa packet (`PROTOCOL §3.2` đòi; khuyến nghị ở spec GATE).
 # `granted_by`    : `ducthangho` — `record-lease` TỪ CHỐI tên provider (`claude`/`codex`).
@@ -39,8 +42,8 @@ assurance_target: cross_approved
 access: read-write
 
 spec_path: ops/specs/MUTANT-WINDOWS-NHANH-DON-DUOC.md
-spec_sha256: 4287c7666a24a0ad7e5981564fa2e6b3276c88a5487eaadc12bf72ff99a7ace8
-spec_hash: 4287c7666a24a0ad7e5981564fa2e6b3276c88a5487eaadc12bf72ff99a7ace8
+spec_sha256: 0a507223161c72282a1efa778000ad7e52ac7a2773c558dd8c7e0640d6bbc91d
+spec_hash: 0a507223161c72282a1efa778000ad7e52ac7a2773c558dd8c7e0640d6bbc91d
 
 write_set:
   - ops/nhanh_don_duoc_test.py
@@ -53,7 +56,8 @@ depends_on:
 branch: claude/mutant-windows-nhanh-don-duoc
 branch_ownership: exclusive
 target_branch_neu_land: master
-# BA MỎ NEO — chỗ giữ, KHÔNG phải giá trị cấp. Packet này đi THỨ TƯ, cuối chuỗi, nên CẢ BA trường
+# 3 MỎ NEO (base_sha · start_from_sha · reviewed_sha_required) — chỗ giữ, KHÔNG phải giá trị cấp.
+# Packet này đi THỨ TƯ, cuối chuỗi, nên CẢ 3 trường
 # dưới đây phải ĐO LẠI tại lúc cấp = head `origin/master` SAU khi MUTANT-WINDOWS-SUBAGENT-GHI-DETECT
 # integrated — ba packet trước đã đổi master rồi. Quy tắc này nằm trong đặc tả đóng băng.
 base_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
@@ -74,13 +78,21 @@ reviewer_provider: codex
 review_class: sensitive
 effective_review_class: sensitive
 
-# CHỐT HAI CHIỀU (`_kiem_bia_mo`): tệp lease của MUTANT-WINDOWS-SUBAGENT-GHI-DETECT phải mang dòng
-#   da_bi_thay_the: mutant-windows-nhanh-don-duoc-exec-1-claude-20260906
-# TRƯỚC khi lease này được đăng. Mắt cuối của chuỗi thu hồi:
-#   #456  →  GATE  →  LO-319  →  MUTANT-WINDOWS-SUBAGENT-GHI-DETECT  →  packet này
-# Bia mộ phải phủ MỌI bản của lease tiền nhiệm trên MỌI ref (thủ tục bốn bước ở spec LO-319).
-thay_the_cho:
-  - mutant-windows-subagent-ghi-detect-exec-1-claude-20260906
+# THAY THẾ tiền nhiệm — chuỗi điều phối #456 → GATE → LO-319 → 2A → 2B; tiền nhiệm TRỰC TIẾP của
+# lease này là 2A (MUTANT-WINDOWS-SUBAGENT-GHI-DETECT):
+#   mutant-windows-subagent-ghi-detect-exec-1-claude-20260906
+# (dấu vết audit — KHÔNG phải điều kiện cổng). Nháp chọn ĐƯỜNG (a): cấp SAU khi tiền nhiệm hết hạn
+# (`lease_expires_at_utc` của lease 2A đã cấp — KHÔNG phải hạn #456) ⇒ `thay_the_cho: []`. Lý do, đo 21:02Z 06-09-2026 trên cây b1c2284:
+#   · `_kiem_bia_mo` (check) KHÔNG miễn cho HẾT_HẠN — giữ tên tiền nhiệm ⇒ check rc=8 tới khi có bia mộ;
+#   · `thay_the_cho: []` + 6 ô điền tạm ⇒ check rc=0 (ĐĂNG ĐƯỢC) ngay khi #456 còn hạn — tức check
+#     KHÔNG chặn chồng lấn write set; chỉ `ai-dang-giu` đo được chuyện ấy;
+#   · `ai-dang-giu` không đếm bản HẾT_HẠN: mô phỏng #456 ⇒ NGƯỜI_GIỮ 1 → 0 đúng tại giây hết hạn.
+# ĐƯỜNG (b) cấp SỚM: điền `thay_the_cho: [<tiền nhiệm>]`; chủ kho thêm `da_bi_thay_the: <lease này>`
+# vào tệp lease tiền nhiệm trên nhánh ops/** và commit TRƯỚC khi check; MỌI ref còn giữ bản cũ được
+# cập nhật/dọn, readback `ai-dang-giu` ⇒ 0 dòng CÒN_HẠN của tiền nhiệm — thủ tục ở spec LO-319 mục
+# "Lease đang giữ" (b). Chọn đường nào ghi vào granted_on_instruction. Trước khi bắt tay, A8/A9 đo
+# bằng `ai-dang-giu` trên MỌI đường write set, không bằng check.
+thay_the_cho: []
 
 ly_do_cap: >-
   Đo 17:39–17:47Z 06-09-2026: bộ này 33 s đầy đủ so 2 s nền-only ⇒ đột biến 93,9 %.
@@ -98,17 +110,21 @@ ly_do_cap: >-
   Cộng LỖ THỨ HAI có sẵn từ trước, cùng họ #319: `return 0 if mutant_dat == len(DOT_BIEN)`
   cho `rc=0` khi bảng đột biến RỖNG (reviewer tái hiện 18:50Z). Hai cách chữa đo được: siết
   `MOI` đọc các dòng `MUTANT` sẵn có (mẫu của reviewer phân biệt đủ/rỗng), hoặc in cặp TỔNG có
-  nhãn `DOT BIEN n/m bi giet` để chốt nhãn của LO-319 soi. Chọn cách hai: cùng hình dạng bằng
+  nhãn `DOT BIEN n/m bi giet` để grammar tổng của LO-319 soi. Chọn cách hai: cùng hình dạng bằng
   chứng với hai bộ kia, và `0/0`/`9/10` bị từ chối ở tầng sổ đăng ký không cần mẫu riêng.
   Phạm vi đúng: không chỉ cắt đột biến khỏi Windows mà còn làm bằng chứng đột biến của bộ này
   ĐỌC ĐƯỢC ở tầng sổ đăng ký trên cả hai nền — "đọc được", không phải "tồn tại".
-  Đối chứng cho A1, đo 19:35Z: `chay_ca()` 136 spawn; `chay_dot_bien()` 35 spawn = 5 + 3×10.
+  Đối chứng cho A1, đo 19:35Z: `chay_ca()` 136 spawn; `chay_dot_bien()` 35 spawn = 5 + 3×10. Đo lại
+  21:02Z/21:07Z 06-09-2026: `chay_ca()` 136 Popen; runner với bảng RỖNG qua seam vẫn 5 lời gọi dựng
+  fixture ⇒ đối chứng là `chay_ca()` (136), KHÔNG phải `main()` bảng rỗng (= 141) — verdict lượt 2, P2.
 
 viec_trong_lease:
   - 'Trên Windows: vòng lặp đột biến KHÔNG chạy; 8 ca nền vẫn chạy đủ.'
-  - 'A1 đo bằng ĐỐI CHỨNG: `S_nt == S_nen` (bảng rỗng trên posix, hôm nay 136), `S_nt` bằng nhau
-     tại hai kích thước bảng (10 và 5 qua seam), `chay_dot_bien` gọi 0 lần trên nt; đối chứng
-     chiều ngược `S_posix − S_nen == 5 + 3·len(DOT_BIEN)` (hôm nay 35).'
+  - 'A1 đo bằng ĐỐI CHỨNG, đếm ở `Popen` (mỗi tiến trình một lần): `S_ca` = spawn của riêng
+     `chay_ca()` (hôm nay 136, 21:02Z) — KHÔNG phải `main()` bảng rỗng (= 136 + 5 lời gọi dựng
+     fixture = 141, đo 21:07Z); `S_nt == S_ca`; `S_nt` bằng nhau tại hai kích thước bảng (10 và 5 qua
+     seam); `chay_dot_bien` gọi 0 lần trên nt; tập tên 8 ca nền trên nt bằng trên posix; đối chứng
+     chiều ngược `S_posix − S_ca == 5 + 3·len(DOT_BIEN)` (hôm nay 35, đo 19:35Z).'
   - 'In cặp TỔNG đột biến CÓ NHÃN trên CẢ HAI nền — Linux `DOT BIEN <đã giết>/<tổng> bi giet`,
      Windows `DOT BIEN <tổng> muc KHONG DO TREN WINDOWS — do tren ubuntu-latest`; giữ nguyên
      10 dòng `MUTANT` sẵn có.'

@@ -3,12 +3,15 @@
 # `t23` của `ops/lease_publish_test.py` chỉ đọc `suffix in (".yaml", ".yml")` — nên nháp KHÔNG bị
 # tính là lease đang giữ. Đo 19:33–19:34Z 06-09-2026 trong bản sao đủ 299 ref: đuôi `.yaml` ⇒
 # `ai-dang-giu .claude/hooks/subagent_ghi_detect_test.py` = NGƯỜI_GIỮ 1 (chính nháp này); đuôi
-# `.nhap` ⇒ 0. `check` vẫn chạy trên tên này (19:31Z: rc=8, thiếu packet_issue/granted_by).
+# `.nhap` ⇒ 0. `check` vẫn chạy trên tên này — đo lại 21:00Z 06-09-2026 trên cây b1c2284: rc=8, thiếu 3
+# trường packet_issue/granted_by/lease_expires_at_utc (bản này đã bỏ hạn điền sẵn; 19:31Z là bản trung gian).
 # ĐỔI TÊN VỀ `.yaml` LÀ BƯỚC CUỐI khi cấp thật, SAU khi điền đủ các ô dưới đây.
 schema_version: 2
 event: executor_lease_granted
 
-# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP — SÁU ô, không ai khác điền được ──────────────────
+# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP — 6 ô: packet_issue · mission_issue · granted_by ·
+#    granted_on_instruction · leased_at_utc · lease_expires_at_utc (yaml.safe_load 21:00Z 06-09-2026: đúng
+#    6 trường null trong tệp này) — không ai khác điền được ──────────────────────────────────
 # `packet_issue`  : số hiệu Issue sau khi đăng (phải là ISSUE, không phải PR).
 # `mission_issue` : Mission Issue chứa packet (`PROTOCOL §3.2` đòi; khuyến nghị ở spec GATE).
 # `granted_by`    : `ducthangho` — `record-lease` TỪ CHỐI tên provider (`claude`/`codex`).
@@ -39,8 +42,8 @@ assurance_target: cross_approved
 access: read-write
 
 spec_path: ops/specs/MUTANT-WINDOWS-SUBAGENT-GHI-DETECT.md
-spec_sha256: e0e26a3012b4166d3871aa1905bde007553218838ef06419de0a92f20a052b8d
-spec_hash: e0e26a3012b4166d3871aa1905bde007553218838ef06419de0a92f20a052b8d
+spec_sha256: 9434f3c48954085b10f709573854e3a75135c090bae8e98bb4b457796d036272
+spec_hash: 9434f3c48954085b10f709573854e3a75135c090bae8e98bb4b457796d036272
 
 write_set:
   - .claude/hooks/subagent_ghi_detect_test.py
@@ -52,8 +55,8 @@ depends_on:
 branch: claude/mutant-windows-subagent-ghi-detect
 branch_ownership: exclusive
 target_branch_neu_land: master
-# BA MỎ NEO — chỗ giữ, KHÔNG phải giá trị cấp. Packet này đi THỨ BA (sau GATE và LO-319), nên
-# CẢ BA trường dưới đây (`base_sha`, `start_from_sha`, `reviewed_sha_required` — bản đầu chỉ nhắc
+# 3 MỎ NEO (base_sha · start_from_sha · reviewed_sha_required) — chỗ giữ, KHÔNG phải giá trị cấp.
+# Packet này đi THỨ BA (sau GATE và LO-319), nên CẢ 3 trường dưới đây (`base_sha`, `start_from_sha`, `reviewed_sha_required` — bản đầu chỉ nhắc
 # hai) phải ĐO LẠI tại lúc cấp = head `origin/master` SAU khi LO-319 integrated. Không có SHA
 # tương lai nào để điền hôm nay. Quy tắc này nằm trong đặc tả đóng băng, không chỉ ở đây.
 base_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
@@ -74,14 +77,21 @@ reviewer_provider: codex
 review_class: sensitive
 effective_review_class: sensitive
 
-# CHỐT HAI CHIỀU (`_kiem_bia_mo`): tệp lease của LO-319 phải mang dòng
-#   da_bi_thay_the: mutant-windows-subagent-ghi-detect-exec-1-claude-20260906
-# TRƯỚC khi lease này được đăng. `da_bi_thay_the` là MỘT chuỗi (đo B19: danh sách ⇒ False), nên
-# bốn packet cùng chạm `.claude/dev/ci_dang_ky_test.py` nối thành CHUỖI THU HỒI, thứ tự CỐ ĐỊNH:
-#   #456  →  GATE  →  LO-319  →  packet này  →  MUTANT-WINDOWS-NHANH-DON-DUOC
-# Bia mộ phải phủ MỌI bản của lease LO-319 trên MỌI ref (thủ tục bốn bước ở spec LO-319).
-thay_the_cho:
-  - lo-319-linux-bang-chung-xanh-exec-1-claude-20260906
+# THAY THẾ tiền nhiệm — chuỗi điều phối #456 → GATE → LO-319 → 2A → 2B; tiền nhiệm TRỰC TIẾP của
+# lease này là LO-319:
+#   lo-319-linux-bang-chung-xanh-exec-1-claude-20260906
+# (dấu vết audit — KHÔNG phải điều kiện cổng). Nháp chọn ĐƯỜNG (a): cấp SAU khi tiền nhiệm hết hạn
+# (`lease_expires_at_utc` của lease LO-319 đã cấp — KHÔNG phải hạn #456) ⇒ `thay_the_cho: []`. Lý do, đo 21:02Z 06-09-2026 trên cây b1c2284:
+#   · `_kiem_bia_mo` (check) KHÔNG miễn cho HẾT_HẠN — giữ tên tiền nhiệm ⇒ check rc=8 tới khi có bia mộ;
+#   · `thay_the_cho: []` + 6 ô điền tạm ⇒ check rc=0 (ĐĂNG ĐƯỢC) ngay khi #456 còn hạn — tức check
+#     KHÔNG chặn chồng lấn write set; chỉ `ai-dang-giu` đo được chuyện ấy;
+#   · `ai-dang-giu` không đếm bản HẾT_HẠN: mô phỏng #456 ⇒ NGƯỜI_GIỮ 1 → 0 đúng tại giây hết hạn.
+# ĐƯỜNG (b) cấp SỚM: điền `thay_the_cho: [<tiền nhiệm>]`; chủ kho thêm `da_bi_thay_the: <lease này>`
+# vào tệp lease tiền nhiệm trên nhánh ops/** và commit TRƯỚC khi check; MỌI ref còn giữ bản cũ được
+# cập nhật/dọn, readback `ai-dang-giu` ⇒ 0 dòng CÒN_HẠN của tiền nhiệm — thủ tục ở spec LO-319 mục
+# "Lease đang giữ" (b). Chọn đường nào ghi vào granted_on_instruction. Trước khi bắt tay, A8/A9 đo
+# bằng `ai-dang-giu` trên MỌI đường write set, không bằng check.
+thay_the_cho: []
 
 ly_do_cap: >-
   Đo 17:39–17:47Z 06-09-2026 trên container Linux, MỘT lượt, không lặp, tách nền/đột biến
@@ -106,12 +116,16 @@ ly_do_cap: >-
 
 viec_trong_lease:
   - 'Trên Windows: CẢ BA kênh đột biến KHÔNG chạy; 33 ca nền vẫn chạy đủ.'
-  - 'A1 đo bằng ĐỐI CHỨNG: `S_nt == S_nen` (ba bảng rỗng trên posix), `S_nt` bằng nhau tại hai
-     kích thước bảng (22 và 11 qua seam), `exec` bản đột biến trên nt = 0, ba hàm runner gọi
-     0 lần trên nt; đối chứng chiều ngược `S_posix > S_nen`.'
+  - 'A1 đo bằng ĐỐI CHỨNG, đếm ở `Popen` (mỗi tiến trình một lần; bọc cả run lẫn Popen là đếm
+     đôi): `S_nen` = chay() với ba bảng rỗng trên posix — đo lại 21:07Z 06-09-2026: 438 Popen, 0
+     exec, bằng đúng ca nền vì bộ này KHÔNG dựng fixture ngoài vòng lặp (khác 2B); `S_nt == S_nen`;
+     `S_nt` bằng nhau tại hai kích thước bảng (22 và 11 qua seam); `exec` bản đột biến trên nt = 0;
+     ba hàm runner gọi 0 lần trên nt; tập tên 33 ca nền trên nt bằng trên posix; đối chứng chiều
+     ngược `S_posix > S_nen` (10.045 > 438, đo 19:35Z, chưa đo lại lượt này).'
   - 'Trên Windows: in một dòng bằng chứng DƯƠNG khai rõ đột biến không đo ở đây và đo ở đâu,
      kèm số mục của CẢ BA kênh. Không mang chữ `bi giet`, không mang cặp `n/m` sau nhãn
-     `DOT BIEN` (LO-319 soi cặp có nhãn).'
+     `DOT BIEN`; dòng ấy phải có grammar riêng trong TONG_WINDOWS (LO-319 đọc bản ghi tổng theo
+     grammar; cặp n/m sau nhãn là sai grammar ⇒ đỏ).'
   - 'Nhánh Windows đứng SAU chốt `duoc_cong_bo_diem` — nền đỏ trên Windows vẫn ĐỎ.'
   - '`dat_windows` đòi số dương BA VẾ — chốt tương đương `len(DOT_BIEN) > 0` cho cả ba kênh.'
   - 'Sổ đăng ký chấp nhận dòng ấy CHỈ khi nền là Windows; hai chiều đều có phản chứng, đi qua

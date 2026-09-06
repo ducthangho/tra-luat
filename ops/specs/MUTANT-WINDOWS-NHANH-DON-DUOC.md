@@ -5,7 +5,8 @@
 - `packet_issue`: **(để trống — chủ kho cấp)**
 - `mission_issue`: **(để trống — chủ kho cấp;** khuyến nghị chung cho bốn packet ở
   `GATE-TACH-JOB-CAT-CHI-PHI.md`**)**
-- `revision`: 1 · `generation`: 1
+- `revision`: 1 · `generation`: 1 — giữ 1 có chủ ý (nháp thứ ba của revision 1, chưa có Issue nên
+  chưa đóng băng; lý do đầy đủ và quy ước `lease_id …-exec-1rN-…` đo được ở `LO-319` dòng `revision`)
 - `executor`: claude · `environment`: cloud
 - `risk`: **sensitive** · `review_class`: **sensitive** (chạm chốt bằng chứng dương của một cổng CI;
   không rõ ⇒ lấy mức chặt nhất)
@@ -27,7 +28,10 @@ Tiền nhiệm trực tiếp: `MUTANT-WINDOWS-SUBAGENT-GHI-DETECT` (bộ thứ n
 phải đọc **biên nhận** của packet đó trước khi bắt tay: nó là chỗ ghi những khác biệt cấu trúc mà
 lượt review tìm thêm được, và là nguồn DUY NHẤT cho bộ đếm kế thừa ở `hinh_dang_ke_thua`.
 
-Bản này là **bản sửa theo verdict cross-review lượt 1** (`reviewed_sha` `d09f2f1`, Codex).
+Bản này là **bản sửa theo verdict cross-review lượt 2** (`reviewed_sha` `b1c2284`, Codex), sau lượt 1
+(`d09f2f1`): đối chứng A1 đổi từ "`main()` bảng rỗng" sang `chay_ca()` (P2
+`mot-diem-spawn-khong-do-duoc-ti-le`), thu hồi lease theo P1, M4 đồng bộ "địa điểm thứ tư" (P3), và
+mọi câu về `LO-319` theo thiết kế T (bản ghi TỔNG).
 
 ## Bối cảnh đo được (mọi số kèm thời điểm)
 
@@ -104,8 +108,8 @@ in ra dưới dạng cặp"* — sai một nửa, verdict lượt 1 P2 `bang-chu
   `1/1`, **2** dòng `3/3`). Cặp `n/m` ở mỗi dòng là **số ca ĐÍCH bị giết / số ca đích của mutant
   ấy** — một mutant SỐNG in `0/3`, không phải vắng dòng. Đơn vị là ca đích, không phải mutant.
 - Thứ **chưa** in là cặp TỔNG `mutant_dat / len(DOT_BIEN)` (hôm nay `10/10`).
-- `MOI` (`^(\d+)/(\d+)$`, span 3 ký tự) chỉ khớp dòng `8/8`, nên `LO-319` — soi cặp có nhãn TRONG
-  SPAN — không nhìn thấy các dòng `MUTANT`. Đó là lý do LO không chữa được lỗ này, **không phải**
+- `MOI` (`^(\d+)/(\d+)$`, span 3 ký tự) chỉ khớp dòng `8/8`, nên `LO-319` — đọc bản ghi TỔNG theo
+  grammar, mà bản ghi tổng hôm nay của bộ này là đúng dòng `8/8` — không nhìn thấy các dòng `MUTANT`. Đó là lý do LO không chữa được lỗ này, **không phải**
   vì bằng chứng không tồn tại.
 
 Hai cách chữa, cả hai đo được:
@@ -115,8 +119,10 @@ Hai cách chữa, cả hai đo được:
   đòi tổng; một bảng còn một mục cũng qua, và một mutant sống (`0/3`) cũng qua trừ khi mẫu soi từng
   dòng.
 - **(ii) in cặp TỔNG có nhãn** — `DOT BIEN <mutant_dat>/<len(DOT_BIEN)> bi giet` trên Linux —
-  rồi siết `MOI` đòi dòng ấy. Sau `LO-319`, `bang_chung_xanh` soi cặp mang nhãn `DOT BIEN` trong
-  span ⇒ `0/0` và `9/10` đều bị từ chối ở TẦNG SỔ ĐĂNG KÝ mà không cần mẫu riêng.
+  rồi siết `MOI` đòi dòng ấy. Sau `LO-319`, dòng ấy được khai là một **bản ghi tổng** trong `TONG`
+  của mục này (đổi từ `[(r"\d+/\d+\s*$", r"(\d+)/(\d+)")]` sang bản ghi có nhãn, M5) ⇒ `0/0` và
+  `9/10` bị từ chối ở TẦNG SỔ ĐĂNG KÝ theo luật cặp `n == m > 0` của T — cần khai grammar mới cho
+  mục này, không cần vị từ riêng.
 
 **Chọn (ii)**, vì nó đưa bộ này về cùng hình dạng bằng chứng với hai bộ kia (một dòng tổng có
 nhãn) và tận dụng chốt `LO-319` thay vì dựng một mẫu span dài riêng. (i) không sai; nó chỉ là một
@@ -142,9 +148,14 @@ và lỏng nhất về nội dung: nó không đòi một chữ nào ngoài hai 
 (`nhanh_don_duoc_test.py` ⇒ `NGƯỜI_GIỮ 1`); đổi đuôi `.yaml.nhap` ⇒ `0` (19:34Z). Chi tiết và thủ
 tục thu hồi ở `ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md` mục *"Lease đang giữ"*.
 
-Chuỗi thu hồi: **`#456 → GATE → LO-319 → 2A → packet này`** (mắt cuối). Lease của packet này khai
-`thay_the_cho: mutant-windows-subagent-ghi-detect-exec-1-claude-20260906`; **mọi bản** của lease
-ấy trên mọi ref phải mang `da_bi_thay_the` trỏ ngược, theo thủ tục bốn bước.
+Chuỗi điều phối: **`#456 → GATE → LO-319 → 2A → packet này`** (mắt cuối). Tiền nhiệm trực tiếp là
+`2A`. Nháp chọn **đường (a)** của `LO-319` mục *"Lease đang giữ"*: cấp SAU khi lease `2A` hết hạn
+(`lease_expires_at_utc` của CHÍNH lease ấy — không phải hạn #456) với `thay_the_cho: []`, tên tiền
+nhiệm ghi ở chú thích. Chọn **đường (b)** cấp sớm thì lease này khai
+`thay_the_cho: [mutant-windows-subagent-ghi-detect-…]`, tệp lease `2A` mang `da_bi_thay_the` trỏ
+ngược **đã commit**, và **mọi bản** trên mọi ref được xử với readback `ai-dang-giu`. Hai cổng khác
+luật (`check` đếm `any`, không nhìn hạn; `ai-dang-giu` đếm mọi bản, chỉ nhìn hạn — đo 21:02Z
+06-09-2026) — chi tiết ở `LO-319`, không chép lại.
 
 ## `review_class` và ngưỡng kích thước
 
@@ -183,26 +194,36 @@ Không ký tự đại diện. Không đường dẫn nào khác.
 | M1 | Trên Windows, vòng lặp đột biến KHÔNG chạy. Tám ca nền vẫn chạy đủ. | `write_set` #1 |
 | M2 | Bộ in **cặp TỔNG đột biến có nhãn** ra bản in trên **cả hai** nền — Linux `DOT BIEN <đã giết>/<tổng> bi giet`, Windows `DOT BIEN <tổng> muc KHONG DO TREN WINDOWS — do tren ubuntu-latest`. Hôm nay không nền nào in cặp tổng; các dòng `MUTANT` theo mutant giữ nguyên. | `write_set` #1 |
 | M3 | Seam `NHANH_DON_DUOC_KHONG_DOT_BIEN` (bản con của runner) và vị từ nền Windows là **hai đường tách biệt**: bản con vẫn in dạng riêng, không mượn dòng Windows. | `write_set` #1 |
-| M4 | Bảng đột biến RỖNG ⇒ `rc != 0` trên **mọi** nền — chốt tương đương `len(DOT_BIEN) > 0`, lấp lỗ #319 tại địa điểm thứ ba. | `write_set` #1 |
+| M4 | Bảng đột biến RỖNG ⇒ `rc != 0` trên **mọi** nền — chốt tương đương `len(DOT_BIEN) > 0`, lấp lỗ #319 tại **địa điểm thứ tư** của bảng `hinh_dang_ke_thua` (đơn vị: địa điểm/ca tái hiện, gồm ca tổng hợp — chưa phải sự cố sản xuất, `chua_do_duoc` #4). | `write_set` #1 |
 | M5 | Sổ đăng ký đòi cặp tổng ấy: mẫu Linux siết để nhìn thấy dòng có nhãn `DOT BIEN`; `MOI_WINDOWS` nhận dòng Windows **chỉ** khi nền là Windows. | `write_set` #2 |
 | M6 | Trên Linux, số ca và số đột biến không đổi: `8` ca, `10` đột biến, `rc=0`. | `write_set` #1, #2 |
 
 ## `nghiem_thu`
 
 **A1 (M1) — đột biến thật sự không chạy trên Windows, đo với ĐỐI CHỨNG và tại HAI kích thước.**
-Giả lập nền qua vị từ THUẦN (`ten_nen="nt"` / `"posix"`), bọc `subprocess.run` và `subprocess.Popen`
-bằng bộ đếm. Bốn phép đo, qua chính `main()` (hoặc hàm tương đương nhận vị từ nền):
-- `S_nen` = spawn trên `posix` với `DOT_BIEN` **rỗng** qua seam (hôm nay `136`, đo 19:35Z — đo lại
-  tại lúc thi công; lưu ý M4 làm lượt ấy `rc != 0`, chỉ lấy số spawn);
-- `S_nt` = spawn trên `nt` với bảng **đầy đủ** (10 mục);
-- `S_nt_nua` = spawn trên `nt` với bảng cắt còn **5** mục qua seam;
-- `S_posix` = spawn trên `posix` với bảng đầy đủ (hôm nay `136 + 35 = 171`).
-Đòi: **`S_nt == S_nen`** và **`S_nt_nua == S_nt`**, số lần `chay_dot_bien` được gọi trên `nt` =
-**0** (đếm qua wrapper), và đối chứng `S_posix − S_nen == 5 + 3·len(DOT_BIEN)` (hôm nay `35`) để
-chắc rig thấy vòng lặp.
-Phép làm ĐỎ: bỏ cắt ⇒ `S_nt = S_nen + 35` ⇒ ĐỎ; cắt "một nửa" (chỉ bỏ `python` con, còn
-`archive|tar`) ⇒ `S_nt = S_nen + 25` ⇒ vẫn ĐỎ — so BẰNG mới bắt được ca này, so "tỉ lệ" thì không.
-Đơn vị: **số lần sinh tiến trình con**. Không đo bằng thời gian tường.
+Giả lập nền qua vị từ THUẦN (`ten_nen="nt"` / `"posix"`), bọc `subprocess.Popen` bằng bộ đếm — **đếm
+ở `Popen`, mỗi tiến trình một lần**: `run` gọi `Popen` bên trong, bọc cả hai là đếm ĐÔI (đo 21:02Z
+06-09-2026: `chay_ca()` cho `run=136` VÀ `Popen=136` cho cùng 136 tiến trình). Bốn phép đo, qua chính
+`main()` (hoặc hàm tương đương nhận vị từ nền):
+- `S_ca` = spawn của **riêng `chay_ca()`** trên `posix` — hôm nay **136** (đo 21:02Z, 8 ca xanh,
+  2,9 s; đo lại tại lúc thi công). **Đây là đối chứng — không phải "`main()` với bảng rỗng"**:
+  `chay_dot_bien` dựng fixture bằng **5** lời gọi `run` (`git init` · `config` ×2 · `add` · `commit`)
+  TRƯỚC khi duyệt bảng (đo 21:07Z qua seam `run` trơ với `DOT_BIEN=[]` ⇒ đúng 5 lời gọi, 0 tiến
+  trình thật), nên `main()` bảng rỗng trên `posix` là `S_ca + 5` = `141`, và tiêu chí
+  `S_nt == S_nen(bảng rỗng)` của bản trước sẽ **bác một triển khai đúng** (verdict lượt 2, P2). M4 còn
+  làm lượt bảng rỗng `rc != 0` — không dùng nó làm nền;
+- `S_nt` = spawn của `main()` trên `nt` với bảng **đầy đủ** (10 mục);
+- `S_nt_nua` = spawn của `main()` trên `nt` với bảng cắt còn **5** mục qua seam;
+- `S_posix` = spawn của `main()` trên `posix` với bảng đầy đủ (`136 + 35 = 171`, đo 19:35Z — **chưa
+  đo lại lượt này**, cần vòng đột biến ~34 s).
+Đòi: **`S_nt == S_ca`** — tức nhánh `nt` không trả một spawn nào cho fixture đột biến; `chay_dot_bien`
+không được gọi (đếm qua wrapper = **0**) — và **`S_nt_nua == S_nt`**, tập tên 8 ca nền trên `nt` bằng
+trên `posix`, và đối chứng `S_posix − S_ca == 5 + 3·len(DOT_BIEN)` (hôm nay `35`) để chắc rig thấy
+vòng lặp.
+Phép làm ĐỎ: bỏ cắt ⇒ `S_nt = S_ca + 35` ⇒ ĐỎ; cắt "một nửa" (chỉ bỏ `python` con, còn
+`archive|tar`) ⇒ `S_nt = S_ca + 25` ⇒ vẫn ĐỎ; cắt vòng lặp nhưng vẫn dựng fixture ⇒ `S_nt = S_ca + 5`
+⇒ vẫn ĐỎ — so BẰNG mới bắt được ba ca này, so "tỉ lệ" thì không. Đơn vị: **số lần sinh tiến trình
+con (`Popen`)**. Không đo bằng thời gian tường.
 
 **A2 (M2) — cặp TỔNG đột biến TỒN TẠI ở bản in, cả hai nền.**
 Phép làm ĐỎ, hai chiều:
@@ -258,22 +279,25 @@ bốn packet — không dùng làm mốc cho packet này.
 
 **A8 — không đụng hành vi nào khác.** `git diff --numstat` chỉ hiện đúng **2** đường dẫn.
 
-**A9 — lease cũ đã thu hồi trước khi bắt tay, đo trên MỌI bản** — như `2A` A9, đổi tên mắt xích
-trước thành `mutant-windows-subagent-ghi-detect-exec-1-claude-20260906`.
+**A9 — tiền nhiệm không còn giữ TRƯỚC khi bắt tay, đo trên MỌI bản bằng `ai-dang-giu`** — như `2A`
+A9, đổi tên mắt xích trước thành `mutant-windows-subagent-ghi-detect-exec-1-claude-20260906`, đo
+trên **cả hai** đường write set. Đường (a): sau `lease_expires_at_utc` của lease `2A` — không phải
+hạn #456; đường (b): sau readback thu hồi mọi bản. `check rc=0` không thay được phép đo này.
 
 ## `hinh_dang_ke_thua`
 
 Mỗi dòng ghi thời điểm đo hoặc nguồn trích (L5):
 
-| hình dạng | số lần đã gặp | đo/trích lúc | ghi chú |
+| hình dạng | số lần đã gặp | đo/trích lúc (đọc lại 21:03Z 06-09-2026 trên `b1c2284`) | ghi chú |
 |---|---:|---|---|
-| tập RỖNG thoả `not song` | **4** | trích #456 + `LO-319`; địa điểm thứ tư đo 18:50Z (reviewer) | #319 (gốc) · #456 Windows · `LO-319` Linux · **bộ này** (`mutant_dat == len(DOT_BIEN)` với bảng rỗng). Lần thứ tư. `PROTOCOL §12` đòi xem lại CÁCH LÀM từ lần thứ ba — câu trả lời của kho là: **chốt số dương phải nằm ở vị từ `dat`, không nằm ở mẫu regex**, vì mẫu chỉ soi được thứ đã in. |
-| nâng `timeout-minutes` để mua cổng xanh | **2 lần nâng** (3 mức `25`→`45`→`60`) | `git log -G`, 19:29Z 06-09 | Không đụng `ci.yml`. |
-| hai lượt khác nhau cho cùng một bằng chứng | **2** | PR #100 trích `CLAUDE.md`; bộ này đo 17:47Z | dấu bỏ-qua-CI làm PR #100 có 0 check mà `mergeable_state: clean` · bộ này: 10 đột biến và 0 đột biến cùng in `8/8` rc=0 tại điểm quan sát. Cùng gốc: **cổng vắng mặt trông giống cổng xanh**. |
-| chép bản vá đã chứng minh sang bộ khác mà không đo khác biệt cấu trúc | **0** | tại lúc soạn, 17:50Z 06-09 — cùng số với `2A` | Bản đầu ghi `1 (từ 2A)` trong khi `2A` đang ghi `0` và chưa có biên nhận nào — số tự tạo, vi phạm L4 (verdict lượt 1, P2). Giá trị ĐÚNG phải **chép từ biên nhận của `2A`** khi có; cho tới lúc đó là `0`, và bộ này khác `2A` bốn chỗ (một kênh, seam env sẵn, không in dòng `DOT BIEN`, gác bằng `rc`) là lý do bộ đếm ấy có thể tăng — nhưng tăng ở biên nhận, không ở đây. |
-| số đo trong tài liệu trôi | **≥ 7** | như `2A` | `39`s→`33`s→`34`s là cái mới nhất, do chính packet này đo ba lần. |
-| lease không tự chết khi packet đã land | **2** | `#355` trích `CLAUDE.md`; `#456` đo 17:46Z | Xem A9. |
-| lời khai rộng hơn phép đo — "chưa bao giờ được in" | **1** (bản đầu của chính đặc tả này) | verdict lượt 1, đo lại 19:31Z | Đã in 10 dòng `MUTANT`; chưa in cặp tổng. |
+| tập RỖNG thoả `not song` | **4** (đơn vị: địa điểm/ca tái hiện, gồm ca tổng hợp) | trích `ops/specs/MUTANT-KHONG-CHAY-TREN-WINDOWS.md:137-140` + `LO-319` (đọc lại 21:03Z); địa điểm thứ tư đo 18:50Z 06-09 (reviewer, `nhanh-probes.json` lượt 1, không chạy lại lượt này) | #319 (gốc) · #456 Windows · `LO-319` Linux · **bộ này** (`mutant_dat == len(DOT_BIEN)` với bảng rỗng). Lần thứ tư. `PROTOCOL §12` đòi xem lại CÁCH LÀM từ lần thứ ba — câu trả lời của kho là: **chốt số dương phải nằm ở vị từ `dat`, không nằm ở mẫu regex**, vì mẫu chỉ soi được thứ đã in. |
+| nâng `timeout-minutes` để mua cổng xanh | **2 lần nâng** (3 mức `25`→`45`→`60`) | `git log -G 'timeout-minutes:' -- .github/workflows/ci.yml` chạy lại 21:03Z 06-09-2026: `9e4f361` · `6d88a2c` (2026-08-29 03:29Z) · `7657bfd` (04:49Z) | Không đụng `ci.yml`. |
+| hai lượt khác nhau cho cùng một bằng chứng | **2** | PR #100: trích `CLAUDE.md` mục dấu bỏ-qua-CI, đọc lại 21:03Z (sự kiện GitHub không readback lại); bộ này: đo 17:47Z 06-09 (hai lượt thật), đọc lại bản in `rc=0` lượt 1 lúc 21:00Z | dấu bỏ-qua-CI làm PR #100 có 0 check mà `mergeable_state: clean` · bộ này: 10 đột biến và 0 đột biến cùng in `8/8` rc=0 tại điểm quan sát. Cùng gốc: **cổng vắng mặt trông giống cổng xanh**. |
+| chép bản vá đã chứng minh sang bộ khác mà không đo khác biệt cấu trúc | **0** | tại lúc soạn, 17:50Z 06-09 — cùng số với `2A`; đọc lại cả hai bảng 21:03Z 06-09-2026: vẫn `0`, chưa có biên nhận | Bản đầu ghi `1 (từ 2A)` trong khi `2A` đang ghi `0` và chưa có biên nhận nào — số tự tạo, vi phạm L4 (verdict lượt 1, P2). Giá trị ĐÚNG phải **chép từ biên nhận của `2A`** khi có; cho tới lúc đó là `0`, và bộ này khác `2A` bốn chỗ (một kênh, seam env sẵn, không in dòng `DOT BIEN`, gác bằng `rc`) là lý do bộ đếm ấy có thể tăng — nhưng tăng ở biên nhận, không ở đây. |
+| số đo trong tài liệu trôi | **≥ 7** | trích `.claude/skills/soan-spec/SKILL.md:56-59` (đọc lại 21:03Z 06-09-2026) + đo ở đây 17:47Z và 19:31Z | `39`s→`33`s→`34`s là cái mới nhất, do chính packet này đo ba lần; bốn cặp #250 và hai lần trôi của `2A` cộng vào là `≥ 7`. |
+| lease không tự chết khi packet đã land | **2** | `#355`: trích `CLAUDE.md`, đọc lại 21:03Z; `#456`: đo 17:46Z, đo lại 21:00Z 06-09-2026 (`NGƯỜI_GIỮ 1`) | Xem A9. |
+| lời khai rộng hơn phép đo — "chưa bao giờ được in" | **1** (bản đầu của chính đặc tả này) | verdict lượt 1, đo lại 19:31Z; đọc lại bản in lượt 1 lúc 21:00Z 06-09-2026: 10 dòng `MUTANT` | Đã in 10 dòng `MUTANT`; chưa in cặp tổng. |
+| đối chứng trả tiền cho thứ nó không đo (bảng rỗng vẫn dựng fixture) | **1** (bản lượt 1 A1 của chính đặc tả này) | verdict lượt 2; đo lại 21:07Z 06-09-2026: 5 lời gọi | Chữa: đối chứng là `chay_ca()`, đếm ở `Popen`. |
 
 ## `chua_do_duoc`
 

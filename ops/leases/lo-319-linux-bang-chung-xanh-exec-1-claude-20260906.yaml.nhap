@@ -3,12 +3,16 @@
 # `t23` của `ops/lease_publish_test.py` chỉ đọc `suffix in (".yaml", ".yml")` — nên nháp KHÔNG bị
 # tính là lease đang giữ. Đo 19:33–19:34Z 06-09-2026 trong bản sao đủ 299 ref: đuôi `.yaml` ⇒
 # `ai-dang-giu .claude/dev/ci_dang_ky_test.py` = NGƯỜI_GIỮ 4 (gồm nháp này); đuôi `.nhap` ⇒ 1
-# (chỉ còn #456). `check` vẫn chạy trên tên này (19:31Z: rc=8, thiếu packet_issue/granted_by).
+# (chỉ còn #456). `check` vẫn chạy trên tên này — đo lại 21:00Z 06-09-2026 trên cây b1c2284: rc=8, thiếu
+# 3 trường packet_issue/granted_by/lease_expires_at_utc (bản này đã bỏ hạn điền sẵn; số 19:31Z "thiếu
+# hai trường" là của bản trung gian còn hạn mặc định).
 # ĐỔI TÊN VỀ `.yaml` LÀ BƯỚC CUỐI khi cấp thật, SAU khi điền đủ các ô dưới đây.
 schema_version: 2
 event: executor_lease_granted
 
-# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP — SÁU ô, không ai khác điền được ──────────────────
+# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP — 6 ô: packet_issue · mission_issue · granted_by ·
+#    granted_on_instruction · leased_at_utc · lease_expires_at_utc (yaml.safe_load 21:00Z 06-09-2026: đúng
+#    6 trường null trong tệp này) — không ai khác điền được ──────────────────────────────────
 # `packet_issue`  : số hiệu Issue sau khi đăng (phải là ISSUE, không phải PR).
 # `mission_issue` : Mission Issue chứa packet (`PROTOCOL §3.2` đòi; khuyến nghị ở spec).
 # `granted_by`    : `ducthangho` — `record-lease` TỪ CHỐI tên provider (`claude`/`codex`).
@@ -41,8 +45,8 @@ assurance_target: cross_approved
 access: read-write
 
 spec_path: ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md
-spec_sha256: 67c8dec228b278928b6062fd22500b03bbf782b3801e6489f0dc6fbd3a79cfcd
-spec_hash: 67c8dec228b278928b6062fd22500b03bbf782b3801e6489f0dc6fbd3a79cfcd
+spec_sha256: 93d48bcef40d284344ccb92e25246bff3738c3125bfad20c37211bb198c396b3
+spec_hash: 93d48bcef40d284344ccb92e25246bff3738c3125bfad20c37211bb198c396b3
 
 write_set:
   - .claude/dev/ci_dang_ky_test.py
@@ -52,7 +56,8 @@ depends_on:
 branch: claude/lo319-linux-bang-chung-xanh
 branch_ownership: exclusive
 target_branch_neu_land: master
-# BA MỎ NEO — chỗ giữ, KHÔNG phải giá trị cấp. Packet này đi THỨ HAI (sau GATE), nên CẢ BA trường
+# 3 MỎ NEO (base_sha · start_from_sha · reviewed_sha_required) — chỗ giữ, KHÔNG phải giá trị cấp.
+# Packet này đi THỨ HAI (sau GATE), nên CẢ 3 trường
 # dưới đây phải ĐO LẠI tại lúc cấp = head `origin/master` SAU khi GATE integrated. Điền một SHA cũ
 # là neo review vào một cây không còn tồn tại; `check` không phân biệt được chỗ giữ với mỏ neo
 # thật, nên đây là việc tay của chủ kho. Quy tắc này cũng nằm trong đặc tả đóng băng.
@@ -74,58 +79,65 @@ reviewer_provider: codex
 review_class: sensitive
 effective_review_class: sensitive
 
-# CHỐT HAI CHIỀU (`_kiem_bia_mo`): tệp lease của GATE phải mang dòng
-#   da_bi_thay_the: lo-319-linux-bang-chung-xanh-exec-1-claude-20260906
-# TRƯỚC khi lease này được đăng. Chuỗi thu hồi (đổi vì GATE đi đầu):
-#   #456  →  GATE  →  packet này  →  MUTANT-WINDOWS-SUBAGENT-GHI-DETECT  →  MUTANT-WINDOWS-NHANH-DON-DUOC
-# Bia mộ phải phủ MỌI bản của lease GATE trên MỌI ref (thủ tục bốn bước ở spec, mục "Lease đang
-# giữ"), vì `_kiem_bia_mo` đếm `any` còn `ai-dang-giu` đếm mọi (blob, path) — đo 19:34Z.
-thay_the_cho:
-  - gate-tach-job-cat-chi-phi-exec-1-claude-20260906
+# THAY THẾ tiền nhiệm — chuỗi điều phối #456 → GATE → LO-319 → 2A → 2B; tiền nhiệm TRỰC TIẾP của
+# lease này là GATE:
+#   gate-tach-job-cat-chi-phi-exec-1-claude-20260906
+# (dấu vết audit — KHÔNG phải điều kiện cổng). Nháp chọn ĐƯỜNG (a): cấp SAU khi tiền nhiệm hết hạn
+# (`lease_expires_at_utc` của lease GATE đã cấp — KHÔNG phải 14:30:07Z 07-09 của #456) ⇒ `thay_the_cho: []`. Lý do, đo 21:02Z 06-09-2026 trên cây b1c2284:
+#   · `_kiem_bia_mo` (check) KHÔNG miễn cho HẾT_HẠN — giữ tên tiền nhiệm ⇒ check rc=8 tới khi có bia mộ;
+#   · `thay_the_cho: []` + 6 ô điền tạm ⇒ check rc=0 (ĐĂNG ĐƯỢC) ngay khi #456 còn hạn — tức check
+#     KHÔNG chặn chồng lấn write set; chỉ `ai-dang-giu` đo được chuyện ấy;
+#   · `ai-dang-giu` không đếm bản HẾT_HẠN: mô phỏng #456 ⇒ NGƯỜI_GIỮ 1 → 0 đúng tại giây hết hạn.
+# ĐƯỜNG (b) cấp SỚM: điền `thay_the_cho: [<tiền nhiệm>]`; chủ kho thêm `da_bi_thay_the: <lease này>`
+# vào tệp lease tiền nhiệm trên nhánh ops/** và commit TRƯỚC khi check; MỌI ref còn giữ bản cũ được
+# cập nhật/dọn, readback `ai-dang-giu` ⇒ 0 dòng CÒN_HẠN của tiền nhiệm — thủ tục ở spec LO-319 mục
+# "Lease đang giữ" (b). Chọn đường nào ghi vào granted_on_instruction. Trước khi bắt tay, A8/A9 đo
+# bằng `ai-dang-giu` trên MỌI đường write set, không bằng check.
+thay_the_cho: []
 
 ly_do_cap: >-
-  `bang_chung_xanh` chỉ soi HAI NHÓM BẮT của regex, mà ở `MOI` hai nhóm ấy là cặp số CA.
-  Cặp số ĐỘT BIẾN nằm ngoài nhóm bắt nên không bao giờ được nhìn tới. Đo 19:32Z 06-09-2026,
-  gọi thẳng hàm với nguyên chuỗi `TONG: CA 39/39 dat · DOT BIEN 0/0 bi giet\nTONG: DAT\n` ⇒
-  `True` — đúng hình dạng "tập rỗng thoả `not song`" mà bài học #319 sinh ra để chặn.
-  Lỗ có sẵn TỪ TRƯỚC #456; #456 bịt phía Windows và CỐ Ý không bịt phía Linux vì M4 của
-  nó đóng băng hành vi Linux (cross-review Codex lượt 1, finding P2; bản vá lùi lại ở
-  `426bfc0`).
-  ĐO CẢ BA HƯỚNG rồi mới chọn — đơn vị: số mẫu regex phải sửa / số phản chứng đổi màu / số mục
-  đỏ trên một bản in hợp lệ có thêm một cặp vô can (ghi chú "đã xem 3/5 hướng cải tiến" chèn
-  vào bản in thật của chon_reviewer). A-b "soi MỌI cặp trong span" = 0 mẫu, 1 phản chứng, NHƯNG
-  1 đỏ giả — reviewer dựng được, và bản đầu của lease này khai "không sinh đỏ giả" rồi gọi cái
-  đỏ giả ấy là hành vi đúng: rút. A-c "nhóm bắt theo cặp + cặp CÓ NHÃN `CA`/`DOT BIEN`/`ĐỘT
-  BIẾN` trong span" = 0 mẫu, 1 phản chứng (đúng ca phải đảo chiều), 0 đỏ giả, 10/13 cặp được
-  kiểm (3 cặp còn lại là hằng số ghi cứng trong regex của probe_mang). Tập nhãn là DANH SÁCH CHO
-  PHÉP; nhãn không bắt nhầm gì trong bảy span thật (đo 19:32Z). Hướng B "bắt cặp đột biến thành
-  nhóm 3/4" là HỒI QUY đo được: mệnh đề `len(m.groups()) != 2` trả `True` VÔ ĐIỀU KIỆN, nên
-  `CA 0/39` đi từ `False` sang `True`, tức tắt luôn cả chốt CA.
-  Lỗ chạm HAI mục `MOI` (`pretooluse_guard_test.py` + `subagent_ghi_detect_test.py`, cùng
-  một chuỗi regex, hai dòng kề nhau); 6/13 cặp bằng chứng của cả sổ đăng ký chưa từng
-  được kiểm.
+  `bang_chung_xanh` chỉ soi HAI NHÓM BẮT của regex, mà ở `MOI` hai nhóm ấy là cặp số CA; cặp
+  ĐỘT BIẾN nằm ngoài nhóm bắt nên không bao giờ được nhìn tới. Đo 19:32Z 06-09-2026: nguyên
+  chuỗi `TONG: CA 39/39 dat · DOT BIEN 0/0 bi giet\nTONG: DAT\n` ⇒ `True` — đúng hình dạng "tập
+  rỗng thoả `not song`" của bài học #319. Lỗ có sẵn TỪ TRƯỚC #456; #456 bịt phía Windows và CỐ Ý
+  không bịt phía Linux vì M4 của nó đóng băng hành vi Linux (`426bfc0`).
+  Hai bản trước chọn A-b rồi A-c ("soi cặp CÓ NHÃN trong span"); cả hai bị bác bằng phép đo:
+  A-b đỏ giả trên ghi chú `3/5` (lượt 1); A-c đỏ giả 7/64 ca (nhãn trong VĂN XUÔI: `Ghi chú:
+  DOT BIEN đã xem 3/5 hướng`) VÀ bỏ sót 7/64 ca (khoảng cách tuỳ ý `{0,24}`; tổng TRÙNG) —
+  verdict lượt 2, đo lại 21:07Z 06-09-2026 qua chính `chay_moi` trên bản in thật. Cùng gốc: đọc
+  cả span rồi cố lọc, và bộ lọc nào cũng vừa rộng vừa hẹp.
+  Bản này chọn T — bản ghi TỔNG theo từng định dạng: mỗi mục `MOI` là cặp (SPAN, TONG); TONG =
+  danh sách (BỘ CHỌN đầu dòng, GRAMMAR fullmatch); mỗi bản ghi đúng MỘT dòng; mọi nhóm bắt soi
+  theo cặp n == m > 0; nhóm lẻ hay 0 nhóm + 0 bản ghi ⇒ False; dòng không khớp bộ chọn là văn
+  xuôi. Đo 64 ca trên 8 định dạng (7 bản in thật + canonical pretooluse): đỏ giả 0, bỏ sót 0
+  (BASE 0/16, A-c 7/7); 5 đột biến vào T, mỗi cái làm ≥ 1 ca đổi màu. Chuỗi regex SPAN của 8 mục
+  giữ NGUYÊN VĂN — chỉ đổi KIỂU giá trị của `MOI`/`MOI_WINDOWS`.
 
 viec_trong_lease:
-  - 'Sửa `bang_chung_xanh`: soi nhóm bắt theo CẶP (mọi số nhóm chẵn; lẻ ⇒ `False`) VÀ mọi cặp
-     `n/m` mang nhãn `CA`/`DOT BIEN`/`ĐỘT BIẾN` trong span khớp; tập nhãn là hằng, danh sách
-     CHO PHÉP.'
-  - 'Gỡ mệnh đề thoát `len(m.groups()) != 2` — không còn số nhóm nào cho `True` vô điều kiện
-     (bảng 5 × 2 ở A2 của spec).'
-  - 'Mẫu 0 nhóm (`probe_mang_test.py`) vẫn ĐẠT trên bản in thật; cặp có nhãn trong span của nó
-     vẫn bị kiểm; cặp KHÔNG nhãn thì không — có chủ ý, có ca canh.'
-  - 'Phản chứng "ghi chú 3/5 hướng" đi qua `chay_moi` phải cho 0 đỏ; đột biến quay về "mọi cặp
-     trong span" phải làm ca ấy ĐỎ.'
-  - 'Đảo chiều VÀ đổi tên ca `p456-linux-nhan-0-tren-0-Y-HET-base`; hai ca anh em giữ nguyên.'
-  - 'Đường Windows của #456 không đổi: dòng `KHONG DO TREN WINDOWS` vẫn ĐẠT trên Windows, vẫn
-     ĐỎ trên Linux (bốn số qua `chay_moi` bằng hệt base, đo 19:32Z).'
-  - 'Mọi phản chứng đi qua chính `chay_moi`, không gọi thẳng `bang_chung_xanh` (bài học r6/#401).'
+  - 'Sửa `bang_chung_xanh` theo 6 luật của T (spec, mục "Thiết kế T"): đơn vị (SPAN, TONG); BỘ CHỌN
+     `re.match` đầu dòng; mỗi bản ghi đúng MỘT dòng; GRAMMAR `re.fullmatch`; mọi nhóm bắt soi theo
+     cặp n == m > 0; nhóm LẺ hay 0 nhóm + 0 bản ghi ⇒ False; dòng ngoài bộ chọn là văn xuôi.'
+  - 'Khai `TONG` cho đủ 8 mục `MOI` và `TONG_WINDOWS` cho mục Windows, tái dẫn xuất từ bản in
+     thật (bảng ở spec); chuỗi regex SPAN giữ NGUYÊN VĂN, chỉ đổi kiểu giá trị.'
+  - 'Gỡ mệnh đề thoát `len(m.groups()) != 2` — không còn số nhóm nào cho True vô điều kiện (A2).'
+  - 'Phản chứng A1–A6 đi qua chính `chay_moi`, không gọi thẳng `bang_chung_xanh` (r6/#401): 0/0
+     trong bản ghi ⇒ 1 đỏ; ghi chú có nhãn ⇒ 0 đỏ; hai bản ghi cùng loại ⇒ 1; có tiền tố tổng mà
+     sai grammar ⇒ 1; 5 đột biến vào T (bảng răng ở spec) mỗi cái làm ≥ 1 ca đổi màu.'
+  - 'Đảo chiều VÀ đổi tên `p456-linux-nhan-0-tren-0-Y-HET-base`; đổi neo hai ca
+     `p456-mau-linux-KHONG-DOI-so-voi-base` / `p456-linux-A-B-tung-dau-vao-khop-base` sang SPAN
+     nguyên văn + TONG canonical; không xoá ca nào (A5).'
+  - 'Đường Windows của #456 giữ năm hành vi đã đo; thêm hai chốt: 0/0 trên Linux ⇒ 1 đỏ, hai dòng
+     Windows ⇒ 1 đỏ (A4).'
+  - 'Chạy lại 5 bộ ngắn lấy bản in nguyên byte của phiên thi công; subagent/nhanh/pretooluse lấy
+     từ full-gate cuối (A6).'
 
 dieu_kien_dung:
-  - 'Sửa một ký tự nào trong `MOI` hoặc `MOI_WINDOWS` — hướng A-c không cần (0 mẫu, đo 19:32Z),
-     và giữ nguyên chúng là thứ giữ được hai chốt `p456-mau-linux-KHONG-DOI-so-voi-base` và
-     `p456-linux-A-B-tung-dau-vao-khop-base` do cross-review #456 sinh ra. Quyết định này đã
-     được mở lại một lần theo verdict lượt 1 và giữ vì lý do ĐO; mở lại lần nữa là revision mới.'
-  - 'Quay về soi MỌI cặp trong span (A-b) — đỏ giả đo được trên bản in hợp lệ.'
+  - 'Đổi chuỗi regex SPAN của bất kỳ mục nào — T chỉ đổi KIỂU giá trị; đổi chuỗi là mở lại M4 của
+     #456 ngoài thẩm quyền của packet này.'
+  - 'Quay về soi MỌI cặp trong span (A-b) hay quét nhãn trong span (A-c) — đỏ giả đo được trên bản in
+     hợp lệ (A-b 1 ca lượt 1; A-c 7/64 ca lượt 2), và A-c còn bỏ sót 7/64 ca.'
+  - 'Coi `check rc=0` là bằng chứng tiền nhiệm đã thôi giữ — check không chặn chồng lấn write set
+     (đo 21:02Z 06-09-2026); chỉ `ai-dang-giu` trên MỌI đường write set đo được.'
   - 'Chạm bất kỳ đường dẫn nào ngoài MỘT đường đã khai — đổi revision, KHÔNG tự mở write set.'
   - 'Đụng `loi_ruff_ci` trong cùng tệp — của GATE, đã land trước.'
   - 'Sửa `.github/workflows/ci.yml` — CỐ Ý ngoài write set; packet này không đổi thời gian

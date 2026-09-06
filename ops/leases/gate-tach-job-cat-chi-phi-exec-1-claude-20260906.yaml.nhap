@@ -3,12 +3,15 @@
 # `t23` của `ops/lease_publish_test.py` chỉ đọc `suffix in (".yaml", ".yml")` — nên nháp KHÔNG bị
 # tính là lease đang giữ. Đo 19:33–19:34Z 06-09-2026 trong bản sao đủ 299 ref: đuôi `.yaml` ⇒
 # `ai-dang-giu .github/workflows/ci.yml` = NGƯỜI_GIỮ 1 (chính nháp này); đuôi `.nhap` ⇒ 0.
-# `check` vẫn chạy trên tên này (19:31Z: rc=8, thiếu packet_issue/granted_by — đúng chẩn đoán).
+# `check` vẫn chạy trên tên này — đo lại 21:00Z 06-09-2026 trên cây b1c2284: rc=8, thiếu 3 trường
+# packet_issue/granted_by/lease_expires_at_utc (bản này đã bỏ hạn điền sẵn; 19:31Z là bản trung gian).
 # ĐỔI TÊN VỀ `.yaml` LÀ BƯỚC CUỐI khi cấp thật, SAU khi điền đủ các ô dưới đây.
 schema_version: 2
 event: executor_lease_granted
 
-# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP — SÁU ô, không ai khác điền được ──────────────────
+# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP — 6 ô: packet_issue · mission_issue · granted_by ·
+#    granted_on_instruction · leased_at_utc · lease_expires_at_utc (yaml.safe_load 21:00Z 06-09-2026: đúng
+#    6 trường null trong tệp này) — không ai khác điền được ──────────────────────────────────
 # `packet_issue`  : số hiệu Issue sau khi đăng (phải là ISSUE, không phải PR).
 # `mission_issue` : Mission Issue chứa packet (`PROTOCOL §3.2` đòi; khuyến nghị ở spec: một
 #                   Mission Issue chung cho bốn packet, hoặc ghi #456 và nói rõ là thay thế).
@@ -44,8 +47,8 @@ assurance_target: cross_approved
 access: read-write
 
 spec_path: ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md
-spec_sha256: ade715bbe6fc013e6a270b9b2cac6de419cc1f7ec51fa8313e7c10aa90d5ed6c
-spec_hash: ade715bbe6fc013e6a270b9b2cac6de419cc1f7ec51fa8313e7c10aa90d5ed6c
+spec_sha256: 6242ce8ad5f31ee562304df9460193cdcc9db923c3b423a213006ebe41cc2772
+spec_hash: 6242ce8ad5f31ee562304df9460193cdcc9db923c3b423a213006ebe41cc2772
 
 # Hai tệp (verdict lượt 1, P1 `write-set-thieu-noi-doc-job-registry`): `loi_ruff_ci` trong tệp #2
 # khoá cứng `jobs.gate`; tách job mà không sửa nó thì bước `test registry` tự đỏ — đo 19:33Z
@@ -60,8 +63,8 @@ depends_on: []
 branch: claude/gate-tach-job-cat-chi-phi
 branch_ownership: exclusive
 target_branch_neu_land: master
-# BA MỎ NEO — chỗ giữ, KHÔNG phải giá trị cấp. Packet đi đầu chuỗi nên không chờ tiền nhiệm, nhưng
-# vẫn phải ĐO LẠI CẢ BA tại lúc cấp bằng `git ls-remote origin master` (master có thể trôi vì lý
+# 3 MỎ NEO (base_sha · start_from_sha · reviewed_sha_required) — chỗ giữ, KHÔNG phải giá trị cấp.
+# Packet đi đầu chuỗi nên không chờ tiền nhiệm, nhưng vẫn phải ĐO LẠI CẢ 3 tại lúc cấp bằng `git ls-remote origin master` (master có thể trôi vì lý
 # do khác). Ba trường cùng một giá trị, cùng đo một lần.
 base_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
 start_from_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
@@ -82,28 +85,30 @@ reviewer_provider: codex
 review_class: sensitive
 effective_review_class: sensitive
 
-# THAY THẾ #456 — packet này là mắt xích ĐẦU của chuỗi thu hồi
-#   #456  →  packet này  →  LO-319  →  MUTANT-WINDOWS-SUBAGENT-GHI-DETECT  →  MUTANT-WINDOWS-NHANH-DON-DUOC
-# vì tệp #2 trong write set là tệp #456 còn giữ (hết hạn 14:30:07Z 07-09-2026; packet #456 ĐÃ LAND
-# ở `1b3caa1`). Chốt `_kiem_bia_mo` đòi hai chiều: tệp lease #456 phải mang
-#   da_bi_thay_the: gate-tach-job-cat-chi-phi-exec-1-claude-20260906
-# NHƯNG hai chiều đếm `any` (một bản mang bia mộ là qua), còn `ai-dang-giu` đếm MỌI bản (blob,path)
-# trên MỌI ref. Đo 19:29–19:35Z: #456 là 1 blob trên 10 ref; đặt bia mộ trên một nhánh ⇒ `check`
-# rc=0 mà `ai-dang-giu ci_dang_ky_test.py` vẫn NGƯỜI_GIỮ 1 (bản trần còn ở
-# `origin/claude/cap-nhat-trang-thai-pr-taxzax`). Ba trong 10 ref là nhánh `claude/**` của phiên
-# khác, có commit chưa land — không có đường xoá/cập nhật từ packet này. Hai lựa chọn, ghi vào
-# `granted_on_instruction`: (a) cấp SAU 14:30:07Z 07-09 ⇒ #456 tự HẾT_HẠN trên mọi ref, A9 đo được
-# ngay; (b) cấp TRƯỚC ⇒ chủ kho tự xử ba nhánh ấy rồi mới đo A9. Thủ tục bốn bước ở spec LO-319.
-thay_the_cho:
-  - mutant-khong-chay-tren-windows-exec-1-claude-20260906
+# THAY THẾ tiền nhiệm — chuỗi điều phối #456 → GATE → LO-319 → 2A → 2B; tiền nhiệm TRỰC TIẾP của
+# lease này là #456 (packet này đi ĐẦU chuỗi):
+#   mutant-khong-chay-tren-windows-exec-1-claude-20260906
+# (dấu vết audit — KHÔNG phải điều kiện cổng). Nháp chọn ĐƯỜNG (a): cấp SAU khi tiền nhiệm hết hạn
+# (hạn #456 = 14:30:07Z 07-09-2026 — đúng mốc vì tiền nhiệm trực tiếp là #456) ⇒ `thay_the_cho: []`. Lý do, đo 21:02Z 06-09-2026 trên cây b1c2284:
+#   · `_kiem_bia_mo` (check) KHÔNG miễn cho HẾT_HẠN — giữ tên tiền nhiệm ⇒ check rc=8 tới khi có bia mộ;
+#   · `thay_the_cho: []` + 6 ô điền tạm ⇒ check rc=0 (ĐĂNG ĐƯỢC) ngay khi #456 còn hạn — tức check
+#     KHÔNG chặn chồng lấn write set; chỉ `ai-dang-giu` đo được chuyện ấy;
+#   · `ai-dang-giu` không đếm bản HẾT_HẠN: mô phỏng #456 ⇒ NGƯỜI_GIỮ 1 → 0 đúng tại giây hết hạn.
+# ĐƯỜNG (b) cấp SỚM: điền `thay_the_cho: [<tiền nhiệm>]`; chủ kho thêm `da_bi_thay_the: <lease này>`
+# vào tệp lease tiền nhiệm trên nhánh ops/** và commit TRƯỚC khi check; MỌI ref còn giữ bản cũ được
+# cập nhật/dọn, readback `ai-dang-giu` ⇒ 0 dòng CÒN_HẠN của tiền nhiệm — thủ tục ở spec LO-319 mục
+# "Lease đang giữ" (b). Chọn đường nào ghi vào granted_on_instruction. Trước khi bắt tay, A8/A9 đo
+# bằng `ai-dang-giu` trên MỌI đường write set, không bằng check.
+thay_the_cho: []
 
 ly_do_cap: >-
   Nợ do chính `ci.yml:63` tự khai: "NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN: gate 22 phút và đang
   lớn dần là nợ riêng". Khi #456 được soạn, nợ ấy CHƯA BÀN ĐƯỢC vì tổng thời gian Windows
   thật chưa ai đo — job luôn bị cắt ở trần. #456 đã land và LẦN ĐẦU sinh ra số đo ấy.
   Đo run 34045664423 (NHÁNH, head `426bfc0`) lúc 17:41Z và run 34048685345 (MASTER, head
-  `1b3caa1`, đã chạy trọn) lúc 18:10Z 06-09-2026: Windows 43,20p `success` 43/43 (nhánh) ·
-  42,28p `success` 43/43 (master). Biên dưới trần 60: 16,80p (nhánh) · 17,72p (master) — mỏng.
+  `1b3caa1`, đã chạy trọn) lúc 18:10Z 06-09-2026: Windows 43,20p `success`, 43 mục GitHub liệt kê /
+  6 skipped (nhánh) · 42,28p `success`, 43 mục / 6 skipped (master) — "mục liệt kê" không phải
+  "bước đã chạy". Biên dưới trần 60: 16,80p (nhánh) · 17,72p (master) — mỏng.
   Hai bước nặng nhất = 63,5 % tổng bước Windows (`test registry` 17,70 = 41,0 % ·
   `packet-loop selftest` 9,70 = 22,5 %; mẫu số là tổng bước 43,17). Chênh job − Σbước = 0,03
   phút — phép đo ấy chỉ phân rã khoảng started→completed của MỘT job đã có runner; nó không
@@ -136,8 +141,11 @@ viec_trong_lease:
      MỌI job, đòi Ruff cài trong CÙNG job và TRƯỚC bước ấy; tương thích với `ci.yml` chưa tách;
      phản chứng bốn ca (A7 của spec).'
   - 'In ra danh sách tên job mới, đúng dạng chuỗi mà branch protection dùng.'
-  - '`actionlint` phải có DELTA = 0 so `origin/master` đo trong CÙNG một lệnh, cùng môi trường
-     — không phải `rc = 0` (kho đã đo `rc=1` khi có `shellcheck`, `rc=0` khi vắng).'
+  - '`actionlint`: so TẬP CHẨN ĐOÁN, không so `rc` — chạy hai vế (`origin/master` · nhánh) trong CÙNG
+     một lệnh, cùng môi trường; lưu phiên bản actionlint/shellcheck, rc và toàn bộ chẩn đoán; chuẩn
+     hoá (tệp, mã, thông điệp, thân bước) bỏ số dòng; đa tập hai vế phải BẰNG NHAU. `rc=1 → 1` che
+     được lỗi mới (phản mô hình đo 06-09-2026). Vắng công cụ hay thiếu log một vế ⇒ KHÔNG ĐO ĐƯỢC ⇒
+     ĐỎ, không phải delta 0.'
   - 'Cột thêm của `git diff --numstat` ≤ 300 (ADR-0044 đo ADDITIONS, không đo ròng); ước
      135–200 từ số đo khối `ci.yml:35-113`.'
 

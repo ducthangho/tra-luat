@@ -1,3 +1,43 @@
+# ★ dev-side — r350: `gate` ĐỎ vì ca test của r349, và cổng đẩy tôi sang cách test đúng hơn (2026-09-06)
+
+`gate (ubuntu-latest)` đỏ trên `a2c0194` — **lần đầu trong cả chuỗi này cổng đo mã đỏ vì
+lỗi của tôi**, không phải cổng duyệt. Bước đỏ: *"G5 kiểm bản kê công cụ + T1..T8"*.
+
+Nguyên nhân: ca `t16` trong `ops/cong_cu_test.py` đòi **mọi gói bên thứ ba import trong
+cây phải được khai ở `ops/cong_cu.yaml`**. Ca `r349` của tôi `import tl_core` trực tiếp
+trong `launcher_test.py`, nên bộ quét xếp `tl_core` vào bên thứ ba ⇒ đỏ, kéo theo 17 dòng
+đỏ dây chuyền vì mọi đột biến đều "giết thêm" ca ấy.
+
+## Cách sửa dễ nhất là cách sai
+
+Nới `ops/cong_cu.yaml` để `tl_core` được chấp nhận sẽ làm cổng xanh trong một phút — và
+hạ một chốt thật. Chính `t16` ghi trong mã rằng bản đầu của nó từng có cửa thoát *"hoặc
+thấy tên trong ci.yml"*, và **đo được** rằng cửa ấy vô hiệu hoá cả ca (gỡ `jsonschema`
+khỏi bản kê mà ca vẫn xanh).
+
+Chữa đúng: **chạy phép đo trong TIẾN TRÌNH CON** thay vì import. Hai lợi ích, và cái thứ
+hai tôi không lường trước:
+
+1. Đo trên interpreter **sạch** — không phải nghịch `sys.modules`/`sys.meta_path` của
+   chính bộ test. Đây đúng là thứ đã làm tôi **dựng sai fixture hai lần** ở r349.
+2. Không import gói ngoài cây ⇒ `t16` không có gì để bắt.
+
+Tức cổng không chỉ chặn một vi phạm hình thức — **nó đẩy tôi sang cách test đúng hơn về
+bản chất**. Đáng ghi vì phản xạ đầu tiên khi gặp cổng đỏ là hỏi *"làm sao cho nó xanh"*,
+trong khi câu hỏi đúng là *"cổng đang nói gì về thiết kế của mình"*.
+
+## Một con số phải nói cho đúng
+
+Chạy `ops/cong_cu_test.py` cục bộ vẫn cho `rc=1`, và đó **không phải hồi quy**:
+`actionlint` không có trên PATH trong container này ⇒ ca `t2_canary_thieu_shellcheck` bị
+BỎ QUA ⇒ đột biến của nó thành `KHÔNG_ĐO_ĐƯỢC` ⇒ cổng fail-close, đúng thiết kế
+(`CLAUDE.md`: một cổng tự tắt khi thiếu công cụ là cổng không tồn tại đúng lúc cần nhất).
+Đo nền `origin/master`: **rc=1, cùng một con số** ⇒ delta = 0. Thứ đã đổi là `t16` không
+còn ĐỎ và `22/22` khớp hệt nền.
+
+Cổng: `ops/cong_cu_test.py` **22/22 đạt** (bỏ qua 1 — thiếu `actionlint` cục bộ, delta so
+master = 0) · `launcher_test` **180/180** (bỏ qua 1 — fixture Windows).
+
 # ★ dev-side — r349: va chạm vân tay (im lặng SAI), và một chẩn đoán tự mâu thuẫn (2026-09-06)
 
 Vòng 9 ra năm finding; **một cái tôi đã tự tìm và vá ở r348 trước khi lượt review về** (`..`

@@ -6745,68 +6745,54 @@ def r349_backend_PDF_du_phong_chay_thi_dung_noi_la_bi_chan():
     hỏng + `pdfplumber` chạy ⇒ `co=True` mà hậu quả vẫn ghi *"MỌI .pdf bị chặn … cài lại
     phụ thuộc"*. Cùng doctrine với `codex login status` NÓI DỐI — công cụ báo sai trạng
     thái tệ hơn công cụ vắng mặt.
+
+    CHẠY TRONG TIẾN TRÌNH CON, không `import tl_core` ở đây. Hai lý do, và lý do thứ hai
+    là một cổng thật đã bắt được: (a) đo trên interpreter SẠCH thì không phải nghịch
+    `sys.modules`/`sys.meta_path` của chính bộ test — hai lần đầu tôi dựng fixture sai
+    đúng vì chuyện ấy; (b) `t16` trong `ops/cong_cu_test.py` đòi mọi gói bên thứ ba
+    import trong cây phải được khai ở `ops/cong_cu.yaml`, và một `import tl_core` ở đây
+    làm cổng ĐỎ — nới bản kê để lách là hạ một chốt thật, không phải sửa test.
     """
-    import sys as _s
-    import tempfile as _tf
     goc = Path(__file__).resolve().parents[2] / "scripts"
     duong = goc / "tl_core" / "ops_misc.py"
     ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
     if ly_do:
         return ly_do
-    them = str(goc) not in _s.path
-    if them:
-        _s.path.insert(0, str(goc))
-    try:
-        import tl_core.ops_misc as om
-    except ImportError as e:
-        return f"KHONG DO DUOC: khong import duoc ops_misc ({e})"
-
-    class _Chan:
-        def __init__(self, ten):
-            self.ten = set(ten)
-
-        def find_spec(self, name, path=None, target=None):
-            if name in self.ten:
-                raise ModuleNotFoundError(name)
-            return None
+    kich = (
+        "import json, sys, tempfile, pathlib\n"
+        "sys.path.insert(0, sys.argv[1])\n"
+        "import tl_core.ops_misc as om\n"
+        "hong, tot, chan = json.loads(sys.argv[2])\n"
+        "class C:\n"
+        "    def find_spec(self, name, path=None, target=None):\n"
+        "        if name in chan: raise ModuleNotFoundError(name)\n"
+        "        return None\n"
+        "td = tempfile.mkdtemp(); p = pathlib.Path(td)\n"
+        "for t in hong: (p / (t + '.py')).write_text(\"raise BaseException('r349')\\n\")\n"
+        "for t in tot:  (p / (t + '.py')).write_text('')\n"
+        "sys.path.insert(0, td); sys.meta_path.insert(0, C())\n"
+        "d = next(x for x in om._doc_dep_probe() if x['ten'].startswith('pypdf'))\n"
+        "print(json.dumps({'co': d['co'], 'hau_qua': d['hau_qua']}))\n"
+    )
 
     def do(hong, tot, chan):
-        cu = {t: _s.modules.pop(t, None) for t in ("pypdf", "pdfplumber")}
-        with _tf.TemporaryDirectory() as td2:
-            p = Path(td2)
-            for t in hong:
-                (p / f"{t}.py").write_text("raise BaseException('r349')\n", encoding="utf-8")
-            for t in tot:
-                (p / f"{t}.py").write_text("", encoding="utf-8")
-            _s.path.insert(0, td2)
-            f = _Chan(chan)
-            _s.meta_path.insert(0, f)
-            try:
-                return next(x for x in om._doc_dep_probe() if x["ten"].startswith("pypdf"))
-            finally:
-                _s.meta_path.remove(f)
-                _s.path.remove(td2)
-                for t, m in cu.items():
-                    _s.modules.pop(t, None)
-                    if m is not None:
-                        _s.modules[t] = m
-    try:
-        d1 = do(["pypdf"], ["pdfplumber"], [])
-        bang(d1["co"] is True, "backend du phong chay ma `co` van False")
-        bang("bị chặn" not in d1["hau_qua"],
-             f"du phong CHAY ma van noi bi chan: {d1['hau_qua'][:110]!r}")
-        bang("pypdf" in d1["hau_qua"],
-             "khong nhac backend hong — mat thong tin chan doan that")
-        # RĂNG hai chiều: hỏng THẬT thì vẫn phải nói bị chặn.
-        d2 = do(["pypdf"], [], ["pdfplumber"])
-        bang(d2["co"] is False and "bị chặn" in d2["hau_qua"],
-             "ca hai duong hong ma khong noi bi chan — chot mat rang")
-        d3 = do([], [], ["pypdf", "pdfplumber"])
-        bang(d3["co"] is False and "pip install pypdf" in d3["hau_qua"],
-             "thieu han ma khong khuyen cai")
-    finally:
-        if them and str(goc) in _s.path:
-            _s.path.remove(str(goc))
+        p = subprocess.run([PY, "-c", kich, str(goc), json.dumps([hong, tot, chan])],
+                           capture_output=True, text=True, timeout=300)
+        bang(p.returncode == 0, f"kich ban con hong: {(p.stdout + p.stderr)[-200:]!r}")
+        return json.loads(p.stdout.strip().splitlines()[-1])
+
+    d1 = do(["pypdf"], ["pdfplumber"], [])
+    bang(d1["co"] is True, "backend du phong chay ma `co` van False")
+    bang("bị chặn" not in d1["hau_qua"],
+         f"du phong CHAY ma van noi bi chan: {d1['hau_qua'][:110]!r}")
+    bang("pypdf" in d1["hau_qua"], "khong nhac backend hong — mat thong tin chan doan that")
+    # RĂNG hai chiều: hỏng THẬT thì vẫn phải nói bị chặn.
+    d2 = do(["pypdf"], [], ["pdfplumber"])
+    bang(d2["co"] is False and "bị chặn" in d2["hau_qua"],
+         "ca hai duong hong ma khong noi bi chan — chot mat rang")
+    d3 = do([], [], ["pypdf", "pdfplumber"])
+    bang(d3["co"] is False and "pip install pypdf" in d3["hau_qua"],
+         "thieu han ma khong khuyen cai")
 
 
 # ------------------------------------------------------ tự đột biến: có răng không

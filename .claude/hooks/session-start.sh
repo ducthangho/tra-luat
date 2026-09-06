@@ -188,10 +188,30 @@ if [ -f requirements.txt ]; then
   # trinh bang tap da tham. Doc khong duoc mot tep include ⇒ dua CHINH DUONG DAN vao bam
   # (KHONG DO DUOC != giong nhau): tep xuat hien lai sau nay se doi bam.
   VAN_TAY="$( "$PY" -c "
-import hashlib, os, re, sys
-CT = re.compile(r'(^|\s)#.*\$')
+import hashlib, os, re, shlex, sys
+# r347 — PHAN TICH CHI THI INCLUDE THEO LUAT PIP, khong bang mot regex hep.
+# Ban truoc bo sot ba dang ma pip DEU NHAN: duong dan CO NHAY, dong NOI bang dau cheo
+# nguoc, va BIEN MOI TRUONG. Ca ba deu khien tep duoc include khong lot vao van tay ⇒
+# sua no ma van tay KHONG DOI ⇒ moc song sot ⇒ hook bo qua cai dat.
+# Dung shlex de tach token (no lo dau nhay) + expandvars cho bien moi truong.
+CT = re.compile(r'(^|\\s)#.*\$')
+CHI_THI = ('-r', '--requirement', '-c', '--constraint')
 h = hashlib.sha256()
 da = set()
+
+def cac_dong(noi_dung):
+    # Noi dong bi cat bang dau cheo nguoc TRUOC khi cat chu thich, dung nhu pip.
+    gop, dem = [], ''
+    for d in noi_dung.splitlines():
+        if d.endswith(chr(92)):
+            dem += d[:-1]
+            continue
+        gop.append(dem + d)
+        dem = ''
+    if dem:
+        gop.append(dem)
+    return gop
+
 def an(duong):
     thuc = os.path.realpath(duong)
     if thuc in da:
@@ -200,15 +220,32 @@ def an(duong):
     try:
         noi_dung = open(duong, 'rb').read()
     except OSError:
+        # KHONG DO DUOC != giong nhau: dua chinh duong dan vao bam.
         h.update(b'KHONG_DOC_DUOC:' + duong.encode('utf-8', 'replace'))
         return
     h.update(noi_dung)
     goc = os.path.dirname(os.path.abspath(duong))
-    for dong in noi_dung.decode('utf-8', 'replace').splitlines():
+    for dong in cac_dong(noi_dung.decode('utf-8', 'replace')):
         dong = CT.sub('', dong).strip()
-        m = re.match(r'^(?:-r|--requirement|-c|--constraint)[=\s]+(.+)\$', dong)
-        if m:
-            an(os.path.join(goc, m.group(1).strip()))
+        if not dong.startswith('-'):
+            continue
+        try:
+            tok = shlex.split(dong)
+        except ValueError:
+            h.update(b'KHONG_TACH_DUOC:' + dong.encode('utf-8', 'replace'))
+            continue
+        i = 0
+        while i < len(tok):
+            t, con = tok[i], None
+            if '=' in t and t.split('=', 1)[0] in CHI_THI:
+                con = t.split('=', 1)[1]
+            elif t in CHI_THI and i + 1 < len(tok):
+                con = tok[i + 1]
+                i += 1
+            i += 1
+            if con:
+                an(os.path.join(goc, os.path.expandvars(con)))
+
 an('requirements.txt')
 print(h.hexdigest()[:16] + '_' + hashlib.sha256(sys.prefix.encode()).hexdigest()[:8])" )"
   DAU="$KHO_MOC/.tl_reqs_$VAN_TAY"
@@ -288,6 +325,45 @@ except ImportError:                 # Python < 3.10
 # `pip._internal` — API khong on dinh, buoc hook vao do la doi mot lop troi lay lop khac.
 _CHU_THICH = re.compile(r"(^|\s)#.*$")
 
+# r347 — DUONG LUI CHO Python 3.8/3.9. `packages_distributions` chi co tu 3.10, nen tren
+# hai nen ta CO Y ho tro thi `ban_do` rong ⇒ vong tham import khong tham gi ca ⇒ lop bao
+# ve r337 (goi du, dung ban, ma `import` chet) BIEN MAT IM LANG. Do duoc: gia lap bo
+# `packages_distributions` roi pha `pypdf/__init__.py` ⇒ chot tra 0 thay vi 1.
+def _module_cua(ten_goi):
+    """Tap module top-level cua mot dist, KHONG can `packages_distributions`."""
+    if _dist is None:
+        return set()
+    try:
+        d = _dist(ten_goi)
+    except KeyboardInterrupt:
+        raise
+    except BaseException:
+        return set()
+    try:
+        tl = d.read_text("top_level.txt")
+    except KeyboardInterrupt:
+        raise
+    except BaseException:
+        tl = None
+    if tl:
+        return {x.strip() for x in tl.splitlines() if x.strip() and not x.startswith("_")}
+    ra = set()
+    try:
+        tep = d.files or ()
+    except KeyboardInterrupt:
+        raise
+    except BaseException:
+        tep = ()
+    for f in tep:
+        dau = str(f).replace("\\", "/").split("/")[0]
+        if dau.endswith(".py"):
+            dau = dau[:-3]
+        if dau and not dau.startswith("_") and not dau.endswith((".dist-info", ".data",
+                                                                 ".egg-info", ".pth")):
+            ra.add(dau)
+    return ra
+
+
 ban_do = {}
 if packages_distributions is not None:
     for _mod, _dists in packages_distributions().items():
@@ -336,7 +412,9 @@ if _Req is not None:
             if not thoa:
                 hong.append(f"{_r.name}: ban {b} KHONG thoa {_r.specifier}")
                 continue
-        for ten in sorted(ban_do.get(_r.name.lower().replace("-", "_")) or ()):
+        # `or _module_cua(...)`: tren <3.10 `ban_do` rong nen phai suy tu metadata.
+        _mods = ban_do.get(_r.name.lower().replace("-", "_")) or _module_cua(_r.name)
+        for ten in sorted(_mods):
             try:
                 __import__(ten)
             except KeyboardInterrupt:

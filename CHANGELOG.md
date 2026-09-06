@@ -1,3 +1,41 @@
+# ★ dev-side — r347: hai lỗ của r345, và một lời khai bị thu hẹp LẦN THỨ HAI (2026-09-06)
+
+Vòng 8 (16 finding). Hai lỗ cụ thể, cả hai tái hiện được trước khi vá:
+
+- **Python 3.8/3.9 mất phép thăm import.** `packages_distributions` chỉ có từ 3.10, nên
+  trên hai nền ta **cố ý hỗ trợ** thì `ban_do` rỗng ⇒ vòng thăm không thăm gì ⇒ lớp bảo
+  vệ r337 biến mất **im lặng**. Đo: giả lập bỏ `packages_distributions` rồi phá
+  `pypdf/__init__.py` ⇒ chốt trả **0** thay vì 1. Chữa bằng đường lui `_module_cua()`
+  đọc `top_level.txt`, thiếu thì suy từ `dist.files`.
+- **Cú pháp include của pip rộng hơn regex của tôi.** `-r 'có nháy'` · nối dòng bằng dấu
+  chéo ngược · `--requirement=${BIẾN}` — pip nhận cả ba, regex cũ bỏ sót cả ba ⇒ sửa tệp
+  được include mà **vân tay không đổi** ⇒ mốc sống sót ⇒ hook bỏ qua cài đặt. Chữa bằng
+  `shlex` (lo dấu nháy) + `expandvars` + nối dòng trước khi cắt chú thích, đúng thứ tự
+  pip làm. Đo theo **hành vi**, không soi biểu thức: sửa tệp include ở cả bốn dạng ⇒ vân
+  tay đổi ở cả bốn.
+
+## Lời khai "offline" bị thu hẹp lần thứ HAI
+
+r345 viết hook *"offline theo cấu tạo"*. r346 đã thu hẹp lần một (phép đo AST chỉ thấy
+`import` tĩnh). Lượt này reviewer thu hẹp lần hai, và đúng: **mạng vẫn có thể đến từ chính
+việc `import` một gói đã khai**, nếu module ấy mở kết nối lúc nạp — họ đo bằng một gói
+tổng hợp, listener đếm **1 kết nối**.
+
+Không bịt ở đây, và nói rõ vì sao: bịt nó cần một **hộp cát mạng thật**, trong khi phép
+thăm import — thứ **duy nhất** thấy được lớp lỗi r337 — buộc phải nạp mã của gói. Nên câu
+đúng là **"mã hook không tự gọi mạng"**, còn chạm mạng gián tiếp qua gói được khai là
+**giới hạn được khai**, không phải lỗ được vá.
+
+Đáng ghi: cùng một câu đã phải sửa **hai lần trong hai commit liên tiếp**, mỗi lần vì một
+hướng khác nhau. Viết một câu bảo đảm rộng thì rẻ; đo đủ để đỡ nó thì không — và mỗi chỗ
+chưa đo là một chỗ sẽ bị bác.
+
+Cổng: 6/6 ca `<3.10` và `>=3.10` đúng · 4/4 dạng include bắt được · `launcher_test`
+**176/176** (bỏ qua 1 — fixture Windows) · đột biến **170/170** (1 không đo được trên nền
+này) · `tl --selftest` **1709/1709** · ruff `--select F` delta = **0** · `bash -n` OK ·
+`git diff --check` rc=0 · `doc-claims-check --strict` rc=0 · quét mẫu bí mật 211 dòng
+thêm: 0 khớp · hook chạy thật hai lượt đúng thiết kế.
+
 # ★ dev-side — r346: ca chống-mạng của r345 CÓ ĐIỂM MÙ, và lời khai đã rộng hơn phép đo (2026-09-06)
 
 Commit r345 viết rằng ca `r345_than_hook_KHONG_duoc_co_duong_mang_nao` là *"phép đo cấu

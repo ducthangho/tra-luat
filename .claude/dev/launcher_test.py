@@ -6339,11 +6339,21 @@ def _r345_chay(py: Path, d: Path, than: str, reqs: str, *them: str) -> int:
 
 @ca
 def r345_than_hook_KHONG_duoc_co_duong_mang_nao():
-    """Bất biến MẠNH NHẤT của bản này, và đo được mà không cần dựng gì.
+    """MÃ HOOK không có đường mạng nào — và PHẠM VI của câu ấy hẹp hơn tôi từng viết.
 
-    Không phải "chúng tôi tin là offline" mà là: trong cây cú pháp của thân hook không
-    có `subprocess`, `socket`, `urllib`, `http`. Cả lớp "mở phiên chậm vì mạng" chết
-    theo CẤU TRÚC — đó là điều ba vòng vá trước không mua nổi.
+    Đo được: trong cây cú pháp của thân hook không có `subprocess`, `socket`, `urllib`,
+    `http`. Bản r345 gọi đó là "cả lớp mở-phiên-chậm-vì-mạng chết theo KIẾN TRÚC" — câu
+    ấy RỘNG HƠN PHÉP ĐO theo HAI hướng, và cả hai đã được đo:
+
+    · phép đo AST chỉ thấy `import` TĨNH: `__import__('socket')`, `__import__` với tên
+      dựng động, `importlib.import_module`, `ctypes` đều LỌT (tự kiểm, r346) ⇒ đã bù
+      bằng ca chặn socket theo HÀNH VI;
+    · mạng vẫn có thể đến từ chính việc `import` một gói ĐÃ KHAI, nếu module ấy mở kết
+      nối lúc nạp (reviewer đo bằng một gói tổng hợp: 1 kết nối) ⇒ KHÔNG bịt được ở
+      đây, vì phép thăm import — thứ duy nhất thấy lớp lỗi r337 — buộc phải nạp mã gói.
+
+    Nên câu đúng là: **mã hook không tự gọi mạng**; hook có thể chạm mạng gián tiếp qua
+    gói được khai. Đó là GIỚI HẠN được khai, không phải lỗ được vá.
     """
     than = _r338_than_hook()
     if not than:
@@ -6482,6 +6492,118 @@ def r345_dot_bien_hai_phep_do_cuc_bo_lam_ca_dich_DO():
                         "definitely_not_installed_r345 @ http://127.0.0.1:9/x.whl\n",
                         "--kiem-ban") == 0,
              "dot bien bo phep kiem VANG MAT VAN DO — ca vang mat khong do phep kiem ay")
+
+
+# r347 — hai lỗ CỤ THỂ của r345, cộng một LỜI KHAI bị thu hẹp.
+#
+# (a) Python 3.8/3.9: `packages_distributions` chỉ có từ 3.10, nên trên hai nền ta CỐ Ý
+#     hỗ trợ thì `ban_do` rỗng ⇒ vòng thăm import không thăm gì ⇒ lớp bảo vệ r337 biến
+#     mất IM LẶNG. Đo được: giả lập bỏ `packages_distributions` rồi phá `pypdf/__init__`
+#     ⇒ chốt trả 0 thay vì 1.
+# (b) Cú pháp include: `-r 'có nháy'`, nối dòng bằng dấu chéo ngược, và biến môi trường —
+#     pip nhận cả ba, regex cũ bỏ sót cả ba ⇒ sửa tệp include mà vân tay KHÔNG ĐỔI ⇒ mốc
+#     sống sót ⇒ hook bỏ qua cài đặt.
+#
+# (c) LỜI KHAI THU HẸP, ghi ở đây vì nó sửa một câu tôi đã viết: r345/r346 nói hook
+#     "offline theo cấu tạo". Đúng cho MÃ HOOK, KHÔNG đúng cho toàn cục — mạng vẫn có
+#     thể đến từ chính việc `import` một gói đã khai, nếu module ấy mở kết nối lúc nạp.
+#     Reviewer đo được điều đó bằng một gói tổng hợp. Đây là GIỚI HẠN được khai, không
+#     phải lỗ được vá: bịt nó cần một hộp cát mạng thật, và phép thăm import — thứ duy
+#     nhất thấy được lớp lỗi r337 — vốn phải nạp mã của gói.
+_R347_CHE_310 = ("import importlib.metadata as _m\n"
+                 "if hasattr(_m, 'packages_distributions'):\n"
+                 "    del _m.packages_distributions\n")
+
+
+@ca
+def r347_tham_import_van_song_tren_python_truoc_310():
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r345_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        bang(_r345_chay(py, d, _R347_CHE_310 + than, "pypdf>=3.0\n", "--kiem-ban") == 0,
+             "gia lap <3.10 lam bao dong gia tren moi truong DA THOA")
+        sp = list(d.glob("v/lib/python*/site-packages")) or list(d.glob("v/Lib/site-packages"))
+        bang(bool(sp), "khong tim thay site-packages")
+        (sp[0] / "pypdf" / "__init__.py").write_text(
+            "raise BaseException('r347-gia-lap')\n", encoding="utf-8")
+        # CA DICH: tren <3.10, goi DU va DUNG BAN ma import CHET van phai DO.
+        bang(_r345_chay(py, d, _R347_CHE_310 + than, "pypdf>=3.0\n", "--kiem-ban") == 1,
+             "tren <3.10 phep tham import BIEN MAT — lop bao ve r337 khong con")
+        # ...va tren >=3.10 van DO nhu cu (khong hoi quy).
+        bang(_r345_chay(py, d, than, "pypdf>=3.0\n", "--kiem-ban") == 1,
+             "tren >=3.10 phep tham import cung mat")
+
+
+@ca
+def r347_dot_bien_bo_duong_lui_310_lam_ca_dich_DO():
+    """Gỡ đường lui ⇒ ca trên phải ĐỎ. Không có nó thì ca kia đo gì?"""
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    neo = "or _module_cua(_r.name)"
+    bang(than.count(neo) == 1, f"R347_ANCHOR_LUI:{than.count(neo)}")
+    dot_bien = than.replace(neo, "or set()")
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r345_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        sp = list(d.glob("v/lib/python*/site-packages")) or list(d.glob("v/Lib/site-packages"))
+        (sp[0] / "pypdf" / "__init__.py").write_text(
+            "raise BaseException('r347-gia-lap')\n", encoding="utf-8")
+        bang(_r345_chay(py, d, _R347_CHE_310 + dot_bien, "pypdf>=3.0\n", "--kiem-ban") == 0,
+             "dot bien go duong lui VAN DO — ca dich khong do duong lui ay")
+
+
+# Bốn dạng chỉ thị include mà pip ĐỀU NHẬN. Ca đo THEO HÀNH VI: sửa tệp được include
+# rồi đòi vân tay ĐỔI — không đo bằng cách soi biểu thức chính quy.
+_R347_INCLUDE = [
+    ("khong nhay",      "-r extra.txt\n",           "extra.txt",      {}),
+    ("co nhay",         "-r 'extra file.txt'\n",    "extra file.txt", {}),
+    ("noi dong",        "-r \\\nextra.txt\n",       "extra.txt",      {}),
+    ("bien moi truong", "--requirement=${REQ}\n",   "extra.txt",      {"REQ": "extra.txt"}),
+]
+
+
+def _r347_van_tay(d: Path, moi_truong: dict) -> str:
+    hook = (LAUNCHER.parent.parent / "hooks" / "session-start.sh").read_text(encoding="utf-8")
+    vt = hook[hook.index('  VAN_TAY="$('):hook.index('  DAU="$KHO_MOC')]
+    (d / "chay.sh").write_text('set -eu\nPY=' + PY + '\n' + vt + '\nprintf "%s" "$VAN_TAY"\n',
+                               encoding="utf-8")
+    env = dict(os.environ)
+    env.update(moi_truong)
+    vo = shutil.which("bash") or "/bin/bash"
+    return subprocess.run([vo, "chay.sh"], cwd=d, capture_output=True, text=True,
+                          env=env, timeout=300).stdout.strip()
+
+
+@ca
+def r347_van_tay_phai_phu_moi_cu_phap_include_cua_pip():
+    duong = LAUNCHER.parent.parent / "hooks" / "session-start.sh"
+    ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
+    if ly_do:
+        return ly_do
+    if os.name == "nt":
+        return "bo qua: khoi VAN_TAY la shell POSIX"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        lot = []
+        for nhan, reqs, ten, env in _R347_INCLUDE:
+            (d / "requirements.txt").write_text(reqs, encoding="utf-8")
+            (d / ten).write_text("pypdf>=3.0\n", encoding="utf-8")
+            a = _r347_van_tay(d, env)
+            (d / ten).write_text("pypdf>=4.0\n", encoding="utf-8")
+            b = _r347_van_tay(d, env)
+            if not a or a == b:
+                lot.append(nhan)
+        bang(not lot,
+             "sua tep include ma van tay KHONG DOI (moc song sot, hook bo qua cai dat): "
+             + ", ".join(lot))
 
 
 # ------------------------------------------------------ tự đột biến: có răng không

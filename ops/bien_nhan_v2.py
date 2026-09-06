@@ -103,28 +103,48 @@ def _khop(d, k, re_, mo_ta):
 def _provider_chinh_tac():
     """Đọc tên provider từ TỪ VỰNG CHÍNH TẮC của kho, không chép tay.
 
-    Bản trước chép tay và cross-review vòng 3 (P2) bác đúng chỗ đó: danh sách ấy TỪ CHỐI
-    `anthropic_claude` — chính là tên trong `_TRANSPORT_CONTRACTS` của `launcher.py`, tức
-    một biên nhận Claude hợp lệ mới tạo sẽ rớt cổng CI bắt buộc. Nguồn duy nhất là hợp đồng
-    transport; đọc không được thì lùi về bản chép tay và KHAI ra, không im lặng."""
+    Trả **(tập, lý do hỏng)** — hai giá trị, vì đây là chỗ ba trạng thái phải sống.
+
+    Bản chép tay TỪ CHỐI `anthropic_claude` — chính là tên trong `_TRANSPORT_CONTRACTS`
+    của `launcher.py` — tức một biên nhận Claude hợp lệ mới tạo sẽ rớt cổng CI bắt buộc
+    (cross-review vòng 3, P2).
+
+    VÀ BẢN VÁ ẤY TỰ SINH RA LỖI KẾ TIẾP, cross-review vòng 4 (`R4-02`) đo được: bản trước
+    NUỐT ngoại lệ rồi trả tập RỖNG, nên khi thiếu `launcher.py` thì `PROVIDER_CHO_PHEP`
+    tụt về đúng hai bí danh lịch sử và cổng **KẾT TỘI** một biên nhận `openai_codex` hợp lệ
+    là *"chuỗi tự do không phải attestation"* — `rc=1`, `1 vi phạm`, **0 chưa đo**. Một lỗi
+    ĐO bị báo thành lỗi DỮ LIỆU, tức người đọc sẽ đi sửa hiện vật đúng. Docstring bản
+    trước còn viết *"đọc không được thì KHAI ra, không im lặng"* trong khi mã làm ngược
+    lại — lời khai rộng hơn phép đo, ngay trong chỗ nói về nó.
+
+    Nay lý do hỏng được GIỮ và đưa tới trạng thái **KHÔNG ĐO ĐƯỢC** của CLI (`rc=2`), và
+    phép kiểm danh sách provider KHÔNG chạy khi nguồn không đọc được — vì không đo được
+    thì không kết luận được, theo cả hai chiều. Cổng vẫn ĐỎ, nên đây không phải fail-open:
+    nó chỉ đỏ ĐÚNG LÝ DO."""
+    nguon = Path(__file__).resolve().parent.parent / ".claude" / "dev" / "launcher.py"
     try:
         import ast
-        cay = ast.parse((Path(__file__).resolve().parent.parent
-                         / ".claude" / "dev" / "launcher.py").read_text(encoding="utf-8"))
-        for n in ast.walk(cay):
-            if (isinstance(n, ast.Assign) and n.targets
-                    and getattr(n.targets[0], "id", "") == "_TRANSPORT_CONTRACTS"):
-                return {t.elts[0].value for t in n.value.elts}
-    except Exception:                                            # noqa: BLE001
-        pass
-    return set()
+        cay = ast.parse(nguon.read_text(encoding="utf-8"))
+    except OSError as ex:
+        return set(), f"không đọc được `{nguon}`: {type(ex).__name__}: {ex}"
+    except SyntaxError as ex:                                    # noqa: BLE001
+        return set(), f"`{nguon}` không phân tích được: {ex}"
+    for n in ast.walk(cay):
+        if (isinstance(n, ast.Assign) and n.targets
+                and getattr(n.targets[0], "id", "") == "_TRANSPORT_CONTRACTS"):
+            try:
+                return {t.elts[0].value for t in n.value.elts}, None
+            except (AttributeError, IndexError, TypeError) as ex:
+                return set(), f"`_TRANSPORT_CONTRACTS` có hình dạng lạ: {type(ex).__name__}: {ex}"
+    return set(), f"`{nguon}` không có phép gán `_TRANSPORT_CONTRACTS`"
 
 
 # `anthropic` (không hậu tố) là DẠNG LỊCH SỬ: bốn biên nhận v2 chuẩn của kho và hai biên
 # nhận lượt 1-2 dùng nó. Giữ làm BÍ DANH có khai, không âm thầm — đổi cách đọc một tên đã
 # nằm trong hiện vật là viết lại lịch sử.
 PROVIDER_LICH_SU = frozenset({"anthropic", "human"})
-PROVIDER_CHO_PHEP = frozenset(_provider_chinh_tac()) | PROVIDER_LICH_SU
+PROVIDER_CHINH_TAC, PROVIDER_NGUON_HONG = _provider_chinh_tac()
+PROVIDER_CHO_PHEP = frozenset(PROVIDER_CHINH_TAC) | PROVIDER_LICH_SU
 
 
 def _mri(d):
@@ -144,7 +164,11 @@ def _mri(d):
     prov = str(v.get("provider") or "").strip()
     if not prov:
         return "`model_reviewer_identity` không có `provider`"
-    if prov not in PROVIDER_CHO_PHEP:
+    # KHÔNG kết luận khi nguồn chính tắc không đọc được. `PROVIDER_CHO_PHEP` lúc ấy chỉ
+    # còn hai bí danh lịch sử, nên phép so này sẽ KẾT TỘI một provider hợp lệ — lỗi ĐO báo
+    # thành lỗi DỮ LIỆU (`R4-02`). Trạng thái thứ ba do `kiem` ghi ra, và nó làm cổng ĐỎ
+    # bằng `rc=2`, nên bỏ qua phép so ở đây KHÔNG phải fail-open.
+    if PROVIDER_NGUON_HONG is None and prov not in PROVIDER_CHO_PHEP:
         return (f"`model_reviewer_identity.provider`={prov!r} ngoài danh sách CHO PHÉP "
                 f"{sorted(PROVIDER_CHO_PHEP)} — chuỗi tự do không phải attestation")
     if not str(v.get("surface") or "").strip():
@@ -531,6 +555,12 @@ def kiem(root: Path, allowlist=None, no_da_do=None):
         raise KhongDoDuoc(f"{tm} không có tệp `*.receipt.yaml` nào — mốc neo đã đổi?")
 
     loi, chua_do, dat, mien_tru, nod = [], [], 0, 0, 0
+    if PROVIDER_NGUON_HONG is not None:
+        # MỘT mục cho CẢ LƯỢT, không phải mỗi tệp một mục: đây là hỏng MÔI TRƯỜNG, không
+        # phải khuyết tật của từng biên nhận. Nói thẳng phép kiểm nào KHÔNG chạy, kẻo
+        # "cổng đỏ" bị đọc thành "đã đo và biên nhận sai".
+        chua_do.append(f"KHÔNG ĐO ĐƯỢC danh sách provider chính tắc — {PROVIDER_NGUON_HONG}; "
+                       f"phép kiểm `model_reviewer_identity.provider` KHÔNG chạy lượt này")
     for p in ds:
         ten, b = p.name, _bam(p)
         if ten in al:

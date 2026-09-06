@@ -97,9 +97,10 @@ cùng một hình dạng, và một chỗ là bệnh của chính bộ chấm đ
   ca đích chết vì lý do KHÁC. `12/12` đúng theo bộ phân hạng mà **không chứng minh 12 thuộc
   tính đã bị khoá**. Đây là `tín dụng giả` ở tầng **NGỮ NGHĨA**, tầng thứ ba của cùng lớp lỗi
   `R5-01`. Nay **cụm mỏ neo** kèm **đối chứng dương phải VẪN XANH dưới đột biến** — một đột biến
-  "từ chối tất cả" rớt đối chứng thay vì lĩnh tín dụng. (Nói đúng phạm vi: **6/21** đột biến khai
-  đối chứng, đúng những cái đi qua `_neo_git`. Bản đầu viết *"mỗi đột biến"* trong khi đo được
-  2/16 — một lời khai rộng hơn phép đo, ngay trong đoạn tố cáo lớp lỗi ấy.)
+  "từ chối tất cả" rớt đối chứng thay vì lĩnh tín dụng. (Nói đúng phạm vi: chỉ những đột biến đi
+  qua `_neo_git` mới khai đối chứng. Bản đầu viết *"mỗi đột biến"* trong khi đo được 2/16 — một
+  lời khai rộng hơn phép đo, ngay trong đoạn tố cáo lớp lỗi ấy. **Tỉ lệ không chép ở đây nữa**:
+  dòng tổng kết tự suy ra từ các hàng, vì bản kế tiếp chép tay "6/21" và nó lệch ngay lượt sau.)
 
 Và một chỗ bộ chấm **không với tới được predicate**: `YEU_CAU` giữ tham chiếu hàm lúc dựng
 bảng, nên hai đột biến nhắm `_mri`/`_gsi` không đổi được gì. Nay bảng gọi qua tên toàn cục.
@@ -139,9 +140,46 @@ cộng một **chốt parity**: bản sao phải khớp bản gốc ở `PROVIDE
 Chốt "khớp đúng 1 chỗ" cũng lập tức trả công: `m9` bản đầu nhắm `loai = _doc_loai(a)` mà chuỗi ấy
 có ở **hai** hàm ⇒ nó **từ chối** thay vì lặng lẽ đột biến sai chỗ.
 
+## Vòng năm: hai P2 + một P3, và rig lại tự bắt mình một lần nữa
+
+Vòng 4 (head `4ef73e6`, 598,4s) — **`approve_with_findings`, vẫn KHÔNG P1**; reviewer xác nhận
+`R3-01`/`R3-02` đã vá thật bằng cách **trích nguyên lambda `m7` hỏng từ AST của `c595292`** rồi
+thả vào bộ test hiện tại: nó bị báo KHÔNG RĂNG đúng như phải thế. Ba phát hiện còn lại:
+
+- **`R4-02` (P2) — lỗi SẢN PHẨM, và đúng thứ cổng này sinh ra để chặn.** Bản vá vòng trước đọc
+  provider từ `_TRANSPORT_CONTRACTS` nhưng **nuốt ngoại lệ** rồi trả tập rỗng. Bỏ riêng
+  `.claude/dev/launcher.py` ⇒ `PROVIDER_CHO_PHEP` tụt về hai bí danh lịch sử và cổng **KẾT TỘI**
+  một biên nhận `openai_codex` hợp lệ là *"chuỗi tự do không phải attestation"*: `rc=1`,
+  `1 vi phạm`, **0 chưa đo**. Lỗi **ĐO** báo thành lỗi **DỮ LIỆU** — người đọc sẽ đi sửa hiện vật
+  đúng. Docstring bản ấy còn viết *"đọc không được thì KHAI ra, không im lặng"* trong khi mã làm
+  ngược lại. Nay `_provider_chinh_tac` trả **(tập, lý do hỏng)**, lý do đi thẳng vào `chua_do`
+  (rc=2) và phép so provider **không chạy** khi nguồn không đo được — không kết luận được theo
+  cả hai chiều, mà cổng vẫn ĐỎ nên không phải fail-open.
+- **`R4-01` (P2) — tám phép làm yếu mà toàn suite vẫn `31/31 · 21/21`.** Một hình dạng: **thiếu
+  ca NHÁNH**. `c14` mang tên *"ba trạng thái"* nhưng chỉ chạy ca sạch và ca thiếu thư mục; `c23`
+  chỉ khoá kết quả **hỗn hợp** — nên nhánh **chỉ có vi phạm** không ai chạm, và
+  `return RC_VI_PHAM` → `return RC_SACH` sống sót. Chốt kiểu vừa thêm ở `_mri` bị chốt assurance
+  ở `_thieu` **che**. Và **năm** phép gỡ `chua` trong `_neo_git` (`rev-parse HEAD` · commit của
+  `evidence_url` · blob rc≠0 · blob ném · `reviewed_sha` rc=127) đều lọt vì `c26` chỉ bơm lỗi ở
+  `merge-base`. Vá bằng **bảng theo từng thao tác** (`c32`), ba trạng thái CLI đo **riêng**
+  (`c29`), hàng ma trận cho `session_run_id` **sai kiểu**, và hợp đồng provider khoá bằng **AST
+  đọc độc lập** trong chính bộ test (`c31`) — chốt parity cây gương không bắt được vì nó so bản
+  sao với module, nên **hai bản cùng sai thì vẫn khớp**.
+- **`R4-03` (P3) — hai mẫu số khác nhau.** Tử số loại `m14` (ca tự kiểm) ra mà mẫu số vẫn giữ nó,
+  và tỉ lệ *"6/21"* chép tay trong chú thích lẫn CHANGELOG lệch **ngay ở đoạn vừa sửa một lời
+  khai rộng hơn phép đo**. Nay dòng tổng kết **tự suy ra** từ các hàng — tách đột biến thường,
+  ca tự kiểm, và số khai đối chứng. Không còn tỉ lệ chép tay nào.
+
+**Và rig lại tự bắt mình.** `_cay_guong` chép `_BNV2_THAT.__file__` (bản THẬT) trong khi ca chạy
+dưới một đột biến mức tệp, nên CLI trong cây gương là bản **chưa bị đột biến** ⇒ `m18`/`m19` báo
+KHÔNG RĂNG oan. Chép bản **đang hiệu lực** thì cả hai có răng. Cùng lớp *"rig đo thứ khác với thứ
+được công bố"*, lần thứ hai trong hai vòng liên tiếp — và cả hai lần đều lộ vì đối chứng, không vì
+đọc mã.
+
 ## Răng
 
-`ops/bien_nhan_v2_test.py`: **31 ca · 21/21 đột biến CÓ RĂNG**, gồm đúng hai thứ protocol đòi —
+`ops/bien_nhan_v2_test.py`: **35 ca · 30/30 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
+hai thứ protocol đòi —
 biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
 của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`
 lúc nạp nên **tự nở theo** khi ai sửa mã nguồn — đúng bệnh mà chú thích cách đó ba chục dòng vừa

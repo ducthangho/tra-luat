@@ -6285,6 +6285,72 @@ def r21_bon_mutant_noi_semantic_allowlist_phai_lam_oracle_DO():
         bang(False, f"mutant noi allowlist SONG SOT: {truong}")
 
 
+# r338 (đo 06-09-2026) — bằng chứng dương của hook phải phủ ĐÚNG gói trong
+# requirements.txt, và TÊN GÓI (pip) không phải TÊN MODULE (import).
+#
+# Ca thật: thêm `PyYAML==6.0.3` vào requirements.txt ⇒ bản cũ suy ra `pyyaml` ⇒
+# `ModuleNotFoundError` trong khi `import yaml` chạy tốt ⇒ hook fail-close vì một
+# BÁO ĐỘNG GIẢ. Cùng họ "CÓ MẶT ≠ DÙNG ĐƯỢC", lật ngược: ở đây thứ dùng được lại
+# bị khai là hỏng, và cái giá vẫn là chặn phiên.
+#
+# TRÍCH thân Python TỪ CHÍNH tệp hook, không chép lại — chép lại là hai bản trôi
+# lệch, đúng bài học `ops/don_ref_chot_test.sh` đã trả giá.
+def _r338_than_hook() -> str:
+    duong = LAUNCHER.parent.parent / "hooks" / "session-start.sh"
+    ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
+    if ly_do:
+        return ""
+    m = re.search(r"<<'PYEOF'\n(.*?)\nPYEOF", duong.read_text(encoding="utf-8"), re.S)
+    bang(m is not None, "khong tim thay than PYEOF trong session-start.sh")
+    return m.group(1)
+
+
+def _r338_chay(than: str, reqs: str) -> int:
+    """Chạy thân hook trên một requirements.txt dựng sẵn; trả mã thoát."""
+    with tempfile.TemporaryDirectory() as td:
+        (Path(td) / "requirements.txt").write_text(reqs, encoding="utf-8")
+        return subprocess.run([PY, "-c", than], cwd=td, capture_output=True,
+                              text=True).returncode
+
+
+@ca
+def r338_ten_goi_pip_khac_ten_module_import():
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    try:
+        import yaml  # noqa: F401 — chỉ để biết nền có PyYAML mà đo
+    except ImportError:
+        return "bo qua: nen khong co PyYAML nen khong phan biet duoc bao gia voi thieu that"
+    bang(_r338_chay(than, "PyYAML==6.0.3\n") == 0,
+         "PyYAML DA CAI ma chot van bao hong — bao dong gia theo ten goi")
+    # RĂNG: gói không tồn tại vẫn phải ĐỎ. Thiếu vế này thì bản vá có thể chỉ là
+    # "luôn trả 0", và ca trên sẽ xanh cho một chốt đã chết.
+    bang(_r338_chay(than, "khong_he_ton_tai_r338\n") == 1,
+         "goi KHONG TON TAI ma chot van xanh — chot da mat rang")
+
+
+@ca
+def r338_dot_bien_bo_ban_do_lam_ca_dich_DO():
+    """Đột biến gỡ bảng ánh xạ phải làm ca trên ĐỎ — không có nó thì ca kia đo gì?"""
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    try:
+        import yaml  # noqa: F401
+    except ImportError:
+        return "bo qua: nen khong co PyYAML"
+    neo = "for ten in sorted(ban_do.get(goi) or {goi}):"
+    bang(than.count(neo) == 1, f"R338_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
+    dot_bien = than.replace(neo, "for ten in [goi]:")
+    bang(_r338_chay(dot_bien, "PyYAML==6.0.3\n") == 1,
+         "dot bien go ban do VAN XANH — ca dich khong do cai ban do")
+    # Chiều ngược: đột biến KHÔNG được làm hỏng ca răng (nó vốn đã đỏ),
+    # nếu không thì "đỏ" ở trên có thể đến từ bất cứ đâu.
+    bang(_r338_chay(dot_bien, "khong_he_ton_tai_r338\n") == 1,
+         "dot bien lam doi ca rang — do o tren khong quy duoc cho ban do")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [

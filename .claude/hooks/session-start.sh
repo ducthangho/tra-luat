@@ -199,18 +199,43 @@ print(h + '_' + hashlib.sha256(sys.prefix.encode()).hexdigest()[:8])" )"
   reqs_import_duoc() {
     "$PY" - <<'PYEOF'
 import re, sys
+# r338 (do 06-09-2026): TEN GOI (pip) KHAC TEN MODULE (import), va suy ten bang chuan
+# hoa chuoi la DOAN chu khong phai DO. Phan chung chay duoc: `PyYAML==6.0.3` -> ban cu
+# suy ra `pyyaml` -> ModuleNotFoundError, TRONG KHI `import yaml` chay tot. Tuc them mot
+# phu thuoc that vao requirements.txt lam chot nay bao dong GIA va fail-close chan phien.
+# Chua bang mot BANG TAY DOI TEN thi cung la doan, chi la doan som hon; hoi
+# `importlib.metadata` cua ban DA CAI moi la do — no doc tu metadata that cua goi.
+try:
+    from importlib.metadata import packages_distributions
+except ImportError:                 # Python < 3.10
+    packages_distributions = None
+ban_do = {}
+if packages_distributions is not None:
+    for _mod, _dists in packages_distributions().items():
+        # BO module gach duoi: chung la ban tang toc TUY CHON, doi ho chung la tai tao
+        # dung lop loi vua sua. Phan chung: PyYAML khai ca `_yaml` (C ext cua libyaml),
+        # ma `yaml/__init__.py` boc no trong `try: from .cyaml import * / except
+        # ImportError` — chan `_yaml` roi `import yaml` VAN OK. Doi `_yaml` la bao GIA
+        # tren moi may cai PyYAML thuan Python.
+        if _mod.startswith("_"):
+            continue
+        for _d in _dists:
+            ban_do.setdefault(_d.lower().replace("-", "_"), set()).add(_mod)
 hong = []
 for dong in open("requirements.txt", encoding="utf-8"):
     dong = dong.split("#", 1)[0].strip()
     if not dong or dong.startswith("-"):
         continue
-    ten = re.split(r"[<>=!~\[; ]", dong, 1)[0].strip().lower().replace("-", "_")
-    try:
-        __import__(ten)
-    except KeyboardInterrupt:
-        raise
-    except BaseException as e:  # PanicException (pyo3) khong phai Exception
-        hong.append(f"{ten}: {type(e).__name__}")
+    goi = re.split(r"[<>=!~\[; ]", dong, 1)[0].strip().lower().replace("-", "_")
+    # Goi CHUA CAI thi khong co trong metadata -> lui ve ten suy ra -> import that bai
+    # -> bao THIEU. Do la dung: ban do chi chua ten, khong che duoc rang cua chot.
+    for ten in sorted(ban_do.get(goi) or {goi}):
+        try:
+            __import__(ten)
+        except KeyboardInterrupt:
+            raise
+        except BaseException as e:  # PanicException (pyo3) khong phai Exception
+            hong.append(f"{ten}: {type(e).__name__}")
 if hong:
     print("[session-start] goi trong requirements.txt KHONG import duoc: " + " · ".join(hong))
     sys.exit(1)

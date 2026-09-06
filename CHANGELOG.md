@@ -1,3 +1,54 @@
+# ★ dev-side — r338: bằng chứng dương của hook không phủ PyYAML, và ba lớp bẫy khi vá (2026-09-06)
+
+r337 đổi bằng chứng của bước pip từ mã thoát `pip install --dry-run` sang **import được
+từng gói trong `requirements.txt`**. Chốt đúng, nhưng phạm vi của nó bằng đúng nội dung
+tệp ấy — mà PyYAML **không nằm trong đó**, dù `ops/lease_publish.py` (3 chỗ) và
+`.claude/dev/packet_loop.py:1812` đều `import yaml`. Máy thiếu PyYAML vẫn được hook cấp
+mốc "đủ", rồi cổng đăng lease chết `ImportError` giữa chừng. Cùng bệnh "phạm vi TUYÊN BỐ
+phải bằng phạm vi ĐO ĐƯỢC", lần này ở dạng **một chốt đúng đặt trên một danh sách thiếu**.
+
+Vá thì đụng liền ba bẫy, không bẫy nào lộ ra bằng đọc code:
+
+- **TÊN GÓI (pip) ≠ TÊN MODULE (import).** Thêm `PyYAML` vào tệp là chốt r337 ĐỎ ngay:
+  nó suy tên bằng chuẩn hoá chuỗi ⇒ `pyyaml` ⇒ `ModuleNotFoundError`, trong khi
+  `import yaml` chạy tốt. Một chốt fail-close báo động GIẢ thì chặn phiên y như chốt
+  đúng — và bản vá cho lỗ "CÓ MẶT ≠ DÙNG ĐƯỢC" suýt tự dựng lại lỗ ấy ở chiều ngược.
+  Chữa bằng `importlib.metadata.packages_distributions()`: **hỏi metadata của bản ĐÃ CÀI**
+  thay vì đoán từ tên. Bảng tay đổi tên cũng là đoán, chỉ là đoán sớm hơn.
+- **Module gạch dưới là bản tăng tốc TUỲ CHỌN, đòi chúng là tái tạo đúng lớp lỗi vừa sửa.**
+  Metadata khai PyYAML gồm cả `_yaml` (C ext của libyaml). Phản chứng đã chạy: chặn
+  `_yaml` bằng meta-path finder rồi `import yaml` **vẫn OK** — `yaml/__init__.py` bọc nó
+  trong `try: from .cyaml import * / except ImportError`. Đòi `_yaml` là báo giả trên
+  mọi máy cài PyYAML thuần Python. Nên bản đồ chỉ lấy module KHÔNG gạch dưới.
+- **Ghim `==6.0.3` cho "khớp CI" làm hook ĐỎ THƯỜNG TRỰC — chỉ lộ vì chạy hook THẬT.**
+  Ba workflow ghim số ấy, nên bản đầu ghim theo. Chạy thật: python hệ thống có PyYAML
+  6.0.1 do distro cài ⇒ `pip install -r` phải GỠ nó trước ⇒
+  `ERROR: Cannot uninstall PyYAML 6.0.1, RECORD file not found ... installed by debian`
+  ⇒ pip rc≠0 ⇒ hook rẽ nhánh hỏng, xoá mốc, in CẢNH BÁO ở **mọi** lượt mở phiên. Đổi
+  sang `>=6.0` (cùng idiom `pypdf>=4.0`): no-op sạch, rc=0. CI giữ pin riêng của nó.
+
+**Và phép đo suýt chọn nhầm cách chữa.** Để so ba dạng (`==6.0.3` · `>=6.0` · trần) tôi
+chạy `pip install --dry-run`: nó trả **rc=0 cho cả ba**, kể cả dạng vừa hỏng thật. Đúng
+lý do r337 đã bác dry-run làm bằng chứng — và tôi gần như dùng lại chính cái oracle hỏng
+ấy để chọn bản vá cho lỗ do nó gây ra. Con số chỉ ra khi cài THẬT trên interpreter thật.
+
+**Đo răng, không nhận ca xanh.** `r338_ten_goi_pip_khac_ten_module_import` trích thân
+Python **từ chính tệp hook** (không chép lại — hai bản sẽ trôi lệch), và có ca răng: gói
+không tồn tại vẫn phải ĐỎ, kẻo bản vá chỉ là "luôn trả 0".
+`r338_dot_bien_bo_ban_do_lam_ca_dich_DO` gỡ bảng ánh xạ và đòi ca đích ĐỎ, cộng chiều
+ngược (đột biến không được làm đổi ca răng) để cái ĐỎ ấy quy được cho bảng ánh xạ.
+A/B một biến, hai vế dựng trong CÙNG một lệnh: hook chưa vá ⇒ ca đích **ĐỎ**; chỉ thay
+đúng tệp hook ⇒ **XANH**.
+
+Cổng: `launcher_test` **170/170** (bỏ qua 1, fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta
+so `057308d` = **0** trên cả ba tệp · `bash -n` OK · `git diff --check` rc=0 · quét mẫu
+bí mật trên 123 dòng thêm: 0 khớp · hook chạy thật hai lượt: lượt 1 cài + đặt mốc, lượt 2
+"không đổi và mọi gói import được — bỏ qua pip".
+
+Nợ đã khai, chưa chữa: `PyYAML` nay ghim ở **bốn** chỗ (ba workflow + tệp này) và không
+cổng nào canh chúng khớp nhau.
+
 # ★ dev-side — vòng 7b: bản vá ĐÚNG của vòng 7 làm đỏ Windows, và vì sao (2026-08-13)
 
 Vòng 7 sửa `if not con:` thành `con == []` — **đúng**, vì `None` là KHÔNG ĐO ĐƯỢC chứ

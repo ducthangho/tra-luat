@@ -20,6 +20,9 @@ executor_provider: claude
 cross_provider: false
 assurance: same_provider_approved
 verdict: changes_requested
+verdict_path: ops/reviews/phan-bien-quy-trinh-review-1-claude-verdict.md
+verdict_sha256: d8b67321f239d37dc8ad3d9c2c9ed26325aaa504eaee133f1984364f5571663c
+verdict_bytes: 5337
 reviewed_sha: 07eb236f9a4831d70c469165d31305830d572370
 
 nhiem_vu: >-

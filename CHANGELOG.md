@@ -1,3 +1,28 @@
+# ★ dev-side — r348: đường lui của r347 mang vào một BÁO ĐỘNG GIẢ, tự tìm ra (2026-09-06)
+
+`_module_cua()` — thứ vừa thêm ở r347 để chữa lỗ Python <3.10 — suy **sai** cho gói **chỉ
+có CLI**. RECORD của loại gói ấy ghi đường kiểu `../../../bin/clix`, nên đoạn đầu là `..`:
+không bắt đầu bằng gạch dưới, không trùng hậu tố loại trừ nào, nên lọt qua và hook đi
+`__import__("..")`. Đo được trước khi vá: **`rc=1` cho một môi trường HOÀN TOÀN ĐÚNG**.
+
+Đúng lớp **BÁO ĐỘNG GIẢ** đã sinh ra bảy finding đầu của chuỗi này — và lần này do chính
+bản vá của tôi mang vào, ở commit ngay sau. Chuỗi r343 → r344 đã dạy đúng bài này (một
+cửa thoát tự thêm sinh hai lỗ mới); r347 → r348 lặp lại nó ở quy mô nhỏ hơn.
+
+Chốt là **`isidentifier()`**: tên module hợp lệ luôn là một định danh Python. Đây là danh
+sách **CHO PHÉP** (thứ hợp lệ mới qua), không phải thêm `..` vào danh sách cấm — bài học
+r344 áp thẳng vào đây, lần này áp *trước* khi bị bắt.
+
+**Cách tìm ra đáng ghi hơn bản vá.** Tôi gửi reviewer ba câu hỏi về chính bản vá r347, rồi
+thay vì ngồi đợi trả lời thì đi đo câu số 2 (*"dạng gói nào làm `_module_cua` suy sai?"*).
+Ba dạng dựng thử — gói chỉ có CLI · wheel có `.data` · không có `top_level.txt` — và dạng
+đầu tiên đỏ ngay. Bài học: **một câu hỏi đủ tốt để gửi reviewer thì cũng đủ tốt để tự
+chạy**; gửi đi rồi chờ là biến một phép đo rẻ thành một vòng review.
+
+Cổng: 3/3 dạng gói đúng · `launcher_test` **178/178** (bỏ qua 1 — fixture Windows) ·
+`tl --selftest` **1709/1709** · ruff `--select F` delta = **0** · `bash -n` OK ·
+`git diff --check` rc=0.
+
 # ★ dev-side — r347: hai lỗ của r345, và một lời khai bị thu hẹp LẦN THỨ HAI (2026-09-06)
 
 Vòng 8 (16 finding). Hai lỗ cụ thể, cả hai tái hiện được trước khi vá:

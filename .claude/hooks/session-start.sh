@@ -358,8 +358,13 @@ def _module_cua(ten_goi):
         dau = str(f).replace("\\", "/").split("/")[0]
         if dau.endswith(".py"):
             dau = dau[:-3]
-        if dau and not dau.startswith("_") and not dau.endswith((".dist-info", ".data",
-                                                                 ".egg-info", ".pth")):
+        # `isidentifier()` la chot QUYET DINH, khong phai lam dep: RECORD cua mot goi
+        # CHI CO CLI ghi duong kieu `../../../bin/clix`, nen doan dau la `..` — khong
+        # bat dau bang gach duoi, khong trung hau to nao — va ban truoc di
+        # `__import__("..")` roi bao BAO DONG GIA. Do duoc truoc khi va: rc=1 cho mot
+        # moi truong HOAN TOAN DUNG. Ten module hop le luon la mot dinh danh Python.
+        if (dau and dau.isidentifier() and not dau.startswith("_")
+                and not dau.endswith((".dist-info", ".data", ".egg-info", ".pth"))):
             ra.add(dau)
     return ra
 

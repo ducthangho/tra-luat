@@ -6606,6 +6606,84 @@ def r347_van_tay_phai_phu_moi_cu_phap_include_cua_pip():
              + ", ".join(lot))
 
 
+# r348 — `_module_cua()` suy SAI cho gói CHỈ CÓ CLI, và tôi tự tìm ra khi kiểm chính câu
+# hỏi mình vừa gửi reviewer.
+#
+# RECORD của một gói chỉ có CLI ghi đường kiểu `../../../bin/clix`, nên đoạn đầu là `..`
+# — không bắt đầu bằng gạch dưới, không trùng hậu tố loại trừ nào — và bản trước đi
+# `__import__("..")` rồi báo hỏng. Đo được trước khi vá: `rc=1` cho một môi trường HOÀN
+# TOÀN ĐÚNG. Đúng lớp BÁO ĐỘNG GIẢ đã sinh ra bảy finding đầu của chuỗi này, lần này do
+# chính đường lui vừa thêm ở r347 mang vào.
+#
+# Chốt là `isidentifier()`: tên module hợp lệ luôn là một định danh Python. Đây là danh
+# sách CHO PHÉP (thứ hợp lệ mới qua), không phải danh sách CẤM thêm `..` vào — bài học
+# r344 áp thẳng vào đây.
+def _r348_dist(sp: Path, ten: str, tep, top=None):
+    di = sp / f"{ten}-1.0.dist-info"
+    di.mkdir(parents=True, exist_ok=True)
+    (di / "METADATA").write_text(f"Metadata-Version: 2.1\nName: {ten}\nVersion: 1.0\n",
+                                 encoding="utf-8")
+    (di / "INSTALLER").write_text("pip\n", encoding="utf-8")
+    (di / "WHEEL").write_text("Wheel-Version: 1.0\nGenerator: t\nRoot-Is-Purelib: true\n"
+                              "Tag: py3-none-any\n", encoding="utf-8")
+    (di / "RECORD").write_text("\n".join(tep), encoding="utf-8")
+    if top is not None:
+        (di / "top_level.txt").write_text(top, encoding="utf-8")
+    for t in tep:
+        f = sp / t
+        if f.suffix in (".py", ".pth") or "/" in t:
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text("", encoding="utf-8")
+
+
+_R348_CHE_310 = ("import importlib.metadata as _m\n"
+                 "if hasattr(_m, 'packages_distributions'):\n"
+                 "    del _m.packages_distributions\n")
+
+
+@ca
+def r348_goi_chi_co_CLI_khong_duoc_bao_dong_gia():
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r345_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        sp = (list(d.glob("v/lib/python*/site-packages")) or list(d.glob("v/Lib/site-packages")))[0]
+        # RECORD tro RA NGOAI cay: dung hinh dang cua mot goi chi co CLI.
+        _r348_dist(sp, "clionly", ["clionly-1.0.dist-info/METADATA", "../../../bin/clix"], top="")
+        _r348_dist(sp, "datapkg", ["datapkg/__init__.py", "datapkg-1.0.data/scripts/x"])
+        _r348_dist(sp, "nofiletop", ["nofiletop/__init__.py"])
+        sai = []
+        for ten in ("clionly", "datapkg", "nofiletop"):
+            ma = _r345_chay(py, d, _R348_CHE_310 + than, ten + "\n", "--kiem-ban")
+            if ma != 0:
+                sai.append(f"{ten}: rc={ma}")
+        bang(not sai, "bao dong gia tren moi truong DUNG: " + " · ".join(sai))
+
+
+@ca
+def r348_dot_bien_bo_isidentifier_lam_ca_dich_DO():
+    """Gỡ chốt `isidentifier()` ⇒ ca trên phải ĐỎ. Không có nó thì ca kia đo gì?"""
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    neo = "if (dau and dau.isidentifier() and not dau.startswith(\"_\")"
+    bang(than.count(neo) == 1, f"R348_ANCHOR:{than.count(neo)}")
+    dot_bien = than.replace(neo, "if (dau and not dau.startswith(\"_\")")
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r345_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        sp = (list(d.glob("v/lib/python*/site-packages")) or list(d.glob("v/Lib/site-packages")))[0]
+        _r348_dist(sp, "clionly", ["clionly-1.0.dist-info/METADATA", "../../../bin/clix"], top="")
+        bang(_r345_chay(py, d, _R348_CHE_310 + dot_bien, "clionly\n", "--kiem-ban") != 0,
+             "dot bien go `isidentifier()` VAN xanh — ca dich khong do chot ay")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [

@@ -307,9 +307,30 @@ nhận, `rc=0`. Trên head sau khi đổi sang **bảng có cấu trúc**, chín
 nguyên vẹn** — vì `AGENTS.md` thôi cấp bề mặt, chỉ còn đối chiếu. Một lớp lỗi chết theo cấu trúc
 thì không cần ca canh nó.
 
+## Windows lượt ĐẦU TIÊN, và nó bắt ngay một lỗi Linux không thể thấy
+
+Đợt này chạm `.claude/dev/**` nên gắn nhãn `windows` theo `CLAUDE.md` — và đo được rằng nhãn ấy
+**thật sự là một cò**: `launcher-windows.yml` có khai `types: [..., labeled]` (khác `ci.yml`,
+workflow ấy không khai, nên gắn nhãn ở đó không sinh lượt chạy nào — đúng bẫy đã ghi).
+
+Lượt `gate (windows-latest)` **đầu tiên từng chạy** bước `bien-nhan v2 selftest` cho **`40/41 ca`**:
+`c32` ĐỎ ngay ở **đối chứng dương**. Nguyên nhân: `_kho_git_re_nhanh` băm
+`than_verdict.encode()` — tức **chuỗi Python** — trong khi `write_text` trên Windows dịch `\n` →
+`\r\n` lúc ghi đĩa, nên băm khai khác băm blob git lưu. **Đó đúng là `R2-02`** — *"băm hai BIỂU
+DIỄN của cùng một thứ"* — mà PR này đã vá cho **SẢN PHẨM** ở vòng 3, rồi **tái phát trong FIXTURE
+của chính nó**. Nay fixture ghi **bytes** và băm **thứ đọc lại từ git**; `c39` khoá bất biến ấy ở
+dạng kiểm được trên mọi nền.
+
+Nói thẳng phạm vi: **đột biến của `c39` chỉ có răng trên Windows**, nên tôi KHÔNG dựng một mutant
+giả vờ có răng trên POSIX. Phản chứng thật của nó là một phép đo có thật — job `101524189479` trên
+`e057edb` — chứ không phải một giả thuyết.
+
+Và một lần nữa: lỗi này **không nằm trong sản phẩm**, nó nằm trong bộ đo. Lần thứ **bảy** trong
+đợt một chốt/nền mới bắt đúng fixture của chính bộ test.
+
 ## Răng
 
-`ops/bien_nhan_v2_test.py`: **41 ca · 48/48 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
+`ops/bien_nhan_v2_test.py`: **42 ca · 48/48 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
 hai thứ protocol đòi —
 biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
 của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`

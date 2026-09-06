@@ -589,7 +589,9 @@ def _kho_git(tmp: Path, than_verdict: str):
     """Dựng một kho git THẬT tối thiểu, commit một tệp verdict, trả (sha, băm, đường dẫn)."""
     duong = "ops/reviews/x-verdict.md"
     (tmp / "ops" / "reviews").mkdir(parents=True, exist_ok=True)
-    (tmp / duong).write_text(than_verdict, encoding="utf-8")
+    # BYTES: nội dung fixture phải GIỐNG NHAU trên mọi nền, kẻo hai lượt CI đo hai thứ khác
+    # nhau mà không ai thấy. (Hàm này vốn đã băm đĩa nên không sai — chỉ là hết trôi theo nền.)
+    (tmp / duong).write_bytes(than_verdict.encode("utf-8"))
     E = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t",
          "GIT_COMMITTER_EMAIL": "t@t", "PATH": os.environ.get("PATH", ""),
          "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull}
@@ -735,14 +737,25 @@ def _kho_git_re_nhanh(tmp: Path, than_verdict: str, lui_head=True):
     (tmp / "nen.txt").write_text("nen\n", encoding="utf-8")
     g("init", "-q"); g("add", "-A"); g("commit", "-qm", "nen")
     nen = g("rev-parse", "HEAD")
-    (tmp / duong).write_text(than_verdict, encoding="utf-8")
+    # BYTES, không `write_text`. Trên Windows `write_text` dịch `\n` → `\r\n`, nên tệp trên
+    # ĐĨA khác chuỗi Python — và dòng dưới từng băm CHUỖI thay vì băm ĐĨA. Đo được ở lượt CI
+    # Windows ĐẦU TIÊN của bộ này (`e057edb`, `gate (windows-latest)`): `c32` ĐỎ ngay ở đối
+    # chứng dương vì băm blob lệch. Đây đúng là `R2-02` — *"băm hai BIỂU DIỄN của cùng một
+    # thứ"* — mà PR này đã vá cho SẢN PHẨM, rồi tái phát trong FIXTURE của chính nó.
+    (tmp / duong).write_bytes(than_verdict.encode("utf-8"))
     g("add", "-A"); g("commit", "-qm", "re")
     re_ = g("rev-parse", "HEAD")
     if lui_head:
         g("checkout", "-q", nen)      # HEAD LÙI về nền ⇒ `re_` thôi là tổ tiên của HEAD
         dung(g("rev-parse", "HEAD") == nen, "checkout không đưa HEAD về commit nền")
     import hashlib as _h
-    return nen, re_, _h.sha256(than_verdict.encode("utf-8")).hexdigest(), duong
+    # BĂM THỨ TRÊN ĐĨA, không băm chuỗi đã đưa vào. `git` băm bytes của tệp, nên mọi phép so
+    # phải xuất phát từ cùng một nguồn — cùng lý do `_neo_git` chỉ đọc đường bytes.
+    # `lui_head=True` đã checkout về commit nền nên tệp không còn; đọc từ chính commit rẽ.
+    ra = subprocess.run(["git", "-C", str(tmp), "cat-file", "-p", f"{re_}:{duong}"],
+                        capture_output=True, env=E)
+    dung(ra.returncode == 0, f"không đọc lại được blob verdict: {ra.stderr[:200]!r}")
+    return nen, re_, _h.sha256(ra.stdout).hexdigest(), duong
 
 
 def _kho_git_hai_commit(tmp: Path, than_verdict: str):
@@ -1404,6 +1417,39 @@ def c38_BI_DANH_phai_duoc_CHUAN_HOA_truoc_moi_phep_kiem():
             ngoai.append(f"{f.name}: {pv}/{bm}")
     bang(not ngoai, f"{len(ngoai)} biên nhận ĐANG ĐẠT dùng bề mặt ngoài hợp đồng:\n      "
                     + "\n      ".join(ngoai[:5]))
+
+
+@ca
+def c39_bam_fixture_phai_LAY_TU_GIT_khong_tu_chuoi_Python():
+    """Bất biến chống trôi-theo-nền: băm fixture phải là băm THỨ GIT LƯU, không phải chuỗi.
+
+    NÓI THẲNG PHẠM VI: trên POSIX ca này gần như không thể ĐỎ, vì `\n` trên đĩa bằng `\n`
+    trong chuỗi — nên **đột biến của nó chỉ có răng trên Windows**, và tôi KHÔNG dựng một
+    mutant giả vờ có răng ở đây. Phản chứng THẬT của nó là một phép đo có thật, không phải
+    một giả thuyết: lượt CI Windows ĐẦU TIÊN của bộ này (`e057edb`,
+    `gate (windows-latest)` job `101524189479`) cho **`40/41 ca`** — `c32` ĐỎ ngay ở đối
+    chứng dương vì `_kho_git_re_nhanh` băm `than_verdict.encode()` trong khi `write_text`
+    đã dịch `\n` → `\r\n` lúc ghi đĩa.
+
+    Đây đúng là `R2-02` — *"băm hai BIỂU DIỄN của cùng một thứ"* — mà PR này đã vá cho SẢN
+    PHẨM ở vòng 3, rồi tái phát trong FIXTURE của chính nó. Ca này khoá bất biến ấy ở dạng
+    kiểm được trên mọi nền: giá trị trả về phải khớp `git cat-file -p <commit>:<đường dẫn>`."""
+    import hashlib as _h
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        for ten, dung_ham in (("_kho_git", False), ("_kho_git_hai_commit", True)):
+            d = tmp / ten
+            d.mkdir()
+            if dung_ham:
+                _nen, sha, bam, duong = _kho_git_hai_commit(d, "noi dung verdict\n")
+            else:
+                sha, bam, duong = _kho_git(d, "noi dung verdict\n")
+            r = subprocess.run(["git", "-C", str(d), "cat-file", "-p", f"{sha}:{duong}"],
+                               capture_output=True)
+            dung(r.returncode == 0, f"KHÔNG ĐO ĐƯỢC: không đọc lại được blob của {ten}")
+            bang(bam == _h.sha256(r.stdout).hexdigest(),
+                 f"{ten}: băm fixture KHÔNG phải băm thứ git lưu — "
+                 f"fixture={bam[:12]}… git={_h.sha256(r.stdout).hexdigest()[:12]}…")
 
 
 @ca

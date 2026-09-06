@@ -1,3 +1,59 @@
+# ★ dev-side — r354: lược đồ biên nhận v2 có cổng sau 19 ngày làm luật suông (2026-09-06)
+
+Cross-review codex trên PR #454 (`3d5eaeb`) ra một finding P2: biên nhận lượt 5 khai
+`assurance: cross_approved` mà thiếu **cả bốn** thứ `PROTOCOL §8` (dòng 453-458) đòi ở đích v2,
+và tự khai model identity là KHÔNG ĐO ĐƯỢC ngay trong tệp. Kiểm lại thì đúng — và rộng hơn
+một tệp.
+
+## Đếm LỚP, không đếm lỗi
+
+62 biên nhận · **10** khai `schema_version: 2` · **4** đủ trường · **6** thiếu. Bốn tệp đủ
+(`handoff-264-*`, `plat-x8*`) chứng minh mẫu đúng đã có trong kho; năm biên nhận
+`phan-bien-quy-trinh-*` của đợt này chép sai mẫu, lượt 5 làm nó thành 6.
+
+Và **không cổng nào đọc lược đồ ấy**: `rg` không thấy `model_reviewer_identity` /
+`github_submitter_identity` / `receipt_id` trong bất kỳ bộ kiểm biên nhận nào; `t26` chỉ kiểm
+`verdict_path` + băm. Chính hai biên nhận v2 đầu tiên của kho đã TỰ KHAI khoảng trống ấy
+(`PLAT-X8b-CHUA-CO-BO-KIEM-RECEIPT-V2`) — đặc tả có từ `2f84531` (18-08), nợ nằm im 19 ngày.
+
+## Hai danh sách đóng băng, và cái thứ hai là chỗ dễ tự lừa
+
+`ops/bien_nhan_v2.py`: ba trạng thái `0/1/2`, `KHÔNG ĐO ĐƯỢC` làm cổng ĐỎ.
+
+**Allowlist legacy** — protocol nói *"11 receipt v1 cũ"*; đo `git ls-tree -r 2f84531 --
+ops/reviews/` cho ĐÚNG **11** tệp, tất cả v1, cả 11 còn byte-identical với bản cutover. Miễn
+trừ neo vào **BĂM**, đúng câu *"`schema_version: 1` do tác giả tệp mới tự khai không tạo miễn
+trừ"*: sửa một tệp trong danh sách là MẤT miễn trừ.
+
+**`NO_DA_DO`** — 42 biên nhận không đạt (41 tệp tự khai v1 SAU cutover + 1 v2 thiếu trường),
+đóng băng theo băm, **chỉ được co lại**. Không bắt sửa hết ngay vì điền
+`model_reviewer_identity` cho một lượt đã chạy xong từ lâu là **bịa bằng chứng danh tính** —
+đúng thứ v2 sinh ra để chặn.
+
+Năm biên nhận của đợt này thì nâng THẬT (có `run_id`, băm prompt, thời lượng đo được), nên nợ
+là 42 chứ không phải 47.
+
+## Cái suýt lọt, và vì sao nó ở lại thành nợ có tên
+
+Lúc nâng, tôi chỉ có SHA viết tắt `482971b` cho một tệp và **bịa nốt 32 ký tự** để có một chuỗi
+40 hex. Nó qua mọi phép kiểm hình dạng; chỉ lộ vì tự đọc lại rồi chạy `git rev-parse`. Cổng
+KHÔNG vá được chỗ này bằng cách gọi git: `actions/checkout` mặc định `depth: 1` nên
+`git cat-file -e` sẽ ĐỎ GIẢ trên CI cho SHA hợp lệ — đúng bẫy clone nông. Khai thành nợ
+`BIEN-NHAN-V2-KHONG-KIEM-SHA-CO-THAT`, không giả vờ đã đóng.
+
+## Răng
+
+`ops/bien_nhan_v2_test.py`: **15 ca · 5/5 đột biến CÓ RĂNG**, gồm đúng hai thứ protocol đòi —
+biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
+của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`
+lúc nạp nên **tự nở theo** khi ai sửa mã nguồn — đúng bệnh mà chú thích cách đó ba chục dòng vừa
+tố cáo; (b) khôi phục sau đột biến `setattr` lại chính object đã bẩn nên khôi phục được SỐ KHÔNG;
+(c) `m4` đặt sai chiều — làm danh sách cho phép RỖNG thì chốt vẫn đỏ, tức đột biến ấy đo số không;
+phải NỚI nó để chứa tên tấn công mới có răng.
+
+Nối vào `ci.yml` và đăng ký ở `ci_dang_ky_test.py` (22/22) — guard không nằm trên đường TỰ ĐỘNG
+thì guard chỉ là tài liệu.
+
 # ★ dev-side — r353: bản vá chống "tín dụng giết giả" tự dính đúng bệnh nó chữa (2026-09-06)
 
 Cross-review lượt 5 (codex, chạy trên `master` `4951f55` SAU khi PR #452 đã merge) ra bốn

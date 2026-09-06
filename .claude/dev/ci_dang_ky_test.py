@@ -43,6 +43,7 @@ DA_NOI = {
     ".claude/dev/idiom_py_test.py", ".claude/dev/launcher_test.py",
     ".claude/dev/packet_loop_test.py", ".githooks/eol_policy_test.py",
     ".githooks/pre_push_test.py", ".github/checks/ci_phamvi_test.py",
+    "ops/bien_nhan_v2_test.py",
     "ops/cong_cu_test.py", "ops/lease_publish_test.py",
     "scripts/tl_core/command_registry_test.py",
 }

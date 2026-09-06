@@ -96,15 +96,52 @@ cùng một hình dạng, và một chỗ là bệnh của chính bộ chấm đ
 - **`m7`/`m9` KHÔNG nới URL như tên khai** — chúng làm verifier từ chối ngay ở hình dạng, nên
   ca đích chết vì lý do KHÁC. `12/12` đúng theo bộ phân hạng mà **không chứng minh 12 thuộc
   tính đã bị khoá**. Đây là `tín dụng giả` ở tầng **NGỮ NGHĨA**, tầng thứ ba của cùng lớp lỗi
-  `R5-01`. Nay mỗi đột biến kèm **đối chứng dương phải VẪN XANH dưới đột biến** — một đột biến
-  "từ chối tất cả" sẽ rớt đối chứng thay vì lĩnh tín dụng.
+  `R5-01`. Nay **cụm mỏ neo** kèm **đối chứng dương phải VẪN XANH dưới đột biến** — một đột biến
+  "từ chối tất cả" rớt đối chứng thay vì lĩnh tín dụng. (Nói đúng phạm vi: **6/21** đột biến khai
+  đối chứng, đúng những cái đi qua `_neo_git`. Bản đầu viết *"mỗi đột biến"* trong khi đo được
+  2/16 — một lời khai rộng hơn phép đo, ngay trong đoạn tố cáo lớp lỗi ấy.)
 
 Và một chỗ bộ chấm **không với tới được predicate**: `YEU_CAU` giữ tham chiếu hàm lúc dựng
 bảng, nên hai đột biến nhắm `_mri`/`_gsi` không đổi được gì. Nay bảng gọi qua tên toàn cục.
 
+## Vòng bốn: hai P2 về PHÉP ĐO, và chốt chống-tự-lừa vừa dựng lại tự bị lừa
+
+Vòng 3 (head `cb21284`, `launcher.py run` trong clone rời, 468,6s) — **`approve_with_findings`,
+KHÔNG còn P1**. Reviewer xác nhận `R2-01` đã vá thật trên các phản chứng cũ. Còn hai P2, cả hai
+về **phép đo**, không về sản phẩm:
+
+- **`R3-01`: chốt đối chứng chạy SAU khối `finally`** — tức trên cổng **ĐÃ KHÔI PHỤC**. Nên một
+  đột biến "từ chối tất cả" giết ca đích, rồi đối chứng chạy trên cổng sạch nên xanh, và vẫn lĩnh
+  tín dụng CÓ RĂNG. Đây là **tầng thứ tư** của cùng lớp lỗi, và lần này nó nằm trong **chính cơ
+  chế dựng ra để chống lớp lỗi ấy**. Kèm hai chỗ nữa: `_kiem` vứt thống kê đi nên "đối chứng
+  xanh" không chứng minh phép xác minh còn chạy (dưới `m9` cũ, `c18` vẫn `qua` trong khi `kiem`
+  trả một mục `chua_do`); và `m13` đổi hằng ở tiến trình **CHA** trong khi child **nạp lại tệp
+  từ đĩa** ⇒ ca đỏ vì **oracle sai**, không vì CLI bị làm yếu.
+- **`R3-02`: ba nhánh mỏ neo gỡ được mà toàn suite vẫn `25/25 · 16/16`** — nhánh hai loại anchor
+  chưa có đường đo · nhánh từ chối non-ancestor · nhánh trạng thái thứ ba của `merge-base`. Lý do
+  cấu trúc: **mọi ca cũ đều dùng `canonical_ancestry`**, nên hai loại kia CÓ MẶT trong danh sách
+  cho phép mà **chưa từng được ai chạm**.
+
+Bản vá đổi cơ chế chứ không thêm ca có tên: `sua()` và đối chứng vào **trong** `try`; đối chứng
+đòi ca dương vừa `qua` vừa để `loi` và `chua_do` **cùng rỗng**; và một đường **đột biến MỨC TỆP**
+cho những chốt mà `setattr` không với tới — nhánh bên trong một hàm, và bất cứ thứ gì child
+`subprocess` đọc lại từ đĩa. Ba ca mới (`c24`/`c25`/`c26`) đo từng nhánh riêng, `c25` dùng fixture
+git nơi commit **có thật, blob khớp băm, nhưng không phải tổ tiên** của HEAD; `c26` bơm lỗi ở
+**riêng** `merge-base`.
+
+**Và chốt vừa siết bắt được một lỗi của chính giàn đo.** Ba đột biến `R3-02` bị báo "phá cả cổng"
+— nhưng thứ hỏng là **rig**: bản sao đột biến đặt phẳng trong `/tmp` làm
+`__file__.parent.parent/.claude/dev/launcher.py` trỏ hụt, `PROVIDER_CHO_PHEP` tụt về bản lịch sử
+`{anthropic, human}`, và mọi biên nhận `openai_codex` rớt. Đúng bài học *"rig tự đẻ ra hồi quy
+không tồn tại"* — hai vế phải khác **đúng một biến**. Chữa bằng cây gương (`ops/` + `.claude/dev/`)
+cộng một **chốt parity**: bản sao phải khớp bản gốc ở `PROVIDER_CHO_PHEP` · `ALLOWLIST_CUTOVER` ·
+`NO_DA_DO` · `ANCHOR_LOAI_CHO_PHEP`, lệch thì báo **giàn giáo hỏng** thay vì đội lốt kết luận.
+Chốt "khớp đúng 1 chỗ" cũng lập tức trả công: `m9` bản đầu nhắm `loai = _doc_loai(a)` mà chuỗi ấy
+có ở **hai** hàm ⇒ nó **từ chối** thay vì lặng lẽ đột biến sai chỗ.
+
 ## Răng
 
-`ops/bien_nhan_v2_test.py`: **25 ca · 16/16 đột biến CÓ RĂNG**, gồm đúng hai thứ protocol đòi —
+`ops/bien_nhan_v2_test.py`: **31 ca · 21/21 đột biến CÓ RĂNG**, gồm đúng hai thứ protocol đòi —
 biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
 của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`
 lúc nạp nên **tự nở theo** khi ai sửa mã nguồn — đúng bệnh mà chú thích cách đó ba chục dòng vừa

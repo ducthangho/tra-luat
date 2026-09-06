@@ -56,6 +56,11 @@ CUTOVER = "2f84531"
 NO_SO_LUONG_DONG_BANG = 42
 
 
+# Module THẬT, giữ riêng: `bnv2` toàn cục bị `_dot_bien_tep` thay chỗ trong lúc đo.
+_BNV2_THAT = bnv2
+_TAM_DOT_BIEN: list = []
+
+
 class TinHieuChotCa(AssertionError):
     """Chỉ `bang()` phát ra. Bài học `R5-01`: một `AssertionError` trần thì mã nào cũng dựng được."""
 
@@ -184,6 +189,77 @@ def _kiem(tmp, **kw):
     return len(loi), loi
 
 
+def _sach_hoan_toan(fn):
+    """ĐỐI CHỨNG NGHIÊM: ca dương phải QUA **và** không để lại `chua_do` nào.
+
+    Cross-review vòng 3 (R3-01) đo được: dưới `m9`, `c18` vẫn `qua` trong khi `kiem` trả về
+    MỘT mục `chua_do` — `_kiem` vứt thống kê đi nên "đối chứng xanh" KHÔNG có nghĩa phép xác
+    minh còn chạy. Một đối chứng chỉ hỏi `loi` là đối chứng nửa mù."""
+    tt, ct = _chay_1(fn)
+    if tt != "qua":
+        return False, f"{tt}: {ct}"
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        sha, bam, duong = _kho_git(tmp, "noi dung verdict\n")
+        import yaml as _y
+        (tmp / bnv2.THU_MUC).mkdir(parents=True, exist_ok=True)
+        (tmp / bnv2.THU_MUC / "a-verdict.receipt.yaml").write_text(
+            _y.safe_dump(_bn_neo(sha, bam, duong), allow_unicode=True), encoding="utf-8")
+        try:
+            loi, tk = bnv2.kiem(tmp, allowlist={}, no_da_do={})
+        except Exception as ex:                                  # noqa: BLE001
+            return False, f"đối chứng ném {type(ex).__name__}: {ex}"
+    if loi or tk.get("chua_do"):
+        return False, f"mỏ neo ĐÚNG mà còn loi={loi} chua_do={tk.get('chua_do')}"
+    return True, ""
+
+
+def _dot_bien_tep(cu: str, moi: str):
+    """Đột biến MỨC TỆP: chép nguồn cổng, thay ĐÚNG MỘT chỗ, nạp bản sao làm `bnv2` và trỏ
+    `CONG` sang nó.
+
+    Vì sao `setattr` KHÔNG với tới được bốn đột biến dùng hàm này:
+      · `c21`/`c23` đo MÃ THOÁT của CLI qua `subprocess`, mà tiến trình con nạp lại module TỪ
+        ĐĨA — mọi `setattr` ở tiến trình cha vô hình với nó. `m13` bản trước đổi hằng ở cha,
+        child vẫn trả 2, nên ca đỏ vì ORACLE sai chứ không vì CLI bị làm yếu (R3-01).
+      · Ba nhánh của `_neo_git` là NHÁNH bên trong một hàm, không phải một tên tra được.
+        R3-02 đo được cả ba gỡ đi mà suite vẫn `25/25 · 16/16`.
+
+    Chốt chống "đột biến rỗng" — bài học `sed` đụng dấu phân cách sinh tệp RỖNG chạy `rc=0`
+    rồi được đọc thành CÓ RĂNG: đòi mẫu khớp ĐÚNG MỘT chỗ, và bản mới phải khác bản gốc mà
+    không bị cắt cụt."""
+    goc = Path(_BNV2_THAT.__file__).read_text(encoding="utf-8")
+    if goc.count(cu) != 1:
+        raise LoiDungCa(f"đột biến mức tệp: mẫu khớp {goc.count(cu)} chỗ, đòi ĐÚNG 1 — {cu!r}")
+    ban_moi = goc.replace(cu, moi)
+    if ban_moi == goc or len(ban_moi) < len(goc) // 2:
+        raise LoiDungCa("đột biến mức tệp KHÔNG đổi gì hoặc cắt cụt tệp")
+    # CÂY GƯƠNG, không phải một tệp lẻ trong `/tmp`. `_provider_chinh_tac()` đọc
+    # `__file__.parent.parent/.claude/dev/launcher.py`, nên một bản sao đặt phẳng làm
+    # `PROVIDER_CHO_PHEP` tụt về bản lịch sử `{anthropic, human}` — và mọi biên nhận
+    # `openai_codex` rớt cổng. Đo được ngay lượt đầu: ba đột biến R3-02 cùng bị đối chứng
+    # `c18` báo "phá cả cổng" trong khi thứ hỏng là RIG, không phải bản vá. Đúng bài học
+    # "rig tự đẻ ra hồi quy không tồn tại" — hai vế phải khác ĐÚNG MỘT biến.
+    d = Path(tempfile.mkdtemp(prefix="bnv2-dotbien-"))
+    _TAM_DOT_BIEN.append(d)
+    (d / "ops").mkdir()
+    (d / ".claude" / "dev").mkdir(parents=True)
+    shutil.copyfile(GOC / ".claude" / "dev" / "launcher.py", d / ".claude" / "dev" / "launcher.py")
+    tep = d / "ops" / "bien_nhan_v2.py"
+    tep.write_text(ban_moi, encoding="utf-8")
+    spec = importlib.util.spec_from_file_location(f"bnv2_db_{len(_TAM_DOT_BIEN)}", tep)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    # CHỐT PARITY: bản sao chỉ được khác bản gốc ĐÚNG dòng ta thay. Thiếu chốt này thì một
+    # lệch do RIG đội lốt "đột biến có răng" (hoặc ngược lại, đội lốt "phá cả cổng").
+    for k in ("PROVIDER_CHO_PHEP", "ALLOWLIST_CUTOVER", "NO_DA_DO", "ANCHOR_LOAI_CHO_PHEP"):
+        if getattr(mod, k) != getattr(_BNV2_THAT, k):
+            raise LoiDungCa(f"rig đột biến làm lệch `{k}`: bản sao KHÔNG chỉ khác một dòng — "
+                            f"{getattr(mod, k)!r} != {getattr(_BNV2_THAT, k)!r}")
+    globals()["bnv2"] = mod
+    globals()["CONG"] = tep
+
+
 # ------------------------------------------------------------------ ca
 @ca
 def c1_kho_that_hien_tai_phai_SACH():
@@ -287,6 +363,51 @@ def c4f_assurance_CHI_thieu_bang_chung():
         tmp2 = _cay(Path(t + "/y"), {"a-verdict.receipt.yaml": d})
         n2, loi2 = _kiem(tmp2, allowlist={}, no_da_do={})
         bang(n2 == 0, f"ĐỐI CHỨNG: khai `phien_doc_lap` tường minh phải QUA, được: {loi2}")
+
+
+@ca
+def c4g_bang_chung_doc_lap_phai_dung_KIEU():
+    """`phien_doc_lap: "false"` là CHUỖI KHÔNG RỖNG nên truthy — nó KHÔNG phải lời khai dương.
+
+    Cùng lớp "CÓ MẶT khác KHẢ NĂNG", ở tầng KIỂU DỮ LIỆU. Cross-review vòng 3 (P1) đo được."""
+    for ten, mri in (
+        ("phien_doc_lap là chuỗi 'false'",
+         {"provider": "anthropic", "surface": "cli", "KHONG_do_duoc": "x", "phien_doc_lap": "false"}),
+        ("session_run_id là ánh xạ",
+         {"provider": "anthropic", "surface": "cli", "session_run_id": {"a": 1}, "KHONG_do_duoc": "x"}),
+    ):
+        with tempfile.TemporaryDirectory() as t:
+            d = v2_du(); d["model_reviewer_identity"] = mri; d["assurance"] = "cross_approved"
+            tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
+            n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+            bang(n >= 1 and any("bằng chứng phiên độc lập" in x for x in loi),
+                 f"{ten}: phải chặn mức approval, được: {loi}")
+
+
+@ca
+def c23_trang_thai_thu_ba_UU_TIEN_hon_vi_pham():
+    """Kết quả HỖN HỢP (một vi phạm + một chưa đo) phải ra rc=2, không phải rc=1.
+
+    Gộp nó thành "vi phạm thường" khiến bên điều phối đọc *thiếu bằng chứng* thành *đã đo và
+    sai* — hai kết luận khác hẳn nhau."""
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        sha, bam, duong = _kho_git(tmp, "noi dung verdict\n")
+        import yaml as _y
+        (tmp / bnv2.THU_MUC).mkdir(parents=True, exist_ok=True)
+        chua = _bn_neo(sha, bam, duong); chua["reviewed_sha"] = "deadbeef" * 5   # chưa đo
+        (tmp / bnv2.THU_MUC / "a-verdict.receipt.yaml").write_text(
+            _y.safe_dump(chua, allow_unicode=True), encoding="utf-8")
+        xau = _bn_neo(sha, bam, duong); xau.pop("receipt_id")                    # vi phạm
+        (tmp / bnv2.THU_MUC / "b-verdict.receipt.yaml").write_text(
+            _y.safe_dump(xau, allow_unicode=True), encoding="utf-8")
+        r = subprocess.run([sys.executable, str(CONG), "--root", str(tmp)],
+                           capture_output=True, text=True)
+        # SỐ 2 VIẾT THẲNG: một oracle lấy từ chính module đang bị đột biến sẽ trôi theo nó.
+        bang(r.returncode == 2,
+             f"hỗn hợp phải rc=2, được {r.returncode}\n{r.stderr[-300:]}")
+        bang("receipt_id" in r.stderr and "KHÔNG ĐO ĐƯỢC" in r.stderr,
+             f"phải IN CẢ HAI nhóm, chỉ đổi mã thoát: {r.stderr[-300:]!r}")
 
 
 @ca
@@ -552,10 +673,138 @@ def c21_object_khong_tra_duoc_la_KHONG_DO_DUOC_chu_khong_phai_DO():
         # MÃ THOÁT, không neo trạng thái trong bộ nhớ.
         r = subprocess.run([sys.executable, str(CONG), "--root", str(tmp)],
                            capture_output=True, text=True)
-        bang(r.returncode == bnv2.RC_KHONG_DO_DUOC,
-             f"CLI phải trả rc={bnv2.RC_KHONG_DO_DUOC} khi có KHÔNG ĐO ĐƯỢC, được {r.returncode}")
+        # SỐ 2 VIẾT THẲNG, không đọc `bnv2.RC_KHONG_DO_DUOC`: một oracle lấy từ chính
+        # module đang bị đột biến sẽ trôi theo nó. `m13` bản trước đổi hằng ở TIẾN TRÌNH
+        # CHA trong khi child nạp lại tệp từ đĩa nên vẫn trả 2 — ca đỏ vì oracle sai, không
+        # vì CLI bị làm yếu (R3-01).
+        bang(r.returncode == 2,
+             f"CLI phải trả rc=2 khi có KHÔNG ĐO ĐƯỢC, được {r.returncode}")
         bang("TỔNG: ĐẠT" not in r.stdout,
              f"CLI KHÔNG được in marker tổng đạt khi còn chưa đo: {r.stdout[-200:]!r}")
+
+
+def _kho_git_re_nhanh(tmp: Path, than_verdict: str):
+    """Kho git nơi commit CHỨA verdict **KHÔNG** phải tổ tiên của HEAD.
+
+    Phân biệt "object CÓ" với "object VỚI TỚI ĐƯỢC": `cat-file -e` và `rev-parse <c>:<đường>`
+    đều QUA ở đây, chỉ `merge-base --is-ancestor` mới đỏ. Không có fixture này thì nhánh tổ
+    tiên gỡ đi mà suite vẫn xanh — đúng phép đo R3-02.
+    Trả (sha_nền, sha_rẽ, băm_blob, đường_dẫn)."""
+    E = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t",
+         "GIT_COMMITTER_EMAIL": "t@t", "PATH": os.environ.get("PATH", ""),
+         "GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull}
+
+    def g(*a):
+        r = subprocess.run(["git", "-C", str(tmp), *a], capture_output=True, text=True, env=E)
+        dung(r.returncode == 0, f"git {' '.join(a)} hỏng: {r.stderr[:200]}")
+        return r.stdout.strip()
+
+    duong = "ops/reviews/x-verdict.md"
+    (tmp / "ops" / "reviews").mkdir(parents=True, exist_ok=True)
+    (tmp / "nen.txt").write_text("nen\n", encoding="utf-8")
+    g("init", "-q"); g("add", "-A"); g("commit", "-qm", "nen")
+    nen = g("rev-parse", "HEAD")
+    (tmp / duong).write_text(than_verdict, encoding="utf-8")
+    g("add", "-A"); g("commit", "-qm", "re")
+    re_ = g("rev-parse", "HEAD")
+    g("checkout", "-q", nen)          # HEAD LÙI về nền ⇒ `re_` thôi là tổ tiên của HEAD
+    dung(g("rev-parse", "HEAD") == nen, "checkout không đưa HEAD về commit nền")
+    import hashlib as _h
+    return nen, re_, _h.sha256(than_verdict.encode("utf-8")).hexdigest(), duong
+
+
+def _ghi_bn(tmp: Path, d: dict, ten="a-verdict.receipt.yaml"):
+    import yaml as _y
+    (tmp / bnv2.THU_MUC).mkdir(parents=True, exist_ok=True)
+    (tmp / bnv2.THU_MUC / ten).write_text(_y.safe_dump(d, allow_unicode=True), encoding="utf-8")
+
+
+@ca
+def c24_anchor_KHONG_CO_DUONG_DO_vao_trang_thai_THU_BA():
+    """`protected_evidence_ref` · `check_object`: cổng CHƯA có đường đo ⇒ KHÔNG ĐO ĐƯỢC.
+
+    R3-02 đo được nhánh này gỡ đi mà suite vẫn `25/25 · 16/16` — mọi ca cũ đều dùng
+    `canonical_ancestry`, nên hai loại kia CÓ MẶT trong danh sách cho phép mà chưa từng
+    được ai chạm. Ca đo TỪNG loại RIÊNG và neo cả MÃ THOÁT: "vào `chua_do`" mà CLI vẫn
+    `rc=0` thì cổng vẫn xanh, đúng bệnh `c21` từng bắt."""
+    for loai in ("protected_evidence_ref", "check_object"):
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            sha, bam, duong = _kho_git(tmp, "noi dung verdict\n")
+            d = _bn_neo(sha, bam, duong); d["anchor"]["loai"] = loai
+            _ghi_bn(tmp, d)
+            loi, tk = bnv2.kiem(tmp, allowlist={}, no_da_do={})
+            bang(not loi, f"{loai}: KHÔNG được thành vi phạm (đó là trạng thái thứ ba): {loi}")
+            bang(any("CHƯA có đường đo" in x for x in (tk.get("chua_do") or [])),
+                 f"{loai}: phải vào KHÔNG ĐO ĐƯỢC, được: {tk.get('chua_do')}")
+            r = subprocess.run([sys.executable, str(CONG), "--root", str(tmp)],
+                               capture_output=True, text=True)
+            bang(r.returncode == 2, f"{loai}: CLI phải rc=2, được {r.returncode}")
+
+
+@ca
+def c25_commit_CO_THAT_ma_KHONG_phai_to_tien_thi_DO():
+    """`canonical_ancestry` đòi mỏ neo VỚI TỚI ĐƯỢC — một nhánh rẽ không phải canonical.
+
+    Bản trước chỉ có fixture mà mọi phép git đều qua, nên `if rc_tt == 1:` gỡ đi vẫn xanh:
+    blob còn đó, băm còn khớp, cổng in "sạch" cho một commit ngoài lịch sử."""
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        nen, re_, bam, duong = _kho_git_re_nhanh(tmp, "noi dung verdict\n")
+        d = v2_du()
+        d["reviewed_sha"] = nen                       # tra được, không phải thứ đang đo
+        d["verdict_sha256"] = bam
+        d["verdict_path"] = duong
+        d["evidence_url"] = f"https://github.com/o/r/blob/{re_}/{duong}"
+        _ghi_bn(tmp, d)
+        n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+        bang(n == 1 and "KHÔNG phải tổ tiên" in loi[0],
+             f"commit ngoài lịch sử của HEAD phải ĐỎ (blob vẫn khớp): {loi}")
+
+
+@ca
+def c26_merge_base_rc_NGOAI_0_1_la_KHONG_DO_DUOC():
+    """`merge-base` trả rc ngoài {0,1} (kho hỏng, git bị giết) là trạng thái THỨ BA.
+
+    Bơm lỗi ở RIÊNG phép ấy — mọi lời gọi git khác đi qua nguyên vẹn — nên ca này phân biệt
+    được "cổng còn phân ba trạng thái ở merge-base" với "cổng chết ở một phép git bất kỳ".
+    Một đột biến giết cả cụm không chứng minh từng chốt còn răng."""
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        sha, bam, duong = _kho_git(tmp, "noi dung verdict\n")
+        _ghi_bn(tmp, _bn_neo(sha, bam, duong))
+        that = bnv2._git
+
+        def _bom(root, *args, **kw):
+            if tuple(args[:2]) == ("merge-base", "--is-ancestor"):
+                return 128, "fatal: bơm lỗi (ca c26)"
+            return that(root, *args, **kw)
+
+        bnv2._git = _bom
+        try:
+            loi, tk = bnv2.kiem(tmp, allowlist={}, no_da_do={})
+        finally:
+            bnv2._git = that
+        bang(not loi, f"git hỏng KHÔNG được thành vi phạm: {loi}")
+        bang(any("KHÔNG ĐO ĐƯỢC quan hệ tổ tiên" in x for x in (tk.get("chua_do") or [])),
+             f"rc=128 của merge-base phải vào KHÔNG ĐO ĐƯỢC, được: {tk.get('chua_do')}")
+
+
+@ca
+def c27_loai_CO_KHOANG_TRANG_khong_duoc_tron_khoi_phep_do():
+    """MỘT phép đọc `anchor.loai` cho CẢ schema LẪN dispatch (R2-01).
+
+    Hai cách đọc cùng một trường là cùng lớp với "hai bản trôi lệch": `" canonical_ancestry "`
+    qua được chốt hình dạng (chuẩn hoá) rồi TRỐN khỏi `_neo_git` (so thô). `c22` không phân
+    biệt được — nó dùng giá trị sạch, nên đột biến dispatch giết nó vì lý do KHÁC."""
+    with tempfile.TemporaryDirectory() as t:
+        d = v2_du()
+        d["anchor"]["loai"] = "  canonical_ancestry  "
+        d["evidence_url"] = "https://github.com/o/r/pull/1"      # KHÔNG ghim commit
+        tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
+        n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+        bang(n == 1 and "KHÔNG đo được" in loi[0],
+             f"`loai` có khoảng trắng phải đi ĐÚNG đường dispatch canonical, được: {loi}")
 
 
 @ca
@@ -721,35 +970,51 @@ def _dot_bien():
     """Mỗi đột biến phải làm ĐÚNG ca đích ĐỎ. Không đỏ ⇒ ca ấy rỗng."""
     ra = []
 
-    def do(ten, sua, ca_dich, mo_ta, doi_chung=None):
+    def do(ten, sua, ca_dich, mo_ta, doi_chung=None, mong_khong_rang=False):
         # BẢN SAO SÂU, không phải tham chiếu: đột biến dưới đây sửa TẠI CHỖ
         # (`dict.__setitem__`), nên `setattr` lại chính object đã bẩn thì khôi phục ĐƯỢC SỐ
         # KHÔNG — và mọi ca chạy sau sẽ đo trên một cổng đã bị nới. Đúng bài học "đột biến
         # ghi vào tệp THẬT rồi khôi phục" của kho, chỉ đổi tệp thành object.
-        cu = {k: copy.deepcopy(getattr(bnv2, k))
+        # `_dot_bien_tep` THAY CHỖ module toàn cục, nên phải giữ tham chiếu module THẬT ở
+        # đây: khôi phục thuộc tính lên module đã bị thay là khôi phục nhầm chỗ.
+        mod_cu, cong_cu = globals()["bnv2"], globals()["CONG"]
+        cu = {k: copy.deepcopy(getattr(mod_cu, k))
               for k in ("ALLOWLIST_CUTOVER", "NO_DA_DO", "YEU_CAU",
                         "ANCHOR_LOAI_CHO_PHEP", "_HEX40",
                         "_HEX64", "_BLOB_URL", "_blob_khop", "_doc_loai", "_git",
                         "_mri", "_gsi", "_thieu", "RC_KHONG_DO_DUOC")}
-        sua()
+        # ĐỐI CHỨNG PHẢI CHẠY TRONG KHI ĐỘT BIẾN CÒN HIỆU LỰC — và bản trước KHÔNG:
+        # nó gọi đối chứng SAU khối `finally`, tức trên cổng ĐÃ KHÔI PHỤC. Nên một đột biến
+        # "từ chối tất cả" giết được ca đích, rồi đối chứng chạy trên cổng sạch nên xanh, và
+        # nó vẫn lĩnh tín dụng CÓ RĂNG. Cross-review vòng 3 (P2) bắt đúng chỗ này: cái chốt
+        # tôi thêm ở vòng trước ĐỂ CHỐNG tín dụng giả tự nó là một NGHI LỄ. Đây là tầng thứ
+        # tư của cùng lớp lỗi — và lần này nó nằm trong chính cơ chế chống lớp lỗi ấy.
+        tt, ct, dc_ok, dc_vi_sao = "gian_giao", "chưa chạy", True, ""
         try:
+            sua()          # có thể THAY CHỖ module ⇒ phải nằm TRONG try, kẻo hỏng là rò
             fn = next(f for f in CA if f.__name__ == ca_dich)
             tt, ct = _chay_1(fn)
+            if tt == "giet_that" and doi_chung:
+                fn_dc = next(f for f in CA if f.__name__ == doi_chung)
+                dc_ok, dc_vi_sao = _sach_hoan_toan(fn_dc)
+        except LoiDungCa as ex:
+            tt, ct = "gian_giao", f"giàn giáo đột biến hỏng: {ex}"
         finally:
             for k, v in cu.items():
-                setattr(bnv2, k, v)
+                setattr(mod_cu, k, v)
+            globals()["bnv2"], globals()["CONG"] = mod_cu, cong_cu
+            while _TAM_DOT_BIEN:
+                shutil.rmtree(_TAM_DOT_BIEN.pop(), ignore_errors=True)
         ok = tt == "giet_that"
-        # ĐỐI CHỨNG DƯỚI ĐỘT BIẾN (R2-04): một đột biến "từ chối tất cả" cũng giết được ca
-        # đích, nhưng nó đo SỰ SỤP ĐỔ chứ không đo thuộc tính được công bố. Nếu ca dương vẫn
-        # phải xanh dưới đột biến mà nó đỏ, thì đây KHÔNG phải răng.
-        if ok and doi_chung:
-            fn_dc = next(f for f in CA if f.__name__ == doi_chung)
-            tt_dc, ct_dc = _chay_1(fn_dc)
-            if tt_dc != "qua":
-                ok = False
-                mo_ta += f" — NHƯNG đối chứng {doi_chung} cũng đỏ ({tt_dc}): đột biến phá cả cổng"
-        ra.append((ten, ca_dich, ok, tt, ((ct or "").splitlines() or [""])[0][:80]))
-        print(f"  {'CÓ RĂNG ' if ok else 'KHÔNG RĂNG'} {ten:38s} → {ca_dich} = {tt}  ({mo_ta})")
+        if ok and doi_chung and not dc_ok:
+            ok = False
+            mo_ta += f" — NHƯNG đối chứng {doi_chung} KHÔNG sạch hoàn toàn ({dc_vi_sao}): đột biến phá cả cổng"
+        # Ca TỰ KIỂM đảo kỳ vọng: nó ĐẠT khi bị báo KHÔNG CÓ RĂNG.
+        dat = (not ok) if mong_khong_rang else ok
+        ra.append((ten, ca_dich, dat, tt, ((ct or "").splitlines() or [""])[0][:80]))
+        nhan = ("TỰ KIỂM ok" if dat else "TỰ KIỂM ĐỎ") if mong_khong_rang else (
+            "CÓ RĂNG " if ok else "KHÔNG RĂNG")
+        print(f"  {nhan:10s} {ten:38s} → {ca_dich} = {tt}  ({mo_ta})")
 
     do("m1_noi_allowlist_chua_tep_tan_cong",
        lambda: bnv2.ALLOWLIST_CUTOVER.__setitem__("ke-gian-verdict.receipt.yaml", "0" * 64),
@@ -794,11 +1059,31 @@ def _dot_bien():
     # R2-04: m7/m9 bản trước KHÔNG nới URL như tên khai — chúng làm verifier TỪ CHỐI ngay ở
     # hình dạng, nên ca đích chết vì lý do KHÁC và `12/12` không chứng minh 12 thuộc tính đã
     # bị khoá. Đây là `tin_dung_gia` ở tầng NGỮ NGHĨA: assert có chạy, nhưng đo khác điều
-    # được công bố. Nay mỗi đột biến kèm ĐỐI CHỨNG `c18` (mỏ neo đúng) phải VẪN QUA — một
-    # đột biến "từ chối tất cả" sẽ rớt đối chứng ấy thay vì lĩnh tín dụng.
-    do("m9_cho_canonical_ancestry_dung_URL_khong_ghim",
-       lambda: setattr(bnv2, "_doc_loai", lambda a: "protected_evidence_ref"),
-       "c22_canonical_ancestry_ma_URL_khong_ghim_thi_DO", "dispatch đọc sai loại ⇒ trốn phép đo",
+    # được công bố. Nay CỤM MỎ NEO (`m7` `m9` `m14` `m15` `m16` `m17`) kèm ĐỐI CHỨNG `c18`
+    # phải VẪN QUA — một đột biến "từ chối tất cả" rớt đối chứng ấy thay vì lĩnh tín dụng.
+    # NÓI ĐÚNG PHẠM VI: các đột biến khác KHÔNG khai đối chứng, vì `c18` không nằm trên đường
+    # chúng phá (đột biến allowlist/ma trận không đi qua `_neo_git`), nên một đối chứng luôn
+    # xanh ở đó chỉ là nghi lễ. Bản trước viết "mỗi đột biến" trong khi đo được 2/16 — một
+    # lời khai rộng hơn phép đo, đúng lớp lỗi tệp này sinh ra để bắt.
+    # m9 bản trước ép `_doc_loai` trả HẲN một loại khác — nó giết `c22` nhưng ĐỐI CHỨNG
+    # NGHIÊM bắt được: dưới nó `c18` (mỏ neo ĐÚNG) cũng rơi vào `chua_do`, tức đột biến phá
+    # cả đường mỏ neo chứ không đo riêng phép chuẩn hoá. Nay nó dựng lại ĐÚNG lỗi R2-01:
+    # schema đọc chuẩn hoá, dispatch đọc THÔ — và có ca riêng (`c27`) cho đúng thuộc tính ấy.
+    do("m9_dispatch_doc_THO_khong_chuan_hoa",
+       # NEO THÊM DÒNG SAU: `loai = _doc_loai(a)` có ở CẢ `_anchor_loai` (schema) lẫn
+       # `_neo_git` (dispatch); chốt "khớp đúng 1 chỗ" vừa bắt được bản đầu nhắm nhầm
+       # (báo `gian_giao` thay vì lặng lẽ đột biến sai chỗ).
+       lambda: _dot_bien_tep('    loai = _doc_loai(a)\n    if loai in (',
+                             '    loai = (a.get("loai") if isinstance(a, dict) else "")\n'
+                             '    if loai in ('),
+       "c27_loai_CO_KHOANG_TRANG_khong_duoc_tron_khoi_phep_do",
+       "hai cách đọc cùng một trường ⇒ qua schema rồi trốn dispatch",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m9b_URL_khong_ghim_tut_xuong_trang_thai_thu_ba",
+       lambda: _dot_bien_tep("loi.append(f\"{ten}: khai `anchor.loai: canonical_ancestry` nhưng",
+                             "chua.append(f\"{ten}: khai `anchor.loai: canonical_ancestry` nhưng"),
+       "c22_canonical_ancestry_ma_URL_khong_ghim_thi_DO",
+       "mỏ neo TỰ KHAI mà không đo được bị hạ từ VI PHẠM xuống chưa đo",
        doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m8_neo_git_khong_so_bam_blob",
        lambda: setattr(bnv2, "_blob_khop", lambda a, b: True),
@@ -806,13 +1091,40 @@ def _dot_bien():
     do("m6_bo_yeu_cau_anchor_cuong_do",
        lambda: setattr(bnv2, "YEU_CAU", tuple(x for x in bnv2.YEU_CAU if x[0] != "anchor.cuong_do")),
        "c16_MA_TRAN_phu_DUNG_tap_yeu_cau_cua_cong", "gỡ một yêu cầu con của anchor")
+    # ĐỘT BIẾN TỰ KIỂM CHO CHÍNH CƠ CHẾ ĐỐI CHỨNG: một mutant TỪ CHỐI TẤT CẢ giết được ca
+    # đích nhưng phá luôn ca dương, nên nó PHẢI bị báo là KHÔNG CÓ RĂNG. Nếu nó lĩnh được
+    # tín dụng thì đối chứng lại là nghi lễ — như bản trước.
+    do("m14_TU_KIEM_tu_choi_tat_ca_phai_bi_bao_KHONG_RANG",
+       lambda: setattr(bnv2, "_thieu", lambda d: ["từ chối tất cả"]),
+       "c19_neo_git_SAI_DUONG_DAN_thi_DO", "PHẢI hiện KHÔNG RĂNG — đây là ca tự kiểm",
+       doi_chung="c18_neo_git_DUNG_thi_qua", mong_khong_rang=True)
     do("m12_assurance_doi_OR_thanh_AND",
        lambda: setattr(bnv2, "_thieu", _thieu_or_thanh_and),
        "c4e_assurance_CHI_co_dieu_kien_che_do", "R2-03 số 3: một ca bật cả hai điều kiện thì mù")
-    do("m13_go_tong_hop_trang_thai_THU_BA",
-       lambda: setattr(bnv2, "RC_KHONG_DO_DUOC", bnv2.RC_SACH),
-       "c21_object_khong_tra_duoc_la_KHONG_DO_DUOC_chu_khong_phai_DO",
-       "KHÔNG ĐO ĐƯỢC lại thành cổng xanh")
+    # m13 đột biến MỨC TỆP rồi chạy CLI từ bản sao ấy — child mới là thứ `c23` đo. Bản trước
+    # `setattr` hằng ở tiến trình CHA trong khi child nạp lại tệp từ đĩa, nên nó đo SỐ KHÔNG.
+    do("m13_go_UU_TIEN_cua_trang_thai_thu_ba",
+       lambda: _dot_bien_tep('if loi and not tk.get("chua_do"):', "if loi:"),
+       "c23_trang_thai_thu_ba_UU_TIEN_hon_vi_pham",
+       "kết quả HỖN HỢP bị gộp thành vi phạm thường (rc=1 thay vì 2)")
+    # --- R3-02: BA NHÁNH trong `_neo_git` mà reviewer gỡ được với suite XANH (`25/25 · 16/16`).
+    # Chúng là nhánh BÊN TRONG một hàm, không phải một tên tra được ⇒ chỉ mức tệp với tới.
+    do("m15_bo_nhanh_hai_loai_anchor_khong_co_duong_do",
+       lambda: _dot_bien_tep('if loai in ("protected_evidence_ref", "check_object"):',
+                             "if False:"),
+       "c24_anchor_KHONG_CO_DUONG_DO_vao_trang_thai_THU_BA",
+       "loại mỏ neo cổng không đo được thì TRỐN luôn khỏi phép đo",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m16_bo_phep_kiem_TO_TIEN",
+       lambda: _dot_bien_tep("if rc_tt == 1:", "if False:"),
+       "c25_commit_CO_THAT_ma_KHONG_phai_to_tien_thi_DO",
+       "`cat-file -e` qua là đủ ⇒ một nhánh rẽ thành canonical ancestry",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m17_bo_trang_thai_thu_ba_cua_merge_base",
+       lambda: _dot_bien_tep("if rc_tt not in (0, 1):", "if False:"),
+       "c26_merge_base_rc_NGOAI_0_1_la_KHONG_DO_DUOC",
+       "git hỏng bị đọc thành 'là tổ tiên'",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m10_bo_kiem_actor_cua_submitter",
        lambda: setattr(bnv2, "_gsi", lambda d: None if "github_submitter_identity" in d
                        else "thiếu khoá `github_submitter_identity`"),

@@ -100,11 +100,31 @@ def _khop(d, k, re_, mo_ta):
     return None if re_.match(v.strip()) else f"`{k}`={v.strip()[:24]!r} không phải {mo_ta}"
 
 
-# Danh sách CHO PHÉP các provider — không phải danh sách cấm. Một chuỗi tự do ở `provider`
-# không phải attestation: cross-review vòng 2 (P1) đo được `{provider: "bat-ky-chuoi-nao"}`
-# vẫn QUA, và biên nhận ấy còn khai được `cross_approved`.
-PROVIDER_CHO_PHEP = frozenset({"anthropic", "openai_codex", "openai_api",
-                               "google_antigravity", "human"})
+def _provider_chinh_tac():
+    """Đọc tên provider từ TỪ VỰNG CHÍNH TẮC của kho, không chép tay.
+
+    Bản trước chép tay và cross-review vòng 3 (P2) bác đúng chỗ đó: danh sách ấy TỪ CHỐI
+    `anthropic_claude` — chính là tên trong `_TRANSPORT_CONTRACTS` của `launcher.py`, tức
+    một biên nhận Claude hợp lệ mới tạo sẽ rớt cổng CI bắt buộc. Nguồn duy nhất là hợp đồng
+    transport; đọc không được thì lùi về bản chép tay và KHAI ra, không im lặng."""
+    try:
+        import ast
+        cay = ast.parse((Path(__file__).resolve().parent.parent
+                         / ".claude" / "dev" / "launcher.py").read_text(encoding="utf-8"))
+        for n in ast.walk(cay):
+            if (isinstance(n, ast.Assign) and n.targets
+                    and getattr(n.targets[0], "id", "") == "_TRANSPORT_CONTRACTS"):
+                return {t.elts[0].value for t in n.value.elts}
+    except Exception:                                            # noqa: BLE001
+        pass
+    return set()
+
+
+# `anthropic` (không hậu tố) là DẠNG LỊCH SỬ: bốn biên nhận v2 chuẩn của kho và hai biên
+# nhận lượt 1-2 dùng nó. Giữ làm BÍ DANH có khai, không âm thầm — đổi cách đọc một tên đã
+# nằm trong hiện vật là viết lại lịch sử.
+PROVIDER_LICH_SU = frozenset({"anthropic", "human"})
+PROVIDER_CHO_PHEP = frozenset(_provider_chinh_tac()) | PROVIDER_LICH_SU
 
 
 def _mri(d):
@@ -129,7 +149,8 @@ def _mri(d):
                 f"{sorted(PROVIDER_CHO_PHEP)} — chuỗi tự do không phải attestation")
     if not str(v.get("surface") or "").strip():
         return "`model_reviewer_identity` không có `surface` (bề mặt thực thi)"
-    if not str(v.get("session_run_id") or "").strip() and not str(v.get("KHONG_do_duoc") or "").strip():
+    rid = v.get("session_run_id")
+    if not (isinstance(rid, str) and rid.strip()) and not str(v.get("KHONG_do_duoc") or "").strip():
         return ("`model_reviewer_identity` không có `session_run_id` và cũng KHÔNG khai "
                 "`KHONG_do_duoc` giải thích vì sao thiếu — im lặng không phải lời khai")
     return None
@@ -352,7 +373,14 @@ def _thieu(d: dict) -> list[str]:
     mri = d.get("model_reviewer_identity")
     if isinstance(mri, dict):
         tu_khai_trong_phien = "subagent" in str(mri.get("che_do") or "").lower()
-        co_bang_chung = bool(str(mri.get("session_run_id") or "").strip()) or bool(mri.get("phien_doc_lap"))
+        # KIỂU, không chỉ TRUTHINESS. Cross-review vòng 3 (P1) đo được: `phien_doc_lap:
+        # "false"` là CHUỖI KHÔNG RỖNG nên truthy ⇒ qua; và `session_run_id` là một ÁNH XẠ
+        # cũng sống sót phép ép `str(...)`. Một biên nhận tự khai KHÔNG có phiên đo được vẫn
+        # lĩnh mức assurance độc lập. Cùng lớp "CÓ MẶT khác KHẢ NĂNG", lần này ở tầng KIỂU
+        # DỮ LIỆU: một giá trị có mặt không có nghĩa nó khẳng định điều ta tưởng.
+        run_id = mri.get("session_run_id")
+        co_run_id = isinstance(run_id, str) and bool(run_id.strip())
+        co_bang_chung = co_run_id or mri.get("phien_doc_lap") is True
         khai = str(d.get("assurance") or d.get("assurance_dat") or "").strip()
         if khai in ASSURANCE_CAN_DOC_LAP and (tu_khai_trong_phien or not co_bang_chung):
             ly_do = ("tự khai chạy trong phiên điều phối" if tu_khai_trong_phien
@@ -575,10 +603,14 @@ def main(argv=None) -> int:
     print(f"\nbien_nhan_v2: {tk['dat']} ĐẠT v2 · {tk['mien_tru']}/{len(ALLOWLIST_CUTOVER)} miễn trừ "
           f"legacy (băm khớp) · {tk['no']} NỢ đóng băng · {len(loi)} vi phạm · "
           f"{len(tk.get('chua_do') or [])} KHÔNG ĐO ĐƯỢC · tổng {tk['tong']}")
-    if loi:
+    if loi and not tk.get("chua_do"):
         print("TỔNG: ĐỎ", file=sys.stderr)
         return RC_VI_PHAM
     if tk.get("chua_do"):
+        # ƯU TIÊN cho trạng thái thứ ba khi HAI thứ cùng có. Bản trước trả `RC_VI_PHAM`
+        # trước nên một kết quả HỖN HỢP bị gộp thành "vi phạm thường", và bên điều phối sẽ
+        # đọc "thiếu bằng chứng" thành "đã đo và sai" — hai kết luận khác hẳn nhau.
+        # Cả hai nhóm vẫn được IN đầy đủ ở trên; chỉ mã thoát đổi.
         # ĐẢO LẠI QUYẾT ĐỊNH CỦA CHÍNH BẢN TRƯỚC — cross-review vòng 2 (P1) bắt đúng chỗ.
         # Bản trước in `KHÔNG ĐO ĐƯỢC` ra stderr rồi vẫn `TỔNG: ĐẠT` + rc=0, nên một SHA BỊA
         # hoặc một checkout nông ĐI QUA ĐƯỢC cổng CI bắt buộc. Đo được: bơm `deadbeef`*5 vào

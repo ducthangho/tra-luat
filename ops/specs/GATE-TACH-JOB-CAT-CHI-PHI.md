@@ -17,6 +17,14 @@
 - `base_sha`: `1b3caa1` (`origin/master`, đo 17:47Z 06-09-2026; `core.abbrev=7`) — vì đi đầu, ba
   mỏ neo trong lease (`base_sha` · `start_from_sha` · `reviewed_sha_required`) vẫn phải **đo lại
   tại lúc cấp** bằng head `origin/master` khi ấy; `1b3caa1` là số của lúc soạn.
+  **Trôi đã đo, 22:45Z 06-09-2026:** `origin/master` = `28cb898`, **46** commit sau `1b3caa1`, chạm
+  **cả hai** tệp của write set: `ci.yml` +8 dòng — thêm bước `bien-nhan v2 selftest`
+  (`python ops/bien_nhan_v2_test.py`) sau `packet-loop selftest`, job `gate` **39 → 40** bước YAML,
+  `if` vẫn 10, `timeout-minutes` vẫn 60 (đo `yaml.safe_load` trên `origin/master:.github/workflows/ci.yml`);
+  `ci_dang_ky_test.py` +1 dòng (mục `DA_NOI`, dòng 65), `loi_ruff_ci` không đổi. Mọi "39 bước" trong hồ
+  sơ này là số trên `1b3caa1`; các số phút/`skipped` là của lượt CI đã dẫn, không đổi theo cây. Phiên
+  cấp lease đo lại ba mỏ neo, số bước và vị trí bước `test registry` — bước mới đứng TRƯỚC nó, nên
+  chỉ số bước trong A3/A6 dịch **+1** nếu đọc theo thứ tự.
 
 ## `nguon_cap_viec`
 
@@ -248,7 +256,7 @@ Write set là **2 tệp**.
 
 | # | đường dẫn | vì sao |
 |---|---|---|
-| 1 | `.github/workflows/ci.yml` | định nghĩa job `gate` và toàn bộ 39 bước của nó |
+| 1 | `.github/workflows/ci.yml` | định nghĩa job `gate` và toàn bộ 39 bước của nó (trên `1b3caa1`; `origin/master` `28cb898` đo 22:45Z 06-09-2026 đã là **40** — xem `base_sha`) |
 | 2 | `.claude/dev/ci_dang_ky_test.py` | consumer `loi_ruff_ci` khoá cứng `jobs.gate`; tách job mà không sửa nó thì bước `test registry` tự đỏ (đo 19:33Z) |
 
 Không ký tự đại diện. Không đường dẫn nào khác. Trong tệp #2 chỉ đụng `loi_ruff_ci` và phản chứng
@@ -467,7 +475,7 @@ chú thích của chính `ci.yml`. Mỗi dòng ghi thời điểm đo hoặc ngu
 | thêm một mặt ĐIỀU KIỆN vào workflow rồi nó vắng mặt lặng lẽ | **2** | trích `ci.yml:490-506` và `CLAUDE.md` (mục *"Workflow có `paths:`"*, mục nhãn `windows`), đọc lại 21:03Z 06-09-2026; hai sự kiện GitHub không readback lại | `paths:` không bắn ở lần đẩy tạo nhánh mới · `pull_request:` thiếu `types:` nên nhãn `windows` không sinh lượt chạy. Cộng lần thứ ba suýt xảy ra: `CI-FASTPATH-THEO-DIFF` (PR #247 đóng). ⇒ `ngoai_pham_vi` #2, và A3 đo bằng cấu trúc. |
 | cổng vắng mặt trông giống cổng xanh | **≥ 3** | trích `CLAUDE.md` (dấu bỏ-qua-CI / PR #100; job `cancelled`; `ops-don-ref.yml` run `31971137920`), đọc lại 21:03Z 06-09-2026; số run tương ứng không readback từ GitHub ở lượt này | dấu bỏ-qua-CI (PR #100, 0 check `clean`) · job `cancelled` không phải `failure` · `ops-don-ref.yml` bị GitHub từ chối, 0 job. Tất cả là lý do A2 so TẬP và A6 tách hai phần. |
 | khai một phép đo là `KHÔNG ĐO ĐƯỢC` rồi để nguyên | **1** | trích `ops/specs/CI-CAI-JSONSCHEMA-r3.md:135-160` (A5), đọc lại 21:03Z 06-09-2026 | #456 sinh ra số đo Windows đầu tiên. Ba mục `chua_do_duoc` của #456 — trạng thái TỪNG MỤC ở bảng dưới. |
-| tối ưu hoá CI mà không nêu phút TÍNH TIỀN | **1** | trích `ci.yml:19-24` (ghi chú 13-08-2026), đọc lại 21:03Z 06-09-2026 — chú thích chỉ ghi sự cố cạn quota, không ghi quyết định thiếu công bố phí | CI đứng hình từ 12-08-2026 vì cạn 2.000 phút/tháng (số của ghi chú, không phải hạn mức hiện tại). ⇒ A5 là bắt buộc. |
+| tối ưu hoá CI mà không nêu phút TÍNH TIỀN | **CHƯA XÁC MINH** (bản lượt 2 ghi `1`; rút vì nguồn dẫn không chứng minh LOẠI sự kiện — verdict lượt 3, P3 `thieu-bo-dem-quyet-dinh-billing`, mở lại từ lượt 2) | nguồn duy nhất đã đọc: `ci.yml:19-24` (ghi chú 13-08-2026), đọc lại 21:03Z và 22:3xZ 06-09-2026 — nó ghi MỘT sự cố **cạn quota** (CI đứng hình từ 12-08-2026 vì cạn 2.000 phút/tháng; số của ghi chú, không phải hạn mức hiện tại), KHÔNG ghi một quyết định tối ưu hoá nào, có hay không kèm phút tính tiền | Sự cố cạn quota là sự kiện KHÁC LOẠI với thứ dòng này đếm; ghi riêng ở cột nguồn, không đếm vào cột số. Không đổi thành `0`: "không có nguồn đúng loại" không phải "không xảy ra". Chỉ ghi số khi có biên nhận/quyết định gốc chứng minh đúng thuộc tính "không nêu phút tính tiền". ⇒ A5 (đo và CÔNG BỐ phút tính tiền) vẫn bắt buộc, không phụ thuộc con số này. |
 | đếm biểu thức thay vì đếm điều kiện | **1** (bản đầu A3 của chính đặc tả này) | verdict lượt 1, tái hiện 19:33Z; đọc lại 21:03Z 06-09-2026 | Cùng gốc *"phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN"* trong `CLAUDE.md`. |
 | so `rc` thay vì so tập kết quả | **1** (bản lượt 1 A3 của chính đặc tả này) | verdict lượt 2; phản mô hình đo 21:22Z 06-09-2026 | Cùng họ với dòng trên: một số tổng che được hai tập khác nhau. Sửa ở A3. |
 | lời khai rộng hơn phép đo | **3** (bản đầu: "không có chi phí ẩn", "không phải ước lượng"; bản lượt 1: "43/43 bước chạy được" cho số mục liệt kê) | verdict lượt 1, lượt 2; đọc lại 21:03Z 06-09-2026 | Sửa ở bối cảnh và các bảng (đơn vị "mục liệt kê"). |

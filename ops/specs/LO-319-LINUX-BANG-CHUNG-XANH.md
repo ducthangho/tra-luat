@@ -25,6 +25,13 @@
   phải mỏ neo**: ba mỏ neo trong lease (`base_sha` · `start_from_sha` · `reviewed_sha_required`)
   phải ĐO LẠI tại lúc cấp, bằng head `origin/master` SAU khi `GATE` đã integrated (`§5`: packet
   có dependency chỉ chạy sau predecessor đã integrated).
+  **Trôi đã đo, 22:45Z 06-09-2026:** `origin/master` = `28cb898`, **46** commit sau `1b3caa1`
+  (`git rev-list --count`), chạm write set của packet này đúng **1** dòng: `ci_dang_ky_test.py` thêm
+  mục `"ops/bien_nhan_v2_test.py"` vào `DA_NOI` (dòng 65) — `MOI`, `MOI_WINDOWS`, `bang_chung_xanh`,
+  `chay_moi`, `phan_chung` **không đổi**, nên mọi phép đo của hồ sơ này còn hiệu lực; **mọi số dòng**
+  của tệp ấy trong hồ sơ (`:205`, `:474`…) là số trên `1b3caa1`, trên master nay **+1** (`:206`,
+  `:475`). Kèm `ci.yml` +8 dòng (một bước `bien-nhan v2 selftest`, 39 → 40 bước) — thuộc write set
+  của `GATE`, không của packet này. Phiên cấp lease đo lại ba mỏ neo và số dòng, không chép từ đây.
 
 ## `nguon_cap_viec`
 
@@ -39,11 +46,14 @@ Cross-review Codex lượt 1 của #456 bắt đúng chỗ này (finding P2) và
 
 Packet này là chỗ M4 ấy được **gỡ đóng băng có thẩm quyền**, không phải chỗ nó bị lách.
 
-Bản này là **bản sửa theo verdict cross-review lượt 2** (`reviewed_sha` `b1c2284`, Codex), sau lượt 1
-(`d09f2f1`). Thiết kế vá đổi lần THỨ HAI: A-b (bản đầu) → A-c *"soi cặp CÓ NHÃN"* (lượt 1) →
-**T — bản ghi TỔNG theo từng định dạng** (bản này), vì reviewer lượt 2 dựng được cả **đỏ giả** lẫn
-**bỏ sót** của A-c và tôi đo lại được — xem *"Ba hướng vá đã ĐO"*. Cùng hình dạng lỗi hai lần
-(*"đọc toàn bộ văn bản rồi cố lọc"*) nên bản này đổi CÁCH LÀM chứ không vá A-c lần thứ ba.
+Bản này là **bản sửa theo verdict cross-review lượt 3** (`reviewed_sha` `4c6aea4`, Codex), sau lượt 2
+(`b1c2284`) và lượt 1 (`d09f2f1`). Lịch sử thiết kế: A-b (bản đầu) → A-c *"soi cặp CÓ NHÃN"* (lượt 1)
+→ **T — bản ghi TỔNG theo từng định dạng** (lượt 2) → **T'** (bản này). Slug
+`span-rong-nuot-ti-le-vo-can` hỏng **ba lượt liên tiếp**, nên `PROTOCOL §12` đòi trả lời *"có nên tiếp
+tục cách làm này không"* TRƯỚC khi vá — câu trả lời, có phép đo, ở mục *"§12 — ba lần hỏng, một gốc"*
+dưới đây. Tóm tắt: ba lần cùng một gốc (số làm bằng chứng đến từ một vùng văn bản không được khoanh);
+hợp đồng T đúng nhưng prototype T trái với chính hợp đồng ấy ở hai chỗ; T' **gỡ mâu thuẫn** và thêm một
+luật để vị từ TỰ kiểm vùng bằng chứng thay vì tin tác giả mẫu. Không có thiết kế thứ tư.
 
 ## Bối cảnh đo được (mọi số kèm thời điểm)
 
@@ -91,7 +101,12 @@ Nên câu đúng **không** phải *"một mục bị hở"* mà là: **hai** m�
 `subagent_ghi_detect_test.py` — cùng một regex, hai dòng kề nhau trong `MOI`) mang cặp đột biến
 không ai canh, và **6 trong 13** cặp bằng chứng của cả sổ đăng ký chưa từng được kiểm. Dưới thiết
 kế T (bên dưới) cả **13/13** cặp nằm trong một bản ghi tổng có grammar — 10 cặp là nhóm bắt, 3 cặp
-của `probe_mang` là hằng số trong grammar (đo 21:07Z 06-09-2026, bảng đo hai chiều).
+của `probe_mang` là hằng số trong grammar (đo 21:07Z 06-09-2026, bảng đo hai chiều). Đo lại 22:33Z
+06-09-2026 bằng bất biến *cặp `SPAN` bắt ⊆ cặp `GRAMMAR` giải trình* (`do_t2.py`, khoá
+`bat_bien_span_tap_con_grammar`): đúng ở **10/10** khối (8 định dạng + 2 dạng Windows); đột biến bỏ
+nhóm bắt ở grammar `chon` làm bất biến VỠ (`tap_con: false`) — đó là câu trả lời đo được cho rủi ro
+reviewer lượt 3 tự khai (*"bỏ nguồn số `SPAN` chỉ đúng nếu `GRAMMAR` bao phủ mọi cặp cần đo"*): hôm
+nay bao phủ, và bất biến này phải thành một ca trong `phan_chung()` (A3) để mai vẫn bao phủ.
 
 ### Ba hướng vá đã ĐO, và vì sao A-c cũng bị bác
 
@@ -108,7 +123,8 @@ bị đếm đỏ) và **bỏ sót** (bản ghi tổng mang `0/0`, `n ≠ m`, ha
 | **A-c** — nhóm bắt theo cặp + cặp CÓ NHÃN trong span | 0 | 1 (`50/51`) | CÓ | **7 / 64** (21:07Z) | **7 / 64** (21:07Z) | **bác ở lượt 2** |
 | **B-tự nhiên** — thêm nhóm bắt cho cặp đột biến (4 nhóm) | 2 | — | **KHÔNG — HỒI QUY** (xem dưới) | — | — | bẫy |
 | **B-thật** — siết từng mẫu thành `[1-9]\d*/[1-9]\d*` | 2 | 3 | chỉ cho 2 mẫu ấy | 0 | không đọc tổng TRÙNG | không đủ |
-| **T** — bản ghi TỔNG theo từng định dạng | 0 chuỗi regex (đổi KIỂU giá trị `MOI`, xem `ngoai_pham_vi` #1) | ≥ 3 (A5) | CÓ | **0 / 64** | **0 / 64** | **chọn** |
+| **T** (lượt 2) — bản ghi TỔNG theo từng định dạng, nhưng prototype còn lấy số từ nhóm `SPAN`, và grammar `probe` #1 có `(?: .*)?` | 0 chuỗi regex | ≥ 3 (A5) | CÓ ở bản ghi · **KHÔNG** ở đuôi wildcard | **7 / 66** (reviewer lượt 3, 22:10Z) · **8 / 137** (đo lại 22:33Z, bộ ca lượt này) | **1 / 66** · **5 / 137** | **bác ở lượt 3** |
+| **T'** — T với luật 5 viết lại (số CHỈ từ dòng tổng) + luật 7 (mọi cặp trên dòng tổng phải được grammar giải trình) | 0 chuỗi regex (đổi KIỂU giá trị `MOI`, xem `ngoai_pham_vi` #1) | ≥ 3 (A5) | CÓ, kể cả khi grammar có lỗ | **0 / 137** (22:33Z) | **0 / 137** (22:33Z) | **chọn** |
 
 A-c bị bác ở HAI chiều, cả hai reviewer lượt 2 dựng được và tôi đo lại 21:07Z 06-09-2026 qua
 chính `chay_moi` trên bản in THẬT:
@@ -126,9 +142,64 @@ Gốc chung của A-b lẫn A-c: cả hai hỏi *"trong span có cặp số nào
 văn bản như bằng chứng rồi cố lọc, và bộ lọc nào cũng vừa quá rộng vừa quá hẹp. Câu hỏi đúng là
 *"bản ghi tổng của bộ này nằm ở dòng nào, có đúng MỘT, và có đúng CẤU TRÚC không"*. Đó là T.
 
+T (lượt 2) hỏi đúng câu ấy, nhưng prototype của nó vẫn trả lời thêm câu cũ ở một chỗ (nhóm của
+`re.search(SPAN)`) và để ngỏ một khoảng `.*` trong một grammar — cùng một gốc, ở dạng nhỏ hơn.
+Reviewer lượt 3 dựng được cả hai. Mục kế tiếp là câu trả lời `§12` — viết vào đặc tả, không chỉ vào
+báo cáo, vì một packet hỏng ba lần ở cùng chỗ mà đặc tả không nói ra thì phiên sau sẽ vá lần thứ năm.
+
+### §12 — ba lần hỏng, một gốc: câu trả lời TRƯỚC khi vá lần thứ tư
+
+`PROTOCOL §12`: *"Cùng hình dạng lỗi xuất hiện lần thứ ba bắt buộc xem lại có nên tiếp tục cách làm
+đó, không chỉ vá lần thứ tư."* Slug `span-rong-nuot-ti-le-vo-can` hỏng ba lượt liên tiếp: A-b (lượt 1)
+→ A-c (lượt 2) → T (lượt 3). Câu hỏi phải trả lời trước, có bằng chứng: **ba lần ấy có cùng một
+nguyên nhân gốc không, hay là ba lỗi khác nhau ở ba thiết kế khác nhau?**
+
+**Cùng một gốc — và đo được.** Cả ba (và cả BASE) để số làm bằng chứng đến từ — hoặc nằm khuất
+trong — một **vùng văn bản mà hợp đồng không khoanh**:
+
+| bản | vùng không được khoanh | phản chứng đã chạy | điều cột kế bên cho thấy |
+|---|---|---|---|
+| A-b | mọi cặp `n/m` trong span (`findall` cả span) | `Ghi chú: … 3/5` trong span ⇒ đỏ giả (lượt 1, 19:32Z) | vùng = toàn span |
+| A-c | cặp CÓ NHÃN trong span, khoảng cách `{0,24}` | nhãn trong văn xuôi ⇒ đỏ giả 7/64; nhãn cách xa / gãy dòng ⇒ bỏ sót 7/64 (lượt 2, 21:07Z) | vùng = toàn span, chỉ đổi bộ lọc |
+| T (lượt 2) | (i) `cap = _cap(m.groups())` — nhóm của `re.search(SPAN)`, tức lượt khớp **TRÁI NHẤT ở bất kỳ đâu** trong văn bản; (ii) `(?: .*)?` trong grammar `probe_mang` #1 — một vùng mở **ngay trong dòng tổng** | (i) `Ghi chú: ví dụ nền: 3/5 đạt` đứng TRƯỚC bản in thật ⇒ đỏ giả (reviewer: 7/66, 22:10Z; đo lại 22:33Z: 8/137); (ii) `· DOT BIEN 0/0 bi giet` nối vào chính dòng tổng probe ⇒ bỏ sót (reviewer: 1/66; 22:33Z: T lượt 2 bỏ sót 5/137) | **BASE cũng đỏ giả ở (i)** (T004 của reviewer: BASE `1`; `do_t2`: BASE 8 ca cùng nhóm) ⇒ (i) là mảnh của BASE mà T **chép lại**, không phải lỗi mới; **A-c bắt được (ii)** (`1` đỏ) ⇒ (ii) là lỗ T **mở ra** khi thu hẹp bằng chứng về một grammar còn lỗ |
+
+Hai mảnh của T mâu thuẫn với chính hợp đồng của nó: luật 6 / M3 nói *dòng ngoài bộ chọn không được
+đọc*, mà luật 5 (bản lượt 2) và prototype vẫn lấy nhóm của `SPAN` — và `(?: .*)?` nghĩa là *phần này
+của dòng tổng không được đọc*, trái luật 4 *"khớp TRỌN dòng"*. Nên đây **không phải thiết kế thứ tư**:
+hợp đồng T đúng, prototype T trái với hợp đồng, và bản vá đúng là **gỡ mâu thuẫn** — T'.
+
+**Cách làm đổi thế nào, để lần thứ tư khác ba lần trước.** Ba bản trước đều **tin một tác giả mẫu**
+khoanh đúng vùng bằng chứng (chuỗi `SPAN`, bộ lọc `NHAN`, rồi `GRAMMAR`) — một danh sách cấm đội lốt
+regex, và `CLAUDE.md` đã đo rằng danh sách cấm không bao giờ đủ. T' đảo thành danh sách CHO PHÉP và để
+**vị từ tự kiểm vùng**:
+
+1. luật 5 viết lại — khi có `TONG`, số **chỉ** đến từ nhóm bắt của `GRAMMAR` trên dòng được chọn;
+   `SPAN` chỉ còn là điều kiện khớp (chuỗi nguyên văn, thứ tự, dòng kết);
+2. **luật 7 mới** — mọi cặp `\d+/\d+` trên dòng được chọn phải được grammar **giải trình** (số cặp trên
+   dòng = số cặp nhóm bắt + số cặp hằng trong grammar). Một `.*`, một `\d+/\d+` không nhóm bắt — đúng
+   hình #319 — không còn giấu được một cặp: cổng ĐỎ **ngay trên bản in xanh** khi grammar có lỗ, thay vì
+   mù. Đo 22:33Z: grammar cố ý viết sai `DOT BIEN \d+/\d+` (không nhóm bắt) + `0/0` ⇒ T lượt 2 **0**,
+   T' **1**; cùng grammar sai + bản in xanh `34/34` ⇒ T' **1** — ồn ào, không mù;
+3. mọi lời khai hai chiều từ nay ghi **`X/N trên bộ ca S`** kèm `sha256` của bộ đo và danh sách **lớp
+   chưa phủ** — không còn "đỏ giả 0" tuyệt đối. Bản lượt 2 viết *"T: đỏ giả 0, bỏ sót 0"* trong khi
+   prototype còn đọc nhóm `SPAN`: đó là lần thứ ba của hình dạng *lời khai rộng hơn phép đo* trong
+   chính đặc tả này (`hinh_dang_ke_thua`).
+
+**Hướng khác đã xét và KHÔNG chọn — đổi thứ các bộ test IN RA** (một dòng máy đọc, ví dụ JSON tổng,
+thay vì sổ đăng ký đọc bản in cho người). Không chọn vì: (a) lỗi ba lượt **không nằm ở bản in** — 7 bản
+in thật đều có đúng một dòng tổng rõ ràng, chưa ca đỏ giả nào là do formatter mơ hồ; lỗi nằm ở NƠI ĐỌC
+lấy số ngoài dòng tổng; (b) nó chạm 8 tệp in, trong đó 2 hook — write set từ 1 lên 9 tệp, trái
+`ADR-0044` cho `sensitive` và trái `ngoai_pham_vi` #2 của chính packet; (c) sổ đăng ký vẫn phải có hợp
+đồng đọc dòng máy ấy — luật 3/4/7 vẫn cần, chỉ đổi cú pháp. **Điều kiện mở lại hướng này** (đòi
+revision, ngoài write set): xuất hiện một bản in THẬT của formatter hiện có mà grammar đóng không mô
+tả được, hoặc lượt review kế tìm được đỏ giả/bỏ sót **không** thuộc vùng *"số ngoài dòng tổng"* — khi
+ấy gốc khác gốc đã đo, và cách làm phải đổi thật chứ không phải vá lần thứ năm.
+
 ### Thiết kế T — bản ghi TỔNG theo từng định dạng (chọn)
 
-**Hợp đồng — 6 luật, mỗi luật có đột biến riêng ở bảng răng bên dưới:**
+**Hợp đồng — 7 luật, mỗi luật có đột biến riêng ở bảng răng bên dưới** (bản lượt 2 có 6; luật 5
+được viết lại và luật 7 thêm vào theo câu trả lời `§12` ở trên — không phải vá thêm một mệnh đề, mà
+là gỡ chỗ prototype trái với chính hợp đồng):
 
 1. Đơn vị bằng chứng của một mục là **cặp `(SPAN, TONG)`**. `SPAN` là regex hiện có, **giữ nguyên
    chuỗi** — nó vẫn giữ thứ tự và dòng kết (`TỔNG: ĐẠT` / `TONG: DAT`). `TONG` là danh sách
@@ -139,11 +210,20 @@ văn bản như bằng chứng rồi cố lọc, và bộ lọc nào cũng vừa
    xanh, vì không có quy tắc chọn một trong hai.
 4. Dòng được chọn phải khớp **GRAMMAR bằng `re.fullmatch`** — trọn dòng, không phải một khúc. Có
    tiền tố tổng mà sai cấu trúc ⇒ `False`; không được bỏ nó rồi tìm dòng khác.
-5. **Mọi nhóm bắt** của `SPAN` lẫn `GRAMMAR` được soi **theo cặp** `(n, m)`: `n == m > 0`. Số nhóm
-   LẺ ⇒ `False` (mẫu lỗi). Mục có `0` nhóm bắt **và** `0` bản ghi tổng ⇒ `False` — mẫu không đo gì
-   thì không được tha (đây là chỗ mệnh đề `len(m.groups()) != 2` của bản hiện tại bị gỡ, M2).
+5. Khi mục có `TONG`, số làm bằng chứng **CHỈ** đến từ nhóm bắt của `GRAMMAR` trên dòng được chọn,
+   soi **theo cặp** `(n, m)`: `n == m > 0`. `SPAN` vẫn phải khớp (chuỗi giữ nguyên, thứ tự và dòng
+   kết vẫn được canh) nhưng **không** lấy giá trị nhóm của nó làm số — `re.search` trả lượt khớp TRÁI
+   NHẤT ở bất kỳ đâu, kể cả trong văn xuôi đứng trước tổng (đây là chỗ bản lượt 2 trái luật 6, P1
+   lượt 3). Chỉ nhánh tương thích **chuỗi trần** (không `TONG`) mới soi số từ nhóm `SPAN`. Số nhóm
+   LẺ ở bất kỳ mẫu nào ⇒ `False` (mẫu lỗi). Chuỗi trần `0` nhóm ⇒ `False` — mẫu không đo gì thì
+   không được tha (đây là chỗ mệnh đề `len(m.groups()) != 2` của bản hiện tại bị gỡ, M2).
 6. Dòng **không** khớp bộ chọn nào là **VĂN XUÔI**: không được đọc, dù chứa nhãn hay cặp số gì. Đây
    là ranh giới có chủ ý thay cho danh sách nhãn của A-c; giá của nó ghi ở `chua_do_duoc` #1.
+7. **Mọi cặp `\d+/\d+` trên dòng được chọn phải được grammar GIẢI TRÌNH**: số cặp đếm được trên dòng
+   = số cặp từ nhóm bắt + số cặp viết HẰNG trong grammar; lệch ⇒ `False`. Đây là bài học #319 đặt
+   vào chính vị từ: một `.*`, một `\d+/\d+` không nhóm bắt (đúng mẫu `MOI` hiện tại) hay bất kỳ
+   khoảng mở nào trong grammar không còn giấu được một cặp — cổng ĐỎ **ngay trên bản in xanh** khi
+   grammar có lỗ, thay vì mù. Luật này không tin tác giả grammar; nó đo dòng tổng.
 
 **Bảng bản ghi tổng của 8 mục, tái dẫn xuất từ bản in thật** — bản đo, chưa phải bản thi công.
 Bản in nguồn: 5 bộ chạy tại container này 21:00:15–21:00:23Z 06-09-2026, `rc=0` cả 5
@@ -159,7 +239,7 @@ TONG = {
     ".claude/dev/mcp_gh_test.py":          [(r"CA\s+:", r"CA\s+: (\d+)/(\d+) đạt · 0 đỏ · ĐẠT"),
                                             (r"ĐỘT BIẾN\s+:", r"ĐỘT BIẾN\s+: đã đo (\d+)/(\d+) tập giết · ĐẠT")],
     ".claude/dev/mcp_github_doc_test.py":  [(r"mcp_github_doc tests: ", r"mcp_github_doc tests: (\d+)/(\d+) ca QUA \(hong 0, bo qua 0\)")],
-    ".claude/dev/probe_mang_test.py":      [(r"tự đột biến cổng: ", r"tự đột biến cổng: 9/9 chết(?: .*)?"),
+    ".claude/dev/probe_mang_test.py":      [(r"tự đột biến cổng: ", r"tự đột biến cổng: 9/9 chết(?: \(m1\.\.m5 \+ 4 dòng cơ chế\))?"),
                                             (r"named mutant probe_missing_tool_executes_git: ", r"named mutant probe_missing_tool_executes_git: 1/1 chết"),
                                             (r"nền: ", r"nền: 11/11 đạt")],
     ".claude/hooks/pretooluse_guard_test.py":    [(r"TONG: CA ", r"TONG: CA (\d+)/(\d+) dat · DOT BIEN (\d+)/(\d+) bi giet")],
@@ -179,29 +259,44 @@ TONG_WINDOWS = {
 ghi; xoá dòng `named mutant …: 1/1 chết` ⇒ `False` (đo). Dòng Windows của `pretooluse` mang
 `[1-9]\d* muc` **không** thành nhóm bắt — số mục không phải cặp; số dương được ép trong grammar.
 
-**Vị từ** (bản đo — thi công được đổi cách biểu diễn `(SPAN, TONG)` miễn giữ đủ 6 luật):
+Grammar `probe_mang` #1 nay **ĐÓNG**: chỉ nhận hậu tố formatter đã kiểm tĩnh `(m1..m5 + 4 dòng cơ
+chế)`, không còn `(?: .*)?` (hunk H002 của reviewer lượt 3, tái dẫn xuất trên cây thật). Đo 22:33Z
+06-09-2026: nối `· DOT BIEN 0/0 bi giet` vào CHÍNH dòng ấy ⇒ T lượt 2 **0**, T' **1**; nối ` rác`
+(đuôi lạ, không cặp) ⇒ T' **1**. Hai lớp ĐỘC LẬP cùng chặn ca `0/0`-trong-đuôi — hậu tố đóng (luật 4)
+**và** luật 7 — nên đột biến trả wildcard `(?: .*)?` lại **không** đổi màu ca ấy (đo: `1 → 1`, luật 7
+bắt). Reviewer viết *"đột biến trả hậu tố về `(?: .*)?` phải làm ca này ĐỎ"*: đúng cho T lượt 2, **sai
+cho T'** — nên không chép. Răng riêng của hậu tố đóng là ca đuôi rác không cặp (`1 → 0`); răng riêng
+của luật 7 là grammar bỏ nhóm bắt (bảng răng). Nói rõ vì *"hai lớp chặn cùng một ca ⇒ đột biến một
+lớp không đổi màu"* là bài học đã trả giá trong `CLAUDE.md` — đột biến sai chỗ, không phải mã sai.
+
+**Vị từ** (bản đo — thi công được đổi cách biểu diễn `(SPAN, TONG)` miễn giữ đủ 7 luật):
 
 ```python
+_CAP = re.compile(r"(\d+)/(\d+)")
+
 def _cap(g):
     return None if len(g) % 2 else [(g[i], g[i + 1]) for i in range(0, len(g), 2)]
 
 def bang_chung_xanh(text, mau):
     span, tong = (mau, ()) if isinstance(mau, str) else mau
     m = re.search(span, text, re.M)
-    if not m:
-        return False
-    cap = _cap(m.groups())
-    if cap is None or (not tong and not m.groups()):
-        return False                                    # nhóm lẻ · mẫu không đo gì
+    if not m or _cap(m.groups()) is None:
+        return False                                    # không khớp · nhóm LẺ (mẫu lỗi)
+    if not tong:                                        # chuỗi trần (tương thích): số CHỈ từ SPAN
+        return bool(m.groups()) and all(int(a) > 0 and a == b for a, b in _cap(m.groups()))
+    cap = []                                            # có TONG: SPAN chỉ là điều kiện khớp (luật 5)
     lines = text.splitlines()
     for chon, grammar in tong:
         hits = [l for l in lines if re.match(chon, l)]
-        if len(hits) != 1:                              # 0 hay ≥ 2 bản ghi cùng loại
+        if len(hits) != 1:                              # luật 3: 0 hay ≥ 2 bản ghi cùng loại
             return False
-        g = re.fullmatch(grammar, hits[0])
-        if not g or _cap(g.groups()) is None:
+        g = re.fullmatch(grammar, hits[0])              # luật 4: trọn dòng
+        c = _cap(g.groups()) if g else None
+        if c is None:
             return False
-        cap += _cap(g.groups())
+        if len(_CAP.findall(hits[0])) != len(c) + len(_CAP.findall(grammar)):
+            return False                                # luật 7: cặp trên dòng tổng mà grammar không giải trình
+        cap += c
     return all(int(a) > 0 and a == b for a, b in cap)
 ```
 
@@ -210,12 +305,15 @@ def bang_chung_xanh(text, mau):
 đi qua `chay_moi` thật mà không sửa hàm ấy). Hai ca neo mẫu cũ so `MOI[_P456]` với một CHUỖI nên
 đổi màu theo thiết kế — xử ở A5, không xoá.
 
-**Đo hai chiều — 64 ca qua chính `chay_moi` trên module thật của `b1c2284`**, chỉ hoán vị từ và
-bảng `MOI` trong bộ nhớ, `doc_nen_windows` là seam; đo 21:07Z 06-09-2026. Bảng đủ 64 dòng, script
-và bản in nguyên byte kèm `sha256` nằm trong gói bàn giao lượt vá này
-(`executor-luot2-va/do_grammar.{py,json,md}` + `fixtures/`):
+**Đo hai chiều — bảng 1: 64 ca của lượt 2 qua chính `chay_moi` trên module thật**, chỉ hoán vị từ và
+bảng `MOI` trong bộ nhớ, `doc_nen_windows` là seam; đo 21:07Z 06-09-2026 với T, **đo lại 22:33Z với
+T'** (`do_t2.py`, nhóm `do-gia`/`bo-sot`): cột T' **bằng hệt** cột T ở cả 64 ca — 13 ca T' khác T
+lượt 2 đều nằm ngoài 64 ca này, tức bộ ca lượt 2 **không có ca nào đo được hai lỗ mà reviewer lượt 3
+dựng** (đó là lý do nó cho `0/64` mà vẫn sai). Script và bản in nguyên byte kèm `sha256`: gói lượt 2
+`do_grammar.{py,json,md}` + `fixtures/`, nay được chép vào gói bàn giao lượt này
+(`executor-luot3-va/`, xem A6) vì reviewer lượt 3 không nhận được gói lượt 2:
 
-| chiều | ca | BASE | A-c | **T** |
+| chiều | ca | BASE | A-c | **T = T'** |
 |---|---|---:|---:|---:|
 | đỏ giả (kỳ vọng 0) | 7 bản in thật + canonical `pretooluse` Linux (trên Linux, trên Windows) + canonical Windows | 0 | 0 | **0** |
 | đỏ giả | `chon` thật + `Ghi chú: đã xem 3/5 hướng cải tiến.` | 0 | 0 | **0** |
@@ -231,16 +329,57 @@ và bản in nguyên byte kèm `sha256` nằm trong gói bàn giao lượt vá n
 | bỏ sót | Windows: dòng Windows trên Linux · `0 muc` · `CA 0/39` · `0/0 muc` sau nhãn · **hai** dòng Windows | 1 · 1 · 1 · 1 · **0** | 1 · 1 · 1 · 1 · **0** | **1** |
 | **tổng 64 ca** | | đỏ giả **0** · bỏ sót **16** | đỏ giả **7** · bỏ sót **7** | đỏ giả **0** · bỏ sót **0** |
 
-**Răng của từng luật** — đột biến vào chính vị từ T, đo 21:07Z; mỗi luật có ít nhất một ca chỉ nó
-bắt, tức không luật nào thừa:
+**Bảng 2 — 186 ca của lượt này** (`do_t2.py`, đo **22:33Z 06-09-2026** trên module thật của
+`4c6aea4`; vị từ T' và bảng `TONG` được bộ đo lấy NGUYÊN VĂN từ hai khối mã ở trên — thứ được đo là
+thứ được viết; T lượt 2 lấy từ blob `4c6aea4`, A-c từ blob `b1c2284`, BASE từ module). Bộ ca S = 64 ca
+của bảng 1 + 12 kiểu probe của reviewer lượt 3 (`measure_t.py`) dựng lại trên bản in THẬT của 8 định
+dạng (reviewer dựng trên chuỗi canonical ở 6/8 định dạng) + 11 fixture lưu của lượt 2 + 6 ca Windows
++ 2 ca đuôi probe + **6 ca mới** (răng riêng cho từng lớp chốt). **137** ca có kỳ vọng, **49** ca ranh
+giới (reviewer cố ý không đặt kỳ vọng — liệt kê ở `chua_do_duoc` #1). Bộ của reviewer là 66 ca có kỳ
+vọng — **hai bộ khác nhau**, không chép số qua lại. Đơn vị: số ca mà giá trị `chay_moi` ≠ kỳ vọng.
 
-| đột biến vào T | luật bị gỡ | ca đổi màu |
-|---|---|---|
-| `len(hits) != 1` → `not hits` (lấy dòng đầu) | 3 | 8 ca "hai bản ghi" về `0` |
-| `fullmatch` → `search` | 4 | 1 ca — đuôi thêm `· DOT BIEN 0/0 bi giet` cùng dòng về `0` |
-| bỏ soi cặp của GRAMMAR | 5 | 6 ca — `0/0`, `33/34`, `21/22`, `53/54`… về `0` |
-| bỏ hẳn `TONG` (= A-a) | 2–5 | 16 ca về `0` — đúng tập "bỏ sót" của BASE |
-| thêm lại quét nhãn `NHAN` của A-c | 6 | 7 ca đỏ giả lên `1` |
+| nhóm ca | số ca | BASE | A-c | T (lượt 2) | **T'** |
+|---|---:|---:|---:|---:|---:|
+| bản in thật + canonical (kỳ vọng 0) | 20 | 0 | 0 | 0 | **0** |
+| văn xuôi mang nhãn / dòng lẻ SAU tổng, cách 25 khoảng trắng, gãy dòng, `đợt 2:` ở dòng lẻ (kỳ vọng 0) | 21 | 0 | 10 | 0 | **0** |
+| `Ghi chú: ví dụ <dòng tổng với 3/5>` đứng **TRƯỚC** bản in — P1 lượt 3 chiều (a) (kỳ vọng 0) | 10 | **8** | **8** | **8** | **0** |
+| cùng ghi chú đứng SAU · CRLF đã chuẩn hoá (kỳ vọng 0) | 16 | 0 | 0 | 0 | **0** |
+| bản ghi `0/0`, `n ≠ m`, `CA 0/n`, thiếu dòng/`TONG: DAT`, từ chối điểm, Windows lệch nền (kỳ vọng 1) | 40 | 7 | 0 | 0 | **0** |
+| HAI bản ghi cùng loại (kỳ vọng 1) | 18 | 18 | 16 | 0 | **0** |
+| có tiền tố tổng mà sai grammar: 25 khoảng trắng, gãy dòng, `đợt 2:`, đuôi thêm `· DOT BIEN 0/0` (kỳ vọng 1) | 6 | 2 | 0 | 0 | **0** |
+| `· DOT BIEN 0/0 bi giet` nối vào CHÍNH dòng tổng `probe_mang` — P1 lượt 3 chiều (b) (kỳ vọng 1) | 2 | 2 | 0 | **2** | **0** |
+| grammar viết SAI (cặp đột biến không nhóm bắt, đúng hình #319) — với `0/0` và với bản in xanh (kỳ vọng 1) | 2 | 2 | 1 | **2** | **0** |
+| đuôi rác không mang cặp trên bản ghi có grammar đóng (kỳ vọng 1) | 2 | 2 | 2 | 1 | **0** |
+| **tổng 137 ca có kỳ vọng** | 137 | đỏ giả **8** · bỏ sót **33** | đỏ giả **18** · bỏ sót **19** | đỏ giả **8** · bỏ sót **5** | đỏ giả **0** · bỏ sót **0** |
+
+Gói bàn giao `executor-luot3-va/`: `do_t2.py` (`sha256 46b3558c…`, đủ 64 ký tự ở `MANIFEST.sha256`) ·
+`do_t2.json` (đủ 186 hàng kể cả giá trị 8 đột biến; băm ghi ở `MANIFEST.sha256` — JSON tự ghi
+`spec_sha256_luc_do` nên không thể dẫn băm của nó trong chính spec) · `do_t2.md` · `fixtures/*.stdout`.
+Thứ neo mã-đã-đo vào mã-đang-đọc là băm hai KHỐI MÃ mà bộ đo trích từ spec, ghi trong JSON
+(`khoi_ma_sha256`): bảng `TONG` `545dedc7…` · vị từ `11fb6d15…` — băm lại hai khối ```python``` ở trên
+(nội dung giữa hai hàng rào, UTF-8) mà lệch thì thứ được đo không phải thứ đang đọc. Reviewer không có
+gói ấy trong sandbox ⇒ mọi số của bảng này là **KHÔNG ĐO ĐƯỢC** với họ, không phải "đã đóng".
+
+**Răng của từng luật** — 8 đột biến áp vào **NGUỒN** của hai khối mã ở trên (thay chuỗi; bộ đo ép
+nguồn phải THAY ĐỔI, một đột biến không đổi nguồn là đột biến chưa từng chạy), đo 22:33Z trên 186 ca.
+Cột *"chỉ nó bắt"* tính **trừ m4**: m4 (bỏ hẳn `TONG`) là siêu-đột-biến nuốt mọi ca do grammar quyết
+định, tính nó vào thì không luật nào của `TONG` có ca riêng — tạo tác của phép đo, không phải luật thừa:
+
+| đột biến vào T' | luật | ca đổi màu / 186 | chỉ nó bắt (trừ m4) | ví dụ ca riêng |
+|---|---|---:|---:|---|
+| m1 `len(hits) != 1` → `not hits` (lấy dòng đầu) | 3 | 17 | 17 | hai dòng `nền: 25/25 đạt` về `0` |
+| m2 `fullmatch` → `search` | 4 | 16 | 13 | ` rác` sau `nền: 11/11 đạt` (probe #3, grammar đóng) về `0` |
+| m3 bỏ `cap += c` (không soi cặp GRAMMAR) | 5 | 27 | 27 | `nền: 0/25` về `0` |
+| m4 bỏ hẳn `TONG` (= A-a, chỉ nhóm `SPAN`) | 2–5, 7 | 68 | — (siêu) | `that-probe` lên `1` (0 nhóm, không bản ghi) |
+| m5 thêm lại quét nhãn `NHAN` của A-c | 6 | 14 | 10 | `Ghi chú: CA 0/0 là ví dụ.` lên `1` |
+| **m6 `cap = []` → `cap = _cap(m.groups())`** (nhóm `SPAN` trở lại khi có `TONG`) | **5 (mới)** | 8 | 4 | `Ghi chú: ví dụ nền: 3/5 đạt` TRƯỚC bản in `chon` lên `1` |
+| **m7 bỏ luật 7** | **7 (mới)** | 2 | 2 | grammar bỏ nhóm bắt + `0/0` về `0`; + `34/34` về `0` |
+| m8 grammar probe #1 trả về `(?: .*)?` | 4 (dữ liệu) | 3 | **0** | ⊆ m2 (đo `m8_tap_con_m2: true`) — hậu tố đóng là mặt DỮ LIỆU của luật 4, không có răng tách khỏi m2; ca `0/0`-trong-đuôi **không** đổi màu vì luật 7 bắt |
+
+Kill-list đầy đủ theo tên ca: `do_t2.json` → `rang_dot_bien` và `rang_dot_bien_chi_no_bat_tru_m4`.
+Reviewer lượt 3 đề xuất đo răng bằng *"đưa nhóm số của `SPAN` trở lại danh sách cặp khi có `TONG`"*
+(= m6) và *"trả wildcard hậu tố lại"* (= m8); m6 áp nguyên ý; m8 đo được là không có răng riêng dưới
+T' — ghi thẳng, không chép lời hint thành bằng chứng.
 
 **B-tự nhiên vẫn là cái BẪY, và T gỡ nó:** mệnh đề `len(m.groups()) != 2` trong `bang_chung_xanh`
 hiện tại trả `True` **vô điều kiện** cho mọi mẫu có số nhóm khác 2 (đo lại 21:07Z: mẫu 0/1/3/4
@@ -248,7 +387,8 @@ nhóm trên `CA 0/39 · DOT BIEN 0/0` ⇒ `True`). Hôm nay chưa mẫu nào có
 **đang ngủ**; nó thức dậy đúng lúc ai đó "canh cặp đột biến" bằng cách bắt nó thành nhóm 3/4. T
 thay mệnh đề ấy bằng luật 5 — bảng đo ở A2.
 
-**T không đổi hành vi Windows của #456** (đo 21:07Z qua `chay_moi`): dòng Windows trên Linux `1` ·
+**T không đổi hành vi Windows của #456** (đo 21:07Z qua `chay_moi` với T; đo lại 22:33Z với T' —
+cùng giá trị ở cả 9 ca `win-*`/`windows_*` của `do_t2.json`): dòng Windows trên Linux `1` ·
 trên Windows `0` · dòng Linux đầy đủ trên Windows `0` · `0/0 bi giet` trên Windows `1` · `CA 0/39`
 trên Windows `1` — bằng hệt BASE; thêm hai chốt mới: `0/0 bi giet` trên **Linux** `1` và **hai**
 dòng Windows `1` (BASE `0` cả hai).
@@ -369,9 +509,12 @@ nhìn hạn, còn `ai-dang-giu` đếm mọi bản và chỉ nhìn hạn** — s
 ## `review_class` và ngưỡng kích thước
 
 `sensitive` ⇒ `ADR-0044`: **≤ 3 tệp và ≤ 300 dòng THÊM** (cột `additions` của `git diff --numstat`,
-không phải thêm-trừ-xoá). Write set là **1 tệp**. Ước dòng thêm: `bang_chung_xanh` mới ≈ 10 dòng,
-`NHAN` 1 dòng, phản chứng A1–A6 ≈ 40 dòng ⇒ dưới `100`. Đo thật bằng `git diff --numstat` trước
-review; vượt `300` thì DỪNG.
+không phải thêm-trừ-xoá). Write set là **1 tệp**. Ước cũ *"≈ 10 dòng vị từ + `NHAN` 1 dòng + ≈ 40
+dòng phản chứng ⇒ dưới 100"* là ước của **A-c** (bản lượt 1) và bị rút: `NHAN` không tồn tại trong
+T', và T' thêm bảng `TONG`/`TONG_WINDOWS` (hai khối mẫu ở trên đã là 21 + 22 dòng), phần ghép kiểu giá
+trị của `MOI`/`MOI_WINDOWS`, vị từ 7 luật và các ca A1–A6 — **chưa có bản thi công để đo tổng
+additions**, nên không khẳng định con số nào dưới `300`. Phiên thi công đo `git diff --numstat` trước
+review; vượt `300` thì DỪNG — không cắt ca để lách, không nâng trần.
 
 ## `write_set`
 
@@ -411,7 +554,7 @@ Giao write set: `GATE-TACH-JOB-CAT-CHI-PHI` (sửa `loi_ruff_ci` trong cùng t�
 
 | # | mục tiêu | chiếu vào |
 |---|---|---|
-| M1 | `bang_chung_xanh` đọc **bản ghi tổng** của từng mục theo `(BỘ CHỌN, GRAMMAR)`: đúng MỘT dòng, khớp TRỌN, mọi cặp `n == m > 0` (luật 1–5). `DOT BIEN 0/0 bi giet` trong bản ghi bị từ chối trên **mọi** nền. | `write_set` #1 |
+| M1 | `bang_chung_xanh` đọc **bản ghi tổng** của từng mục theo `(BỘ CHỌN, GRAMMAR)`: đúng MỘT dòng, khớp TRỌN, số CHỈ từ dòng tổng, mọi cặp `n == m > 0`, mọi cặp trên dòng tổng được grammar giải trình (luật 1–5, 7). `DOT BIEN 0/0 bi giet` trong bản ghi bị từ chối trên **mọi** nền — kể cả khi nó nằm ở đuôi dòng tổng hay grammar quên nhóm bắt. | `write_set` #1 |
 | M2 | Mệnh đề thoát `len(m.groups()) != 2` bị **gỡ**: nhóm bắt soi theo cặp với mọi số nhóm chẵn; LẺ ⇒ `False`; `0` nhóm và `0` bản ghi ⇒ `False`. Không còn số nhóm nào cho `True` vô điều kiện. | `write_set` #1 |
 | M3 | Văn xuôi không là bằng chứng (luật 6): dòng không khớp bộ chọn nào không được đọc, kể cả khi mang nhãn `CA`/`DOT BIEN`/`ĐỘT BIẾN` hay cặp số. Tổng TRÙNG và tổng SAI CẤU TRÚC là ĐỎ. | `write_set` #1 |
 | M4 | Đường Windows của #456 giữ nguyên năm hành vi đã đo; dòng Windows có grammar riêng (`[1-9]\d* muc`, không nhóm bắt cho số mục); thêm hai chốt mới (`0/0` trên Linux, hai dòng Windows). | `write_set` #1 |
@@ -423,7 +566,10 @@ Giao write set: `GATE-TACH-JOB-CAT-CHI-PHI` (sửa `loi_ruff_ci` trong cùng t�
 **A1 (M1) — lỗ #319 phía Linux đóng, đo bằng SỐ ĐỎ của `chay_moi`, không bằng mắt.**
 `chay_moi(moi={P: MOI[P]}, chay_mot=lambda _: (0, RONG), doc_nen_windows=lambda: False)` với
 `RONG = "TONG: CA 39/39 dat · DOT BIEN 0/0 bi giet\nTONG: DAT\n"` ⇒ **1** (đo 21:07Z 06-09-2026:
-BASE `0`, T `1`); cùng chuỗi với `doc_nen_windows=lambda: True` ⇒ `1` (BASE `1`). Cùng phép đo trên
+BASE `0`, T `1`; đo lại 22:33Z: T' `1`); cùng chuỗi với `doc_nen_windows=lambda: True` ⇒ `1` (BASE
+`1`). Thêm hai ca cùng đơn vị (đo 22:33Z): `· DOT BIEN 0/0 bi giet` nối vào đuôi dòng tổng `probe_mang`
+⇒ **1** (T lượt 2 `0`); grammar `pretooluse` cố ý bỏ nhóm bắt cặp đột biến (`DOT BIEN \d+/\d+`) +
+`RONG` ⇒ **1** (T lượt 2 `0`) — luật 7. Cùng phép đo trên
 bản in THẬT của `subagent_ghi_detect` (`22/22 → 0/0`) và `mcp_gh` (`54/54 → 0/0`) ⇒ `1` mỗi bộ
 (BASE `0`). Đi qua chính `chay_moi` — khuyết tật "làm tròn" nằm ở NƠI TIÊU THỤ (r6/#401). Đơn vị:
 **số mục bị đếm là ĐỎ**. Phép làm ĐỎ của ca: bỏ soi cặp của GRAMMAR ⇒ về `0` (đo, bảng răng).
@@ -440,7 +586,8 @@ bản ghi tổng của `pretooluse`. Đo 21:07Z, trị phải đạt:
 | 3 | `True` (tha) | `False` (lẻ) | `False` | `True` | `False` (lẻ) | `False` |
 | 4 | **`True`** (BẪY) | `False` | `False` | `True` | `True` | `True` |
 
-Phép làm ĐỎ: bất kỳ ô nào lệch cột T. Đơn vị: **giá trị trả về của `bang_chung_xanh`**. Số nhóm LẺ
+Phép làm ĐỎ: bất kỳ ô nào lệch cột T (đo lại 22:33Z trên T': 20/20 ô khớp, `A2_dat: true` trong
+`do_t2.json`). Đơn vị: **giá trị trả về của `bang_chung_xanh`**. Số nhóm LẺ
 trả `False` ngay cả trên bản in đầy đủ — có chủ ý; `0` nhóm **không** bản ghi cũng `False` — mẫu
 không đo gì thì không phải bằng chứng.
 
@@ -460,8 +607,23 @@ Qua `chay_moi`, đo 21:07Z (cột A-c để thấy đúng chỗ T khác):
 - có tiền tố tổng mà sai grammar ⇒ **1**: `DOT BIEN` + 25 khoảng trắng + `0/0` (và + `34/34`) ·
   `DOT BIEN\n0/0` · `DOT BIEN đợt 2: 0/0` · đuôi thêm `· DOT BIEN 0/0 bi giet` cùng dòng (BASE `0`
   ở ca cuối) · nhánh từ chối điểm `TONG: CA 30/33 dat` + `TONG: DIEM DOT BIEN BI TU CHOI …`.
-Phép làm ĐỎ: gỡ luật 3 ⇒ 8 ca "hai bản ghi" về `0`; `fullmatch` → `search` ⇒ ca "đuôi thêm" về
-`0`; thêm lại `NHAN` ⇒ 7 ca đỏ giả lên `1` (bảng răng). Đơn vị: **số mục bị `chay_moi` đếm là ĐỎ**.
+- **văn xuôi mang tiền tố tổng đứng TRƯỚC bản in** (P1 lượt 3, chiều a) — `Ghi chú: ví dụ nền: 3/5
+  đạt` trước bản in thật `chon_reviewer` ⇒ **0**; cùng kiểu cho `gh_readback`, `mcp_gh`,
+  `mcp_github_doc`, `subagent`, `pretooluse` Linux, dòng Windows trên Windows ⇒ **0** mỗi ca; đặt SAU
+  cũng **0** (đo 22:33Z; T lượt 2 và BASE cho `1` ở 7 ca Linux/Windows — `probe` và `nhanh` `0` vì
+  `SPAN` của chúng không có nhóm bắt hoặc neo `^…$`). Phản chứng tự soi: cùng ghi chú trước + `0/0`
+  trong bản ghi ⇒ **1** — văn xuôi không đổi màu theo cả hai chiều;
+- **cặp trên dòng tổng phải được giải trình** (luật 7): grammar `pretooluse` cố ý viết `DOT BIEN
+  \d+/\d+` (không nhóm bắt — đúng mẫu `MOI` hiện tại) + `0/0` ⇒ **1**; cùng grammar + bản in xanh
+  `34/34` ⇒ **1** (ồn ào, không mù; T lượt 2 `0` cả hai). Thêm ca **tĩnh** trong `phan_chung()`: với
+  mỗi mục `MOI`/`MOI_WINDOWS` trên bản in canonical, tập cặp `SPAN` bắt ⊆ tập cặp `GRAMMAR` giải trình
+  (đo 22:33Z: 10/10 khối đúng); đột biến bỏ nhóm bắt ở grammar `chon` ⇒ ca ĐỎ;
+- **đuôi lạ trên dòng tổng** (luật 4, hậu tố đóng): ` rác` sau `tự đột biến cổng: … cơ chế)` ⇒ **1**;
+  ` rác` sau `nền: 11/11 đạt` ⇒ **1** (T lượt 2 `0` / `1`).
+Phép làm ĐỎ (bảng răng, đo 22:33Z): m1 gỡ luật 3 ⇒ 17 ca "hai bản ghi" về `0`; m2 `fullmatch` →
+`search` ⇒ 16 ca (13 chỉ nó) về `0`; m5 thêm lại `NHAN` ⇒ 14 ca đỏ giả lên `1`; **m6 trả nhóm `SPAN`
+lại khi có `TONG` ⇒ 8 ca ghi-chú-trước lên `1`**; **m7 bỏ luật 7 ⇒ 2 ca grammar-sai về `0`**. Đơn vị:
+**số mục bị `chay_moi` đếm là ĐỎ**.
 
 **A4 (M4) — đường Windows của #456 nguyên vẹn, cộng hai chốt mới.**
 Qua `chay_moi` với seam `doc_nen_windows`, đo 21:07Z: dòng Windows trên Linux **1** · trên Windows
@@ -489,11 +651,20 @@ ca nào trong ba ⇒ `phan_chung()` dưới `N/N`.
 
 **A6 (M6) — tám định dạng từ bản in NGUYÊN BYTE, và sổ đăng ký chạy thật.**
 - (a) qua `chay_moi`: 7 bản in thật + canonical `pretooluse` (Linux, Windows) ⇒ **0** đỏ mỗi bộ
-  (đo 21:07Z). `sha256` bản in, đủ để ai cũng tự đo lại: `chon_reviewer` `a5807082…` · `gh_readback`
+  (đo 21:07Z với T; đo lại 22:33Z với T', nhóm `that-*`/`canonical-*`/`*-baseline` của `do_t2.json`:
+  **0**). `sha256` bản in, đủ để ai cũng tự đo lại: `chon_reviewer` `a5807082…` · `gh_readback`
   `0a476a97…` · `mcp_gh` `b3034838…` · `mcp_github_doc` `82f89e9d…` · `probe_mang` `c9997dac…` (5 bộ
-  này chạy 21:00Z tại đây, `rc=0`) · `subagent_ghi_detect` `449578d8…` · `nhanh_don_duoc`
-  `366795e4…` (bản in `rc=0` của sandbox reviewer lượt 1). Phiên thi công phải **chạy lại** 5 bộ ngắn
-  và dùng bản in của mình; `subagent`/`nhanh`/`pretooluse` lấy từ lượt full-gate cuối.
+  này chạy 21:00:15–21:00:23Z 06-09-2026 tại container soạn spec, `rc=0`) · `subagent_ghi_detect`
+  `449578d8…` · `nhanh_don_duoc` `366795e4…` (bản in `rc=0` của sandbox reviewer lượt 1).
+  **Bản in nằm ở đâu, nói cho đúng ở cả hai phía:** tệp nguyên byte ở gói bàn giao
+  `executor-luot3-va/fixtures/*.stdout` kèm `MANIFEST.sha256` (bản lượt 2 dẫn `executor-luot2-va/…`
+  — gói ấy có thật nhưng **không được giao vào sandbox lượt 3**, verdict lượt 3 P3
+  `thieu-ban-in-de-do-span-mcp`; băm bảy tệp trong hai gói **trùng nhau từng byte**, kiểm 22:26Z).
+  Định danh tệp là **BĂM**, không phải tên thư mục: reviewer nhận gói nào thì so băm gói ấy với bảy
+  băm trên; **không có tệp mang đúng băm trong sandbox ⇒ mọi số dẫn từ bản in ấy là KHÔNG ĐO ĐƯỢC với
+  reviewer**, kể cả `2171/2251` ở `chua_do_duoc` #6 — không tự sinh log mới để thay bản đã dẫn. Phiên
+  thi công phải **chạy lại** 5 bộ ngắn và dùng bản in của mình; `subagent`/`nhanh`/`pretooluse` lấy từ
+  lượt full-gate cuối.
 - (b) `python .claude/dev/ci_dang_ky_test.py --chay` trên `ubuntu-latest` phải `success` — **KHÔNG ĐO
   ĐƯỢC ở lượt này (ràng buộc chủ kho)**; full-gate cuối sau khi hết P1 trả lời.
 Đơn vị: **số mục bị `chay_moi` đếm là ĐỎ**.
@@ -520,23 +691,34 @@ hoặc nguồn trích (L5):
 
 | hình dạng | số lần đã gặp | đo/trích lúc (đọc lại 21:03Z 06-09-2026 trên `b1c2284`) | ghi chú |
 |---|---:|---|---|
-| tập RỖNG thoả `not song` (`0/0` được nhận là bằng chứng) | **3** | trích `ops/specs/MUTANT-KHONG-CHAY-TREN-WINDOWS.md:137-140` (đọc lại 21:03Z) + đo B1 19:32Z và đo lại A1 21:07Z 06-09-2026 | #319 (gốc) · #456 đường Windows (đã bịt) · đường Linux (packet này). Lần thứ ba ⇒ `PROTOCOL §12` đòi xem lại CÁCH LÀM: câu trả lời là **bịt ở vị từ dùng chung**, không bịt ở từng mẫu. |
+| tập RỖNG thoả `not song` (`0/0` được nhận là bằng chứng) | **3** | trích `ops/specs/MUTANT-KHONG-CHAY-TREN-WINDOWS.md:137-140` (đọc lại 21:03Z) + đo B1 19:32Z và đo lại A1 21:07Z, 22:33Z 06-09-2026 | #319 (gốc) · #456 đường Windows (đã bịt) · đường Linux (packet này). Lần thứ ba ⇒ `PROTOCOL §12` đòi xem lại CÁCH LÀM: câu trả lời là **bịt ở vị từ dùng chung**, không bịt ở từng mẫu. Lần thứ tư **suýt** xảy ra trong chính bản nháp T lượt 2 (`(?: .*)?` cho `0/0` lọt ở đuôi dòng tổng — reviewer lượt 3 đo 22:10Z); chưa thi công nên không đếm, nhưng luật 7 sinh ra từ đó. |
 | nâng `timeout-minutes` để mua cổng xanh | **2 lần nâng** (3 mức: `25` khởi tạo `9e4f361` → `45` `6d88a2c` → `60` `7657bfd`) | `git log -G 'timeout-minutes:' -- .github/workflows/ci.yml` chạy lại 21:03Z 06-09-2026: `9e4f361` (2026-07-09) · `6d88a2c` (2026-08-29 03:29Z) · `7657bfd` (2026-08-29 04:49Z) | Bản đầu chép `3` từ #456; #456 đếm MỨC chứ không đếm LẦN NÂNG (verdict lượt 1, P2). Lần nâng kế tiếp là lần **thứ ba** ⇒ `§12`. Packet này không đụng `ci.yml`. |
 | khai một phép đo là `KHÔNG ĐO ĐƯỢC` rồi để nguyên | **1** | trích `ops/specs/CI-CAI-JSONSCHEMA-r3.md:135-160` (A5), đọc lại 21:03Z 06-09-2026 | Đã đo được ở #456. Sự kiện lịch sử, không tái chạy. |
 | cổng vắng mặt trông giống cổng xanh | nhiều | trích `CLAUDE.md` (mục dấu bỏ-qua-CI / PR #100; `ops-don-ref.yml` run `31971137920`), đọc lại 21:03Z 06-09-2026 | Ở đây: cổng CÓ MẶT, CÓ CHẠY, và vẫn không đo — biến thể đắt hơn. Sự kiện GitHub không readback lại ở lượt này. |
 | lease không tự chết khi packet đã land | **2** | `#355`: trích `CLAUDE.md` mục *"LEASE KHÔNG TỰ CHẾT KHI PACKET ĐÃ LAND"*, đọc lại 21:03Z; `#456`: đo 17:46Z và **đo lại 21:00Z 06-09-2026** (`ai-dang-giu` ⇒ `NGƯỜI_GIỮ 1`, còn ~17,5 giờ) | Xem A8. |
-| lời khai rộng hơn phép đo | **2** (bản đầu: *"A-b không sinh đỏ giả"*; bản lượt 1: *"mọi cặp mang nhãn được kiểm"* trong khi `[^\n\d]{0,24}?` bỏ sót) | verdict lượt 1 tái hiện 19:32Z; verdict lượt 2 tái hiện **21:07Z 06-09-2026** | Cùng họ *"thu hẹp mà viết thành đóng"* trong `CLAUDE.md`. Hai lần trong cùng một đặc tả ⇒ bản này đổi cách làm (T), không vá A-c lần nữa. |
-| đọc toàn bộ văn bản làm bằng chứng rồi cố lọc (A-b, A-c) | **2** (hai bản trước của chính đặc tả này) | verdict lượt 1 (19:32Z), verdict lượt 2 (21:07Z 06-09-2026) | Lần thứ hai; `§12` nói lần thứ ba mới bắt buộc xem lại, nhưng bộ lọc nào cũng vừa rộng vừa hẹp nên đổi sớm một lần. |
+| lời khai rộng hơn phép đo | **3** (bản đầu: *"A-b không sinh đỏ giả"*; bản lượt 1: *"mọi cặp mang nhãn được kiểm"* trong khi `[^\n\d]{0,24}?` bỏ sót; **bản lượt 2: *"T: đỏ giả 0, bỏ sót 0"* viết như tính chất tuyệt đối trong khi prototype còn đọc nhóm `SPAN` và một grammar còn `.*`** — 64 ca không có ca nào đo hai chỗ ấy) | verdict lượt 1 tái hiện 19:32Z; verdict lượt 2 tái hiện 21:07Z; verdict lượt 3 tái hiện **22:10Z 06-09-2026**, đo lại 22:33Z | Cùng họ *"thu hẹp mà viết thành đóng"* trong `CLAUDE.md`. **Lần thứ ba ⇒ `§12`:** cách làm đổi — mọi điểm hai chiều từ nay là `X/N trên bộ ca S` kèm băm bộ đo và danh sách lớp chưa phủ (`chua_do_duoc` #1), không còn "0" tuyệt đối. |
+| đọc toàn bộ văn bản làm bằng chứng rồi cố lọc (A-b, A-c, và mảnh `SPAN`/`.*` còn sót trong T) | **3** (ba bản trước của chính đặc tả này; ở T là mảnh CHÉP LẠI từ BASE + một khoảng mở trong grammar) | verdict lượt 1 (19:32Z), lượt 2 (21:07Z), lượt 3 (22:10Z 06-09-2026) | **Lần thứ ba ⇒ `§12`**, trả lời ở mục *"§12 — ba lần hỏng, một gốc"*: cùng gốc, hợp đồng T đúng, prototype trái hợp đồng; sửa = gỡ mâu thuẫn + luật 7 để vị từ tự kiểm vùng bằng chứng. Hướng "đổi bên IN" đã xét và ghi điều kiện mở lại. |
 
 ## `chua_do_duoc`
 
-1. **Giá của luật 6 — văn xuôi không được đọc, và hợp đồng là HỮU HẠN.** T không hứa đọc mọi cặp
+1. **Giá của luật 6 — văn xuôi không được đọc, và hợp đồng là HỮU HẠN.** T' không hứa đọc mọi cặp
    có nhãn ở mọi vị trí văn bản; một bộ TƯƠNG LAI in bằng chứng ngoài bản ghi tổng đã khai sẽ không
-   được canh cho tới khi có grammar riêng, và đổi formatter ⇒ phải đổi `TONG` rồi chạy lại 64 ca +
+   được canh cho tới khi có grammar riêng, và đổi formatter ⇒ phải đổi `TONG` rồi chạy lại bộ ca +
    bản in thật. Nợ có tên **`GRAMMAR-TONG-LA-HOP-DONG-HUU-HAN`** (thay cho
    `NHAN-BANG-CHUNG-LA-DANH-SACH-CHO-PHEP` của bản lượt 1). Rủi ro ngược — grammar quá chặt bác một
    formatter hợp lệ — đo được ở A6(a): 7 bản in thật ⇒ `0` đỏ; **chưa đo** trên bản in thật của
    `pretooluse` (mục 2, 4) và trên **Windows** (mục 3).
+   **Lớp CHƯA PHỦ, liệt kê để không ai đọc "0/137" thành "0 với mọi cách in"** — 49 ca ranh giới
+   reviewer lượt 3 dựng và cố ý không đặt kỳ vọng (`do_t2.json` → `ranh_gioi_T'`), giá trị T' ghi
+   nguyên: thêm khoảng trắng cuối dòng tổng · hậu tố ` (xong)` · thụt lề dòng tổng · mã màu ANSI ⇒ T'
+   **từ chối** (8/8 định dạng mỗi kiểu) — đó là giá của hợp đồng hữu hạn, và reviewer kiểm tĩnh không
+   thấy tuỳ chọn formatter hiện tại nào in các biến thể ấy qua đường capture; dòng tổng RỖNG **thụt
+   lề** đứng sau tổng xanh ⇒ T' **nhận** (8/8: dòng ấy ngoài bộ chọn, luật 6 — không formatter nào in
+   nó, nhưng đây là ranh giới thật, không phải "an toàn"); CRLF thô ⇒ nhận 7/8, `nhanh` từ chối vì
+   `SPAN` neo `$` — mà `_chay_that` dùng `subprocess.run(text=True)` nên đường thật đã chuẩn hoá về
+   LF (ca `consumer_normalized_CRLF` ⇒ 0 đỏ 8/8); `nhanh` + dòng `0/0 (xong)` ⇒ nhận (bộ chọn neo
+   cuối dòng, luật 6). Đổi formatter ⇒ phải khai lại `TONG` và chạy lại toàn bộ bộ ca; **không** được
+   nới grammar bằng `.*` để "qua" — luật 7 sẽ làm ĐỎ ngay bản in xanh, và đó là kết quả đúng.
 2. **Nền của `pretooluse_guard_test.py` KHÔNG xanh trong container soạn spec.** `rc=1`,
    **270 giây**, 3 ca đỏ sẵn (`t11_lo_336_co_that_VA_bi_chan` ·
    `t15_cong_kiem_bang_khop_nguon_that` · `t33_cong_hoi_RUNTIME_chu_khong_parse_van_ban`, đo
@@ -562,8 +744,11 @@ hoặc nguồn trích (L5):
    của lượt này (bản in 19:32Z không được lưu nên số ấy không tự đo lại được — verdict lượt 2, P3):
    `chon_reviewer` span `2745` ký tự = `2764` byte UTF-8 (stdout `2746`/`2765`, `sha256`
    `a5807082…`) · `mcp_gh` span `2171` ký tự = `2251` byte (stdout `2172`/`2252`, `sha256`
-   `b3034838…`, `rc=0`, chạy 21:00:15–21:00:22Z). Hai số của lượt 1 trùng số hôm nay; bản in nguyên
-   byte nằm trong gói bàn giao lượt vá này để ai cũng tự đo lại được. Độ dài span không nói gì về
-   việc grammar đọc đúng — T không dùng span để chọn cặp. Bản đầu ghi `2745 b`/`2179 b` — sai đơn
-   vị, và số `mcp_gh` trôi theo bản in; P3 lượt 1 đóng bằng đơn vị đúng, P3 lượt 2 đóng bằng bản in
-   được LƯU cùng `sha256`, không phải bằng một con số mới không ai đo lại được.
+   `b3034838…`, `rc=0`, chạy 21:00:15–21:00:22Z; đo lại 22:33Z trên cùng tệp: `2171/2251`, băm khớp).
+   Hai số của lượt 1 trùng số hôm nay. Bản in nguyên byte: `executor-luot3-va/fixtures/mcp_gh_test.stdout`
+   (định danh bằng BĂM — A6(a)); reviewer lượt 3 không nhận được gói lượt 2 nên với họ số này còn
+   **KHÔNG ĐO ĐƯỢC** cho tới khi sandbox có tệp mang đúng băm — nói thẳng thay vì gọi là đã đóng. Độ
+   dài span không nói gì về việc grammar đọc đúng — T' không dùng span để chọn cặp. Bản đầu ghi
+   `2745 b`/`2179 b` — sai đơn vị, và số `mcp_gh` trôi theo bản in; P3 lượt 1 đóng bằng đơn vị đúng,
+   P3 lượt 2 đóng bằng bản in được LƯU cùng `sha256`; P3 lượt 3 (`thieu-ban-in-de-do-span-mcp`, VÁ HỜ)
+   đóng bằng cách nói đúng vị trí tệp ở CẢ HAI phía của lần giao gói, và bằng chính tệp được giao.

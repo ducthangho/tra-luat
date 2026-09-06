@@ -45,8 +45,8 @@ assurance_target: cross_approved
 access: read-write
 
 spec_path: ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md
-spec_sha256: 93d48bcef40d284344ccb92e25246bff3738c3125bfad20c37211bb198c396b3
-spec_hash: 93d48bcef40d284344ccb92e25246bff3738c3125bfad20c37211bb198c396b3
+spec_sha256: f2a5807cb99ef1711d4c69e81024f2e60419774c58a16c6072696386514c03ef
+spec_hash: f2a5807cb99ef1711d4c69e81024f2e60419774c58a16c6072696386514c03ef
 
 write_set:
   - .claude/dev/ci_dang_ky_test.py
@@ -106,23 +106,47 @@ ly_do_cap: >-
   DOT BIEN đã xem 3/5 hướng`) VÀ bỏ sót 7/64 ca (khoảng cách tuỳ ý `{0,24}`; tổng TRÙNG) —
   verdict lượt 2, đo lại 21:07Z 06-09-2026 qua chính `chay_moi` trên bản in thật. Cùng gốc: đọc
   cả span rồi cố lọc, và bộ lọc nào cũng vừa rộng vừa hẹp.
-  Bản này chọn T — bản ghi TỔNG theo từng định dạng: mỗi mục `MOI` là cặp (SPAN, TONG); TONG =
-  danh sách (BỘ CHỌN đầu dòng, GRAMMAR fullmatch); mỗi bản ghi đúng MỘT dòng; mọi nhóm bắt soi
-  theo cặp n == m > 0; nhóm lẻ hay 0 nhóm + 0 bản ghi ⇒ False; dòng không khớp bộ chọn là văn
-  xuôi. Đo 64 ca trên 8 định dạng (7 bản in thật + canonical pretooluse): đỏ giả 0, bỏ sót 0
-  (BASE 0/16, A-c 7/7); 5 đột biến vào T, mỗi cái làm ≥ 1 ca đổi màu. Chuỗi regex SPAN của 8 mục
-  giữ NGUYÊN VĂN — chỉ đổi KIỂU giá trị của `MOI`/`MOI_WINDOWS`.
+  Bản lượt 2 chọn T — bản ghi TỔNG theo từng định dạng — nhưng prototype T còn lấy số từ nhóm
+  của `re.search(SPAN)` (khớp trái nhất, kể cả trong văn xuôi TRƯỚC tổng) và grammar probe #1
+  còn `(?: .*)?`: reviewer lượt 3 dựng được đỏ giả (ghi chú `nền: 3/5` trước bản in ⇒ 1) và bỏ
+  sót (`· DOT BIEN 0/0 bi giet` nối vào chính dòng tổng ⇒ 0). Slug hỏng BA lượt ⇒ PROTOCOL §12:
+  đo được ba lần cùng MỘT gốc (số làm bằng chứng đến từ vùng văn bản không được khoanh); hợp
+  đồng T đúng, prototype trái hợp đồng — câu trả lời ghi trong spec, mục "§12 — ba lần hỏng, một
+  gốc", kèm hướng "đổi bên IN" đã xét và điều kiện mở lại.
+  Bản này chọn T' = T gỡ mâu thuẫn: mỗi mục `MOI` là cặp (SPAN, TONG); TONG = danh sách (BỘ CHỌN
+  đầu dòng, GRAMMAR fullmatch); mỗi bản ghi đúng MỘT dòng; khi có TONG, số CHỈ từ nhóm bắt của
+  GRAMMAR trên dòng được chọn, soi cặp n == m > 0 — SPAN chỉ là điều kiện khớp (luật 5); mọi cặp
+  `\d+/\d+` trên dòng được chọn phải được grammar giải trình (luật 7, mới); nhóm lẻ ⇒ False; chuỗi
+  trần 0 nhóm ⇒ False; dòng không khớp bộ chọn là văn xuôi (luật 6). Đo 22:33Z 06-09-2026, 186 ca
+  qua chính `chay_moi` (137 có kỳ vọng, 49 ranh giới; bộ đo `do_t2.py` lấy vị từ NGUYÊN VĂN từ
+  spec): T' đỏ giả 0/137, bỏ sót 0/137 (BASE 8/33 · A-c 18/19 · T lượt 2 8/5); 8 đột biến vào
+  nguồn khối mã, 7 có ca riêng trừ m4 (siêu-đột-biến), m8 (wildcard) ⊆ m2 — nói thẳng, không chép
+  lời hint. Chuỗi regex SPAN của 8 mục giữ NGUYÊN VĂN — chỉ đổi KIỂU giá trị của `MOI`/`MOI_WINDOWS`.
 
 viec_trong_lease:
-  - 'Sửa `bang_chung_xanh` theo 6 luật của T (spec, mục "Thiết kế T"): đơn vị (SPAN, TONG); BỘ CHỌN
-     `re.match` đầu dòng; mỗi bản ghi đúng MỘT dòng; GRAMMAR `re.fullmatch`; mọi nhóm bắt soi theo
-     cặp n == m > 0; nhóm LẺ hay 0 nhóm + 0 bản ghi ⇒ False; dòng ngoài bộ chọn là văn xuôi.'
+  - 'Sửa `bang_chung_xanh` theo 7 luật của T'' (spec, mục "Thiết kế T"): đơn vị (SPAN, TONG); BỘ CHỌN
+     `re.match` đầu dòng; mỗi bản ghi đúng MỘT dòng; GRAMMAR `re.fullmatch`. Khi có TONG, số CHỈ từ
+     nhóm bắt của GRAMMAR trên dòng được chọn, soi cặp n == m > 0; SPAN chỉ là điều kiện khớp, KHÔNG
+     lấy số từ nhóm của nó (luật 5). Mọi cặp `\d+/\d+` trên dòng được chọn phải được grammar giải
+     trình: số cặp trên dòng = số cặp nhóm bắt + số cặp hằng trong grammar (luật 7). Chỉ chuỗi trần
+     (không TONG) mới soi số từ SPAN. Nhóm LẺ ⇒ False; chuỗi trần 0 nhóm ⇒ False; dòng ngoài bộ chọn
+     là văn xuôi (luật 6).'
   - 'Khai `TONG` cho đủ 8 mục `MOI` và `TONG_WINDOWS` cho mục Windows, tái dẫn xuất từ bản in
-     thật (bảng ở spec); chuỗi regex SPAN giữ NGUYÊN VĂN, chỉ đổi kiểu giá trị.'
+     thật (bảng ở spec); chuỗi regex SPAN giữ NGUYÊN VĂN, chỉ đổi kiểu giá trị. Grammar probe_mang
+     #1 ĐÓNG với hậu tố formatter đã biết `(m1..m5 + 4 dòng cơ chế)`, không wildcard đuôi; mọi
+     grammar không có `.*` hay `\d+/\d+` không nhóm bắt — luật 7 sẽ làm ĐỎ ngay bản in xanh nếu có.'
+  - 'Ca tĩnh trong `phan_chung()`: với mỗi mục `MOI`/`MOI_WINDOWS` trên bản in canonical, tập cặp SPAN
+     bắt ⊆ tập cặp GRAMMAR giải trình (đo 22:33Z: 10/10 khối); đột biến bỏ nhóm bắt ở grammar `chon`
+     ⇒ ca ĐỎ. Đây là câu trả lời cho rủi ro reviewer lượt 3 tự khai về độ phủ của GRAMMAR.'
   - 'Gỡ mệnh đề thoát `len(m.groups()) != 2` — không còn số nhóm nào cho True vô điều kiện (A2).'
   - 'Phản chứng A1–A6 đi qua chính `chay_moi`, không gọi thẳng `bang_chung_xanh` (r6/#401): 0/0
-     trong bản ghi ⇒ 1 đỏ; ghi chú có nhãn ⇒ 0 đỏ; hai bản ghi cùng loại ⇒ 1; có tiền tố tổng mà
-     sai grammar ⇒ 1; 5 đột biến vào T (bảng răng ở spec) mỗi cái làm ≥ 1 ca đổi màu.'
+     trong bản ghi ⇒ 1 đỏ, kể cả nối ở đuôi dòng tổng probe; ghi chú có nhãn ⇒ 0 đỏ; ghi chú mang
+     tiền tố tổng (`Ghi chú: ví dụ nền: 3/5 đạt`) đứng TRƯỚC và SAU bản in thật ⇒ 0 đỏ ở mọi định
+     dạng có SPAN bắt cặp; hai bản ghi cùng loại ⇒ 1; có tiền tố tổng mà sai grammar ⇒ 1; grammar
+     cố ý bỏ nhóm bắt cặp đột biến + 0/0 ⇒ 1 và + bản in xanh ⇒ 1 (luật 7); đuôi rác không cặp trên
+     dòng tổng ⇒ 1. Đột biến vào T'' (bảng răng ở spec): m6 trả nhóm SPAN lại khi có TONG ⇒ ca ghi
+     chú-trước phải ĐỎ; m7 bỏ luật 7 ⇒ ca grammar-sai phải ĐỎ; m1/m2/m3/m5 như bảng; m8 (trả wildcard
+     probe) đo được KHÔNG có răng riêng dưới T'' vì ⊆ m2 — không khai nó là chốt độc lập.'
   - 'Đảo chiều VÀ đổi tên `p456-linux-nhan-0-tren-0-Y-HET-base`; đổi neo hai ca
      `p456-mau-linux-KHONG-DOI-so-voi-base` / `p456-linux-A-B-tung-dau-vao-khop-base` sang SPAN
      nguyên văn + TONG canonical; không xoá ca nào (A5).'
@@ -136,6 +160,12 @@ dieu_kien_dung:
      #456 ngoài thẩm quyền của packet này.'
   - 'Quay về soi MỌI cặp trong span (A-b) hay quét nhãn trong span (A-c) — đỏ giả đo được trên bản in
      hợp lệ (A-b 1 ca lượt 1; A-c 7/64 ca lượt 2), và A-c còn bỏ sót 7/64 ca.'
+  - 'Lấy số từ nhóm bắt của SPAN khi mục đã có TONG (bản T lượt 2) — đỏ giả 8/137 ca đo 22:33Z
+     06-09-2026 (ghi chú mang tiền tố tổng đứng trước bản in). Đó là lần thứ ba của cùng một gốc;
+     §12 đã trả lời — làm lại là vá lần thứ năm, không phải sửa.'
+  - 'Nới grammar bằng `.*`/khoảng mở hay bỏ luật 7 để "qua" một bản in — luật 7 làm ĐỎ ngay bản in
+     xanh khi grammar có lỗ là KẾT QUẢ ĐÚNG; bản in không mô tả được bằng grammar đóng là điều kiện
+     mở revision (đổi bên IN, spec mục §12), không phải lý do nới bên ĐỌC.'
   - 'Coi `check rc=0` là bằng chứng tiền nhiệm đã thôi giữ — check không chặn chồng lấn write set
      (đo 21:02Z 06-09-2026); chỉ `ai-dang-giu` trên MỌI đường write set đo được.'
   - 'Chạm bất kỳ đường dẫn nào ngoài MỘT đường đã khai — đổi revision, KHÔNG tự mở write set.'

@@ -53,7 +53,7 @@ anchor:
     Neo bang verdict_sha256 + commit DAU TIEN chua tep verdict. GHIM O COMMIT SAU, vi mot
     commit khong chua duoc bam cua chinh no — cung ly do bon bien nhan v2 chuan cua kho lam
     hai buoc.
-evidence_url: https://github.com/ducthangho/tra-luat/blob/GHIM_O_COMMIT_SAU/ops/reviews/pr455-bien-nhan-v2-review-2-codex-verdict.md
+evidence_url: https://github.com/ducthangho/tra-luat/blob/1cd8ec78e42e32e6ff5af8edcc4660b1e601fd93/ops/reviews/pr455-bien-nhan-v2-review-2-codex-verdict.md
 authoritative_source: repo_file
 evidence_channel: repo_file
 

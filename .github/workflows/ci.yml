@@ -107,6 +107,10 @@ jobs:
         run: |
           python ops/cong_cu.py kiem-tra --json
           python ops/cong_cu_test.py
+      - name: cài Ruff 0.15.15 và in probe dương
+        run: |
+          python -m pip install --quiet ruff==0.15.15
+          ruff --version
       # Kiểm CHÍNH head của PR, không dùng GITHUB_SHA vì trên pull_request đó là synthetic merge.
       # `cat-file` và `merge-base` đều không có nhánh bỏ qua: thiếu object/fetch/lỗi git phải đỏ.
       - name: PR head contains required EOL base

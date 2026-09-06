@@ -11,6 +11,7 @@ Moi ca dung cay git TAM (khong bao gio cham kho that), va anh chup di sang thu m
 RIENG qua `TL_SUBAGENT_SNAP_DIR`.
 """
 import contextlib
+import functools
 import importlib.util
 import json
 import os
@@ -26,7 +27,7 @@ HOOK = HERE / "subagent_ghi_detect.py"
 
 def _la_cau_hinh_pham_vi_lenh(k):
     """`GIT_CONFIG_COUNT` + `GIT_CONFIG_KEY_<n>`/`VALUE_<n>` — kenh cau hinh PHAM VI LENH."""
-    if k == "GIT_CONFIG_COUNT":
+    if k in ("GIT_CONFIG_COUNT", "GIT_CONFIG_PARAMETERS"):
         return True
     for tien_to in ("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_"):
         # Xoa MOI cap danh so, khong chi nhung cap duoi `COUNT` hien tai: bo sot mot cap
@@ -36,7 +37,7 @@ def _la_cau_hinh_pham_vi_lenh(k):
     return False
 
 
-def _moi_truong_git_dong(env=None):
+def _moi_truong_git_dong(env=None, safe_directory=None):
     """Moi truong KHONG doc cau hinh git ngoai nao. Nhan `env` lam DOI SO de `t22b` goi
     duoc voi mot nen THU DICH dung san — mot ham chi sua `os.environ` thi khong co cach
     nao cho no mot ca biet truoc dap an."""
@@ -46,6 +47,9 @@ def _moi_truong_git_dong(env=None):
     e.update({"GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_SYSTEM": os.devnull,
               "GIT_AUTHOR_NAME": "tl329", "GIT_AUTHOR_EMAIL": "tl329@invalid",
               "GIT_COMMITTER_NAME": "tl329", "GIT_COMMITTER_EMAIL": "tl329@invalid"})
+    if safe_directory is not None:
+        e.update({"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "safe.directory",
+                  "GIT_CONFIG_VALUE_0": str(pathlib.Path(safe_directory).resolve())})
     return e
 
 
@@ -459,7 +463,57 @@ def t20_duong_KHONG_bam_duoc_thi_UNKNOWN_khong_phai_clean(h):
 _VAN_TAY_DA_IN = []      # in DUNG MOT LAN moi tien trinh — ly do o cuoi `t21`
 
 
-def _bash_tuyet_doi():
+@functools.lru_cache(maxsize=1)
+def _git_for_windows_usr_bin():
+    if os.name != "nt":
+        return None
+    git = shutil.which("git")
+    if not git:
+        return None
+    candidates = [pathlib.Path(git)]
+    try:
+        probe = subprocess.run([git, "--exec-path"], capture_output=True, text=True,
+                               encoding="utf-8", errors="replace", timeout=20)
+        if probe.returncode == 0 and probe.stdout.strip():
+            candidates.append(pathlib.Path(probe.stdout.strip()))
+    except (OSError, subprocess.SubprocessError):
+        pass
+    for candidate in candidates:
+        try:
+            candidate = candidate.resolve()
+        except OSError:
+            continue
+        for root in (candidate, *candidate.parents):
+            usr_bin = root / "usr" / "bin"
+            if usr_bin.is_dir():
+                return usr_bin
+    return None
+
+
+def _ung_vien_bash():
+    """Liet ke co thu tu, khong dong nhat `co tep` voi `chay duoc`."""
+    ds = []
+
+    def them(p):
+        if not p:
+            return
+        p = str(pathlib.Path(p))
+        khoa = os.path.normcase(os.path.abspath(p))
+        if all(os.path.normcase(os.path.abspath(x)) != khoa for x in ds):
+            ds.append(p)
+
+    # Giu ung vien PATH dau tien de probe co the TU CHOI vo System32 that.
+    them(shutil.which("bash"))
+    if os.name == "nt":
+        usr_bin = _git_for_windows_usr_bin()
+        if usr_bin:
+            root = usr_bin.parents[1]
+            them(root / "bin" / "bash.exe")
+            them(usr_bin / "bash.exe")
+    return ds
+
+
+def _bash_tuyet_doi(ung_vien=None, chay=subprocess.run):
     """Phan giai `bash` thanh DUONG DAN TUYET DOI truoc khi phong. `(duong, None)` hoac
     `(None, ly_do)` — KHONG bao gio im lang cho qua.
 
@@ -477,12 +531,58 @@ def _bash_tuyet_doi():
     von phai do: lenh hook co chay duoc duoi mot shell POSIX that hay khong. Day KHONG
     phai rut ruot ca — khang dinh van doi du `4/4`, xem `t21`.
     """
-    duong = shutil.which("bash")
-    if not duong:
-        return None, "khong phan giai duoc `bash` tren PATH"
-    if not pathlib.Path(duong).is_file():
-        return None, f"`bash` phan giai ve {duong} nhung do khong phai mot tep"
-    return duong, None
+    cac = list(_ung_vien_bash() if ung_vien is None else ung_vien)
+    bi_tu_choi = []
+    for duong in cac:
+        if not pathlib.Path(duong).is_file():
+            bi_tu_choi.append(f"{duong}: khong phai tep")
+            continue
+        try:
+            v = chay([duong, "--version"], stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE, timeout=15)
+            c = chay([duong, "-c", ":"], stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE, timeout=15)
+        except (OSError, subprocess.SubprocessError) as e:
+            bi_tu_choi.append(f"{duong}: {type(e).__name__}: {e}")
+            continue
+        dau_ra = (v.stdout or b"") + (v.stderr or b"")
+        dung_duoc = (v.returncode == 0 and b"gnu bash" in dau_ra.lower()
+                     and c.returncode == 0)
+        if not dung_duoc:  # named-mutant: reject-present-unusable-bash
+            tom = dau_ra[:100].decode("utf-8", "backslashreplace").strip()
+            bi_tu_choi.append(f"{duong}: version_rc={v.returncode} shell_rc={c.returncode} "
+                              f"output={tom or 'RONG'}")
+            continue
+        return duong, None
+    if not cac:
+        return None, "khong phan giai duoc `bash`"
+    return None, "khong co bash dung duoc: " + "; ".join(bi_tu_choi)
+
+
+def _probe_bash_co_rang():
+    """Phan chung: rc, GNU-output va `bash -c` la ba conjunct doc lap."""
+    with tempfile.TemporaryDirectory(prefix="tl329-bash-") as d:
+        base = pathlib.Path(d)
+        hong, khong_gnu, khong_c, tot = (base / x for x in
+            ("hong.exe", "khong-gnu.exe", "khong-c.exe", "tot.exe"))
+        for path in (hong, khong_gnu, khong_c, tot):
+            path.touch()
+
+        def gia(argv, **_kwargs):
+            path = os.path.normcase(os.path.abspath(argv[0]))
+            if path == os.path.normcase(str(hong)):
+                return subprocess.CompletedProcess(argv, 1, b"", b"")
+            if argv[1] == "--version":
+                out = (("Windows Subsystem for Linux has no installed distributions.")
+                       .encode("utf-16-le") if path == os.path.normcase(str(khong_gnu))
+                       else b"GNU bash, version fixture")
+                return subprocess.CompletedProcess(argv, 0, out, b"")
+            rc = 1 if path == os.path.normcase(str(khong_c)) else 0
+            return subprocess.CompletedProcess(argv, rc, b"", b"")
+
+        chon, _ = _bash_tuyet_doi(
+            [str(hong), str(khong_gnu), str(khong_c), str(tot)], gia)
+        return chon is not None and os.path.normcase(chon) == os.path.normcase(str(tot))
 
 
 def _van_tay_nen_chay():
@@ -498,7 +598,9 @@ def _van_tay_nen_chay():
     VANG MAT va RONG la hai ket luan khac nhau, nen chuoi rong van phai in ra chu.
     """
     duong = shutil.which("bash")
-    ra = ["VANTAY bash-which  : " + (duong if duong else "KHONG TIM THAY")]
+    chon, ly_do = _bash_tuyet_doi()
+    ra = ["VANTAY bash-which  : " + (duong if duong else "KHONG TIM THAY"),
+          "VANTAY bash-chon   : " + (chon if chon else f"KHONG ({ly_do})")]
     # GOI HAI LAN CO CHU Y: ten tran (di qua `CreateProcess`) va duong dan tuyet doi.
     # Hai dong khac nhau CHINH LA con bo — xem `_bash_tuyet_doi`. Giu ca hai thi lan sau
     # ai doc log cung thay ngay, khong phai suy dien lai tu dau.
@@ -539,6 +641,8 @@ def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h, doi_lenh=None):
     `doi_lenh` la moc cua KENH DOT BIEN THU BA (`DOT_BIEN_SETTINGS`): mot ham nhan chuoi
     lenh va tra ve ban da doi. Chi `_chay_dot_bien_settings` truyen no; nen that luon
     `None`. No ton tai de chinh ca nay CHUNG MINH duoc minh con do duoc."""
+    if not _probe_bash_co_rang():
+        return (False, "fixture resolver da chap nhan bash co mat nhung khong chay duoc")
     goc = HERE.parent.parent
     bash, ly_do = _bash_tuyet_doi()
     if bash is None:
@@ -557,7 +661,9 @@ def t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT(h, doi_lenh=None):
             lenh = doi_lenh(lenh)
         for nhan, moi_truong in (("khong dat", {}),
                                  ("co dat", {"CLAUDE_PROJECT_DIR": str(goc)})):
-            env = {k: v for k, v in os.environ.items() if k != "CLAUDE_PROJECT_DIR"}
+            env = _moi_truong_git_dong(
+                {k: v for k, v in os.environ.items() if k != "CLAUDE_PROJECT_DIR"},
+                safe_directory=goc)
             env.update(moi_truong)
             env["TL_SUBAGENT_SNAP_DIR"] = _snap()
             r = subprocess.run([bash, "-c", lenh], cwd=str(goc / ".claude" / "dev"),
@@ -991,6 +1097,20 @@ DOT_BIEN_NHAM_TEST = [
      "    for k in [k for k in e if _la_cau_hinh_pham_vi_lenh(k)]:\n        del e[k]\n",
      "    pass  # dot bien: bo sot kenh cau hinh pham vi lenh\n",
      "t22b_fixture_KHONG_an_cau_hinh_git_ngoai"),
+    ("subagent_missing_gnu_bash_output_conjunct",
+     "        dung_duoc = (v.returncode == 0 and b\"gnu bash\" in dau_ra.lower()\n"
+     "                     and c.returncode == 0)\n",
+     "        dung_duoc = (v.returncode == 0 and c.returncode == 0)\n",
+     "t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT"),
+    ("subagent_missing_bash_c_conjunct",
+     "        dung_duoc = (v.returncode == 0 and b\"gnu bash\" in dau_ra.lower()\n"
+     "                     and c.returncode == 0)\n",
+     "        dung_duoc = (v.returncode == 0 and b\"gnu bash\" in dau_ra.lower())\n",
+     "t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT"),
+    ("subagent_present_unusable_bash_is_accepted",
+     "        if not dung_duoc:  # named-mutant: reject-present-unusable-bash\n",
+     "        if False:  # named-mutant: subagent_present_unusable_bash_is_accepted\n",
+     "t21_lenh_hook_chay_duoc_khi_CLAUDE_PROJECT_DIR_KHONG_DAT"),
 ]
 
 

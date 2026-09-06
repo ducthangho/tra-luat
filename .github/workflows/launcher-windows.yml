@@ -16,6 +16,15 @@ name: launcher (Windows that)
 # hoac gan nhan `windows` cho PR dung toi duong phu thuoc nen.
 on:
   workflow_dispatch:
+    inputs:
+      runner_set:
+        description: 'Nền cần đo trong lượt gọi tay'
+        required: true
+        default: windows-only
+        type: choice
+        options:
+          - windows-only
+          - windows-and-ubuntu
   push:
     branches: [master]
     paths:
@@ -33,9 +42,10 @@ concurrency:
 jobs:
   launcher:
     strategy:
-      fail-fast: false        # phải thấy CẢ HAI nền để lập bảng parity
+      fail-fast: false        # push/PR đo hai nền; dispatch mặc định Windows, có lựa chọn parity
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        # Gọi tay mặc định chỉ trả phút cho Windows; push/PR vẫn đo đủ hai nền.
+        os: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.runner_set == 'windows-only' && '["windows-latest"]' || '["windows-latest","ubuntu-latest"]') }}
     runs-on: ${{ matrix.os }}
     # PR chi chay khi duoc gan nhan `windows`; push master va goi tay thi luon chay.
     if: >-
@@ -50,7 +60,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          # Windows cần mode=0700 ACL chỉ có từ Python 3.13; Ubuntu giữ 3.11.
+          python-version: ${{ matrix.os == 'windows-latest' && '3.13' || '3.11' }}
 
       - name: Su that ve nen chay
         shell: pwsh

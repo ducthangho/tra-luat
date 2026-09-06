@@ -73,3 +73,11 @@ dieu_kien_dung:
      số BỊ CẮT, bước 19→43 chưa từng chạy). Thiếu chỗ thì mở packet kế, đừng sửa cổng theo đoán.'
   - 'A5 ĐỎ (job Windows vẫn cancelled) là KẾT QUẢ ĐO, không phải thất bại — báo chủ kho, đừng
      tự nới trần để ép nó xanh.'
+
+ghi_chu_dang: >-
+  Lần đẩy TẠO nhánh `ops/cap-lease-456` (`537afd0`, 2026-09-06) KHÔNG kích hoạt
+  `ops-publish-lease.yml`: đo qua `actions_list` lọc `head_branch`, ra ĐÚNG 1 lượt và nó là
+  `ops — mở PR bằng git` (skipped). Khớp ca đã ghi trong CLAUDE.md (đo 21-08-2026, nguyên nhân
+  CHƯA BIẾT — đừng chế ra). Chữa bằng commit này: đẩy lên nhánh ĐÃ TỒN TẠI, cùng bộ lọc, cùng
+  thư mục — đường đã có bằng chứng chạy. Ghi lại vì triệu chứng mới là thứ đáng nhớ: một
+  workflow ta trông cậy có thể VẮNG MẶT đúng lần đẩy đầu, và vắng mặt trông y hệt xanh.

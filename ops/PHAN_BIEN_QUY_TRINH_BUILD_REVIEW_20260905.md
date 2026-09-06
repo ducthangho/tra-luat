@@ -28,7 +28,15 @@ Chỗ nào tệp này lệch protocol thì TỆP NÀY sai.
 | `review_rounds_used` được ghi | **10/57** | biên nhận |
 | `codex_review_calls_used` được ghi | **2/57** | biên nhận |
 | `codex_executor_calls_used` được ghi | **0/57** | biên nhận |
-| Lease có mỏ neo đặc tả | **BỐN TÊN**: `spec_hash` 10 · `spec_sha256_required` 29 · `spec_sha256` 5 · `spec_path` 48. **KHÔNG hợp thành 50/82** — xem dưới. Số đứng được: **44/82 có ít nhất một trường BĂM không rỗng**, và ngay cả 44 cũng **chưa phải** "44 lease tuân thủ" | `ops/leases/*.yaml` |
+| Lease có mỏ neo đặc tả — **BA TẦNG, không phải một** (`R4-01`) | tổng **82**, phân rã cộng đúng: | `ops/leases/*.yaml` |
+| · (1) có **ĐỊNH DANH BYTE** (một trong `spec_hash`/`spec_sha256_required`/`spec_sha256` không rỗng) | **44** | |
+| · (2) chỉ có **LOCATOR** (`spec_path`, không băm) | **3** — và cả ba khai `spec_status: ban_thao_chua_duyet`, tức **cố ý không neo** | |
+| · (3) có KHOÁ `spec_path` nhưng giá trị **`null`** | **3** — ngay cả địa chỉ cũng không có | |
+| · (4) không có gì | **32** | |
+| · (5) **ĐÃ XÁC MINH** băm + thẩm quyền | **KHÔNG ĐO ĐƯỢC** — chưa ai kiểm băm khớp nội dung và ai duyệt | |
+
+**Một ĐỊA CHỈ nói tìm bản thảo ở đâu; nó KHÔNG định danh byte đã được duyệt.** Nên `44` là *"có định
+danh byte"*, **không** phải *"44 lease tuân thủ"* — bậc (5) mới là tuân thủ, và bậc ấy chưa đo được.
 | …vì sao 50 là đếm thừa (cross-review lượt 3, `N1`) | **3** lease chỉ có `spec_path` và **tự khai là BẢN THẢO CHƯA DUYỆT**, cố ý không neo; **3** lease có KHOÁ `spec_path` nhưng giá trị **`null`** — được đếm chỉ vì khoá tồn tại. Một **địa chỉ** nói tìm bản thảo ở đâu; nó **không định danh byte đã được duyệt** | |
 | Trần vòng review — hiện trạng thật (`N2`) | `review_rounds_limit`: **41 THIẾU** · **23** khai `2` · **18** khai `>2`, trong đó **17/18 KHÔNG có `nang_tran`**. **6** lease tự ghi đã dùng **>2** vòng | `ops/leases/*.yaml` |
 
@@ -159,7 +167,7 @@ là **va chạm từ vựng**, và cái đó có cổng đỏ được thật (`
 |---|---|---|---|
 | 1. Ba tầng kiểm tra | **ĐÃ CÓ, mạnh hơn** | §10.1 — **sáu tầng T0–T5** + classifier/aggregator | Bản đề xuất là bản RÚT GỌN của thứ đang có. Gộp T3/T4/T5 thành "full CI" xoá mất phân biệt integration-freeze / canonical / release artifact. |
 | 2. Hoãn full CI khỏi vòng lặp | **MÂU THUẪN** | §10.1 | Xem F1. Ngoài ra §10.1 đã cấm trước: selector chỉ được activate sau **shadow 2–4 tuần** chứng minh không bỏ sót failure. Đề xuất chính là activate selector, mà không kèm shadow evidence. |
-| 3. Architecture review gate | **ĐÃ CÓ, chưa đo cưỡng chế** | §3.2 + skill `soan-spec` + 46 ADR | **RÚT `17%`** (§0): mỏ neo đặc tả có **bốn tên**, đo theo khả năng = **61%**. §20 không có ô cổng cho §3.2 ⇒ trạng thái là **chưa đo**, không phải "không cần thêm gate". |
+| 3. Architecture review gate | **ĐÃ CÓ, chưa đo cưỡng chế** | §3.2 + skill `soan-spec` + 46 ADR | **RÚT cả `17%` LẪN `61%`** — xem §0: mỏ neo đặc tả có **ba tầng**, `44/82` có định danh byte, và bậc *"đã xác minh băm + thẩm quyền"* là **KHÔNG ĐO ĐƯỢC**. §20 không có ô cổng cho §3.2 ⇒ trạng thái là **chưa đo**. |
 | 4. Chuẩn hoá severity | **ĐÃ CÓ, mạnh hơn** | verdict có severity/evidence (§ dòng 845); class `sensitive/systemic/routine` (ADR-0036); P0/P1 | Đề xuất **hai** bậc P1/P2; kho có P0 và có class theo rủi ro. Xem F4 về trạng thái thứ ba. |
 | 5. Tìm theo bug class | **MỚI — GIỮ** | doctrine có bản mạnh hơn ("danh sách CẤM → danh sách CHO PHÉP"; "đếm HÌNH DẠNG lỗi") nhưng chưa vào prompt reviewer | Mục giá trị nhất của cả đề xuất. |
 | 6. Root-cause vs local patch | **MỚI, nhưng xung đột** | — | Xem F5: root cause có thể nằm NGOÀI write set đã đóng băng. |
@@ -441,7 +449,7 @@ kê giới hạn này.
    nào cần soạn nội dung nhạy cảm thì mô tả bằng lời. Đã chữa hai lượt chết liên tiếp.
    **(c) Tự khai thiên vị của thứ mình giao.** Giao bảng 21 con số kèm chính script trích ra nó và nói
    thẳng nó lọc theo danh sách đơn vị đoán trước ⇒ reviewer trả về hai finding, một nhắm thẳng bộ lọc.
-   **(d) Thống nhất TỪ VỰNG mỏ neo đặc tả TRƯỚC** (bốn tên, 61% — xem MVP-2), rồi mới cưỡng chế — vòng review tốn nhiều nhất là vòng cãi nhau về đặc tả.
+   **(d) TÁCH BA TẦNG mỏ neo đặc tả TRƯỚC** (locator / định danh byte / đã xác minh — xem §0 và MVP-2), rồi mới cưỡng chế — vòng review tốn nhiều nhất là vòng cãi nhau về đặc tả.
 10. **Minimum viable process — BẢN ĐẦU CÓ BA VIỆC, CẢ BA ĐỀU HỎNG. Cross-review lượt 1 phá từng cái;
     dưới đây là bản đã sửa, xếp lại theo thứ tự rẻ-trước.**
 
@@ -464,8 +472,12 @@ kê giới hạn này.
       schema mà không khai ngày ⇒ cổng đỏ vĩnh viễn trên hiện vật cũ.
 
     **MVP-2 · Thống nhất TỪ VỰNG mỏ neo đặc tả TRƯỚC, cưỡng chế SAU.** Bản đầu nói "cưỡng chế `spec_hash`
-    (đang 17%)". Phép đo nói kho có **bốn tên** cho một khái niệm và **61%** lease đã neo được đặc tả.
-    Cưỡng chế một tên trong bốn sẽ bắt oan **40/82 = 48,8%** lease đang làm đúng bằng tên khác (bản 2 ghi "44%" = 61 − 17, tức trộn nền đo mới với con số 17% vừa bị rút — cross-review lượt 2 bắt). Việc đúng: chọn một tên
+    (đang 17%)". Bản 3 sửa thành "bốn tên, 61% đã neo" — **cũng sai**, và `R4-01` bắt: nó gộp
+    **locator** vào **định danh byte**. Phân rã đúng ở §0: **44** có định danh byte · **3** chỉ có
+    locator và **tự khai là bản thảo chưa duyệt** · **3** có khoá `spec_path` nhưng `null` · **32**
+    không có gì · và bậc **"đã xác minh băm + thẩm quyền" là KHÔNG ĐO ĐƯỢC**.
+    **Bỏ hẳn tỉ lệ "đang làm đúng"** — cả `40/82` lẫn `48,8%` đều chưa có bằng chứng; *"có giá trị
+    băm"* chưa phải *"đã xác minh băm và thẩm quyền"*. Việc đúng: chọn một tên
     canon, khai ánh xạ cho ba tên kia, rồi mới dựng cổng.
 
     **MVP-3 · ĐO Windows trước, đừng BẮT BUỘC Windows.** Bản đầu bắt buộc một lượt `workflow_dispatch`
@@ -555,7 +567,7 @@ Khi khôi phục được codex, chạy lại đúng bộ prompt ấy qua `launc
 | # | Bản đầu khai | Phép đo nói | Xử lý |
 |---|---|---|---|
 | 1 | "9/13 ĐÃ CÓ ⇒ đề xuất thêm ít; vấn đề là TUÂN THỦ" | §20 đo **`0 cổng`** cho 8 ADR | **ĐẢO** kết luận trung tâm (§1) |
-| 2 | `spec_hash` 14/82 = 17,1% | 10/82 theo trường; **50/82 = 61%** theo khả năng (4 tên) | sửa §0, đổi MVP-2 |
+| 2 | `spec_hash` 14/82 = 17,1% | 10/82 theo trường; **50/82 = 61%** theo khả năng (4 tên) | sửa §0 — **nhưng `50/82` sau đó bị `R4-01`/`N1` BÁC**: nó gộp locator vào định danh byte. Số đứng: **44** có băm, 3 locator bản thảo, 3 `null`, 32 không có |
 | 3 | "trần 2 lượt/PR, **cứng**" | `nang_tran` nới được; **0 lần** trong `lease_publish.py` | sửa F1 |
 | 4 | "gắn nhãn windows không sinh lượt chạy nào" | `launcher-windows.yml` có `labeled` + `windows-latest` | sửa MVP-3 |
 | 5 | "một lượt không đo được phải ra `blocked`" | `blocked` = spec thiếu → **trạng thái tận cùng** | F3 đổi sang trường `nang_luc_do` |
@@ -584,11 +596,11 @@ nhất mà không nhận ra mình đang minh hoạ cho nó.
 |---|---|---|---|
 | 15 | cú đảo: "9 mục phần lớn `0 cổng`" | bảng 8 ADR **KHÔNG GIAO** với 9 mục | rút bảng, đổi biến (§1) |
 | 16 | `ADR-0038 \| 0 cổng` | **SAI tại HEAD** — cổng land 23-08, sau mốc đo 22-08 một ngày | §1 nêu; dùng phép đo có ngày phải kiểm ngày |
-| 17 | "`0 cổng` ⇒ không cưỡng chế" | §0 bác: mỏ neo 61% với **0 dòng mã**; trần vòng 81/82 | đổi sang biến **tỉ lệ vi phạm** |
+| 17 | "`0 cổng` ⇒ không cưỡng chế" | §0 bác: mỏ neo 61% với **0 dòng mã**; trần vòng 81/82 | đổi sang biến **tỉ lệ vi phạm** — **nhưng CẢ HAI tử số ấy sau đó bị `N2`/`R4-01` BÁC** (đếm vắng mặt thành tuân thủ). Xem §1 |
 | 18 | "phần lớn" | `0 cổng` = **9/30 = 30%**, thiểu số | sửa §1 |
 | 19 | vá `spec_hash` | **5 trường khác đo y hệt cách sai ấy** — `assurance` cũng 4 tên, **17** tệp TỪ CHỐI khai bị đếm thành đã khai | §0 quét theo LỚP |
 | 20 | §1 đảo | §2 và §5 **không đổi một ô** — vẫn "17%", "co giãn", "trùng lặp" | truyền vào §2/§5 |
-| 21 | MVP-2 "bắt oan 44%" | 61 − 17 trộn nền đo; đúng là **40/82 = 48,8%** | sửa |
+| 21 | MVP-2 "bắt oan 44%" | 61 − 17 trộn nền đo; đúng là **40/82 = 48,8%** | sửa — **rồi `R4-01` BÁC luôn cả 48,8%**: mọi tỉ lệ "đang làm đúng" đều chưa có bằng chứng, nay **bỏ hẳn** |
 | 22 | §9 dòng 10 "57/57" | `bien-nhan` lọc `role` (55) rồi khử trùng ⇒ **52** | sửa |
 | 23 | §9 dòng 14 "đã đánh dấu" | §0 **chưa hề bị sửa**, vẫn in "cạn ~ngày 11" | sửa tại chỗ |
 | 24 | — | **hai lượt review để lại 0 hiện vật** — đúng khuyết tật MVP-1 xếp số một | viết `ops/reviews/phan-bien-quy-trinh-review-{1,2}-*.receipt.yaml` |

@@ -622,7 +622,12 @@ def c19_neo_git_SAI_DUONG_DAN_thi_DO():
         tmp = Path(t)
         sha, bam, duong = _kho_git(tmp, "noi dung verdict\n")
         d = _bn_neo(sha, bam, duong)
+        # ĐỔI CẢ HAI trường: chốt `c37` (URL phải neo đúng `verdict_path`) nay chạy TRƯỚC,
+        # nên fixture chỉ đổi URL sẽ chết vì lý do KHÁC — ca đo nhánh "trỏ hụt" phải thật sự
+        # tới được nhánh ấy. Lần thứ ba trong đợt một chốt mới bắt fixture của chính bộ test,
+        # và cả ba lần fixture mới là thứ sai.
         d["evidence_url"] = f"https://github.com/o/r/blob/{sha}/ops/reviews/KHONG-HE-CO.md"
+        d["verdict_path"] = "ops/reviews/KHONG-HE-CO.md"
         import yaml as _y
         (tmp / bnv2.THU_MUC).mkdir(parents=True, exist_ok=True)
         (tmp / bnv2.THU_MUC / "a-verdict.receipt.yaml").write_text(
@@ -832,7 +837,8 @@ def c27_loai_CO_KHOANG_TRANG_khong_duoc_tron_khoi_phep_do():
              f"`loai` có khoảng trắng phải đi ĐÚNG đường dispatch canonical, được: {loi}")
 
 
-def _cay_guong(tmp: Path, co_launcher=True, than_launcher=None, co_agents=True):
+def _cay_guong(tmp: Path, co_launcher=True, than_launcher=None, co_agents=True,
+               bo_cau_neo=False, sua_launcher=None, sua_agents=None):
     """Cây GƯƠNG đủ để chạy CLI THẬT: `ops/bien_nhan_v2.py` + `.claude/dev/launcher.py` + kho git.
 
     Chép chính tệp thật rồi bỏ/đổi ĐÚNG nguồn cần hỏng — không mô phỏng lại cổng, vì một
@@ -844,13 +850,26 @@ def _cay_guong(tmp: Path, co_launcher=True, than_launcher=None, co_agents=True):
     # phép làm yếu có thật. Đúng lớp lỗi "rig đo thứ khác với thứ được công bố".
     shutil.copyfile(Path(bnv2.__file__), tmp / "ops" / "bien_nhan_v2.py")
     if co_agents:
-        shutil.copyfile(GOC / "AGENTS.md", tmp / "AGENTS.md")
+        van_a = (GOC / "AGENTS.md").read_text(encoding="utf-8")
+        if bo_cau_neo:
+            for cau in bnv2._NEO_LUAT_ASSURANCE.values():
+                van_a = van_a.replace(cau, "(đã xoá)")
+        if sua_agents:
+            van_a = sua_agents(van_a)
+        if isinstance(van_a, bytes):
+            (tmp / "AGENTS.md").write_bytes(van_a)
+        else:
+            (tmp / "AGENTS.md").write_text(van_a, encoding="utf-8")
     if co_launcher or than_launcher is not None:
         (tmp / ".claude" / "dev").mkdir(parents=True, exist_ok=True)
-        (tmp / ".claude" / "dev" / "launcher.py").write_text(
-            than_launcher if than_launcher is not None
-            else (GOC / ".claude" / "dev" / "launcher.py").read_text(encoding="utf-8"),
-            encoding="utf-8")
+        van_l = (than_launcher if than_launcher is not None
+                 else (GOC / ".claude" / "dev" / "launcher.py").read_text(encoding="utf-8"))
+        if sua_launcher:
+            van_l = sua_launcher(van_l)
+        if isinstance(van_l, bytes):
+            (tmp / ".claude" / "dev" / "launcher.py").write_bytes(van_l)
+        else:
+            (tmp / ".claude" / "dev" / "launcher.py").write_text(van_l, encoding="utf-8")
     sha, bam, duong = _kho_git(tmp, "noi dung verdict\n")
     _ghi_bn(tmp, _bn_neo(sha, bam, duong))
     return tmp / "ops" / "bien_nhan_v2.py"
@@ -872,6 +891,30 @@ def c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA():
         # NGUỒN THỨ BA cũng phải fail-close: từ vựng provider nằm ở BA chỗ, nên mỗi chỗ mất
         # là một đường mù riêng. Bỏ sót hàng này thì `AGENTS.md` biến mất mà cổng vẫn xanh.
         ("thiếu AGENTS.md",       {"co_agents": False},            2, "không đọc được nguồn từ vựng"),
+        # LUẬT CHÉP TAY MẤT NEO cũng là trạng thái thứ ba: câu biện minh biến khỏi `AGENTS.md`
+        # thì giữ nguyên một luật có thể đã hết hiệu lực là tự bịa thẩm quyền.
+        ("AGENTS.md mất câu biện minh", {"bo_cau_neo": True},      2, "luật chép tay mất neo"),
+        # `R5-01`: CÓ MẶT khác DÙNG ĐƯỢC. Ba nguồn mà chỉ hai cái fail-close là một cổng
+        # có ba cửa và chỉ khoá hai.
+        # Thay NGUYÊN KHỐI gán, không chắp vá chuỗi: bản đầu của hàng này chèn nhầm và sinh
+        # tệp KHÔNG PHÂN TÍCH ĐƯỢC ⇒ ca vẫn rc=2 nhưng vì lý do KHÁC. Một fixture "hỏng theo
+        # cách khác" là một ca đo thứ khác — đúng bệnh `tin_dung_gia` ở tầng ngữ nghĩa.
+        ("`_TRANSPORT_CONTRACTS` RỖNG",
+         {"sua_launcher": lambda v: __import__("re").sub(
+             r"(?ms)^_TRANSPORT_CONTRACTS = \(.*?^\)", "_TRANSPORT_CONTRACTS = ()", v, count=1)},
+         2, "RỖNG — có mặt mà không dùng được"),
+        ("launcher có byte KHÔNG giải mã được",
+         {"sua_launcher": lambda v: v.encode("utf-8") + b"\n# \xff\xfe\n"}, 2, "không đọc được nguồn từ vựng"),
+        ("AGENTS.md có byte KHÔNG giải mã được",
+         {"sua_agents": lambda v: v.encode("utf-8") + b"\n\xff\xfe\n"}, 2, "không đọc được nguồn từ vựng"),
+        # `R5-02`: mất RIÊNG nội dung nguồn 2 hoặc nguồn 3, tệp vẫn còn.
+        ("nguồn 2 mất nội dung",
+         {"sua_launcher": lambda v: v.replace("qua execution_surface", "qua be mat")
+                                     .replace(", surface:", ", be_mat:")},
+         2, "không còn khai `provider` nào"),
+        ("nguồn 3 mất nội dung",
+         {"sua_agents": lambda v: v.replace("provider: openai_chatgpt", "nha_cung_cap: openai_chatgpt")},
+         2, "khối mã rào không còn khai"),
     ):
         with tempfile.TemporaryDirectory() as t:
             tmp = Path(t)
@@ -918,13 +961,31 @@ def c31_hop_dong_provider_doc_DU_BA_NGUON_khong_chep_tay():
     ten |= ngoai | web
     thieu = sorted(x for x in ten if x not in bnv2.PROVIDER_CHO_PHEP)
     bang(not thieu, f"cổng TỪ CHỐI provider chính tắc {thieu} — danh sách đã tụt về bản chép tay")
+    # CHIỀU THỪA, và nó là chiều NGUY. Cross-review vòng 5 (`R5-02`) đo được: nhét execution
+    # surface vào tập provider (`hd |= {t.elts[2].value …}`) ⇒ `claude_code` `codex_cli`
+    # `llm_cli` thành provider hợp lệ, mà toàn suite vẫn `37/37 · 33/33`. Ca chỉ hỏi "có
+    # thiếu không" là ca chỉ khoá được một nửa — và nửa nó bỏ là nửa NỚI QUYỀN.
+    thua = sorted(x for x in bnv2.PROVIDER_CHO_PHEP if x not in ten | set(bnv2.PROVIDER_LICH_SU))
+    bang(not thua,
+         f"cổng CHẤP NHẬN {thua} — không có tên nào trong ba nguồn, cũng không phải bí danh "
+         f"lịch sử đã khai. Danh sách CHO PHÉP nở thêm là nới quyền.")
     # HÀNH VI, không chỉ tập hợp: một biên nhận dùng tên chính tắc phải QUA thật.
     for prov in sorted(ten):
         with tempfile.TemporaryDirectory() as t:
             d = v2_du(); d["model_reviewer_identity"]["provider"] = prov
+            # BỀ MẶT phải đi cùng PROVIDER: chốt bộ ba vừa thêm (`c36`) bắt đúng fixture này,
+            # vốn gán `codex_cli` cho mọi provider. Lấy bề mặt chính tắc từ bản đồ của cổng —
+            # đây là chỗ DUY NHẤT trong ca này đọc từ cổng, và nó chỉ chọn fixture, không
+            # sinh kỳ vọng: kỳ vọng vẫn là tập tên đọc ĐỘC LẬP từ ba nguồn ở trên.
+            bm = sorted(bnv2.PROVIDER_BE_MAT.get(prov) or {"codex_cli"})
+            d["model_reviewer_identity"]["surface"] = bm[0]
+            # `openai_chatgpt` bị `AGENTS.md` §4 giới hạn ở `advisory_review` — dùng mức ấy
+            # cho nó, kẻo ca dương này lại đo nhầm chốt assurance.
+            if prov in bnv2.ASSURANCE_CAM_THEO_PROVIDER:
+                d["assurance"] = "advisory_review"
             tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
             n_, loi = _kiem(tmp, allowlist={}, no_da_do={})
-            bang(n_ == 0, f"provider chính tắc {prov!r} bị từ chối: {loi}")
+            bang(n_ == 0, f"provider chính tắc {prov!r} (bề mặt {bm[0]!r}) bị từ chối: {loi}")
 
 
 @ca
@@ -988,6 +1049,12 @@ def c32_MOI_thao_tac_git_HONG_deu_phai_vao_KHONG_DO_DUOC():
             ("không có HEAD để so tổ tiên",
              lambda a: a[:2] == ("rev-parse", "--verify"),
              1, "KHÔNG ĐO ĐƯỢC tổ tiên"),
+            # THAO TÁC THỨ SÁU — connector (P2 trên `670071b`) chỉ đúng chỗ bảng này còn
+            # thiếu: `rev-parse <commit>:<đường dẫn>` trả 127 (KHÔNG GỌI ĐƯỢC git) bị đọc
+            # thẳng thành *"mỏ neo trỏ hụt"*, tức lỗi ĐO thành lời KẾT TỘI, `rc=1` thay `rc=2`.
+            ("không tra được đường dẫn trong commit",
+             lambda a: a[0] == "rev-parse" and len(a) > 1 and ":" in str(a[1]),
+             127, "KHÔNG ĐO ĐƯỢC đường dẫn"),
         )
         for ten, khop, rc, phai_co in bang_thao_tac:
             that = bnv2._git
@@ -1144,6 +1211,68 @@ def c35_KHONG_duoc_NOI_danh_sach_provider_bang_van_ban_tu_do():
                 hong.append(f"{ten}: NỚI được danh sách CHO PHÉP bằng văn bản tự do")
     bang(not hong, f"{len(hong)}/{len(bang_tan_cong)} hướng nới được:\n      "
                    + "\n      ".join(hong))
+
+
+@ca
+def c36_provider_KHONG_mang_theo_quyen_cua_provider_khac():
+    """Nhận một tên vào danh sách CHO PHÉP **không** nhận luôn quyền của tên khác.
+
+    Connector (P1 trên `670071b`): bản vá vòng trước nới danh sách để nhận `openai_chatgpt`
+    — đúng — nhưng chỉ mang theo cái TÊN, bỏ lại GIỚI HẠN đi kèm nó. `AGENTS.md` §4 nói
+    tường minh ChatGPT Web *"không được … tự tạo `cross_approved`, `same_provider_approved`
+    hoặc `human_audited`"*. Đo được: `{openai_chatgpt, surface: banana, session_run_id}` +
+    `cross_approved` ⇒ **0 vi phạm**."""
+    for ten, sua, phai_chua in (
+        ("bề mặt lạ cho một provider chính tắc",
+         {"provider": "openai_chatgpt", "surface": "banana", "session_run_id": "f" * 32},
+         "không phải bề mặt của provider"),
+        ("bề mặt ĐÚNG mà khai mức có thẩm quyền",
+         {"provider": "openai_chatgpt", "surface": "chatgpt_web", "session_run_id": "f" * 32},
+         "KHÔNG được tự tạo"),
+        ("bề mặt lạ cho provider CLI",
+         {"provider": "openai_codex", "surface": "chatgpt_web", "session_run_id": "f" * 32},
+         "không phải bề mặt của provider"),
+    ):
+        with tempfile.TemporaryDirectory() as t:
+            d = v2_du(); d["model_reviewer_identity"] = sua; d["assurance"] = "cross_approved"
+            tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
+            n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+            bang(n >= 1 and any(phai_chua in x for x in loi),
+                 f"{ten}: phải ĐỎ vì {phai_chua!r}, được: {loi}")
+    # ĐỐI CHỨNG DƯƠNG — chốt này KHÔNG được bắt oan một lượt advisory hợp lệ.
+    with tempfile.TemporaryDirectory() as t:
+        d = v2_du()
+        d["model_reviewer_identity"] = {"provider": "openai_chatgpt", "surface": "chatgpt_web",
+                                        "session_run_id": "f" * 32}
+        d["assurance"] = "advisory_review"
+        tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
+        n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+        bang(n == 0, f"ĐỐI CHỨNG: ChatGPT Web khai `advisory_review` phải QUA, được: {loi}")
+
+
+@ca
+def c37_URL_phai_neo_DUNG_duong_dan_bien_nhan_khai():
+    """Hai trường cùng nói về MỘT tệp mà không ai so chúng với nhau.
+
+    Connector (P2 trên `670071b`): `verdict_path` chỉ bị kiểm "không rỗng", còn `_neo_git`
+    chỉ xác minh đường dẫn PHÂN TÍCH TỪ URL — nên khai một `verdict_path` không liên quan mà
+    `evidence_url` trỏ tệp BẤT KỲ có băm trùng `verdict_sha256` thì vẫn qua."""
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        sha, bam, duong = _kho_git(tmp, "noi dung verdict\n")
+        d = _bn_neo(sha, bam, duong)
+        d["verdict_path"] = "ops/reviews/mot-tep-KHAC-han.md"      # URL vẫn trỏ `duong`
+        _ghi_bn(tmp, d)
+        n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+        bang(n == 1 and "KHÔNG neo thứ nó khai" in loi[0],
+             f"`verdict_path` lệch đường dẫn trong URL phải ĐỎ, được: {loi}")
+    # ĐỐI CHỨNG: khớp thì sạch (đã có `c18`, nhắc lại ở đây để chốt không bắt oan).
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        sha, bam, duong = _kho_git(tmp, "noi dung verdict\n")
+        _ghi_bn(tmp, _bn_neo(sha, bam, duong))
+        n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+        bang(n == 0, f"ĐỐI CHỨNG: `verdict_path` khớp URL phải QUA, được: {loi}")
 
 
 @ca
@@ -1493,9 +1622,9 @@ def _dot_bien():
     # giữ lại thì phép canh hoá ra đang đòi đột biến đừng xảy ra.
     do("m20_provider_tut_ve_ban_CHEP_TAY",
        lambda: _dot_bien_tep(
-           "PROVIDER_CHINH_TAC, PROVIDER_NGUON_HONG = _provider_chinh_tac()",
-           'PROVIDER_CHINH_TAC, PROVIDER_NGUON_HONG = ({"anthropic", "openai_codex", '
-           '"openai_api", "google_antigravity", "human"}, None)',
+           "PROVIDER_CHINH_TAC, PROVIDER_BE_MAT, PROVIDER_NGUON_HONG = _provider_chinh_tac()",
+           'PROVIDER_CHINH_TAC, PROVIDER_BE_MAT, PROVIDER_NGUON_HONG = ({"anthropic", '
+           '"openai_codex", "openai_api", "google_antigravity", "human"}, {}, None)',
            bo_qua_parity=("PROVIDER_CHO_PHEP",)),
        "c31_hop_dong_provider_doc_DU_BA_NGUON_khong_chep_tay",
        "bản chép tay TỪ CHỐI `anthropic_claude` — biên nhận Claude hợp lệ rớt cổng",
@@ -1549,8 +1678,10 @@ def _dot_bien():
        "c34_MOI_truong_attestation_phai_la_CHUOI_khong_chi_truthy",
        "ánh xạ/danh sách lại thành lời khai hợp lệ", doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m29_tu_vung_provider_tut_ve_MOT_nguon",
-       lambda: _dot_bien_tep("    return hd | ngoai | web, None", "    return hd, None",
-                             bo_qua_parity=("PROVIDER_CHO_PHEP",)),
+       lambda: _dot_bien_tep(
+           "    return hd | ngoai | web, {k: frozenset(v) for k, v in bm.items()}, None",
+           "    return hd, {k: frozenset(v) for k, v in bm.items()}, None",
+           bo_qua_parity=("PROVIDER_CHO_PHEP",)),
        "c31_hop_dong_provider_doc_DU_BA_NGUON_khong_chep_tay",
        "đọc MỘT nguồn ⇒ `google_antigravity` và `openai_chatgpt` bị từ chối",
        doi_chung="c18_neo_git_DUNG_thi_qua")
@@ -1562,6 +1693,49 @@ def _dot_bien():
            bo_qua_parity=("PROVIDER_CHO_PHEP",)),
        "c35_KHONG_duoc_NOI_danh_sach_provider_bang_van_ban_tu_do",
        "một dòng chú thích lại cấp được quyền", doi_chung="c18_neo_git_DUNG_thi_qua")
+    # --- vòng 7 (connector trên `670071b`): quyền đi kèm tên, và hai trường cùng nói một thứ
+    do("m32_bo_gioi_han_assurance_theo_provider",
+       lambda: _dot_bien_tep("        cam = ASSURANCE_CAM_THEO_PROVIDER.get(prov, frozenset())",
+                             "        cam = frozenset()"),
+       "c36_provider_KHONG_mang_theo_quyen_cua_provider_khac",
+       "advisory biến thành bằng chứng có thẩm quyền", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m33_bo_kiem_BO_BA_provider_be_mat",
+       lambda: _dot_bien_tep("    hop_le = PROVIDER_BE_MAT.get(prov)", "    hop_le = None"),
+       "c36_provider_KHONG_mang_theo_quyen_cua_provider_khac",
+       "`surface: banana` lại qua", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m34_bo_so_verdict_path_voi_duong_dan_trong_URL",
+       lambda: _dot_bien_tep("    if khai_duong and khai_duong != duong:", "    if False:"),
+       "c37_URL_phai_neo_DUNG_duong_dan_bien_nhan_khai",
+       "mỏ neo trỏ một tệp KHÁC thứ nó khai", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m35_rc127_cua_rev_parse_duong_dan_thanh_TRO_HUT",
+       lambda: _dot_bien_tep("    if rc == 127:\n        chua.append(f\"{ten}: KHÔNG ĐO ĐƯỢC đường dẫn",
+                             "    if False:\n        chua.append(f\"{ten}: KHÔNG ĐO ĐƯỢC đường dẫn"),
+       "c32_MOI_thao_tac_git_HONG_deu_phai_vao_KHONG_DO_DUOC",
+       "lỗi ĐO thành lời KẾT TỘI ở thao tác git thứ sáu",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m36_luat_chep_tay_MAT_NEO_van_giu_nguyen",
+       lambda: _dot_bien_tep("        if cau not in van_agents:", "        if False:"),
+       "c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA",
+       "giữ một luật có thể đã hết hiệu lực", doi_chung="c18_neo_git_DUNG_thi_qua")
+    # --- vòng 5 launcher (`R5-01`/`R5-02`)
+    do("m37_bang_transport_RONG_van_di_tiep",
+       lambda: _dot_bien_tep("    if not hd:\n", "    if False:\n"),
+       "c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA",
+       "nguồn 1 không fail-close như hai nguồn kia", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m38_khong_bat_loi_GIAI_MA_nguon",
+       lambda: _dot_bien_tep("    except (OSError, UnicodeDecodeError) as ex:",
+                             "    except OSError as ex:"),
+       "c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA",
+       "cổng chết trước khi kịp phân ba trạng thái", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m39_nhet_execution_surface_vao_tap_provider",
+       lambda: _dot_bien_tep(
+           "                hd = {t.elts[0].value for t in n.value.elts}",
+           "                hd = {t.elts[0].value for t in n.value.elts} | "
+           "{t.elts[2].value for t in n.value.elts}",
+           bo_qua_parity=("PROVIDER_CHO_PHEP",)),
+       "c31_hop_dong_provider_doc_DU_BA_NGUON_khong_chep_tay",
+       "`R5-02`: nới danh sách bằng chính token trong nguồn",
+       doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m10_bo_kiem_actor_cua_submitter",
        lambda: setattr(bnv2, "_gsi", lambda d: None if "github_submitter_identity" in d
                        else "thiếu khoá `github_submitter_identity`"),

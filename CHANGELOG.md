@@ -214,9 +214,45 @@ tôi đổi là NGUỒN, không phải HÌNH DẠNG rủi ro. Nay chỉ đọc h
 `AGENTS.md`; bảng nào vắng ⇒ `KHÔNG ĐO ĐƯỢC`, không thu hẹp im lặng. `c35` đo **bốn** hướng nới
 (chú thích · chuỗi ngoài bảng · docstring · văn xuôi Markdown) kèm đối chứng dương, `m31` khoá.
 
+## Vòng bảy: quyền không đi theo tên, và ba nguồn mà chỉ hai cái fail-close
+
+Hai reviewer trên `670071b`. Connector ra **một P1 + hai P2**, `launcher.py run` ra **hai P2**,
+không trùng nhau — và cả năm đều tố cáo bản vá ngay trước nó:
+
+- **P1 — nhận một TÊN vào danh sách CHO PHÉP không nhận luôn QUYỀN của tên khác.** Vòng trước
+  nới danh sách để nhận `openai_chatgpt` (đúng), nhưng chỉ mang theo cái tên, **bỏ lại giới hạn
+  đi kèm nó**: `AGENTS.md` §4 nói tường minh ChatGPT Web *"không được … tự tạo `cross_approved`,
+  `same_provider_approved` hoặc `human_audited`"*. Đo được: `{openai_chatgpt, surface: banana,
+  session_run_id}` + `cross_approved` ⇒ **0 vi phạm** — một lượt advisory thành bằng chứng
+  identity có thẩm quyền. Nay có `ASSURANCE_CAM_THEO_PROVIDER` (chép tay **có NEO**: câu biện
+  minh mất khỏi `AGENTS.md` ⇒ trạng thái thứ ba, chứ không giữ một luật có thể đã hết hiệu lực),
+  và `surface` phải thuộc **bộ ba** provider→bề mặt rút từ **chính ba nguồn ấy**, một lần đọc.
+- **P2 — hai trường cùng nói về MỘT tệp mà không ai so chúng với nhau.** `verdict_path` chỉ bị
+  kiểm "không rỗng"; `_neo_git` chỉ xác minh đường dẫn **phân tích từ URL** ⇒ khai một
+  `verdict_path` không liên quan mà URL trỏ tệp **bất kỳ** có băm trùng `verdict_sha256` thì vẫn
+  qua. Cùng lớp *"có HAI cách đọc một thứ"*.
+- **P2 — thao tác git THỨ SÁU.** `rev-parse <commit>:<đường dẫn>` trả 127 (không gọi được git)
+  bị đọc thẳng thành *"mỏ neo trỏ hụt"* — lỗi **ĐO** thành lời **KẾT TỘI**, `rc=1` thay `rc=2`.
+  Bảng của `c32` mới có năm hàng; nay sáu.
+- **`R5-01` — CÓ MẶT khác DÙNG ĐƯỢC, ở tầng NỘI DUNG.** `_TRANSPORT_CONTRACTS = ()` vẫn là một
+  phép gán nên `hd is None` không bắt; tập rỗng đi tiếp và cổng **kết tội** `openai_codex`. Nguồn
+  2 và 3 đòi "không rỗng" từ đầu, nguồn 1 thì không — **ba nguồn mà chỉ hai cái fail-close**.
+  Kèm: một byte không giải mã được trong bất kỳ nguồn nào làm cổng **chết lúc import** với
+  traceback, tức chết **trước khi** kịp phân ba trạng thái (`UnicodeDecodeError` không phải
+  `OSError`).
+- **`R5-02` — ca mới khoá chiều THIẾU, bỏ chiều THỪA.** `c31` chỉ hỏi *"có provider chính tắc nào
+  bị từ chối không"*. Reviewer nhét **execution surface** vào tập provider (`hd |= {t.elts[2]…}`)
+  ⇒ `claude_code` `codex_cli` `llm_cli` thành provider hợp lệ, mà toàn suite vẫn `37/37 · 33/33`.
+  Một ca chỉ khoá được một nửa, và nửa nó bỏ là nửa **NỚI QUYỀN**. Nay `c31` khoá cả hai chiều
+  (bí danh lịch sử phải khai tường minh), và `c28` lên **chín** hàng fail-close.
+
+Kèm hai fixture của **chính bộ test** bị chốt mới bắt — lần thứ ba và thứ tư trong đợt, và cả
+bốn lần fixture mới là thứ sai: `c19` chỉ đổi URL nên chết vì chốt `verdict_path` mới thay vì vì
+nhánh "trỏ hụt"; `c31` gán `codex_cli` cho **mọi** provider nên vướng chốt bộ ba.
+
 ## Răng
 
-`ops/bien_nhan_v2_test.py`: **38 ca · 34/34 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
+`ops/bien_nhan_v2_test.py`: **40 ca · 42/42 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
 hai thứ protocol đòi —
 biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
 của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`

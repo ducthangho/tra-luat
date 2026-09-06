@@ -116,6 +116,26 @@ def _khop(d, k, re_, mo_ta):
     return None if re_.match(v.strip()) else f"`{k}`={v.strip()[:24]!r} không phải {mo_ta}"
 
 
+# LUẬT THEO PROVIDER, chép tay có NEO. `AGENTS.md` §4 nói tường minh cho ChatGPT Web:
+# *"không được … tự tạo `cross_approved`, `same_provider_approved` hoặc `human_audited`"*,
+# và *"Review của ChatGPT Web được ghi là `advisory_review`"*. Luật ấy là VĂN XUÔI — không
+# rút được bằng máy — nên nó nằm đây; `_provider_chinh_tac` đòi câu biện minh CÒN TRONG
+# `AGENTS.md`, mất thì trạng thái THỨ BA.
+#
+# VÌ SAO CÓ: cross-review connector trên `670071b` (P1). Bản vá vòng trước NỚI danh sách
+# provider để nhận `openai_chatgpt` — đúng — nhưng chỉ mang theo cái TÊN, không mang theo
+# GIỚI HẠN của nó. Đo được: `{provider: openai_chatgpt, surface: banana,
+# session_run_id: …}` + `assurance: cross_approved` ⇒ **0 vi phạm**. Một lượt advisory biến
+# thành bằng chứng identity có thẩm quyền. Nhận một tên vào danh sách CHO PHÉP mà bỏ lại
+# ràng buộc đi kèm nó là nới quyền, không phải sửa lỗi bắt oan.
+_NEO_LUAT_ASSURANCE = {
+    "openai_chatgpt": "tự tạo `cross_approved`, `same_provider_approved` hoặc `human_audited`",
+}
+ASSURANCE_CAM_THEO_PROVIDER = {
+    "openai_chatgpt": frozenset({"cross_approved", "same_provider_approved", "human_audited"}),
+}
+
+
 def _provider_chinh_tac():
     """Đọc tên provider từ TỪ VỰNG CHÍNH TẮC của kho, không chép tay.
 
@@ -144,25 +164,38 @@ def _provider_chinh_tac():
         import ast
         van_launcher = nguon.read_text(encoding="utf-8")
         van_agents = tv.read_text(encoding="utf-8")
-    except OSError as ex:
-        return set(), f"không đọc được nguồn từ vựng provider: {type(ex).__name__}: {ex}"
+    except (OSError, UnicodeDecodeError) as ex:
+        # `UnicodeDecodeError` KHÔNG phải `OSError`. Cross-review vòng 5 (`R5-01`) đo được:
+        # bơm một byte không giải mã được vào một trong hai nguồn ⇒ ngoại lệ ném lúc IMPORT,
+        # trước cả `main`, nên CLI chết với traceback và `rc=1` — không có marker phân loại
+        # nào. Một cổng chết trước khi phân ba trạng thái là cổng KHÔNG có trạng thái thứ ba.
+        return set(), {}, f"không đọc được nguồn từ vựng provider: {type(ex).__name__}: {ex}"
     try:
         cay = ast.parse(van_launcher)
     except SyntaxError as ex:                                    # noqa: BLE001
-        return set(), f"`{nguon}` không phân tích được: {ex}"
+        return set(), {}, f"`{nguon}` không phân tích được: {ex}"
 
     # NGUỒN 1 — hợp đồng transport CLI (`_TRANSPORT_CONTRACTS`).
+    bm = {}          # provider -> {bề mặt hợp lệ}; rút TỪ CÙNG MỘT lần đọc, không đọc lại
     hd = None
     for n in ast.walk(cay):
         if (isinstance(n, ast.Assign) and n.targets
                 and getattr(n.targets[0], "id", "") == "_TRANSPORT_CONTRACTS"):
             try:
                 hd = {t.elts[0].value for t in n.value.elts}
+                for t in n.value.elts:
+                    bm.setdefault(t.elts[0].value, set()).add(t.elts[2].value)
             except (AttributeError, IndexError, TypeError) as ex:
-                return set(), f"`_TRANSPORT_CONTRACTS` có hình dạng lạ: {type(ex).__name__}: {ex}"
+                return set(), {}, f"`_TRANSPORT_CONTRACTS` có hình dạng lạ: {type(ex).__name__}: {ex}"
             break
     if hd is None:
-        return set(), f"`{nguon}` không có phép gán `_TRANSPORT_CONTRACTS`"
+        return set(), {}, f"`{nguon}` không có phép gán `_TRANSPORT_CONTRACTS`"
+    if not hd:
+        # CÓ MẶT khác DÙNG ĐƯỢC, ở tầng NỘI DUNG. `_TRANSPORT_CONTRACTS = ()` vẫn là một
+        # phép gán nên `hd is None` không bắt; tập rỗng đi tiếp và `PROVIDER_CHO_PHEP` tụt về
+        # hai bí danh lịch sử ⇒ cổng KẾT TỘI `openai_codex`. Nguồn 2 và 3 đã đòi "không rỗng"
+        # từ đầu; nguồn 1 thì không — ba nguồn mà chỉ hai cái fail-close (`R5-01`).
+        return set(), {}, f"`{nguon}`: `_TRANSPORT_CONTRACTS` RỖNG — có mặt mà không dùng được"
 
     # NGUỒN 2 và 3 — provider KHÔNG đi qua CLI của launcher, nên `_TRANSPORT_CONTRACTS`
     # KHÔNG BAO GIỜ chứa chúng. Cross-review connector (P2, head `4ef73e6`) đo được: bản
@@ -185,28 +218,47 @@ def _provider_chinh_tac():
                     if isinstance(n, ast.Assign) and n.targets
                     and getattr(n.targets[0], "id", "") == bang), None)
         if nut is None:
-            return set(), f"`{nguon}` không có literal `{bang}` đọc được"
+            return set(), {}, f"`{nguon}` không có literal `{bang}` đọc được"
         van = "\n".join(x.value for x in ast.walk(nut)
                         if isinstance(x, ast.Constant) and isinstance(x.value, str))
         # HAI dạng khai đang cùng tồn tại trong hai bảng ấy; đọc cả hai chứ đừng chọn một
         # rồi kết luận "không còn provider nào" — đó lại là thu hẹp im lặng.
-        tim = (set(re.findall(r"provider\s+([a-z0-9_]+)\s+qua\s+execution_surface", van))
-               | set(re.findall(r"provider:\s*([a-z0-9_]+)\s*,\s*surface:", van)))
+        cap = (re.findall(r"provider\s+([a-z0-9_]+)\s+qua\s+execution_surface\s+([a-z0-9_]+)", van)
+               + re.findall(r"provider:\s*([a-z0-9_]+)\s*,\s*surface:\s*([a-z0-9_]+)", van))
+        for p_, s_ in cap:
+            bm.setdefault(p_, set()).add(s_)
+        tim = {p_ for p_, _ in cap}
         if not tim:
-            return set(), f"`{nguon}`: literal `{bang}` không còn khai `provider` nào"
+            return set(), {}, f"`{nguon}`: literal `{bang}` không còn khai `provider` nào"
         ngoai |= tim
     rao = re.findall(r"(?ms)^```[a-z]*\n(.*?)^```", van_agents)
-    web = set(re.findall(r"(?m)^provider:\s*([a-z0-9_]+)\s*$", "\n".join(rao)))
+    web = set()
+    for khoi in rao:
+        p_ = re.search(r"(?m)^provider:\s*([a-z0-9_]+)\s*$", khoi)
+        if not p_:
+            continue
+        web.add(p_.group(1))
+        s_ = re.search(r"(?m)^execution_surface:\s*([a-z0-9_]+)\s*$", khoi)
+        if s_:
+            bm.setdefault(p_.group(1), set()).add(s_.group(1))
     if not web:
-        return set(), f"`{tv}`: khối mã rào không còn khai `provider: …` nào"
-    return hd | ngoai | web, None
+        return set(), {}, f"`{tv}`: khối mã rào không còn khai `provider: …` nào"
+    # NEO CHO LUẬT CHÉP TAY. `ASSURANCE_CAM_THEO_PROVIDER` không rút được bằng máy từ văn
+    # xuôi §4, nên nó chép tay — mà một luật chép tay không neo vào nguồn thì sẽ TRÔI mà
+    # không ai biết (bài học "một con số không ghi ĐIỀU KIỆN ĐO"). Câu biện minh biến mất
+    # ⇒ trạng thái THỨ BA, chứ không phải giữ nguyên một luật có thể đã hết hiệu lực.
+    for prov, cau in _NEO_LUAT_ASSURANCE.items():
+        if cau not in van_agents:
+            return set(), {}, (f"`{tv}` không còn câu biện minh cho giới hạn assurance của "
+                               f"`{prov}` ({cau!r}) — luật chép tay mất neo")
+    return hd | ngoai | web, {k: frozenset(v) for k, v in bm.items()}, None
 
 
 # `anthropic` (không hậu tố) là DẠNG LỊCH SỬ: bốn biên nhận v2 chuẩn của kho và hai biên
 # nhận lượt 1-2 dùng nó. Giữ làm BÍ DANH có khai, không âm thầm — đổi cách đọc một tên đã
 # nằm trong hiện vật là viết lại lịch sử.
 PROVIDER_LICH_SU = frozenset({"anthropic", "human"})
-PROVIDER_CHINH_TAC, PROVIDER_NGUON_HONG = _provider_chinh_tac()
+PROVIDER_CHINH_TAC, PROVIDER_BE_MAT, PROVIDER_NGUON_HONG = _provider_chinh_tac()
 PROVIDER_CHO_PHEP = frozenset(PROVIDER_CHINH_TAC) | PROVIDER_LICH_SU
 
 
@@ -234,8 +286,17 @@ def _mri(d):
     if PROVIDER_NGUON_HONG is None and prov not in PROVIDER_CHO_PHEP:
         return (f"`model_reviewer_identity.provider`={prov!r} ngoài danh sách CHO PHÉP "
                 f"{sorted(PROVIDER_CHO_PHEP)} — chuỗi tự do không phải attestation")
-    if not _chuoi(v.get("surface")):
+    be_mat = _chuoi(v.get("surface"))
+    if not be_mat:
         return "`model_reviewer_identity` không có `surface` (bề mặt thực thi, chuỗi không rỗng)"
+    # BỘ BA, không chỉ TÊN. Reviewer nói thẳng: *"validate the provider/surface/transport
+    # tuple rather than only membership"*. Bản đồ rút từ CHÍNH ba nguồn từ vựng, nên bí danh
+    # LỊCH SỬ (`anthropic`, `human`) không nằm trong đó và được MIỄN — cố ý, vì hiện vật cũ
+    # dùng `anthropic`/`claude_code_cli`, và siết chúng là bắt oan một tên đã nằm trong lịch sử.
+    hop_le = PROVIDER_BE_MAT.get(prov)
+    if PROVIDER_NGUON_HONG is None and hop_le and be_mat not in hop_le:
+        return (f"`model_reviewer_identity.surface`={be_mat!r} không phải bề mặt của provider "
+                f"`{prov}` — hợp đồng của kho cho {sorted(hop_le)}")
     rid = _chuoi(v.get("session_run_id"))
     if not rid and not _chuoi(v.get("KHONG_do_duoc")):
         return ("`model_reviewer_identity` không có `session_run_id` và cũng KHÔNG khai "
@@ -468,6 +529,13 @@ def _thieu(d: dict) -> list[str]:
         co_bang_chung = (_chuoi(mri.get("session_run_id")) is not None
                          or mri.get("phien_doc_lap") is True)
         khai = _chuoi(d.get("assurance")) or _chuoi(d.get("assurance_dat")) or ""
+        prov = _chuoi(mri.get("provider")) or ""
+        cam = ASSURANCE_CAM_THEO_PROVIDER.get(prov, frozenset())
+        if khai in cam:
+            loi.append(
+                f"provider `{prov}` KHÔNG được tự tạo `{khai}` — `AGENTS.md` §4 giới hạn nó ở "
+                f"`advisory_review`; nhận một tên vào danh sách CHO PHÉP không mang theo quyền "
+                f"của tên khác")
         if khai in ASSURANCE_CAN_DOC_LAP and (tu_khai_trong_phien or not co_bang_chung):
             ly_do = ("tự khai chạy trong phiên điều phối" if tu_khai_trong_phien
                      else "không có `session_run_id` lẫn `phien_doc_lap`")
@@ -547,6 +615,16 @@ def _neo_git(root: Path, ten: str, d: dict):
                    f"KHÔNG đo được, mà không đo được thì không được khai là canonical ancestry")
         return loi, chua
     commit, duong = m.group(1), m.group(2)
+    # MỎ NEO PHẢI NEO ĐÚNG THỨ NÓ KHAI. Bản trước kiểm `verdict_path` chỉ ở chỗ "không
+    # rỗng", còn `_neo_git` chỉ xác minh đường dẫn PHÂN TÍCH TỪ URL — nên một biên nhận khai
+    # `verdict_path` không tồn tại/không liên quan mà `evidence_url` trỏ tệp BẤT KỲ có băm
+    # trùng `verdict_sha256` thì vẫn qua (connector, P2 trên `670071b`). Hai trường cùng nói
+    # về MỘT tệp mà không ai so chúng với nhau: cùng lớp "có HAI cách đọc một thứ".
+    khai_duong = str(d.get("verdict_path") or "").strip().lstrip("./")
+    if khai_duong and khai_duong != duong:
+        loi.append(f"{ten}: `evidence_url` neo đường dẫn `{duong}` nhưng biên nhận khai "
+                   f"`verdict_path: {khai_duong}` — mỏ neo KHÔNG neo thứ nó khai")
+        return loi, chua
     rc, _ = _git(root, "cat-file", "-e", f"{commit}^{{commit}}")
     if rc != 0:
         chua.append(f"{ten}: KHÔNG ĐO ĐƯỢC commit `{commit[:12]}…` trong `evidence_url`")
@@ -569,6 +647,15 @@ def _neo_git(root: Path, ten: str, d: dict):
         if rc_tt not in (0, 1):
             chua.append(f"{ten}: KHÔNG ĐO ĐƯỢC quan hệ tổ tiên của `{commit[:12]}…` (git rc={rc_tt})")
     rc, oid = _git(root, "rev-parse", f"{commit}:{duong}")
+    # THAO TÁC GIT THỨ SÁU, và nó cũng có ba trạng thái. `_git` trả 127 khi KHÔNG GỌI ĐƯỢC
+    # git (OSError/timeout) — bản trước đọc thẳng "rc khác 0" thành *"mỏ neo trỏ hụt"*, tức
+    # một lỗi ĐO thành lời kết tội, `rc=1` thay vì `rc=2`. Cross-review connector trên
+    # `670071b` (P2) đo được: bơm rc=127 cho RIÊNG thao tác này ⇒ `loi` có mục, `chua` RỖNG.
+    # Đúng lớp `R4-02`, chỉ đổi chỗ — nên nó nằm trong bảng của `c32` chứ không thành ca riêng.
+    if rc == 127:
+        chua.append(f"{ten}: KHÔNG ĐO ĐƯỢC đường dẫn `{duong}` trong commit "
+                    f"`{commit[:12]}…` — không gọi được git")
+        return loi, chua
     if rc != 0:
         loi.append(f"{ten}: `evidence_url` khai commit `{commit[:12]}…` CÓ THẬT nhưng "
                    f"KHÔNG chứa đường dẫn `{duong}` — mỏ neo trỏ hụt")

@@ -1,3 +1,42 @@
+# ★ dev-side — r351: ngừng bắt chước cú pháp pip; hình dạng lỗi lặp LẦN THỨ HAI (2026-09-06)
+
+Vòng 10 ra bốn finding, **tất cả ở bộ phân tích chỉ thị include**, và tôi **không vá từng
+cái** — bỏ cả bộ phân tích. Lý do là HÌNH DẠNG, không phải bốn lỗi ấy.
+
+| lượt | tôi tự làm gì | finding | chữa bằng |
+|---|---|---|---|
+| r338–r341 | tự phân tích **dòng requirement** | 5 | uỷ quyền cho pip (r342) |
+| r347 · r349 · r350 · vòng 10 | tự phân tích **chỉ thị include** | ~7 | **ngừng phân tích** (r351) |
+
+Mỗi vòng vá xong lại lộ một luật pip chép chưa đúng: `expand_env_variables` chỉ nhận
+`${UPPER}` và bỏ giá trị rỗng · `join_lines` dùng `strip(backslash)` chứ không bỏ MỘT ký
+tự · `realpath` gộp làm mất một nhánh symlink · chuỗi `KHONG_DOC_DUOC` trong tệp thật
+trùng trạng thái tệp bị xoá. Lần này **không uỷ quyền cho pip được**: phép băm phải chạy
+offline, mà pip thì không.
+
+## Luật mới thô — và thô là điểm mạnh
+
+Ký tự đầu không-trắng của một dòng là `-` ⇒ có chỉ thị ⇒ **không đặt mốc**, để pip quyết.
+Nó **không cần biết cú pháp pip**, nên không có gì để chép sai. Một dòng `# -r x` bị tính
+nhầm chỉ tốn một lượt pip thừa — **chiều sai duy nhất là AN TOÀN**. Cả lớp "chép sai luật
+của pip" chết theo KIẾN TRÚC, không còn nhánh nào để vá.
+
+Đo: **chín** dạng chỉ thị (gồm hai dạng vòng 10 vừa bắt: nhiều dấu chéo ngược, và biến
+môi trường) — không dạng nào đặt mốc. **Răng chiều ngược**: không có chỉ thị thì VẪN phải
+đặt mốc, kẻo bản vá thành "không bao giờ đặt mốc" — đúng kiểu chốt không thể đỏ.
+
+## Giá phải trả — ĐO, không khẳng định
+
+Kho nào dùng `-r`/`-c`/`-e` sẽ chạy pip mỗi lượt mở phiên. Kho này **không có chỉ thị
+nào**, nên giá ở đây bằng **không** — và điều đó được khoá bằng một ca test, để ai thêm
+chỉ thị sau này thì ca ấy đỏ và người thêm biết mình đang đánh đổi gì. Nói cái giá ra
+thành một ca chạy được, thay vì một câu trong tài liệu sẽ trôi.
+
+Cổng: 9/9 dạng chỉ thị · `launcher_test` **181/181** (bỏ qua 1 — fixture Windows) ·
+`ops/cong_cu_test.py` **22/22** (cổng vừa đỏ vì r349, nay xanh) · `tl --selftest`
+**1709/1709** · ruff `--select F` delta = **0** · `bash -n` OK · `git diff --check` rc=0 ·
+`doc-claims-check --strict` rc=0 · hook chạy thật hai lượt đúng thiết kế.
+
 # ★ dev-side — r350: `gate` ĐỎ vì ca test của r349, và cổng đẩy tôi sang cách test đúng hơn (2026-09-06)
 
 `gate (ubuntu-latest)` đỏ trên `a2c0194` — **lần đầu trong cả chuỗi này cổng đo mã đỏ vì

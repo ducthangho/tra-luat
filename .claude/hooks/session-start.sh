@@ -187,81 +187,37 @@ if [ -f requirements.txt ]; then
   # mai mai. Theo `-r`/`-c` de quy, giai duong TUONG DOI theo tep CHUA no, va chan chu
   # trinh bang tap da tham. Doc khong duoc mot tep include ⇒ dua CHINH DUONG DAN vao bam
   # (KHONG DO DUOC != giong nhau): tep xuat hien lai sau nay se doi bam.
-  VAN_TAY="$( "$PY" -c "
-import hashlib, os, re, shlex, sys
-# r349 — BA lo cua khoi bam, tat ca deu lam MOC SONG SOT SAI (do duoc truoc khi va):
-#  (1) VA CHAM: bam noi dung THO nen hai bo cuc include khac nhau cho cung mot chuoi byte.
-#      Chuyen 'somepkg' tu con.txt sang req.txt (mot ben rang buoc, mot ben CAI THAT) ⇒
-#      van tay Y HET. Chua bang cach dong KHUNG tung tep: do dai duong dan + duong dan +
-#      do dai noi dung + noi dung, nen khong bo cuc nao trung duoc bo cuc khac.
-#  (2) NOI DONG NUOT CHI THI: mot dong CHU THICH ket thuc bang dau cheo nguoc keo dong
-#      '-r' ke tiep vao chinh no, roi buoc cat chu thich xoa ca hai. pip KHONG the:
-#      no mien tru dong khop COMMENT_RE khoi phep noi. Chua bang cach kiem tra truoc.
-#  (3) DOI SO DINH LIEN: '-rextra.txt' la mot token duy nhat sau shlex, khong nhanh nao
-#      nhan ra. pip nhan dang nay va giai duoc.
-CT = re.compile(r'(^|\\s)#.*\$')
-CHI_THI = ('-r', '--requirement', '-c', '--constraint')
-NGAN = ('-r', '-c')
-h = hashlib.sha256()
-da = set()
-
-def cac_dong(noi_dung):
-    gop, dem = [], ''
-    for d in noi_dung.splitlines():
-        # Dong CHU THICH khong bao gio la dong noi — dung luat cua pip.
-        if d.endswith(chr(92)) and not CT.search(d):
-            dem += d[:-1]
-            continue
-        gop.append(dem + d)
-        dem = ''
-    if dem:
-        gop.append(dem)
-    return gop
-
-def khung(nhan, du_lieu):
-    # Dong khung: do dai + noi dung cho CA HAI phan, nen khong ghep nao trung ghep khac.
-    h.update(str(len(nhan)).encode() + b':' + nhan)
-    h.update(str(len(du_lieu)).encode() + b':' + du_lieu)
-
-def an(duong):
-    thuc = os.path.realpath(duong)
-    if thuc in da:
-        return
-    da.add(thuc)
-    nhan = os.path.relpath(thuc, os.getcwd()).encode('utf-8', 'replace')
-    try:
-        noi_dung = open(duong, 'rb').read()
-    except OSError:
-        # KHONG DO DUOC != giong nhau.
-        khung(nhan, b'KHONG_DOC_DUOC')
-        return
-    khung(nhan, noi_dung)
-    goc = os.path.dirname(os.path.abspath(duong))
-    for dong in cac_dong(noi_dung.decode('utf-8', 'replace')):
-        dong = CT.sub('', dong).strip()
-        if not dong.startswith('-'):
-            continue
-        try:
-            tok = shlex.split(dong)
-        except ValueError:
-            khung(b'KHONG_TACH_DUOC', dong.encode('utf-8', 'replace'))
-            continue
-        i = 0
-        while i < len(tok):
-            t, con = tok[i], None
-            if '=' in t and t.split('=', 1)[0] in CHI_THI:
-                con = t.split('=', 1)[1]
-            elif t in CHI_THI and i + 1 < len(tok):
-                con = tok[i + 1]
-                i += 1
-            elif len(t) > 2 and t[:2] in NGAN:
-                con = t[2:]          # dang dinh lien: -rextra.txt
-            i += 1
-            if con:
-                an(os.path.join(goc, os.path.expandvars(con)))
-
-an('requirements.txt')
-print(h.hexdigest()[:16] + '_' + hashlib.sha256(sys.prefix.encode()).hexdigest()[:8])" )"
+  # r351 — NGUNG BAT CHUOC CU PHAP PIP. Doc ky truoc khi "them lai cho day du".
+  #
+  # Hinh dang loi nay lap LAN THU HAI. Lan mot (r338-r341, 5 finding): tu phan tich DONG
+  # REQUIREMENT ⇒ chua bang cach uy quyen cho pip. Lan hai (r347/r349/r350 + vong 10,
+  # ~7 finding): tu phan tich CHI THI INCLUDE — chu thich, noi dong, bien moi truong,
+  # symlink, va cham bam. Moi vong vá xong lai lo ra mot luat cua pip ma ta chua chep
+  # dung: `expand_env_variables` chi nhan `${UPPER}` va bo gia tri rong · `join_lines`
+  # dung `strip(backslash)` chu khong bo mot ky tu · `realpath` gop lam mat mot nhanh
+  # symlink · va chuoi 'KHONG_DOC_DUOC' trong tep that trung voi trang thai tep bi xoa.
+  #
+  # Lan nay KHONG uy quyen duoc: phep bam phai chay OFFLINE, ma pip thi khong.
+  # Nen cach dung la NGUNG DOAN: neu requirements.txt co BAT KY dong chi thi nao thi ta
+  # KHONG DU SUC noi "khong doi", va phai noi thang thay vi doan cho ra ve chinh xac.
+  #
+  # Phep do rat tho — ky tu dau tien khong-trang cua mot dong la '-' — va tho CO CHU
+  # DICH: no khong can biet cu phap pip. Mot dong chu thich '# -r x' bi tinh nham chi la
+  # chay pip thua mot lan; chieu sai duy nhat cua no la AN TOAN. Doi lay: ca lop loi
+  # "chep sai luat cua pip" chet theo KIEN TRUC, khong con nhanh nao de vá.
+  #
+  # GIA PHAI TRA, khai thang: kho nao DUNG `-r`/`-c`/`-e` se chay pip MOI lan mo phien
+  # (mat moc). Kho nay khong dung chi thi nao nen gia o day bang KHONG — do duoc bang
+  # chinh phep kiem ben duoi.
+  KQ_VT="$( "$PY" -c "
+import hashlib, sys
+noi_dung = open('requirements.txt','rb').read()
+h = hashlib.sha256(noi_dung).hexdigest()[:16]
+tien_to = hashlib.sha256(sys.prefix.encode()).hexdigest()[:8]
+co = any(d.lstrip().startswith(b'-') for d in noi_dung.splitlines())
+print(h + '_' + tien_to + ' ' + ('1' if co else '0'))" )"
+  VAN_TAY="${KQ_VT%% *}"
+  CO_CHI_THI="${KQ_VT##* }"
   DAU="$KHO_MOC/.tl_reqs_$VAN_TAY"
   # BANG CHUNG DUONG = IMPORT DUOC, khong phai `pip install --dry-run` (r337, do 02-09-2026).
   # Ban truoc tin ma thoat cua dry-run: no tra rc=0 KE CA khi in "Would install cffi-2.1.1"
@@ -447,7 +403,12 @@ if hong:
 PYEOF
   }
   CAN_CAI=1
-  if [ -f "$DAU" ]; then
+  # `CO_CHI_THI` (r351): tep co chi thi `-r`/`-c`/`-e` thi ta KHONG DU SUC noi "khong doi"
+  # — noi dung that nam o tep khac ma ta khong phan tich duong dan nua. Khong tin moc,
+  # de pip lam. Chieu sai duy nhat la chay pip THUA, khong bao gio la BO SOT.
+  if [ "$CO_CHI_THI" = 1 ]; then
+    echo "[session-start] requirements.txt co chi thi -r/-c/-e — khong dung moc, de pip quyet"
+  elif [ -f "$DAU" ]; then
     if reqs_import_duoc --kiem-ban; then
       echo "[session-start] requirements.txt khong doi va moi goi import duoc — bo qua pip"
       CAN_CAI=0
@@ -458,7 +419,8 @@ PYEOF
   if [ "$CAN_CAI" = 1 ]; then
     echo "[session-start] cai requirements.txt ..."
     if "$PY" -m pip install --quiet -r requirements.txt && reqs_import_duoc; then
-      : > "$DAU"     # moc CHI duoc dat khi da chung minh import duoc
+      # Co chi thi ⇒ KHONG dat moc: dat vao la tu khai mot dieu ta khong do duoc.
+      [ "$CO_CHI_THI" = 1 ] || : > "$DAU"   # moc CHI dat khi da chung minh import duoc
     else
       rm -f "$DAU"   # khong de lai moc "da cai" cho mot moi truong chua chung minh
       echo "[session-start] CANH BAO: requirements.txt CHUA DUNG DUOC (xem dong tren)."

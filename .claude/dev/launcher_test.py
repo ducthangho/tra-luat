@@ -6560,50 +6560,107 @@ def r347_dot_bien_bo_duong_lui_310_lam_ca_dich_DO():
              "dot bien go duong lui VAN DO — ca dich khong do duong lui ay")
 
 
-# Bốn dạng chỉ thị include mà pip ĐỀU NHẬN. Ca đo THEO HÀNH VI: sửa tệp được include
-# rồi đòi vân tay ĐỔI — không đo bằng cách soi biểu thức chính quy.
-_R347_INCLUDE = [
-    ("khong nhay",      "-r extra.txt\n",           "extra.txt",      {}),
-    ("co nhay",         "-r 'extra file.txt'\n",    "extra file.txt", {}),
-    ("noi dong",        "-r \\\nextra.txt\n",       "extra.txt",      {}),
-    ("bien moi truong", "--requirement=${REQ}\n",   "extra.txt",      {"REQ": "extra.txt"}),
+# r351 — NGỪNG BẮT CHƯỚC CÚ PHÁP PIP. Hai ca `r347_van_tay…` và `r349_van_tay…` đã được
+# THAY, không phải sửa cho xanh: chúng khoá một bộ phân tích không còn tồn tại.
+#
+# Hình dạng lỗi này lặp LẦN THỨ HAI. Lần một (r338–r341, 5 finding): tự phân tích DÒNG
+# REQUIREMENT ⇒ chữa bằng uỷ quyền cho pip. Lần hai (r347/r349/r350 + vòng 10, ~7
+# finding): tự phân tích CHỈ THỊ INCLUDE. Mỗi vòng vá xong lại lộ một luật của pip chưa
+# chép đúng — `expand_env_variables` chỉ nhận `${UPPER}` và bỏ giá trị rỗng ·
+# `join_lines` dùng `strip(backslash)` chứ không bỏ MỘT ký tự · `realpath` gộp làm mất
+# một nhánh symlink · chuỗi `KHONG_DOC_DUOC` trong tệp thật trùng trạng thái tệp bị xoá.
+#
+# Lần này KHÔNG uỷ quyền được: phép băm phải chạy OFFLINE, mà pip thì không. Nên cách
+# đúng là NGỪNG ĐOÁN — có chỉ thị thì nói thẳng "không đủ sức nói khớp" thay vì đoán cho
+# ra vẻ chính xác.
+#
+# Phép đo cố ý THÔ (ký tự đầu không-trắng của một dòng là `-`) và đó là điểm mạnh: nó
+# không cần biết cú pháp pip. Một dòng `# -r x` bị tính nhầm chỉ là chạy pip thừa một
+# lượt; **chiều sai duy nhất của nó là AN TOÀN**.
+_R351_CHI_THI = [
+    ("khong nhay",       "-r extra.txt\n"),
+    ("co nhay",          "-r 'extra file.txt'\n"),
+    ("noi dong",         "-r \\\nextra.txt\n"),
+    ("bien moi truong",  "--requirement=${REQ}\n"),
+    ("dinh lien",        "-rextra.txt\n"),
+    ("nhieu dau cheo",   "-r \\\\\nextra.txt\n"),
+    ("constraint",       "-c con.txt\n"),
+    ("editable",         "-e .\n"),
+    ("thut dau dong",    "   -r extra.txt\n"),
 ]
 
 
-def _r347_van_tay(d: Path, moi_truong: dict) -> str:
+def _r351_khoi_moc(d: Path, reqs: str) -> tuple:
+    """Chạy KHỐI ĐẶT MỐC thật của hook hai lượt; trả (số mốc sau lượt 1, dòng cuối lượt 2)."""
     hook = (LAUNCHER.parent.parent / "hooks" / "session-start.sh").read_text(encoding="utf-8")
-    vt = hook[hook.index('  VAN_TAY="$('):hook.index('  DAU="$KHO_MOC')]
-    (d / "chay.sh").write_text('set -eu\nPY=' + PY + '\n' + vt + '\nprintf "%s" "$VAN_TAY"\n',
-                               encoding="utf-8")
-    env = dict(os.environ)
-    env.update(moi_truong)
+    kh = hook[hook.index("if [ -f requirements.txt ]; then"):hook.index("# --- Xác thực codex")]
+    (d / "chay.sh").write_text("set -euo pipefail\nPY=" + PY + "\n" + kh, encoding="utf-8")
+    (d / "requirements.txt").write_text(reqs, encoding="utf-8")
+    (d / "extra.txt").write_text("pypdf>=3.0\n", encoding="utf-8")
+    (d / "extra file.txt").write_text("pypdf>=3.0\n", encoding="utf-8")
+    (d / "con.txt").write_text("pypdf>=3.0\n", encoding="utf-8")
+    for f in (d / ".git").glob(".tl_reqs_*"):
+        f.unlink()
     vo = shutil.which("bash") or "/bin/bash"
-    return subprocess.run([vo, "chay.sh"], cwd=d, capture_output=True, text=True,
-                          env=env, timeout=300).stdout.strip()
+    subprocess.run([vo, "chay.sh"], cwd=d, capture_output=True, text=True, timeout=600)
+    return len(list((d / ".git").glob(".tl_reqs_*")))
 
 
 @ca
-def r347_van_tay_phai_phu_moi_cu_phap_include_cua_pip():
+def r351_co_chi_thi_thi_KHONG_duoc_dat_moc():
+    """Bất biến thay cho cả bộ phân tích: có chỉ thị ⇒ không mốc ⇒ pip quyết.
+
+    Chín dạng chỉ thị, gồm bốn dạng mà bản phân tích cũ đã phải vá từng cái và hai dạng
+    vòng 10 vừa bắt được. Ở đây không dạng nào cần luật riêng — phép đo không biết cú
+    pháp pip, nên không có gì để chép sai.
+    """
     duong = LAUNCHER.parent.parent / "hooks" / "session-start.sh"
     ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
     if ly_do:
         return ly_do
     if os.name == "nt":
-        return "bo qua: khoi VAN_TAY la shell POSIX"
+        return "bo qua: khoi dat moc la shell POSIX"
+    lot = []
+    for nhan, reqs in _R351_CHI_THI:
+        with tempfile.TemporaryDirectory() as td:
+            d = Path(td)
+            subprocess.run(["git", "init", "-q", str(d)], capture_output=True, timeout=120)
+            if _r351_khoi_moc(d, reqs) != 0:
+                lot.append(nhan)
+    bang(not lot, "co chi thi ma VAN dat moc (moc se song sot sai): " + " · ".join(lot))
+
+
+@ca
+def r351_KHONG_co_chi_thi_thi_van_phai_dat_moc():
+    """RĂNG chiều ngược: nếu không có chỉ thị mà cũng không đặt mốc thì hook chạy pip mãi.
+
+    Thiếu vế này, bản vá "không bao giờ đặt mốc" sẽ làm ca trên XANH tuyệt đối — đúng
+    kiểu chốt không thể đỏ mà kho này đã trả giá nhiều lần.
+    """
+    duong = LAUNCHER.parent.parent / "hooks" / "session-start.sh"
+    ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
+    if ly_do:
+        return ly_do
+    if os.name == "nt":
+        return "bo qua: khoi dat moc la shell POSIX"
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)
-        lot = []
-        for nhan, reqs, ten, env in _R347_INCLUDE:
-            (d / "requirements.txt").write_text(reqs, encoding="utf-8")
-            (d / ten).write_text("pypdf>=3.0\n", encoding="utf-8")
-            a = _r347_van_tay(d, env)
-            (d / ten).write_text("pypdf>=4.0\n", encoding="utf-8")
-            b = _r347_van_tay(d, env)
-            if not a or a == b:
-                lot.append(nhan)
-        bang(not lot,
-             "sua tep include ma van tay KHONG DOI (moc song sot, hook bo qua cai dat): "
-             + ", ".join(lot))
+        subprocess.run(["git", "init", "-q", str(d)], capture_output=True, timeout=120)
+        bang(_r351_khoi_moc(d, "pypdf>=3.0\n") == 1,
+             "khong co chi thi ma cung khong dat moc — hook se chay pip moi luot")
+
+
+@ca
+def r351_requirements_cua_kho_khong_phai_tra_gia():
+    """Giá của r351 chỉ rơi vào kho DÙNG chỉ thị. Đo trên kho này thay vì khẳng định."""
+    duong = Path(__file__).resolve().parents[2] / "requirements.txt"
+    ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
+    if ly_do:
+        return ly_do
+    co = [d for d in duong.read_text(encoding="utf-8").splitlines() if d.lstrip().startswith("-")]
+    bang(not co,
+         "requirements.txt cua kho CO chi thi ⇒ hook se chay pip moi luot mo phien; "
+         f"neu co y thi cap nhat ca nay: {co[:3]}")
 
 
 # r348 — `_module_cua()` suy SAI cho gói CHỈ CÓ CLI, và tôi tự tìm ra khi kiểm chính câu
@@ -6682,59 +6739,6 @@ def r348_dot_bien_bo_isidentifier_lam_ca_dich_DO():
         _r348_dist(sp, "clionly", ["clionly-1.0.dist-info/METADATA", "../../../bin/clix"], top="")
         bang(_r345_chay(py, d, _R348_CHE_310 + dot_bien, "clionly\n", "--kiem-ban") != 0,
              "dot bien go `isidentifier()` VAN xanh — ca dich khong do chot ay")
-
-
-# r349 — BA lỗ của khối băm vân tay, tất cả đều làm MỐC SỐNG SÓT SAI, và một chẩn đoán
-# TỰ MÂU THUẪN. Cả bốn tái hiện được trước khi vá.
-_R349_VT = [
-    # (nhãn, requirements.txt, tệp include, biến môi trường)
-    ("chuyen dong giua hai tep include", None, None, {}),   # xu ly rieng ben duoi
-    ("chu thich ket thuc dau cheo nguoc", "# chu thich \\\n-r extra.txt\n", "extra.txt", {}),
-    ("doi so dinh lien -rextra.txt",      "-rextra.txt\n",                  "extra.txt", {}),
-    ("cu: -r extra.txt",                  "-r extra.txt\n",                 "extra.txt", {}),
-    ("cu: -r co nhay",                    "-r 'extra file.txt'\n",          "extra file.txt", {}),
-    ("cu: noi dong that",                 "-r \\\nextra.txt\n",             "extra.txt", {}),
-    ("cu: --requirement=$BIEN",           "--requirement=${REQ}\n",         "extra.txt", {"REQ": "extra.txt"}),
-]
-
-
-@ca
-def r349_van_tay_khong_duoc_de_moc_song_sot_sai():
-    """Ba lỗ mới + bốn dạng cũ, đo theo HÀNH VI: sửa tệp include ⇒ vân tay phải ĐỔI.
-
-    Lỗ nguy nhất là VA CHẠM: bản trước băm nội dung THÔ nên hai bố cục include khác nhau
-    cho **cùng một chuỗi byte**. Chuyển `somepkg` từ tệp `-c` (chỉ ràng buộc) sang tệp
-    `-r` (CÀI THẬT) ⇒ vân tay y hệt ⇒ mốc sống sót ⇒ gói mới khai báo không bao giờ được
-    cài. Chữa bằng đóng KHUNG từng tệp (độ dài + đường dẫn + độ dài + nội dung).
-    """
-    duong = LAUNCHER.parent.parent / "hooks" / "session-start.sh"
-    ly_do = _bo_qua_neu_ban_sao_roi_thieu(duong)
-    if ly_do:
-        return ly_do
-    if os.name == "nt":
-        return "bo qua: khoi VAN_TAY la shell POSIX"
-    with tempfile.TemporaryDirectory() as td:
-        d = Path(td)
-        lot = []
-        # VA CHAM: cung chuoi byte, hai bo cuc khac nhau.
-        (d / "requirements.txt").write_text("-r req.txt\n-c con.txt\n", encoding="utf-8")
-        (d / "req.txt").write_text("", encoding="utf-8")
-        (d / "con.txt").write_text("somepkg\n", encoding="utf-8")
-        a = _r347_van_tay(d, {})
-        (d / "req.txt").write_text("somepkg\n", encoding="utf-8")
-        (d / "con.txt").write_text("", encoding="utf-8")
-        b = _r347_van_tay(d, {})
-        if not a or a == b:
-            lot.append("chuyen dong giua hai tep include (VA CHAM)")
-        for nhan, reqs, ten, env in _R349_VT[1:]:
-            (d / "requirements.txt").write_text(reqs, encoding="utf-8")
-            (d / ten).write_text("pypdf>=3.0\n", encoding="utf-8")
-            a = _r347_van_tay(d, env)
-            (d / ten).write_text("pypdf>=4.0\n", encoding="utf-8")
-            b = _r347_van_tay(d, env)
-            if not a or a == b:
-                lot.append(nhan)
-        bang(not lot, "van tay KHONG DOI (moc song sot sai): " + " · ".join(lot))
 
 
 @ca

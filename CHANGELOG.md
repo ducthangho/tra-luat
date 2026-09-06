@@ -1,3 +1,36 @@
+# ★ dev-side — r340: một DÒNG requirements không chỉ là TÊN (P2 thứ hai của codex) (2026-09-06)
+
+Lượt review thứ hai trên `1474d7d` ra P2 *"Respect requirement markers before probing
+imports"*, và nó **đúng** — đã tái hiện trước khi vá. Trên Linux với
+`pywin32; sys_platform == "win32"`: **pip trả `rc=0`** và nói thẳng *"Ignoring pywin32:
+markers ... don't match your environment"*, còn chốt trả **`rc=1` ở CẢ HAI chế độ** ⇒ sau
+mỗi lần pip THÀNH CÔNG, hook vẫn xoá mốc và cảnh báo lại ở lượt sau.
+
+**Đây là lần thứ BA trong cùng một ngày lớp lỗi CHỐT ĐỎ THƯỜNG TRỰC tái phát** — r338
+(ghim `==6.0.3` bắt pip gỡ gói distro), r339 (đòi bản ở chế độ hậu-pip), giờ là marker.
+Ba lần cùng một hình dạng thì câu hỏi đúng không còn là *"vá thế nào"* mà là *"có nên tự
+làm việc này không"*, đúng như bài học **BẢY phát hiện cùng MỘT đường** đã ghi. Nên bản vá
+này không thêm một nhánh nữa vào biểu thức chính quy mà **ngừng tự phân tích**: giao cả
+dòng cho `Requirement` — thứ pip dùng — và lấy tên + specifier + marker từ MỘT nguồn.
+
+- **Marker không áp dụng ⇒ bỏ qua dòng**, vì pip cũng bỏ qua. Đòi import một thứ pip cố ý
+  không cài là tự chế ra bất đồng với thẩm quyền.
+- **Dòng hỏng ⇒ fail-closed**, không `continue` lặng lẽ: bộ phân tích của pip từ chối thì
+  ta cũng từ chối (`InvalidRequirement`).
+- **Thiếu bộ phân tích + dòng CÓ marker ⇒ `KHONG_DO_DUOC_MARKER`**. Đoán xem marker có áp
+  dụng hay không chính là cái vừa hỏng.
+
+Sáu ca đo sau khi vá, trên cùng một venv: marker không khớp (cả hai chế độ) ⇒ rc=0 · marker
+khớp + gói thiếu thật ⇒ rc=1 · lệch bản (P2 trước) ⇒ rc=1, không hồi quy · bản thoả ⇒ rc=0
+· dòng hỏng ⇒ rc=1. Đo răng hai chiều, một biến, hai vế dựng trong cùng một lệnh: hook chưa
+vá ⇒ ca đích **ĐỎ**; chỉ thay đúng tệp hook ⇒ **XANH**. Đột biến gỡ phép đánh giá marker
+phải làm ca đích ĐỎ.
+
+Cổng: `launcher_test` **174/174** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta so
+`1474d7d` = **0** · `bash -n` OK · `git diff --check` rc=0 · hook chạy thật hai lượt đúng
+thiết kế.
+
 # ★ dev-side — r339: IMPORT ĐƯỢC không chứng minh ĐÚNG BẢN (P2 của codex trên PR #449) (2026-09-06)
 
 Codex review trên `3028506` ra một P2, và nó **đúng** — đã tái hiện bằng phản chứng chạy

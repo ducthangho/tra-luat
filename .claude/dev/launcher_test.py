@@ -6419,6 +6419,61 @@ def r339_dot_bien_bo_kiem_ban_lam_ca_dich_DO():
              "dot bien bo phep so specifier VAN DO — cai DO cua ca dich khong quy duoc cho phep so ay")
 
 
+# r340 — P2 thứ hai của codex trên PR #449, ĐÃ TÁI HIỆN trước khi vá: một DÒNG trong
+# `requirements.txt` không chỉ là TÊN, nó còn mang ENVIRONMENT MARKER. Bản trước cắt bỏ
+# marker rồi import vô điều kiện. Phản chứng trên Linux với `pywin32; sys_platform ==
+# "win32"`: pip trả **rc=0** và nói thẳng *"Ignoring pywin32: markers ... don't match
+# your environment"*, còn chốt trả **rc=1** ở CẢ HAI chế độ ⇒ sau mỗi lần pip THÀNH CÔNG
+# hook vẫn xoá mốc và cảnh báo lại ở lượt sau. Lớp CHỐT ĐỎ THƯỜNG TRỰC, tái phát lần thứ
+# ba trong cùng một ngày — nên cách chữa là NGỪNG TỰ PHÂN TÍCH: giao cả dòng cho
+# `Requirement`, thứ mà pip dùng.
+#
+# Ca này không cần mạng: `pywin32` không được cài, và điểm đo là chốt có ĐÒI nó hay không.
+def _r340_chay(than: str, reqs: str, *them: str) -> int:
+    with tempfile.TemporaryDirectory() as td:
+        (Path(td) / "requirements.txt").write_text(reqs, encoding="utf-8")
+        return subprocess.run([PY, "-c", than, *them], cwd=td, capture_output=True,
+                              text=True, timeout=300).returncode
+
+
+@ca
+def r340_marker_khong_khop_thi_khong_duoc_doi_import():
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    khong_khop = "win32" if sys.platform != "win32" else "linux"
+    khop = "win32" if sys.platform == "win32" else sys.platform
+    goi = "pywin32" if sys.platform != "win32" else "khong_he_ton_tai_r340"
+    # (a) marker KHONG ap dung ⇒ pip bo qua ⇒ chot cung phai bo qua, o CA HAI che do.
+    reqs = f'{goi}; sys_platform == "{khong_khop}"\n'
+    bang(_r340_chay(than, reqs) == 0,
+         "marker khong khop ma chot van DOI import — sau moi lan pip THANH CONG hook se "
+         "xoa moc va canh bao lai o luot sau")
+    bang(_r340_chay(than, reqs, "--kiem-ban") == 0,
+         "marker khong khop ma --kiem-ban van DO")
+    # (b) RĂNG: marker CÓ áp dụng thì gói thiếu vẫn phải ĐỎ, kẻo bản vá thành "bỏ qua tất".
+    bang(_r340_chay(than, f'khong_he_ton_tai_r340; sys_platform == "{khop}"\n') == 1,
+         "marker KHOP + goi THIEU that ma chot van XANH — chot da mat rang")
+    # (c) Dòng hỏng phải fail-closed, không được lặng lẽ đi qua.
+    bang(_r340_chay(than, "khong hop le ===== bay\n") == 1,
+         "dong HONG ma chot van XANH — phai fail-closed nhu bo phan tich cua pip")
+
+
+@ca
+def r340_dot_bien_bo_danh_gia_marker_lam_ca_dich_DO():
+    """Đột biến bỏ phép đánh giá marker phải làm ca trên ĐỎ — nếu không, ca kia đo gì?"""
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    neo = "            if not ap_dung:"
+    bang(than.count(neo) == 1, f"R340_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
+    dot_bien = than.replace(neo, "            if False:")
+    khong_khop = "win32" if sys.platform != "win32" else "linux"
+    goi = "pywin32" if sys.platform != "win32" else "khong_he_ton_tai_r340"
+    bang(_r340_chay(dot_bien, f'{goi}; sys_platform == "{khong_khop}"\n') == 1,
+         "dot bien bo danh gia marker VAN XANH — ca dich khong do phep danh gia ay")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [

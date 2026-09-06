@@ -233,16 +233,25 @@ if packages_distributions is not None:
 # thâm quyen), nen doi them mot phep do o do chi tao ra chot do thuong truc khi may
 # khong co bo phan tich specifier.
 kiem_ban = "--kiem-ban" in sys.argv[1:]
-_spec = None
-if kiem_ban:
-    for _m in ("packaging.specifiers", "pip._vendor.packaging.specifiers"):
-        # `packaging` tran KHONG co trong venv tran (do 06-09-2026); ban vendor cua pip
-        # thi co o CA HAI nen — ma hook nay von da doi pip. Do la ly do co duong lui.
-        try:
-            _spec = __import__(_m, fromlist=["SpecifierSet"]).SpecifierSet
-            break
-        except ImportError:
-            continue
+# r340 (P2 thu hai cua codex tren PR #449, da TAI HIEN truoc khi va): mot DONG trong
+# requirements.txt khong chi la TEN. No con mang SPECIFIER va ENVIRONMENT MARKER, va
+# ban truoc CAT BO marker roi import vo dieu kien. Phan chung chay duoc tren Linux voi
+# `pywin32; sys_platform == "win32"`: pip rc=0 va noi thang "Ignoring pywin32: markers
+# ... don't match your environment", con chot tra rc=1 o CA HAI che do ⇒ sau moi lan pip
+# THANH CONG, hook van xoa moc va canh bao lai o lượt sau. Lai dung lop CHOT DO THUONG
+# TRUC — lop nay da tai phat BA lan trong cung mot ngay, nen cach chua khong phai vá
+# tiep mot bieu thuc chinh quy ma la NGUNG TU PHAN TICH: dua ca dong cho `Requirement`,
+# thu ma pip dung, de lay ten + specifier + marker tu MOT nguon.
+_Req = _spec = None
+for _m in ("packaging", "pip._vendor.packaging"):
+    # `packaging` tran KHONG co trong venv tran (do 06-09-2026); ban vendor cua pip thi
+    # co o CA HAI nen — ma hook nay von da doi pip. Do la ly do co duong lui.
+    try:
+        _Req = __import__(_m + ".requirements", fromlist=["Requirement"]).Requirement
+        _spec = __import__(_m + ".specifiers", fromlist=["SpecifierSet"]).SpecifierSet
+        break
+    except ImportError:
+        _Req = _spec = None
 try:
     from importlib.metadata import version as _ban_da_cai
 except ImportError:
@@ -253,11 +262,41 @@ for dong in open("requirements.txt", encoding="utf-8"):
     dong = dong.split("#", 1)[0].strip()
     if not dong or dong.startswith("-"):
         continue
-    dong = dong.split(";", 1)[0].strip()          # bo environment marker
-    m = re.match(r"([A-Za-z0-9._-]+)\s*(?:\[[^\]]*\])?\s*(.*)$", dong)
-    if not m:
-        continue
-    ten_goi, dieu_kien = m.group(1), m.group(2).strip()
+    dieu_kien = ""
+    if _Req is not None:
+        try:
+            _r = _Req(dong)
+        except KeyboardInterrupt:
+            raise
+        except BaseException as e:
+            # Dong HONG khong duoc im lang di qua: bo phan tich cua pip tu choi thi ta
+            # cung tu choi. Fail-closed, dung `continue`.
+            hong.append(f"{dong!r}: KHONG PHAN TICH DUOC ({type(e).__name__})")
+            continue
+        if _r.marker is not None:
+            try:
+                ap_dung = _r.marker.evaluate()
+            except KeyboardInterrupt:
+                raise
+            except BaseException as e:
+                hong.append(f"{_r.name}: KHONG_DO_DUOC_MARKER ({type(e).__name__})")
+                continue
+            if not ap_dung:
+                # Marker KHONG khop nen tren nay ⇒ pip bo qua dong nay ⇒ ta cung phai bo
+                # qua. Doi import o day la doi mot thu pip co y khong cai.
+                continue
+        ten_goi, dieu_kien = _r.name, str(_r.specifier)
+    else:
+        # KHONG co bo phan tich: van lam duoc phan TEN, nhung marker thi khong. Dong CO
+        # marker phai fail-closed — doan xem no ap dung hay khong chinh la cai vua hong.
+        if ";" in dong:
+            hong.append(f"{dong!r}: KHONG_DO_DUOC_MARKER (thieu bo phan tich)")
+            continue
+        m = re.match(r"([A-Za-z0-9._-]+)\s*(?:\[[^\]]*\])?\s*(.*)$", dong)
+        if not m:
+            hong.append(f"{dong!r}: KHONG PHAN TICH DUOC")
+            continue
+        ten_goi, dieu_kien = m.group(1), m.group(2).strip()
     goi = ten_goi.strip().lower().replace("-", "_")
     # Goi CHUA CAI thi khong co trong metadata -> lui ve ten suy ra -> import that bai
     # -> bao THIEU. Do la dung: ban do chi chua ten, khong che duoc rang cua chot.
@@ -271,7 +310,7 @@ for dong in open("requirements.txt", encoding="utf-8"):
     if not (kiem_ban and dieu_kien):
         continue
     # KHONG DO DUOC != DAT. Thieu bo phan tich hay thieu metadata thi KHONG duoc khai
-    # la thoa; tra hong o day nghia la "dung bo qua pip", tuc de pip — thâm quyen that
+    # la thoa; tra hong o day nghia la "dung bo qua pip", tuc de pip — tham quyen that
     # su — quyet dinh. Do la tu chua, khong phai chot chet.
     if _spec is None or _ban_da_cai is None:
         hong.append(f"{ten_goi}: KHONG_DO_DUOC_BAN (thieu bo phan tich specifier)")

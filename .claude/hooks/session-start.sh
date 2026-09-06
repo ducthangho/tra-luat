@@ -201,7 +201,14 @@ if [ -f requirements.txt ]; then
   # Nen cach dung la NGUNG DOAN: neu requirements.txt co BAT KY dong chi thi nao thi ta
   # KHONG DU SUC noi "khong doi", va phai noi thang thay vi doan cho ra ve chinh xac.
   #
-  # Phep do rat tho — ky tu dau tien khong-trang cua mot dong la '-' — va tho CO CHU
+  # r352 — luat tho lan mot con THUNG: pip GIAI BIEN MOI TRUONG TRUOC khi phan tich
+  # option, nen mot dong `${INCLUDE}` voi `INCLUDE='-r extra.txt'` keo duoc tep khac
+  # vao trong khi ky tu dau la dola chu khong phai gach ngang. Do duoc: pip keo
+  # `extra.txt`, luat cu tra 0. Chua bang cach THO HON — dong nao CHUA dau dola cung
+  # tinh la co chi thi. Khong doc gia tri bien, khong chep luat `${UPPER}` cua pip:
+  # chep luat chinh la thu da hong bay lan.
+  #
+  # Phep do rat tho — ky tu dau khong-trang la '-', hoac dong co dola — va tho CO CHU
   # DICH: no khong can biet cu phap pip. Mot dong chu thich '# -r x' bi tinh nham chi la
   # chay pip thua mot lan; chieu sai duy nhat cua no la AN TOAN. Doi lay: ca lop loi
   # "chep sai luat cua pip" chet theo KIEN TRUC, khong con nhanh nao de vá.
@@ -214,7 +221,8 @@ import hashlib, sys
 noi_dung = open('requirements.txt','rb').read()
 h = hashlib.sha256(noi_dung).hexdigest()[:16]
 tien_to = hashlib.sha256(sys.prefix.encode()).hexdigest()[:8]
-co = any(d.lstrip().startswith(b'-') for d in noi_dung.splitlines())
+co = any(d.lstrip().startswith(b'-') or b'\x24' in d
+         for d in noi_dung.splitlines())
 print(h + '_' + tien_to + ' ' + ('1' if co else '0'))" )"
   VAN_TAY="${KQ_VT%% *}"
   CO_CHI_THI="${KQ_VT##* }"

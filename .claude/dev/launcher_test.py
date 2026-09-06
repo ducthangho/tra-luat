@@ -6587,7 +6587,19 @@ _R351_CHI_THI = [
     ("constraint",       "-c con.txt\n"),
     ("editable",         "-e .\n"),
     ("thut dau dong",    "   -r extra.txt\n"),
+    # r352 — pip GIAI BIEN MOI TRUONG TRUOC khi phan tich option, nen mot dong `${BIEN}`
+    # keo duoc tep khac vao trong khi ky tu dau la dola. Do duoc: pip keo `extra.txt`,
+    # luat tho lan mot tra 0. Toi da TU HOI dung cau nay ("dang nao khong bat dau bang
+    # `-` ma van keo tep?") va thu `pypdf -r extra.txt` roi ket luan "khong thung" — cau
+    # hoi dung, PHEP THU THIEU MOT DANG. Nen ca duoi giu ca hai dang bien.
+    ("bien moi truong ${}", "${INCLUDE}\n"),
+    ("bien moi truong $",   "$INCLUDE\n"),
 ]
+
+# BIEN PHAI DUOC DAT, khong thi ca KHONG CO RANG — do duoc, khong phai lo xa: bien
+# khong dat ⇒ pip that bai ⇒ khong dat moc ⇒ ca XANH tren CA hook chua va. Phep do rang
+# hai chieu bat duoc dung chuyen nay (nen 1 moc / sau 0 moc chi hien khi bien co dat).
+_R351_MOI_TRUONG = {"INCLUDE": "-r extra.txt"}
 
 
 def _r351_khoi_moc(d: Path, reqs: str) -> tuple:
@@ -6602,7 +6614,9 @@ def _r351_khoi_moc(d: Path, reqs: str) -> tuple:
     for f in (d / ".git").glob(".tl_reqs_*"):
         f.unlink()
     vo = shutil.which("bash") or "/bin/bash"
-    subprocess.run([vo, "chay.sh"], cwd=d, capture_output=True, text=True, timeout=600)
+    env = dict(os.environ)
+    env.update(_R351_MOI_TRUONG)
+    subprocess.run([vo, "chay.sh"], cwd=d, capture_output=True, text=True, timeout=600, env=env)
     return len(list((d / ".git").glob(".tl_reqs_*")))
 
 

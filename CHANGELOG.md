@@ -1,3 +1,40 @@
+# ★ dev-side — r352: luật thô của r351 vẫn thủng ở BIẾN MÔI TRƯỜNG (2026-09-06)
+
+Vòng 11 ra **một** finding (giảm từ bốn), và nó bắt đúng chỗ tôi **tự kiểm mà không nghĩ
+ra**. pip **giải biến môi trường TRƯỚC** khi phân tích option, nên một dòng `${INCLUDE}`
+với `INCLUDE='-r extra.txt'` kéo được tệp khác vào trong khi ký tự đầu là `$` chứ không
+phải `-`. Đo: pip **có** kéo `extra.txt`; luật thô lần một trả `0`.
+
+## Câu hỏi ĐÚNG, phép thử THIẾU MỘT DẠNG
+
+Đáng ghi vì tôi đã hỏi chính xác câu này ở lượt trước — *"pip có dạng nào không bắt đầu
+bằng `-` mà vẫn kéo tệp khác vào không?"* — rồi tự đo bằng `pypdf -r extra.txt`, thấy pip
+không đệ quy, và kết luận **"không thủng"**. Tôi đọc `break_args_options` rồi dừng;
+reviewer đọc tiếp tới `expand_env_variables`. Nghĩ ra được câu hỏi không có nghĩa là đã
+trả lời được nó — và một phép thử thiếu dạng thì cho ra đúng cái cảm giác "đã kiểm".
+
+Chữa theo đúng tinh thần r351: **thô hơn nữa** — dòng nào **chứa dấu đô-la** cũng tính là
+có chỉ thị. Cố ý KHÔNG đọc giá trị biến và KHÔNG chép luật `${UPPER_CASE}` của pip: chép
+luật chính là thứ đã hỏng bảy lần. Chiều sai vẫn an toàn — một dòng có `$` vô hại chỉ tốn
+thêm một lượt pip.
+
+## Ca khoá của chính bản vá này SUÝT không có răng
+
+Thêm hai dạng `${INCLUDE}` / `$INCLUDE` vào bảng ca xong, phép đo răng hai chiều cho
+**XANH ở CẢ HAI vế** — tức ca không đo gì. Lý do: fixture không đặt biến, nên pip thất
+bại, nên không có mốc nào được đặt, nên ca xanh **vì lý do sai**. Đặt `INCLUDE='-r
+extra.txt'` thì hook chưa vá đặt mốc = 1 và ca ĐỎ đúng như phải thế.
+
+Đây là lần thứ **ba** trong đợt phép đo răng cứu một ca xanh vô nghĩa, và lần này nạn nhân
+là ca vừa viết để khoá bản vá. Ca xanh không chứng minh gì nếu chưa ai thử giết nó — kể cả
+khi ca ấy vừa ra đời từ một finding thật.
+
+Cổng: `launcher_test` **181/181** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `ops/cong_cu_test.py` **0 đỏ** · `tl --selftest`
+**1709/1709** · ruff `--select F` delta = **0** · `bash -n` OK · `git diff --check` rc=0 ·
+quét mẫu bí mật 25 dòng thêm: 0 khớp · hook chạy thật hai lượt đúng thiết kế · bốn dạng đo
+lại (`${INCLUDE}` · `$INCLUDE` · `-r extra.txt` ⇒ không mốc; `pypdf>=3.0` ⇒ có mốc).
+
 # ★ dev-side — r351: ngừng bắt chước cú pháp pip; hình dạng lỗi lặp LẦN THỨ HAI (2026-09-06)
 
 Vòng 10 ra bốn finding, **tất cả ở bộ phân tích chỉ thị include**, và tôi **không vá từng

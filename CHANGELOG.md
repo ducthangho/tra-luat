@@ -1,3 +1,49 @@
+# ★ dev-side — r341: `#` không phải lúc nào cũng là chú thích, và LẦN THỨ TƯ cùng một lớp lỗi (2026-09-06)
+
+P2 thứ ba của codex trên `033d67d`, **đúng**, đã tái hiện trước khi vá: pip chỉ coi `#` là
+chú thích khi nó ở **đầu dòng** hoặc đi **sau khoảng trắng**; `#` nằm giữa một chuỗi —
+marker, hay fragment của direct URL — là ký tự HỢP LỆ. Phản chứng:
+`pypdf; os_name == "posix#x"` ⇒ pip `rc=0` (marker sai nên bỏ qua), bản trước cắt ở `#`
+đầu tiên ⇒ dòng cụt ⇒ `InvalidRequirement` ⇒ `rc=1`.
+
+**Đây là lần thứ TƯ trong một ngày cùng lớp CHỐT ĐỎ THƯỜNG TRỰC**, và cả bốn có chung một
+gốc: *ta tự làm một việc mà pip đã có luật riêng.*
+
+| | ta tự làm gì | pip làm gì |
+|---|---|---|
+| r338 | ghim `==6.0.3` | phải gỡ gói distro ⇒ hỏng |
+| r339 | tự đòi bản ở chế độ hậu-pip | pip đã là thẩm quyền |
+| r340 | tự cắt marker | pip đánh giá marker |
+| r341 | tự cắt `#` | pip có luật cắt riêng |
+
+Điều đáng ghi nhất **không phải bản vá mà là cách r340 hụt**: commit r340 viết ra bài học
+"ngừng tự phân tích", chuyển việc cho `Requirement` — rồi **để nguyên dòng `split("#")`
+ngay phía trên chỗ vừa sửa**. Chuyển được phần phân tích mà bỏ sót phần TIỀN XỬ LÝ, và
+đúng chỗ bỏ sót ấy là lỗi kế tiếp. Bài học: khi kết luận "đừng tự làm việc này nữa", phải
+đi hết **cả đường dẫn tới nó**, không chỉ đoạn đang bị chỉ ra.
+
+Chép **LUẬT** của pip (`(^|\s)#`) chứ KHÔNG import bộ phân tích nội bộ: reviewer dặn đúng
+một điều đang định làm sai — `pip._internal` là API không ổn định, buộc hook vào đó là đổi
+một lớp trôi này lấy một lớp trôi khác.
+
+**Một hàng trong bảng đo của chính lượt này không đo cái nó ghi.** Vòng lặp kiểm chạy
+`pip install` trước mỗi ca, nên tới hàng `pypdf>=4.0` thì pip **đã nâng cấp** pypdf — hàng
+ấy in "không hồi quy" trong khi ca đã mất điều kiện. Đo lại trên rig giữ nguyên
+`pypdf` 3.17.4: r339 vẫn `rc=1`, r340 và r341 đều `rc=0`. Cùng bệnh *"ca có MẶT khác ca có
+ĐO"*, lần này nạn nhân là bảng dựng ra để chứng minh không hồi quy.
+
+Bảy ca đối chiếu **thẳng với pip** trên cùng một venv (marker chứa `#` · chú thích thật sau
+khoảng trắng · chú thích đầu dòng · chú thích sau TAB · marker không khớp · lệch bản · dòng
+hỏng): mã thoát của chốt khớp pip ở **cả bảy**. Răng hai chiều, một biến, hai vế dựng trong
+cùng một lệnh: hook chưa vá ⇒ ca đích **ĐỎ**; chỉ thay tệp hook ⇒ **XANH**. Ca răng giữ cho
+bản vá không hẹp thành "giữ nguyên chú thích thật", và đột biến quay về `split("#")` vô điều
+kiện phải làm ca đích ĐỎ.
+
+Cổng: `launcher_test` **176/176** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta so
+`033d67d` = **0** · `bash -n` OK · `git diff --check` rc=0 · hook chạy thật hai lượt đúng
+thiết kế.
+
 # ★ dev-side — r340: một DÒNG requirements không chỉ là TÊN (P2 thứ hai của codex) (2026-09-06)
 
 Lượt review thứ hai trên `1474d7d` ra P2 *"Respect requirement markers before probing

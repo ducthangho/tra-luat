@@ -6474,6 +6474,46 @@ def r340_dot_bien_bo_danh_gia_marker_lam_ca_dich_DO():
          "dot bien bo danh gia marker VAN XANH — ca dich khong do phep danh gia ay")
 
 
+# r341 — P2 thứ ba của codex trên PR #449, ĐÃ TÁI HIỆN trước khi vá: `#` KHÔNG phải lúc
+# nào cũng mở đầu chú thích. pip chỉ coi nó là chú thích khi nó ở ĐẦU DÒNG hoặc đi sau
+# KHOẢNG TRẮNG; `#` nằm giữa một chuỗi — marker, hay fragment của direct URL — là ký tự
+# HỢP LỆ. Phản chứng: `pypdf; os_name == "posix#x"` ⇒ pip rc=0 (marker sai nên bỏ qua),
+# bản trước cắt ở `#` đầu tiên ⇒ dòng cụt ⇒ `InvalidRequirement` ⇒ rc=1.
+#
+# Chép LUẬT của pip chứ KHÔNG import bộ phân tích nội bộ: `pip._internal` là API không ổn
+# định, buộc hook vào đó là đổi một lớp trôi này lấy một lớp trôi khác.
+@ca
+def r341_dau_thang_giua_chuoi_khong_phai_chu_thich():
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    khong_khop = "posix#x" if os.name == "posix" else "nt#x"
+    # (a) `#` giữa chuỗi marker: marker sai ⇒ không áp dụng ⇒ bỏ qua dòng ⇒ XANH.
+    bang(_r340_chay(than, f'pypdf; os_name == "{khong_khop}"\n') == 0,
+         "`#` giua chuoi bi cat nen dong cut — pip rc=0 ma chot DO, lai la chot do thuong truc")
+    # (b) RĂNG: chú thích THẬT vẫn phải bị cắt, kẻo bản vá hẹp lại thành giữ nguyên chú thích.
+    bang(_r340_chay(than, "khong_he_ton_tai_r341  # chu thich that\n") == 1,
+         "chu thich that bi GIU lai — ten goi se mang ca chu thich")
+    bang(_r340_chay(than, "# ca dong nay la chu thich\n") == 0,
+         "chu thich dau dong khong duoc cat")
+    bang(_r340_chay(than, "khong_he_ton_tai_r341\t# sau TAB\n") == 1,
+         "chu thich sau TAB khong duoc cat — `\\s` phai phu ca tab")
+
+
+@ca
+def r341_dot_bien_cat_vo_dieu_kien_lam_ca_dich_DO():
+    """Đột biến quay về `split("#")` vô điều kiện phải làm ca trên ĐỎ."""
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    neo = '    dong = _CHU_THICH.sub("", dong).strip()'
+    bang(than.count(neo) == 1, f"R341_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
+    dot_bien = than.replace(neo, '    dong = dong.split("#", 1)[0].strip()')
+    khong_khop = "posix#x" if os.name == "posix" else "nt#x"
+    bang(_r340_chay(dot_bien, f'pypdf; os_name == "{khong_khop}"\n') == 1,
+         "dot bien cat vo dieu kien VAN XANH — ca dich khong do luat cat chu thich")
+
+
 # ------------------------------------------------------ tự đột biến: có răng không
 
 DOT_BIEN = [

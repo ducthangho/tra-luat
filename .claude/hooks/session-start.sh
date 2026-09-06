@@ -257,9 +257,18 @@ try:
 except ImportError:
     _ban_da_cai = None
 
+# r341 (P2 thu ba cua codex tren PR #449, da TAI HIEN truoc khi va): `#` KHONG phai
+# lúc nào cũng mo dau chu thich. pip chi coi no la chu thich khi no o DAU DONG hoac di
+# sau KHOANG TRANG; `#` nam giua mot chuoi — marker hay fragment cua direct URL — la ky
+# tu HOP LE. Phan chung: `pypdf; os_name == "posix#x"` ⇒ pip rc=0 (marker sai nen bo
+# qua), con ban truoc cat o `#` dau tien ⇒ dong cut ⇒ `InvalidRequirement` ⇒ rc=1 ⇒ lai
+# dung lop CHOT DO THUONG TRUC (lan thu TU trong ngay). Chep LUAT cua pip chu KHONG
+# import bo phan tich noi bo cua no: `pip._internal` la API khong on dinh, buoc hook vao
+# do la doi mot lop troi nay lay mot lop troi khac.
+_CHU_THICH = re.compile(r"(^|\s)#.*$")
 hong = []
 for dong in open("requirements.txt", encoding="utf-8"):
-    dong = dong.split("#", 1)[0].strip()
+    dong = _CHU_THICH.sub("", dong).strip()
     if not dong or dong.startswith("-"):
         continue
     dieu_kien = ""

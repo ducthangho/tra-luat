@@ -262,9 +262,40 @@ không có neo thì `BE_MAT_LICH_SU` là một danh sách bịa, đặt đúng c
 Chốt ấy lập tức bắt **năm fixture** của chính bộ test dùng `surface: "cli"` — một bề mặt **không
 tồn tại** trong kho. Lần thứ năm và thứ sáu trong đợt, và **cả sáu lần fixture mới là thứ sai**.
 
+## Vòng tám: bốn phát hiện nữa, và ba trong bốn là **bản vá trước đó mới đóng được MỘT NỬA**
+
+Connector trên `5a78c15` — một P1 + ba P2, và cả bốn đều đo được trên head lúc ấy:
+
+- **P1 — bí danh đi vòng quanh CẢ HAI nửa hợp đồng.** Nửa đầu tôi tự tìm ở vòng trước
+  (`anthropic` + bề mặt **bịa**) và vá bằng cách cho bí danh mượn **hợp nhất mọi bề mặt**.
+  Reviewer đo nửa sau: `anthropic` + **`chatgpt_web`** + `cross_approved` vẫn **0 vi phạm** — bí
+  danh **mượn được bề mặt của provider khác**, còn luật assurance thì khoá theo **TÊN**. Một bản
+  vá nửa vời tệ hơn không vá: nó làm chỗ ấy **trông như đã đóng**. Nay bí danh được **chuẩn hoá
+  TRƯỚC** mọi phép kiểm (`_chuan_hoa_provider`), và bảng bí danh cũng đọc từ nguồn có cấu trúc.
+- **P2 — "đọc, không chép" vẫn là đọc PROSE.** Vòng trước tôi thu hẹp từ *toàn tệp* xuống *dưới
+  hai bảng* — nhưng vẫn gom **mọi hằng chuỗi** dưới đó, nên chính chuỗi `vi_sao` **mô tả** của
+  một mục cũng cấp được quyền: đổi một câu lý do thành `provider ke_gian_5 qua execution_surface
+  forged` ⇒ `ke_gian_5` vào danh sách CHO PHÉP, không lỗi nguồn nào. **Đổi NGUỒN mà giữ HÌNH
+  DẠNG thì lỗ chỉ đổi chỗ** — lần thứ hai liên tiếp. Nay `launcher.py` có **bảng có cấu trúc**
+  (`_PROVIDER_NGOAI_CLI`, `_PROVIDER_BI_DANH`, `_BE_MAT_BI_DANH`) và cổng **chỉ đọc bảng**;
+  `AGENTS.md` thôi làm nguồn cấp tên, chỉ còn là **phép đối chiếu** — khai lệch hợp đồng ⇒
+  `KHÔNG ĐO ĐƯỢC`, nên một dòng văn xuôi không nới được gì mà mâu thuẫn thì vẫn bị bắt.
+- **P2 — bộ ba thiếu vế thứ ba.** `transport` chưa bao giờ được kiểm: `openai_chatgpt` khai
+  `transport: machine` vẫn qua, dù `AGENTS.md` §4 đòi `human_mediated`. Nay khai SAI thì chặn;
+  **khuyết** thì chưa (0/14 hiện vật khai nó — đòi ngay là bắt oan cả kho), và đó là **nợ đã
+  khai**, không phải chỗ bị bỏ quên.
+- **P2 — `lstrip("./")` bóc MỌI dấu chấm và gạch chéo**, không phải *"một `./` tuỳ chọn"*: cả
+  `../../ops/reviews/x.md` lẫn `/ops/reviews/x.md` đều chuẩn hoá về `ops/reviews/x.md` rồi
+  **khớp URL**, trong khi trường thô mà người đọc mở lại trỏ tệp khác. Bản chuẩn hoá tự viết
+  **thứ hai** trong tệp này bị bắt vì **làm nhiều hơn tên gọi của nó**.
+
+Kèm một nguyên tắc thay cho một danh sách: **KHÔNG HỢP ĐỒNG ⇒ KHÔNG THẨM QUYỀN** — provider nào
+chưa khai được bề mặt/vận chuyển thì không được khai một mức assurance hàm ý review có thẩm
+quyền. Nó chặn luôn cả provider hợp lệ **mới thêm mà quên hợp đồng**, tức chặn cái chưa xảy ra.
+
 ## Răng
 
-`ops/bien_nhan_v2_test.py`: **41 ca · 43/43 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
+`ops/bien_nhan_v2_test.py`: **41 ca · 46/46 đột biến thường CÓ RĂNG · 1/1 ca tự kiểm**, gồm đúng
 hai thứ protocol đòi —
 biên nhận mới tự khai v1 phải ĐỎ, và **nới allowlist để chứa tệp tấn công** phải ĐỎ. Ba lỗi
 của chính bộ test bị bắt khi tự đột biến: (a) bản đóng băng của nợ lấy `frozenset(bnv2.NO_DA_DO)`

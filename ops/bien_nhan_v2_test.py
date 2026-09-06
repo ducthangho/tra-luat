@@ -22,6 +22,7 @@ import copy
 import importlib.util
 import os
 import shutil
+import re as _RE
 import subprocess
 import sys
 import tempfile
@@ -884,37 +885,41 @@ def c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA():
     không phải attestation"* — `rc=1`, `1 vi phạm`, **0 chưa đo**. Lỗi ĐO báo thành lỗi DỮ
     LIỆU, tức người đọc sẽ đi sửa hiện vật đúng. Ba đường hỏng, cùng một kết luận."""
     for ten, kw, rc_mong, phai_co in (
-        ("đủ nguồn",              {},                              0, "TỔNG: ĐẠT"),
-        ("thiếu launcher.py",     {"co_launcher": False},          2, "KHÔNG ĐO ĐƯỢC danh sách provider"),
-        ("không có bảng hợp đồng", {"than_launcher": "X = 1\n"},   2, "không có phép gán"),
-        ("nguồn hỏng cú pháp",    {"than_launcher": "def (\n"},   2, "không phân tích được"),
-        # NGUỒN THỨ BA cũng phải fail-close: từ vựng provider nằm ở BA chỗ, nên mỗi chỗ mất
-        # là một đường mù riêng. Bỏ sót hàng này thì `AGENTS.md` biến mất mà cổng vẫn xanh.
-        ("thiếu AGENTS.md",       {"co_agents": False},            2, "không đọc được nguồn từ vựng"),
-        # LUẬT CHÉP TAY MẤT NEO cũng là trạng thái thứ ba: câu biện minh biến khỏi `AGENTS.md`
-        # thì giữ nguyên một luật có thể đã hết hiệu lực là tự bịa thẩm quyền.
-        ("AGENTS.md mất câu biện minh", {"bo_cau_neo": True},      2, "luật chép tay mất neo"),
-        # `R5-01`: CÓ MẶT khác DÙNG ĐƯỢC. Ba nguồn mà chỉ hai cái fail-close là một cổng
-        # có ba cửa và chỉ khoá hai.
-        # Thay NGUYÊN KHỐI gán, không chắp vá chuỗi: bản đầu của hàng này chèn nhầm và sinh
-        # tệp KHÔNG PHÂN TÍCH ĐƯỢC ⇒ ca vẫn rc=2 nhưng vì lý do KHÁC. Một fixture "hỏng theo
-        # cách khác" là một ca đo thứ khác — đúng bệnh `tin_dung_gia` ở tầng ngữ nghĩa.
+        ("đủ nguồn",                   {},                              0, "TỔNG: ĐẠT"),
+        ("thiếu launcher.py",          {"co_launcher": False},          2, "không đọc được nguồn từ vựng"),
+        ("thiếu AGENTS.md",            {"co_agents": False},            2, "không đọc được nguồn từ vựng"),
+        ("launcher hỏng cú pháp",      {"than_launcher": "def (\n"},   2, "không phân tích được"),
+        ("`_TRANSPORT_CONTRACTS` vắng",
+         {"sua_launcher": lambda v: v.replace("_TRANSPORT_CONTRACTS = (", "_KHAC = (", 1)},
+         2, "thiếu hoặc sai hình dạng"),
         ("`_TRANSPORT_CONTRACTS` RỖNG",
-         {"sua_launcher": lambda v: __import__("re").sub(
-             r"(?ms)^_TRANSPORT_CONTRACTS = \(.*?^\)", "_TRANSPORT_CONTRACTS = ()", v, count=1)},
-         2, "RỖNG — có mặt mà không dùng được"),
+         {"sua_launcher": lambda v: _RE.sub(r"(?ms)^_TRANSPORT_CONTRACTS = \(.*?^\)",
+                                            "_TRANSPORT_CONTRACTS = ()", v, count=1)},
+         2, "`_TRANSPORT_CONTRACTS` RỖNG"),
+        ("`_PROVIDER_NGOAI_CLI` RỖNG",
+         {"sua_launcher": lambda v: _RE.sub(r"(?ms)^_PROVIDER_NGOAI_CLI = \(.*?^\)",
+                                            "_PROVIDER_NGOAI_CLI = ()", v, count=1)},
+         2, "`_PROVIDER_NGOAI_CLI` RỖNG"),
+        ("bảng bí danh vắng",
+         {"sua_launcher": lambda v: v.replace("_PROVIDER_BI_DANH = (", "_KHAC2 = (", 1)},
+         2, "thiếu bảng bí danh"),
+        ("bí danh trỏ provider KHÔNG hợp đồng",
+         {"sua_launcher": lambda v: v.replace('("anthropic", "anthropic_claude"),',
+                                              '("anthropic", "khong_he_co"),', 1)},
+         2, "không có hợp đồng"),
+        ("AGENTS.md mất câu biện minh", {"bo_cau_neo": True},            2, "luật chép tay mất neo"),
+        ("AGENTS.md khai LỆCH hợp đồng",
+         {"sua_agents": lambda v: v.replace("transport: human_mediated", "transport: machine", 1)},
+         2, "hai nguồn LỆCH nhau"),
+        ("AGENTS.md khai provider KHÔNG hợp đồng",
+         {"sua_agents": lambda v: v.replace("provider: openai_chatgpt", "provider: ke_gian_9", 1)},
+         2, "hai nguồn LỆCH nhau"),
         ("launcher có byte KHÔNG giải mã được",
-         {"sua_launcher": lambda v: v.encode("utf-8") + b"\n# \xff\xfe\n"}, 2, "không đọc được nguồn từ vựng"),
+         {"sua_launcher": lambda v: v.encode("utf-8") + b"\n# \xff\xfe\n"},
+         2, "không đọc được nguồn từ vựng"),
         ("AGENTS.md có byte KHÔNG giải mã được",
-         {"sua_agents": lambda v: v.encode("utf-8") + b"\n\xff\xfe\n"}, 2, "không đọc được nguồn từ vựng"),
-        # `R5-02`: mất RIÊNG nội dung nguồn 2 hoặc nguồn 3, tệp vẫn còn.
-        ("nguồn 2 mất nội dung",
-         {"sua_launcher": lambda v: v.replace("qua execution_surface", "qua be mat")
-                                     .replace(", surface:", ", be_mat:")},
-         2, "không còn khai `provider` nào"),
-        ("nguồn 3 mất nội dung",
-         {"sua_agents": lambda v: v.replace("provider: openai_chatgpt", "nha_cung_cap: openai_chatgpt")},
-         2, "khối mã rào không còn khai"),
+         {"sua_agents": lambda v: v.encode("utf-8") + b"\n\xff\xfe\n"},
+         2, "không đọc được nguồn từ vựng"),
     ):
         with tempfile.TemporaryDirectory() as t:
             tmp = Path(t)
@@ -931,61 +936,45 @@ def c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA():
 
 @ca
 def c31_hop_dong_provider_doc_DU_BA_NGUON_khong_chep_tay():
-    """Mọi provider kho KHAI — ở CẢ BA chỗ khai — phải được cổng CHẤP NHẬN.
+    """Tập provider phải khớp ĐÚNG hai bảng CÓ CẤU TRÚC của kho — hai chiều, không một.
 
-    `R4-01` (`provider_back_to_handcopy`): phục hồi tập chép tay cũ qua được cả suite, mà
-    tập ấy TỪ CHỐI `anthropic_claude` — một biên nhận Claude hợp lệ mới tạo rớt cổng CI bắt
-    buộc. Chốt parity của cây gương KHÔNG bắt được: nó so bản sao với module, nên hai bản
-    cùng sai thì vẫn khớp."""
+    Chiều THIẾU: bản chép tay từ chối `anthropic_claude`, tức một biên nhận Claude hợp lệ
+    rớt cổng CI. Chiều THỪA: nhét execution surface vào tập provider ⇒ `claude_code`
+    `codex_cli` `llm_cli` thành provider hợp lệ mà suite vẫn xanh (`R5-02`). Một ca chỉ hỏi
+    một chiều khoá được một nửa, và nửa nó bỏ là nửa NỚI QUYỀN."""
     import ast
-    import re as _re
     dung((GOC / ".claude" / "dev" / "launcher.py").is_file() and (GOC / "AGENTS.md").is_file(),
          "KHÔNG ĐO ĐƯỢC: thiếu .claude/dev/launcher.py hoặc AGENTS.md")
-    van_l = (GOC / ".claude" / "dev" / "launcher.py").read_text(encoding="utf-8")
-    van_a = (GOC / "AGENTS.md").read_text(encoding="utf-8")
-    cay = ast.parse(van_l)
-    ten = set()
-    for n in ast.walk(cay):
-        if (isinstance(n, ast.Assign) and n.targets
-                and getattr(n.targets[0], "id", "") == "_TRANSPORT_CONTRACTS"):
-            ten = {t.elts[0].value for t in n.value.elts}
-    dung(ten, "KHÔNG ĐO ĐƯỢC: không đọc được `_TRANSPORT_CONTRACTS`")
-    # BA NGUỒN, vì từ vựng provider của kho KHÔNG nằm một chỗ. Cross-review connector (P2)
-    # đo được: rút CHỈ từ `_TRANSPORT_CONTRACTS` là TỪ CHỐI `google_antigravity` (vốn đã
-    # được chấp nhận ở bản chép tay cũ) và `openai_chatgpt` (AGENTS.md §4 khai đích danh) —
-    # tức bản vá "đọc, không chép" của vòng trước THU HẸP tập hợp lệ. Đọc đủ chỗ mới là đọc.
-    ngoai = set(_re.findall(r"provider\s+([a-z0-9_]+)\s+qua\s+execution_surface", van_l))
-    web = set(_re.findall(r"(?m)^provider:\s*([a-z0-9_]+)\s*$", van_a))
-    dung(ngoai and web,
-         f"KHÔNG ĐO ĐƯỢC nguồn 2/3: launcher={sorted(ngoai)} agents={sorted(web)}")
-    ten |= ngoai | web
+    cay = ast.parse((GOC / ".claude" / "dev" / "launcher.py").read_text(encoding="utf-8"))
+
+    def _doc_bang(ten):
+        nut = next((n for n in ast.walk(cay) if isinstance(n, ast.Assign) and n.targets
+                    and getattr(n.targets[0], "id", "") == ten), None)
+        dung(nut is not None, f"KHÔNG ĐO ĐƯỢC: `{ten}` không có trong launcher.py")
+        return [[x.value for x in t.elts if isinstance(x, ast.Constant)] for t in nut.value.elts]
+
+    ten = ({r[0] for r in _doc_bang("_TRANSPORT_CONTRACTS")}
+           | {r[0] for r in _doc_bang("_PROVIDER_NGOAI_CLI")})
+    bi_danh = {r[0] for r in _doc_bang("_PROVIDER_BI_DANH")}
+    dung(ten and bi_danh, "KHÔNG ĐO ĐƯỢC: bảng provider rỗng")
     thieu = sorted(x for x in ten if x not in bnv2.PROVIDER_CHO_PHEP)
-    bang(not thieu, f"cổng TỪ CHỐI provider chính tắc {thieu} — danh sách đã tụt về bản chép tay")
-    # CHIỀU THỪA, và nó là chiều NGUY. Cross-review vòng 5 (`R5-02`) đo được: nhét execution
-    # surface vào tập provider (`hd |= {t.elts[2].value …}`) ⇒ `claude_code` `codex_cli`
-    # `llm_cli` thành provider hợp lệ, mà toàn suite vẫn `37/37 · 33/33`. Ca chỉ hỏi "có
-    # thiếu không" là ca chỉ khoá được một nửa — và nửa nó bỏ là nửa NỚI QUYỀN.
-    thua = sorted(x for x in bnv2.PROVIDER_CHO_PHEP if x not in ten | set(bnv2.PROVIDER_LICH_SU))
+    bang(not thieu, f"cổng TỪ CHỐI provider chính tắc {thieu}")
+    thua = sorted(x for x in bnv2.PROVIDER_CHO_PHEP
+                  if x not in ten | bi_danh | set(bnv2.PROVIDER_KHONG_HOP_DONG))
     bang(not thua,
-         f"cổng CHẤP NHẬN {thua} — không có tên nào trong ba nguồn, cũng không phải bí danh "
-         f"lịch sử đã khai. Danh sách CHO PHÉP nở thêm là nới quyền.")
-    # HÀNH VI, không chỉ tập hợp: một biên nhận dùng tên chính tắc phải QUA thật.
+          f"cổng CHẤP NHẬN {thua} — không có trong bảng nào, cũng không phải bí danh hay "
+          f"provider-không-hợp-đồng đã khai. Danh sách CHO PHÉP nở thêm là nới quyền.")
+    # HÀNH VI, không chỉ tập hợp: mỗi provider chính tắc + bề mặt của CHÍNH NÓ phải QUA.
     for prov in sorted(ten):
         with tempfile.TemporaryDirectory() as t:
             d = v2_du(); d["model_reviewer_identity"]["provider"] = prov
-            # BỀ MẶT phải đi cùng PROVIDER: chốt bộ ba vừa thêm (`c36`) bắt đúng fixture này,
-            # vốn gán `codex_cli` cho mọi provider. Lấy bề mặt chính tắc từ bản đồ của cổng —
-            # đây là chỗ DUY NHẤT trong ca này đọc từ cổng, và nó chỉ chọn fixture, không
-            # sinh kỳ vọng: kỳ vọng vẫn là tập tên đọc ĐỘC LẬP từ ba nguồn ở trên.
-            bm = sorted(bnv2.PROVIDER_BE_MAT.get(prov) or {"codex_cli"})
-            d["model_reviewer_identity"]["surface"] = bm[0]
-            # `openai_chatgpt` bị `AGENTS.md` §4 giới hạn ở `advisory_review` — dùng mức ấy
-            # cho nó, kẻo ca dương này lại đo nhầm chốt assurance.
+            hd = bnv2.PROVIDER_HOP_DONG.get(prov) or {"be_mat": {"codex_cli"}}
+            d["model_reviewer_identity"]["surface"] = sorted(hd["be_mat"])[0]
             if prov in bnv2.ASSURANCE_CAM_THEO_PROVIDER:
                 d["assurance"] = "advisory_review"
             tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
             n_, loi = _kiem(tmp, allowlist={}, no_da_do={})
-            bang(n_ == 0, f"provider chính tắc {prov!r} (bề mặt {bm[0]!r}) bị từ chối: {loi}")
+            bang(n_ == 0, f"provider chính tắc {prov!r} bị từ chối: {loi}")
 
 
 @ca
@@ -1203,6 +1192,29 @@ def c35_KHONG_duoc_NOI_danh_sach_provider_bang_van_ban_tu_do():
         ("văn xuôi trong AGENTS.md", "ke_gian_4",
          {"bom_agents": "\nprovider: ke_gian_4\n"}),
     )
+    # HƯỚNG THỨ NĂM — đúng vector cross-review dùng (P2 trên `5a78c15`): không thêm dòng
+    # mới, mà SỬA CHÍNH chuỗi lý do của một mục có sẵn trong `CONG_CU`. Bản vá trước thu hẹp
+    # từ "toàn tệp" xuống "dưới hai bảng" nhưng vẫn ĐỌC PROSE, nên lỗ chỉ đổi chỗ. Không
+    # dùng `bom_*` được vì phải sửa nội dung sẵn có, nên nó là một ca riêng ngay dưới.
+    with tempfile.TemporaryDirectory() as t:
+        van = (GOC / ".claude" / "dev" / "launcher.py").read_text(encoding="utf-8")
+        cu_ = "duong du phong/chan doan GitHub"
+        dung(cu_ in van, f"KHÔNG ĐO ĐƯỢC: không tìm thấy chuỗi lý do {cu_!r} để sửa")
+        mod = _nap_guong(Path(t) / "g5", bom_launcher="")
+        # dựng lại cây gương với chuỗi ĐÃ SỬA (không thêm dòng, chỉ đổi nội dung có sẵn)
+        d = Path(t) / "g5b"
+        (d / "ops").mkdir(parents=True); (d / ".claude" / "dev").mkdir(parents=True)
+        shutil.copyfile(Path(bnv2.__file__), d / "ops" / "bien_nhan_v2.py")
+        shutil.copyfile(GOC / "AGENTS.md", d / "AGENTS.md")
+        (d / ".claude" / "dev" / "launcher.py").write_text(
+            van.replace(cu_, "provider ke_gian_5 qua execution_surface forged", 1),
+            encoding="utf-8")
+        sp = importlib.util.spec_from_file_location("bnv2_g5b", d / "ops" / "bien_nhan_v2.py")
+        m5 = importlib.util.module_from_spec(sp); sp.loader.exec_module(m5)
+        bang("ke_gian_5" not in m5.PROVIDER_CHO_PHEP,
+             "sửa CHÍNH chuỗi lý do của một mục `CONG_CU` vẫn NỚI được danh sách CHO PHÉP")
+        bang(m5.PROVIDER_CHO_PHEP == mod.PROVIDER_CHO_PHEP,
+             f"sửa prose làm đổi tập provider: {sorted(m5.PROVIDER_CHO_PHEP)}")
     hong = []
     for i, (ten, ke_gian, kw) in enumerate(bang_tan_cong):
         with tempfile.TemporaryDirectory() as t:
@@ -1232,6 +1244,16 @@ def c36_provider_KHONG_mang_theo_quyen_cua_provider_khac():
         ("bề mặt lạ cho provider CLI",
          {"provider": "openai_codex", "surface": "chatgpt_web", "session_run_id": "f" * 32},
          "không phải bề mặt của provider"),
+        # BỘ BA đủ ba trường. `AGENTS.md` §4 đòi ChatGPT Web khai `transport: human_mediated`;
+        # khai `machine` là một bộ ba SAI SỰ THẬT, tệ hơn một bộ ba khuyết (P2 trên `5a78c15`).
+        ("vận chuyển SAI cho provider chính tắc",
+         {"provider": "openai_chatgpt", "surface": "chatgpt_web", "transport": "machine",
+          "session_run_id": "f" * 32},
+         "không phải vận chuyển của provider"),
+        # KHÔNG HỢP ĐỒNG ⇒ KHÔNG THẨM QUYỀN — nguyên tắc, không phải danh sách.
+        ("provider KHÔNG có hợp đồng khai mức có thẩm quyền",
+         {"provider": "human", "surface": "x", "session_run_id": "f" * 32},
+         "KHÔNG có hợp đồng"),
     ):
         with tempfile.TemporaryDirectory() as t:
             d = v2_du(); d["model_reviewer_identity"] = sua; d["assurance"] = "cross_approved"
@@ -1266,6 +1288,27 @@ def c37_URL_phai_neo_DUNG_duong_dan_bien_nhan_khai():
         n, loi = _kiem(tmp, allowlist={}, no_da_do={})
         bang(n == 1 and "KHÔNG neo thứ nó khai" in loi[0],
              f"`verdict_path` lệch đường dẫn trong URL phải ĐỎ, được: {loi}")
+    # `lstrip("./")` BÓC MỌI dấu chấm và gạch chéo — cả `../../x` lẫn `/x` đều chuẩn hoá về
+    # `x` rồi KHỚP URL, trong khi trường THÔ mà người đọc mở lại trỏ tệp khác (P2 trên
+    # `5a78c15`). Bản chuẩn hoá tự viết thứ hai trong tệp này làm nhiều hơn tên gọi của nó.
+    for tien_to in ("../../", "/"):
+        with tempfile.TemporaryDirectory() as t:
+            tmp = Path(t)
+            sha, bam, duong = _kho_git(tmp, "noi dung verdict\n")
+            d = _bn_neo(sha, bam, duong)
+            d["verdict_path"] = tien_to + duong
+            _ghi_bn(tmp, d)
+            n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+            bang(n == 1 and "không phải đường dẫn tương đối gốc kho" in loi[0],
+                 f"`verdict_path: {tien_to + duong}` phải ĐỎ, được: {loi}")
+    # ĐỐI CHỨNG: `./` dẫn đầu là hợp lệ và phải QUA — chốt không được siết quá tay.
+    with tempfile.TemporaryDirectory() as t:
+        tmp = Path(t)
+        sha, bam, duong = _kho_git(tmp, "noi dung verdict\n")
+        d = _bn_neo(sha, bam, duong); d["verdict_path"] = "./" + duong
+        _ghi_bn(tmp, d)
+        n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+        bang(n == 0, f"ĐỐI CHỨNG: `./` dẫn đầu phải QUA, được: {loi}")
     # ĐỐI CHỨNG: khớp thì sạch (đã có `c18`, nhắc lại ở đây để chốt không bắt oan).
     with tempfile.TemporaryDirectory() as t:
         tmp = Path(t)
@@ -1276,48 +1319,57 @@ def c37_URL_phai_neo_DUNG_duong_dan_bien_nhan_khai():
 
 
 @ca
-def c38_BI_DANH_lich_su_cung_phai_co_BIEN():
-    """Một miễn trừ tương thích mà không có biên là một đường lách VĨNH VIỄN.
+def c38_BI_DANH_phai_duoc_CHUAN_HOA_truoc_moi_phep_kiem():
+    """Một bí danh không được chuẩn hoá là đường vòng quanh ràng buộc của tên nó trỏ tới.
 
-    Phiên thi công tự dựng phản chứng cho đúng chỗ mình vừa khai là mỏng (mục 1 của prompt
-    vòng 6) và nó TRÚNG: `{provider: anthropic, surface: banana, session_run_id}` +
-    `cross_approved` ⇒ **0 vi phạm**. Cùng lớp với *"nhận một TÊN thì nhận luôn QUYỀN"* của
-    vòng trước, chỉ đổi từ QUYỀN sang BỀ MẶT."""
-    for prov in sorted(bnv2.PROVIDER_LICH_SU):
+    Hai lượt liên tiếp bắt đúng chỗ này, mỗi lượt một nửa. Phiên thi công tự tìm nửa đầu
+    (`anthropic` + bề mặt **bịa** ⇒ 0 vi phạm) và vá bằng cách cho bí danh mượn **hợp nhất
+    mọi bề mặt** — rồi cross-review (P1 trên `5a78c15`) đo nửa sau: `anthropic` +
+    `chatgpt_web` + `cross_approved` vẫn 0 vi phạm, vì bí danh **mượn được bề mặt của
+    provider khác** và luật assurance thì khoá theo TÊN. Vá nửa vời còn tệ hơn không vá: nó
+    làm chỗ ấy trông như đã đóng. Nay bí danh được **chuẩn hoá TRƯỚC** mọi phép kiểm."""
+    dung(bnv2.PROVIDER_BI_DANH, "KHÔNG ĐO ĐƯỢC: không đọc được bảng bí danh")
+    for bd, chinh_tac in sorted(bnv2.PROVIDER_BI_DANH.items()):
+        hd = bnv2.PROVIDER_HOP_DONG.get(chinh_tac) or {"be_mat": frozenset()}
+        lam = sorted(set().union(*[v["be_mat"] for v in bnv2.PROVIDER_HOP_DONG.values()])
+                     - set(hd["be_mat"]))
+        dung(lam, f"KHÔNG ĐO ĐƯỢC: không có bề mặt nào của provider KHÁC để mượn thử")
+        for be_mat, vi_sao in (("banana", "bề mặt BỊA"), (lam[0], f"bề mặt MƯỢN {lam[0]!r}")):
+            with tempfile.TemporaryDirectory() as t:
+                d = v2_du()
+                d["model_reviewer_identity"] = {"provider": bd, "surface": be_mat,
+                                                "session_run_id": "f" * 32}
+                d["assurance"] = "cross_approved"
+                tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
+                n, loi = _kiem(tmp, allowlist={}, no_da_do={})
+                bang(n >= 1 and any("không phải bề mặt của provider" in x for x in loi),
+                     f"bí danh {bd!r} + {vi_sao} phải ĐỎ, được: {loi}")
+        # ĐỐI CHỨNG: bề mặt THẬT của tên chính tắc phải QUA — chốt không được bắt oan hiện vật.
         with tempfile.TemporaryDirectory() as t:
             d = v2_du()
-            d["model_reviewer_identity"] = {"provider": prov, "surface": "banana",
+            d["model_reviewer_identity"] = {"provider": bd, "surface": sorted(hd["be_mat"])[0],
                                             "session_run_id": "f" * 32}
-            d["assurance"] = "cross_approved"
             tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
             n, loi = _kiem(tmp, allowlist={}, no_da_do={})
-            bang(n >= 1 and any("không phải bề mặt của provider" in x for x in loi),
-                 f"bí danh {prov!r} + bề mặt bịa phải ĐỎ, được: {loi}")
-    # ĐỐI CHỨNG: bề mặt LỊCH SỬ thật sự đang dùng phải QUA — chốt không được bắt oan hiện vật.
-    with tempfile.TemporaryDirectory() as t:
-        d = v2_du()
-        d["model_reviewer_identity"] = {"provider": "anthropic", "surface": "claude_code_cli",
-                                        "session_run_id": "f" * 32}
-        tmp = _cay(Path(t), {"a-verdict.receipt.yaml": d})
-        n, loi = _kiem(tmp, allowlist={}, no_da_do={})
-        bang(n == 0, f"ĐỐI CHỨNG: `anthropic`/`claude_code_cli` phải QUA, được: {loi}")
-    # NEO CHO HẰNG CHÉP TAY: mọi biên nhận ĐANG ĐẠT v2 trong kho phải nằm trong biên ấy.
-    # Không có neo này thì `BE_MAT_LICH_SU` là một danh sách bịa — và một danh sách bịa
-    # trong một chốt allow-list là chỗ nguy nhất có thể đặt nó.
+            bang(n == 0, f"ĐỐI CHỨNG: {bd!r} + bề mặt của {chinh_tac!r} phải QUA, được: {loi}")
+    # NEO CHO HIỆN VẬT: mọi biên nhận ĐANG ĐẠT v2 phải nằm trong hợp đồng — không có neo
+    # thì bảng bí danh là một danh sách bịa, đặt đúng chỗ nguy nhất có thể đặt nó.
     import yaml as _y
     tm = GOC / bnv2.THU_MUC
     dung(tm.is_dir(), f"KHÔNG ĐO ĐƯỢC: thiếu {tm}")
-    cho_phep = frozenset().union(*bnv2.PROVIDER_BE_MAT.values()) | bnv2.BE_MAT_LICH_SU
     ngoai = []
     for f in sorted(tm.glob("*.receipt.yaml")):
         d = _y.safe_load(f.read_text(encoding="utf-8")) or {}
         if not isinstance(d, dict) or bnv2._thieu(d):
-            continue                      # chỉ soi tệp ĐANG ĐẠT v2
-        bm = (d.get("model_reviewer_identity") or {}).get("surface")
-        if isinstance(bm, str) and bm.strip() and bm.strip() not in cho_phep:
-            ngoai.append(f"{f.name}: `{bm}`")
-    bang(not ngoai, f"{len(ngoai)} biên nhận ĐANG ĐẠT dùng bề mặt ngoài biên đã khai "
-                    f"{sorted(cho_phep)}:\n      " + "\n      ".join(ngoai[:5]))
+            continue
+        mri = d.get("model_reviewer_identity") or {}
+        pv = bnv2._chuan_hoa_provider(str(mri.get("provider") or ""))
+        hd = bnv2.PROVIDER_HOP_DONG.get(pv)
+        bm = str(mri.get("surface") or "")
+        if hd and bm and bm not in hd["be_mat"]:
+            ngoai.append(f"{f.name}: {pv}/{bm}")
+    bang(not ngoai, f"{len(ngoai)} biên nhận ĐANG ĐẠT dùng bề mặt ngoài hợp đồng:\n      "
+                    + "\n      ".join(ngoai[:5]))
 
 
 @ca
@@ -1667,9 +1719,10 @@ def _dot_bien():
     # giữ lại thì phép canh hoá ra đang đòi đột biến đừng xảy ra.
     do("m20_provider_tut_ve_ban_CHEP_TAY",
        lambda: _dot_bien_tep(
-           "PROVIDER_CHINH_TAC, PROVIDER_BE_MAT, PROVIDER_NGUON_HONG = _provider_chinh_tac()",
-           'PROVIDER_CHINH_TAC, PROVIDER_BE_MAT, PROVIDER_NGUON_HONG = ({"anthropic", '
-           '"openai_codex", "openai_api", "google_antigravity", "human"}, {}, None)',
+           "_HD, PROVIDER_NGUON_HONG = _provider_chinh_tac()",
+           '_HD, PROVIDER_NGUON_HONG = ({"hop_dong": {"anthropic": {"be_mat": frozenset(), '
+           '"van_chuyen": frozenset()}, "openai_codex": {"be_mat": frozenset({"codex_cli"}), '
+           '"van_chuyen": frozenset()}}, "bi_danh": {}}, None)',
            bo_qua_parity=("PROVIDER_CHO_PHEP",)),
        "c31_hop_dong_provider_doc_DU_BA_NGUON_khong_chep_tay",
        "bản chép tay TỪ CHỐI `anthropic_claude` — biên nhận Claude hợp lệ rớt cổng",
@@ -1722,30 +1775,31 @@ def _dot_bien():
            '    return str(v or "").strip() or None'),
        "c34_MOI_truong_attestation_phai_la_CHUOI_khong_chi_truthy",
        "ánh xạ/danh sách lại thành lời khai hợp lệ", doi_chung="c18_neo_git_DUNG_thi_qua")
-    do("m29_tu_vung_provider_tut_ve_MOT_nguon",
-       lambda: _dot_bien_tep(
-           "    return hd | ngoai | web, {k: frozenset(v) for k, v in bm.items()}, None",
-           "    return hd, {k: frozenset(v) for k, v in bm.items()}, None",
-           bo_qua_parity=("PROVIDER_CHO_PHEP",)),
-       "c31_hop_dong_provider_doc_DU_BA_NGUON_khong_chep_tay",
-       "đọc MỘT nguồn ⇒ `google_antigravity` và `openai_chatgpt` bị từ chối",
-       doi_chung="c18_neo_git_DUNG_thi_qua")
+    # KHÔNG khai đối chứng, và đây là ca DUY NHẤT trong cụm mỏ neo cố ý bỏ nó: bỏ một bảng
+    # nguồn làm hai nguồn LỆCH nhau, và "lệch ⇒ KHÔNG ĐO ĐƯỢC cả lượt" chính là HÀNH VI
+    # ĐÚNG vừa thiết kế. Đòi đối chứng dương xanh ở đây là đòi bản vá đừng hoạt động.
+    do("m29_bo_mot_bang_nguon_phai_lam_HAI_NGUON_LECH",
+       lambda: _dot_bien_tep("        for prov, be_mat, van_chuyen in ngoai:",
+                             "        for prov, be_mat, van_chuyen in []:",
+                             bo_qua_parity=("PROVIDER_CHO_PHEP",)),
+       "c28_nguon_provider_khong_doc_duoc_la_TRANG_THAI_THU_BA",
+       "bỏ một bảng nguồn KHÔNG được im lặng thu hẹp")
     do("m31_quet_TOAN_TEP_thay_vi_hai_bang",
        lambda: _dot_bien_tep(
-           '        van = "\\n".join(x.value for x in ast.walk(nut)\n'
-           '                        if isinstance(x, ast.Constant) and isinstance(x.value, str))',
-           "        van = van_launcher",
+           "    hop_dong = {}",
+           '    hop_dong = {p: {"be_mat": {"forged"}, "van_chuyen": {"forged"}} for p in '
+           're.findall(r"provider\\s+([a-z0-9_]+)\\s+qua\\s+execution_surface", van_launcher)}',
            bo_qua_parity=("PROVIDER_CHO_PHEP",)),
        "c35_KHONG_duoc_NOI_danh_sach_provider_bang_van_ban_tu_do",
        "một dòng chú thích lại cấp được quyền", doi_chung="c18_neo_git_DUNG_thi_qua")
     # --- vòng 7 (connector trên `670071b`): quyền đi kèm tên, và hai trường cùng nói một thứ
     do("m32_bo_gioi_han_assurance_theo_provider",
-       lambda: _dot_bien_tep("        cam = ASSURANCE_CAM_THEO_PROVIDER.get(prov, frozenset())",
-                             "        cam = frozenset()"),
+       lambda: _dot_bien_tep("        cam = set(ASSURANCE_CAM_THEO_PROVIDER.get(prov, frozenset()))",
+                             "        cam = set()"),
        "c36_provider_KHONG_mang_theo_quyen_cua_provider_khac",
        "advisory biến thành bằng chứng có thẩm quyền", doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m33_bo_kiem_BO_BA_provider_be_mat",
-       lambda: _dot_bien_tep("    hop_le = PROVIDER_BE_MAT.get(prov)", "    hop_le = None"),
+       lambda: _dot_bien_tep('        if be_mat not in hd["be_mat"]:', "        if False:"),
        "c36_provider_KHONG_mang_theo_quyen_cua_provider_khac",
        "`surface: banana` lại qua", doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m34_bo_so_verdict_path_voi_duong_dan_trong_URL",
@@ -1774,19 +1828,38 @@ def _dot_bien():
        "cổng chết trước khi kịp phân ba trạng thái", doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m39_nhet_execution_surface_vao_tap_provider",
        lambda: _dot_bien_tep(
-           "                hd = {t.elts[0].value for t in n.value.elts}",
-           "                hd = {t.elts[0].value for t in n.value.elts} | "
-           "{t.elts[2].value for t in n.value.elts}",
+           "            hop_dong[prov][\"be_mat\"].add(be_mat)\n"
+           "            hop_dong[prov][\"van_chuyen\"].add(van_chuyen)\n"
+           "        for prov, be_mat, van_chuyen in ngoai:",
+           "            hop_dong[prov][\"be_mat\"].add(be_mat)\n"
+           "            hop_dong[prov][\"van_chuyen\"].add(van_chuyen)\n"
+           "            hop_dong.setdefault(be_mat, {\"be_mat\": set(), \"van_chuyen\": set()})\n"
+           "        for prov, be_mat, van_chuyen in ngoai:",
            bo_qua_parity=("PROVIDER_CHO_PHEP",)),
        "c31_hop_dong_provider_doc_DU_BA_NGUON_khong_chep_tay",
        "`R5-02`: nới danh sách bằng chính token trong nguồn",
        doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m40_bi_danh_lich_su_KHONG_co_bien",
-       lambda: _dot_bien_tep("    if hop_le is None and prov in PROVIDER_LICH_SU:",
-                             "    if False:"),
-       "c38_BI_DANH_lich_su_cung_phai_co_BIEN",
+       lambda: _dot_bien_tep("    prov = _chuan_hoa_provider(prov)",
+                             "    prov = prov"),
+       "c38_BI_DANH_phai_duoc_CHUAN_HOA_truoc_moi_phep_kiem",
        "miễn trừ tương thích thành đường lách vĩnh viễn",
        doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m41_bo_kiem_VAN_CHUYEN_trong_bo_ba",
+       lambda: _dot_bien_tep('        vc = _chuoi(v.get("transport"))', "        vc = None"),
+       "c36_provider_KHONG_mang_theo_quyen_cua_provider_khac",
+       "bộ ba SAI SỰ THẬT vẫn qua", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m42_KHONG_hop_dong_van_co_tham_quyen",
+       lambda: _dot_bien_tep("        if prov and prov not in PROVIDER_HOP_DONG:",
+                             "        if False:"),
+       "c36_provider_KHONG_mang_theo_quyen_cua_provider_khac",
+       "chưa khai hợp đồng mà vẫn cấp thẩm quyền", doi_chung="c18_neo_git_DUNG_thi_qua")
+    do("m43_duong_dan_THOAT_khong_bi_chan",
+       lambda: _dot_bien_tep(
+           '    if khai_duong and (khai_duong.startswith("/") or ".." in Path(khai_duong).parts):',
+           "    if False:"),
+       "c37_URL_phai_neo_DUNG_duong_dan_bien_nhan_khai",
+       "`../../x` và `/x` chuẩn hoá về `x` rồi khớp URL", doi_chung="c18_neo_git_DUNG_thi_qua")
     do("m10_bo_kiem_actor_cua_submitter",
        lambda: setattr(bnv2, "_gsi", lambda d: None if "github_submitter_identity" in d
                        else "thiếu khoá `github_submitter_identity`"),

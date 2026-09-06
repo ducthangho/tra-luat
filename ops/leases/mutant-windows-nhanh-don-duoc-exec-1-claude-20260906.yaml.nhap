@@ -1,0 +1,142 @@
+# TỆP NHÁP — đuôi `.yaml.nhap` CÓ CHỦ ĐÍCH. `ai-dang-giu` chỉ đọc blob đuôi `.yaml`/`.yml`
+# (`ops/lease_publish.py:521`), `ops-publish-lease.yml` chỉ bắn với `ops/leases/**.yaml|yml`, và
+# `t23` của `ops/lease_publish_test.py` chỉ đọc `suffix in (".yaml", ".yml")` — nên nháp KHÔNG bị
+# tính là lease đang giữ. Đo 19:33–19:34Z 06-09-2026 trong bản sao đủ 299 ref: đuôi `.yaml` ⇒
+# `ai-dang-giu ops/nhanh_don_duoc_test.py` = NGƯỜI_GIỮ 1 (chính nháp này); đuôi `.nhap` ⇒ 0.
+# `check` vẫn chạy trên tên này (19:31Z: rc=8, thiếu packet_issue/granted_by).
+# ĐỔI TÊN VỀ `.yaml` LÀ BƯỚC CUỐI khi cấp thật, SAU khi điền đủ các ô dưới đây.
+schema_version: 2
+event: executor_lease_granted
+
+# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP — SÁU ô, không ai khác điền được ──────────────────
+# `packet_issue`  : số hiệu Issue sau khi đăng (phải là ISSUE, không phải PR).
+# `mission_issue` : Mission Issue chứa packet (`PROTOCOL §3.2` đòi; khuyến nghị ở spec GATE).
+# `granted_by`    : `ducthangho` — `record-lease` TỪ CHỐI tên provider (`claude`/`codex`).
+# `granted_on_instruction`: dấu vết BỀN của uỷ quyền (URL/ID comment cấp lease).
+# `leased_at_utc` / `lease_expires_at_utc`: giờ cấp THẬT và giờ hết hạn = giờ cấp + `run_minutes`.
+#                   Hai mốc là SỰ KIỆN cấp, không có mặc định. Để trống: `check` chặn rc=8 khi
+#                   thiếu `lease_expires_at_utc` (đo 19:35Z). `--expires-utc` phải khớp.
+packet_issue:
+mission_issue:
+granted_by:
+granted_on_instruction:
+leased_at_utc:
+lease_expires_at_utc:
+# ───────────────────────────────────────────────────────────────────────────────────
+
+packet_id: MUTANT-WINDOWS-NHANH-DON-DUOC
+revision: 1
+generation: 1
+lease_id: mutant-windows-nhanh-don-duoc-exec-1-claude-20260906
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/MUTANT-WINDOWS-NHANH-DON-DUOC.md
+spec_sha256: 4287c7666a24a0ad7e5981564fa2e6b3276c88a5487eaadc12bf72ff99a7ace8
+spec_hash: 4287c7666a24a0ad7e5981564fa2e6b3276c88a5487eaadc12bf72ff99a7ace8
+
+write_set:
+  - ops/nhanh_don_duoc_test.py
+  - .claude/dev/ci_dang_ky_test.py
+depends_on:
+  - GATE-TACH-JOB-CAT-CHI-PHI
+  - LO-319-LINUX-BANG-CHUNG-XANH
+  - MUTANT-WINDOWS-SUBAGENT-GHI-DETECT
+
+branch: claude/mutant-windows-nhanh-don-duoc
+branch_ownership: exclusive
+target_branch_neu_land: master
+# BA MỎ NEO — chỗ giữ, KHÔNG phải giá trị cấp. Packet này đi THỨ TƯ, cuối chuỗi, nên CẢ BA trường
+# dưới đây phải ĐO LẠI tại lúc cấp = head `origin/master` SAU khi MUTANT-WINDOWS-SUBAGENT-GHI-DETECT
+# integrated — ba packet trước đã đổi master rồi. Quy tắc này nằm trong đặc tả đóng băng.
+base_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+start_from_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+reviewed_sha_required: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+# `run_minutes` = độ dài HẠN LEASE (phút), KHÔNG phải trần một run (`max_run_minutes: 90`, §12).
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+# CHỐT HAI CHIỀU (`_kiem_bia_mo`): tệp lease của MUTANT-WINDOWS-SUBAGENT-GHI-DETECT phải mang dòng
+#   da_bi_thay_the: mutant-windows-nhanh-don-duoc-exec-1-claude-20260906
+# TRƯỚC khi lease này được đăng. Mắt cuối của chuỗi thu hồi:
+#   #456  →  GATE  →  LO-319  →  MUTANT-WINDOWS-SUBAGENT-GHI-DETECT  →  packet này
+# Bia mộ phải phủ MỌI bản của lease tiền nhiệm trên MỌI ref (thủ tục bốn bước ở spec LO-319).
+thay_the_cho:
+  - mutant-windows-subagent-ghi-detect-exec-1-claude-20260906
+
+ly_do_cap: >-
+  Đo 17:39–17:47Z 06-09-2026: bộ này 33 s đầy đủ so 2 s nền-only ⇒ đột biến 93,9 %.
+  (#456 đo 39 s cùng ngày; chạy lại 19:31Z: 34 s.) Phần trong bước `test registry`: 33/400
+  = 8,3 % (8,25 % làm tròn) — rẻ nhất trong ba bộ mang vòng lặp đột biến, nên nó đi SAU.
+  CÁI BẪY, đo được bằng hai lượt thật lúc 17:47Z: bộ này CÓ SẴN seam
+  `NHANH_DON_DUOC_KHONG_DOT_BIEN`, và dùng nó để cắt đột biến khỏi Windows là KHÔNG PHÁT
+  HIỆN ĐƯỢC tại điểm quan sát của sổ đăng ký — lượt chạy đủ 10 đột biến và lượt 0 đột biến cùng
+  cho `8/8`, `rc=0` ở dòng duy nhất mà `MOI` (`^(\d+)/(\d+)$`) nhìn. Toàn bộ stdout thì KHÁC:
+  lượt đầy đủ ĐÃ IN 10 dòng `MUTANT <tên> | <ca đích> | n/m` (8 dòng `1/1`, 2 dòng `3/3`, đo
+  19:31Z — cặp là số ca ĐÍCH bị giết của mỗi mutant, không phải tổng). Bản đầu của lease này
+  viết "số đột biến CHƯA BAO GIỜ được in ra dưới dạng cặp" — sai một nửa (verdict lượt 1, P2):
+  thứ chưa in là cặp TỔNG `mutant_dat/len(DOT_BIEN)`, và LO-319 không chữa được vì span của
+  `MOI` dài 3 ký tự, không vì bằng chứng không tồn tại.
+  Cộng LỖ THỨ HAI có sẵn từ trước, cùng họ #319: `return 0 if mutant_dat == len(DOT_BIEN)`
+  cho `rc=0` khi bảng đột biến RỖNG (reviewer tái hiện 18:50Z). Hai cách chữa đo được: siết
+  `MOI` đọc các dòng `MUTANT` sẵn có (mẫu của reviewer phân biệt đủ/rỗng), hoặc in cặp TỔNG có
+  nhãn `DOT BIEN n/m bi giet` để chốt nhãn của LO-319 soi. Chọn cách hai: cùng hình dạng bằng
+  chứng với hai bộ kia, và `0/0`/`9/10` bị từ chối ở tầng sổ đăng ký không cần mẫu riêng.
+  Phạm vi đúng: không chỉ cắt đột biến khỏi Windows mà còn làm bằng chứng đột biến của bộ này
+  ĐỌC ĐƯỢC ở tầng sổ đăng ký trên cả hai nền — "đọc được", không phải "tồn tại".
+  Đối chứng cho A1, đo 19:35Z: `chay_ca()` 136 spawn; `chay_dot_bien()` 35 spawn = 5 + 3×10.
+
+viec_trong_lease:
+  - 'Trên Windows: vòng lặp đột biến KHÔNG chạy; 8 ca nền vẫn chạy đủ.'
+  - 'A1 đo bằng ĐỐI CHỨNG: `S_nt == S_nen` (bảng rỗng trên posix, hôm nay 136), `S_nt` bằng nhau
+     tại hai kích thước bảng (10 và 5 qua seam), `chay_dot_bien` gọi 0 lần trên nt; đối chứng
+     chiều ngược `S_posix − S_nen == 5 + 3·len(DOT_BIEN)` (hôm nay 35).'
+  - 'In cặp TỔNG đột biến CÓ NHÃN trên CẢ HAI nền — Linux `DOT BIEN <đã giết>/<tổng> bi giet`,
+     Windows `DOT BIEN <tổng> muc KHONG DO TREN WINDOWS — do tren ubuntu-latest`; giữ nguyên
+     10 dòng `MUTANT` sẵn có.'
+  - 'Tách hai câu hỏi: "đang chạy bản con của runner" KHÁC "đang trên Windows"; bản con vẫn
+     in dạng riêng, không mượn dòng Windows.'
+  - 'Bảng đột biến RỖNG ⇒ `rc != 0` trên MỌI nền (chốt tương đương `len(DOT_BIEN) > 0`).'
+  - 'Sổ đăng ký đòi cặp tổng ấy: siết mẫu Linux để nhìn thấy dòng có nhãn `DOT BIEN`;
+     `MOI_WINDOWS` nhận dòng Windows CHỈ khi nền là Windows; `0/0` trên Linux ⇒ 1 đỏ.'
+  - 'Trên Linux: SỐ CA CHẠY và SỐ ĐỘT BIẾN CHẠY không đổi (8 và 10). Bản in thì CÓ đổi —
+     có chủ đích, khác M4 của #456. Tổng Linux của `test registry` KHÔNG giảm ở packet này.'
+  - 'Mọi đột biến chạy trên BẢN SAO tạm, không đụng tệp thật.'
+  - 'A7: tìm bước `test registry` theo TÊN trên mọi job (sau GATE nó ở `gate-registry`); mốc so
+     sánh là lượt Windows gần nhất chạy trọn SAU 2A và TRƯỚC packet này, không phải 17,70 phút.'
+
+dieu_kien_dung:
+  - 'XOÁ seam `NHANH_DON_DUOC_KHONG_DOT_BIEN` — chính runner đột biến dùng nó để chạy bản con
+     mà không đệ quy (`ops/nhanh_don_duoc_test.py:208`). Xoá là làm hỏng vòng lặp đột biến.'
+  - 'Dùng lại seam ấy làm đường cắt Windows — hai lượt sẽ vẫn giống nhau từng byte tại điểm quan
+     sát, tức không đo gì. Nếu sau bản vá hai lượt vẫn cho cùng một bản in ở chỗ sổ đăng ký nhìn
+     thì A2 ĐỎ, bất kể mọi thứ khác xanh.'
+  - 'Chạm `ops/nhanh_don_duoc.py` (mã sản xuất) — packet này sửa cách bộ TEST tự khai bằng
+     chứng, không sửa thứ nó đo.'
+  - 'Đụng `loi_ruff_ci` hoặc `bang_chung_xanh` trong `ci_dang_ky_test.py` — của GATE và LO-319.'
+  - 'Đổi bộ ca `CA` hoặc bảng `DOT_BIEN`.'
+  - 'Đột biến ghi vào TỆP THẬT rồi khôi phục trong `finally` — một lượt bị SIGTERM cắt giữa
+     chừng để tệp ở trạng thái đã méo.'
+  - 'Chép bộ đếm "chép bản vá… không đo khác biệt cấu trúc" từ dự đoán thay vì từ BIÊN NHẬN của
+     2A — hôm nay nó là 0 ở cả hai hồ sơ.'
+  - 'Nâng `timeout-minutes` trong `ci.yml` — đã nâng HAI lần; lần kế là lần thứ ba. Điều kiện DỪNG.'
+  - 'Bắt tay khi `ai-dang-giu .claude/dev/ci_dang_ky_test.py` còn một dòng của lease 2A thiếu
+     `ĐÃ_BỊ_THAY_THẾ`/`HẾT_HẠN`.'

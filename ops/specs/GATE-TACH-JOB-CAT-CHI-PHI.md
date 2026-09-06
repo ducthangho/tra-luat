@@ -1,13 +1,21 @@
 # Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI
 
-- `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI**
+- `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI** (bí danh chữ; ID bền theo `PROTOCOL §3.2` là
+  `wp<packet_issue>`, suy ra được ngay khi có số Issue — tiền lệ #456 giữ bí danh ở `packet_id`,
+  số ở `packet_issue`)
 - `packet_issue`: **(để trống — chủ kho cấp)**
-- `revision`: 1
-- `generation`: 1
+- `mission_issue`: **(để trống — chủ kho cấp.)** `§3.2` đòi; lease #456 không có, và không có
+  mission nào đang mở cho lane này. Khuyến nghị: mở MỘT Mission Issue cho cả bốn packet
+  (`GATE` · `LO` · `2A` · `2B`); nếu không, ghi số Issue của `#456` và nói rõ đó là thay thế.
+- `revision`: 1 · `generation`: 1
 - `executor`: claude · `environment`: cloud
-- `review_class`: **sensitive** (`.github/workflows/` — `PROTOCOL §8` loại trừ tường minh khỏi
-  patch-as-hint; đây là ĐỊNH NGHĨA của cổng, không phải mã dưới cổng)
-- `base_sha`: `1b3caa1` (`origin/master`, đo 17:47Z 06-09-2026; `core.abbrev=7`)
+- `risk`: **sensitive** · `review_class`: **sensitive** (`.github/workflows/` — `PROTOCOL §8` loại
+  trừ tường minh khỏi patch-as-hint; đây là ĐỊNH NGHĨA của cổng, không phải mã dưới cổng)
+- `depends_on`: **`[]`** — RỖNG VÌ: packet này đi **ĐẦU** chuỗi nối tiếp `GATE → LO → 2A → 2B`
+  (lý do ở `write_set`). Nó chỉ chờ lease #456 được thu hồi (A9), không chờ packet nào.
+- `base_sha`: `1b3caa1` (`origin/master`, đo 17:47Z 06-09-2026; `core.abbrev=7`) — vì đi đầu, ba
+  mỏ neo trong lease (`base_sha` · `start_from_sha` · `reviewed_sha_required`) vẫn phải **đo lại
+  tại lúc cấp** bằng head `origin/master` khi ấy; `1b3caa1` là số của lúc soạn.
 
 ## `nguon_cap_viec`
 
@@ -20,12 +28,16 @@ Và `ops/specs/MUTANT-KHONG-CHAY-TREN-WINDOWS.md` mục `ngoai_pham_vi` #3 để
 **chưa ai đo** vì job luôn bị cắt ở trần. Packet #456 đã land và **lần đầu tiên** sinh ra số đo
 ấy. Packet này là chỗ số đo ấy được dùng.
 
+Bản này là **bản sửa theo verdict cross-review lượt 1** (`reviewed_sha` `d09f2f1`, Codex): write
+set mở từ 1 lên 2 tệp vì reviewer đo được một consumer của `ci.yml` nằm ngoài write set (P1
+`write-set-thieu-noi-doc-job-registry`); thứ tự packet đổi theo.
+
 ## Bối cảnh đo được (mọi số kèm thời điểm)
 
 ### Chân Windows nay chạy trọn — số đo mới, do #456 sinh ra
 
-Run `34045664423`, head `426bfc0` (nhánh packet #456), đọc 17:41Z 06-09-2026 qua `actions_list`
-+ `method: list_workflow_jobs` trên `/mcp/x/actions`:
+Run `34045664423` (**lượt NHÁNH**), head `426bfc0` (nhánh packet #456), đọc 17:41Z 06-09-2026 qua
+`actions_list` + `method: list_workflow_jobs` trên `/mcp/x/actions`:
 
 | | trước #456 | sau #456 |
 |---|---:|---:|
@@ -39,8 +51,8 @@ Run `34045664423`, head `426bfc0` (nhánh packet #456), đọc 17:41Z 06-09-2026
 
 ### Số của MASTER, đo riêng — KHÔNG chép số nhánh
 
-Run `34048685345`, head `1b3caa1` (đẩy master sau khi merge PR #457), **lượt đã chạy trọn**, đọc
-18:10Z 06-09-2026:
+Run `34048685345` (**lượt MASTER**), head `1b3caa1` (đẩy master sau khi merge PR #457), **lượt đã
+chạy trọn**, đọc 18:10Z 06-09-2026:
 
 | job | tổng | `test registry` | `packet-loop selftest` | trạng thái |
 |---|---:|---:|---:|---|
@@ -52,17 +64,28 @@ Run `34048685345`, head `1b3caa1` (đẩy master sau khi merge PR #457), **lư�
 
 Số master và số nhánh **KHÁC NHAU và trôi theo hai hướng ngược nhau**: ubuntu `26,52` so `24,25`
 (master ĐẮT hơn), Windows `42,28` so `43,20` (master RẺ hơn), `test registry` ubuntu `14,33` so
-`13,13`. Cùng một cây (`426bfc0` là cha của merge `1b3caa1`, không có thay đổi mã nào giữa hai
-lượt về phần gate đo) mà biên độ tới `1,2` phút ⇒ **nhiễu runner cỡ ±1 phút là có thật**, và mọi
-ngưỡng ở `nghiem_thu` phải chừa biên cho nó.
+`13,13`. Cùng một cây (`git diff --name-only 426bfc0..1b3caa1` rỗng — `426bfc0` là cha của merge
+`1b3caa1`) mà biên độ giữa hai lượt, **tách theo đơn vị** (bản đầu gộp thành "tới 1,2 phút", đúng
+cho một bước và sai cho job — verdict lượt 1, P2):
+
+| đại lượng | nhánh | master | chênh |
+|---|---:|---:|---:|
+| bước `test registry` ubuntu | 13,13 | 14,33 | **1,20** |
+| job `gate (ubuntu-latest)` | 24,25 | 26,52 | **2,27** |
+| job `gate (windows-latest)` | 43,20 | 42,28 | **0,92** |
+
+⇒ **nhiễu runner cỡ `1`–`2,3` phút ở mức job là có thật**, và mọi ngưỡng ở `nghiem_thu` phải chừa
+biên cho nó. Hai lượt là **hai điểm dữ liệu**; không dựng được phân phối (xem `chua_do_duoc` #3).
 
 Đó là lý do bảng này tách khỏi bảng trên thay vì dùng chung. **Phiên thi công phải ĐO LẠI cả hai
 bảng** — đây là số của 06-09-2026, và `L5` nói con số đúng lúc viết vẫn sai lúc người khác đọc.
 
-### Chi phí nằm ở đâu — phân rã theo bước, run `34045664423`
+### Chi phí nằm ở đâu — phân rã theo bước, run `34045664423` (lượt nhánh)
 
 Đơn vị: **phút tường của một bước** (`completed_at − started_at`), không phải phút CPU, không
-phải trung bình.
+phải trung bình. Cột "phần" tính trên **tổng bước** `43,17` (không phải job `43,20`), làm tròn một
+chữ số từ số gốc; "luỹ kế" là cộng các phần ĐÃ làm tròn (nên `71,7` chứ không phải `71,6` nếu làm
+tròn trực tiếp — nói ra vì reviewer đo hai cách cho hai số).
 
 | | Windows | phần | luỹ kế | ubuntu |
 |---|---:|---:|---:|---:|
@@ -75,12 +98,18 @@ phải trung bình.
 | **tổng bước** | **43,17** | | | 24,20 |
 | **tổng job** | **43,20** | | | 24,25 |
 
-Chênh job − Σbước = **0,03 phút** trên Windows, **0,05** trên ubuntu ⇒ **không có chi phí ẩn
-ngoài các bước**. Mọi khoản cắt phải cắt vào một bước có tên, không có "phí hạ tầng" nào để tiết
-kiệm.
+Chênh job − Σbước = **0,03 phút** trên Windows, **0,05** trên ubuntu. **Phép đo này nói gì và
+không nói gì** (bản đầu viết *"không có chi phí ẩn ngoài các bước"* — rộng hơn phép đo, verdict
+lượt 1 P2 `chi-phi-duoc-khai-chac-hon-phep-do`): nó chỉ phân rã khoảng `started_at → completed_at`
+của **một job đã được cấp runner**. Nó **không** đo thời gian xếp hàng chờ runner, độ trễ đầu-cuối
+của cả workflow, hay chi phí thiết lập của hai runner MỚI. Phản mô hình của reviewer: chờ runner
+30 phút ⇒ job − Σbước vẫn `0,03`, mà đầu-cuối là `73,20`. Thứ rút ra được chỉ là: **bên trong một
+job, mọi khoản cắt phải cắt vào một bước có tên**.
 
 Chi phí thiết lập (bước 1–10, tính riêng vì nó là thứ **bị nhân lên** khi tách job):
-**Windows 3,33 phút · ubuntu 1,18 phút**.
+**Windows 3,33 phút · ubuntu 1,18 phút** — đo trên `34045664423` (lượt nhánh), là số của MỘT job;
+khối ấy chứa cả `actions/checkout` (`fetch-depth: 0`) lẫn G5, nên khi tách thành ba job là ba lần
+checkout, không phải một.
 
 ### "Bỏ bước trùng" — ĐO RỒI, KHÔNG CÓ
 
@@ -101,12 +130,16 @@ mọi bảng thời lượng là **số mục GitHub liệt kê cho một job đ
 nêu (*"bỏ bước trùng"*) **không có mục tiêu nào** trên cây hôm nay. Không ghi ra thì phiên sau sẽ
 đi tìm lại.
 
-### Ba lần cùng một hình dạng — và vì sao packet này KHÔNG nâng trần
+### Hai lần nâng trần, ba mức — và vì sao packet này KHÔNG nâng
 
-`ci.yml:53-63` ghi lại đủ: `25` → `45` → `60`, ba lần nâng `timeout-minutes`, và chính chú thích
-ấy tự kết luận *"NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN"*. `docs/PROTOCOL_DA_PHIEN.md §12`, câu cuối:
-*"Cùng hình dạng lỗi xuất hiện lần thứ ba bắt buộc xem lại có nên tiếp tục cách làm đó, không chỉ
-vá lần thứ tư."*
+Lịch sử `timeout-minutes` của `ci.yml`, đo 19:29Z 06-09-2026 bằng
+`git log -G 'timeout-minutes:' -- .github/workflows/ci.yml`: khởi tạo **`25`** ở `9e4f361`, nâng
+**`25 → 45`** ở `6d88a2c`, nâng **`45 → 60`** ở `7657bfd`. Tức **ba MỨC, hai lần NÂNG**. Bản đầu
+của đặc tả này (và spec #456, dòng 137, nơi con số được chép từ) viết *"ba lần nâng"* — đếm mức
+thành lần; verdict lượt 1 (P2 `dem-muc-tran-thanh-so-lan-nang`) bắt được, và không nhân lỗi ấy
+sang các hồ sơ kế nữa. Chú thích `ci.yml:53-63` tự kết luận *"NÂNG TRẦN KHÔNG CHỮA NGUYÊN NHÂN"*.
+`docs/PROTOCOL_DA_PHIEN.md §12`, câu cuối: *"Cùng hình dạng lỗi xuất hiện lần thứ ba bắt buộc xem
+lại có nên tiếp tục cách làm đó, không chỉ vá lần thứ tư."* Lần nâng kế tiếp sẽ là lần **thứ ba**.
 
 **Nâng `timeout-minutes` là điều kiện DỪNG của packet này**, không phải một lựa chọn cuối cùng.
 
@@ -124,9 +157,10 @@ HAI lần — workflow có `paths:` không chạy ở lần đẩy tạo nhánh 
 vì `pull_request:` thiếu `types:`."*
 
 **Hệ quả cho packet này: không thêm một mặt điều kiện nào.** Tách job là thêm **jobs**, không
-thêm **điều kiện** — phân biệt ấy là ranh giới của packet.
+thêm **điều kiện** — phân biệt ấy là ranh giới của packet, và A3 đo nó bằng CẤU TRÚC chứ không
+bằng số đếm (xem A3, lý do ở đó).
 
-### Cái giá của việc tách job — tính bằng số, không bằng cảm giác
+### Cái giá của việc tách job — ước CÓ ĐƠN VỊ từ số đo cũ, chưa phải phép đo mới
 
 Chia `gate` thành ba job trên **cùng một ma trận nền**:
 
@@ -134,72 +168,139 @@ Chia `gate` thành ba job trên **cùng một ma trận nền**:
 - `gate-registry` — thiết lập + `test registry`
 - `gate-packet-loop` — thiết lập + `packet-loop selftest`
 
-Số học suy thẳng từ bảng phân rã (run `34045664423`), **không phải ước lượng**:
+Số học suy từ bảng phân rã (run `34045664423`). Bản đầu gọi bảng này là *"không phải ước lượng"*;
+nói cho đúng: nó là **ước có đơn vị** — mỗi ô là tổng của các số đã đo, nhưng chưa có lượt chạy
+nào sau tách để đối chiếu, và ba ô thiết lập giả định runner mới tốn đúng bằng runner cũ. Cột
+"sau khi tách" tính từ **tổng bước** (`43,17` / `24,20`), cột "hôm nay" là **job** (`43,20` /
+`24,25`) — hai mẫu số khác nhau, và chênh `0,11` giữa chúng sẽ hiện ra ở dòng tổng:
 
 | | Windows hôm nay | Windows sau khi tách | ubuntu hôm nay | ubuntu sau |
 |---|---:|---:|---:|---:|
 | `gate` | 43,20 | 15,77 | 24,25 | 7,42 |
-| `gate-registry` | — | **21,03** | — | 14,32 |
+| `gate-registry` | — | **21,03** | — | 14,31 |
 | `gate-packet-loop` | — | 13,03 | — | 4,83 |
-| **job dài nhất** | **43,20** | **21,03** | **24,25** | **14,32** |
-| **tổng phút tường** | 43,20 | 49,83 | 24,25 | 26,57 |
+| **job dài nhất** | **43,20** | **21,03** | **24,25** | **14,31** |
+| **tổng phút tường** | 43,20 | 49,83 | 24,25 | 26,56 |
+
+(Bản đầu in `14,32` / `26,57` / `126,23`; `13,13 + 1,18 = 14,31`, nên ba số ấy lệch `0,01` — finding
+P3 lượt 1, sửa ở đây. Tỉ lệ `14,1 %` làm tròn giống nhau ở cả hai cách, tức chỉ kiểm tỉ lệ thì
+không thấy lỗi số hạng — đúng bài học *"kiểm SỐ HẠNG, đừng kiểm quan hệ"*.)
 
 - **Wall clock job dài nhất: `43,20` → `21,03` phút Windows = −51,3 %.** Biên dưới trần 60 đi từ
-  `16,80` lên `38,97` phút.
+  `16,80` lên `38,97` phút. Đây là số của JOB; thời gian người dùng CHỜ cả workflow còn cộng xếp
+  hàng của ba runner, chưa đo.
 - **Phút TÍNH TIỀN: tăng.** Windows nhân hệ số **×2** (`ci.yml:19-23`): `43,20×2 = 86,40` →
-  `49,83×2 = 99,66`. Cộng ubuntu `24,25 → 26,57`. Tổng một lượt master:
-  **`110,65` → `126,23` phút tính tiền = +15,58 (+14,1 %)**.
+  `49,83×2 = 99,66`. Cộng ubuntu `24,25 → 26,56`. Tổng một lượt, nền là **lượt NHÁNH
+  `34045664423`** (bản đầu gọi nhầm là "một lượt master" — lượt master `34048685345` là `111,08`):
+  **`110,65` → `126,22` phút tính tiền = +15,57 (+14,1 %)**. Phân rã cái tăng: thiết lập nhân đôi
+  theo hệ số `3,33×2×2 + 1,18×2 = 15,68`, trừ `0,11` chênh job−Σbước cũ bị rơi khi vế sau dùng
+  tổng bước ⇒ `15,57`.
 
-Khoản tăng ấy là **ba lần trả tiền thiết lập** thay vì một (`3,33×2 + 1,18×2` phút tường). Nó
-không phải hiệu ứng phụ mà là **chính cái giá** của tách job, và nó đụng đúng chỗ kho này đã chết
-một lần: `ci.yml:19-24` ghi CI đứng hình từ 12-08-2026 vì cạn hạn mức 2.000 phút/tháng.
-**Đây là con số chủ kho phải duyệt, không phải con số phiên thi công tự nuốt.**
+Khoản tăng ấy là **ba lần trả tiền thiết lập** thay vì một. Nó không phải hiệu ứng phụ mà là
+**chính cái giá** của tách job, và nó đụng đúng chỗ kho này đã chết một lần: `ci.yml:19-24` ghi CI
+đứng hình từ 12-08-2026 vì cạn hạn mức 2.000 phút/tháng (số của ghi chú 13-08-2026, không phải
+hạn mức hiện tại — chưa đọc lại). **Đây là con số chủ kho phải duyệt, không phải con số phiên thi
+công tự nuốt.**
+
+### Consumer của `ci.yml` nằm ngoài `ci.yml` — đo được, và nó đổi write set
+
+`loi_ruff_ci()` (`.claude/dev/ci_dang_ky_test.py:140-158`) chỉ đọc `jobs.gate.steps` và đòi bước
+`ci_dang_ky_test.py --chay` đứng **sau** bước cài `ruff==0.15.15` **trong chính danh sách ấy**.
+Đo 19:33Z 06-09-2026, dựng YAML ba job trong bộ nhớ từ `ci.yml` hiện tại (9 bước thiết lập tới hết
+bước Ruff chép sang mỗi job mới, hai bước nặng dời đi, không đổi lệnh nào):
+
+```
+loi_ruff_ci(ci.yml hôm nay)   -> ([], 3)
+loi_ruff_ci(ci.yml đã tách)   -> (["CI không provision Ruff trước test registry"], 3)
+số lời gọi registry còn trong jobs.gate sau tách: 0
+```
+
+Tách đúng M1 ⇒ `gate_i = -1` ⇒ bước `test registry` **tự đỏ** ở mục `RUFF CI`, trên cả hai nền.
+Bản đầu chỉ khai `ci.yml` trong write set, nên executor **không thể** sửa consumer này — vi phạm
+`L2` (verdict lượt 1, P1). Chữa ở `write_set` dưới đây.
 
 ## `review_class` và ngưỡng kích thước
 
-`sensitive` ⇒ `ADR-0044`: **≤ 3 tệp và ≤ 300 dòng thêm**. Write set là **1 tệp**.
-`ci.yml` hiện **588 dòng**; tách job chủ yếu là **di chuyển** bước, nên dòng thêm ròng dự kiến
-thấp. Vượt `300` thì DỪNG trước review.
+`sensitive` ⇒ `ADR-0044`: **≤ 3 tệp và ≤ 300 dòng THÊM** — cột `additions` của
+`git diff --numstat`, KHÔNG phải `adds − deletes`. Bản đầu lý luận *"chủ yếu di chuyển nên dòng
+thêm ròng thấp"*; sai thước: `+351/−351` có ròng `0` mà `additions = 351 > 300` (verdict lượt 1,
+P2). Ước ĐÚNG THƯỚC, từ số đo khối (19:31Z, `sed -n | wc -l` trên `ci.yml` 588 dòng):
+
+| khối phải NHÂN ĐÔI (mỗi job mới một bản) | dòng (kể chú thích) | dòng (bỏ chú thích) |
+|---|---:|---:|
+| đầu job: `strategy`/`matrix`/`runs-on`/`timeout-minutes`/`env` (`ci.yml:35-69`) | 35 | 17 |
+| 9 bước thiết lập tới hết bước Ruff (`ci.yml:70-113`) | 44 | 33 |
+| **một job mới** | **79** | **50** |
+| **hai job mới** | **158** | **100** |
+
+Cộng hai bước dời (≈4 dòng), sửa `loi_ruff_ci` (hàm hôm nay 19 dòng; ước +15–25) và phản chứng
+mới (ước +15) ⇒ **ước `135`–`200` dòng thêm**, tuỳ chép hay không chép chú thích. Dưới `300`,
+biên ≥ `100`. **Đo thật bằng `git diff --numstat` trước review; vượt `300` thì DỪNG** — và cách
+giảm nếu cần là rút phần thiết lập thành composite action (`.github/actions/…`), tức thêm MỘT tệp
+(3 tệp, vẫn ≤ 3), không phải cắt bớt bước.
+
+Write set là **2 tệp**.
 
 ## `write_set`
 
 | # | đường dẫn | vì sao |
 |---|---|---|
 | 1 | `.github/workflows/ci.yml` | định nghĩa job `gate` và toàn bộ 39 bước của nó |
+| 2 | `.claude/dev/ci_dang_ky_test.py` | consumer `loi_ruff_ci` khoá cứng `jobs.gate`; tách job mà không sửa nó thì bước `test registry` tự đỏ (đo 19:33Z) |
 
-Không ký tự đại diện. Không đường dẫn nào khác.
+Không ký tự đại diện. Không đường dẫn nào khác. Trong tệp #2 chỉ đụng `loi_ruff_ci` và phản chứng
+của nó; **không** đụng `bang_chung_xanh`, `MOI`, `MOI_WINDOWS`, `chay_moi` — đó là của ba packet
+sau.
 
-**Không giao với ba packet mutant-Windows** (`LO-319-LINUX-BANG-CHUNG-XANH`,
-`MUTANT-WINDOWS-SUBAGENT-GHI-DETECT`, `MUTANT-WINDOWS-NHANH-DON-DUOC`) — chúng chạm
-`.claude/**` và `ops/nhanh_don_duoc_test.py`. Packet này chạy **song song** được với cả ba.
-Đo 17:46Z: `ai-dang-giu .github/workflows/ci.yml` ⇒ `NGƯỜI_GIỮ 0: không có`. Quét hai nguồn:
-`ls-remote` **295** ref · `for-each-ref` **295** ref · `comm -23` rỗng ⇒ không mù.
+**Hệ quả của tệp #2 — giao write set, đổi thứ tự, và lý do chọn thứ tự này.** Tệp #2 cũng nằm trong
+write set của `LO-319-LINUX-BANG-CHUNG-XANH`, `MUTANT-WINDOWS-SUBAGENT-GHI-DETECT`,
+`MUTANT-WINDOWS-NHANH-DON-DUOC`. `§5`: exclusion theo ĐƯỜNG DẪN, không cấp lease theo vùng dòng ⇒
+bốn packet **nối tiếp**, không song song như bản đầu khai. Hai thứ tự khả dĩ, chọn **GATE đi ĐẦU**:
+
+| tiêu chí | GATE đầu (`GATE → LO → 2A → 2B`) | GATE cuối (`LO → 2A → 2B → GATE`) |
+|---|---|---|
+| số tệp / trần `ADR-0044` | 2 / 3 — như nhau | 2 / 3 |
+| số đo của GATE (A1/A2/A5) | đo trên cây **chưa đổi** — nền `34045664423`/`34048685345` còn đúng | nền trôi sau ba packet cắt `test registry` (41 % chi phí Windows) ⇒ đo lại cả bảng |
+| A7 của 2A/2B (bước `test registry` trên Windows) | viết MỘT LẦN theo bố cục sau tách (`gate-registry`) — đóng finding `acceptance-phu-thuoc-job-packet-khac-doi` bằng cấu trúc | phải viết "tìm bước theo job tại đúng head" và giữ hai trường hợp |
+| giá mỗi lượt `workflow_dispatch` Windows của ba packet sau | job dài nhất ≈ `21` phút (ước) | `43,20` phút |
+| phần sửa ở tệp #2 | `loi_ruff_ci` — rời `bang_chung_xanh`; ba packet sau rebase không đụng | như nhau |
+
+Cột giữa thắng ở ba dòng có số; không có dòng nào cột phải thắng. Chuỗi thu hồi lease theo đó:
+**`#456 → GATE → LO → 2A → 2B`** (lease của packet này khai `thay_the_cho: #456`; xem A9).
+
+Đo 17:46Z: `ai-dang-giu .github/workflows/ci.yml` ⇒ `NGƯỜI_GIỮ 0: không có`;
+`ai-dang-giu .claude/dev/ci_dang_ky_test.py` ⇒ `NGƯỜI_GIỮ 1: mutant-khong-chay-tren-windows-…`
+(#456, còn hạn tới `14:30:07Z 07-09`). Quét hai nguồn 19:29Z: `ls-remote` **298** ·
+`for-each-ref` **298** · `comm -23` rỗng ⇒ không mù.
 
 ## `ngoai_pham_vi`
 
-1. **`timeout-minutes` — CẤM đụng, theo cả hai chiều.** Không nâng (hình dạng đã hỏng ba lần), và
-   cũng không hạ để "ép kỷ luật": hạ trần biến một job chậm thành một job `cancelled`, tức đổi
-   một vấn đề đọc được thành một vấn đề vô hình. Trần đứng nguyên ở `60`.
+1. **`timeout-minutes` — CẤM đụng, theo cả hai chiều.** Không nâng (hai lần nâng đã có, lần kế là
+   lần thứ ba theo `§12`), và cũng không hạ để "ép kỷ luật": hạ trần biến một job chậm thành một
+   job `cancelled`, tức đổi một vấn đề đọc được thành một vấn đề vô hình. Trần đứng nguyên ở `60`.
 2. **Chạy CÓ ĐIỀU KIỆN theo diff / theo nhãn / theo `paths`.** Đã có đặc tả đóng băng
    (`CI-FASTPATH-THEO-DIFF.md`) và bản triển khai đã bị bỏ (PR #247 đóng). Kho đã trả giá hai lần
    cho logic điều kiện của workflow. Không mở lại trong packet này.
-3. **Song song hoá TRONG `test registry`** (`chay_moi` chạy 8 bộ tuần tự). Đây là hướng **rẻ hơn
-   về phút tính tiền** vì nó cắt cả wall clock lẫn billing, nhưng: (a) nó chạm
-   `.claude/dev/ci_dang_ky_test.py` — giao write set với cả ba packet mutant-Windows, tức nối
-   tiếp thêm một lượt; (b) hiệu quả của nó trên Windows **chưa đo được** vì không có phân rã theo
-   bộ trên nền ấy; (c) đo trên Linux 17:47Z 06-09: tuần tự `400` giây, mà bộ dài nhất một mình là
-   `270` giây ⇒ trần song song hoá là `−32,5 %`, và sau khi hai packet mutant-Windows land thì
-   phần cắt được co lại còn `≈ 5 %` (tổng tuần tự ước `284` giây, bộ dài nhất vẫn `270`).
+3. **Song song hoá TRONG `test registry`** (`chay_moi` chạy 8 bộ tuần tự). Hướng này cắt cả wall
+   clock lẫn billing, nhưng: (a) nó chạm `chay_moi` trong `.claude/dev/ci_dang_ky_test.py` — hàm
+   có phản chứng bám chữ ký ("ĐƯỜNG NỐI ĐỂ ĐO"), và là vùng ba packet sau sửa; (b) hiệu quả trên
+   Windows **chưa đo được** vì không có phân rã theo bộ trên nền ấy; (c) đo trên Linux 17:47Z
+   06-09: tuần tự `400` giây, bộ dài nhất một mình `270` giây ⇒ trần song song hoá là `−32,5 %`.
+   **Con số ấy KHÔNG đổi sau hai packet mutant-Windows** — bản đầu viết tổng Linux co về `≈284` s
+   và trần còn `≈5 %`, nhưng hai packet ấy giữ nguyên vòng đột biến trên Linux (M6/A6 của cả 2A
+   lẫn 2B), nên tổng Linux vẫn `400` s (verdict lượt 1, P2 `tiet-kiem-windows-bi-tru-khoi-linux`).
    **Nợ có tên: `SONG-SONG-HOA-TRONG-TEST-REGISTRY`** — mở packet riêng SAU khi có phân rã theo bộ
    trên Windows.
 4. **Cắt vòng lặp đột biến của `packet_loop_test.py`.** Bước ấy tốn **9,70** phút Windows
-   (22,5 %) so `3,65` ubuntu; tệp `4.733` dòng và nhắc đột biến ở **169** chỗ (đo 17:43Z
-   06-09-2026). Cùng hình dạng bản vá với #456, và có lẽ là khoản cắt lớn thứ hai của kho — nhưng
-   nó là `.claude/dev/packet_loop_test.py`, không phải `ci.yml`. **Nợ có tên:
-   `MUTANT-WINDOWS-PACKET-LOOP`.**
+   (22,5 %) so `3,65` ubuntu; tệp `4.733` dòng và nhắc đột biến ở **169 dòng** (đo 17:43Z
+   06-09-2026, mẫu `DOT_BIEN|dot_bien|đột biến` phân biệt hoa/thường; 179 lần xuất hiện). Cùng
+   hình dạng bản vá với #456 — nhưng nó là `.claude/dev/packet_loop_test.py`, không phải `ci.yml`.
+   **Nợ có tên: `MUTANT-WINDOWS-PACKET-LOOP`.**
 5. **Bỏ bước trùng** — đã đo, **0 bước trùng** (xem bối cảnh). Không có gì để làm.
 6. **Không đổi tập bước, không đổi lệnh của bước nào.** Packet này chỉ đổi bước ấy nằm trong
    **job** nào.
+7. **Trong `.claude/dev/ci_dang_ky_test.py`: không đụng gì ngoài `loi_ruff_ci` và phản chứng của
+   nó.** `bang_chung_xanh`/`MOI`/`MOI_WINDOWS`/`chay_moi` là của `LO-319` và hai packet mutant.
 
 ## `muc_tieu`
 
@@ -207,55 +308,85 @@ Không ký tự đại diện. Không đường dẫn nào khác.
 |---|---|---|
 | M1 | Hai bước nặng nhất (`test registry`, `packet-loop selftest`) chuyển sang job riêng, cùng ma trận nền với `gate`. | `write_set` #1 |
 | M2 | **Độ phủ không đổi**: tập `(tên bước, nền, kết luận)` sau khi tách phải bằng đúng tập trước khi tách. Không bước nào biến mất, không bước nào đổi từ `success` sang `skipped`. | `write_set` #1 |
-| M3 | Điều kiện chạy Windows KHÔNG đổi: mọi job mới dùng CÙNG biểu thức `fromJSON(...)` của `gate` hôm nay (`workflow_dispatch` ∨ `master` ∨ nhãn `windows`). Không thêm một mặt điều kiện nào. | `write_set` #1 |
+| M3 | Điều kiện chạy KHÔNG đổi: mọi job mới mang **cùng** `if` mức job (hôm nay: không có), cùng biểu thức ma trận `fromJSON(...)`, cùng `timeout-minutes`; mọi bước dời đi giữ nguyên `if` của nó. Không thêm một mặt điều kiện nào — kể cả `if:` viết KHÔNG có dấu nội suy. | `write_set` #1 |
 | M4 | `timeout-minutes: 60` giữ nguyên trên **mọi** job. | `write_set` #1 |
 | M5 | Phút tính tiền tăng thêm được **đo và công bố**, không phải ước — nó là số chủ kho đã duyệt trước, và lượt chạy phải xác nhận nó. | `write_set` #1 |
-| M6 | Bảo vệ nhánh vẫn có cổng: nếu `gate` đang là required status check thì hai job mới cũng phải được khai, kẻo tách job = tháo cổng. | `write_set` #1 |
+| M6 | Bảo vệ nhánh vẫn có cổng: nếu `gate` đang là required status check thì hai job mới cũng phải được khai, kẻo tách job = tháo cổng. | `write_set` #1 (phần đo được) |
+| M7 | `loi_ruff_ci` tìm bước `test registry` trong **mọi** job và đòi Ruff được cài trong **cùng job**, **trước** bước ấy; không job nào có bước ⇒ lỗi. Tương thích với `ci.yml` chưa tách. | `write_set` #2 |
 
 ## `nghiem_thu`
 
-**A1 (M1) — job dài nhất giảm, đo bằng PHÚT TƯỜNG CỦA JOB.**
+**A1 (M1) — job dài nhất giảm, đo bằng PHÚT TƯỜNG CỦA JOB, kèm đầu-cuối của WORKFLOW.**
 `workflow_dispatch` `ci.yml` trên nhánh packet. Đòi: `max(thời lượng job)` trên `windows-latest`
-**≤ 25,00 phút**. Ngưỡng ấy suy từ số học `21,03` cộng `~4` phút biên cho nhiễu runner.
+**≤ 25,00 phút**. Ngưỡng ấy suy từ số học `21,03` cộng `~4` phút biên cho nhiễu runner (chênh job
+đo được giữa hai lượt: `0,92`–`2,27`).
 Đơn vị: **`completed_at − started_at` của JOB**, đọc qua `actions_list` +
 `method: list_workflow_jobs`; lấy `max` trên tất cả job của lượt, không lấy tổng.
+**Kèm, công bố nhưng không đặt ngưỡng** (chưa có nền): thời gian đầu-cuối của cả lượt
+(`run.created_at → run.updated_at` khi `status = completed`) trước và sau tách. Đây là phép đo duy
+nhất thấy được xếp hàng của ba runner; nếu nó KHÔNG giảm dù `max(job)` giảm, đó là kết quả đo, báo
+chủ kho. **Không quy thời gian chờ thành phút tính tiền** — chờ không tính tiền, và ta chưa có dữ
+liệu billing.
 Phép làm ĐỎ: gộp lại một job ⇒ `43,20` ⇒ ĐỎ. Và: nếu `max` **không** giảm dù đã tách, đó là
 **KẾT QUẢ ĐO** (chi phí thiết lập trên Windows lớn hơn `3,33` phút đã đo) — báo chủ kho, đừng nới
 gì để ép nó xanh.
 
-**A2 (M2) — độ phủ không đổi, đo bằng TẬP HỢP, không bằng số đếm.**
-Lấy `(job, tên bước, nền, conclusion)` của lượt TRƯỚC (`34048685345`, master `1b3caa1`) và của
-lượt SAU trên nhánh packet. Bỏ cột `job`, rồi so **tập** `(tên bước, nền, conclusion)`.
-Hai tập phải **bằng nhau**.
+**A2 (M2) — độ phủ không đổi, đo bằng TẬP HỢP, không bằng số đếm, trên HAI loại cò.**
+Lấy `(job, tên bước, nền, conclusion)` của lượt TRƯỚC và của lượt SAU. Bỏ cột `job`, rồi so **tập**
+`(tên bước, nền, conclusion)`. Hai tập phải **bằng nhau**. Làm HAI lần:
+- lượt `workflow_dispatch` trên nhánh packet (cả hai nền) so với lượt master `34048685345`
+  (`1b3caa1`; nền: ubuntu **43/43** bước, **4** `skipped`; Windows **43/43**, **6** `skipped`);
+- lượt `pull_request` của chính PR packet (ubuntu) so với lượt `pull_request` gần nhất trên master
+  trước đó — đây là lượt DUY NHẤT chứng minh ba job **có mặt trên PR**, tức chứng minh không ai đã
+  thêm điều kiện chỉ-dispatch (xem A3).
 Đơn vị: **tập bộ ba**, không phải `wc -l`. Lý do dùng tập chứ không dùng số đếm là bài học đã đo
 của kho: hai tập lệch vẫn có thể cùng lực lượng (`CLAUDE.md`, mục `git for-each-ref`).
-Nền hôm nay để đối chiếu: ubuntu **43/43** bước chạy, **4** `skipped`; Windows **43/43**,
-**6** `skipped` (đo trên `34045664423`).
 Phép làm ĐỎ: quên chép `if: runner.os != 'Windows'` sang job mới ⇒ một bước đổi từ `skipped` sang
 `success` (hoặc ngược lại) ⇒ tập lệch ⇒ ĐỎ. Mười bước có `if:` là mười cơ hội để hỏng chỗ này.
 
-**A3 (M3) — không thêm mặt điều kiện nào.**
-Phép làm ĐỎ: đếm **số biểu thức `${{ }}` điều khiển việc CHẠY** (`if:` mức job/bước, `strategy`,
-`concurrency`) trước và sau. Sau khi tách, mỗi job mới được phép mang **bản sao nguyên văn** của
-biểu thức ma trận; **số biểu thức KHÁC NHAU** (tập chuỗi sau khi chuẩn hoá khoảng trắng) phải
-không tăng.
-Đơn vị: **lực lượng tập chuỗi biểu thức phân biệt**, không phải số lần xuất hiện.
-Kèm chốt cứng: `actionlint` phải `rc` **không đổi so với `origin/master` đo trong CÙNG một lệnh,
-CÙNG một môi trường** — `CLAUDE.md` đã đo `rc=1` khi có `shellcheck` và `rc=0` khi vắng, nên
-"delta = 0" mới là tiêu chí, không phải "rc = 0".
-Và: **không viết cú pháp `${{ }}` trong comment của `run:`** — kho đã bị GitHub từ chối cả tệp
-vì đúng chuyện đó (`ops-don-ref.yml`, run `31971137920`, 0 job, `conclusion: failure`).
+**A3 (M3) — không thêm mặt điều kiện nào, đo bằng CẤU TRÚC.**
+Bản đầu đếm **lực lượng tập chuỗi biểu thức `${{ }}`** — và reviewer dựng được phản chứng: thêm
+`if: github.event_name == 'workflow_dispatch'` (KHÔNG có dấu nội suy, cú pháp Actions cho phép)
+vào `gate-registry` ⇒ tập biểu thức vẫn `6 → 6`, A3 cũ **PASS**, mà job biến mất trên mọi PR (đo
+lại 19:33Z, đúng như reviewer). Đếm delimiter là đếm CÁCH VIẾT, không đếm ĐIỀU KIỆN. Thay bằng ba
+phép so, đã chạy 19:33Z trên YAML tách trong bộ nhớ:
+1. **mức job**: với mỗi job, bộ ba `(if mức job, chuỗi `matrix.os`, `timeout-minutes`)` sau chuẩn
+   hoá khoảng trắng phải **bằng** bộ ba của `gate`. Hôm nay `gate` = `(None, fromJSON(…), 60)`.
+   Đo: YAML tách đúng ⇒ ba job bằng nhau; YAML có `if` chèn ⇒ **bắt được** (bộ ba của
+   `gate-registry` khác).
+2. **mức bước, hai nửa** (đo 19:59Z trên YAML tách trong bộ nhớ; nửa nào cũng có đột biến riêng
+   vì mỗi nửa mù đúng chỗ nửa kia thấy):
+   - tập `(tên bước, if của bước)` trên **mọi** job sau tách phải **bằng** tập trước tách. Đo:
+     tách đúng ⇒ bằng; thêm `if: false` vào bản sao bước Ruff trong `gate-registry` ⇒ **bắt được**
+     (`('cài Ruff 0.15.15 và in probe dương', 'false')` xuất hiện); xoá `if` của bước
+     `PR head contains required EOL base` trong `gate` ⇒ **bắt được**. Nhưng **xoá hẳn một BẢN
+     SAO** của một bước thiết lập khỏi một job mới ⇒ tập **KHÔNG** đổi (tập dedup; `gate` vẫn có
+     bước ấy) — đo được, và bản đầu của mục này viết "bắt được" cho một đột biến chưa từng chạm
+     bước nào (bước EOL không nằm trong 9 bước được chép), tức lời khai không có phép đo.
+   - **tiền tố 9 bước** (theo tên, theo thứ tự) của mỗi job mới phải **bằng** tiền tố 9 bước của
+     `gate`. Đo: tách đúng ⇒ bằng ở cả hai job mới; xoá bản sao Ruff khỏi `gate-registry` ⇒
+     **bắt được** (`gate-registry: False`). Với riêng Ruff, A7 (`loi_ruff_ci`) cũng bắt.
+3. **mức workflow**: `on:` và `concurrency:` không đổi một ký tự (so chuỗi sau `yaml.safe_load` +
+   `safe_dump`).
+Đơn vị: **tập bộ ba / tập cặp**, không phải số đếm. Kèm chốt cứng: `actionlint` phải có `rc`
+**không đổi so với `origin/master` đo trong CÙNG một lệnh, CÙNG một môi trường** — `CLAUDE.md` đã
+đo `rc=1` khi có `shellcheck` và `rc=0` khi vắng, nên "delta = 0" mới là tiêu chí, không phải
+"rc = 0". Và: **không viết cú pháp `${{ }}` trong comment của `run:`** — kho đã bị GitHub từ chối
+cả tệp vì đúng chuyện đó (`ops-don-ref.yml`, run `31971137920`, 0 job, `conclusion: failure`).
+Phép làm ĐỎ: bất kỳ phép so nào lệch. Đột biến bắt buộc: chính ca `if` không delimiter ở trên.
 
 **A4 (M4) — trần không đổi.**
 Phép làm ĐỎ: `grep -c 'timeout-minutes: 60'` phải bằng **số job**, và không tồn tại
 `timeout-minutes` mang giá trị khác. Bất kỳ giá trị khác `60` ⇒ ĐỎ, kể cả nhỏ hơn.
 
-**A5 (M5) — phút tính tiền được ĐO và công bố.**
+**A5 (M5) — phút tính tiền được ĐO và công bố, neo đúng lượt.**
 Tính `Σ(thời lượng job × hệ số nền)` với hệ số `windows = 2`, `ubuntu = 1`, cho lượt TRƯỚC và
 lượt SAU trên cùng bộ bước.
-Nền đo (`34045664423`): **110,65** phút tính tiền. Dự kiến sau: **126,23** (**+14,1 %**).
-Đòi: số đo thật **≤ 135,00** phút tính tiền.
-Đơn vị: **phút tính tiền** = Σ phút tường của job × hệ số nền.
+Nền: lượt **nhánh** `34045664423` = **110,65** (bảng phân rã theo bước chỉ có cho lượt này, nên
+mọi số "sau" suy từ nó); lượt **master** `34048685345` = **111,08** (để đối chiếu nhiễu). Ước sau:
+**126,22** (**+14,1 %**) từ lượt nhánh. Đòi: số đo thật **≤ 135,00** phút tính tiền
+(`126,22 + ~9` biên, tức `~7 %` — rộng hơn nhiễu job đo được `2,27` nhân hệ số).
+Đơn vị: **phút tính tiền** = Σ phút tường của job × hệ số nền. Đo lại cả hai nền tại lúc thi công.
 Phép làm ĐỎ: vượt `135,00` ⇒ ĐỎ ⇒ tách job đắt hơn dự kiến ⇒ báo chủ kho.
 **Tiêu chí này KHÔNG được bỏ dù A1 xanh.** Packet này mua wall clock bằng billing; một lượt đo
 chỉ nói nửa đầu là một lời khai thiếu nửa sau, và nửa sau là thứ đã giết CI của kho một lần.
@@ -270,53 +401,81 @@ KHÔNG đo được từ phiên thi công**:
 Phép làm ĐỎ cho (a): tên job trong `ci.yml` khác tên in ra ⇒ ĐỎ.
 Cho (b): **không có phép đo** — ghi thẳng, và nó phải nằm trong thân Issue như một mục chủ kho
 phải làm TRƯỚC khi merge. Tách một job đang được require thành ba job mà chỉ require một là
-**tháo cổng bằng một thao tác trông như tối ưu hoá** — cùng họ `[skip ci]` làm PR #100 có 0 check
-mà vẫn `mergeable_state: clean`.
+**tháo cổng bằng một thao tác trông như tối ưu hoá** — cùng họ dấu bỏ-qua-CI làm PR #100 có 0
+check mà vẫn `mergeable_state: clean`.
 
-**A7 — không đụng gì khác.** `git diff --numstat` chỉ hiện đúng **1** đường dẫn.
+**A7 (M7) — consumer `loi_ruff_ci` đọc được bố cục mới và vẫn có răng.**
+Bốn ca, đi qua chính `loi_ruff_ci(source)`:
+- `ci.yml` **hôm nay** (chưa tách) ⇒ `[]` lỗi (tương thích lùi; đo 19:33Z bản cũ: `[]`);
+- `ci.yml` **đã tách đúng** (Ruff trong `gate-registry`, trước `test registry`) ⇒ `[]` lỗi (đo
+  19:33Z bản cũ: **1** lỗi — đây là ca đổi màu của packet);
+- đã tách nhưng **bỏ** bước Ruff khỏi `gate-registry` ⇒ ≥ 1 lỗi;
+- đã tách, Ruff nằm **sau** `test registry` trong cùng job ⇒ ≥ 1 lỗi.
+Hai phản chứng sẵn có `ruff-pin-required` và `ruff-version-probe-required` giữ nguyên màu.
+Đơn vị: **số thông điệp lỗi trả về**. Phép làm ĐỎ: đột biến `loi_ruff_ci` quay về đọc
+`jobs.gate` ⇒ ca thứ hai ĐỎ.
+
+**A8 — không đụng gì khác.** `git diff --numstat` chỉ hiện đúng **2** đường dẫn, và cột thêm
+≤ `300`.
+
+**A9 — lease #456 đã thu hồi TRƯỚC khi bắt tay, đo trên MỌI bản.**
+`python ops/lease_publish.py ai-dang-giu .claude/dev/ci_dang_ky_test.py` phải in `NGƯỜI_GIỮ 1` với
+tên lease của **packet này**, và **0** dòng mang `mutant-khong-chay-tren-windows-…` mà thiếu
+`ĐÃ_BỊ_THAY_THẾ` lẫn `HẾT_HẠN`. Thủ tục bốn bước và giới hạn của nó (một blob trên 10 ref, ba
+nhánh phiên khác không xoá được từ đây, `_kiem_bia_mo` đếm `any` còn `ai-dang-giu` đếm `all`, đo
+19:29–19:35Z) viết đủ ở `ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md` mục *"Lease đang giữ"* —
+không chép lại để khỏi trôi lệch. Vì packet này đi đầu, **nó** là mắt xích thay #456. Nếu chủ kho
+cấp SAU `14:30:07Z 07-09-2026` thì #456 tự `HẾT_HẠN` và điều kiện thứ hai đo được ngay; cấp TRƯỚC
+thì điều kiện ấy **không đạt được bằng công cụ hiện có** — xem `chua_do_duoc` #7.
 
 ## `hinh_dang_ke_thua`
 
 Chép từ `ops/specs/MUTANT-KHONG-CHAY-TREN-WINDOWS.md`, `ops/specs/CI-CAI-JSONSCHEMA-r3.md` và từ
-chú thích của chính `ci.yml`:
+chú thích của chính `ci.yml`. Mỗi dòng ghi thời điểm đo hoặc nguồn trích (L5):
 
-| hình dạng | số lần đã gặp | ghi chú |
-|---|---:|---|
-| nâng `timeout-minutes` để mua cổng xanh | **3** (`25`→`45`→`60`) | Điều kiện DỪNG của packet này. `§12` đòi xem lại CÁCH LÀM từ lần thứ ba; câu trả lời ở đây là **tách job**, không phải trần. |
-| thêm một mặt ĐIỀU KIỆN vào workflow rồi nó vắng mặt lặng lẽ | **2** | `paths:` không bắn ở lần đẩy tạo nhánh mới · `pull_request:` thiếu `types:` nên nhãn `windows` không sinh lượt chạy. Cộng lần thứ ba suýt xảy ra: `CI-FASTPATH-THEO-DIFF` (PR #247 đóng). ⇒ `ngoai_pham_vi` #2. |
-| cổng vắng mặt trông giống cổng xanh | **≥ 3** | `[skip ci]` (PR #100, 0 check `clean`) · job `cancelled` không phải `failure` · `ops-don-ref.yml` bị GitHub từ chối, 0 job. Tất cả là lý do A2 so TẬP và A6 tách hai phần. |
-| khai một phép đo là `KHÔNG ĐO ĐƯỢC` rồi để nguyên | **1** (`CI-CAI-JSONSCHEMA-r3` A5) | Đã đóng lại: #456 sinh ra số đo Windows đầu tiên. Ba mục `chua_do_duoc` của #456 nay đóng được — xem dưới. |
-| tối ưu hoá CI mà không nêu phút TÍNH TIỀN | **1** | `ci.yml:19-24`: CI đứng hình từ 12-08-2026 vì cạn 2.000 phút/tháng. ⇒ A5 là bắt buộc. |
+| hình dạng | số lần đã gặp | đo/trích lúc | ghi chú |
+|---|---:|---|---|
+| nâng `timeout-minutes` để mua cổng xanh | **2 lần nâng** (3 mức `25`→`45`→`60`) | `git log -G`, 19:29Z 06-09 | Bản đầu chép `3` từ #456 (đếm mức). Lần kế là lần thứ ba ⇒ `§12` đòi xem lại CÁCH LÀM; câu trả lời ở đây là **tách job**, không phải trần. Điều kiện DỪNG. |
+| thêm một mặt ĐIỀU KIỆN vào workflow rồi nó vắng mặt lặng lẽ | **2** | trích `ci.yml:490-506`, `CLAUDE.md` | `paths:` không bắn ở lần đẩy tạo nhánh mới · `pull_request:` thiếu `types:` nên nhãn `windows` không sinh lượt chạy. Cộng lần thứ ba suýt xảy ra: `CI-FASTPATH-THEO-DIFF` (PR #247 đóng). ⇒ `ngoai_pham_vi` #2, và A3 đo bằng cấu trúc. |
+| cổng vắng mặt trông giống cổng xanh | **≥ 3** | trích `CLAUDE.md` | dấu bỏ-qua-CI (PR #100, 0 check `clean`) · job `cancelled` không phải `failure` · `ops-don-ref.yml` bị GitHub từ chối, 0 job. Tất cả là lý do A2 so TẬP và A6 tách hai phần. |
+| khai một phép đo là `KHÔNG ĐO ĐƯỢC` rồi để nguyên | **1** | trích `CI-CAI-JSONSCHEMA-r3` A5 | #456 sinh ra số đo Windows đầu tiên. Ba mục `chua_do_duoc` của #456 — trạng thái TỪNG MỤC ở bảng dưới. |
+| tối ưu hoá CI mà không nêu phút TÍNH TIỀN | **1** | trích `ci.yml:19-24` (ghi chú 13-08-2026) | CI đứng hình từ 12-08-2026 vì cạn 2.000 phút/tháng. ⇒ A5 là bắt buộc. |
+| đếm biểu thức thay vì đếm điều kiện | **1** (bản đầu A3 của chính đặc tả này) | verdict lượt 1, tái hiện 19:33Z | Cùng gốc *"phân biệt CÁCH VIẾT, không phân biệt THẨM QUYỀN"* trong `CLAUDE.md`. |
+| lời khai rộng hơn phép đo | **2** (bản đầu: "không có chi phí ẩn", "không phải ước lượng") | verdict lượt 1 | Sửa ở bối cảnh. |
 
-### Ba mục `chua_do_duoc` của #456 — nay đóng được
+### Ba mục `chua_do_duoc` của #456 — trạng thái TỪNG MỤC, không gộp
+
+Bản đầu viết *"ba mục nay đóng được"* trong khi bảng của chính nó ghi ba trạng thái khác nhau
+(verdict lượt 1, P2). Đúng là: **1 ĐÓNG · 1 ĐÓNG MỘT PHẦN · 1 KHÔNG ĐÓNG**.
 
 | mục của #456 | trạng thái sau #456 |
 |---|---|
-| #1 *"tổng thời gian thật của job Windows"* | **ĐÓNG.** `43,20` phút, run `34045664423`, 43/43 bước. |
-| #3 *"tỉ lệ 3× là đo TỔNG BƯỚC, không đo riêng đột biến"* | **ĐÓNG một phần.** Ước `44,3p → ~14p` cho `test registry`; thật là `17,70`. Ước lệch `+26 %` về phía đắt hơn. Ghi lại vì nó hiệu chỉnh mọi ước theo tỉ lệ về sau. |
+| #1 *"tổng thời gian thật của job Windows"* | **ĐÓNG.** `43,20` phút, run `34045664423`, 43/43 bước (đọc 17:41Z 06-09). |
+| #3 *"tỉ lệ 3× là đo TỔNG BƯỚC, không đo riêng đột biến"* | **ĐÓNG MỘT PHẦN.** Ước `44,3p → ~14p` cho `test registry`; thật là `17,70`. Ước lệch `+26 %` về phía đắt hơn. Vẫn chưa có phân rã theo bộ trên Windows. |
 | #4 *"không có đường đo Windows tại chỗ"* | **KHÔNG ĐÓNG.** Vẫn đúng, xem `chua_do_duoc` #2 dưới đây. |
 
 ## `chua_do_duoc`
 
 1. **Chi phí thiết lập trên Windows sau khi tách chưa ai đo.** `3,33` phút là đo của **một** job.
-   Job mới có thể tốn khác (cache runner, thứ tự cấp máy). Mọi con số ở bảng "cái giá" là **số
-   học từ số đo cũ**, không phải phép đo mới. A1 và A5 là hai phép đo trả lời câu ấy — và nếu
-   chúng ĐỎ thì đó là kết quả, không phải thất bại.
+   Job mới có thể tốn khác (cache runner, thứ tự cấp máy, ba lần checkout `fetch-depth: 0`). Mọi
+   con số ở bảng "cái giá" là **ước có đơn vị từ số đo cũ**, không phải phép đo mới. A1 và A5 là
+   hai phép đo trả lời câu ấy — và nếu chúng ĐỎ thì đó là kết quả, không phải thất bại.
 2. **Không có đường đo Windows tại chỗ.** Container Linux. Mọi khẳng định về Windows đi qua CI.
    Kế thừa nguyên vẹn từ #456 `chua_do_duoc` #4.
-3. **Chỉ có MỘT lượt master chạy trọn để so.** `34048685345` là lượt master đầu tiên có chân
-   Windows `success`; trước đó mọi lượt đều `cancelled` ở trần. Nên `42,28` phút **không có
-   phương sai** — không biết nó là điển hình hay là một lượt may. Biên độ `1,2` phút giữa lượt
-   nhánh và lượt master là dấu hiệu duy nhất về nhiễu, và một điểm dữ liệu không dựng được phân
-   phối. Ngưỡng `≤ 25,00` ở A1 chừa `~4` phút cho chuyện đó; nếu phiên thi công có thêm lượt
-   master nào thì **đo lại phương sai trước**, đừng tin một điểm.
-4. **Ba packet mutant-Windows sẽ làm nền trôi.** `LO-319`, `MUTANT-WINDOWS-SUBAGENT-GHI-DETECT`
-   và `MUTANT-WINDOWS-NHANH-DON-DUOC` đều cắt vào `test registry` — tức vào **41 %** chi phí
-   Windows mà packet này đang phân rã. Nếu chúng land trước, mọi ngưỡng tuyệt đối ở A1/A5 quá
-   lỏng; nếu land sau, chúng làm chính phép đo của packet này cũ đi. **Không có thứ tự nào làm
-   con số đứng yên** — nên A1/A5 phải được ĐO LẠI ngay trước khi merge, và ngưỡng phải nêu lượt
-   chạy nó neo vào.
+3. **Chỉ có HAI lượt chạy trọn để so, và chúng là hai điểm dữ liệu.** `34048685345` là lượt master
+   đầu tiên có chân Windows `success`; trước đó mọi lượt master đều `cancelled` ở trần. Chênh giữa
+   lượt nhánh và lượt master (`0,92` Windows · `2,27` ubuntu ở mức job · `1,20` ở bước registry
+   ubuntu) là dấu hiệu duy nhất về nhiễu, và hai điểm không dựng được phân phối. Ngưỡng `≤ 25,00`
+   ở A1 chừa `~4` phút; nếu phiên thi công có thêm lượt master nào thì **đo lại phương sai trước**.
+4. **Thứ tự nay CỐ ĐỊNH, nên nền của packet này đứng yên — nhưng nền của ba packet sau thì
+   không.** GATE đi đầu ⇒ A1/A2/A5 đo trên cây chưa bị ba packet mutant-Windows đổi; đổi lại, ba
+   packet ấy phải đo A7 của mình trên bố cục ĐÃ TÁCH (`gate-registry`), và đặc tả của chúng đã viết
+   như vậy. Vẫn phải ĐO LẠI A1/A5 ngay trước khi merge, vì master có thể trôi vì lý do khác.
 5. **Không đo được branch protection từ phiên.** `PLAT-X5-required-status-check`. Xem A6(b).
 6. **Không đo được hệ số nhân thật của Windows.** `×2` lấy từ chú thích `ci.yml:19-23`
    (r245, 13-08-2026), không từ hoá đơn. Nếu hệ số đã đổi thì con số phút tính tiền ở A5 sai theo
    hệ số ấy — nhưng **chiều** của kết luận (tách job làm tăng billing) không đổi.
+7. **A9 không đạt được bằng công cụ hiện có nếu cấp lease trước `14:30:07Z 07-09-2026`** — cùng
+   giới hạn và cùng hai đường lựa chọn như `LO-319` `chua_do_duoc` #5.
+8. **Xếp hàng và độ trễ đầu-cuối của workflow chưa có nền.** A1 công bố số này lần đầu; không
+   có ngưỡng vì không có lượt nào trước để so cùng đơn vị.

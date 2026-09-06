@@ -1,0 +1,138 @@
+# TỆP NHÁP — đuôi `.yaml.nhap` CÓ CHỦ ĐÍCH. `ai-dang-giu` chỉ đọc blob đuôi `.yaml`/`.yml`
+# (`ops/lease_publish.py:521`), `ops-publish-lease.yml` chỉ bắn với `ops/leases/**.yaml|yml`, và
+# `t23` của `ops/lease_publish_test.py` chỉ đọc `suffix in (".yaml", ".yml")` — nên nháp KHÔNG bị
+# tính là lease đang giữ. Đo 19:33–19:34Z 06-09-2026 trong bản sao đủ 299 ref: đuôi `.yaml` ⇒
+# `ai-dang-giu .claude/dev/ci_dang_ky_test.py` = NGƯỜI_GIỮ 4 (gồm nháp này); đuôi `.nhap` ⇒ 1
+# (chỉ còn #456). `check` vẫn chạy trên tên này (19:31Z: rc=8, thiếu packet_issue/granted_by).
+# ĐỔI TÊN VỀ `.yaml` LÀ BƯỚC CUỐI khi cấp thật, SAU khi điền đủ các ô dưới đây.
+schema_version: 2
+event: executor_lease_granted
+
+# ── CÁC Ô CHỦ KHO ĐIỀN TẠI LÚC CẤP — SÁU ô, không ai khác điền được ──────────────────
+# `packet_issue`  : số hiệu Issue sau khi đăng (phải là ISSUE, không phải PR).
+# `mission_issue` : Mission Issue chứa packet (`PROTOCOL §3.2` đòi; khuyến nghị ở spec).
+# `granted_by`    : `ducthangho` — `record-lease` TỪ CHỐI tên provider (`claude`/`codex`).
+# `granted_on_instruction`: dấu vết BỀN của uỷ quyền (URL/ID comment cấp lease). Một câu trong
+#                   khung chat KHÔNG phải dấu vết bền.
+# `leased_at_utc` / `lease_expires_at_utc`: giờ cấp THẬT và giờ hết hạn = giờ cấp + `run_minutes`.
+#                   Hai mốc là SỰ KIỆN cấp, không có mặc định (bản đầu điền sẵn 18:30Z — bỏ).
+#                   Để trống: `check` chặn rc=8 khi thiếu `lease_expires_at_utc` (đo 19:35Z).
+#                   `--expires-utc` của `record-lease` phải khớp đúng giá trị điền ở đây.
+packet_issue:
+mission_issue:
+granted_by:
+granted_on_instruction:
+leased_at_utc:
+lease_expires_at_utc:
+# ───────────────────────────────────────────────────────────────────────────────────
+
+packet_id: LO-319-LINUX-BANG-CHUNG-XANH
+revision: 1
+generation: 1
+lease_id: lo-319-linux-bang-chung-xanh-exec-1-claude-20260906
+role: executor
+provider: claude
+executor: claude
+model: opus-5
+effort: xhigh
+environment: cloud
+risk: sensitive
+assurance_target: cross_approved
+access: read-write
+
+spec_path: ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md
+spec_sha256: 67c8dec228b278928b6062fd22500b03bbf782b3801e6489f0dc6fbd3a79cfcd
+spec_hash: 67c8dec228b278928b6062fd22500b03bbf782b3801e6489f0dc6fbd3a79cfcd
+
+write_set:
+  - .claude/dev/ci_dang_ky_test.py
+depends_on:
+  - GATE-TACH-JOB-CAT-CHI-PHI
+
+branch: claude/lo319-linux-bang-chung-xanh
+branch_ownership: exclusive
+target_branch_neu_land: master
+# BA MỎ NEO — chỗ giữ, KHÔNG phải giá trị cấp. Packet này đi THỨ HAI (sau GATE), nên CẢ BA trường
+# dưới đây phải ĐO LẠI tại lúc cấp = head `origin/master` SAU khi GATE integrated. Điền một SHA cũ
+# là neo review vào một cây không còn tồn tại; `check` không phân biệt được chỗ giữ với mỏ neo
+# thật, nên đây là việc tay của chủ kho. Quy tắc này cũng nằm trong đặc tả đóng băng.
+base_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+start_from_sha: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+reviewed_sha_required: 1b3caa11df3e339bcfdb52be903884b5b99b9f77
+
+authority_basis: '§2 — start/pause/resume/reroute/override/authorize thuộc chủ kho'
+recorded_by: claude-session
+recorder_is_dispatcher: false
+
+# `run_minutes` = độ dài HẠN LEASE (phút), KHÔNG phải trần một run (`max_run_minutes: 90`, §12).
+run_minutes: 1440
+heartbeat_required_minutes: 30
+attempts_used: 0
+attempts_limit: 3
+
+reviewer_provider: codex
+review_class: sensitive
+effective_review_class: sensitive
+
+# CHỐT HAI CHIỀU (`_kiem_bia_mo`): tệp lease của GATE phải mang dòng
+#   da_bi_thay_the: lo-319-linux-bang-chung-xanh-exec-1-claude-20260906
+# TRƯỚC khi lease này được đăng. Chuỗi thu hồi (đổi vì GATE đi đầu):
+#   #456  →  GATE  →  packet này  →  MUTANT-WINDOWS-SUBAGENT-GHI-DETECT  →  MUTANT-WINDOWS-NHANH-DON-DUOC
+# Bia mộ phải phủ MỌI bản của lease GATE trên MỌI ref (thủ tục bốn bước ở spec, mục "Lease đang
+# giữ"), vì `_kiem_bia_mo` đếm `any` còn `ai-dang-giu` đếm mọi (blob, path) — đo 19:34Z.
+thay_the_cho:
+  - gate-tach-job-cat-chi-phi-exec-1-claude-20260906
+
+ly_do_cap: >-
+  `bang_chung_xanh` chỉ soi HAI NHÓM BẮT của regex, mà ở `MOI` hai nhóm ấy là cặp số CA.
+  Cặp số ĐỘT BIẾN nằm ngoài nhóm bắt nên không bao giờ được nhìn tới. Đo 19:32Z 06-09-2026,
+  gọi thẳng hàm với nguyên chuỗi `TONG: CA 39/39 dat · DOT BIEN 0/0 bi giet\nTONG: DAT\n` ⇒
+  `True` — đúng hình dạng "tập rỗng thoả `not song`" mà bài học #319 sinh ra để chặn.
+  Lỗ có sẵn TỪ TRƯỚC #456; #456 bịt phía Windows và CỐ Ý không bịt phía Linux vì M4 của
+  nó đóng băng hành vi Linux (cross-review Codex lượt 1, finding P2; bản vá lùi lại ở
+  `426bfc0`).
+  ĐO CẢ BA HƯỚNG rồi mới chọn — đơn vị: số mẫu regex phải sửa / số phản chứng đổi màu / số mục
+  đỏ trên một bản in hợp lệ có thêm một cặp vô can (ghi chú "đã xem 3/5 hướng cải tiến" chèn
+  vào bản in thật của chon_reviewer). A-b "soi MỌI cặp trong span" = 0 mẫu, 1 phản chứng, NHƯNG
+  1 đỏ giả — reviewer dựng được, và bản đầu của lease này khai "không sinh đỏ giả" rồi gọi cái
+  đỏ giả ấy là hành vi đúng: rút. A-c "nhóm bắt theo cặp + cặp CÓ NHÃN `CA`/`DOT BIEN`/`ĐỘT
+  BIẾN` trong span" = 0 mẫu, 1 phản chứng (đúng ca phải đảo chiều), 0 đỏ giả, 10/13 cặp được
+  kiểm (3 cặp còn lại là hằng số ghi cứng trong regex của probe_mang). Tập nhãn là DANH SÁCH CHO
+  PHÉP; nhãn không bắt nhầm gì trong bảy span thật (đo 19:32Z). Hướng B "bắt cặp đột biến thành
+  nhóm 3/4" là HỒI QUY đo được: mệnh đề `len(m.groups()) != 2` trả `True` VÔ ĐIỀU KIỆN, nên
+  `CA 0/39` đi từ `False` sang `True`, tức tắt luôn cả chốt CA.
+  Lỗ chạm HAI mục `MOI` (`pretooluse_guard_test.py` + `subagent_ghi_detect_test.py`, cùng
+  một chuỗi regex, hai dòng kề nhau); 6/13 cặp bằng chứng của cả sổ đăng ký chưa từng
+  được kiểm.
+
+viec_trong_lease:
+  - 'Sửa `bang_chung_xanh`: soi nhóm bắt theo CẶP (mọi số nhóm chẵn; lẻ ⇒ `False`) VÀ mọi cặp
+     `n/m` mang nhãn `CA`/`DOT BIEN`/`ĐỘT BIẾN` trong span khớp; tập nhãn là hằng, danh sách
+     CHO PHÉP.'
+  - 'Gỡ mệnh đề thoát `len(m.groups()) != 2` — không còn số nhóm nào cho `True` vô điều kiện
+     (bảng 5 × 2 ở A2 của spec).'
+  - 'Mẫu 0 nhóm (`probe_mang_test.py`) vẫn ĐẠT trên bản in thật; cặp có nhãn trong span của nó
+     vẫn bị kiểm; cặp KHÔNG nhãn thì không — có chủ ý, có ca canh.'
+  - 'Phản chứng "ghi chú 3/5 hướng" đi qua `chay_moi` phải cho 0 đỏ; đột biến quay về "mọi cặp
+     trong span" phải làm ca ấy ĐỎ.'
+  - 'Đảo chiều VÀ đổi tên ca `p456-linux-nhan-0-tren-0-Y-HET-base`; hai ca anh em giữ nguyên.'
+  - 'Đường Windows của #456 không đổi: dòng `KHONG DO TREN WINDOWS` vẫn ĐẠT trên Windows, vẫn
+     ĐỎ trên Linux (bốn số qua `chay_moi` bằng hệt base, đo 19:32Z).'
+  - 'Mọi phản chứng đi qua chính `chay_moi`, không gọi thẳng `bang_chung_xanh` (bài học r6/#401).'
+
+dieu_kien_dung:
+  - 'Sửa một ký tự nào trong `MOI` hoặc `MOI_WINDOWS` — hướng A-c không cần (0 mẫu, đo 19:32Z),
+     và giữ nguyên chúng là thứ giữ được hai chốt `p456-mau-linux-KHONG-DOI-so-voi-base` và
+     `p456-linux-A-B-tung-dau-vao-khop-base` do cross-review #456 sinh ra. Quyết định này đã
+     được mở lại một lần theo verdict lượt 1 và giữ vì lý do ĐO; mở lại lần nữa là revision mới.'
+  - 'Quay về soi MỌI cặp trong span (A-b) — đỏ giả đo được trên bản in hợp lệ.'
+  - 'Chạm bất kỳ đường dẫn nào ngoài MỘT đường đã khai — đổi revision, KHÔNG tự mở write set.'
+  - 'Đụng `loi_ruff_ci` trong cùng tệp — của GATE, đã land trước.'
+  - 'Sửa `.github/workflows/ci.yml` — CỐ Ý ngoài write set; packet này không đổi thời gian
+     chạy của bất cứ thứ gì, nó chỉ làm một cổng đang mù nhìn thấy.'
+  - 'Xoá ca `p456-linux-nhan-0-tren-0-Y-HET-base` thay vì đảo chiều nó — xoá là mất phép đo,
+     không phải đổi nó.'
+  - 'Bắt tay khi `ai-dang-giu .claude/dev/ci_dang_ky_test.py` còn một dòng của lease GATE hoặc
+     #456 thiếu `ĐÃ_BỊ_THAY_THẾ`/`HẾT_HẠN`.'
+  - 'Nâng `timeout-minutes` trong `ci.yml` — đã nâng HAI lần (ba mức 25→45→60); lần kế là lần
+     thứ ba, `PROTOCOL §12` đòi xem lại cách làm. Ngoài write set, và là điều kiện DỪNG.'

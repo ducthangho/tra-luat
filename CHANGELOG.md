@@ -1,3 +1,61 @@
+# ★ dev-side — r345: BỎ HẲN phép hỏi pip lúc mở phiên; 13 finding, 7 vòng, hai hình dạng (2026-09-06)
+
+Vòng 7 ra ba P2, và một trong đó **bác bỏ bảo đảm của cả thiết kế** chứ không phải chỉ ra
+một khe hở. Đo trực tiếp bằng socket đếm kết nối: một gói **đã cài** có
+`Requires-Dist: childpkg @ http://…/x.whl` khiến pip đi lấy URL ấy **ngay cả khi**
+`requirements.txt` chỉ có một dòng TRẦN và đã có `--no-index` — **1 kết nối**. Nghĩa là
+**không thể bảo đảm offline bằng cách soi tệp requirements**: thứ quyết định nằm trong
+metadata của gói đã cài, ngoài tầm mọi phép đọc tệp.
+
+## Đếm hình dạng, không đếm lỗi — và lần này có HAI hình dạng
+
+| vòng | hình dạng | kết cục |
+|---|---|---|
+| r338–r341 (5 finding) | **ta tự làm thay pip** (ghim bản · bản đã cài · marker · `#`) | r342 uỷ quyền cho pip |
+| r343–r345 (8 finding) | **mọi cách làm phép hỏi pip an toàn đều thua** | r345 bỏ hẳn phép hỏi pip |
+
+`CLAUDE.md` đặt ngưỡng ở ba lần cùng hình dạng. Hình dạng thứ nhất tôi nhận ra ở lần thứ
+năm; hình dạng thứ hai ở lần thứ ba — nhưng chỉ vì phản chứng ép, không phải vì tôi tự
+đếm. Chuỗi r343 → r344 là hai lần vá liên tiếp cho **cùng một bảo đảm không thể giữ
+được**: `--no-index` không chặn direct reference, rồi danh sách CẤM lọt URL trần và
+`git+`. Đáng ghi hơn cả: **r343 dựng lại đúng cơ chế "ta tự quyết" mà r342 sinh ra để
+bỏ** — tôi viết bài học vào commit r342 rồi vi phạm nó ở commit ngay sau.
+
+## Còn lại: ba phép đo CỤC BỘ, offline theo cấu tạo
+
+- **bản đã cài có thoả specifier không** — `importlib.metadata` + `SpecifierSet`;
+- **gói có còn đó không** — `distribution()`; vắng mặt là hỏng;
+- **`import` có chạy không** — lớp lỗi r337 mà pip không bao giờ thấy.
+
+Hai finding còn lại của vòng cũng chữa: `distribution` nay **import riêng** (gộp một câu
+`from … import a, b` làm nhánh `ImportError` vứt luôn `distribution` trên Python 3.8/3.9 —
+đúng các nền ta cố ý hỗ trợ), và `VAN_TAY` nay **băm cả tệp `-r`/`-c` được include** (đệ
+quy, giải đường tương đối theo tệp chứa nó, chặn chu trình; đọc không được thì đưa chính
+đường dẫn vào băm, vì `KHÔNG ĐO ĐƯỢC` ≠ `giống nhau`). Phản chứng: sửa `extra.txt` từ
+`pypdf>=3.0` sang `>=4.0` ⇒ vân tay đổi `a86b9149…` → `9d02d12a…`.
+
+## Bất biến mạnh nhất, và nó đo được mà không cần dựng gì
+
+`r345_than_hook_KHONG_duoc_co_duong_mang_nao` đọc **cây cú pháp** của thân hook và đòi
+không có `subprocess` · `socket` · `urllib` · `http`. Đây không phải lời hứa "chúng tôi
+tin là offline" mà là một phép đo cấu trúc: cả lớp *"mở phiên chậm vì mạng"* chết theo
+KIẾN TRÚC. Đo răng hai chiều — bản `3a19298` chưa vá làm ca này **ĐỎ**
+(`import module co duong mang: ['subprocess']`), chỉ thay tệp hook ⇒ **XANH**.
+
+## Khai thẳng thứ đã mất
+
+Không còn phép giải phụ thuộc của pip, nên **extras sâu và `-r` lồng nhau không được kiểm
+nội dung**. Bù ở chỗ khác: vân tay băm cả tệp include nên sửa chúng làm mốc hết hiệu lực
+và pip thật sự chạy lại. Đổi một phép đo **không bảo đảm được** lấy một phép đo **bảo đảm
+được** — và nói rõ cái giá thay vì giấu nó.
+
+Cổng: 10/10 ca cục bộ đúng (gồm URL trần · `git+` · direct reference · vắng mặt) · phản
+chứng metadata bắc cầu **0 kết nối** (trước: 1) · `launcher_test` **172/172** (bỏ qua 1 —
+fixture Windows) · đột biến **170/170** (1 không đo được trên nền này) · `tl --selftest`
+**1709/1709** · ruff `--select F` delta = **0** · `bash -n` OK · `git diff --check` rc=0 ·
+quét mẫu bí mật 184 dòng thêm: 0 khớp · hook chạy thật hai lượt đúng thiết kế · phép đo
+thời gian 5 lượt liên tiếp: **0,19s** ổn định (1,27s lượt đầu là khởi động nguội).
+
 # ★ dev-side — r344: đảo danh sách CẤM thành danh sách CHO PHÉP, và tôi vừa tái phạm đúng thứ mình vừa sửa (2026-09-06)
 
 Lượt review thứ sáu ra hai P2, và **cả hai đều là hậu quả của `_co_xa`** — cái cửa thoát

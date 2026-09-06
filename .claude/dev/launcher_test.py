@@ -6305,7 +6305,20 @@ def _r338_than_hook() -> str:
     return m.group(1)
 
 
-def _r342_venv(td: Path):
+# r345 — HỢP ĐỒNG CUỐI: KHÔNG gọi pip nữa. Các ca `r342`–`r344` đã được THAY, không phải
+# sửa cho xanh — chúng khoá một thiết kế bị PHẢN CHỨNG bác bỏ, không phải một thiết kế
+# còn đúng mà cài sai.
+#
+# Bảy lượt review ra MƯỜI BA finding. Năm vòng đầu cùng một hình dạng (ta tự làm thay
+# pip) ⇒ r342 uỷ quyền cho pip. Ba vòng sau cùng một hình dạng KHÁC: mọi cách làm cho
+# phép hỏi ấy an toàn đều thua — `--no-index` không chặn direct reference (r343), danh
+# sách CẤM lọt URL trần và `git+` (r344), và cuối cùng phản chứng giết cả thiết kế: một
+# gói ĐÃ CÀI có `Requires-Dist: childpkg @ http://…` khiến pip đi lấy URL ấy dù
+# `requirements.txt` chỉ có một dòng TRẦN. Đo trực tiếp bằng socket đếm kết nối: 1.
+# Tức không thể bảo đảm offline bằng cách soi tệp requirements.
+#
+# Nên phép hỏi pip bị BỎ. Ba bất biến còn lại, tất cả CỤC BỘ và offline theo cấu tạo.
+def _r345_venv(td: Path):
     """venv thật + `pypdf` 3.17.4 (cố ý CŨ hơn `>=4.0`). None nếu không dựng được."""
     v = td / "v"
     subprocess.run([PY, "-m", "venv", str(v)], capture_output=True, timeout=300)
@@ -6318,245 +6331,114 @@ def _r342_venv(td: Path):
     return py
 
 
-def _r342_doi_chieu(py: Path, d: Path, than: str, reqs: str):
-    """Trả (ma_pip, ma_chot) trên cùng một requirements.txt."""
+def _r345_chay(py: Path, d: Path, than: str, reqs: str, *them: str) -> int:
     (d / "requirements.txt").write_text(reqs, encoding="utf-8")
-    pip = subprocess.run([str(py), "-m", "pip", "install", "--dry-run", "--quiet",
-                          "--no-index", "-r", "requirements.txt"],
-                         cwd=d, capture_output=True, text=True, timeout=600).returncode
-    chot = subprocess.run([str(py), "-c", than, "--kiem-ban"], cwd=d,
+    return subprocess.run([str(py), "-c", than, *them], cwd=d,
                           capture_output=True, text=True, timeout=600).returncode
-    return pip, chot
-
-
-# Mười lớp, trong đó BỐN lớp bản cũ đã trả lời SAI (`-r` thiếu · `-r` đủ · extras · và
-# lệch bản ở chế độ hậu-pip). Tiêu chí là KHỚP PIP, không phải một bảng mã thoát ta tự đặt.
-# PHAM VI CUA BAT BIEN NAY DA THU HEP O r344, va noi thang thay vi lang le bo ca:
-# doi chieu voi pip CHI ap cho tep MA DANH SACH CHO PHEP NHAN (moi dong la ten+specifier
-# tran). Tep co URL/VCS/`-r` khong duoc hoi pip nua — `r344` do rieng chung, va ly do
-# chung khong con doi chieu duoc voi pip nam ngay trong docstring cua ca ay.
-_R342_CA = [
-    ("lech ban pypdf>=4.0",        "pypdf>=4.0\n"),
-    ("ban thoa pypdf>=3.0",        "pypdf>=3.0\n"),
-    ("marker khong khop",          'pywin32; sys_platform == "win32"\n'),
-    ("marker chua dau thang",      'pypdf; os_name == "posix#x"\n'),
-    ("chu thich sau khoang trang", "pypdf>=3.0  # ghi chu\n"),
-    ("extras",                     "pypdf[crypto]>=3.0\n"),
-    ("goi thieu han",              "khong_he_ton_tai_r342\n"),
-]
 
 
 @ca
-def r342_ma_thoat_cua_chot_phai_khop_pip():
+def r345_than_hook_KHONG_duoc_co_duong_mang_nao():
+    """Bất biến MẠNH NHẤT của bản này, và đo được mà không cần dựng gì.
+
+    Không phải "chúng tôi tin là offline" mà là: trong cây cú pháp của thân hook không
+    có `subprocess`, `socket`, `urllib`, `http`. Cả lớp "mở phiên chậm vì mạng" chết
+    theo CẤU TRÚC — đó là điều ba vòng vá trước không mua nổi.
+    """
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    import ast as _ast
+    cay = _ast.parse(than)
+    ten = set()
+    for n in _ast.walk(cay):
+        if isinstance(n, _ast.Import):
+            ten.update(a.name.split(".")[0] for a in n.names)
+        elif isinstance(n, _ast.ImportFrom) and n.module:
+            ten.add(n.module.split(".")[0])
+    cam = ten & {"subprocess", "socket", "urllib", "http", "requests", "ftplib", "asyncio"}
+    bang(not cam, f"than hook import module co duong mang: {sorted(cam)}")
+    goi = {getattr(n.func, "attr", None) for n in _ast.walk(cay) if isinstance(n, _ast.Call)}
+    xau = goi & {"system", "popen", "spawn", "urlopen"}
+    bang(not xau, f"than hook goi ham chay tien trinh/mang: {sorted(xau)}")
+
+
+@ca
+def r345_cac_phep_do_cuc_bo_van_dung():
     than = _r338_than_hook()
     if not than:
         return "bo qua ban sao roi (khong co session-start.sh)"
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)
-        py = _r342_venv(d)
+        py = _r345_venv(d)
         if py is None:
             return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
-        ca_ds = _R342_CA
-        lech = []
-        for nhan, reqs in ca_ds:
-            mp, mc = _r342_doi_chieu(py, d, than, reqs)
-            if (mp == 0) != (mc == 0):
-                lech.append(f"{nhan}: pip={mp} chot={mc}")
-        bang(not lech, "chot LECH pip: " + " · ".join(lech))
+        ca_ds = [
+            ("ban thoa",                   "pypdf>=3.0\n", 0),
+            ("lech ban",                   "pypdf>=4.0\n", 1),
+            ("marker khong khop",          'pywin32; sys_platform == "win32"\n', 0),
+            ("marker chua dau thang",      'pypdf; os_name == "posix#x"\n', 0),
+            ("chu thich sau khoang trang", "pypdf>=3.0  # ghi chu\n", 0),
+            ("URL tran toi host chet",     "http://127.0.0.1:9/x-1.0-py3-none-any.whl\n", 0),
+            ("VCS git+http",               "git+http://127.0.0.1:9/x.git\n", 0),
+            ("goi VANG MAT + direct ref",  "definitely_not_installed_r345 @ http://127.0.0.1:9/x.whl\n", 1),
+            ("goi CO MAT + direct ref",    "pypdf @ http://127.0.0.1:9/x.whl\n", 0),
+            ("goi thieu han",              "khong_he_ton_tai_r345\n", 1),
+        ]
+        sai = []
+        for nhan, reqs, mong in ca_ds:
+            ma = _r345_chay(py, d, than, reqs, "--kiem-ban")
+            if ma != mong:
+                sai.append(f"{nhan}: duoc {ma}, mong {mong}")
+        bang(not sai, "phep do cuc bo sai: " + " · ".join(sai))
+        # Che do hau-pip KHONG duoc doi ban (pip vua chay xong la tham quyen).
+        bang(_r345_chay(py, d, than, "pypdf>=4.0\n") == 0,
+             "che do hau-pip van doi ban — se thanh chot do thuong truc")
 
 
 @ca
-def r342_lop_phu_bat_duoc_goi_DU_ma_import_CHET():
-    """Lý do DUY NHẤT lớp phụ tồn tại: pip không nhìn thấy lớp lỗi này (r337)."""
+def r345_lop_tham_import_van_co_rang():
+    """Lý do DUY NHẤT lớp thăm import tồn tại: pip không nhìn thấy lớp lỗi này (r337)."""
     than = _r338_than_hook()
     if not than:
         return "bo qua ban sao roi (khong co session-start.sh)"
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)
-        py = _r342_venv(d)
+        py = _r345_venv(d)
         if py is None:
             return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
-        mp, mc = _r342_doi_chieu(py, d, than, "pypdf>=3.0\n")
-        bang(mp == 0 and mc == 0, f"nen chua sach: pip={mp} chot={mc}")
-        # PHÁ import nhưng GIỮ metadata — pip vẫn thấy "đủ", `import` thì chết.
+        bang(_r345_chay(py, d, than, "pypdf>=3.0\n", "--kiem-ban") == 0, "nen chua sach")
         sp = list(d.glob("v/lib/python*/site-packages")) or list(d.glob("v/Lib/site-packages"))
         bang(bool(sp), "khong tim thay site-packages")
+        # PHA import nhung GIU metadata: ban con du, `import` thi chet.
         (sp[0] / "pypdf" / "__init__.py").write_text(
-            "raise BaseException('r342-gia-lap-pyo3-panic')\n", encoding="utf-8")
-        mp, mc = _r342_doi_chieu(py, d, than, "pypdf>=3.0\n")
-        bang(mp == 0, f"pip phai VAN noi du (metadata con nguyen), duoc {mp}")
-        bang(mc == 1, "goi DU ma import CHET van xanh — lop phu mat rang, "
-                      "va do la ly do duy nhat no ton tai")
+            "raise BaseException('r345-gia-lap-pyo3-panic')\n", encoding="utf-8")
+        bang(_r345_chay(py, d, than, "pypdf>=3.0\n", "--kiem-ban") == 1,
+             "goi DU va DUNG BAN ma import CHET van xanh — lop tham mat rang")
 
 
 @ca
-def r342_khe_ho_bo_phan_tich_KHONG_duoc_chan_phien():
-    """Chiều rủi ro phải NGƯỢC với bản cũ: không hiểu ⇒ thăm ít hơn, KHÔNG báo hỏng.
-
-    Bảy finding trước đều sinh ra từ chỗ khe hở của bộ phân tích tự viết biến thành
-    báo động giả. Ca này khoá phép đảo chiều ấy: cho `Requirement` biến mất hoàn toàn,
-    một requirements.txt ĐÃ THOẢ vẫn phải XANH.
-    """
+def r345_dot_bien_hai_phep_do_cuc_bo_lam_ca_dich_DO():
+    """Hai đột biến, mỗi cái nhắm một phép đo cục bộ. Không có chúng thì ca trên đo gì?"""
     than = _r338_than_hook()
     if not than:
         return "bo qua ban sao roi (khong co session-start.sh)"
-    che = ("import builtins as _b\n"
-           "_that = _b.__import__\n"
-           "def _gia(t, *a, **k):\n"
-           "    if 'packaging' in t:\n"
-           "        raise ImportError(t)\n"
-           "    return _that(t, *a, **k)\n"
-           "_b.__import__ = _gia\n")
+    neo_ban = "            if not thoa:"
+    neo_vang = '                hong.append(f"{_r.name}: VANG MAT (khong co metadata)")'
+    bang(than.count(neo_ban) == 1, f"R345_ANCHOR_BAN:{than.count(neo_ban)}")
+    bang(than.count(neo_vang) == 1, f"R345_ANCHOR_VANG:{than.count(neo_vang)}")
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)
-        py = _r342_venv(d)
+        py = _r345_venv(d)
         if py is None:
             return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
-        (d / "requirements.txt").write_text("pypdf>=3.0\n", encoding="utf-8")
-        r = subprocess.run([str(py), "-c", che + than, "--kiem-ban"], cwd=d,
-                           capture_output=True, text=True, timeout=600)
-        bang(r.returncode == 0,
-             "mat bo phan tich ma chot BAO HONG tren moi truong DA THOA — "
-             f"khe ho lai chan phien: {(r.stdout + r.stderr)[:120]!r}")
-
-
-@ca
-def r342_dot_bien_bo_hoi_pip_lam_ca_dich_DO():
-    """Gỡ phép hỏi pip ⇒ ca đối chiếu phải ĐỎ. Không có nó thì ca kia đo gì?
-
-    ĐỘT BIẾN NHẮM ĐÚNG THỨ ĐANG ĐO — bản đầu của ca này nhắm sai và tự lộ ra: nó chỉ
-    nuốt nhánh "kế hoạch KHÔNG rỗng", trong khi với `pypdf>=4.0` + `--no-index` pip
-    KHÔNG GIẢI ĐƯỢC nên nhánh `rc != 0` bắt trước ⇒ mutant vẫn ĐỎ ⇒ ca báo hỏng. Bài
-    học đúng chỗ: một đột biến sống sót có thể nghĩa là đột biến ĐẶT SAI CHỖ, không
-    phải mã sai. Nay gỡ CẢ khối hỏi pip, tức đo thẳng "thẩm quyền ấy có răng không".
-
-    KHAI THẲNG CHỖ CHƯA ĐO: nhánh *kế hoạch không rỗng* không được đo RIÊNG ở đây. Với
-    `--no-index`, một gói chưa thoả thì pip thoát khác 0 chứ không trả kế hoạch không
-    rỗng; muốn chạm nhánh ấy phải có kho wheel cục bộ. Đây là khoảng trống ĐÃ BIẾT,
-    không phải khoảng trống được che.
-    """
-    than = _r338_than_hook()
-    if not than:
-        return "bo qua ban sao roi (khong co session-start.sh)"
-    neo = 'if kiem_ban and _chi_ten_tran("requirements.txt"):'
-    bang(than.count(neo) == 1, f"R342_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
-    dot_bien = than.replace(neo, "if False:")
-    with tempfile.TemporaryDirectory() as td:
-        d = Path(td)
-        py = _r342_venv(d)
-        if py is None:
-            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
-        (d / "requirements.txt").write_text("pypdf>=4.0\n", encoding="utf-8")
-        r = subprocess.run([str(py), "-c", dot_bien, "--kiem-ban"], cwd=d,
-                           capture_output=True, text=True, timeout=600)
-        bang(r.returncode == 0,
-             "dot bien go CA khoi hoi pip ma van DO — cai DO cua ca doi chieu khong "
-             "quy duoc cho phep hoi pip")
-
-
-# r344 — DANH SÁCH CHO PHÉP, không phải danh sách CẤM.
-#
-# r343 dò direct reference bằng `@ scheme://` rồi bỏ qua pip. Đó là DANH SÁCH CẤM, và nó
-# thua ngay lượt review kế tiếp: URL TRẦN (`http://host/x.whl`) và VCS (`git+https://…`)
-# không có dấu `@` nên lọt sạch — đo được: chạm mạng rồi `rc=1` ⇒ mỗi phiên đều đi đường
-# cài lại. Đúng bài học *"danh sách CẤM không bao giờ đủ — phải đảo thành danh sách CHO
-# PHÉP"*: danh sách cấm phải đoán trước MỌI cách viết nên thua từ trong thiết kế.
-#
-# VÌ SAO KHÔNG ĐỐI CHIẾU ĐƯỢC VỚI PIP Ở ĐÂY, và vì sao thế vẫn an toàn: với tệp mà danh
-# sách cho phép TỪ CHỐI, chốt không hỏi pip nên mã thoát của nó cố ý LỆCH pip. Điều giữ
-# cho việc ấy an toàn là MỐC: `.tl_reqs_<sha256(requirements.txt)>_<sha256(sys.prefix)>`
-# chỉ được đặt SAU khi `pip install` thành công (`: > "$DAU"`), nên đường `--kiem-ban`
-# chỉ chạy trên đúng tệp mà pip ĐÃ cài được. Một tệp hỏng hay một URL chết không bao giờ
-# đặt được mốc; sửa tệp thì băm đổi và mốc hết hiệu lực.
-#
-# KHOẢNG TRỐNG CÒN LẠI, khai thẳng: gói bị GỠ SAU khi mốc đã đặt, trên một dòng mà
-# `Requirement` không phân tích được (URL trần, VCS) ⇒ không phát hiện được. Dạng
-# `tên @ url` thì PHÁT HIỆN ĐƯỢC — ca dưới đo đúng chỗ đó.
-_R344_XA = [
-    ("URL tran", "http://127.0.0.1:9/pypdf-3.17.4-py3-none-any.whl\n"),
-    ("VCS git+http", "git+http://127.0.0.1:9/x.git\n"),
-    ("direct ref `ten @ url`", "pypdf @ http://127.0.0.1:9/pypdf-3.17.4-py3-none-any.whl\n"),
-]
-
-
-@ca
-def r344_nguon_tu_xa_khong_duoc_cham_mang_luc_mo_phien():
-    than = _r338_than_hook()
-    if not than:
-        return "bo qua ban sao roi (khong co session-start.sh)"
-    with tempfile.TemporaryDirectory() as td:
-        d = Path(td)
-        py = _r342_venv(d)
-        if py is None:
-            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
-        for nhan, reqs in _R344_XA:
-            (d / "requirements.txt").write_text(reqs, encoding="utf-8")
-            t0 = time.monotonic()
-            r = subprocess.run([str(py), "-c", than, "--kiem-ban"], cwd=d,
-                               capture_output=True, text=True, timeout=600)
-            mat = time.monotonic() - t0
-            # 2s: rong rai so voi ~0,1s do duoc, nhung duoi moi lan cham mang da do
-            # (0,65s · 0,97s · 8,5s tuy dang).
-            bang(mat < 2.0, f"{nhan}: phep do cham {mat:.2f}s — pip da di lay nguon tu xa")
-            bang(r.returncode == 0,
-                 f"{nhan}: ep di duong cai lai ⇒ moi phien deu cai lai (rc={r.returncode})")
-
-
-@ca
-def r344_goi_VANG_MAT_van_phai_DO_du_khong_hoi_duoc_pip():
-    """Lớp phụ là thứ DUY NHẤT còn lại khi danh sách cho phép từ chối — nó phải có răng.
-
-    Ca thật: mốc cũ + một gói đã bị gỡ ⇒ bản r343 trả 0 mãi mãi. Kiểm bằng METADATA chứ
-    không bằng module, vì gói chỉ có CLI hoặc gói meta thì không phơi module nào cả.
-    """
-    than = _r338_than_hook()
-    if not than:
-        return "bo qua ban sao roi (khong co session-start.sh)"
-    with tempfile.TemporaryDirectory() as td:
-        d = Path(td)
-        py = _r342_venv(d)
-        if py is None:
-            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
-        (d / "requirements.txt").write_text(
-            "definitely_not_installed_r344 @ http://127.0.0.1:9/x.whl\n", encoding="utf-8")
-        r = subprocess.run([str(py), "-c", than, "--kiem-ban"], cwd=d,
-                           capture_output=True, text=True, timeout=600)
-        bang(r.returncode == 1,
-             "goi VANG MAT ma chot van xanh — moc cu se song mai va moi truong khong bao "
-             "gio duoc sua")
-        bang("VANG MAT" in (r.stdout + r.stderr),
-             f"do DO nhung khong noi ro la VANG MAT: {(r.stdout + r.stderr)[:120]!r}")
-        # RĂNG hai chiều: gói CÓ MẶT trên cùng dạng dòng ấy thì tuyệt đối không báo động giả.
-        (d / "requirements.txt").write_text(
-            "pypdf @ http://127.0.0.1:9/x.whl\n", encoding="utf-8")
-        r2 = subprocess.run([str(py), "-c", than, "--kiem-ban"], cwd=d,
-                            capture_output=True, text=True, timeout=600)
-        bang(r2.returncode == 0, "goi CO MAT ma van bao VANG MAT — bao dong gia")
-
-
-@ca
-def r344_dot_bien_go_danh_sach_cho_phep_lam_ca_dich_DO():
-    """Gỡ danh sách cho phép ⇒ nguồn từ xa lại chạm mạng ⇒ ca trên phải ĐỎ."""
-    than = _r338_than_hook()
-    if not than:
-        return "bo qua ban sao roi (khong co session-start.sh)"
-    neo = "        for _d in _doc_dong(duong):\n            if _d.startswith(\"-\"):"
-    bang(than.count(neo) == 1, f"R344_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
-    dot_bien = than.replace("def _chi_ten_tran(duong):\n    if _Req is None:\n        return False",
-                            "def _chi_ten_tran(duong):\n    return True\n    if _Req is None:\n        return False")
-    with tempfile.TemporaryDirectory() as td:
-        d = Path(td)
-        py = _r342_venv(d)
-        if py is None:
-            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
-        (d / "requirements.txt").write_text(_R344_XA[0][1], encoding="utf-8")
-        t0 = time.monotonic()
-        r = subprocess.run([str(py), "-c", dot_bien, "--kiem-ban"], cwd=d,
-                           capture_output=True, text=True, timeout=600)
-        mat = time.monotonic() - t0
-        bang(r.returncode != 0 or mat >= 2.0,
-             f"dot bien go danh sach cho phep VAN nhanh va VAN xanh (rc={r.returncode}, "
-             f"{mat:.2f}s) — ca dich khong do danh sach cho phep")
+        bang(_r345_chay(py, d, than.replace(neo_ban, "            if False:"),
+                        "pypdf>=4.0\n", "--kiem-ban") == 0,
+             "dot bien bo phep so specifier VAN DO — ca lech ban khong do phep so ay")
+        bang(_r345_chay(py, d, than.replace(neo_vang, "                pass"),
+                        "definitely_not_installed_r345 @ http://127.0.0.1:9/x.whl\n",
+                        "--kiem-ban") == 0,
+             "dot bien bo phep kiem VANG MAT VAN DO — ca vang mat khong do phep kiem ay")
 
 
 # ------------------------------------------------------ tự đột biến: có răng không

@@ -6305,213 +6305,153 @@ def _r338_than_hook() -> str:
     return m.group(1)
 
 
-def _r338_chay(than: str, reqs: str) -> int:
-    """Chạy thân hook trên một requirements.txt dựng sẵn; trả mã thoát."""
-    with tempfile.TemporaryDirectory() as td:
-        (Path(td) / "requirements.txt").write_text(reqs, encoding="utf-8")
-        return subprocess.run([PY, "-c", than], cwd=td, capture_output=True,
-                              text=True).returncode
-
-
-@ca
-def r338_ten_goi_pip_khac_ten_module_import():
-    than = _r338_than_hook()
-    if not than:
-        return "bo qua ban sao roi (khong co session-start.sh)"
-    try:
-        import yaml  # noqa: F401 — chỉ để biết nền có PyYAML mà đo
-    except ImportError:
-        return "bo qua: nen khong co PyYAML nen khong phan biet duoc bao gia voi thieu that"
-    bang(_r338_chay(than, "PyYAML==6.0.3\n") == 0,
-         "PyYAML DA CAI ma chot van bao hong — bao dong gia theo ten goi")
-    # RĂNG: gói không tồn tại vẫn phải ĐỎ. Thiếu vế này thì bản vá có thể chỉ là
-    # "luôn trả 0", và ca trên sẽ xanh cho một chốt đã chết.
-    bang(_r338_chay(than, "khong_he_ton_tai_r338\n") == 1,
-         "goi KHONG TON TAI ma chot van xanh — chot da mat rang")
-
-
-@ca
-def r338_dot_bien_bo_ban_do_lam_ca_dich_DO():
-    """Đột biến gỡ bảng ánh xạ phải làm ca trên ĐỎ — không có nó thì ca kia đo gì?"""
-    than = _r338_than_hook()
-    if not than:
-        return "bo qua ban sao roi (khong co session-start.sh)"
-    try:
-        import yaml  # noqa: F401
-    except ImportError:
-        return "bo qua: nen khong co PyYAML"
-    neo = "for ten in sorted(ban_do.get(goi) or {goi}):"
-    bang(than.count(neo) == 1, f"R338_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
-    dot_bien = than.replace(neo, "for ten in [goi]:")
-    bang(_r338_chay(dot_bien, "PyYAML==6.0.3\n") == 1,
-         "dot bien go ban do VAN XANH — ca dich khong do cai ban do")
-    # Chiều ngược: đột biến KHÔNG được làm hỏng ca răng (nó vốn đã đỏ),
-    # nếu không thì "đỏ" ở trên có thể đến từ bất cứ đâu.
-    bang(_r338_chay(dot_bien, "khong_he_ton_tai_r338\n") == 1,
-         "dot bien lam doi ca rang — do o tren khong quy duoc cho ban do")
-
-
-# r339 — vá P2 của codex trên PR #449, ĐÃ TÁI HIỆN trước khi vá: IMPORT ĐƯỢC không
-# chứng minh ĐÚNG BẢN. Phản chứng: `requirements.txt` đòi `pypdf>=4.0`, môi trường cài
-# `pypdf` 3.17.4 ⇒ import chạy ngon ⇒ chốt rc=0 ⇒ hook BỎ QUA pip và giữ nguyên một môi
-# trường không còn thoả `requirements.txt` — đúng thứ trôi mà chốt ấy sinh ra để sửa.
-#
-# Ca này dựng một venv THẬT rồi cài một bản CỐ Ý sai, vì đó là cách duy nhất phân biệt
-# "chốt đọc specifier" với "chốt chỉ import". Cần mạng nên bỏ qua khi không cài được —
-# và khi bỏ qua thì nói thẳng là KHÔNG ĐO ĐƯỢC, không đếm là ĐẠT.
-def _r339_venv(td: Path):
+def _r342_venv(td: Path):
+    """venv thật + `pypdf` 3.17.4 (cố ý CŨ hơn `>=4.0`). None nếu không dựng được."""
     v = td / "v"
     subprocess.run([PY, "-m", "venv", str(v)], capture_output=True, timeout=300)
     py = v / ("Scripts" if os.name == "nt" else "bin") / ("python.exe" if os.name == "nt" else "python")
     if not py.exists():
         return None
-    p = subprocess.run([str(py), "-m", "pip", "install", "--quiet", "pypdf==3.17.4"],
-                       capture_output=True, text=True, timeout=600)
-    if p.returncode != 0:
+    if subprocess.run([str(py), "-m", "pip", "install", "--quiet", "pypdf==3.17.4"],
+                      capture_output=True, timeout=600).returncode != 0:
         return None
     return py
 
 
+def _r342_doi_chieu(py: Path, d: Path, than: str, reqs: str):
+    """Trả (ma_pip, ma_chot) trên cùng một requirements.txt."""
+    (d / "requirements.txt").write_text(reqs, encoding="utf-8")
+    pip = subprocess.run([str(py), "-m", "pip", "install", "--dry-run", "--quiet",
+                          "--no-index", "-r", "requirements.txt"],
+                         cwd=d, capture_output=True, text=True, timeout=600).returncode
+    chot = subprocess.run([str(py), "-c", than, "--kiem-ban"], cwd=d,
+                          capture_output=True, text=True, timeout=600).returncode
+    return pip, chot
+
+
+# Mười lớp, trong đó BỐN lớp bản cũ đã trả lời SAI (`-r` thiếu · `-r` đủ · extras · và
+# lệch bản ở chế độ hậu-pip). Tiêu chí là KHỚP PIP, không phải một bảng mã thoát ta tự đặt.
+_R342_CA = [
+    ("lech ban pypdf>=4.0",        "pypdf>=4.0\n"),
+    ("ban thoa pypdf>=3.0",        "pypdf>=3.0\n"),
+    ("marker khong khop",          'pywin32; sys_platform == "win32"\n'),
+    ("marker chua dau thang",      'pypdf; os_name == "posix#x"\n'),
+    ("chu thich sau khoang trang", "pypdf>=3.0  # ghi chu\n"),
+    ("extras",                     "pypdf[crypto]>=3.0\n"),
+    ("dong hong",                  "khong hop le ===== bay\n"),
+    ("goi thieu han",              "khong_he_ton_tai_r342\n"),
+]
+
+
 @ca
-def r339_import_duoc_khong_chung_minh_dung_ban():
+def r342_ma_thoat_cua_chot_phai_khop_pip():
     than = _r338_than_hook()
     if not than:
         return "bo qua ban sao roi (khong co session-start.sh)"
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)
-        py = _r339_venv(d)
+        py = _r342_venv(d)
         if py is None:
             return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
-        (d / "requirements.txt").write_text("pypdf>=4.0\n", encoding="utf-8")
-        def chay(*them):
-            return subprocess.run([str(py), "-c", than, *them], cwd=d,
-                                  capture_output=True, text=True, timeout=300)
-        # `--kiem-ban` = câu hỏi "có được BỎ QUA pip không" ⇒ lệch bản phải ĐỎ
-        r = chay("--kiem-ban")
-        bang(r.returncode == 1, "lech ban ma chot van XANH — hook se bo qua pip va giu moi truong troi")
-        bang("KHONG thoa" in (r.stdout + r.stderr),
-             f"do ĐỎ nhưng khong noi ro la lech BAN: {(r.stdout + r.stderr)[:120]!r}")
-        # Sau khi pip vừa chạy thì pip là thẩm quyền — chế độ thường KHÔNG đo bản.
-        bang(chay().returncode == 0, "che do thuong khong duoc doi bản — se thanh chot do thuong truc")
-        # RĂNG hai chiều: bản THOẢ thì tuyệt đối không được báo động giả.
-        (d / "requirements.txt").write_text("pypdf>=3.0\n", encoding="utf-8")
-        bang(chay("--kiem-ban").returncode == 0, "ban THOA ma van bao hong — bao dong gia")
+        (d / "extra_thieu.txt").write_text("khong_he_ton_tai_r342\n", encoding="utf-8")
+        (d / "extra_du.txt").write_text("pypdf>=3.0\n", encoding="utf-8")
+        ca_ds = _R342_CA + [("chi thi -r toi goi thieu", "-r extra_thieu.txt\n"),
+                            ("chi thi -r toi goi du", "-r extra_du.txt\n")]
+        lech = []
+        for nhan, reqs in ca_ds:
+            mp, mc = _r342_doi_chieu(py, d, than, reqs)
+            if (mp == 0) != (mc == 0):
+                lech.append(f"{nhan}: pip={mp} chot={mc}")
+        bang(not lech, "chot LECH pip: " + " · ".join(lech))
 
 
 @ca
-def r339_dot_bien_bo_kiem_ban_lam_ca_dich_DO():
-    """Đột biến bỏ phép so specifier phải làm ca trên ĐỎ — nếu không, ca kia đo gì?"""
+def r342_lop_phu_bat_duoc_goi_DU_ma_import_CHET():
+    """Lý do DUY NHẤT lớp phụ tồn tại: pip không nhìn thấy lớp lỗi này (r337)."""
     than = _r338_than_hook()
     if not than:
         return "bo qua ban sao roi (khong co session-start.sh)"
-    neo = "    if not thoa:"
-    bang(than.count(neo) == 1, f"R339_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
-    dot_bien = than.replace(neo, "    if False:")
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)
-        py = _r339_venv(d)
+        py = _r342_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        mp, mc = _r342_doi_chieu(py, d, than, "pypdf>=3.0\n")
+        bang(mp == 0 and mc == 0, f"nen chua sach: pip={mp} chot={mc}")
+        # PHÁ import nhưng GIỮ metadata — pip vẫn thấy "đủ", `import` thì chết.
+        sp = list(d.glob("v/lib/python*/site-packages")) or list(d.glob("v/Lib/site-packages"))
+        bang(bool(sp), "khong tim thay site-packages")
+        (sp[0] / "pypdf" / "__init__.py").write_text(
+            "raise BaseException('r342-gia-lap-pyo3-panic')\n", encoding="utf-8")
+        mp, mc = _r342_doi_chieu(py, d, than, "pypdf>=3.0\n")
+        bang(mp == 0, f"pip phai VAN noi du (metadata con nguyen), duoc {mp}")
+        bang(mc == 1, "goi DU ma import CHET van xanh — lop phu mat rang, "
+                      "va do la ly do duy nhat no ton tai")
+
+
+@ca
+def r342_khe_ho_bo_phan_tich_KHONG_duoc_chan_phien():
+    """Chiều rủi ro phải NGƯỢC với bản cũ: không hiểu ⇒ thăm ít hơn, KHÔNG báo hỏng.
+
+    Bảy finding trước đều sinh ra từ chỗ khe hở của bộ phân tích tự viết biến thành
+    báo động giả. Ca này khoá phép đảo chiều ấy: cho `Requirement` biến mất hoàn toàn,
+    một requirements.txt ĐÃ THOẢ vẫn phải XANH.
+    """
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    che = ("import builtins as _b\n"
+           "_that = _b.__import__\n"
+           "def _gia(t, *a, **k):\n"
+           "    if 'packaging' in t:\n"
+           "        raise ImportError(t)\n"
+           "    return _that(t, *a, **k)\n"
+           "_b.__import__ = _gia\n")
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r342_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        (d / "requirements.txt").write_text("pypdf>=3.0\n", encoding="utf-8")
+        r = subprocess.run([str(py), "-c", che + than, "--kiem-ban"], cwd=d,
+                           capture_output=True, text=True, timeout=600)
+        bang(r.returncode == 0,
+             "mat bo phan tich ma chot BAO HONG tren moi truong DA THOA — "
+             f"khe ho lai chan phien: {(r.stdout + r.stderr)[:120]!r}")
+
+
+@ca
+def r342_dot_bien_bo_hoi_pip_lam_ca_dich_DO():
+    """Gỡ phép hỏi pip ⇒ ca đối chiếu phải ĐỎ. Không có nó thì ca kia đo gì?
+
+    ĐỘT BIẾN NHẮM ĐÚNG THỨ ĐANG ĐO — bản đầu của ca này nhắm sai và tự lộ ra: nó chỉ
+    nuốt nhánh "kế hoạch KHÔNG rỗng", trong khi với `pypdf>=4.0` + `--no-index` pip
+    KHÔNG GIẢI ĐƯỢC nên nhánh `rc != 0` bắt trước ⇒ mutant vẫn ĐỎ ⇒ ca báo hỏng. Bài
+    học đúng chỗ: một đột biến sống sót có thể nghĩa là đột biến ĐẶT SAI CHỖ, không
+    phải mã sai. Nay gỡ CẢ khối hỏi pip, tức đo thẳng "thẩm quyền ấy có răng không".
+
+    KHAI THẲNG CHỖ CHƯA ĐO: nhánh *kế hoạch không rỗng* không được đo RIÊNG ở đây. Với
+    `--no-index`, một gói chưa thoả thì pip thoát khác 0 chứ không trả kế hoạch không
+    rỗng; muốn chạm nhánh ấy phải có kho wheel cục bộ. Đây là khoảng trống ĐÃ BIẾT,
+    không phải khoảng trống được che.
+    """
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    neo = "if kiem_ban:\n    p = subprocess.run("
+    bang(than.count(neo) == 1, f"R342_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
+    dot_bien = than.replace(neo, "if False:\n    p = subprocess.run(")
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r342_venv(d)
         if py is None:
             return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
         (d / "requirements.txt").write_text("pypdf>=4.0\n", encoding="utf-8")
         r = subprocess.run([str(py), "-c", dot_bien, "--kiem-ban"], cwd=d,
-                           capture_output=True, text=True, timeout=300)
+                           capture_output=True, text=True, timeout=600)
         bang(r.returncode == 0,
-             "dot bien bo phep so specifier VAN DO — cai DO cua ca dich khong quy duoc cho phep so ay")
-
-
-# r340 — P2 thứ hai của codex trên PR #449, ĐÃ TÁI HIỆN trước khi vá: một DÒNG trong
-# `requirements.txt` không chỉ là TÊN, nó còn mang ENVIRONMENT MARKER. Bản trước cắt bỏ
-# marker rồi import vô điều kiện. Phản chứng trên Linux với `pywin32; sys_platform ==
-# "win32"`: pip trả **rc=0** và nói thẳng *"Ignoring pywin32: markers ... don't match
-# your environment"*, còn chốt trả **rc=1** ở CẢ HAI chế độ ⇒ sau mỗi lần pip THÀNH CÔNG
-# hook vẫn xoá mốc và cảnh báo lại ở lượt sau. Lớp CHỐT ĐỎ THƯỜNG TRỰC, tái phát lần thứ
-# ba trong cùng một ngày — nên cách chữa là NGỪNG TỰ PHÂN TÍCH: giao cả dòng cho
-# `Requirement`, thứ mà pip dùng.
-#
-# Ca này không cần mạng: `pywin32` không được cài, và điểm đo là chốt có ĐÒI nó hay không.
-def _r340_chay(than: str, reqs: str, *them: str) -> int:
-    with tempfile.TemporaryDirectory() as td:
-        (Path(td) / "requirements.txt").write_text(reqs, encoding="utf-8")
-        return subprocess.run([PY, "-c", than, *them], cwd=td, capture_output=True,
-                              text=True, timeout=300).returncode
-
-
-@ca
-def r340_marker_khong_khop_thi_khong_duoc_doi_import():
-    than = _r338_than_hook()
-    if not than:
-        return "bo qua ban sao roi (khong co session-start.sh)"
-    khong_khop = "win32" if sys.platform != "win32" else "linux"
-    khop = "win32" if sys.platform == "win32" else sys.platform
-    goi = "pywin32" if sys.platform != "win32" else "khong_he_ton_tai_r340"
-    # (a) marker KHONG ap dung ⇒ pip bo qua ⇒ chot cung phai bo qua, o CA HAI che do.
-    reqs = f'{goi}; sys_platform == "{khong_khop}"\n'
-    bang(_r340_chay(than, reqs) == 0,
-         "marker khong khop ma chot van DOI import — sau moi lan pip THANH CONG hook se "
-         "xoa moc va canh bao lai o luot sau")
-    bang(_r340_chay(than, reqs, "--kiem-ban") == 0,
-         "marker khong khop ma --kiem-ban van DO")
-    # (b) RĂNG: marker CÓ áp dụng thì gói thiếu vẫn phải ĐỎ, kẻo bản vá thành "bỏ qua tất".
-    bang(_r340_chay(than, f'khong_he_ton_tai_r340; sys_platform == "{khop}"\n') == 1,
-         "marker KHOP + goi THIEU that ma chot van XANH — chot da mat rang")
-    # (c) Dòng hỏng phải fail-closed, không được lặng lẽ đi qua.
-    bang(_r340_chay(than, "khong hop le ===== bay\n") == 1,
-         "dong HONG ma chot van XANH — phai fail-closed nhu bo phan tich cua pip")
-
-
-@ca
-def r340_dot_bien_bo_danh_gia_marker_lam_ca_dich_DO():
-    """Đột biến bỏ phép đánh giá marker phải làm ca trên ĐỎ — nếu không, ca kia đo gì?"""
-    than = _r338_than_hook()
-    if not than:
-        return "bo qua ban sao roi (khong co session-start.sh)"
-    neo = "            if not ap_dung:"
-    bang(than.count(neo) == 1, f"R340_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
-    dot_bien = than.replace(neo, "            if False:")
-    khong_khop = "win32" if sys.platform != "win32" else "linux"
-    goi = "pywin32" if sys.platform != "win32" else "khong_he_ton_tai_r340"
-    bang(_r340_chay(dot_bien, f'{goi}; sys_platform == "{khong_khop}"\n') == 1,
-         "dot bien bo danh gia marker VAN XANH — ca dich khong do phep danh gia ay")
-
-
-# r341 — P2 thứ ba của codex trên PR #449, ĐÃ TÁI HIỆN trước khi vá: `#` KHÔNG phải lúc
-# nào cũng mở đầu chú thích. pip chỉ coi nó là chú thích khi nó ở ĐẦU DÒNG hoặc đi sau
-# KHOẢNG TRẮNG; `#` nằm giữa một chuỗi — marker, hay fragment của direct URL — là ký tự
-# HỢP LỆ. Phản chứng: `pypdf; os_name == "posix#x"` ⇒ pip rc=0 (marker sai nên bỏ qua),
-# bản trước cắt ở `#` đầu tiên ⇒ dòng cụt ⇒ `InvalidRequirement` ⇒ rc=1.
-#
-# Chép LUẬT của pip chứ KHÔNG import bộ phân tích nội bộ: `pip._internal` là API không ổn
-# định, buộc hook vào đó là đổi một lớp trôi này lấy một lớp trôi khác.
-@ca
-def r341_dau_thang_giua_chuoi_khong_phai_chu_thich():
-    than = _r338_than_hook()
-    if not than:
-        return "bo qua ban sao roi (khong co session-start.sh)"
-    khong_khop = "posix#x" if os.name == "posix" else "nt#x"
-    # (a) `#` giữa chuỗi marker: marker sai ⇒ không áp dụng ⇒ bỏ qua dòng ⇒ XANH.
-    bang(_r340_chay(than, f'pypdf; os_name == "{khong_khop}"\n') == 0,
-         "`#` giua chuoi bi cat nen dong cut — pip rc=0 ma chot DO, lai la chot do thuong truc")
-    # (b) RĂNG: chú thích THẬT vẫn phải bị cắt, kẻo bản vá hẹp lại thành giữ nguyên chú thích.
-    bang(_r340_chay(than, "khong_he_ton_tai_r341  # chu thich that\n") == 1,
-         "chu thich that bi GIU lai — ten goi se mang ca chu thich")
-    bang(_r340_chay(than, "# ca dong nay la chu thich\n") == 0,
-         "chu thich dau dong khong duoc cat")
-    bang(_r340_chay(than, "khong_he_ton_tai_r341\t# sau TAB\n") == 1,
-         "chu thich sau TAB khong duoc cat — `\\s` phai phu ca tab")
-
-
-@ca
-def r341_dot_bien_cat_vo_dieu_kien_lam_ca_dich_DO():
-    """Đột biến quay về `split("#")` vô điều kiện phải làm ca trên ĐỎ."""
-    than = _r338_than_hook()
-    if not than:
-        return "bo qua ban sao roi (khong co session-start.sh)"
-    neo = '    dong = _CHU_THICH.sub("", dong).strip()'
-    bang(than.count(neo) == 1, f"R341_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
-    dot_bien = than.replace(neo, '    dong = dong.split("#", 1)[0].strip()')
-    khong_khop = "posix#x" if os.name == "posix" else "nt#x"
-    bang(_r340_chay(dot_bien, f'pypdf; os_name == "{khong_khop}"\n') == 1,
-         "dot bien cat vo dieu kien VAN XANH — ca dich khong do luat cat chu thich")
+             "dot bien go CA khoi hoi pip ma van DO — cai DO cua ca doi chieu khong "
+             "quy duoc cho phep hoi pip")
 
 
 # ------------------------------------------------------ tự đột biến: có răng không

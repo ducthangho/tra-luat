@@ -198,13 +198,69 @@ print(h + '_' + hashlib.sha256(sys.prefix.encode()).hexdigest()[:8])" )"
   # BaseException vi PanicException KHONG phai Exception; chi cho KeyboardInterrupt xuyen qua.
   reqs_import_duoc() {
     "$PY" - "$@" <<'PYEOF'
-import re, sys
-# r338 (do 06-09-2026): TEN GOI (pip) KHAC TEN MODULE (import), va suy ten bang chuan
-# hoa chuoi la DOAN chu khong phai DO. Phan chung chay duoc: `PyYAML==6.0.3` -> ban cu
-# suy ra `pyyaml` -> ModuleNotFoundError, TRONG KHI `import yaml` chay tot. Tuc them mot
-# phu thuoc that vao requirements.txt lam chot nay bao dong GIA va fail-close chan phien.
-# Chua bang mot BANG TAY DOI TEN thi cung la doan, chi la doan som hon; hoi
-# `importlib.metadata` cua ban DA CAI moi la do — no doc tu metadata that cua goi.
+import json, re, subprocess, sys
+
+# r342 — NGUNG TU QUYET, HOI PIP. Doc ky truoc khi "don gon" khoi nay.
+#
+# Bon luot review lien tiep ra BAY finding, tat ca CUNG MOT hinh dang: ta tu lam mot
+# viec ma pip da co luat rieng. r338 ghim `==6.0.3` (pip phai go goi distro) · r339 tu
+# doi ban o che do hau-pip · r340 tu cat marker · r341 tu cat `#` · roi direct
+# reference (`foo @ URL`), extras (`foo[x]`), va chi thi `-r`/`-c`/`-e`. Moi vong bao
+# toan duoc thu ta NGHI TOI va lam hong thu ta KHONG NGHI TOI — dung the "dem hinh dang
+# loi, dung chi dem loi" trong CLAUDE.md: lap ba lan tro len thi cau hoi khong con la
+# "va the nao" ma la "CO NEN LAM VIEC NAY KHONG".
+#
+# Nen tang quyet dinh doi han: THAM QUYEN la pip, khong phai ta.
+#   `pip install --dry-run --report -` tra KE HOACH duoi dang JSON; `install` RONG
+#   nghia la moi truong DA thoa requirements.txt. Marker, extras, direct reference,
+#   `-r`/`-c`/`-e`, phien ban, cu phap chu thich — pip lo het, mien phi.
+#
+# VI SAO KHONG MAU THUAN VOI r337. r337 bac `--dry-run` vi doc MA THOAT: pip 24.0 tra
+# rc=0 KE CA khi in "Would install", nen chot cu chua bao gio noi "thieu". Doc KE HOACH
+# la mot phep do khac han — do la bang chung duong ma luc ay con thieu, khong phai quay
+# ve cai oracle da bi bac.
+#
+# `--no-index` co chu dinh: hook phien khong duoc phu thuoc mang. Da THOA thi pip tra
+# `install=[]` ma khong can index (do: 0.4s); CHUA thoa thi no khong tim duoc ban phan
+# phoi va thoat khac 0 — ca hai deu anh xa DUNG sang "co duoc bo qua pip khong".
+kiem_ban = "--kiem-ban" in sys.argv[1:]
+hong = []
+
+if kiem_ban:
+    p = subprocess.run([sys.executable, "-m", "pip", "install", "--dry-run", "--report", "-",
+                        "--quiet", "--no-index", "-r", "requirements.txt"],
+                       capture_output=True, text=True)
+    if p.returncode != 0:
+        hong.append("pip: moi truong CHUA thoa requirements.txt")
+    else:
+        try:
+            ke_hoach = json.loads(p.stdout).get("install", [])
+        except ValueError:
+            # KHONG DO DUOC != DAT: khong doc noi ke hoach thi dung khai la thoa.
+            ke_hoach = None
+        if ke_hoach is None:
+            hong.append("pip: KHONG DOC DUOC ke hoach (--report khong tra JSON)")
+        elif ke_hoach:
+            ten = ", ".join(sorted(x.get("metadata", {}).get("name", "?") for x in ke_hoach))
+            hong.append(f"pip: con phai cai {len(ke_hoach)} goi ({ten})")
+
+# LOP PHU — va no CO Y yeu, dung theo chieu nguoc voi ban truoc.
+#
+# pip khong thay duoc lop loi cua r337: goi CO MAT, ban DUNG, ma `import` van chet
+# (`pypdf` keo `cryptography` thieu `_cffi_backend` ⇒ pyo3 nem PanicException). Nen van
+# can mot phep tham import.
+#
+# Nhung phep nay KHONG con la tham quyen, va do la ca thiet ke: dong nao ta khong hieu
+# thi BO QUA chu khong bao hong. Bay finding tren deu tu viec khe ho cua bo phan tich
+# TU VIET bien thanh BAO DONG GIA lam do phien. Nay khe ho chi dan toi "tham it hon",
+# khong bao gio dan toi "chan phien" — doi chieu rui ro sang huong an toan.
+_Req = None
+for _m in ("packaging.requirements", "pip._vendor.packaging.requirements"):
+    try:
+        _Req = __import__(_m, fromlist=["Requirement"]).Requirement
+        break
+    except ImportError:
+        continue
 try:
     from importlib.metadata import packages_distributions
 except ImportError:                 # Python < 3.10
@@ -212,137 +268,40 @@ except ImportError:                 # Python < 3.10
 ban_do = {}
 if packages_distributions is not None:
     for _mod, _dists in packages_distributions().items():
-        # BO module gach duoi: chung la ban tang toc TUY CHON, doi ho chung la tai tao
-        # dung lop loi vua sua. Phan chung: PyYAML khai ca `_yaml` (C ext cua libyaml),
-        # ma `yaml/__init__.py` boc no trong `try: from .cyaml import * / except
-        # ImportError` — chan `_yaml` roi `import yaml` VAN OK. Doi `_yaml` la bao GIA
-        # tren moi may cai PyYAML thuan Python.
+        # BO module gach duoi: chung la ban tang toc TUY CHON. Phan chung (r338): PyYAML
+        # khai ca `_yaml` (C ext cua libyaml), ma `yaml/__init__.py` boc no trong
+        # `try: from .cyaml import * / except ImportError` — chan `_yaml` roi
+        # `import yaml` VAN OK. Doi `_yaml` la bao gia tren may cai PyYAML thuan Python.
         if _mod.startswith("_"):
             continue
         for _d in _dists:
             ban_do.setdefault(_d.lower().replace("-", "_"), set()).add(_mod)
 
-# r338b (P2 cua codex tren PR #449, da TAI HIEN truoc khi vá): IMPORT DUOC khong chung
-# minh BAN DUNG. Phan chung chay duoc: requirements doi `pypdf>=4.0`, moi truong cai
-# `pypdf` 3.17.4 — import chay ngon nen chot tra rc=0, hook BO QUA pip, va giu nguyen
-# mot moi truong khong con thoa requirements.txt. Dung thu troi ma chot nay sinh ra de
-# sua. Cung ho "CO MAT != DUNG DUOC", them mot nac: DUNG DUOC != DUNG BAN.
-#
-# CHI kiem ban o che do `--kiem-ban`, tuc luc tra loi cau "co duoc BO QUA pip khong".
-# Sau khi pip vua chay xong thi moi truong thoa requirements THEO CACH DUNG (pip la
-# thâm quyen), nen doi them mot phep do o do chi tao ra chot do thuong truc khi may
-# khong co bo phan tich specifier.
-kiem_ban = "--kiem-ban" in sys.argv[1:]
-# r340 (P2 thu hai cua codex tren PR #449, da TAI HIEN truoc khi va): mot DONG trong
-# requirements.txt khong chi la TEN. No con mang SPECIFIER va ENVIRONMENT MARKER, va
-# ban truoc CAT BO marker roi import vo dieu kien. Phan chung chay duoc tren Linux voi
-# `pywin32; sys_platform == "win32"`: pip rc=0 va noi thang "Ignoring pywin32: markers
-# ... don't match your environment", con chot tra rc=1 o CA HAI che do ⇒ sau moi lan pip
-# THANH CONG, hook van xoa moc va canh bao lai o lượt sau. Lai dung lop CHOT DO THUONG
-# TRUC — lop nay da tai phat BA lan trong cung mot ngay, nen cach chua khong phai vá
-# tiep mot bieu thuc chinh quy ma la NGUNG TU PHAN TICH: dua ca dong cho `Requirement`,
-# thu ma pip dung, de lay ten + specifier + marker tu MOT nguon.
-_Req = _spec = None
-for _m in ("packaging", "pip._vendor.packaging"):
-    # `packaging` tran KHONG co trong venv tran (do 06-09-2026); ban vendor cua pip thi
-    # co o CA HAI nen — ma hook nay von da doi pip. Do la ly do co duong lui.
-    try:
-        _Req = __import__(_m + ".requirements", fromlist=["Requirement"]).Requirement
-        _spec = __import__(_m + ".specifiers", fromlist=["SpecifierSet"]).SpecifierSet
-        break
-    except ImportError:
-        _Req = _spec = None
-try:
-    from importlib.metadata import version as _ban_da_cai
-except ImportError:
-    _ban_da_cai = None
-
-# r341 (P2 thu ba cua codex tren PR #449, da TAI HIEN truoc khi va): `#` KHONG phai
-# lúc nào cũng mo dau chu thich. pip chi coi no la chu thich khi no o DAU DONG hoac di
-# sau KHOANG TRANG; `#` nam giua mot chuoi — marker hay fragment cua direct URL — la ky
-# tu HOP LE. Phan chung: `pypdf; os_name == "posix#x"` ⇒ pip rc=0 (marker sai nen bo
-# qua), con ban truoc cat o `#` dau tien ⇒ dong cut ⇒ `InvalidRequirement` ⇒ rc=1 ⇒ lai
-# dung lop CHOT DO THUONG TRUC (lan thu TU trong ngay). Chep LUAT cua pip chu KHONG
-# import bo phan tich noi bo cua no: `pip._internal` la API khong on dinh, buoc hook vao
-# do la doi mot lop troi nay lay mot lop troi khac.
 _CHU_THICH = re.compile(r"(^|\s)#.*$")
-hong = []
-for dong in open("requirements.txt", encoding="utf-8"):
-    dong = _CHU_THICH.sub("", dong).strip()
-    if not dong or dong.startswith("-"):
-        continue
-    dieu_kien = ""
-    if _Req is not None:
+if _Req is not None:
+    for dong in open("requirements.txt", encoding="utf-8"):
+        dong = _CHU_THICH.sub("", dong).strip()
+        if not dong or dong.startswith("-"):
+            continue                      # chi thi cua pip — pip da lo o tren
         try:
             _r = _Req(dong)
+            if _r.marker is not None and not _r.marker.evaluate():
+                continue                  # khong ap dung tren nen nay
         except KeyboardInterrupt:
             raise
-        except BaseException as e:
-            # Dong HONG khong duoc im lang di qua: bo phan tich cua pip tu choi thi ta
-            # cung tu choi. Fail-closed, dung `continue`.
-            hong.append(f"{dong!r}: KHONG PHAN TICH DUOC ({type(e).__name__})")
-            continue
-        if _r.marker is not None:
+        except BaseException:
+            continue                      # khong hieu dong nay ⇒ THAM IT HON, khong bao hong
+        goi = _r.name.lower().replace("-", "_")
+        for ten in sorted(ban_do.get(goi) or ()):
             try:
-                ap_dung = _r.marker.evaluate()
+                __import__(ten)
             except KeyboardInterrupt:
                 raise
-            except BaseException as e:
-                hong.append(f"{_r.name}: KHONG_DO_DUOC_MARKER ({type(e).__name__})")
-                continue
-            if not ap_dung:
-                # Marker KHONG khop nen tren nay ⇒ pip bo qua dong nay ⇒ ta cung phai bo
-                # qua. Doi import o day la doi mot thu pip co y khong cai.
-                continue
-        ten_goi, dieu_kien = _r.name, str(_r.specifier)
-    else:
-        # KHONG co bo phan tich: van lam duoc phan TEN, nhung marker thi khong. Dong CO
-        # marker phai fail-closed — doan xem no ap dung hay khong chinh la cai vua hong.
-        if ";" in dong:
-            hong.append(f"{dong!r}: KHONG_DO_DUOC_MARKER (thieu bo phan tich)")
-            continue
-        m = re.match(r"([A-Za-z0-9._-]+)\s*(?:\[[^\]]*\])?\s*(.*)$", dong)
-        if not m:
-            hong.append(f"{dong!r}: KHONG PHAN TICH DUOC")
-            continue
-        ten_goi, dieu_kien = m.group(1), m.group(2).strip()
-    goi = ten_goi.strip().lower().replace("-", "_")
-    # Goi CHUA CAI thi khong co trong metadata -> lui ve ten suy ra -> import that bai
-    # -> bao THIEU. Do la dung: ban do chi chua ten, khong che duoc rang cua chot.
-    for ten in sorted(ban_do.get(goi) or {goi}):
-        try:
-            __import__(ten)
-        except KeyboardInterrupt:
-            raise
-        except BaseException as e:  # PanicException (pyo3) khong phai Exception
-            hong.append(f"{ten}: {type(e).__name__}")
-    if not (kiem_ban and dieu_kien):
-        continue
-    # KHONG DO DUOC != DAT. Thieu bo phan tich hay thieu metadata thi KHONG duoc khai
-    # la thoa; tra hong o day nghia la "dung bo qua pip", tuc de pip — tham quyen that
-    # su — quyet dinh. Do la tu chua, khong phai chot chet.
-    if _spec is None or _ban_da_cai is None:
-        hong.append(f"{ten_goi}: KHONG_DO_DUOC_BAN (thieu bo phan tich specifier)")
-        continue
-    try:
-        ban = _ban_da_cai(ten_goi)
-    except KeyboardInterrupt:
-        raise
-    except BaseException:
-        hong.append(f"{ten_goi}: KHONG_DO_DUOC_BAN (khong co metadata)")
-        continue
-    try:
-        thoa = _spec(dieu_kien).contains(ban, prereleases=True)
-    except KeyboardInterrupt:
-        raise
-    except BaseException as e:
-        hong.append(f"{ten_goi}: KHONG_DO_DUOC_BAN ({type(e).__name__})")
-        continue
-    if not thoa:
-        hong.append(f"{ten_goi}: ban {ban} KHONG thoa {dieu_kien}")
+            except BaseException as e:    # PanicException (pyo3) KHONG phai Exception
+                hong.append(f"{ten}: {type(e).__name__}")
+
 if hong:
-    print("[session-start] requirements.txt CHUA THOA (import hong hoac lech ban): "
-          + " · ".join(hong))
+    print("[session-start] requirements.txt CHUA THOA: " + " · ".join(hong))
     sys.exit(1)
 PYEOF
   }

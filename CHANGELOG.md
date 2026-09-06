@@ -1,3 +1,55 @@
+# ★ dev-side — r342: NGỪNG TỰ QUYẾT, HỎI PIP — bảy finding một hình dạng (2026-09-06)
+
+Lượt review thứ tư trên `37af367` ra **ba P2 nữa** — direct reference (`foo @ URL`),
+extras (`foo[x]`), và chỉ thị `-r`/`-c`/`-e` — nâng tổng lên **BẢY finding, một hình
+dạng**: *bộ phân tích TỰ VIẾT của hook lệch khỏi luật của pip.*
+
+| vòng | ta tự làm gì | hậu quả đo được |
+|---|---|---|
+| r338 | ghim `==6.0.3` | pip phải gỡ gói distro ⇒ hook đỏ mọi lượt |
+| r339 | tự đòi bản ở chế độ hậu-pip | chốt đỏ thường trực khi thiếu bộ phân tích |
+| r340 | tự cắt marker | pip `rc=0`, chốt `rc=1` |
+| r341 | tự cắt `#` | pip `rc=0`, chốt `rc=1` |
+| +3 | direct ref · extras · `-r` | pip `rc=1`, chốt `rc=0` — lần này **lọt**, không phải chặn |
+
+`CLAUDE.md` đã ghi ngưỡng cho đúng tình huống này: **đếm HÌNH DẠNG lỗi, đừng chỉ đếm
+lỗi** — lặp ba lần trở lên thì câu hỏi đúng là *"có nên làm việc này không"*. Vòng năm là
+lúc trả lời: **không**.
+
+**Thẩm quyền chuyển sang pip.** `pip install --dry-run --report -` trả KẾ HOẠCH dạng JSON;
+`install` rỗng nghĩa là môi trường ĐÃ thoả. Marker, extras, direct reference, `-r`/`-c`/`-e`,
+phiên bản, cú pháp chú thích — pip lo hết. Kèm `--no-index` để hook phiên không phụ thuộc
+mạng: đã thoả ⇒ `install=[]` trong **0,4s**; chưa thoả ⇒ pip thoát khác 0. Cả hai ánh xạ
+đúng sang câu hỏi *"có được bỏ qua pip không"*.
+
+**KHÔNG mâu thuẫn với r337.** r337 bác `--dry-run` vì đọc **mã thoát** (pip 24.0 trả rc=0
+kể cả khi in "Would install"). Đọc **kế hoạch** là một phép đo khác hẳn — đó chính là bằng
+chứng dương mà lúc ấy còn thiếu, không phải quay về cái oracle đã bị bác.
+
+**Lớp phụ giữ lại, và CỐ Ý yếu đi.** pip không thấy được lớp lỗi r337: gói CÓ MẶT, ĐÚNG BẢN,
+mà `import` chết (`PanicException`). Nên vẫn thăm import — nhưng nay dòng nào ta không hiểu
+thì **BỎ QUA** chứ không báo hỏng. Cả bảy finding đều sinh ra từ chỗ khe hở của bộ phân tích
+tự viết biến thành BÁO ĐỘNG GIẢ; nay khe hở chỉ dẫn tới *thăm ít hơn*, không bao giờ tới
+*chặn phiên*. Đổi chiều rủi ro sang hướng an toàn.
+
+**Tám ca `r338`–`r341` bị THAY, không phải sửa cho xanh** — chúng khoá một thiết kế không
+còn tồn tại (đo từng nhánh của bộ phân tích tự viết). Bốn ca `r342` khoá hợp đồng mới:
+mã thoát **khớp pip** trên 10 lớp (đo: **0/10 lệch**, gồm cả `-r` và extras mà bản cũ trả
+lời sai) · lớp phụ **có răng** (phá `pypdf/__init__.py` mà giữ metadata: pip `rc=0`, chốt
+`rc=1`) · **khe hở không được chặn phiên** (cho `Requirement` biến mất hoàn toàn, môi
+trường đã thoả vẫn XANH) · đột biến gỡ cả khối hỏi pip phải làm ca đối chiếu ĐỎ.
+
+**Một đột biến sống sót ở đây KHÔNG phải mã sai — nó đặt sai chỗ, và ca tự lộ ra.** Bản đầu
+của đột biến chỉ nuốt nhánh *"kế hoạch không rỗng"*, trong khi với `pypdf>=4.0` + `--no-index`
+pip KHÔNG GIẢI ĐƯỢC nên nhánh `rc != 0` bắt trước ⇒ mutant vẫn ĐỎ. Đúng bài học *"đột biến
+SỐNG SÓT không luôn nghĩa là test yếu"*. Nay gỡ CẢ khối. **Khai thẳng chỗ chưa đo:** nhánh
+*kế hoạch không rỗng* không được đo RIÊNG — muốn chạm nó phải có kho wheel cục bộ.
+
+Cổng: `launcher_test` **172/172** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta so
+`033d67d` = **0** · `bash -n` OK · `git diff --check` rc=0 · hook chạy thật hai lượt đúng
+thiết kế.
+
 # ★ dev-side — r341: `#` không phải lúc nào cũng là chú thích, và LẦN THỨ TƯ cùng một lớp lỗi (2026-09-06)
 
 P2 thứ ba của codex trên `033d67d`, **đúng**, đã tái hiện trước khi vá: pip chỉ coi `#` là

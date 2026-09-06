@@ -28,7 +28,9 @@ Chỗ nào tệp này lệch protocol thì TỆP NÀY sai.
 | `review_rounds_used` được ghi | **10/57** | biên nhận |
 | `codex_review_calls_used` được ghi | **2/57** | biên nhận |
 | `codex_executor_calls_used` được ghi | **0/57** | biên nhận |
-| Lease có mỏ neo đặc tả | **BỐN TÊN cho một khái niệm**: `spec_hash` 10 · `spec_sha256_required` 29 · `spec_sha256` 5 · `spec_path` 48 ⇒ **bất kỳ mỏ neo nào = 50/82 = 61,0%** | `ops/leases/*.yaml` |
+| Lease có mỏ neo đặc tả | **BỐN TÊN**: `spec_hash` 10 · `spec_sha256_required` 29 · `spec_sha256` 5 · `spec_path` 48. **KHÔNG hợp thành 50/82** — xem dưới. Số đứng được: **44/82 có ít nhất một trường BĂM không rỗng**, và ngay cả 44 cũng **chưa phải** "44 lease tuân thủ" | `ops/leases/*.yaml` |
+| …vì sao 50 là đếm thừa (cross-review lượt 3, `N1`) | **3** lease chỉ có `spec_path` và **tự khai là BẢN THẢO CHƯA DUYỆT**, cố ý không neo; **3** lease có KHOÁ `spec_path` nhưng giá trị **`null`** — được đếm chỉ vì khoá tồn tại. Một **địa chỉ** nói tìm bản thảo ở đâu; nó **không định danh byte đã được duyệt** | |
+| Trần vòng review — hiện trạng thật (`N2`) | `review_rounds_limit`: **41 THIẾU** · **23** khai `2` · **18** khai `>2`, trong đó **17/18 KHÔNG có `nang_tran`**. **6** lease tự ghi đã dùng **>2** vòng | `ops/leases/*.yaml` |
 
 ```
 grep -hoE 'thoi_luong_giay[:=] *[0-9]+\.[0-9]+' ops/reviews/*.receipt.yaml | grep -oE '[0-9]+\.[0-9]+' | sort -n
@@ -79,14 +81,28 @@ không. Finding ấy đứng nguyên.
    có cổng thật, fail-closed, **7** ca phản chứng `RC_LOP`, ghim băm trong workflow — và nó land
    **23-08-2026**, đúng **một ngày sau** mốc `22-08-2026` mà §20 tự ghi ở đầu cột. Tôi dùng một phép đo
    **có ghi ngày** mà không kiểm ngày.
-3. **Tiền đề bị chính §0 của tệp này bác.** Bản 2 suy *"`0 cổng` ⇒ không được cưỡng chế"*. Đo:
+3. **Tiền đề bị chính §0 của tệp này bác** — nhưng **KHÔNG mạnh như bản 3 đã viết**; xem ngay dưới.
 
-   | luật | số lần xuất hiện trong 6 tệp cổng của §20 | hiện vật TUÂN |
-   |---|---|---|
-   | mỏ neo đặc tả | **0** ở cả sáu | **50/82 = 61,0%** |
-   | trần vòng ADR-0043 | `nang_tran` **0** | **81/82** giữ trần |
+**BẢN 3 PHẠM LẠI CÙNG MỘT LỚP LỖI, LẦN THỨ TƯ — cross-review lượt 3 (codex, KHÁC NỀN) bắt.**
 
-   **Luật không cổng vẫn ràng buộc được, ở mức 61–99%.**
+Bản 3 viết: *"Luật không cổng vẫn ràng buộc được, ở mức 61–99%"*, dựa trên hai tử số **50/82** và
+**81/82**. Cả hai đếm **sự VẮNG MẶT của một khoá thành TUÂN THỦ**:
+
+- **81/82 = 82 − 1** lấy "không khai `nang_tran`" làm "không vượt trần". Không khai có **ít nhất hai**
+  nghĩa: *không cần nâng*, hoặc *đã nới mà thiếu khai báo*. Đo trường liên quan trực tiếp:
+  **41** lease **không khai** `review_rounds_limit` · **23** khai `2` · **18** khai **>2**, và
+  **17/18** trong số ấy **không có** `nang_tran`; **6** lease tự ghi đã dùng **>2** vòng.
+- **50/82** gộp `spec_path` vào "mỏ neo", trong khi **3** lease dùng nó cho **bản thảo chưa duyệt** (cố ý
+  không neo) và **3** lease có khoá ấy với giá trị **`null`**.
+
+**Và đây là chỗ phải nói cho đúng, kẻo lại sai theo chiều ngược — đúng lỗi bản 2 đã mắc:**
+17–18 **KHÔNG** được đọc thành "17–18 vi phạm". Còn ngày hiệu lực của ADR, miễn trừ và thẩm quyền, đơn
+vị đếm vòng, và nhiều lease thuộc cùng một việc. Trạng thái đúng của phần lớn quần thể là **CHƯA ĐỦ
+BẰNG CHỨNG** — ô thứ ba, không phải một trong hai ô kia.
+
+Nên câu *"luật không cổng vẫn ràng buộc được 61–99%"* **bị rút**. Thứ còn đứng: `0 cổng` **không** đủ
+để kết luận "không được cưỡng chế" (bản 2 sai), nhưng cũng **không** có phép đo nào hiện có đỡ được
+mệnh đề ngược. Cả hai chiều đều là **chưa đo**.
 
 Và `0 cổng` là **9/30 = 30%** của bảng §20 (15 `có nhắc`, 6 `chưa đo`) — **thiểu số**, không phải "phần lớn".
 
@@ -99,11 +115,15 @@ NĂNG**, chỉ đảo dấu. Bản 2 phạm lại chính lỗi nó vừa đặt 
 Với mỗi luật, đo **tỉ lệ vi phạm trên hiện vật** (lease · biên nhận · PR), không đo `grep` trong 6 tệp.
 Ba ô, không phải hai:
 
-| ô | nghĩa | ví dụ đo được |
+| ô | nghĩa | trạng thái đo được hôm nay |
 |---|---|---|
 | có cổng | cưỡng chế bằng mã | `ADR-0038` — 13/13 lease `schema_version: 2` tuân |
-| không cổng **nhưng tuân** | luật sống bằng kỷ luật | mỏ neo đặc tả 61% · trần vòng 81/82 |
-| không cổng **và có vi phạm đo được** | ← **việc cần làm** | phải đo mới biết; chưa ai đo |
+| không cổng **nhưng tuân** | luật sống bằng kỷ luật | **CHƯA CHỨNG MINH ĐƯỢC** — hai tử số bản 3 dùng đều đếm vắng mặt thành tuân (lượt 3, `N2`) |
+| không cổng **và có vi phạm đo được** | việc cần làm | chưa ai đo |
+| **chưa đủ bằng chứng** | thiếu ngày hiệu lực / thẩm quyền / đơn vị đếm | **ô bản 3 BỎ QUÊN** — và nó chứa phần lớn quần thể (41/82 không khai limit) |
+
+Cộng một ô nữa mà lượt 3 nêu và bản 3 cũng bỏ: **có cổng nhưng CHƯA KIỂM ĐỘ PHỦ/RĂNG**. "Có cổng"
+không phải lý do loại một luật khỏi danh sách việc.
 
 Chỉ ô thứ ba là việc. Đó là trục duy nhất khiến chữ *"theo thứ tự rủi ro"* có nghĩa, và **cả ba bản đều
 chưa đo nó**.
@@ -582,3 +602,39 @@ theo từng finding*) — mục mà bản 1 khen là giá trị nhất rồi t�
 
 Nên phán quyết cuối cùng về đề xuất gốc đổi: **mục 5 không phải "phần mới đáng giữ", nó là phần đáng làm
 TRƯỚC** — và ba bản của tệp này là bằng chứng thực nghiệm cho nó.
+
+
+### Lượt 3 (trên `76318fa`) — codex, **KHÁC NỀN**, và nó trả lời được câu M6
+
+| # | Bản 3 khai | Phép đo nói | Xử lý |
+|---|---|---|---|
+| 26 | *"luật không cổng vẫn ràng buộc được 61–99%"* | **KHÔNG CÓ CƠ SỞ** — cả hai tử số đếm **vắng mặt một khoá** thành **tuân thủ** | RÚT (§1) |
+| 27 | `nang_tran` 1/82 ⇒ **81/82 giữ trần** | `review_rounds_limit`: **41 THIẾU** · 23 khai `2` · **18 khai >2** với **17/18 không có `nang_tran`**; **6** lease tự ghi đã dùng >2 vòng | RÚT; thêm ô **chưa đủ bằng chứng** |
+| 28 | bất kỳ mỏ neo nào = **50/82** | **44/82** có trường băm không rỗng; 3 lease là **bản thảo chưa duyệt** cố ý không neo, 3 lease `spec_path: null` | sửa §0 |
+| 29 | bảng ba ô | thiếu ô **chưa đủ bằng chứng** và ô **có cổng nhưng chưa kiểm răng** | thêm cả hai |
+| 30 | M4 *"cổng có đỏ được không"* — chưa ai đo | **ĐÃ ĐO**: 6 cổng (`RC_DOCTRINE` · `bien-nhan` · `RC_LOP` · `t26` · `t27` · `t33`) đột biến trên bản sao, **tất cả ĐỎ đúng ca đích**, kiểm bằng **nội dung assertion** chứ không chỉ `rc≠0`; control **4/4, rc=0, bỏ qua=0** | ghi nhận — reviewer tự khai *"không suy thành mọi cổng đều được bảo vệ"* |
+
+**ĐÂY LÀ CÂU TRẢ LỜI THỰC NGHIỆM CHO M6, và nó rõ hơn mong đợi.**
+
+M6 nói: cấp năng lực đo **không** cấp tính độc lập; hai phiên cùng mô hình mù cùng chỗ. Đo được:
+
+| | reviewer | tìm ra lớp lỗi "đếm vắng mặt thành tuân thủ" ở kết luận trung tâm? |
+|---|---|---|
+| lượt 1 (2 reviewer) | Claude | không |
+| lượt 2 (2 reviewer) | Claude | không |
+| **lượt 3 (1 reviewer)** | **codex** | **có — ngay lượt đầu** |
+
+Bốn reviewer cùng nền đọc qua câu *"61–99%"* mà không dừng lại; nó **được viết ra ở bản 3 để sửa** hai
+lỗi mà chính họ vừa tìm. Và trớ trêu đúng chỗ: lỗi ấy **cùng lớp** với hai lỗi kia — chỉ đổi biến. Ba
+lỗi đo mà tác giả tự bắt trong phiên (`rg` bỏ tệp ẩn · `rc=$?` sau ống · kho nông) cũng **không**
+reviewer cùng nền nào bắt được.
+
+Nên kết luận về M6 không còn là suy đoán: **cùng nền có một điểm mù có hệ thống ở lớp lỗi phương pháp
+của chính tác giả**, và khác nền mua được đúng lớp ấy. Đó là lý lẽ định lượng mạnh nhất mà cả đợt này
+sinh ra cho việc giữ `cross_approved` là bắt buộc với phạm vi nhạy cảm — mạnh hơn mọi lập luận trong
+§2 hay §5.
+
+**Và phải nói cả chiều ngược, kẻo lại là lời khai rộng hơn phép đo:** đây là **n=1** lượt khác nền, có
+ràng buộc phân công (cấm tự soạn phản chứng) nên độ phủ hẹp hơn, và nó **không** chứng minh codex giỏi
+hơn — chỉ chứng minh **khác nền thấy được chỗ cùng nền mù**. Một lượt Claude thứ năm có thể cũng tìm
+ra; điều đó chưa ai đo.

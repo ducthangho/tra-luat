@@ -6331,6 +6331,10 @@ def _r342_doi_chieu(py: Path, d: Path, than: str, reqs: str):
 
 # Mười lớp, trong đó BỐN lớp bản cũ đã trả lời SAI (`-r` thiếu · `-r` đủ · extras · và
 # lệch bản ở chế độ hậu-pip). Tiêu chí là KHỚP PIP, không phải một bảng mã thoát ta tự đặt.
+# PHAM VI CUA BAT BIEN NAY DA THU HEP O r344, va noi thang thay vi lang le bo ca:
+# doi chieu voi pip CHI ap cho tep MA DANH SACH CHO PHEP NHAN (moi dong la ten+specifier
+# tran). Tep co URL/VCS/`-r` khong duoc hoi pip nua — `r344` do rieng chung, va ly do
+# chung khong con doi chieu duoc voi pip nam ngay trong docstring cua ca ay.
 _R342_CA = [
     ("lech ban pypdf>=4.0",        "pypdf>=4.0\n"),
     ("ban thoa pypdf>=3.0",        "pypdf>=3.0\n"),
@@ -6338,7 +6342,6 @@ _R342_CA = [
     ("marker chua dau thang",      'pypdf; os_name == "posix#x"\n'),
     ("chu thich sau khoang trang", "pypdf>=3.0  # ghi chu\n"),
     ("extras",                     "pypdf[crypto]>=3.0\n"),
-    ("dong hong",                  "khong hop le ===== bay\n"),
     ("goi thieu han",              "khong_he_ton_tai_r342\n"),
 ]
 
@@ -6353,10 +6356,7 @@ def r342_ma_thoat_cua_chot_phai_khop_pip():
         py = _r342_venv(d)
         if py is None:
             return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
-        (d / "extra_thieu.txt").write_text("khong_he_ton_tai_r342\n", encoding="utf-8")
-        (d / "extra_du.txt").write_text("pypdf>=3.0\n", encoding="utf-8")
-        ca_ds = _R342_CA + [("chi thi -r toi goi thieu", "-r extra_thieu.txt\n"),
-                            ("chi thi -r toi goi du", "-r extra_du.txt\n")]
+        ca_ds = _R342_CA
         lech = []
         for nhan, reqs in ca_ds:
             mp, mc = _r342_doi_chieu(py, d, than, reqs)
@@ -6438,7 +6438,7 @@ def r342_dot_bien_bo_hoi_pip_lam_ca_dich_DO():
     than = _r338_than_hook()
     if not than:
         return "bo qua ban sao roi (khong co session-start.sh)"
-    neo = "if kiem_ban and not _co_xa:"
+    neo = 'if kiem_ban and _chi_ten_tran("requirements.txt"):'
     bang(than.count(neo) == 1, f"R342_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
     dot_bien = than.replace(neo, "if False:")
     with tempfile.TemporaryDirectory() as td:
@@ -6454,18 +6454,33 @@ def r342_dot_bien_bo_hoi_pip_lam_ca_dich_DO():
              "quy duoc cho phep hoi pip")
 
 
-# r343 — `--no-index` KHÔNG làm phép đo offline, và đây là lớp lỗi MỚI do chính việc uỷ
-# quyền cho pip (r342) mở ra. `--no-index` chỉ tắt TRA CỨU CHỈ MỤC; một direct reference
-# (`gói @ https://…`) vẫn được pip đi lấy. Phản chứng đã chạy: URL tới một host chết ⇒
-# pip thử rồi thoát 1 sau **8,5s** ⇒ mỗi lần mở phiên chậm thêm chừng ấy VÀ luôn đi
-# đường cài lại. Một chốt chẩn đoán làm chậm mọi phiên là chốt sẽ bị gỡ.
+# r344 — DANH SÁCH CHO PHÉP, không phải danh sách CẤM.
 #
-# Ca đo CẢ HAI hậu quả — mã thoát và THỜI GIAN — vì cái hại chính là độ trễ.
-_R343_URL = "pypdf @ http://127.0.0.1:9/pypdf-3.17.4-py3-none-any.whl\n"
+# r343 dò direct reference bằng `@ scheme://` rồi bỏ qua pip. Đó là DANH SÁCH CẤM, và nó
+# thua ngay lượt review kế tiếp: URL TRẦN (`http://host/x.whl`) và VCS (`git+https://…`)
+# không có dấu `@` nên lọt sạch — đo được: chạm mạng rồi `rc=1` ⇒ mỗi phiên đều đi đường
+# cài lại. Đúng bài học *"danh sách CẤM không bao giờ đủ — phải đảo thành danh sách CHO
+# PHÉP"*: danh sách cấm phải đoán trước MỌI cách viết nên thua từ trong thiết kế.
+#
+# VÌ SAO KHÔNG ĐỐI CHIẾU ĐƯỢC VỚI PIP Ở ĐÂY, và vì sao thế vẫn an toàn: với tệp mà danh
+# sách cho phép TỪ CHỐI, chốt không hỏi pip nên mã thoát của nó cố ý LỆCH pip. Điều giữ
+# cho việc ấy an toàn là MỐC: `.tl_reqs_<sha256(requirements.txt)>_<sha256(sys.prefix)>`
+# chỉ được đặt SAU khi `pip install` thành công (`: > "$DAU"`), nên đường `--kiem-ban`
+# chỉ chạy trên đúng tệp mà pip ĐÃ cài được. Một tệp hỏng hay một URL chết không bao giờ
+# đặt được mốc; sửa tệp thì băm đổi và mốc hết hiệu lực.
+#
+# KHOẢNG TRỐNG CÒN LẠI, khai thẳng: gói bị GỠ SAU khi mốc đã đặt, trên một dòng mà
+# `Requirement` không phân tích được (URL trần, VCS) ⇒ không phát hiện được. Dạng
+# `tên @ url` thì PHÁT HIỆN ĐƯỢC — ca dưới đo đúng chỗ đó.
+_R344_XA = [
+    ("URL tran", "http://127.0.0.1:9/pypdf-3.17.4-py3-none-any.whl\n"),
+    ("VCS git+http", "git+http://127.0.0.1:9/x.git\n"),
+    ("direct ref `ten @ url`", "pypdf @ http://127.0.0.1:9/pypdf-3.17.4-py3-none-any.whl\n"),
+]
 
 
 @ca
-def r343_direct_reference_tu_xa_khong_duoc_lam_cham_phien():
+def r344_nguon_tu_xa_khong_duoc_cham_mang_luc_mo_phien():
     than = _r338_than_hook()
     if not than:
         return "bo qua ban sao roi (khong co session-start.sh)"
@@ -6474,39 +6489,74 @@ def r343_direct_reference_tu_xa_khong_duoc_lam_cham_phien():
         py = _r342_venv(d)
         if py is None:
             return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
-        (d / "requirements.txt").write_text(_R343_URL, encoding="utf-8")
-        t0 = time.monotonic()
+        for nhan, reqs in _R344_XA:
+            (d / "requirements.txt").write_text(reqs, encoding="utf-8")
+            t0 = time.monotonic()
+            r = subprocess.run([str(py), "-c", than, "--kiem-ban"], cwd=d,
+                               capture_output=True, text=True, timeout=600)
+            mat = time.monotonic() - t0
+            # 2s: rong rai so voi ~0,1s do duoc, nhung duoi moi lan cham mang da do
+            # (0,65s · 0,97s · 8,5s tuy dang).
+            bang(mat < 2.0, f"{nhan}: phep do cham {mat:.2f}s — pip da di lay nguon tu xa")
+            bang(r.returncode == 0,
+                 f"{nhan}: ep di duong cai lai ⇒ moi phien deu cai lai (rc={r.returncode})")
+
+
+@ca
+def r344_goi_VANG_MAT_van_phai_DO_du_khong_hoi_duoc_pip():
+    """Lớp phụ là thứ DUY NHẤT còn lại khi danh sách cho phép từ chối — nó phải có răng.
+
+    Ca thật: mốc cũ + một gói đã bị gỡ ⇒ bản r343 trả 0 mãi mãi. Kiểm bằng METADATA chứ
+    không bằng module, vì gói chỉ có CLI hoặc gói meta thì không phơi module nào cả.
+    """
+    than = _r338_than_hook()
+    if not than:
+        return "bo qua ban sao roi (khong co session-start.sh)"
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        py = _r342_venv(d)
+        if py is None:
+            return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
+        (d / "requirements.txt").write_text(
+            "definitely_not_installed_r344 @ http://127.0.0.1:9/x.whl\n", encoding="utf-8")
         r = subprocess.run([str(py), "-c", than, "--kiem-ban"], cwd=d,
                            capture_output=True, text=True, timeout=600)
-        mat = time.monotonic() - t0
-        bang(r.returncode == 0,
-             "direct reference toi host CHET van ep di duong cai lai — moi phien se cai lai")
-        # 5s: rong rai so voi 0,2s do duoc, nhung van duoi 8,5s cua ban chua va.
-        bang(mat < 5.0, f"phep do cham {mat:.1f}s — pip da di lay URL that du co --no-index")
+        bang(r.returncode == 1,
+             "goi VANG MAT ma chot van xanh — moc cu se song mai va moi truong khong bao "
+             "gio duoc sua")
+        bang("VANG MAT" in (r.stdout + r.stderr),
+             f"do DO nhung khong noi ro la VANG MAT: {(r.stdout + r.stderr)[:120]!r}")
+        # RĂNG hai chiều: gói CÓ MẶT trên cùng dạng dòng ấy thì tuyệt đối không báo động giả.
+        (d / "requirements.txt").write_text(
+            "pypdf @ http://127.0.0.1:9/x.whl\n", encoding="utf-8")
+        r2 = subprocess.run([str(py), "-c", than, "--kiem-ban"], cwd=d,
+                            capture_output=True, text=True, timeout=600)
+        bang(r2.returncode == 0, "goi CO MAT ma van bao VANG MAT — bao dong gia")
 
 
 @ca
-def r343_dot_bien_bo_chot_direct_reference_lam_ca_dich_DO():
-    """Gỡ phép dò direct reference ⇒ ca trên phải ĐỎ (chậm hoặc ép cài lại)."""
+def r344_dot_bien_go_danh_sach_cho_phep_lam_ca_dich_DO():
+    """Gỡ danh sách cho phép ⇒ nguồn từ xa lại chạm mạng ⇒ ca trên phải ĐỎ."""
     than = _r338_than_hook()
     if not than:
         return "bo qua ban sao roi (khong co session-start.sh)"
-    neo = "if kiem_ban and not _co_xa:"
-    bang(than.count(neo) == 1, f"R343_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
-    dot_bien = than.replace(neo, "if kiem_ban:")
+    neo = "        for _d in _doc_dong(duong):\n            if _d.startswith(\"-\"):"
+    bang(than.count(neo) == 1, f"R344_MUTATION_ANCHOR_COUNT:{than.count(neo)}")
+    dot_bien = than.replace("def _chi_ten_tran(duong):\n    if _Req is None:\n        return False",
+                            "def _chi_ten_tran(duong):\n    return True\n    if _Req is None:\n        return False")
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)
         py = _r342_venv(d)
         if py is None:
             return "KHONG DO DUOC: khong dung duoc venv/pip (co the khong co mang)"
-        (d / "requirements.txt").write_text(_R343_URL, encoding="utf-8")
+        (d / "requirements.txt").write_text(_R344_XA[0][1], encoding="utf-8")
         t0 = time.monotonic()
         r = subprocess.run([str(py), "-c", dot_bien, "--kiem-ban"], cwd=d,
                            capture_output=True, text=True, timeout=600)
         mat = time.monotonic() - t0
-        bang(r.returncode != 0 or mat >= 5.0,
-             f"dot bien go chot VAN nhanh va VAN xanh (rc={r.returncode}, {mat:.1f}s) — "
-             "ca dich khong do chot direct reference")
+        bang(r.returncode != 0 or mat >= 2.0,
+             f"dot bien go danh sach cho phep VAN nhanh va VAN xanh (rc={r.returncode}, "
+             f"{mat:.2f}s) — ca dich khong do danh sach cho phep")
 
 
 # ------------------------------------------------------ tự đột biến: có răng không

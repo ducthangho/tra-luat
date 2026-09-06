@@ -1,3 +1,44 @@
+# ★ dev-side — r344: đảo danh sách CẤM thành danh sách CHO PHÉP, và tôi vừa tái phạm đúng thứ mình vừa sửa (2026-09-06)
+
+Lượt review thứ sáu ra hai P2, và **cả hai đều là hậu quả của `_co_xa`** — cái cửa thoát
+tôi tự thêm ở r343. Tức r343 dựng lại một cơ chế *"ta tự quyết"*, đúng thứ r342 sinh ra để
+bỏ, và nó thủng ngay lượt sau.
+
+Thủng theo đúng cách `CLAUDE.md` đã tiên đoán: `_co_xa` dò `@ scheme://` nên **URL TRẦN**
+(`http://host/x.whl`) và **VCS** (`git+https://…`) lọt sạch — đo được `rc=1` sau 0,97s và
+0,65s, tức mỗi phiên vẫn chạm mạng rồi đi đường cài lại. *"Danh sách CẤM phải đoán trước
+MỌI cách viết nên thua từ trong thiết kế; danh sách cho phép chỉ phải liệt kê một tập NHỎ
+và BIẾT TRƯỚC."*
+
+**Đảo lại:** chỉ hỏi pip khi **mọi** dòng là `Requirement` trần (có tên, có thể có
+specifier/marker, **không** có `url`); có `-r`/`-c`/`-e` hay bất kỳ URL nào ⇒ không hỏi.
+Chiều rủi ro của khe hở nay **ngược**: bỏ sót một dạng hợp lệ chỉ làm ta hỏi pip *ít hơn*,
+không bao giờ làm pip đi lấy mạng lúc mở phiên. Đo sau vá: **0,09–0,15s** ở cả ba dạng
+nguồn từ xa (trước: 0,65s · 0,97s · 8,5s).
+
+**P2 thứ hai — gói VẮNG MẶT bị coi là đủ.** Khi danh sách cho phép từ chối, lớp phụ là thứ
+duy nhất còn lại, mà nó lại lặng lẽ bỏ qua gói không có trong `ban_do` ⇒ một mốc cũ cộng
+một gói đã gỡ khiến chốt trả 0 mãi mãi. Chữa bằng kiểm **metadata** (`importlib.metadata`),
+KHÔNG phải kiểm module — gói chỉ có CLI hoặc gói meta thì không phơi module nào cả.
+
+**BA KỲ VỌNG ĐẦU CỦA TÔI TRONG BẢNG ĐO LÀ SAI, KHÔNG PHẢI MÃ SAI.** Tôi viết "URL trần
+phải `rc=1`", trong khi thiết kế nói ngược: allowlist từ chối ⇒ lui về mốc + thăm import ⇒
+`rc=0`. Thứ giữ cho việc ấy an toàn là **mốc khoá theo `sha256(requirements.txt)`** và chỉ
+được đặt SAU khi `pip install` thành công (`: > "$DAU"`) — nên một tệp hỏng hay một URL
+chết **không bao giờ đặt được mốc**, và sửa tệp thì băm đổi, mốc hết hiệu lực. Đã đo cả hai
+vế thay vì khẳng định. Bài học: khi ba ca cùng "đỏ", hãy hỏi *"kỳ vọng của tôi có đúng
+không"* trước khi hỏi *"mã sai ở đâu"*.
+
+**Một bất biến bị THU HẸP, và nói ra thay vì lặng lẽ bỏ ca:** "đối chiếu với pip" nay chỉ
+áp cho tệp mà danh sách cho phép NHẬN. Hai ca `dòng hỏng` và `-r` rời khỏi bảng parity, kèm
+lý do ngay trong mã. **Khoảng trống còn lại, khai thẳng:** gói bị gỡ SAU khi mốc đã đặt,
+trên một dòng mà `Requirement` không phân tích được (URL trần, VCS) ⇒ không phát hiện được;
+dạng `tên @ url` thì phát hiện được, và `r344` đo đúng chỗ đó.
+
+Cổng: `launcher_test` **175/175** (bỏ qua 1 — fixture Windows) · đột biến **170/170**
+(1 không đo được trên nền này) · `tl --selftest` **1709/1709** · ruff `--select F` delta
+= **0** · `bash -n` OK · `git diff --check` rc=0 · hook chạy thật hai lượt đúng thiết kế.
+
 # ★ dev-side — r343: `--no-index` KHÔNG làm phép đo offline (lớp lỗi r342 tự mở ra) (2026-09-06)
 
 Lượt review sau r342 ra **một** P2 (giảm từ ba), và nó trả lời đúng câu hỏi tôi đặt cho

@@ -42,8 +42,8 @@ assurance_target: cross_approved
 access: read-write
 
 spec_path: ops/specs/MUTANT-WINDOWS-NHANH-DON-DUOC.md
-spec_sha256: 0a507223161c72282a1efa778000ad7e52ac7a2773c558dd8c7e0640d6bbc91d
-spec_hash: 0a507223161c72282a1efa778000ad7e52ac7a2773c558dd8c7e0640d6bbc91d
+spec_sha256: 1740da866b8df2c19f9affb2c5f585a55957335b552bbaf9864c3f88ec7c72e9
+spec_hash: 1740da866b8df2c19f9affb2c5f585a55957335b552bbaf9864c3f88ec7c72e9
 
 write_set:
   - ops/nhanh_don_duoc_test.py

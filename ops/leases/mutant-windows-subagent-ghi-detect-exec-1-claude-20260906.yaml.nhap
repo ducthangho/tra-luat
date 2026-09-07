@@ -42,8 +42,8 @@ assurance_target: cross_approved
 access: read-write
 
 spec_path: ops/specs/MUTANT-WINDOWS-SUBAGENT-GHI-DETECT.md
-spec_sha256: 9434f3c48954085b10f709573854e3a75135c090bae8e98bb4b457796d036272
-spec_hash: 9434f3c48954085b10f709573854e3a75135c090bae8e98bb4b457796d036272
+spec_sha256: 2e5a0ca510326e3a096a5453ff6a0206cd24b1528ffa29f4540d0be4c12189f3
+spec_hash: 2e5a0ca510326e3a096a5453ff6a0206cd24b1528ffa29f4540d0be4c12189f3
 
 write_set:
   - .claude/hooks/subagent_ghi_detect_test.py

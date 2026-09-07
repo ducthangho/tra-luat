@@ -326,6 +326,16 @@ Chép từ biên nhận và đặc tả của `MUTANT-KHONG-CHAY-TREN-WINDOWS` (
    bản đầu của lease này viết *"giá gấp ba"* như số đo (verdict lượt 1, P2) — sửa thành nội suy.
    Khoản tiết kiệm packet này mua được là **ước theo tỉ lệ**; A7 là phép đo trả lời. Nợ có tên
    **`CHUA-CO-PHAN-RA-THOI-GIAN-THEO-BO-TREN-WINDOWS`**.
+   · **ĐO THÊM 00:47Z 07-09-2026 — và nó BÁC con số `~3`, theo cả hai chiều.** Trên **9** lượt
+   master, tỉ lệ `phút Windows / phút ubuntu` của **cùng một bước, cùng head, cả hai nền `success`**
+   (bảng đủ ở `GATE-TACH-JOB-CAT-CHI-PHI` mục *"Hệ số nền KHÔNG phải một con số"*): `test registry`
+   trung vị **`1,21×`** (n=9) · `packet-loop selftest` **`2,35×`** (n=9) · `lease-publish selftest`
+   **`2,94×`** (n=9) · `bien-nhan v2 selftest` **`8,01×`** (n=8) · **job trọn `gate`** **`1,68×`**
+   (n=9). Dải toàn bộ: `1,07×` – `9,74×`. Nên `~3` **quá CAO** cho job trọn và **quá THẤP** cho một
+   selftest python nặng; nhân bằng một hệ số duy nhất là sai bất kể chọn số nào.
+   · **Nợ này VẪN MỞ, và phép đo trên KHÔNG đóng nó.** Không bước nào trong bảng ấy là một **vòng
+   đột biến** — thứ packet này thật sự cần nhân. Chúng là **proxy gần nhất đo được**, không phải
+   phép đo thay. `A7` vẫn là phép đo duy nhất trả lời cho bộ này.
 2. **Không có đường đo Windows tại chỗ.** Container Linux. Mọi khẳng định về hành vi Windows đi
    qua CI, và đó là lý do vị từ nền phải là hàm THUẦN nhận `ten_nen` — nếu chỉ đọc `os.name` thật
    thì phản chứng A1/A5 cần máy Windows mới chạy được, tức không ai canh.

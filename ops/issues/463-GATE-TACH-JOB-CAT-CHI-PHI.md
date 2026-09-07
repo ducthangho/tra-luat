@@ -10,7 +10,7 @@ lần, ba mức** (`25` khởi tạo `9e4f361` → `45` `6d88a2c` → `60` `7657
 nâng lần nữa là **điều kiện DỪNG**, nên **đặc tả này không đề xuất nâng trần** và packet nào đề xuất
 thì bị bác.
 
-## Trần 60 KHÔNG còn là rủi ro suy diễn — nó ĐÃ BỊ CHẠM, trên master
+## Trần 60 KHÔNG còn là rủi ro suy diễn — nó ĐÃ BỊ CHẠM (run `workflow_dispatch` trên nhánh `claude/tra-luat-process-review-o4d7kb`, không phải master — sửa theo lượt 8)
 
 Run `34048229370`, head `4cd80c5`, `gate (windows-latest)`: **60,17 phút**, `conclusion: cancelled`,
 cắt giữa bước `test registry`, **26 / 44** mục còn `skipped`. Job ubuntu cùng run `success` `26,42 p`.
@@ -30,10 +30,10 @@ thường của GitHub, **không** phải hai tầng mâu thuẫn.)
 Không con số nào sai lúc viết; chúng **hết hạn**, và hết hạn theo **chiều xấu đi**. Đó là `L5` phát
 biểu bằng dữ liệu. **Phiên thi công phải ĐO LẠI**, đừng trích bảng này.
 
-**Hệ quả cứng cho `nghiem_thu`:** biên độ `10,28` phút **lớn hơn** mọi khoản tiết kiệm mà bảng "cái
-giá của việc tách job" hứa cho một bước đơn lẻ. Ngưỡng nào chừa dưới `10,28` phút thì **đang đo nhiễu
-chứ không đo bản vá** — kể cả ngưỡng `A1 ≤ 25,00` hiện tại, vốn chỉ chừa `~4` phút. Khoảng cách ấy
-**rộng ra** giữa hai phép đo, không hẹp lại (`chua_do_duoc` #3).
+**Hệ quả cho `nghiem_thu` (sửa theo lượt 7–8):** biên độ `10,28` phút là **khoảng biến thiên của một mẫu tiện tay
+gộp khác tải (39/40 bước) lẫn khác nhánh (5 master + 6 nhánh)** — không phải nhiễu runner thuần, không phải phương
+sai. Nó là lý do ĐỌC kết quả A1 thận trọng, **không** phải giấy phép nới: **A1 giữ `≤ 25,00`**, A1 ĐỎ thì báo chủ kho
+như KẾT QUẢ ĐO (đặc tả revision 2–3, `chua_do_duoc` #3; nợ có tên `NHIEU-RUNNER-CHUA-TACH-KHOI-TAI`).
 
 ## Hệ số nền KHÔNG phải một con số — và điều này đổi hướng ba packet kia
 
@@ -57,12 +57,13 @@ trung vị lệch**: `test registry` **1,21×** (khai 1,20) · `packet-loop self
 (2,39) · `bien-nhan v2 selftest` **7,79×** (7,56 — ngoài cả dải làm tròn đã khai `7,48–7,65`); `n`/min/max
 khớp. Và **11 run ấy KHÔNG đều là master**: 5 `master/push` + 6 run nhánh khác (`pull_request`/`workflow_dispatch`),
 1 head 39 bước + 10 head 40 bước — tức biên độ `10,28` gộp cả khác tải lẫn khác nhánh (finding P2
-`bien-do-khac-head-khong-phai-nhieu-runner`). Bảng trong đặc tả đóng băng vì vậy là **lời khai lịch sử**; con số
-dùng được là con số tính lại được từ `buoc.tsv`. Đồng bộ lại đặc tả GATE đòi **revision có thẩm quyền chủ kho**
-(đổi băm ⇒ lease cấp lại), chưa làm ở PR này.
+`bien-do-khac-head-khong-phai-nhieu-runner`). Bảng trong đặc tả **revision 1** vì vậy là **lời khai lịch sử**; con số
+dùng được là con số tính lại được từ `buoc.tsv` — và **revision 2** (07-09-2026, chỉ thị chủ kho) đã đưa đúng bảng ấy vào
+đặc tả, **revision 3** sửa nốt A2 và các câu sót (xem footer). Bảng dưới đây giữ nguyên số revision 1 để đối chiếu lịch sử;
+bảng hiện hành ở đặc tả r3.
 
 Nội suy *"Windows đắt gấp ~3"* mà hai packet `MUTANT-WINDOWS-*` dựa vào là **sai theo cả hai chiều**:
-quá CAO cho job trọn (`1,73×`), quá THẤP hơn hai lần cho một selftest python nặng (`7,56×`).
+quá CAO cho job trọn (`1,73×`), quá THẤP hơn hai lần cho một selftest python nặng (`7,79×` theo r2–r3; r1 ghi `7,56×`).
 Dải toàn bộ `1,07×` – `9,74×`. **Một hệ số duy nhất không dùng được** — phải nói rõ đang nhân cho
 **bước nào**.
 
@@ -118,11 +119,11 @@ Phép canh hai nguồn ref chạy trước: máy chủ 299 ⊆ cục bộ 300 (`
 ---
 
 **Đặc tả đóng băng (revision 2):** `ops/specs/GATE-TACH-JOB-CAT-CHI-PHI.md` @ `d85365463259615537c4fb96acd2408d917d9bd2` (commit ĐẦU TIÊN chứa bản có băm dưới đây; revision 1 @ `b743f17`, băm `8cca700c…`)
-**`spec_sha256`:** `bda86f128c220b868e9c103c919d213d8aba5ed1753962b0898ea1ce1852812c` (**revision 2**, 07-09-2026 — chỉ thị https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5567157629; revision 1 = `8cca700cba9c2312d05bf64eee3d4a5bda5317cb45e244ed22161b4ddcc83c62`)
+**`spec_sha256`:** `37800aa6b33afb8caf3296440bd0ac49dbd6b4300fe59f832e11ae629cc1ffb2` (**revision 3**, 07-09-2026 — chỉ thị https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936; revision 2 = `bda86f128c220b868e9c103c919d213d8aba5ed1753962b0898ea1ce1852812c`; revision 1 = `8cca700cba9c2312d05bf64eee3d4a5bda5317cb45e244ed22161b4ddcc83c62`)
 **`base_sha`:** `1b3caa1` lúc soạn; **ba mỏ neo trong lease đo lại lúc cấp = `d28c4b1`** (head `master`
 03:37:33Z 07-09-2026) · **đi TRƯỚC** `LO-319` · `2A` · `2B`
-**Lease ĐÃ CẤP (revision 2):** `ops/leases/gate-tach-job-cat-chi-phi-exec-1r2-claude-20260906.yaml` (0 ô null; cấp 2026-09-07T07:50:35Z, hạn 2026-09-08T07:50:35Z, `thay_the_cho` exec-1,
-uỷ quyền neo https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5567157629); lease `exec-1` (cấp 03:37:33Z 07-09, Mission #467) mang bia mộ `da_bi_thay_the`.
+**Lease ĐÃ CẤP (revision 3):** `ops/leases/gate-tach-job-cat-chi-phi-exec-1r3-claude-20260906.yaml` (0 ô null; cấp 2026-09-07T09:44:51Z, hạn 2026-09-08T09:44:51Z, `thay_the_cho` exec-1r2,
+uỷ quyền neo https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936); chuỗi `#456 → exec-1 → exec-1r2 → exec-1r3`, mỗi mắt mang bia mộ `da_bi_thay_the` hai chiều.
 **Nền A1/A5 tái lập được TRONG KHO:** `ops/reviews/pr468-hoso-4-packet-review-6-codex/nen-a1-a5/`
 (13 run · 26 job · 1140 bước, `job.tsv` + `buoc.tsv` + `tinh.py`, đo 03:54Z 07-09-2026) — thay cho
 `buoc_master.tsv` mà đặc tả nhắc nhưng không có trong kho (finding P1 `thieu-hien-vat-quyet-dinh-h-va-chi-phi`).

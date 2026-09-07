@@ -257,7 +257,7 @@ thì H **không đủ** và packet chuyển sang lựa chọn 2 hoặc 3, không
 khi cấp lease LO-319, `granted_on_instruction` neo vào đó. Các bản trước của đặc tả không tự trả lời `§12`; câu trả lời
 là của chủ kho và nay đã có. Lease nháp giữ `thay_the_cho: []` và các ô chủ kho trống cho tới lúc cấp.
 
-### Thiết kế H — phủ VỊ TRÍ cặp trên dòng được chọn (ứng viên, đã đo, CHƯA được chọn)
+### Thiết kế H — phủ VỊ TRÍ cặp trên dòng được chọn (đã đo; **chủ kho CHỌN 07-09-2026 — lựa chọn 1**, xem mục §12 ngay trên; thi công chưa bắt đầu, lease chưa cấp, Đ1–Đ5 còn ràng buộc)
 
 Nguồn: gói gợi ý của verdict lượt 4 (nhãn *"chưa chạy trên cây thật — executor tự áp, tự đo, tự chịu
 trách nhiệm commit"*). **Nói cho đúng mức sau cross-review lượt 6** (finding P1

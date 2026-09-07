@@ -45,8 +45,8 @@ assurance_target: cross_approved
 access: read-write
 
 spec_path: ops/specs/LO-319-LINUX-BANG-CHUNG-XANH.md
-spec_sha256: 4db18266746e220b5745a341faa1307a105b1ace457e31c6af5dcf461d3c86ae
-spec_hash: 4db18266746e220b5745a341faa1307a105b1ace457e31c6af5dcf461d3c86ae
+spec_sha256: 399a9e8162dbe6a59c8bee3514a725e796c82787aa6dfffba6d42f1eb76973c0
+spec_hash: 399a9e8162dbe6a59c8bee3514a725e796c82787aa6dfffba6d42f1eb76973c0
 
 write_set:
   - .claude/dev/ci_dang_ky_test.py
@@ -116,11 +116,12 @@ ly_do_cap: >-
   14 đột biến vào nguồn, 12 có ca chứng (mH13 là mã chết; mH8/mH9 là con của mH7). 5 ranh giới
   mới của H ghi ở spec `chua_do_duoc` #1 (chuỗi `54/54/0` khi grammar khai `/\d+`; `039/39`;
   chữ số Unicode; số 5000 chữ số ⇒ ngoại lệ rc≠0; `nhanh` hậu tố).
-  H là bản thiết kế THỨ NĂM của cùng một cách làm. Spec KHÔNG khai §12 đã xong: ba lựa chọn (1 —
-  tiếp H trong write set 1 tệp · 2 — mở revision đổi bên IN, 9 tệp, vượt trần sensitive ADR-0044 ·
-  3 — dừng packet và tách lại) và năm điều kiện đo được Đ1–Đ5 đặt ở spec mục "§12 — bốn lần
-  hỏng" cho chủ kho quyết; lựa chọn ghi vào granted_on_instruction. Lease này CHỈ có việc nếu chủ
-  kho chọn 1. Chuỗi regex SPAN của 8 mục giữ NGUYÊN VĂN — chỉ đổi KIỂU giá trị của `MOI`/`MOI_WINDOWS`.
+  H là bản thiết kế THỨ NĂM của cùng một cách làm; spec đặt ba lựa chọn (1 — tiếp H trong write
+  set 1 tệp · 2 — mở revision đổi bên IN, 9 tệp, vượt trần sensitive ADR-0044 · 3 — dừng packet và
+  tách lại) và năm điều kiện đo được Đ1–Đ5 ở mục "§12 — bốn lần hỏng". CHỦ KHO ĐÃ CHỌN 07-09-2026:
+  lựa chọn 1 — tiếp H (dấu vết bền: https://github.com/ducthangho/tra-luat/issues/464#issuecomment-5567158069; khi cấp, granted_on_instruction
+  neo vào đó). Quyết định thiết kế KHÔNG phải cấp lease: các ô chủ kho vẫn trống tới lúc cấp, thi
+  công chưa bắt đầu, Đ1–Đ5 tiếp tục ràng buộc (chạm ngưỡng ⇒ chuyển 2/3). Chuỗi regex SPAN của 8 mục giữ NGUYÊN VĂN — chỉ đổi KIỂU giá trị của `MOI`/`MOI_WINDOWS`.
 
 viec_trong_lease:
   - 'CHỈ bắt tay khi granted_on_instruction ghi chủ kho đã chọn lựa chọn 1 của spec mục "§12 — bốn

@@ -237,3 +237,10 @@ Codex `gpt-6-astra`, xhigh, **1576 s, chạy trọn ngay lần đầu**. `change
 lượt 6: 6 ĐÃ VÁ THẬT · 2 VÁ HỜ · 1 VÁ SINH LỖI MỚI (`a9-khai-sai-base-ngoai-le`) · 2 CHƯA VÁ (`bia-mo-…` chờ hết hạn/dọn ref,
 `bien-do-…` trong đặc tả GATE đóng băng). Finding mới P1 `issue-lo-neo-commit-cu-kem-bam-moi`. Verdict `pr468-hoso-4-packet-review-7-codex-verdict.md`,
 hiện vật `pr468-hoso-4-packet-review-7-codex/`. Bản vá theo verdict ở commit kế.
+
+# LƯỢT 8 — 07-09-2026, `reviewed_sha` `4d0ead5` (sau revision 2 GATE + quyết định §12)
+
+Codex `gpt-6-astra`, xhigh, **1405 s, chạy trọn ngay lần đầu**. `changes_requested` — **2 P1 / 2 P2**. ĐỐI CHIẾU 6 finding lượt 7:
+4 ĐÃ VÁ THẬT (`span-rong-…` **đóng**: 1213/0/0, Đ2 8/8 · `thieu-hien-vat-…` · `issue-lo-neo-…` · `a9-…`) · 1 VÁ HỜ (`bien-do-…`) ·
+1 CHƯA VÁ (`bia-mo-…`, chờ 14:30:07Z). Mới: P1 `a2-neo-nen-cu-trai-write-set-hien-tai`, P2 `quyet-dinh-tiep-h-con-bi-phu-dinh`.
+Verdict `pr468-hoso-4-packet-review-8-codex-verdict.md`, hiện vật `pr468-hoso-4-packet-review-8-codex/`. Bản vá + **revision 3** ở commit kế (chỉ thị chủ kho https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936).

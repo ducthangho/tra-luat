@@ -1,4 +1,4 @@
-# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 2)
+# Đặc tả packet — GATE-TACH-JOB-CAT-CHI-PHI (revision 3)
 
 - `packet_id`: **GATE-TACH-JOB-CAT-CHI-PHI** (bí danh chữ; ID bền theo `PROTOCOL §3.2` là
   `wp<packet_issue>`, suy ra được ngay khi có số Issue — tiền lệ #456 giữ bí danh ở `packet_id`,
@@ -7,7 +7,10 @@
 - `mission_issue`: **(để trống — chủ kho cấp.)** `§3.2` đòi; lease #456 không có, và không có
   mission nào đang mở cho lane này. Khuyến nghị: mở MỘT Mission Issue cho cả bốn packet
   (`GATE` · `LO` · `2A` · `2B`); nếu không, ghi số Issue của `#456` và nói rõ đó là thay thế.
-- `revision`: **2** · `generation`: 1 — revision 2 mở theo chỉ thị chủ kho 07-09-2026 (dấu vết bền: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5567157629) sau
+- `revision`: **3** · `generation`: 1 — **revision 3** mở theo chỉ thị chủ kho 07-09-2026 (dấu vết bền: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936) sau
+  cross-review lượt 8 (`reviewed_sha` `4d0ead5`): (e) **A2** không neo run `34048685345` (`1b3caa1`, 39 bước) nữa — nền so tập phải
+  là lượt **cùng base của lease, cùng event/lane** (P1 `a2-neo-nen-cu-trai-write-set-hien-tai`); (f) gỡ nốt hai câu "mười một/mọi
+  lượt master" ở phần bối cảnh (P2 `bien-do-khac-head-khong-phai-nhieu-runner`, VÁ HỜ ở r2). Revision 2 (băm `bda86f12…`) mở theo chỉ thị chủ kho 07-09-2026 (dấu vết bền: https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5567157629) sau
   cross-review lượt 6–7 của PR #468. Đổi so với revision 1 (băm `8cca700c…`): (a) bảng *"Hệ số nền"* tính lại từ nguồn
   TRONG KHO `ops/reviews/pr468-hoso-4-packet-review-6-codex/nen-a1-a5/buoc.tsv` — 4/7 trung vị đổi (`test registry`
   `1,20→1,21` · `packet-loop` `2,35→2,37` · `G5` `2,39→2,40` · `bien-nhan v2` `7,56→7,79`), thay cho `buoc_master.tsv` không có
@@ -94,7 +97,7 @@ cho một bước và sai cho job — verdict lượt 1, P2):
 
 ⇒ **nhiễu runner cỡ `1`–`2,3` phút ở mức job là có thật**, và mọi ngưỡng ở `nghiem_thu` phải chừa
 biên cho nó. Hai lượt là **hai điểm dữ liệu** — **và câu ấy đã HẾT HẠN sau 6 giờ**: phép đo
-02:49Z 07-09-2026 ngay dưới đây có **mười một** lượt master chạy trọn (xem `chua_do_duoc` #3).
+02:49Z 07-09-2026 ngay dưới đây có **mười một** lượt chạy trọn — 5 master + 6 nhánh (xem `chua_do_duoc` #3).
 
 Đó là lý do bảng này tách khỏi bảng trên thay vì dùng chung. **Phiên thi công phải ĐO LẠI cả hai
 bảng** — đây là số của 06-09-2026, và `L5` nói con số đúng lúc viết vẫn sai lúc người khác đọc.
@@ -192,7 +195,7 @@ selftest python nặng. Một hệ số duy nhất không dùng được cho c�
    **proxy gần nhất đo được** (selftest python, cùng runner, cùng head), không phải phép đo thay.
    `chua_do_duoc` #1 của hai đặc tả ấy **vẫn mở**.
 3. `n` ghi theo TỪNG DÒNG chứ không gộp — một bước `skipped` ở lượt nào thì lượt ấy rụng khỏi dòng đó.
-4. Mẫu là **mọi lượt master trong ~9,6 giờ** — **mẫu tiện tay**, không phải mẫu thiết kế. Nó không nói gì
+4. Mẫu là **mọi lượt chạy trọn trong ~9,6 giờ mà API liệt kê — 5 `master/push` + 6 run nhánh** — **mẫu tiện tay**, không phải mẫu thiết kế. Nó không nói gì
    về nền ở giờ cao điểm của GitHub, về runner ở vùng khác, hay về cây sau khi ba packet mutant land.
 
 **Hiện vật để TÁI TÍNH — nay ở TRONG KHO.** Revision 1 dẫn `buoc_master.tsv` (2062 hàng) nằm ở scratchpad phiên soạn —
@@ -457,12 +460,16 @@ gì để ép nó xanh.
 **A2 (M2) — độ phủ không đổi, đo bằng TẬP HỢP, không bằng số đếm, trên HAI loại cò.**
 Lấy `(job, tên bước, nền, conclusion)` của lượt TRƯỚC và của lượt SAU. Bỏ cột `job`, rồi so **tập**
 `(tên bước, nền, conclusion)`. Hai tập phải **bằng nhau**. Làm HAI lần:
-- lượt `workflow_dispatch` trên nhánh packet (cả hai nền) so với lượt master `34048685345`
-  (`1b3caa1`; nền: ubuntu **43** mục liệt kê, **4** `skipped`; Windows **43** mục, **6** `skipped` —
-  `conclusion` từng mục đọc lại bằng `list_workflow_jobs` khi so, không suy từ phép trừ);
-- lượt `pull_request` của chính PR packet (ubuntu) so với lượt `pull_request` gần nhất trên master
-  trước đó — đây là lượt DUY NHẤT chứng minh ba job **có mặt trên PR**, tức chứng minh không ai đã
-  thêm điều kiện chỉ-dispatch (xem A3).
+- (revision 3 — P1 `a2-neo-nen-cu-trai-write-set-hien-tai`, lượt 8) lượt `workflow_dispatch` SAU tách trên nhánh packet (cả hai
+  nền) so với lượt `workflow_dispatch` **TRƯỚC tách trên CÙNG nhánh tại `start_from_sha` của lease** (nền `d28c4b1`: **40** bước
+  YAML, có `bien-nhan v2 selftest`) — **cùng base, cùng event, cùng lane**; executor phóng lượt nền ấy TRƯỚC khi đẩy commit tách.
+  Run master `34048685345` (`1b3caa1`, 39 bước, `push`) chỉ còn là đối chiếu lịch sử: so với nó thì tách đủ bước **không thể**
+  khớp (thiếu bộ ba `bien-nhan v2`) còn bỏ bước ấy lại khớp — reviewer lượt 8 dựng phản mô hình, đúng thứ M2 sinh ra để chặn.
+  `conclusion` từng mục đọc lại bằng `list_workflow_jobs` khi so, không suy từ phép trừ; base trôi lúc thi công thì lấy lượt nền
+  mới cùng cách, không dùng lượt khác event/lane;
+- lượt `pull_request` của chính PR packet (ubuntu) so với lượt `pull_request` gần nhất mà `ci.yml` nền BẰNG BYTE `ci.yml` của
+  `start_from_sha` (ví dụ lượt `pull_request` của PR #468 tại head ≥ `2adb681`, đã merge `d28c4b1`) — đây là lượt DUY NHẤT
+  chứng minh ba job **có mặt trên PR**, tức chứng minh không ai đã thêm điều kiện chỉ-dispatch (xem A3).
 Đơn vị: **tập bộ ba**, không phải `wc -l`. Lý do dùng tập chứ không dùng số đếm là bài học đã đo
 của kho: hai tập lệch vẫn có thể cùng lực lượng (`CLAUDE.md`, mục `git for-each-ref`).
 Phép làm ĐỎ: quên chép `if: runner.os != 'Windows'` sang job mới ⇒ một bước đổi từ `skipped` sang

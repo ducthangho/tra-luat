@@ -1,0 +1,157 @@
+# BIEN NHAN v2 — cross-review luot 8 cua PR #455, tren head c0f18ac. LUOT CUOI cua PR nay.
+#
+# 1 P2 + 2 P3, KHONG P1 — va CA BA nham vao PHIEN DIEU PHOI, khong phai executor. Do la khac
+# biet dang ghi: bay luot truoc, finding nham vao SAN PHAM hoac BO TEST do executor viet.
+# Luot nay reviewer duoc giao ba cau hoi ve chinh ba phep bac cua dieu phoi, va bac mot trong
+# ba — R8-02. `R8-01` la lo DO PHU THAT, co phan chung chay duoc, tren head DA MERGE.
+
+schema_version: 2
+receipt_id: pr455-bien-nhan-v2-review-8-gpt6astra-20260906-b7384eee
+kind: review_delivery_receipt
+packet_id: 'PR455-BIEN-NHAN-V2'
+lease_id: khong-co-lease
+phase_key: PR455-CONG-LUOC-DO-BIEN-NHAN-V2
+luot: 8
+role: reviewer
+provider: codex
+executor_provider: claude
+cross_provider: true
+assurance: cross_approved
+verdict: approve_with_findings
+verdict_path: ops/reviews/pr455-bien-nhan-v2-review-8-gpt6astra-verdict.md
+verdict_sha256: 0889e7071dd9d5115f4b59637f8c6a7b23ebdcb418eb52408bd5bed7f797b06d
+verdict_bytes: 25961
+reviewed_sha: c0f18ac1fac53d72cb8e458fc20611dd8099fedc
+
+model_reviewer_identity:
+  provider: openai_codex
+  surface: codex_cli
+  transport: machine
+  session_run_id: b7384eee92a045a1b145718ac5310081
+  prompt_sha256: c5d34ea47c40477d57bb28bad64708232d0a380c16b8eaa4689a79c54141e9c5
+  prompt_kin_hoan_toan: true
+  thoi_luong_giay: 890.924
+  ma_thoat: 0
+  model_yeu_cau: gpt-6-astra
+  reasoning_effort_yeu_cau: high
+  neo_boi_launcher: >-
+    launcher.py run boc `codex exec -m gpt-6-astra -c model_reasoning_effort="high"
+    -s workspace-write --skip-git-repo-check` trong SANDBOX co MIRROR GIT DAY DU:
+    clone --bare --no-local + nap du ref, roi clone ra cay lam viec detached dung
+    reviewed_sha; 1759 commit, is-shallow=false, 299 ref remote-tracking, core.abbrev=7,
+    worktree sach. --require-clean; prompt truyen qua bien PROMPT_FILE.
+  KHONG_do_duoc: >-
+    MODEL THUC SU DA PHUC VU. `model_yeu_cau` va `reasoning_effort_yeu_cau` la thu TA YEU CAU,
+    khong phai thu da chay: `codex` KHONG phat truong `modelUsage` nhu `claude`, nen khong co
+    duong doi chieu sau luot chay. Thu DO DUOC truoc luot chay chi la HAI phep loai tru, moi
+    phep co doi chung rieng: (a) id `gpt-6-astra` DUOC CHAP NHAN — doi chung
+    `-m gpt-6-khong-he-ton-tai` tra HTTP 400 "model is not supported"; (b) bac
+    `model_reasoning_effort="high"` DUOC CHAP NHAN — doi chung gia tri bia tra HTTP 400 kem
+    danh sach enum ('none','minimal','low','medium','high','xhigh','max'), tuc `high` la mot
+    bac co that. Hai phep ay loai duoc "id khong ton tai" va "effort bi lui im lang"; chung
+    KHONG chung minh model nao da sinh ra van ban nay.
+
+github_submitter_identity:
+  actor: ducthangho
+  la_tac_gia_PR: true
+  ghi_chu: >-
+    ADR-0040: bien nhan do tai khoan tac gia dang KHONG thanh required check hay merge
+    authorization.
+
+anchor:
+  loai: canonical_ancestry
+  cuong_do: trung_binh
+  mo_ta: Neo bang verdict_sha256 + commit DAU TIEN chua tep verdict (71dd2a80).
+evidence_url: https://github.com/ducthangho/tra-luat/blob/71dd2a80a9e839997d3cee5fe4796b5377c6cffb/ops/reviews/pr455-bien-nhan-v2-review-8-gpt6astra-verdict.md
+authoritative_source: repo_file
+evidence_channel: repo_file
+
+phat_hien_chinh: >-
+  KHONG CON P1 (luot thu sau lien tiep khong co P1).
+  R8-01 (P2) — LO DO PHU THAT, co phan chung chay duoc: `c28` co mot hang xoa CA HAI cau neo
+  `PROTOCOL §8` cung luc, va `_cay_guong` lay danh sach neo tu chinh `bnv2._NEO_LUAT_CHEP_TAY`
+  cua san pham (phu thuoc vong). Hai mutant, moi cai bo MOT chot neo, SONG SOT qua toan suite
+  (45/45 ca, 57/57 dot bien, 2/2 tu kiem, TONG: DAT, rc=0). Reviewer loai mutant tuong duong
+  bang BANG WITNESS DOI XUNG tren ban sao PROTOCOL: xoa rieng cau NGUOI thi chi
+  mutant-bo-chot-NGUOI cho rc=0, xoa rieng cau MO HINH thi chi mutant kia cho rc=0; san pham
+  goc rc=2 o ca hai. Nen moi mutant that su bo mot hanh vi fail-close chu khong chi doi thong
+  bao. Loi khai "tung cau neo theo tep" cua dieu phoi rong hon kha nang phan biet cua ma tran.
+  R8-02 (P3) — CHINH DIEU PHOI khai rong hon phep do: commit `c0f18ac` va muc CHANGELOG cua
+  no viet "do ba lop" trong khi chi co HAI phep thu, lop thu ba suy bang LOAI TRU. Nang hon:
+  `pretooluse_guard.py` tra ve som khi tool khong phai `Bash`, nen phep thu bom mot ban ghi
+  `Edit` KHONG DO GI ve duong dan; va `rc=0` cua hook khong dong nghia allow — reviewer dung
+  doi chung cho thay hook tra 0 ca khi xuat `permissionDecision: ask`.
+  R8-03 (P3) — ba con so cua dieu phoi con lech: bang nguon la 1 DOI CHUNG + 5 nguon hong chu
+  khong phai sau nguon hong; bang transport so hai MAU SO khac nhau (`1/15` receipt DAT o
+  `4488ff1` so `2/17` tep tu khai v2 o head moi) roi goi `1/15` la "khong khop" du no dung
+  tren co so cua no; `m49` khai `11/68` dung o moc executor, do lai head nay la `12/69`.
+
+phan_bac_cua_reviewer: >-
+  Reviewer BAC HAI VUNG MONG dieu phoi tu nghi, tuc hai finding tiem nang KHONG thanh finding:
+  (a) "chin hang c28 khong co mutant rieng" — thuc ra la 11 hang (nhom arity va nhom dich bi
+  danh moi nhom hai hang), va chay tung hang voi mot phep lam yeu san pham cho thay CA 11 DEU
+  VI PHAM it nhat mot assertion cua c28; khong co co so noi mot hang "khong the do". Hai luot
+  trong so do chi thieu thong bao kieu mong doi, la rang diagnostic. (b) bo ba
+  ("human","manual_audit","human") DUNG nguyen hang Human Auditor cua ke hoach da provider §2,
+  va phan vung theo cot van chuyen cho ket qua phu hop tren sau hop dong hien tai — nhung §8
+  KHONG dinh nghia dinh ly tong quat "transport human <=> reviewer la nguoi", nen day la QUY
+  UOC DIEN GIAI moi, khong phai phep xac minh danh tinh. Reviewer khuyen: khi mo rong nguon,
+  khai vai reviewer/policy assurance tuong minh trong du lieu co cau truc thay vi de transport
+  tu quyet dinh vai, va phai co ca cho vai chua biet va hop dong hon hop.
+
+ba_cau_dieu_phoi_tu_hoi: >-
+  Dieu phoi giao reviewer kiem lai BA phep bac cua chinh minh doi voi bao cao executor.
+  (1) "do ba lop nen executor sai lop" — BI BAC, xem R8-02. (2) "0 ten chep tay tren 4488ff1
+  la sai" — DUNG: `git show 4488ff1:ops/bien_nhan_v2.py` dong 269 la
+  `PROVIDER_KHONG_HOP_DONG = frozenset({"human"})`, dong 273-274 hop no vao danh sach cho phep.
+  (3) "so thu tu khong neo duoc" — QUA TUYET DOI: reviewer neo duoc mot chuoi BON dot cu the
+  duoi dinh nghia "loi do bi bao thanh vi pham cua receipt" (R4-02@4ef73e6, R5-01@670071b,
+  finding connector@670071b va o b7a53ba, R7-01@ca960160) va KHONG tim duoc dot thu nam. Tuc
+  executor viet "TU" la dung, README viet "NAM" la sai. Hai so ay VAN CON o docstring
+  `_muc_cam_theo_provider` va o README — dieu phoi bo sot khi sua.
+
+do_luong_sandbox: >-
+  Mirror day du dat BEN TRONG sandbox de rang buoc "cam doc ra ngoai thu muc nay" van giu.
+  Doi chieu cong TRUOC khi giao: `doc-claims-check --strict` nen rc=0 / sandbox rc=0;
+  `release-verify --strict` nen rc=0 / sandbox rc=0. Hai ma thoat bang nhau KHONG chung minh
+  moi truong tuong duong — no chi noi HAI cong ay khong phan biet duoc.
+  Phep so hai nguon chay TREN KHO NGUON truoc khi clone: `ls-remote --heads` 298 ten so
+  `for-each-ref` 298 ten, `comm -23` va `comm -13` deu RONG, `is-shallow-repository=false`.
+
+KHONG_do_duoc: >-
+  Ngoai model da phuc vu (xem tren): trang thai GitHub truc tiep va `gate` tren CI la KHONG DO
+  DUOC tu sandbox (khong co mang) — reviewer khai thang va khong doc su vang mat ay thanh
+  "cong xanh" hay "cong do". Reviewer do `launcher_test` duoc 173/173 (tong 182, bo qua 9) chu
+  khong tai lap duoc 181/181 cua dieu phoi, vi tam ca khong dung duoc venv/pip trong sandbox;
+  reviewer goi thang la "rc=0 NHUNG THIEU PHEP DO", khong doc thanh hoi quy. Hai bo test git
+  (`eol_policy_test`, `pre_push_test`) mac dinh rc=1 trong sandbox vi dich vu ky commit bi
+  chan; chay lai voi `commit.gpgsign=false` o muc TIEN TRINH cho rc=0 30/30 va 9/9 — ket qua
+  sau dieu chinh KHONG duoc trinh bay nhu lenh mac dinh von xanh.
+  Reviewer bi CAM tu soan chuoi thoat / dong tu Unicode / duong dan tan cong, nen moi huong
+  thuoc lop ay chi duoc mo ta bang loi, KHONG duoc do trong luot nay. Reviewer cung chua dung
+  duoc phep doi cau neo thanh trich dan/vi du, nen "parser hieu hieu luc phap quy cua prose"
+  van la KHONG DO DUOC.
+
+tuan_thu_cam: >-
+  Reviewer KHONG cham cay duoc review: `git -C cay-kho status --porcelain` RONG va
+  `git log c0f18ac..HEAD` RONG sau luot chay. Moi thay doi phuc vu phan chung nam trong /tmp,
+  ngoai clone. Khong commit, khong push.
+
+trang_thai_va: >-
+  DA VA ca ba, tren nhanh claude/tra-luat-process-review-o4d7kb (PR #460).
+  R8-01: oracle doc lap NEO_LUAT_DONG_BANG (chep tay, khong lay tu bnv2._NEO_LUAT_CHEP_TAY);
+  _cay_guong(bo_neo_luat=...) xoa MOT neo chi dinh; hang PROTOCOL cua c28 tach thanh HAI luot,
+  moi luot mat dung mot cau va giu cau kia nguyen byte; them c43 khoa bang neo san pham voi
+  oracle. Do duoc: hai mutant cua reviewer TAI HIEN song sot truoc khi va (45/45 . 57/57 . 2/2,
+  rc=0, TONG: DAT), sau khi va thi m56/m57/m58 deu giet_that va chet dung thuoc tinh (thong bao
+  neu DUNG ten luat cua no, khong neu luat kia; m56/m57 chet o MA THOAT rc=2 chu khong o thong
+  bao). Dot bien chinh ban va tren ban sao tam: go khoi hai luot => m56/m57 SONG lai; cho c43
+  lay oracle tu san pham => m58 SONG lai.
+  R8-02 va R8-03: sua VAN BAN trong CHANGELOG (thong diep commit c0f18ac nam trong lich su
+  master, khong sua duoc - da noi thang dieu do). Bo "do ba lop"; ha lop quyen CLI xuong
+  NGHI VAN chua co trace; tach bang transport thanh hai hang cung don vi qua hai moc; sua
+  "ca sau rc=2" thanh 1 doi chung rc=0 + 5 nguon hong rc=2; neo dieu kien do cho m49.
+  So thu tu hinh dang "loi DO thanh loi DU LIEU": README.md sua NAM -> TU (executor dung),
+  kem dinh nghia hinh dang o CHANGELOG va docstring _muc_cam_theo_provider.
+  Nen sau va (head 5898e5f + ban va): 46/46 ca . 60/60 dot bien . 2/2 tu kiem . TONG: DAT;
+  CLI rc=0, 17 DAT v2, 0 vi pham, 0 KHONG DO DUOC, tong 70.

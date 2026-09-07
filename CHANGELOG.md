@@ -432,11 +432,23 @@ này (executor: Claude, cây rời detached `4488ff1`) đóng cả năm; mỗi c
 của từng mutant được ghi lại nguyên văn trong `BAO_CAO_EXECUTOR.md`.
 
 **`R7-01` — nguồn hợp đồng hỏng vẫn thành KẾT TỘI, hoặc CRASH lúc import.** Lại đúng hình dạng
-*"lỗi ĐO thành lỗi DỮ LIỆU"*, lần này ở ngay NGƯỜI TẠO dữ liệu nguồn — **không kèm số thứ tự, vì số
-ấy không neo được**: bản executor viết *"lần thứ TƯ"*, dòng `ops/reviews/README.md` do phiên điều phối
-viết ghi *"lần thứ NĂM"*, còn verdict lượt 7 **không đếm** (`rg "lần thứ"` trên tệp verdict ⇒ rỗng).
-Hai con số cùng nằm trong kho, ngược nhau, cả hai chép tay — nên bỏ hẳn, giữ thứ ĐO ĐƯỢC là `11/68`
-dưới đây. Chi tiết: `_bang`
+*"lỗi ĐO thành lỗi DỮ LIỆU"*, lần này ở ngay NGƯỜI TẠO dữ liệu nguồn — và đây là **lần thứ TƯ**.
+**ĐÍNH CHÍNH (`R8-03`):** bản đầu bỏ hẳn số thứ tự với lý do *"không neo được"*, sau khi thấy bản
+executor viết *"lần thứ TƯ"* và `ops/reviews/README.md` viết *"lần thứ NĂM"*. Reviewer lượt 8 neo được
+chuỗi, và **executor đúng**. Số ấy neo được vì **hình dạng có định nghĩa**, nên chép định nghĩa ra đây
+để lần sau đếm lại được thay vì đếm lại từ trí nhớ:
+
+> **Hình dạng:** một lỗi ĐO (nguồn/phụ thuộc/giàn đo hỏng, tức cổng KHÔNG BIẾT) bị sản phẩm báo thành
+> **vi phạm của receipt** (tức cổng KẾT TỘI một hiện vật đúng). Không tính crash, mất trạng thái, hay
+> lỗi giàn đo không sinh cáo buộc — chúng là hình dạng khác.
+
+Bốn đợt, mỗi đợt một neo commit: **(1)** `R4-02` tại `4ef73e6` — thiếu `launcher.py` ⇒ kết tội receipt;
+**(2)** `R5-01` tại `670071b` — bảng transport rỗng; **(3)** finding connector tại `670071b`, vá trong
+`b7a53ba` — thao tác Git thứ sáu trả 127 bị gọi là mỏ neo trỏ hụt; **(4)** `R7-01` tại `ca960160` —
+nguồn hỏng vẫn suy "không hợp đồng". **Không có đợt thứ NĂM** trong hồ sơ đã đối chiếu: `R6-02` là
+thiếu dữ liệu nguồn nhưng báo SẠCH (chiều ngược lại), `R3-02` là thiếu độ phủ. Nên `README.md` đã sửa
+`NĂM` → `TƯ`; docstring `_muc_cam_theo_provider` vốn đã ghi `TƯ`, giữ nguyên. Số ĐO ĐƯỢC đi kèm là
+`11/68` dưới đây. Chi tiết: `_bang`
 trả hàng bất kỳ số cột, hai vòng unpack bí danh nằm ngoài khối bắt lỗi ⇒ hàng thiếu cột là
 `ValueError` lúc import (rc=1, không stdout); kiểm kiểu chỉ áp cho TÊN provider ⇒ surface/transport
 `None` thành hợp đồng `[None]` ⇒ **9 biên nhận nguyên byte bị kết tội, 0 chưa đo**; và khi nguồn hỏng,
@@ -444,11 +456,20 @@ trả hàng bất kỳ số cột, hai vòng unpack bí danh nằm ngoài khối
 Vá theo lớp: `_LUOC_DO_BANG` (4/3/2/2 cột), `_bang` trả `(hàng, lỗi)` — `ast.literal_eval` ở mức
 module, đúng một lần, arity và kiểu TỪNG Ô, lỗi nêu bảng/hàng/cột; đích bí danh bề mặt phải tồn tại
 (bản trước lặng lẽ bỏ qua); `_muc_cam_theo_provider` chỉ suy giới hạn khi `PROVIDER_NGUON_HONG is
-None`, còn kiểm kiểu/SHA/độc lập vẫn chạy. Chạy lại đúng bảng sáu biến đổi nguồn của reviewer trên 68
-biên nhận thật: **cả sáu rc=2 · 0 ĐỎ · 0 traceback** (trước: 11 oan / crash / crash / rc=1 / rc=1).
+None`, còn kiểm kiểu/SHA/độc lập vẫn chạy. Chạy lại đúng bảng sáu lượt nguồn của reviewer: **1 đối chứng
+rc=0 · 5 nguồn hỏng rc=2 · cả 6 đều 0 ĐỎ, 0 traceback** (trước: 11 oan / crash / crash / rc=1 / rc=1
+— đúng năm lượt hỏng). **ĐÍNH CHÍNH (`R8-03`):** bản đầu viết *"cả sáu rc=2"*, gộp lượt ĐỐI CHỨNG vào
+nhóm nguồn hỏng; hàng đầu bảng R7 là *"Đối chứng đầy đủ | rc=0"* và một cây đủ nguồn mà rc=2 thì cổng
+đã hỏng. Đo lại 06-09-2026 trên biên nhận thật của head này (70 tệp): đối chứng `rc=0`, năm lượt hỏng
+`rc=2`, cả sáu `0 ĐỎ / 0 traceback`.
 Bốn mutant reviewer đòi chết độc lập — `m46`/`m47` (arity RIÊNG từng bảng bí danh), `m48` (kiểu ô),
 `m49` (điều kiện nguồn-đo-được ở `_thieu`) — đều CÓ RĂNG; `m49` chết đúng bằng con số *"11 biên nhận
-THẬT bị KẾT TỘI"* trên `c40` (chạy CLI từ cây gương hỏng nguồn lên `--root` kho thật).
+THẬT bị KẾT TỘI"* trên `c40` (chạy CLI từ cây gương hỏng nguồn lên `--root` kho thật). **Con số ấy
+neo vào TẬP BIÊN NHẬN, không phải vào bản vá** (`R8-03`): **11 trên tập 68 của executor** (`4488ff1`);
+đo lại là **12 trên 69** (`c0f18ac`) và **13 trên 70** (head `2d5fb72` của lượt vá này — KHÔNG phải `c0f18ac`, head mà verdict lượt 8 neo) — cùng một mutant, cùng một chốt,
+chỉ mẫu số lớn dần vì kho thêm biên nhận. Số lịch sử giữ nguyên: sửa `11` thành số hiện tại làm mất
+tính đúng của nó tại mốc nó được đo. Và **không** đóng băng `69`/`12` vào suite — chúng sẽ đổi ở
+biên nhận hợp lệ kế tiếp.
 
 **`R7-02` — `human` chép tay vào tập "KHÔNG hợp đồng", nên bị cấm cả `human_audited`.** Câu
 *"provider không có hợp đồng nào trong kho"* sai với bảng chuyển tiếp (`KE_HOACH_THI_CONG_DA_PROVIDER`
@@ -465,20 +486,33 @@ dương qua cả tiến trình lẫn CLI; người khai mức mô hình ĐỎ; t
 comment GitHub ⇒ `protected_evidence_ref` ⇒ trạng thái THỨ BA. Nói thẳng phạm vi: cổng vẫn chỉ kiểm
 CẤU TRÚC — danh tính GitHub bền của người audit KHÔNG đo được từ một tệp trong kho, như mọi provider.
 **Hàng launcher KHÔNG vào được cây executor** — và câu ấy phải nói ĐÚNG LỚP. Executor khai *"hệ
-thống quyền của nền chặn mọi sửa dưới `.claude/`"*; phiên điều phối **đo ba lớp** thay vì nhận lời
-khai: (a) hệ thống tệp — `read_bytes` rồi `write_bytes` lên chính `.claude/dev/launcher.py` trong cây
-ấy ⇒ **GHI ĐƯỢC**; (b) hook gác của kho — bơm một bản ghi `Edit` trỏ đúng tệp ấy vào
-`pretooluse_guard.py` ⇒ **rc=0**, không chặn; (c) loại trừ ⇒ chốt nằm ở **lớp quyền của CLI `claude`**
-(`acceptEdits` không tự duyệt sửa dưới `.claude/`). Hệ quả vận hành y hệt, nhưng "nền" và "hệ thống
-tệp" là hai lớp khác nhau, và ghi sai lớp là tái phạm đúng bài học *"phải biết mình đang đứng ở LỚP
-NÀO"*. Hàng ấy do phiên điều phối áp trong cây chính; mọi số dưới đây đo SAU khi đã áp.
+thống quyền của nền chặn mọi sửa dưới `.claude/`"*. **ĐÍNH CHÍNH (`R8-02`, lượt 8):** bản đầu của
+đoạn này khai *"đo ba lớp"* và kết luận executor sai lớp — **rộng hơn phép đo**. Chỉ có HAI phép thử,
+và một trong hai không đo thứ nó tưởng:
+· **(a) đường ghi Python — ĐO ĐƯỢC:** `read_bytes` rồi `write_bytes` lên chính
+`.claude/dev/launcher.py` trong cây ấy ⇒ **GHI ĐƯỢC**. Phạm vi: đúng đường ghi ấy, trong môi trường ấy.
+· **(b) hook gác của kho — KHÔNG ĐO GÌ về đường dẫn.** `pretooluse_guard.py` `main()` trả ngay
+`return 0` khi `tool_name != "Bash"` (dòng 947-948), **trước** mọi phép xét đường dẫn — nên một bản ghi
+`Edit` trỏ đúng tệp ấy đi qua mà hook chưa từng nhìn tới `file_path`. Phép thử ấy chỉ chứng minh *hook
+này không chặn `Edit` trong payload đã thử*, không chứng minh gì về `.claude/`.
+· **và `rc=0` của hook KHÔNG đồng nghĩa allow.** Đo thẳng ba tải trọng: `Edit` ⇒ rc=0, stdout **rỗng**;
+`Bash` + `golden-test --write` ⇒ rc=0, stdout `permissionDecision: ask`; agent read-only + `rm` ⇒ rc=0,
+stdout `permissionDecision: **deny**`. Cả ba đều rc=0 — quyết định nằm ở **stdout**, không ở mã thoát,
+nên đọc `rc=0` thành "không chặn" là đọc một kênh không mang tin ấy.
+· **(c) lớp quyền của CLI `claude`: NGHI VẤN, chưa có trace.** Không có log quyết định nào của phiên
+executor gốc (phiên/version/policy/tool/path) — **KHÔNG ĐO ĐƯỢC**, và một kết luận bằng LOẠI TRỪ đòi
+tập nguyên nhân đầy đủ mà hai phép trên không tạo ra. Muốn kết luận thì phải có log dương, không lấy
+việc *đổi công cụ ghi được* làm bằng chứng cho quyết định của công cụ trước.
+Hệ quả vận hành không đổi; cái đổi là ĐỘ CHẮC CHẮN — và ghi một lớp mình chưa đo thành lớp đã đo là
+tái phạm đúng bài học *"phải biết mình đang đứng ở LỚP NÀO"*, lần này ngay trong đoạn viết ra để tránh
+nó. Hàng ấy do phiên điều phối áp trong cây chính; mọi số dưới đây đo SAU khi đã áp.
 
 **`R7-03` — ma trận nguồn và parity còn mù.** Reviewer bỏ riêng chốt đối chiếu SURFACE của
 `AGENTS.md` (A) và riêng chốt thiếu bảng bí danh BỀ MẶT (B): cả hai `41/41 · 48/48`. Và bơm mất hàng
 `_BE_MAT_BI_DANH` vào riêng bản launcher rig chép: bốn hằng parity vẫn bằng nhau mà hợp đồng đã khác.
 Vá: `c28` mở theo TỪNG thành phần lược đồ (mỗi bảng: vắng/rỗng/khai hai lần/không literal · mỗi cột:
 arity từng bảng, kiểu từng ô · từng đích bí danh · từng cột đối chiếu AGENTS · từng câu neo theo tệp ·
-byte hỏng từng nguồn — **34 hàng** đếm bằng AST, mỗi hàng đòi rc đúng, bằng chứng dương, KHÔNG
+byte hỏng từng nguồn — **34 hàng** *(số của base `5898e5f`; head lượt 8 tách hàng PROTOCOL thành hai lượt riêng nên còn **33 hàng tuple** + 2 lượt neo + 1 lượt hỗn hợp, `R9-F07`)* đếm bằng AST, mỗi hàng đòi rc đúng, bằng chứng dương, KHÔNG
 traceback, KHÔNG kết tội); cây gương có biên nhận `b` khai `cross_approved` nên nhánh kết tội nằm trên
 đường đo; một lượt
 HỖN HỢP (nguồn hỏng + biên nhận sai thật) đòi rc=2 mà biên nhận sai VẪN bị báo. `_dot_bien_tep` so
@@ -501,17 +535,29 @@ thành **0 lỗi, 1 đạt** dưới mutant trước khi assertion đầu giết
 
 Số đi kèm phải ghi ĐIỀU KIỆN ĐO, kẻo trôi tiếp — ba phép đo, hai mốc khác nhau:
 
-| đo cái gì | trên `4488ff1` (nền executor) | trên head land (sau bản vá) |
+| đo cái gì | trên `4488ff1` (nền executor) | trên head land `c0f18ac` (sau bản vá) |
 |---|---|---|
-| biên nhận khai `transport` | **1/15** | **2/17** tệp khai `schema_version: 2` (cổng nhận 16) |
+| khai `transport`, **trên tệp TỰ KHAI v2** | **1/16** | **2/17** |
+| khai `transport`, **trên receipt ĐẠT v2** | **1/15** | **2/16** |
 | provider chính tắc từ bảng | 5 | **6** (thêm `human`) |
 | bí danh từ bảng | 1 | 1 |
 | tên provider **chép tay** trong `bien_nhan_v2.py` | **1** — `PROVIDER_KHONG_HOP_DONG = frozenset({"human"})` | **0** — hằng ấy gỡ hẳn |
 
-Ô cuối sửa một lời khai SAI của bản executor: nó ghi *"0 chép tay"* cho `4488ff1`. Đo lại bằng
-`git show 4488ff1:ops/bien_nhan_v2.py` ⇒ hằng chép tay CÓ ở đó (dòng 269), đúng như reviewer đếm.
-Nó gán trạng thái SAU bản vá cho mốc TRƯỚC bản vá — đúng bệnh **ghép sai lượt**, và trớ trêu là nó
-xảy ra ngay trong finding sinh ra để sửa hai con số chép tay sai.
+**ĐÍNH CHÍNH (`R8-03`):** bản đầu gộp hai hàng transport làm một và so **hai MẪU SỐ khác nhau** —
+`1/15` (receipt ĐẠT v2, mốc cũ) với `2/17` (tệp TỰ KHAI v2, mốc mới) — rồi kết luận `1/15` "không
+khớp". `1/15` **ĐÚNG** trên cơ sở của nó; thứ sai là đem nó so với một mẫu số khác. Nay tách hai hàng,
+mỗi hàng một đơn vị, đi qua cùng hai mốc. Đo lại 06-09-2026 bằng `git ls-tree` + `git show` +
+`yaml.safe_load`, `transport` đếm ở trường **có cấu trúc** `model_reviewer_identity.transport` (đếm
+bằng substring trên YAML đã dump cho **3/4** — nó bắt cả chữ "transport" trong prose; con số đúng chỉ
+ra khi hỏi đúng trường. **Điều kiện đo:** `3/4` là trên **TOÀN BỘ** 68/69 receipt; nếu chỉ tính tập
+**tự khai v2** thì phép substring cho `2/3` — cùng một bộ quét, hai mẫu số, `R9-F07`), còn "ĐẠT v2" là chạy **cổng của head này** trên byte receipt lấy từ từng mốc:
+`4488ff1` 68 receipt / 16 tự khai v2 / 15 ĐẠT; `c0f18ac` 69 / 17 / 16.
+
+Ô cuối **giữ nguyên** — reviewer lượt 8 xác nhận phép bác này ĐÚNG. Nó sửa một lời khai SAI của bản
+executor: nó ghi *"0 chép tay"* cho `4488ff1`. Đo lại bằng `git show 4488ff1:ops/bien_nhan_v2.py` ⇒
+hằng chép tay CÓ ở đó (dòng 269), đúng như reviewer đếm. Nó gán trạng thái SAU bản vá cho mốc TRƯỚC
+bản vá — đúng bệnh **ghép sai lượt**. Nhưng phép bác ấy đúng ở ô CHÉP TAY **không** kéo theo ô
+transport cũng sai: hai ô, hai phép đo.
 
 **Một con số của executor hết hạn ngay lúc nó viết:** báo cáo khai `ops/lease_publish_test.py`
 **120/121**, `t27` đỏ vì verdict lượt 7 chưa có dòng mục lục trong `ops/reviews/README.md` — đúng
@@ -528,7 +574,7 @@ hàng `human` trong `launcher.py`), Linux, py3.11.15, `core.abbrev=7`:
 | `ops/bien_nhan_v2_test.py` | 0 | `45/45 ca đạt · 57/57 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 39/57 khai đối chứng` · `TỔNG: ĐẠT` |
 | `ops/bien_nhan_v2.py --root .` | 0 | `16 ĐẠT v2 · 11/11 miễn trừ legacy (băm khớp) · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 69` |
 | `.claude/dev/ci_dang_ky_test.py` | 0 | `PHẢN CHỨNG: 51/51 đỏ đúng` · `TỔNG: ĐẠT` |
-| `.claude/dev/launcher_test.py` | 0 | `181/181 ca DA CHAY QUA (tong 182, bo qua 1, hong 0)` |
+| `.claude/dev/launcher_test.py` | 0 | `181/181 ca DA CHAY QUA (tong 182, bo qua 1, hong 0)` — **ĐIỀU KIỆN ĐO** (`R9-F08`): con số này cần **mạng + dựng được venv/pip**. Trong sandbox reviewer CẤM MẠNG, tám ca venv không dựng được nên nó đo `173/173 (tổng 182, **bỏ qua 9**, hỏng 0)` ở CẢ head lẫn base — tức **không tái lập được 181**, và đó là **sai khác BẰNG CHỨNG**, không phải hồi quy. Ai chép lại số 181 phải kèm điều kiện này. |
 | `ops/lease_publish_test.py` | 0 | `121/121 đạt; đã chạy=121, bỏ qua=0` |
 | `packet_loop doctrine-scan` | 0 | `sạch — đã quét 7 tệp, 0 chỗ chép doctrine` |
 | `packet_loop adr-song` | 0 | `sạch — 46 ADR trên đĩa, 46 dòng trong §20, khớp 1–1` |
@@ -540,6 +586,136 @@ hàng `human` trong `launcher.py`), Linux, py3.11.15, `core.abbrev=7`:
 Ba con số của executor đã được kiểm chéo bằng phép đo độc lập chứ không đọc: `c28` **34 hàng** và
 `HANG_PARITY` **11 hằng** đếm lại bằng AST trên chính suite (khớp), còn `1/15` · `0 chép tay` thì
 **không khớp** và đã sửa ở bảng trên.
+
+## Vòng mười (lượt 8): một lỗ ĐỘ PHỦ THẬT, và hai lời khai rộng hơn phép đo — của chính phiên điều phối
+
+Lượt 8 (`gpt-6-astra`, effort high, `approve_with_findings`) tìm **1 P2 + 2 P3**. Đáng ghi vì tỉ lệ:
+**hai trong ba** finding nhắm vào HỒ SƠ, không vào mã — và cả hai là lời khai do phiên điều phối viết
+**trong lúc đang sửa lỗi cùng loại của người khác**. Đây là PR thứ hai liên tiếp như vậy.
+
+**`R8-01` (P2) — hai câu neo CHE NHAU, và đó là lỗ độ phủ THẬT.** Hàng `PROTOCOL` của `c28` xoá **CẢ
+HAI** câu neo §8 cùng lúc, còn `_cay_guong` lấy danh sách câu neo từ **chính `bnv2._NEO_LUAT_CHEP_TAY`
+của sản phẩm** — phụ thuộc vòng. Nên bỏ kiểm RIÊNG một luật thì luật kia vẫn làm hàng ấy đỏ, và lời
+khai *"từng câu neo"* rộng hơn khả năng phân biệt của ma trận. Reviewer đo được **hai mutant**, mỗi cái
+thêm một `continue` bỏ đúng một neo, **SỐNG SÓT qua toàn suite**: `45/45 ca · 57/57 đột biến · 2/2 tự
+kiểm`, rc=0, `TỔNG: ĐẠT`. Phiên này **tái hiện phản chứng ấy trước khi vá** (cùng hai con số, cùng
+rc=0) chứ không nhận lời khai. Vá ba phần: **(a)** oracle ĐỘC LẬP `NEO_LUAT_DONG_BANG` — ba bộ
+`(tên_luật, tệp, câu_neo)` **chép tay** từ hai nguồn phụ, và `_cay_guong` nay đọc oracle ấy chứ không
+đọc sản phẩm; **(b)** `_cay_guong(bo_neo_luat=…)` xoá **một neo được chỉ định**, kèm chốt `LoiDungCa`
+đòi câu ấy khớp ĐÚNG MỘT chỗ — `replace` hụt thì ca sẽ xanh mà chẳng đo gì (*"ca có MẶT khác ca có
+ĐO"*); **(c)** hàng PROTOCOL tách thành **hai lượt**, mỗi lượt mất đúng một câu và giữ câu kia
+**nguyên byte** (rig kiểm cả hai điều đó TRƯỚC khi đọc kết quả), đòi rc=2 + thông báo nêu **đúng tên
+luật của nó** + **không** nêu luật kia + không `TỔNG: ĐẠT` + **không kết tội receipt nào**. Thêm `c43`:
+bảng neo của sản phẩm phải khớp oracle chép tay, và mỗi câu oracle phải có thật đúng một chỗ trong
+nguồn nó khai — chặn lối làm yếu thứ hai (bỏ một MỤC khỏi bảng, để fixture co theo).
+
+**Ba mutant mới, và mỗi cái phải chết ĐÚNG THUỘC TÍNH** — kho đã trả giá hai lần cho *tín dụng giả*
+(`R2-04`, `R7-04`), nên `giet_that` (đúng CA) chưa đủ, phải đọc NGUYÊN VĂN thông báo giết:
+
+| mutant | phép làm yếu | ca đích | chết bằng |
+|---|---|---|---|
+| `m56` | `continue` bỏ neo `ASSURANCE_CUA_NGUOI` | `c28` | ``mất RIÊNG neo `ASSURANCE_CUA_NGUOI`: đòi rc=2, được 0`` |
+| `m57` | `continue` bỏ neo `ASSURANCE_CUA_MO_HINH` | `c28` | ``mất RIÊNG neo `ASSURANCE_CUA_MO_HINH`: đòi rc=2, được 0`` |
+| `m58` | bỏ MỘT MỤC khỏi `_NEO_LUAT_CHEP_TAY` | `c43` | `` `_NEO_LUAT_CHEP_TAY` LỆCH oracle chép tay `` |
+
+`m56`/`m57` chết ở **mã thoát** (cổng nhận nguồn thiếu neo ⇒ hành vi fail-close mất thật), không ở
+thông báo — và mỗi cái nêu **luật của nó**, không nêu luật kia. Rồi **đột biến CHÍNH BẢN VÁ** trên bản
+sao tạm để biết răng nằm ở đâu: gỡ khối hai lượt ⇒ `m56`/`m57` **SỐNG lại** (`qua`); cho `c43` lấy
+oracle từ sản phẩm thay vì bảng chép tay ⇒ `m58` **SỐNG lại**. Không có hai phép đảo đó thì không biết
+ca đang đo chốt mới hay đo thứ khác.
+
+**`R8-02` (P3) — "đo ba lớp" là suy luận LOẠI TRỪ đội lốt phép đo.** Xem đoạn đã đính chính ở trên: chỉ
+có HAI phép thử; phép thử hook **không đo gì về đường dẫn** vì `pretooluse_guard.py` trả `return 0`
+ngay khi `tool_name != "Bash"`, TRƯỚC mọi phép xét `file_path`; và `rc=0` của hook không mang tin về
+quyết định — đo thẳng ba tải trọng cho **rc=0 ở cả allow, `ask` LẪN `deny`**. Lớp quyền CLI hạ từ *đã
+đo* xuống **NGHI VẤN, chưa có trace**. Thông điệp commit `c0f18ac` đã nằm trong lịch sử master nên
+không sửa được — đính chính chỉ ở CHANGELOG, và nói thẳng là nó ở đó.
+
+**`R8-03` (P3) — ba con số, ba kiểu sai khác nhau.** (1) *"cả sáu rc=2"* gộp lượt **đối chứng** (rc=0)
+vào nhóm nguồn hỏng; (2) bảng transport so **hai mẫu số khác nhau** rồi kết luận `1/15` "không khớp",
+trong khi `1/15` ĐÚNG trên cơ sở của nó — nay tách hai hàng cùng đơn vị qua hai mốc, giữ nguyên phép
+bác `0 tên chép tay` (reviewer xác nhận đúng); (3) `m49` `11/68` ĐÚNG ở mốc executor, chỉ thiếu điều
+kiện đo — nay ghi kèm `12/69` và `13/70`, và **không** sửa số lịch sử thành số hiện tại. Kèm một nợ hồ
+sơ: số thứ tự *"lần thứ mấy của hình dạng lỗi ĐO thành lỗi DỮ LIỆU"* neo được **BỐN** đợt, nên
+executor viết `TƯ` là ĐÚNG và `ops/reviews/README.md` viết `NĂM` là SAI; đã sửa README, và **chép định
+nghĩa hình dạng** vào cả CHANGELOG lẫn docstring `_muc_cam_theo_provider` để lần sau đếm lại được
+thay vì đếm bằng trí nhớ.
+
+**Bài học của lượt này, và nó không có cổng nào canh:** `doctrine-scan` và `doc-claims-check` chỉ canh
+HÌNH THỨC; không có gì bắt một câu văn khai rộng hơn phép đo đứng sau nó. Mỗi con số ở trên vì vậy
+mang **ĐIỀU KIỆN ĐO** (head nào · tập nào · đơn vị nào), và mỗi khẳng định hẹp đúng bằng phép đo đã
+chạy. Riêng `R8-01` thì có: hai mutant sống-rồi-chết là phép đo, không phải lời hứa.
+
+### Lượt 8 bổ sung — ba finding codex trên `c0f18ac`, đăng SAU khi #455 đã merge
+
+Ba finding nữa tới sau khi #455 land. Vá cùng đợt, và **cả ba đều tự đo lại** chứ không nhận lời khai.
+
+**`R8-04` (P2) — `transport` không phải chuỗi bị NUỐT LẶNG.** `_chuoi()` trả `None` cho **cả**
+"vắng mặt" **lẫn** "có mặt nhưng hỏng kiểu", rồi nhánh `if vc and vc not in hd["van_chuyen"]` đối xử
+hai thứ ấy y hệt — nên **chỉ chuỗi-sai-hợp-đồng bị bắt**, mọi kiểu khác lọt. Đo trên một biên nhận
+hợp lệ, chỉ đổi mỗi trường ấy (`_thieu` gọi thẳng): `{'fake': 1}` · `''` · `7` · `['machine']` ·
+`True` · `None` ⇒ **0 lỗi**, không phân biệt được với `(vắng hẳn)` ⇒ 0 lỗi; chỉ `'human'` ⇒ 1 lỗi.
+Hai giá trị cuối là của phiên này tìm thêm, ngoài bảng reviewer gửi. Vá đúng doctrine `None ≠ False`:
+phân biệt bằng `"transport" in v`, CÓ-MÀ-HỎNG thành lỗi riêng, VẮNG vẫn hợp lệ (trường tuỳ chọn).
+Khoá bằng cách thêm `transport` vào **ma trận kiểu** `TRUONG_ATTESTATION` của `c34` — chỗ của cả LỚP,
+không phải một ca lẻ — cộng `""` vào bảng kiểu (đo trước trên base `5898e5f`: ma trận có **7** trường và **cả 7/7** đã chặn chuỗi rỗng — bản đầu viết "6", reviewer lượt 9 đếm lại ra 7, `R9-F07`). Lượt 9 còn đo được một lỗ NỮA của chính đoạn này: `None` được khai là *"phản chứng tìm thêm"* nhưng **không** có trong ma trận, nên bỏ riêng chặn null vẫn qua toàn suite `48/48 · 62/62`. Nay `None` vào ma trận và có `m61` đo riêng nó (`R9-F02`).
+
+**`R8-05` (P2) — hàng Antigravity trong `launcher.py` LỆCH nguồn, và lệch theo chiều CHẶN NHẦM.**
+`ops/KE_HOACH_THI_CONG_DA_PROVIDER.md` §2 khai `machine/local`; `_PROVIDER_NGOAI_CLI` khai `machine`.
+Hệ quả đo được: biên nhận Antigravity khai **TRUNG THỰC** `machine/local` bị **TỪ CHỐI**, khai **SAI**
+`machine` thì **ĐƯỢC NHẬN** — validation đảo ngược. Đối chiếu **cả 5 hàng** của §2 (không chỉ hàng
+được chỉ): Antigravity là hàng **duy nhất lệch CỘT TRANSPORT** — và câu ấy phải nói ĐÚNG PHẠM VI (`R9-F05`): bản đầu viết *"duy nhất lệch §2"*, rộng hơn phép đo, vì tầng (b) chỉ so ô transport. Nay `c44` đối chiếu **cả cột surface**, và reviewer lượt 9 đã dựng phản chứng cho lỗ ấy: đổi riêng ô surface Antigravity trong bản sao kế hoạch, `c44` bản cũ **vẫn qua**, bản mới **ĐỎ**. Ngoại lệ khai thẳng: hàng Codex của §2 là prose nhiều giá trị (*"`codex_cli` hoặc Codex service"*) và *"Codex service"* **chưa có tên máy trong hợp đồng dữ liệu** — nợ CHÍNH SÁCH, không vá ở PR này. `anthropic_claude` vốn đã dùng `machine/local`, nên
+dạng giá trị ấy được hỗ trợ sẵn. Cùng LỚP `R7-02` (chặn quá rộng vì một hằng lệch nguồn). Vá hàng, và
+khoá bằng `c44` **ba tầng**: (a) bảng launcher ⊇ oracle chép tay `BO_BA_PROVIDER_DONG_BANG`; (b) oracle
+khớp **ô cuối** của bảng §2 — so ô, không dò substring, vì `machine` là **tiền tố** của `machine/local`
+và một phép `in` sẽ mất răng đúng chỗ cần nó nhất; (c) **witness đối xứng**: hàng thật ⇒ biên nhận
+trung thực ĐƯỢC NHẬN, hàng lệch ⇒ chính nó BỊ TỪ CHỐI. Thiếu (c) thì (a)/(b) chỉ là hai chuỗi bằng nhau.
+
+**`R8-06` (P1 của codex) — KẾT LUẬN SAI, NỢ BÊN DƯỚI LÀ THẬT.** Codex khai `403fe125…` là squash
+commit của #455 nên bảy neo không phải tổ tiên và master đỏ. Đo lại: `git cat-file -t 403fe125…` ⇒
+object **KHÔNG TỒN TẠI**; `origin/master` = `cacaba3`, **merge commit** hai cha (`1b3caa11` +
+`c0f18ac`); `merge-base --is-ancestor` cho **cả tám** neo ⇒ **LÀ tổ tiên**; cổng chạy trên clone
+**ghim đúng `cacaba3`** (kiểm `rev-parse HEAD` khớp trước khi tin số — lượt clone đầu **âm thầm rơi về
+nhánh khác** và suýt cho một con số của cây sai) ⇒ `rc=0 · 16 ĐẠT v2 · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC ·
+tổng 69`. **Master không đỏ.** Nhưng tiền đề ĐÚNG, và có phản chứng chạy được: cùng một CÂY, land bằng
+merge ⇒ neo còn là tổ tiên; land bằng **squash** ⇒ **không còn**. Ghi thành **caveat CÓ TÊN**
+`neo-canonical-ancestry-chi-dung-khi-land-bang-merge` trong `ops/reviews/README.md`, và khoá **tiền đề**
+bằng `c45`. **KHÔNG ĐO ĐƯỢC** — và nói thẳng thay vì bịa: không ca cục bộ nào cưỡng chế được *"kho phải
+land bằng merge"*; bất biến ấy sống ở nút merge của GitHub. Đổi cơ chế neo là thay đổi KIẾN TRÚC ⇒
+packet riêng, **không** làm trong PR này.
+
+**Và bài học của đợt bổ sung, đắt hơn cả ba finding:** codex bắt đầu review lúc `19:36:33Z`, #455
+merge lúc `19:37:13Z` — **40 giây sau**. `CLAUDE.md` có nguyên một mục về đúng chuyện đó (*"Gate xanh
+KHÔNG phải đã được review"*, PR #104/#105). Cổng xanh và review sạch trả lời **hai câu hỏi khác nhau**;
+lần này ba finding thật đi vào master vì chỉ câu thứ nhất được hỏi.
+
+**Một đột biến đặt sai hình dạng, ghi lại vì nó suýt cấp tín dụng oan:** bản đầu của `m59` dùng
+`if False:` cho nhánh kiểu mới. Dưới nó `vc=None` **rơi xuống** chốt hợp đồng (`None not in {...}` ⇒
+True) nên giá trị VẪN bị chặn, chỉ khác thông báo — `c34` xanh, đột biến lĩnh *"không răng"* OAN. Chỉ
+khi đột biến quay về **đúng hình dạng cũ** (`if vc and …`) nó mới chết. **Điều kiện đo của con số**: `5/40` là
+**5 giá trị `transport` lọt** trên mẫu **8 trường × 5 kiểu**, đo lúc ma trận chưa có `None`. Sau khi
+`R9-F02` thêm `None` vào ma trận, cùng mutant ấy cho **6/48** (8 × 6). Hai số đúng ở hai mốc khác
+nhau; đừng đọc số sau thành số trước. Cùng họ *"đột biến sai chỗ ≠ mã sai"*.
+
+### Đo lại sau bản vá lượt 8 (head `5898e5f` + bản vá, Linux, py3.11.15, `core.abbrev=7`)
+
+| cổng | mã thoát | dòng tổng kết THẬT |
+|---|---|---|
+| `ops/bien_nhan_v2_test.py` | 0 | `48/48 ca đạt · 63/63 đột biến thường CÓ RĂNG · 2/2 ca TỰ KIỂM đạt · 45/63 khai đối chứng` · `TỔNG: ĐẠT` |
+| `ops/bien_nhan_v2.py --root .` | 0 | `17 ĐẠT v2 · 11/11 miễn trừ legacy · 42 NỢ đóng băng · 0 vi phạm · 0 KHÔNG ĐO ĐƯỢC · tổng 70` |
+| `ops/lease_publish_test.py` | 0 | `121/121 đạt; đã chạy=121, bỏ qua=0` — **và ĐIỀU KIỆN ĐO của nó đã ĐỔI giữa chừng, ghi lại kẻo con số cũ bị đọc nhầm.** Các thông điệp commit của đợt này khai `120/121, chỉ t33`: đúng **với điều kiện đã nêu ở đó** — container thiếu `actionlint`, nên `t33` fail-close (*"KHÔNG ĐO ĐƯỢC"* ⇒ ĐỎ) **đúng thiết kế**, không phải hồi quy. Sau khi cài đủ công cụ bằng chính script của kho (`ops/cai_actionlint.sh` + `ops/cai_cong_cu.sh shellcheck`), `t33` **đo được** và xanh: head và `origin/master` đo trong **CÙNG một lệnh** đều `121/121`, `0` dòng ĐỎ ⇒ delta = 0 ở **cả hai** nền đo. Quan sát kèm, đúng thứ doctrine đã cảnh báo: `actionlint` **có** `shellcheck` bật thêm luật nền và báo 1 finding `SC1003:info` ở `ops-don-ref.yml` — **đỏ sẵn trên master**, và `t33` không đọc tệp ấy nên không ảnh hưởng |
+
+Nền trước bản vá trên cùng head: `45/45 · 57/57 · 2/2 · 39/57`. Delta là **+3 ca** (`c43` `c44` `c45`)
+và **+6 đột biến** (`m56`…`m61`) — đúng bằng thứ thêm vào, không ca nào mất. (`m61` đến từ vòng vá
+`R9-F02`; bảng này đo ở head sau khi vá xong lượt 9.)
+
+**MỘT PHÉP ĐO CỦA MÔI TRƯỜNG, không phải của bản vá:** container phiên này mở ra ở trạng thái **clone
+nông, 2 ref cục bộ / 298 ref trên máy chủ**, nên `bien_nhan_v2.py --root .` cho `rc=2` với **8 KHÔNG ĐO
+ĐƯỢC** (object của `reviewed_sha`/`evidence_url` không tra được) và suite cho `43/45 · TỔNG: ĐỎ`. Đó
+KHÔNG phải hồi quy: theo đúng phép canh hai nguồn của doctrine (`ls-remote` so `for-each-ref`, so TẬP
+TÊN chứ không `wc -l`), `comm -23` cho **296 ref mù**; sau `fetch --unshallow` + refspec đầy đủ thì
+`298/298`, `comm -23` rỗng, và mọi số trở về nền đã khai. Ghi ra vì hai lượt số ấy khác nhau HOÀN
+TOÀN vì môi trường, và ai đọc số đầu sẽ đi truy một hồi quy không tồn tại.
 
 ## Răng
 

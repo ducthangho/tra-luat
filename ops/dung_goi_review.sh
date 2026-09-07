@@ -11,9 +11,12 @@
 #       (`ops/lease_publish.py:307-321`) chay `for-each-ref refs/heads refs/remotes` va
 #       tinh ten tu CA `refs/remotes/origin/*`; `_quet_lease_toan_kho` doc het danh sach ay.
 #       Banner CLI (`:937`) in "quet refs/heads/*" nen de tin nham — do la loi doc banner
-#       thay vi doc ma. Nguyen nhan THAT cua goi 3 ref la kieu clone (bare/hep), khong phai
-#       pham vi quet. Buoc materialize duoi day van giu, nhung vi ly do KHAC: de goi khong
-#       phu thuoc ten remote va de doi chieu tap ten truc tiep.
+#       thay vi doc ma. Nguyen nhan LICH SU cua goi 3 ref: CHUA XAC THUC DUOC (hien vat luot
+#       12 khong con). Cross-review #477 luot 2 do: `--bare --no-local` TU NO khong quyet dinh
+#       — bare tu nguon co 306 local head thi giu du 306; bare tu clone thuong (1 local head)
+#       moi con 1. Tuc phu thuoc CAU TRUC REF CUA NGUON. Chac chan KHONG phai pham vi quet;
+#       phan con lai la GIA THUYET. Buoc materialize duoi day van giu, nhung vi ly do KHAC:
+#       de goi khong phu thuoc ten remote va de doi chieu tap ten truc tiep.
 #
 #   PR #468 luot 13, P3 `evidence-thieu-phuong-phap-trich-va-gioi-han-bao-phu`
 #       EVIDENCE.md khong khai CACH TRICH tung so va PHAN BO SOT, nen nguoi doc khong
@@ -98,29 +101,53 @@ N_L1=$(wc -l < "$R/refs-lech-mirror.tsv");  N_L2=$(wc -l < "$R/refs-lech-cay-kho
 # Dung `${VAR-...}` (chi khi CHUA DAT), roi chan tuong minh neu dat ma rong.
 AL_VER="${AL_VER-1.7.7}"
 [ -n "$AL_VER" ] || loi 4 "AL_VER duoc dat nhung RONG — khong tu thay bang mac dinh"
+
+# Thu muc cai phai MOI. Cross-review #477 luot 2 do duoc: neu AL_DICH con tep cu
+# (`shellcheck`, `sha256sum`...), buoc prepend PATH lam chung CHE lenh he thong — script
+# 3d2ac9b chon stub trong AL_DICH trong khi 14dab5e chon /usr/bin/shellcheck.
 AL_DICH="$R/cong-cu/actionlint"
+rm -rf "$AL_DICH"
 AL_VER="$AL_VER" AL_DICH="$AL_DICH" bash "$KHO/ops/cai_actionlint.sh" > "$R/cai-actionlint.log" 2>&1 \
   || loi 4 "cai actionlint (ban ghim $AL_VER) that bai — xem $R/cai-actionlint.log"
-PATH="$AL_DICH:$PATH"; export PATH
+
+# KHONG prepend AL_DICH vao PATH, va KHONG resolve lai actionlint theo TEN.
+# Ly do (cung cross-review #477 luot 2):
+#   - prepend ca thu muc => moi tep trong do che lenh he thong (be mat che lenh MOI do
+#     chinh ban va truoc tao ra);
+#   - `command -v actionlint` tra ve FUNCTION neu co `export -f actionlint`, vi bash
+#     function uu tien hon PATH => van chay ban gia. Phan chung: function in "1.7.70".
+# Nen: goi binary bang DUONG DAN TUYET DOI tu AL_DICH.
+AL_BIN="$AL_DICH/actionlint"
+[ -x "$AL_BIN" ] || AL_BIN="$AL_DICH/actionlint.exe"
+[ -x "$AL_BIN" ] || loi 4 "khong thay binary actionlint trong $AL_DICH sau khi cai"
 
 : > "$R/cong-cu.txt"
-# Bat rc that su cho tung cong cu bat buoc. THIEU hoac KHONG CHAY DUOC deu la CHAN.
-for c in actionlint shellcheck git python3; do
-  duong=$(command -v "$c" 2>/dev/null) || loi 4 "thieu cong cu bat buoc: $c"
+
+# actionlint: doc dong dau, bo CR, so BANG NHAU voi ban ghim.
+# `case *"$AL_VER"*` la khop CHUOI CON — nhan ca `1.7.70` va `11.7.7`. Do la dung lop loi
+# ma `cai_actionlint.sh` da tra gia o #200/#203.
+if ! al_raw=$("$AL_BIN" --version 2>&1); then
+  loi 4 "actionlint khong chay duoc: $AL_BIN"
+fi
+al_ban=$(printf '%s' "$al_raw" | head -1 | tr -d '\r')
+[ "$al_ban" = "$AL_VER" ] || loi 4 "actionlint SAI BAN: can '$AL_VER', do duoc '$al_ban' ($AL_BIN)"
+printf '%s\t%s\t%s\n' actionlint "$AL_BIN" "$al_ban" >> "$R/cong-cu.txt"
+
+# Cac cong cu con lai: resolve tren PATH DAU VAO bang `type -P` (bo qua function/alias/builtin),
+# roi goi bang dung duong dan vua resolve. THIEU hoac KHONG CHAY DUOC deu la CHAN.
+# `shellcheck` la BAT BUOC: thieu no thi `actionlint` bo luat SC* TRONG IM LANG.
+for c in shellcheck git python3; do
+  duong=$(type -P "$c" 2>/dev/null) || duong=""
   [ -n "$duong" ] || loi 4 "thieu cong cu bat buoc: $c"
-  if ! ban=$("$c" --version 2>&1 | head -1); then
+  if ! raw=$("$duong" --version 2>&1); then
     loi 4 "cong cu bat buoc khong chay duoc: $c ($duong)"
   fi
+  # Lay dong DAU TIEN co chu so — `shellcheck --version` in ten o dong 1, so o dong 2,
+  # nen `head -1` ghi "ShellCheck - shell script analysis tool" vao cot "phien ban".
+  ban=$(printf '%s\n' "$raw" | tr -d '\r' | grep -m1 '[0-9]' || true)
   [ -n "$ban" ] || loi 4 "cong cu bat buoc khong khai duoc phien ban: $c ($duong)"
   printf '%s\t%s\t%s\n' "$c" "$duong" "$ban" >> "$R/cong-cu.txt"
 done
-# `actionlint` bo luat SC* TRONG IM LANG khi thieu `shellcheck`, nen shellcheck nam trong
-# danh sach BAT BUOC o tren, khong phai "ghi THIEU roi di tiep".
-al_ban=$(awk -F'\t' '$1=="actionlint"{print $3}' "$R/cong-cu.txt")
-case "$al_ban" in
-  *"$AL_VER"*) : ;;
-  *) loi 4 "actionlint SAI BAN: can $AL_VER, do duoc '$al_ban'" ;;
-esac
 
 # ---- 6. EVIDENCE: khai CACH TRICH va PHAN BO SOT, khong chi khai ket qua ----
 cat > "$R/EVIDENCE.md" <<EOF

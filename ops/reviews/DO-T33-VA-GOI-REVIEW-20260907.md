@@ -25,8 +25,17 @@ phải nới phép kiểm.
 | nền | `b416830` | **0** | `121/121 đạt; đã chạy=121, bỏ qua=0` |
 | sau | `f77f198` | **0** | `121/121 đạt; đã chạy=121, bỏ qua=0` |
 
-`out` = 8649 B ở cả hai vế. **DELTA vẫn 0**, và `rc=1` cuối cùng của full-gate đã biến mất.
-Trước: 120/121, `rc=1`. Nay: **121/121, `rc=0`**.
+`out` = 8649 B ở cả hai vế. Bộ `lease` đi từ `120/121, rc=1` lên **`121/121, rc=0`**.
+
+**Phạm vi — thu hẹp theo P3 lượt 2 của #477.** Hiện vật đính kèm chỉ là **bộ `lease`**. Nên đúng
+phải nói: *DELTA đã chuẩn hoá **của log bộ lease** bằng 0.* Câu cũ — *"`rc=1` cuối cùng của
+**full-gate** đã biến mất"* — **rộng hơn hiện vật**: năm bộ còn lại không được chạy lại và không
+có log kèm.
+
+Thêm nữa, `nen_rc=0`, `sau_rc=0`, phiên bản công cụ và cách cài trong `moi-truong-va-rc.txt` là
+**lời khai của executor**: không có transcript của runner ghi exit status, cũng không có log
+installer hay băm archive để đối chiếu độc lập. Suy `rc=0` từ `main()` và dòng tổng kết là suy
+luận có điều kiện, không phải phép đo `rc` của tiến trình đã chạy.
 
 CI **đã** cài `actionlint` từ trước (`ci.yml:98`, `duyet-phan-chung.yml:54`,
 `ops-publish-lease.yml`). Nên đây chưa bao giờ là lỗ hổng của kho — chỉ là container chạy gate
@@ -64,8 +73,14 @@ Bản đầu của tài liệu này (và các báo cáo tôi gửi chủ kho) vi
 Tôi tin **banner của CLI** (`ops/lease_publish.py:937` in `PHẠM_VI: quét refs/heads/*`) thay vì đọc
 mã. Banner không phản ánh hết hành vi.
 
-Hệ quả: nguyên nhân THẬT của gói 3 ref ở lượt 12 là **kiểu clone** (`clone --bare --no-local`
-theo ghi nhận lượt 12), không phải phạm vi quét.
+Hệ quả về nguyên nhân lịch sử, nói ở mức **giả thuyết** chứ không phải kết luận: cross-review
+#477 lượt 2 đo được rằng `--bare --no-local` **tự nó không quyết định** — bare từ một nguồn đã có
+306 local head thì giữ đủ 306; bare từ một clone thường (1 local head) mới còn 1. Tức nguyên nhân
+phụ thuộc **cấu trúc ref của nguồn clone**, mà hiện vật của lượt 12 không còn để xác định.
+
+Vậy: chắc chắn **không** phải phạm vi quét; nhiều khả năng là kiểu clone kết hợp cấu trúc ref
+nguồn — nhưng **chưa xác thực được** bằng hiện vật lịch sử. Ca `--single-branch` tôi dựng chỉ mô
+phỏng một cách thu hẹp, không chứng minh chuyện đã xảy ra.
 
 Bước vật chất hoá `refs/heads/*` trong script **vẫn giữ**, nhưng vì lý do KHÁC với lý do tôi
 nêu ban đầu: để gói không phụ thuộc tên remote, và để đối chiếu tập tên trực tiếp.

@@ -8,7 +8,24 @@ sau `f77f19895e00835d71644d82f1c54e9b519ccfe6`.
 
 ## CÁCH TRÍCH SỐ (khai theo P3 `evidence-thieu-phuong-phap-trich-va-gioi-han-bao-phu`)
 
-Mọi số dưới đây lấy từ tệp trong chính thư mục này, không chép tay:
+**Phân loại nguồn — sửa một lời khai quá mạnh.** Bản đầu viết *"mọi số lấy từ tệp trong chính
+thư mục này"* và xếp mọi dòng là "đo lại được". Không đúng: **đọc một giá trị đã tổng hợp trong
+log** khác với **tự đếm lại từ nguyên liệu**. Đo cụ thể:
+
+| số | hiện vật được giao | tự đếm lại được? |
+|---|---|---|
+| `doc-claims-check` 70861 B | `*.doc-claims.json`, nguyên vẹn 70861 B | **có** |
+| `cidk` 2934 B | `*.cidk.tail.txt`, chỉ 5 dòng cuối = 206 B | không |
+| `ploop` 8752 B | `*.ploop.tail.txt`, 96 B | không |
+| `lease` 8971 B | `*.lease.norm.out` đã chuẩn hoá = 8827 B | không |
+| `doctrine-scan` 69 B · `adr-song` 113 B | **không giao hiện vật** | không |
+| 12 `rc` và các số giây | chỉ có trong `*.rc` — log tổng hợp, không kèm script/timestamp | không |
+
+Tức **1/6** kích thước stdout tự đếm lại được. Phần còn lại là **lời khai của executor đọc từ
+log tổng hợp**, không phải tái tính. Không suy từ đó rằng các số ấy sai — chỉ là gói này không đủ
+để kiểm.
+
+Cách trích từng dòng (áp cho phần đọc lại được):
 
 | số | trích bằng | loại nguồn |
 |---|---|---|
@@ -39,8 +56,11 @@ Bộ lọc và phần bỏ sót — nêu để không ai tưởng bảng này ph
 | `adr-song` | 0 | 0 | 113 B | — |
 | `doc-claims-check` | 0 | 0 | 70861 B | — |
 
-**DELTA = 0.** Khác duy nhất là số giây và tên thư mục tạm ngẫu nhiên. Chuẩn hoá xong,
-`nen.lease.norm.out` và `sau.lease.norm.out` giống hệt từng byte, **50/50 dòng**.
+**DELTA = 0**, nhưng nêu rõ phạm vi: phép so byte thật chỉ chạy trên **bốn cặp tệp** thực sự
+lưu trong thư mục này (`cidk.tail`, `ploop.tail`, `lease.norm`, `doc-claims.json`). Với `lease`,
+`nen.lease.norm.out` và `sau.lease.norm.out` giống hệt từng byte, **50/50 dòng**, sau khi chuẩn
+hoá tên thư mục tạm ngẫu nhiên. DELTA của `doctrine-scan` và `adr-song` chỉ dựa vào `rc` và kích
+thước ghi trong `*.rc`, **không có hiện vật để so**.
 
 **Không bộ nào `out=0B`.** Đây là phép kiểm có chủ đích: một lần chạy full-gate trước đó đã
 XANH GIẢ vì script bọc mỗi bộ trong `/usr/bin/time` vốn không tồn tại — cả sáu bộ `rc=127`,
@@ -53,8 +73,17 @@ chưa hề chạy, mà so sánh delta vẫn in *"khớp từng dòng"* do `rc` k
 Container không cài `actionlint` (`command -v actionlint` không thấy). Đây là **fail-close
 đúng** cho công cụ vắng mặt, **giống hệt hai vế**, KHÔNG phải hồi quy do các commit của PR.
 
-Hệ quả phải ghi thẳng: **ca `t33` chưa từng được đo trong lần gate này.** Nó không đỏ, cũng
-không xanh — nó không chạy. Ai muốn đóng nó phải cài `actionlint` rồi chạy lại.
+**ĐÍNH CHÍNH.** Bản đầu viết: *"ca `t33` chưa từng được đo … nó không đỏ, cũng không xanh — nó
+không chạy."* **Sai, và bị chính log trong thư mục này bác bỏ.** `nen.lease.norm.out:48` ghi
+`ĐỎ  t33_workflow_dang_lease_phai_qua_actionlint`, và dòng 50 ghi
+`lease_publish: 120/121 đạt; đã chạy=121, bỏ qua=0`.
+
+Đúng phải là: **`t33` ĐÃ CHẠY và ĐỎ** ở tiền điều kiện thiếu `actionlint`; `main` tính nó vào
+phần hỏng, nên suite `120/121`, `rc=1`. Thứ **chưa chạy** là thao tác **lint workflow** bên trong
+hàm — nó không bao giờ tới được lệnh `actionlint`.
+
+Khác biệt này không nhỏ: "không chạy" hàm ý phép kiểm im lặng bỏ qua, còn thực tế cổng đã **kêu
+đỏ đúng như thiết kế**. Ai muốn đóng nó phải cài `actionlint` rồi chạy lại — điều đó vẫn đúng.
 
 ## Điều bản ghi này KHÔNG chứng minh
 

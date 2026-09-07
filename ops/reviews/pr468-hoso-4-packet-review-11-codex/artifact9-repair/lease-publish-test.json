@@ -1,0 +1,14 @@
+{
+  "name": "lease-publish-test",
+  "command": [
+    "python3",
+    "ops/lease_publish_test.py"
+  ],
+  "start_utc": "2026-09-07T09:21:47.659900+00:00",
+  "end_utc": "2026-09-07T09:22:53.243601+00:00",
+  "seconds": 65.58369995600003,
+  "rc": 0,
+  "stdout_bytes": 8649,
+  "stdout_sha256": "9d3f3e46cd0ba25f7c7bd19f6505704d928baae39138e80539e275b64d8e6c7d",
+  "stderr_bytes": 56
+}

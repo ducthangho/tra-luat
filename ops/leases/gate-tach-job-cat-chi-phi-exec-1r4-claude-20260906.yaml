@@ -6,6 +6,9 @@
 # `check` vẫn chạy trên tên này — đo lại 21:00Z 06-09-2026 trên cây b1c2284: rc=8, thiếu 3 trường
 # packet_issue/granted_by/lease_expires_at_utc (bản này đã bỏ hạn điền sẵn; 19:31Z là bản trung gian).
 # ĐỔI TÊN VỀ `.yaml` LÀ BƯỚC CUỐI khi cấp thật, SAU khi điền đủ các ô dưới đây.
+# SỬA VĂN trong revision 4 — 2026-09-07T11:5xZ, sau cross-review lượt 10 (P2 `bien-do-khac-head-khong-phai-nhieu-runner`):
+# mục billing của `viec_trong_lease` bỏ cụm gán nghĩa NHIỄU cho lượt master 34048685345 (trái spec r4), gọi đúng là đối chiếu LỊCH SỬ khác event/lane.
+# Chỉ MỘT mục văn bản đổi; ngưỡng 135,00, spec_hash, write_set_hash, authority, mốc cấp/hết hạn, chuỗi thay thế GIỮ NGUYÊN.
 # REVISION 4 — 2026-09-07T10:17:12Z: thay lease exec-1r3 (băm r3 `37800aa6…`) sau cross-review lượt 9. Dấu vết bền: comment r3
 # https://github.com/ducthangho/tra-luat/issues/463#issuecomment-5568696936 (chỉ thị "không cần hỏi lại" + "tiếp tục vòng lặp vá tới khi hết P1"); comment riêng cho r4 executor CHƯA đăng
 # được (công cụ chặn) — chủ kho có thể bổ sung. Chuỗi: #456 → exec-1 → exec-1r2 → exec-1r3 → exec-1r4.
@@ -160,7 +163,10 @@ viec_trong_lease:
      không có dấu nội suy lọt (đo 19:33Z).'
   - 'Giữ `timeout-minutes: 60` trên MỌI job.'
   - 'ĐO và CÔNG BỐ phút tính tiền; ngưỡng ≤ 135,00 phút tính tiền, nền lượt nhánh 34045664423
-     = 110,65 (lượt master 34048685345 = 111,08 để đối chiếu nhiễu). Công bố kèm thời gian
+     = 110,65 (lượt master 34048685345 = 111,08 chỉ là ĐỐI CHIẾU LỊCH SỬ: cùng tree, khác
+     event/lane — `workflow_dispatch` trên nhánh so `push` trên master, WORKER so LAND — nên
+     KHÔNG tách được phần nhiễu runner; biên A1/A5 là biên THIẾT KẾ, không nới theo chênh ấy —
+     đồng bộ với spec r4 §"Bối cảnh hai run"/§"Biên thiết kế"). Công bố kèm thời gian
      đầu-cuối của workflow, không đặt ngưỡng vì chưa có nền.'
   - 'Sửa `loi_ruff_ci` trong `.claude/dev/ci_dang_ky_test.py`: tìm bước `test registry` trong
      MỌI job, đòi Ruff cài trong CÙNG job và TRƯỚC bước ấy; tương thích với `ci.yml` chưa tách;
